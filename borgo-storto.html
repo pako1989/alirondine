@@ -89,15 +89,18 @@ const HERO = {
     { n: "Tiro della Rondine", d: "danno 28-36 · grinta 3", c: 3, f: (u, t) => hit(t, Math.round((rnd(28, 36) + G.lv * 3) * (u.pw ? 1.3 : 1)), `TIRO DELLA RONDINE! ${t.name} guarda il pallone passare e non fa in tempo a offendersi.`) } ] },
   gigi: { name: "Gigi", ic: "🕊️", hp: 55, sk: [
     { n: "Chiacchiera", d: "danno 6-10, il nemico fa meno male", c: 0, f: (u, t) => { t.weak = 2; return hit(t, rnd(6, 10) + G.lv, `Gigi parla per quaranta secondi senza respirare. ${t.name} cede per sfinimento.`); } },
-    { n: "KRAAA!", d: "stordisce un nemico · grinta 2", c: 2, f: (u, t) => { t.stun = 1; return `${u.name} imita un gabbiano così bene che ${t.name} si gira a controllare. È fermo un turno.`; } } ] },
+    { n: "KRAAA!", d: "stordisce un nemico · grinta 2", c: 2, f: (u, t) => { t.stun = 1; floatText("STUN!", "#ffd23f"); return `${u.name} imita un gabbiano così bene che ${t.name} si gira a controllare. È fermo un turno.`; } } ] },
   sara: { name: "Sara", ic: "📓", hp: 55, sk: [
     { n: "Appunti taglienti", d: "danno 9-13", c: 0, f: (u, t) => hit(t, rnd(9, 13) + G.lv * 2, `Sara legge ad alta voce le sue statistiche su ${t.name}. Fanno più male di un calcio.`) },
-    { n: "Analisi", d: "il nemico prende +50% per 2 turni · grinta 2", c: 2, f: (u, t) => { t.mark = 2; return `«Punto debole: tutto.» ${t.name} si sente osservato e peggiora.`; } } ] },
+    { n: "Analisi", d: "il nemico prende +50% per 2 turni · grinta 2", c: 2, f: (u, t) => { t.mark = 2; floatText("ANALISI!", "#3fa7ff"); return `«Punto debole: tutto.» ${t.name} si sente osservato e peggiora.`; } } ] },
   nico: { name: "Nico", ic: "🧤", hp: 80, sk: [
-    { n: "Parata", d: "cura sé stesso di 25", c: 0, self: 1, f: (u) => { u.hp = Math.min(u.max, u.hp + 25); return `Nico si para da solo. Funziona, nessuno ha chiesto come.`; } },
-    { n: "Gatto Volante", d: "squadra riparata per un turno · grinta 2", c: 2, self: 1, f: (u) => { P.guard = 1; return `GATTO VOLANTE! Nico si butta davanti a tutti. Il pavimento ci rimane male.`; } } ] },
+    { n: "Parata", d: "cura sé stesso di 25", c: 0, self: 1, f: (u) => { u.hp = Math.min(u.max, u.hp + 25); floatText("+25", "#57d68d"); return `Nico si para da solo. Funziona, nessuno ha chiesto come.`; } },
+    { n: "Gatto Volante", d: "squadra riparata per un turno · grinta 2", c: 2, self: 1, f: (u) => { P.guard = 1; floatText("DIFESA!", "#3fa7ff"); return `GATTO VOLANTE! Nico si butta davanti a tutti. Il pavimento ci rimane male.`; } } ] },
+  rita: { name: "Rita", ic: "🍳", hp: 65, sk: [
+    { n: "Padellata", d: "danno 14-22 · stordisce sotto 50% HP", c: 0, f: (u, t) => { const s = t.hp < t.max * 0.5 ? (t.stun = 1, " STORDITO!") : ""; if (s) floatText("STUN!", "#ffd23f"); return hit(t, rnd(14, 22) + G.lv * 2, `Rita fa vibrare la padella pesante su ${t.name}.${s}`); } },
+    { n: "Focaccia al volo", d: "cura 35 il più ferito · grinta 2", c: 2, self: 1, f: (u) => { const w = P.u.filter(x => x.hp > 0).sort((a,b)=>a.hp-b.hp)[0]; if (w) { w.hp = Math.min(w.max, w.hp + 35); floatText("+35", "#57d68d"); return `Rita lancia una focaccia caldissima a ${w.name}: +35 HP!`; } return "Nessuno ferito."; } } ] },
 };
-const NAMES = { leo: "Leo", gigi: "Gigi", sara: "Sara", nico: "Nico" };
+const NAMES = { leo: "Leo", gigi: "Gigi", sara: "Sara", nico: "Nico", rita: "Rita" };
 
 // ---- nemici ----
 const FOE = {
@@ -105,6 +108,10 @@ const FOE = {
   cuoco: () => ({ name: "Pino Con Più Braccia", ic: "🍝", hp: 55, atk: [7, 11], say: ["«Otto frittelle alla volta, bello!»", "«Il menu è solo in latino!»"] }),
   tommy: () => ({ name: "Tommy Senza Difetti", ic: "😇", hp: 70, atk: [8, 13], shield: 1, say: ["«Non sbaglio mai.»", "«Non perdo mai.»", "«Non ho mai fame.»"] }),
   rugg: () => ({ name: "Ruggeri Gentile", ic: "🥰", hp: 210, atk: [11, 16], boss: 1, heal: 0, say: ["«Che bravi che siete, davvero!»", "«Un abbraccio non ha mai fatto male a nessuno.»", "«Siete tutti perfetti. Restate qui.»"] }),
+  granchio: () => ({ name: "Granchio Guardalinee", ic: "🦀", hp: 44, atk: [7, 12], strike: 1, say: ["«Fuorigioco millimetrico!»", "«Bandierina alzata!»", "«Pizzico sulla caviglia!»"] }),
+  ombra: () => ({ name: "Ombra del Provino", ic: "👤", hp: 70, atk: [9, 15], strike: 1, say: ["«Non ti prenderanno mai.»", "«Il provino era ieri.»", "«Chiudi gli occhi e arrenditi.»"] }),
+  padella: () => ({ name: "Padella Furiosa", ic: "🍳", hp: 76, atk: [9, 14], say: ["«Brucia tutto sul fondo!»", "«Oggi non si mangia!»"] }),
+  arbitro: () => ({ name: "L'Arbitro del Paradosso", ic: "⏱️", hp: 290, atk: [13, 19], boss: 1, heal: 0, say: ["«Fischio preventivo!»", "«Recupero infinito!»", "«Cartellino per presunzione!»"] }),
 };
 
 // ---- storia ----
@@ -154,32 +161,89 @@ const STORY = {
     T("rugg", "…Va bene. Vi lascio andare. Ricordatemi urlare, ogni tanto."),
     T("ugolino", "Ragazzi! Ho trovato l'interruttore! Se lo giro la crepa si chiude. Se lo lascio così, rimane aperta di un dito."),
   ],
+  intro2: [
+    T(null, "Capitolo 2: L'Orologio del Paradosso. La crepa sul campanile pulsa di una strana luce smeraldo."),
+    T("ugolino", "Ragazzi! Il flipper fa le scintille e le lancette girano al contrario!"),
+    T("leo", "Guardate la spiaggia... i granchi sventolano cartellini."),
+    T("sara", "Dobbiamo raggiungere la cima dell'Orologio del Campanile per fermare il paradosso."),
+    T("gigi", "Io ho la mia sciarpa portafortuna e molta fame. Andiamo.")
+  ],
+  n6: [
+    T("gigi", "La spiaggia storta. I granchi hanno la divisa da arbitro."),
+    T(null, "Due granchi giganti sventolano chele e cartellini gialli: «Fuorigioco preventivo!»")
+  ],
+  w6: [
+    T("sara", "Fuorigioco inesistente, ma sono stati neutralizzati."),
+    T("leo", "Guardate là in fondo: il faro è sott'acqua ma la luce gira lo stesso.")
+  ],
+  n7: [
+    T(null, "Il Faro Sommerso. L'acqua non bagna, ma è densa. Un'ombra scura vi sbarra il passaggio."),
+    T("ombra", "Io sono il ricordo di tutte le volte che hai avuto paura di tirare quel rigore, Moretti."),
+    T("leo", "Allora fatti sotto. Adesso tiro sempre.")
+  ],
+  w7: [
+    T("nico", "L'abbiamo mandata via. Ma sento profumo di fritto... sott'acqua?"),
+    T("gigi", "È Rita! Non c'è dimensione senza la sua cucina.")
+  ],
+  n8: [
+    T(null, "La Trattoria del Tempo. Rita è circondata da padelle fluttuanti che attaccano chiunque non mangi."),
+    T("rita", "Leo! Finalmente! Queste padelle non capiscono che il sugo ha bisogno di venti minuti a fuoco lento!"),
+    T("gigi", "Una padella mi ha appena minacciato col rosmarino. Aiuto.")
+  ],
+  w8: [
+    T("rita", "Grazie ragazzi. Mi unisco a voi: con la mia padella pesante non passa nessuno!"),
+    T(null, "Rita si unisce alla squadra!")
+  ],
+  n9: [
+    T(null, "La Pineta Capovolta. Gli alberi hanno le radici nel cielo viola. Tonino è lì con una cassa di Chinotto."),
+    T("tonino", "Il Chinotto del Paradosso. Bevetelo e la vostra Grinta tornerà al massimo.")
+  ],
+  n10: [
+    T(null, "L'Orologio del Campanile. In mezzo a ingranaggi dorati giganti, c'è una figura con fischietto e cronometro gigante."),
+    T("arbitro", "Io sono l'Arbitro del Paradosso. Qui non ci sono pareggi, non ci sono vittorie. Solo tempo che si ripete!"),
+    T("leo", "Noi giochiamo per vincere e tornare a casa. Fischia l'inizio!")
+  ],
+  mid2: "«Espulsione per tutta la squadra! Il tempo appartiene a me!»",
+  win2: [
+    T("arbitro", "…Fischio finale. Il novantesimo minuto è scaduto. La crepa si richiude."),
+    T("ugolino", "Ha funzionato! Il flipper è spento e le lancette sono tornate a girare a destra!"),
+    T("leo", "Torniamo al nostro Borgo. Papà e gli altri ci aspettano.")
+  ],
 };
-const WHO = { rita: "Rita", ugolino: "Ugolino", papa: "Papà Moretti", tommy: "Tommy (perfetto)", tonino: "Tonino", rugg: "Mister Ruggeri", leo: "Leo", gigi: "Gigi", sara: "Sara", nico: "Nico" };
+const WHO = { rita: "Rita", ugolino: "Ugolino", papa: "Papà Moretti", tommy: "Tommy (perfetto)", tonino: "Tonino", rugg: "Mister Ruggeri", leo: "Leo", gigi: "Gigi", sara: "Sara", nico: "Nico", granchio: "Granchio", ombra: "Ombra", padella: "Padella", arbitro: "Arbitro" };
 
 // ---- mappa ----
 const NODES = [
-  { id: "n1", t: "Il campetto storto", sub: "Due gabbiani sindacalizzati", foes: ["gabb", "gabb"] },
-  { id: "n2", t: "Trattoria Moretti", sub: "Papà è famoso", foes: ["cuoco"] },
-  { id: "n3", t: "Il molo", sub: "Nico è chiuso in una porta", foes: ["tommy"], join: "nico" },
-  { id: "n4", t: "Il chiosco di Tonino", sub: "Pausa e gelato" , rest: 1 },
-  { id: "n5", t: "Il campanile storto", sub: "Il Mister è troppo gentile", foes: ["rugg"], boss: 1 },
+  { id: "n1", t: "Il campetto storto", sub: "Due gabbiani sindacalizzati", foes: ["gabb", "gabb"], cap: 1 },
+  { id: "n2", t: "Trattoria Moretti", sub: "Papà è famoso", foes: ["cuoco"], cap: 1 },
+  { id: "n3", t: "Il molo", sub: "Nico è chiuso in una porta", foes: ["tommy"], join: "nico", cap: 1 },
+  { id: "n4", t: "Il chiosco di Tonino", sub: "Pausa e gelato" , rest: 1, cap: 1 },
+  { id: "n5", t: "Il campanile storto", sub: "Il Mister è troppo gentile", foes: ["rugg"], boss: 1, cap: 1 },
+  { id: "n6", t: "La Spiaggia Storta", sub: "Due granchi guardalinee", foes: ["granchio", "granchio"], cap: 2 },
+  { id: "n7", t: "Il Faro Sommerso", sub: "La luce gira al contrario", foes: ["ombra"], cap: 2 },
+  { id: "n8", t: "Trattoria del Tempo", sub: "Rita ha padelle fluttuanti", foes: ["padella"], join: "rita", cap: 2 },
+  { id: "n9", t: "La Pineta Capovolta", sub: "Pausa e chinotto", rest: 1, cap: 2 },
+  { id: "n10", t: "L'Orologio del Campanile", sub: "L'Arbitro del Paradosso", foes: ["arbitro"], boss: 1, cap: 2 },
 ];
 
 // ---- sprite pixel disegnati a codice (16x16), usati sia in mappa sia nei ritratti ----
 const PAL = {
-  leo:  { skin: "#f0c9a8", hair: "#4a2c1a", hs: "short", shirt: "#d33a3a", cap: "#2a4aa8" },
-  gigi: { skin: "#f4d2b0", hair: "#e8c46a", hs: "spiky", shirt: "#3a8ad8" },
+  leo:  { skin: "#f0c9a8", hair: "#4a2c1a", hs: "short", shirt: "#d33a3a", cap: "#2a4aa8", ballFoot: 1 },
+  gigi: { skin: "#f4d2b0", hair: "#e8c46a", hs: "spiky", shirt: "#3a8ad8", knee: 1 },
   sara: { skin: "#f0c9a8", hair: "#2a1a14", hs: "long", shirt: "#7a3ad8", glasses: 1 },
   nico: { skin: "#e0b08a", hair: "#1a1a1a", hs: "short", shirt: "#2e9a52", gloves: 1 },
   papa: { skin: "#f0c9a8", hair: "#8a8a8a", hs: "short", shirt: "#f2f2f2", apron: 1 },
-  rita: { skin: "#f0c9a8", hair: "#8a3a2a", hs: "long", shirt: "#ffffff", apron: 1 },
+  rita: { skin: "#f0c9a8", hair: "#8a3a2a", hs: "long", shirt: "#ffffff", apron: 1, panInHand: 1 },
   ugolino: { skin: "#e8bf98", hair: "#dddddd", hs: "bald", shirt: "#e8a82e", hat: "#e8a82e", goggles: 1 },
   tommy: { skin: "#f0c9a8", hair: "#f2e08a", hs: "short", shirt: "#ffffff", halo: 1 },
   tonino: { skin: "#e0b08a", hair: "#3a2a1a", hs: "short", shirt: "#ffb0d8", hat: "#ffffff" },
   rugg: { skin: "#e8bf98", hair: "#b8b8b8", hs: "short", shirt: "#2a3a5a", heart: 1 },
   pino: { skin: "#f0c9a8", hair: "#d87a2a", hs: "short", shirt: "#e8e8e8", arms: 1 },
   gabb: { bird: 1 },
+  granchio: { crab: 1, skin: "#ff4d5a", shirt: "#e03030" },
+  ombra: { skin: "#20283a", hair: "#0a0d18", hs: "spiky", shirt: "#121a2c" },
+  padella: { pan: 1, skin: "#d8d8d8", shirt: "#444444" },
+  arbitro: { skin: "#f0c9a8", hair: "#3a2a1a", hs: "short", shirt: "#ffd23f", cap: "#111111", stripes: 1, whistle: 1 },
 };
 const SPR = {};
 // sprite 16x20 con contorno scuro e ombreggiatura; frame 0 fermo, 1/2 passo
@@ -188,7 +252,20 @@ function sprite(id, px, frame) {
   const W = 18, H = 22, base = document.createElement("canvas"); base.width = W; base.height = H;
   const g = base.getContext("2d"), q = PAL[id] || PAL.gigi;
   const r = (x, y, w, h, col) => { g.fillStyle = col; g.fillRect(x + 1, y + 1, w, h); };
-  if (q.bird) {
+  if (q.crab) {
+    r(3, 8, 12, 7, "#ff4d5a");
+    r(1, 5, 4, 4, "#ff4d5a"); r(13, 5, 4, 4, "#ff4d5a");
+    r(4, 7, 2, 2, "#111"); r(12, 7, 2, 2, "#111");
+    r(2, 15, 2, 4, "#d03040"); r(6, 15, 2, 4, "#d03040"); r(10, 15, 2, 4, "#d03040"); r(14, 15, 2, 4, "#d03040");
+    // Bandierina a scacchi da guardalinee nella chela destra
+    r(14, 2, 4, 3, "#ffd23f"); r(14, 2, 2, 2, "#ff4d5a"); r(16, 3, 2, 2, "#ff4d5a"); r(13, 1, 1, 6, "#111");
+  } else if (q.pan) {
+    r(3, 5, 12, 10, "#999"); r(4, 6, 10, 8, "#ffd23f"); r(14, 9, 3, 2, "#222");
+    // Occhi infuocati della padella vivente
+    r(5, 8, 2, 2, "#ff2d55"); r(9, 8, 2, 2, "#ff2d55");
+    // Fumo sfrigolante
+    r(6, 2 + (frame % 2), 2, 2, "#ffffff88"); r(9, 1 + (frame % 2), 2, 2, "#ffffff66");
+  } else if (q.bird) {
     r(3, 8, 9, 6, "#f7f7f7"); r(2, 7, 5, 4, "#f7f7f7"); r(0, 8, 3, 2, "#ffb52e"); r(4, 8, 1, 1, "#111"); r(10, 6 + (frame === 1 ? -2 : frame === 2 ? 1 : 0), 5, 2, "#cfd8e6"); r(5, 14, 1, 3, "#ffb52e"); r(8, 14, 1, 3, "#ffb52e"); r(5, 5, 5, 3, "#5a7aa0"); r(4, 12, 8, 2, "#dfe6f2");
   } else {
     const pants = q.pants || "#2a3550", sk = q.skin;
@@ -202,6 +279,11 @@ function sprite(id, px, frame) {
     if (q.apron) r(5, 12, 6, 5, "#e8e0c8");
     if (q.heart) { r(6, 12, 2, 1, "#ff5d8a"); r(9, 12, 2, 1, "#ff5d8a"); r(7, 13, 3, 1, "#ff5d8a"); }
     if (q.gloves) { r(1, 14, 2, 3, "#57d68d"); r(13, 14, 2, 3, "#57d68d"); }
+    if (q.panInHand) { r(13, 10, 4, 4, "#555"); r(15, 14, 1, 3, "#222"); }
+    if (q.stripes) { r(5, 11, 2, 6, "#111"); r(9, 11, 2, 6, "#111"); }
+    if (q.whistle) { r(7, 10, 2, 2, "#ffd23f"); }
+    if (q.ballFoot) { r(1, 17, 3, 3, "#fff"); r(2, 18, 1, 1, "#111"); }
+    if (q.knee) { r(4, 15, 3, 2, "#f4f4f4"); }
     r(7, 10, 2, 2, sk); r(4, 3, 8, 8, sk); r(11, 4, 1, 7, "#00000020"); r(5, 10, 6, 1, "#00000018");
     if (q.hs === "short") { r(4, 2, 8, 2, q.hair); r(3, 3, 1, 4, q.hair); r(12, 3, 1, 4, q.hair); r(5, 2, 3, 1, "#ffffff30"); }
     if (q.hs === "spiky") { r(4, 2, 8, 2, q.hair); r(4, 1, 2, 1, q.hair); r(7, 0, 2, 2, q.hair); r(10, 1, 2, 1, q.hair); r(3, 3, 1, 3, q.hair); r(12, 3, 1, 3, q.hair); }
@@ -231,13 +313,18 @@ const ART = {
   crepa: '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a1030"/><stop offset="1" stop-color="#24365e"/></linearGradient></defs><rect width="320" height="120" fill="url(#g)"/><circle cx="40" cy="20" r="2" fill="#fff"/><circle cx="270" cy="30" r="1.5" fill="#fff"/><path d="M170 0 L162 22 L176 40 L160 62 L172 78" stroke="#5dff9a" stroke-width="5" fill="none"/><path d="M170 0 L162 22 L176 40 L160 62 L172 78" stroke="#c9ffe0" stroke-width="1.5" fill="none"/><polygon points="120,120 124,50 140,50 144,120" fill="#10172e" transform="rotate(-8 130 120)"/><rect x="0" y="108" width="320" height="12" fill="#143a2a"/>',
   campetto: '<rect width="320" height="120" fill="#4aa8d8"/><rect y="70" width="320" height="50" fill="#2e9a52"/><rect x="230" y="40" width="50" height="40" fill="none" stroke="#fff" stroke-width="3"/><g fill="#fff" stroke="#888"><ellipse cx="70" cy="36" rx="14" ry="7"/><ellipse cx="120" cy="22" rx="12" ry="6"/></g><g fill="#ffd23f"><circle cx="64" cy="34" r="2"/><circle cx="114" cy="20" r="2"/></g><path d="M0 70 L320 70" stroke="#fff" stroke-width="2" opacity=".5"/>',
   trattoria: '<rect width="320" height="120" fill="#3a2418"/><rect x="30" y="20" width="90" height="80" fill="#f2c976" stroke="#7a4a22" stroke-width="4"/><text x="75" y="75" font-size="52" fill="#b3202c" text-anchor="middle" font-family="sans-serif" font-weight="bold">9</text><rect x="170" y="35" width="120" height="60" rx="6" fill="#6a3a24"/><circle cx="200" cy="65" r="14" fill="#f4e6c8"/><circle cx="250" cy="65" r="14" fill="#f4e6c8"/><rect y="100" width="320" height="20" fill="#241008"/>',
-  molo: '<rect width="320" height="120" fill="#6fb3d8"/><rect y="64" width="320" height="56" fill="#1d5f8f"/><path d="M0 80 q20 -8 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0" stroke="#9ed4f0" fill="none" stroke-width="2"/><rect x="110" y="30" width="100" height="56" fill="none" stroke="#fff" stroke-width="4"/><rect x="0" y="92" width="110" height="10" fill="#8a6540"/>',
+  molo: '<rect width="320" height="120" fill="#6fb3d8"/><rect y="64" width="320" height="56" fill="#1d5f8f"/><path d="M0 80 q20 -8 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0" stroke="#9ed4f0" fill="none" stroke-width="2"/><rect x="110" y="30" width="100" height="56" fill="none" stroke="#fff" stroke-width="4"/><rect x="0" y="92" width="110" height="10" fill="#8a6540"/>',
   chiosco: '<rect width="320" height="120" fill="#ffe9b5"/><path d="M80 30 h160 l10 30 h-180 z" fill="#ff6a7a"/><path d="M80 30 h20 l-5 30 h-25z M120 30 h20 l-5 30 h-20z M160 30 h20 l-5 30 h-20z M200 30 h20 l-5 30 h-20z" fill="#fff"/><rect x="90" y="60" width="140" height="50" fill="#9a6a3a"/><polygon points="160,110 148,78 172,78" fill="#d9a05a"/><circle cx="160" cy="70" r="14" fill="#c9a0ff"/><circle cx="160" cy="70" r="5" fill="#fff" opacity=".6"/>',
   campanile: '<defs><radialGradient id="h"><stop offset="0" stop-color="#ffe9a0"/><stop offset="1" stop-color="#ffe9a000"/></radialGradient></defs><rect width="320" height="120" fill="#2a1a40"/><circle cx="170" cy="22" r="48" fill="url(#h)"/><polygon points="145,120 150,30 190,30 195,120" fill="#c9b8a8" transform="rotate(7 170 120)"/><rect x="152" y="40" width="30" height="24" fill="#2a1a40" transform="rotate(7 170 120)"/><polygon points="148,30 170,0 192,30" fill="#b3202c" transform="rotate(7 170 120)"/><text x="170" y="64" text-anchor="middle" font-size="20">🥰</text>',
+  spiaggia: '<defs><linearGradient id="spg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a1a36"/><stop offset="1" stop-color="#144d6a"/></linearGradient></defs><rect width="320" height="120" fill="url(#spg)"/><path d="M0 70 Q80 40 160 70 T320 70 L320 120 L0 120 Z" fill="#e8c070"/><path d="M0 68 Q80 38 160 68 T320 68" stroke="#5dff9a" stroke-width="3" fill="none"/><circle cx="260" cy="25" r="16" fill="#ffd23f44"/><circle cx="260" cy="25" r="12" fill="#ffd23f"/>',
+  faro: '<rect width="320" height="120" fill="#091d36"/><rect y="60" width="320" height="60" fill="#051224"/><rect x="140" y="20" width="40" height="80" fill="#d33a3a"/><rect x="146" y="10" width="28" height="20" fill="#ffe86a"/><circle cx="160" cy="20" r="18" fill="#ffe86a44"/><path d="M160 20 L320 0 L320 80 Z" fill="#ffe86a22"/>',
+  trattoria2: '<rect width="320" height="120" fill="#3a2418"/><rect x="40" y="20" width="240" height="80" rx="8" fill="#4a2a1c"/><circle cx="160" cy="60" r="28" fill="#e8c070"/><circle cx="160" cy="60" r="24" fill="#999"/><circle cx="160" cy="60" r="18" fill="#ffd23f"/>',
+  pineta: '<rect width="320" height="120" fill="#2a143a"/><polygon points="40,110 60,20 80,110" fill="#1b4d32"/><polygon points="120,110 145,15 170,110" fill="#173d27"/><polygon points="210,110 235,25 260,110" fill="#1b4d32"/><rect y="100" width="320" height="20" fill="#1a0c24"/>',
+  orologio: '<defs><radialGradient id="og" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffd23f"/><stop offset="1" stop-color="#b8860b"/></radialGradient></defs><rect width="320" height="120" fill="#1a1426"/><circle cx="160" cy="60" r="46" fill="url(#og)" stroke="#fff" stroke-width="4"/><line x1="160" y1="60" x2="160" y2="28" stroke="#111" stroke-width="5"/><line x1="160" y1="60" x2="188" y2="60" stroke="#b3202c" stroke-width="4"/><circle cx="160" cy="60" r="6" fill="#111"/>',
 };
 const art = (k) => (ART[k] ? `<svg viewBox="0 0 320 120" style="width:100%;border-radius:12px;border:2px solid var(--line);display:block;margin:0 0 8px">${ART[k]}</svg>` : "");
 // vignetta: sfondo illustrato + personaggi in scena (chi parla è in primo piano)
-const CAST = { crepa: ["leo", "gigi", "sara", "ugolino"], campetto: ["leo", "gigi", "sara", "gabb"], trattoria: ["papa", "rita", "leo", "gigi"], molo: ["nico", "tommy", "gigi", "sara"], chiosco: ["tonino", "leo", "sara", "gigi"], campanile: ["rugg", "leo", "gigi", "sara"] };
+const CAST = { crepa: ["leo", "gigi", "sara", "ugolino"], campetto: ["leo", "gigi", "sara", "gabb"], trattoria: ["papa", "rita", "leo", "gigi"], molo: ["nico", "tommy", "gigi", "sara"], chiosco: ["tonino", "leo", "sara", "gigi"], campanile: ["rugg", "leo", "gigi", "sara"], spiaggia: ["leo", "gigi", "sara", "granchio"], faro: ["leo", "nico", "sara", "ombra"], trattoria2: ["rita", "leo", "gigi", "padella"], pineta: ["tonino", "leo", "sara", "rita"], orologio: ["arbitro", "leo", "gigi", "sara"] };
 function vig(scene, who, foes) {
   const bg = ART[scene]; if (!bg) return "";
   let list = (CAST[scene] || []).slice(); if (who && PAL[who] && !list.includes(who)) list.unshift(who);
@@ -252,15 +339,38 @@ let SCENE = "crepa";
 
 // ---- UI ----
 function title() {
-  const n = G.done.length;
-  app.innerHTML = `<div class="topbar"><h1>Il Borgo Storto</h1><button type="button" class="btn-icon" id="thBtn">🎨 ${THEMES[curThemeIdx].name}</button></div><div class="sub">GDR a capitoli · Capitolo 1: La crepa sul campanile</div>
-  <div class="card">${vig("crepa", "leo")}<p>Ugolino ha fatto un guaio. Il cielo ha una crepa, e dall'altra parte c'è un Borgo uguale al tuo. Quasi. Tutto è storto, tutti sono una versione strana di sé stessi. E non si sa chi comanda.</p></div>
-  <button class="hot" id="go">${n ? "Continua" : "Inizia"}<small>${n ? `Tappe fatte: ${n}/5` : "Capitolo 1"}</small></button>
-  ${n ? `<button id="new">Ricomincia da capo<small>Cancella i progressi di questo capitolo</small></button>` : ""}
+  const cap = G.cap || 1;
+  const n = G.done.filter(id => {
+    const nd = NODES.find(x => x.id === id);
+    return nd && (nd.cap || 1) === cap;
+  }).length;
+  app.innerHTML = `<div class="topbar"><h1>Il Borgo Storto</h1><button type="button" class="btn-icon" id="thBtn">🎨 ${THEMES[curThemeIdx].name}</button></div>
+  <div class="sub">GDR a capitoli · ${cap === 2 ? "Capitolo 2: L'Orologio del Paradosso" : "Capitolo 1: La crepa sul campanile"}</div>
+  <div class="card">${vig(cap === 2 ? "orologio" : "crepa", "leo")}<p>${cap === 2 ? "Le lancette del campanile girano all'indietro! Il mare risale la costa e le conchiglie urlano fuorigioco. Bisogna trovare l'Arbitro del Paradosso per fermare il tempo." : "Ugolino ha fatto un guaio. Il cielo ha una crepa, e dall'altra parte c'è un Borgo uguale al tuo. Quasi. Tutto è storto, tutti sono una versione strana di sé stessi. E non si sa chi comanda."}</p></div>
+  <button class="hot" id="go">${n ? "Continua" : "Inizia"}<small>${n ? `Tappe fatte: ${n}/5` : `Inizia Capitolo ${cap}`}</small></button>
+  <button id="capBtn">Cambia capitolo: Passa al Capitolo ${cap === 1 ? "2 (L'Orologio)" : "1 (La Crepa)"} ▸<small>${cap === 1 ? "Gioca il nuovo capitolo con Rita e l'Arbitro" : "Torna al Capitolo 1"}</small></button>
+  ${n ? `<button id="new">Ricomincia capitolo da capo<small>Azzera le tappe di questo capitolo</small></button>` : ""}
   <button id="back">◂ Torna ad Ali di Rondine</button>`;
   $("#thBtn").onclick = cycleTheme;
-  $("#go").onclick = () => { SCENE = "crepa"; n ? map() : dialog(STORY.intro, map); };
-  if ($("#new")) $("#new").onclick = () => { G = { v: 1, done: [], party: ["leo", "gigi", "sara"], lv: 1, focacce: 2, flags: {} }; save(); title(); };
+  $("#capBtn").onclick = () => {
+    G.cap = cap === 1 ? 2 : 1;
+    G.area = G.cap === 2 ? 5 : 0;
+    save();
+    title();
+  };
+  $("#go").onclick = () => {
+    SCENE = cap === 2 ? "spiaggia" : "crepa";
+    n ? map() : dialog(cap === 2 ? STORY.intro2 : STORY.intro, map);
+  };
+  if ($("#new")) $("#new").onclick = () => {
+    G.done = G.done.filter(id => {
+      const nd = NODES.find(x => x.id === id);
+      return nd && (nd.cap || 1) !== cap;
+    });
+    G.area = cap === 2 ? 5 : 0;
+    save();
+    title();
+  };
   $("#back").onclick = () => { location.href = "./index.html"; };
 }
 function dialog(lines, then) {
@@ -301,12 +411,43 @@ const MAPS = [
     "####################", "####################", "#..##..........##..#", "#..................#", "#..................#", "#..................#",
     "#...##........##...#", "#..................#", "#..................#", "#..................#", "#..................#", "####################"],
     start: [9, 10], exit: null, objs: [{ k: "foe", id: "rugg", x: 9, y: 3, fight: 1 }] },
+  { node: "n6", floor: ["#4a8aa5", "#3f7a95"], wall: "#1e4a60", name: "La Spiaggia Storta", rows: [
+    "####################", "####################", "#..................#", "#...##........##...#", "#...##........##...#", "#..................#",
+    "#..................#", "#..................#", "#.....########.....#", "#..................#", "#..................#", "####################"],
+    start: [2, 9], exit: [18, 10], objs: [
+      { k: "foe", id: "granchio", x: 10, y: 5, fight: 1 }, { k: "foe", id: "granchio", x: 14, y: 7, fight: 1 }
+    ] },
+  { node: "n7", floor: ["#1e3d59", "#173048"], wall: "#0d1b2a", name: "Il Faro Sommerso", water: 1, rows: [
+    "~~~~~~~~~~~~~~~~~~~~", "~~~~~~~~~~~~~~~~~~~~", "#..................#", "#.....######.......#", "#.....#....#.......#", "#..................#",
+    "#..................#", "#.....######.......#", "#..................#", "#..................#", "~~~~~~~~~~~~~~~~~~~~", "~~~~~~~~~~~~~~~~~~~~"],
+    start: [2, 8], exit: [18, 8], objs: [{ k: "foe", id: "ombra", x: 12, y: 5, fight: 1 }] },
+  { node: "n8", floor: ["#8a523a", "#7a4630"], wall: "#4a2418", name: "La Trattoria del Tempo", rows: [
+    "####################", "####################", "#..##..........##..#", "#..................#", "#..................#", "#..................#",
+    "#......######......#", "#..................#", "#..................#", "#..................#", "#..................#", "####################"],
+    start: [2, 9], exit: [18, 9], objs: [
+      { k: "npc", id: "rita", x: 7, y: 4, say: [["rita", "Leo! Queste padelle non capiscono le buone maniere!"], ["leo", "Ti aiutiamo noi!"]] },
+      { k: "foe", id: "padella", x: 12, y: 5, fight: 1 }
+    ] },
+  { node: "n9", floor: ["#4a305a", "#3e264c"], wall: "#22132a", name: "La Pineta Capovolta", rows: [
+    "####################", "####################", "#..................#", "#.....########.....#", "#..................#", "#..................#",
+    "#..................#", "#.....########.....#", "#..................#", "#..................#", "#..................#", "####################"],
+    start: [2, 9], exit: [18, 10], objs: [{ k: "npc", id: "tonino", x: 9, y: 5, talk: "n9" }] },
+  { node: "n10", floor: ["#5a4a2a", "#4c3e22"], wall: "#2e2410", name: "L'Orologio del Campanile", rows: [
+    "####################", "####################", "#..................#", "#..##..........##..#", "#..................#", "#..................#",
+    "#..................#", "#..##..........##..#", "#..................#", "#..................#", "#..................#", "####################"],
+    start: [9, 10], exit: null, objs: [{ k: "foe", id: "arbitro", x: 9, y: 4, fight: 1 }] },
 ];
 let X = null; // stato esplorazione
 function nodeDone(m) { return G.done.includes(m.node); }
 function explore() {
   busy2 = false; X && (X.cool = Date.now() + 700);
-  if (G.area == null) { const i = NODES.findIndex((n) => !G.done.includes(n.id)); G.area = i < 0 ? 4 : i; }
+  const cap = G.cap || 1;
+  const maxArea = cap === 2 ? 9 : 4;
+  const minArea = cap === 2 ? 5 : 0;
+  if (G.area == null || G.area < minArea || G.area > maxArea) {
+    const i = NODES.findIndex((n) => (n.cap || 1) === cap && !G.done.includes(n.id));
+    G.area = i < 0 ? maxArea : i;
+  }
   const m = MAPS[G.area]; SCENE = "";
   if (!X || X.m !== m) X = { m, x: m.start[0], y: m.start[1] };
   app.innerHTML = `<h1>${esc(m.name)}</h1><div class="sub">Livello ${G.lv} · focacce ${G.focacce} · tocca le frecce per camminare, parla con i personaggi</div>
@@ -326,14 +467,16 @@ function explore() {
   near(); draw();
 }
 function objs(m) {
-  return m.objs.filter((o) => !(o.k === "foe" && (nodeDone(m) || o.wait && !G.flags["met_" + m.node]))).filter((o) => !(o.id === "nico" && G.party.includes("nico")));
+  return m.objs.filter((o) => !(o.k === "foe" && (nodeDone(m) || o.wait && !G.flags["met_" + m.node]))).filter((o) => !(o.id === "nico" && G.party.includes("nico"))).filter((o) => !(o.id === "rita" && G.party.includes("rita")));
 }
 function step(d) {
   if (!$("#cv") || busy2 || (X && X.cool > Date.now())) return;
   const m = X.m, nx = X.x + d[0], ny = X.y + d[1];
   const row = m.rows[ny]; if (!row) return;
   const t = row[nx];
-  if (nx >= row.length - 1 && d[0] === 1 && nodeDone(m)) { G.area = Math.min(4, G.area + 1); X = null; save(); return explore(); }
+  const cap = G.cap || 1;
+  const maxArea = cap === 2 ? 9 : 4;
+  if (nx >= row.length - 1 && d[0] === 1 && nodeDone(m)) { G.area = Math.min(maxArea, G.area + 1); X = null; save(); return explore(); }
   if (t === "#" || t === "~" || t === undefined) return;
   const o = objs(m).find((q) => q.x === nx && q.y === ny);
   const msg = (h) => { const e = $("#msg"); if (e) e.innerHTML = h; };
@@ -344,7 +487,7 @@ function step(d) {
   X.x = nx; X.y = ny; X.mv = 8;
   if (m.exit && nx === m.exit[0] && ny === m.exit[1]) {
     if (!nodeDone(m)) { msg("Qualcosa non ti lascia andare: prima risolvi qui."); X.x -= d[0]; X.y -= d[1]; }
-    else { G.area = Math.min(4, G.area + 1); X = null; save(); return explore(); }
+    else { G.area = Math.min(maxArea, G.area + 1); X = null; save(); return explore(); }
   }
   near(); draw();
 }
@@ -467,10 +610,11 @@ function loop() { RAF = requestAnimationFrame(() => { RAF = 0; if (!$("#cv")) re
 function map() { busy2 = false; explore(); }
 function enter(n) {
   busy2 = true; clearInterval(window.PADTM);
-  SCENE = { n1: "campetto", n2: "trattoria", n3: "molo", n4: "chiosco", n5: "campanile" }[n.id];
+  SCENE = { n1: "campetto", n2: "trattoria", n3: "molo", n4: "chiosco", n5: "campanile", n6: "spiaggia", n7: "faro", n8: "trattoria2", n9: "pineta", n10: "orologio" }[n.id] || "campetto";
   if (n.id === "n2") return dialog(STORY.n2, papaChoice);
-  if (n.rest) return dialog(STORY[n.id], rest);
-  dialog(STORY[n.id], () => fight(n));
+  if (n.id === "n4") return dialog(STORY.n4, rest);
+  if (n.id === "n9") return dialog(STORY.n9, rest9);
+  dialog(STORY[n.id] || [], () => fight(n));
 }
 function papaChoice() {
   app.innerHTML = vig(SCENE, "papa") + `<div class="card"><span class="who">Papà Moretti</span><br>Siete venuti per un autografo o per le acciughe?</div>
@@ -486,15 +630,48 @@ function rest() {
   $("#a").onclick = () => { G.flags.paradosso = 1; fin("n4", [T("tonino", "Stai benissimo. E ricordi che ieri hai segnato dall'altra parte del campo."), T("gigi", "Io mi ricordo un cane parlante. Era mio nonno.")]); };
   $("#b").onclick = () => { G.focacce += 2; fin("n4", [T("tonino", "Scelta noiosa e sana. Mi piaci."), T("sara", "Siamo qui da dieci minuti e questo è già il momento più normale.")]); };
 }
+function rest9() {
+  app.innerHTML = vig(SCENE, "tonino") + `<div class="card"><span class="who">Tonino</span><br>Siamo sotto la Pineta Capovolta. Le radici nel cielo fanno ombra. Cosa prendete per rimettervi in forze?</div>
+  <button id="a" class="hot">Bevi una bottiglietta di Chinotto del Paradosso<small>Ricarica tutta la Grinta della squadra al massimo (6/6)</small></button>
+  <button id="b">Prendi 3 focacce calde di Rita<small>+3 focacce nell'inventario per curarsi</small></button>`;
+  $("#a").onclick = () => { if (P) P.gr = 6; floatText("GRINTA MAX!", "#ffd23f"); fin("n9", [T("tonino", "Il Chinotto frizzante vi rimette le ali. Grinta piena!"), T("gigi", "Ha il sapore della vittoria e delle domeniche al mare.")]); };
+  $("#b").onclick = () => { G.focacce += 3; floatText("+3 FOCACCE", "#57d68d"); fin("n9", [T("tonino", "Focaccia appena sfornata. Unte e perfette."), T("sara", "Siamo pronte per la cima dell'Orologio.")]); };
+}
 function fin(id, lines) { if (!G.done.includes(id)) G.done.push(id); save(); dialog(lines, map); }
 
-// ---- scontri a turni ----
+// ---- scontri a turni con effetti visivi ----
 let P, F, busy;
-const hit = (t, d, msg) => { if (t.shield && !t.mark && !t.stun) { d = Math.ceil(d / 4); msg += " Ma Tommy è perfetto: il colpo scivola via. Serve Sara, o un modo per farlo sbagliare."; } if (t.mark) d = Math.round(d * 1.5); t.hp = Math.max(0, t.hp - d); return `${msg} (-${d})`; };
+function floatText(txt, col = "#ff4d5a") {
+  const el = document.createElement("div");
+  el.className = "float-num";
+  el.textContent = txt;
+  el.style.color = col;
+  el.style.left = (Math.random() * 30 + 35) + "%";
+  el.style.top = (Math.random() * 25 + 35) + "%";
+  app.appendChild(el);
+  setTimeout(() => el.remove(), 800);
+}
+function triggerFlash() {
+  app.classList.remove("screen-flash");
+  void app.offsetWidth;
+  app.classList.add("screen-flash");
+}
+const hit = (t, d, msg) => {
+  if (t.shield && !t.mark && !t.stun) { d = Math.ceil(d / 4); msg += " Ma Tommy è perfetto: il colpo scivola via. Serve Sara, o un modo per farlo sbagliare."; }
+  if (t.mark) d = Math.round(d * 1.5);
+  t.hp = Math.max(0, t.hp - d);
+  triggerFlash();
+  floatText(`-${d}`, t.mark ? "#ffd23f" : "#ff4d5a");
+  return `${msg} (-${d})`;
+};
 function fight(n) {
   const mk = (id) => { const h = HERO[id], mx = h.hp + (G.lv - 1) * 8; return { id, pal: id, name: h.name, ic: h.ic, hp: mx, max: mx, sk: h.sk }; };
   P = { u: G.party.map(mk), gr: 3, guard: 0, log: "Inizia lo scontro." };
-  F = n.foes.map((k) => { const f = FOE[k](); f.pal = { gabb: 'gabb', cuoco: 'pino', tommy: 'tommy', rugg: 'rugg' }[k]; f.hp += (G.lv - 1) * 6; f.max = f.hp; return f; });
+  F = n.foes.map((k) => {
+    const f = FOE[k]();
+    f.pal = { gabb: 'gabb', cuoco: 'pino', tommy: 'tommy', rugg: 'rugg', granchio: 'granchio', ombra: 'ombra', padella: 'padella', arbitro: 'arbitro' }[k] || 'gabb';
+    f.hp += (G.lv - 1) * 6; f.max = f.hp; return f;
+  });
   if (n.id === 'n2' && G.flags.verita) P.u.forEach((u) => { if (u.id === 'leo') u.pw = 1; });
   if (n.id === 'n2' && G.flags.verita === 0) F.forEach((f) => { f.hp += 15; f.max += 15; });
   P.node = n; P.phase2 = false; busy = false; renderFight();
@@ -515,7 +692,7 @@ function menu() {
   m.querySelectorAll("button").forEach((b) => (b.onclick = () => {
     const s = b.dataset.s;
     if (s === "p") { P.gr = Math.min(6, P.gr + 1); end(u, `${u.name} respira e aspetta.`); }
-    else if (s === "f") { G.focacce--; u.hp = Math.min(u.max, u.hp + 40); end(u, `${u.name} mangia una focaccia. Si sente meglio e leggermente unto.`); }
+    else if (s === "f") { G.focacce--; u.hp = Math.min(u.max, u.hp + 40); floatText("+40", "#57d68d"); end(u, `${u.name} mangia una focaccia. Si sente meglio e leggermente unto.`); }
     else { const sk = u.sk[+s]; if (sk.self) { P.gr -= sk.c; end(u, sk.f(u)); } else target(u, sk); }
   }));
 }
@@ -529,7 +706,11 @@ function run(u, sk, t) { P.gr -= sk.c; end(u, sk.f(u, t)); }
 function end(u, msg) {
   u.acted = true; P.log = esc(msg);
   const boss = F.find((f) => f.boss);
-  if (boss && !P.phase2 && boss.hp > 0 && boss.hp <= boss.max / 2) { P.phase2 = true; boss.heal = 12; P.log += `<br><i>${esc(STORY.mid)}</i> Ruggeri smette di sorridere. Adesso fa sul serio.`; boss.atk = [boss.atk[0] + 4, boss.atk[1] + 5]; }
+  if (boss && !P.phase2 && boss.hp > 0 && boss.hp <= boss.max / 2) {
+    P.phase2 = true; boss.heal = 12;
+    P.log += `<br><i>${esc(boss.pal === "arbitro" ? STORY.mid2 : STORY.mid)}</i> Il boss carica la sua forma finale!`;
+    boss.atk = [boss.atk[0] + 4, boss.atk[1] + 5];
+  }
   if (F.every((f) => f.hp <= 0)) return win();
   renderFight();
 }
@@ -540,11 +721,13 @@ function foeTurn() {
     const al = P.u.filter((u) => u.hp > 0); if (!al.length) return;
     const t = pick(al); let d = rnd(f.atk[0], f.atk[1]); if (f.weak) d = Math.ceil(d / 2); if (P.guard) d = Math.ceil(d / 3);
     t.hp = Math.max(0, t.hp - d);
+    triggerFlash();
+    floatText(`-${d}`, "#ff4d5a");
     log += `${esc(pick(f.say))} ${esc(f.name)} colpisce ${esc(t.name)} (-${d}).<br>`;
     if (f.strike && t.hp > 0 && Math.random() < 0.4) { t.skip = 1; log += `${esc(t.name)} viene coinvolto nello sciopero e salta il prossimo turno.<br>`; }
     if (f.weak) f.weak--; if (f.mark) f.mark--;
   });
-  F.forEach((f) => { if (f.heal && f.hp > 0) { f.hp = Math.min(f.max, f.hp + f.heal); log += `${f.ic} ${esc(f.name)} abbraccia tutti. Cura ${f.heal}. Come si fa a prendere a calci uno così?<br>`; } });
+  F.forEach((f) => { if (f.heal && f.hp > 0) { f.hp = Math.min(f.max, f.hp + f.heal); log += `${f.ic} ${esc(f.name)} recupera energie (+${f.heal}).<br>`; } });
   P.guard = 0; P.u.forEach((u) => (u.acted = false)); P.gr = Math.min(6, P.gr + 1); P.log = log;
   if (P.u.every((u) => u.hp <= 0)) return lose();
   busy = false; renderFight();
@@ -558,19 +741,33 @@ function win() {
   if (n.join && !G.party.includes(n.join)) G.party.push(n.join);
   if (!G.done.includes(n.id)) G.done.push(n.id); save();
   app.innerHTML = `<div class="card"><span class="who">Vittoria</span><br>Livello squadra ${G.lv}. ${n.join ? `${esc(NAMES[n.join])} si unisce alla squadra.` : ""}</div><button class="hot" id="c">Continua ▸</button>`;
-  $("#c").onclick = () => (n.id === "n5" ? dialog(STORY.win, choice) : STORY["w" + n.id.slice(1)] ? dialog(STORY["w" + n.id.slice(1)], map) : map());
+  $("#c").onclick = () => {
+    if (n.id === "n5") return dialog(STORY.win, choice);
+    if (n.id === "n10") return dialog(STORY.win2, finale2);
+    if (STORY["w" + n.id.slice(1)]) return dialog(STORY["w" + n.id.slice(1)], map);
+    return map();
+  };
+}
+function finale2() {
+  app.innerHTML = `<div class="card"><span class="who">Vittoria del Capitolo 2</span><br>L'Orologio del Paradosso si è arrestato al novantesimo minuto. Le onde sono ridiscese verso il mare aperto, i granchi hanno riposto i cartellini e la grande crepa verde sopra il campanile si richiude con un dolce sibilo di vento.<br><br>Rita vi porge un ultimo trancio di focaccia: «Tornate a casa, ragazzi. Avete una partita da vincere al campetto vero».</div>
+  <div class="card"><span class="who">Trofeo del Borgo Storto</span><br>Hai completato entrambi i Capitoli di Borgo Storto!</div>
+  <button class="hot" id="t">◂ Torna al Titolo</button>`;
+  $("#t").onclick = title;
 }
 function choice() {
   app.innerHTML = `<div class="card"><span class="who">Ugolino</span><br>Allora? Chiudo la crepa o la lascio aperta di un dito?</div>
   <button id="a">Chiudi la crepa<small>Tutto torna come prima. Quasi.</small></button>
-  <button id="b" class="hot">Lasciala aperta di un dito<small>Il Borgo Storto resta raggiungibile</small></button>`;
+  <button id="b" class="hot">Lasciala aperta di un dito<small>Il Borgo Storto resta raggiungibile per il Capitolo 2</small></button>`;
   $("#a").onclick = () => { G.flags.crepa = "chiusa"; save(); finale(); };
   $("#b").onclick = () => { G.flags.crepa = "aperta"; save(); finale(); };
 }
 function finale() {
   const aperta = G.flags.crepa !== "chiusa";
   app.innerHTML = `<div class="card"><span class="who">Fine del capitolo 1</span><br>${aperta ? "La crepa resta aperta di un dito. Dall'altra parte qualcosa ha sentito. Ugolino dice «È solo un gabbiano». Non è un gabbiano." : "La crepa si chiude con un rumore da sacchetto del pane. Il cielo torna a posto, ma dal campanile si sente ancora un piccolo «KRAAA». Gigi giura di non essere stato lui."}${G.flags.paradosso ? "<br><br><i>Qualcuno nel gruppo ricorda ancora il cane parlante. Sarà un problema.</i>" : ""}</div>
-  <div class="card"><span class="who">Prossimamente</span><br>Capitolo 2: il Borgo Storto non ha finito con voi.</div><button id="t">◂ Titolo</button>`;
+  <div class="card"><span class="who">Capitolo 2 Sbloccato</span><br>Puoi iniziare subito il Capitolo 2 con Rita e l'Arbitro del Paradosso!</div>
+  <button class="hot" id="cap2">Vai al Capitolo 2 ▸</button>
+  <button id="t">◂ Titolo</button>`;
+  $("#cap2").onclick = () => { G.cap = 2; G.area = 5; save(); title(); };
   $("#t").onclick = title;
 }
 title();
