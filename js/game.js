@@ -9823,17 +9823,23 @@
     const bgc = g.createLinearGradient(0, 0, 0, H); bgc.addColorStop(0, "#23304a"); bgc.addColorStop(1, "#0f1626"); g.fillStyle = bgc; g.fillRect(0, 0, W, H);
     if (F.mode === "pack") {
       F.t++;
-      if (F.ph === "closed") {
-        const wob = Math.sin(F.t / 8) * 2;
-        g.save(); g.translate(160, 100 + wob); g.rotate(Math.sin(F.t / 20) * 0.04);
+      if (F.ph === "tear" && F.t >= 36) { F.ph = "open"; F.t = 0; sfx("goal"); }
+      if (F.ph === "closed" || F.ph === "tear") {
+        const tear = F.ph === "tear", sh = tear ? F.t * 0.28 : 0;
+        const wob = Math.sin(F.t / 8) * 2 + (tear ? (Math.random() - 0.5) * sh : 0);
+        if (tear) { const gl = g.createRadialGradient(160, 100, 5, 160, 100, 20 + F.t * 4); gl.addColorStop(0, "rgba(255,230,120," + Math.min(0.8, F.t / 40) + ")"); gl.addColorStop(1, "rgba(255,230,120,0)"); g.fillStyle = gl; g.fillRect(0, 0, W, H); }
+        g.save(); g.translate(160 + (tear ? (Math.random() - 0.5) * sh : 0), 100 + wob); g.rotate(Math.sin(F.t / 20) * 0.04 + (tear ? (Math.random() - 0.5) * sh * 0.02 : 0));
         const pg = g.createLinearGradient(-45, -65, 45, 65); pg.addColorStop(0, "#ff4d5a"); pg.addColorStop(0.5, "#ffd23f"); pg.addColorStop(1, "#3fa7ff"); g.fillStyle = pg; g.fillRect(-45, -65, 90, 130);
         for (let i = 0; i < 9; i++) px(-45 + i * 10, -65, 5, 4, "#ffffff88"); for (let i = 0; i < 9; i++) px(-45 + i * 10, 61, 5, 4, "#ffffff88");
         g.fillStyle = "#1b1b2a"; g.font = "bold 11px sans-serif"; g.textAlign = "center"; g.fillText("CAMPIONI", 0, -30); g.fillText("DELLA COSTA", 0, -17); g.font = "bold 8px sans-serif"; g.fillText("100 ANNI DI COPPA", 0, 44); g.fillText("5 FIGURINE", 0, 54);
         g.strokeStyle = "#1b1b2a"; g.lineWidth = 3; g.beginPath(); g.moveTo(-18, 0); g.quadraticCurveTo(-6, 16, 0, 8); g.quadraticCurveTo(6, 16, 18, 0); g.stroke();
         g.restore(); g.textAlign = "left";
         if (F.left > 1) { g.fillStyle = "#cfe0ff"; g.font = "bold 9px sans-serif"; g.fillText(`Bustine: ${F.left}`, 8, 14); }
+        if (tear) { for (let i = 0; i < 18; i++) { const a = i * 1.7 + F.t * 0.05, d = F.t * 2.2; px(160 + Math.cos(a) * d, 100 + Math.sin(a) * d * 0.8, 3, 3, ["#ffd23f", "#fff", "#ff9ec0", "#9be2ff"][i % 4]); }
+          if (F.t > 24) { g.fillStyle = "rgba(255,255,255," + Math.min(1, (F.t - 24) / 12) + ")"; g.fillRect(0, 0, W, H); } }
       } else {
         const n = F.cards.length, cw = 56, ch = 76, gap = 6, x0 = (W - (n * cw + (n - 1) * gap)) / 2;
+        if (F.t < 18) { g.fillStyle = "rgba(255,255,255," + (1 - F.t / 18) * 0.9 + ")"; g.fillRect(0, 0, W, H); }
         F.cards.forEach((c, i) => {
           const tr = F.t - i * 14, u = clamp(tr / 12, 0, 1), x = x0 + i * (cw + gap), y = 50 + (1 - Math.min(1, F.t / 10)) * 40;
           if (u < 0.5) { const sw = cw * (1 - u * 2); px(x + (cw - sw) / 2, y, sw, ch, "#2f4a7a"); px(x + (cw - sw) / 2 + 3, y + 3, Math.max(0, sw - 6), ch - 6, "#3a5a9a"); }
@@ -9865,17 +9871,19 @@
     view = { kind: "fig" }; chap("Edicola · Bustina");
     text("pina", n > 1 ? `Due bustine, offre la casa. Aprile piano: le figurine hanno i nervi scoperti.` : pick(["Aprila tu. Io porto sfortuna: l'ultima leggendaria l'ho aperta io, ed era il parroco.", "Una bustina. Cinque facce. Qualcuna la conosci, qualcuna no, qualcuna vorresti non conoscerla.", "Strappa dall'angolo. Chi strappa dal centro non è un vero collezionista, dice mio cugino."]));
     const openOne = () => {
-      const cards = figPack(r); FG.cards = cards; FG.ph = "open"; FG.t = 0; FG.left--; sfx("kick");
+      const cards = figPack(r); FG.cards = cards; FG.ph = "tear"; FG.t = 0; FG.left--; sfx("kick"); $("choices").innerHTML = "";
+      const best = cards.slice().sort((a, b) => (figRar(b.id) || 0) - (figRar(a.id) || 0) || (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0))[0];
       const nn = cards.filter((c) => c.isNew).length, rare = cards.filter((c) => figRar(c.id)).map((c) => `${RAR[figRar(c.id)]}: ${figName(c.id)}`);
       setTimeout(() => {
         text("pina", `${nn ? `<b>${nn} nuov${nn === 1 ? "a" : "e"}!</b>` : "Tutte doppie. Succede. Anche ai migliori. Soprattutto ai migliori."} ${cards.map((c) => `n. ${figNum(c.id)} ${esc(figName(c.id))}`).join(" · ")}${rare.length ? `<br><em>${esc(rare.join(" · "))}</em>` : ""}${FG.msgs.length ? `<br><em>${esc(FG.msgs.join(" · "))}</em>` : ""}`);
         FG.msgs = [];
         buttons([
           ...(FG.left > 0 ? [{ label: "Apri la prossima ▸", cls: "hot", fn: () => { FG.ph = "closed"; FG.t = 0; openOne(); } }] : []),
+          { label: "✨ Guarda in 3D", sub: figName(best.id), fn: () => { if (window.open3DCardViewer) window.open3DCardViewer(best.id, () => {}); } },
           { label: "Guarda l'album", fn: () => { const first = cards.find((c) => c.isNew) || cards[0]; figAlbum(FIG_PAGES.findIndex((p) => p.ids.includes(first.id)), back); } },
           ...(FG.left > 0 ? [] : [{ label: "◂ Indietro", fn: back }]),
         ], true);
-      }, 950);
+      }, 1650);
     };
     buttons([{ label: "Strappa la bustina ▸", cls: "hot", fn: openOne }]);
   }
