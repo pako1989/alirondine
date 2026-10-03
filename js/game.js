@@ -23515,6 +23515,8 @@
     closeAltStage: () => closeAltStage()
   };
   window.title = () => title();
+  window.setView = (v) => { view = v; };
+  window.getView = () => view;
   window.closeAltStage = () => closeAltStage();
   window.setChapter = (t) => chap(t);
   window.renderText = (who, html) => text(who, html);

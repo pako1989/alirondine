@@ -593,12 +593,15 @@
       opp: { name: "Toro Galli", team: "Tori di Torino", color: "#ff4d5a" }
     };
 
-    window.view = { kind: "tsubasa" };
+    if (typeof window.setView === "function") window.setView({ kind: "tsubasa" });
+    else if (window.gameEngine && window.gameEngine.setView) window.gameEngine.setView({ kind: "tsubasa" });
+
+    if (typeof window.setChapter === "function") window.setChapter("Esibizione Captain Tsubasa (NES/SNES)");
+    if (typeof window.renderText === "function") {
+      window.renderText("voce", "Partita d'esibizione a duelli 1v1 contro i <b>Tori di Torino</b>! In alto vedi il duello e il radar tattico dinamico. Quando scegli un'azione, il campo si anima a 60 FPS!");
+    }
 
     const textEl = document.getElementById("text");
-    if (textEl) {
-      textEl.innerHTML = `<span class="who" style="background:#ffd23f; color:#0e1424; font-weight:bold;">Esibizione Tecmo</span><span class="t">Rondine FC contro i <b>Tori di Torino</b>! Duello 1v1 in stile Captain Tsubasa NES/SNES.</span>`;
-    }
 
     function renderChoices() {
       const s = window.tsubasaExhibState;
@@ -615,7 +618,7 @@
           choices.style.flexDirection = "column";
           choices.innerHTML = `
             <button type="button" class="choice-btn hot" onclick="window.openTsubasaExhibition()">Gioca un'altra esibizione 🔄</button>
-            <button type="button" class="choice-btn" onclick="if(window.title) window.title();">Torna al Menu Principale 🏠</button>
+            <button type="button" class="choice-btn" onclick="if(window.setView) window.setView({ kind: 'scene', bg: 'title' }); if(window.title) window.title();">Torna al Menu Principale 🏠</button>
           `;
         }
         return;
