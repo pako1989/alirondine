@@ -1210,6 +1210,7 @@
     frame++; const gx0 = performance.now();
     const alt = $("stageAlt");
     const isAltKind = view && (
+      view.kind === "tsubasa" ||
       view.kind === "diorama" ||
       view.kind === "alt" ||
       view.kind === "enc_card" ||
@@ -1227,7 +1228,16 @@
     if (SA) drawSA();
     else if (CEL) drawCel();
     else if (cutin) drawCutin();
-    else if (view.kind === "match") drawPitch();
+    else if (view.kind === "match") {
+      if (SET && SET.tsubasa && window.drawTsubasaMatch) {
+        window.drawTsubasaMatch(g, M);
+      } else {
+        drawPitch();
+      }
+    }
+    else if (view.kind === "tsubasa") {
+      if (window.drawTsubasaMatch) window.drawTsubasaMatch(g, window.tsubasaExhibState);
+    }
     else if (view.kind === "timing" && tm) drawTiming();
     else if (view.kind === "coach") drawCoach();
     else if (view.kind === "borgo" && BW) drawBorgo();
@@ -1389,50 +1399,48 @@
     try { list = mnDressList(list); } catch {}
     list = list.map((o) => (o && ({ "◂ Altre modalità": 1, "◂ Extra": 1 })[o.label] ? { ...o, label: o.label === "◂ Extra" ? "◂ Collezioni" : "◂ Modalità" } : o));
 
-    if (view && view.kind === "match" && SET && SET.tsubasa && window.renderTsubasaTurn && M) {
-      const isAtk = M.poss === "us";
-      const opp = (TEAMS && TEAMS[M.team]) || {};
-      const curOpp = M.cur || { name: opp.vs || "Avversario" };
-      window.renderTsubasaTurn({
-        isAttack: isAtk,
-        carrierName: M.carrier || (typeof heroName === "function" ? heroName() : "Leo Moretti"),
-        carrierNum: isAtk ? 10 : 1,
-        oppName: curOpp.name || "Difensore",
-        oppNum: isAtk ? 4 : 9,
-        zone: M.zone || 3,
-        guts: M.guts || 50,
-        maxGuts: (S && S.st && S.st.grinta) || 100,
-        score: M.score || [0, 0],
-        min: M.min || 0,
-        oppColor: opp.color || "#ff4d5a",
-        usColor: "#ffd23f",
-        actions: list,
-        onAction: (act) => {
-          if (window.playTecmoAnimation && act.label) {
-            const isShot = /TIR|RONDINE|FOGLIA|ROVESCIATA|BOMBA/i.test(act.label);
-            const isDrib = /DRIB|FINTA|SCATTO/i.test(act.label);
-            const isTack = /SCIVOLATA|CONTRAST|TACKLE/i.test(act.label);
-            window.playTecmoAnimation(isShot ? "shot" : isDrib ? "drib" : isTack ? "tackle" : "pass", {
-              title: act.label.toUpperCase(),
-              sub: act.sub || "Azione sul campo!",
-              color: isShot ? "#ffd23f" : isDrib ? "#00e5ff" : "#ff4d5a",
-              soundWord: isShot ? "BOOOM!" : isDrib ? "SWOOOSH!" : "STAAACK!"
-            }, () => {
-              if (act.fn) act.fn();
-            });
-          } else {
-            if (act.fn) act.fn();
-          }
-        }
+    if (view && view.kind === "match" && SET && SET.tsubasa && window.startTsubasaAction && M) {
+      const c = $("choices"); c.innerHTML = ""; c.className = "choices";
+      c.style.display = "grid";
+      c.style.gridTemplateColumns = "repeat(2, 1fr)";
+      c.style.gap = "8px";
+
+      list.forEach((o) => {
+        const b = document.createElement("button"); b.type = "button";
+        b.className = "choice-btn" + (o.cls ? " " + o.cls : "");
+        b.disabled = !!o.disabled;
+        b.style.display = "flex";
+        b.style.flexDirection = "column";
+        b.style.alignItems = "center";
+        b.style.justifyContent = "center";
+        b.style.padding = "10px 6px";
+        b.style.minHeight = "52px";
+
+        const isShot = /TIR|RONDINE|FOGLIA|ROVESCIATA|BOMBA/i.test(o.label);
+        const isDrib = /DRIB|FINTA|SCATTO/i.test(o.label);
+        const isTack = /SCIVOLATA|CONTRAST|TACKLE/i.test(o.label);
+        const icon = isShot ? "🔥 " : isDrib ? "💨 " : isTack ? "🦵 " : "👟 ";
+
+        b.innerHTML = `
+          <div style="font-weight:900; font-size:13px; font-family:var(--display, sans-serif);">${icon}${o.label}</div>
+          ${o.sub ? `<small style="font-size:10px; opacity:0.85; margin-top:2px;">${o.sub}</small>` : ""}
+        `;
+
+        b.onclick = () => {
+          c.innerHTML = "";
+          const actionType = isShot ? "shot" : isDrib ? "drib" : isTack ? "tackle" : "pass";
+          window.startTsubasaAction(actionType, {
+            title: o.label.toUpperCase(),
+            sub: o.sub || "Azione sul campo!",
+            color: isShot ? "#ffd23f" : isDrib ? "#00e5ff" : "#ff4d5a",
+            soundWord: isShot ? "BOOOM!" : isDrib ? "SWOOOSH!" : "STAAACK!"
+          }, () => {
+            if (o.fn) o.fn();
+          });
+        };
+        c.appendChild(b);
       });
       return;
-    } else {
-      const alt = document.getElementById("stageAlt");
-      if (alt && !alt.hidden && view && view.kind === "match") {
-        alt.hidden = true;
-        alt.style.display = "none";
-        alt.innerHTML = "";
-      }
     }
 
     const c = $("choices"); c.innerHTML = ""; c.className = "choices" + (one || list.length === 1 ? " one" : "");
