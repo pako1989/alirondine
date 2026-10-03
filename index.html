@@ -20448,6 +20448,7 @@
     play(lines, () => hqPage(back, page));
   }
   MODES8.push(() => ({ label: "Quartier Generale delle 108 Stelle", sub: `${hqCount()}/${svTot()} persone · strutture ${HQ_LEVELS.filter((x) => hqCount() >= x.need).length}/4`, fn: () => hqEnter(modes) }));
+  MODES8.push(() => ({ label: "Il Borgo Storto (GDR)", sub: "Capitolo 1 · trama, scontri a turni, tono assurdo", fn: () => { location.href = "./borgo-storto.html"; } }));
   MN_BORGO_BTN.push(() => ({ label: "Quartier Generale", sub: `${hqCount()}/${svTot()} Stelle e residenti · strutture ${HQ_LEVELS.filter((x) => hqCount() >= x.need).length}/4`, fn: () => hqEnter(menuBorgo) }));
   MN_BORGO.push(() => hqCount() / svTot());
   TRX.push(() => {
