@@ -4856,13 +4856,14 @@
     b.push({ label: `Partite tattiche: ${SET.tatt ? "sì" : "no"}`, sub: SET.tatt ? "Pressing, contropiede, fiato, cambi e piccoli infortuni in ogni partita" : "Modalità alternativa: aggiunge piano di gioco, fiato, cambi e botte", fn: () => { SET.tatt = !SET.tatt; save(); again(); } });
     if (on) Object.entries(SET_T).forEach(([k, [l, sub]]) => b.push({ label: `${SET.t[k] ? "✓" : "✗"} ${l}`, sub, fn: () => { SET.t[k] = !SET.t[k]; save(); again(); } }));
     Object.entries(SET_PC).forEach(([k, [l, sub]]) => b.push({ label: `${SET.pc[k] ? "✓" : "✗"} ${l}`, sub: `Partita classica · ${sub}`, fn: () => { SET.pc = { ...SET.pc, [k]: !SET.pc[k] }; save(); again(); } }));
+    let AB = [];
     b.push(
-      ...audioButtons(again),
+      ...(AB = audioButtons(again)),
       { label: `Stile Carte & Ritratti: ${SET.cardView === "holo3d" ? "Olografico 3D" : "Classico Pixel Canvas"} ▸`, sub: SET.cardView === "holo3d" ? "Tocca per tornare al Pixel Canvas retrò" : "Tocca per attivare le carte 3D con riflessi Foil", fn: () => { SET.cardView = SET.cardView === "holo3d" ? "canvas" : "holo3d"; save(); again(); } },
       { label: `Stile Trofei: ${SET.trophyView === "3d" ? "3D su Piedistallo" : "Classico Canvas"} ▸`, sub: SET.trophyView === "3d" ? "Tocca per tornare alla bacheca classica su canvas" : "Tocca per esaminare i trofei in 3D con rotazione a 360°", fn: () => { SET.trophyView = SET.trophyView === "3d" ? "canvas" : "3d"; save(); again(); } },
       { label: `Stile Fumetto Manga: ${SET.mangaView === "manga" ? "Attivo" : "Disattivato"} ▸`, sub: SET.mangaView === "manga" ? "Tavole illustrate a fumetto nei momenti chiave" : "Visualizzazione classica su canvas retrò", fn: () => { SET.mangaView = SET.mangaView === "manga" ? "canvas" : "manga"; save(); again(); } },
       { label: `Effetti Anime Manga (Cut-in): ${(window.isAnimeFxEnabled && window.isAnimeFxEnabled()) ? "Attivi" : "Disattivati"} ▸`, sub: (window.isAnimeFxEnabled && window.isAnimeFxEnabled()) ? "Speed-lines, lampo agli occhi e lettering shonen (tocca per disattivare)" : "Stile classico senza cut-in a schermo intero (tocca per attivare)", fn: () => { if (window.toggleAnimeFx) { const now = window.toggleAnimeFx(); again(`Effetti Anime ${now ? "attivati" : "disattivati"}.`); } else { again(); } } },
-      { label: `Modalità Partita: ${SET.tsubasa ? "Captain Tsubasa (NES/SNES)" : "Classico JRPG"} ▸`, sub: SET.tsubasa ? "Duelli cinematografici Tecmo, comandi a griglia, radar e animazioni rétro" : "Elenco scelte testuali classico (tocca per cambiare)", fn: () => { SET.tsubasa = !SET.tsubasa; save(); again(`Modalità Partita: ${SET.tsubasa ? "Captain Tsubasa (NES/SNES)" : "Classico JRPG"}`); } },
+      { label: `Modalità Partita: ${SET.tsubasa ? "Captain Tsubasa (NES/SNES)" : "Classico JRPG"} ▸`, sub: SET.tsubasa ? "Duelli cinematografici Tecmo, comandi a griglia, radar e animazioni rétro" : "Ora: scelte a testo. Attivandola: campo con i giocatori e una scena animata a ogni azione (le regole restano le stesse)", fn: () => { SET.tsubasa = !SET.tsubasa; save(); again(`Modalità Partita: ${SET.tsubasa ? "Captain Tsubasa (NES/SNES)" : "Classico JRPG"}`); } },
       { label: "⚽ Gioca Esibizione Captain Tsubasa (NES/SNES) ▸", sub: "Sfida immediata con il motore a duelli Tecmo", cls: "hot", fn: () => { if (window.openTsubasaExhibition) window.openTsubasaExhibition(again); } },
       { label: `Scene speciali: ${SET.speed} ▸`, sub: "normale · veloce · salta (tocca la scena per saltarla)", fn: () => { SET.speed = { normale: "veloce", veloce: "salta", salta: "normale" }[SET.speed] || "normale"; save(); again(); } },
       { label: `Animazioni: ${SET.anim ? "sì" : "no"}`, sub: "Tiri, esultanze, fischio d'inizio e finale, coppa, cartellini · tocca per saltarle", fn: () => { SET.anim = !SET.anim; save(); again(); } },
@@ -4872,10 +4873,25 @@
       { label: `Filtro retrò: ${SET.crt ? "sì" : "no"}`, sub: "Righe e bordi curvi, come la tv della trattoria", fn: () => { SET.crt = !SET.crt; save(); again(); } },
       { label: `Risparmio batteria: ${SET.eco ? "sì" : "no"}`, sub: SET.eco ? "Effetti pesanti spenti" : GX.auto ? "Il telefono faticava: effetti pesanti già alleggeriti" : "Se il telefono fatica, il gioco si alleggerisce da solo", fn: () => { SET.eco = !SET.eco; save(); again(); } },
       { label: `Testo più grande: ${SET.big ? "sì" : "no"}`, fn: () => { SET.big = !SET.big; save(); again(); } },
-      { label: "Ripristina predefinite", sub: "Anni '90, tutto attivo", fn: () => { SET = setDefault(); save(); again("Impostazioni ripristinate."); } },
-      { label: "◂ Indietro", fn: back },
     );
-    buttons(b);
+    const isGame = (o) => /^(Stile partite|Difficoltà|Partite tattiche|Modalità Partita|⚽ Gioca Esibizione)/.test(o.label);
+    const isRule = (o) => /^[✓✗] /.test(o.label);
+    const gameB = b.filter(isGame), ruleB = b.filter(isRule), audioB = AB, lookB = b.filter((o) => !isGame(o) && !isRule(o) && !AB.includes(o));
+    const SEC = settings._sec || "";
+    const sec = (id, label, sub, cls) => ({ label, sub, cls, fn: () => { settings._sec = id; again(); } });
+    const bk = { label: "◂ Impostazioni", cls: "pick", fn: () => { settings._sec = ""; again(); } };
+    if (SEC === "partita") return buttons([...gameB, bk]);
+    if (SEC === "regole") return buttons([...ruleB, bk]);
+    if (SEC === "audio") return buttons([...audioB, bk]);
+    if (SEC === "aspetto") return buttons([...lookB, bk]);
+    buttons([
+      sec("partita", "Modalità di partita", `${on ? "Anni '90" : "Classico"} · ${(DIFF[SET.diff] || DIFF.normale)[0]} · ${SET.tsubasa ? "Captain Tsubasa" : "Classico JRPG"}`, "hot"),
+      sec("regole", "Opzioni di gioco", "Tiri murati, duelli, grinta di riserva, tiro a tempo e le altre regole: accese o spente"),
+      sec("audio", "Audio", "Suoni, musica, voci, volumi"),
+      sec("aspetto", "Grafica e aspetto", "Carte 3D, temi, animazioni, filtro retrò, testo grande"),
+      { label: "Ripristina predefinite", sub: "Anni '90, tutto attivo", fn: () => { SET = setDefault(); save(); again("Impostazioni ripristinate."); } },
+      { label: "◂ Indietro", fn: () => { settings._sec = ""; back(); } },
+    ]);
   }
 
   // ================= SALVATAGGI =================
