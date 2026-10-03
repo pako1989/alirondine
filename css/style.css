@@ -102,6 +102,9 @@
   .guts i { display: block; height: 100%; background: linear-gradient(90deg, #ff9d2e, var(--gold)); }
   .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
   .choices.one { grid-template-columns: 1fr; }
+  .choices .head { grid-column: 1 / -1; margin: 6px 2px 0; font: 700 11px var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); border-bottom: 1px solid #ffffff22; padding-bottom: 2px; }
+  .choices .head:first-child { margin-top: 0; }
+  .choices > button:has(+ .head) { grid-column: 1 / -1; }
   .choices button { font: 700 14px var(--body); color: var(--ink); background: #1f3a63; border: 2px solid #ffffff40; border-radius: 8px; padding: 9px 10px; cursor: pointer; text-align: left; transition: all var(--transition); animation: choiceSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) backwards; }
   .choices button:nth-child(1) { animation-delay: 0.02s; }
   .choices button:nth-child(2) { animation-delay: 0.05s; }

@@ -1445,6 +1445,7 @@
 
     const c = $("choices"); c.innerHTML = ""; c.className = "choices" + (one || list.length === 1 ? " one" : "");
     list.forEach((o) => {
+      if (o && o.head) { const h = document.createElement("div"); h.className = "head"; h.textContent = o.head; c.appendChild(h); return; }
       const b = document.createElement("button"); b.type = "button";
       b.textContent = o.label; if (o.cls) b.className = o.cls;
       if (o.sub) { const s = document.createElement("small"); s.textContent = o.sub; b.appendChild(s); }
@@ -14284,24 +14285,38 @@
     buttons([
       ...(has && STORY[has.step] ? [{ label: "Continua", sub: STORY[has.step].chap, cls: "hot", fn: () => { S = has; run(); } }] : []),
       ...(fresh0 ? [{ label: "Nuova partita", sub: "Stagione 1 · circa 30–40 minuti", cls: "hot", fn: () => { S = fresh(); run(); } }] : []),
-      { label: "🔥 Blue Lock · La Gabbia dell'Ego", sub: "Nuova modalità: Torneo dei Predatori · Ego vs Altruismo e Fiamme Nere", cls: "hot", fn: () => { if (window.openBlueLockMode) window.openBlueLockMode(title); } },
-      { label: "🕵️ Noir · Il Peschereccio Fantasma", sub: "Nuova saga investigativa con Lina · True Detective & Breaking Bad", cls: "hot", fn: () => { if (window.openNoirStoryMenu) window.openNoirStoryMenu(title); } },
-      { label: "🌌 Multiverso · La Panda Quantistica", sub: "Nuova saga demenziale con Nonna · Rick & Morty, Futurama e Game of Thrones", cls: "hot", fn: () => { if (window.openMultiverseMenu) window.openMultiverseMenu(title); } },
-      { label: "🛡️ Roster & Talenti del Borgo", sub: "Dashboard tattica: compagni ed equipaggiamento passivo", cls: "hot", fn: () => { if (window.openRosterTalentsModal) window.openRosterTalentsModal(); } },
-      { label: "⚽ Stadio 3D · Sfida dei Tiri", sub: "Tiro della Rondine in 3D · Batti i portieri leggendari!", cls: "hot", fn: () => { if (window.openStadium3D) window.openStadium3D(title); } },
-      { label: "🚗 La Corsa della Panda 30", sub: "Minigioco 3D · Consegna la focaccia calda con Nonna!", cls: "hot", fn: () => { if (window.openPanda3D) window.openPanda3D(title); } },
-      { label: "⛵ La Notte del Faro", sub: "Saga narrativa speciale · Il torneo sulla scogliera", cls: "hot", fn: () => { if (window.openFaroStoryMenu) window.openFaroStoryMenu(title); } },
-      { label: "👑 La Traversata d'Oro", sub: "Nuova saga · Il Torneo dei Trabucchi e la Lanterna d'Oro", cls: "hot", fn: () => { if (window.openTraversataMenu) window.openTraversataMenu(title); } },
+      { head: "Gioca" },
       { label: "Storia", sub: `Le stagioni di Leo · ${mnPct(mnStoria())}%`, fn: menuStoria },
-      { label: "Albero delle scelte", sub: "Mappa dei bivi, scelte e finali alternativi", cls: "hot", fn: () => choiceTree(title) },
-      { label: "Enciclopedia del Borgo", sub: "Personaggi, schede, ritratti e curiosità", fn: () => borgoEncyclopedia(title) },
-      { label: "Il Borgo Storto", sub: "Lo spin-off GDR a turni tra campetto e focacce", cls: "hot", fn: () => openBorgoStorto(title) },
+      { label: "Il Borgo Storto", sub: "Spin-off GDR a turni", cls: "hot", fn: () => openBorgoStorto(title) },
       { label: "Borgo e trasferte", sub: `A piedi per il paese · ${mnPct(mnBorgo())}%`, fn: menuBorgo },
-      { label: "Modalità", sub: `Tutte le modalità di gioco · ${mnPct(mnModi())}%`, cls: "hot", fn: modes },
-      { label: "Collezioni", sub: `Trofei, figurine, finali, ricordi · ${mnPct(mnColl())}%`, fn: extras },
+      { label: "Modalità", sub: `Tutte le modalità · ${mnPct(mnModi())}%`, fn: modes },
+      { label: "Saghe e minigiochi", sub: "Blue Lock, Noir, Multiverso, Stadio 3D, Panda, Faro…", cls: "hot", fn: menuSaghe },
+      { head: "Esplora" },
+      { label: "Collezioni", sub: `Trofei, figurine, finali · ${mnPct(mnColl())}%`, fn: extras },
+      { label: "Enciclopedia del Borgo", sub: "Personaggi, schede e carte", fn: () => borgoEncyclopedia(title) },
+      { label: "Albero delle scelte", sub: "Bivi e finali alternativi", fn: () => choiceTree(title) },
+      { label: "Log dei dialoghi", sub: "Rileggi le ultime battute", fn: () => { if (window.openDialogueLog) window.openDialogueLog(); } },
+      { head: "Aiuto" },
       { label: "Impostazioni", sub: `${(DIFF[SET.diff] || DIFF.normale)[0]} · salvataggi · guida`, fn: menuImp },
-      { label: "Dove andare adesso?", sub: "Un consiglio senza spoiler", cls: fresh0 ? "" : "hot", fn: () => guDove(title) },
+      { label: "Dove andare adesso?", sub: "Un consiglio senza spoiler", cls: fresh0 ? "" : "pick", fn: () => guDove(title) },
       ...(!gr.seen ? [{ label: "Guida rapida", sub: "Partite, Borgo e collezioni in due minuti", cls: fresh0 ? "hot" : "", fn: () => guida(title) }] : []),
+    ]);
+  }
+  function menuSaghe() {
+    view = { kind: "scene", bg: "title" }; chap("Saghe e minigiochi");
+    text("voce", "<b>Saghe e minigiochi</b><br>Storie speciali e giochi a parte. Ognuna si gioca per conto suo.");
+    buttons([
+      { head: "Saghe" },
+      { label: "🔥 Blue Lock · La Gabbia dell'Ego", sub: "Torneo dei Predatori", fn: () => { if (window.openBlueLockMode) window.openBlueLockMode(menuSaghe); } },
+      { label: "🕵️ Noir · Il Peschereccio Fantasma", sub: "Saga investigativa con Lina", fn: () => { if (window.openNoirStoryMenu) window.openNoirStoryMenu(menuSaghe); } },
+      { label: "🌌 Multiverso · La Panda Quantistica", sub: "Saga demenziale con Nonna", fn: () => { if (window.openMultiverseMenu) window.openMultiverseMenu(menuSaghe); } },
+      { label: "⛵ La Notte del Faro", sub: "Il torneo sulla scogliera", fn: () => { if (window.openFaroStoryMenu) window.openFaroStoryMenu(menuSaghe); } },
+      { label: "👑 La Traversata d'Oro", sub: "Torneo dei Trabucchi", fn: () => { if (window.openTraversataMenu) window.openTraversataMenu(menuSaghe); } },
+      { head: "Minigiochi e strumenti" },
+      { label: "⚽ Stadio 3D · Sfida dei Tiri", sub: "Batti i portieri leggendari", fn: () => { if (window.openStadium3D) window.openStadium3D(menuSaghe); } },
+      { label: "🚗 La Corsa della Panda 30", sub: "Consegna la focaccia calda", fn: () => { if (window.openPanda3D) window.openPanda3D(menuSaghe); } },
+      { label: "🛡️ Roster & Talenti", sub: "Compagni ed equipaggiamento", fn: () => { if (window.openRosterTalentsModal) window.openRosterTalentsModal(); } },
+      { label: "◂ Menu", cls: "pick", fn: title },
     ]);
   }
   function menuStoria() {
@@ -14381,10 +14396,10 @@
     const p = mnCollParts(), n = (x, t) => `${Math.round(x * t)}/${t}`;
     text("voce", `<b>Collezioni</b> ${mnBar(mnPct(mnColl()))}<br>Trofei ${mnPct(p.tro)}% · Figurine di Pina ${mnPct(p.fig)}% · Ricordi ${mnPct(p.foto)}% · Figurine dei personaggi ${n(p.card, Object.keys(BIO).length)} · Finali ${n(p.fin, ENDINGS.length)}`);
     buttons([
-      { label: "Album delle figurine & Enciclopedia", sub: `Personaggi ${getList(CARDS).length}/${Object.keys(BIO).length} · Ritratti, citazioni, schede e segreti`, cls: "hot", fn: () => borgoEncyclopedia(extras) },
+      { label: "Carte dei personaggi", sub: `${getList(CARDS).length}/${Object.keys(BIO).length} · Schede, ritratti e carta olografica 3D`, cls: "hot", fn: () => borgoEncyclopedia(extras) },
       { label: "Bacheca dei trofei", sub: `${trophies().filter((t) => t.got).length}/${trophies().length}`, cls: "hot", fn: () => bacheca(extras) },
       { label: "L'Eco del Tirreno", sub: "Archivio delle prime pagine storiche e pagelle", fn: () => ecoArchivio(extras) },
-      { label: "Album di Pina «Campioni della Costa»", sub: (() => { try { const r = figRec(); return r.started ? `Figurine ${figOwned(r)}/${FIG_ALL.length}` : "Si trova all'edicola del Borgo"; } catch { return ""; } })(), fn: () => figAlbum(0, extras) },
+      { label: "Figurine di Pina · Album", sub: (() => { try { const r = figRec(); return r.started ? `Figurine ${figOwned(r)}/${FIG_ALL.length}` : "Si trova all'edicola del Borgo"; } catch { return ""; } })(), cls: "hot", fn: () => figAlbum(0, extras) },
       { label: "Il Corriere delle Figurine", sub: (() => { const r = figRec(); return r.started ? `${r.courier.length}/3 uscite lette` : "Prima passa dall'edicola di Pina"; })(), disabled: !figRec().started, fn: () => figCourier(extras) },
       { label: "Album dei ricordi", sub: (() => { try { fotoScan(); } catch {} return `Fotografie ${fotoRec().got.length}/${FOTO.length}`; })(), fn: () => ricordi(extras) },
       { label: "Galleria dei finali", sub: `${getList(ENDS).length}/${ENDINGS.length}`, fn: gallery },
@@ -20616,6 +20631,7 @@
       { label: "Albero delle scelte", sub: "Mappa dei bivi di questa stagione", fn: () => { closeOverlay(); choiceTree(run); } },
       { label: "Enciclopedia del Borgo", sub: "Dossier e ritratti dei personaggi", fn: () => { closeOverlay(); borgoEncyclopedia(run); } },
       { label: "Il Borgo Storto (GDR)", sub: "Fai un salto nello spin-off a turni", fn: () => { closeOverlay(); openBorgoStorto(run); } },
+      { label: "Log dei dialoghi", sub: "Rileggi le ultime battute", fn: () => { closeOverlay(); if (window.openDialogueLog) window.openDialogueLog(); } },
       { label: "Salva ed esci al menu", fn: () => leaveStory("menu") },
       { label: "Vai a Borgo Marino", sub: "La storia resta salvata", fn: () => leaveStory("borgo") },
     ]);
