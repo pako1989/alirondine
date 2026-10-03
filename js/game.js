@@ -14225,6 +14225,10 @@
     buttons([
       ...(has && STORY[has.step] ? [{ label: "Continua", sub: STORY[has.step].chap, cls: "hot", fn: () => { S = has; run(); } }] : []),
       ...(fresh0 ? [{ label: "Nuova partita", sub: "Stagione 1 · circa 30–40 minuti", cls: "hot", fn: () => { S = fresh(); run(); } }] : []),
+      { label: "🔥 Blue Lock · La Gabbia dell'Ego", sub: "Nuova modalità: Torneo dei Predatori · Ego vs Altruismo e Fiamme Nere", cls: "hot", fn: () => { if (window.openBlueLockMode) window.openBlueLockMode(title); } },
+      { label: "🕵️ Noir · Il Peschereccio Fantasma", sub: "Nuova saga investigativa con Lina · True Detective & Breaking Bad", cls: "hot", fn: () => { if (window.openNoirStoryMenu) window.openNoirStoryMenu(title); } },
+      { label: "🌌 Multiverso · La Panda Quantistica", sub: "Nuova saga demenziale con Nonna · Rick & Morty, Futurama e Game of Thrones", cls: "hot", fn: () => { if (window.openMultiverseMenu) window.openMultiverseMenu(title); } },
+      { label: "🛡️ Roster & Talenti del Borgo", sub: "Dashboard tattica: compagni ed equipaggiamento passivo", cls: "hot", fn: () => { if (window.openRosterTalentsModal) window.openRosterTalentsModal(); } },
       { label: "⚽ Stadio 3D · Sfida dei Tiri", sub: "Tiro della Rondine in 3D · Batti i portieri leggendari!", cls: "hot", fn: () => { if (window.openStadium3D) window.openStadium3D(title); } },
       { label: "🚗 La Corsa della Panda 30", sub: "Minigioco 3D · Consegna la focaccia calda con Nonna!", cls: "hot", fn: () => { if (window.openPanda3D) window.openPanda3D(title); } },
       { label: "⛵ La Notte del Faro", sub: "Saga narrativa speciale · Il torneo sulla scogliera", cls: "hot", fn: () => { if (window.openFaroStoryMenu) window.openFaroStoryMenu(title); } },
@@ -14234,7 +14238,7 @@
       { label: "Enciclopedia del Borgo", sub: "Personaggi, schede, ritratti e curiosità", fn: () => borgoEncyclopedia(title) },
       { label: "Il Borgo Storto", sub: "Lo spin-off GDR a turni tra campetto e focacce", cls: "hot", fn: () => openBorgoStorto(title) },
       { label: "Borgo e trasferte", sub: `A piedi per il paese · ${mnPct(mnBorgo())}%`, fn: menuBorgo },
-      { label: "Modalità", sub: `Mondiali, Sfide, Carriera… · ${mnPct(mnModi())}%`, fn: modes },
+      { label: "Modalità", sub: `Tutte le modalità di gioco · ${mnPct(mnModi())}%`, cls: "hot", fn: modes },
       { label: "Collezioni", sub: `Trofei, figurine, finali, ricordi · ${mnPct(mnColl())}%`, fn: extras },
       { label: "Impostazioni", sub: `${(DIFF[SET.diff] || DIFF.normale)[0]} · salvataggi · guida`, fn: menuImp },
       { label: "Dove andare adesso?", sub: "Un consiglio senza spoiler", cls: fresh0 ? "" : "hot", fn: () => guDove(title) },
@@ -14258,6 +14262,8 @@
       { label: "Stagione 7", sub: load(SAVE6) ? "L'ultimo muro, con il tuo Leo" : "L'ultimo muro · il finale della saga", cls: seasonDone(7) ? "" : "hot", fn: pickS7 },
       s8Btn(),
       s9Btn(),
+      { label: "🕵️ Noir · Il Peschereccio Fantasma", sub: "Nuova saga investigativa con Lina · True Detective & Breaking Bad", cls: "hot", fn: () => { if (window.openNoirStoryMenu) window.openNoirStoryMenu(menuStoria); } },
+      { label: "🌌 Multiverso · La Panda Quantistica", sub: "Nuova saga demenziale con Nonna · Rick & Morty, Futurama e Game of Thrones", cls: "hot", fn: () => { if (window.openMultiverseMenu) window.openMultiverseMenu(menuStoria); } },
       { label: "⛵ La Notte del Faro", sub: "Saga narrativa speciale · Il torneo sulla scogliera", cls: "hot", fn: () => { if (window.openFaroStoryMenu) window.openFaroStoryMenu(menuStoria); } },
       { label: "👑 La Traversata d'Oro", sub: "Nuova saga · I Corsari del Tigullio e la Lanterna d'Oro", cls: "hot", fn: () => { if (window.openTraversataMenu) window.openTraversataMenu(menuStoria); } },
       ...MN_STORIA.map(mnObj).filter(Boolean),
@@ -14283,16 +14289,21 @@
   function modes() {
     view = { kind: "scene", bg: "stadium" }; chap("Modalità");
     const tr = readJSON(TOUR, { titles: 0 }), co = readJSON(COACH, { w: 0, played: 0 });
-    text("voce", `<b>Modalità</b> ${mnBar(mnPct(mnModi()))}<br>Da giocare quando vuoi: non toccano il salvataggio della storia.`);
+    text("voce", `<b>Modalità di Gioco</b> ${mnBar(mnPct(mnModi()))}<br>Scegli tra tornei speciali, saghe investigative, multiverso o sfide calcistiche. Tutte indipendenti dal salvataggio principale.`);
     buttons([
+      { label: "🔥 Blue Lock · La Gabbia dell'Ego", sub: "Torneo Predatori 5 round · Ego vs Altruismo, anime cut-in e Fiamme Nere", cls: "hot", fn: () => { if (window.openBlueLockMode) window.openBlueLockMode(modes); } },
+      { label: "🕵️ Noir · Il Peschereccio Fantasma", sub: "Saga investigativa con Lina · True Detective e Breaking Bad nel Golfo", cls: "hot", fn: () => { if (window.openNoirStoryMenu) window.openNoirStoryMenu(modes); } },
+      { label: "🌌 Multiverso · La Panda Quantistica", sub: "Saga demenziale con Nonna · Rick & Morty, Futurama e Trono di Spade", cls: "hot", fn: () => { if (window.openMultiverseMenu) window.openMultiverseMenu(modes); } },
+      { label: "🛡️ Roster & Talenti del Borgo", sub: "Dashboard tattica anime: visualizza la squadra ed equipaggia i talenti", cls: "hot", fn: () => { if (window.openRosterTalentsModal) window.openRosterTalentsModal(); } },
       { label: "⚽ Stadio 3D · Sfida dei Tiri", sub: "Tiro della Rondine in 3D: batti i portieri sul campo tridimensionale!", cls: "hot", fn: () => { if (window.openStadium3D) window.openStadium3D(modes); } },
+      { label: "🚗 La Corsa della Panda di Nonna", sub: "Minigioco 3D / Arcade: sfreccia tra i caruggi con la focaccia!", cls: "hot", fn: () => { if (window.openPanda3D) window.openPanda3D(modes); else pandaGameMode(modes); } },
+      { label: "🌀 Il Borgo Storto (GDR a turni)", sub: "GDR a turni espanso con mosse Anime (Tiro dell'Ego, Gabbiano Sonico)", cls: "hot", fn: () => openBorgoStorto(modes) },
       { label: "⛵ La Notte del Faro (Saga Speciale)", sub: "Il torneo notturno sulla scogliera di Punta Rondine", cls: "hot", fn: () => { if (window.openFaroStoryMenu) window.openFaroStoryMenu(modes); } },
+      { label: "👑 La Traversata d'Oro", sub: "Nuova saga · I Corsari del Tigullio e la Lanterna d'Oro", cls: "hot", fn: () => { if (window.openTraversataMenu) window.openTraversataMenu(modes); } },
       { label: "Mappa delle modalità", sub: "Tutto il gioco su un foglio", cls: "hot", fn: () => mappa(modes) },
       { label: "Diorama 3D di Borgo Marino", sub: "Esplora il plastico 3D interattivo del paese", cls: "hot", fn: () => dioramaBorgo(modes) },
-      { label: "La Corsa della Panda di Nonna", sub: "Arcade tra i caruggi: schiva gabbiani e pomodori a tutto gas!", cls: "hot", fn: () => pandaGameMode(modes) },
       { label: "Torneo Supereroi (Anime Power)", sub: "Super tiri manga, aure shonen e barriere mecha!", cls: "hot", fn: () => animeTorneoMode(modes) },
       { label: "Fumetto Manga · Le Tavole del Borgo", sub: "Rileggi i momenti chiave come un webcomic d'azione", cls: "hot", fn: () => mangaViewer(modes) },
-      { label: "Il Borgo Storto (GDR)", sub: "GDR a turni: combatti nel borgo speculare tra focacce e gabbiani", cls: "hot", fn: () => openBorgoStorto(modes) },
       { label: "La Gabbia sul Molo", sub: "Street football 3v3 con sponde di ferro e zero rimesse", cls: "hot", fn: () => gabbiaMode(modes) },
       { label: "Carriera", sub: careerSub(), fn: career },
       { label: "Crea il tuo campione", sub: heroLoad() ? `${heroLoad().name} · Carriera, Rigori, Borgo` : "Per Carriera, Rigori e partite del Borgo", fn: () => heroEditor(modes) },
