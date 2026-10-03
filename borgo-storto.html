@@ -269,14 +269,14 @@ const MAPS = [
 let X = null; // stato esplorazione
 function nodeDone(m) { return G.done.includes(m.node); }
 function explore() {
-  busy2 = false;
+  busy2 = false; X && (X.cool = Date.now() + 700);
   if (G.area == null) { const i = NODES.findIndex((n) => !G.done.includes(n.id)); G.area = i < 0 ? 4 : i; }
   const m = MAPS[G.area]; SCENE = "";
   if (!X || X.m !== m) X = { m, x: m.start[0], y: m.start[1] };
   app.innerHTML = `<h1>${esc(m.name)}</h1><div class="sub">Livello ${G.lv} · focacce ${G.focacce} · tocca le frecce per camminare, parla con i personaggi</div>
   <canvas id="cv" width="640" height="384"></canvas><div class="log" id="msg">${nodeDone(m) ? "Qui hai finito. Vai verso l'uscita." : "Avvicinati ai personaggi. I nemici si affrontano toccandoli."}</div>
-  <div class="pad"><span></span><button data-d="u">▲</button><span></span><button data-d="l">◀</button><button data-d="d">▼</button><button data-d="r">▶</button></div><button id="t">◂ Titolo</button>`;
-  $("#t").onclick = title;
+  <button id="talk" class="hot" hidden></button><div class="pad"><span></span><button data-d="u">▲</button><span></span><button data-d="l">◀</button><button data-d="d">▼</button><button data-d="r">▶</button></div><button id="t">◂ Titolo</button>`;
+  $("#t").onclick = title; $("#talk").onclick = () => talkNear();
   const D = { u: [0, -1], d: [0, 1], l: [-1, 0], r: [1, 0] };
   let tm = null;
   const stop = () => { clearInterval(tm); tm = null; };
@@ -286,13 +286,13 @@ function explore() {
     b.onpointerup = b.onpointerleave = b.onpointercancel = stop;
   });
   window.onkeydown = (e) => { const k = { ArrowUp: "u", ArrowDown: "d", ArrowLeft: "l", ArrowRight: "r", w: "u", s: "d", a: "l", d: "r" }[e.key]; if (k && $("#cv")) { e.preventDefault(); step(D[k]); } };
-  draw();
+  near(); draw();
 }
 function objs(m) {
   return m.objs.filter((o) => !(o.k === "foe" && (nodeDone(m) || o.wait && !G.flags["met_" + m.node]))).filter((o) => !(o.id === "nico" && G.party.includes("nico")));
 }
 function step(d) {
-  if (!$("#cv") || busy2) return;
+  if (!$("#cv") || busy2 || (X && X.cool > Date.now())) return;
   const m = X.m, nx = X.x + d[0], ny = X.y + d[1];
   const row = m.rows[ny]; if (!row) return;
   const t = row[nx]; if (t === "#" || t === "~" || t === undefined) return;
@@ -300,18 +300,27 @@ function step(d) {
   const msg = (h) => { const e = $("#msg"); if (e) e.innerHTML = h; };
   if (o) {
     if (o.k === "foe") return meet(m, o);
-    if (o.talk) { busy2 = true; const node = NODES.find((n) => n.id === o.talk); if (m.node === "n2") G.flags["met_n2"] = 1; return enter(node); }
-    if (o.say) { busy2 = true; return dialog(o.say.map((s) => T(s[0], s[1])), () => { busy2 = false; explore(); }); }
-    return;
+    near(); return;
   }
   X.x = nx; X.y = ny; X.mv = 8;
   if (m.exit && nx === m.exit[0] && ny === m.exit[1]) {
     if (!nodeDone(m)) { msg("Qualcosa non ti lascia andare: prima risolvi qui."); X.x -= d[0]; X.y -= d[1]; }
     else { G.area = Math.min(4, G.area + 1); X = null; save(); return explore(); }
   }
-  draw();
+  near(); draw();
 }
 let busy2 = false;
+// pulsante "Parla": compare quando sei accanto a un personaggio (niente dialoghi in loop se tieni premuto)
+function nearNpc() { if (!X) return null; return objs(X.m).find((o) => o.k === "npc" && Math.abs(o.x - X.x) + Math.abs(o.y - X.y) === 1) || null; }
+function near() {
+  const b = $("#talk"); if (!b) return; const o = nearNpc();
+  if (o) { b.hidden = false; b.textContent = "💬 Parla con " + (WHO[o.id] || o.id); } else b.hidden = true;
+}
+function talkNear() {
+  const o = nearNpc(); if (!o || busy2) return; busy2 = true;
+  if (o.talk) { const node = NODES.find((n) => n.id === o.talk); if (X.m.node === "n2") G.flags["met_n2"] = 1; return enter(node); }
+  dialog(o.say.map((q) => T(q[0], q[1])), () => { busy2 = false; explore(); });
+}
 function meet(m, o) {
   busy2 = true;
   const n = NODES.find((q) => q.id === m.node);
