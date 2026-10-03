@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1026">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Ali di Rondine</title>
+<meta name="description" content="Un'avventura calcistica e narrativa con Leo Moretti e il Rondine FC.">
+<meta property="og:title" content="Ali di Rondine">
+<meta property="og:description" content="Un'avventura calcistica e narrativa con Leo Moretti e il Rondine FC.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="game">
+  <div class="top">
+    <h1>Ali di Rondine</h1>
+    <div class="topr">
+      <span class="chap" id="chap"></span>
+      <button type="button" class="mute" id="homeBtn" aria-label="Home" title="Torna alla Home / Menu Principale">🏠</button>
+      <button type="button" class="mute" id="btn3d" aria-label="Stadio 3D" title="Stadio 3D · Sfida dei Tiri (Tiro della Rondine 3D)">⚽ 3D</button>
+      <button type="button" class="mute" id="btnPanda" aria-label="Panda 3D" title="La Corsa della Panda 30 in 3D">🚗 Panda</button>
+      <button type="button" class="mute" id="btnFaro" aria-label="Notte del Faro" title="La Notte del Faro (Nuova Saga Narrativa)">⛵ Faro</button>
+      <button type="button" class="mute" id="radioBtn" aria-label="Radiolina" title="La Radiolina del Borgo (Musica & Frequenze)">📻</button>
+      <button type="button" class="mute" id="themeBtn" aria-label="Tema Grafico" title="Cambia tema (Classico / Vintage / Neon / Arcade)">🎨</button>
+      <button type="button" class="mute" id="gmenu" aria-label="Menu" hidden>☰</button>
+      <button type="button" class="mute" id="mute" aria-label="Suoni">🔊</button>
+    </div>
+  </div>
+  <div class="stage">
+    <canvas id="cv" width="320" height="200" aria-label="Scena di gioco"></canvas>
+    <div id="stageAlt" class="stage-alt" hidden></div>
+  </div>
+  <div class="box" id="matchHud" hidden>
+    <div class="hud">
+      <div>Minuto<b id="hMin">0'</b></div>
+      <div>Risultato<b id="hScore">0–0</b></div>
+      <div>Zona<b id="hZone">—</b></div>
+      <div>Palla<b id="hPoss">—</b></div>
+    </div>
+    <div class="guts" title="Grinta"><i id="hGuts"></i></div>
+  </div>
+  <div class="box" id="text" aria-live="polite"></div>
+  <div class="choices" id="choices"></div>
+  <div class="box stats" id="stats"></div>
+  <div id="ovl" hidden><div class="ovlwrap"><div id="ovlText"></div><div class="choices one" id="ovlCh"></div></div></div>
+  <div class="foot">Leo Moretti · Rondine FC · il gioco si salva da solo a ogni capitolo</div>
+</div>
+<div id="toasts" aria-live="polite"></div>
+<div id="eventLog" role="log" aria-label="Cronologia eventi"></div>
+<div id="saveIndicator" role="status" aria-live="polite">Salvataggio...</div>
+
+<!-- Modal integrato per Il Borgo Storto -->
+<div id="borgoModal" hidden style="position:fixed; inset:0; z-index:9999; background:var(--sky); display:none; flex-direction:column;">
+  <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#14243d; border-bottom:2px solid var(--gold); gap:8px;">
+    <div style="font-weight:bold; color:var(--gold); font-size:15px; display:flex; align-items:center; gap:8px;">
+      <span>🌀 Il Borgo Storto</span>
+      <span style="font-size:12px; color:var(--dim); font-weight:normal;">(GDR a turni · Spin-off)</span>
+    </div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <a href="borgo-storto.html" target="_blank" class="mute" style="text-decoration:none; padding:4px 8px;" title="Apri in una nuova scheda">↗ Scheda</a>
+      <button type="button" class="mute" id="closeBorgoBtn" style="background:#b3202c; color:#fff; border-color:#ff4d5a; font-weight:bold; padding:4px 10px;">✕ Torna ad Ali di Rondine</button>
+    </div>
+  </div>
+  <iframe id="borgoIframe" src="about:blank" style="flex:1; width:100%; border:none; background:#0e1424;"></iframe>
+</div>
+
+<!-- Script modulari -->
+<script src="js/slots.js"></script>
+<script src="js/three.standalone.js"></script>
+<script src="js/stadium3d.js"></script>
+<script src="js/panda3d.js"></script>
+<script src="js/fig3d.js"></script>
+<script src="js/faro-story.js"></script>
+<script src="js/traversata-story.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/game.js"></script>
+<script>
+var btn3d = document.getElementById("btn3d");
+if (btn3d) {
+  btn3d.onclick = function () {
+    if (window.openStadium3D) window.openStadium3D();
+  };
+}
+var btnPanda = document.getElementById("btnPanda");
+if (btnPanda) {
+  btnPanda.onclick = function () {
+    if (window.openPanda3D) window.openPanda3D();
+  };
+}
+var btnFaro = document.getElementById("btnFaro");
+if (btnFaro) {
+  btnFaro.onclick = function () {
+    if (window.openFaroStoryMenu) {
+      window.openFaroStoryMenu(function () {
+        if (window.title) window.title();
+      });
+    }
+  };
+}
+window.openBorgoStortoModal = function () {
+  var m = document.getElementById("borgoModal");
+  var fr = document.getElementById("borgoIframe");
+  if (!m || !fr) return;
+  fr.src = "borgo-storto.html";
+  m.hidden = false;
+  m.style.display = "flex";
+};
+window.closeBorgoStortoModal = function () {
+  var m = document.getElementById("borgoModal");
+  var fr = document.getElementById("borgoIframe");
+  if (!m || !fr) return;
+  m.hidden = true;
+  m.style.display = "none";
+  fr.src = "about:blank";
+  if (window.toast) window.toast("Sei tornato a Borgo Marino", "info", "⚽");
+};
+var closeBtn = document.getElementById("closeBorgoBtn");
+if (closeBtn) closeBtn.onclick = window.closeBorgoStortoModal;
+window.addEventListener("message", function (e) {
+  if (e.data && e.data.type === "closeBorgo") {
+    window.closeBorgoStortoModal();
+  }
+});
+
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  addEventListener("load", function () {
+    navigator.serviceWorker.register("sw.js").catch(function () {});
+  });
+}
+</script>
+</body>
+</html>
