@@ -61,6 +61,7 @@
     spagna:   { vs: "la Spagna", name: "Spagna U19", color: "#c9302c", defs: [["Navarro", 31], ["Ruiz", 33], ["Ortega", 34]], atk: [["Iker Solano", 36], ["Vidal", 31]], gk: ["Casals", 46], power: 34, special: ["TIKI-TAKA INFINITO", 50] },
     brasile:  { vs: "il Brasile", name: "Brasile U19", color: "#ffd23f", defs: [["Tiago", 33], ["Rafinha", 34], ["Muralha", 36]], atk: [["Jojo Batista", 39], ["Dudu", 33]], gk: ["Wellington", 50], power: 37, special: ["SAMBA DI FUOCO", 56] },
     leoni:    { vs: "i Leoni Neri", name: "Leoni Neri", color: "#1b1b1b", defs: [["Kraus", 25], ["Mele", 26], ["Il Muro", 29]], atk: [["Dario Moretti", 30], ["Serra", 24]], gk: ["Zanetti", 30], power: 29, special: ["ZANNA NERA", 42] },
+    leggende: { vs: "le Leggende del Bar Sport", name: "Leggende del Bar Sport", color: "#e88024", defs: [["Mister Ruggeri", 28], ["Dario", 27]], atk: [["Papà Moretti", 32]], gk: ["Baciccia", 30], power: 28, special: ["TAVOLINO ALL'APERTO", 42] },
     // Serie A (Stagione 4 e Carriera)
     vulcani:   { vs: "i Vulcani di Napoli", name: "Vulcani di Napoli", color: "#e0602a", defs: [["Esposito", 37], ["Capuano", 39], ["Iervolino", 41]], atk: [["Totò Russo", 43], ["Amoroso", 38]], gk: ["Sannino", 62], power: 40, special: ["ERUZIONE", 58] },
     lupi:      { vs: "i Lupi di Roma", name: "Lupi di Roma", color: "#8a1c2a", defs: [["Proietti", 39], ["Mancini", 41], ["Del Vecchio", 43]], atk: [["Massimo Ceccarelli", 45], ["Tonelli", 40]], gk: ["Bianchi", 66], power: 42, special: ["ULULATO", 61] },
@@ -3837,6 +3838,9 @@
       evButton(),
       { label: "Accendi la radio", sub: "Radio Rondine 98.6 · il notiziario di oggi", fn: () => radio(borgoMenu) },
       mtButton(borgoMenu),
+      { label: "⚽ Biliardino del Bar del Porto", sub: "Sfida Baciccia, Gino e Papà al calcio balilla!", cls: "hot", fn: () => { borgoLeave(); if (window.openBiliardino) window.openBiliardino(0, borgo); } },
+      { label: "🌊 Gozzo di Baciccia · In Mare", sub: "Naviga tra gli scogli e recupera i palloni!", cls: "hot", fn: () => { borgoLeave(); if (window.openGozzoGame) window.openGozzoGame("recupero", borgo); } },
+      { label: "🕹️ Cabinato: Super Rondine '94", sub: "Gioca al videogioco arcade 16-bit nel Bar!", cls: "hot", fn: () => { borgoLeave(); if (window.openArcadeMachine) window.openArcadeMachine(borgo); } },
       beButton(),
       { label: "Stelle del Borgo", sub: ((r) => { const n = SV.filter((s) => r.rec[s.id]).length; return `${n}/${SV.length} reclutate`; })(svRec()), fn: () => svPage(borgoMenu) },
       { label: "Rivali", sub: ((id) => id ? "Oggi qualcuno ti cerca" : "Chi ti ha sfidato, e com'è finita")(rvToday()), fn: () => rvPage(borgoMenu) },
@@ -14399,6 +14403,9 @@
     const tr = readJSON(TOUR, { titles: 0 }), co = readJSON(COACH, { w: 0, played: 0 });
     text("voce", `<b>Modalità di Gioco</b> ${mnBar(mnPct(mnModi()))}<br>Scegli tra tornei speciali, saghe investigative, multiverso o sfide calcistiche. Tutte indipendenti dal salvataggio principale.`);
     buttons([
+      { label: "⚽ Il Biliardino del Bar del Porto", sub: "Calcio balilla fisico: ometti, stecche cromate e sfide a Gino, Baciccia e Papà!", cls: "hot", fn: () => { if (window.openBiliardino) window.openBiliardino(0, modes); } },
+      { label: "🌊 Il Gozzo di Baciccia · Derby del Golfo", sub: "Navigazione 2.5D nel golfo: recupera i palloni perduti e vinci la Regata!", cls: "hot", fn: () => { if (window.openGozzoGame) window.openGozzoGame("recupero", modes); } },
+      { label: "🕹️ Cabinato: Super Rondine '94", sub: "Arcade 16-bit a gettoni nel Bar: scanline CRT, tiri a effetto e scivolate!", cls: "hot", fn: () => { if (window.openArcadeMachine) window.openArcadeMachine(modes); } },
       { label: "🔥 Blue Lock · La Gabbia dell'Ego", sub: "Torneo Predatori 5 round · Ego vs Altruismo, anime cut-in e Fiamme Nere", cls: "hot", fn: () => { if (window.openBlueLockMode) window.openBlueLockMode(modes); } },
       { label: "🕵️ Noir · Il Peschereccio Fantasma", sub: "Saga investigativa con Lina · True Detective e Breaking Bad nel Golfo", cls: "hot", fn: () => { if (window.openNoirStoryMenu) window.openNoirStoryMenu(modes); } },
       { label: "🌌 Multiverso · La Panda Quantistica", sub: "Saga demenziale con Nonna · Rick & Morty, Futurama e Trono di Spade", cls: "hot", fn: () => { if (window.openMultiverseMenu) window.openMultiverseMenu(modes); } },
@@ -19763,7 +19770,7 @@
   const azRec = () => { const r = readJSON(AZK, null), o = { v: 1, ctl: "trascina", opt: {}, modes: {}, hard: {}, obj: {}, objN: 0, pitW: {}, seen: {}, sea: null, played: 0, w: 0, d: 0, l: 0, goals: 0, beat: {} }; const x = r && typeof r === "object" ? { ...o, ...r } : o; ["beat", "modes", "hard", "obj", "pitW", "seen", "opt"].forEach((k) => { if (!x[k] || typeof x[k] !== "object" || Array.isArray(x[k])) x[k] = {}; }); return x; };
   const AZ_CTL = [["trascina", "Trascina", "Trascini il dito sul campo"], ["joystick", "Joystick virtuale", "Un cerchio compare dove appoggi il pollice sulla metà sinistra"], ["croce", "Croce direzionale", "Quattro frecce fisse, otto direzioni"]];
   const azCtlMode = () => { const c = azRec().ctl; return AZ_CTL.some((x) => x[0] === c) ? c : "trascina"; };
-  const AZ_T = [["gabbiani", () => true], ["tori", () => true], ["aquile", () => true], ["delfini", () => seasonDone(1)], ["grifoni", () => seasonDone(2)], ["corvi", () => seasonDone(3)], ["leoni", () => seasonDone(4)], ["brasile", () => seasonDone(5)]];
+  const AZ_T = [["gabbiani", () => true], ["tori", () => true], ["aquile", () => true], ["delfini", () => seasonDone(1)], ["grifoni", () => seasonDone(2)], ["corvi", () => seasonDone(3)], ["leoni", () => seasonDone(4)], ["brasile", () => seasonDone(5)], ["leggende", () => prog().n >= 2]];
   let AZ_L = 12, AZ_R = 308, AZ_UP = 24, AZ_DN = 178, AZ_G0 = 84, AZ_G1 = 118;
   let AZ = null, azFast = 1, azBack = null;
   function azioneMenu(back) {
@@ -19788,6 +19795,14 @@
     $("choices").className = "choices"; cv.style.touchAction = "none";
     azAbBtns();
     if (AZ.ctl !== "trascina") azPad(bs);
+    if (AZ.opt && AZ.opt.pro) {
+      const fb = document.createElement("button");
+      fb.type = "button"; fb.className = "pad"; fb.id = "azfinta";
+      fb.textContent = "Finta";
+      fb.style.cssText = "font-size:14px;min-height:44px;background:linear-gradient(135deg,#1d3fa3,#3fa7ff);border-color:#ffd23f";
+      fb.addEventListener("pointerdown", (e) => { e.preventDefault(); if (window.azProDribble) window.azProDribble(AZ); });
+      bs[3].parentNode.insertBefore(fb, bs[3]);
+    }
     if (AZ.sw) { const cb = document.createElement("button"); cb.type = "button"; cb.className = "pad"; cb.id = "azcb"; cb.textContent = "Cambia"; cb.style.cssText = "font-size:14px;min-height:44px"; cb.addEventListener("pointerdown", (e) => { e.preventDefault(); azSwap(); }); bs[3].parentNode.insertBefore(cb, bs[3]); }
   }
   const azSide = (t) => (t ? AZ.them : AZ.us);
@@ -19862,7 +19877,9 @@
     p.x = clamp(p.x, AZ_L + 4, AZ_R - 4); p.y = clamp(p.y, AZ_UP, AZ_DN);
   }
   function azGoal(team) {
-    const A = AZ; A.sc[team] += A.gold ? 2 : 1; if (A.gold) A.gold = false; A.stat.on[team]++; if (team === 0) { if (A.ball.sp) { A.specGoal = (A.specGoal || 0) + 1; A.stat.spec++; } if (A.firstGoal == null) A.firstGoal = A.t; } A.pause = 80; A.flash = { t: team ? "GOL LORO" : "GOOOL!", c: team ? "#9be2ff" : "#ffd23f", u: A.t + 80 }; A.last = team; try { sfx(team ? "crowd" : "goal"); } catch {}
+    const A = AZ; A.sc[team] += A.gold ? 2 : 1; if (A.gold) A.gold = false; A.stat.on[team]++; if (team === 0) { if (A.ball.sp) { A.specGoal = (A.specGoal || 0) + 1; A.stat.spec++; } if (A.firstGoal == null) A.firstGoal = A.t; } A.pause = 80; A.flash = { t: team ? "GOL LORO" : "GOOOL!", c: team ? "#9be2ff" : "#ffd23f", u: A.t + 80 }; A.last = team;
+    if (window.AP) { if (team === 0) window.AP.netShakeR = 36; else window.AP.netShakeL = 36; }
+    try { sfx(team ? "crowd" : "goal"); } catch {}
   }
   function azTick() {
     const A = AZ, b = A.ball;
@@ -19871,6 +19888,7 @@
     A.t++; A.en = Math.min(100, A.en + 0.02 + A.st.grinta / 9000 + (A.enB || 0));
     if (A.charge >= 0) A.charge = Math.min(60, A.charge + 1);
     azTick15(A);
+    if (window.azProTick) window.azProTick(A);
     if (A.sw) azSwTick(A); const l = azMe(A);
     [...A.us, ...A.them].forEach((p) => { p.lock--; p.cd--; p.slide--; p.boost = (p.boost | 0) - 1; p.shield = (p.shield | 0) - 1; });
     // Leo
@@ -19928,13 +19946,21 @@
     azBg15(A);
     g.strokeStyle = "#ffffffcc"; g.lineWidth = 2; g.strokeRect(AZ_L, AZ_UP, AZ_R - AZ_L, AZ_DN - AZ_UP); g.beginPath(); g.moveTo(160, AZ_UP); g.lineTo(160, AZ_DN); g.stroke(); g.beginPath(); g.arc(160, 101, 22, 0, 7); g.stroke();
     [[AZ_L - 6, "#ffffff"], [AZ_R, "#ffffff"]].forEach(([x]) => { px(x, AZ_G0, 6, AZ_G1 - AZ_G0, "#ffffff33"); px(x, AZ_G0, 6, 2, "#fff"); px(x, AZ_G1, 6, 2, "#fff"); });
-    const sh = (x, y) => { g.fillStyle = "rgba(0,0,0,.22)"; g.beginPath(); g.ellipse(x, y + 9, 5, 2, 0, 0, 7); g.fill(); };
-    const ents = [...A.us.map((p) => [p, usCol(), "#fff"]), ...A.them.map((p) => [p, A.T.color, A.T.color === "#ffffff" ? "#1d3fa3" : "#fff"]), [A.gk[0], "#3fa7ff", "#fff"], [A.gk[1], "#8a8a8a", "#fff"]].sort((a, b) => a[0].y - b[0].y);
-    ents.forEach(([p, c, tr]) => { sh(p.x, p.y); man(p.x, p.y, c, tr); });
+    if (A.opt && A.opt.pro && window.azProDrawPlayer) {
+      A.us.forEach((p) => window.azProDrawPlayer(p, 0, p === l, false, l, A, g));
+      A.them.forEach((p) => window.azProDrawPlayer(p, 1, false, false, l, A, g));
+      window.azProDrawPlayer(A.gk[0], 0, false, true, l, A, g);
+      window.azProDrawPlayer(A.gk[1], 1, false, true, l, A, g);
+    } else {
+      const sh = (x, y) => { g.fillStyle = "rgba(0,0,0,.22)"; g.beginPath(); g.ellipse(x, y + 9, 5, 2, 0, 0, 7); g.fill(); };
+      const ents = [...A.us.map((p) => [p, usCol(), "#fff"]), ...A.them.map((p) => [p, A.T.color, A.T.color === "#ffffff" ? "#1d3fa3" : "#fff"]), [A.gk[0], "#3fa7ff", "#fff"], [A.gk[1], "#8a8a8a", "#fff"]].sort((a, b) => a[0].y - b[0].y);
+      ents.forEach(([p, c, tr]) => { sh(p.x, p.y); man(p.x, p.y, c, tr); });
+    }
     const l = azMe(A); g.strokeStyle = "#ffd23f"; g.lineWidth = 2; g.beginPath(); g.ellipse(l.x, l.y + 9, 8, 3.5, 0, 0, 7); g.stroke();
     if (A.sw) { const yy = l.y - 24 - (A.cpFx > A.t ? (A.cpFx - A.t) / 4 : 0); g.fillStyle = "#ffd23f"; g.strokeStyle = "#0008"; g.lineWidth = 1; g.beginPath(); g.moveTo(l.x, yy + 6); g.lineTo(l.x - 4.5, yy); g.lineTo(l.x + 4.5, yy); g.closePath(); g.fill(); g.stroke(); if (A.cpFx > A.t) { g.strokeStyle = "rgba(255,210,63,.8)"; g.lineWidth = 1.5; g.beginPath(); g.arc(l.x, l.y + 2, 10 + (A.cpFx - A.t) / 3, 0, 7); g.stroke(); } }
     if (A.owner) { g.strokeStyle = "rgba(255,255,255,.7)"; g.beginPath(); g.ellipse(A.owner.x, A.owner.y + 9, 6, 2.6, 0, 0, 7); g.stroke(); }
     g.fillStyle = "rgba(0,0,0,.22)"; g.beginPath(); g.ellipse(A.ball.x + 1, A.ball.y + 3, 4, 1.8, 0, 0, 7); g.fill(); ball(A.ball.x, A.ball.y, 4);
+    if (A.opt && A.opt.pro && window.azProDrawEffects) window.azProDrawEffects(A, g, W, H);
     azOver15(A);
     if (A.charge >= 0 && A.owner === l) { const my = azAimOf(A, l), ty = my == null ? 101 + (A.gk[1].y < 101 ? 13 : -13) : 101 + my * AZ_AIMY, cl = my == null ? "rgba(255,255,255,.75)" : "#ffd23f"; g.save(); g.setLineDash([3, 4]); g.strokeStyle = my == null ? "rgba(255,255,255,.35)" : "rgba(255,210,63,.6)"; g.lineWidth = 1; g.beginPath(); g.moveTo(A.ball.x, A.ball.y); g.lineTo(AZ_R, ty); g.stroke(); g.restore(); g.fillStyle = cl; g.beginPath(); g.moveTo(AZ_R - 1, ty); g.lineTo(AZ_R - 8, ty - 4); g.lineTo(AZ_R - 8, ty + 4); g.closePath(); g.fill(); g.beginPath(); g.arc(AZ_R + 3, ty, 2.5, 0, 7); g.fill(); g.font = "bold 7px sans-serif"; g.textAlign = "right"; g.fillText(my == null ? "AUTO" : my ? (my < 0 ? "ALTO" : "BASSO") : "CENTRO", AZ_R - 10, ty + (my === 1 ? 10 : -6)); g.textAlign = "left"; }
     if (A.charge > 4) { px(l.x - 12, l.y - 18, 24, 4, "#000a"); px(l.x - 11, l.y - 17, 22 * A.charge / 60, 2, A.charge >= 45 ? (A.en >= 50 ? "#ffd23f" : "#ff4d5a") : "#9be2ff"); }
@@ -20291,8 +20317,9 @@
     sabbia: { n: "Sabbia", fx: { spd: 0.9, fr: 0.972, tk: -0.03, nz: 0.02, sh: 0.96 }, ok: () => seasonDone(1), why: "La spiaggia di Tano: il pallone affonda, l'orgoglio no. Ogni scatto costa il doppio e dura la metà." },
     fango: { n: "Fango e pioggia", fx: { spd: 0.94, fr: 0.992, tk: 0.05, nz: 0.03, sh: 1.03, rain: true }, ok: () => seasonDone(2), why: "Il campetto allagato dopo tre giorni di pioggia. Le pozzanghere hanno già un nome. La palla scivola, i contrasti anche." },
     notte: { n: "Notte con i fari", fx: { spd: 1, fr: 0.985, tk: 0, nz: 0.02, sh: 1.06, night: true }, ok: () => seasonDone(3), why: "Si gioca di notte, coi fari dei pescherecci puntati sul campo. Più luce di così non l'ha mai avuta nessuno." },
+    molo: { n: "Molo al tramonto", fx: { spd: 1.05, fr: 0.99, tk: 0.02, nz: 0.01, sh: 1.08, sunset: true, dock: true }, ok: () => true, why: "La banchina in pietra affacciata sul golfo dorato. Se calci troppo forte la palla finisce in mare con uno splash!" },
   };
-  const AZ_PITS = ["erba", "campo", "sabbia", "fango", "notte"];
+  const AZ_PITS = ["erba", "campo", "sabbia", "fango", "notte", "molo"];
   const AZ_DIF = { facile: { n: "Facile", fx: { ps: 0.9, tk: -0.05, gk: 0.85 }, note: "Gli altri sono più lenti. Non conta per le imprese né per la Rosa; monete ridotte." }, norm: { n: "Normale", fx: { ps: 1, tk: 0, gk: 1 }, note: "La partita di sempre." }, duro: { n: "Duro", fx: { ps: 1.1, tk: 0.06, gk: 1.15 }, note: "Avversari più veloci, portiere più lungo. Più monete." } };
   const AZ_MOD = [["amic", "Amichevole", "La partita di sempre", () => true], ["sfida", "Sfida a obiettivo", "Un obiettivo in più: bonus se lo centri", () => Object.keys(azRec().beat).length >= 1], ["eventi", "Partita a eventi", "Meteo, palla d'oro e altre sorprese a metà partita", () => Object.keys(azRec().beat).length >= 3]];
   const AZ_OBJ = [
@@ -20308,7 +20335,7 @@
   const azPit = (id) => (AZ_PIT[id] && AZ_PIT[id].ok() ? id : "erba");
   const azOpen = (f) => { try { return !!f(); } catch { return false; } };
   function azOpt() {
-    const r = azRec(), o = { mode: "amic", pitch: "erba", diff: "norm", pu: false, roles: [], ...(r.opt || {}) };
+    const r = azRec(), o = { mode: "amic", pitch: "erba", diff: "norm", pu: false, roles: [], pro: true, ...(r.opt || {}) };
     if (!AZ_MOD.some((m) => m[0] === o.mode && azOpen(m[3]))) o.mode = "amic";
     o.pitch = AZ_PIT[o.pitch] && azOpen(AZ_PIT[o.pitch].ok) ? o.pitch : "erba"; if (!AZ_DIF[o.diff]) o.diff = "norm";
     o.roles = (Array.isArray(o.roles) ? o.roles : []).filter((id, i, a) => AZ_AB[id] && a.indexOf(id) === i && azOpen(() => sqKnown(id))).slice(0, 3); o.pu = !!o.pu; o.sw = !!o.sw; return o;
@@ -20321,6 +20348,7 @@
     A.stat = { sh: [0, 0], on: [0, 0], poss: [0, 0], pass: [0, 0], steal: 0, save: [0, 0], spec: 0, pu: 0, ab: 0 };
     A.pu = !!o.pu || o.mode !== "amic"; A.puL = []; A.puN = 420 + Math.floor(Math.random() * 300);
     A.gkBoost = A.aim = A.bomb = A.turbo = A.windT = 0; A.windD = 1; A.gold = false;
+    if (window.azProInit) window.azProInit(A);
     A.obj = o.mode === "sfida" ? (ov && ov.obj ? AZ_OBJ.find((x) => x.id === ov.obj) : AZ_OBJ[Math.floor(Math.random() * AZ_OBJ.length)]) : null;
     A.evs = [];
     if (o.mode === "eventi") { const pool = Object.keys(AZ_EV).filter((e) => !(e === "pioggia" && A.pit.rain) && !(e === "notte" && A.pit.night)); for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; } A.evs = pool.slice(0, 3).map((id, i) => ({ id, t: 700 + i * 1250 + Math.floor(Math.random() * 500) })); }
@@ -20369,6 +20397,7 @@
   }
   // ---------- disegno: campo, pioggia, notte, potenziamenti ----------
   function azBg15(A) {
+    if (A.opt && A.opt.pitch === "molo" && window.azProDrawPitchMolo) return window.azProDrawPitchMolo(A, g, W, H);
     const p = A.opt ? A.opt.pitch : "erba", rain = A.pit.rain, night = A.pit.night;
     const base = p === "sabbia" ? ["#d9bd78", "#d2b46c"] : rain ? ["#42703f", "#3b6638"] : night ? ["#1f6b3d", "#237444"] : ["#2f9e55", "#34a95c"];
     px(0, 0, W, H, base[0]); for (let i = 0; i < 8; i++) px(i * 40, 0, 20, H, base[1]);
@@ -20398,6 +20427,7 @@
       { label: `Potenziamenti: ${o.pu || o.mode !== "amic" ? "sì" : "no"}`, sub: o.mode !== "amic" ? "Sempre attivi in questo tipo di partita" : "Energia, scarpini e scudo sul campo", disabled: o.mode !== "amic", fn: () => { azSetOpt("pu", !o.pu); azPrep(back); } },
       { label: `Ruoli: ${o.roles.length ? o.roles.map((i) => SQ_NAME[i]).join(", ") : "nessuno"}`, sub: "Scegli fino a tre compagni", cls: "hot", fn: () => azRoles(back) },
       { label: `Cambio giocatore: ${o.sw ? "automatico" : "Solo Leo"}`, sub: o.sw ? "Difendi col compagno più vicino alla palla; passi = controlli chi riceve" : "Muovi sempre Leo, i compagni fanno da soli", fn: () => { azSetOpt("sw", !o.sw); azPrep(back); } },
+      { label: o.pro ? "Grafica & Stile: Arcade Pro ✨" : "Grafica & Stile: Classico ⚪", sub: o.pro ? "Sprite campioni, finta/sombrero, scie, rovesciate e campo al tramonto" : "Modalità classica minimale originale", cls: o.pro ? "hot" : "", fn: () => { azSetOpt("pro", !o.pro); azPrep(back); } },
       { label: "Rinforzi dal Borgo", sub: "Fino a due Stelle reclutate", fn: () => { try { rosaRin(() => azPrep(back)); } catch { azPrep(back); } } },
       { label: "◂ Fatto", fn: () => azioneMenu(back) }]);
   }
@@ -20425,6 +20455,7 @@
     corvi: [["I Corvi dell'Aurora giocano all'alba e parlano poco. Vestono scuro e sorridono nel momento più sbagliato.", "Radio Rondine: «Qui sembra già sera. Ed è mattina.»"], "Un Corvo ti guarda e non dice niente. Il silenzio ha un buon motivo, o forse no.", "Vinci. Alla fine uno dei Corvi sorride: è stato un bel gesto, e ve lo dicono.", "Pareggio. Resta un'aria strana, di quelle che non danno torto a nessuno.", "Perdi. È ancora presto, e già ti sembra tardi."],
     leoni: [["I Leoni Neri sono quelli che tutti nominano a mezza voce. Poi, sul campo, ruggiscono davvero.", "Radio Rondine, sottovoce: «Questi sono i Leoni. Non applaudite prima.»"], "Il loro capitano non ti guarda: guarda la porta.", "Vinci. Nessun ruggito, solo uno sguardo lungo. Per loro è un abbraccio.", "Pareggio. Ti salutano con rispetto. Il rispetto, qui, è raro come un gelato in inverno.", "Perdi. Hanno ruggito. Ti scordi presto il punteggio, non il ruggito."],
     brasile: [["Il Brasile Under 19 è arrivato per un'amichevole e si è portato il sole. Ballano anche mentre difendono.", "Radio Rondine: «Hanno attraversato un oceano. Per questa partita. Ci vuole fiducia.»"], "Il loro portiere, altissimo, saluta il Borgo intero con una mano sola.", "Vinci. Il Brasile applaude, balla, ti abbraccia tutti insieme. Un'esperienza.", "Pareggio. Si balla ugualmente. Anche chi non sa ballare.", "Perdi. Ma che spettacolo. Il Borgo, per una volta, applaude gli altri."],
+    leggende: [["I veterani del Bar Sport: giocano con le scarpe di cuoio consumate e la maglia di lana pesante. Non corrono: sanno già dove va il pallone.", "Papà Moretti ti strizza l'occhio: «Piedi a terra e guarda il secondo palo». Poi fa una finta che ti manda al bar."], "Baciccia sistema la coppola tra i pali: «Tira dove vuoi, tanto esce».", "Vinci! Al bar offrono spuma e focaccia a tutti: «I giovani hanno ancora fiato, ma l'esperienza resta qui».", "Pareggio. Si discute fino a notte fonda davanti a una gassosa.", "Perdi. Ti hanno nascosto la palla per tutta la partita. L'arte non invecchia."],
   };
   function azIntro15(k, back) {
     const n = AZN[k], r = azRec(), o = azOpt(), seen = r.seen || {}, ln = [];
