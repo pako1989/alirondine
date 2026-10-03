@@ -1,0 +1,8 @@
+{
+  "name": "Ali di Rondine",
+  "description": "Un'avventura calcistica e narrativa con Leo Moretti e il Rondine FC.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

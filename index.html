@@ -8,6 +8,9 @@
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Ali di Rondine</title>
+<meta name="description" content="Un'avventura calcistica e narrativa con Leo Moretti e il Rondine FC.">
+<meta property="og:title" content="Ali di Rondine">
+<meta property="og:description" content="Un'avventura calcistica e narrativa con Leo Moretti e il Rondine FC.">
 <style>
   :root {
     color-scheme: dark;
@@ -31,25 +34,64 @@
     --transition: .2s ease;
     --transition-fast: .1s ease;
   }
+  body.theme-vintage {
+    --sky: #191410;
+    --panel: #292019;
+    --panel-light: #3a2e24;
+    --edge: #eed9b7;
+    --ink: #f8f2e6;
+    --dim: #baa48b;
+    --red: #cf3742;
+    --blue: #4088d6;
+    --gold: #e5a73b;
+    --grass: #418b52;
+    --shadow: 0 4px 12px rgba(0,0,0,.5);
+  }
+  body.theme-neon {
+    --sky: #050b18;
+    --panel: #0d172e;
+    --panel-light: #162649;
+    --edge: #00e5ff;
+    --ink: #f0faff;
+    --dim: #7f9ec2;
+    --red: #ff2d62;
+    --blue: #00e5ff;
+    --gold: #ffd000;
+    --grass: #00e676;
+    --shadow: 0 4px 16px rgba(0,229,255,.2);
+  }
+  body.theme-arcade {
+    --sky: #0a1b0a;
+    --panel: #133313;
+    --panel-light: #1d481d;
+    --edge: #86c440;
+    --ink: #d2f694;
+    --dim: #7da54b;
+    --red: #e04838;
+    --blue: #42b0d5;
+    --gold: #e2c034;
+    --grass: #5da832;
+    --shadow: 0 4px 12px rgba(0,0,0,.6);
+  }
   * { box-sizing: border-box; }
   html, body { height: 100%; }
-  body { margin: 0; background: var(--sky); color: var(--ink); font: 16px/1.45 var(--body); padding-inline: 16px; padding-block: 12px 24px; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
-  .game { max-width: 540px; margin: 0 auto; display: grid; gap: 10px; }
-  .top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
-  h1 { flex: none; white-space: nowrap; margin: 0; font: 400 22px var(--display); letter-spacing: .01em; color: var(--gold); text-shadow: 2px 2px 0 #b3202c; }
-  .chap { color: var(--dim); font-size: 13px; text-align: right; }
-  .topr { display: flex; align-items: center; gap: 8px; min-width: 0; }
-  .mute { flex: none; font: 700 13px var(--body); color: var(--ink); background: #1f3a63; border: 2px solid #ffffff40; border-radius: var(--radius-sm); padding: 3px 8px; cursor: pointer; transition: all var(--transition-fast); }
+  body { margin: 0; background: var(--sky); color: var(--ink); font: 14.5px/1.4 var(--body); padding-inline: clamp(8px, 2.5vw, 14px); padding-block: 8px 20px; -webkit-user-select: none; user-select: none; touch-action: manipulation; overflow-x: hidden; }
+  .game { max-width: 470px; width: 100%; margin: 0 auto; display: grid; gap: 8px; }
+  .top { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+  h1 { flex: none; white-space: nowrap; margin: 0; font: 400 clamp(16px, 4.5vw, 20px) var(--display); letter-spacing: .01em; color: var(--gold); text-shadow: 2px 2px 0 #b3202c; }
+  .chap { color: var(--dim); font-size: 12px; text-align: right; }
+  .topr { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .mute { flex: none; font: 700 12px var(--body); color: var(--ink); background: #1f3a63; border: 2px solid #ffffff40; border-radius: var(--radius-sm); padding: 4px 7px; cursor: pointer; transition: all var(--transition-fast); }
   .mute:hover { filter: brightness(1.2); }
-  .stage { position: relative; width: 100%; max-width: 100%; aspect-ratio: 16 / 10; border-radius: 10px; overflow: hidden; background: #000; border: 3px solid var(--edge); }
+  .stage { position: relative; width: 100%; max-width: 100%; aspect-ratio: 16 / 10; border-radius: 8px; overflow: hidden; background: #000; border: 2px solid var(--edge); }
   canvas { display: block; width: 100%; height: 100%; }
   body.pixel-canvas canvas { image-rendering: pixelated; }
-  .box { background: var(--panel); border: 2px solid #ffffff30; border-radius: var(--radius); padding: 12px 14px; transition: box-shadow var(--transition); }
+  .box { background: var(--panel); border: 2px solid #ffffff30; border-radius: 8px; padding: 10px 12px; transition: box-shadow var(--transition); }
   .box:hover { box-shadow: var(--shadow); }
-  #text { min-height: 104px; }
-  #text .who { display: inline-block; font: 400 13px var(--display); letter-spacing: .04em; background: var(--red); color: #fff; padding: 2px 8px; border-radius: 4px; margin-bottom: 6px; }
+  #text { min-height: 80px; }
+  #text .who { display: inline-block; font: 400 12px var(--display); letter-spacing: .04em; background: var(--red); color: #fff; padding: 2px 7px; border-radius: 4px; margin-bottom: 5px; }
   #text .who.blue { background: var(--blue); } #text .who.gold { background: var(--gold); color: #2a1a00; } #text .who.gray { background: #56657d; }
-  #text .t { display: block; line-height: 1.6; }
+  #text .t { display: block; line-height: 1.5; font-size: 14px; }
   #text .t em { color: var(--gold); font-style: normal; font-weight: 700; }
   .comic-page { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; margin-top: 8px; }
   .comic-panel { position: relative; display: flex; min-height: 128px; flex-direction: column; justify-content: space-between; overflow: hidden; padding: 8px; border: 2px solid #f3d6a2; border-radius: 7px 12px 7px 12px; background: linear-gradient(150deg, var(--comic-tint), #10182e 78%); box-shadow: inset 0 0 18px #0005; }
@@ -59,27 +101,27 @@
   .comic-sfx { position: absolute; top: 27px; right: 8px; color: #ffd23f; font: 400 17px var(--display); text-shadow: 2px 2px #202034; transform: rotate(-7deg); }
   .comic-bubble { position: relative; z-index: 1; margin-top: 28px; padding: 7px 8px; border: 1px solid #17223b; border-radius: 10px 10px 10px 2px; background: #f3f6fb; color: #17223b; font-size: 12px; line-height: 1.4; }
   .comic-caption { grid-column: 1 / -1; padding: 6px 8px; border-left: 3px solid var(--gold); background: #0005; color: var(--dim); font-size: 11px; font-style: italic; }
-  .hud { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; font-size: 12px; color: var(--dim); }
+  .hud { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; font-size: 11px; color: var(--dim); }
   .hud div { background: #0006; border-radius: 6px; padding: 4px 6px; text-align: center; }
-  .hud b { display: block; color: var(--ink); font-size: 15px; font-variant-numeric: tabular-nums; }
-  .guts { height: 10px; border-radius: 5px; background: #0007; overflow: hidden; margin-top: 6px; }
+  .hud b { display: block; color: var(--ink); font-size: 14px; font-variant-numeric: tabular-nums; }
+  .guts { height: 9px; border-radius: 5px; background: #0007; overflow: hidden; margin-top: 5px; }
   .guts i { display: block; height: 100%; background: linear-gradient(90deg, #ff9d2e, var(--gold)); }
-  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
   .choices.one { grid-template-columns: 1fr; }
-  .choices button { font: 700 15px var(--body); color: var(--ink); background: #1f3a63; border: 2px solid #ffffff40; border-radius: var(--radius); padding: 11px 10px; cursor: pointer; text-align: left; transition: all var(--transition); }
-  .choices button:hover:not(:disabled) { border-color: var(--gold); transform: translateY(-2px); box-shadow: var(--shadow); }
+  .choices button { font: 700 14px var(--body); color: var(--ink); background: #1f3a63; border: 2px solid #ffffff40; border-radius: 8px; padding: 9px 10px; cursor: pointer; text-align: left; transition: all var(--transition); }
+  .choices button:hover:not(:disabled) { border-color: var(--gold); transform: translateY(-1px); box-shadow: var(--shadow); }
   .choices button:active:not(:disabled) { transform: translateY(0); }
   .choices button.hot { background: linear-gradient(135deg, #b3202c, #ff4d5a); border-color: #ffd23f; }
   .choices button.danger { background: #4a1119; border-color: #ff4d5a; }
   .choices button.pick { background: #2b2350; border-color: #b9a6ff80; }
   .choices button:disabled { opacity: .38; cursor: default; }
   .choices button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
-  .choices button small { display: block; font-weight: 400; font-size: 12px; color: #c9d6ea; margin-top: 2px; }
-  .log { font-size: 14px; color: var(--dim); }
+  .choices button small { display: block; font-weight: 400; font-size: 11px; color: #c9d6ea; margin-top: 2px; }
+  .log { font-size: 13px; color: var(--dim); }
   .log b { color: var(--ink); }
-  .stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; font-size: 11px; color: var(--dim); text-align: center; }
-  .stats b { display: block; font-size: 16px; color: var(--ink); }
-  .foot { font-size: 12px; color: var(--dim); text-align: center; }
+  .stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; font-size: 10.5px; color: var(--dim); text-align: center; }
+  .stats b { display: block; font-size: 15px; color: var(--ink); }
+  .foot { font-size: 11px; color: var(--dim); text-align: center; }
   [hidden] { display: none !important; }
   .tbl { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; table-layout: fixed; }
   .tbl th, .tbl td { padding: 3px 2px; text-align: center; border-bottom: 1px solid #ffffff18; }
@@ -135,7 +177,7 @@
 </style>
 
 <div class="game">
-  <div class="top"><h1>Ali di Rondine</h1><div class="topr"><span class="chap" id="chap"></span><button type="button" class="mute" id="gmenu" aria-label="Menu" hidden>☰</button><button type="button" class="mute" id="mute" aria-label="Suoni">🔊</button></div></div>
+  <div class="top"><h1>Ali di Rondine</h1><div class="topr"><span class="chap" id="chap"></span><button type="button" class="mute" id="homeBtn" aria-label="Home" title="Torna alla Home / Menu Principale">🏠</button><button type="button" class="mute" id="themeBtn" aria-label="Tema Grafico" title="Cambia tema (Classico / Vintage / Neon / Arcade)">🎨</button><button type="button" class="mute" id="gmenu" aria-label="Menu" hidden>☰</button><button type="button" class="mute" id="mute" aria-label="Suoni">🔊</button></div></div>
   <div class="stage"><canvas id="cv" width="320" height="200" aria-label="Scena di gioco"></canvas></div>
   <div class="box" id="matchHud" hidden>
     <div class="hud">
@@ -287,8 +329,36 @@
     saveTimeout = setTimeout(() => saveIndicator.classList.remove("show"), 1500);
   };
 
+  const THEMES = [
+    { id: "classic", name: "Classico Rondine", cls: "", icon: "⚽" },
+    { id: "vintage", name: "Gazzetta Vintage", cls: "theme-vintage", icon: "📰" },
+    { id: "neon", name: "Neon Costa", cls: "theme-neon", icon: "✨" },
+    { id: "arcade", name: "Arcade Retrò", cls: "theme-arcade", icon: "🕹️" }
+  ];
+  let curThemeIdx = 0;
+  function applyTheme(idx, notify = false) {
+    curThemeIdx = (idx + THEMES.length) % THEMES.length;
+    const th = THEMES[curThemeIdx];
+    document.body.classList.remove("theme-vintage", "theme-neon", "theme-arcade");
+    if (th.cls) document.body.classList.add(th.cls);
+    try { localStorage.setItem("ali-di-rondine.theme", th.id); } catch (e) {}
+    if (notify) showToast(`Tema: ${th.name}`, "info", th.icon);
+  }
+  function cycleTheme() {
+    applyTheme(curThemeIdx + 1, true);
+  }
+  window.cycleTheme = cycleTheme;
+  window.applyTheme = applyTheme;
+  window.THEMES = THEMES;
+
   document.addEventListener("DOMContentLoaded", () => {
     checkSeasonalEvents();
+    const themeBtn = $("themeBtn");
+    if (themeBtn) themeBtn.onclick = cycleTheme;
+    let savedTh = "classic";
+    try { savedTh = localStorage.getItem("ali-di-rondine.theme") || "classic"; } catch (e) {}
+    const foundIdx = THEMES.findIndex(t => t.id === savedTh);
+    applyTheme(foundIdx >= 0 ? foundIdx : 0, false);
   });
 })();
 </script>
@@ -1358,7 +1428,7 @@
     g.strokeRect(10, 20, 300, 160); g.beginPath(); g.moveTo(160, 20); g.lineTo(160, 180); g.stroke();
     g.beginPath(); g.arc(160, 100, 22, 0, 7); g.stroke();
     g.strokeRect(10, 60, 36, 80); g.strokeRect(274, 60, 36, 80);
-    if (SET.gfx === "campo") {
+    if (SET.gfx === "campo" || SET.gfx === "arcade_hd") {
       g.lineWidth = 1; g.strokeStyle = "rgba(255,255,255,.72)";
       g.strokeRect(10, 78, 18, 44); g.strokeRect(292, 78, 18, 44);
       g.beginPath(); g.arc(28, 100, 13, -0.8, 0.8); g.stroke(); g.beginPath(); g.arc(292, 100, 13, Math.PI - 0.8, Math.PI + 0.8); g.stroke();
@@ -1366,6 +1436,20 @@
       for (let i = 0; i < 8; i++) { px(3, 82 + i * 5, 1, 3, "#ffffff55"); px(316, 82 + i * 5, 1, 3, "#ffffff55"); }
     }
     px(4, 80, 6, 40, "#fff"); px(310, 80, 6, 40, "#fff");
+    if (SET.gfx === "arcade_hd") {
+      // Reti porte 3D isometriche e spalti con tifosi animati
+      g.strokeStyle = "rgba(255,255,255,.45)"; g.lineWidth = 1;
+      for (let i = 0; i < 7; i++) {
+        g.beginPath(); g.moveTo(4, 80 + i * 6); g.lineTo(0, 82 + i * 6); g.stroke();
+        g.beginPath(); g.moveTo(316, 80 + i * 6); g.lineTo(320, 82 + i * 6); g.stroke();
+      }
+      for (let i = 0; i < 20; i++) {
+        const hcol = (i % 2 === 0) ? usCol() : (M ? (TEAMS[M.team] || {}).color || "#ffd23f" : "#ffd23f");
+        const wave = Math.sin(frame / 14 + i) * 1.5;
+        px(12 + i * 15, 3 + wave, 9, 6, hcol);
+        px(14 + i * 15, 1 + wave, 5, 3, "#f6d0a8");
+      }
+    }
     const m = M; if (!m) return;
     // zona (1..5) verso la porta avversaria (destra) quando attacchiamo, verso la nostra (sinistra) quando difendiamo
     const zx = (z, us) => us ? 60 + (z - 1) * 55 : 260 - (z - 1) * 55;
@@ -1374,12 +1458,28 @@
     g.fillRect(bx - 27, 20, 55, 160);
     try { gxPitchUnder(); } catch {}
     // giocatori
-    const opp = TEAMS[m.team];
-    for (let i = 0; i < 5; i++) { man(60 + i * 50 + Math.sin(frame / 30 + i) * 4, 45 + (i % 3) * 50, usCol(), "#fff"); man(90 + i * 48 + Math.cos(frame / 28 + i) * 4, 70 + ((i + 1) % 3) * 40, opp.color, opp.color === "#ffffff" ? "#1d3fa3" : "#fff"); }
-    man(18, 100, "#3fa7ff", "#fff"); man(302, 100, "#8a8a8a", "#fff");
+    const opp = TEAMS[m.team] || { color: "#ffffff", name: "Avversari" };
+    for (let i = 0; i < 5; i++) {
+      man(60 + i * 50 + Math.sin(frame / 30 + i) * 4, 45 + (i % 3) * 50, usCol(), "#fff");
+      man(90 + i * 48 + Math.cos(frame / 28 + i) * 4, 70 + ((i + 1) % 3) * 40, opp.color, opp.color === "#ffffff" ? "#1d3fa3" : "#fff");
+    }
+    man(18, 100, "#3fa7ff", "#fff");
+    man(302, 100, "#8a8a8a", "#fff");
     const by = 100 + Math.sin(frame / 10) * 3;
-    if (m.anim) { const k = m.anim.t / m.anim.d; ball(m.anim.x0 + (m.anim.x1 - m.anim.x0) * (1 - k), by - Math.sin((1 - k) * Math.PI) * 25, 5); m.anim.t--; if (m.anim.t <= 0) m.anim = null; }
-    else ball(bx, by, 5);
+    if (m.anim) {
+      const k = m.anim.t / m.anim.d;
+      const curX = m.anim.x0 + (m.anim.x1 - m.anim.x0) * (1 - k), curY = by - Math.sin((1 - k) * Math.PI) * 25;
+      if (SET.gfx === "arcade_hd") {
+        g.fillStyle = "rgba(255,210,63,.45)"; g.beginPath(); g.arc(curX - (m.anim.x1 > m.anim.x0 ? 8 : -8), curY + 2, 4, 0, 7); g.fill();
+        g.fillStyle = "rgba(255,255,255,.25)"; g.beginPath(); g.arc(curX - (m.anim.x1 > m.anim.x0 ? 14 : -14), curY + 4, 3, 0, 7); g.fill();
+      }
+      ball(curX, curY, 5); m.anim.t--; if (m.anim.t <= 0) m.anim = null;
+    } else {
+      if (SET.gfx === "arcade_hd") {
+        g.fillStyle = "rgba(255,255,255,.25)"; g.beginPath(); g.arc(bx - (m.poss === "us" ? 5 : -5), by, 3, 0, 7); g.fill();
+      }
+      ball(bx, by, 5);
+    }
     try { gxPitchMid(); } catch {}
     if (m.meteo === "pioggia") { for (let i = 0; i < 60; i++) { const x = (i * 53 + frame * 3) % (W + 20) - 10, y = (i * 37 + frame * 7) % H; px(x, y, 1, 6, "#cfe6ff99"); } g.fillStyle = "rgba(20,30,60,.18)"; g.fillRect(0, 0, W, H); }
     if (m.meteo === "vento") for (let i = 0; i < 14; i++) { const x = (i * 71 + frame * 4) % (W + 40) - 20, y = (i * 29) % H + Math.sin(frame / 10 + i) * 4; px(x, y, 12, 1, "#ffffff88"); px(x + 3, y + 3, 8, 1, "#ffffff55"); }
@@ -1389,7 +1489,16 @@
     px(110, 2, 100, 16, "#000a"); g.fillStyle = "#fff"; g.font = "bold 11px sans-serif"; g.textAlign = "center";
     g.fillText(`${usName().slice(0, 4).toUpperCase()} ${m.score[0]} – ${m.score[1]} ${opp.name.split(" ")[0].slice(0, 4).toUpperCase()}   ${m.min}'`, 160, 14); g.textAlign = "left";
   }
-  function man0(x, y, c, trim) { px(x - 3, y - 9, 6, 6, "#f0c9a0"); px(x - 4, y - 3, 8, 8, c); px(x - 4, y - 3, 8, 2, trim); px(x - 3, y + 5, 2, 5, "#222"); px(x + 1, y + 5, 2, 5, "#222"); }
+  function man0(x, y, c, trim, role) {
+    px(x - 3, y - 9, 6, 6, "#f0c9a0");
+    if (role === "sara") px(x - 6, y - 10, 3, 5, "#2a1c14");
+    if (role === "leo") px(x - 4, y - 11, 4, 2, "#2a1c14");
+    if (role === "nico") { px(x - 4, y - 11, 8, 2, "#ffd23f"); px(x - 6, y - 2, 2, 4, "#fff"); px(x + 4, y - 2, 2, 4, "#fff"); }
+    px(x - 4, y - 3, 8, 8, role === "nico" ? "#19a060" : c);
+    px(x - 4, y - 3, 8, 2, trim);
+    if (role === "leo") px(x - 5, y - 1, 2, 3, "#ffd23f");
+    px(x - 3, y + 5, 2, 5, "#222"); px(x + 1, y + 5, 2, 5, "#222");
+  }
 
   function drawCutin0() {
     const c = cutin;
@@ -4754,8 +4863,15 @@
   // 15l · Partita classica: quattro aggiunte, ognuna spegnibile (spente = regole di prima)
   const SET_PC = { coppie: ["Schemi a coppie avanzati", "Con grande intesa, ogni compagno sblocca un secondo tiro in coppia (intesa 14)"], rete: ["Rete strappata", "Un tiro potentissimo può bucare la rete: cut-in speciale, un po' di grinta e il conto delle reti strappate"], star: ["Fuoriclasse rivali", "Il capitano avversario carica lo speciale con una frase sua e un cut-in nei colori della squadra"], gkf: ["Portieri che si stancano", "Più tiri affronta, più un portiere cala (il tuo e il loro); all'intervallo recupera"], duelli: ["Duelli 1 contro 1", "Dribbling in attacco (zona 3+): leggi il difensore e scegli finta, scatto o protezione"], area: ["Comandi in area", "Parata, pugno o uscita: li scegli tu col tuo portiere, e anche il portiere avversario li usa"], tempo: ["Tiro a tempo", "Ferma la barra al momento giusto: preciso = tiro più forte, sbagliato = più debole"], fiato: ["Grinta di riserva", "A secco puoi tirare lo stesso (più debole); rifiatare ridà almeno 10"], spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
   const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false });
-  function setLoad() { const d = setDefault(), s = readJSON(SETK, null); if (!s || s.v !== 1) return d; return { ...d, ...s, t: { ...d.t, ...(s.t || {}) }, pc: { ...d.pc, ...(s.pc && typeof s.pc === "object" ? s.pc : {}) } }; }
+  function setLoad() {
+    const d = setDefault(), s = readJSON(SETK, null);
+    if (!s || s.v !== 1) return d;
+    const res = { ...d, ...s, t: { ...d.t, ...(s.t || {}) }, pc: { ...d.pc, ...(s.pc && typeof s.pc === "object" ? s.pc : {}) } };
+    if (res.gfx === "arcade_hd" || !res.gfx) res.gfx = "migliorata";
+    return res;
+  }
   let SET = setLoad();
+  if (SET.gfx === "arcade_hd") { SET.gfx = "migliorata"; writeJSON(SETK, SET); }
   const feat = (k) => SET.style === "90" && !!SET.t[k];
   const setApply = () => {
     document.body.classList.toggle("big", !!SET.big);
@@ -4812,7 +4928,8 @@
       ...audioButtons(again),
       { label: `Scene speciali: ${SET.speed} ▸`, sub: "normale · veloce · salta (tocca la scena per saltarla)", fn: () => { SET.speed = { normale: "veloce", veloce: "salta", salta: "normale" }[SET.speed] || "normale"; save(); again(); } },
       { label: `Animazioni: ${SET.anim ? "sì" : "no"}`, sub: "Tiri, esultanze, fischio d'inizio e finale, coppa, cartellini · tocca per saltarle", fn: () => { SET.anim = !SET.anim; save(); again(); } },
-      { label: `Grafica: ${{ classica: "Classica", migliorata: "Migliorata", pixel: "Pixel art rifinita", campo: "Campo dettagliato" }[SET.gfx] || "Migliorata"} ▸`, sub: SET.gfx === "classica" ? "Aspetto originale, senza effetti aggiuntivi" : SET.gfx === "pixel" ? "Calciatori ridisegnati con contorni e dettagli pixel" : SET.gfx === "campo" ? "Strisce d'erba, linee più leggibili e giocatori più grandi" : "Luci, cielo e mare animati, particelle, riflettori e pubblico", fn: () => { SET.gfx = ({ classica: "migliorata", migliorata: "pixel", pixel: "campo", campo: "classica" })[SET.gfx] || "migliorata"; GX.low = false; GX.auto = false; GX.slow = 0; save(); again(); } },
+      { label: `Tema visivo: ${(window.THEMES && window.THEMES.find(t => (localStorage.getItem("ali-di-rondine.theme") || "classic") === t.id) || { name: "Classico Rondine" }).name} ▸`, sub: "Classico · Gazzetta Vintage · Neon Costa · Arcade Retrò", fn: () => { if (window.cycleTheme) window.cycleTheme(); again(); } },
+      { label: `Grafica: ${SET.gfx === "classica" ? "Classica" : "Migliorata"} ▸`, sub: SET.gfx === "classica" ? "Aspetto originale retrò, senza effetti aggiuntivi" : "Luci, cielo e mare animati, particelle, riflettori e pubblico", fn: () => { SET.gfx = SET.gfx === "classica" ? "migliorata" : "classica"; GX.low = false; GX.auto = false; GX.slow = 0; save(); again(); } },
       { label: `Filtro retrò: ${SET.crt ? "sì" : "no"}`, sub: "Righe e bordi curvi, come la tv della trattoria", fn: () => { SET.crt = !SET.crt; save(); again(); } },
       { label: `Risparmio batteria: ${SET.eco ? "sì" : "no"}`, sub: SET.eco ? "Effetti pesanti spenti" : GX.auto ? "Il telefono faticava: effetti pesanti già alleggeriti" : "Se il telefono fatica, il gioco si alleggerisce da solo", fn: () => { SET.eco = !SET.eco; save(); again(); } },
       { label: `Testo più grande: ${SET.big ? "sì" : "no"}`, fn: () => { SET.big = !SET.big; save(); again(); } },
@@ -9874,21 +9991,146 @@
     if (k0 > 0.88) { g.fillStyle = `rgba(255,255,255,${(k0 - 0.88) * 5})`; g.fillRect(0, 0, W, H); }
     px(0, 0, W, 12, "#000"); px(0, H - 12, W, 12, "#000");
   }
-  // ---------- campo: ombre, riflettori, pubblico, cartelloni ----------
-  function man(x, y, c, trim) {
+  // ---------- campo: ombre, riflettori, pubblico, cartelloni e sprite dedicati ----------
+  function man(x, y, c, trim, role) {
     if (GX.sh) { g.fillStyle = "rgba(0,0,0,.28)"; g.beginPath(); g.ellipse(x + 2, y + 10, 5.5, 2, 0, 0, 7); g.fill(); }
-    if (SET.gfx === "pixel") manPixel0(x, y, c, trim);
-    else if (SET.gfx === "campo") manField0(x, y, c, trim);
-    else man0(x, y, c, trim);
+    if (SET.gfx === "arcade_hd") manArcadeHD(x, y, c, trim, role);
+    else if (SET.gfx === "pixel") manPixel0(x, y, c, trim, role);
+    else if (SET.gfx === "campo") manField0(x, y, c, trim, role);
+    else man0(x, y, c, trim, role);
     if (GX.sh) px(x - 4, y - 3, 8, 1, "rgba(255,255,255,.35)");
   }
-  function manField0(x, y, c, trim) {
+  function manArcadeHD(x, y, c, trim, role = "") {
     x = Math.round(x); y = Math.round(y);
-    const edge = "#152431", skin = "#f0c9a0", step = (Math.floor(frame / 4) + Math.floor(x / 40)) % 2;
+    const edge = "#0a101d", skin = role === "sara" ? "#fce3ce" : role === "gigi" ? "#ebc19b" : "#f6d0a8";
+    const step = (Math.floor(frame / 3) + Math.floor(x / 30)) % 3;
+    const dy = step === 1 ? -1 : 0;
+    const isGigi = role === "gigi" || role === "opp_def";
+    const isNico = role === "nico" || role === "opp_gk";
+    const isLeo = role === "leo";
+    const isSara = role === "sara";
+    const isStar = role === "opp_star";
+
+    // Ombra a terra
+    g.fillStyle = "rgba(0,0,0,.35)"; g.beginPath(); g.ellipse(x, y + 14, isGigi ? 8.5 : 7, 2.5, 0, 0, 7); g.fill();
+
+    // Testa e capigliatura personalizzata per personaggio
+    px(x - 4, y - 16 + dy, 8, 8, edge);
+    px(x - 3, y - 15 + dy, 6, 6, skin);
+
+    if (isLeo) {
+      // Ciuffo iconico da capitano e fascia
+      px(x - 5, y - 18 + dy, 9, 4, "#1c1426");
+      px(x - 7, y - 16 + dy, 4, 3, "#2a1e38");
+      px(x + 3, y - 16 + dy, 2, 3, "#1c1426");
+    } else if (isSara) {
+      // Coda di cavallo che ondeggia al vento ed elastico rosso
+      const ponyW = Math.sin(frame / 6) * 2;
+      px(x - 4, y - 18 + dy, 8, 4, "#2a1810");
+      px(x - 8, y - 18 + dy + ponyW, 4, 8, "#2a1810");
+      px(x - 5, y - 16 + dy, 2, 2, "#ff4d5a"); // elastico rosso
+    } else if (isNico) {
+      // Cappellino da portiere vintage con visiera
+      px(x - 5, y - 18 + dy, 10, 4, role === "nico" ? "#ffd23f" : "#ff761a");
+      px(x - 8, y - 15 + dy, 4, 2, "#1d3fa3");
+      px(x - 3, y - 14 + dy, 2, 2, "#e89228"); // capelli arancio sotto la visiera
+    } else if (isGigi) {
+      // Capelli corti e barba mascolina
+      px(x - 4, y - 17 + dy, 8, 3, "#3d2a1c");
+      px(x - 3, y - 10 + dy, 6, 2, "#3d2a1ccc"); // barba incolta
+    } else if (isStar) {
+      // Cresta punk rivale
+      px(x - 2, y - 20 + dy, 4, 5, "#ff4d5a");
+      px(x - 4, y - 17 + dy, 8, 3, "#2a1c14");
+    } else {
+      // Standard
+      px(x - 4, y - 17 + dy, 8, 3, "#2a1c14");
+      px(x - 5, y - 14 + dy, 2, 3, "#2a1c14");
+      px(x + 3, y - 14 + dy, 2, 3, "#2a1c14");
+    }
+
+    // Occhi manga con riflesso bianco
+    px(x - 2, y - 13 + dy, 2, 2, "#182033");
+    px(x + 1, y - 13 + dy, 2, 2, "#182033");
+    px(x - 2, y - 14 + dy, 1, 1, "#fff");
+    px(x + 1, y - 14 + dy, 1, 1, "#fff");
+
+    // Maglia e busto (Gigi è più largo di 2px)
+    const bw = isGigi ? 14 : 12;
+    const bx = isGigi ? x - 7 : x - 6;
+    px(bx, y - 7 + dy, bw, 10, edge);
+    px(bx + 1, y - 6 + dy, bw - 2, 8, isNico ? (role === "nico" ? "#19a060" : "#ff6600") : c);
+    px(x - 2, y - 6 + dy, 4, 2, trim);
+    px(bx + 1, y - 5 + dy, 1, 6, trim);
+    px(bx + bw - 2, y - 5 + dy, 1, 6, trim);
+
+    // Braccia e accessori
+    px(bx - 1, y - 4 + dy, 2, 6, edge);
+    px(bx + bw - 1, y - 4 + dy, 2, 6, edge);
+    px(bx - 1, y - 3 + dy, 1, 4, skin);
+    px(bx + bw, y - 3 + dy, 1, 4, skin);
+
+    // Dettagli esclusivi:
+    if (isLeo) {
+      // Fascia da capitano dorata al braccio sinistro
+      px(bx - 2, y - 3 + dy, 3, 3, "#ffd23f");
+      px(bx - 1, y - 2 + dy, 1, 1, "#111"); // 'C'
+    } else if (isSara) {
+      // Polsini rossi sportivi
+      px(bx - 1, y - 1 + dy, 2, 2, "#ff4d5a");
+      px(bx + bw, y - 1 + dy, 2, 2, "#ff4d5a");
+    } else if (isNico) {
+      // Grandi guantoni da portiere imbottiti
+      const gCol = role === "nico" ? "#ffffff" : "#222222";
+      const gTrim = role === "nico" ? "#ff4d5a" : "#00e5ff";
+      px(bx - 3, y - 3 + dy, 4, 5, edge);
+      px(bx - 2, y - 2 + dy, 3, 4, gCol);
+      px(bx - 2, y - 1 + dy, 2, 2, gTrim);
+      px(bx + bw, y - 3 + dy, 4, 5, edge);
+      px(bx + bw + 1, y - 2 + dy, 3, 4, gCol);
+      px(bx + bw + 1, y - 1 + dy, 2, 2, gTrim);
+    }
+
+    // Pantaloncini
+    px(x - 5, y + 3 + dy, 10, 5, edge);
+    px(x - 4, y + 4 + dy, 8, 3, isNico ? "#152033" : "#1a2538");
+    px(x - 1, y + 4 + dy, 2, 3, trim);
+
+    // Gambe animate con scarpini
+    const lStep = step === 1 ? -2 : step === 2 ? 1 : 0;
+    const rStep = step === 1 ? 1 : step === 2 ? -2 : 0;
+    px(x - 4, y + 8 + dy + lStep, 3, 5, edge);
+    px(x + 1, y + 8 + dy + rStep, 3, 5, edge);
+    px(x - 3, y + 8 + dy + lStep, 2, 4, isNico ? "#152033" : c);
+    px(x + 2, y + 8 + dy + rStep, 2, 4, isNico ? "#152033" : c);
+    px(x - 3, y + 8 + dy + lStep, 2, 1, trim);
+    px(x + 2, y + 8 + dy + rStep, 2, 1, trim);
+
+    // Ginocchiera di Gigi
+    if (isGigi) {
+      px(x - 4, y + 9 + dy + lStep, 3, 2, "#f4f4f4");
+    }
+
+    // Scarpini
+    const bootCol = isLeo ? "#ffd23f" : isStar ? "#ff4d5a" : isSara ? "#f4f4f4" : "#111";
+    const bootTrim = isLeo ? "#ff4d5a" : isStar ? "#ffd23f" : "#ffd23f";
+    px(x - 5, y + 13 + dy + lStep, 4, 2, edge);
+    px(x + 1, y + 13 + dy + rStep, 4, 2, edge);
+    px(x - 4, y + 13 + dy + lStep, 3, 1, bootCol);
+    px(x + 2, y + 13 + dy + rStep, 3, 1, bootCol);
+    px(x - 3, y + 14 + dy + lStep, 1, 1, bootTrim);
+    px(x + 3, y + 14 + dy + rStep, 1, 1, bootTrim);
+  }
+  function manField0(x, y, c, trim, role = "") {
+    x = Math.round(x); y = Math.round(y);
+    const edge = "#152431", skin = role === "sara" ? "#fce3ce" : "#f0c9a0", step = (Math.floor(frame / 4) + Math.floor(x / 40)) % 2;
     px(x - 5, y - 14, 10, 10, edge); px(x - 4, y - 13, 8, 8, skin);
     px(x - 4, y - 14, 8, 3, "#30252a"); px(x - 5, y - 11, 3, 2, "#30252a"); px(x + 2, y - 11, 3, 2, "#30252a");
+    if (role === "sara") { px(x - 7, y - 15, 3, 6, "#30252a"); px(x - 5, y - 13, 2, 2, "#ff4d5a"); }
+    if (role === "leo") { px(x - 6, y - 15, 3, 2, "#30252a"); px(x - 7, y - 1, 2, 3, "#ffd23f"); }
+    if (role === "nico") { px(x - 5, y - 16, 10, 3, "#ffd23f"); px(x - 8, y, 3, 4, "#fff"); px(x + 6, y, 3, 4, "#fff"); }
     px(x - 2, y - 9, 1, 1, "#28221d"); px(x + 2, y - 9, 1, 1, "#28221d");
-    px(x - 6, y - 4, 12, 12, edge); px(x - 4, y - 3, 8, 10, c);
+    px(x - 6, y - 4, 12, 12, edge); px(x - 4, y - 3, 8, 10, role === "nico" ? "#19a060" : c);
     px(x - 6, y - 3, 2, 6, trim); px(x + 4, y - 3, 2, 6, trim);
     px(x - 1, y - 2, 2, 3, "rgba(255,255,255,.55)"); px(x + 2, y + 1, 2, 3, "rgba(0,0,0,.2)");
     px(x - 8, y - 2, 2, 8, edge); px(x + 6, y - 2, 2, 8, edge);
@@ -9900,7 +10142,7 @@
     px(x - 5 + step, y + 17, 5, 2, "#192331"); px(x + 1 - step, y + 17, 5, 2, "#192331");
     if (GX.sh) { g.fillStyle = "rgba(0,0,0,.18)"; g.beginPath(); g.ellipse(x + 1, y + 19, 8, 2, 0, 0, 7); g.fill(); }
   }
-  function manPixel0(x, y, c, trim) {
+  function manPixel0(x, y, c, trim, role = "") {
     x = Math.round(x); y = Math.round(y);
     const edge = "#182033", skin = "#f0c9a0";
     px(x - 3, y - 10, 6, 7, edge);
@@ -19463,7 +19705,7 @@
   const MNK = "ali-di-rondine.menu";
   const mnRec2 = () => { const r = readJSON(MNK, null), o = { v: 1, open: {}, known: {}, fresh: {}, bk: {} }; const x = r && typeof r === "object" ? { ...o, ...r } : o; ["open", "known", "fresh", "bk"].forEach((k) => { if (!x[k] || typeof x[k] !== "object" || Array.isArray(x[k])) x[k] = {}; }); return x; };
   const mnSave2 = (r) => writeJSON(MNK, r);
-  (() => { const st = document.createElement("style"); st.textContent = ".choices button{min-height:44px}.choices button.mnsec{grid-column:1/-1;background:#16294a;border-color:#ffffff66;font-size:16px;letter-spacing:.2px}.choices button.mnew{box-shadow:0 0 0 2px #ffd23f80}.choices button.mnew small::before{content:'NUOVO · ';color:#ffd23f;font-weight:700}.choices button.mnnow{background:#1c4a3a;border-color:#57d68d99}.choices button.mnnow small::before{content:'Ora · ';color:#9be28f;font-weight:700}.mute{min-height:44px;min-width:44px}@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}"; document.head.appendChild(st); })();
+  (() => { const st = document.createElement("style"); st.textContent = ".choices button{min-height:36px;font-size:13.5px;padding:7px 9px}.choices button.mnsec{grid-column:1/-1;background:#16294a;border-color:#ffffff66;font-size:14px;letter-spacing:.2px}.choices button.mnew{box-shadow:0 0 0 2px #ffd23f80}.choices button.mnew small::before{content:'NUOVO · ';color:#ffd23f;font-weight:700}.choices button.mnnow{background:#1c4a3a;border-color:#57d68d99}.choices button.mnnow small::before{content:'Ora · ';color:#9be28f;font-weight:700}.mute{min-height:32px!important;min-width:32px!important;height:32px!important;width:32px!important;padding:0!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;font-size:14px!important}@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}"; document.head.appendChild(st); })();
   const MN_CAT = [
     ["Partite", /^(Carriera|Mondiali|Mondiale per club|Torneo dei rigori|Calcio d'azione|Sfide 1 contro 1|Squadra di sbandati|Squadra dei sogni|Squadra da collezione|Ultimate Team del Borgo|Sfida del giorno|Modalità Allenatore)/],
     ["Allenamento", /^(Minigiochi|Punizioni|Portiere invincibile|Sfide$|Sfide a obiettivo|Allenatore per un giorno)/],
@@ -19639,6 +19881,34 @@
     ]);
   }
   gmenuBtn.onclick = gameMenu;
+  const homeBtn = $("homeBtn");
+  if (homeBtn) {
+    homeBtn.onclick = function () {
+      const inMatch = !!(M || (typeof MGm !== "undefined" && MGm) || (typeof NK !== "undefined" && NK) || (typeof SA !== "undefined" && SA));
+      if (inMatch) {
+        overlay("<b>Partita in corso</b><br>Vuoi uscire dalla partita e tornare al Menu Principale?<br><span style=\"color:var(--dim)\">I tuoi progressi generali e la carriera restano salvati.</span>", [
+          {
+            label: "🏠 Torna alla Home",
+            cls: "danger",
+            fn: () => {
+              closeOverlay();
+              M = null; cutin = null; if (typeof SA !== "undefined") SA = null; tm = null; if (typeof MGm !== "undefined") MGm = null; if (typeof NK !== "undefined") NK = null;
+              $("matchHud").hidden = true;
+              playing = false;
+              title();
+            }
+          },
+          { label: "⚽ Continua la partita", cls: "hot", fn: closeOverlay }
+        ]);
+      } else {
+        closeOverlay();
+        M = null; cutin = null; if (typeof SA !== "undefined") SA = null; tm = null; if (typeof MGm !== "undefined") MGm = null;
+        $("matchHud").hidden = true;
+        playing = false;
+        title();
+      }
+    };
+  }
 
   // ================= TITOLO =================
   function goMenu() { title(); }
