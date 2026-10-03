@@ -26,7 +26,10 @@
       <button type="button" class="mute" id="mute" aria-label="Suoni">🔊</button>
     </div>
   </div>
-  <div class="stage"><canvas id="cv" width="320" height="200" aria-label="Scena di gioco"></canvas></div>
+  <div class="stage">
+    <canvas id="cv" width="320" height="200" aria-label="Scena di gioco"></canvas>
+    <div id="stageAlt" class="stage-alt" hidden></div>
+  </div>
   <div class="box" id="matchHud" hidden>
     <div class="hud">
       <div>Minuto<b id="hMin">0'</b></div>

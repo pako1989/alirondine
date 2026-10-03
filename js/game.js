@@ -4615,7 +4615,7 @@
   };
   // 15l · Partita classica: quattro aggiunte, ognuna spegnibile (spente = regole di prima)
   const SET_PC = { coppie: ["Schemi a coppie avanzati", "Con grande intesa, ogni compagno sblocca un secondo tiro in coppia (intesa 14)"], rete: ["Rete strappata", "Un tiro potentissimo può bucare la rete: cut-in speciale, un po' di grinta e il conto delle reti strappate"], star: ["Fuoriclasse rivali", "Il capitano avversario carica lo speciale con una frase sua e un cut-in nei colori della squadra"], gkf: ["Portieri che si stancano", "Più tiri affronta, più un portiere cala (il tuo e il loro); all'intervallo recupera"], duelli: ["Duelli 1 contro 1", "Dribbling in attacco (zona 3+): leggi il difensore e scegli finta, scatto o protezione"], area: ["Comandi in area", "Parata, pugno o uscita: li scegli tu col tuo portiere, e anche il portiere avversario li usa"], tempo: ["Tiro a tempo", "Ferma la barra al momento giusto: preciso = tiro più forte, sbagliato = più debole"], fiato: ["Grinta di riserva", "A secco puoi tirare lo stesso (più debole); rifiatare ridà almeno 10"], spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
-  const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false, dis: false });
+  const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false, dis: false, cardView: "canvas", mangaView: "canvas" });
   function setLoad() {
     const d = setDefault(), s = readJSON(SETK, null);
     if (!s || s.v !== 1) return d;
@@ -4679,6 +4679,8 @@
     Object.entries(SET_PC).forEach(([k, [l, sub]]) => b.push({ label: `${SET.pc[k] ? "✓" : "✗"} ${l}`, sub: `Partita classica · ${sub}`, fn: () => { SET.pc = { ...SET.pc, [k]: !SET.pc[k] }; save(); again(); } }));
     b.push(
       ...audioButtons(again),
+      { label: `Stile Carte & Ritratti: ${SET.cardView === "holo3d" ? "Olografico 3D" : "Classico Pixel Canvas"} ▸`, sub: SET.cardView === "holo3d" ? "Tocca per tornare al Pixel Canvas retrò" : "Tocca per attivare le carte 3D con riflessi Foil", fn: () => { SET.cardView = SET.cardView === "holo3d" ? "canvas" : "holo3d"; save(); again(); } },
+      { label: `Stile Fumetto Manga: ${SET.mangaView === "manga" ? "Attivo" : "Disattivato"} ▸`, sub: SET.mangaView === "manga" ? "Tavole illustrate a fumetto nei momenti chiave" : "Visualizzazione classica su canvas retrò", fn: () => { SET.mangaView = SET.mangaView === "manga" ? "canvas" : "manga"; save(); again(); } },
       { label: `Scene speciali: ${SET.speed} ▸`, sub: "normale · veloce · salta (tocca la scena per saltarla)", fn: () => { SET.speed = { normale: "veloce", veloce: "salta", salta: "normale" }[SET.speed] || "normale"; save(); again(); } },
       { label: `Animazioni: ${SET.anim ? "sì" : "no"}`, sub: "Tiri, esultanze, fischio d'inizio e finale, coppa, cartellini · tocca per saltarle", fn: () => { SET.anim = !SET.anim; save(); again(); } },
       { label: `Tema visivo: ${(window.THEMES && window.THEMES.find(t => (localStorage.getItem("ali-di-rondine.theme") || "classic") === t.id) || { name: "Classico Rondine" }).name} ▸`, sub: "Classico · Gazzetta Vintage · Neon Costa · Arcade Retrò", fn: () => { if (window.cycleTheme) window.cycleTheme(); again(); } },
@@ -10683,6 +10685,7 @@
   }
   // ---------- titolo del capitolo quando cambia, durante il gioco ----------
   function run() {
+    closeAltStage();
     const s = STORY[S.step], c = s && s.chap, prev = GX.lastChap;
     GX.lastChap = c || prev;
     if (c && prev !== undefined && c !== prev && !s.choice && gxOn() && gxAnimOk() && !SA) {
@@ -13874,6 +13877,121 @@
   let curEncCat = "rondine";
   let curEncChar = "leo";
 
+  function closeAltStage() {
+    const alt = $("stageAlt");
+    const cv = $("cv");
+    if (alt) { alt.hidden = true; alt.innerHTML = ""; }
+    if (cv) cv.hidden = false;
+  }
+
+  function render3DCard(charId, isUnlocked) {
+    const alt = $("stageAlt");
+    const cv = $("cv");
+    if (!alt || !cv) return;
+    cv.hidden = true;
+    alt.hidden = false;
+
+    const c = CAST[charId] || { name: charId };
+    const ex = ENC_EXTRA[charId] || { role: "Figura del Borgo", quote: "«Sempre forza Rondine!»", stat: "Cuore ligure", bond: "Comunità" };
+    const bio = BIO[charId] || "Abitante e figura chiave di Borgo Marino.";
+
+    const name = isUnlocked ? (c.name || charId).toUpperCase() : "🔒 ??? SCONOSCIUTO";
+    const role = isUnlocked ? ex.role : "Mistero del Borgo";
+    const quote = isUnlocked ? ex.quote : "«Incrocia questo personaggio nel Borgo o nella storia per sbloccare la sua carta.»";
+    const statName = isUnlocked ? ex.stat : "???";
+
+    const avatarEmoji = isUnlocked ? (
+      charId === "leo" ? "🦅" :
+      charId === "nico" ? "🧤" :
+      charId === "sara" ? "📋" :
+      charId === "tommy" ? "⚡" :
+      charId === "gigi" ? "🕊️" :
+      charId === "nonna" ? "🚗" :
+      charId === "baciccia" ? "🐟" :
+      charId === "ester" ? "🗼" :
+      charId === "tonino" ? "🍨" :
+      charId === "pietrino" ? "⚽" : "⭐"
+    ) : "🔒";
+
+    alt.innerHTML = `
+      <div class="holo-card-wrap" id="holoCardWrap" title="Tocca per girare la carta · Muovi per inclinare in 3D">
+        <div class="holo-card" id="holoCard">
+          <div class="holo-side holo-front">
+            <div class="holo-sheen" id="holoSheen"></div>
+            <div class="holo-header">
+              <span>${esc(name)}</span>
+              <span class="holo-role">${esc(role)}</span>
+            </div>
+            <div class="holo-body">
+              <div class="holo-avatar-frame">
+                <span>${avatarEmoji}</span>
+              </div>
+              <div class="holo-stats">
+                <div class="holo-stat-row">
+                  <span>Specialità:</span>
+                  <b style="color:#57d68d; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:68px;">${esc(statName)}</b>
+                </div>
+                <div class="holo-stat-row">
+                  <span>Potenza</span>
+                  <div class="holo-stat-bar"><div class="holo-stat-fill" style="width:${isUnlocked ? '85%' : '15%'};"></div></div>
+                </div>
+                <div class="holo-stat-row">
+                  <span>Rarità</span>
+                  <span style="color:#ffd23f;">${isUnlocked ? '★★★★★' : '★☆☆☆☆'}</span>
+                </div>
+              </div>
+            </div>
+            <div class="holo-footer">
+              ${esc(quote)}
+            </div>
+          </div>
+
+          <div class="holo-side holo-back">
+            <div class="holo-back-emblem">🦅</div>
+            <div class="holo-back-title">ALI DI RONDINE · CARD #${charId.toUpperCase()}</div>
+            <div class="holo-back-desc">
+              ${isUnlocked ? esc(bio) : "<i>Questa carta è ancora sigillata nel mazzo. Esplora Borgo Marino o avanza nei capitoli per sbloccarla.</i>"}
+            </div>
+            <div class="holo-flip-hint">Tocca per girare di nuovo 🔄</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const wrap = document.getElementById("holoCardWrap");
+    const card = document.getElementById("holoCard");
+    const sheen = document.getElementById("holoSheen");
+
+    if (wrap && card) {
+      const handleMove = (clientX, clientY) => {
+        const rect = wrap.getBoundingClientRect();
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+        const midX = rect.width / 2;
+        const midY = rect.height / 2;
+        const rotY = ((x - midX) / midX) * 20;
+        const rotX = -((y - midY) / midY) * 20;
+
+        if (!card.classList.contains("flipped")) {
+          card.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+          if (sheen) sheen.style.backgroundPosition = `${x * 1.5}px ${y * 1.5}px`;
+        }
+      };
+
+      wrap.onmousemove = (e) => handleMove(e.clientX, e.clientY);
+      wrap.ontouchmove = (e) => {
+        if (e.touches && e.touches[0]) handleMove(e.touches[0].clientX, e.touches[0].clientY);
+      };
+      wrap.onmouseleave = () => {
+        if (!card.classList.contains("flipped")) card.style.transform = "rotateX(0deg) rotateY(0deg)";
+      };
+      wrap.onclick = () => {
+        card.classList.toggle("flipped");
+        try { playCarHorn(); } catch {}
+      };
+    }
+  }
+
   function borgoEncyclopedia(backFn, catId, charId) {
     if (backFn) borgoEncyclopedia._back = backFn;
     const bFn = borgoEncyclopedia._back || title;
@@ -13899,6 +14017,12 @@
     const c = CAST[curEncChar] || { name: curEncChar };
     const bioText = BIO[curEncChar] || "Abitante e figura chiave delle vicende di Borgo Marino.";
     const ex = ENC_EXTRA[curEncChar] || { role: "Figura del Borgo", quote: "«Sempre forza Rondine!»", stat: "Cuore ligure", bond: "Comunità" };
+
+    if (SET.cardView === "holo3d") {
+      render3DCard(curEncChar, isUnlocked);
+    } else {
+      closeAltStage();
+    }
 
     if (isUnlocked) {
       text("voce", `
@@ -13960,16 +14084,30 @@
       };
     });
 
+    const toggleStyleBtn = {
+      label: SET.cardView === "holo3d" ? "🖼️ Torna a Pixel Canvas" : "✨ Passa a Carta Olografica 3D",
+      sub: SET.cardView === "holo3d" ? "Disattiva la carta 3D e torna al canvas classico" : "Attiva la carta tridimensionale con riflessi Foil",
+      cls: "pick",
+      fn: () => {
+        SET.cardView = SET.cardView === "holo3d" ? "canvas" : "holo3d";
+        writeJSON(SETK, SET);
+        borgoEncyclopedia(bFn, curEncCat, curEncChar);
+      }
+    };
+
     buttons([
       ...memberBtns,
+      { label: "── Stile di Visualizzazione ──", disabled: true },
+      toggleStyleBtn,
       { label: "── Scegli Categoria ──", disabled: true },
       ...catBtns,
-      { label: "◂ Torna indietro", cls: "pick", fn: bFn }
+      { label: "◂ Torna indietro", cls: "pick", fn: () => { closeAltStage(); bFn(); } }
     ]);
   }
 
   // ---------- il titolo: poche porte, ognuna con la sua percentuale ----------
   function title() {
+    closeAltStage();
     if (TW) TW.active = false;
     view = { kind: "scene", bg: "title" }; chap(""); statsBox(); document.body.classList.remove("borgo"); playing = false; T = null; if (BW) BW.active = false;
     const has = load(), gr = guRec(), fresh0 = !has && prog().n === 0;
@@ -14033,6 +14171,7 @@
       { label: "Mappa delle modalità", sub: "Tutto il gioco su un foglio", cls: "hot", fn: () => mappa(modes) },
       { label: "La Corsa della Panda di Nonna", sub: "Arcade tra i caruggi: schiva gabbiani e pomodori a tutto gas!", cls: "hot", fn: () => pandaGameMode(modes) },
       { label: "Torneo Supereroi (Anime Power)", sub: "Super tiri manga, aure shonen e barriere mecha!", cls: "hot", fn: () => animeTorneoMode(modes) },
+      { label: "Fumetto Manga · Le Tavole del Borgo", sub: "Rileggi i momenti chiave come un webcomic d'azione", cls: "hot", fn: () => mangaViewer(modes) },
       { label: "Il Borgo Storto (GDR)", sub: "GDR a turni: combatti nel borgo speculare tra focacce e gabbiani", cls: "hot", fn: () => openBorgoStorto(modes) },
       { label: "La Gabbia sul Molo", sub: "Street football 3v3 con sponde di ferro e zero rimesse", cls: "hot", fn: () => gabbiaMode(modes) },
       { label: "Carriera", sub: careerSub(), fn: career },
@@ -22729,6 +22868,110 @@
     g.fillText(`RONDINE Z  ${ANIME.score[0]} – ${ANIME.score[1]}  LEGIONE OSCURA`, 160, 23);
     g.textAlign = "left";
   }
+
+  // ================= FUMETTO MANGA INTERATTIVO · LE TAVOLE DEL BORGO =================
+  const MANGA_EPISODES = [
+    {
+      id: "tiro_vento",
+      title: "Episodio 1: Il Tiro del Vento sul Molo",
+      caption: "Borgo Marino · Primi tiri di Leo contro il muro del porto prima del debutto.",
+      panels: [
+        { who: "Leo", text: "«Il mare soffia forte oggi... ma se il pallone torna dritto, sono pronto!»", sfx: "SWOOOSH!", sfxSound: "whoosh", hot: false },
+        { who: "Papà Enzo", text: "«Poco fumo e tanto arrosto, ragazzo! Tira d'interno collo!»", sfx: "CLANG!", sfxSound: "horn", hot: false },
+        { who: "Leo", text: "«TIRO DELLA RONDINE! L'onda si apre in due!»", sfx: "BOOOOM!", sfxSound: "whoosh", hot: true, shout: true }
+      ]
+    },
+    {
+      id: "parata_gatto",
+      title: "Episodio 2: La Parata del Gatto Volante",
+      caption: "Novantesimo minuto · Finale di Coppa contro le Aquile di Ponente.",
+      panels: [
+        { who: "Kenji", text: "«Nessun portiere di terza categoria può fermare il Volo dell'Aquila!»", sfx: "WHIZZ!", sfxSound: "whoosh", hot: false },
+        { who: "Nico", text: "«Tu non conosci i gatti di Borgo Marino! MI BUTTO A DESTRA!»", sfx: "KRAAA!", sfxSound: "horn", hot: false },
+        { who: "Sara", text: "«L'ha presa con la punta dei polpastrelli! NON CI CREDO!»", sfx: "SBAM!", sfxSound: "goal", hot: true, shout: true }
+      ]
+    },
+    {
+      id: "corsa_panda",
+      title: "Episodio 3: La Corsa Pazzoide della Panda",
+      caption: "Ore 14:50 · A dieci minuti dal fischio d'inizio nei caruggi stretti.",
+      panels: [
+        { who: "Nonna Ferri", text: "«Reggetevi forte! La terza marcia entra solo se il motore piange!»", sfx: "VROOOOM!", sfxSound: "whoosh", hot: false },
+        { who: "Nico", text: "«Nonnaaaa! C'è un carretto di pomodori in mezzo al vicolo!»", sfx: "BEEP BEEP!", sfxSound: "horn", hot: false },
+        { who: "Leo", text: "«Siamo arrivati al cancello dello stadio in derapata! ALLACCIATE GLI SCARPINI!»", sfx: "SKRRRT!", sfxSound: "goal", hot: true, shout: true }
+      ]
+    }
+  ];
+
+  let curMangaEp = 0;
+
+  function mangaViewer(backFn, epIndex = 0) {
+    if (backFn) mangaViewer._back = backFn;
+    const bFn = mangaViewer._back || modes;
+    curMangaEp = (epIndex + MANGA_EPISODES.length) % MANGA_EPISODES.length;
+    const ep = MANGA_EPISODES[curMangaEp];
+
+    chap("Fumetto Manga · " + ep.title);
+    view = { kind: "manga" };
+
+    const alt = $("stageAlt");
+    const cv = $("cv");
+    if (alt && cv) {
+      cv.hidden = true;
+      alt.hidden = false;
+
+      alt.innerHTML = `
+        <div class="manga-viewport">
+          <div style="font-size:11px; font-weight:bold; color:#ffd23f; text-shadow:1px 1px 2px #000; padding:2px 4px; border-bottom:1px solid #ffffff25; display:flex; justify-content:space-between;">
+            <span>📖 ${esc(ep.title)}</span>
+            <span style="color:#94a3b8;">Ep. ${curMangaEp + 1}/${MANGA_EPISODES.length}</span>
+          </div>
+          <div class="manga-panel-row">
+            <div class="manga-frame">
+              <span class="manga-sfx-stamp" onclick="window.playMangaSfx('${ep.panels[0].sfxSound}')" title="Tocca per il suono">${esc(ep.panels[0].sfx)}</span>
+              <div style="font-weight:bold; font-size:10px; color:#ffd23f;">${esc(ep.panels[0].who)}</div>
+              <div class="manga-balloon">${esc(ep.panels[0].text)}</div>
+            </div>
+            <div class="manga-frame">
+              <span class="manga-sfx-stamp" onclick="window.playMangaSfx('${ep.panels[1].sfxSound}')" title="Tocca per il suono">${esc(ep.panels[1].sfx)}</span>
+              <div style="font-weight:bold; font-size:10px; color:#3fa7ff;">${esc(ep.panels[1].who)}</div>
+              <div class="manga-balloon">${esc(ep.panels[1].text)}</div>
+            </div>
+          </div>
+          <div class="manga-panel-row single">
+            <div class="manga-frame hot">
+              <span class="manga-sfx-stamp" onclick="window.playMangaSfx('${ep.panels[2].sfxSound}')" title="Tocca per il suono">${esc(ep.panels[2].sfx)}</span>
+              <div style="font-weight:bold; font-size:10.5px; color:#ff4d5a;">${esc(ep.panels[2].who)}</div>
+              <div class="manga-balloon ${ep.panels[2].shout ? 'shout' : ''}">${esc(ep.panels[2].text)}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    text("voce", `
+      <div style="font-size:13px; line-height:1.45; color:var(--ink); margin-bottom:4px;">
+        <b>${esc(ep.title)}</b><br>
+        <span style="color:var(--dim); font-size:12px;">${esc(ep.caption)}</span>
+      </div>
+      <div style="font-size:11.5px; color:#ffd23f;">
+        💡 <i>Tocca le scritte onomatopee (BOOM, KRAAA, BEEP) per ascoltare il sonoro del fumetto!</i>
+      </div>
+    `);
+
+    buttons([
+      { label: "▶ Prossimo Episodio", cls: "hot", fn: () => mangaViewer(bFn, curMangaEp + 1) },
+      { label: "◀ Episodio Precedente", fn: () => mangaViewer(bFn, curMangaEp - 1) },
+      { label: "⚽ Torna alla visuale classica", cls: "pick", fn: () => { closeAltStage(); bFn(); } }
+    ]);
+  }
+
+  window.playMangaSfx = function(soundType) {
+    if (soundType === "whoosh") playTurboWhoosh();
+    else if (soundType === "horn") playCarHorn();
+    else if (soundType === "goal") sfx("goal");
+    else sfx("kick");
+  };
 
   TRX.push(() => { const r = comicRec(); return [{ name: "Numero Zero", kind: "comic", c: "#a94c53", got: r.won.length === COMIC_EP.length, part: `${r.won.length}/3`, hint: seasonDone(1) ? "Completa Il numero nell'ultima vignetta" : "???" }]; });
   if (/[?&]debug/.test(location.search)) window.__comic = { comicRec, comicSave, comicStats, comicMenu, comicPage, comicChoose, comicStart, comicResult, comicFinalChoice, comicEnd, comicNewVolume, COMIC_EP, COMIC_COS };
