@@ -279,11 +279,12 @@ function explore() {
   <button id="talk" class="hot" hidden></button><div class="pad"><span></span><button data-d="u">▲</button><span></span><button data-d="l">◀</button><button data-d="d">▼</button><button data-d="r">▶</button></div><button id="t">◂ Titolo</button>`;
   $("#t").onclick = title; $("#talk").onclick = () => talkNear();
   const D = { u: [0, -1], d: [0, 1], l: [-1, 0], r: [1, 0] };
-  let tm = null;
-  const stop = () => { clearInterval(tm); tm = null; };
+  clearInterval(window.PADTM);
+  const stop = () => { clearInterval(window.PADTM); window.PADTM = null; };
+  window.onpointerup = window.onpointercancel = window.onblur = stop;
   app.querySelectorAll(".pad button").forEach((b) => {
     const go = () => step(D[b.dataset.d]);
-    b.onpointerdown = (e) => { e.preventDefault(); go(); stop(); tm = setInterval(go, 150); };
+    b.onpointerdown = (e) => { e.preventDefault(); go(); stop(); window.PADTM = setInterval(() => { if (!$("#cv")) return stop(); go(); }, 150); };
     b.onpointerup = b.onpointerleave = b.onpointercancel = stop;
   });
   window.onkeydown = (e) => { const k = { ArrowUp: "u", ArrowDown: "d", ArrowLeft: "l", ArrowRight: "r", w: "u", s: "d", a: "l", d: "r" }[e.key]; if (k && $("#cv")) { e.preventDefault(); step(D[k]); } };
@@ -325,7 +326,7 @@ function talkNear() {
   dialog(o.say.map((q) => T(q[0], q[1])), () => { busy2 = false; explore(); });
 }
 function meet(m, o) {
-  busy2 = true;
+  busy2 = true; clearInterval(window.PADTM);
   const n = NODES.find((q) => q.id === m.node);
   if (m.node === "n2" && !G.flags.met_n2) { busy2 = false; const e = $("#msg"); if (e) e.innerHTML = "Prima parla con Papà."; return; }
   if (m.node === "n2") return fight(n);
@@ -430,7 +431,7 @@ function draw() {
 function loop() { RAF = requestAnimationFrame(() => { RAF = 0; if (!$("#cv")) return; if (X && X.mv > 0) X.mv--; draw(); }); }
 function map() { busy2 = false; explore(); }
 function enter(n) {
-  busy2 = true;
+  busy2 = true; clearInterval(window.PADTM);
   SCENE = { n1: "campetto", n2: "trattoria", n3: "molo", n4: "chiosco", n5: "campanile" }[n.id];
   if (n.id === "n2") return dialog(STORY.n2, papaChoice);
   if (n.rest) return dialog(STORY[n.id], rest);
