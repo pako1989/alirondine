@@ -46,11 +46,51 @@
 <div id="eventLog" role="log" aria-label="Cronologia eventi"></div>
 <div id="saveIndicator" role="status" aria-live="polite">Salvataggio...</div>
 
+<!-- Modal integrato per Il Borgo Storto -->
+<div id="borgoModal" hidden style="position:fixed; inset:0; z-index:9999; background:var(--sky); display:none; flex-direction:column;">
+  <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#14243d; border-bottom:2px solid var(--gold); gap:8px;">
+    <div style="font-weight:bold; color:var(--gold); font-size:15px; display:flex; align-items:center; gap:8px;">
+      <span>🌀 Il Borgo Storto</span>
+      <span style="font-size:12px; color:var(--dim); font-weight:normal;">(GDR a turni · Spin-off)</span>
+    </div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <a href="borgo-storto.html" target="_blank" class="mute" style="text-decoration:none; padding:4px 8px;" title="Apri in una nuova scheda">↗ Scheda</a>
+      <button type="button" class="mute" id="closeBorgoBtn" style="background:#b3202c; color:#fff; border-color:#ff4d5a; font-weight:bold; padding:4px 10px;">✕ Torna ad Ali di Rondine</button>
+    </div>
+  </div>
+  <iframe id="borgoIframe" src="about:blank" style="flex:1; width:100%; border:none; background:#0e1424;"></iframe>
+</div>
+
 <!-- Script modulari -->
 <script src="js/slots.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/game.js"></script>
 <script>
+window.openBorgoStortoModal = function () {
+  var m = document.getElementById("borgoModal");
+  var fr = document.getElementById("borgoIframe");
+  if (!m || !fr) return;
+  fr.src = "borgo-storto.html";
+  m.hidden = false;
+  m.style.display = "flex";
+};
+window.closeBorgoStortoModal = function () {
+  var m = document.getElementById("borgoModal");
+  var fr = document.getElementById("borgoIframe");
+  if (!m || !fr) return;
+  m.hidden = true;
+  m.style.display = "none";
+  fr.src = "about:blank";
+  if (window.toast) window.toast("Sei tornato a Borgo Marino", "info", "⚽");
+};
+var closeBtn = document.getElementById("closeBorgoBtn");
+if (closeBtn) closeBtn.onclick = window.closeBorgoStortoModal;
+window.addEventListener("message", function (e) {
+  if (e.data && e.data.type === "closeBorgo") {
+    window.closeBorgoStortoModal();
+  }
+});
+
 if ("serviceWorker" in navigator && location.protocol === "https:") {
   addEventListener("load", function () {
     navigator.serviceWorker.register("sw.js").catch(function () {});

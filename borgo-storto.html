@@ -344,7 +344,7 @@ function title() {
     const nd = NODES.find(x => x.id === id);
     return nd && (nd.cap || 1) === cap;
   }).length;
-  app.innerHTML = `<div class="topbar"><h1>Il Borgo Storto</h1><button type="button" class="btn-icon" id="thBtn">🎨 ${THEMES[curThemeIdx].name}</button></div>
+  app.innerHTML = `<div class="topbar"><h1>Il Borgo Storto</h1><div style="display:flex;gap:6px;"><button type="button" class="btn-icon" id="quickBackBtn" title="Torna ad Ali di Rondine">🏠</button><button type="button" class="btn-icon" id="thBtn">🎨 ${THEMES[curThemeIdx].name}</button></div></div>
   <div class="sub">GDR a capitoli · ${cap === 2 ? "Capitolo 2: L'Orologio del Paradosso" : "Capitolo 1: La crepa sul campanile"}</div>
   <div class="card">${vig(cap === 2 ? "orologio" : "crepa", "leo")}<p>${cap === 2 ? "Le lancette del campanile girano all'indietro! Il mare risale la costa e le conchiglie urlano fuorigioco. Bisogna trovare l'Arbitro del Paradosso per fermare il tempo." : "Ugolino ha fatto un guaio. Il cielo ha una crepa, e dall'altra parte c'è un Borgo uguale al tuo. Quasi. Tutto è storto, tutti sono una versione strana di sé stessi. E non si sa chi comanda."}</p></div>
   <button class="hot" id="go">${n ? "Continua" : "Inizia"}<small>${n ? `Tappe fatte: ${n}/5` : `Inizia Capitolo ${cap}`}</small></button>
@@ -371,7 +371,15 @@ function title() {
     save();
     title();
   };
-  $("#back").onclick = () => { location.href = "./index.html"; };
+  const goBackHome = () => {
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: "closeBorgo" }, "*");
+    } else {
+      location.href = "./index.html";
+    }
+  };
+  $("#back").onclick = goBackHome;
+  if ($("#quickBackBtn")) $("#quickBackBtn").onclick = goBackHome;
 }
 function dialog(lines, then) {
   let i = 0;

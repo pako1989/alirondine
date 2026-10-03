@@ -7002,7 +7002,17 @@
     const tgt = SA_X[a.dive], x0 = 160, x = x0 + (tgt - x0) * k * (a.dive === "centro" ? 0.2 : 1), jump = a.dive === "centro" ? -10 * Math.sin(k * Math.PI) : -14 * Math.sin(k * Math.PI * 0.8);
     const rot = a.dive === "sx" ? -1.25 * k : a.dive === "dx" ? 1.25 * k : 0;
     const col = a.us ? (TEAMS[a.team] ? "#2c2c2c" : "#8a8a8a") : "#3fa7ff", trim = a.us ? (TEAMS[a.team] ? TEAMS[a.team].color : "#fff") : "#ffd23f";
-    if (a.gatto && k > 0.1) for (let i = 0; i < 5; i++) px(x - (tgt - x0) * 0.1 * i - 6, 76 + jump + i * 3, 14, 1, "#9be2ffaa");
+    if (a.gatto && k > 0.1) {
+      for (let i = 0; i < 6; i++) px(x - (tgt - x0) * 0.1 * i - 6, 76 + jump + i * 3, 16, 1.5, "#9be2ffcc");
+      // Aura felina fiammeggiante e artigli di luce
+      g.strokeStyle = "#ffd23f"; g.lineWidth = 1.5;
+      for (let c = -1; c <= 1; c++) {
+        g.beginPath();
+        g.moveTo(x + c * 8, 86 + jump - 6);
+        g.lineTo(x + c * 14 + (tgt > 160 ? 12 : -12), 86 + jump - 18);
+        g.stroke();
+      }
+    }
     saMan(x, 86 + jump, 1.9, col, trim, rot);
     // guanti
     const gx = x + Math.sin(rot) * 20, gy = 86 + jump - Math.cos(rot) * 20;
@@ -7032,7 +7042,7 @@
     const u = clamp((t - wind - pre) / fly, 0, 1);
     // rigonfiamento della rete dopo il gol
     const after = t - hit;
-    const bulge = a.res === "goal" && after >= 0 ? { x: a.tx, y: a.ty, a: 16 * Math.exp(-after / (gxOn() ? 14 : 10)) * Math.cos(after / 3), t: after } : null;
+    const bulge = a.res === "goal" && after >= 0 ? { x: a.tx, y: a.ty, a: 18 * Math.exp(-after / (gxOn() ? 14 : 10)) * Math.cos(after / 2.8), t: after } : null;
     saGoal(a, bulge);
     const kp = saKeeper(a, clamp((t - wind - pre - fly * 0.35) / (fly * 0.75), 0, 1));
     saShooter(a, clamp((t - pre) / (wind + 6), 0, 1));
@@ -7047,22 +7057,53 @@
     }
     // palla in volo con scia
     else if (t < hit) {
-      if (a.kind === "opp_sp" || lk.gold) { const p = saPath(a, u); g.fillStyle = (lk.aura || "#ffd23f") + "66"; g.beginPath(); g.arc(p.x, p.y, p.r * 2.2, 0, 7); g.fill(); }
-      for (let k = 7; k >= 1; k--) {
+      if (a.kind === "opp_sp" || lk.gold) {
+        const p = saPath(a, u);
+        g.fillStyle = (lk.aura || "#ffd23f") + "66";
+        g.beginPath(); g.arc(p.x, p.y, p.r * 2.4, 0, 7); g.fill();
+        if (a.kind === "opp_sp") {
+          g.strokeStyle = "#9be2ff"; g.lineWidth = 1;
+          for (let sp = 0; sp < 3; sp++) {
+            const an = (t * 0.4 + sp * 2.1), dist = p.r * 2.8;
+            g.beginPath(); g.moveTo(p.x, p.y);
+            g.lineTo(p.x + Math.cos(an) * dist, p.y + Math.sin(an) * dist);
+            g.stroke();
+          }
+        }
+      }
+      for (let k = 8; k >= 1; k--) {
         const q = saPath(a, Math.max(0, u - k * 0.035));
-        g.globalAlpha = 0.5 * (1 - k / 8); g.fillStyle = lk.trail; g.beginPath(); g.arc(q.x, q.y, q.r * (lk.w / 3), 0, 7); g.fill();
+        g.globalAlpha = 0.55 * (1 - k / 9); g.fillStyle = lk.trail; g.beginPath(); g.arc(q.x, q.y, q.r * (lk.w / 2.8), 0, 7); g.fill();
       }
       g.globalAlpha = 1;
       const p = saPath(a, u);
-      if (lk.wings) { const fl = Math.sin(t / 2) * 6; g.fillStyle = "#ff4d5acc"; g.beginPath(); g.moveTo(p.x, p.y); g.lineTo(p.x - 16, p.y + 4 + fl); g.lineTo(p.x - 6, p.y + 2); g.fill(); g.beginPath(); g.moveTo(p.x, p.y); g.lineTo(p.x + 16, p.y + 4 + fl); g.lineTo(p.x + 6, p.y + 2); g.fill(); }
-      if (lk.leaf) { g.fillStyle = "#7ee0a0"; g.save(); g.translate(p.x + 8, p.y - 6); g.rotate(t / 5); g.fillRect(-3, -1, 6, 2); g.restore(); }
+      if (lk.wings) {
+        const fl = Math.sin(t / 2) * 6;
+        g.fillStyle = "#ff4d5acc";
+        g.beginPath(); g.moveTo(p.x, p.y); g.lineTo(p.x - 17, p.y + 4 + fl); g.lineTo(p.x - 6, p.y + 2); g.fill();
+        g.beginPath(); g.moveTo(p.x, p.y); g.lineTo(p.x + 17, p.y + 4 + fl); g.lineTo(p.x + 6, p.y + 2); g.fill();
+        // Scintille dorate e piume scarlatte
+        for (let fp = 0; fp < 3; fp++) {
+          const offX = Math.sin(t * 0.65 + fp * 1.8) * 8, offY = (t * 2 + fp * 4) % 13;
+          px(p.x + offX - 4, p.y + offY + 2, 2, 2, fp % 2 === 0 ? "#ffd23f" : "#ff4d5a");
+        }
+      }
+      if (lk.leaf) {
+        g.fillStyle = "#7ee0a0"; g.save(); g.translate(p.x + 8, p.y - 6); g.rotate(t / 5); g.fillRect(-3, -1, 6, 2); g.restore();
+        g.fillStyle = "#ffd23f"; g.save(); g.translate(p.x - 7, p.y - 4); g.rotate(-t / 4); g.fillRect(-2, -1, 4, 2); g.restore();
+        px(p.x + Math.sin(t / 3) * 6, p.y + 3, 2, 1, "#ffd23fcc");
+      }
       ball(p.x, p.y, p.r);
     } else {
       // esito
       const e = Math.min(1, after / 14);
       if (a.res === "goal") {
         ball(a.tx, a.ty - (bulge ? bulge.a * 0.6 : 0), 3);
-        for (let i = 0; i < 18; i++) { const s = (i * 37 + a.seed) % 100; px(40 + ((s * 3.1 + i * 13) % 240), (after * (1 + (i % 4) * 0.4) * 2 + s) % 120, 3, 3, ["#ff4d5a", "#ffd23f", "#9be2ff", "#fff"][i % 4]); }
+        // Eruzione di coriandoli e scintille dorate dalla rete
+        for (let i = 0; i < 28; i++) {
+          const s = (i * 37 + a.seed) % 100;
+          px(28 + ((s * 3.3 + i * 11) % 264), (after * (1 + (i % 4) * 0.45) * 2.2 + s) % 130, 3, 3, ["#ff4d5a", "#ffd23f", "#9be2ff", "#57d68d", "#fff"][i % 5]);
+        }
         saText(a.us !== false ? (a.vg || "GOL!") : "GOL…", a.us !== false ? "#ffd23f" : "#cfd6e4");
       } else if (a.res === "post") {
         const px0 = a.aim === "dx" ? 219 : 101, dir = a.aim === "dx" ? -1 : 1;
@@ -13393,6 +13434,390 @@
     fin: mnTry(() => getList(ENDS).length / ENDINGS.length),
   });
   const mnColl = () => { const p = mnCollParts(); return mnAvg([p.tro, p.fig, p.foto, p.card, p.fin]); };
+
+  // ================= IL BORGO STORTO · PONTE DIRETTO =================
+  function openBorgoStorto(backFn) {
+    save();
+    if (typeof window.openBorgoStortoModal === "function") {
+      window.openBorgoStortoModal();
+    } else {
+      location.href = "borgo-storto.html";
+    }
+  }
+
+  // ================= ALBERO DELLE SCELTE (BRANCHING FLOWCHART) =================
+  const BRANCHES = [
+    {
+      season: 1,
+      title: "Stagione 1 · Coppa della Costa",
+      dilemmas: [
+        {
+          id: "style",
+          chap: "Prologo · Il primo focus",
+          text: "Su cosa concentrare il primo allenamento della stagione con Sara e Ruggeri?",
+          opts: [
+            { id: "tiro", label: "Il Tiro", effect: "Tiro +3", desc: "Attaccante puro e affamato di gol, stile istintivo." },
+            { id: "drib", label: "Il Dribbling", effect: "Dribbling +3", desc: "Controllo palla per saltare l'uomo e creare superiorità." },
+            { id: "squadra", label: "Gioco di squadra", effect: "Passaggio +2, Squadra +1", desc: "Fiducia cieca nei compagni e altruismo." }
+          ]
+        },
+        {
+          id: "deal",
+          chap: "Capitolo 1 · Il patto di Valli",
+          text: "Valli ti offre 8.000€ per perdere contro i Tori del Nord e salvare la trattoria di papà.",
+          opts: [
+            { id: "preso", label: "Accetta il biglietto", effect: "Onore −1, Tentazione", desc: "Tieni il biglietto nero in tasca: il dubbio ti logora." },
+            { id: "rifiutato", label: "Strappalo davanti a lui", effect: "Onore +2", desc: "Faccia a faccia con il combinatore: la trattoria non si compra." },
+            { id: "detto", label: "Fotografa la targa e dillo a Sara", effect: "Onore +1, Squadra +1", desc: "Indagine di squadra per scoprire chi muove i fili." }
+          ]
+        },
+        {
+          id: "nico",
+          chap: "Capitolo 1 · Il consiglio a Nico",
+          text: "Nico ti chiede aiuto per dichiararsi a Sara: come mandare il messaggio?",
+          opts: [
+            { id: "cosi", label: "Mandalo così (poesia goffa)", effect: "Squadra +1", desc: "Sara risponde con l'emoji dubbiosa, Nico sogna a occhi aperti." },
+            { id: "semplice", label: "«Ti va un gelato?»", effect: "Squadra +2", desc: "Approccio genuino: Sara accetta e Nico è al settimo cielo." },
+            { id: "persona", label: "«Diglielo di persona»", effect: "Grinta +10", desc: "Nico inciampa tra i secchi ma strappa un sorriso vero a Sara." }
+          ]
+        },
+        {
+          id: "coach",
+          chap: "Capitolo 2 · Il passato di Ruggeri",
+          text: "Sara trova l'articolo: Ruggeri squalificato a vita 20 anni fa per un rigore venduto a Valli!",
+          opts: [
+            { id: "privato", label: "Affronta Ruggeri da solo", effect: "Confessione", desc: "Il Mister confessa il suo debito e consegna le vecchie lettere." },
+            { id: "squadra", label: "Dillo a tutta la squadra", effect: "Squadra −1, Onore +1", desc: "Spogliatoio diviso, ma Ruggeri va dai Carabinieri a denunciare." },
+            { id: "papa", label: "Chiedi prima a tuo padre", effect: "Onore +1", desc: "Scopri che papà giocava con la maglia 9 e smise per non sporcarsi." }
+          ]
+        },
+        {
+          id: "kenji",
+          chap: "Semifinale · La promessa a Kenji",
+          text: "Kenji Arata rivela che gioca con un problema cardiaco e che Dario è ai Leoni Neri.",
+          opts: [
+            { id: "piano", label: "Gioca piano sul suo lato", effect: "Rispetto, indizio su Dario", desc: "Kenji ti rivela: Dario non gioca volentieri per Valli, è ricattato." },
+            { id: "forte", label: "Attacca senza sconti", effect: "Determinazione feroce", desc: "Calcio duro fino all'ultimo respiro: le Aquile escono a testa alta." }
+          ]
+        },
+        {
+          id: "final",
+          chap: "Capitolo 3 · L'incontro notturno con Dario",
+          text: "Dario si presenta alla trattoria la notte prima della finale dei Leoni Neri.",
+          opts: [
+            { id: "serio", label: "«Gioca sul serio, pensiamo noi al resto»", effect: "Onore +2", desc: "Sfida tra fratelli pulita al 100%: riscatto sportivo della famiglia." },
+            { id: "finta", label: "«Fai quello che chiede Valli»", effect: "Salva trattoria, rimorso", desc: "Partita amara e finta, il debito si chiude con l'amaro in bocca." },
+            { id: "squadra", label: "Chiama Ruggeri e Sara subito", effect: "Squadra +2, Trappola", desc: "I carabinieri di Lina Esposito registrano Valli in flagrante." }
+          ]
+        }
+      ]
+    },
+    {
+      season: 2,
+      title: "Stagione 2 · Le Due Riviere & Aurora",
+      dilemmas: [
+        {
+          id: "sponsor",
+          chap: "Sei mesi dopo",
+          text: "La Contessa Ines Corvo offre divise nuove e fondi per la Rondine FC.",
+          opts: [
+            { id: "si", label: "Accetta lo sponsor Aurora", effect: "Tiro +2, Grinta +10", desc: "Dotazioni da serie A, ma Ruggeri si chiude in un silenzio cupo." },
+            { id: "no", label: "Rifiuta: maglie vecchie", effect: "Onore +1, Squadra +1", desc: "Orgoglio popolare del Borgo contro i milioni dell'Aurora." },
+            { id: "chiesto", label: "Chiedi a Ruggeri chi è la Contessa", effect: "Verità, Squadra +1", desc: "Ruggeri rivela: era la sua compagna 20 anni fa e madre di Bruno." }
+          ]
+        },
+        {
+          id: "rita",
+          chap: "Capitolo 4 · Il segreto di Rita",
+          text: "Trovi Rita in dispensa con la busta dell'Aurora: passava informazioni sul debito.",
+          opts: [
+            { id: "spia", label: "Proteggila: lavora come infiltrata", effect: "Prova +1, Squadra +1", desc: "Rita gira a Sara le lettere della Contessa, smascherandone la sede." },
+            { id: "papa", label: "Dillo a papà insieme", effect: "Onore +1", desc: "Papà brucia la busta e perdona Rita: «Sei di famiglia, chi fa le trofie?»" },
+            { id: "via", label: "Mandala via dalla trattoria", effect: "Onore −1", desc: "Rottura amara: Rita se ne va e in cucina cala il gelo." }
+          ]
+        },
+        {
+          id: "tommy",
+          chap: "Capitolo 5 · Il contratto di Tommy",
+          text: "Tommy riceve un'offerta da 3.000€/mese dall'Aurora per salvare la sua famiglia.",
+          opts: [
+            { id: "firma", label: "«Firma, è la tua vita»", effect: "Squadra −1, Addio Tommy", desc: "Tommy passa ai rivali, entra in squadra il giovane Gigi Scotto." },
+            { id: "resta", label: "«Resta, ci pensiamo insieme»", effect: "Squadra +2", desc: "Papà Moretti assume la madre di Tommy con contratto vero." },
+            { id: "letto", label: "«Prima lo legge Sara»", effect: "Prova +1, Squadra +1", desc: "Sara scopre la clausola-ricatto firmata da Valli dal carcere!" }
+          ]
+        }
+      ]
+    },
+    {
+      season: 3,
+      title: "Stagione 3 · Nazionale Under 19",
+      dilemmas: [
+        {
+          id: "bottle",
+          chap: "Capitolo 7 · La borraccia",
+          text: "Nico beve dalla tua borraccia contaminata per doping e finisce in ospedale!",
+          opts: [
+            { id: "accusa", label: "Accusa Fede davanti a tutti", effect: "Squadra −1", desc: "Spogliatoio spaccato: Fede fugge disperato e offeso." },
+            { id: "indaga", label: "Indaga con Sara in silenzio", effect: "Verità +1", desc: "Scoperta la bottiglia manipolata nel frigo privato dello staff." },
+            { id: "ct", label: "Parla con la CT Marta Galli", effect: "Verità +1, Grinta +10", desc: "La CT prende in mano la situazione e protegge i ragazzi." }
+          ]
+        },
+        {
+          id: "home",
+          chap: "Capitolo 8 · La chiamata da Chiavari",
+          text: "Chiamata notturna: papà Moretti ha avuto un infarto in cucina.",
+          opts: [
+            { id: "treno", label: "Prendi il treno stanotte", effect: "Onore +1, Affaticamento", desc: "5 ore di treno notturno per stringergli la mano in ospedale." },
+            { id: "resta", label: "Resta a Marsiglia e gioca per lui", effect: "Tiro +2", desc: "Rabbia e dedizione pura: cento tiri all'alba contro la traversa." },
+            { id: "dario", label: "Chiama Dario", effect: "Squadra +1", desc: "Dario corre a Chiavari a vegliare papà: i fratelli uniti." }
+          ]
+        },
+        {
+          id: "fedechoice",
+          chap: "Capitolo 9 · Il padre di Fede",
+          text: "Fede scopre che suo padre (Aldo Lanza) ha scommesso contro l'Italia.",
+          opts: [
+            { id: "insieme", label: "«Lo facciamo insieme»", effect: "Verità +1, Squadra +1", desc: "Chiamata notturna al Maresciallo Lina Esposito per incastrare Lanza." },
+            { id: "aldo", label: "Affronta Aldo Lanza di persona", effect: "Onore +2, Rischio", desc: "Scontro tagliente nella suite d'albergo con registrazione nascosta." },
+            { id: "dopo", label: "«Pensa alla finale, poi vediamo»", effect: "Grinta +20", desc: "Focus immediato sulla finale col Brasile di Jojo Batista." }
+          ]
+        }
+      ]
+    },
+    {
+      season: 4,
+      title: "Stagione 4 · Serie A & Professionismo",
+      dilemmas: [
+        {
+          id: "agent",
+          chap: "Capitolo 11 · Il Procuratore",
+          text: "La scelta del procuratore per l'approdo in Serie A.",
+          opts: [
+            { id: "mazza", label: "Carlo Mazza («Il Notaio»)", effect: "Contratto ricco, cinismo", desc: "Massimo guadagno ma l'ombra del vecchio arbitro squalificato." },
+            { id: "nonna", label: "Nonna Ferri (in Panda)", effect: "Spirito di famiglia, Onore +2", desc: "Trattative a colpi di lasagne e contratti blindati con il cuore." }
+          ]
+        },
+        {
+          id: "dario4",
+          chap: "Finale Derby",
+          text: "Derby di Genova contro i Marinai capitanati da Dario Moretti.",
+          opts: [
+            { id: "frontale", label: "Scontro totale a viso aperto", effect: "Spettacolo, Grinta +20", desc: "Duello fraterno leggendario sotto la Gradinata Nord." },
+            { id: "tattico", label: "Raddoppio su Dario e contropiede", effect: "Pragmatismo, Vittoria", desc: "Studio analitico con Sara per togliere il sinistro al fratello." }
+          ]
+        }
+      ]
+    },
+    {
+      season: 5,
+      title: "Stagione 5 · Champions League & Meridian",
+      dilemmas: [
+        {
+          id: "london",
+          chap: "Capitolo 14 · La sede di Londra",
+          text: "Viaggio a Londra nel quartier generale del Fondo Meridian di Sir Edmund Crane.",
+          opts: [
+            { id: "blitz", label: "Infiltrazione con Sara e Nico", effect: "Traccia +1, Rischio", desc: "Scovare i contratti di debito che legano tutti i club europei." },
+            { id: "faccia", label: "Faccia a faccia diplomatico", effect: "Psicologia, Onore +1", desc: "Guardare negli occhi Crane prima della finale col Lumière." }
+          ]
+        },
+        {
+          id: "marco",
+          chap: "Capitolo 15 · Il padre di Nico",
+          text: "Il ritorno di Marco Ferri, padre scomparso di Nico, ricattato da Crane.",
+          opts: [
+            { id: "perdona", label: "Aiuta Nico a perdonarlo", effect: "Pace familiare, Squadra +2", desc: "Nico ritrova un padre prima della finale e del matrimonio." },
+            { id: "distanza", label: "Prima i fatti, poi le scuse", effect: "Prudenza, Verità +1", desc: "Marco consegna l'ultima chiave d'accesso per salvare il torneo." }
+          ]
+        }
+      ]
+    }
+  ];
+
+  let curTreeSeason = 1;
+  function choiceTree(backFn, seasonNum) {
+    if (backFn) choiceTree._back = backFn;
+    const bFn = choiceTree._back || title;
+    if (seasonNum) curTreeSeason = seasonNum;
+    view = { kind: "albero", bg: "title", season: curTreeSeason };
+    chap(`Bivi · S${curTreeSeason}`);
+    statsBox();
+
+    const branchData = BRANCHES.find(b => b.season === curTreeSeason) || BRANCHES[0];
+    const sFlags = (S && S.f) || {};
+
+    let totalNodes = 0;
+    let unlockedNodes = 0;
+    BRANCHES.forEach(b => {
+      b.dilemmas.forEach(d => {
+        totalNodes++;
+        if (sFlags[d.id] !== undefined) unlockedNodes++;
+      });
+    });
+
+    const dilemmaHtml = branchData.dilemmas.map((d) => {
+      const chosenId = sFlags[d.id];
+      const optsHtml = d.opts.map(o => {
+        const isChosen = chosenId === o.id;
+        const badge = isChosen
+          ? `<span style="background:#22c55e; color:#0e1424; font-weight:bold; font-size:10.5px; padding:2px 6px; border-radius:4px;">★ SCELTA ATTUALE</span>`
+          : `<span style="border:1px solid #ffffff40; color:var(--dim); font-size:10.5px; padding:1px 5px; border-radius:4px;">BIVIO</span>`;
+        return `
+          <div style="background:${isChosen ? "rgba(34,197,94,0.14)" : "rgba(255,255,255,0.04)"}; border:1px solid ${isChosen ? "#22c55e" : "rgba(255,255,255,0.1)"}; border-radius:6px; padding:7px 9px; margin-top:5px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+              <b style="color:${isChosen ? "#ffd23f" : "var(--ink)"}; font-size:13px;">${esc(o.label)}</b>
+              ${badge}
+            </div>
+            <div style="font-size:11.5px; color:#57d68d; margin-top:2px;">Effetto: ${esc(o.effect)}</div>
+            <div style="font-size:11.5px; color:var(--dim); margin-top:2px;">${esc(o.desc)}</div>
+          </div>
+        `;
+      }).join("");
+
+      return `
+        <div style="background:var(--panel-light); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:10px; margin-bottom:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <span style="font-weight:bold; color:var(--gold); font-size:12px;">${esc(d.chap)}</span>
+            <span style="font-size:11px; color:${chosenId ? "#57d68d" : "var(--dim)"};">${chosenId ? "✓ Bivio affrontato" : "○ Da esplorare"}</span>
+          </div>
+          <div style="font-size:13px; font-weight:500; margin-bottom:6px;">${esc(d.text)}</div>
+          <div>${optsHtml}</div>
+        </div>
+      `;
+    }).join("");
+
+    text("voce", `
+      <div style="margin-bottom:8px;">
+        <span class="who gold" style="font-weight:bold; font-size:12px;">Mappa delle Decisioni</span>
+        <span style="float:right; font-size:12px; color:var(--gold); font-weight:bold;">${branchData.title}</span>
+      </div>
+      <div style="font-size:12px; color:var(--dim); margin-bottom:10px;">
+        In questo salvataggio hai affrontato <b>${unlockedNodes}</b> decisioni su <b>${totalNodes}</b> bivi complessivi della saga.
+      </div>
+      <div style="max-height:280px; overflow-y:auto; padding-right:4px;">
+        ${dilemmaHtml}
+      </div>
+    `);
+
+    const sBtns = BRANCHES.map(b => ({
+      label: `Stagione ${b.season}`,
+      cls: b.season === curTreeSeason ? "hot" : "",
+      fn: () => choiceTree(bFn, b.season)
+    }));
+
+    buttons([
+      ...sBtns,
+      { label: "◂ Torna indietro", cls: "pick", fn: bFn }
+    ]);
+  }
+
+  // ================= ENCICLOPEDIA DEL BORGO =================
+  const ENC_CATS = [
+    { id: "rondine", name: "🦅 Rondine FC", members: ["leo", "nico", "sara", "tommy", "gigi", "ruggeri", "papa", "rita"] },
+    { id: "rivals", name: "⚡ Rivali & Stelle", members: ["dario", "kenji", "sho", "bruno", "fede", "jojo", "vitale", "keller"] },
+    { id: "borgo", name: "⚓ Il Borgo", members: ["nonna", "baciccia", "pina", "aurelio", "tonino", "pietrino", "rocco", "ernesta", "ornella", "ester", "settimio", "anselmo"] },
+    { id: "shadows", name: "🕵️ Ombre & Potere", members: ["valli", "ines", "lina", "marta", "aldo", "mazza", "crane", "marco"] }
+  ];
+
+  const ENC_EXTRA = {
+    leo: { role: "Attaccante e Capitano · Maglia #10", quote: "«Se il pallone torna dritto dal muro del porto, sei pronto.»", stat: "Tiro della Rondine", bond: "Protagonista della saga" },
+    nico: { role: "Portiere acrobatico · Rondine FC", quote: "«Consiste nel volare. Come un gatto. Per questo è una tecnica segreta.»", stat: "Gatto Volante", bond: "Migliore amico & compagno inseparabile" },
+    sara: { role: "Manager, Tattica & Cervello del Club", quote: "«Punto debole della squadra avversaria: tutto.»", stat: "Analisi Tattica & Inchieste", bond: "Manager rigorosa, legata a Nico" },
+    tommy: { role: "Ala veloce & altruista · Rondine FC", quote: "«Passare la palla è il regalo più bello che puoi fare a un compagno.»", stat: "Doppia Rondine", bond: "Fratello acquisito in campo" },
+    gigi: { role: "Riserva prodigio & Gabbiano Umano", quote: "«KRAAA! Sono veloce, simpatico e non sto mai zitto.»", stat: "Distrazione & Sprint", bond: "L'energia pura del vivaio" },
+    ruggeri: { role: "Mister & Guida morale", quote: "«Ho perso vent'anni fa. Da allora alleno per rimediare.»", stat: "Tattica & Cuore antico", bond: "Maestro di calcio e di vita" },
+    papa: { role: "Ex bomber #9 & Cuoco della Trattoria", quote: "«Il calcio è pulito solo se chi gioca non si vende.»", stat: "Foglia di Basilico & Cozze", bond: "Padre fiero e protettivo" },
+    rita: { role: "Colonna della Trattoria Moretti", quote: "«Nessuno sa fare le trofie come me, neanche con una busta in tasca.»", stat: "Focaccia al volo & Cura", bond: "Seconda madre per Leo e Dario" },
+    dario: { role: "Campione dei Marinai & Fratello maggiore", quote: "«Piccolo, i cani randagi a volte mordono.»", stat: "Sinistro di Borgo Marino", bond: "Fratello ed eterno punto di riferimento" },
+    kenji: { role: "Bandiera delle Aquile & Maestro", quote: "«Il cuore può fare i capricci, ma la lealtà non sbaglia mira.»", stat: "Volo dell'Aquila", bond: "Rivale rispettato e leale" },
+    sho: { role: "Attaccante del Giappone U19", quote: "«Mio fratello Kenji mi ha insegnato che ogni tiro è una promessa.»", stat: "Volo dell'Aquila II", bond: "Erede dell'eredità Arata" },
+    bruno: { role: "Capitano dei Corvi dell'Aurora", quote: "«Non ho mai perso. Ma non ho mai avuto una famiglia come la vostra.»", stat: "Becco del Corvo", bond: "Figlio segreto di Ruggeri" },
+    fede: { role: "Fantasista della Nazionale U19", quote: "«Ho diciannove anni e per la prima volta gioco per me stesso.»", stat: "Piedi di velluto & Coraggio", bond: "Compagno di reparto in azzurro" },
+    jojo: { role: "Fenomeno del Brasile U19", quote: "«La palla deve ballare la samba prima di entrare in rete!»", stat: "Samba di Fuoco", bond: "L'avversario più formidabile al Vélodrome" },
+    vitale: { role: "Capitano storico della Lanterna", quote: "«Diciassette anni con una maglia. Finché il cuore batte, io corro.»", stat: "Grinta da Capitano", bond: "Guida nei professionisti" },
+    keller: { role: "Centravanti dello Sturmwald 1906", quote: "«I contratti si firmano col sangue, ma le finali si giocano col cuore.»", stat: "Blitz di Sturmwald", bond: "Rivalità europea in Champions" },
+    nonna: { role: "Procuratrice autodidatta in Panda", quote: "«I contratti si chiudono a colpi di lasagne calde. Nessuno rifiuta.»", stat: "Trattativa di Ferro", bond: "Nonna di Nico & protettrice di tutti" },
+    baciccia: { role: "Decano dei pescatori del Molo", quote: "«Oggi le acciughe saltano che è una meraviglia, ragazzo.»", stat: "Saggezza marinara", bond: "L'anima autentica del porto" },
+    pina: { role: "Direttrice del Corriere del Borgo", quote: "«Io riporto i fatti, non giudico. Poi giudico severamente.»", stat: "Cronaca locale & Album", bond: "La custode di ogni notizia" },
+    aurelio: { role: "Parroco di San Pietro", quote: "«Benedico barche, ginocchia e diagonali difensive.»", stat: "Campane del Borgo", bond: "Fede, speranza e calcio" },
+    tonino: { role: "Mastro gelataio dello Scoglio", quote: "«Un gusto per ogni gol della Rondine: pistacchio e riscatto!»", stat: "Gelato tonificante", bond: "Tifoso dolcissimo" },
+    pietrino: { role: "Capitano dei ragazzini del campetto", quote: "«Leo è fortissimo, ma io da grande farò più gol di lui.»", stat: "Entusiasmo puro", bond: "Il futuro del calcio al Borgo" },
+    rocco: { role: "Capitano degli Squali di Punta Nera", quote: "«Dietro la curva c'è solo una squadra: la nostra!»", stat: "Contrasto duro", bond: "L'eterno derby di campanile" },
+    ernesta: { role: "Pioniera del 1968 · «La Gatta»", quote: "«Nel '68 paravamo senza guanti e con gli occhi. Imparate, maschietti.»", stat: "Occhio Felino", bond: "Leggenda vivente del calcio femminile" },
+    ornella: { role: "Pastora e casara della collina", quote: "«Tre capre, nessun compromesso. E niente chiacchiere.»", stat: "Ricotta d'oro", bond: "La forza aspra della terra" },
+    ester: { role: "Guardiana del Faro di Punta Rondine", quote: "«Centotredici gradini al giorno tengono lontana la mediocrità.»", stat: "Luce nella tempesta", bond: "La sentinella della costa" },
+    settimio: { role: "Custode del vecchio stadio dal 1962", quote: "«L'erba si taglia con le forbici se vuoi che il pallone corra dritto.»", stat: "Manutenzione sacra", bond: "La memoria storica del prato verde" },
+    anselmo: { role: "Pescatore di lampare", quote: "«Parlo solo coi pesci nella notte, e loro non mentono mai sui rigori.»", stat: "Visione notturna", bond: "Mistero del mare aperto" },
+    valli: { role: "Il combinatore & faccendiere", quote: "«Lavoro con le probabilità. Il coraggio non paga i mutui.»", stat: "Biglietto nero & Ricatti", bond: "L'antagonista che ha dato inizio a tutto" },
+    ines: { role: "Contessa & Presidente Aurora", quote: "«Le maglie vecchie si strappano facilmente. Come le famiglie.»", stat: "Denaro & Influenze", bond: "Il potere occulto delle Due Riviere" },
+    lina: { role: "Maresciallo dei Carabinieri", quote: "«Voi calciatori riducete tutto a gol. È per questo che vi voglio bene.»", stat: "Indagini & Legge", bond: "L'alleata di ferro della giustizia" },
+    marta: { role: "CT della Nazionale Under 19", quote: "«Due ginocchia rifatte, zero pazienza. In campo voglio guerrieri puliti.»", stat: "Disciplina d'acciaio", bond: "La prima donna a guidare gli azzurrini" },
+    aldo: { role: "Vicepresidente della Federazione", quote: "«Le provette del doping si perdono, capitano incidenti.»", stat: "Potere politico & Veleni", bond: "Il mandante dello scandalo di Marsiglia" },
+    mazza: { role: "Il Procuratore («Il Notaio»)", quote: "«Quello che firmo io ha valore di sentenza definitiva.»", stat: "Contratti miliardari", bond: "Il cinismo del calcio moderno" },
+    crane: { role: "Sir Edmund Crane · Fondo Meridian", quote: "«Io non compro partite. Io compro i debiti e decido chi respira.»", stat: "Finanza internazionale", bond: "La mente dietro ogni ricatto europeo" },
+    marco: { role: "Padre scomparso di Nico Ferri", quote: "«Ho lo stesso modo storto di stare in piedi. Ma adesso voglio raddrizzarmi.»", stat: "Chiave d'accesso Meridian", bond: "Redenzione paterna a Londra" }
+  };
+
+  let curEncCat = "rondine";
+  let curEncChar = "leo";
+
+  function borgoEncyclopedia(backFn, catId, charId) {
+    if (backFn) borgoEncyclopedia._back = backFn;
+    const bFn = borgoEncyclopedia._back || title;
+    if (catId) curEncCat = catId;
+    const cat = ENC_CATS.find(c => c.id === curEncCat) || ENC_CATS[0];
+    if (charId && cat.members.includes(charId)) curEncChar = charId;
+    else if (!cat.members.includes(curEncChar)) curEncChar = cat.members[0];
+
+    view = { kind: "enciclopedia", bg: "title", charId: curEncChar };
+    chap("Enciclopedia del Borgo");
+    statsBox();
+
+    const c = CAST[curEncChar] || { name: curEncChar };
+    const bioText = BIO[curEncChar] || "Abitante e figura chiave delle vicende di Borgo Marino.";
+    const ex = ENC_EXTRA[curEncChar] || { role: "Figura del Borgo", quote: "«Sempre forza Rondine!»", stat: "Cuore ligure", bond: "Comunità" };
+
+    text("voce", `
+      <div style="margin-bottom:6px;">
+        <span class="who gold" style="font-weight:bold; font-size:13px; color:#0e1424;">${esc(c.name || curEncChar)}</span>
+        <span style="font-size:12px; color:var(--dim); margin-left:6px;">${esc(ex.role)}</span>
+      </div>
+      <div style="font-style:italic; color:#ffd23f; margin:4px 0 8px; font-size:13px; border-left:3px solid #ffd23f; padding-left:8px;">
+        ${esc(ex.quote)}
+      </div>
+      <div style="font-size:13.5px; line-height:1.45; color:var(--ink); margin-bottom:8px;">
+        ${esc(bioText)}
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:11.5px; background:rgba(0,0,0,0.25); border-radius:6px; padding:6px 8px;">
+        <div><b>Specialità:</b> <span style="color:#57d68d;">${esc(ex.stat)}</span></div>
+        <div><b>Legame:</b> <span style="color:#3fa7ff;">${esc(ex.bond)}</span></div>
+      </div>
+    `);
+
+    const catBtns = ENC_CATS.map(ct => ({
+      label: ct.name,
+      cls: ct.id === curEncCat ? "hot" : "",
+      fn: () => borgoEncyclopedia(bFn, ct.id, ct.members[0])
+    }));
+
+    const memberBtns = cat.members.map(mId => {
+      const mc = CAST[mId] || { name: mId };
+      const isCur = mId === curEncChar;
+      return {
+        label: (isCur ? "★ " : "") + (mc.name || mId),
+        cls: isCur ? "hot" : "",
+        fn: () => borgoEncyclopedia(bFn, curEncCat, mId)
+      };
+    });
+
+    buttons([
+      ...memberBtns,
+      { label: "── Scegli Categoria ──", disabled: true },
+      ...catBtns,
+      { label: "◂ Torna indietro", cls: "pick", fn: bFn }
+    ]);
+  }
+
   // ---------- il titolo: poche porte, ognuna con la sua percentuale ----------
   function title() {
     if (TW) TW.active = false;
@@ -13403,6 +13828,9 @@
       ...(has && STORY[has.step] ? [{ label: "Continua", sub: STORY[has.step].chap, cls: "hot", fn: () => { S = has; run(); } }] : []),
       ...(fresh0 ? [{ label: "Nuova partita", sub: "Stagione 1 · circa 30–40 minuti", cls: "hot", fn: () => { S = fresh(); run(); } }] : []),
       { label: "Storia", sub: `Le stagioni di Leo · ${mnPct(mnStoria())}%`, fn: menuStoria },
+      { label: "Albero delle scelte", sub: "Mappa dei bivi, scelte e finali alternativi", cls: "hot", fn: () => choiceTree(title) },
+      { label: "Enciclopedia del Borgo", sub: "Personaggi, schede, ritratti e curiosità", fn: () => borgoEncyclopedia(title) },
+      { label: "Il Borgo Storto", sub: "Lo spin-off GDR a turni tra campetto e focacce", cls: "hot", fn: () => openBorgoStorto(title) },
       { label: "Borgo e trasferte", sub: `A piedi per il paese · ${mnPct(mnBorgo())}%`, fn: menuBorgo },
       { label: "Modalità", sub: `Mondiali, Sfide, Carriera… · ${mnPct(mnModi())}%`, fn: modes },
       { label: "Collezioni", sub: `Trofei, figurine, finali, ricordi · ${mnPct(mnColl())}%`, fn: extras },
@@ -13429,6 +13857,7 @@
       s8Btn(),
       s9Btn(),
       ...MN_STORIA.map(mnObj).filter(Boolean),
+      { label: "Albero delle scelte", sub: "Tutti i bivi e i finali delle stagioni", cls: "hot", fn: () => choiceTree(menuStoria) },
       { label: "Galleria dei finali", sub: `${getList(ENDS).length}/${ENDINGS.length}`, fn: gallery },
       { label: "Diario di Leo", sub: "Solo quello che hai vissuto", fn: () => diario(menuStoria) },
       { label: "◂ Menu", fn: title },
@@ -13452,6 +13881,7 @@
     text("voce", `<b>Modalità</b> ${mnBar(mnPct(mnModi()))}<br>Da giocare quando vuoi: non toccano il salvataggio della storia.`);
     buttons([
       { label: "Mappa delle modalità", sub: "Tutto il gioco su un foglio", cls: "hot", fn: () => mappa(modes) },
+      { label: "Il Borgo Storto (GDR)", sub: "GDR a turni: combatti nel borgo speculare tra focacce e gabbiani", cls: "hot", fn: () => openBorgoStorto(modes) },
       { label: "La Gabbia sul Molo", sub: "Street football 3v3 con sponde di ferro e zero rimesse", cls: "hot", fn: () => gabbiaMode(modes) },
       { label: "Carriera", sub: careerSub(), fn: career },
       { label: "Crea il tuo campione", sub: heroLoad() ? `${heroLoad().name} · Carriera, Rigori, Borgo` : "Per Carriera, Rigori e partite del Borgo", fn: () => heroEditor(modes) },
@@ -13469,6 +13899,7 @@
     const p = mnCollParts(), n = (x, t) => `${Math.round(x * t)}/${t}`;
     text("voce", `<b>Collezioni</b> ${mnBar(mnPct(mnColl()))}<br>Trofei ${mnPct(p.tro)}% · Figurine di Pina ${mnPct(p.fig)}% · Ricordi ${mnPct(p.foto)}% · Figurine dei personaggi ${n(p.card, Object.keys(BIO).length)} · Finali ${n(p.fin, ENDINGS.length)}`);
     buttons([
+      { label: "Enciclopedia del Borgo", sub: "Tutti i personaggi con schede, citazioni e ritratti", cls: "hot", fn: () => borgoEncyclopedia(extras) },
       { label: "Bacheca dei trofei", sub: `${trophies().filter((t) => t.got).length}/${trophies().length}`, cls: "hot", fn: () => bacheca(extras) },
       { label: "L'Eco del Tirreno", sub: "Archivio delle prime pagine storiche e pagelle", fn: () => ecoArchivio(extras) },
       { label: "Album di Pina «Campioni della Costa»", sub: (() => { try { const r = figRec(); return r.started ? `Figurine ${figOwned(r)}/${FIG_ALL.length}` : "Si trova all'edicola del Borgo"; } catch { return ""; } })(), fn: () => figAlbum(0, extras) },
@@ -14023,7 +14454,57 @@
     if (who !== "scirocco") portrait("scirocco", 222, 168, 0.8, true);
     px(0, 0, W, 10, "rgba(0,0,0,.4)"); g.fillStyle = "#ffd23f"; g.font = "bold 8px sans-serif"; g.fillText(`RADIO RONDINE 98.6 · ${RADIO.i + 1}/${RADIO.show.segs.length}`, 6, 8);
   }
-  function drawScene() { if (view.kind === "radio" && RADIO) return drawRadio(); drawScene12(); }
+  function drawEncPortrait(charId) {
+    const c = CAST[charId] || { name: charId };
+    const bg = (c && c.bg) || ["#0e1a2e", "#1f3a63"];
+    const gr = g.createLinearGradient(0, 0, 0, H);
+    gr.addColorStop(0, bg[0]); gr.addColorStop(1, bg[1]);
+    g.fillStyle = gr; g.fillRect(0, 0, W, H);
+    for (let i = 0; i < 22; i++) {
+      px((i * 47 + frame * 0.35) % W, (i * 23 + frame * 0.15) % H, 1, 1, "rgba(255,255,255,0.35)");
+    }
+    g.fillStyle = "rgba(0,0,0,0.45)";
+    g.beginPath(); g.ellipse(160, 168, 55, 14, 0, 0, 7); g.fill();
+    g.strokeStyle = "rgba(255,210,63,0.35)"; g.lineWidth = 1.5;
+    g.beginPath(); g.ellipse(160, 168, 55, 14, 0, 0, 7); g.stroke();
+    if (c && c.skin) {
+      portrait(charId, 160, 92, 2.3, false);
+    } else {
+      anPortrait(charId, 160, 92, 2.3, false, bg[1]);
+    }
+    px(40, 6, 240, 20, "rgba(10,16,36,.88)");
+    g.strokeStyle = "#ffd23f"; g.lineWidth = 1.5;
+    g.strokeRect(40, 6, 240, 20);
+    g.fillStyle = "#ffd23f"; g.font = "bold 11px sans-serif"; g.textAlign = "center";
+    g.fillText((c && c.name ? c.name : charId).toUpperCase(), 160, 20);
+    g.textAlign = "left";
+  }
+  function drawAlberoCanvas(season) {
+    px(0, 0, W, H, "#0d172e");
+    g.strokeStyle = "rgba(255,255,255,0.06)"; g.lineWidth = 1;
+    for (let x = 0; x < W; x += 32) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H); g.stroke(); }
+    for (let y = 0; y < H; y += 25) { g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); }
+    const pts = [[50, 80], [115, 60], [115, 120], [185, 65], [185, 105], [185, 145], [260, 95]];
+    g.strokeStyle = "rgba(255,210,63,0.45)"; g.lineWidth = 2;
+    g.beginPath(); pts.forEach(([x, y], i) => { i === 0 ? g.moveTo(x, y) : g.lineTo(x, y); }); g.stroke();
+    pts.forEach(([x, y], i) => {
+      g.fillStyle = i === pts.length - 1 ? "#57d68d" : "#ffd23f";
+      g.beginPath(); g.arc(x, y, 4, 0, 7); g.fill();
+      g.strokeStyle = "#fff"; g.lineWidth = 1;
+      g.beginPath(); g.arc(x, y, 4, 0, 7); g.stroke();
+    });
+    px(35, 8, 250, 22, "rgba(8,12,24,0.9)");
+    g.strokeStyle = "#ffd23f"; g.lineWidth = 1.5; g.strokeRect(35, 8, 250, 22);
+    g.fillStyle = "#ffd23f"; g.font = "bold 11px sans-serif"; g.textAlign = "center";
+    g.fillText(`ALBERO DELLE SCELTE · STAGIONE ${season}`, 160, 23);
+    g.textAlign = "left";
+  }
+  function drawScene() {
+    if (view.kind === "radio" && RADIO) return drawRadio();
+    if (view.kind === "enciclopedia" && view.charId) return drawEncPortrait(view.charId);
+    if (view.kind === "albero") return drawAlberoCanvas(view.season || 1);
+    drawScene12();
+  }
   // ---------- dove si ascolta: nel Borgo (menu), in soffitta (se la radio è in camera), dal menu ----------
   CASA_BTN.push(() => casaHas(casaRec(), "radio") ? { label: "Accendi la radio", sub: "Radio Rondine 98.6", fn: () => radio(() => casaUI()) } : null);
   MN_BORGO_BTN.push(() => ({ label: "Radio Rondine", sub: radRec().days.includes(radDay()) ? "Notiziario di oggi ascoltato ✓" : "Il notiziario di oggi · 98.6", fn: () => radio(menuBorgo) }));
@@ -19630,6 +20111,9 @@
     ]);
     overlay(`<b>Menu</b> · ${esc(here)}<br><span style="color:var(--dim)">La storia è salvata all'inizio di questa scena: riprendi da qui con «Continua» o dalla porta della trattoria.</span>`, [
       { label: "Torna alla storia", cls: "hot", fn: closeOverlay },
+      { label: "Albero delle scelte", sub: "Mappa dei bivi di questa stagione", fn: () => { closeOverlay(); choiceTree(run); } },
+      { label: "Enciclopedia del Borgo", sub: "Dossier e ritratti dei personaggi", fn: () => { closeOverlay(); borgoEncyclopedia(run); } },
+      { label: "Il Borgo Storto (GDR)", sub: "Fai un salto nello spin-off a turni", fn: () => { closeOverlay(); openBorgoStorto(run); } },
       { label: "Salva ed esci al menu", fn: () => leaveStory("menu") },
       { label: "Vai a Borgo Marino", sub: "La storia resta salvata", fn: () => leaveStory("borgo") },
     ]);
