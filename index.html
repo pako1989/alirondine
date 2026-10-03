@@ -1706,6 +1706,9 @@
     if (M.step.fixable && S.f.deal === "preso" && !M.fixDone && M.min >= 60 && M.poss === "us" && M.zone >= 3) return fixMoment();
     if (M.poss === "us") attackTurn(); else defendTurn();
   }
+  // portieri che si stancano: ogni tiro affrontato toglie un po' di tenuta (4% a tiro, massimo 20%); l'intervallo ne toglie 2
+  const gkFat = (side) => { const f = M && M.gkF ? M.gkF[side] : 0; return pcOn("gkf") ? 1 - 0.04 * Math.min(5, f) : 1; };
+  const gkFatAdd = (side, n) => { if (!pcOn("gkf") || !M) return; M.gkF = M.gkF || { us: 0, them: 0 }; M.gkF[side] += n; };
   // duelli 1 contro 1: il difensore si prepara (con un indizio, non sempre sincero), tu scegli la mossa. Ogni mossa batte una, perde con una, pareggia con una.
   const DUEL_DEF = [["la scivolata", "si abbassa sulle gambe, pronto a scivolare"], ["la marcatura", "ti sta addosso, spalla contro spalla"], ["il pressing", "avanza di corsa per pressarti"]];
   const DUEL_ME = [["Finta", "batte la scivolata"], ["Scatto", "batte la marcatura"], ["Protezione", "batte il pressing"]];
@@ -1926,6 +1929,7 @@
       else if (kc === "uscita") { const lontano = M.zone <= 3; keep *= lontano ? 0.88 : 1.18; pre += lontano ? `${gn} esce da lontano: azzardo! ` : `${gn} esce incontro, chiude lo specchio. `; }
     }
     const punch = kc === "pugno";
+    { const fT = M && M.gkF ? M.gkF.them : 0; keep *= gkFat("them"); gkFatAdd("them", sp ? 2 : 1); if (pcOn("gkf") && fT >= 3) pre += `${esc(t.gk[0])} è affaticato. `; }
     if (feat("blocchi")) {
       const d = oppDef(), ch = clamp((sp ? 0.12 : 0.26) + (d.v - st.tiro) / 160, 0.04, 0.36) * (M.zone >= 5 ? 0.75 : 1);
       if (Math.random() < ch) {
@@ -2008,7 +2012,9 @@
         power *= 0.82; preO = `${esc(mate())} devia il tiro con la schiena! `;
       }
     }
-    const base = (S.nico + Math.min(S.bond, 8) * 1.5 + 6 + sqNicoB() + bvNicoB() + spNico()) * rnd(0.85, 1.25);
+    let base = (S.nico + Math.min(S.bond, 8) * 1.5 + 6 + sqNicoB() + bvNicoB() + spNico()) * rnd(0.85, 1.25);
+    const fU = M && M.gkF ? M.gkF.us : 0; base *= gkFat("us"); gkFatAdd("us", special ? 2 : 1);
+    if (pcOn("gkf") && fU >= 3) preO += `${gkN()} è stanco, si vede. `;
     const SIDES = { sx: "sinistra", centro: "centro", dx: "destra" };
     const aim = dfAim(Object.keys(SIDES));
     const honest = Math.random() < clamp(0.55 + S.bond * 0.05, 0.55, 0.85) - (dfx() - 1) * 1.2 - DF.lie[hLv()];
@@ -2080,6 +2086,7 @@
     ], true);
   }
   function halftime0() {
+    if (M.gkF) { M.gkF.us = Math.max(0, M.gkF.us - 2); M.gkF.them = Math.max(0, M.gkF.them - 2); }
     M.half = 2; M.min = 45; M.guts = Math.min(S.st.grinta, M.guts + (M.ch && M.ch.noHalf ? 0 : S.st.grinta * 0.45 * dfRegen())); sfx("whistle");
     const kind = M.step.halftime;
     const back = () => { view = { kind: "match" }; $("matchHud").hidden = false; M.poss = "them"; M.zone = 1; say("Inizia il secondo tempo."); hud(); buttons([{ label: "Avanti ▸", fn: turn }]); };
@@ -4721,7 +4728,7 @@
     mini: ["Calci d'angolo", "Dopo una respinta del portiere, l'angolo lo batti tu"],
   };
   // 15l · Partita classica: quattro aggiunte, ognuna spegnibile (spente = regole di prima)
-  const SET_PC = { duelli: ["Duelli 1 contro 1", "Dribbling in attacco (zona 3+): leggi il difensore e scegli finta, scatto o protezione"], area: ["Comandi in area", "Parata, pugno o uscita: li scegli tu col tuo portiere, e anche il portiere avversario li usa"], tempo: ["Tiro a tempo", "Ferma la barra al momento giusto: preciso = tiro più forte, sbagliato = più debole"], fiato: ["Grinta di riserva", "A secco puoi tirare lo stesso (più debole); rifiatare ridà almeno 10"], spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
+  const SET_PC = { gkf: ["Portieri che si stancano", "Più tiri affronta, più un portiere cala (il tuo e il loro); all'intervallo recupera"], duelli: ["Duelli 1 contro 1", "Dribbling in attacco (zona 3+): leggi il difensore e scegli finta, scatto o protezione"], area: ["Comandi in area", "Parata, pugno o uscita: li scegli tu col tuo portiere, e anche il portiere avversario li usa"], tempo: ["Tiro a tempo", "Ferma la barra al momento giusto: preciso = tiro più forte, sbagliato = più debole"], fiato: ["Grinta di riserva", "A secco puoi tirare lo stesso (più debole); rifiatare ridà almeno 10"], spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
   const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false });
   function setLoad() { const d = setDefault(), s = readJSON(SETK, null); if (!s || s.v !== 1) return d; return { ...d, ...s, t: { ...d.t, ...(s.t || {}) }, pc: { ...d.pc, ...(s.pc && typeof s.pc === "object" ? s.pc : {}) } }; }
   let SET = setLoad();
