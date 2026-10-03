@@ -3673,7 +3673,11 @@
         chibi(sx, sy + gxIdleY(n), { ...c, ...(n.id === "pietrino" && BW.prog && BW.prog.n >= 4 ? { shirt: "#ff4d5a", num: "10" } : {}), shirt: n.id === "pietrino" && BW.prog && BW.prog.n >= 4 ? "#ff4d5a" : c.shirt || { papa: "#e8e0d0", rita: "#8a4b6b", ruggeri: "#34465f", nico: "#3fa7ff", tommy: "#ff4d5a", sara: "#ffd23f", nonna: "#6b8cff", gigi: "#ff4d5a", dario: "#16325c" }[n.id] }, face === "up" ? "down" : face, 0);
         if (npcNews(n.id)) { px(sx - 4, sy - 38, 9, 11, "#ffd23f"); g.fillStyle = "#2a1a00"; g.font = "bold 9px sans-serif"; g.textAlign = "center"; g.fillText("!", sx + 0.5, sy - 29); g.textAlign = "left"; }
       } else {
-        const c = CAST.leo; chibi(sx, sy, { ...c, shirt: "#ff4d5a", num: "10" }, B.dir, (dx || dy) ? BW.walk : 0);
+        const h = heroLoad();
+        const c = (B && B.useHero && h && CAST.hero) ? CAST.hero : CAST.leo;
+        const sh = (B && B.useHero && h) ? h.shirt : "#ff4d5a";
+        const nm = (B && B.useHero && h) ? String(h.num) : "10";
+        chibi(sx, sy, { ...c, shirt: sh, num: nm }, B.dir, (dx || dy) ? BW.walk : 0);
       }
     });
     try { bvDraw(); } catch {}
@@ -3805,6 +3809,16 @@
       { label: "◂ Torna a esplorare", cls: "hot", fn: borgoResume },
       { label: B.night ? "Aspetta il mattino" : "Aspetta la notte", sub: B.night ? "I bambini tornano al campo" : "Di notte si vedono cose nuove", fn: () => { B.night = !B.night; borgoSave(); borgoResume(); try { bvSetPh(B.night ? 3 : 0); } catch {} borgoToast(B.night ? "È scesa la notte sul Borgo" : "Buongiorno, Borgo Marino"); } },
       { label: "Cosmetici sbloccati", sub: `${cosOwned().length}/${Object.keys(COSM).length} · per il tuo campione`, fn: () => { const own = cosOwned(); text("voce", Object.entries(COSM).map(([k, c]) => own.includes(k) ? `✓ <b>${esc(c.label)}</b>` : `🔒 <span style="color:var(--dim)">${esc(c.from)}</span>`).join("<br>")); buttons([{ label: "Crea il tuo campione", sub: "Usa i cosmetici", fn: () => { borgoLeave(); heroEditor(borgo); } }, { label: "◂ Menu del Borgo", fn: borgoMenu }]); } },
+      ...(heroLoad() ? [{
+        label: B.useHero ? `In paese: ${heroLoad().name}` : "In paese: Leo Moretti",
+        sub: B.useHero ? `Maglia personalizzata n. ${heroLoad().num}` : "Tocca per esplorare con il tuo campione creato",
+        cls: B.useHero ? "hot" : "",
+        fn: () => {
+          B.useHero = !B.useHero;
+          borgoSave();
+          borgoMenu();
+        }
+      }] : []),
       evButton(),
       { label: "Accendi la radio", sub: "Radio Rondine 98.6 · il notiziario di oggi", fn: () => radio(borgoMenu) },
       mtButton(borgoMenu),
@@ -4409,6 +4423,7 @@
   const cosOwned = () => { const b = B || borgoLoad(); return Object.keys(COSM).filter((k) => (COSM[k].story ? COSM[k].story() : b.cos.includes(k))); };
   const heroDefault = () => ({ v: 1, name: "Luca", style: "spiky", hair: "#2b1d14", skin: "#f2c9a0", shirt: "#ff4d5a", acc: "none", num: 9, shot: "saetta", shotName: "SAETTA DI LUCA" });
   const heroLoad = () => { const h = readJSON(HERO, null); return h && h.v === 1 && h.name ? { ...heroDefault(), ...h } : null; };
+  window.heroLoad = heroLoad;
   function heroCast(h) {
     CAST.hero = { name: h.name, tag: "", hair: h.hair, style: h.style, skin: h.skin, eye: "#2a1a0a", bg: [h.shirt, "#ffd23f"], shirt: h.shirt, num: String(h.num), acc: h.acc, cap: h.acc === "cappellino" ? "#ffd23f" : h.acc === "berretto" ? "#26324a" : undefined };
   }

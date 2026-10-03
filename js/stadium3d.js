@@ -467,10 +467,22 @@
     leoMesh.position.set(-1.25, 0, 4.45);
     leoMesh.rotation.y = 0.38;
 
-    const skinMat = new THREE.MeshStandardMaterial({ color: 0xf2c9a0 });
-    const shirtMat = new THREE.MeshStandardMaterial({ color: 0xb3202c }); // Rosso Rondine
+    let heroColor = 0xb3202c; // Default Rosso Rondine
+    let hairColor = 0x241812;
+    let skinColor = 0xf2c9a0;
+    try {
+      const h = (typeof window.heroLoad === "function" ? window.heroLoad() : (window.localStorage ? JSON.parse(window.localStorage.getItem("ali-di-rondine.hero") || "null") : null));
+      if (h) {
+        if (h.shirt && h.shirt.startsWith("#")) heroColor = parseInt(h.shirt.slice(1), 16);
+        if (h.hair && h.hair.startsWith("#")) hairColor = parseInt(h.hair.slice(1), 16);
+        if (h.skin && h.skin.startsWith("#")) skinColor = parseInt(h.skin.slice(1), 16);
+      }
+    } catch (e) {}
+
+    const skinMat = new THREE.MeshStandardMaterial({ color: skinColor });
+    const shirtMat = new THREE.MeshStandardMaterial({ color: heroColor });
     const shortsMat = new THREE.MeshStandardMaterial({ color: 0xffffff }); // Bianco
-    const hairMat = new THREE.MeshStandardMaterial({ color: 0x241812 });
+    const hairMat = new THREE.MeshStandardMaterial({ color: hairColor });
 
     // Torso con maglia #10 della Rondine
     const body = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.62, 0.26), shirtMat);
