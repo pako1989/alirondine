@@ -75,23 +75,23 @@
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; }
-  body { margin: 0; background: var(--sky); color: var(--ink); font: 16px/1.45 var(--body); padding-inline: 16px; padding-block: 12px 24px; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
-  .game { max-width: 540px; margin: 0 auto; display: grid; gap: 10px; }
-  .top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
-  h1 { flex: none; white-space: nowrap; margin: 0; font: 400 22px var(--display); letter-spacing: .01em; color: var(--gold); text-shadow: 2px 2px 0 #b3202c; }
-  .chap { color: var(--dim); font-size: 13px; text-align: right; }
-  .topr { display: flex; align-items: center; gap: 8px; min-width: 0; }
-  .mute { flex: none; font: 700 13px var(--body); color: var(--ink); background: #1f3a63; border: 2px solid #ffffff40; border-radius: var(--radius-sm); padding: 3px 8px; cursor: pointer; transition: all var(--transition-fast); }
+  body { margin: 0; background: var(--sky); color: var(--ink); font: 14.5px/1.4 var(--body); padding-inline: clamp(8px, 2.5vw, 14px); padding-block: 8px 20px; -webkit-user-select: none; user-select: none; touch-action: manipulation; overflow-x: hidden; }
+  .game { max-width: 470px; width: 100%; margin: 0 auto; display: grid; gap: 8px; }
+  .top { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+  h1 { flex: none; white-space: nowrap; margin: 0; font: 400 clamp(16px, 4.5vw, 20px) var(--display); letter-spacing: .01em; color: var(--gold); text-shadow: 2px 2px 0 #b3202c; }
+  .chap { color: var(--dim); font-size: 12px; text-align: right; }
+  .topr { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .mute { flex: none; font: 700 12px var(--body); color: var(--ink); background: #1f3a63; border: 2px solid #ffffff40; border-radius: var(--radius-sm); padding: 4px 7px; cursor: pointer; transition: all var(--transition-fast); }
   .mute:hover { filter: brightness(1.2); }
-  .stage { position: relative; width: 100%; max-width: 100%; aspect-ratio: 16 / 10; border-radius: 10px; overflow: hidden; background: #000; border: 3px solid var(--edge); }
+  .stage { position: relative; width: 100%; max-width: 100%; aspect-ratio: 16 / 10; border-radius: 8px; overflow: hidden; background: #000; border: 2px solid var(--edge); }
   canvas { display: block; width: 100%; height: 100%; }
   body.pixel-canvas canvas { image-rendering: pixelated; }
-  .box { background: var(--panel); border: 2px solid #ffffff30; border-radius: var(--radius); padding: 12px 14px; transition: box-shadow var(--transition); }
+  .box { background: var(--panel); border: 2px solid #ffffff30; border-radius: 8px; padding: 10px 12px; transition: box-shadow var(--transition); }
   .box:hover { box-shadow: var(--shadow); }
-  #text { min-height: 104px; }
-  #text .who { display: inline-block; font: 400 13px var(--display); letter-spacing: .04em; background: var(--red); color: #fff; padding: 2px 8px; border-radius: 4px; margin-bottom: 6px; }
+  #text { min-height: 80px; }
+  #text .who { display: inline-block; font: 400 12px var(--display); letter-spacing: .04em; background: var(--red); color: #fff; padding: 2px 7px; border-radius: 4px; margin-bottom: 5px; }
   #text .who.blue { background: var(--blue); } #text .who.gold { background: var(--gold); color: #2a1a00; } #text .who.gray { background: #56657d; }
-  #text .t { display: block; line-height: 1.6; }
+  #text .t { display: block; line-height: 1.5; font-size: 14px; }
   #text .t em { color: var(--gold); font-style: normal; font-weight: 700; }
   .comic-page { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; margin-top: 8px; }
   .comic-panel { position: relative; display: flex; min-height: 128px; flex-direction: column; justify-content: space-between; overflow: hidden; padding: 8px; border: 2px solid #f3d6a2; border-radius: 7px 12px 7px 12px; background: linear-gradient(150deg, var(--comic-tint), #10182e 78%); box-shadow: inset 0 0 18px #0005; }
@@ -101,27 +101,27 @@
   .comic-sfx { position: absolute; top: 27px; right: 8px; color: #ffd23f; font: 400 17px var(--display); text-shadow: 2px 2px #202034; transform: rotate(-7deg); }
   .comic-bubble { position: relative; z-index: 1; margin-top: 28px; padding: 7px 8px; border: 1px solid #17223b; border-radius: 10px 10px 10px 2px; background: #f3f6fb; color: #17223b; font-size: 12px; line-height: 1.4; }
   .comic-caption { grid-column: 1 / -1; padding: 6px 8px; border-left: 3px solid var(--gold); background: #0005; color: var(--dim); font-size: 11px; font-style: italic; }
-  .hud { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; font-size: 12px; color: var(--dim); }
+  .hud { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; font-size: 11px; color: var(--dim); }
   .hud div { background: #0006; border-radius: 6px; padding: 4px 6px; text-align: center; }
-  .hud b { display: block; color: var(--ink); font-size: 15px; font-variant-numeric: tabular-nums; }
-  .guts { height: 10px; border-radius: 5px; background: #0007; overflow: hidden; margin-top: 6px; }
+  .hud b { display: block; color: var(--ink); font-size: 14px; font-variant-numeric: tabular-nums; }
+  .guts { height: 9px; border-radius: 5px; background: #0007; overflow: hidden; margin-top: 5px; }
   .guts i { display: block; height: 100%; background: linear-gradient(90deg, #ff9d2e, var(--gold)); }
-  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
   .choices.one { grid-template-columns: 1fr; }
-  .choices button { font: 700 15px var(--body); color: var(--ink); background: #1f3a63; border: 2px solid #ffffff40; border-radius: var(--radius); padding: 11px 10px; cursor: pointer; text-align: left; transition: all var(--transition); }
-  .choices button:hover:not(:disabled) { border-color: var(--gold); transform: translateY(-2px); box-shadow: var(--shadow); }
+  .choices button { font: 700 14px var(--body); color: var(--ink); background: #1f3a63; border: 2px solid #ffffff40; border-radius: 8px; padding: 9px 10px; cursor: pointer; text-align: left; transition: all var(--transition); }
+  .choices button:hover:not(:disabled) { border-color: var(--gold); transform: translateY(-1px); box-shadow: var(--shadow); }
   .choices button:active:not(:disabled) { transform: translateY(0); }
   .choices button.hot { background: linear-gradient(135deg, #b3202c, #ff4d5a); border-color: #ffd23f; }
   .choices button.danger { background: #4a1119; border-color: #ff4d5a; }
   .choices button.pick { background: #2b2350; border-color: #b9a6ff80; }
   .choices button:disabled { opacity: .38; cursor: default; }
   .choices button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
-  .choices button small { display: block; font-weight: 400; font-size: 12px; color: #c9d6ea; margin-top: 2px; }
-  .log { font-size: 14px; color: var(--dim); }
+  .choices button small { display: block; font-weight: 400; font-size: 11px; color: #c9d6ea; margin-top: 2px; }
+  .log { font-size: 13px; color: var(--dim); }
   .log b { color: var(--ink); }
-  .stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; font-size: 11px; color: var(--dim); text-align: center; }
-  .stats b { display: block; font-size: 16px; color: var(--ink); }
-  .foot { font-size: 12px; color: var(--dim); text-align: center; }
+  .stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; font-size: 10.5px; color: var(--dim); text-align: center; }
+  .stats b { display: block; font-size: 15px; color: var(--ink); }
+  .foot { font-size: 11px; color: var(--dim); text-align: center; }
   [hidden] { display: none !important; }
   .tbl { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; table-layout: fixed; }
   .tbl th, .tbl td { padding: 3px 2px; text-align: center; border-bottom: 1px solid #ffffff18; }
@@ -177,7 +177,7 @@
 </style>
 
 <div class="game">
-  <div class="top"><h1>Ali di Rondine</h1><div class="topr"><span class="chap" id="chap"></span><button type="button" class="mute" id="homeBtn" aria-label="Home" title="Torna alla Home / Menu Principale">🏠</button><button type="button" class="mute" id="gfxBtn" aria-label="Grafica Partita" title="Attiva/Disattiva Grafica Partita (Arcade Deluxe / Classica)">⚽</button><button type="button" class="mute" id="themeBtn" aria-label="Tema Grafico" title="Cambia tema (Classico / Vintage / Neon / Arcade)">🎨</button><button type="button" class="mute" id="gmenu" aria-label="Menu" hidden>☰</button><button type="button" class="mute" id="mute" aria-label="Suoni">🔊</button></div></div>
+  <div class="top"><h1>Ali di Rondine</h1><div class="topr"><span class="chap" id="chap"></span><button type="button" class="mute" id="homeBtn" aria-label="Home" title="Torna alla Home / Menu Principale">🏠</button><button type="button" class="mute" id="themeBtn" aria-label="Tema Grafico" title="Cambia tema (Classico / Vintage / Neon / Arcade)">🎨</button><button type="button" class="mute" id="gmenu" aria-label="Menu" hidden>☰</button><button type="button" class="mute" id="mute" aria-label="Suoni">🔊</button></div></div>
   <div class="stage"><canvas id="cv" width="320" height="200" aria-label="Scena di gioco"></canvas></div>
   <div class="box" id="matchHud" hidden>
     <div class="hud">
@@ -1457,59 +1457,14 @@
     g.fillStyle = m.poss === "us" ? "#ff4d5a33" : "#3fa7ff33";
     g.fillRect(bx - 27, 20, 55, 160);
     try { gxPitchUnder(); } catch {}
-    // giocatori con ruoli e sprite iconici personalizzati
+    // giocatori
     const opp = TEAMS[m.team] || { color: "#ffffff", name: "Avversari" };
-    const usRoles = ["gigi", "mid", "sara", "winger", "leo"];
-    const oppRoles = ["opp_def", "opp_mid", "opp_star", "opp_winger", "opp_def"];
-    const activeUsIdx = Math.min(4, Math.max(0, m.zone - 1));
-    const activeOppIdx = Math.min(4, Math.max(0, 5 - m.zone));
-
     for (let i = 0; i < 5; i++) {
-      const ux = 60 + i * 50 + Math.sin(frame / 30 + i) * 4;
-      const uy = 45 + (i % 3) * 50;
-      man(ux, uy, usCol(), "#fff", SET.gfx !== "classica" ? usRoles[i] : "");
-
-      const ox = 90 + i * 48 + Math.cos(frame / 28 + i) * 4;
-      const oy = 70 + ((i + 1) % 3) * 40;
-      man(ox, oy, opp.color, opp.color === "#ffffff" ? "#1d3fa3" : "#fff", SET.gfx !== "classica" ? oppRoles[i] : "");
-
-      // Indicatore dinamico del portatore di palla (disattivabile se grafica classica)
-      if (SET.gfx !== "classica") {
-        if (m.poss === "us" && i === activeUsIdx) {
-          const tag = i === 4 ? "LEO 10" : i === 2 ? "SARA 8" : i === 0 ? "GIGI 5" : "RONDINE";
-          const bob = Math.sin(frame / 6) * 2;
-          g.fillStyle = "#ffd23f";
-          g.beginPath();
-          g.moveTo(ux, uy - 24 + bob);
-          g.lineTo(ux - 4, uy - 30 + bob);
-          g.lineTo(ux + 4, uy - 30 + bob);
-          g.fill();
-          px(ux - 16, uy - 39 + bob, 32, 8, "#000b");
-          g.fillStyle = "#ffd23f";
-          g.font = "bold 6px sans-serif";
-          g.textAlign = "center";
-          g.fillText(tag, ux, uy - 33 + bob);
-          g.textAlign = "left";
-        } else if (m.poss === "them" && i === activeOppIdx) {
-          const bob = Math.sin(frame / 6) * 2;
-          g.fillStyle = "#ff4d5a";
-          g.beginPath();
-          g.moveTo(ox, oy - 24 + bob);
-          g.lineTo(ox - 4, oy - 30 + bob);
-          g.lineTo(ox + 4, oy - 30 + bob);
-          g.fill();
-          px(ox - 16, oy - 39 + bob, 32, 8, "#000b");
-          g.fillStyle = "#ff8a93";
-          g.font = "bold 6px sans-serif";
-          g.textAlign = "center";
-          g.fillText(i === 2 ? "STELLA" : "RIVALE", ox, oy - 33 + bob);
-          g.textAlign = "left";
-        }
-      }
+      man(60 + i * 50 + Math.sin(frame / 30 + i) * 4, 45 + (i % 3) * 50, usCol(), "#fff");
+      man(90 + i * 48 + Math.cos(frame / 28 + i) * 4, 70 + ((i + 1) % 3) * 40, opp.color, opp.color === "#ffffff" ? "#1d3fa3" : "#fff");
     }
-    // Portieri: Nico (nostro portiere volante coi guanti giganti) e portiere rivale
-    man(18, 100, "#3fa7ff", "#ffd23f", SET.gfx !== "classica" ? "nico" : "");
-    man(302, 100, "#8a8a8a", "#fff", SET.gfx !== "classica" ? "opp_gk" : "");
+    man(18, 100, "#3fa7ff", "#fff");
+    man(302, 100, "#8a8a8a", "#fff");
     const by = 100 + Math.sin(frame / 10) * 3;
     if (m.anim) {
       const k = m.anim.t / m.anim.d;
@@ -4907,26 +4862,22 @@
   };
   // 15l · Partita classica: quattro aggiunte, ognuna spegnibile (spente = regole di prima)
   const SET_PC = { coppie: ["Schemi a coppie avanzati", "Con grande intesa, ogni compagno sblocca un secondo tiro in coppia (intesa 14)"], rete: ["Rete strappata", "Un tiro potentissimo può bucare la rete: cut-in speciale, un po' di grinta e il conto delle reti strappate"], star: ["Fuoriclasse rivali", "Il capitano avversario carica lo speciale con una frase sua e un cut-in nei colori della squadra"], gkf: ["Portieri che si stancano", "Più tiri affronta, più un portiere cala (il tuo e il loro); all'intervallo recupera"], duelli: ["Duelli 1 contro 1", "Dribbling in attacco (zona 3+): leggi il difensore e scegli finta, scatto o protezione"], area: ["Comandi in area", "Parata, pugno o uscita: li scegli tu col tuo portiere, e anche il portiere avversario li usa"], tempo: ["Tiro a tempo", "Ferma la barra al momento giusto: preciso = tiro più forte, sbagliato = più debole"], fiato: ["Grinta di riserva", "A secco puoi tirare lo stesso (più debole); rifiatare ridà almeno 10"], spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
-  const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "arcade_hd", crt: false, eco: false });
-  function setLoad() { const d = setDefault(), s = readJSON(SETK, null); if (!s || s.v !== 1) return d; return { ...d, ...s, t: { ...d.t, ...(s.t || {}) }, pc: { ...d.pc, ...(s.pc && typeof s.pc === "object" ? s.pc : {}) } }; }
+  const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false });
+  function setLoad() {
+    const d = setDefault(), s = readJSON(SETK, null);
+    if (!s || s.v !== 1) return d;
+    const res = { ...d, ...s, t: { ...d.t, ...(s.t || {}) }, pc: { ...d.pc, ...(s.pc && typeof s.pc === "object" ? s.pc : {}) } };
+    if (res.gfx === "arcade_hd" || !res.gfx) res.gfx = "migliorata";
+    return res;
+  }
   let SET = setLoad();
+  if (SET.gfx === "arcade_hd") { SET.gfx = "migliorata"; writeJSON(SETK, SET); }
   const feat = (k) => SET.style === "90" && !!SET.t[k];
   const setApply = () => {
     document.body.classList.toggle("big", !!SET.big);
     document.body.classList.toggle("pixel-canvas", SET.gfx !== "classica");
   };
   setApply();
-  window.toggleGfx = function () {
-    SET.gfx = SET.gfx === "arcade_hd" ? "classica" : "arcade_hd";
-    writeJSON(SETK, SET);
-    setApply();
-    if (window.toast) {
-      if (SET.gfx === "arcade_hd") window.toast("Grafica Partita: Arcade Deluxe (Sprite unici attivi)", "info", "⚽");
-      else window.toast("Grafica Partita: Classica Originale (Sprite vintage)", "info", "⚽");
-    }
-  };
-  const gBtn = $("gfxBtn");
-  if (gBtn) gBtn.onclick = () => window.toggleGfx();
   const METEO_TXT = { neve: "<em>Nevica</em>: il pallone si ferma nella neve, dribblare è una lotteria e i tiri perdono forza. Il riscaldamento è una palla di neve.", pioggia: "<em>Piove forte</em>: il pallone scivola, dribblare è più difficile e i portieri faticano a tenerlo.", vento: "<em>Tira vento</em>: i tiri da lontano fanno strane curve, in bene o in male." };
   function weatherPow(p, us) {
     if (M.meteo === "pioggia") return p * 0.95;
@@ -4978,7 +4929,7 @@
       { label: `Scene speciali: ${SET.speed} ▸`, sub: "normale · veloce · salta (tocca la scena per saltarla)", fn: () => { SET.speed = { normale: "veloce", veloce: "salta", salta: "normale" }[SET.speed] || "normale"; save(); again(); } },
       { label: `Animazioni: ${SET.anim ? "sì" : "no"}`, sub: "Tiri, esultanze, fischio d'inizio e finale, coppa, cartellini · tocca per saltarle", fn: () => { SET.anim = !SET.anim; save(); again(); } },
       { label: `Tema visivo: ${(window.THEMES && window.THEMES.find(t => (localStorage.getItem("ali-di-rondine.theme") || "classic") === t.id) || { name: "Classico Rondine" }).name} ▸`, sub: "Classico · Gazzetta Vintage · Neon Costa · Arcade Retrò", fn: () => { if (window.cycleTheme) window.cycleTheme(); again(); } },
-      { label: `Grafica: ${{ classica: "Classica", migliorata: "Migliorata", pixel: "Pixel art rifinita", campo: "Campo dettagliato", arcade_hd: "Arcade Deluxe 16-bit" }[SET.gfx] || "Arcade Deluxe 16-bit"} ▸`, sub: SET.gfx === "classica" ? "Aspetto originale, senza effetti aggiuntivi" : SET.gfx === "pixel" ? "Calciatori ridisegnati con contorni e dettagli pixel" : SET.gfx === "campo" ? "Strisce d'erba, linee più leggibili e giocatori più grandi" : SET.gfx === "arcade_hd" ? "Calciatori animati 16-bit, spalti vivaci, reti 3D e scia del pallone" : "Luci, cielo e mare animati, particelle, riflettori e pubblico", fn: () => { SET.gfx = ({ classica: "migliorata", migliorata: "pixel", pixel: "campo", campo: "arcade_hd", arcade_hd: "classica" })[SET.gfx] || "arcade_hd"; GX.low = false; GX.auto = false; GX.slow = 0; save(); again(); } },
+      { label: `Grafica: ${SET.gfx === "classica" ? "Classica" : "Migliorata"} ▸`, sub: SET.gfx === "classica" ? "Aspetto originale retrò, senza effetti aggiuntivi" : "Luci, cielo e mare animati, particelle, riflettori e pubblico", fn: () => { SET.gfx = SET.gfx === "classica" ? "migliorata" : "classica"; GX.low = false; GX.auto = false; GX.slow = 0; save(); again(); } },
       { label: `Filtro retrò: ${SET.crt ? "sì" : "no"}`, sub: "Righe e bordi curvi, come la tv della trattoria", fn: () => { SET.crt = !SET.crt; save(); again(); } },
       { label: `Risparmio batteria: ${SET.eco ? "sì" : "no"}`, sub: SET.eco ? "Effetti pesanti spenti" : GX.auto ? "Il telefono faticava: effetti pesanti già alleggeriti" : "Se il telefono fatica, il gioco si alleggerisce da solo", fn: () => { SET.eco = !SET.eco; save(); again(); } },
       { label: `Testo più grande: ${SET.big ? "sì" : "no"}`, fn: () => { SET.big = !SET.big; save(); again(); } },
@@ -19754,7 +19705,7 @@
   const MNK = "ali-di-rondine.menu";
   const mnRec2 = () => { const r = readJSON(MNK, null), o = { v: 1, open: {}, known: {}, fresh: {}, bk: {} }; const x = r && typeof r === "object" ? { ...o, ...r } : o; ["open", "known", "fresh", "bk"].forEach((k) => { if (!x[k] || typeof x[k] !== "object" || Array.isArray(x[k])) x[k] = {}; }); return x; };
   const mnSave2 = (r) => writeJSON(MNK, r);
-  (() => { const st = document.createElement("style"); st.textContent = ".choices button{min-height:44px}.choices button.mnsec{grid-column:1/-1;background:#16294a;border-color:#ffffff66;font-size:16px;letter-spacing:.2px}.choices button.mnew{box-shadow:0 0 0 2px #ffd23f80}.choices button.mnew small::before{content:'NUOVO · ';color:#ffd23f;font-weight:700}.choices button.mnnow{background:#1c4a3a;border-color:#57d68d99}.choices button.mnnow small::before{content:'Ora · ';color:#9be28f;font-weight:700}.mute{min-height:44px;min-width:44px}@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}"; document.head.appendChild(st); })();
+  (() => { const st = document.createElement("style"); st.textContent = ".choices button{min-height:36px;font-size:13.5px;padding:7px 9px}.choices button.mnsec{grid-column:1/-1;background:#16294a;border-color:#ffffff66;font-size:14px;letter-spacing:.2px}.choices button.mnew{box-shadow:0 0 0 2px #ffd23f80}.choices button.mnew small::before{content:'NUOVO · ';color:#ffd23f;font-weight:700}.choices button.mnnow{background:#1c4a3a;border-color:#57d68d99}.choices button.mnnow small::before{content:'Ora · ';color:#9be28f;font-weight:700}.mute{min-height:32px!important;min-width:32px!important;height:32px!important;width:32px!important;padding:0!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;font-size:14px!important}@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}"; document.head.appendChild(st); })();
   const MN_CAT = [
     ["Partite", /^(Carriera|Mondiali|Mondiale per club|Torneo dei rigori|Calcio d'azione|Sfide 1 contro 1|Squadra di sbandati|Squadra dei sogni|Squadra da collezione|Ultimate Team del Borgo|Sfida del giorno|Modalità Allenatore)/],
     ["Allenamento", /^(Minigiochi|Punizioni|Portiere invincibile|Sfide$|Sfide a obiettivo|Allenatore per un giorno)/],
