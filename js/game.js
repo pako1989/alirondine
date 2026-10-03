@@ -1245,6 +1245,7 @@
   let chapCard = null;
 
   function triggerChapterCard(title) {
+    if (!SET.dis) return;
     chapCard = {
       title: title.replace(/ · [^·]+$/, ""),
       frame: 0,
@@ -1253,6 +1254,7 @@
   }
 
   function drawTransitions() {
+    if (!SET.dis) { sceneTrans = null; chapCard = null; return; }
     // 1. Rileva cambio scena sul canvas per avviare la dissolvenza fluida
     const curKey = (view.kind || "scene") + ":" + (view.bg || "") + ":" + (view.speaker || "");
     if (lastSceneKey === null) {
@@ -4611,7 +4613,7 @@
   };
   // 15l · Partita classica: quattro aggiunte, ognuna spegnibile (spente = regole di prima)
   const SET_PC = { coppie: ["Schemi a coppie avanzati", "Con grande intesa, ogni compagno sblocca un secondo tiro in coppia (intesa 14)"], rete: ["Rete strappata", "Un tiro potentissimo può bucare la rete: cut-in speciale, un po' di grinta e il conto delle reti strappate"], star: ["Fuoriclasse rivali", "Il capitano avversario carica lo speciale con una frase sua e un cut-in nei colori della squadra"], gkf: ["Portieri che si stancano", "Più tiri affronta, più un portiere cala (il tuo e il loro); all'intervallo recupera"], duelli: ["Duelli 1 contro 1", "Dribbling in attacco (zona 3+): leggi il difensore e scegli finta, scatto o protezione"], area: ["Comandi in area", "Parata, pugno o uscita: li scegli tu col tuo portiere, e anche il portiere avversario li usa"], tempo: ["Tiro a tempo", "Ferma la barra al momento giusto: preciso = tiro più forte, sbagliato = più debole"], fiato: ["Grinta di riserva", "A secco puoi tirare lo stesso (più debole); rifiatare ridà almeno 10"], spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
-  const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false });
+  const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false, dis: false });
   function setLoad() {
     const d = setDefault(), s = readJSON(SETK, null);
     if (!s || s.v !== 1) return d;
@@ -4679,6 +4681,7 @@
       { label: `Animazioni: ${SET.anim ? "sì" : "no"}`, sub: "Tiri, esultanze, fischio d'inizio e finale, coppa, cartellini · tocca per saltarle", fn: () => { SET.anim = !SET.anim; save(); again(); } },
       { label: `Tema visivo: ${(window.THEMES && window.THEMES.find(t => (localStorage.getItem("ali-di-rondine.theme") || "classic") === t.id) || { name: "Classico Rondine" }).name} ▸`, sub: "Classico · Gazzetta Vintage · Neon Costa · Arcade Retrò", fn: () => { if (window.cycleTheme) window.cycleTheme(); again(); } },
       { label: `Grafica: ${SET.gfx === "classica" ? "Classica" : "Migliorata"} ▸`, sub: SET.gfx === "classica" ? "Aspetto originale retrò, senza effetti aggiuntivi" : "Luci, cielo e mare animati, particelle, riflettori e pubblico", fn: () => { SET.gfx = SET.gfx === "classica" ? "migliorata" : "classica"; GX.low = false; GX.auto = false; GX.slow = 0; save(); again(); } },
+      { label: `Dissolvenze e card di capitolo: ${SET.dis ? "sì" : "no"}`, sub: "Schermata col titolo e sfumature a ogni cambio scena", fn: () => { SET.dis = !SET.dis; save(); again(); } },
       { label: `Filtro retrò: ${SET.crt ? "sì" : "no"}`, sub: "Righe e bordi curvi, come la tv della trattoria", fn: () => { SET.crt = !SET.crt; save(); again(); } },
       { label: `Risparmio batteria: ${SET.eco ? "sì" : "no"}`, sub: SET.eco ? "Effetti pesanti spenti" : GX.auto ? "Il telefono faticava: effetti pesanti già alleggeriti" : "Se il telefono fatica, il gioco si alleggerisce da solo", fn: () => { SET.eco = !SET.eco; save(); again(); } },
       { label: `Testo più grande: ${SET.big ? "sì" : "no"}`, fn: () => { SET.big = !SET.big; save(); again(); } },
