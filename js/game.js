@@ -2735,12 +2735,29 @@
     buttons([{ label: "◂ Extra", fn: extras }]);
   }
   function album(page = 0, backFn = extras) {
-    const bFn = typeof page === "function" ? page : (typeof backFn === "function" ? backFn : extras);
-    borgoEncyclopedia(bFn);
+    if (typeof page === "function") { backFn = page; page = 0; }
+    if (typeof backFn !== "function") backFn = extras;
+    album._back = backFn;
+    const got = getList(CARDS), ids = Object.keys(BIO), per = 8, pages = Math.ceil(ids.length / per);
+    page = Math.max(0, Math.min(page, pages - 1));
+    view = { kind: "scene", bg: "title" }; chap(`Carte dei personaggi · ${page + 1}/${pages}`);
+    text("voce", `Carte: <em>${got.length} su ${ids.length}</em>. Ogni personaggio che incontri entra nell'album.`);
+    buttons([
+      ...ids.slice(page * per, page * per + per).map((id) => got.includes(id)
+        ? { label: (CAST[id] && CAST[id].name) || id, fn: () => card(id, page, backFn) }
+        : { label: "???", sub: "Ancora da incontrare", disabled: true, fn: () => {} }),
+      ...(page > 0 ? [{ label: "◂ Pagina prima", cls: "pick", fn: () => album(page - 1, backFn) }] : []),
+      ...(page < pages - 1 ? [{ label: "Pagina dopo ▸", cls: "pick", fn: () => album(page + 1, backFn) }] : []),
+      { label: "◂ Indietro", fn: backFn },
+    ]);
   }
   function card(id, page, backFn = extras) {
-    const bFn = typeof page === "function" ? page : (typeof backFn === "function" ? backFn : extras);
-    borgoEncyclopedia(bFn, undefined, id);
+    if (typeof page === "function") { backFn = page; page = 0; }
+    const toAlbum = () => album(page || 0, backFn);
+    if (ENC_CATS.some((c) => c.members.includes(id))) return borgoEncyclopedia(toAlbum, undefined, id);
+    view = { kind: "scene", bg: "title", speaker: id };
+    text(id, esc(BIO[id] || ""));
+    buttons([{ label: "◂ Album", fn: toAlbum }]);
   }
 
   // ================= STORIE EXTRA =================
@@ -14396,7 +14413,8 @@
     const p = mnCollParts(), n = (x, t) => `${Math.round(x * t)}/${t}`;
     text("voce", `<b>Collezioni</b> ${mnBar(mnPct(mnColl()))}<br>Trofei ${mnPct(p.tro)}% · Figurine di Pina ${mnPct(p.fig)}% · Ricordi ${mnPct(p.foto)}% · Figurine dei personaggi ${n(p.card, Object.keys(BIO).length)} · Finali ${n(p.fin, ENDINGS.length)}`);
     buttons([
-      { label: "Carte dei personaggi", sub: `${getList(CARDS).length}/${Object.keys(BIO).length} · Schede, ritratti e carta olografica 3D`, cls: "hot", fn: () => borgoEncyclopedia(extras) },
+      { label: "Carte dei personaggi", sub: `${getList(CARDS).length}/${Object.keys(BIO).length} · L'album di tutti i personaggi incontrati`, cls: "hot", fn: () => album(0, extras) },
+      { label: "Enciclopedia del Borgo", sub: "Schede approfondite e carta olografica 3D dei personaggi principali", fn: () => borgoEncyclopedia(extras) },
       { label: "Bacheca dei trofei", sub: `${trophies().filter((t) => t.got).length}/${trophies().length}`, cls: "hot", fn: () => bacheca(extras) },
       { label: "L'Eco del Tirreno", sub: "Archivio delle prime pagine storiche e pagelle", fn: () => ecoArchivio(extras) },
       { label: "Figurine di Pina · Album", sub: (() => { try { const r = figRec(); return r.started ? `Figurine ${figOwned(r)}/${FIG_ALL.length}` : "Si trova all'edicola del Borgo"; } catch { return ""; } })(), cls: "hot", fn: () => figAlbum(0, extras) },
