@@ -61,13 +61,16 @@
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; }
+  html, body { max-width: 100%; overflow-x: clip; }
+  .game > * { min-width: 0; max-width: 100%; }
   body { margin: 0; background: var(--sky); color: var(--ink); font: 14.5px/1.4 var(--body); padding-inline: clamp(8px, 2.5vw, 14px); padding-block: 8px 20px; -webkit-user-select: none; user-select: none; touch-action: manipulation; overflow-x: hidden; }
   .game { max-width: 470px; width: 100%; margin: 0 auto; display: grid; gap: 8px; }
-  .top { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+  .top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px; }
   h1 { flex: none; white-space: nowrap; margin: 0; font: 400 clamp(16px, 4.5vw, 20px) var(--display); letter-spacing: .01em; color: var(--gold); text-shadow: 2px 2px 0 #b3202c; }
   .chap { color: var(--dim); font-size: 12px; text-align: right; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
   .chap.glow { color: var(--gold); text-shadow: 0 0 10px rgba(255, 210, 63, 0.7); transform: scale(1.04); }
-  .topr { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .topr { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 6px; max-width: 100%; margin-left: auto; }
+  .chap { min-width: 0; overflow-wrap: anywhere; }
   .mute { flex: none; font: 700 12px var(--body); color: var(--ink); background: #1f3a63; border: 2px solid #ffffff40; border-radius: var(--radius-sm); padding: 4px 7px; cursor: pointer; transition: all var(--transition-fast); }
   .mute:hover { filter: brightness(1.2); }
   .stage { position: relative; width: 100%; max-width: 100%; aspect-ratio: 16 / 10; border-radius: 8px; overflow: hidden; background: #000; border: 2px solid var(--edge); box-shadow: 0 4px 18px rgba(0,0,0,0.5); transition: border-color 0.3s ease, box-shadow 0.3s ease; }
