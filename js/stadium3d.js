@@ -128,13 +128,43 @@
     return tex;
   }
 
+  function disposeThreeScene() {
+    if (animFrame) {
+      cancelAnimationFrame(animFrame);
+      animFrame = null;
+    }
+    if (scene) {
+      scene.traverse((obj) => {
+        if (obj.geometry) {
+          try { obj.geometry.dispose(); } catch (e) {}
+        }
+        if (obj.material) {
+          if (Array.isArray(obj.material)) {
+            obj.material.forEach((m) => {
+              if (m.map) { try { m.map.dispose(); } catch (e) {} }
+              try { m.dispose(); } catch (e) {}
+            });
+          } else {
+            if (obj.material.map) { try { obj.material.map.dispose(); } catch (e) {} }
+            try { obj.material.dispose(); } catch (e) {}
+          }
+        }
+      });
+      scene.clear();
+    }
+    if (renderer) {
+      try { renderer.dispose(); } catch (e) {}
+      renderer = null;
+    }
+  }
+
   function initThreeScene(wrapper) {
     if (!window.THREE) {
       wrapper.innerHTML = "<div style='color:#fff;padding:24px;text-align:center;'>Caricamento modulo 3D in corso...</div>";
       return false;
     }
+    disposeThreeScene();
     const THREE = window.THREE;
-    if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
 
     const rect = wrapper.getBoundingClientRect();
     const w = Math.max(300, Math.round(rect.width || wrapper.clientWidth || window.innerWidth || 320));
@@ -149,9 +179,6 @@
     camera = new THREE.PerspectiveCamera(fov, aspect, 0.1, 140);
     applyCameraMode();
 
-    if (renderer) {
-      try { renderer.dispose(); } catch (e) {}
-    }
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
     renderer.setSize(w, h);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -522,37 +549,163 @@
     scene.add(ballShadow);
   }
 
-  function setupSwipeControls(wrapper) {
-    let down = false, sX = 0, sY = 0, startTime = 0;
+  let trailCanvas = null;
+  let trailCtx = null;
 
-    const onStart = (cx, cy) => {
-      if (isShooting) return;
-      down = true;
-      sX = cx; sY = cy;
-      startTime = Date.now();
+  function initTrailCanvas(wrapper) {
+    trailCanvas = document.getElementById("s3dSwipeTrail");
+    if (!trailCanvas) {
+      trailCanvas = document.createElement("canvas");
+      trailCanvas.id = "s3dSwipeTrail";
+      trailCanvas.className = "s3d-swipe-trail";
+      wrapper.appendChild(trailCanvas);
+    }
+    const rect = wrapper.getBoundingClientRect();
+    trailCanvas.width = Math.max(300, Math.round(rect.width || wrapper.clientWidth || 320));
+    trailCanvas.height = Math.max(200, Math.round(rect.height || wrapper.clientHeight || 280));
+    trailCtx = trailCanvas.getContext("2d");
+  }
+
+  function clearTrail() {
+    if (trailCtx && trailCanvas) {
+      trailCtx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
+    }
+  }
+
+  function drawSwipeTrail(pts) {
+    if (!trailCtx || !trailCanvas || pts.length < 2) return;
+    trailCtx.clearRect(0, 0, trailCanvas.width, trailCanvas.height);
+
+    trailCtx.save();
+    trailCtx.lineCap = "round";
+    trailCtx.lineJoin = "round";
+
+    const p0 = pts[0], pLast = pts[pts.length - 1];
+    const grad = trailCtx.createLinearGradient(p0.x, p0.y, pLast.x, pLast.y);
+    if (isSpecialActive) {
+      grad.addColorStop(0, "rgba(255, 77, 90, 0.3)");
+      grad.addColorStop(1, "rgba(255, 210, 63, 0.95)");
+    } else {
+      grad.addColorStop(0, "rgba(63, 167, 255, 0.3)");
+      grad.addColorStop(1, "rgba(255, 210, 63, 0.95)");
+    }
+
+    // Bagliore esterno
+    trailCtx.strokeStyle = isSpecialActive ? "rgba(255, 210, 63, 0.45)" : "rgba(63, 167, 255, 0.4)";
+    trailCtx.lineWidth = 14;
+    trailCtx.beginPath();
+    trailCtx.moveTo(p0.x, p0.y);
+    for (let i = 1; i < pts.length; i++) {
+      trailCtx.lineTo(pts[i].x, pts[i].y);
+    }
+    trailCtx.stroke();
+
+    // Nucleo luminoso
+    trailCtx.strokeStyle = grad;
+    trailCtx.lineWidth = 5;
+    trailCtx.stroke();
+
+    // Cursore luminoso alla punta del dito
+    trailCtx.fillStyle = "#ffffff";
+    trailCtx.beginPath();
+    trailCtx.arc(pLast.x, pLast.y, 6, 0, Math.PI * 2);
+    trailCtx.fill();
+
+    trailCtx.restore();
+  }
+
+  function setupSwipeControls(wrapper) {
+    initTrailCanvas(wrapper);
+    let down = false;
+    let pts = [];
+    let startTime = 0;
+
+    const getPos = (e) => {
+      const rect = wrapper.getBoundingClientRect();
+      const cx = (e.clientX !== undefined) ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : (e.changedTouches ? e.changedTouches[0].clientX : 0));
+      const cy = (e.clientY !== undefined) ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : (e.changedTouches ? e.changedTouches[0].clientY : 0));
+      return { x: cx - rect.left, y: cy - rect.top };
     };
 
-    const onEnd = (cx, cy) => {
-      if (!down || isShooting) return;
-      down = false;
-      const dx = cx - sX;
-      const dy = sY - cy;
-      const dt = Math.max(40, Date.now() - startTime);
+    const onStart = (e) => {
+      if (isShooting) return;
+      if (e.cancelable) e.preventDefault();
+      down = true;
+      pts = [];
+      const pos = getPos(e);
+      pts.push({ x: pos.x, y: pos.y, t: Date.now() });
+      startTime = Date.now();
+      clearTrail();
+      if (window.haptic) window.haptic(15);
+    };
 
-      if (dy > 20) {
-        const force = Math.min(1.35, Math.max(0.7, (dy / dt) * 1.8));
-        const targetX = Math.max(-2.3, Math.min(2.3, (dx / 40) * 1.4));
-        const targetY = Math.min(2.3, Math.max(0.35, (dy / 70) * 1.8));
-        const curve = (dx / 90) * 0.7;
-        executeShot({ targetX, targetY, curve, force, type: isSpecialActive ? "special" : "swipe" });
+    const onMove = (e) => {
+      if (!down || isShooting) return;
+      if (e.cancelable) e.preventDefault();
+      const pos = getPos(e);
+      const prev = pts[pts.length - 1];
+      if (!prev || Math.hypot(pos.x - prev.x, pos.y - prev.y) > 4) {
+        pts.push({ x: pos.x, y: pos.y, t: Date.now() });
+        drawSwipeTrail(pts);
       }
     };
 
-    wrapper.onmousedown = (e) => onStart(e.clientX, e.clientY);
-    wrapper.onmouseup = (e) => onEnd(e.clientX, e.clientY);
+    const onEnd = (e) => {
+      if (!down || isShooting) return;
+      if (e.cancelable) e.preventDefault();
+      down = false;
+      const pos = getPos(e);
+      pts.push({ x: pos.x, y: pos.y, t: Date.now() });
+      drawSwipeTrail(pts);
 
-    wrapper.ontouchstart = (e) => { if (e.touches[0]) onStart(e.touches[0].clientX, e.touches[0].clientY); };
-    wrapper.ontouchend = (e) => { if (e.changedTouches[0]) onEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY); };
+      if (pts.length < 2) {
+        clearTrail();
+        return;
+      }
+
+      const pStart = pts[0];
+      const pEnd = pts[pts.length - 1];
+      const dx = pEnd.x - pStart.x;
+      const dy = pStart.y - pEnd.y; // swipe verso l'alto = valore positivo
+      const dt = Math.max(30, Date.now() - startTime);
+
+      // Calcolo curvatura reale (deviazione massima dalla retta start-end per effetto a giro)
+      let maxDev = 0;
+      const lineLen = Math.hypot(dx, dy);
+      if (lineLen > 30) {
+        for (let i = 1; i < pts.length - 1; i++) {
+          const pt = pts[i];
+          const cross = (dx * (pt.y - pStart.y) - (-dy) * (pt.x - pStart.x)) / lineLen;
+          if (Math.abs(cross) > Math.abs(maxDev)) {
+            maxDev = cross;
+          }
+        }
+      }
+
+      if (dy > 25 && lineLen > 35) {
+        if (window.haptic) window.haptic([30, 45]);
+        const force = Math.min(1.4, Math.max(0.72, (dy / dt) * 1.85));
+        const targetX = Math.max(-2.35, Math.min(2.35, (dx / 42) * 1.35));
+        const targetY = Math.min(2.35, Math.max(0.35, (dy / 75) * 1.85));
+
+        const arcCurve = (maxDev / 32) * 0.45;
+        const dirCurve = (dx / 95) * 0.35;
+        const curve = Math.max(-0.85, Math.min(0.85, arcCurve + dirCurve));
+
+        executeShot({ targetX, targetY, curve, force, type: isSpecialActive ? "special" : "swipe" });
+      }
+
+      setTimeout(clearTrail, 320);
+    };
+
+    wrapper.onmousedown = onStart;
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onEnd);
+
+    wrapper.ontouchstart = onStart;
+    wrapper.ontouchmove = onMove;
+    wrapper.ontouchend = onEnd;
+    wrapper.ontouchcancel = () => { down = false; clearTrail(); };
   }
 
   function executeShot(cfg) {
@@ -711,6 +864,7 @@
       stats.streak = 0;
       ballVel.z = 0.18; // Rimbalzo sul portiere
       ballVel.x *= -0.5;
+      if (window.haptic) window.haptic(60);
     } else if (isInside) {
       playSound("goal");
       shakeIntensity = 22;
@@ -721,8 +875,10 @@
       const gk = GK_LIST[activeGKIdx];
       if (!stats.beaten.includes(gk.id)) stats.beaten.push(gk.id);
 
-      triggerImpactMsg("GOOOOL!", isSpecialActive ? "TIRO DELLA RONDINE IMPARABILE!" : "Palla all'incrocio dei pali!", "#ffd23f");
-      if (window.toast) window.toast(`GOL! Serie attuale: ${stats.streak}`, "success", "⚽");
+      const comboText = stats.streak >= 3 ? `🔥 COMBO x${stats.streak}! INARRESTABILE!` : (isSpecialActive ? "TIRO DELLA RONDINE IMPARABILE!" : "Palla all'incrocio dei pali!");
+      triggerImpactMsg("GOOOOL!", comboText, "#ffd23f");
+      if (window.toast) window.toast(`GOL! Serie: ${stats.streak}`, "success", "⚽");
+      if (window.haptic) window.haptic([40, 60, 90]);
 
       // Ricompensa per la partita della storia
       if (window.S && window.S.st) {
@@ -734,10 +890,12 @@
       triggerImpactMsg("PALO CLAMOROSO!", "La traversa trema ancora!", "#ff9800");
       stats.streak = 0;
       ballVel.z = 0.25; // Rimbalzo dal palo
+      if (window.haptic) window.haptic([80, 50]);
     } else {
       playSound("kick");
       triggerImpactMsg("FUORI!", "Il pallone sfila sul fondo tra gli scogli.", "#90a4ae");
       stats.streak = 0;
+      if (window.haptic) window.haptic(25);
     }
 
     saveStats(stats);
@@ -995,6 +1153,10 @@
     camera.aspect = aspect;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h);
+    if (trailCanvas) {
+      trailCanvas.width = w;
+      trailCanvas.height = h;
+    }
   }
 
   function closeStadium3D() {
@@ -1003,6 +1165,7 @@
     if (modal) modal.style.display = "none";
     if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
     window.removeEventListener("resize", handleResize);
+    disposeThreeScene();
     if (returnCallback && typeof returnCallback === "function") {
       returnCallback();
     }

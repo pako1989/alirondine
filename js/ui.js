@@ -81,6 +81,21 @@
   window.toggleLog = toggleLog;
   window.checkSeasonalEvents = checkSeasonalEvents;
 
+  // Feedback aptico (vibrazione) ottimizzato per smartphone e browser mobile
+  window.haptic = function (pattern = 15) {
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      try { navigator.vibrate(pattern); } catch (e) {}
+    }
+  };
+
+  // Risposta aptica globale al tocco sui pulsanti
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if (btn && !btn.disabled) {
+      window.haptic(btn.classList.contains("hot") ? 25 : 12);
+    }
+  }, { passive: true });
+
   const saveIndicator = $("saveIndicator");
   let saveTimeout = null;
   window.showSaveIndicator = function () {
