@@ -177,7 +177,7 @@
 </style>
 
 <div class="game">
-  <div class="top"><h1>Ali di Rondine</h1><div class="topr"><span class="chap" id="chap"></span><button type="button" class="mute" id="gfxBtn" aria-label="Grafica Partita" title="Attiva/Disattiva Grafica Partita (Arcade Deluxe / Classica)">⚽</button><button type="button" class="mute" id="themeBtn" aria-label="Tema Grafico" title="Cambia tema (Classico / Vintage / Neon / Arcade)">🎨</button><button type="button" class="mute" id="gmenu" aria-label="Menu" hidden>☰</button><button type="button" class="mute" id="mute" aria-label="Suoni">🔊</button></div></div>
+  <div class="top"><h1>Ali di Rondine</h1><div class="topr"><span class="chap" id="chap"></span><button type="button" class="mute" id="homeBtn" aria-label="Home" title="Torna alla Home / Menu Principale">🏠</button><button type="button" class="mute" id="gfxBtn" aria-label="Grafica Partita" title="Attiva/Disattiva Grafica Partita (Arcade Deluxe / Classica)">⚽</button><button type="button" class="mute" id="themeBtn" aria-label="Tema Grafico" title="Cambia tema (Classico / Vintage / Neon / Arcade)">🎨</button><button type="button" class="mute" id="gmenu" aria-label="Menu" hidden>☰</button><button type="button" class="mute" id="mute" aria-label="Suoni">🔊</button></div></div>
   <div class="stage"><canvas id="cv" width="320" height="200" aria-label="Scena di gioco"></canvas></div>
   <div class="box" id="matchHud" hidden>
     <div class="hud">
@@ -19930,6 +19930,34 @@
     ]);
   }
   gmenuBtn.onclick = gameMenu;
+  const homeBtn = $("homeBtn");
+  if (homeBtn) {
+    homeBtn.onclick = function () {
+      const inMatch = !!(M || (typeof MGm !== "undefined" && MGm) || (typeof NK !== "undefined" && NK) || (typeof SA !== "undefined" && SA));
+      if (inMatch) {
+        overlay("<b>Partita in corso</b><br>Vuoi uscire dalla partita e tornare al Menu Principale?<br><span style=\"color:var(--dim)\">I tuoi progressi generali e la carriera restano salvati.</span>", [
+          {
+            label: "🏠 Torna alla Home",
+            cls: "danger",
+            fn: () => {
+              closeOverlay();
+              M = null; cutin = null; if (typeof SA !== "undefined") SA = null; tm = null; if (typeof MGm !== "undefined") MGm = null; if (typeof NK !== "undefined") NK = null;
+              $("matchHud").hidden = true;
+              playing = false;
+              title();
+            }
+          },
+          { label: "⚽ Continua la partita", cls: "hot", fn: closeOverlay }
+        ]);
+      } else {
+        closeOverlay();
+        M = null; cutin = null; if (typeof SA !== "undefined") SA = null; tm = null; if (typeof MGm !== "undefined") MGm = null;
+        $("matchHud").hidden = true;
+        playing = false;
+        title();
+      }
+    };
+  }
 
   // ================= TITOLO =================
   function goMenu() { title(); }
