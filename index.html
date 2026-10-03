@@ -24,8 +24,6 @@
       <span class="chap" id="chap"></span>
       <button type="button" class="mute" id="homeBtn" aria-label="Home" title="Torna alla Home / Menu Principale">🏠</button>
       <button type="button" class="mute" id="btn3d" aria-label="Stadio 3D" title="Stadio 3D · Sfida dei Tiri (Tiro della Rondine 3D)">⚽ 3D</button>
-      <button type="button" class="mute" id="btnPanda" aria-label="Panda 3D" title="La Corsa della Panda 30 in 3D">🚗 Panda</button>
-      <button type="button" class="mute" id="btnFaro" aria-label="Notte del Faro" title="La Notte del Faro (Nuova Saga Narrativa)">⛵ Faro</button>
       <button type="button" class="mute" id="radioBtn" aria-label="Radiolina" title="La Radiolina del Borgo (Musica & Frequenze)">📻</button>
       <button type="button" class="mute" id="themeBtn" aria-label="Tema Grafico" title="Cambia tema (Classico / Vintage / Neon / Arcade)">🎨</button>
       <button type="button" class="mute" id="gmenu" aria-label="Menu" hidden>☰</button>
@@ -85,22 +83,6 @@ var btn3d = document.getElementById("btn3d");
 if (btn3d) {
   btn3d.onclick = function () {
     if (window.openStadium3D) window.openStadium3D();
-  };
-}
-var btnPanda = document.getElementById("btnPanda");
-if (btnPanda) {
-  btnPanda.onclick = function () {
-    if (window.openPanda3D) window.openPanda3D();
-  };
-}
-var btnFaro = document.getElementById("btnFaro");
-if (btnFaro) {
-  btnFaro.onclick = function () {
-    if (window.openFaroStoryMenu) {
-      window.openFaroStoryMenu(function () {
-        if (window.title) window.title();
-      });
-    }
   };
 }
 window.openBorgoStortoModal = function () {
