@@ -211,7 +211,10 @@
   .dpad { flex: none; display: grid; grid-template-columns: repeat(3, 58px); grid-template-rows: repeat(3, 58px); gap: 4px; }
   .choices button.pad { text-align: center; font: 700 18px var(--body); color: var(--ink); background: #1f3a63; border: 2px solid #ffffff40; border-radius: 12px; touch-action: none; -webkit-touch-callout: none; cursor: pointer; padding: 0; }
   .choices button.pad.on { background: #2b4f85; border-color: var(--gold); }
-  .padacts { flex: 1; min-width: 0; display: grid; grid-template-rows: 2fr 1fr; gap: 8px; }
+  .padacts { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+  .choices button.pad.act { flex: 1.3; font-size: 16px; }
+  .padacts .pad-row { display: flex; gap: 6px; flex: 1; min-height: 44px; }
+  .padacts .pad-row button.pad { flex: 1; font-size: 13px; }
   .choices button.pad.act { background: linear-gradient(135deg, #b3202c, #ff4d5a); border-color: #ffd23f; font-size: 17px; }
   .choices button.pad.act:disabled { background: #1f3a63; border-color: #ffffff40; opacity: .55; }
   body.borgo #stats, body.borgo .foot { display: none; }

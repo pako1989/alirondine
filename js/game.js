@@ -3760,7 +3760,11 @@
     BW.active = true; view = { kind: "borgo" }; chap("Borgo Marino" + bvChapTxt() + (typeof mtChap === "function" ? mtChap() : ""));
     BW.keys = {}; BW.tkey = null; BW.area = null; BW.t = 0; BW.prog = prog(); BW.info = storyInfo(BW.prog);
     const c = $("choices"); c.className = "choices one";
-    c.innerHTML = `<div class="padwrap"><div class="dpad"><span></span><button type="button" class="pad" data-d="up" aria-label="Su">▲</button><span></span><button type="button" class="pad" data-d="left" aria-label="Sinistra">◀</button><span></span><button type="button" class="pad" data-d="right" aria-label="Destra">▶</button><span></span><button type="button" class="pad" data-d="down" aria-label="Giù">▼</button><span></span></div><div class="padacts"><button type="button" class="pad act" id="bAct" disabled>Parla</button><button type="button" class="pad" id="bMenu">Menu</button></div></div>`;
+    const h = heroLoad();
+    const heroBtnHtml = h
+      ? `<div class="pad-row"><button type="button" class="pad" id="bHero" title="Cambia personaggio tra Leo e ${esc(h.name)}">${B.useHero ? '👤 ' + esc(h.name.slice(0, 6)) : '👤 Leo'}</button><button type="button" class="pad" id="bMenu">Menu</button></div>`
+      : `<button type="button" class="pad" id="bMenu">Menu</button>`;
+    c.innerHTML = `<div class="padwrap"><div class="dpad"><span></span><button type="button" class="pad" data-d="up" aria-label="Su">▲</button><span></span><button type="button" class="pad" data-d="left" aria-label="Sinistra">◀</button><span></span><button type="button" class="pad" data-d="right" aria-label="Destra">▶</button><span></span><button type="button" class="pad" data-d="down" aria-label="Giù">▼</button><span></span></div><div class="padacts"><button type="button" class="pad act" id="bAct" disabled>Parla</button>${heroBtnHtml}</div></div>`;
     c.querySelectorAll("[data-d]").forEach((b) => {
       const d = b.dataset.d, on = (e) => { e.preventDefault(); BW.keys[d] = true; b.classList.add("on"); try { b.setPointerCapture(e.pointerId); } catch {} };
       const off = () => { BW.keys[d] = false; b.classList.remove("on"); };
@@ -3768,6 +3772,17 @@
       b.addEventListener("contextmenu", (e) => e.preventDefault());
     });
     $("bAct").onclick = borgoAction; $("bMenu").onclick = borgoMenu;
+    if ($("bHero")) {
+      $("bHero").onclick = () => {
+        B.useHero = !B.useHero;
+        borgoSave();
+        const curName = B.useHero && h ? h.name : "Leo Moretti";
+        const curNum = B.useHero && h ? h.num : 10;
+        if (window.toast) window.toast(`Personaggio: ${curName} (maglia n. ${curNum})`, "success", "👤");
+        if (window.haptic) window.haptic(25);
+        borgoResume();
+      };
+    }
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
   }
   function borgoLeave() { if (BW) { BW.bomb = null; BW.del = null; BW.active = false; } borgoSave(); document.body.classList.remove("borgo"); if (BW) BW.keys = {}; if (chBack) S = chBack; chBack = null; }
