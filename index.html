@@ -1869,6 +1869,12 @@
     return out;
   }
   function shoot(kind) {
+    // tiro a tempo: prima la barra, poi il tiro vero con la potenza corretta (perfetto +12%, buono uguale, fuori −15%)
+    if (pcOn("tempo") && !M.tmGo) {
+      const nm = kind === "normal" ? "Tiro" : kind === "hero" ? heroShot().name : kind === "mate" ? mateShot(M.carrier).name : (SHOTS[kind] && SHOTS[kind].name) || "Tiro";
+      return timing(nm, (n) => { M.tmGo = true; M.tmMul = [0.85, 1, 1.12][n - 1]; view = { kind: "match" }; shoot(kind); }, "stadium");
+    }
+    const tmMul = M.tmGo ? M.tmMul || 1 : 1, tmN = M.tmGo ? (M.tmMul > 1 ? "<b>Coordinazione perfetta!</b> " : M.tmMul < 1 ? "<span style=\"color:var(--dim)\">Colpita male…</span> " : "") : ""; M.tmGo = false; M.tmMul = 1;
     const t = TEAMS[M.team], st = S.st, mk = M.carrier, sp = kind === "hero" ? heroShot() : kind === "mate" ? mateShot(mk) : SHOTS[kind];
     const sid = mk ? (MATE_ID[mk] && CAST[MATE_ID[mk]] ? MATE_ID[mk] : (M && M.mateGeneric ? heroId() : "tommy")) : heroId();
     M.carrier = null;
@@ -1889,7 +1895,8 @@
     power += bvPow() + spPow(); power *= ttPow();
     power = weatherPow(power, true);
     if (M.tiredShot) { M.tiredShot = false; if (!sp) power *= 0.8; }
-    let tired = ""; if (sp && pcOn("spec")) { const k = kind === "mate" ? "mate_" + mk : kind, u = M.spN || (M.spN = {}), n = u[k] || 0; u[k] = n + 1; if (n) { const f = Math.max(0.8, 1 - 0.07 * n); power *= f; tired = `<span style="color:var(--dim)">${esc(sp.name)}, di nuovo: ${f > 0.88 ? "ormai se lo aspettano, e le gambe un po' lo sentono" : "le gambe pesano e il portiere lo conosce a memoria"}.</span> `; } }
+    power *= tmMul;
+    let tired = tmN; if (sp && pcOn("spec")) { const k = kind === "mate" ? "mate_" + mk : kind, u = M.spN || (M.spN = {}), n = u[k] || 0; u[k] = n + 1; if (n) { const f = Math.max(0.8, 1 - 0.07 * n); power *= f; tired += `<span style="color:var(--dim)">${esc(sp.name)}, di nuovo: ${f > 0.88 ? "ormai se lo aspettano, e le gambe un po' lo sentono" : "le gambe pesano e il portiere lo conosce a memoria"}.</span> `; } }
     const keep = (t.gk[1] + (M.gkBoost || 0) - (M.team === "oracolo" && M.nudgeOff ? 6 : 0) - (M.team === "marina7" && M.consOff ? 6 : 0)) * rnd(0.85, 1.2) * (M.meteo === "pioggia" ? 0.96 : 1) * dfx() * dfKeep(kind);
     let pre = dfPre(kind) + tired;
     if (feat("blocchi")) {
@@ -4675,7 +4682,7 @@
     mini: ["Calci d'angolo", "Dopo una respinta del portiere, l'angolo lo batti tu"],
   };
   // 15l · Partita classica: quattro aggiunte, ognuna spegnibile (spente = regole di prima)
-  const SET_PC = { fiato: ["Grinta di riserva", "A secco puoi tirare lo stesso (più debole); rifiatare ridà almeno 10"], spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
+  const SET_PC = { tempo: ["Tiro a tempo", "Ferma la barra al momento giusto: preciso = tiro più forte, sbagliato = più debole"], fiato: ["Grinta di riserva", "A secco puoi tirare lo stesso (più debole); rifiatare ridà almeno 10"], spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
   const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false });
   function setLoad() { const d = setDefault(), s = readJSON(SETK, null); if (!s || s.v !== 1) return d; return { ...d, ...s, t: { ...d.t, ...(s.t || {}) }, pc: { ...d.pc, ...(s.pc && typeof s.pc === "object" ? s.pc : {}) } }; }
   let SET = setLoad();
