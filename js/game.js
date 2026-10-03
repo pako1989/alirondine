@@ -137,6 +137,7 @@
       }
     } catch {}
   }
+  window.sfx = sfx;
 
   // ================= STORIA =================
   // Ogni passo: scena (righe), scelta, allenamento, partita, oppure funzione.
