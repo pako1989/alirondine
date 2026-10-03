@@ -1235,17 +1235,124 @@
     if (gxS) g.restore();
     try { if (view && view.bw) bnPost(); } catch {}
     try { gxPost(gx0); } catch {}
+    drawTransitions();
     requestAnimationFrame(render);
   }
+
+  // ================= TRANSIZIONI FLUIDE NEL CANVAS =================
+  let sceneTrans = null;
+  let lastSceneKey = null;
+  let chapCard = null;
+
+  function triggerChapterCard(title) {
+    chapCard = {
+      title: title.replace(/ · [^·]+$/, ""),
+      frame: 0,
+      maxFrames: 68
+    };
+  }
+
+  function drawTransitions() {
+    // 1. Rileva cambio scena sul canvas per avviare la dissolvenza fluida
+    const curKey = (view.kind || "scene") + ":" + (view.bg || "") + ":" + (view.speaker || "");
+    if (lastSceneKey === null) {
+      lastSceneKey = curKey;
+    } else if (lastSceneKey !== curKey) {
+      lastSceneKey = curKey;
+      if (!chapCard) {
+        sceneTrans = { frame: 0, maxFrames: 14 };
+      }
+    }
+
+    // Disegna la transizione di cambio scena
+    if (sceneTrans) {
+      sceneTrans.frame++;
+      const p = sceneTrans.frame / sceneTrans.maxFrames;
+      if (p <= 1) {
+        const alpha = Math.sin(p * Math.PI) * 0.45;
+        g.fillStyle = "rgba(7, 12, 24, " + alpha + ")";
+        g.fillRect(0, 0, W, H);
+
+        const sy = p * H;
+        g.fillStyle = "rgba(255, 210, 63, " + (0.35 * (1 - p)) + ")";
+        g.fillRect(0, sy, W, 2);
+
+        const barH = Math.sin(p * Math.PI) * 9;
+        g.fillStyle = "#050914";
+        g.fillRect(0, 0, W, barH);
+        g.fillRect(0, H - barH, W, barH);
+      } else {
+        sceneTrans = null;
+      }
+    }
+
+    // 2. Disegna la card di passaggio di capitolo fluida e cinematografica
+    if (chapCard) {
+      chapCard.frame++;
+      const p = chapCard.frame / chapCard.maxFrames;
+      if (p <= 1) {
+        let alpha = 0;
+        if (p < 0.22) alpha = p / 0.22;
+        else if (p <= 0.72) alpha = 1;
+        else alpha = (1 - p) / 0.28;
+
+        g.fillStyle = "rgba(6, 11, 24, " + (alpha * 0.82) + ")";
+        g.fillRect(0, 0, W, H);
+
+        const lineW = Math.min(1, p * 2.6) * 120;
+        g.fillStyle = "rgba(255, 210, 63, " + (alpha * 0.95) + ")";
+        g.fillRect(160 - lineW, 76, lineW * 2, 2);
+        g.fillRect(160 - lineW, 126, lineW * 2, 2);
+
+        g.fillStyle = "rgba(160, 205, 250, " + (alpha * 0.9) + ")";
+        g.font = "bold 9px sans-serif";
+        g.textAlign = "center";
+        g.fillText("RONDINE FC · BORGO MARINO", 160, 68);
+
+        g.fillStyle = "rgba(255, 210, 63, " + alpha + ")";
+        g.font = "bold 15px 'Dela Gothic One', Impact, sans-serif";
+        g.shadowColor = "rgba(0, 0, 0, 0.9)";
+        g.shadowBlur = 8;
+        g.fillText(chapCard.title.toUpperCase(), 160, 104);
+        g.shadowBlur = 0;
+
+        g.fillStyle = "rgba(240, 244, 255, " + (alpha * 0.8) + ")";
+        g.font = "italic 9px sans-serif";
+        g.fillText("«La storia si scrive su ogni zolla»", 160, 120);
+        g.textAlign = "left";
+      } else {
+        chapCard = null;
+      }
+    }
+  }
+
+  cv.addEventListener("click", () => {
+    if (chapCard && chapCard.frame < chapCard.maxFrames - 10) {
+      chapCard.frame = chapCard.maxFrames - 10;
+    }
+  });
 
   // ================= INTERFACCIA =================
   function statsBox() {
     const st = S.st;
     $("stats").innerHTML = `<div>Tiro<b>${st.tiro}</b></div><div>Dribbling<b>${st.drib}</b></div><div>Passaggio<b>${st.pass}</b></div><div>Contrasto<b>${st.contr}</b></div><div>Liv.<b>${S.lv}</b></div>`;
   }
+  let lastChapTitleSeen = "";
   function chap(t) {
+    const raw = t || "";
     const tag = (label, n) => ` · ${label} ${n >= 2 ? n + " ✓" : n + "/2"}`;
-    $("chap").textContent = (t || "") + (!t ? "" : S.season === 2 && S.step > S2 + 7 && S.step < S3 ? tag("Prove", S.f.evid || 0) : S.season === 3 && S.step > S3 + 5 ? tag("Verità", S.f.truth || 0) : S.season === 4 && S.step > S4 + 2 && S.step < S5 ? tag("Indizi", S.f.clue || 0) : S.season === 5 && S.step > S5 + 1 ? tag("Tracce", S.f.trace || 0) : S.season === 6 && S.step > S6 + 1 ? tag("Codici", S.f.code || 0) : S.season === 7 && S.step > S7 + 1 ? tag("Fili", S.f.fili || 0) : S.season === 8 && S.step > S8 + 1 && S.step < S9 ? tag("Ricevute", S.f.ricevute || 0) : S.season === 9 && S.step > S9 + 1 ? tag("Negativi", S.f.negativi || 0) : "");
+    const fullText = (t || "") + (!t ? "" : S.season === 2 && S.step > S2 + 7 && S.step < S3 ? tag("Prove", S.f.evid || 0) : S.season === 3 && S.step > S3 + 5 ? tag("Verità", S.f.truth || 0) : S.season === 4 && S.step > S4 + 2 && S.step < S5 ? tag("Indizi", S.f.clue || 0) : S.season === 5 && S.step > S5 + 1 ? tag("Tracce", S.f.trace || 0) : S.season === 6 && S.step > S6 + 1 ? tag("Codici", S.f.code || 0) : S.season === 7 && S.step > S7 + 1 ? tag("Fili", S.f.fili || 0) : S.season === 8 && S.step > S8 + 1 && S.step < S9 ? tag("Ricevute", S.f.ricevute || 0) : S.season === 9 && S.step > S9 + 1 ? tag("Negativi", S.f.negativi || 0) : "");
+    const chapEl = $("chap");
+    if (chapEl) {
+      chapEl.textContent = fullText;
+      chapEl.classList.remove("glow");
+      void chapEl.offsetWidth;
+      chapEl.classList.add("glow");
+    }
+    if (raw && raw !== lastChapTitleSeen && !raw.startsWith("Modalità") && !raw.startsWith("Impostazioni") && !raw.startsWith("Collezioni") && !raw.startsWith("L'Eco") && !raw.startsWith("Archivio")) {
+      lastChapTitleSeen = raw;
+      triggerChapterCard(raw);
+    }
   }
   function text0(who, html) {
     const box = $("text");
