@@ -1,22 +1,30 @@
 // ================= v22 · LA FENDITURA QUANTISTICA DELLA PANDA 30 =================
 // Saga demenziale e multiversale (Stile Rick & Morty, Futurama e Game of Thrones parody).
-// La Panda 30 di Nonna Ferri alimentata a olio di frittura tachionico spalanca
-// tre portali dimensionali sopra la scogliera di Borgo Marino!
+// Grafica visuale su Stage (Asset tunnel spaziotemporale, cruscotto interattivo, minigioco tachionico e 3 dimensioni).
 (function () {
-  const K_MULTI = "ali-di-rondine.saga-multiverso";
+  const K_MULTI = "ali-di-rondine.multiverse-progress";
 
-  function getMultiData() {
+  function getProgress() {
     try {
-      return JSON.parse(localStorage.getItem(K_MULTI)) || { unlocked: [0], done: [] };
+      return JSON.parse(localStorage.getItem(K_MULTI)) || { portals: [], won: 0 };
     } catch {
-      return { unlocked: [0], done: [] };
+      return { portals: [], won: 0 };
     }
   }
 
-  function saveMultiData(d) {
+  function saveProgress(p) {
     try {
-      localStorage.setItem(K_MULTI, JSON.stringify(d));
+      localStorage.setItem(K_MULTI, JSON.stringify(p));
     } catch {}
+  }
+
+  let onExitCallback = null;
+  let tachyonEnergy = 0; // 0..3
+  let pandaPosX = 50; // %
+  let animTimer = null;
+
+  function getStageAlt() {
+    return document.getElementById("stageAlt");
   }
 
   function setChap(t) {
@@ -27,7 +35,7 @@
   function showText(who, html) {
     const el = document.getElementById("text");
     if (el) {
-      el.innerHTML = `<span class="who" style="background:#57d68d; color:#0e1424;">${who}</span><span class="t">${html}</span>`;
+      el.innerHTML = `<span class="who" style="background:#ba68c8; color:#fff; font-weight:bold;">${who}</span><span class="t">${html}</span>`;
     }
   }
 
@@ -55,240 +63,304 @@
     });
   }
 
-  let onBackCb = null;
+  function closeMultiStage() {
+    if (animTimer) {
+      clearInterval(animTimer);
+      animTimer = null;
+    }
+    const alt = getStageAlt();
+    if (alt) {
+      alt.hidden = true;
+      alt.style.display = "none";
+      alt.innerHTML = "";
+    }
+  }
 
   function openMultiverseMenu(onBack) {
-    onBackCb = onBack;
-    const data = getMultiData();
+    onExitCallback = onBack;
+    tachyonEnergy = 0;
+    pandaPosX = 50;
+    showHub();
+  }
+
+  function showHub() {
+    closeMultiStage();
     setChap("Multiverso · La Panda Quantistica");
+    const prog = getProgress();
+
+    // Render cosmic wormhole visual in stageAlt
+    const alt = getStageAlt();
+    if (alt) {
+      alt.hidden = false;
+      alt.style.display = "flex";
+      alt.style.flexDirection = "column";
+      alt.style.justifyContent = "flex-end";
+      alt.style.position = "relative";
+      alt.style.overflow = "hidden";
+      alt.innerHTML = `
+        <img src="img/multiverse_panda.jpg" alt="Panda Quantistica" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:contrast(1.2) brightness(0.95);">
+        <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(14,6,32,0.2) 0%, rgba(14,6,32,0.85) 90%);"></div>
+        <div style="position:relative; z-index:2; padding:12px; display:flex; justify-content:space-between; align-items:flex-end;">
+          <div>
+            <div style="font-family:var(--display); font-size:16px; color:#e1bee7; text-shadow:0 0 10px rgba(225,190,231,0.8);">LA PANDA 30 QUANTISTICA</div>
+            <div style="font-size:12px; color:#f3e5f5;">Warp Spaziotemporale · Alimentata a Olio di Fritto</div>
+          </div>
+          <div style="background:rgba(225,190,231,0.15); border:1px solid #ba68c8; border-radius:6px; padding:4px 8px; font-size:11px; color:#fff;">
+            Mondi esplorati: <b>${prog.portals.length}/3</b>
+          </div>
+        </div>
+      `;
+    }
 
     showText(
-      "nonna",
-      `
-      «Nicola! Leo! Salite subito sulla Panda! L'altro ieri ho messo nel serbatoio l'olio della frittura di calamari mischiato con l'acqua santa di Don Aurelio e i pezzi di un vecchio transistor di Baciccia.<br>
-      Ai cento all'ora sui tornanti del faro... si è aperto uno squarcio verde fluorescente nel cielo sopra le onde!<br>
-      Dobbiamo andare a salvare il multiverso prima che si freddi la focaccia!»
-    `
+      "Nonna Ferri",
+      `«Leo, muoviti a salire! Ho fritto quaranta chili di panissa con l'olio della trattoria e quando ho pigiato il pedale della terza la Panda ha cominciato a vibrare e ha aperto un buco nel tessuto dello spaziotempo!<br>
+      Adesso il tachimetro segna 88.000 miglia all'ora e davanti al parabrezza vedo cavalieri medievali, robot che mangiano focaccia al silicio e un gatto grande come un pianeta! Se non acceleriamo restiamo bloccati nel vuoto cosmico!»`
     );
 
     showButtons([
       {
-        label: "🌐 Dimensione 1: Borgo Cyberpunk 2099",
-        sub: "Cyber-Gabbiani, droni al neon e palloni al plasma",
+        label: "🚀 Sali sulla Panda e accendi il Motore Tachionico",
+        sub: "Pilota la Panda 30 attraverso la fenditura quantistica!",
         cls: "hot",
-        fn: () => playCyberpunk()
+        fn: () => startCockpitFlight()
       },
       {
-        label: "⚔️ Dimensione 2: Il Trono delle Tre Riviere",
-        sub: data.unlocked.includes(1) ? "Parodia Game of Thrones: cavalieri, trofie e casate" : "Sblocca completando Borgo 2099",
-        disabled: !data.unlocked.includes(1),
-        cls: data.unlocked.includes(1) ? "hot" : "",
-        fn: () => playMedieval()
+        label: "📖 Teoria del Fritto Quantico di Nonna",
+        sub: "Perché l'olio delle acciughe piega la relatività",
+        fn: () => showTheory()
       },
       {
-        label: "🐱 Dimensione 3: L'Impero Galattico del Gatto Supremo",
-        sub: data.unlocked.includes(2) ? "Nico è l'Imperatore di un pianeta di gelato" : "Sblocca completando il Trono",
-        disabled: !data.unlocked.includes(2),
-        cls: data.unlocked.includes(2) ? "hot" : "",
-        fn: () => playGalactic()
-      },
-      {
-        label: "◂ Torna al Mondo Reale",
+        label: "◂ Torna al Menu",
         fn: () => {
-          if (onBackCb) onBackCb();
+          closeMultiStage();
+          if (onExitCallback) onExitCallback();
         }
       }
     ], true);
   }
 
-  function playCyberpunk() {
-    setChap("Multiverso · Borgo 2099");
+  function showTheory() {
     showText(
-      "voce",
-      `
-      <b>BZZZZT!</b> La Panda 30 attraversa il vortice ed esce tra grattacieli olografici sopra il mare di Borgo Marino.<br>
-      I gabbiani hanno visori a infrarossi e beccucci al titanio. Don Aurelio è un'IA a 64-bit che dispensa assoluzioni digitali.<br>
-      Al posto del campetto della scogliera c'è un'arena antigravitazionale. I <i>Cyber-Gabbiani MK-4</i> vi sfidano: se vincete, vi ridanno la batteria al litio della Panda!
-    `
+      "Nonna Ferri",
+      `«Einstein non ha mai assaggiato la frittura mista di Don Aurelio al sabato sera! Quando l'olio raggiunge i 190 gradi e ci butti dentro le acciughe appena pescate, la densità molecolare genera particelle di frittoni subatomici che annullano la gravità terrestre.<br>
+      Basta innestare la retro e premere il pomello del cambio!»`
     );
 
     showButtons([
       {
-        label: "Calcia il pallone al plasma antigravitazionale!",
-        sub: "Curva la traiettoria superando i sensori dei droni",
+        label: "Allacciati le cinture e andiamo! ▸",
         cls: "hot",
-        fn: () => {
-          if (window.triggerAnimeCutin) {
-            window.triggerAnimeCutin(
-              {
-                who: "CYBER-LEO",
-                shotName: "RONDINE AL PLASMA 2099",
-                isEgo: true,
-                sfxWord: "SYSTEM ERROR!"
-              },
-              () => finishCyberpunk()
-            );
-          } else {
-            finishCyberpunk();
-          }
-        }
+        fn: () => startCockpitFlight()
       }
     ], true);
   }
 
-  function finishCyberpunk() {
-    const d = getMultiData();
-    if (!d.unlocked.includes(1)) d.unlocked.push(1);
-    if (!d.done.includes(0)) d.done.push(0);
-    saveMultiData(d);
+  function startCockpitFlight() {
+    setChap("Cockpit · Tunnel Spaziotemporale");
+    const alt = getStageAlt();
+    if (!alt) return;
 
-    if (window.sfx) window.sfx("goal");
+    alt.hidden = false;
+    alt.style.display = "block";
+    alt.style.position = "relative";
+    alt.style.overflow = "hidden";
+
+    renderCockpitStage();
+  }
+
+  function renderCockpitStage() {
+    const alt = getStageAlt();
+    if (!alt) return;
+
+    alt.innerHTML = `
+      <div style="position:absolute; inset:0; overflow:hidden;">
+        <img src="img/multiverse_panda.jpg" style="width:100%; height:100%; object-fit:cover; filter:contrast(1.25) brightness(0.9);">
+        <div style="position:absolute; inset:0; background:radial-gradient(circle at center, transparent 30%, rgba(14,6,32,0.6) 80%);"></div>
+      </div>
+
+      <!-- Top Warp Dashboard -->
+      <div style="position:absolute; top:6px; left:8px; right:8px; z-index:10; display:flex; justify-content:space-between; align-items:center; background:rgba(18,8,38,0.85); border:1px solid #ba68c8; border-radius:8px; padding:4px 10px; font-size:11px;">
+        <span style="color:#e1bee7; font-weight:bold;">🛸 CRUSCOTTO PANDA 30 TACHIONICA</span>
+        <span style="color:var(--gold);">Carica Olio: <b>${tachyonEnergy}/3 Focacce</b></span>
+      </div>
+
+      <!-- Interactive Ship Cursor -->
+      <div id="pandaCursor" style="position:absolute; bottom:28px; left:${pandaPosX}%; transform:translateX(-50%); z-index:15; transition:left 0.2s ease; text-align:center;">
+        <div style="font-size:28px; filter:drop-shadow(0 0 10px #ff4d5a);">🚗</div>
+        <div style="font-size:9px; background:#ff4d5a; color:#fff; border-radius:4px; padding:1px 4px; font-weight:bold;">PANDA 30</div>
+      </div>
+
+      <!-- Dimensional Portals Floating -->
+      <div style="position:absolute; top:36px; left:12px; right:12px; display:flex; justify-content:space-between; z-index:12;">
+        <button type="button" onclick="window.__warpTo('cyberpunk')" style="background:rgba(0,229,255,0.2); border:1.5px solid #00e5ff; color:#fff; border-radius:8px; padding:6px 10px; font-size:11px; cursor:pointer; text-align:center;">
+          <div style="font-size:18px;">🏙️</div>
+          <b>Cyberpunk 2099</b>
+        </button>
+        <button type="button" onclick="window.__warpTo('thrones')" style="background:rgba(255,210,63,0.2); border:1.5px solid #ffd23f; color:#fff; border-radius:8px; padding:6px 10px; font-size:11px; cursor:pointer; text-align:center;">
+          <div style="font-size:18px;">⚔️</div>
+          <b>Trono Tre Riviere</b>
+        </button>
+        <button type="button" onclick="window.__warpTo('spacecat')" style="background:rgba(225,190,231,0.2); border:1.5px solid #e1bee7; color:#fff; border-radius:8px; padding:6px 10px; font-size:11px; cursor:pointer; text-align:center;">
+          <div style="font-size:18px;">🐱</div>
+          <b>Gatto Supremo 42</b>
+        </button>
+      </div>
+
+      <!-- Controls Overlay -->
+      <div style="position:absolute; bottom:6px; left:8px; right:8px; z-index:15; display:flex; justify-content:space-between; align-items:center; background:rgba(10,5,22,0.85); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:4px 8px;">
+        <button type="button" onclick="window.__pandaSteer(-20)" class="choice-btn" style="padding:4px 14px; font-weight:bold;">◂ Sterza SX</button>
+        <span style="font-size:11px; color:#e1bee7;">Scegli il portale o raccogli focaccia</span>
+        <button type="button" onclick="window.__pandaSteer(20)" class="choice-btn" style="padding:4px 14px; font-weight:bold;">Sterza DX ▸</button>
+      </div>
+    `;
+
+    window.__pandaSteer = function (delta) {
+      pandaPosX = Math.max(15, Math.min(85, pandaPosX + delta));
+      const el = document.getElementById("pandaCursor");
+      if (el) el.style.left = pandaPosX + "%";
+      tachyonEnergy = Math.min(3, tachyonEnergy + 1);
+      if (window.toast) window.toast(`+1 Focaccia Tachionica raccolta! (${tachyonEnergy}/3)`, "info", "⚡");
+      renderCockpitStage();
+    };
+
+    window.__warpTo = function (dim) {
+      if (window.triggerAnimeCutin) {
+        window.triggerAnimeCutin({
+          who: "Nonna Ferri",
+          shotName: "SALTO DIMENSIONALE TACHIONICO!",
+          isEgo: false,
+          sfxWord: "KAAA-BOOM!"
+        });
+      }
+      resolveDimension(dim);
+    };
+
     showText(
-      "nico",
-      `
-      «GOOOL NEL FUTURO! Il loro portiere-robot ha fatto fumo da tutte le ventole ed è andato in cortocircuito!<br>
-      Nonna ha caricato la batteria della Panda con la spina di un distributore di bibite quantiche. Il portale medievale si sta aprendo!»
-    `
+      "Nonna",
+      `«Tocca uno dei tre squarci dimensionali in cima allo schermo oppure usa i pulsanti dello sterzo per allineare la Panda con la realtà che preferisci!»`
     );
 
     showButtons([
       {
-        label: "Attraversa il prossimo portale ▸",
+        label: "🏙️ Tuffati nel Borgo Cyberpunk 2099",
+        sub: "Mega-corporazioni, droni gabbiano e cyber-calcio",
         cls: "hot",
-        fn: () => playMedieval()
+        fn: () => window.__warpTo("cyberpunk")
       },
       {
-        label: "Torna alla cabina di pilotaggio",
-        fn: () => openMultiverseMenu(onBackCb)
-      }
-    ], true);
-  }
-
-  function playMedieval() {
-    setChap("Multiverso · Il Trono delle Riviere");
-    showText(
-      "voce",
-      `
-      <b>WOSH!</b> La Panda atterra nel fango davanti alle mura merlate di Castel Moretti.<br>
-      Tuo padre indossa una corona di alloro e una corazza d'ottone: <i>Re Enzo il Cuoco di Pietra, Signore delle Sette Padelle</i>.<br>
-      «Figlio mio! I Corvi d'Inverno guidati dalla Contessa Ines e da Ser Franco Ruggeri assediano il molo per impadronirsi del segreto del basilico sacro!<br>
-      La guerra si deciderà sul campo d'onore in una giostra calcistica!»
-    `
-    );
-
-    showButtons([
-      {
-        label: "Sfida Ser Ruggeri alla giostra dei rigori!",
-        sub: "Tiro della Rondine con armatura medievale completa",
+        label: "⚔️ Schiantati sul Trono delle Tre Riviere",
+        sub: "Game of Thrones parody: re Enzo e calcio in armatura",
         cls: "hot",
-        fn: () => {
-          if (window.triggerAnimeCutin) {
-            window.triggerAnimeCutin(
-              {
-                who: "SER LEO",
-                shotName: "LANCIA DELLA RONDINE",
-                isEgo: false,
-                sfxWord: "PER IL RE!"
-              },
-              () => finishMedieval()
-            );
-          } else {
-            finishMedieval();
-          }
-        }
-      }
-    ], true);
-  }
-
-  function finishMedieval() {
-    const d = getMultiData();
-    if (!d.unlocked.includes(2)) d.unlocked.push(2);
-    if (!d.done.includes(1)) d.done.push(1);
-    saveMultiData(d);
-
-    if (window.sfx) window.sfx("goal");
-    showText(
-      "papa",
-      `
-      «GOL! Il tiro di Ser Leo spezza lo scudo avversario e gonfia la rete di corda d'ormeggio!<br>
-      I Corvi d'Inverno si ritirano oltre le montagne! Il regno della trattoria è salvo per altri mille anni!»<br>
-      Nonna dà una sgasata: «Salgono tutti! La lancetta dell'olio sta per esplodere verso l'Universo 42!»
-    `
-    );
-
-    showButtons([
-      {
-        label: "Verso la Galassia del Gatto Supremo ▸",
-        cls: "hot",
-        fn: () => playGalactic()
+        fn: () => window.__warpTo("thrones")
       },
       {
-        label: "Torna alla mappa del Multiverso",
-        fn: () => openMultiverseMenu(onBackCb)
+        label: "🐱 Atterra sull'Impero del Gatto Supremo",
+        sub: "Universo 42: Nico Ferri imperatore galattico",
+        cls: "hot",
+        fn: () => window.__warpTo("spacecat")
       }
-    ], true);
+    ]);
   }
 
-  function playGalactic() {
-    setChap("Multiverso · Il Gatto Supremo");
-    showText(
-      "voce",
-      `
-      Lo spazio profondo. Nebulose viola, stelle scintillanti e... un pianeta sferico ricoperto interamente di panna e gelato al fiordilatte.<br>
-      Sul trono dell'asteroide siede l'<b>IMPERATORE NICO I</b>, con un mantello galattico e due comete al posto dei guantoni:<br>
-      «Benvenuti nella mia dimensione! Qui nessuno paga il gelato, Sara ha acconsentito al matrimonio cosmico e il Gatto Volante è la legge dell'universo! Volete sfidarmi o preferite diventare miei ministri delle acciughe?»
-    `
-    );
+  function resolveDimension(dim) {
+    const prog = getProgress();
+    if (!prog.portals.includes(dim)) {
+      prog.portals.push(dim);
+      saveProgress(prog);
+    }
 
-    showButtons([
-      {
-        label: "Tira con tutta la forza per risvegliare Nico dal sogno cosmico!",
-        sub: "Il tiro più potente di tutte le dimensioni",
-        cls: "hot",
-        fn: () => {
-          if (window.triggerAnimeCutin) {
-            window.triggerAnimeCutin(
-              {
-                who: "LEO MORETTI",
-                shotName: "RONDINE IPERSPAZIALE",
-                isEgo: false,
-                sfxWord: "SVEGLIATI, NICO!"
-              },
-              () => finishGalactic()
-            );
-          } else {
-            finishGalactic();
-          }
+    if (dim === "cyberpunk") {
+      setChap("Dimensione 2099 · Borgo Cyberpunk");
+      showText(
+        "Cyber-Nico",
+        `<b>BENVENUTO A NEO-BORGO MARINO 2099</b><br>
+        Grattacieli di cromo si affacciano su un mare di fibra ottica. Nico indossa un visore neurale e un braccio bionico idraulico:<br>
+        «Leo! Sei in ritardo per la finale della Lega Olografica contro il Real Corporation! Il pallone viaggia a energia fotonica a 300 chilometri orari: se sbagli il cross ti brucia le scarpette!»`
+      );
+
+      showButtons([
+        {
+          label: "⚡ Calcia il Pallone Fotonico con Sovraccarico Neurale",
+          sub: "Canalizza la cyber-focaccia nel tiro!",
+          cls: "hot",
+          fn: () => finishDimension("cyberpunk")
+        },
+        {
+          label: "🛡️ Attiva lo Scudo Deflettore della Panda 30",
+          sub: "Respingi l'assalto dei robot nemici",
+          fn: () => finishDimension("cyberpunk")
         }
-      }
-    ], true);
+      ], true);
+
+    } else if (dim === "thrones") {
+      setChap("Dimensione Medievale · Il Trono");
+      showText(
+        "Re Enzo Moretti",
+        `<b>ROCCAFORTE DELLE TRE RIVIERE · ANNO DOMINI 1240</b><br>
+        Enzo Moretti siede su un trono fatto di vecchie reti da pesca e remi d'oro forgiati nel fuoco di mille tempeste:<br>
+        «Mio prode cavaliere Leo! Ser Franco Ruggeri dei Trabucchi ha osato sfidare la nostra casata a Calcio-Giostra! Indossa la corazza di latta e calcia il pallone di cuoio rovente dritto nel loro castello!»`
+      );
+
+      showButtons([
+        {
+          label: "⚔️ Scaglia il Tiro della Rondine Infuocato!",
+          sub: "Brucia le difese di Ser Franco e conquista la Lanterna",
+          cls: "hot",
+          fn: () => finishDimension("thrones")
+        },
+        {
+          label: "🛡️ Difendi il Ponte Levatoio con la Panda Corazzata",
+          sub: "Nonna carica i cavalieri nemici!",
+          fn: () => finishDimension("thrones")
+        }
+      ], true);
+
+    } else {
+      setChap("Dimensione 42 · Gatto Supremo");
+      showText(
+        "Imperatore Nico",
+        `<b>NEBULOSA DEL FELINO · UNIVERSO 42</b><br>
+        Un gatto tigrato gigante con una sciarpa del Rondine FC fa le fusa nello spazio profondo, facendo vibrare le galassie. Nico indossa un mantello di velluto rosso:<br>
+        «Leo, finalmente! In questa dimensione il calcio si gioca in assenza di gravità saltando da un asteroide all'altro. Il Gatto Supremo è il portiere della galassia: battilo o giocherà con la tua astronave come un gomitolo!»`
+      );
+
+      showButtons([
+        {
+          label: "🧶 Tira la Sfera Gravitazionale col Giro a Spirale",
+          sub: "Inganna i riflessi cosmici del Gatto Supremo!",
+          cls: "hot",
+          fn: () => finishDimension("spacecat")
+        },
+        {
+          label: "🐟 Distrai il Gatto con una Cassa di Acciughe Spaziali",
+          sub: "Strategia d'astuzia felina!",
+          fn: () => finishDimension("spacecat")
+        }
+      ], true);
+    }
   }
 
-  function finishGalactic() {
-    const d = getMultiData();
-    if (!d.done.includes(2)) d.done.push(2);
-    saveMultiData(d);
+  function finishDimension(dim) {
+    const prog = getProgress();
+    prog.won++;
+    saveProgress(prog);
 
-    if (window.sfx) window.sfx("goal");
-    setChap("Multiverso · Ritorno al Porto");
+    if (window.toast) window.toast("✨ DIMENSIONE CONQUISTATA!", "goal", "🌌");
 
     showText(
-      "nico",
-      `
-      <b style="color:var(--gold); font-size:16px;">CRASH DIMENSIONALE!</b><br>
-      Il pallone buca l'asteroide di gelato e la Panda 30 riatterra con un sonoro tonfo sulla banchina di Borgo Marino, sollevando uno spruzzo d'acqua di mare.<br><br>
-      Nico si strofina gli occhi sul muretto: «Leo? Sara? Ma... non ero l'Imperatore di Andromeda? E le comete di gelato dove sono finite?»<br>
-      Nonna Ferri spegne il motore che scoppietta: «Sono finite nel congelatore di Tonino, scemo! E ora andiamo a mangiare le trofie prima che si raffreddino!»<br>
-      <i>🏆 Completata la Saga del Multiverso!</i>
-    `
+      "Nonna Ferri",
+      `<b style="color:var(--gold); font-size:16px;">VITTORIA MULTIVERSALE! LA PANDA RIENTRA A CASA!</b><br>
+      «Hai visto, Leo? Abbiamo rimesso a posto le galassie e siamo atterrati giusti giusti davanti al bar prima che si raffreddassero i frollini! La Panda 30 non tradisce mai.»`
     );
 
     showButtons([
       {
-        label: "Rientra alla Trattoria di Casa ▸",
+        label: "Torna a Borgo Marino (Menu Principale) 🏠",
         cls: "hot",
         fn: () => {
-          if (onBackCb) onBackCb();
+          closeMultiStage();
+          if (onExitCallback) onExitCallback();
         }
       }
     ], true);

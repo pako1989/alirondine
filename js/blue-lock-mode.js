@@ -1,6 +1,6 @@
 // ================= v20 · BLUE LOCK: L'ALCHIMIA DELL'EGO =================
 // Modalità Torneo Sopravvivenza nella Gabbia dei Predatori di Punta Nera.
-// Misuratore EGO vs ALTRUISMO, aura manga infuocata e tiro speciale delle Fiamme Nere.
+// Grafica visuale su Stage (Asset arena della Gabbia, mirino di tiro, aura fiamme nere e boss animati).
 (function () {
   const K_BL = "ali-di-rondine.bluelock-record";
 
@@ -23,61 +23,74 @@
       id: "toro",
       name: "Toro Galli",
       title: "Il Demolitore del Nord",
-      quote: "«Il campo è un'arena, Moretti. Chi esita finisce schiacciato contro le reti!»",
-      power: 24,
-      gk: 22,
-      gkName: "Mura",
-      special: "CARICA DEL TORO DISTRUTTIVA"
+      quote: "«Il campo è un'arena, Moretti. Chi esita finisce schiacciato contro le reti metalliche!»",
+      color: "#ff4d5a",
+      gkName: "Mura d'Acciaio",
+      gkSpeed: 2.2,
+      special: "CARICA DEL TORO DISTRUTTIVA",
+      gkZone: "basso"
     },
     {
       id: "kenji",
       name: "Kenji Arata",
       title: "L'Imperatore Aereo",
-      quote: "«Da quassù vedo tutte le tue scelte prima che tu muova il piede. Non puoi nasconderti.»",
-      power: 28,
-      gk: 26,
-      gkName: "Wagner",
-      special: "VOLO DELL'AQUILA REALE"
+      quote: "«Dall'alto vedo tutte le tue scelte prima che tu muova il piede. Non puoi nasconderti.»",
+      color: "#00e5ff",
+      gkName: "Wagner il Falco",
+      gkSpeed: 2.8,
+      special: "VOLO DELL'AQUILA REALE",
+      gkZone: "alto"
     },
     {
       id: "sho",
       name: "Sho Arata",
       title: "Il Cecchino Invisibile",
-      quote: "«Non guardare me. Guarda la palla che sta già gonfiando l'incrocio.»",
-      power: 32,
-      gk: 30,
-      gkName: "Ishikawa",
-      special: "LAMPO FANTASMA"
+      quote: "«Non guardare me. Guarda la palla che sta già gonfiando l'incrocio dei pali.»",
+      color: "#b9a6ff",
+      gkName: "Ishikawa Riflesso",
+      gkSpeed: 3.4,
+      special: "LAMPO FANTASMA",
+      gkZone: "destra"
     },
     {
       id: "bruno",
       name: "Bruno Sabatini",
       title: "Il Corvo d'Acciaio",
       quote: "«I sentimenti fanno perdere le finali. Il cinismo vince i campionati.»",
-      power: 36,
-      gk: 34,
-      gkName: "Orsini",
-      special: "BECCO DEL CORVO FEROCE"
+      color: "#ffd23f",
+      gkName: "Orsini la Roccia",
+      gkSpeed: 3.8,
+      special: "BECCO DEL CORVO FEROCE",
+      gkZone: "sinistra"
     },
     {
       id: "alter",
       name: "L'Ombra di Leo (Alter Ego)",
       title: "La Rondine Oscura",
-      quote: "«Sei davvero disposto a sacrificare tutto pur di diventare il numero uno al mondo?»",
-      power: 40,
-      gk: 38,
+      quote: "«Sei davvero disposto a divorare tutto pur di diventare il numero uno al mondo?»",
+      color: "#00f0ff",
       gkName: "Riflesso Oscuro",
-      special: "EGO VOLANTE SUPREMO"
+      gkSpeed: 4.4,
+      special: "EGO VOLANTE SUPREMO",
+      gkZone: "centro"
     }
   ];
 
   let currentStage = 0;
-  let egoMeter = 50; // 0 = Altruismo totale, 100 = Ego assoluto
+  let egoMeter = 50; // 0..100
   let matchGuts = 100;
   let myScore = 0;
   let oppScore = 0;
   let matchTurn = 0;
   let onExitCallback = null;
+  let animId = null;
+  let targetAim = { x: 50, y: 50 }; // % in porta
+  let isShooting = false;
+  let ballAnim = null;
+
+  function getStageAlt() {
+    return document.getElementById("stageAlt");
+  }
 
   function setChap(t) {
     const el = document.getElementById("chap");
@@ -87,7 +100,7 @@
   function showText(who, html) {
     const el = document.getElementById("text");
     if (el) {
-      el.innerHTML = `<span class="who" style="background:#00e5ff; color:#0e1424;">${who}</span><span class="t">${html}</span>`;
+      el.innerHTML = `<span class="who" style="background:#00e5ff; color:#0e1424; font-weight:800;">${who}</span><span class="t">${html}</span>`;
     }
   }
 
@@ -115,52 +128,6 @@
     });
   }
 
-  function renderEgoHud() {
-    const stageBox = document.getElementById("matchHud");
-    if (stageBox) stageBox.hidden = true;
-
-    let egoBox = document.getElementById("egoHudPanel");
-    if (!egoBox) {
-      egoBox = document.createElement("div");
-      egoBox.id = "egoHudPanel";
-      egoBox.className = "ego-hud-panel";
-      const txt = document.getElementById("text");
-      if (txt && txt.parentNode) {
-        txt.parentNode.insertBefore(egoBox, txt);
-      }
-    }
-    egoBox.hidden = false;
-
-    const boss = BOSSES[currentStage];
-    const egoPercent = Math.min(100, Math.max(0, egoMeter));
-    const modeName = egoPercent >= 75 ? "🔥 AURA EGOISTA (Attaccante Predatore)" : egoPercent <= 25 ? "🤝 CUORE DI SQUADRA (Sinergia Totale)" : "⚖️ EQUILIBRIO";
-
-    egoBox.innerHTML = `
-      <div class="ego-hud-top">
-        <span style="color:#00e5ff;">🏆 Sfida ${currentStage + 1}/5 · vs ${boss.name}</span>
-        <span style="color:var(--gold);">⚽ ${myScore} – ${oppScore}</span>
-      </div>
-      <div style="font-size:11px; color:var(--dim); display:flex; justify-content:space-between;">
-        <span>Intesa Altruista</span>
-        <span style="color:#fff; font-weight:bold;">${modeName}</span>
-        <span>Ego Predatore</span>
-      </div>
-      <div class="ego-bar-wrap">
-        <div class="ego-bar-fill" style="width:${egoPercent}%;"></div>
-        <div class="ego-bar-indicator" style="left:${egoPercent}%;"></div>
-      </div>
-      <div style="font-size:11px; color:#9fb0c8; display:flex; justify-content:space-between;">
-        <span>Grinta: <b>${Math.round(matchGuts)}</b>/100</span>
-        <span>Turno: <b>${matchTurn}</b>/8</span>
-      </div>
-    `;
-  }
-
-  function hideEgoHud() {
-    const egoBox = document.getElementById("egoHudPanel");
-    if (egoBox) egoBox.hidden = true;
-  }
-
   function openBlueLockMode(onBack) {
     onExitCallback = onBack;
     currentStage = 0;
@@ -168,53 +135,87 @@
     showHub();
   }
 
+  function closeArenaStage() {
+    if (animId) {
+      cancelAnimationFrame(animId);
+      animId = null;
+    }
+    const alt = getStageAlt();
+    if (alt) {
+      alt.hidden = true;
+      alt.style.display = "none";
+      alt.innerHTML = "";
+    }
+    const egoBox = document.getElementById("egoHudPanel");
+    if (egoBox) egoBox.remove();
+  }
+
   function showHub() {
-    hideEgoHud();
+    closeArenaStage();
     setChap("Blue Lock · La Gabbia dell'Ego");
     const rec = getBLRecord();
     const boss = BOSSES[currentStage];
 
+    // Render hub visual banner in stageAlt
+    const alt = getStageAlt();
+    if (alt) {
+      alt.hidden = false;
+      alt.style.display = "flex";
+      alt.style.flexDirection = "column";
+      alt.style.justifyContent = "flex-end";
+      alt.style.position = "relative";
+      alt.style.overflow = "hidden";
+      alt.innerHTML = `
+        <img src="img/blue_lock_cage.jpg" alt="La Gabbia" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:contrast(1.15) brightness(0.9);">
+        <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(6,11,24,0.3) 0%, rgba(6,11,24,0.85) 90%);"></div>
+        <div style="position:relative; z-index:2; padding:12px; display:flex; justify-content:space-between; align-items:flex-end;">
+          <div>
+            <div style="font-family:var(--display); font-size:16px; color:#00e5ff; text-shadow:0 0 10px rgba(0,229,255,0.8);">LA GABBIA DI PUNTA NERA</div>
+            <div style="font-size:12px; color:#ced9eb;">Torneo Sopravvivenza Predatori · Sfida ${currentStage + 1}/5</div>
+          </div>
+          <div style="background:rgba(0,229,255,0.15); border:1px solid #00e5ff; border-radius:6px; padding:4px 8px; font-size:11px; color:#fff; text-align:right;">
+            Avversario: <b style="color:${boss.color};">${boss.name}</b>
+          </div>
+        </div>
+      `;
+    }
+
     showText(
       "voce",
-      `
-      <b style="color:#00e5ff; font-size:16px;">LA GABBIA DEI PREDATORI · PUNTA NERA</b><br>
-      Un bunker scavato nella roccia a picco sul mare. Nessun arbitro, nessuna pietà. Solo il pallone e il tuo istinto di sopravvivenza calcistica.<br><br>
-      Livello attuale: <b>Sfida ${currentStage + 1} di 5</b> contro <b>${boss.name}</b> (${boss.title}).<br>
-      <i>Record: Vittorie complete: ${rec.won} · Stage massimo: ${rec.highStage}/5</i>
-    `
+      `<b>BENVENUTO NELLA GABBIA DEI PREDATORI</b><br>
+      Un'arena d'asfalto e catene d'acciaio scavata nella roccia della scogliera. Qui non conta il possesso palla o l'accademia: conta chi ha la fame di divorare la porta avversaria.<br>
+      <i>Trofeo: ${rec.won > 0 ? "Vinto " + rec.won + " volte 🏆" : "Non ancora conquistato"} · Massimo raggiunto: Round ${rec.highStage + 1}/5</i>`
     );
 
     showButtons([
       {
-        label: `Scendi nella Gabbia contro ${boss.name}`,
-        sub: `Portiere ${boss.gkName} · Sfida a 8 turni`,
+        label: `⚽ Sfida ${boss.name} nella Gabbia`,
+        sub: `Portiere ${boss.gkName} · Sfida a bersagli & riflessi`,
         cls: "hot",
         fn: () => startStageMatch()
       },
       {
-        label: "Regolamento dell'Ego & Altruismo",
-        sub: "Come funziona il misuratore interiore",
-        fn: () => showRules()
+        label: "📜 Filosofia: Ego vs Altruismo",
+        sub: "Come scatenare il Tiro delle Fiamme Nere",
+        fn: () => showPhilosophy()
       },
       {
         label: "◂ Torna al Menu",
         fn: () => {
-          hideEgoHud();
+          closeArenaStage();
           if (onExitCallback) onExitCallback();
         }
       }
     ], true);
   }
 
-  function showRules() {
+  function showPhilosophy() {
     showText(
       "Sara",
-      `
-      «Leo, ho studiato la gabbia: ogni tua decisione sposta l'ago della bilancia:<br>
-      - <b>Azione Egoista</b>: tieni palla, sfidi tutti da solo e carichi l'<b>EGO</b>. Quando superi il 75%, sblocchi il <b>Tiro dell'Ego (Fiamme Nere)</b>, devastante contro qualunque portiere!<br>
-      - <b>Azione d'Intesa</b>: cerchi la sponda di Tommy e Gigi. Carichi l'<b>ALTRUISMO</b> e recuperi Grinta preziosa per non rimanere col fiato corto.<br>
-      Scegli quale filosofia ti porterà sul tetto del mondo!»
-    `
+      `«Leo, ogni tuo tiro nella Gabbia influenza la tua <b>Aura</b>:<br>
+      - <b>Tiro Egoista (Fiamme Nere)</b>: Mirando agli angoli impossibili e sfidando il portiere da solo aumenti l'<b>EGO</b>. Sopra il 75%, Leo rilascia l'aura ciano/oscura e il tiro travolge qualsiasi barriera!<br>
+      - <b>Azione d'Intesa</b>: Appoggiando ai compagni ricarichi la <b>Grinta</b> per non esaurire il fiato negli ultimi round.<br>
+      Trova il tuo istinto e abbatti tutti i 5 predatori!»`
     );
 
     showButtons([
@@ -229,323 +230,381 @@
   function startStageMatch() {
     myScore = 0;
     oppScore = 0;
-    matchTurn = 0;
+    matchTurn = 1;
     matchGuts = 100;
-    egoMeter = 50;
-
+    isShooting = false;
+    ballAnim = null;
     const boss = BOSSES[currentStage];
-    setChap(`Gabbia · vs ${boss.name}`);
-    renderEgoHud();
-
-    showText(
-      boss.id === "alter" ? "ombra" : "voce",
-      `
-      <b>${boss.name.toUpperCase()}</b> ti fissa da metà campo.<br>
-      ${boss.quote}
-    `
-    );
-
-    setTimeout(() => {
-      runAttackTurn();
-    }, 1200);
+    setChap(`Gabbia · ${boss.name}`);
+    renderArenaVisual();
   }
 
-  function runAttackTurn() {
-    matchTurn++;
-    renderEgoHud();
-
-    if (matchTurn > 8) {
-      endMatch();
-      return;
-    }
+  function renderArenaVisual() {
+    const alt = getStageAlt();
+    if (!alt) return;
+    alt.hidden = false;
+    alt.style.display = "block";
+    alt.style.position = "relative";
+    alt.style.overflow = "hidden";
 
     const boss = BOSSES[currentStage];
-    const hasEgoShot = egoMeter >= 70 && matchGuts >= 25;
-    const hasComboShot = egoMeter <= 30 && matchGuts >= 20;
+    const egoPercent = Math.min(100, Math.max(0, egoMeter));
+    const isEgoActive = egoPercent >= 75;
+
+    alt.innerHTML = `
+      <div id="arenaBgWrap" style="position:absolute; inset:0; pointer-events:none;">
+        <img src="img/blue_lock_cage.jpg" style="width:100%; height:100%; object-fit:cover; filter:contrast(1.2) brightness(0.85);">
+        <div style="position:absolute; inset:0; background:radial-gradient(circle at center, transparent 40%, rgba(6,11,24,0.7) 90%);"></div>
+        ${isEgoActive ? '<div style="position:absolute; inset:0; box-shadow:inset 0 0 40px #00e5ff; mix-blend-mode:screen; animation:pulseEgo 1.5s infinite alternate;"></div>' : ''}
+      </div>
+
+      <!-- Top Cage HUD -->
+      <div style="position:absolute; top:6px; left:8px; right:8px; z-index:10; display:flex; justify-content:space-between; align-items:center; background:rgba(10,16,32,0.85); border:1px solid rgba(0,229,255,0.4); border-radius:8px; padding:4px 10px; font-size:11px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="color:#00e5ff; font-weight:bold;">VS ${boss.name.toUpperCase()}</span>
+          <span style="color:var(--dim);">Turno ${matchTurn}/6</span>
+        </div>
+        <div style="font-size:14px; font-weight:bold; color:var(--gold); font-family:var(--display);">
+          LEO ${myScore} – ${oppScore} ${boss.name.split(" ")[0].toUpperCase()}
+        </div>
+        <div style="color:${isEgoActive ? '#00e5ff' : '#ffd23f'}; font-weight:bold;">
+          ${isEgoActive ? '🔥 EGO MASSIMO' : '⚡ GRINTA ' + Math.round(matchGuts)}
+        </div>
+      </div>
+
+      <!-- Interactive Goal Stage with Keeper and Target Crosshair -->
+      <div id="cagePitchView" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding-top:24px;">
+        <canvas id="cageCv" width="320" height="200" style="width:100%; height:100%; cursor:crosshair;"></canvas>
+      </div>
+
+      <!-- Ego Flame Meter Overlay -->
+      <div style="position:absolute; bottom:6px; left:12px; right:12px; z-index:10; background:rgba(6,11,24,0.8); border:1px solid #1a2744; border-radius:6px; padding:4px 8px; display:flex; align-items:center; gap:8px;">
+        <span style="font-size:10px; color:#81d4fa; font-weight:bold;">INTESA</span>
+        <div style="flex:1; height:8px; background:#0e1424; border-radius:4px; overflow:hidden; position:relative; border:1px solid rgba(0,229,255,0.3);">
+          <div style="height:100%; width:${egoPercent}%; background:linear-gradient(90deg, #ffd23f 0%, #00e5ff 70%, #ff4d5a 100%); transition:width 0.3s ease;"></div>
+        </div>
+        <span style="font-size:10px; color:#ff4d5a; font-weight:bold;">EGO</span>
+      </div>
+    `;
+
+    setupCageCanvas();
+    startTurnPrompt();
+  }
+
+  let keeperX = 160;
+  let keeperDir = 1;
+
+  function setupCageCanvas() {
+    const cv = document.getElementById("cageCv");
+    if (!cv) return;
+    const ctx = cv.getContext("2d");
+    const boss = BOSSES[currentStage];
+
+    // Click to aim on cage
+    cv.onclick = (e) => {
+      if (isShooting) return;
+      const rect = cv.getBoundingClientRect();
+      const clickX = ((e.clientX - rect.left) / rect.width) * 320;
+      const clickY = ((e.clientY - rect.top) / rect.height) * 200;
+      // Target area inside goal (x: 60..260, y: 50..150)
+      targetAim.x = Math.max(70, Math.min(250, clickX));
+      targetAim.y = Math.max(55, Math.min(145, clickY));
+    };
+
+    function loop() {
+      if (!document.getElementById("cageCv")) return;
+      ctx.clearRect(0, 0, 320, 200);
+
+      // 1. Draw goal perspective
+      ctx.strokeStyle = "rgba(255,255,255,0.7)";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(60, 50, 200, 100);
+
+      // Goal nets pattern
+      ctx.strokeStyle = "rgba(0, 229, 255, 0.15)";
+      ctx.lineWidth = 1;
+      for (let x = 60; x <= 260; x += 15) {
+        ctx.beginPath(); ctx.moveTo(x, 50); ctx.lineTo(x, 150); ctx.stroke();
+      }
+      for (let y = 50; y <= 150; y += 15) {
+        ctx.beginPath(); ctx.moveTo(60, y); ctx.lineTo(260, y); ctx.stroke();
+      }
+
+      // 2. Animate Keeper
+      if (!isShooting) {
+        keeperX += boss.gkSpeed * keeperDir;
+        if (keeperX > 225) keeperDir = -1;
+        if (keeperX < 95) keeperDir = 1;
+      }
+
+      // Draw Keeper sprite
+      ctx.fillStyle = boss.color;
+      ctx.beginPath();
+      ctx.arc(keeperX, 105, 14, 0, Math.PI * 2);
+      ctx.fill();
+      // Keeper body
+      ctx.fillRect(keeperX - 12, 118, 24, 28);
+      // Keeper eyes
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(keeperX - 6, 100, 4, 4);
+      ctx.fillRect(keeperX + 2, 100, 4, 4);
+      // Keeper label
+      ctx.font = "bold 8px sans-serif";
+      ctx.fillStyle = "#fff";
+      ctx.textAlign = "center";
+      ctx.fillText(boss.gkName, keeperX, 90);
+
+      // 3. Draw Target Crosshair
+      ctx.strokeStyle = egoMeter >= 75 ? "#00e5ff" : "#ffd23f";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(targetAim.x, targetAim.y, 10, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(targetAim.x - 14, targetAim.y);
+      ctx.lineTo(targetAim.x + 14, targetAim.y);
+      ctx.moveTo(targetAim.x, targetAim.y - 14);
+      ctx.lineTo(targetAim.x, targetAim.y + 14);
+      ctx.stroke();
+
+      // 4. Ball animation if shooting
+      if (ballAnim) {
+        ctx.fillStyle = ballAnim.flame ? "#00e5ff" : "#fff";
+        ctx.beginPath();
+        ctx.arc(ballAnim.x, ballAnim.y, ballAnim.r, 0, Math.PI * 2);
+        ctx.fill();
+        if (ballAnim.flame) {
+          ctx.strokeStyle = "#fff";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(ballAnim.x, ballAnim.y, ballAnim.r + 4, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      }
+
+      animId = requestAnimationFrame(loop);
+    }
+
+    if (animId) cancelAnimationFrame(animId);
+    animId = requestAnimationFrame(loop);
+  }
+
+  function startTurnPrompt() {
+    const boss = BOSSES[currentStage];
+    const isEgoActive = egoMeter >= 75;
 
     showText(
-      "leo",
-      `
-      <b>Turno ${matchTurn}/8</b> · Sei al limite dell'area della Gabbia. ${boss.name} ti sbarra la strada con gli occhi iniettati di sfida.<br>
-      Come decidi di attaccare?
-    `
+      "Leo",
+      `<b>TURNO ${matchTurn}/6</b> · Tocca la porta sullo schermo per mirare, poi scegli l'azione:<br>
+      ${isEgoActive ? '<span style="color:#00e5ff; font-weight:bold;">⚡ L\'EGO È AL MASSIMO: Tiro delle Fiamme Nere sbloccato!</span>' : 'Decidi se rischiare da solo o giocare di sponda coi compagni.'}`
     );
 
-    const opts = [
+    const btns = [
       {
-        label: "🔥 Sfonda da solo (Scatto Predatore)",
-        sub: "EGO +18% · Grinta -12 · Cerchi la gloria personale",
+        label: isEgoActive ? "🔥 SCATENA IL TIRO DELLE FIAMME NERE!" : "⚡ Conclusione Personale Aggressiva",
+        sub: isEgoActive ? "Trafigge qualunque guardia (+Ego)" : "Mira all'angolino selezionato (+15 Ego)",
+        cls: "hot",
+        fn: () => executeShot(isEgoActive ? "ego_special" : "solo")
+      },
+      {
+        label: "🤝 Triangolazione & Spallata d'Intesa",
+        sub: "Sponda con Tommy: spiazza il portiere (+Grinta, -Ego)",
+        fn: () => executeShot("team")
+      },
+      {
+        label: "🎯 Cambia bersaglio: Incrocio Alto",
+        sub: "Mira all'angolo superiore sinistro",
         fn: () => {
-          egoMeter = Math.min(100, egoMeter + 18);
-          matchGuts = Math.max(0, matchGuts - 12);
-          resolveDribble(true);
+          targetAim = { x: 80, y: 65 };
+          startTurnPrompt();
         }
       },
       {
-        label: "🤝 Dialoga col compagno (Sponda Rapida)",
-        sub: "ALTRUISMO +18% · Grinta +10 · Ti appoggi alla squadra",
+        label: "🎯 Cambia bersaglio: Rasoterra a Fil di Palo",
+        sub: "Mira all'angolino basso destro",
         fn: () => {
-          egoMeter = Math.max(0, egoMeter - 18);
-          matchGuts = Math.min(100, matchGuts + 10);
-          resolveDribble(false);
+          targetAim = { x: 240, y: 135 };
+          startTurnPrompt();
         }
       }
     ];
 
-    if (hasEgoShot) {
-      opts.unshift({
-        label: "⚡ TIRO DELL'EGO (FIAMME NERE)",
-        sub: "Tiro speciale anime dell'attaccante supremo · Grinta 25",
-        cls: "hot",
-        fn: () => executeEgoShot()
-      });
-    } else if (hasComboShot) {
-      opts.unshift({
-        label: "⚽ SINERGIA PERFETTA DEL BORGO",
-        sub: "Tiro combinato d'intesa assoluta · Grinta 20",
-        cls: "hot",
-        fn: () => executeComboShot()
-      });
-    } else {
-      opts.push({
-        label: "Tira di precisione",
-        sub: "Conclusione rapida nell'angolino · Grinta 10",
-        disabled: matchGuts < 10,
-        fn: () => {
-          matchGuts = Math.max(0, matchGuts - 10);
-          resolveNormalShot();
-        }
+    showButtons(btns);
+  }
+
+  function executeShot(type) {
+    if (isShooting) return;
+    isShooting = true;
+
+    // Trigger Anime Cut-in if special or high ego
+    if (type === "ego_special" && window.triggerAnimeCutin) {
+      window.triggerAnimeCutin({
+        who: "Leo Moretti",
+        shotName: "TIRO DELL'EGO · FIAMME NERE",
+        isEgo: true,
+        sfxWord: "DOOOM!"
       });
     }
 
-    showButtons(opts);
+    // Ball flight animation
+    ballAnim = {
+      x: 160,
+      y: 190,
+      r: 12,
+      flame: type === "ego_special"
+    };
+
+    const targetX = targetAim.x;
+    const targetY = targetAim.y;
+    const boss = BOSSES[currentStage];
+
+    let step = 0;
+    const totalSteps = 24;
+
+    const timer = setInterval(() => {
+      step++;
+      const progress = step / totalSteps;
+      ballAnim.x = 160 + (targetX - 160) * progress;
+      ballAnim.y = 190 + (targetY - 190) * progress;
+      ballAnim.r = Math.max(6, 12 - 6 * progress);
+
+      if (step >= totalSteps) {
+        clearInterval(timer);
+        resolveShotOutcome(type);
+      }
+    }, 20);
   }
 
-  function resolveDribble(isEgo) {
+  function resolveShotOutcome(type) {
     const boss = BOSSES[currentStage];
-    const success = Math.random() < 0.65;
+    const distToKeeper = Math.abs(targetAim.x - keeperX);
+    let goal = false;
 
-    if (success) {
-      showText(
-        "voce",
-        isEgo
-          ? `<b>SUPERATO!</b> Fai passare la palla tra le gambe di ${boss.name} con un ghigno da predatore. Sei a tu per tu con ${boss.gkName}!`
-          : `<b>SCAMBIO PERFETTO!</b> Uno-due fulmineo con Tommy che disorienta ${boss.name}. Sei libero davanti alla porta!`
-      );
-      showButtons([
-        {
-          label: "Concludi a rete! ▸",
-          cls: "hot",
-          fn: () => resolveNormalShot(true)
-        }
-      ]);
+    if (type === "ego_special") {
+      goal = true; // Special is unstoppable
+      egoMeter = Math.max(40, egoMeter - 20); // Consumes some ego
+    } else if (type === "team") {
+      // Team pass displaces keeper
+      goal = Math.random() > 0.3;
+      egoMeter = Math.max(0, egoMeter - 15);
+      matchGuts = Math.min(100, matchGuts + 20);
     } else {
-      showText(
-        "voce",
-        `<b>INTERCETTATO!</b> ${boss.name} intuisce il tuo movimento e ti sradica il pallone con una spallata decisa!`
-      );
-      setTimeout(runDefendTurn, 1000);
+      // Solo: success if far enough from keeper
+      goal = distToKeeper > 35;
+      egoMeter = Math.min(100, egoMeter + 20);
+      matchGuts = Math.max(0, matchGuts - 15);
     }
-  }
-
-  function executeEgoShot() {
-    matchGuts = Math.max(0, matchGuts - 25);
-    const boss = BOSSES[currentStage];
-
-    if (window.triggerAnimeCutin) {
-      window.triggerAnimeCutin(
-        {
-          who: "LEO (EGO)",
-          shotName: "TIRO DELL'EGO SUPREMO",
-          isEgo: true,
-          sfxWord: "GOOOAL!"
-        },
-        () => {
-          myScore++;
-          if (window.sfx) window.sfx("goal");
-          showText(
-            "leo",
-            `
-            <b style="color:#00e5ff; font-size:17px;">GOL DISTRUTTIVO!</b><br>
-            La palla brucia l'aria con una scia di fiamme blu e nere! Il portiere ${boss.gkName} non fa nemmeno in tempo a muovere un dito!
-          `
-          );
-          showButtons([{ label: "Avanti ▸", fn: runDefendTurn }]);
-        }
-      );
-    } else {
-      myScore++;
-      showText("leo", `<b>GOL DELL'EGO!</b> Il tiro piega le mani di ${boss.gkName}!`);
-      showButtons([{ label: "Avanti ▸", fn: runDefendTurn }]);
-    }
-  }
-
-  function executeComboShot() {
-    matchGuts = Math.max(0, matchGuts - 20);
-    const boss = BOSSES[currentStage];
-
-    if (window.triggerAnimeCutin) {
-      window.triggerAnimeCutin(
-        {
-          who: "RONDINE FC",
-          shotName: "SINERGIA TOTALE",
-          isEgo: false,
-          sfxWord: "RETEEE!"
-        },
-        () => {
-          myScore++;
-          if (window.sfx) window.sfx("goal");
-          showText(
-            "voce",
-            `
-            <b style="color:var(--gold); font-size:17px;">GOL SPETTACOLARE!</b><br>
-            Triangolazione perfetta a occhi chiusi! Leo appoggia in rete a porta spalancata!
-          `
-          );
-          showButtons([{ label: "Avanti ▸", fn: runDefendTurn }]);
-        }
-      );
-    } else {
-      myScore++;
-      showText("voce", `<b>GOL DI SQUADRA!</b> Rete splendida!`);
-      showButtons([{ label: "Avanti ▸", fn: runDefendTurn }]);
-    }
-  }
-
-  function resolveNormalShot(boosted = false) {
-    const boss = BOSSES[currentStage];
-    const prob = boosted ? 0.75 : 0.5;
-    const goal = Math.random() < prob;
 
     if (goal) {
       myScore++;
-      if (window.sfx) window.sfx("goal");
-      showText("voce", `<b>GOL!</b> Conclusione secca all'angolino basso, ${boss.gkName} battuto!`);
+      if (window.toast) window.toast("⚽ GOOOL NELLA GABBIA!", "goal", "🔥");
+      showText("arbitro", `<b style="color:#00e5ff; font-size:16px;">GOOOL!</b> La palla scuote la rete metallica! Leo esulta nella gabbia!`);
     } else {
-      if (window.sfx) window.sfx("crowd");
-      showText("voce", `<b>PARATO!</b> ${boss.gkName} devia il pallone sopra la traversa con la punta delle dita!`);
+      if (window.toast) window.toast("PARATA! Il portiere respinge!", "warn", "🧤");
+      showText("arbitro", `<b>PARATO!</b> ${boss.gkName} si allunga con un balzo felino e toglie il pallone dal sacco!`);
     }
-    showButtons([{ label: "Avanti ▸", fn: runDefendTurn }]);
+
+    // Opponent counter-attack turn
+    setTimeout(() => {
+      resolveCounterAttack();
+    }, 1800);
   }
 
-  function runDefendTurn() {
-    renderEgoHud();
+  function resolveCounterAttack() {
     const boss = BOSSES[currentStage];
+    matchTurn++;
 
-    showText(
-      boss.id === "alter" ? "ombra" : "voce",
-      `
-      <b>CONTRATTACCO!</b> ${boss.name} carica verso Nico preparando il suo colpo segreto: <b>${boss.special}</b>!
-    `
-    );
+    // Boss attack chance
+    const bossScores = Math.random() < 0.45;
+    if (bossScores) {
+      oppScore++;
+      if (window.toast) window.toast(`GOL DI ${boss.name.toUpperCase()}!`, "warn", "⚡");
+      showText(
+        boss.name,
+        `«${boss.special}!»<br>${boss.name} schianta un siluro contro la traversa che rimbalza oltre la linea! Nico non ci arriva!`
+      );
+    } else {
+      showText(
+        "Nico",
+        `«Col cavolo che passa! Questa gabbia è mia!»<br>Nico devia a pugni chiusi l'attacco di ${boss.name}!`
+      );
+    }
 
-    showButtons([
-      {
-        label: "Muro Difensivo con Nico (Gatto Volante)",
-        sub: "Nico si lancia a corpo morto",
-        fn: () => {
-          const save = Math.random() < 0.6;
-          if (save) {
-            if (window.sfx) window.sfx("kick");
-            showText("nico", "«GATTO VOLANTE DELLA GABBIA! Non passa niente qui!» Nico blocca il tiro sulla linea!");
-          } else {
-            oppScore++;
-            if (window.sfx) window.sfx("goal");
-            showText("voce", `<b>GOL AVVERSARIO!</b> La potenza di ${boss.name} piega le difese: pareggiano i conti.`);
-          }
-          showButtons([{ label: "Prossimo Turno ▸", fn: runAttackTurn }]);
-        }
-      },
-      {
-        label: "Intervento in Scivolata Disperata",
-        sub: "Leo si lancia per deviare la traiettoria",
-        fn: () => {
-          const block = Math.random() < 0.55;
-          if (block) {
-            showText("leo", "Ci metti la punta dello scarpino! Palla deviata in fallo laterale.");
-          } else {
-            oppScore++;
-            showText("voce", `Troppo veloce! ${boss.name} trova il pertugio vincente.`);
-          }
-          showButtons([{ label: "Prossimo Turno ▸", fn: runAttackTurn }]);
-        }
+    setTimeout(() => {
+      isShooting = false;
+      ballAnim = null;
+      renderArenaVisual();
+
+      if (matchTurn > 6) {
+        endStageMatch();
+      } else {
+        startTurnPrompt();
       }
-    ]);
+    }, 1800);
   }
 
-  function endMatch() {
-    hideEgoHud();
+  function endStageMatch() {
     const boss = BOSSES[currentStage];
-    const isWin = myScore > oppScore;
-
     const rec = getBLRecord();
-    rec.highStage = Math.max(rec.highStage, currentStage + (isWin ? 1 : 0));
 
-    if (isWin) {
+    if (myScore > oppScore) {
+      rec.highStage = Math.max(rec.highStage, currentStage + 1);
+      saveBLRecord(rec);
+
       if (currentStage >= BOSSES.length - 1) {
-        // Vittoria totale torneo
+        // Tournament victory
         rec.won++;
         saveBLRecord(rec);
-        setChap("Blue Lock · VITTORIA SUPREMA");
         showText(
           "voce",
-          `
-          <b style="color:#00e5ff; font-size:18px;">HAI DOMATO LA GABBIA DEI PREDATORI!</b><br>
-          Hai superato persino la tua Ombra interiore. Adesso Leo possiede l'Alchimia perfetta: il cuore del Borgo unito all'istinto letale del fuoriclasse assoluto!<br><br>
-          <i>🏆 Sbloccato il trofeo "PREDATORE SUPREMO DELLA COSTA"!</i>
-        `
+          `<b style="color:var(--gold); font-size:18px;">👑 RE DELLA GABBIA DEI PREDATORI!</b><br>
+          Hai battuto anche il tuo Alter Ego oscuro! Hai dominato la gabbia di Punta Nera. L'Ego e il Cuore di Borgo Marino ti appartengono!`
         );
         showButtons([
           {
-            label: "Trionfo al Molo ▸",
+            label: "Trionfo & Ritorna al Menu",
             cls: "hot",
             fn: () => {
+              closeArenaStage();
               if (onExitCallback) onExitCallback();
             }
           }
         ], true);
       } else {
-        currentStage++;
-        saveBLRecord(rec);
-        setChap("Gabbia · Vittoria");
         showText(
-          boss.id === "alter" ? "ombra" : "voce",
-          `
-          <b>VITTORIA CONTRO ${boss.name.toUpperCase()} (${myScore}–${oppScore})!</b><br>
-          ${boss.name} riconosce la tua superiorità nella Gabbia.<br>
-          Ti prepari per la prossima sfida: <b>${BOSSES[currentStage].name}</b> ti attende!
-        `
+          boss.name,
+          `«Sei forte, Moretti... La gabbia ha scelto il suo predatore. Ma la prossima sfida ti distruggerà.»<br>
+          <b>VITTORIA ${myScore} – ${oppScore}! Avanzi al Round ${currentStage + 2}!</b>`
         );
         showButtons([
           {
-            label: `Affronta ${BOSSES[currentStage].name} ▸`,
+            label: `Avanza al Round ${currentStage + 2} ▸`,
             cls: "hot",
-            fn: () => startStageMatch()
-          },
-          {
-            label: "Prendi fiato al Bar Moretti",
-            fn: () => showHub()
+            fn: () => {
+              currentStage++;
+              startStageMatch();
+            }
           }
         ], true);
       }
     } else {
-      saveBLRecord(rec);
-      setChap("Gabbia · Sconfitta");
       showText(
-        "nico",
-        `
-        «Che batosta! I tiri nella Gabbia rimbalzano ovunque! Ricarichiamoci con due teglie di focaccia e riproviamo subito!»
-      `
+        boss.name,
+        `«Questa gabbia non perdona chi esita. Torna ad allenarti coi gabbiani, Moretti!»<br>
+        <b>SCONFITTA ${myScore} – ${oppScore}. Fine della corsa.</b>`
       );
       showButtons([
         {
-          label: "Riprova questa sfida",
+          label: "Riprova la Sfida 🔄",
           cls: "hot",
           fn: () => startStageMatch()
         },
         {
-          label: "Torna all'ingresso della Gabbia",
-          fn: () => showHub()
+          label: "Torna al Menu",
+          fn: () => {
+            closeArenaStage();
+            if (onExitCallback) onExitCallback();
+          }
         }
       ], true);
     }

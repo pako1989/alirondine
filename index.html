@@ -23,11 +23,7 @@
     <div class="topr">
       <span class="chap" id="chap"></span>
       <button type="button" class="mute" id="homeBtn" aria-label="Home" title="Torna alla Home / Menu Principale">🏠</button>
-      <button type="button" class="mute" id="modesHubBtn" aria-label="Tutte le Modalità" title="Tutte le Modalità & Novità" style="color:var(--gold); font-weight:800; border-color:var(--gold); background:rgba(255,210,63,0.12);">✨ Modalità</button>
       <button type="button" class="mute" id="btn3d" aria-label="Stadio 3D" title="Stadio 3D · Sfida dei Tiri (Tiro della Rondine 3D)">⚽ 3D</button>
-      <button type="button" class="mute" id="rosterBtn" aria-label="Roster & Talenti" title="Roster Squadra & Talenti del Borgo">🛡️</button>
-      <button type="button" class="mute" id="logBtn" aria-label="Registro Dialoghi" title="Registro Dialoghi (L)">📜</button>
-      <button type="button" class="mute" id="animeFxBtn" aria-label="Effetti Anime Manga" title="Attiva/Disattiva Anime Cut-in">⚡</button>
       <button type="button" class="mute" id="radioBtn" aria-label="Radiolina" title="La Radiolina del Borgo (Musica & Frequenze)">📻</button>
       <button type="button" class="mute" id="themeBtn" aria-label="Tema Grafico" title="Cambia tema (Classico / Vintage / Neon / Arcade)">🎨</button>
       <button type="button" class="mute" id="gmenu" aria-label="Menu" hidden>☰</button>
@@ -72,92 +68,6 @@
   <iframe id="borgoIframe" src="about:blank" style="flex:1; width:100%; border:none; background:#0e1424;"></iframe>
 </div>
 
-<!-- Modal Hub Tutte le Modalità & Novità -->
-<div id="modesHubModal" hidden style="position:fixed; inset:0; z-index:9990; background:rgba(7,11,26,0.92); backdrop-filter:blur(6px); display:none; align-items:center; justify-content:center; padding:16px;">
-  <div style="background:var(--sky); border:2px solid var(--gold); border-radius:14px; max-width:680px; width:100%; max-height:90vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 0 35px rgba(0,0,0,0.85);">
-    <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:#14243d; border-bottom:1.5px solid rgba(255,210,63,0.35);">
-      <div style="font-weight:bold; color:var(--gold); font-size:16px; display:flex; align-items:center; gap:8px; font-family:var(--display, sans-serif);">
-        <span>✨ Tutte le Modalità & Novità</span>
-      </div>
-      <button type="button" class="mute" id="closeModesHubBtn" style="padding:4px 10px; font-weight:bold; border-color:#ff4d5a; color:#ff8088;">✕ Chiudi</button>
-    </div>
-    <div style="padding:14px; overflow-y:auto; display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:10px;">
-      
-      <div style="background:#131c33; border:1px solid #00e5ff; border-radius:10px; padding:12px; display:flex; flex-direction:column; justify-content:space-between;">
-        <div>
-          <div style="color:#00e5ff; font-weight:bold; font-size:15px; margin-bottom:4px;">🔥 Blue Lock · La Gabbia dell'Ego</div>
-          <p style="color:#ced9eb; font-size:12px; margin:0 0 10px 0; line-height:1.4;">Torneo di sopravvivenza in 5 round a Punta Nera. Misuratore Ego vs Altruismo, aura Fiamme Nere e cut-in manga shonen.</p>
-        </div>
-        <button type="button" class="choice-btn hot" style="width:100%; padding:8px;" onclick="window.closeModesHubModal(); if(window.openBlueLockMode) window.openBlueLockMode();">Avvia Torneo Blue Lock ▸</button>
-      </div>
-
-      <div style="background:#131c33; border:1px solid #78909c; border-radius:10px; padding:12px; display:flex; flex-direction:column; justify-content:space-between;">
-        <div>
-          <div style="color:#90caf9; font-weight:bold; font-size:15px; margin-bottom:4px;">🕵️ Noir · Il Peschereccio Fantasma</div>
-          <p style="color:#ced9eb; font-size:12px; margin:0 0 10px 0; line-height:1.4;">Indagine costiera noir stile True Detective & Breaking Bad con il Maresciallo Lina Esposito sul «Sale Blu» del Golfo.</p>
-        </div>
-        <button type="button" class="choice-btn hot" style="width:100%; padding:8px;" onclick="window.closeModesHubModal(); if(window.openNoirStoryMenu) window.openNoirStoryMenu();">Apri Saga Noir ▸</button>
-      </div>
-
-      <div style="background:#131c33; border:1px solid #ba68c8; border-radius:10px; padding:12px; display:flex; flex-direction:column; justify-content:space-between;">
-        <div>
-          <div style="color:#e1bee7; font-weight:bold; font-size:15px; margin-bottom:4px;">🌌 Multiverso · La Panda Quantistica</div>
-          <p style="color:#ced9eb; font-size:12px; margin:0 0 10px 0; line-height:1.4;">Saga demenziale stile Rick & Morty, Futurama e Game of Thrones con Nonna Ferri, Borgo Cyberpunk e Gatto Supremo.</p>
-        </div>
-        <button type="button" class="choice-btn hot" style="width:100%; padding:8px;" onclick="window.closeModesHubModal(); if(window.openMultiverseMenu) window.openMultiverseMenu();">Viaggia nel Multiverso ▸</button>
-      </div>
-
-      <div style="background:#131c33; border:1px solid var(--gold); border-radius:10px; padding:12px; display:flex; flex-direction:column; justify-content:space-between;">
-        <div>
-          <div style="color:var(--gold); font-weight:bold; font-size:15px; margin-bottom:4px;">🛡️ Roster & Talenti del Borgo</div>
-          <p style="color:#ced9eb; font-size:12px; margin:0 0 10px 0; line-height:1.4;">Dashboard tattica anime: visualizza le schede compagni ed equipaggia fino a 2 Talenti del Borgo (Focaccia, Acciughe, Cruciverba).</p>
-        </div>
-        <button type="button" class="choice-btn" style="width:100%; padding:8px;" onclick="window.closeModesHubModal(); if(window.openRosterTalentsModal) window.openRosterTalentsModal();">Apri Roster & Talenti ▸</button>
-      </div>
-
-      <div style="background:#131c33; border:1px solid #ffd23f; border-radius:10px; padding:12px; display:flex; flex-direction:column; justify-content:space-between;">
-        <div>
-          <div style="color:#ffd23f; font-weight:bold; font-size:15px; margin-bottom:4px;">⚽ Stadio 3D · Sfida dei Tiri</div>
-          <p style="color:#ced9eb; font-size:12px; margin:0 0 10px 0; line-height:1.4;">Tiro della Rondine in campo 3D tridimensionale con Three.js: batti i portieri leggendari con traiettorie a effetto.</p>
-        </div>
-        <button type="button" class="choice-btn hot" style="width:100%; padding:8px;" onclick="window.closeModesHubModal(); if(window.openStadium3D) window.openStadium3D();">Entra nello Stadio 3D ▸</button>
-      </div>
-
-      <div style="background:#131c33; border:1px solid #4caf50; border-radius:10px; padding:12px; display:flex; flex-direction:column; justify-content:space-between;">
-        <div>
-          <div style="color:#a5d6a7; font-weight:bold; font-size:15px; margin-bottom:4px;">🌀 Il Borgo Storto (GDR a turni)</div>
-          <p style="color:#ced9eb; font-size:12px; margin:0 0 10px 0; line-height:1.4;">Lo spin-off GDR ora arricchito con nuove mosse speciali anime: Tiro dell'Ego, Gabbiano Sonico, Analisi Debolezza e Gatto Spaziale.</p>
-        </div>
-        <button type="button" class="choice-btn" style="width:100%; padding:8px;" onclick="window.closeModesHubModal(); window.openBorgoStortoModal();">Gioca a Borgo Storto ▸</button>
-      </div>
-
-      <div style="background:#131c33; border:1px solid #ff7043; border-radius:10px; padding:12px; display:flex; flex-direction:column; justify-content:space-between;">
-        <div>
-          <div style="color:#ffab91; font-weight:bold; font-size:15px; margin-bottom:4px;">🚗 La Corsa della Panda 30</div>
-          <p style="color:#ced9eb; font-size:12px; margin:0 0 10px 0; line-height:1.4;">Minigioco 3D / Arcade: sfreccia tra i caruggi con Nonna Ferri per consegnare la focaccia calda!</p>
-        </div>
-        <button type="button" class="choice-btn" style="width:100%; padding:8px;" onclick="window.closeModesHubModal(); if(window.openPanda3D) window.openPanda3D();">Sali sulla Panda 3D ▸</button>
-      </div>
-
-      <div style="background:#131c33; border:1px solid #4fc3f7; border-radius:10px; padding:12px; display:flex; flex-direction:column; justify-content:space-between;">
-        <div>
-          <div style="color:#81d4fa; font-weight:bold; font-size:15px; margin-bottom:4px;">⛵ Saghe Speciali del Golfo</div>
-          <p style="color:#ced9eb; font-size:12px; margin:0 0 10px 0; line-height:1.4;">«La Notte del Faro» (torneo notturno sulla scogliera) e «La Traversata d'Oro» (Corsari del Tigullio).</p>
-        </div>
-        <div style="display:flex; gap:6px;">
-          <button type="button" class="choice-btn" style="flex:1; padding:6px 4px; font-size:12px;" onclick="window.closeModesHubModal(); if(window.openFaroStoryMenu) window.openFaroStoryMenu();">Il Faro ▸</button>
-          <button type="button" class="choice-btn" style="flex:1; padding:6px 4px; font-size:12px;" onclick="window.closeModesHubModal(); if(window.openTraversataMenu) window.openTraversataMenu();">Traversata ▸</button>
-        </div>
-      </div>
-
-    </div>
-    <div style="padding:10px 14px; background:#101a2e; border-top:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center; gap:8px;">
-      <span style="font-size:12px; color:var(--dim);">Tutto accessibile anche dai pulsanti in cima (🏠, ✨, ⚽ 3D, 🛡️, 📜, ⚡)</span>
-      <button type="button" class="choice-btn" style="padding:5px 12px; font-size:12px;" onclick="window.closeModesHubModal(); if(window.title) window.title();">Menu Principale Completo 🏠</button>
-    </div>
-  </div>
-</div>
-
 <!-- Script modulari -->
 <script src="js/slots.js"></script>
 <script src="js/three.standalone.js"></script>
@@ -181,26 +91,6 @@ if (homeBtn) {
     if (window.title) window.title();
     if (window.toast) window.toast("Menu Principale", "info", "🏠");
   };
-}
-window.openModesHubModal = function () {
-  var m = document.getElementById("modesHubModal");
-  if (!m) return;
-  m.hidden = false;
-  m.style.display = "flex";
-};
-window.closeModesHubModal = function () {
-  var m = document.getElementById("modesHubModal");
-  if (!m) return;
-  m.hidden = true;
-  m.style.display = "none";
-};
-var modesHubBtn = document.getElementById("modesHubBtn");
-if (modesHubBtn) {
-  modesHubBtn.onclick = window.openModesHubModal;
-}
-var closeModesHubBtn = document.getElementById("closeModesHubBtn");
-if (closeModesHubBtn) {
-  closeModesHubBtn.onclick = window.closeModesHubModal;
 }
 var btn3d = document.getElementById("btn3d");
 if (btn3d) {
