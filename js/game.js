@@ -2646,23 +2646,13 @@
     text("voce", rows.join("<br>"));
     buttons([{ label: "◂ Extra", fn: extras }]);
   }
-  function album(page = 0) {
-    const got = getList(CARDS), ids = Object.keys(BIO), per = 8, pages = Math.ceil(ids.length / per);
-    view = { kind: "scene", bg: "title" }; chap(`Album · pagina ${page + 1}/${pages}`);
-    text("voce", `Figurine: <em>${got.length} su ${ids.length}</em>. Le trovi giocando: ogni personaggio che incontri entra nell'album.`);
-    buttons([
-      ...ids.slice(page * per, page * per + per).map((id) => got.includes(id)
-        ? { label: CAST[id].name, fn: () => card(id, page) }
-        : { label: "???", sub: "Ancora da incontrare", disabled: true, fn: () => {} }),
-      ...(page > 0 ? [{ label: "◂ Pagina prima", fn: () => album(page - 1) }] : []),
-      ...(page < pages - 1 ? [{ label: "Pagina dopo ▸", fn: () => album(page + 1) }] : []),
-      { label: "◂ Extra", fn: extras },
-    ]);
+  function album(page = 0, backFn = extras) {
+    const bFn = typeof page === "function" ? page : (typeof backFn === "function" ? backFn : extras);
+    borgoEncyclopedia(bFn);
   }
-  function card(id, page) {
-    view = { kind: "scene", bg: "title", speaker: id };
-    text(id, esc(BIO[id]));
-    buttons([{ label: "◂ Album", fn: () => album(page) }]);
+  function card(id, page, backFn = extras) {
+    const bFn = typeof page === "function" ? page : (typeof backFn === "function" ? backFn : extras);
+    borgoEncyclopedia(bFn, undefined, id);
   }
 
   // ================= STORIE EXTRA =================
@@ -13758,6 +13748,53 @@
     marco: { role: "Padre scomparso di Nico Ferri", quote: "«Ho lo stesso modo storto di stare in piedi. Ma adesso voglio raddrizzarmi.»", stat: "Chiave d'accesso Meridian", bond: "Redenzione paterna a Londra" }
   };
 
+  const ENC_HINTS = {
+    leo: "Protagonista della storia.",
+    nico: "Il portiere della Rondine: compagno inseparabile.",
+    sara: "La manager e stratega della Rondine FC.",
+    tommy: "Ala generosa: incontralo nella prima stagione.",
+    gigi: "La riserva prodigio: entra in squadra nella Stagione 2.",
+    ruggeri: "L'allenatore storico: alla Trattoria Moretti o al campo.",
+    papa: "Tuo padre: sempre al timone della Trattoria Moretti.",
+    rita: "In cucina alla Trattoria Moretti.",
+    dario: "Tuo fratello maggiore: cercalo nella storia delle prime stagioni.",
+    kenji: "Capitano delle Aquile di Ponente: incontralo nella Stagione 1.",
+    sho: "Talento giapponese: sfidalo nella Stagione 3.",
+    bruno: "Capitano dei Corvi dell'Aurora: compare nella Stagione 2.",
+    fede: "Il fantasista azzurro: convocato nella Nazionale U19 (Stagione 3).",
+    jojo: "Fenomeno del Brasile U19: affrontalo a Marsiglia nella Stagione 3.",
+    vitale: "Bandiera della Lanterna: incontralo in Serie A (Stagione 4).",
+    keller: "Centravanti dello Sturmwald: compare in Champions League (Stagione 5).",
+    nonna: "Nonna Ferri in piazza a Borgo Marino a bordo della sua Panda.",
+    baciccia: "Il pescatore sul molo di Ponente a Borgo Marino.",
+    pina: "All'edicola del Borgo in piazza.",
+    aurelio: "Don Aurelio sul sagrato della Chiesa di San Pietro a Borgo Marino.",
+    tonino: "Al chiosco dei gelati sul lungomare di Borgo Marino.",
+    pietrino: "Al campetto di terra dietro al porto di Borgo Marino.",
+    rocco: "Capitano degli Squali di Punta Nera, vicino alla scogliera.",
+    ernesta: "Pioniera del calcio femminile del '68: cercala nella piazza delle erbe.",
+    ornella: "Sulla collina degli ulivi sopra il Borgo.",
+    ester: "Al faro di Punta Rondine in fondo alla scogliera.",
+    settimio: "Custode del vecchio stadio comunale tra le sterpaglie.",
+    anselmo: "Sulla barca delle lampare al calare del sole.",
+    valli: "Il combinatore di partite: compare nella Stagione 1.",
+    ines: "La Contessa Ines Corvo dell'Aurora: compare nella Stagione 2.",
+    lina: "Il Maresciallo Lina Esposito: caserma dei Carabinieri di Borgo Marino.",
+    marta: "La CT Marta Galli della Nazionale: compare nella Stagione 3.",
+    aldo: "Il dirigente Aldo Lanza: compare nella Stagione 3.",
+    mazza: "Il potente procuratore «Il Notaio»: compare nella Stagione 4.",
+    crane: "Sir Edmund Crane: la mente del Fondo Meridian nella Stagione 5.",
+    marco: "Marco Ferri, padre scomparso di Nico: compare a Londra nella Stagione 5."
+  };
+
+  function encIsUnlocked(id) {
+    if (id === "leo" || id === "papa" || id === "rita" || id === "ruggeri" || id === "nico" || id === "sara") return true;
+    const cards = getList(CARDS);
+    if (cards.includes(id)) return true;
+    if (S && S.f && (S.f["met_" + id] || S.f["talk_" + id] || S.f[id])) return true;
+    return false;
+  }
+
   let curEncCat = "rondine";
   let curEncChar = "leo";
 
@@ -13773,26 +13810,61 @@
     chap("Enciclopedia del Borgo");
     statsBox();
 
+    // Calcolo progresso sblocco totale
+    let totalEnc = 0, unlockedEnc = 0;
+    ENC_CATS.forEach(ct => {
+      ct.members.forEach(m => {
+        totalEnc++;
+        if (encIsUnlocked(m)) unlockedEnc++;
+      });
+    });
+
+    const isUnlocked = encIsUnlocked(curEncChar);
     const c = CAST[curEncChar] || { name: curEncChar };
     const bioText = BIO[curEncChar] || "Abitante e figura chiave delle vicende di Borgo Marino.";
     const ex = ENC_EXTRA[curEncChar] || { role: "Figura del Borgo", quote: "«Sempre forza Rondine!»", stat: "Cuore ligure", bond: "Comunità" };
 
-    text("voce", `
-      <div style="margin-bottom:6px;">
-        <span class="who gold" style="font-weight:bold; font-size:13px; color:#0e1424;">${esc(c.name || curEncChar)}</span>
-        <span style="font-size:12px; color:var(--dim); margin-left:6px;">${esc(ex.role)}</span>
-      </div>
-      <div style="font-style:italic; color:#ffd23f; margin:4px 0 8px; font-size:13px; border-left:3px solid #ffd23f; padding-left:8px;">
-        ${esc(ex.quote)}
-      </div>
-      <div style="font-size:13.5px; line-height:1.45; color:var(--ink); margin-bottom:8px;">
-        ${esc(bioText)}
-      </div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:11.5px; background:rgba(0,0,0,0.25); border-radius:6px; padding:6px 8px;">
-        <div><b>Specialità:</b> <span style="color:#57d68d;">${esc(ex.stat)}</span></div>
-        <div><b>Legame:</b> <span style="color:#3fa7ff;">${esc(ex.bond)}</span></div>
-      </div>
-    `);
+    if (isUnlocked) {
+      text("voce", `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <div>
+            <span class="who gold" style="font-weight:bold; font-size:13px; color:#0e1424;">${esc(c.name || curEncChar)}</span>
+            <span style="font-size:12px; color:var(--dim); margin-left:6px;">${esc(ex.role)}</span>
+          </div>
+          <span style="font-size:11px; color:#ffd23f; font-weight:bold;">Scoperti ${unlockedEnc}/${totalEnc}</span>
+        </div>
+        <div style="font-style:italic; color:#ffd23f; margin:4px 0 8px; font-size:13px; border-left:3px solid #ffd23f; padding-left:8px;">
+          ${esc(ex.quote)}
+        </div>
+        <div style="font-size:13.5px; line-height:1.45; color:var(--ink); margin-bottom:8px;">
+          ${esc(bioText)}
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:11.5px; background:rgba(0,0,0,0.25); border-radius:6px; padding:6px 8px;">
+          <div><b>Specialità:</b> <span style="color:#57d68d;">${esc(ex.stat)}</span></div>
+          <div><b>Legame:</b> <span style="color:#3fa7ff;">${esc(ex.bond)}</span></div>
+        </div>
+      `);
+    } else {
+      text("voce", `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <div>
+            <span class="who" style="background:#475569; color:#fff; font-weight:bold; font-size:12px; padding:2px 8px; border-radius:4px;">🔒 Personaggio non ancora incontrato</span>
+            <span style="font-size:12px; color:var(--dim); margin-left:6px;">Mistero del Borgo</span>
+          </div>
+          <span style="font-size:11px; color:#ffd23f; font-weight:bold;">Scoperti ${unlockedEnc}/${totalEnc}</span>
+        </div>
+        <div style="font-style:italic; color:#94a3b8; margin:4px 0 8px; font-size:13px; border-left:3px solid #64748b; padding-left:8px;">
+          «??? Non hai ancora incrociato questa persona nella storia o nel Borgo.»
+        </div>
+        <div style="font-size:13px; line-height:1.45; color:var(--ink); margin-bottom:8px; background:rgba(0,0,0,0.25); border-radius:6px; padding:8px 10px; border:1px dashed rgba(255,255,255,0.15);">
+          <b style="color:#ffd23f;">Come sbloccarlo:</b> ${esc(ENC_HINTS[curEncChar] || "Incontralo proseguendo nei capitoli della storia o visitando i luoghi del paese.")}
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:11.5px; background:rgba(0,0,0,0.25); border-radius:6px; padding:6px 8px;">
+          <div><b>Specialità:</b> <span style="color:var(--dim);">🔒 Da scoprire</span></div>
+          <div><b>Legame:</b> <span style="color:var(--dim);">🔒 Ignoto</span></div>
+        </div>
+      `);
+    }
 
     const catBtns = ENC_CATS.map(ct => ({
       label: ct.name,
@@ -13801,11 +13873,13 @@
     }));
 
     const memberBtns = cat.members.map(mId => {
+      const ok = encIsUnlocked(mId);
       const mc = CAST[mId] || { name: mId };
       const isCur = mId === curEncChar;
+      const label = ok ? ((isCur ? "★ " : "") + (mc.name || mId)) : (isCur ? "★ 🔒 ???" : "🔒 ???");
       return {
-        label: (isCur ? "★ " : "") + (mc.name || mId),
-        cls: isCur ? "hot" : "",
+        label: label,
+        cls: isCur ? "hot" : (ok ? "" : "dim"),
         fn: () => borgoEncyclopedia(bFn, curEncCat, mId)
       };
     });
@@ -13899,13 +13973,12 @@
     const p = mnCollParts(), n = (x, t) => `${Math.round(x * t)}/${t}`;
     text("voce", `<b>Collezioni</b> ${mnBar(mnPct(mnColl()))}<br>Trofei ${mnPct(p.tro)}% · Figurine di Pina ${mnPct(p.fig)}% · Ricordi ${mnPct(p.foto)}% · Figurine dei personaggi ${n(p.card, Object.keys(BIO).length)} · Finali ${n(p.fin, ENDINGS.length)}`);
     buttons([
-      { label: "Enciclopedia del Borgo", sub: "Tutti i personaggi con schede, citazioni e ritratti", cls: "hot", fn: () => borgoEncyclopedia(extras) },
+      { label: "Album delle figurine & Enciclopedia", sub: `Personaggi ${getList(CARDS).length}/${Object.keys(BIO).length} · Ritratti, citazioni, schede e segreti`, cls: "hot", fn: () => borgoEncyclopedia(extras) },
       { label: "Bacheca dei trofei", sub: `${trophies().filter((t) => t.got).length}/${trophies().length}`, cls: "hot", fn: () => bacheca(extras) },
       { label: "L'Eco del Tirreno", sub: "Archivio delle prime pagine storiche e pagelle", fn: () => ecoArchivio(extras) },
       { label: "Album di Pina «Campioni della Costa»", sub: (() => { try { const r = figRec(); return r.started ? `Figurine ${figOwned(r)}/${FIG_ALL.length}` : "Si trova all'edicola del Borgo"; } catch { return ""; } })(), fn: () => figAlbum(0, extras) },
       { label: "Il Corriere delle Figurine", sub: (() => { const r = figRec(); return r.started ? `${r.courier.length}/3 uscite lette` : "Prima passa dall'edicola di Pina"; })(), disabled: !figRec().started, fn: () => figCourier(extras) },
       { label: "Album dei ricordi", sub: (() => { try { fotoScan(); } catch {} return `Fotografie ${fotoRec().got.length}/${FOTO.length}`; })(), fn: () => ricordi(extras) },
-      { label: "Album delle figurine", sub: `Personaggi ${getList(CARDS).length}/${Object.keys(BIO).length}`, fn: album },
       { label: "Galleria dei finali", sub: `${getList(ENDS).length}/${ENDINGS.length}`, fn: gallery },
       { label: "Diario di Leo", sub: "Scelte, finali, cifre e record", fn: () => diario(extras) },
       { label: "Jukebox del Borgo", sub: `Brani ${jbGot().length}/${JB.length}`, fn: () => jukebox(extras) },
@@ -14454,29 +14527,48 @@
     if (who !== "scirocco") portrait("scirocco", 222, 168, 0.8, true);
     px(0, 0, W, 10, "rgba(0,0,0,.4)"); g.fillStyle = "#ffd23f"; g.font = "bold 8px sans-serif"; g.fillText(`RADIO RONDINE 98.6 · ${RADIO.i + 1}/${RADIO.show.segs.length}`, 6, 8);
   }
-  function drawEncPortrait(charId) {
+  function drawEncPortrait(charId, unlocked = true) {
     const c = CAST[charId] || { name: charId };
-    const bg = (c && c.bg) || ["#0e1a2e", "#1f3a63"];
+    const bg = unlocked && c && c.bg ? c.bg : ["#090d18", "#121929"];
     const gr = g.createLinearGradient(0, 0, 0, H);
     gr.addColorStop(0, bg[0]); gr.addColorStop(1, bg[1]);
     g.fillStyle = gr; g.fillRect(0, 0, W, H);
     for (let i = 0; i < 22; i++) {
-      px((i * 47 + frame * 0.35) % W, (i * 23 + frame * 0.15) % H, 1, 1, "rgba(255,255,255,0.35)");
+      px((i * 47 + frame * 0.35) % W, (i * 23 + frame * 0.15) % H, 1, 1, unlocked ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.12)");
     }
-    g.fillStyle = "rgba(0,0,0,0.45)";
+    g.fillStyle = "rgba(0,0,0,0.55)";
     g.beginPath(); g.ellipse(160, 168, 55, 14, 0, 0, 7); g.fill();
-    g.strokeStyle = "rgba(255,210,63,0.35)"; g.lineWidth = 1.5;
+    g.strokeStyle = unlocked ? "rgba(255,210,63,0.35)" : "rgba(100,116,139,0.35)"; g.lineWidth = 1.5;
     g.beginPath(); g.ellipse(160, 168, 55, 14, 0, 0, 7); g.stroke();
-    if (c && c.skin) {
-      portrait(charId, 160, 92, 2.3, false);
+
+    if (unlocked) {
+      if (c && c.skin) {
+        portrait(charId, 160, 92, 2.3, false);
+      } else {
+        anPortrait(charId, 160, 92, 2.3, false, bg[1]);
+      }
+      px(40, 6, 240, 20, "rgba(10,16,36,.88)");
+      g.strokeStyle = "#ffd23f"; g.lineWidth = 1.5;
+      g.strokeRect(40, 6, 240, 20);
+      g.fillStyle = "#ffd23f"; g.font = "bold 11px sans-serif"; g.textAlign = "center";
+      g.fillText((c && c.name ? c.name : charId).toUpperCase(), 160, 20);
     } else {
-      anPortrait(charId, 160, 92, 2.3, false, bg[1]);
+      // Sagoma misteriosa con punto interrogativo luminoso
+      g.fillStyle = "rgba(15,23,42,0.92)";
+      g.beginPath(); g.arc(160, 74, 26, 0, 7); g.fill();
+      g.beginPath(); g.ellipse(160, 126, 40, 30, 0, 0, 7); g.fill();
+      g.strokeStyle = "rgba(255,210,63,0.35)"; g.lineWidth = 2;
+      g.beginPath(); g.arc(160, 74, 26, 0, 7); g.stroke();
+
+      g.fillStyle = "#ffd23f"; g.font = "bold 32px monospace"; g.textAlign = "center";
+      g.fillText("?", 160, 85);
+
+      px(40, 6, 240, 20, "rgba(10,16,36,.88)");
+      g.strokeStyle = "#64748b"; g.lineWidth = 1.5;
+      g.strokeRect(40, 6, 240, 20);
+      g.fillStyle = "#94a3b8"; g.font = "bold 11px sans-serif"; g.textAlign = "center";
+      g.fillText("🔒 SCONOSCIUTO", 160, 20);
     }
-    px(40, 6, 240, 20, "rgba(10,16,36,.88)");
-    g.strokeStyle = "#ffd23f"; g.lineWidth = 1.5;
-    g.strokeRect(40, 6, 240, 20);
-    g.fillStyle = "#ffd23f"; g.font = "bold 11px sans-serif"; g.textAlign = "center";
-    g.fillText((c && c.name ? c.name : charId).toUpperCase(), 160, 20);
     g.textAlign = "left";
   }
   function drawAlberoCanvas(season) {
@@ -14501,7 +14593,7 @@
   }
   function drawScene() {
     if (view.kind === "radio" && RADIO) return drawRadio();
-    if (view.kind === "enciclopedia" && view.charId) return drawEncPortrait(view.charId);
+    if (view.kind === "enciclopedia" && view.charId) return drawEncPortrait(view.charId, encIsUnlocked(view.charId));
     if (view.kind === "albero") return drawAlberoCanvas(view.season || 1);
     drawScene12();
   }
