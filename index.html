@@ -1706,6 +1706,24 @@
     if (M.step.fixable && S.f.deal === "preso" && !M.fixDone && M.min >= 60 && M.poss === "us" && M.zone >= 3) return fixMoment();
     if (M.poss === "us") attackTurn(); else defendTurn();
   }
+  // duelli 1 contro 1: il difensore si prepara (con un indizio, non sempre sincero), tu scegli la mossa. Ogni mossa batte una, perde con una, pareggia con una.
+  const DUEL_DEF = [["la scivolata", "si abbassa sulle gambe, pronto a scivolare"], ["la marcatura", "ti sta addosso, spalla contro spalla"], ["il pressing", "avanza di corsa per pressarti"]];
+  const DUEL_ME = [["Finta", "batte la scivolata"], ["Scatto", "batte la marcatura"], ["Protezione", "batte il pressing"]];
+  function duello(d) {
+    const real = Math.floor(Math.random() * 3), honest = Math.random() < clamp(0.62 - hLv() * 0.08, 0.4, 0.7);
+    const shown = honest ? real : (real + 1 + Math.floor(Math.random() * 2)) % 3;
+    $("choices").innerHTML = ""; sfx("special");
+    anCine({ who: heroId(), text: "DUELLO", c1: "#101840", c2: "#ffd23f", t: 40, d: 40, cine: "opp", done: () => {
+      view = { kind: "match" };
+      say(`<b>${esc(d.name)}</b> ${DUEL_DEF[shown][1]}. Che mossa fai?`);
+      buttons(DUEL_ME.map((m, i) => ({ label: m[0], sub: m[1], fn: () => {
+        const r = (real - i + 3) % 3; // 0 = la tua mossa batte la sua, 1 = perde, 2 = pareggio
+        M.duelP = r === 0 ? 0.96 : r === 1 ? 0.04 : null;
+        const msg = (r === 0 ? `<b>${m[0]}!</b> Aveva scelto ${DUEL_DEF[real][0]}: lo bruci sul tempo.` : r === 1 ? `<b>${m[0]}…</b> ma lui aveva scelto ${DUEL_DEF[real][0]} e ti legge.` : `<b>${m[0]}</b> contro ${DUEL_DEF[real][0]}: nessuno dei due cede, decide il talento.`) + "<br>";
+        act("drib", d); try { $("text").querySelector(".t").insertAdjacentHTML("afterbegin", msg); } catch {}
+      } })));
+    } });
+  }
   function attackTurn() {
     const d = oppDef(); M.cur = d;
     const z = M.zone;
@@ -1724,7 +1742,7 @@
       return buttons([...cupInfo, ...o]);
     }
     const opts = [
-      { label: "Dribbla", sub: `contro ${d.name} · grinta 6${pcR(pcDrib(d) + styleMod)}`, fn: () => act("drib", d), disabled: !cost(6) },
+      { label: pcOn("duelli") && z >= 3 ? "Duello" : "Dribbla", sub: `contro ${d.name} · grinta 6${pcOn("duelli") && z >= 3 ? " · leggi il difensore" : pcR(pcDrib(d) + styleMod)}`, fn: () => (pcOn("duelli") && z >= 3 ? duello(d) : act("drib", d)), disabled: !cost(6) },
       { label: `Passa a ${mate()}`, sub: `più sicuro · grinta 4${pcR(pcPass(d) + styleMod)}`, fn: () => act("pass", d), disabled: !cost(4) },
     ];
     const pcs = pcOn("pass") ? pcMates() : []; if (pcs.length > 1) opts[1] = { label: "Passa ▸", sub: `a ${pcs.join(", ")} · grinta 4`, fn: () => pcPassMenu(d, pcs, opts), disabled: !cost(4) };
@@ -1769,7 +1787,7 @@
     if (kind !== "shot" && kind !== "hero" && kind !== "mate" && !SHOTS[kind]) sfx("kick");
     if (kind === "drib") {
       spend(6); tick(3, 5);
-      const p = pcDrib(d);
+      const p = M.duelP != null ? M.duelP : pcDrib(d); M.duelP = null;
       if (Math.random() < p) { M.zone = Math.min(5, z + 1); say(`Finta, doppio passo… <b>${esc(d.name)}</b> resta piantato! Avanzi in zona ${M.zone}.`); try { gxMini("drib"); } catch {} }
       else if (z >= 4 && Math.random() < 0.35) {
         tick(0, 1); say(`<b>${esc(d.name)}</b> ti stende al limite dell'area. <b>Fallo!</b> L'arbitro indica il punto: punizione.`); hud();
@@ -4703,7 +4721,7 @@
     mini: ["Calci d'angolo", "Dopo una respinta del portiere, l'angolo lo batti tu"],
   };
   // 15l · Partita classica: quattro aggiunte, ognuna spegnibile (spente = regole di prima)
-  const SET_PC = { area: ["Comandi in area", "Parata, pugno o uscita: li scegli tu col tuo portiere, e anche il portiere avversario li usa"], tempo: ["Tiro a tempo", "Ferma la barra al momento giusto: preciso = tiro più forte, sbagliato = più debole"], fiato: ["Grinta di riserva", "A secco puoi tirare lo stesso (più debole); rifiatare ridà almeno 10"], spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
+  const SET_PC = { duelli: ["Duelli 1 contro 1", "Dribbling in attacco (zona 3+): leggi il difensore e scegli finta, scatto o protezione"], area: ["Comandi in area", "Parata, pugno o uscita: li scegli tu col tuo portiere, e anche il portiere avversario li usa"], tempo: ["Tiro a tempo", "Ferma la barra al momento giusto: preciso = tiro più forte, sbagliato = più debole"], fiato: ["Grinta di riserva", "A secco puoi tirare lo stesso (più debole); rifiatare ridà almeno 10"], spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
   const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false });
   function setLoad() { const d = setDefault(), s = readJSON(SETK, null); if (!s || s.v !== 1) return d; return { ...d, ...s, t: { ...d.t, ...(s.t || {}) }, pc: { ...d.pc, ...(s.pc && typeof s.pc === "object" ? s.pc : {}) } }; }
   let SET = setLoad();
