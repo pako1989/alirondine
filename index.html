@@ -177,7 +177,7 @@
 </style>
 
 <div class="game">
-  <div class="top"><h1>Ali di Rondine</h1><div class="topr"><span class="chap" id="chap"></span><button type="button" class="mute" id="themeBtn" aria-label="Tema Grafico" title="Cambia tema (Classico / Vintage / Neon / Arcade)">🎨</button><button type="button" class="mute" id="gmenu" aria-label="Menu" hidden>☰</button><button type="button" class="mute" id="mute" aria-label="Suoni">🔊</button></div></div>
+  <div class="top"><h1>Ali di Rondine</h1><div class="topr"><span class="chap" id="chap"></span><button type="button" class="mute" id="gfxBtn" aria-label="Grafica Partita" title="Attiva/Disattiva Grafica Partita (Arcade Deluxe / Classica)">⚽</button><button type="button" class="mute" id="themeBtn" aria-label="Tema Grafico" title="Cambia tema (Classico / Vintage / Neon / Arcade)">🎨</button><button type="button" class="mute" id="gmenu" aria-label="Menu" hidden>☰</button><button type="button" class="mute" id="mute" aria-label="Suoni">🔊</button></div></div>
   <div class="stage"><canvas id="cv" width="320" height="200" aria-label="Scena di gioco"></canvas></div>
   <div class="box" id="matchHud" hidden>
     <div class="hud">
@@ -1467,47 +1467,49 @@
     for (let i = 0; i < 5; i++) {
       const ux = 60 + i * 50 + Math.sin(frame / 30 + i) * 4;
       const uy = 45 + (i % 3) * 50;
-      man(ux, uy, usCol(), "#fff", usRoles[i]);
+      man(ux, uy, usCol(), "#fff", SET.gfx !== "classica" ? usRoles[i] : "");
 
       const ox = 90 + i * 48 + Math.cos(frame / 28 + i) * 4;
       const oy = 70 + ((i + 1) % 3) * 40;
-      man(ox, oy, opp.color, opp.color === "#ffffff" ? "#1d3fa3" : "#fff", oppRoles[i]);
+      man(ox, oy, opp.color, opp.color === "#ffffff" ? "#1d3fa3" : "#fff", SET.gfx !== "classica" ? oppRoles[i] : "");
 
-      // Indicatore dinamico del portatore di palla
-      if (m.poss === "us" && i === activeUsIdx) {
-        const tag = i === 4 ? "LEO 10" : i === 2 ? "SARA 8" : i === 0 ? "GIGI 5" : "RONDINE";
-        const bob = Math.sin(frame / 6) * 2;
-        g.fillStyle = "#ffd23f";
-        g.beginPath();
-        g.moveTo(ux, uy - 24 + bob);
-        g.lineTo(ux - 4, uy - 30 + bob);
-        g.lineTo(ux + 4, uy - 30 + bob);
-        g.fill();
-        px(ux - 16, uy - 39 + bob, 32, 8, "#000b");
-        g.fillStyle = "#ffd23f";
-        g.font = "bold 6px sans-serif";
-        g.textAlign = "center";
-        g.fillText(tag, ux, uy - 33 + bob);
-        g.textAlign = "left";
-      } else if (m.poss === "them" && i === activeOppIdx) {
-        const bob = Math.sin(frame / 6) * 2;
-        g.fillStyle = "#ff4d5a";
-        g.beginPath();
-        g.moveTo(ox, oy - 24 + bob);
-        g.lineTo(ox - 4, oy - 30 + bob);
-        g.lineTo(ox + 4, oy - 30 + bob);
-        g.fill();
-        px(ox - 16, oy - 39 + bob, 32, 8, "#000b");
-        g.fillStyle = "#ff8a93";
-        g.font = "bold 6px sans-serif";
-        g.textAlign = "center";
-        g.fillText(i === 2 ? "STELLA" : "RIVALE", ox, oy - 33 + bob);
-        g.textAlign = "left";
+      // Indicatore dinamico del portatore di palla (disattivabile se grafica classica)
+      if (SET.gfx !== "classica") {
+        if (m.poss === "us" && i === activeUsIdx) {
+          const tag = i === 4 ? "LEO 10" : i === 2 ? "SARA 8" : i === 0 ? "GIGI 5" : "RONDINE";
+          const bob = Math.sin(frame / 6) * 2;
+          g.fillStyle = "#ffd23f";
+          g.beginPath();
+          g.moveTo(ux, uy - 24 + bob);
+          g.lineTo(ux - 4, uy - 30 + bob);
+          g.lineTo(ux + 4, uy - 30 + bob);
+          g.fill();
+          px(ux - 16, uy - 39 + bob, 32, 8, "#000b");
+          g.fillStyle = "#ffd23f";
+          g.font = "bold 6px sans-serif";
+          g.textAlign = "center";
+          g.fillText(tag, ux, uy - 33 + bob);
+          g.textAlign = "left";
+        } else if (m.poss === "them" && i === activeOppIdx) {
+          const bob = Math.sin(frame / 6) * 2;
+          g.fillStyle = "#ff4d5a";
+          g.beginPath();
+          g.moveTo(ox, oy - 24 + bob);
+          g.lineTo(ox - 4, oy - 30 + bob);
+          g.lineTo(ox + 4, oy - 30 + bob);
+          g.fill();
+          px(ox - 16, oy - 39 + bob, 32, 8, "#000b");
+          g.fillStyle = "#ff8a93";
+          g.font = "bold 6px sans-serif";
+          g.textAlign = "center";
+          g.fillText(i === 2 ? "STELLA" : "RIVALE", ox, oy - 33 + bob);
+          g.textAlign = "left";
+        }
       }
     }
     // Portieri: Nico (nostro portiere volante coi guanti giganti) e portiere rivale
-    man(18, 100, "#3fa7ff", "#ffd23f", "nico");
-    man(302, 100, "#8a8a8a", "#fff", "opp_gk");
+    man(18, 100, "#3fa7ff", "#ffd23f", SET.gfx !== "classica" ? "nico" : "");
+    man(302, 100, "#8a8a8a", "#fff", SET.gfx !== "classica" ? "opp_gk" : "");
     const by = 100 + Math.sin(frame / 10) * 3;
     if (m.anim) {
       const k = m.anim.t / m.anim.d;
@@ -4914,6 +4916,17 @@
     document.body.classList.toggle("pixel-canvas", SET.gfx !== "classica");
   };
   setApply();
+  window.toggleGfx = function () {
+    SET.gfx = SET.gfx === "arcade_hd" ? "classica" : "arcade_hd";
+    writeJSON(SETK, SET);
+    setApply();
+    if (window.toast) {
+      if (SET.gfx === "arcade_hd") window.toast("Grafica Partita: Arcade Deluxe (Sprite unici attivi)", "info", "⚽");
+      else window.toast("Grafica Partita: Classica Originale (Sprite vintage)", "info", "⚽");
+    }
+  };
+  const gBtn = $("gfxBtn");
+  if (gBtn) gBtn.onclick = () => window.toggleGfx();
   const METEO_TXT = { neve: "<em>Nevica</em>: il pallone si ferma nella neve, dribblare è una lotteria e i tiri perdono forza. Il riscaldamento è una palla di neve.", pioggia: "<em>Piove forte</em>: il pallone scivola, dribblare è più difficile e i portieri faticano a tenerlo.", vento: "<em>Tira vento</em>: i tiri da lontano fanno strane curve, in bene o in male." };
   function weatherPow(p, us) {
     if (M.meteo === "pioggia") return p * 0.95;
