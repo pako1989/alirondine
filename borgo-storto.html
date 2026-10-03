@@ -14,6 +14,7 @@ h1{font-size:22px;margin:4px 0 2px;color:var(--gold)}
 .card{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0}
 .who{display:inline-block;background:#43507a;border-radius:8px;padding:2px 10px;font-size:14px;margin-bottom:6px}
 .big{font-size:44px;text-align:center;letter-spacing:6px;margin:6px 0}
+[hidden]{display:none!important}
 button{display:block;width:100%;text-align:left;background:#1e2d57;color:var(--ink);border:2px solid #3b4f86;border-radius:12px;padding:12px 14px;margin:8px 0;font:inherit;cursor:pointer}
 button small{display:block;color:var(--dim);font-size:13px}
 button.hot{background:#2a3f7a;border-color:var(--gold)}
@@ -274,7 +275,7 @@ function explore() {
   const m = MAPS[G.area]; SCENE = "";
   if (!X || X.m !== m) X = { m, x: m.start[0], y: m.start[1] };
   app.innerHTML = `<h1>${esc(m.name)}</h1><div class="sub">Livello ${G.lv} · focacce ${G.focacce} · tocca le frecce per camminare, parla con i personaggi</div>
-  <canvas id="cv" width="640" height="384"></canvas><div class="log" id="msg">${nodeDone(m) ? "Qui hai finito. Vai verso l'uscita." : "Avvicinati ai personaggi. I nemici si affrontano toccandoli."}</div>
+  <canvas id="cv" width="640" height="384"></canvas><div class="log" id="msg">${nodeDone(m) ? "Qui hai finito. Vai a destra, oltre il bordo." : "Avvicinati ai personaggi. I nemici si affrontano toccandoli."}</div>
   <button id="talk" class="hot" hidden></button><div class="pad"><span></span><button data-d="u">▲</button><span></span><button data-d="l">◀</button><button data-d="d">▼</button><button data-d="r">▶</button></div><button id="t">◂ Titolo</button>`;
   $("#t").onclick = title; $("#talk").onclick = () => talkNear();
   const D = { u: [0, -1], d: [0, 1], l: [-1, 0], r: [1, 0] };
@@ -295,7 +296,9 @@ function step(d) {
   if (!$("#cv") || busy2 || (X && X.cool > Date.now())) return;
   const m = X.m, nx = X.x + d[0], ny = X.y + d[1];
   const row = m.rows[ny]; if (!row) return;
-  const t = row[nx]; if (t === "#" || t === "~" || t === undefined) return;
+  const t = row[nx];
+  if (nx >= row.length - 1 && d[0] === 1 && nodeDone(m)) { G.area = Math.min(4, G.area + 1); X = null; save(); return explore(); }
+  if (t === "#" || t === "~" || t === undefined) return;
   const o = objs(m).find((q) => q.x === nx && q.y === ny);
   const msg = (h) => { const e = $("#msg"); if (e) e.innerHTML = h; };
   if (o) {
