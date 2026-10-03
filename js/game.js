@@ -1387,6 +1387,53 @@
   function buttons(list, one) {
     try { list = mnDressList(list); } catch {}
     list = list.map((o) => (o && ({ "◂ Altre modalità": 1, "◂ Extra": 1 })[o.label] ? { ...o, label: o.label === "◂ Extra" ? "◂ Collezioni" : "◂ Modalità" } : o));
+
+    if (view && view.kind === "match" && SET && SET.tsubasa && window.renderTsubasaTurn && M) {
+      const isAtk = M.poss === "us";
+      const opp = (TEAMS && TEAMS[M.team]) || {};
+      const curOpp = M.cur || { name: opp.vs || "Avversario" };
+      window.renderTsubasaTurn({
+        isAttack: isAtk,
+        carrierName: M.carrier || (typeof heroName === "function" ? heroName() : "Leo Moretti"),
+        carrierNum: isAtk ? 10 : 1,
+        oppName: curOpp.name || "Difensore",
+        oppNum: isAtk ? 4 : 9,
+        zone: M.zone || 3,
+        guts: M.guts || 50,
+        maxGuts: (S && S.st && S.st.grinta) || 100,
+        score: M.score || [0, 0],
+        min: M.min || 0,
+        oppColor: opp.color || "#ff4d5a",
+        usColor: "#ffd23f",
+        actions: list,
+        onAction: (act) => {
+          if (window.playTecmoAnimation && act.label) {
+            const isShot = /TIR|RONDINE|FOGLIA|ROVESCIATA|BOMBA/i.test(act.label);
+            const isDrib = /DRIB|FINTA|SCATTO/i.test(act.label);
+            const isTack = /SCIVOLATA|CONTRAST|TACKLE/i.test(act.label);
+            window.playTecmoAnimation(isShot ? "shot" : isDrib ? "drib" : isTack ? "tackle" : "pass", {
+              title: act.label.toUpperCase(),
+              sub: act.sub || "Azione sul campo!",
+              color: isShot ? "#ffd23f" : isDrib ? "#00e5ff" : "#ff4d5a",
+              soundWord: isShot ? "BOOOM!" : isDrib ? "SWOOOSH!" : "STAAACK!"
+            }, () => {
+              if (act.fn) act.fn();
+            });
+          } else {
+            if (act.fn) act.fn();
+          }
+        }
+      });
+      return;
+    } else {
+      const alt = document.getElementById("stageAlt");
+      if (alt && !alt.hidden && view && view.kind === "match") {
+        alt.hidden = true;
+        alt.style.display = "none";
+        alt.innerHTML = "";
+      }
+    }
+
     const c = $("choices"); c.innerHTML = ""; c.className = "choices" + (one || list.length === 1 ? " one" : "");
     list.forEach((o) => {
       const b = document.createElement("button"); b.type = "button";
@@ -4719,7 +4766,7 @@
   };
   // 15l · Partita classica: quattro aggiunte, ognuna spegnibile (spente = regole di prima)
   const SET_PC = { coppie: ["Schemi a coppie avanzati", "Con grande intesa, ogni compagno sblocca un secondo tiro in coppia (intesa 14)"], rete: ["Rete strappata", "Un tiro potentissimo può bucare la rete: cut-in speciale, un po' di grinta e il conto delle reti strappate"], star: ["Fuoriclasse rivali", "Il capitano avversario carica lo speciale con una frase sua e un cut-in nei colori della squadra"], gkf: ["Portieri che si stancano", "Più tiri affronta, più un portiere cala (il tuo e il loro); all'intervallo recupera"], duelli: ["Duelli 1 contro 1", "Dribbling in attacco (zona 3+): leggi il difensore e scegli finta, scatto o protezione"], area: ["Comandi in area", "Parata, pugno o uscita: li scegli tu col tuo portiere, e anche il portiere avversario li usa"], tempo: ["Tiro a tempo", "Ferma la barra al momento giusto: preciso = tiro più forte, sbagliato = più debole"], fiato: ["Grinta di riserva", "A secco puoi tirare lo stesso (più debole); rifiatare ridà almeno 10"], spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
-  const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false, dis: false, cardView: "holo3d", mangaView: "comic", trophyView: "3d" });
+  const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false, dis: false, cardView: "holo3d", mangaView: "comic", trophyView: "3d", tsubasa: false });
   function setLoad() {
     const d = setDefault(), s = readJSON(SETK, null);
     if (!s || s.v !== 1) return d;
@@ -4788,6 +4835,8 @@
       { label: `Stile Trofei: ${SET.trophyView === "3d" ? "3D su Piedistallo" : "Classico Canvas"} ▸`, sub: SET.trophyView === "3d" ? "Tocca per tornare alla bacheca classica su canvas" : "Tocca per esaminare i trofei in 3D con rotazione a 360°", fn: () => { SET.trophyView = SET.trophyView === "3d" ? "canvas" : "3d"; save(); again(); } },
       { label: `Stile Fumetto Manga: ${SET.mangaView === "manga" ? "Attivo" : "Disattivato"} ▸`, sub: SET.mangaView === "manga" ? "Tavole illustrate a fumetto nei momenti chiave" : "Visualizzazione classica su canvas retrò", fn: () => { SET.mangaView = SET.mangaView === "manga" ? "canvas" : "manga"; save(); again(); } },
       { label: `Effetti Anime Manga (Cut-in): ${(window.isAnimeFxEnabled && window.isAnimeFxEnabled()) ? "Attivi" : "Disattivati"} ▸`, sub: (window.isAnimeFxEnabled && window.isAnimeFxEnabled()) ? "Speed-lines, lampo agli occhi e lettering shonen (tocca per disattivare)" : "Stile classico senza cut-in a schermo intero (tocca per attivare)", fn: () => { if (window.toggleAnimeFx) { const now = window.toggleAnimeFx(); again(`Effetti Anime ${now ? "attivati" : "disattivati"}.`); } else { again(); } } },
+      { label: `Modalità Partita: ${SET.tsubasa ? "Captain Tsubasa (NES/SNES)" : "Classico JRPG"} ▸`, sub: SET.tsubasa ? "Duelli cinematografici Tecmo, comandi a griglia, radar e animazioni rétro" : "Elenco scelte testuali classico (tocca per cambiare)", fn: () => { SET.tsubasa = !SET.tsubasa; save(); again(`Modalità Partita: ${SET.tsubasa ? "Captain Tsubasa (NES/SNES)" : "Classico JRPG"}`); } },
+      { label: "⚽ Gioca Esibizione Captain Tsubasa (NES/SNES) ▸", sub: "Sfida immediata con il motore a duelli Tecmo", cls: "hot", fn: () => { if (window.openTsubasaExhibition) window.openTsubasaExhibition(again); } },
       { label: `Scene speciali: ${SET.speed} ▸`, sub: "normale · veloce · salta (tocca la scena per saltarla)", fn: () => { SET.speed = { normale: "veloce", veloce: "salta", salta: "normale" }[SET.speed] || "normale"; save(); again(); } },
       { label: `Animazioni: ${SET.anim ? "sì" : "no"}`, sub: "Tiri, esultanze, fischio d'inizio e finale, coppa, cartellini · tocca per saltarle", fn: () => { SET.anim = !SET.anim; save(); again(); } },
       { label: `Tema visivo: ${(window.THEMES && window.THEMES.find(t => (localStorage.getItem("ali-di-rondine.theme") || "classic") === t.id) || { name: "Classico Rondine" }).name} ▸`, sub: "Classico · Gazzetta Vintage · Neon Costa · Arcade Retrò", fn: () => { if (window.cycleTheme) window.cycleTheme(); again(); } },
@@ -14295,6 +14344,7 @@
       { label: "🔥 Blue Lock · La Gabbia dell'Ego", sub: "Torneo Predatori 5 round · Ego vs Altruismo, anime cut-in e Fiamme Nere", cls: "hot", fn: () => { if (window.openBlueLockMode) window.openBlueLockMode(modes); } },
       { label: "🕵️ Noir · Il Peschereccio Fantasma", sub: "Saga investigativa con Lina · True Detective e Breaking Bad nel Golfo", cls: "hot", fn: () => { if (window.openNoirStoryMenu) window.openNoirStoryMenu(modes); } },
       { label: "🌌 Multiverso · La Panda Quantistica", sub: "Saga demenziale con Nonna · Rick & Morty, Futurama e Trono di Spade", cls: "hot", fn: () => { if (window.openMultiverseMenu) window.openMultiverseMenu(modes); } },
+      { label: "⚽ Esibizione Captain Tsubasa (NES/SNES)", sub: "Partita a duelli 1v1 rétro Tecmo con radar, split-screen e comandi a griglia", cls: "hot", fn: () => { if (window.openTsubasaExhibition) window.openTsubasaExhibition(modes); } },
       { label: "🛡️ Roster & Talenti del Borgo", sub: "Dashboard tattica anime: visualizza la squadra ed equipaggia i talenti", cls: "hot", fn: () => { if (window.openRosterTalentsModal) window.openRosterTalentsModal(); } },
       { label: "⚽ Stadio 3D · Sfida dei Tiri", sub: "Tiro della Rondine in 3D: batti i portieri sul campo tridimensionale!", cls: "hot", fn: () => { if (window.openStadium3D) window.openStadium3D(modes); } },
       { label: "🚗 La Corsa della Panda di Nonna", sub: "Minigioco 3D / Arcade: sfreccia tra i caruggi con la focaccia!", cls: "hot", fn: () => { if (window.openPanda3D) window.openPanda3D(modes); else pandaGameMode(modes); } },

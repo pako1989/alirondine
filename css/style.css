@@ -1547,5 +1547,20 @@
   .borgo-radar-blip.quest { background: #57d68d; box-shadow: 0 0 4px #57d68d; }
   .borgo-radar-blip.npc { background: #3fa7ff; }
 
+  /* ================= CAPTAIN TSUBASA TECMO ENGINE STYLES ================= */
+  @keyframes pulseCarrier {
+    0% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 6px #ffd23f; }
+    100% { transform: translate(-50%, -50%) scale(1.18); box-shadow: 0 0 16px #00e5ff; }
+  }
+  @keyframes slideStripes {
+    0% { background-position: 0 0; }
+    100% { background-position: 40px 0; }
+  }
+  @keyframes bounceIcon {
+    0% { transform: scale(0.6); opacity: 0; }
+    60% { transform: scale(1.25); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+
 
 
