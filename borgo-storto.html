@@ -6,8 +6,17 @@
 <title>Il Borgo Storto · Ali di Rondine</title>
 <style>
 :root{--bg:#0e1424;--card:#172038;--line:#2c3a5e;--ink:#f1f4ff;--dim:#9aa8cf;--gold:#ffd23f;--red:#ff5d6c;--grn:#57d68d;--blu:#6fb3ff}
+body.theme-vintage{--bg:#191410;--card:#292019;--line:#473729;--ink:#f8f2e6;--dim:#baa48b;--gold:#e5a73b;--red:#cf3742;--grn:#52aa66;--blu:#4088d6}
+body.theme-neon{--bg:#050b18;--card:#0d172e;--line:#00e5ff55;--ink:#f0faff;--dim:#7f9ec2;--gold:#ffd000;--red:#ff2d62;--grn:#00e676;--blu:#00e5ff}
+body.theme-arcade{--bg:#0a1b0a;--card:#133313;--line:#2a572a;--ink:#d2f694;--dim:#7da54b;--gold:#e2c034;--red:#e04838;--grn:#5da832;--blu:#42b0d5}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 system-ui,sans-serif;min-height:100vh;padding:env(safe-area-inset-top) 14px 40px}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 system-ui,sans-serif;min-height:100vh;padding:env(safe-area-inset-top) 14px 40px;transition:background .2s,color .2s}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.btn-icon{background:#1e2d57;color:var(--ink);border:2px solid var(--line);border-radius:8px;padding:4px 10px;font-size:15px;cursor:pointer}
+.float-num{position:absolute;pointer-events:none;font-weight:bold;font-size:20px;text-shadow:1px 1px 3px #000;animation:floatUp .8s ease forwards;z-index:20}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-26px) scale(1.15)}}
+.screen-flash{animation:flashHit .22s ease}
+@keyframes flashHit{0%,100%{filter:none}50%{filter:brightness(1.5) contrast(1.2)}}
 #app{max-width:560px;margin:0 auto;padding-top:14px}
 h1{font-size:22px;margin:4px 0 2px;color:var(--gold)}
 .sub{color:var(--dim);font-size:14px;margin-bottom:12px}
@@ -47,6 +56,31 @@ const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt
 const load = () => { try { const v = JSON.parse(localStorage.getItem(K)); return v && v.v === 1 ? v : null; } catch { return null; } };
 const save = () => { try { localStorage.setItem(K, JSON.stringify(G)); } catch {} };
 let G = load() || { v: 1, done: [], party: ["leo", "gigi", "sara"], lv: 1, focacce: 2, flags: {} };
+
+const THEMES = [
+  { id: "classic", name: "Classico", cls: "", icon: "⚽" },
+  { id: "vintage", name: "Vintage", cls: "theme-vintage", icon: "📰" },
+  { id: "neon", name: "Neon", cls: "theme-neon", icon: "✨" },
+  { id: "arcade", name: "Arcade", cls: "theme-arcade", icon: "🕹️" }
+];
+let curThemeIdx = 0;
+function applyTheme(idx) {
+  curThemeIdx = (idx + THEMES.length) % THEMES.length;
+  const th = THEMES[curThemeIdx];
+  document.body.classList.remove("theme-vintage", "theme-neon", "theme-arcade");
+  if (th.cls) document.body.classList.add(th.cls);
+  try { localStorage.setItem("ali-di-rondine.theme", th.id); } catch (e) {}
+}
+function cycleTheme() {
+  applyTheme(curThemeIdx + 1);
+  const btn = $("#thBtn");
+  if (btn) btn.textContent = "🎨 " + THEMES[curThemeIdx].name;
+}
+try {
+  const savedTh = localStorage.getItem("ali-di-rondine.theme") || "classic";
+  const fIdx = THEMES.findIndex(t => t.id === savedTh);
+  applyTheme(fIdx >= 0 ? fIdx : 0);
+} catch (e) {}
 
 // ---- personaggi ----
 const HERO = {
@@ -219,11 +253,12 @@ let SCENE = "crepa";
 // ---- UI ----
 function title() {
   const n = G.done.length;
-  app.innerHTML = `<h1>Il Borgo Storto</h1><div class="sub">GDR a capitoli · Capitolo 1: La crepa sul campanile</div>
+  app.innerHTML = `<div class="topbar"><h1>Il Borgo Storto</h1><button type="button" class="btn-icon" id="thBtn">🎨 ${THEMES[curThemeIdx].name}</button></div><div class="sub">GDR a capitoli · Capitolo 1: La crepa sul campanile</div>
   <div class="card">${vig("crepa", "leo")}<p>Ugolino ha fatto un guaio. Il cielo ha una crepa, e dall'altra parte c'è un Borgo uguale al tuo. Quasi. Tutto è storto, tutti sono una versione strana di sé stessi. E non si sa chi comanda.</p></div>
   <button class="hot" id="go">${n ? "Continua" : "Inizia"}<small>${n ? `Tappe fatte: ${n}/5` : "Capitolo 1"}</small></button>
   ${n ? `<button id="new">Ricomincia da capo<small>Cancella i progressi di questo capitolo</small></button>` : ""}
   <button id="back">◂ Torna ad Ali di Rondine</button>`;
+  $("#thBtn").onclick = cycleTheme;
   $("#go").onclick = () => { SCENE = "crepa"; n ? map() : dialog(STORY.intro, map); };
   if ($("#new")) $("#new").onclick = () => { G = { v: 1, done: [], party: ["leo", "gigi", "sara"], lv: 1, focacce: 2, flags: {} }; save(); title(); };
   $("#back").onclick = () => { location.href = "./index.html"; };
