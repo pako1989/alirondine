@@ -741,3 +741,221 @@
     color: #b3202c;
   }
 
+  /* ================= 3D TROPHY SHOWCASE ================= */
+  .trophy-3d-wrap {
+    perspective: 900px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 50% 30%, #1e293b 0%, #080c14 90%);
+    position: relative;
+    user-select: none;
+    cursor: grab;
+    overflow: hidden;
+  }
+  .trophy-3d-wrap:active { cursor: grabbing; }
+
+  .trophy-spotlight {
+    position: absolute;
+    top: -40px;
+    width: 140px;
+    height: 160px;
+    background: radial-gradient(ellipse at top, rgba(255, 210, 63, 0.25) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .trophy-3d-scene {
+    width: 130px;
+    height: 150px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.1s ease-out;
+  }
+
+  .trophy-cup-model {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .trophy-gold-glow {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 210, 63, 0.4) 0%, transparent 70%);
+    top: 15px;
+    pointer-events: none;
+    animation: goldPulse 2.4s infinite alternate;
+  }
+  @keyframes goldPulse {
+    0% { transform: scale(0.9); opacity: 0.6; }
+    100% { transform: scale(1.15); opacity: 0.95; }
+  }
+
+  .trophy-bowl {
+    width: 68px;
+    height: 52px;
+    background: linear-gradient(135deg, #ffe066 0%, #d4a017 50%, #996515 100%);
+    border-radius: 6px 6px 30px 30px;
+    border: 2px solid #fff5c0;
+    box-shadow: inset 0 2px 8px rgba(255,255,255,0.7), 0 6px 14px rgba(0,0,0,0.5);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateZ(10px);
+  }
+
+  .trophy-bowl-emblem {
+    font-size: 20px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+  }
+
+  .trophy-handle-left, .trophy-handle-right {
+    position: absolute;
+    top: 6px;
+    width: 18px;
+    height: 32px;
+    border: 4px solid #ffd23f;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  }
+  .trophy-handle-left {
+    left: -15px;
+    clip-path: polygon(0 0, 60% 0, 60% 100%, 0 100%);
+  }
+  .trophy-handle-right {
+    right: -15px;
+    clip-path: polygon(40% 0, 100% 0, 100% 100%, 40% 100%);
+  }
+
+  .trophy-stem {
+    width: 14px;
+    height: 20px;
+    background: linear-gradient(90deg, #b8860b, #ffd700, #b8860b);
+    border: 1px solid #d4a017;
+    margin-top: -2px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+  }
+
+  .trophy-pedestal-cube {
+    width: 76px;
+    height: 34px;
+    background: linear-gradient(145deg, #1f2937, #111827);
+    border: 2px solid #374151;
+    border-radius: 4px;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 4px;
+    transform: translateZ(6px);
+  }
+
+  .trophy-plaque-gold {
+    width: 66px;
+    background: linear-gradient(90deg, #cca028, #ffeb99, #cca028);
+    border: 1px solid #73510d;
+    border-radius: 2px;
+    padding: 1px 3px;
+    text-align: center;
+    color: #1a1202;
+    font-size: 7.5px;
+    font-weight: bold;
+    text-transform: uppercase;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .trophy-spin-hint {
+    position: absolute;
+    bottom: 6px;
+    font-size: 9px;
+    color: #94a3b8;
+    background: rgba(0,0,0,0.5);
+    padding: 2px 8px;
+    border-radius: 10px;
+    pointer-events: none;
+  }
+
+  /* ================= 3D DIORAMA DI BORGO MARINO ================= */
+  .diorama-wrap {
+    perspective: 1000px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 50% 20%, #1e3a5f 0%, #070d18 90%);
+    position: relative;
+    user-select: none;
+    cursor: grab;
+    overflow: hidden;
+  }
+  .diorama-wrap:active { cursor: grabbing; }
+
+  .diorama-stage {
+    width: 200px;
+    height: 150px;
+    position: relative;
+    transform-style: preserve-3d;
+    transform: rotateX(55deg) rotateZ(-30deg);
+    transition: transform 0.12s ease-out;
+  }
+
+  .diorama-base-island {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 60%, #4a3828 100%);
+    border: 3px solid #66bb6a;
+    border-radius: 18px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.5);
+    transform-style: preserve-3d;
+  }
+
+  .diorama-sea-rim {
+    position: absolute;
+    bottom: -15px;
+    left: -15px;
+    right: -15px;
+    height: 65px;
+    background: linear-gradient(180deg, rgba(30,136,229,0.7), rgba(13,71,161,0.9));
+    border-radius: 0 0 22px 22px;
+    border: 2px solid #4fc3f7;
+    transform: translateZ(-10px);
+  }
+
+  .diorama-item-3d {
+    position: absolute;
+    transform-style: preserve-3d;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+  .diorama-item-3d:hover {
+    transform: translateZ(12px) scale(1.15) !important;
+  }
+
+  .diorama-tag {
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    font-size: 10px;
+    font-weight: bold;
+    color: #ffd23f;
+    background: rgba(0,0,0,0.6);
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,210,63,0.3);
+  }
+

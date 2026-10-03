@@ -4588,17 +4588,93 @@
     px(0, 0, W, 16, "#0008"); g.fillStyle = "#ffd23f"; g.font = "bold 10px sans-serif"; g.textAlign = "center";
     g.fillText(`BACHECA DEI TROFEI · ${list.filter((t) => t.got).length}/${list.length}${list.length > 16 ? ` · pag. ${off / 16 + 1}/${Math.ceil(list.length / 16)}` : ""}`, W / 2, 11); g.textAlign = "left";
   }
+  function render3DTrophy(t, sel) {
+    const alt = $("stageAlt");
+    const cv = $("cv");
+    if (!alt || !cv) return;
+    cv.hidden = true;
+    alt.hidden = false;
+
+    const emblem = t.kind === "cup" ? "🏆" : t.kind === "star" ? "⭐" : t.kind === "pen" ? "✒️" : t.kind === "comic" ? "📖" : "🏅";
+    const name = t.got ? t.name : "??? BLOCCATO";
+
+    alt.innerHTML = `
+      <div class="trophy-3d-wrap" id="trophy3dWrap" title="Trascina orizzontalmente per ruotare il trofeo a 360°">
+        <div class="trophy-spotlight"></div>
+        <div class="trophy-3d-scene" id="trophy3dScene">
+          <div class="trophy-cup-model">
+            ${t.got ? '<div class="trophy-gold-glow"></div>' : ''}
+            <div class="trophy-bowl" style="${t.got ? '' : 'filter:grayscale(1) brightness(0.4); border-color:#555; background:#333;'}">
+              <div class="trophy-handle-left" style="${t.got ? '' : 'border-color:#555;'}"></div>
+              <span class="trophy-bowl-emblem">${t.got ? emblem : '🔒'}</span>
+              <div class="trophy-handle-right" style="${t.got ? '' : 'border-color:#555;'}"></div>
+            </div>
+            <div class="trophy-stem" style="${t.got ? '' : 'background:#222; border-color:#444;'}"></div>
+            <div class="trophy-pedestal-cube">
+              <div class="trophy-plaque-gold" style="${t.got ? '' : 'background:#333; color:#888; border-color:#444;'}">${esc(name)}</div>
+              <span style="font-size:7px; color:#94a3b8; margin-top:2px;">RONDINE FC</span>
+            </div>
+          </div>
+        </div>
+        <div class="trophy-spin-hint">↔ Trascina per ruotare a 360°</div>
+      </div>
+    `;
+
+    const wrap = document.getElementById("trophy3dWrap");
+    const scene = document.getElementById("trophy3dScene");
+    if (wrap && scene) {
+      let isDown = false;
+      let startX = 0;
+      let currentAngleY = 0;
+
+      const onStart = (cx) => { isDown = true; startX = cx; };
+      const onMove = (cx) => {
+        if (!isDown) return;
+        const delta = cx - startX;
+        startX = cx;
+        currentAngleY += delta * 1.2;
+        scene.style.transform = `rotateY(${currentAngleY}deg)`;
+      };
+      const onEnd = () => { isDown = false; };
+
+      wrap.onmousedown = (e) => onStart(e.clientX);
+      window.onmousemove = (e) => onMove(e.clientX);
+      window.onmouseup = onEnd;
+
+      wrap.ontouchstart = (e) => { if (e.touches[0]) onStart(e.touches[0].clientX); };
+      wrap.ontouchmove = (e) => { if (e.touches[0]) onMove(e.touches[0].clientX); };
+      wrap.ontouchend = onEnd;
+    }
+  }
+
   function bacheca(back, sel = 0) {
     BK = { list: trophies(), sel, back: back || extras };
     view = { kind: "bacheca" }; chap("Bacheca dei trofei");
     const t = BK.list[sel], got = BK.list.filter((x) => x.got).length;
+
+    if (SET.trophyView === "3d") {
+      render3DTrophy(t, sel);
+    } else {
+      closeAltStage();
+    }
+
     text("voce", `${t.got ? `✓ <b>${esc(t.name)}</b>` : `🔒 <b>???</b> <span style="color:var(--dim)">${esc(t.hint)}</span>`}${t.part ? ` <span style="color:var(--dim)">· ${esc(t.part)}</span>` : ""}<br><span style="color:var(--dim)">Trofei: ${got} su ${BK.list.length}. Usa le frecce per guardarli uno per uno.</span>`);
     const n = BK.list.length;
     buttons([
       { label: "◂ Precedente", fn: () => bacheca(BK.back, (sel + n - 1) % n) },
       { label: "Successivo ▸", fn: () => bacheca(BK.back, (sel + 1) % n) },
-      { label: "Elenco completo", fn: () => { text("voce", BK.list.map((x) => x.got ? `✓ <b>${esc(x.name)}</b>${x.part ? ` <span style="color:var(--dim)">(${esc(x.part)})</span>` : ""}` : `🔒 <span style="color:var(--dim)">${esc(x.hint)}${x.part ? ` (${esc(x.part)})` : ""}</span>`).join("<br>")); buttons([{ label: "◂ Bacheca", fn: () => bacheca(BK.back, sel) }]); } },
-      { label: "◂ Indietro", fn: () => { const b = BK.back; BK = null; b(); } },
+      {
+        label: SET.trophyView === "3d" ? "🖼️ Torna a Vista Canvas" : "🏆 Passa a Trofeo 3D Interattivo",
+        sub: SET.trophyView === "3d" ? "Disattiva il piedistallo 3D e torna alla bacheca classica" : "Esamina il trofeo su piedistallo 3D ruotabile a 360°",
+        cls: "pick",
+        fn: () => {
+          SET.trophyView = SET.trophyView === "3d" ? "canvas" : "3d";
+          writeJSON(SETK, SET);
+          bacheca(BK.back, sel);
+        }
+      },
+      { label: "Elenco completo", fn: () => { closeAltStage(); text("voce", BK.list.map((x) => x.got ? `✓ <b>${esc(x.name)}</b>${x.part ? ` <span style="color:var(--dim)">(${esc(x.part)})</span>` : ""}` : `🔒 <span style="color:var(--dim)">${esc(x.hint)}${x.part ? ` (${esc(x.part)})` : ""}</span>`).join("<br>")); buttons([{ label: "◂ Bacheca", fn: () => bacheca(BK.back, sel) }]); } },
+      { label: "◂ Indietro", fn: () => { closeAltStage(); const b = BK.back; BK = null; b(); } },
     ]);
   }
 
@@ -4615,7 +4691,7 @@
   };
   // 15l · Partita classica: quattro aggiunte, ognuna spegnibile (spente = regole di prima)
   const SET_PC = { coppie: ["Schemi a coppie avanzati", "Con grande intesa, ogni compagno sblocca un secondo tiro in coppia (intesa 14)"], rete: ["Rete strappata", "Un tiro potentissimo può bucare la rete: cut-in speciale, un po' di grinta e il conto delle reti strappate"], star: ["Fuoriclasse rivali", "Il capitano avversario carica lo speciale con una frase sua e un cut-in nei colori della squadra"], gkf: ["Portieri che si stancano", "Più tiri affronta, più un portiere cala (il tuo e il loro); all'intervallo recupera"], duelli: ["Duelli 1 contro 1", "Dribbling in attacco (zona 3+): leggi il difensore e scegli finta, scatto o protezione"], area: ["Comandi in area", "Parata, pugno o uscita: li scegli tu col tuo portiere, e anche il portiere avversario li usa"], tempo: ["Tiro a tempo", "Ferma la barra al momento giusto: preciso = tiro più forte, sbagliato = più debole"], fiato: ["Grinta di riserva", "A secco puoi tirare lo stesso (più debole); rifiatare ridà almeno 10"], spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
-  const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false, dis: false, cardView: "canvas", mangaView: "canvas" });
+  const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false, dis: false, cardView: "canvas", mangaView: "canvas", trophyView: "canvas" });
   function setLoad() {
     const d = setDefault(), s = readJSON(SETK, null);
     if (!s || s.v !== 1) return d;
@@ -4680,6 +4756,7 @@
     b.push(
       ...audioButtons(again),
       { label: `Stile Carte & Ritratti: ${SET.cardView === "holo3d" ? "Olografico 3D" : "Classico Pixel Canvas"} ▸`, sub: SET.cardView === "holo3d" ? "Tocca per tornare al Pixel Canvas retrò" : "Tocca per attivare le carte 3D con riflessi Foil", fn: () => { SET.cardView = SET.cardView === "holo3d" ? "canvas" : "holo3d"; save(); again(); } },
+      { label: `Stile Trofei: ${SET.trophyView === "3d" ? "3D su Piedistallo" : "Classico Canvas"} ▸`, sub: SET.trophyView === "3d" ? "Tocca per tornare alla bacheca classica su canvas" : "Tocca per esaminare i trofei in 3D con rotazione a 360°", fn: () => { SET.trophyView = SET.trophyView === "3d" ? "canvas" : "3d"; save(); again(); } },
       { label: `Stile Fumetto Manga: ${SET.mangaView === "manga" ? "Attivo" : "Disattivato"} ▸`, sub: SET.mangaView === "manga" ? "Tavole illustrate a fumetto nei momenti chiave" : "Visualizzazione classica su canvas retrò", fn: () => { SET.mangaView = SET.mangaView === "manga" ? "canvas" : "manga"; save(); again(); } },
       { label: `Scene speciali: ${SET.speed} ▸`, sub: "normale · veloce · salta (tocca la scena per saltarla)", fn: () => { SET.speed = { normale: "veloce", veloce: "salta", salta: "normale" }[SET.speed] || "normale"; save(); again(); } },
       { label: `Animazioni: ${SET.anim ? "sì" : "no"}`, sub: "Tiri, esultanze, fischio d'inizio e finale, coppa, cartellini · tocca per saltarle", fn: () => { SET.anim = !SET.anim; save(); again(); } },
@@ -14159,6 +14236,7 @@
     text("voce", `<b>Borgo e trasferte</b> ${mnBar(mnPct(mnBorgo()))}<br>${p ? `Conchiglie ${p.shells}/8 · Costumi e oggetti ${p.cosHave}/${p.cosAll} · ${trOk ? `Ricordi delle trasferte ${p.got}/${p.items}` : "Trasferte: ???"}` : ""}<br><span style="color:var(--dim)">Il Borgo si gira a piedi. Le trasferte partono dalla fermata del pullman${trOk ? "" : ", più avanti nella storia"}.</span>`);
     buttons([
       { label: "Borgo Marino", sub: "Esplora il paese a piedi", cls: "hot", fn: borgo },
+      { label: "Plastico 3D del Borgo", sub: "Diorama tridimensionale con caruggi, porto e faro", cls: "hot", fn: () => dioramaBorgo(menuBorgo) },
       ...MN_BORGO_BTN.map(mnObj).filter(Boolean),
       { label: "◂ Menu", fn: title },
     ]);
@@ -14169,6 +14247,7 @@
     text("voce", `<b>Modalità</b> ${mnBar(mnPct(mnModi()))}<br>Da giocare quando vuoi: non toccano il salvataggio della storia.`);
     buttons([
       { label: "Mappa delle modalità", sub: "Tutto il gioco su un foglio", cls: "hot", fn: () => mappa(modes) },
+      { label: "Diorama 3D di Borgo Marino", sub: "Esplora il plastico 3D interattivo del paese", cls: "hot", fn: () => dioramaBorgo(modes) },
       { label: "La Corsa della Panda di Nonna", sub: "Arcade tra i caruggi: schiva gabbiani e pomodori a tutto gas!", cls: "hot", fn: () => pandaGameMode(modes) },
       { label: "Torneo Supereroi (Anime Power)", sub: "Super tiri manga, aure shonen e barriere mecha!", cls: "hot", fn: () => animeTorneoMode(modes) },
       { label: "Fumetto Manga · Le Tavole del Borgo", sub: "Rileggi i momenti chiave come un webcomic d'azione", cls: "hot", fn: () => mangaViewer(modes) },
@@ -22971,6 +23050,119 @@
     else if (soundType === "horn") playCarHorn();
     else if (soundType === "goal") sfx("goal");
     else sfx("kick");
+  };
+
+  // ================= 3D DIORAMA DI BORGO MARINO =================
+  function dioramaBorgo(backFn) {
+    if (backFn) dioramaBorgo._back = backFn;
+    const bFn = dioramaBorgo._back || modes;
+    chap("Plastico 3D · Diorama di Borgo Marino");
+    view = { kind: "diorama" };
+
+    const alt = $("stageAlt");
+    const cv = $("cv");
+    if (alt && cv) {
+      cv.hidden = true;
+      alt.hidden = false;
+
+      alt.innerHTML = `
+        <div class="diorama-wrap" id="dioramaWrap" title="Trascina per inclinare e ruotare il Borgo in 3D">
+          <div class="diorama-tag">🏝️ BORGO MARINO 3D</div>
+          <div class="diorama-stage" id="dioramaStage">
+            <div class="diorama-base-island">
+              <div class="diorama-sea-rim"></div>
+              
+              <!-- 1. Molo & Barca Baciccia -->
+              <div class="diorama-item-3d" style="left:20px; top:85px; transform:translateZ(8px);" onclick="window.dioramaClick('molo')" title="Molo e Barca di Baciccia">
+                <span style="font-size:24px; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.5));">⛵</span>
+              </div>
+
+              <!-- 2. Trattoria Moretti -->
+              <div class="diorama-item-3d" style="left:80px; top:45px; transform:translateZ(14px);" onclick="window.dioramaClick('trattoria')" title="Trattoria Moretti">
+                <span style="font-size:24px; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.5));">🍲</span>
+              </div>
+
+              <!-- 3. Panda di Nonna in Piazza -->
+              <div class="diorama-item-3d" style="left:110px; top:75px; transform:translateZ(10px);" onclick="window.dioramaClick('panda')" title="Piazza Ferri & Panda 30">
+                <span style="font-size:22px; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.5));">🚗</span>
+              </div>
+
+              <!-- 4. Faro di Ester sulla scogliera -->
+              <div class="diorama-item-3d" style="left:155px; top:25px; transform:translateZ(20px);" onclick="window.dioramaClick('faro')" title="Faro di Punta Rondine">
+                <span style="font-size:26px; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.5));">🗼</span>
+              </div>
+
+              <!-- 5. Campo del Molo (Rondine FC) -->
+              <div class="diorama-item-3d" style="left:45px; top:20px; transform:translateZ(12px);" onclick="window.dioramaClick('campo')" title="Campo del Molo">
+                <span style="font-size:22px; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.5));">⚽</span>
+              </div>
+            </div>
+          </div>
+          <div class="trophy-spin-hint">Trascina per esplorare in 3D · Tocca i luoghi</div>
+        </div>
+      `;
+
+      const wrap = document.getElementById("dioramaWrap");
+      const stage = document.getElementById("dioramaStage");
+      if (wrap && stage) {
+        let isDown = false;
+        let startX = 0, startY = 0;
+        let rotX = 55, rotZ = -30;
+
+        const onStart = (cx, cy) => { isDown = true; startX = cx; startY = cy; };
+        const onMove = (cx, cy) => {
+          if (!isDown) return;
+          const dx = cx - startX;
+          const dy = cy - startY;
+          startX = cx; startY = cy;
+          rotZ += dx * 0.7;
+          rotX = Math.max(30, Math.min(75, rotX - dy * 0.5));
+          stage.style.transform = `rotateX(${rotX}deg) rotateZ(${rotZ}deg)`;
+        };
+        const onEnd = () => { isDown = false; };
+
+        wrap.onmousedown = (e) => onStart(e.clientX, e.clientY);
+        window.onmousemove = (e) => onMove(e.clientX);
+        window.onmouseup = onEnd;
+
+        wrap.ontouchstart = (e) => { if (e.touches[0]) onStart(e.touches[0].clientX, e.touches[0].clientY); };
+        wrap.ontouchmove = (e) => { if (e.touches[0]) onMove(e.touches[0].clientX, e.touches[0].clientY); };
+        wrap.ontouchend = onEnd;
+      }
+    }
+
+    text("voce", `
+      <b>Plastico 3D Interattivo di Borgo Marino</b><br>
+      Ruota e inclina il plastico artigianale del paese tra moli, caruggi e scogliere.<br>
+      <i>Tocca i modellini sulla mappa o usa i pulsanti per interagire con i luoghi storici della Rondine!</i>
+    `);
+
+    buttons([
+      { label: "🍲 Trattoria Moretti", sub: "Profumo di trofie e focaccia calda", fn: () => { window.dioramaClick("trattoria"); } },
+      { label: "🚗 Piazza Ferri & Panda", sub: "La leggendaria Panda 30 di Nonna", fn: () => { window.dioramaClick("panda"); } },
+      { label: "🗼 Faro di Punta Rondine", sub: "La lanterna di Ester a picco sulle onde", fn: () => { window.dioramaClick("faro"); } },
+      { label: "⛵ Molo di Ponente", sub: "Baciccia e le reti da pesca", fn: () => { window.dioramaClick("molo"); } },
+      { label: "🗺️ Torna alla mappa classica 2D", cls: "pick", fn: () => { closeAltStage(); bFn(); } }
+    ]);
+  }
+
+  window.dioramaClick = function(place) {
+    if (place === "molo") {
+      try { playCarHorn(); } catch {}
+      borgoToast("Molo di Ponente: Baciccia sta pulendo le reti del gozzo.");
+    } else if (place === "trattoria") {
+      sfx("goal");
+      borgoToast("Trattoria Moretti: profumo di trofie al pesto appena scolate!");
+    } else if (place === "panda") {
+      playCarHorn();
+      borgoToast("Piazza Ferri: BEEP BEEP! Nonna sgomma mezza sul marciapiede!");
+    } else if (place === "faro") {
+      playTurboWhoosh();
+      borgoToast("Punta Rondine: il fascio di luce di Ester fende la salsedine.");
+    } else if (place === "campo") {
+      sfx("kick");
+      borgoToast("Campo Comunale: Nico si tuffa sul cemento gridando GATTO VOLANTE!");
+    }
   };
 
   TRX.push(() => { const r = comicRec(); return [{ name: "Numero Zero", kind: "comic", c: "#a94c53", got: r.won.length === COMIC_EP.length, part: `${r.won.length}/3`, hint: seasonDone(1) ? "Completa Il numero nell'ultima vignetta" : "???" }]; });
