@@ -1228,6 +1228,7 @@
     else if (view.kind === "nk" && NK) drawNK();
     else if (MINI_VIEWS.includes(view.kind) && MGm) drawMini();
     else if (view.kind === "bacheca" && BK) drawBacheca();
+    else if (view.kind === "gabbia" && GB) drawGabbia();
     else if (view.kind === "sabbia") drawSabbia();
     else if (view.kind === "azione") drawAzione();
     else drawScene();
@@ -2097,8 +2098,14 @@
       if (ups) msg += ` Sali al <b>livello ${S.lv}</b>: tutte le statistiche crescono.`;
       if (S.lv >= 3 && !S.f.fogliaMsg) { S.f.fogliaMsg = true; msg += ` Nuova tecnica: <b>Foglia Secca</b>, un tiro che funziona da ogni distanza!`; }
     }
+    const lastResultData = { vs: t.vs, score: S.results[S.results.length - 1]?.score || [2, 1] };
     M = null; statsBox(); jingle("win"); view = { kind: "scene", bg: "stadium", speaker: "nico" };
-    text("nico", msg); buttons([{ label: "Continua ▸", fn: advance }, { label: "Passa da Borgo Marino", sub: "La storia riprende da qui", fn: () => { S.step++; save(); playing = false; borgo(); } }]);
+    text("nico", msg);
+    buttons([
+      { label: "📰 Leggi L'Eco del Tirreno", sub: "Prima pagina e pagelle della partita", fn: () => ecoDelTirreno(lastResultData, advance) },
+      { label: "Continua ▸", fn: advance },
+      { label: "Passa da Borgo Marino", sub: "La storia riprende da qui", fn: () => { S.step++; save(); playing = false; borgo(); } }
+    ]);
   }
 
   // ================= FINALI =================
@@ -13335,6 +13342,7 @@
     text("voce", `<b>Modalità</b> ${mnBar(mnPct(mnModi()))}<br>Da giocare quando vuoi: non toccano il salvataggio della storia.`);
     buttons([
       { label: "Mappa delle modalità", sub: "Tutto il gioco su un foglio", cls: "hot", fn: () => mappa(modes) },
+      { label: "La Gabbia sul Molo", sub: "Street football 3v3 con sponde di ferro e zero rimesse", cls: "hot", fn: () => gabbiaMode(modes) },
       { label: "Carriera", sub: careerSub(), fn: career },
       { label: "Crea il tuo campione", sub: heroLoad() ? `${heroLoad().name} · Carriera, Rigori, Borgo` : "Per Carriera, Rigori e partite del Borgo", fn: () => heroEditor(modes) },
       { label: "Mondiali", sub: `Con la Nazionale · vinti ${mondRec().titles}`, fn: mondiali },
@@ -13352,6 +13360,7 @@
     text("voce", `<b>Collezioni</b> ${mnBar(mnPct(mnColl()))}<br>Trofei ${mnPct(p.tro)}% · Figurine di Pina ${mnPct(p.fig)}% · Ricordi ${mnPct(p.foto)}% · Figurine dei personaggi ${n(p.card, Object.keys(BIO).length)} · Finali ${n(p.fin, ENDINGS.length)}`);
     buttons([
       { label: "Bacheca dei trofei", sub: `${trophies().filter((t) => t.got).length}/${trophies().length}`, cls: "hot", fn: () => bacheca(extras) },
+      { label: "L'Eco del Tirreno", sub: "Archivio delle prime pagine storiche e pagelle", fn: () => ecoArchivio(extras) },
       { label: "Album di Pina «Campioni della Costa»", sub: (() => { try { const r = figRec(); return r.started ? `Figurine ${figOwned(r)}/${FIG_ALL.length}` : "Si trova all'edicola del Borgo"; } catch { return ""; } })(), fn: () => figAlbum(0, extras) },
       { label: "Il Corriere delle Figurine", sub: (() => { const r = figRec(); return r.started ? `${r.courier.length}/3 uscite lette` : "Prima passa dall'edicola di Pina"; })(), disabled: !figRec().started, fn: () => figCourier(extras) },
       { label: "Album dei ricordi", sub: (() => { try { fotoScan(); } catch {} return `Fotografie ${fotoRec().got.length}/${FOTO.length}`; })(), fn: () => ricordi(extras) },
@@ -20999,6 +21008,306 @@
     ? { label: "Fumetto interattivo", sub: ((r) => r.won.length === COMIC_EP.length ? `Completato · edizioni ${r.volume + 1}` : `Pagine ${r.won.length}/3 · partite ${r.played}`)(comicRec()), fn: () => comicMenu(modes) }
     : { label: "???", sub: "Si sblocca dopo la Stagione 1", disabled: true, fn: () => {} });
   MN_MODI.push(() => { const r = comicRec(); return r.won.length / COMIC_EP.length; });
+  // ================= L'ECO DEL TIRRENO =================
+  function ecoDelTirreno(data, backFn) {
+    view = { kind: "scene", bg: "stadium" };
+    chap("L'Eco del Tirreno");
+    const vs = (data && data.vs) ? data.vs : "i rivali";
+    const sc = (data && data.score) ? data.score : [2, 1];
+    const win = sc[0] >= sc[1];
+    const diff = sc[0] - sc[1];
+
+    let headline = "";
+    if (diff >= 3) headline = `RONDINE DEVASTANTE: ${esc(vs).toUpperCase()} TRAVOLTO ${sc[0]}–${sc[1]}!`;
+    else if (win && sc[0] >= 3) headline = `FESTA AL MOLO: VITTORIA SPETTACOLARE ${sc[0]}–${sc[1]}!`;
+    else if (win) headline = `CUORE E GRINTA: LA RONDINE PIEGA ${esc(vs).toUpperCase()} ${sc[0]}–${sc[1]}`;
+    else if (sc[0] === sc[1]) headline = `BATTAGLIA SUL MARE: PAREGGIO DI FERRO ${sc[0]}–${sc[1]}`;
+    else headline = `ORGOGLIO AL 90°: LA RONDINE CADE A TESTA ALTA CONTRO ${esc(vs).toUpperCase()}`;
+
+    const lead = win
+      ? `Novanta minuti di pura passione ligure hanno infiammato gli spalti del litorale. Leo Moretti ha guidato i compagni con la fascia al braccio in un pomeriggio che profuma di salsedine e leggenda. Tra le onde e il fischietto dell'arbitro, il Rondine FC dimostra che le favole di paese possono piegare i giganti del campionato.`
+      : `Una partita dura, spigolosa e senza sconti. I ragazzi del borgo hanno gettato il cuore oltre ogni ostacolo, lottando su ogni zolla polverosa fino all'ultimo respiro. Il Bar Moretti accoglie comunque i suoi beniamini tra applausi scroscianti e una teglia di focaccia calda.`;
+
+    const html = `
+      <div class="eco-paper">
+        <div class="eco-stamp">${win ? "VITTORIA STORICA" : "EDIZIONE STRAORDINARIA"}</div>
+        <div class="eco-header">
+          <div class="eco-topline">
+            <span>ANNO XLII · N. 104</span>
+            <span>DOMENICA SPORTIVA LIGURE</span>
+            <span>LIRE 500 / COPIA</span>
+          </div>
+          <div class="eco-title">L'Eco del Tirreno</div>
+          <div class="eco-motto">Il quotidiano dei porti, delle scogliere e delle grandi imprese</div>
+        </div>
+        <div class="eco-headline">${headline}</div>
+        <div class="eco-lead">${lead}</div>
+        <div class="eco-pagelle">
+          <div class="eco-pagelle-title">LE PAGELLE DEL BAR MORETTI</div>
+          <div class="eco-pagella-item">
+            <span class="eco-vote">${win ? "8.5" : "7.5"}</span>
+            <div><b>Leo Moretti:</b> Accende la luce nel buio con dribbling secchi e tocchi al millimetro. Capitano vero.</div>
+          </div>
+          <div class="eco-pagella-item">
+            <span class="eco-vote">${win ? "8" : "7"}</span>
+            <div><b>Sara:</b> Geometrie da applausi e visione periferica. Quando parte in contropiede la brezza marina spinge con lei.</div>
+          </div>
+          <div class="eco-pagella-item">
+            <span class="eco-vote">7.5</span>
+            <div><b>Gigi:</b> Difende come una scogliera contro i marosi. Se passa la palla, non passa l'uomo.</div>
+          </div>
+          <div class="eco-pagella-item">
+            <span class="eco-vote">${win ? "8" : "7.5"}</span>
+            <div><b>Nico:</b> Guanti bagnati dal salmastro ma riflessi felini. La saracinesca di Borgo Marino non tradisce.</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    text("", html);
+    buttons([
+      { label: "Continua ▸", cls: "hot", fn: backFn },
+      { label: "📻 Sintonizza la Radiolina", sub: "La cronaca del Borgo", fn: () => { if (window.openRadioModal) window.openRadioModal(); } }
+    ]);
+  }
+
+  function ecoArchivio(backFn) {
+    view = { kind: "scene", bg: "title" };
+    chap("Archivio L'Eco del Tirreno");
+    text("voce", `<b>Archivio de «L'Eco del Tirreno»</b><br>Tutte le prime pagine stampate sui campi della Costa. Rileggi i titoli delle tue imprese e le pagelle compilate da Baciccia e dai tifosi del Bar.`);
+    const results = S.results || [];
+    const list = [];
+    if (results.length > 0) {
+      results.slice(-6).reverse().forEach((r) => {
+        const vs = r.team ? r.team.toUpperCase() : "RIVALE";
+        list.push({
+          label: `Edizione: ${vs} (${r.score ? r.score[0] + '–' + r.score[1] : 'vittoria'})`,
+          sub: r.win ? "Prima pagina trionfale" : "Edizione da combattimento",
+          fn: () => ecoDelTirreno({ vs: r.team, score: r.score }, () => ecoArchivio(backFn))
+        });
+      });
+    } else {
+      list.push({
+        label: "Edizione Speciale · Derby della Scogliera",
+        sub: "Prima pagina commemorativa Rondine FC 3–1 Gabbiani",
+        fn: () => ecoDelTirreno({ vs: "Gabbiani del Porto", score: [3, 1] }, () => ecoArchivio(backFn))
+      });
+    }
+    list.push({ label: "◂ Indietro", fn: backFn });
+    buttons(list);
+  }
+
+  // ================= LA GABBIA SUL MOLO (3v3 STREET FOOTBALL) =================
+  let GB = null;
+  function gabbiaMode(backFn) {
+    chap("La Gabbia sul Molo");
+    view = { kind: "gabbia" };
+    $("matchHud").hidden = true;
+    GB = {
+      score: [0, 0],
+      target: 3,
+      poss: "leo",
+      log: "Palla al centro sulla pavimentazione di cemento. La gabbia metallica trema già!",
+      backFn: backFn || modes
+    };
+    gabbiaTurn();
+  }
+
+  function gabbiaTurn() {
+    if (!GB) return;
+    if (GB.score[0] >= GB.target) {
+      jingle("win");
+      view = { kind: "scene", bg: "molo", speaker: "leo" };
+      text("leo", `<b>Vittoria nella Gabbia per ${GB.score[0]}–${GB.score[1]}!</b><br>I rivali del molo applaudono stringendo le mani insabbiate. Ginocchia sbucciate ma onore intatto!`);
+      return buttons([
+        { label: "📰 Leggi L'Eco del Molo", sub: "La prima pagina dell'Eco del Tirreno", fn: () => ecoDelTirreno({ vs: "Lupi del Molo (3v3)", score: GB.score }, () => gabbiaMode(GB.backFn)) },
+        { label: "Gioca un'altra partita", cls: "hot", fn: () => gabbiaMode(GB.backFn) },
+        { label: "◂ Esci dalla gabbia", fn: GB.backFn }
+      ]);
+    }
+    if (GB.score[1] >= GB.target) {
+      view = { kind: "scene", bg: "molo", speaker: "gigi" };
+      text("gigi", `I rivali vincono ${GB.score[1]}–${GB.score[0]}! Hanno sfruttato i rimbalzi sul ferro meglio di noi. Ci rifacciamo alla prossima!`);
+      return buttons([
+        { label: "Rivincita immediata", cls: "hot", fn: () => gabbiaMode(GB.backFn) },
+        { label: "◂ Esci dalla gabbia", fn: GB.backFn }
+      ]);
+    }
+
+    view = { kind: "gabbia" };
+    const p = GB.poss;
+    if (p === "rival") {
+      text("voce", `<b>Rivali in possesso!</b> Spigola prova a convergere verso il centro puntando la rete di ferro.<br><i>«${GB.log}»</i>`);
+      buttons([
+        { label: "🧱 Muro di Gigi in scivolata", sub: "Intervento duro sul cemento", fn: () => gabbiaDef("gigi") },
+        { label: "⚡ Anticipo di Sara", sub: "Lettura della traiettoria", fn: () => gabbiaDef("sara") },
+        { label: "🧤 Uscita bassa di Nico", sub: "A chiudere lo specchio della gabbia", fn: () => gabbiaDef("nico") }
+      ]);
+    } else {
+      const whoName = p === "leo" ? "Leo" : p === "sara" ? "Sara" : "Gigi";
+      text("voce", `<b>Palla a ${whoName}!</b> Spazio stretto, la recinzione è a due passi.<br><i>«${GB.log}»</i>`);
+      buttons([
+        { label: "🎯 Tiro secco verso i pali nudi", sub: "Conclusione tesa e rasoterra", fn: () => gabbiaShoot("tiro") },
+        { label: "⛓️ Sponda sulla recinzione di ferro", sub: "Fai rimbalzare la palla sulla maglia metallica", cls: "hot", fn: () => gabbiaShoot("sponda") },
+        { label: "🔄 Dribbling stretto / Tunnel", sub: "Finta di corpo sul cemento", fn: () => gabbiaShoot("tunnel") },
+        { label: p === "leo" ? "👟 Passa a Sara" : "👟 Passa a Leo", sub: "Fai girare la palla veloce", fn: () => gabbiaPass() }
+      ]);
+    }
+  }
+
+  function gabbiaShoot(action) {
+    if (!GB) return;
+    const rndVal = Math.random();
+    if (action === "sponda") {
+      if (rndVal > 0.35) {
+        GB.score[0]++;
+        GB.log = "CLANG! Sponda perfetta sulla rete metallica! La palla rimbalza beffarda e si infila all'angolino! GOL!";
+        GB.poss = "rival";
+        jingle("goal");
+      } else {
+        GB.log = "Il rimbalzo sul ferro è troppo violento e finisce sui piedi di Spigola!";
+        GB.poss = "rival";
+      }
+    } else if (action === "tunnel") {
+      if (rndVal > 0.40) {
+        GB.score[0]++;
+        GB.log = "TUNNEL! Palla tra le gambe del difensore e appoggio a porta vuota! Delirio nella gabbia!";
+        GB.poss = "rival";
+        jingle("goal");
+      } else {
+        GB.log = "Il difensore chiude le gambe e riparte in contropiede!";
+        GB.poss = "rival";
+      }
+    } else {
+      if (rndVal > 0.45) {
+        GB.score[0]++;
+        GB.log = "BOMBA RASOTERRA! Il pallone sbatte sul palo interno ed entra! GOL!";
+        GB.poss = "rival";
+        jingle("goal");
+      } else {
+        GB.log = "Tiro ribattuto dal corpo del portiere rivale sul cemento!";
+        GB.poss = "rival";
+      }
+    }
+    gabbiaTurn();
+  }
+
+  function gabbiaPass() {
+    if (!GB) return;
+    if (GB.poss === "leo") GB.poss = "sara";
+    else if (GB.poss === "sara") GB.poss = "gigi";
+    else GB.poss = "leo";
+    GB.log = `Scambio rapido di prima intenzione! Ora la sfera è nei piedi di ${GB.poss === "leo" ? "Leo" : GB.poss === "sara" ? "Sara" : "Gigi"}!`;
+    gabbiaTurn();
+  }
+
+  function gabbiaDef(choice) {
+    if (!GB) return;
+    const rndVal = Math.random();
+    if (choice === "gigi") {
+      if (rndVal > 0.35) {
+        GB.log = "Gigi intercetta col fisico da vero scoglio! Palla recuperata!";
+        GB.poss = "leo";
+      } else {
+        GB.score[1]++;
+        GB.log = "Spigola salta Gigi in velocità e scarica sotto la traversa! Gol avversario!";
+        GB.poss = "leo";
+      }
+    } else if (choice === "sara") {
+      if (rndVal > 0.35) {
+        GB.log = "Sara intuisce il passaggio e riparte in contropiede!";
+        GB.poss = "sara";
+      } else {
+        GB.score[1]++;
+        GB.log = "Rimbalzo beffardo sulla rete e gol avversario!";
+        GB.poss = "leo";
+      }
+    } else {
+      if (rndVal > 0.30) {
+        GB.log = "Nico si distende sul cemento e blocca a terra con sicurezza!";
+        GB.poss = "leo";
+      } else {
+        GB.score[1]++;
+        GB.log = "Tiro angolato imparabile all'incrocio! Pareggiano i rivali!";
+        GB.poss = "leo";
+      }
+    }
+    gabbiaTurn();
+  }
+
+  function drawGabbia() {
+    if (!GB) return drawScene();
+    // 1. Cielo e sfondo molo
+    px(0, 0, W, 40, "#1a2c4e");
+    px(0, 40, W, 20, "#2c486e");
+    // Mare e barche
+    px(0, 52, W, 18, "#1a3b5c");
+    for (let x = 0; x < W; x += 32) {
+      px(x + 4, 56, 12, 4, "#8a4f2a");
+      px(x + 9, 48, 2, 8, "#d8c090");
+    }
+    // 2. Campo di cemento della Gabbia
+    px(0, 68, W, H - 68, "#323640");
+    for (let i = 0; i < 6; i++) {
+      px(20 + i * 50, 80 + (i * 19) % 80, 24, 1, "#262932");
+    }
+    // Linee bianche usurate
+    px(159, 70, 2, H - 70, "rgba(255,255,255,0.45)");
+    g.strokeStyle = "rgba(255,255,255,0.45)";
+    g.lineWidth = 2;
+    g.strokeRect(10, 74, W - 20, H - 80);
+    g.beginPath();
+    g.arc(160, 135, 24, 0, 7);
+    g.stroke();
+
+    // 3. Rete metallica a maglie zincate
+    g.strokeStyle = "rgba(180, 205, 230, 0.4)";
+    g.lineWidth = 1;
+    for (let x = 0; x <= W; x += 12) {
+      g.beginPath();
+      g.moveTo(x, 42); g.lineTo(x + 12, 74);
+      g.moveTo(x + 12, 42); g.lineTo(x, 74);
+      g.stroke();
+    }
+    for (let x = 0; x <= W; x += 48) {
+      px(x - 1, 38, 3, 36, "#788896");
+    }
+
+    // 4. Porticine di ferro
+    px(4, 110, 6, 50, "rgba(255,255,255,0.3)");
+    px(4, 110, 6, 3, "#ff4d5a");
+    px(4, 157, 6, 3, "#ff4d5a");
+    px(310, 110, 6, 50, "rgba(255,255,255,0.3)");
+    px(310, 110, 6, 3, "#ffd23f");
+    px(310, 157, 6, 3, "#ffd23f");
+
+    // 5. Giocatori in pixel retrò
+    const shade = (x, y) => { g.fillStyle = "rgba(0,0,0,0.35)"; g.beginPath(); g.ellipse(x, y + 8, 6, 3, 0, 0, 7); g.fill(); };
+    shade(120, 120); man(120, 120, "#b3202c", "#ffd23f");
+    shade(80, 95);   man(80, 95, "#b3202c", "#ffd23f");
+    shade(55, 145);  man(55, 145, "#b3202c", "#ffd23f");
+    shade(20, 135);  man(20, 135, "#ffd23f", "#111");
+    shade(200, 120); man(200, 120, "#2b4f85", "#fff");
+    shade(240, 100); man(240, 100, "#2b4f85", "#fff");
+    shade(295, 135); man(295, 135, "#333", "#fff");
+
+    // 6. Pallone
+    const bx = GB.poss === "leo" ? 128 : GB.poss === "sara" ? 88 : GB.poss === "gigi" ? 63 : 208;
+    const by = GB.poss === "leo" ? 124 : GB.poss === "sara" ? 99 : GB.poss === "gigi" ? 149 : 124;
+    g.fillStyle = "rgba(0,0,0,0.4)";
+    g.beginPath(); g.ellipse(bx + 1, by + 4, 4, 2, 0, 0, 7); g.fill();
+    ball(bx, by, 4);
+
+    // 7. Tabellone
+    px(80, 4, 160, 22, "#181a20");
+    g.strokeStyle = "#ffd23f"; g.lineWidth = 1; g.strokeRect(80, 4, 160, 22);
+    g.fillStyle = "#fff"; g.font = "bold 9px sans-serif"; g.textAlign = "center";
+    g.fillText("LA GABBIA DEL MOLO · PRIMO A 3 GOL", 160, 13);
+    g.fillStyle = "#ffd23f"; g.font = "bold 11px sans-serif";
+    g.fillText(`RONDINE ${GB.score[0]} – ${GB.score[1]} RIVALI`, 160, 23);
+    g.textAlign = "left";
+  }
+
   TRX.push(() => { const r = comicRec(); return [{ name: "Numero Zero", kind: "comic", c: "#a94c53", got: r.won.length === COMIC_EP.length, part: `${r.won.length}/3`, hint: seasonDone(1) ? "Completa Il numero nell'ultima vignetta" : "???" }]; });
   if (/[?&]debug/.test(location.search)) window.__comic = { comicRec, comicSave, comicStats, comicMenu, comicPage, comicChoose, comicStart, comicResult, comicFinalChoice, comicEnd, comicNewVolume, COMIC_EP, COMIC_COS };
   if (/[?&]debug/.test(location.search)) window.__ali = { get S() { return S; }, set S(v) { S = v; }, get M() { return M; }, get B() { return B; }, get BW() { return BW; }, get C() { return C; }, get tm() { return tm; }, get view() { return view; }, prog, borgo, borgoResume, title, run, STORY, get SA() { return SA; }, get MG() { return MGm; }, get TW() { return TW; }, dailyToday, dailyStart, get K() { return K; }, get SET() { return SET; }, shotAnim, trophies };

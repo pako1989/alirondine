@@ -112,10 +112,152 @@
   window.applyTheme = applyTheme;
   window.THEMES = THEMES;
 
+  // ================= LA RADIOLINA DEL BORGO (PLAYER RETRO) =================
+  const STATIONS = [
+    { id: "molo", name: "88.5 · Radio Molo", needle: 12, quote: "«Brezza calma sul porto vecchio... oggi le acciughe saltano che è una meraviglia.»", bpm: 90, scale: [261.6, 293.7, 329.6, 392.0, 440.0, 523.3] },
+    { id: "calcio", name: "94.0 · Tutto il Calcio", needle: 38, quote: "«Clamoroso al Molo: traversa di Gigi! La palla rimbalza fino alla banchina!»", bpm: 120, scale: [220, 277.2, 329.6, 440, 554.4, 659.3] },
+    { id: "bar", name: "101.2 · Bar Moretti Swing", needle: 68, quote: "«Un caffè corretto e due paste al bar... Ruggeri spiega la diagonale con le tazzine!»", bpm: 110, scale: [261.6, 311.1, 349.2, 392.0, 466.2, 523.3] },
+    { id: "rondine", name: "107.8 · Inno Rondine", needle: 92, quote: "«Volano le rondini sul cielo della Liguria! La finale si avvicina!»", bpm: 128, scale: [293.7, 369.9, 440.0, 587.3, 739.9, 880.0] }
+  ];
+
+  let audioCtx = null;
+  let curStation = null;
+  let radioTimer = null;
+  let noteIdx = 0;
+
+  function initAudio() {
+    if (!audioCtx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) audioCtx = new AudioCtx();
+    }
+    if (audioCtx && audioCtx.state === "suspended") {
+      audioCtx.resume().catch(() => {});
+    }
+  }
+
+  function playRadioNote(freq, type = "sine", dur = 0.22, vol = 0.12) {
+    if (!audioCtx) return;
+    try {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + dur);
+    } catch (e) {}
+  }
+
+  function stepRadioMusic() {
+    if (!curStation || !audioCtx) return;
+    const notes = curStation.scale;
+    const f = notes[noteIdx % notes.length];
+    const type = curStation.id === "rondine" ? "sawtooth" : curStation.id === "calcio" ? "square" : "triangle";
+    const vol = curStation.id === "calcio" ? 0.05 : 0.08;
+    playRadioNote(f, type, (60 / curStation.bpm) * 0.8, vol);
+    noteIdx = (noteIdx + Math.floor(Math.random() * 2) + 1);
+  }
+
+  function tuneStation(idx) {
+    initAudio();
+    if (radioTimer) { clearInterval(radioTimer); radioTimer = null; }
+    if (idx === null || curStation === STATIONS[idx]) {
+      curStation = null;
+      updateRadioUI();
+      return;
+    }
+    curStation = STATIONS[idx];
+    updateRadioUI();
+    const interval = (60 / curStation.bpm) * 1000;
+    radioTimer = setInterval(stepRadioMusic, interval);
+    stepRadioMusic();
+  }
+
+  let radioOverlay = null;
+
+  function openRadioModal() {
+    initAudio();
+    if (!radioOverlay) {
+      radioOverlay = document.createElement("div");
+      radioOverlay.className = "radio-overlay";
+      radioOverlay.setAttribute("role", "dialog");
+      radioOverlay.setAttribute("aria-label", "La Radiolina del Borgo");
+      radioOverlay.innerHTML = `
+        <div class="radio-chassis">
+          <div class="radio-antenna"></div>
+          <div class="radio-topbar">
+            <span><i class="radio-led" id="rLed"></i>BORGO MARINO TRANSISTOR · FM STEREO</span>
+          </div>
+          <div class="radio-scale">
+            <div class="radio-needle" id="rNeedle" style="left: 10%;"></div>
+            <div style="font-size: 10px; color: #88ccaa;">MHZ · MODULAZIONE DI FREQUENZA</div>
+            <div class="radio-freq-labels">
+              <span>88</span><span>94</span><span>101</span><span>108</span>
+            </div>
+          </div>
+          <div class="radio-grill" id="rStations"></div>
+          <div class="radio-commentary" id="rQuote">«Sintonizzati su una frequenza per ascoltare le onde di Borgo Marino...»</div>
+          <div class="radio-controls">
+            <button type="button" class="radio-close-btn" id="rClose">Chiudi radiolina ✕</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(radioOverlay);
+
+      const stBox = radioOverlay.querySelector("#rStations");
+      STATIONS.forEach((st, i) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "radio-station-btn";
+        btn.textContent = st.name.split(" · ")[1];
+        btn.onclick = () => tuneStation(i);
+        stBox.appendChild(btn);
+      });
+
+      radioOverlay.querySelector("#rClose").onclick = () => {
+        radioOverlay.style.display = "none";
+      };
+      radioOverlay.onclick = (e) => {
+        if (e.target === radioOverlay) radioOverlay.style.display = "none";
+      };
+    }
+    radioOverlay.style.display = "flex";
+    updateRadioUI();
+  }
+
+  function updateRadioUI() {
+    if (!radioOverlay) return;
+    const needle = radioOverlay.querySelector("#rNeedle");
+    const led = radioOverlay.querySelector("#rLed");
+    const quote = radioOverlay.querySelector("#rQuote");
+    const btns = radioOverlay.querySelectorAll(".radio-station-btn");
+
+    if (curStation) {
+      needle.style.left = curStation.needle + "%";
+      led.classList.add("on");
+      quote.textContent = curStation.quote;
+      btns.forEach((b, i) => {
+        b.classList.toggle("active", STATIONS[i].id === curStation.id);
+      });
+    } else {
+      needle.style.left = "4%";
+      led.classList.remove("on");
+      quote.textContent = "«Radiolina in stand-by. Scegli una stazione radiofonica del Borgo!»";
+      btns.forEach(b => b.classList.remove("active"));
+    }
+  }
+
+  window.openRadioModal = openRadioModal;
+
   document.addEventListener("DOMContentLoaded", () => {
     checkSeasonalEvents();
     const themeBtn = $("themeBtn");
     if (themeBtn) themeBtn.onclick = cycleTheme;
+    const radioBtn = $("radioBtn");
+    if (radioBtn) radioBtn.onclick = openRadioModal;
     let savedTh = "classic";
     try { savedTh = localStorage.getItem("ali-di-rondine.theme") || "classic"; } catch (e) {}
     const foundIdx = THEMES.findIndex(t => t.id === savedTh);
