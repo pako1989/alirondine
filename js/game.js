@@ -1328,7 +1328,14 @@
     }
   }
 
-  cv.addEventListener("click", () => {
+  cv.addEventListener("click", (e) => {
+    if (view.kind === "panda" && PANDA && !PANDA.over) {
+      const rect = cv.getBoundingClientRect();
+      const clickX = ((e.clientX - rect.left) / rect.width) * W;
+      if (clickX < W / 2) pandaSteer(-1);
+      else pandaSteer(1);
+      return;
+    }
     if (chapCard && chapCard.frame < chapCard.maxFrames - 10) {
       chapCard.frame = chapCard.maxFrames - 10;
     }
@@ -2660,8 +2667,10 @@
     view = { kind: "scene", bg: "title" }; chap("Storie extra");
     const seen = getList(ENDS + ".extra");
     const n = (p) => seen.filter((x) => x.startsWith(p)).length;
-    text("voce", "Nove storie brevi, fuori dal campionato. Si giocano quando vuoi e non toccano il tuo salvataggio.");
+    text("voce", "Undici storie brevi e intime, fuori dal campionato. Si giocano quando vuoi e non toccano il tuo salvataggio.");
     buttons([
+      { label: "Il Segreto di Baciccia", sub: `La parata leggendaria del 1965 · ${n("baciccia")}/3`, cls: "hot", fn: storyBaciccia },
+      { label: "La Notte del Faro", sub: `Ester, la bufera e la foto di Anna · ${n("ester")}/3`, cls: "hot", fn: storyEster },
       { label: "Il primo gelato", sub: `Nico e Sara · finali ${n("gelato")}/3`, fn: storyGelato },
       { label: "La finale del 2006", sub: `Papà e Ruggeri, vent'anni fa · ${n("finale")}/2`, fn: storyFinale },
       { label: "Tommy da bambino", sub: `Il primo giorno di scuola · ${n("tommy")}/3`, fn: storyTommy },
@@ -4018,7 +4027,10 @@
         ], () => { q.acc = 2; bCos("codino"); borgoSave(); borgoResume(); sfx("goal"); borgoToast("Sbloccato: taglio a codino · torna da Baciccia"); });
         const l = [BL("nonna", n < 4 ? "Nicola non si mette la maglietta della salute. Leo, se lo vedi, mettigliela tu. Anche con la forza. Soprattutto con la forza." : "Ho ottant'anni e quattro clienti. Tre sono nipoti. Il quarto è un gatto, ma ha talento. Le trattative le faccio a colpi di lasagne.")];
         if (e.baci) l.push(BL("nonna", { verita: "Baciccia è venuto domenica. Con una cravatta annodata come una cima d'ormeggio. Abbiamo preso il caffè. Non ha detto niente per un'ora. È stata l'ora più bella dell'anno.", bugia: "Baciccia non è venuto, domenica. Ho aspettato con il caffè pronto. Va bene così. Alla mia età si aspetta con calma. Ma non all'infinito.", porta: "Baciccia adesso viene a pranzo tutte le domeniche. Pulisce il pesce meglio di Nicola. Non ditelo a Nicola." }[e.baci]));
-        return bSay(l);
+        return bSay(l, () => bAsk("nonna", "La leggendaria Panda 30 di Nonna è parcheggiata mezza sul marciapiede col motore che borbotta.", [
+          { label: "🚗 Sali sulla Panda con Nonna Ferri", sub: "Corsa spericolata nei caruggi fino allo stadio!", cls: "hot", go: () => pandaGameMode(borgoResume) },
+          { label: "«Grazie Nonna, vado a piedi»", go: borgoResume }
+        ]));
       },
       gigi: () => {
         view = { kind: "scene", bg: "beach", speaker: "gigi" };
@@ -5627,7 +5639,64 @@
     ]);
   }
   CAST.matteo = { name: "Matteo", tag: "blue", hair: "#3a2a1a", style: "messy", skin: "#eec39c", eye: "#2a1a0a", bg: ["#56657d", "#9be2ff"], shirt: "#8a8a92" };
-  TRX.push(() => { const ex = getList(ENDS + ".extra"), k = ["turno", "dario", "sara"].filter((p) => ex.some((x) => x.startsWith(p))).length, all = ex.filter((x) => /^(turno|dario|sara)\d/.test(x)).length; return [{ name: "Taccuino dei ricordi", kind: "pen", c: "#9be2ff", got: k >= 3, part: `finali ${all}/9`, hint: "Gioca le tre storie extra su Tommy, Dario e Sara" }]; });
+
+  function storyBaciccia() {
+    chap("Storia extra · Il segreto di Baciccia");
+    sideChoice([
+      L("voce", "Maggio 1965. Spareggio promozione tra la Rondine e la temibile Pro Recco. Al campo del porto non entra uno spillo: ci sono trecento persone arrampicate sui muretti a secco."),
+      L("voce", "In porta per la Rondine c'è Giovanni «Baciccia» Traverso, vent'anni, due spalle larghe come un portone e le mani piene di calli da pescatore."),
+      L("baciccia", "(da giovane) Il mare insegna una cosa sola: non guardare mai l'onda che arriva, guarda il punto dove frange. In porta è uguale."),
+      L("voce", "All'ottantottesimo minuto, sul risultato di 1–0 per la Rondine, l'arbitro fischia un rigore contestatissimo. Sugli spalti scoppia la bolgia. In tribuna ci sono due emissari del Genoa con la cartellina di cuoio."),
+      L("voce", "Baciccia ha una tibia incrinata per uno scontro precedente: a ogni passo sente fitte di fuoco, ma i cambi non esistono. Deve parare o la Rondine perde il sogno."),
+    ], "molo", "baciccia", "Il rigorista posiziona il pallone sul dischetto di terra battuta. Baciccia si sistema la coppola. Dove ti tuffi?", [
+      { label: "Batti il pugno sul palo e tuffati a sinistra", lines: [
+        L("voce", "Baciccia urla contro il vento, vola nell'aria come un gabbiano e devia il siluro a fil di palo con la punta delle dita! Lo stadio esplode!"),
+        L("voce", "La tibia cede definitivamente al momento dell'atterraggio. Il Genoa ritira l'offerta da professionista, ma la Rondine vince la Coppa."),
+        L("baciccia", "(da giovane, sorridendo con la gamba fasciata sul gozzo) Meglio così. La Serie A voleva portarmi a Milano o a Torino. Lontano dal mare sarei seccato come un'acciuga al sole."),
+      ], end: "<b>Il segreto di Baciccia</b>, finale «La parata del secolo». Quella coppa d'argento è ancora dietro al bancone della Trattoria Moretti. Prova le altre scelte.", id: "baciccia1" },
+      { label: "Rimani piantato al centro: sguardo d'acciaio", lines: [
+        L("voce", "Baciccia non abbocca alla finta: fissa il tiratore negli occhi come ha fatto per anni con i barracuda nel golfo. Il rigorista, ipnotizzato e nervoso, spara alto sopra la traversa!"),
+        L("voce", "A fine partita l'osservatore del Genoa gli offre un assegno in bianco. Baciccia guarda sua madre che lo aspetta sul molo con la cassetta del pescato."),
+        L("baciccia", "(da giovane) «Dottore, i vostri milioni non sanno tirare su le reti all'alba. Tenetevi la città, io mi tengo il borgo.»"),
+      ], end: "<b>Il segreto di Baciccia</b>, finale «Il contratto strappato». Da quel giorno Baciccia non ha mai rimpianto un solo minuto passato sulla barca. Prova le altre scelte.", id: "baciccia2" },
+      { label: "Uscita a valanga kamikaze prima del tiro", lines: [
+        L("voce", "Baciccia esce a tutta velocità ruggendo prima che il piede dell'avversario colpisca la palla: devia il pallone col petto con un tonfo sordo che zittisce l'intero campo!"),
+        L("voce", "La Rondine porta a casa la vittoria più gloriosa della sua storia. Quella parata a corpo morto diventerà la leggenda che Nonna Ferri racconterà a Nico cinquant'anni dopo per insegnargli il Gatto Volante."),
+        L("nonna", "(da ragazza, sulla Panda) «Quel Traverso è un testone, ma in porta fa paura persino ai gabbiani.»"),
+      ], end: "<b>Il segreto di Baciccia</b>, finale «L'eredità del Gatto». Ora sai dove Nico ha imparato a non aver paura di buttarsi sul cemento. Prova le altre scelte.", id: "baciccia3" },
+    ]);
+  }
+
+  function storyEster() {
+    chap("Storia extra · La Notte del Faro");
+    sideChoice([
+      L("voce", "Novembre 2004. Una mareggiata spaventosa si abbatte sulle scogliere di Punta Rondine: onde nere alte otto metri scavalcano la diga frangiflutti."),
+      L("voce", "Ester ha venticinque anni ed è la nuova guardiana del faro. Durante la burrasca il generatore a nafta salta. Il faro rischia di spegnersi proprio mentre tre pescherecci stanno rientrando nel buio."),
+      L("ester", "Se la lanterna si spegne, stanotte il mare si prende le barche del Borgo. Non posso permetterlo."),
+      L("voce", "Nel bel mezzo della bufera, la porta della torre si apre: entra una ragazza fradicia, col maglione zuppo d'acqua salata e una macchina fotografica reflex al collo. È Anna, la madre di Leo e Dario."),
+      L("anna", "«Ester! Ho visto la luce vacillare dal paese. Sono venuta ad aiutarti!»"),
+    ], "borgo", "ester", "Il vento ulula fortissimo e i vetri della lanterna tremano. Il rotore va girato manualmente o la luce morirà.", [
+      { label: "Girate la manovella dell'ingranaggio a turno", lines: [
+        L("voce", "Ester e Anna si alternano per quattro ore consecutive a girare la pesante manovella di bronzo con i muscoli indolenziti e le dita ghiacciate."),
+        L("voce", "Il fascio di luce non si spegne per un solo secondo. Verso le cinque del mattino, i tre gozzi entrano stremati e salvi nel porto protetto."),
+        L("ester", "Ce l'abbiamo fatta, Anna. Abbiamo salvato i pescatori."),
+        L("anna", "«Non siamo state noi, Ester. È stata la luce che non voleva arrendersi.»"),
+      ], end: "<b>La Notte del Faro</b>, finale «La lanterna invincibile». Quella manovella di bronzo porta ancora le impronte di due donne che non hanno ceduto al mare. Prova le altre scelte.", id: "ester1" },
+      { label: "Anna sale sul ballatoio esterno a scattare foto", lines: [
+        L("voce", "Mentre Ester riattiva i fusibili di emergenza, Anna esce sul ballatoio a picco sulle onde che schiumano nel buio pesto."),
+        L("voce", "Scatta quattordici rullini nella burrasca: onde titaniche, gabbiani che volano radenti e la torre che risplende nella notte nera."),
+        L("anna", "«Guarda Ester: la tempesta sembra voler distruggere tutto, ma finisce solo per bagnare le rocce. Domani ci sarà il sole più splendido dell'anno.»"),
+        L("voce", "Quella serie di fotografie è custodita ancora oggi in una scatola di latta al faro. In una si vede Enzo da giovane sul molo che guarda preoccupato verso la lanterna."),
+      ], end: "<b>La Notte del Faro</b>, finale «La pellicola del sale». Ester conserva ancora quelle stampe. Prova le altre scelte.", id: "ester2" },
+      { label: "Azionate la vecchia sirena d'ottone", lines: [
+        L("voce", "Oltre alla luce, azionano il mantice della sirena nautica: un boato profondo e caldo che taglia il ruggito dei flutti come una campana."),
+        L("voce", "Al suono della sirena, dal paese scendono tutti sul molo con le torce per accogliere i pescatori. C'è anche piccolo Dario per mano a papà Enzo."),
+        L("anna", "«Ascolta il Borgo, Ester. Sembrano spaventati, ma quando c'è una burrasca diventano tutti una famiglia sola.»"),
+      ], end: "<b>La Notte del Faro</b>, finale «Il richiamo nella nebbia». La sirena del faro non ha mai più suonato così forte. Prova le altre scelte.", id: "ester3" },
+    ]);
+  }
+
+  TRX.push(() => { const ex = getList(ENDS + ".extra"), k = ["turno", "dario", "sara", "baciccia", "ester"].filter((p) => ex.some((x) => x.startsWith(p))).length, all = ex.filter((x) => /^(turno|dario|sara|baciccia|ester)\d/.test(x)).length; return [{ name: "Taccuino dei ricordi", kind: "pen", c: "#9be2ff", got: k >= 3, part: `finali ${all}/15`, hint: "Gioca le storie extra dei residenti del Borgo" }]; });
 
   // ================= CARRIERA v7: mercato, infortuni, campionato lungo =================
   const MARKET = [
@@ -8773,6 +8842,13 @@
     }
   }
   window.addEventListener("keydown", (e) => {
+    if (view.kind === "panda" && PANDA && !PANDA.over) {
+      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") { e.preventDefault(); pandaSteer(-1); }
+      if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") { e.preventDefault(); pandaSteer(1); }
+      if (e.key === " " || e.key === "Enter") { e.preventDefault(); pandaHonk(); }
+      if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") { e.preventDefault(); pandaBoost(); }
+      return;
+    }
     if (view.kind !== "pesca" || !PW || (e.target && /^(BUTTON|INPUT|TEXTAREA)$/.test(e.target.tagName))) return;
     if ((e.key === " " || e.key === "Enter") && !e.repeat && ["cast", "wait", "reel"].includes(PW.ph)) { e.preventDefault(); pcAct(); }
   });
@@ -13955,6 +14031,8 @@
     text("voce", `<b>Modalità</b> ${mnBar(mnPct(mnModi()))}<br>Da giocare quando vuoi: non toccano il salvataggio della storia.`);
     buttons([
       { label: "Mappa delle modalità", sub: "Tutto il gioco su un foglio", cls: "hot", fn: () => mappa(modes) },
+      { label: "La Corsa della Panda di Nonna", sub: "Arcade tra i caruggi: schiva gabbiani e pomodori a tutto gas!", cls: "hot", fn: () => pandaGameMode(modes) },
+      { label: "Torneo Supereroi (Anime Power)", sub: "Super tiri manga, aure shonen e barriere mecha!", cls: "hot", fn: () => animeTorneoMode(modes) },
       { label: "Il Borgo Storto (GDR)", sub: "GDR a turni: combatti nel borgo speculare tra focacce e gabbiani", cls: "hot", fn: () => openBorgoStorto(modes) },
       { label: "La Gabbia sul Molo", sub: "Street football 3v3 con sponde di ferro e zero rimesse", cls: "hot", fn: () => gabbiaMode(modes) },
       { label: "Carriera", sub: careerSub(), fn: career },
@@ -14595,6 +14673,8 @@
     if (view.kind === "radio" && RADIO) return drawRadio();
     if (view.kind === "enciclopedia" && view.charId) return drawEncPortrait(view.charId, encIsUnlocked(view.charId));
     if (view.kind === "albero") return drawAlberoCanvas(view.season || 1);
+    if (view.kind === "panda" && PANDA) return drawPandaCanvas();
+    if (view.kind === "anime" && ANIME) return drawAnimeCanvas();
     drawScene12();
   }
   // ---------- dove si ascolta: nel Borgo (menu), in soffitta (se la radio è in camera), dal menu ----------
@@ -21991,6 +22071,662 @@
     g.fillText("LA GABBIA DEL MOLO · PRIMO A 3 GOL", 160, 13);
     g.fillStyle = "#ffd23f"; g.font = "bold 11px sans-serif";
     g.fillText(`RONDINE ${GB.score[0]} – ${GB.score[1]} RIVALI`, 160, 23);
+    g.textAlign = "left";
+  }
+
+  // ================= LA CORSA DELLA PANDA DI NONNA FERRI =================
+  let PANDA = null;
+  const PANDA_QUOTES = [
+    "«Tieni forte il cruscotto Leo! A Borgo Marino i sensi unici sono solo un suggerimento!»",
+    "«Questi turisti con le valigie a rotelle sui sassi, belin!»",
+    "«Suona il clacson che quel gabbiano ha la precedenza solo nei suoi sogni!»",
+    "«Metti la quarta che la focaccia si raffredda e l'arbitro fischia!»",
+    "«Derapata sul ciottolato! Nico, non guardare giù dalla scogliera!»",
+    "«Se tocchiamo quel muretto a secco, il muretto chiede pietà!»",
+    "«Focaccia con la salamoia calda! Giù tutto il gas!»"
+  ];
+
+  function playCarHorn() {
+    try {
+      if (!actx) return;
+      const osc = actx.createOscillator();
+      const gain = actx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(340, actx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(390, actx.currentTime + 0.12);
+      gain.gain.setValueAtTime(0.18, actx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.22);
+      osc.connect(gain); gain.connect(actx.destination);
+      osc.start(); osc.stop(actx.currentTime + 0.22);
+    } catch {}
+  }
+
+  function playTurboWhoosh() {
+    try {
+      if (!actx) return;
+      const osc = actx.createOscillator();
+      const gain = actx.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(220, actx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(750, actx.currentTime + 0.28);
+      gain.gain.setValueAtTime(0.22, actx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.32);
+      osc.connect(gain); gain.connect(actx.destination);
+      osc.start(); osc.stop(actx.currentTime + 0.32);
+    } catch {}
+  }
+
+  function pandaGameMode(backFn) {
+    if (backFn) pandaGameMode._back = backFn;
+    const bFn = pandaGameMode._back || modes;
+    PANDA = {
+      backFn: bFn,
+      x: 160,
+      targetX: 160,
+      speed: 68,
+      dist: 0,
+      maxDist: 850,
+      time: 40.0,
+      score: 0,
+      focaccia: 1,
+      honkTimer: 0,
+      crashTimer: 0,
+      boostTimer: 0,
+      quote: PANDA_QUOTES[0],
+      obstacles: [],
+      roadScroll: 0,
+      lastTick: Date.now(),
+      over: false,
+      won: false
+    };
+    chap("La Corsa della Panda di Nonna");
+    view = { kind: "panda" };
+    // Ostacoli iniziali distribuiti
+    for (let i = 0; i < 4; i++) {
+      pandaSpawnObstacle(-40 - i * 65);
+    }
+    pandaUI();
+  }
+
+  function pandaSpawnObstacle(yPos) {
+    if (!PANDA) return;
+    const types = ["gabbiano", "pomodori", "vespa", "turista", "focaccia"];
+    const t = Math.random() < 0.25 ? "focaccia" : types[Math.floor(Math.random() * (types.length - 1))];
+    const laneX = 90 + Math.random() * 140;
+    PANDA.obstacles.push({
+      type: t,
+      x: laneX,
+      y: yPos,
+      w: t === "pomodori" ? 22 : t === "vespa" ? 18 : 20,
+      h: t === "vespa" ? 24 : 18,
+      isBonus: t === "focaccia",
+      scared: false
+    });
+  }
+
+  function pandaSteer(dir) {
+    if (!PANDA || PANDA.over) return;
+    PANDA.targetX = Math.max(85, Math.min(235, PANDA.targetX + dir * 32));
+    if (dir < 0) PANDA.quote = "Nonna: «Gira a gomito! Il caruggio è stretto!»";
+    else PANDA.quote = "Nonna: «Attento alle persiane aperte sul muro!»";
+    pandaUI();
+  }
+
+  function pandaHonk() {
+    if (!PANDA || PANDA.over) return;
+    PANDA.honkTimer = 22;
+    playCarHorn();
+    PANDA.quote = "Nonna: «BEEP BEEP! Pista, belin! Abbiamo il derby tra cinque minuti!»";
+    // Spaventa tutti i gabbiani vicini
+    PANDA.obstacles.forEach(o => {
+      if (o.type === "gabbiano" && !o.scared && o.y > 20 && o.y < 160) {
+        o.scared = true;
+        PANDA.score += 50;
+      }
+    });
+    pandaUI();
+  }
+
+  function pandaBoost() {
+    if (!PANDA || PANDA.over) return;
+    if (PANDA.focaccia > 0) {
+      PANDA.focaccia--;
+      PANDA.boostTimer = 45;
+      PANDA.speed = 110;
+      playTurboWhoosh();
+      PANDA.quote = "Nonna: «FOCACCIA TURBO! Mettiti le mani nei capelli, Nico!»";
+      pandaUI();
+    } else {
+      PANDA.quote = "Nonna: «Focaccia finita! Raccogline un'altra fetta per strada!»";
+      pandaUI();
+    }
+  }
+
+  function pandaUI() {
+    if (!PANDA) return;
+    if (PANDA.over) return;
+    text("voce", `
+      <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); border-radius:6px; padding:6px 10px; margin-bottom:6px;">
+        <div><b>Velocità:</b> <span style="color:#ffd23f; font-weight:bold;">${Math.round(PANDA.speed)} km/h</span></div>
+        <div><b>Traguardo:</b> <span style="color:#57d68d; font-weight:bold;">${Math.round(PANDA.dist)}/${PANDA.maxDist}m</span></div>
+        <div><b>Tempo:</b> <span style="color:${PANDA.time < 10 ? '#ff4d5a' : '#fff'}; font-weight:bold;">${PANDA.time.toFixed(1)}s</span></div>
+        <div><b>Focaccia:</b> <span style="color:#ffd23f;">🥐 x${PANDA.focaccia}</span></div>
+      </div>
+      <div style="font-style:italic; color:#ffd23f; font-size:12.5px; border-left:3px solid #ffd23f; padding-left:8px;">
+        ${esc(PANDA.quote)}
+      </div>
+    `);
+
+    buttons([
+      { label: "◀ Sterza Sinistra", cls: "pick", fn: () => pandaSteer(-1) },
+      { label: "📢 BEEP CLACSON!", cls: "hot", fn: pandaHonk },
+      { label: "Sterza Destra ▶", cls: "pick", fn: () => pandaSteer(1) },
+      { label: `🥐 Turbo Focaccia (${PANDA.focaccia})`, cls: PANDA.focaccia > 0 ? "hot" : "", fn: pandaBoost },
+      { label: "◂ Esci dalla corsa", fn: PANDA.backFn }
+    ]);
+  }
+
+  function pandaWin() {
+    PANDA.over = true;
+    PANDA.won = true;
+    sfx("goal");
+    jingle("win");
+    addList(CARDS, "nonna");
+    addList(CARDS, "baciccia");
+    view = { kind: "scene", bg: "stadium", speaker: "nonna" };
+    text("nonna", `
+      <b>SGOMMATA LEGGENDARIA NEL PIAZZALE DELLO STADIO!</b><br><br>
+      La Panda bianca di Nonna Ferri si arresta a mezzo millimetro dal cancello con le quattro frecce accese e il radiatore che sbuffa vapore.<br>
+      Leo salta fuori al volo con gli scarpini allacciati, Nico fa una capriola sopra il cofano e l'arbitro sgrana gli occhi sbalordito!<br>
+      <i>Nonna: «Arbitro, fischia adesso se hai coraggio! A Borgo Marino arriviamo sempre in tempo!»</i><br><br>
+      <b>Premio:</b> Sbloccati 100 crediti, il titolo <i>«Pilota di Caruggio»</i> e schede complete nell'Enciclopedia!
+    `);
+    buttons([
+      { label: "Rigioca la Corsa della Panda", cls: "hot", fn: () => pandaGameMode(PANDA.backFn) },
+      { label: "◂ Torna indietro", fn: PANDA.backFn }
+    ]);
+  }
+
+  function pandaTimeout() {
+    PANDA.over = true;
+    view = { kind: "scene", bg: "stadium", speaker: "nonna" };
+    text("nonna", `
+      <b>ARRIVO AL FOTOFINISH!</b><br><br>
+      La Panda arriva col motore che tossisce proprio mentre l'arbitro ha il fischietto in bocca per dare partita persa.<br>
+      Ma Nonna Ferri spalanca il baule ed estrae una teglia ancora fumante di focaccia al formaggio e una bottiglia di Pigato fresco.<br>
+      L'arbitro assaggia, si commuove e concede 15 minuti di riscaldamento supplementare concesso d'ufficio per «meriti gastronomici»!
+    `);
+    buttons([
+      { label: "Riprova la corsa", cls: "hot", fn: () => pandaGameMode(PANDA.backFn) },
+      { label: "◂ Torna indietro", fn: PANDA.backFn }
+    ]);
+  }
+
+  function drawPandaCanvas() {
+    if (!PANDA) return;
+    const now = Date.now();
+    const dt = Math.min(0.08, (now - PANDA.lastTick) / 1000);
+    PANDA.lastTick = now;
+
+    if (!PANDA.over) {
+      PANDA.time = Math.max(0, PANDA.time - dt);
+      if (PANDA.boostTimer > 0) {
+        PANDA.boostTimer--;
+        PANDA.speed = 105;
+      } else {
+        PANDA.speed = Math.max(60, PANDA.speed - 30 * dt);
+      }
+      PANDA.dist += (PANDA.speed / 3.6) * dt * 2.2;
+      PANDA.roadScroll = (PANDA.roadScroll + PANDA.speed * dt * 6) % 36;
+      if (PANDA.honkTimer > 0) PANDA.honkTimer--;
+      if (PANDA.crashTimer > 0) PANDA.crashTimer--;
+
+      // Smooth camera interpolation
+      PANDA.x += (PANDA.targetX - PANDA.x) * 0.22;
+
+      // Movimento ostacoli verso la telecamera
+      PANDA.obstacles.forEach(o => {
+        if (o.scared) {
+          o.y -= PANDA.speed * dt * 4;
+          o.x += (Math.random() - 0.5) * 6;
+        } else {
+          o.y += PANDA.speed * dt * 5.2;
+        }
+
+        // Collision check con la Panda
+        if (!o.scared && Math.abs(o.y - 145) < 16 && Math.abs(o.x - PANDA.x) < 26) {
+          if (o.isBonus) {
+            o.scared = true;
+            PANDA.focaccia++;
+            PANDA.score += 200;
+            PANDA.dist += 50;
+            PANDA.boostTimer = 40;
+            playTurboWhoosh();
+            PANDA.quote = "Nonna: «Focaccia fresca presa al volo! Spingi a tavoletta!»";
+            pandaUI();
+          } else {
+            o.scared = true;
+            PANDA.crashTimer = 22;
+            PANDA.speed = 32;
+            PANDA.time = Math.max(0, PANDA.time - 1.2);
+            sfx("foul");
+            PANDA.quote = PANDA_QUOTES[Math.floor(Math.random() * PANDA_QUOTES.length)];
+            pandaUI();
+          }
+        }
+      });
+
+      // Rimuovi ostacoli usciti dal fondo e genera nuovi
+      PANDA.obstacles = PANDA.obstacles.filter(o => o.y < 210 && o.y > -150);
+      if (PANDA.obstacles.length < 5) {
+        pandaSpawnObstacle(-50 - Math.random() * 80);
+      }
+
+      // Check fine partita
+      if (PANDA.dist >= PANDA.maxDist) return pandaWin();
+      if (PANDA.time <= 0) return pandaTimeout();
+    }
+
+    // 1. Cielo crepuscolare ligure
+    const sky = g.createLinearGradient(0, 0, 0, 75);
+    sky.addColorStop(0, "#2c1e4a");
+    sky.addColorStop(0.5, "#d9654e");
+    sky.addColorStop(1, "#f4a261");
+    g.fillStyle = sky; g.fillRect(0, 0, W, 75);
+
+    // Mare all'orizzonte e gabbiani lontani
+    px(0, 68, W, 12, "#1d3d63");
+    for (let i = 0; i < 3; i++) {
+      const gx = (i * 90 + frame * 0.3) % W;
+      px(gx, 45 + (i * 7) % 15, 3, 1, "#fff");
+      px(gx + 2, 44 + (i * 7) % 15, 2, 1, "#fff");
+    }
+
+    // 2. Case liguri sui lati (prospettiva dei caruggi)
+    // Muro sinistro (Terracotta e persiane verdi)
+    px(0, 75, 76, H - 75, "#c86d51");
+    for (let y = 80; y < H; y += 30) {
+      px(14, y, 18, 22, "#2d5a3c"); // persiana verde
+      px(18, y + 4, 10, 14, "#1d3a27");
+    }
+    // Fili della biancheria stesi
+    g.strokeStyle = "#ffffff66"; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(20, 90); g.lineTo(160, 115); g.stroke();
+    for (let i = 0; i < 3; i++) {
+      px(50 + i * 28, 98 + i * 3, 12, 10, ["#fff", "#ffd23f", "#3fa7ff"][i]);
+    }
+
+    // Muro destro (Giallo ocra e limoni)
+    px(W - 76, 75, 76, H - 75, "#e5b364");
+    for (let y = 80; y < H; y += 30) {
+      px(W - 32, y, 18, 22, "#2d5a3c");
+      px(W - 28, y + 4, 10, 14, "#1d3a27");
+    }
+
+    // 3. Fondo stradale di ciottoli (Caruggio in prospettiva)
+    const road = g.createLinearGradient(0, 75, 0, H);
+    road.addColorStop(0, "#3e4452");
+    road.addColorStop(1, "#5a6275");
+    g.fillStyle = road;
+    g.beginPath();
+    g.moveTo(76, 75);
+    g.lineTo(W - 76, 75);
+    g.lineTo(W - 55, H);
+    g.lineTo(55, H);
+    g.fill();
+
+    // Linee dei ciottoli che scorrono
+    g.strokeStyle = "rgba(0,0,0,0.25)"; g.lineWidth = 1;
+    for (let y = 78 + (PANDA.roadScroll % 18); y < H; y += 18) {
+      g.beginPath();
+      const lx = 76 - (y - 75) * 0.16;
+      const rx = W - 76 + (y - 75) * 0.16;
+      g.moveTo(lx, y); g.lineTo(rx, y);
+      g.stroke();
+    }
+
+    // 4. Ostacoli sul percorso
+    PANDA.obstacles.forEach(o => {
+      const ox = o.x, oy = o.y;
+      if (oy < 65 || oy > H + 10) return;
+      if (o.type === "gabbiano") {
+        g.fillStyle = "rgba(0,0,0,0.3)";
+        g.beginPath(); g.ellipse(ox, oy + 8, 8, 3, 0, 0, 7); g.fill();
+        px(ox - 6, oy - 2, 12, 8, "#ffffff");
+        px(ox + 4, oy - 4, 4, 4, "#ffd23f"); // becco
+        if (o.scared) {
+          px(ox - 10, oy - 6, 8, 4, "#ffffff"); // ala spiegata
+          px(ox + 2, oy - 6, 8, 4, "#ffffff");
+        }
+      } else if (o.type === "pomodori") {
+        px(ox - 10, oy - 4, 20, 12, "#7a4a25"); // cassa legno
+        for (let i = 0; i < 4; i++) {
+          px(ox - 7 + i * 4, oy - 2, 3, 3, "#d9383a"); // pomodori
+        }
+        px(ox - 2, oy - 3, 4, 2, "#48bb78"); // basilico
+      } else if (o.type === "vespa") {
+        px(ox - 7, oy - 8, 14, 16, "#3fa7ff"); // carrozzeria
+        px(ox - 4, oy + 6, 8, 4, "#1a1a1a");  // ruota
+        px(ox - 5, oy - 12, 10, 4, "#ffffff"); // faro tondo
+      } else if (o.type === "turista") {
+        px(ox - 6, oy - 14, 12, 8, "#e8c39e"); // testa
+        px(ox - 8, oy - 16, 16, 3, "#f4d06f"); // cappello paglia
+        px(ox - 7, oy - 6, 14, 12, "#38a169"); // camicia hawaiana
+        px(ox + 7, oy - 2, 8, 12, "#e53e3e");  // trolley rosso
+      } else if (o.type === "focaccia") {
+        // Focaccia dorata luccicante
+        px(ox - 8, oy - 6, 16, 10, "#e6a838");
+        px(ox - 6, oy - 4, 12, 6, "#fcd34d");
+        px(ox - 2, oy - 8, 2, 3, "rgba(255,255,255,0.7)"); // vapore caldo
+        px(ox + 3, oy - 10, 2, 4, "rgba(255,255,255,0.7)");
+      }
+    });
+
+    // 5. La Fiat Panda 30 di Nonna Ferri
+    const px0 = PANDA.x - 20 + (PANDA.crashTimer > 0 ? (Math.random() - 0.5) * 6 : 0);
+    const py0 = 138;
+
+    // Ombra veicolo
+    g.fillStyle = "rgba(0,0,0,0.45)";
+    g.beginPath(); g.ellipse(PANDA.x, py0 + 38, 24, 7, 0, 0, 7); g.fill();
+
+    // Fumo marmitta o Turbo fiammeggiante
+    if (PANDA.boostTimer > 0) {
+      for (let i = 0; i < 4; i++) {
+        px(px0 + 8 + (Math.random() - 0.5) * 8, py0 + 36 + i * 4, 6, 6, i % 2 ? "#ffd23f" : "#ff4d5a");
+      }
+    } else {
+      px(px0 + 6, py0 + 36, 4, 4, "rgba(200,200,200,0.6)");
+      px(px0 + 4, py0 + 40, 6, 6, "rgba(180,180,180,0.3)");
+    }
+
+    // Carrozzeria Panda Bianca/Panna
+    px(px0, py0 + 10, 40, 26, "#f4f4f0"); // scocca
+    px(px0 + 3, py0, 34, 14, "#e8e8e2");  // tettuccio
+    px(px0 - 2, py0 + 26, 44, 10, "#2b2b2b"); // paraurti nero
+
+    // Finestrini e abitacolo
+    px(px0 + 6, py0 + 3, 28, 10, "#4a6984");
+    // Nonna Ferri al volante (chignon grigio)
+    px(px0 + 10, py0 + 4, 7, 6, "#f2cfae");
+    px(px0 + 11, py0 + 2, 5, 4, "#dcdcdc"); // capelli canuti
+    // Nico e guantoni dal finestrino sinistro
+    px(px0 - 4, py0 + 8, 6, 6, "#3fa7ff"); // guantone arancione/blu
+    // Leo dal finestrino destro
+    px(px0 + 24, py0 + 4, 7, 6, "#e8bf98");
+    px(px0 + 24, py0 + 2, 7, 3, "#3a2a1a");
+
+    // Fari anteriori accesi
+    px(px0 + 2, py0 + 24, 6, 6, "#fffae0");
+    px(px0 + 32, py0 + 24, 6, 6, "#fffae0");
+    // Fasci di luce
+    g.fillStyle = "rgba(255, 250, 200, 0.15)";
+    g.beginPath();
+    g.moveTo(px0 + 2, py0 + 27); g.lineTo(px0 - 30, py0 + 55); g.lineTo(px0 + 10, py0 + 55); g.fill();
+    g.beginPath();
+    g.moveTo(px0 + 34, py0 + 27); g.lineTo(px0 + 30, py0 + 55); g.lineTo(px0 + 70, py0 + 55); g.fill();
+
+    // 6. Onde d'urto del Clacson
+    if (PANDA.honkTimer > 0) {
+      g.strokeStyle = "#ffd23f"; g.lineWidth = 2;
+      for (let r = 1; r <= 3; r++) {
+        g.beginPath();
+        g.arc(PANDA.x, py0 + 20, r * 14 + (22 - PANDA.honkTimer) * 2, -1.2, 1.2);
+        g.stroke();
+      }
+    }
+
+    // 7. HUD superiore sovrimpresso sul canvas
+    px(0, 0, W, 22, "rgba(10,16,30,0.85)");
+    g.fillStyle = "#ffd23f"; g.font = "bold 9px sans-serif";
+    g.fillText(`🚗 PANDA 30 · ${Math.round(PANDA.speed)} KM/H`, 8, 14);
+
+    // Barra avanzamento traguardo
+    const prog = Math.min(1, PANDA.dist / PANDA.maxDist);
+    px(130, 6, 90, 9, "#1e293b");
+    px(131, 7, Math.floor(prog * 88), 7, "#57d68d");
+    g.fillStyle = "#fff"; g.font = "8px sans-serif";
+    g.fillText(`${Math.round(PANDA.dist)}m / ${PANDA.maxDist}m`, 146, 13);
+
+    // Timer
+    g.fillStyle = PANDA.time < 10 ? "#ff4d5a" : "#fff"; g.font = "bold 10px sans-serif";
+    g.textAlign = "right";
+    g.fillText(`⏱️ ${PANDA.time.toFixed(1)}s`, 312, 15);
+    g.textAlign = "left";
+  }
+
+  // ================= TORNEO SUPEREROI · ANIME POWER LEAGUE =================
+  let ANIME = null;
+  const ANIME_MOVES = [
+    { id: "fenice", who: "leo", name: "VOLO DELLA FENICE DORATA", kanji: "鳳凰飛翔", color: "#ffd23f", bgCol: "#b91c1c", quote: "«BRUCIA NEL CUORE, ALI DI RONDINE!»" },
+    { id: "mecha_gatto", who: "nico", name: "BARRIERA MECHA · ARTIGLIO DEL GATTO", kanji: "超猫爪壁", color: "#38bdf8", bgCol: "#0f172a", quote: "«NESSUN TIRO SUPERA LA MIA ZAMPA!»" },
+    { id: "tornado_basilico", who: "tommy", name: "TORNADO DEL BASILICO SUPREMO", kanji: "羅勒風暴", color: "#4ade80", bgCol: "#14532d", quote: "«IL VENTO DELLA RIVIERA VI SPAZZA VIA!»" },
+    { id: "tuono_nero", who: "dario", name: "SPADA DEL TUONO NERO", kanji: "黒雷一撃", color: "#c084fc", bgCol: "#3b0764", quote: "«SPACCA I PALI E NON CHIEDERE PERDONO!»" }
+  ];
+
+  function animeTorneoMode(backFn) {
+    if (backFn) animeTorneoMode._back = backFn;
+    const bFn = animeTorneoMode._back || modes;
+    ANIME = {
+      backFn: bFn,
+      score: [0, 0],
+      target: 3,
+      aura: 65,
+      activeMove: null,
+      moveTimer: 0,
+      log: "Inizia il Torneo Supereroi! L'Aura Shonen divampa sul campo!",
+      turn: "player"
+    };
+    chap("Torneo Supereroi (Anime Power)");
+    view = { kind: "anime" };
+    animeUI();
+  }
+
+  function animeUI() {
+    if (!ANIME) return;
+    if (ANIME.score[0] >= ANIME.target) {
+      jingle("win");
+      view = { kind: "scene", bg: "stadium", speaker: "leo" };
+      text("leo", `
+        <b>VITTORIA SCHIACCIANTE NEL TORNEO SUPEREROI! (${ANIME.score[0]}–${ANIME.score[1]})</b><br><br>
+        Le onde d'urto dorate si dissolvono sul manto erboso mentre il pubblico inneggia alla Rondine!<br>
+        Hai dimostrato la vera forza dello Spirito Shonen ligure!<br><br>
+        <b>Premio conquistato:</b> 120 crediti e il trofeo cosmico <i>«Eroe della Costa»</i>!
+      `);
+      return buttons([
+        { label: "Nuovo Torneo Anime", cls: "hot", fn: () => animeTorneoMode(ANIME.backFn) },
+        { label: "◂ Torna alle modalità", fn: ANIME.backFn }
+      ]);
+    }
+    if (ANIME.score[1] >= ANIME.target) {
+      view = { kind: "scene", bg: "stadium", speaker: "nico" };
+      text("nico", `I rivali vincono per ${ANIME.score[1]}–${ANIME.score[0]}! Hanno scatenato una supermossa combinata all'ultimo respiro. Ma la Rondine non si arrende mai!`);
+      return buttons([
+        { label: "Rivincita immediata", cls: "hot", fn: () => animeTorneoMode(ANIME.backFn) },
+        { label: "◂ Torna alle modalità", fn: ANIME.backFn }
+      ]);
+    }
+
+    view = { kind: "anime" };
+    const canSuper = ANIME.aura >= 100;
+    text("voce", `
+      <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); border-radius:6px; padding:6px 10px; margin-bottom:6px;">
+        <div><b>Squadra:</b> <span style="color:#ffd23f;">RONDINE Z</span></div>
+        <div><b>Risultato:</b> <span style="font-weight:bold; color:#fff;">${ANIME.score[0]} – ${ANIME.score[1]}</span></div>
+        <div><b>Aura Shonen:</b> <span style="color:${canSuper ? '#ff4d5a' : '#57d68d'}; font-weight:bold;">${Math.min(100, Math.round(ANIME.aura))}%</span></div>
+      </div>
+      <div style="font-style:italic; color:#ffd23f; font-size:13px; margin:4px 0 8px; border-left:3px solid #ffd23f; padding-left:8px;">
+        ${esc(ANIME.log)}
+      </div>
+    `);
+
+    if (canSuper) {
+      buttons([
+        { label: "🔥 SCATENA SUPER MOSSA ANIME!", sub: "Volo della Fenice / Artiglio Mecha / Tuono Nero", cls: "hot", fn: animePickSuper },
+        { label: "⚽ Passaggio Tattico", sub: "Mantieni l'aura al massimo", fn: () => animeAction("pass") },
+        { label: "◂ Esci dal torneo", fn: ANIME.backFn }
+      ]);
+    } else {
+      buttons([
+        { label: "⚽ Passaggio Fulmineo (+25% Aura)", sub: "Azione rapida in profondità", cls: "pick", fn: () => animeAction("pass") },
+        { label: "⚡ Dribbling ad Alta Velocità (+35% Aura)", sub: "Finta con linee cinetiche shonen", cls: "pick", fn: () => animeAction("dribble") },
+        { label: "🧘 Concentrazione dello Spirito (+50% Aura)", sub: "Carica l'energia cosmica", cls: "hot", fn: () => animeAction("charge") },
+        { label: "🎯 Tiro Secco Tradizionale", sub: "Conclusione rapida senza superpoteri", fn: () => animeAction("shoot") },
+        { label: "◂ Esci dal torneo", fn: ANIME.backFn }
+      ]);
+    }
+  }
+
+  function animeAction(act) {
+    if (!ANIME) return;
+    if (act === "pass") {
+      ANIME.aura = Math.min(100, ANIME.aura + 25);
+      ANIME.log = "Passaggio perfetto col taglio dell'aria! L'intesa della squadra genera scintille!";
+      sfx("kick");
+    } else if (act === "dribble") {
+      ANIME.aura = Math.min(100, ANIME.aura + 35);
+      ANIME.log = "Dribbling a velocità teletrasporto! I difensori avversari restano immobili!";
+      sfx("kick");
+    } else if (act === "charge") {
+      ANIME.aura = Math.min(100, ANIME.aura + 50);
+      playTurboWhoosh();
+      ANIME.log = "AURA AL MASSIMO! Fiamme dorate circondano Leo e la Rondine!";
+    } else if (act === "shoot") {
+      if (Math.random() > 0.4) {
+        ANIME.score[0]++;
+        sfx("goal");
+        ANIME.log = "GOL! Bel tiro angolato che gonfia la rete!";
+      } else {
+        ANIME.log = "Il portiere rivale devia con uno scatto prodigioso!";
+      }
+    }
+
+    // Risposta avversaria se non è gol finale
+    if (Math.random() < 0.35 && ANIME.score[0] < ANIME.target) {
+      ANIME.score[1]++;
+      ANIME.log += " Ma i rivali contrattaccano con il loro cannone al plasma e pareggiano!";
+    }
+    animeUI();
+  }
+
+  function animePickSuper() {
+    if (!ANIME) return;
+    buttons([
+      ...ANIME_MOVES.map(m => ({
+        label: `${m.name} 『${m.kanji}』`,
+        sub: m.quote,
+        cls: "hot",
+        fn: () => animeTriggerSuper(m)
+      })),
+      { label: "◂ Annulla", fn: animeUI }
+    ]);
+  }
+
+  function animeTriggerSuper(move) {
+    if (!ANIME) return;
+    ANIME.activeMove = move;
+    ANIME.moveTimer = 90; // frames di cut-in
+    ANIME.aura = 0;
+    playTurboWhoosh();
+    playCarHorn();
+    sfx("goal");
+    ANIME.score[0]++;
+    ANIME.log = `IMPATTO DEVASTANTE! ${move.name} sfonda la barriera dimensionale e gonfia la rete! GOL!`;
+    setTimeout(() => {
+      animeUI();
+    }, 1600);
+  }
+
+  function drawAnimeCanvas() {
+    if (!ANIME) return;
+    // 1. Se c'è una super mossa attiva, disegna il cut-in MANGA epico
+    if (ANIME.activeMove && ANIME.moveTimer > 0) {
+      ANIME.moveTimer--;
+      const m = ANIME.activeMove;
+
+      // Sfondo manga a velocità estrema
+      px(0, 0, W, H, m.bgCol);
+
+      // Linee cinetiche shonen radianti dal centro
+      g.strokeStyle = "rgba(255,255,255,0.4)";
+      g.lineWidth = 2;
+      for (let i = 0; i < 24; i++) {
+        const ang = (i / 24) * Math.PI * 2 + (frame * 0.05);
+        g.beginPath();
+        g.moveTo(160, 100);
+        g.lineTo(160 + Math.cos(ang) * 220, 100 + Math.sin(ang) * 220);
+        g.stroke();
+      }
+
+      // Spaccatura diagonale stile comic
+      g.fillStyle = "rgba(0,0,0,0.6)";
+      g.beginPath();
+      g.moveTo(0, 30); g.lineTo(W, 70); g.lineTo(W, 130); g.lineTo(0, 90);
+      g.fill();
+
+      // Kanji giganteschi
+      g.fillStyle = m.color;
+      g.font = "bold 34px sans-serif";
+      g.textAlign = "center";
+      g.fillText(m.kanji, 160, 95);
+
+      // Nome colpo ad impatto
+      g.fillStyle = "#ffffff";
+      g.font = "bold 13px sans-serif";
+      g.fillText(m.name, 160, 122);
+
+      // Quote fiammeggiante
+      g.fillStyle = "#ffd23f";
+      g.font = "italic bold 10px sans-serif";
+      g.fillText(m.quote, 160, 142);
+
+      // Effetto scintille / fulmini
+      for (let i = 0; i < 8; i++) {
+        px((i * 41 + frame * 8) % W, (i * 27 + frame * 5) % H, 4, 4, m.color);
+      }
+      g.textAlign = "left";
+      return;
+    }
+
+    // 2. Partita normale con campo illuminato da aure cosmiche
+    // Campo verde brillante con aura
+    px(0, 0, W, 45, "#0b192c");
+    px(0, 45, W, H - 45, "#15803d");
+
+    // Linee bianche e cerchio di centrocampo
+    g.strokeStyle = "rgba(255,255,255,0.5)"; g.lineWidth = 1.5;
+    g.strokeRect(15, 60, W - 30, H - 75);
+    g.beginPath(); g.arc(160, 125, 30, 0, 7); g.stroke();
+
+    // Giocatori con aure shonen ardenti
+    const auraCol = ANIME.aura >= 100 ? "#ff4d5a" : "rgba(255,210,63,0.6)";
+    g.strokeStyle = auraCol; g.lineWidth = 3;
+    g.beginPath(); g.arc(120, 120, 14, 0, 7); g.stroke();
+    g.beginPath(); g.arc(70, 90, 12, 0, 7); g.stroke();
+
+    // Sprite giocatori
+    man(120, 120, "#ff4d5a", "#ffd23f"); // Leo
+    man(70, 90, "#ff4d5a", "#ffd23f");   // Tommy
+    man(30, 125, "#3fa7ff", "#111");     // Nico
+
+    // Rivali oscuri
+    man(200, 120, "#7c3aed", "#fff");
+    man(250, 95, "#7c3aed", "#fff");
+    man(290, 125, "#475569", "#fff");
+
+    // Pallone energetico
+    g.fillStyle = "#ffd23f";
+    g.beginPath(); g.arc(135, 124, 6, 0, 7); g.fill();
+    px(133, 122, 4, 4, "#fff");
+
+    // Tabellone superiore stile Anime TV
+    px(50, 4, 220, 22, "rgba(10,15,30,0.92)");
+    g.strokeStyle = "#ffd23f"; g.lineWidth = 1.5;
+    g.strokeRect(50, 4, 220, 22);
+    g.fillStyle = "#fff"; g.font = "bold 9px sans-serif"; g.textAlign = "center";
+    g.fillText("TORNEO SUPEREROI · ANIME POWER LEAGUE", 160, 13);
+    g.fillStyle = "#ffd23f"; g.font = "bold 11px sans-serif";
+    g.fillText(`RONDINE Z  ${ANIME.score[0]} – ${ANIME.score[1]}  LEGIONE OSCURA`, 160, 23);
     g.textAlign = "left";
   }
 
