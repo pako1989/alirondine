@@ -1746,7 +1746,10 @@
     if (M.step && M.step.tower) towerOpts(opts, d, z);
     if (M.ch && M.ch.noSpecial) for (let i = opts.length - 1; i >= 0; i--) if (opts[i].cls === "hot") opts.splice(i, 1);
     if (pcOn("spec")) pcLimit(opts);
-    if (!opts.some((o) => !o.disabled)) opts.push({ label: "Tieni palla e rifiata", sub: "+15 grinta", fn: () => { M.guts = Math.min(S.st.grinta, M.guts + Math.round(15 * dfRegen())); tick(2, 4); say("Rallenti il gioco e riprendi fiato."); turn(); } });
+    // grinta finita: puoi sempre tirare lo stesso (più debole) oppure rifiatare, che ridà almeno la grinta di un tiro
+    if (z >= 3 && cupReady && !cupSpecialOnly && !M.carrier && !cost(10) && pcOn("fiato") && !(M.step && M.step.tower)) opts.push({ label: "Tira lo stesso", sub: `sei stanco: tiro più debole · usa la grinta rimasta (${Math.round(M.guts)})`, fn: () => { M.tiredShot = true; act("shot", d); } });
+    const rg = () => pcOn("fiato") ? Math.max(10, Math.round(15 * dfRegen())) : Math.round(15 * dfRegen());
+    if (!opts.some((o) => !o.disabled) || (pcOn("fiato") && !cost(10))) opts.push({ label: "Tieni palla e rifiata", sub: `+${rg()} grinta`, fn: () => { M.guts = Math.min(S.st.grinta, M.guts + rg()); tick(2, 4); say("Rallenti il gioco e riprendi fiato."); turn(); } });
     buttons([...cupInfo, ...opts]);
   }
   function defendTurn() {
@@ -1885,6 +1888,7 @@
     power += sqShotB(kind, mk);
     power += bvPow() + spPow(); power *= ttPow();
     power = weatherPow(power, true);
+    if (M.tiredShot) { M.tiredShot = false; if (!sp) power *= 0.8; }
     let tired = ""; if (sp && pcOn("spec")) { const k = kind === "mate" ? "mate_" + mk : kind, u = M.spN || (M.spN = {}), n = u[k] || 0; u[k] = n + 1; if (n) { const f = Math.max(0.8, 1 - 0.07 * n); power *= f; tired = `<span style="color:var(--dim)">${esc(sp.name)}, di nuovo: ${f > 0.88 ? "ormai se lo aspettano, e le gambe un po' lo sentono" : "le gambe pesano e il portiere lo conosce a memoria"}.</span> `; } }
     const keep = (t.gk[1] + (M.gkBoost || 0) - (M.team === "oracolo" && M.nudgeOff ? 6 : 0) - (M.team === "marina7" && M.consOff ? 6 : 0)) * rnd(0.85, 1.2) * (M.meteo === "pioggia" ? 0.96 : 1) * dfx() * dfKeep(kind);
     let pre = dfPre(kind) + tired;
@@ -4671,7 +4675,7 @@
     mini: ["Calci d'angolo", "Dopo una respinta del portiere, l'angolo lo batti tu"],
   };
   // 15l · Partita classica: quattro aggiunte, ognuna spegnibile (spente = regole di prima)
-  const SET_PC = { spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
+  const SET_PC = { fiato: ["Grinta di riserva", "A secco puoi tirare lo stesso (più debole); rifiatare ridà almeno 10"], spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
   const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false });
   function setLoad() { const d = setDefault(), s = readJSON(SETK, null); if (!s || s.v !== 1) return d; return { ...d, ...s, t: { ...d.t, ...(s.t || {}) }, pc: { ...d.pc, ...(s.pc && typeof s.pc === "object" ? s.pc : {}) } }; }
   let SET = setLoad();
