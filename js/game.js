@@ -1208,7 +1208,15 @@
   function render() {
     frame++; const gx0 = performance.now();
     const alt = $("stageAlt");
-    if (alt && !alt.hidden && view && view.kind !== "diorama" && view.kind !== "enc_card" && view.kind !== "alt") {
+    const isAltKind = view && (
+      view.kind === "diorama" ||
+      view.kind === "alt" ||
+      view.kind === "enc_card" ||
+      (view.kind === "enciclopedia" && SET && SET.cardView !== "canvas") ||
+      (view.kind === "bacheca" && SET && SET.trophyView === "3d") ||
+      (view.kind === "manga" && SET && SET.mangaView !== "canvas")
+    );
+    if (alt && !alt.hidden && !isAltKind) {
       closeAltStage();
     }
     if (frame % 12 === 0) { try { musicFrame(); } catch {} try { crowdFrame(); } catch {} }
@@ -4695,11 +4703,12 @@
   };
   // 15l · Partita classica: quattro aggiunte, ognuna spegnibile (spente = regole di prima)
   const SET_PC = { coppie: ["Schemi a coppie avanzati", "Con grande intesa, ogni compagno sblocca un secondo tiro in coppia (intesa 14)"], rete: ["Rete strappata", "Un tiro potentissimo può bucare la rete: cut-in speciale, un po' di grinta e il conto delle reti strappate"], star: ["Fuoriclasse rivali", "Il capitano avversario carica lo speciale con una frase sua e un cut-in nei colori della squadra"], gkf: ["Portieri che si stancano", "Più tiri affronta, più un portiere cala (il tuo e il loro); all'intervallo recupera"], duelli: ["Duelli 1 contro 1", "Dribbling in attacco (zona 3+): leggi il difensore e scegli finta, scatto o protezione"], area: ["Comandi in area", "Parata, pugno o uscita: li scegli tu col tuo portiere, e anche il portiere avversario li usa"], tempo: ["Tiro a tempo", "Ferma la barra al momento giusto: preciso = tiro più forte, sbagliato = più debole"], fiato: ["Grinta di riserva", "A secco puoi tirare lo stesso (più debole); rifiatare ridà almeno 10"], spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
-  const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false, dis: false, cardView: "canvas", mangaView: "canvas", trophyView: "canvas" });
+  const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false, dis: false, cardView: "holo3d", mangaView: "comic", trophyView: "3d" });
   function setLoad() {
     const d = setDefault(), s = readJSON(SETK, null);
     if (!s || s.v !== 1) return d;
     const res = { ...d, ...s, t: { ...d.t, ...(s.t || {}) }, pc: { ...d.pc, ...(s.pc && typeof s.pc === "object" ? s.pc : {}) } };
+    if (!res.cardView || res.cardView === "canvas") res.cardView = "holo3d";
     if (res.gfx === "arcade_hd" || !res.gfx) res.gfx = "migliorata";
     return res;
   }
@@ -14103,7 +14112,7 @@
     const bioText = BIO[curEncChar] || "Abitante e figura chiave delle vicende di Borgo Marino.";
     const ex = ENC_EXTRA[curEncChar] || { role: "Figura del Borgo", quote: "«Sempre forza Rondine!»", stat: "Cuore ligure", bond: "Comunità" };
 
-    if (SET.cardView === "holo3d") {
+    if (SET.cardView !== "canvas") {
       render3DCard(curEncChar, isUnlocked);
     } else {
       closeAltStage();
@@ -14170,11 +14179,11 @@
     });
 
     const toggleStyleBtn = {
-      label: SET.cardView === "holo3d" ? "🖼️ Torna a Pixel Canvas" : "✨ Passa a Carta Olografica 3D",
-      sub: SET.cardView === "holo3d" ? "Disattiva la carta 3D e torna al canvas classico" : "Attiva la carta tridimensionale con riflessi Foil",
+      label: SET.cardView === "canvas" ? "✨ Passa a Carta Olografica 3D" : "🖼️ Torna a Pixel Canvas",
+      sub: SET.cardView === "canvas" ? "Attiva la carta tridimensionale con riflessi Foil" : "Disattiva la carta 3D e torna al canvas classico",
       cls: "pick",
       fn: () => {
-        SET.cardView = SET.cardView === "holo3d" ? "canvas" : "holo3d";
+        SET.cardView = SET.cardView === "canvas" ? "holo3d" : "canvas";
         writeJSON(SETK, SET);
         borgoEncyclopedia(bFn, curEncCat, curEncChar);
       }
