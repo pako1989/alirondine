@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Il Borgo Storto · Ali di Rondine</title>
+<style>
+:root{--bg:#0e1424;--card:#172038;--line:#2c3a5e;--ink:#f1f4ff;--dim:#9aa8cf;--gold:#ffd23f;--red:#ff5d6c;--grn:#57d68d;--blu:#6fb3ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 system-ui,sans-serif;min-height:100vh;padding:env(safe-area-inset-top) 14px 40px}
+#app{max-width:560px;margin:0 auto;padding-top:14px}
+h1{font-size:22px;margin:4px 0 2px;color:var(--gold)}
+.sub{color:var(--dim);font-size:14px;margin-bottom:12px}
+.card{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0}
+.who{display:inline-block;background:#43507a;border-radius:8px;padding:2px 10px;font-size:14px;margin-bottom:6px}
+.big{font-size:44px;text-align:center;letter-spacing:6px;margin:6px 0}
+[hidden]{display:none!important}
+button{display:block;width:100%;text-align:left;background:#1e2d57;color:var(--ink);border:2px solid #3b4f86;border-radius:12px;padding:12px 14px;margin:8px 0;font:inherit;cursor:pointer}
+button small{display:block;color:var(--dim);font-size:13px}
+button.hot{background:#2a3f7a;border-color:var(--gold)}
+button:disabled{opacity:.4}
+.bar{height:10px;border-radius:6px;background:#0a0f1d;overflow:hidden;margin:3px 0 6px}
+.bar i{display:block;height:100%;background:var(--grn);transition:width .3s}
+.bar.e i{background:var(--red)}
+.row{display:flex;gap:8px}.row>div{flex:1}
+.unit{font-size:14px}.unit b{font-size:15px}
+.dead{opacity:.35}
+.log{font-size:15px;color:#d7defa;min-height:3.2em}
+.stun::after{content:" 💫"}
+canvas#cv{width:100%;image-rendering:pixelated;border:2px solid var(--line);border-radius:12px;display:block;background:#000}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-width:240px;margin:10px auto}
+.pad button{margin:0;text-align:center;font-size:22px;padding:14px 0;touch-action:manipulation}
+.dlg{display:flex;gap:10px;align-items:flex-start}.dlg img{width:64px;height:64px;image-rendering:pixelated;border:2px solid var(--line);border-radius:10px;background:#0a0f1d;flex:none}
+.ui{width:30px;height:30px;image-rendering:pixelated;vertical-align:middle;margin-right:4px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(() => {
+"use strict";
+const K = "ali-di-rondine.borgostorto";
+const $ = (s) => document.querySelector(s), app = $("#app");
+const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const pick = (a) => a[Math.floor(Math.random() * a.length)];
+const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+const load = () => { try { const v = JSON.parse(localStorage.getItem(K)); return v && v.v === 1 ? v : null; } catch { return null; } };
+const save = () => { try { localStorage.setItem(K, JSON.stringify(G)); } catch {} };
+let G = load() || { v: 1, done: [], party: ["leo", "gigi", "sara"], lv: 1, focacce: 2, flags: {} };
+
+// ---- personaggi ----
+const HERO = {
+  leo:  { name: "Leo", ic: "⚽", hp: 70, sk: [
+    { n: "Tiro", d: "danno 10-16", c: 0, f: (u, t) => hit(t, Math.round((rnd(10, 16) + G.lv * 2) * (u.pw ? 1.3 : 1)), `${u.name} calcia dritto in faccia a ${t.name}.`) },
+    { n: "Tiro della Rondine", d: "danno 28-36 · grinta 3", c: 3, f: (u, t) => hit(t, Math.round((rnd(28, 36) + G.lv * 3) * (u.pw ? 1.3 : 1)), `TIRO DELLA RONDINE! ${t.name} guarda il pallone passare e non fa in tempo a offendersi.`) } ] },
+  gigi: { name: "Gigi", ic: "🕊️", hp: 55, sk: [
+    { n: "Chiacchiera", d: "danno 6-10, il nemico fa meno male", c: 0, f: (u, t) => { t.weak = 2; return hit(t, rnd(6, 10) + G.lv, `Gigi parla per quaranta secondi senza respirare. ${t.name} cede per sfinimento.`); } },
+    { n: "KRAAA!", d: "stordisce un nemico · grinta 2", c: 2, f: (u, t) => { t.stun = 1; return `${u.name} imita un gabbiano così bene che ${t.name} si gira a controllare. È fermo un turno.`; } } ] },
+  sara: { name: "Sara", ic: "📓", hp: 55, sk: [
+    { n: "Appunti taglienti", d: "danno 9-13", c: 0, f: (u, t) => hit(t, rnd(9, 13) + G.lv * 2, `Sara legge ad alta voce le sue statistiche su ${t.name}. Fanno più male di un calcio.`) },
+    { n: "Analisi", d: "il nemico prende +50% per 2 turni · grinta 2", c: 2, f: (u, t) => { t.mark = 2; return `«Punto debole: tutto.» ${t.name} si sente osservato e peggiora.`; } } ] },
+  nico: { name: "Nico", ic: "🧤", hp: 80, sk: [
+    { n: "Parata", d: "cura sé stesso di 25", c: 0, self: 1, f: (u) => { u.hp = Math.min(u.max, u.hp + 25); return `Nico si para da solo. Funziona, nessuno ha chiesto come.`; } },
+    { n: "Gatto Volante", d: "squadra riparata per un turno · grinta 2", c: 2, self: 1, f: (u) => { P.guard = 1; return `GATTO VOLANTE! Nico si butta davanti a tutti. Il pavimento ci rimane male.`; } } ] },
+};
+const NAMES = { leo: "Leo", gigi: "Gigi", sara: "Sara", nico: "Nico" };
+
+// ---- nemici ----
+const FOE = {
+  gabb: () => ({ name: "Gabbiano Sindacalista", ic: "🐦", hp: 34, atk: [5, 9], strike: 1, say: ["«Pausa pranzo, stronzo.»", "«Chiedi alla RSU dei gabbiani.»", "«Sciopero del cielo!»"] }),
+  cuoco: () => ({ name: "Pino Con Più Braccia", ic: "🍝", hp: 55, atk: [7, 11], say: ["«Otto frittelle alla volta, bello!»", "«Il menu è solo in latino!»"] }),
+  tommy: () => ({ name: "Tommy Senza Difetti", ic: "😇", hp: 70, atk: [8, 13], shield: 1, say: ["«Non sbaglio mai.»", "«Non perdo mai.»", "«Non ho mai fame.»"] }),
+  rugg: () => ({ name: "Ruggeri Gentile", ic: "🥰", hp: 210, atk: [11, 16], boss: 1, heal: 0, say: ["«Che bravi che siete, davvero!»", "«Un abbraccio non ha mai fatto male a nessuno.»", "«Siete tutti perfetti. Restate qui.»"] }),
+};
+
+// ---- storia ----
+const T = (who, text) => ({ who, text });
+const STORY = {
+  intro: [
+    T(null, "Sera sul campetto del Borgo. L'allenamento è finito. Ugolino Lampadina è sul tetto del campanile con due cavi e un flipper."),
+    T("ugolino", "Ho collegato il campanile al flipper per fare una luminaria «dinamica». È andata benissimo. Fino a quando è andata malissimo."),
+    T(null, "Nel cielo si apre una crepa verde, larga come una busta della spesa."),
+    T("gigi", "Cazzo. Il cielo si è aperto come un sacchetto del pane."),
+    T("sara", "Statisticamente è la cosa più improbabile mai successa al Borgo. E abbiamo un precedente col campanile."),
+    T("leo", "Qualcuno guardi dentro. No, non io. Va bene, io."),
+    T(null, "Entrate. Dall'altra parte c'è il Borgo. Ma qualcosa è storto: il campanile pende, le barche hanno le ruote, e tutti i gabbiani hanno un cartellino con il nome."),
+  ],
+  n1: [T("gigi", "Questo è il Borgo Storto. Lo capisco da come i gabbiani ci guardano male."), T(null, "Due gabbiani con la sciarpa del sindacato vi bloccano il passaggio.")],
+  w1: [T("sara", "Appunto: dopo l'ultimo sciopero hanno chiesto anche i weekend. Andiamo."), T("gigi", "Mi hanno quasi convinto. Quasi.")],
+  n2: [
+    T(null, "La Trattoria Moretti è aperta. Dentro c'è un uomo con la maglia numero 9 incorniciata sul muro. È papà Moretti, ma qui è un'altra persona."),
+    T("papa", "Ragazzi! Sono il 9 della nazionale da vent'anni. Firmo autografi sui piatti."),
+    T("leo", "…Papà? Qui hai continuato a giocare?"),
+    T("papa", "Sì. Ho tre scudetti, due Palloni d'oro e nessuno che mi prepara le acciughe."),
+    T("leo", "E sei felice?"),
+    T("papa", "…Sono famoso. È diverso."),
+    T(null, "Leo non risponde. Dalla cucina esce Pino, ma con otto braccia, e vi guarda male."),
+  ],
+  w2: [T("leo", "Andiamo. Non voglio più sentire che qui «papà vince»."), T("sara", "Appunto. Non ti ha neanche chiesto come stai.")],
+  n3: [
+    T(null, "Al molo c'è una porta da calcio sul mare, e dentro, in fondo, c'è Nico che para da ore. Sempre lo stesso tiro. Sempre da Tommy."),
+    T("tommy", "Ciao ragazzi. Non perdo mai, non sbaglio mai e non ho mai fame."),
+    T("gigi", "Fa schifo. Voglio il Tommy vero."),
+    T("nico", "Aiuto! Sono in questa porta da un tempo che non so! Ho parato quattrocento volte lo stesso tiro!"),
+  ],
+  w3: [T("nico", "Grazie. Ho fatto il conto: quattrocento parate. Non è neanche un record. Che umiliazione."), T("gigi", "Il Tommy vero non sarebbe mai perfetto: sarebbe in ritardo e con la focaccia in mano."), T(null, "Nico si unisce alla squadra.")],
+  n4: [
+    T(null, "Il chiosco di Tonino. Sulla lavagna: «Gusto del giorno: Paradosso». Costa un euro e il futuro."),
+    T("tonino", "Chi lo assaggia sta benissimo per un'ora. Poi inizia a ricordarsi cose che non sono successe."),
+  ],
+  n5: [
+    T(null, "Il campanile storto. In cima, al posto del flipper, c'è il Mister. Sorride. Troppo."),
+    T("rugg", "Ragazzi! Che bello vedervi! Qui nessuno si arrabbia mai. Nessuno corre. Nessuno perde. Rimanete."),
+    T("sara", "È Ruggeri… gentile. È la cosa più inquietante che abbia visto."),
+    T("leo", "Mister, il Ruggeri vero urlava. Ma ci ha insegnato a giocare."),
+    T("rugg", "Urlare non serve. Io vi voglio bene e basta."),
+  ],
+  mid: "«Ho detto che vi voglio bene. Avevo anche un'altra squadra, una volta. Non l'ho allenata abbastanza.»",
+  win: [
+    T("rugg", "…Va bene. Vi lascio andare. Ricordatemi urlare, ogni tanto."),
+    T("ugolino", "Ragazzi! Ho trovato l'interruttore! Se lo giro la crepa si chiude. Se lo lascio così, rimane aperta di un dito."),
+  ],
+};
+const WHO = { rita: "Rita", ugolino: "Ugolino", papa: "Papà Moretti", tommy: "Tommy (perfetto)", tonino: "Tonino", rugg: "Mister Ruggeri", leo: "Leo", gigi: "Gigi", sara: "Sara", nico: "Nico" };
+
+// ---- mappa ----
+const NODES = [
+  { id: "n1", t: "Il campetto storto", sub: "Due gabbiani sindacalizzati", foes: ["gabb", "gabb"] },
+  { id: "n2", t: "Trattoria Moretti", sub: "Papà è famoso", foes: ["cuoco"] },
+  { id: "n3", t: "Il molo", sub: "Nico è chiuso in una porta", foes: ["tommy"], join: "nico" },
+  { id: "n4", t: "Il chiosco di Tonino", sub: "Pausa e gelato" , rest: 1 },
+  { id: "n5", t: "Il campanile storto", sub: "Il Mister è troppo gentile", foes: ["rugg"], boss: 1 },
+];
+
+// ---- sprite pixel disegnati a codice (16x16), usati sia in mappa sia nei ritratti ----
+const PAL = {
+  leo:  { skin: "#f0c9a8", hair: "#4a2c1a", hs: "short", shirt: "#d33a3a", cap: "#2a4aa8" },
+  gigi: { skin: "#f4d2b0", hair: "#e8c46a", hs: "spiky", shirt: "#3a8ad8" },
+  sara: { skin: "#f0c9a8", hair: "#2a1a14", hs: "long", shirt: "#7a3ad8", glasses: 1 },
+  nico: { skin: "#e0b08a", hair: "#1a1a1a", hs: "short", shirt: "#2e9a52", gloves: 1 },
+  papa: { skin: "#f0c9a8", hair: "#8a8a8a", hs: "short", shirt: "#f2f2f2", apron: 1 },
+  rita: { skin: "#f0c9a8", hair: "#8a3a2a", hs: "long", shirt: "#ffffff", apron: 1 },
+  ugolino: { skin: "#e8bf98", hair: "#dddddd", hs: "bald", shirt: "#e8a82e", hat: "#e8a82e", goggles: 1 },
+  tommy: { skin: "#f0c9a8", hair: "#f2e08a", hs: "short", shirt: "#ffffff", halo: 1 },
+  tonino: { skin: "#e0b08a", hair: "#3a2a1a", hs: "short", shirt: "#ffb0d8", hat: "#ffffff" },
+  rugg: { skin: "#e8bf98", hair: "#b8b8b8", hs: "short", shirt: "#2a3a5a", heart: 1 },
+  pino: { skin: "#f0c9a8", hair: "#d87a2a", hs: "short", shirt: "#e8e8e8", arms: 1 },
+  gabb: { bird: 1 },
+};
+const SPR = {};
+// sprite 16x20 con contorno scuro e ombreggiatura; frame 0 fermo, 1/2 passo
+function sprite(id, px, frame) {
+  frame = frame || 0; const key = id + "@" + px + "#" + frame; if (SPR[key]) return SPR[key];
+  const W = 18, H = 22, base = document.createElement("canvas"); base.width = W; base.height = H;
+  const g = base.getContext("2d"), q = PAL[id] || PAL.gigi;
+  const r = (x, y, w, h, col) => { g.fillStyle = col; g.fillRect(x + 1, y + 1, w, h); };
+  if (q.bird) {
+    r(3, 8, 9, 6, "#f7f7f7"); r(2, 7, 5, 4, "#f7f7f7"); r(0, 8, 3, 2, "#ffb52e"); r(4, 8, 1, 1, "#111"); r(10, 6 + (frame === 1 ? -2 : frame === 2 ? 1 : 0), 5, 2, "#cfd8e6"); r(5, 14, 1, 3, "#ffb52e"); r(8, 14, 1, 3, "#ffb52e"); r(5, 5, 5, 3, "#5a7aa0"); r(4, 12, 8, 2, "#dfe6f2");
+  } else {
+    const pants = q.pants || "#2a3550", sk = q.skin;
+    // gambe
+    const lo = frame === 1 ? 1 : 0, ro = frame === 2 ? 1 : 0;
+    r(5, 16 - lo, 3, 3, pants); r(9, 16 - ro, 3, 3, pants); r(5, 19 - lo, 3, 1, "#1a1a22"); r(9, 19 - ro, 3, 1, "#1a1a22");
+    if (q.halo) r(5, 0, 6, 1, "#ffe86a");
+    if (q.arms) { r(1, 10, 2, 4, sk); r(13, 10, 2, 4, sk); r(0, 8, 2, 3, sk); r(14, 8, 2, 3, sk); }
+    r(3, 11, 10, 6, q.shirt); r(2, 12, 1, 4, q.shirt); r(13, 12, 1, 4, q.shirt); r(2, 16, 1, 1, sk); r(13, 16, 1, 1, sk);
+    r(3, 15, 10, 2, "#00000022"); r(11, 11, 2, 6, "#00000018");
+    if (q.apron) r(5, 12, 6, 5, "#e8e0c8");
+    if (q.heart) { r(6, 12, 2, 1, "#ff5d8a"); r(9, 12, 2, 1, "#ff5d8a"); r(7, 13, 3, 1, "#ff5d8a"); }
+    if (q.gloves) { r(1, 14, 2, 3, "#57d68d"); r(13, 14, 2, 3, "#57d68d"); }
+    r(7, 10, 2, 2, sk); r(4, 3, 8, 8, sk); r(11, 4, 1, 7, "#00000020"); r(5, 10, 6, 1, "#00000018");
+    if (q.hs === "short") { r(4, 2, 8, 2, q.hair); r(3, 3, 1, 4, q.hair); r(12, 3, 1, 4, q.hair); r(5, 2, 3, 1, "#ffffff30"); }
+    if (q.hs === "spiky") { r(4, 2, 8, 2, q.hair); r(4, 1, 2, 1, q.hair); r(7, 0, 2, 2, q.hair); r(10, 1, 2, 1, q.hair); r(3, 3, 1, 3, q.hair); r(12, 3, 1, 3, q.hair); }
+    if (q.hs === "long") { r(4, 2, 8, 2, q.hair); r(3, 3, 2, 10, q.hair); r(11, 3, 2, 10, q.hair); r(5, 2, 3, 1, "#ffffff30"); }
+    if (q.cap) { r(4, 2, 8, 2, q.cap); r(3, 3, 10, 1, q.cap); r(2, 3, 3, 1, "#1a2f78"); }
+    if (q.hat) { r(4, 1, 8, 3, q.hat); r(3, 3, 10, 1, q.hat); }
+    r(6, 7, 1, 2, "#16161e"); r(9, 7, 1, 2, "#16161e"); r(6, 7, 1, 1, "#ffffff90"); r(7, 10, 2, 1, "#a8554a");
+    if (q.glasses) { r(5, 6, 3, 3, "#16161e40"); r(8, 6, 3, 3, "#16161e40"); r(5, 6, 3, 1, "#111"); r(8, 6, 3, 1, "#111"); r(7, 7, 1, 1, "#111"); }
+    if (q.goggles) { r(4, 5, 8, 2, "#7fd0e8"); r(4, 5, 8, 1, "#222"); r(4, 6, 8, 1, "#bfeaf6"); }
+  }
+  // contorno scuro
+  const d = g.getImageData(0, 0, W, H), o = g.createImageData(W, H), A = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? 0 : d.data[(y * W + x) * 4 + 3]);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const i = (y * W + x) * 4;
+    if (d.data[i + 3] > 40) { o.data.set(d.data.slice(i, i + 4), i); }
+    else if (A(x - 1, y) > 40 || A(x + 1, y) > 40 || A(x, y - 1) > 40 || A(x, y + 1) > 40) { o.data[i] = 20; o.data[i + 1] = 16; o.data[i + 2] = 28; o.data[i + 3] = 255; }
+  }
+  g.putImageData(o, 0, 0);
+  const c = document.createElement("canvas"); c.width = W * px; c.height = H * px; const k = c.getContext("2d"); k.imageSmoothingEnabled = false; k.drawImage(base, 0, 0, c.width, c.height);
+  SPR[key] = c; return c;
+}
+const face = (id, px) => { try { const s0 = sprite(id, px), c = document.createElement("canvas"); c.width = s0.width; c.height = Math.round(s0.height * 0.66); c.getContext("2d").drawImage(s0, 0, 0, s0.width, c.height, 0, 0, s0.width, c.height); return c.toDataURL(); } catch { return ""; } };
+const body = (id, px) => { try { return sprite(id, px).toDataURL(); } catch { return ""; } };
+
+// ---- grafica: scenette SVG senza file esterni ----
+const ART = {
+  crepa: '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a1030"/><stop offset="1" stop-color="#24365e"/></linearGradient></defs><rect width="320" height="120" fill="url(#g)"/><circle cx="40" cy="20" r="2" fill="#fff"/><circle cx="270" cy="30" r="1.5" fill="#fff"/><path d="M170 0 L162 22 L176 40 L160 62 L172 78" stroke="#5dff9a" stroke-width="5" fill="none"/><path d="M170 0 L162 22 L176 40 L160 62 L172 78" stroke="#c9ffe0" stroke-width="1.5" fill="none"/><polygon points="120,120 124,50 140,50 144,120" fill="#10172e" transform="rotate(-8 130 120)"/><rect x="0" y="108" width="320" height="12" fill="#143a2a"/>',
+  campetto: '<rect width="320" height="120" fill="#4aa8d8"/><rect y="70" width="320" height="50" fill="#2e9a52"/><rect x="230" y="40" width="50" height="40" fill="none" stroke="#fff" stroke-width="3"/><g fill="#fff" stroke="#888"><ellipse cx="70" cy="36" rx="14" ry="7"/><ellipse cx="120" cy="22" rx="12" ry="6"/></g><g fill="#ffd23f"><circle cx="64" cy="34" r="2"/><circle cx="114" cy="20" r="2"/></g><path d="M0 70 L320 70" stroke="#fff" stroke-width="2" opacity=".5"/>',
+  trattoria: '<rect width="320" height="120" fill="#3a2418"/><rect x="30" y="20" width="90" height="80" fill="#f2c976" stroke="#7a4a22" stroke-width="4"/><text x="75" y="75" font-size="52" fill="#b3202c" text-anchor="middle" font-family="sans-serif" font-weight="bold">9</text><rect x="170" y="35" width="120" height="60" rx="6" fill="#6a3a24"/><circle cx="200" cy="65" r="14" fill="#f4e6c8"/><circle cx="250" cy="65" r="14" fill="#f4e6c8"/><rect y="100" width="320" height="20" fill="#241008"/>',
+  molo: '<rect width="320" height="120" fill="#6fb3d8"/><rect y="64" width="320" height="56" fill="#1d5f8f"/><path d="M0 80 q20 -8 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0" stroke="#9ed4f0" fill="none" stroke-width="2"/><rect x="110" y="30" width="100" height="56" fill="none" stroke="#fff" stroke-width="4"/><rect x="0" y="92" width="110" height="10" fill="#8a6540"/>',
+  chiosco: '<rect width="320" height="120" fill="#ffe9b5"/><path d="M80 30 h160 l10 30 h-180 z" fill="#ff6a7a"/><path d="M80 30 h20 l-5 30 h-25z M120 30 h20 l-5 30 h-20z M160 30 h20 l-5 30 h-20z M200 30 h20 l-5 30 h-20z" fill="#fff"/><rect x="90" y="60" width="140" height="50" fill="#9a6a3a"/><polygon points="160,110 148,78 172,78" fill="#d9a05a"/><circle cx="160" cy="70" r="14" fill="#c9a0ff"/><circle cx="160" cy="70" r="5" fill="#fff" opacity=".6"/>',
+  campanile: '<defs><radialGradient id="h"><stop offset="0" stop-color="#ffe9a0"/><stop offset="1" stop-color="#ffe9a000"/></radialGradient></defs><rect width="320" height="120" fill="#2a1a40"/><circle cx="170" cy="22" r="48" fill="url(#h)"/><polygon points="145,120 150,30 190,30 195,120" fill="#c9b8a8" transform="rotate(7 170 120)"/><rect x="152" y="40" width="30" height="24" fill="#2a1a40" transform="rotate(7 170 120)"/><polygon points="148,30 170,0 192,30" fill="#b3202c" transform="rotate(7 170 120)"/><text x="170" y="64" text-anchor="middle" font-size="20">🥰</text>',
+};
+const art = (k) => (ART[k] ? `<svg viewBox="0 0 320 120" style="width:100%;border-radius:12px;border:2px solid var(--line);display:block;margin:0 0 8px">${ART[k]}</svg>` : "");
+// vignetta: sfondo illustrato + personaggi in scena (chi parla è in primo piano)
+const CAST = { crepa: ["leo", "gigi", "sara", "ugolino"], campetto: ["leo", "gigi", "sara", "gabb"], trattoria: ["papa", "rita", "leo", "gigi"], molo: ["nico", "tommy", "gigi", "sara"], chiosco: ["tonino", "leo", "sara", "gigi"], campanile: ["rugg", "leo", "gigi", "sara"] };
+function vig(scene, who, foes) {
+  const bg = ART[scene]; if (!bg) return "";
+  let list = (CAST[scene] || []).slice(); if (who && PAL[who] && !list.includes(who)) list.unshift(who);
+  const np = foes ? Math.min(4, G.party.length) : 0;
+  if (foes) list = G.party.slice(0, np).concat(foes);
+  const n = list.length;
+  const imgs = list.map((id, i) => { const sp = id === who, h = sp ? 96 : 62, left = n > 1 ? 4 + (i / (n - 1)) * 80 : 40;
+    return `<img src="${body(id, 4)}" alt="" style="position:absolute;bottom:${sp ? 4 : 2}px;left:${left}%;height:${h}px;image-rendering:pixelated;filter:${sp ? "drop-shadow(0 0 6px #ffd23f)" : "brightness(.78)"};transform:${foes && i >= np ? "scaleX(-1)" : "none"}">`; }).join("");
+  return `<div style="position:relative;border-radius:12px;border:2px solid var(--line);overflow:hidden;margin:0 0 8px"><svg viewBox="0 0 320 120" preserveAspectRatio="xMidYMid slice" style="width:100%;height:170px;display:block">${bg}</svg>${imgs}</div>`;
+}
+let SCENE = "crepa";
+
+// ---- UI ----
+function title() {
+  const n = G.done.length;
+  app.innerHTML = `<h1>Il Borgo Storto</h1><div class="sub">GDR a capitoli · Capitolo 1: La crepa sul campanile</div>
+  <div class="card">${vig("crepa", "leo")}<p>Ugolino ha fatto un guaio. Il cielo ha una crepa, e dall'altra parte c'è un Borgo uguale al tuo. Quasi. Tutto è storto, tutti sono una versione strana di sé stessi. E non si sa chi comanda.</p></div>
+  <button class="hot" id="go">${n ? "Continua" : "Inizia"}<small>${n ? `Tappe fatte: ${n}/5` : "Capitolo 1"}</small></button>
+  ${n ? `<button id="new">Ricomincia da capo<small>Cancella i progressi di questo capitolo</small></button>` : ""}
+  <button id="back">◂ Torna ad Ali di Rondine</button>`;
+  $("#go").onclick = () => { SCENE = "crepa"; n ? map() : dialog(STORY.intro, map); };
+  if ($("#new")) $("#new").onclick = () => { G = { v: 1, done: [], party: ["leo", "gigi", "sara"], lv: 1, focacce: 2, flags: {} }; save(); title(); };
+  $("#back").onclick = () => { location.href = "./index.html"; };
+}
+function dialog(lines, then) {
+  let i = 0;
+  const show = () => {
+    const l = lines[i];
+    app.innerHTML = vig(SCENE, l.who) + `<div class="card"><div class="dlg">${PAL[l.who] ? `<img src="${face(l.who, 4)}" alt="">` : ""}<div>${l.who ? `<span class="who">${esc(WHO[l.who] || l.who)}</span><br>` : ""}${esc(l.text)}</div></div></div><button class="hot" id="nx">Continua ▸</button>`;
+    $("#nx").onclick = () => { i++; i < lines.length ? show() : then(); };
+  };
+  show();
+}
+
+// ---- esplorazione a piedi ----
+const MAPS = [
+  { node: "n1", floor: ["#3fa05c", "#389554"], wall: "#2a6a3e", name: "Il campetto storto", rows: [
+    "####################", "####################", "#..................#", "#.......##.........#", "#.......##.........#", "#..................#",
+    "#..................#", "#.....#............#", "#.....#............#", "#..................#", "#..................#", "####################"],
+    start: [2, 9], exit: [18, 10], objs: [
+      { k: "foe", id: "gabb", x: 10, y: 6, fight: 1 }, { k: "foe", id: "gabb", x: 13, y: 3, fight: 1 },
+      { k: "npc", id: "ugolino", x: 4, y: 2, say: [["ugolino", "Io? Io non c'entro. Il flipper si è acceso da solo."], ["gigi", "Ugolino, hai i cavi in mano."], ["ugolino", "Sono fiducioso e disoccupato."]] } ] },
+  { node: "n2", floor: ["#b07a4a", "#a56f40"], wall: "#5a3418", name: "Trattoria Moretti", rows: [
+    "####################", "####################", "#.##....##....##...#", "#..................#", "#..................#", "#.##....##....##...#",
+    "#..................#", "#..................#", "#..................#", "#..................#", "#..................#", "####################"],
+    start: [2, 9], exit: [18, 10], objs: [
+      { k: "npc", id: "papa", x: 6, y: 3, talk: "n2" }, { k: "foe", id: "pino", x: 14, y: 8, fight: 1, wait: 1 },
+      { k: "npc", id: "rita", x: 11, y: 6, say: [["rita", "Otto padelle, otto fuochi, otto fastidi. Mangia, Leo."], ["leo", "Anche qui mi dici di mangiare."], ["rita", "Certe cose sono universali."]] } ] },
+  { node: "n3", floor: ["#c9a46a", "#bd9a60"], wall: "#7a5a30", name: "Il molo", water: 1, rows: [
+    "~~~~~~~~~~~~~~~~~~~~", "~~~~~~~~~~~~~~~~~~~~", "~~~~~~~~#....#~~~~~~", "#..................#", "#..................#", "#.....##......##...#",
+    "#..................#", "#..................#", "#.....##......##...#", "#..................#", "~~~~~~~~~~~~~~~~~~~~", "~~~~~~~~~~~~~~~~~~~~"],
+    start: [2, 9], exit: [18, 9], objs: [
+      { k: "npc", id: "nico", x: 10, y: 2, say: [["nico", "Para, ripara, ripara. Ho perso il conto delle parate."], ["gigi", "Non ti muovere, ti sblocchiamo noi."]] },
+      { k: "foe", id: "tommy", x: 10, y: 6, fight: 1 } ] },
+  { node: "n4", floor: ["#f0d9a0", "#e8cf92"], wall: "#d0883a", name: "Il chiosco di Tonino", rows: [
+    "####################", "####################", "#..................#", "#.....########.....#", "#.....#......#.....#", "#.....#......#.....#",
+    "#..................#", "#..................#", "#..................#", "#..................#", "#..................#", "####################"],
+    start: [2, 9], exit: [18, 10], objs: [{ k: "npc", id: "tonino", x: 9, y: 6, talk: "n4" }] },
+  { node: "n5", floor: ["#6a5a8a", "#5f4f80"], wall: "#2a1a40", name: "Il campanile storto", rows: [
+    "####################", "####################", "#..##..........##..#", "#..................#", "#..................#", "#..................#",
+    "#...##........##...#", "#..................#", "#..................#", "#..................#", "#..................#", "####################"],
+    start: [9, 10], exit: null, objs: [{ k: "foe", id: "rugg", x: 9, y: 3, fight: 1 }] },
+];
+let X = null; // stato esplorazione
+function nodeDone(m) { return G.done.includes(m.node); }
+function explore() {
+  busy2 = false; X && (X.cool = Date.now() + 700);
+  if (G.area == null) { const i = NODES.findIndex((n) => !G.done.includes(n.id)); G.area = i < 0 ? 4 : i; }
+  const m = MAPS[G.area]; SCENE = "";
+  if (!X || X.m !== m) X = { m, x: m.start[0], y: m.start[1] };
+  app.innerHTML = `<h1>${esc(m.name)}</h1><div class="sub">Livello ${G.lv} · focacce ${G.focacce} · tocca le frecce per camminare, parla con i personaggi</div>
+  <canvas id="cv" width="640" height="384"></canvas><div class="log" id="msg">${nodeDone(m) ? "Qui hai finito. Vai a destra, oltre il bordo." : "Avvicinati ai personaggi. I nemici si affrontano toccandoli."}</div>
+  <button id="talk" class="hot" hidden></button><div class="pad"><span></span><button data-d="u">▲</button><span></span><button data-d="l">◀</button><button data-d="d">▼</button><button data-d="r">▶</button></div><button id="t">◂ Titolo</button>`;
+  $("#t").onclick = title; $("#talk").onclick = () => talkNear();
+  const D = { u: [0, -1], d: [0, 1], l: [-1, 0], r: [1, 0] };
+  clearInterval(window.PADTM);
+  const stop = () => { clearInterval(window.PADTM); window.PADTM = null; };
+  window.onpointerup = window.onpointercancel = window.onblur = stop;
+  app.querySelectorAll(".pad button").forEach((b) => {
+    const go = () => step(D[b.dataset.d]);
+    b.onpointerdown = (e) => { e.preventDefault(); go(); stop(); window.PADTM = setInterval(() => { if (!$("#cv")) return stop(); go(); }, 150); };
+    b.onpointerup = b.onpointerleave = b.onpointercancel = stop;
+  });
+  window.onkeydown = (e) => { const k = { ArrowUp: "u", ArrowDown: "d", ArrowLeft: "l", ArrowRight: "r", w: "u", s: "d", a: "l", d: "r" }[e.key]; if (k && $("#cv")) { e.preventDefault(); step(D[k]); } };
+  near(); draw();
+}
+function objs(m) {
+  return m.objs.filter((o) => !(o.k === "foe" && (nodeDone(m) || o.wait && !G.flags["met_" + m.node]))).filter((o) => !(o.id === "nico" && G.party.includes("nico")));
+}
+function step(d) {
+  if (!$("#cv") || busy2 || (X && X.cool > Date.now())) return;
+  const m = X.m, nx = X.x + d[0], ny = X.y + d[1];
+  const row = m.rows[ny]; if (!row) return;
+  const t = row[nx];
+  if (nx >= row.length - 1 && d[0] === 1 && nodeDone(m)) { G.area = Math.min(4, G.area + 1); X = null; save(); return explore(); }
+  if (t === "#" || t === "~" || t === undefined) return;
+  const o = objs(m).find((q) => q.x === nx && q.y === ny);
+  const msg = (h) => { const e = $("#msg"); if (e) e.innerHTML = h; };
+  if (o) {
+    if (o.k === "foe") return meet(m, o);
+    near(); return;
+  }
+  X.x = nx; X.y = ny; X.mv = 8;
+  if (m.exit && nx === m.exit[0] && ny === m.exit[1]) {
+    if (!nodeDone(m)) { msg("Qualcosa non ti lascia andare: prima risolvi qui."); X.x -= d[0]; X.y -= d[1]; }
+    else { G.area = Math.min(4, G.area + 1); X = null; save(); return explore(); }
+  }
+  near(); draw();
+}
+let busy2 = false;
+// pulsante "Parla": compare quando sei accanto a un personaggio (niente dialoghi in loop se tieni premuto)
+function nearNpc() { if (!X) return null; return objs(X.m).find((o) => o.k === "npc" && Math.abs(o.x - X.x) + Math.abs(o.y - X.y) === 1) || null; }
+function near() {
+  const b = $("#talk"); if (!b) return; const o = nearNpc();
+  if (o) { b.hidden = false; b.textContent = "💬 Parla con " + (WHO[o.id] || o.id); } else b.hidden = true;
+}
+function talkNear() {
+  const o = nearNpc(); if (!o || busy2) return; busy2 = true;
+  if (o.talk) { const node = NODES.find((n) => n.id === o.talk); if (X.m.node === "n2") G.flags["met_n2"] = 1; return enter(node); }
+  dialog(o.say.map((q) => T(q[0], q[1])), () => { busy2 = false; explore(); });
+}
+function meet(m, o) {
+  busy2 = true; clearInterval(window.PADTM);
+  const n = NODES.find((q) => q.id === m.node);
+  if (m.node === "n2" && !G.flags.met_n2) { busy2 = false; const e = $("#msg"); if (e) e.innerHTML = "Prima parla con Papà."; return; }
+  if (m.node === "n2") return fight(n);
+  enter(n);
+}
+// ---------- grafica mappe: sfondi illustrati disegnati a codice (tile 32px) ----------
+const TS = 32, BGC = {};
+const hsh = (x, y, k) => (((x * 73856093) ^ (y * 19349663) ^ ((k || 1) * 83492791)) >>> 0) % 1000 / 1000;
+function paintBG(m) {
+  if (BGC[m.node]) return BGC[m.node];
+  const c = document.createElement("canvas"); c.width = 640; c.height = 384; const g = c.getContext("2d");
+  const R = (x, y, w, h, col) => { g.fillStyle = col; g.fillRect(x, y, w, h); };
+  const rowsOf = (y) => m.rows[y], at = (x, y) => (m.rows[y] || "")[x];
+  // pavimenti
+  for (let y = 0; y < 12; y++) for (let x = 0; x < 20; x++) {
+    const t = at(x, y), X0 = x * TS, Y0 = y * TS, h = hsh(x, y);
+    if (t === "~") continue;
+    if (m.node === "n1") { R(X0, Y0, TS, TS, (x + y) % 2 ? "#4cae62" : "#45a45a"); for (let i = 0; i < 6; i++) R(X0 + hsh(x, y, i + 3) * 28, Y0 + hsh(x, y, i + 9) * 28, 2, 4, "#2f8a47"); if (h > .8) R(X0 + 8, Y0 + 12, 3, 3, "#f6e27a"); }
+    else if (m.node === "n2") { R(X0, Y0, TS, TS, y % 2 ? "#b9824f" : "#ad7745"); R(X0, Y0 + TS - 2, TS, 2, "#6c4526"); R(X0 + (y % 2 ? 16 : 0), Y0, 2, TS, "#6c4526"); R(X0 + 6, Y0 + 8, 3, 1, "#ffffff22"); }
+    else if (m.node === "n3") { R(X0, Y0, TS, TS, "#c99f62"); R(X0, Y0 + TS - 3, TS, 3, "#8c6a38"); R(X0 + 2, Y0 + 4, 2, 2, "#5c4220"); R(X0 + TS - 5, Y0 + 4, 2, 2, "#5c4220"); }
+    else if (m.node === "n4") { R(X0, Y0, TS, TS, (x + y) % 2 ? "#f1dba3" : "#ead29a"); for (let i = 0; i < 5; i++) R(X0 + hsh(x, y, i + 2) * 28, Y0 + hsh(x, y, i + 7) * 28, 2, 2, "#d3b67a"); if (h > .93) R(X0 + 10, Y0 + 10, 6, 4, "#ffb7c9"); }
+    else { R(X0, Y0, TS, TS, (x + y) % 2 ? "#6c5c8f" : "#64548a"); R(X0, Y0, TS, 1, "#ffffff18"); R(X0 + TS - 1, Y0, 1, TS, "#00000030"); if (h > .85) { R(X0 + 12, Y0 + 12, 8, 2, "#c09bff55"); } }
+  }
+  // fondali (righe 0-1)
+  if (m.node === "n1") { // cielo storto al tramonto + case storte
+    const sk = g.createLinearGradient(0, 0, 0, 64); sk.addColorStop(0, "#2a1c5a"); sk.addColorStop(.6, "#d96a6a"); sk.addColorStop(1, "#ffb86a"); g.fillStyle = sk; g.fillRect(0, 0, 640, 64);
+    g.fillStyle = "#3b2a5a"; g.beginPath(); g.moveTo(0, 64); g.lineTo(0, 40); g.quadraticCurveTo(120, 18, 240, 44); g.quadraticCurveTo(360, 20, 500, 40); g.quadraticCurveTo(580, 30, 640, 44); g.lineTo(640, 64); g.fill();
+    [[40, "#e8b86a"], [130, "#d98a6a"], [250, "#e8d27a"], [400, "#c97a9a"], [520, "#e8b86a"]].forEach(([hx, col], i) => { g.save(); g.translate(hx + 30, 64); g.rotate((i % 2 ? 1 : -1) * 0.1); R(-30, -40, 60, 40, col); g.fillStyle = "#8a2f3a"; g.beginPath(); g.moveTo(-36, -40); g.lineTo(0, -62); g.lineTo(36, -40); g.fill(); R(-18, -28, 10, 12, "#2a1c3a"); R(8, -28, 10, 12, "#2a1c3a"); g.restore(); });
+    g.strokeStyle = "#5dff9a"; g.lineWidth = 4; g.shadowColor = "#5dff9a"; g.shadowBlur = 14; g.beginPath(); g.moveTo(330, 0); g.lineTo(318, 18); g.lineTo(338, 34); g.lineTo(322, 54); g.stroke(); g.shadowBlur = 0;
+    for (let x = 0; x < 20; x++) { R(x * TS, 64, TS, 6, "#2f8a47"); } // siepe
+  } else if (m.node === "n2") { // parete della trattoria
+    R(0, 0, 640, 64, "#7a4a2a"); R(0, 40, 640, 24, "#5a3418"); for (let x = 0; x < 20; x++) R(x * TS, 0, 2, 40, "#6a3e22");
+    [[60, "#7fd0e8"], [300, "#ffd88a"], [500, "#7fd0e8"]].forEach(([wx, col]) => { R(wx, 6, 70, 32, "#3a2010"); R(wx + 4, 10, 62, 24, col); R(wx + 34, 10, 3, 24, "#3a2010"); });
+    R(190, 8, 70, 40, "#f2c976"); R(190, 8, 70, 4, "#7a4a22"); g.fillStyle = "#b3202c"; g.font = "bold 36px sans-serif"; g.textAlign = "center"; g.fillText("9", 225, 44); g.textAlign = "left";
+    for (let i = 0; i < 5; i++) { R(420 + i * 24, 2, 3, 16, "#d8d0b8"); g.fillStyle = "#e8a0a0"; g.beginPath(); g.arc(421 + i * 24, 26, 8, 0, 7); g.fill(); }
+  } else if (m.node === "n3") { // mare e faro
+    const sk = g.createLinearGradient(0, 0, 0, 64); sk.addColorStop(0, "#7ec8f0"); sk.addColorStop(1, "#cfeefa"); g.fillStyle = sk; g.fillRect(0, 0, 640, 64);
+    R(0, 52, 640, 12, "#2b86b8"); R(520, 8, 22, 50, "#f2f2f2"); R(520, 16, 22, 6, "#d33a3a"); R(520, 30, 22, 6, "#d33a3a"); R(516, 4, 30, 6, "#d33a3a"); R(528, -2, 6, 6, "#ffe86a");
+    g.fillStyle = "#fff"; [[80, 14], [260, 24], [400, 10]].forEach(([cx, cy]) => { g.beginPath(); g.ellipse(cx, cy, 36, 10, 0, 0, 7); g.fill(); g.beginPath(); g.ellipse(cx + 22, cy + 4, 24, 8, 0, 0, 7); g.fill(); });
+  } else if (m.node === "n4") { // facciata pastello + tenda a righe
+    R(0, 0, 640, 64, "#ffd8b8"); for (let x = 0; x < 20; x++) R(x * TS, 40, TS, 24, x % 2 ? "#ffb7c9" : "#fff6e6");
+    R(60, 8, 80, 30, "#fff"); R(66, 12, 68, 22, "#6fd0c0"); R(150, 6, 120, 34, "#3a2a1a"); g.fillStyle = "#ffe9b5"; g.font = "bold 20px sans-serif"; g.fillText("GELATI", 168, 30);
+    for (let i = 0; i < 8; i++) R(300 + i * 40, 4, 20, 40, i % 2 ? "#ff6a7a" : "#fff"); R(300, 44, 320, 6, "#cf4a5a");
+  } else { // torre storta
+    const sk = g.createLinearGradient(0, 0, 0, 64); sk.addColorStop(0, "#1a0f33"); sk.addColorStop(1, "#4a2f70"); g.fillStyle = sk; g.fillRect(0, 0, 640, 64);
+    for (let x = 0; x < 20; x++) { R(x * TS, 30, TS, 34, x % 2 ? "#3a2a55" : "#34264e"); R(x * TS, 30, TS, 2, "#ffffff22"); }
+    g.save(); g.translate(320, 64); g.rotate(0.12); R(-40, -60, 80, 60, "#cdbfae"); g.fillStyle = "#b3202c"; g.beginPath(); g.moveTo(-48, -60); g.lineTo(0, -100); g.lineTo(48, -60); g.fill(); R(-14, -48, 28, 30, "#ffe9a0"); g.restore();
+    [[90, 20], [550, 20]].forEach(([tx, ty]) => { R(tx, ty, 6, 30, "#6b4a2a"); g.fillStyle = "#ffb52e"; g.beginPath(); g.ellipse(tx + 3, ty - 3, 6, 9, 0, 0, 7); g.fill(); });
+  }
+  // bordi e ostacoli
+  const rim = (x, y) => x === 0 || x === 19 || y === 11 || y <= 1;
+  for (let y = 0; y < 12; y++) for (let x = 0; x < 20; x++) {
+    if (at(x, y) !== "#" || y <= 1) continue; const X0 = x * TS, Y0 = y * TS;
+    const edge = x === 0 || x === 19 || y === 11;
+    if (m.node === "n1") { if (edge) { R(X0, Y0, TS, TS, "#2f8a47"); R(X0 + 12, Y0 + 2, 6, TS - 2, "#8a6a3a"); R(X0 + 2, Y0 + 8, TS - 4, 4, "#a07a46"); R(X0 + 2, Y0 + 20, TS - 4, 4, "#a07a46"); } else { R(X0 + 2, Y0 + 12, TS - 4, 10, "#8a5a2e"); R(X0 + 2, Y0 + 12, TS - 4, 3, "#b27a42"); R(X0 + 4, Y0 + 22, 4, 8, "#5a3a1a"); R(X0 + TS - 8, Y0 + 22, 4, 8, "#5a3a1a"); } }
+    else if (m.node === "n2") { if (edge) { R(X0, Y0, TS, TS, "#5a3418"); R(X0, Y0, TS, 4, "#7a4a2a"); R(X0 + 4, Y0 + 10, TS - 8, 2, "#3a2010"); } else { R(X0 + 1, Y0 + 6, TS - 2, 18, "#d8c8a0"); R(X0 + 1, Y0 + 6, TS - 2, 4, "#fff6dc"); R(X0 + 4, Y0 + 24, 4, 6, "#6a4224"); R(X0 + TS - 8, Y0 + 24, 4, 6, "#6a4224"); g.fillStyle = "#b3202c"; g.beginPath(); g.arc(X0 + 16, Y0 + 14, 5, 0, 7); g.fill(); } }
+    else if (m.node === "n3") { if (edge) { R(X0 + 12, Y0 + 2, 6, TS, "#6a4a2a"); R(X0, Y0 + 6, TS, 4, "#8a6a3a"); } else { R(X0 + 3, Y0 + 5, TS - 6, TS - 8, "#a0723a"); R(X0 + 3, Y0 + 5, TS - 6, 4, "#c9965a"); R(X0 + 3, Y0 + 16, TS - 6, 2, "#6a4a22"); R(X0 + 14, Y0 + 5, 3, TS - 8, "#6a4a22"); } }
+    else if (m.node === "n4") { if (edge) { R(X0, Y0, TS, TS, "#f6a8c0"); R(X0 + 12, Y0 + 2, 8, TS, "#fff"); } else { g.fillStyle = "#ff6a7a"; g.beginPath(); g.arc(X0 + 16, Y0 + 10, 14, Math.PI, 0); g.fill(); R(X0 + 14, Y0 + 10, 4, 18, "#c9c9c9"); R(X0 + 6, Y0 + 24, 20, 3, "#00000030"); } }
+    else { if (edge) { R(X0, Y0, TS, TS, "#2a1c40"); R(X0 + 2, Y0 + 2, TS - 4, TS - 4, "#35254f"); } else { R(X0 + 6, Y0 + 2, 20, TS - 2, "#8a7aa8"); R(X0 + 6, Y0 + 2, 20, 4, "#b9aad6"); R(X0 + 9, Y0 + 8, 3, 18, "#ffffff22"); g.fillStyle = "#9bff9a"; g.beginPath(); g.arc(X0 + 16, Y0 + 14, 3, 0, 7); g.fill(); } }
+  }
+  // ombre morbide di muri e ostacoli
+  for (let y = 2; y < 11; y++) for (let x = 1; x < 19; x++) if (at(x, y) === "#") R(x * TS + 2, y * TS + TS - 3, TS, 5, "#00000026");
+  if (m.node === "n1") { g.strokeStyle = "#ffffffaa"; g.lineWidth = 3; g.strokeRect(40, 90, 560, 250); g.beginPath(); g.moveTo(320, 90); g.lineTo(320, 340); g.stroke(); g.beginPath(); g.arc(320, 215, 36, 0, 7); g.stroke(); g.strokeRect(40, 160, 70, 110); g.strokeRect(530, 160, 70, 110); }
+  if (m.node === "n3") { // porta da calcio sul molo
+    g.strokeStyle = "#fff"; g.lineWidth = 5; g.strokeRect(8 * TS - 4, 2 * TS - 2, 6 * TS + 8, TS + 2); g.lineWidth = 1; g.strokeStyle = "#ffffff80"; for (let i = 1; i < 12; i++) { g.beginPath(); g.moveTo(8 * TS + i * 16, 2 * TS); g.lineTo(8 * TS + i * 16, 3 * TS); g.stroke(); }
+  }
+  BGC[m.node] = c; return c;
+}
+let TIME = 0, RAF = 0;
+function draw() {
+  const cv = $("#cv"); if (!cv) { RAF = 0; return; } const g = cv.getContext("2d"); g.imageSmoothingEnabled = false;
+  const m = X.m; TIME++;
+  g.drawImage(paintBG(m), 0, 0);
+  // acqua animata
+  for (let y = 0; y < 12; y++) for (let x = 0; x < 20; x++) if (m.rows[y][x] === "~") {
+    const X0 = x * TS, Y0 = y * TS, w = Math.sin((TIME / 18) + x * 0.9 + y * 0.6);
+    g.fillStyle = (x + y) % 2 ? "#1d5f8f" : "#23699a"; g.fillRect(X0, Y0, TS, TS);
+    g.fillStyle = "rgba(255,255,255,.28)"; g.fillRect(X0 + 4 + w * 4, Y0 + 10, 14, 2); g.fillRect(X0 + 12 - w * 4, Y0 + 22, 10, 2);
+    if (y === 10 || (y === 2 && (x < 8 || x > 13))) { g.fillStyle = "rgba(255,255,255,.35)"; g.fillRect(X0, Y0, TS, 2); }
+  }
+  // luce del chiosco / insegne
+  const O = objs(m).map((o) => ({ ...o })); O.push({ k: "me", id: "leo", x: X.x, y: X.y, mv: X.mv });
+  O.sort((a, b) => a.y - b.y).forEach((o) => {
+    const bob = Math.sin(TIME / 9 + o.x) * 1.5, fr = o.k === "me" && o.mv > 0 ? 1 + (Math.floor(TIME / 6) % 2) : o.k === "foe" ? 1 + (Math.floor(TIME / 14) % 2) : 0, sp = sprite(o.id, 2, fr);
+    g.fillStyle = "rgba(0,0,0,.28)"; g.beginPath(); g.ellipse(o.x * TS + 16, o.y * TS + 29, 11, 4, 0, 0, 7); g.fill();
+    const dy = o.k === "me" && o.mv > 0 ? 0 : bob * (o.k === "foe" ? 1.4 : 0.5);
+    g.drawImage(sp, o.x * TS - 2, o.y * TS - 14 + dy, 36, 44);
+    if (o.k === "foe") { g.fillStyle = "#ff5d6c"; g.beginPath(); g.moveTo(o.x * TS + 16, o.y * TS - 20 + bob * 2); g.lineTo(o.x * TS + 10, o.y * TS - 28 + bob * 2); g.lineTo(o.x * TS + 22, o.y * TS - 28 + bob * 2); g.fill(); }
+    if (o.k === "npc") { g.fillStyle = "#ffd23f"; g.beginPath(); g.arc(o.x * TS + 16, o.y * TS - 20 + bob * 2, 4, 0, 7); g.fill(); }
+  });
+  // uscita
+  if (m.exit) { const on = nodeDone(m), pl = 0.6 + 0.4 * Math.sin(TIME / 10); g.fillStyle = on ? `rgba(255,210,63,${pl})` : "rgba(110,110,125,.7)"; g.fillRect(m.exit[0] * TS, m.exit[1] * TS, TS, TS); g.fillStyle = "#111"; g.font = "bold 22px sans-serif"; g.fillText(on ? "➜" : "✕", m.exit[0] * TS + 6, m.exit[1] * TS + 24); }
+  // gabbiani storti che passano (solo scena esterna) e luce ambientale
+  if (m.node === "n1" || m.node === "n3") { const bx = (TIME * 1.2) % 760 - 60; g.fillStyle = "#fff"; g.fillRect(bx, 30 + Math.sin(TIME / 9) * 5, 14, 4); g.fillRect(bx + 4, 26 + Math.sin(TIME / 9) * 5, 8, 3); }
+  const tint = { n1: "rgba(255,150,90,.14)", n2: "rgba(255,190,100,.16)", n3: "rgba(120,200,255,.06)", n4: "rgba(255,200,230,.08)", n5: "rgba(150,90,255,.16)" }[m.node];
+  g.fillStyle = tint; g.fillRect(0, 0, 640, 384);
+  const vg = g.createRadialGradient(320, 200, 160, 320, 200, 420); vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,.45)"); g.fillStyle = vg; g.fillRect(0, 0, 640, 384);
+  // bagliore verde della crepa: il Borgo Storto "pulsa"
+  g.fillStyle = `rgba(93,255,154,${0.03 + 0.02 * Math.sin(TIME / 25)})`; g.fillRect(0, 0, 640, 384);
+  if (!RAF) loop();
+}
+function loop() { RAF = requestAnimationFrame(() => { RAF = 0; if (!$("#cv")) return; if (X && X.mv > 0) X.mv--; draw(); }); }
+function map() { busy2 = false; explore(); }
+function enter(n) {
+  busy2 = true; clearInterval(window.PADTM);
+  SCENE = { n1: "campetto", n2: "trattoria", n3: "molo", n4: "chiosco", n5: "campanile" }[n.id];
+  if (n.id === "n2") return dialog(STORY.n2, papaChoice);
+  if (n.rest) return dialog(STORY[n.id], rest);
+  dialog(STORY[n.id], () => fight(n));
+}
+function papaChoice() {
+  app.innerHTML = vig(SCENE, "papa") + `<div class="card"><span class="who">Papà Moretti</span><br>Siete venuti per un autografo o per le acciughe?</div>
+  <button id="a">Dì la verità: «Non sei felice, papà»<small>Leo si carica: colpi più forti nello scontro</small></button>
+  <button id="b">Fai finta di niente e chiedi un autografo<small>Papà ti regala 2 focacce, ma Pino è più forte</small></button>`;
+  $("#a").onclick = () => { G.flags.verita = 1; save(); dialog([T("leo", "Hai tutto, papà. Ma ti manca qualcuno che ti chiami a tavola. Lo so perché manca anche a me."), T("papa", "…Leo. Non dirlo ad alta voce. Poi lo so anch'io.")], () => fight(NODES[1])); };
+  $("#b").onclick = () => { G.focacce += 2; G.flags.verita = 0; save(); dialog([T("papa", "Ecco, firmato sul piatto. Non lavarlo mai."), T("gigi", "Papà Moretti ha appena firmato un piatto come fosse un contratto.")], () => fight(NODES[1])); };
+}
+function rest() {
+  app.innerHTML = vig(SCENE, "tonino") + `<div class="card"><span class="who">Tonino</span><br>Scegli bene. Il gelato non è una scelta neutra.</div>
+  <button id="a">Assaggia il gusto Paradosso<small>La squadra guarisce del tutto. Ma si ricorderà di cose mai successe.</small></button>
+  <button id="b" class="hot">Prendi due focacce e una granita<small>+2 focacce e il gruppo respira</small></button>`;
+  $("#a").onclick = () => { G.flags.paradosso = 1; fin("n4", [T("tonino", "Stai benissimo. E ricordi che ieri hai segnato dall'altra parte del campo."), T("gigi", "Io mi ricordo un cane parlante. Era mio nonno.")]); };
+  $("#b").onclick = () => { G.focacce += 2; fin("n4", [T("tonino", "Scelta noiosa e sana. Mi piaci."), T("sara", "Siamo qui da dieci minuti e questo è già il momento più normale.")]); };
+}
+function fin(id, lines) { if (!G.done.includes(id)) G.done.push(id); save(); dialog(lines, map); }
+
+// ---- scontri a turni ----
+let P, F, busy;
+const hit = (t, d, msg) => { if (t.shield && !t.mark && !t.stun) { d = Math.ceil(d / 4); msg += " Ma Tommy è perfetto: il colpo scivola via. Serve Sara, o un modo per farlo sbagliare."; } if (t.mark) d = Math.round(d * 1.5); t.hp = Math.max(0, t.hp - d); return `${msg} (-${d})`; };
+function fight(n) {
+  const mk = (id) => { const h = HERO[id], mx = h.hp + (G.lv - 1) * 8; return { id, pal: id, name: h.name, ic: h.ic, hp: mx, max: mx, sk: h.sk }; };
+  P = { u: G.party.map(mk), gr: 3, guard: 0, log: "Inizia lo scontro." };
+  F = n.foes.map((k) => { const f = FOE[k](); f.pal = { gabb: 'gabb', cuoco: 'pino', tommy: 'tommy', rugg: 'rugg' }[k]; f.hp += (G.lv - 1) * 6; f.max = f.hp; return f; });
+  if (n.id === 'n2' && G.flags.verita) P.u.forEach((u) => { if (u.id === 'leo') u.pw = 1; });
+  if (n.id === 'n2' && G.flags.verita === 0) F.forEach((f) => { f.hp += 15; f.max += 15; });
+  P.node = n; P.phase2 = false; busy = false; renderFight();
+}
+function renderFight() {
+  const unit = (u, e) => `<div class="unit ${u.hp <= 0 ? "dead" : ""} ${u.stun ? "stun" : ""}"><b><img class="ui" src="${face(u.pal, 2)}" alt="">${esc(u.name)}</b> ${u.hp}/${u.max}<div class="bar ${e ? "e" : ""}"><i style="width:${Math.round((u.hp / u.max) * 100)}%"></i></div></div>`;
+  app.innerHTML = vig(SCENE, null, F.map((f) => f.pal)) + `<div class="card"><div class="row"><div>${F.map((f) => unit(f, 1)).join("")}</div><div>${P.u.map((u) => unit(u)).join("")}</div></div>
+  <div class="sub">Grinta ${"●".repeat(P.gr)}${"○".repeat(6 - P.gr)} · focacce ${G.focacce}</div><div class="log">${P.log}</div></div><div id="menu"></div>`;
+  if (!busy) menu();
+}
+function menu() {
+  P.u.forEach((x) => { if (x.hp > 0 && x.skip && !x.acted) { x.skip = 0; x.acted = true; P.log += ` ${esc(x.name)} è in sciopero.`; } });
+  const u = P.u.find((x) => x.hp > 0 && !x.acted);
+  if (!u) return foeTurn();
+  const m = $("#menu");
+  m.innerHTML = `<div class="sub">Tocca a ${esc(u.name)}</div>` + u.sk.map((s, i) => `<button data-s="${i}" ${P.gr < s.c ? "disabled" : ""}>${esc(s.n)}<small>${esc(s.d)}</small></button>`).join("") +
+    `<button data-s="f" ${G.focacce < 1 ? "disabled" : ""}>Focaccia<small>cura 40 a ${esc(u.name)}</small></button><button data-s="p">Salta il turno<small>+1 grinta</small></button>`;
+  m.querySelectorAll("button").forEach((b) => (b.onclick = () => {
+    const s = b.dataset.s;
+    if (s === "p") { P.gr = Math.min(6, P.gr + 1); end(u, `${u.name} respira e aspetta.`); }
+    else if (s === "f") { G.focacce--; u.hp = Math.min(u.max, u.hp + 40); end(u, `${u.name} mangia una focaccia. Si sente meglio e leggermente unto.`); }
+    else { const sk = u.sk[+s]; if (sk.self) { P.gr -= sk.c; end(u, sk.f(u)); } else target(u, sk); }
+  }));
+}
+function target(u, sk) {
+  const alive = F.filter((f) => f.hp > 0);
+  if (alive.length === 1) return run(u, sk, alive[0]);
+  $("#menu").innerHTML = `<div class="sub">Contro chi?</div>` + alive.map((f, i) => `<button data-t="${i}">${f.ic} ${esc(f.name)} (${f.hp})</button>`).join("");
+  $("#menu").querySelectorAll("button").forEach((b) => (b.onclick = () => run(u, sk, alive[+b.dataset.t])));
+}
+function run(u, sk, t) { P.gr -= sk.c; end(u, sk.f(u, t)); }
+function end(u, msg) {
+  u.acted = true; P.log = esc(msg);
+  const boss = F.find((f) => f.boss);
+  if (boss && !P.phase2 && boss.hp > 0 && boss.hp <= boss.max / 2) { P.phase2 = true; boss.heal = 12; P.log += `<br><i>${esc(STORY.mid)}</i> Ruggeri smette di sorridere. Adesso fa sul serio.`; boss.atk = [boss.atk[0] + 4, boss.atk[1] + 5]; }
+  if (F.every((f) => f.hp <= 0)) return win();
+  renderFight();
+}
+function foeTurn() {
+  busy = true; let log = P.log + "<br>";
+  F.filter((f) => f.hp > 0).forEach((f) => {
+    if (f.stun) { f.stun = 0; log += `${f.ic} ${esc(f.name)} è ancora stordito.<br>`; return; }
+    const al = P.u.filter((u) => u.hp > 0); if (!al.length) return;
+    const t = pick(al); let d = rnd(f.atk[0], f.atk[1]); if (f.weak) d = Math.ceil(d / 2); if (P.guard) d = Math.ceil(d / 3);
+    t.hp = Math.max(0, t.hp - d);
+    log += `${esc(pick(f.say))} ${esc(f.name)} colpisce ${esc(t.name)} (-${d}).<br>`;
+    if (f.strike && t.hp > 0 && Math.random() < 0.4) { t.skip = 1; log += `${esc(t.name)} viene coinvolto nello sciopero e salta il prossimo turno.<br>`; }
+    if (f.weak) f.weak--; if (f.mark) f.mark--;
+  });
+  F.forEach((f) => { if (f.heal && f.hp > 0) { f.hp = Math.min(f.max, f.hp + f.heal); log += `${f.ic} ${esc(f.name)} abbraccia tutti. Cura ${f.heal}. Come si fa a prendere a calci uno così?<br>`; } });
+  P.guard = 0; P.u.forEach((u) => (u.acted = false)); P.gr = Math.min(6, P.gr + 1); P.log = log;
+  if (P.u.every((u) => u.hp <= 0)) return lose();
+  busy = false; renderFight();
+}
+function lose() {
+  app.innerHTML = `<div class="card"><span class="who">Narratore</span><br>Siete a terra. Una voce dice «Scusate, qui nessuno si fa male, per favore ricominciate». Il Borgo Storto vi rimette in piedi, con un po' di vergogna.</div><button class="hot" id="r">Riprova lo scontro</button><button id="m">Torna alla mappa</button>`;
+  $("#r").onclick = () => fight(P.node); $("#m").onclick = map;
+}
+function win() {
+  const n = P.node; G.lv++; G.focacce += n.boss ? 1 : 0;
+  if (n.join && !G.party.includes(n.join)) G.party.push(n.join);
+  if (!G.done.includes(n.id)) G.done.push(n.id); save();
+  app.innerHTML = `<div class="card"><span class="who">Vittoria</span><br>Livello squadra ${G.lv}. ${n.join ? `${esc(NAMES[n.join])} si unisce alla squadra.` : ""}</div><button class="hot" id="c">Continua ▸</button>`;
+  $("#c").onclick = () => (n.id === "n5" ? dialog(STORY.win, choice) : STORY["w" + n.id.slice(1)] ? dialog(STORY["w" + n.id.slice(1)], map) : map());
+}
+function choice() {
+  app.innerHTML = `<div class="card"><span class="who">Ugolino</span><br>Allora? Chiudo la crepa o la lascio aperta di un dito?</div>
+  <button id="a">Chiudi la crepa<small>Tutto torna come prima. Quasi.</small></button>
+  <button id="b" class="hot">Lasciala aperta di un dito<small>Il Borgo Storto resta raggiungibile</small></button>`;
+  $("#a").onclick = () => { G.flags.crepa = "chiusa"; save(); finale(); };
+  $("#b").onclick = () => { G.flags.crepa = "aperta"; save(); finale(); };
+}
+function finale() {
+  const aperta = G.flags.crepa !== "chiusa";
+  app.innerHTML = `<div class="card"><span class="who">Fine del capitolo 1</span><br>${aperta ? "La crepa resta aperta di un dito. Dall'altra parte qualcosa ha sentito. Ugolino dice «È solo un gabbiano». Non è un gabbiano." : "La crepa si chiude con un rumore da sacchetto del pane. Il cielo torna a posto, ma dal campanile si sente ancora un piccolo «KRAAA». Gigi giura di non essere stato lui."}${G.flags.paradosso ? "<br><br><i>Qualcuno nel gruppo ricorda ancora il cane parlante. Sarà un problema.</i>" : ""}</div>
+  <div class="card"><span class="who">Prossimamente</span><br>Capitolo 2: il Borgo Storto non ha finito con voi.</div><button id="t">◂ Titolo</button>`;
+  $("#t").onclick = title;
+}
+title();
+if (/[?&]debug/.test(location.search)) window.__bs = { get G() { return G; }, get X() { return X; }, step, explore, MAPS };
+})();
+</script>
+</body>
+</html>
