@@ -1560,6 +1560,23 @@
     $("hZone").textContent = M.poss === "us" ? `${M.zone}/5 ▶` : `◀ ${M.zone}/5`;
     $("hPoss").textContent = M.poss === "us" ? usName() : "Avversari";
     $("hGuts").style.width = clamp(100 * M.guts / S.st.grinta, 0, 100) + "%";
+    try {
+      const radar = $("fieldRadar");
+      if (radar) {
+        radar.querySelectorAll(".radar-zone").forEach((el) => {
+          const z = parseInt(el.getAttribute("data-zone"), 10);
+          el.classList.toggle("active", z === M.zone);
+          el.classList.toggle("poss-us", z === M.zone && M.poss === "us");
+          el.classList.toggle("poss-them", z === M.zone && M.poss !== "us");
+        });
+        const ball = $("radarBall");
+        if (ball) {
+          const pct = Math.max(8, Math.min(92, (M.zone - 1) * 20 + 10));
+          ball.style.left = `${pct}%`;
+          ball.textContent = M.poss === "us" ? "⚽" : "🔴";
+        }
+      }
+    } catch (e) {}
     try { ttHud(); } catch {}
   }
   const cost = (n) => M.guts >= n;
@@ -21734,6 +21751,135 @@
   MN_MODI.push(() => { const r = s11Rec(); return r.won.length / S11_EP.length; });
   TRX.push(() => { const r = s11Rec(); return [{ name: "La panchina è lunga", kind: "cup", c: "#b54e5b", got: r.won.length === S11_EP.length, part: `${r.won.length}/4`, hint: s11Open() ? "Completa la Stagione 11" : "???" }]; });
   if (/[?&]debug/.test(location.search)) window.__s11 = { s11Rec, s11Open, s11Menu, s11Talk, s11Pick, s11Kick, S11_EP, S11_PARTNERS, mnStoria };
+
+  // ================= v18 · STAGIONE 12: L'EREDITÀ DELLA RONDINE =================
+  // La nuova stagione leggendaria: Tina impara a calciare, rivali da tutto il mondo arrivano sul molo
+  // e Leo deve difendere l'anima del calcio popolare da un'offerta miliardaria.
+  const S12K = "ali-di-rondine.stagione12";
+  const S12_COS = [
+    ["s12_sciarpa", "Sciarpa Anna Moretti", "#2f9e55", "acc"],
+    ["s12_maglia", "Maglia Volo Infinito", "#ffd23f", "shirt"],
+    ["s12_fascia", "Fascia dell'Eredità", "#ff4d5a", "acc"],
+    ["s12_stemma", "Stella della Scogliera", "#3fa7ff", "acc"],
+  ];
+  S12_COS.forEach(([id, label, val, kind]) => { COSM[id] = { kind, label, val, from: "Una ricompensa della Stagione 12" }; });
+  const S12_EP = [
+    {
+      name: "Il primo tiro di Tina", team: "s12_0", vs: "i Samurai del Sol Levante", mult: 0.85, color: "#e84118", special: "TEMPESTA DI PETALI",
+      scene: [
+        ["sara", "Tina ha preso il pallone di cuoio di nonna Anna e lo ha portato sul molo. Ha guardato la porta e ha detto: «Zio Leo, se tiro forte il mare si sposta?»"],
+        ["leo", "Il mare non si sposta, Tina. Ma impara ad ascoltare chi non ha paura di sbagliare il rimbalzo."],
+        ["kenji", "Arata è sceso dal traghetto con Sho. «Siamo venuti dal Giappone», dice Kenji inchinandosi, «per vedere se il ragazzo del muro ha ancora il tiro più veloce del vento.»"]
+      ]
+    },
+    {
+      name: "La scatola di latta aperta", team: "s12_1", vs: "il Boca del Tigre", mult: 0.98, color: "#192a56", special: "TANGO DEL PORTO",
+      scene: [
+        ["papa", "C'era un doppio fondo nella scatola di latta di Anna. Una fotografia del 1982: un campetto di terra in Argentina, e una scritta: «Non importa dove nasci: il pallone rotola uguale dappertutto»."],
+        ["jojo", "Jojo Batista ride sulla banchina, con il mate in mano. «Moretti! Abbiamo portato il ritmo di Buenos Aires tra i vostri caruggi. Vediamo se la Rondine balla!»"],
+        ["tommy", "La Rondine non balla il tango, Jojo. La Rondine plana. E quando tocca terra, è già in rete."]
+      ]
+    },
+    {
+      name: "L'offerta dei cinque milioni", team: "s12_2", vs: "i Titan-Capital d'Europa", mult: 1.10, color: "#2f3640", special: "GOLDEN BUYOUT",
+      scene: [
+        ["voce", "Due emissari in completo di sartoria posano una valigetta sul tavolo della trattoria. Cinque milioni di euro per i diritti del nome Rondine e per radere al suolo il campetto e costruire un resort di lusso con campo privato."],
+        ["ruggeri", "«Moretti», dice il Mister toccando la vecchia tovaglia a quadri, «ci sono cose che hanno un prezzo e cose che hanno un nome. Questa trattoria ha un nome. Il campetto ha un nome.»"],
+        ["leo", "«Tenetevi i vostri assegni», diciamo in coro. «Il nostro campo non è in vendita. Si gioca sul prato verde: chi vince decide il futuro del Borgo.»"]
+      ]
+    },
+    {
+      name: "Il volo che non finisce", team: "s12_3", vs: "la Selezione Mondiale delle Riviere", mult: 1.25, color: "#ffd23f", special: "VOLO INFINITO DELLA RONDINE",
+      scene: [
+        ["voce", "Finale del Trofeo del Centenario. Sugli spalti della scogliera ci sono cinquemila persone arrampicate fin sopra i tetti. Jonas Keller stringe la mano a Bruno Sabatini. Dario Moretti sorride a Leo dal tunnel degli spogliatoi."],
+        ["nico", "«Non ho mai avuto i guanti così caldi», urla Nico toccando i pali tre volte. «Oggi si vola tutti insieme!»"],
+        ["sara", "Sara solleva Tina per farle vedere il cielo. «Guarda là in alto, piccola. Quello è il tiro che ti racconterò per tutta la vita.»"]
+      ]
+    }
+  ];
+  const S12_PARTNERS = [
+    [["kenji", "Kenji Arata", "Sho Arata", "«L'intesa tra fratelli del Sol Levante contro il vento di Liguria.»"], ["nico", "Nico Ferri", "Sara Ferri", "«Nico protegge i pali mentre Sara cronometra la traiettoria ideale.»"], ["tommy", "Tommy Diallo", "Leo", "«La classica asse Tommy-Leo: passaggi radenti e cuore del molo.»"]],
+    [["tommy", "Tommy Diallo", "Gigi Scotto", "«Gigi imita i gabbiani per confondere la difesa carioca, Tommy scatta sulla fascia.»"], ["bruno", "Bruno Sabatini", "Fede Lanza", "«Bruno e Fede: tecnica sopraffina e diagonale insuperabile.»"], ["nico", "Nico Ferri", "Baciccia", "«I guardiani della darsena: riflessi felini e saggezza marinaia.»"]],
+    [["leo", "Leo Moretti", "Tommy Diallo", "«I Gemelli del Borgo: un'intesa nata vent'anni fa che nessun denaro può comprare.»"], ["ruggeri", "Mister Ruggeri", "Papà Moretti", "«La vecchia guardia: la grinta di chi non si è mai piegato ai compromessi.»"], ["fede", "Fede Lanza", "Bruno Sabatini", "«Il muro difensivo che spegne gli assalti dei mercenari.»"]],
+    [["tommy", "Tommy Diallo", "Nico Ferri", "«La Rondine al completo: l'ultimo assalto per la storia del Borgo.»"], ["bruno", "Bruno Sabatini", "Leo Moretti", "«Bruno serve il filtrante perfetto per il Tiro della Rondine!»"], ["gigi", "Gigi Scotto", "Fede Lanza", "«L'energia pura del gabbiano che trascina tutta la scogliera.»"]]
+  ];
+  const s12Rec = () => {
+    const r = readJSON(S12K, null), d = { v: 1, won: [], played: 0, choices: {} };
+    return r && typeof r === "object"
+      ? { ...d, ...r, won: Array.isArray(r.won) ? r.won.filter((n) => Number.isInteger(n) && n >= 0 && n < S12_EP.length) : [], choices: { ...(r.choices || {}) } }
+      : d;
+  };
+  const s12Save = (r) => writeJSON(S12K, r);
+  const s12Open = () => seasonDone(1);
+  function s12Menu(back = menuStoria) {
+    const r = s12Rec(), i = r.won.length < S12_EP.length ? r.won.length : 0, ep = S12_EP[i];
+    view = { kind: "scene", bg: "hq", speaker: "leo" }; chap("Stagione 12 · L'Eredità della Rondine");
+    text("leo", `<b>L'Eredità della Rondine · ${r.won.length}/4</b><br>${r.won.length ? `Hai già superato ${r.won.length} tappe leggendarie. ` : ""}Tina impara a tirare sul molo e squadre da tutto il mondo sbarcano a Borgo Marino per il Torneo del Centenario. Un fondo straniero tenta di comprare il campo, ma la Rondine è pronta al suo volo più alto.<br><span style="color:var(--dim)">${r.won.length === S12_EP.length ? "Trofeo del Centenario conquistato! La Scuola Popolare Anna Moretti è realtà." : `Prossimo capitolo: ${esc(ep.name)} · ${esc(ep.vs)}.`}</span>`);
+    buttons([
+      { label: r.won.length === S12_EP.length ? "Ricomincia il Torneo del Centenario" : `Apri il capitolo · ${ep.name}`, cls: "hot", fn: () => s12Talk(i, back) },
+      { label: "◂ Indietro", fn: back },
+    ], true);
+  }
+  function s12Talk(i, back) {
+    view = { kind: "scene", bg: "hq" }; chap(`Stagione 12 · ${S12_EP[i].name}`);
+    play(S12_EP[i].scene.map(([who, line]) => L(who, line, "hq")), () => s12Pick(i, back));
+  }
+  function s12Pick(i, back) {
+    const ep = S12_EP[i];
+    view = { kind: "scene", bg: "hq", speaker: "leo" }; chap(`Stagione 12 · ${ep.name}`);
+    text("leo", "Scegli chi schierare in campo per questa sfida decisiva. Ogni compagno porta la grinta di Borgo Marino.");
+    buttons(S12_PARTNERS[i].map(([id, mate, third, line]) => ({
+      label: `${mate} in attacco`, sub: `${third} a supporto · ${line}`, cls: "pick",
+      fn: () => s12Kick(i, id, mate, third, back),
+    })).concat([{ label: "◂ Indietro", fn: () => s12Menu(back) }]), true);
+  }
+  function s12Kick(i, id, mate, third, back) {
+    const ep = S12_EP[i], base = Math.max(14, Math.round((S.st.tiro + S.st.drib) / 2)), power = Math.round(base * ep.mult);
+    TEAMS[ep.team] = {
+      vs: ep.vs, name: ep.vs, color: ep.color,
+      defs: [["Muro del Mondo", power], ["Difensore d'Acciaio", Math.round(power * 1.05)], ["Centrocampista", Math.round(power * 0.98)]],
+      atk: [["Capitano Rival", power], ["Ala Rapida", Math.round(power * 0.95)]],
+      gk: ["Portiere Leggendario", Math.round(power * 0.96)], power: Math.round(power * 1.02), special: [ep.special, Math.round(power * 1.15)],
+    };
+    if (!chBack) chBack = S;
+    startMatch({ match: ep.team, chap: `Stagione 12 · ${ep.name}`, quick: true, isolated: true, min: 45, mate, third, mateGeneric: true, us: "Rondine FC", intro: `${esc(ep.scene[0][1])}<br><em>${esc(CAST[id] ? CAST[id].name : mate)} e ${esc(CAST[third.toLowerCase()] ? CAST[third.toLowerCase()].name : third)} scendono in campo con te!</em>`, onEnd: () => s12Result(i, id, back) });
+  }
+  function s12Result(i, id, back) {
+    const [a, b] = M.score, win = a > b;
+    M = null; $("matchHud").hidden = true;
+    if (chBack) S = chBack; chBack = null;
+    const r = s12Rec(); r.played++; r.choices[i] = id;
+    const first = win && !r.won.includes(i);
+    if (win && first) r.won.push(i);
+    r.won.sort((x, y) => x - y); s12Save(r);
+    let reward = "";
+    if (first) {
+      if (!B) B = borgoLoad();
+      addCoins(15 + i * 5);
+      const [cosId, label] = S12_COS[i], got = bCos(cosId);
+      reward = ` <em>+${15 + i * 5} monete${got ? ` · Sbloccato: ${esc(label)}` : ""}.</em>`;
+    }
+    const ep = S12_EP[i], next = r.won.length < S12_EP.length ? r.won.length : 0;
+    const memory = i === 3 ? `<br><em>La Stella della Scogliera brilla alta sul golfo. Tina calcia la palla in rete ed esulta col papà e lo zio Leo.</em>` : "";
+    view = { kind: "scene", bg: win ? "end" : "hq", speaker: win ? id : "leo" }; chap(`Stagione 12 · ${ep.name}`);
+    text(view.speaker, `<b>${win ? "Vittoria Straordinaria" : a === b ? "Pareggio" : "Sconfitta"} ${a}–${b}</b> contro ${esc(ep.vs)}.<br>${esc(win ? ["Tina batte le mani e corre sul molo: Kenji e Sho si inchinano al talento della nuova generazione.", "Jojo alza il mate verso il cielo della Liguria: il calcio di quartiere ha vinto su tutto.", "La valigetta del fondo viene respinta con una risata corale. Il campetto resta nostro!", "La scogliera esplode di fuochi d'artificio e cori: il Volo della Rondine non finirà mai."][i] : "Non si molla mai: la Rondine torna in campo per la rivincita!")}${memory}${reward}`);
+    buttons([
+      ...(win && r.won.length < S12_EP.length ? [{ label: `Prossimo capitolo · ${S12_EP[next].name}`, cls: "hot", fn: () => s12Menu(back) }] : []),
+      ...(win && r.won.length === S12_EP.length ? [{ label: "Stagione 12 Completata 🏆", cls: "hot", fn: () => s12Menu(back) }] : []),
+      ...(!win ? [{ label: "Riprova", cls: "hot", fn: () => s12Pick(i, back) }] : []),
+      { label: "◂ Stagione 12", fn: () => s12Menu(back) },
+      { label: "◂ Storia", fn: back },
+    ], true);
+  }
+  MODES8.push(() => s12Open()
+    ? { label: "Stagione 12 · L'Eredità della Rondine", sub: ((r) => `Nuova saga · capitoli ${r.won.length}/4 · Tina e il Torneo del Centenario`)(s12Rec()), cls: "hot", fn: () => s12Menu(modes) }
+    : { label: "???", sub: "Si sblocca più avanti", disabled: true, fn: () => {} });
+  MN_STORIA.push(() => s12Open()
+    ? { label: "Stagione 12", sub: ((r) => `L'Eredità della Rondine · capitoli ${r.won.length}/4`)(s12Rec()), cls: "hot", fn: () => s12Menu(menuStoria) }
+    : null);
+  MN_MODI.push(() => { const r = s12Rec(); return r.won.length / S12_EP.length; });
+  TRX.push(() => { const r = s12Rec(); return [{ name: "La Stella della Scogliera", kind: "cup", c: "#ffd23f", got: r.won.length === S12_EP.length, part: `${r.won.length}/4`, hint: s12Open() ? "Completa la Stagione 12" : "???" }]; });
+  if (/[?&]debug/.test(location.search)) window.__s12 = { s12Rec, s12Open, s12Menu, s12Talk, s12Pick, s12Kick, S12_EP, S12_PARTNERS };
   // ================= v15o · COPPA DELLE MAREE: una storia di campetti, scelte e calcio corale =================
   const CUP_K = "ali-di-rondine.coppa-maree";
   const CUP_COS = [

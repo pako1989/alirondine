@@ -51,6 +51,18 @@
   let powerDir = 1;
   let powerTimer = null;
 
+  // Modalità Portiere (I Guantoni di Nico)
+  let activeRole = "striker"; // "striker" | "keeper"
+  let keeperIncomingTimer = null;
+  let keeperTargetShot = null;
+  const RIVALS = [
+    { name: "Bruno Sabatini", move: "TIRO DI GRANITO!", color: "#ffd23f" },
+    { name: "Kenji Arata", move: "VOLO DELL'AQUILA!", color: "#3fa7ff" },
+    { name: "Jonas Keller", move: "BLITZ DI STURMWALD!", color: "#ff4d5a" },
+    { name: "Toro Galli", move: "CARICA DEL TORO!", color: "#e84118" },
+  ];
+  let rivalIdx = 0;
+
   function playSound(type) {
     if (window.sfx) {
       try {
@@ -692,7 +704,18 @@
         const dirCurve = (dx / 95) * 0.35;
         const curve = Math.max(-0.85, Math.min(0.85, arcCurve + dirCurve));
 
-        executeShot({ targetX, targetY, curve, force, type: isSpecialActive ? "special" : "swipe" });
+        if (activeRole === "keeper") {
+          if (dy > 15 && dx < -15) diveKeeper("TL");
+          else if (dy > 15 && dx > 15) diveKeeper("TR");
+          else if (dy <= 15 && dx < -15) diveKeeper("BL");
+          else if (dy <= 15 && dx > 15) diveKeeper("BR");
+          else if (dy > 20) diveKeeper("TC");
+          else diveKeeper("BC");
+        } else {
+          executeShot({ targetX, targetY, curve, force, type: isSpecialActive ? "special" : "swipe" });
+        }
+      } else if (activeRole === "keeper") {
+        diveKeeper("TC");
       }
 
       setTimeout(clearTrail, 320);
@@ -1011,22 +1034,191 @@
     }, 1400);
   }
 
+  function toggleRole() {
+    activeRole = activeRole === "striker" ? "keeper" : "striker";
+    const btn = document.getElementById("s3dRoleBtn");
+    if (btn) {
+      btn.textContent = activeRole === "keeper" ? "⚽ Tira" : "🧤 Para";
+      btn.style.background = activeRole === "keeper" ? "#2f9e55" : "#1f3a63";
+    }
+
+    if (activeRole === "keeper") {
+      cameraMode = "keeper";
+      applyCameraMode();
+      triggerImpactMsg("I GUANTONI DI NICO!", "Difendi la porta del Rondine nei panni di Nico Ferri!", "#2f9e55");
+      if (window.toast) window.toast("Modalità Portiere: Tuffati con swipe o tocca gli angoli per parare!", "success", "🧤");
+      updateControlsUI();
+      scheduleRivalShot();
+    } else {
+      if (keeperIncomingTimer) { clearTimeout(keeperIncomingTimer); keeperIncomingTimer = null; }
+      cameraMode = "anime";
+      applyCameraMode();
+      triggerImpactMsg("LEO MORETTI!", "Torna al dischetto per calciare a effetto!", "#ffd23f");
+      updateControlsUI();
+      resetForNextShot();
+    }
+    updateHUD();
+  }
+
+  function updateControlsUI() {
+    const specialBtn = document.getElementById("s3dSpecial");
+    const lobBtn = document.getElementById("s3dLob");
+    if (!specialBtn || !lobBtn) return;
+    if (activeRole === "keeper") {
+      specialBtn.textContent = "🐱 GATTO VOLANTEEE!";
+      specialBtn.style.background = "linear-gradient(135deg, #1b7a40, #2f9e55)";
+      lobBtn.textContent = "🧤 Presa Sicura";
+    } else {
+      specialBtn.textContent = "🔥 TIRO DELLA RONDINE 3D";
+      specialBtn.style.background = "";
+      lobBtn.textContent = "🥄 Pallonetto";
+    }
+  }
+
+  function diveKeeper(targetCorner) {
+    if (activeRole !== "keeper") return;
+    if (window.haptic) window.haptic(25);
+
+    const cornerMap = {
+      TL: { x: -2.0, y: 2.1 },
+      TC: { x: 0, y: 2.3 },
+      TR: { x: 2.0, y: 2.1 },
+      BL: { x: -2.1, y: 0.4 },
+      BC: { x: 0, y: 0.35 },
+      BR: { x: 2.1, y: 0.4 },
+    };
+    const divePos = cornerMap[targetCorner] || { x: 0, y: 1.2 };
+
+    if (keeperGroup) {
+      keeperGroup.position.x = divePos.x * 0.85;
+      keeperGroup.position.y = divePos.y;
+      keeperGroup.rotation.z = -divePos.x * 0.3;
+    }
+
+    if (keeperTargetShot && !keeperTargetShot.resolved) {
+      const dist = Math.hypot(divePos.x - keeperTargetShot.x, divePos.y - keeperTargetShot.y);
+      if (dist < 1.45) {
+        keeperTargetShot.resolved = true;
+        playSound("post");
+        shakeIntensity = 20;
+        stats.saves = (stats.saves || 0) + 1;
+        stats.keeperStreak = (stats.keeperStreak || 0) + 1;
+        const streakBonus = stats.keeperStreak >= 3 ? `🔥 MURO ASSOLUTO x${stats.keeperStreak}!` : "Nico blocca con il GATTO VOLANTE!";
+        triggerImpactMsg("PARATA DA CAMPIONE!", streakBonus, "#ffd23f");
+        if (window.haptic) window.haptic([50, 70, 90]);
+        spawnKickAura();
+        saveStats(stats);
+        updateHUD();
+        setTimeout(scheduleRivalShot, 1800);
+      }
+    }
+  }
+
+  function scheduleRivalShot() {
+    if (activeRole !== "keeper") return;
+    if (keeperIncomingTimer) clearTimeout(keeperIncomingTimer);
+
+    ballMesh.position.set(0, 0.22, 4.2);
+    ballVel = { x: 0, y: 0, z: 0 };
+    if (keeperGroup) {
+      keeperGroup.position.set(0, 0, -2.8);
+      keeperGroup.rotation.set(0, 0, 0);
+    }
+
+    const rival = RIVALS[rivalIdx % RIVALS.length];
+    triggerImpactMsg("ATTENZIONE AL TIRO!", `${rival.name} prepara il ${rival.move}`, rival.color);
+
+    keeperIncomingTimer = setTimeout(() => {
+      if (activeRole !== "keeper") return;
+      executeRivalShot();
+    }, 1300);
+  }
+
+  function executeRivalShot() {
+    playSound("kick");
+    if (window.haptic) window.haptic(30);
+
+    const corners = [
+      { id: "TL", x: -2.0, y: 2.1 },
+      { id: "TR", x: 2.0, y: 2.1 },
+      { id: "BL", x: -2.1, y: 0.4 },
+      { id: "BR", x: 2.1, y: 0.4 },
+      { id: "TC", x: 0, y: 2.3 }
+    ];
+    const picked = corners[Math.floor(Math.random() * corners.length)];
+    keeperTargetShot = { ...picked, resolved: false };
+
+    stats.keeperShots = (stats.keeperShots || 0) + 1;
+    saveStats(stats);
+    updateHUD();
+
+    const speed = 0.29;
+    const steps = (4.2 - (-2.8)) / speed;
+    ballVel.z = -speed;
+    ballVel.x = picked.x / steps;
+    ballVel.y = (picked.y - 0.22) / steps + (0.5 * 0.009 * steps);
+
+    let frames = 0;
+    function ballInFlight() {
+      if (activeRole !== "keeper") return;
+      frames++;
+      ballMesh.position.x += ballVel.x;
+      ballMesh.position.y += ballVel.y;
+      ballMesh.position.z += ballVel.z;
+      ballMesh.rotation.x += 0.3;
+
+      if (ballMesh.position.z <= -2.6) {
+        if (!keeperTargetShot.resolved) {
+          keeperTargetShot.resolved = true;
+          playSound("goal");
+          shakeIntensity = 24;
+          stats.keeperStreak = 0;
+          const rival = RIVALS[rivalIdx % RIVALS.length];
+          triggerImpactMsg("GOL RIVALE!", `${rival.name} insacca all'angolo!`, "#ff4d5a");
+          if (window.haptic) window.haptic(80);
+          rivalIdx++;
+          saveStats(stats);
+          updateHUD();
+          setTimeout(scheduleRivalShot, 2000);
+        }
+        return;
+      }
+      requestAnimationFrame(ballInFlight);
+    }
+    requestAnimationFrame(ballInFlight);
+  }
+
   function updateHUD() {
     const gk = GK_LIST[activeGKIdx];
     const gkEl = document.getElementById("s3dGkInfo");
     const scEl = document.getElementById("s3dScoreInfo");
     if (gkEl) {
-      gkEl.innerHTML = `
-        <span style="font-weight:bold; color:var(--gold);">${gk.name}</span>
-        <span style="color:var(--dim); font-size:11px;">(${gk.team})</span>
-        <span style="margin-left:6px; font-size:10px; background:#1b2e4b; padding:2px 6px; border-radius:4px;">★ ${gk.skill}</span>
-      `;
+      if (activeRole === "keeper") {
+        gkEl.innerHTML = `
+          <span style="font-weight:bold; color:#2f9e55;">🧤 Nico Ferri</span>
+          <span style="color:var(--dim); font-size:11px;">(Rondine FC)</span>
+          <span style="margin-left:6px; font-size:10px; background:#1b3d2b; padding:2px 6px; border-radius:4px; color:#57d68d;">★ Il Gatto Volante</span>
+        `;
+      } else {
+        gkEl.innerHTML = `
+          <span style="font-weight:bold; color:var(--gold);">${gk.name}</span>
+          <span style="color:var(--dim); font-size:11px;">(${gk.team})</span>
+          <span style="margin-left:6px; font-size:10px; background:#1b2e4b; padding:2px 6px; border-radius:4px;">★ ${gk.skill}</span>
+        `;
+      }
     }
     if (scEl) {
-      scEl.innerHTML = `
-        <span>Gol: <b>${stats.goals}/${stats.shots}</b></span>
-        <span style="margin-left:8px; color:var(--gold);">Serie: <b>${stats.streak}</b></span>
-      `;
+      if (activeRole === "keeper") {
+        scEl.innerHTML = `
+          <span>Parate: <b>${stats.saves || 0}/${stats.keeperShots || 0}</b></span>
+          <span style="margin-left:8px; color:#57d68d;">Imbattuto: <b>${stats.keeperStreak || 0}</b></span>
+        `;
+      } else {
+        scEl.innerHTML = `
+          <span>Gol: <b>${stats.goals}/${stats.shots}</b></span>
+          <span style="margin-left:8px; color:var(--gold);">Serie: <b>${stats.streak}</b></span>
+        `;
+      }
     }
   }
 
@@ -1044,8 +1236,9 @@
             <span style="font-size:11px; color:var(--dim); font-weight:normal; font-family:sans-serif;">(Arena Anime)</span>
           </div>
           <div class="s3d-top-actions">
+            <button type="button" class="s3d-btn" id="s3dRoleBtn" title="Passa tra Tiratore (Leo) e Portiere (Nico)">🧤 Parate</button>
             <button type="button" class="s3d-btn" id="s3dCamBtn" title="Cambia inquadratura (Anime / Mirino / Portiere)">🎥 Visuale</button>
-            <button type="button" class="s3d-btn" id="s3dChangeGk" title="Scegli il portiere da sfidare">🧤 Portiere</button>
+            <button type="button" class="s3d-btn" id="s3dChangeGk" title="Scegli il portiere da sfidare">Portiere</button>
             <button type="button" class="s3d-btn s3d-btn-close" id="s3dClose">✕ Esci</button>
           </div>
         </div>
@@ -1089,15 +1282,45 @@
       `;
       document.body.appendChild(modal);
 
-      modal.querySelector("#s3dTL").onclick = () => executeShot({ targetX: -2.1, targetY: 2.15, curve: -0.4, force: 1.15 });
-      modal.querySelector("#s3dTC").onclick = () => executeShot({ targetX: 0, targetY: 2.3, curve: 0, force: 1.1 });
-      modal.querySelector("#s3dTR").onclick = () => executeShot({ targetX: 2.1, targetY: 2.15, curve: 0.4, force: 1.15 });
-      modal.querySelector("#s3dBL").onclick = () => executeShot({ targetX: -2.2, targetY: 0.35, curve: -0.1, force: 1.25 });
-      modal.querySelector("#s3dBC").onclick = () => executeShot({ targetX: 0, targetY: 0.32, curve: 0, force: 1.2 });
-      modal.querySelector("#s3dBR").onclick = () => executeShot({ targetX: 2.2, targetY: 0.35, curve: 0.1, force: 1.25 });
+      modal.querySelector("#s3dRoleBtn").onclick = toggleRole;
 
-      modal.querySelector("#s3dLob").onclick = () => executeShot({ targetX: 0.1, targetY: 2.35, curve: 0, force: 0.72 });
+      modal.querySelector("#s3dTL").onclick = () => {
+        if (activeRole === "keeper") diveKeeper("TL");
+        else executeShot({ targetX: -2.1, targetY: 2.15, curve: -0.4, force: 1.15 });
+      };
+      modal.querySelector("#s3dTC").onclick = () => {
+        if (activeRole === "keeper") diveKeeper("TC");
+        else executeShot({ targetX: 0, targetY: 2.3, curve: 0, force: 1.1 });
+      };
+      modal.querySelector("#s3dTR").onclick = () => {
+        if (activeRole === "keeper") diveKeeper("TR");
+        else executeShot({ targetX: 2.1, targetY: 2.15, curve: 0.4, force: 1.15 });
+      };
+      modal.querySelector("#s3dBL").onclick = () => {
+        if (activeRole === "keeper") diveKeeper("BL");
+        else executeShot({ targetX: -2.2, targetY: 0.35, curve: -0.1, force: 1.25 });
+      };
+      modal.querySelector("#s3dBC").onclick = () => {
+        if (activeRole === "keeper") diveKeeper("BC");
+        else executeShot({ targetX: 0, targetY: 0.32, curve: 0, force: 1.2 });
+      };
+      modal.querySelector("#s3dBR").onclick = () => {
+        if (activeRole === "keeper") diveKeeper("BR");
+        else executeShot({ targetX: 2.2, targetY: 0.35, curve: 0.1, force: 1.25 });
+      };
+
+      modal.querySelector("#s3dLob").onclick = () => {
+        if (activeRole === "keeper") diveKeeper("BC");
+        else executeShot({ targetX: 0.1, targetY: 2.35, curve: 0, force: 0.72 });
+      };
       modal.querySelector("#s3dSpecial").onclick = () => {
+        if (activeRole === "keeper") {
+          // Gatto Volante garantito!
+          if (window.haptic) window.haptic([40, 60, 90]);
+          triggerImpactMsg("GATTO VOLANTEEE!", "Nico spicca il volo e blocca qualsiasi tiro!", "#57d68d");
+          if (keeperTargetShot) diveKeeper(keeperTargetShot.id || "TC");
+          return;
+        }
         if (window.S && window.S.st && window.S.st.grinta < 25) {
           if (window.toast) window.toast("Grinta insufficiente (servono 25 punti)!", "info", "⚡");
           return;
@@ -1161,6 +1384,7 @@
 
   function closeStadium3D() {
     stopPowerLoop();
+    if (keeperIncomingTimer) { clearTimeout(keeperIncomingTimer); keeperIncomingTimer = null; }
     const modal = document.getElementById("stadium3dModal");
     if (modal) modal.style.display = "none";
     if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
