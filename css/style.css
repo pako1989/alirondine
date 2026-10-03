@@ -71,6 +71,7 @@
   .chap.glow { color: var(--gold); text-shadow: 0 0 10px rgba(255, 210, 63, 0.7); transform: scale(1.04); }
   .topr { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 6px; max-width: 100%; margin-left: auto; }
   .chap { min-width: 0; overflow-wrap: anywhere; }
+  @media (max-width: 480px) { .top { display: grid; grid-template-columns: minmax(0, 1fr); } .topr { width: 100%; margin-left: 0; justify-content: space-between; } .chap { flex: 1 1 auto; text-align: left; } }
   .mute { flex: none; font: 700 12px var(--body); color: var(--ink); background: #1f3a63; border: 2px solid #ffffff40; border-radius: var(--radius-sm); padding: 4px 7px; cursor: pointer; transition: all var(--transition-fast); }
   .mute:hover { filter: brightness(1.2); }
   .stage { position: relative; width: 100%; max-width: 100%; aspect-ratio: 16 / 10; border-radius: 8px; overflow: hidden; background: #000; border: 2px solid var(--edge); box-shadow: 0 4px 18px rgba(0,0,0,0.5); transition: border-color 0.3s ease, box-shadow 0.3s ease; }
