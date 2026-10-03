@@ -86,16 +86,20 @@ try {
 const HERO = {
   leo:  { name: "Leo", ic: "⚽", hp: 70, sk: [
     { n: "Tiro", d: "danno 10-16", c: 0, f: (u, t) => hit(t, Math.round((rnd(10, 16) + G.lv * 2) * (u.pw ? 1.3 : 1)), `${u.name} calcia dritto in faccia a ${t.name}.`) },
-    { n: "Tiro della Rondine", d: "danno 28-36 · grinta 3", c: 3, f: (u, t) => hit(t, Math.round((rnd(28, 36) + G.lv * 3) * (u.pw ? 1.3 : 1)), `TIRO DELLA RONDINE! ${t.name} guarda il pallone passare e non fa in tempo a offendersi.`) } ] },
+    { n: "Tiro della Rondine", d: "danno 28-36 · grinta 3", c: 3, f: (u, t) => hit(t, Math.round((rnd(28, 36) + G.lv * 3) * (u.pw ? 1.3 : 1)), `TIRO DELLA RONDINE! ${t.name} guarda il pallone passare e non fa in tempo a offendersi.`) },
+    { n: "Tiro dell'Ego", d: "danno 38-50 · fiamme blu · grinta 4", c: 4, f: (u, t) => hit(t, Math.round((rnd(38, 50) + G.lv * 3) * (u.pw ? 1.4 : 1)), `🔥 TIRO DELL'EGO! Fiamme blu avvolgono il pallone che carbonizza la difesa di ${t.name}!`) } ] },
   gigi: { name: "Gigi", ic: "🕊️", hp: 55, sk: [
     { n: "Chiacchiera", d: "danno 6-10, il nemico fa meno male", c: 0, f: (u, t) => { t.weak = 2; return hit(t, rnd(6, 10) + G.lv, `Gigi parla per quaranta secondi senza respirare. ${t.name} cede per sfinimento.`); } },
-    { n: "KRAAA!", d: "stordisce un nemico · grinta 2", c: 2, f: (u, t) => { t.stun = 1; floatText("STUN!", "#ffd23f"); return `${u.name} imita un gabbiano così bene che ${t.name} si gira a controllare. È fermo un turno.`; } } ] },
+    { n: "KRAAA!", d: "stordisce un nemico · grinta 2", c: 2, f: (u, t) => { t.stun = 1; floatText("STUN!", "#ffd23f"); return `${u.name} imita un gabbiano così bene che ${t.name} si gira a controllare. È fermo un turno.`; } },
+    { n: "Gabbiano Sonico", d: "danno 18-26 · stordisce · grinta 3", c: 3, f: (u, t) => { t.stun = 1; floatText("SONICO!", "#ffd23f"); return hit(t, rnd(18, 26) + G.lv * 2, `⚡ GABBIANO SONICO! ${u.name} emette un grido ultrasonico che manda ${t.name} in confusione totale!`); } } ] },
   sara: { name: "Sara", ic: "📓", hp: 55, sk: [
     { n: "Appunti taglienti", d: "danno 9-13", c: 0, f: (u, t) => hit(t, rnd(9, 13) + G.lv * 2, `Sara legge ad alta voce le sue statistiche su ${t.name}. Fanno più male di un calcio.`) },
-    { n: "Analisi", d: "il nemico prende +50% per 2 turni · grinta 2", c: 2, f: (u, t) => { t.mark = 2; floatText("ANALISI!", "#3fa7ff"); return `«Punto debole: tutto.» ${t.name} si sente osservato e peggiora.`; } } ] },
+    { n: "Analisi", d: "il nemico prende +50% per 2 turni · grinta 2", c: 2, f: (u, t) => { t.mark = 2; floatText("ANALISI!", "#3fa7ff"); return `«Punto debole: tutto.» ${t.name} si sente osservato e peggiora.`; } },
+    { n: "Aura Tattica", d: "potenzia tutta la squadra per 2 turni · grinta 3", c: 3, self: 1, f: (u) => { P.u.forEach(x => { if (x.hp > 0) x.pw = 2; }); floatText("AURA ANIME!", "#57d68d"); return `✨ AURA TATTICA! Sara legge le linee temporali: tutta la squadra entra in Aura Anime (+30% danno)!`; } } ] },
   nico: { name: "Nico", ic: "🧤", hp: 80, sk: [
     { n: "Parata", d: "cura sé stesso di 25", c: 0, self: 1, f: (u) => { u.hp = Math.min(u.max, u.hp + 25); floatText("+25", "#57d68d"); return `Nico si para da solo. Funziona, nessuno ha chiesto come.`; } },
-    { n: "Gatto Volante", d: "squadra riparata per un turno · grinta 2", c: 2, self: 1, f: (u) => { P.guard = 1; floatText("DIFESA!", "#3fa7ff"); return `GATTO VOLANTE! Nico si butta davanti a tutti. Il pavimento ci rimane male.`; } } ] },
+    { n: "Gatto Volante", d: "squadra riparata per un turno · grinta 2", c: 2, self: 1, f: (u) => { P.guard = 1; floatText("DIFESA!", "#3fa7ff"); return `GATTO VOLANTE! Nico si butta davanti a tutti. Il pavimento ci rimane male.`; } },
+    { n: "Gatto Spaziale", d: "scudo + cura tutti di 20 · grinta 3", c: 3, self: 1, f: (u) => { P.guard = 2; P.u.forEach(x => { if (x.hp > 0) x.hp = Math.min(x.max, x.hp + 20); }); floatText("GATTO!", "#ffd23f"); return `🐱 GATTO VOLANTE SPAZIALE! Scudo impenetrabile e cura per tutti!`; } } ] },
   rita: { name: "Rita", ic: "🍳", hp: 65, sk: [
     { n: "Padellata", d: "danno 14-22 · stordisce sotto 50% HP", c: 0, f: (u, t) => { const s = t.hp < t.max * 0.5 ? (t.stun = 1, " STORDITO!") : ""; if (s) floatText("STUN!", "#ffd23f"); return hit(t, rnd(14, 22) + G.lv * 2, `Rita fa vibrare la padella pesante su ${t.name}.${s}`); } },
     { n: "Focaccia al volo", d: "cura 35 il più ferito · grinta 2", c: 2, self: 1, f: (u) => { const w = P.u.filter(x => x.hp > 0).sort((a,b)=>a.hp-b.hp)[0]; if (w) { w.hp = Math.min(w.max, w.hp + 35); floatText("+35", "#57d68d"); return `Rita lancia una focaccia caldissima a ${w.name}: +35 HP!`; } return "Nessuno ferito."; } } ] },

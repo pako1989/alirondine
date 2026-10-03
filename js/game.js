@@ -1381,6 +1381,7 @@
     box.innerHTML = (c && c.name ? `<span class="who ${c.tag}"></span>` : "") + `<span class="t"></span>`;
     if (c && c.name) box.querySelector(".who").textContent = c.name;
     box.querySelector(".t").innerHTML = html;
+    if (window.addDialogueLog) window.addDialogueLog(c && c.name ? c.name : who, html);
   }
   function esc(s) { return s.replace(/[&<>]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[ch])); }
   function buttons(list, one) {
@@ -1565,7 +1566,12 @@
   const mate = () => (M && M.mate) || (S.season === 8 ? "Leo" : (S.season === 2 && S.f.tommy === "firma") ? "Gigi" : "Tommy");
   const tacB = () => (M && M.tac === "off" ? 0.06 : M && M.tac === "cat" ? -0.05 : 0) + (typeof ttB === "function" ? ttB() : 0);
   const whoOf = (name) => ({ Jonas: "keller", Kenji: "kenji", Dario: "dario", Bruno: "bruno", Tommy: "tommy", Sho: "sho", Jojo: "jojo", Numero: "zero", Bogdan: "varga", Duarte: "duarte", Ettore: "ettore", Rocco: "rocco", Nino: "nino" }[name.split(" ")[0]] || WHO9[name.split(" ")[0]] || "voce");
-  function say0(html) { const box = $("text"); box.innerHTML = `<span class="t"></span>`; box.querySelector(".t").innerHTML = html; }
+  function say0(html) {
+    const box = $("text");
+    box.innerHTML = `<span class="t"></span>`;
+    box.querySelector(".t").innerHTML = html;
+    if (window.addDialogueLog) window.addDialogueLog("Telecronaca", html);
+  }
 
   function turn() {
     if (M && M._anHold) { M._anPend = true; return; }
@@ -1728,10 +1734,10 @@
   const third = () => (M && M.third) || (S.season === 8 ? (mate() === "Leo" ? "Gigi" : "Leo") : mate() === "Tommy" ? (S.season === 2 ? "Gigi" : "Fede") : "Tommy");
   // ---------- 15l · partita classica: rischio, speciali a rotazione, difesa a indizi, passaggio a scelta (Impostazioni › Partita classica) ----------
   const pcOn = (k) => !!(SET && SET.pc && SET.pc[k]);
-  const pcDrib = (d, m = mate()) => clamp(0.5 + (S.st.drib - d.v * 0.8) / 30 + tacB() + (m === "Gigi" ? 0.08 : 0) - (M.meteo === "pioggia" ? 0.05 : M.meteo === "neve" ? 0.07 : 0), 0.15, 0.92);
-  const pcPass = (d, m = mate()) => clamp(0.62 + (S.st.pass - d.v * 0.8) / 35 + S.bond * 0.02 + sqVelB() + bvVelB() + spVel() + tacB() + (m === "Fede" ? 0.08 : 0) - (m === "Gigi" ? 0.08 : 0), 0.25, 0.95);
+  const pcDrib = (d, m = mate()) => clamp(0.5 + (S.st.drib - d.v * 0.8) / 30 + tacB() + (m === "Gigi" ? 0.08 : 0) + (window.hasTalent && window.hasTalent("appunti") ? 0.07 : 0) - (M.meteo === "pioggia" ? 0.05 : M.meteo === "neve" ? 0.07 : 0), 0.15, 0.95);
+  const pcPass = (d, m = mate()) => clamp(0.62 + (S.st.pass - d.v * 0.8) / 35 + S.bond * 0.02 + sqVelB() + bvVelB() + spVel() + tacB() + (m === "Fede" ? 0.08 : 0) + (window.hasTalent && window.hasTalent("cruciverba") ? 0.07 : 0) - (m === "Gigi" ? 0.08 : 0), 0.25, 0.98);
   const pcOne = (d, m = mate()) => clamp(0.5 + (S.st.pass - d.v * 0.8) / 30 + S.bond * 0.03 + sqVelB() + bvVelB() + spVel() + tacB() + (m === "Fede" ? 0.08 : 0), 0.2, 0.9);
-  const pcTack = (a, x = 0) => clamp(0.5 + (S.st.contr - a.v * 0.7) / 40 + Math.min(S.bond, 8) * 0.02 + sqDefB() + ttDefB() + bvDefB() + spDef() + (M.tac === "cat" ? 0.06 : 0) + (mate() === "Bruno" ? 0.05 : 0) + x, 0.15, 0.88);
+  const pcTack = (a, x = 0) => clamp(0.5 + (S.st.contr - a.v * 0.7) / 40 + Math.min(S.bond, 8) * 0.02 + sqDefB() + ttDefB() + bvDefB() + spDef() + (M.tac === "cat" ? 0.06 : 0) + (mate() === "Bruno" ? 0.05 : 0) + (window.hasTalent && window.hasTalent("acciughe") ? 0.08 : 0) + x, 0.15, 0.92);
   const pcInt = (a, x = 0) => clamp(0.35 + (S.st.contr - a.v * 0.7) / 45 + (M.tac === "cp" ? 0.12 : 0) + x, 0.12, 0.78);
   function pcShotP() { // stima del tiro normale con le stesse formule di shoot(), senza effetti
     const t = TEAMS[M.team], st = S.st, dist = (5 - M.zone) * 5; let n = 0;
@@ -1804,6 +1810,7 @@
     if (kind === "hero") power = heroPower(st);
     if (kind === "mate") power = matePower(st, dist, mk);
     power += sqShotB(kind, mk);
+    if (window.hasTalent && window.hasTalent("fischietto")) power += 4;
     power += bvPow() + spPow(); power *= ttPow();
     power = weatherPow(power, true);
     if (M.tiredShot) { M.tiredShot = false; if (!sp) power *= 0.8; }
@@ -1862,7 +1869,12 @@
     const who2 = sp && ((kind === "doppia" && S.season === 8 ? "leo" : sp.who2) || (kind === "tuffo" || kind === "trio" ? MATE_ID[mate()] : null));
     if (sp) {
       sfx("special"); voci("special"); $("choices").innerHTML = ""; say(kind === "doppia" && S.season === 8 ? "Tommy e Leo calciano insieme lo stesso pallone! Vent'anni di passaggi in un tiro solo." : M.hero ? sp.intro.replace(/\bLeo\b/g, esc(M.hero.name)) : sp.intro);
-      anCine({ who: sid, who2, text: sp.name, c1: sp.c1, c2: sp.c2, t: 70, d: 70, done: clash, cine: kind });
+      if (window.triggerAnimeCutin && window.isAnimeFxEnabled && window.isAnimeFxEnabled()) {
+        const charName = (CAST[sid] ? CAST[sid].name : sid) || "LEO";
+        window.triggerAnimeCutin({ who: charName.toUpperCase(), shotName: sp.name, isEgo: false, sfxWord: "GOOOAL!" }, clash);
+      } else {
+        anCine({ who: sid, who2, text: sp.name, c1: sp.c1, c2: sp.c2, t: 70, d: 70, done: clash, cine: kind });
+      }
     }
     else { animBall(M.zone, 6); resolve(); }
   }
@@ -2679,8 +2691,12 @@
     view = { kind: "scene", bg: "title" }; chap("Storie extra");
     const seen = getList(ENDS + ".extra");
     const n = (p) => seen.filter((x) => x.startsWith(p)).length;
-    text("voce", "Undici storie brevi e intime, fuori dal campionato. Si giocano quando vuoi e non toccano il tuo salvataggio.");
+    text("voce", "Storie speciali, saghe narrative e modalità fuori dal campionato. Si giocano quando vuoi e non toccano il tuo salvataggio.");
     buttons([
+      { label: "🔥 Blue Lock · La Gabbia dell'Ego", sub: "Torneo dei Predatori · Ego vs Altruismo", cls: "hot", fn: () => { if (window.openBlueLockMode) window.openBlueLockMode(sideStories); } },
+      { label: "🕵️ Noir · Il Peschereccio Fantasma", sub: "Indagine notturna con Lina · True Detective & Breaking Bad", cls: "hot", fn: () => { if (window.openNoirStoryMenu) window.openNoirStoryMenu(sideStories); } },
+      { label: "🌌 Multiverso · La Panda Quantistica", sub: "Rick & Morty, Futurama e Game of Thrones con Nonna", cls: "hot", fn: () => { if (window.openMultiverseMenu) window.openMultiverseMenu(sideStories); } },
+      { label: "🛡️ Roster & Talenti del Borgo", sub: "Visualizza formazione ed equipaggia i potenziamenti", fn: () => { if (window.openRosterTalentsModal) window.openRosterTalentsModal(); } },
       { label: "Il Segreto di Baciccia", sub: `La parata leggendaria del 1965 · ${n("baciccia")}/3`, cls: "hot", fn: storyBaciccia },
       { label: "La Notte del Faro", sub: `Ester, la bufera e la foto di Anna · ${n("ester")}/3`, cls: "hot", fn: storyEster },
       { label: "Il primo gelato", sub: `Nico e Sara · finali ${n("gelato")}/3`, fn: storyGelato },

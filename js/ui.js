@@ -258,6 +258,23 @@
     if (themeBtn) themeBtn.onclick = cycleTheme;
     const radioBtn = $("radioBtn");
     if (radioBtn) radioBtn.onclick = openRadioModal;
+    const rosterBtn = $("rosterBtn");
+    if (rosterBtn) rosterBtn.onclick = () => { if (window.openRosterTalentsModal) window.openRosterTalentsModal(); };
+    const logBtn = $("logBtn");
+    if (logBtn) logBtn.onclick = () => { if (window.openDialogueLog) window.openDialogueLog(); };
+    const animeFxBtn = $("animeFxBtn");
+    if (animeFxBtn) {
+      const updateAnimeBtn = () => {
+        const on = window.isAnimeFxEnabled ? window.isAnimeFxEnabled() : true;
+        animeFxBtn.style.opacity = on ? "1" : "0.5";
+        animeFxBtn.title = on ? "Anime Cut-in: ATTIVI (Clicca per disattivare)" : "Anime Cut-in: CLASSICI (Clicca per attivare)";
+      };
+      animeFxBtn.onclick = () => {
+        if (window.toggleAnimeFx) window.toggleAnimeFx();
+        updateAnimeBtn();
+      };
+      updateAnimeBtn();
+    }
     let savedTh = "classic";
     try { savedTh = localStorage.getItem("ali-di-rondine.theme") || "classic"; } catch (e) {}
     const foundIdx = THEMES.findIndex(t => t.id === savedTh);
@@ -272,6 +289,8 @@
       if (e.key === "Escape") {
         if (window.closeStadium3D) window.closeStadium3D();
         if (window.closeBorgoStortoModal) window.closeBorgoStortoModal();
+        if (window.closeRosterTalentsModal) window.closeRosterTalentsModal();
+        if (window.closeDialogueLog) window.closeDialogueLog();
         if (radioOverlay && radioOverlay.style.display !== "none") radioOverlay.style.display = "none";
         const ovl = $("ovl");
         if (ovl && !ovl.hidden) {

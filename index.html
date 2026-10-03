@@ -24,6 +24,9 @@
       <span class="chap" id="chap"></span>
       <button type="button" class="mute" id="homeBtn" aria-label="Home" title="Torna alla Home / Menu Principale">🏠</button>
       <button type="button" class="mute" id="btn3d" aria-label="Stadio 3D" title="Stadio 3D · Sfida dei Tiri (Tiro della Rondine 3D)">⚽ 3D</button>
+      <button type="button" class="mute" id="rosterBtn" aria-label="Roster & Talenti" title="Roster Squadra & Talenti del Borgo">🛡️</button>
+      <button type="button" class="mute" id="logBtn" aria-label="Registro Dialoghi" title="Registro Dialoghi (L)">📜</button>
+      <button type="button" class="mute" id="animeFxBtn" aria-label="Effetti Anime Manga" title="Attiva/Disattiva Anime Cut-in">⚡</button>
       <button type="button" class="mute" id="radioBtn" aria-label="Radiolina" title="La Radiolina del Borgo (Musica & Frequenze)">📻</button>
       <button type="button" class="mute" id="themeBtn" aria-label="Tema Grafico" title="Cambia tema (Classico / Vintage / Neon / Arcade)">🎨</button>
       <button type="button" class="mute" id="gmenu" aria-label="Menu" hidden>☰</button>
@@ -74,11 +77,24 @@
 <script src="js/stadium3d.js"></script>
 <script src="js/panda3d.js"></script>
 <script src="js/fig3d.js"></script>
+<script src="js/anime-fx.js"></script>
+<script src="js/roster-talents.js"></script>
+<script src="js/dialog-log.js"></script>
+<script src="js/blue-lock-mode.js"></script>
+<script src="js/noir-story.js"></script>
+<script src="js/multiverse-story.js"></script>
 <script src="js/faro-story.js"></script>
 <script src="js/traversata-story.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/game.js"></script>
 <script>
+var homeBtn = document.getElementById("homeBtn");
+if (homeBtn) {
+  homeBtn.onclick = function () {
+    if (window.title) window.title();
+    if (window.toast) window.toast("Menu Principale", "info", "🏠");
+  };
+}
 var btn3d = document.getElementById("btn3d");
 if (btn3d) {
   btn3d.onclick = function () {
