@@ -1897,8 +1897,17 @@
     if (M.tiredShot) { M.tiredShot = false; if (!sp) power *= 0.8; }
     power *= tmMul;
     let tired = tmN; if (sp && pcOn("spec")) { const k = kind === "mate" ? "mate_" + mk : kind, u = M.spN || (M.spN = {}), n = u[k] || 0; u[k] = n + 1; if (n) { const f = Math.max(0.8, 1 - 0.07 * n); power *= f; tired += `<span style="color:var(--dim)">${esc(sp.name)}, di nuovo: ${f > 0.88 ? "ormai se lo aspettano, e le gambe un po' lo sentono" : "le gambe pesano e il portiere lo conosce a memoria"}.</span> `; } }
-    const keep = (t.gk[1] + (M.gkBoost || 0) - (M.team === "oracolo" && M.nudgeOff ? 6 : 0) - (M.team === "marina7" && M.consOff ? 6 : 0)) * rnd(0.85, 1.2) * (M.meteo === "pioggia" ? 0.96 : 1) * dfx() * dfKeep(kind);
+    let keep = (t.gk[1] + (M.gkBoost || 0) - (M.team === "oracolo" && M.nudgeOff ? 6 : 0) - (M.team === "marina7" && M.consOff ? 6 : 0)) * rnd(0.85, 1.2) * (M.meteo === "pioggia" ? 0.96 : 1) * dfx() * dfKeep(kind);
     let pre = dfPre(kind) + tired;
+    // comandi in area: anche il portiere avversario sceglie tra parata, pugno e uscita
+    let kc = "parata";
+    if (pcOn("area")) {
+      const r0 = Math.random(); kc = r0 < 0.25 ? "pugno" : r0 < 0.45 ? "uscita" : "parata";
+      const gn = esc(t.gk[0]);
+      if (kc === "pugno") { keep *= 1.08; pre += `${gn} alza i pugni. `; }
+      else if (kc === "uscita") { const lontano = M.zone <= 3; keep *= lontano ? 0.88 : 1.18; pre += lontano ? `${gn} esce da lontano: azzardo! ` : `${gn} esce incontro, chiude lo specchio. `; }
+    }
+    const punch = kc === "pugno";
     if (feat("blocchi")) {
       const d = oppDef(), ch = clamp((sp ? 0.12 : 0.26) + (d.v - st.tiro) / 160, 0.04, 0.36) * (M.zone >= 5 ? 0.75 : 1);
       if (Math.random() < ch) {
@@ -1913,8 +1922,8 @@
     }
     const parryR = Math.random();
     const resolve = (skipA) => {
-      const postHit = !(power > keep) && !(power > keep * 0.8 && parryR < 0.5) && power > keep * 0.85 && parryR > 0.55;
-      if (skipA !== true) return shotAnim({ kind: kind === "normal" || !SA_LOOK[kind] ? (sp ? "mate" : "normal") : kind, res: power > keep ? "goal" : power > keep * 0.8 && parryR < 0.5 ? "parry" : postHit ? "post" : "save", us: true, team: M.team, who: kind === "doppia" ? (S.season === 8 ? "hero" : "tommy") : sid }, () => resolve(true));
+      const postHit = !(power > keep) && !(power > keep * 0.8 && (parryR < 0.5 || punch)) && power > keep * 0.85 && parryR > 0.55;
+      if (skipA !== true) return shotAnim({ kind: kind === "normal" || !SA_LOOK[kind] ? (sp ? "mate" : "normal") : kind, res: power > keep ? "goal" : power > keep * 0.8 && (parryR < 0.5 || punch) ? "parry" : postHit ? "post" : "save", us: true, team: M.team, who: kind === "doppia" ? (S.season === 8 ? "hero" : "tommy") : sid }, () => resolve(true));
       view = { kind: "match" }; let corner9 = false;
       if (power > keep) {
         M.score[0]++; try { stGoal(kind, mk); } catch {} try { glGoal(kind, mk); } catch {} try { snGoal(kind); } catch {}
@@ -1923,7 +1932,7 @@
         say(`${pre}${sp ? "" : "Tiro! "}<b>GOOOL!</b> ${esc(t.gk[0])} si tuffa ma non ci arriva. ${M.score[0]}–${M.score[1]}.${learn ? ` <span style="color:var(--dim)">${esc(t.gk[0])} ha studiato il tuo tiro: il prossimo speciale sarà più difficile.</span>` : ""}`);
         M.poss = "them"; M.zone = 1; M.guts = Math.min(S.st.grinta, M.guts + Math.round(10 * dfRegen()));
         sfx("goal"); voci("gol"); cutin = { who: kind === "doppia" ? (S.season === 8 ? "leo" : "tommy") : sid, who2: kind === "doppia" ? heroId() : (S.bond >= 3 ? (sid === "nico" ? null : "nico") : null), text: "GOOOL!", c1: "#ffd23f", c2: "#ff4d5a", t: 50, d: 50 };
-      } else if (power > keep * 0.8 && parryR < 0.5) {
+      } else if (power > keep * 0.8 && (parryR < 0.5 || punch)) {
         say(`${pre}${esc(t.gk[0])} respinge coi pugni! Calcio d'angolo, la palla resta a voi.`); M.zone = 4; sfx("crowd"); corner9 = true;
       } else { say(postHit ? `${pre}<b>PALO!</b> Il pallone torna in campo e lo blocca <b>${esc(t.gk[0])}</b>. Rinvio lungo.` : `${pre}Parata di <b>${esc(t.gk[0])}</b>. Rinvio lungo.`); M.poss = "them"; M.zone = 2; sfx("crowd"); }
       hud(); if (corner9 && feat("mini")) buttons([{ label: "Batti l'angolo ▸", sub: "Scegli la zona e calcia", cls: "hot", fn: matchCorner }, { label: "Gioca corto", sub: "Riparti dalla zona 4", fn: turn }]); else buttons([{ label: "Avanti ▸", fn: turn }]);
@@ -1994,7 +2003,9 @@
       else if (power > save) { M.score[1]++; sfx("crowd"); say(`Tiro di <b>${esc(a.name)}</b> a ${SIDES[aim]}${dive === aim ? `, ${gkN()} ci arriva ma non basta` : `, ${gkN()} va dall'altra parte`}… gol. ${M.score[0]}–${M.score[1]}.`); }
       else { sfx("crowd"); voci("parata"); say(`<b>${gkSave()}</b> ${dive === aim ? (Math.random() < 0.5 ? (gkN() === "Nico" ? "Tuffo perfetto! «GATTO VOLANTE!» urla, rialzandosi." : "Tuffo perfetto! Si rialza come se niente fosse.") : "L'aveva letto. La blocca in due tempi.") : "Si era buttato male, ma allunga un piede all'ultimo. Miracolo!"}`); }
       if (preO) $("text").querySelector(".t").insertAdjacentHTML("afterbegin", preO);
-      M.poss = "us"; M.zone = 1; hud(); buttons([{ label: "Avanti ▸", fn: turn }]);
+      M.poss = "us"; M.zone = 1;
+      if (M.areaPunch) { M.areaPunch = false; if (!(power > save)) { M.poss = "them"; M.zone = 4; $("text").querySelector(".t").insertAdjacentHTML("beforeend", " Respinta in angolo: restano in attacco."); } }
+      hud(); buttons([{ label: "Avanti ▸", fn: turn }]);
     };
     const gatto = () => {
       spend(25); $("choices").innerHTML = ""; sfx("special"); voci(gkN() === "Nico" || gkN() === "Ernesta" ? "gatto" : "special");
@@ -2004,13 +2015,23 @@
       };
       anCine({ who: "nico", text: "GATTO VOLANTE", c1: "#3fa7ff", c2: "#ffd23f", t: 55, d: 55, done: go, cine: "gatto" });
     };
+    // comandi in area: dopo la direzione scegli come intervenire
+    const area = (d) => {
+      say(`Ti butti a <em>${SIDES[d]}</em>. Come intervieni?<br><span style="color:var(--dim)">Parata: normale. Pugno: più sicuro, ma se arriva è angolo per loro. Uscita: ignora la direzione, ottima sui tiri deboli, tragica sui forti.</span>`);
+      buttons([
+        { label: "Parata", sub: "normale", fn: () => resolve(d) },
+        { label: "Pugno", sub: "più sicuro, ma angolo per loro", fn: () => { preO += "Respingi coi pugni! "; M.areaPunch = true; resolve(d, (d === aim ? 1.45 : 0.72) * 1.12); } },
+        { label: "Uscita", sub: "ottima sui tiri deboli, tragica sui forti", fn: () => { const forte = power > base * 1.25; preO += forte ? "Esci incontro… ma il tiro è troppo forte! " : "Esci incontro e chiudi lo specchio! "; resolve(aim, forte ? 0.6 : 1.3); } },
+      ]);
+    };
+    const pick1 = (d) => { dfDive(d); if (pcOn("area")) area(d); else resolve(d); };
     const duel = () => {
       if (power === 0) return resolve("centro");
       say(dfAimNote() + (M.ch && M.ch.noTell ? `<b>${esc(a.name)}</b> prende la mira. Non tradisce niente. Dove si tuffa ${gkN()}?` : `<b>${esc(a.name)}</b> prende la mira. Il piede d'appoggio guarda a <em>${SIDES[tell]}</em>. Dove si tuffa ${gkN()}?`));
       buttons([
-        { label: "◀ Sinistra", fn: () => { dfDive("sx"); resolve("sx"); } },
-        { label: "Resta al centro", fn: () => { dfDive("centro"); resolve("centro"); } },
-        { label: "Destra ▶", fn: () => { dfDive("dx"); resolve("dx"); } },
+        { label: "◀ Sinistra", fn: () => pick1("sx") },
+        { label: "Resta al centro", fn: () => pick1("centro") },
+        { label: "Destra ▶", fn: () => pick1("dx") },
         ...(feat("speciali") && power > 0 ? [{ label: "GATTO VOLANTE", sub: "Nico legge il tiro · grinta 25", cls: "hot", fn: gatto, disabled: !cost(25) }] : []),
       ]);
     };
@@ -4682,7 +4703,7 @@
     mini: ["Calci d'angolo", "Dopo una respinta del portiere, l'angolo lo batti tu"],
   };
   // 15l · Partita classica: quattro aggiunte, ognuna spegnibile (spente = regole di prima)
-  const SET_PC = { tempo: ["Tiro a tempo", "Ferma la barra al momento giusto: preciso = tiro più forte, sbagliato = più debole"], fiato: ["Grinta di riserva", "A secco puoi tirare lo stesso (più debole); rifiatare ridà almeno 10"], spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
+  const SET_PC = { area: ["Comandi in area", "Parata, pugno o uscita: li scegli tu col tuo portiere, e anche il portiere avversario li usa"], tempo: ["Tiro a tempo", "Ferma la barra al momento giusto: preciso = tiro più forte, sbagliato = più debole"], fiato: ["Grinta di riserva", "A secco puoi tirare lo stesso (più debole); rifiatare ridà almeno 10"], spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
   const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false });
   function setLoad() { const d = setDefault(), s = readJSON(SETK, null); if (!s || s.v !== 1) return d; return { ...d, ...s, t: { ...d.t, ...(s.t || {}) }, pc: { ...d.pc, ...(s.pc && typeof s.pc === "object" ? s.pc : {}) } }; }
   let SET = setLoad();
