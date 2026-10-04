@@ -14485,7 +14485,6 @@
       ...(has && STORY[has.step] ? [{ label: "Continua", sub: STORY[has.step].chap, cls: "hot", fn: () => { S = has; run(); } }] : []),
       ...(fresh0 ? [{ label: "Nuova partita", sub: "Stagione 1 · circa 30–40 minuti", cls: "hot", fn: () => { S = fresh(); run(); } }] : []),
       { head: "Gioca" },
-      { label: "✨ Arena 2D HD del Borgo", sub: "Tactical Emblem, Action 60fps, Street Cage & Gestionale Live", cls: "hot", fn: () => { if (window.openArena2DHDModal) window.openArena2DHDModal(title); } },
       { label: "Storia", sub: `Le stagioni di Leo · ${mnPct(mnStoria())}%`, fn: menuStoria },
       { label: "Il Borgo Storto", sub: "Spin-off GDR a turni", cls: "hot", fn: () => openBorgoStorto(title) },
       { label: "Borgo e trasferte", sub: `A piedi per il paese · ${mnPct(mnBorgo())}%`, fn: menuBorgo },
