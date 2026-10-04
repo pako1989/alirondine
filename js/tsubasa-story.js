@@ -136,6 +136,79 @@
     } catch (e) {}
   }
 
+  function getStageAlt() {
+    return document.getElementById("stageAlt");
+  }
+
+  function activateTsubasaStage() {
+    if (window.setView) window.setView({ kind: "tsubasa" });
+    const cv = document.getElementById("cv");
+    if (cv) cv.hidden = true;
+    const alt = getStageAlt();
+    if (alt) {
+      alt.hidden = false;
+      alt.style.display = "block";
+      alt.style.position = "relative";
+      alt.style.overflow = "hidden";
+      alt.style.zIndex = "10";
+      alt.innerHTML = "";
+    }
+    return alt;
+  }
+
+  function renderTsubasaHubStage(prog, curTeam) {
+    const alt = activateTsubasaStage();
+    if (!alt) return;
+
+    alt.innerHTML = `
+      <div style="position:absolute; inset:0; background:linear-gradient(135deg, #1b0429 0%, #3a0ca3 45%, #ff0054 100%); overflow:hidden;">
+        <!-- Anime Speedlines Shonen -->
+        <svg style="position:absolute; inset:0; width:100%; height:100%; opacity:0.35; pointer-events:none;" viewBox="0 0 320 200">
+          <line x1="0" y1="0" x2="320" y2="200" stroke="#fff" stroke-width="2" stroke-dasharray="14 20" />
+          <line x1="320" y1="0" x2="0" y2="200" stroke="#fff" stroke-width="2" stroke-dasharray="16 22" />
+          <line x1="160" y1="0" x2="160" y2="200" stroke="#ffd23f" stroke-width="3" stroke-dasharray="8 14" />
+        </svg>
+
+        <!-- Sole del tramonto sul mare ligure -->
+        <div style="position:absolute; bottom:-40px; left:50%; margin-left:-90px; width:180px; height:180px; border-radius:50%; background:radial-gradient(circle, #ffd23f 30%, #ff5400 70%, transparent 80%); opacity:0.85;"></div>
+
+        <!-- Sagome Leo & Nico scatto shonen verso la porta -->
+        <div style="position:absolute; bottom:15px; left:25px; width:34px; height:55px; background:#3fa7ff; border-radius:6px 6px 2px 2px; border:2px solid #fff; box-shadow:0 0 15px #3fa7ff; transform:skewX(-15deg); z-index:3;">
+          <div style="position:absolute; top:8px; left:5px; font-weight:bold; font-size:11px; color:#fff;">10</div>
+        </div>
+        <div style="position:absolute; bottom:15px; left:65px; width:34px; height:55px; background:#ffd23f; border-radius:6px 6px 2px 2px; border:2px solid #fff; box-shadow:0 0 15px #ffd23f; transform:skewX(-15deg); z-index:3;">
+          <div style="position:absolute; top:8px; left:5px; font-weight:bold; font-size:11px; color:#000;">11</div>
+        </div>
+
+        <!-- Pallone con aureola Twin Shot a mezza altezza -->
+        <div style="position:absolute; bottom:55px; left:125px; width:22px; height:22px; background:#fff; border-radius:50%; border:2px solid #000; box-shadow:0 0 20px #00f5d4, 0 0 35px #ff0054; z-index:4;"></div>
+
+        <!-- Overlay HUD Capitan Tsubasa -->
+        <div style="position:relative; z-index:5; height:100%; padding:10px; display:flex; flex-direction:column; justify-content:space-between;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <div style="font-family:var(--display); font-size:16px; color:#ffd23f; text-shadow:2px 2px 0 #900, 0 0 12px #ffd23f;">
+                ⚡ IL TORNEO DELLA SCOGLIERA
+              </div>
+              <div style="font-size:11px; color:#f3e5f5; font-weight:bold;">
+                Saga Shonen · Tributo a Capitan Tsubasa
+              </div>
+            </div>
+            <div style="background:rgba(10,5,25,0.85); border:1.5px solid #ff0054; border-radius:6px; padding:3px 8px; font-size:11px; color:#fff; text-align:right;">
+              <div>Tappe vinte: <b>${prog.cleared.length}/4</b></div>
+              <div style="color:#ffd23f; font-size:10px;">Gol segnati: <b>${prog.goals}</b></div>
+            </div>
+          </div>
+
+          <div style="background:rgba(12,4,28,0.85); border:1.5px solid rgba(255,255,255,0.3); border-radius:6px; padding:4px 8px; font-size:11px; color:#fff; margin-left:110px;">
+            ⚽ Prossimo Match: <b style="color:#ffd23f;">${curTeam.name}</b><br>
+            <span style="font-size:10px; color:#4cc9f0;">Capitano: ${curTeam.captain}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   // ================= 1. HUB DELLA SAGA =================
   function openTsubasaMenu(onBack) {
     onExitCallback = onBack;
@@ -143,10 +216,10 @@
   }
 
   function showHub() {
-    if (window.closeAltStage) window.closeAltStage();
     if (window.setChapter) window.setChapter("Capitan Tsubasa · Il Torneo della Scogliera");
     const prog = getProgress();
     const curTeam = TEAMS_DATA[prog.stage % TEAMS_DATA.length];
+    renderTsubasaHubStage(prog, curTeam);
 
     showText(
       "Mister Roberto Sedinho",

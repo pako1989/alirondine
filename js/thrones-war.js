@@ -149,6 +149,82 @@
     } catch (e) {}
   }
 
+  function getStageAlt() {
+    return document.getElementById("stageAlt");
+  }
+
+  function activateThronesStage() {
+    if (window.setView) window.setView({ kind: "thrones" });
+    const cv = document.getElementById("cv");
+    if (cv) cv.hidden = true;
+    const alt = getStageAlt();
+    if (alt) {
+      alt.hidden = false;
+      alt.style.display = "block";
+      alt.style.position = "relative";
+      alt.style.overflow = "hidden";
+      alt.style.zIndex = "10";
+      alt.innerHTML = "";
+    }
+    return alt;
+  }
+
+  function renderThronesHubStage(prog) {
+    const alt = activateThronesStage();
+    if (!alt) return;
+
+    alt.innerHTML = `
+      <div style="position:absolute; inset:0; background:radial-gradient(circle at 50% 30%, #3a0d14 0%, #100406 100%); overflow:hidden;">
+        <!-- Fiocchi di neve che scendono dal Nord -->
+        <div style="position:absolute; width:3px; height:3px; background:#a2d2ff; top:10%; left:20%; box-shadow: 40px 30px #a2d2ff, 90px 10px #fff, 160px 40px #a2d2ff, 240px 20px #fff, 280px 50px #a2d2ff;"></div>
+        
+        <!-- Bastione medievale in pietra e torce -->
+        <div style="position:absolute; bottom:0; left:0; width:100%; height:75px; background:#21100a; border-top:3px solid #ffb703; display:flex; justify-content:space-around; align-items:flex-end;">
+          <div style="width:24px; height:50px; background:#361a10; border-top:4px solid #ffb703;"></div>
+          <div style="width:24px; height:65px; background:#361a10; border-top:4px solid #ffb703;"></div>
+          <div style="width:30px; height:80px; background:#4a2417; border-top:5px solid #ffb703;"></div>
+          <div style="width:24px; height:65px; background:#361a10; border-top:4px solid #ffb703;"></div>
+          <div style="width:24px; height:50px; background:#361a10; border-top:4px solid #ffb703;"></div>
+        </div>
+
+        <!-- Trono di Focaccia dorato al centro -->
+        <div style="position:absolute; bottom:25px; left:50%; margin-left:-25px; width:50px; height:55px; background:#d4a373; border-radius:12px 12px 2px 2px; border:3px solid #ffb703; box-shadow:0 0 25px rgba(255,183,3,0.7); z-index:3; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+          <span style="font-size:18px;">👑</span>
+          <span style="font-size:9px; font-weight:bold; color:#590d22;">TRONO</span>
+        </div>
+
+        <!-- Stendardi delle 5 Casate -->
+        <div style="position:absolute; top:42px; left:15px; font-size:16px;">🦅</div>
+        <div style="position:absolute; top:42px; left:45px; font-size:16px;">🏮</div>
+        <div style="position:absolute; top:42px; right:45px; font-size:16px;">🥖</div>
+        <div style="position:absolute; top:42px; right:15px; font-size:16px;">⚓</div>
+
+        <!-- Overlay HUD Westeros -->
+        <div style="position:relative; z-index:5; height:100%; padding:10px; display:flex; flex-direction:column; justify-content:space-between;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <div style="font-family:var(--display); font-size:16px; color:#ffb703; text-shadow:2px 2px 0 #000, 0 0 10px #ffb703;">
+                👑 LA GUERRA DEI CINQUE TRABUCCHI
+              </div>
+              <div style="font-size:11px; color:#f8edeb; font-weight:bold;">
+                Cronache della Focaccia e del Fuoco · Anno Domini 1240
+              </div>
+            </div>
+            <div style="background:rgba(20,5,5,0.85); border:1.5px solid #ffb703; border-radius:6px; padding:3px 8px; font-size:11px; color:#fff; text-align:right;">
+              <div>🪙 Oro: <b>${prog.gold}</b></div>
+              <div style="color:#06d6a0; font-size:10px;">🫒 Pesto: <b>${prog.pesto} barili</b></div>
+            </div>
+          </div>
+
+          <div style="background:rgba(25,10,8,0.9); border:1px solid rgba(255,183,3,0.4); border-radius:6px; padding:4px 8px; font-size:11px; color:#fff; display:flex; justify-content:space-between; align-items:center;">
+            <span>Feudi Conquistati: <b>${prog.conquered.length}/5</b></span>
+            <span style="color:#a2d2ff; font-weight:bold;">Avanzata dell'Inverno: ${prog.winterMeter}%</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   // ================= 1. HUB CONSIGLIO DI GUERRA =================
   function openThronesWarMenu(onBack) {
     onExitCallback = onBack;
@@ -156,9 +232,9 @@
   }
 
   function showWarCouncil() {
-    if (window.closeAltStage) window.closeAltStage();
     if (window.setChapter) window.setChapter("Westeros Ligure · La Guerra dei Cinque Trabucchi");
     const prog = getProgress();
+    renderThronesHubStage(prog);
 
     const unscaled = HOUSES.filter(h => !prog.conquered.includes(h.id));
 

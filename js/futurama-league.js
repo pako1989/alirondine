@@ -123,6 +123,83 @@
     } catch (e) {}
   }
 
+  function getStageAlt() {
+    return document.getElementById("stageAlt");
+  }
+
+  function activateFuturamaStage() {
+    if (window.setView) window.setView({ kind: "futurama" });
+    const cv = document.getElementById("cv");
+    if (cv) cv.hidden = true;
+    const alt = getStageAlt();
+    if (alt) {
+      alt.hidden = false;
+      alt.style.display = "block";
+      alt.style.position = "relative";
+      alt.style.overflow = "hidden";
+      alt.style.zIndex = "10";
+      alt.innerHTML = "";
+    }
+    return alt;
+  }
+
+  function renderFuturamaHubStage(prog) {
+    const alt = activateFuturamaStage();
+    if (!alt) return;
+
+    alt.innerHTML = `
+      <div style="position:absolute; inset:0; background:radial-gradient(circle at 60% 40%, #003049 0%, #001219 100%); overflow:hidden;">
+        <!-- Stelle e nebulosa -->
+        <div style="position:absolute; width:2px; height:2px; background:#fff; top:15%; left:20%; box-shadow: 60px 40px #fff, 140px 80px #00f5d4, 240px 30px #fee440, 90px 130px #f72585, 200px 140px #fff;"></div>
+        
+        <!-- Navetta Planet Express 2D animata -->
+        <div style="position:absolute; top:25px; right:20px; width:120px; height:60px; background:#2ec4b6; border-radius:35px 70px 15px 35px; border:2.5px solid #fff; transform:rotate(-12deg); box-shadow:0 0 20px #00f5d4; z-index:3;">
+          <!-- Finestrino cabina arancione -->
+          <div style="position:absolute; top:14px; left:25px; width:30px; height:15px; background:#ff9f1c; border-radius:50%; border:1.5px solid #fff;"></div>
+          <!-- Pinna caudale rossa -->
+          <div style="position:absolute; top:-18px; right:15px; width:20px; height:25px; background:#e71d36; clip-path:polygon(50% 0%, 0% 100%, 100% 100%);"></div>
+          <!-- Scia reattore a fiamma -->
+          <div style="position:absolute; top:20px; left:-24px; width:24px; height:16px; background:radial-gradient(circle, #ff0054 30%, #fee440 70%, transparent); border-radius:50%;"></div>
+        </div>
+
+        <!-- Bender sagoma robot in basso a sinistra -->
+        <div style="position:absolute; bottom:10px; left:15px; width:36px; height:65px; background:#adb5bd; border-radius:18px 18px 4px 4px; border:2px solid #212529; z-index:4;">
+          <!-- Occhi sotto visiera -->
+          <div style="position:absolute; top:12px; left:4px; right:4px; height:12px; background:#212529; border-radius:3px; display:flex; justify-content:space-around; align-items:center;">
+            <div style="width:6px; height:6px; background:#fee440; border-radius:50%;"></div>
+            <div style="width:6px; height:6px; background:#fee440; border-radius:50%;"></div>
+          </div>
+          <!-- Antenna -->
+          <div style="position:absolute; top:-14px; left:16px; width:4px; height:14px; background:#adb5bd; border:1px solid #212529;">
+            <div style="position:absolute; top:-4px; left:-2px; width:8px; height:8px; background:#fee440; border-radius:50%;"></div>
+          </div>
+        </div>
+
+        <!-- Overlay HUD Champions 3000 -->
+        <div style="position:relative; z-index:5; height:100%; padding:10px; display:flex; flex-direction:column; justify-content:space-between;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <div style="font-family:var(--display); font-size:16px; color:#fee440; text-shadow:2px 2px 0 #000, 0 0 10px #00f5d4;">
+                🛸 CHAMPIONS GALATTICA 3000
+              </div>
+              <div style="font-size:11px; color:#e0fbfc; font-weight:bold;">
+                Pianeta Express Inc. · Torneo Interplanetario
+              </div>
+            </div>
+            <div style="background:rgba(0,18,25,0.85); border:1.5px solid #00f5d4; border-radius:6px; padding:3px 8px; font-size:11px; color:#fff; text-align:right;">
+              <div>Crediti: <b style="color:#fee440;">${prog.cyberCredits} ⍟</b></div>
+              <div style="color:#00f5d4; font-size:10px;">Pianeti vinti: <b>${prog.planetsCleared.length}/3</b></div>
+            </div>
+          </div>
+
+          <div style="background:rgba(0,18,25,0.85); border:1px solid rgba(0,245,212,0.5); border-radius:6px; padding:4px 8px; font-size:11px; color:#fff; margin-left:45px;">
+            Trofeo Galattico: <b>${prog.trophyPlanetExpress ? "CONQUISTATO 🏆" : "In Palio 🚀"}</b>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   // ================= 1. HUB DELLA LEGA GALATTICA =================
   function openFuturamaLeagueMenu(onBack) {
     onExitCallback = onBack;
@@ -130,9 +207,9 @@
   }
 
   function showHub() {
-    if (window.closeAltStage) window.closeAltStage();
     if (window.setChapter) window.setChapter("Futurama 3000 · Champions Galattica");
     const prog = getProgress();
+    renderFuturamaHubStage(prog);
 
     showText(
       "Prof. Farnsworth",

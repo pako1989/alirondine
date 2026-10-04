@@ -118,10 +118,82 @@
     showHub();
   }
 
+  function getStageAlt() {
+    return document.getElementById("stageAlt");
+  }
+
+  function activateCitadelStage() {
+    if (window.setView) window.setView({ kind: "citadel" });
+    const cv = document.getElementById("cv");
+    if (cv) cv.hidden = true;
+    const alt = getStageAlt();
+    if (alt) {
+      alt.hidden = false;
+      alt.style.display = "block";
+      alt.style.position = "relative";
+      alt.style.overflow = "hidden";
+      alt.style.zIndex = "10";
+      alt.innerHTML = "";
+    }
+    return alt;
+  }
+
+  function renderCitadelHubStage(prog) {
+    const alt = activateCitadelStage();
+    if (!alt) return;
+
+    alt.innerHTML = `
+      <div style="position:absolute; inset:0; background:radial-gradient(circle at 50% 45%, #180033 0%, #050010 100%); overflow:hidden;">
+        <!-- Stelle quantiche -->
+        <div style="position:absolute; width:2px; height:2px; background:#fff; top:20%; left:15%; box-shadow: 40px 60px #fff, 120px 20px #76ff03, 220px 80px #00e5ff, 80px 140px #ff0054, 260px 130px #fff, 180px 160px #76ff03;"></div>
+        
+        <!-- Portale verde acido rotante -->
+        <div style="position:absolute; top:50%; left:50%; width:150px; height:150px; margin:-75px 0 0 -75px; border-radius:50%; background:radial-gradient(circle, #76ff03 25%, #00b300 65%, transparent 75%); box-shadow:0 0 35px #76ff03, inset 0 0 25px #003300; opacity:0.85; animation:spin 12s linear infinite;"></div>
+
+        <!-- Silhouette Cittadella dei Leo -->
+        <svg style="position:absolute; bottom:0; left:0; width:100%; height:80px; opacity:0.65; pointer-events:none;" viewBox="0 0 320 80">
+          <polygon points="20,80 35,30 50,80" fill="#2d004d" />
+          <polygon points="70,80 85,15 100,80" fill="#1f0033" />
+          <polygon points="120,80 140,40 160,80" fill="#38006b" />
+          <polygon points="180,80 205,10 230,80" fill="#1f0033" />
+          <polygon points="250,80 270,35 290,80" fill="#2d004d" />
+        </svg>
+
+        <!-- Stile animazione -->
+        <style>
+          @keyframes spin { 100% { transform:rotate(360deg); } }
+        </style>
+
+        <!-- Overlay HUD Multiverso -->
+        <div style="position:relative; z-index:5; height:100%; padding:10px; display:flex; flex-direction:column; justify-content:space-between;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <div style="font-family:var(--display); font-size:16px; color:#76ff03; text-shadow:0 0 12px #76ff03, 2px 2px 0 #000;">
+                🧪 LA CITTADELLA DEI LEO
+              </div>
+              <div style="font-size:11px; color:#e0fbfc; font-weight:bold;">
+                Dimensione C-137 · Multiverso dei Calciatori
+              </div>
+            </div>
+            <div style="background:rgba(5,0,20,0.8); border:1.5px solid #76ff03; border-radius:6px; padding:3px 8px; font-size:11px; color:#fff; text-align:right;">
+              <div>Status: <b style="color:${prog.evilLeoDefeated ? '#76ff03' : '#ff0054'};">${prog.evilLeoDefeated ? 'LIBERA 🏆' : 'OCCUPATA ⚠️'}</b></div>
+              <div style="color:var(--gold); font-size:10px;">Partite vinte: <b>${prog.stagesCleared.length}/2</b></div>
+            </div>
+          </div>
+
+          <div style="background:rgba(10,0,25,0.85); border:1px solid rgba(118,255,3,0.5); border-radius:6px; padding:5px 8px; font-size:11px; color:#fff; display:flex; justify-content:space-between; align-items:center;">
+            <span>Boss della Cittadella: <b style="color:#ff0054;">Evil Leo (Benda sull'Occhio)</b></span>
+            <span style="color:#76ff03; font-size:10px;">Fluido Portale 100%</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   function showHub() {
-    if (window.closeAltStage) window.closeAltStage();
     if (window.setChapter) window.setChapter("Rick & Morty · La Cittadella dei Leo");
     const prog = getProgress();
+    renderCitadelHubStage(prog);
 
     if (prog.evilLeoDefeated) {
       showText(
@@ -226,6 +298,7 @@
   function handleCitadelResult(s, myGoals, rivalGoals) {
     const won = myGoals > rivalGoals;
     const prog = getProgress();
+    renderCitadelHubStage(prog);
 
     if (won) {
       if (!prog.stagesCleared.includes(s.id)) prog.stagesCleared.push(s.id);
