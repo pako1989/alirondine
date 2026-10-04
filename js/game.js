@@ -4556,7 +4556,7 @@
     const o = heroOptions(), h = HE.h;
     const cyc = (k, label) => { const list = o[k], i = Math.max(0, list.findIndex(([v]) => v === h[k])), cur = list[i] || list[0]; return { label: `${label}: ${cur[1]} ▸`, sub: `${i + 1} di ${list.length}`, fn: () => { const nx = list[(i + 1) % list.length]; const oldShot = H_SHOTS[h.shot].label.toUpperCase(); h[k] = nx[0]; if (k === "shot" && (!h.shotName || h.shotName.startsWith(oldShot))) { h.shotName = `${H_SHOTS[h.shot].label.toUpperCase()} DI ${h.name.toUpperCase()}`; $("hShot").value = h.shotName; } heroCast(h); heroSum(); heroButtons(); } }; };
     buttons([cyc("style", "Capelli"), cyc("hair", "Colore"), cyc("skin", "Pelle"), cyc("shirt", "Maglia"), cyc("acc", "Accessorio"), cyc("shot", "Tiro"),
-      { label: "Salva il campione", sub: "Usalo in Carriera", cls: "hot", fn: () => { HE.h.v = 1; writeJSON(HERO, HE.h); heroCast(HE.h); view = { kind: "scene", bg: "end", speaker: "hero", chibi: true }; text("hero", `<b>${esc(HE.h.name)}</b>, numero ${HE.h.num}, pronto a scendere in campo. Il tiro speciale si chiama <em>${esc(HE.h.shotName)}</em>.<br><span style="color:var(--dim)">${heroWhere}</span>`); buttons([{ label: "Gioca la Carriera ▸", cls: "hot", fn: career }, { label: "Torneo dei rigori", fn: tournament }, { label: "◂ Indietro", fn: HE.back }]); } },
+      { label: "Salva il campione", sub: "Usalo in Carriera e nella sua Storia", cls: "hot", fn: () => { HE.h.v = 1; writeJSON(HERO, HE.h); heroCast(HE.h); view = { kind: "scene", bg: "end", speaker: "hero", chibi: true }; text("hero", `<b>${esc(HE.h.name)}</b>, numero ${HE.h.num}, pronto a scendere in campo. Il tiro speciale si chiama <em>${esc(HE.h.shotName)}</em>.<br><span style="color:var(--dim)">${heroWhere}</span>`); buttons([{ label: "⭐ Vivi la Storia del tuo Campione ▸", sub: `La saga inedita di ${HE.h.name}`, cls: "hot", fn: () => { if (window.openHeroStoryMenu) window.openHeroStoryMenu(HE.back); } }, { label: "Gioca la Carriera", fn: career }, { label: "Torneo dei rigori", fn: tournament }, { label: "◂ Indietro", fn: HE.back }]); } },
       { label: "◂ Indietro", sub: "Senza salvare", fn: HE.back }]);
   }
   function drawHeroChibi() {
@@ -14485,6 +14485,7 @@
     text("voce", "<b>Saghe e minigiochi</b><br>Storie speciali e giochi a parte. Ognuna si gioca per conto suo.");
     buttons([
       { head: "Saghe Ispirate & Speciali" },
+      { label: "⭐ La Leggenda del Tuo Campione", sub: heroLoad() ? `La saga esclusiva di ${heroLoad().name} (N.${heroLoad().num})` : "Crea il tuo campione e scendi in campo!", cls: "hot", fn: () => { if (window.openHeroStoryMenu) window.openHeroStoryMenu(menuSaghe); } },
       { label: "⚡ Tsubasa · Il Tiro Combinato", sub: "Holly & Benji: Twin Shot ad elica, la Muppet e parate dal palo!", cls: "hot", fn: () => { if (window.openTsubasaMenu) window.openTsubasaMenu(menuSaghe); } },
       { label: "👑 Westeros · I Cinque Trabucchi", sub: "Game of Thrones: Mappa tattica a feudi, risorse e Re della Notte!", cls: "hot", fn: () => { if (window.openThronesWarMenu) window.openThronesWarMenu(menuSaghe); } },
       { label: "🛸 Futurama · Champions 3000", sub: "Lega Galattica: 4 pianeti a gravità variabile e innesti di Bender!", cls: "hot", fn: () => { if (window.openFuturamaLeagueMenu) window.openFuturamaLeagueMenu(menuSaghe); } },
@@ -14512,6 +14513,7 @@
     text("voce", `<b>Storia</b> ${mnBar(mnPct(mnStoria()))}<br>${rows.join(" &nbsp;")}<br><span style="color:var(--dim)">Finali trovati ${getList(ENDS).length}/${ENDINGS.length}. Ogni stagione si può giocare anche da sola.</span>`);
     buttons([
       ...(has && STORY[has.step] ? [{ label: "Continua", sub: STORY[has.step].chap, cls: "hot", fn: () => { S = has; run(); } }] : []),
+      { label: "⭐ La Leggenda del Tuo Campione", sub: heroLoad() ? `La saga esclusiva di ${heroLoad().name} (N.${heroLoad().num})` : "Crea il tuo campione e scendi in campo!", cls: "hot", fn: () => { if (window.openHeroStoryMenu) window.openHeroStoryMenu(menuStoria); } },
       { label: "Nuova partita", sub: has ? "Ricomincia dalla Stagione 1" : "Stagione 1 · circa 30–40 minuti", cls: has ? "" : "hot", fn: () => { S = fresh(); run(); } },
       { label: "Stagione 2", sub: load(SAVE1) ? "Con il tuo Leo della Stagione 1" : "Dove è finito Dario?", fn: pickS2 },
       { label: "Stagione 3", sub: load(SAVE2) ? "Con il tuo Leo della Stagione 2" : "Leo in Nazionale Under 19", fn: pickS3 },
