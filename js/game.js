@@ -14420,15 +14420,18 @@
     text("voce", "<b>Saghe e minigiochi</b><br>Storie speciali e giochi a parte. Ognuna si gioca per conto suo.");
     buttons([
       { head: "Saghe" },
-      { label: "🔥 Blue Lock · La Gabbia dell'Ego", sub: "Torneo dei Predatori", fn: () => { if (window.openBlueLockMode) window.openBlueLockMode(menuSaghe); } },
+      { label: "🔥 Blue Lock · La Gabbia dell'Ego", sub: "Torneo dei Predatori", cls: "hot", fn: () => { if (window.openBlueLockMode) window.openBlueLockMode(menuSaghe); } },
       { label: "🕵️ Noir · Il Peschereccio Fantasma", sub: "Saga investigativa con Lina", fn: () => { if (window.openNoirStoryMenu) window.openNoirStoryMenu(menuSaghe); } },
       { label: "🌌 Multiverso · La Panda Quantistica", sub: "Saga demenziale con Nonna", fn: () => { if (window.openMultiverseMenu) window.openMultiverseMenu(menuSaghe); } },
       { label: "⛵ La Notte del Faro", sub: "Il torneo sulla scogliera", fn: () => { if (window.openFaroStoryMenu) window.openFaroStoryMenu(menuSaghe); } },
       { label: "👑 La Traversata d'Oro", sub: "Torneo dei Trabucchi", fn: () => { if (window.openTraversataMenu) window.openTraversataMenu(menuSaghe); } },
-      { head: "Minigiochi e strumenti" },
-      { label: "⚽ Stadio 3D · Sfida dei Tiri", sub: "Batti i portieri leggendari", fn: () => { if (window.openStadium3D) window.openStadium3D(menuSaghe); } },
-      { label: "🚗 La Corsa della Panda 30", sub: "Consegna la focaccia calda", fn: () => { if (window.openPanda3D) window.openPanda3D(menuSaghe); } },
-      { label: "🛡️ Roster & Talenti", sub: "Compagni ed equipaggiamento", fn: () => { if (window.openRosterTalentsModal) window.openRosterTalentsModal(); } },
+      { head: "Minigiochi del Borgo e strumenti" },
+      { label: "⚽ Stadio 3D · Sfida dei Tiri", sub: "Tiro della Rondine 3D contro i portieri leggendari", cls: "hot", fn: () => { if (window.openStadium3D) window.openStadium3D(menuSaghe); } },
+      { label: "⚽ Il Biliardino del Bar del Porto", sub: "Calcio balilla fisico contro Gino, Baciccia e Papà", cls: "hot", fn: () => { if (window.openBiliardino) window.openBiliardino(0, menuSaghe); } },
+      { label: "🕹️ Cabinato: Super Rondine '94", sub: "Arcade 16-bit a gettoni: scanline CRT e tiri curvi", cls: "hot", fn: () => { if (window.openArcadeMachine) window.openArcadeMachine(menuSaghe); } },
+      { label: "🌊 Il Gozzo di Baciccia · In Mare", sub: "Navigazione nel golfo: recupera palloni o corri la Regata", fn: () => { if (window.openGozzoGame) window.openGozzoGame("recupero", menuSaghe); } },
+      { label: "🚗 La Corsa della Panda 30", sub: "Consegna la focaccia calda con Nonna", fn: () => { if (window.openPanda3D) window.openPanda3D(menuSaghe); } },
+      { label: "🛡️ Roster & Talenti", sub: "Compagni ed equipaggiamento del Borgo", fn: () => { if (window.openRosterTalentsModal) window.openRosterTalentsModal(); } },
       { label: "◂ Menu", cls: "pick", fn: title },
     ]);
   }
