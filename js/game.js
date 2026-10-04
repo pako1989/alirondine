@@ -1214,6 +1214,9 @@
       view.kind === "diorama" ||
       view.kind === "alt" ||
       view.kind === "enc_card" ||
+      view.kind === "multiverse" ||
+      view.kind === "bluelock" ||
+      view.kind === "noir" ||
       (view.kind === "enciclopedia" && SET && SET.cardView !== "canvas") ||
       (view.kind === "bacheca" && SET && SET.trophyView === "3d") ||
       (view.kind === "manga" && SET && SET.mangaView !== "canvas")

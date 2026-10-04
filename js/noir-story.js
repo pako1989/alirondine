@@ -69,6 +69,11 @@
       alt.style.display = "none";
       alt.innerHTML = "";
     }
+    const cv = document.getElementById("cv");
+    if (cv) cv.hidden = false;
+    if (window.gameEngine && window.gameEngine.setView) {
+      window.gameEngine.setView({ kind: "scene", bg: "title" });
+    }
   }
 
   function openNoirStoryMenu(onBack) {
@@ -80,6 +85,11 @@
 
   function showNoirHub() {
     closeNoirStage();
+    if (window.gameEngine && window.gameEngine.setView) {
+      window.gameEngine.setView({ kind: "noir" });
+    }
+    const cv = document.getElementById("cv");
+    if (cv) cv.hidden = true;
     setChap("Noir Costiero · Caso Sale Blu");
     const prog = getProgress();
 
@@ -92,6 +102,7 @@
       alt.style.justifyContent = "flex-end";
       alt.style.position = "relative";
       alt.style.overflow = "hidden";
+      alt.style.zIndex = "10";
       alt.innerHTML = `
         <img src="img/noir_fishing_boat.jpg" alt="Peschereccio Fantasma" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:contrast(1.2) brightness(0.8) saturate(0.8);">
         <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(7,13,24,0.2) 0%, rgba(7,13,24,0.85) 90%);"></div>

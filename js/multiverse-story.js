@@ -104,6 +104,24 @@
     }
   }
 
+  function activateMultiView(displayMode = "block") {
+    clearLoops();
+    if (window.gameEngine && window.gameEngine.setView) {
+      window.gameEngine.setView({ kind: "multiverse" });
+    }
+    const cv = document.getElementById("cv");
+    if (cv) cv.hidden = true;
+    const alt = getStageAlt();
+    if (alt) {
+      alt.hidden = false;
+      alt.style.display = displayMode;
+      alt.style.position = "relative";
+      alt.style.overflow = "hidden";
+      alt.style.zIndex = "10";
+    }
+    return alt;
+  }
+
   function closeMultiStage() {
     clearLoops();
     const alt = getStageAlt();
@@ -111,6 +129,11 @@
       alt.hidden = true;
       alt.style.display = "none";
       alt.innerHTML = "";
+    }
+    const cv = document.getElementById("cv");
+    if (cv) cv.hidden = false;
+    if (window.gameEngine && window.gameEngine.setView) {
+      window.gameEngine.setView({ kind: "scene", bg: "title" });
     }
   }
 
@@ -121,18 +144,11 @@
   }
 
   function showHub() {
-    closeMultiStage();
     setChap("Multiverso · La Panda Quantistica");
     const prog = getProgress();
+    const alt = activateMultiView("flex");
 
-    const alt = getStageAlt();
     if (alt) {
-      alt.hidden = false;
-      alt.style.display = "flex";
-      alt.style.flexDirection = "column";
-      alt.style.justifyContent = "flex-end";
-      alt.style.position = "relative";
-      alt.style.overflow = "hidden";
       alt.innerHTML = `
         <img src="img/multiverse_panda.jpg" alt="Panda Quantistica" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:contrast(1.25) brightness(0.9);">
         <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(20,5,40,0.25) 0%, rgba(14,4,30,0.92) 85%);"></div>
@@ -218,14 +234,10 @@
 
   // ================= 2. MINIGIOCO: PILOTAGGIO NEL TUNNEL IPERSPAZIALE =================
   function startHyperspaceFlight() {
-    closeMultiStage();
     setChap("Tunnel Iperspaziale · Volo Tachionico");
-    const alt = getStageAlt();
+    const alt = activateMultiView("block");
     if (!alt) return;
 
-    alt.hidden = false;
-    alt.style.display = "block";
-    alt.style.position = "relative";
     alt.innerHTML = `
       <canvas id="warpCanvas" width="320" height="200" style="display:block; width:100%; height:100%; background:#0a0416;"></canvas>
       <div style="position:absolute; top:4px; left:6px; right:6px; display:flex; justify-content:space-between; align-items:center; background:rgba(18,6,36,0.85); border:1px solid #ba68c8; border-radius:6px; padding:3px 8px; font-size:11px; color:#fff; z-index:10;">
@@ -521,14 +533,10 @@
 
   // ================= 3. DIMENSIONE C-137: CALCIO DEI PORTALI (RICK & MORTY) =================
   function startRickDimension() {
-    closeMultiStage();
     setChap("Dimensione C-137 · Torneo dei Cromulon");
-    const alt = getStageAlt();
+    const alt = activateMultiView("block");
     if (!alt) return;
 
-    alt.hidden = false;
-    alt.style.display = "block";
-    alt.style.position = "relative";
     alt.innerHTML = `
       <canvas id="rickCanvas" width="320" height="200" style="display:block; width:100%; height:100%; background:#10002b;"></canvas>
       <div style="position:absolute; top:4px; left:6px; right:6px; display:flex; justify-content:space-between; align-items:center; background:rgba(20,5,40,0.85); border:1px solid #76ff03; border-radius:6px; padding:3px 8px; font-size:11px; color:#fff; z-index:10;">
@@ -767,14 +775,10 @@
 
   // ================= 4. DIMENSIONE 3000: IL DERBY DEL FUTURO (FUTURAMA) =================
   function startBenderDimension() {
-    closeMultiStage();
     setChap("Dimensione 3000 · Il Derby del Molo");
-    const alt = getStageAlt();
+    const alt = activateMultiView("block");
     if (!alt) return;
 
-    alt.hidden = false;
-    alt.style.display = "block";
-    alt.style.position = "relative";
     alt.innerHTML = `
       <canvas id="futCanvas" width="320" height="200" style="display:block; width:100%; height:100%; background:#051923;"></canvas>
       <div style="position:absolute; top:4px; left:6px; right:6px; display:flex; justify-content:space-between; align-items:center; background:rgba(0,53,102,0.85); border:1px solid #00b4d8; border-radius:6px; padding:3px 8px; font-size:11px; color:#fff; z-index:10;">
@@ -970,14 +974,10 @@
 
   // ================= 5. DIMENSIONE WESTEROS: DRACARYS SHOT (GAME OF THRONES) =================
   function startThronesDimension() {
-    closeMultiStage();
     setChap("Westeros Ligure · La Battaglia della Barriera");
-    const alt = getStageAlt();
+    const alt = activateMultiView("block");
     if (!alt) return;
 
-    alt.hidden = false;
-    alt.style.display = "block";
-    alt.style.position = "relative";
     alt.innerHTML = `
       <canvas id="gotCanvas" width="320" height="200" style="display:block; width:100%; height:100%; background:#0b132b;"></canvas>
       <div style="position:absolute; top:4px; left:6px; right:6px; display:flex; justify-content:space-between; align-items:center; background:rgba(11,19,43,0.9); border:1px solid #48cae4; border-radius:6px; padding:3px 8px; font-size:11px; color:#fff; z-index:10;">
