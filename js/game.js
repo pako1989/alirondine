@@ -8448,6 +8448,7 @@
   function trTalk(id) {
     const r = trRec(), q = r.q, p = TW.prog || prog(), f = p.f || {};
     seeCard(id);
+    if (window.trTalkHook && window.trTalkHook(id)) return;
     if ((typeof rnTalk === "function" && rnTalk(id)) || (typeof svTalk === "function" && svTalk(id)) || beTalkT(id) || regTalk(id) || itTalk(id)) return;
     if (torreTrTalk(id)) return;
     if (id === "gilda") return trAsk("gilda", r.day.foc === todayKey()
@@ -23982,6 +23983,8 @@
     }
   };
 
+  window.addCoins = addCoins;
+  window.__borgoApi = { TRZ, MN_BORGO_BTN, CAST, trGo, trAsk, trSay, trResume, L, trToast };
   title();
   render();
 })();
