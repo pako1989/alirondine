@@ -218,6 +218,17 @@
   .choices button.pad.act { background: linear-gradient(135deg, #b3202c, #ff4d5a); border-color: #ffd23f; font-size: 17px; }
   .choices button.pad.act:disabled { background: #1f3a63; border-color: #ffffff40; opacity: .55; }
   body.borgo #stats, body.borgo .foot { display: none; }
+  body.bw-vintage #cv {
+    filter: grayscale(100%) contrast(125%) brightness(95%);
+    transition: filter 0.4s ease;
+  }
+  body.bw-vintage #matchHud, body.bw-vintage .field-radar {
+    filter: grayscale(85%) contrast(110%);
+  }
+  body.bw-vintage .chap {
+    color: #e0e0e0 !important;
+    text-shadow: 0 1px 3px #000;
+  }
   body.big #text { font-size: 19px; } body.big .choices button { font-size: 17px; } body.big .choices button small { font-size: 14px; }
   body.borgo #text { min-height: 72px; }
   input.field { display: block; width: 100%; margin: 6px 0 2px; font: 700 16px var(--body); color: var(--ink); background: #0b1426; border: 2px solid #ffffff40; border-radius: 8px; padding: 8px 10px; -webkit-user-select: text; user-select: text; }

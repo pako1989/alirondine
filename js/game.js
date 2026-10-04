@@ -1494,6 +1494,8 @@
   const stHalf = () => (M && (M.story || M.career) ? 0.5 : 1);
   function startMatch(step) {
     if (step.match === "vetrina8") vet8Reset();
+    if (step.bw || step.legend) document.body.classList.add("bw-vintage");
+    else document.body.classList.remove("bw-vintage");
     const team = TEAMS[step.match];
     M = { team: step.match, step, career: !!step.career, min: 0, half: 1, score: [0, 0], poss: "us", zone: 1, guts: S.st.grinta, fixDone: false, htDone: false, anim: null, ad: { sp: {}, act: {}, dive: {}, told: {} } };
     if (step.cupRule) {
@@ -2242,6 +2244,7 @@
     });
   }
   function endMatch0(win) {
+    document.body.classList.remove("bw-vintage");
     $("matchHud").hidden = true;
     const t = TEAMS[M.team];
     if (!win) {
@@ -8701,6 +8704,10 @@
     maglia87:   { kind: "shirt", label: "Maglia Rondine '87", val: "#8a1c2a", from: "Una finale di tanti anni fa, con un centravanti per disperazione" },
     maglia06:   { kind: "hairc", label: "Capelli Castano 2006", val: "#4a2e1c", from: "Un sogno che ricomincia ogni notte, al minuto sessanta" },
     glorie:     { kind: "shirt", label: "Maglia delle Vecchie Glorie", val: "#d9c38a", from: "Batti chi c'era prima di te" },
+    maglia74:   { kind: "shirt", label: "Maglia di Lana '74", val: "#3a2618", from: "Il diluvio del '74 con Nonno Dante Moretti" },
+    maglia91:   { kind: "shirt", label: "Maglia Scoglio '91", val: "#ffffff", from: "La sfida sul molo con Dario Moretti giovane" },
+    canotta60:  { kind: "shirt", label: "Canotta a Righe '60", val: "#2b5c8f", from: "La coppa con le cassette di pesce di Baciccia Senior" },
+    fornaio95:  { kind: "shirt", label: "Divisa Fornaio '95", val: "#e8dcbc", from: "Il derby della focaccia calda con Tonino e Ruggeri" },
   });
   const LEG = [
     { id: "68", t: "Le Rondinelle del '68", sub: "Con Ernesta «la Gatta» · sulla spiaggia", need: () => prog().n >= 1, cos: "rondinelle", bg: "beach",
@@ -8754,6 +8761,54 @@
       team: (s) => { const t = (v) => Math.max(4, Math.round(v)); return { vs: "le Vecchie Glorie del Borgo", name: "Vecchie Glorie del Borgo", color: "#d9c38a", defs: [["Tonino", t(s.drib * .8)], ["Rita", t(s.drib * .88)], ["Franco Ruggeri", t(s.drib * .98)]], atk: [["Enzo Moretti", t(s.tiro * .95)], ["Baciccia «il Siluro»", t(s.tiro * .82)]], gk: ["Settimio", t(s.tiro * 1.12)], power: t(s.tiro * .86), special: ["SINISTRO DEL PORTO", t(s.tiro * 1.25)] }; },
       win: [["papa", "Battuti dai ragazzi. Era ora. Sai che ti dico, campione? È la prima partita che perdo contento. Anche Franco è contento. Si vede perché fa finta di no."], ["baciccia", "Io ho segnato di testa. Non sapete quando, ma l'ho fatto. Lo dico al bar e nessuno potrà dire il contrario: erano tutti distratti dalla mia orata."], ["voce", "Il tetto della chiesa viene rifatto con gli incassi. Don Aurelio fa incidere una targa: «Qui hanno giocato le Glorie. Le vecchie e le nuove. Ha vinto il tetto.»"]],
       lose: [["papa", "Hai perso contro tuo padre. Succede una volta nella vita, e di solito a quarant'anni. Tu sei in anticipo: bravo."], ["ruggeri", "Rivincita quando vuoi, Moretti. Ma aspetta che le ginocchia si riprendano. Le mie, dico. Almeno un mese."]] },
+    { id: "74", t: "Il Diluvio del '74", sub: "Con Nonno Dante Moretti · pioggia e fango d'epoca", need: () => prog().n >= 2, cos: "maglia74", bg: "stadium",
+      story: [
+        ["papa", "Il 1974. Mio padre Dante, tuo nonno, giocava centravanti con la maglia di lana spessa che quando pioveva pesava dieci chili. Quella domenica venne giù il cielo."],
+        ["settimio", "Io ero già custode. Il campo era una risaia. Il pallone era di cuoio marrone con le cuciture a vista. Se lo colpivi di testa ti ricordavi la partita fino al giovedì."],
+        ["papa", "Contro di noi la Pro Recco del '74: gente tosta, abituata alle onde. Tu sei Nonno Dante, Moretti. Fagli vedere come si calcia una palla bagnata."],
+      ],
+      intro: "Campo vecchio nel fango, autunno 1974. La Rondine contro <em>la Pro Recco '74</em>, un tempo solo nella tempesta. Tu sei Dante Moretti, numero 10. Settimio giovane gioca con te.",
+      hero: { name: "Dante", style: "slick", hair: "#1a1410", skin: "#d9a578", shirt: "#3a2618", acc: "none", num: 10, shot: "martello", shotName: "DESTRO DEL DILUVIO" },
+      S: { tiro: 35, drib: 25, pass: 28, contr: 30, grinta: 175 }, nico: 32, bond: 7, mate: "Settimio", us: "Rondine '74", min: 45,
+      team: () => ({ vs: "la Pro Recco '74", name: "Pro Recco '74", color: "#16325c", defs: [["Parodi il Rosso", 27], ["Bagnasco", 28], ["Repetto", 29]], atk: [["Caneva", 30], ["Tassara", 26]], gk: ["Ginocchio", 33], power: 29, special: ["ONDA DI FANGO", 42] }),
+      win: [["papa", "Vinto nel fango! Nonno Dante tornò a casa con mezzo campo addosso. Mamma Rita gli fece fare il bagno nel mastello in cortile prima di entrare."], ["settimio", "Quella maglia non si è mai asciugata del tutto. Ce l'ho ancora appesa nello sgabuzzino: profuma di pioggia e di gioventù."]],
+      lose: [["papa", "Il fango ha vinto lui. Ma Nonno diceva sempre: «Finché la palla rotola, c'è speranza». Riprova, Leo."]] },
+    { id: "91", t: "Lo Scoglio del '91", sub: "Con Dario Moretti giovane · sul molo del porto", need: () => prog().n >= 3, cos: "maglia91", bg: "beach",
+      story: [
+        ["dario", "Estate 1991. Io avevo diciotto anni e un sinistro che faceva tremare le saracinesche del porto. Franco mi diceva: «Dario, tu corri troppo dritto». Io rispondevo: «La porta è dritta»."],
+        ["baciccia", "Giocavamo sulla banchina di cemento, senza rimesse: la palla sbatteva sui pescherecci ormeggiati e tornava in campo col profumo di nafta."],
+        ["dario", "Contro di noi i Camallesi del Porto di Genova. Uomini di stiva, duri come il ferro. Giocala come me, Leo: col sinistro pieno e senza paura di nessuno."],
+      ],
+      intro: "Banchina del porto vecchio, 1991. La Rondine Giovani contro <em>i Camallesi del Porto</em>, un tempo solo. Tu sei Dario Moretti a 18 anni. Baciccia gioca con te.",
+      hero: { name: "Dario", style: "buzz", hair: "#1c1410", skin: "#dfab7e", shirt: "#ffffff", acc: "none", num: 11, shot: "saetta", shotName: "SINISTRO DI BANCHINA" },
+      S: { tiro: 40, drib: 32, pass: 24, contr: 22, grinta: 160 }, nico: 33, bond: 7, mate: "Baciccia", us: "Rondine '91", min: 45,
+      team: () => ({ vs: "i Camallesi del Porto", name: "Camallesi del Porto", color: "#222233", defs: [["Ghiglione", 30], ["Crosa", 32], ["L'Ormeggiatore", 33]], atk: [["Bruzzone", 33], ["Il Marinaio", 29]], gk: ["Traverso", 35], power: 32, special: ["CARICO PESANTE", 46] }),
+      win: [["dario", "Vinto con una bomba sotto la traversa! La palla rimbalzò sulla banchina e finì sulla barca del sindaco. Che tempi, Leo. Il sinistro non mente mai."], ["baciccia", "Quella sera Dario mangiò cinque teglie di focaccia da solo. Aveva ancora il sale addosso."]],
+      lose: [["dario", "I Camallesi ci misero nel sacco. Ma il bello del cemento è che ti rialzi subito. Riprova, nipote."]] },
+    { id: "60", t: "Le Cassette di Sardine del '60", sub: "Con Baciccia Senior · porte di legno improvvisate", need: () => prog().n >= 4, cos: "canotta60", bg: "beach",
+      story: [
+        ["baciccia", "1960. Il calcio a Borgo Marino era appena nato. Non c'erano le porte: mettemmo quattro cassette di legno delle sardine. Se la palla passava sopra, si discuteva mezz'ora."],
+        ["nonna", "Io stavo seduta sul muretto a sferruzzare calzini. Ogni volta che la palla andava in mare, toccava a Baciccia tuffarsi a recuperarla. Faceva più chilometri a nuoto che a piedi."],
+        ["baciccia", "Contro i marinai di Capo Noli. Tutti scalzi, tutti abbronzati, tutti con la canotta a righe. Mettiti la canotta, Leo, e non farti buttare in acqua."],
+      ],
+      intro: "Spiaggia del porto, 1960. I Pescatori del Borgo contro <em>i Marinai di Capo Noli</em>, scalzi sulla sabbia. Tu sei Baciccia Senior, numero 4. Ernesta giovane fa il tifo dal muretto.",
+      hero: { name: "Baciccia Sr", style: "messy", hair: "#3a2a1a", skin: "#c88e58", shirt: "#2b5c8f", acc: "none", num: 4, shot: "martello", shotName: "SPONDA DI CASSETTA" },
+      S: { tiro: 32, drib: 28, pass: 26, contr: 34, grinta: 180 }, nico: 35, bond: 8, mate: "Ernesta", us: "Pescatori '60", min: 45,
+      team: () => ({ vs: "i Marinai di Capo Noli", name: "Marinai di Capo Noli '60", color: "#3a7a9a", defs: [["Il Rosso", 28], ["Sciacchetrà", 30], ["Spigola", 31]], atk: [["Calamaro", 32], ["Libeccio", 28]], gk: ["Buran", 34], power: 30, special: ["TIRA E MOLLA", 44] }),
+      win: [["baciccia", "Che trionfo! Si festeggiò con una damigiana di vino bianco e le acciughe fritte al molo. Le cassette di pesce le tenemmo per le partite della domenica."], ["nonna", "Fu la prima volta che vidi Baciccia sorridere senza brontolare. Durò dieci minuti, poi ricominciò a brontolare per le reti."]],
+      lose: [["baciccia", "Perdemmo e la palla finì al largo. La ripescò un peschereccio tre giorni dopo a Monterosso. Riprova, ragazzo!"]] },
+    { id: "95", t: "Il Derby della Focaccia '95", sub: "Con Tonino e il Mister vent'anni fa", need: () => prog().n >= 5, cos: "fornaio95", bg: "stadium",
+      story: [
+        ["tonino", "1995. La storica sfida: Fornai contro Pasticceri del Borgo. Si giocava per l'onore e per la fornitura di colazioni gratis per un anno intero."],
+        ["ruggeri", "Io allenavo i Fornai. Misi Tonino mezza punta: era lento come una brioche, ma aveva un colpo di tacco che profumava di vaniglia."],
+        ["tonino", "Contro di noi la Pasticceria Svizzera di Santa Margherita. Ci misero il cioccolato nei tacchetti per farci scivolare. Ora tocca a te pareggiare i conti!"],
+      ],
+      intro: "Vecchio stadio del Borgo, maggio 1995. I Fornai della Scogliera contro <em>la Pasticceria Svizzera</em>, un tempo solo. Tu sei Tonino il Pasticcere. Franco Ruggeri gioca con te.",
+      hero: { name: "Tonino '95", style: "messy", hair: "#3a2818", skin: "#f0c498", shirt: "#e8dcbc", acc: "none", num: 10, shot: "saetta", shotName: "TACCO ALLA VANIGLIA" },
+      S: { tiro: 36, drib: 34, pass: 30, contr: 24, grinta: 165 }, nico: 34, bond: 8, mate: "Franco", us: "Fornai '95", min: 45,
+      team: () => ({ vs: "la Pasticceria Svizzera", name: "Pasticceria Svizzera", color: "#6a2e38", defs: [["Meringa", 31], ["Zabaione", 33], ["Croccante", 34]], atk: [["Bignè", 35], ["Millefoglie", 31]], gk: ["Panna Calda", 37], power: 34, special: ["TORTA IN FACCIA", 48] }),
+      win: [["tonino", "Focaccia gratis per tutti! Vincemmo all'ultimo secondo con un cucchiaio zuccherato. Franco mi sollevò come una torta nuziale."], ["ruggeri", "Non esagerare, Tonino. Ti sollevai solo per non farti sporcare il campo col gelato. Ma giocasti una gran partita."]],
+      lose: [["tonino", "Ci mangiarono in testa. Ma la rivincita l'abbiamo sempre avuta al bancone. Rifai la partita, Leo!"]] },
   ];
   function leggende(back) {
     back = back || modes;
@@ -9745,24 +9800,44 @@
     const p = FIG_PAGES[page];
     view = { kind: "scene", bg: "borgo", speaker: "pina" }; chap(`Catalogo · ${figPageT(p, r)}`);
     const rows = p.ids.map((id) => {
-      const copies = r.have[id] || 0, open = figOpen(id) || copies > 0;
-      const status = copies > 1 ? `${copies} copie · ${copies - 1} doppioni` : copies ? "nell'album" : open ? "da trovare" : "in attesa della storia";
+      const copies = r.have[id] || 0, isOwned = copies > 0;
+      if (!isOwned) {
+        return `<b>n. ${figNum(id)} · ???</b> — <span style="color:var(--dim)">Non ancora pescata nelle bustine</span>`;
+      }
+      const status = copies > 1 ? `${copies} copie · ${copies - 1} doppioni` : "presente nell'album";
       return `<b>n. ${figNum(id)} · ${esc(figName(id))}</b> — ${RAR[figRar(id)]}, ${esc(status)}`;
     });
-    text("pina", `<b>Catalogo «Campioni della Costa»</b> · pagina ${page + 1}/${FIG_PAGES.length}<br><span style="color:var(--dim)">${esc(p.t)} · ${p.ids.filter((id) => r.have[id] > 0).length}/9 figurine raccolte</span><br><br>${rows.join("<br>")}<br><br><span style="color:var(--dim)">Scegli una figurina per leggere la scheda completa.</span>`);
+    text("pina", `<b>Catalogo «Campioni della Costa»</b> · pagina ${page + 1}/${FIG_PAGES.length}<br><span style="color:var(--dim)">${esc(p.t)} · ${p.ids.filter((id) => r.have[id] > 0).length}/9 figurine raccolte</span><br><br>${rows.join("<br>")}<br><br><span style="color:var(--dim)">Puoi ispezionare la scheda e il modello 3D solo delle figurine che hai già trovato nell'album.</span>`);
     buttons([
-      ...p.ids.map((id) => ({ label: `Scheda n. ${figNum(id)} · ${figName(id)}`, sub: `${RAR[figRar(id)]}${r.have[id] > 1 ? ` · doppioni ${r.have[id] - 1}` : ""}`, disabled: !figOpen(id) && !(r.have[id] > 0), fn: () => figDetail(id, page, back) })),
+      ...p.ids.map((id) => {
+        const isOwned = (r.have[id] || 0) > 0;
+        return {
+          label: isOwned ? `Scheda n. ${figNum(id)} · ${figName(id)}` : `n. ${figNum(id)} · ???`,
+          sub: isOwned ? `${RAR[figRar(id)]}${r.have[id] > 1 ? ` · doppioni ${r.have[id] - 1}` : ""}` : "Non ancora pescata (apri le bustine)",
+          disabled: !isOwned,
+          cls: isOwned ? "hot" : "",
+          fn: () => figDetail(id, page, back)
+        };
+      }),
       { label: "◂ Pagina", disabled: page === 0, fn: () => figCatalog(page - 1, back) },
       { label: "Pagina ▸", disabled: page === FIG_PAGES.length - 1, fn: () => figCatalog(page + 1, back) },
       { label: "◂ Indietro", fn: back || extras },
     ], true);
   }
   function figDetail(id, page, back) {
-    const r = figRec(), copies = r.have[id] || 0, available = figOpen(id) || copies > 0;
+    const r = figRec(), copies = r.have[id] || 0, isOwned = copies > 0;
+    if (!isOwned) {
+      view = { kind: "scene", bg: "borgo", speaker: "pina" }; chap(`Scheda n. ${figNum(id)} · ???`);
+      text("pina", `<b>Figurina n. ${figNum(id)} · ???</b><br>Questa figurina non è ancora presente nel tuo album. Trovala aprendo le bustine all'edicola di Pina per svelare l'identità, la storia e il modello 3D interattivo!`);
+      return buttons([
+        { label: "◂ Torna al catalogo", cls: "pick", fn: () => figCatalog(page, back) },
+        { label: "◂ Indietro", fn: back || extras }
+      ]);
+    }
     const pg = FIG_PAGES.find((p) => p.ids.includes(id)), rarity = RAR[figRar(id)];
     const story = FIG_SP[id] ? FIG_SP_INFO[id] : BIO[id] || "La redazione sta ancora raccogliendo notizie su questa figurina.";
     view = { kind: "scene", bg: "borgo", speaker: "pina" }; chap(`Scheda n. ${figNum(id)} · ${figName(id)}`);
-    text("pina", `<b>${esc(figName(id))}</b><br>${esc(pg ? pg.t : "Campioni della Costa")} · ${esc(rarity)}${copies > 1 ? ` · ${copies} copie (${copies - 1} doppioni)` : copies ? " · presente nell'album" : " · non ancora raccolta"}<br><br>${available ? esc(story) : "Questa pagina è ancora coperta: la redazione aspetta che la storia ti faccia incontrare questo personaggio."}<br><br><span style="color:var(--dim)">Numero ${figNum(id)} di ${FIG_ALL.length}. Le lucide e le leggendarie hanno una stampa speciale.</span>`);
+    text("pina", `<b>${esc(figName(id))}</b><br>${esc(pg ? pg.t : "Campioni della Costa")} · ${esc(rarity)}${copies > 1 ? ` · ${copies} copie (${copies - 1} doppioni)` : " · presente nell'album"}<br><br>${esc(story)}<br><br><span style="color:var(--dim)">Numero ${figNum(id)} di ${FIG_ALL.length}. Le lucide e le leggendarie hanno una stampa speciale.</span>`);
     buttons([
       { label: "✨ Ispeziona Figurina in 3D", sub: "Gira, inclina ed esplora i riflessi olografici", cls: "hot", fn: () => { if (window.open3DCardViewer) window.open3DCardViewer(id, () => figDetail(id, page, back)); } },
       { label: "◂ Torna al catalogo", cls: "pick", fn: () => figCatalog(page, back) },
@@ -14403,6 +14478,8 @@
     const tr = readJSON(TOUR, { titles: 0 }), co = readJSON(COACH, { w: 0, played: 0 });
     text("voce", `<b>Modalità di Gioco</b> ${mnBar(mnPct(mnModi()))}<br>Scegli tra tornei speciali, saghe investigative, multiverso o sfide calcistiche. Tutte indipendenti dal salvataggio principale.`);
     buttons([
+      { label: "📜 Leggende del passato (8 sfide d'epoca)", sub: "Le grandi partite storiche: Wanda '68, Nonno Dante '74, Baciccia Sr '60, Dario '91…", cls: "hot", fn: () => leggende(modes) },
+      { label: "📽️ Momenti in Bianco e Nero (B&W)", sub: "Partite storiche in autentico bianco e nero d'epoca: fumo del '54, Rita '70, Don Aurelio '65…", cls: "hot", fn: () => flashback(modes) },
       { label: "⚽ Il Biliardino del Bar del Porto", sub: "Calcio balilla fisico: ometti, stecche cromate e sfide a Gino, Baciccia e Papà!", cls: "hot", fn: () => { if (window.openBiliardino) window.openBiliardino(0, modes); } },
       { label: "🌊 Il Gozzo di Baciccia · Derby del Golfo", sub: "Navigazione 2.5D nel golfo: recupera i palloni perduti e vinci la Regata!", cls: "hot", fn: () => { if (window.openGozzoGame) window.openGozzoGame("recupero", modes); } },
       { label: "🕹️ Cabinato: Super Rondine '94", sub: "Arcade 16-bit a gettoni nel Bar: scanline CRT, tiri a effetto e scivolate!", cls: "hot", fn: () => { if (window.openArcadeMachine) window.openArcadeMachine(modes); } },
@@ -20053,15 +20130,55 @@
       team: () => ({ vs: "i Guardiani del Faro", name: "Guardiani del Faro", color: "#ffd23f", defs: [["Torcia", 28], ["Lumino", 29], ["Fanale", 30]], atk: [["Lampo", 31], ["Scintilla", 27]], gk: ["Cero", 33], power: 30, special: ["RAGGIO DEL FARO", 42] }),
       win: [["settimio", "Vincemmo. La luce tornò al secondo tempo e nessuno se ne accorse: eravamo tutti abituati alle lanterne. Qualcuno le tiene ancora in garage, per scaramanzia."], ["aurelio", "Una notte così non si dimentica. Si ricorda a lume di candela."]],
       lose: [["settimio", "Perdemmo, e al ritorno della luce vedemmo anche l'errore. È il guaio della luce: fa vedere troppo."]] },
+    { id: "fb54", t: "Il Fumo del Carbone '54 (B&W)", sub: "Con il Nonno macchinista · bianco e nero d'epoca", need: () => prog().n >= 2, cos: "fb_carbone", bg: "stadium", bw: true,
+      story: [["settimio", "1954. Il dopoguerra era appena finito. Il campo era a ridosso dei binari: quando passava il treno merci a vapore, una coltre di fumo nero copriva tutto. Chi tirava a memoria segnava, gli altri perdevano la palla."], ["papa", "Mio padre diceva: «Chiudi gli occhi e ascolta il rumore del ferro». Non c'erano colori: c'era solo il nero della fuliggine e il bianco delle maglie stese al sole."], ["settimio", "Contro i Ferrovieri di Sampierdarena. Duri come i binari. Entra nella nebbia, Leo: è ora di segnare al buio."]],
+      intro: "Campo dei binari, 1954. La Rondine contro <em>i Ferrovieri di Sampierdarena</em>, un tempo solo in bianco e nero tra i fumi del vapore. Tu sei il Nonno macchinista, numero 9.",
+      hero: { name: "Macchinista", style: "slick", hair: "#1a1a1a", skin: "#d0d0d0", shirt: "#222222", acc: "none", num: 9, shot: "martello", shotName: "FUMO DEL DIRETTO" },
+      S: { tiro: 34, drib: 26, pass: 28, contr: 30, grinta: 170 }, nico: 32, bond: 7, mate: "Settimio", us: "Rondine '54", min: 45, bw: true,
+      team: () => ({ vs: "i Ferrovieri di Sampierdarena", name: "Ferrovieri '54", color: "#ffffff", defs: [["Bullone", 28], ["Biella", 29], ["La Ghisa", 30]], atk: [["La Caldaia", 31], ["Il Fochista", 27]], gk: ["Pistone", 33], power: 30, special: ["SBBUFFO DI VAPORE", 44] }),
+      win: [["settimio", "Vinto nel fumo! Quando la nebbia si diradò, la palla era in rete e il portiere cercava ancora i guanti tra i binari."], ["papa", "Il nonno festeggiò con mezzo toscano e una gassosa. Diceva che i gol nel fumo profumavano di libertà."]],
+      lose: [["settimio", "Il treno è passato e ci ha portato via il gol. Si ricomincia: il carbone non si spegne mai."]] },
+    { id: "fb70", t: "La Ghiaia della Stazione '70 (B&W)", sub: "Con Rita ragazza · trecce e passaggi filtranti", need: () => prog().n >= 3, cos: "fb_rita", bg: "beach", bw: true,
+      story: [["rita", "1970. Avevo quattordici anni e le trecce legate con lo spago. Nel piazzale di ghiaia della stazione non c'erano porte: due sassi bianchi e guai a chi tirava alto che la palla finiva sotto i vagoni."], ["nonna", "Tutti dicevano: «Una ragazzina non può giocare con i grandi». Poi Rita faceva passare la palla sotto le gambe del capostazione e tutti stavano zitti."], ["rita", "Contro i Garzoni di Rena Bianca. Scalzi e veloci. Fagli vedere come si disegna il calcio sulla ghiaia."]],
+      intro: "Piazzale di ghiaia, estate 1970. I Ragazzi del Piazzale contro <em>i Garzoni di Rena Bianca</em>, un tempo solo in bianco e nero. Tu sei Rita Moretti a 14 anni. Ernesta giovane gioca con te.",
+      hero: { name: "Rita '70", style: "long", hair: "#111111", skin: "#e0e0e0", shirt: "#ffffff", acc: "none", num: 8, shot: "saetta", shotName: "FILTRANTE SULLA GHIAIA" },
+      S: { tiro: 32, drib: 35, pass: 38, contr: 22, grinta: 165 }, nico: 34, bond: 8, mate: "Ernesta", us: "Piazzale '70", min: 45, bw: true,
+      team: () => ({ vs: "i Garzoni di Rena Bianca", name: "Garzoni di Rena", color: "#333333", defs: [["Lo Zoppo", 29], ["Il Lungo", 31], ["Scoglio", 32]], atk: [["Ghiretto", 33], ["Spillo", 28]], gk: ["Pietra", 34], power: 31, special: ["RIMBALZO DI SASSO", 45] }),
+      win: [["rita", "Che meraviglia! Il pallone passò tra due sassi al millimetro. Il capostazione fischiò il fischietto come se fosse un treno in partenza!"], ["nonna", "Quella sera Rita tornò coi ginocchi sbucciati ma col sorriso più luminoso del golfo."]],
+      lose: [["rita", "La ghiaia ha tradito il rimbalzo. Ma la classe non invecchia mai: riprovaci, Leo!"]] },
+    { id: "fb65", t: "La Partita dei Campanili '65 (B&W)", sub: "Con Don Aurelio seminarista · tonaca e scarpini", need: () => prog().n >= 4, cos: "fb_don", bg: "stadium", bw: true,
+      story: [["aurelio", "1965. Ero seminarista, vent'anni appena. La tonaca la rimboccavo nei calzettoni di lana grigia. Si giocava contro la parrocchia di San Fruttuoso: l'arbitro era il sagrestano cieco da un occhio."], ["baciccia", "Aurelio correva come una lepre. Pregava tra un contrasto e l'altro: «Signore, fa che sia gol, o almeno traversa». Il Signore era quasi sempre dalla parte della traversa."], ["aurelio", "Mettiti le scarpe di cuoio, Leo: la fede aiuta, ma il diagonale sul secondo palo aiuta di più."]],
+      intro: "Prato parrocchiale, autunno 1965. Il Seminario del Borgo contro <em>i Pescatori di San Fruttuoso</em>, un tempo solo in bianco e nero. Tu sei Aurelio a vent'anni. Baciccia Senior gioca con te.",
+      hero: { name: "Aurelio '65", style: "buzz", hair: "#222222", skin: "#dddddd", shirt: "#1a1a1a", acc: "none", num: 10, shot: "saetta", shotName: "BENEDIZIONE D'INCROCIO" },
+      S: { tiro: 36, drib: 30, pass: 32, contr: 26, grinta: 175 }, nico: 35, bond: 8, mate: "Baciccia", us: "Seminario '65", min: 45, bw: true,
+      team: () => ({ vs: "i Pescatori di San Fruttuoso", name: "Pescatori Fruttuoso", color: "#555555", defs: [["La Fune", 30], ["L'Ormeggio", 32], ["Gomena", 33]], atk: [["Il Sagrestano", 34], ["Acciughina", 30]], gk: ["Campanile", 36], power: 33, special: ["TOCCO DI CAMPANA", 47] }),
+      win: [["aurelio", "Miracolo! La palla scheggiò il palo ed entrò mentre suonavano le campane delle sei. Don Gerolamo ci offrì il vino da messa con i biscotti."], ["baciccia", "Fu l'unica volta in cui sentii Aurelio urlare come un dannato. Di gioia, però."]],
+      lose: [["aurelio", "La Provvidenza ci ha rimandati a settembre. Il campo di Dio ha le porte larghe, ma i pali sono stretti. Riprova!"]] },
+    { id: "fb89", t: "I Centodieci Minuti dell'89 (B&W)", sub: "Con l'orologio fermo della torre · recupero infinito", need: () => prog().n >= 5, cos: "fb_orologio", bg: "stadium", bw: true,
+      story: [["ruggeri", "1989. La semifinale infinita. Al minuto 88 un gabbiano si posò sulla lancetta dell'orologio del campanile e la bloccò sul dodici. L'arbitro non aveva il cronometro e continuò a far giocare."], ["papa", "Giocammo per quasi due ore. Il sole tramontò, si accese la luna, e noi eravamo ancora lì a correre con i crampi ai polpacci."], ["ruggeri", "Contro i Corsari di Ponente. Nessuno voleva cedere. Fammi vedere come si resiste quando il tempo si rifiuta di finire."]],
+      intro: "Vecchio stadio del Borgo, 1989. La Rondine contro <em>i Corsari di Ponente</em>, recupero a oltranza in bianco e nero sotto la torre. Tu sei Franco Ruggeri capitano. Enzo Moretti gioca con te.",
+      hero: { name: "Ruggeri '89", style: "slick", hair: "#111111", skin: "#cccccc", shirt: "#333333", acc: "none", num: 6, shot: "martello", shotName: "RECUPERO INFINITO" },
+      S: { tiro: 37, drib: 31, pass: 33, contr: 35, grinta: 190 }, nico: 36, bond: 9, mate: "Enzo", us: "Rondine '89", min: 75, bw: true,
+      team: () => ({ vs: "i Corsari di Ponente", name: "Corsari Ponente", color: "#777777", defs: [["Murena", 32], ["Pietrone", 34], ["La Roccia", 35]], atk: [["Scirocco", 36], ["Libeccio", 32]], gk: ["Torre", 38], power: 35, special: ["MAREA MONTANTE", 50] }),
+      win: [["ruggeri", "Al minuto 112 Enzo trovò il corridoio e la infilò all'incrocio! Il gabbiano volò via e l'arbitro fischiò la fine tra le lacrime."], ["papa", "Restammo sdraiati sull'erba per mezz'ora a guardare le stelle. È stata la partita più lunga e più bella della nostra vita."]],
+      lose: [["ruggeri", "Il tempo si è fermato, ma l'avversario no. Rigioca la partita: prima o poi quel gabbiano volerà via."]] },
   ];
-  Object.assign(COSM, { fb_stretta: { kind: "shirt", label: "Maglia di via Stretta", val: "#b3202c", from: "Una partita di ragazzini, con lo scotch" }, fb_bar: { kind: "shirt", label: "Maglia dei Gelatai", val: "#ff9ec0", from: "Un torneo dei bar di una volta" }, fb_fari: { kind: "hairc", label: "Capelli Argento Lanterna", val: "#c8c8d0", from: "Una notte senza luce" } });
+  Object.assign(COSM, {
+    fb_stretta: { kind: "shirt", label: "Maglia di via Stretta", val: "#b3202c", from: "Una partita di ragazzini, con lo scotch" },
+    fb_bar: { kind: "shirt", label: "Maglia dei Gelatai", val: "#ff9ec0", from: "Un torneo dei bar di una volta" },
+    fb_fari: { kind: "hairc", label: "Capelli Argento Lanterna", val: "#c8c8d0", from: "Una notte senza luce" },
+    fb_carbone: { kind: "shirt", label: "Maglia Carbone '54 (B&W)", val: "#222222", from: "Il fumo del treno a vapore nel 1954" },
+    fb_rita: { kind: "shirt", label: "Fascia di Rita '70 (B&W)", val: "#e0e0e0", from: "La ghiaia della stazione con Rita ragazza" },
+    fb_don: { kind: "hairc", label: "Coppola del Seminarista '65 (B&W)", val: "#444444", from: "La partita dei campanili con Don Aurelio giovane" },
+    fb_orologio: { kind: "shirt", label: "Maglia del Minuto Infinito '89 (B&W)", val: "#4a5460", from: "La partita dell'89 con l'orologio fermo" }
+  });
   function flashback(back) {
     back = back || modes; const r = legRec();
-    view = { kind: "scene", bg: "stadium", speaker: "settimio" }; chap("Flashback");
-    text("settimio", `Altre partite di una volta, che nessuno ha mai raccontato fino in fondo. Le giochi tu, al posto loro. <span style="color:var(--dim)">Giocate vinte ${FB_L.filter((l) => r.won[l.id]).length}/${FB_L.length}</span>`);
+    view = { kind: "scene", bg: "stadium", speaker: "settimio" }; chap("Momenti in Bianco e Nero · Flashback");
+    text("settimio", `Partite e ricordi d'epoca in <b>bianco e nero</b>: le storie autentiche del Borgo prima che arrivassero i colori e la televisione moderna. Le giochi tu al posto loro. <span style="color:var(--dim)">Momenti vissuti: ${FB_L.filter((l) => r.won[l.id]).length}/${FB_L.length}</span>`);
     buttons([...FB_L.map((l) => { let ok = false; try { ok = l.need(); } catch {} return ok ? { label: `${r.won[l.id] ? "✓ " : ""}${l.t}`, sub: r.won[l.id] ? `${l.sub} · vinta` : l.sub, cls: r.won[l.id] ? "" : "hot", fn: () => legIntro(l, () => flashback(back)) } : { label: "???", sub: "Si sblocca più avanti nella storia", disabled: true, fn: () => {} }; }), { label: "◂ Indietro", fn: back }]);
   }
-  MODES8.push(() => prog().n >= 4 ? { label: "Flashback", sub: ((r) => `Altre partite del passato · ${FB_L.filter((l) => r.won[l.id]).length}/${FB_L.length}`)(legRec()), fn: () => flashback(modes) } : null);
+  MODES8.push(() => prog().n >= 2 ? { label: "Momenti in Bianco e Nero", sub: ((r) => `Partite e flashback storici in B&W · ${FB_L.filter((l) => r.won[l.id]).length}/${FB_L.length}`)(legRec()), fn: () => flashback(modes) } : null);
   TRX.push(() => { const w = legRec().won, n = FB_L.filter((l) => w[l.id]).length; return [{ name: "Memoria del Borgo", kind: "cup", c: "#c8b8e8", got: n === FB_L.length, part: `${n}/${FB_L.length}`, hint: "Vinci tutti i flashback" }]; });
   if (/[?&]debug/.test(location.search)) window.__fb = { FB_L, flashback };
   // ================= v14 · SQUADRA DEI SOGNI: scegli tre persone che hai conosciuto e portale al Torneo delle Leggende =================

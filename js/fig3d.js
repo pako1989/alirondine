@@ -157,6 +157,16 @@
   }
 
   function open3DCardViewer(id, onDone) {
+    try {
+      if (typeof window.figRec === "function") {
+        const r = window.figRec();
+        if (!r || !r.have || !r.have[id] || r.have[id] <= 0) {
+          if (window.toast) window.toast("Figurina non presente nel tuo album!", "warn", "🔒");
+          if (typeof onDone === "function") onDone();
+          return;
+        }
+      }
+    } catch (e) {}
     onDoneCb = onDone;
     currentCardId = id;
     isFlipped = false;
