@@ -1217,6 +1217,10 @@
       view.kind === "multiverse" ||
       view.kind === "bluelock" ||
       view.kind === "noir" ||
+      view.kind === "tsubasa" ||
+      view.kind === "thrones" ||
+      view.kind === "futurama" ||
+      view.kind === "citadel" ||
       (view.kind === "enciclopedia" && SET && SET.cardView !== "canvas") ||
       (view.kind === "bacheca" && SET && SET.trophyView === "3d") ||
       (view.kind === "manga" && SET && SET.mangaView !== "canvas")
@@ -14422,7 +14426,11 @@
     view = { kind: "scene", bg: "title" }; chap("Saghe e minigiochi");
     text("voce", "<b>Saghe e minigiochi</b><br>Storie speciali e giochi a parte. Ognuna si gioca per conto suo.");
     buttons([
-      { head: "Saghe" },
+      { head: "Saghe Ispirate & Speciali" },
+      { label: "⚡ Tsubasa · Il Tiro Combinato", sub: "Holly & Benji: Twin Shot ad elica, la Muppet e parate dal palo!", cls: "hot", fn: () => { if (window.openTsubasaMenu) window.openTsubasaMenu(menuSaghe); } },
+      { label: "👑 Westeros · I Cinque Trabucchi", sub: "Game of Thrones: Mappa tattica a feudi, risorse e Re della Notte!", cls: "hot", fn: () => { if (window.openThronesWarMenu) window.openThronesWarMenu(menuSaghe); } },
+      { label: "🛸 Futurama · Champions 3000", sub: "Lega Galattica: 4 pianeti a gravità variabile e innesti di Bender!", cls: "hot", fn: () => { if (window.openFuturamaLeagueMenu) window.openFuturamaLeagueMenu(menuSaghe); } },
+      { label: "🧪 Rick & Morty · La Cittadella", sub: "Squad builder con 5 varianti di Leo, Portal Gun e scontro a Evil Leo!", cls: "hot", fn: () => { if (window.openCitadelStoryMenu) window.openCitadelStoryMenu(menuSaghe); } },
       { label: "🔥 Blue Lock · La Gabbia dell'Ego", sub: "Torneo dei Predatori", cls: "hot", fn: () => { if (window.openBlueLockMode) window.openBlueLockMode(menuSaghe); } },
       { label: "🕵️ Noir · Il Peschereccio Fantasma", sub: "Saga investigativa con Lina", fn: () => { if (window.openNoirStoryMenu) window.openNoirStoryMenu(menuSaghe); } },
       { label: "🌌 Multiverso · La Panda Quantistica", sub: "Saga demenziale con Nonna", fn: () => { if (window.openMultiverseMenu) window.openMultiverseMenu(menuSaghe); } },
@@ -14489,6 +14497,10 @@
       { label: "⚽ Il Biliardino del Bar del Porto", sub: "Calcio balilla fisico: ometti, stecche cromate e sfide a Gino, Baciccia e Papà!", cls: "hot", fn: () => { if (window.openBiliardino) window.openBiliardino(0, modes); } },
       { label: "🌊 Il Gozzo di Baciccia · Derby del Golfo", sub: "Navigazione 2.5D nel golfo: recupera i palloni perduti e vinci la Regata!", cls: "hot", fn: () => { if (window.openGozzoGame) window.openGozzoGame("recupero", modes); } },
       { label: "🕹️ Cabinato: Super Rondine '94", sub: "Arcade 16-bit a gettoni nel Bar: scanline CRT, tiri a effetto e scivolate!", cls: "hot", fn: () => { if (window.openArcadeMachine) window.openArcadeMachine(modes); } },
+      { label: "⚡ Tsubasa · Il Tiro Combinato", sub: "Holly & Benji: Twin Shot ad elica, la Muppet e parate dal palo!", cls: "hot", fn: () => { if (window.openTsubasaMenu) window.openTsubasaMenu(modes); } },
+      { label: "👑 Westeros · I Cinque Trabucchi", sub: "Game of Thrones: Mappa tattica a feudi, risorse e Re della Notte!", cls: "hot", fn: () => { if (window.openThronesWarMenu) window.openThronesWarMenu(modes); } },
+      { label: "🛸 Futurama · Champions 3000", sub: "Lega Galattica: 4 pianeti a gravità variabile e innesti di Bender!", cls: "hot", fn: () => { if (window.openFuturamaLeagueMenu) window.openFuturamaLeagueMenu(modes); } },
+      { label: "🧪 Rick & Morty · La Cittadella", sub: "Squad builder con 5 varianti di Leo, Portal Gun e scontro a Evil Leo!", cls: "hot", fn: () => { if (window.openCitadelStoryMenu) window.openCitadelStoryMenu(modes); } },
       { label: "🔥 Blue Lock · La Gabbia dell'Ego", sub: "Torneo Predatori 5 round · Ego vs Altruismo, anime cut-in e Fiamme Nere", cls: "hot", fn: () => { if (window.openBlueLockMode) window.openBlueLockMode(modes); } },
       { label: "🕵️ Noir · Il Peschereccio Fantasma", sub: "Saga investigativa con Lina · True Detective e Breaking Bad nel Golfo", cls: "hot", fn: () => { if (window.openNoirStoryMenu) window.openNoirStoryMenu(modes); } },
       { label: "🌌 Multiverso · La Panda Quantistica", sub: "Saga demenziale con Nonna · Rick & Morty, Futurama e Trono di Spade", cls: "hot", fn: () => { if (window.openMultiverseMenu) window.openMultiverseMenu(modes); } },
