@@ -1,10 +1,7 @@
-// ================= v24 · LA FENDITURA QUANTISTICA DELLA PANDA 30 =================
+// ================= v25 · LA FENDITURA QUANTISTICA DELLA PANDA 30 =================
 // Saga demenziale e multiversale (Ispirata a Rick & Morty, Futurama e Game of Thrones).
-// Con VERO gameplay profondo interattivo:
-// 1. Minigioco di volo/navigazione in tempo reale nel Tunnel Spaziotemporale
-// 2. Dimensione C-137 (Rick & Morty): Calcio dei Portali con fisica balistica e teletrasporto
-// 3. Dimensione 3000 (Futurama): Sfida a Bender con scudi magnetici, curve EMP e timer consegna focaccia
-// 4. Dimensione Westeros (Game of Thrones): Battaglia alla Barriera di Pesto con Dracarys Shot contro il Re della Notte
+// Con VERO gameplay profondo, controlli su #choices sempre visibili e reattivi,
+// animazioni su Canvas e tutte le 4 dimensioni sbloccate e giocabili subito!
 (function () {
   const K_MULTI = "ali-di-rondine.multiverse-progress";
 
@@ -32,7 +29,8 @@
   }
 
   let onExitCallback = null;
-  let animLoopId = null;
+  let activeAnimId = null;
+  let activeIntervalId = null;
 
   function getStageAlt() {
     return document.getElementById("stageAlt");
@@ -70,7 +68,6 @@
         b.appendChild(s);
       }
       b.onclick = () => {
-        c.innerHTML = "";
         if (window.haptic) window.haptic(15);
         if (o.fn) o.fn();
       };
@@ -96,11 +93,19 @@
     } catch (e) {}
   }
 
-  function closeMultiStage() {
-    if (animLoopId) {
-      cancelAnimationFrame(animLoopId);
-      animLoopId = null;
+  function clearLoops() {
+    if (activeAnimId) {
+      cancelAnimationFrame(activeAnimId);
+      activeAnimId = null;
     }
+    if (activeIntervalId) {
+      clearInterval(activeIntervalId);
+      activeIntervalId = null;
+    }
+  }
+
+  function closeMultiStage() {
+    clearLoops();
     const alt = getStageAlt();
     if (alt) {
       alt.hidden = true;
@@ -130,14 +135,14 @@
       alt.style.overflow = "hidden";
       alt.innerHTML = `
         <img src="img/multiverse_panda.jpg" alt="Panda Quantistica" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:contrast(1.25) brightness(0.9);">
-        <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(20,5,40,0.3) 0%, rgba(14,4,30,0.92) 85%);"></div>
-        <div style="position:relative; z-index:2; padding:12px; display:flex; justify-content:space-between; align-items:flex-end;">
+        <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(20,5,40,0.25) 0%, rgba(14,4,30,0.92) 85%);"></div>
+        <div style="position:relative; z-index:2; padding:10px 12px; display:flex; justify-content:space-between; align-items:flex-end;">
           <div>
-            <div style="font-family:var(--display); font-size:16px; color:#e1bee7; text-shadow:0 0 10px rgba(225,190,231,0.8);">LA PANDA 30 QUANTISTICA</div>
-            <div style="font-size:12px; color:#f3e5f5;">Warp Iperspaziale · Fritto Subatomico ad Alta Densità</div>
+            <div style="font-family:var(--display); font-size:15px; color:#e1bee7; text-shadow:0 0 10px rgba(225,190,231,0.8);">LA PANDA 30 QUANTISTICA</div>
+            <div style="font-size:11px; color:#f3e5f5;">Warp Iperspaziale · Fritto Subatomico ad Alta Densità</div>
           </div>
-          <div style="background:rgba(225,190,231,0.18); border:1.5px solid #ba68c8; border-radius:6px; padding:4px 9px; font-size:11px; color:#fff; text-align:right;">
-            <div>Dimensioni sbloccate: <b>${prog.portals.length}/3</b></div>
+          <div style="background:rgba(225,190,231,0.18); border:1.5px solid #ba68c8; border-radius:6px; padding:4px 8px; font-size:11px; color:#fff; text-align:right;">
+            <div>Dimensioni vinte: <b>${prog.portals.length}/3</b></div>
             <div style="color:var(--gold); font-size:10px;">Record Tunnel: <b>${prog.highScoreFlight} pt</b></div>
           </div>
         </div>
@@ -148,68 +153,54 @@
       "Nonna Ferri",
       `«Leo, chiudi lo sportello con decisione che sennò prende aria! Ho fritto quaranta chili di panissa con l'olio della trattoria e quando ho ingranato la quarta la Panda ha aperto uno squarcio spaziotemporale a 88 miglia orarie!<br>
       Davanti al parabrezza vedo teste giganti nel cielo stile <b>Rick & Morty</b>, una metropoli futuristica con robot alcolizzati stile <b>Futurama</b> e una bufera di ghiaccio su Westeros stile <b>Game of Thrones</b>!<br>
-      Allacciati la cintura: dobbiamo pilotare la Panda nel tunnel e riportare la focaccia a casa!»`
+      Scegli quale dimensione affrontare oppure vola nel tunnel a fare rifornimento!»`
     );
 
-    const b = [
+    showButtons([
       {
-        label: "🚀 Pilota la Panda 30 nel Tunnel Iperspaziale",
-        sub: "Schiva asteroidi di focaccia, raccogli olio tachionico e apri i varchi!",
+        label: "🚀 1. Pilota la Panda nel Tunnel Iperspaziale",
+        sub: "Minigioco arcade a scorrimento: schiva i meteoriti e raccogli l'olio!",
         cls: "hot",
         fn: startHyperspaceFlight
-      }
-    ];
-
-    if (prog.portals.includes("rick") || prog.highScoreFlight >= 100) {
-      b.push({
-        label: "🧪 Dimensione C-137: Il Torneo dei Cromulon (Rick & Morty)",
-        sub: "Calcio dei Portali: sfrutta i varchi dimensionali per segnare!",
+      },
+      {
+        label: "🧪 2. Dimensione C-137: Il Torneo dei Cromulon (Rick & Morty)",
+        sub: "Calcio dei Portali: piega la traiettoria coi varchi verde e arancione!",
         cls: "hot",
-        fn: () => startRickDimension()
-      });
-    }
-
-    if (prog.portals.includes("bender") || prog.highScoreFlight >= 100) {
-      b.push({
-        label: "🤖 Dimensione 3000: Il Derby del Futuro (Futurama)",
-        sub: "Sfida Bender e i suoi scudi elettromagnetici prima del timer!",
+        fn: startRickDimension
+      },
+      {
+        label: "🤖 3. Dimensione 3000: Il Derby del Futuro (Futurama)",
+        sub: "Sfida Bender e i suoi deflettori EMP prima che la focaccia si raffreddi!",
         cls: "hot",
-        fn: () => startBenderDimension()
-      });
-    }
-
-    if (prog.portals.includes("got") || prog.highScoreFlight >= 100) {
-      b.push({
-        label: "⚔️ Westeros Ligure: Il Trono di Focaccia (Game of Thrones)",
+        fn: startBenderDimension
+      },
+      {
+        label: "⚔️ 4. Westeros Ligure: Il Trono di Focaccia (Game of Thrones)",
         sub: "Dracarys Shot infuocato contro gli Estranei e la Barriera di Pesto!",
         cls: "hot",
-        fn: () => startThronesDimension()
-      });
-    }
-
-    b.push(
+        fn: startThronesDimension
+      },
       {
         label: "📖 La Teoria del Fritto Quantico di Nonna",
         sub: "Perché la frittura di acciughe piega la relatività generale",
         fn: showTheory
       },
       {
-        label: "◂ Torna al Menu",
+        label: "◂ Torna al Menu Principale",
         cls: "pick",
         fn: () => {
           closeMultiStage();
           if (onExitCallback) onExitCallback();
         }
       }
-    );
-
-    showButtons(b, true);
+    ], true);
   }
 
   function showTheory() {
     showText(
       "Nonna Ferri",
-      `«Einstein conosceva la fisica, ma non sapeva mantecare il pesto! Quando l'olio d'oliva ligure tocca i 192 gradi e incontra la pastella fredda di farina di ceci, la densità molecolare genera particelle di <i>Frittoni Subatomici</i> con spin invertito.<br>
+      `«Einstein conosceva la fisica, ma non sapeva mantecare il pesto! Quando l'olio d'oliva tocca i 192 gradi e incontra la pastella di farina di ceci, la densità molecolare genera particelle di <i>Frittoni Subatomici</i> con spin invertito.<br>
       La Panda 30 dell'82 non ha la centralina elettronica a frenarla: vibra alla frequenza dell'universo e fora il tessuto della realtà. Semplice, no?»`
     );
     showButtons([
@@ -219,7 +210,7 @@
         fn: startHyperspaceFlight
       },
       {
-        label: "◂ Torna al Cruscotto",
+        label: "◂ Torna al Cruscotto della Panda",
         fn: showHub
       }
     ]);
@@ -237,36 +228,25 @@
     alt.style.position = "relative";
     alt.innerHTML = `
       <canvas id="warpCanvas" width="320" height="200" style="display:block; width:100%; height:100%; background:#0a0416;"></canvas>
-      <div id="warpUi" style="position:absolute; top:6px; left:8px; right:8px; display:flex; justify-content:space-between; align-items:center; background:rgba(18,6,36,0.85); border:1px solid #ba68c8; border-radius:6px; padding:3px 8px; font-size:11px; color:#fff; z-index:10;">
+      <div style="position:absolute; top:4px; left:6px; right:6px; display:flex; justify-content:space-between; align-items:center; background:rgba(18,6,36,0.85); border:1px solid #ba68c8; border-radius:6px; padding:3px 8px; font-size:11px; color:#fff; z-index:10;">
         <span style="color:#e1bee7; font-weight:bold;">🚗 PANDA 30: WARP</span>
         <span id="warpFuel" style="color:var(--gold);">Olio: <b>100%</b></span>
         <span id="warpScore" style="color:#00e5ff;">Punti: <b>0</b></span>
       </div>
-      <div style="position:absolute; bottom:6px; left:6px; right:6px; display:flex; justify-content:space-between; gap:6px; z-index:15;">
-        <button type="button" id="btnSteerL" class="mute" style="flex:1; padding:6px; background:rgba(186,104,200,0.3); border:1.5px solid #ba68c8; color:#fff; font-weight:bold; font-size:13px; border-radius:6px;">◂ STERZA SX</button>
-        <button type="button" id="btnTurbo" class="mute" style="flex:1.2; padding:6px; background:rgba(255,77,90,0.4); border:1.5px solid #ff4d5a; color:#fff; font-weight:bold; font-size:12px; border-radius:6px;">⚡ TURBO PANISSA</button>
-        <button type="button" id="btnSteerR" class="mute" style="flex:1; padding:6px; background:rgba(186,104,200,0.3); border:1.5px solid #ba68c8; color:#fff; font-weight:bold; font-size:13px; border-radius:6px;">STERZA DX ▸</button>
-      </div>
     `;
-
-    showText(
-      "Nonna",
-      `«Usa i pulsanti dello sterzo o le <b>frecce della tastiera (A / D)</b>! Schiva i meteoriti cosmici e i buchi neri, raccogli le fiasche d'olio tachionico per caricare il reattore al 100%!»`
-    );
 
     const canvas = document.getElementById("warpCanvas");
     const ctx = canvas.getContext("2d");
 
     let pandaX = 160;
     let pandaY = 160;
-    let speed = 3.5;
+    let speed = 3.2;
     let fuel = 100;
     let score = 0;
-    let keys = { l: false, r: false, turbo: false };
     let stars = [];
-    let items = []; // { x, y, type: 'oil' | 'rock' | 'wormhole', r: 8 }
-    let gameActive = true;
+    let items = []; // { x, y, type: 'oil' | 'rock' | 'portal', r: 8 }
     let frameCount = 0;
+    let isGameOver = false;
 
     for (let i = 0; i < 45; i++) {
       stars.push({
@@ -277,92 +257,106 @@
       });
     }
 
-    const btnL = document.getElementById("btnSteerL");
-    const btnR = document.getElementById("btnSteerR");
-    const btnT = document.getElementById("btnTurbo");
+    function steer(delta) {
+      if (isGameOver) return;
+      pandaX = Math.max(30, Math.min(290, pandaX + delta));
+      playSynth(440, "sine", 0.06, 0.1);
+      if (window.haptic) window.haptic(10);
+    }
 
-    const pressL = (on) => { keys.l = on; if (on && window.haptic) window.haptic(10); };
-    const pressR = (on) => { keys.r = on; if (on && window.haptic) window.haptic(10); };
-    const pressT = (on) => { keys.turbo = on; if (on) { playSynth(620, "sawtooth", 0.15, 0.18); if (window.haptic) window.haptic(25); } };
+    function turbo() {
+      if (isGameOver || fuel <= 8) return;
+      fuel = Math.max(0, fuel - 10);
+      score += 25;
+      playSynth(680, "sawtooth", 0.2, 0.25);
+      if (window.haptic) window.haptic(25);
+      if (window.toast) window.toast("⚡ SCATTO TURBO PANISSA!", "info", "🚀");
+    }
 
-    btnL.onpointerdown = () => pressL(true);
-    btnL.onpointerup = () => pressL(false);
-    btnL.onpointerleave = () => pressL(false);
-
-    btnR.onpointerdown = () => pressR(true);
-    btnR.onpointerup = () => pressR(false);
-    btnR.onpointerleave = () => pressR(false);
-
-    btnT.onpointerdown = () => pressT(true);
-    btnT.onpointerup = () => pressT(false);
-    btnT.onpointerleave = () => pressT(false);
-
-    const onKeyDown = (e) => {
-      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") pressL(true);
-      if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") pressR(true);
-      if (e.key === " " || e.key === "ArrowUp" || e.key === "w" || e.key === "W") pressT(true);
+    // Comandi da tastiera opzionali
+    const onKey = (e) => {
+      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") steer(-25);
+      if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") steer(25);
+      if (e.key === " " || e.key === "ArrowUp" || e.key === "w" || e.key === "W") turbo();
     };
-    const onKeyUp = (e) => {
-      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") pressL(false);
-      if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") pressR(false);
-      if (e.key === " " || e.key === "ArrowUp" || e.key === "w" || e.key === "W") pressT(false);
-    };
-    window.addEventListener("keydown", onKeyDown);
-    window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("keydown", onKey);
 
-    function step() {
-      if (!gameActive) return;
+    function updateFlightUi() {
+      showText(
+        "Nonna",
+        `«Schiva i sassi spaziali e raccogli le fiasche d'<b>Olio Tachionico</b> (⚡) per mantenere il reattore carico! Usa i pulsanti qui sotto o le <b>frecce della tastiera</b>!»`
+      );
+      showButtons([
+        {
+          label: "◂ Sterza a Sinistra",
+          sub: "Sposta la Panda a sinistra",
+          fn: () => steer(-30)
+        },
+        {
+          label: "⚡ Turbo Panissa (+25 pt)",
+          sub: "Brucia olio per scattare avanti",
+          cls: "hot",
+          fn: turbo
+        },
+        {
+          label: "Sterza a Destra ▸",
+          sub: "Sposta la Panda a destra",
+          fn: () => steer(30)
+        },
+        {
+          label: "🛑 Rientra al Cruscotto della Panda",
+          sub: "Esci dal tunnel",
+          fn: () => {
+            window.removeEventListener("keydown", onKey);
+            showHub();
+          }
+        }
+      ]);
+    }
+    updateFlightUi();
+
+    function flightLoop() {
+      if (isGameOver) return;
       frameCount++;
-
-      // Movimento Panda
-      const curSpeed = keys.turbo && fuel > 5 ? speed * 1.7 : speed;
-      if (keys.turbo && fuel > 5) {
-        fuel -= 0.25;
-        score += 2;
-      } else {
-        score += 1;
-      }
-
-      if (keys.l) pandaX -= curSpeed * 1.1;
-      if (keys.r) pandaX += curSpeed * 1.1;
-      pandaX = Math.max(30, Math.min(290, pandaX));
+      score += 1;
 
       // Spawna oggetti cosmici
-      if (frameCount % 30 === 0) {
+      if (frameCount % 24 === 0) {
         const rnd = Math.random();
         if (rnd < 0.45) {
-          items.push({ x: 40 + Math.random() * 240, y: -10, type: "oil", r: 9 });
-        } else if (rnd < 0.85) {
-          items.push({ x: 30 + Math.random() * 260, y: -10, type: "rock", r: 12 });
+          items.push({ x: 35 + Math.random() * 250, y: -10, type: "oil", r: 9 });
+        } else if (rnd < 0.82) {
+          items.push({ x: 30 + Math.random() * 260, y: -10, type: "rock", r: 11 });
         } else {
-          items.push({ x: 40 + Math.random() * 240, y: -10, type: "portal", r: 15 });
+          items.push({ x: 45 + Math.random() * 230, y: -10, type: "portal", r: 14 });
         }
       }
 
       // Aggiorna oggetti
       for (let i = items.length - 1; i >= 0; i--) {
         const it = items[i];
-        it.y += curSpeed;
+        it.y += speed;
 
-        // Collisione con Panda
+        // Collisione con la Panda
         const dist = Math.hypot(it.x - pandaX, it.y - pandaY);
         if (dist < it.r + 14) {
           if (it.type === "oil") {
             fuel = Math.min(100, fuel + 22);
-            score += 40;
+            score += 35;
             playSynth(880, "sine", 0.18, 0.22);
-            if (window.toast) window.toast("+Olio Tachionico! (+40 pt)", "success", "⚡");
+            if (window.toast) window.toast("+Olio Tachionico! (+35 pt)", "success", "⚡");
             items.splice(i, 1);
             continue;
           } else if (it.type === "rock") {
             fuel = Math.max(0, fuel - 25);
             playSynth(150, "sawtooth", 0.25, 0.3);
-            if (window.toast) window.toast("BOOM! Impatto meteorite!", "error", "💥");
+            if (window.toast) window.toast("BOOM! Impatto meteorite! (-25% olio)", "error", "💥");
             items.splice(i, 1);
             continue;
           } else if (it.type === "portal") {
             // Varco dimensionale raggiunto!
-            gameActive = false;
+            isGameOver = true;
+            window.removeEventListener("keydown", onKey);
             finishFlight(true, score);
             return;
           }
@@ -375,12 +369,12 @@
       ctx.fillStyle = "#0c051a";
       ctx.fillRect(0, 0, 320, 200);
 
-      // Stelle iper-spazio
+      // Stelle
       stars.forEach((s) => {
-        s.y += curSpeed * s.z * 0.8;
+        s.y += speed * s.z * 0.9;
         if (s.y > 200) { s.y = 0; s.x = Math.random() * 320; }
         ctx.fillStyle = s.c;
-        ctx.fillRect(s.x, s.y, s.z, s.z * (keys.turbo ? 4 : 2));
+        ctx.fillRect(s.x, s.y, s.z, s.z * 2.2);
       });
 
       // Disegna oggetti
@@ -392,8 +386,9 @@
           ctx.fill();
           ctx.strokeStyle = "#fff";
           ctx.stroke();
-          ctx.font = "10px sans-serif";
-          ctx.fillText("⚡", it.x - 4, it.y + 4);
+          ctx.fillStyle = "#000";
+          ctx.font = "bold 9px sans-serif";
+          ctx.fillText("⚡", it.x - 4, it.y + 3);
         } else if (it.type === "rock") {
           ctx.beginPath();
           ctx.arc(it.x, it.y, it.r, 0, Math.PI * 2);
@@ -404,7 +399,7 @@
         } else if (it.type === "portal") {
           ctx.beginPath();
           ctx.arc(it.x, it.y, it.r, 0, Math.PI * 2);
-          ctx.fillStyle = "rgba(0, 229, 255, 0.35)";
+          ctx.fillStyle = "rgba(0, 229, 255, 0.4)";
           ctx.fill();
           ctx.strokeStyle = "#00e5ff";
           ctx.lineWidth = 2.5;
@@ -417,21 +412,13 @@
       // Disegna la Panda 30 vista da dietro
       ctx.save();
       ctx.translate(pandaX, pandaY);
-      // Fumo marmitta se turbo
-      if (keys.turbo) {
-        ctx.fillStyle = "rgba(255,77,90,0.6)";
-        ctx.beginPath();
-        ctx.arc(-8, 12, 6, 0, Math.PI * 2);
-        ctx.arc(8, 12, 6, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      // Sagoma carrozzeria
-      ctx.fillStyle = "#d32f2f"; // Rosso Panda
+      // Carrozzeria Rossa
+      ctx.fillStyle = "#d32f2f";
       ctx.fillRect(-16, -10, 32, 20);
-      // Lunotto posteriore
+      // Lunotto blu notte
       ctx.fillStyle = "#1a237e";
       ctx.fillRect(-12, -8, 24, 9);
-      // Targa e luci
+      // Fari e targa
       ctx.fillStyle = "#fff";
       ctx.fillRect(-7, 4, 14, 5);
       ctx.fillStyle = "#ffeb3b";
@@ -445,26 +432,27 @@
       if (elFuel) elFuel.innerHTML = `Olio: <b>${Math.round(fuel)}%</b>`;
       if (elScore) elScore.innerHTML = `Punti: <b>${score}</b>`;
 
-      // Game Over se esaurito carburante
+      // Se carburante esaurito
       if (fuel <= 0) {
-        gameActive = false;
+        isGameOver = true;
+        window.removeEventListener("keydown", onKey);
         finishFlight(false, score);
         return;
       }
 
-      // Se superati 250 punti senza portale, sblocca la scelta dei varchi
-      if (score >= 260) {
-        gameActive = false;
+      // Se superati 250 punti, traguardo varco raggiunto!
+      if (score >= 250) {
+        isGameOver = true;
+        window.removeEventListener("keydown", onKey);
         finishFlight(true, score);
         return;
       }
 
-      animLoopId = requestAnimationFrame(step);
+      activeAnimId = requestAnimationFrame(flightLoop);
     }
 
     function finishFlight(success, finalScore) {
-      window.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("keyup", onKeyUp);
+      clearLoops();
       const prog = getProgress();
       if (finalScore > prog.highScoreFlight) {
         prog.highScoreFlight = finalScore;
@@ -477,18 +465,18 @@
         showText(
           "Nonna Ferri",
           `<b style="color:var(--gold);">SALTO RIUSCITO! PUNTEGGIO: ${finalScore} PT!</b><br>
-          «La Panda ruggisce come una tigre del Bengala alimentata a panissa! Abbiamo agganciato i tre segnali dimensionali principali: scegli dove vuoi fiondarti per sfidare i campioni delle altre realtà!»`
+          «La Panda ruggisce alimentata a panissa! Abbiamo agganciato il tunnel quantico. Scegli in quale realtà vuoi catapultarti per giocare!»`
         );
         showButtons([
           {
             label: "🧪 1. Dimensione C-137: Torneo dei Cromulon (Rick & Morty)",
-            sub: "Calcio dei Portali: piega le traiettorie coi varchi verdi!",
+            sub: "Calcio dei Portali: piega le traiettorie coi varchi!",
             cls: "hot",
             fn: startRickDimension
           },
           {
             label: "🤖 2. Dimensione 3000: Il Derby del Futuro (Futurama)",
-            sub: "Sfida Bender e i suoi deflettori EMP prima che la focaccia si raffreddi!",
+            sub: "Sfida Bender e i suoi deflettori EMP prima dello scadere del timer!",
             cls: "hot",
             fn: startBenderDimension
           },
@@ -500,15 +488,19 @@
           },
           {
             label: "🔄 Vola ancora nel Tunnel Iperspaziale",
-            sub: "Batti il tuo record di punti",
+            sub: "Batti il tuo record personale",
             fn: startHyperspaceFlight
+          },
+          {
+            label: "◂ Torna al Cruscotto della Panda",
+            fn: showHub
           }
         ], true);
       } else {
         showText(
           "Nonna Ferri",
           `<b style="color:#ff4d5a;">OLIO TACHIONICO ESAURITO!</b><br>
-          «Mannaggia alla frittura! Abbiamo urtato troppi sassi cosmici e la Panda ha tossito! Dobbiamo ricaricare la caffettiera e ripartire prima che si chiuda la finestra temporale!»`
+          «Mannaggia alla frittura! Abbiamo urtato troppi sassi cosmici e il motore si è spento! Ricarica la caffettiera e ripartiamo subito!»`
         );
         showButtons([
           {
@@ -520,11 +512,11 @@
             label: "◂ Torna al Cruscotto della Panda",
             fn: showHub
           }
-        ]);
+        ], true);
       }
     }
 
-    animLoopId = requestAnimationFrame(step);
+    activeAnimId = requestAnimationFrame(flightLoop);
   }
 
   // ================= 3. DIMENSIONE C-137: CALCIO DEI PORTALI (RICK & MORTY) =================
@@ -539,36 +531,24 @@
     alt.style.position = "relative";
     alt.innerHTML = `
       <canvas id="rickCanvas" width="320" height="200" style="display:block; width:100%; height:100%; background:#10002b;"></canvas>
-      <div style="position:absolute; top:4px; left:8px; right:8px; display:flex; justify-content:space-between; align-items:center; background:rgba(20,5,40,0.85); border:1px solid #76ff03; border-radius:6px; padding:3px 8px; font-size:11px; color:#fff; z-index:10;">
+      <div style="position:absolute; top:4px; left:6px; right:6px; display:flex; justify-content:space-between; align-items:center; background:rgba(20,5,40,0.85); border:1px solid #76ff03; border-radius:6px; padding:3px 8px; font-size:11px; color:#fff; z-index:10;">
         <span style="color:#76ff03; font-weight:bold;">🧪 TORNEO DEI CROMULON</span>
-        <span id="rickScoreEl" style="color:var(--gold);">Gol: <b>0 / 3</b></span>
+        <span id="rickScoreEl" style="color:var(--gold);">Gol: <b>0 / 2</b></span>
         <span id="rickShotsEl" style="color:#00e5ff;">Tiri rimasti: <b>5</b></span>
       </div>
-      <div style="position:absolute; bottom:6px; left:8px; right:8px; display:flex; gap:6px; z-index:15;">
-        <button type="button" id="btnRickAimUp" class="mute" style="flex:1; padding:5px; background:rgba(118,255,3,0.25); border:1.5px solid #76ff03; color:#fff; font-weight:bold; font-size:12px; border-radius:6px;">▲ ALZA MIRA</button>
-        <button type="button" id="btnRickAimDown" class="mute" style="flex:1; padding:5px; background:rgba(118,255,3,0.25); border:1.5px solid #76ff03; color:#fff; font-weight:bold; font-size:12px; border-radius:6px;">▼ ABBASSA</button>
-        <button type="button" id="btnRickShoot" class="mute" style="flex:1.5; padding:5px; background:#76ff03; color:#000; font-weight:bold; font-size:12px; border-radius:6px;">⚽ TIRA NEL PORTALE!</button>
-      </div>
     `;
-
-    showText(
-      "Testa Cromulon Gigante",
-      `«<b>MOSTRATECI COSA SAPETE FARE!</b><br>
-      Se non segnate almeno 3 gol al portiere alieno Glapflap sfruttando i portali quantici di Nonna, disintegreremo la Terra con un raggio al plasma per farci un campo di calcetto intergalattico!»`
-    );
 
     const canvas = document.getElementById("rickCanvas");
     const ctx = canvas.getContext("2d");
 
     let goals = 0;
     let shotsLeft = 5;
-    let aimAngle = -0.35; // radianti
-    let power = 7.5;
+    let aimAngle = -0.32; // radianti
+    let power = 7.2;
     let ball = { x: 50, y: 155, vx: 0, vy: 0, flying: false };
-    let gk = { y: 90, vy: 1.8, h: 32 };
-    // Due portali quantici: Green P1 e Orange P2
-    let p1 = { x: 120, y: 130, r: 16 };
-    let p2 = { x: 200, y: 65, r: 16 };
+    let gk = { y: 90, vy: 1.8, h: 34 };
+    let p1 = { x: 125, y: 130, r: 16 }; // Portale Verde
+    let p2 = { x: 205, y: 65, r: 16 };  // Portale Arancione
     let portalCooldown = 0;
     let stars = [];
 
@@ -576,53 +556,84 @@
       stars.push({ x: Math.random() * 320, y: Math.random() * 200, c: i % 2 === 0 ? "#76ff03" : "#00e5ff" });
     }
 
-    const btnUp = document.getElementById("btnRickAimUp");
-    const btnDown = document.getElementById("btnRickAimDown");
-    const btnShoot = document.getElementById("btnRickShoot");
-
-    btnUp.onclick = () => { aimAngle = Math.max(-0.85, aimAngle - 0.1); playSynth(440, "sine", 0.08); };
-    btnDown.onclick = () => { aimAngle = Math.min(0.05, aimAngle + 0.1); playSynth(350, "sine", 0.08); };
-    btnShoot.onclick = () => {
+    function shoot(anglePreset) {
       if (ball.flying || shotsLeft <= 0) return;
+      aimAngle = anglePreset;
       ball.flying = true;
       ball.vx = Math.cos(aimAngle) * power;
       ball.vy = Math.sin(aimAngle) * power;
       shotsLeft--;
       playSynth(520, "triangle", 0.15, 0.25);
       if (window.haptic) window.haptic(20);
-    };
+      updateRickUi();
+    }
 
-    function loop() {
-      // Aggiorna portiere
+    function updateRickUi() {
+      showText(
+        "Testa Cromulon Gigante",
+        `«<b>MOSTRATECI COSA SAPETE FARE!</b><br>
+        Segnate almeno 2 gol a Glapflap usando i portali quantici di Nonna, altrimenti disintegreremo la Terra per farci un campo di bocce intergalattico!»`
+      );
+      showButtons([
+        {
+          label: "🌀 1. Tiro a Mezza Altezza nel Portale Verde",
+          sub: "La palla entra nel varco verde ed esce dall'arancione!",
+          cls: "hot",
+          disabled: ball.flying || shotsLeft <= 0,
+          fn: () => shoot(-0.35)
+        },
+        {
+          label: "📐 2. Parabola Alta all'Incrocio",
+          sub: "Tiro a spiovere sopra il portiere alieno",
+          disabled: ball.flying || shotsLeft <= 0,
+          fn: () => shoot(-0.65)
+        },
+        {
+          label: "⚡ 3. Rasoterra Veloce a Effetto",
+          sub: "Tiro teso sul palo lontano",
+          disabled: ball.flying || shotsLeft <= 0,
+          fn: () => shoot(-0.08)
+        },
+        {
+          label: "◂ Torna al Cruscotto della Panda",
+          fn: () => { clearLoops(); showHub(); }
+        }
+      ]);
+    }
+    updateRickUi();
+
+    function rickLoop() {
+      // Movimento portiere
       gk.y += gk.vy;
-      if (gk.y < 35 || gk.y > 145) gk.vy = -gk.vy;
+      if (gk.y < 35 || gk.y > 140) gk.vy = -gk.vy;
 
-      // Aggiorna palla
+      // Movimento palla
       if (ball.flying) {
         ball.x += ball.vx;
         ball.y += ball.vy;
-        ball.vy += 0.08; // gravità leggera dello spazio alieno
+        ball.vy += 0.08;
 
         if (portalCooldown > 0) portalCooldown--;
 
-        // Collisione con Portale Verde P1 -> Teletrasporto a P2!
+        // Entrata in Portale Verde P1 -> Teletrasporto a P2!
         if (portalCooldown === 0 && Math.hypot(ball.x - p1.x, ball.y - p1.y) < p1.r) {
-          ball.x = p2.x + 8;
+          ball.x = p2.x + 10;
           ball.y = p2.y;
-          ball.vx = Math.abs(ball.vx) * 1.15; // accelerazione quantica
+          ball.vx = Math.abs(ball.vx) * 1.2;
           ball.vy = -1.2;
           portalCooldown = 25;
           playSynth(950, "sine", 0.25, 0.3);
-          if (window.toast) window.toast("🌀 TELETRASPORTO QUANTICO!", "info", "⚡");
+          if (window.toast) window.toast("🌀 TELETRASPORTO QUANTICO NEL PORTALE!", "info", "⚡");
         }
 
         // Parata del portiere alieno
-        if (ball.x >= 280 && ball.x <= 295 && ball.y >= gk.y - 16 && ball.y <= gk.y + gk.h) {
+        if (ball.x >= 280 && ball.x <= 295 && ball.y >= gk.y - 12 && ball.y <= gk.y + gk.h) {
           ball.flying = false;
           ball.x = 50; ball.y = 155;
           playSynth(180, "sawtooth", 0.2, 0.25);
           if (window.toast) window.toast("Parata da Glapflap!", "error", "🧤");
           checkEnd();
+          updateRickUi();
         }
         // GOL!
         else if (ball.x > 300 && ball.y >= 30 && ball.y <= 165) {
@@ -632,12 +643,14 @@
           playSynth(880, "sine", 0.3, 0.3);
           if (window.toast) window.toast("⚽ GOOOL QUANTICO DEI CROMULON!", "success", "🌟");
           checkEnd();
+          updateRickUi();
         }
         // Fuori campo
         else if (ball.x > 325 || ball.y > 205 || ball.y < -15) {
           ball.flying = false;
           ball.x = 50; ball.y = 155;
           checkEnd();
+          updateRickUi();
         }
       }
 
@@ -648,14 +661,14 @@
       // Stelle
       stars.forEach(s => { ctx.fillStyle = s.c; ctx.fillRect(s.x, s.y, 1.5, 1.5); });
 
-      // Testa Cromulon nel cielo di sfondo
+      // Testa Cromulon nel cielo
       ctx.fillStyle = "#ffb74d";
       ctx.beginPath();
-      ctx.ellipse(160, 35, 30, 24, 0, 0, Math.PI * 2);
+      ctx.ellipse(160, 35, 28, 22, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = "#000";
-      ctx.fillRect(150, 28, 5, 5); ctx.fillRect(165, 28, 5, 5);
-      ctx.fillRect(152, 44, 16, 4);
+      ctx.fillRect(151, 28, 5, 5); ctx.fillRect(165, 28, 5, 5);
+      ctx.fillRect(153, 44, 14, 4);
 
       // Porta aliena a destra
       ctx.strokeStyle = "#00e5ff";
@@ -667,7 +680,7 @@
       ctx.fillRect(282, gk.y, 10, gk.h);
       ctx.fillStyle = "#fff";
       ctx.fillRect(280, gk.y + 4, 3, 3);
-      ctx.fillRect(280, gk.y + 12, 3, 3);
+      ctx.fillRect(280, gk.y + 14, 3, 3);
 
       // Portale P1 (Verde)
       ctx.save();
@@ -691,22 +704,11 @@
       ctx.stroke();
       ctx.restore();
 
-      // Linea di mira di Leo
-      if (!ball.flying) {
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
-        ctx.setLineDash([4, 4]);
-        ctx.beginPath();
-        ctx.moveTo(ball.x, ball.y);
-        ctx.lineTo(ball.x + Math.cos(aimAngle) * 45, ball.y + Math.sin(aimAngle) * 45);
-        ctx.stroke();
-        ctx.setLineDash([]);
-      }
-
       // Giocatore Leo
       ctx.fillStyle = "#3fa7ff";
       ctx.fillRect(36, 142, 14, 24);
       ctx.fillStyle = "#ffd23f";
-      ctx.fillRect(40, 134, 8, 8); // Testa
+      ctx.fillRect(40, 134, 8, 8);
 
       // Pallone
       ctx.beginPath();
@@ -720,38 +722,38 @@
       // Aggiorna UI testo
       const sc = document.getElementById("rickScoreEl");
       const sh = document.getElementById("rickShotsEl");
-      if (sc) sc.innerHTML = `Gol: <b>${goals} / 3</b>`;
+      if (sc) sc.innerHTML = `Gol: <b>${goals} / 2</b>`;
       if (sh) sh.innerHTML = `Tiri rimasti: <b>${shotsLeft}</b>`;
 
-      animLoopId = requestAnimationFrame(loop);
+      activeAnimId = requestAnimationFrame(rickLoop);
     }
 
     function checkEnd() {
-      if (goals >= 3) {
-        cancelAnimationFrame(animLoopId);
+      if (goals >= 2) {
+        clearLoops();
         const prog = getProgress();
         if (!prog.portals.includes("rick")) prog.portals.push("rick");
         prog.rickScore = Math.max(prog.rickScore, goals);
         saveProgress(prog);
-        if (window.addCoins) window.addCoins(20);
+        if (window.addCoins) window.addCoins(25);
         if (window.triggerAnimeCutin) {
-          window.triggerAnimeCutin({ who: "Leo & Nonna", shotName: "GOL QUANTICO CROMULON!", sfxWord: "DISQUALIFIED!" });
+          window.triggerAnimeCutin({ who: "Leo & Nonna", shotName: "GOL QUANTICO CROMULON!", sfxWord: "I LIKE WHAT YOU GOT!" });
         }
         showText(
           "Cromulon Gigante",
           `«<b>MI PIACE QUELLO CHE AVETE FATTO! BUON LAVORO!</b><br>
-          La Terra è salva per un'altra settimana! Vi concedo 20 monete d'oro cosmiche e l'approvazione del Consiglio Galattico!»`
+          La Terra è salva per un'altra settimana! Vi concedo 25 monete d'oro cosmiche e l'approvazione del Consiglio Galattico!»`
         );
         showButtons([
           { label: "Esplora un'altra dimensione ▸", cls: "hot", fn: showHub },
           { label: "Torna al Menu Principale 🏠", fn: () => { closeMultiStage(); if (onExitCallback) onExitCallback(); } }
         ], true);
       } else if (shotsLeft <= 0) {
-        cancelAnimationFrame(animLoopId);
+        clearLoops();
         showText(
           "Cromulon",
           `«<b>NON ABBASTANZA TALENTO!</b><br>
-          Avete fatto solo ${goals} gol su 3! Glapflap ha parato le vostre speranze. Ricaricate i portali e riprovateci!»`
+          Avete segnato ${goals} gol su 2 richiesti! Glapflap ha parato le vostre speranze. Ricaricate i portali e riprovateci!»`
         );
         showButtons([
           { label: "Riprova la Sfida dei Cromulon ▸", cls: "hot", fn: startRickDimension },
@@ -760,7 +762,7 @@
       }
     }
 
-    animLoopId = requestAnimationFrame(loop);
+    activeAnimId = requestAnimationFrame(rickLoop);
   }
 
   // ================= 4. DIMENSIONE 3000: IL DERBY DEL FUTURO (FUTURAMA) =================
@@ -775,21 +777,12 @@
     alt.style.position = "relative";
     alt.innerHTML = `
       <canvas id="futCanvas" width="320" height="200" style="display:block; width:100%; height:100%; background:#051923;"></canvas>
-      <div style="position:absolute; top:4px; left:8px; right:8px; display:flex; justify-content:space-between; align-items:center; background:rgba(0,53,102,0.85); border:1px solid #00b4d8; border-radius:6px; padding:3px 8px; font-size:11px; color:#fff; z-index:10;">
+      <div style="position:absolute; top:4px; left:6px; right:6px; display:flex; justify-content:space-between; align-items:center; background:rgba(0,53,102,0.85); border:1px solid #00b4d8; border-radius:6px; padding:3px 8px; font-size:11px; color:#fff; z-index:10;">
         <span style="color:#00b4d8; font-weight:bold;">🤖 BENDER DEFLECTOR 3000</span>
         <span id="futTimerEl" style="color:var(--gold);">Timer Focaccia: <b>35s</b></span>
         <span id="futScoreEl" style="color:#90e0ef;">Gol: <b>0 / 2</b></span>
       </div>
-      <div style="position:absolute; bottom:6px; left:8px; right:8px; display:flex; gap:6px; z-index:15;">
-        <button type="button" id="btnFutFeint" class="mute" style="flex:1; padding:5px; background:rgba(255,210,63,0.3); border:1.5px solid #ffd23f; color:#fff; font-weight:bold; font-size:12px; border-radius:6px;">🎭 FINTA ANTI-EMP</button>
-        <button type="button" id="btnFutShoot" class="mute" style="flex:1.5; padding:5px; background:#00b4d8; color:#000; font-weight:bold; font-size:12px; border-radius:6px;">⚡ TIRO MAGNETICO!</button>
-      </div>
     `;
-
-    showText(
-      "Bender Bending Rodríguez",
-      `«Mettetevi comodi e ammirate il mio lucido telaio d'acciaio! Con il mio scudo deflettore a birra e titanio non farete mai gol alla Planet Express! E se la focaccia si raffredda me la mangio io!»`
-    );
 
     const canvas = document.getElementById("futCanvas");
     const ctx = canvas.getContext("2d");
@@ -797,77 +790,106 @@
     let goals = 0;
     let timerSec = 35;
     let benderY = 90;
-    let benderVy = 2.2;
+    let benderVy = 2.0;
     let shieldOn = true;
     let shieldTimer = 0;
     let ball = { x: 60, y: 150, vx: 0, vy: 0, flying: false };
-    let countdownInterval = setInterval(() => {
+
+    activeIntervalId = setInterval(() => {
       timerSec--;
       const el = document.getElementById("futTimerEl");
       if (el) el.innerHTML = `Timer Focaccia: <b>${timerSec}s</b>`;
       if (timerSec <= 0) {
-        clearInterval(countdownInterval);
         checkFutEnd();
       }
     }, 1000);
 
-    const btnFeint = document.getElementById("btnFutFeint");
-    const btnShoot = document.getElementById("btnFutShoot");
-
-    btnFeint.onclick = () => {
-      // La finta disattiva temporaneamente lo scudo di Bender per 2.5 secondi
+    function feint() {
       shieldOn = false;
-      shieldTimer = 140;
+      shieldTimer = 150;
       playSynth(700, "square", 0.12, 0.2);
-      if (window.toast) window.toast("⚡ SCUDO DI BENDER SOVRACCARICATO!", "info", "🔧");
-    };
+      if (window.toast) window.toast("⚡ SCUDO DI BENDER SOVRACCARICATO PER 3 SECONDI!", "info", "🔧");
+      updateBenderUi();
+    }
 
-    btnShoot.onclick = () => {
+    function shoot() {
       if (ball.flying) return;
       ball.flying = true;
       ball.vx = 8.5;
-      ball.vy = -1.8;
+      ball.vy = -1.6;
       playSynth(600, "sawtooth", 0.15, 0.25);
-    };
+      if (window.haptic) window.haptic(20);
+      updateBenderUi();
+    }
+
+    function updateBenderUi() {
+      showText(
+        "Bender Bending Rodríguez",
+        `«Mettetevi comodi e ammirate il mio lucido telaio d'acciaio! Con il mio scudo deflettore a birra e titanio non farete mai gol alla Planet Express! E se la focaccia si raffredda me la mangio io!»`
+      );
+      showButtons([
+        {
+          label: "🎭 1. Esegui la Finta Anti-EMP (Disattiva lo Scudo!)",
+          sub: "Manda in tilt il generatore di Bender per qualche secondo",
+          cls: shieldOn ? "hot" : "",
+          fn: feint
+        },
+        {
+          label: "⚡ 2. Scaglia il Tiro Magnetico in Porta!",
+          sub: shieldOn ? "⚠️ Attenzione: lo scudo di Bender è ancora attivo!" : "🔥 ORA! Lo scudo è a terra!",
+          cls: !shieldOn ? "hot" : "",
+          disabled: ball.flying,
+          fn: shoot
+        },
+        {
+          label: "◂ Torna al Cruscotto della Panda",
+          fn: () => { clearLoops(); showHub(); }
+        }
+      ]);
+    }
+    updateBenderUi();
 
     function futLoop() {
-      // Movimento Bender
       benderY += benderVy;
       if (benderY < 40 || benderY > 140) benderVy = -benderVy;
 
-      // Gestione scudo
       if (shieldTimer > 0) {
         shieldTimer--;
-        if (shieldTimer === 0) shieldOn = true;
+        if (shieldTimer === 0) {
+          shieldOn = true;
+          updateBenderUi();
+        }
       }
 
-      // Aggiorna palla
       if (ball.flying) {
         ball.x += ball.vx;
         ball.y += ball.vy;
 
-        // Se scudo attivo, respinge la palla!
+        // Se scudo attivo
         if (shieldOn && ball.x >= 240 && ball.x <= 265 && ball.y >= benderY - 20 && ball.y <= benderY + 45) {
           ball.flying = false;
           ball.x = 60; ball.y = 150;
           playSynth(150, "sawtooth", 0.25, 0.3);
           if (window.toast) window.toast("Scudo Magnetico: TIRO RESPINTO!", "error", "🛡️");
+          updateBenderUi();
         }
-        // Se scudo disattivato e colpisce la porta -> GOL!
+        // Se scudo a terra -> GOL!
         else if (!shieldOn && ball.x >= 285 && ball.y >= 30 && ball.y <= 165) {
           ball.flying = false;
           ball.x = 60; ball.y = 150;
           goals++;
-          shieldOn = true; // reset
+          shieldOn = true;
           playSynth(880, "sine", 0.35, 0.3);
           if (window.toast) window.toast("⚽ GOL ALLA PLANET EXPRESS!", "success", "🌟");
           const sc = document.getElementById("futScoreEl");
           if (sc) sc.innerHTML = `Gol: <b>${goals} / 2</b>`;
           checkFutEnd();
+          updateBenderUi();
         }
         else if (ball.x > 320 || ball.y < 0 || ball.y > 200) {
           ball.flying = false;
           ball.x = 60; ball.y = 150;
+          updateBenderUi();
         }
       }
 
@@ -875,7 +897,6 @@
       ctx.fillStyle = "#031926";
       ctx.fillRect(0, 0, 320, 200);
 
-      // Linee cyber del campo
       ctx.strokeStyle = "rgba(0, 180, 216, 0.25)";
       ctx.lineWidth = 1;
       ctx.beginPath();
@@ -883,19 +904,17 @@
       ctx.stroke();
 
       // Bender
-      ctx.fillStyle = "#9e9e9e"; // Metallo Bender
+      ctx.fillStyle = "#9e9e9e";
       ctx.fillRect(270, benderY, 18, 36);
-      // Occhi visore
       ctx.fillStyle = "#fff";
       ctx.fillRect(268, benderY + 6, 8, 6);
       ctx.fillStyle = "#000";
       ctx.fillRect(270, benderY + 8, 2, 2);
-      // Antenna
       ctx.strokeStyle = "#9e9e9e";
       ctx.lineWidth = 2;
       ctx.beginPath(); ctx.moveTo(279, benderY); ctx.lineTo(279, benderY - 8); ctx.stroke();
 
-      // Scudo energetico attorno a Bender
+      // Scudo energetico
       if (shieldOn) {
         ctx.strokeStyle = "#00e5ff";
         ctx.lineWidth = 2.5;
@@ -914,13 +933,12 @@
       ctx.fillStyle = "#fff";
       ctx.fill();
 
-      animLoopId = requestAnimationFrame(futLoop);
+      activeAnimId = requestAnimationFrame(futLoop);
     }
 
     function checkFutEnd() {
       if (goals >= 2) {
-        clearInterval(countdownInterval);
-        cancelAnimationFrame(animLoopId);
+        clearLoops();
         const prog = getProgress();
         if (!prog.portals.includes("bender")) prog.portals.push("bender");
         prog.benderScore = Math.max(prog.benderScore, goals);
@@ -928,18 +946,17 @@
         if (window.addCoins) window.addCoins(25);
         showText(
           "Bender",
-          `«Maledizione! Mi avete bruciato i diodi con quella finta! Va bene, prendetevi la mancia da 25 monete e portate la teglia calda a Farnsworth prima che mi metta a piangere grasso sintetico!»`
+          `«Maledizione! Mi avete bruciato i diodi con quella finta! Va bene, prendetevi la mancia da 25 monete e portate la teglia calda al Professore prima che mi metta a piangere grasso sintetico!»`
         );
         showButtons([
           { label: "Esplora un'altra dimensione ▸", cls: "hot", fn: showHub },
           { label: "Torna al Menu Principale 🏠", fn: () => { closeMultiStage(); if (onExitCallback) onExitCallback(); } }
         ], true);
       } else if (timerSec <= 0) {
-        clearInterval(countdownInterval);
-        cancelAnimationFrame(animLoopId);
+        clearLoops();
         showText(
           "Nonna Ferri",
-          `«La focaccia si è raffreddata e Bender se l'è mangiata tutta con una birra da due litri! Dobbiamo rimettere in moto la Panda e riprovare la consegna!»`
+          `«La focaccia si è raffreddata e Bender se l'è mangiata tutta con una birra da due litri! Ricarichiamo la Panda e riproviamo la consegna!»`
         );
         showButtons([
           { label: "Riprova la Sfida di Bender ▸", cls: "hot", fn: startBenderDimension },
@@ -948,7 +965,7 @@
       }
     }
 
-    animLoopId = requestAnimationFrame(futLoop);
+    activeAnimId = requestAnimationFrame(futLoop);
   }
 
   // ================= 5. DIMENSIONE WESTEROS: DRACARYS SHOT (GAME OF THRONES) =================
@@ -963,29 +980,19 @@
     alt.style.position = "relative";
     alt.innerHTML = `
       <canvas id="gotCanvas" width="320" height="200" style="display:block; width:100%; height:100%; background:#0b132b;"></canvas>
-      <div style="position:absolute; top:4px; left:8px; right:8px; display:flex; justify-content:space-between; align-items:center; background:rgba(11,19,43,0.9); border:1px solid #48cae4; border-radius:6px; padding:3px 8px; font-size:11px; color:#fff; z-index:10;">
+      <div style="position:absolute; top:4px; left:6px; right:6px; display:flex; justify-content:space-between; align-items:center; background:rgba(11,19,43,0.9); border:1px solid #48cae4; border-radius:6px; padding:3px 8px; font-size:11px; color:#fff; z-index:10;">
         <span style="color:#48cae4; font-weight:bold;">⚔️ LA BARRIERA DI PESTO</span>
         <span id="gotWindEl" style="color:var(--gold);">Vento del Nord: <b>◄ Medio</b></span>
-        <span id="gotGkHp" style="color:#ff4d5a;">Ghiaccio Re della Notte: <b>100%</b></span>
-      </div>
-      <div style="position:absolute; bottom:6px; left:8px; right:8px; display:flex; gap:6px; z-index:15;">
-        <button type="button" id="btnGotAimL" class="mute" style="flex:1; padding:5px; background:rgba(72,202,228,0.25); border:1.5px solid #48cae4; color:#fff; font-weight:bold; font-size:12px; border-radius:6px;">◄ ANGOLA SX</button>
-        <button type="button" id="btnGotAimR" class="mute" style="flex:1; padding:5px; background:rgba(72,202,228,0.25); border:1.5px solid #48cae4; color:#fff; font-weight:bold; font-size:12px; border-radius:6px;">ANGOLA DX ►</button>
-        <button type="button" id="btnGotDracarys" class="mute" style="flex:1.5; padding:5px; background:#ff5400; color:#fff; font-weight:bold; font-size:12px; border-radius:6px;">🔥 DRACARYS SHOT!</button>
+        <span id="gotGkHp" style="color:#ff4d5a;">Ghiaccio: <b>100%</b></span>
       </div>
     `;
-
-    showText(
-      "Re della Notte",
-      `«<i>L'Inverno è arrivato sui moli di Borgo Marino.</i> La Barriera di Pesto è congelata per l'eternità. Se la vostra fiamma non è pura, diventerete spettri della banchina per mille inverni!»`
-    );
 
     const canvas = document.getElementById("gotCanvas");
     const ctx = canvas.getContext("2d");
 
     let gkHp = 100;
     let aimX = 280;
-    let wind = -1.2; // Spinge verso sinistra
+    let wind = -1.2;
     let ball = { x: 50, y: 160, vx: 0, vy: 0, flying: false, onFire: false };
     let snow = [];
 
@@ -993,15 +1000,9 @@
       snow.push({ x: Math.random() * 320, y: Math.random() * 200, sp: Math.random() * 1.5 + 0.8 });
     }
 
-    const btnL = document.getElementById("btnGotAimL");
-    const btnR = document.getElementById("btnGotAimR");
-    const btnFire = document.getElementById("btnGotDracarys");
-
-    btnL.onclick = () => { aimX = Math.max(240, aimX - 12); playSynth(400, "sine", 0.08); };
-    btnR.onclick = () => { aimX = Math.min(310, aimX + 12); playSynth(460, "sine", 0.08); };
-
-    btnFire.onclick = () => {
+    function fireDracarys(aimPreset) {
       if (ball.flying) return;
+      aimX = aimPreset;
       ball.flying = true;
       ball.onFire = true;
       ball.vx = 7.8;
@@ -1016,22 +1017,54 @@
           sfxWord: "FUOCO E SANGUE!"
         });
       }
-    };
+      updateGotUi();
+    }
+
+    function updateGotUi() {
+      showText(
+        "Re della Notte",
+        `«<i>L'Inverno è arrivato sui moli di Borgo Marino.</i> La Barriera di Pesto è congelata per l'eternità. Se la vostra fiamma non è pura, diventerete spettri della banchina per mille inverni!»`
+      );
+      showButtons([
+        {
+          label: "🔥 1. Dracarys Shot: All'Incrocio dei Pali!",
+          sub: "Fiammata pura per sciogliere la cresta della barriera",
+          cls: "hot",
+          disabled: ball.flying,
+          fn: () => fireDracarys(250)
+        },
+        {
+          label: "🔥 2. Dracarys Shot: Dritto al Cuore del Ghiaccio!",
+          sub: "Bordata centrale rovente contro il Re della Notte",
+          cls: "hot",
+          disabled: ball.flying,
+          fn: () => fireDracarys(285)
+        },
+        {
+          label: "🔥 3. Dracarys Shot: Basso controvento!",
+          sub: "Compensa la bufera con una traiettoria radente",
+          disabled: ball.flying,
+          fn: () => fireDracarys(305)
+        },
+        {
+          label: "◂ Torna al Cruscotto della Panda",
+          fn: () => { clearLoops(); showHub(); }
+        }
+      ]);
+    }
+    updateGotUi();
 
     function gotLoop() {
-      // Neve
       snow.forEach(s => {
         s.y += s.sp;
-        s.x += wind * 0.5;
+        s.x += wind * 0.4;
         if (s.y > 200) { s.y = 0; s.x = Math.random() * 320; }
       });
 
-      // Palla
       if (ball.flying) {
         ball.x += ball.vx;
         ball.y += ball.vy + wind;
 
-        // Impatto con la porta/Re della Notte
         if (ball.x >= 280) {
           ball.flying = false;
           ball.x = 50; ball.y = 160;
@@ -1039,37 +1072,35 @@
           playSynth(220, "sawtooth", 0.35, 0.35);
           if (window.toast) window.toast("BOOM! Il Fuoco Valyriano scioglie il ghiaccio!", "success", "🔥");
           const el = document.getElementById("gotGkHp");
-          if (el) el.innerHTML = `Ghiaccio Re della Notte: <b>${gkHp}%</b>`;
+          if (el) el.innerHTML = `Ghiaccio: <b>${gkHp}%</b>`;
           checkGotEnd();
+          updateGotUi();
         }
       }
 
-      // Render
       ctx.fillStyle = "#0b132b";
       ctx.fillRect(0, 0, 320, 200);
 
-      // Neve
       ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
       snow.forEach(s => ctx.fillRect(s.x, s.y, 2, 2));
 
-      // Barriera di Ghiaccio (Game of Thrones Wall)
+      // Barriera di Ghiaccio
       ctx.fillStyle = "#48cae4";
       ctx.fillRect(285, 20, 35, 160);
       ctx.fillStyle = "#ade8f4";
       ctx.fillRect(288, 25, 29, 150);
 
-      // Re della Notte (Night King)
+      // Re della Notte
       ctx.fillStyle = "#023e8a";
       ctx.fillRect(275, 75, 14, 30);
-      // Occhi azzurri glaciali
       ctx.fillStyle = "#00f5d4";
       ctx.fillRect(274, 80, 3, 3);
       ctx.fillRect(274, 86, 3, 3);
 
-      // Leo in armatura con mantello
+      // Leo in armatura
       ctx.fillStyle = "#ffd23f";
       ctx.fillRect(44, 144, 14, 26);
-      ctx.fillStyle = "#d00000"; // Mantello rosso
+      ctx.fillStyle = "#d00000";
       ctx.fillRect(38, 148, 6, 18);
 
       // Palla infuocata
@@ -1078,20 +1109,12 @@
       ctx.fillStyle = ball.onFire ? "#ff5400" : "#fff";
       ctx.fill();
 
-      // Scia di fiamme
-      if (ball.flying) {
-        ctx.fillStyle = "rgba(255, 183, 3, 0.6)";
-        ctx.beginPath();
-        ctx.arc(ball.x - 8, ball.y, 4, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      animLoopId = requestAnimationFrame(gotLoop);
+      activeAnimId = requestAnimationFrame(gotLoop);
     }
 
     function checkGotEnd() {
       if (gkHp <= 0) {
-        cancelAnimationFrame(animLoopId);
+        clearLoops();
         const prog = getProgress();
         if (!prog.portals.includes("got")) prog.portals.push("got");
         prog.gotScore = 100;
@@ -1123,7 +1146,7 @@
       }
     }
 
-    animLoopId = requestAnimationFrame(gotLoop);
+    activeAnimId = requestAnimationFrame(gotLoop);
   }
 
   window.openMultiverseMenu = openMultiverseMenu;
