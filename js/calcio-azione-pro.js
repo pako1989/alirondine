@@ -15,6 +15,21 @@
     seaWaves: 0,
   };
 
+  window.isProActionFxEnabled = function () {
+    try {
+      if (window.SET && window.SET.proActionFx === false) return false;
+      return true;
+    } catch (e) {
+      return true;
+    }
+  };
+
+  window.azProTriggerNetShake = function (side) {
+    if (!window.isProActionFxEnabled()) return;
+    if (side === 0 || side === "left") AP.netShakeL = 30;
+    else AP.netShakeR = 30;
+  };
+
   window.azProInit = function (A) {
     if (!A) return;
     A.furia = A.furia || 0;
@@ -26,7 +41,7 @@
   };
 
   window.azProTick = function (A) {
-    if (!A || !A.opt || !A.opt.pro) return;
+    if (!A || !A.opt || !A.opt.pro || !window.isProActionFxEnabled()) return;
     AP.seaWaves = (AP.seaWaves + 0.05) % (Math.PI * 2);
 
     // Overdrive decay

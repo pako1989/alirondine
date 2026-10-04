@@ -129,6 +129,9 @@
     const src = a.createBufferSource(); src.buffer = b; return src;
   }
   function sfx(kind) {
+    if (kind === "goal" && typeof window.triggerGoalCelebration === "function") {
+      try { window.triggerGoalCelebration(true); } catch (e) {}
+    }
     if (!AUD.fx) return;
     if ((kind === "crowd" || kind === "goal") && M && AUD.folla !== false) { crowdEv(kind === "goal" ? "roar" : "ooh"); return; }
     const a = ac(); if (!a) return;
@@ -980,6 +983,10 @@
     return c;
   }
   function bgScene0(kind) {
+    if (typeof window.renderDetailedBg === "function" && window.renderDetailedBg(kind, g, W, H, frame)) {
+      if (kind === "borgo") borgoBackdrop();
+      return;
+    }
     const cached = getBgCache(kind);
     g.drawImage(cached, 0, 0);
     if (kind === "beach") for (let i = 0; i < 8; i++) px(((i * 47 + frame / 2) % 340) - 20, 150 + (i % 3) * 14, 26, 2, "#9fd6ff");
@@ -4816,13 +4823,16 @@
   };
   // 15l · Partita classica: quattro aggiunte, ognuna spegnibile (spente = regole di prima)
   const SET_PC = { coppie: ["Schemi a coppie avanzati", "Con grande intesa, ogni compagno sblocca un secondo tiro in coppia (intesa 14)"], rete: ["Rete strappata", "Un tiro potentissimo può bucare la rete: cut-in speciale, un po' di grinta e il conto delle reti strappate"], star: ["Fuoriclasse rivali", "Il capitano avversario carica lo speciale con una frase sua e un cut-in nei colori della squadra"], gkf: ["Portieri che si stancano", "Più tiri affronta, più un portiere cala (il tuo e il loro); all'intervallo recupera"], duelli: ["Duelli 1 contro 1", "Dribbling in attacco (zona 3+): leggi il difensore e scegli finta, scatto o protezione"], area: ["Comandi in area", "Parata, pugno o uscita: li scegli tu col tuo portiere, e anche il portiere avversario li usa"], tempo: ["Tiro a tempo", "Ferma la barra al momento giusto: preciso = tiro più forte, sbagliato = più debole"], fiato: ["Grinta di riserva", "A secco puoi tirare lo stesso (più debole); rifiatare ridà almeno 10"], spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
-  const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false, dis: false, cardView: "holo3d", mangaView: "comic", trophyView: "3d" });
+  const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false, dis: false, cardView: "holo3d", mangaView: "comic", trophyView: "3d", bgArt: "detailed", confetti: true, proActionFx: true });
   function setLoad() {
     const d = setDefault(), s = readJSON(SETK, null);
     if (!s || s.v !== 1) return d;
     const res = { ...d, ...s, t: { ...d.t, ...(s.t || {}) }, pc: { ...d.pc, ...(s.pc && typeof s.pc === "object" ? s.pc : {}) } };
     if (!res.cardView || res.cardView === "canvas") res.cardView = "holo3d";
     if (res.gfx === "arcade_hd" || !res.gfx) res.gfx = "migliorata";
+    if (res.bgArt === undefined) res.bgArt = "detailed";
+    if (res.confetti === undefined) res.confetti = true;
+    if (res.proActionFx === undefined) res.proActionFx = true;
     return res;
   }
   let SET = setLoad();
@@ -4884,6 +4894,9 @@
       ...(AB = audioButtons(again)),
       { label: `Stile Carte & Ritratti: ${SET.cardView === "holo3d" ? "Olografico 3D" : "Classico Pixel Canvas"} ▸`, sub: SET.cardView === "holo3d" ? "Tocca per tornare al Pixel Canvas retrò" : "Tocca per attivare le carte 3D con riflessi Foil", fn: () => { SET.cardView = SET.cardView === "holo3d" ? "canvas" : "holo3d"; save(); again(); } },
       { label: `Stile Trofei: ${SET.trophyView === "3d" ? "3D su Piedistallo" : "Classico Canvas"} ▸`, sub: SET.trophyView === "3d" ? "Tocca per tornare alla bacheca classica su canvas" : "Tocca per esaminare i trofei in 3D con rotazione a 360°", fn: () => { SET.trophyView = SET.trophyView === "3d" ? "canvas" : "3d"; save(); again(); } },
+      { label: `Sfondi 2D Scenari: ${SET.bgArt === "retro" ? "Retrò Semplici" : "Illustrati Dettagliati"} ▸`, sub: SET.bgArt === "retro" ? "Sfondi minimali retrò originali (tocca per attivare gli scenari illustrati)" : "Trattoria, molo, spogliatoi e notte con dettagli vivi e animati (tocca per tornare al retrò)", fn: () => { SET.bgArt = SET.bgArt === "retro" ? "detailed" : "retro"; save(); again(`Sfondi impostati su: ${SET.bgArt === "retro" ? "Retrò" : "Dettagliati"}`); } },
+      { label: `Coriandoli & Celebrazioni: ${SET.confetti !== false ? "Attivi (Oro e Amaranto)" : "Disattivati"} ▸`, sub: SET.confetti !== false ? "Esplosione di coriandoli e festa al gol, vittorie e trofei (tocca per disattivare)" : "Celebrazioni senza coriandoli a schermo (tocca per attivare)", fn: () => { SET.confetti = SET.confetti === false; save(); again(`Coriandoli ${SET.confetti !== false ? "attivati" : "disattivati"}`); if (SET.confetti && typeof window.triggerGoalCelebration === "function") window.triggerGoalCelebration(true); } },
+      { label: `Effetti Calcio d'Azione: ${SET.proActionFx !== false ? "Avanzati Pro (Scia, Rete, Zolle)" : "Base Classico"} ▸`, sub: SET.proActionFx !== false ? "Scia cometa del pallone, rete reattiva e zolle nelle scivolate (tocca per disattivare)" : "Calcio d'azione senza effetti particellari avanzati (tocca per attivare)", fn: () => { SET.proActionFx = SET.proActionFx === false; save(); again(`Effetti Azione ${SET.proActionFx !== false ? "avanzati attivi" : "base"}`); } },
       { label: `Stile Fumetto Manga: ${SET.mangaView === "manga" ? "Attivo" : "Disattivato"} ▸`, sub: SET.mangaView === "manga" ? "Tavole illustrate a fumetto nei momenti chiave" : "Visualizzazione classica su canvas retrò", fn: () => { SET.mangaView = SET.mangaView === "manga" ? "canvas" : "manga"; save(); again(); } },
       { label: `Effetti Anime Manga (Cut-in): ${(window.isAnimeFxEnabled && window.isAnimeFxEnabled()) ? "Attivi" : "Disattivati"} ▸`, sub: (window.isAnimeFxEnabled && window.isAnimeFxEnabled()) ? "Speed-lines, lampo agli occhi e lettering shonen (tocca per disattivare)" : "Stile classico senza cut-in a schermo intero (tocca per attivare)", fn: () => { if (window.toggleAnimeFx) { const now = window.toggleAnimeFx(); again(`Effetti Anime ${now ? "attivati" : "disattivati"}.`); } else { again(); } } },
       { label: `Scene speciali: ${SET.speed} ▸`, sub: "normale · veloce · salta (tocca la scena per saltarla)", fn: () => { SET.speed = { normale: "veloce", veloce: "salta", salta: "normale" }[SET.speed] || "normale"; save(); again(); } },
@@ -10900,8 +10913,14 @@
     gxPlay("final", { res: a > b ? "win" : a < b ? "lose" : "draw", pens: a === b && M.step && M.step.final }, () => { if (!M) return; M._ftx = 2; fullTime0(); });
   }
   function endMatch(win) {
+    if (win && typeof window.triggerGoalCelebration === "function") {
+      try { window.triggerGoalCelebration(false); } catch (e) {}
+    }
     if (win && M && M.step && M.step.final && !M.ch && !M.career && !M._trx && gxAnimOk()) {
       M._trx = 1; $("matchHud").hidden = true;
+      if (typeof window.triggerTrophyCelebration === "function") {
+        try { window.triggerTrophyCelebration(); } catch (e) {}
+      }
       return gxPlay("trophy", {}, () => endMatch0(win));
     }
     endMatch0(win);
@@ -19988,7 +20007,8 @@
   }
   function azGoal(team) {
     const A = AZ; A.sc[team] += A.gold ? 2 : 1; if (A.gold) A.gold = false; A.stat.on[team]++; if (team === 0) { if (A.ball.sp) { A.specGoal = (A.specGoal || 0) + 1; A.stat.spec++; } if (A.firstGoal == null) A.firstGoal = A.t; } A.pause = 80; A.flash = { t: team ? "GOL LORO" : "GOOOL!", c: team ? "#9be2ff" : "#ffd23f", u: A.t + 80 }; A.last = team;
-    if (window.AP) { if (team === 0) window.AP.netShakeR = 36; else window.AP.netShakeL = 36; }
+    if (typeof window.azProTriggerNetShake === "function") window.azProTriggerNetShake(team === 0 ? "right" : "left");
+    if (team === 0 && typeof window.triggerGoalCelebration === "function") window.triggerGoalCelebration(!!A.ball.sp);
     try { sfx(team ? "crowd" : "goal"); } catch {}
   }
   function azTick() {
@@ -20036,6 +20056,12 @@
   }
   function azEnd() {
     const A = AZ, [a, c] = A.sc, r = azRec(), win = a > c, dif = A.opt ? A.opt.diff : "norm", mode = A.opt ? A.opt.mode : "amic", pit = A.opt ? A.opt.pitch : "erba";
+    if (win && typeof window.triggerGoalCelebration === "function") {
+      try { window.triggerGoalCelebration(true); } catch (e) {}
+    }
+    if (win && (mode === "torneo" || mode === "sfida") && typeof window.triggerTrophyCelebration === "function") {
+      try { window.triggerTrophyCelebration(); } catch (e) {}
+    }
     const first = win && dif !== "facile" && !r.beat[A.k]; azClean(); AZ = null; cv.style.touchAction = ""; azBounds("erba");
     if (A.cz) return A.cz.end(a, c);
     r.played++; r.goals += a; if (win) { r.w++; if (dif !== "facile") r.beat[A.k] = 1; if (dif === "duro") r.hard[A.k] = 1; r.pitW[pit] = 1; } else if (a === c) r.d++; else r.l++;
