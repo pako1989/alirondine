@@ -129,6 +129,14 @@
     const src = a.createBufferSource(); src.buffer = b; return src;
   }
   function sfx(kind) {
+    if (typeof window.hapticTrigger === "function") {
+      try {
+        if (kind === "goal") window.hapticTrigger("goal");
+        else if (kind === "kick") window.hapticTrigger("kick");
+        else if (kind === "whistle") window.hapticTrigger("whistle");
+        else if (kind === "special") window.hapticTrigger("special");
+      } catch (e) {}
+    }
     if (kind === "goal" && typeof window.triggerGoalCelebration === "function") {
       try { window.triggerGoalCelebration(true); } catch (e) {}
     }
@@ -1909,7 +1917,12 @@
         sfx("goal"); voci("gol"); cutin = { who: kind === "doppia" ? (S.season === 8 ? "leo" : "tommy") : sid, who2: kind === "doppia" ? heroId() : (S.bond >= 3 ? (sid === "nico" ? null : "nico") : null), text: rip ? "RETE STRAPPATA!" : "GOOOL!", c1: rip ? "#ff4d5a" : "#ffd23f", c2: rip ? "#ffd23f" : "#ff4d5a", t: rip ? 80 : 50, d: rip ? 80 : 50 };
       } else if (power > keep * 0.8 && (parryR < 0.5 || punch)) {
         say(`${pre}${esc(t.gk[0])} respinge coi pugni! Calcio d'angolo, la palla resta a voi.`); M.zone = 4; sfx("crowd"); corner9 = true;
-      } else { say(postHit ? `${pre}<b>PALO!</b> Il pallone torna in campo e lo blocca <b>${esc(t.gk[0])}</b>. Rinvio lungo.` : `${pre}Parata di <b>${esc(t.gk[0])}</b>. Rinvio lungo.`); M.poss = "them"; M.zone = 2; sfx("crowd"); }
+      } else {
+        if (typeof window.hapticTrigger === "function") {
+          window.hapticTrigger(postHit ? "post" : "save");
+        }
+        say(postHit ? `${pre}<b>PALO!</b> Il pallone torna in campo e lo blocca <b>${esc(t.gk[0])}</b>. Rinvio lungo.` : `${pre}Parata di <b>${esc(t.gk[0])}</b>. Rinvio lungo.`); M.poss = "them"; M.zone = 2; sfx("crowd");
+      }
       hud(); if (corner9 && feat("mini")) buttons([{ label: "Batti l'angolo ▸", sub: "Scegli la zona e calcia", cls: "hot", fn: matchCorner }, { label: "Gioca corto", sub: "Riparti dalla zona 4", fn: turn }]); else buttons([{ label: "Avanti ▸", fn: turn }]);
     };
     // scontro: speciale contro parata speciale, solo quando è in bilico
@@ -1935,6 +1948,7 @@
     const st = S.st, hi = pcOn("def") && M.dI && M.dI.a === a.name ? M.dI.I : null, hm = (w, g = 0.08, b = 0.08) => (!hi ? 0 : hi === w ? g : -b); M.dI = null;
     if (kind === "tackle") {
       spend(6); tick(3, 5);
+      if (typeof window.hapticTrigger === "function") window.hapticTrigger("tackle");
       const p = pcTack(a, hm("drib"));
       if (Math.random() < clamp(p + (M.cup ? M.cup.support * 0.04 : 0), 0.15, 0.96)) { M.poss = "us"; M.zone = clamp(6 - M.zone, 1, 3); if (M.cup && M.cup.rule === "win-ball") M.cup.done = true; ttCounter(); say(`Scivolata pulita su <b>${esc(a.name)}</b>! Palla vostra, zona ${M.zone}.${M.cup && M.cup.rule === "win-ball" ? " Recupero riuscito: ora costruisci l'azione." : ""}`); }
       else { M.zone += Math.random() < DF.run2[hLv()] ? 2 : 1; say(`<b>${esc(a.name)}</b> ti salta e avanza${M.zone >= 5 && hLv() ? " di corsa, fino in area" : ""}.`); gxCardMaybe(a); }
@@ -1982,8 +1996,14 @@
       if (skipA !== true && power !== 0) return shotAnim({ kind: special ? "opp_sp" : "opp", res: power > save ? "goal" : "save", us: false, team: M.team, aim, dive, gatto: !!mult }, () => resolve(dive, mult, true));
       view = { kind: "match" };
       if (power === 0) { say(`Dario tira… altissimo, sopra la traversa. Lo stadio fischia. Lui non alza lo sguardo.`); }
-      else if (power > save) { M.score[1]++; sfx("crowd"); say(`Tiro di <b>${esc(a.name)}</b> a ${SIDES[aim]}${dive === aim ? `, ${gkN()} ci arriva ma non basta` : `, ${gkN()} va dall'altra parte`}… gol. ${M.score[0]}–${M.score[1]}.`); }
-      else { sfx("crowd"); voci("parata"); say(`<b>${gkSave()}</b> ${dive === aim ? (Math.random() < 0.5 ? (gkN() === "Nico" ? "Tuffo perfetto! «GATTO VOLANTE!» urla, rialzandosi." : "Tuffo perfetto! Si rialza come se niente fosse.") : "L'aveva letto. La blocca in due tempi.") : "Si era buttato male, ma allunga un piede all'ultimo. Miracolo!"}`); }
+      else if (power > save) {
+        if (typeof window.hapticTrigger === "function") window.hapticTrigger("oppGoal");
+        M.score[1]++; sfx("crowd"); say(`Tiro di <b>${esc(a.name)}</b> a ${SIDES[aim]}${dive === aim ? `, ${gkN()} ci arriva ma non basta` : `, ${gkN()} va dall'altra parte`}… gol. ${M.score[0]}–${M.score[1]}.`);
+      }
+      else {
+        if (typeof window.hapticTrigger === "function") window.hapticTrigger("save");
+        sfx("crowd"); voci("parata"); say(`<b>${gkSave()}</b> ${dive === aim ? (Math.random() < 0.5 ? (gkN() === "Nico" ? "Tuffo perfetto! «GATTO VOLANTE!» urla, rialzandosi." : "Tuffo perfetto! Si rialza come se niente fosse.") : "L'aveva letto. La blocca in due tempi.") : "Si era buttato male, ma allunga un piede all'ultimo. Miracolo!"}`);
+      }
       if (preO) $("text").querySelector(".t").insertAdjacentHTML("afterbegin", preO);
       M.poss = "us"; M.zone = 1;
       if (M.areaPunch) { M.areaPunch = false; if (!(power > save)) { M.poss = "them"; M.zone = 4; $("text").querySelector(".t").insertAdjacentHTML("beforeend", " Respinta in angolo: restano in attacco."); } }
@@ -2259,7 +2279,7 @@
         const guess = serious ? pick(["sx", "dx", "centro"]) : "altro";
         const scored = side === "rondine" ? true : side === "foglia" ? Math.random() < 0.8 : guess !== side || Math.random() < 0.35;
         sfx("kick");
-        cutin = { who: "leo", text: side === "rondine" ? "TIRO DELLA RONDINE" : side === "foglia" ? "FOGLIA SECCA" : "RIGORE DECISIVO", c1: "#b3202c", c2: "#ffd23f", t: 70, d: 70, done: () => shotAnim({ kind: side === "rondine" ? "rondine" : side === "foglia" ? "foglia" : "pen", res: scored ? "goal" : "save", us: true, team: M.team, aim: SA_X[side] ? side : pick(["sx", "dx"]), dive: scored ? null : (SA_X[side] ? side : null) }, () => { M.score[0] += scored ? 1 : 0; sfx(scored ? "goal" : "crowd"); say(scored ? "<b>GOL!</b> La rete si gonfia. Hai segnato." : ma7 ? "Vannucci si allunga e la tocca. Il pallone torna indietro, storto. Come dal muro, la prima volta." : or6 ? "Stål si tuffa nel momento esatto, né prima né dopo. Il sei per cento, stavolta, resta in tribuna." : lu ? "Garnier intuisce e para. Guarda il cielo, poi guarda te, e sembra quasi dispiaciuto." : mr ? "Dario intuisce e para. Poi resta seduto sull'erba, ti guarda, e scuote la testa: «Scusa, piccolo. Stavolta era vero.»" : br ? "Wellington intuisce e para. Jojo ti abbraccia, e sembra dispiaciuto davvero." : s2 ? "Orsini intuisce e para. Bruno ti passa accanto e non dice niente." : `Dario intuisce e para. Si rialza e ti tende la mano.`); buttons([{ label: "Avanti ▸", fn: () => endMatch(scored) }]); }) };
+        cutin = { who: "leo", text: side === "rondine" ? "TIRO DELLA RONDINE" : side === "foglia" ? "FOGLIA SECCA" : "RIGORE DECISIVO", c1: "#b3202c", c2: "#ffd23f", t: 70, d: 70, done: () => shotAnim({ kind: side === "rondine" ? "rondine" : side === "foglia" ? "foglia" : "pen", res: scored ? "goal" : "save", us: true, team: M.team, aim: SA_X[side] ? side : pick(["sx", "dx"]), dive: scored ? null : (SA_X[side] ? side : null) }, () => { M.score[0] += scored ? 1 : 0; sfx(scored ? "goal" : "crowd"); if (!scored && typeof window.hapticTrigger === "function") window.hapticTrigger("save"); say(scored ? "<b>GOL!</b> La rete si gonfia. Hai segnato." : ma7 ? "Vannucci si allunga e la tocca. Il pallone torna indietro, storto. Come dal muro, la prima volta." : or6 ? "Stål si tuffa nel momento esatto, né prima né dopo. Il sei per cento, stavolta, resta in tribuna." : lu ? "Garnier intuisce e para. Guarda il cielo, poi guarda te, e sembra quasi dispiaciuto." : mr ? "Dario intuisce e para. Poi resta seduto sull'erba, ti guarda, e scuote la testa: «Scusa, piccolo. Stavolta era vero.»" : br ? "Wellington intuisce e para. Jojo ti abbraccia, e sembra dispiaciuto davvero." : s2 ? "Orsini intuisce e para. Bruno ti passa accanto e non dice niente." : `Dario intuisce e para. Si rialza e ti tende la mano.`); buttons([{ label: "Avanti ▸", fn: () => endMatch(scored) }]); }) };
         $("choices").innerHTML = "";
       };
       buttons([

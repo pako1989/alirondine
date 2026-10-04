@@ -81,18 +81,100 @@
   window.toggleLog = toggleLog;
   window.checkSeasonalEvents = checkSeasonalEvents;
 
-  // Feedback aptico (vibrazione) ottimizzato per smartphone e browser mobile
+  // ================= FEEDBACK APTICO AVANZATO (HAPTIC ENGINE) =================
+  const HAPTIC_STORAGE_KEY = "ali-di-rondine.haptic-mode";
+  const HAPTIC_MODES = [
+    { id: "full", label: "Pieno (Tutto attivo)", icon: "📳", desc: "Vibrazione completa su gol, tiri, contrasti, parate, eventi e pulsanti" },
+    { id: "match", label: "Solo Partite (Gol & Azioni)", icon: "📳", desc: "Vibrazione solo per gol, tiri speciali, pali, parate e fischi" },
+    { id: "off", label: "Disattivato", icon: "📴", desc: "Nessuna vibrazione" }
+  ];
+
+  let curHapticIdx = 0;
+  try {
+    const savedHaptic = localStorage.getItem(HAPTIC_STORAGE_KEY) || "full";
+    const foundH = HAPTIC_MODES.findIndex(m => m.id === savedHaptic);
+    if (foundH >= 0) curHapticIdx = foundH;
+  } catch (e) {}
+
+  const HAPTIC_PATTERNS = {
+    tap: 12,
+    hot: 24,
+    kick: 35,
+    whistle: [70, 40, 120],
+    special: [35, 25, 60, 30, 140],
+    goal: [90, 40, 90, 40, 190, 50, 120],
+    oppGoal: [150, 70, 140],
+    post: [60, 30, 80],
+    save: [100, 30, 75],
+    tackle: [75, 35, 85],
+    heartbeat: [40, 120, 40],
+    slot: [20, 30, 20]
+  };
+
+  function getHapticMode() {
+    return HAPTIC_MODES[curHapticIdx].id;
+  }
+
+  function updateHapticButton() {
+    const btn = $("hapticBtn");
+    if (!btn) return;
+    const mode = HAPTIC_MODES[curHapticIdx];
+    btn.textContent = mode.icon;
+    btn.title = `Feedback Aptico: ${mode.label} (Clicca per cambiare)`;
+    btn.style.opacity = mode.id === "off" ? "0.45" : "1";
+    btn.setAttribute("aria-label", `Feedback Aptico: ${mode.label}`);
+  }
+
+  function setHapticMode(modeId, notify = false) {
+    const idx = HAPTIC_MODES.findIndex(m => m.id === modeId);
+    if (idx >= 0) curHapticIdx = idx;
+    const mode = HAPTIC_MODES[curHapticIdx];
+    try { localStorage.setItem(HAPTIC_STORAGE_KEY, mode.id); } catch (e) {}
+    updateHapticButton();
+    if (notify) {
+      showToast(`Aptico: ${mode.label}`, "info", mode.icon);
+      if (mode.id !== "off" && typeof navigator !== "undefined" && navigator.vibrate) {
+        try { navigator.vibrate(mode.id === "full" ? [25, 35, 50] : 35); } catch (e) {}
+      }
+    }
+  }
+
+  function cycleHapticMode() {
+    curHapticIdx = (curHapticIdx + 1) % HAPTIC_MODES.length;
+    setHapticMode(HAPTIC_MODES[curHapticIdx].id, true);
+  }
+
+  function triggerHaptic(type = "tap") {
+    const mode = getHapticMode();
+    if (mode === "off") return;
+    if (mode === "match" && (type === "tap" || type === "hot" || type === "slot")) return;
+
+    const pattern = HAPTIC_PATTERNS[type] != null ? HAPTIC_PATTERNS[type] : (typeof type === "number" || Array.isArray(type) ? type : 15);
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      try { navigator.vibrate(pattern); } catch (e) {}
+    }
+  }
+
   window.haptic = function (pattern = 15) {
+    const mode = getHapticMode();
+    if (mode === "off") return;
+    if (mode === "match" && typeof pattern === "number" && pattern < 30) return;
     if (typeof navigator !== "undefined" && navigator.vibrate) {
       try { navigator.vibrate(pattern); } catch (e) {}
     }
   };
 
+  window.hapticTrigger = triggerHaptic;
+  window.cycleHapticMode = cycleHapticMode;
+  window.setHapticMode = setHapticMode;
+  window.getHapticMode = getHapticMode;
+  window.updateHapticButton = updateHapticButton;
+
   // Risposta aptica globale al tocco sui pulsanti
   document.addEventListener("click", (e) => {
     const btn = e.target.closest("button");
     if (btn && !btn.disabled) {
-      window.haptic(btn.classList.contains("hot") ? 25 : 12);
+      triggerHaptic(btn.classList.contains("hot") ? "hot" : "tap");
     }
   }, { passive: true });
 
@@ -271,6 +353,9 @@
     checkSeasonalEvents();
     const themeBtn = $("themeBtn");
     if (themeBtn) themeBtn.onclick = cycleTheme;
+    const hapticBtn = $("hapticBtn");
+    if (hapticBtn) hapticBtn.onclick = cycleHapticMode;
+    updateHapticButton();
     const radioBtn = $("radioBtn");
     if (radioBtn) radioBtn.onclick = openRadioModal;
     const rosterBtn = $("rosterBtn");
