@@ -25,6 +25,7 @@
     </div>
     <div class="topr" role="toolbar" aria-label="Controlli rapidi">
       <button type="button" class="mute" id="homeBtn" aria-label="Home" title="Torna alla Home / Menu Principale">🏠</button>
+      <button type="button" class="mute" id="arenaBtn" aria-label="Arena 2D HD" title="Arena 2D HD del Borgo (Tactical Emblem, Action 60fps, Street Cage, Match Director)">🎮</button>
       <button type="button" class="mute" id="btn3d" aria-label="Stadio 3D" title="Stadio 3D · Sfida dei Tiri (Tiro della Rondine 3D)">⚽</button>
       <button type="button" class="mute" id="rosterBtn" aria-label="Roster e Talenti" title="Roster & Talenti del Borgo (Formazione ed Equipaggiamento)">🛡️</button>
       <button type="button" class="mute" id="radioBtn" aria-label="Radiolina" title="La Radiolina del Borgo (Musica & Frequenze)">📻</button>
@@ -116,12 +117,19 @@
 <script src="js/arena-2d-hd.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/game.js"></script>
+<script src="js/borgo-expansions.js"></script>
 <script>
 var homeBtn = document.getElementById("homeBtn");
 if (homeBtn) {
   homeBtn.onclick = function () {
     if (window.title) window.title();
     if (window.toast) window.toast("Menu Principale", "info", "🏠");
+  };
+}
+var arenaBtn = document.getElementById("arenaBtn");
+if (arenaBtn) {
+  arenaBtn.onclick = function () {
+    if (window.openArena2DHDModal) window.openArena2DHDModal();
   };
 }
 var btn3d = document.getElementById("btn3d");
