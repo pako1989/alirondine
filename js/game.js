@@ -75,6 +75,20 @@
     solmar:    { vs: "l'Atlético Solmar", name: "Atlético Solmar", color: "#f2f2f2", defs: [["Arrieta", 48], ["Beltrán", 50], ["Quiroga", 52]], atk: [["Iker Solano", 60], ["Marcos Vela", 53]], gk: ["Unai Lasa", 76], power: 56, special: ["TIKI-TAKA DEL MARE", 70] },
     lumiere:   { vs: "l'Olympique Lumière", name: "Olympique Lumière", color: "#1a2a6b", defs: [["Lefèvre", 53], ["Kanouté", 55], ["Dufresne", 57]], atk: [["Raphaël Morel", 68], ["Samy Benali", 60]], gk: ["Antoine Garnier", 80], power: 63, special: ["LAMPO DI LUMIÈRE", 80] },
     falchi:    { vs: "i Falchi di Bologna", name: "Falchi di Bologna", color: "#b8862a", defs: [["Righi", 38], ["Zanardi", 40], ["Monari", 41]], atk: [["Nino Tabellini", 44], ["Guermandi", 39]], gk: ["Minelli", 65], power: 41, special: ["PICCHIATA", 58] },
+    // ===== SQUADRE DELLE SAGHE SPECIALI =====
+    muppet:    { vs: "la Muppet della Riviera", name: "La Muppet (Mark Lenders)", color: "#1b1b1b", defs: [["Baroni", 28], ["Muro", 30], ["Roccia", 32]], atk: [["Brando 'Il Tigre' De Marchi", 38]], gk: ["Gino Baroni", 42], power: 34, special: ["TIRO DELLA TIGRE", 52] },
+    gemelli:   { vs: "i Gemelli della Falesia", name: "I Gemelli della Falesia", color: "#7209b7", defs: [["Sandro", 30], ["Pino", 32], ["Costa", 34]], atk: [["Dario Trabucco", 37], ["Mirko Trabucco", 37]], gk: ["Balzo Felino", 44], power: 36, special: ["CATAPULTA INFERNALE", 54] },
+    flynet:    { vs: "la Flynet del Turchino", name: "Flynet del Monte Turchino", color: "#0077b6", defs: [["Gelo", 32], ["Neve", 34], ["Valanga", 36]], atk: [["Matteo Neve", 39]], gk: ["Walter Muraglia", 46], power: 38, special: ["TIRO A VALANGA", 56] },
+    sanfrancis:{ vs: "il San Francis (Benji)", name: "San Francis del Molo", color: "#ffb703", defs: [["Ferraris", 35], ["Costa", 37], ["Riva", 39]], atk: [["Julian Riva", 43]], gk: ["Benji Costantini", 62], power: 42, special: ["PARATA LEGGENDARIA", 66] },
+    lanterna_got: { vs: "la Casata Ruggeri", name: "Fortezza della Lanterna", color: "#ffb703", defs: [["Mastino", 30], ["Lancia", 32], ["Scudo", 34]], atk: [["Ser Ruggeri", 38]], gk: ["Torre di Pietra", 42], power: 35, special: ["FALANGE DI FERRO", 50] },
+    ferri_got:    { vs: "la Casata Ferri", name: "Castel Forno", color: "#fb8500", defs: [["Lievito", 32], ["Farina", 34], ["Teglia", 36]], atk: [["Lady Nonna", 40]], gk: ["Braciere Ardente", 44], power: 37, special: ["FIAMMA DEL FORNO", 52] },
+    baciccia_got: { vs: "la Casata Baciccia", name: "Porto Trabucco", color: "#06d6a0", defs: [["Onda", 34], ["Corrente", 36], ["Scoglio", 38]], atk: [["Sire Baciccia", 41]], gk: ["Gozzo d'Acciaio", 46], power: 39, special: ["ONDA DEI TRABUCCHI", 55] },
+    night_king:   { vs: "l'Armata del Re della Notte", name: "L'Esercito della Notte", color: "#03045e", defs: [["Gelo", 40], ["Tormenta", 42], ["Ghiaccio", 44]], atk: [["Il Re della Notte", 48]], gk: ["Barriera Eterna", 56], power: 45, special: ["BUFERA ETERNA", 68] },
+    vergon6:      { vs: "i Nibbloniani di Vergon 6", name: "Nibbloniani Selvaggi", color: "#9b5de5", defs: [["Zanna", 30], ["Morso", 32], ["Artiglio", 34]], atk: [["Lord Nibbler", 38]], gk: ["Occhio Galattico", 42], power: 35, special: ["SALTO IPERSPAZIALE", 50] },
+    omicron8:     { vs: "i Giganti di Omicron Persei 8", name: "Omicron Persei 8", color: "#f15bb5", defs: [["Distruttore", 36], ["Sbriciola", 38], ["Schiaccia", 40]], atk: [["Lrrr di Omicron Persei 8", 45]], gk: ["Ndnd", 48], power: 42, special: ["SCHIACCIATA COSMICA", 62] },
+    mecha_bender: { vs: "l'All-Star Mecha di Bender", name: "Bender All-Stars 3000", color: "#00f5d4", defs: [["Pinza", 38], ["Don Bot", 40], ["Calculon", 42]], atk: [["Bender Rodriguez", 47]], gk: ["Titanio Lucido", 52], power: 44, special: ["CALCIO AL TITANIO", 64] },
+    citadel_army: { vs: "la Milizia della Cittadella", name: "Milizia della Cittadella", color: "#76ff03", defs: [["Leo Clone 1", 32], ["Leo Clone 2", 34], ["Leo Guard", 36]], atk: [["Leo Cyborg", 40]], gk: ["Portal Guard", 44], power: 38, special: ["VARCO DIMENSIONALE", 56] },
+    evil_leo:     { vs: "l'Armata di Evil Leo", name: "Evil Leo Syndicate", color: "#ff0054", defs: [["Mecha Leo", 40], ["Samurai Leo", 42], ["Dark Leo", 44]], atk: [["Evil Leo (Benda sull'Occhio)", 49]], gk: ["Reattore Quantico", 58], power: 47, special: ["DISINTEGRAZIONE", 70] },
   };
 
   // ================= STATO =================
@@ -23866,6 +23880,19 @@
   window.setChapter = (t) => chap(t);
   window.renderText = (who, html) => text(who, html);
   window.renderButtons = (list, one) => buttons(list, one);
+  window.azStartSagaMatch = function(teamKey, options, onEnd) {
+    closeAltStage();
+    const opt = options || { mode: "amic", pitch: "erba", diff: "norm", pu: true, roles: ["nico"] };
+    azStart(teamKey, () => onEnd(0, 0), true, opt);
+    if (AZ) {
+      AZ.cz = {
+        names: ["Leo", "Nico", "Dario"],
+        sc: [],
+        last: null,
+        end: (a, c) => onEnd(a, c)
+      };
+    }
+  };
 
   title();
   render();

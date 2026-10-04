@@ -1,12 +1,10 @@
-// ================= SAGA 2: GAME OF THRONES · LA GUERRA DEI CINQUE TRABUCCHI =================
-// Tributo epico a George R.R. Martin, Westeros, le Casate e la Battaglia della Notte.
-// Con vero gameplay profondo:
-// 1. Mappa tattica a feudi costieri (Guerra di Conquista)
-// 2. Gestione risorse: Oro delle Decime, Barili di Pesto/Viveri, Morale della Guarnigione
-// 3. Battaglie d'assedio medievali in armatura (Falange di Scudi, Cavalleria, Balestrieri)
-// 4. Minaccia dell'Inverno e scontro finale contro il Re della Notte per il Trono di Focaccia
+// ================= SAGA 2: GAME OF THRONES · LA GUERRA DEI CINQUE TRABUCCHI (MATCH REALE + NARRATIVA DARK) =================
+// Combina:
+// 1. VERO GAMEPLAY PARTITA: Partite reali in tempo reale con Calcio d'Azione contro le Casate rivali e l'Esercito del Re della Notte
+// 2. GESTIONE TATTICA & MAPPA: Conquista dei 5 feudi, rifornimenti di pesto, oro delle decime e avanzata dell'Inverno
+// 3. NARRATIVA MARTINIANA: Corvi messaggeri, alleanze treacherous, monologhi di potere e il Trono di Focaccia
 (function () {
-  const K_GOT = "ali-di-rondine.thrones-progress";
+  const K_GOT = "ali-di-rondine.thrones-v3";
 
   function getProgress() {
     try {
@@ -14,8 +12,8 @@
       if (d && typeof d === "object") {
         return {
           conquered: Array.isArray(d.conquered) ? d.conquered : ["rondine"],
-          gold: typeof d.gold === "number" ? d.gold : 120,
-          pesto: typeof d.pesto === "number" ? d.pesto : 80,
+          gold: typeof d.gold === "number" ? d.gold : 150,
+          pesto: typeof d.pesto === "number" ? d.pesto : 100,
           morale: typeof d.morale === "number" ? d.morale : 90,
           winterMeter: typeof d.winterMeter === "number" ? d.winterMeter : 10,
           wonIronFocaccia: !!d.wonIronFocaccia
@@ -24,8 +22,8 @@
     } catch (e) {}
     return {
       conquered: ["rondine"],
-      gold: 120,
-      pesto: 80,
+      gold: 150,
+      pesto: 100,
       morale: 90,
       winterMeter: 10,
       wonIronFocaccia: false
@@ -40,25 +38,18 @@
 
   const HOUSES = [
     {
-      id: "rondine",
-      name: "Casata Moretti",
-      seat: "Trabucco Rondine",
-      sigil: "🦅 Rondine Alata",
-      motto: "Il Calcio sta Arrivando",
-      color: "#3fa7ff",
-      leader: "Lord Leo Moretti",
-      defense: 0
-    },
-    {
       id: "lanterna",
       name: "Casata Ruggeri",
-      seat: "Rocca Lanterna",
+      seat: "Fortezza della Lanterna",
       sigil: "🏮 Faro nella Tempesta",
       motto: "Noi Non Passiamo",
-      color: "#ffb703",
+      teamKey: "lanterna_got",
+      pitch: "molo",
       leader: "Ser Ruggeri il Mastino",
-      defense: 65,
-      tributeGold: 45
+      rewardGold: 60,
+      introLore: `«Lord Leo! I Ruggeri custodiscono la roccia della Lanterna da nove generazioni. I loro difensori giocano con corazze pesanti di cuoio bollito e non lasciano un solo centimetro sul molo.<br>
+      Ser Ruggeri ha arruolato i balestrieri della falesia: chiunque provi a crossare al centro viene intercettato da una selva di gambe d'acciaio!»`,
+      dialoguePre: `«Vedo che la Rondine osa spingersi fin sotto i miei bastioni. Qui non siamo in campionato: il mare sbatte contro gli scogli e se sbagli un passaggio finisci nell'abisso! Vediamo se i tuoi ricami reggono il ferro di Ser Ruggeri!»`
     },
     {
       id: "ferri",
@@ -66,10 +57,13 @@
       seat: "Castel Forno",
       sigil: "🥖 Teglia d'Oro",
       motto: "Caldi e Croccanti",
-      color: "#fb8500",
+      teamKey: "ferri_got",
+      pitch: "campo",
       leader: "Lady Nonna Ferri",
-      defense: 75,
-      tributeGold: 55
+      rewardGold: 75,
+      introLore: `«Castel Forno è la cassaforte del regno: qui riposano i sacchi di grano saraceno e le giare dell'olio nobile.<br>
+      Lady Nonna governa con il mestolo di ferro e il sorriso accogliente: "Un uomo a pancia piena non pensa a farsi ammazzare... ma se tocca la mia farina, gli scaglio addosso cento teglie roventi!"»`,
+      dialoguePre: `«Leo, amore di nonna! Lo sai che ti voglio bene, ma gli affari della Casata vengono prima dei sentimenti! I miei attaccanti sono cresciuti a panissa e pesto concentrato: corrono il doppio dei tuoi!»`
     },
     {
       id: "baciccia",
@@ -77,40 +71,36 @@
       seat: "Porto Trabucco",
       sigil: "⚓ Rete di Cuoio",
       motto: "Reti e Tempesta",
-      color: "#06d6a0",
+      teamKey: "baciccia_got",
+      pitch: "sabbia",
       leader: "Sire Baciccia il Vecchio",
-      defense: 85,
-      tributeGold: 65
+      rewardGold: 90,
+      introLore: `«Porto Trabucco sorge su mille palafitte di rovere piantate nel fondale marino. Sire Baciccia ha novant'anni e non ha mai piegato la schiena davanti a nessun duca.<br>
+      La loro squadra gioca con il vento in poppa: scivolate rasoterra tra la battigia e tiri a effetto che sfruttano le raffiche del libeccio!»`,
+      dialoguePre: `«Ragazzetto di paese! Ho visto imperi crollare e mari prosciugarsi. Il Trabucco appartiene ai Baciccia da quando il mare era solo pioggia! Se vuoi il mio rispetto, devi strapparmelo con tre gol sul bagnasciuga!»`
     },
     {
-      id: "corsari",
-      name: "Casata dei Corsari",
-      seat: "Falesia Nera",
-      sigil: "🗡️ Sciabola di Mare",
-      motto: "Ciò che affonda non muore",
-      color: "#e63946",
-      leader: "Barbanera del Tigullio",
-      defense: 95,
-      tributeGold: 80
+      id: "night_king",
+      name: "L'Armata della Notte",
+      seat: "La Barriera di Ghiaccio",
+      sigil: "❄️ Teschio Gelido",
+      motto: "L'Inverno è Qui",
+      teamKey: "night_king",
+      pitch: "erba",
+      leader: "Il Re della Notte",
+      rewardGold: 150,
+      introLore: `«I corvi neri tacciono, l'acqua del porto si è tramutata in una lastra di ghiaccio perenne. Il Re della Notte scende dalle montagne con i non-morti della bufera.<br>
+      Non sentono il dolore, non si stancano mai e il loro sguardo azzurro gela la palla ad ogni tocco. È la battaglia finale per il Trono di Focaccia e per la vita stessa di Borgo Marino!»`,
+      dialoguePre: `«<i>...Il gelo consuma ogni speranza. Non esistono tattiche o passaggi di prima nella tomba del ghiaccio eterno. Il vostro regno si spegnerà qui.</i>»`
     }
   ];
 
   let onExitCallback = null;
-  let activeAnimId = null;
-
-  function getStageAlt() {
-    return document.getElementById("stageAlt");
-  }
-
-  function setChap(t) {
-    const el = document.getElementById("chap");
-    if (el) el.textContent = t;
-  }
 
   function showText(who, html) {
     const el = document.getElementById("text");
     if (el) {
-      el.innerHTML = `<span class="who" style="background:#590d22; color:#ffb703; font-weight:800; border:1px solid #ffb703;">${who}</span><span class="t">${html}</span>`;
+      el.innerHTML = `<span class="who" style="background:#590d22; color:#ffb703; font-weight:800; border:1px solid #ffb703; letter-spacing:0.5px;">${who}</span><span class="t">${html}</span>`;
     }
     if (window.addDialogueLog) {
       window.addDialogueLog(who, html);
@@ -159,89 +149,37 @@
     } catch (e) {}
   }
 
-  function clearLoops() {
-    if (activeAnimId) {
-      cancelAnimationFrame(activeAnimId);
-      activeAnimId = null;
-    }
-  }
-
-  function activateThronesView() {
-    clearLoops();
-    if (window.gameEngine && window.gameEngine.setView) {
-      window.gameEngine.setView({ kind: "thrones" });
-    }
-    const cv = document.getElementById("cv");
-    if (cv) cv.hidden = true;
-    const alt = getStageAlt();
-    if (alt) {
-      alt.hidden = false;
-      alt.style.display = "block";
-      alt.style.position = "relative";
-      alt.style.overflow = "hidden";
-      alt.style.zIndex = "10";
-    }
-    return alt;
-  }
-
-  function closeThronesStage() {
-    clearLoops();
-    const alt = getStageAlt();
-    if (alt) {
-      alt.hidden = true;
-      alt.style.display = "none";
-      alt.innerHTML = "";
-    }
-    const cv = document.getElementById("cv");
-    if (cv) cv.hidden = false;
-    if (window.gameEngine && window.gameEngine.setView) {
-      window.gameEngine.setView({ kind: "scene", bg: "title" });
-    }
-  }
-
-  // ================= 1. HUB & MAPPA TATTICA =================
-  function openThronesMenu(onBack) {
+  // ================= 1. HUB CONSIGLIO DI GUERRA =================
+  function openThronesWarMenu(onBack) {
     onExitCallback = onBack;
-    showWarMap();
+    showWarCouncil();
   }
 
-  function showWarMap() {
-    setChap("Westeros Ligure · La Guerra dei Cinque Trabucchi");
+  function showWarCouncil() {
+    if (window.closeAltStage) window.closeAltStage();
+    if (window.setChapter) window.setChapter("Westeros Ligure · La Guerra dei Cinque Trabucchi");
     const prog = getProgress();
-    const alt = activateThronesView();
-
-    if (alt) {
-      alt.innerHTML = `
-        <canvas id="mapCv" width="320" height="200" style="display:block; width:100%; height:100%; background:#1c1008;"></canvas>
-        <div style="position:absolute; top:4px; left:6px; right:6px; display:flex; justify-content:space-between; align-items:center; background:rgba(30,15,5,0.9); border:1.5px solid #ffb703; border-radius:6px; padding:3px 8px; font-size:11px; color:#fff; z-index:10;">
-          <span style="color:#ffd23f;">🪙 Oro: <b>${prog.gold}</b></span>
-          <span style="color:#06d6a0;">🫒 Pesto: <b>${prog.pesto}</b></span>
-          <span style="color:#ff4d5a;">⚔️ Morale: <b>${prog.morale}%</b></span>
-          <span style="color:#a2d2ff;">❄️ Inverno: <b>${prog.winterMeter}%</b></span>
-        </div>
-      `;
-
-      renderMapCanvas(prog);
-    }
 
     const unscaled = HOUSES.filter(h => !prog.conquered.includes(h.id));
 
     if (unscaled.length === 0 && !prog.wonIronFocaccia) {
-      // Sblocco gran finale contro il Re della Notte
+      // Re della Notte pronto
+      const boss = HOUSES.find(h => h.id === "night_king");
       showText(
-        "Maestro del Golfo",
-        `«Mio Signore! Tutte le 5 Casate hanno piegato il ginocchio alla Casata Moretti! Ma dalle nebbie del Nord scende l'Inverno Eterno: il <b>Re della Notte</b> marcia con l'armata dei Trabucchi Spettrali per strapparvi il Trono di Focaccia!»`
+        "Maestro del Consiglio",
+        `«Lord Leo! Tutte le fortezze della costa hanno piegato il ginocchio alla Casata Moretti! Ma dalle vette innevate scende l'Inverno Eterno: il <b>Re della Notte</b> marcia con l'armata dei Trabucchi Spettrali!<br>
+        La partita della vita si gioca sul ghiaccio della Barriera: se vinciamo, il <b>Trono di Focaccia</b> sarà nostro per sempre!»`
       );
       showButtons([
         {
-          label: "👑 La Grande Battaglia per il Trono di Focaccia!",
-          sub: "Affronta il Re della Notte con l'esercito unificato della Costa",
+          label: "👑 SCENDI IN CAMPO CONTRO IL RE DELLA NOTTE (PARTITA FINALE)",
+          sub: "Partita decisiva per il destino di Westeros e del Golfo!",
           cls: "hot",
-          fn: startFinalBattle
+          fn: () => startSiegeMatchBriefing(boss)
         },
         {
           label: "◂ Torna al Menu Principale",
-          fn: () => { closeThronesStage(); if (onExitCallback) onExitCallback(); }
+          fn: () => { if (onExitCallback) onExitCallback(); else if (window.title) window.title(); }
         }
       ], true);
       return;
@@ -249,54 +187,53 @@
 
     if (prog.wonIronFocaccia) {
       showText(
-        "Lord Leo Moretti",
-        `«La Costa è pacificata, l'Inverno è stato respinto col Fuoco Valyriano e il Trono di Focaccia appartiene per sempre alla Rondine FC!»`
+        "Lord Leo Moretti (Re del Golfo)",
+        `«La costa è pacificata, l'inverno è stato scacciato dal calore del nostro gioco e il Trono di Focaccia è saldamente nelle mani della Rondine FC!»`
       );
     } else {
       showText(
-        "Consigliere di Guerra",
-        `«Mio Signore, la Casata Moretti controlla ${prog.conquered.length}/5 feudi. I barili di pesto nutrono gli armigeri, l'oro paga le armature. Scegliete quale fortezza assediare o rinforzate le scorte prima che cali la bufera!»`
+        "Primo Cavaliere del Porto",
+        `«Mio Signore, controlliamo ${prog.conquered.length}/5 feudi. Abbiamo ${prog.gold} monete d'oro e ${prog.pesto} barili di pesto nelle dispense.<br>
+        Le casate rivali non cederanno i loro trabucchi con le buone parole: dobbiamo sfidarle in campo aperto in una <b>Vera Partita in Tempo Reale</b> (Calcio d'Azione Pro con passaggi, scivolate, tiro caricato e finta)!»`
       );
     }
 
     const b = [];
-
-    // Feudi assediabili
     unscaled.forEach(h => {
       b.push({
-        label: `⚔️ Assedia ${h.seat} (${h.name})`,
-        sub: `Difesa: ${h.defense} · Comandante: ${h.leader} · Ricompensa: +${h.tributeGold} oro`,
+        label: `⚔️ Scendi in Campo contro ${h.name} (${h.seat})`,
+        sub: `Partita reale sul ${h.pitch} · Comandante: ${h.leader} · Premio: +${h.rewardGold} oro`,
         cls: "hot",
-        fn: () => startSiegeBattle(h)
+        fn: () => startSiegeMatchBriefing(h)
       });
     });
 
     b.push(
       {
-        label: "🥖 Rifornisci la Guarnigione (-30 Oro -> +40 Pesto, +15 Morale)",
-        sub: "Acquista focaccia e acciughe per sfamare i cavalieri",
+        label: "🥖 Distribuisci Focaccia alle Truppe (-30 Oro -> +40 Pesto, +20 Morale)",
+        sub: "Evita carestie e malcontento nella guarnigione",
         disabled: prog.gold < 30,
         fn: () => {
           prog.gold -= 30;
           prog.pesto += 40;
-          prog.morale = Math.min(100, prog.morale + 15);
+          prog.morale = Math.min(100, prog.morale + 20);
           saveProgress(prog);
-          playSynth(520, "sine", 0.2, 0.2);
-          if (window.toast) window.toast("+Rifornimenti distribuiti alle truppe!", "success", "🥖");
-          showWarMap();
+          playSynth(520, "sine", 0.25, 0.25);
+          if (window.toast) window.toast("Viveri distribuiti alle truppe!", "success", "🥖");
+          showWarCouncil();
         }
       },
       {
-        label: "📜 La Mappa delle Cinque Casate",
-        sub: "Consulta stemmi, motti e alleanze del Golfo",
+        label: "📜 Lettere dei Corvi & Motti delle Casate",
+        sub: "Leggi i segreti e le minacce intercettate",
         fn: showLore
       },
       {
         label: "◂ Torna al Menu Principale",
         cls: "pick",
         fn: () => {
-          closeThronesStage();
           if (onExitCallback) onExitCallback();
+          else if (window.title) window.title();
         }
       }
     );
@@ -304,312 +241,135 @@
     showButtons(b, true);
   }
 
-  function renderMapCanvas(prog) {
-    const canvas = document.getElementById("mapCv");
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-
-    // Sfondo pergamena antica
-    ctx.fillStyle = "#2b1a0e";
-    ctx.fillRect(0, 0, 320, 200);
-
-    // Mare del Golfo
-    ctx.fillStyle = "#16283b";
-    ctx.beginPath();
-    ctx.moveTo(0, 70);
-    ctx.bezierCurveTo(90, 90, 180, 50, 320, 110);
-    ctx.lineTo(320, 200);
-    ctx.lineTo(0, 200);
-    ctx.fill();
-
-    // Costa e Trabucchi
-    const coords = [
-      { id: "rondine", x: 45, y: 130 },
-      { id: "lanterna", x: 105, y: 95 },
-      { id: "ferri", x: 170, y: 125 },
-      { id: "baciccia", x: 235, y: 85 },
-      { id: "corsari", x: 285, y: 140 }
-    ];
-
-    coords.forEach(c => {
-      const isConq = prog.conquered.includes(c.id);
-      // Cerchio feudo
-      ctx.beginPath();
-      ctx.arc(c.x, c.y, 14, 0, Math.PI * 2);
-      ctx.fillStyle = isConq ? "#3fa7ff" : "#590d22";
-      ctx.fill();
-      ctx.strokeStyle = isConq ? "#ffd23f" : "#a2d2ff";
-      ctx.lineWidth = 2.5;
-      ctx.stroke();
-
-      // Icona
-      ctx.font = "11px sans-serif";
-      ctx.fillStyle = "#fff";
-      ctx.fillText(isConq ? "👑" : "🏰", c.x - 6, c.y + 4);
-    });
-
-    // Tempesta di ghiaccio a Nord
-    if (prog.winterMeter > 20) {
-      ctx.fillStyle = "rgba(162, 210, 255, 0.25)";
-      ctx.fillRect(0, 0, 320, (prog.winterMeter / 100) * 80);
-    }
-  }
-
   function showLore() {
     showText(
-      "Archivi di Borgo",
-      `«<b>I MOTTI DELLE CINQUE CASATE:</b><br>
-      • <b>Casata Moretti</b>: <i>"Il Calcio sta Arrivando"</i> (Stemma della Rondine)<br>
-      • <b>Casata Ruggeri</b>: <i>"Noi Non Passiamo"</i> (Stemma del Faro)<br>
-      • <b>Casata Ferri</b>: <i>"Caldi e Croccanti"</i> (Stemma della Teglia d'Oro)<br>
-      • <b>Casata Baciccia</b>: <i>"Reti e Tempesta"</i> (Stemma dell'Ancora)<br>
-      • <b>Casata dei Corsari</b>: <i>"Ciò che affonda non muore"</i> (Stemma della Sciabola)»`
+      "Archivio dei Corvi",
+      `«<b>I MOTTI E GLI STEMMI DELLE GRANDI CASATE:</b><br>
+      • <b>Casata Moretti</b>: <i>"Il Calcio sta Arrivando"</i> (Rondine Alata)<br>
+      • <b>Casata Ruggeri</b>: <i>"Noi Non Passiamo"</i> (Faro nella Tempesta)<br>
+      • <b>Casata Ferri</b>: <i>"Caldi e Croccanti"</i> (Teglia d'Oro)<br>
+      • <b>Casata Baciccia</b>: <i>"Reti e Tempesta"</i> (Rete di Cuoio)<br>
+      • <b>Casata dei Corsari</b>: <i>"Ciò che affonda non muore"</i> (Sciabola di Mare)»`
     );
-    showButtons([{ label: "◂ Torna alla Mappa di Guerra", fn: showWarMap }]);
+    showButtons([{ label: "◂ Torna al Consiglio di Guerra", fn: showWarCouncil }]);
   }
 
-  // ================= 2. BATTAGLIA D'ASSEDIO TATTICA =================
-  function startSiegeBattle(targetHouse) {
+  // ================= 2. BRIEFING NARRATIVO PRE-PARTITA =================
+  function startSiegeMatchBriefing(house) {
+    showText(
+      house.leader,
+      `<i>«${house.dialoguePre}»</i><br><br>
+      <b>DOSSIER DELLA FORTEZZA:</b><br>
+      ${house.introLore}`
+    );
+    showButtons([
+      {
+        label: `Schiera la Rondine FC sul campo di ${house.seat}! (FISCHIA L'ARBITRO) ▸`,
+        cls: "hot",
+        fn: () => launchSiegeMatch(house)
+      },
+      {
+        label: "◂ Torna al Consiglio di Guerra",
+        fn: showWarCouncil
+      }
+    ], true);
+  }
+
+  // ================= 3. PARTITA REALE IN TEMPO REALE SUL CAMPO =================
+  function launchSiegeMatch(house) {
+    if (!window.azStartSagaMatch) {
+      if (window.toast) window.toast("Motore di gioco non pronto!", "error", "⚠️");
+      showWarCouncil();
+      return;
+    }
+
+    if (window.toast) window.toast(`⚔️ ASSEDIO SUL CAMPO: RONDINE FC vs ${house.name.toUpperCase()}!`, "success", "🏰");
+
+    window.azStartSagaMatch(
+      house.teamKey,
+      {
+        mode: "amic",
+        pitch: house.pitch,
+        diff: "norm",
+        pu: true,
+        roles: ["nico", "sandro", "dario"]
+      },
+      (myGoals, rivalGoals) => {
+        handleSiegeResult(house, myGoals, rivalGoals);
+      }
+    );
+  }
+
+  // ================= 4. POST-PARTITA & CONQUISTA DEL FEUDO =================
+  function handleSiegeResult(house, myGoals, rivalGoals) {
+    const won = myGoals > rivalGoals;
     const prog = getProgress();
-    setChap(`Assedio · ${targetHouse.seat}`);
-    const alt = activateThronesView();
-    if (!alt) return;
 
-    alt.innerHTML = `
-      <canvas id="siegeCv" width="320" height="200" style="display:block; width:100%; height:100%; background:#1c0e0b;"></canvas>
-      <div style="position:absolute; top:4px; left:6px; right:6px; display:flex; justify-content:space-between; align-items:center; background:rgba(20,5,5,0.9); border:1px solid #e63946; border-radius:6px; padding:3px 8px; font-size:11px; color:#fff; z-index:10;">
-        <span style="color:#ffd23f;">ASSEDIO A ${targetHouse.name.toUpperCase()}</span>
-        <span id="siegeWallEl" style="color:#ff4d5a;">Mura: <b>${targetHouse.defense} HP</b></span>
-        <span id="siegeMoraleEl" style="color:#06d6a0;">Nostro Esercito: <b>${prog.morale}%</b></span>
-      </div>
-    `;
+    if (won) {
+      if (!prog.conquered.includes(house.id)) prog.conquered.push(house.id);
+      prog.gold += house.rewardGold;
+      prog.winterMeter = Math.min(100, prog.winterMeter + 18);
+      prog.morale = Math.min(100, prog.morale + 15);
 
-    let wallHp = targetHouse.defense;
-    let myHp = prog.morale;
-
-    function executeAssault(type) {
-      let dmg = 0;
-      let costPesto = 10;
-
-      if (type === "shield_wall") {
-        dmg = 22 + Math.floor(Math.random() * 10);
-        myHp -= 5;
-        playSynth(420, "triangle", 0.25, 0.25);
-        if (window.toast) window.toast("🛡️ Falange di Scudi: Avanzata solida e mura incrinate!", "info", "⚔️");
-      } else if (type === "cavalry") {
-        dmg = 35 + Math.floor(Math.random() * 15);
-        myHp -= 15;
-        playSynth(680, "sawtooth", 0.3, 0.3);
-        if (window.toast) window.toast("🐎 Carica di Cavalleria: Breccia nelle porte del castello!", "success", "⚡");
-      } else if (type === "archers") {
-        dmg = 18 + Math.floor(Math.random() * 8);
-        myHp -= 2;
-        playSynth(800, "sine", 0.15, 0.2);
-        if (window.toast) window.toast("🏹 Pioggia di Frecce e Tiri d'Assedio!", "info", "🎯");
-      }
-
-      wallHp = Math.max(0, wallHp - dmg);
-      prog.pesto = Math.max(0, prog.pesto - costPesto);
-
-      const elWall = document.getElementById("siegeWallEl");
-      const elMorale = document.getElementById("siegeMoraleEl");
-      if (elWall) elWall.innerHTML = `Mura: <b>${wallHp} HP</b>`;
-      if (elMorale) elMorale.innerHTML = `Nostro Esercito: <b>${myHp}%</b>`;
-
-      if (wallHp <= 0) {
-        // Conquistato!
-        prog.conquered.push(targetHouse.id);
-        prog.gold += targetHouse.tributeGold;
-        prog.winterMeter = Math.min(100, prog.winterMeter + 18);
-        prog.morale = Math.max(40, myHp + 15);
-        saveProgress(prog);
-
-        playSynth(950, "sine", 0.4, 0.35);
-        if (window.toast) window.toast(`👑 ${targetHouse.seat.toUpperCase()} È CADUTO!`, "success", "🏰");
-
-        showText(
-          targetHouse.leader,
-          `«Ci arrendiamo, Lord Leo! Le nostre spade e i nostri migliori attaccanti sono al vostro servizio. Vi versiamo ${targetHouse.tributeGold} monete d'oro e giuriamo fedeltà alla Rondine!»`
-        );
-        showButtons([
-          { label: "Ritorna trionfante alla Mappa di Guerra ▸", cls: "hot", fn: showWarMap }
-        ], true);
-      } else if (myHp <= 0 || prog.pesto <= 0) {
-        showText(
-          "Generale",
-          `«Lord Leo, le nostre truppe sono sfinite e il pesto è finito! Dobbiamo ritirarci al Trabucco Rondine prima della disfatta!»`
-        );
-        prog.morale = 50;
-        saveProgress(prog);
-        showButtons([
-          { label: "Ritirata strategica ▸", fn: showWarMap }
-        ], true);
-      } else {
-        updateSiegeUi();
-      }
-    }
-
-    function updateSiegeUi() {
-      showText(
-        "Tattica d'Assalto",
-        `«Scegli l'ordine d'attacco contro le difese di ${targetHouse.seat}:<br>
-        - <b>Falange di Scudi</b>: Danni stabili, perdite minime.<br>
-        - <b>Carica di Cavalleria</b>: Danni devastanti ma subisce il fuoco nemico.<br>
-        - <b>Tiri d'Assedio dei Balestrieri</b>: Bersaglia i difensori a distanza.»`
-      );
-      showButtons([
-        {
-          label: "🛡️ 1. Falange di Scudi Avanzata",
-          sub: "Assalto coordinato a difesa alta",
-          fn: () => executeAssault("shield_wall")
-        },
-        {
-          label: "🐎 2. Carica di Cavalleria sui Fianchi",
-          sub: "Bordata rovinosa per spaccare le porte",
-          cls: "hot",
-          fn: () => executeAssault("cavalry")
-        },
-        {
-          label: "🏹 3. Tiri dei Balestrieri dal Molo",
-          sub: "Tiro a spiovere a logoramento",
-          fn: () => executeAssault("archers")
-        },
-        {
-          label: "🛑 Ordina la Ritirata al Trabucco",
-          fn: showWarMap
-        }
-      ]);
-    }
-    updateSiegeUi();
-
-    // Disegno assedio medievale
-    const cv = document.getElementById("siegeCv");
-    const ctx = cv.getContext("2d");
-    ctx.fillStyle = "#1e1008";
-    ctx.fillRect(0, 0, 320, 200);
-
-    // Mura del castello
-    ctx.fillStyle = targetHouse.color;
-    ctx.fillRect(230, 40, 80, 140);
-    ctx.fillStyle = "#111";
-    ctx.fillRect(250, 110, 25, 45); // Portone
-
-    // Armata Rondine
-    ctx.fillStyle = "#3fa7ff";
-    ctx.fillRect(40, 120, 16, 32); // Leo
-    ctx.fillStyle = "#ffd23f";
-    ctx.fillRect(20, 128, 14, 24);
-    ctx.fillRect(60, 128, 14, 24);
-  }
-
-  // ================= 3. GRAN FINALE: IL TRONO DI FOCACCIA =================
-  function startFinalBattle() {
-    setChap("La Lunga Notte · Il Re della Notte");
-    const alt = activateThronesView();
-    if (!alt) return;
-
-    alt.innerHTML = `
-      <canvas id="finalCv" width="320" height="200" style="display:block; width:100%; height:100%; background:#050c1a;"></canvas>
-      <div style="position:absolute; top:4px; left:6px; right:6px; display:flex; justify-content:space-between; align-items:center; background:rgba(5,15,35,0.9); border:1.5px solid #a2d2ff; border-radius:6px; padding:3px 8px; font-size:11px; color:#fff; z-index:10;">
-        <span style="color:#a2d2ff;">❄️ IL RE DELLA NOTTE</span>
-        <span id="finalBossHp" style="color:#ff4d5a;">Gelo Eterno: <b>150 HP</b></span>
-      </div>
-    `;
-
-    let bossHp = 150;
-
-    function strikeValyrian() {
-      bossHp = Math.max(0, bossHp - 50);
-      playSynth(880, "sawtooth", 0.35, 0.35);
-      if (window.haptic) window.haptic(35);
-
-      if (window.triggerAnimeCutin) {
-        window.triggerAnimeCutin({
-          who: "Lord Leo Moretti",
-          shotName: "COLPO DEL FUOCO VALYRIANO!",
-          isEgo: true,
-          sfxWord: "DRACARYS!"
-        });
-      }
-
-      const el = document.getElementById("finalBossHp");
-      if (el) el.innerHTML = `Gelo Eterno: <b>${bossHp} HP</b>`;
-
-      if (bossHp <= 0) {
-        const prog = getProgress();
+      if (house.id === "night_king") {
         prog.wonIronFocaccia = true;
-        saveProgress(prog);
-        if (window.addCoins) window.addCoins(50);
+      }
+      saveProgress(prog);
+      if (window.addCoins) window.addCoins(50);
 
+      playSynth(950, "sine", 0.45, 0.4);
+      if (window.toast) window.toast(`👑 ${house.seat.toUpperCase()} È CADUTO! (${myGoals} – ${rivalGoals})`, "success", "🏆");
+
+      if (house.id === "night_king") {
         showText(
           "Il Re della Notte",
-          `«<i>Il ghiaccio si frantuma... il calore del pesto e della focaccia ha sconfitto la notte perenne.</i> Il Trono di Focaccia è vostro, Lord Leo!»`
+          `<b style="color:var(--gold); font-size:14px;">TRIPLICE FISCHIO! LA NOTTE ETERNA È SCONFITTA! ${myGoals} – ${rivalGoals}!</b><br><br>
+          «<i>Il gelo si frantuma... il fuoco della focaccia e la passione del popolo ligure hanno sciolto la Barriera!</i> Il Trono di Focaccia è vostro, Lord Leo!»`
         );
         showButtons([
           {
-            label: "🏆 Sali sul Trono di Focaccia delle Cinque Casate!",
+            label: "🏆 SALI SUL TRONO DI FOCACCIA DELLE CINQUE CASATE!",
             cls: "hot",
-            fn: () => {
-              if (window.toast) window.toast("👑 SIGNORE ASSOLUTO DEL GOLFO E DI WESTEROS!", "success", "🏆");
-              showWarMap();
-            }
+            fn: showWarCouncil
           }
         ], true);
       } else {
-        updateFinalUi();
+        showText(
+          house.leader,
+          `<b style="color:var(--gold); font-size:14px;">VITTORIA TOTALE! ${myGoals} – ${rivalGoals}! ${house.seat.toUpperCase()} È VOSTRO!</b><br><br>
+          «Ammainate i nostri stendardi! I vostri attaccanti hanno spaccato la nostra difesa come burro caldo!<br>
+          Lord Leo Moretti, vi consegniamo le chiavi del feudo e ${house.rewardGold} monete d'oro. I nostri guerrieri giurano fedeltà alla Rondine Alata!»`
+        );
+        showButtons([
+          {
+            label: "Ritorna trionfante al Consiglio di Guerra ▸",
+            cls: "hot",
+            fn: showWarCouncil
+          }
+        ], true);
       }
-    }
-
-    function updateFinalUi() {
+    } else if (myGoals === rivalGoals) {
       showText(
-        "Re della Notte",
-        `«La bufera gela i vostri scarpini! Nessun mortale può resistere all'inverno del profondo mare!»`
+        house.leader,
+        `<b style="color:#4cc9f0;">PAREGGIO! ${myGoals} – ${rivalGoals}!</b><br><br>
+        «I nostri bastioni hanno retto l'assalto, ma avete dimostrato valore eccezionale! L'assedio continua: riorganizzate le truppe e tornate a sfidarci se ne avete il coraggio!»`
       );
       showButtons([
-        {
-          label: "🔥 TIRO DRACARYS DEL DRAGO DI MARE!",
-          sub: "Colpisci il cuore di ghiaccio con fiamme pure",
-          cls: "hot",
-          fn: strikeValyrian
-        },
-        {
-          label: "🛡️ Resistenza di Pesto e Acciughe",
-          sub: "Proteggi i tuoi compagni con gli scudi scaldati dal forno",
-          fn: () => {
-            playSynth(520, "sine", 0.2, 0.2);
-            if (window.toast) window.toast("Gli scudi di rame riflettono la tormenta!", "info", "🛡️");
-            strikeValyrian();
-          }
-        }
-      ]);
+        { label: "Ripeti l'Assalto sul Campo ▸", cls: "hot", fn: () => launchSiegeMatch(house) },
+        { label: "◂ Torna al Consiglio", fn: showWarCouncil }
+      ], true);
+    } else {
+      showText(
+        house.leader,
+        `<b style="color:#ff0054;">DISFATTA SUL CAMPO! ${myGoals} – ${rivalGoals}!</b><br><br>
+        «La vostra armata è stata respinta con perdite pesanti! Tornate a leccarvi le ferite al Trabucco prima che la marea vi sommerga!»`
+      );
+      showButtons([
+        { label: "Riprova l'Assalto ▸", cls: "hot", fn: () => launchSiegeMatch(house) },
+        { label: "◂ Ritirata al Consiglio", fn: showWarCouncil }
+      ], true);
     }
-    updateFinalUi();
-
-    // Disegno scontro epico sul ghiaccio
-    const cv = document.getElementById("finalCv");
-    const ctx = cv.getContext("2d");
-    ctx.fillStyle = "#050c1a";
-    ctx.fillRect(0, 0, 320, 200);
-
-    // Neve
-    for (let i = 0; i < 60; i++) {
-      ctx.fillStyle = "#a2d2ff";
-      ctx.fillRect(Math.random() * 320, Math.random() * 200, 2, 2);
-    }
-
-    // Re della Notte
-    ctx.fillStyle = "#03045e";
-    ctx.fillRect(240, 80, 22, 50);
-    ctx.fillStyle = "#00f5d4";
-    ctx.fillRect(238, 86, 4, 4); // Occhi azzurro ghiaccio
-    ctx.fillRect(238, 94, 4, 4);
-
-    // Leo in armatura con spada infuocata
-    ctx.fillStyle = "#3fa7ff";
-    ctx.fillRect(60, 110, 20, 40);
-    ctx.fillStyle = "#ff5400";
-    ctx.fillRect(75, 100, 8, 25); // Fiamma
   }
 
-  window.openThronesWarMenu = openThronesMenu;
+  window.openThronesWarMenu = openThronesWarMenu;
 })();

@@ -1,30 +1,26 @@
-// ================= SAGA 4: RICK & MORTY · LA CITTADELLA DEI LEO MORETTI =================
-// Tributo ufficiale a The Ricklantis Mixup, Evil Morty, la Cittadella e la Portal Gun.
-// Con vero gameplay profondo:
-// 1. Reclutamento Squadra Multiversale (5 Varianti uniche di Leo)
-// 2. Gameplay balistico con la PORTAL GUN tattica (spara varchi verdi sul campo)
-// 3. Boss fight a 3 fasi contro Evil Leo (Benda sull'occhio e armi quantiche)
-// 4. Dialoghi demenziali, sblocco Carta Multiverso ed easter egg cosmici
+// ================= SAGA 4: RICK & MORTY · LA CITTADELLA DEI LEO MORETTI (MATCH REALE + NARRATIVA CYNICAL) =================
+// Combina:
+// 1. VERO GAMEPLAY PARTITA: Partite reali in tempo reale contro la Milizia dei Cloni e l'Armata di Evil Leo
+// 2. DIALOGHI MULTIVERSALI & PORTAL GUN: Teorie quantiche demenziali sulla focaccia e bivi narrativi
+// 3. SCONTRO FINALE CON EVIL LEO: Boss match decisivo per liberare tutte le varianti di Leo
 (function () {
-  const K_CIT = "ali-di-rondine.citadel-progress";
+  const K_CIT = "ali-di-rondine.citadel-v3";
 
   function getProgress() {
     try {
       const d = JSON.parse(localStorage.getItem(K_CIT));
       if (d && typeof d === "object") {
         return {
-          recruited: Array.isArray(d.recruited) ? d.recruited : ["cyborg", "samurai"],
-          squad: Array.isArray(d.squad) ? d.squad : ["cyborg", "samurai"],
-          portalFluid: typeof d.portalFluid === "number" ? d.portalFluid : 100,
-          evilLeoDefeated: !!d.evilLeoDefeated
+          stagesCleared: Array.isArray(d.stagesCleared) ? d.stagesCleared : [],
+          evilLeoDefeated: !!d.evilLeoDefeated,
+          dimensionJumps: d.dimensionJumps || 0
         };
       }
     } catch (e) {}
     return {
-      recruited: ["cyborg", "samurai"],
-      squad: ["cyborg", "samurai"],
-      portalFluid: 100,
-      evilLeoDefeated: false
+      stagesCleared: [],
+      evilLeoDefeated: false,
+      dimensionJumps: 0
     };
   }
 
@@ -34,60 +30,40 @@
     } catch (e) {}
   }
 
-  const VARIANTS = [
+  const STAGES = [
     {
-      id: "cyborg",
-      name: "Leo Cyborg C-800",
-      role: "Ariete da Sfondamento",
-      ability: "Laser Shot (+30% velocità tiro)",
-      color: "#00e5ff"
+      id: "citadel_patrol",
+      name: "1. La Milizia dei Cloni della Cittadella",
+      rival: "Milizia della Cittadella",
+      captain: "Leo Cyborg C-800",
+      teamKey: "citadel_army",
+      pitch: "campo",
+      rewardCoins: 40,
+      introLore: `«La Cittadella è una metropoli orbitale costruita su infinite dimensioni. Ogni strada è pattugliata da varianti clonate di te stesso.<br>
+      La Milizia dei Cloni gioca con schemi programmati al millimetro da algoritmi quantici: non commettono mai un errore di posizionamento e raddoppiano sempre sul portatore di palla!»`,
+      dialoguePre: `«Identificato soggetto: Leo Moretti originale, dimensione Terra C-137. Livello di minaccia: focaccia non autorizzata. Consegnate gli scarpini o verrete vaporizzati sul campo da gioco!»`
     },
     {
-      id: "samurai",
-      name: "Leo Ronin del Giappone Feudale",
-      role: "Fantasista di Taglio",
-      ability: "Fendente della Katana (Tiro ad effetto ad angolo retto)",
-      color: "#ff0054"
-    },
-    {
-      id: "wizard",
-      name: "Leo Arcimago della Focaccia",
-      role: "Regista Arcano",
-      ability: "Teletrasporto Istantaneo della palla",
-      color: "#9d4edd"
-    },
-    {
-      id: "vampire",
-      name: "Lord Leo Vampiro della Notte",
-      role: "Centrocampista Ruba-Palloni",
-      ability: "Assorbe il fiato del portiere avversario",
-      color: "#7209b7"
-    },
-    {
-      id: "retro70",
-      name: "Leo Anziano degli Anni '70",
-      role: "Libero d'Altri Tempi",
-      ability: "Fumata di Pipa (Nube di fumo che acceca la difesa)",
-      color: "#ffb703"
+      id: "evil_syndicate",
+      name: "2. Lo Scontro Finale: Il Sindacato di Evil Leo",
+      rival: "Evil Leo Syndicate",
+      captain: "Evil Leo (Benda sull'Occhio)",
+      teamKey: "evil_leo",
+      pitch: "molo",
+      rewardCoins: 80,
+      introLore: `«Nel cuore della Cittadella siede Evil Leo. Ha una benda sull'occhio, gel quantico nei capelli e un disprezzo assoluto per il calcio pulito.<br>
+      Ha potenziato la sua squadra con microchip illegali e portieri a campo magnetico. Se vinciamo, liberiamo tutte le versioni di Leo del multiverso!»`,
+      dialoguePre: `«Sei prevedibile, Leo C-137. Corri, sudi, sogni di salvare il tuo paesino sul mare... Che spreco di potenziale multiversale!<br>
+      Io domino decine di dimensioni mentre tu friggi le acciughe con Nonna. Questo match decreterà chi di noi due merita di esistere nella linea temporale principale!»`
     }
   ];
 
   let onExitCallback = null;
-  let activeAnimId = null;
-
-  function getStageAlt() {
-    return document.getElementById("stageAlt");
-  }
-
-  function setChap(t) {
-    const el = document.getElementById("chap");
-    if (el) el.textContent = t;
-  }
 
   function showText(who, html) {
     const el = document.getElementById("text");
     if (el) {
-      el.innerHTML = `<span class="who" style="background:#76ff03; color:#0d1b2a; font-weight:900;">${who}</span><span class="t">${html}</span>`;
+      el.innerHTML = `<span class="who" style="background:#76ff03; color:#0d1b2a; font-weight:900; letter-spacing:0.5px;">${who}</span><span class="t">${html}</span>`;
     }
     if (window.addDialogueLog) {
       window.addDialogueLog(who, html);
@@ -136,367 +112,186 @@
     } catch (e) {}
   }
 
-  function clearLoops() {
-    if (activeAnimId) {
-      cancelAnimationFrame(activeAnimId);
-      activeAnimId = null;
-    }
-  }
-
-  function activateCitadelView() {
-    clearLoops();
-    if (window.gameEngine && window.gameEngine.setView) {
-      window.gameEngine.setView({ kind: "citadel" });
-    }
-    const cv = document.getElementById("cv");
-    if (cv) cv.hidden = true;
-    const alt = getStageAlt();
-    if (alt) {
-      alt.hidden = false;
-      alt.style.display = "block";
-      alt.style.position = "relative";
-      alt.style.overflow = "hidden";
-      alt.style.zIndex = "10";
-    }
-    return alt;
-  }
-
-  function closeCitadelStage() {
-    clearLoops();
-    const alt = getStageAlt();
-    if (alt) {
-      alt.hidden = true;
-      alt.style.display = "none";
-      alt.innerHTML = "";
-    }
-    const cv = document.getElementById("cv");
-    if (cv) cv.hidden = false;
-    if (window.gameEngine && window.gameEngine.setView) {
-      window.gameEngine.setView({ kind: "scene", bg: "title" });
-    }
-  }
-
   // ================= 1. HUB DELLA CITTADELLA =================
-  function openCitadelMenu(onBack) {
+  function openCitadelStoryMenu(onBack) {
     onExitCallback = onBack;
     showHub();
   }
 
   function showHub() {
-    setChap("Rick & Morty · La Cittadella dei Leo");
+    if (window.closeAltStage) window.closeAltStage();
+    if (window.setChapter) window.setChapter("Rick & Morty · La Cittadella dei Leo");
     const prog = getProgress();
-    const alt = activateCitadelView();
-
-    if (alt) {
-      alt.innerHTML = `
-        <div style="position:absolute; inset:0; background:linear-gradient(135deg, #10002b 0%, #240046 50%, #76ff03 100%);"></div>
-        
-        <!-- Portale verde acido rotante -->
-        <div style="position:absolute; top:25px; left:50%; transform:translateX(-50%); width:120px; height:120px; border-radius:50%; background:radial-gradient(circle, #76ff03 20%, #38b000 60%, transparent 80%); box-shadow:0 0 25px #76ff03; opacity:0.85;"></div>
-
-        <div style="position:relative; z-index:2; height:100%; padding:12px; display:flex; flex-direction:column; justify-content:space-between;">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-            <div>
-              <div style="font-family:var(--display); font-size:16px; color:#76ff03; text-shadow:2px 2px 0 #000, 0 0 10px #76ff03;">
-                🧪 LA CITTADELLA DEI LEO
-              </div>
-              <div style="font-size:11px; color:#fff;">
-                Consiglio Multiversale dei Bomber · Dimensione C-137
-              </div>
-            </div>
-            <div style="background:rgba(0,0,0,0.6); border:1.5px solid #76ff03; border-radius:6px; padding:4px 8px; font-size:11px; color:#fff; text-align:right;">
-              <div>Fluido Portale: <b>${prog.portalFluid}%</b></div>
-              <div style="color:var(--gold); font-size:10px;">Varianti: <b>${prog.recruited.length}/5</b></div>
-            </div>
-          </div>
-
-          <div style="background:rgba(10,5,30,0.85); border:1px solid #76ff03; border-radius:8px; padding:6px 10px; font-size:11px; color:#fff;">
-            Squadra schierata: <b>${prog.squad.map(id => VARIANTS.find(v => v.id === id)?.name.split(" ")[1]).join(" + ")}</b>
-          </div>
-        </div>
-      `;
-    }
 
     if (prog.evilLeoDefeated) {
       showText(
-        "Leo Moretti Originale",
-        `«Evil Leo è stato sconfitto e rinchiuso nella dimensione dei criceti giganti! La Cittadella dei Leo è finalmente libera e i varchi sono aperti per ogni amichevole cosmica!»`
+        "Leo Moretti C-137",
+        `«Evil Leo è stato sconfitto sul campo ed esiliato nella dimensione dei tuberi parlanti! La Cittadella è libera e tutte le nostre varianti possono giocare senza catene!»`
       );
     } else {
       showText(
         "Rick-Nonna C-137",
-        `«*Burp* Leo, ascoltami! <b>Evil Leo</b> (la tua versione con la benda sull'occhio e il gel quantico nei capelli) ha preso il comando della Cittadella!<br>
-        Costringe tutte le tue varianti a giocare in gabbie spaziali senza sosta. Prendi questa <b>Portal Gun</b> modificata a pesto, recluta altre varianti e vai a fargli il gol della vita prima che faccia esplodere la linea temporale!»`
+        `«*Burp* Leo, ascoltami! Non fare quella faccia da triglia bollita! <b>Evil Leo</b> ha militarizzato la Cittadella e costringe tutti i Leo a giocare partite truccate per vendere i biglietti ai Gromflomiti!<br>
+        Devi scendere in campo e giocare una <b>Vera Partita in Tempo Reale</b> (3 contro 3 con passaggi, scivolate, tiro caricato al massimo e finta acrobatiche)!<br>
+        Se vinci, liberiamo il multiverso... Se perdi, ti trasformo in un cetriolo per sempre!»`
       );
     }
 
-    const b = [
+    const b = [];
+    STAGES.forEach((s) => {
+      const isWon = prog.stagesCleared.includes(s.id);
+      b.push({
+        label: `${isWon ? "✓" : "🧪"} Partita Reale: ${s.name}`,
+        sub: `Partita vera (3v3 sul ${s.pitch}) · Contro ${s.captain}`,
+        cls: isWon ? "" : "hot",
+        fn: () => startBriefing(s)
+      });
+    });
+
+    b.push(
       {
-        label: "⚽ 1. Sfida l'Armata di Evil Leo in Gabbia Quantica",
-        sub: "Usa la Portal Gun per segnare e liberare le varianti prigioniere",
-        cls: "hot",
-        fn: startPortalMatch
-      },
-      {
-        label: "👥 2. Squad Builder Multiversale",
-        sub: "Scegli quali 2 varianti di Leo schierare al tuo fianco",
-        fn: showSquadBuilder
-      },
-      {
-        label: "🧪 3. Recluta Nuove Varianti nei Varchi Dimensionali",
-        sub: "Spendi 30% di Fluido Portale per trovare altre versioni di te stesso",
-        disabled: prog.recruited.length >= 5 || prog.portalFluid < 30,
-        fn: recruitVariant
+        label: "🌀 Monologo Esistenziale di Rick-Nonna sul Pesto Quantico",
+        sub: "Perché il multiverso collasserà prima della fine del primo tempo",
+        fn: showRickPhilosophy
       },
       {
         label: "◂ Torna al Menu Principale",
         cls: "pick",
         fn: () => {
-          closeCitadelStage();
           if (onExitCallback) onExitCallback();
+          else if (window.title) window.title();
         }
       }
-    ];
+    );
 
     showButtons(b, true);
   }
 
-  // ================= 2. SQUAD BUILDER MULTIVERSALE =================
-  function showSquadBuilder() {
-    const prog = getProgress();
+  function showRickPhilosophy() {
     showText(
-      "Banco Tattico Multiverso",
-      `«Scegli quali varianti di Leo compongono il tuo tandem d'attacco per combinare abilità bioniche, magiche e samurai!»`
+      "Rick-Nonna C-137",
+      `«Vuoi la verità, Leo? Ci sono infinite versioni di te che hanno calciato sul palo, infinite versioni che hanno preso gol al 90° e infinite versioni che hanno aperto una pizzeria a Francoforte.<br>
+      Nessuno esiste di proposito, nessuno appartiene a nessun posto, tutti giocheremo i tempi supplementari. Ora smettila di farti le pippe mentali, allacciati gli scarpini e vai a bucare la rete!»`
     );
-
-    const b = prog.recruited.map(id => {
-      const v = VARIANTS.find(x => x.id === id);
-      const isSelected = prog.squad.includes(id);
-      return {
-        label: `${isSelected ? "★ IN CAMPO: " : ""}${v.name}`,
-        sub: `${v.role} · ${v.ability}`,
-        cls: isSelected ? "hot" : "",
-        fn: () => {
-          if (isSelected && prog.squad.length > 1) {
-            prog.squad = prog.squad.filter(x => x !== id);
-          } else if (!isSelected) {
-            if (prog.squad.length >= 2) prog.squad.shift();
-            prog.squad.push(id);
-          }
-          saveProgress(prog);
-          playSynth(600, "triangle", 0.15, 0.2);
-          showSquadBuilder();
-        }
-      };
-    });
-
-    b.push({ label: "✓ Conferma Formazione e Torna all'Hub", cls: "hot", fn: showHub });
-    showButtons(b, true);
+    showButtons([{ label: "◂ Torna al Portale Dimensionale", fn: showHub }]);
   }
 
-  function recruitVariant() {
-    const prog = getProgress();
-    const missing = VARIANTS.filter(v => !prog.recruited.includes(v.id));
-    if (missing.length === 0) return;
-
-    prog.portalFluid -= 30;
-    const newV = missing[0];
-    prog.recruited.push(newV.id);
-    saveProgress(prog);
-
-    playSynth(880, "sine", 0.3, 0.3);
-    if (window.toast) window.toast(`🌀 Trovato: ${newV.name}!`, "success", "✨");
-
+  // ================= 2. BRIEFING PRE-PARTITA =================
+  function startBriefing(s) {
     showText(
-      newV.name,
-      `«*Zzzzt* Eccomi qua, compare! Evil Leo mi teneva congelato in un blocco di carbonite. Al tuo comando, il mio <b>${newV.ability}</b> è pronto a bucare le reti!»`
+      s.captain,
+      `<i>«${s.dialoguePre}»</i><br><br>
+      <b>ANALISI TATTICA DIMENSIONALE:</b><br>
+      ${s.introLore}`
     );
-    showButtons([{ label: "Aggiungi alla rosa ▸", cls: "hot", fn: showHub }]);
+    showButtons([
+      {
+        label: `Scendi in Campo contro ${s.rival}! (FISCHIA L'ARBITRO MULTIVERSALE) ▸`,
+        cls: "hot",
+        fn: () => launchActualMatch(s)
+      },
+      {
+        label: "◂ Torna al Menu",
+        fn: showHub
+      }
+    ], true);
   }
 
-  // ================= 3. PARTITA PORTAL GUN =================
-  function startPortalMatch() {
+  // ================= 3. PARTITA REALE IN TEMPO REALE =================
+  function launchActualMatch(s) {
+    if (!window.azStartSagaMatch) {
+      if (window.toast) window.toast("Motore partita non pronto!", "error", "⚠️");
+      showHub();
+      return;
+    }
+
+    if (window.toast) window.toast(`🧪 FISCHIO D'INIZIO: RONDINE FC vs ${s.rival.toUpperCase()}!`, "success", "🌀");
+
+    window.azStartSagaMatch(
+      s.teamKey,
+      {
+        mode: "amic",
+        pitch: s.pitch,
+        diff: "norm",
+        pu: true,
+        roles: ["nico", "sandro", "dario"]
+      },
+      (myGoals, rivalGoals) => {
+        handleCitadelResult(s, myGoals, rivalGoals);
+      }
+    );
+  }
+
+  // ================= 4. POST-PARTITA & LIBERAZIONE CITTADELLA =================
+  function handleCitadelResult(s, myGoals, rivalGoals) {
+    const won = myGoals > rivalGoals;
     const prog = getProgress();
-    setChap("La Gabbia di Evil Leo · Scontro Quantico");
-    const alt = activateCitadelView();
-    if (!alt) return;
 
-    alt.innerHTML = `
-      <canvas id="citMatchCv" width="320" height="200" style="display:block; width:100%; height:100%; background:#10002b;"></canvas>
-      <div style="position:absolute; top:4px; left:6px; right:6px; display:flex; justify-content:space-between; align-items:center; background:rgba(20,0,40,0.9); border:1px solid #76ff03; border-radius:6px; padding:3px 8px; font-size:11px; color:#fff; z-index:10;">
-        <span style="color:#76ff03; font-weight:bold;">VS EVIL LEO</span>
-        <span id="citScoreEl" style="color:var(--gold); font-size:13px; font-weight:bold;">0 – 0</span>
-        <span id="citTurnsEl" style="color:#00e5ff;">Turno: <b>1 / 4</b></span>
-      </div>
-    `;
+    if (won) {
+      if (!prog.stagesCleared.includes(s.id)) prog.stagesCleared.push(s.id);
+      prog.dimensionJumps++;
 
-    const canvas = document.getElementById("citMatchCv");
-    const ctx = canvas.getContext("2d");
-
-    let myGoals = 0;
-    let evilGoals = 0;
-    let turn = 1;
-    let portalGunAngle = -0.3;
-    let ball = { x: 50, y: 145, vx: 0, vy: 0, flying: false };
-    let evilGk = { y: 80, vy: 2.2, h: 36 };
-
-    function shootPortalGun(tactic) {
-      if (ball.flying) return;
-      ball.flying = true;
-
-      if (tactic === "portal_teleport") {
-        ball.vx = 9.0;
-        ball.vy = -1.8;
-        playSynth(920, "sine", 0.25, 0.3);
-        if (window.toast) window.toast("🌀 PORTAL GUN SPARATA! LA PALLA SCOMPARE E RIAPPARE SOTTO L'INCROCIO!", "success", "⚡");
-      } else if (tactic === "laser_curva") {
-        ball.vx = 8.0;
-        ball.vy = -0.5;
-        playSynth(700, "sawtooth", 0.2, 0.25);
-      }
-
-      setTimeout(() => {
-        ball.flying = false;
-        ball.x = 50; ball.y = 145;
-
-        // Gol
-        const isGoal = tactic === "portal_teleport" || Math.random() < 0.65;
-        if (isGoal) {
-          myGoals++;
-          playSynth(980, "sine", 0.35, 0.35);
-          if (window.toast) window.toast("⚽ GOOOL QUANTICO CONTRO EVIL LEO!", "success", "🌟");
-        } else {
-          playSynth(180, "sawtooth", 0.2, 0.25);
-          if (window.toast) window.toast("Evil Leo devia il tiro con lo scudo!", "error", "🛡️");
-        }
-
-        if (Math.random() < 0.35) {
-          evilGoals++;
-          if (window.toast) window.toast("Evil Leo segna con il raggio mortale!", "error", "💥");
-        }
-
-        turn++;
-        const sc = document.getElementById("citScoreEl");
-        const tu = document.getElementById("citTurnsEl");
-        if (sc) sc.innerHTML = `${myGoals} – ${evilGoals}`;
-        if (tu) tu.innerHTML = `Turno: <b>${Math.min(4, turn)} / 4</b>`;
-
-        if (turn > 4) {
-          endCitadelMatch();
-        } else {
-          updateCitUi();
-        }
-      }, 1200);
-    }
-
-    function updateCitUi() {
-      showText(
-        "Evil Leo (Benda sull'Occhio)",
-        `«Sei patetico, Leo C-137! Pensi che la tua focaccia possa competere con l'intelletto supremo della Cittadella? Questo stadio è la tua tomba temporale!»`
-      );
-      showButtons([
-        {
-          label: "🧪 1. Spara la Portal Gun (Teletrasporto nel Varco Verde)",
-          sub: "La palla attraversa la realtà e spunta alle spalle del portiere",
-          cls: "hot",
-          fn: () => shootPortalGun("portal_teleport")
-        },
-        {
-          label: "⚡ 2. Tiro al Laser della Variante Cyborg",
-          sub: "Traiettoria fulminea a sfondare il telaio",
-          cls: "hot",
-          fn: () => shootPortalGun("laser_curva")
-        },
-        {
-          label: "◂ Ritirati dal Duello Quantico",
-          fn: () => { clearLoops(); showHub(); }
-        }
-      ]);
-    }
-    updateCitUi();
-
-    function citLoop() {
-      evilGk.y += evilGk.vy;
-      if (evilGk.y < 35 || evilGk.y > 140) evilGk.vy = -evilGk.vy;
-
-      if (ball.flying) {
-        ball.x += ball.vx;
-        ball.y += ball.vy;
-      }
-
-      ctx.fillStyle = "#10002b";
-      ctx.fillRect(0, 0, 320, 200);
-
-      // Portale verde a mezz'aria
-      ctx.beginPath();
-      ctx.ellipse(180, 80, 16, 32, 0, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(118, 255, 3, 0.4)";
-      ctx.fill();
-      ctx.strokeStyle = "#76ff03";
-      ctx.lineWidth = 2.5;
-      ctx.stroke();
-
-      // Porta nemica
-      ctx.strokeStyle = "#ff0054";
-      ctx.lineWidth = 3;
-      ctx.strokeRect(280, 40, 30, 120);
-
-      // Evil Leo in porta
-      ctx.fillStyle = "#ff0054";
-      ctx.fillRect(278, evilGk.y, 14, evilGk.h);
-      ctx.fillStyle = "#000";
-      ctx.fillRect(276, evilGk.y + 6, 6, 4); // Benda nera sull'occhio
-
-      // Leo
-      ctx.fillStyle = "#3fa7ff";
-      ctx.fillRect(45, 130, 16, 32);
-
-      // Palla
-      ctx.beginPath();
-      ctx.arc(ball.x, ball.y, 6, 0, Math.PI * 2);
-      ctx.fillStyle = "#fff";
-      ctx.fill();
-
-      activeAnimId = requestAnimationFrame(citLoop);
-    }
-
-    function endCitadelMatch() {
-      clearLoops();
-      const won = myGoals > evilGoals;
-      if (won) {
+      if (s.id === "evil_syndicate") {
         prog.evilLeoDefeated = true;
-        prog.portalFluid = 100;
-        saveProgress(prog);
-        if (window.addCoins) window.addCoins(40);
+      }
+      saveProgress(prog);
+      if (window.addCoins) window.addCoins(50);
 
+      playSynth(950, "sine", 0.45, 0.4);
+      if (window.toast) window.toast(`✨ VITTORIA SUL CAMPO! ${myGoals} – ${rivalGoals}!`, "success", "🏆");
+
+      if (s.id === "evil_syndicate") {
         showText(
-          "Evil Leo",
-          `«NOOO! Com'è possibile?! La mia equazione calcistica era perfetta! Maledetto tu e il tuo pesto tachionico!»`
+          "Evil Leo (Benda sull'Occhio)",
+          `<b style="color:var(--gold); font-size:14px;">TRIPLICE FISCHIO! EVIL LEO È STATO SCONFITTO! ${myGoals} – ${rivalGoals}!</b><br><br>
+          «NOOO! Com'è possibile?! La mia equazione calcistica era matematicamente imbattibile!<br>
+          Quel tiro... quell'effetto curvo all'incrocio... non proveniva dalla logica, ma dal cuore!<br>
+          <i>La benda gli cade a terra mentre il generatore della Cittadella collassa...</i> Tutte le varianti di Leo Moretti sono finalmente libere!»`
         );
         showButtons([
           {
-            label: "🏆 Libera la Cittadella e Ritorna da Eroe del Multiverso!",
+            label: "🏆 FESTEGGIA IL TRIONFO SUPREMO NEL MULTIVERSO!",
             cls: "hot",
-            fn: () => {
-              if (window.toast) window.toast("👑 CITTADELLA DEI LEO LIBERATA!", "success", "🏆");
-              showHub();
-            }
+            fn: showHub
           }
         ], true);
       } else {
         showText(
-          "Evil Leo",
-          `«Vittoria per me! Ricarica il tuo fluido portale e riprovaci, dilettante!»`
+          s.captain,
+          `<b style="color:var(--gold); font-size:14px;">VITTORIA PERFETTA! ${myGoals} – ${rivalGoals}!</b><br><br>
+          «Errore di sistema... la Milizia è stata aggirata dal dinamismo di Borgo Marino!<br>
+          Soggetto Leo C-137 promosso a livello d'allerta Alfa. La strada verso la torre di Evil Leo è spalancata!»`
         );
         showButtons([
-          { label: "Riprova lo Scontro ▸", cls: "hot", fn: startPortalMatch },
-          { label: "◂ Torna all'Hub", fn: showHub }
+          {
+            label: "Avanza verso lo Scontro Finale con Evil Leo ▸",
+            cls: "hot",
+            fn: showHub
+          }
         ], true);
       }
+    } else if (myGoals === rivalGoals) {
+      showText(
+        s.captain,
+        `<b style="color:#4cc9f0;">PARITÀ QUANTICA! ${myGoals} – ${rivalGoals}!</b><br><br>
+        «La linea temporale è in stallo! Nessun vincitore, le probabilità sono al cinquanta per cento. Rientrate in campo per spezzare l'equilibrio!»`
+      );
+      showButtons([
+        { label: "Rigoca il Match Subito! ▸", cls: "hot", fn: () => launchActualMatch(s) },
+        { label: "◂ Torna all'Hub", fn: showHub }
+      ], true);
+    } else {
+      showText(
+        s.captain,
+        `<b style="color:#ff0054;">SCONFITTA MULTIVERSALE: ${myGoals} – ${rivalGoals}!</b><br><br>
+        «Liquidati! Non eravate abbastanza veloci per competere con i cloni della Cittadella! Tornate alla vostra dimensione di fritto e ricaricate le batterie!»`
+      );
+      showButtons([
+        { label: "Rivincita Immediata sul Campo! ▸", cls: "hot", fn: () => launchActualMatch(s) },
+        { label: "◂ Torna all'Hub", fn: showHub }
+      ], true);
     }
-
-    activeAnimId = requestAnimationFrame(citLoop);
   }
 
-  window.openCitadelStoryMenu = openCitadelMenu;
+  window.openCitadelStoryMenu = openCitadelStoryMenu;
 })();
