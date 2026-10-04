@@ -298,26 +298,57 @@
     showButtons(b, true);
   }
 
+  function renderTsubasaMatchPreviewStage(team) {
+    const alt = activateTsubasaStage();
+    if (!alt) return;
+    alt.innerHTML = `
+      <div style="position:absolute; inset:0; background:linear-gradient(135deg, #1b0429 0%, #3a0ca3 45%, #ff0054 100%); display:flex; flex-direction:column; justify-content:space-between; padding:10px; box-sizing:border-box;">
+        <div style="text-align:center; font-family:var(--display); font-size:13px; color:#ffd23f; text-shadow:0 0 8px #ffd23f;">
+          ⚡ SFIDA DEL CAMPIONATO DELLA SCOGLIERA
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-around;">
+          <div style="text-align:center;">
+            <div style="font-size:30px;">🦅</div>
+            <div style="color:#3fa7ff; font-weight:bold; font-size:12px;">RONDINE FC</div>
+            <div style="color:#a2d2ff; font-size:10px;">Leo & Nico</div>
+          </div>
+          <div style="font-family:var(--display); font-size:20px; color:#ffd23f; text-shadow:0 0 10px #ff0054;">VS</div>
+          <div style="text-align:center;">
+            <div style="font-size:30px;">🐯</div>
+            <div style="color:#ffd23f; font-weight:bold; font-size:12px;">${team.name.toUpperCase()}</div>
+            <div style="color:#f8edeb; font-size:10px;">${team.captain}</div>
+          </div>
+        </div>
+        <div style="background:rgba(12,4,28,0.85); border:1px solid #ffd23f; border-radius:6px; padding:3px 8px; font-size:10px; color:#fff; text-align:center;">
+          Campo: <b>${team.pitch.toUpperCase()}</b> · Arbitro con fischietto pronto!
+        </div>
+      </div>
+    `;
+  }
+
   // ================= 2. BRIEFING NARRATIVO PRE-PARTITA REALE =================
   function startRealMatchBriefing(stageIdx) {
     const team = TEAMS_DATA[stageIdx];
+    renderTsubasaMatchPreviewStage(team);
     showText(
       team.captain,
-      `«${team.dialogueIntro}»`
+      `<i>«${team.dialogueIntro}»</i><br>
+      <b>${team.captain} e i suoi compagni ti attendono sul campo!</b>`
     );
     showButtons([
       {
-        label: "Leo: «Noi siamo la Rondine e giochiamo per il nostro porto! FISCHIA L'ARBITRO!» ▸",
+        label: `⚽ FISCHIO D'INIZIO: GIOCA ORA! (3v3)`,
+        sub: `Partita reale sul ${team.pitch} · Comandi completi`,
         cls: "hot",
         fn: () => launchActualMatch(stageIdx)
       },
       {
-        label: "Nico: «Leo, copro io le tue spalle. Facciamogli vedere chi comanda!»",
-        cls: "hot",
-        fn: () => launchActualMatch(stageIdx)
+        label: "📜 Consulta Dossier e Consigli di Sedinho",
+        sub: "Leggi le debolezze tattiche prima del fischio",
+        fn: () => showLockerRoomTalk(team)
       },
       {
-        label: "◂ Un attimo, torno allo spogliatoio",
+        label: "◂ Torna allo Spogliatoio",
         fn: showHub
       }
     ], true);
@@ -356,6 +387,7 @@
     const team = TEAMS_DATA[stageIdx];
     const won = myGoals > rivalGoals;
     const prog = getProgress();
+    renderTsubasaHubStage(prog, team);
 
     if (won) {
       if (!prog.cleared.includes(team.id)) prog.cleared.push(team.id);

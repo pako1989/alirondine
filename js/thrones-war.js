@@ -330,23 +330,77 @@
     showButtons([{ label: "◂ Torna al Consiglio di Guerra", fn: showWarCouncil }]);
   }
 
+  function renderThronesMatchPreviewStage(house) {
+    const alt = activateThronesStage();
+    if (!alt) return;
+    alt.innerHTML = `
+      <div style="position:absolute; inset:0; background:radial-gradient(circle at 50% 50%, #3a0d14 0%, #0d0406 100%); display:flex; flex-direction:column; justify-content:space-between; padding:10px; box-sizing:border-box;">
+        <div style="text-align:center; font-family:var(--display); font-size:13px; color:#ffb703; text-shadow:0 0 8px #ffb703;">
+          ⚔️ ASSEDIO SUL RETTANGOLO VERDE
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-around;">
+          <div style="text-align:center;">
+            <div style="font-size:30px;">🦅</div>
+            <div style="color:#3fa7ff; font-weight:bold; font-size:12px;">RONDINE FC</div>
+            <div style="color:#a2d2ff; font-size:10px;">Leo & Nico</div>
+          </div>
+          <div style="font-family:var(--display); font-size:20px; color:#ffb703; text-shadow:0 0 10px #ff5400;">VS</div>
+          <div style="text-align:center;">
+            <div style="font-size:30px;">${house.sigil.split(" ")[0]}</div>
+            <div style="color:#ffb703; font-weight:bold; font-size:12px;">${house.name.toUpperCase()}</div>
+            <div style="color:#f8edeb; font-size:10px;">${house.leader}</div>
+          </div>
+        </div>
+        <div style="background:rgba(20,5,5,0.85); border:1px solid #ffb703; border-radius:6px; padding:3px 8px; font-size:10px; color:#fff; text-align:center;">
+          Terreno: <b>${house.pitch.toUpperCase()}</b> · Obiettivo: <b>Espugna la fortezza!</b>
+        </div>
+      </div>
+    `;
+  }
+
   // ================= 2. BRIEFING NARRATIVO PRE-PARTITA =================
   function startSiegeMatchBriefing(house) {
+    renderThronesMatchPreviewStage(house);
     showText(
       house.leader,
-      `<i>«${house.dialoguePre}»</i><br><br>
-      <b>DOSSIER DELLA FORTEZZA:</b><br>
-      ${house.introLore}`
+      `<i>«${house.dialoguePre}»</i><br>
+      <b>Ser Ruggeri e i suoi cavalieri ti attendono sul campo!</b>`
     );
     showButtons([
       {
-        label: `Schiera la Rondine FC sul campo di ${house.seat}! (FISCHIA L'ARBITRO) ▸`,
+        label: `⚽ FISCHIO D'INIZIO: GIOCA ORA! (3v3)`,
+        sub: `Partita reale sul ${house.pitch} · Comandi completi`,
         cls: "hot",
         fn: () => launchSiegeMatch(house)
       },
       {
+        label: "📜 Consulta Dossier e Segreti della Fortezza",
+        sub: "Leggi le debolezze tattiche prima del fischio",
+        fn: () => showHouseLoreModal(house)
+      },
+      {
         label: "◂ Torna al Consiglio di Guerra",
         fn: showWarCouncil
+      }
+    ], true);
+  }
+
+  function showHouseLoreModal(house) {
+    showText(
+      house.leader,
+      `<b>DOSSIER DELLA FORTEZZA: ${house.seat.toUpperCase()}</b><br>
+      ${house.introLore}<br><br>
+      Motto di Casata: <i>"${house.motto}"</i>`
+    );
+    showButtons([
+      {
+        label: `⚽ Schiera la squadra e gioca subito! ▸`,
+        cls: "hot",
+        fn: () => launchSiegeMatch(house)
+      },
+      {
+        label: "◂ Torna al Preview",
+        fn: () => startSiegeMatchBriefing(house)
       }
     ], true);
   }
@@ -380,6 +434,7 @@
   function handleSiegeResult(house, myGoals, rivalGoals) {
     const won = myGoals > rivalGoals;
     const prog = getProgress();
+    renderThronesHubStage(prog);
 
     if (won) {
       if (!prog.conquered.includes(house.id)) prog.conquered.push(house.id);

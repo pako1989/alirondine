@@ -23882,6 +23882,7 @@
   window.renderButtons = (list, one) => buttons(list, one);
   window.azStartSagaMatch = function(teamKey, options, onEnd) {
     closeAltStage();
+    try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) {}
     const opt = options || { mode: "amic", pitch: "erba", diff: "norm", pu: true, roles: ["nico"] };
     azStart(teamKey, () => onEnd(0, 0), true, opt);
     if (AZ) {

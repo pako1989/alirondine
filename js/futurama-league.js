@@ -259,23 +259,76 @@
     showButtons([{ label: "◂ Torna all'Hangar della Navetta", fn: showHub }]);
   }
 
+  function renderFuturamaMatchPreviewStage(m) {
+    const alt = activateFuturamaStage();
+    if (!alt) return;
+    alt.innerHTML = `
+      <div style="position:absolute; inset:0; background:radial-gradient(circle at 50% 50%, #003049 0%, #001219 100%); display:flex; flex-direction:column; justify-content:space-between; padding:10px; box-sizing:border-box;">
+        <div style="text-align:center; font-family:var(--display); font-size:13px; color:#fee440; text-shadow:0 0 8px #00f5d4;">
+          🛸 SFIDA DELLA CHAMPIONS GALATTICA 3000
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-around;">
+          <div style="text-align:center;">
+            <div style="font-size:30px;">🦅</div>
+            <div style="color:#3fa7ff; font-weight:bold; font-size:12px;">RONDINE FC</div>
+            <div style="color:#a2d2ff; font-size:10px;">Leo & Nico</div>
+          </div>
+          <div style="font-family:var(--display); font-size:20px; color:#fee440; text-shadow:0 0 10px #00f5d4;">VS</div>
+          <div style="text-align:center;">
+            <div style="font-size:30px;">👽</div>
+            <div style="color:#00f5d4; font-weight:bold; font-size:12px;">${m.rival.toUpperCase()}</div>
+            <div style="color:#f8edeb; font-size:10px;">${m.captain}</div>
+          </div>
+        </div>
+        <div style="background:rgba(0,18,25,0.85); border:1px solid #00f5d4; border-radius:6px; padding:3px 8px; font-size:10px; color:#fff; text-align:center;">
+          Atmosfera: <b>${m.pitch.toUpperCase()}</b> · Arbitro robot con fischietto laser!
+        </div>
+      </div>
+    `;
+  }
+
   // ================= 2. BRIEFING PRE-PARTITA =================
   function startSciFiMatchBriefing(m) {
+    renderFuturamaMatchPreviewStage(m);
     showText(
       m.captain,
-      `<i>«${m.dialoguePre}»</i><br><br>
-      <b>DOSSIER DELLA SQUADRA:</b><br>
-      ${m.introLore}`
+      `<i>«${m.dialoguePre}»</i><br>
+      <b>I campioni alieni ti attendono sul campo cosmico!</b>`
     );
     showButtons([
       {
-        label: `Scendi in Campo contro ${m.rival}! (FISCHIA L'ARBITRO ROBOT) ▸`,
+        label: `⚽ FISCHIO D'INIZIO: GIOCA ORA! (3v3)`,
+        sub: `Partita reale sul ${m.pitch} · Comandi completi`,
         cls: "hot",
         fn: () => launchActualMatch(m)
       },
       {
+        label: "📜 Consulta Dossier Tattico del Pianeta",
+        sub: "Leggi le debolezze aliene prima del fischio",
+        fn: () => showSciFiLoreModal(m)
+      },
+      {
         label: "◂ Torna all'Hangar",
         fn: showHub
+      }
+    ], true);
+  }
+
+  function showSciFiLoreModal(m) {
+    showText(
+      m.captain,
+      `<b>DOSSIER DELLA SQUADRA: ${m.rival.toUpperCase()}</b><br>
+      ${m.introLore}`
+    );
+    showButtons([
+      {
+        label: `⚽ Scendi in campo e gioca subito! ▸`,
+        cls: "hot",
+        fn: () => launchActualMatch(m)
+      },
+      {
+        label: "◂ Torna al Preview",
+        fn: () => startSciFiMatchBriefing(m)
       }
     ], true);
   }
@@ -309,6 +362,7 @@
   function handleSciFiResult(m, myGoals, rivalGoals) {
     const won = myGoals > rivalGoals;
     const prog = getProgress();
+    renderFuturamaHubStage(prog);
 
     if (won) {
       if (!prog.planetsCleared.includes(m.id)) prog.planetsCleared.push(m.id);

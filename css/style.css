@@ -79,7 +79,10 @@
   body.pixel-canvas canvas { image-rendering: pixelated; }
   .box { background: var(--panel); border: 2px solid #ffffff30; border-radius: 8px; padding: 10px 12px; transition: box-shadow var(--transition), transform 0.2s ease; }
   .box:hover { box-shadow: var(--shadow); }
-  #text { min-height: 80px; }
+  #text { min-height: 80px; max-height: 220px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  @media (max-width: 600px) {
+    #text { max-height: 140px; }
+  }
   #text .who { display: inline-block; font: 400 12px var(--display); letter-spacing: .04em; background: var(--red); color: #fff; padding: 2px 7px; border-radius: 4px; margin-bottom: 5px; animation: whoPop 0.24s cubic-bezier(0.16, 1, 0.3, 1); }
   #text .who.blue { background: var(--blue); } #text .who.gold { background: var(--gold); color: #2a1a00; } #text .who.gray { background: #56657d; }
   #text .t { display: block; line-height: 1.5; font-size: 14px; animation: textAppear 0.22s cubic-bezier(0.16, 1, 0.3, 1); }

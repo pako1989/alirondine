@@ -248,23 +248,76 @@
     showButtons([{ label: "◂ Torna al Portale Dimensionale", fn: showHub }]);
   }
 
+  function renderCitadelMatchPreviewStage(s) {
+    const alt = activateCitadelStage();
+    if (!alt) return;
+    alt.innerHTML = `
+      <div style="position:absolute; inset:0; background:radial-gradient(circle at 50% 50%, #1a0033 0%, #050010 100%); display:flex; flex-direction:column; justify-content:space-between; padding:10px; box-sizing:border-box;">
+        <div style="text-align:center; font-family:var(--display); font-size:13px; color:#76ff03; text-shadow:0 0 8px #76ff03;">
+          🧪 SCONTRO MULTIVERSALE DEL RETTANGOLO VERDE
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-around;">
+          <div style="text-align:center;">
+            <div style="font-size:30px;">🦅</div>
+            <div style="color:#3fa7ff; font-weight:bold; font-size:12px;">RONDINE FC</div>
+            <div style="color:#a2d2ff; font-size:10px;">Leo C-137 & Nico</div>
+          </div>
+          <div style="font-family:var(--display); font-size:20px; color:#76ff03; text-shadow:0 0 10px #76ff03;">VS</div>
+          <div style="text-align:center;">
+            <div style="font-size:30px;">🤖</div>
+            <div style="color:#ff0054; font-weight:bold; font-size:12px;">${s.rival.toUpperCase()}</div>
+            <div style="color:#f8edeb; font-size:10px;">${s.captain}</div>
+          </div>
+        </div>
+        <div style="background:rgba(10,0,25,0.85); border:1px solid #76ff03; border-radius:6px; padding:3px 8px; font-size:10px; color:#fff; text-align:center;">
+          Dimensione: <b>${s.pitch.toUpperCase()}</b> · Arbitro con fischietto tachionico!
+        </div>
+      </div>
+    `;
+  }
+
   // ================= 2. BRIEFING PRE-PARTITA =================
   function startBriefing(s) {
+    renderCitadelMatchPreviewStage(s);
     showText(
       s.captain,
-      `<i>«${s.dialoguePre}»</i><br><br>
-      <b>ANALISI TATTICA DIMENSIONALE:</b><br>
-      ${s.introLore}`
+      `<i>«${s.dialoguePre}»</i><br>
+      <b>I cloni della Cittadella sono schierati a centrocampo!</b>`
     );
     showButtons([
       {
-        label: `Scendi in Campo contro ${s.rival}! (FISCHIA L'ARBITRO MULTIVERSALE) ▸`,
+        label: `⚽ FISCHIO D'INIZIO: GIOCA ORA! (3v3)`,
+        sub: `Partita reale sul ${s.pitch} · Comandi completi`,
         cls: "hot",
         fn: () => launchActualMatch(s)
       },
       {
-        label: "◂ Torna al Menu",
+        label: "📜 Consulta Dossier e Analisi Tattica",
+        sub: "Leggi le debolezze algoritmiche prima del fischio",
+        fn: () => showCitadelLoreModal(s)
+      },
+      {
+        label: "◂ Torna al Portale",
         fn: showHub
+      }
+    ], true);
+  }
+
+  function showCitadelLoreModal(s) {
+    showText(
+      s.captain,
+      `<b>ANALISI TATTICA DIMENSIONALE: ${s.rival.toUpperCase()}</b><br>
+      ${s.introLore}`
+    );
+    showButtons([
+      {
+        label: `⚽ Schiera la squadra e gioca subito! ▸`,
+        cls: "hot",
+        fn: () => launchActualMatch(s)
+      },
+      {
+        label: "◂ Torna al Preview",
+        fn: () => startBriefing(s)
       }
     ], true);
   }
