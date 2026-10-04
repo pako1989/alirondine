@@ -3939,8 +3939,11 @@
     if (id === "trattoria") {
       const has = load();
       view = { kind: "scene", bg: "trattoria", speaker: "papa" }; chap("Trattoria Moretti");
-      text("papa", has && STORY[has.step] ? `Entri in trattoria. Profumo di frittura e di una storia lasciata a metà: <em>${esc(STORY[has.step].chap)}</em>. «Campione, ti ho tenuto il posto. Riprendiamo da lì?»` : "Entri in trattoria. Papà pulisce le cozze e canta De André. «Campione! Vuoi cominciare dall'inizio? La Coppa della Costa non aspetta.»");
+      text("papa", has && STORY[has.step] ? `Entri in trattoria. Profumo di frittura e di una storia lasciata a metà: <em>${esc(STORY[has.step].chap)}</em>. «Campione, ti ho tenuto il posto. Accanto al bancone c'è il distributore dei pupazzetti e in fondo alla sala il biliardino!»` : "Entri in trattoria. Papà pulisce le cozze e canta De André. «Campione! C'è il distributore dei pupazzetti accanto alla cassa e il biliardino pronto per una partita!»");
       return buttons([
+        { label: "🎰 Distributore Gashapon 3D", sub: "I Pupazzetti della Costa accanto al bancone", cls: "hot", fn: () => { if (window.openGachaModal) window.openGachaModal(); } },
+        { label: "⚽ Sfida al Biliardino", sub: "Il calcio balilla storico in fondo alla sala", cls: "hot", fn: () => { if (window.openBiliardino) window.openBiliardino(0, () => borgoDoor("trattoria")); } },
+        { label: "🕹️ Cabinato: Super Rondine '94", sub: "Arcade a gettoni 16-bit nell'angolo", fn: () => { if (window.openArcadeMachine) window.openArcadeMachine(() => borgoDoor("trattoria")); } },
         ...(has && STORY[has.step] ? [{ label: "Continua la storia", sub: STORY[has.step].chap, cls: "hot", fn: () => { borgoLeave(); S = has; run(); } }] : []),
         { label: "Nuova partita", sub: has ? "Ricomincia dalla Stagione 1" : "Stagione 1", cls: has ? "" : "hot", fn: () => { borgoLeave(); S = fresh(); run(); } },
         ...(casaOpen() ? [{ label: "Sali in soffitta", sub: "Casa di Leo", fn: () => { borgoLeave(); casa(borgo); } }] : []),
@@ -3953,12 +3956,34 @@
       text("nonna", "Entri a Casa Ferri. Profumo di lasagne e di naftalina. La Nonna ti guarda da sopra gli occhiali: «Leo. Vuoi sentire di quando Nicola ha giocato la finale dei Pulcini? Ho un baule, in soffitta.»");
       return buttons([{ label: "Ascolta la storia di Nico", sub: "Storia extra · la Gatta del 1968", cls: "hot", fn: () => { borgoLeave(); storyNico(borgo); } }, { label: "◂ Resta nel Borgo", fn: borgoResume }], true);
     }
+    if (id === "edicola") {
+      view = { kind: "scene", bg: "borgo", speaker: "pina" }; chap("Edicola di Pina");
+      text("pina", "«Leo! Se cerchi le bustine dei Campioni della Costa o vuoi sfogliare l'album, sei nel posto giusto. Oggi sono arrivate anche le nuove uscite del Corriere delle Figurine!»");
+      return buttons([
+        { label: "Figurine di Pina · Album", sub: "Apri l'album e compra bustine", cls: "hot", fn: () => { borgoLeave(); figAlbum(0, borgoResume); } },
+        { label: "L'Eco del Tirreno", sub: "Archivio delle prime pagine storiche", fn: () => { borgoLeave(); ecoArchivio(borgoResume); } },
+        { label: "◂ Resta nel Borgo", fn: borgoResume }
+      ], true);
+    }
+    if (id === "gelateria") {
+      view = { kind: "scene", bg: "borgo", speaker: "tonino" }; chap("Gelateria Lo Scoglio");
+      text("tonino", "«Leo! Il gusto Acciuga e Zabaione oggi è venuto una bomba. Vuoi fare un giro sul gozzo di Baciccia o ascoltare Radio Rondine?»");
+      return buttons([
+        { label: "🌊 Il Gozzo di Baciccia", sub: "Naviga nel golfo e recupera i palloni", cls: "hot", fn: () => { borgoLeave(); if (window.openGozzoGame) window.openGozzoGame("recupero", borgoResume); } },
+        { label: "📻 Radio Rondine 98.6", sub: "La voce del Borgo e il notiziario", fn: () => { borgoLeave(); radioRondine(borgoResume); } },
+        { label: "◂ Resta nel Borgo", fn: borgoResume }
+      ], true);
+    }
+    if (id === "faro") {
+      view = { kind: "scene", bg: "faro", speaker: "voce" }; chap("Il Faro di Punta Rondine");
+      text("voce", "La porta del faro è socchiusa. Centotredici gradini a chiocciola verso la scogliera più alta del Golfo dove si tiene il torneo notturno.");
+      return buttons([
+        { label: "⛵ La Notte del Faro", sub: "La saga speciale notturna sulla scogliera", cls: "hot", fn: () => { borgoLeave(); if (window.openFaroStoryMenu) window.openFaroStoryMenu(borgoResume); } },
+        { label: "◂ Resta nel Borgo", fn: borgoResume }
+      ], true);
+    }
     const msg = {
       chiesa: "La chiesa di San Pietro, patrono dei pescatori. Dentro c'è fresco, odore di cera e un confessionale dove Nico, a otto anni, si è nascosto per non andare dal dentista.",
-      edicola: "Sulla porta dell'edicola c'è un cartello: «Torno subito». Il cartello è lì dal 1997. La signora Pina è qui fuori, comunque.",
-      gelateria: "Lo Scoglio. Dentro fa freddo come in uno spogliatoio a gennaio. In vetrina, tra il puffo e la stracciatella, c'è sempre posto per un gusto nuovo.",
-      ferri: "Casa Ferri. Sulla porta un cartello scritto a mano: «Non si vende niente, non si compra niente. Si entra solo con le lasagne.»",
-      faro: "La porta del faro è socchiusa. Dentro, una scala a chiocciola di centoquattordici gradini. Ester dice che sono centotredici: uno lo salta sempre, per scaramanzia.",
     }[id];
     bSay([BL("voce", msg)]);
   }
