@@ -14525,6 +14525,7 @@
     const tr = readJSON(TOUR, { titles: 0 }), co = readJSON(COACH, { w: 0, played: 0 });
     text("voce", `<b>Modalità di Gioco</b> ${mnBar(mnPct(mnModi()))}<br>Scegli tra tornei speciali, saghe investigative, multiverso o sfide calcistiche. Tutte indipendenti dal salvataggio principale.`);
     buttons([
+      { label: "🎰 Distributore Gashapon 3D", sub: "I Pupazzetti della Costa: gira la manovella e colleziona i giocattoli 3D!", cls: "hot", fn: () => { if (window.openGachaModal) window.openGachaModal(); } },
       { label: "📜 Leggende del passato (8 sfide d'epoca)", sub: "Le grandi partite storiche: Wanda '68, Nonno Dante '74, Baciccia Sr '60, Dario '91…", cls: "hot", fn: () => leggende(modes) },
       { label: "📽️ Momenti in Bianco e Nero (B&W)", sub: "Partite storiche in autentico bianco e nero d'epoca: fumo del '54, Rita '70, Don Aurelio '65…", cls: "hot", fn: () => flashback(modes) },
       { label: "⚽ Il Biliardino del Bar del Porto", sub: "Calcio balilla fisico: ometti, stecche cromate e sfide a Gino, Baciccia e Papà!", cls: "hot", fn: () => { if (window.openBiliardino) window.openBiliardino(0, modes); } },
@@ -14564,6 +14565,7 @@
     const p = mnCollParts(), n = (x, t) => `${Math.round(x * t)}/${t}`;
     text("voce", `<b>Collezioni</b> ${mnBar(mnPct(mnColl()))}<br>Trofei ${mnPct(p.tro)}% · Figurine di Pina ${mnPct(p.fig)}% · Ricordi ${mnPct(p.foto)}% · Figurine dei personaggi ${n(p.card, Object.keys(BIO).length)} · Finali ${n(p.fin, ENDINGS.length)}`);
     buttons([
+      { label: "🧸 Vetrinetta Pupazzetti 3D", sub: "I giocattoli da collezione in miniatura del distributore del Bar", cls: "hot", fn: () => { if (window.openGachaCabinetModal) window.openGachaCabinetModal(); } },
       { label: "Carte dei personaggi", sub: `${getList(CARDS).length}/${Object.keys(BIO).length} · L'album di tutti i personaggi incontrati`, cls: "hot", fn: () => album(0, extras) },
       { label: "Enciclopedia del Borgo", sub: "Schede approfondite e carta olografica 3D dei personaggi principali", fn: () => borgoEncyclopedia(extras) },
       { label: "Bacheca dei trofei", sub: `${trophies().filter((t) => t.got).length}/${trophies().length}`, cls: "hot", fn: () => bacheca(extras) },
