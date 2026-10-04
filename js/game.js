@@ -20056,6 +20056,7 @@
     g.strokeStyle = "#ffffffcc"; g.lineWidth = 2; g.strokeRect(AZ_L, AZ_UP, AZ_R - AZ_L, AZ_DN - AZ_UP); g.beginPath(); g.moveTo(160, AZ_UP); g.lineTo(160, AZ_DN); g.stroke(); g.beginPath(); g.arc(160, 101, 22, 0, 7); g.stroke();
     [[AZ_L - 6, "#ffffff"], [AZ_R, "#ffffff"]].forEach(([x]) => { px(x, AZ_G0, 6, AZ_G1 - AZ_G0, "#ffffff33"); px(x, AZ_G0, 6, 2, "#fff"); px(x, AZ_G1, 6, 2, "#fff"); });
     if (A.opt && A.opt.pro && window.azProDrawPlayer) {
+      const l = azMe(A);
       A.us.forEach((p) => window.azProDrawPlayer(p, 0, p === l, false, l, A, g));
       A.them.forEach((p) => window.azProDrawPlayer(p, 1, false, false, l, A, g));
       window.azProDrawPlayer(A.gk[0], 0, false, true, l, A, g);
@@ -20493,7 +20494,7 @@
   function azBounds(p) { if (p === "campo") { AZ_L = 30; AZ_R = 290; AZ_UP = 48; AZ_DN = 154; } else { AZ_L = 12; AZ_R = 308; AZ_UP = 24; AZ_DN = 178; } }
   function azSetup15(A, ov) {
     const o = { ...azOpt(), ...(ov || {}) }; o.pitch = azPit(o.pitch);
-    A.opt = o; A.pit = { ...AZ_PIT[o.pitch].fx }; azBounds(o.pitch); A.dif = AZ_DIF[o.diff].fx; A.mode = o.mode; A.sea = !!(ov && ov.sea); A.sw = o.sw && !/^(cz|ut)_/.test(String(A.k)); // Squadra da collezione e Ultimate: sempre la squadra di carte com'è
+    o.roles = (Array.isArray(o.roles) ? o.roles : []).filter((id) => AZ_AB[id]); A.opt = o; A.pit = { ...AZ_PIT[o.pitch].fx }; azBounds(o.pitch); A.dif = AZ_DIF[o.diff].fx; A.mode = o.mode; A.sea = !!(ov && ov.sea); A.sw = o.sw && !/^(cz|ut)_/.test(String(A.k)); // Squadra da collezione e Ultimate: sempre la squadra di carte com'è
     A.stat = { sh: [0, 0], on: [0, 0], poss: [0, 0], pass: [0, 0], steal: 0, save: [0, 0], spec: 0, pu: 0, ab: 0 };
     A.pu = !!o.pu || o.mode !== "amic"; A.puL = []; A.puN = 420 + Math.floor(Math.random() * 300);
     A.gkBoost = A.aim = A.bomb = A.turbo = A.windT = 0; A.windD = 1; A.gold = false;

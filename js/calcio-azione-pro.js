@@ -22,8 +22,7 @@
     A.netShake = 0;
     AP.particles = [];
     AP.ballTrail = [];
-    A.ball.z = 0;
-    A.ball.vz = 0;
+    if (A.ball) { A.ball.z = 0; A.ball.vz = 0; }
   };
 
   window.azProTick = function (A) {
@@ -40,6 +39,8 @@
 
     // Ball height physics for aerial passes/volleys
     const b = A.ball;
+    if (b.z == null) b.z = 0;
+    if (b.vz == null) b.vz = 0;
     if (b.z > 0 || b.vz !== 0) {
       b.z += b.vz;
       b.vz -= 0.35; // gravity
