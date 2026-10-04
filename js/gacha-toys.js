@@ -426,8 +426,46 @@
       quote: "«Il denaro compra i muri... Ma l'orgoglio del Borgo non è in vendita.»",
       lore: "Abito regale in velluto damascato e diadema di cristallo prismatico olografico.",
       bonus: "+20% Monete vinte in tutte le partite e sfide"
+    },
+    {
+      id: "hero_custom_gold",
+      name: "Il Tuo Campione d'Oro",
+      title: "La Nuova Leggenda Consacrata",
+      stars: 6,
+      rarityName: "Leggenda Mitica",
+      pedestal: "rainbow",
+      shirtColor: "#ffd23f",
+      shortsColor: "#ffffff",
+      hairColor: "#2a1810",
+      skinColor: "#f3cb9e",
+      headType: "classic_curly",
+      acc: "trophy_cup",
+      quote: "«Il calcio della Riviera ha un nuovo eroe.»",
+      lore: "Miniatura celebrativa intarsiata d'oro massiccio e platino prismatico che riflette il tuo campione creato!",
+      bonus: "+10 a tutte le statistiche e carisma leggendario"
     }
   ];
+
+  function resolveToy(t) {
+    if (!t) return t;
+    if (t.id === "hero_custom_gold") {
+      try {
+        const h = typeof window.heroLoad === "function" ? window.heroLoad() : JSON.parse(localStorage.getItem("ali-di-rondine.eroe") || "null");
+        if (h && h.name) {
+          return {
+            ...t,
+            name: `${h.name} #${h.num}`,
+            title: `Tiro: ${h.shotName || "Fulmine del Golfo"}`,
+            shirtColor: h.shirt || "#ffd23f",
+            hairColor: h.hair || "#2a1810",
+            skinColor: h.skin || "#f3cb9e",
+            quote: `«La maglia numero ${h.num} non si toglie mai.»`
+          };
+        }
+      } catch (e) {}
+    }
+    return t;
+  }
 
   // --- STATO E PERSISTENZA ---
   function getGachaData() {
@@ -584,8 +622,9 @@
     return true;
   }
 
-  function build3DToyMesh(toy) {
+  function build3DToyMesh(rawToy) {
     if (!threeScene || !window.THREE) return;
+    const toy = resolveToy(rawToy);
     if (toyMeshGroup) threeScene.remove(toyMeshGroup);
 
     const T = window.THREE;
@@ -1204,7 +1243,8 @@
 
       <!-- Mensole in legno da collezione -->
       <div style="width: 100%; max-width: 480px; flex: 1; margin: 12px 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; overflow-y: auto; padding: 6px;">
-        ${TOY_CATALOG.map((toy) => {
+        ${TOY_CATALOG.map((rawToy) => {
+          const toy = resolveToy(rawToy);
           const count = data.owned[toy.id] || 0;
           const isOwned = count > 0;
           const starColor = toy.stars === 6 ? "#ff70a6" : toy.stars === 5 ? "#ffd23f" : toy.stars === 4 ? "#60a5fa" : "#cd7f32";
@@ -1244,7 +1284,7 @@
       el.onclick = () => {
         const id = el.getAttribute("data-id");
         if (data.owned[id]) {
-          const toy = TOY_CATALOG.find((t) => t.id === id);
+          const toy = resolveToy(TOY_CATALOG.find((t) => t.id === id));
           if (toy) {
             showPullRevealModal([{ toy, isDuplicate: false, shardReward: 0 }]);
           }

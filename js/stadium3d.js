@@ -40,6 +40,16 @@
   let returnCallback = null;
   let isSpecialActive = false;
   let shakeIntensity = 0;
+  let activeShooter = "leo"; // "leo" | "hero"
+
+  function getCustomHero() {
+    try {
+      if (typeof window.heroLoad === "function") return window.heroLoad();
+      const raw = localStorage.getItem("ali-di-rondine.eroe");
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return null;
+  }
 
   // Telecamere
   let cameraMode = "anime"; // "anime" | "precision" | "keeper"
@@ -471,8 +481,8 @@
     let hairColor = 0x241812;
     let skinColor = 0xf2c9a0;
     try {
-      const h = (typeof window.heroLoad === "function" ? window.heroLoad() : (window.localStorage ? JSON.parse(window.localStorage.getItem("ali-di-rondine.hero") || "null") : null));
-      if (h) {
+      const h = getCustomHero();
+      if (activeShooter === "hero" && h) {
         if (h.shirt && h.shirt.startsWith("#")) heroColor = parseInt(h.shirt.slice(1), 16);
         if (h.hair && h.hair.startsWith("#")) hairColor = parseInt(h.hair.slice(1), 16);
         if (h.skin && h.skin.startsWith("#")) skinColor = parseInt(h.skin.slice(1), 16);
@@ -1232,6 +1242,19 @@
         `;
       }
     }
+    const shooterBtn = document.getElementById("s3dShooterBtn");
+    const hero = getCustomHero();
+    if (shooterBtn) {
+      if (hero && activeRole !== "keeper") {
+        shooterBtn.style.display = "";
+        shooterBtn.textContent = activeShooter === "hero" ? `⭐ ${hero.name}` : "⚽ Leo";
+        shooterBtn.style.background = activeShooter === "hero" ? "linear-gradient(135deg, #ffd23f, #ff9e2e)" : "#1f3a63";
+        shooterBtn.style.color = activeShooter === "hero" ? "#111" : "#fff";
+      } else {
+        shooterBtn.style.display = "none";
+      }
+    }
+    updateControlsUI();
   }
 
   function openStadium3D(onBack) {
@@ -1248,6 +1271,7 @@
             <span style="font-size:11px; color:var(--dim); font-weight:normal; font-family:sans-serif;">(Arena Anime)</span>
           </div>
           <div class="s3d-top-actions">
+            <button type="button" class="s3d-btn" id="s3dShooterBtn" style="display:none;" title="Passa tra Leo Moretti e il Tuo Campione">⚽ Tiratore</button>
             <button type="button" class="s3d-btn" id="s3dRoleBtn" title="Passa tra Tiratore (Leo) e Portiere (Nico)">🧤 Parate</button>
             <button type="button" class="s3d-btn" id="s3dCamBtn" title="Cambia inquadratura (Anime / Mirino / Portiere)">🎥 Visuale</button>
             <button type="button" class="s3d-btn" id="s3dChangeGk" title="Scegli il portiere da sfidare">Portiere</button>
@@ -1339,10 +1363,35 @@
         }
         if (window.S && window.S.st) window.S.st.grinta -= 25;
         isSpecialActive = true;
-        triggerImpactMsg("TIRO DELLA RONDINE!", "Leo calcia con l'effetto della scogliera!", "#ffd23f");
+        const h = getCustomHero();
+        if (activeShooter === "hero" && h) {
+          triggerImpactMsg((h.shotName || "TIRO SPECIALE!").toUpperCase(), `${h.name} calcia con l'effetto della scogliera!`, h.shirt || "#ffd23f");
+        } else {
+          triggerImpactMsg("TIRO DELLA RONDINE!", "Leo calcia con l'effetto della scogliera!", "#ffd23f");
+        }
         updateHUD();
         executeShot({ targetX: (Math.random() > 0.5 ? 2.15 : -2.15), targetY: 2.2, curve: 0.65, force: 1.35 });
       };
+
+      // Toggle tiratore: Leo Moretti o il Tuo Campione
+      const shooterBtn = modal.querySelector("#s3dShooterBtn");
+      if (shooterBtn) {
+        shooterBtn.onclick = () => {
+          const h = getCustomHero();
+          if (!h) return;
+          activeShooter = activeShooter === "leo" ? "hero" : "leo";
+          const THREE = window.THREE;
+          if (THREE) buildLeoShooter(THREE);
+          updateControlsUI();
+          updateHUD();
+          triggerImpactMsg(
+            activeShooter === "hero" ? h.name.toUpperCase() : "LEO MORETTI!",
+            activeShooter === "hero" ? `Pronto a calciare ${h.shotName}!` : "Torna al dischetto per calciare a effetto!",
+            activeShooter === "hero" ? (h.shirt || "#ffd23f") : "#ffd23f"
+          );
+          if (window.toast) window.toast(`Tiratore attivo: ${activeShooter === "hero" ? h.name : "Leo Moretti"}`, "info", "⚽");
+        };
+      }
 
       // Switch visuale telecamera
       modal.querySelector("#s3dCamBtn").onclick = () => {

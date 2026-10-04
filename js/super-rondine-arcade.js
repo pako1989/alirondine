@@ -43,10 +43,29 @@
   const AW = 360, AH = 240;
   let ARC_STATE = null;
 
+  function getHeroInfo() {
+    try {
+      if (typeof window.heroLoad === "function") return window.heroLoad();
+      const raw = localStorage.getItem("ali-di-rondine.eroe");
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return null;
+  }
+
   function initArcadeMatch() {
+    const hero = getHeroInfo();
     ARC_STATE = {
       frame: 0,
-      p1: { x: 130, y: 120, vx: 0, vy: 0, speed: 2.6, slide: 0, num: 10, isMoving: false },
+      hero: hero,
+      heroName: hero && hero.name ? hero.name.toUpperCase() : "RONDINE",
+      p1: {
+        x: 130, y: 120, vx: 0, vy: 0, speed: 2.6, slide: 0,
+        num: hero && hero.num ? hero.num : 10,
+        shirt: hero && hero.shirt ? hero.shirt : "#ff3344",
+        skin: hero && hero.skin ? hero.skin : "#f5c898",
+        hair: hero && hero.hair ? hero.hair : "#241810",
+        isMoving: false
+      },
       p2: { x: 80, y: 65, vx: 0, vy: 0, speed: 2.2, slide: 0, num: 8, isMoving: false },
       p3: { x: 80, y: 175, vx: 0, vy: 0, speed: 2.2, slide: 0, num: 17, isMoving: false },
       gk1: { x: 26, y: 120, vy: 0, speed: 1.8, isMoving: false },
@@ -429,8 +448,8 @@
       }
     };
 
-    // Rondine (Maglia Rossa Amaranto)
-    drawSprite16(s.p1.x, s.p1.y, "#ff3344", "#f5c898", "#241810", false, s.p1.isMoving, true);
+    // Rondine (Maglia Rossa Amaranto o Maglia del Tuo Campione)
+    drawSprite16(s.p1.x, s.p1.y, s.p1.shirt, s.p1.skin, s.p1.hair, false, s.p1.isMoving, true);
     drawSprite16(s.p2.x, s.p2.y, "#ff3344", "#f5c898", "#e6be44", false, s.p2.isMoving);
     drawSprite16(s.p3.x, s.p3.y, "#ff3344", "#dfab7e", "#111111", false, s.p3.isMoving);
     drawSprite16(s.gk1.x, s.gk1.y, "#19a0b8", "#f5c898", "#ff7a22", true, s.gk1.isMoving);
@@ -476,7 +495,7 @@
     g.fillStyle = "#ffd23f";
     g.font = "bold 11px monospace";
     g.textAlign = "left";
-    g.fillText(`1P [RONDINE] ${s.score[0]} - ${s.score[1]} [BAR SPORT] 2P`, 10, 13);
+    g.fillText(`1P [${s.heroName}] ${s.score[0]} - ${s.score[1]} [BAR SPORT] 2P`, 10, 13);
 
     g.fillStyle = "#ff4d5a";
     g.textAlign = "right";
@@ -560,10 +579,13 @@
     const b = ARC_STATE.ball;
     if (b.owner === ARC_STATE.p1) {
       b.owner = null;
-      b.vx = 6.4;
+      b.vx = 6.6;
       b.vy = (ARC_STATE.joyY || 0) * 2.2 + (Math.random() - 0.5) * 1.5;
-      play8BitBeep(520, 0.12);
+      play8BitBeep(560, 0.12);
       if (window.haptic) window.haptic(30);
+      if (ARC_STATE.hero && ARC_STATE.hero.shotName && Math.random() < 0.35) {
+        if (window.toast) window.toast(`${ARC_STATE.hero.name}: ${ARC_STATE.hero.shotName}!`, "info", "⚡");
+      }
     }
   }
 

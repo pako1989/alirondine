@@ -81,7 +81,8 @@
     { id: "gino", name: "Gino il Mozzo", note: "Principiante: muove le stecche a caso ma con entusiasmo.", speed: 1.2, err: 0.28 },
     { id: "baciccia", name: "Baciccia", note: "Veterano della Riviera: esperto di sponde e rullate veloci!", speed: 1.8, err: 0.16 },
     { id: "ruggeri", name: "Mister Ruggeri", note: "Tattico: copre a centrocampo e aspetta il tuo errore.", speed: 2.3, err: 0.08 },
-    { id: "papa", name: "Papà Moretti", note: "Il Campione del Bar dal 1985: tiro al volo all'incrocio!", speed: 2.8, err: 0.03 }
+    { id: "papa", name: "Papà Moretti", note: "Il Campione del Bar dal 1985: tiro al volo all'incrocio!", speed: 2.8, err: 0.03 },
+    { id: "pvp", name: "👥 Sfida 1v1 a 2 Giocatori", note: "Sfida dal vivo sullo stesso schermo: P1 Rossi (sinistra) vs P2 Blu (destra)!", is2P: true, speed: 0, err: 0 }
   ];
 
   function resetBall(servingTeam = 0) {
@@ -164,6 +165,7 @@
 
   function tickAI() {
     const opp = B_GAME.opp;
+    if (opp.is2P) return; // In modalita 2 Giocatori le stecche blu sono controllate da P2!
     const b = B_GAME.ball;
     const spd = opp.speed;
 
@@ -410,23 +412,34 @@
     g.stroke();
 
     // Segnapunti / Pallottoliere in legno
-    g.fillStyle = "rgba(0,0,0,0.7)";
-    g.fillRect(TW / 2 - 60, 4, 120, 18);
+    g.fillStyle = "rgba(0,0,0,0.75)";
+    g.fillRect(TW / 2 - 80, 4, 160, 18);
     g.fillStyle = "#ffd23f";
-    g.font = "bold 12px sans-serif";
+    g.font = "bold 11px sans-serif";
     g.textAlign = "center";
-    g.fillText(`RONDINE ${B_GAME.score[0]} – ${B_GAME.score[1]} ${B_GAME.opp.name.toUpperCase()}`, TW / 2, 17);
+    if (B_GAME.opp.is2P) {
+      g.fillText(`P1 (ROSSI) ${B_GAME.score[0]} – ${B_GAME.score[1]} P2 (BLU)`, TW / 2, 16);
+    } else {
+      g.fillText(`RONDINE ${B_GAME.score[0]} – ${B_GAME.score[1]} ${B_GAME.opp.name.toUpperCase()}`, TW / 2, 16);
+    }
 
     // Overlay fine partita o gol
     if (B_GAME.winner !== null) {
       g.fillStyle = "rgba(10,18,36,0.85)";
       g.fillRect(0, 0, TW, TH);
       g.fillStyle = B_GAME.winner === 0 ? "#ffd23f" : "#ff4d5a";
-      g.font = "bold 20px sans-serif";
-      g.fillText(B_GAME.winner === 0 ? "HAI VINTO LA PARTITA! 🏆" : "HA VINTO IL BAR SPORT!", TW / 2, TH / 2 - 12);
-      g.fillStyle = "#ffffff";
-      g.font = "12px sans-serif";
-      g.fillText(B_GAME.winner === 0 ? "+10 Monete del Borgo aggiunte!" : "Baciccia ti allunga una gassosa: «Rigioca, ragazzo».", TW / 2, TH / 2 + 16);
+      g.font = "bold 18px sans-serif";
+      if (B_GAME.opp.is2P) {
+        g.fillText(B_GAME.winner === 0 ? "VITTORIA GIOCATORE 1 (ROSSI)! 🏆" : "VITTORIA GIOCATORE 2 (BLU)! 🏆", TW / 2, TH / 2 - 12);
+        g.fillStyle = "#ffffff";
+        g.font = "12px sans-serif";
+        g.fillText("Tocca il tavolo o 'Avversario' per una nuova sfida!", TW / 2, TH / 2 + 16);
+      } else {
+        g.fillText(B_GAME.winner === 0 ? "HAI VINTO LA PARTITA! 🏆" : "HA VINTO IL BAR SPORT!", TW / 2, TH / 2 - 12);
+        g.fillStyle = "#ffffff";
+        g.font = "12px sans-serif";
+        g.fillText(B_GAME.winner === 0 ? "+10 Monete del Borgo aggiunte!" : "Baciccia ti allunga una gassosa: «Rigioca, ragazzo».", TW / 2, TH / 2 + 16);
+      }
     }
   }
 
@@ -467,10 +480,13 @@
 
       <!-- Barra dei comandi touch -->
       <div style="width:100%; max-width:440px; display:flex; gap:8px; margin-top:8px;">
-        <button type="button" id="bilWristKick" style="flex:2; background:linear-gradient(135deg, #b3202c, #ff4d5a); color:#fff; border:2px solid #ffd23f; border-radius:8px; padding:10px; font-weight:bold; font-size:15px; cursor:pointer;">
+        <button type="button" id="bilWristKick" style="flex:2; background:linear-gradient(135deg, #b3202c, #ff4d5a); color:#fff; border:2px solid #ffd23f; border-radius:8px; padding:10px; font-weight:bold; font-size:14px; cursor:pointer;">
           ⚡ COLPO DI POLSO / TIRO
         </button>
-        <button type="button" id="bilChangeOpp" style="flex:1; background:#1b365d; color:#ffd23f; border:1px solid #4a7ab5; border-radius:8px; padding:10px; font-weight:bold; font-size:12px; cursor:pointer;">
+        <button type="button" id="bilP2Kick" style="flex:2; display:none; background:linear-gradient(135deg, #1d3fa3, #3fa7ff); color:#fff; border:2px solid #5cb8ff; border-radius:8px; padding:10px; font-weight:bold; font-size:14px; cursor:pointer;">
+          🔵 TIRO BLU (P2)
+        </button>
+        <button type="button" id="bilChangeOpp" style="flex:1.2; background:#1b365d; color:#ffd23f; border:1px solid #4a7ab5; border-radius:8px; padding:10px; font-weight:bold; font-size:12px; cursor:pointer;">
           👥 Avversario
         </button>
       </div>
@@ -481,31 +497,40 @@
     canvas = modalEl.querySelector("#bilCanvas");
     ctx = canvas.getContext("2d");
 
-    // Touch & pointer handlers for sliding rods
-    let lastPointerY = null;
+    // Touch & pointer handlers for sliding rods (Multi-touch support per 1v1)
+    const activePointers = new Map();
     canvas.addEventListener("pointerdown", (e) => {
-      lastPointerY = e.clientY;
+      const rect = canvas.getBoundingClientRect();
+      const isRight = (e.clientX - rect.left) > rect.width / 2;
+      activePointers.set(e.pointerId, { y: e.clientY, isRight });
       try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
     });
 
     canvas.addEventListener("pointermove", (e) => {
-      if (lastPointerY === null || !B_GAME) return;
-      const dy = (e.clientY - lastPointerY) * 1.2;
-      lastPointerY = e.clientY;
+      if (!B_GAME || !activePointers.has(e.pointerId)) return;
+      const pt = activePointers.get(e.pointerId);
+      const dy = (e.clientY - pt.y) * 1.25;
+      pt.y = e.clientY;
 
-      // Move player rods simultaneously
-      ["rGk", "rDef", "rMid", "rAtk"].forEach((k) => {
-        B_GAME.rods[k] = Math.max(-55, Math.min(55, B_GAME.rods[k] + dy));
-      });
+      if (B_GAME.opp.is2P && pt.isRight) {
+        // Controllo Stecche Blu (Giocatore 2)
+        ["bGk", "bDef", "bMid", "bAtk"].forEach((k) => {
+          B_GAME.rods[k] = Math.max(-55, Math.min(55, B_GAME.rods[k] + dy));
+        });
+      } else {
+        // Controllo Stecche Rosse (Giocatore 1)
+        ["rGk", "rDef", "rMid", "rAtk"].forEach((k) => {
+          B_GAME.rods[k] = Math.max(-55, Math.min(55, B_GAME.rods[k] + dy));
+        });
+      }
     });
 
-    const stopDrag = () => { lastPointerY = null; };
+    const stopDrag = (e) => { activePointers.delete(e.pointerId); };
     canvas.addEventListener("pointerup", stopDrag);
     canvas.addEventListener("pointercancel", stopDrag);
 
-    // Wrist kick button
-    const kickBtn = modalEl.querySelector("#bilWristKick");
-    const doKick = () => {
+    // Kick functions
+    const doKickRed = () => {
       if (!B_GAME) return;
       ["rGk", "rDef", "rMid", "rAtk"].forEach((k) => {
         B_GAME.kickTimes[k] = 10;
@@ -513,9 +538,46 @@
       playMetalClack();
       if (window.haptic) window.haptic(35);
     };
-    kickBtn.addEventListener("pointerdown", (e) => {
+
+    const doKickBlue = () => {
+      if (!B_GAME) return;
+      ["bGk", "bDef", "bMid", "bAtk"].forEach((k) => {
+        B_GAME.kickTimes[k] = 10;
+      });
+      playMetalClack();
+      if (window.haptic) window.haptic(35);
+    };
+
+    modalEl.querySelector("#bilWristKick").addEventListener("pointerdown", (e) => {
       e.preventDefault();
-      doKick();
+      doKickRed();
+    });
+
+    modalEl.querySelector("#bilP2Kick").addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      doKickBlue();
+    });
+
+    // Keyboard support
+    window.addEventListener("keydown", (e) => {
+      if (!isPlaying || !B_GAME) return;
+      if (e.code === "KeyW") {
+        ["rGk", "rDef", "rMid", "rAtk"].forEach((k) => { B_GAME.rods[k] = Math.max(-55, B_GAME.rods[k] - 14); });
+      } else if (e.code === "KeyS") {
+        ["rGk", "rDef", "rMid", "rAtk"].forEach((k) => { B_GAME.rods[k] = Math.min(55, B_GAME.rods[k] + 14); });
+      } else if (e.code === "Space" || e.code === "KeyD") {
+        doKickRed();
+      }
+
+      if (B_GAME.opp.is2P) {
+        if (e.code === "ArrowUp") {
+          ["bGk", "bDef", "bMid", "bAtk"].forEach((k) => { B_GAME.rods[k] = Math.max(-55, B_GAME.rods[k] - 14); });
+        } else if (e.code === "ArrowDown") {
+          ["bGk", "bDef", "bMid", "bAtk"].forEach((k) => { B_GAME.rods[k] = Math.min(55, B_GAME.rods[k] + 14); });
+        } else if (e.code === "Enter" || e.code === "ArrowLeft") {
+          doKickBlue();
+        }
+      }
     });
 
     // Close button
@@ -534,8 +596,18 @@
 
   function updateDesc() {
     const d = document.getElementById("bilOppDesc");
-    if (d && B_GAME) {
-      d.innerHTML = `Avversario: <b>${B_GAME.opp.name}</b> · <em>${B_GAME.opp.note}</em>`;
+    const p2Btn = document.getElementById("bilP2Kick");
+    const p1Btn = document.getElementById("bilWristKick");
+    if (B_GAME) {
+      if (d) {
+        if (B_GAME.opp.is2P) {
+          d.innerHTML = `Modalità 1v1: <b>🔴 P1 Rossi</b> (sinistra / W-S) vs <b>🔵 P2 Blu</b> (destra / Frecce)`;
+        } else {
+          d.innerHTML = `Avversario: <b>${B_GAME.opp.name}</b> · <em>${B_GAME.opp.note}</em>`;
+        }
+      }
+      if (p2Btn) p2Btn.style.display = B_GAME.opp.is2P ? "" : "none";
+      if (p1Btn) p1Btn.textContent = B_GAME.opp.is2P ? "🔴 TIRO P1 (Rossi)" : "⚡ COLPO DI POLSO / TIRO";
     }
   }
 

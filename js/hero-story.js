@@ -362,6 +362,10 @@
                 // Ricompense di gioco
                 try {
                   if (window.addCoins) window.addCoins(50);
+                  const gdata = JSON.parse(localStorage.getItem("ali-di-rondine.gacha-toys") || "{}");
+                  if (!gdata.owned) gdata.owned = {};
+                  gdata.owned["hero_custom_gold"] = (gdata.owned["hero_custom_gold"] || 0) + 1;
+                  localStorage.setItem("ali-di-rondine.gacha-toys", JSON.stringify(gdata));
                 } catch (e) {}
 
                 showEpilogue(hero, prog);
@@ -389,6 +393,7 @@
         Hai guidato la Rondine FC alla vittoria con <b>${hero.name}</b> (N. ${hero.num})!<br>
         • Gol segnati dal tuo campione: <b>${prog.goals}</b><br>
         • Tiro leggendario consacrato: <b>${hero.shotName || "Tiro Fulminante"}</b><br>
+        • Sbloccata la statuina 3D esclusiva 6★: <b>«${hero.name} d'Oro»</b> nella Vetrinetta dei Giocattoli!<br>
         • Ricompensa riscossa: <b>🪙 +50 Monete del Borgo</b> per il Gashapon e il negozio!`);
 
       eng.buttons([
