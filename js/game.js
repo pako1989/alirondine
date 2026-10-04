@@ -14484,6 +14484,7 @@
       ...(has && STORY[has.step] ? [{ label: "Continua", sub: STORY[has.step].chap, cls: "hot", fn: () => { S = has; run(); } }] : []),
       ...(fresh0 ? [{ label: "Nuova partita", sub: "Stagione 1 · circa 30–40 minuti", cls: "hot", fn: () => { S = fresh(); run(); } }] : []),
       { head: "Gioca" },
+      { label: "✨ Arena 2D HD del Borgo", sub: "Tactical Emblem, Action 60fps, Street Cage & Gestionale Live", cls: "hot", fn: () => { if (window.openArena2DHDModal) window.openArena2DHDModal(title); } },
       { label: "Storia", sub: `Le stagioni di Leo · ${mnPct(mnStoria())}%`, fn: menuStoria },
       { label: "Il Borgo Storto", sub: "Spin-off GDR a turni", cls: "hot", fn: () => openBorgoStorto(title) },
       { label: "Borgo e trasferte", sub: `A piedi per il paese · ${mnPct(mnBorgo())}%`, fn: menuBorgo },
@@ -14504,6 +14505,12 @@
     view = { kind: "scene", bg: "title" }; chap("Saghe e minigiochi");
     text("voce", "<b>Saghe e minigiochi</b><br>Storie speciali e giochi a parte. Ognuna si gioca per conto suo.");
     buttons([
+      { head: "✨ Nuova Suite Gameplay 2D HD" },
+      { label: "✨ Arena 2D HD · Hub Completo", sub: "Tutte le 4 modalità 2D HD ad alta definizione", cls: "hot", fn: () => { if (window.openArena2DHDModal) window.openArena2DHDModal(menuSaghe); } },
+      { label: "🛡️ Rondine Emblem · RPG Tattico 2D HD", sub: "Stile Fire Emblem · Griglia, triangolo dello stile e duelli", cls: "hot", fn: () => { if (window.openTacticalEmblemMode) window.openTacticalEmblemMode(menuSaghe); } },
+      { label: "⚽ Top-Down Action Soccer 2D HD", sub: "Stile Sensible Soccer · 60fps, Aftertouch e fisica reale", cls: "hot", fn: () => { if (window.openActionSoccerHD) window.openActionSoccerHD(menuSaghe); } },
+      { label: "👟 Street Football · La Gabbia del Molo", sub: "Calcio 3v3 da strada con sponde sui muri e barra Grinta", cls: "hot", fn: () => { if (window.openStreetCageMode) window.openStreetCageMode(menuSaghe); } },
+      { label: "📋 Matchday Director 2D HD", sub: "Gestionale Live · Ordini in tempo reale e lavagna tattica 2D", cls: "hot", fn: () => { if (window.openMatchDirectorHD) window.openMatchDirectorHD(menuSaghe); } },
       { head: "Saghe Ispirate & Speciali" },
       { label: "⭐ La Leggenda del Tuo Campione", sub: heroLoad() ? `La saga esclusiva di ${heroLoad().name} (N.${heroLoad().num})` : "Crea il tuo campione e scendi in campo!", cls: "hot", fn: () => { if (window.openHeroStoryMenu) window.openHeroStoryMenu(menuSaghe); } },
       { label: "⚡ Tsubasa · Il Tiro Combinato", sub: "Holly & Benji: Twin Shot ad elica, la Muppet e parate dal palo!", cls: "hot", fn: () => { if (window.openTsubasaMenu) window.openTsubasaMenu(menuSaghe); } },
@@ -14572,6 +14579,7 @@
     const tr = readJSON(TOUR, { titles: 0 }), co = readJSON(COACH, { w: 0, played: 0 });
     text("voce", `<b>Modalità di Gioco</b> ${mnBar(mnPct(mnModi()))}<br>Scegli tra tornei speciali, saghe investigative, multiverso o sfide calcistiche. Tutte indipendenti dal salvataggio principale.`);
     buttons([
+      { label: "✨ Arena 2D HD del Borgo", sub: "Suite Completa: Tactical Emblem, Action 60fps, Street Cage & Gestionale Live", cls: "hot", fn: () => { if (window.openArena2DHDModal) window.openArena2DHDModal(modes); } },
       { label: "🎰 Distributore Gashapon 3D", sub: "I Pupazzetti della Costa: gira la manovella e colleziona i giocattoli 3D!", cls: "hot", fn: () => { if (window.openGachaModal) window.openGachaModal(); } },
       { label: "📜 Leggende del passato (8 sfide d'epoca)", sub: "Le grandi partite storiche: Wanda '68, Nonno Dante '74, Baciccia Sr '60, Dario '91…", cls: "hot", fn: () => leggende(modes) },
       { label: "📽️ Momenti in Bianco e Nero (B&W)", sub: "Partite storiche in autentico bianco e nero d'epoca: fumo del '54, Rita '70, Don Aurelio '65…", cls: "hot", fn: () => flashback(modes) },
