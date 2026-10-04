@@ -19878,7 +19878,8 @@
   const AZK = "ali-di-rondine.azione";
   const azRec = () => { const r = readJSON(AZK, null), o = { v: 1, ctl: "trascina", opt: {}, modes: {}, hard: {}, obj: {}, objN: 0, pitW: {}, seen: {}, sea: null, played: 0, w: 0, d: 0, l: 0, goals: 0, beat: {} }; const x = r && typeof r === "object" ? { ...o, ...r } : o; ["beat", "modes", "hard", "obj", "pitW", "seen", "opt"].forEach((k) => { if (!x[k] || typeof x[k] !== "object" || Array.isArray(x[k])) x[k] = {}; }); return x; };
   const AZ_CTL = [["trascina", "Trascina", "Trascini il dito sul campo"], ["joystick", "Joystick virtuale", "Un cerchio compare dove appoggi il pollice sulla metà sinistra"], ["croce", "Croce direzionale", "Quattro frecce fisse, otto direzioni"]];
-  const azCtlMode = () => { const c = azRec().ctl; return AZ_CTL.some((x) => x[0] === c) ? c : "trascina"; };
+  let azCtlForce = null;
+  const azCtlMode = () => { if (azCtlForce) return azCtlForce; const c = azRec().ctl; return AZ_CTL.some((x) => x[0] === c) ? c : "trascina"; };
   const AZ_T = [["gabbiani", () => true], ["tori", () => true], ["aquile", () => true], ["delfini", () => seasonDone(1)], ["grifoni", () => seasonDone(2)], ["corvi", () => seasonDone(3)], ["leoni", () => seasonDone(4)], ["brasile", () => seasonDone(5)], ["leggende", () => prog().n >= 2]];
   let AZ_L = 12, AZ_R = 308, AZ_UP = 24, AZ_DN = 178, AZ_G0 = 84, AZ_G1 = 118;
   let AZ = null, azFast = 1, azBack = null;
@@ -23885,7 +23886,8 @@
     closeAltStage();
     try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) {}
     const opt = options || { mode: "amic", pitch: "erba", diff: "norm", pu: true, roles: ["nico"] };
-    azStart(teamKey, () => onEnd(0, 0), true, opt);
+    azCtlForce = azRec().ctl === "croce" ? "croce" : "joystick";
+    try { azStart(teamKey, () => onEnd(0, 0), true, opt); } finally { azCtlForce = null; }
     if (AZ) {
       AZ.cz = {
         names: ["Leo", "Nico", "Dario"],
