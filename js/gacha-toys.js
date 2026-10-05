@@ -493,25 +493,44 @@
     } catch (e) {}
   }
 
-  // Helper monete del gioco
+  // Helper monete del gioco - Sincronizzato con il Borgo e il salvataggio principale
   function getUserCoins() {
     try {
+      if (typeof window.bCoins === "function") return window.bCoins();
       if (typeof window.coins === "function") return window.coins();
+      const rawBorgo = localStorage.getItem("ali-di-rondine.borgo");
+      if (rawBorgo) {
+        const b = JSON.parse(rawBorgo);
+        if (b && typeof b.coins === "number") return b.coins;
+      }
       const raw = localStorage.getItem("ali-di-rondine.monete");
       if (raw) return parseInt(raw, 10) || 0;
     } catch (e) {}
-    return 30; // Minimo per provare subito se nuovo salvataggio
+    return 0; // Se non ci sono monete sono 0, mai 30 fittizie infinite!
   }
 
   function deductUserCoins(amount) {
     try {
+      let deducted = false;
       if (typeof window.addCoins === "function") {
         window.addCoins(-amount);
-        return true;
+        deducted = true;
       }
-      const cur = getUserCoins();
-      localStorage.setItem("ali-di-rondine.monete", Math.max(0, cur - amount));
-      return true;
+      const rawBorgo = localStorage.getItem("ali-di-rondine.borgo");
+      if (rawBorgo) {
+        const b = JSON.parse(rawBorgo);
+        if (b && typeof b.coins === "number") {
+          b.coins = Math.max(0, b.coins - amount);
+          localStorage.setItem("ali-di-rondine.borgo", JSON.stringify(b));
+          deducted = true;
+        }
+      }
+      const raw = localStorage.getItem("ali-di-rondine.monete");
+      if (raw) {
+        const cur = parseInt(raw, 10) || 0;
+        localStorage.setItem("ali-di-rondine.monete", Math.max(0, cur - amount));
+      }
+      return deducted;
     } catch (e) {
       return false;
     }
@@ -638,7 +657,7 @@
     else if (toy.pedestal === "gold") { baseCol = 0xffd23f; metalness = 0.95; roughness = 0.15; }
     else if (toy.pedestal === "rainbow") { baseCol = 0xff70a6; metalness = 0.85; roughness = 0.1; }
 
-    const baseGeo = new T.CylinderGeometry(0.85, 0.95, 0.22, 8);
+    const baseGeo = new T.CylinderGeometry(0.88, 0.98, 0.22, 8);
     const baseMat = new T.MeshStandardMaterial({
       color: baseCol,
       metalness,
@@ -650,98 +669,262 @@
     toyMeshGroup.add(baseMesh);
 
     // Anello dorato inciso sulla basetta
-    const ringGeo = new T.TorusGeometry(0.88, 0.03, 8, 24);
+    const ringGeo = new T.TorusGeometry(0.9, 0.03, 8, 24);
     const ringMat = new T.MeshStandardMaterial({ color: 0xffe277, metalness: 0.9, roughness: 0.2 });
     const ringMesh = new T.Mesh(ringGeo, ringMat);
     ringMesh.rotation.x = Math.PI / 2;
     ringMesh.position.y = 0.22;
     toyMeshGroup.add(ringMesh);
 
-    // 2. Scarpini Giocattolo
-    const bootGeo = new T.BoxGeometry(0.18, 0.12, 0.32);
-    const bootMat = new T.MeshStandardMaterial({ color: 0x111111, roughness: 0.4 });
+    // -------------------------------------------------------------
+    // CASO SPECIALE: GABBIANO MASCOTTE (Gabbiano 3D completo)
+    // -------------------------------------------------------------
+    if (toy.id === "gabbiano_mascotte" || toy.headType === "beak") {
+      const birdMat = new T.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 });
+      const greyMat = new T.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.5 });
+      const darkWingMat = new T.MeshStandardMaterial({ color: 0x334155, roughness: 0.5 });
+      const yellowBeakMat = new T.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.2 });
+      const orangeLegMat = new T.MeshStandardMaterial({ color: 0xf97316, roughness: 0.3 });
+      const eyeMat = new T.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1 });
+
+      // Zampette arancioni
+      const legGeo = new T.CylinderGeometry(0.04, 0.04, 0.45, 6);
+      const legL = new T.Mesh(legGeo, orangeLegMat); legL.position.set(-0.16, 0.38, 0);
+      const legR = new T.Mesh(legGeo, orangeLegMat); legR.position.set(0.16, 0.38, 0);
+      const footGeo = new T.BoxGeometry(0.12, 0.04, 0.22);
+      const footL = new T.Mesh(footGeo, orangeLegMat); footL.position.set(-0.16, 0.22, 0.06);
+      const footR = new T.Mesh(footGeo, orangeLegMat); footR.position.set(0.16, 0.22, 0.06);
+      toyMeshGroup.add(legL, legR, footL, footR);
+
+      // Corpo da gabbiano
+      const bodyGeo = new T.SphereGeometry(0.42, 14, 14);
+      bodyGeo.scale(0.85, 0.95, 1.25);
+      const bodyMesh = new T.Mesh(bodyGeo, birdMat);
+      bodyMesh.position.set(0, 0.85, 0);
+      bodyMesh.rotation.x = -0.15;
+      toyMeshGroup.add(bodyMesh);
+
+      // Coda piumata
+      const tailGeo = new T.BoxGeometry(0.35, 0.06, 0.4);
+      const tailMesh = new T.Mesh(tailGeo, birdMat);
+      tailMesh.position.set(0, 0.9, -0.6);
+      tailMesh.rotation.x = -0.3;
+      toyMeshGroup.add(tailMesh);
+
+      // Ali grigie ripiegate sui fianchi
+      const wingGeo = new T.BoxGeometry(0.1, 0.35, 0.7);
+      const wingL = new T.Mesh(wingGeo, greyMat); wingL.position.set(-0.36, 0.95, -0.05); wingL.rotation.y = 0.12; wingL.rotation.z = -0.1;
+      const wingR = new T.Mesh(wingGeo, greyMat); wingR.position.set(0.36, 0.95, -0.05); wingR.rotation.y = -0.12; wingR.rotation.z = 0.1;
+      const tipGeo = new T.BoxGeometry(0.08, 0.2, 0.3);
+      const tipL = new T.Mesh(tipGeo, darkWingMat); tipL.position.set(-0.37, 0.9, -0.4);
+      const tipR = new T.Mesh(tipGeo, darkWingMat); tipR.position.set(0.37, 0.9, -0.4);
+      toyMeshGroup.add(wingL, wingR, tipL, tipR);
+
+      // Testa rotonda
+      const headGeo = new T.SphereGeometry(0.32, 14, 14);
+      const headMesh = new T.Mesh(headGeo, birdMat);
+      headMesh.position.set(0, 1.35, 0.25);
+      toyMeshGroup.add(headMesh);
+
+      // Occhietti
+      const eyeGeo = new T.SphereGeometry(0.045, 8, 8);
+      const eL = new T.Mesh(eyeGeo, eyeMat); eL.position.set(-0.25, 1.4, 0.35);
+      const eR = new T.Mesh(eyeGeo, eyeMat); eR.position.set(0.25, 1.4, 0.35);
+      toyMeshGroup.add(eL, eR);
+
+      // Becco giallo con punta rossa
+      const beakGeo = new T.ConeGeometry(0.12, 0.45, 8);
+      const beakMesh = new T.Mesh(beakGeo, yellowBeakMat);
+      beakMesh.rotation.x = Math.PI / 2;
+      beakMesh.position.set(0, 1.32, 0.65);
+      const redSpotGeo = new T.BoxGeometry(0.06, 0.06, 0.08);
+      const redSpotMat = new T.MeshBasicMaterial({ color: 0xef4444 });
+      const redSpot = new T.Mesh(redSpotGeo, redSpotMat);
+      redSpot.position.set(0, 1.28, 0.72);
+      toyMeshGroup.add(beakMesh, redSpot);
+
+      // Focaccia ligure nel becco
+      const focacciaGeo = new T.BoxGeometry(0.32, 0.05, 0.2);
+      const focacciaMat = new T.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.6 });
+      const focacciaMesh = new T.Mesh(focacciaGeo, focacciaMat);
+      focacciaMesh.position.set(0, 1.3, 0.82);
+      focacciaMesh.rotation.y = 0.25;
+      toyMeshGroup.add(focacciaMesh);
+
+      threeScene.add(toyMeshGroup);
+      startToyAnimation();
+      return;
+    }
+
+    // -------------------------------------------------------------
+    // MODELLI UMANI: CARATTERIZZAZIONE PRECISA DI OGNI PERSONAGGIO
+    // -------------------------------------------------------------
+    const isPriest = toy.id.includes("aurelio") || toy.headType === "bald";
+    const isFisherman = toy.id.includes("baciccia") || toy.id.includes("pescivendolo");
+    const isGrandma = toy.id.includes("rita") || toy.id.includes("nonna") || toy.headType === "glasses_grandma" || toy.headType === "bun";
+    const isNico = toy.id.includes("nico");
+    const isTommy = toy.id.includes("tommy");
+    const isSara = toy.id.includes("sara");
+    const isTonino = toy.id.includes("tonino");
+    const isEnzo = toy.id.includes("enzo");
+    const isCountess = toy.id.includes("ines") || toy.headType === "noble_updo";
+    const isLeo = toy.id.includes("leo");
+    const isTsubasa = toy.id.includes("tsubasa");
+    const isDario = toy.id.includes("dario");
+
+    // 2. Calzature / Scarpini / Stivali di gomma
+    let bootCol = 0x111111;
+    if (isFisherman) bootCol = 0xca8a04; // stivali impermeabili gialli da lupo di mare
+    else if (toy.acc === "gold_boots" || toy.stars === 6) bootCol = 0xffd23f;
+    else if (toy.shirtColor === "#1d3fa3" || isTsubasa) bootCol = 0xffffff;
+
+    const bootGeo = new T.BoxGeometry(0.18, 0.14, 0.34);
+    const bootMat = new T.MeshStandardMaterial({
+      color: bootCol,
+      metalness: (toy.acc === "gold_boots" || toy.stars === 6) ? 0.8 : 0.1,
+      roughness: 0.4
+    });
     const bL = new T.Mesh(bootGeo, bootMat); bL.position.set(-0.25, 0.28, 0.05);
     const bR = new T.Mesh(bootGeo, bootMat); bR.position.set(0.25, 0.28, 0.05);
     toyMeshGroup.add(bL, bR);
 
-    // 3. Gambe / Calzettoni
-    const legGeo = new T.CylinderGeometry(0.08, 0.08, 0.3, 8);
-    const legMat = new T.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6 });
-    const lmL = new T.Mesh(legGeo, legMat); lmL.position.set(-0.25, 0.48, 0);
-    const lmR = new T.Mesh(legGeo, legMat); lmR.position.set(0.25, 0.48, 0);
-    toyMeshGroup.add(lmL, lmR);
+    // 3. Gambe / Pantaloncini o Abito lungo
+    if (!isPriest && !isCountess) {
+      const sockCol = isFisherman ? 0x1e293b : (toy.id.includes("nico") ? 0x0f172a : 0xffffff);
+      const legGeo = new T.CylinderGeometry(0.08, 0.08, 0.3, 8);
+      const legMat = new T.MeshStandardMaterial({ color: sockCol, roughness: 0.6 });
+      const lmL = new T.Mesh(legGeo, legMat); lmL.position.set(-0.25, 0.48, 0);
+      const lmR = new T.Mesh(legGeo, legMat); lmR.position.set(0.25, 0.48, 0);
+      toyMeshGroup.add(lmL, lmR);
 
-    // 4. Pantaloncini
-    const shortsGeo = new T.CylinderGeometry(0.32, 0.28, 0.26, 12);
-    const shortsMat = new T.MeshStandardMaterial({ color: parseInt(toy.shortsColor.replace("#", "0x")), roughness: 0.5 });
-    const shortsMesh = new T.Mesh(shortsGeo, shortsMat);
-    shortsMesh.position.y = 0.72;
-    toyMeshGroup.add(shortsMesh);
+      // Pantaloncini da gioco
+      const shortsGeo = new T.CylinderGeometry(0.33, 0.29, 0.28, 12);
+      const shortsMat = new T.MeshStandardMaterial({ color: parseInt(toy.shortsColor.replace("#", "0x")), roughness: 0.5 });
+      const shortsMesh = new T.Mesh(shortsGeo, shortsMat);
+      shortsMesh.position.y = 0.72;
+      toyMeshGroup.add(shortsMesh);
+    } else {
+      // Tonaca talare per Don Aurelio o Abito nobile per Contessa
+      const robeCol = isPriest ? 0x111116 : 0x581c87;
+      const robeGeo = new T.CylinderGeometry(0.34, 0.52, 0.9, 16);
+      const robeMat = new T.MeshStandardMaterial({ color: robeCol, roughness: 0.7 });
+      const robeMesh = new T.Mesh(robeGeo, robeMat);
+      robeMesh.position.y = 0.78;
+      toyMeshGroup.add(robeMesh);
 
-    // 5. Torso / Maglietta
+      if (isPriest) {
+        // Colletto bianco clericale romano
+        const collarGeo = new T.CylinderGeometry(0.18, 0.18, 0.08, 12);
+        const collarMat = new T.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 });
+        const collarMesh = new T.Mesh(collarGeo, collarMat);
+        collarMesh.position.y = 1.3;
+        toyMeshGroup.add(collarMesh);
+
+        // Croce pettorale d'oro
+        const crossV = new T.BoxGeometry(0.04, 0.16, 0.02);
+        const crossH = new T.BoxGeometry(0.11, 0.04, 0.02);
+        const crossMat = new T.MeshStandardMaterial({ color: 0xffd23f, metalness: 0.9, roughness: 0.2 });
+        const c1 = new T.Mesh(crossV, crossMat); c1.position.set(0, 1.12, 0.36);
+        const c2 = new T.Mesh(crossH, crossMat); c2.position.set(0, 1.15, 0.36);
+        toyMeshGroup.add(c1, c2);
+      }
+    }
+
+    // 4. Torso / Maglietta
     const torsoGeo = new T.CylinderGeometry(0.36, 0.32, 0.46, 12);
-    const shirtMat = new T.MeshStandardMaterial({ color: parseInt(toy.shirtColor.replace("#", "0x")), roughness: 0.4 });
+    const shirtColorNum = parseInt(toy.shirtColor.replace("#", "0x"));
+    const shirtMat = new T.MeshStandardMaterial({ color: shirtColorNum, roughness: 0.4 });
     const torsoMesh = new T.Mesh(torsoGeo, shirtMat);
     torsoMesh.position.y = 1.05;
     toyMeshGroup.add(torsoMesh);
 
-    // Numero di maglia o stemma sul petto (piccolo cubo smussato bianco)
-    const numGeo = new T.BoxGeometry(0.16, 0.16, 0.02);
-    const numMat = new T.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
-    const numMesh = new T.Mesh(numGeo, numMat);
-    numMesh.position.set(0, 1.08, 0.35);
-    toyMeshGroup.add(numMesh);
+    // Grembiule da lavoro (Nonna Rita, Tonino, Pescivendolo)
+    if (isGrandma || isTonino || toy.id.includes("pescivendolo")) {
+      const apronGeo = new T.BoxGeometry(0.38, 0.5, 0.04);
+      const apronCol = isTonino ? 0x991b1b : (isGrandma ? 0xf8fafc : 0x0284c7);
+      const apronMat = new T.MeshStandardMaterial({ color: apronCol, roughness: 0.5 });
+      const apronMesh = new T.Mesh(apronGeo, apronMat);
+      apronMesh.position.set(0, 0.98, 0.22);
+      toyMeshGroup.add(apronMesh);
 
-    // 6. Braccia e Mani Giocattolo
+      if (isGrandma) {
+        // Macchia di pesto ligure autentico
+        const spotGeo = new T.SphereGeometry(0.06, 6, 6);
+        spotGeo.scale(1, 1, 0.2);
+        const pestoMat = new T.MeshBasicMaterial({ color: 0x15803d });
+        const spotMesh = new T.Mesh(spotGeo, pestoMat);
+        spotMesh.position.set(0.08, 0.98, 0.25);
+        toyMeshGroup.add(spotMesh);
+      }
+    }
+
+    // Stemma / Numero 10 sul petto per i capitani
+    if (isLeo || isEnzo || isTsubasa) {
+      const numGeo = new T.BoxGeometry(0.18, 0.18, 0.02);
+      const numMat = new T.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
+      const numMesh = new T.Mesh(numGeo, numMat);
+      numMesh.position.set(0, 1.08, 0.35);
+      toyMeshGroup.add(numMesh);
+    }
+
+    // Fascia da capitano giallo oro in rilievo
+    if (isLeo || isDario || isEnzo) {
+      const bandGeo = new T.CylinderGeometry(0.085, 0.085, 0.1, 10);
+      const bandMat = new T.MeshStandardMaterial({ color: 0xffd23f, metalness: 0.8, roughness: 0.2 });
+      const bandMesh = new T.Mesh(bandGeo, bandMat);
+      bandMesh.position.set(-0.46, 1.05, 0);
+      toyMeshGroup.add(bandMesh);
+    }
+
+    // 5. Braccia
     const armGeo = new T.CylinderGeometry(0.07, 0.07, 0.38, 8);
-    const armMat = new T.MeshStandardMaterial({ color: parseInt(toy.shirtColor.replace("#", "0x")), roughness: 0.5 });
+    const armMat = new T.MeshStandardMaterial({ color: shirtColorNum, roughness: 0.5 });
     const armL = new T.Mesh(armGeo, armMat);
-    armL.position.set(-0.46, 1.02, 0);
-    armL.rotation.z = 0.35;
     const armR = new T.Mesh(armGeo, armMat);
-    armR.position.set(0.46, 1.02, 0);
-    armR.rotation.z = -0.35;
+
+    if (isEnzo && toy.acc === "trophy_cup") {
+      // Braccia alzate verso il cielo che stringono la coppa
+      armL.position.set(-0.42, 1.25, 0); armL.rotation.z = 2.4;
+      armR.position.set(0.42, 1.25, 0); armR.rotation.z = -2.4;
+    } else {
+      armL.position.set(-0.46, 1.02, 0); armL.rotation.z = 0.35;
+      armR.position.set(0.46, 1.02, 0); armR.rotation.z = -0.35;
+    }
     toyMeshGroup.add(armL, armR);
 
-    // Guanti o mani in carne
-    const handGeo = new T.SphereGeometry(0.1, 8, 8);
+    // Mani o Guantoni
+    const skinNum = parseInt(toy.skinColor.replace("#", "0x"));
+    const handGeo = isNico ? new T.BoxGeometry(0.18, 0.18, 0.12) : new T.SphereGeometry(0.1, 8, 8);
     const handMat = new T.MeshStandardMaterial({
-      color: toy.acc === "gloves" || toy.id.includes("nico") ? 0xffd23f : parseInt(toy.skinColor.replace("#", "0x")),
-      roughness: 0.6
+      color: isNico ? 0xf59e0b : skinNum,
+      roughness: isNico ? 0.3 : 0.6
     });
-    const hL = new T.Mesh(handGeo, handMat); hL.position.set(-0.55, 0.85, 0);
-    const hR = new T.Mesh(handGeo, handMat); hR.position.set(0.55, 0.85, 0);
+    const hL = new T.Mesh(handGeo, handMat);
+    const hR = new T.Mesh(handGeo, handMat);
+    if (isEnzo && toy.acc === "trophy_cup") {
+      hL.position.set(-0.25, 1.45, 0);
+      hR.position.set(0.25, 1.45, 0);
+    } else {
+      hL.position.set(-0.55, 0.85, 0);
+      hR.position.set(0.55, 0.85, 0);
+    }
     toyMeshGroup.add(hL, hR);
 
-    // 7. Grande Testa Stile Pupazzetto / Chibi
+    // 6. Testa
     const headGeo = new T.SphereGeometry(0.44, 16, 16);
-    const headMat = new T.MeshStandardMaterial({ color: parseInt(toy.skinColor.replace("#", "0x")), roughness: 0.45 });
+    const headMat = new T.MeshStandardMaterial({ color: skinNum, roughness: 0.45 });
     const headMesh = new T.Mesh(headGeo, headMat);
     headMesh.position.y = 1.55;
     toyMeshGroup.add(headMesh);
 
-    // Capelli sagomati
-    const hairGeo = new T.SphereGeometry(0.47, 14, 14, 0, Math.PI * 2, 0, Math.PI * 0.6);
-    const hairMat = new T.MeshStandardMaterial({ color: parseInt(toy.hairColor.replace("#", "0x")), roughness: 0.65 });
-    const hairMesh = new T.Mesh(hairGeo, hairMat);
-    hairMesh.position.y = 1.62;
-    toyMeshGroup.add(hairMesh);
-
-    // Ciuffo sporgente avanti
-    const tuftGeo = new T.ConeGeometry(0.18, 0.3, 8);
-    const tuftMesh = new T.Mesh(tuftGeo, hairMat);
-    tuftMesh.rotation.x = Math.PI / 3;
-    tuftMesh.position.set(0, 1.88, 0.32);
-    toyMeshGroup.add(tuftMesh);
-
-    // Occhi stile giocattolo anni '80
+    // Occhi stile collezionabile
     const eyeGeo = new T.SphereGeometry(0.06, 8, 8);
     const eyeMat = new T.MeshStandardMaterial({ color: 0x111111, roughness: 0.1 });
     const eyeL = new T.Mesh(eyeGeo, eyeMat); eyeL.position.set(-0.16, 1.56, 0.4);
     const eyeR = new T.Mesh(eyeGeo, eyeMat); eyeR.position.set(0.16, 1.56, 0.4);
     toyMeshGroup.add(eyeL, eyeR);
 
-    // Sorriso stampato
+    // Sorriso
     const smileGeo = new T.TorusGeometry(0.08, 0.02, 6, 12, Math.PI);
     const smileMat = new T.MeshBasicMaterial({ color: 0x4a1e12 });
     const smileMesh = new T.Mesh(smileGeo, smileMat);
@@ -749,30 +932,333 @@
     smileMesh.rotation.z = Math.PI;
     toyMeshGroup.add(smileMesh);
 
-    // 8. Accessorio Caratteristico (Pallone, Ali, Coppa, ecc.)
-    if (toy.acc === "ball" || !toy.acc) {
+    // -------------------------------------------------------------
+    // ACCONCIATURE & COPRICAPI SU MISURA
+    // -------------------------------------------------------------
+    const hairColorNum = parseInt(toy.hairColor.replace("#", "0x"));
+    const hairMat = new T.MeshStandardMaterial({ color: hairColorNum, roughness: 0.7 });
+
+    if (isFisherman) {
+      // Berretto in lana da marinaio ligure con risvolto
+      const capGeo = new T.SphereGeometry(0.48, 14, 14, 0, Math.PI * 2, 0, Math.PI * 0.5);
+      const capMat = new T.MeshStandardMaterial({ color: 0x1e3a8a, roughness: 0.6 });
+      const capMesh = new T.Mesh(capGeo, capMat);
+      capMesh.position.y = 1.68;
+      const brimGeo = new T.TorusGeometry(0.46, 0.08, 8, 20);
+      const brimMesh = new T.Mesh(brimGeo, capMat);
+      brimMesh.rotation.x = Math.PI / 2;
+      brimMesh.position.y = 1.66;
+      toyMeshGroup.add(capMesh, brimMesh);
+
+      // Barba folta marinara grigia che incornicia la mascella
+      const beardGeo = new T.TorusGeometry(0.38, 0.12, 8, 16, Math.PI * 0.85);
+      const beardMat = new T.MeshStandardMaterial({ color: hairColorNum, roughness: 0.8 });
+      const beardMesh = new T.Mesh(beardGeo, beardMat);
+      beardMesh.rotation.x = Math.PI / 2;
+      beardMesh.position.set(0, 1.48, 0.12);
+      toyMeshGroup.add(beardMesh);
+    } else if (isPriest) {
+      // Chierica da parroco con corona di capelli bianchi
+      const tonsureGeo = new T.TorusGeometry(0.42, 0.09, 8, 16, Math.PI * 1.2);
+      const tonsureMat = new T.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.8 });
+      const tonsureMesh = new T.Mesh(tonsureGeo, tonsureMat);
+      tonsureMesh.rotation.x = 2.2;
+      tonsureMesh.position.set(0, 1.6, -0.05);
+      toyMeshGroup.add(tonsureMesh);
+    } else if (isGrandma) {
+      // Chignon di Nonna
+      const hairGeo = new T.SphereGeometry(0.48, 14, 14, 0, Math.PI * 2, 0, Math.PI * 0.6);
+      const hairMesh = new T.Mesh(hairGeo, hairMat);
+      hairMesh.position.y = 1.62;
+      const bunGeo = new T.SphereGeometry(0.24, 12, 12);
+      const bunMesh = new T.Mesh(bunGeo, hairMat);
+      bunMesh.position.set(0, 1.9, -0.2);
+      toyMeshGroup.add(hairMesh, bunMesh);
+
+      // Occhiali da vista cerchiati dorati
+      const glassesFrameMat = new T.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.1 });
+      const lensGeo = new T.TorusGeometry(0.09, 0.015, 6, 16);
+      const lensL = new T.Mesh(lensGeo, glassesFrameMat); lensL.position.set(-0.16, 1.56, 0.44);
+      const lensR = new T.Mesh(lensGeo, glassesFrameMat); lensR.position.set(0.16, 1.56, 0.44);
+      const bridgeGeo = new T.BoxGeometry(0.08, 0.015, 0.015);
+      const bridge = new T.Mesh(bridgeGeo, glassesFrameMat); bridge.position.set(0, 1.56, 0.44);
+      toyMeshGroup.add(lensL, lensR, bridge);
+    } else if (isTommy) {
+      // Afro volumoso biondo/dorato
+      const afroGeo = new T.SphereGeometry(0.62, 14, 14);
+      const afroMat = new T.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.9 });
+      const afroMesh = new T.Mesh(afroGeo, afroMat);
+      afroMesh.position.set(0, 1.72, -0.05);
+      toyMeshGroup.add(afroMesh);
+    } else if (isNico) {
+      // Capelli arancioni ribelli e spettinati
+      const nicoHairGeo = new T.SphereGeometry(0.48, 14, 14, 0, Math.PI * 2, 0, Math.PI * 0.6);
+      const nicoHairMat = new T.MeshStandardMaterial({ color: 0xff7a22, roughness: 0.7 });
+      const nicoHairMesh = new T.Mesh(nicoHairGeo, nicoHairMat);
+      nicoHairMesh.position.y = 1.62;
+      toyMeshGroup.add(nicoHairMesh);
+
+      for (let i = 0; i < 5; i++) {
+        const spikeGeo = new T.ConeGeometry(0.12, 0.28, 6);
+        const spike = new T.Mesh(spikeGeo, nicoHairMat);
+        spike.position.set((i - 2) * 0.14, 1.95, 0.2 - Math.abs(i - 2) * 0.05);
+        spike.rotation.x = 0.3;
+        spike.rotation.z = -(i - 2) * 0.2;
+        toyMeshGroup.add(spike);
+      }
+
+      if (toy.headType === "cat_ears" || toy.id.includes("flying_cat")) {
+        const earMat = new T.MeshStandardMaterial({ color: 0x111111, roughness: 0.4 });
+        const earGeo = new T.ConeGeometry(0.14, 0.3, 4);
+        const earL = new T.Mesh(earGeo, earMat); earL.position.set(-0.32, 2.05, 0.05); earL.rotation.z = 0.3;
+        const earR = new T.Mesh(earGeo, earMat); earR.position.set(0.32, 2.05, 0.05); earR.rotation.z = -0.3;
+        toyMeshGroup.add(earL, earR);
+
+        const tailGeo = new T.TorusGeometry(0.3, 0.05, 6, 16, Math.PI * 0.75);
+        const tailMesh = new T.Mesh(tailGeo, earMat);
+        tailMesh.position.set(0.1, 0.75, -0.4);
+        tailMesh.rotation.y = Math.PI / 2;
+        toyMeshGroup.add(tailMesh);
+      }
+    } else if (isSara) {
+      // Coda di cavallo e occhiali rettangolari
+      const hairGeo = new T.SphereGeometry(0.48, 14, 14, 0, Math.PI * 2, 0, Math.PI * 0.6);
+      const hairMesh = new T.Mesh(hairGeo, hairMat);
+      hairMesh.position.y = 1.62;
+      const ponyGeo = new T.CylinderGeometry(0.08, 0.14, 0.45, 8);
+      const ponyMesh = new T.Mesh(ponyGeo, hairMat);
+      ponyMesh.position.set(0, 1.55, -0.55);
+      ponyMesh.rotation.x = -0.7;
+      toyMeshGroup.add(hairMesh, ponyMesh);
+
+      const frameMat = new T.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2 });
+      const gBox = new T.BoxGeometry(0.42, 0.1, 0.02);
+      const gMesh = new T.Mesh(gBox, frameMat);
+      gMesh.position.set(0, 1.56, 0.43);
+      toyMeshGroup.add(gMesh);
+    } else if (isTsubasa) {
+      // Acconciatura shonen ad aculei
+      const baseHair = new T.SphereGeometry(0.48, 14, 14);
+      const tsubasaMat = new T.MeshStandardMaterial({ color: 0x09090b, roughness: 0.6 });
+      const baseMesh = new T.Mesh(baseHair, tsubasaMat);
+      baseMesh.position.set(0, 1.62, -0.05);
+      toyMeshGroup.add(baseMesh);
+
+      const spikeData = [
+        [-0.35, 1.85, -0.2, 0.8, -0.6],
+        [0.35, 1.85, -0.2, 0.8, 0.6],
+        [0, 2.05, -0.25, 0.9, 0],
+        [-0.45, 1.55, -0.1, 0.2, -0.8],
+        [0.45, 1.55, -0.1, 0.2, 0.8],
+        [0, 1.9, 0.35, -0.6, 0]
+      ];
+      spikeData.forEach(([x, y, z, rx, rz]) => {
+        const spGeo = new T.ConeGeometry(0.18, 0.45, 6);
+        const spMesh = new T.Mesh(spGeo, tsubasaMat);
+        spMesh.position.set(x, y, z);
+        spMesh.rotation.x = rx;
+        spMesh.rotation.z = rz;
+        toyMeshGroup.add(spMesh);
+      });
+    } else if (isEnzo || isTonino || toy.headType === "mustache") {
+      // Baffo iconico anni '80
+      const stacheGeo = new T.BoxGeometry(0.24, 0.07, 0.05);
+      const stacheMat = new T.MeshStandardMaterial({ color: hairColorNum, roughness: 0.8 });
+      const stacheMesh = new T.Mesh(stacheGeo, stacheMat);
+      stacheMesh.position.set(0, 1.48, 0.43);
+      toyMeshGroup.add(stacheMesh);
+
+      const hairGeo = new T.SphereGeometry(0.48, 14, 14, 0, Math.PI * 2, 0, Math.PI * 0.6);
+      const hairMesh = new T.Mesh(hairGeo, hairMat);
+      hairMesh.position.y = 1.62;
+      toyMeshGroup.add(hairMesh);
+    } else {
+      // Capelli classici sagomati con ciuffo
+      const hairGeo = new T.SphereGeometry(0.48, 14, 14, 0, Math.PI * 2, 0, Math.PI * 0.6);
+      const hairMesh = new T.Mesh(hairGeo, hairMat);
+      hairMesh.position.y = 1.62;
+      const tuftGeo = new T.ConeGeometry(0.18, 0.32, 8);
+      const tuftMesh = new T.Mesh(tuftGeo, hairMat);
+      tuftMesh.rotation.x = Math.PI / 3;
+      tuftMesh.position.set(0, 1.88, 0.35);
+      toyMeshGroup.add(hairMesh, tuftMesh);
+    }
+
+    // -------------------------------------------------------------
+    // ACCESSORI CARATTERISTICI FEDELI
+    // -------------------------------------------------------------
+    if (toy.acc === "wings" || isLeo) {
+      // Ali di Rondine Dorate
+      const wingMat = new T.MeshStandardMaterial({
+        color: 0xffd23f,
+        metalness: 0.85,
+        roughness: 0.15,
+        transparent: true,
+        opacity: 0.88
+      });
+      const wingL = new T.BoxGeometry(0.85, 0.32, 0.04);
+      const wMeshL = new T.Mesh(wingL, wingMat);
+      wMeshL.position.set(-0.65, 1.25, -0.28);
+      wMeshL.rotation.y = 0.45;
+      wMeshL.rotation.z = 0.25;
+
+      const wingR = new T.BoxGeometry(0.85, 0.32, 0.04);
+      const wMeshR = new T.Mesh(wingR, wingMat);
+      wMeshR.position.set(0.65, 1.25, -0.28);
+      wMeshR.rotation.y = -0.45;
+      wMeshR.rotation.z = -0.25;
+      toyMeshGroup.add(wMeshL, wMeshR);
+
+      // Pallone ai piedi
+      const ballGeo = new T.SphereGeometry(0.24, 12, 12);
+      const ballMat = new T.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
+      const ballMesh = new T.Mesh(ballGeo, ballMat);
+      ballMesh.position.set(0.48, 0.32, 0.28);
+      toyMeshGroup.add(ballMesh);
+    } else if (toy.acc === "trophy_cup" || isEnzo) {
+      // Coppa d'Oro Storica
+      const cupMat = new T.MeshStandardMaterial({ color: 0xffd23f, metalness: 0.95, roughness: 0.1 });
+      const cupBody = new T.CylinderGeometry(0.28, 0.14, 0.45, 14);
+      const cupMesh = new T.Mesh(cupBody, cupMat);
+      const cupBase = new T.CylinderGeometry(0.2, 0.22, 0.12, 12);
+      const cupBaseMesh = new T.Mesh(cupBase, cupMat);
+      cupBaseMesh.position.y = -0.25;
+      cupMesh.add(cupBaseMesh);
+
+      const handleGeo = new T.TorusGeometry(0.16, 0.03, 6, 12, Math.PI);
+      const hL = new T.Mesh(handleGeo, cupMat); hL.position.set(-0.28, 0.05, 0); hL.rotation.z = Math.PI / 2;
+      const hR = new T.Mesh(handleGeo, cupMat); hR.position.set(0.28, 0.05, 0); hR.rotation.z = -Math.PI / 2;
+      cupMesh.add(hL, hR);
+
+      if (isEnzo) {
+        cupMesh.position.set(0, 1.82, 0.08);
+      } else {
+        cupMesh.position.set(0.55, 1.15, 0.28);
+      }
+      toyMeshGroup.add(cupMesh);
+    } else if (toy.acc === "icecream" || (isNico && toy.id.includes("gelato"))) {
+      // Gelato pistacchio e limone
+      const coneGeo = new T.ConeGeometry(0.1, 0.35, 8);
+      const coneMat = new T.MeshStandardMaterial({ color: 0xd97706, roughness: 0.7 });
+      const coneMesh = new T.Mesh(coneGeo, coneMat);
+      coneMesh.rotation.x = Math.PI;
+      coneMesh.position.set(0.65, 0.9, 0.25);
+
+      const scoopPistacchio = new T.SphereGeometry(0.12, 8, 8);
+      const pistacchioMat = new T.MeshStandardMaterial({ color: 0x84cc16, roughness: 0.5 });
+      const s1 = new T.Mesh(scoopPistacchio, pistacchioMat); s1.position.y = -0.2;
+      coneMesh.add(s1);
+
+      const scoopLimone = new T.SphereGeometry(0.1, 8, 8);
+      const limoneMat = new T.MeshStandardMaterial({ color: 0xfef08a, roughness: 0.5 });
+      const s2 = new T.Mesh(scoopLimone, limoneMat); s2.position.set(0, -0.32, 0.04);
+      coneMesh.add(s2);
+
+      toyMeshGroup.add(coneMesh);
+    } else if (toy.acc === "coffee" || isTonino) {
+      // Caffè espresso
+      const saucerGeo = new T.CylinderGeometry(0.16, 0.14, 0.03, 10);
+      const ceramicMat = new T.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 });
+      const saucer = new T.Mesh(saucerGeo, ceramicMat);
+      saucer.position.set(0.55, 0.88, 0.25);
+
+      const cupGeo = new T.CylinderGeometry(0.09, 0.07, 0.12, 10);
+      const cup = new T.Mesh(cupGeo, ceramicMat);
+      cup.position.y = 0.08;
+      saucer.add(cup);
+
+      const coffeeLiquid = new T.CylinderGeometry(0.08, 0.08, 0.02, 8);
+      const coffeeMat = new T.MeshBasicMaterial({ color: 0x3d1c06 });
+      const cLiq = new T.Mesh(coffeeLiquid, coffeeMat);
+      cLiq.position.y = 0.13;
+      saucer.add(cLiq);
+
+      toyMeshGroup.add(saucer);
+    } else if (toy.acc === "pipe" || isFisherman) {
+      // Pipa marinara in radica
+      const pipeBowl = new T.CylinderGeometry(0.05, 0.04, 0.1, 8);
+      const pipeMat = new T.MeshStandardMaterial({ color: 0x5c2c16, roughness: 0.4 });
+      const pMesh = new T.Mesh(pipeBowl, pipeMat);
+      pMesh.position.set(0.25, 1.45, 0.45);
+      const stemGeo = new T.CylinderGeometry(0.02, 0.02, 0.14, 6);
+      const stem = new T.Mesh(stemGeo, pipeMat);
+      stem.rotation.x = Math.PI / 3;
+      stem.position.set(-0.04, -0.02, -0.05);
+      pMesh.add(stem);
+      toyMeshGroup.add(pMesh);
+    } else if (toy.acc === "bell" || isPriest) {
+      // Campanella d'ottone di Don Aurelio
+      const bellGeo = new T.CylinderGeometry(0.05, 0.14, 0.2, 10);
+      const bellMat = new T.MeshStandardMaterial({ color: 0xffd23f, metalness: 0.9, roughness: 0.15 });
+      const bellMesh = new T.Mesh(bellGeo, bellMat);
+      bellMesh.position.set(0.55, 0.85, 0.25);
+      const handleGeo = new T.CylinderGeometry(0.025, 0.025, 0.12, 6);
+      const hMesh = new T.Mesh(handleGeo, new T.MeshStandardMaterial({ color: 0x3d1c06 }));
+      hMesh.position.y = 0.15;
+      bellMesh.add(hMesh);
+      toyMeshGroup.add(bellMesh);
+    } else if (toy.acc === "tablet" || isSara) {
+      // Tablet tattico verde
+      const tabGeo = new T.BoxGeometry(0.32, 0.22, 0.02);
+      const tabMat = new T.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3 });
+      const tabMesh = new T.Mesh(tabGeo, tabMat);
+      tabMesh.position.set(0.5, 0.95, 0.28);
+      tabMesh.rotation.x = -0.4;
+      tabMesh.rotation.y = -0.3;
+
+      const screenGeo = new T.BoxGeometry(0.28, 0.18, 0.01);
+      const screenMat = new T.MeshBasicMaterial({ color: 0x22c55e });
+      const screenMesh = new T.Mesh(screenGeo, screenMat);
+      screenMesh.position.z = 0.015;
+      tabMesh.add(screenMesh);
+      toyMeshGroup.add(tabMesh);
+    } else if (toy.acc === "mini_panda" || toy.id.includes("panda")) {
+      // Mini Panda 30 rossa ai piedi
+      const pandaGroup = new T.Group();
+      const carBody = new T.BoxGeometry(0.5, 0.24, 0.32);
+      const carMat = new T.MeshStandardMaterial({ color: 0xdc2626, metalness: 0.6, roughness: 0.3 });
+      const bodyM = new T.Mesh(carBody, carMat);
+      bodyM.position.y = 0.16;
+      pandaGroup.add(bodyM);
+
+      const cabGeo = new T.BoxGeometry(0.32, 0.18, 0.3);
+      const cabMat = new T.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.4 });
+      const cabM = new T.Mesh(cabGeo, cabMat);
+      cabM.position.set(-0.04, 0.34, 0);
+      pandaGroup.add(cabM);
+
+      const wheelGeo = new T.CylinderGeometry(0.08, 0.08, 0.06, 8);
+      const wheelMat = new T.MeshStandardMaterial({ color: 0x111111, roughness: 0.6 });
+      [[-0.16, -0.16], [0.16, -0.16], [-0.16, 0.16], [0.16, 0.16]].forEach(([wx, wz]) => {
+        const w = new T.Mesh(wheelGeo, wheelMat);
+        w.rotation.x = Math.PI / 2;
+        w.position.set(wx, 0.08, wz);
+        pandaGroup.add(w);
+      });
+
+      const headlightGeo = new T.SphereGeometry(0.04, 6, 6);
+      const hlMat = new T.MeshBasicMaterial({ color: 0xfef08a });
+      const hl1 = new T.Mesh(headlightGeo, hlMat); hl1.position.set(0.25, 0.18, -0.1);
+      const hl2 = new T.Mesh(headlightGeo, hlMat); hl2.position.set(0.25, 0.18, 0.1);
+      pandaGroup.add(hl1, hl2);
+
+      pandaGroup.position.set(0.5, 0.22, 0.25);
+      pandaGroup.rotation.y = -0.6;
+      toyMeshGroup.add(pandaGroup);
+    } else {
+      // Default: Pallone da calcio classico
       const ballGeo = new T.SphereGeometry(0.24, 12, 12);
       const ballMat = new T.MeshStandardMaterial({ color: 0xf5f5f5, roughness: 0.25 });
       const ballMesh = new T.Mesh(ballGeo, ballMat);
       ballMesh.position.set(0.52, 0.34, 0.28);
       toyMeshGroup.add(ballMesh);
-    } else if (toy.acc === "wings") {
-      const wingGeo = new T.BoxGeometry(0.9, 0.35, 0.05);
-      const wingMat = new T.MeshStandardMaterial({ color: 0xffd23f, metalness: 0.8, roughness: 0.2, transparent: true, opacity: 0.85 });
-      const wL = new T.Mesh(wingGeo, wingMat); wL.position.set(-0.6, 1.25, -0.3); wL.rotation.y = 0.4; wL.rotation.z = 0.2;
-      const wR = new T.Mesh(wingGeo, wingMat); wR.position.set(0.6, 1.25, -0.3); wR.rotation.y = -0.4; wR.rotation.z = -0.2;
-      toyMeshGroup.add(wL, wR);
-    } else if (toy.acc === "trophy_cup") {
-      const cupGeo = new T.CylinderGeometry(0.24, 0.12, 0.45, 12);
-      const cupMat = new T.MeshStandardMaterial({ color: 0xffd23f, metalness: 0.95, roughness: 0.1 });
-      const cupMesh = new T.Mesh(cupGeo, cupMat);
-      cupMesh.position.set(0.55, 1.2, 0.3);
-      toyMeshGroup.add(cupMesh);
     }
 
     threeScene.add(toyMeshGroup);
+    startToyAnimation();
+  }
 
-    // Animazione di rotazione dolce
+  function startToyAnimation() {
     if (threeAnimId) cancelAnimationFrame(threeAnimId);
     let t = 0;
     function animate() {
@@ -782,7 +1268,9 @@
         toyMeshGroup.rotation.y += 0.008;
         toyMeshGroup.position.y = Math.sin(t) * 0.04;
       }
-      threeRenderer.render(threeScene, threeCamera);
+      if (threeRenderer && threeScene && threeCamera) {
+        threeRenderer.render(threeScene, threeCamera);
+      }
     }
     animate();
   }
@@ -1030,10 +1518,32 @@
     const pityEl = document.getElementById("gachaPityCount");
     const ownedEl = document.getElementById("gachaOwnedCount");
 
-    if (coinsEl) coinsEl.textContent = getUserCoins();
+    const curCoins = getUserCoins();
+    if (coinsEl) coinsEl.textContent = curCoins;
     if (shardsEl) shardsEl.textContent = data.shards || 0;
     if (pityEl) pityEl.textContent = `${data.pity || 0}/30`;
     if (ownedEl) ownedEl.textContent = `${Object.keys(data.owned).length}/${TOY_CATALOG.length}`;
+
+    const b1 = document.getElementById("gachaPull1Btn");
+    const b10 = document.getElementById("gachaPull10Btn");
+    if (b1) {
+      if (curCoins < 15) {
+        b1.style.opacity = "0.55";
+        b1.style.filter = "grayscale(0.6)";
+      } else {
+        b1.style.opacity = "1";
+        b1.style.filter = "none";
+      }
+    }
+    if (b10) {
+      if (curCoins < 130) {
+        b10.style.opacity = "0.55";
+        b10.style.filter = "grayscale(0.6)";
+      } else {
+        b10.style.opacity = "1";
+        b10.style.filter = "none";
+      }
+    }
   }
 
   // --- LOGICA DI PESCATA CON ANIMAZIONE ---
@@ -1046,12 +1556,14 @@
 
     if (userCoins < cost) {
       if (window.toast) {
-        window.toast(`Monete insufficienti! Ne servono ${cost}. Gioca partite per guadagnarne altre.`, "warn", "🪙");
+        window.toast(`🪙 Monete insufficienti! Ne hai solo ${userCoins}, ne servono ${cost}. Gioca partite, sfide o missioni nel Borgo per guadagnarne altre!`, "warn", "🔒");
       }
+      updateHeaderCounters();
       return;
     }
 
     deductUserCoins(cost);
+    updateHeaderCounters();
     isPulling = true;
 
     // Animazione rotazione manovella

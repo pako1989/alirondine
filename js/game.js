@@ -24613,6 +24613,8 @@
     }
   };
 
+  window.bCoins = bCoins;
+  window.coins = bCoins;
   window.addCoins = addCoins;
   window.__borgoApi = { TRZ, MN_BORGO_BTN, CAST, trGo, trAsk, trSay, trResume, L, trToast };
   title();
