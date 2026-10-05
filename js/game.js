@@ -1265,7 +1265,14 @@
     else if (CEL) drawCel();
     else if (cutin) drawCutin();
     else if (view.kind === "match") {
-      drawPitch();
+      if (SET && SET.tsubasa && window.drawTsubasaMatch) {
+        window.drawTsubasaMatch(g, M);
+      } else {
+        drawPitch();
+      }
+    }
+    else if (view.kind === "tsubasa") {
+      if (window.drawTsubasaMatch) window.drawTsubasaMatch(g, window.tsubasaExhibState);
     }
     else if (view.kind === "timing" && tm) drawTiming();
     else if (view.kind === "coach") drawCoach();
@@ -1427,6 +1434,55 @@
   function buttons(list, one) {
     try { list = mnDressList(list); } catch {}
     list = list.map((o) => (o && ({ "◂ Altre modalità": 1, "◂ Extra": 1 })[o.label] ? { ...o, label: o.label === "◂ Extra" ? "◂ Collezioni" : "◂ Modalità" } : o));
+
+    if (view && view.kind === "match" && SET && SET.tsubasa && window.startTsubasaAction && M) {
+      const c = $("choices"); c.innerHTML = ""; c.className = "choices";
+      c.style.display = "grid";
+      c.style.gridTemplateColumns = "repeat(2, 1fr)";
+      c.style.gap = "8px";
+
+      list.forEach((o) => {
+        if (o && o.head) { const h = document.createElement("div"); h.className = "head"; h.textContent = o.head; h.style.gridColumn = "1 / -1"; c.appendChild(h); return; }
+        const b = document.createElement("button"); b.type = "button";
+        b.className = "choice-btn" + (o.cls ? " " + o.cls : "");
+        b.disabled = !!o.disabled;
+        b.style.display = "flex";
+        b.style.flexDirection = "column";
+        b.style.alignItems = "center";
+        b.style.justifyContent = "center";
+        b.style.padding = "10px 6px";
+        b.style.minHeight = "52px";
+
+        const isShot = /TIR|RONDINE|FOGLIA|ROVESCIATA|BOMBA/i.test(o.label);
+        const isDrib = /DRIB|FINTA|SCATTO|DUELLO/i.test(o.label);
+        const isTack = /SCIVOLATA|CONTRAST|TACKLE/i.test(o.label);
+        const icon = isShot ? "🔥 " : isDrib ? "💨 " : isTack ? "🦵 " : "👟 ";
+
+        b.innerHTML = `
+          <div style="font-weight:900; font-size:13px; font-family:var(--display, sans-serif);">${icon}${o.label}</div>
+          ${o.sub ? `<small style="font-size:10px; opacity:0.85; margin-top:2px;">${o.sub}</small>` : ""}
+        `;
+
+        b.onclick = () => {
+          c.innerHTML = `
+            <div style="grid-column: 1 / -1; background:#0c1a30; border:1.5px solid #00e5ff; border-radius:8px; padding:10px; text-align:center; color:#00e5ff; font-weight:bold; font-size:13px; font-family:var(--display, sans-serif); animation:pulseCarrier 0.8s infinite alternate;">
+              ⚡ AZIONE IN CORSO: ${o.label.toUpperCase()}...
+            </div>
+          `;
+          const actionType = isShot ? "shot" : isDrib ? "drib" : isTack ? "tackle" : "pass";
+          window.startTsubasaAction(actionType, {
+            title: o.label.toUpperCase(),
+            sub: o.sub || "Azione sul campo!",
+            color: isShot ? "#ffd23f" : isDrib ? "#00e5ff" : "#ff4d5a",
+            soundWord: isShot ? "BOOOM!" : isDrib ? "SWOOOSH!" : "STAAACK!"
+          }, () => {
+            if (o.fn) o.fn();
+          });
+        };
+        c.appendChild(b);
+      });
+      return;
+    }
 
     const c = $("choices"); c.innerHTML = ""; c.className = "choices" + (one || list.length === 1 ? " one" : "");
     list.forEach((o) => {
@@ -4904,7 +4960,7 @@
   };
   // 15l · Partita classica: quattro aggiunte, ognuna spegnibile (spente = regole di prima)
   const SET_PC = { coppie: ["Schemi a coppie avanzati", "Con grande intesa, ogni compagno sblocca un secondo tiro in coppia (intesa 14)"], rete: ["Rete strappata", "Un tiro potentissimo può bucare la rete: cut-in speciale, un po' di grinta e il conto delle reti strappate"], star: ["Fuoriclasse rivali", "Il capitano avversario carica lo speciale con una frase sua e un cut-in nei colori della squadra"], gkf: ["Portieri che si stancano", "Più tiri affronta, più un portiere cala (il tuo e il loro); all'intervallo recupera"], duelli: ["Duelli 1 contro 1", "Dribbling in attacco (zona 3+): leggi il difensore e scegli finta, scatto o protezione"], area: ["Comandi in area", "Parata, pugno o uscita: li scegli tu col tuo portiere, e anche il portiere avversario li usa"], tempo: ["Tiro a tempo", "Ferma la barra al momento giusto: preciso = tiro più forte, sbagliato = più debole"], fiato: ["Grinta di riserva", "A secco puoi tirare lo stesso (più debole); rifiatare ridà almeno 10"], spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
-  const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false, dis: false, cardView: "holo3d", mangaView: "comic", trophyView: "3d", bgArt: "detailed", confetti: true, proActionFx: true });
+  const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false, dis: false, cardView: "holo3d", mangaView: "comic", trophyView: "3d", bgArt: "detailed", confetti: true, proActionFx: true, tsubasa: false });
   function setLoad() {
     const d = setDefault(), s = readJSON(SETK, null);
     if (!s || s.v !== 1) return d;
@@ -4914,6 +4970,7 @@
     if (res.bgArt === undefined) res.bgArt = "detailed";
     if (res.confetti === undefined) res.confetti = true;
     if (res.proActionFx === undefined) res.proActionFx = true;
+    if (res.tsubasa === undefined) res.tsubasa = false;
     return res;
   }
   let SET = setLoad();
@@ -4968,6 +5025,8 @@
     const b = [{ label: `Stile partite: ${on ? "Anni '90" : "Classico"} ▸`, sub: on ? "Passa al Classico" : "Passa agli Anni '90", cls: "hot", fn: () => { SET.style = on ? "classic" : "90"; save(); again(); } }];
     b.push(diffButton(save, again));
     b.push({ label: `Partite tattiche: ${SET.tatt ? "sì" : "no"}`, sub: SET.tatt ? "Pressing, contropiede, fiato, cambi e piccoli infortuni in ogni partita" : "Modalità alternativa: aggiunge piano di gioco, fiato, cambi e botte", fn: () => { SET.tatt = !SET.tatt; save(); again(); } });
+    b.push({ label: `Modalità Partita: ${SET.tsubasa ? "Captain Tsubasa (NES/SNES)" : "Classico JRPG"} ▸`, sub: SET.tsubasa ? "Duelli cinematografici Tecmo, comandi a griglia, radar e animazioni rétro" : "Elenco scelte testuali classico (tocca per cambiare)", fn: () => { SET.tsubasa = !SET.tsubasa; save(); again(`Modalità Partita: ${SET.tsubasa ? "Captain Tsubasa (NES/SNES)" : "Classico JRPG"}`); } });
+    b.push({ label: "⚽ Gioca Esibizione Captain Tsubasa (NES/SNES) ▸", sub: "Sfida immediata con il motore a duelli Tecmo", cls: "hot", fn: () => { if (window.openTsubasaExhibition) window.openTsubasaExhibition(again); } });
     if (on) Object.entries(SET_T).forEach(([k, [l, sub]]) => b.push({ label: `${SET.t[k] ? "✓" : "✗"} ${l}`, sub, fn: () => { SET.t[k] = !SET.t[k]; save(); again(); } }));
     Object.entries(SET_PC).forEach(([k, [l, sub]]) => b.push({ label: `${SET.pc[k] ? "✓" : "✗"} ${l}`, sub: `Partita classica · ${sub}`, fn: () => { SET.pc = { ...SET.pc, [k]: !SET.pc[k] }; save(); again(); } }));
     let AB = [];
@@ -14623,6 +14682,7 @@
       { label: "🌊 Il Gozzo di Baciccia · Derby del Golfo", sub: "Navigazione 2.5D nel golfo: recupera i palloni perduti e vinci la Regata!", cls: "hot", fn: () => { if (window.openGozzoGame) window.openGozzoGame("recupero", modes); } },
       { label: "🕹️ Cabinato: Super Rondine '94", sub: "Arcade 16-bit a gettoni nel Bar: scanline CRT, tiri a effetto e scivolate!", cls: "hot", fn: () => { if (window.openArcadeMachine) window.openArcadeMachine(modes); } },
       { label: "⚡ Tsubasa · Il Tiro Combinato", sub: "Holly & Benji: Twin Shot ad elica, la Muppet e parate dal palo!", cls: "hot", fn: () => { if (window.openTsubasaMenu) window.openTsubasaMenu(modes); } },
+      { label: "⚽ Esibizione Captain Tsubasa (NES/SNES)", sub: "Partita a duelli 1v1 rétro Tecmo con radar, split-screen e comandi a griglia", cls: "hot", fn: () => { if (window.openTsubasaExhibition) window.openTsubasaExhibition(modes); } },
       { label: "👑 Westeros · I Cinque Trabucchi", sub: "Game of Thrones: Mappa tattica a feudi, risorse e Re della Notte!", cls: "hot", fn: () => { if (window.openThronesWarMenu) window.openThronesWarMenu(modes); } },
       { label: "🛸 Futurama · Champions 3000", sub: "Lega Galattica: 4 pianeti a gravità variabile e innesti di Bender!", cls: "hot", fn: () => { if (window.openFuturamaLeagueMenu) window.openFuturamaLeagueMenu(modes); } },
       { label: "🧪 Rick & Morty · La Cittadella", sub: "Squad builder con 5 varianti di Leo, Portal Gun e scontro a Evil Leo!", cls: "hot", fn: () => { if (window.openCitadelStoryMenu) window.openCitadelStoryMenu(modes); } },

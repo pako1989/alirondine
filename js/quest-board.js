@@ -929,74 +929,74 @@
     const overlay = document.createElement("div");
     overlay.id = "rosterModalOverlay";
     overlay.style.cssText = `
-      position: fixed; inset: 0; background: rgba(5, 11, 24, 0.92); backdrop-filter: blur(10px);
-      z-index: 10001; display: flex; align-items: center; justify-content: center; padding: 14px;
+      position: fixed; inset: 0; background: rgba(5, 11, 24, 0.94); backdrop-filter: blur(10px);
+      z-index: 10001; display: flex; align-items: center; justify-content: center; padding: 8px;
       font-family: system-ui, -apple-system, sans-serif; color: #f1f5f9; box-sizing: border-box;
     `;
 
     const box = document.createElement("div");
     box.style.cssText = `
-      width: 100%; max-width: 680px; max-height: 90vh; background: #0f172a;
-      border: 2px solid #38bdf8; border-radius: 18px; box-shadow: 0 16px 40px rgba(0,0,0,0.8);
-      display: flex; flex-direction: column; overflow: hidden; animation: popIn .2s ease;
+      width: 100%; max-width: 640px; max-height: 94vh; height: 94vh; background: #0f172a;
+      border: 2px solid #38bdf8; border-radius: 16px; box-shadow: 0 16px 40px rgba(0,0,0,0.85);
+      display: flex; flex-direction: column; overflow: hidden; animation: popIn .2s ease; box-sizing: border-box;
     `;
 
     const recruitedCount = ROSTER_RECRUITS.filter(r => !!svRecData[r.id]).length;
 
     box.innerHTML = `
       <!-- Header -->
-      <div style="background:linear-gradient(180deg, #0c2d48, #071927); padding:16px 18px; border-bottom:2px solid #38bdf8; display:flex; justify-content:space-between; align-items:center;">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <div style="width:44px; height:44px; background:#0284c7; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:24px; box-shadow:0 4px 10px rgba(0,0,0,0.4);">
+      <div style="flex-shrink:0; background:linear-gradient(180deg, #0c2d48, #071927); padding:12px 14px; border-bottom:2px solid #38bdf8; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+        <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+          <div style="width:38px; height:38px; background:#0284c7; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 4px 10px rgba(0,0,0,0.4); flex-shrink:0;">
             👥
           </div>
-          <div>
-            <div style="font-size:18px; font-weight:bold; color:#38bdf8; letter-spacing:0.5px;">ROSTER RONDINE F.C. · LE RECLUTE</div>
-            <div style="font-size:12px; color:#cbd5e1;">${recruitedCount}/${ROSTER_RECRUITS.length} Campioni Reclutati · Attivi in Sede & Calcio d'Azione</div>
+          <div style="min-width:0;">
+            <div style="font-size:clamp(13px, 4vw, 16px); font-weight:800; color:#38bdf8; letter-spacing:0.3px; line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">ROSTER RONDINE F.C. · RECLUTE</div>
+            <div style="font-size:11px; color:#cbd5e1; line-height:1.2; margin-top:2px;">${recruitedCount}/${ROSTER_RECRUITS.length} Reclutati · Attivi in Sede & Azione</div>
           </div>
         </div>
-        <button id="rosterCloseBtn" style="background:#1e293b; color:#cbd5e1; border:1px solid #334155; width:34px; height:34px; border-radius:50%; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+        <button id="rosterCloseBtn" style="background:#1e293b; color:#cbd5e1; border:1px solid #334155; width:32px; height:32px; border-radius:50%; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0;">✕</button>
       </div>
 
       <!-- Spiegazione -->
-      <div style="padding:10px 16px; background:#0b1329; border-bottom:1px solid #1e293b; font-size:12px; color:#94a3b8; line-height:1.4;">
-        Le reclute ingaggiate tramite le sfide della bacheca entrano ufficialmente nel club: vivono nel Borgo, popolano la <b>Sede del Club</b> e possono essere schierate come <b>Rinforzi</b> in <em>Calcio d'Azione</em> per attivare bonus unici!
+      <div style="flex-shrink:0; padding:8px 12px; background:#0b1329; border-bottom:1px solid #1e293b; font-size:11.5px; color:#94a3b8; line-height:1.35;">
+        Le reclute ingaggiate tramite le sfide della bacheca entrano nel club: vivono nel Borgo, popolano la <b>Sede</b> e possono essere schierate come <b>Rinforzi</b> in <em>Calcio d'Azione</em>!
       </div>
 
       <!-- Lista Reclute -->
-      <div style="flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:10px;">
+      <div style="flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:10px; display:flex; flex-direction:column; gap:8px;">
         ${ROSTER_RECRUITS.map(r => {
           const isRecruited = !!svRecData[r.id];
           return `
-            <div style="background:#1e293b; border:2px solid ${isRecruited ? "#22c55e" : "#334155"}; border-radius:12px; padding:12px 14px; display:flex; gap:12px; align-items:center; position:relative; overflow:hidden;">
-              <div style="width:48px; height:48px; background:${isRecruited ? r.color : "#334155"}; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:26px; box-shadow:0 4px 10px rgba(0,0,0,0.3); flex-shrink:0;">
+            <div style="flex-shrink:0; min-height:fit-content; background:#1e293b; border:1.5px solid ${isRecruited ? "#22c55e" : "#334155"}; border-radius:10px; padding:10px 12px; display:flex; gap:10px; align-items:flex-start; box-sizing:border-box;">
+              <div style="width:40px; height:40px; background:${isRecruited ? r.color : "#334155"}; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:22px; box-shadow:0 3px 8px rgba(0,0,0,0.3); flex-shrink:0; margin-top:2px;">
                 ${r.badge}
               </div>
-              <div style="flex:1; min-width:0;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-                  <div style="font-weight:bold; font-size:15px; color:${isRecruited ? "#f8fafc" : "#94a3b8"};">
-                    ${esc(r.name)} <span style="font-size:12px; color:#38bdf8; font-weight:normal;">[${esc(r.role)}]</span>
+              <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:3px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:6px; flex-wrap:wrap;">
+                  <div style="font-weight:bold; font-size:14px; color:${isRecruited ? "#f8fafc" : "#f1f5f9"}; line-height:1.2;">
+                    ${esc(r.name)} <span style="font-size:11.5px; color:#38bdf8; font-weight:600;">[${esc(r.role)}]</span>
                   </div>
                   <div>
                     ${isRecruited ? `
-                      <span style="font-size:11px; color:#22c55e; font-weight:bold; padding:3px 8px; background:rgba(34,197,94,0.15); border-radius:6px; border:1px solid #22c55e;">IN ROSA ✓</span>
+                      <span style="font-size:10px; color:#22c55e; font-weight:bold; padding:2px 6px; background:rgba(34,197,94,0.18); border-radius:5px; border:1px solid #22c55e; white-space:nowrap;">IN ROSA ✓</span>
                     ` : `
-                      <span style="font-size:11px; color:#f59e0b; font-weight:bold; padding:3px 8px; background:rgba(245,158,11,0.15); border-radius:6px; border:1px solid #f59e0b;">DA RECLUTARE</span>
+                      <span style="font-size:10px; color:#f59e0b; font-weight:bold; padding:2px 6px; background:rgba(245,158,11,0.18); border-radius:5px; border:1px solid #f59e0b; white-space:nowrap;">DA RECLUTARE</span>
                     `}
                   </div>
                 </div>
-                <div style="font-size:12px; color:#e2e8f0; margin-bottom:4px;">
+                <div style="font-size:11.5px; color:#cbd5e1; line-height:1.35;">
                   ${esc(r.bio)}
                 </div>
-                <div style="font-size:11px; color:#facc15; font-weight:500;">
-                  ⚡ <b>Perk Squadra:</b> ${esc(r.perk)}
+                <div style="font-size:11px; color:#facc15; font-weight:600; line-height:1.25;">
+                  ⚡ <b>Perk:</b> ${esc(r.perk)}
                 </div>
                 ${!isRecruited ? `
-                  <div style="font-size:11px; color:#94a3b8; margin-top:4px;">
+                  <div style="font-size:10.5px; color:#94a3b8; line-height:1.25;">
                     📍 <em>Come reclutare:</em> ${esc(r.source)} (Stagione ${r.season})
                   </div>
                 ` : `
-                  <div style="font-size:11px; color:#67e8f9; margin-top:4px; font-style:italic;">
+                  <div style="font-size:10.5px; color:#67e8f9; line-height:1.25; font-style:italic;">
                     ${esc(r.quote)}
                   </div>
                 `}
@@ -1007,9 +1007,9 @@
       </div>
 
       <!-- Footer -->
-      <div style="padding:12px 16px; background:#0b1329; border-top:1px solid #1e293b; display:flex; justify-content:space-between; align-items:center; font-size:12px;">
-        <button id="rosterGoHq" style="background:#0284c7; color:#f8fafc; border:none; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:bold; cursor:pointer;">Visita Sede del Club ▸</button>
-        <button id="rosterCloseFooter" style="background:#1e293b; color:#cbd5e1; border:1px solid #334155; padding:8px 14px; border-radius:8px; font-size:13px; cursor:pointer;">Chiudi</button>
+      <div style="flex-shrink:0; padding:10px 14px; background:#0b1329; border-top:1px solid #1e293b; display:flex; justify-content:space-between; align-items:center;">
+        <button id="rosterGoHq" style="background:#0284c7; color:#f8fafc; border:none; padding:8px 12px; border-radius:8px; font-size:12.5px; font-weight:bold; cursor:pointer;">Visita Sede del Club ▸</button>
+        <button id="rosterCloseFooter" style="background:#1e293b; color:#cbd5e1; border:1px solid #334155; padding:8px 14px; border-radius:8px; font-size:12.5px; cursor:pointer;">Chiudi</button>
       </div>
     `;
 
@@ -1094,7 +1094,7 @@
           @keyframes popIn { 0%{opacity:0; transform:scale(.96)} 100%{opacity:1; transform:scale(1)} }
           .qb-tab { background:#1e293b; color:#94a3b8; border:1px solid #334155; padding:6px 12px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; transition:.15s; white-space:nowrap; }
           .qb-tab.active { background:#b88648; color:#0f172a; border-color:#d4a359; }
-          .qb-card { background:#1e293b; border:2px solid #334155; border-radius:12px; padding:12px 14px; margin-bottom:12px; transition:.15s; position:relative; overflow:hidden; }
+          .qb-card { flex-shrink:0; min-height:fit-content; background:#1e293b; border:2px solid #334155; border-radius:12px; padding:12px 14px; margin-bottom:12px; transition:.15s; position:relative; overflow:visible; box-sizing:border-box; }
           .qb-card.ready { border-color:#22c55e; box-shadow:0 0 12px rgba(34,197,94,0.2); }
           .qb-card.done { border-color:#475569; opacity:.75; }
           .qb-btn { background:#b88648; color:#0f172a; border:none; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:bold; cursor:pointer; }
@@ -1130,7 +1130,7 @@
         </div>
 
         <!-- Lista incarichi -->
-        <div style="flex:1; overflow-y:auto; padding:14px;">
+        <div style="flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:12px;">
           ${filtered.length === 0 ? `
             <div style="text-align:center; padding:40px 20px; color:#64748b;">
               <div style="font-size:36px; margin-bottom:8px;">📜</div>
