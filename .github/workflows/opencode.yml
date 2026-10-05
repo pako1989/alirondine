@@ -15,10 +15,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          node-version: '20'
+          python-version: '3.10'
 
       - name: Generate Analysis with Gemini
         env:
@@ -26,26 +26,40 @@ jobs:
           ISSUE_TITLE: ${{ github.event.issue.title }}
           ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
-          node -e '
-            const fs = require("fs");
-            const https = require("https");
+          python3 -c '
+          import os
+          import json
+          import urllib.request
+          import urllib.error
 
-            const apiKey = process.env.GEMINI_API_KEY;
-            const issueTitle = process.env.ISSUE_TITLE || "Analisi repository";
-            const issueBody = process.env.ISSUE_BODY || "Analizza la struttura.";
+          api_key = os.environ.get("GEMINI_API_KEY")
+          issue_title = os.environ.get("ISSUE_TITLE", "Analisi repository")
+          issue_body = os.environ.get("ISSUE_BODY", "Analizza la struttura del progetto.")
 
-            // Generiamo un contenuto strutturato per il gioco
-            const analysisContent = "# Analisi della Repository alirondine\n\n" +
-              "Richiesta ricevuta dalla Issue: " + issueTitle + "\n\n" +
-              "## Struttura del Progetto\n" +
-              "- **HTML/JS Frontend**: Gestione della logica di gioco principale.\n" +
-              "- **Asset grafici**: Directory dedicate a immagini e icone.\n\n" +
-              "## Suggerimenti di Miglioramento\n" +
-              "1. Ottimizzare il caricamento degli asset per dispositivi mobili.\n" +
-              "2. Aggiungere un sistema di salvataggio locale dei progressi.\n";
+          prompt = f"Agisci come un esperto sviluppatore di giochi e assistente di codice. L utente ha aperto una richiesta con questo titolo: \"{issue_title}\" e questa descrizione: \"{issue_body}\". Analizza la richiesta e genera il contenuto completo e dettagliato per un file markdown chiamato ANALYSIS.md che risponda esattamente a ciò che è stato chiesto, fornendo idee creative, suggerimenti tecnici e una suddivisione in micro-passi sicuri."
 
-            fs.writeFileSync("ANALYSIS.md", analysisContent);
-            console.log("File ANALYSIS.md creato con successo!");
+          url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+          
+          payload = {
+              "contents": [{ "parts": [{ "text": prompt }] }]
+          }
+          
+          data = json.dumps(payload).encode("utf-8")
+          req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+
+          try:
+              with urllib.request.urlopen(req) as response:
+                  res_data = json.loads(response.read().decode("utf-8"))
+                  text = res_data["candidates"][0]["content"]["parts"][0]["text"]
+                  with open("ANALYSIS.md", "w", encoding="utf-8") as f:
+                      f.write(text)
+                  print("ANALYSIS.md generato con successo!")
+          except urllib.error.HTTPError as e:
+              print(f"Errore HTTP: {e.code} - {e.read().decode()}")
+              exit(1)
+          except Exception as e:
+              print(f"Errore imprevisto: {e}")
+              exit(1)
           '
 
       - name: Create Pull Request
@@ -54,6 +68,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "docs: add automated repository analysis"
           title: "Analisi automatica della repository (ANALYSIS.md)"
-          body: "Questo file è stato generato automaticamente in risposta alla richiesta dell'Issue."
-          branch: ai-analysis-patch
+          body: "Questo file è stato generato automaticamente in risposta alla richiesta dell'issue."
+          branch: "ai-analysis-patch"
           delete-branch: true
