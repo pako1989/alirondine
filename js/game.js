@@ -14751,7 +14751,7 @@
 
   // ---------- il titolo: poche porte, ognuna con la sua percentuale ----------
   function title() {
-    closeAltStage();
+    closeAltStage(); $("matchHud").hidden = true;
     if (TW) TW.active = false;
     view = { kind: "scene", bg: "title" }; chap(""); statsBox(); document.body.classList.remove("borgo"); playing = false; T = null; if (BW) BW.active = false;
     const has = load(), gr = guRec(), fresh0 = !has && prog().n === 0;
