@@ -25,15 +25,17 @@
     </div>
     <div class="topr" role="toolbar" aria-label="Controlli rapidi">
       <button type="button" class="mute" id="homeBtn" aria-label="Home" title="Torna alla Home / Menu Principale">🏠</button>
-      <button type="button" class="mute" id="arenaBtn" aria-label="Arena 2D HD" title="Arena 2D HD del Borgo (Tactical Emblem, Action 60fps, Street Cage, Match Director)">🎮</button>
       <button type="button" class="mute" id="btn3d" aria-label="Stadio 3D" title="Stadio 3D · Sfida dei Tiri (Tiro della Rondine 3D)">⚽</button>
       <button type="button" class="mute" id="rosterBtn" aria-label="Roster e Talenti" title="Roster & Talenti del Borgo (Formazione ed Equipaggiamento)">🛡️</button>
       <button type="button" class="mute" id="radioBtn" aria-label="Radiolina" title="La Radiolina del Borgo (Musica & Frequenze)">📻</button>
-      <button type="button" class="mute" id="themeBtn" aria-label="Tema Grafico" title="Cambia tema (Classico / Vintage / Neon / Arcade)">🎨</button>
-      <button type="button" class="mute" id="logBtn" aria-label="Cronologia Dialoghi" title="Cronologia dei dialoghi e eventi (Tasto L)">📜</button>
-      <button type="button" class="mute" id="hapticBtn" aria-label="Feedback Aptico" title="Feedback Aptico (Vibrazione Tattile)">📳</button>
+      <button type="button" class="mute" id="optBtn" aria-label="Opzioni e Utility" title="Opzioni (Tema, Cronologia, Feedback Aptico)">⚙️</button>
       <button type="button" class="mute" id="gmenu" aria-label="Menu" hidden>☰</button>
       <button type="button" class="mute" id="mute" aria-label="Suoni">🔊</button>
+    </div>
+    <div class="top-opt-panel" id="topOptPanel" hidden>
+      <button type="button" class="opt-pill" id="themeBtn" aria-label="Tema Grafico" title="Cambia tema (Classico / Vintage / Neon / Arcade)">🎨 <span>Tema</span></button>
+      <button type="button" class="opt-pill" id="logBtn" aria-label="Cronologia Dialoghi" title="Cronologia dei dialoghi e eventi (Tasto L)">📜 <span>Log</span></button>
+      <button type="button" class="opt-pill" id="hapticBtn" aria-label="Feedback Aptico" title="Feedback Aptico (Vibrazione Tattile)">📳 <span>Aptico</span></button>
     </div>
   </div>
   <div class="stage">
@@ -128,16 +130,18 @@ if (homeBtn) {
     if (window.toast) window.toast("Menu Principale", "info", "🏠");
   };
 }
-var arenaBtn = document.getElementById("arenaBtn");
-if (arenaBtn) {
-  arenaBtn.onclick = function () {
-    if (window.openArena2DHDModal) window.openArena2DHDModal();
-  };
-}
 var btn3d = document.getElementById("btn3d");
 if (btn3d) {
   btn3d.onclick = function () {
     if (window.openStadium3D) window.openStadium3D();
+  };
+}
+var optBtn = document.getElementById("optBtn");
+var topOptPanel = document.getElementById("topOptPanel");
+if (optBtn && topOptPanel) {
+  optBtn.onclick = function () {
+    topOptPanel.hidden = !topOptPanel.hidden;
+    optBtn.classList.toggle("active", !topOptPanel.hidden);
   };
 }
 window.openBorgoStortoModal = function () {

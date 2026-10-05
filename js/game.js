@@ -1654,7 +1654,17 @@
     $("hMin").textContent = M.min + "'"; $("hScore").textContent = `${M.score[0]}–${M.score[1]}`;
     $("hZone").textContent = M.poss === "us" ? `${M.zone}/5 ▶` : `◀ ${M.zone}/5`;
     $("hPoss").textContent = M.poss === "us" ? usName() : "Avversari";
-    $("hGuts").style.width = clamp(100 * M.guts / S.st.grinta, 0, 100) + "%";
+    const gutsPct = clamp(100 * M.guts / S.st.grinta, 0, 100);
+    const gutsEl = $("hGuts");
+    if (gutsEl) {
+      gutsEl.style.width = gutsPct + "%";
+      const gutsWrap = gutsEl.parentElement;
+      if (gutsWrap) {
+        const isTired = gutsPct <= 25;
+        gutsWrap.classList.toggle("fatigue", isTired);
+        gutsWrap.title = isTired ? `Grinta: ${Math.round(M.guts)}/${S.st.grinta} (Affanno!)` : `Grinta: ${Math.round(M.guts)}/${S.st.grinta}`;
+      }
+    }
     try {
       const radar = $("fieldRadar");
       if (radar) {
