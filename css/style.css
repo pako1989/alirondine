@@ -79,7 +79,8 @@
   .topr .mute.active { background: #2f568f; border-color: var(--gold); box-shadow: 0 0 10px rgba(255,210,63,0.4); }
   .top-opt-panel {
     display: flex;
-    gap: 8px;
+    flex-wrap: wrap;
+    gap: 6px;
     padding: 6px 8px;
     background: #111d33;
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -87,13 +88,14 @@
     animation: slideUp 0.2s ease;
   }
   .opt-pill {
-    flex: 1;
+    flex: 1 1 calc(33.333% - 6px);
+    min-width: 95px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 5px;
     height: 38px;
-    font: 700 13px var(--body);
+    font: 700 12.5px var(--body);
     color: var(--ink);
     background: #1a2f4d;
     border: 1px solid rgba(255, 255, 255, 0.25);

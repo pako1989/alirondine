@@ -14803,6 +14803,7 @@
       { label: "🕹️ Cabinato: Super Rondine '94", sub: "Arcade 16-bit a gettoni: scanline CRT e tiri curvi", cls: "hot", fn: () => { if (window.openArcadeMachine) window.openArcadeMachine(menuSaghe); } },
       { label: "🌊 Il Gozzo di Baciccia · In Mare", sub: "Navigazione nel golfo: recupera palloni o corri la Regata", fn: () => { if (window.openGozzoGame) window.openGozzoGame("recupero", menuSaghe); } },
       { label: "🚗 La Corsa della Panda 30", sub: "Consegna la focaccia calda con Nonna", fn: () => { if (window.openPanda3D) window.openPanda3D(menuSaghe); } },
+      { label: "📋 Bacheca Incarichi (Quest Board)", sub: "Missioni secondarie, sviluppo legami e reclutamento FC", cls: "hot", fn: () => { if (window.openQuestBoard) window.openQuestBoard(menuSaghe); } },
       { label: "🛡️ Roster & Talenti", sub: "Compagni ed equipaggiamento del Borgo", fn: () => { if (window.openRosterTalentsModal) window.openRosterTalentsModal(); } },
       { label: "◂ Menu", cls: "pick", fn: title },
     ]);
@@ -24616,6 +24617,10 @@
   window.bCoins = bCoins;
   window.coins = bCoins;
   window.addCoins = addCoins;
+  window.prog = prog;
+  window.borgoLoad = borgoLoad;
+  window.svRec = svRec;
+  window.svSave = svSave;
   window.__borgoApi = { TRZ, MN_BORGO_BTN, CAST, trGo, trAsk, trSay, trResume, L, trToast };
   title();
   render();

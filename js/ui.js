@@ -119,9 +119,16 @@
     const btn = $("hapticBtn");
     if (!btn) return;
     const mode = HAPTIC_MODES[curHapticIdx];
-    btn.textContent = mode.icon;
+    const lbl = btn.querySelector("#hapticLbl") || btn.querySelector("span");
+    const modeShort = mode.id === "off" ? "Aptico: OFF" : mode.id === "match" ? "Aptico: Match" : "Aptico: Full";
+    if (lbl) {
+      lbl.textContent = modeShort;
+      btn.innerHTML = `${mode.icon} <span id="hapticLbl">${modeShort}</span>`;
+    } else {
+      btn.innerHTML = `${mode.icon} <span id="hapticLbl">${modeShort}</span>`;
+    }
     btn.title = `Feedback Aptico: ${mode.label} (Clicca per cambiare)`;
-    btn.style.opacity = mode.id === "off" ? "0.45" : "1";
+    btn.style.opacity = mode.id === "off" ? "0.5" : "1";
     btn.setAttribute("aria-label", `Feedback Aptico: ${mode.label}`);
   }
 
@@ -368,6 +375,8 @@
         const on = window.isAnimeFxEnabled ? window.isAnimeFxEnabled() : true;
         animeFxBtn.style.opacity = on ? "1" : "0.5";
         animeFxBtn.title = on ? "Anime Cut-in: ATTIVI (Clicca per disattivare)" : "Anime Cut-in: CLASSICI (Clicca per attivare)";
+        const lbl = animeFxBtn.querySelector("#animeFxLbl") || animeFxBtn.querySelector("span");
+        if (lbl) lbl.textContent = on ? "Anime FX: ON" : "Anime FX: OFF";
       };
       animeFxBtn.onclick = () => {
         if (window.toggleAnimeFx) window.toggleAnimeFx();

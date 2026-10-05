@@ -123,6 +123,12 @@
             </div>
             <div class="roster-grid" id="rosterGrid"></div>
           </div>
+          <div>
+            <div style="font-weight:bold; font-size:13px; color:var(--gold); margin:14px 0 6px;">
+              ⚡ RECLUTE DEL BORGO & PERK IN PARTITA
+            </div>
+            <div class="roster-grid" id="recruitsGrid"></div>
+          </div>
         </div>
       </div>
     `;
@@ -171,6 +177,38 @@
         <div class="roster-card-trait">${m.trait}</div>
       </div>
     `).join("");
+
+    const recBox = el.querySelector("#recruitsGrid");
+    if (recBox) {
+      let recData = {};
+      try {
+        if (typeof window.svRec === "function") recData = (window.svRec() && window.svRec().rec) || {};
+      } catch {}
+
+      const RECRUITS_LIST = [
+        { id: "mattia", name: "Mattia la Saracinesca", icon: "🧤", role: "Portiere Recluta", perk: "⚡ Saracinesca: blocca la sfera d'istinto e fa ripartire da Zona 1 in difesa." },
+        { id: "kevin", name: "Kevin del Pedalò", icon: "🏖️", role: "Ala Recluta", perk: "⚡ Scatto di Kevin: cavalcata scalzo lungo la fascia per avanzare in attacco." },
+        { id: "pietrino", name: "Pietrino il Fantasista", icon: "👟", role: "Trequartista Recluta", perk: "⚡ Pennellata di Pietrino: traiettoria a scavalcare la difesa direttamente in Zona 5." },
+        { id: "mirko", name: "Mirko dei Caruggi", icon: "🧢", role: "Centrocampista Recluta", perk: "⚡ Ricarica di Grinta: incita la squadra a bordo campo (+25 Grinta)." },
+        { id: "saverio", name: "Saverio Cozza", icon: "🦀", role: "Difensore Recluta", perk: "⚡ Muro di Pietra: tackle scivolato pulito come uno scoglio e ripartenza da Zona 2." }
+      ];
+
+      recBox.innerHTML = RECRUITS_LIST.map((r) => {
+        const isRecruited = !!recData[r.id];
+        return `
+          <div class="roster-card" style="border-color:${isRecruited ? "#22c55e" : "#475569"}; opacity:${isRecruited ? "1" : "0.75"};">
+            <div class="roster-card-header" style="display:flex; justify-content:space-between; align-items:center;">
+              <span>${r.icon} ${r.name}</span>
+              <span style="font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px; background:${isRecruited ? "#14532d" : "#334155"}; color:${isRecruited ? "#4ade80" : "#94a3b8"};">
+                ${isRecruited ? "RECLUTATO ✓" : "DA RECLUTARE"}
+              </span>
+            </div>
+            <div class="roster-card-role">${r.role}</div>
+            <div class="roster-card-trait" style="color:${isRecruited ? "var(--ink)" : "var(--dim)"};">${r.perk}</div>
+          </div>
+        `;
+      }).join("");
+    }
   }
 
   function openRosterModal() {

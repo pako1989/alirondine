@@ -201,7 +201,12 @@
     camera = new THREE.PerspectiveCamera(fov, aspect, 0.1, 140);
     applyCameraMode();
 
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+    } catch (e) {
+      wrapper.innerHTML = "<div style='color:#ffd23f;padding:24px;text-align:center;font-weight:bold;'>⚠️ Accelerazione grafica WebGL 3D non disponibile nel browser.</div>";
+      return false;
+    }
     renderer.setSize(w, h);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.shadowMap.enabled = true;
