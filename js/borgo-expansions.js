@@ -282,8 +282,24 @@
       if (id === "dario_storto") {
         return api.trAsk(
           "dario_storto",
-          "«Leo! In questa dimensione non c'è rivalità tra fratelli: siamo la coppia d'attacco più forte della galassia. Ti va una gabbia 3v3 con me e Nico contro i campioni dell'Ossidiana?»",
+          "«Leo! In questa dimensione non c'è rivalità tra fratelli: siamo la coppia d'attacco più forte della galassia. Ti va una gabbia 3v3 con me e Nico, o proviamo la leggendaria Doppia Rondine?»",
           [
+            {
+              label: "🔥 Doppia Rondine dei Fratelli Moretti",
+              sub: "Sferra l'attacco combinato leggendario con Dario!",
+              cls: "hot",
+              fn: () => {
+                api.trSay([
+                  api.L("dario_storto", "«Pronto Leo? Tu crossa teso sul secondo palo col compasso, io ci metto la rovesciata d'ossidiana!»"),
+                  api.L("voce", "⚡🔥 I due fratelli colpiscono all'unisono: un fulmine azzurro e nero squarcia la nebbia viola del Borgo Storto! (+25 Monete e trofeo sbloccato!)")
+                ], () => {
+                  if (window.addCoins) window.addCoins(25);
+                  if (window.fireConfetti) window.fireConfetti();
+                  if (window.toast) window.toast("🔥 Doppia Rondine dei Fratelli Moretti eseguita con successo!", "success", "⚽");
+                  api.trResume();
+                });
+              }
+            },
             {
               label: "Gabbia 3v3 dei Trabucchi (Street Soccer)",
               sub: "Gioca con Dario e Nico in 2D HD",
