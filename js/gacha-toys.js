@@ -1609,18 +1609,19 @@
   // --- MODALE RIVELAZIONE DELLA STATUINA 3D ---
   let revealModalEl = null;
 
-  function showPullRevealModal(results) {
+  function showPullRevealModal(results, fromCabinet = false) {
     if (!revealModalEl) {
       revealModalEl = document.createElement("div");
       revealModalEl.id = "gachaRevealModal";
-      revealModalEl.style.cssText = `
-        position: fixed; inset: 0; z-index: 1000000;
-        background: rgba(3, 7, 18, 0.95); backdrop-filter: blur(10px);
-        display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-        padding: 16px; box-sizing: border-box; font-family: var(--body, system-ui, sans-serif); color: #fff;
-      `;
       document.body.appendChild(revealModalEl);
     }
+
+    revealModalEl.style.cssText = `
+      position: fixed; inset: 0; z-index: 1000005;
+      background: rgba(3, 7, 18, 0.96); backdrop-filter: blur(12px);
+      display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+      padding: 16px; box-sizing: border-box; font-family: var(--body, system-ui, sans-serif); color: #fff;
+    `;
 
     revealModalEl.style.display = "flex";
 
@@ -1631,8 +1632,8 @@
       const item = results[currentIndex];
       const toy = item.toy;
 
-      // Effetto coriandoli se 5★ o 6★!
-      if (toy.stars >= 5) {
+      // Effetto coriandoli se 5★ o 6★ solo in caso di pescata
+      if (!fromCabinet && toy.stars >= 5) {
         try {
           if (window.triggerTrophyCelebration) window.triggerTrophyCelebration();
           else if (window.triggerGoalCelebration) window.triggerGoalCelebration(true);
@@ -1646,10 +1647,13 @@
         <!-- Header -->
         <div style="width: 100%; max-width: 420px; display: flex; justify-content: space-between; align-items: center;">
           <div style="font-size: 13px; color: #94a3b8;">
-            Capsula ${currentIndex + 1} di ${results.length}
+            ${fromCabinet ? "🔍 ISPEZIONE 3D MINIATURA" : `Capsula ${currentIndex + 1} di ${results.length}`}
           </div>
-          <div style="font-size: 18px; color: ${starColor}; text-shadow: 0 0 10px ${starColor}; font-weight: bold;">
-            ${starIcons} ${toy.rarityName.toUpperCase()}
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div style="font-size: 16px; color: ${starColor}; text-shadow: 0 0 10px ${starColor}; font-weight: bold;">
+              ${starIcons} ${toy.rarityName.toUpperCase()}
+            </div>
+            <button type="button" id="gachaTopCloseBtn" style="background:#b3202c; color:#fff; border:1px solid #ff4d5a; border-radius:6px; padding:4px 10px; font-size:12px; font-weight:bold; cursor:pointer;">✕</button>
           </div>
         </div>
 
@@ -1669,7 +1673,7 @@
           <div style="font-size: 11px; color: #94a3b8; margin-bottom: 6px;">${toy.lore}</div>
           <div style="font-size: 12px; font-weight: bold; color: #4ade80;">✨ Effetto: ${toy.bonus}</div>
 
-          ${item.isDuplicate ? `
+          ${!fromCabinet ? (item.isDuplicate ? `
             <div style="margin-top: 8px; font-size: 11px; background: rgba(234, 179, 8, 0.2); border: 1px dashed #eab308; border-radius: 6px; padding: 4px 8px; color: #fde047;">
               ♻️ Doppione convertito in: <b>+${item.shardReward} Frammenti di Plastica Pregiata</b>
             </div>
@@ -1677,18 +1681,18 @@
             <div style="margin-top: 8px; font-size: 11px; background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; border-radius: 6px; padding: 4px 8px; color: #86efac;">
               🎉 NUOVO GIOCATTOLO AGGIUNTO ALLA TUA COLLEZIONE!
             </div>
-          `}
+          `) : ""}
         </div>
 
         <!-- Tasti avanti / chiudi -->
         <div style="width: 100%; max-width: 420px; display: flex; gap: 10px; margin-top: 10px;">
-          ${currentIndex < results.length - 1 ? `
+          ${!fromCabinet && currentIndex < results.length - 1 ? `
             <button type="button" id="gachaNextBtn" style="flex:1; background:linear-gradient(180deg, #2563eb, #1d4ed8); color:#fff; border:1.5px solid #60a5fa; border-radius:8px; padding:12px; font-size:14px; font-weight:bold; cursor:pointer;">
               Prossima Capsula ▸
             </button>
           ` : `
-            <button type="button" id="gachaDoneBtn" style="flex:1; background:linear-gradient(180deg, #16a34a, #15803d); color:#fff; border:1.5px solid #4ade80; border-radius:8px; padding:12px; font-size:14px; font-weight:bold; cursor:pointer;">
-              ✓ Ritiro Completato
+            <button type="button" id="gachaDoneBtn" style="flex:1; background:${fromCabinet ? "linear-gradient(180deg, #2563eb, #1d4ed8)" : "linear-gradient(180deg, #16a34a, #15803d)"}; color:#fff; border:1.5px solid ${fromCabinet ? "#60a5fa" : "#4ade80"}; border-radius:8px; padding:12px; font-size:14px; font-weight:bold; cursor:pointer;">
+              ${fromCabinet ? "◂ Torna alla Vetrinetta" : "✓ Ritiro Completato"}
             </button>
           `}
         </div>
@@ -1701,6 +1705,15 @@
       }
 
       // Eventi
+      const closeFn = () => {
+        revealModalEl.style.display = "none";
+        if (threeAnimId) cancelAnimationFrame(threeAnimId);
+        updateHeaderCounters();
+      };
+
+      const topCloseBtn = document.getElementById("gachaTopCloseBtn");
+      if (topCloseBtn) topCloseBtn.onclick = closeFn;
+
       const nextBtn = document.getElementById("gachaNextBtn");
       if (nextBtn) {
         nextBtn.onclick = () => {
@@ -1710,13 +1723,7 @@
       }
 
       const doneBtn = document.getElementById("gachaDoneBtn");
-      if (doneBtn) {
-        doneBtn.onclick = () => {
-          revealModalEl.style.display = "none";
-          if (threeAnimId) cancelAnimationFrame(threeAnimId);
-          updateHeaderCounters();
-        };
-      }
+      if (doneBtn) doneBtn.onclick = closeFn;
     }
 
     renderCurrentToy();
@@ -1798,7 +1805,7 @@
         if (data.owned[id]) {
           const toy = resolveToy(TOY_CATALOG.find((t) => t.id === id));
           if (toy) {
-            showPullRevealModal([{ toy, isDuplicate: false, shardReward: 0 }]);
+            showPullRevealModal([{ toy, isDuplicate: false, shardReward: 0 }], true);
           }
         } else {
           if (window.toast) window.toast("Statuina non ancora trovata nel distributore!", "warn", "🔒");
