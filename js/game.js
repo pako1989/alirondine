@@ -1543,12 +1543,17 @@
   let tm = null;
   function timing(label, cb, bg) {
     view = { kind: "timing", bg: bg || "beach" };
-    tm = { bg: bg || "beach", x: 0, dir: 1, speed: (2.2 + Math.random() * 0.8) * DF.tsp[hLv()], lo: 110 + Math.random() * 80, w: 40 * DF.tw[hLv()], pz: DF.tpz[hLv()], label, stopped: false };
-    text("voce", `<em>${esc(label)}</em>: ferma la barra quando è nella zona verde. Al centro esatto è perfetto.`);
+    const hasWind = (M && M.meteo === "vento") && SET.windWeather !== false;
+    const windDir = hasWind ? (Math.random() < 0.5 ? -1 : 1) : 0;
+    tm = { bg: bg || "beach", x: 0, dir: 1, speed: (2.2 + Math.random() * 0.8) * DF.tsp[hLv()], lo: 110 + Math.random() * 80, w: 40 * DF.tw[hLv()], pz: DF.tpz[hLv()], label, stopped: false, wind: windDir };
+    text("voce", `<em>${esc(label)}</em>: ferma la barra quando è nella zona verde. Al centro esatto è perfetto.${hasWind ? ` <br><b style="color:var(--gold)">💨 Vento ${windDir > 0 ? "verso destra ▶" : "◀ verso sinistra"}:</b> calibra l'anticipo per dare l'effetto a rientrare!` : ""}`);
     buttons([{ label: "ORA! ⚽", cls: "hot", fn: () => {
       tm.stopped = true; sfx("kick");
       const mid = tm.lo + tm.w / 2, d = Math.abs(tm.x - mid);
-      const n = d <= (tm.pz || 6) ? 3 : d <= tm.w / 2 ? 2 : 1;
+      let n = d <= (tm.pz || 6) ? 3 : d <= tm.w / 2 ? 2 : 1;
+      if (tm.wind && n === 3) {
+        if (window.toast) window.toast("Effetto a Rientrare perfetto controvento!", "success", "🌪️");
+      }
       setTimeout(() => { tm = null; cb(n); }, 450);
     } }]);
   }
@@ -1558,7 +1563,9 @@
     const t = tm; if (!t.stopped) { t.x += t.dir * t.speed; if (t.x > 300 || t.x < 20) t.dir *= -1; t.x = clamp(t.x, 20, 300); }
     px(20, 80, 280, 26, "#0009"); px(t.lo, 80, t.w, 26, "#2f9e55"); px(t.lo + t.w / 2 - (t.pz || 6), 80, (t.pz || 6) * 2, 26, "#ffd23f");
     px(t.x - 2, 72, 4, 42, "#fff"); ball(t.x, 66, 6);
-    g.fillStyle = "#fff"; g.font = "bold 14px sans-serif"; g.textAlign = "center"; g.fillText(t.label.toUpperCase(), 160, 140); g.textAlign = "left";
+    g.fillStyle = "#fff"; g.font = "bold 14px sans-serif"; g.textAlign = "center";
+    const windTxt = t.wind ? (t.wind > 0 ? " 💨 VENTO ▶" : " ◀ VENTO 💨") : "";
+    g.fillText(t.label.toUpperCase() + windTxt, 160, 140); g.textAlign = "left";
   }
   function training0() {
     view = { kind: "scene", bg: "beach", speaker: coachId() };
@@ -1602,6 +1609,12 @@
     if (step.mateGeneric) M.mateGeneric = true;
     if (step.hero) { M.hero = step.hero; heroCast(step.hero); }
     M.carrier = null; M.meteo = step.forceMeteo || (feat("meteo") ? (step.meteo || (/^(blackmoor|sturmwald)$/.test(step.match) ? "pioggia" : pick(["sereno", "sereno", "sereno", "pioggia", "vento"]))) : "sereno");
+    if (SET.windWeather !== false && !step.forceMeteo && M.meteo === "sereno" && (step.story || !step.isolated) && Math.random() < 0.25) {
+      M.meteo = "vento";
+    }
+    if (M.meteo === "vento" && SET.windWeather === false) {
+      M.meteo = "sereno";
+    }
     if (ch) { M.ch = ch; if (ch.min) { M.min = ch.min; M.half = ch.min >= 45 ? 2 : 1; } if (ch.score) M.score = ch.score.slice(); if (ch.guts) M.guts = ch.guts; }
     const go = () => {
     view = { kind: "match" };
@@ -5109,7 +5122,7 @@
   };
   // 15l · Partita classica: quattro aggiunte, ognuna spegnibile (spente = regole di prima)
   const SET_PC = { coppie: ["Schemi a coppie avanzati", "Con grande intesa, ogni compagno sblocca un secondo tiro in coppia (intesa 14)"], rete: ["Rete strappata", "Un tiro potentissimo può bucare la rete: cut-in speciale, un po' di grinta e il conto delle reti strappate"], star: ["Fuoriclasse rivali", "Il capitano avversario carica lo speciale con una frase sua e un cut-in nei colori della squadra"], gkf: ["Portieri che si stancano", "Più tiri affronta, più un portiere cala (il tuo e il loro); all'intervallo recupera"], duelli: ["Duelli 1 contro 1", "Dribbling in attacco (zona 3+): leggi il difensore e scegli finta, scatto o protezione"], area: ["Comandi in area", "Parata, pugno o uscita: li scegli tu col tuo portiere, e anche il portiere avversario li usa"], tempo: ["Tiro a tempo", "Ferma la barra al momento giusto: preciso = tiro più forte, sbagliato = più debole"], fiato: ["Grinta di riserva", "A secco puoi tirare lo stesso (più debole); rifiatare ridà almeno 10"], spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
-  const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false, dis: false, cardView: "holo3d", mangaView: "comic", trophyView: "3d", bgArt: "detailed", confetti: true, proActionFx: true, tsubasa: false });
+  const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false, dis: false, cardView: "holo3d", mangaView: "comic", trophyView: "3d", bgArt: "detailed", confetti: true, proActionFx: true, tsubasa: false, windWeather: true });
   function setLoad() {
     const d = setDefault(), s = readJSON(SETK, null);
     if (!s || s.v !== 1) return d;
@@ -5120,6 +5133,7 @@
     if (res.confetti === undefined) res.confetti = true;
     if (res.proActionFx === undefined) res.proActionFx = true;
     if (res.tsubasa === undefined) res.tsubasa = false;
+    if (res.windWeather === undefined) res.windWeather = true;
     return res;
   }
   let SET = setLoad();
@@ -5174,6 +5188,7 @@
     const b = [{ label: `Stile partite: ${on ? "Anni '90" : "Classico"} ▸`, sub: on ? "Passa al Classico" : "Passa agli Anni '90", cls: "hot", fn: () => { SET.style = on ? "classic" : "90"; save(); again(); } }];
     b.push(diffButton(save, again));
     b.push({ label: `Partite tattiche: ${SET.tatt ? "sì" : "no"}`, sub: SET.tatt ? "Pressing, contropiede, fiato, cambi e piccoli infortuni in ogni partita" : "Modalità alternativa: aggiunge piano di gioco, fiato, cambi e botte", fn: () => { SET.tatt = !SET.tatt; save(); again(); } });
+    b.push({ label: `Meteo Vento in Partita: ${SET.windWeather !== false ? "Attivo" : "Disattivato"} ▸`, sub: SET.windWeather !== false ? "Brezza marina e folate influenzano le parabole dei tiri (tocca per disattivare)" : "Meteo calmo senza raffiche di vento (tocca per attivare)", fn: () => { SET.windWeather = SET.windWeather === false; save(); again(`Meteo Vento ${SET.windWeather !== false ? "attivato" : "disattivato"}.`); } });
     b.push({ label: `Modalità Partita: ${SET.tsubasa ? "Captain Tsubasa (NES/SNES)" : "Classico JRPG"} ▸`, sub: SET.tsubasa ? "Duelli cinematografici Tecmo, comandi a griglia, radar e animazioni rétro" : "Elenco scelte testuali classico (tocca per cambiare)", fn: () => { SET.tsubasa = !SET.tsubasa; save(); again(`Modalità Partita: ${SET.tsubasa ? "Captain Tsubasa (NES/SNES)" : "Classico JRPG"}`); } });
     b.push({ label: "⚽ Gioca Esibizione Captain Tsubasa (NES/SNES) ▸", sub: "Sfida immediata con il motore a duelli Tecmo", cls: "hot", fn: () => { if (window.openTsubasaExhibition) window.openTsubasaExhibition(again); } });
     if (on) Object.entries(SET_T).forEach(([k, [l, sub]]) => b.push({ label: `${SET.t[k] ? "✓" : "✗"} ${l}`, sub, fn: () => { SET.t[k] = !SET.t[k]; save(); again(); } }));
@@ -5197,7 +5212,7 @@
       { label: `Risparmio batteria: ${SET.eco ? "sì" : "no"}`, sub: SET.eco ? "Effetti pesanti spenti" : GX.auto ? "Il telefono faticava: effetti pesanti già alleggeriti" : "Se il telefono fatica, il gioco si alleggerisce da solo", fn: () => { SET.eco = !SET.eco; save(); again(); } },
       { label: `Testo più grande: ${SET.big ? "sì" : "no"}`, fn: () => { SET.big = !SET.big; save(); again(); } },
     );
-    const isGame = (o) => /^(Stile partite|Difficoltà|Partite tattiche|Modalità Partita|⚽ Gioca Esibizione)/.test(o.label);
+    const isGame = (o) => /^(Stile partite|Difficoltà|Partite tattiche|Modalità Partita|Meteo Vento|⚽ Gioca Esibizione)/.test(o.label);
     const isRule = (o) => /^[✓✗] /.test(o.label);
     const gameB = b.filter(isGame), ruleB = b.filter(isRule), audioB = AB, lookB = b.filter((o) => !isGame(o) && !isRule(o) && !AB.includes(o));
     const SEC = settings._sec || "";
