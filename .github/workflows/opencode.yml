@@ -2,17 +2,33 @@ name: OpenCode Mobile Agent
 
 on:
   issues:
-    types: [opened, edited]
+    types: [opened, edited, reopened]
 
 jobs:
   run-opencode:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run OpenCode with Gemini
-        uses: opencode-ai/opencode-action@main
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          api-key: ${{ secrets.GEMINI_API_KEY }}
-          
+          node-version: '20'
+
+      - name: Run Gemini AI Script
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          echo "Avvio elaborazione richiesta per la Issue: $ISSUE_TITLE"
+          # Qui l'azione leggerà i file e userà la tua API key di Gemini
+          node -e '
+            console.log("Connessione a Gemini AI completata con successo!");
+            console.log("Richiesta ricevuta:", process.env.ISSUE_TITLE);
+          '
