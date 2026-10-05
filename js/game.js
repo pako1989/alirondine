@@ -3590,6 +3590,7 @@
   ];
   const npcList = () => NPCS.filter((n) => (!n.day || !B.night) && (!n.night || B.night) && (!n.when || n.when())).map((n) => ({ ...n, x: n.at[0] * TS + 8, y: n.at[1] * TS + 12 }));
   function npcNews(id) {
+    if (typeof window.questBoardNpcHasNews === "function" && window.questBoardNpcHasNews(id)) return true;
     const xs = svNews(id); if (xs !== null) return xs;
     const x = npcNewsX(id); if (x !== null) return x;
     const q = B.q, e = B.ep;
@@ -4088,6 +4089,7 @@
   // ---------- dialoghi ----------
   function borgoTalk(id) {
     if (beTalkB(id)) return;
+    if (typeof window.questBoardTalk === "function" && window.questBoardTalk(id, bSay, bAsk, BL, borgoResume)) return;
     if (borgoTalkX(id)) return;
     const p = prog(), f = p.f, q = B.q, e = B.ep, n = p.n;
     chap("Borgo Marino");
