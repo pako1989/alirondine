@@ -407,38 +407,63 @@
   function onQuestMatchWin(matchId) {
     const state = loadQuestState();
     let updated = false;
+    let res = null;
 
     if (matchId === "ragazzini") {
-      if (state.active["q1_rec_mattia"] && !state.active["q1_rec_mattia_done"]) {
-        state.active["q1_rec_mattia_done"] = true;
-        updated = true;
-        if (window.toast) window.toast("Mattia battuto al campetto! Reclutamento pronto!", "success", "🛡️");
-      }
       if (state.active["q1_tommy_traiettoria"] && !state.active["q1_tommy_traiettoria_done"]) {
         state.active["q1_tommy_traiettoria_done"] = true;
         updated = true;
+        res = {
+          who: "tommy",
+          text: "«…Maledizione, Moretti. Quell'uno-due nello spazio ha tagliato fuori tutti. Il portiere era ancora fermo a guardare il lampione mentre la rete si muoveva già. Avevi ragione tu: l'intesa batte l'individualismo! Incarico completato: va' pure in bacheca a prenderti i meriti!»",
+          questCompleted: true
+        };
         if (window.toast) window.toast("Intesa con Tommy affinata in partita!", "success", "🎯");
-      }
-      if (state.active["q3_rec_pietrino"] && !state.active["q3_rec_pietrino_done"]) {
+      } else if (state.active["q1_rec_mattia"] && !state.active["q1_rec_mattia_done"]) {
+        state.active["q1_rec_mattia_done"] = true;
+        updated = true;
+        res = {
+          who: "pietrino",
+          text: "«GOOOOOL! Mattia si è alzato, si è pulito le mani dalla focaccia e ha detto: «Quel tiro non lo prendeva manco Buffon. Ci sto: firmo per le Rondinelle!» Mattia la Saracinesca è una nostra recluta! Passa in bacheca a convalidare il tesseramento!»",
+          questCompleted: true
+        };
+        if (window.toast) window.toast("Mattia battuto al campetto! Reclutamento pronto!", "success", "🛡️");
+      } else if (state.active["q3_rec_pietrino"] && !state.active["q3_rec_pietrino_done"]) {
         state.active["q3_rec_pietrino_done"] = true;
         updated = true;
+        res = {
+          who: "pietrino",
+          text: "«GRAZIE CAPITANO! Hai visto che lanci ho fatto? Prometto che non mangerò focaccia durante i supplementari! Pietrino entra ufficialmente nel roster della prima squadra! Fai un salto alla bacheca per completare l'incarico!»",
+          questCompleted: true
+        };
         if (window.toast) window.toast("Pietrino ha dimostrato la sua stoffa da Prima Squadra!", "success", "👟");
       }
     } else if (matchId === "bagnini") {
       if (state.active["q2_rec_kevin"] && !state.active["q2_rec_kevin_done"]) {
         state.active["q2_rec_kevin_done"] = true;
         updated = true;
+        res = {
+          who: "gigi",
+          text: "«KRAAA! Abbiamo battuto i Bagnini! Kevin del Pedalò è rimasto a bocca aperta e ha gridato: «Chi corre così sulla sabbia merita che giochi con lui!» Kevin ha firmato per il Rondine FC: sulla fascia voleremo! Riscuoti il premio in bacheca!»",
+          questCompleted: true
+        };
         if (window.toast) window.toast("Bagnini battuti a Beach Soccer! Kevin reclutato!", "success", "🏖️");
       }
     } else if (matchId === "squali") {
       if (state.active["q3_rec_saverio"] && !state.active["q3_rec_saverio_done"]) {
         state.active["q3_rec_saverio_done"] = true;
         updated = true;
+        res = {
+          who: "rocco",
+          text: "«Gli porto il messaggio, Moretti. Da stasera la vostra porta ha un muro di pietra lavica in più. Saverio Cozza veste biancoblù e viene alla Rondine. Va' in bacheca a ufficializzare il nuovo difensore roccioso!»",
+          questCompleted: true
+        };
         if (window.toast) window.toast("Squali battuti! Saverio Cozza entra nel Rondine FC!", "success", "🦀");
       }
     }
 
     if (updated) saveQuestState(state);
+    return res;
   }
   window.onQuestMatchWin = onQuestMatchWin;
 
@@ -446,11 +471,17 @@
   function onQuestMuroEnd(pts) {
     const state = loadQuestState();
     let updated = false;
+    let res = null;
 
     if (state.active["q1_nico_glove"] && !state.active["q1_nico_glove_done"]) {
       if (pts >= 6) {
         state.active["q1_nico_glove_done"] = true;
         updated = true;
+        res = {
+          who: "nico",
+          text: "«ZAMPA DI GATTO! Hai visto come ho tenuto l'equilibrio? La Nonna dice sempre che sono sgraziato, ma sui palloni bassi adesso non passa niente! Incarico superato, capitano! Fai un salto alla bacheca per riscuotere il premio!»",
+          questCompleted: true
+        };
         if (window.toast) window.toast("Nico ha parato le uscite basse! Allenamento superato!", "success", "🧤");
       }
     }
@@ -459,11 +490,17 @@
       if (pts >= 8) {
         state.active["q3_tonio_trabucchi_done"] = true;
         updated = true;
+        res = {
+          who: "tonino",
+          text: "«Mastro Tonio si è tolto il cappello di paglia e ha battuto le mani! Ha detto: «Tale e quale a suo padre nel '74!» Hai sbloccato la maglia vintage e il rispetto di tutta la scogliera! Corri alla bacheca a riscuotere!»",
+          questCompleted: true
+        };
         if (window.toast) window.toast("Prova dei Trabucchi superata al Muro del Porto!", "success", "🪵");
       }
     }
 
     if (updated) saveQuestState(state);
+    return res;
   }
   window.onQuestMuroEnd = onQuestMuroEnd;
 
@@ -487,7 +524,7 @@
   }
   window.questBoardHasNews = questBoardHasNews;
 
-  // Interazione dialoghi ricchi con opzioni di GAMEPLAY reale (partite, muro, ecc.)
+  // Interazione dialoghi ricchi con gameplay reale e dialoghi al superamento
   function questBoardTalk(npcId, bSay, bAsk, BL, borgoResume) {
     const curSeason = getCurrentSeason();
     const state = loadQuestState();
@@ -497,13 +534,28 @@
 
     const isAlreadyDone = !!state.active[activeQuest.id + "_done"];
 
-    // Se l'obiettivo è già stato completato nel gameplay precedente ma non ancora riscosso in bacheca
+    // Se l'obiettivo è già stato superato nel gameplay: mostra il dialogo trionfale del personaggio
     if (isAlreadyDone) {
-      bAsk(npcId, `«Leo! Abbiamo già vinto la sfida per l'incarico: «${activeQuest.title}»! Corri alla Bacheca in Piazza San Pietro a riscuotere la tua ricompensa!»`, [
-        { label: "📋 Apri Bacheca Incarichi", cls: "hot", go: () => openQuestBoard(borgoResume) },
-        { label: "👥 Vedi Roster Squadra", cls: "pick", go: () => openRosterModal(borgoResume) },
-        { label: "◂ Torna al Borgo", go: borgoResume }
-      ]);
+      const victorySpeeches = {
+        q1_nico_glove: "«ZAMPA DI GATTO! Hai visto come ho tenuto l'equilibrio? La Nonna dice sempre che sono sgraziato, ma sui palloni bassi adesso non passa niente! Incarico superato, capitano! Fai un salto alla bacheca per riscuotere il premio!»",
+        q1_tommy_traiettoria: "«…Maledizione, Moretti. Quell'uno-due nello spazio ha tagliato fuori tutti. Il portiere era ancora fermo a guardare il lampione mentre la rete si muoveva già. Avevi ragione tu! Incarico completato: va' pure in bacheca a prenderti i meriti!»",
+        q1_rec_mattia: "«GOOOOOL! Mattia si è alzato, si è pulito le mani dalla focaccia e ha detto: «Quel tiro non lo prendeva manco Buffon. Ci sto: firmo per le Rondinelle!» Mattia la Saracinesca è una nostra recluta! Passa in bacheca a convalidare il tesseramento!»",
+        q2_rec_kevin: "«PARI AL CENTESIMO! Kevin è rimasto senza fiato e ha gridato: «Chi corre così sulla sabbia merita che giochi con lui!» Kevin del Pedalò ha firmato per il Rondine FC! Sulla fascia destra voleremo! Riscuoti il premio in bacheca!»",
+        q3_rec_saverio: "«Gli porto il messaggio, Moretti. Da stasera la vostra porta ha un muro di pietra lavica in più. Saverio Cozza veste biancoblù. Va' in bacheca a ufficializzare il nuovo difensore roccioso!»",
+        q3_tonio_trabucchi: "«Mastro Tonio si è tolto il cappello di paglia e ha battuto le mani! Ha detto: «Tale e quale a suo padre nel '74!» Hai sbloccato la maglia vintage e il rispetto di tutta la scogliera! Corri alla bacheca a riscuotere!»",
+        q3_rec_pietrino: "«GRAZIE CAPITANO! Prometto che non mangerò focaccia durante i supplementari! Pietrino entra nel roster della prima squadra! Fai un salto alla bacheca per completare l'incarico!»"
+      };
+
+      const speech = victorySpeeches[activeQuest.id] || `«Leo! Abbiamo già vinto la sfida per l'incarico: «${activeQuest.title}»! Corri alla Bacheca in Piazza San Pietro a riscuotere la tua ricompensa!»`;
+      const buttonsList = [
+        { label: "📋 Apri Bacheca Incarichi", cls: "hot", go: () => openQuestBoard(borgoResume) }
+      ];
+      if (/^q[123]_rec_/.test(activeQuest.id)) {
+        buttonsList.push({ label: "👥 Vedi Roster Squadra", cls: "pick", go: () => openRosterModal(borgoResume) });
+      }
+      buttonsList.push({ label: "◂ Torna al Borgo", go: borgoResume });
+
+      bAsk(npcId, speech, buttonsList);
       return true;
     }
 
@@ -513,29 +565,16 @@
     if (activeQuest.id === "q1_nico_glove") {
       bAsk("nico", "«Leo! Meno male che sei qui! Hai visto il mio annuncio in bacheca? Sulle uscite basse ho ancora il terrore di spaccarmi le ginocchia sui ciottoli bagnati. Tirami 5 volte con il Muro del Porto: se fai almeno 6 punti col minigioco, imparo a tuffarmi a occhi aperti!»", [
         {
-          label: "⚽ Minigioco: Sfida al Muro del Porto (5 tiri)",
-          sub: "Minigioco con tempismo reale contro il muro",
+          label: "⚽ Sfida al Muro del Porto (5 tiri)",
+          sub: "Fai almeno 6 punti di tempismo contro il muro",
           cls: "hot",
           go: () => {
             if (typeof window.borgoMuro === "function") window.borgoMuro();
           }
         },
         {
-          label: "«Finta di tiro e tocco morbido all'angolino»",
-          sub: "Risolvi con allenamento rapido di posizione",
-          cls: "pick",
-          fx: () => {
-            state.active["q1_nico_glove_done"] = true;
-            saveQuestState(state);
-            if (typeof window.sfx === "function") window.sfx("goal");
-            if (window.toast) window.toast("Nico devia la sfera in tuffo!", "success", "🧤");
-          },
-          lines: [
-            BL("nico", "ZAMPA DI GATTO! (Nico allunga la mano sinistra con riflesso felino e devia sul palo esterno)"),
-            BL("nico", "Hai visto come ho tenuto l'equilibrio? La Nonna dice sempre che sono sgraziato, ma sui palloni bassi adesso non passa niente!"),
-            BL("nico", "Incarico superato, capitano! Fai un salto alla bacheca per riscuotere il premio!")
-          ],
-          then: borgoResume
+          label: "◂ Ci penso dopo",
+          go: borgoResume
         }
       ]);
       return true;
@@ -548,28 +587,15 @@
       bAsk("tommy", "«Moretti! Sei venuto per la sfida della bacheca? Sostieni che l'uno-due di squadra sia più efficace delle mie magie individuali? Dimostramelo: giochiamo una partitella vera al campo contro i ragazzi del Borgo!»", [
         {
           label: "⚽ Scendi in campo con Tommy nella Partitella!",
-          sub: "Partita giocabile sul campetto di calcio",
+          sub: "Batti i ragazzi del Borgo al campetto",
           cls: "hot",
           go: () => {
             if (typeof window.borgoMatch === "function") window.borgoMatch("ragazzini");
           }
         },
         {
-          label: "«Dimostrazione rapida dell'uno-due nello spazio»",
-          sub: "Azione tattica a due tocchi",
-          cls: "pick",
-          fx: () => {
-            state.active["q1_tommy_traiettoria_done"] = true;
-            saveQuestState(state);
-            if (typeof window.sfx === "function") window.sfx("goal");
-            if (window.toast) window.toast("Intesa Tommy affinata con successo!", "success", "🎯");
-          },
-          lines: [
-            BL("tommy", "(Tommy ti appoggia la sfera di prima, scatta bruciando il guardalinee immaginario e riceve il tuo filtrante al volo in porta)"),
-            BL("tommy", "…Maledizione, Moretti. Il portiere era ancora fermo a guardare il lampione mentre la rete si muoveva già. Avevi ragione tu!"),
-            BL("tommy", "Incarico completato: va' pure in bacheca a prenderti i meriti!")
-          ],
-          then: borgoResume
+          label: "◂ Ci penso dopo",
+          go: borgoResume
         }
       ]);
       return true;
@@ -589,21 +615,8 @@
           }
         },
         {
-          label: "Siluro teso a fil di traversa dal dischetto",
-          sub: "Tiro di collo pieno per piegare le mani",
-          cls: "pick",
-          fx: () => {
-            state.active["q1_rec_mattia_done"] = true;
-            saveQuestState(state);
-            if (typeof window.sfx === "function") window.sfx("goal");
-            if (window.toast) window.toast("Gol spettacolare! Mattia accetta il reclutamento!", "success", "🛡️");
-          },
-          lines: [
-            BL("pietrino", "GOOOOOL! La palla ha quasi strappato la maglia che usavamo come palo!"),
-            BL("pietrino", "Mattia si è alzato, si è pulito le mani dalla focaccia e ha detto: «Quel tiro non lo prendeva manco Buffon. Ci sto: firmo per le Rondinelle!»"),
-            BL("pietrino", "Mattia la Saracinesca è una nostra recluta! Passa in bacheca a convalidare il tesseramento!")
-          ],
-          then: borgoResume
+          label: "◂ Ci penso dopo",
+          go: borgoResume
         }
       ]);
       return true;
@@ -629,6 +642,10 @@
             BL("rita", "Tieni, due fette fumanti per te e i compagni. L'incarico è fatto: riscuoti la ricompensa alla bacheca!")
           ],
           then: borgoResume
+        },
+        {
+          label: "◂ Più tardi",
+          go: borgoResume
         }
       ]);
       return true;
@@ -648,20 +665,8 @@
           }
         },
         {
-          label: "Sfida di scatto secco sui 50 metri della spiaggia",
-          sub: "Confronto rapido sulla battigia",
-          cls: "pick",
-          fx: () => {
-            state.active["q2_rec_kevin_done"] = true;
-            saveQuestState(state);
-            if (typeof window.sfx === "function") window.sfx("goal");
-            if (window.toast) window.toast("Kevin del Pedalò reclutato!", "success", "🏖️");
-          },
-          lines: [
-            BL("gigi", "PARI AL CENTESIMO! Kevin è rimasto senza fiato e ha gridato: «Chi corre così sulla sabbia merita che giochi con lui!»"),
-            BL("gigi", "Kevin del Pedalò ha firmato per il Rondine FC! Sulla fascia destra voleremo! Riscuoti il premio in bacheca!")
-          ],
-          then: borgoResume
+          label: "◂ Ci penso dopo",
+          go: borgoResume
         }
       ]);
       return true;
@@ -688,6 +693,10 @@
             BL("sara", "Missione completata con lode: passa in bacheca a riscuotere la ricompensa!")
           ],
           then: borgoResume
+        },
+        {
+          label: "◂ Più tardi",
+          go: borgoResume
         }
       ]);
       return true;
@@ -713,6 +722,10 @@
             BL("gigi", "Domenica urlerò così forte dagli spalti che ci sentiranno fino a Portofino! Grazie capitano, riscuoti subito il premio in bacheca!")
           ],
           then: borgoResume
+        },
+        {
+          label: "◂ Più tardi",
+          go: borgoResume
         }
       ]);
       return true;
@@ -732,20 +745,8 @@
           }
         },
         {
-          label: "«Al Rondine FC la grinta è la prima regola: il posto è suo!»",
-          sub: "Patto d'onore tra capitani",
-          cls: "pick",
-          fx: () => {
-            state.active["q3_rec_saverio_done"] = true;
-            saveQuestState(state);
-            if (typeof window.sfx === "function") window.sfx("goal");
-            if (window.toast) window.toast("Saverio Cozza entra nel Rondine FC!", "success", "🦀");
-          },
-          lines: [
-            BL("rocco", "Gli porto il messaggio. Da stasera la vostra porta ha un muro di pietra lavica in più."),
-            BL("rocco", "Saverio Cozza veste biancoblù. Va' in bacheca a ufficializzare il nuovo difensore roccioso!")
-          ],
-          then: borgoResume
+          label: "◂ Ci penso dopo",
+          go: borgoResume
         }
       ]);
       return true;
@@ -783,20 +784,8 @@
           }
         },
         {
-          label: "Esegui tre sponde millimetriche con tiro all'incrocio",
-          sub: "Dimostrazione acrobatica rapida",
-          cls: "pick",
-          fx: () => {
-            state.active["q3_tonio_trabucchi_done"] = true;
-            saveQuestState(state);
-            if (typeof window.sfx === "function") window.sfx("goal");
-            if (window.toast) window.toast("Prova dei Trabucchi superata!", "success", "🪵");
-          },
-          lines: [
-            BL("tonino", "Mastro Tonio si è tolto il cappello di paglia e ha battuto le mani! Ha detto: «Tale e quale a suo padre nel '74!»"),
-            BL("tonino", "Hai sbloccato la maglia vintage e il rispetto di tutta la scogliera! Corri alla bacheca a riscuotere!")
-          ],
-          then: borgoResume
+          label: "◂ Ci penso dopo",
+          go: borgoResume
         }
       ]);
       return true;
@@ -816,20 +805,8 @@
           }
         },
         {
-          label: "«Pietrino, ti sei meritato la maglia numero 10: benvenuto tra noi!»",
-          sub: "Consegna la maglia ufficiale",
-          cls: "pick",
-          fx: () => {
-            state.active["q3_rec_pietrino_done"] = true;
-            saveQuestState(state);
-            if (typeof window.sfx === "function") window.sfx("goal");
-            if (window.toast) window.toast("Pietrino è ufficialmente un giocatore del Rondine FC!", "success", "👟");
-          },
-          lines: [
-            BL("pietrino", "GRAZIE CAPITANO! Prometto che non mangerò focaccia durante i supplementari!"),
-            BL("pietrino", "Pietrino entra nel roster! Fai un salto alla bacheca per completare l'incarico!")
-          ],
-          then: borgoResume
+          label: "◂ Ci penso dopo",
+          go: borgoResume
         }
       ]);
       return true;

@@ -4009,18 +4009,26 @@
     const cos = win ? { ragazzini: "cresta", bagnini: "cappellino", squali: "fascia" }[id] : null;
     const got = cos && bCos(cos); borgoSave();
     sfx(win ? "goal" : "crowd"); if (win) jingle("win");
+    let questDialogue = null;
     if (win && typeof window.onQuestMatchWin === "function") {
-      window.onQuestMatchWin(id);
+      questDialogue = window.onQuestMatchWin(id);
     }
-    const who = { ragazzini: "pietrino", bagnini: "gigi", squali: "rocco" }[id];
+    const who = (questDialogue && questDialogue.who) || { ragazzini: "pietrino", bagnini: "gigi", squali: "rocco" }[id];
     view = { kind: "scene", bg: "borgo", speaker: who };
-    const lines = {
+    const defaultLines = {
       ragazzini: win ? "Avete vinto solo perché il campo era in discesa. E perché Mattia si è fermato a mangiare la merenda in porta. La rivincita quando vuoi!" : "HAHAHA! Battuto dai ragazzini! Lo scrivo col gesso sul muro della scuola. In stampatello.",
       bagnini: win ? "KRAAA! Abbiamo battuto i Bagnini! Adesso ci fanno l'ombrellone gratis per un'estate. O ci annegano. Vediamo." : "Capitano, abbiamo perso contro gente che si chiama «Il Pinna». Io non riesco a dormire stanotte.",
       squali: win ? "Va bene, Moretti. Il gusto Squalo alla menta resta a Punta Nera. Tanto lo mangiamo solo noi. …Fa schifo, comunque." : "Squalo alla menta in vetrina allo Scoglio! Tonino è disperato. Ci vediamo alla rivincita, Moretti.",
     }[id];
+    const lines = (questDialogue && questDialogue.text) || defaultLines;
     text(who, `<b>${win ? "Vittoria" : a === b ? "Pareggio" : "Sconfitta"} ${a}–${b}.</b> ${esc(lines)}${got ? ` <em>Sbloccato: ${esc(COSM[cos].label)}!</em>` : ""}`);
-    buttons([{ label: "Torna al Borgo ▸", cls: "hot", fn: borgoResume }, { label: "Rivincita", fn: () => borgoMatch(id, hero) }], true);
+    const btns = [];
+    if (questDialogue && questDialogue.questCompleted) {
+      btns.push({ label: "📋 Apri Bacheca per Riscuotere ▸", cls: "hot", fn: () => { if (window.openQuestBoard) window.openQuestBoard(borgoResume); else borgoResume(); } });
+    }
+    btns.push({ label: "Torna al Borgo ▸", cls: questDialogue ? "" : "hot", fn: borgoResume });
+    btns.push({ label: "Rivincita", fn: () => borgoMatch(id, hero) });
+    buttons(btns, true);
   }
 
   // ---------- oggetti e porte ----------
@@ -4132,12 +4140,22 @@
       if (shot === 5) {
         const rec = pts > B.q.muro; if (rec) B.q.muro = pts;
         const got = pts >= 13 && bCos("muro"); borgoSave(); sfx(pts >= 13 ? "goal" : "crowd");
+        let questMuroDialogue = null;
         if (typeof window.onQuestMuroEnd === "function") {
-          window.onQuestMuroEnd(pts);
+          questMuroDialogue = window.onQuestMuroEnd(pts);
         }
-        view = { kind: "scene", bg: "beach", speaker: pts >= 13 ? "leo" : null };
-        text(pts >= 13 ? "leo" : "voce", `<b>${pts} punti su 15.</b> ${pts >= 14 ? "Il pallone torna dritto come un fuso. Dario dovrà farsene una ragione." : pts >= 13 ? "Tredici. Come Dario. Il muro, per un attimo, sembra sorridere." : pts >= 10 ? "Buono. Il muro però ha visto di meglio. Ha visto Dario." : "Il pallone torna storto. Ma torna. Forse basta questo."}${rec ? " <em>Nuovo record!</em>" : ""}${got ? " <em>Sbloccato il tiro «Rimbalzo del Muro» per il tuo campione!</em>" : ""}`);
-        return buttons([{ label: "Riprova", fn: borgoMuro }, { label: "Torna al Borgo ▸", cls: "hot", fn: borgoResume }], true);
+        const who = (questMuroDialogue && questMuroDialogue.who) || (pts >= 13 ? "leo" : null);
+        view = { kind: "scene", bg: "beach", speaker: who };
+        const defaultMuroText = `${pts >= 14 ? "Il pallone torna dritto come un fuso. Dario dovrà farsene una ragione." : pts >= 13 ? "Tredici. Come Dario. Il muro, per un attimo, sembra sorridere." : pts >= 10 ? "Buono. Il muro però ha visto di meglio. Ha visto Dario." : "Il pallone torna storto. Ma torna. Forse basta questo."}${rec ? " <em>Nuovo record!</em>" : ""}${got ? " <em>Sbloccato il tiro «Rimbalzo del Muro» per il tuo campione!</em>" : ""}`;
+        const muroSpeech = questMuroDialogue ? questMuroDialogue.text : defaultMuroText;
+        text(who || "voce", `<b>${pts} punti su 15.</b> ${esc(muroSpeech)}`);
+        const muroBtns = [];
+        if (questMuroDialogue && questMuroDialogue.questCompleted) {
+          muroBtns.push({ label: "📋 Apri Bacheca per Riscuotere ▸", cls: "hot", fn: () => { if (window.openQuestBoard) window.openQuestBoard(borgoResume); else borgoResume(); } });
+        }
+        muroBtns.push({ label: "Torna al Borgo ▸", cls: questMuroDialogue ? "" : "hot", fn: borgoResume });
+        muroBtns.push({ label: "Riprova", fn: borgoMuro });
+        return buttons(muroBtns, true);
       }
       timing(`Muro · tiro ${shot + 1} di 5`, (n) => {
         shot++; pts += n;
