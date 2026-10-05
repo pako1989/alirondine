@@ -6,6 +6,7 @@
   "use strict";
 
   const STORAGE_KEY = "ali-di-rondine.questboard";
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
   // Database delle missioni dinamiche suddivise per Stagioni e Categorie
   const QUEST_DEFS = [
@@ -356,6 +357,10 @@
 
   // Apre la modale ricca della Quest Board
   function openQuestBoard(onClose) {
+    if (window.BW && window.BW.keys) window.BW.keys = {};
+    const existing = document.getElementById("questBoardOverlay");
+    if (existing) existing.remove();
+
     const curSeason = getCurrentSeason();
     const state = loadQuestState();
     let curFilter = "all";
@@ -374,6 +379,15 @@
       border: 2px solid #b88648; border-radius: 18px; box-shadow: 0 16px 40px rgba(0,0,0,0.7);
       display: flex; flex-direction: column; overflow: hidden; animation: popIn .2s ease;
     `;
+
+    const escListener = (e) => {
+      if (e.key === "Escape") {
+        if (typeof window.removeEventListener === "function") window.removeEventListener("keydown", escListener);
+        overlay.remove();
+        if (typeof onClose === "function") onClose();
+      }
+    };
+    if (typeof window.addEventListener === "function") window.addEventListener("keydown", escListener);
 
     function renderContent() {
       const B = typeof window.borgoLoad === "function" ? window.borgoLoad() : (window.B || null);
@@ -545,6 +559,7 @@
       });
 
       const closeHandler = () => {
+        if (typeof window.removeEventListener === "function") window.removeEventListener("keydown", escListener);
         overlay.remove();
         if (typeof onClose === "function") onClose();
       };
@@ -560,6 +575,7 @@
 
     overlay.onclick = (e) => {
       if (e.target === overlay) {
+        if (typeof window.removeEventListener === "function") window.removeEventListener("keydown", escListener);
         overlay.remove();
         if (typeof onClose === "function") onClose();
       }
