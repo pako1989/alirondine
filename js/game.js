@@ -1544,10 +1544,10 @@
 
   const coachId = () => (M && M.step && M.step.coach) || (S.season === 7 || S.season === 8 || S.season === 9 ? "ruggeri" : S.season >= 4 ? "bellandi" : S.season === 3 ? "marta" : "ruggeri");
   let tm = null;
-  function timing(label, cb, bg) {
+  function timing(label, cb, bg, forceWind) {
     view = { kind: "timing", bg: bg || "beach" };
-    const hasWind = (M && M.meteo === "vento") && SET.windWeather !== false;
-    const windDir = hasWind ? (Math.random() < 0.5 ? -1 : 1) : 0;
+    const hasWind = forceWind !== undefined ? !!forceWind : ((M && M.meteo === "vento") && SET.windWeather !== false);
+    const windDir = hasWind ? (typeof forceWind === "number" && forceWind !== 0 ? forceWind : (Math.random() < 0.5 ? -1 : 1)) : 0;
     tm = { bg: bg || "beach", x: 0, dir: 1, speed: (2.2 + Math.random() * 0.8) * DF.tsp[hLv()], lo: 110 + Math.random() * 80, w: 40 * DF.tw[hLv()], pz: DF.tpz[hLv()], label, stopped: false, wind: windDir };
     text("voce", `<em>${esc(label)}</em>: ferma la barra quando è nella zona verde. Al centro esatto è perfetto.${hasWind ? ` <br><b style="color:var(--gold)">💨 Vento ${windDir > 0 ? "verso destra ▶" : "◀ verso sinistra"}:</b> calibra l'anticipo per dare l'effetto a rientrare!` : ""}`);
     buttons([{ label: "ORA! ⚽", cls: "hot", fn: () => {
@@ -14770,10 +14770,10 @@
       { label: "Enciclopedia del Borgo", sub: "Personaggi, schede e carte", fn: () => borgoEncyclopedia(title) },
       { label: "Albero delle scelte", sub: "Bivi e finali alternativi", fn: () => choiceTree(title) },
       { label: "Log dei dialoghi", sub: "Rileggi le ultime battute", fn: () => { if (window.openDialogueLog) window.openDialogueLog(); } },
-      { head: "Aiuto" },
-      { label: "Impostazioni", sub: `${(DIFF[SET.diff] || DIFF.normale)[0]} · salvataggi · guida`, fn: menuImp },
-      { label: "Dove andare adesso?", sub: "Un consiglio senza spoiler", cls: fresh0 ? "" : "pick", fn: () => guDove(title) },
-      ...(!gr.seen ? [{ label: "Guida rapida", sub: "Partite, Borgo e collezioni in due minuti", cls: fresh0 ? "hot" : "", fn: () => guida(title) }] : []),
+      { head: "Aiuto & Guide" },
+      { label: "📖 Manuale del Rondine FC", sub: "Guida ufficiale · Meccaniche, Meteo Vento e Perk Reclute", cls: "hot", fn: () => manualeRondine(title) },
+      { label: "Impostazioni", sub: `${(DIFF[SET.diff] || DIFF.normale)[0]} · salvataggi · grafica`, fn: menuImp },
+      { label: "Dove andare adesso?", sub: "Un consiglio senza spoiler da Pina", cls: fresh0 ? "" : "pick", fn: () => guDove(title) },
     ]);
   }
   function menuSaghe() {
@@ -14915,12 +14915,12 @@
   const MN_COLL = [];
   function menuImp() {
     view = { kind: "scene", bg: "stadium" }; chap("Impostazioni");
-    const gr = guRec(), gd = ["partite", "borgo", "collezioni"].filter((k) => gr.done[k]).length;
+    const gr = guRec(), gd = Object.keys(MANUALE_CHAPTERS).filter((k) => gr.done && gr.done[k]).length;
     text("voce", `<b>Impostazioni</b><br>Difficoltà ${(DIFF[SET.diff] || DIFF.normale)[0]} · Animazioni ${SET.anim ? "sì" : "no"} · Grafica ${{ classica: "classica", migliorata: "migliorata", pixel: "pixel art rifinita" }[SET.gfx] || "migliorata"}<br><span style="color:var(--dim)">Tutto si salva da solo. Da «Salvataggi» puoi portare i progressi su un altro telefono.</span>`);
     buttons([
       { label: "Impostazioni", sub: "Difficoltà, stile partite, animazioni, suoni, testo", cls: "hot", fn: () => settings(menuImp) },
       { label: "Salvataggi", sub: "Esporta · Importa", fn: saves },
-      { label: "Guida rapida", sub: `Capitoli letti ${gd}/3`, fn: () => guida(menuImp) },
+      { label: "📖 Manuale del Rondine FC", sub: `Capitoli consultati ${gd}/${Object.keys(MANUALE_CHAPTERS).length} · Guide complete`, cls: "hot", fn: () => manualeRondine(menuImp) },
       { label: "Dove andare adesso?", sub: "Un consiglio senza spoiler", fn: () => guDove(menuImp) },
       { label: "◂ Menu", fn: title },
     ], true);
@@ -14963,59 +14963,370 @@
     ]);
   }
 
-  // ---------- guida rapida: tre capitoli brevi, con una prova del tempismo ----------
-  const GUIDA = {
-    partite: { t: "Le partite", who: "ruggeri", bg: "stadium", pages: [
-      "Ascolta il mister. Il campo è diviso in <b>cinque zone</b>: parti dalla 1, la porta è dopo la 5. Dalla zona 3 in su puoi tirare.",
-      "Ogni giocata costa <b>grinta</b>, la barra in alto. Dribbla, passa, uno-due: così si avanza. Se resti a secco, «Tieni palla e rifiata». Non è vergogna, è strategia.",
-      "I bottoni rossi sono gli <b>speciali</b>: costano tanta grinta e fanno male. Però i portieri imparano: lo stesso tiro tre volte di fila non sorprende più nessuno.",
-      "Quando tirano loro, guarda il <b>piede d'appoggio</b>: di solito dice dove va il pallone. Di solito. A Difficile, un po' meno di solito.",
-      "E poi c'è la <b>barra del tempismo</b>: fermala nella zona verde, al centro esatto è perfetto. Proviamo? Non conta niente, giuro.",
-      "Ultima cosa. Scene, animazioni e difficoltà si cambiano in <b>Impostazioni</b>. Se una scena ti piace guardala; se hai fretta, tocca lo schermo.",
-    ], prova: 4 },
-    borgo: { t: "Il Borgo", who: "pina", bg: "borgo", pages: [
-      "Borgo Marino si gira a piedi: <b>frecce</b> sotto lo schermo, oppure le frecce o WASD della tastiera. Io sto all'edicola, non ti puoi sbagliare: sono quella che sa tutto.",
-      "Avvicinati a qualcuno e premi <b>Parla</b> (o Invio). La gente del Borgo ha sempre qualcosa da dire. Anche quando non ha niente da dire.",
-      "Nel Borgo si vincono <b>monete</b>: sfide al campetto, feste, lavoretti. Marinella, in piazza, le accetta per la sua bancarella. Solo monete del paese: «Le altre non hanno storia».",
-      "Dalla <b>fermata del pullman</b>, quando la storia va avanti, partono le trasferte: gite piccole, cose da trovare, partite nuove.",
-      "Col <b>menu del Borgo</b> (il bottone, o il tasto M) cambi costume, guardi la mappa e torni a casa. Casa, qui, vuol dire la trattoria.",
-    ] },
-    collezioni: { t: "Le collezioni", who: "nico", bg: "title", pages: [
-      "Io tengo il conto di tutto, è un vizio da portiere. La <b>Bacheca</b> conta i trofei: quelli nascosti mostrano «???» e un indizio, niente di più.",
-      "All'edicola di Pina ci sono le <b>figurine</b>: bustine, doppioni e scambi. Il parroco bara, ma con stile.",
-      "Nell'<b>Album dei ricordi</b> le fotografie arrivano vivendo le cose, non comprandole. Come le cose belle vere.",
-      "Il <b>Diario di Leo</b> tiene scelte, finali e record: solo quello che hai vissuto. E tutto si salva da solo; da «Salvataggi» puoi portarlo su un altro telefono.",
-    ] },
-  };
-  function guida(back) {
-    back = back || title;
-    const gr = guRec(); if (!gr.seen) { gr.seen = true; guSave(gr); }
-    view = { kind: "scene", bg: "title", speaker: "ruggeri" }; chap("Guida rapida");
-    text("voce", `Tre capitoli brevi. Si leggono in qualsiasi ordine, si saltano quando vuoi e si ritrovano in Impostazioni.<br>${Object.entries(GUIDA).map(([k, c]) => `${gr.done[k] ? "✓" : "·"} ${c.t}`).join(" &nbsp;")}`);
-    buttons([
-      ...Object.entries(GUIDA).map(([k, c]) => ({ label: c.t, sub: gr.done[k] ? "Letto ✓" : `${c.pages.length} pagine`, cls: gr.done[k] ? "" : "hot", fn: () => guPage(k, 0, back) })),
-      { label: "◂ Indietro", fn: back },
-    ], true);
-  }
-  function guPage(k, i, back) {
-    const c = GUIDA[k];
-    if (i >= c.pages.length) {
-      const gr = guRec(); gr.done[k] = true; guSave(gr);
-      view = { kind: "scene", bg: c.bg, speaker: c.who }; chap(`Guida · ${c.t}`);
-      const left = Object.keys(GUIDA).filter((x) => !gr.done[x]);
-      text(c.who, left.length ? `Fatto. Restano ${left.map((x) => GUIDA[x].t.toLowerCase()).join(" e ")}.` : "Fatto tutto. Adesso sai quello che serve; il resto lo scopri giocando, che è la parte bella.");
-      return buttons([...(left.length ? [{ label: GUIDA[left[0]].t, cls: "hot", fn: () => guPage(left[0], 0, back) }] : []), { label: "Guida rapida", fn: () => guida(back) }, { label: "◂ Indietro", fn: back }], true);
+  // ================= MANUALE UFFICIALE DEL RONDINE FC =================
+  // Guida interattiva e completa alle meccaniche di gioco, meteo dinamico, perk reclute, talenti, bacheca e saghe
+  const MANUALE_CHAPTERS = {
+    partite: {
+      id: "partite",
+      icon: "⚽",
+      tag: "FONDAMENTI",
+      t: "Calcio d'Azione & Partite",
+      desc: "Zone 1-5, grinta, allerta affanno, contrasti e tiri speciali",
+      who: "ruggeri",
+      bg: "stadium",
+      pages: [
+        `<b>LE 5 ZONE DEL CAMPO & IL RADAR TATTICO:</b><br>
+        Il campo di Borgo Marino è suddiviso in 5 settori, visibili nel radar sopra il testo:<br>
+        • <b>Zona 1 (Difesa)</b>: La nostra area di rigore. Qui ogni errore è fatale.<br>
+        • <b>Zona 2 (Mediana)</b>: La cerniera di centrocampo. Ottima per contrastare e rilanciare.<br>
+        • <b>Zona 3 (Regia)</b>: Il cerchio di centrocampo. Da qui in avanti puoi già tentare la conclusione da lontano!<br>
+        • <b>Zona 4 (Trequarti)</b>: Territorio d'attacco per assist filtranti e triangolazioni.<br>
+        • <b>Zona 5 (Area di Rigore)</b>: L'area piccola. Qui ogni tiro ha la massima probabilità di gonfiare la rete!`,
+
+        `<b>LA BARRA DELLA GRINTA & ALLERTA AFFANNO:</b><br>
+        Ogni giocata ha un costo fisico in Grinta (barra dorata in cima):<br>
+        • Dribbling, passaggi filtranti e scivolate consumano energia.<br>
+        • <b style="color:var(--red)">Allerta Affanno</b>: Se la grinta scende sotto quota 20, i tuoi tiri perdono potenza e rischi di farti sfilare il pallone.<br>
+        • <b>«Tieni palla e rifiata»</b>: Quando sei a secco, rallenta il ritmo per recuperare fiato prezioso (+12/15 grinta). La lucidità vince le finali!`,
+
+        `<b>CONTRASTI, SCIVOLATE & FASE DIFENSIVA:</b><br>
+        Quando la palla ce l'hanno loro, non farti prendere dal panico:<br>
+        • <b>Intercetta</b>: Rischioso ma decisivo, anticipa la traiettoria del passaggio avversario.<br>
+        • <b>Contrasto duro</b>: Intervento fisico per strappare la sfera all'attaccante.<br>
+        • <b>Copri e rifiata</b>: Cede qualche metro ma chiude lo specchio della porta per agevolare la presa del portiere.`,
+
+        `<b>I TIRI SPECIALI & L'AFFATICAMENTO DEI PORTIERI:</b><br>
+        I pulsanti rossi sono le abilità leggendarie (come il <b>Tiro della Rondine</b>):<br>
+        • Bruciano molta grinta ma scatenano una potenza travolgente.<br>
+        • <i>Attenzione</i>: I portieri rivali imparano! Ripetere lo stesso tiro per 3 volte di fila stanca e perde efficacia di sorpresa.<br>
+        • Inoltre, ogni parata mina la resistenza del portiere: a fine partita anche i colossi avranno le mani pesanti!`,
+
+        `<b>BARRA DEL TEMPISMO & LETTURA DEL RIVAL:</b><br>
+        Quando scatta la barra del tempismo, ferma il cursore nella zona verde: al centro esatto (zona dorata) il tiro è un missile imparabile!<br>
+        Quando tirano loro, osserva il <b>piede d'appoggio</b>: indica dove finirà la sfera (destra, sinistra o centrale).<br>
+        <i>Vuoi provare adesso la barra del tempismo standard? Premi il pulsante qui sotto!</i>`
+      ],
+      prova: 4
+    },
+
+    meteo: {
+      id: "meteo",
+      icon: "🌪️",
+      tag: "NOVITÀ DINAMICA",
+      t: "Meteo Dinamico & Vento Ligure",
+      desc: "Brezza marina, folate controvento e l'effetto a rientrare",
+      who: "baciccia",
+      bg: "beach",
+      pages: [
+        `<b>IL VENTO CHE SOFFIA DAL GOLFO:</b><br>
+        A Borgo Marino il campo è a due passi dagli scogli. Il vento non è un semplice effetto decorativo, ma un vero fattore tattico!<br>
+        Nelle partite della storia c'è il <b>25% di probabilità</b> che si alzi la brezza marina:<br>
+        • 💨 <b>Vento verso destra (▶)</b>: La sfera viene trascinata verso il secondo palo.<br>
+        • 💨 <b>Vento verso sinistra (◀)</b>: La traiettoria tende a rientrare sul primo palo.<br>
+        L'indicatore meteo compare subito sulla barra del tiro a tempo.`,
+
+        `<b>CALIBRARE L'ANTICIPO & L'EFFETTO A RIENTRARE:</b><br>
+        Quando il vento spira forte, la barra risente della resistenza dell'aria:<br>
+        • Se calci controvento, devi anticipare il tocco di una frazione di secondo.<br>
+        • <b style="color:var(--gold)">Effetto a Rientrare Perfetto</b>: Se centri il centro esatto dorato mentre c'è vento attivo, Leo disegna una traiettoria a banana curva ad effetto che beffa il portiere avversario!<br>
+        Riceverai la notifica speciale <i>«Effetto a Rientrare perfetto controvento! 🌪️»</i>.`,
+
+        `<b>GESTIONE NELLE IMPOSTAZIONI:</b><br>
+        Il Meteo Vento è pensato per rendere ogni partita viva e imprevedibile.<br>
+        Se preferisci un'esperienza classica a traiettorie fisse senza folate improvvise:<br>
+        • Vai in <b>Impostazioni</b> -> <b>Meteo Vento in Partita</b> (tocca per passare da <i>Attivo</i> a <i>Disattivato</i>).<br>
+        <i>Proviamo un tiro controvento per prendere la mano?</i>`
+      ],
+      provaWind: 2
+    },
+
+    perks: {
+      id: "perks",
+      icon: "⚡",
+      tag: "NOVITÀ RECLUTE",
+      t: "Perk Tattici delle Reclute",
+      desc: "Le abilità delle reclute in partita: bilanciati a max 1 uso per match",
+      who: "tommy",
+      bg: "borgo",
+      pages: [
+        `<b>LA REGOLA D'ORO: MASSIMO 1 PERK PER MATCH!</b><br>
+        Le reclute che incontri e arruoli nel Borgo non sono semplici figurine: possono entrare in campo e ribaltare il match con la loro mossa caratteristica!<br>
+        Per salvaguardare il bilanciamento e l'anima del calcio del Borgo:<br>
+        • Puoi attivare <b>un solo Perk Recluta per ciascuna partita</b>.<br>
+        • Una volta utilizzato, il potere della panchina si esaurisce fino al fischio finale: scegli con intelligenza il minuto decisivo!`,
+
+        `<b>I PERK IN FASE DI ATTACCO (POSSESSO PALLA):</b><br>
+        Quando la Rondine manovra tra Zona 2 e Zona 4:<br>
+        • 🏖️ <b>Scatto di Kevin del Pedalò</b>: Cavalcata a piedi scalzi sulla linea laterale: brucia il terzino e avanza pulito di una zona!<br>
+        • 👟 <b>Pennellata di Pietrino il Fantasista</b>: Assist filtrante telecomandato che scavalca la difesa e ti mette solo davanti al portiere in <b>Zona 5</b>!<br>
+        • 🧢 <b>Ricarica di Mirko dei Caruggi</b> (con Grinta < 75%): Mirko infonde la passione dei vicoli dalla panchina: recuperi istantaneamente <b>+25 Grinta</b>!`,
+
+        `<b>I PERK IN FASE DI DIFESA (NON POSSESSO):</b><br>
+        Quando il rivale preme minaccioso verso i nostri pali:<br>
+        • 🧤 <b>Saracinesca di Mattia</b>: Tuffo plastico a mezza altezza: disinnesca un gol subito certo e riavvia la nostra ripartenza da Zona 1!<br>
+        • 🦀 <b>Muro di Pietra di Saverio Cozza</b>: Tackle frangiflutti pulito sulle caviglie dell'avversario: recupera palla e rilancia la sfera in Zona 2!<br>
+        • 🧢 <b>Incitamento di Mirko</b> (con Grinta < 60%): Scuote la squadra sotto assedio ridonando +25 Grinta.`,
+
+        `<b>COME SBLOCCARLI & TOGGLE RAPIDO NELLE OPZIONI:</b><br>
+        • Recluta Kevin, Pietrino, Mirko, Mattia e Saverio completando le loro missioni alla <b>Bacheca di Piazza San Pietro</b> o parlando nei caruggi!<br>
+        • Vuoi giocare senza aiuti esterni? Clicca il pulsante <b>⚡ Perk: ON / OFF</b> nel pannello rapido in alto (icona ⚙️) per disattivarli all'istante!`
+      ]
+    },
+
+    talenti: {
+      id: "talenti",
+      icon: "🛡️",
+      tag: "EQUIPAGGIAMENTO",
+      t: "Talenti del Borgo & Sede del Club",
+      desc: "Focaccia di Nonna, Olio Santo di Don Aurelio e intesa a coppie",
+      who: "nonna",
+      bg: "borgo",
+      pages: [
+        `<b>LA SEDE SOCIALE DEL RONDINE FC:</b><br>
+        Il nostro quartier generale sorge proprio sopra la trattoria.<br>
+        Cliccando l'icona 🛡️ <b>Roster & Talenti</b> nella barra dei comandi in alto puoi:<br>
+        • Consultare le schede di tutti i compagni storici (Leo, Nico, Tommy, Bruno, Gigi, Fede) e delle reclute arruolate.<br>
+        • Equipaggiare dotazioni e abilità uniche del paese ligure.`,
+
+        `<b>I TALENTI ICONICI DEL BORGO:</b><br>
+        • 🥖 <b>Teglia di Focaccia di Nonna Rita</b>: Nessuno gioca a stomaco vuoto! Aumenta il recupero di grinta e protegge dal calo di morale se subisci un gol all'incrocio.<br>
+        • 🕊️ <b>Olio Santo di Don Aurelio</b>: Benedizione parrocchiale prima della partita: rafforza ginocchia e caviglie, riducendo falli e infortuni nei contrasti spigolosi sul cemento.<br>
+        • ⚓ <b>Salsedine di Baciccia</b>: Tempra marinaia per resistere alle folate di vento più ostili.`,
+
+        `<b>INTESA DI COPPIA & SCHEMI AVANZATI:</b><br>
+        Giocando fianco a fianco, l'affiatamento tra i compagni cresce costantemente:<br>
+        • Al raggiungimento di <b>quota 14 di Intesa</b>, si sbloccano schemi a coppia avanzati e doppi tiri combinati in partita!<br>
+        • Nico e Leo, Tommy e Gigi, Bruno e Fede: ogni coppia possiede una sinergia speciale.`
+      ]
+    },
+
+    bacheca: {
+      id: "bacheca",
+      icon: "📋",
+      tag: "MISSIONI & LORE",
+      t: "Bacheca Incarichi di Piazza San Pietro",
+      desc: "Missioni secondarie, segreti del paese e reclutamento compagni",
+      who: "pina",
+      bg: "borgo",
+      pages: [
+        `<b>LA GRANDE BACHECA IN PIAZZA:</b><br>
+        Camminando a piedi per Borgo Marino, proprio davanti alla facciata di San Pietro, trovi la nostra bacheca in legno massiccio.<br>
+        Qui i paesani, i pescatori e i ragazzini affiggono volantini con compiti, sfide e richieste d'aiuto.<br>
+        Quando ci sono novità, compare il bollino esclamativo <b>«!»</b> sulla bacheca!`,
+
+        `<b>TIPOLOGIE DI INCARICHI:</b><br>
+        • 📜 <b>Missioni Narrative a Bivi</b>: Dialoghi profondi che svelano aneddoti sul passato di Nonna, di Mister Ruggeri e del vecchio faro.<br>
+        • ⚽ <b>Sfide sul Campo</b>: Prove di abilità, palleggi a tempo e sfide contro i giovani talenti delle frazioni vicine.<br>
+        • 🤝 <b>Incarichi di Reclutamento</b>: Aiuta i personaggi in difficoltà per convincerli a vestire la maglia del Rondine FC e sbloccare i loro Perk Tattici!`,
+
+        `<b>RICOMPENSE DEL BORGO:</b><br>
+        Completando gli incarichi ricevi:<br>
+        • <b>Monete del Borgo</b>: spendibili alla bancarella di Marinella per cosmetici e maglie speciali.<br>
+        • <b>Figurine di Pina</b>: bustine e doppioni per completare l'album dell'edicola.<br>
+        • <b>Nuove voci nell'Album dei Ricordi</b> e trofei per la Bacheca del Club!`
+      ]
+    },
+
+    saghe: {
+      id: "saghe",
+      icon: "🌟",
+      tag: "EXTRA & MULTIVERSO",
+      t: "Saghe Multiverso, Minigiochi & Arcade",
+      desc: "Capitan Tsubasa, Westeros, Futurama, Rick & Morty, Stadio 3D e Cabinato",
+      who: "leo",
+      bg: "title",
+      pages: [
+        `<b>LE GRANDI SAGHE NARRATIVE ALTERNATIVE:</b><br>
+        Nel menu <i>«Saghe e minigiochi»</i> ti aspettano mondi paralleli giocabili per intero:<br>
+        • ⚡ <b>Capitan Tsubasa · Il Torneo della Scogliera</b>: Il leggendario Twin Shot ad elica, la parata dal palo e la Muppet di Brando De Marchi!<br>
+        • 👑 <b>Westeros · I Cinque Trabucchi</b>: Mappa medievale a feudi, risorse di pesto e l'assalto finale al Re della Notte!<br>
+        • 🛸 <b>Futurama 3000 · Champions Galattica</b>: La navetta Planet Express, Bender e quattro pianeti a gravità alterata!<br>
+        • 🧪 <b>Rick & Morty · La Cittadella dei Leo</b>: Squad builder quantico, portali verde acido e lo scontro contro Evil Leo!`,
+
+        `<b>CABINATO ARCADE & MINIGIOCHI VINTAGE:</b><br>
+        • 🕹️ <b>Cabinato Super Rondine '94</b>: Un autentico arcade calcistico 16-bit a gettoni con grafica pixel art, scanline CRT e tiri curvi supersonici.<br>
+        • ⚽ <b>Il Biliardino del Bar del Porto</b>: Calcio balilla fisico con stecche a molla contro Papà, Gino e Baciccia.<br>
+        • ⚽ <b>Stadio 3D · Sfida dei Tiri</b>: Campo tridimensionale con tiri a effetto contro i portieri leggendari.<br>
+        • 🌊 <b>Il Gozzo di Baciccia</b>: Prendi il timone in mare aperto per recuperare i palloni caduti tra le onde o vincere la regata del golfo!`
+      ]
+    },
+
+    dove: {
+      id: "dove",
+      icon: "🧭",
+      tag: "NAVIGATORE",
+      t: "Dove Andare Adesso? (Consigli di Pina)",
+      desc: "L'edicola sa tutto: un suggerimento senza spoiler su cosa fare ora",
+      who: "pina",
+      bg: "borgo",
+      pages: [
+        `Pina dell'Edicola raccoglie tutte le voci del paese e analizza il tuo stato di gioco in tempo reale per offrirti sempre il consiglio perfetto senza mai rovinarti la sorpresa della trama!<br><br>
+        Vuoi scoprire subito quale sfida, trofeo o capitolo ti aspetta? Clicca il pulsante qui sotto per consultare Pina!`
+      ],
+      isDove: true
     }
-    view = { kind: "scene", bg: c.bg, speaker: c.who }; chap(`Guida · ${c.t} ${i + 1}/${c.pages.length}`);
-    text(c.who, c.pages[i]);
-    const next = () => guPage(k, i + 1, back);
-    buttons([
-      ...(c.prova === i ? [{ label: "Prova il tempismo", sub: "Non conta niente", cls: "hot", fn: () => timing("Prova", (n) => { view = { kind: "scene", bg: c.bg, speaker: c.who }; text(c.who, n === 3 ? "<b>Perfetto!</b> Al centro esatto. Non montarti la testa, però." : n === 2 ? "<b>Buono.</b> Nella zona verde, un filo fuori centro. Va benissimo." : "Fuori dalla zona. Capita: la barra non porta rancore. Riprova quando vuoi."); buttons([{ label: "Riprova", fn: () => guPage(k, i, back) }, { label: "Avanti ▸", cls: "hot", fn: next }], true); }, c.bg) }] : []),
-      { label: "Avanti ▸", cls: c.prova === i ? "" : "hot", fn: next },
-      ...(i > 0 ? [{ label: "◂ Indietro", fn: () => guPage(k, i - 1, back) }] : []),
-      { label: "Salta", fn: back },
-    ], true);
+  };
+
+  const GUIDA = MANUALE_CHAPTERS;
+
+  function manualeRondine(back) {
+    back = back || title;
+    closeAltStage();
+    const gr = guRec();
+    if (!gr.seen) { gr.seen = true; guSave(gr); }
+    view = { kind: "scene", bg: "title", speaker: "leo" };
+    chap("Manuale del Rondine FC");
+    const totalCaps = Object.keys(MANUALE_CHAPTERS).length;
+    const doneCount = Object.keys(MANUALE_CHAPTERS).filter(k => gr.done && gr.done[k]).length;
+
+    text("leo", `
+      <div class="manuale-container">
+        <div class="manuale-header">
+          <div class="manuale-title">📖 MANUALE UFFICIALE DEL RONDINE FC</div>
+          <span class="manuale-badge ${doneCount === totalCaps ? "info" : "new"}">${doneCount === totalCaps ? "COMPLETO ✓" : `${doneCount}/${totalCaps} CONSULTATI`}</span>
+        </div>
+        <div class="manuale-tip-box">
+          <b>Benvenuto al quartier generale di Borgo Marino!</b><br>
+          Consulta i capitoli per padroneggiare ogni segreto del gioco: dalle <b>5 Zone del campo</b> alle novità del <b>Meteo Vento Dinamico</b> e dei <b>Perk Tattici delle Reclute</b>.
+        </div>
+      </div>
+    `);
+
+    const btns = Object.entries(MANUALE_CHAPTERS).map(([k, c]) => {
+      const isDone = !!(gr.done && gr.done[k]);
+      return {
+        label: `${c.icon} ${c.t}`,
+        sub: `${c.desc} · [${c.tag}]${isDone ? " ✓" : ""}`,
+        cls: isDone ? "" : "hot",
+        fn: () => manualePage(k, 0, back)
+      };
+    });
+
+    btns.push({
+      label: "◂ Chiudi Manuale",
+      cls: "pick",
+      fn: back
+    });
+
+    buttons(btns, true);
   }
+
+  function manualePage(k, i, back) {
+    const c = MANUALE_CHAPTERS[k];
+    if (!c) return manualeRondine(back);
+    if (i >= c.pages.length) {
+      const gr = guRec();
+      if (!gr.done) gr.done = {};
+      gr.done[k] = true;
+      guSave(gr);
+      view = { kind: "scene", bg: c.bg, speaker: c.who };
+      chap(`Manuale · ${c.icon} ${c.t}`);
+      const unread = Object.keys(MANUALE_CHAPTERS).filter(x => !gr.done[x]);
+      text(c.who, `
+        <div class="manuale-container">
+          <div class="manuale-header">
+            <div class="manuale-title">${c.icon} ${c.t} · LETTO CON SUCCESSO!</div>
+            <span class="manuale-badge new">COMPLETATO ✓</span>
+          </div>
+          <div class="manuale-tip-box">
+            ${unread.length ? `Hai completato questo capitolo. Ti mancano ancora <b>${unread.length} capitoli</b> per padroneggiare tutto il gioco!` : "Complimenti! Hai consultato tutti i capitoli del Manuale Ufficiale. Sei pronto per portare la Rondine alla vittoria!"}
+          </div>
+        </div>
+      `);
+      const nextBtn = unread.length ? [{
+        label: `${MANUALE_CHAPTERS[unread[0]].icon} Prossimo: ${MANUALE_CHAPTERS[unread[0]].t}`,
+        cls: "hot",
+        fn: () => manualePage(unread[0], 0, back)
+      }] : [];
+      return buttons([
+        ...nextBtn,
+        { label: "📖 Indice del Manuale", fn: () => manualeRondine(back) },
+        { label: "◂ Torna indietro", fn: back }
+      ], true);
+    }
+
+    view = { kind: "scene", bg: c.bg, speaker: c.who };
+    chap(`Manuale · ${c.icon} ${c.t} (${i + 1}/${c.pages.length})`);
+    text(c.who, `
+      <div class="manuale-container">
+        <div class="manuale-header">
+          <div class="manuale-title">${c.icon} ${c.t}</div>
+          <span class="manuale-badge info">PAG. ${i + 1}/${c.pages.length} · ${c.tag}</span>
+        </div>
+        <div class="manuale-section-card">
+          ${c.pages[i]}
+        </div>
+      </div>
+    `);
+
+    const next = () => manualePage(k, i + 1, back);
+    const b = [];
+
+    if (c.prova === i) {
+      b.push({
+        label: "⚽ Prova la Barra del Tempismo Standard",
+        sub: "Esercitati senza vento: centro esatto = perfetto!",
+        cls: "hot",
+        fn: () => timing("Prova Tempismo", (n) => {
+          view = { kind: "scene", bg: c.bg, speaker: c.who };
+          text(c.who, n === 3 ? "<b>Perfetto!</b> Al centro esatto dorato. Un tiro così buca le mani al portiere!" : n === 2 ? "<b>Buono!</b> Nella zona verde. Palla precisa e carica." : "Fuori zona! Non preoccuparti: la barra del tempismo si allena col ritmo. Riprova!");
+          buttons([
+            { label: "Riprova il tiro", fn: () => manualePage(k, i, back) },
+            { label: "Continua la lettura ▸", cls: "hot", fn: next }
+          ], true);
+        }, c.bg, 0)
+      });
+    }
+
+    if (c.provaWind === i) {
+      b.push({
+        label: "🌪️ Prova il Tempismo con Vento Dinamico (Folate del Golfo)",
+        sub: "Calibra l'anticipo controvento: centra l'oro per l'effetto a rientrare!",
+        cls: "hot",
+        fn: () => timing("Prova Controvento", (n) => {
+          view = { kind: "scene", bg: c.bg, speaker: c.who };
+          text(c.who, n === 3 ? "<b>FENOMENALE!</b> Effetto a rientrare controvento da manuale! La palla curva all'incrocio!" : n === 2 ? "<b>Ottimo controllo!</b> Hai domato la raffica verde." : "La folata ha spinto il pallone fuori sagoma! Controvento serve calcolare l'inerzia. Riprova!");
+          buttons([
+            { label: "Riprova controvento", fn: () => manualePage(k, i, back) },
+            { label: "Continua la lettura ▸", cls: "hot", fn: next }
+          ], true);
+        }, c.bg, 1)
+      });
+    }
+
+    if (c.isDove) {
+      b.push({
+        label: "🧭 Chiedi subito consiglio a Pina (Senza Spoiler) ▸",
+        cls: "hot",
+        fn: () => guDove(back)
+      });
+    }
+
+    b.push({
+      label: i === c.pages.length - 1 ? "✓ Completa capitolo" : "Avanti ▸",
+      cls: (c.prova === i || c.provaWind === i) ? "" : "hot",
+      fn: next
+    });
+
+    if (i > 0) {
+      b.push({
+        label: "◂ Pagina precedente",
+        fn: () => manualePage(k, i - 1, back)
+      });
+    }
+
+    b.push({
+      label: "📖 Indice del Manuale",
+      fn: () => manualeRondine(back)
+    });
+
+    buttons(b, true);
+  }
+
+  function guida(back) {
+    manualeRondine(back);
+  }
+  window.openManualeRondine = manualeRondine;
 
   // ---------- la mappa delle modalità: tutto il gioco su un foglio ----------
   // Ogni luogo: aperto (nome, colore, descrizione) o chiuso («???» e un indizio generico).
@@ -21220,6 +21531,7 @@
     ]);
     overlay(`<b>Menu</b> · ${esc(here)}<br><span style="color:var(--dim)">La storia è salvata all'inizio di questa scena: riprendi da qui con «Continua» o dalla porta della trattoria.</span>`, [
       { label: "Torna alla storia", cls: "hot", fn: closeOverlay },
+      { label: "📖 Manuale del Rondine FC", sub: "Guide alle partite, meteo vento e perk recluta", fn: () => { closeOverlay(); manualeRondine(run); } },
       { label: "Albero delle scelte", sub: "Mappa dei bivi di questa stagione", fn: () => { closeOverlay(); choiceTree(run); } },
       { label: "Enciclopedia del Borgo", sub: "Dossier e ritratti dei personaggi", fn: () => { closeOverlay(); borgoEncyclopedia(run); } },
       { label: "Il Borgo Storto (GDR)", sub: "Fai un salto nello spin-off a turni", fn: () => { closeOverlay(); openBorgoStorto(run); } },

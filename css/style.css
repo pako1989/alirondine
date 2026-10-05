@@ -1715,5 +1715,106 @@
     100% { transform: scale(1); }
   }
 
+  /* ================= MANUALE DEL RONDINE FC ================= */
+  .manuale-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    line-height: 1.5;
+    font-size: 13.5px;
+  }
+  .manuale-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid rgba(255, 210, 63, 0.35);
+    padding-bottom: 6px;
+    margin-bottom: 4px;
+  }
+  .manuale-title {
+    font-family: var(--display);
+    font-size: 15px;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .manuale-badge {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .manuale-badge.new {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #fff;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+  }
+  .manuale-badge.hot {
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    color: #fff;
+  }
+  .manuale-badge.info {
+    background: rgba(56, 189, 248, 0.2);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.4);
+  }
+  .manuale-section-card {
+    background: rgba(14, 26, 48, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-left: 3.5px solid var(--gold);
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+  }
+  .manuale-section-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+  .manuale-perk-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 5px;
+    margin-top: 6px;
+  }
+  .manuale-perk-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 5px;
+    padding: 6px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .manuale-perk-icon {
+    font-size: 18px;
+    line-height: 1;
+  }
+  .manuale-perk-body {
+    flex: 1;
+    font-size: 12px;
+  }
+  .manuale-perk-name {
+    font-weight: bold;
+    color: #ffd23f;
+  }
+  .manuale-tip-box {
+    background: rgba(255, 210, 63, 0.08);
+    border: 1px dashed rgba(255, 210, 63, 0.4);
+    border-radius: 6px;
+    padding: 6px 9px;
+    font-size: 12px;
+    color: #fef08a;
+    margin-top: 4px;
+  }
+
 
 

@@ -37,6 +37,7 @@
       <button type="button" class="opt-pill" id="logBtn" aria-label="Cronologia Dialoghi" title="Cronologia dei dialoghi e eventi (Tasto L)">📜 <span>Log</span></button>
       <button type="button" class="opt-pill" id="hapticBtn" aria-label="Feedback Aptico" title="Feedback Aptico (Vibrazione Tattile)">📳 <span>Aptico</span></button>
       <button type="button" class="opt-pill" id="perkToggleBtn" aria-label="Perk Reclute in Partita" title="Attiva o disattiva l'abilità delle reclute in partita">⚡ <span id="perkToggleLbl">Perk: ON</span></button>
+      <button type="button" class="opt-pill" id="manualBtn" aria-label="Manuale del Rondine FC" title="Manuale ufficiale del club: partite, meteo vento e perk recluta">📖 <span>Manuale</span></button>
     </div>
   </div>
   <div class="stage">
@@ -165,6 +166,14 @@ if (perkToggleBtn) {
     if (window.toast) {
       window.toast(next === "on" ? "Perk Reclute in partita ATTIVATI (Max 1 a match)" : "Perk Reclute in partita DISATTIVATI", "info", "⚡");
     }
+  };
+}
+var manualBtn = document.getElementById("manualBtn");
+if (manualBtn) {
+  manualBtn.onclick = function () {
+    if (topOptPanel) topOptPanel.hidden = true;
+    if (optBtn) optBtn.classList.remove("active");
+    if (window.openManualeRondine) window.openManualeRondine();
   };
 }
 window.openBorgoStortoModal = function () {
