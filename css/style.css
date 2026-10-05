@@ -1834,3 +1834,5 @@ body:has(#matchHud:not([hidden])) #choices::-webkit-scrollbar-thumb { background
 body:has(#matchHud:not([hidden])) .foot { display: none; }
 body:has(#matchHud:not([hidden])) #stats { padding: 4px 8px; font-size: 11px; }
 body:has(#matchHud:not([hidden])) #stats b { font-size: 14px; }
+
+.foot { display: none; }
