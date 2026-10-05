@@ -3907,6 +3907,7 @@
       }] : []),
       evButton(),
       { label: "📋 Bacheca Incarichi (Quest Board)", sub: "Missioni secondarie, sviluppo legami e reclutamento FC", cls: "hot", fn: () => { borgoLeave(); if (window.openQuestBoard) window.openQuestBoard(borgo); } },
+      { label: "👥 Roster Rondine F.C. & Reclute", sub: "Le nuove reclute della bacheca e i loro bonus", cls: "pick", fn: () => { borgoLeave(); if (window.openRosterModal) window.openRosterModal(borgo); } },
       { label: "Accendi la radio", sub: "Radio Rondine 98.6 · il notiziario di oggi", fn: () => radio(borgoMenu) },
       mtButton(borgoMenu),
       { label: "⚽ Biliardino del Bar del Porto", sub: "Sfida Baciccia, Gino e Papà al calcio balilla!", cls: "hot", fn: () => { borgoLeave(); if (window.openBiliardino) window.openBiliardino(0, borgo); } },
@@ -3952,6 +3953,9 @@
     const cos = win ? { ragazzini: "cresta", bagnini: "cappellino", squali: "fascia" }[id] : null;
     const got = cos && bCos(cos); borgoSave();
     sfx(win ? "goal" : "crowd"); if (win) jingle("win");
+    if (win && typeof window.onQuestMatchWin === "function") {
+      window.onQuestMatchWin(id);
+    }
     const who = { ragazzini: "pietrino", bagnini: "gigi", squali: "rocco" }[id];
     view = { kind: "scene", bg: "borgo", speaker: who };
     const lines = {
@@ -4072,6 +4076,9 @@
       if (shot === 5) {
         const rec = pts > B.q.muro; if (rec) B.q.muro = pts;
         const got = pts >= 13 && bCos("muro"); borgoSave(); sfx(pts >= 13 ? "goal" : "crowd");
+        if (typeof window.onQuestMuroEnd === "function") {
+          window.onQuestMuroEnd(pts);
+        }
         view = { kind: "scene", bg: "beach", speaker: pts >= 13 ? "leo" : null };
         text(pts >= 13 ? "leo" : "voce", `<b>${pts} punti su 15.</b> ${pts >= 14 ? "Il pallone torna dritto come un fuso. Dario dovrà farsene una ragione." : pts >= 13 ? "Tredici. Come Dario. Il muro, per un attimo, sembra sorridere." : pts >= 10 ? "Buono. Il muro però ha visto di meglio. Ha visto Dario." : "Il pallone torna storto. Ma torna. Forse basta questo."}${rec ? " <em>Nuovo record!</em>" : ""}${got ? " <em>Sbloccato il tiro «Rimbalzo del Muro» per il tuo campione!</em>" : ""}`);
         return buttons([{ label: "Riprova", fn: borgoMuro }, { label: "Torna al Borgo ▸", cls: "hot", fn: borgoResume }], true);
@@ -4085,6 +4092,8 @@
     };
     next();
   }
+  window.borgoMatch = borgoMatch;
+  window.borgoMuro = borgoMuro;
 
   // ---------- dialoghi ----------
   function borgoTalk(id) {
@@ -19323,6 +19332,22 @@
   const svC = (name, tag, hair, style, skin, shirt, x) => ({ name, tag, hair, style, skin, eye: "#2a1a0a", bg: [shirt, "#fff4c2"], shirt, ...(x || {}) });
   // m: missione · t = tempo | quiz | scelta | porta | monete | cond ; b: bonus · k = dono | sconto | pesca | flipper | premio | cos
   const SV = [
+    // --- Reclute Rondine FC (Bacheca Incarichi) ---
+    { id: "mattia", c: svC("Mattia la Saracinesca", "gold", "#4a2a10", "short", "#e8bf98", "#ffcc00", { cap: "#333333" }), at: ["borgo", 34, 5], home: ["borgo", 34, 5], when: "giorno",
+      bio: "Portierone dei ragazzini della scuola. Mangia focaccia tra un palo e l'altro, ma sui tiri non fa passare uno spillo. Reclutato nella Primavera della Rondine.",
+      hi: "In porta per la Rondine non si passa!", m: { t: "cond", test: "kids", hint: "Vinci la partitella al campetto" }, ok: "La saracinesca è abbassata per il Rondine FC!", b: { k: "cos", v: 10 }, idle: ["Nessuno segna alle Rondinelle!"] },
+    { id: "kevin", c: svC("Kevin del Pedalò", "orange", "#ff8800", "spiky", "#d49b6a", "#0099ff", {}), at: ["borgo", 30, 22], home: ["borgo", 30, 22], when: "giorno",
+      bio: "Ala velocissima delle spiagge dello Scoglio. Si allena trainando i pedalò sulla battigia a piedi scalzi.",
+      hi: "Sulla fascia destra non mi prende nessuno!", m: { t: "cond", test: "beach", hint: "Vinci la sfida di beach soccer allo Scoglio" }, ok: "Kevin vola sulla fascia per la Rondine!", b: { k: "flipper", v: 10 }, idle: ["Pronto a scattare sulla sabbia e sull'erba!"] },
+    { id: "saverio", c: svC("Saverio Cozza", "blue", "#223344", "buzz", "#c68b59", "#0a3a4a", {}), at: ["borgo", 24, 9], home: ["borgo", 24, 9], when: "giorno",
+      bio: "Stopper roccioso di Punta Nera. Entra in scivolata sui palloni vaganti con grinta da pietra lavica.",
+      hi: "Chi tocca la porta della Rondine deve fare i conti con me.", m: { t: "cond", test: "rocco", hint: "Vinci contro gli Squali di Rocco" }, ok: "Difesa della Rondine blindata!", b: { k: "pesca", v: 10 }, idle: ["Pietra lavica e contrasti puliti."] },
+    { id: "pietrino", c: svC("Pietrino il Fantasista", "green", "#2b1d0c", "curly", "#f2c59d", "#10b981", {}), at: ["borgo", 34, 5], home: ["borgo", 34, 5], when: "giorno",
+      bio: "Fantasista cresciuto nei caruggi, capace di dribblare tra le panchine della piazza e servire assist col contagiri.",
+      hi: "La maglia numero 10 è il mio sogno!", m: { t: "cond", test: "kids", hint: "Parla con Pietrino in piazza" }, ok: "Pietrino veste la maglia della Prima Squadra!", b: { k: "sconto", v: 10 }, idle: ["Guarda questo sombrero!"] },
+    { id: "mirko", c: svC("Mirko dei Caruggi", "purple", "#1a1a1a", "side", "#e0b088", "#8b5cf6", { hat: "#333" }), at: ["borgo", 12, 12], home: ["borgo", 12, 12], when: "giorno",
+      bio: "Mezzala genovese con la coppola del nonno. Calcia con l'esterno a giro sulle serrande dei vicoli.",
+      hi: "Porto la classe di Genova nel Rondine FC.", m: { t: "quiz", a: ["Corriere di Genova", "Gazzetta", "Secolo"] }, ok: "Mirko firma per il Rondine FC!", b: { k: "dono", v: 10 }, idle: ["Il tiro a giro è una poesia."] },
     // --- incontri nel Borgo ---
     { id: "sv_ottavio", c: svC("Maestro Oreste", "gray", "#e8e8e8", "slick", "#e8bf98", "#1d3fa3", { cap: "#1d3fa3" }), at: ["borgo", 33, 12], home: ["bealto", 26, 12], when: "giorno",
       bio: "Dirige la banda del Borgo da quarant'anni. La banda ha avuto sessanta musicisti, mai più di nove alla volta. Batte il tempo anche quando parla.",

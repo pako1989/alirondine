@@ -1,6 +1,7 @@
 /**
  * Ali di Rondine - Quest Board del Borgo (Piazza Centrale)
  * Sistema dinamico di missioni secondarie per sviluppo personaggi e reclutamento Rondine FC.
+ * Include gameplay vero (partite al campetto, beach soccer, sfide degli squali, muro del porto) e gestione Roster.
  */
 (() => {
   "use strict";
@@ -35,6 +36,75 @@
     return 1;
   }
 
+  // Database delle 5 Reclute Speciali del Rondine FC
+  const ROSTER_RECRUITS = [
+    {
+      id: "mattia",
+      name: "Mattia la Saracinesca",
+      role: "Portiere (GK)",
+      badge: "🧤",
+      color: "#ffd23f",
+      season: 1,
+      source: "Partitella al Campetto contro i Ragazzini",
+      questId: "q1_rec_mattia",
+      perk: "Presa d'Acciaio (+10% parate sicure nelle partite e in Calcio d'Azione)",
+      bio: "Mangia focaccia calda tra un palo e l'altro, ma quando parte il tiro blocca tutto con riflessi insospettabili.",
+      quote: "«Finché ci sono io tra i pali, la saracinesca della Rondine è abbassata!»"
+    },
+    {
+      id: "kevin",
+      name: "Kevin del Pedalò",
+      role: "Ala Destra (AD)",
+      badge: "🏖️",
+      color: "#ff7a45",
+      season: 2,
+      source: "Beach Soccer contro i Bagnini dello Scoglio",
+      questId: "q2_rec_kevin",
+      perk: "Scatto della Battigia (+10% velocità sulle fasce e contropiedi rapidi)",
+      bio: "Corre scalzo sulla battigia trascinando i pedalò. Sulla fascia destra brucia qualsiasi terzino della costa.",
+      quote: "«Datemi la palla nello spazio: prima della linea di fondo non mi prende nessuno!»"
+    },
+    {
+      id: "saverio",
+      name: "Saverio Cozza",
+      role: "Difensore Centrale (DC)",
+      badge: "🦀",
+      color: "#0a3a4a",
+      season: 3,
+      source: "Sfida Secca contro gli Squali di Punta Nera",
+      questId: "q3_rec_saverio",
+      perk: "Muro di Pietra Lavica (+10% contrasti vincenti e scivolate pulite)",
+      bio: "Stopper roccioso di Punta Nera. Entra in tackle anche sui ciottoli bagnati con determinazione d'acciaio.",
+      quote: "«Chi prova a entrare nell'area della Rondine trova me. E io non mi sposto.»"
+    },
+    {
+      id: "pietrino",
+      name: "Pietrino il Fantasista",
+      role: "Trequartista (COC)",
+      badge: "👟",
+      color: "#10b981",
+      season: 3,
+      source: "Promozione dai Caruggi alla Prima Squadra",
+      questId: "q3_rec_pietrino",
+      perk: "Sombrero dei Caruggi (+10% precisione passaggi filtranti e dribbling)",
+      bio: "Cresciuto dribblando tra le panchine di Piazza San Pietro, serve assist al bacio con entrambi i piedi.",
+      quote: "«Il calcio è fantasia: un tunnel, un colpo di tacco e palla all'incrocio!»"
+    },
+    {
+      id: "mirko",
+      name: "Mirko dei Caruggi",
+      role: "Mezzala D'Assalto (CC)",
+      badge: "🧢",
+      color: "#8b5cf6",
+      season: 4,
+      source: "Ingaggio da Genova tramite il Corriere di Pina",
+      questId: "q4_rec_mirko",
+      perk: "Tiro a Giro della Lanterna (+10% ricarica abilità speciali e conclusioni a effetto)",
+      bio: "Mezzala genovese con la coppola del nonno. Calcia con l'esterno a giro sulle serrande dei vicoli con classe pura.",
+      quote: "«Nei vicoli stretti di Genova ho imparato che lo spazio si inventa, non si aspetta.»"
+    }
+  ];
+
   // Database delle missioni dinamiche suddivise per Stagioni e Categorie
   const QUEST_DEFS = [
     // ==========================================
@@ -48,9 +118,9 @@
       icon: "🧤",
       targetChar: "nico",
       title: "La Presa del Gatto di Nico",
-      sub: "Aiuta Nico a superare l'esitazione sulle uscite basse",
-      desc: "Nico si allena sulla scogliera tra gli scogli aguzzi: ha paura delle uscite basse sui ciottoli bagnati. Parlagli al campetto o sul molo per fargli ritrovare il coraggio da saracinesca.",
-      objective: "Parla con Nico al campetto e aiutalo con l'allenamento delle uscite basse.",
+      sub: "Aiuta Nico con le uscite basse sui sassi",
+      desc: "Nico si allena sulla scogliera tra gli scogli aguzzi: ha paura delle uscite basse sui ciottoli bagnati. Parlagli e affronta la sessione al Muro del Porto per fargli ritrovare il coraggio!",
+      objective: "Parla con Nico e completa la sfida di 5 tiri al Muro del Porto (minimo 6 punti).",
       coins: 20,
       rewardText: "+20 Monete · Affinità Nico +10 · Talento «Presa d'Acciaio»",
       checkReady: (prog, B, state) => {
@@ -69,8 +139,8 @@
       targetChar: "tommy",
       title: "La Traiettoria Perfetta di Tommy",
       sub: "Insegna a Tommy il valore dell'uno-due col compagno",
-      desc: "Tommy passa ore a tirare col compasso contro la saracinesca del porto, convinto che il calcio sia solo estetica individuale. Dimostragli l'intesa con un'azione di squadra!",
-      objective: "Parla con Tommy al porto e insegnagli l'azione corale con l'uno-due.",
+      desc: "Tommy passa ore a tirare col compasso contro la saracinesca del porto, convinto che il calcio sia solo estetica individuale. Scendi in campo con lui al campetto per dimostrargli l'intesa!",
+      objective: "Parla con Tommy e gioca la partitella al campo contro i ragazzini.",
       coins: 20,
       rewardText: "+20 Monete · Intesa Squadra +5 · Carta Speciale Tommy nell'Album",
       checkReady: (prog, B, state) => {
@@ -89,8 +159,8 @@
       targetChar: "pietrino",
       title: "Reclutamento: Mattia la Saracinesca",
       sub: "Ingaggia il portierone dei ragazzini della scuola",
-      desc: "Mattia mangia focaccia tra un palo e l'altro, ma quando parte il tiro non fa passare uno spillo. Se batti la sua difesa dal dischetto parlando con Pietrino, accetterà di entrare nella Primavera della Rondine!",
-      objective: "Parla con Pietrino al campetto e supera la sfida dal dischetto con Mattia.",
+      desc: "Mattia mangia focaccia tra un palo e l'altro, ma quando parte il tiro non fa passare uno spillo. Se batti la sua squadra al campetto, accetterà di entrare nella Primavera della Rondine!",
+      objective: "Parla con Pietrino e vinci la partitella al campetto contro Mattia.",
       coins: 25,
       recruitId: "mattia",
       recruitName: "Mattia la Saracinesca (Portiere)",
@@ -135,8 +205,8 @@
       targetChar: "gigi",
       title: "Reclutamento: Kevin del Pedalò",
       sub: "Ingaggia l'ala velocista delle spiagge dello Scoglio",
-      desc: "Kevin corre a piedi nudi sulla battigia più veloce del vento e si allena trainando i pedalò. Dimostragli che il Rondine FC sa correre e lottare sulla sabbia parlando con Gigi allo Scoglio!",
-      objective: "Parla con Gigi allo Scoglio e supera il test di velocità sulla sabbia con Kevin.",
+      desc: "Kevin corre a piedi nudi sulla battigia più veloce del vento e si allena trainando i pedalò. Dimostragli che il Rondine FC sa correre e lottare sulla sabbia vincendo a Beach Soccer!",
+      objective: "Parla con Gigi allo Scoglio e vinci la partita di Beach Soccer contro i Bagnini.",
       coins: 30,
       recruitId: "kevin",
       recruitName: "Kevin del Pedalò (Ala Destra)",
@@ -201,8 +271,8 @@
       targetChar: "rocco",
       title: "Reclutamento: Saverio Cozza",
       sub: "Convinci lo stopper roccioso di Punta Nera a cambiare maglia",
-      desc: "Saverio Cozza è stanco delle scorrettezze di Scafati. Cerca un club vero dove si giochi duro ma con onore. Parla con Rocco Scafati al campo per concordare il passaggio di Saverio al Rondine FC!",
-      objective: "Parla con Rocco Scafati al campo e accogli Saverio Cozza nel club.",
+      desc: "Saverio Cozza cerca un club vero dove si giochi duro ma con onore. Sfida gli Squali di Punta Nera in una partita secca per portare Saverio al Rondine FC!",
+      objective: "Parla con Rocco Scafati e vinci la sfida secca contro gli Squali di Punta Nera.",
       coins: 35,
       recruitId: "saverio",
       recruitName: "Saverio Cozza (Difensore Centrale)",
@@ -222,9 +292,9 @@
       icon: "🪵",
       targetChar: "tonino",
       title: "La Prova dei Trabucchi",
-      sub: "Domina la gabbia in ferro battuto di Mastro Tonio",
-      desc: "Sulla scogliera alta, Mastro Tonio ha terminato la nuova Gabbia 3v3 da strada. Vuole vedere se Leo sa far rimbalzare il pallone sui montanti di quercia come faceva papà Enzo negli anni '70.",
-      objective: "Parla con Tonino al chiosco o affronta una sfida nella gabbia street.",
+      sub: "Domina le sponde e i rimbalzi di Mastro Tonio",
+      desc: "Mastro Tonio ha terminato la nuova Gabbia sui Trabucchi. Vuole vedere se Leo sa far rimbalzare il pallone sui montanti di quercia con almeno 8 punti al Muro del Porto o una partita a Biliardino!",
+      objective: "Parla con Tonino ed esegui la prova di precisione al Muro o al Biliardino del Bar.",
       coins: 40,
       rewardText: "+40 Monete · Maglia Storica Trabucchi '74",
       checkReady: (prog, B, state) => {
@@ -243,7 +313,7 @@
       targetChar: "pietrino",
       title: "Reclutamento: Pietrino il Fantasista",
       sub: "Promuovi Pietrino dai caruggi alla prima squadra",
-      desc: "Pietrino è cresciuto: ormai semina il panico tra le panchine della piazza e calcia con entrambi i piedi. Parlagli in piazza per consegnargli gli scarpini ufficiali del Rondine FC.",
+      desc: "Pietrino è cresciuto: semina il panico tra le panchine della piazza e calcia con entrambi i piedi. Parlagli in piazza per consegnargli la maglia ufficiale del Rondine FC.",
       objective: "Incontra Pietrino in Piazza e dagli la maglia della Prima Squadra.",
       coins: 35,
       recruitId: "pietrino",
@@ -333,6 +403,70 @@
   }
   window.questBoardNpcHasNews = questBoardNpcHasNews;
 
+  // Hook chiamato automaticamente quando Leo vince una partita nel Borgo
+  function onQuestMatchWin(matchId) {
+    const state = loadQuestState();
+    let updated = false;
+
+    if (matchId === "ragazzini") {
+      if (state.active["q1_rec_mattia"] && !state.active["q1_rec_mattia_done"]) {
+        state.active["q1_rec_mattia_done"] = true;
+        updated = true;
+        if (window.toast) window.toast("Mattia battuto al campetto! Reclutamento pronto!", "success", "🛡️");
+      }
+      if (state.active["q1_tommy_traiettoria"] && !state.active["q1_tommy_traiettoria_done"]) {
+        state.active["q1_tommy_traiettoria_done"] = true;
+        updated = true;
+        if (window.toast) window.toast("Intesa con Tommy affinata in partita!", "success", "🎯");
+      }
+      if (state.active["q3_rec_pietrino"] && !state.active["q3_rec_pietrino_done"]) {
+        state.active["q3_rec_pietrino_done"] = true;
+        updated = true;
+        if (window.toast) window.toast("Pietrino ha dimostrato la sua stoffa da Prima Squadra!", "success", "👟");
+      }
+    } else if (matchId === "bagnini") {
+      if (state.active["q2_rec_kevin"] && !state.active["q2_rec_kevin_done"]) {
+        state.active["q2_rec_kevin_done"] = true;
+        updated = true;
+        if (window.toast) window.toast("Bagnini battuti a Beach Soccer! Kevin reclutato!", "success", "🏖️");
+      }
+    } else if (matchId === "squali") {
+      if (state.active["q3_rec_saverio"] && !state.active["q3_rec_saverio_done"]) {
+        state.active["q3_rec_saverio_done"] = true;
+        updated = true;
+        if (window.toast) window.toast("Squali battuti! Saverio Cozza entra nel Rondine FC!", "success", "🦀");
+      }
+    }
+
+    if (updated) saveQuestState(state);
+  }
+  window.onQuestMatchWin = onQuestMatchWin;
+
+  // Hook chiamato quando si conclude la sessione di 5 tiri al Muro del Porto
+  function onQuestMuroEnd(pts) {
+    const state = loadQuestState();
+    let updated = false;
+
+    if (state.active["q1_nico_glove"] && !state.active["q1_nico_glove_done"]) {
+      if (pts >= 6) {
+        state.active["q1_nico_glove_done"] = true;
+        updated = true;
+        if (window.toast) window.toast("Nico ha parato le uscite basse! Allenamento superato!", "success", "🧤");
+      }
+    }
+
+    if (state.active["q3_tonio_trabucchi"] && !state.active["q3_tonio_trabucchi_done"]) {
+      if (pts >= 8) {
+        state.active["q3_tonio_trabucchi_done"] = true;
+        updated = true;
+        if (window.toast) window.toast("Prova dei Trabucchi superata al Muro del Porto!", "success", "🪵");
+      }
+    }
+
+    if (updated) saveQuestState(state);
+  }
+  window.onQuestMuroEnd = onQuestMuroEnd;
+
   // Verifica se ci sono quest nuove o completabili per la bacheca
   function questBoardHasNews() {
     const curSeason = getCurrentSeason();
@@ -353,7 +487,7 @@
   }
   window.questBoardHasNews = questBoardHasNews;
 
-  // Interazione dialoghi specifici per NPC legati a missioni attive
+  // Interazione dialoghi ricchi con opzioni di GAMEPLAY reale (partite, muro, ecc.)
   function questBoardTalk(npcId, bSay, bAsk, BL, borgoResume) {
     const curSeason = getCurrentSeason();
     const state = loadQuestState();
@@ -363,44 +497,38 @@
 
     const isAlreadyDone = !!state.active[activeQuest.id + "_done"];
 
-    // Se l'obiettivo è già stato completato nel dialogo precedente ma non ancora riscosso in bacheca
+    // Se l'obiettivo è già stato completato nel gameplay precedente ma non ancora riscosso in bacheca
     if (isAlreadyDone) {
-      bAsk(npcId, `«Leo! Abbiamo già fatto tutto per l'incarico: «${activeQuest.title}». Corri alla Bacheca in Piazza San Pietro a riscuotere la tua ricompensa!»`, [
+      bAsk(npcId, `«Leo! Abbiamo già vinto la sfida per l'incarico: «${activeQuest.title}»! Corri alla Bacheca in Piazza San Pietro a riscuotere la tua ricompensa!»`, [
         { label: "📋 Apri Bacheca Incarichi", cls: "hot", go: () => openQuestBoard(borgoResume) },
-        { label: "◂ Torna a esplorare", go: borgoResume }
+        { label: "👥 Vedi Roster Squadra", cls: "pick", go: () => openRosterModal(borgoResume) },
+        { label: "◂ Torna al Borgo", go: borgoResume }
       ]);
       return true;
     }
 
-    // Gestione interattiva specifica per ciascun incarico
+    // ==========================================
+    // 1. NICO FERRI (La Presa del Gatto)
+    // ==========================================
     if (activeQuest.id === "q1_nico_glove") {
-      bAsk("nico", "«Leo! Meno male che sei qui! Hai visto il mio annuncio in bacheca? Sulle uscite basse ho ancora il terrore di spaccarmi le ginocchia sui ciottoli bagnati. Nessuno mi capisce: dicono tutti che un portiere deve buttarsi e basta. Tirami tre volte dal limite, rasoterra, così imparo a non chiudere gli occhi!»", [
+      bAsk("nico", "«Leo! Meno male che sei qui! Hai visto il mio annuncio in bacheca? Sulle uscite basse ho ancora il terrore di spaccarmi le ginocchia sui ciottoli bagnati. Tirami 5 volte con il Muro del Porto: se fai almeno 6 punti col minigioco, imparo a tuffarmi a occhi aperti!»", [
         {
-          label: "Tiro radente e teso sul palo destro",
-          sub: "Colpo da biliardo a pelo d'erba",
+          label: "⚽ Minigioco: Sfida al Muro del Porto (5 tiri)",
+          sub: "Minigioco con tempismo reale contro il muro",
           cls: "hot",
-          fx: () => {
-            state.active["q1_nico_glove_done"] = true;
-            saveQuestState(state);
-            if (typeof window.sfx === "function") window.sfx("goal");
-            if (window.toast) window.toast("Nico compie una parata miracolosa in tuffo!", "success", "🧤");
-          },
-          lines: [
-            BL("nico", "TIENI DURO GATTO! (Nico si tuffa a pelo dei sassi bagnati, blocca il pallone al millimetro e rotola ridendo)"),
-            BL("nico", "L'HO PRESA! L'HO PRESA! Senti i guanti: fumano! Adesso non ho più paura delle uscite basse! Leo, sei il capitano migliore del mondo!"),
-            BL("nico", "Corri alla bacheca in piazza a ritirare la ricompensa e segnare la missione come compiuta!")
-          ],
-          then: borgoResume
+          go: () => {
+            if (typeof window.borgoMuro === "function") window.borgoMuro();
+          }
         },
         {
-          label: "Finta di tiro e tocco morbido all'angolino",
-          sub: "Metti alla prova i riflessi di posizione",
+          label: "«Finta di tiro e tocco morbido all'angolino»",
+          sub: "Risolvi con allenamento rapido di posizione",
           cls: "pick",
           fx: () => {
             state.active["q1_nico_glove_done"] = true;
             saveQuestState(state);
             if (typeof window.sfx === "function") window.sfx("goal");
-            if (window.toast) window.toast("Nico intercetta con la punta delle dita!", "success", "🧤");
+            if (window.toast) window.toast("Nico devia la sfera in tuffo!", "success", "🧤");
           },
           lines: [
             BL("nico", "ZAMPA DI GATTO! (Nico allunga la mano sinistra con riflesso felino e devia sul palo esterno)"),
@@ -413,12 +541,23 @@
       return true;
     }
 
+    // ==========================================
+    // 2. TOMMY (La Traiettoria Perfetta)
+    // ==========================================
     if (activeQuest.id === "q1_tommy_traiettoria") {
-      bAsk("tommy", "«Moretti! Sei venuto per la sfida della bacheca? Guarda: ho calcolato che tirando con una rotazione d'esterno da dietro il lampione, il pallone si curva da solo. Nel calcio vince chi fa il gesto più bello da solo, giusto?»", [
+      bAsk("tommy", "«Moretti! Sei venuto per la sfida della bacheca? Sostieni che l'uno-due di squadra sia più efficace delle mie magie individuali? Dimostramelo: giochiamo una partitella vera al campo contro i ragazzi del Borgo!»", [
         {
-          label: "«Tommy, guarda me: dai la palla di prima e scatta nello spazio!»",
-          sub: "L'uno-due rapido della Rondine",
+          label: "⚽ Scendi in campo con Tommy nella Partitella!",
+          sub: "Partita giocabile sul campetto di calcio",
           cls: "hot",
+          go: () => {
+            if (typeof window.borgoMatch === "function") window.borgoMatch("ragazzini");
+          }
+        },
+        {
+          label: "«Dimostrazione rapida dell'uno-due nello spazio»",
+          sub: "Azione tattica a due tocchi",
+          cls: "pick",
           fx: () => {
             state.active["q1_tommy_traiettoria_done"] = true;
             saveQuestState(state);
@@ -427,8 +566,8 @@
           },
           lines: [
             BL("tommy", "(Tommy ti appoggia la sfera di prima, scatta bruciando il guardalinee immaginario e riceve il tuo filtrante al volo in porta)"),
-            BL("tommy", "…Maledizione, Moretti. Il portiere era ancora fermo a guardare il lampione mentre la rete si muoveva già."),
-            BL("tommy", "Avevi ragione tu. Giocare insieme è persino più bello che fare dieci palleggi sul posto. Incarico completato: va' pure in bacheca a prenderti i meriti!")
+            BL("tommy", "…Maledizione, Moretti. Il portiere era ancora fermo a guardare il lampione mentre la rete si muoveva già. Avevi ragione tu!"),
+            BL("tommy", "Incarico completato: va' pure in bacheca a prenderti i meriti!")
           ],
           then: borgoResume
         }
@@ -436,12 +575,23 @@
       return true;
     }
 
+    // ==========================================
+    // 3. PIETRINO & MATTIA LA SARACINESCA
+    // ==========================================
     if (activeQuest.id === "q1_rec_mattia") {
-      bAsk("pietrino", "«Leo! Sei qui per la bacheca? Mattia fa il difficile: dice che finché gioca coi ragazzini nessuno gli fa gol, e che se vogliamo che entri nella Primavera del Rondine FC dobbiamo fargli almeno un gol su rigore imparabile!»", [
+      bAsk("pietrino", "«Leo! Sei qui per la bacheca? Mattia fa il difficile: dice che se vuoi che entri nella Primavera del Rondine FC devi battere la sua squadra al campetto! Scendete in campo contro di noi: se battete i Ragazzini del Borgo, Mattia firma il cartellino per la Rondine!»", [
         {
-          label: "Siluro teso a fil di traversa",
-          sub: "Tiro di collo pieno dal dischetto",
+          label: "⚽ Sfida al Campo: Batti Mattia e i Ragazzini!",
+          sub: "Partita giocabile contro la difesa di Mattia",
           cls: "hot",
+          go: () => {
+            if (typeof window.borgoMatch === "function") window.borgoMatch("ragazzini");
+          }
+        },
+        {
+          label: "Siluro teso a fil di traversa dal dischetto",
+          sub: "Tiro di collo pieno per piegare le mani",
+          cls: "pick",
           fx: () => {
             state.active["q1_rec_mattia_done"] = true;
             saveQuestState(state);
@@ -459,6 +609,9 @@
       return true;
     }
 
+    // ==========================================
+    // 4. RITA (La Focaccia della Vigilia)
+    // ==========================================
     if (activeQuest.id === "q1_rita_spezie") {
       bAsk("rita", "«Leo! Hai visto l'avviso sulla bacheca? Per il derby voglio preparare la teglia speciale con gli aromi della collina e il rosmarino marino. Mi dai una mano a condire la teglia prima che il forno scotti?»", [
         {
@@ -481,12 +634,23 @@
       return true;
     }
 
+    // ==========================================
+    // 5. GIGI & KEVIN DEL PEDALÒ
+    // ==========================================
     if (activeQuest.id === "q2_rec_kevin") {
-      bAsk("gigi", "«KRAAA! Leo! Kevin del Pedalò ha letto il manifesto in bacheca! Dice che corre i cento metri sui ciottoli scalzo e che sulle fasce non lo vede nessuno! Vuole un test di velocità contro di te sulla battigia!»", [
+      bAsk("gigi", "«KRAAA! Leo! Kevin del Pedalò ha letto il manifesto in bacheca! Dice che sulle spiagge dello Scoglio non lo batte nessuno! Vuole una partita vera di Beach Soccer sulla sabbia: se battiamo i Bagnini dello Scoglio, Kevin firma per la Rondine!»", [
         {
-          label: "Scatto bruciante sui 50 metri della spiaggia",
-          sub: "Sfida di pura accelerazione sulla sabbia",
+          label: "🏖️ Gioca a Beach Soccer per reclutare Kevin!",
+          sub: "Partita giocabile sulla sabbia dello Scoglio",
           cls: "hot",
+          go: () => {
+            if (typeof window.borgoMatch === "function") window.borgoMatch("bagnini");
+          }
+        },
+        {
+          label: "Sfida di scatto secco sui 50 metri della spiaggia",
+          sub: "Confronto rapido sulla battigia",
+          cls: "pick",
           fx: () => {
             state.active["q2_rec_kevin_done"] = true;
             saveQuestState(state);
@@ -503,6 +667,9 @@
       return true;
     }
 
+    // ==========================================
+    // 6. SARA (Il Grande Taccuino Tattico)
+    // ==========================================
     if (activeQuest.id === "q2_sara_dati") {
       bAsk("sara", "«Leo! Perfetto che sei arrivato. Per il dossier sulla Riviera mi mancavano i dettagli sui terzini avversari e sulle diagonali difensive. Tu che hai giocato in campo aperto, cosa hai notato?»", [
         {
@@ -526,6 +693,9 @@
       return true;
     }
 
+    // ==========================================
+    // 7. GIGI (La Sciarpa Benedetta)
+    // ==========================================
     if (activeQuest.id === "q2_gigi_sciarpa") {
       bAsk("gigi", "«LEO! HAI LETTO IL MIO APPELLO IN BACHECA?! La mia sciarpa! Il vento l'ha trascinata sul molo vecchio! Senza di quella perdiamo tutte le partite fino al 2030!»", [
         {
@@ -548,12 +718,23 @@
       return true;
     }
 
+    // ==========================================
+    // 8. ROCCO SCAFATI & SAVERIO COZZA
+    // ==========================================
     if (activeQuest.id === "q3_rec_saverio") {
-      bAsk("rocco", "«Moretti. Saverio Cozza mi ha detto che hai affisso il bando per lui in bacheca. Quell'uomo pesa novanta chili ed entra in scivolata anche sui tombini. Ha detto che viene da voi solo se gli prometti che si lotta su ogni palla senza mai tirare indietro la gamba.»", [
+      bAsk("rocco", "«Moretti. Saverio Cozza gioca stopper con noi negli Squali. Dice che viene alla Rondine solo se dimostrate di saper vincere una battaglia vera contro di noi sul campo! Accetti la sfida secca degli Squali di Punta Nera?»", [
         {
-          label: "«Al Rondine FC la grinta è la prima regola: il posto al centro della difesa è suo!»",
-          sub: "Patto d'onore tra capitani",
+          label: "⚔️ Sfida Secca contro gli Squali di Rocco!",
+          sub: "Partita giocabile dura sul campo",
           cls: "hot",
+          go: () => {
+            if (typeof window.borgoMatch === "function") window.borgoMatch("squali");
+          }
+        },
+        {
+          label: "«Al Rondine FC la grinta è la prima regola: il posto è suo!»",
+          sub: "Patto d'onore tra capitani",
+          cls: "pick",
           fx: () => {
             state.active["q3_rec_saverio_done"] = true;
             saveQuestState(state);
@@ -570,12 +751,41 @@
       return true;
     }
 
+    // ==========================================
+    // 9. TONINO (La Prova dei Trabucchi)
+    // ==========================================
     if (activeQuest.id === "q3_tonio_trabucchi") {
-      bAsk("tonino", "«Leo! Mastro Tonio ha visto l'annuncio in bacheca. La Gabbia Street 3v3 sui Trabucchi è pronta: sponde di ferro battuto e rimbalzi imprevedibili. Mi ha chiesto se te la senti di fare una dimostrazione tecnica!»", [
+      bAsk("tonino", "«Leo! Mastro Tonio ha visto l'annuncio in bacheca. Vuole vedere se hai il tocco di palla di papà Enzo: fai almeno 8 punti con i 5 tiri al Muro del Porto o sfidaci al Biliardino del Bar!»", [
+        {
+          label: "🪵 Minigioco: Prova di precisione al Muro del Porto",
+          sub: "5 tiri di tempismo al muro (minimo 8 punti)",
+          cls: "hot",
+          go: () => {
+            if (typeof window.borgoMuro === "function") window.borgoMuro();
+          }
+        },
+        {
+          label: "⚽ Sfida al Biliardino del Bar del Porto",
+          sub: "Gioca al calcio balilla del bar",
+          cls: "pick",
+          go: () => {
+            if (typeof window.openBiliardino === "function") {
+              window.openBiliardino(0, () => {
+                state.active["q3_tonio_trabucchi_done"] = true;
+                saveQuestState(state);
+                borgoResume();
+              });
+            } else {
+              state.active["q3_tonio_trabucchi_done"] = true;
+              saveQuestState(state);
+              borgoResume();
+            }
+          }
+        },
         {
           label: "Esegui tre sponde millimetriche con tiro all'incrocio",
-          sub: "Stile puro da street soccer",
-          cls: "hot",
+          sub: "Dimostrazione acrobatica rapida",
+          cls: "pick",
           fx: () => {
             state.active["q3_tonio_trabucchi_done"] = true;
             saveQuestState(state);
@@ -592,12 +802,23 @@
       return true;
     }
 
+    // ==========================================
+    // 10. PIETRINO (Reclutamento Prima Squadra)
+    // ==========================================
     if (activeQuest.id === "q3_rec_pietrino") {
       bAsk("pietrino", "«Leo! Mi hai davvero convocato per la prima squadra del Rondine FC?! Non ci credo... Ho dormito con gli scarpini ai piedi per tutta la settimana!»", [
         {
-          label: "«Pietrino, ti sei meritato la maglia numero 10 della Primavera: benvenuto tra noi!»",
-          sub: "Consegna la maglia ufficiale",
+          label: "⚽ Gioca una partitella amichevole con Pietrino",
+          sub: "Verifica sul campo le sue geometrie",
           cls: "hot",
+          go: () => {
+            if (typeof window.borgoMatch === "function") window.borgoMatch("ragazzini");
+          }
+        },
+        {
+          label: "«Pietrino, ti sei meritato la maglia numero 10: benvenuto tra noi!»",
+          sub: "Consegna la maglia ufficiale",
+          cls: "pick",
           fx: () => {
             state.active["q3_rec_pietrino_done"] = true;
             saveQuestState(state);
@@ -614,8 +835,11 @@
       return true;
     }
 
+    // ==========================================
+    // 11. DARIO (Doppia Rondine)
+    // ==========================================
     if (activeQuest.id === "q4_dario_doppia") {
-      bAsk("dario", "«Leo! Ho visto che hai messo l'avviso in bacheca per noi due. Era ora. I giornali dicono che in Serie A la Doppia Rondine è prevedibile. Vogliamo fargli vedere cosa significa il sangue dei Moretti?»", [
+      bAsk("dario", "«Leo! Ho visto che hai messo l'avviso in bacheca per noi due. I giornali dicono che in Serie A la Doppia Rondine è prevedibile. Vogliamo fargli vedere cosa significa il sangue dei Moretti?»", [
         {
           label: "«Io cross teso a uscire, tu finta di testa e io rovesciata a rimorchio!»",
           sub: "Sincronia pura tra fratelli",
@@ -637,11 +861,14 @@
       return true;
     }
 
+    // ==========================================
+    // 12. PINA & MIRKO DEI CARUGGI
+    // ==========================================
     if (activeQuest.id === "q4_rec_mirko") {
-      bAsk("pina", "«Leo! È arrivata una lettera da Genova via corriere delle figurine: Mirko ha letto il tuo annuncio in bacheca! Dice che è pronto a salire sul pullman della costa e portare la sua classe nei caruggi del Rondine FC!»", [
+      bAsk("pina", "«Leo! È arrivata una lettera da Genova via corriere delle figurine: Mirko ha letto il tuo annuncio in bacheca! Dice che è pronto a portare la sua classe nei caruggi del Rondine FC!»", [
         {
           label: "Accetta la richiesta di tesseramento di Mirko",
-          sub: "Convalida l'ingaggio",
+          sub: "Convalida l'ingaggio per la Serie A",
           cls: "hot",
           fx: () => {
             state.active["q4_rec_mirko_done"] = true;
@@ -659,6 +886,9 @@
       return true;
     }
 
+    // ==========================================
+    // 13. DON AURELIO (Paradosso dell'Orologio)
+    // ==========================================
     if (activeQuest.id === "q4_paradosso_orologio") {
       bAsk("aurelio", "«Leo! Sento le campane di San Pietro vibrare all'incontrario! La crepa temporale del Borgo Storto si è placata appena hai recitato la preghiera dei marinai. L'Orologio del Paradosso è di nuovo saldo!»", [
         {
@@ -684,6 +914,132 @@
     return false;
   }
   window.questBoardTalk = questBoardTalk;
+
+  // Modale del Roster Rondine F.C. & Reclute
+  function openRosterModal(onClose) {
+    if (window.BW && window.BW.keys) window.BW.keys = {};
+    const existing = document.getElementById("rosterModalOverlay");
+    if (existing) existing.remove();
+
+    let svRecData = {};
+    try {
+      if (typeof window.svRec === "function") svRecData = window.svRec().rec || {};
+    } catch {}
+
+    const overlay = document.createElement("div");
+    overlay.id = "rosterModalOverlay";
+    overlay.style.cssText = `
+      position: fixed; inset: 0; background: rgba(5, 11, 24, 0.92); backdrop-filter: blur(10px);
+      z-index: 10001; display: flex; align-items: center; justify-content: center; padding: 14px;
+      font-family: system-ui, -apple-system, sans-serif; color: #f1f5f9; box-sizing: border-box;
+    `;
+
+    const box = document.createElement("div");
+    box.style.cssText = `
+      width: 100%; max-width: 680px; max-height: 90vh; background: #0f172a;
+      border: 2px solid #38bdf8; border-radius: 18px; box-shadow: 0 16px 40px rgba(0,0,0,0.8);
+      display: flex; flex-direction: column; overflow: hidden; animation: popIn .2s ease;
+    `;
+
+    const recruitedCount = ROSTER_RECRUITS.filter(r => !!svRecData[r.id]).length;
+
+    box.innerHTML = `
+      <!-- Header -->
+      <div style="background:linear-gradient(180deg, #0c2d48, #071927); padding:16px 18px; border-bottom:2px solid #38bdf8; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:44px; height:44px; background:#0284c7; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:24px; box-shadow:0 4px 10px rgba(0,0,0,0.4);">
+            👥
+          </div>
+          <div>
+            <div style="font-size:18px; font-weight:bold; color:#38bdf8; letter-spacing:0.5px;">ROSTER RONDINE F.C. · LE RECLUTE</div>
+            <div style="font-size:12px; color:#cbd5e1;">${recruitedCount}/${ROSTER_RECRUITS.length} Campioni Reclutati · Attivi in Sede & Calcio d'Azione</div>
+          </div>
+        </div>
+        <button id="rosterCloseBtn" style="background:#1e293b; color:#cbd5e1; border:1px solid #334155; width:34px; height:34px; border-radius:50%; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+      </div>
+
+      <!-- Spiegazione -->
+      <div style="padding:10px 16px; background:#0b1329; border-bottom:1px solid #1e293b; font-size:12px; color:#94a3b8; line-height:1.4;">
+        Le reclute ingaggiate tramite le sfide della bacheca entrano ufficialmente nel club: vivono nel Borgo, popolano la <b>Sede del Club</b> e possono essere schierate come <b>Rinforzi</b> in <em>Calcio d'Azione</em> per attivare bonus unici!
+      </div>
+
+      <!-- Lista Reclute -->
+      <div style="flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:10px;">
+        ${ROSTER_RECRUITS.map(r => {
+          const isRecruited = !!svRecData[r.id];
+          return `
+            <div style="background:#1e293b; border:2px solid ${isRecruited ? "#22c55e" : "#334155"}; border-radius:12px; padding:12px 14px; display:flex; gap:12px; align-items:center; position:relative; overflow:hidden;">
+              <div style="width:48px; height:48px; background:${isRecruited ? r.color : "#334155"}; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:26px; box-shadow:0 4px 10px rgba(0,0,0,0.3); flex-shrink:0;">
+                ${r.badge}
+              </div>
+              <div style="flex:1; min-width:0;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+                  <div style="font-weight:bold; font-size:15px; color:${isRecruited ? "#f8fafc" : "#94a3b8"};">
+                    ${esc(r.name)} <span style="font-size:12px; color:#38bdf8; font-weight:normal;">[${esc(r.role)}]</span>
+                  </div>
+                  <div>
+                    ${isRecruited ? `
+                      <span style="font-size:11px; color:#22c55e; font-weight:bold; padding:3px 8px; background:rgba(34,197,94,0.15); border-radius:6px; border:1px solid #22c55e;">IN ROSA ✓</span>
+                    ` : `
+                      <span style="font-size:11px; color:#f59e0b; font-weight:bold; padding:3px 8px; background:rgba(245,158,11,0.15); border-radius:6px; border:1px solid #f59e0b;">DA RECLUTARE</span>
+                    `}
+                  </div>
+                </div>
+                <div style="font-size:12px; color:#e2e8f0; margin-bottom:4px;">
+                  ${esc(r.bio)}
+                </div>
+                <div style="font-size:11px; color:#facc15; font-weight:500;">
+                  ⚡ <b>Perk Squadra:</b> ${esc(r.perk)}
+                </div>
+                ${!isRecruited ? `
+                  <div style="font-size:11px; color:#94a3b8; margin-top:4px;">
+                    📍 <em>Come reclutare:</em> ${esc(r.source)} (Stagione ${r.season})
+                  </div>
+                ` : `
+                  <div style="font-size:11px; color:#67e8f9; margin-top:4px; font-style:italic;">
+                    ${esc(r.quote)}
+                  </div>
+                `}
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+
+      <!-- Footer -->
+      <div style="padding:12px 16px; background:#0b1329; border-top:1px solid #1e293b; display:flex; justify-content:space-between; align-items:center; font-size:12px;">
+        <button id="rosterGoHq" style="background:#0284c7; color:#f8fafc; border:none; padding:8px 14px; border-radius:8px; font-size:13px; font-weight:bold; cursor:pointer;">Visita Sede del Club ▸</button>
+        <button id="rosterCloseFooter" style="background:#1e293b; color:#cbd5e1; border:1px solid #334155; padding:8px 14px; border-radius:8px; font-size:13px; cursor:pointer;">Chiudi</button>
+      </div>
+    `;
+
+    const closeHandler = () => {
+      overlay.remove();
+      if (typeof onClose === "function") onClose();
+    };
+
+    box.querySelector("#rosterCloseBtn").onclick = closeHandler;
+    box.querySelector("#rosterCloseFooter").onclick = closeHandler;
+    const hqBtn = box.querySelector("#rosterGoHq");
+    if (hqBtn) {
+      hqBtn.onclick = () => {
+        overlay.remove();
+        if (typeof window.hqEnter === "function") {
+          window.hqEnter(onClose || (() => {}));
+        } else if (typeof onClose === "function") {
+          onClose();
+        }
+      };
+    }
+
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    overlay.onclick = (e) => {
+      if (e.target === overlay) closeHandler();
+    };
+  }
+  window.openRosterModal = openRosterModal;
 
   // Apre la modale ricca della Quest Board
   function openQuestBoard(onClose) {
@@ -758,7 +1114,10 @@
               <div style="font-size:12px; color:#cbd5e1;">Piazza San Pietro · Stagione ${curSeason} in corso · ${totalCompleted}/${QUEST_DEFS.length} Completati</div>
             </div>
           </div>
-          <button id="qbCloseBtn" style="background:#334155; color:#cbd5e1; border:none; width:34px; height:34px; border-radius:50%; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button id="qbRosterBtn" style="background:#0284c7; color:#fff; border:none; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:bold; cursor:pointer; display:flex; align-items:center; gap:4px;">👥 Roster Reclute</button>
+            <button id="qbCloseBtn" style="background:#334155; color:#cbd5e1; border:none; width:34px; height:34px; border-radius:50%; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+          </div>
         </div>
 
         <!-- Filtri categorie -->
@@ -832,6 +1191,16 @@
         </div>
       `;
 
+      // Event listener sul tasto Roster
+      const rosterBtn = box.querySelector("#qbRosterBtn");
+      if (rosterBtn) {
+        rosterBtn.onclick = () => {
+          openRosterModal(() => {
+            renderContent();
+          });
+        };
+      }
+
       // Event listener sui filtri
       box.querySelectorAll(".qb-tab").forEach(tab => {
         tab.onclick = () => {
@@ -865,7 +1234,7 @@
               window.addCoins(quest.coins);
             }
 
-            // Se c'è una recluta, aggiungila alla Casa delle Stelle
+            // Se c'è una recluta, aggiungila alla Rosa e alle Stelle del Borgo
             if (quest.recruitId) {
               try {
                 if (typeof window.svRec === "function") {
@@ -916,5 +1285,6 @@
   // Espone globalmente
   window.openQuestBoard = openQuestBoard;
   window.QUEST_DEFS = QUEST_DEFS;
+  window.ROSTER_RECRUITS = ROSTER_RECRUITS;
 
 })();
