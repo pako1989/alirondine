@@ -42,6 +42,9 @@
     ester:   { name: "Ester", tag: "blue", hair: "#3a2a1a", style: "long", skin: "#eec39c", eye: "#1f3a63", bg: ["#16325c", "#ffe7a0"], shirt: "#16325c" },
     settimio:{ name: "Settimio", tag: "gray", hair: "#f1f1f1", style: "buzz", skin: "#e0b48a", eye: "#2a2a2a", bg: ["#556b2f", "#e8f0ff"], glasses: true, shirt: "#556b2f" },
     anselmo: { name: "Anselmo", tag: "", hair: "#9a9a9a", style: "messy", skin: "#c98a5a", eye: "#1a1a1a", bg: ["#0b1026", "#ffd98a"], beard: true, cap: "#26324a", shirt: "#8a2a2a" },
+    mattia:  { name: "Mattia la Saracinesca", tag: "blue", hair: "#3a2a1a", style: "buzz", skin: "#f2c9a0", eye: "#224", bg: ["#ffd23f", "#3fa7ff"], shirt: "#ffd23f" },
+    kevin:   { name: "Kevin del Pedalò", tag: "blue", hair: "#d9953a", style: "spiky", skin: "#d9a57a", eye: "#1f3a63", bg: ["#19a0b8", "#ffd23f"], shirt: "#19a0b8" },
+    saverio: { name: "Saverio Cozza", tag: "blue", hair: "#1a1a1a", style: "slick", skin: "#d49a68", eye: "#1a1a1a", bg: ["#354f82", "#2f5f8a"], shirt: "#354f82" },
     // Stagione 5
     crane:   { name: "Sir Edmund Crane", tag: "", hair: "#cfcfd6", style: "slick", skin: "#f0d6c0", eye: "#3a5a3a", bg: ["#0f2a1f", "#3a6b4f"], shirt: "#1f3a2f" },
     marco:   { name: "Marco Ferri", tag: "blue", hair: "#d9953a", style: "messy", skin: "#f2cdaa", eye: "#224", bg: ["#2a3a5a", "#3fa7ff"], beard: true, shirt: "#2e5a2e" },
@@ -1597,6 +1600,7 @@
     else document.body.classList.remove("bw-vintage");
     const team = TEAMS[step.match];
     M = { team: step.match, step, career: !!step.career, min: 0, half: 1, score: [0, 0], poss: "us", zone: 1, guts: S.st.grinta, fixDone: false, htDone: false, anim: null, perkUsed: false, ad: { sp: {}, act: {}, dive: {}, told: {} } };
+    if (window.hasTalent && window.hasTalent("focaccia")) M.guts += 15;
     if (step.cupRule) {
       M.cup = { rule: step.cupRule, done: false, bond: !!step.cupBond, support: step.cupSupport || 0 };
       if (step.cupStart === "them") { M.poss = "them"; M.zone = step.cupZone || 3; }
@@ -2197,6 +2201,13 @@
       view = { kind: "match" };
       if (power === 0) { say(`Dario tira… altissimo, sopra la traversa. Lo stadio fischia. Lui non alza lo sguardo.`); }
       else if (power > save) {
+        if (window.hasTalent && window.hasTalent("olio_santo") && Math.random() < 0.10) {
+          sfx("kick");
+          say(`CLAMOROSO! Il tiro di <b>${esc(a.name)}</b> supera il portiere ma si stampa sul PALO pieno! L'Olio Santo di Don Aurelio fa il miracolo! Palla vostra.`);
+          if (window.toast) window.toast("Miracolo del palo benedetto!", "success", "✨");
+          M.poss = "us"; M.zone = 1;
+          hud(); return buttons([{ label: "Avanti ▸", fn: turn }]);
+        }
         if (typeof window.hapticTrigger === "function") window.hapticTrigger("oppGoal");
         M.score[1]++; sfx("crowd"); say(`Tiro di <b>${esc(a.name)}</b> a ${SIDES[aim]}${dive === aim ? `, ${gkN()} ci arriva ma non basta` : `, ${gkN()} va dall'altra parte`}… gol. ${M.score[0]}–${M.score[1]}.`);
       }
@@ -2269,7 +2280,12 @@
   }
   function halftime0() {
     if (M.gkF) { M.gkF.us = Math.max(0, M.gkF.us - 2); M.gkF.them = Math.max(0, M.gkF.them - 2); }
-    M.half = 2; M.min = 45; M.guts = Math.min(S.st.grinta, M.guts + (M.ch && M.ch.noHalf ? 0 : S.st.grinta * 0.45 * dfRegen())); sfx("whistle");
+    M.half = 2; M.min = 45; M.guts = Math.min(S.st.grinta, M.guts + (M.ch && M.ch.noHalf ? 0 : S.st.grinta * 0.45 * dfRegen()));
+    if (window.hasTalent && window.hasTalent("focaccia")) {
+      M.guts = Math.min(S.st.grinta + 15, M.guts + 15);
+      if (window.toast) window.toast("+15 Grinta con la Focaccia della Nonna!", "info", "🥖");
+    }
+    sfx("whistle");
     const kind = M.step.halftime;
     const back = () => { view = { kind: "match" }; $("matchHud").hidden = false; M.poss = "them"; M.zone = 1; say("Inizia il secondo tempo."); hud(); buttons([{ label: "Avanti ▸", fn: turn }]); };
     $("matchHud").hidden = true;
@@ -21868,7 +21884,24 @@
     const r = svRec();
     const stars = SV.filter((s) => r.rec[s.id]).map((s) => ({ id: s.id, name: s.c.name }));
     const residents = svResidents().map((id) => ({ id, name: CAST[id] ? CAST[id].name : id }));
-    return [...residents, ...stars];
+    let recruits = [];
+    try {
+      const qProg = JSON.parse(localStorage.getItem("ali-di-rondine.quest-board.v1") || "{}");
+      const done = qProg.completed || [];
+      const recMap = [
+        { q: "q1_rec_mattia", id: "mattia", name: "Mattia la Saracinesca" },
+        { q: "q2_rec_kevin", id: "kevin", name: "Kevin del Pedalò" },
+        { q: "q3_rec_saverio", id: "saverio", name: "Saverio Cozza" },
+        { q: "q3_rec_pietrino", id: "pietrino", name: "Pietrino il Fantasista" },
+        { q: "q4_rec_mirko", id: "mirko", name: "Mirko dei Caruggi" }
+      ];
+      recMap.forEach(rm => {
+        if (done.includes(rm.q) && !stars.some(s => s.id === rm.id) && !residents.some(res => res.id === rm.id)) {
+          recruits.push({ id: rm.id, name: rm.name });
+        }
+      });
+    } catch {}
+    return [...residents, ...stars, ...recruits];
   }
   function hqCount() { return hqRoster().length; }
   function hqCosUnlock(n) {
@@ -21915,6 +21948,10 @@
     nico: ["Ho provato il Gatto Volante sul tappeto del cortile. Il tappeto ha perso.", "Un portiere vede tutta la squadra da dietro. Da qui vedo tutto il Borgo. È la stessa sensazione.", "Ho controllato le uscite di sicurezza. Sono due. Gigi ne ha inventata una terza, dal tetto."],
     tommy: ["Mi hanno dato la chiave del cortile. A me! Non l'ho ancora persa. Sono due giorni.", "Stasera mia madre lavora. Resto qui un po' di più, se non ti dispiace.", "Ho messo un pallone sotto ogni panca. Così nessuno deve chiederlo."],
     pietrino: ["Leo, ti ho visto palleggiare in cortile. Scarso. Però meno di ieri.", "I ragazzini del campetto vogliono una panca loro. Bassa. Con scritto «capitani».", "Da grande voglio fare quello che apre il portone la mattina. Il primo che entra decide come va la giornata."],
+    mattia: ["Ho controllato la dispensa del Quartier Generale: c'era solo tè e biscotti secchi. Domani porto tre teglie di focaccia al formaggio.", "Tra i pali mangio la focaccia, ma quando parte il tiro chiudo tutto. Nico mi fa da riserva? Scherzo, siamo una coppia d'acciaio.", "Se mi metti una brandina dietro la porta della Sede, ci dormo io. Così non entra nessun ladro."],
+    kevin: ["La spiaggia del Borgo è bella, ma questo pavimento in cotto è perfetto per gli allunghi a piedi nudi!", "Ho portato un remo spezzato dal pedalò: Sara ci ha scritto sopra «Rondine FC». Sembra una reliquia sacra.", "Sulla fascia destra metto la quinta marcia: se Tommy crossa lungo, arrivo prima del mare."],
+    saverio: ["Ho sistemato il cardine del portone con un tassello di pietra lavica. Qui non si passa senza permesso.", "I tackle sui ciottoli bagnati insegnano il rispetto. Gli attaccanti di città hanno paura di sporcarsi i calzettoni: noi no.", "Quando vesto la maglia biancoblù, difendere la porta è come difendere il molo dai marosi."],
+    mirko: ["Dai caruggi si sente l'eco delle risate del Quartier Generale. Ho avvisato tutti i ragazzini: la Rondine vola!", "Ho due bandiere amaranto e oro pronte. Se andiamo ai supplementari, canto fino a restare senza voce.", "Non sono alto, ma sui ciottoli non mi prendono mai. Leo, quando serve un assist rapido, chiamami!"],
     sara: ["Ho fatto la tabella dei turni per le pulizie. Gigi risulta assente in tutte le colonne, anche in quelle che non esistono.", "Ho chiesto a tutti perché sono venuti. La risposta più comune è «c'era la luce accesa».", "Le statistiche dicono chi vince. Questo registro dice chi c'era. Mi interessa di più il secondo."],
     pina: ["Edizione straordinaria del Corriere: «Il Quartier Generale ha una porta nuova». Tiratura: undici copie.", "Riporto, non giudico. Ma la tenda che ha scelto Gigi la giudico eccome.", "Qui la gente si racconta le cose prima che le scriva io. Mi sto abituando. Male."],
     aurelio: ["Ho benedetto le panche. Una per volta. Quella di Gigi due volte, per sicurezza.", "Le campane le suono io, ma qui la musica la fate voi. Mi va bene così.", "Una casa piena è la preghiera più semplice che conosca."],
@@ -22030,6 +22067,11 @@
       pina: [L("pina", "Ho messo il registro all'ingresso. Chi passa lascia un nome, una partita o una ricetta. Gigi ha scritto «volo» tre volte."), L("leo", "Lascialo fare. Un giorno gli servirà come indirizzo."), L("pina", "Per lui scrivo: «sul tetto, chiedere al gabbiano».")],
       bruno: [L("bruno", "In questa panchina ci si siede senza chiedere il permesso?"), L("leo", "È per questo che l'abbiamo costruita."), L("bruno", "Allora siediti. Voglio vedere se per una volta riusciamo a stare qui senza contare i gol.")],
       ester: [L("ester", "Da qui si vede il faro. Non è alto come il mio, ma le finestre sono più calde."), L("leo", "Vuoi che mettiamo una sedia vicino alla finestra?"), L("ester", "Sì. E niente ascensore: a questa età ho già imparato a farmi portare il tè.")],
+      mattia: [L("mattia", "Leo, ho controllato gli armadietti della Sede. C'è spazio per le scarpette, i guanti da portiere e tre teglie di focaccia al formaggio."), L("leo", "La focaccia non va negli armadietti, Mattia. La teniamo in cucina con Rita."), L("mattia", "Allora il mio posto è in cucina. Ma per la partita vengo giù in porta: tra me e Nico non passa nemmeno un refolo di vento!")],
+      kevin: [L("kevin", "Questa panca del Quartier Generale è più comoda dei pedalò del lido! Se mi dai il via, disegno una corsia d'atletica dal portone fino agli scogli."), L("leo", "Basta che non corri coi pedalò nel corridoio, Kevin."), L("kevin", "Tranquillo capitano: sulla fascia destra corro a piedi scalzi, la sabbia mi dà trazione!")],
+      saverio: [L("saverio", "Leo, la porta della Sede aveva un cardine allentato. L'ho bloccato con un cuneo di quercia marina. Quando metto un tackle, le cose restano al loro posto."), L("leo", "Grazie Saverio. In campo fai la stessa cosa con gli attaccanti rivali?"), L("saverio", "Identico. O passa il pallone, o passa l'attaccante. Tutti e due insieme non sono mai passati.")],
+      pietrino: [L("pietrino", "Capitano! Ho provato il tiro a giro dal cortile della Sede fino al campanile. Don Aurelio ha applaudito dalla sagrestia!"), L("leo", "L'importante è che il pallone sia tornato indietro intero, Pietrino."), L("pietrino", "È atterrato dritto nella cassetta delle acciughe di Baciccia. Dice che gli ho aromatizzato la traiettoria!")],
+      mirko: [L("mirko", "Leo, da quassù si sentono tutti i caruggi che cantano quando giochiamo al campetto. Ho portato due bandiere nuove."), L("leo", "Sei la nostra voce fuori dal campo, Mirko."), L("mirko", "E in campo vi porto il fiato di tutto il Borgo. Quando siete stanchi, guardate verso la banchina: noi non molliamo mai!")],
     };
     // ogni volta una combinazione diversa: scena scritta (se c'è) alternata alle frasi proprie, mai la stessa due volte di fila
     const sv = SV.find((x) => x.id === id), own = [...(HQ_SAY[id] || []), ...((sv && sv.idle) || [])];
@@ -22060,6 +22102,7 @@
     return HQ_LEVELS.map((x, i) => ({ name: x.name, kind: "star", c: ["#ffd23f", "#57d68d", "#9be2ff", "#ff9ec0"][i], got: n >= x.need, part: `${Math.min(n, x.need)}/${x.need}`, hint: `Porta ${x.need} persone al Quartier Generale` }));
   });
   if (/[?&]debug/.test(location.search)) window.__hq = { hqPage, hqTalk, hqEnter, hqRoster, hqCount, HQ_LEVELS, drawHQBackground, borgoDoor, borgoTarget };
+  window.hqEnter = hqEnter;
   // ================= v15l · I CUSTODI DELLA COSTA =================
   // Campagna originale con tre alleati del cast esistente; i poteri alterano la squadra avversaria solo nella singola partita.
   const HMK = "ali-di-rondine.custodi";
