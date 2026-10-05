@@ -1825,10 +1825,12 @@
 body:has(#matchHud:not([hidden])) { overflow: hidden; }
 body:has(#matchHud:not([hidden])) .game { height: calc(100dvh - 28px); display: flex; flex-direction: column; min-height: 0; }
 body:has(#matchHud:not([hidden])) .game > * { flex: none; }
-body:has(#matchHud:not([hidden])) .stage { width: min(100%, 27dvh * 1.6); margin-left: auto; margin-right: auto; }
+body:has(#matchHud:not([hidden])) .stage { width: min(100%, 24dvh * 1.6); margin-left: auto; margin-right: auto; }
 body:has(#matchHud:not([hidden])) #text { flex: 0 1 auto; min-height: 44px; max-height: 15dvh; }
 body:has(#matchHud:not([hidden])) #choices { flex: 1 1 0; min-height: 110px; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; align-content: start; padding-right: 2px; scroll-snap-type: y proximity; border-radius: 8px; }
 body:has(#matchHud:not([hidden])) #choices > button { scroll-snap-align: start; }
 body:has(#matchHud:not([hidden])) #choices::-webkit-scrollbar { width: 6px; }
 body:has(#matchHud:not([hidden])) #choices::-webkit-scrollbar-thumb { background: #ffffff55; border-radius: 3px; }
-body:has(#matchHud:not([hidden])) .foot, body:has(#matchHud:not([hidden])) #stats { display: none; }
+body:has(#matchHud:not([hidden])) .foot { display: none; }
+body:has(#matchHud:not([hidden])) #stats { padding: 4px 8px; font-size: 11px; }
+body:has(#matchHud:not([hidden])) #stats b { font-size: 14px; }
