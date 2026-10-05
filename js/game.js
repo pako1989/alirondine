@@ -3527,11 +3527,11 @@
     fill(26, 1, 26, 2, "T"); m[3][24] = "T"; m[3][25] = "b"; m[3][26] = "T"; m[1][24] = "X";
     BLD.forEach((b) => { fill(b.x, b.y, b.x + b.w - 1, b.y + b.h - 1, "#"); m[b.door[1]][b.door[0]] = "D"; });
     TREES.forEach(([x, y]) => { m[y][x] = "T"; }); LAMPS.forEach(([x, y]) => { m[y][x] = "L"; });
-    m[5][9] = "A"; m[15][36] = "S";
+    m[5][9] = "A"; m[15][36] = "S"; m[7][17] = "Q";
     try { beMapB(m); } catch {}
     return m;
   }
-  const SOLID = "~#TWGOSXLADKYVJ";
+  const SOLID = "~#TWGOSXLADKYVJQ";
   const tileAt = (x, y) => { const tx = Math.floor(x / TS), ty = Math.floor(y / TS); return (BW.map[ty] && BW.map[ty][tx]) || "T"; };
 
   // ---------- progressi della storia (per i dialoghi) ----------
@@ -3650,7 +3650,7 @@
     const grass = BW.snow ? ((tx + ty) % 2 ? "#e9f0f7" : "#f3f7fb") : (tx + ty) % 2 ? "#57a84a" : "#5aae4d";
     if (ch === "." || ch === "T" || ch === "b" || ch === "X" || ch === "L" || ch === "A" || ch === "S") { px(sx, sy, TS, TS, grass); if ((tx * 7 + ty * 3) % 5 === 0) px(sx + 5, sy + 9, 2, 2, "#3f8f3a"); }
     else if (ch === ",") { px(sx, sy, TS, TS, "#efd08d"); if ((tx + ty * 3) % 4 === 0) px(sx + 7, sy + 5, 2, 1, "#d8b56a"); }
-    else if (ch === "=" || ch === "O") { px(sx, sy, TS, TS, "#c9bfae"); px(sx, sy + 7, TS, 1, "#b3a996"); px(sx + ((ty % 2) ? 4 : 11), sy, 1, 7, "#b3a996"); px(sx + ((ty % 2) ? 11 : 4), sy + 8, 1, 8, "#b3a996"); }
+    else if (ch === "=" || ch === "O" || ch === "Q") { px(sx, sy, TS, TS, "#c9bfae"); px(sx, sy + 7, TS, 1, "#b3a996"); px(sx + ((ty % 2) ? 4 : 11), sy, 1, 7, "#b3a996"); px(sx + ((ty % 2) ? 11 : 4), sy + 8, 1, 8, "#b3a996"); }
     else if (ch === "~") { px(sx, sy, TS, TS, "#2f7fbf"); if ((tx + Math.floor(frame / 20) + ty) % 4 === 0) px(sx + 3, sy + 6, 8, 1, "#9fd6ff"); }
     else if (ch === "W") { px(sx, sy, TS, TS, "#8e8a83"); px(sx, sy + 7, TS, 1, "#6e6a64"); px(sx + (tx % 2 ? 5 : 11), sy, 1, 7, "#6e6a64"); px(sx + (tx % 2 ? 11 : 5), sy + 8, 1, 8, "#6e6a64"); px(sx, sy, TS, 2, "#aaa59c"); }
     else if (ch === "P") { px(sx, sy, TS, TS, "#9a6a3a"); for (let i = 0; i < 4; i++) px(sx, sy + i * 4 + 3, TS, 1, "#7a4f28"); }
@@ -3667,6 +3667,24 @@
     if (ch === "L") { px(sx + 7, sy + 2, 2, 13, "#2a2a3a"); px(sx + 5, sy, 6, 3, B.night ? "#ffe7a0" : "#3a3a4a"); }
     if (ch === "S") { px(sx + 7, sy + 2, 2, 14, "#555"); px(sx + 2, sy, 12, 8, "#1d3fa3"); g.fillStyle = "#fff"; g.font = "bold 7px sans-serif"; g.textAlign = "center"; g.fillText("BUS", sx + 8, sy + 7); g.textAlign = "left"; }
     if (ch === "X") { px(sx + 4, sy + 8, 9, 6, "#8a7a5a"); px(sx + 4, sy + 8, 9, 2, "#a89a7a"); }
+    if (ch === "Q") {
+      px(sx + 3, sy + 7, 2, 9, "#5c3a1e");
+      px(sx + 11, sy + 7, 2, 9, "#5c3a1e");
+      px(sx + 2, sy + 2, 12, 7, "#b88a4c");
+      px(sx + 3, sy + 3, 10, 5, "#f5eed4");
+      px(sx + 4, sy + 4, 3, 3, "#fff");
+      px(sx + 5, sy + 3, 1, 1, "#e03030");
+      px(sx + 8, sy + 4, 3, 3, "#fff");
+      px(sx + 9, sy + 3, 1, 1, "#3060e0");
+      px(sx + 1, sy + 1, 14, 2, "#8a3a2a");
+      const unread = typeof window.questBoardHasNews === "function" ? window.questBoardHasNews() : true;
+      if (unread) {
+        const bob = Math.sin((frame >> 3)) * 2;
+        px(sx + 6, sy - 8 + bob, 4, 6, "#ffd23f");
+        g.fillStyle = "#111"; g.font = "bold 6px sans-serif"; g.textAlign = "center";
+        g.fillText("!", sx + 8, sy - 3 + bob); g.textAlign = "left";
+      }
+    }
   }
   function drawBorgo() {
     BW.snow = bEvent() === "natale" || (typeof mtNow === "function" && mtNow() === "neve");
@@ -3779,7 +3797,7 @@
     let target = t ? { kind: "npc", id: t.id, label: "Parla" } : null;
     if (!target) {
       const tx = Math.floor(fx / TS), ty = Math.floor(fy / TS), ch = BW.map[ty] && BW.map[ty][tx];
-      if (ch && "DWSXOKVJ".includes(ch)) target = { kind: "obj", ch, tx, ty, label: { D: "Entra", W: "Tira al muro", S: "Aspetta il bus", X: "Apri", O: "Guarda", K: "Guarda", V: "Siediti", J: "Guarda" }[ch], id: ch + tx + "," + ty };
+      if (ch && "DWSXOKVJQ".includes(ch)) target = { kind: "obj", ch, tx, ty, label: { D: "Entra", W: "Tira al muro", S: "Aspetta il bus", X: "Apri", O: "Guarda", K: "Guarda", V: "Siediti", J: "Guarda", Q: "Bacheca Incarichi" }[ch], id: ch + tx + "," + ty };
     }
     BW.target = target;
     const key = target ? target.id + target.label : "";
@@ -3887,6 +3905,7 @@
         }
       }] : []),
       evButton(),
+      { label: "📋 Bacheca Incarichi (Quest Board)", sub: "Missioni secondarie, sviluppo legami e reclutamento FC", cls: "hot", fn: () => { borgoLeave(); if (window.openQuestBoard) window.openQuestBoard(borgo); } },
       { label: "Accendi la radio", sub: "Radio Rondine 98.6 · il notiziario di oggi", fn: () => radio(borgoMenu) },
       mtButton(borgoMenu),
       { label: "⚽ Biliardino del Bar del Porto", sub: "Sfida Baciccia, Gino e Papà al calcio balilla!", cls: "hot", fn: () => { borgoLeave(); if (window.openBiliardino) window.openBiliardino(0, borgo); } },
@@ -3952,6 +3971,12 @@
     if (ch === "V") return borgoBench();
     if (ch === "K") return bSay([BL("voce", pick(["Un cancello chiuso. Sopra c'è un cartello scritto a mano: «Riapre presto. Forse. Non chiedere a Pina.»", "Il passaggio è sbarrato. Un cartello dice «Lavori in corso». Sotto, a matita: «da quando?»", "Chiuso. Dall'altra parte si sente un gabbiano ridere. Di te, probabilmente."]))]);
     if (ch === "O") return bSay([BL("voce", pick(["Lanci una monetina nella fontana: «Fa' che il pallone torni dritto.» La monetina affonda dritta. Buon segno.", "Nella fontana ci sono cento monetine e un tappo di gazzosa. Qualcuno ha desiderato una gazzosa, e l'ha avuta.", "Un piccione fa il bagno nella fontana e ti guarda come se l'intruso fossi tu."]))]);
+    if (ch === "Q") {
+      if (window.openQuestBoard) {
+        return window.openQuestBoard(borgoResume);
+      }
+      return bSay([BL("voce", "La bacheca della piazza è piena di annunci di tornei e richieste di aiuto dai ragazzi del paese.")]);
+    }
     const b = BLD.find((x) => x.door[0] === tx && x.door[1] === ty);
     if (b) borgoDoor(b.id);
   }
