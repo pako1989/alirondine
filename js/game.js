@@ -1589,7 +1589,7 @@
     if (step.bw || step.legend) document.body.classList.add("bw-vintage");
     else document.body.classList.remove("bw-vintage");
     const team = TEAMS[step.match];
-    M = { team: step.match, step, career: !!step.career, min: 0, half: 1, score: [0, 0], poss: "us", zone: 1, guts: S.st.grinta, fixDone: false, htDone: false, anim: null, ad: { sp: {}, act: {}, dive: {}, told: {} } };
+    M = { team: step.match, step, career: !!step.career, min: 0, half: 1, score: [0, 0], poss: "us", zone: 1, guts: S.st.grinta, fixDone: false, htDone: false, anim: null, perkUsed: false, ad: { sp: {}, act: {}, dive: {}, told: {} } };
     if (step.cupRule) {
       M.cup = { rule: step.cupRule, done: false, bond: !!step.cupBond, support: step.cupSupport || 0 };
       if (step.cupStart === "them") { M.poss = "them"; M.zone = step.cupZone || 3; }
@@ -1751,6 +1751,119 @@
       } })));
     } });
   }
+  function recruitPerksEnabled() {
+    try {
+      return localStorage.getItem("rondine_recruit_perks") !== "off";
+    } catch {
+      return true;
+    }
+  }
+  function getActiveRecruitPerks(phase) {
+    if (!M || M.perkUsed || !recruitPerksEnabled()) return [];
+    let rec = {};
+    try {
+      if (typeof svRec === "function") rec = (svRec() && svRec().rec) || {};
+    } catch {}
+
+    const perks = [];
+    if (phase === "attack") {
+      if (rec["kevin"] && M.zone >= 2 && M.zone <= 4) {
+        perks.push({
+          label: "⚡ SCATTO DI KEVIN",
+          sub: "Perk Recluta (Max 1) · Allungo sulla fascia, avanza pulito",
+          cls: "pick",
+          fn: () => useRecruitPerk("kevin")
+        });
+      }
+      if (rec["pietrino"] && M.zone >= 2 && M.zone <= 4) {
+        perks.push({
+          label: "⚡ PENNELLATA DI PIETRINO",
+          sub: "Perk Recluta (Max 1) · Assist filtrante in area (Zona 5)",
+          cls: "pick",
+          fn: () => useRecruitPerk("pietrino")
+        });
+      }
+      if (rec["mirko"] && M.guts < S.st.grinta * 0.75) {
+        perks.push({
+          label: "⚡ RICARICA DI MIRKO",
+          sub: "Perk Recluta (Max 1) · Rinvigorisce la squadra (+25 Grinta)",
+          cls: "pick",
+          fn: () => useRecruitPerk("mirko")
+        });
+      }
+    } else if (phase === "defend") {
+      if (rec["mattia"]) {
+        perks.push({
+          label: "⚡ SARACINESCA DI MATTIA",
+          sub: "Perk Recluta (Max 1) · Riflesso prodigioso tra i pali",
+          cls: "pick",
+          fn: () => useRecruitPerk("mattia")
+        });
+      }
+      if (rec["saverio"]) {
+        perks.push({
+          label: "⚡ MURO DI SAVERIO",
+          sub: "Perk Recluta (Max 1) · Tackle pulito di pietra, recupero palla",
+          cls: "pick",
+          fn: () => useRecruitPerk("saverio")
+        });
+      }
+      if (rec["mirko"] && M.guts < S.st.grinta * 0.6) {
+        perks.push({
+          label: "⚡ INCITAMENTO DI MIRKO",
+          sub: "Perk Recluta (Max 1) · Grinta dalla panchina (+25 Grinta)",
+          cls: "pick",
+          fn: () => useRecruitPerk("mirko")
+        });
+      }
+    }
+    return perks;
+  }
+  function useRecruitPerk(id) {
+    if (!M || M.perkUsed) return;
+    M.perkUsed = true;
+    sfx("special");
+    if (id === "kevin") {
+      M.zone = Math.min(5, M.zone + 1);
+      say(`<b>🏖️ Scatto di Kevin del Pedalò!</b><br>Kevin brucia il terzino avversario lungo la linea laterale con una cavalcata scalzo: allungo pulito e palla servita in <b>Zona ${M.zone}</b>!<br><small style="color:var(--gold)">⚡ Perk Reclute esaurito per questo match.</small>`);
+      if (window.toast) window.toast("Kevin: Scatto sulla fascia riuscito!", "success", "🏖️");
+      tick(1, 2);
+      hud();
+      turn();
+    } else if (id === "pietrino") {
+      M.zone = 5;
+      say(`<b>👟 Pennellata di Pietrino il Fantasista!</b><br>Pietrino inventa una traiettoria a scavalcare la difesa col contagiri: pallone telecomandato sui tuoi piedi in <b>Zona 5</b>!<br><small style="color:var(--gold)">⚡ Perk Reclute esaurito per questo match.</small>`);
+      if (window.toast) window.toast("Pietrino: Assist al bacio in Zona 5!", "success", "👟");
+      tick(2, 3);
+      hud();
+      turn();
+    } else if (id === "mirko") {
+      M.guts = Math.min(S.st.grinta, M.guts + 25);
+      say(`<b>🧢 Grinta di Mirko dei Caruggi!</b><br>Mirko carica la squadra a bordo campo con la grinta dei vicoli: «Fino alla fine, ragazzi!» Recuperi <b>+25 Grinta</b>!<br><small style="color:var(--gold)">⚡ Perk Reclute esaurito per questo match.</small>`);
+      if (window.toast) window.toast("Mirko: +25 Grinta alla squadra!", "success", "🧢");
+      tick(1, 1);
+      hud();
+      turn();
+    } else if (id === "mattia") {
+      M.poss = "us";
+      M.zone = 1;
+      sfx("catch");
+      say(`<b>🧤 Saracinesca di Mattia!</b><br>Conclusione a colpo sicuro degli avversari, ma Mattia vola d'istinto a mezza altezza e blocca la sfera con presa ferrea! Ripartenza nostra in <b>Zona 1</b>!<br><small style="color:var(--gold)">⚡ Perk Reclute esaurito per questo match.</small>`);
+      if (window.toast) window.toast("Mattia: Parata della Saracinesca!", "success", "🧤");
+      tick(2, 3);
+      hud();
+      turn();
+    } else if (id === "saverio") {
+      M.poss = "us";
+      M.zone = 2;
+      sfx("kick");
+      say(`<b>🦀 Muro di Pietra di Saverio Cozza!</b><br>Saverio entra in scivolata d'anticipo come uno scoglio frangiflutti: tocco netto sul pallone e rilancio immediato in <b>Zona 2</b>!<br><small style="color:var(--gold)">⚡ Perk Reclute esaurito per questo match.</small>`);
+      if (window.toast) window.toast("Saverio Cozza: Tackle pulito vincente!", "success", "🦀");
+      tick(1, 2);
+      hud();
+      turn();
+    }
+  }
   function attackTurn() {
     const d = oppDef(); M.cur = d;
     const z = M.zone;
@@ -1795,6 +1908,10 @@
     if (z >= 3 && cupReady && !cupSpecialOnly && !M.carrier && !cost(10) && pcOn("fiato") && !(M.step && M.step.tower)) opts.push({ label: "Tira lo stesso", sub: `sei stanco: tiro più debole · usa la grinta rimasta (${Math.round(M.guts)})`, fn: () => { M.tiredShot = true; act("shot", d); } });
     const rg = () => pcOn("fiato") ? Math.max(10, Math.round(15 * dfRegen())) : Math.round(15 * dfRegen());
     if (!opts.some((o) => !o.disabled) || (pcOn("fiato") && !cost(10))) opts.push({ label: "Tieni palla e rifiata", sub: `+${rg()} grinta`, fn: () => { M.guts = Math.min(S.st.grinta, M.guts + rg()); tick(2, 4); say("Rallenti il gioco e riprendi fiato."); turn(); } });
+    try {
+      const rPerks = getActiveRecruitPerks("attack");
+      if (rPerks.length) opts.push(...rPerks);
+    } catch {}
     buttons([...cupInfo, ...opts]);
   }
   function defendTurn() {
@@ -1805,6 +1922,10 @@
       { label: "Intercetta", sub: `rischioso · grinta 5${pcR(pcInt(a))}`, fn: () => defend("intercept", a), disabled: !cost(5) },
       { label: "Copri e rifiata", sub: `+12 grinta, li fai avanzare${pcOn("def") ? " · chiude lo specchio se tirano" : ""}`, fn: () => defend("cover", a) },
     ];
+    try {
+      const rPerks = getActiveRecruitPerks("defend");
+      if (rPerks.length) opts.push(...rPerks);
+    } catch {}
     const hint = pcHint(a); if (hint) { try { $("text").querySelector(".t").insertAdjacentHTML("beforeend", " " + hint); } catch {} }
     buttons(opts);
   }

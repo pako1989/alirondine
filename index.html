@@ -36,6 +36,7 @@
       <button type="button" class="opt-pill" id="themeBtn" aria-label="Tema Grafico" title="Cambia tema (Classico / Vintage / Neon / Arcade)">🎨 <span>Tema</span></button>
       <button type="button" class="opt-pill" id="logBtn" aria-label="Cronologia Dialoghi" title="Cronologia dei dialoghi e eventi (Tasto L)">📜 <span>Log</span></button>
       <button type="button" class="opt-pill" id="hapticBtn" aria-label="Feedback Aptico" title="Feedback Aptico (Vibrazione Tattile)">📳 <span>Aptico</span></button>
+      <button type="button" class="opt-pill" id="perkToggleBtn" aria-label="Perk Reclute in Partita" title="Attiva o disattiva l'abilità delle reclute in partita">⚡ <span id="perkToggleLbl">Perk: ON</span></button>
     </div>
   </div>
   <div class="stage">
@@ -142,6 +143,28 @@ if (optBtn && topOptPanel) {
   optBtn.onclick = function () {
     topOptPanel.hidden = !topOptPanel.hidden;
     optBtn.classList.toggle("active", !topOptPanel.hidden);
+  };
+}
+var perkToggleBtn = document.getElementById("perkToggleBtn");
+var perkToggleLbl = document.getElementById("perkToggleLbl");
+function syncPerkBtn() {
+  var isEnabled = localStorage.getItem("rondine_recruit_perks") !== "off";
+  if (perkToggleLbl) perkToggleLbl.textContent = isEnabled ? "Perk: ON" : "Perk: OFF";
+  if (perkToggleBtn) {
+    perkToggleBtn.style.color = isEnabled ? "#38bdf8" : "#94a3b8";
+    perkToggleBtn.style.borderColor = isEnabled ? "#38bdf8" : "#475569";
+  }
+}
+syncPerkBtn();
+if (perkToggleBtn) {
+  perkToggleBtn.onclick = function () {
+    var cur = localStorage.getItem("rondine_recruit_perks") !== "off";
+    var next = cur ? "off" : "on";
+    localStorage.setItem("rondine_recruit_perks", next);
+    syncPerkBtn();
+    if (window.toast) {
+      window.toast(next === "on" ? "Perk Reclute in partita ATTIVATI (Max 1 a match)" : "Perk Reclute in partita DISATTIVATI", "info", "⚡");
+    }
   };
 }
 window.openBorgoStortoModal = function () {
