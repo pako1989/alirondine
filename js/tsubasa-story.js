@@ -365,13 +365,14 @@
 
     if (window.toast) window.toast(`⚽ FISCHIO D'INIZIO: RONDINE FC vs ${team.name.toUpperCase()}!`, "success", "🏟️");
 
+    const curDiff = window.getGlobalAzDiff ? window.getGlobalAzDiff() : "norm";
     // Lancia la VERA partita di Calcio d'Azione Pro contro la squadra rivale
     window.azStartSagaMatch(
       team.teamKey,
       {
         mode: "amic",
         pitch: team.pitch,
-        diff: "norm",
+        diff: curDiff,
         pu: true,
         roles: ["nico", "sandro", "dario"]
       },

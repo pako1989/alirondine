@@ -286,6 +286,47 @@
 
     b.push(
       {
+        label: `🫒 Tattica Bellica: Trabucchi al Pesto Concentrato (-35 Barili)${prog.pestoBuff ? " · ATTIVA!" : ""}`,
+        sub: prog.pestoBuff ? "La difesa nemica sarà scivolosa e lenta nel prossimo match d'assedio" : "Inonda l'area di rigore avversaria: riduce la velocità rivale del 20% in partita",
+        cls: prog.pestoBuff ? "pick" : "hot",
+        disabled: prog.pesto < 35 || !!prog.pestoBuff,
+        fn: () => {
+          prog.pesto -= 35;
+          prog.pestoBuff = true;
+          saveProgress(prog);
+          playSynth(580, "sine", 0.3, 0.3);
+          if (window.toast) window.toast("Trabucchi armati coi barili di pesto! Vantaggio tattico nel prossimo assedio!", "success", "🫒");
+          showWarCouncil();
+        }
+      },
+      {
+        label: "🪙 Baratto Mercantile al Porto Trabucco (-40 Barili -> +60 Oro)",
+        sub: "Vendi il pesto eccedente ai mercanti d'Oltremare per incassare monete d'oro sonanti",
+        disabled: prog.pesto < 40,
+        fn: () => {
+          prog.pesto -= 40;
+          prog.gold += 60;
+          saveProgress(prog);
+          playSynth(650, "sine", 0.3, 0.3);
+          if (window.toast) window.toast("Carovana venduta con successo: +60 Oro nobiliare!", "success", "🪙");
+          showWarCouncil();
+        }
+      },
+      {
+        label: "🛡️ Soccorso Contadino contro l'Inverno (-50 Barili -> -15% Avanzata Inverno & +25 Morale)",
+        sub: "Distribuisci il pesto alle famiglie povere per scacciare il gelo e unire il regno",
+        disabled: prog.pesto < 50,
+        fn: () => {
+          prog.pesto -= 50;
+          prog.winterMeter = Math.max(0, prog.winterMeter - 15);
+          prog.morale = Math.min(100, prog.morale + 25);
+          saveProgress(prog);
+          playSynth(720, "sine", 0.3, 0.3);
+          if (window.toast) window.toast("Il popolo benedice la Casata Moretti: l'Inverno arretra!", "success", "👑");
+          showWarCouncil();
+        }
+      },
+      {
         label: "🥖 Distribuisci Focaccia alle Truppe (-30 Oro -> +40 Pesto, +20 Morale)",
         sub: "Evita carestie e malcontento nella guarnigione",
         disabled: prog.gold < 30,
@@ -413,14 +454,23 @@
       return;
     }
 
-    if (window.toast) window.toast(`⚔️ ASSEDIO SUL CAMPO: RONDINE FC vs ${house.name.toUpperCase()}!`, "success", "🏰");
+    const prog = getProgress();
+    const hasBuff = !!prog.pestoBuff;
+    if (hasBuff) {
+      if (window.toast) window.toast(`🫒 TATTICA PESTO ATTIVA: Difesa nemica rallentata dai trabucchi!`, "warn", "🫒");
+      prog.pestoBuff = false;
+      saveProgress(prog);
+    } else {
+      if (window.toast) window.toast(`⚔️ ASSEDIO SUL CAMPO: RONDINE FC vs ${house.name.toUpperCase()}!`, "success", "🏰");
+    }
 
+    const curDiff = window.getGlobalAzDiff ? window.getGlobalAzDiff() : "norm";
     window.azStartSagaMatch(
       house.teamKey,
       {
         mode: "amic",
         pitch: house.pitch,
-        diff: "norm",
+        diff: curDiff,
         pu: true,
         roles: ["nico", "sandro", "dario"]
       },
@@ -434,11 +484,13 @@
   function handleSiegeResult(house, myGoals, rivalGoals) {
     const won = myGoals > rivalGoals;
     const prog = getProgress();
+    prog.goals = (prog.goals || 0) + myGoals;
     renderThronesHubStage(prog);
 
     if (won) {
       if (!prog.conquered.includes(house.id)) prog.conquered.push(house.id);
       prog.gold += house.rewardGold;
+      prog.pesto += 30; // Rifornimento di barili di pesto dal feudo liberato!
       prog.winterMeter = Math.min(100, prog.winterMeter + 18);
       prog.morale = Math.min(100, prog.morale + 15);
 

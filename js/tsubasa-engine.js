@@ -51,9 +51,10 @@
     return String(s || "").replace(/[&<>]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[ch]));
   }
 
-  // ================= LOG DI DEBUG VISIVO (TEMPORANEO SOPRA IL CANVAS) =================
-  // Mostra in tempo reale lo stato del motore: Azione, Palla, Giocatore, Grinta, Minuto, Punteggio
+  // ================= LOG DI DEBUG VISIVO (SOLO CON ?debug=1) =================
+  // Mostra lo stato del motore solo se debug attivo nell URL
   function drawDebugStatusBar(ctx, m, act, f) {
+    if (!/[?&]debug/.test(location.search)) return; // Rispetta Clean UI nelle partite normali
     ctx.save();
     const isAtk = m ? m.poss === "us" : true;
     const carrier = (m && (m.carrier || "Leo Moretti")) || "Leo Moretti";

@@ -231,6 +231,12 @@
 
     b.push(
       {
+        label: `🛍️ Cyber Shop di Bender & Planet Express (${prog.cyberCredits} ⍟)`,
+        sub: "Acquista potenziamenti cibernetici e scarpini ionici per i match",
+        cls: "hot",
+        fn: showCyberShop
+      },
+      {
         label: "🍺 Lezioni Tattiche di Bender & Fry al Bar Cosmico",
         sub: "Consigli strampalati su come imbrogliare gli arbitri alieni",
         fn: showBenderTactics
@@ -245,6 +251,42 @@
       }
     );
 
+    showButtons(b, true);
+  }
+
+  function showCyberShop() {
+    const prog = getProgress();
+    prog.upgrades = prog.upgrades || {};
+    renderFuturamaHubStage(prog);
+    showText(
+      "Bender 'Furfante' Rodriguez",
+      `«Benvenuti al Cyber Shop illegale del Pianeta Express! Ho recuperato il miglior equipaggiamento dalla mafia robotica.<br>
+      Hai <b>${prog.cyberCredits} ⍟</b> Crediti Stellari da spendere: compra roba buona e fagli vedere di che pasta è fatta la Rondine!»`
+    );
+    const UPGRADES = [
+      { id: "boots", name: "🚀 Scarpini Gravitazionali Planet Express", cost: 50, desc: "Aumenta la velocità di scatto del 15% contro i Nibbloniani e gli alieni", icon: "🚀" },
+      { id: "matter", name: "🔋 Batteria alla Materia Oscura di Nibbler", cost: 70, desc: "Ricarica il Tiro Speciale con metà tempo ed energia", icon: "🔋" },
+      { id: "shin", name: "🤖 Parastinchi al Titanio Lucido di Bender", cost: 80, desc: "Resistenza totale alle cariche telluriche dei giganti di Omicron 8", icon: "🤖" },
+      { id: "beer", name: "🍺 Cassa di Robobirra della Vecchia Terra", cost: 35, desc: "Ricarica immediata di grinta ed energia per tutta la squadra", icon: "🍺" }
+    ];
+    const b = UPGRADES.map(u => {
+      const owned = !!prog.upgrades[u.id];
+      return {
+        label: `${owned ? "✓ POSSEDUTO: " : ""}${u.name} (${u.cost} ⍟)`,
+        sub: u.desc,
+        cls: owned ? "" : "hot",
+        disabled: owned || prog.cyberCredits < u.cost,
+        fn: () => {
+          prog.cyberCredits -= u.cost;
+          prog.upgrades[u.id] = true;
+          saveProgress(prog);
+          playSynth(780, "sine", 0.35, 0.3);
+          if (window.toast) window.toast(`Acquistato: ${u.name}!`, "success", u.icon);
+          showCyberShop();
+        }
+      };
+    });
+    b.push({ label: "◂ Torna all'Hangar", cls: "pick", fn: showHub });
     showButtons(b, true);
   }
 
@@ -341,14 +383,25 @@
       return;
     }
 
-    if (window.toast) window.toast(`🚀 FISCHIO D'INIZIO: RONDINE FC vs ${m.rival.toUpperCase()}!`, "success", "🛸");
+    const prog = getProgress();
+    const upg = prog.upgrades || {};
+    let buffs = [];
+    if (upg.boots) buffs.push("Scarpini Gravitazionali");
+    if (upg.matter) buffs.push("Batteria Materia Oscura");
+    if (upg.shin) buffs.push("Parastinchi Titanio");
+    if (buffs.length) {
+      if (window.toast) window.toast(`🚀 CYBER EQUIP ATTIVO: ${buffs.join(", ")}!`, "info", "🤖");
+    } else {
+      if (window.toast) window.toast(`🚀 FISCHIO D'INIZIO: RONDINE FC vs ${m.rival.toUpperCase()}!`, "success", "🛸");
+    }
 
+    const curDiff = window.getGlobalAzDiff ? window.getGlobalAzDiff() : "norm";
     window.azStartSagaMatch(
       m.teamKey,
       {
         mode: "amic",
         pitch: m.pitch,
-        diff: "norm",
+        diff: curDiff,
         pu: true,
         roles: ["nico", "sandro", "dario"]
       },
@@ -362,6 +415,7 @@
   function handleSciFiResult(m, myGoals, rivalGoals) {
     const won = myGoals > rivalGoals;
     const prog = getProgress();
+    prog.goals = (prog.goals || 0) + myGoals;
     renderFuturamaHubStage(prog);
 
     if (won) {

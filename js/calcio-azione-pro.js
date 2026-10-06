@@ -38,6 +38,17 @@
     AP.particles = [];
     AP.ballTrail = [];
     if (A.ball) { A.ball.z = 0; A.ball.vz = 0; }
+    // Inizializza barili e oggetti interattivi sul campo
+    const p = (A.opt && A.opt.pitch) || "erba";
+    const hasProps = (A.opt && A.opt.pu !== false) || p === "molo" || p === "sabbia" || p === "campo";
+    if (hasProps) {
+      AP.props = [
+        { type: "barrel", x: 65, y: 36, r: 7.5, wobble: 0, hp: 2, broken: false },
+        { type: "barrel", x: 255, y: 36, r: 7.5, wobble: 0, hp: 2, broken: false }
+      ];
+    } else {
+      AP.props = [];
+    }
   };
 
   window.azProTick = function (A) {
@@ -112,6 +123,48 @@
       pt.y += pt.vy;
       pt.life--;
       if (pt.life <= 0) AP.particles.splice(i, 1);
+    }
+
+    // Collisione palla con barili e oggetti interattivi
+    if (AP.props && AP.props.length && b) {
+      AP.props.forEach((prop) => {
+        if (prop.wobble > 0) prop.wobble--;
+        if (prop.broken) return;
+        const d = Math.hypot(b.x - prop.x, b.y - prop.y);
+        if (d < prop.r + 5) {
+          const ang = Math.atan2(b.y - prop.y, b.x - prop.x);
+          const curSp = Math.max(2.5, Math.hypot(b.vx, b.vy) * 0.85);
+          b.vx = Math.cos(ang) * curSp;
+          b.vy = Math.sin(ang) * curSp;
+          b.x = prop.x + Math.cos(ang) * (prop.r + 6);
+          b.y = prop.y + Math.sin(ang) * (prop.r + 6);
+          prop.wobble = 18;
+          try { if (window.sfx) window.sfx("kick"); } catch (e) {}
+          for (let k = 0; k < 6; k++) {
+            AP.particles.push({
+              x: prop.x + (Math.random() - 0.5) * 8,
+              y: prop.y + (Math.random() - 0.5) * 8,
+              vx: (Math.random() - 0.5) * 2,
+              vy: -Math.random() * 2,
+              color: "rgba(160, 110, 60, .85)",
+              life: 20,
+              maxLife: 20,
+              size: 2.5
+            });
+          }
+          if (b.shot || curSp > 4.2 || b.sp) {
+            prop.hp--;
+            if (prop.hp <= 0) {
+              prop.broken = true;
+              A.flash = { t: "BARILE ROTTO! BONUS!", c: "#ffd23f", u: A.t + 45 };
+              try { if (window.sfx) window.sfx("special"); } catch (e) {}
+              if (A.puL) A.puL.push({ ty: "en", x: prop.x, y: prop.y + 12, life: 600 });
+              if (typeof window.addCoins === "function") window.addCoins(2);
+              if (window.toast) window.toast("Barile distrutto: +2 Monete e sfera di Energia!", "success", "🛢️");
+            }
+          }
+        }
+      });
     }
 
     // Net shake
@@ -409,6 +462,53 @@
       g.moveTo(308 + 6, 84);
       g.quadraticCurveTo(308 + 6 + bulge, 101, 308 + 6, 118);
       g.stroke();
+    }
+
+    // Disegno dei Barili dinamici interattivi
+    if (AP.props && AP.props.length) {
+      AP.props.forEach((prop) => {
+        g.save();
+        const wobbleOff = prop.wobble > 0 ? Math.sin(prop.wobble * 0.8) * 2.5 : 0;
+        g.translate(prop.x + wobbleOff, prop.y);
+        if (prop.broken) {
+          g.fillStyle = "rgba(0,0,0,0.22)";
+          g.beginPath(); g.ellipse(0, 4, 9, 3.5, 0, 0, 7); g.fill();
+          g.fillStyle = "#8a582d";
+          g.fillRect(-6, 2, 5, 2);
+          g.fillRect(1, 3, 6, 2);
+          g.fillRect(-2, 0, 4, 2);
+          g.fillStyle = "#5c3a1e";
+          g.fillRect(-4, 4, 8, 1);
+        } else {
+          g.fillStyle = "rgba(0,0,0,0.28)";
+          g.beginPath(); g.ellipse(0, 7, 7.5, 3, 0, 0, 7); g.fill();
+          g.fillStyle = "#9c6644";
+          g.beginPath();
+          g.ellipse(0, 0, 7, 8, 0, 0, Math.PI * 2);
+          g.fill();
+          g.strokeStyle = "#7f4f24";
+          g.lineWidth = 1;
+          g.beginPath();
+          g.moveTo(-3, -7); g.lineTo(-3, 7);
+          g.moveTo(3, -7); g.lineTo(3, 7);
+          g.stroke();
+          g.strokeStyle = "#343a40";
+          g.lineWidth = 1.5;
+          g.beginPath();
+          g.arc(0, -3, 6.8, 0, Math.PI);
+          g.arc(0, 3, 6.8, 0, Math.PI);
+          g.stroke();
+          g.fillStyle = "#b08968";
+          g.beginPath();
+          g.ellipse(0, -6, 5.5, 2.5, 0, 0, Math.PI * 2);
+          g.fill();
+          g.fillStyle = "rgba(255,255,255,0.22)";
+          g.beginPath();
+          g.ellipse(-2, -6, 2.5, 1, 0, 0, Math.PI * 2);
+          g.fill();
+        }
+        g.restore();
+      });
     }
 
     // Barra Furia della Rondine in basso a destra

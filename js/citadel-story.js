@@ -222,6 +222,12 @@
 
     b.push(
       {
+        label: "🧪 Laboratorio Quantico di Rick-Nonna C-137",
+        sub: "Attiva sieri e congegni quantici per potenziare la squadra contro i cloni",
+        cls: "hot",
+        fn: showQuantumLab
+      },
+      {
         label: "🌀 Monologo Esistenziale di Rick-Nonna sul Pesto Quantico",
         sub: "Perché il multiverso collasserà prima della fine del primo tempo",
         fn: showRickPhilosophy
@@ -236,6 +242,42 @@
       }
     );
 
+    showButtons(b, true);
+  }
+
+  function showQuantumLab() {
+    const prog = getProgress();
+    prog.gadgets = prog.gadgets || {};
+    renderCitadelHubStage(prog);
+    showText(
+      "Rick-Nonna C-137",
+      `«*Burp* Benvenuto nel mio laboratorio dimensionale, Leo! Non toccare quella leva o finiamo tutti nel 1942 a giocare con i palloni di pezza.<br>
+      Ho sintetizzato dei congegni quantici per farti superare i cloni di Evil Leo: compra quello che ti serve e scendi in campo!»`
+    );
+    const GADGETS = [
+      { id: "pickle", name: "🧪 Siero Cetriolo Leo C-137", cost: 35, desc: "Aumenta agilità nei contrasti e sblocca la finta a sombrero istantanea", icon: "🥒" },
+      { id: "fluid", name: "🌀 Fluido Portale Concentrato", cost: 45, desc: "Se gli avversari attaccano in contropiede, aumenta i riflessi del portiere", icon: "🌀" },
+      { id: "pizza", name: "🍕 Focaccia Multiversale a 4 Dimensioni", cost: 25, desc: "Dona grinta infinita ed energia al 100% per tutta la partita", icon: "🍕" }
+    ];
+    const b = GADGETS.map(g => {
+      const owned = !!prog.gadgets[g.id];
+      const curCoins = (typeof window.coins === "function" ? window.coins() : 0);
+      return {
+        label: `${owned ? "✓ ATTIVO: " : ""}${g.name} (${g.cost} Monete)`,
+        sub: g.desc,
+        cls: owned ? "" : "hot",
+        disabled: owned || curCoins < g.cost,
+        fn: () => {
+          if (window.addCoins) window.addCoins(-g.cost);
+          prog.gadgets[g.id] = true;
+          saveProgress(prog);
+          playSynth(820, "sine", 0.35, 0.3);
+          if (window.toast) window.toast(`Attivato: ${g.name}!`, "success", g.icon);
+          showQuantumLab();
+        }
+      };
+    });
+    b.push({ label: "◂ Torna al Portale", cls: "pick", fn: showHub });
     showButtons(b, true);
   }
 
@@ -330,14 +372,25 @@
       return;
     }
 
-    if (window.toast) window.toast(`🧪 FISCHIO D'INIZIO: RONDINE FC vs ${s.rival.toUpperCase()}!`, "success", "🌀");
+    const prog = getProgress();
+    const gad = prog.gadgets || {};
+    let active = [];
+    if (gad.pickle) active.push("Siero Cetriolo");
+    if (gad.fluid) active.push("Fluido Portale");
+    if (gad.pizza) active.push("Focaccia 4D");
+    if (active.length) {
+      if (window.toast) window.toast(`🌀 GADGET QUANTICI ATTIVI: ${active.join(", ")}!`, "info", "🧪");
+    } else {
+      if (window.toast) window.toast(`🧪 FISCHIO D'INIZIO: RONDINE FC vs ${s.rival.toUpperCase()}!`, "success", "🌀");
+    }
 
+    const curDiff = window.getGlobalAzDiff ? window.getGlobalAzDiff() : "norm";
     window.azStartSagaMatch(
       s.teamKey,
       {
         mode: "amic",
         pitch: s.pitch,
-        diff: "norm",
+        diff: curDiff,
         pu: true,
         roles: ["nico", "sandro", "dario"]
       },
@@ -351,6 +404,7 @@
   function handleCitadelResult(s, myGoals, rivalGoals) {
     const won = myGoals > rivalGoals;
     const prog = getProgress();
+    prog.goals = (prog.goals || 0) + myGoals;
     renderCitadelHubStage(prog);
 
     if (won) {

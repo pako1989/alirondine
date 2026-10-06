@@ -5138,7 +5138,7 @@
   };
   // 15l · Partita classica: quattro aggiunte, ognuna spegnibile (spente = regole di prima)
   const SET_PC = { coppie: ["Schemi a coppie avanzati", "Con grande intesa, ogni compagno sblocca un secondo tiro in coppia (intesa 14)"], rete: ["Rete strappata", "Un tiro potentissimo può bucare la rete: cut-in speciale, un po' di grinta e il conto delle reti strappate"], star: ["Fuoriclasse rivali", "Il capitano avversario carica lo speciale con una frase sua e un cut-in nei colori della squadra"], gkf: ["Portieri che si stancano", "Più tiri affronta, più un portiere cala (il tuo e il loro); all'intervallo recupera"], duelli: ["Duelli 1 contro 1", "Dribbling in attacco (zona 3+): leggi il difensore e scegli finta, scatto o protezione"], area: ["Comandi in area", "Parata, pugno o uscita: li scegli tu col tuo portiere, e anche il portiere avversario li usa"], tempo: ["Tiro a tempo", "Ferma la barra al momento giusto: preciso = tiro più forte, sbagliato = più debole"], fiato: ["Grinta di riserva", "A secco puoi tirare lo stesso (più debole); rifiatare ridà almeno 10"], spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
-  const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false, dis: false, cardView: "holo3d", mangaView: "comic", trophyView: "3d", bgArt: "detailed", confetti: true, proActionFx: true, tsubasa: false, windWeather: true });
+  const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false, dis: false, cardView: "holo3d", mangaView: "comic", trophyView: "3d", bgArt: "detailed", confetti: true, proActionFx: true, tsubasa: false, windWeather: true, azDiff: "norm", azCtl: "joystick", azPowerUps: true, azAimAssist: true });
   function setLoad() {
     const d = setDefault(), s = readJSON(SETK, null);
     if (!s || s.v !== 1) return d;
@@ -5150,6 +5150,10 @@
     if (res.proActionFx === undefined) res.proActionFx = true;
     if (res.tsubasa === undefined) res.tsubasa = false;
     if (res.windWeather === undefined) res.windWeather = true;
+    if (res.azDiff === undefined) res.azDiff = "norm";
+    if (res.azCtl === undefined) res.azCtl = "joystick";
+    if (res.azPowerUps === undefined) res.azPowerUps = true;
+    if (res.azAimAssist === undefined) res.azAimAssist = true;
     return res;
   }
   let SET = setLoad();
@@ -5160,6 +5164,33 @@
     document.body.classList.toggle("pixel-canvas", SET.gfx !== "classica");
   };
   setApply();
+
+  // ================= CALCIO D'AZIONE & SAGHE: CONFIGURAZIONE GLOBALE =================
+  const AZK = "ali-di-rondine.azione";
+  const azRec = () => { const r = readJSON(AZK, null), o = { v: 1, ctl: "joystick", opt: {}, modes: {}, hard: {}, obj: {}, objN: 0, pitW: {}, seen: {}, sea: null, played: 0, w: 0, d: 0, l: 0, goals: 0, beat: {} }; const x = r && typeof r === "object" ? { ...o, ...r } : o; ["beat", "modes", "hard", "obj", "pitW", "seen", "opt"].forEach((k) => { if (!x[k] || typeof x[k] !== "object" || Array.isArray(x[k])) x[k] = {}; }); return x; };
+  const AZ_CTL = [["joystick", "Joystick virtuale", "Levetta analogica virtuale a sinistra + tasti azione"], ["croce", "Croce direzionale", "Quattro frecce fisse D-Pad, 8 direzioni"], ["trascina", "Trascina", "Trascini il dito o cursore direttamente sul campo"]];
+  let azCtlForce = null;
+  const azCtlMode = () => { if (azCtlForce) return azCtlForce; const c = (SET && SET.azCtl) || azRec().ctl; return AZ_CTL.some((x) => x[0] === c) ? c : "joystick"; };
+  const AZ_DIF = {
+    facile: { n: "Facile", fx: { ps: 0.88, tk: -0.06, gk: 0.82 }, note: "Avversari più lenti e contrasti morbidi. Ideale per la storia." },
+    norm: { n: "Normale", fx: { ps: 1, tk: 0, gk: 1 }, note: "La partita di sempre, ritmo serrato e bilanciato." },
+    duro: { n: "Duro", fx: { ps: 1.12, tk: 0.06, gk: 1.15 }, note: "Avversari veloci, tackle decisi, portieri più reattivi." },
+    leggenda: { n: "Leggenda", fx: { ps: 1.22, tk: 0.12, gk: 1.3 }, note: "Massima sfida: tackle implacabili e contropiedi micidiali." }
+  };
+  window.getGlobalAzDiff = () => ((SET && SET.azDiff) || (typeof azOpt === "function" ? azOpt().diff : "norm") || "norm");
+  window.getGlobalAzCtl = () => ((SET && SET.azCtl) || azCtlMode());
+  window.setGlobalAzDiff = (d) => {
+    if (AZ_DIF[d]) {
+      if (SET) { SET.azDiff = d; writeJSON(SETK, SET); }
+      if (typeof azSetOpt === "function") azSetOpt("diff", d);
+    }
+  };
+  window.setGlobalAzCtl = (c) => {
+    if (AZ_CTL.some(x => x[0] === c)) {
+      if (SET) { SET.azCtl = c; writeJSON(SETK, SET); }
+      const r = azRec(); r.ctl = c; writeJSON(AZK, r);
+    }
+  };
   const METEO_TXT = { neve: "<em>Nevica</em>: il pallone si ferma nella neve, dribblare è una lotteria e i tiri perdono forza. Il riscaldamento è una palla di neve.", pioggia: "<em>Piove forte</em>: il pallone scivola, dribblare è più difficile e i portieri faticano a tenerlo.", vento: "<em>Tira vento</em>: i tiri da lontano fanno strane curve, in bene o in male." };
   function weatherPow(p, us) {
     if (M.meteo === "pioggia") return p * 0.95;
@@ -5230,11 +5261,83 @@
     );
     const isGame = (o) => /^(Stile partite|Difficoltà|Partite tattiche|Modalità Partita|Meteo Vento|⚽ Gioca Esibizione)/.test(o.label);
     const isRule = (o) => /^[✓✗] /.test(o.label);
+    const azCtlName = () => (AZ_CTL.find((x) => x[0] === azCtlMode()) || ["", "Joystick virtuale"])[1];
+    const azDiffName = () => (AZ_DIF[window.getGlobalAzDiff()] ? AZ_DIF[window.getGlobalAzDiff()].n : "Normale");
+    const azB = [
+      {
+        label: `Schema Comandi: ${azCtlName()} ▸`,
+        sub: "Cambia tra Joystick virtuale, D-Pad a croce e Trascina dito (si applica a tutto il gioco e a tutte le Saghe)",
+        cls: "hot",
+        fn: () => {
+          const list = ["joystick", "croce", "trascina"];
+          const cur = azCtlMode();
+          const next = list[(list.indexOf(cur) + 1) % list.length];
+          window.setGlobalAzCtl(next);
+          again(`Comandi Calcio d'Azione impostati su: ${azCtlName()}`);
+        }
+      },
+      {
+        label: `Difficoltà Globale: ${azDiffName()} ▸`,
+        sub: "Facile · Normale · Duro · Leggenda (si applica a Calcio d'Azione, Tsubasa, Futurama, Citadel e Westeros)",
+        cls: "hot",
+        fn: () => {
+          const list = ["facile", "norm", "duro", "leggenda"];
+          const cur = window.getGlobalAzDiff();
+          const next = list[(list.indexOf(cur) + 1) % list.length];
+          window.setGlobalAzDiff(next);
+          again(`Difficoltà Calcio d'Azione impostata su: ${azDiffName()}`);
+        }
+      },
+      {
+        label: `Power-Up sul Campo: ${SET.azPowerUps !== false ? "Attivi (Bonus, Scarpini, Barili)" : "Disattivati (Puro Calcio)"} ▸`,
+        sub: SET.azPowerUps !== false ? "Sfere energia, scarpini turbo, scudi e barili dinamici sul campo" : "Nessun potenziamento sul terreno di gioco",
+        fn: () => {
+          SET.azPowerUps = SET.azPowerUps === false;
+          save();
+          again(`Power-Up ${SET.azPowerUps !== false ? "attivati" : "disattivati"}.`);
+        }
+      },
+      {
+        label: `Effetti Grafici Pro: ${SET.proActionFx !== false ? "Avanzati Pro (Scie, Reti, Zolle, Finta)" : "Base Classico"} ▸`,
+        sub: SET.proActionFx !== false ? "Scia cometa del pallone, rete reattiva, zolle nelle scivolate e tasto Finta" : "Grafica d'azione base originale",
+        fn: () => {
+          SET.proActionFx = SET.proActionFx === false;
+          save();
+          again(`Effetti Azione ${SET.proActionFx !== false ? "avanzati attivi" : "base"}`);
+        }
+      },
+      {
+        label: `Assistenza Mira Tiri: ${SET.azAimAssist !== false ? "Attiva (Correzione angoli porta)" : "Manuale (Puro Controllo)"} ▸`,
+        sub: SET.azAimAssist !== false ? "I tiri vengono orientati leggermente verso l'angolo scoperto dal portiere" : "La traiettoria segue rigidamente il puntatore",
+        fn: () => {
+          SET.azAimAssist = SET.azAimAssist === false;
+          save();
+          again(`Assistenza mira ${SET.azAimAssist !== false ? "attivata" : "disattivata"}.`);
+        }
+      },
+      {
+        label: "🎮 Gioca Test Rapido Comandi Calcio d'Azione ▸",
+        sub: "Scendi subito sul campo per testare sensibilità, levetta analogica e pulsanti",
+        cls: "hot",
+        fn: () => {
+          if (typeof azStart === "function") {
+            azStart("gabbiani", () => settings(back), true, {
+              mode: "amic",
+              pitch: "erba",
+              diff: window.getGlobalAzDiff(),
+              pu: SET.azPowerUps !== false,
+              roles: ["nico"]
+            });
+          }
+        }
+      }
+    ];
     const gameB = b.filter(isGame), ruleB = b.filter(isRule), audioB = AB, lookB = b.filter((o) => !isGame(o) && !isRule(o) && !AB.includes(o));
     const SEC = settings._sec || "";
     const sec = (id, label, sub, cls) => ({ label, sub, cls, fn: () => { settings._sec = id; again(); } });
     const bk = { label: "◂ Impostazioni", cls: "pick", fn: () => { settings._sec = ""; again(); } };
     if (SEC === "partita") return buttons([...gameB, bk]);
+    if (SEC === "calcio_azione") return buttons([...azB, bk]);
     if (SEC === "regole") return buttons([...ruleB, bk]);
     if (SEC === "audio") return buttons([...audioB, bk]);
     if (SEC === "aspetto") return buttons([...lookB, bk]);
@@ -5243,6 +5346,7 @@
       sec("regole", "Opzioni di gioco", "Tiri murati, duelli, grinta di riserva, tiro a tempo e le altre regole: accese o spente"),
       sec("audio", "Audio", "Suoni, musica, voci, volumi"),
       sec("aspetto", "Grafica e aspetto", "Carte 3D, temi, animazioni, filtro retrò, testo grande"),
+      sec("calcio_azione", "Calcio d'azione", `Comandi: ${azCtlName()} · ${azDiffName()}`),
       { label: "Ripristina predefinite", sub: "Anni '90, tutto attivo", fn: () => { SET = setDefault(); save(); again("Impostazioni ripristinate."); } },
       { label: "◂ Indietro", fn: () => { settings._sec = ""; back(); } },
     ]);
@@ -20554,12 +20658,7 @@
   // ================= v14 · CALCIO D'AZIONE: partite in tempo reale, pensate per il telefono (modalità a parte) =================
   // Tre contro tre più i portieri, 75 secondi veri. Trascina il dito sul campo per muovere Leo; «Passa», «Contrasto» e «Tiro» (tieni premuto
   // per caricare: carico = tiro speciale, costa energia). Usa le tue statistiche e i bonus della Squadra. La storia e le altre partite non cambiano.
-  // Chiave propria: ali-di-rondine.azione.
-  const AZK = "ali-di-rondine.azione";
-  const azRec = () => { const r = readJSON(AZK, null), o = { v: 1, ctl: "trascina", opt: {}, modes: {}, hard: {}, obj: {}, objN: 0, pitW: {}, seen: {}, sea: null, played: 0, w: 0, d: 0, l: 0, goals: 0, beat: {} }; const x = r && typeof r === "object" ? { ...o, ...r } : o; ["beat", "modes", "hard", "obj", "pitW", "seen", "opt"].forEach((k) => { if (!x[k] || typeof x[k] !== "object" || Array.isArray(x[k])) x[k] = {}; }); return x; };
-  const AZ_CTL = [["trascina", "Trascina", "Trascini il dito sul campo"], ["joystick", "Joystick virtuale", "Un cerchio compare dove appoggi il pollice sulla metà sinistra"], ["croce", "Croce direzionale", "Quattro frecce fisse, otto direzioni"]];
-  let azCtlForce = null;
-  const azCtlMode = () => { if (azCtlForce) return azCtlForce; const c = azRec().ctl; return AZ_CTL.some((x) => x[0] === c) ? c : "trascina"; };
+  // Chiave propria: ali-di-rondine.azione (gestita anche dalle Impostazioni globali).
   const AZ_T = [["gabbiani", () => true], ["tori", () => true], ["aquile", () => true], ["delfini", () => seasonDone(1)], ["grifoni", () => seasonDone(2)], ["corvi", () => seasonDone(3)], ["leoni", () => seasonDone(4)], ["brasile", () => seasonDone(5)], ["leggende", () => prog().n >= 2]];
   let AZ_L = 12, AZ_R = 308, AZ_UP = 24, AZ_DN = 178, AZ_G0 = 84, AZ_G1 = 118;
   let AZ = null, azFast = 1, azBack = null;
@@ -20724,12 +20823,12 @@
       try { window.triggerTrophyCelebration(); } catch (e) {}
     }
     const first = win && dif !== "facile" && !r.beat[A.k]; azClean(); AZ = null; cv.style.touchAction = ""; azBounds("erba");
-    if (A.cz) return A.cz.end(a, c);
-    r.played++; r.goals += a; if (win) { r.w++; if (dif !== "facile") r.beat[A.k] = 1; if (dif === "duro") r.hard[A.k] = 1; r.pitW[pit] = 1; } else if (a === c) r.d++; else r.l++;
+    r.played++; r.goals += a; if (win) { r.w++; if (dif !== "facile") r.beat[A.k] = 1; if (dif === "duro" || dif === "leggenda") r.hard[A.k] = 1; r.pitW[pit] = 1; } else if (a === c) r.d++; else r.l++;
     const md = r.modes[mode] || { p: 0, w: 0 }; md.p++; if (win) md.w++; r.modes[mode] = md;
     const objOk = !!(A.obj && A.obj.ok(a, c, A)); if (objOk) { r.obj[A.obj.id] = (r.obj[A.obj.id] || 0) + 1; r.objN = (r.objN || 0) + 1; }
-    let coins = win ? (dif === "facile" ? 1 : 2 + (first ? 5 : 0) + (A.coinB || 0) + (dif === "duro" ? 2 : 0) + (mode === "eventi" ? 1 : 0)) : a === c ? 1 : 0; if (objOk) coins += 3;
+    let coins = win ? (dif === "facile" ? 1 : 2 + (first ? 5 : 0) + (A.coinB || 0) + (dif === "duro" ? 2 : dif === "leggenda" ? 4 : 0) + (mode === "eventi" ? 1 : 0)) : a === c ? 1 : 0; if (objOk) coins += 3;
     writeJSON(AZK, r); if (coins) addCoins(coins);
+    if (A.cz) return A.cz.end(a, c);
     const res = win ? "W" : a === c ? "D" : "L", n = (typeof AZN !== "undefined" && AZN[A.k]) || null, st = A.stat, tp = st.poss[0] + st.poss[1] || 1;
     const epi = [n ? n[win ? 2 : a === c ? 3 : 4] : "", A.sea ? azSeaAfter(A, res) : ""].filter(Boolean).map((t) => `<br><em>${esc(t)}</em>`).join("");
     view = { kind: "scene", bg: "stadium", speaker: null }; chap("Calcio d'azione");
@@ -21158,7 +21257,6 @@
     molo: { n: "Molo al tramonto", fx: { spd: 1.05, fr: 0.99, tk: 0.02, nz: 0.01, sh: 1.08, sunset: true, dock: true }, ok: () => true, why: "La banchina in pietra affacciata sul golfo dorato. Se calci troppo forte la palla finisce in mare con uno splash!" },
   };
   const AZ_PITS = ["erba", "campo", "sabbia", "fango", "notte", "molo"];
-  const AZ_DIF = { facile: { n: "Facile", fx: { ps: 0.9, tk: -0.05, gk: 0.85 }, note: "Gli altri sono più lenti. Non conta per le imprese né per la Rosa; monete ridotte." }, norm: { n: "Normale", fx: { ps: 1, tk: 0, gk: 1 }, note: "La partita di sempre." }, duro: { n: "Duro", fx: { ps: 1.1, tk: 0.06, gk: 1.15 }, note: "Avversari più veloci, portiere più lungo. Più monete." } };
   const AZ_MOD = [["amic", "Amichevole", "La partita di sempre", () => true], ["sfida", "Sfida a obiettivo", "Un obiettivo in più: bonus se lo centri", () => Object.keys(azRec().beat).length >= 1], ["eventi", "Partita a eventi", "Meteo, palla d'oro e altre sorprese a metà partita", () => Object.keys(azRec().beat).length >= 3]];
   const AZ_OBJ = [
     { id: "clean", txt: "Vinci senza subire gol", ok: (a, c) => a > c && c === 0, line: "Nico ha scommesso una focaccia che non prenderai gol. Con lui le scommesse sono sempre a perdere." },
@@ -24601,8 +24699,18 @@
   window.azStartSagaMatch = function(teamKey, options, onEnd) {
     closeAltStage();
     try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) {}
-    const opt = options || { mode: "amic", pitch: "erba", diff: "norm", pu: true, roles: ["nico"] };
-    azCtlForce = azRec().ctl === "croce" ? "croce" : "joystick";
+    const curDiff = window.getGlobalAzDiff();
+    const curCtl = window.getGlobalAzCtl();
+    const opt = {
+      mode: "amic",
+      pitch: "erba",
+      diff: curDiff,
+      pu: (SET && SET.azPowerUps !== false),
+      roles: ["nico", "sandro", "dario"],
+      ...(options || {})
+    };
+    if (!options || !options.customDiff) opt.diff = curDiff;
+    azCtlForce = curCtl;
     try { azStart(teamKey, () => onEnd(0, 0), true, opt); } finally { azCtlForce = null; }
     if (AZ) {
       AZ.cz = {
