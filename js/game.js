@@ -4789,6 +4789,7 @@
   const heroDefault = () => ({ v: 1, name: "Luca", style: "spiky", hair: "#2b1d14", skin: "#f2c9a0", shirt: "#ff4d5a", acc: "none", num: 9, shot: "saetta", shotName: "SAETTA DI LUCA" });
   const heroLoad = () => { const h = readJSON(HERO, null); return h && h.v === 1 && h.name ? { ...heroDefault(), ...h } : null; };
   window.heroLoad = heroLoad;
+  window.heroEditor = heroEditor;
   function heroCast(h) {
     CAST.hero = { name: h.name, tag: "", hair: h.hair, style: h.style, skin: h.skin, eye: "#2a1a0a", bg: [h.shirt, "#ffd23f"], shirt: h.shirt, num: String(h.num), acc: h.acc, cap: h.acc === "cappellino" ? "#ffd23f" : h.acc === "berretto" ? "#26324a" : undefined };
   }
