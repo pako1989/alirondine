@@ -1228,8 +1228,22 @@
   }
 
 
+  // Il pupazzetto prende aspetto (capelli, pelle, occhi, accessori) dal personaggio omonimo del Borgo
+  function castFor(t) {
+    try {
+      const C = window.__borgoApi && window.__borgoApi.CAST;
+      if (!C || !t) return null;
+      const k = [t.id].concat(t.id.split("_")).find((x) => C[x]);
+      return k ? C[k] : null;
+    } catch (e) { return null; }
+  }
+
   function resolveToy(t) {
     if (!t) return t;
+    if (t.id !== "hero_custom_gold" && !t._cast) {
+      const c = castFor(t);
+      if (c) t = { ...t, _cast: c, hairColor: c.hair || t.hairColor, skinColor: c.skin || t.skinColor };
+    }
     if (t.id === "hero_custom_gold") {
       try {
         const h = typeof window.heroLoad === "function" ? window.heroLoad() : JSON.parse(localStorage.getItem("ali-di-rondine.eroe") || "null");
@@ -1303,10 +1317,10 @@
         }
       });
       // Cap bilanciati per non rompere il gioco (diminishing returns)
-      b.spd = Math.min(0.20, b.spd);
-      b.def = Math.min(0.20, b.def);
-      b.coin = Math.min(5, b.coin);
-      b.en = Math.min(0.025, b.en);
+      b.spd = Math.min(0.08, b.spd);
+      b.def = Math.min(0.08, b.def);
+      b.coin = Math.min(3, b.coin);
+      b.en = Math.min(0.015, b.en);
       return b;
     } catch (e) {
       return { spd: 0, def: 0, coin: 0, en: 0 };
@@ -1957,10 +1971,10 @@
     // Barba Bianca da Lupo di Mare (Baciccia / Capitan Corrado)
     if (isBaciccia || isCapitanoFaro) {
       const beardG = new T.SphereGeometry(0.38, 12, 12);
-      beardG.scale(0.9, 0.6, 0.9);
+      beardG.scale(0.82, 0.42, 0.62);
       const beardM = new T.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.7 });
       const bm = new T.Mesh(beardG, beardM);
-      bm.position.set(0, 1.42, 0.22);
+      bm.position.set(0, 1.27, 0.2);
       toyMeshGroup.add(bm);
     }
 
@@ -2149,8 +2163,63 @@
       toyMeshGroup.add(ballMesh);
     }
 
+    try { polishToy(T, toy); } catch (e) {}
     threeScene.add(toyMeshGroup);
     startToyAnimation();
+  }
+
+  // Rifiniture: volto espressivo, capelli come nel Borgo, occhiali/barba, alone per le rarità alte
+  function polishToy(T, toy) {
+    const c = toy._cast || {};
+    const col = (h, d) => parseInt(String(h || d).replace("#", "0x"));
+    const skin = col(toy.skinColor, "#f5caa0"), hair = col(toy.hairColor, "#451a03"), eye = col(c.eye, "#2a1a10");
+    const std = (color, extra) => new T.MeshStandardMaterial(Object.assign({ color, roughness: 0.5 }, extra || {}));
+    const add = (g, m, x, y, z, sx, sy, sz) => { const o = new T.Mesh(g, m); o.position.set(x, y, z); if (sx) o.scale.set(sx, sy, sz); toyMeshGroup.add(o); return o; };
+    const id = toy.id;
+    const hat = /baciccia|capitano_faro|focaccere|tsubasa|rita/.test(id);
+    const beard = /baciccia|capitano_faro/.test(id) || c.beard;
+    // occhi: bianco, iride, pupilla, luce
+    const white = std(0xffffff, { roughness: 0.2 }), dark = std(0x0b0f19, { roughness: 0.1 }), iris = std(eye, { roughness: 0.2 });
+    [-0.16, 0.16].forEach((x) => {
+      add(new T.SphereGeometry(0.09, 12, 12), white, x, 1.585, 0.375, 1, 1.15, 0.55);
+      add(new T.SphereGeometry(0.058, 10, 10), iris, x, 1.58, 0.425);
+      add(new T.SphereGeometry(0.032, 8, 8), dark, x, 1.58, 0.465);
+      add(new T.SphereGeometry(0.014, 6, 6), white, x + 0.02, 1.605, 0.485);
+      // sopracciglia
+      add(new T.BoxGeometry(0.15, 0.03, 0.03), std(hair), x, 1.71, 0.37).rotation.z = x < 0 ? 0.12 : -0.12;
+    });
+    // naso, guance, bocca
+    add(new T.SphereGeometry(0.04, 8, 8), std(skin, { roughness: 0.6 }), 0, 1.52, 0.44, 1, 0.9, 1.1);
+    const blush = std(0xff8fa3, { transparent: true, opacity: 0.55 });
+    [-0.27, 0.27].forEach((x) => add(new T.SphereGeometry(0.06, 8, 8), blush, x, 1.47, 0.33, 1, 0.6, 0.4));
+    if (!beard) {
+      const m = add(new T.TorusGeometry(0.085, 0.014, 6, 14, Math.PI), std(0x7f1d1d), 0, 1.43, 0.41);
+      m.rotation.z = Math.PI;
+    }
+    // capelli come nel Borgo
+    if (!hat) {
+      const hm = std(hair, { roughness: 0.7 });
+      const st = c.style;
+      if (st === "spiky") for (let i = 0; i < 6; i++) { const o = add(new T.ConeGeometry(0.11, 0.36, 5), hm, -0.33 + i * 0.132, 2.0, 0.08); o.rotation.z = -0.45 + i * 0.18; }
+      else if (st === "messy") for (let i = 0; i < 5; i++) { const a = i * 1.25; const o = add(new T.ConeGeometry(0.1, 0.3, 5), hm, Math.cos(a) * 0.3, 1.98 + (i % 2) * 0.04, Math.sin(a) * 0.2); o.rotation.set(Math.sin(a) * 0.5, 0, -Math.cos(a) * 0.6); }
+      else if (st === "long") { add(new T.SphereGeometry(0.44, 14, 14), hm, 0, 1.36, -0.2, 0.95, 1.35, 0.7); }
+      else if (st === "bun") { add(new T.SphereGeometry(0.2, 10, 10), hm, 0, 2.02, -0.12); }
+      else if (st === "codino") { const o = add(new T.CylinderGeometry(0.07, 0.04, 0.5, 8), hm, 0, 1.45, -0.5); o.rotation.x = 0.5; add(new T.SphereGeometry(0.09, 8, 8), hm, 0, 1.22, -0.62); }
+      else if (st === "slick") { add(new T.BoxGeometry(0.78, 0.08, 0.12), hm, 0, 1.97, 0.18).rotation.x = -0.35; }
+    }
+    // occhiali e barba dal Borgo
+    if (c.glasses && !/fede|nonna|mister/.test(id)) [-0.16, 0.16].forEach((x) => add(new T.TorusGeometry(0.12, 0.02, 6, 16), std(0x1e293b, { metalness: 0.7 }), x, 1.585, 0.43));
+    if (c.shades && !/fede|nonna|mister/.test(id)) add(new T.BoxGeometry(0.5, 0.1, 0.05), std(0x0b0f19, { metalness: 0.8, roughness: 0.1 }), 0, 1.585, 0.43);
+    if (c.beard && !/baciccia|capitano_faro/.test(id)) add(new T.SphereGeometry(0.34, 12, 12), std(hair, { roughness: 0.8 }), 0, 1.28, 0.18, 0.85, 0.42, 0.7);
+    // colletto e fascia in vita
+    add(new T.TorusGeometry(0.2, 0.04, 6, 16), std(0xffffff), 0, 1.3, 0.04).rotation.x = Math.PI / 2;
+    // alone per le rarità alte
+    if (toy.stars >= 5) {
+      const gold = toy.stars === 6 ? 0xf0abfc : 0xffd23f;
+      const ring = add(new T.TorusGeometry(0.78, 0.018, 6, 40), std(gold, { metalness: 0.9, roughness: 0.15, emissive: gold, emissiveIntensity: 0.5 }), 0, 2.2, 0);
+      ring.rotation.x = Math.PI / 2;
+      for (let i = 0; i < 5; i++) { const a = i * 1.2566; add(new T.OctahedronGeometry(0.06), std(gold, { emissive: gold, emissiveIntensity: 0.8 }), Math.cos(a) * 0.78, 2.2 + Math.sin(i * 2) * 0.08, Math.sin(a) * 0.78); }
+    }
   }
 
   function startToyAnimation() {
