@@ -14887,11 +14887,11 @@
     text("voce", "<b>Saghe e minigiochi</b><br>Storie speciali e giochi a parte. Ognuna si gioca per conto suo.");
     buttons([
       { head: "✨ Nuova Suite Gameplay 2D HD" },
-      { label: "✨ Arena 2D HD · Hub Completo", sub: "Tutte le 4 modalità 2D HD ad alta definizione", cls: "hot", fn: () => { if (window.openArena2DHDModal) window.openArena2DHDModal(menuSaghe); } },
-      { label: "🛡️ Rondine Emblem · RPG Tattico 2D HD", sub: "Stile Fire Emblem · Griglia, triangolo dello stile e duelli", cls: "hot", fn: () => { if (window.openTacticalEmblemMode) window.openTacticalEmblemMode(menuSaghe); } },
-      { label: "⚽ Top-Down Action Soccer 2D HD", sub: "Stile Sensible Soccer · 60fps, Aftertouch e fisica reale", cls: "hot", fn: () => { if (window.openActionSoccerHD) window.openActionSoccerHD(menuSaghe); } },
-      { label: "👟 Street Football · La Gabbia del Molo", sub: "Calcio 3v3 da strada con sponde sui muri e barra Grinta", cls: "hot", fn: () => { if (window.openStreetCageMode) window.openStreetCageMode(menuSaghe); } },
-      { label: "📋 Matchday Director 2D HD", sub: "Gestionale Live · Ordini in tempo reale e lavagna tattica 2D", cls: "hot", fn: () => { if (window.openMatchDirectorHD) window.openMatchDirectorHD(menuSaghe); } },
+      { label: "✨ Arena 2D HD · Hub Completo", sub: "Le 4 modalità 2D HD in un posto solo", cls: "hot", fn: () => { if (window.openArena2DHDModal) window.openArena2DHDModal(menuSaghe); } },
+      { label: "🛡️ Rondine Emblem · RPG Tattico 2D HD", sub: "RPG tattico a griglia: 4 capitoli, anteprima dei danni, stelle", cls: "hot", fn: () => { if (window.openTacticalEmblemMode) window.openTacticalEmblemMode(menuSaghe); } },
+      { label: "⚽ Top-Down Action Soccer 2D HD", sub: "Coppa del Molo · 5 contro 5, aftertouch, torneo a 5 squadre", cls: "hot", fn: () => { if (window.openActionSoccerHD) window.openActionSoccerHD(menuSaghe); } },
+      { label: "👟 Street Football · La Gabbia del Molo", sub: "3 contro 3 da strada: sponde sui muri, Trabucco, 4 livelli", cls: "hot", fn: () => { if (window.openStreetCageMode) window.openStreetCageMode(menuSaghe); } },
+      { label: "📋 Matchday Director 2D HD", sub: "Fai il Mister: modulo, cambi, discorso all'intervallo, pagella", cls: "hot", fn: () => { if (window.openMatchDirectorHD) window.openMatchDirectorHD(menuSaghe); } },
       { head: "Saghe Ispirate & Speciali" },
       { label: "⭐ La Leggenda del Tuo Campione", sub: heroLoad() ? `La saga esclusiva di ${heroLoad().name} (N.${heroLoad().num})` : "Crea il tuo campione e scendi in campo!", cls: "hot", fn: () => { if (window.openHeroStoryMenu) window.openHeroStoryMenu(menuSaghe); } },
       { label: "⚡ Tsubasa · Il Tiro Combinato", sub: "Holly & Benji: Twin Shot ad elica, la Muppet e parate dal palo!", cls: "hot", fn: () => { if (window.openTsubasaMenu) window.openTsubasaMenu(menuSaghe); } },
@@ -14961,7 +14961,7 @@
     const tr = readJSON(TOUR, { titles: 0 }), co = readJSON(COACH, { w: 0, played: 0 });
     text("voce", `<b>Modalità di Gioco</b> ${mnBar(mnPct(mnModi()))}<br>Scegli tra tornei speciali, saghe investigative, multiverso o sfide calcistiche. Tutte indipendenti dal salvataggio principale.`);
     buttons([
-      { label: "✨ Arena 2D HD del Borgo", sub: "Suite Completa: Tactical Emblem, Action 60fps, Street Cage & Gestionale Live", cls: "hot", fn: () => { if (window.openArena2DHDModal) window.openArena2DHDModal(modes); } },
+      { label: "✨ Arena 2D HD del Borgo", sub: "Suite Completa: Emblem, Action Soccer, Gabbia del Molo e Matchday Director", cls: "hot", fn: () => { if (window.openArena2DHDModal) window.openArena2DHDModal(modes); } },
       { label: "🎰 Distributore Gashapon 3D", sub: "I Pupazzetti della Costa: gira la manovella e colleziona i giocattoli 3D!", cls: "hot", fn: () => { if (window.openGachaModal) window.openGachaModal(); } },
       { label: "📜 Leggende del passato (8 sfide d'epoca)", sub: "Le grandi partite storiche: Wanda '68, Nonno Dante '74, Baciccia Sr '60, Dario '91…", cls: "hot", fn: () => leggende(modes) },
       { label: "📽️ Momenti in Bianco e Nero (B&W)", sub: "Partite storiche in autentico bianco e nero d'epoca: fumo del '54, Rita '70, Don Aurelio '65…", cls: "hot", fn: () => flashback(modes) },

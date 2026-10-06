@@ -1,166 +1,122 @@
-// js/arena-2d-hd.js - Hub & Master Launcher for the 2D HD Game Suite
+// js/arena-2d-hd.js - Hub "Arena 2D HD": presenta le 4 modalità della suite e le lancia
+// Entry: window.openArena2DHDModal(onExit)
 (function () {
+  "use strict";
+
+  const LAST_KEY = "ali-di-rondine.arena-hd-last";
+  const DIR_KEY = "ali-di-rondine.director-hd-v1";
+  const STYLE_ID = "arx-style";
+
   let modal = null;
   let onExitCallback = null;
+  let keyFn = null;
+
+  const MODES = [
+    { id: "emblem", fn: "openTacticalEmblemMode", ico: "🛡️", t: "Rondine Emblem", tag: "Tattica a turni", col: "#38bdf8", time: "~10 min", ctrl: "Tocco o mouse", d: "Muovi la squadra su una griglia, tocca i rivali e scegli le mosse. Contano portata e ruoli: pensa prima di muoverti.", btn: "Gioca" },
+    { id: "action", fn: "openActionSoccerHD", ico: "⚽", t: "Action Soccer", tag: "Calcio d'azione 5v5", col: "#4ade80", time: "~5 min", ctrl: "Joystick o tocco", d: "Partita rapida vista dall'alto: corri, passa, tira. Calci a effetto con l'aftertouch e uno scatto speciale per i momenti caldi.", btn: "Gioca" },
+    { id: "street", fn: "openStreetCageMode", ico: "👟", t: "Gabbia del Molo", tag: "Calcio da strada 3v3", col: "#fb923c", time: "~4 min", ctrl: "Tocco, frecce o WASD", d: "Campetto recintato: i muri restituiscono la palla, usali per sponde e uno-due. Riempi la Grinta per il tiro speciale.", btn: "Entra" },
+    { id: "director", fn: "openMatchDirectorHD", ico: "📋", t: "Matchday Director", tag: "Gestionale dal vivo", col: "#c084fc", time: "~3 min a partita", ctrl: "Solo tocco: nessun riflesso", d: "Sei il Mister: modulo, mentalità, pressing, cambi e discorso dell'intervallo. 5 avversari, progressione e pagella.", btn: "Siediti" }
+  ];
+
+  const CSS = `
+  .arx-root{position:fixed;inset:0;z-index:999999;background:radial-gradient(120% 60% at 50% 0%,#0f2542 0%,#060d1a 60%);color:#e5edf8;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;overflow-y:auto;-webkit-overflow-scrolling:touch;font-size:14px}
+  .arx-root *{box-sizing:border-box}
+  .arx-wrap{max-width:820px;margin:0 auto;padding:12px 14px 22px}
+  .arx-head{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+  .arx-head h1{margin:2px 0 0;font-size:21px;font-weight:800;color:#fff;letter-spacing:-.3px;text-shadow:none}
+  .arx-head p{margin:4px 0 0;font-size:12.5px;line-height:1.45;color:#93a4bd}
+  .arx-x{flex:none;min-width:48px;min-height:44px;border:1px solid #ef4444;background:#7f1d1d;color:#fff;border-radius:10px;font:800 15px system-ui;cursor:pointer}
+  .arx-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+  .arx-card{display:flex;flex-direction:column;background:#0d1a2e;border:1px solid #223653;border-top:3px solid var(--c);border-radius:14px;padding:11px 11px 12px;position:relative;min-width:0}
+  .arx-card .ic{font-size:30px;line-height:1}
+  .arx-card h2{margin:6px 0 1px;font-size:15px;font-weight:800;color:var(--c);line-height:1.2;text-shadow:none}
+  .arx-card .tg{font-size:10.5px;font-weight:700;color:#93a4bd;letter-spacing:.3px;text-transform:uppercase}
+  .arx-card p{margin:7px 0 8px;font-size:12px;line-height:1.45;color:#c4d1e6;flex:1}
+  .arx-meta{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:9px}
+  .arx-meta span{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:10px;background:#16253e;color:#a9bbd6}
+  .arx-play{min-height:46px;width:100%;border:0;border-radius:10px;font:800 14px system-ui;color:#08111f;background:var(--c);cursor:pointer;touch-action:manipulation}
+  .arx-play:active{transform:scale(.97)}
+  .arx-play[disabled]{opacity:.4}
+  .arx-last{position:absolute;top:8px;right:8px;font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:9px;background:#facc15;color:#241a02}
+  .arx-info{margin-top:12px;padding:10px 12px;border:1px solid #223653;border-radius:12px;background:rgba(13,26,46,.7);font-size:12px;line-height:1.5;color:#93a4bd}
+  .arx-info b{color:#e5edf8}
+  @media (min-width:700px){.arx-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+  `;
+
+  function readLast() { try { return localStorage.getItem(LAST_KEY) || ""; } catch (e) { return ""; } }
+  function writeLast(id) { try { localStorage.setItem(LAST_KEY, id); } catch (e) { /* ignora */ } }
+  function directorLine() {
+    try {
+      const r = JSON.parse(localStorage.getItem(DIR_KEY) || "null");
+      if (r && r.played) return `Il tuo Matchday Director: ${Number(r.wins) || 0} vittorie, ${Number(r.draws) || 0} pareggi, ${Number(r.losses) || 0} sconfitte, ${Number(r.pts) || 0} punti Mister.`;
+    } catch (e) { /* default */ }
+    return "Il Matchday Director conserva i tuoi record su questo dispositivo.";
+  }
+
+  function closeHub() {
+    if (keyFn) { document.removeEventListener("keydown", keyFn); keyFn = null; }
+    if (modal) { modal.remove(); modal = null; }
+    const st = document.getElementById(STYLE_ID); if (st) st.remove();
+  }
+
+  function launch(mode) {
+    const fn = window[mode.fn];
+    if (typeof fn !== "function") {
+      try { if (window.toast) window.toast("Modalità non disponibile in questa versione.", "warn", "⚠️"); } catch (e) { /* noop */ }
+      return;
+    }
+    writeLast(mode.id);
+    const exit = onExitCallback;
+    closeHub();
+    // all'uscita della modalità riapriamo l'hub, con lo stesso onExit originale
+    try {
+      fn(function () { window.openArena2DHDModal(exit); });
+    } catch (e) {
+      console.error(e);
+      window.openArena2DHDModal(exit);
+    }
+  }
 
   window.openArena2DHDModal = function (onExit) {
+    closeHub();
     onExitCallback = onExit;
-    if (modal) {
-      modal.remove();
-      modal = null;
-    }
+    const st = document.createElement("style");
+    st.id = STYLE_ID; st.textContent = CSS;
+    document.head.appendChild(st);
 
+    const last = readLast();
     modal = document.createElement("div");
     modal.id = "arena2dModal";
-    modal.style.position = "fixed";
-    modal.style.top = "0";
-    modal.style.left = "0";
-    modal.style.width = "100vw";
-    modal.style.height = "100vh";
-    modal.style.background = "rgba(4, 8, 17, 0.96)";
-    modal.style.zIndex = "999999";
-    modal.style.display = "flex";
-    modal.style.flexDirection = "column";
-    modal.style.backdropFilter = "blur(12px)";
-    modal.style.overflowY = "auto";
-    modal.style.color = "#fff";
-    modal.style.fontFamily = "system-ui, -apple-system, sans-serif";
-
-    modal.innerHTML = `
-      <div style="max-width:1100px; width:100%; margin:0 auto; padding:24px 20px; box-sizing:border-box;">
-        
-        <!-- Header -->
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #1e293b; padding-bottom:16px; margin-bottom:24px;">
-          <div>
-            <div style="display:inline-block; background:rgba(56, 189, 248, 0.15); color:#38bdf8; font-size:12px; font-weight:bold; padding:4px 10px; border-radius:12px; margin-bottom:6px; border:1px solid rgba(56, 189, 248, 0.3);">
-              ✨ NUOVA SUITE DI GIOCO 2D HD
-            </div>
-            <h1 style="margin:0; font-size:26px; font-weight:800; color:#fff; letter-spacing:-0.5px;">Arena 2D HD del Borgo Marino</h1>
-            <p style="margin:4px 0 0; font-size:14px; color:#94a3b8;">
-              Quattro esperienze di gameplay 2D HD ad alta definizione: RPG Tattico alla Fire Emblem, Calcio d'Azione a 60fps, Street Soccer con sponde e Gestionale Tattico dal vivo.
-            </p>
-          </div>
-          <button id="arenaCloseBtn" style="background:#e63946; color:#fff; border:none; padding:10px 18px; border-radius:8px; font-weight:bold; font-size:14px; cursor:pointer; transition:transform 0.15s ease;">
-            ✕ Chiudi
-          </button>
-        </div>
-
-        <!-- 4 Game Cards Grid -->
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:20px; margin-bottom:30px;">
-          
-          <!-- Card 1: Tactical Emblem -->
-          <div style="background:#0f172a; border:1px solid #334155; border-radius:12px; padding:20px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 10px 25px rgba(0,0,0,0.5);">
-            <div>
-              <div style="font-size:36px; margin-bottom:10px;">🛡️</div>
-              <h2 style="margin:0 0 6px; font-size:18px; color:#38bdf8; font-weight:700;">Rondine Emblem · Torneo del Faro</h2>
-              <div style="font-size:11px; color:#f59e0b; font-weight:bold; margin-bottom:12px;">TACTICAL SOCCER RPG (STILE FIRE EMBLEM)</div>
-              <p style="font-size:13px; color:#cbd5e1; line-height:1.5; margin:0 0 16px;">
-                Griglia tattica a turni sul campo del molo! Triangolo dello stile: <b>Tecnica > Potenza > Velocità</b>. Duelli cinematografici con calcolo di Hit%, Crit%, mosse speciali e 3 capitoli narrativi contro i rivali della costa.
-              </p>
-            </div>
-            <button id="playEmblemBtn" style="background:linear-gradient(135deg, #0284c7, #2563eb); color:#fff; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer; width:100%; font-size:14px;">
-              Gioca Rondine Emblem ⚔️
-            </button>
-          </div>
-
-          <!-- Card 2: Action Soccer HD -->
-          <div style="background:#0f172a; border:1px solid #334155; border-radius:12px; padding:20px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 10px 25px rgba(0,0,0,0.5);">
-            <div>
-              <div style="font-size:36px; margin-bottom:10px;">⚽</div>
-              <h2 style="margin:0 0 6px; font-size:18px; color:#22c55e; font-weight:700;">Top-Down Action Soccer 2D HD</h2>
-              <div style="font-size:11px; color:#4ade80; font-weight:bold; margin-bottom:12px;">CALCIO D'AZIONE 60FPS (STILE SENSIBLE SOCCER)</div>
-              <p style="font-size:13px; color:#cbd5e1; line-height:1.5; margin:0 0 16px;">
-                Calcio giocato puro a 60fps con controllo diretto su tastiera o touch screen. Fisica del pallone con rimbalzi, portieri reattivi, contrasti e <b>Aftertouch</b> per curvare i tiri al volo sul secondo palo!
-              </p>
-            </div>
-            <button id="playActionBtn" style="background:linear-gradient(135deg, #16a34a, #15803d); color:#fff; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer; width:100%; font-size:14px;">
-              Gioca Action Soccer ⚽
-            </button>
-          </div>
-
-          <!-- Card 3: Street Soccer Cage -->
-          <div style="background:#0f172a; border:1px solid #334155; border-radius:12px; padding:20px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 10px 25px rgba(0,0,0,0.5);">
-            <div>
-              <div style="font-size:36px; margin-bottom:10px;">👟</div>
-              <h2 style="margin:0 0 6px; font-size:18px; color:#f97316; font-weight:700;">Street Soccer · La Gabbia del Molo</h2>
-              <div style="font-size:11px; color:#fb923c; font-weight:bold; margin-bottom:12px;">CALCIO DA STRADA 3v3 CON SPONDE</div>
-              <p style="font-size:13px; color:#cbd5e1; line-height:1.5; margin:0 0 16px;">
-                Campetto d'asfalto recintato sul molo dei pescherecci! Usa i muri e le ringhiere di pietra per sponde e assist a rimbalzo. Carica la barra <b>Grinta del Molo</b> e scatena il Tiro del Trabucco!
-              </p>
-            </div>
-            <button id="playStreetBtn" style="background:linear-gradient(135deg, #ea580c, #c2410c); color:#fff; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer; width:100%; font-size:14px;">
-              Entra nella Gabbia 🔥
-            </button>
-          </div>
-
-          <!-- Card 4: Matchday Director -->
-          <div style="background:#0f172a; border:1px solid #334155; border-radius:12px; padding:20px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 10px 25px rgba(0,0,0,0.5);">
-            <div>
-              <div style="font-size:36px; margin-bottom:10px;">📋</div>
-              <h2 style="margin:0 0 6px; font-size:18px; color:#a855f7; font-weight:700;">Matchday Director 2D HD</h2>
-              <div style="font-size:11px; color:#c084fc; font-weight:bold; margin-bottom:12px;">GESTIONALE TATTICO LIVE DALLA PANCHINA</div>
-              <p style="font-size:13px; color:#cbd5e1; line-height:1.5; margin:0 0 16px;">
-                Siediti in panchina e dirigi la Rondine durante i 90 minuti: cambi di modulo in diretta (4-3-3, 3-5-2, 4-4-2), ordini di pressing e assedio, linee di passaggio visibili in 2D e analisi statistica xG in tempo reale.
-              </p>
-            </div>
-            <button id="playDirectorBtn" style="background:linear-gradient(135deg, #9333ea, #7e22ce); color:#fff; border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer; width:100%; font-size:14px;">
-              Siediti in Panchina 📋
-            </button>
-          </div>
-
-        </div>
-
-        <!-- Footer Lore info -->
-        <div style="background:rgba(30, 41, 59, 0.5); border:1px solid #334155; border-radius:10px; padding:16px 20px; font-size:13px; color:#94a3b8; display:flex; justify-content:space-between; align-items:center;">
-          <span>🌊 Tutte le modalità 2D HD sono completamente indipendenti dal salvataggio principale e giocabili sia con mouse/tastiera che su smartphone e tablet.</span>
-          <span style="font-size:12px; color:#38bdf8; font-weight:bold;">Borgo Marino · Stagione 2D HD</span>
-        </div>
-
+    modal.className = "arx-root";
+    modal.innerHTML = `<div class="arx-wrap">
+      <div class="arx-head">
+        <div><h1>✨ Arena 2D HD</h1>
+        <p>Quattro modi diversi di vivere il calcio del Borgo. Sono indipendenti dalla storia principale: provali nell'ordine che vuoi.</p></div>
+        <button class="arx-x" id="arenaCloseBtn" aria-label="Chiudi">✕</button>
       </div>
-    `;
-
+      <div class="arx-grid">${MODES.map((m) => `
+        <div class="arx-card" style="--c:${m.col}">
+          ${last === m.id ? '<span class="arx-last">ULTIMA</span>' : ""}
+          <div class="ic">${m.ico}</div>
+          <h2>${m.t}</h2>
+          <div class="tg">${m.tag}</div>
+          <p>${m.d}</p>
+          <div class="arx-meta"><span>⏱ ${m.time}</span><span>🎮 ${m.ctrl}</span></div>
+          <button class="arx-play" data-mode="${m.id}" ${typeof window[m.fn] === "function" ? "" : "disabled"}>${m.btn} ${m.ico}</button>
+        </div>`).join("")}
+      </div>
+      <div class="arx-info">🌊 <b>Nota:</b> ${directorLine()} Alcune modalità offrono piccole monete alla prima vittoria; niente tocca le statistiche della Carriera.</div>
+    </div>`;
     document.body.appendChild(modal);
 
-    document.getElementById("arenaCloseBtn").onclick = function () {
-      modal.remove();
-      modal = null;
+    modal.querySelector("#arenaCloseBtn").onclick = function () {
+      closeHub();
       if (typeof onExitCallback === "function") onExitCallback();
     };
-
-    document.getElementById("playEmblemBtn").onclick = function () {
-      if (window.openTacticalEmblemMode) {
-        window.openTacticalEmblemMode(() => {
-          if (modal) modal.style.display = "flex";
-        });
-        modal.style.display = "none";
-      }
-    };
-
-    document.getElementById("playActionBtn").onclick = function () {
-      if (window.openActionSoccerHD) {
-        window.openActionSoccerHD(() => {
-          if (modal) modal.style.display = "flex";
-        });
-        modal.style.display = "none";
-      }
-    };
-
-    document.getElementById("playStreetBtn").onclick = function () {
-      if (window.openStreetCageMode) {
-        window.openStreetCageMode(() => {
-          if (modal) modal.style.display = "flex";
-        });
-        modal.style.display = "none";
-      }
-    };
-
-    document.getElementById("playDirectorBtn").onclick = function () {
-      if (window.openMatchDirectorHD) {
-        window.openMatchDirectorHD(() => {
-          if (modal) modal.style.display = "flex";
-        });
-        modal.style.display = "none";
-      }
-    };
+    modal.querySelectorAll("[data-mode]").forEach((b) => {
+      b.onclick = function () { const m = MODES.find((x) => x.id === b.dataset.mode); if (m) launch(m); };
+    });
+    keyFn = function (e) { if (e.key === "Escape" && modal) { closeHub(); if (typeof onExitCallback === "function") onExitCallback(); } };
+    document.addEventListener("keydown", keyFn);
   };
 })();
