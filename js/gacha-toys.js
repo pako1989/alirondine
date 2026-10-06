@@ -1720,7 +1720,7 @@
       const handleG = new T.TorusGeometry(0.38, 0.07, 8, 16, Math.PI);
       const hL = new T.Mesh(handleG, goldM); hL.position.set(-0.62, 1.15, 0); hL.rotation.z = Math.PI / 2;
       const hR = new T.Mesh(handleG, goldM); hR.position.set(0.62, 1.15, 0); hR.rotation.z = -Math.PI / 2;
-      toyMeshGroup.add(hL, hR);
+    toyMeshGroup.add(hL, hR);
 
       threeScene.add(toyMeshGroup);
       startToyAnimation();
@@ -1910,6 +1910,7 @@
       armL.position.set(-0.46, 1.04, 0); armL.rotation.z = 0.32;
       armR.position.set(0.46, 1.04, 0); armR.rotation.z = -0.32;
     }
+    armL.name = "armL"; armR.name = "armR";
     toyMeshGroup.add(armL, armR);
 
     // Mani o Grandi Guantoni
@@ -1933,6 +1934,7 @@
       hL.position.set(-0.55, 0.88, 0);
       hR.position.set(0.55, 0.88, 0);
     }
+    hL.name = "handL"; hR.name = "handR";
     toyMeshGroup.add(hL, hR);
 
     // 5. Testa, Occhi, Baffi, Occhiali e Dettagli del Viso
@@ -2190,8 +2192,6 @@
     });
     // naso, guance, bocca
     add(new T.SphereGeometry(0.04, 8, 8), std(skin, { roughness: 0.6 }), 0, 1.52, 0.44, 1, 0.9, 1.1);
-    const blush = std(0xff8fa3, { transparent: true, opacity: 0.55 });
-    [-0.27, 0.27].forEach((x) => add(new T.SphereGeometry(0.06, 8, 8), blush, x, 1.47, 0.33, 1, 0.6, 0.4));
     if (!beard) {
       const m = add(new T.TorusGeometry(0.085, 0.014, 6, 14, Math.PI), std(0x7f1d1d), 0, 1.43, 0.41);
       m.rotation.z = Math.PI;
@@ -2211,6 +2211,23 @@
     if (c.glasses && !/fede|nonna|mister/.test(id)) [-0.16, 0.16].forEach((x) => add(new T.TorusGeometry(0.12, 0.02, 6, 16), std(0x1e293b, { metalness: 0.7 }), x, 1.585, 0.43));
     if (c.shades && !/fede|nonna|mister/.test(id)) add(new T.BoxGeometry(0.5, 0.1, 0.05), std(0x0b0f19, { metalness: 0.8, roughness: 0.1 }), 0, 1.585, 0.43);
     if (c.beard && !/baciccia|capitano_faro/.test(id)) add(new T.SphereGeometry(0.34, 12, 12), std(hair, { roughness: 0.8 }), 0, 1.28, 0.18, 0.85, 0.42, 0.7);
+    // pose: ogni pupazzetto ha la sua
+    const g = (n) => toyMeshGroup.getObjectByName(n);
+    const aL = g("armL"), aR = g("armR"), hL = g("handL"), hR = g("handR");
+    const fixed = /nico|mattia|garnier|enzo/.test(id) && !/leo/.test(id);
+    if (aL && aR && hL && hR && !fixed) {
+      if (/arbitro|mister|ruggeri|capitano|kenji|aldo|ines|nonna/.test(id)) { // braccia conserte
+        aL.position.set(-0.3, 1.05, 0.3); aL.rotation.set(0, 0, 1.45); aR.position.set(0.3, 1.0, 0.33); aR.rotation.set(0, 0, -1.45);
+        hL.position.set(0.2, 1.05, 0.38); hR.position.set(-0.2, 1.0, 0.4);
+      } else if (/leo|dario|crane|jojo|tommy|bomber|sandro|pietrino/.test(id) || toy.stars >= 5) { // pugno al cielo
+        aR.position.set(0.5, 1.4, 0.05); aR.rotation.set(0, 0, -0.5); hR.position.set(0.66, 1.64, 0.05);
+      } else if (/rita|tonino|pescivendolo|focaccere|chicca|gigi|bice|tamburino/.test(id)) { // mani sui fianchi
+        aL.position.set(-0.42, 1.0, 0.1); aL.rotation.set(0, 0, 0.9); aR.position.set(0.42, 1.0, 0.1); aR.rotation.set(0, 0, -0.9);
+        hL.position.set(-0.56, 0.86, 0.18); hR.position.set(0.56, 0.86, 0.18);
+      } else { // saluto con la mano
+        aL.position.set(-0.52, 1.28, 0.05); aL.rotation.set(0, 0, 0.9); hL.position.set(-0.68, 1.5, 0.05);
+      }
+    }
     // colletto e fascia in vita
     add(new T.TorusGeometry(0.2, 0.04, 6, 16), std(0xffffff), 0, 1.3, 0.04).rotation.x = Math.PI / 2;
     // alone per le rarità alte
