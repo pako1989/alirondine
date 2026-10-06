@@ -1840,3 +1840,7 @@ body:has(#matchHud:not([hidden])) #stats b { font-size: 14px; }
 body:has(#matchHud:not([hidden])) #choices > button { flex: none; min-height: 44px; height: auto; overflow: visible; }
 body:has(#matchHud:not([hidden])) #matchHud { padding: 6px 8px; }
 body:has(#matchHud:not([hidden])) #matchHud .hud div { padding: 2px 6px; }
+.choices button { min-width: 0; }
+@media (max-width: 440px) { .choices button { padding-inline: 6px; font-size: 13px; } }
+.padacts .pad-row button.pad { font-size: 12px; padding-inline: 2px; min-width: 0; }
+.azb button:not(.big) { padding-inline: 2px !important; font-size: 12.5px !important; }
