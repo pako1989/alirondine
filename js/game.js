@@ -5179,6 +5179,8 @@
     leggenda: { n: "Leggenda", fx: { ps: 1.22, tk: 0.12, gk: 1.3 }, note: "Massima sfida: tackle implacabili e contropiedi micidiali." }
   };
   window.getGlobalAzDiff = () => ((SET && SET.azDiff) || (typeof azOpt === "function" ? azOpt().diff : "norm") || "norm");
+  function azCtlName() { return (AZ_CTL.find((x) => x[0] === azCtlMode()) || ["", "Joystick virtuale"])[1]; }
+  function azDiffName() { return AZ_DIF[window.getGlobalAzDiff()] ? AZ_DIF[window.getGlobalAzDiff()].n : "Normale"; }
   window.getGlobalAzCtl = () => ((SET && SET.azCtl) || azCtlMode());
   window.setGlobalAzDiff = (d) => {
     if (AZ_DIF[d]) {
@@ -5263,8 +5265,6 @@
     );
     const isGame = (o) => /^(Stile partite|Difficoltà|Partite tattiche|Modalità Partita|Meteo Vento|⚽ Gioca Esibizione)/.test(o.label);
     const isRule = (o) => /^[✓✗] /.test(o.label);
-    const azCtlName = () => (AZ_CTL.find((x) => x[0] === azCtlMode()) || ["", "Joystick virtuale"])[1];
-    const azDiffName = () => (AZ_DIF[window.getGlobalAzDiff()] ? AZ_DIF[window.getGlobalAzDiff()].n : "Normale");
     const azB = [
       {
         label: `Schema Comandi: ${azCtlName()} ▸`,
