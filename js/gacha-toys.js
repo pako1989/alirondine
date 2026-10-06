@@ -826,8 +826,407 @@
       bonus: "+10 a tutte le statistiche e carisma leggendario",
       statKey: "all",
       statVal: 0.08
+    },
+    {
+      id: "gatto_miro",
+      name: "Il Gatto Mirò della Banchina",
+      title: "Mascotte Sonnecchiante del Molo",
+      stars: 3,
+      rarityName: "Comune",
+      series: "Serie 1 · I Pionieri del Molo",
+      pedestal: "bronze",
+      material: "Gomma vulcanizzata Bar Moretti 1987",
+      pose: "Acciambellato sopra un parastinco rosso",
+      shirtColor: "#e2e8f0",
+      shortsColor: "#475569",
+      hairColor: "#1e293b",
+      skinColor: "#f1f5f9",
+      headType: "bald",
+      acc: "bell",
+      quote: "«Miao... (Se non mi svegliate prima del 90°, portate i tre punti).»",
+      lore: "Il gatto tigrato che viveva dietro la macchina del caffè di Tonino. Si dice portasse fortuna nelle rimesse laterali.",
+      bonus: "+3% Grinta nei minuti di recupero",
+      statKey: "def",
+      statVal: 0.015
+    },
+    {
+      id: "focaccere_notte",
+      name: "Mastro Ugo il Focaccere",
+      title: "Il Signore della Teglia Notturna",
+      stars: 4,
+      rarityName: "Raro",
+      series: "Serie 1 · I Sapori della Costa",
+      pedestal: "silver",
+      material: "Resina smaltata a fuoco con teglia lucida",
+      pose: "Inforna una teglia fumante di focaccia all'olio extravergine",
+      shirtColor: "#f8fafc",
+      shortsColor: "#1e293b",
+      hairColor: "#94a3b8",
+      skinColor: "#e2b184",
+      headType: "cap",
+      acc: "apron",
+      quote: "«Alle quattro del mattino si impasta, alle tre del pomeriggio si vince.»",
+      lore: "Fedelissimo tifoso che regalava i bordi croccanti a Leo dopo ogni allenamento all'alba.",
+      bonus: "+5% Ricarica energia tra primo e secondo tempo",
+      statKey: "en",
+      statVal: 0.02
+    },
+    {
+      id: "chicca_chiringuito",
+      name: "Chicca del Chiringuito",
+      title: "Regina della Granita al Limone",
+      stars: 4,
+      rarityName: "Raro",
+      series: "Serie 2 · Bagnini & Torneo Estivo",
+      pedestal: "silver",
+      material: "Plastica fluorescente estiva con visiera trasparente",
+      pose: "Braccia conserte con vassoio di granite ghiacciate",
+      shirtColor: "#06b6d4",
+      shortsColor: "#fef08a",
+      hairColor: "#f59e0b",
+      skinColor: "#f4a261",
+      headType: "ponytail",
+      acc: "whistle",
+      quote: "«Una granita a chi segna all'incrocio, un ghiacciolo per chi corre all'indietro!»",
+      lore: "Gestisce il chiosco sulla sabbia dove la Rondine si disseta dopo le sfide contro i Bagnini.",
+      bonus: "+4% Velocità negli scatti su terreni pesanti",
+      statKey: "spd",
+      statVal: 0.02
+    },
+    {
+      id: "capitano_faro",
+      name: "Capitan Corrado del Faro",
+      title: "La Vedetta di Ponente",
+      stars: 4,
+      rarityName: "Raro",
+      series: "Serie 2 · Bagnini & Torneo Estivo",
+      pedestal: "silver",
+      material: "Ottone pesante brunito stile nautico",
+      pose: "Guarda attraverso un lungo cannocchiale in ottone dorato",
+      shirtColor: "#1e3a8a",
+      shortsColor: "#0f172a",
+      hairColor: "#f8fafc",
+      skinColor: "#c68a4c",
+      headType: "cap",
+      acc: "pipe",
+      quote: "«Da quassù vedo il mare aperto e i fuorigioco prima ancora che avvengano.»",
+      lore: "Custode del faro di San Pietro. I suoi rintocchi avvisavano il borgo quando la Rondine segnava in trasferta.",
+      bonus: "+4% Visione nei passaggi filtranti",
+      statKey: "def",
+      statVal: 0.02
+    },
+    {
+      id: "arbitro_fischietto",
+      name: "L'Arbitro Severo di Ponente",
+      title: "Legge del Fischietto d'Ottone",
+      stars: 4,
+      rarityName: "Raro",
+      series: "Serie 3 · Campioni & Derby di Liguria",
+      pedestal: "silver",
+      material: "Resina bicolore nero lucido con fischietto cromato",
+      pose: "Cartellino rosso alzato verso il cielo e sguardo di ghiaccio",
+      shirtColor: "#0f172a",
+      shortsColor: "#000000",
+      hairColor: "#334155",
+      skinColor: "#e5b887",
+      headType: "bald",
+      acc: "whistle",
+      quote: "«Sul mio taccuino non c'è pietà per chi fa ostruzione.»",
+      lore: "Ha arbitrato 30 derby di terra battuta senza mai farsi intimidire da nessuno.",
+      bonus: "+4% Pulizia difensiva nei contrasti scivolati",
+      statKey: "def",
+      statVal: 0.025
+    },
+    {
+      id: "bomber_arenzano",
+      name: "Zena lo Scagliatore",
+      title: "Il Siluro dei Trenta Metri",
+      stars: 4,
+      rarityName: "Raro",
+      series: "Serie 3 · Campioni & Derby di Liguria",
+      pedestal: "silver",
+      material: "Metallo pesante pressofuso finitura argento antico",
+      pose: "Caricamento violento di collo pieno con zolla che si alza",
+      shirtColor: "#dc2626",
+      shortsColor: "#1e293b",
+      hairColor: "#1f2937",
+      skinColor: "#df9755",
+      headType: "messy",
+      acc: "tape",
+      quote: "«Quando carico il destro, i portieri chiedono la barriera anche sui rigori!»",
+      lore: "Il bomber più temuto dei tornei regionali, famoso per i suoi tiri che piegavano i pali di legno.",
+      bonus: "+5% Velocità di tiro speciale e potenza carica",
+      statKey: "spd",
+      statVal: 0.025
+    },
+    {
+      id: "tamburino_curva",
+      name: "Il Tamburino dei Fedelissimi",
+      title: "Il Battito del Molo",
+      stars: 4,
+      rarityName: "Raro",
+      series: "Serie 3 · Campioni & Derby di Liguria",
+      pedestal: "silver",
+      material: "Plastica rigida con pelle del tamburo tesa a mano",
+      pose: "Due bacchette sollevate pronte a colpire il tamburo bianco-celeste",
+      shirtColor: "#0284c7",
+      shortsColor: "#ffffff",
+      hairColor: "#92400e",
+      skinColor: "#f3c68f",
+      headType: "cap",
+      acc: "badge",
+      quote: "«Finché il tamburo batte, la Rondine non può arrendersi!»",
+      lore: "Seguiva la squadra ovunque con la sua Fiat 127 arancione e il grande tamburo sul portapacchi.",
+      bonus: "+5% Resistenza ai contrasti avversari",
+      statKey: "en",
+      statVal: 0.02
+    },
+    {
+      id: "sirena_golfo",
+      name: "La Sirena del Golfo Mascotte",
+      title: "Protettrice delle Maree",
+      stars: 5,
+      rarityName: "Super Star",
+      series: "Serie 2 · Bagnini & Torneo Estivo",
+      pedestal: "gold",
+      material: "Porcellana di Savona con iridescenza perlacea e conchiglia d'oro",
+      pose: "Coda di pesce lucente avvolta attorno a un pallone di cuoio antico",
+      shirtColor: "#0d9488",
+      shortsColor: "#14b8a6",
+      hairColor: "#10b981",
+      skinColor: "#fde047",
+      headType: "bun",
+      acc: "medal",
+      quote: "«Chi gioca col cuore delle onde non affonda mai.»",
+      lore: "Mascotte intagliata regalata ai marinai del Borgo prima della grande traversata del '74.",
+      bonus: "+6% Fortuna nei rimpalli e nelle deviazioni",
+      statKey: "def",
+      statVal: 0.035
+    },
+    {
+      id: "mister_venturino",
+      name: "Mister Venturino & La Lavagnetta",
+      title: "Lo Stratega dei Campi di Sabbia",
+      stars: 5,
+      rarityName: "Super Star",
+      series: "Serie 3 · Campioni & Derby di Liguria",
+      pedestal: "gold",
+      material: "Resina dorata e mini-lavagnetta in vera ardesia di Lavagna",
+      pose: "Gessetto alla mano intento a disegnare diagonali tattiche",
+      shirtColor: "#b91c1c",
+      shortsColor: "#1c1917",
+      hairColor: "#6b7280",
+      skinColor: "#eab676",
+      headType: "short_part",
+      acc: "notepad",
+      quote: "«Il pallone non suda. Fatelo correre al posto vostro!»",
+      lore: "Il leggendario allenatore che inventò il modulo a due ali strette per sfruttare il vento di tramontana.",
+      bonus: "+6% Precisione passaggi e posizionamento tattico",
+      statKey: "spd",
+      statVal: 0.03
+    },
+    {
+      id: "telstar_1970",
+      name: "Il Pallone Telstar del '70",
+      title: "Il Cuore di Cuoio Esagonale",
+      stars: 5,
+      rarityName: "Super Star",
+      series: "Fuoriserie · Gabbiano d'Oro Mitico",
+      pedestal: "gold",
+      material: "Pelle e cuoio cuciti a mano con rifiniture in foglia d'oro",
+      pose: "Poggiato su un piedistallo intarsiato come una reliquia",
+      shirtColor: "#ffffff",
+      shortsColor: "#000000",
+      hairColor: "#ffffff",
+      skinColor: "#ffffff",
+      headType: "ball_head",
+      acc: "star",
+      quote: "«Trentadue toppe, un solo destino: gonfiare la rete.»",
+      lore: "Il pallone originale autografato conservato nella vetrina blindata del Bar Moretti dal 1970.",
+      bonus: "+7% Precisione balistica sui tiri da lontano",
+      statKey: "spd",
+      statVal: 0.035
+    },
+    {
+      id: "trofeo_baia_oro",
+      name: "La Coppa d'Oro della Baia",
+      title: "Il Graal dei Tornei Notturni",
+      stars: 5,
+      rarityName: "Super Star",
+      series: "Fuoriserie · Gabbiano d'Oro Mitico",
+      pedestal: "gold",
+      material: "Ottone placcato oro 24k con manici a forma di delfino",
+      pose: "Coppa trionfale sollevata con nastri bicolori svolazzanti",
+      shirtColor: "#fbbf24",
+      shortsColor: "#f59e0b",
+      hairColor: "#ffd23f",
+      skinColor: "#ffd23f",
+      headType: "trophy_head",
+      acc: "cup",
+      quote: "«Sollevata solo da chi non ha mai mollato un solo contrasto.»",
+      lore: "Il trofeo storico vinto dalla Rondine nel memorabile torneo estivo del 1988 contro la Pro Vado.",
+      bonus: "+25% Monete guadagnate a fine partita",
+      statKey: "coin",
+      statVal: 0.25
+    },
+    {
+      id: "amedeo_rondine_1968",
+      name: "Amedeo Moretti · Fondatore 1968",
+      title: "Il Padre Spirituale della Rondine",
+      stars: 6,
+      rarityName: "Leggenda Mitica",
+      series: "Fuoriserie · Gabbiano d'Oro Mitico",
+      pedestal: "rainbow",
+      material: "Resina olografica prismatica semitrasparente con riflessi arcobaleno",
+      pose: "Posa solenne da capitano con mano sul cuore e stemma ricamato",
+      shirtColor: "#1e40af",
+      shortsColor: "#ffffff",
+      hairColor: "#f3f4f6",
+      skinColor: "#e5b887",
+      headType: "short_part",
+      acc: "armband",
+      quote: "«Una maglia, un borgo, una famiglia. Finché vola la Rondine, San Pietro vive.»",
+      lore: "Il nonno che fondò la squadra nel retrobottega del Bar Moretti cucendo le prime undici casacche a mano.",
+      bonus: "+8% Grinta, Stamina e Spirito di Squadra totale",
+      statKey: "en",
+      statVal: 0.05
+    },
+    {
+      id: "leo_rondine_derby",
+      name: "Leo Moretti · Edizione Derby Infuocato",
+      title: "Il Fuoco della Rivincita",
+      stars: 6,
+      rarityName: "Leggenda Mitica",
+      series: "Fuoriserie · Gabbiano d'Oro Mitico",
+      pedestal: "rainbow",
+      material: "Composito cangiante cromato con scarpini dorati specchiati",
+      pose: "Volo a mezza altezza a ali spiegate con scia cometa sul pallone",
+      shirtColor: "#ef4444",
+      shortsColor: "#1e3a8a",
+      hairColor: "#451a03",
+      skinColor: "#f6c391",
+      headType: "messy",
+      acc: "wing",
+      quote: "«Questo tiro non è solo mio: è per ogni caruggio di San Pietro!»",
+      lore: "Raffigura Leo nell'istante esatto del gol decisivo al 94° minuto nel derby più caldo della storia del Ponente.",
+      bonus: "+8% Scatto fulmineo e potenza assoluta del Tiro Speciale",
+      statKey: "spd",
+      statVal: 0.05
+    },
+    {
+      id: "gabbiano_oro_supremo",
+      name: "Il Gabbiano d'Oro Supremo",
+      title: "L'Eterno Guardiano del Bar",
+      stars: 6,
+      rarityName: "Leggenda Mitica",
+      series: "Fuoriserie · Gabbiano d'Oro Mitico",
+      pedestal: "rainbow",
+      material: "Oro zecchino satinato e cristallo ametista con ali spiegate al vento",
+      pose: "Appollaiato su un'insegna d'epoca del Bar Moretti con mini-coppa nel becco",
+      shirtColor: "#ffd23f",
+      shortsColor: "#f59e0b",
+      hairColor: "#ffffff",
+      skinColor: "#fde047",
+      headType: "beak",
+      acc: "cup",
+      quote: "«Kraaah! (La fortuna bacia solo chi osa calciare da fuori area!)»",
+      lore: "Il pezzo più ambito di tutti i collezionisti della Liguria. Tiratura numero 1/1 custodita in cassaforte.",
+      bonus: "+10% a tutti gli attributi e raddoppio frammenti ottenuti",
+      statKey: "coin",
+      statVal: 0.35
+    }
+
+  ];
+
+  // --- CATALOGO DEI DISTRIBUTORI GASHAPON DISPONIBILI (I 4 GASHAPON DELLA COSTA) ---
+  const GACHA_MACHINES = [
+    {
+      id: "borgo_vintage",
+      name: "Bar Moretti Classico",
+      tagline: "Serie 1 · I Pionieri & Sapori del Borgo",
+      icon: "🔴",
+      themeColor: "#b3202c",
+      accentColor: "#f59e0b",
+      glassTint: "rgba(96, 165, 250, 0.22)",
+      bodyGrad: ["#8a1620", "#d92b3a", "#73121a"],
+      baseCol: "#1e2229",
+      accentBar: "#b3202c",
+      crankCol: "#cbd5e1",
+      plateText: "VINTAGE '86",
+      balls: ["#ef4444", "#3b82f6", "#eab308", "#10b981", "#a855f7", "#ec4899", "#f97316"],
+      cost1: 15,
+      cost10: 130,
+      filterSeries: ["Serie 1"],
+      rates: { star6: 1.5, star5: 8.5, star4: 25.0, star3: 65.0 },
+      desc: "La macchinetta originale in ghisa amaranto del Bar Moretti. Include botteghe, sapori e pionieri di San Pietro."
+    },
+    {
+      id: "baia_sole",
+      name: "Baia del Sole & Costa",
+      tagline: "Serie 2 · Bagnini, Molo & Torneo Estivo",
+      icon: "🌊",
+      themeColor: "#0284c7",
+      accentColor: "#38bdf8",
+      glassTint: "rgba(6, 182, 212, 0.22)",
+      bodyGrad: ["#0369a1", "#0284c7", "#075985"],
+      baseCol: "#0f2338",
+      accentBar: "#38bdf8",
+      crankCol: "#e0f2fe",
+      plateText: "BAIA ESTIVA",
+      balls: ["#0284c7", "#06b6d4", "#38bdf8", "#facc15", "#10b981", "#22d3ee", "#fb923c"],
+      cost1: 18,
+      cost10: 155,
+      filterSeries: ["Serie 2", "Bagnini", "Baia"],
+      rates: { star6: 2.0, star5: 10.0, star4: 28.0, star3: 60.0 },
+      desc: "Decorata con onde e timoni. Contiene bagnini, marinai, re del pedalò e specialisti della sabbia!"
+    },
+    {
+      id: "derby_liguria",
+      name: "Derby & Rivali di Liguria",
+      tagline: "Serie 3 · Campioni dei Campi in Terra",
+      icon: "⚽",
+      themeColor: "#1e293b",
+      accentColor: "#fbbf24",
+      glassTint: "rgba(234, 179, 8, 0.18)",
+      bodyGrad: ["#0f172a", "#334155", "#020617"],
+      baseCol: "#111827",
+      accentBar: "#eab308",
+      crankCol: "#fef08a",
+      plateText: "DERBY CUP",
+      balls: ["#f59e0b", "#1e293b", "#e2e8f0", "#d97706", "#475569", "#fbbf24", "#ef4444"],
+      cost1: 22,
+      cost10: 190,
+      filterSeries: ["Serie 3", "Derby", "Rivali", "Campioni"],
+      rates: { star6: 2.5, star5: 11.5, star4: 31.0, star3: 55.0 },
+      desc: "Finitura antracite e oro. Racchiude i bomber storici, i muri difensivi e i capitani rivali."
+    },
+    {
+      id: "gabbiano_oro",
+      name: "Gabbiano d'Oro Mitico",
+      tagline: "Fuoriserie Deluxe · Olografici & Leggende",
+      icon: "✨",
+      themeColor: "#7c3aed",
+      accentColor: "#f43f5e",
+      glassTint: "rgba(168, 85, 247, 0.28)",
+      bodyGrad: ["#581c87", "#7e22ce", "#3b0764"],
+      baseCol: "#2e1065",
+      accentBar: "#fde047",
+      crankCol: "#fde047",
+      plateText: "FUORISERIE",
+      balls: ["#ffd23f", "#ec4899", "#8b5cf6", "#06b6d4", "#f43f5e", "#a855f7", "#ffffff"],
+      cost1: 35,
+      cost10: 300,
+      filterSeries: ["Fuoriserie", "Leggende", "Mitico", "Serie 4"],
+      rates: { star6: 5.0, star5: 22.0, star4: 45.0, star3: 28.0 },
+      desc: "Distributore reale in oro zecchino e ametista! Probabilità raddoppiate per 5★ Oro e 6★ Arcobaleno, 4★ minimo garantito!"
     }
   ];
+
+  let activeMachineId = "borgo_vintage";
+  function getActiveMachine() {
+    return GACHA_MACHINES.find(m => m.id === activeMachineId) || GACHA_MACHINES[0];
+  }
+
 
   function resolveToy(t) {
     if (!t) return t;
@@ -974,10 +1373,11 @@
   }
 
   // --- LOGICA DI PESCATA (RNG & PITY) ---
-  function pullSingleToy(data) {
+    function pullSingleToy(data) {
     data.pullCount = (data.pullCount || 0) + 1;
     data.pity = (data.pity || 0) + 1;
 
+    const mach = getActiveMachine();
     let targetStar = 3;
     const r = Math.random() * 100;
 
@@ -991,19 +1391,31 @@
     else if (data.pity >= 30) {
       targetStar = Math.random() < 0.25 ? 6 : 5;
       data.pity = 0;
-    } else if (r < 1.5) {
-      targetStar = 6; // 1.5% Leggenda Mitica
-      data.pity = 0;
-    } else if (r < 10.0) {
-      targetStar = 5; // 8.5% Super Star
-      data.pity = 0;
-    } else if (r < 35.0) {
-      targetStar = 4; // 25% Raro
     } else {
-      targetStar = 3; // 65% Comune
+      const r6 = mach.rates ? mach.rates.star6 : 1.5;
+      const r5 = mach.rates ? mach.rates.star5 : 8.5;
+      const r4 = mach.rates ? mach.rates.star4 : 25.0;
+      if (r < r6) {
+        targetStar = 6; // Leggenda Mitica
+        data.pity = 0;
+      } else if (r < (r6 + r5)) {
+        targetStar = 5; // Super Star
+        data.pity = 0;
+      } else if (r < (r6 + r5 + r4)) {
+        targetStar = 4; // Raro
+      } else {
+        targetStar = 3; // Comune
+      }
     }
 
-    const pool = TOY_CATALOG.filter((t) => t.stars === targetStar);
+    // Filtra la pool dando priorità ai pupazzetti della serie della macchinetta (75% affinità)
+    let pool = TOY_CATALOG.filter((t) => t.stars === targetStar);
+    if (mach.filterSeries && mach.filterSeries.length > 0) {
+      const seriesMatches = pool.filter(t => mach.filterSeries.some(s => (t.series || "").includes(s)));
+      if (seriesMatches.length > 0 && Math.random() < 0.75) {
+        pool = seriesMatches;
+      }
+    }
     const chosen = pool[Math.floor(Math.random() * pool.length)] || TOY_CATALOG[0];
 
     const isDuplicate = !!(data.owned[chosen.id]);
@@ -1589,7 +2001,7 @@
   }
   window.openGachaFoundryModal = openGachaFoundryModal;
 
-  // --- MODALE GACHA PRINCIPALE ---
+  // --- MODALE GACHA PRINCIPALE CON MULTI-DISTRIBUTORE ---
   let gachaModalEl = null;
 
   function createGachaModal() {
@@ -1601,7 +2013,7 @@
       position: fixed; inset: 0; z-index: 999999;
       background: radial-gradient(circle at center, #132442 0%, #060b14 100%);
       display: none; flex-direction: column; align-items: center; justify-content: space-between;
-      padding: 12px; box-sizing: border-box; font-family: var(--body, system-ui, sans-serif);
+      padding: 10px; box-sizing: border-box; font-family: var(--body, system-ui, sans-serif);
       color: #fff; overflow-y: auto; user-select: none; -webkit-user-select: none;
     `;
 
@@ -1609,58 +2021,75 @@
       <!-- Intestazione -->
       <div style="width: 100%; max-width: 480px; display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1.5px solid rgba(255,255,255,0.15);">
         <div style="display:flex; align-items:center; gap:8px;">
-          <span style="font-size:24px;">🎰</span>
+          <span id="gachaHeaderIcon" style="font-size:24px;">🎰</span>
           <div>
-            <div style="font-size:15px; font-weight:900; color:var(--gold, #ffd23f); text-shadow:0 2px 4px #000; letter-spacing:0.5px;">GASHAPON DEL BAR MORETTI</div>
-            <div style="font-size:11px; color:#9cb5db;">Mini-Leggende & Pupazzetti della Costa 3D (${TOY_CATALOG.length} Statuine)</div>
+            <div id="gachaHeaderTitle" style="font-size:15px; font-weight:900; color:var(--gold, #ffd23f); text-shadow:0 2px 4px #000; letter-spacing:0.5px;">GASHAPON DEL BAR MORETTI</div>
+            <div id="gachaHeaderSub" style="font-size:11px; color:#9cb5db;">Mini-Leggende & Pupazzetti della Costa 3D (${TOY_CATALOG.length} Statuine)</div>
           </div>
         </div>
         <button type="button" id="gachaCloseBtn" style="background:#b3202c; color:#fff; border:1px solid #ff4d5a; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:bold; cursor:pointer;">✕ Chiudi</button>
       </div>
 
-      <!-- Barra Valute & Pity -->
-      <div style="width: 100%; max-width: 480px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.4); border-radius: 8px; padding: 6px 12px; margin: 6px 0; font-size: 12px;">
-        <div style="display:flex; align-items:center; gap:5px;">
-          <span>🪙 Monete:</span>
+      <!-- SELETTORE DEI 4 DISTRIBUTORI GASHAPON -->
+      <div id="gachaMachineTabs" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; width: 100%; max-width: 480px; margin: 6px 0 2px 0;">
+        ${GACHA_MACHINES.map(m => `
+          <button type="button" class="gacha-mach-tab" data-id="${m.id}" style="background:${m.id === activeMachineId ? m.themeColor : '#1e293b'}; color:#fff; border:1.5px solid ${m.id === activeMachineId ? m.accentColor : '#334155'}; border-radius:6px; padding:5px 2px; font-size:11px; font-weight:bold; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px; box-shadow:${m.id === activeMachineId ? '0 0 8px ' + m.accentColor + '66' : 'none'};">
+            <span>${m.icon}</span>
+            <span style="font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;">${m.name.split(' ')[0]}</span>
+          </button>
+        `).join('')}
+      </div>
+
+      <!-- Barra Valute, Guida Frammenti & Pity -->
+      <div style="width: 100%; max-width: 480px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.45); border-radius: 8px; padding: 6px 10px; margin: 4px 0; font-size: 12px;">
+        <div style="display:flex; align-items:center; gap:4px;">
+          <span>🪙</span>
           <b id="gachaCoinsCount" style="color:#ffd23f; font-size:14px;">0</b>
         </div>
-        <div style="display:flex; align-items:center; gap:5px; cursor:pointer;" id="gachaShardsClick">
-          <span>🧩 Frammenti:</span>
+        <div style="display:flex; align-items:center; gap:5px; cursor:pointer;" id="gachaShardsClick" title="Tocca per aprire la Fonderia">
+          <span>🧩</span>
           <b id="gachaShardsCount" style="color:#57d68d; font-size:14px;">0</b>
-          <span style="font-size:10px; color:#38bdf8; text-decoration:underline;">(Fonderia)</span>
+          <button type="button" id="gachaGuideBtn" style="background:rgba(52,211,153,0.18); border:1px solid #34d399; color:#6ee7b7; border-radius:4px; padding:2px 6px; font-size:10px; font-weight:bold; cursor:pointer;" title="Spiegazione di cosa servono i frammenti">
+            ❓ Guida
+          </button>
         </div>
         <div style="font-size:11px; color:#a0b8df;">
-          Pity 5★/6★: <b id="gachaPityCount" style="color:#ff7a22;">0/30</b>
+          Pity: <b id="gachaPityCount" style="color:#ff7a22;">0/30</b>
         </div>
       </div>
 
       <!-- Schermata Centrale del Distributore (2D Canvas) -->
-      <div id="gachaMachineWrapper" style="position: relative; width: 100%; max-width: 340px; aspect-ratio: 1 / 1.1; margin: 4px auto; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <div id="gachaMachineWrapper" style="position: relative; width: 100%; max-width: 320px; aspect-ratio: 1 / 1.1; margin: 2px auto; display: flex; flex-direction: column; align-items: center; justify-content: center;">
         <canvas id="gachaMachineCanvas" width="340" height="374" style="width: 100%; height: 100%; border-radius: 12px; box-shadow: 0 12px 28px rgba(0,0,0,0.6);"></canvas>
       </div>
 
+      <!-- Info Macchinetta Attiva -->
+      <div id="gachaActiveDesc" style="width: 100%; max-width: 480px; font-size: 11px; color: #94a3b8; text-align: center; background: rgba(0,0,0,0.25); border-radius: 6px; padding: 4px; margin-top: 2px;">
+        ${getActiveMachine().desc}
+      </div>
+
       <!-- Pulsanti Azione e Menu -->
-      <div style="width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+      <div style="width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 6px; margin-top: 4px;">
         <div style="display: flex; gap: 8px; width: 100%;">
-          <button type="button" id="gachaPull1Btn" style="flex:1; background:linear-gradient(180deg, #2563eb, #1d4ed8); color:#fff; border:2px solid #60a5fa; border-radius:8px; padding:10px 4px; font-weight:bold; font-size:13px; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.4); display:flex; flex-direction:column; align-items:center; gap:2px;">
+          <button type="button" id="gachaPull1Btn" style="flex:1; background:linear-gradient(180deg, #2563eb, #1d4ed8); color:#fff; border:2px solid #60a5fa; border-radius:8px; padding:8px 4px; font-weight:bold; font-size:12.5px; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.4); display:flex; flex-direction:column; align-items:center; gap:2px;">
             <span>GIRA 1 CAPSULA</span>
-            <span style="font-size:11px; color:#ffd23f;">🪙 15 Monete</span>
+            <span id="gachaPull1Sub" style="font-size:11px; color:#ffd23f;">🪙 ${getActiveMachine().cost1} Monete</span>
           </button>
-          <button type="button" id="gachaPull10Btn" style="flex:1.2; background:linear-gradient(180deg, #d97706, #b45309); color:#fff; border:2px solid #fbbf24; border-radius:8px; padding:10px 4px; font-weight:bold; font-size:13px; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.4); display:flex; flex-direction:column; align-items:center; gap:2px;">
+          <button type="button" id="gachaPull10Btn" style="flex:1.2; background:linear-gradient(180deg, #d97706, #b45309); color:#fff; border:2px solid #fbbf24; border-radius:8px; padding:8px 4px; font-weight:bold; font-size:12.5px; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.4); display:flex; flex-direction:column; align-items:center; gap:2px;">
             <span>🎰 SCARICA 10 CAPSULE</span>
-            <span style="font-size:11px; color:#ffd23f;">🪙 130 Monete (4★ Garantito!)</span>
+            <span id="gachaPull10Sub" style="font-size:11px; color:#ffd23f;">🪙 ${getActiveMachine().cost10} Monete (${getActiveMachine().id === 'gabbiano_oro' ? '5★ Oro Gar.' : '4★ Gar.'})</span>
           </button>
         </div>
 
-        <div style="display: flex; gap: 8px; width: 100%;">
-          <button type="button" id="gachaCabinetBtn" style="flex:1.2; background:#1e293b; color:#cbd5e1; border:1px solid #475569; border-radius:6px; padding:8px; font-size:12px; font-weight:bold; cursor:pointer;">
+        <div style="display: flex; gap: 6px; width: 100%;">
+          <button type="button" id="gachaCabinetBtn" style="flex:1.2; background:#1e293b; color:#cbd5e1; border:1px solid #475569; border-radius:6px; padding:8px 4px; font-size:11.5px; font-weight:bold; cursor:pointer;">
             🧸 Vetrinetta (<span id="gachaOwnedCount">0/${TOY_CATALOG.length}</span>)
           </button>
-          <button type="button" id="gachaFoundryBtn" style="flex:1.2; background:linear-gradient(180deg, #059669, #047857); color:#fff; border:1px solid #34d399; border-radius:6px; padding:8px; font-size:12px; font-weight:bold; cursor:pointer;">
+          <button type="button" id="gachaFoundryBtn" style="flex:1.3; background:linear-gradient(180deg, #059669, #047857); color:#fff; border:1px solid #34d399; border-radius:6px; padding:8px 4px; font-size:11.5px; font-weight:bold; cursor:pointer;">
             🧩 Fonderia Frammenti
           </button>
-          <button type="button" id="gachaRatesBtn" style="flex:0.8; background:#1e293b; color:#cbd5e1; border:1px solid #475569; border-radius:6px; padding:8px; font-size:12px; font-weight:bold; cursor:pointer;">
-            📊 Info Rarità
+          <button type="button" id="gachaRatesBtn" style="flex:0.8; background:#1e293b; color:#cbd5e1; border:1px solid #475569; border-radius:6px; padding:8px 4px; font-size:11.5px; font-weight:bold; cursor:pointer;">
+            📊 Info
           </button>
         </div>
       </div>
@@ -1668,7 +2097,7 @@
 
     document.body.appendChild(gachaModalEl);
 
-    // Eventi
+    // Eventi Principali
     gachaModalEl.querySelector("#gachaCloseBtn").onclick = () => {
       gachaModalEl.style.display = "none";
     };
@@ -1677,38 +2106,87 @@
     gachaModalEl.querySelector("#gachaCabinetBtn").onclick = () => openGachaCabinetModal();
     gachaModalEl.querySelector("#gachaFoundryBtn").onclick = () => openGachaFoundryModal();
     gachaModalEl.querySelector("#gachaShardsClick").onclick = () => openGachaFoundryModal();
+    gachaModalEl.querySelector("#gachaGuideBtn").onclick = (e) => {
+      e.stopPropagation();
+      showFragmentsGuideModal();
+    };
     gachaModalEl.querySelector("#gachaRatesBtn").onclick = () => showRatesInfo();
+
+    // Eventi Cambio Macchinetta
+    gachaModalEl.querySelectorAll(".gacha-mach-tab").forEach(tab => {
+      tab.onclick = () => {
+        const mid = tab.getAttribute("data-id");
+        if (mid && mid !== activeMachineId) {
+          activeMachineId = mid;
+          updateActiveMachineUI();
+        }
+      };
+    });
 
     return gachaModalEl;
   }
 
+  function updateActiveMachineUI() {
+    const mach = getActiveMachine();
+    const hIcon = document.getElementById("gachaHeaderIcon");
+    const hTitle = document.getElementById("gachaHeaderTitle");
+    const hSub = document.getElementById("gachaHeaderSub");
+    const descEl = document.getElementById("gachaActiveDesc");
+    const p1Sub = document.getElementById("gachaPull1Sub");
+    const p10Sub = document.getElementById("gachaPull10Sub");
+
+    if (hIcon) hIcon.textContent = mach.icon;
+    if (hTitle) hTitle.textContent = mach.name.toUpperCase();
+    if (hSub) hSub.textContent = `${mach.tagline} (${TOY_CATALOG.length} Statuine)`;
+    if (descEl) descEl.textContent = mach.desc;
+    if (p1Sub) p1Sub.textContent = `🪙 ${mach.cost1} Monete`;
+    if (p10Sub) p10Sub.textContent = `🪙 ${mach.cost10} Monete (${mach.id === 'gabbiano_oro' ? '5★ Oro Gar.' : '4★ Gar.'})`;
+
+    // Aggiorna stile tab
+    if (gachaModalEl) {
+      gachaModalEl.querySelectorAll(".gacha-mach-tab").forEach(t => {
+        const id = t.getAttribute("data-id");
+        const m = GACHA_MACHINES.find(x => x.id === id);
+        const isAct = id === activeMachineId;
+        t.style.background = isAct ? (m ? m.themeColor : "#2563eb") : "#1e293b";
+        t.style.border = "1.5px solid " + (isAct ? (m ? m.accentColor : "#60a5fa") : "#334155");
+        t.style.boxShadow = isAct ? ("0 0 8px " + (m ? m.accentColor : "#60a5fa") + "66") : "none";
+      });
+    }
+
+    drawGachaMachine();
+    updateHeaderCounters();
+  }
+
   // Disegno 2D della Macchinetta Gashapon
-  let crankAngle = 0;
+    let crankAngle = 0;
 
   function drawGachaMachine() {
     const cv = document.getElementById("gachaMachineCanvas");
     if (!cv) return;
     const g = cv.getContext("2d");
     const W = cv.width, H = cv.height;
+    const mach = getActiveMachine();
 
-    // Sfondo caldo da Bar d'epoca
+    // Sfondo dinamico in tema con la macchinetta attiva
     const bgGrad = g.createRadialGradient(W / 2, H / 2, 40, W / 2, H / 2, 200);
-    bgGrad.addColorStop(0, "#1d3254");
-    bgGrad.addColorStop(1, "#0c1524");
+    bgGrad.addColorStop(0, mach.id === "gabbiano_oro" ? "#2e1065" : mach.id === "baia_sole" ? "#0c2b48" : mach.id === "derby_liguria" ? "#181e28" : "#1d3254");
+    bgGrad.addColorStop(1, "#060b14");
     g.fillStyle = bgGrad;
     g.fillRect(0, 0, W, H);
 
-    // Piedistallo metallico inferiore
-    g.fillStyle = "#1e2229";
+    // Piedistallo inferiore
+    g.fillStyle = mach.baseCol || "#1e2229";
     g.fillRect(70, 310, 200, 50);
-    g.fillStyle = "#b3202c";
+    g.fillStyle = mach.accentBar || "#b3202c";
     g.fillRect(75, 305, 190, 8);
 
-    // Corpo centrale distributore in ghisa rossa amaranto
+    // Corpo centrale distributore con sfumature specifiche
     const bodyGrad = g.createLinearGradient(70, 0, 270, 0);
-    bodyGrad.addColorStop(0, "#8a1620");
-    bodyGrad.addColorStop(0.5, "#d92b3a");
-    bodyGrad.addColorStop(1, "#73121a");
+    const bgCols = mach.bodyGrad || ["#8a1620", "#d92b3a", "#73121a"];
+    bodyGrad.addColorStop(0, bgCols[0]);
+    bodyGrad.addColorStop(0.5, bgCols[1]);
+    bodyGrad.addColorStop(1, bgCols[2]);
     g.fillStyle = bodyGrad;
     g.beginPath();
     g.roundRect(70, 155, 200, 155, [0, 0, 12, 12]);
@@ -1722,13 +2200,13 @@
     g.clip();
 
     const glassGrad = g.createRadialGradient(cx - 25, cy - 25, 10, cx, cy, r);
-    glassGrad.addColorStop(0, "#60a5fa44");
-    glassGrad.addColorStop(0.8, "#1e3a8a33");
-    glassGrad.addColorStop(1, "#0f172a66");
+    glassGrad.addColorStop(0, mach.glassTint || "rgba(96, 165, 250, 0.22)");
+    glassGrad.addColorStop(0.8, "rgba(30, 58, 138, 0.25)");
+    glassGrad.addColorStop(1, "rgba(15, 23, 42, 0.55)");
     g.fillStyle = glassGrad;
     g.fillRect(cx - r, cy - r, r * 2, r * 2);
 
-    const ballColors = ["#ef4444", "#3b82f6", "#eab308", "#10b981", "#a855f7", "#ec4899", "#f97316"];
+    const ballColors = mach.balls || ["#ef4444", "#3b82f6", "#eab308", "#10b981", "#a855f7"];
     const seed = 42;
     for (let i = 0; i < 28; i++) {
       const bx = cx + Math.sin(i * 1.7 + seed) * (r - 20) * 0.85;
@@ -1752,44 +2230,52 @@
     }
     g.restore();
 
-    g.strokeStyle = "rgba(255,255,255,0.6)";
+    // Bordo campana di vetro
+    g.strokeStyle = "rgba(255,255,255,0.65)";
     g.lineWidth = 3;
     g.beginPath();
     g.arc(cx, cy, r, 0, Math.PI * 2);
     g.stroke();
 
-    g.fillStyle = "#cbd5e1";
+    // Corona superiore del coperchio
+    g.fillStyle = mach.crankCol || "#cbd5e1";
     g.beginPath();
     g.roundRect(cx - 50, cy - r - 12, 100, 16, [6, 6, 0, 0]);
     g.fill();
 
     // Mascherina metallica frontale cromata
-    g.fillStyle = "#334155";
+    g.fillStyle = "#1e293b";
     g.beginPath();
     g.roundRect(110, 175, 120, 68, 8);
     g.fill();
-    g.strokeStyle = "#94a3b8";
+    g.strokeStyle = mach.accentColor || "#94a3b8";
     g.lineWidth = 2;
     g.stroke();
 
-    // Fessura moneta
-    g.fillStyle = "#0f172a";
-    g.fillRect(cx - 24, 185, 48, 5);
+    // Targhetta metallica incisa col nome della macchinetta
+    g.fillStyle = mach.accentColor || "#ffd23f";
+    g.font = "bold 9px sans-serif";
+    g.textAlign = "center";
+    g.fillText(mach.plateText || "BAR MORETTI", cx, 185);
 
-    // Manovella rotante cromata al centro
+    // Fessura moneta
+    g.fillStyle = "#020617";
+    g.fillRect(cx - 22, 190, 44, 4);
+
+    // Manovella rotante al centro
     g.save();
-    g.translate(cx, 218);
+    g.translate(cx, 220);
     g.rotate(crankAngle);
 
-    g.fillStyle = "#64748b";
+    g.fillStyle = "#475569";
     g.beginPath(); g.arc(0, 0, 14, 0, Math.PI * 2); g.fill();
-    g.fillStyle = "#cbd5e1";
+    g.fillStyle = mach.crankCol || "#cbd5e1";
     g.beginPath(); g.arc(0, 0, 9, 0, Math.PI * 2); g.fill();
 
-    g.fillStyle = "#cbd5e1";
+    g.fillStyle = mach.crankCol || "#cbd5e1";
     g.beginPath();
-    g.roundRect(-28, -6, 56, 12, 4);
-    g.roundRect(-6, -28, 12, 56, 4);
+    g.roundRect(-26, -5, 52, 10, 4);
+    g.roundRect(-5, -26, 10, 52, 4);
     g.fill();
     g.restore();
 
@@ -1798,13 +2284,13 @@
     g.beginPath();
     g.roundRect(cx - 36, 256, 72, 44, [8, 8, 4, 4]);
     g.fill();
-    g.strokeStyle = "#475569";
+    g.strokeStyle = mach.accentColor || "#475569";
     g.lineWidth = 2;
     g.stroke();
 
-    g.fillStyle = "rgba(100,150,220,0.3)";
+    g.fillStyle = "rgba(100,150,220,0.2)";
     g.fillRect(cx - 32, 260, 64, 34);
-    g.fillStyle = "#94a3b8";
+    g.fillStyle = "#cbd5e1";
     g.font = "bold 9px sans-serif";
     g.textAlign = "center";
     g.fillText("RITIRO", cx, 280);
@@ -1817,6 +2303,7 @@
     const pityEl = document.getElementById("gachaPityCount");
     const ownedEl = document.getElementById("gachaOwnedCount");
 
+    const mach = getActiveMachine();
     const curCoins = getUserCoins();
     if (coinsEl) coinsEl.textContent = curCoins;
     if (shardsEl) shardsEl.textContent = data.shards || 0;
@@ -1826,7 +2313,7 @@
     const b1 = document.getElementById("gachaPull1Btn");
     const b10 = document.getElementById("gachaPull10Btn");
     if (b1) {
-      if (curCoins < 15) {
+      if (curCoins < mach.cost1) {
         b1.style.opacity = "0.55";
         b1.style.filter = "grayscale(0.6)";
       } else {
@@ -1835,7 +2322,7 @@
       }
     }
     if (b10) {
-      if (curCoins < 130) {
+      if (curCoins < mach.cost10) {
         b10.style.opacity = "0.55";
         b10.style.filter = "grayscale(0.6)";
       } else {
@@ -1850,7 +2337,8 @@
 
   function handlePull(count) {
     if (isPulling) return;
-    const cost = count === 1 ? 15 : 130;
+    const mach = getActiveMachine();
+    const cost = count === 1 ? mach.cost1 : mach.cost10;
     const userCoins = getUserCoins();
 
     if (userCoins < cost) {
@@ -1964,6 +2452,8 @@
           <div style="font-size: 18px; font-weight: 900; color: #fff; font-family: var(--display, sans-serif);">${toy.name}</div>
           <div style="font-size: 12px; color: var(--gold, #ffd23f); font-weight: bold; margin-bottom: 2px;">${toy.title}</div>
           <div style="font-size: 11px; color: #93c5fd; margin-bottom: 4px;">🏷️ ${toy.series || "Serie 1"}</div>
+          ${toy.material ? `<div style="font-size: 10.5px; color: #a5f3fc; margin-bottom: 2px;">🧱 <b>Materiale:</b> ${toy.material}</div>` : ""}
+          ${toy.pose ? `<div style="font-size: 10.5px; color: #fde68a; margin-bottom: 4px;">🥋 <b>Posa:</b> ${toy.pose}</div>` : ""}
           <div style="font-size: 12px; font-style: italic; color: #cbd5e1; margin-bottom: 6px;">${toy.quote}</div>
           <div style="font-size: 11px; color: #94a3b8; margin-bottom: 6px; line-height: 1.35;">${toy.lore}</div>
           <div style="font-size: 12px; font-weight: bold; color: #4ade80;">✨ Effetto: ${toy.bonus} ${isUpgraded ? "<b>(RADDOPPIATO x2!)</b>" : ""}</div>
@@ -2025,6 +2515,8 @@
   // --- VETRINETTA COLLEZIONE PUPAZZETTI (WOODEN CABINET) ---
   let cabinetModalEl = null;
 
+  let cabinetFilter = "all";
+
   function openGachaCabinetModal() {
     if (!cabinetModalEl) {
       cabinetModalEl = document.createElement("div");
@@ -2033,99 +2525,198 @@
         position: fixed; inset: 0; z-index: 1000001;
         background: radial-gradient(circle at center, #1e1511 0%, #0c0806 100%);
         display: none; flex-direction: column; align-items: center; justify-content: space-between;
-        padding: 14px; box-sizing: border-box; font-family: var(--body, system-ui, sans-serif); color: #fff;
+        padding: 12px; box-sizing: border-box; font-family: var(--body, system-ui, sans-serif); color: #fff;
         overflow-y: auto;
       `;
       document.body.appendChild(cabinetModalEl);
     }
 
-    const data = getGachaData();
-    const ownedCount = Object.keys(data.owned).length;
+    function renderCabinet() {
+      const data = getGachaData();
+      const ownedCount = Object.keys(data.owned).length;
 
-    cabinetModalEl.style.display = "flex";
-    cabinetModalEl.innerHTML = `
-      <!-- Header Vetrinetta -->
-      <div style="width: 100%; max-width: 520px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid rgba(255,255,255,0.15); padding-bottom: 8px;">
-        <div>
-          <div style="font-size:16px; font-weight:900; color:var(--gold, #ffd23f);">🧸 VETRINETTA DEI PUPAZZETTI</div>
-          <div style="font-size:11px; color:#c7a685;">Collezione Mini-Leggende: ${ownedCount} su ${TOY_CATALOG.length} raccolti · 🧩 Frammenti: ${data.shards || 0}</div>
-        </div>
-        <div style="display:flex; align-items:center; gap:6px;">
-          <button type="button" id="cabinetFoundryBtn" style="background:#059669; color:#fff; border:1px solid #34d399; border-radius:6px; padding:6px 10px; font-size:11px; font-weight:bold; cursor:pointer;">🧩 Fonderia</button>
-          <button type="button" id="cabinetCloseBtn" style="background:#b3202c; color:#fff; border:1px solid #ff4d5a; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:bold; cursor:pointer;">✕ Chiudi</button>
-        </div>
-      </div>
-
-      <!-- Mensole in legno da collezione -->
-      <div style="width: 100%; max-width: 520px; flex: 1; margin: 12px 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; overflow-y: auto; padding: 6px;">
-        ${TOY_CATALOG.map((rawToy) => {
-          const toy = resolveToy(rawToy);
-          const count = data.owned[toy.id] || 0;
-          const isOwned = count > 0;
-          const isUp = !!(data.upgraded && data.upgraded[toy.id]);
-          const starColor = toy.stars === 6 ? "#ff70a6" : toy.stars === 5 ? "#ffd23f" : toy.stars === 4 ? "#60a5fa" : "#cd7f32";
-
-          return `
-            <div class="cabinet-toy-slot" data-id="${toy.id}" style="background: ${isOwned ? (isUp ? "rgba(14, 46, 74, 0.9)" : "rgba(40, 25, 18, 0.85)") : "rgba(15, 12, 10, 0.7)"}; border: 1.5px solid ${isUp ? "#38bdf8" : (isOwned ? starColor : "#4a3528")}; border-radius: 10px; padding: 8px 4px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.5); position: relative; min-height: 120px;">
-              <div style="font-size: 10px; color: ${starColor}; font-weight: bold;">
-                ${"★".repeat(toy.stars)}${isUp ? " <span style='color:#38bdf8;'>★+</span>" : ""}
-              </div>
-              <div style="font-size: ${isOwned ? "34px" : "28px"}; filter: ${isOwned ? "drop-shadow(0 4px 6px rgba(0,0,0,0.6))" : "grayscale(1) brightness(0.2)"}; margin: 4px 0;">
-                ${isOwned ? (toy.stars >= 5 ? "🏆" : "⚽") : "🔒"}
-              </div>
-              <div style="font-size: 11px; font-weight: bold; text-align: center; color: ${isOwned ? "#fff" : "#785b46"}; line-height: 1.2;">
-                ${isOwned ? toy.name : "???"}
-              </div>
-              <div style="font-size: 9px; color: ${isOwned ? (isUp ? "#38bdf8" : "#ffd23f") : "#554030"}; margin-top: 2px;">
-                ${isOwned ? (isUp ? "★+ Potenziato" : (count > 1 ? `${count} copie` : "1 copia")) : "Tocca per scolpire"}
-              </div>
-            </div>
-          `;
-        }).join("")}
-      </div>
-
-      <!-- Footer Info -->
-      <div style="width: 100%; max-width: 520px; font-size: 11px; color: #a88a6d; text-align: center;">
-        Tocca una statuina sbloccata per ispezionarla in 3D a 360°, oppure tocca un lucchetto per scolpirlo nella Fonderia!
-      </div>
-    `;
-
-    cabinetModalEl.querySelector("#cabinetCloseBtn").onclick = () => {
-      cabinetModalEl.style.display = "none";
-    };
-
-    cabinetModalEl.querySelector("#cabinetFoundryBtn").onclick = () => {
-      openGachaFoundryModal(() => {
-        openGachaCabinetModal();
+      const filteredList = TOY_CATALOG.filter(rawToy => {
+        if (cabinetFilter === "all") return true;
+        const s = rawToy.series || "";
+        if (cabinetFilter === "s1") return s.includes("Serie 1");
+        if (cabinetFilter === "s2") return s.includes("Serie 2") || s.includes("Bagnini");
+        if (cabinetFilter === "s3") return s.includes("Serie 3") || s.includes("Campioni") || s.includes("Derby");
+        if (cabinetFilter === "s4") return s.includes("Serie 4") || s.includes("Fuoriserie") || s.includes("Gabbiano") || s.includes("Miti");
+        return true;
       });
-    };
 
-    cabinetModalEl.querySelectorAll(".cabinet-toy-slot").forEach((el) => {
-      el.onclick = () => {
-        const id = el.getAttribute("data-id");
-        if (data.owned[id]) {
-          const toy = resolveToy(TOY_CATALOG.find((t) => t.id === id));
-          if (toy) {
-            showPullRevealModal([{ toy, isDuplicate: false, shardReward: 0 }], true);
-          }
-        } else {
-          const toy = resolveToy(TOY_CATALOG.find((t) => t.id === id));
-          const cost = toy.stars === 3 ? 25 : toy.stars === 4 ? 60 : toy.stars === 5 ? 150 : 300;
-          if (confirm(`Non hai ancora trovato «${toy.name}» (${toy.stars}★).\n\nVuoi aprire la Fonderia dei Frammenti per scolpirlo direttamente per ${cost} frammenti?`)) {
+      cabinetModalEl.style.display = "flex";
+      cabinetModalEl.innerHTML = `
+        <!-- Header Vetrinetta -->
+        <div style="width: 100%; max-width: 520px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid rgba(255,255,255,0.15); padding-bottom: 8px;">
+          <div>
+            <div style="font-size:16px; font-weight:900; color:var(--gold, #ffd23f);">🧸 VETRINETTA DEI PUPAZZETTI</div>
+            <div style="font-size:11px; color:#c7a685;">Collezione Mini-Leggende: ${ownedCount} su ${TOY_CATALOG.length} raccolti · 🧩 Frammenti: ${data.shards || 0}</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <button type="button" id="cabinetFoundryBtn" style="background:#059669; color:#fff; border:1px solid #34d399; border-radius:6px; padding:6px 10px; font-size:11px; font-weight:bold; cursor:pointer;">🧩 Fonderia</button>
+            <button type="button" id="cabinetCloseBtn" style="background:#b3202c; color:#fff; border:1px solid #ff4d5a; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:bold; cursor:pointer;">✕ Chiudi</button>
+          </div>
+        </div>
+
+        <!-- Filtri per Serie / Distributore -->
+        <div style="width: 100%; max-width: 520px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-top: 8px;">
+          <button type="button" class="btn-cab-filter" data-f="all" style="background:${cabinetFilter === "all" ? "#2563eb" : "#2d1f18"}; color:#fff; border:1px solid ${cabinetFilter === "all" ? "#60a5fa" : "#5a3e30"}; border-radius:6px; padding:4px 2px; font-size:10px; font-weight:bold; cursor:pointer;">Tutte</button>
+          <button type="button" class="btn-cab-filter" data-f="s1" style="background:${cabinetFilter === "s1" ? "#b3202c" : "#2d1f18"}; color:#fff; border:1px solid ${cabinetFilter === "s1" ? "#f87171" : "#5a3e30"}; border-radius:6px; padding:4px 2px; font-size:10px; font-weight:bold; cursor:pointer;">🔴 Borgo</button>
+          <button type="button" class="btn-cab-filter" data-f="s2" style="background:${cabinetFilter === "s2" ? "#0284c7" : "#2d1f18"}; color:#fff; border:1px solid ${cabinetFilter === "s2" ? "#38bdf8" : "#5a3e30"}; border-radius:6px; padding:4px 2px; font-size:10px; font-weight:bold; cursor:pointer;">🌊 Baia</button>
+          <button type="button" class="btn-cab-filter" data-f="s3" style="background:${cabinetFilter === "s3" ? "#d97706" : "#2d1f18"}; color:#fff; border:1px solid ${cabinetFilter === "s3" ? "#fbbf24" : "#5a3e30"}; border-radius:6px; padding:4px 2px; font-size:10px; font-weight:bold; cursor:pointer;">⚽ Derby</button>
+          <button type="button" class="btn-cab-filter" data-f="s4" style="background:${cabinetFilter === "s4" ? "#7c3aed" : "#2d1f18"}; color:#fff; border:1px solid ${cabinetFilter === "s4" ? "#c084fc" : "#5a3e30"}; border-radius:6px; padding:4px 2px; font-size:10px; font-weight:bold; cursor:pointer;">✨ Deluxe</button>
+        </div>
+
+        <!-- Mensole in legno da collezione -->
+        <div style="width: 100%; max-width: 520px; flex: 1; margin: 8px 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; overflow-y: auto; padding: 6px;">
+          ${filteredList.map((rawToy) => {
+            const toy = resolveToy(rawToy);
+            const count = data.owned[toy.id] || 0;
+            const isOwned = count > 0;
+            const isUp = !!(data.upgraded && data.upgraded[toy.id]);
+            const starColor = toy.stars === 6 ? "#ff70a6" : toy.stars === 5 ? "#ffd23f" : toy.stars === 4 ? "#60a5fa" : "#cd7f32";
+
+            return `
+              <div class="cabinet-toy-slot" data-id="${toy.id}" style="background: ${isOwned ? (isUp ? "rgba(14, 46, 74, 0.9)" : "rgba(40, 25, 18, 0.85)") : "rgba(15, 12, 10, 0.7)"}; border: 1.5px solid ${isUp ? "#38bdf8" : (isOwned ? starColor : "#4a3528")}; border-radius: 10px; padding: 8px 4px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.5); position: relative; min-height: 120px;">
+                <div style="font-size: 10px; color: ${starColor}; font-weight: bold;">
+                  ${"★".repeat(toy.stars)}${isUp ? " <span style='color:#38bdf8;'>★+</span>" : ""}
+                </div>
+                <div style="font-size: ${isOwned ? "34px" : "28px"}; filter: ${isOwned ? "drop-shadow(0 4px 6px rgba(0,0,0,0.6))" : "grayscale(1) brightness(0.2)"}; margin: 4px 0;">
+                  ${isOwned ? (toy.stars >= 5 ? "🏆" : "⚽") : "🔒"}
+                </div>
+                <div style="font-size: 11px; font-weight: bold; text-align: center; color: ${isOwned ? "#fff" : "#785b46"}; line-height: 1.2;">
+                  ${isOwned ? toy.name : "???"}
+                </div>
+                <div style="font-size: 9px; color: ${isOwned ? (isUp ? "#38bdf8" : "#ffd23f") : "#554030"}; margin-top: 2px;">
+                  ${isOwned ? (isUp ? "★+ Potenziato" : (count > 1 ? `${count} copie` : "1 copia")) : "Tocca per scolpire"}
+                </div>
+              </div>
+            `;
+          }).join("")}
+        </div>
+
+        <!-- Footer Info -->
+        <div style="width: 100%; max-width: 520px; font-size: 11px; color: #a88a6d; text-align: center;">
+          Tocca una statuina per ispezionarla in 3D a 360°, oppure tocca un lucchetto per scolpirla nella Fonderia!
+        </div>
+      `;
+
+      cabinetModalEl.querySelector("#cabinetCloseBtn").onclick = () => {
+        cabinetModalEl.style.display = "none";
+      };
+
+      cabinetModalEl.querySelector("#cabinetFoundryBtn").onclick = () => {
+        openGachaFoundryModal(() => {
+          renderCabinet();
+        });
+      };
+
+      cabinetModalEl.querySelectorAll(".btn-cab-filter").forEach(b => {
+        b.onclick = () => {
+          cabinetFilter = b.getAttribute("data-f");
+          renderCabinet();
+        };
+      });
+
+      cabinetModalEl.querySelectorAll(".cabinet-toy-slot").forEach((el) => {
+        el.onclick = () => {
+          const id = el.getAttribute("data-id");
+          if (data.owned[id]) {
+            const toy = resolveToy(TOY_CATALOG.find((t) => t.id === id));
+            if (toy) {
+              showPullRevealModal([{ toy, isDuplicate: false, shardReward: 0 }], true);
+            }
+          } else {
+            const toy = resolveToy(TOY_CATALOG.find((t) => t.id === id));
+            const cost = toy.stars === 3 ? 25 : toy.stars === 4 ? 60 : toy.stars === 5 ? 150 : 300;
+            if (window.toast) {
+              window.toast(`Aperta Fonderia per scolpire «${toy.name}» (🧩 ${cost})`, "info", "🔨");
+            }
             openGachaFoundryModal(() => {
-              openGachaCabinetModal();
+              renderCabinet();
             });
           }
-        }
-      };
-    });
+        };
+      });
+    }
+
+    renderCabinet();
   }
 
   // Info Rarità & Regole senza window.alert
+  
+  // --- GUIDA COMPLETA: A COSA SERVONO I FRAMMENTI? ---
+  function showFragmentsGuideModal() {
+    const existing = document.getElementById("gachaGuideModal");
+    if (existing) existing.remove();
+
+    const m = document.createElement("div");
+    m.id = "gachaGuideModal";
+    m.style.cssText = "position:fixed; inset:0; z-index:1000015; background:rgba(3,7,18,0.92); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; padding:14px; font-family:var(--body, system-ui, sans-serif); color:#fff; user-select:none;";
+    m.innerHTML = `
+      <div style="background:#0f172a; border:2px solid #34d399; border-radius:14px; padding:18px; max-width:480px; width:100%; box-shadow:0 16px 36px rgba(0,0,0,0.8); max-height:90vh; overflow-y:auto;">
+        <div style="font-size:17px; font-weight:900; color:#57d68d; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.15); padding-bottom:8px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:24px;">🧩</span>
+            <span>A COSA SERVONO I FRAMMENTI?</span>
+          </div>
+          <button type="button" id="closeGuideTopBtn" style="background:#334155; color:#fff; border:none; border-radius:6px; padding:4px 10px; font-size:12px; font-weight:bold; cursor:pointer;">✕</button>
+        </div>
+
+        <div style="font-size:12.5px; color:#cbd5e1; line-height:1.55; display:flex; flex-direction:column; gap:10px;">
+          <div style="background:rgba(52,211,153,0.1); border-left:3px solid #34d399; padding:8px 10px; border-radius:0 8px 8px 0;">
+            <b style="color:#57d68d;">1. COME SI OTTENGONO?</b><br>
+            Ogni volta che peschi una statuina che possiedi già (un doppione), la macchinetta non la spreca! Viene automaticamente fusa in <b>Frammenti di Resina Modellabile</b>:<br>
+            • <b>3★ Comune:</b> +5 frammenti<br>
+            • <b>4★ Raro:</b> +15 frammenti<br>
+            • <b>5★ Super Star:</b> +50 frammenti<br>
+            • <b>6★ Leggenda Mitica:</b> +150 frammenti
+          </div>
+
+          <div style="background:rgba(37,99,235,0.1); border-left:3px solid #60a5fa; padding:8px 10px; border-radius:0 8px 8px 0;">
+            <b style="color:#60a5fa;">2. 🔨 SCOLPISCI I PUPAZZETTI MANCANTI (CRAFTING)</b><br>
+            Ti manca quella specifica statuina per completare la collezione o per sbloccare il suo bonus? Nella <b>Fonderia</b> puoi plasmare qualsiasi pupazzetto non ancora trovato senza affidarti alla sorte!
+          </div>
+
+          <div style="background:rgba(217,119,6,0.1); border-left:3px solid #fbbf24; padding:8px 10px; border-radius:0 8px 8px 0;">
+            <b style="color:#fbbf24;">3. 🪙 FORGIA MONETE & BIGLIETTO DORATO</b><br>
+            Puoi fondere i frammenti in eccedenza per ricevere monete borgo fresche (🪙 40 o 🪙 120), oppure forgiare il <b>Biglietto Dorato del Barista</b> che ti garantisce al 100% una Super Star 5★ o Leggenda 6★ al tiro successivo!
+          </div>
+
+          <div style="background:rgba(124,58,237,0.1); border-left:3px solid #a78bfa; padding:8px 10px; border-radius:0 8px 8px 0;">
+            <b style="color:#a78bfa;">4. ✨ LUCIDATURA A SPECCHIO ★+ (DOPPIO BONUS!)</b><br>
+            Puoi potenziare qualsiasi pupazzetto già posseduto a ★+: riceve una basetta cromata lucida, un'aura scintillante nella vetrinetta 3D e il suo <b>bonus per Calcio d'Azione e Borgo viene RADDOPPIATO (x2)</b> permanente!
+          </div>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:14px;">
+          <button type="button" id="guideGoFoundryBtn" style="flex:1.5; background:linear-gradient(180deg,#059669,#047857); color:#fff; border:1px solid #34d399; padding:10px; border-radius:8px; font-weight:bold; font-size:13px; cursor:pointer;">
+            🧩 Apri Subito la Fonderia
+          </button>
+          <button type="button" id="closeGuideBottomBtn" style="flex:1; background:#334155; color:#fff; border:none; padding:10px; border-radius:8px; font-weight:bold; font-size:13px; cursor:pointer;">
+            Chiudi
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(m);
+    const close = () => m.remove();
+    m.querySelector("#closeGuideTopBtn").onclick = close;
+    m.querySelector("#closeGuideBottomBtn").onclick = close;
+    m.querySelector("#guideGoFoundryBtn").onclick = () => {
+      close();
+      openGachaFoundryModal();
+    };
+    m.onclick = (e) => { if (e.target === m) close(); };
+  }
+  window.showFragmentsGuideModal = showFragmentsGuideModal;
+
   function showRatesInfo() {
     const existing = document.getElementById("gachaRatesModal");
     if (existing) existing.remove();
 
+    const curM = getActiveMachine();
     const m = document.createElement("div");
     m.id = "gachaRatesModal";
     m.style.cssText = `
@@ -2135,21 +2726,30 @@
       font-family: var(--body, system-ui, sans-serif); color: #fff;
     `;
     m.innerHTML = `
-      <div style="background:#0f172a; border:2px solid #b88648; border-radius:14px; padding:18px; max-width:440px; width:100%; box-shadow:0 16px 36px rgba(0,0,0,0.7);">
+      <div style="background:#0f172a; border:2px solid #b88648; border-radius:14px; padding:18px; max-width:460px; width:100%; box-shadow:0 16px 36px rgba(0,0,0,0.7); max-height:90vh; overflow-y:auto;">
         <div style="font-size:16px; font-weight:bold; color:#ffd23f; margin-bottom:8px; display:flex; align-items:center; gap:8px;">
-          <span>🎰</span> PROBABILITÀ DEL GASHAPON DEL BAR MORETTI
+          <span>🎰</span> PROBABILITÀ DEI 4 DISTRIBUTORI GASHAPON
         </div>
-        <div style="font-size:12px; color:#cbd5e1; line-height:1.5; margin-bottom:12px;">
-          <div>• <b style="color:#cd7f32;">3★ COMUNI (Bronzo):</b> 65.0%</div>
-          <div>• <b style="color:#60a5fa;">4★ RARI (Argento Cromato):</b> 25.0%</div>
-          <div>• <b style="color:#ffd23f;">5★ SUPER STAR (Oro Foil):</b> 8.5%</div>
-          <div>• <b style="color:#ff70a6;">6★ LEGGENDE MITICHE (Arcobaleno):</b> 1.5%</div>
-          <br>
+        <div style="font-size:12px; color:#cbd5e1; line-height:1.55; margin-bottom:12px;">
+          <div style="background:rgba(255,255,255,0.06); padding:8px; border-radius:6px; margin-bottom:8px;">
+            <b style="color:${curM.accentColor}; font-size:13px;">${curM.icon} DISTRIBUTORE ATTIVO: ${curM.name}</b><br>
+            <span style="color:#94a3b8;">${curM.tagline}</span><br>
+            • Costo: <b>🪙 ${curM.cost1}</b> (1x) · <b>🪙 ${curM.cost10}</b> (10x)<br>
+            • Probabilità: <b>3★ ${curM.rates.star3}% · 4★ ${curM.rates.star4}% · 5★ ${curM.rates.star5}% · 6★ ${curM.rates.star6}%</b>
+          </div>
+
+          <div style="font-size:11.5px; color:#94a3b8; display:flex; flex-direction:column; gap:4px; margin-bottom:10px;">
+            <div>🔴 <b>Bar Moretti Classico:</b> 15 monete · Serie 1 (Borgo, botteghe e sapori)</div>
+            <div>🌊 <b>Baia del Sole & Costa:</b> 18 monete · Serie 2 (Bagnini, pedalò e sabbia)</div>
+            <div>⚽ <b>Derby & Rivali:</b> 22 monete · Serie 3 (Bomber rivali e muri difensivi)</div>
+            <div>✨ <b>Gabbiano d'Oro Mitico:</b> 35 monete · Tassi 5★/6★ raddoppiati! 4★ minimo garantito</div>
+          </div>
+
           <div>✨ <b>PITY GARANTITO:</b> Al 30° tiro consecutivo senza 5★/6★, la prossima capsula conterrà al 100% una Super Star o una Leggenda!</div>
           <br>
-          <div>🪙 <b>MULTI-PESCATA (10x):</b> Garantisce sempre almeno un pupazzetto 4★ Raro o superiore!</div>
+          <div>🪙 <b>MULTI-PESCATA (10x):</b> Garantisce sempre un pupazzetto 4★ Raro (o 5★ Oro nel distributore Mitico)!</div>
           <br>
-          <div>🧩 <b>FRAMMENTI & FONDERIA:</b> I doppioni diventano frammenti pregiati utilizzabili per scolpire statuine mancanti, forgiare monete o potenziare i pupazzetti a ★+!</div>
+          <div>🧩 <b>FRAMMENTI & FONDERIA:</b> I doppioni si trasformano in frammenti per scolpire pezzi mancanti, forgiare monete o potenziare i pupazzetti a ★+!</div>
         </div>
         <button type="button" id="closeRatesModalBtn" style="width:100%; background:#2563eb; color:#fff; border:none; padding:10px; border-radius:8px; font-weight:bold; cursor:pointer;">Ho capito</button>
       </div>
@@ -2171,5 +2771,5 @@
     openGachaCabinetModal();
   };
 
-  console.log("✓ Modalità Gacha (Pupazzetti 3D del Bar Moretti - 40 miniature) caricata con successo");
+  console.log("✓ Modalità Gacha (I 4 Distributori della Costa & 54 Pupazzetti 3D) caricata con successo");
 })();
