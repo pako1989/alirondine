@@ -5226,7 +5226,8 @@
     c.t--; if (c.t <= 0) { cutin = null; if (c.done) c.done(); }
   }
   $("cv").addEventListener("click", () => { if (cutin && cutin.t > 1) cutin.t = 1; });
-  function settings(back, note) {
+  function settings(back, note, forcedSec) {
+    if (forcedSec) settings._sec = forcedSec;
     back = back || title;
     view = { kind: "scene", bg: "stadium" }; chap("Impostazioni");
     const on = SET.style === "90", save = () => { writeJSON(SETK, SET); setApply(); };
@@ -5343,10 +5344,10 @@
     if (SEC === "aspetto") return buttons([...lookB, bk]);
     buttons([
       sec("partita", "Modalità di partita", `${on ? "Anni '90" : "Classico"} · difficoltà ${(DIFF[SET.diff] || DIFF.normale)[0]}`, "hot"),
+      sec("calcio_azione", "⚙️ Calcio d'Azione (Difficoltà & Comandi)", `Comandi: ${azCtlName()} · Difficoltà: ${azDiffName()}`, "hot"),
       sec("regole", "Opzioni di gioco", "Tiri murati, duelli, grinta di riserva, tiro a tempo e le altre regole: accese o spente"),
       sec("audio", "Audio", "Suoni, musica, voci, volumi"),
       sec("aspetto", "Grafica e aspetto", "Carte 3D, temi, animazioni, filtro retrò, testo grande"),
-      sec("calcio_azione", "Calcio d'azione", `Comandi: ${azCtlName()} · ${azDiffName()}`),
       { label: "Ripristina predefinite", sub: "Anni '90, tutto attivo", fn: () => { SET = setDefault(); save(); again("Impostazioni ripristinate."); } },
       { label: "◂ Indietro", fn: () => { settings._sec = ""; back(); } },
     ]);
@@ -20666,7 +20667,7 @@
     const r = azRec();
     view = { kind: "scene", bg: "stadium", speaker: null }; chap("Calcio d'azione");
     text("voce", `<b>Calcio d'azione</b>: partite brevi in tempo reale, tre contro tre. <b>Trascina il dito</b> sul campo per muovere Leo. <b>Passa</b>, <b>Contrasto</b> e <b>Tiro</b> (tienilo premuto per caricare: pieno è un tiro speciale, costa energia). <b>Mira</b>: quando lasci Tiro, la direzione in cui muovi Leo sceglie palo alto (su), palo basso (giù) o centro (dritto); senza direzione tira all'angolo lontano dal portiere. Gli angoli sono più forti ma rischi palo e fuori, il centro è preciso ma il portiere è lì. In Preparazione puoi attivare il <b>cambio giocatore</b> automatico (freccia gialla su chi controlli, pulsante «Cambia»). Non cambia la storia e non conta per Carriera.<br><span style="color:var(--dim)">Giocate ${r.played} · vinte ${r.w} · gol ${r.goals}</span>`);
-    buttons([...AZ_T.map(([k, ok], i) => { let o = false; try { o = ok(); } catch {} return o ? { label: `Contro ${TEAMS[k].name}`, sub: `Livello ${i + 1}${r.beat[k] ? " · battuti" : ""}`, cls: r.beat[k] ? "" : "hot", fn: () => azStart(k, back) } : { label: "???", sub: "Si sblocca più avanti nella storia", disabled: true, fn: () => {} }; }), { label: "Stagione del Borgo", sub: azSeaSub(), cls: r.played >= 1 ? "hot" : "", disabled: r.played < 1, fn: () => azSeaMenu(back) }, { label: "Preparazione partita", sub: azSum().slice(0, 60), fn: () => azPrep(back) }, { label: `Controlli: ${AZ_CTL.find((x) => x[0] === azCtlMode())[1]}`, sub: AZ_CTL.find((x) => x[0] === azCtlMode())[2], fn: () => { const r2 = azRec(), i = AZ_CTL.findIndex((x) => x[0] === azCtlMode()); r2.ctl = AZ_CTL[(i + 1) % AZ_CTL.length][0]; writeJSON(AZK, r2); azioneMenu(back); } }, { label: "◂ Indietro", fn: back || modes }]);
+    buttons([...AZ_T.map(([k, ok], i) => { let o = false; try { o = ok(); } catch {} return o ? { label: `Contro ${TEAMS[k].name}`, sub: `Livello ${i + 1}${r.beat[k] ? " · battuti" : ""}`, cls: r.beat[k] ? "" : "hot", fn: () => azStart(k, back) } : { label: "???", sub: "Si sblocca più avanti nella storia", disabled: true, fn: () => {} }; }), { label: "Stagione del Borgo", sub: azSeaSub(), cls: r.played >= 1 ? "hot" : "", disabled: r.played < 1, fn: () => azSeaMenu(back) }, { label: "Preparazione partita", sub: azSum().slice(0, 60), fn: () => azPrep(back) }, { label: "⚙️ Impostazioni Globali (Difficoltà & Comandi)", sub: `Difficoltà: ${azDiffName()} · Comandi: ${azCtlName()}`, cls: "hot", fn: () => settings(azioneMenu, null, "calcio_azione") }, { label: `Controlli: ${AZ_CTL.find((x) => x[0] === azCtlMode())[1]}`, sub: AZ_CTL.find((x) => x[0] === azCtlMode())[2], fn: () => { const r2 = azRec(), i = AZ_CTL.findIndex((x) => x[0] === azCtlMode()); r2.ctl = AZ_CTL[(i + 1) % AZ_CTL.length][0]; writeJSON(AZK, r2); azioneMenu(back); } }, { label: "◂ Indietro", fn: back || modes }]);
   }
   function azStart(k, back, skip, ov) {
     if (!skip && azIntro15(k, back)) return;
@@ -20674,6 +20675,7 @@
     azBack = back; const T = TEAMS[k], pw = T.power, tr = (f) => { try { return f(); } catch { return 0; } };
     AZ = { k, T, pw, st, back, velB: tr(sqVelB), defB: tr(sqDefB), nicoB: tr(sqNicoB), ctl: azCtlMode(), mv: null, t: 0, dur: 4500, sc: [0, 0], en: 100, charge: -1, ptr: null, kx: 0, ky: 0, pause: 0, flash: null, over: false };
     try { if (typeof rsAz === "function") { const b = rsAz(); AZ.velB += b.spd; AZ.defB += b.def || 0; AZ.gkM = b.gk; AZ.coinB = b.coin; AZ.enB = b.en; AZ.noiseB = b.noise; } } catch {}
+    try { if (typeof window.getGachaToyBonus === "function") { const gb = window.getGachaToyBonus(); if (gb) { AZ.velB += (gb.spd || 0); AZ.defB += (gb.def || 0); AZ.coinB = (AZ.coinB || 0) + (gb.coin || 0); AZ.enB = (AZ.enB || 0) + (gb.en || 0); } } } catch {}
     azSetup15(AZ, ov);
     azReset(0);
     view = { kind: "azione" }; chap(`Calcio d'azione · ${T.name}`);
@@ -21359,7 +21361,8 @@
     buttons([
       { label: `Tipo: ${AZ_MOD.find((m) => m[0] === o.mode)[1]}`, sub: "Cambia tipo di partita", fn: () => { azSetOpt("mode", nx(mods.map((m) => m[0]), o.mode)); azPrep(back); } },
       { label: `Campo: ${AZ_PIT[o.pitch].n}`, sub: "Cambia campo", fn: () => { azSetOpt("pitch", nx(pits, o.pitch)); azPrep(back); } },
-      { label: `Difficoltà: ${AZ_DIF[o.diff].n}`, sub: AZ_DIF[o.diff].note.slice(0, 44), fn: () => { azSetOpt("diff", nx(["facile", "norm", "duro"], o.diff)); azPrep(back); } },
+      { label: `Difficoltà: ${AZ_DIF[o.diff] ? AZ_DIF[o.diff].n : "Normale"}`, sub: (AZ_DIF[o.diff] ? AZ_DIF[o.diff].note : "").slice(0, 44), fn: () => { const nd = nx(["facile", "norm", "duro", "leggenda"], o.diff); azSetOpt("diff", nd); if (window.setGlobalAzDiff) window.setGlobalAzDiff(nd); azPrep(back); } },
+      { label: "⚙️ Tutte le Impostazioni (Comandi & Grafica)", sub: `Difficoltà: ${azDiffName()} · Comandi: ${azCtlName()}`, cls: "hot", fn: () => settings(azPrep, null, "calcio_azione") },
       { label: `Potenziamenti: ${o.pu || o.mode !== "amic" ? "sì" : "no"}`, sub: o.mode !== "amic" ? "Sempre attivi in questo tipo di partita" : "Energia, scarpini e scudo sul campo", disabled: o.mode !== "amic", fn: () => { azSetOpt("pu", !o.pu); azPrep(back); } },
       { label: `Ruoli: ${o.roles.length ? o.roles.map((i) => SQ_NAME[i]).join(", ") : "nessuno"}`, sub: "Scegli fino a tre compagni", cls: "hot", fn: () => azRoles(back) },
       { label: `Controlli: ${AZ_CTL.find((x) => x[0] === azCtlMode())[1]}`, sub: AZ_CTL.find((x) => x[0] === azCtlMode())[2], cls: "hot", fn: () => { const r2 = azRec(), i = AZ_CTL.findIndex((x) => x[0] === azCtlMode()); r2.ctl = AZ_CTL[(i + 1) % AZ_CTL.length][0]; writeJSON(AZK, r2); azPrep(back); } },
