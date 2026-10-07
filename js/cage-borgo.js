@@ -113,7 +113,7 @@
     };
     // se borgo-expansions.js (o altri) assegneranno trTalkHook dopo di noi, la loro funzione resta in coda alla catena
     try {
-      Object.defineProperty(window, "trTalkHook", { configurable: true, enumerable: true, get() { return mine; }, set(fn) { prev = typeof fn === "function" && fn !== mine ? fn : prev; } });
+      Object.defineProperty(window, "trTalkHook", { configurable: true, enumerable: true, get() { return mine; }, set(fn) { if (typeof fn !== "function" || fn === mine) return; const old = prev; prev = function (id) { return fn(id) || (typeof old === "function" ? old(id) : false); }; } });
     } catch (e) { window.trTalkHook = mine; }
 
     // ---------------------------------------------------------------- NPC nella mappa dei Trabucchi (accanto alla Gabbia)

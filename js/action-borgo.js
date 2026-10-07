@@ -107,11 +107,13 @@
       ]);
     }
 
-    var prev = window.trTalkHook;
+    var desc = Object.getOwnPropertyDescriptor(window, "trTalkHook");
+    var chained = !(desc && desc.set); // con accessor (cage-borgo) la catena la fa il setter
+    var prev = chained ? window.trTalkHook : null;
     window.trTalkHook = function (id) {
       if (id === "ginetta_molo") { menuMain(); return true; }
       if (id === "arturo_molo") { arturoTalk(); return true; }
-      return typeof prev === "function" ? prev(id) : false;
+      return chained && typeof prev === "function" ? prev(id) : false;
     };
 
     if (Array.isArray(MN)) {
