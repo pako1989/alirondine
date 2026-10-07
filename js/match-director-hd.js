@@ -518,7 +518,8 @@
   .mdx-stars{color:#fbbf24;letter-spacing:1px;font-size:13px}
   .mdx-stars span{color:#334155}
   .mdx-top{display:flex;gap:6px;align-items:center;padding:6px 8px;background:#0a1424;border-bottom:1px solid #1b2a43;flex:none}
-  .mdx-top .mdx-btn{min-width:44px;padding:4px 6px}
+  .mdx-top .mdx-btn{min-width:36px;padding:4px 5px}
+  @media(max-width:360px){.mdx-top{gap:4px;padding:6px 4px}.mdx-top #mdxTO{min-width:0!important}}
   .mdx-sb{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:6px;padding:6px 10px 4px;background:#0a1424;flex:none}
   .mdx-sb .tn{font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .mdx-sb .tn.r{text-align:right}

@@ -175,7 +175,7 @@
   // Tasto Finta: Roulette o Sombrero
   window.azProDribble = function (A) {
     if (!A || A.pause || !A.opt || !A.opt.pro) return;
-    const l = (typeof azMe === "function") ? azMe(A) : A.us[0];
+    const l = (window.__azHooks && window.__azHooks.azMe) ? window.__azHooks.azMe(A) : A.us[0];
     if (A.owner !== l || l.drib > 0) return;
     if (A.en < 15 && (!A.overdrive || A.overdrive <= 0)) {
       if (window.toast) window.toast("Energia insufficiente per la Finta!", "warn", "⚡");
@@ -193,7 +193,7 @@
     }
 
     // Stun nearby sliding tacklers
-    const foes = (typeof azSide === "function") ? azSide(1) : A.them;
+    const foes = (window.__azHooks && window.__azHooks.azSide) ? window.__azHooks.azSide(1) : A.them;
     foes.forEach((p) => {
       if (Math.hypot(p.x - l.x, p.y - l.y) < 32) {
         p.stun = 55;
@@ -268,7 +268,7 @@
 
   // Disegno dettagliato dei giocatori Pro (campioni, capelli, numeri, divise)
   window.azProDrawPlayer = function (p, team, isControlled, isGk, l, A, g) {
-    const isHeroActive = (typeof heroLoad === "function" && heroLoad());
+    const isHeroActive = (window.__azHooks && window.__azHooks.heroLoad && window.__azHooks.heroLoad());
     let hairCol = "#2b1d14";
     let skinCol = "#f2c9a0";
     let shirtCol = "#ff4d5a";

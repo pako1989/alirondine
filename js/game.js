@@ -4244,7 +4244,7 @@
       text("tonino", "«Leo! Il gusto Acciuga e Zabaione oggi è venuto una bomba. Vuoi fare un giro sul gozzo di Baciccia o ascoltare Radio Rondine?»");
       return buttons([
         { label: "🌊 Il Gozzo di Baciccia", sub: "Naviga nel golfo e recupera i palloni", cls: "hot", fn: () => { borgoLeave(); if (window.openGozzoGame) window.openGozzoGame("recupero", borgoResume); } },
-        { label: "📻 Radio Rondine 98.6", sub: "La voce del Borgo e il notiziario", fn: () => { borgoLeave(); radioRondine(borgoResume); } },
+        { label: "📻 Radio Rondine 98.6", sub: "La voce del Borgo e il notiziario", fn: () => { borgoLeave(); radio(borgoResume); } },
         { label: "◂ Resta nel Borgo", fn: borgoResume }
       ], true);
     }
@@ -21498,13 +21498,15 @@
     });
     if (ch) mnSave2(rec);
     if (id !== "modes") return src;
+    { const seenL = new Set(); // voci doppie (stessa etichetta senza parentesi): resta la prima
+      src = src.filter((b) => { if (!b || b.label === "???" || /^[◂▾▸]/.test(b.label)) return true; const k = String(b.label).replace(/\s*\([^)]*\)\s*$/, "").replace(/^[^\p{L}\p{N}]+/u, "").trim().toLowerCase(); if (seenL.has(k)) return false; seenL.add(k); return true; }); }
     const top = [], cats = {}, tail = [];
     src.forEach((b) => { if (!b) return; if (b.label === "◂ Menu") tail.push(b); else if (b.label === "Mappa delle modalità") top.push(b); else { const c = (MN_CAT.find(([, re]) => re.test(b.label)) || ["Altro"])[0]; (cats[c] = cats[c] || []).push(b); } });
     const out = [...top];
     MN_ORDER.forEach((c) => {
       let arr = cats[c]; if (MN_EXP[c]) { const real = (arr || []).filter((b) => b && b.label !== "???"), lock = (arr || []).find((b) => b && b.label === "???") || { label: "???", sub: "Si sblocca più avanti nella storia", disabled: true, fn: () => {} }; arr = [...real, ...Array.from({ length: Math.max(0, MN_EXP[c] - real.length) }, () => ({ ...lock }))]; }
       if (!arr || !arr.length) return; const nNew = arr.filter((b) => b._new).length, open = rec.open[c] === undefined ? (c === "Partite" || nNew > 0) : !!rec.open[c];
-      out.push({ label: `${open ? "▾" : "▸"} ${c}`, sub: `${arr.filter((b) => !b.disabled).length} ${arr.filter((b) => !b.disabled).length === 1 ? "voce" : "voci"}${nNew ? ` · ${nNew} ${nNew === 1 ? "nuova" : "nuove"}` : ""}`, cls: "mnsec" + (nNew ? " mnew" : ""), fn: () => { const r = mnRec2(); r.open[c] = !open; mnSave2(r); modes(); } });
+      out.push({ label: `${open ? "▾" : "▸"} ${c}`, sub: `${arr.filter((b) => !b.disabled).length} ${arr.filter((b) => !b.disabled).length === 1 ? "voce" : "voci"}${arr.some((b) => b.disabled) ? ` · ${arr.filter((b) => b.disabled).length} da sbloccare` : ""}${nNew ? ` · ${nNew} ${nNew === 1 ? "nuova" : "nuove"}` : ""}`, cls: "mnsec" + (nNew ? " mnew" : ""), fn: () => { const r = mnRec2(); r.open[c] = !open; mnSave2(r); modes(); } });
       if (open) out.push(...arr);
     });
     return [...out, ...tail];
@@ -23599,6 +23601,7 @@
 
   function playCarHorn() {
     try {
+      const actx = ac();
       if (!actx) return;
       const osc = actx.createOscillator();
       const gain = actx.createGain();
@@ -24733,6 +24736,7 @@
   window.borgoLoad = borgoLoad;
   window.svRec = svRec;
   window.svSave = svSave;
+  window.__azHooks = { azMe, azSide, heroLoad };
   window.__borgoApi = { TRZ, MN_BORGO_BTN, CAST, trGo, trAsk, trSay, trResume, L, trToast, TR_IDS, NPCS, trLevel };
   title();
   render();
