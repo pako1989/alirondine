@@ -3799,6 +3799,8 @@
     { id: "hq", x: 30, y: 16, w: 8, h: 4, door: [33, 19], roof: "#365a78", wall: "#e1d2ad", label: "CASA DELLE STELLE" },
     { id: "ferri", x: 3, y: 3, w: 6, h: 5, door: [5, 7], roof: "#d9853b", wall: "#f7e08a", label: "CASA FERRI" },
     { id: "faro", x: 53, y: 21, w: 3, h: 3, door: [54, 23], roof: "#c8102e", wall: "#f2f2f2", label: "FARO" },
+    // ingresso dello Stadio del Borgo (js/stadio-borgo.js): un varco nel muro del vecchio stadio, si arriva dalla strada della costa
+    { id: "stadio", x: 43, y: 15, w: 3, h: 1, door: [44, 15], roof: "#8e8a83", wall: "#8e8a83", label: "" },
   ];
   const TREES = [[2, 10], [8, 11], [1, 16], [13, 17], [15, 16], [22, 16], [30, 16], [33, 18], [11, 2], [13, 3], [30, 1], [34, 1], [16, 2], [1, 8]];
   const LAMPS = [[13, 12], [26, 12], [3, 12], [17, 19], [22, 20], [31, 15]];
@@ -4030,6 +4032,7 @@
         px(x + w / 2 - 1, y - 15, 2, 17, "#624b3c"); px(x + w / 2 + 1, y - 15, 15, 8, "#b3202c"); px(x + w / 2 + 1, y - 7, 15, 8, "#ffd23f");
       }
       if (b.id === "chiesa") { px(x + w / 2 - 1, y - 8, 2, 10, "#e8e0c8"); px(x + w / 2 - 4, y - 5, 8, 2, "#e8e0c8"); }
+      if (b.id === "stadio") { try { if (window.__stadioBorgo && window.__stadioBorgo.drawBorgo) window.__stadioBorgo.drawBorgo(g, x, y, w, h, !!B.night, frame); } catch {} }
       const dxp = b.door[0] * TS - cx, dyp = b.door[1] * TS - cy; px(dxp + 3, dyp + 2, 10, 14, "#5a3a22"); px(dxp + 10, dyp + 9, 2, 2, "#ffd23f");
       g.font = "bold 8px sans-serif"; g.textAlign = "center"; g.fillStyle = "#0008"; g.fillText(b.label, x + w / 2 + 1, y + 11); g.fillStyle = "#fff"; g.fillText(b.label, x + w / 2, y + 10); g.textAlign = "left";
     });
@@ -4317,6 +4320,7 @@
       ], true);
     }
     if (id === "hq") return hqEnter(() => borgo(), true);
+    if (id === "stadio") { if (window.__stadioBorgo && window.__stadioBorgo.enter) return window.__stadioBorgo.enter({ fromBorgo: true }); return borgoToast("Il cancello dello stadio è chiuso con una catena."); }
     if (id === "ferri") {
       view = { kind: "scene", bg: "borgo", speaker: "nonna" }; chap("Casa Ferri");
       text("nonna", "Entri a Casa Ferri. Profumo di lasagne e di naftalina. La Nonna ti guarda da sopra gli occhiali: «Leo. Vuoi sentire di quando Nicola ha giocato la finale dei Pulcini? Ho un baule, in soffitta.»");
@@ -24919,7 +24923,7 @@
     trLeave(); TW = null; B = borgoLoad();
     if (!BW) BW = { keys: {}, walk: 0, saved: 0 };
     if (typeof back === "function") return back();
-    if (toDoor) { const hq = BLD.find((b) => b.id === "hq"); if (hq) { B.x = hq.door[0] * TS + 8; B.y = (hq.door[1] + 1) * TS + 12; B.dir = "down"; borgoSave(); } }
+    if (toDoor) { const hq = BLD.find((b) => b.id === (typeof toDoor === "string" ? toDoor : "hq")); if (hq) { const up = hq.id === "stadio"; B.x = hq.door[0] * TS + 8; B.y = (hq.door[1] + (up ? -1 : 1)) * TS + 12; B.dir = up ? "up" : "down"; borgoSave(); } }
     borgo();
   }
   // ponte per js/quartier-generale.js (Casa delle Stelle camminabile): funzioni del Quartier Generale e delle modalità collegate
@@ -24929,7 +24933,8 @@
     isStar: (id) => SV.some((s) => s.id === id), star: (id) => SV.find((s) => s.id === id) || null, starsRec: () => SV.filter((s) => svRec().rec[s.id]).length, svTalk,
     squadra, spMenu, daily, svPage,
   };
-  window.__borgoApi = { TRZ, MN_BORGO_BTN, CAST, trGo, trAsk, trSay, trResume, L, trToast, TR_IDS, NPCS, trLevel, trZone: () => (TW ? TW.id : null), trExitTo, trRec, todayKey, hq: HQ_API };
+  window.__borgoApi = { TRZ, MN_BORGO_BTN, CAST, trGo, trAsk, trSay, trResume, L, trToast, TR_IDS, NPCS, trLevel, trZone: () => (TW ? TW.id : null), trExitTo, trRec, todayKey, hq: HQ_API, COSM, bCos };
+  if (/[?&]debug/.test(location.search)) window.__borgoDbg = { get BW() { return BW; }, get B() { return B; }, BLD, borgo, borgoMap, borgoDoor, borgoOpenLevel };
   try { if (window.__storyNav && window.__storyNav.seedFromSaveState) window.__storyNav.seedFromSaveState(S); } catch {}
   title();
   render();
