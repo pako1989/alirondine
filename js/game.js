@@ -1600,7 +1600,7 @@
     else document.body.classList.remove("bw-vintage");
     const team = TEAMS[step.match];
     M = { team: step.match, step, career: !!step.career, min: 0, half: 1, score: [0, 0], poss: "us", zone: 1, guts: S.st.grinta, fixDone: false, htDone: false, anim: null, perkUsed: false, ad: { sp: {}, act: {}, dive: {}, told: {} } };
-    if (window.hasTalent && window.hasTalent("focaccia")) M.guts += 15;
+    if (window.hasTalent && window.hasTalent("focaccia")) M.guts += Math.round(15 * stHalf());
     if (step.cupRule) {
       M.cup = { rule: step.cupRule, done: false, bond: !!step.cupBond, support: step.cupSupport || 0 };
       if (step.cupStart === "them") { M.poss = "them"; M.zone = step.cupZone || 3; }
@@ -1754,7 +1754,7 @@
   const DUEL_DEF = [["la scivolata", "si abbassa sulle gambe, pronto a scivolare"], ["la marcatura", "ti sta addosso, spalla contro spalla"], ["il pressing", "avanza di corsa per pressarti"]];
   const DUEL_ME = [["Finta", "batte la scivolata"], ["Scatto", "batte la marcatura"], ["Protezione", "batte il pressing"]];
   function duello(d) {
-    const real = Math.floor(Math.random() * 3), honest = Math.random() < clamp(0.62 - hLv() * 0.08, 0.4, 0.7);
+    const real = Math.floor(Math.random() * 3), honest = Math.random() < clamp(0.62 - hLv() * 0.12, 0.38, 0.7);
     const shown = honest ? real : (real + 1 + Math.floor(Math.random() * 2)) % 3;
     $("choices").innerHTML = ""; sfx("special");
     anCine({ who: heroId(), text: "DUELLO", c1: "#101840", c2: "#ffd23f", t: 40, d: 40, cine: "opp", done: () => {
@@ -1777,6 +1777,7 @@
   }
   function getActiveRecruitPerks(phase) {
     if (!M || M.perkUsed || !recruitPerksEnabled()) return [];
+    if (M.story || M.career) return []; // niente aiuti delle reclute nelle partite di storia e Carriera
     let rec = {};
     try {
       if (typeof svRec === "function") rec = (svRec() && svRec().rec) || {};
@@ -1923,7 +1924,7 @@
     if (pcOn("spec")) pcLimit(opts);
     // grinta finita: puoi sempre tirare lo stesso (più debole) oppure rifiatare, che ridà almeno la grinta di un tiro
     if (z >= 3 && cupReady && !cupSpecialOnly && !M.carrier && !cost(10) && pcOn("fiato") && !(M.step && M.step.tower)) opts.push({ label: "Tira lo stesso", sub: `sei stanco: tiro più debole · usa la grinta rimasta (${Math.round(M.guts)})`, fn: () => { M.tiredShot = true; act("shot", d); } });
-    const rg = () => pcOn("fiato") ? Math.max(10, Math.round(15 * dfRegen())) : Math.round(15 * dfRegen());
+    const rg = () => pcOn("fiato") && hLv() === 0 ? Math.max(10, Math.round(15 * dfRegen())) : Math.round(15 * dfRegen());
     if (!opts.some((o) => !o.disabled) || (pcOn("fiato") && !cost(10))) opts.push({ label: "Tieni palla e rifiata", sub: `+${rg()} grinta`, fn: () => { M.guts = Math.min(S.st.grinta, M.guts + rg()); tick(2, 4); say("Rallenti il gioco e riprendi fiato."); turn(); } });
     try {
       const rPerks = getActiveRecruitPerks("attack");
@@ -1999,10 +2000,10 @@
   const third = () => (M && M.third) || (S.season === 8 ? (mate() === "Leo" ? "Gigi" : "Leo") : mate() === "Tommy" ? (S.season === 2 ? "Gigi" : "Fede") : "Tommy");
   // ---------- 15l · partita classica: rischio, speciali a rotazione, difesa a indizi, passaggio a scelta (Impostazioni › Partita classica) ----------
   const pcOn = (k) => !!(SET && SET.pc && SET.pc[k]);
-  const pcDrib = (d, m = mate()) => clamp(0.5 + (S.st.drib - d.v * 0.8) / 30 + tacB() + (m === "Gigi" ? 0.08 : 0) + (window.hasTalent && window.hasTalent("appunti") ? 0.07 : 0) - (M.meteo === "pioggia" ? 0.05 : M.meteo === "neve" ? 0.07 : 0), 0.15, 0.95);
-  const pcPass = (d, m = mate()) => clamp(0.62 + (S.st.pass - d.v * 0.8) / 35 + S.bond * 0.02 + sqVelB() + bvVelB() + spVel() + tacB() + (m === "Fede" ? 0.08 : 0) + (window.hasTalent && window.hasTalent("cruciverba") ? 0.07 : 0) - (m === "Gigi" ? 0.08 : 0), 0.25, 0.98);
+  const pcDrib = (d, m = mate()) => clamp(0.5 + (S.st.drib - d.v * 0.8) / 30 + tacB() + (m === "Gigi" ? 0.08 : 0) + (window.hasTalent && window.hasTalent("appunti") ? 0.07 * stHalf() : 0) - (M.meteo === "pioggia" ? 0.05 : M.meteo === "neve" ? 0.07 : 0), 0.15, 0.95);
+  const pcPass = (d, m = mate()) => clamp(0.62 + (S.st.pass - d.v * 0.8) / 35 + S.bond * 0.02 + sqVelB() + bvVelB() + spVel() + tacB() + (m === "Fede" ? 0.08 : 0) + (window.hasTalent && window.hasTalent("cruciverba") ? 0.07 * stHalf() : 0) - (m === "Gigi" ? 0.08 : 0), 0.25, 0.98);
   const pcOne = (d, m = mate()) => clamp(0.5 + (S.st.pass - d.v * 0.8) / 30 + S.bond * 0.03 + sqVelB() + bvVelB() + spVel() + tacB() + (m === "Fede" ? 0.08 : 0), 0.2, 0.9);
-  const pcTack = (a, x = 0) => clamp(0.5 + (S.st.contr - a.v * 0.7) / 40 + Math.min(S.bond, 8) * 0.02 + sqDefB() + ttDefB() + bvDefB() + spDef() + (M.tac === "cat" ? 0.06 : 0) + (mate() === "Bruno" ? 0.05 : 0) + (window.hasTalent && window.hasTalent("acciughe") ? 0.08 : 0) + x, 0.15, 0.92);
+  const pcTack = (a, x = 0) => clamp(0.5 + (S.st.contr - a.v * 0.7) / 40 + Math.min(S.bond, 8) * 0.02 + sqDefB() + ttDefB() + bvDefB() + spDef() + (M.tac === "cat" ? 0.06 : 0) + (mate() === "Bruno" ? 0.05 : 0) + (window.hasTalent && window.hasTalent("acciughe") ? 0.08 * stHalf() : 0) + x, 0.15, 0.92);
   const pcInt = (a, x = 0) => clamp(0.35 + (S.st.contr - a.v * 0.7) / 45 + (M.tac === "cp" ? 0.12 : 0) + x, 0.12, 0.78);
   function pcShotP() { // stima del tiro normale con le stesse formule di shoot(), senza effetti
     const t = TEAMS[M.team], st = S.st, dist = (5 - M.zone) * 5; let n = 0;
@@ -2075,7 +2076,7 @@
     if (kind === "hero") power = heroPower(st);
     if (kind === "mate") power = matePower(st, dist, mk);
     power += sqShotB(kind, mk);
-    if (window.hasTalent && window.hasTalent("fischietto")) power += 4;
+    if (window.hasTalent && window.hasTalent("fischietto")) power += 4 * stHalf();
     power += bvPow() + spPow(); power *= ttPow();
     power = weatherPow(power, true);
     if (M.tiredShot) { M.tiredShot = false; if (!sp) power *= 0.8; }
@@ -2201,7 +2202,7 @@
       view = { kind: "match" };
       if (power === 0) { say(`Dario tira… altissimo, sopra la traversa. Lo stadio fischia. Lui non alza lo sguardo.`); }
       else if (power > save) {
-        if (window.hasTalent && window.hasTalent("olio_santo") && Math.random() < 0.10) {
+        if (window.hasTalent && window.hasTalent("olio_santo") && Math.random() < 0.10 * stHalf()) {
           sfx("kick");
           say(`CLAMOROSO! Il tiro di <b>${esc(a.name)}</b> supera il portiere ma si stampa sul PALO pieno! L'Olio Santo di Don Aurelio fa il miracolo! Palla vostra.`);
           if (window.toast) window.toast("Miracolo del palo benedetto!", "success", "✨");
@@ -2282,7 +2283,7 @@
     if (M.gkF) { M.gkF.us = Math.max(0, M.gkF.us - 2); M.gkF.them = Math.max(0, M.gkF.them - 2); }
     M.half = 2; M.min = 45; M.guts = Math.min(S.st.grinta, M.guts + (M.ch && M.ch.noHalf ? 0 : S.st.grinta * 0.45 * dfRegen()));
     if (window.hasTalent && window.hasTalent("focaccia")) {
-      M.guts = Math.min(S.st.grinta + 15, M.guts + 15);
+      M.guts = Math.min(S.st.grinta + 15, M.guts + Math.round(15 * stHalf()));
       if (window.toast) window.toast("+15 Grinta con la Focaccia della Nonna!", "info", "🥖");
     }
     sfx("whistle");
@@ -17099,10 +17100,10 @@
     nastro: { shop: "ivano", label: "Nastro da capitano", cost: 10, fx: "Nella prossima partita i passaggi sono più precisi" },
   };
   const bvB = (k) => { try { return M && !(M.step && M.step.tower) && bv().buff === k; } catch { return false; } };
-  const bvPow = () => (bvB("focaccia") ? 4 : 0);
-  const bvDefB = () => (bvB("farinata") ? 0.05 : 0);
-  const bvNicoB = () => (bvB("torta") ? 3 : 0);
-  const bvVelB = () => (bvB("nastro") ? 0.04 : 0);
+  const bvPow = () => (bvB("focaccia") ? 4 * stHalf() : 0);
+  const bvDefB = () => (bvB("farinata") ? 0.05 * stHalf() : 0);
+  const bvNicoB = () => (bvB("torta") ? 3 * stHalf() : 0);
+  const bvVelB = () => (bvB("nastro") ? 0.04 * stHalf() : 0);
   function bvAfter() { if (!M || (M.step && M.step.tower)) return; const r = bv(); if (r.buff) { r.buff = null; bvSave(); } }
   function bvShop(id, msg) {
     const r = bv(), ph = bvPh(), open = id === "graziella" ? ph <= 1 : ph >= 1;
