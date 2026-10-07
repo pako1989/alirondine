@@ -1519,7 +1519,12 @@
 
       if (o.sub) { const s = document.createElement("small"); s.textContent = o.sub; b.appendChild(s); }
       if (o.disabled) b.disabled = true;
-      b.onclick = () => { c.innerHTML = ""; o.fn(); };
+      b.onclick = () => {
+        if (typeof o.fn === "function") {
+          c.innerHTML = "";
+          o.fn();
+        }
+      };
       c.appendChild(b);
     });
     const f = c.querySelector("button:not(:disabled)"); if (f) f.focus({ preventScroll: true });
@@ -1595,12 +1600,13 @@
       view = { kind: "scene", bg: view.bg, speaker: s.choice.who };
       text(s.choice.who, esc(s.choice.text));
 
+      const showHints = !SET || SET.storyChoiceHints !== false;
       const forkKey = (s.chap || ("step_" + S.step)) + "#" + (s.choice.text || "");
-      const anyChosenInFork = s.choice.options.some((opt) => window.isOptionAlreadyChosen && window.isOptionAlreadyChosen(forkKey + "#" + opt.label));
+      const anyChosenInFork = showHints && s.choice.options.some((opt) => window.isOptionAlreadyChosen && window.isOptionAlreadyChosen(forkKey + "#" + opt.label));
 
       const decorated = s.choice.options.map((o) => {
         const optKey = forkKey + "#" + o.label;
-        const alreadyChosen = window.isOptionAlreadyChosen ? window.isOptionAlreadyChosen(optKey) : false;
+        const alreadyChosen = showHints && window.isOptionAlreadyChosen ? window.isOptionAlreadyChosen(optKey) : false;
         return {
           ...o,
           alreadyChosen,
@@ -5422,10 +5428,19 @@
     ];
     const gameB = b.filter(isGame), ruleB = b.filter(isRule), audioB = AB, lookB = b.filter((o) => !isGame(o) && !isRule(o) && !AB.includes(o));
     const storyStats = window.__storyNav ? window.__storyNav.getStats() : { seenDialoguesCount: 0, chosenOptionsCount: 0 };
+    const hintsOn = SET.storyChoiceHints !== false;
     const storyB = [
       {
-        label: `Segnaposto "Già scelto": ATTIVO`,
-        sub: `Mostra "● Già scelto" nei bivi narrativi e illumina le risposte "✦ Mai provato"`
+        label: `Segnaposto "Già scelto": ${hintsOn ? "ATTIVO" : "DISATTIVATO"} ▸`,
+        sub: hintsOn
+          ? `Mostra "● Già scelto" nei bivi narrativi e illumina le risposte "✦ Mai provato" (tocca per disattivare)`
+          : `Indicatori di playthrough disattivati: opzioni presentate in modo neutro (tocca per attivare)`,
+        cls: "hot",
+        fn: () => {
+          SET.storyChoiceHints = !hintsOn;
+          save();
+          again(`Segnaposto "Già scelto" nei bivi: ${SET.storyChoiceHints !== false ? "ATTIVATO" : "DISATTIVATO"}.`);
+        }
       },
       {
         label: `Velocità Skip Scene Viste: ${(localStorage.getItem("ali-di-rondine.skip-speed") || "veloce").toUpperCase()} ▸`,
@@ -5440,8 +5455,11 @@
         }
       },
       {
-        label: `Statistiche Esplorazione`,
-        sub: `Bivi registrati: ${storyStats.chosenOptionsCount} · Battute viste: ${storyStats.seenDialoguesCount}`
+        label: `Statistiche Esplorazione: ${storyStats.chosenOptionsCount} bivi · ${storyStats.seenDialoguesCount} battute`,
+        sub: `Tocca per aggiornare il riepilogo dei bivi memorizzati e battute viste`,
+        fn: () => {
+          again(`Esplorazione attuale: ${storyStats.chosenOptionsCount} bivi registrati e ${storyStats.seenDialoguesCount} battute di dialogo viste.`);
+        }
       },
       {
         label: "Azzera Memoria Bivi e Dialoghi Visti",
@@ -7636,11 +7654,12 @@
       }
       view = { kind: "scene", bg: view.bg || "beach", speaker: s.choice.who };
       text(s.choice.who, esc(s.choice.text));
+      const showHints = !SET || SET.storyChoiceHints !== false;
       const forkKey = "fi_" + F.step + "#" + (s.choice.text || "");
-      const anyChosenInFork = s.choice.options.some((opt) => window.isOptionAlreadyChosen && window.isOptionAlreadyChosen(forkKey + "#" + opt.label));
+      const anyChosenInFork = showHints && s.choice.options.some((opt) => window.isOptionAlreadyChosen && window.isOptionAlreadyChosen(forkKey + "#" + opt.label));
       const decorated = s.choice.options.map((o) => {
         const optKey = forkKey + "#" + o.label;
-        const alreadyChosen = window.isOptionAlreadyChosen ? window.isOptionAlreadyChosen(optKey) : false;
+        const alreadyChosen = showHints && window.isOptionAlreadyChosen ? window.isOptionAlreadyChosen(optKey) : false;
         return {
           ...o,
           alreadyChosen,
@@ -9549,7 +9568,7 @@
   function pcBiteWin() { return ({ facile: 0.8, difficile: 0.42 }[SET && SET.diff] || 0.58); }
   function pcBtns(list) {
     const c = $("choices"); c.innerHTML = ""; c.className = "choices" + (list.length === 1 ? " one" : "");
-    list.forEach((o) => { const b = document.createElement("button"); b.type = "button"; b.textContent = o.label; if (o.cls) b.className = o.cls; if (o.sub) { const s = document.createElement("small"); s.textContent = o.sub; b.appendChild(s); } b.onclick = () => o.fn(); c.appendChild(b); });
+    list.forEach((o) => { const b = document.createElement("button"); b.type = "button"; b.textContent = o.label; if (o.cls) b.className = o.cls; if (o.sub) { const s = document.createElement("small"); s.textContent = o.sub; b.appendChild(s); } b.onclick = () => { if (typeof o.fn === "function") o.fn(); }; c.appendChild(b); });
   }
   function pcStatus() {
     const r = pcRec();
