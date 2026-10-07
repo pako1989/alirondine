@@ -1348,13 +1348,14 @@
     return 0;
   }
 
+  // le monete passano da window.addCoins (che salva già): il fallback su localStorage serve solo se manca
   function deductUserCoins(amount) {
     try {
-      let deducted = false;
       if (typeof window.addCoins === "function") {
         window.addCoins(-amount);
-        deducted = true;
+        return true;
       }
+      let deducted = false;
       const rawBorgo = localStorage.getItem("ali-di-rondine.borgo");
       if (rawBorgo) {
         const b = JSON.parse(rawBorgo);
@@ -1379,6 +1380,7 @@
     try {
       if (typeof window.addCoins === "function") {
         window.addCoins(amount);
+        return;
       }
       const rawBorgo = localStorage.getItem("ali-di-rondine.borgo");
       if (rawBorgo) {
@@ -2358,7 +2360,7 @@
             <div style="display:flex; flex-direction:column; gap:10px;">
               <div style="background:rgba(30,41,59,0.7); border:1.5px solid #fbbf2466; border-radius:10px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
                 <div>
-                  <div style="font-weight:bold; font-size:14px; color:#ffd23f;">Borsa di Monete Piccola (🪙 40)</div>
+                  <div style="font-weight:bold; font-size:14px; color:#ffd23f;">Borsa di Monete Piccola (🪙 10)</div>
                   <div style="font-size:11px; color:#cbd5e1;">Fondi 20 frammenti per un po' di spiccioli immediati al Bar</div>
                 </div>
                 <button type="button" class="btn-forge-action" data-type="coins20" style="background:#d97706; color:#fff; border:1px solid #fbbf24; border-radius:6px; padding:8px 12px; font-size:12px; font-weight:bold; cursor:pointer;">
@@ -2368,7 +2370,7 @@
 
               <div style="background:rgba(30,41,59,0.7); border:1.5px solid #fbbf2488; border-radius:10px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
                 <div>
-                  <div style="font-weight:bold; font-size:14px; color:#ffd23f;">Forziere di Monete Grande (🪙 120)</div>
+                  <div style="font-weight:bold; font-size:14px; color:#ffd23f;">Forziere di Monete Grande (🪙 25)</div>
                   <div style="font-size:11px; color:#cbd5e1;">Fondi 50 frammenti per quasi un'intera multi-pescata 10x!</div>
                 </div>
                 <button type="button" class="btn-forge-action" data-type="coins50" style="background:#b45309; color:#fff; border:1px solid #fbbf24; border-radius:6px; padding:8px 12px; font-size:12px; font-weight:bold; cursor:pointer;">
@@ -2466,8 +2468,8 @@
             }
             d.shards -= 20;
             saveGachaData(d);
-            addUserCoins(40);
-            if (window.toast) window.toast("+40 Monete d'oro forgiate!", "success", "🪙");
+            addUserCoins(10);
+            if (window.toast) window.toast("+10 Monete d'oro forgiate!", "success", "🪙");
           } else if (type === "coins50") {
             if ((d.shards || 0) < 50) {
               if (window.toast) window.toast("Servono 50 frammenti per questa forgiatura!", "warn", "🧩");
@@ -2475,8 +2477,8 @@
             }
             d.shards -= 50;
             saveGachaData(d);
-            addUserCoins(120);
-            if (window.toast) window.toast("+120 Monete d'oro forgiate!", "success", "🪙");
+            addUserCoins(25);
+            if (window.toast) window.toast("+25 Monete d'oro forgiate!", "success", "🪙");
           } else if (type === "ticket") {
             if ((d.shards || 0) < 100) {
               if (window.toast) window.toast("Servono 100 frammenti per il Biglietto Dorato!", "warn", "🧩");
