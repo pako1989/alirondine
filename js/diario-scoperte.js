@@ -55,6 +55,25 @@
       return [e, n < 12 && (n || live) ? { id: "storia-ancora", g: "storia", ico: "❔", name: "???", st: "lock", cur: 0, line: HINT.stagione } : null].filter(Boolean);
     });
 
+    // --- Bivi Narrativi & Rigiocabilità
+    add(function () {
+      var nav = window.__storyNav || null;
+      var stats = nav && fn(nav.getStats) ? nav.getStats() : { chosenOptionsCount: 0, seenDialoguesCount: 0 };
+      var ch = stats.chosenOptionsCount | 0;
+      var dg = stats.seenDialoguesCount | 0;
+      if (!ch && !dg) return null;
+      var line = "Scelte narrative segnate: " + ch + " · battute di dialogo viste: " + dg;
+      return {
+        id: "storia-bivi",
+        g: "storia",
+        ico: "🔀",
+        name: "Bivi narrativi scoperti",
+        st: ch >= 35 ? "done" : ch > 0 ? "prog" : "todo",
+        cur: ch,
+        line: line
+      };
+    });
+
     // --- Carriera
     add(function () {
       var r = obj(rj("ali-di-rondine.carriera.record", null)), cur = rj("ali-di-rondine.carriera", null);

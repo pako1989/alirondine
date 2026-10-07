@@ -1432,6 +1432,7 @@
     if (c && c.name) box.querySelector(".who").textContent = c.name;
     box.querySelector(".t").innerHTML = html;
     if (window.addDialogueLog) window.addDialogueLog(c && c.name ? c.name : who, html);
+    if (window.markDialogueSeen) window.markDialogueSeen(c && c.name ? c.name : who, html);
   }
   function esc(s) { return s.replace(/[&<>]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[ch])); }
   function buttons(list, one) {
@@ -1491,10 +1492,39 @@
     list.forEach((o) => {
       if (o && o.head) { const h = document.createElement("div"); h.className = "head"; h.textContent = o.head; c.appendChild(h); return; }
       const b = document.createElement("button"); b.type = "button";
-      b.textContent = o.label; if (o.cls) b.className = o.cls;
+      if (o.cls) b.className = o.cls;
+      if (o.alreadyChosen) {
+        b.classList.add("seen-choice");
+        b.setAttribute("data-already-chosen", "true");
+      }
+
+      const lbl = document.createElement("span");
+      lbl.className = "choice-lbl-text";
+      lbl.textContent = o.label;
+      b.appendChild(lbl);
+
+      if (o.alreadyChosen) {
+        const tag = document.createElement("span");
+        tag.className = "choice-tag-seen";
+        tag.innerHTML = `<span class="choice-dot-seen">●</span> Già scelto`;
+        tag.title = "Risposta già data nei tuoi playthrough precedenti";
+        b.appendChild(tag);
+      } else if (o.isNewFork) {
+        const tag = document.createElement("span");
+        tag.className = "choice-tag-new";
+        tag.innerHTML = `✦ Mai provato`;
+        tag.title = "Scelta non ancora effettuata nei tuoi playthrough";
+        b.appendChild(tag);
+      }
+
       if (o.sub) { const s = document.createElement("small"); s.textContent = o.sub; b.appendChild(s); }
       if (o.disabled) b.disabled = true;
-      b.onclick = () => { c.innerHTML = ""; o.fn(); };
+      b.onclick = () => {
+        if (typeof o.fn === "function") {
+          c.innerHTML = "";
+          o.fn();
+        }
+      };
       c.appendChild(b);
     });
     const f = c.querySelector("button:not(:disabled)"); if (f) f.focus({ preventScroll: true });
@@ -1507,8 +1537,42 @@
       const l = q[i++];
       view = { kind: "scene", bg: l.bg || view.bg, speaker: l.who };
       seeCard(l.who);
+
+      const wasSeen = window.isDialogueSeen ? window.isDialogueSeen(l.who, l.text) : true;
       text(l.who, esc(l.text));
-      buttons([{ label: "Continua ▸", fn: next }]);
+
+      if (window.isStorySkipActive && window.isStorySkipActive()) {
+        if (!wasSeen) {
+          // Si ferma subito al primo dialogo nuovo/inedito
+          if (window.stopStorySkip) window.stopStorySkip("dialogo_nuovo");
+          if (window.toast) window.toast("✦ Nuova battuta non ancora vista: Skip arrestato.", "info", "📖");
+          buttons([{ label: "Continua ▸", fn: next }]);
+        } else {
+          // Dialogo già visto: scorre velocemente e permette lo stop manuale
+          buttons([{
+            label: "⏹️ Ferma Avanzamento Veloce (Skip in corso...)",
+            cls: "skip-active-btn",
+            fn: () => {
+              if (window.stopStorySkip) window.stopStorySkip("manuale");
+              buttons(wasSeen ? [{ label: "Continua ▸", fn: next }, { label: "⏩ Skip scene viste", cls: "skip-btn", fn: () => { if (window.startStorySkip) window.startStorySkip(next); } }] : [{ label: "Continua ▸", fn: next }]);
+            }
+          }], true);
+          if (window.__storyNav && window.__storyNav.scheduleNext) {
+            window.__storyNav.scheduleNext(next);
+          } else {
+            setTimeout(next, 75);
+          }
+        }
+      } else {
+        if (wasSeen) {
+          buttons([
+            { label: "Continua ▸", fn: next },
+            { label: "⏩ Skip scene viste", cls: "skip-btn", fn: () => { if (window.startStorySkip) window.startStorySkip(next); } }
+          ]);
+        } else {
+          buttons([{ label: "Continua ▸", fn: next }]);
+        }
+      }
     };
     next();
   }
@@ -1524,21 +1588,48 @@
     $("matchHud").hidden = true;
     if (s.scene) { view = { kind: "scene", bg: s.scene }; play(s.lines.map((l) => ({ ...l, bg: s.scene })), advance); }
     else if (s.choice) {
+      if (window.isStorySkipActive && window.isStorySkipActive()) {
+        if (window.stopStorySkip) window.stopStorySkip("bivio");
+        const status = window.__storyNav ? window.__storyNav.getForkStats(s, S.step) : { isAllChosen: false };
+        if (!status.isAllChosen && window.toast) {
+          window.toast("✦ Nuovo bivio narrativo! Scegli una strada non ancora esplorata.", "info", "🔀");
+        } else if (window.toast) {
+          window.toast("Bivio narrativo raggiunto.", "info", "🔀");
+        }
+      }
       view = { kind: "scene", bg: view.bg, speaker: s.choice.who };
       text(s.choice.who, esc(s.choice.text));
-      buttons(s.choice.options.map((o) => ({ label: o.label, sub: o.sub, cls: o.cls, fn: () => { o.fx(); statsBox(); play((o.after || []).map((l) => ({ ...l, bg: view.bg })), advance); } })), true);
+
+      const showHints = !SET || SET.storyChoiceHints !== false;
+      const forkKey = (s.chap || ("step_" + S.step)) + "#" + (s.choice.text || "");
+      const anyChosenInFork = showHints && s.choice.options.some((opt) => window.isOptionAlreadyChosen && window.isOptionAlreadyChosen(forkKey + "#" + opt.label));
+
+      const decorated = s.choice.options.map((o) => {
+        const optKey = forkKey + "#" + o.label;
+        const alreadyChosen = showHints && window.isOptionAlreadyChosen ? window.isOptionAlreadyChosen(optKey) : false;
+        return {
+          ...o,
+          alreadyChosen,
+          isNewFork: anyChosenInFork && !alreadyChosen,
+          fn: () => {
+            if (window.recordOptionChosen) window.recordOptionChosen(optKey);
+            o.fx(); statsBox(); play((o.after || []).map((l) => ({ ...l, bg: view.bg })), advance);
+          }
+        };
+      });
+      buttons(decorated, true);
     }
-    else if (s.train) training();
-    else if (s.match) { startMatch(s); if (M) M.story = true; }
-    else if (s.ending) ending();
-    else if (s.ending2) ending2();
-    else if (s.ending3) ending3();
-    else if (s.ending4) ending4();
-    else if (s.ending5) ending5();
-    else if (s.ending6) ending6();
-    else if (s.ending7) ending7();
-    else if (s.ending8) ending8();
-    else if (s.ending9) ending9();
+    else if (s.train) { if (window.stopStorySkip) window.stopStorySkip("allenamento"); training(); }
+    else if (s.match) { if (window.stopStorySkip) window.stopStorySkip("partita"); startMatch(s); if (M) M.story = true; }
+    else if (s.ending) { if (window.stopStorySkip) window.stopStorySkip("finale"); ending(); }
+    else if (s.ending2) { if (window.stopStorySkip) window.stopStorySkip("finale"); ending2(); }
+    else if (s.ending3) { if (window.stopStorySkip) window.stopStorySkip("finale"); ending3(); }
+    else if (s.ending4) { if (window.stopStorySkip) window.stopStorySkip("finale"); ending4(); }
+    else if (s.ending5) { if (window.stopStorySkip) window.stopStorySkip("finale"); ending5(); }
+    else if (s.ending6) { if (window.stopStorySkip) window.stopStorySkip("finale"); ending6(); }
+    else if (s.ending7) { if (window.stopStorySkip) window.stopStorySkip("finale"); ending7(); }
+    else if (s.ending8) { if (window.stopStorySkip) window.stopStorySkip("finale"); ending8(); }
+    else if (s.ending9) { if (window.stopStorySkip) window.stopStorySkip("finale"); ending9(); }
   }
   function advance() { S.step++; run(); }
 
@@ -5336,17 +5427,63 @@
       }
     ];
     const gameB = b.filter(isGame), ruleB = b.filter(isRule), audioB = AB, lookB = b.filter((o) => !isGame(o) && !isRule(o) && !AB.includes(o));
+    const storyStats = window.__storyNav ? window.__storyNav.getStats() : { seenDialoguesCount: 0, chosenOptionsCount: 0 };
+    const hintsOn = SET.storyChoiceHints !== false;
+    const storyB = [
+      {
+        label: `Segnaposto "Già scelto": ${hintsOn ? "ATTIVO" : "DISATTIVATO"} ▸`,
+        sub: hintsOn
+          ? `Mostra "● Già scelto" nei bivi narrativi e illumina le risposte "✦ Mai provato" (tocca per disattivare)`
+          : `Indicatori di playthrough disattivati: opzioni presentate in modo neutro (tocca per attivare)`,
+        cls: "hot",
+        fn: () => {
+          SET.storyChoiceHints = !hintsOn;
+          save();
+          again(`Segnaposto "Già scelto" nei bivi: ${SET.storyChoiceHints !== false ? "ATTIVATO" : "DISATTIVATO"}.`);
+        }
+      },
+      {
+        label: `Velocità Skip Scene Viste: ${(localStorage.getItem("ali-di-rondine.skip-speed") || "veloce").toUpperCase()} ▸`,
+        sub: "veloce (75ms) · rapido (50ms) · istantaneo (25ms) — tocca per cambiare",
+        cls: "hot",
+        fn: () => {
+          const list = ["veloce", "rapido", "istantaneo"];
+          const cur = localStorage.getItem("ali-di-rondine.skip-speed") || "veloce";
+          const next = list[(list.indexOf(cur) + 1) % list.length];
+          try { localStorage.setItem("ali-di-rondine.skip-speed", next); } catch {}
+          again(`Velocità Skip impostata su: ${next.toUpperCase()}`);
+        }
+      },
+      {
+        label: `Statistiche Esplorazione: ${storyStats.chosenOptionsCount} bivi · ${storyStats.seenDialoguesCount} battute`,
+        sub: `Tocca per aggiornare il riepilogo dei bivi memorizzati e battute viste`,
+        fn: () => {
+          again(`Esplorazione attuale: ${storyStats.chosenOptionsCount} bivi registrati e ${storyStats.seenDialoguesCount} battute di dialogo viste.`);
+        }
+      },
+      {
+        label: "Azzera Memoria Bivi e Dialoghi Visti",
+        sub: "Ripristina la storia come non ancora esplorata per una partita alla cieca",
+        cls: "danger",
+        fn: () => {
+          if (window.__storyNav) window.__storyNav.resetExplorationHistory();
+          again("Memoria bivi narrativi e dialoghi azzerata.");
+        }
+      }
+    ];
     const SEC = settings._sec || "";
     const sec = (id, label, sub, cls) => ({ label, sub, cls, fn: () => { settings._sec = id; again(); } });
     const bk = { label: "◂ Impostazioni", cls: "pick", fn: () => { settings._sec = ""; again(); } };
     if (SEC === "partita") return buttons([...gameB, bk]);
     if (SEC === "calcio_azione") return buttons([...azB, bk]);
+    if (SEC === "storia_bivi") return buttons([...storyB, bk]);
     if (SEC === "regole") return buttons([...ruleB, bk]);
     if (SEC === "audio") return buttons([...audioB, bk]);
     if (SEC === "aspetto") return buttons([...lookB, bk]);
     buttons([
       sec("partita", "Modalità di partita", `${on ? "Anni '90" : "Classico"} · difficoltà ${(DIFF[SET.diff] || DIFF.normale)[0]}`, "hot"),
       sec("calcio_azione", "⚙️ Calcio d'Azione (Difficoltà & Comandi)", `Comandi: ${azCtlName()} · Difficoltà: ${azDiffName()}`, "hot"),
+      sec("storia_bivi", "📖 Navigazione Storia & Rigiocabilità", `Bivi memorizzati: ${storyStats.chosenOptionsCount} · Skip scene già viste`, "hot"),
       sec("regole", "Opzioni di gioco", "Tiri murati, duelli, grinta di riserva, tiro a tempo e le altre regole: accese o spente"),
       sec("audio", "Audio", "Suoni, musica, voci, volumi"),
       sec("aspetto", "Grafica e aspetto", "Carte 3D, temi, animazioni, filtro retrò, testo grande"),
@@ -7511,9 +7648,29 @@
     $("matchHud").hidden = true;
     if (s.lines) { fiChap(F.step === 0 ? "Il fischietto · Le Rondinelle" : "Il fischietto"); view = { kind: "scene", bg: s.bg }; play(s.lines.map((l) => ({ ...l, bg: s.bg })), adv); }
     else if (s.choice) {
+      if (window.isStorySkipActive && window.isStorySkipActive()) {
+        if (window.stopStorySkip) window.stopStorySkip("bivio");
+        if (window.toast) window.toast("Bivio narrativo raggiunto.", "info", "🔀");
+      }
       view = { kind: "scene", bg: view.bg || "beach", speaker: s.choice.who };
       text(s.choice.who, esc(s.choice.text));
-      buttons(s.choice.options.map((o) => ({ label: o.label, sub: o.sub, cls: "pick", fn: () => { o.fx(); fiSave(); play((o.after || []).map((l) => ({ ...l, bg: view.bg })), adv); } })), true);
+      const showHints = !SET || SET.storyChoiceHints !== false;
+      const forkKey = "fi_" + F.step + "#" + (s.choice.text || "");
+      const anyChosenInFork = showHints && s.choice.options.some((opt) => window.isOptionAlreadyChosen && window.isOptionAlreadyChosen(forkKey + "#" + opt.label));
+      const decorated = s.choice.options.map((o) => {
+        const optKey = forkKey + "#" + o.label;
+        const alreadyChosen = showHints && window.isOptionAlreadyChosen ? window.isOptionAlreadyChosen(optKey) : false;
+        return {
+          ...o,
+          alreadyChosen,
+          isNewFork: anyChosenInFork && !alreadyChosen,
+          fn: () => {
+            if (window.recordOptionChosen) window.recordOptionChosen(optKey);
+            o.fx(); fiSave(); play((o.after || []).map((l) => ({ ...l, bg: view.bg })), adv);
+          }
+        };
+      });
+      buttons(decorated, true);
     }
     else if (s.match) fiMatch(s);
     else if (s.ending) fiEnding();
@@ -9413,7 +9570,7 @@
   function pcBiteWin() { return ({ facile: 0.8, difficile: 0.42 }[SET && SET.diff] || 0.58); }
   function pcBtns(list) {
     const c = $("choices"); c.innerHTML = ""; c.className = "choices" + (list.length === 1 ? " one" : "");
-    list.forEach((o) => { const b = document.createElement("button"); b.type = "button"; b.textContent = o.label; if (o.cls) b.className = o.cls; if (o.sub) { const s = document.createElement("small"); s.textContent = o.sub; b.appendChild(s); } b.onclick = () => o.fn(); c.appendChild(b); });
+    list.forEach((o) => { const b = document.createElement("button"); b.type = "button"; b.textContent = o.label; if (o.cls) b.className = o.cls; if (o.sub) { const s = document.createElement("small"); s.textContent = o.sub; b.appendChild(s); } b.onclick = () => { if (typeof o.fn === "function") o.fn(); }; c.appendChild(b); });
   }
   function pcStatus() {
     const r = pcRec();
@@ -24773,6 +24930,7 @@
     squadra, spMenu, daily, svPage,
   };
   window.__borgoApi = { TRZ, MN_BORGO_BTN, CAST, trGo, trAsk, trSay, trResume, L, trToast, TR_IDS, NPCS, trLevel, trZone: () => (TW ? TW.id : null), trExitTo, trRec, todayKey, hq: HQ_API };
+  try { if (window.__storyNav && window.__storyNav.seedFromSaveState) window.__storyNav.seedFromSaveState(S); } catch {}
   title();
   render();
 })();
