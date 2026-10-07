@@ -546,6 +546,7 @@
   .mdx-row .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .mdx-row .sb{flex:1;height:6px;border-radius:4px;background:#1c2b44;overflow:hidden;flex:none}.mdx-row .sb>i{display:block;height:100%}
   .mdx-row .pc{width:30px;text-align:right;font-size:11px;color:#93a4bd;flex:none}
+  .mdx-row .ov{font-size:11px;font-weight:800;padding:1px 5px;border-radius:5px;background:#12341f;color:#86efac;flex:none}
   .mdx-row .gp{font-size:10px;padding:1px 4px;border-radius:5px;background:#1c2b44;color:#93a4bd;flex:none}
   .mdx-log div{padding:5px 2px;border-bottom:1px solid #13213a;font-size:12.5px;line-height:1.4}
   .mdx-log .goal{color:#fde68a;font-weight:700}.mdx-log .opp{color:#fda4af}.mdx-log .tip{color:#7dd3fc}.mdx-log .ev{color:#c4b5fd}
@@ -1534,7 +1535,7 @@
       pan.querySelectorAll("[data-ment]").forEach((b) => { b.onclick = () => { S.ment = b.dataset.ment; snd("playSelect"); addLog(`📢 Mentalità: ${MENT[S.ment].t.toUpperCase()}.`, "tip"); renderPanel(); }; });
       pan.querySelectorAll("[data-press]").forEach((b) => { b.onclick = () => { S.press = b.dataset.press; snd("playSelect"); addLog(`📢 Pressing: ${PRESS[S.press].t.toUpperCase()}.`, "tip"); renderPanel(); }; });
     } else if (tab === "squadra") {
-      const row = (p, kind) => `<button class="mdx-row ${S.selOut === p.id ? "sel" : ""}" data-${kind}="${p.id}"><span class="top"><span class="n">${p.num}</span><span class="nm">${esc(p.name)}</span><span class="gp">${p.slotGrp === p.grp ? p.grp : p.slotGrp + "*"}</span></span><span class="bot"><span class="sb"><i data-st="${p.id}" style="width:${Math.round(p.st)}%;background:${staminaCol(p.st)}"></i></span><span class="pc" data-stt="${p.id}">${Math.round(p.st)}</span></span></button>`;
+      const row = (p, kind) => `<button class="mdx-row ${S.selOut === p.id ? "sel" : ""}" data-${kind}="${p.id}"><span class="top"><span class="n">${p.num}</span><span class="nm">${esc(p.name)}</span><span class="ov" title="Valutazione">${Math.round(p.r)}</span><span class="gp">${p.slotGrp === p.grp ? p.grp : p.slotGrp + "*"}</span></span><span class="bot"><span class="sb"><i data-st="${p.id}" style="width:${Math.round(p.st)}%;background:${staminaCol(p.st)}"></i></span><span class="pc" data-stt="${p.id}">${Math.round(p.st)}</span></span></button>`;
       const out = S.xi.slice().sort((a, b) => ["POR", "DIF", "CEN", "ATT"].indexOf(a.slotGrp) - ["POR", "DIF", "CEN", "ATT"].indexOf(b.slotGrp));
       const bench = S.bench.filter((p) => !p.off);
       pan.innerHTML = `<div class="mdx-lbl">In campo <em>Tocca chi esce, poi chi entra · cambi ${S.maxSubs - S.subsUsed}/${S.maxSubs}</em></div>
