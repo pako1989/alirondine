@@ -39,7 +39,7 @@
 
     function greet(s) {
       if (!s) return "«La Coppa del Molo parte quando vuoi. Il vento, per ora, e' d'accordo.»";
-      if (!s.played) return "«Tu sei Leo? Io sono Ginetta Bandierina, arbitra, organizzatrice e unica persona che ha letto il regolamento. Cinque contro cinque, cento secondi, niente tacchetti di ferro. Il fritto lo offre la Pina.»";
+      if (!s.played) return "«Tu sei Leo? Io sono Ginetta Bandierina, arbitra, organizzatrice e unica persona che ha letto il regolamento. Cinque contro cinque, cento secondi, niente tacchetti di ferro. Il fritto lo offre Nando.»";
       if (s.cupOn) return "«La Coppa e' in corso: il tabellone ti aspetta e io ho gia' il fischietto in bocca. Si fischia quando sei pronto.»";
       if (s.seasonOn) return "«Campionato in corso, giornata " + (s.md + 1) + ". La classifica non perdona. Io, a volte, si'.»";
       if (s.newChapters > 0) return "«Ehi, Leo! Ho una cosa da raccontarti sul Molo. Passa dal Diario quando hai due minuti: la Coppa ha piu' storie che gol.»";
@@ -61,7 +61,7 @@
     }
     function menuPartite() {
       api.trAsk("ginetta_molo", "«Partita libera per divertirsi, Sopravvivenza per resistere alle ondate, Sfida a tempo per chi ha fretta. Qui nessuno sbaglia: al massimo il pallone cambia idea.»", [
-        opt("Torneo del Molo", "Le sette squadre, in ordine", "torneo", true),
+        opt("Torneo d'apertura", "Le cinque squadre, in ordine", "torneo", true),
         opt("Partita libera", "Scegli squadra e durata", "free"),
         opt("Sopravvivenza", "Ondate sempre piu' forti", "surv"),
         opt("Sfida a tempo", "Segna piu' gol che puoi", "timed"),
@@ -69,7 +69,7 @@
       ]);
     }
     function menuStagione() {
-      api.trAsk("ginetta_molo", "«Il campionato dura sei giornate, la Coppa un tabellone solo: chi cade, cade nel fritto. Si impara in fretta a rialzarsi.»", [
+      api.trAsk("ginetta_molo", "«Il campionato dura dieci giornate, la Coppa un tabellone solo: chi cade, cade nel fritto. Si impara in fretta a rialzarsi.»", [
         opt("Campionato", "Classifica e giornate", "season", true),
         opt("Coppa del Molo", "Tabellone a eliminazione", "cup", true),
         back(menuMain),

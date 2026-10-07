@@ -1,4 +1,4 @@
-// js/match-director-hd.js - Matchday Director 2D HD: il gestionale live del Mister del Rondine FC
+// js/match-director-hd.js - Matchday Director 2D HD: il gestionale live del Mister della Rondine FC
 // Entry: window.openMatchDirectorHD(onExit)
 (function () {
   "use strict";
@@ -43,7 +43,7 @@
       hint: "Soffrono il pressing alto: costringili a sbagliare.",
       goal: "Recupera palla alta almeno 2 volte (pressing alto)",
       mod: { atk: 0.95, mid: 1.08, def: 0.92, pressWeak: 0.86, foul: 0.02, ctr: 0.9, wall: 1, tire: 1 },
-      names: ["Pippo Sala", "Remo Vento", "Orso Bini", "Gigi Ancora", "Tullio Nasse", "Biagio Salsa", "Cesco Lima", "Nino Rete", "Ettore Faro", "Zeno Pinna", "Lollo Bruma"],
+      names: ["Pippo Sala", "Remo Vento", "Orso Bini", "Gigi Ancora", "Tazio Nasse", "Biagio Salsa", "Cesco Lima", "Nino Rete", "Ettore Faro", "Zeno Pinna", "Lollo Bruma"],
       twist: (S) => {
         if (S.min === 60 && S.scoreB >= S.scoreA) { S.oppBuff.mid = 1.12; S.oppBuff.atk = 0.92; addLog("🕊️ I Gabbiani fanno melina: palleggio a oltranza, il pubblico sbadiglia.", "opp"); }
       }
@@ -93,7 +93,7 @@
       hint: "Nessun punto debole, ma leggono i tuoi ordini: variali al momento giusto.",
       goal: "Vinci usando al massimo 2 cambi",
       mod: { atk: 1.04, mid: 1.04, def: 1.04, pressWeak: 0.97, foul: 0.03, ctr: 1.1, wall: 0.95, tire: 0.9 },
-      names: ["Fausto Marea", "Ruggero Onda", "Leandro Corrente", "Tancredi Risacca", "Ettore Spuma", "Orlando Baia", "Ludo Scirocco", "Silvano Bonaccia", "Gualtiero Maestrale", "Ivo Libeccio", "Cesare Tramonto"],
+      names: ["Fausto Marea", "Ruggero Onda", "Leandro Corrente", "Tancredi Risacca", "Ettore Spuma", "Orlando Baia", "Ludo Scirocco", "Silvano Bonomo", "Gualtiero Maestrale", "Ivo Libeccio", "Cesare Tramonto"],
       twist: (S) => {
         if (S.min === 50) {
           if (S.ment === "offensiva" || S.ment === "allin") { S.oppBuff.ctr = 1.2; addLog("🌊 Il Mareggiata ha letto il tuo assalto: preparano il contropiede.", "opp"); }
@@ -118,8 +118,8 @@
       intro: ["Dina", "«Buone e cattive notizie, Mister. Le buone: la Coppa delle Due Baie ci ha invitati. Le cattive: si gioca fuori casa, di sera, e il pullman è quello di Baciccia. Dice che 'tiene'.»"],
       outro: ["Spigola", "«Il Cavalier Bonaccia ha ritirato l'offerta sul campo. Ha detto 'a mai più', che da lui è un complimento. Mister, il campo di Settimio resta del Borgo!»"] },
     { id: 2, t: "Stagione 3 · Il Campionato del Golfo", ico: "🌊", trophy: "Coppa del Golfo", fin: "libeccio",
-      intro: ["Arturo", "«Qui Radio Molo, buonasera. Parte il Campionato del Golfo: sei giornate, un golfo, e il Rondine in testa alla classifica per distrazione altrui. Il vento è favorevole a chi ha il vento favorevole.»"],
-      outro: ["Dina", "«Primi nel Golfo. Ho dovuto stampare una classifica nuova: la vecchia aveva il Rondine solo in nota a piè di pagina.»"] },
+      intro: ["Arturo", "«Qui Radio Molo, buonasera. Parte il Campionato del Golfo: sei giornate, un golfo, e la Rondine in testa alla classifica per distrazione altrui. Il vento è favorevole a chi ha il vento favorevole.»"],
+      outro: ["Dina", "«Primi nel Golfo. Ho dovuto stampare una classifica nuova: la vecchia aveva la Rondine solo in nota a piè di pagina.»"] },
     { id: 3, t: "Stagione 4 · La Coppa del Faro", ico: "🔦", trophy: "Coppa del Faro", fin: "mareggiata2",
       intro: ["Ester", "«Dal faro si vede tutta la costa, Mister. Stasera si vede anche la Coppa: per averla si sale, si scende e si risale. Come i miei centotredici gradini.»"],
       outro: ["Spigola", "«Mister... il Borgo è in piazza e nessuno vuole tornare a casa. Settimio ha tagliato l'erba della piazza, per festeggiare. Non l'avevamo chiesto.»"] }
@@ -141,7 +141,7 @@
   Object.keys(STORY0).forEach((k) => { const o = OPPS.find((x) => x.id === k); const s = STORY0[k]; o.season = s.s; o.ep = s.ep; o.story = { pre: s.pre, win: s.win, lose: s.lose }; o.coin = 3; });
   OPPS.find((x) => x.id === "mareggiata").needStars = 0;
 
-  const FIRSTN = ["Remo", "Gino", "Nando", "Ciro", "Pino", "Toto", "Sergio", "Baldo", "Lino", "Mario", "Elio", "Rino", "Saro", "Ivo", "Berto", "Oreste", "Tullio", "Dino", "Memo", "Aldo", "Nilo", "Santo", "Tito", "Bepi"];
+  const FIRSTN = ["Remo", "Gigio", "Nando", "Ciro", "Pino", "Toto", "Sergio", "Baldo", "Lino", "Mario", "Elio", "Rino", "Saro", "Ivo", "Berto", "Oreste", "Tazio", "Dino", "Memo", "Aldo", "Nilo", "Santo", "Tito", "Bepi"];
   function mkNames(seed, nk) { return Array.from({ length: 11 }, (_, i) => FIRSTN[(seed * 5 + i * 7) % FIRSTN.length] + " " + nk[i % nk.length]); }
   const T = (S, t, c) => addLog(t, c || "opp");
 
@@ -198,7 +198,7 @@
     {
       id: "settimio", name: "Vecchie Glorie del Molo", short: "Vecchie Glorie", ico: "👴", col: "#e7e5e4", col2: "#57534e", lvl: 0.99, form: "3-5-2", style: "Gambe vecchie, testa fina",
       season: 1, ep: 10, coin: 4, mod: { atk: 1.02, mid: 1.1, def: 0.94, pressWeak: 1, foul: 0.01, ctr: 0.9, wall: 1, tire: 1.7 },
-      blurb: "Il Trofeo Settimio: gli ex del Borgo sfidano la squadra attuale per i sessant'anni di Settimio, custode del vecchio stadio dal '62. Si gioca per ridere. Si ride, ma si gioca.",
+      blurb: "Il Trofeo Settimio: gli ex del Borgo sfidano la squadra attuale per i sessant'anni e passa di Settimio, custode del vecchio stadio dal '62. Si gioca per ridere. Si ride, ma si gioca.",
       hint: "Corrono poco e male, ma ragionano benissimo. Si rispetta chi ha più anni: niente pressing.",
       goal: "Vinci senza mai usare il pressing alto", check: (S) => S.stats.altoMin === 0,
       rules: { morale: 66 }, evForce: [{ min: 30, id: "settimio" }],
@@ -287,7 +287,7 @@
       hint: "Rispondono alle tue mosse: cambia tattica al momento giusto, non troppo spesso.",
       goal: "Vinci dopo essere andato in svantaggio (rimonta)", check: (S) => S.stats.trailed,
       rules: { morale: 55 }, evForce: [],
-      story: { pre: ["Arturo", "«Qui Radio Molo, ultima giornata. Si decide tutto: se il Rondine vince, vince. Se perde, resta il fritto. E ne abbiamo tanto.»"], win: ["Spigola", "«CAMPIONI DEL GOLFO! Dina, fermi le macchine! Non c'è nessuna macchina? Ferme comunque!»"], lose: ["Sara", "«Per un punto: un solo punto, Mister. Non il solito, con l'asterisco: uno vero.»"] },
+      story: { pre: ["Arturo", "«Qui Radio Molo, ultima giornata. Si decide tutto: se la Rondine vince, vince. Se perde, resta il fritto. E ne abbiamo tanto.»"], win: ["Spigola", "«CAMPIONI DEL GOLFO! Dina, fermi le macchine! Non c'è nessuna macchina? Ferme comunque!»"], lose: ["Sara", "«Per un punto: un solo punto, Mister. Non il solito, con l'asterisco: uno vero.»"] },
       beats: [{ min: 40, who: "Sara", t: "«Mister, il Libeccio sta leggendo le tue mosse. Se cambi qualcosa ora, magari non se lo aspetta.»" }],
       names: mkNames(12, ["Libeccio", "Vento", "Girasole", "Bussola", "Raffica", "Scirocco"]),
       twist: (S) => { if (S.min === 35 || S.min === 65) { if (S.ment === "offensiva" || S.ment === "allin") { S.oppBuff.ctr = 1.25; T(S, "🌬️ Il Libeccio gira: e va dritto sul tuo attacco, in contropiede."); } else { S.oppBuff.mid = 1.07; S.oppBuff.ctr = 1.1; T(S, "🌬️ Il Libeccio gira: prende il centrocampo mentre aspetti."); } } }
@@ -320,7 +320,7 @@
     {
       id: "ormeggiatori", name: "Ormeggiatori del Porto Vecchio", short: "Ormeggiatori", ico: "🪢", col: "#fdba74", col2: "#9a3412", lvl: 1.12, form: "5-4-1", style: "Corda e pazienza",
       season: 3, ep: 20, coin: 6, mod: { atk: 0.96, mid: 1.0, def: 1.1, pressWeak: 1, foul: 0.04, ctr: 1.1, wall: 0.88, tire: 1 },
-      blurb: "Squadra da quarti di finale. In tribuna, per protesta contro il prezzo dei biglietti, la curva del Rondine resta in silenzio: nessun coro, nessun tamburo, nessuna cassa.",
+      blurb: "Squadra da quarti di finale. In tribuna, per protesta contro il prezzo dei biglietti, la curva della Rondine resta in silenzio: nessun coro, nessun tamburo, nessuna cassa.",
       hint: "Si parte con il morale a terra: serve un'idea per riaccenderla.",
       goal: "Chiudi la partita con il morale almeno a 80", check: (S) => S.morale >= 80,
       rules: { morale: 36 }, evForce: [{ min: 31, id: "curva" }],
@@ -362,7 +362,7 @@
       rules: { morale: 62 }, evForce: [{ min: 66, id: "brina" }],
       story: { pre: ["Brina", "«Mister, la volta scorsa ho avuto una giornata storta. Quest'anno non farò la stessa gentilezza. Lo dico con affetto, e con la cravatta nuova.»"], win: ["Brina", "«...Si chiama davvero Rondine, questa squadra? Complimenti. Ho guardato il tabellone e c'è scritto il vostro nome, grande. Strano: mi piace.»"], lose: ["Ferri", "«Non importa, ragazzi. La sciarpa del '68 aveva perso finali peggiori. E ha scaldato lo stesso.»"] },
       beats: [{ min: 1, who: "Arturo", t: "«Qui Radio Molo, la finale. In piazza il Borgo è tutto presente. Anche Baciccia, anche Don Aurelio, anche un gabbiano che non c'entra niente.»" }],
-      names: mkNames(18, ["Marea", "Corrente", "Risacca", "Maestrale", "Bonaccia Jr", "Tramonto"]),
+      names: mkNames(18, ["Marea", "Corrente", "Risacca", "Maestrale", "Bonomo Jr", "Tramonto"]),
       twist: (S) => { if (S.min === 30 || S.min === 62) { if (S.ment === "offensiva" || S.ment === "allin") { S.oppBuff.ctr = 1.25; T(S, "🌊 Il Mareggiata legge il tuo assalto: contropiede preparato."); } else { S.oppBuff.mid = 1.07; T(S, "🌊 Il Mareggiata studia il tuo ordine e prende il centrocampo."); } } if (S.min === 80 && S.scoreB >= S.scoreA) { S.oppBuff.atk = 1.15; T(S, "🌊 Ultimi dieci: il Mareggiata butta tutto in avanti."); } }
     }
   ];
@@ -411,11 +411,11 @@
   const ARRIVALS = [
     { id: "mattia", name: "Mattia la Saracinesca", num: 18, grp: "DIF", r: 72, ep: "corsari", bio: "Si abbassa come una serranda e nessuno passa." },
     { id: "kevin", name: "Kevin del Pedalò", num: 19, grp: "ATT", r: 73, ep: "dragoni", bio: "Gambe da pedalò estivo: arriva sempre, anche dove non c'è niente." },
-    { id: "brando", name: "Brando", num: 20, grp: "ATT", r: 75, ep: "lanterne", bio: "Fornaio: alle tre impasta, alle sei tira. Le mani sono ancora in forno." },
-    { id: "osvaldo", name: "Osvaldo", num: 21, grp: "DIF", r: 74, ep: "cantiere", bio: "Scarica le casse al molo. Se c'è da fare muro, lo fa lui." },
-    { id: "mimi", name: "Mimì", num: 22, grp: "CEN", r: 75, ep: "settimio", bio: "La postina del molo: conosce ogni indirizzo, quindi ogni compagno." },
+    { id: "brando", name: "Brando", num: 20, grp: "ATT", r: 75, ep: "lanterne", bio: "Bagnino: d'estate in torretta, d'inverno in campo. Le mani sono ancora bianche di crema solare." },
+    { id: "osvaldo", name: "Otello", num: 21, grp: "DIF", r: 74, ep: "cantiere", bio: "Scarica le casse al molo. Se c'è da fare muro, lo fa lui." },
+    { id: "mimi", name: "Mimì", num: 22, grp: "CEN", r: 75, ep: "settimio", bio: "La fattorina in bici del molo: conosce ogni indirizzo, quindi ogni compagno." },
     { id: "ondina", name: "Ondina", num: 12, grp: "POR", r: 77, ep: "bellavista", bio: "Portiera di Punta Nera. Arriva prima della palla, poi dice di avere ragione.", gk: true },
-    { id: "zoe", name: "Zoe", num: 23, grp: "ATT", r: 76, ep: "squali", bio: "Consegna i gelati in bici, in salita, controvento." },
+    { id: "zoe", name: "Zoe", num: 23, grp: "ATT", r: 76, ep: "squali", bio: "Consegna i gelati dello Scoglio in bici, in salita, controvento." },
     { id: "nina", name: "Nina", num: 24, grp: "CEN", r: 76, ep: "vignaioli", bio: "Ripara biciclette: conosce l'angolo di ogni raggio, quindi di ogni passaggio." },
     { id: "ester", name: "Ester", num: 25, grp: "DIF", r: 77, ep: "faro_est", bio: "La guardiana del faro: centotredici gradini due volte al giorno, polmoni d'acciaio." }
   ];
@@ -667,7 +667,7 @@
     S.events = scheduleEvents();
     // posizioni iniziali immediate
     layout(); S.xi.concat(S.oppXI).forEach((p) => { p.x = p.tx; p.y = p.ty; });
-    S.log.unshift({ m: 0, t: `Il Rondine FC riceve i ${opp.name}. ${opp.blurb}`, c: "" });
+    S.log.unshift({ m: 0, t: `La Rondine FC riceve i ${opp.name}. ${opp.blurb}`, c: "" });
     if (R.startScore) S.log.unshift({ m: 0, t: `Si parte da ${R.startScore[0]}-${R.startScore[1]}: ${opp.short} è già avanti.`, c: "opp" });
   }
 
@@ -834,7 +834,7 @@
     // recupero palla alta con pressing alto
     if (S.press === "alto" && !ours && rnd() < 0.06) {
       S.stats.recups++;
-      addLog(`⚡ Pressing alto! Palla recuperata nella loro metà: il Rondine riparte subito.`, "tip");
+      addLog(`⚡ Pressing alto! Palla recuperata nella loro metà: la Rondine riparte subito.`, "tip");
       shot = rollShot("A", 0.16 + rnd() * 0.12, 0.1);
       S.poss = "A";
     } else if (ours) {
@@ -869,7 +869,7 @@
     S.radioMin = S.min;
     const d = S.scoreA - S.scoreB, o = S.opp.short, pa = S.posTotal ? S.posA / S.posTotal : 0.5;
     const pool = [];
-    if (d > 0) pool.push(`Arturo: «Rondine avanti. Il Borgo sorride, la curva intona, Baciccia fa finta di non sapere cosa sia un pallone.»`, `Arturo: «${S.scoreA}-${S.scoreB} per il Rondine. Dalla cabina sento già l'odore del fritto di Zia Pina.»`);
+    if (d > 0) pool.push(`Arturo: «Rondine avanti. Il Borgo sorride, la curva intona, Baciccia fa finta di non sapere cosa sia un pallone.»`, `Arturo: «${S.scoreA}-${S.scoreB} per la Rondine. Dalla cabina sento già l'odore del fritto di Zia Pina.»`);
     else if (d < 0) pool.push(`Arturo: «Siamo sotto, ma il vento cambia. O almeno così dicono i gabbiani, che hanno sempre una teoria.»`, `Arturo: «Rondine indietro. Il Mister fissa il vuoto: è la sua posa migliore, si dice.»`);
     else pool.push(`Arturo: «Partita equilibrata: il pallone gira, le idee un po' meno. Nel frattempo, ${o} suda con dignità.»`, `Arturo: «Il pareggio è come il caffè di Tonino: serve per stare svegli, ma non ci credi mai fino in fondo.»`);
     if (pa > 0.6) pool.push(`Arturo: «Il possesso è nostro, ma il pallone ci tiene più a ${o} che a noi. Strano, vero?»`);
@@ -1023,7 +1023,7 @@
 
   const EVENTS = {
     rigore: {
-      ico: "🎯", title: "RIGORE PER IL RONDINE!", text: () => "Fallo in area, l'arbitro indica il dischetto. Il pallone pesa come un'ancora. Chi lo calcia?",
+      ico: "🎯", title: "RIGORE PER LA RONDINE!", text: () => "Fallo in area, l'arbitro indica il dischetto. Il pallone pesa come un'ancora. Chi lo calcia?",
       ch: [
         { t: "Dario dal dischetto", s: "Il bomber · circa 80%", go: () => penalty("Dario", 0.8, 0) },
         { t: "Leo, il capitano", s: "Se segna, la squadra decolla · circa 72%", go: () => penalty("Leo", 0.72, 5) },
@@ -1034,7 +1034,7 @@
       ico: "🟨", title: "Chicco è sul filo", text: () => "Chicco ha già un giallo e continua a entrare duro. Il fischietto lo guarda con sospetto.",
       ch: [
         { t: "Richiamalo a bordo campo", s: "Più prudente: difesa leggermente meno aggressiva", go: () => { S.buff = { atk: 1, mid: 1, def: 0.97, until: S.min + 12 }; return "Chicco annuisce e smette di fare il boscaiolo. Difesa un filo più morbida per 12'."; } },
-        { t: "Lascialo giocare: serve grinta", s: "Difesa più dura, ma 30% di rischio rosso", go: () => { S.buff = { atk: 1, mid: 1, def: 1.04, until: S.min + 12 }; if (rnd() < 0.3) { const c = byName("Chicco") || weakest(); S.xi = S.xi.filter((p) => p !== c); S.stats.reds++; S.stats.cards++; S.morale = clamp(S.morale - 6, 0, 100); reassign(S.form); addLog(`🟥 ESPULSO ${c.name}! Il Rondine resta in dieci.`, "opp"); S.banner = { t: "ROSSO", sub: c.name, col: "#f87171", life: 2 }; return "Il rischio non ha pagato: rosso a Chicco, si gioca in dieci. Morale -6."; } S.stats.cards++; return "Chicco gioca al limite e sopravvive. Difesa più cattiva per 12'."; } },
+        { t: "Lascialo giocare: serve grinta", s: "Difesa più dura, ma 30% di rischio rosso", go: () => { S.buff = { atk: 1, mid: 1, def: 1.04, until: S.min + 12 }; if (rnd() < 0.3) { const c = byName("Chicco") || weakest(); S.xi = S.xi.filter((p) => p !== c); S.stats.reds++; S.stats.cards++; S.morale = clamp(S.morale - 6, 0, 100); reassign(S.form); addLog(`🟥 ESPULSO ${c.name}! La Rondine resta in dieci.`, "opp"); S.banner = { t: "ROSSO", sub: c.name, col: "#f87171", life: 2 }; return "Il rischio non ha pagato: rosso a Chicco, si gioca in dieci. Morale -6."; } S.stats.cards++; return "Chicco gioca al limite e sopravvive. Difesa più cattiva per 12'."; } },
         { t: "Sostituiscilo ora", s: "Usa un cambio: scegli dalla scheda Squadra", dis: () => S.subsUsed >= S.maxSubs, go: () => { const c = byName("Chicco"); if (c) S.selOut = c.id; tab = "squadra"; return "Apri la scheda Squadra e scegli chi entra al suo posto."; } }
       ]
     },
@@ -1055,9 +1055,9 @@
       ]
     },
     nonna: {
-      ico: "🧣", title: "In tribuna c'è Nonna Teresa", text: () => "Nonna Teresa, 84 anni, è venuta a vedere il Rondine con la sciarpa del '71 sulle ginocchia. Non ha mai mancato una partita. Il capitano ti guarda: dedicare la partita a lei?",
+      ico: "🧣", title: "In tribuna c'è Nonna Ferri", text: () => "Nonna Ferri è venuta a vedere la Rondine con la sciarpa del '68 sulle ginocchia. Non ha mai mancato una partita. Il capitano ti guarda: dedicare la partita a lei?",
       ch: [
-        { t: "Sì, a gran voce", s: "Morale +9", go: () => { S.morale = clamp(S.morale + 9, 0, 100); S.banner = { t: "PER TERESA", sub: "", col: "#f9a8d4", life: 2 }; return "Tutta la squadra alza la sciarpa verso la tribuna. Vecchi tifosi si asciugano gli occhi. Morale +9."; } },
+        { t: "Sì, a gran voce", s: "Morale +9", go: () => { S.morale = clamp(S.morale + 9, 0, 100); S.banner = { t: "PER NONNA FERRI", sub: "", col: "#f9a8d4", life: 2 }; return "Tutta la squadra alza la sciarpa verso la tribuna. Vecchi tifosi si asciugano gli occhi. Morale +9."; } },
         { t: "Zitto: si vince in silenzio", s: "Concentrazione: difesa +5% per 12'", go: () => { S.buff = { atk: 1, mid: 1, def: 1.05, until: S.min + 12 }; return "Un cenno col capo e basta. La squadra stringe i denti. Difesa +5% per 12'."; } },
         { t: "Fai suonare il coro del molo", s: "Morale +4, energia +4 a tutti", go: () => { S.morale = clamp(S.morale + 4, 0, 100); S.xi.forEach((p) => { p.st = Math.min(100, p.st + 4); }); return "Il coro parte dal molo e arriva fino al campo. Morale +4, energia +4."; } }
       ]
@@ -1148,7 +1148,7 @@
       ]
     },
     corner: {
-      ico: "⛳", title: "Calcio d'angolo", text: () => "Corner per il Rondine: il pallone è sul dischetto d'angolo e il Borgo trattiene il fiato. Dove lo mandiamo?",
+      ico: "⛳", title: "Calcio d'angolo", text: () => "Corner per la Rondine: il pallone è sul dischetto d'angolo e il Borgo trattiene il fiato. Dove lo mandiamo?",
       ch: [
         { t: "Primo palo: Chicco", s: "Colpo di testa di un difensore", go: () => shotBy("Chicco", 0.18, "Svetta Chicco: la traversa gli fa un regalo. GOL!", "Chicco ci prova, ma la porta è più alta di quel che pensava.") },
         { t: "Secondo palo: Dario", s: "Più pericoloso, 30% si inceppa", go: () => { if (rnd() < 0.3) return "Il cross è troppo lungo: palla in fallo laterale."; return shotBy("Dario", 0.24, "Dario si inserisce di sinistro: GOL!", "Dario ci arriva, ma il portiere ha fiutato la traiettoria."); } },
@@ -1189,7 +1189,7 @@
       ]
     },
     tifosi: {
-      ico: "🗣️", title: "Insulti dagli spalti", text: () => "Dagli spalti ospiti arrivano battute pesanti. Un tifoso grida che il Rondine è 'una squadra di fritto e canzonette'. La panchina ribolle.",
+      ico: "🗣️", title: "Insulti dagli spalti", text: () => "Dagli spalti ospiti arrivano battute pesanti. Un tifoso grida che la Rondine è 'una squadra di fritto e canzonette'. La panchina ribolle.",
       ch: [
         { t: "Zittiscili con un gol: attacca", s: "Attacco +6% per 10'", go: () => { buf({ atk: 1.06 }, 10); return "Il fritto e le canzonette, adesso, hanno fame di gol. Attacco +6% per 10'."; } },
         { t: "Fai cantare il molo", s: "Morale +5", go: () => { mor(5); return "Il coro del molo copre tutto, anche l'insulto. Morale +5."; } },
@@ -1289,7 +1289,7 @@
       ]
     },
     brina: {
-      ico: "🎩", title: "Parole tra colleghi", text: () => "A venti minuti dalla fine Mister Brina ti raggiunge a bordo campo e dice sottovoce: «Quest'anno è il mio miglior Mareggiata. Ma credo sia anche il tuo miglior Rondine.» Poi torna al suo posto.",
+      ico: "🎩", title: "Parole tra colleghi", text: () => "A venti minuti dalla fine Mister Brina ti raggiunge a bordo campo e dice sottovoce: «Quest'anno è il mio miglior Mareggiata. Ma credo sia anche la tua miglior Rondine.» Poi torna al suo posto.",
       ch: [
         { t: "«Lo vedremo dal tabellone»", s: "Morale +6, difesa +3% per 10'", go: () => { mor(6); buf({ def: 1.03 }, 10); return "Una risposta secca, un sorriso piccolo. Morale +6, difesa +3%."; } },
         { t: "Sorridi e non rispondere", s: "Morale +3", go: () => { mor(3); return "Brina lo prende come un rispetto. Il campo, per un attimo, profuma di stima. Morale +3."; } },
@@ -1360,7 +1360,7 @@
     root.innerHTML = `<div class="mdx-scr mdx-menu">
       <div style="display:flex;gap:10px;align-items:flex-start;justify-content:space-between">
         <div><h1 class="mdx-h1">📋 Matchday Director</h1>
-        <p class="mdx-sub">Tu sei il Mister del Rondine FC, nel Borgo Marino. Il pallone lo calciano gli altri: tu decidi modulo, mentalità, pressing, cambi e che cosa urlare all'intervallo.</p></div>
+        <p class="mdx-sub">Tu sei il Mister della Rondine FC, nel Borgo Marino (titolo onorario: la panchina, però, è vera). Il pallone lo calciano gli altri: tu decidi modulo, mentalità, pressing, cambi e che cosa urlare all'intervallo.</p></div>
         <button class="mdx-btn red" id="mdxExit" style="flex:none;min-width:48px" aria-label="Chiudi">✕</button>
       </div>
       <div class="mdx-card">
@@ -1376,7 +1376,7 @@
         <button class="mdx-btn gold" id="mdxNext" ${nx ? "" : "disabled"}>${nx ? "▶ Prossimo: ep. " + nx.ep : firstUnwon(prog) >= 0 ? "⭐ Servono stelle" : "Tutto completato"}</button>
         <button class="mdx-btn" id="mdxLocker">👕 Spogliatoio e bacheca</button>
       </div>
-      <div style="margin:14px 0 2px;font-weight:800;font-size:13px;color:#93a4bd;letter-spacing:.5px">GLI EPISODI DEL RONDINE FC · prima vittoria su ognuno: monete</div>
+      <div style="margin:14px 0 2px;font-weight:800;font-size:13px;color:#93a4bd;letter-spacing:.5px">GLI EPISODI DELLA RONDINE FC · prima vittoria su ognuno: monete</div>
       ${seasonsHtml}
       <p class="mdx-sub" style="margin-top:12px">Una partita dura circa 3 minuti (puoi accelerare). Stelle: ★ vittoria · ★★ con 2 gol di scarto o porta inviolata · ★★★ obiettivo speciale del match. Le finali di stagione richiedono un po' di stelle raccolte.</p>
     </div>`;
@@ -1400,7 +1400,7 @@
     const trophies = SEASONS.map((se) => seasonDone(prog, se.id) ? `<span class="mdx-chip y">${se.ico} ${esc(se.trophy)}</span>` : `<span class="mdx-chip">🔒 ???</span>`).join("");
     root.innerHTML = `<div class="mdx-scr mdx-menu">
       <div style="display:flex;gap:10px;align-items:flex-start;justify-content:space-between">
-        <div><h1 class="mdx-h1">👕 Spogliatoio</h1><p class="mdx-sub">La rosa del Rondine FC cresce a ogni stagione vinta (+2 a tutti) e con i nuovi arrivi. Le maglie sono solo estetica.</p></div>
+        <div><h1 class="mdx-h1">👕 Spogliatoio</h1><p class="mdx-sub">La rosa della Rondine FC cresce a ogni stagione vinta (+2 a tutti) e con i nuovi arrivi. Le maglie sono solo estetica.</p></div>
         <button class="mdx-btn" id="mdxBack" style="flex:none;min-width:48px" aria-label="Indietro">◂</button>
       </div>
       <div class="mdx-lbl">Bacheca</div><div>${trophies}</div>

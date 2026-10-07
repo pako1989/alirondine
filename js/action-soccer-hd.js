@@ -49,8 +49,8 @@
     },
     {
       name: "Il Gran Fanale", tag: "FAN", kit: "#fbbf24", kit2: "#1e3a8a", gk: "#fb7185", spd: 1.05, tkl: 1.1, press: 250, line: 0.05, shoot: 340,
-      names: ["Lanterna", "Faro", "Marea", "Bussola", "Zio Ormeggio"],
-      hint: "La squadra più antica del Borgo. Il capitano, Zio Ormeggio, gioca scalzo dal 1987 e non sbaglia un passaggio di sguardo.",
+      names: ["Lucignolo", "Fiammella", "Marea", "Bussola", "Zio Ormeggio"],
+      hint: "Una delle squadre più antiche del Molo. Il capitano, Zio Ormeggio, gioca scalzo dal 1987 e non sbaglia un passaggio di sguardo.",
       win: "Zio Ormeggio si siede sull'argine, si toglie il cappello e applaude da solo. Non l'aveva mai fatto con nessuno. Il Molo, per una volta, tace.",
     },
   ];
@@ -89,19 +89,19 @@
   const PRE = { // battute prima del fischio, a rotazione
     GAB: ["Ginetta: «Mettete al sicuro i panini. Tutti. Anche quelli che non avete ancora comprato.»", "Arturo: «Dalla cabina vedo i gabbiani in tribuna. Hanno già l'aria di chi ha un parere.»"],
     COR: ["Ginetta: «Contrasti puliti, per favore. Il Capitano dice che l'occhio è a posto. L'orzaiolo no.»", "Arturo: «I Corsari entrano in campo con la bandana. Scelta stilistica o semplice abitudine, mah.»"],
-    MUR: ["Zia Pina: «Fate gol subito, che dopo si addormentano. A bocca aperta, poverini.»", "Arturo: «Le Murene sbadigliano e già fanno paura. Immaginate quando sono sveglie.»"],
+    MUR: ["Signora Pina: «Fate gol subito, che dopo si addormentano. A bocca aperta, poverini. Lo scrivo sul Corriere.»", "Arturo: «Le Murene sbadigliano e già fanno paura. Immaginate quando sono sveglie.»"],
     DOP: ["Il Capostazione: «Fischio di partenza. Poi li guardo passare uno a uno, come i treni.»", "Arturo: «Il Dopolavoro schiera otto giocatori in difesa. Per essere in cinque, è un traguardo.»"],
     FAN: ["Zio Ormeggio, senza scarpe: «Il campo l'ho sentito con i piedi. Stasera ha voglia di giocare.»", "Arturo: «Il Gran Fanale: l'unica squadra che segna e chiede scusa al pallone.»"],
-    FOR: ["Zia Pina: «Ho portato la focaccia ai Fornai. Mi hanno portato la focaccia. Siamo pari.»", "Arturo: «I Fornai hanno la farina nei capelli. A fine partita non sapremo se siamo sporchi o benedetti.»"],
+    FOR: ["Nando: «Ho portato il fritto ai Fornai. Mi hanno portato la focaccia. Siamo pari.»", "Arturo: «I Fornai hanno la farina nei capelli. A fine partita non sapremo se siamo sporchi o benedetti.»"],
     LAM: ["Ginetta: «Le Lampare arrivano dal mare, e il mare non è mai puntuale. Fischio quando tutti sono qui.»", "Arturo: «Sulla fascia destra una lampara. Sulla sinistra, il buio. Il mare sembra d'accordo.»"],
   };
   const QUIP = {
     start: ["Radio Molo, buonasera. Il vento è a favore di chi ha il vento a favore.", "Radio Molo in diretta. L'audio arriva a tratti, la fiducia sempre.", "Qui Arturo dalla cabina: il pallone è rotondo, il Molo è storto."],
-    goalFor: ["Gol! La rete ha ricevuto e la rete non si è opposta.", "Una rete così non si vedeva dai tempi delle reti vere.", "Zia Pina alza il mestolo: approvato!", "Tecnica, coraggio e un gabbiano che non c'entra niente."],
+    goalFor: ["Gol! La rete ha ricevuto e la rete non si è opposta.", "Una rete così non si vedeva dai tempi delle reti vere.", "Nando alza il mestolo: approvato!", "Tecnica, coraggio e un gabbiano che non c'entra niente."],
     goalAg: ["Gol avversario. Il portiere dice che era già in volo, ma verso un'altra idea.", "Si è aperta la porta. Come sempre, dall'interno.", "Un gol subito fa bene al carattere. Il secondo fa male al fritto."],
     save: ["Che parata! Sandro ha la faccia di chi ha già visto tutto.", "Il portiere ci mette la faccia. Anche le mani, per fortuna.", "Salvataggio! Il pubblico, tre persone, esulta in due."],
     post: ["Il palo! Dura da anni, come la vernice.", "Palo pieno. Il Molo ringrazia: era la parte che reggeva."],
-    half: ["Intervallo: il vento cambia lato, noi no.", "Pausa. Zia Pina distribuisce il fritto e le opinioni."],
+    half: ["Intervallo: il vento cambia lato, noi no.", "Pausa. Nando distribuisce il fritto, la Signora Pina le opinioni."],
     level: ["Arriva un'altra ondata. Il Molo è fatto per le onde.", "Si alza il livello. Si abbassa il morale. Va bene così."],
   };
   const pick = (a) => a[Math.floor(Math.random() * a.length)];
@@ -145,7 +145,7 @@
     { id: "cima", n: "Capitan Cima", t: "Capitano dei Corsari della Banchina. Mani come argani, cuore uguale. Dice che l'occhio è perso a carte: è solo un orzaiolo.", ch: "c3" },
     { id: "capo", n: "Il Capostazione", t: "Quarant'anni di fischi per le partenze degli altri. Il Dopolavoro gioca per chiudere con un binario libero.", ch: "c5" },
     { id: "orme", n: "Zio Ormeggio", t: "Capitano del Gran Fanale. Gioca scalzo dal 1987 e non sbaglia un passaggio di sguardo.", ch: "c6" },
-    { id: "pina", n: "Signora Pina", t: "Trattoria, fritto e opinioni non richieste. Madrina non ufficiale di ogni squadra, quindi di nessuna.", ch: "c2" },
+    { id: "pina", n: "Signora Pina", t: "L'edicolante del Borgo e direttrice del Corriere: opinioni non richieste e una notizia per ogni partita. Madrina non ufficiale di ogni squadra, quindi di nessuna.", ch: "c2" },
   ];
 
   // filo narrativo a tappe: i capitoli bloccati compaiono come «???»
@@ -167,16 +167,16 @@
       "Per un secondo l'orzaiolo gli fa lacrimare l'occhio. Nessuno dice niente. Nemmeno Arturo, che è la cosa più rara che si sia vista sul Molo quell'anno."] },
     { id: "c4", t: "Bocca aperta", tone: "ironico", cond: () => PROG.stars[2] > 0, hint: "Batti le Murene di Scoglio Rosso", p: [
       "Il mistero delle Murene che dormono a bocca aperta è risolto: finiscono il turno al mercato del pesce alle tre e mezza di notte e si allenano all'alba. «Dormiamo quando il pallone è in volo», spiega Fondale.",
-      "Zia Pina porta una focaccia, e una Murena si addormenta con il pezzo ancora in bocca. Arturo, in diretta: «Calcio d'azione. E di digestione.»",
+      "Nando porta un cartoccio di fritto, e una Murena si addormenta con il pezzo ancora in bocca. Arturo, in diretta: «Calcio d'azione. E di digestione.»",
       "Poi qualcuno le mette una coperta addosso. Alle Murene non era mai successo. È l'unico momento in cui la bocca si chiude."] },
     { id: "c5", t: "L'ultimo binario", tone: "serio", cond: () => PROG.stars[3] > 0, hint: "Batti il Dopolavoro Ferroviario", p: [
       "Il Capostazione slega il fischietto dal cordino e te lo mette nel palmo. «Da gennaio al banco della stazione del Molo non ci sarà più nessuno. Il treno passerà lo stesso, ma nessuno lo saluterà. Per quarant'anni ho fischiato le partenze degli altri.»",
       "Guarda i binari arrugginiti che finiscono accanto al campo. «Questo non è un addio. È un passaggio di consegne: la prossima partenza la fischi tu.»",
       "Ginetta si asciuga gli occhi con il fischietto d'argento e finge che sia stato il vento."] },
     { id: "c6", t: "Scalzo dal 1987", tone: "serio", cond: () => PROG.stars[4] > 0, hint: "Batti Il Gran Fanale", p: [
-      "Zio Ormeggio gioca scalzo dal 1987. Lo raccontano come una leggenda, ma la verità è più semplice: quell'anno la mareggiata si portò via la baracca degli spogliatoi e il compagno Tullio rimase senza scarpe. Ormeggio gli prestò le sue. «A fine anno te le ridò», disse Tullio. Poi Tullio cambiò città.",
+      "Zio Ormeggio gioca scalzo dal 1987. Lo raccontano come una leggenda, ma la verità è più semplice: quell'anno la mareggiata si portò via la baracca degli spogliatoi e il compagno Ottone rimase senza scarpe. Ormeggio gli prestò le sue. «A fine anno te le ridò», disse Ottone. Poi Ottone cambiò città.",
       "Ormeggio non ne comprò altre. «Se ne compro un altro paio, vuol dire che non torna.»",
-      "Oggi, sul bordo del campo, c'è un signore con un sacchetto: un paio di scarpini lucidati ogni domenica per trentasette anni. «Scusa il ritardo, Orme'.» Ormeggio li guarda a lungo. Poi se ne infila uno solo. «L'altro lo tengo per la prossima volta.»",
+      "Oggi, sul bordo del campo, c'è un signore con un sacchetto: un paio di scarpini lucidati ogni domenica per trentanove anni. «Scusa il ritardo, Orme'.» Ormeggio li guarda a lungo. Poi se ne infila uno solo. «L'altro lo tengo per la prossima volta.»",
       "Nessun applauso. Gli occhi lucidi, tutti. E la Coppa, da sola, suona un po' per il vento."] },
     { id: "c7", t: "La targhetta", tone: "serio", cond: () => X.meta.seasonsDone >= 1, hint: "Concludi una stagione di campionato", p: [
       "A fine stagione Ginetta gira la Coppa e ti mostra la targa dal retro. Ci sono nomi graffiati con un chiodo che nessun registro ricorda: pescatori, bagnini, un postino, due gemelli che si sono sempre fatti passare l'uno per l'altro.",
@@ -189,7 +189,7 @@
     { id: "c9", t: "Radio Molo, fuori onda", tone: "serio", cond: () => X.meta.maxStreak >= 3 || X.meta.shellsTotal >= 40, hint: "Tre giorni di fila di sfide, o 40 conchiglie in tutto", p: [
       "Arturo spegne il mestolo e, per una volta, non fa battute. «Sai perché commento ogni partita, anche quelle senza pubblico? Perché un giorno qualcuno mi ha detto: quando smetti di parlare di una cosa, quella comincia a smettere di esistere. Allora parlo. Del vento, dei gabbiani, dei portieri col fiatone.»",
       "Fa una pausa. «Se torni ogni giorno, il Molo non smette. È tutto qui il segreto.»",
-      "Poi riaccende il microfono. «E ora la pubblicità: Trattoria da Zia Pina, il fritto che ti guarda negli occhi.»"] },
+      "Poi riaccende il microfono. «E ora la pubblicità: Friggitoria Nando Frittura, il fritto che ti guarda negli occhi.»"] },
     { id: "c10", t: "Il Molo non chiude", tone: "serio", cond: () => CHAPS.slice(1, 10).every((c) => c.cond()), hint: "Sblocca tutti gli altri capitoli", p: [
       "Arriva una lettera del Comune, carta intestata e timbro: il campo del Molo «non è in programma di chiusura». Ginetta la legge tre volte, poi la appende accanto al fischietto con le puntine, dentro una busta di plastica per il fritto.",
       "Non ci sono messaggi nascosti: solo una riga di burocrazia che, per una volta, dice la cosa giusta. «Domani si gioca», annuncia. Le squadre arrivano alla spicciolata: i Fornai con la farina, le Lampare con il lume, Zio Ormeggio con un solo scarpino.",
@@ -201,7 +201,7 @@
     "Secondo posto: argento, che a Genova dicono sia la parte che si lucida meglio. La prossima stagione è lì che aspetta.",
     "Terzo posto. Sul podio, in piedi dietro due che si abbracciano. Si vede tutto, da dietro.",
     "A metà classifica. Il Molo non ti fischia: ti offre il fritto. Il che, a ben vedere, è più grave.",
-    "Penultimo, ma con stile. Zia Pina dice che la sconfitta con garbo è la vittoria dei signori.",
+    "Penultimo, ma con stile. La Signora Pina dice che la sconfitta con garbo è la vittoria dei signori.",
     "Ultimo in classifica, primo in simpatia. Arturo ti dedica la sigla di chiusura, che dura quattro secondi.",
   ];
   const CUP_END = {
@@ -2386,7 +2386,7 @@
     if (m === "pens" || m === "cup-pens") return resPens();
     return resTeam();
   }
-  const SOCC_LOSE = ["Si perde, ogni tanto. Zia Pina intanto ha messo su il fritto: perdere con un cartoccio in mano fa meno male.", "Una sconfitta in meno di cento secondi. Per un Borgo che ha perso il traghetto cento volte, è quasi puntualità."];
+  const SOCC_LOSE = ["Si perde, ogni tanto. Nando intanto ha acceso la friggitrice: perdere con un cartoccio in mano fa meno male.", "Una sconfitta in meno di cento secondi. Per un Borgo che ha perso il traghetto cento volte, è quasi puntualità."];
   const SOCC_TIE = "Pareggio anche ai supplementari. Nessuno ha vinto, nessuno ha perso, e il fritto è ancora caldo. Riprova: stavolta la palla non ha scuse.";
 
   function resTeam() {

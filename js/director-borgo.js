@@ -1,4 +1,4 @@
-// js/director-borgo.js - Aggancio di "Matchday Director" al Borgo camminabile: la sede del Rondine FC ai Trabucchi
+// js/director-borgo.js - Aggancio di "Matchday Director" al Borgo camminabile: la sede della Rondine FC ai Trabucchi
 // Il Presidente Spigola e Dina Cartella (segretaria della società) aspettano in panchina, accanto al campo dei Trabucchi:
 // da qui si apre la modalità (stagioni, episodi, spogliatoio). Carica solo se esistono window.__borgoApi e window.__directorHd.
 // Va incluso DOPO game.js, match-director-hd.js, borgo-expansions.js (anche dopo cage-borgo.js e action-borgo.js).
@@ -45,18 +45,18 @@
     // ---------------------------------------------------------------- dialoghi
     function presHead(s) {
       var m = mem();
-      if (!m.met) return "«Commendator Ottavio Spigola, presidente del Rondine FC: ex droghiere, attuale ottimista. Il bilancio della società sta in un barattolo di acciughe: nessuno ha il coraggio di aprirlo. Lei è il Mister, no? Venga, si sieda in panchina: è l'unico posto della società che non perde.»";
+      if (!m.met) return "«Commendator Amedeo Spigola, presidente della Rondine FC: ex droghiere, attuale ottimista. Il bilancio della società sta in un barattolo di acciughe: nessuno ha il coraggio di aprirlo. Lei è Leo, no? Per la società, da oggi, è il Mister: titolo onorario, ma la panchina è vera. Venga, si sieda: è l'unico posto della società che non perde.»";
       if (!s) return "«Mister! Il campo è pronto, il barattolo anche. Cosa facciamo?»";
       if (s.unread > 0 && s.won > 0) return "«Mister, Dina ha ricevuto una lettera: ci sono " + (s.unread === 1 ? "un nuovo avversario" : s.unread + " nuovi avversari") + " in calendario. Io, per sicurezza, ho cambiato la marca delle acciughe.»";
       if (s.blocked) return "«Mister, la finale di stagione ha un cancello, e il cancello vuole stelle. Rigiochi qualche episodio con l'obiettivo speciale: Dina dice che ne servono un paio.»";
-      if (s.won >= s.total) return "«Il Rondine ha vinto tutto, Mister. Non capita spesso: vado in piazza a farmelo ripetere dal vento.»";
+      if (s.won >= s.total) return "«La Rondine ha vinto tutto, Mister. Non capita spesso: vado in piazza a farmelo ripetere dal vento.»";
       return "«Mister, siamo all'episodio " + (s.next ? s.next.ep : "?") + ": " + s.seasonTitle + ". Dina ha già stampato il calendario. In tre copie, per scaramanzia.»";
     }
     function presMenu() {
       var s = st(), m = mem();
       m.met = 1; memSet(m);
       var opts = [];
-      opts.push({ label: s && s.won > 0 ? "Matchday Director" : "Comincia il Torneo del Molo", sub: s ? ("Episodio " + (s.next ? s.next.ep : s.total) + "/" + s.total + " · " + s.seasonTitle) : "Il Rondine FC dalla panchina", cls: "hot", fn: function () { go(); } });
+      opts.push({ label: s && s.won > 0 ? "Matchday Director" : "Comincia il Torneo del Molo", sub: s ? ("Episodio " + (s.next ? s.next.ep : s.total) + "/" + s.total + " · " + s.seasonTitle) : "La Rondine FC dalla panchina", cls: "hot", fn: function () { go(); } });
       if (s && s.next && s.won > 0) opts.push({ label: "Prossimo episodio", sub: s.next.name, cls: "hot", fn: function () { go({ opp: s.next.id }); } });
       opts.push({ label: "Spogliatoio e bacheca", sub: s ? ("Rosa " + (16 + s.roster) + " giocatori · maglia, portiere, trofei") : "Rosa, maglie, trofei", fn: function () { go({ screen: "locker" }); } });
       opts.push({ label: "Quattro chiacchiere col Presidente", sub: "Aneddoti, ironie, qualche ricordo", fn: presChat });
@@ -64,10 +64,10 @@
     }
 
     var PCHAT = [
-      { need: function () { return true; }, t: ["Il Rondine FC nasce da una scommessa: mio cognato diceva che il Borgo non avrebbe mai avuto una squadra vera. Io ho dato la parola, lui ha dato le magliette. Lui, in compenso, ha perso la scommessa e ha vinto il fritto.", "Sa perché tengo i soldi nel barattolo delle acciughe? Perché in società chiunque si fida di una cosa che profuma di mare e di cosa vecchia."] },
+      { need: function () { return true; }, t: ["La società della Rondine FC l'ho rilevata io per una scommessa: mio cognato diceva che il Borgo non avrebbe mai avuto una società come si deve. Io ho dato la parola, lui ha dato le magliette. Lui, in compenso, ha perso la scommessa e ha vinto il fritto.", "Sa perché tengo i soldi nel barattolo delle acciughe? Perché in società chiunque si fida di una cosa che profuma di mare e di cosa vecchia."] },
       { need: function (s) { return s.won >= 2; }, t: ["Ai miei tempi la panchina era una cassetta del pesce. Adesso ne abbiamo una vera, col cuscino. Me l'ha fatta Settimio, che di legno non ne capisce niente, ma di sedere sì."] },
       { need: function (s) { return s.seasonsDone >= 1; }, t: ["Il Cavalier Bonaccia mi ha detto: «Il Borgo è un paesello». Io gli ho risposto che 'paesello' è un complimento: vuol dire che ci si conosce tutti, anche quelli che non si parlano."] },
-      { need: function (s) { return s.seasonsDone >= 2; }, t: ["Mio padre vendeva chiodi e viti. Diceva che una società è un mazzo di chiavi: ognuno ne ha una, e la porta si apre solo se ci sono tutte. Io avevo solo il portachiavi. Poi sono arrivati i ragazzi, e le chiavi.", "Quando ho preso il Rondine avevo un debito e una speranza. Il debito è ancora lì. La speranza, lo ammetto, ha messo su un po' di peso."] },
+      { need: function (s) { return s.seasonsDone >= 2; }, t: ["Mio padre vendeva chiodi e viti. Diceva che una società è un mazzo di chiavi: ognuno ne ha una, e la porta si apre solo se ci sono tutte. Io avevo solo il portachiavi. Poi sono arrivati i ragazzi, e le chiavi.", "Quando ho preso la Rondine avevo un debito e una speranza. Il debito è ancora lì. La speranza, lo ammetto, ha messo su un po' di peso."] },
       { need: function (s) { return s.seasonsDone >= 3 || s.won >= 20; }, t: ["Se mi chiedono cosa ho vinto, rispondo: una piazza piena. Non c'è coppa che pesi meno, e nessuna che si tiene meglio sul comò."] }
     ];
     function presChat() {
@@ -87,7 +87,7 @@
       var s = st(), m = mem();
       m.dmet = 1; memSet(m);
       api.trAsk(DINA, dinaHead(s), [
-        { label: "Il calendario del Rondine", sub: s ? ("Rank " + s.rank + " · stelle " + s.stars) : "Episodi e stagioni", cls: "hot", fn: function () { go(); } },
+        { label: "Il calendario della Rondine", sub: s ? ("Rank " + s.rank + " · stelle " + s.stars) : "Episodi e stagioni", cls: "hot", fn: function () { go(); } },
         { label: "Spogliatoio e bacheca", sub: s ? ("Nuovi arrivi " + s.roster + "/" + s.rosterTotal) : "Rosa e maglie", fn: function () { go({ screen: "locker" }); } },
         { label: "Racconti dall'archivio", sub: "Dina ricorda ogni formazione dal '99", fn: dinaChat }
       ]);
@@ -120,8 +120,8 @@
       var f = function () {
         var s = st();
         return {
-          label: "📋 Matchday Director · Sede del Rondine FC",
-          sub: s ? (s.seasonTitle + " · ep. " + (s.next ? s.next.ep : s.total) + "/" + s.total + (s.unread ? " · " + s.unread + " nuovi" : "") + " · in panchina ai Trabucchi") : "Il Rondine FC dalla panchina",
+          label: "📋 Matchday Director · Sede della Rondine FC",
+          sub: s ? (s.seasonTitle + " · ep. " + (s.next ? s.next.ep : s.total) + "/" + s.total + (s.unread ? " · " + s.unread + " nuovi" : "") + " · in panchina ai Trabucchi") : "La Rondine FC dalla panchina",
           cls: "hot",
           fn: function () { if (zone) api.trGo(zoneId); else go(); }
         };

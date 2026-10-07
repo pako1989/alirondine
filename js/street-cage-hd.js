@@ -19,22 +19,22 @@
 
   const LEVELS = [
     {
-      name: "Scaricatori del Mercato", tag: "MER", kit: "#f97316", kit2: "#fde68a", skin: ["#d9a679", "#c68642", "#e8b88c"], names: ["Gino", "Ciccio Gru", "Bepi Stiva"],
+      name: "Scaricatori del Mercato", tag: "MER", kit: "#f97316", kit2: "#fde68a", skin: ["#d9a679", "#c68642", "#e8b88c"], names: ["Tano", "Ciccio Gru", "Bepi Stiva"],
       spd: 0.9, react: 20, dash: 0.004, noise: 34, bank: 0.1, target: 7, read: 0.1, mut: "Nessuna regola strana", mutKey: "",
-      hint: "Escono dal turno all'alba e giocano con la stessa grazia con cui spostano le cassette di pesce. Il capo, Gino, ha il fiato di un mantice rotto.",
-      win: "Gino perde e offre il caffè a tutti. Poi si accorge che il bar è chiuso dal 2011. Passa un gatto. Per qualche secondo nessuno dice niente, e va benissimo così.",
+      hint: "Escono dal turno all'alba e giocano con la stessa grazia con cui spostano le cassette di pesce. Il capo, Tano, ha il fiato di un mantice rotto.",
+      win: "Tano perde e offre il caffè a tutti. Poi si accorge che il bar è chiuso dal 2011. Passa un gatto. Per qualche secondo nessuno dice niente, e va benissimo così.",
     },
     {
-      name: "Le Gemelle Schiuma", tag: "SCH", kit: "#d946ef", kit2: "#0f172a", skin: ["#e8b88c", "#e8b88c", "#c68642"], names: ["Rina", "Rita", "Cugino Gigi"],
+      name: "Le Gemelle Schiuma", tag: "SCH", kit: "#d946ef", kit2: "#0f172a", skin: ["#e8b88c", "#e8b88c", "#c68642"], names: ["Rina", "Rosa", "Cugino Memo"],
       spd: 0.97, react: 14, dash: 0.007, noise: 24, bank: 0.25, target: 8, read: 0.5, mut: "Cemento bagnato: la palla scivola di più", mutKey: "wet",
-      hint: "Rina e Rita finiscono le frasi l'una dell'altra, e anche i passaggi. Il cugino Gigi è lì «per fare numero». Fa spesso il numero sbagliato.",
-      win: "Rina e Rita ti salutano all'unisono, finendo la stessa frase a metà. Nessuna delle due ha capito chi ha vinto, ma entrambe giurano di averlo previsto.",
+      hint: "Rina e Rosa finiscono le frasi l'una dell'altra, e anche i passaggi. Il cugino Memo è lì «per fare numero». Fa spesso il numero sbagliato.",
+      win: "Rina e Rosa ti salutano all'unisono, finendo la stessa frase a metà. Nessuna delle due ha capito chi ha vinto, ma entrambe giurano di averlo previsto.",
     },
     {
       name: "La Vecchia Guardia del Molo", tag: "VEC", kit: "#a8a29e", kit2: "#78350f", skin: ["#d9a679", "#c68642", "#d9a679"], names: ["Don Tullio", "Mastro Remo", "Ciro Mezzaluna"],
       spd: 0.98, react: 12, dash: 0.008, noise: 18, bank: 0.35, target: 8, read: 0.75, mut: "Pareti di gomma: i muri non frenano la palla", mutKey: "rubber",
       hint: "Hanno costruito questa gabbia con le proprie mani, quarant'anni fa. Giocano piano e non sbagliano mai l'angolo: lo conoscono a memoria.",
-      win: "Don Tullio ti porge il lucchetto della Gabbia, arrugginito dal sale. «L'abbiamo chiusa ogni sera per cinquant'anni, aspettando qualcuno che la riaprisse.» Mastro Remo si soffia il naso con un fazzoletto grande come una vela.",
+      win: "Don Tullio ti porge il lucchetto della Gabbia, arrugginito dal sale. «L'abbiamo chiusa ogni sera per quarant'anni, aspettando qualcuno che la riaprisse.» Mastro Remo si soffia il naso con un fazzoletto grande come una vela.",
     },
     {
       name: "Mastro Cavalletto & Co.", tag: "CAV", kit: "#18181b", kit2: "#facc15", skin: ["#c68642", "#8d5524", "#e8b88c"], names: ["Mastro Cavalletto", "Sgrinfia", "Palanca"],
@@ -51,8 +51,8 @@
   ];
   const HOME = [
     { name: "Leo", spd: 4.8, kit: "#2563eb", kit2: "#bae6fd", skin: "#e8b88c", hair: "#3b2314" },
-    { name: "Nico", spd: 5.1, kit: "#0ea5e9", kit2: "#ffffff", skin: "#c68642", hair: "#111827" },
-    { name: "Dario", spd: 4.5, kit: "#1e3a8a", kit2: "#facc15", skin: "#d9a679", hair: "#6b7280" },
+    { name: "Nico", spd: 5.1, kit: "#0ea5e9", kit2: "#ffffff", skin: "#f5d0ae", hair: "#e8a33d" },
+    { name: "Dario", spd: 4.5, kit: "#1e3a8a", kit2: "#facc15", skin: "#e9bf96", hair: "#2b1d14" },
   ];
   // posizioni base nel sistema della squadra: u = avanzamento (0 propria porta, 1 porta avversaria), v = larghezza
   const SLOT = [{ u: 0.5, v: 0.32, role: "Fronte" }, { u: 0.42, v: 0.68, role: "Jolly" }, { u: 0.2, v: 0.5, role: "Muro" }];
@@ -115,12 +115,12 @@
   // compagni: i tre storici + cinque reclute (si ingaggiano col Diario)
   const POOL = {
     leo: { id: "leo", name: "Leo", spd: 4.8, kit: "#2563eb", kit2: "#bae6fd", skin: "#e8b88c", hair: "#3b2314", tr: "", bio: "Il capitano per ostinazione. Corre dritto, tira dritto, a volte pensa dritto." },
-    nico: { id: "nico", name: "Nico", spd: 5.1, kit: "#0ea5e9", kit2: "#ffffff", skin: "#c68642", hair: "#111827", tr: "", bio: "Veloce di piedi e di bocca. Quando non passa la palla, passa il tempo." },
-    dario: { id: "dario", name: "Dario", spd: 4.5, kit: "#1e3a8a", kit2: "#facc15", skin: "#d9a679", hair: "#6b7280", tr: "", bio: "Stessa grinta di Leo, più pazienza. Un po'." },
-    zoe: { id: "zoe", name: "Zoe", spd: 5.3, kit: "#ec4899", kit2: "#fdf2f8", skin: "#d9a679", hair: "#7c2d12", tr: "scatto", rec: 1, bio: "Consegna i gelati del chiosco in bici, in salita, controvento. Dice che la Gabbia è «troppo piana».", pitch: "Scatto: la spallata si ricarica più in fretta." },
-    mimi: { id: "mimi", name: "Mimì", spd: 4.9, kit: "#eab308", kit2: "#1c1917", skin: "#e8b88c", hair: "#1f1a17", tr: "passaggio", rec: 2, bio: "Postina del molo. Conosce ogni indirizzo, quindi anche ogni compagno.", pitch: "Passaggio: i suoi passaggi viaggiano più veloci." },
-    brando: { id: "brando", name: "Brando", spd: 4.7, kit: "#f8fafc", kit2: "#b45309", skin: "#c68642", hair: "#e5e7eb", tr: "tiro", rec: 3, bio: "Fornaio. Alle tre del mattino impasta, alle sei tira. Le mani sono sempre bianche, i tiri anche.", pitch: "Tiro: le sue botte partono più forti." },
-    osvaldo: { id: "osvaldo", name: "Osvaldo", spd: 4.3, kit: "#334155", kit2: "#fb923c", skin: "#8d5524", hair: "#111827", tr: "tenuta", rec: 5, bio: "Scarica le casse al molo. Se c'è da fare muro, si piazza lui: non per merito, per ingombro.", pitch: "Tenuta: le spallate subite lo stendono meno." },
+    nico: { id: "nico", name: "Nico", spd: 5.1, kit: "#0ea5e9", kit2: "#ffffff", skin: "#f5d0ae", hair: "#e8a33d", tr: "", bio: "Veloce di piedi e di bocca. Quando non passa la palla, passa il tempo." },
+    dario: { id: "dario", name: "Dario", spd: 4.5, kit: "#1e3a8a", kit2: "#facc15", skin: "#e9bf96", hair: "#2b1d14", tr: "", bio: "Stessa grinta di Leo, più pazienza. Un po'." },
+    zoe: { id: "zoe", name: "Zoe", spd: 5.3, kit: "#ec4899", kit2: "#fdf2f8", skin: "#d9a679", hair: "#7c2d12", tr: "scatto", rec: 1, bio: "Consegna i gelati dello Scoglio in bici, in salita, controvento. Dice che la Gabbia è «troppo piana».", pitch: "Scatto: la spallata si ricarica più in fretta." },
+    mimi: { id: "mimi", name: "Mimì", spd: 4.9, kit: "#eab308", kit2: "#1c1917", skin: "#e8b88c", hair: "#1f1a17", tr: "passaggio", rec: 2, bio: "Fattorina in bici del molo. Conosce ogni indirizzo, quindi anche ogni compagno.", pitch: "Passaggio: i suoi passaggi viaggiano più veloci." },
+    brando: { id: "brando", name: "Brando", spd: 4.7, kit: "#f8fafc", kit2: "#b45309", skin: "#c68642", hair: "#e5e7eb", tr: "tiro", rec: 3, bio: "Bagnino. D'estate sulla torretta, d'inverno in Gabbia. Le mani sono sempre bianche di crema solare, i tiri anche.", pitch: "Tiro: le sue botte partono più forti." },
+    osvaldo: { id: "osvaldo", name: "Otello", spd: 4.3, kit: "#334155", kit2: "#fb923c", skin: "#8d5524", hair: "#111827", tr: "tenuta", rec: 5, bio: "Scarica le casse al molo. Se c'è da fare muro, si piazza lui: non per merito, per ingombro.", pitch: "Tenuta: le spallate subite lo stendono meno." },
     nina: { id: "nina", name: "Nina", spd: 5.0, kit: "#16a34a", kit2: "#ecfccb", skin: "#e8b88c", hair: "#3b2314", tr: "sponda", rec: 6, bio: "Ripara biciclette. Conosce l'angolo di ogni raggio, quindi anche quello di ogni sponda.", pitch: "Sponda: ogni sponda che tenta le carica la Grinta." },
   };
   const TRAIT_N = { "": "", scatto: "Scatto", passaggio: "Passaggio", tiro: "Tiro", tenuta: "Tenuta", sponda: "Sponda" };
@@ -161,19 +161,19 @@
 
   // battute del quartiere (ironiche di base)
   const QUIP = {
-    pre: ["Dal balcone, Nives: «Fate meno rumore dopo le dieci!». Sono le cinque.", "Gino indica il bar chiuso: «Offro io!». Nessuno raccoglie.", "Il gabbiano del tetto prende posto. Ha già deciso come va a finire.", "Don Tullio gira il lucchetto in tasca. Fa il rumore del sale."],
-    goal: ["Nives batte un colpo sulla ringhiera. Uno. Per il rumore.", "Mastro Remo si commuove. Si sente il fazzoletto, come una vela.", "Il gabbiano approva: una piuma cade, di approvazione.", "Gino alza un caffè immaginario. È anche buono.", "Don Tullio annuisce. Per lui è una standing ovation."],
-    conc: ["Nives: «Andava bene così!». Non andava bene così.", "Passa un gatto. Nessuno osa fermarlo.", "Gino: «Colpa del fondo!». Il fondo è di cemento, Gino.", "Il gabbiano si volta dall'altra parte, per delicatezza.", "Qualcuno dice «Ci può stare». Non ci stava."],
+    pre: ["Dal balcone, Nives: «Fate meno rumore dopo le dieci!». Sono le cinque.", "Tano indica il bar chiuso: «Offro io!». Nessuno raccoglie.", "Il gabbiano del tetto prende posto. Ha già deciso come va a finire.", "Don Tullio gira il lucchetto in tasca. Fa il rumore del sale."],
+    goal: ["Nives batte un colpo sulla ringhiera. Uno. Per il rumore.", "Mastro Remo si commuove. Si sente il fazzoletto, come una vela.", "Il gabbiano approva: una piuma cade, di approvazione.", "Tano alza un caffè immaginario. È anche buono.", "Don Tullio annuisce. Per lui è una standing ovation."],
+    conc: ["Nives: «Andava bene così!». Non andava bene così.", "Passa un gatto. Nessuno osa fermarlo.", "Tano: «Colpa del fondo!». Il fondo è di cemento, Tano.", "Il gabbiano si volta dall'altra parte, per delicatezza.", "Qualcuno dice «Ci può stare». Non ci stava."],
     wall: ["Il muro ti ringrazia: era un po' che nessuno lo trattava così bene.", "La rete canta col vento: do diesis, più o meno.", "Una sponda così la mette in cornice anche Remo."],
-    end: ["Il sole cala sul molo e il gabbiano lascia il tetto.", "Nives chiude la finestra, ma piano. È un segnale.", "Tullio passa con il lucchetto e lo rimette in tasca. Per ora.", "Sul muro, tra i graffiti, qualcuno ha aggiunto un nome nuovo. Nessuno ammette chi.", "La rete vibra ancora. Dentro, per un secondo, sembra di sentire cinquant'anni di partite.", "Una bicicletta passa lenta davanti alla Gabbia. Il fattorino guarda dentro, sorride, e va."],
+    end: ["Il sole cala sul molo e il gabbiano lascia il tetto.", "Nives chiude la finestra, ma piano. È un segnale.", "Tullio passa con il lucchetto e lo rimette in tasca. Per ora.", "Sul muro, tra i graffiti, qualcuno ha aggiunto un nome nuovo. Nessuno ammette chi.", "La rete vibra ancora. Dentro, per un secondo, sembra di sentire quarant'anni di partite.", "Una bicicletta passa lenta davanti alla Gabbia. Il fattorino guarda dentro, sorride, e va."],
   };
   const pickQ = (a) => a[Math.floor(Math.random() * a.length)];
 
   // cast ricorrente del quartiere (per le scene del Diario)
   const CASTC = {
-    voce: { n: "", c: "#64748b" }, tullio: { n: "Don Tullio", c: "#a8a29e" }, remo: { n: "Mastro Remo", c: "#78350f" }, gino: { n: "Gino", c: "#f97316" },
-    rina: { n: "Rina", c: "#d946ef" }, rita: { n: "Rita", c: "#a855f7" }, nives: { n: "Signora Nives", c: "#f472b6" }, cav: { n: "Mastro Cavalletto", c: "#facc15" },
-    zoe: { n: "Zoe", c: "#ec4899" }, mimi: { n: "Mimì", c: "#eab308" }, brando: { n: "Brando", c: "#e5e7eb" }, osvaldo: { n: "Osvaldo", c: "#fb923c" }, nina: { n: "Nina", c: "#16a34a" },
+    voce: { n: "", c: "#64748b" }, tullio: { n: "Don Tullio", c: "#a8a29e" }, remo: { n: "Mastro Remo", c: "#78350f" }, gino: { n: "Tano", c: "#f97316" },
+    rina: { n: "Rina", c: "#d946ef" }, rita: { n: "Rosa", c: "#a855f7" }, nives: { n: "Signora Nives", c: "#f472b6" }, cav: { n: "Mastro Cavalletto", c: "#facc15" },
+    zoe: { n: "Zoe", c: "#ec4899" }, mimi: { n: "Mimì", c: "#eab308" }, brando: { n: "Brando", c: "#e5e7eb" }, osvaldo: { n: "Otello", c: "#fb923c" }, nina: { n: "Nina", c: "#16a34a" },
     sandra: { n: "Sandra la Gru", c: "#ef4444" }, nino: { n: "Nino Cavo", c: "#b91c1c" }, nando: { n: "Nando Frittura", c: "#f59e0b" }, marea: { n: "Capitana Marea", c: "#0f766e" }, elio: { n: "Elio (cartolina)", c: "#38bdf8" },
   };
 
@@ -194,7 +194,7 @@
       lines: [
         ["gino", "Hai vinto, bravo. Vieni, ti offro un caffè. Il bar è lì, vedi? Con la saracinesca abbassata."],
         ["voce", "La saracinesca è abbassata dal 2011. Sul vetro, un cartello a pennarello: «TORNO SUBITO»."],
-        ["zoe", "Lui ti offre il caffè, io ti porto il gelato: insieme facciamo un bar. Sono Zoe, del chiosco. Corro in bici in salita, la tua Gabbia è piatta: mi annoio."],
+        ["zoe", "Lui ti offre il caffè, io ti porto il gelato: insieme facciamo un bar. Sono Zoe, consegno per Lo Scoglio. Corro in bici in salita, la tua Gabbia è piatta: mi annoio."],
         ["tullio", "Zoe corre come chi deve consegnare un gelato prima che si sciolga. Cioè sempre."],
         ["gino", "Sai perché non ho più riaperto? Perché ogni mattina alle cinque il primo cliente era Tullio. Senza di lui il bar non aveva senso, e poi abbiamo scoperto che anche senza il bar ci si trova. Il caffè è finto, la compagnia no."],
       ],
@@ -202,11 +202,11 @@
     {
       id: "c2", t: "Il terzo posto", w: "A bordo campo", need: () => starsOf(1) > 0, rec: "mimi",
       lines: [
-        ["rina", "Sai perché Cugino Gigi gioca con noi? Perché a noi due..."],
-        ["rita", "...manca sempre qualcuno. Ma a quest'ora è di solito Gigi a mancare."],
+        ["rina", "Sai perché Cugino Memo gioca con noi? Perché a noi due..."],
+        ["rita", "...manca sempre qualcuno. Ma a quest'ora è di solito Memo a mancare."],
         ["rina", "Eravamo in tre, da piccoli. Beppe, nostro fratello, lavora su un traghetto, in mezzo al mare, e ci scrive ogni domenica."],
-        ["rita", "Così Gigi sta al suo posto. «Per fare numero». Beppe ci chiama il sabato: «Come va il numero?»"],
-        ["mimi", "Io sono Mimì, la postina del molo. Ho sentito: l'unico indirizzo che conosco a memoria senza guardare è il vostro. Passatemi la palla, so già dove spedirla."],
+        ["rita", "Così Memo sta al suo posto. «Per fare numero». Beppe ci chiama il sabato: «Come va il numero?»"],
+        ["mimi", "Io sono Mimì, la fattorina del molo: consegno quello che al postino pesa. Ho sentito: l'unico indirizzo che conosco a memoria senza guardare è il vostro. Passatemi la palla, so già dove spedirla."],
       ],
     },
     {
@@ -214,19 +214,19 @@
       lines: [
         ["nives", "Sono Nives, terzo piano, quella dei «fate meno rumore». Sto qui dal '71. Quando hanno chiuso la Gabbia, per un anno, ho avuto un silenzio troppo grande."],
         ["nives", "Allora adesso mi lamento io e giocate voi. Funziona così: io mi lamento, voi giocate, e la sera non cala mai del tutto."],
-        ["brando", "Io sono Brando, fornaio. Alle tre del mattino impasto, alle sei esco. Ho le mani bianche e i tiri anche: nessuno vede arrivare la palla, in mezzo alla farina."],
+        ["brando", "Io sono Brando, bagnino. D'estate sto sulla torretta, d'inverno vengo qui. Ho le mani bianche di crema solare e i tiri anche: nessuno vede arrivare la palla, in mezzo al riverbero."],
         ["nives", "Ragazzo, se fai un gol di sponda batto un colpo sulla ringhiera. Uno. Per tre ne devi fare tre."],
       ],
     },
     {
-      id: "c4", t: "Cinquant'anni di sera", w: "La rete, al tramonto", need: () => starsOf(2) > 0, rec: "osvaldo",
+      id: "c4", t: "Quarant'anni di sera", w: "La rete, al tramonto", need: () => starsOf(2) > 0, rec: "osvaldo",
       lines: [
-        ["tullio", "Il lucchetto l'ho chiuso ogni sera per cinquant'anni, alle undici. E ogni mattina alle sei l'ho riaperto, anche quando non c'era nessuno ad aspettare."],
+        ["tullio", "Il lucchetto l'ho chiuso ogni sera per quarant'anni, alle undici. E ogni mattina alle sei l'ho riaperto, anche quando non c'era nessuno ad aspettare."],
         ["remo", "(si soffia il naso, rumore di vela) Che vuoi, Tullio, sei sentimentale."],
         ["tullio", "Eravamo in cinque, nel 1987. Io, Remo, Ciro, Nandino ed Elio. Il terreno era un parcheggio dimenticato: ognuno portò un pezzo di rete e un secchio di cemento."],
         ["voce", "Sul muro, accanto al graffito «1987», ci sono cinque impronte di mano nel cemento. Quattro sono grandi. Una è un po' più piccola, e più storta."],
         ["tullio", "Il resto della storia te la racconto un'altra sera."],
-        ["osvaldo", "Io sono Osvaldo, scarico casse al molo. Se c'è da fare muro, mi piazzo io. Non per merito: per ingombro."],
+        ["osvaldo", "Io sono Otello, scarico casse al molo. Se c'è da fare muro, mi piazzo io. Non per merito: per ingombro."],
       ],
     },
     {
@@ -282,11 +282,11 @@
       id: "c10", t: "Il lucchetto resta aperto", w: "La notte della riapertura", need: () => bossDone("mar") && (EXT.stat.titles > 0 || EXT.stat.cups > 0),
       lines: [
         ["voce", "Notte di riapertura. Nastri appesi alla rete, cartocci vuoti ai pali e una cartolina nuova, appuntata con tre mollette: «Torno presto. Tenete aperto. Elio»."],
-        ["tullio", "Ragazzo. Questo lucchetto lo tengo da cinquant'anni. Stasera lo togli tu."],
+        ["tullio", "Ragazzo. Questo lucchetto lo tengo da quarant'anni. Stasera lo togli tu."],
         ["voce", "Il lucchetto cade nel secchio con un clang di sale e di tempo. Nessuno lo raccoglie."],
         ["nives", "(dal balcone, a squarciagola) Fate rumore! Tutto il rumore che volete!"],
         ["cav", "Il Re della Gabbia è chi lascia la porta aperta."],
-        ["voce", "La Gabbia resta aperta, di notte: per Elio, per Gino che non apre, per il gabbiano, per chi arriva. Da stasera la palla non rimbalza solo sui muri."],
+        ["voce", "La Gabbia resta aperta, di notte: per Elio, per Tano che non apre, per il gabbiano, per chi arriva. Da stasera la palla non rimbalza solo sui muri."],
       ],
     },
     {
@@ -1784,7 +1784,7 @@
     }
     let h = `<h2>Campionato del molo</h2>`;
     if (SEA.done) {
-      h += `<p class="cgd-sub">Stagione conclusa: ${SEA.pos}° posto.</p>${seaTable()}<div class="cgd-quote">${esc(SEA.pos === 1 ? "Don Tullio appende una targa sulla rete, con il nastro adesivo. La targa dice «CAMPIONI». Sotto, a penna: «(del molo)». Per lui è già troppo." : SEA.pos <= 3 ? "Sul podio, in terza fila, ma sul podio. Nives dal balcone grida «Ai miei tempi sarebbe stato peggio!». È un complimento." : "Stagione dura. Gino ti offre un caffè finto: «Offre la casa». La casa è chiusa. Ma il gesto è vero.")}</div>`;
+      h += `<p class="cgd-sub">Stagione conclusa: ${SEA.pos}° posto.</p>${seaTable()}<div class="cgd-quote">${esc(SEA.pos === 1 ? "Don Tullio appende una targa sulla rete, con il nastro adesivo. La targa dice «CAMPIONI». Sotto, a penna: «(del molo)». Per lui è già troppo." : SEA.pos <= 3 ? "Sul podio, in terza fila, ma sul podio. Nives dal balcone grida «Ai miei tempi sarebbe stato peggio!». È un complimento." : "Stagione dura. Tano ti offre un caffè finto: «Offre la casa». La casa è chiusa. Ma il gesto è vero.")}</div>`;
       h += `<button class="cgd-btn" data-a="again">Nuova stagione</button><button class="cgd-btn sec" data-a="back">Indietro</button>`;
       showUi(h); return act({ again: () => { SEA = null; try { localStorage.removeItem(KEY_SEASON); } catch (e) { /* ignora */ } showSeason(); }, back: showHub });
     }
@@ -1841,7 +1841,7 @@
     }
     const draw = () => CUP.pairs.map((p) => `<div class="cgd-stat"><span class="${p[0] === "ron" ? "cgd-me" : ""}">${esc(SEA_N(p[0]))}</span><span class="${p[1] === "ron" ? "cgd-me" : ""}">${esc(SEA_N(p[1]))}</span></div>`).join("");
     if (CUP.done) {
-      h += `<p class="cgd-sub">${CUP.champ ? "Hai vinto la Coppa del molo!" : "Eliminato: " + esc(CUP.out)}</p><div class="cgd-quote">${esc(CUP.champ ? "La coppa è un secchio verniciato d'oro, con i manici. Tullio la solleva, Remo la tiene ferma, il gabbiano la guarda con rispetto. Resta lì a lungo, in silenzio. Nives batte un colpo sulla ringhiera. Uno." : "Si esce a testa alta, per quel che serve in cemento. Gino: «Il tabellone è come il caffè: va riprovato». Il bar è chiuso, ma è un buon consiglio.")}</div>`;
+      h += `<p class="cgd-sub">${CUP.champ ? "Hai vinto la Coppa del molo!" : "Eliminato: " + esc(CUP.out)}</p><div class="cgd-quote">${esc(CUP.champ ? "La coppa è un secchio verniciato d'oro, con i manici. Tullio la solleva, Remo la tiene ferma, il gabbiano la guarda con rispetto. Resta lì a lungo, in silenzio. Nives batte un colpo sulla ringhiera. Uno." : "Si esce a testa alta, per quel che serve in cemento. Tano: «Il tabellone è come il caffè: va riprovato». Il bar è chiuso, ma è un buon consiglio.")}</div>`;
       showUi(h + `<button class="cgd-btn" data-a="again">Nuova coppa</button><button class="cgd-btn sec" data-a="back">Indietro</button>`);
       return act({ again: () => { CUP = null; try { localStorage.removeItem(KEY_CUP); } catch (e) { /* ignora */ } showCup(); }, back: showHub });
     }
@@ -2022,7 +2022,7 @@
     "Perso. Succede, la Gabbia non fa sconti e nemmeno il caffè. Un vecchio dal balcone grida «Andava bene così!». Non è vero, ma è un gesto d'amore.",
     "Hai perso, ma almeno hai rimbalzato con stile. Di quelli che lasciano il segno sul muro: se ci guardi bene, c'è ancora.",
     "Tullio ti passa un secchio d'acqua e un'occhiata paterna: «Il muro è lì anche domani. Tu pure, spero».",
-    "Gino: «Colpa del fondo!». Il fondo è di cemento, Gino. Ma intanto ti offre un caffè immaginario. Di quelli che consolano davvero.",
+    "Tano: «Colpa del fondo!». Il fondo è di cemento, Tano. Ma intanto ti offre un caffè immaginario. Di quelli che consolano davvero.",
   ];
   function showResult() {
     uiState = "result";

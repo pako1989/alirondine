@@ -30,7 +30,7 @@
     // ---------------------------------------------------------------- dialoghi
     // battute a tappe: ironiche di base, poi qualche momento serio. Nessun riferimento alla trama principale.
     const CHAT = [
-      { need: () => true, t: ["Il lucchetto? Pesa meno di come lo racconto. Il fatto è che a raccontarlo sembra più importante di una porta. Sei il tipo che ascolta, vedo.", "In cinquant'anni ho aperto la Gabbia a ogni ora. L'unica volta che ho fatto tardi, il gabbiano ha scritto una lettera di protesta. Cioè ha fatto un paio di cose sul cancello."] },
+      { need: () => true, t: ["Il lucchetto? Pesa meno di come lo racconto. Il fatto è che a raccontarlo sembra più importante di una porta. Sei il tipo che ascolta, vedo.", "In quarant'anni ho aperto la Gabbia a ogni ora. L'unica volta che ho fatto tardi, il gabbiano ha scritto una lettera di protesta. Cioè ha fatto un paio di cose sul cancello."] },
       { need: (i) => i.stars[0] > 0, t: ["Gli Scaricatori ti hanno preso in simpatia. Succede quando uno non ti passa la palla ma ti passa la cassetta del pesce. Per loro è la stessa cosa."] },
       { need: (i) => i.stars[2] > 0, t: ["Quando abbiamo fatto la Gabbia eravamo cinque. Io, Remo, Ciro, Nandino ed Elio. Ognuno portò un secchio di cemento. Il secchio di Elio era il più storto. Ci scrivemmo i nomi sopra, e ci sono ancora."] },
       { need: (i) => i.chapters >= 4, t: ["Sai qual è la cosa più difficile del custode? Non aprire. Chiudere. Alle undici, la sera, quando c'è ancora qualcuno che vorrebbe tirare un'ultima volta. L'ultima volta dura sempre un'ora."] },
