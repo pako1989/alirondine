@@ -41,6 +41,12 @@
     function st() { try { return dir.state(); } catch (e) { return null; } }
     function go(extra) { dir.start(Object.assign({ onExit: api.trResume, from: "borgo" }, extra || {})); }
     function back(fn) { return { label: "◂ Indietro", fn: fn }; }
+    // Settimana del Molo (js/settimana-molo.js): tabellone e cerimonia al Faro, solo se il modulo è caricato
+    function moloOpt(opts) {
+      var m = window.__moloSettimana;
+      if (m && typeof m.open === "function") { var i = m.info(); opts.push({ label: "La Settimana del Molo", sub: i.sub, cls: i.pending ? "hot" : "", fn: function () { m.open({ view: i.pending ? "ceremony" : "board", onExit: api.trResume }); } }); }
+      return opts;
+    }
 
     // ---------------------------------------------------------------- dialoghi
     function presHead(s) {
@@ -60,6 +66,7 @@
       if (s && s.next && s.won > 0) opts.push({ label: "Prossimo episodio", sub: s.next.name, cls: "hot", fn: function () { go({ opp: s.next.id }); } });
       opts.push({ label: "Spogliatoio e bacheca", sub: s ? ("Rosa " + (16 + s.roster) + " giocatori · maglia, portiere, trofei") : "Rosa, maglie, trofei", fn: function () { go({ screen: "locker" }); } });
       opts.push({ label: "Quattro chiacchiere col Presidente", sub: "Aneddoti, ironie, qualche ricordo", fn: presChat });
+      moloOpt(opts);
       api.trAsk(PRES, presHead(s), opts);
     }
 
@@ -90,7 +97,7 @@
         { label: "Il calendario della Rondine", sub: s ? ("Rank " + s.rank + " · stelle " + s.stars) : "Episodi e stagioni", cls: "hot", fn: function () { go(); } },
         { label: "Spogliatoio e bacheca", sub: s ? ("Nuovi arrivi " + s.roster + "/" + s.rosterTotal) : "Rosa e maglie", fn: function () { go({ screen: "locker" }); } },
         { label: "Racconti dall'archivio", sub: "Dina ricorda ogni formazione dal '99", fn: dinaChat }
-      ]);
+      ].concat(moloOpt([])));
     }
     var DCHAT = [
       { need: function () { return true; }, t: ["Tengo tutto in tre cartelle: azzurra, gialla e 'Varie'. 'Varie' è la più grande. Nessuno la apre, nemmeno io, ma so sempre cosa c'è dentro."] },

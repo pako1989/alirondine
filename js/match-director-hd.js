@@ -1769,6 +1769,7 @@
     KITS.forEach((k) => { if (!before.kits.includes(k.id) && k.need(prog)) news.push(`🎽 Nuova maglia: <b>${esc(k.name)}</b>`); });
     const seasonJust = SEASONS.find((x) => !before.seasons[x.id] && seasonDone(prog, x.id));
     if (seasonJust) news.push(`${seasonJust.ico} Stagione completata: <b>${esc(seasonJust.trophy)}</b>. La rosa cresce: +2 a tutti!`);
+    try { const mp = (kind, id) => window.dispatchEvent(new CustomEvent("molo:punti", { detail: { mode: "director", kind, id: String(id) } })); if (win) mp("win", o.id); if (s3) mp("star3", o.id); if (seasonJust) mp("season", seasonJust.id); } catch (er) { /* ignora: Settimana del Molo */ }
     const nIdx = OPPS.indexOf(o) + 1, nxtO = OPPS[nIdx];
     if (win && nxtO && !oppUnlocked(prog, nIdx) && nxtO.needStars) news.push(`⭐ La finale di stagione richiede ${nxtO.needStars} stelle: ne hai ${seasonStars(prog, nxtO.season)}. Rigioca gli episodi per raccoglierne altre.`);
     if (coin) news.push(`🪙 Prima vittoria su ${esc(o.short)}: <b>+${coin} monete</b>`);

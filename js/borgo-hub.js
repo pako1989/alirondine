@@ -135,6 +135,8 @@
       o.push({ label: "Portami ai Trabucchi", sub: "Scorciatoia in carretto", cls: "hot", go: go });
       o.push({ label: "Come ci arrivo?", sub: "La strada, a parole", go: function () { directions(bSay, bAsk, BL, resume); } });
       if (ms.length) o.push({ label: "Le tre modalità", sub: "Dove sei arrivato in ognuna", cls: "hot", go: function () { menuModes(bSay, bAsk, BL, resume); } });
+      var mo = window.__moloSettimana; // Settimana del Molo (js/settimana-molo.js), se caricato
+      if (mo && typeof mo.open === "function") { var mi = safe(function () { return mo.info(); }); if (mi) o.push({ label: "La Settimana del Molo", sub: mi.sub, cls: mi.pending ? "hot" : "", go: function () { mo.open({ view: mi.pending ? "ceremony" : "board", onExit: function () { menuMain(bSay, bAsk, BL, resume); } }); } }); }
       o.push({ label: "Quattro chiacchiere", sub: "Annunci, ricordi e qualche ripetizione", go: function () { chat(bSay, bAsk, BL, resume); } });
       o.push({ label: "◂ Torna al Borgo", go: resume });
       bAsk(ID, hd, o);

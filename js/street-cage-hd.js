@@ -391,6 +391,7 @@
     if (typeof window.addCoins === "function") { try { window.addCoins(n); } catch (e) { /* ignora */ } }
     return n;
   }
+  function moloPt(kind, id) { try { window.dispatchEvent(new CustomEvent("molo:punti", { detail: { mode: "cage", kind: kind, id: String(id) } })); } catch (e) { /* ignora */ } } // Settimana del Molo
 
   // ---------------------------------------------------------------- stato modulo
   let root = null, cv = null, cx = null, ui = null, stage = null;
@@ -1808,7 +1809,7 @@
     if (SEA.round >= SEA.fix.length) {
       SEA.done = true; SEA.pos = sorted(SEA.table).indexOf("ron") + 1; EXT.stat.seasons++;
       const g = SEA.pos === 1 ? 12 : SEA.pos <= 3 ? 5 : 2; EXT.gt += g; msg = `Stagione finita: ${SEA.pos}° posto, +${g} gettoni.`;
-      if (SEA.pos === 1) { EXT.stat.titles++; const c2 = giveCoin("title", 10); if (c2) msg += ` Primo titolo: +${c2} monete.`; }
+      if (SEA.pos === 1) { moloPt("title", "season"); EXT.stat.titles++; const c2 = giveCoin("title", 10); if (c2) msg += ` Primo titolo: +${c2} monete.`; }
     }
     saveSea(); saveExt(); return msg;
   }
@@ -1863,7 +1864,7 @@
       EXT.stat.cupWins++;
       const next = CUP.pairs.map((p) => { if (p === mine) return "ron"; const sa = strOf(p[0]), sb = strOf(p[1]); return Math.random() < sa / (sa + sb) ? p[0] : p[1]; });
       EXT.gt += 2; msg = `${rn} superata. +2 gettoni.`;
-      if (next.length === 1) { CUP.done = true; CUP.champ = true; EXT.stat.cups++; EXT.gt += 8; msg = "Coppa vinta! +10 gettoni."; const c2 = giveCoin("cup", 8); if (c2) msg += ` Prima coppa: +${c2} monete.`; }
+      if (next.length === 1) { CUP.done = true; CUP.champ = true; moloPt("cup", "cup"); EXT.stat.cups++; EXT.gt += 8; msg = "Coppa vinta! +10 gettoni."; const c2 = giveCoin("cup", 8); if (c2) msg += ` Prima coppa: +${c2} monete.`; }
       else { CUP.alive = next; CUP.pairs = cupPairs(next); }
     }
     saveCup(); saveExt(); return msg;
@@ -2050,6 +2051,9 @@
     else if (k === "cup") { extra = `<p style="text-align:center;color:#fde047;font-weight:800">${esc(cupAfter(win))}</p>`; }
     else if (k === "daily") { const r = dailyAfter(G, a, c); extra = `<p style="text-align:center;color:${r.ok ? "#fde047" : "#fdba74"};font-weight:800">${esc(r.msg)}</p>`; }
     if (gt && k !== "daily") { EXT.gt += gt; }
+    if (win) moloPt(k === "boss" ? "boss" : "win", k + ":" + (cfg.lv ? (cfg.lv.id || cfg.lv.tag || cfg.lv.name) : ""));
+    if (k === "surv" && G.wave >= 4) moloPt("feat", "surv4");
+    if (k === "time" && a >= 8) moloPt("feat", "time8");
     saveProg(); saveExt();
     const fresh = newOpenChapters().filter((x) => before.indexOf(x) < 0 && !readCh(x)).map((x) => CHAPTERS.find((y) => y.id === x).t);
     const lvq = cfg.lv && cfg.lv.win;

@@ -284,6 +284,7 @@
   };
   const hashStr = (s) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
   function addShells(n) { if (n <= 0) return; X.meta.shells += n; X.meta.shellsTotal += n; saveX("meta"); }
+  function moloPt(kind, id) { try { window.dispatchEvent(new CustomEvent("molo:punti", { detail: { mode: "action", kind: kind, id: String(id) } })); } catch (e) { /* ignora */ } } // Settimana del Molo
   function coinOnce(key, n) { // monete solo alla prima volta, solo tramite window.addCoins
     if (X.meta.coin[key]) return 0;
     X.meta.coin[key] = 1; saveX("meta");
@@ -1927,7 +1928,7 @@
       S.done = true; S.rank = seaRank(S).indexOf(0);
       X.meta.seasonsDone++; out.done = true; out.rank = S.rank;
       out.shells = [12, 8, 6, 4, 3, 2][S.rank];
-      if (S.rank === 0) { X.meta.seasonTitles++; out.coins = coinOnce("season", 6); }
+      if (S.rank === 0) { moloPt("title", "season"); X.meta.seasonTitles++; out.coins = coinOnce("season", 6); }
     }
     saveX("season"); saveX("meta");
     return out;
@@ -1968,7 +1969,7 @@
     if (!win) C.out = true;
     cupAdvance(C);
     if (win && C.champ === 0) {
-      out.champ = true; X.meta.cupsWon++; out.coins = coinOnce("cup", 8); out.shells = 14;
+      out.champ = true; moloPt("cup", "cup"); X.meta.cupsWon++; out.coins = coinOnce("cup", 8); out.shells = 14;
     } else out.shells = win ? 3 + C.r : 2 + C.r;
     if (C.champ >= 0) C.done = true;
     saveX("cup"); saveX("meta");
@@ -2407,6 +2408,7 @@
       if (!PROG.coin[M.mi]) { PROG.coin[M.mi] = 1; coins += STAR_COINS[M.mi]; if (typeof window.addCoins === "function") { try { window.addCoins(STAR_COINS[M.mi]); } catch (e) { /* ignora */ } } }
     }
     if (mode === "free" && win) coins += coinOnce("free", 2);
+    if (win) moloPt("win", mode + ":" + (M.mi >= 0 ? M.mi : (o.tag || o.name)));
     let quote = win ? o.win : draw ? SOCC_TIE : pick(SOCC_LOSE);
     let sea = null, cup = null;
     if (mode === "season") {
@@ -2449,6 +2451,7 @@
     const g = M.score[0], lv = M.level, rec = g > X.best.surv;
     if (rec) X.best.surv = g; saveX("best");
     const coins = g >= 5 ? coinOnce("surv", 3) : 0, shells = g + (lv - 1);
+    if (g >= 5) moloPt("feat", "surv5");
     addShells(shells);
     const dl = dailyEval({ mode: "surv", level: lv, a: g, c: M.score[1], st: M.st, team: false });
     putRes(`<h2>Sopravvivenza finita</h2><div class="ahd-score"><span style="color:#7dd3fc">${g}</span></div><p class="ahd-sub" style="text-align:center">gol segnati · ondata ${lv}${rec ? " · nuovo record!" : ""}</p>
@@ -2462,6 +2465,7 @@
     const g = M.score[0], medal = g >= 6 ? 3 : g >= 4 ? 2 : g >= 2 ? 1 : 0, rec = g > X.best.timed;
     if (rec) X.best.timed = g; saveX("best");
     const coins = medal === 3 ? coinOnce("timed", 3) : 0, shells = g + medal;
+    if (medal === 3) moloPt("feat", "timed3");
     addShells(shells);
     const dl = dailyEval({ mode: "timed", a: g, c: M.score[1], st: M.st, team: false });
     const txt = ["Zero medaglie. Il cronometro dice che hai corso bene: peccato che il pallone fosse altrove.", "Bronzo: il minimo sindacale del Molo, cioè quello che regge.", "Argento. Ginetta controlla l'orologio e non trova nulla da ridire, il che è già una medaglia.", "Oro! Arturo, in diretta: «Il tempo è finito, ma il Molo era già in ritardo»."][medal];
@@ -2476,6 +2480,7 @@
     const S = M.setp, g = S.goals, rec = g > X.best.setp, st = g >= 5 ? 3 : g >= 4 ? 2 : g >= 2 ? 1 : 0;
     if (rec) X.best.setp = g; saveX("best");
     const coins = g >= 4 ? coinOnce("setp", 3) : 0, shells = g + st;
+    if (g >= 4) moloPt("feat", "setp4");
     addShells(shells);
     const dl = dailyEval({ mode: "setp", goals: g, a: g, c: 0, st: M.st, team: false });
     const nm = { fk: "Punizione", cor: "Angolo", pen: "Rigore" }, rs = { goal: "gol", save: "parato", block: "barriera", miss: "fuori", conceded: "gol subito" };
@@ -2490,7 +2495,7 @@
   function resPens() {
     const S = M.so, win = S.sc[0] > S.sc[1], cupMode = M.mode === "cup-pens";
     let coins = 0, shells = win ? 4 : 1, extra = "", cup = null;
-    if (!cupMode) { if (win) { X.best.pens++; saveX("best"); coins = coinOnce("pens", 3); } }
+    if (!cupMode) { if (win) { X.best.pens++; saveX("best"); coins = coinOnce("pens", 3); moloPt("feat", "pens"); } }
     else { const reg = CTX.reg || [0, 0]; cup = cupApply(win, reg[0], reg[1], true); shells += cup.shells; coins += cup.coins; extra = `<div class="ahd-quote">${esc(cup.champ ? CUP_END.win : cup.out ? CUP_END.lose : "Rigori vinti, nervi saldi: avanti nel tabellone.")}</div>`; }
     if (win) PROG.wins++; saveProg();
     addShells(shells);

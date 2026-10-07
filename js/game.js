@@ -14962,6 +14962,7 @@
     text("voce", `<b>Modalità di Gioco</b> ${mnBar(mnPct(mnModi()))}<br>Scegli tra tornei speciali, saghe investigative, multiverso o sfide calcistiche. Tutte indipendenti dal salvataggio principale.`);
     buttons([
       { label: "✨ Arena 2D HD del Borgo", sub: "Suite Completa: Emblem, Action Soccer, Gabbia del Molo e Matchday Director", cls: "hot", fn: () => { if (window.openArena2DHDModal) window.openArena2DHDModal(modes); } },
+      ...(window.__moloSettimana ? [{ label: "🏆 Settimana del Molo", sub: window.__moloSettimana.info().sub, cls: "hot", fn: () => window.__moloSettimana.open({ onExit: modes }) }] : []),
       { label: "🎰 Distributore Gashapon 3D", sub: "I Pupazzetti della Costa: gira la manovella e colleziona i giocattoli 3D!", cls: "hot", fn: () => { if (window.openGachaModal) window.openGachaModal(); } },
       { label: "📜 Leggende del passato (8 sfide d'epoca)", sub: "Le grandi partite storiche: Wanda '68, Nonno Dante '74, Baciccia Sr '60, Dario '91…", cls: "hot", fn: () => leggende(modes) },
       { label: "📽️ Momenti in Bianco e Nero (B&W)", sub: "Partite storiche in autentico bianco e nero d'epoca: fumo del '54, Rita '70, Don Aurelio '65…", cls: "hot", fn: () => flashback(modes) },
