@@ -1538,7 +1538,7 @@
       const row = (p, kind) => `<button class="mdx-row ${S.selOut === p.id ? "sel" : ""}" data-${kind}="${p.id}"><span class="top"><span class="n">${p.num}</span><span class="nm">${esc(p.name)}</span><span class="ov" title="Valutazione">${Math.round(p.r)}</span><span class="gp">${p.slotGrp === p.grp ? p.grp : p.slotGrp + "*"}</span></span><span class="bot"><span class="sb"><i data-st="${p.id}" style="width:${Math.round(p.st)}%;background:${staminaCol(p.st)}"></i></span><span class="pc" data-stt="${p.id}">${Math.round(p.st)}</span></span></button>`;
       const out = S.xi.slice().sort((a, b) => ["POR", "DIF", "CEN", "ATT"].indexOf(a.slotGrp) - ["POR", "DIF", "CEN", "ATT"].indexOf(b.slotGrp));
       const bench = S.bench.filter((p) => !p.off);
-      pan.innerHTML = `<div class="mdx-lbl">In campo <em>Tocca chi esce, poi chi entra · cambi ${S.maxSubs - S.subsUsed}/${S.maxSubs}</em></div>
+      pan.innerHTML = `<div class="mdx-lbl">In campo <em>Tocca chi esce, poi chi entra · ${!S.started && S.min === 0 ? "prima del fischio: scambi liberi" : `cambi ${S.maxSubs - S.subsUsed}/${S.maxSubs}`}</em></div>
         <div class="mdx-g2">${out.map((p) => row(p, "xi")).join("")}</div>
         <div class="mdx-lbl">In panchina <em>* = fuori ruolo (rende meno)</em></div>
         <div class="mdx-g2">${bench.length ? bench.map((p) => row(p, "bn")).join("") : '<div class="mdx-fx">Panchina vuota.</div>'}</div>`;
@@ -1563,9 +1563,16 @@
 
   function doSub(benchId) {
     if (S.selOut == null) { toastMsg("Scegli prima chi esce (tocca un giocatore in campo)."); return; }
-    if (S.subsUsed >= S.maxSubs) { toastMsg("Hai finito i cambi."); return; }
+    const pre = !S.started && S.min === 0; // prima del fischio: scambio libero, chi esce resta in panchina
+    if (!pre && S.subsUsed >= S.maxSubs) { toastMsg("Hai finito i cambi."); return; }
     const out = S.xi.find((p) => p.id === S.selOut), inn = S.bench.find((p) => p.id === benchId);
     if (!out || !inn) return;
+    if (pre) {
+      inn.slotGrp = out.slotGrp; inn.x = out.x; inn.y = out.y; inn.bench = false; out.bench = true;
+      S.xi[S.xi.indexOf(out)] = inn; S.bench[S.bench.indexOf(inn)] = out; S.selOut = null;
+      toastMsg(`Formazione: ${inn.name} titolare, ${out.name} in panchina.`);
+      snd("playSelect"); renderPanel(); refreshLive(); return;
+    }
     inn.slotGrp = out.slotGrp; inn.x = out.x; inn.y = out.y; inn.st = Math.min(100, Math.max(inn.st, 92));
     out.off = true; S.bench.push(Object.assign(out, { off: true }));
     S.xi[S.xi.indexOf(out)] = inn;
