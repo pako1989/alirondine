@@ -21471,9 +21471,14 @@
     ["Allenamento", /^(Minigiochi|Punizioni|Portiere invincibile|Sfide$|Sfide a obiettivo|Allenatore per un giorno)/],
     ["Storie e ricordi", /^(Il fischietto|Leggende del passato|Flashback|E se fosse|Infortunio e ritorno|Scuola e calcio|Presidente|La Torre del Faro|\?\?\?)/],
     ["Squadra e Stelle", /^(Crea il tuo campione|Squadra$|Spogliatoio|Rosa del Borgo|Stelle del Borgo)/],
+    // le voci con emoji/prefisso (ex «Altro»): si riconoscono dal nome, senza ancora a inizio etichetta
+    ["Partite", /Settimana del Molo/],
+    ["Calcio d'azione e arcade", /Arena 2D|Biliardino|Cabinato|Stadio 3D|Corsa della Panda|Gozzo di Baciccia|Gabbia sul Molo|Tsubasa|Supereroi/],
+    ["Saghe e GDR", /Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro/],
+    ["Collezioni e curiosità", /Gashapon|Roster & Talenti|Diorama|Fumetto|Leggende del passato|Bianco e Nero|Quartier Generale/],
   ];
   const MN_EXP = { "Partite": 12, "Allenamento": 6, "Storie e ricordi": 8 }; // quante voci ha la categoria a tutto sbloccato: le mancanti appaiono come «???»
-  const MN_ORDER = ["Partite", "Allenamento", "Storie e ricordi", "Squadra e Stelle", "Altro"];
+  const MN_ORDER = ["Partite", "Allenamento", "Storie e ricordi", "Squadra e Stelle", "Calcio d'azione e arcade", "Saghe e GDR", "Collezioni e curiosità", "Altro"];
   const MN_IDS = [["Modalità", "modes"], ["Storia", "storia"], ["Collezioni", "coll"], ["Borgo e trasferte", "borgo"]];
   const mnShort = (lab, mk) => { try { const o = MN_STORIA.map(mnObj).filter(Boolean).find((x) => x.label === lab); return o ? { ...o, fn: mk } : null; } catch { return null; } };
   function mnDressList(list) {
