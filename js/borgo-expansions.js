@@ -32,7 +32,7 @@
       bus: "a piedi",
       item: ["Legno di Trabucco", "Legni"],
       itemCos: "trabucco_amulet",
-      items: [[5, 3], [18, 5], [29, 14], [12, 19]],
+      items: [[9, 9], [18, 5], [29, 14], [4, 14]],
       bld: [
         { id: "capanno_reti", x: 2, y: 2, w: 5, h: 4, door: [4, 5], roof: "#8a5a2a", wall: "#d4a373", label: "CAPANNO RETI" },
         { id: "faro_antico", x: 24, y: 1, w: 6, h: 6, door: [26, 6], roof: "#334155", wall: "#cbd5e1", label: "FARO VECCHIO" }
@@ -57,13 +57,11 @@
         fill(12, 6, 14, 16, "=");
 
         // La Gabbia d'Acciaio del Molo Est (Street Soccer Court)
-        fill(18, 8, 28, 14, "Y");
-        fill(19, 9, 27, 13, "g");
-        m[11][18] = "G";
-        m[11][28] = "G";
+        fill(18, 8, 28, 14, "g");
+        fill(18, 10, 18, 12, "G");
+        fill(28, 10, 28, 12, "G");
 
         // Panchina panoramica sul promontorio
-        m[3][10] = "V";
         m[16][2] = "S"; // Cartello ritorno al Borgo
       },
       npcs: [
@@ -104,7 +102,7 @@
       bus: "portale",
       item: ["Frammento di Focaccia Quantica", "Frammenti"],
       itemCos: "aura_viola",
-      items: [[4, 4], [28, 5], [16, 12], [24, 18]],
+      items: [[9, 9], [20, 5], [16, 12], [24, 18]],
       bld: [
         { id: "trattoria_storta", x: 2, y: 2, w: 6, h: 5, door: [5, 6], roof: "#7c3aed", wall: "#4c1d95", label: "TRATTORIA QUANTICA" },
         { id: "faro_distorto", x: 23, y: 1, w: 7, h: 6, door: [26, 6], roof: "#a855f7", wall: "#3b0764", label: "FARO SOTTOSOPRA" }
@@ -125,14 +123,14 @@
 
         // Campo di Calcio Storto
         fill(10, 7, 22, 13, "g");
-        m[10][10] = "G";
-        m[10][22] = "G";
+        fill(10, 9, 10, 11, "G");
+        fill(22, 9, 22, 11, "G");
 
         // Portale di ritorno
         m[16][2] = "S";
       },
       npcs: [
-        { id: "ombra_nonna", at: [7, 5] },
+        { id: "ombra_nonna", at: [9, 5] },
         { id: "arbitro_storto", at: [16, 10] },
         { id: "dario_storto", at: [22, 12] }
       ],
@@ -327,6 +325,9 @@
     // ==========================================
     // 4. INTEGRAZIONE IN MENU BORGO & TRASFERTE
     // ==========================================
+    // le nuove mappe compaiono anche alla fermata del pullman (Trasferte)
+    if (Array.isArray(api.TR_IDS)) ["trabucchi", "borgostorto"].forEach((id) => { if (TRZ[id] && !api.TR_IDS.includes(id)) api.TR_IDS.push(id); });
+
     if (Array.isArray(MN_BORGO_BTN)) {
       MN_BORGO_BTN.unshift(
         () => ({

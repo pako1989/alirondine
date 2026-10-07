@@ -24733,7 +24733,7 @@
   window.borgoLoad = borgoLoad;
   window.svRec = svRec;
   window.svSave = svSave;
-  window.__borgoApi = { TRZ, MN_BORGO_BTN, CAST, trGo, trAsk, trSay, trResume, L, trToast };
+  window.__borgoApi = { TRZ, MN_BORGO_BTN, CAST, trGo, trAsk, trSay, trResume, L, trToast, TR_IDS };
   title();
   render();
 })();
