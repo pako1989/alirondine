@@ -14964,6 +14964,7 @@
     buttons([
       { label: "✨ Arena 2D HD del Borgo", sub: "Suite Completa: Emblem, Action Soccer, Gabbia del Molo e Matchday Director", cls: "hot", fn: () => { if (window.openArena2DHDModal) window.openArena2DHDModal(modes); } },
       ...(window.__moloSettimana ? [{ label: "🏆 Settimana del Molo", sub: window.__moloSettimana.info().sub, cls: "hot", fn: () => window.__moloSettimana.open({ onExit: modes }) }] : []),
+      ...(window.__diarioScoperte ? [{ label: "📰 Il Diario del Corriere", sub: window.__diarioScoperte.info().sub, cls: "hot", fn: () => window.__diarioScoperte.open({ onExit: modes }) }] : []),
       { label: "🎰 Distributore Gashapon 3D", sub: "I Pupazzetti della Costa: gira la manovella e colleziona i giocattoli 3D!", cls: "hot", fn: () => { if (window.openGachaModal) window.openGachaModal(); } },
       { label: "📜 Leggende del passato (8 sfide d'epoca)", sub: "Le grandi partite storiche: Wanda '68, Nonno Dante '74, Baciccia Sr '60, Dario '91…", cls: "hot", fn: () => leggende(modes) },
       { label: "📽️ Momenti in Bianco e Nero (B&W)", sub: "Partite storiche in autentico bianco e nero d'epoca: fumo del '54, Rita '70, Don Aurelio '65…", cls: "hot", fn: () => flashback(modes) },
@@ -21473,6 +21474,7 @@
     ["Squadra e Stelle", /^(Crea il tuo campione|Squadra$|Spogliatoio|Rosa del Borgo|Stelle del Borgo)/],
     // le voci con emoji/prefisso (ex «Altro»): si riconoscono dal nome, senza ancora a inizio etichetta
     ["Partite", /Settimana del Molo/],
+    ["Collezioni e curiosità", /Diario del Corriere/],
     ["Calcio d'azione e arcade", /Arena 2D|Biliardino|Cabinato|Stadio 3D|Corsa della Panda|Gozzo di Baciccia|Gabbia sul Molo|Tsubasa|Supereroi/],
     ["Saghe e GDR", /Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro/],
     ["Collezioni e curiosità", /Gashapon|Roster & Talenti|Diorama|Fumetto|Leggende del passato|Bianco e Nero|Quartier Generale/],

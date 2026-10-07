@@ -85,7 +85,7 @@
         rows.push(e);
       });
       var head = { id: "trasferte", g: "borgo", ico: "🧭", name: "Trasferte", st: st(totSeen, ids.length - closed), cur: totSeen, tot: Math.max(1, ids.length - closed), line: "Luoghi visitati " + totSeen + "/" + (ids.length - closed) + " · tesori " + gotTre + "/" + totTre };
-      var res = [head].concat(rows);
+      var res = ids.length - closed > 0 ? [head].concat(rows) : [];
       if (closed) res.push({ id: "zone-chiuse", g: "borgo", ico: "❔", name: "???", st: "lock", cur: 0, line: HINT.zona });
       return res;
     });
@@ -296,7 +296,7 @@
     h += '<div class="dia-card"><div class="dia-big"><b>' + p + '%</b><span>scoperto · ' + es.filter(function (e) { return e.st === "done"; }).length + " voci completate · " + hid + " ancora da scoprire</span></div>" + bar({ cur: p, tot: 100 }) + "</div>";
     h += '<div class="dia-card"><div class="dia-h">Novità dall\'ultima volta</div>';
     if (!prev) h += '<div class="dia-rl" style="margin:0">Prima apertura del Diario: da adesso segno cosa cambia tra una visita e l\'altra.</div>';
-    else if (nw && nw.length) h += '<div class="dia-rl" style="margin:0 0 8px">Ultima visita: ' + esc(ago(prev.t)) + "</div>" + '<div class="dia-news">' + nw.map(function (x) { return "<span>" + esc(x.name) + " " + esc(x.txt) + "</span>"; }).join("") + "</div>";
+    else if (nw && nw.length) h += '<div class="dia-rl" style="margin:0 0 8px">Ultima visita: ' + esc(ago(prev.t)) + "</div>" + '<div class="dia-news">' + nw.map(function (x) { return "<span>" + esc(x.name) + ": " + esc(x.txt) + "</span>"; }).join("") + "</div>";
     else h += '<div class="dia-rl" style="margin:0">Ultima visita ' + esc(ago(prev.t)) + ": niente di nuovo. Il Borgo ti aspetta.</div>";
     h += "</div>";
     GROUPS.forEach(function (g) {
