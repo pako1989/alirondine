@@ -4225,7 +4225,7 @@
         { label: "◂ Resta nel Borgo", fn: borgoResume },
       ], true);
     }
-    if (id === "hq") return hqEnter(() => borgo());
+    if (id === "hq") return hqEnter(() => borgo(), true);
     if (id === "ferri") {
       view = { kind: "scene", bg: "borgo", speaker: "nonna" }; chap("Casa Ferri");
       text("nonna", "Entri a Casa Ferri. Profumo di lasagne e di naftalina. La Nonna ti guarda da sopra gli occhiali: «Leo. Vuoi sentire di quando Nicola ha giocato la finale dei Pulcini? Ho un baule, in soffitta.»");
@@ -8670,7 +8670,7 @@
   function trArea() { const tx = Math.floor(TW.x / TS), ty = Math.floor((TW.y - 4) / TS); const a = TW.z.areas.find(([x0, y0, x1, y1]) => tx >= x0 && tx <= x1 && ty >= y0 && ty <= y1); return a ? a[4] : TW.z.short; }
   function trHint() {
     if (view.kind !== "trasf") return;
-    text("voce", `<b>${esc(TW.area)}</b> · ${esc(TW.z.hints[TW.area] || "")} <span style="color:var(--dim)">Frecce per muoverti, <em>Parla</em> vicino a qualcuno. ${TW.z.local ? (TW.z.boat ? "Per tornare: Baciccia e la sua barca, o il Menu." : "Le frecce gialle ai bordi portano nelle altre zone.") : `Per tornare al Borgo: la fermata${TW.z.bus === "battello" ? ", cioè la barca," : ""} o il Menu.`}</span>`);
+    text("voce", `<b>${esc(TW.area)}</b> · ${esc(TW.z.hints[TW.area] || "")} <span style="color:var(--dim)">Frecce per muoverti, <em>Parla</em> vicino a qualcuno. ${TW.z.tail ? esc(TW.z.tail) : TW.z.local ? (TW.z.boat ? "Per tornare: Baciccia e la sua barca, o il Menu." : "Le frecce gialle ai bordi portano nelle altre zone.") : `Per tornare al Borgo: la fermata${TW.z.bus === "battello" ? ", cioè la barca," : ""} o il Menu.`}</span>`);
   }
   function trTry(nx, ny) {
     nx = clamp(nx, 6, TW.z.w * TS - 6); ny = clamp(ny, 8, TW.z.h * TS - 2);
@@ -8752,6 +8752,7 @@
   function trMenu() {
     if (!TW) return;
     if (TW.z.local) return beMenuT(); trSavePos(); BW.keys = {};
+    if (TW.z.menu) return TW.z.menu();
     const r = trRec(), p = prog();
     view = { kind: "scene", bg: "borgo" }; chap(`${TW.z.short} · Menu`);
     const mark = (ok) => ok ? "✓" : "•";
@@ -8765,6 +8766,7 @@
     ]);
   }
   function trObj(ch, tx, ty) {
+    if (TW.z.onObj && TW.z.onObj(ch, tx, ty)) return;
     if (TW.z.local && beObj(ch, tx, ty)) return;
     if (ch === "S" || ch === "B") return trBus(true);
     if (TW.z.obj && TW.z.obj[ch]) return trSay([L("voce", pick(TW.z.obj[ch]))]);
@@ -22361,7 +22363,7 @@
       { label: "◂ Indietro", fn: back },
     ], true);
   }
-  function hqEnter(back) {
+  function hqEnter(back, fromBorgo) {
     if (!BW || !BW.active) borgo();
     const n = hqCount();
     if (n < 8) {
@@ -22370,6 +22372,8 @@
       return buttons([{ label: "Stelle del Borgo", fn: () => svPage(() => borgo()) }, { label: "◂ Torna a esplorare", fn: borgoResume }], true);
     }
     borgoLeave();
+    // Casa delle Stelle camminabile (js/quartier-generale.js); senza quel file resta il vecchio Registro
+    if (window.__casaStelle && typeof window.__casaStelle.enter === "function") { try { return window.__casaStelle.enter({ back, fromBorgo: !!fromBorgo }); } catch (e) { console.error(e); } }
     hqPage(back, 0);
   }
   // frasi proprie di ogni Stella e residente al Quartier Generale (ruotano: mai la stessa coppia due volte di fila)
@@ -22489,7 +22493,7 @@
   };
   const HQ_LEO = ["Me lo segno. Davvero.", "Detto da te ha perfettamente senso. Non so perché.", "Pina ci farà un titolo, vedrai.", "Resta quanto vuoi. Il posto è tuo.", "Non so se ridere o prendere appunti.", "Questa me la tengo per i giorni storti.", "Lo dico a Sara: finisce nel registro.", "Grazie. Lo penso anch'io, solo che non sapevo dirlo.", "Allora domani torna e raccontami il resto.", "Gigi direbbe KRAAA. Io dico che hai ragione.", "E poi dicono che il calcio è complicato."];
   const HQ_LASTK = "ali-di-rondine.hqfrasi";
-  function hqTalk(id, back, page) {
+  function hqTalk(id, back, page, after) {
     const person = hqRoster().find((x) => x.id === id), name = person ? person.name : (CAST[id] ? CAST[id].name : id);
     const scenes = {
       papa: [L("papa", "Hai messo una panca anche per me, Leo? Non gioco da vent'anni. Però so preparare un pranzo per centotto. Quello sì."), L("leo", "La panca è tua, papà. Il pranzo lo facciamo tutti insieme."), L("papa", "Allora porto le acciughe. Ma se Tommy le chiama «snack», lo faccio correre fino a Chiavari.")],
@@ -22524,7 +22528,7 @@
       L(id, "Allora torno domani. Ho una storia da aggiungere al registro."),
     ];
     view = { kind: "scene", bg: "hq" }; chap(`Quartier Generale · ${name}`);
-    play(lines, () => hqPage(back, page));
+    play(lines, after || (() => hqPage(back, page)));
   }
   MODES8.push(() => ({ label: "Quartier Generale delle 108 Stelle", sub: `${hqCount()}/${svTot()} persone · strutture ${HQ_LEVELS.filter((x) => hqCount() >= x.need).length}/4`, fn: () => hqEnter(modes) }));
   MODES8.push(() => ({ label: "Il Borgo Storto (GDR)", sub: "Capitolo 1 · trama, scontri a turni, tono assurdo", fn: () => { location.href = "./borgo-storto.html"; } }));
@@ -24753,7 +24757,22 @@
   window.svRec = svRec;
   window.svSave = svSave;
   window.__azHooks = { azMe, azSide, heroLoad };
-  window.__borgoApi = { TRZ, MN_BORGO_BTN, CAST, trGo, trAsk, trSay, trResume, L, trToast, TR_IDS, NPCS, trLevel };
+  // uscita da una zona camminabile verso il Borgo (porta del Quartier Generale) o verso una funzione di ritorno
+  function trExitTo(back, toDoor) {
+    trLeave(); TW = null; B = borgoLoad();
+    if (!BW) BW = { keys: {}, walk: 0, saved: 0 };
+    if (typeof back === "function") return back();
+    if (toDoor) { const hq = BLD.find((b) => b.id === "hq"); if (hq) { B.x = hq.door[0] * TS + 8; B.y = (hq.door[1] + 1) * TS + 12; B.dir = "down"; borgoSave(); } }
+    borgo();
+  }
+  // ponte per js/quartier-generale.js (Casa delle Stelle camminabile): funzioni del Quartier Generale e delle modalità collegate
+  const HQ_API = {
+    roster: hqRoster, count: hqCount, levels: HQ_LEVELS, say: HQ_SAY, cos: HQ_COS, page: hqPage, cosUnlock: hqCosUnlock, total: svTot,
+    talkIn(id, after) { HQ_SCENE = hqRoster(); HQ_SCENE_LEVEL = HQ_LEVELS.filter((x) => hqCount() >= x.need).length; hqTalk(id, null, 0, after); },
+    isStar: (id) => SV.some((s) => s.id === id), star: (id) => SV.find((s) => s.id === id) || null, starsRec: () => SV.filter((s) => svRec().rec[s.id]).length, svTalk,
+    squadra, spMenu, daily, svPage,
+  };
+  window.__borgoApi = { TRZ, MN_BORGO_BTN, CAST, trGo, trAsk, trSay, trResume, L, trToast, TR_IDS, NPCS, trLevel, trZone: () => (TW ? TW.id : null), trExitTo, trRec, todayKey, hq: HQ_API };
   title();
   render();
 })();
