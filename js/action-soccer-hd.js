@@ -1,6 +1,10 @@
 // js/action-soccer-hd.js - Action Soccer 2D HD · "Coppa del Molo"
 // Partita 5v5 a campo aperto, vista dall'alto con aftertouch, Tiro della Rondine e Intesa Leo-Nico.
-// Entry: window.openActionSoccerHD(onExit)
+// Entry: window.openActionSoccerHD(onExit)  ·  API estesa: window.__actionHd.start({mode, onExit})
+// Modalità: torneo, partita libera, sopravvivenza, sfida a tempo, rigori, calci piazzati, allenamento,
+// campionato, coppa a eliminazione, sfide giornaliere, squadra, look, tattiche, diario della Coppa.
+// Chiavi proprie: ali-di-rondine.action-hd-{prefs,meta,best,season,cup,daily,team,look}; le vecchie
+// (progress, settings) restano intatte. Le monete passano solo da window.addCoins, una volta per traguardo.
 (function () {
   "use strict";
 
@@ -65,6 +69,161 @@
   ];
   const HOME_NAMES = ["Sandro", "Chicco", "Baciccia Jr", "Leo", "Nico"];
 
+  // ---------------------------------------------------------------- dati estesi: squadre, cast, battute
+  const XOPPS = [
+    {
+      name: "Fornai della Salita", tag: "FOR", kit: "#f5e6c8", kit2: "#92400e", gk: "#60a5fa", spd: 1.0, tkl: 1.0, press: 205, line: 0.0, shoot: 310,
+      names: ["Lievito", "Mattarello", "Pagnotta", "Biga", "Infornata"],
+      hint: "Si allenano alle quattro del mattino e giocano come lievita la pasta: piano, poi tutto insieme. Hanno sempre un po' di farina sulle maglie.",
+      win: "I Fornai ti regalano un sacchetto di grissini ancora tiepidi. «Per le prossime partite. Il pane non si vende ai vincitori: si offre.»",
+    },
+    {
+      name: "Lampare di Capo Ventoso", tag: "LAM", kit: "#0e7490", kit2: "#fef08a", gk: "#f97316", spd: 1.02, tkl: 1.05, press: 215, line: 0.03, shoot: 325,
+      names: ["Lampara", "Calamaro", "Seppia", "Totano", "Fanalino"],
+      hint: "Pescatori di notte, attaccanti di sera. Giocano con la luce negli occhi e con il mare nelle caviglie: contrasti salati.",
+      win: "Una lampara ti accende il viso: «Tieni il lume, ragazzo. Di notte il campo si trova seguendo chi non ha paura del buio.»",
+    },
+  ];
+  const ALLT = OPPS.concat(XOPPS); // tutte le squadre del Molo (7)
+  const STRN = [0.85, 1.05, 1.0, 0.9, 1.3, 0.95, 1.1]; // forza per le partite simulate (stesso ordine di ALLT)
+  const PRE = { // battute prima del fischio, a rotazione
+    GAB: ["Ginetta: «Mettete al sicuro i panini. Tutti. Anche quelli che non avete ancora comprato.»", "Arturo: «Dalla cabina vedo i gabbiani in tribuna. Hanno già l'aria di chi ha un parere.»"],
+    COR: ["Ginetta: «Contrasti puliti, per favore. Il Capitano dice che l'occhio è a posto. L'orzaiolo no.»", "Arturo: «I Corsari entrano in campo con la bandana. Scelta stilistica o semplice abitudine, mah.»"],
+    MUR: ["Zia Pina: «Fate gol subito, che dopo si addormentano. A bocca aperta, poverini.»", "Arturo: «Le Murene sbadigliano e già fanno paura. Immaginate quando sono sveglie.»"],
+    DOP: ["Il Capostazione: «Fischio di partenza. Poi li guardo passare uno a uno, come i treni.»", "Arturo: «Il Dopolavoro schiera otto giocatori in difesa. Per essere in cinque, è un traguardo.»"],
+    FAN: ["Zio Ormeggio, senza scarpe: «Il campo l'ho sentito con i piedi. Stasera ha voglia di giocare.»", "Arturo: «Il Gran Fanale: l'unica squadra che segna e chiede scusa al pallone.»"],
+    FOR: ["Zia Pina: «Ho portato la focaccia ai Fornai. Mi hanno portato la focaccia. Siamo pari.»", "Arturo: «I Fornai hanno la farina nei capelli. A fine partita non sapremo se siamo sporchi o benedetti.»"],
+    LAM: ["Ginetta: «Le Lampare arrivano dal mare, e il mare non è mai puntuale. Fischio quando tutti sono qui.»", "Arturo: «Sulla fascia destra una lampara. Sulla sinistra, il buio. Il mare sembra d'accordo.»"],
+  };
+  const QUIP = {
+    start: ["Radio Molo, buonasera. Il vento è a favore di chi ha il vento a favore.", "Radio Molo in diretta. L'audio arriva a tratti, la fiducia sempre.", "Qui Arturo dalla cabina: il pallone è rotondo, il Molo è storto."],
+    goalFor: ["Gol! La rete ha ricevuto e la rete non si è opposta.", "Una rete così non si vedeva dai tempi delle reti vere.", "Zia Pina alza il mestolo: approvato!", "Tecnica, coraggio e un gabbiano che non c'entra niente."],
+    goalAg: ["Gol avversario. Il portiere dice che era già in volo, ma verso un'altra idea.", "Si è aperta la porta. Come sempre, dall'interno.", "Un gol subito fa bene al carattere. Il secondo fa male al fritto."],
+    save: ["Che parata! Sandro ha la faccia di chi ha già visto tutto.", "Il portiere ci mette la faccia. Anche le mani, per fortuna.", "Salvataggio! Il pubblico, tre persone, esulta in due."],
+    post: ["Il palo! Dura da anni, come la vernice.", "Palo pieno. Il Molo ringrazia: era la parte che reggeva."],
+    half: ["Intervallo: il vento cambia lato, noi no.", "Pausa. Zia Pina distribuisce il fritto e le opinioni."],
+    level: ["Arriva un'altra ondata. Il Molo è fatto per le onde.", "Si alza il livello. Si abbassa il morale. Va bene così."],
+  };
+  const pick = (a) => a[Math.floor(Math.random() * a.length)];
+  const quip = (k) => "🎙 " + pick(QUIP[k]);
+
+  // compagni di squadra: 3 slot variabili (portiere, due difensori), Leo e Nico restano fissi (Intesa)
+  const MATES = [
+    { id: "sandro", name: "Sandro", slot: 0, mods: {}, desc: "Il portiere di sempre. Para con la faccia di chi ha visto tre generazioni di palloni.", req: null, hint: "" },
+    { id: "ondina", name: "Ondina", slot: 0, mods: { reach: 1.12 }, desc: "Portiera di Punta Nera. Arriva prima della palla e poi dice di avere avuto ragione. Parata +12%.", req: () => X.meta.seasonMd >= 3, hint: "Gioca 3 giornate di campionato" },
+    { id: "chicco", name: "Chicco", slot: 1, mods: {}, desc: "Sempre affamato, sempre al suo posto. Soprattutto se il suo posto è vicino al fritto.", req: null, hint: "" },
+    { id: "bj", name: "Baciccia Jr", slot: 1, mods: {}, desc: "Il nipote del Baciccia. Ha ereditato il cappello e il carattere. Il cappello gli sta meglio.", req: null, hint: "" },
+    { id: "mattia", name: "Mattia la Saracinesca", slot: 1, mods: { tkl: 1.35 }, desc: "Si abbassa come una serranda e a quel punto nessuno passa. Contrasti +35%.", req: () => PROG.stars[1] > 0, hint: "Batti i Corsari della Banchina" },
+    { id: "kevin", name: "Kevin del Pedalò", slot: 1, mods: { spd: 1.04 }, desc: "Ha le gambe di chi pedala tutta l'estate senza arrivare mai da nessuna parte. Qui arriva. Velocità +4%.", req: () => PROG.stars[2] > 0, hint: "Batti le Murene di Scoglio Rosso" },
+    { id: "bue", name: "Il Bue", slot: 1, mods: { tkl: 1.2, spd: 0.98 }, desc: "Lento, saldo, inamovibile. Contrasti +20%, un po' meno rapido.", req: () => X.meta.cupsPlayed >= 1, hint: "Gioca una Coppa del Molo" },
+    { id: "morena", name: "Morena", slot: 1, mods: { spd: 1.03, tkl: 1.1 }, desc: "Ha il passo del pescatore all'alba: silenzioso, preciso, mai fuori tempo. Velocità +3%, contrasti +10%.", req: () => X.meta.seasonsDone >= 1, hint: "Concludi una stagione di campionato" },
+  ];
+  const KITS = [
+    { id: "blu", name: "Blu Rondine", k: "#1d4ed8", k2: "#7dd3fc", cost: 0 },
+    { id: "rosso", name: "Rosso Fanale", k: "#dc2626", k2: "#fde68a", cost: 6 },
+    { id: "verde", name: "Verde Murena", k: "#15803d", k2: "#bbf7d0", cost: 8 },
+    { id: "nero", name: "Nero Corsaro", k: "#1f2937", k2: "#fb923c", cost: 10 },
+    { id: "bianco", name: "Bianco Gabbiano", k: "#e2e8f0", k2: "#1d4ed8", cost: 10 },
+    { id: "viola", name: "Viola di Stagione", k: "#7e22ce", k2: "#f0abfc", cost: 0, req: () => X.meta.seasonTitles >= 1, hint: "Vinci il campionato" },
+    { id: "oro", name: "Oro del Molo", k: "#f59e0b", k2: "#1e3a8a", cost: 0, req: () => X.meta.cupsWon >= 1, hint: "Vinci la Coppa del Molo" },
+  ];
+  const PATS = [{ id: "classic", name: "Classica", cost: 0 }, { id: "stripes", name: "Strisce", cost: 4 }, { id: "hoops", name: "Righe", cost: 4 }, { id: "solid", name: "Tinta unita", cost: 2 }];
+  const BALLS = [
+    { id: "bianco", name: "Classico", c: "#ffffff", cost: 0 },
+    { id: "arancio", name: "Arancio del Molo", c: "#fdba74", cost: 5 },
+    { id: "lime", name: "Lime Fosforo", c: "#d9f99d", cost: 5 },
+    { id: "oro", name: "Palla d'Oro", c: "#fde047", cost: 0, req: () => X.meta.cupsWon >= 1, hint: "Vinci la Coppa del Molo" },
+  ];
+  const PITCHES = [{ id: "giorno", name: "Giorno", cost: 0 }, { id: "tramonto", name: "Tramonto", cost: 6 }, { id: "notte", name: "Notte con lucine", cost: 8 }];
+  const FORMS = ["Equilibrato", "Offensivo", "Difensivo"];
+  const PRESS = ["Basso", "Medio", "Alto"];
+
+  // cast ricorrente (le schede si sbloccano con il filo narrativo)
+  const CASTD = [
+    { id: "ginetta", n: "Ginetta Bandierina", t: "Organizzatrice e arbitra della Coppa. Ex arbitra di campionato, è ancora convinta che il primo fallo del 1979 fosse rigore.", ch: "c0" },
+    { id: "arturo", n: "Arturo Altoparlante", t: "La voce di Radio Molo. Commenta con un mestolo e del nastro adesivo, con la competenza di chi ha visto una partita, una volta, di spalle.", ch: "c1" },
+    { id: "cima", n: "Capitan Cima", t: "Capitano dei Corsari della Banchina. Mani come argani, cuore uguale. Dice che l'occhio è perso a carte: è solo un orzaiolo.", ch: "c3" },
+    { id: "capo", n: "Il Capostazione", t: "Quarant'anni di fischi per le partenze degli altri. Il Dopolavoro gioca per chiudere con un binario libero.", ch: "c5" },
+    { id: "orme", n: "Zio Ormeggio", t: "Capitano del Gran Fanale. Gioca scalzo dal 1987 e non sbaglia un passaggio di sguardo.", ch: "c6" },
+    { id: "pina", n: "Signora Pina", t: "Trattoria, fritto e opinioni non richieste. Madrina non ufficiale di ogni squadra, quindi di nessuna.", ch: "c2" },
+  ];
+
+  // filo narrativo a tappe: i capitoli bloccati compaiono come «???»
+  const CHAPS = [
+    { id: "c0", t: "La Coppa di Latta", tone: "ironico", cond: () => true, hint: "", p: [
+      "Ginetta Bandierina ti mostra un secchio di latta, ammaccato e lucido solo sul bordo. «Questa è la Coppa del Molo. Gaspare il lattoniere la fece nel 1962 con il fondo di un bidone di vernice e il manico di un mestolo. Se la alzi forte, suona.»",
+      "Sotto, una targa di rame con una colonna di nomi punzonati a chiodo. Gli ultimi sono illeggibili: la salsedine si è mangiata gli anni. «Ogni anno un nome nuovo. Quest'anno ne manca uno. Non dico chi.»",
+      "«Regole: cinque contro cinque, cento secondi, niente tacchetti di ferro. E si saluta l'arbitro. Anche se sono io. Soprattutto se sono io.»"] },
+    { id: "c1", t: "Il primo fischio", tone: "ironico", cond: () => totalPlays() >= 1, hint: "Gioca la tua prima partita", p: [
+      "Arturo Altoparlante prende in mano il microfono, che è un mestolo con il nastro adesivo. «Signore e signori... c'è il vento.» Pausa. Dopo mezz'ora, in diretta: «C'è ancora il vento.»",
+      "Ginetta lo lascia fare. «Il pubblico non sente niente», dice, «ma si sente ascoltato.»",
+      "Da oggi Radio Molo trasmette ogni partita. L'audio arriva a tratti. La fiducia, sempre."] },
+    { id: "c2", t: "Il panino", tone: "ironico", cond: () => PROG.stars[0] > 0, hint: "Batti i Gabbiani del Porto", p: [
+      "Dopo la partita il panino non è più nella borsa. Sul palo della porta, un gabbiano ti fissa masticando con grande dignità. Era Peppino? Nessuno lo sa: i gabbiani del porto hanno tutti la stessa faccia da avvocato.",
+      "Ginetta registra un reclamo: «Furto con scasso di cerniera». Il reclamo non verrà letto. Ma sul retro, a matita, c'è scritto: «Nel 1962 il primo spettatore della Coppa fu un gabbiano. Lo hanno sempre fatto pagare in natura.»"] },
+    { id: "c3", t: "La sagola di Capitan Cima", tone: "serio", cond: () => PROG.stars[1] > 0, hint: "Batti i Corsari della Banchina", p: [
+      "Capitan Cima ti aspetta a fine partita con un rotolo di sagola, tenuto come si tiene una cosa di valore. «Era di mio padre. Quando il porto cambiò le regole della pesca, lui smise di uscire. Teneva le reti appese come si tengono le giacche di chi ti manca. Questo è l'ultimo pezzo che ha intrecciato.»",
+      "Lo lega al manico della Coppa: tre nodi, il terzo più stretto degli altri. «Così non cade dal ripiano. E se cade, almeno è legata a qualcuno.»",
+      "Per un secondo l'orzaiolo gli fa lacrimare l'occhio. Nessuno dice niente. Nemmeno Arturo, che è la cosa più rara che si sia vista sul Molo quell'anno."] },
+    { id: "c4", t: "Bocca aperta", tone: "ironico", cond: () => PROG.stars[2] > 0, hint: "Batti le Murene di Scoglio Rosso", p: [
+      "Il mistero delle Murene che dormono a bocca aperta è risolto: finiscono il turno al mercato del pesce alle tre e mezza di notte e si allenano all'alba. «Dormiamo quando il pallone è in volo», spiega Fondale.",
+      "Zia Pina porta una focaccia, e una Murena si addormenta con il pezzo ancora in bocca. Arturo, in diretta: «Calcio d'azione. E di digestione.»",
+      "Poi qualcuno le mette una coperta addosso. Alle Murene non era mai successo. È l'unico momento in cui la bocca si chiude."] },
+    { id: "c5", t: "L'ultimo binario", tone: "serio", cond: () => PROG.stars[3] > 0, hint: "Batti il Dopolavoro Ferroviario", p: [
+      "Il Capostazione slega il fischietto dal cordino e te lo mette nel palmo. «Da gennaio al banco della stazione del Molo non ci sarà più nessuno. Il treno passerà lo stesso, ma nessuno lo saluterà. Per quarant'anni ho fischiato le partenze degli altri.»",
+      "Guarda i binari arrugginiti che finiscono accanto al campo. «Questo non è un addio. È un passaggio di consegne: la prossima partenza la fischi tu.»",
+      "Ginetta si asciuga gli occhi con il fischietto d'argento e finge che sia stato il vento."] },
+    { id: "c6", t: "Scalzo dal 1987", tone: "serio", cond: () => PROG.stars[4] > 0, hint: "Batti Il Gran Fanale", p: [
+      "Zio Ormeggio gioca scalzo dal 1987. Lo raccontano come una leggenda, ma la verità è più semplice: quell'anno la mareggiata si portò via la baracca degli spogliatoi e il compagno Tullio rimase senza scarpe. Ormeggio gli prestò le sue. «A fine anno te le ridò», disse Tullio. Poi Tullio cambiò città.",
+      "Ormeggio non ne comprò altre. «Se ne compro un altro paio, vuol dire che non torna.»",
+      "Oggi, sul bordo del campo, c'è un signore con un sacchetto: un paio di scarpini lucidati ogni domenica per trentasette anni. «Scusa il ritardo, Orme'.» Ormeggio li guarda a lungo. Poi se ne infila uno solo. «L'altro lo tengo per la prossima volta.»",
+      "Nessun applauso. Gli occhi lucidi, tutti. E la Coppa, da sola, suona un po' per il vento."] },
+    { id: "c7", t: "La targhetta", tone: "serio", cond: () => X.meta.seasonsDone >= 1, hint: "Concludi una stagione di campionato", p: [
+      "A fine stagione Ginetta gira la Coppa e ti mostra la targa dal retro. Ci sono nomi graffiati con un chiodo che nessun registro ricorda: pescatori, bagnini, un postino, due gemelli che si sono sempre fatti passare l'uno per l'altro.",
+      "«La Coppa non è del più forte», dice. «È di chi si ricorda di tornare.»",
+      "Accanto alla tua stagione scrive una riga a matita: «Completata». Per la prima volta in vent'anni, non la cancella."] },
+    { id: "c8", t: "Il nome sulla latta", tone: "ironico", cond: () => X.meta.cupsWon >= 1, hint: "Vinci la Coppa del Molo", p: [
+      "Il chiodo, il martello, tre colpi. Il tuo nome entra nella targa tra quello di un postino e quello di due gemelli. Non è un gran lavoro: la R sembra una P con l'ernia.",
+      "Ginetta lo guarda con occhio critico. «Lasciamola così. Un nome deve dare un po' di pensiero.» Poi capovolge la Coppa e la batte con le nocche: un do, lungo, un po' stonato.",
+      "Dalla cabina, Arturo annuncia: «Signore e signori, il vento si è fermato un secondo. Poi ha ripreso.»"] },
+    { id: "c9", t: "Radio Molo, fuori onda", tone: "serio", cond: () => X.meta.maxStreak >= 3 || X.meta.shellsTotal >= 40, hint: "Tre giorni di fila di sfide, o 40 conchiglie in tutto", p: [
+      "Arturo spegne il mestolo e, per una volta, non fa battute. «Sai perché commento ogni partita, anche quelle senza pubblico? Perché un giorno qualcuno mi ha detto: quando smetti di parlare di una cosa, quella comincia a smettere di esistere. Allora parlo. Del vento, dei gabbiani, dei portieri col fiatone.»",
+      "Fa una pausa. «Se torni ogni giorno, il Molo non smette. È tutto qui il segreto.»",
+      "Poi riaccende il microfono. «E ora la pubblicità: Trattoria da Zia Pina, il fritto che ti guarda negli occhi.»"] },
+    { id: "c10", t: "Il Molo non chiude", tone: "serio", cond: () => CHAPS.slice(1, 10).every((c) => c.cond()), hint: "Sblocca tutti gli altri capitoli", p: [
+      "Arriva una lettera del Comune, carta intestata e timbro: il campo del Molo «non è in programma di chiusura». Ginetta la legge tre volte, poi la appende accanto al fischietto con le puntine, dentro una busta di plastica per il fritto.",
+      "Non ci sono messaggi nascosti: solo una riga di burocrazia che, per una volta, dice la cosa giusta. «Domani si gioca», annuncia. Le squadre arrivano alla spicciolata: i Fornai con la farina, le Lampare con il lume, Zio Ormeggio con un solo scarpino.",
+      "L'ultima riga della targa è vuota. «Quella è per l'anno prossimo», dice Ginetta. «E per quello dopo. Finché ci saranno ragazzi con le scarpe slacciate e qualcuno che li guarda dalla banchina.»"] },
+  ];
+  const totalPlays = () => PROG.played + (X.meta.spPlayed | 0);
+  const SEA_END = [
+    "Campionessa del Molo! Ginetta ti consegna il secchio, tu lo alzi, lui suona un do. Arturo: «È il rumore dell'estate».",
+    "Secondo posto: argento, che a Genova dicono sia la parte che si lucida meglio. La prossima stagione è lì che aspetta.",
+    "Terzo posto. Sul podio, in piedi dietro due che si abbracciano. Si vede tutto, da dietro.",
+    "A metà classifica. Il Molo non ti fischia: ti offre il fritto. Il che, a ben vedere, è più grave.",
+    "Penultimo, ma con stile. Zia Pina dice che la sconfitta con garbo è la vittoria dei signori.",
+    "Ultimo in classifica, primo in simpatia. Arturo ti dedica la sigla di chiusura, che dura quattro secondi.",
+  ];
+  const CUP_END = {
+    win: "Il nome entra nella targa. Il chiodo, il martello, tre colpi. Il Molo, per una volta, tace e ascolta la latta suonare.",
+    lose: "Eliminato. Ginetta ti passa un cartoccio: «Si cade dal tabellone e si atterra nel fritto. Succede ai migliori».",
+  };
+
+  // sfide giornaliere
+  const DPOOL = [
+    { id: "win", t: "Vinci una partita (torneo, libera, campionato o coppa)", chk: (r) => r.team && r.win },
+    { id: "clean", t: "Vinci senza subire gol", chk: (r) => r.team && r.win && r.c === 0 },
+    { id: "intesa", t: "Metti a segno 2 Intese Leo-Nico in una partita", chk: (r) => r.team && r.st.intesa >= 2 },
+    { id: "rond", t: "Segna con il Tiro della Rondine", chk: (r) => r.team && r.st.rond >= 1 },
+    { id: "curve", t: "Segna un gol con la curva (aftertouch)", chk: (r) => r.team && r.st.curve >= 1 },
+    { id: "g3", t: "Segna almeno 3 gol in una partita", chk: (r) => r.team && r.a >= 3 },
+    { id: "steals", t: "Recupera 6 palloni in una partita", chk: (r) => r.team && r.st.steals >= 6 },
+    { id: "sp3", t: "Segna 3 calci piazzati in una sessione", chk: (r) => r.mode === "setp" && r.goals >= 3 },
+    { id: "pensave", t: "Para un rigore nei Rigori", chk: (r) => r.mode === "pens" && r.saved >= 1 },
+    { id: "surv3", t: "Raggiungi l'ondata 3 in Sopravvivenza", chk: (r) => r.mode === "surv" && r.level >= 3 },
+    { id: "timed4", t: "Segna 4 gol nella Sfida a tempo", chk: (r) => r.mode === "timed" && r.a >= 4 },
+  ];
+
   // ---------------------------------------------------------------- salvataggi
   function lsGet(key, def) {
     try {
@@ -92,6 +251,45 @@
   let SET = loadSet();
   const saveProg = () => lsSet(KEY_PROG, PROG);
   const saveSet = () => lsSet(KEY_SET, SET);
+
+  // ---- stato esteso: una chiave per area, tutte nuove (ali-di-rondine.action-hd-*)
+  const K = (n) => "ali-di-rondine.action-hd-" + n;
+  const XKEYS = ["prefs", "meta", "best", "season", "cup", "daily", "team", "look"];
+  const defX = () => ({
+    prefs: { f: 0, p: 1, free: { opp: 0, len: 1, gold: 1 }, train: 1 },
+    meta: { shells: 0, shellsTotal: 0, coin: {}, seen: [], seasonsDone: 0, seasonTitles: 0, seasonMd: 0, cupsPlayed: 0, cupsWon: 0, spPlayed: 0, maxStreak: 0 },
+    best: { surv: 0, timed: 0, setp: 0, pens: 0 },
+    season: null, cup: null,
+    daily: { day: "", ids: [], done: [], streak: 0, last: "" },
+    team: { gk: "sandro", def: ["chicco", "bj"] },
+    look: { kit: "blu", pat: "classic", ball: "bianco", pitch: "giorno", own: [] },
+  });
+  function loadX() {
+    const d = defX();
+    XKEYS.forEach((k) => {
+      const o = lsGet(K(k), null);
+      if (!o) return;
+      if (d[k] && typeof d[k] === "object" && !Array.isArray(d[k])) {
+        Object.keys(o).forEach((f) => { if (f in d[k] && o[f] !== null && o[f] !== undefined) d[k][f] = (typeof d[k][f] === "object" && !Array.isArray(d[k][f]) && typeof o[f] === "object") ? Object.assign(d[k][f], o[f]) : o[f]; });
+      } else d[k] = o;
+    });
+    return d;
+  }
+  let X = loadX();
+  const saveX = (k) => lsSet(K(k), X[k]);
+  const dayKey = () => {
+    if (DEBUG && window.__ahdDay) return window.__ahdDay;
+    const d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  };
+  const hashStr = (s) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  function addShells(n) { if (n <= 0) return; X.meta.shells += n; X.meta.shellsTotal += n; saveX("meta"); }
+  function coinOnce(key, n) { // monete solo alla prima volta, solo tramite window.addCoins
+    if (X.meta.coin[key]) return 0;
+    X.meta.coin[key] = 1; saveX("meta");
+    if (typeof window.addCoins === "function") { try { window.addCoins(n); } catch (e) { return 0; } return n; }
+    return 0;
+  }
 
   // ---------------------------------------------------------------- stato modulo
   let root = null, cv = null, cx = null, ui = null, stage = null;
@@ -190,6 +388,38 @@
 .ahd-quote{border-left:3px solid #38bdf8;padding:4px 10px;margin:10px 0;color:#e2e8f0;font-style:italic}
 .ahd-stat{display:flex;justify-content:space-between;font-size:13px;color:#cbd5e1;border-bottom:1px solid #1e3350;padding:5px 0}
 .ahd-dots{text-align:center;margin:10px 0;color:#475569;font-size:22px}.ahd-dots b{color:#38bdf8}
+.ahd-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0}
+.ahd-tile{min-height:62px;padding:8px 10px;border-radius:14px;border:1px solid #29456c;background:#0f1f36;color:#fff;text-align:left;font:inherit;cursor:pointer;touch-action:manipulation;display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:0}
+.ahd-tile:active{background:#17304f}
+.ahd-tile b{font-size:14px;line-height:1.15}
+.ahd-tile span{font-size:11px;color:#9bb4d6;line-height:1.25}
+.ahd-tile.on{border-color:#7dd3fc;background:#0c3b63}
+.ahd-tile.hot{border-color:#fde047}
+.ahd-tile[disabled]{opacity:.45;cursor:default}
+.ahd-tile .ahd-crest{width:30px;height:30px;border-radius:50%;border:3px solid;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:10px;margin-bottom:3px}
+.ahd-row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ahd-row2 .ahd-btn{margin:4px 0;font-size:14px;padding:0 6px}
+.ahd-tbl{width:100%;border-collapse:collapse;font-size:13px;color:#cbd5e1}
+.ahd-tbl th{font-size:11px;color:#94a3b8;font-weight:700}
+.ahd-tbl td,.ahd-tbl th{padding:6px 3px;text-align:center;border-bottom:1px solid #1e3350}
+.ahd-tbl td:nth-child(2),.ahd-tbl th:nth-child(2){text-align:left}
+.ahd-tbl tr.me{background:#0c3b63;color:#fff;font-weight:800}
+.ahd-brk{display:flex;gap:6px;align-items:stretch;margin:8px 0}
+.ahd-brk>div{flex:1;display:flex;flex-direction:column;justify-content:space-around;gap:6px;min-width:0}
+.ahd-brk h4{margin:0 0 2px;font-size:10px;letter-spacing:1px;color:#94a3b8;text-transform:uppercase;text-align:center}
+.ahd-mt{border:1px solid #29456c;border-radius:10px;background:#0f1f36;font-size:12px;overflow:hidden}
+.ahd-mt.me{border-color:#fde047}
+.ahd-mt div{display:flex;justify-content:space-between;padding:4px 6px;gap:4px}
+.ahd-mt div.w{font-weight:800;color:#fff}.ahd-mt div.l{color:#64748b}
+.ahd-mt i{font-style:normal;color:#7dd3fc}
+.ahd-chip{display:inline-block;padding:2px 8px;border-radius:999px;background:#13304f;border:1px solid #2b4f7a;font-size:12px;color:#bae6fd;margin:0 4px 4px 0}
+.ahd-sw{display:inline-block;width:16px;height:16px;border-radius:50%;border:2px solid #fff;vertical-align:middle;margin-right:6px}
+.ahd-new{border:1px solid #fde047;border-radius:12px;padding:8px 10px;margin:10px 0;background:rgba(253,224,71,.08);font-size:13px;color:#fef9c3}
+.ahd-chap p{font-size:14px;line-height:1.5}
+.ahd-chap .ahd-tone{display:inline-block;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#fde047;border:1px solid #a16207;border-radius:6px;padding:1px 6px}
+.ahd-lock{color:#64748b}
+.ahd-done{color:#86efac;font-weight:800}
+.ahd-warn{color:#fca5a5}
 `;
     document.head.appendChild(st);
   }
@@ -303,22 +533,59 @@
       g.beginPath(); g.moveTo(x0, GT); g.lineTo(x1, GT); g.lineTo(x1, GB); g.lineTo(x0, GB); g.stroke();
       g.fillStyle = "#fff"; g.beginPath(); g.arc(x0, GT, 5, 0, 7); g.arc(x0, GB, 5, 0, 7); g.fill();
     });
+    // ---- luce del campo (personalizzazione)
+    const pit = X.look.pitch;
+    if (pit === "tramonto" || pit === "notte") {
+      g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
+      g.globalCompositeOperation = "source-atop";
+      g.fillStyle = pit === "tramonto" ? "rgba(255,120,40,.2)" : "rgba(8,18,70,.5)";
+      g.fillRect(0, 0, bw, bh);
+      g.restore();
+      if (pit === "notte") {
+        // lucine del Molo accese lungo la banchina e coni di luce sul prato
+        g.save();
+        for (let x = -MX; x < bw - MX; x += 28) { g.fillStyle = "rgba(253,230,138,.9)"; g.beginPath(); g.arc(x, -26 + Math.sin(x * 0.05) * 4, 3.4, 0, 7); g.fill(); }
+        [[W * 0.2, 40], [W * 0.5, 40], [W * 0.8, 40], [W * 0.2, H - 40], [W * 0.5, H - 40], [W * 0.8, H - 40]].forEach(([x, y]) => {
+          const rg = g.createRadialGradient(x, y, 4, x, y, 230);
+          rg.addColorStop(0, "rgba(255,244,190,.22)"); rg.addColorStop(1, "rgba(255,244,190,0)");
+          g.fillStyle = rg; g.fillRect(x - 230, y - 230, 460, 460);
+        });
+        g.restore();
+      }
+    }
     return c;
   }
 
   // ---------------------------------------------------------------- creazione partita
+  const mateById = (id) => MATES.find((m) => m.id === id);
+  const mateOpen = (m) => !m.req || !!m.req();
+  function homeRoster() { // portiere, 2 difensori scelti tra i compagni sbloccati; Leo e Nico fissi
+    const t = X.team;
+    let gk = mateById(t.gk); if (!gk || gk.slot !== 0 || !mateOpen(gk)) gk = mateById("sandro");
+    const df = (t.def || []).map(mateById).filter((m) => m && m.slot === 1 && mateOpen(m));
+    const out = [];
+    df.forEach((m) => { if (!out.includes(m) && out.length < 2) out.push(m); });
+    ["chicco", "bj"].forEach((id) => { const m = mateById(id); if (out.length < 2 && !out.includes(m)) out.push(m); });
+    return [gk, out[0], out[1], { name: "Leo", mods: {} }, { name: "Nico", mods: {} }];
+  }
+  const hexRgb = (h) => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+  const colDist = (a, b) => { const x = hexRgb(a), y = hexRgb(b); return Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]); };
+  const kitOf = () => KITS.find((k) => k.id === X.look.kit) || KITS[0];
   function mkTeam(team, opp) {
     const arr = [];
+    const ros = team === 0 ? homeRoster() : null, hk = kitOf();
     for (let i = 0; i < 5; i++) {
       const ro = ROLES[i];
+      const md = ros ? ros[i].mods || {} : {};
       const p = {
         team, i, role: ro.r, isGK: i === 0,
-        name: team === 0 ? HOME_NAMES[i] : opp.names[i],
+        name: team === 0 ? ros[i].name : opp.names[i],
         bu: ro.u, bv: ro.v,
         x: xOfU(team, ro.u), y: yOfV(ro.v), vx: 0, vy: 0, face: team === 0 ? 0 : Math.PI,
-        spd: ro.spd * (team === 0 ? (i === 3 ? 1.02 : i === 4 ? 1.04 : 1) : 1),
-        kit: team === 0 ? "#1d4ed8" : opp.kit, kit2: team === 0 ? "#7dd3fc" : opp.kit2,
-        stun: 0, cd: 0, think: 0, lunge: 0, lungeCd: 0, ph: Math.random() * 6, hold: 0, dribT: null, err: 0, tkMul: 1,
+        spd: ro.spd * (team === 0 ? (i === 3 ? 1.02 : i === 4 ? 1.04 : 1) * (md.spd || 1) : 1),
+        kit: team === 0 ? hk.k : opp.kit, kit2: team === 0 ? hk.k2 : opp.kit2, pat: team === 0 ? X.look.pat : "classic",
+        stun: 0, cd: 0, think: 0, lunge: 0, lungeCd: 0, ph: Math.random() * 6, hold: 0, dribT: null, err: 0, tkMul: md.tkl || 1, reachMul: md.reach || 1,
+        frozen: false, userKeeper: false, dive: 0,
       };
       if (i === 0) { p.kit = team === 0 ? "#f59e0b" : opp.gk; p.kit2 = "#111827"; }
       arr.push(p);
@@ -326,26 +593,34 @@
     return arr;
   }
 
-  function newMatch(mi, diffIdx) {
-    const opp = OPPS[mi < 0 ? 0 : mi];
+  function newMatch(mi, diffIdx, o) {
+    o = o || {};
+    let opp = o.opp || OPPS[mi < 0 ? 0 : mi];
+    const hk = kitOf();
+    if (colDist(hk.k, opp.kit) < 90) opp = Object.assign({}, opp, { kit: opp.kit2, kit2: opp.kit }); // niente maglie uguali
+    if (o.opass) opp = Object.assign({}, opp, { shoot: 40, press: o.opass === 2 ? 0 : 70, tkl: 0.4 });
+    const len = o.len === undefined ? MATCH_SECS : o.len;
     M = {
-      mi, opp, D: DIFFS[diffIdx], diffIdx,
+      mi, opp, D: Object.assign({}, DIFFS[diffIdx]), diffIdx, mode: o.mode || "torneo", len, halfT: o.noHalf ? 0 : len / 2, noGolden: !!o.noGolden,
       state: "kickoff", timer: 90, score: [0, 0], t: 0, golden: false, halfDone: false,
       tm: [mkTeam(0, opp), mkTeam(1, opp)], pl: [],
-      ball: { x: W / 2, y: GM, vx: 0, vy: 0, z: 0, vz: 0, owner: null, lastTeam: 0, lastP: null, passTo: null, at: 0, atTeam: 0, fire: 0, curl: 0, rot: 0, hot: 0, trail: [] },
+      ball: { x: W / 2, y: GM, vx: 0, vy: 0, z: 0, vz: 0, owner: null, lastTeam: 0, lastP: null, passTo: null, at: 0, atTeam: 0, fire: 0, curl: 0, rot: 0, hot: 0, trail: [], curved: false },
       ctl: null, ctlLock: 0, kickTeam: 0, chase: [[], []],
       grinta: 0, stam: 1, stamLock: false,
       lastPass: null, intesa: 0,
       parts: [], shake: 0, flash: 0,
       shots: [0, 0], saves: [0, 0], goalsLog: [],
+      st: { intesa: 0, rond: 0, curve: 0, steals: 0 },
+      lives: 3, level: 1, sp: null, so: null, setp: null,
       msg: "", msgT: 0, banner: 0, hintShot: false, hintCurve: 0,
       label: "", rep: null, frames: new Float32Array(150 * 44), fi: 0, fcount: 0, goalPhase: 0, goalTimer: 0, lastScorer: null,
       camX: W / 2, camY: H / 2, ended: false, tick: 0,
     };
     M.pl = M.tm[0].concat(M.tm[1]);
     M.ctl = M.tm[0][3];
-    M.tm[1].forEach((p) => { p.spd *= M.D.spd * opp.spd; p.tkMul = opp.tkl; });
+    M.tm[1].forEach((p) => { p.spd *= M.D.spd * opp.spd; p.tkMul = opp.tkl; if (o.opass === 2 && !p.isGK) p.frozen = true; if (o.opass === 1) p.spd *= 0.5; });
     M.tm[0].forEach((p) => { p.spd *= M.D.usr; });
+    if (o.mode === "train") M.grinta = 100;
     setupKickoff(0);
     return M;
   }
@@ -397,7 +672,7 @@
     b.owner = null; b.x = p.x + Math.cos(a) * 13; b.y = p.y + Math.sin(a) * 13;
     b.vx = Math.cos(a) * v0; b.vy = Math.sin(a) * v0; b.vz = vz; if (vz > 0) b.z = Math.max(b.z, 0.5);
     b.lastTeam = p.team; b.lastP = p; b.passTo = opts.to || null;
-    b.at = opts.at || 0; b.atTeam = p.team; b.fire = opts.fire || 0; b.curl = opts.curl || 0; b.hot = opts.hot || 0;
+    b.at = opts.at || 0; b.atTeam = p.team; b.fire = opts.fire || 0; b.curl = opts.curl || 0; b.hot = opts.hot || 0; b.curved = false;
     p.cd = 26; p.face = a;
     b.trail.length = 0;
     snd("playKick", opts.snd || 1);
@@ -434,7 +709,9 @@
     const gx = goalXOf(p.team);
     const gk = M.tm[1 - p.team][0];
     let ay;
-    if (p.team === 0 && (Math.abs(input.jx) + Math.abs(input.jy) > 0.25 || Math.abs(input.kx) + Math.abs(input.ky) > 0.1)) {
+    if (p.team === 0 && M.sp && M.sp.lock && SET.ctrl === "touch" && input.touchOn) {
+      ay = clamp(input.ty, GT + 10, GB - 10);
+    } else if (p.team === 0 && (Math.abs(input.jx) + Math.abs(input.jy) > 0.25 || Math.abs(input.kx) + Math.abs(input.ky) > 0.1)) {
       const jy = input.jy + input.ky;
       ay = GM + clamp(jy * 1.3, -1, 1) * (GH / 2 - 9);
     } else {
@@ -453,6 +730,7 @@
     const noise = intesa ? 0 : 3 + charge * 14;
     const tgt = aimShot(p, charge, noise);
     let v0 = 10.5 + 9.5 * charge, lift = 0.5 + 3.4 * charge * charge + rnd(-0.2, 0.3);
+    if (M.sp && M.sp.kind === "fk") lift = 2 + 4.4 * charge; // la punizione si alza per scavalcare la barriera
     if (intesa) { v0 *= 1.1; M.intesa++; addGrinta(22); say("INTESA LEO-NICO!", 1700); spark(p.x, p.y, 22, "#7dd3fc", 4); M.flash = 8; snd("playEmblemCrit"); }
     if (rondine) {
       v0 = 21.5; lift = 2.2; M.grinta = 0;
@@ -535,12 +813,13 @@
   function formationTarget(p, hasPoss) {
     const b = M.ball, t = p.team;
     const bu = uOf(t, b.x), bv = (b.y - YT) / (YB - YT);
-    const line = t === 1 ? M.opp.line : 0;
-    let u = p.bu + (bu - 0.5) * 0.36 + (hasPoss ? 0.17 : -0.06) + line * (hasPoss ? 0 : 1);
+    const line = t === 1 ? M.opp.line : ((X.prefs.p | 0) - 1) * 0.05;
+    const fs = t === 0 ? (X.prefs.f === 1 ? 0.08 : X.prefs.f === 2 ? -0.08 : 0) : 0;
+    let u = fs + p.bu + (bu - 0.5) * 0.36 + (hasPoss ? 0.17 : -0.06) + line * (hasPoss ? 0 : 1);
     let v = p.bv + (bv - 0.5) * 0.4;
     if (hasPoss && p.role === "FWD") v = clamp(bv + (p.bv - 0.5) * 0.9 + Math.sin(M.tick * 0.02 + p.i) * 0.2, 0.12, 0.88);
     if (hasPoss && p.role === "MID") v = clamp(bv + (bv < 0.5 ? 0.22 : -0.22), 0.15, 0.85);
-    const lim = p.role === "DEF" ? [0.1, 0.56] : p.role === "MID" ? [0.22, 0.8] : [0.36, 0.93];
+    const lim = (p.role === "DEF" ? [0.1, 0.56] : p.role === "MID" ? [0.22, 0.8] : [0.36, 0.93]).map((v) => v + fs * 0.75);
     u = clamp(u, lim[0], lim[1]);
     v = clamp(v, 0.08, 0.92);
     return { x: xOfU(t, u), y: yOfV(v) };
@@ -550,6 +829,7 @@
     const b = M.ball, D = M.D;
     if (p.stun > 0) { integrate(p); return; }
     if (p.isGK) { gkUpdate(p); integrate(p); return; }
+    if (p.frozen) { p.vx *= 0.8; p.vy *= 0.8; integrate(p); return; }
     if (b.owner === p) { aiCarrier(p); integrate(p); return; }
     if (b.passTo === p && !b.owner) {
       const q = predictBall(Math.min(26, dist(p.x, p.y, b.x, b.y) / 6));
@@ -557,7 +837,7 @@
     }
     const ownerTeam = b.owner ? b.owner.team : -1;
     const ch = M.chase[p.team];
-    const press = p.team === 1 ? M.opp.press : 220;
+    const press = p.team === 1 ? M.opp.press : [150, 220, 300][X.prefs.p | 0] || 220;
     if (ownerTeam !== p.team) {
       const ref = b.owner ? b.owner : predictBall(8);
       const dRef = dist(p.x, p.y, ref.x, ref.y);
@@ -621,7 +901,7 @@
     const b = M.ball, D = M.D, t = g.team;
     const dIn = dirOf(t);
     const gx = ownX(t);
-    const reach = (t === 1 ? D.reach : 36) * (b.fire ? 0.62 : 1);
+    const reach = (t === 1 ? D.reach : 36) * (b.fire ? 0.62 : 1) * (g.reachMul || 1) * (g.dive > 0 ? 1.4 : 1);
     const gks = t === 1 ? D.gk : 3.4;
     if (b.owner === g) {
       g.hold--; g.vx *= 0.8; g.vy *= 0.8;
@@ -635,10 +915,17 @@
       }
       return;
     }
+    if (g.userKeeper) { // portiere guidato dal giocatore (rigori subiti)
+      let jy = clamp(input.jy + input.ky, -1, 1);
+      if (SET.ctrl === "touch" && input.touchOn) jy = clamp((input.ty - g.y) / 30, -1, 1);
+      if (g.dive > 0) { g.dive--; g.vy = g.diveDir * 9.5; } else g.vy += (jy * 4.4 - g.vy) * 0.4;
+      g.vx += (gx + dIn * 22 - g.x) * 0.2 - g.vx * 0.5;
+      g.y = clamp(g.y, GT - 34, GB + 34);
+    }
     const toward = b.vx * -dIn > 1.5;
     let ty = GM + (b.y - GM) * 0.32, tx = gx + dIn * 22;
     let sp = gks;
-    if (toward) {
+    if (g.userKeeper) { /* movimento già gestito */ } else if (toward) {
       const distX = Math.abs(b.x - gx);
       const tt = distX / Math.max(Math.abs(b.vx), 1);
       if (distX < 640) {
@@ -651,7 +938,7 @@
     }
     ty = clamp(ty, GT - 20, GB + 20);
     const dx = tx - g.x, dy = ty - g.y, d = Math.hypot(dx, dy);
-    if (d > 1) { g.vx += (dx / d * Math.min(sp, d * 0.4) - g.vx) * 0.35; g.vy += (dy / d * Math.min(sp, d * 0.4) - g.vy) * 0.35; }
+    if (!g.userKeeper && d > 1) { g.vx += (dx / d * Math.min(sp, d * 0.4) - g.vx) * 0.35; g.vy += (dy / d * Math.min(sp, d * 0.4) - g.vy) * 0.35; }
     g.x = clamp(g.x, XL - 2, XL + BOX_D - 10); if (t === 1) g.x = clamp(g.x, XR - BOX_D + 10, XR + 2);
     // parata
     if (!b.owner && b.z < 40 && M.state === "play") {
@@ -669,6 +956,8 @@
         g.cd = 20;
         snd("playBounce"); spark(b.x, b.y, 10, "#fde68a", 3);
         if (t === 0) addGrinta(6);
+        if (M.sp) spEnd("save");
+        else if (Math.random() < 0.5) say(quip("save"), 1700);
       }
     }
   }
@@ -677,6 +966,9 @@
   function userUpdate(p) {
     const b = M.ball, D = M.D;
     if (p.stun > 0) { integrate(p); return; }
+    if (M.sp && M.sp.lock && b.owner === p) { // calcio piazzato: il battitore è fermo, mira con lo stick
+      p.vx = p.vy = 0; p.face = Math.atan2(GM - p.y, XR - p.x); return;
+    }
     let jx = input.jx + input.kx, jy = input.jy + input.ky, mag = Math.hypot(jx, jy);
     if (input.touchOn && SET.ctrl === "touch") {
       const dx = input.tx - p.x, dy = input.ty - p.y, d = Math.hypot(dx, dy);
@@ -702,6 +994,14 @@
 
   function userActions() {
     const p = M.ctl, b = M.ball;
+    if (M.sp && M.sp.def) { // portiere dei rigori: tuffo con PASSA o TIRO
+      if ((input.passEdge || input.shootRel) && p && p.dive <= 0 && M.state === "play") {
+        const jy = input.jy + input.ky;
+        p.diveDir = Math.abs(jy) > 0.2 ? Math.sign(jy) : (b.y < p.y ? -1 : 1); p.dive = 11; snd("playTackle");
+      }
+      input.passEdge = false; input.shootRel = false; input.rond = false; input.charging = false;
+      return;
+    }
     if (!p || M.state !== "play") { input.passEdge = false; input.shootRel = false; input.rond = false; if (M.state !== "kickoff") { return; } }
     // calcio d'inizio: qualunque azione
     const near = dist(p.x, p.y, b.x, b.y) < 34 && b.z < 28;
@@ -746,7 +1046,7 @@
     b.owner = q; b.passTo = null; b.at = 0; b.lastTeam = q.team; b.lastP = q;
     o.stun = 18; o.cd = 40; q.cd = 14;
     snd("playTackle"); spark(o.x, o.y, 8, "#e2d5a8", 2.5);
-    if (q.team === 0) { addGrinta(7); say("Palla recuperata!", 800); M.ctl = q; M.ctlLock = 10; }
+    if (q.team === 0) { addGrinta(7); say("Palla recuperata!", 800); M.ctl = q; M.ctlLock = 10; M.st.steals++; }
     else { setLabel("Palla persa"); }
   }
 
@@ -765,7 +1065,7 @@
         if (q.isGK || q.cd > 0 || q.stun > 0 || q === M.ctl) return;
         const d = dist(q.x, q.y, o.x, o.y);
         if (d < 20) {
-          const base = q.team === 1 ? M.D.tkl * q.tkMul : 0.035;
+          const base = q.team === 1 ? M.D.tkl * q.tkMul : 0.035 * q.tkMul;
           const sh = o === M.ctl && input.sprint && !M.stamLock ? 0.7 : 1;
           if (Math.random() < base * sh) steal(q, o); else if (Math.random() < 0.02) q.cd = 12;
         }
@@ -784,7 +1084,7 @@
         const cross = (b.vx * jy - b.vy * jx) / sp;
         const g = b.fire ? 0.034 : 0.026;
         ang += clamp(cross, -1, 1) * g;
-        if (Math.abs(cross) > 0.3) b.userCurved = 8;
+        if (Math.abs(cross) > 0.3) { b.userCurved = 8; b.curved = true; }
       }
       if (ang) { const c = Math.cos(ang), s = Math.sin(ang); const nx = b.vx * c - b.vy * s, ny = b.vx * s + b.vy * c; b.vx = nx; b.vy = ny; }
     }
@@ -842,6 +1142,7 @@
   }
   function outSide() {
     const b = M.ball;
+    if (M.sp) { spOut(); return; }
     const team = 1 - b.lastTeam;
     const x = clamp(b.x, XL + 30, XR - 30), y = b.y < YT ? YT + 2 : YB - 2;
     const tk = nearest(team, x, y, true);
@@ -849,6 +1150,7 @@
   }
   function outEnd(defTeam) {
     const b = M.ball;
+    if (M.sp) { spOut(); return; }
     if (b.lastTeam === defTeam) {
       // calcio d'angolo per l'attacco
       const att = 1 - defTeam;
@@ -880,6 +1182,9 @@
       const d = dist(p.x, p.y, b.x, b.y);
       if (d < R && d < bd) { bd = d; best = p; }
     });
+    if (best && M.sp) {
+      if (M.sp.def ? best.team === 0 : best.team === 1) { b.owner = best; b.vx = b.vy = 0; spEnd(best.isGK ? "save" : "block"); return; }
+    }
     if (best) {
       const prev = b.lastTeam;
       b.owner = best; b.passTo = null; b.at = 0; b.fire = 0; b.lastTeam = best.team; b.lastP = best;
@@ -891,7 +1196,9 @@
   // ---------------------------------------------------------------- gol
   function goalScored(team) {
     const b = M.ball;
+    if (M.sp) { spGoal(team); return; }
     M.score[team]++;
+    if (team === 0) { if (b.fire) M.st.rond++; if (b.curved) M.st.curve++; }
     M.state = "goal"; M.goalPhase = 0; M.goalTimer = 0;
     const scorer = b.lastTeam === team ? b.lastP : null;
     M.lastScorer = scorer; M.goalTeam = team;
@@ -909,13 +1216,16 @@
       addGrinta(12);
     }
     if (team === 0) PROG.goals++;
+    let lv = false;
+    if (M.mode === "surv") { if (team === 1) M.lives--; else if (M.score[0] % 2 === 0) { survLevelUp(); lv = true; } }
+    if (!lv && M.mode !== "train" && Math.random() < 0.65) later(() => { if (M && !closed && uiState === "play") say(quip(team === 0 ? "goalFor" : "goalAg"), 2300); }, 700);
     b.owner = null; b.at = 0; b.fire = 0;
     b.vx *= 0.35; b.vy *= 0.2; b.passTo = null;
     // pool snapshot per replay
     M.repFrames = Math.min(M.fcount, 120);
     M.repEnd = M.fi;
   }
-  function clockMin() { const f = M.golden ? 90 + Math.floor((M.t - MATCH_SECS) / GOLDEN_SECS * 6) : Math.floor(M.t / MATCH_SECS * 90); return Math.max(1, f); }
+  function clockMin() { const L = M.len || MATCH_SECS; const f = M.golden ? 90 + Math.floor((M.t - L) / GOLDEN_SECS * 6) : Math.floor(M.t / L * 90); return Math.max(1, f); }
 
   function banner(h, p, bad, ms) {
     const el = stage.querySelector(".ahd-banner");
@@ -948,6 +1258,7 @@
 
     const st = M.state;
     if (st === "full" || st === "half") return;
+    if (M.sp) { stepSP(); return; }
 
     if (st === "kickoff") {
       M.timer--;
@@ -970,17 +1281,18 @@
 
     // ---- play
     M.t += STEP * (DEBUG && window.__ahdTS ? window.__ahdTS : 1);
-    if (!M.halfDone && M.t >= HALF_SECS && !M.golden) {
+    if (M.mode === "train" && M.grinta < 100) M.grinta = Math.min(100, M.grinta + 0.3);
+    if (M.halfT && !M.halfDone && M.t >= M.halfT && !M.golden) {
       M.halfDone = true; M.state = "half"; banner("INTERVALLO", `${M.score[0]} - ${M.score[1]}`, false, 1800);
-      snd("playWhistle", true);
+      snd("playWhistle", true); say(quip("half"), 1800);
       later(() => { if (closed || !M) return; setupKickoff(1); }, 1900);
       return;
     }
-    if (M.t >= MATCH_SECS && !M.golden) {
-      if (M.score[0] === M.score[1]) { M.golden = true; banner("SUPPLEMENTARI", "Gol d'oro: il prossimo vince!", false, 1900); snd("playWhistle", true); }
+    if (M.len && M.t >= M.len && !M.golden) {
+      if (M.score[0] === M.score[1] && !M.noGolden) { M.golden = true; banner("SUPPLEMENTARI", "Gol d'oro: il prossimo vince!", false, 1900); snd("playWhistle", true); }
       else { endMatch(); return; }
     }
-    if (M.golden && M.t >= MATCH_SECS + GOLDEN_SECS) { endMatch(); return; }
+    if (M.golden && M.t >= M.len + GOLDEN_SECS) { endMatch(); return; }
 
     chooseControl();
     computeChasers();
@@ -1041,6 +1353,7 @@
   }
   function afterGoal() {
     if (M.golden) { endMatch(); return; }
+    if (M.mode === "surv" && M.lives <= 0) { endMatch(); return; }
     const el = stage.querySelector(".ahd-banner"); if (el) el.style.display = "none";
     setupKickoff(1 - M.goalTeam);
   }
@@ -1053,6 +1366,149 @@
     const [a, c] = M.score;
     banner("FISCHIO FINALE", `${a} - ${c}`, false, 2200);
     later(() => { if (!closed) showResult(); }, 1700);
+  }
+
+  // ---------------------------------------------------------------- sopravvivenza: ondate
+  function survLevelUp() {
+    M.level++;
+    const o = ALLT[(M.level - 1) % ALLT.length];
+    M.opp = o;
+    M.D.react = Math.max(5, M.D.react - 1.5); M.D.noise = Math.max(14, M.D.noise - 4); M.D.tkl *= 1.05; M.D.gk += 0.1;
+    M.tm[1].forEach((p, i) => { p.name = o.names[i]; p.kit = i === 0 ? o.gk : o.kit; p.kit2 = i === 0 ? "#111827" : o.kit2; p.spd *= 1.025; p.tkMul = o.tkl; });
+    say("🎙 Ondata " + M.level + ": arrivano " + o.name + "!", 2600);
+  }
+
+  // ---------------------------------------------------------------- calci piazzati e rigori
+  const SP_NAMES = { pen: "Rigore", pend: "Rigore da parare", fk: "Punizione", cor: "Calcio d'angolo" };
+  const SP_LIM = { pen: 150, pend: 150, fk: 420, cor: 560 };
+  const SP_HINT = {
+    pen: "Rigore: stick su/giù per scegliere l'angolo, tieni TIRO e rilascia",
+    pend: "Para! Stick su/giù per muoverti, PASSA o TIRO per il tuffo",
+    fk: "Punizione: carica a metà per scavalcare la barriera, poi curva con lo stick",
+    cor: "Angolo: PASSA a Nico per l'Intesa, oppure crossa con TIRO",
+  };
+  function spSetup(kind) {
+    const b = M.ball, T = M.tm[0], O = M.tm[1], sp = M.sp;
+    M.pl.forEach((p) => { p.vx = p.vy = 0; p.stun = 0; p.cd = 0; p.lunge = 0; p.hold = 0; p.think = 0; p.frozen = false; p.userKeeper = false; p.dive = 0; p.err = 0; p.errT = null; });
+    Object.assign(sp, { kind, t: 0, rel: 0, rt: 0, done: false, res: null, def: false, lock: false, wait: 0, lim: SP_LIM[kind], taker: null, label: SP_NAMES[kind] });
+    b.owner = null; b.vx = b.vy = 0; b.z = 0; b.vz = 0; b.at = 0; b.fire = 0; b.passTo = null; b.curl = 0; b.trail.length = 0; b.curved = false;
+    input.charging = false; input.chargeF = 0; input.passEdge = false; input.shootRel = false; input.rond = false;
+    M.parts.length = 0;
+    const side = Math.random() < 0.5 ? -1 : 1;
+    const leo = T[3], nico = T[4], gkU = T[0], gkO = O[0];
+    T.forEach((p) => { p.face = 0; }); O.forEach((p) => { p.face = Math.PI; });
+    gkU.x = XL + 22; gkU.y = GM; gkO.x = XR - 22; gkO.y = GM;
+    T.forEach((p, i) => { if (!p.isGK) { p.x = xOfU(0, 0.34 + i * 0.015); p.y = yOfV(0.2 + i * 0.16); } });
+    O.forEach((p, i) => { if (!p.isGK) { p.x = xOfU(0, 0.5 + i * 0.015); p.y = yOfV(0.18 + i * 0.17); } });
+    const hold = (p, x, y) => { p.x = x; p.y = y; b.x = x + 15 * Math.cos(p.face); b.y = y + 15 * Math.sin(p.face); b.owner = p; b.lastP = p; b.lastTeam = p.team; };
+    const freezeAll = () => M.pl.forEach((p) => { if (!p.isGK) p.frozen = true; });
+    if (kind === "pend") {
+      const k = O[4]; k.face = Math.PI; hold(k, XL + 135, GM);
+      gkU.userKeeper = true; M.ctl = gkU; sp.def = true; sp.taker = k; sp.wait = 50 + Math.floor(Math.random() * 45);
+      freezeAll();
+    } else if (kind === "pen") {
+      leo.face = 0; hold(leo, XR - 135, GM);
+      M.ctl = leo; sp.lock = true; freezeAll();
+    } else if (kind === "fk") {
+      const d = rnd(250, 320), by = GM + side * rnd(70, 190), bx = XR - d;
+      leo.face = Math.atan2(GM - by, XR - bx); hold(leo, bx - 15 * Math.cos(leo.face), by - 15 * Math.sin(leo.face));
+      const ang = leo.face, wx = bx + Math.cos(ang) * 120, wy = by + Math.sin(ang) * 120;
+      [1, 2, 3].forEach((k, j) => { const q = O[k]; q.x = wx - Math.sin(ang) * (j - 1) * 24; q.y = wy + Math.cos(ang) * (j - 1) * 24; });
+      O[4].x = XR - 70; O[4].y = GM - side * 90;
+      nico.x = XR - 140; nico.y = GM - side * 70;
+      M.ctl = leo; sp.lock = true; freezeAll();
+    } else { // cor
+      const cy = side < 0 ? YT + 6 : YB - 6, cx = XR - 6;
+      leo.face = Math.atan2(GM - cy, XR - 120 - cx); hold(leo, cx - 15 * Math.cos(leo.face), cy - 15 * Math.sin(leo.face));
+      nico.x = XR - 105; nico.y = GM - side * 25;
+      O[1].x = XR - 70; O[1].y = GM - 70; O[2].x = XR - 70; O[2].y = GM + 70; O[3].x = XR - 115; O[3].y = GM; O[4].x = XR - 215; O[4].y = GM + side * 30;
+      T[1].x = XR - 260; T[1].y = GM - side * 60; T[2].x = XR - 330; T[2].y = GM + side * 80;
+      M.ctl = leo; sp.lock = true;
+    }
+    M.state = "spready"; M.timer = 50;
+    setLabel(sp.label); say(SP_HINT[kind], 2600);
+    snd("playWhistle", false);
+    M.camX = (b.x + 0) ; M.camY = b.y;
+  }
+  function stepSP() {
+    const sp = M.sp, b = M.ball, st = M.state;
+    if (st === "spready") {
+      M.timer--; M.pl.forEach((p) => { p.vx *= 0.8; p.vy *= 0.8; integrate(p); }); updateBall();
+      if (M.timer <= 0) M.state = "play";
+      return;
+    }
+    if (st === "spwait") {
+      M.timer--; updateBall();
+      if (sp.res === "goal" || sp.res === "conceded") { b.x = clamp(b.x, XL - 32, XR + 32); b.y = clamp(b.y, GT + 4, GB - 4); b.vx *= 0.9; b.vy *= 0.9; }
+      M.pl.forEach((p) => { p.vx *= 0.8; p.vy *= 0.8; integrate(p); });
+      if (M.timer <= 0) { const nx = sp.next; sp.next = null; if (nx) nx(); }
+      return;
+    }
+    if (st !== "play") return;
+    sp.t++;
+    if (sp.def && !sp.rel) { sp.wait--; if (sp.wait <= 0 && b.owner === sp.taker) aiPenaltyShot(); }
+    if (!sp.rel && !b.owner) { sp.rel = 1; sp.rt = 0; }
+    if (sp.rel) { sp.rt++; if (sp.rt > sp.lim) { spEnd("miss"); return; } }
+    if (!sp.def) {
+      if (b.owner && b.owner.team === 0 && !b.owner.isGK) M.ctl = b.owner;
+      else if (b.passTo && b.passTo.team === 0 && !b.owner) M.ctl = b.passTo;
+    }
+    computeChasers();
+    M.pl.forEach((p) => { if (p === M.ctl && !sp.def) userUpdate(p); else updateAI(p); });
+    separate(); updateBall(); userActions(); pickups();
+    if (M.sp && M.sp.def === false && b.owner && b.owner.team === 1 && !M.sp.done) spEnd(b.owner.isGK ? "save" : "block");
+  }
+  function aiPenaltyShot() {
+    const k = M.sp.taker, d = M.diffIdx, side = Math.random() < 0.5 ? -1 : 1;
+    const ay = GM + side * (Math.random() < 0.22 ? rnd(0, 14) : rnd(34, GH / 2 - 8));
+    kickBall(k, XL, ay, [11.5, 13.2, 15][d] + rnd(-0.6, 0.8), 0.45, { snd: 1.1 });
+    M.shots[1]++;
+  }
+  function spGoal(team) {
+    const b = M.ball;
+    M.shake = 10; M.flash = 8; spark(b.x, b.y, 30, team === 0 ? "#7dd3fc" : "#fca5a5", 5);
+    spEnd(team === 0 ? "goal" : "conceded");
+  }
+  function spOut() { const sp = M.sp, b = M.ball; spEnd(b.lastTeam === (sp.def ? 0 : 1) ? "save" : "miss"); }
+  function spEnd(res) {
+    const sp = M.sp; if (!sp || sp.done) return;
+    sp.done = true; sp.res = res; M.state = "spwait"; M.timer = 90; input.charging = false;
+    const good = sp.def ? (res !== "conceded") : res === "goal";
+    const head = { goal: "GOOOL!", conceded: "GOL " + M.opp.tag, save: sp.def ? "PARATO!" : "PARATA!", block: "BARRIERA!", miss: sp.def ? "FUORI!" : "FUORI!" }[res] || "";
+    const sub = { goal: sp.label, conceded: sp.label, save: sp.def ? "Hai indovinato l'angolo" : "Il portiere ci arriva", block: "Troppo bassa: scavalca!", miss: sp.def ? "Ha sbagliato la mira" : "Un'altra volta" }[res] || "";
+    banner(head, sub, !good, 1500);
+    snd(res === "goal" || res === "conceded" ? "playGoal" : "playBounce");
+    if (sp.onEnd) sp.onEnd(res);
+  }
+  function soKick(res) {
+    const S = M.so, turn = M.sp.kind === "pen" ? 0 : 1;
+    const ok = turn === 0 ? res === "goal" : res === "conceded";
+    if (ok) S.sc[turn]++;
+    S.n[turn]++; S.log[turn].push(ok);
+    if (turn === 1 && res === "save") S.saved++;
+    M.sp.next = soNext;
+  }
+  function soNext() {
+    const S = M.so, n = S.n, sc = S.sc;
+    let over;
+    if (n[0] >= 5 && n[1] >= 5) over = n[0] === n[1] && sc[0] !== sc[1];
+    else over = sc[0] > sc[1] + Math.max(0, 5 - n[1]) || sc[1] > sc[0] + Math.max(0, 5 - n[0]);
+    if (n[0] + n[1] >= 30) over = true;
+    if (over) { M.state = "full"; M.ended = true; snd("playWhistle", true); later(() => { if (!closed && M) showResult(); }, 600); return; }
+    M.sp.onEnd = soKick;
+    spSetup(n[0] <= n[1] ? "pen" : "pend");
+  }
+  function setpKick(res) {
+    const S = M.setp;
+    S.log.push({ kind: M.sp.kind, res }); if (res === "goal") S.goals++;
+    M.sp.next = setpNext;
+  }
+  function setpNext() {
+    const S = M.setp;
+    if (S.i >= S.plan.length) { M.state = "full"; M.ended = true; snd("playWhistle", true); later(() => { if (!closed && M) showResult(); }, 500); return; }
+    const kind = S.plan[S.i++];
+    M.sp.onEnd = setpKick;
+    spSetup(kind);
   }
 
   // ---------------------------------------------------------------- render
@@ -1078,8 +1534,16 @@
     // maglia
     const lean = Math.cos(face) * 1.5;
     g.fillStyle = p.kit; g.beginPath(); g.ellipse(x + lean * 0.5, y - 5, 10, 9.5, 0, 0, 7); g.fill();
-    g.strokeStyle = p.kit2; g.lineWidth = 2.4; g.beginPath(); g.ellipse(x + lean * 0.5, y - 5, 10, 9.5, 0, 0.35, 2.8); g.stroke();
-    g.fillStyle = p.kit2; g.fillRect(x - 10 + lean * 0.5, y - 6, 20, 2.6);
+    const pat = p.pat || "classic";
+    if (pat === "classic") {
+      g.strokeStyle = p.kit2; g.lineWidth = 2.4; g.beginPath(); g.ellipse(x + lean * 0.5, y - 5, 10, 9.5, 0, 0.35, 2.8); g.stroke();
+      g.fillStyle = p.kit2; g.fillRect(x - 10 + lean * 0.5, y - 6, 20, 2.6);
+    } else if (pat !== "solid") {
+      g.save(); g.beginPath(); g.ellipse(x + lean * 0.5, y - 5, 10, 9.5, 0, 0, 7); g.clip(); g.fillStyle = p.kit2;
+      if (pat === "stripes") { for (let k = -8; k <= 8; k += 8) g.fillRect(x + lean * 0.5 + k - 2, y - 15, 4, 20); }
+      else { g.fillRect(x - 11, y - 11, 22, 3.4); g.fillRect(x - 11, y - 4, 22, 3.4); }
+      g.restore();
+    }
     // braccia
     g.fillStyle = "#e8b88c"; g.beginPath(); g.arc(x - 10.5 + lean, y - 3 + sw * 0.3, 2.6, 0, 7); g.arc(x + 10.5 + lean, y - 3 - sw * 0.3, 2.6, 0, 7); g.fill();
     // testa
@@ -1162,7 +1626,7 @@
       if (!M.rep) b.trail.forEach((t, i) => { g.fillStyle = b.fire ? `rgba(251,146,60,${0.55 - i * 0.05})` : `rgba(255,255,255,${0.28 - i * 0.025})`; g.beginPath(); g.arc(t.x, t.y - 4 - t.z, 5.5 - i * 0.4, 0, 7); g.fill(); });
       const by = vb.y - 4 - vb.z;
       g.save(); g.translate(vb.x, by); g.rotate(vb.rot);
-      g.fillStyle = b.fire && !M.rep ? "#fde68a" : "#fff"; g.beginPath(); g.arc(0, 0, 6.2, 0, 7); g.fill();
+      g.fillStyle = b.fire && !M.rep ? "#fde68a" : (BALLS.find((q) => q.id === X.look.ball) || BALLS[0]).c; g.beginPath(); g.arc(0, 0, 6.2, 0, 7); g.fill();
       g.fillStyle = "#1f2937"; for (let k = 0; k < 5; k++) { const a = k * 1.2566; g.beginPath(); g.arc(Math.cos(a) * 3.4, Math.sin(a) * 3.4, 1.6, 0, 7); g.fill(); }
       g.beginPath(); g.arc(0, 0, 1.7, 0, 7); g.fill();
       g.restore();
@@ -1232,17 +1696,37 @@
   }
 
   // ---------------------------------------------------------------- HUD DOM
+  const MODE_NAMES = { torneo: "Torneo", free: "Partita libera", surv: "Sopravvivenza", timed: "Sfida a tempo", pens: "Rigori", setp: "Calci piazzati", train: "Allenamento", season: "Campionato", cup: "Coppa", "cup-pens": "Coppa · rigori" };
+  function hudInfo() {
+    const o = M.opp, sc = M.score;
+    let a = sc[0], c = sc[1], sub;
+    const mn = M.state === "full" ? (M.golden ? "90+" : "90") : clockMin();
+    const m = M.mode;
+    if (m === "pens" || m === "cup-pens") {
+      const S = M.so; a = S ? S.sc[0] : 0; c = S ? S.sc[1] : 0;
+      const dots = (arr) => arr.map((r) => (r ? "●" : "✕")).join("") || "-";
+      sub = (m === "cup-pens" ? "Rigori · " : "") + (S ? "Tu " + dots(S.log[0]) + " · " + o.tag + " " + dots(S.log[1]) : "");
+    } else if (m === "setp") {
+      const S = M.setp; a = S ? S.goals : 0; c = 0;
+      sub = "Calci piazzati " + (S ? Math.min(S.i, S.plan.length) + "/" + S.plan.length : "");
+    } else if (m === "surv") sub = "Sopravvivenza · ondata " + M.level + " · vite " + "♥".repeat(Math.max(0, M.lives)) + "♡".repeat(Math.max(0, 3 - M.lives)) + " · " + o.name;
+    else if (m === "timed") sub = "Sfida a tempo · " + Math.max(0, Math.ceil(M.len - M.t)) + "s · " + o.name;
+    else if (m === "train") sub = "Allenamento · " + o.name;
+    else sub = (M.golden ? "Supplementari " : "") + mn + "' · " + o.name + " · " + DIFFS[M.diffIdx].n + (m === "season" ? " · Campionato" : m === "cup" ? " · Coppa" : "");
+    const right = (m === "setp") ? "---" : o.tag;
+    return { a, c, sub, right };
+  }
   function hud() {
     if (!M || !root) return;
     const sc = root.querySelector(".ahd-sc");
     if (!sc) return;
-    const mn = M.state === "full" ? (M.golden ? "90+" : "90") : clockMin();
-    sc.querySelector("b").innerHTML = `<span class="ahd-ta">RON</span> ${M.score[0]} - ${M.score[1]} <span class="ahd-tb">${M.opp.tag}</span>`;
-    sc.querySelector("small").textContent = (M.golden ? "Supplementari " : "") + mn + "' · " + M.opp.name + " · " + DIFFS[M.diffIdx].n;
+    const h = hudInfo();
+    sc.querySelector("b").innerHTML = `<span class="ahd-ta">RON</span> ${h.a} - ${h.c} <span class="ahd-tb">${h.right}</span>`;
+    sc.querySelector("small").textContent = h.sub;
     const gb = root.querySelector(".ahd-bar.g");
     gb.firstElementChild.style.width = M.grinta + "%"; gb.classList.toggle("full", M.grinta >= 100);
     root.querySelector(".ahd-bar.s i").style.width = M.stam * 100 + "%";
-    root.querySelector(".ahd-b.ron").classList.toggle("on", M.grinta >= 100 && M.state === "play");
+    root.querySelector(".ahd-b.ron").classList.toggle("on", M.grinta >= 100 && M.state === "play" && !M.sp);
     const chg = root.querySelector(".ahd-chg");
     chg.style.display = input.charging ? "block" : "none"; chg.firstElementChild.style.width = clamp(input.chargeF / 42, 0, 1) * 100 + "%";
   }
@@ -1345,47 +1829,492 @@
 
   // ---------------------------------------------------------------- schermate
   const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
-  function showUi(html) { ui.innerHTML = `<div class="ahd-card">${html}</div>`; ui.classList.add("on"); ui.scrollTop = 0; }
+  function showUi(html) { ui.innerHTML = `<div class="ahd-card">${html}</div>`; ui.classList.add("on"); ui.scrollTop = 0; bindSegs(); }
   function hideUi() { ui.classList.remove("on"); ui.innerHTML = ""; }
   const stars = (n) => "★".repeat(n) + "☆".repeat(3 - n);
+  let CTX = null; // configurazione dell'ultima partita lanciata (serve a «Rigioca»)
 
+  function segHtml(k, labels, cur, vals) {
+    return `<div class="ahd-seg" data-k="${k}">${labels.map((l, i) => { const v = vals ? vals[i] : i; return `<button data-v="${v}" class="${String(cur) === String(v) ? "on" : ""}">${l}</button>`; }).join("")}</div>`;
+  }
+  const SEGSET = {
+    ctrl: (v) => { SET.ctrl = v === "touch" ? "touch" : "stick"; saveSet(); },
+    diff: (v) => { SET.diff = +v; saveSet(); },
+    sound: (v) => { SET.sound = +v; saveSet(); },
+    tf: (v) => { X.prefs.f = +v; saveX("prefs"); },
+    tp: (v) => { X.prefs.p = +v; saveX("prefs"); },
+    flen: (v) => { X.prefs.free.len = +v; saveX("prefs"); },
+    fgold: (v) => { X.prefs.free.gold = +v; saveX("prefs"); },
+    train: (v) => { X.prefs.train = +v; saveX("prefs"); },
+  };
+  function bindSegs() {
+    if (!ui) return;
+    ui.querySelectorAll(".ahd-seg").forEach((sg) => sg.querySelectorAll("button").forEach((b) => (b.onclick = () => {
+      const k = sg.dataset.k; if (SEGSET[k]) SEGSET[k](b.dataset.v);
+      sg.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b)); snd("playSelect");
+      if (k === "ctrl" && stage) stage.querySelector(".ahd-pad").classList.toggle("all", SET.ctrl === "touch");
+    })));
+  }
+  const on = (sel, fn) => { const el = ui && ui.querySelector(sel); if (el) el.onclick = fn; };
+  const tile = (go, title, sub, cls) => `<button class="ahd-tile ${cls || ""}" data-go="${go}"><b>${title}</b><span>${sub}</span></button>`;
+  const tacticsHtml = () => `<h3>Tattiche</h3><div class="ahd-sub">Assetto</div>${segHtml("tf", FORMS, X.prefs.f)}<div class="ahd-sub">Pressing dei compagni</div>${segHtml("tp", PRESS, X.prefs.p)}`;
+  const diffHtml = () => `<h3>Difficoltà</h3>${segHtml("diff", DIFFS.map((d) => d.n), SET.diff)}`;
+
+  // ---- capitoli, sfide, stagione, coppa: logica di supporto
+  const chapOpen = (c) => { try { return !!c.cond(); } catch (e) { return false; } };
+  const chapIds = () => CHAPS.filter(chapOpen).map((c) => c.id);
+  function prevDay(day) { const d = new Date(day + "T12:00:00"); d.setDate(d.getDate() - 1); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+  function dailyEnsure() {
+    const D = X.daily, today = dayKey();
+    if (D.day !== today) {
+      if (D.last && D.last !== prevDay(today)) D.streak = 0;
+      const rg = seeded(hashStr("molo" + today)), pool = DPOOL.slice(), ids = [];
+      while (ids.length < 3) ids.push(pool.splice(Math.floor(rg() * pool.length), 1)[0].id);
+      D.day = today; D.ids = ids; D.done = []; saveX("daily");
+    }
+    return D;
+  }
+  function dailyEval(r) { // r: {mode, team, win, a, c, st, goals, saved, level}
+    const D = dailyEnsure(), out = [];
+    D.ids.forEach((id) => {
+      if (D.done.includes(id)) return;
+      const ch = DPOOL.find((x) => x.id === id);
+      let ok = false; try { ok = ch && ch.chk(r); } catch (e) { ok = false; }
+      if (ok) { D.done.push(id); out.push(ch.t); }
+    });
+    let sh = 0;
+    if (out.length) {
+      const today = dayKey();
+      if (D.last !== today) { D.streak = D.last === prevDay(today) ? D.streak + 1 : 1; D.last = today; X.meta.maxStreak = Math.max(X.meta.maxStreak, D.streak); }
+      sh = out.length * 2 + (D.done.length >= 3 ? 3 : 0);
+      saveX("daily"); addShells(sh);
+    }
+    return { out, sh };
+  }
+  const teamName = (t) => (t === 0 ? "Rondine" : ALLT[t - 1].name);
+  const teamTag = (t) => (t === 0 ? "RON" : ALLT[t - 1].tag);
+  const teamStr = (t) => (t === 0 ? 1.0 : STRN[t - 1]);
+  const pois = (l) => { let L = Math.exp(-l), k = 0, p = 1; do { k++; p *= Math.random(); } while (p > L && k < 9); return k - 1; };
+  function simScore(a, b) { const sa = teamStr(a), sb = teamStr(b); return [Math.min(6, pois(1.3 * Math.sqrt(sa / sb))), Math.min(6, pois(1.3 * Math.sqrt(sb / sa)))]; }
+  const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; } return a; };
+
+  // campionato: 6 squadre (Rondine + le 5 del torneo), andata e ritorno = 10 giornate
+  function seasonNew() {
+    const arr = [0, 1, 2, 3, 4, 5], rounds = [];
+    for (let r = 0; r < 5; r++) {
+      rounds.push([[arr[0], arr[5]], [arr[1], arr[4]], [arr[2], arr[3]]]);
+      arr.splice(1, 0, arr.pop());
+    }
+    const back = rounds.map((rd) => rd.map(([a, b]) => [b, a]));
+    return { n: X.meta.seasonsDone + 1, md: 0, rounds: rounds.concat(back), t: [0, 1, 2, 3, 4, 5].map(() => ({ w: 0, d: 0, l: 0, gf: 0, ga: 0 })), done: false, rank: -1 };
+  }
+  const seaPts = (r) => r.w * 3 + r.d;
+  function seaRank(S) { return [0, 1, 2, 3, 4, 5].sort((a, b) => (seaPts(S.t[b]) - seaPts(S.t[a])) || ((S.t[b].gf - S.t[b].ga) - (S.t[a].gf - S.t[a].ga)) || (S.t[b].gf - S.t[a].gf) || a - b); }
+  function seaPut(S, a, b, ga, gb) {
+    const A = S.t[a], B = S.t[b];
+    A.gf += ga; A.ga += gb; B.gf += gb; B.ga += ga;
+    if (ga > gb) { A.w++; B.l++; } else if (ga < gb) { B.w++; A.l++; } else { A.d++; B.d++; }
+  }
+  const seaOpp = (S) => { const pr = S.rounds[S.md].find((p) => p[0] === 0 || p[1] === 0); return pr[0] === 0 ? pr[1] : pr[0]; };
+  function seasonApply(a, c) { // dopo la partita del giocatore: applica, simula le altre, chiude la stagione se serve
+    const S = X.season, out = { done: false, rank: -1, shells: 0, coins: 0 };
+    S.rounds[S.md].forEach((pr) => {
+      if (pr[0] === 0 || pr[1] === 0) { if (pr[0] === 0) seaPut(S, 0, pr[1], a, c); else seaPut(S, pr[0], 0, c, a); }
+      else { const sc = simScore(pr[0], pr[1]); seaPut(S, pr[0], pr[1], sc[0], sc[1]); }
+    });
+    S.md++; X.meta.seasonMd++;
+    if (S.md >= S.rounds.length) {
+      S.done = true; S.rank = seaRank(S).indexOf(0);
+      X.meta.seasonsDone++; out.done = true; out.rank = S.rank;
+      out.shells = [12, 8, 6, 4, 3, 2][S.rank];
+      if (S.rank === 0) { X.meta.seasonTitles++; out.coins = coinOnce("season", 6); }
+    }
+    saveX("season"); saveX("meta");
+    return out;
+  }
+
+  // coppa: tabellone a 8 squadre, quarti / semifinali / finale
+  const CUP_R = ["Quarti di finale", "Semifinali", "Finale"];
+  function cupNew() {
+    const ids = shuffle([0, 1, 2, 3, 4, 5, 6, 7]), r0 = [];
+    for (let i = 0; i < 8; i += 2) r0.push({ a: ids[i], b: ids[i + 1], sa: 0, sb: 0, w: -1, pen: false });
+    X.meta.cupsPlayed++;
+    return { r: 0, rounds: [r0, [], []], out: false, champ: -1 };
+  }
+  const cupMine = (C) => C.rounds[C.r].find((m) => m.a === 0 || m.b === 0);
+  function cupSim(m) {
+    const sc = simScore(m.a, m.b); m.sa = sc[0]; m.sb = sc[1];
+    if (m.sa === m.sb) { m.pen = true; m.w = Math.random() < teamStr(m.a) / (teamStr(m.a) + teamStr(m.b)) ? m.a : m.b; }
+    else m.w = m.sa > m.sb ? m.a : m.b;
+  }
+  function cupAdvance(C) { // chiude il turno, prepara il successivo (o simula tutto se il giocatore è fuori)
+    for (;;) {
+      const rd = C.rounds[C.r];
+      rd.forEach((m) => { if (m.w < 0 && m.a !== 0 && m.b !== 0) cupSim(m); });
+      if (rd.some((m) => m.w < 0)) return; // tocca ancora al giocatore
+      if (C.r >= 2) { C.champ = rd[0].w; return; }
+      const nx = C.rounds[C.r + 1];
+      for (let i = 0; i < rd.length; i += 2) nx.push({ a: rd[i].w, b: rd[i + 1].w, sa: 0, sb: 0, w: -1, pen: false });
+      C.r++;
+      if (C.out) continue; // il giocatore è fuori: si simula fino alla finale
+      if (!nx.some((m) => m.a === 0 || m.b === 0)) { C.out = true; continue; }
+      return;
+    }
+  }
+  function cupApply(win, ua, uc, pens) {
+    const C = X.cup, m = cupMine(C), out = { champ: false, out: !win, shells: 0, coins: 0 };
+    const mine = m.a === 0;
+    m.sa = mine ? ua : uc; m.sb = mine ? uc : ua; m.pen = !!pens; m.w = win ? 0 : (mine ? m.b : m.a);
+    if (!win) C.out = true;
+    cupAdvance(C);
+    if (win && C.champ === 0) {
+      out.champ = true; X.meta.cupsWon++; out.coins = coinOnce("cup", 8); out.shells = 14;
+    } else out.shells = win ? 3 + C.r : 2 + C.r;
+    if (C.champ >= 0) C.done = true;
+    saveX("cup"); saveX("meta");
+    return out;
+  }
+  const cupRound = (C) => CUP_R[Math.min(2, C.r)];
+
+  // ---------------------------------------------------------------- menu principale
+  function openGo(go) {
+    ({
+      menu: showMenu, torneo: showTorneo, season: showSeason, cup: showCup, free: showFree, surv: showSurv, timed: showTimed, pens: showPens, setp: showSetp, train: showTrain,
+      daily: showDaily, team: showTeam, look: showLook, tac: showTac, diary: showDiary,
+    }[go] || showMenu)();
+  }
   function showMenu() {
     uiState = "menu"; paused = false;
+    const done = PROG.stars.filter((s) => s > 0).length, D = dailyEnsure(), left = D.ids.length - D.done.length;
+    const S = X.season, C = X.cup, nNew = chapIds().filter((id) => !X.meta.seen.includes(id)).length;
+    let h = `<h2>Coppa del Molo</h2><p class="ahd-sub">Calcio a 5 a campo aperto, visto dall'alto. Aftertouch, Intesa Leo-Nico e il Tiro della Rondine. Una coppa di latta, otto squadre, un Molo intero che tifa a distanza di sicurezza. Conchiglie: <b>${X.meta.shells}</b></p>`;
+    h += `<div class="ahd-grid">`
+      + tile("torneo", "Torneo", `5 sfide · ${done}/${OPPS.length} vinte`)
+      + tile("season", "Campionato", S && !S.done ? `Giornata ${S.md + 1}/${S.rounds.length}` : S ? "Stagione conclusa" : "Stagione di 10 giornate")
+      + tile("cup", "Coppa del Molo", C && !C.done ? (C.out ? "Eliminato" : cupRound(C)) : "Tabellone a 8 squadre")
+      + tile("free", "Partita libera", "7 squadre, durata a scelta")
+      + tile("surv", "Sopravvivenza", `Tre vite · record ${X.best.surv} gol`)
+      + tile("timed", "Sfida a tempo", `75 secondi · record ${X.best.timed}`)
+      + tile("pens", "Rigori", `Tira e para · serie vinte ${X.best.pens}`)
+      + tile("setp", "Calci piazzati", `Punizioni, angoli, rigori · ${X.best.setp}/6`)
+      + tile("train", "Allenamento", "Senza classifica né fretta")
+      + tile("daily", "Sfide del giorno", left ? `${left} da completare` : "Tutte fatte", left ? "hot" : "")
+      + tile("team", "Squadra", "Portiere e difensori")
+      + tile("look", "Look", "Maglia, pallone, campo")
+      + tile("tac", "Tattiche", `${FORMS[X.prefs.f]} · pressing ${PRESS[X.prefs.p].toLowerCase()}`)
+      + tile("diary", "Diario della Coppa", `${chapIds().length}/${CHAPS.length} capitoli${nNew ? " · " + nNew + " nuovi" : ""}`, nNew ? "hot" : "")
+      + `</div>`;
+    h += `<h3>Controlli</h3>${segHtml("ctrl", ["Joystick", "Tocca e corri"], SET.ctrl, ["stick", "touch"])}`;
+    h += diffHtml();
+    h += `<h3>Audio</h3>${segHtml("sound", ["Suoni attivi", "Muto"], SET.sound ? 1 : 0, [1, 0])}`;
+    h += `<div class="ahd-row2"><button class="ahd-btn sec" data-a="tut">Come si gioca</button><button class="ahd-btn sec" data-a="exit">Esci</button></div>`;
+    h += `<p class="ahd-sub" style="text-align:center">Partite: ${PROG.played} · Vittorie: ${PROG.wins} · Gol segnati: ${PROG.goals}</p>`;
+    showUi(h);
+    ui.querySelectorAll("[data-go]").forEach((b) => (b.onclick = () => { snd("playSelect"); openGo(b.dataset.go); }));
+    on('[data-a="tut"]', () => showTutorial(0, showMenu));
+    on('[data-a="exit"]', closeAll);
+    if (!PROG.tut) { PROG.tut = 1; saveProg(); showTutorial(0, showMenu); }
+  }
+  const backRow = (fn) => `<button class="ahd-btn sec" data-a="back">Indietro</button>`;
+
+  function showTorneo() {
+    uiState = "menu";
     const done = PROG.stars.filter((s) => s > 0).length;
-    let h = `<h2>Coppa del Molo</h2><p class="ahd-sub">Calcio a 5 a campo aperto, visto dall'alto. Aftertouch, Intesa Leo-Nico e il Tiro della Rondine. Cinque squadre del Borgo, una sola coppa (di latta).</p>`;
-    h += `<h3>Il torneo · ${done}/${OPPS.length}</h3>`;
+    let h = `<h2>Il torneo</h2><p class="ahd-sub">Cinque squadre del Borgo, in ordine. Vinci la prima volta e incassi le monete. ${done}/${OPPS.length}</p>`;
     OPPS.forEach((o, i) => {
       const open = i === 0 || PROG.stars[i - 1] > 0;
       h += `<button class="ahd-opp" data-mi="${i}" ${open ? "" : "disabled"}><div class="ahd-crest" style="border-color:${o.kit2};background:${o.kit};color:${o.kit2}">${o.tag}</div><div><b>${o.name}</b><span>${open ? (PROG.stars[i] ? "Vinta" : "Da affrontare") : "Batti la squadra precedente"}</span></div><em>${open ? stars(PROG.stars[i]) : "🔒"}</em></button>`;
     });
-    h += `<h3>Controlli</h3><div class="ahd-seg" data-k="ctrl"><button data-v="stick" class="${SET.ctrl === "stick" ? "on" : ""}">Joystick</button><button data-v="touch" class="${SET.ctrl === "touch" ? "on" : ""}">Tocca e corri</button></div>`;
-    h += `<h3>Difficoltà</h3><div class="ahd-seg" data-k="diff">${DIFFS.map((d, i) => `<button data-v="${i}" class="${SET.diff === i ? "on" : ""}">${d.n}</button>`).join("")}</div>`;
-    h += `<h3>Audio</h3><div class="ahd-seg" data-k="sound"><button data-v="1" class="${SET.sound ? "on" : ""}">Suoni attivi</button><button data-v="0" class="${SET.sound ? "" : "on"}">Muto</button></div>`;
-    h += `<button class="ahd-btn sec" data-a="tut">Come si gioca</button>`;
-    h += `<p class="ahd-sub" style="text-align:center">Partite: ${PROG.played} · Vittorie: ${PROG.wins} · Gol segnati: ${PROG.goals}</p>`;
-    h += `<button class="ahd-btn sec" data-a="exit">Esci</button>`;
+    h += backRow();
     showUi(h);
     ui.querySelectorAll(".ahd-opp").forEach((b) => (b.onclick = () => showIntro(+b.dataset.mi)));
-    ui.querySelectorAll(".ahd-seg").forEach((sg) => sg.querySelectorAll("button").forEach((b) => (b.onclick = () => {
-      const k = sg.dataset.k; SET[k] = k === "ctrl" ? b.dataset.v : +b.dataset.v; saveSet();
-      sg.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b)); snd("playSelect");
-    })));
-    ui.querySelector('[data-a="tut"]').onclick = () => showTutorial(0, showMenu);
-    ui.querySelector('[data-a="exit"]').onclick = closeAll;
-    if (!PROG.tut) { PROG.tut = 1; saveProg(); showTutorial(0, showMenu); }
+    on('[data-a="back"]', showMenu);
   }
 
+  // schermata di preparazione generica: citazione, regole, tattiche, difficoltà, via
+  function showPre(cfg) {
+    uiState = "intro";
+    const o = cfg.opp;
+    let h = `<h2>${cfg.title}</h2><p class="ahd-sub">${cfg.sub || ""}</p>`;
+    if (o) h += `<div class="ahd-quote">${esc(o.hint)}</div>`;
+    if (o && PRE[o.tag]) h += `<p class="ahd-sub"><i>${esc(pick(PRE[o.tag]))}</i></p>`;
+    (cfg.rules || []).forEach((r) => { h += `<div class="ahd-stat"><span>${r[0]}</span><span>${r[1]}</span></div>`; });
+    if (cfg.tactics !== false) h += tacticsHtml();
+    if (cfg.diff !== false) h += diffHtml();
+    h += `<button class="ahd-btn" data-a="go">${cfg.go || "Calcio d'inizio"}</button><button class="ahd-btn sec" data-a="back">Indietro</button>`;
+    showUi(h);
+    on('[data-a="go"]', () => launch(cfg.launch));
+    on('[data-a="back"]', cfg.back || showMenu);
+  }
   function showIntro(mi) {
     const o = OPPS[mi];
+    showPre({
+      title: o.name, opp: o, back: showTorneo, launch: { mode: "torneo", mi, opp: o },
+      sub: `Sfida ${mi + 1} di ${OPPS.length} · Premio prima vittoria: ${STAR_COINS[mi]} monete${PROG.coin[mi] ? " (già incassato)" : ""}`,
+      rules: [["Obiettivo", `Vinci in ${MATCH_SECS} secondi`], ["★ ★★ ★★★", "Vittoria · 2 gol di scarto · porta inviolata"]],
+    });
+  }
+
+  function showFree() {
     uiState = "intro";
-    showUi(`<h2>${o.name}</h2><p class="ahd-sub">Sfida ${mi + 1} di ${OPPS.length} · ${DIFFS[SET.diff].n} · Premio prima vittoria: ${STAR_COINS[mi]} monete${PROG.coin[mi] ? " (già incassato)" : ""}</p>
-      <div class="ahd-quote">${esc(o.hint)}</div>
-      <div class="ahd-stat"><span>Obiettivo</span><span>Vinci in ${MATCH_SECS} secondi</span></div>
-      <div class="ahd-stat"><span>★ ★★ ★★★</span><span>Vittoria · 2 gol di scarto · porta inviolata</span></div>
-      <button class="ahd-btn" data-a="go">Calcio d'inizio</button>
+    const F = X.prefs.free, o = ALLT[F.opp] || ALLT[0], lens = [60, 100, 150];
+    let h = `<h2>Partita libera</h2><p class="ahd-sub">Scegli l'avversaria, la durata e le regole. Niente monete in palio (solo la prima vittoria: 2), ma conchiglie e Diario sì.</p><div class="ahd-grid">`;
+    ALLT.forEach((t, i) => { h += `<button class="ahd-tile ${i === F.opp ? "on" : ""}" data-t="${i}"><div class="ahd-crest" style="border-color:${t.kit2};background:${t.kit};color:${t.kit2}">${t.tag}</div><b>${t.name}</b></button>`; });
+    h += `</div><div class="ahd-quote">${esc(o.hint)}</div>`;
+    h += `<h3>Durata</h3>${segHtml("flen", ["Breve 60s", "Normale 100s", "Lunga 150s"], F.len)}`;
+    h += `<h3>Pareggio</h3>${segHtml("fgold", ["Supplementari", "Si pareggia"], F.gold)}`;
+    h += tacticsHtml() + diffHtml();
+    h += `<button class="ahd-btn" data-a="go">Calcio d'inizio</button><button class="ahd-btn sec" data-a="back">Indietro</button>`;
+    showUi(h);
+    ui.querySelectorAll("[data-t]").forEach((b) => (b.onclick = () => { X.prefs.free.opp = +b.dataset.t; saveX("prefs"); snd("playSelect"); const sc = ui.scrollTop; showFree(); ui.scrollTop = sc; }));
+    on('[data-a="go"]', () => launch({ mode: "free", opp: o, len: lens[F.len] || 100, noGolden: !F.gold }));
+    on('[data-a="back"]', showMenu);
+  }
+
+  function showSurv() {
+    showPre({
+      title: "Sopravvivenza", back: showMenu, opp: null, go: "Parti",
+      sub: "Ondate di squadre sempre più dure. Tre vite: ogni gol subito ne toglie una. Ogni due gol segnati, arriva l'ondata successiva.",
+      rules: [["Tuo record", X.best.surv + " gol"], ["Premio", "3 monete la prima volta che segni 5 gol"]],
+      launch: { mode: "surv", opp: ALLT[0], len: 0, noHalf: true, noGolden: true },
+    });
+  }
+  function showTimed() {
+    showPre({
+      title: "Sfida a tempo", back: showMenu, opp: null, go: "Parti",
+      sub: "75 secondi contro i Gabbiani del Porto. Segna più gol che puoi: dopo ogni rete si riparte subito.",
+      rules: [["Tuo record", X.best.timed + " gol"], ["Medaglie", "Bronzo 2 · Argento 4 · Oro 6"], ["Premio", "3 monete alla prima medaglia d'oro"]],
+      launch: { mode: "timed", opp: OPPS[0], len: 75, noHalf: true, noGolden: true },
+    });
+  }
+  function showPens() {
+    showPre({
+      title: "Rigori", back: showMenu, opp: OPPS[1], tactics: false, go: "Al dischetto",
+      sub: "Serie da cinque, a oltranza se serve. Tu tiri: stick su/giù per l'angolo, TIRO per la forza. Loro tirano: muovi il portiere con lo stick e tuffati con PASSA o TIRO.",
+      rules: [["Serie vinte", String(X.best.pens)], ["Premio", "3 monete alla prima serie vinta"]],
+      launch: { mode: "pens", opp: OPPS[1] },
+    });
+  }
+  function showSetp() {
+    showPre({
+      title: "Calci piazzati", back: showMenu, opp: null, tactics: false, go: "Si comincia",
+      sub: "Sei calci da fermo contro il portiere: punizione dal limite con barriera (carica a metà per scavalcarla), angolo con Intesa Leo-Nico, rigore.",
+      rules: [["Tuo record", X.best.setp + "/6"], ["Stelle", "★ 2 gol · ★★ 4 gol · ★★★ 5 gol"], ["Premio", "3 monete alla prima sessione con 4 gol"]],
+      launch: { mode: "setp", opp: OPPS[2] },
+    });
+  }
+  function showTrain() {
+    uiState = "intro";
+    const o = OPPS[0];
+    let h = `<h2>Allenamento</h2><p class="ahd-sub">Nessun punteggio che conti, nessun orologio. Grinta sempre carica, per provare Rondine e aftertouch finché il pallone non ti odia. Dalla pausa puoi rimettere la palla al centro.</p>`;
+    h += `<h3>Avversari</h3>${segHtml("train", ["Fermi", "Passivi", "Normali"], X.prefs.train)}`;
+    h += tacticsHtml();
+    h += `<button class="ahd-btn" data-a="go">Inizia</button><button class="ahd-btn sec" data-a="back">Indietro</button>`;
+    showUi(h);
+    on('[data-a="go"]', () => launch({ mode: "train", opp: o, len: 0, noHalf: true, noGolden: true, opass: [2, 1, 0][X.prefs.train | 0] }));
+    on('[data-a="back"]', showMenu);
+  }
+  function showTac() {
+    uiState = "menu";
+    showUi(`<h2>Tattiche</h2><p class="ahd-sub">Valgono per i tuoi compagni controllati dal computer, in ogni modalità.</p>${tacticsHtml()}
+      <p class="ahd-sub"><b>Offensivo</b>: la squadra sale, più spazio davanti e meno dietro. <b>Difensivo</b>: due linee basse, contropiede.<br><b>Pressing alto</b>: i compagni aggrediscono da lontano e tengono la linea alta; <b>basso</b>: aspettano.</p>
       <button class="ahd-btn sec" data-a="back">Indietro</button>`);
-    ui.querySelector('[data-a="go"]').onclick = () => startMatch(mi);
-    ui.querySelector('[data-a="back"]').onclick = showMenu;
+    on('[data-a="back"]', showMenu);
+  }
+
+  // ---- campionato
+  function showSeason() {
+    uiState = "menu";
+    let S = X.season;
+    if (!S) {
+      showUi(`<h2>Campionato del Molo</h2><p class="ahd-sub">Sei squadre, andata e ritorno: dieci giornate. Tre punti per la vittoria, uno per il pareggio (qui si pareggia: niente supplementari). Le altre partite le gioca Arturo, con la fantasia.</p>
+        <p>Titolo in palio: la targhetta, una maglia viola e Morena in difesa. ${X.meta.coin.season ? "" : "Primo titolo: 6 monete."}</p>
+        <button class="ahd-btn" data-a="new">Inizia la stagione</button><button class="ahd-btn sec" data-a="back">Indietro</button>`);
+      on('[data-a="new"]', () => { X.season = seasonNew(); saveX("season"); showSeason(); });
+      on('[data-a="back"]', showMenu);
+      return;
+    }
+    const rk = seaRank(S);
+    let h = `<h2>Campionato · stagione ${S.n}</h2><p class="ahd-sub">${S.done ? "Stagione conclusa" : "Giornata " + (S.md + 1) + " di " + S.rounds.length}</p>`;
+    h += `<table class="ahd-tbl"><tr><th>#</th><th>Squadra</th><th>G</th><th>V</th><th>N</th><th>P</th><th>DR</th><th>Pt</th></tr>`;
+    rk.forEach((t, i) => { const r = S.t[t]; h += `<tr class="${t === 0 ? "me" : ""}"><td>${i + 1}</td><td>${esc(teamName(t))}</td><td>${r.w + r.d + r.l}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td><td>${r.gf - r.ga >= 0 ? "+" : ""}${r.gf - r.ga}</td><td>${seaPts(r)}</td></tr>`; });
+    h += `</table>`;
+    if (S.done) {
+      h += `<div class="ahd-quote">${esc(SEA_END[Math.min(5, S.rank)])}</div><div class="ahd-row2"><button class="ahd-btn" data-a="new">Nuova stagione</button><button class="ahd-btn sec" data-a="back">Menu</button></div>`;
+      showUi(h);
+      on('[data-a="new"]', () => { X.season = seasonNew(); saveX("season"); showSeason(); });
+    } else {
+      const j = seaOpp(S), o = OPPS[j - 1];
+      h += `<h3>Prossima partita</h3><div class="ahd-stat"><span>Giornata ${S.md + 1}</span><span>Rondine vs ${esc(o.name)}</span></div>`;
+      h += `<div class="ahd-row2"><button class="ahd-btn" data-a="go">Prepara</button><button class="ahd-btn sec" data-a="back">Menu</button></div>`;
+      h += `<button class="ahd-btn sec red" data-a="ab" style="min-height:40px;font-size:13px">Abbandona la stagione</button>`;
+      showUi(h);
+      on('[data-a="go"]', () => showPre({ title: "Giornata " + (S.md + 1), opp: o, back: showSeason, sub: `Campionato · stagione ${S.n} · ${o.name}`, rules: [["Regola", "Si pareggia: niente supplementari"], ["Ricompensa", "Conchiglie per ogni risultato"]], launch: { mode: "season", opp: o, noGolden: true } }));
+      let armed = false;
+      on('[data-a="ab"]', function () { if (!armed) { armed = true; this.textContent = "Sicuro? Tocca ancora per abbandonare"; return; } X.season = null; saveX("season"); showSeason(); });
+    }
+    on('[data-a="back"]', showMenu);
+  }
+
+  // ---- coppa
+  function bracketHtml(C) {
+    let h = `<div class="ahd-brk">`;
+    for (let r = 0; r < 3; r++) {
+      h += `<div><h4>${["Quarti", "Semi", "Finale"][r]}</h4>`;
+      const n = [4, 2, 1][r];
+      for (let i = 0; i < n; i++) {
+        const m = C.rounds[r][i];
+        if (!m) { h += `<div class="ahd-mt"><div><span>?</span><i></i></div><div><span>?</span><i></i></div></div>`; continue; }
+        const cls = (m.a === 0 || m.b === 0) ? "me" : "";
+        const row = (t, sc, win) => `<div class="${m.w < 0 ? "" : win ? "w" : "l"}"><span>${teamTag(t)}</span><i>${m.w < 0 ? "" : sc + (m.pen && win ? "*" : "")}</i></div>`;
+        h += `<div class="ahd-mt ${cls}">${row(m.a, m.sa, m.w === m.a)}${row(m.b, m.sb, m.w === m.b)}</div>`;
+      }
+      h += `</div>`;
+    }
+    return h + `</div><p class="ahd-sub">* decisa ai rigori</p>`;
+  }
+  function showCup() {
+    uiState = "menu";
+    let C = X.cup;
+    if (!C) {
+      showUi(`<h2>Coppa del Molo</h2><p class="ahd-sub">Otto squadre, tabellone a eliminazione diretta: quarti, semifinali, finale. Se si pareggia dopo i supplementari, si va ai rigori (tiri e parate). La Coppa è un secchio di latta che suona quando la alzi.</p>
+        <p>${X.meta.coin.cup ? "Il nome sulla targa è già inciso: si può incidere di nuovo." : "Primo trionfo: 8 monete, la Palla d'Oro e la maglia Oro del Molo."}</p>
+        <button class="ahd-btn" data-a="new">Sorteggia il tabellone</button><button class="ahd-btn sec" data-a="back">Indietro</button>`);
+      on('[data-a="new"]', () => { X.cup = cupNew(); saveX("cup"); saveX("meta"); showCup(); });
+      on('[data-a="back"]', showMenu);
+      return;
+    }
+    let h = `<h2>Tabellone della Coppa</h2>` + bracketHtml(C);
+    if (C.done) {
+      const me = C.champ === 0;
+      h += `<div class="ahd-quote">${esc(me ? CUP_END.win : CUP_END.lose)}</div>`;
+      if (!me && C.champ >= 0) h += `<p class="ahd-sub">Ha vinto: <b>${esc(teamName(C.champ))}</b></p>`;
+      h += `<div class="ahd-row2"><button class="ahd-btn" data-a="new">Nuova coppa</button><button class="ahd-btn sec" data-a="back">Menu</button></div>`;
+      showUi(h);
+      on('[data-a="new"]', () => { X.cup = cupNew(); saveX("cup"); saveX("meta"); showCup(); });
+    } else {
+      const m = cupMine(C), j = m.a === 0 ? m.b : m.a, o = ALLT[j - 1];
+      h += `<h3>${cupRound(C)}</h3><div class="ahd-stat"><span>Rondine vs</span><span>${esc(o.name)}</span></div>`;
+      h += `<div class="ahd-row2"><button class="ahd-btn" data-a="go">Prepara</button><button class="ahd-btn sec" data-a="back">Menu</button></div>`;
+      h += `<button class="ahd-btn sec red" data-a="ab" style="min-height:40px;font-size:13px">Ritirati dalla coppa</button>`;
+      showUi(h);
+      on('[data-a="go"]', () => showPre({ title: cupRound(C), opp: o, back: showCup, sub: "Coppa del Molo · eliminazione diretta", rules: [["Regola", "Pareggio: supplementari, poi rigori"]], launch: { mode: "cup", opp: o, cupJ: j } }));
+      let armed = false;
+      on('[data-a="ab"]', function () { if (!armed) { armed = true; this.textContent = "Sicuro? Tocca ancora per ritirarti"; return; } C.out = true; cupAdvance(C); C.done = true; saveX("cup"); showCup(); });
+    }
+    on('[data-a="back"]', showMenu);
+  }
+
+  // ---- sfide giornaliere
+  function showDaily() {
+    uiState = "menu";
+    const D = dailyEnsure();
+    let h = `<h2>Sfide del giorno</h2><p class="ahd-sub">Tre sfide che cambiano ogni giorno, valide in ogni modalità adatta. Premio: 2 conchiglie l'una, +3 se le completi tutte. Giorni di fila: <b>${D.streak}</b> (record ${X.meta.maxStreak}). Conchiglie: <b>${X.meta.shells}</b></p>`;
+    D.ids.forEach((id) => {
+      const ch = DPOOL.find((x) => x.id === id), ok = D.done.includes(id);
+      h += `<div class="ahd-stat"><span>${esc(ch.t)}</span><span class="${ok ? "ahd-done" : ""}">${ok ? "✓ fatta" : "da fare"}</span></div>`;
+    });
+    h += `<p class="ahd-sub">Le conchiglie servono per il Look. Non hanno nessun valore fuori dalla Coppa del Molo: restano qui, nel Molo.</p><button class="ahd-btn sec" data-a="back">Indietro</button>`;
+    showUi(h);
+    on('[data-a="back"]', showMenu);
+  }
+
+  // ---- squadra
+  let teamInfo = "";
+  const modsTxt = (m) => { const a = []; if (m.mods.reach) a.push("Parata " + (m.mods.reach > 1 ? "+" : "") + Math.round((m.mods.reach - 1) * 100) + "%"); if (m.mods.tkl) a.push("Contrasti " + (m.mods.tkl > 1 ? "+" : "") + Math.round((m.mods.tkl - 1) * 100) + "%"); if (m.mods.spd) a.push("Velocità " + (m.mods.spd > 1 ? "+" : "") + Math.round((m.mods.spd - 1) * 100) + "%"); return a.join(" · ") || "Nessun bonus"; };
+  function showTeam() {
+    uiState = "menu";
+    const ros = homeRoster(), cur = [ros[0].id, ros[1].id, ros[2].id];
+    const card = (m) => {
+      const open = mateOpen(m), sel = cur.includes(m.id);
+      return open ? `<button class="ahd-tile ${sel ? "on" : ""}" data-m="${m.id}"><b>${m.name}</b><span>${modsTxt(m)}</span></button>`
+        : `<button class="ahd-tile" data-m="${m.id}" disabled><b class="ahd-lock">???</b><span>${m.hint}</span></button>`;
+    };
+    let h = `<h2>La squadra</h2><p class="ahd-sub">Leo (centrocampo) e Nico (attacco) restano fissi: l'Intesa è la loro. Scegli il portiere e due difensori. I compagni si sbloccano con la Coppa.</p>`;
+    h += `<h3>Portiere</h3><div class="ahd-grid">${MATES.filter((m) => m.slot === 0).map(card).join("")}</div>`;
+    h += `<h3>Difensori (due)</h3><div class="ahd-grid">${MATES.filter((m) => m.slot === 1).map(card).join("")}</div>`;
+    h += `<p class="ahd-sub">${esc(teamInfo || "Tocca un compagno per scegliere o leggere la scheda.")}</p><button class="ahd-btn sec" data-a="back">Indietro</button>`;
+    showUi(h);
+    ui.querySelectorAll("[data-m]").forEach((b) => (b.onclick = () => {
+      const m = mateById(b.dataset.m); if (!m || !mateOpen(m)) return;
+      if (m.slot === 0) X.team.gk = m.id;
+      else {
+        let d = [ros[1].id, ros[2].id];
+        if (d.includes(m.id)) { if (d.length > 1) d = d.filter((x) => x !== m.id); } else { d.push(m.id); if (d.length > 2) d.shift(); }
+        X.team.def = d;
+      }
+      saveX("team"); teamInfo = m.name + ": " + m.desc; snd("playSelect"); const sc = ui.scrollTop; showTeam(); ui.scrollTop = sc;
+    }));
+    on('[data-a="back"]', showMenu);
+  }
+
+  // ---- look
+  let lookPend = "";
+  const lookOwned = (cat, it) => (it.cost === 0 && (!it.req || !!it.req())) || X.look.own.includes(cat + ":" + it.id);
+  function showLook() {
+    uiState = "menu";
+    const L = X.look;
+    const sec = (title, cat, list, key) => {
+      let h = `<h3>${title}</h3><div class="ahd-grid">`;
+      list.forEach((it) => {
+        const own = lookOwned(cat, it), sel = L[key] === it.id;
+        let sub, nm = it.name;
+        if (own) sub = sel ? "In uso" : "Posseduto";
+        else if (it.cost === 0) { nm = "???"; sub = it.hint || ""; }
+        else sub = lookPend === cat + ":" + it.id ? "Tocca ancora per comprare" : it.cost + " conchiglie";
+        const sw = cat === "kit" ? `<i class="ahd-sw" style="background:${it.k};border-color:${it.k2}"></i>` : cat === "ball" ? `<i class="ahd-sw" style="background:${it.c};border-color:#111"></i>` : "";
+        h += `<button class="ahd-tile ${sel ? "on" : ""}" data-l="${cat}:${it.id}" ${(!own && it.cost === 0) ? "disabled" : ""}><b>${sw}${esc(nm)}</b><span>${esc(sub)}</span></button>`;
+      });
+      return h + `</div>`;
+    };
+    let h = `<h2>Look</h2><p class="ahd-sub">Solo estetica: nessun vantaggio in campo. Conchiglie: <b>${X.meta.shells}</b> (si guadagnano giocando e con le sfide del giorno).</p>`;
+    h += sec("Maglia", "kit", KITS, "kit") + sec("Motivo", "pat", PATS, "pat") + sec("Pallone", "ball", BALLS, "ball") + sec("Campo", "pitch", PITCHES, "pitch");
+    h += `<button class="ahd-btn sec" data-a="back">Indietro</button>`;
+    showUi(h);
+    ui.querySelectorAll("[data-l]").forEach((b) => (b.onclick = () => {
+      const [cat, id] = b.dataset.l.split(":");
+      const list = { kit: KITS, pat: PATS, ball: BALLS, pitch: PITCHES }[cat], it = list.find((x) => x.id === id);
+      if (!it) return;
+      if (!lookOwned(cat, it)) {
+        if (it.cost === 0) return;
+        if (lookPend !== b.dataset.l) { lookPend = b.dataset.l; const sc = ui.scrollTop; showLook(); ui.scrollTop = sc; return; }
+        if (X.meta.shells < it.cost) { lookPend = ""; const sc = ui.scrollTop; showLook(); ui.scrollTop = sc; say2("Servono " + it.cost + " conchiglie"); return; }
+        X.meta.shells -= it.cost; X.look.own.push(b.dataset.l); saveX("meta");
+      }
+      lookPend = ""; L[cat] = id; saveX("look"); if (cat === "pitch") bgCache = null; snd("playSelect");
+      const sc = ui.scrollTop; showLook(); ui.scrollTop = sc;
+    }));
+    on('[data-a="back"]', showMenu);
+  }
+  function say2(t) { const p = ui && ui.querySelector(".ahd-sub"); if (p) p.textContent = t; }
+
+  // ---- diario
+  function showDiary() {
+    uiState = "menu";
+    const open = chapIds();
+    let h = `<h2>Diario della Coppa</h2><p class="ahd-sub">Il filo che lega il Molo, le squadre e il secchio di latta. Capitoli sbloccati: ${open.length}/${CHAPS.length}. Gli altri aspettano, come i treni.</p>`;
+    CHAPS.forEach((c) => {
+      const o = open.includes(c.id), fresh = o && !X.meta.seen.includes(c.id);
+      h += o ? `<button class="ahd-opp" data-c="${c.id}"><div class="ahd-crest" style="border-color:#fde047;background:#13304f;color:#fde047">${CHAPS.indexOf(c) + 1}</div><div><b>${esc(c.t)}</b><span>${c.tone}</span></div><em>${fresh ? "nuovo" : "leggi"}</em></button>`
+        : `<button class="ahd-opp" disabled><div class="ahd-crest" style="border-color:#475569;color:#64748b">?</div><div><b class="ahd-lock">???</b><span>Sblocco: ${esc(c.hint)}</span></div><em>🔒</em></button>`;
+    });
+    h += `<h3>Il cast</h3>`;
+    CASTD.forEach((c) => {
+      const ch = CHAPS.find((x) => x.id === c.ch), o = ch && open.includes(ch.id);
+      h += `<div class="ahd-stat" style="display:block"><b>${o ? esc(c.n) : '<span class="ahd-lock">???</span>'}</b><br><span style="font-size:12px;color:#94a3b8">${o ? esc(c.t) : "Si sblocca con il filo narrativo"}</span></div>`;
+    });
+    h += `<button class="ahd-btn sec" data-a="back">Indietro</button>`;
+    showUi(h);
+    ui.querySelectorAll("[data-c]").forEach((b) => (b.onclick = () => showChapter(b.dataset.c, showDiary)));
+    on('[data-a="back"]', showMenu);
+  }
+  function showChapter(id, back) {
+    const c = CHAPS.find((x) => x.id === id);
+    if (!c || !chapOpen(c)) return back();
+    uiState = "menu";
+    if (!X.meta.seen.includes(id)) { X.meta.seen.push(id); saveX("meta"); }
+    showUi(`<div class="ahd-chap"><span class="ahd-tone">${c.tone}</span><h2>${esc(c.t)}</h2>${c.p.map((t) => `<p>${esc(t)}</p>`).join("")}</div><button class="ahd-btn sec" data-a="back">Indietro</button>`);
+    on('[data-a="back"]', back);
   }
 
   function showTutorial(step, back) {
@@ -1395,6 +2324,7 @@
       ["Passa e contrasta", "PASSA manda la palla al compagno nella direzione dello stick (lo vedi cerchiato in azzurro). Senza palla, PASSA è la scivolata: tempismo, non disperazione. SCATTO consuma fiato."],
       ["Tira e curva", "Tieni premuto TIRO per caricare e rilascia. Stick in su o in giù: scegli l'angolo della porta. Dopo il tiro muovi lo stick di lato mentre la palla vola: curva! È l'aftertouch."],
       ["Intesa e Rondine", "Passaggio Leo-Nico (o Nico-Leo) e tiro entro 3 secondi: Intesa, tiro potenziato e preciso. Passaggi, contrasti e parate riempiono la barra GRINTA: quando è piena premi il tasto dorato per il Tiro della Rondine."],
+      ["Calci piazzati", "Punizione: carica il tiro a metà per scavalcare la barriera e curva con lo stick. Angolo: PASSA a Nico e tira. Rigore: scegli l'angolo con lo stick. Rigore subito: muovi il portiere con lo stick e tuffati con PASSA o TIRO."],
     ];
     const t = T[step];
     showUi(`<h2>${t[0]}</h2><div class="ahd-dots">${T.map((_, i) => (i === step ? "<b>●</b>" : "●")).join(" ")}</div><p>${t[1]}</p>
@@ -1404,67 +2334,192 @@
     const pv = ui.querySelector('[data-a="prev"]'); if (pv) pv.onclick = () => showTutorial(step - 1, back);
   }
 
-  function startMatch(mi) {
+  // ---------------------------------------------------------------- avvio partite
+  function resetInput() {
+    input.jx = input.jy = input.kx = input.ky = 0; input.charging = false; input.chargeF = 0; input.passEdge = false; input.shootRel = false; input.rond = false; input.sprint = false; input.touchOn = false; input.skip = false;
+  }
+  function launch(cfg) {
+    CTX = cfg; cfg.cb = chapIds();
     hideUi(); uiState = "play"; paused = false;
-    newMatch(mi, SET.diff);
-    input.jx = input.jy = input.kx = input.ky = 0; input.charging = false; input.chargeF = 0; input.passEdge = false; input.shootRel = false; input.rond = false; input.sprint = false; input.touchOn = false;
+    const sp = cfg.mode === "setp" || cfg.mode === "pens" || cfg.mode === "cup-pens";
+    const dIdx = cfg.diff === undefined ? SET.diff : cfg.diff;
+    if (sp) newMatch(-1, dIdx, { opp: cfg.opp || OPPS[0], mode: cfg.mode, len: 0, noHalf: true, noGolden: true });
+    else newMatch(cfg.mi === undefined ? -1 : cfg.mi, dIdx, cfg);
+    resetInput();
     stage.querySelector(".ahd-pad").classList.toggle("all", SET.ctrl === "touch");
     showDefaultStick();
     acc = 0; lastTs = 0;
-    PROG.played++; saveProg();
+    if (sp) {
+      M.sp = { onEnd: null, next: null, kind: "", done: true, res: null, def: false, lock: false, rel: 0, rt: 0, t: 0, lim: 0 };
+      if (cfg.mode === "setp") { M.setp = { plan: ["fk", "cor", "pen", "fk", "cor", "pen"], i: 0, goals: 0, log: [] }; X.meta.spPlayed++; saveX("meta"); M.sp.next = setpNext; }
+      else { M.so = { sc: [0, 0], n: [0, 0], log: [[], []], saved: 0 }; M.sp.next = soNext; }
+      M.state = "spwait"; M.timer = 24;
+    } else {
+      if (cfg.mode !== "train") { PROG.played++; saveProg(); }
+      say(cfg.mode === "train" ? "Allenamento: prova Rondine e aftertouch senza fretta" : quip("start"), 2400);
+    }
     hud();
   }
+  function startMatch(mi) { launch({ mode: "torneo", mi, opp: OPPS[mi] }); }
 
+  // ---------------------------------------------------------------- risultati
+  let lastRes = null;
+  const newChapsHtml = () => CHAPS.filter((c) => chapOpen(c) && !((CTX && CTX.cb) || []).includes(c.id)).map((c) => `<div class="ahd-new">Nuovo capitolo nel Diario: <b>${esc(c.t)}</b><button class="ahd-btn sec" data-ch="${c.id}" style="min-height:40px;margin:6px 0 0">Leggi</button></div>`).join("");
+  function putRes(html, bind) {
+    lastRes = { html, bind }; uiState = "result";
+    showUi(html);
+    ui.querySelectorAll("[data-ch]").forEach((b) => (b.onclick = () => showChapter(b.dataset.ch, () => putRes(lastRes.html, lastRes.bind))));
+    if (bind) bind();
+  }
+  function tailHtml(shells, coins, dl) {
+    let h = "";
+    if (coins) h += `<p style="text-align:center;color:#fde047;font-weight:800">+${coins} monete (prima volta)</p>`;
+    if (shells || (dl && dl.sh)) h += `<p class="ahd-sub" style="text-align:center">+${shells + (dl ? dl.sh : 0)} conchiglie</p>`;
+    if (dl) dl.out.forEach((t) => { h += `<div class="ahd-new">Sfida del giorno completata: ${esc(t)}</div>`; });
+    return h + newChapsHtml();
+  }
   function showResult() {
-    uiState = "result";
-    const [a, c] = M.score;
-    const win = a > c, draw = a === c;
-    let st = 0, coins = 0;
-    if (win) {
-      st = 1 + (a - c >= 2 ? 1 : 0) + (c === 0 ? 1 : 0);
-      PROG.wins++;
-      if (M.mi >= 0) {
-        PROG.stars[M.mi] = Math.max(PROG.stars[M.mi], st);
-        if (!PROG.coin[M.mi]) { PROG.coin[M.mi] = 1; coins = STAR_COINS[M.mi]; if (typeof window.addCoins === "function") { try { window.addCoins(coins); } catch (e) { /* ignora */ } } }
-      }
+    const m = M.mode;
+    if (m === "surv") return resSurv();
+    if (m === "timed") return resTimed();
+    if (m === "setp") return resSetp();
+    if (m === "pens" || m === "cup-pens") return resPens();
+    return resTeam();
+  }
+  const SOCC_LOSE = ["Si perde, ogni tanto. Zia Pina intanto ha messo su il fritto: perdere con un cartoccio in mano fa meno male.", "Una sconfitta in meno di cento secondi. Per un Borgo che ha perso il traghetto cento volte, è quasi puntualità."];
+  const SOCC_TIE = "Pareggio anche ai supplementari. Nessuno ha vinto, nessuno ha perso, e il fritto è ancora caldo. Riprova: stavolta la palla non ha scuse.";
+
+  function resTeam() {
+    const [a, c] = M.score, mode = M.mode, win = a > c, draw = a === c, o = M.opp;
+    if (mode === "cup" && draw) {
+      uiState = "result";
+      showUi(`<h2>Pareggio dopo i supplementari</h2><div class="ahd-score"><span style="color:#7dd3fc">${a}</span> - <span style="color:#fca5a5">${c}</span></div>
+        <div class="ahd-quote">${esc("Ginetta alza il fischietto d'argento: «Nella Coppa non si pareggia. Si va ai rigori. Respirate, poi tirate.»")}</div>
+        <button class="ahd-btn" data-a="go">Ai rigori</button>`);
+      on('[data-a="go"]', () => launch({ mode: "cup-pens", opp: o, diff: M.diffIdx, reg: [a, c], cb: CTX.cb }));
+      return;
     }
-    saveProg();
-    const o = M.opp;
-    const lose = ["Si perde, ogni tanto. Zia Pina intanto ha messo su il fritto: perdere con un cartoccio in mano fa meno male.", "Una sconfitta in meno di cento secondi. Per un Borgo che ha perso il traghetto cento volte, è quasi puntualità."];
-    const tie = "Pareggio anche ai supplementari. Nessuno ha vinto, nessuno ha perso, e il fritto è ancora caldo. Riprova: stavolta la palla non ha scuse.";
-    const quote = win ? o.win : draw ? tie : lose[Math.floor(Math.random() * lose.length)];
-    const next = M.mi >= 0 && win && M.mi < OPPS.length - 1;
-    showUi(`<h2>${win ? "Vittoria!" : draw ? "Pareggio" : "Sconfitta"}</h2><div class="ahd-score"><span style="color:#7dd3fc">${a}</span> - <span style="color:#fca5a5">${c}</span></div>
-      <p class="ahd-sub" style="text-align:center">Rondine vs ${o.name}</p>
+    M.st.intesa = M.intesa;
+    let st = 0, coins = 0, shells = win ? 0 : draw ? 1 : 0, extra = "";
+    if (win) { st = 1 + (a - c >= 2 ? 1 : 0) + (c === 0 ? 1 : 0); PROG.wins++; shells = 2 + st; }
+    if (mode === "torneo" && win && M.mi >= 0) {
+      PROG.stars[M.mi] = Math.max(PROG.stars[M.mi], st);
+      if (!PROG.coin[M.mi]) { PROG.coin[M.mi] = 1; coins += STAR_COINS[M.mi]; if (typeof window.addCoins === "function") { try { window.addCoins(STAR_COINS[M.mi]); } catch (e) { /* ignora */ } } }
+    }
+    if (mode === "free" && win) coins += coinOnce("free", 2);
+    let quote = win ? o.win : draw ? SOCC_TIE : pick(SOCC_LOSE);
+    let sea = null, cup = null;
+    if (mode === "season") {
+      sea = seasonApply(a, c); shells += sea.shells; coins += sea.coins;
+      if (sea.done) extra = `<h3>Stagione conclusa: ${sea.rank + 1}° posto</h3><div class="ahd-quote">${esc(SEA_END[Math.min(5, sea.rank)])}</div>`;
+    }
+    if (mode === "cup") {
+      cup = cupApply(win, a, c, false); shells += cup.shells; coins += cup.coins;
+      extra = `<div class="ahd-quote">${esc(cup.champ ? CUP_END.win : cup.out ? CUP_END.lose : "Passi il turno. Il tabellone, nel frattempo, si è mosso senza di te.")}</div>`;
+    }
+    addShells(shells); saveProg();
+    const dl = dailyEval({ mode, team: true, win, a, c, st: M.st });
+    const next = mode === "torneo" && M.mi >= 0 && win && M.mi < OPPS.length - 1;
+    const stat = (k, v) => `<div class="ahd-stat"><span>${k}</span><span>${v}</span></div>`;
+    let btns = "";
+    if (next) btns += `<button class="ahd-btn" data-a="next">Prossima sfida</button>`;
+    if (mode === "season") btns += `<div class="ahd-row2"><button class="ahd-btn" data-a="tbl">Classifica</button><button class="ahd-btn sec" data-a="menu">Menu</button></div>`;
+    else if (mode === "cup") btns += `<div class="ahd-row2"><button class="ahd-btn" data-a="tbl">Tabellone</button><button class="ahd-btn sec" data-a="menu">Menu</button></div>`;
+    else btns += `<div class="ahd-row2"><button class="ahd-btn ${next ? "sec" : ""}" data-a="again">Rigioca</button><button class="ahd-btn sec" data-a="menu">${mode === "torneo" ? "Torneo" : "Menu"}</button></div>`;
+    putRes(`<h2>${win ? "Vittoria!" : draw ? "Pareggio" : "Sconfitta"}</h2><div class="ahd-score"><span style="color:#7dd3fc">${a}</span> - <span style="color:#fca5a5">${c}</span></div>
+      <p class="ahd-sub" style="text-align:center">Rondine vs ${esc(o.name)} · ${MODE_NAMES[mode] || ""}</p>
       ${win ? `<div class="ahd-stars">${stars(st)}</div>` : ""}
-      ${coins ? `<p style="text-align:center;color:#fde047;font-weight:800">+${coins} monete (prima vittoria)</p>` : ""}
-      <div class="ahd-quote">${esc(quote)}</div>
-      <div class="ahd-stat"><span>Tiri</span><span>${M.shots[0]} - ${M.shots[1]}</span></div>
-      <div class="ahd-stat"><span>Parate</span><span>${M.saves[0]} - ${M.saves[1]}</span></div>
-      <div class="ahd-stat"><span>Intese Leo-Nico</span><span>${M.intesa}</span></div>
-      ${next ? '<button class="ahd-btn" data-a="next">Prossima sfida</button>' : ""}
-      <button class="ahd-btn ${next ? "sec" : ""}" data-a="again">Rigioca</button>
-      <button class="ahd-btn sec" data-a="menu">Menu del torneo</button>`);
-    const nx = ui.querySelector('[data-a="next"]'); if (nx) nx.onclick = () => showIntro(M.mi + 1);
-    ui.querySelector('[data-a="again"]').onclick = () => startMatch(M.mi);
-    ui.querySelector('[data-a="menu"]').onclick = showMenu;
+      <div class="ahd-quote">${esc(quote)}</div>${extra}
+      ${stat("Tiri", M.shots[0] + " - " + M.shots[1])}${stat("Parate", M.saves[0] + " - " + M.saves[1])}${stat("Intese Leo-Nico", M.intesa)}
+      ${tailHtml(shells, coins, dl)}${btns}`, () => {
+      on('[data-a="next"]', () => showIntro(M.mi + 1));
+      on('[data-a="again"]', () => launch(CTX));
+      on('[data-a="tbl"]', mode === "season" ? showSeason : showCup);
+      on('[data-a="menu"]', mode === "torneo" ? showTorneo : showMenu);
+    });
+  }
+
+  const SURV_END = [
+    "Cadi alla prima ondata. Il mare insegna: non tutte le onde si prendono di petto.",
+    "Hai tenuto un po', poi la marea ha fatto la marea. Il Molo non giudica: ti passa un cartoccio.",
+    "Bella resistenza. Arturo parla di «lotta di scoglio»: a Genova è un complimento.",
+    "Quasi un faro: hai retto ondata dopo ondata. Ginetta annota il nome a matita, per ora.",
+  ];
+  function resSurv() {
+    const g = M.score[0], lv = M.level, rec = g > X.best.surv;
+    if (rec) X.best.surv = g; saveX("best");
+    const coins = g >= 5 ? coinOnce("surv", 3) : 0, shells = g + (lv - 1);
+    addShells(shells);
+    const dl = dailyEval({ mode: "surv", level: lv, a: g, c: M.score[1], st: M.st, team: false });
+    putRes(`<h2>Sopravvivenza finita</h2><div class="ahd-score"><span style="color:#7dd3fc">${g}</span></div><p class="ahd-sub" style="text-align:center">gol segnati · ondata ${lv}${rec ? " · nuovo record!" : ""}</p>
+      <div class="ahd-quote">${esc(SURV_END[lv <= 1 ? 0 : lv <= 3 ? 1 : lv <= 5 ? 2 : 3])}</div>
+      <div class="ahd-stat"><span>Record</span><span>${X.best.surv} gol</span></div>${tailHtml(shells, coins, dl)}
+      <div class="ahd-row2"><button class="ahd-btn" data-a="again">Riprova</button><button class="ahd-btn sec" data-a="menu">Menu</button></div>`, () => {
+      on('[data-a="again"]', () => launch(CTX)); on('[data-a="menu"]', showMenu);
+    });
+  }
+  function resTimed() {
+    const g = M.score[0], medal = g >= 6 ? 3 : g >= 4 ? 2 : g >= 2 ? 1 : 0, rec = g > X.best.timed;
+    if (rec) X.best.timed = g; saveX("best");
+    const coins = medal === 3 ? coinOnce("timed", 3) : 0, shells = g + medal;
+    addShells(shells);
+    const dl = dailyEval({ mode: "timed", a: g, c: M.score[1], st: M.st, team: false });
+    const txt = ["Zero medaglie. Il cronometro dice che hai corso bene: peccato che il pallone fosse altrove.", "Bronzo: il minimo sindacale del Molo, cioè quello che regge.", "Argento. Ginetta controlla l'orologio e non trova nulla da ridire, il che è già una medaglia.", "Oro! Arturo, in diretta: «Il tempo è finito, ma il Molo era già in ritardo»."][medal];
+    putRes(`<h2>Tempo scaduto</h2><div class="ahd-score"><span style="color:#7dd3fc">${g}</span></div><p class="ahd-sub" style="text-align:center">gol in 75 secondi${rec ? " · nuovo record!" : ""}</p>
+      <div class="ahd-stars">${["☆☆☆", "★☆☆", "★★☆", "★★★"][medal]}</div><div class="ahd-quote">${esc(txt)}</div>
+      <div class="ahd-stat"><span>Record</span><span>${X.best.timed} gol</span></div>${tailHtml(shells, coins, dl)}
+      <div class="ahd-row2"><button class="ahd-btn" data-a="again">Riprova</button><button class="ahd-btn sec" data-a="menu">Menu</button></div>`, () => {
+      on('[data-a="again"]', () => launch(CTX)); on('[data-a="menu"]', showMenu);
+    });
+  }
+  function resSetp() {
+    const S = M.setp, g = S.goals, rec = g > X.best.setp, st = g >= 5 ? 3 : g >= 4 ? 2 : g >= 2 ? 1 : 0;
+    if (rec) X.best.setp = g; saveX("best");
+    const coins = g >= 4 ? coinOnce("setp", 3) : 0, shells = g + st;
+    addShells(shells);
+    const dl = dailyEval({ mode: "setp", goals: g, a: g, c: 0, st: M.st, team: false });
+    const nm = { fk: "Punizione", cor: "Angolo", pen: "Rigore" }, rs = { goal: "gol", save: "parato", block: "barriera", miss: "fuori", conceded: "gol subito" };
+    const lines = S.log.map((l, i) => `<div class="ahd-stat"><span>${i + 1}. ${nm[l.kind]}</span><span class="${l.res === "goal" ? "ahd-done" : ""}">${rs[l.res] || l.res}</span></div>`).join("");
+    const txt = ["Sei calci da fermo, zero gol: Ginetta controlla se il pallone è quadrato. Non lo è.", "Qualcosa si muove: il Molo applaude con una mano sola, l'altra tiene il cartoccio.", "Bel lavoro da fermo. Il portiere dice che era già in volo, ma verso un'altra idea.", "Da manuale. Arturo propone di dedicarti una sigla; Ginetta di dedicarti un calcio d'angolo."][st];
+    putRes(`<h2>Calci piazzati</h2><div class="ahd-score"><span style="color:#7dd3fc">${g}</span> / ${S.plan.length}</div><div class="ahd-stars">${stars(st)}</div>
+      <div class="ahd-quote">${esc(txt)}</div>${lines}${tailHtml(shells, coins, dl)}
+      <div class="ahd-row2"><button class="ahd-btn" data-a="again">Riprova</button><button class="ahd-btn sec" data-a="menu">Menu</button></div>`, () => {
+      on('[data-a="again"]', () => launch(CTX)); on('[data-a="menu"]', showMenu);
+    });
+  }
+  function resPens() {
+    const S = M.so, win = S.sc[0] > S.sc[1], cupMode = M.mode === "cup-pens";
+    let coins = 0, shells = win ? 4 : 1, extra = "", cup = null;
+    if (!cupMode) { if (win) { X.best.pens++; saveX("best"); coins = coinOnce("pens", 3); } }
+    else { const reg = CTX.reg || [0, 0]; cup = cupApply(win, reg[0], reg[1], true); shells += cup.shells; coins += cup.coins; extra = `<div class="ahd-quote">${esc(cup.champ ? CUP_END.win : cup.out ? CUP_END.lose : "Rigori vinti, nervi saldi: avanti nel tabellone.")}</div>`; }
+    if (win) PROG.wins++; saveProg();
+    addShells(shells);
+    const dl = dailyEval({ mode: "pens", saved: S.saved, win, a: S.sc[0], c: S.sc[1], st: M.st, team: false });
+    const dots = (arr) => arr.map((r) => (r ? "●" : "✕")).join(" ");
+    const txt = win ? "Il portiere guarda la palla in rete come si guarda un treno che parte. Nessun rimpianto, solo un po' di fritto." : "Dal dischetto il pallone pesa il doppio: succede a tutti, a Genova di più.";
+    putRes(`<h2>${win ? "Rigori vinti!" : "Rigori persi"}</h2><div class="ahd-score"><span style="color:#7dd3fc">${S.sc[0]}</span> - <span style="color:#fca5a5">${S.sc[1]}</span></div>
+      <div class="ahd-stat"><span>Tuoi tiri</span><span>${dots(S.log[0])}</span></div><div class="ahd-stat"><span>Loro tiri</span><span>${dots(S.log[1])}</span></div>
+      <div class="ahd-quote">${esc(txt)}</div>${extra}${tailHtml(shells, coins, dl)}
+      <div class="ahd-row2">${cupMode ? `<button class="ahd-btn" data-a="tbl">Tabellone</button>` : `<button class="ahd-btn" data-a="again">Rigioca</button>`}<button class="ahd-btn sec" data-a="menu">Menu</button></div>`, () => {
+      on('[data-a="again"]', () => launch(CTX)); on('[data-a="tbl"]', showCup); on('[data-a="menu"]', showMenu);
+    });
   }
 
   function pauseGame() {
     if (uiState !== "play") return;
     uiState = "pause"; paused = true;
     input.charging = false; input.jx = input.jy = 0;
-    showUi(`<h2>In pausa</h2><p class="ahd-sub">${M.opp.name} · ${M.score[0]} - ${M.score[1]}</p>
+    const mode = M.mode, train = mode === "train";
+    showUi(`<h2>In pausa</h2><p class="ahd-sub">${esc(MODE_NAMES[mode] || "")} · ${esc(M.opp.name)} · ${hudInfo().a} - ${hudInfo().c}</p>
       <button class="ahd-btn" data-a="res">Riprendi</button>
-      <h3>Controlli</h3><div class="ahd-seg" data-k="ctrl"><button data-v="stick" class="${SET.ctrl === "stick" ? "on" : ""}">Joystick</button><button data-v="touch" class="${SET.ctrl === "touch" ? "on" : ""}">Tocca e corri</button></div>
-      <button class="ahd-btn sec" data-a="tut">Come si gioca</button>
-      <button class="ahd-btn sec" data-a="rst">Ricomincia la partita</button>
+      <h3>Controlli</h3>${segHtml("ctrl", ["Joystick", "Tocca e corri"], SET.ctrl, ["stick", "touch"])}
+      <div class="ahd-row2"><button class="ahd-btn sec" data-a="tut">Come si gioca</button>${train ? '<button class="ahd-btn sec" data-a="ctr">Palla al centro</button>' : '<button class="ahd-btn sec" data-a="rst">Ricomincia</button>'}</div>
       <button class="ahd-btn red" data-a="menu">Abbandona (menu)</button>`);
-    ui.querySelector('[data-a="res"]').onclick = resumeGame;
-    ui.querySelectorAll(".ahd-seg button").forEach((b) => (b.onclick = () => { SET.ctrl = b.dataset.v; saveSet(); ui.querySelectorAll(".ahd-seg button").forEach((x) => x.classList.toggle("on", x === b)); stage.querySelector(".ahd-pad").classList.toggle("all", SET.ctrl === "touch"); }));
-    ui.querySelector('[data-a="tut"]').onclick = () => showTutorial(0, pauseGame);
-    ui.querySelector('[data-a="rst"]').onclick = () => startMatch(M.mi);
-    ui.querySelector('[data-a="menu"]').onclick = showMenu;
+    on('[data-a="res"]', resumeGame);
+    on('[data-a="tut"]', () => showTutorial(0, pauseGame));
+    on('[data-a="rst"]', () => launch(CTX));
+    on('[data-a="ctr"]', () => { setupKickoff(0); M.score = [0, 0]; resumeGame(); });
+    on('[data-a="menu"]', showMenu);
   }
   function resumeGame() { hideUi(); uiState = "play"; paused = false; lastTs = 0; acc = 0; showDefaultStick(); }
 
@@ -1482,11 +2537,12 @@
     if (silent !== true && typeof cb === "function") { try { cb(); } catch (e) { console.error(e); } }
   }
 
-  window.openActionSoccerHD = function (onExit) {
+  function openHd(opts) {
+    opts = opts || {};
     if (root) closeAll(true);
     injectCss();
-    onExitCb = onExit;
-    PROG = loadProg(); SET = loadSet();
+    onExitCb = typeof opts.onExit === "function" ? opts.onExit : null;
+    PROG = loadProg(); SET = loadSet(); X = loadX(); bgCache = null; CTX = null; lookPend = ""; teamInfo = "";
     closed = false; paused = false; lastTs = 0; acc = 0; M = null; uiState = "menu";
     root = document.createElement("div");
     root.className = "ahd-root"; root.id = "actionSoccerModal"; root.tabIndex = 0;
@@ -1528,10 +2584,33 @@
     const vis = () => { if (document.hidden && uiState === "play") pauseGame(); };
     document.addEventListener("visibilitychange", vis);
     cleanup.push(() => { window.removeEventListener("keydown", kd); window.removeEventListener("keyup", ku); document.removeEventListener("visibilitychange", vis); });
-    if (DEBUG) { window.__ahd = { M: () => M, input, SET, PROG: () => PROG, start: (mi, d) => { if (d !== undefined) SET.diff = d; startMatch(mi); }, ts: (n) => { window.__ahdTS = n; } }; }
+    if (DEBUG) {
+      window.__ahd = {
+        M: () => M, input, SET, PROG: () => PROG, X: () => X, CTX: () => CTX,
+        start: (mi, d) => { if (d !== undefined) SET.diff = d; startMatch(mi); },
+        launch: (cfg) => launch(cfg), go: (g) => openGo(g), ALLT, KITS, CHAPS, MATES,
+        ts: (n) => { window.__ahdTS = n; },
+      };
+    }
 
     raf = requestAnimationFrame(loop);
     root.focus();
-    showMenu();
-  };
+    const go = opts.mode || "menu";
+    if (go === "menu") showMenu(); else openGo(go);
+  }
+  window.openActionSoccerHD = function (onExit) { openHd({ onExit }); };
+
+  // stato sintetico per il Borgo (NPC organizzatrice): legge solo i salvataggi, non apre nulla
+  function hdState() {
+    if (!root) { PROG = loadProg(); SET = loadSet(); X = loadX(); }
+    const open = CHAPS.filter(chapOpen), D = dailyEnsure();
+    const last = open[open.length - 1];
+    return {
+      version: 2, chapters: open.length, total: CHAPS.length, latest: last ? last.t : "",
+      latestId: last ? last.id : "", newChapters: open.filter((c) => !X.meta.seen.includes(c.id)).length,
+      seasonOn: !!(X.season && !X.season.done), md: X.season ? X.season.md : 0, cupOn: !!(X.cup && !X.cup.done), cupWon: X.meta.cupsWon, titles: X.meta.seasonTitles,
+      dailyLeft: D.ids.length - D.done.length, streak: D.streak, shells: X.meta.shells, played: totalPlays(), torneo: PROG.stars.filter((q) => q > 0).length,
+    };
+  }
+  window.__actionHd = { version: 2, start: openHd, state: hdState, modes: ["menu", "torneo", "season", "cup", "free", "surv", "timed", "pens", "setp", "train", "daily", "team", "look", "tac", "diary"] };
 })();
