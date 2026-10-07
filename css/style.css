@@ -245,6 +245,94 @@
   .choices button.hot { background: linear-gradient(135deg, #b3202c, #ff4d5a); border-color: #ffd23f; }
   .choices button.danger { background: #4a1119; border-color: #ff4d5a; }
   .choices button.pick { background: #2b2350; border-color: #b9a6ff80; }
+  /* Segnaposto "Già scelto" & Nuove scelte nei bivi narrativi */
+  .choices button.seen-choice {
+    opacity: 0.82;
+    background: #17243b;
+    border-color: rgba(147, 197, 253, 0.4);
+    filter: saturate(0.85);
+  }
+  .choices button.seen-choice:hover,
+  .choices button.seen-choice:focus-visible {
+    opacity: 1;
+    background: #1e3352;
+    border-color: var(--gold);
+    filter: saturate(1);
+  }
+  .choice-lbl-text {
+    vertical-align: middle;
+  }
+  .choice-tag-seen {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #93c5fd;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-left: 6px;
+    vertical-align: middle;
+    letter-spacing: 0.02em;
+  }
+  .choice-dot-seen {
+    color: #38bdf8;
+    font-size: 8px;
+    line-height: 1;
+  }
+  .choice-tag-new {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10.5px;
+    font-weight: 800;
+    color: #ffd23f;
+    background: rgba(255, 210, 63, 0.18);
+    border: 1px solid rgba(255, 210, 63, 0.5);
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-left: 6px;
+    vertical-align: middle;
+    letter-spacing: 0.02em;
+    animation: pulseNewTag 1.8s infinite alternate ease-in-out;
+  }
+  @keyframes pulseNewTag {
+    from { border-color: rgba(255, 210, 63, 0.4); }
+    to { border-color: rgba(255, 210, 63, 0.9); box-shadow: 0 0 6px rgba(255, 210, 63, 0.3); }
+  }
+  /* Pulsanti Skip / Avanzamento Veloce */
+  .choices button.skip-btn {
+    background: linear-gradient(135deg, #13243d, #1e3a63);
+    border-color: #38bdf880;
+    color: #e0f2fe;
+    font-size: 13.5px;
+  }
+  .choices button.skip-btn:hover {
+    background: linear-gradient(135deg, #1a3356, #254b7d);
+    border-color: #38bdf8;
+    color: #ffffff;
+  }
+  .choices button.skip-active-btn {
+    background: linear-gradient(135deg, #7f1d1d, #b91c1c);
+    border-color: #f87171;
+    color: #ffffff;
+    font-size: 14px;
+    animation: pulseSkipBtn 1.2s infinite alternate ease-in-out;
+  }
+  @keyframes pulseSkipBtn {
+    from { box-shadow: 0 0 6px rgba(239, 68, 68, 0.35); }
+    to { box-shadow: 0 0 16px rgba(239, 68, 68, 0.75); border-color: #fca5a5; }
+  }
+  @keyframes pulseSkipBanner {
+    from { transform: translateX(-50%) scale(1); }
+    to { transform: translateX(-50%) scale(1.02); }
+  }
+  @keyframes spinFast {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
   .choices button:disabled { opacity: .38; cursor: default; }
   .choices button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
   .choices button small { display: block; font-weight: 400; font-size: 11px; color: #c9d6ea; margin-top: 2px; }

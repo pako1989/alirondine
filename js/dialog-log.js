@@ -102,7 +102,16 @@
     }
   }
 
+  function isDialogueInLog(who, text) {
+    if (!text) return false;
+    const clean = String(text).replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+    if (!clean) return false;
+    return logEntries.some((e) => e.text === clean || (e.text.length > 20 && clean.includes(e.text)));
+  }
+
   window.addDialogueLog = addDialogueLog;
+  window.isDialogueInLog = isDialogueInLog;
+  window.getDialogueLogEntries = () => logEntries.slice();
   window.openDialogueLog = openDialogueLog;
   window.closeDialogueLog = closeDialogueLog;
   window.getTextSpeed = getTextSpeed;
