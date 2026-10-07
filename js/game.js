@@ -2056,7 +2056,7 @@
     // tiro a tempo: prima la barra, poi il tiro vero con la potenza corretta (perfetto +12%, buono uguale, fuori −15%)
     if (pcOn("tempo") && !M.tmGo) {
       const nm = kind === "normal" ? "Tiro" : kind === "hero" ? heroShot().name : kind === "mate" ? mateShot(M.carrier).name : (SHOTS[kind] && SHOTS[kind].name) || "Tiro";
-      return timing(nm, (n) => { M.tmGo = true; M.tmMul = [0.85, 1, 1.12][n - 1]; view = { kind: "match" }; shoot(kind); }, "stadium");
+      return timing(nm, (n) => { M.tmGo = true; M.tmMul = [[0.85, 1, 1.12], [0.85, 0.98, 1.1], [0.82, 0.95, 1.08]][hLv()][n - 1]; view = { kind: "match" }; shoot(kind); }, "stadium");
     }
     const tmMul = M.tmGo ? M.tmMul || 1 : 1, tmN = M.tmGo ? (M.tmMul > 1 ? "<b>Coordinazione perfetta!</b> " : M.tmMul < 1 ? "<span style=\"color:var(--dim)\">Colpita male…</span> " : "") : ""; M.tmGo = false; M.tmMul = 1;
     const t = TEAMS[M.team], st = S.st, mk = M.carrier, sp = kind === "hero" ? heroShot() : kind === "mate" ? mateShot(mk) : SHOTS[kind];
@@ -20834,12 +20834,18 @@
     const md = r.modes[mode] || { p: 0, w: 0 }; md.p++; if (win) md.w++; r.modes[mode] = md;
     const objOk = !!(A.obj && A.obj.ok(a, c, A)); if (objOk) { r.obj[A.obj.id] = (r.obj[A.obj.id] || 0) + 1; r.objN = (r.objN || 0) + 1; }
     let coins = win ? (dif === "facile" ? 1 : 2 + (first ? 5 : 0) + (A.coinB || 0) + (dif === "duro" ? 2 : dif === "leggenda" ? 4 : 0) + (mode === "eventi" ? 1 : 0)) : a === c ? 1 : 0; if (objOk) coins += 3;
+    { // tetto giornaliero: 20 monete al giorno dalle partite di Calcio d'azione (la prima vittoria su una squadra non conta nel tetto)
+      const day = new Date().toDateString(), AZC = "ali-di-rondine.az-monete-giorno";
+      let cp = readJSON(AZC, null); if (!cp || cp.d !== day) cp = { d: day, n: 0 };
+      const bonus = first ? 5 : 0, base = Math.max(0, coins - bonus), give = Math.min(base, Math.max(0, 20 - cp.n));
+      cp.n += give; writeJSON(AZC, cp); coins = give + bonus;
+    }
     writeJSON(AZK, r); if (coins) addCoins(coins);
     if (A.cz) return A.cz.end(a, c);
     const res = win ? "W" : a === c ? "D" : "L", n = (typeof AZN !== "undefined" && AZN[A.k]) || null, st = A.stat, tp = st.poss[0] + st.poss[1] || 1;
     const epi = [n ? n[win ? 2 : a === c ? 3 : 4] : "", A.sea ? azSeaAfter(A, res) : ""].filter(Boolean).map((t) => `<br><em>${esc(t)}</em>`).join("");
     view = { kind: "scene", bg: "stadium", speaker: null }; chap("Calcio d'azione");
-    text("voce", `<b>${win ? "Vittoria" : a === c ? "Pareggio" : "Sconfitta"} ${a}–${c}</b> contro ${esc(A.T.name)}. ${win ? `${first ? "Prima volta che li batti: " : ""}<em>+${coins} monete</em>.` : a === c ? "<em>+1 moneta</em> di consolazione." : "Si riprova: il pallone non ha fretta."}${A.obj ? `<br><b>Obiettivo «${esc(A.obj.txt)}»:</b> ${objOk ? "centrato! <em>+3 monete</em>" : "mancato"}.` : ""}${dif === "facile" && win ? "<br><span style='color:var(--dim)'>In Facile la vittoria non conta per le imprese.</span>" : ""}${epi}<br><span style="color:var(--dim)">Possesso ${Math.round(st.poss[0] / tp * 100)}–${Math.round(st.poss[1] / tp * 100)} · tiri ${st.sh[0]}–${st.sh[1]} (in porta ${st.on[0]}–${st.on[1]}) · parate ${st.save[0]}–${st.save[1]} · passaggi ${st.pass[0]}–${st.pass[1]} · palle rubate ${st.steal}${st.spec ? ` · speciali ${st.spec}` : ""}${st.pu ? ` · potenziamenti ${st.pu}` : ""}${st.ab ? ` · mosse dei compagni ${st.ab}` : ""}<br>${esc(AZ_PIT[pit].n)} · ${esc(AZ_DIF[dif].n)}</span>`);
+    text("voce", `<b>${win ? "Vittoria" : a === c ? "Pareggio" : "Sconfitta"} ${a}–${c}</b> contro ${esc(A.T.name)}. ${win ? `${first ? "Prima volta che li batti: " : ""}<em>${coins ? "+" + coins + " monete" : "monete di oggi finite: tetto di 20"}</em>.` : a === c ? "<em>+1 moneta</em> di consolazione." : "Si riprova: il pallone non ha fretta."}${A.obj ? `<br><b>Obiettivo «${esc(A.obj.txt)}»:</b> ${objOk ? "centrato! <em>+3 monete</em>" : "mancato"}.` : ""}${dif === "facile" && win ? "<br><span style='color:var(--dim)'>In Facile la vittoria non conta per le imprese.</span>" : ""}${epi}<br><span style="color:var(--dim)">Possesso ${Math.round(st.poss[0] / tp * 100)}–${Math.round(st.poss[1] / tp * 100)} · tiri ${st.sh[0]}–${st.sh[1]} (in porta ${st.on[0]}–${st.on[1]}) · parate ${st.save[0]}–${st.save[1]} · passaggi ${st.pass[0]}–${st.pass[1]} · palle rubate ${st.steal}${st.spec ? ` · speciali ${st.spec}` : ""}${st.pu ? ` · potenziamenti ${st.pu}` : ""}${st.ab ? ` · mosse dei compagni ${st.ab}` : ""}<br>${esc(AZ_PIT[pit].n)} · ${esc(AZ_DIF[dif].n)}</span>`);
     const ov = A.sea ? { sea: true, pitch: pit, mode: "amic" } : null;
     buttons(A.sea ? [{ label: "Avanti con la stagione ▸", cls: "hot", fn: () => azSeaMenu(A.back) }, { label: "◂ Calcio d'azione", fn: () => azioneMenu(A.back) }] : [{ label: "Rivincita", cls: "hot", fn: () => azStart(A.k, A.back, true) }, { label: "Altre squadre", fn: () => azioneMenu(A.back) }, { label: "◂ Modalità", fn: modes }]);
   }
