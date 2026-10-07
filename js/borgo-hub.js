@@ -175,6 +175,9 @@
     function chat(bSay, bAsk, BL, resume) {
       var m = mem(), k = (m.c | 0), pool = k < CHAT_OPEN.length ? CHAT_OPEN : CHAT_MORE;
       var t = pool[k < CHAT_OPEN.length ? k : (k - CHAT_OPEN.length) % CHAT_MORE.length];
+      // ogni tanto un annuncio sulle reclute con una storia (js/reclute-borgo.js), se ce ne sono di completate
+      var rb = safe(function () { return window.__recluteBorgo.chat("nereo"); }) || [];
+      if (rb.length && k >= CHAT_OPEN.length && k % 2 === 1) t = rb[Math.floor(k / 2) % rb.length].t[0];
       m.c = k + 1; memSet(m);
       bSay([BL(ID, t)], function () { menuMain(bSay, bAsk, BL, resume); });
     }

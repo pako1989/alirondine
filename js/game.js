@@ -8810,6 +8810,7 @@
     const xi = itNews(id); if (xi !== null) return xi;
     const xr = regNews(id); if (xr !== null) return xr;
     const xto = torreTrNews(id); if (xto !== null) return xto;
+    if (typeof window.trNewsHook === "function") { const xh = window.trNewsHook(id); if (xh !== null && xh !== undefined) return !!xh; }
     const q = trRec().q;
     if (id === "gilda") return trRec().day.foc !== todayKey();
     if (id === "ansaldo") return !q.almanacco;

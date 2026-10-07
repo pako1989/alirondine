@@ -2174,6 +2174,9 @@
   window.__cageHd = {
     start: function (opts) { opts = opts || {}; openCage(opts.onExit, opts); },
     info: function () { dailyEnsure(); return { unread: unreadCount(), dailyLeft: EXT.daily.done.filter((x) => !x).length, season: !!(SEA && SEA.active && !SEA.done), cup: !!(CUP && CUP.active && !CUP.done), stars: LEVELS.map((_, i) => starsOf(i)), bosses: BOSSES.filter((b) => bossDone(b.id)).length, titles: EXT.stat.titles, cups: EXT.stat.cups, gt: EXT.gt, open: openTeams(false).length, chapters: EXT.read.length }; },
+    // arruolamento "narrativo" (missioni del Borgo): come leggere la pagina del Diario, ma senza gettone né soglie
+    recruit: function (id) { if (!POOL[id] || !POOL[id].rec || EXT.pool.indexOf(id) >= 0) return false; EXT.pool.push(id); saveExt(); return true; },
+    recruited: function (id) { return !!POOL[id] && EXT.pool.indexOf(id) >= 0; },
     version: 2,
   };
 })();

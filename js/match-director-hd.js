@@ -432,7 +432,7 @@
   // ---------------------------------------------------------------- progressi
   // Salvataggio retrocompatibile: i campi nuovi (kit, gk, intro) sono additivi; chi aveva finito le 5 partite vede i nuovi capitoli sbloccati.
   function defaultProg() {
-    return { v: 1, played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, pts: 0, opp: {}, coins: {}, lastForm: "4-3-3", lastMent: "equil", lastPress: "medio", kit: "blu", gk: "sandro", intro: {} };
+    return { v: 1, played: 0, wins: 0, draws: 0, losses: 0, gf: 0, ga: 0, pts: 0, opp: {}, coins: {}, lastForm: "4-3-3", lastMent: "equil", lastPress: "medio", kit: "blu", gk: "sandro", intro: {}, recruits: {} };
   }
   function loadProg() {
     const d = defaultProg();
@@ -452,6 +452,7 @@
         if (PRESS[r.lastPress]) d.lastPress = r.lastPress;
         if (typeof r.kit === "string" && KITS.some((k) => k.id === r.kit)) d.kit = r.kit;
         if (r.gk === "ondina") d.gk = "ondina";
+        if (r.recruits && typeof r.recruits === "object") ARRIVALS.forEach((a) => { if (r.recruits[a.id]) d.recruits[a.id] = true; }); // arruolati fuori dalle partite (missioni del Borgo)
         if (r.intro && typeof r.intro === "object") SEASONS.forEach((se) => { if (r.intro[se.id]) d.intro[se.id] = true; });
       }
     } catch (e) { /* default sicuro */ }
@@ -469,7 +470,7 @@
   function seasonOpps(si) { return OPPS.filter((o) => o.season === si); }
   // stelle raccolte nella stagione senza contare la finale
   function seasonStars(p, si) { return seasonOpps(si).filter((o) => o.id !== SEASONS[si].fin).reduce((n, o) => n + ((p.opp[o.id] || {}).stars || 0), 0); }
-  function arrivalHas(p, id) { const a = ARRIVALS.find((x) => x.id === id); return !!a && oppWon(p, a.ep); }
+  function arrivalHas(p, id) { const a = ARRIVALS.find((x) => x.id === id); return !!a && (oppWon(p, a.ep) || !!(p.recruits && p.recruits[id])); }
   // sblocco: serve una vittoria nell'episodio precedente (e, per le finali di stagione, abbastanza stelle)
   function oppState(p, i) {
     if (i === 0) return { open: true };
@@ -1958,6 +1959,9 @@
     version: 2,
     start: function (o) { o = o || {}; open(o.onExit, { opp: o.opp, screen: o.screen, from: o.from }); },
     state: stateInfo,
+    // arruolamento "narrativo" (missioni del Borgo): non tocca episodi, stelle né soglie; true solo se la recluta entra ora
+    recruit: function (id) { const p = loadProg(); if (!ARRIVALS.some((a) => a.id === id) || arrivalHas(p, id)) return false; p.recruits[id] = true; saveProg(p); return true; },
+    recruited: function (id) { return arrivalHas(loadProg(), id); },
     episodes: function () { const p = loadProg(); return OPPS.map((x, i) => ({ id: x.id, ep: x.ep, season: x.season, name: oppUnlocked(p, i) ? x.name : "???", open: oppUnlocked(p, i), stars: (p.opp[x.id] || {}).stars || 0 })); },
     // simulazione senza interfaccia (taratura): n partite contro l'episodio con una strategia semplice
     sim: function (id, n, strat, asIfProg) { return simulate(id, n || 1, strat || "base", asIfProg); }

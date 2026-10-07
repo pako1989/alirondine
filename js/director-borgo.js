@@ -77,8 +77,10 @@
       { need: function (s) { return s.seasonsDone >= 2; }, t: ["Mio padre vendeva chiodi e viti. Diceva che una società è un mazzo di chiavi: ognuno ne ha una, e la porta si apre solo se ci sono tutte. Io avevo solo il portachiavi. Poi sono arrivati i ragazzi, e le chiavi.", "Quando ho preso la Rondine avevo un debito e una speranza. Il debito è ancora lì. La speranza, lo ammetto, ha messo su un po' di peso."] },
       { need: function (s) { return s.seasonsDone >= 3 || s.won >= 20; }, t: ["Se mi chiedono cosa ho vinto, rispondo: una piazza piena. Non c'è coppa che pesi meno, e nessuna che si tiene meglio sul comò."] }
     ];
+    // battute sulle reclute con una storia (js/reclute-borgo.js), se il modulo è caricato: una per missione completata
+    function rbChat(who) { try { var r = window.__recluteBorgo; return r && typeof r.chat === "function" ? (r.chat(who) || []) : []; } catch (e) { return []; } }
     function presChat() {
-      var s = st() || { won: 0, seasonsDone: 0 }, ok = PCHAT.filter(function (c) { try { return c.need(s); } catch (e) { return false; } });
+      var s = st() || { won: 0, seasonsDone: 0 }, ok = PCHAT.filter(function (c) { try { return c.need(s); } catch (e) { return false; } }).concat(rbChat("pres"));
       var m = mem(), n = m.pchat | 0, c = ok[n % ok.length];
       m.pchat = n + 1; memSet(m);
       api.trSay(c.t.map(function (t) { return L(PRES, t); }), api.trResume);
@@ -106,7 +108,7 @@
       { need: function (s) { return s.seasonsDone >= 2; }, t: ["Quando un ragazzo se ne va, tengo il suo foglio: non per nostalgia, per l'archivio. Ne ho una pila alta così. È nostalgia, certo. Ma l'archivio è l'archivio."] }
     ];
     function dinaChat() {
-      var s = st() || { won: 0, seasonsDone: 0 }, ok = DCHAT.filter(function (c) { try { return c.need(s); } catch (e) { return false; } });
+      var s = st() || { won: 0, seasonsDone: 0 }, ok = DCHAT.filter(function (c) { try { return c.need(s); } catch (e) { return false; } }).concat(rbChat("dina"));
       var m = mem(), n = m.dchat | 0, c = ok[n % ok.length];
       m.dchat = n + 1; memSet(m);
       api.trSay(c.t.map(function (t) { return L(DINA, t); }), api.trResume);
