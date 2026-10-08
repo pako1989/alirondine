@@ -4948,7 +4948,7 @@
     const o = heroOptions(), h = HE.h;
     const cyc = (k, label) => { const list = o[k], i = Math.max(0, list.findIndex(([v]) => v === h[k])), cur = list[i] || list[0]; return { label: `${label}: ${cur[1]} ▸`, sub: `${i + 1} di ${list.length}`, fn: () => { const nx = list[(i + 1) % list.length]; const oldShot = H_SHOTS[h.shot].label.toUpperCase(); h[k] = nx[0]; if (k === "shot" && (!h.shotName || h.shotName.startsWith(oldShot))) { h.shotName = `${H_SHOTS[h.shot].label.toUpperCase()} DI ${h.name.toUpperCase()}`; $("hShot").value = h.shotName; } heroCast(h); heroSum(); heroButtons(); } }; };
     buttons([cyc("style", "Capelli"), cyc("hair", "Colore"), cyc("skin", "Pelle"), cyc("shirt", "Maglia"), cyc("acc", "Accessorio"), cyc("shot", "Tiro"),
-      { label: "Salva il campione", sub: "Usalo in Carriera e nella sua Storia", cls: "hot", fn: () => { HE.h.v = 1; writeJSON(HERO, HE.h); heroCast(HE.h); view = { kind: "scene", bg: "end", speaker: "hero", chibi: true }; text("hero", `<b>${esc(HE.h.name)}</b>, numero ${HE.h.num}, pronto a scendere in campo. Il tiro speciale si chiama <em>${esc(HE.h.shotName)}</em>.<br><span style="color:var(--dim)">${heroWhere}</span>`); buttons([{ label: "⭐ Vivi la Storia del tuo Campione ▸", sub: `La saga inedita di ${HE.h.name}`, cls: "hot", fn: () => { if (window.openHeroStoryMenu) window.openHeroStoryMenu(HE.back); } }, { label: "Gioca la Carriera", fn: career }, { label: "Torneo dei rigori", fn: tournament }, { label: "◂ Indietro", fn: HE.back }]); } },
+      { label: "Salva il campione", sub: "Usalo in Carriera e nella sua Storia", cls: "hot", fn: () => { HE.h.v = 1; writeJSON(HERO, HE.h); heroCast(HE.h); view = { kind: "scene", bg: "end", speaker: "hero", chibi: true }; text("hero", `<b>${esc(HE.h.name)}</b>, numero ${HE.h.num}, pronto a scendere in campo. Il tiro speciale si chiama <em>${esc(HE.h.shotName)}</em>.<br><span style="color:var(--dim)">${heroWhere}</span>`); buttons([{ label: "⭐ Vivi la Storia del tuo Campione ▸", sub: `La saga inedita di ${HE.h.name}`, cls: "hot", fn: () => { if (window.openHeroStoryMenu) window.openHeroStoryMenu(HE.back); } }, { label: "🌊 Cala Tramontana · Borgo del Campione ▸", sub: `Esplora il borgo marino alternativo a piedi con ${HE.h.name}`, cls: "hot", fn: () => { if (window.openCalaTramontana) window.openCalaTramontana(HE.back); } }, { label: "Gioca la Carriera", fn: career }, { label: "Torneo dei rigori", fn: tournament }, { label: "◂ Indietro", fn: HE.back }]); } },
       { label: "◂ Indietro", sub: "Senza salvare", fn: HE.back }]);
   }
   function drawHeroChibi() {
@@ -15038,6 +15038,7 @@
       { head: "Gioca" },
       { label: "Storia", sub: `Le stagioni di Leo · ${mnPct(mnStoria())}%`, fn: menuStoria },
       { label: "Il Borgo Storto", sub: "Spin-off GDR a turni", cls: "hot", fn: () => openBorgoStorto(title) },
+      { label: "🌊 Cala Tramontana", sub: heroLoad() ? `Il borgo alternativo con ${heroLoad().name}` : "Il borgo alternativo del tuo campione", cls: "hot", fn: () => { if (window.openCalaTramontana) window.openCalaTramontana(title); } },
       { label: "Borgo e trasferte", sub: `A piedi per il paese · ${mnPct(mnBorgo())}%`, fn: menuBorgo },
       { label: "Modalità", sub: `Tutte le modalità · ${mnPct(mnModi())}%`, fn: modes },
       { label: "Saghe e minigiochi", sub: "Blue Lock, Noir, Multiverso, Stadio 3D, Panda, Faro…", cls: "hot", fn: menuSaghe },
@@ -15064,6 +15065,7 @@
       { label: "📋 Matchday Director 2D HD", sub: "Fai il Mister: modulo, cambi, discorso all'intervallo, pagella", cls: "hot", fn: () => { if (window.openMatchDirectorHD) window.openMatchDirectorHD(menuSaghe); } },
       { head: "Saghe Ispirate & Speciali" },
       { label: "⭐ La Leggenda del Tuo Campione", sub: heroLoad() ? `La saga esclusiva di ${heroLoad().name} (N.${heroLoad().num})` : "Crea il tuo campione e scendi in campo!", cls: "hot", fn: () => { if (window.openHeroStoryMenu) window.openHeroStoryMenu(menuSaghe); } },
+      { label: "🌊 Cala Tramontana · Il Borgo del Tuo Campione", sub: heroLoad() ? `Esplora a piedi il borgo alternativo con ${heroLoad().name}` : "Modalità a piedi nel borgo marino alternativo per il tuo campione", cls: "hot", fn: () => { if (window.openCalaTramontana) window.openCalaTramontana(menuSaghe); } },
       { label: "⚡ Tsubasa · Il Tiro Combinato", sub: "Holly & Benji: Twin Shot ad elica, la Muppet e parate dal palo!", cls: "hot", fn: () => { if (window.openTsubasaMenu) window.openTsubasaMenu(menuSaghe); } },
       { label: "👑 Westeros · I Cinque Trabucchi", sub: "Game of Thrones: Mappa tattica a feudi, risorse e Re della Notte!", cls: "hot", fn: () => { if (window.openThronesWarMenu) window.openThronesWarMenu(menuSaghe); } },
       { label: "🛸 Futurama · Champions 3000", sub: "Lega Galattica: 4 pianeti a gravità variabile e innesti di Bender!", cls: "hot", fn: () => { if (window.openFuturamaLeagueMenu) window.openFuturamaLeagueMenu(menuSaghe); } },
@@ -15132,6 +15134,7 @@
     text("voce", `<b>Modalità di Gioco</b> ${mnBar(mnPct(mnModi()))}<br>Scegli tra tornei speciali, saghe investigative, multiverso o sfide calcistiche. Tutte indipendenti dal salvataggio principale.`);
     buttons([
       { label: "✨ Arena 2D HD del Borgo", sub: "Suite Completa: Emblem, Action Soccer, Gabbia del Molo e Matchday Director", cls: "hot", fn: () => { if (window.openArena2DHDModal) window.openArena2DHDModal(modes); } },
+      { label: "🌊 Cala Tramontana · Il Borgo del Tuo Campione", sub: heroLoad() ? `Esplora a piedi il borgo alternativo con ${heroLoad().name}` : "Modalità a piedi nel borgo marino alternativo per il tuo campione", cls: "hot", fn: () => { if (window.openCalaTramontana) window.openCalaTramontana(modes); } },
       ...(window.__moloSettimana ? [{ label: "🏆 Settimana del Molo", sub: window.__moloSettimana.info().sub, cls: "hot", fn: () => window.__moloSettimana.open({ onExit: modes }) }] : []),
       ...(window.__diarioScoperte ? [{ label: "📰 Il Diario del Corriere", sub: window.__diarioScoperte.info().sub, cls: "hot", fn: () => window.__diarioScoperte.open({ onExit: modes }) }] : []),
       { label: "🎰 Distributore Gashapon 3D", sub: "I Pupazzetti della Costa: gira la manovella e colleziona i giocattoli 3D!", cls: "hot", fn: () => { if (window.openGachaModal) window.openGachaModal(); } },
