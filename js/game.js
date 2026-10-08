@@ -21829,6 +21829,16 @@
     ]);
   }
   gmenuBtn.onclick = gameMenu;
+  const heroBtn = $("heroBtn");
+  if (heroBtn) {
+    heroBtn.onclick = function () {
+      const inMatch = !!(M || (typeof MGm !== "undefined" && MGm) || (typeof NK !== "undefined" && NK) || (typeof SA !== "undefined" && SA));
+      if (inMatch) { if (window.toast) window.toast("Esci dalla partita per modificare il campione", "info", "🧑"); return; }
+      const tp = $("topOptPanel"); if (tp) tp.hidden = true;
+      closeOverlay(); closeAltStage();
+      heroEditor(title);
+    };
+  }
   const homeBtn = $("homeBtn");
   if (homeBtn) {
     homeBtn.onclick = function () {
