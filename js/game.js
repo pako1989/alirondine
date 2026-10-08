@@ -20171,7 +20171,7 @@
       hi: "Chi tocca la porta della Rondine deve fare i conti con me.", m: { t: "cond", test: "rocco", hint: "Vinci contro gli Squali di Rocco" }, ok: "Difesa della Rondine blindata!", b: { k: "pesca", v: 10 }, idle: ["Pietra lavica e contrasti puliti."] },
     { id: "pietrino", c: svC("Pietrino il Fantasista", "green", "#2b1d0c", "curly", "#f2c59d", "#10b981", {}), at: ["borgo", 34, 5], home: ["borgo", 34, 5], when: "giorno",
       bio: "Fantasista cresciuto nei caruggi, capace di dribblare tra le panchine della piazza e servire assist col contagiri.",
-      hi: "La maglia numero 10 è il mio sogno!", m: { t: "cond", test: "kids", hint: "Parla con Pietrino in piazza" }, ok: "Pietrino veste la maglia della Prima Squadra!", b: { k: "sconto", v: 10 }, idle: ["Guarda questo sombrero!"] },
+      hi: "La maglia numero 10 è il mio sogno!", m: { t: "cond", test: "kids", hint: "Vinci la partitella contro i ragazzini: Pietrino ti aspetta in piazza" }, ok: "Pietrino veste la maglia della Prima Squadra!", b: { k: "sconto", v: 10 }, idle: ["Guarda questo sombrero!"] },
     { id: "mirko", c: svC("Mirko dei Caruggi", "purple", "#1a1a1a", "side", "#e0b088", "#8b5cf6", { hat: "#333" }), at: ["borgo", 12, 12], home: ["borgo", 12, 12], when: "giorno",
       bio: "Mezzala genovese con la coppola del nonno. Calcia con l'esterno a giro sulle serrande dei vicoli.",
       hi: "Porto la classe di Genova nel Rondine FC.", m: { t: "quiz", a: ["Corriere di Genova", "Gazzetta", "Secolo"] }, ok: "Mirko firma per il Rondine FC!", b: { k: "dono", v: 10 }, idle: ["Il tiro a giro è una poesia."] },
@@ -20378,6 +20378,7 @@
     if (k0 === "star") return !!svRec().rec[k1];
     const b = (() => { try { return beQ(); } catch { return {}; } })();
     if (k === "capre") return !!(B && B.q && B.q.capre >= 3);
+    if (k === "kids" || k === "beach" || k === "rocco") return !!(B && B.q && B.q[k] > 0);
     if (k === "cine") return b.cine >= 3;
     if (k === "sign") return b.sign >= 1;
     if (k === "mill") return b.mill >= 2;
