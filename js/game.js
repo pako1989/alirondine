@@ -15039,6 +15039,7 @@
       { label: "Storia", sub: `Le stagioni di Leo · ${mnPct(mnStoria())}%`, fn: menuStoria },
       { label: "Il Borgo Storto", sub: "Spin-off GDR a turni", cls: "hot", fn: () => openBorgoStorto(title) },
       { label: "🌊 Cala Tramontana", sub: heroLoad() ? `Il borgo alternativo con ${heroLoad().name}` : "Il borgo alternativo del tuo campione", cls: "hot", fn: () => { if (window.openCalaTramontana) window.openCalaTramontana(title); } },
+      { label: "★ JoJo · Stand Soccer Battle", sub: "Le Bizzarre Avventure di Rondine: Star Rondine & ORA ORA ORA!", cls: "hot", fn: () => { if (window.openJoJoAdventure) window.openJoJoAdventure(title); } },
       { label: "Borgo e trasferte", sub: `A piedi per il paese · ${mnPct(mnBorgo())}%`, fn: menuBorgo },
       { label: "Modalità", sub: `Tutte le modalità · ${mnPct(mnModi())}%`, fn: modes },
       { label: "Saghe e minigiochi", sub: "Blue Lock, Noir, Multiverso, Stadio 3D, Panda, Faro…", cls: "hot", fn: menuSaghe },
@@ -15065,6 +15066,7 @@
       { label: "📋 Matchday Director 2D HD", sub: "Fai il Mister: modulo, cambi, discorso all'intervallo, pagella", cls: "hot", fn: () => { if (window.openMatchDirectorHD) window.openMatchDirectorHD(menuSaghe); } },
       { head: "Saghe Ispirate & Speciali" },
       { label: "⭐ La Leggenda del Tuo Campione", sub: heroLoad() ? `La saga esclusiva di ${heroLoad().name} (N.${heroLoad().num})` : "Crea il tuo campione e scendi in campo!", cls: "hot", fn: () => { if (window.openHeroStoryMenu) window.openHeroStoryMenu(menuSaghe); } },
+      { label: "★ JoJo · Stand Soccer Battle", sub: "Le Bizzarre Avventure di Rondine: Star Rondine & ORA ORA ORA!", cls: "hot", fn: () => { if (window.openJoJoAdventure) window.openJoJoAdventure(menuSaghe); } },
       { label: "🌊 Cala Tramontana · Il Borgo del Tuo Campione", sub: heroLoad() ? `Esplora a piedi il borgo alternativo con ${heroLoad().name}` : "Modalità a piedi nel borgo marino alternativo per il tuo campione", cls: "hot", fn: () => { if (window.openCalaTramontana) window.openCalaTramontana(menuSaghe); } },
       { label: "⚡ Tsubasa · Il Tiro Combinato", sub: "Holly & Benji: Twin Shot ad elica, la Muppet e parate dal palo!", cls: "hot", fn: () => { if (window.openTsubasaMenu) window.openTsubasaMenu(menuSaghe); } },
       { label: "👑 Westeros · I Cinque Trabucchi", sub: "Game of Thrones: Mappa tattica a feudi, risorse e Re della Notte!", cls: "hot", fn: () => { if (window.openThronesWarMenu) window.openThronesWarMenu(menuSaghe); } },
@@ -15134,6 +15136,7 @@
     text("voce", `<b>Modalità di Gioco</b> ${mnBar(mnPct(mnModi()))}<br>Scegli tra tornei speciali, saghe investigative, multiverso o sfide calcistiche. Tutte indipendenti dal salvataggio principale.`);
     buttons([
       { label: "✨ Arena 2D HD del Borgo", sub: "Suite Completa: Emblem, Action Soccer, Gabbia del Molo e Matchday Director", cls: "hot", fn: () => { if (window.openArena2DHDModal) window.openArena2DHDModal(modes); } },
+      { label: "★ JoJo · Stand Soccer Battle", sub: "Le Bizzarre Avventure di Rondine: Star Rondine & ORA ORA ORA!", cls: "hot", fn: () => { if (window.openJoJoAdventure) window.openJoJoAdventure(modes); } },
       { label: "🌊 Cala Tramontana · Il Borgo del Tuo Campione", sub: heroLoad() ? `Esplora a piedi il borgo alternativo con ${heroLoad().name}` : "Modalità a piedi nel borgo marino alternativo per il tuo campione", cls: "hot", fn: () => { if (window.openCalaTramontana) window.openCalaTramontana(modes); } },
       ...(window.__moloSettimana ? [{ label: "🏆 Settimana del Molo", sub: window.__moloSettimana.info().sub, cls: "hot", fn: () => window.__moloSettimana.open({ onExit: modes }) }] : []),
       ...(window.__diarioScoperte ? [{ label: "📰 Il Diario del Corriere", sub: window.__diarioScoperte.info().sub, cls: "hot", fn: () => window.__diarioScoperte.open({ onExit: modes }) }] : []),

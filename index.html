@@ -38,6 +38,7 @@
       <button type="button" class="opt-pill" id="hapticBtn" aria-label="Feedback Aptico" title="Feedback Aptico (Vibrazione Tattile)">📳 <span id="hapticLbl">Aptico: Full</span></button>
       <button type="button" class="opt-pill" id="perkToggleBtn" aria-label="Perk Reclute in Partita" title="Attiva o disattiva l'abilità delle reclute in partita">⚡ <span id="perkToggleLbl">Perk: ON</span></button>
       <button type="button" class="opt-pill" id="heroBtn" aria-label="Il mio campione" title="Crea o modifica il tuo campione (nome, look, numero, tiro speciale)">🧑 <span>Campione</span></button>
+      <button type="button" class="opt-pill" id="jojoBtn" aria-label="JoJo Stand Battle" title="Le Bizzarre Avventure di Rondine: Stand Soccer Battle">★ <span>JoJo Bizzarro</span></button>
       <button type="button" class="opt-pill" id="manualBtn" aria-label="Manuale del Rondine FC" title="Manuale ufficiale del club: partite, meteo vento e perk recluta">📖 <span>Manuale</span></button>
     </div>
   </div>
@@ -136,6 +137,7 @@
 <script src="js/quartier-generale.js?v=2"></script>
 <script src="js/stadio-borgo.js?v=2"></script>
 <script src="js/borgo-alternativo.js?v=1"></script>
+<script src="js/jojo-story.js?v=1"></script>
 <script>
 var homeBtn = document.getElementById("homeBtn");
 if (homeBtn) {
@@ -194,6 +196,14 @@ if (borgoAltBtn) {
     if (topOptPanel) topOptPanel.hidden = true;
     if (optBtn) optBtn.classList.remove("active");
     if (window.openCalaTramontana) window.openCalaTramontana();
+  };
+}
+var jojoBtn = document.getElementById("jojoBtn");
+if (jojoBtn) {
+  jojoBtn.onclick = function () {
+    if (topOptPanel) topOptPanel.hidden = true;
+    if (optBtn) optBtn.classList.remove("active");
+    if (window.openJoJoAdventure) window.openJoJoAdventure();
   };
 }
 window.openBorgoStortoModal = function () {
