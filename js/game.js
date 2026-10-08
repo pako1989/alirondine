@@ -4107,8 +4107,10 @@
     const [vx, vy] = DIRV[B.dir] || [0, 1];
     const fx = B.x + vx * 13, fy = B.y - 2 + vy * 13;
     const npcs = npcList();
-    let t = npcs.find((n) => Math.hypot(n.x - fx, n.y - fy) < 13) || npcs.find((n) => Math.hypot(n.x - B.x, n.y - B.y) < 19);
+    let t = npcs.find((n) => Math.hypot(n.x - fx, n.y - fy) < 13);
     let target = t ? { kind: "npc", id: t.id, label: "Parla" } : null;
+    if (!target) { try { target = bsTarget(fx, fy); } catch { target = null; } }
+    if (!target) { t = npcs.find((n) => Math.hypot(n.x - B.x, n.y - B.y) < 19); target = t ? { kind: "npc", id: t.id, label: "Parla" } : null; }
     if (!target) {
       const tx = Math.floor(fx / TS), ty = Math.floor(fy / TS), ch = BW.map[ty] && BW.map[ty][tx];
       if (ch && "DWSXOKVJQ".includes(ch)) target = { kind: "obj", ch, tx, ty, label: { D: "Entra", W: "Tira al muro", S: "Aspetta il bus", X: "Apri", O: "Guarda", K: "Guarda", V: "Siediti", J: "Guarda", Q: "Bacheca Incarichi" }[ch], id: ch + tx + "," + ty };
@@ -4175,6 +4177,7 @@
     const t = BW.target; BW.keys = {}; borgoSave();
     document.querySelectorAll(".pad.on").forEach((b) => b.classList.remove("on"));
     if (t.kind === "npc") return borgoTalk(t.id);
+    if (t.kind === "bs") return bsTalk(t.id);
     borgoObj(t.ch, t.tx, t.ty);
   }
   function bSay(lines, then) { play(lines.map((l) => ({ ...l, bg: l.bg || "borgo" })), then || borgoResume); }
@@ -20103,7 +20106,7 @@
       return `${ok(b) && got === 5 ? "✓" : "•"} <b>${esc(z.short)}</b>${r.seen[id] ? ` · ${esc(lab)} ${ok(b) ? "✓" : "…"} · ${esc(z.item[1].toLowerCase())} ${got}/5` : ` · <span style="color:var(--dim)">mai visitato</span>`}`;
     });
   }
-  const BE_SEAS = ["La Coppa della Costa in vetrina alla trattoria", "Reti nuove alle porte del campetto", "I ritagli di giornale sulla parete dell'edicola", "Le pubblicazioni di matrimonio sulla porta di San Pietro", "Il riso ancora sui gradini della chiesa", "Un fiocco rosa sulla porta di Casa Ferri", "Le maglie della Rondine stese ad asciugare al porto", "La fascia da capitano rammendata, appesa alla rete del campo", "Una targa nuova al campetto: «Qui si gioca»"];
+  const BE_SEAS = ["La Coppa della Costa in vetrina alla trattoria (la vedi alla finestra a destra della porta)", "Reti nuove alle porte del campetto (le vedi ai due lati del campo)", "I ritagli di giornale sulla parete dell'edicola (li vedi vicino alla porta dell'edicola di Pina)", "Le pubblicazioni di matrimonio sulla porta di San Pietro (le vedi vicino alla porta della chiesa, a destra)", "Il riso ancora sui gradini della chiesa (lo vedi sui gradini di San Pietro)", "Un fiocco rosa sulla porta di Casa Ferri (lo vedi vicino alla porta di Casa Ferri)", "Le maglie della Rondine stese ad asciugare al porto (le vedi vicino al porto, a destra della trattoria)", "La fascia da capitano rammendata, appesa alla rete del campo (la vedi vicino alla porta ovest del campetto, in alto)", "Una targa nuova al campetto: «Qui si gioca» (la vedi vicino all'ingresso sud del campetto)"];
   const beSeasLines = () => BE_SEAS.map((t, i) => { let ok = false; try { ok = seasonDone(i + 1); } catch {} return ok ? `✓ <b>Dopo la Stagione ${i + 1}</b> · ${esc(t)}` : `<span style="color:var(--dim)">??? · Cambierà qualcosa, più avanti nella storia</span>`; });
   function bePage(back) {
     view = { kind: "scene", bg: "borgo" }; chap("Il Borgo cresce");
@@ -20126,19 +20129,162 @@
   const beMenuB = (mark) => { const r = trRec(), open = BE_IDS.filter(beOpen), seen = open.filter((id) => r.seen[id]).length, ch = BE_SEAS.filter((t, i) => { try { return seasonDone(i + 1); } catch { return false; } }).length; return open.length ? [`${mark(seen === BE_IDS.length)} Il Borgo cresce · zone visitate <b>${seen}</b>/${open.length} aperte · cambiamenti ${ch}/9`] : []; };
   const beButton = () => ({ label: "Il Borgo cresce", sub: "Zone nuove, barca e cambiamenti", fn: () => bePage(borgoMenu) });
   // --- il Borgo che cambia: un segno per ogni stagione finita ---
+  // Oggetti del Borgo che cambia: ognuno compare quando la stagione k è finita (BW.beSeas), si vede nella mappa
+  // e si può guardare (tasto Parla davanti). Non toccano la mappa: nessuna collisione cambia, nessun salvataggio.
+  const BS_OBJ = [
+    { k: 1, id: "coppa", tiles: [[8, 19]], near: "alla finestra della trattoria, a destra della porta",
+      sc: [
+        [["voce", "La vetrina della trattoria. Dietro il vetro, la Coppa della Costa: latta dorata, un'ammaccatura sul manico e un cartellino scritto a mano: «NON TOCCARE. (Papà)»."], ["leo", "Ventidue anni senza vincere niente. Adesso la lucida più spesso di quanto lavi le padelle."]],
+        [["voce", "Sotto la coppa, un fazzoletto a quadri e una mosca che si crede una tifosa. Papà giura che la coppa porta fortuna ai clienti. I clienti giurano che porta fortuna ai conti."]],
+        [["voce", "Papà non guarda mai la coppa in faccia: dice che porta male. Poi, quando pensa che nessuno veda, la lucida con la manica. Il vetro, dalla parte di dentro, ha le impronte di un uomo che sorride."]]] },
+    { k: 2, id: "reti", tiles: [[27, 7], [27, 8], [38, 6], [38, 7], [38, 8]], near: "alle porte del campetto, ai due lati del campo",
+      sc: [
+        [["voce", "Reti nuove ai pali del campetto: bianche, tese, senza un buco. Il pallone entra e resta dentro. Un'abitudine nuova, da queste parti."], ["voce", "Nico le tasta come un sarto: «Troppo belle. Un portiere con le reti nuove non ha più scuse.»"]],
+        [["voce", "Pietrino, braccia conserte: «Adesso il gol vale il doppio. Prima era un'opinione, e si litigava fino a cena.»"]],
+        [["voce", "La vecchia rete era più buchi che rete. Ogni buco aveva un nome e una partita. Qualcuno ne ha tenuto un pezzo in cantina. Non dire chi: è un portiere, e dice di no."]]] },
+    { k: 3, id: "ritagli", tiles: [[10, 11], [12, 11]], near: "sulla parete dell'edicola di Pina, accanto alla porta",
+      sc: [
+        [["voce", "La parete dell'edicola: ritagli del Corriere di Borgo Marino appuntati con le puntine più economiche della Riviera. «MORETTI IN AZZURRO». Sotto, a penna: «Lo sapevo. — P.»"]],
+        [["voce", "Titolo del giorno dopo la convocazione: «LEO IN NAZIONALE: IL BORGO NON DORME». Pina ha tolto il «pare» dal sottotitolo. Dice che l'ha tolto per ragioni di spazio."]],
+        [["voce", "In basso c'è un ritaglio ingiallito, più vecchio degli altri: le Rondinelle del '68, in posa. Pina l'ha messo accanto ai tuoi. Nessuno ha detto niente. Quando una cosa è giusta, non serve."]]] },
+    { k: 4, id: "pubblic", tiles: [[21, 4]], near: "sul muro di San Pietro, a destra della porta",
+      sc: [
+        [["voce", "Pubblicazioni di matrimonio, con il timbro del Comune: Nico e Sara. «Chi sa di impedimenti, parli ora.» Sotto, a matita: «Chi sa di Nico, taccia: potrebbe cambiare idea.»"]],
+        [["voce", "Don Aurelio, dal sagrato: «Il foglio dice trenta giorni. Nico li ha già contati due volte, ad alta voce, anche di notte. Mi ha chiesto se si può anticipare. Non si può.»"]],
+        [["voce", "Accanto ai nomi, il timbro e una firma che sbava: la mano che para i rigori non ha tenuto ferma la penna. Sara ha guardato la firma e ha riso. Poi ha pianto. Poi ha riso di nuovo."]]] },
+    { k: 5, id: "riso", tiles: [[18, 5], [19, 5], [21, 5], [19, 6], [21, 6]], near: "sui gradini davanti a San Pietro",
+      sc: [
+        [["voce", "Sui gradini di San Pietro c'è ancora del riso. Don Aurelio lo spazza ogni mattina; ogni mattina i gabbiani lo rimettono in ordine di importanza."]],
+        [["voce", "Un segno sul sagrato, largo come un portiere in volo: è lì che Nico ha detto «sì» con un tuffo. Don Aurelio aveva detto di no. Il riso, per fortuna, non fa domande."]],
+        [["voce", "Un chicco di riso e un petalo rosa, incastrati tra due gradini. Fra cent'anni qualcuno li troverà e penserà a un matrimonio. Avrà ragione."]]] },
+    { k: 6, id: "fiocco", tiles: [[4, 7], [6, 7]], near: "alla porta di Casa Ferri, a fianco dell'ingresso",
+      sc: [
+        [["voce", "Un fiocco rosa sulla porta di Casa Ferri, grande come una testa di Baciccia. Sotto, a pennarello: «È NATA TINA. Silenzio, si dorme. (Nico, tu no: tu ti metti in un angolo.)»"]],
+        [["voce", "La Nonna, dalla finestra: «Una nipote. Adesso ho un'altra persona da caricare sulla Panda.» Il fiocco ondeggia piano. Dentro qualcuno dice: «Shh». Dentro qualcun altro dice: «Shh» più forte."]],
+        [["voce", "Dal piano di sopra arriva una ninna nanna cantata da un portiere stonato. Un gabbiano si ferma sul tetto ad ascoltare e non scappa. Al Borgo, è la recensione migliore."]]] },
+    { k: 7, id: "maglie", tiles: [[12, 20], [13, 20], [14, 20], [15, 20]], near: "al porto, tese tra la trattoria e il lampione",
+      sc: [
+        [["voce", "Le maglie della Rondine, stese ad asciugare: il 10, il 9, il 7 e un 1 con la toppa dei guanti. Rita le ha lavate tutte. Una è rosa: ha insistito Gigi, e nessuno ha avuto la forza di dire no."]],
+        [["voce", "Tra una maglia e l'altra è finita una canottiera che non c'entra niente. È di Baciccia. Era già lì prima della corda. A Borgo Marino le cose arrivano prima delle cose."]],
+        [["voce", "Ci sono tante maglie quante persone sono tornate al muro. Gocciolano sul selciato come se piovesse, ma c'è il sole. Il pallone, intanto, torna."]]] },
+    { k: 8, id: "fascia", tiles: [[27, 6]], near: "alla rete della porta ovest del campetto, in alto",
+      sc: [
+        [["voce", "La fascia da capitano, appesa alla rete del campo: gialla, rammendata con filo rosso. Si vedono tutti i punti. Tommy dice che i punti sono la parte migliore."]],
+        [["voce", "Un gabbiano la sorveglia dal palo e non ha nessuna intenzione di lasciarla. Lavora gratis. Il suo unico stipendio è un po' di pane, e a volte nemmeno quello."]],
+        [["voce", "Ogni punto è un posto dove la fascia si era strappata. Ogni punto è un posto dove qualcuno è tornato a cucire. A Leo viene in mente solo adesso: è il modo più testardo di volersi bene."]]] },
+    { k: 9, id: "targa", tiles: [[35, 12], [36, 12]], near: "all'ingresso del campetto, a sud, sull'erba",
+      sc: [
+        [["voce", "Una targa nuova ficcata nel prato a martellate: «QUI SI GIOCA». Niente padel, niente prosecco, niente sponsor. I gabbiani, che non sanno leggere, lo fanno comunque."]],
+        [["voce", "Pietrino ha già corretto la targa: «Qui si gioca (a casa mia)». Poi è arrivata Sara e ha corretto Pietrino. La targa, per ora, tiene botta."]],
+        [["voce", "In basso a destra, sotto la vernice, qualcuno ha scritto una A piccola a pennarello. Papà dice che è un errore di vernice. Papà non è mai stato bravo con le bugie."]]] },
+  ];
+  const bsOn = (o) => !!(BW && BW.beSeas && BW.beSeas[o.k - 1]);
+  const bsFind = (tx, ty) => BS_OBJ.find((o) => bsOn(o) && o.tiles.some(([x, y]) => x === tx && y === ty));
+  // bersaglio dalla mappa: usato da borgoTarget (davanti agli occhi, nessuna porta nella stessa tessera)
+  function bsTarget(fx, fy) {
+    const tx = Math.floor(fx / TS), ty = Math.floor(fy / TS), ch = BW.map[ty] && BW.map[ty][tx];
+    if (ch === "D") return null;
+    const o = bsFind(tx, ty); return o ? { kind: "bs", id: o.id, label: "Guarda" } : null;
+  }
+  function bsTalk(id) {
+    const o = BS_OBJ.find((x) => x.id === id); if (!o) return borgoResume();
+    BW.bsN = BW.bsN || {}; const n = BW.bsN[id] || 0; BW.bsN[id] = (n + 1) % o.sc.length;
+    bSay(o.sc[n].map(([who, t]) => BL(who, t)));
+  }
+  function bsSpark(x, y, i) { if ((frame + i * 31) % 110 < 7) { px(x - 1, y, 3, 1, "#fff"); px(x, y - 1, 1, 3, "#fff"); } }
+  function bsDraw(cx, cy) {
+    const on = (x, y) => x > -50 && x < W + 50 && y > -60 && y < H + 50, T = (tx, ty) => [tx * TS - cx, ty * TS - cy], night = !!(B && B.night);
+    BS_OBJ.forEach((o, i) => {
+      if (!bsOn(o)) return;
+      const [x, y] = T(o.tiles[0][0], o.tiles[0][1]);
+      if (o.id === "coppa") {
+        if (!on(x, y)) return;
+        px(x + 1, y + 1, 14, 15, "#4a2c18"); px(x + 2, y + 2, 12, 13, night ? "#ffd98a" : "#a9d6ee"); px(x + 2, y + 2, 3, 13, night ? "#fff0c0" : "#d6eefa");
+        px(x + 2, y + 12, 12, 2, "#8a5a2a");
+        px(x + 4, y + 3, 8, 5, "#ffd23f"); px(x + 5, y + 8, 6, 1, "#e0a800"); px(x + 7, y + 9, 2, 2, "#e0a800"); px(x + 5, y + 11, 6, 1, "#c9a24a");
+        px(x + 3, y + 4, 1, 3, "#e0a800"); px(x + 12, y + 4, 1, 3, "#e0a800"); px(x + 5, y + 3, 1, 4, "#fff6b0"); px(x + 6, y + 13, 4, 1, "#b3202c");
+        bsSpark(x + 12, y + 3, i);
+      } else if (o.id === "reti") {
+        [[27, 6, "w"], [38, 6, "e"]].forEach(([tx, ty, side]) => {
+          const [gx, gy] = T(tx, ty); if (!on(gx, gy)) return;
+          px(gx, gy, TS, 3 * TS, "#00000026");
+          g.fillStyle = "#ffffffd9";
+          for (let a = 2; a < TS; a += 3) g.fillRect(gx + a, gy + 1, 1, 3 * TS - 2);
+          for (let b = 3; b < 3 * TS - 1; b += 3) g.fillRect(gx + 1, gy + b, TS - 2, 1);
+          const pw = side === "w" ? 12 : 0;
+          px(gx + pw, gy, 4, 3 * TS, "#fff"); px(gx + pw, gy, 4, 1, "#cfd8e0");
+          px(gx, gy, TS, 3, "#fff"); px(gx, gy + 3 * TS - 3, TS, 3, "#fff");
+          px(gx + (side === "w" ? 0 : 12), gy, 4, 3, "#e8eef4");
+          bsSpark(gx + 8, gy + 22, i);
+        });
+      } else if (o.id === "ritagli") {
+        [[10, 11, 0], [12, 11, 1]].forEach(([tx, ty, k]) => {
+          const [bx, by] = T(tx, ty); if (!on(bx, by)) return;
+          px(bx + 1, by + 1, 14, 14, "#6b4a2a"); px(bx + 2, by + 2, 12, 12, "#c79a62"); px(bx + 2, by + 2, 12, 1, "#dcb47c");
+          px(bx + 3 + k, by + 3, 6, 8, "#f6f1e2"); px(bx + 4 + k, by + 4, 4, 2, "#222"); px(bx + 4 + k, by + 7, 4, 1, "#888"); px(bx + 4 + k, by + 9, 3, 1, "#888");
+          px(bx + 8 - k * 4, by + 7, 5, 6, "#fffaf0"); px(bx + 9 - k * 4, by + 8, 3, 3, k ? "#ff4d5a" : "#3fa7ff"); px(bx + 9 - k * 4, by + 12, 3, 1, "#888");
+          px(bx + 5 + k, by + 2, 2, 2, "#e03030");
+        });
+        const [bx, by] = T(10, 11); bsSpark(bx + 12, by + 3, i);
+      } else if (o.id === "pubblic") {
+        if (!on(x, y)) return;
+        px(x + 2, y + 1, 12, 14, "#6b4a2a"); px(x + 3, y + 2, 10, 12, "#fffdf6");
+        px(x + 4, y + 3, 8, 1, "#444"); px(x + 4, y + 11, 8, 1, "#999"); px(x + 4, y + 12, 6, 1, "#999");
+        g.fillStyle = "#ff4d5a"; g.beginPath(); g.arc(x + 6.2, y + 6.4, 1.9, 0, 7); g.arc(x + 9.8, y + 6.4, 1.9, 0, 7); g.fill();
+        g.beginPath(); g.moveTo(x + 4.4, y + 7.4); g.lineTo(x + 8, y + 11); g.lineTo(x + 11.6, y + 7.4); g.fill();
+        px(x + 1, y, 2, 2, "#d8a82a"); px(x + 13, y, 2, 2, "#d8a82a");
+        bsSpark(x + 13, y + 4, i);
+      } else if (o.id === "riso") {
+        for (let ty = 5; ty <= 6; ty++) for (let tx = 18; tx <= 22; tx++) {
+          const [rx, ry] = T(tx, ty); if (!on(rx, ry)) continue;
+          if (ty === 5 && tx >= 19 && tx <= 21) { px(rx, ry + 5, TS, 1, "#e4dccb"); px(rx, ry + 11, TS, 1, "#a99f8d"); }
+          for (let n = 0; n < 9; n++) { const h = (tx * 13 + ty * 7 + n * 17) % 29, gx = rx + (h * 5) % 13, gy = ry + ((h * 7 + n * 3) % 14); px(gx + 1, gy + 1, 3, 1, "#00000030"); px(gx, gy, 3, 1, n % 3 ? "#ffffff" : "#f6edcf"); }
+          if ((tx + ty * 3) % 3 === 0) { const pxx = rx + (tx * 3) % 11 + 2, pyy = ry + 6 + (ty % 3); px(pxx, pyy, 3, 2, "#ff8fb5"); px(pxx + 1, pyy - 1, 1, 1, "#ffc4d8"); }
+        }
+        const [rx, ry] = T(19, 5); bsSpark(rx + 5, ry + 3, i);
+      } else if (o.id === "fiocco") {
+        const [dx, dy] = T(5, 7); if (!on(dx, dy)) return;
+        const sw = Math.round(Math.sin(frame / 22) * 0.6);
+        px(dx + 1, dy + 1, 14, 2, "#ffc4d8"); px(dx + 1, dy + 1, 14, 1, "#fff");
+        px(dx + 2, dy + 3, 5, 4, "#ff8fb5"); px(dx + 9, dy + 3, 5, 4, "#ff8fb5"); px(dx + 3, dy + 4, 3, 2, "#ffc4d8"); px(dx + 10, dy + 4, 3, 2, "#ffc4d8");
+        px(dx + 6, dy + 4, 4, 3, "#e8508a"); px(dx + 6 + sw, dy + 7, 2, 5, "#ff8fb5"); px(dx + 8 + sw, dy + 7, 2, 6, "#ff8fb5"); px(dx + 6 + sw, dy + 12, 1, 1, "#e8508a"); px(dx + 9 + sw, dy + 13, 1, 1, "#e8508a");
+        bsSpark(dx + 14, dy + 3, i);
+      } else if (o.id === "maglie") {
+        const [x0, y0] = T(11, 20), x1 = x0 + 5 * TS + 6; if (!on(x0, y0) && !on(x1, y0)) return;
+        px(x0, y0 - 4, 2, 7, "#6b4a2a"); px(x1 - 1, y0 - 9, 2, 14, "#6b4a2a"); px(x1 - 3, y0 - 9, 6, 1, "#6b4a2a");
+        g.strokeStyle = "#f0f0f0"; g.lineWidth = 1; g.beginPath(); g.moveTo(x0 + 1, y0 - 3); g.quadraticCurveTo((x0 + x1) / 2, y0 + 5, x1, y0 - 8); g.stroke();
+        const sh = [["#ff4d5a", "#fff", "10"], ["#f4f4f4", "#ff4d5a", ""], ["#ff4d5a", "#fff", "9"], ["#ff8fb5", "#fff", "7"], ["#ffd23f", "#222", "1"]];
+        sh.forEach(([c, tc, num], n) => {
+          const bx = x0 + 6 + n * 17, sag = Math.round(5 * Math.sin(Math.PI * (bx - x0) / (x1 - x0))) - 2, by = y0 - 4 + sag + Math.round(Math.sin(frame / 18 + n)), sw = Math.round(Math.sin(frame / 18 + n * 1.7) * 1);
+          px(bx - 5 + sw, by + 1, 10, 10, "#0000001f"); px(bx - 4 + sw, by + 2, 8, 9, c); px(bx - 7 + sw, by + 2, 3, 4, c); px(bx + 4 + sw, by + 2, 3, 4, c);
+          px(bx - 2 + sw, by + 2, 4, 1, "#2a2a3a"); px(bx - 1, by - 1, 2, 3, "#fff");
+          if (num) { g.fillStyle = tc; g.font = "bold 6px sans-serif"; g.textAlign = "center"; g.fillText(num, bx + sw, by + 9); g.textAlign = "left"; } else { px(bx - 4 + sw, by + 5, 8, 1, tc); }
+        });
+        bsSpark(x0 + 40, y0 - 4, i);
+      } else if (o.id === "fascia") {
+        const [fx, fy] = T(27, 6); if (!on(fx, fy)) return;
+        const sw = Math.round(Math.sin(frame / 26));
+        px(fx + 1, fy + 3, 14, 6, "#8a6a10"); px(fx + 1, fy + 3, 14, 5, "#ffd23f"); px(fx + 1, fy + 3, 14, 1, "#fff0a0");
+        for (let a = 0; a < 5; a++) { px(fx + 3 + a * 3, fy + 4, 1, 1, "#b3202c"); px(fx + 4 + a * 3, fy + 6, 1, 1, "#b3202c"); }
+        px(fx + 6, fy + 4, 4, 3, "#1b1b1b"); px(fx + 7, fy + 5, 2, 1, "#ffd23f");
+        px(fx + 2, fy + 8, 2, 1, "#b3202c"); px(fx + 12 + sw, fy + 9, 1, 3, "#b3202c"); px(fx + 11 + sw, fy + 11, 2, 1, "#b3202c");
+        px(fx, fy + 2, 2, 2, "#d9d9d9"); px(fx + 14, fy + 2, 2, 2, "#d9d9d9");
+        bsSpark(fx + 12, fy + 2, i);
+      } else if (o.id === "targa") {
+        const [tx0, ty0] = T(35, 12), bx = tx0 + 4, by = ty0 - 2; if (!on(bx, by)) return;
+        px(bx + 3, by + 10, 3, 9, "#5c3a1e"); px(bx + 31, by + 10, 3, 9, "#5c3a1e"); px(bx + 3, by + 18, 3, 1, "#3e2713"); px(bx + 31, by + 18, 3, 1, "#3e2713");
+        px(bx - 2, by - 2, 42, 14, "#c9a24a"); px(bx - 1, by - 1, 40, 12, "#f6f0d8"); px(bx - 1, by + 9, 40, 2, "#d8cfa8");
+        g.fillStyle = "#1e5a34"; g.font = "bold 6px sans-serif"; g.textAlign = "center"; g.fillText("QUI SI GIOCA", bx + 18, by + 7); g.textAlign = "left";
+        px(bx + 33, by + 7, 4, 4, "#fff"); px(bx + 34, by + 8, 2, 2, "#222");
+        bsSpark(bx + 38, by - 3, i);
+      }
+    });
+  }
   function beDecorB(cx, cy) {
     if (typeof svDraw === "function") svDraw("borgo", cx, cy);
-    const s = (BW && BW.beSeas) || [], on = (x, y) => x > -40 && x < W + 40 && y > -40 && y < H + 40, at = (tx, ty, dx, dy) => [tx * TS - cx + (dx || 0), ty * TS - cy + (dy || 0)];
-    if (s[0]) { const [x, y] = at(9, 19, 6, 3); if (on(x, y)) { g.fillStyle = "#ffd23f"; g.beginPath(); g.arc(x, y, 3, 0, Math.PI); g.fill(); px(x - 1, y + 2, 2, 3, "#ffd23f"); px(x - 3, y + 5, 6, 1, "#c9a24a"); } }
-    if (s[1]) [[27, 6], [38, 6]].forEach(([tx, ty]) => { const [x, y] = at(tx, ty); if (!on(x, y)) return; g.strokeStyle = "#ffffff77"; g.lineWidth = 1; for (let i = 0; i <= 3; i++) { g.beginPath(); g.moveTo(x + i * 4, y); g.lineTo(x + i * 4, y + 3 * TS); g.stroke(); } for (let j = 0; j <= 12; j++) { g.beginPath(); g.moveTo(x, y + j * 4); g.lineTo(x + TS, y + j * 4); g.stroke(); } });
-    if (s[2]) [[10, 11], [12, 11]].forEach(([tx, ty], i) => { const [x, y] = at(tx, ty, 3, 3); if (!on(x, y)) return; px(x, y, 9, 7, "#f5f0e0"); px(x + 1, y + 1, 7, 1, "#555"); px(x + 1, y + 3, 5, 1, "#999"); px(x + 1, y + 5, 6, 1, "#999"); px(x + 6, y + 3, 2, 2, i ? "#ff4d5a" : "#3fa7ff"); });
-    if (s[3]) { const [x, y] = at(21, 4, 3, 3); if (on(x, y)) { px(x, y, 8, 10, "#fff"); g.fillStyle = "#ff4d5a"; g.beginPath(); g.arc(x + 3, y + 4, 1.6, 0, 7); g.arc(x + 5, y + 4, 1.6, 0, 7); g.fill(); g.beginPath(); g.moveTo(x + 1.6, y + 4.6); g.lineTo(x + 4, y + 7.5); g.lineTo(x + 6.4, y + 4.6); g.fill(); } }
-    if (s[4]) for (let i = 0; i < 14; i++) { const [x, y] = at(19, 5, (i * 7) % 30, (i * 5) % 12 + 2); if (on(x, y)) px(x, y, 1, 1, "#ffffff"); }
-    if (s[5]) { const [x, y] = at(5, 7, 5, -2); if (on(x, y)) { px(x, y, 3, 3, "#ff9ec0"); px(x + 4, y, 3, 3, "#ff9ec0"); px(x + 3, y + 1, 1, 1, "#ff6b9a"); px(x + 2, y + 3, 1, 4, "#ff9ec0"); px(x + 4, y + 3, 1, 4, "#ff9ec0"); } }
-    if (s[6]) { const [x0, y0] = at(11, 20, 0, 2), x1 = x0 + 5 * TS; if (on(x0, y0) || on(x1, y0)) { g.strokeStyle = "#e8e8e8"; g.lineWidth = 1; g.beginPath(); g.moveTo(x0, y0); g.quadraticCurveTo((x0 + x1) / 2, y0 + 5, x1, y0); g.stroke(); for (let i = 1; i < 5; i++) { const x = x0 + i * 16, sw = Math.sin(frame / 18 + i) * 1.5; px(x - 4 + sw, y0 + 3, 8, 7, i % 2 ? "#ff4d5a" : "#f2f2f2"); px(x - 6 + sw, y0 + 3, 2, 3, i % 2 ? "#ff4d5a" : "#f2f2f2"); px(x + 4 + sw, y0 + 3, 2, 3, i % 2 ? "#ff4d5a" : "#f2f2f2"); } } }
-    if (s[7]) { const [x, y] = at(33, 2, 2, 8); if (on(x, y)) { px(x, y, 12, 4, "#ffd23f"); px(x + 3, y + 1, 1, 2, "#b3202c"); px(x + 7, y + 1, 1, 2, "#b3202c"); g.fillStyle = "#1b1b1b"; g.font = "bold 4px sans-serif"; g.fillText("C", x + 4.5, y + 3.5); } }
-    if (s[8]) { const [x, y] = at(33, 12, 0, 0); if (on(x, y)) { px(x + 7, y + 6, 2, 10, "#6b4a2a"); px(x - 6, y - 2, 28, 9, "#2a5a3a"); px(x - 6, y - 2, 28, 1, "#ffd23f"); g.fillStyle = "#fff"; g.font = "bold 5px sans-serif"; g.textAlign = "center"; g.fillText("QUI SI GIOCA", x + 8, y + 4); g.textAlign = "left"; } }
+    bsDraw(cx, cy);
   }
+  if (/[?&]debug/.test(location.search)) window.__bs = { get B() { return B; }, get BW() { return BW; }, borgoMap, SOLID, BLD, NPCS, npcList, borgoTalk, borgoTarget, borgoAction };
   TRX.push(() => {
     const r = trRec(borgoLoad()), q = (r.q && r.q.be) || {}, open = BE_IDS.some(beOpen), seen = BE_IDS.filter((id) => r.seen[id]).length, fish = BE_FISH_ALL.filter((f) => q.fish && q.fish[f]).length;
     return [
