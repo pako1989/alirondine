@@ -1,6 +1,6 @@
 (function () {
   const $ = (id) => document.getElementById(id);
-  const cv = $("cv"), g = cv.getContext("2d"), W = 320, H = 200;
+  const cv = $("cv"), W = 320, H = 200; let g = cv.getContext("2d");
   const rnd = (a, b) => a + Math.random() * (b - a);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -24935,7 +24935,23 @@
     isStar: (id) => SV.some((s) => s.id === id), star: (id) => SV.find((s) => s.id === id) || null, starsRec: () => SV.filter((s) => svRec().rec[s.id]).length, svTalk,
     squadra, spMenu, daily, svPage,
   };
-  window.__borgoApi = { TRZ, MN_BORGO_BTN, CAST, BIO, seeCard, trGo, trAsk, trSay, trResume, L, trToast, TR_IDS, NPCS, trLevel, trZone: () => (TW ? TW.id : null), trExitTo, trRec, todayKey, hq: HQ_API, COSM, bCos };
+  // ritratto (busto) di un personaggio come immagine, per i moduli HD: stessa grafica della storia principale, disegnata fuori schermo; null se non ha un ritratto
+  const PORT_IMG = {};
+  function portraitImg(id, spec) {
+    let tmp = false;
+    try {
+      if (id in PORT_IMG) return PORT_IMG[id];
+      let c = CAST[id];
+      if (!(c && c.skin) && spec && spec.skin) { CAST[id] = c = spec; tmp = true; } // personaggio senza scheda: ritratto dal profilo passato, senza registrarlo
+      if (!c || !c.skin) return null;
+      const o = document.createElement("canvas"); o.width = 96; o.height = 96;
+      const og = o.getContext("2d"), main = g, sp = view.speaker;
+      og.fillStyle = c.bg ? c.bg[0] : "#121929"; og.fillRect(0, 0, 96, 96);
+      try { g = og; view.speaker = null; portrait(id, 48, 38, 1.15, false); } finally { g = main; view.speaker = sp; }
+      const u = o.toDataURL("image/png"); if (id !== "hero") PORT_IMG[id] = u; return u;
+    } catch (e) { return null; } finally { if (tmp) delete CAST[id]; }
+  }
+  window.__borgoApi = { portraitImg, TRZ, MN_BORGO_BTN, CAST, BIO, seeCard, trGo, trAsk, trSay, trResume, L, trToast, TR_IDS, NPCS, trLevel, trZone: () => (TW ? TW.id : null), trExitTo, trRec, todayKey, hq: HQ_API, COSM, bCos };
   if (/[?&]debug/.test(location.search)) window.__borgoDbg = { get BW() { return BW; }, get B() { return B; }, BLD, borgo, borgoMap, borgoDoor, borgoOpenLevel };
   try { if (window.__storyNav && window.__storyNav.seedFromSaveState) window.__storyNav.seedFromSaveState(S); } catch {}
   title();

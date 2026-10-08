@@ -447,6 +447,9 @@
 .ahd-sw{display:inline-block;width:16px;height:16px;border-radius:50%;border:2px solid #fff;vertical-align:middle;margin-right:6px}
 .ahd-new{border:1px solid #fde047;border-radius:12px;padding:8px 10px;margin:10px 0;background:rgba(253,224,71,.08);font-size:13px;color:#fef9c3}
 .ahd-chap p{font-size:14px;line-height:1.5}
+.ahd-pp{display:flex;gap:10px;align-items:flex-start;margin:10px 0}.ahd-pp p{flex:1;min-width:0;margin:0;overflow-wrap:anywhere}
+.ahd-pw{flex:none;width:72px;text-align:center}.ahd-pw i{display:block;font-style:normal;font-size:10.5px;font-weight:700;color:#fde047;margin-top:2px;line-height:1.15}
+.ahd-pt{display:block;width:72px;height:72px;border-radius:10px;border:2px solid #fde047;background:#0b1424}
 .ahd-chap .ahd-tone{display:inline-block;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#fde047;border:1px solid #a16207;border-radius:6px;padding:1px 6px}
 .ahd-lock{color:#64748b}
 .ahd-done{color:#86efac;font-weight:800}
@@ -2340,12 +2343,36 @@
     ui.querySelectorAll("[data-c]").forEach((b) => (b.onclick = () => showChapter(b.dataset.c, showDiary)));
     on('[data-a="back"]', showMenu);
   }
+  // ritratti dalla storia principale: i capitoli sono testo libero, quindi chi "parla" è il primo personaggio nominato nel paragrafo
+  const PT_WHO = [
+    ["ginetta_molo", "Ginetta", /Ginetta/], ["arturo_molo", "Arturo", /Arturo/], ["ac_cima", "Capitan Cima", /Cima\b/], ["ac_capostazione", "Il Capostazione", /Capostazione/],
+    ["ac_ormeggio", "Zio Ormeggio", /Ormeggio/], ["pina_edicola", "Signora Pina", /Pina\b/], ["nando_frittura", "Nando", /Nando/]
+  ];
+  const PT_SPEC = {
+    ginetta_molo: { name: "Ginetta Bandierina", hair: "#7c2d12", style: "long", skin: "#f1c6a0", eye: "#3b2415", bg: ["#fde68a", "#f97316"], shirt: "#111827" },
+    arturo_molo: { name: "Arturo Altoparlante", hair: "#6b7280", style: "messy", skin: "#e9be95", eye: "#222", bg: ["#7dd3fc", "#e0f2fe"], glasses: true, shirt: "#0e7490" },
+    pina_edicola: { name: "Signora Pina", hair: "#b8b2a8", style: "bun", skin: "#e8b88c", eye: "#2a2a2a", bg: ["#a855f7", "#fae8ff"], glasses: true, shirt: "#a855f7" },
+    nando_frittura: { name: "Nando Frittura", hair: "#3b2a1c", style: "messy", skin: "#d9a679", eye: "#2a2a2a", bg: ["#f59e0b", "#451a03"], beard: true, shirt: "#f59e0b" }
+  };
+  function portraitOf(id) {
+    try { const a = window.__borgoApi; if (!id || !a || typeof a.portraitImg !== "function") return ""; hdcReg(); return a.portraitImg(id, PT_SPEC[id]) || ""; } catch (e) { return ""; }
+  }
+  function chapParas(c) {
+    let last = null;
+    return c.p.map((t) => {
+      let best = null, bi = 1e9;
+      PT_WHO.forEach((w) => { const m = w[2].exec(t); if (m && m.index < bi) { bi = m.index; best = w; } });
+      const same = best && last === best[0]; if (best) last = best[0];
+      const pi = best && !same ? portraitOf(best[0]) : "";
+      return pi ? `<div class="ahd-pp"><div class="ahd-pw"><img class="ahd-pt" src="${pi}" alt="" width="72" height="72"><i>${esc(best[1])}</i></div><p>${esc(t)}</p></div>` : `<p>${esc(t)}</p>`;
+    }).join("");
+  }
   function showChapter(id, back) {
     const c = CHAPS.find((x) => x.id === id);
     if (!c || !chapOpen(c)) return back();
     uiState = "menu";
     if (!X.meta.seen.includes(id)) { X.meta.seen.push(id); saveX("meta"); }
-    showUi(`<div class="ahd-chap"><span class="ahd-tone">${c.tone}</span><h2>${esc(c.t)}</h2>${c.p.map((t) => `<p>${esc(t)}</p>`).join("")}</div><button class="ahd-btn sec" data-a="back">Indietro</button>`);
+    showUi(`<div class="ahd-chap"><span class="ahd-tone">${c.tone}</span><h2>${esc(c.t)}</h2>${chapParas(c)}</div><button class="ahd-btn sec" data-a="back">Indietro</button>`);
     on('[data-a="back"]', back);
   }
 

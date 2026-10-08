@@ -602,6 +602,10 @@
   .mdx-opp .ep{display:block;font-size:10.5px;color:#7d8da6;font-weight:700;letter-spacing:.4px}
   .mdx-new{display:inline-block;background:#f59e0b;color:#1b1203;border-radius:6px;padding:0 5px;font-size:10px;font-weight:800;margin-left:4px;vertical-align:1px}
   .mdx-story{background:#10203a;border-left:3px solid #38bdf8;border-radius:8px;padding:8px 10px;margin:8px 0;font-size:13px;line-height:1.5;color:#dbe6f6}
+  .mdx-story.pt{display:flex;gap:10px;align-items:flex-start}
+  .mdx-story .mdx-st{flex:1;min-width:0;overflow-wrap:anywhere}
+  .mdx-pt{flex:none;width:72px;height:72px;border-radius:10px;border:2px solid #38bdf8;image-rendering:auto;background:#0b1424}
+  .mdx-story.win .mdx-pt{border-color:#4ade80}.mdx-story.lose .mdx-pt{border-color:#fb7185}
   .mdx-story b{display:block;font-size:11.5px;color:#7dd3fc;letter-spacing:.3px;margin-bottom:2px}
   .mdx-story.win{border-left-color:#4ade80}.mdx-story.win b{color:#86efac}
   .mdx-story.lose{border-left-color:#fb7185}.mdx-story.lose b{color:#fda4af}
@@ -1343,10 +1347,13 @@
 
   function stars(n) { return `<span class="mdx-stars">${"★".repeat(n)}<span>${"★".repeat(3 - n)}</span></span>`; }
 
+  // ritratto del personaggio dalla storia principale (game.js si carica dopo: accesso al momento della chiamata, senza ritratto = come prima)
+  function portraitOf(id) { try { const a = window.__borgoApi; if (!id || !a || typeof a.portraitImg !== "function") return ""; hdcReg(); return a.portraitImg(id) || ""; } catch (e) { return ""; } }
   function storyBox(pair, cls) {
     if (!pair) return "";
     meet(HDC_WHO[pair[0]]);
-    return `<div class="mdx-story ${cls || ""}"><b>${esc(CHAR[pair[0]] || pair[0])}</b>${esc(pair[1])}</div>`;
+    const pi = portraitOf(HDC_WHO[pair[0]] || (pair[0] === "Leo" ? "leo" : null));
+    return `<div class="mdx-story ${cls || ""}${pi ? " pt" : ""}">${pi ? `<img class="mdx-pt" src="${pi}" alt="" width="72" height="72">` : ""}<div class="mdx-st"><b>${esc(CHAR[pair[0]] || pair[0])}</b>${esc(pair[1])}</div></div>`;
   }
   // primo episodio non ancora vinto (aperto oppure in attesa di stelle)
   function firstUnwon(p) { for (let i = 0; i < OPPS.length; i++) { if (!oppWon(p, OPPS[i].id)) return i; } return -1; }

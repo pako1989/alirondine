@@ -545,6 +545,9 @@
 .cgd-tr.h{background:#2a1f15;color:#a8957a;font-weight:700}.cgd-tr.me{background:#3a2610;color:#fde68a}
 .cgd-me{color:#fde047;font-weight:800}
 .cgd-sc2{border-left:3px solid #fb923c;padding:6px 12px;margin:12px 0;background:rgba(255,255,255,.04);border-radius:0 10px 10px 0;min-height:110px}
+.cgd-sc2.pt{display:flex;gap:10px;align-items:flex-start}
+.cgd-st{flex:1;min-width:0;overflow-wrap:anywhere}
+.cgd-pt{flex:none;width:72px;height:72px;border-radius:10px;border:2px solid #fb923c;background:#0b1424;margin-top:2px}
 .cgd-sc2 b{font-size:13px}.cgd-sc2 p{font-size:15px}
 .cgd-pshoot{position:absolute;left:50%;bottom:max(24px,env(safe-area-inset-bottom));transform:translateX(-50%);width:170px;height:64px;border-radius:32px;border:3px solid #ffedd5;background:radial-gradient(circle at 35% 30%,#fb923c,#c2410c);font:900 20px system-ui;color:#fff;z-index:8;touch-action:none;display:none;align-items:center;justify-content:center;box-shadow:0 5px 14px rgba(0,0,0,.55)}
 .cgd-pz{position:absolute;z-index:8;display:none;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:3px}
@@ -2020,11 +2023,27 @@
     showUi(h);
     act({ rd: (id) => showScene(id, 0, showDiary), back: showHub });
   }
+  // ritratti della storia principale per chi parla nel diario (id CASTC -> scheda; se manca la scheda, profilo semplice nello stesso stile)
+  const PT_ID = { tullio: "don_tullio", remo: "cg_remo", gino: "cg_tano", rina: "cg_rina", nives: "nives_balcone", cav: "cg_cavalletto", zoe: "rb_zoe", mimi: "rb_mimi", brando: "brando", osvaldo: "rb_otello", nina: "rb_nina", sandra: "cg_gru", nando: "cg_nando", marea: "cg_marea", rita: "cg_rosa", nino: "cg_nino", elio: "cg_elio" };
+  const PT_SPEC = {
+    don_tullio: { name: "Don Tullio", hair: "#c9c5bd", style: "buzz", skin: "#d49a68", eye: "#3b2f1f", bg: ["#78350f", "#d6b98c"], beard: true, shirt: "#78350f" },
+    cg_remo: { name: "Mastro Remo", hair: "#c9c5bd", style: "buzz", skin: "#d49a68", eye: "#2a2a2a", bg: ["#78350f", "#a8a29e"], beard: true, shirt: "#78350f" },
+    nives_balcone: { name: "Signora Nives", hair: "#d8d4cc", style: "bun", skin: "#e8b88c", eye: "#2a2a2a", bg: ["#9d174d", "#f9a8d4"], shirt: "#f472b6" },
+    cg_rosa: { name: "Rosa", hair: "#2a1a2a", style: "long", skin: "#e8b88c", eye: "#2a2a2a", bg: ["#a855f7", "#0f172a"], shirt: "#a855f7" },
+    cg_nino: { name: "Nino Cavo", hair: "#2a1a10", style: "messy", skin: "#d9a679", eye: "#2a2a2a", bg: ["#b91c1c", "#fecaca"], shirt: "#b91c1c" },
+    cg_elio: { name: "Elio", hair: "#3b2a1c", style: "messy", skin: "#e0b48a", eye: "#2a2a2a", bg: ["#38bdf8", "#e0f2fe"], shirt: "#38bdf8" }
+  };
+  function portraitOf(k) {
+    try {
+      const a = window.__borgoApi, id = PT_ID[k]; if (!id || !a || typeof a.portraitImg !== "function") return "";
+      hdcReg(); return a.portraitImg(id, PT_SPEC[id]) || "";
+    } catch (e) { return ""; }
+  }
   function showScene(id, i, back) {
     const c = CHAPTERS.find((x) => x.id === id); uiState = "scene";
-    const ln = c.lines[i], who = CASTC[ln[0]] || CASTC.voce, last = i === c.lines.length - 1;
+    const ln = c.lines[i], who = CASTC[ln[0]] || CASTC.voce, last = i === c.lines.length - 1, pi = who.n ? portraitOf(ln[0]) : "";
     showUi(`<h3>${esc(c.t)} · ${esc(c.w)}</h3><div class="cgd-dots">${c.lines.map((_, k) => (k === i ? "<b>●</b>" : "●")).join(" ")}</div>
-      <div class="cgd-sc2" style="border-color:${who.c}">${who.n ? `<b style="color:${who.c}">${esc(who.n)}</b>` : ""}<p${who.n ? "" : ' style="font-style:italic"'}>${esc(ln[1])}</p></div>
+      <div class="cgd-sc2${pi ? " pt" : ""}" style="border-color:${who.c}">${pi ? `<img class="cgd-pt" src="${pi}" alt="" width="72" height="72" style="border-color:${who.c}">` : ""}<div class="cgd-st">${who.n ? `<b style="color:${who.c}">${esc(who.n)}</b>` : ""}<p${who.n ? "" : ' style="font-style:italic"'}>${esc(ln[1])}</p></div></div>
       <button class="cgd-btn" data-a="next">${last ? "Chiudi la pagina" : "Avanti"}</button>${i > 0 ? '<button class="cgd-btn sec" data-a="prev">Indietro</button>' : ""}`);
     act({
       next: () => {
