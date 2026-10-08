@@ -12,7 +12,7 @@
   let keyFn = null;
 
   const MODES = [
-    { id: "emblem", fn: "openTacticalEmblemMode", ico: "🛡️", t: "Rondine Emblem", tag: "Tattica a turni", col: "#38bdf8", time: "~10 min", ctrl: "Tocco o mouse", d: "Muovi la squadra su una griglia, tocca i rivali e scegli le mosse. Contano portata e ruoli: pensa prima di muoverti.", btn: "Gioca" },
+    { id: "emblem", fn: "openTacticalEmblemMode", ico: "🛡️", t: "Rondine Emblem", tag: "Tattica a turni", col: "#38bdf8", time: "~30 min", ctrl: "Tocco o mouse", d: "Muovi la squadra su una griglia, tocca i rivali e scegli le mosse. Contano portata e ruoli: pensa prima di muoverti.", btn: "Gioca" },
     { id: "action", fn: "openActionSoccerHD", ico: "⚽", t: "Action Soccer", tag: "Calcio d'azione 5v5", col: "#4ade80", time: "~5 min", ctrl: "Joystick o tocco", d: "Partita rapida vista dall'alto: corri, passa, tira. Calci a effetto con l'aftertouch e uno scatto speciale per i momenti caldi.", btn: "Gioca" },
     { id: "street", fn: "openStreetCageMode", ico: "👟", t: "Gabbia del Molo", tag: "Calcio da strada 3v3", col: "#fb923c", time: "~4 min", ctrl: "Tocco, frecce o WASD", d: "Campetto recintato: i muri restituiscono la palla, usali per sponde e uno-due. Riempi la Grinta per il tiro speciale.", btn: "Entra" },
     { id: "director", fn: "openMatchDirectorHD", ico: "📋", t: "Matchday Director", tag: "Gestionale dal vivo", col: "#c084fc", time: "~3 min a partita", ctrl: "Solo tocco: nessun riflesso", d: "Sei il Mister: modulo, mentalità, pressing, cambi e discorso dell'intervallo. 23 episodi in 4 stagioni, progressione e pagella.", btn: "Siediti" }

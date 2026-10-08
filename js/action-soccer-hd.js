@@ -606,21 +606,22 @@
   const hexRgb = (h) => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
   const colDist = (a, b) => { const x = hexRgb(a), y = hexRgb(b); return Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]); };
   const kitOf = () => KITS.find((k) => k.id === X.look.kit) || KITS[0];
-  function mkTeam(team, opp) {
+  function mkTeam(team, opp, ut) {
     const arr = [];
-    const ros = team === 0 ? homeRoster() : null, hk = kitOf();
+    const ros = team === 0 ? (ut ? ut.map((u) => ({ name: u.name, mods: {} })) : homeRoster()) : null, hk = kitOf();
     for (let i = 0; i < 5; i++) {
       const ro = ROLES[i];
       const md = ros ? ros[i].mods || {} : {};
+      const uf = team === 0 && ut ? ut[i].f : null; // modalita' "ut": valori -1..1 delle carte, vedi utFor()
       const p = {
         team, i, role: ro.r, isGK: i === 0,
         name: team === 0 ? ros[i].name : opp.names[i],
         bu: ro.u, bv: ro.v,
         x: xOfU(team, ro.u), y: yOfV(ro.v), vx: 0, vy: 0, face: team === 0 ? 0 : Math.PI,
-        spd: ro.spd * (team === 0 ? (i === 3 ? 1.02 : i === 4 ? 1.04 : 1) * (md.spd || 1) : 1),
+        spd: ro.spd * (team === 0 ? (uf ? 1 + UTK.spd * uf.spd : (i === 3 ? 1.02 : i === 4 ? 1.04 : 1) * (md.spd || 1)) : 1),
         kit: team === 0 ? hk.k : opp.kit, kit2: team === 0 ? hk.k2 : opp.kit2, pat: team === 0 ? X.look.pat : "classic",
-        stun: 0, cd: 0, think: 0, lunge: 0, lungeCd: 0, ph: Math.random() * 6, hold: 0, dribT: null, err: 0, tkMul: md.tkl || 1, reachMul: md.reach || 1,
-        frozen: false, userKeeper: false, dive: 0,
+        stun: 0, cd: 0, think: 0, lunge: 0, lungeCd: 0, ph: Math.random() * 6, hold: 0, dribT: null, err: 0, tkMul: uf ? 1 + UTK.def * uf.def : md.tkl || 1, reachMul: uf ? 1 + UTK.gk * uf.gk : md.reach || 1,
+        frozen: false, userKeeper: false, dive: 0, ut: uf, rxAdj: uf && i === 0 ? -Math.round(UTK.rx * uf.gk) : 0,
       };
       if (i === 0) { p.kit = team === 0 ? "#f59e0b" : opp.gk; p.kit2 = "#111827"; }
       arr.push(p);
@@ -638,7 +639,7 @@
     M = {
       mi, opp, D: Object.assign({}, DIFFS[diffIdx]), diffIdx, mode: o.mode || "torneo", len, halfT: o.noHalf ? 0 : len / 2, noGolden: !!o.noGolden,
       state: "kickoff", timer: 90, score: [0, 0], t: 0, golden: false, halfDone: false,
-      tm: [mkTeam(0, opp), mkTeam(1, opp)], pl: [],
+      tm: [mkTeam(0, opp, o.ut), mkTeam(1, opp)], pl: [], ut: !!o.ut,
       ball: { x: W / 2, y: GM, vx: 0, vy: 0, z: 0, vz: 0, owner: null, lastTeam: 0, lastP: null, passTo: null, at: 0, atTeam: 0, fire: 0, curl: 0, rot: 0, hot: 0, trail: [], curved: false },
       ctl: null, ctlLock: 0, kickTeam: 0, chase: [[], []],
       grinta: 0, stam: 1, stamLock: false,
@@ -732,9 +733,10 @@
 
   function doPass(p, m, power) {
     const d = dist(p.x, p.y, m.x, m.y);
-    const v0 = passSpeed(d) * (power || 1);
+    const v0 = passSpeed(d) * (power || 1) * (p.ut ? 1 + UTK.pasV * p.ut.pas : 1);
     const lead = clamp(d / Math.max(v0, 1), 0, 22) * 0.55;
-    const tx = clamp(m.x + m.vx * lead, XL + 8, XR - 8), ty = clamp(m.y + m.vy * lead, YT + 8, YB - 8);
+    const pe = p.ut ? UTK.pasE * (1 - p.ut.pas) / 2 : 0; // imprecisione del passaggio (px): 0 con passaggio al massimo
+    const tx = clamp(m.x + m.vx * lead + rnd(-pe, pe), XL + 8, XR - 8), ty = clamp(m.y + m.vy * lead + rnd(-pe, pe), YT + 8, YB - 8);
     kickBall(p, tx, ty, v0, d > 360 ? 1.8 : 0.3, { to: m, snd: 0.85, at: p.team === 0 ? 26 : 0 });
     M.lastPass = { from: p, to: m, t: M.t };
     if (p.team === 0) { M.ctl = m; M.ctlLock = 20; }
@@ -762,11 +764,12 @@
     const dg = dist(p.x, p.y, goalXOf(p.team), GM);
     let intesa = false;
     if (M.lastPass && M.lastPass.to === p && M.t - M.lastPass.t < 2.8 && ((M.lastPass.from.i === 3 && p.i === 4) || (M.lastPass.from.i === 4 && p.i === 3))) intesa = true;
-    const noise = intesa ? 0 : 3 + charge * 14;
+    const noise = intesa ? 0 : (3 + charge * 14) * (p.ut ? 1 - UTK.acc * p.ut.acc : 1);
     const tgt = aimShot(p, charge, noise);
     let v0 = 10.5 + 9.5 * charge, lift = 0.5 + 3.4 * charge * charge + rnd(-0.2, 0.3);
+    if (p.ut) v0 *= 1 + UTK.pow * p.ut.pow;
     if (M.sp && M.sp.kind === "fk") lift = 2 + 4.4 * charge; // la punizione si alza per scavalcare la barriera
-    if (intesa) { v0 *= 1.1; M.intesa++; addGrinta(22); say("INTESA LEO-NICO!", 1700); spark(p.x, p.y, 22, "#7dd3fc", 4); M.flash = 8; snd("playEmblemCrit"); }
+    if (intesa) { v0 *= 1.1; M.intesa++; addGrinta(22); say(M.ut ? "INTESA " + p.name.toUpperCase() + "!" : "INTESA LEO-NICO!", 1700); spark(p.x, p.y, 22, "#7dd3fc", 4); M.flash = 8; snd("playEmblemCrit"); }
     if (rondine) {
       v0 = 21.5; lift = 2.2; M.grinta = 0;
       const side = p.y < GM ? 1 : -1, curl = side * 0.02;
@@ -788,9 +791,9 @@
 
   function aiShoot(p) {
     const D = M.D;
-    const tgt = aimShot(p, 0.8, D.noise);
+    const tgt = aimShot(p, 0.8, D.noise * (p.ut ? 1 - UTK.acc * p.ut.acc : 1));
     const dg = dist(p.x, p.y, goalXOf(p.team), GM);
-    kickBall(p, tgt.x, tgt.y, clamp(9.5 + dg * 0.016, 11, 17.5), clamp(0.5 + dg * 0.004, 0.6, 2.4), { snd: 1.1 });
+    kickBall(p, tgt.x, tgt.y, clamp(9.5 + dg * 0.016, 11, 17.5) * (p.ut ? 1 + UTK.pow * p.ut.pow : 1), clamp(0.5 + dg * 0.004, 0.6, 2.4), { snd: 1.1 });
     M.shots[1]++;
   }
 
@@ -986,7 +989,7 @@
     else if (incoming) {
       if (!g.sh) { // nuovo tiro: lettura con ritardo di reazione e errore che dipendono dalla difficoltà
         const rd = gkReadShot(b, gx + dIn * 14);
-        const sh = g.sh = { rd, fr: Math.round(pen ? 2 + (D.gr - 5) * 0.4 : D.gr) + Math.floor(Math.random() * 3), ty: null, k: 0 };
+        const sh = g.sh = { rd, fr: Math.max(1, Math.round(pen ? 2 + (D.gr - 5) * 0.4 : D.gr) + Math.floor(Math.random() * 3) + (g.rxAdj || 0)), ty: null, k: 0 };
         if (rd) {
           const yT = rd.y;
           if (pen) { // rigore: tuffo da un lato; con probabilità pr legge il lato giusto, altrimenti va a caso
@@ -1031,7 +1034,7 @@
         M.saves[t]++;
         if (sp0 < 11 + (t === 1 ? M.diffIdx * 2 : 2) && !b.fire && Math.random() < 0.7) {
           b.owner = g; g.hold = 55; b.vx = b.vy = 0; b.passTo = null; b.at = 0; b.lastTeam = t; b.lastP = g;
-          say(t === 1 ? "Parata! Presa sicura" : "Sandro la blocca!", 1200);
+          say(t === 1 ? "Parata! Presa sicura" : (M.ut ? g.name : "Sandro") + " la blocca!", 1200);
         } else {
           b.vx = dIn * Math.max(4, sp0 * 0.45); b.vy = (b.y - g.y) * 0.35 + rnd(-2.5, 2.5); b.vz = 1.5; b.at = 0; b.fire = 0; b.passTo = null; b.lastTeam = t; b.lastP = g;
           say("Parata in angolo!", 1100); M.shake = 4;
@@ -1059,8 +1062,9 @@
     }
     if (mag > 1) { jx /= mag; jy /= mag; mag = 1; }
     const wantSprint = input.sprint && mag > 0.2 && !M.stamLock && M.stam > 0;
-    if (wantSprint) { M.stam = Math.max(0, M.stam - 0.0075); if (M.stam <= 0.01) M.stamLock = true; }
-    else { M.stam = Math.min(1, M.stam + 0.004); if (M.stamLock && M.stam > 0.3) M.stamLock = false; }
+    const sf = p.ut ? p.ut.sta : 0; // resistenza della carta: consuma meno fiato (e lo recupera prima)
+    if (wantSprint) { M.stam = Math.max(0, M.stam - 0.0075 * (1 - UTK.sta * sf)); if (M.stam <= 0.01) M.stamLock = true; }
+    else { M.stam = Math.min(1, M.stam + 0.004 * (1 + UTK.sta * 0.8 * sf)); if (M.stamLock && M.stam > 0.3) M.stamLock = false; }
     let sp = p.spd * (wantSprint ? 1.34 : 1) * (b.owner === p ? 0.94 : 1);
     if (p.lunge > 0) {
       p.lunge--;
@@ -1271,7 +1275,7 @@
     if (best) {
       const prev = b.lastTeam;
       b.owner = best; b.passTo = null; b.at = 0; b.fire = 0; b.lastTeam = best.team; b.lastP = best;
-      if (best.team === 0 && !best.isGK) { M.ctl = best; if (M.lastPass && M.lastPass.to === best && prev === 0) { addGrinta(4); if ((M.lastPass.from.i === 3 && best.i === 4) || (M.lastPass.from.i === 4 && best.i === 3)) { addGrinta(5); say("Una-due Leo-Nico!", 900); } } }
+      if (best.team === 0 && !best.isGK) { M.ctl = best; if (M.lastPass && M.lastPass.to === best && prev === 0) { addGrinta(4); if ((M.lastPass.from.i === 3 && best.i === 4) || (M.lastPass.from.i === 4 && best.i === 3)) { addGrinta(5); say(M.ut ? "Una-due!" : "Una-due Leo-Nico!", 900); } } }
       if (best.isGK) best.hold = 40;
     }
   }
@@ -1298,7 +1302,7 @@
       banner("GOL " + M.opp.tag, `${nm} · ${min}'`, true, 1800);
       addGrinta(12);
     }
-    if (team === 0) PROG.goals++;
+    if (team === 0 && !M.ut) PROG.goals++;
     let lv = false;
     if (M.mode === "surv") { if (team === 1) M.lives--; else if (M.score[0] % 2 === 0) { survLevelUp(); lv = true; } }
     if (!lv && M.mode !== "train" && Math.random() < 0.65) later(() => { if (M && !closed && uiState === "play") say(quip(team === 0 ? "goalFor" : "goalAg"), 2300); }, 700);
@@ -1779,13 +1783,14 @@
   }
 
   // ---------------------------------------------------------------- HUD DOM
-  const MODE_NAMES = { torneo: "Torneo", free: "Partita libera", surv: "Sopravvivenza", timed: "Sfida a tempo", pens: "Rigori", setp: "Calci piazzati", train: "Allenamento", season: "Campionato", cup: "Coppa", "cup-pens": "Coppa · rigori" };
+  const MODE_NAMES = { torneo: "Torneo", free: "Partita libera", surv: "Sopravvivenza", timed: "Sfida a tempo", pens: "Rigori", setp: "Calci piazzati", train: "Allenamento", season: "Campionato", cup: "Coppa", "cup-pens": "Coppa · rigori", ut: "Ultimate Team" };
   function hudInfo() {
     const o = M.opp, sc = M.score;
     let a = sc[0], c = sc[1], sub;
     const mn = M.state === "full" ? (M.golden ? "90+" : "90") : clockMin();
     const m = M.mode;
-    if (m === "pens" || m === "cup-pens") {
+    if (m === "ut") sub = (M.golden ? "Supplementari " : "") + mn + "' · " + o.name + " · " + DIFFS[M.diffIdx].n;
+    else if (m === "pens" || m === "cup-pens") {
       const S = M.so; a = S ? S.sc[0] : 0; c = S ? S.sc[1] : 0;
       const dots = (arr) => arr.map((r) => (r ? "●" : "✕")).join("") || "-";
       sub = (m === "cup-pens" ? "Rigori · " : "") + (S ? "Tu " + dots(S.log[0]) + " · " + o.tag + " " + dots(S.log[1]) : "");
@@ -2442,6 +2447,74 @@
     const pv = ui.querySelector('[data-a="prev"]'); if (pv) pv.onclick = () => showTutorial(step - 1, back);
   }
 
+  // ---------------------------------------------------------------- modalita' "ut" (Ultimate Team del Borgo)
+  // start({mode:"ut", team:[5 carte in ordine di slot: portiere, difensore, difensore, centrocampista, attaccante],
+  //        opp:{name, pw?, kit?, names?[5], spd?, tkl?, press?, shoot?, line?}, diff?:0..2, onExit(res)})
+  // Ogni carta: {id?, name, role, rar?, lv?, stats:{spd,pow,acc,pas,def,gk,sta}} con valori 0..100 (50 = neutro; mancante = 50).
+  // Mappatura valore -> campo (f = (valore-50)/50 limitato a -1..1; i moltiplicatori stanno nei range gia' usati dai compagni/DIFFS):
+  //   spd (scatto/velocita')  velocita' del giocatore        x(1 +/- 6%)
+  //   pow (potenza di tiro)   velocita' del pallone al tiro  x(1 +/- 6%)  (anche i tiri dei compagni controllati dall'IA)
+  //   acc (precisione tiro)   errore di mira (noise)         x(1 -/+ 30%)
+  //   pas (passaggio)         velocita' del passaggio x(1 +/- 5%) e imprecisione del lancio da 0 a 9 px
+  //   def (difesa/contrasto)  probabilita' di rubare palla   x(1 +/- 20%)
+  //   gk  (portiere)          raggio di parata x(1 +/- 12%) e riflessi -/+ 2 frame prima del tuffo (solo la carta in porta)
+  //   sta (resistenza/grinta) consumo del fiato nello scatto x(1 -/+ 18%), recupero +/- 14%  (vale per chi stai muovendo)
+  // Niente salvataggi propri: il risultato esce solo da onExit(res) = {win, draw, a, c, scorers[], shots[], saves[]} (null se abbandoni).
+  const UTK = { spd: 0.06, pow: 0.06, acc: 0.3, pasV: 0.05, pasE: 9, def: 0.2, gk: 0.12, rx: 2, sta: 0.18 };
+  let utCfg = null;
+  const utF = (v) => clamp(((v === undefined || v === null || isNaN(+v) ? 50 : +v) - 50) / 50, -1, 1);
+  function utNorm(team) {
+    const out = [];
+    for (let i = 0; i < 5; i++) {
+      const c = (Array.isArray(team) && team[i]) || {}, st = c.stats || {};
+      const f = {}; ["spd", "pow", "acc", "pas", "def", "gk", "sta"].forEach((k) => { f[k] = utF(st[k]); });
+      out.push({ id: c.id || "", name: String(c.name || HOME_NAMES[i]).slice(0, 24), role: c.role || "", rar: c.rar || "", lv: c.lv || 1, st, f });
+    }
+    return out;
+  }
+  function utOpp(o) {
+    o = o || {}; const t = clamp(((+o.pw || 36) - 28) / 22, 0, 1), nm = String(o.name || "Avversari");
+    const lum = (h) => { try { const r = hexRgb(h); return r[0] * 0.3 + r[1] * 0.59 + r[2] * 0.11; } catch (e) { return 128; } };
+    const kit = /^#[0-9a-f]{6}$/i.test(o.kit || "") ? o.kit : "#c97a3a";
+    const n = Array.isArray(o.names) && o.names.length >= 5 ? o.names : ["Portiere", "Difensore", "Difensore", "Centrale", "Punta"];
+    return { name: nm, tag: nm.replace(/^(i|il|la|le|gli|lo|l')\s*/i, "").slice(0, 3).toUpperCase() || "AVV", kit, kit2: lum(kit) > 140 ? "#1f2937" : "#f8fafc", gk: "#a3e635",
+      spd: o.spd || 0.94 + 0.1 * t, tkl: o.tkl || 0.8 + 0.45 * t, press: o.press || 190 + 60 * t, shoot: o.shoot || 300 + 40 * t, line: o.line || 0.06 * t, names: n.slice(0, 5), win: "", hint: "" };
+  }
+  function utBegin(opts) {
+    const team = utNorm(opts.team), opp = utOpp(opts.opp), diff = opts.diff !== undefined ? clamp(opts.diff | 0, 0, 2) : ((opts.opp && opts.opp.pw) || 36) <= 31 ? 0 : (opts.opp && opts.opp.pw) >= 47 ? 2 : 1;
+    utCfg = { onExit: typeof opts.onExit === "function" ? opts.onExit : null, team, opp, diff, res: null, title: opts.title || "" };
+    onExitCb = null; uiState = "menu"; utLineup();
+  }
+  const utChip = (k, v) => `<span style="display:inline-block;margin:1px 5px 1px 0;white-space:nowrap">${k} <b style="color:#fde047">${Math.round(v)}</b></span>`;
+  function utLineup() {
+    const C = utCfg, RN = { p: "Portiere", d: "Difesa", c: "Centrocampo", a: "Attacco" }, RR = { c: "Comune", r: "Rara", e: "Epica", l: "Leggendaria" };
+    const rows = C.team.map((c, i) => {
+      const st = c.st, chips = i === 0 ? utChip("Parata", st.gk ?? 50) + utChip("Pass", st.pas ?? 50) + utChip("Fiato", st.sta ?? 50) : utChip("Vel", st.spd ?? 50) + utChip("Tiro", st.pow ?? 50) + utChip("Prec", st.acc ?? 50) + utChip("Pass", st.pas ?? 50) + utChip("Dif", st.def ?? 50) + utChip("Fiato", st.sta ?? 50);
+      return `<div class="ahd-ut-row"><div class="ahd-ut-pt" data-pi="${i}">${esc(c.name.charAt(0))}</div><div style="min-width:0"><b>${esc(c.name)}</b><div class="ahd-sub" style="margin:0">${(() => { const sl = i === 0 ? "Portiere" : ["", "Difesa", "Difesa", "Centrocampo", "Attacco"][i], cr = i === 0 ? "Portiere" : RN[c.role] || ""; return sl === cr || !cr ? sl : sl + " (carta: " + cr.toLowerCase() + ")"; })()}${c.rar ? " · " + esc(RR[c.rar] || "") : ""} · Lv ${c.lv}</div><div class="ahd-ut-st">${chips}</div></div></div>`;
+    }).join("");
+    showUi(`<h2>${esc(C.title || "Action Soccer HD")}</h2><p class="ahd-sub">Le tue carte in campo contro <b>${esc(C.opp.name)}</b> (${DIFFS[C.diff].n}). I valori delle carte cambiano scatto, tiro, passaggio, contrasto, parate e fiato.</p>${utCss()}${rows}
+      <button class="ahd-btn" data-a="utgo">Calcio d'inizio</button><button class="ahd-btn sec" data-a="utno">Indietro</button>`);
+    try { const sm = root.querySelector(".ahd-sc small"); if (sm) sm.textContent = "Ultimate Team del Borgo"; } catch (e) { /* ignora */ }
+    on('[data-a="utgo"]', () => launch({ mode: "ut", opp: C.opp, diff: C.diff, ut: C.team, len: 100 }));
+    on('[data-a="utno"]', () => closeAll());
+    // ritratti: uno per volta, solo se il Borgo li sa disegnare; altrimenti resta l'iniziale
+    C.team.forEach((c, i) => later(() => { try { const el = ui && ui.querySelector(`[data-pi="${i}"]`), api = window.__borgoApi; if (!el || !api || !api.portraitImg || !c.id) return; const u = api.portraitImg(c.id); if (u) { el.textContent = ""; el.style.backgroundImage = `url(${u})`; } } catch (e) { /* resta l'iniziale */ } }, 40 + i * 60));
+  }
+  function utCss() {
+    return document.getElementById("ahd-ut-css") ? "" : `<style id="ahd-ut-css">.ahd-ut-row{display:flex;gap:9px;align-items:center;padding:6px 8px;margin:5px 0;border:1px solid #274466;border-radius:10px;background:#0f1d33}.ahd-ut-pt{flex:0 0 46px;width:46px;height:46px;border-radius:10px;background:#1e3a5f center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;color:#7dd3fc}.ahd-ut-st{font-size:11px;color:#b6c8e4;line-height:1.35}.ahd-ut-row b{font-size:14px;overflow-wrap:anywhere}</style>`;
+  }
+  function resUt() {
+    const [a, c] = M.score, win = a > c, draw = a === c, C = utCfg, sc = {};
+    M.goalsLog.forEach((g) => { if (g.team === 0) sc[g.who] = (sc[g.who] || 0) + 1; });
+    const scorers = Object.entries(sc).map(([n, k]) => (k > 1 ? n + " x" + k : n));
+    C.res = { win, draw, a, c, scorers, shots: M.shots.slice(), saves: M.saves.slice(), names: C.team.map((x) => x.name) };
+    const stat = (k, v) => `<div class="ahd-stat"><span>${k}</span><span>${v}</span></div>`;
+    putRes(`<h2>${win ? "Vittoria!" : draw ? "Pareggio" : "Sconfitta"}</h2><div class="ahd-score"><span style="color:#7dd3fc">${a}</span> - <span style="color:#fca5a5">${c}</span></div>
+      <p class="ahd-sub" style="text-align:center">Le tue carte vs ${esc(C.opp.name)}</p>
+      ${stat("Marcatori", scorers.length ? esc(scorers.join(", ")) : "nessuno")}${stat("Tiri", M.shots[0] + " - " + M.shots[1])}${stat("Parate", M.saves[0] + " - " + M.saves[1])}
+      <button class="ahd-btn" data-a="utdone">Continua</button>`, () => on('[data-a="utdone"]', () => closeAll()));
+  }
+
   // ---------------------------------------------------------------- avvio partite
   function resetInput() {
     input.jx = input.jy = input.kx = input.ky = 0; input.charging = false; input.chargeF = 0; input.passEdge = false; input.shootRel = false; input.rond = false; input.sprint = false; input.touchOn = false; input.skip = false;
@@ -2452,6 +2525,7 @@
     hideUi(); uiState = "play"; paused = false;
     const sp = cfg.mode === "setp" || cfg.mode === "pens" || cfg.mode === "cup-pens";
     const dIdx = cfg.diff === undefined ? SET.diff : cfg.diff;
+    if (cfg.mode === "ut") { newMatch(-1, dIdx, { opp: cfg.opp, mode: "ut", len: cfg.len || 100, ut: cfg.ut }); resetInput(); stage.querySelector(".ahd-pad").classList.toggle("all", SET.ctrl === "touch"); showDefaultStick(); acc = 0; lastTs = 0; say("Le tue carte in campo!", 2200); hud(); return; }
     if (sp) newMatch(-1, dIdx, { opp: cfg.opp || OPPS[0], mode: cfg.mode, len: 0, noHalf: true, noGolden: true });
     else newMatch(cfg.mi === undefined ? -1 : cfg.mi, dIdx, cfg);
     resetInput();
@@ -2489,6 +2563,7 @@
   }
   function showResult() {
     const m = M.mode;
+    if (m === "ut") return resUt();
     if (m === "surv") return resSurv();
     if (m === "timed") return resTimed();
     if (m === "setp") return resSetp();
@@ -2632,7 +2707,7 @@
     on('[data-a="tut"]', () => showTutorial(0, pauseGame));
     on('[data-a="rst"]', () => launch(CTX));
     on('[data-a="ctr"]', () => { setupKickoff(0); M.score = [0, 0]; resumeGame(); });
-    on('[data-a="menu"]', showMenu);
+    on('[data-a="menu"]', () => (utCfg ? closeAll() : showMenu()));
   }
   function resumeGame() { hideUi(); uiState = "play"; paused = false; lastTs = 0; acc = 0; showDefaultStick(); }
 
@@ -2647,12 +2722,15 @@
     cv = cx = ui = stage = null; M = null;
     input.jx = input.jy = input.kx = input.ky = 0; input.charging = false;
     const cb = onExitCb; onExitCb = null;
+    const uc = utCfg; utCfg = null;
+    if (silent !== true && uc && typeof uc.onExit === "function") { try { uc.onExit(uc.res); } catch (e) { console.error(e); } return; }
     if (silent !== true && typeof cb === "function") { try { cb(); } catch (e) { console.error(e); } }
   }
 
   function openHd(opts) {
     opts = opts || {};
     if (root) closeAll(true);
+    utCfg = null;
     injectCss();
     onExitCb = typeof opts.onExit === "function" ? opts.onExit : null;
     PROG = loadProg(); SET = loadSet(); X = loadX(); bgCache = null; CTX = null; lookPend = ""; teamInfo = "";
@@ -2710,7 +2788,7 @@
     raf = requestAnimationFrame(loop);
     root.focus();
     const go = opts.mode || "menu";
-    if (go === "menu") showMenu(); else openGo(go);
+    if (go === "ut") utBegin(opts); else if (go === "menu") showMenu(); else openGo(go);
   }
   window.openActionSoccerHD = function (onExit) { openHd({ onExit }); };
 
@@ -2726,5 +2804,5 @@
       dailyLeft: D.ids.length - D.done.length, streak: D.streak, shells: X.meta.shells, played: totalPlays(), torneo: PROG.stars.filter((q) => q > 0).length,
     };
   }
-  window.__actionHd = { version: 2, start: openHd, state: hdState, modes: ["menu", "torneo", "season", "cup", "free", "surv", "timed", "pens", "setp", "train", "daily", "team", "look", "tac", "diary"] };
+  window.__actionHd = { version: 2, ut: 1, start: openHd, state: hdState, modes: ["menu", "torneo", "season", "cup", "free", "surv", "timed", "pens", "setp", "train", "daily", "team", "look", "tac", "diary"] };
 })();

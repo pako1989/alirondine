@@ -506,11 +506,12 @@
     return { open: true };
   }
   function oppUnlocked(p, i) { return oppState(p, i).open; }
-  function formUnlocked(p, f) { const u = FORMS[f].unlock; return !u || p.wins >= u.wins; }
+  function formUnlocked(p, f) { if (utCfg) return true; const u = FORMS[f].unlock; return !u || p.wins >= u.wins; }
 
   // ---------------------------------------------------------------- stato modulo
   let root = null, style = null, canvas = null, ctx = null, rafId = 0, onExitCb = null, openOpts = null;
   let prog = defaultProg();
+  let utCfg = null; // modalita' "ut" (Ultimate Team del Borgo): rosa = carte dell'utente, nessun salvataggio proprio
   let S = null; // partita
   let tab = "ordini";
   let lastT = 0, cw = 0;
@@ -689,8 +690,8 @@
     if (R.drain) S.drain = R.drain;
     if (typeof R.morale === "number") S.morale = R.morale;
     if (R.startScore) { S.scoreA = R.startScore[0]; S.scoreB = R.startScore[1]; if (S.scoreB > S.scoreA) S.stats.trailed = true; S.shotsB = S.scoreB; S.sotB = S.scoreB; }
-    const squad = makeSquad();
-    S.squad = squad;
+    const squad = utCfg ? makeUtSquad() : makeSquad();
+    S.squad = squad; S.ut = !!utCfg;
     S.bench = squad.filter((p) => p.bench);
     S.xi = squad.filter((p) => !p.bench);
     reassign(form);
@@ -699,7 +700,7 @@
     S.events = scheduleEvents();
     // posizioni iniziali immediate
     layout(); S.xi.concat(S.oppXI).forEach((p) => { p.x = p.tx; p.y = p.ty; });
-    S.log.unshift({ m: 0, t: `La Rondine FC riceve i ${opp.name}. ${opp.blurb}`, c: "" });
+    S.log.unshift({ m: 0, t: `La Rondine FC riceve ${utCfg ? "" : "i "}${opp.name}. ${opp.blurb}`, c: "" });
     if (R.startScore) S.log.unshift({ m: 0, t: `Si parte da ${R.startScore[0]}-${R.startScore[1]}: ${opp.short} è già avanti.`, c: "opp" });
   }
 
@@ -750,11 +751,11 @@
   }
   function pickShooterA() {
     const f = S.xi.filter((p) => p.slotGrp !== "POR");
-    return weightedPlayer(f, (p) => ({ ATT: 5, CEN: 2.2, DIF: 0.5 }[p.slotGrp]) * (p.r / 72));
+    return weightedPlayer(f, (p) => ({ ATT: 5, CEN: 2.2, DIF: 0.5 }[p.slotGrp]) * (p.r / 72) * (p.fin || 1));
   }
   function pickAssistA(ex) {
     const f = S.xi.filter((p) => p.slotGrp !== "POR" && p !== ex);
-    return weightedPlayer(f, (p) => ({ ATT: 2, CEN: 3, DIF: 1 }[p.slotGrp]));
+    return weightedPlayer(f, (p) => ({ ATT: 2, CEN: 3, DIF: 1 }[p.slotGrp]) * (p.pasW || 1));
   }
   function ourGK() { return S.xi.find((p) => p.slotGrp === "POR"); }
 
@@ -762,7 +763,8 @@
     q = q * (S.qf || 1);
     const A = powerA(), B = powerB();
     const gkf = team === "A" ? clamp(B.gk, 0.85, 1.2) : clamp(A.gk, 0.85, 1.2);
-    const pGoal = clamp(q * (1 + (bonus || 0)) / gkf, 0.02, 0.9);
+    const sh0 = team === "A" ? pickShooterA() : null; // chi tira si decide prima: la qualita' del tiratore (carte) pesa sulla conversione
+    const pGoal = clamp(q * (1 + (bonus || 0)) / gkf * (sh0 && sh0.fin ? sh0.fin : 1), 0.02, 0.9);
     const r = rnd();
     let kind;
     if (r < pGoal) kind = "goal";
@@ -771,22 +773,24 @@
       kind = x < 0.5 ? "save" : x < 0.75 ? "miss" : x < 0.85 ? "post" : "block";
     }
     let shooter, assist = null;
-    if (team === "A") { shooter = pickShooterA(); if (kind === "goal" && rnd() < 0.7) assist = pickAssistA(shooter); }
+    if (team === "A") { shooter = sh0; if (kind === "goal" && rnd() < 0.7) assist = pickAssistA(shooter); }
     else { shooter = pick(S.oppXI.filter((p) => p.slotGrp !== "POR")); }
     return { team, kind, q, shooter, assist };
   }
 
+  const gkN = () => { try { if (S && S.ut) { const g = ourGK(); if (g) return g.name; } } catch (e) { /* noop */ } return "Sandro"; };
+  const defN = () => { try { if (S && S.ut) { const d = S.xi.filter((q) => q.slotGrp === "DIF"); if (d.length) return pick(d).name; } } catch (e) { /* noop */ } return "Chicco"; };
   const TXT = {
     goalA: [(s, a) => `⚽ GOOOL! ${s} la mette dentro${a ? ` su assist di ${a}` : ""}. Il molo esplode!`, (s, a) => `⚽ ${s} non perdona${a ? `: assist di ${a}` : ""}. 1 a zero per la poesia.`, (s) => `⚽ Rete di ${s}! Il vice abbraccia il fisioterapista, che non c'entrava niente.`, (s, a) => `⚽ Azione da manuale${a ? `, ${a} apre` : ""}, ${s} chiude. Applausi a scena aperta!`],
-    goalB: [(s) => `💥 Gol subito: ${s} ci punisce. Silenzio in panchina.`, (s) => `💥 ${s} trova l'angolo. Sandro guarda il cielo cercando spiegazioni.`, (s) => `💥 Rete avversaria di ${s}. Il Mister si morde la penna.`],
+    goalB: [(s) => `💥 Gol subito: ${s} ci punisce. Silenzio in panchina.`, (s) => `💥 ${s} trova l'angolo. ${gkN()} guarda il cielo cercando spiegazioni.`, (s) => `💥 Rete avversaria di ${s}. Il Mister si morde la penna.`],
     save: [(s) => `🧤 Occasione Rondine: ${s} calcia, il portiere si allunga!`, (s) => `🧤 ${s} ci prova da posizione invitante: parata strepitosa.`],
     miss: [(s) => `😬 ${s} spara alto. La Madonna del Faro ringrazia.`, (s) => `😬 Tiro di ${s}: fuori di un soffio.`],
     post: [(s) => `🥁 PALO di ${s}! Il rumore si sente fino alla darsena.`],
     block: [(s) => `🧱 ${s} calcia, un difensore si immola sul tiro.`],
-    saveB: [(s) => `🧤 Sandro vola e salva sul tiro di ${s}!`, (s) => `🧤 ${s} calcia: Sandro respinge di pugno. Sarà il pesce di ieri.`],
+    saveB: [(s) => `🧤 ${gkN()} vola e salva sul tiro di ${s}!`, (s) => `🧤 ${s} calcia: ${gkN()} respinge di pugno. Sarà il pesce di ieri.`],
     missB: [(s) => `😮‍💨 ${s} tira alto. Respiriamo.`, (s) => `😮‍💨 ${s} fuori di un soffio. Ancora tutti vivi.`],
     postB: [(s) => `🥁 Palo avversario con ${s}! Ci è andata di lusso.`],
-    blockB: [(s) => `🛡️ Chicco mura il tiro di ${s} sulla linea!`]
+    blockB: [(s) => `🛡️ ${defN()} mura il tiro di ${s} sulla linea!`]
   };
 
   function applyShot(res) {
@@ -845,7 +849,7 @@
     S.xi.forEach((p) => {
       if (p.slotGrp === "POR") { p.st = Math.max(25, p.st - 0.08); return; }
       const g = p.slotGrp === "CEN" ? 1.12 : p.slotGrp === "DIF" ? 0.92 : 1;
-      p.st = Math.max(8, p.st - 0.52 * M.st * P.st * g * (S.drain || 1) * (p.eco ? 0.5 : 1));
+      p.st = Math.max(8, p.st - 0.52 * M.st * P.st * g * (S.drain || 1) * (p.eco ? 0.5 : 1) * (p.fat || 1));
     });
     S.oppStam = Math.max(15, S.oppStam - 0.48 * S.opp.mod.tire * (S.press === "alto" ? 1.35 : 1) * (S.oppBuff.atk > 1.1 ? 1.1 : 1));
     S.oppXI.forEach((p) => { p.st = S.oppStam; });
@@ -1009,7 +1013,7 @@
 
   // ---------------------------------------------------------------- eventi a scelta
   function scheduleEvents() {
-    const ids = GENERAL_EV.slice();
+    const ids = (utCfg ? UT_EV : GENERAL_EV).slice();
     for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
     const mins = [9 + Math.floor(rnd() * 6), 20 + Math.floor(rnd() * 8), 33 + Math.floor(rnd() * 8), 52 + Math.floor(rnd() * 6), 65 + Math.floor(rnd() * 6), 78 + Math.floor(rnd() * 8)];
     if (S.opp.season >= 1) mins.push(28 + Math.floor(rnd() * 5)); // dalla seconda stagione un imprevisto in più
@@ -1029,8 +1033,8 @@
   function routeEvent(ev) {
     if (ev.forced) return ev.id;
     const d = diff();
-    if (ev.min >= 55 && d <= -2 && !S.usedRim) { S.usedRim = true; return "rimonta"; }
-    if (ev.min >= 62 && d >= 1 && !S.usedVan && rnd() < 0.55) { S.usedVan = true; return "vantaggio"; }
+    if (ev.min >= 55 && d <= -2 && !S.usedRim) { S.usedRim = true; return utCfg ? "ut_rim" : "rimonta"; }
+    if (ev.min >= 62 && d >= 1 && !S.usedVan && rnd() < 0.55) { S.usedVan = true; return utCfg ? "ut_van" : "vantaggio"; }
     const def = EVENTS[ev.id];
     if (!def.when || def.when()) return ev.id;
     while (S.evPool.length) { const n = S.evPool.shift(); if (!EVENTS[n].when || EVENTS[n].when()) return n; }
@@ -1335,6 +1339,120 @@
   EVENTS.giallo.text = () => "Chicco ha già un giallo e continua a entrare duro: pensa al fritto dell'intervallo, e si vede. Il fischietto lo guarda con sospetto.";
   const GENERAL_EV = ["rigore", "giallo", "contropiede", "punizione", "nonna", "gambe", "pioggia", "arbitro", "radio", "presidente", "striscione", "gabbiano", "capitano", "vento", "corner", "fairplay", "campane", "capra", "gigi", "tifosi", "acqua"];
   const COND_EV = ["rimonta", "vantaggio"];
+  const UT_EV = ["ut_rig", "ut_pun", "ut_cor", "pioggia", "gambe", "arbitro", "tifosi", "acqua"]; // solo imprevisti senza personaggi fissi della storia
+
+  // ---------------------------------------------------------------- modalita' "ut" (Ultimate Team del Borgo)
+  // start({mode:"ut", squad:[{id?, name, grp:"POR|DIF|CEN|ATT", r?, bench?, st:{spd,pow,acc,pas,def,gk,sta}}], opp:{name, pw?}, onExit(res)})
+  // La rosa e' fatta dalle carte dell'utente (11 titolari + panchina; se mancano carte si completa con "Giovani del Borgo" di valore basso).
+  // Mappatura statistica -> partita (valori 0..100, 50 = neutro; f = (v-50)/50 in -1..1):
+  //   r (valutazione, quella usata da tutta la simulazione) = 52 + 0.36 * stat principale del ruolo, limitata a 62..84:
+  //        POR: parata(gk) | DIF: difesa(def) | CEN: media di passaggio(pas) e resistenza(sta) | ATT: media di tiro(pow), precisione(acc) e scatto(spd)
+  //        (i titolari del Director vanno da 68 a 77: con carte medie il valore resta in quella fascia)
+  //   fin = 1 + 8% * f((pow+acc)/2)  -> pesa su chi tira e su quanto converte      pasW = 1 + 50% * f(pas) -> chi fa l'assist
+  //   fat = 1 - 18% * f(sta)          -> consumo di energia al minuto (resistenza/grinta)
+  // Risultato: onExit(res) con res = {win, draw, a, c, scorers[], shots[], mvp} oppure null se esci prima del fischio finale. Nessun salvataggio.
+  function utHash(s) { let h = 7; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; }
+  const utF = (v) => clamp(((v === undefined || v === null || isNaN(+v) ? 50 : +v) - 50) / 50, -1, 1);
+  function utRating(c) {
+    const st = c.st || {}, v = (k) => (st[k] === undefined ? 50 : +st[k]);
+    const main = c.grp === "POR" ? v("gk") : c.grp === "DIF" ? v("def") : c.grp === "CEN" ? (v("pas") + v("sta")) / 2 : (v("pow") + v("acc") + v("spd")) / 3;
+    return clamp(Math.round(52 + 0.36 * main), 62, 84);
+  }
+  function makeUtSquad() {
+    const raw = (utCfg.squad || []).filter((c) => c && c.name && /^(POR|DIF|CEN|ATT)$/.test(c.grp)).slice(0, 18);
+    const start = [], bench = []; let gkIn = false;
+    raw.forEach((c) => { if (!c.bench && start.length < 11 && (c.grp !== "POR" || !gkIn)) { start.push(c); if (c.grp === "POR") gkIn = true; } else bench.push(c); });
+    const fill = (grp, k) => ({ name: "Giovane " + (k + 1), grp, r: 62, st: {}, filler: true });
+    if (!gkIn) start.unshift(fill("POR", 0));
+    ["DIF", "CEN", "ATT"].forEach((g) => { const want = { DIF: 4, CEN: 3, ATT: 3 }[g]; let have = start.filter((c) => c.grp === g).length, k = 0; while (have < want && start.length < 11) { start.push(fill(g, k++)); have++; } });
+    while (start.length < 11) start.push(fill("CEN", start.length));
+    while (bench.length < 5) bench.push(fill(["DIF", "CEN", "ATT", "CEN", "DIF"][bench.length % 5], bench.length));
+    return start.slice(0, 11).map((c) => Object.assign(c, { bench: false })).concat(bench.slice(0, 7).map((c) => Object.assign(c, { bench: true }))).map((c, i) => {
+      const st = c.st || {}, r = c.r || utRating(c);
+      return { id: i, cid: c.id || "", name: String(c.name).slice(0, 22), num: c.num || (i < 11 ? i + 1 : i + 2), grp: c.grp, r, st: 100, slotGrp: c.grp, x: W / 2, y: H - 20, tx: 0, ty: 0, goals: 0, assists: 0, saves: 0, bonus: 0, mins: 0, eco: false, bench: !!c.bench, off: false, side: 0,
+        fin: 1 + 0.08 * utF(((st.pow === undefined ? 50 : st.pow) + (st.acc === undefined ? 50 : st.acc)) / 2), pasW: 1 + 0.5 * utF(st.pas), fat: 1 - 0.18 * utF(st.sta), filler: !!c.filler };
+    });
+  }
+  function utOppMake(o) {
+    o = o || {}; const t = clamp(((+o.pw || 36) - 28) / 22, 0, 1), nm = String(o.name || "Avversari");
+    const forms = ["4-4-2", "4-3-3", "5-4-1", "3-5-2"];
+    return { id: "ut", name: nm, short: nm.replace(/^(i|il|la|le|gli|lo|l')\s*/i, "").split(" ")[0] || "Avversari", ico: "🃏", col: o.kit || "#c97a3a", col2: "#1f2937", lvl: 0.94 + 0.12 * t, form: forms[utHash(nm) % forms.length], style: "Squadra di carta",
+      blurb: o.blurb || "Una squadra del Campionato delle Figurine. Si gioca con la lavagna: la rosa sono le tue carte.", hint: "I numeri delle carte contano: guarda chi e' stanco e cambia.", goal: "Vinci la partita",
+      mod: { atk: 1, mid: 1, def: 1, pressWeak: 1, foul: 0.03, ctr: 1.05, wall: 1, tire: 1 }, names: (Array.isArray(o.names) && o.names.length >= 5 ? o.names.concat(["Rincalzo", "Riserva", "Jolly", "Ala", "Mediano", "Stopper"]) : mkNames(utHash(nm) % 9, ["Carta", "Bustina", "Figurina", "Album", "Rara"])), twist: function () {}, season: 0, ep: 0 };
+  }
+  const utTop = (n, f) => S.xi.filter((p) => p.slotGrp !== "POR").sort((a, b) => f(b) - f(a)).slice(0, n);
+  const utShortName = (p) => p.name.replace(" (C)", "");
+  Object.assign(EVENTS, {
+    ut_rig: {
+      ico: "🎯", title: "RIGORE PER LA RONDINE!", text: () => "Fallo in area, l'arbitro indica il dischetto. Chi lo calcia? Le carte parlano: guarda tiro e precisione.",
+      get ch() { return utTop(3, (p) => p.r * p.fin).map((p) => { const pr = clamp(0.58 + (p.r - 62) * 0.012 + (p.fin - 1) * 0.6, 0.5, 0.88); return { t: utShortName(p) + " dal dischetto", s: "circa " + Math.round(pr * 100) + "%", go: () => penalty(p.name, pr, 0) }; }); }
+    },
+    ut_pun: {
+      ico: "🎯", title: "Punizione dal limite", text: () => "Fallo a 22 metri dalla porta. Il muro e' schierato: chi ha il piede giusto?",
+      get ch() { const t = utTop(3, (p) => p.r * p.fin); return t.map((p, i) => ({ t: i === 0 ? "Tiro diretto di " + utShortName(p) : i === 1 ? "Schema: sponda per " + utShortName(p) : "Cross per " + utShortName(p) + " in area", s: i === 0 ? "Pulito e senza fronzoli" : i === 1 ? "Piu' pericoloso, 40% si inceppa" : "Colpo di testa", go: () => { if (i === 1 && rnd() < 0.4) return "Lo schema si inceppa. Si riparte."; return shotBy(p.name, [0.15, 0.26, 0.19][i], utShortName(p) + " la mette dentro: GOL!", "Non e' bastato, ma il boato era gia' partito."); } })); }
+    },
+    ut_cor: {
+      ico: "⛳", title: "Calcio d'angolo", text: () => "Corner per la Rondine: il pallone e' sul dischetto d'angolo e il Borgo trattiene il fiato.",
+      get ch() { const t = utTop(3, (p) => p.r * p.fin * (p.grp === "DIF" ? 1.1 : 1)); return t.map((p, i) => ({ t: (i === 0 ? "Primo palo: " : i === 1 ? "Secondo palo: " : "Al limite: ") + utShortName(p), s: i === 1 ? "Piu' pericoloso, 30% si inceppa" : "Colpo di testa o botta", go: () => { if (i === 1 && rnd() < 0.3) return "Il cross e' troppo lungo: palla in fallo laterale."; return shotBy(p.name, [0.18, 0.24, 0.2][i], utShortName(p) + " non perdona: GOL!", "Ci prova, ma il portiere c'era."); } })); }
+    },
+    ut_rim: {
+      ico: "😤", title: "Siamo sotto di due", text: () => "Sotto di due. Il pubblico guarda a terra, la panchina guarda te. Il tempo corre.",
+      ch: [
+        { t: "All-in: tutti avanti", s: "Mentalita' All-in, morale +6", go: () => { S.ment = "allin"; mor(6); return "Tutti avanti, difesa compresa. Morale +6."; } },
+        { t: "Un gol alla volta", s: "Mentalita' equilibrata, morale +8", go: () => { S.ment = "equil"; mor(8); return "Un gol. Poi un altro. Morale +8."; } },
+        { t: "Pressing alto", s: "Pressing alto, centrocampo +5% per 10'", go: () => { S.press = "alto"; buf({ mid: 1.05 }, 10); mor(4); return "Pressing alto, centrocampo +5%, morale +4."; } }
+      ]
+    },
+    ut_van: {
+      ico: "🛡️", title: "Difendere il vantaggio", text: () => "Siamo avanti. Ogni minuto pesa come un'ancora.",
+      ch: [
+        { t: "Pullman davanti alla porta", s: "Mentalita' prudente, difesa +6% per 12'", go: () => { S.ment = "prudente"; buf({ def: 1.06 }, 12); return "Si chiude tutto. Difesa +6% per 12'."; } },
+        { t: "Continua ad attaccare", s: "Attacco +5% per 10'", go: () => { buf({ atk: 1.05 }, 10); return "Chi attacca non si fa male. Attacco +5%."; } },
+        { t: "Perdi tempo (con eleganza)", s: "Gli avversari -5% attacco per 10', morale -2", go: () => { S.oppBuff.atk = Math.min(S.oppBuff.atk, 0.95); mor(-2); return "Il tempo scorre. Morale -2."; } }
+      ]
+    }
+  });
+  function utPic(p) { // ritratto della carta (lazy, con fallback: resta il numero)
+    try { if (!p.cid || p.filler) return ""; if (p.pic === undefined) { const a = window.__borgoApi; p.pic = a && a.portraitImg ? (a.portraitImg(p.cid) || "") : ""; } return p.pic ? `<img src="${p.pic}" alt="" style="width:22px;height:22px;border-radius:5px;object-fit:cover;flex:none;margin-right:3px">` : ""; } catch (e) { return ""; }
+  }
+  function openKickoffUt() {
+    const o = S.opp; S.over = true;
+    const gk = ourGK(), avg = Math.round(S.xi.reduce((n, p) => n + p.r, 0) / S.xi.length);
+    openSheet(`<h2>${o.ico} Le tue carte vs ${esc(o.name)}</h2>
+      <p>${esc(o.blurb)}</p>
+      <div><span class="mdx-chip y">Rosa: ${S.squad.filter((p) => !p.filler).length} carte</span><span class="mdx-chip">Valore medio XI ${avg}</span><span class="mdx-chip">In porta ${esc(gk ? gk.name : "-")}</span><span class="mdx-chip">Modulo ${S.form}</span></div>
+      <p style="font-size:12.5px;color:#93a4bd">Il valore di ogni giocatore viene dalle statistiche della carta (tiro, precisione, passaggio, difesa, parata, resistenza). Scegli modulo, mentalita' e pressing nella scheda Ordini; hai ${S.maxSubs} cambi e 2 timeout.</p>
+      <div class="mdx-g2"><button class="mdx-btn" id="mdxSet">Imposta la squadra</button><button class="mdx-btn gold" id="mdxGo">Fischio d'inizio!</button></div>`);
+    sheetEl.querySelector("#mdxSet").onclick = () => { closeSheet(); S.over = false; };
+    sheetEl.querySelector("#mdxGo").onclick = () => { closeSheet(); S.over = false; toggleRun(); };
+  }
+  function startUt(o) {
+    prog = loadProg();
+    utCfg = { onExit: typeof o.onExit === "function" ? o.onExit : null, squad: o.squad || [], opp: o.opp || {}, res: null };
+    newMatch(utOppMake(o.opp), "4-3-3", "equil", "medio");
+    tab = "ordini"; buildMatchUI(); openKickoffUt(); startLoop();
+  }
+  function finishUt() {
+    S.ended = true; S.run = false; S.over = true; snd("playWhistle", true);
+    const o = S.opp, win = S.scoreA > S.scoreB, draw = S.scoreA === S.scoreB, cleanSheet = S.scoreB === 0;
+    const ratings = S.squad.filter((p) => p.mins >= 15 || p.grp === "POR").map((p) => {
+      let v = 6 + p.goals * 1.1 + p.assists * 0.6 + p.saves * 0.2 + p.bonus + (win ? 0.4 : draw ? 0.1 : -0.3) + (rnd() - 0.5) * 0.7;
+      if (p.slotGrp === "POR" && cleanSheet) v += 0.6;
+      if (p.slotGrp === "DIF" && cleanSheet) v += 0.3;
+      return { p, v: clamp(Math.round(v * 10) / 10, 4.5, 10) };
+    }).sort((a, b) => b.v - a.v);
+    const sc = S.stats.scorers, scorers = Object.keys(sc).map((n) => (sc[n] > 1 ? n + " x" + sc[n] : n));
+    utCfg.res = { win, draw, a: S.scoreA, c: S.scoreB, scorers, shots: [S.shotsA, S.shotsB], mvp: ratings[0] ? ratings[0].p.name : "" };
+    const headline = win ? "VITTORIA! Il Borgo canta." : draw ? "Pareggio: nessuno e' contento, nessuno e' triste." : "Sconfitta. Una squadra di carte si rifa.";
+    openSheet(`<div style="font-size:12px;color:#93a4bd;text-align:center">${esc(o.name)} · Fischio finale</div>
+      <div class="mdx-big">${S.scoreA} - ${S.scoreB}</div><h2 style="text-align:center">${esc(headline)}</h2>
+      <div class="mdx-res">Tiri ${S.shotsA}-${S.shotsB} · xG ${S.xgA.toFixed(1)}-${S.xgB.toFixed(1)} · Possesso ${S.posTotal ? Math.round(S.posA / S.posTotal * 100) : 50}%${scorers.length ? "<br>Marcatori: " + esc(scorers.join(", ")) : ""}</div>
+      <div class="mdx-lbl">Pagella</div>
+      ${ratings.map((r, i) => `<div class="mdx-pg"><i class="${i === 0 ? "mvp" : r.v >= 7 ? "hi" : r.v < 5.5 ? "lo" : ""}">${r.v.toFixed(1)}</i><span>${esc(r.p.name)}${i === 0 ? " ⭐ MVP" : ""}</span><small>${r.p.goals ? "⚽" + r.p.goals + " " : ""}${r.p.assists ? "🅰️" + r.p.assists + " " : ""}${r.p.saves && r.p.slotGrp === "POR" ? "🧤" + r.p.saves : ""}</small></div>`).join("")}
+      <button class="mdx-btn gold" id="mdxUtDone" style="width:100%;margin-top:12px">Continua</button>`, true);
+    sheetEl.querySelector("#mdxUtDone").onclick = exitAll;
+    updateScoreboard(); refreshLive();
+  }
 
   // ---------------------------------------------------------------- UI: schermate
   function injectStyle() {
@@ -1361,6 +1479,7 @@
   function unreadCount(p) { let n = 0; OPPS.forEach((o, i) => { if (oppUnlocked(p, i) && !(p.opp[o.id] || {}).played) n++; }); return n; }
 
   function showMenu() {
+    if (utCfg) { exitAll(); return; }
     stopLoop();
     S = null;
     prog = loadProg();
@@ -1527,6 +1646,7 @@
   function closeSheet() { if (sheetEl) { sheetEl.style.display = "none"; sheetEl.innerHTML = ""; } }
 
   function openKickoff() {
+    if (utCfg) return openKickoffUt();
     const o = S.opp, se = SEASONS[o.season];
     S.over = true;
     const showIntro = se && !prog.intro[se.id] && oppUnlocked(prog, OPPS.indexOf(o)) && seasonOpps(se.id)[0] === o;
@@ -1572,7 +1692,7 @@
       pan.querySelectorAll("[data-ment]").forEach((b) => { b.onclick = () => { S.ment = b.dataset.ment; snd("playSelect"); addLog(`📢 Mentalità: ${MENT[S.ment].t.toUpperCase()}.`, "tip"); renderPanel(); }; });
       pan.querySelectorAll("[data-press]").forEach((b) => { b.onclick = () => { S.press = b.dataset.press; snd("playSelect"); addLog(`📢 Pressing: ${PRESS[S.press].t.toUpperCase()}.`, "tip"); renderPanel(); }; });
     } else if (tab === "squadra") {
-      const row = (p, kind) => `<button class="mdx-row ${S.selOut === p.id ? "sel" : ""}" data-${kind}="${p.id}"><span class="top"><span class="n">${p.num}</span><span class="nm">${esc(p.name)}</span><span class="ov" title="Valutazione">${Math.round(p.r)}</span><span class="gp">${p.slotGrp === p.grp ? p.grp : p.slotGrp + "*"}</span></span><span class="bot"><span class="sb"><i data-st="${p.id}" style="width:${Math.round(p.st)}%;background:${staminaCol(p.st)}"></i></span><span class="pc" data-stt="${p.id}">${Math.round(p.st)}</span></span></button>`;
+      const row = (p, kind) => `<button class="mdx-row ${S.selOut === p.id ? "sel" : ""}" data-${kind}="${p.id}"><span class="top"><span class="n">${p.num}</span>${utCfg ? utPic(p) : ""}<span class="nm">${esc(p.name)}</span><span class="ov" title="Valutazione">${Math.round(p.r)}</span><span class="gp">${p.slotGrp === p.grp ? p.grp : p.slotGrp + "*"}</span></span><span class="bot"><span class="sb"><i data-st="${p.id}" style="width:${Math.round(p.st)}%;background:${staminaCol(p.st)}"></i></span><span class="pc" data-stt="${p.id}">${Math.round(p.st)}</span></span></button>`;
       const out = S.xi.slice().sort((a, b) => ["POR", "DIF", "CEN", "ATT"].indexOf(a.slotGrp) - ["POR", "DIF", "CEN", "ATT"].indexOf(b.slotGrp));
       const bench = S.bench.filter((p) => !p.off);
       pan.innerHTML = `<div class="mdx-lbl">In campo <em>Tocca chi esce, poi chi entra · ${!S.started && S.min === 0 ? "prima del fischio: scambi liberi" : `cambi ${S.maxSubs - S.subsUsed}/${S.maxSubs}`}</em></div>
@@ -1756,6 +1876,7 @@
 
   // ---------------------------------------------------------------- fine partita
   function finishMatch() {
+    if (utCfg) return finishUt();
     S.ended = true; S.run = false; S.over = true;
     stopLoopSoft();
     snd("playWhistle", true);
@@ -1957,12 +2078,15 @@
 
   function exitAll() {
     const cb = onExitCb; onExitCb = null;
+    const uc = utCfg; utCfg = null;
     teardown();
+    if (uc) { if (typeof uc.onExit === "function") { try { uc.onExit(uc.res); } catch (e) { console.error(e); } } return; }
     if (typeof cb === "function") { try { cb(); } catch (e) { console.error(e); } }
   }
 
   function open(onExit, opts) {
     if (root) teardown(); // riapertura: niente doppio callback
+    utCfg = null;
     onExitCb = onExit;
     openOpts = opts || null;
     injectStyle();
@@ -1973,6 +2097,7 @@
     document.body.appendChild(root);
     listen(document, "keydown", onKey);
     listen(document, "visibilitychange", onVis);
+    if (opts && opts.ut) { onExitCb = null; startUt(opts.ut); return; }
     const o = opts && opts.opp ? OPPS.find((x) => x.id === opts.opp) : null;
     if (o && oppUnlocked(prog, OPPS.indexOf(o))) { showMenu(); startPrep(o); }
     else if (opts && opts.screen === "locker") showLocker();
@@ -1993,7 +2118,7 @@
   }
   window.__directorHd = {
     version: 2,
-    start: function (o) { o = o || {}; open(o.onExit, { opp: o.opp, screen: o.screen, from: o.from }); },
+    start: function (o) { o = o || {}; if (o.mode === "ut") { open(null, { ut: o }); return; } open(o.onExit, { opp: o.opp, screen: o.screen, from: o.from }); },
     state: stateInfo,
     // arruolamento "narrativo" (missioni del Borgo): non tocca episodi, stelle né soglie; true solo se la recluta entra ora
     recruit: function (id) { const p = loadProg(); if (!ARRIVALS.some((a) => a.id === id) || arrivalHas(p, id)) return false; p.recruits[id] = true; saveProg(p); return true; },
@@ -2004,6 +2129,23 @@
   };
 
   if (/[?&]debug\b/.test(location.search || "")) window.__directorHd._S = function () { return S; };
+  // solo debug: n partite "ut" senza interfaccia (taratura della mappatura carte -> rating)
+  if (/[?&]debug\b/.test(location.search || "")) window.__directorHd._simUt = function (o, n) {
+    const bakProg = prog, bakS = S, bakCfg = utCfg, res = { w: 0, d: 0, l: 0, gf: 0, ga: 0 };
+    utCfg = { onExit: null, squad: o.squad || [], opp: o.opp || {}, res: null };
+    for (let k = 0; k < (n || 1); k++) {
+      prog = defaultProg(); newMatch(utOppMake(o.opp), "4-3-3", "equil", "medio"); S.started = true;
+      let evI = 0;
+      while (S.min < 90) {
+        const ev = S.events[evI];
+        if (ev && ev.min <= S.min + 1) { evI++; const rid = routeEvent(ev); if (rid) { const def = EVENTS[rid]; const ch = def.ch.filter((c) => !(c.dis && c.dis())); const c = ch[0] || def.ch[0]; try { c.go(); } catch (e) { /* noop */ } if (S.selOut != null) S.selOut = null; } }
+        stepMinute(); S.pend.forEach((e) => e.fn()); S.pend = [];
+        if (S.min === 45) { S.xi.forEach((q) => { q.st = Math.min(100, q.st + 8); }); }
+      }
+      res.gf += S.scoreA; res.ga += S.scoreB; if (S.scoreA > S.scoreB) res.w++; else if (S.scoreA === S.scoreB) res.d++; else res.l++;
+    }
+    prog = bakProg; S = bakS; utCfg = bakCfg; res.avgGF = +(res.gf / n).toFixed(2); res.avgGA = +(res.ga / n).toFixed(2); res.winPct = Math.round(res.w / n * 100); return res;
+  };
 
   // ---------------------------------------------------------------- simulatore headless (solo test di bilanciamento)
   function simulate(id, n, strat, asIf) {

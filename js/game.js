@@ -15055,7 +15055,7 @@
     buttons([
       { head: "✨ Nuova Suite Gameplay 2D HD" },
       { label: "✨ Arena 2D HD · Hub Completo", sub: "Le 4 modalità 2D HD in un posto solo", cls: "hot", fn: () => { if (window.openArena2DHDModal) window.openArena2DHDModal(menuSaghe); } },
-      { label: "🛡️ Rondine Emblem · RPG Tattico 2D HD", sub: "RPG tattico a griglia: 4 capitoli, anteprima dei danni, stelle", cls: "hot", fn: () => { if (window.openTacticalEmblemMode) window.openTacticalEmblemMode(menuSaghe); } },
+      { label: "🛡️ Rondine Emblem · RPG Tattico 2D HD", sub: "RPG tattico a griglia: 10 capitoli con storia, ritratti e sfondi, anteprima dei danni, stelle", cls: "hot", fn: () => { if (window.openTacticalEmblemMode) window.openTacticalEmblemMode(menuSaghe); } },
       { label: "⚽ Top-Down Action Soccer 2D HD", sub: "Coppa del Molo · 5 contro 5, aftertouch, torneo a 5 squadre", cls: "hot", fn: () => { if (window.openActionSoccerHD) window.openActionSoccerHD(menuSaghe); } },
       { label: "👟 Street Football · La Gabbia del Molo", sub: "3 contro 3 da strada: sponde sui muri, Trabucco, 4 livelli", cls: "hot", fn: () => { if (window.openStreetCageMode) window.openStreetCageMode(menuSaghe); } },
       { label: "📋 Matchday Director 2D HD", sub: "Fai il Mister: modulo, cambi, discorso all'intervallo, pagella", cls: "hot", fn: () => { if (window.openMatchDirectorHD) window.openMatchDirectorHD(menuSaghe); } },
@@ -22264,7 +22264,7 @@
     ["prog", "done", "ss"].forEach((k) => { const a = Array.isArray(r[k]) ? r[k] : []; r[k] = [0, 1, 2].map((i) => Math.max(0, Math.min(k === "prog" ? 3 : 1, +a[i] || 0))); });
     r.base = [0, 1, 2].map((i) => (Array.isArray(r.base) && r.base[i] && typeof r.base[i] === "object" ? r.base[i] : null));
     Object.keys(r.have).forEach((k) => { if (!utSp(k)) { delete r.have[k]; delete r.on[k]; } });
-    r.mode = r.mode === "action" ? "action" : r.mode === "classic" ? "classic" : "";
+    r.mode = ["action", "classic", "hd", "dir"].includes(r.mode) ? r.mode : "";
     r.seen = r.seen ? 1 : 0; r.wk = Math.max(0, +r.wk || 0); r.wkN = Math.max(0, Math.min(3, +r.wkN || 0));
     const cur = utWeek(); if (!r.wk) { r.wk = cur; r.wkN = 1; } else if (cur > r.wk) { r.wkN = Math.min(3, r.wkN + cur - r.wk); r.wk = cur; }
     return r;
@@ -22390,11 +22390,15 @@
     const u = utRec(), cr = czRec(), o = UT_S[i].opp[m], fl = czField(cr, 3), b = utBonus(cr), pref = u.mode || cr.mode;
     view = { kind: "scene", bg: "stadium", speaker: null }; chap(`Stagione ${i + 1} · partita ${m + 1}`);
     text("voce", `<b>${esc(UT_S[i].t)} · partita ${m + 1}</b> contro <em>${esc(o.n)}</em>. In campo: ${fl.map((c) => esc(c.name)).join(", ")}. Come vuoi giocarla?<br><span style="color:var(--dim)">Bonus: ${czBonTxt(b)}${b.sp ? ` · carte speciali in uso ${b.sp}` : ""}${b.chem.length ? ` · intesa ${esc(b.chem.join(", "))}` : ""}</span>`);
-    buttons([{ label: "Partita classica", sub: `${pref === "classic" ? "La tua scelta di sempre · " : ""}Con Leo, un tempo solo`, cls: pref === "classic" ? "hot" : "", fn: () => utGo(i, m, back, "classic") },
-      { label: "Calcio d'azione", sub: `${pref === "action" ? "La tua scelta di sempre · " : ""}Tempo reale, tre contro tre`, cls: pref === "action" ? "hot" : "", fn: () => utGo(i, m, back, "action") },
+    const rem = (k) => (pref === k ? "La tua scelta di sempre · " : ""), hdOk = !!(window.__actionHd && window.__actionHd.ut), dirOk = !!(window.__directorHd && window.__directorHd.start);
+    buttons([{ head: "Giochi tu" },
+      { label: "Partita classica", sub: `${rem("classic")}Con Leo, un tempo solo`, cls: pref === "classic" ? "hot" : "", fn: () => utGo(i, m, back, "classic") },
+      { label: "Calcio d'azione", sub: `${rem("action")}Tempo reale, tre contro tre`, cls: pref === "action" ? "hot" : "", fn: () => utGo(i, m, back, "action") },
+      ...(hdOk ? [{ label: "Action Soccer 2D HD", sub: `${rem("hd")}Tu giochi, le carte contano in campo`, cls: pref === "hd" ? "hot" : "", fn: () => utGo(i, m, back, "hd") }] : []),
+      ...(dirOk ? [{ head: "Manageriale" }, { label: "Matchday Director", sub: `${rem("dir")}Tu allenatore: tattica e cambi`, cls: pref === "dir" ? "hot" : "", fn: () => utGo(i, m, back, "dir") }] : []),
       { label: "◂ Indietro", fn: () => utSeason(i, back) }]);
   }
-  function utGo(i, m, back, kind) { const u = utRec(); u.mode = kind; utSave(u); if (kind === "action") utAction(i, m, back); else utClassic(i, m, back); }
+  function utGo(i, m, back, kind) { const u = utRec(); u.mode = kind; utSave(u); if (kind === "action") utAction(i, m, back); else if (kind === "hd") utHd(i, m, back); else if (kind === "dir") utDir(i, m, back); else utClassic(i, m, back); }
   function utClassic(i, m, back) {
     const cr = czRec(), o = UT_S[i].opp[m], key = utKey(i, m); utTeam(i, m);
     if (!chBack) chBack = S; S = borgoPlayer(); const b = utBonus(cr), st = { ...S.st };
@@ -22414,6 +22418,52 @@
     A.cz = { names: fl.map((c) => c.name), sc: [], last: null, end: (a, c) => utResult(i, m, back, a, c, czAzRecap(A)) };
     $("text").querySelector(".t").insertAdjacentHTML("beforeend", ` <em>In campo: ${fl.map((c) => esc(c.name)).join(", ")}</em> (muovi ${esc(fl[0].name)}). ${esc(T.name)} contro la tua squadra di carte.`);
   }
+  // ---- v15l · Action Soccer 2D HD e Matchday Director con le carte della formazione
+  // Valori carta -> statistiche 0..100 (50 = neutro). q = 40 + 3.2 * potenza carta (rarita' + livello; comune Lv1 = 46, leggendaria Lv5 = 75),
+  // + 2 per ogni intesa attiva (max 6) + 2 * potenza della carta speciale in uso (stessa base). Poi un profilo per ruolo (offset su q) e una piccola
+  // variazione fissa per carta (+/-5, dall'id) per distinguere carte dello stesso ruolo. Valori limitati a 20..92 cosi' le carte restano dentro i
+  // range del motore (vedi mappatura in action-soccer-hd.js / match-director-hd.js: pochi punti percentuali di scatto, tiro, contrasto, parata).
+  //   ruolo   spd  pow  acc  pas  def  gk   sta
+  //   p       -14  -14  -14  -2   -14  +16  +0     portiere: parata alta, il resto basso
+  //   d       -2   -6   -8   -2   +14  -20  +4     difensore: contrasto e fiato
+  //   c       +2   -4   +0   +14  -2   -20  +10    centrocampista: passaggio e resistenza
+  //   a       +8   +10  +12  -4   -14  -20  -2     attaccante: scatto, potenza e precisione di tiro
+  const UT_PROF = { p: [-14, -14, -14, -2, -14, 16, 0], d: [-2, -6, -8, -2, 14, -20, 4], c: [2, -4, 0, 14, -2, -20, 10], a: [8, 10, 12, -4, -14, -20, -2] }, UT_SK = ["spd", "pow", "acc", "pas", "def", "gk", "sta"];
+  function utStats(c, cr, b) {
+    let q = 40 + 3.2 * c.pw + Math.min(6, 2 * ((b && b.chem && b.chem.length) || 0));
+    try { UT_SP.forEach((sp) => { if (utRec().have[sp.id] && utRec().on[sp.id] && sp.base === c.id) q += 2 * sp.pw; }); } catch {}
+    const st = {}, pf = UT_PROF[c.role] || UT_PROF.c;
+    UT_SK.forEach((k, j) => { st[k] = Math.max(20, Math.min(92, Math.round(q + pf[j] + ((czHash(c.id + k) % 11) - 5)))); });
+    return st;
+  }
+  // le cinque carte della formazione negli slot del motore HD: portiere, difensore, difensore, centrocampista, attaccante (ruolo giusto per primo)
+  function utSlots(cr) {
+    const cs = czTeamIds(cr).map((id) => czCard(cr, id)).sort((x, y) => y.pw - x.pw), left = cs.slice(), out = [null, null, null, null, null];
+    const take = (slot, roles) => { for (const r of roles) { const k = left.findIndex((c) => c.role === r); if (k >= 0) { out[slot] = left.splice(k, 1)[0]; return; } } if (left.length) out[slot] = left.shift(); };
+    take(0, ["p"]); take(4, ["a", "c", "d"]); take(3, ["c", "a", "d"]); take(1, ["d", "c", "a"]); take(2, ["d", "c", "a"]);
+    return out.filter(Boolean);
+  }
+  const utOppNames = (o) => [o.g, o.d[0], o.d[1], o.d[2], o.f[0]];
+  function utHd(i, m, back) {
+    const cr = czRec(), o = UT_S[i].opp[m], b = utBonus(cr), sl = utSlots(cr);
+    if (!window.__actionHd || !window.__actionHd.ut) return utSeason(i, back, "Action Soccer HD non disponibile ora.");
+    const team = sl.map((c) => ({ id: c.id, name: czShort(c.id), role: c.role, rar: c.rar, lv: c.lv, stats: utStats(c, cr, b) }));
+    window.__actionHd.start({ mode: "ut", team, title: `${UT_S[i].t} · partita ${m + 1}`, opp: { name: o.n, pw: o.pw, kit: o.c, names: utOppNames(o) },
+      onExit: (res) => { if (!res) return utSeason(i, back); const sc = res.scorers && res.scorers.length ? ` <span style="color:var(--dim)">Marcatori: ${res.scorers.map(esc).join(", ")}.</span>` : ""; utResult(i, m, back, res.a, res.c, sc); } });
+  }
+  function utDirSquad(cr, b) {
+    const G = { p: "POR", d: "DIF", c: "CEN", a: "ATT" }, tm = czTeamIds(cr), all = czAll(cr).sort((x, y) => (tm.includes(y.id) - tm.includes(x.id)) || y.pw - x.pw), left = all.slice(), start = [];
+    [["p", 1], ["d", 4], ["c", 3], ["a", 3]].forEach(([r, n]) => { for (let k = 0; k < n; k++) { const j = left.findIndex((c) => c.role === r); if (j >= 0) start.push(left.splice(j, 1)[0]); } });
+    const names = {}; all.forEach((c) => { const sh = czShort(c.id); names[sh] = (names[sh] || 0) + 1; });
+    const mk = (c, bench) => ({ id: c.id, name: names[czShort(c.id)] > 1 ? c.name : czShort(c.id), grp: G[c.role], bench, st: utStats(c, cr, b) });
+    return start.map((c) => mk(c, false)).concat(left.slice(0, 7).map((c) => mk(c, true)));
+  }
+  function utDir(i, m, back) {
+    const cr = czRec(), o = UT_S[i].opp[m], b = utBonus(cr);
+    if (!window.__directorHd || !window.__directorHd.start) return utSeason(i, back, "Matchday Director non disponibile ora.");
+    window.__directorHd.start({ mode: "ut", squad: utDirSquad(cr, b), opp: { name: o.n, pw: o.pw, kit: o.c, names: utOppNames(o).concat(o.f.slice(1)) },
+      onExit: (res) => { if (!res) return utSeason(i, back); const sc = res.scorers && res.scorers.length ? ` <span style="color:var(--dim)">Marcatori: ${res.scorers.map(esc).join(", ")}.</span>` : ""; utResult(i, m, back, res.a, res.c, sc); } });
+  }
   function utResult(i, m, back, a, c, rc) {
     const u = utRec(), o = UT_S[i].opp[m], win = a > c, key = i + "_" + m, first = win && !u.won[key]; let msg = "", epi = false; u.cnt.games++;
     if (win) {
@@ -22430,7 +22480,7 @@
     buttons([...(epi ? [{ label: "Epilogo ▸", cls: "hot", fn: () => utPlay(UT_S[i].epi, () => utSeason(i, back)) }] : win && first && m < 2 ? [{ label: `Partita ${m + 2} ▸`, cls: "hot", fn: () => utPlay([UT_S[i].opp[m + 1].pre], () => utKick(i, m + 1, back)) }] : !win ? [{ label: "Riprova ▸", cls: "hot", fn: () => utKick(i, m, back) }] : []), { label: "Formazione", fn: () => czForm(Object.assign(() => utSeason(i, back), { _ut: 1 })) }, { label: "◂ Stagione", fn: () => utSeason(i, back) }, { label: "◂ Modalità", fn: back }]);
   }
   MODES8.push(() => utUnlock() ? { label: "Ultimate Team del Borgo", sub: ((u) => `Stagioni ${utSN(u)}/3 · carte speciali ${Object.keys(u.have).length}/${UT_SP.length}`)(utRec()), fn: () => utMenu(modes) } : null);
-  if (/[?&]debug/.test(location.search)) window.__ut = { utResult, utSeason, utRec, utSave, utMenu, utUnlock, utBonus, utPick, utUnits, UT_S, UT_SBC, UT_TR, UT_SP, utWeek };
+  if (/[?&]debug/.test(location.search)) window.__ut = { utStats, utSlots, utDirSquad, utHd, utDir, utKick, utResult, utSeason, utRec, utSave, utMenu, utUnlock, utBonus, utPick, utUnits, UT_S, UT_SBC, UT_TR, UT_SP, utWeek };
   // ================= v15k · CASA DELLE 108 STELLE =================
   // Usa le 78 Stelle e i 30 residenti già presenti: nessun personaggio o reclutamento duplicato.
   const HQ_COS = [
