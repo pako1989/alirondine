@@ -20160,7 +20160,7 @@
   // m: missione · t = tempo | quiz | scelta | porta | monete | cond ; b: bonus · k = dono | sconto | pesca | flipper | premio | cos
   const SV = [
     // --- Reclute Rondine FC (Bacheca Incarichi) ---
-    { id: "mattia", c: svC("Mattia la Saracinesca", "gold", "#4a2a10", "short", "#e8bf98", "#ffcc00", { cap: "#333333" }), at: ["borgo", 34, 5], home: ["borgo", 34, 5], when: "giorno",
+    { id: "mattia", c: svC("Mattia la Saracinesca", "gold", "#4a2a10", "short", "#e8bf98", "#ffcc00", { cap: "#333333" }), at: ["borgo", 36, 6], home: ["borgo", 36, 6], when: "giorno",
       bio: "Portierone dei ragazzini della scuola. Mangia focaccia tra un palo e l'altro, ma sui tiri non fa passare uno spillo. Reclutato nella Primavera della Rondine.",
       hi: "In porta per la Rondine non si passa!", m: { t: "cond", test: "kids", hint: "Vinci la partitella al campetto" }, ok: "La saracinesca è abbassata per il Rondine FC!", b: { k: "cos", v: 10 }, idle: ["Nessuno segna alle Rondinelle!"] },
     { id: "kevin", c: svC("Kevin del Pedalò", "orange", "#ff8800", "spiky", "#d49b6a", "#0099ff", {}), at: ["borgo", 30, 22], home: ["borgo", 30, 22], when: "giorno",
@@ -20342,6 +20342,7 @@
   // --- dialoghi ---
   function svTalk(id) {
     const s = SV.find((x) => x.id === id); if (!s) return false;
+    if (id === "pietrino" && !(B && B.q && B.q.kids > 0) && !(view.kind === "trasf" && TW)) return false; // prima la partitella di Pietrino, poi la Stella
     const inZone = view.kind === "trasf" && !!TW, r = svRec(), bg = inZone ? svBg() : "borgo";
     const back = () => (inZone ? trResume() : borgoResume());
     const show = (html, opts) => { view = { kind: "scene", bg, speaker: id }; seeCard(id); text(id, html); buttons([...opts, { label: "◂ Torna a esplorare", fn: back }], true); };
