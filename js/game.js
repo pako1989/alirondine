@@ -3079,10 +3079,12 @@
   function card(id, page, backFn = extras) {
     if (typeof page === "function") { backFn = page; page = 0; }
     const toAlbum = () => album(page || 0, backFn);
-    if (ENC_CATS.some((c) => c.members.includes(id))) return borgoEncyclopedia(toAlbum, undefined, id);
     view = { kind: "scene", bg: "title", speaker: id };
     text(id, esc(BIO[id] || ""));
-    buttons([{ label: "◂ Album", fn: toAlbum }]);
+    buttons([
+      ...(ENC_CATS.some((c) => c.members.includes(id)) ? [{ label: "Scheda in Enciclopedia ▸", sub: "Dossier e carta olografica 3D", fn: () => borgoEncyclopedia(() => card(id, page, backFn), undefined, id) }] : []),
+      { label: "◂ Album", fn: toAlbum },
+    ]);
   }
 
   // ================= STORIE EXTRA =================
