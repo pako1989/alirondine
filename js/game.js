@@ -20162,7 +20162,7 @@
     // --- Reclute Rondine FC (Bacheca Incarichi) ---
     { id: "mattia", c: svC("Mattia la Saracinesca", "gold", "#4a2a10", "short", "#e8bf98", "#ffcc00", { cap: "#333333" }), at: ["borgo", 36, 6], home: ["borgo", 36, 6], when: "giorno",
       bio: "Portierone dei ragazzini della scuola. Mangia focaccia tra un palo e l'altro, ma sui tiri non fa passare uno spillo. Reclutato nella Primavera della Rondine.",
-      hi: "In porta per la Rondine non si passa!", m: { t: "cond", test: "kids", hint: "Vinci la partitella al campetto" }, ok: "La saracinesca è abbassata per il Rondine FC!", b: { k: "cos", v: 10 }, idle: ["Nessuno segna alle Rondinelle!"] },
+      hi: "In porta per la Rondine non si passa!", m: { t: "cond", test: "kids", hint: "Vinci la partitella al campetto" }, ok: "La saracinesca è abbassata per il Rondine FC!", b: { k: "dono", v: 5 }, idle: ["Nessuno segna alle Rondinelle!"] },
     { id: "kevin", c: svC("Kevin del Pedalò", "orange", "#ff8800", "spiky", "#d49b6a", "#0099ff", {}), at: ["borgo", 30, 22], home: ["borgo", 30, 22], when: "giorno",
       bio: "Ala velocissima delle spiagge dello Scoglio. Si allena trainando i pedalò sulla battigia a piedi scalzi.",
       hi: "Sulla fascia destra non mi prende nessuno!", m: { t: "cond", test: "beach", hint: "Vinci la sfida di beach soccer allo Scoglio" }, ok: "Kevin vola sulla fascia per la Rondine!", b: { k: "flipper", v: 10 }, idle: ["Pronto a scattare sulla sabbia e sull'erba!"] },
@@ -20342,7 +20342,7 @@
   // --- dialoghi ---
   function svTalk(id) {
     const s = SV.find((x) => x.id === id); if (!s) return false;
-    if (id === "pietrino" && !(B && B.q && B.q.kids > 0) && !(view.kind === "trasf" && TW)) return false; // prima la partitella di Pietrino, poi la Stella
+    if (id === "pietrino" && !(view.kind === "trasf" && TW) && (!(B && B.q && B.q.kids > 0) || (typeof window.questBoardNpcHasNews === "function" && window.questBoardNpcHasNews("pietrino")))) return false; // prima la partitella di Pietrino, poi la Stella
     const inZone = view.kind === "trasf" && !!TW, r = svRec(), bg = inZone ? svBg() : "borgo";
     const back = () => (inZone ? trResume() : borgoResume());
     const show = (html, opts) => { view = { kind: "scene", bg, speaker: id }; seeCard(id); text(id, html); buttons([...opts, { label: "◂ Torna a esplorare", fn: back }], true); };
@@ -23077,7 +23077,7 @@
       : d;
   };
   const s12Save = (r) => writeJSON(S12K, r);
-  const s12Open = () => seasonDone(1);
+  const s12Open = () => s11Rec().won.length === S11_EP.length;
   function s12Menu(back = menuStoria) {
     const r = s12Rec(), i = r.won.length < S12_EP.length ? r.won.length : 0, ep = S12_EP[i];
     view = { kind: "scene", bg: "hq", speaker: "leo" }; chap("Stagione 12 · L'Eredità della Rondine");
