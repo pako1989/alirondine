@@ -56,9 +56,10 @@
   ];
   const STAR_COINS = [2, 2, 3, 4, 5]; // 16 monete totali, solo alla prima vittoria
   const DIFFS = [
-    { n: "Facile", spd: 0.9, react: 22, tkl: 0.022, reach: 28, gk: 2.5, noise: 62, usr: 1.05 },
-    { n: "Normale", spd: 0.97, react: 14, tkl: 0.035, reach: 35, gk: 3.2, noise: 40, usr: 1.0 },
-    { n: "Duro", spd: 1.04, react: 8, tkl: 0.055, reach: 41, gk: 3.8, noise: 22, usr: 1.0 },
+    // gr = frame di reazione del portiere al tiro, gd = velocità di tuffo, ge = errore di lettura (px), rd = probabilità di leggere il tiro, pr = lettura del rigore
+    { n: "Facile", spd: 0.9, react: 22, tkl: 0.022, reach: 13, gk: 2.5, noise: 62, usr: 1.05, gr: 11, gd: 4.6, ge: 18, rd: 0.02, pr: 0.15 },
+    { n: "Normale", spd: 0.97, react: 14, tkl: 0.035, reach: 18, gk: 3.2, noise: 40, usr: 1.0, gr: 8, gd: 5.8, ge: 14, rd: 0.08, pr: 0.25 },
+    { n: "Duro", spd: 1.04, react: 8, tkl: 0.055, reach: 21, gk: 3.8, noise: 22, usr: 1.0, gr: 5, gd: 7.2, ge: 10, rd: 0.25, pr: 0.42 },
   ];
   const ROLES = [
     { r: "GK", u: 0.02, v: 0.5, spd: 3.1 },
@@ -931,12 +932,29 @@
     }
   }
 
+  // Punto della linea di porta che divide a metà l'angolo palla-pali (portiere centrato sull'angolo di tiro)
+  function gkAngleY(bx, by, gxl) {
+    const dx = Math.abs(bx - gxl) + 1, dT = Math.hypot(dx, by - GT), dB = Math.hypot(dx, by - GB);
+    return clamp(GT + GH * dT / (dT + dB), GT + 8, GB - 8);
+  }
+  // dove taglia la linea di porta il pallone in volo (con attrito), per la lettura del tiro
+  function gkReadShot(b, gxl) {
+    let x = b.x, y = b.y, vx = b.vx, vy = b.vy;
+    const f = b.z > 0.5 || b.vz > 0 ? 0.995 : FR;
+    for (let n = 1; n < 90; n++) {
+      x += vx; y += vy; vx *= f; vy *= f;
+      if ((vx > 0 && x >= gxl) || (vx < 0 && x <= gxl)) return { y, n };
+    }
+    return null;
+  }
+
   function gkUpdate(g) {
-    const b = M.ball, D = M.D, t = g.team;
+    const b = M.ball, t = g.team;
+    const D = t === 1 ? M.D : DIFFS[1];
     const dIn = dirOf(t);
     const gx = ownX(t);
-    const reach = (t === 1 ? D.reach : 36) * (b.fire ? 0.62 : 1) * (g.reachMul || 1) * (g.dive > 0 ? 1.4 : 1);
-    const gks = t === 1 ? D.gk : 3.4;
+    const reach = D.reach * (M.sp && !M.sp.def && M.sp.kind === "pen" && g.team === 1 ? 0.62 : 1) * (b.fire ? 0.62 : 1) * (g.reachMul || 1) * (g.dive > 0 ? (g.userKeeper ? 1.4 : 1.15) : 1);
+    const gks = D.gk;
     if (b.owner === g) {
       g.hold--; g.vx *= 0.8; g.vy *= 0.8;
       if (g.hold <= 0 && M.state === "play") {
@@ -957,23 +975,54 @@
       g.y = clamp(g.y, GT - 34, GB + 34);
     }
     const toward = b.vx * -dIn > 1.5;
-    let ty = GM + (b.y - GM) * 0.32, tx = gx + dIn * 22;
-    let sp = gks;
-    if (g.userKeeper) { /* movimento già gestito */ } else if (toward) {
-      const distX = Math.abs(b.x - gx);
-      const tt = distX / Math.max(Math.abs(b.vx), 1);
-      if (distX < 640) {
-        if (!g.err || g.errT !== b.lastP) { g.err = rnd(-1, 1) * (t === 1 ? (D.noise * 0.7) : 14); g.errT = b.lastP; }
-        ty = clamp(b.y + b.vy * tt * 0.9 + g.err * (distX / 640), GT - 14, GB + 14);
-        if (distX < 220) { sp = gks * 1.9; tx = gx + dIn * 14; }
+    const spd0 = Math.hypot(b.vx, b.vy);
+    const pen = !!(M.sp && !M.sp.def && t === 1 && M.sp.kind === "pen");
+    // posizione base: sulla linea di porta, centrato sull'angolo palla-pali
+    let ty = gkAngleY(b.x, b.y, gx), tx = gx + dIn * 14, sp = gks;
+    if (pen) ty = GM;
+    const incoming = !g.userKeeper && !b.owner && toward && b.lastTeam !== t && spd0 > 6.5 && Math.abs(b.x - gx) < 760;
+    if (!incoming) g.sh = null;
+    if (g.userKeeper) { /* movimento già gestito */ }
+    else if (incoming) {
+      if (!g.sh) { // nuovo tiro: lettura con ritardo di reazione e errore che dipendono dalla difficoltà
+        const rd = gkReadShot(b, gx + dIn * 14);
+        const sh = g.sh = { rd, fr: Math.round(pen ? 2 + (D.gr - 5) * 0.4 : D.gr) + Math.floor(Math.random() * 3), ty: null, k: 0 };
+        if (rd) {
+          const yT = rd.y;
+          if (pen) { // rigore: tuffo da un lato; con probabilità pr legge il lato giusto, altrimenti va a caso
+            const real = Math.abs(yT - GM) < 10 ? 0 : Math.sign(yT - GM);
+            const side = Math.random() < D.pr ? (real || (Math.random() < 0.5 ? -1 : 1)) : (Math.random() < 0.5 ? -1 : 1);
+            sh.ty = GM + side * rnd(34, 54);
+          } else {
+            // legge il tiro con probabilità gr_ (più bassa se il tiro è potente o di Rondine), altrimenti si tuffa a intuito
+            const pRead = D.rd * clamp(1.3 - spd0 / 32, 0.5, 1) * (b.fire ? 0.6 : 1);
+            if (Math.random() < pRead) sh.ty = clamp(yT + rnd(-1, 1) * D.ge, GT - 14, GB + 14);
+            else sh.ty = GM + rnd(-1, 1) * (GH / 2 - 6);
+          }
+          sh.inGoal = yT > GT - 22 && yT < GB + 22;
+        }
       }
-    } else if (!b.owner && Math.abs(b.x - gx) < 120 && Math.abs(b.y - GM) < 130 && b.z < 20 && Math.hypot(b.vx, b.vy) < 5) {
+      const sh = g.sh;
+      sh.k++;
+      if (sh.ty !== null && sh.inGoal && sh.k > sh.fr) {
+        ty = sh.ty; sp = D.gd; tx = gx + dIn * 14;
+        if (Math.abs(ty - g.y) > 12 && g.dive <= 0) g.dive = 12; // tuffo: raggio di parata maggiore
+        if (g.dive > 0) g.dive--;
+      }
+    } else if (!b.owner && Math.abs(b.x - gx) < 120 && Math.abs(b.y - GM) < 130 && b.z < 20 && spd0 < 5) {
       ty = b.y; tx = b.x; sp = gks * 1.2; // esce a prendere la palla
+    } else if (b.owner && b.owner.team !== t && !pen && M.state === "play") {
+      // 1 contro 1: esce incontro all'attaccante solo se non ha difensori vicini
+      const o = b.owner, dg = Math.abs(o.x - gx);
+      if (dg < 240 && Math.abs(o.y - GM) < 190 && !M.tm[t].some((q) => q !== g && dist(q.x, q.y, o.x, o.y) < 110)) {
+        const out = clamp((240 - dg) * 0.3, 0, 52);
+        tx = gx + dIn * (14 + out); ty = ty + (o.y - ty) * clamp(out / 52, 0, 1) * 0.35; sp = gks * 1.3;
+      }
     }
     ty = clamp(ty, GT - 20, GB + 20);
     const dx = tx - g.x, dy = ty - g.y, d = Math.hypot(dx, dy);
-    if (!g.userKeeper && d > 1) { g.vx += (dx / d * Math.min(sp, d * 0.4) - g.vx) * 0.35; g.vy += (dy / d * Math.min(sp, d * 0.4) - g.vy) * 0.35; }
-    g.x = clamp(g.x, XL - 2, XL + BOX_D - 10); if (t === 1) g.x = clamp(g.x, XR - BOX_D + 10, XR + 2);
+    if (!g.userKeeper && d > 1) { const gain = incoming && g.sh && g.sh.k > g.sh.fr ? 0.6 : 0.35; g.vx += (dx / d * Math.min(sp, d * 0.4) - g.vx) * gain; g.vy += (dy / d * Math.min(sp, d * 0.4) - g.vy) * gain; }
+    if (t === 0) g.x = clamp(g.x, XL - 2, XL + BOX_D - 10); else g.x = clamp(g.x, XR - BOX_D + 10, XR + 2);
     // parata
     if (!b.owner && b.z < 40 && M.state === "play") {
       const dxB = Math.abs(b.x - g.x), dyB = Math.abs(b.y - g.y);
@@ -2654,6 +2703,7 @@
         start: (mi, d) => { if (d !== undefined) SET.diff = d; startMatch(mi); },
         launch: (cfg) => launch(cfg), go: (g) => openGo(g), ALLT, KITS, CHAPS, MATES,
         ts: (n) => { window.__ahdTS = n; },
+        step: () => step(), kick: (...a) => kickBall(...a), gkUpdate: (g) => gkUpdate(g), spSetup: (k) => spSetup(k), K: { XL, XR, GM, GH, GT, GB, BOX_D },
       };
     }
 
