@@ -17,6 +17,17 @@
       dario_storto: { ...CAST.dario, name: "Dario Storto", shirt: "#7c3aed" }
     });
 
+    // carte dell'album: la carta si sblocca solo quando il PNG parla (seeCard); nico_trabucchi usa la carta di Nico
+    const BIOX = {
+      mastro_tonio: "Carpentiere dei Trabucchi: conosce per nome ogni trave delle passerelle e quale ha litigato con la mareggiata del '66. Parla di legno con più tenerezza di quanta ne riservi ai vivi, ma ai vivi regala comunque un ciondolo.",
+      peppino_gabbiano: "Gabbiano dei Trabucchi convinto che ogni briciola di focaccia sia un contratto. Paga in monete d'argento pescate dal fondale, ed è l'unico creditore del Borgo che non manda solleciti.",
+      ombra_nonna: "Versione viola di Nonna Ferri in servizio nel Borgo Storto: stessa autorità, un'ombra in più e una sospetta passione per le dimensioni extra. Chiama Leo «nipote mio» e, stranamente, funziona.",
+      arbitro_storto: "Fischia falli alla gravità, alle onde e talvolta al vento, sempre con il cartellino d'ambra. Il regolamento del Borgo Storto lo conosce solo lui, e cambia ogni volta che starnutisce.",
+      dario_storto: "Il Dario del Borgo Storto: niente rivalità tra fratelli, una rovesciata d'ossidiana e un entusiasmo che il Dario vero guarderebbe con sospetto. Giura che con Leo forma la coppia d'attacco più forte della galassia, e nessuno ha il coraggio di verificare."
+    };
+    if (api.BIO) Object.keys(BIOX).forEach((k) => { if (!api.BIO[k]) api.BIO[k] = BIOX[k]; });
+    const meet = (id) => { try { if (api.seeCard) api.seeCard(id); } catch (e) { /* ignora */ } };
+
     // ==========================================
     // 1. NUOVA MAPPA: I TRABUCCHI & LA SCOGLIERA ALTA
     // ==========================================
@@ -318,6 +329,7 @@
     const EXP_NPC = ["mastro_tonio", "nico_trabucchi", "peppino_gabbiano", "ombra_nonna", "arbitro_storto", "dario_storto"];
     window.trTalkHook = function (id) {
       if (!EXP_NPC.includes(id)) return false;
+      meet(id === "nico_trabucchi" ? "nico" : id);
       expTalk(id);
       return true;
     };

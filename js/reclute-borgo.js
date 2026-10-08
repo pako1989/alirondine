@@ -350,6 +350,19 @@
     cast("rb_nina", null, { name: "Nina", tag: "green", hair: "#3b2314", style: "bun", skin: "#e8b88c", eye: "#2a1a0a", bg: ["#16a34a", "#ecfccb"], shirt: "#16a34a" });
     cast("rb_teo", null, { name: "Teo, il fratello di Ondina", tag: "blue", hair: "#2b1d14", style: "messy", skin: "#f2c9a0", eye: "#1f3a63", bg: ["#0a3a4a", "#9be2ff"], shirt: "#19a0b8" });
 
+    // ------------------------------------------------------------ carte dell'album (si sbloccano solo quando il PNG parla)
+    // rb_brando e rb_ester sono le stesse persone di "brando" ed "ester" (carte già esistenti): si sblocca quella.
+    var BIOX = {
+      rb_mimi: "Fattorina in bici del molo, con una bici gialla dai freni offesi e un tubo di cartone per ogni sera. Conosce ogni indirizzo del Borgo, tranne quello di chi aspetta qualcosa.",
+      rb_zoe: "Consegna i gelati dello Scoglio in bici, in salita, controvento, con un cono che dura quattro minuti e una strada che ne dura sei. Dice che la Gabbia è troppo piana.",
+      rb_otello: "Scaricatore del molo, Osvaldo sulla carta d'identità e Otello da undici anni, per colpa di una cassa. Se c'è da fare muro, lo fa lui: non per merito, per ingombro.",
+      rb_nina: "Ripara biciclette al Colle dei Mulini, tra un mulo e nessuna fretta. Conosce l'angolo di ogni raggio, quindi anche quello di ogni sponda, e ha un problema di precedenze con le ruote storte.",
+      rb_teo: "Fratello di Ondina e suo preparatore ufficiale e non pagato. Ha costruito i pali del Catino con due pile di secchi e tira fuori consigli a ogni parata, anche quando non servono.",
+    };
+    if (api.BIO) Object.keys(BIOX).forEach(function (k) { if (!api.BIO[k]) api.BIO[k] = BIOX[k]; });
+    var CARD_OF = { rb_brando: "brando", rb_ester: "ester" };
+    function meet(npc) { try { if (api.seeCard) api.seeCard(CARD_OF[npc] || npc); } catch (e) { /* ignora */ } }
+
     // ------------------------------------------------------------ PNG sulle mappe (visibili solo con progresso esistente)
     MS.forEach(function (m) {
       var z = TRZ[m.zone]; if (!z) return;
@@ -413,7 +426,7 @@
     var prev = chained ? window.trTalkHook : null;
     window.trTalkHook = function (id) {
       var m = byNpc(id);
-      if (m) { talk(m); return true; }
+      if (m) { meet(m.npc); talk(m); return true; }
       return chained && typeof prev === "function" ? prev(id) : false;
     };
     // il "!" sopra il PNG: usato solo se game.js legge window.trNewsHook (patch proposta); altrimenti nessun effetto

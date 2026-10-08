@@ -118,6 +118,36 @@
     { id: "bue", name: "Il Bue", slot: 1, mods: { tkl: 1.2, spd: 0.98 }, desc: "Lento, saldo, inamovibile. Contrasti +20%, un po' meno rapido.", req: () => X.meta.cupsPlayed >= 1, hint: "Gioca una Coppa del Molo" },
     { id: "morena", name: "Morena", slot: 1, mods: { spd: 1.03, tkl: 1.1 }, desc: "Ha il passo del pescatore all'alba: silenzioso, preciso, mai fuori tempo. Velocità +3%, contrasti +10%.", req: () => X.meta.seasonsDone >= 1, hint: "Concludi una stagione di campionato" },
   ];
+  // ---------------------------------------------------------------- carte dell'album (Borgo · "Carte dei personaggi")
+  // Solo i personaggi con nome ricorrente. BIO/CAST si registrano appena esiste window.__borgoApi (game.js si carica dopo);
+  // la carta si sblocca con seeCard() soltanto quando il personaggio viene incontrato. Senza Borgo non succede nulla.
+  const HDC = {
+    ac_cima: { n: "Capitan Cima", h: "#1f1a17", s: "buzz", k: "#c68642", c: "#1f2937", c2: "#f97316", x: { beard: true }, bio: "Capitano dei Corsari della Banchina: giura di aver perso un occhio in una partita a carte, ma ha solo l'orzaiolo. Ha il cuore grosso quanto le braccia e regala pezzi di sagola «per le prossime scarpe»." },
+    ac_ormeggio: { n: "Zio Ormeggio", h: "#d8d4cc", s: "messy", k: "#d9a57a", c: "#fbbf24", c2: "#1e3a8a", x: { beard: true }, bio: "Capitano del Gran Fanale: gioca scalzo dal 1987 e non sbaglia un passaggio di sguardo. In campo si muove poco e illumina molto, come i fari di una volta." },
+    ac_capostazione: { n: "Il Capostazione", h: "#2a2a2a", s: "slick", k: "#e0b48a", c: "#7f1d1d", c2: "#fde68a", x: { cap: "#7f1d1d" }, bio: "Guida il Dopolavoro Ferroviario con un catenaccio da otto fischi di fila e cinque bandierine. Ha fischiato partenze per quarant'anni e dice di sentire i treni anche quando non passano." },
+    hd_sandro: { n: "Sandro", h: "#3a2a1a", s: "buzz", k: "#d9a57a", c: "#a3e635", c2: "#1d4ed8", bio: "Il portiere di sempre: para con la faccia di chi ha visto tre generazioni di palloni. Nessuno lo ha mai sentito commentare un gol subito, e questo lo rende l'uomo più misterioso del Molo." },
+    hd_chicco: { n: "Chicco", h: "#4a3a2a", s: "messy", k: "#e8b88c", c: "#1d4ed8", c2: "#7dd3fc", bio: "Sempre affamato, sempre al suo posto, soprattutto se il posto è vicino al fritto. In difesa si muove attorno agli attaccanti come attorno a un buffet." },
+    hd_bj: { n: "Baciccia Jr", h: "#8a8a8a", s: "messy", k: "#e0b48a", c: "#1d4ed8", c2: "#7dd3fc", x: { cap: "#26324a" }, bio: "Il nipote del Baciccia: ha ereditato il cappello e il carattere, e il cappello gli sta meglio. Aspetta il pallone con la stessa pazienza con cui il nonno aspetta il pesce." },
+    hd_morena: { n: "Morena", h: "#2a1a10", s: "codino", k: "#d9a57a", c: "#1d4ed8", c2: "#7dd3fc", bio: "Ha il passo del pescatore all'alba: silenzioso, preciso, mai fuori tempo. Quando recupera un pallone sembra che lo stia solo ritirando da una rete." },
+    hd_bue: { n: "Il Bue", h: "#1a1a1a", s: "buzz", k: "#c68642", c: "#1d4ed8", c2: "#7dd3fc", bio: "Lento, saldo, inamovibile: in difesa non lo si scarta, se ne prende atto. Ha anche un nome vero, ma nessuno lo ricorda e lui non ha mai fatto una piega." }
+  };
+  let hdcOk = false;
+  function hdcReg() {
+    if (hdcOk) return true;
+    const a = window.__borgoApi;
+    if (!a || !a.BIO || !a.CAST || typeof a.seeCard !== "function") return false;
+    Object.keys(HDC).forEach((id) => {
+      const d = HDC[id];
+      if (!a.BIO[id]) a.BIO[id] = d.bio;
+      if (!a.CAST[id]) a.CAST[id] = { name: d.n, tag: "", hair: d.h, style: d.s, skin: d.k, eye: "#2a2a2a", bg: [d.c, d.c2], shirt: d.c, ...(d.x || {}) };
+    });
+    hdcOk = true; return true;
+  }
+  (function hdcWait(n) { try { if (!hdcReg() && n < 120) setTimeout(() => hdcWait(n + 1), 250); } catch (e) { /* ignora */ } })(0);
+  function meet(ids) { try { if (!hdcReg()) return; [].concat(ids).forEach((id) => { if (id) window.__borgoApi.seeCard(id); }); } catch (e) { /* ignora */ } }
+  // squadra avversaria (tag) -> carte; compagno (id MATES) -> carta (ondina, mattia e kevin sono carte già esistenti del Borgo)
+  const HDC_TEAM = { COR: ["ac_cima"], FAN: ["ac_ormeggio"], DOP: ["ac_capostazione"] };
+  const HDC_MATE = { sandro: "hd_sandro", chicco: "hd_chicco", bj: "hd_bj", morena: "hd_morena", bue: "hd_bue", ondina: "ondina", mattia: "mattia", kevin: "kevin" };
   const KITS = [
     { id: "blu", name: "Blu Rondine", k: "#1d4ed8", k2: "#7dd3fc", cost: 0 },
     { id: "rosso", name: "Rosso Fanale", k: "#dc2626", k2: "#fde68a", cost: 6 },
@@ -2225,6 +2255,7 @@
   const modsTxt = (m) => { const a = []; if (m.mods.reach) a.push("Parata " + (m.mods.reach > 1 ? "+" : "") + Math.round((m.mods.reach - 1) * 100) + "%"); if (m.mods.tkl) a.push("Contrasti " + (m.mods.tkl > 1 ? "+" : "") + Math.round((m.mods.tkl - 1) * 100) + "%"); if (m.mods.spd) a.push("Velocità " + (m.mods.spd > 1 ? "+" : "") + Math.round((m.mods.spd - 1) * 100) + "%"); return a.join(" · ") || "Nessun bonus"; };
   function showTeam() {
     uiState = "menu";
+    meet(MATES.filter(mateOpen).map((m) => HDC_MATE[m.id]));
     const ros = homeRoster(), cur = [ros[0].id, ros[1].id, ros[2].id];
     const card = (m) => {
       const open = mateOpen(m), sel = cur.includes(m.id);
@@ -2341,6 +2372,7 @@
   }
   function launch(cfg) {
     CTX = cfg; cfg.cb = chapIds();
+    try { if (cfg.opp && cfg.opp.tag) meet(HDC_TEAM[cfg.opp.tag]); meet(homeRoster().map((m) => HDC_MATE[m.id])); } catch (e) { /* ignora */ }
     hideUi(); uiState = "play"; paused = false;
     const sp = cfg.mode === "setp" || cfg.mode === "pens" || cfg.mode === "cup-pens";
     const dIdx = cfg.diff === undefined ? SET.diff : cfg.diff;

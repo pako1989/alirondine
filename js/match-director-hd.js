@@ -104,6 +104,32 @@
   ];
 
 
+  // ---------------------------------------------------------------- carte dell'album (Borgo · "Carte dei personaggi")
+  // Solo i personaggi con nome ricorrente. BIO/CAST si registrano appena esiste window.__borgoApi (game.js si carica dopo);
+  // la carta si sblocca con seeCard() soltanto quando il personaggio viene incontrato. Senza Borgo non succede nulla.
+  const HDC = {
+    md_brina: { n: "Mister Brina", h: "#cfcfcf", s: "slick", k: "#e9bf96", c: "#1e3a8a", c2: "#7dd3fc", x: { glasses: true }, bio: "Allenatore del Real Mareggiata: giacca di seta, sorriso da rivista e una concezione della finale come abitudine di famiglia. Ti augura sempre una bella gita, con un tono che somiglia molto a una sfida." },
+    md_bonaccia: { n: "Cavalier Bonaccia", h: "#e5e0d5", s: "slick", k: "#e9bf96", c: "#831843", c2: "#f9a8d4", bio: "Patron del Bellavista Resort: completo color crema, parole misurate e l'abitudine di chiamare il Borgo «un paesello» come si legge un preventivo. Ha un debole per i terreni con vista e per le trattative a cui non si può dire di no." },
+    md_rob: { n: "Rob", h: "#3a2a1a", s: "messy", k: "#e0b48a", c: "#1f4e9c", c2: "#bae6fd", bio: "Il vice del Mister, sempre in panchina con un quaderno e un avvertimento pronto. Ogni consiglio comincia con «Mister,» e finisce con una similitudine che nessuno ha chiesto." }
+  };
+  let hdcOk = false;
+  function hdcReg() {
+    if (hdcOk) return true;
+    const a = window.__borgoApi;
+    if (!a || !a.BIO || !a.CAST || typeof a.seeCard !== "function") return false;
+    Object.keys(HDC).forEach((id) => {
+      const d = HDC[id];
+      if (!a.BIO[id]) a.BIO[id] = d.bio;
+      if (!a.CAST[id]) a.CAST[id] = { name: d.n, tag: "", hair: d.h, style: d.s, skin: d.k, eye: "#2a2a2a", bg: [d.c, d.c2], shirt: d.c, ...(d.x || {}) };
+    });
+    hdcOk = true; return true;
+  }
+  (function hdcWait(n) { try { if (!hdcReg() && n < 120) setTimeout(() => hdcWait(n + 1), 250); } catch (e) { /* ignora */ } })(0);
+  function meet(ids) { try { if (!hdcReg()) return; [].concat(ids).forEach((id) => { if (id) window.__borgoApi.seeCard(id); }); } catch (e) { /* ignora */ } }
+  // chi parla nelle storie -> carta (i PNG del Borgo e le reclute usano le carte già registrate dagli altri moduli)
+  const HDC_WHO = { Spigola: "presidente_spigola", Dina: "dina_cartella", Sara: "sara", Arturo: "arturo_molo", Ferri: "nonna", Settimio: "settimio", Rocco: "rocco", Brina: "md_brina", Bonaccia: "md_bonaccia", Ester: "ester", Anselmo: "anselmo", Aurelio: "aurelio", Rob: "md_rob" };
+  const HDC_ARR = { mattia: "mattia", kevin: "kevin", brando: "brando", osvaldo: "rb_otello", mimi: "rb_mimi", ondina: "ondina", zoe: "rb_zoe", nina: "rb_nina", ester: "ester" };
+
   // ---------------------------------------------------------------- Stagioni, personaggi, episodi nuovi
   const CHAR = {
     Spigola: "Presidente Spigola", Dina: "Dina Cartella", Sara: "Sara", Arturo: "Arturo · Radio Molo", Ferri: "Nonna Ferri",
@@ -809,7 +835,7 @@
     if (S.confuse > 0) S.confuse--;
     if (S.press === "alto") S.stats.altoMin++;
     if (S.ment === "allin") S.stats.allin = true;
-    (S.opp.beats || []).forEach((b) => { if (b.min === S.min) addLog(`${CHAR[b.who] ? CHAR[b.who].split(" ·")[0] : b.who}: ${b.t}`, "tip"); });
+    (S.opp.beats || []).forEach((b) => { if (b.min === S.min) meet(HDC_WHO[b.who]); if (b.min === S.min) addLog(`${CHAR[b.who] ? CHAR[b.who].split(" ·")[0] : b.who}: ${b.t}`, "tip"); });
     // stanchezza
     const M = MENT[S.ment], P = PRESS[S.press];
     S.xi.forEach((p) => {
@@ -1319,6 +1345,7 @@
 
   function storyBox(pair, cls) {
     if (!pair) return "";
+    meet(HDC_WHO[pair[0]]);
     return `<div class="mdx-story ${cls || ""}"><b>${esc(CHAR[pair[0]] || pair[0])}</b>${esc(pair[1])}</div>`;
   }
   // primo episodio non ancora vinto (aperto oppure in attesa di stelle)
@@ -1393,6 +1420,7 @@
     stopLoop(); S = null;
     prog = loadProg();
     const grow = seasonsDone(prog) * 2;
+    meet(ARRIVALS.filter((a) => arrivalHas(prog, a.id)).map((a) => HDC_ARR[a.id]).concat(["hd_chicco", "hd_bj", "hd_morena"]));
     const rows = SQUAD.filter((x) => !(x.grp === "POR" && prog.gk === "ondina")).map((x) => `<div class="mdx-pl"><span class="n">${x.num}</span><div>${esc(x.name)}<small>${x.grp}</small></div><em>${x.r + grow}</em></div>`);
     ARRIVALS.forEach((a) => {
       const has = arrivalHas(prog, a.id), ref = OPPS.find((o) => o.id === a.ep), known = ref && oppUnlocked(prog, OPPS.indexOf(ref));
@@ -1766,6 +1794,7 @@
     if (afterRank > before.rank) news.push(`🧢 Promozione: ora sei <b>${esc(RANKS[afterRank].t)}</b>!`);
     Object.keys(FORMS).forEach((f) => { const u = FORMS[f].unlock; if (u && before.wins < u.wins && prog.wins >= u.wins) news.push(`🔓 Nuovo modulo sbloccato: <b>${f}</b>`); });
     OPPS.forEach((op, i) => { if (!before.opps[i] && oppUnlocked(prog, i)) news.push(`🔓 Nuovo episodio: <b>${esc(op.name)}</b>`); });
+    meet(ARRIVALS.filter((a) => arrivalHas(prog, a.id)).map((a) => HDC_ARR[a.id]));
     ARRIVALS.forEach((a) => { if (!before.arr.includes(a.id) && arrivalHas(prog, a.id)) news.push(`👕 Nuovo in rosa: <b>${esc(a.name)}</b> (${a.grp}, ${a.r})`); });
     KITS.forEach((k) => { if (!before.kits.includes(k.id) && k.need(prog)) news.push(`🎽 Nuova maglia: <b>${esc(k.name)}</b>`); });
     const seasonJust = SEASONS.find((x) => !before.seasons[x.id] && seasonDone(prog, x.id));

@@ -19,6 +19,14 @@
     CAST.ginetta_molo = { name: "Ginetta Bandierina", tag: "gold", hair: "#7c2d12", style: "long", skin: "#f1c6a0", eye: "#3b2415", bg: ["#fde68a", "#f97316"], shirt: "#111827" };
     CAST.arturo_molo = { name: "Arturo Altoparlante", tag: "blue", hair: "#6b7280", style: "messy", skin: "#e9be95", eye: "#222", bg: ["#7dd3fc", "#e0f2fe"], glasses: true, shirt: "#0e7490" };
 
+    // carte dell'album: la carta si sblocca solo quando il PNG parla (seeCard)
+    var BIOX = {
+      ginetta_molo: "Arbitra, organizza e custodisce l'unica copia letta del regolamento della Coppa del Molo. Fischia con una bandierina arancione e il tono di chi ha già previsto la tua obiezione.",
+      arturo_molo: "La voce di Radio Molo, che trasmette da una cabina con un mestolo al posto del microfono. Commenta ogni partita anche senza pubblico, e giura di avere i suoi motivi.",
+    };
+    if (api.BIO) Object.keys(BIOX).forEach(function (k) { if (!api.BIO[k]) api.BIO[k] = BIOX[k]; });
+    function meet(id) { try { if (api.seeCard) api.seeCard(id); } catch (e) { /* ignora */ } }
+
     if (zone) {
       zone.npcs = zone.npcs || [];
       if (!zone.npcs.some(function (n) { return n.id === "ginetta_molo"; })) {
@@ -111,8 +119,8 @@
     var chained = !(desc && desc.set); // con accessor (cage-borgo) la catena la fa il setter
     var prev = chained ? window.trTalkHook : null;
     window.trTalkHook = function (id) {
-      if (id === "ginetta_molo") { menuMain(); return true; }
-      if (id === "arturo_molo") { arturoTalk(); return true; }
+      if (id === "ginetta_molo") { meet(id); menuMain(); return true; }
+      if (id === "arturo_molo") { meet(id); arturoTalk(); return true; }
       return chained && typeof prev === "function" ? prev(id) : false;
     };
 

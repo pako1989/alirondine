@@ -34,6 +34,10 @@
     var CAST = api.CAST, TRZ = api.TRZ || {};
     CAST[ID] = CAST[ID] || { name: "Nereo il Banditore", tag: "gold", hair: "#9ca3af", style: "slick", skin: "#dca877", eye: "#2a2a2a", bg: ["#0e7490", "#fcd34d"], beard: true, cap: "#0e7490", shirt: "#b45309" };
 
+    // carta dell'album: si sblocca solo quando Nereo parla (seeCard)
+    if (api.BIO && !api.BIO[ID]) api.BIO[ID] = "Dà gli annunci del Borgo con un megafono e li ripete due volte, per sicurezza, a volte tre. Il suo carretto va piano ma non perde mai la strada; a volte è la strada a perdere lui, ma questo non lo annuncia.";
+    function meet() { try { if (api.seeCard) api.seeCard(ID); } catch (e) { /* ignora */ } }
+
     if (!NPCS.some(function (n) { return n && n.id === ID; })) NPCS.push({ id: ID, at: SPOT.slice() });
 
     // ---------------------------------------------------------------- stato (tutto in sola lettura, tutto protetto)
@@ -185,7 +189,7 @@
     // ---------------------------------------------------------------- aggancio al dialogo del Borgo (solo il proprio id)
     var prevTalk = window.questBoardTalk;
     window.questBoardTalk = function (id, bSay, bAsk, BL, resume) {
-      if (id === ID) { menuMain(bSay, bAsk, BL, resume); return true; }
+      if (id === ID) { meet(); menuMain(bSay, bAsk, BL, resume); return true; }
       return typeof prevTalk === "function" ? prevTalk.apply(this, arguments) : false;
     };
     // il punto "!" sopra il PNG: solo finchè ha qualcosa da dire (zona aperta ma mai visitata, oppure prima chiacchierata)

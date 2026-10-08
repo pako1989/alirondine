@@ -29,6 +29,13 @@
     CAST[PRES] = CAST[PRES] || { name: "Commendator Spigola", tag: "gray", hair: "#d8d8d8", style: "slick", skin: "#e9be95", eye: "#2a2a2a", bg: ["#7c2d12", "#fcd34d"], glasses: true, shirt: "#7c2d12" };
     CAST[DINA] = CAST[DINA] || { name: "Dina Cartella", tag: "gold", hair: "#4a2c2a", style: "bun", skin: "#f0c9a8", eye: "#3a2a1a", bg: ["#a78bfa", "#fde68a"], glasses: true, shirt: "#6d28d9" };
 
+    // carte dell'album: la carta si sblocca solo quando il PNG parla (seeCard)
+    var BIOX = {};
+    BIOX[PRES] = "Amedeo Spigola, ex droghiere e presidente della Rondine FC per scommessa. Il bilancio della società sta in un barattolo di acciughe che nessuno ha il coraggio di aprire.";
+    BIOX[DINA] = "Segretaria della Rondine FC: tiene i fogli, le chiavi e la memoria di tutto ciò che il Presidente dimentica a bella posta. Scrive le formazioni a mano con la stilografica, perché l'inchiostro non si connette a niente e quindi non si perde.";
+    if (api.BIO) Object.keys(BIOX).forEach(function (k) { if (!api.BIO[k]) api.BIO[k] = BIOX[k]; });
+    function meet(id) { try { if (api.seeCard) api.seeCard(id); } catch (e) { /* ignora */ } }
+
     // ---------------------------------------------------------------- NPC sulla mappa: in panchina, sul bordo ovest del campo
     if (zone) {
       zone.npcs = zone.npcs || [];
@@ -119,8 +126,8 @@
     var chained = !(desc && desc.set); // con accessor (cage-borgo) la catena la fa il setter
     var prev = chained ? window.trTalkHook : null;
     window.trTalkHook = function (id) {
-      if (id === PRES) { presMenu(); return true; }
-      if (id === DINA) { dinaMenu(); return true; }
+      if (id === PRES) { meet(id); presMenu(); return true; }
+      if (id === DINA) { meet(id); dinaMenu(); return true; }
       return chained && typeof prev === "function" ? prev(id) : false;
     };
 

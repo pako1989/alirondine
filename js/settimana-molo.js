@@ -445,6 +445,9 @@
     var TRZ = api.TRZ, CAST = api.CAST, MN = api.MN_BORGO_BTN, L = api.L, zone = TRZ.trabucchi;
 
     CAST[ID] = CAST[ID] || { name: "Ottone il Fanalista", tag: "gray", hair: "#e5e7eb", style: "buzz", skin: "#d9a57a", eye: "#1f2937", bg: ["#334155", "#fde68a"], beard: true, cap: "#334155", shirt: "#475569" };
+    // carta dell'album: si sblocca solo quando Ottone parla (seeCard)
+    if (api.BIO && !api.BIO[ID]) api.BIO[ID] = "Fanalista a riposo del Faro Vecchio: non fa più luce, ma tiene in ordine la scala e il tabellone. Conta i gradini tre volte e gli vengono tre risultati diversi, per questo si fida dei numeri solo quando c'è Dina.";
+    function meet() { try { if (api.seeCard) api.seeCard(ID); } catch (e) { /* ignora */ } }
     if (zone) {
       zone.npcs = zone.npcs || [];
       if (!zone.npcs.some(function (n) { return n.id === ID; })) zone.npcs.push({ id: ID, at: FARO_SPOT.slice() });
@@ -481,7 +484,7 @@
     var chained = !(desc && desc.set); // con un accessor (cage-borgo.js) la catena la fa il setter
     var prev = chained ? window.trTalkHook : null;
     window.trTalkHook = function (id) {
-      if (id === ID) { menu(); return true; }
+      if (id === ID) { meet(); menu(); return true; }
       return chained && typeof prev === "function" ? prev(id) : false;
     };
 

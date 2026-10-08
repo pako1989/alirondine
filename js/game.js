@@ -24935,7 +24935,7 @@
     isStar: (id) => SV.some((s) => s.id === id), star: (id) => SV.find((s) => s.id === id) || null, starsRec: () => SV.filter((s) => svRec().rec[s.id]).length, svTalk,
     squadra, spMenu, daily, svPage,
   };
-  window.__borgoApi = { TRZ, MN_BORGO_BTN, CAST, trGo, trAsk, trSay, trResume, L, trToast, TR_IDS, NPCS, trLevel, trZone: () => (TW ? TW.id : null), trExitTo, trRec, todayKey, hq: HQ_API, COSM, bCos };
+  window.__borgoApi = { TRZ, MN_BORGO_BTN, CAST, BIO, seeCard, trGo, trAsk, trSay, trResume, L, trToast, TR_IDS, NPCS, trLevel, trZone: () => (TW ? TW.id : null), trExitTo, trRec, todayKey, hq: HQ_API, COSM, bCos };
   if (/[?&]debug/.test(location.search)) window.__borgoDbg = { get BW() { return BW; }, get B() { return B; }, BLD, borgo, borgoMap, borgoDoor, borgoOpenLevel };
   try { if (window.__storyNav && window.__storyNav.seedFromSaveState) window.__storyNav.seedFromSaveState(S); } catch {}
   title();

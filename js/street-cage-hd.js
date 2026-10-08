@@ -123,6 +123,38 @@
     osvaldo: { id: "osvaldo", name: "Otello", spd: 4.3, kit: "#334155", kit2: "#fb923c", skin: "#8d5524", hair: "#111827", tr: "tenuta", rec: 5, bio: "Scarica le casse al molo. Se c'è da fare muro, si piazza lui: non per merito, per ingombro.", pitch: "Tenuta: le spallate subite lo stendono meno." },
     nina: { id: "nina", name: "Nina", spd: 5.0, kit: "#16a34a", kit2: "#ecfccb", skin: "#e8b88c", hair: "#3b2314", tr: "sponda", rec: 6, bio: "Ripara biciclette. Conosce l'angolo di ogni raggio, quindi anche quello di ogni sponda.", pitch: "Sponda: ogni sponda che tenta le carica la Grinta." },
   };
+  // ---------------------------------------------------------------- carte dell'album (Borgo · "Carte dei personaggi")
+  // Solo i personaggi con nome ricorrente. BIO/CAST si registrano appena esiste window.__borgoApi (game.js si carica dopo);
+  // la carta si sblocca con seeCard() soltanto quando il personaggio viene incontrato. Senza Borgo non succede nulla.
+  const HDC = {
+    cg_tano: { n: "Tano", h: "#3b2a1c", s: "buzz", k: "#d9a679", c: "#f97316", c2: "#fde68a", bio: "Capo degli Scaricatori del Mercato: esce dal turno all'alba e gioca con la grazia con cui sposta le cassette di pesce. Ha il fiato di un mantice rotto e offre il caffè a tutti, anche quando il bar è chiuso da anni." },
+    cg_rina: { n: "Rina Schiuma", h: "#2a1a2a", s: "long", k: "#e8b88c", c: "#d946ef", c2: "#0f172a", bio: "Con la sorella Rosa guida le Gemelle Schiuma e finisce le frasi altrui, passaggi compresi. Nessuna delle due ha mai capito chi ha vinto, ma entrambe giurano di averlo previsto." },
+    cg_peppe: { n: "Peppe Olio", h: "#5a3a1a", s: "messy", k: "#d9a679", c: "#eab308", c2: "#7c2d12", bio: "Capitano dei Friggitori Uniti, gioca con i guanti da forno per abitudine e per scaramanzia. Quando perde offre un cartoccio da tre a dodici persone: nessuno protesta, è il fritto, non l'aritmetica." },
+    cg_gisella: { n: "Gisella", h: "#7c4a1a", s: "bun", k: "#e8b88c", c: "#0ea5e9", c2: "#f0f9ff", bio: "Rammenda le reti dei pescatori da una vita e annoda anche i passaggi: lenti, ma impossibili da sciogliere. Quando perde ti restituisce la palla con un nodo sopra, perché qui si ritorna." },
+    cg_rossi: { n: "Geometra Rossi", h: "#4a4a4a", s: "slick", k: "#e8b88c", c: "#64748b", c2: "#fde68a", x: { glasses: true }, bio: "Misura il fuorigioco col metro da cantiere, anche se in Gabbia il fuorigioco non esiste. Poi manda la parcella, regolarmente timbrata dal Dottor Squadra." },
+    cg_remo: { n: "Mastro Remo", h: "#c9c5bd", s: "buzz", k: "#d49a68", c: "#78350f", c2: "#a8a29e", x: { beard: true }, bio: "Uno dei vecchi che hanno costruito la Gabbia portando un secchio di cemento a testa. Gioca piano, non sbaglia mai l'angolo e si soffia il naso con un fazzoletto grande come una vela." },
+    cg_cavalletto: { n: "Mastro Cavalletto", h: "#18181b", s: "buzz", k: "#8d5524", c: "#18181b", c2: "#facc15", x: { cap: "#facc15" }, bio: "Il Re della Gabbia: casco da cantiere, tre dita per mano e nessuna pietà, imbattuto da prima del telefono col filo. Dice che il re è chi lascia la porta aperta, e poi pretende il fritto." },
+    cg_gru: { n: "Sandra la Gru", h: "#2a1a10", s: "codino", k: "#c68642", c: "#ef4444", c2: "#111827", bio: "Vede tutto il molo dalla cabina della gru e non scende mai, tranne per le grandi occasioni. Ha il passo di un container e il tiro di un carroponte." },
+    cg_nando: { n: "Nando Frittura", h: "#3b2a1c", s: "messy", k: "#d9a679", c: "#f59e0b", c2: "#451a03", x: { beard: true }, bio: "Frigge per il molo da quarant'anni e gioca come cuoce: a fuoco alto e senza guardare il timer. Il cartoccio lo offre a tutto il quartiere, il gabbiano lo sorveglia a distanza di sicurezza." },
+    cg_marea: { n: "Capitana Marea", h: "#2a2a3a", s: "slick", k: "#e8b88c", c: "#0f766e", c2: "#ecfeff", x: { cap: "#0f766e" }, bio: "Comanda la Capitaneria del molo e conta le barche che rientrano una per una, a registro. Gioca con la calma di chi ha già visto tutti i temporali." }
+  };
+  let hdcOk = false;
+  function hdcReg() {
+    if (hdcOk) return true;
+    const a = window.__borgoApi;
+    if (!a || !a.BIO || !a.CAST || typeof a.seeCard !== "function") return false;
+    Object.keys(HDC).forEach((id) => {
+      const d = HDC[id];
+      if (!a.BIO[id]) a.BIO[id] = d.bio;
+      if (!a.CAST[id]) a.CAST[id] = { name: d.n, tag: "", hair: d.h, style: d.s, skin: d.k, eye: "#2a2a2a", bg: [d.c, d.c2], shirt: d.c, ...(d.x || {}) };
+    });
+    hdcOk = true; return true;
+  }
+  (function hdcWait(n) { try { if (!hdcReg() && n < 120) setTimeout(() => hdcWait(n + 1), 250); } catch (e) { /* ignora */ } })(0);
+  function meet(ids) { try { if (!hdcReg()) return; [].concat(ids).forEach((id) => { if (id) window.__borgoApi.seeCard(id); }); } catch (e) { /* ignora */ } }
+  // squadra avversaria (tag) -> carte; recluta della Gabbia -> carta (aliasa le persone già nel Borgo: reclute-borgo.js o carte esistenti)
+  const HDC_TEAM = { MER: ["cg_tano"], SCH: ["cg_rina"], FRI: ["cg_peppe"], RET: ["cg_gisella"], GEO: ["cg_rossi"], VEC: ["don_tullio", "cg_remo"], CAV: ["cg_cavalletto"], GRU: ["cg_gru"], FRT: ["cg_nando"], MAR: ["cg_marea"] };
+  const HDC_REC = { zoe: "rb_zoe", mimi: "rb_mimi", brando: "brando", osvaldo: "rb_otello", nina: "rb_nina" };
   const TRAIT_N = { "": "", scatto: "Scatto", passaggio: "Passaggio", tiro: "Tiro", tenuta: "Tenuta", sponda: "Sponda" };
 
   // estetica
@@ -1675,6 +1707,7 @@
   function modeRule(cfg) { return cfg.mod === undefined || cfg.mod === "team" ? cfg.lv.mut : modName(cfg.mod) + ": " + (MODS.find((m) => m.id === cfg.mod) || MODS[1]).d; }
   function showBrief(cfg, back, extra) {
     uiState = "intro"; const lv = cfg.lv, k = cfg.kind;
+    if (lv && lv.tag) meet(HDC_TEAM[lv.tag]);
     let rew = "";
     if (k === "tour") rew = `Premio prima vittoria: ${coinFor(lv)} monete${(LEVELS.indexOf(lv) >= 0 ? PROG.coin[LEVELS.indexOf(lv)] : EXT.coin["ex-" + lv.id]) ? " (già incassato)" : ""}`;
     else if (k === "boss") rew = `Premio prima vittoria: ${lv.coin} monete e ${lv.gt} gettoni${EXT.coin["boss-" + lv.id] ? " (già incassato)" : ""}`;
@@ -1928,6 +1961,7 @@
   let swapSel = "";
   function showSquad() {
     uiState = "menu";
+    meet(EXT.pool.map((id) => HDC_REC[id]));
     let h = `<h2>La squadra</h2><p class="cgd-sub">Tre in campo: Fronte (davanti), Jolly (a metà) e Muro (dietro). Tocca un compagno in panchina, poi uno dei titolari da sostituire.</p>`;
     h += `<h3>In campo</h3>`;
     EXT.squad.forEach((id, i) => { const p = POOL[id]; h += `<button class="cgd-opp${swapSel ? " pick" : ""}" data-a="st" data-p="${id}"><div class="cgd-crest" style="border-color:${p.kit2};background:${p.kit};color:${p.kit2}">${SLOT[i].role.slice(0, 2).toUpperCase()}</div><div><b>${p.name} · ${SLOT[i].role}</b><span>${p.tr ? esc(p.pitch) : esc(p.bio)}</span></div></button>`; });
@@ -1996,7 +2030,7 @@
       next: () => {
         if (!last) return showScene(id, i + 1, back);
         let m = "";
-        if (!readCh(id)) { EXT.read.push(id); EXT.gt += 1; if (c.rec && EXT.pool.indexOf(c.rec) < 0) { EXT.pool.push(c.rec); m = POOL[c.rec].name + " entra in squadra (la trovi in panchina)."; } saveExt(); }
+        if (!readCh(id)) { EXT.read.push(id); EXT.gt += 1; if (c.rec && EXT.pool.indexOf(c.rec) < 0) { EXT.pool.push(c.rec); meet(HDC_REC[c.rec]); m = POOL[c.rec].name + " entra in squadra (la trovi in panchina)."; } saveExt(); }
         if (m) { showUi(`<h2>${esc(c.t)}</h2><div class="cgd-quote">${esc(m)}</div><p class="cgd-sub">+1 gettone di Gabbia.</p><button class="cgd-btn" data-a="ok">Continua</button>`); act({ ok: back }); } else back();
       },
       prev: () => showScene(id, i - 1, back),

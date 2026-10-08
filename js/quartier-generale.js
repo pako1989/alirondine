@@ -384,6 +384,7 @@
     const go = (fn) => () => { try { fn(); } catch (e) { api.trSay([L("voce", "Qualcosa si è inceppato. Riprova tra un attimo.")], api.trResume); if (DEBUG) console.error(e); } };
 
     function personMenu(id) {
+      safe(() => api.seeCard && api.seeCard(id)); // la carta (se esiste) si sblocca solo dopo l'incontro
       const m = mem(); const first = !m.talked[id]; m.talked[id] = 1; memSet(m);
       const rk = placed[id] || "hall", room = ROOMS[rk], name = nameOf(id);
       const lines = ROOM_LINES[rk] || ROOM_LINES.hall, blurb = lines[hash(id + today()) % lines.length];

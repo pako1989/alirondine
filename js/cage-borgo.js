@@ -19,6 +19,14 @@
     CAST.don_tullio = CAST.don_tullio || { name: "Don Tullio", tag: "gray", hair: "#c9c5bd", style: "buzz", skin: "#d49a68", eye: "#3b2f1f", bg: ["#78350f", "#d6b98c"], beard: true, cap: "#57534e", shirt: "#78716c" };
     CAST.nives_balcone = CAST.nives_balcone || Object.assign({}, CAST.nonna || {}, { name: "Signora Nives", shirt: "#f472b6", bg: ["#9d174d", "#f9a8d4"] });
 
+    // carte dell'album (Carte dei personaggi): la carta si sblocca solo quando il PNG parla (seeCard)
+    const BIOX = {
+      don_tullio: "Custode della Gabbia del Molo da quarant'anni: ha le chiavi, il lucchetto e, a sentir lui, nessun altro merito. Ogni sera alle undici chiude, e ogni sera qualcuno gli chiede un'ultima tirata che dura un'ora.",
+      nives_balcone: "Dal balcone sopra la Gabbia protesta contro il rumore del pallone con la stessa puntualità con cui non perde un tiro. Stende il bucato proprio all'ora delle partite, per puro caso, giura.",
+    };
+    if (api.BIO) Object.keys(BIOX).forEach((k) => { if (!api.BIO[k]) api.BIO[k] = BIOX[k]; });
+    const meet = (id) => { try { if (api.seeCard) api.seeCard(id); } catch (e) { /* ignora */ } };
+
     const go = (screen, extra) => cage.start(Object.assign({ screen, onExit: api.trResume, from: "borgo" }, extra || {}));
     const inf = () => { try { return cage.info(); } catch (e) { return { unread: 0, dailyLeft: 0, stars: [0, 0, 0, 0], bosses: 0, open: 1, chapters: 0, titles: 0, cups: 0, season: false, cup: false }; } };
 
@@ -107,8 +115,8 @@
     const MINE = ["don_tullio", "nives_balcone"];
     let prev = window.trTalkHook;
     const mine = function (id) {
-      if (id === "don_tullio") { tullioMenu(); return true; }
-      if (id === "nives_balcone") { nivesTalk(); return true; }
+      if (id === "don_tullio") { meet(id); tullioMenu(); return true; }
+      if (id === "nives_balcone") { meet(id); nivesTalk(); return true; }
       return typeof prev === "function" ? prev(id) : false;
     };
     // se borgo-expansions.js (o altri) assegneranno trTalkHook dopo di noi, la loro funzione resta in coda alla catena

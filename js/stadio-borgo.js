@@ -104,6 +104,18 @@
     CAST.sb_speaker = CAST.sb_speaker || base({ name: "Ermete Megafono", tag: "gold", hair: "#4a2c2a", style: "slick", skin: "#eec39c", bg: ["#7c3aed", "#fde68a"], glasses: true, shirt: "#7c3aed" });
     CAST.sb_coro = CAST.sb_coro || base({ name: "Bepi Diapason", tag: "blue", hair: "#9a9a9a", style: "buzz", skin: "#d9a57a", bg: ["#16325c", "#ffe7a0"], beard: true, shirt: "#16325c" });
 
+    // carte dell'album: la carta si sblocca solo quando il PNG parla (seeCard); sb_custode è Settimio (carta "settimio")
+    const BIOX = {
+      sb_capo: "Capocantiere del vecchio stadio, con l'elmetto di suo padre imbottito di giornali del '78. Il preventivo l'ha scritto su un sacco di cemento, e il sacco è in magazzino.",
+      sb_mimmo: "Ragazzino del quartiere che ha contato i gradoni dello stadio uno per uno e ne ha battezzato uno «Paolo». Sogna di fare il raccattapalle e ha già scelto il numero della pettorina.",
+      sb_delfina: "Abbonata storica dello stadio, posto tredici, con un cuscino ricamato che considera di sua proprietà. Guarda le partite a maglia e sostiene che il cuscino senta il silenzio meglio di chiunque.",
+      sb_gennaro: "Venditore di noccioline, bibite e bandierine, con prezzi che lui chiama onesti e i clienti chiamano affettuosi. Le figurine, dice, arrivano da sole come i gabbiani.",
+      sb_speaker: "Ermete Megafono, la voce dello stadio: annuncia le formazioni con la solennità di un telegiornale e il fiato di chi ha appena fatto le scale. Se gli chiedi di annunciare qualcosa, annuncia, anche il meteo.",
+      sb_coro: "Direttore del coro dello stadio: la nota la dà il gabbiano, lui la ripete. Il coro parte sempre con un verso di ritardo, e lui lo chiama stile.",
+    };
+    if (api.BIO) Object.keys(BIOX).forEach((k) => { if (!api.BIO[k]) api.BIO[k] = BIOX[k]; });
+    const meet = (id) => { try { if (api.seeCard) api.seeCard(id === "sb_custode" ? "settimio" : id); } catch (e) { /* ignora */ } };
+
     // cosmetici del guardaroba (solo colori; nessun effetto in partita)
     if (api.COSM) Object.assign(api.COSM, {
       sb_cantiere: { kind: "shirt", label: "Maglia giallo cantiere", val: "#f2c94c", from: "Porta lo Stadio del Borgo alla tappa Prato e tribuna" },
@@ -696,7 +708,7 @@
     const chained = !(desc && desc.set); // con accessor (cage-borgo.js) la catena la fa il setter
     const prev = chained ? window.trTalkHook : null;
     window.trTalkHook = function (id) {
-      if (mine(id)) { go(TALK[id])(); return true; }
+      if (mine(id)) { meet(id); go(TALK[id])(); return true; }
       return chained && typeof prev === "function" ? prev(id) : false;
     };
     const prevNews = window.trNewsHook;
