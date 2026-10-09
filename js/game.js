@@ -8818,7 +8818,7 @@
         const c = CAST[n.id], face = TW.target && TW.target.id === n.id ? (TW.x < n.x - 4 ? "left" : TW.x > n.x + 4 ? "right" : "down") : gxIdleFace(n);
         chibi(sx, sy + gxIdleY(n), { ...c, shirt: c.shirt || { dario: "#16325c" }[n.id] || "#555" }, face, 0);
         if (trNews(n.id)) { px(sx - 4, sy - 38, 9, 11, "#ffd23f"); g.fillStyle = "#2a1a00"; g.font = "bold 9px sans-serif"; g.textAlign = "center"; g.fillText("!", sx + 0.5, sy - 29); g.textAlign = "left"; }
-      } else chibi(sx, sy, { ...CAST.leo, shirt: "#ff4d5a", num: "10" }, TW.dir, (dx || dy) ? TW.walk : 0);
+      } else chibi(sx, sy, z.me ? z.me() : { ...CAST.leo, shirt: "#ff4d5a", num: "10" }, TW.dir, (dx || dy) ? TW.walk : 0);
     });
     trTop(cx, cy); if (z.top) z.top(cx, cy);
     // HUD
@@ -15137,6 +15137,7 @@
       { label: "✨ Arena 2D HD del Borgo", sub: "Suite Completa: Emblem, Action Soccer, Gabbia del Molo e Matchday Director", cls: "hot", fn: () => { if (window.openArena2DHDModal) window.openArena2DHDModal(modes); } },
       { label: "★ JoJo · Stand Soccer Battle", sub: "Le Bizzarre Avventure di Rondine: Star Rondine & ORA ORA ORA!", cls: "hot", fn: () => { if (window.openJoJoAdventure) window.openJoJoAdventure(modes); } },
       { label: "🌊 Cala Tramontana · Il Borgo del Tuo Campione", sub: heroLoad() ? `Esplora a piedi il borgo alternativo con ${heroLoad().name}` : "Modalità a piedi nel borgo marino alternativo per il tuo campione", cls: "hot", fn: () => { if (window.openCalaTramontana) window.openCalaTramontana(modes); } },
+      ...(window.__storiaCampione ? [window.__storiaCampione.menuEntry(modes)] : []),
       ...(window.__moloSettimana ? [{ label: "🏆 Settimana del Molo", sub: window.__moloSettimana.info().sub, cls: "hot", fn: () => window.__moloSettimana.open({ onExit: modes }) }] : []),
       ...(window.__diarioScoperte ? [{ label: "📰 Il Diario del Corriere", sub: window.__diarioScoperte.info().sub, cls: "hot", fn: () => window.__diarioScoperte.open({ onExit: modes }) }] : []),
       { label: "🎰 Distributore Gashapon 3D", sub: "I Pupazzetti della Costa: gira la manovella e colleziona i giocattoli 3D!", cls: "hot", fn: () => { if (window.openGachaModal) window.openGachaModal(); } },
@@ -21802,7 +21803,7 @@
     ["Partite", /Settimana del Molo/],
     ["Collezioni e curiosità", /Diario del Corriere/],
     ["Calcio d'azione e arcade", /Arena 2D|Biliardino|Cabinato|Stadio 3D|Corsa della Panda|Gozzo di Baciccia|Gabbia sul Molo|Tsubasa|Supereroi/],
-    ["Saghe e GDR", /Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro/],
+    ["Saghe e GDR", /Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro/],
     ["Collezioni e curiosità", /Gashapon|Roster & Talenti|Diorama|Fumetto|Leggende del passato|Bianco e Nero|Quartier Generale/],
   ];
   const MN_EXP = { "Partite": 12, "Allenamento": 6, "Storie e ricordi": 8 }; // quante voci ha la categoria a tutto sbloccato: le mancanti appaiono come «???»
@@ -25165,7 +25166,19 @@
       const u = o.toDataURL("image/png"); if (id !== "hero") PORT_IMG[id] = u; return u;
     } catch (e) { return null; } finally { if (tmp) delete CAST[id]; }
   }
-  window.__borgoApi = { portraitImg, TRZ, MN_BORGO_BTN, CAST, BIO, seeCard, trGo, trAsk, trSay, trResume, L, trToast, TR_IDS, NPCS, trLevel, trZone: () => (TW ? TW.id : null), trExitTo, trRec, todayKey, hq: HQ_API, COSM, bCos };
+  // partita breve per i moduli a piedi (js/storia-campione.js): squadra avversaria su misura, il campione in campo; onDone({a,b,win,recap}) a fine partita
+  function apiMatch(cfg) {
+    const h = cfg.hero === undefined ? heroLoad() : cfg.hero;
+    trSavePos(); document.body.classList.remove("borgo");
+    if (!chBack) chBack = S;
+    S = borgoPlayer(); if (h) { heroCast(h); S.st = heroBias(S.st, h); }
+    const t = (v) => Math.max(4, Math.round(v)), key = "ap_" + cfg.id;
+    TEAMS[key] = cfg.team(t, S.st); statsBox();
+    startMatch({ match: key, chap: cfg.chap, quick: true, min: cfg.min || 45, mate: cfg.mate || "Tommy", mateGeneric: !!cfg.mateGeneric, us: cfg.us || "Borgo", intro: cfg.intro, hero: h || undefined,
+      onEnd: () => { const [a, b] = M.score, rc = mRecap(); M = null; $("matchHud").hidden = true; if (chBack) S = chBack; chBack = null; sfx(a > b ? "goal" : "crowd"); if (a > b) jingle("win"); cfg.onDone({ a, b, win: a > b, recap: rc }); } });
+    chap(cfg.chap);
+  }
+  window.__borgoApi = { match: apiMatch, play, chap, scene: (bg, who, html, opts, title) => { view = { kind: "scene", bg, speaker: who }; if (title) chap(title); text(who || "voce", html); buttons(opts, true); }, portraitImg, TRZ, MN_BORGO_BTN, CAST, BIO, seeCard, trGo, trAsk, trSay, trResume, L, trToast, TR_IDS, NPCS, trLevel, trZone: () => (TW ? TW.id : null), trExitTo, trRec, todayKey, hq: HQ_API, COSM, bCos };
   if (/[?&]debug/.test(location.search)) window.__borgoDbg = { get BW() { return BW; }, get B() { return B; }, BLD, borgo, borgoMap, borgoDoor, borgoOpenLevel };
   try { if (window.__storyNav && window.__storyNav.seedFromSaveState) window.__storyNav.seedFromSaveState(S); } catch {}
   title();
