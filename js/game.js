@@ -1027,7 +1027,8 @@
     if (c.style === "bun") { g.beginPath(); g.ellipse(0, -12, 22, 14, 0, Math.PI, 0); g.fill(); g.beginPath(); g.arc(0, -28, 9, 0, 7); g.fill(); }
     if (c.style === "cresta") { g.beginPath(); g.ellipse(0, -10, 21, 13, 0, Math.PI, 0); g.fill(); g.beginPath(); g.moveTo(-7, -18); for (let i = 0; i < 5; i++) g.lineTo(-7 + i * 3.5, i % 2 ? -30 : -40); g.lineTo(7, -18); g.fill(); }
     if (c.style === "codino") { g.beginPath(); g.ellipse(0, -12, 22, 14, 0, Math.PI, 0); g.fill(); g.beginPath(); g.ellipse(24, 0, 5, 13, 0.3, 0, 7); g.fill(); px(-22, -12, 6, 10, c.hair); }
-    if (c.cap) { const cc = typeof c.cap === "string" ? c.cap : "#1d3fa3"; g.fillStyle = cc; g.beginPath(); g.ellipse(0, -13, 23, 13, 0, Math.PI, 0); g.fill(); px(-2, -15, 30, 4, cc); px(-4, -24, 8, 3, "#ffffff55"); }
+    const capV = c.cap || (c.acc === "cappellino" ? "#ffd23f" : c.acc === "berretto" ? "#26324a" : null); // il cappello vale anche dove il campione è ricostruito senza «cap»
+    if (capV) { const cc = typeof capV === "string" ? capV : "#1d3fa3"; g.fillStyle = cc; g.beginPath(); g.ellipse(0, -13, 23, 13, 0, Math.PI, 0); g.fill(); px(-2, -15, 30, 4, cc); px(-4, -24, 8, 3, "#ffffff55"); }
     const blink = (frame + id.length * 17) % 180 < 6;
     [-8, 8].forEach((ex) => {
       if (blink) { px(ex - 5, 2, 10, 2, "#222"); return; }
@@ -3941,7 +3942,8 @@
     if (c.style === "messy") { px(x - 6, y - 24, 3, 3, hair); px(x + 3, y - 24, 3, 3, hair); }
     if (c.style === "cresta") px(x - 1, y - 27, 3, 5, hair);
     if (c.style === "codino") px(dir === "left" ? x + 4 : x - 7, y - 20, 3, 6, hair);
-    if (c.cap) { const cc = typeof c.cap === "string" ? c.cap : "#1d3fa3"; px(x - 5, y - 24, 10, 3, cc); if (dir !== "up") px(dir === "left" ? x - 8 : x - 2, y - 22, dir === "down" ? 0 : 6, 2, cc); }
+    const capV = c.cap || (c.acc === "cappellino" ? "#ffd23f" : c.acc === "berretto" ? "#26324a" : null);
+    if (capV) { const cc = typeof capV === "string" ? capV : "#1d3fa3"; px(x - 5, y - 24, 10, 3, cc); if (dir !== "up") px(dir === "left" ? x - 8 : x - 2, y - 22, dir === "down" ? 0 : 6, 2, cc); }
     if (c.acc === "bandana") px(x - 5, y - 21, 10, 2, "#d62a2a");
     if (c.acc === "cappellino") { px(x - 6, y - 25, 12, 3, "#ffd23f"); px(x - 7, y - 23, 14, 1, "#e0a800"); }
     if (dir !== "up") {
@@ -4935,12 +4937,14 @@
   }
   function heroOptions() {
     const own = cosOwned(), of = (kind) => own.filter((k) => COSM[k].kind === kind).map((k) => [COSM[k].val, COSM[k].label.replace(/^(Capelli|Taglio a|Tiro:) /, "")]);
+    // un solo elemento per valore: due cosmetici con lo stesso colore bloccavano il ciclo e nascondevano tutti quelli dopo
+    const uq = (l) => { const seen = new Set(); return l.filter(([v]) => !seen.has(v) && seen.add(v)); };
     return {
-      style: [...Object.entries(H_STYLES), ...of("style").map(([v, l]) => [v, l[0].toUpperCase() + l.slice(1)])],
-      hair: [...Object.entries(H_HAIR), ...of("hairc")],
+      style: uq([...Object.entries(H_STYLES), ...of("style").map(([v, l]) => [v, l[0].toUpperCase() + l.slice(1)])]),
+      hair: uq([...Object.entries(H_HAIR), ...of("hairc")]),
       skin: H_SKIN.map((c, i) => [c, `Tono ${i + 1}`]),
-      shirt: [...Object.entries(H_SHIRT), ...of("shirt")],
-      acc: [...Object.entries(H_ACC), ...of("acc")],
+      shirt: uq([...Object.entries(H_SHIRT), ...of("shirt")]),
+      acc: uq([...Object.entries(H_ACC), ...of("acc")]),
       shot: Object.entries(H_SHOTS).filter(([, s]) => !s.cos || own.includes(s.cos)).map(([k, s]) => [k, s.label]),
     };
   }
@@ -6136,7 +6140,25 @@
   });
   H_SHOTS.saudade = { label: "Saudade", sub: "Malinconia che entra · Passaggio +2, Dribbling +2, Tiro −2", bias: { pass: 2, drib: 2, tiro: -2 }, c1: "#1a6bd1", c2: "#ffd23f", cos: "saudade" };
   // accessori nuovi: ritratto e omino
+  // accessori «a colore» (Quartier Generale, stagioni 10-12, Coppa, fumetto, Custodi): il valore è un colore, la forma si ricava dal nome
+  const accHexKind = (a) => { const e = Object.values(COSM).find((c) => c.kind === "acc" && c.val === a); const l = e ? e.label.toLowerCase() : ""; return /sciarpa/.test(l) ? "scarf" : /fascia/.test(l) ? "band" : "badge"; };
+  function portraitAccHex(a, part) {
+    if (part === "head") return true;
+    const k = accHexKind(a);
+    if (k === "scarf") { px(-18, 26, 36, 8, a); px(-18, 33, 36, 1, "#0003"); px(6, 33, 9, 18, a); px(6, 46, 9, 2, "#fff8"); }
+    else if (k === "band") { px(-31, 44, 11, 8, a); px(-31, 44, 11, 1, "#fff8"); px(-31, 51, 11, 1, "#0004"); }
+    else { g.fillStyle = a; g.beginPath(); g.moveTo(-26, 42); g.lineTo(-14, 42); g.lineTo(-14, 52); g.lineTo(-20, 58); g.lineTo(-26, 52); g.fill(); px(-24, 44, 8, 2, "#fff9"); g.strokeStyle = "#0006"; g.lineWidth = 1; g.beginPath(); g.moveTo(-26, 42); g.lineTo(-14, 42); g.lineTo(-14, 52); g.lineTo(-20, 58); g.lineTo(-26, 52); g.closePath(); g.stroke(); }
+    return true;
+  }
+  function chibiAccHex(x, y, a, dir) {
+    const k = accHexKind(a);
+    if (k === "scarf") { px(x - 5, y - 14, 10, 2, a); if (dir !== "up") px(x + 1, y - 12, 2, 3, a); }
+    else if (k === "band") px(x - 7, y - 11, 2, 2, a);
+    else if (dir !== "up") { px(x - 4, y - 11, 3, 3, a); px(x - 4, y - 11, 3, 1, "#fff9"); }
+    return true;
+  }
   function portraitAccX(a, part) {
+    if (typeof a === "string" && a[0] === "#") return portraitAccHex(a, part);
     if (portraitAccPc(a, part) || portraitAccV9(a, part) || portraitAcc9(a, part)) return true;
     if (part === "head") {
       if (a === "occhiali") { g.strokeStyle = "#8a2a2a"; g.lineWidth = 2; g.beginPath(); g.arc(-8, 2, 6, 0, 7); g.stroke(); g.beginPath(); g.arc(8, 2, 6, 0, 7); g.stroke(); px(-2, 1, 4, 2, "#8a2a2a"); return true; }
@@ -6150,7 +6172,7 @@
     return false;
   }
   function chibiAcc(x, y, c, dir) {
-    const a = c.acc; if (!a) return; if (chibiAccPc(x, y, a, dir) || chibiAccV9(x, y, a, dir) || chibiAcc9(x, y, a, dir)) return;
+    const a = c.acc; if (!a) return; if (typeof a === "string" && a[0] === "#") return void chibiAccHex(x, y, a, dir); if (chibiAccPc(x, y, a, dir) || chibiAccV9(x, y, a, dir) || chibiAcc9(x, y, a, dir)) return;
     if (a === "borsa") { px(dir === "left" ? x + 3 : x - 7, y - 9, 4, 4, "#8a5a2a"); px(x - 3, y - 13, 1, 4, "#6b4a2a"); }
     if (a === "calzini") { px(x - 4, y - 3, 3, 3, "#f2f2f2"); px(x + 1, y - 3, 3, 3, "#f2f2f2"); }
     if (a === "braccialetto") px(dir === "left" ? x - 7 : x + 5, y - 7, 2, 1, "#ffd23f");
