@@ -609,8 +609,8 @@
     const goal = (s) => ({
       0: "Presentati a Teodora, in stazione.",
       1: "Raggiungi Mirtilla al Rifugio Tre Tazze, in piazza.",
-      2: !has("kit_done") && !has("bianca_in") ? "Trova una maglia da Fosco (magazzino) e una compagna: Bianca, alla cabina." : !has("kit_done") ? "Fatti dare una maglia da Fosco, al magazzino." : "Convinci Bianca, la meccanica alla cabina, a giocare con te.",
-      3: "Vai al Campo Sospeso: il sindaco ti aspetta per il fischio d'inizio.",
+      2: !has("kit_done") && !has("bianca_in") ? "Trova una maglia da Fosco (magazzino) e una compagna: Bianca, alla cabina." : !has("kit_done") ? "Prima di andare al Campo: fatti dare una maglia da Fosco, al Magazzino Stambecchi (edificio in alto a sinistra, porta in basso)." : "Convinci Bianca, la meccanica, a giocare con te: è alla cabina, in basso a sinistra, vicino alla stazione.",
+      3: "Vai al Campo Sospeso: esci dal paese dal cancello a EST (freccia gialla, in fondo a destra, oltre la fontana e il Rifugio). Il sindaco ti aspetta.",
       4: "Torna in paese.",
       5: "Fosco ti aspetta al magazzino.",
       6: "Teodora ti aspetta nell'ufficio della stazione.",
@@ -914,7 +914,7 @@
     function biancaScelta(k) {
       F.set("bianca", k);
       const a = k === 1 ? [["vl_bianca", "Detta così mi fa quasi piacere. Quasi."]] : k === 2 ? [["vl_bianca", "Una cabina nuova… guarda che ti prendo in parola. Le promesse sulle cabine pesano."]] : [["vl_bianca", "Stanca?! Faccio la rampa della stazione in nove secondi. Dieci minuti li passo a sistemarti la difesa."]];
-      say(sw([...a, ["vl_bianca", "Va bene, ci sono. Ma ho un patto: se la cabina tre suona ancora, sospendo la partita e vado a vedere."], ["voce", "Bianca si pulisce le mani su uno straccio che era già del colore dell'olio. «Ci vediamo al Campo.»"]], BG.P), () => {
+      say(sw([...a, ["vl_bianca", "Va bene, ci sono. Ma ho un patto: se la cabina tre suona ancora, sospendo la partita e vado a vedere."], ["voce", "Bianca si pulisce le mani su uno straccio che era già del colore dell'olio. «Ci vediamo al Campo. Si va a est: il cancello con la freccia gialla, in fondo al paese, oltre il Rifugio.»"]], BG.P), () => {
         F.set("bianca_in", true); X.lanAdd("vl_bianca"); note(k === 2 ? "Bianca Rovedo gioca con noi. Le ho promesso una cabina nuova. Non so come." : k === 3 ? "Bianca Rovedo gioca con noi. L'ho sfidata e mi ha risposto con una rampa in nove secondi." : "Bianca Rovedo, meccanica, gioca con noi.");
         if (has("kit_done")) setStep(N, 3); done();
       });
