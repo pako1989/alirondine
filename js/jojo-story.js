@@ -23,16 +23,18 @@
       }
       .jojo-hud b { font-family: var(--display); color: #ffd23f; }
       .jojo-stand-bar {
-        position: absolute; bottom: 6px; left: 8px; right: 8px; z-index: 15;
+        position: absolute; bottom: 4px; left: 8px; right: 8px; z-index: 15;
         background: rgba(14, 6, 26, 0.92); border: 1px solid #7c4dff;
-        border-radius: 8px; padding: 4px 8px; display: flex; flex-direction: column; gap: 4px;
+        border-radius: 8px; padding: 3px 8px; display: flex; align-items: center; gap: 6px;
+        font-size: 9px; font-weight: 800; color: #e1bee7; min-width: 0;
       }
+      .jojo-stand-bar > span:first-child { flex: 0 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
       .jojo-stand-row {
         display: flex; align-items: center; justify-content: space-between;
         font-size: 10px; font-weight: 800; color: #e1bee7;
       }
       .jojo-meter {
-        flex: 1; height: 8px; margin: 0 6px; background: #261138;
+        flex: 1 1 40px; height: 8px; margin: 0; background: #261138;
         border-radius: 4px; overflow: hidden; border: 1px solid #ba68c8;
       }
       .jojo-meter-fill {
@@ -64,6 +66,14 @@
         text-shadow: 3px 3px 0 #b3202c, 0 0 15px #e040fb;
         text-align: center; letter-spacing: 2px;
       }
+      body:has(#stageAlt.jojo-on:not([hidden])) #text { max-height: none; overflow: visible; }
+      .jojo-quit {
+        flex: none; font: 800 10px var(--display, sans-serif); color: #fff; background: #5b1030;
+        border: 1px solid #ff5c8a; border-radius: 6px; padding: 5px 8px; min-height: 28px; cursor: pointer;
+        white-space: nowrap;
+      }
+      .jojo-quit.sure { background: #d50000; border-color: #ffd23f; }
+      .jojo-hud > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
       .jojo-pose-sub {
         font-size: 13px; font-weight: 800; color: #00e5ff;
         text-shadow: 1px 1px 0 #000; margin-top: 4px; text-transform: uppercase;
@@ -72,7 +82,20 @@
     document.head.appendChild(st);
   }
 
-  // Audio sintesi WebAudio stile anime JoJo
+  // Audio sintesi WebAudio: un solo AudioContext condiviso (creato al primo suono)
+  let AUD = null;
+  function audioCtx() {
+    try {
+      if (!AUD) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return null;
+        AUD = new AC();
+      }
+      if (AUD.state === "suspended") AUD.resume();
+      return AUD;
+    } catch (e) { return null; }
+  }
+
   function playJoJoSfx(type) {
     if (typeof window.hapticTrigger === "function") {
       try {
@@ -82,55 +105,56 @@
       } catch (e) {}
     }
     try {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if (!AC) return;
-      const ctx = new AC();
-      if (ctx.state === "suspended") ctx.resume();
+      const ctx = audioCtx();
+      if (!ctx) return;
       const t = ctx.currentTime;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.connect(gain);
       gain.connect(ctx.destination);
-
-      if (type === "ora") {
-        // Suono percussivo raffiche pugno Stand
-        osc.type = "sawtooth";
-        osc.frequency.setValueAtTime(320, t);
-        osc.frequency.exponentialRampToValueAtTime(80, t + 0.08);
-        gain.gain.setValueAtTime(0.45, t);
-        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.08);
+      const tone = (wave, f0, f1, v, dur, lin) => {
+        osc.type = wave;
+        osc.frequency.setValueAtTime(f0, t);
+        if (lin) osc.frequency.linearRampToValueAtTime(f1, t + dur * 0.8);
+        else osc.frequency.exponentialRampToValueAtTime(f1, t + dur * 0.8);
+        gain.gain.setValueAtTime(v, t);
+        gain.gain.exponentialRampToValueAtTime(0.005, t + dur);
         osc.start(t);
-        osc.stop(t + 0.09);
-      } else if (type === "time_stop") {
-        // Risonanza sorda inversione temporale ZA WARUDO
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(140, t);
-        osc.frequency.exponentialRampToValueAtTime(40, t + 0.45);
-        gain.gain.setValueAtTime(0.6, t);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
-        osc.start(t);
-        osc.stop(t + 0.52);
-      } else if (type === "hamon") {
-        // Scintille Hamon solari
-        osc.type = "triangle";
-        osc.frequency.setValueAtTime(540, t);
-        osc.frequency.linearRampToValueAtTime(880, t + 0.25);
-        gain.gain.setValueAtTime(0.3, t);
-        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
-        osc.start(t);
-        osc.stop(t + 0.32);
-      } else if (type === "stand_summon") {
-        // Eco evocazione Stand
-        osc.type = "square";
-        osc.frequency.setValueAtTime(220, t);
-        osc.frequency.exponentialRampToValueAtTime(660, t + 0.35);
-        gain.gain.setValueAtTime(0.35, t);
-        gain.gain.exponentialRampToValueAtTime(0.005, t + 0.4);
-        osc.start(t);
-        osc.stop(t + 0.42);
-      }
+        osc.stop(t + dur + 0.02);
+      };
+      if (type === "ora") tone("sawtooth", 320, 80, 0.4, 0.08);
+      else if (type === "time_stop") tone("sine", 140, 40, 0.5, 0.5);
+      else if (type === "hamon") tone("triangle", 540, 880, 0.28, 0.3, true);
+      else if (type === "stand_summon") tone("square", 220, 660, 0.3, 0.4);
+      else if (type === "goal") tone("triangle", 400, 900, 0.3, 0.35, true);
+      else tone("triangle", 220, 90, 0.3, 0.12);
     } catch (e) {}
   }
+
+  // roundRect con fallback per browser vecchi
+  function rrect(ctx, x, y, w, h, r) {
+    if (typeof ctx.roundRect === "function") { ctx.roundRect(x, y, w, h, r); return; }
+    r = Math.min(r, w / 2, h / 2);
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  // Il protagonista: il Campione creato dall'utente, altrimenti Leo Moretti
+  function heroInfo() {
+    let h = null;
+    try {
+      const f = window.heroLoad || (window.__azHooks && window.__azHooks.heroLoad);
+      if (typeof f === "function") h = f();
+    } catch (e) {}
+    const name = h && h.name ? String(h.name).replace(/[<>&"]/g, "").slice(0, 24) : "Leo Moretti";
+    const first = name.split(/\s+/)[0] || "Leo";
+    return { name, first, short: first.toUpperCase().slice(0, 8), custom: !!(h && h.name) };
+  }
+  const H = (str) => str.replace(/\{H\}/g, heroInfo().first).replace(/\{HF\}/g, heroInfo().name);
 
   // Nemici Stand User dei 5 Atti
   const STAND_BOSSES = [
@@ -138,14 +162,16 @@
       act: 1,
       id: "dio_brando",
       user: "Lord Brando delle Rive",
+      short: "BRANDO",
       stand: "THE WORLD DEL MOLO",
       title: "Parte 1: Il Vampiro dell'Antico Molo",
       lore: "Un sinistro nobile è approdato a Punta Rondine con una Maschera di Pietra Marina. Sostiene che il calcio del borgo sia debole e destinato a sottomettersi al suo Stand che congela il tempo!",
-      preQuote: "«KONO BRANDO DA! Credi davvero che i tuoi passaggi possano superare il mio Regno Congelato, Leo?»",
+      preQuote: "«KONO BRANDO DA! Credi davvero che i tuoi passaggi possano superare il mio Regno Congelato, {H}?»",
       gkName: "The World (Riflesso)",
       color: "#ffd700",
       aura: "#ffe600",
       speed: 3.5,
+      skill: 0.35,
       power: "TIME STOP (2s di fermo palla)",
       favZone: "centro",
       standCry: "MUDA MUDA MUDA!",
@@ -155,6 +181,7 @@
       act: 2,
       id: "kars_pillar",
       user: "Santana & i Custodi della Scogliera",
+      short: "SANTANA",
       stand: "PILLAR BLADE",
       title: "Parte 2: L'Uomo del Pilastro del Faro",
       lore: "Dalla Grotta delle Sirene si sono risvegliati gli Uomini del Pilastro. Usano l'elasticità corporea e l'assorbimento per intercettare qualsiasi traiettoria d'aria.",
@@ -163,6 +190,7 @@
       color: "#ff5722",
       aura: "#ff8a65",
       speed: 4.0,
+      skill: 0.42,
       power: "FLEX BODY (Estensione mostruosa delle braccia)",
       favZone: "basso",
       standCry: "WHAAM! AWAKEN!",
@@ -172,6 +200,7 @@
       act: 3,
       id: "kira_yoshi",
       user: "Kira del Baracchino",
+      short: "KIRA",
       stand: "KILLER RONDINE",
       title: "Parte 3: La Bomba Silenziosa di Via Marina",
       lore: "Un individuo apparentemente tranquillo che vuole solo vivere in pace... trasformando ogni pallone che tocca nella prima bomba detonante a contatto!",
@@ -180,6 +209,7 @@
       color: "#ec407a",
       aura: "#f48fb1",
       speed: 4.3,
+      skill: 0.49,
       power: "FIRST BOMB (Esplosione respingente)",
       favZone: "alto",
       standCry: "SHEER HEART ATTACK!",
@@ -189,6 +219,7 @@
       act: 4,
       id: "diavolo_boss",
       user: "Il Boss Mascherato 'Diavolo'",
+      short: "DIAVOLO",
       stand: "KING CRIMSON DEL GOLFO",
       title: "Parte 4: La Cancellazione del Tempo",
       lore: "Nessuno ha mai visto la sua faccia nella trattoria del porto. Cancella 5 secondi di traiettoria e prevede il futuro con Epitaph per far svanire i gol fatti!",
@@ -197,6 +228,7 @@
       color: "#d50000",
       aura: "#ff1744",
       speed: 4.8,
+      skill: 0.56,
       power: "TIME ERASE (Cancella la traiettoria ideale)",
       favZone: "alterna",
       standCry: "EPITAPH PREDICTION!",
@@ -206,14 +238,16 @@
       act: 5,
       id: "pucci_made",
       user: "Padre Enrico della Cappella del Molo",
+      short: "DON ENRICO",
       stand: "MADE IN BORGO (ACCELERAZIONE)",
       title: "Parte 5 Finale: Il Paradiso della Rondine",
-      lore: "La battaglia finale sul campo bagnato dalla burrasca. Il tempo del match accelera all'infinito: solo la determinazione di Leo e l'eredità Joestar della Rondine possono raggiungere la vittoria!",
-      preQuote: "«Il destino ha già decretato chi alzerà la coppa. Credi nella gravità, Moretti?»",
+      lore: "La battaglia finale sul campo bagnato dalla burrasca. Il tempo del match accelera all'infinito: solo la determinazione di {H} e l'eredità Joestar della Rondine possono raggiungere la vittoria!",
+      preQuote: "«Il destino ha già decretato chi alzerà la coppa. Credi nella gravità, {H}?»",
       gkName: "Made in Haven",
       color: "#00e5ff",
       aura: "#18ffff",
       speed: 5.3,
+      skill: 0.63,
       power: "INFINITE SPEED (Traiettorie ipersoniche)",
       favZone: "specchio",
       standCry: "HALLELUJAH! ORA ORA ORA!",
@@ -221,27 +255,36 @@
     }
   ];
 
-  // Stand del Protagonista Leo & Compagni
+  // Stand del Protagonista. Ogni Stand ha un perk distinto che cambia davvero il gioco:
+  //   perfectWin  = ampiezza della zona "perfect" del tiro a tempo (0.22 base)
+  //   perfectFree = il tiro perfect non si para mai
+  //   curveSave   = moltiplicatore delle parate sui tiri a effetto
+  //   parryTol    = pixel di tolleranza extra della parata difensiva
+  //   parryFrom   = da che punto (0-1) del volo la parata è valida
+  //   slice       = probabilità di "affettare" un gol avversario
+  //   rushNeed    = pugni necessari per la Raffica
   const HERO_STANDS = [
     {
       id: "star_rondine",
       name: "STAR RONDINE",
       type: "Potenza & Precisione",
-      user: "Leo Moretti",
+      user: "{HF}",
       cry: "ORA ORA ORA ORA ORA!",
-      desc: "Raffica supersonica di colpi al pallone. Distrugge ogni barriera e annulla la parata.",
+      desc: "Raffica supersonica di colpi al pallone. Il tiro perfect non si para mai, la zona perfect è più larga e la Raffica richiede solo 7 pugni.",
+      perk: "Perfect più largo e imparabile · Raffica da 7 pugni",
       color: "#7c4dff",
-      rushHits: 12
+      perfectWin: 0.32, perfectFree: true, curveSave: 1, parryTol: 0, parryFrom: 0.55, slice: 0, rushNeed: 7
     },
     {
       id: "golden_gabbiano",
       name: "GOLDEN GABBIANO",
       type: "Vita & Curvatura",
-      user: "Tommy & Leo",
+      user: "Tommy & {H}",
       cry: "MUDA MUDA MUDA MUDA!",
-      desc: "Dona vita alla traiettoria del pallone: devia a mezz'aria come uno stormo dorato.",
+      desc: "Dona vita alla traiettoria del pallone: devia a mezz'aria come uno stormo dorato. I tiri a effetto vengono parati il 70% in meno. Raffica da 9 pugni.",
+      perk: "Tiri a effetto -70% parate · Raffica da 9 pugni",
       color: "#ffd700",
-      rushHits: 10
+      perfectWin: 0.22, perfectFree: false, curveSave: 0.3, parryTol: 0, parryFrom: 0.55, slice: 0, rushNeed: 9
     },
     {
       id: "silver_trabucco",
@@ -249,9 +292,10 @@
       type: "Spadaccino Difensivo",
       user: "Nico (Il Muro)",
       cry: "HORA HORA HORA!",
-      desc: "Affetta qualsiasi tiro avversario con riflessi d'acciaio prima che superi la linea.",
+      desc: "Affetta i tiri avversari con riflessi d'acciaio: parata più larga e più anticipata, e il 30% dei gol subiti viene tagliato a metà strada. Raffica da 10 pugni.",
+      perk: "Parata più larga e anticipata, 30% di tiri affettati · Raffica da 10 pugni",
       color: "#b0bec5",
-      rushHits: 8
+      perfectWin: 0.22, perfectFree: false, curveSave: 1, parryTol: 18, parryFrom: 0.42, slice: 0.3, rushNeed: 10
     }
   ];
 
@@ -292,6 +336,22 @@
   let S = null;
   let onExitCb = null;
   let animFrameId = null;
+  let dragging = false;
+  let winListenersOn = false;
+  const DEBUG = /[?&]debug/.test(location.search);
+
+  // Esegue fn dopo ms solo se la partita è ancora la stessa (evita timer orfani dopo Abbandona)
+  function later(fn, ms) {
+    const mine = S;
+    setTimeout(() => { if (S && S === mine) fn(); }, ms);
+  }
+  const addMeter = (n) => {
+    if (!S) return;
+    const k = n > 0 ? 1 + 0.2 * (S.lvl - 1) : 1;
+    S.standMeter = clamp(S.standMeter + n * k, 0, 100);
+    updateMatchHUD();
+  };
+  const rushNeed = () => Math.max(4, S.stand.rushNeed - Math.floor((S.lvl - 1) / 2));
 
   function stopMatchLoop() {
     if (animFrameId) {
@@ -306,6 +366,7 @@
     if (cv) cv.hidden = true;
     const alt = $("stageAlt");
     if (alt) {
+      alt.classList.add("jojo-on");
       alt.hidden = false;
       alt.style.display = "block";
       alt.style.position = "absolute";
@@ -364,11 +425,11 @@
     if (textEl) {
       const curBoss = STAND_BOSSES[Math.min(4, prog.actCleared)];
       textEl.innerHTML = `
-        <span class="who" style="background:#7c4dff; color:#fff; font-weight:800;">Jotaro & Leo</span>
+        <span class="who" style="background:#7c4dff; color:#fff; font-weight:800;">Jotaro & ${heroInfo().first}</span>
         <span class="t">
-          <b>«Yare Yare Daze...»</b> Un'aura misteriosa avvolge il campo del Borgo. Gli avversari possiedono il potere degli <b>STAND</b>!
-          Solo risvegliando il tuo potenziale potrai fermare la stirpe di Brando e liberare la costa a suon di <em>ORA ORA ORA!</em><br>
-          <span style="color:#ffd23f;">Prossimo avversario: <b>${curBoss.user}</b> (${curBoss.stand})</span>
+          <b>«Yare Yare Daze...»</b> Un'aura misteriosa avvolge il campo del Borgo: gli avversari hanno il potere degli <b>STAND</b>!
+          Ferma la stirpe di Brando a suon di <em>ORA ORA ORA!</em><br>
+          <span style="color:#ffd23f;">Prossimo: <b>${curBoss.user}</b> (${curBoss.stand})</span>
         </span>
       `;
     }
@@ -409,11 +470,21 @@
       });
     }
 
+    if (DEBUG) {
+      btns.push({
+        label: "🐞 Debug: salta Atto",
+        sub: "Segna come superato l'atto corrente (senza monete)",
+        fn: () => { const q = loadProg(); q.actCleared = Math.min(5, q.actCleared + 1); if (q.actCleared >= 5) q.trophyJoJo = true; saveProg(q); showHub(); }
+      });
+    }
+
     btns.push({
       label: "◂ Torna al Menu",
       cls: "pick",
       fn: () => {
         stopMatchLoop();
+        const alt0 = $("stageAlt");
+        if (alt0) alt0.classList.remove("jojo-on");
         if (window.setView) window.setView({ kind: "scene", bg: "title" });
         if (window.closeAltStage) window.closeAltStage();
         const alt2 = $("stageAlt");
@@ -464,7 +535,7 @@
           <div style="color:#ba68c8; font-size:11px; font-weight:800; text-transform:uppercase;">STAND ATTUALMENTE RISVEGLIATO</div>
           <div style="font-family:var(--display); font-size:22px; color:${curStand.color}; text-shadow:2px 2px 0 #000, 0 0 12px ${curStand.color};">${curStand.name}</div>
           <div style="color:#ffd23f; font-size:12px; font-weight:800; margin-top:2px;">Grido di battaglia: ${curStand.cry}</div>
-          <div style="color:#e1bee7; font-size:11px; margin-top:4px;">${curStand.desc}</div>
+          <div style="color:#e1bee7; font-size:11px; margin-top:4px;">${curStand.perk}</div>
         </div>
       `;
     }
@@ -474,14 +545,15 @@
       textEl.innerHTML = `
         <span class="who" style="background:#7c4dff; color:#fff; font-weight:800;">Freccia Stand</span>
         <span class="t">
-          Scegli la manifestazione spirituale da schierare in campo. Ognuna conferisce un tipo diverso di super-tiro e abilità contro i boss!
+          Scegli lo Stand da schierare. Ognuno cambia davvero il gioco.<br>
+          <b>${curStand.name}</b>: ${curStand.desc}
         </span>
       `;
     }
 
     const btns = HERO_STANDS.map((st) => ({
       label: (st.id === prog.currentStand ? "✓ " : "") + st.name,
-      sub: `${st.type} · Gridata: ${st.cry}`,
+      sub: `${st.type} · ${st.perk}`,
       cls: st.id === prog.currentStand ? "hot" : "",
       fn: () => {
         prog.currentStand = st.id;
@@ -509,7 +581,7 @@
         <div style="position:relative; z-index:2; padding:16px; display:flex; flex-direction:column; justify-content:flex-end; height:100%; box-sizing:border-box;">
           <div style="color:#ffd23f; font-size:12px; font-weight:800; text-transform:uppercase;">DOJO DELLE POSE & HAMON</div>
           <div style="font-family:var(--display); font-size:22px; color:#e040fb; text-shadow:2px 2px 0 #000;">ENERGIA SPIRITUALE LIV. ${prog.standLevel}</div>
-          <div style="color:#00e5ff; font-size:12px; font-weight:700; margin-top:2px;">Bonus Velocità Carica: +${(prog.standLevel - 1) * 20}%</div>
+          <div style="color:#00e5ff; font-size:12px; font-weight:700; margin-top:2px;">Bonus carica Stand: +${(prog.standLevel - 1) * 20}% · Monete: ${typeof window.bCoins === "function" ? window.bCoins() : 0}</div>
         </div>
       `;
     }
@@ -521,7 +593,7 @@
         <span class="who" style="background:#ffd23f; color:#0e1424; font-weight:800;">Pose Master Caesar</span>
         <span class="t">
           <b>IL RESPIRO DELL'HAMON E LE POSE PLASTICHE!</b><br>
-          Livello Stand Attuale: <b>Liv. ${prog.standLevel}</b> (Bonus barra Stand: +${(prog.standLevel - 1) * 20}% velocità di ricarica).<br>
+          Livello Stand: <b>Liv. ${prog.standLevel}</b> · ricarica energia +${(prog.standLevel - 1) * 20}%, energia iniziale più alta e Raffica più facile (-1 pugno ogni 2 livelli).<br>
           <i>«Assumi una posa ad angolo retto con la schiena arcuata e grida la tua determinazione!»</i>
         </span>
       `;
@@ -529,29 +601,19 @@
 
     const btns = [
       {
-        label: `✨ Meditazione Hamon · Sblocca Posa (Liv. ${prog.standLevel + 1})`,
-        sub: `Costo: ${cost} Monete · Aumenta potenza Raffica ORA`,
+        label: prog.standLevel >= 5 ? "✨ Meditazione Hamon · Livello massimo" : `✨ Meditazione Hamon · Sblocca Posa (Liv. ${prog.standLevel + 1})`,
+        sub: prog.standLevel >= 5 ? "Livello massimo raggiunto" : `Costo: ${cost} Monete · Più energia e Raffica più facile`,
         cls: "hot",
         disabled: prog.standLevel >= 5,
         fn: () => {
-          let coins = 0;
-          try {
-            const raw = localStorage.getItem("ali-di-rondine.monete");
-            coins = raw ? parseInt(raw, 10) || 0 : 0;
-          } catch (e) {}
-
-          if (coins < cost) {
-            if (window.toast) window.toast(`Monete insufficienti! Ti servono ${cost} monete del Borgo.`, "warn", "🪙");
+          // monete reali del Borgo (esposte da game.js)
+          const coins = typeof window.bCoins === "function" ? Number(window.bCoins()) || 0 : 0;
+          if (typeof window.addCoins !== "function" || coins < cost) {
+            if (window.toast) window.toast(`Monete insufficienti! Ti servono ${cost} monete del Borgo (ne hai ${coins}).`, "warn", "🪙");
             return;
           }
-
-          if (typeof window.addCoins === "function") {
-            window.addCoins(-cost);
-          } else {
-            try {
-              localStorage.setItem("ali-di-rondine.monete", Math.max(0, coins - cost));
-            } catch (e) {}
-          }
+          if (prog.standLevel >= 5) return;
+          window.addCoins(-cost);
 
           prog.standLevel++;
           prog.posesUnlocked.push(`Posa Divina Liv.${prog.standLevel}`);
@@ -583,7 +645,7 @@
         <div class="jojo-menace" style="bottom:20px; right:20px; font-size:28px;">ゴゴゴ</div>
         <div style="position:relative; z-index:2; padding:16px; display:flex; flex-direction:column; justify-content:flex-end; height:100%; box-sizing:border-box;">
           <div style="font-family:var(--display); font-size:20px; color:#ffd23f; text-shadow:2px 2px 0 #b3202c;">REGOLE DEL COMBATTIMENTO STAND</div>
-          <div style="color:#e1bee7; font-size:12px; margin-top:4px;">Punta alla porta, carica la barra con tiri o pose e distruggi i boss con la Raffica ORA!</div>
+          <div style="color:#e1bee7; font-size:12px; margin-top:4px;">Punta alla porta, para i loro tiri, carica la barra e sorprendi i boss con la Raffica ORA!</div>
         </div>
       `;
     }
@@ -594,10 +656,12 @@
         <span class="who" style="background:#e040fb; color:#fff; font-weight:800;">Grimorio Stand</span>
         <span class="t">
           <b>GUIDA AL COMBATTIMENTO STAND</b><br>
-          • <b>BARRA STAND</b>: si riempie segnando, parando e con la posa tattica.<br>
-          • <b>RAFFICA ORA ORA ORA</b>: quando la barra Stand è al 100%, premi il super attacco e tocca ripetutamente lo schermo per scatenare fino a 15 pugni contemporanei!<br>
-          • <b>TIME STOP & CONTROMOSSE</b>: quando l'avversario usa il suo potere bizzarro, mantieni la calma e respingi il pallone nell'angolo scoperto!<br>
-          • <b>VITTORIA FINALE</b>: sconfiggendo Padre Pucci all'Atto 5 otterrai il titolo leggendario <em>Campione dei Portatori di Stand</em> e un tesoro di monete!
+          • <b>TURNI</b>: ogni turno tiri tu e poi para. Dopo 5 turni, se è pari, c'è un supplementare e poi i rigori.<br>
+          • <b>TIRO</b>: mira, poi premi il pulsante quando il cursore è al centro (solo il pulsante, non lo schermo).<br>
+          • <b>PARATA</b>: sposta lo scudo sotto il tiro avversario e premi PARATA quando il cerchio è vicino. Se non pari, è gol per loro!<br>
+          • <b>BARRA STAND</b>: si riempie segnando e parando. Al 70% c'è il Time Stop, al 100% la <b>RAFFICA ORA</b>: tocca veloce lo schermo per sferrare i pugni.<br>
+          • <b>ABBANDONA</b>: in partita il pulsante in alto a destra riporta all'hub (tocca due volte).<br>
+          • <b>VITTORIA FINALE</b>: sconfiggi Padre Pucci all'Atto 5 per il titolo <em>Campione dei Portatori di Stand</em>. Le monete si vincono solo alla prima vittoria di ogni atto.
         </span>
       `;
     }
@@ -625,7 +689,7 @@
       const b = STAND_BOSSES[i];
       btns.push({
         label: `Atto ${i + 1}: ${b.user}`,
-        sub: b.stand,
+        sub: i < prog.actCleared ? `${b.stand} · già superato (niente monete)` : b.stand,
         fn: () => startStoryBriefing(i)
       });
     }
@@ -658,8 +722,8 @@
       textEl.innerHTML = `
         <span class="who" style="background:#d50000; color:#fff; font-weight:800;">${boss.user}</span>
         <span class="t">
-          <b>${boss.preQuote}</b><br>
-          ${boss.lore}
+          <b>${H(boss.preQuote)}</b><br>
+          ${H(boss.lore)}
         </span>
       `;
     }
@@ -718,12 +782,14 @@
       bossIdx: bossIndex,
       boss: boss,
       stand: stand,
+      lvl: prog.standLevel,
       turn: 1,
       maxTurns: 5,
+      pen: null,
       myScore: 0,
       oppScore: 0,
-      standMeter: 45 + (prog.standLevel - 1) * 15,
-      phase: "aim", // aim, timing, ora_rush, time_stop, def_charge, def_parry, anim
+      standMeter: Math.min(90, 45 + (prog.standLevel - 1) * 10),
+      phase: "aim", // aim, timing, ora_rush, time_stop, def_charge, def_parry, anim, pen_shoot, pen_def
       aimX: 160,
       aimY: 95,
       curveOffset: 0,
@@ -739,11 +805,12 @@
       timeStopActive: false,
       defShieldX: 160,
       defBall: null,
-      defParrySuccess: false,
+      parryLock: 0,
       ball: null,
       anim: null,
       shake: 0,
       particles: [],
+      fx: [],
       menaceRunes: [
         { x: 38, y: 30, text: "ゴゴゴ", rot: -0.1 },
         { x: 268, y: 38, text: "ドドド", rot: 0.15 },
@@ -756,6 +823,14 @@
     startTurn();
   }
 
+  // Abbandona: torna all'hub senza ricaricare la pagina
+  function abandonMatch() {
+    stopMatchLoop();
+    dragging = false;
+    S = null;
+    showHub();
+  }
+
   function setupMatchDOM() {
     const alt = activateJoJoStage();
     if (!alt) return;
@@ -763,30 +838,42 @@
 
     alt.innerHTML = `
       <div class="jojo-hud">
-        <span>TURNO <b id="jTurn">1/5</b></span>
-        <span><b>LEO</b> <b id="jScore" style="color:#00e5ff;">0 – 0</b> <b style="color:#ff1744;" id="jBossName">${S.boss.user.split(" ")[0]}</b></span>
-        <span style="color:#ffd23f;">★ STAND LV.${loadProg().standLevel}</span>
+        <span>T <b id="jTurn">1/5</b></span>
+        <span><b>${heroInfo().short}</b> <b id="jScore" style="color:#00e5ff;">0 – 0</b> <b style="color:#ff1744;" id="jBossName">${S.boss.short}</b></span>
+        <button type="button" class="jojo-quit" id="jQuit" aria-label="Abbandona la partita">✕ Abbandona</button>
       </div>
       <canvas id="jojoCv" width="320" height="200" style="display:block; width:100%; height:100%; touch-action:none; user-select:none; -webkit-user-select:none;"></canvas>
       <div class="jojo-stand-bar">
-        <div class="jojo-stand-row">
-          <span>ENERGIA STAND (${S.stand.name})</span>
-          <span id="jMeterVal">45%</span>
-        </div>
+        <span>LV.${S.lvl} ${S.stand.name}</span>
         <div class="jojo-meter">
           <i class="jojo-meter-fill" id="jMeterFill" style="width:45%; background:linear-gradient(90deg, #7c4dff, #e040fb 70%, #ffd23f 100%);"></i>
         </div>
+        <span id="jMeterVal">45%</span>
       </div>
     `;
 
+    const quit = $("jQuit");
+    if (quit) {
+      let armed = 0;
+      quit.onclick = () => {
+        const now = performance.now();
+        if (armed && now - armed < 2500) { abandonMatch(); return; }
+        armed = now;
+        quit.classList.add("sure");
+        quit.textContent = "Sicuro? Tocca ancora";
+        setTimeout(() => {
+          if (armed === now && quit.isConnected) { armed = 0; quit.classList.remove("sure"); quit.textContent = "✕ Abbandona"; }
+        }, 2500);
+      };
+    }
+
     const cv = $("jojoCv");
     if (cv) {
-      let isDragging = false;
-
       const getCvCoords = (e) => {
         const rect = cv.getBoundingClientRect();
-        const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
-        const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+        const t0 = e.touches && e.touches[0] ? e.touches[0] : e.changedTouches && e.changedTouches[0] ? e.changedTouches[0] : null;
+        const clientX = e.clientX !== undefined ? e.clientX : (t0 ? t0.clientX : 0);
+        const clientY = e.clientY !== undefined ? e.clientY : (t0 ? t0.clientY : 0);
         return {
           x: clamp(((clientX - rect.left) / rect.width) * 320, 10, 310),
           y: clamp(((clientY - rect.top) / rect.height) * 200, 10, 190)
@@ -796,7 +883,7 @@
       const handlePointerDown = (e) => {
         if (!S) return;
         const pt = getCvCoords(e);
-        isDragging = true;
+        dragging = true;
 
         if (S.phase === "aim") {
           S.aimX = clamp(pt.x, 65, 255);
@@ -810,17 +897,19 @@
           playJoJoSfx("hamon");
           spawnParticles(S.aimX, S.aimY, "#00e5ff", 8);
         } else if (S.phase === "timing") {
-          fireNormalShot();
+          // il tiro parte solo dal pulsante: un tocco sul canvas non spara
+          S.fx.push({ t: "USA IL PULSANTE!", x: 160, y: 136, c: "#ffd23f", life: 1 });
         } else if (S.phase === "ora_rush") {
           tapOraRush();
         } else if (S.phase === "def_parry") {
           S.defShieldX = clamp(pt.x, 70, 250);
-          attemptParry();
+          // il tocco sposta lo scudo; para solo se il tiro è ormai vicino
+          if (defProgress() >= S.stand.parryFrom - 0.05) attemptParry();
         }
       };
 
       const handlePointerMove = (e) => {
-        if (!S || !isDragging) return;
+        if (!S || !dragging) return;
         const pt = getCvCoords(e);
 
         if (S.phase === "aim") {
@@ -835,17 +924,20 @@
         }
       };
 
-      const handlePointerUp = () => {
-        isDragging = false;
-      };
+      const handlePointerUp = () => { dragging = false; };
 
       cv.onmousedown = handlePointerDown;
       cv.onmousemove = handlePointerMove;
-      window.addEventListener("mouseup", handlePointerUp);
-
       cv.ontouchstart = (e) => { e.preventDefault(); handlePointerDown(e); };
       cv.ontouchmove = (e) => { e.preventDefault(); handlePointerMove(e); };
       cv.ontouchend = handlePointerUp;
+      cv.ontouchcancel = handlePointerUp;
+    }
+
+    // un solo listener globale per tutta la vita della pagina
+    if (!winListenersOn) {
+      winListenersOn = true;
+      window.addEventListener("mouseup", () => { dragging = false; });
     }
 
     startMatchLoop();
@@ -869,10 +961,17 @@
     }
   }
 
+  function turnLabel() {
+    if (!S) return "";
+    if (S.pen) return "RIGORI";
+    if (S.turn > S.maxTurns) return "SUPPL.";
+    return `${S.turn}/${S.maxTurns}`;
+  }
+
   function updateMatchHUD() {
     if (!S) return;
     const t = $("jTurn"), sc = $("jScore"), mv = $("jMeterVal"), mf = $("jMeterFill");
-    if (t) t.textContent = `${S.turn}/${S.maxTurns}`;
+    if (t) t.textContent = turnLabel();
     if (sc) sc.textContent = `${S.myScore} – ${S.oppScore}`;
     if (mv) mv.textContent = `${Math.round(S.standMeter)}%`;
     if (mf) mf.style.width = `${clamp(S.standMeter, 0, 100)}%`;
@@ -883,6 +982,7 @@
     S.phase = "aim";
     S.anim = null;
     S.ball = null;
+    S.defBall = null;
     S.shotType = "normal";
     S.timeStopActive = false;
     S.curveOffset = 0;
@@ -895,14 +995,15 @@
     const standReady = S.standMeter >= 100;
     const canTimeStop = S.standMeter >= 70;
     const textEl = $("text");
+    const extra = S.turn > S.maxTurns;
 
     if (textEl) {
       textEl.innerHTML = `
         <span class="who" style="background:#7c4dff; color:#fff; font-weight:800;">${S.stand.name}</span>
         <span class="t">
-          <b>TURNO ${S.turn}/${S.maxTurns} · FASE ATTACCO STAND</b><br>
-          Trascina o tocca la porta per mirare e imprimere la traiettoria ad effetto Hamon!<br>
-          ${standReady ? '<span style="color:#ffd23f; font-weight:800;">★ ENERGIA STAND AL 100%: RAFFICA ORA DEVASTANTE PRONTA!</span>' : canTimeStop ? '<span style="color:#00e5ff; font-weight:800;">⏳ ENERGIA STAND SUFFICIENTE: PUOI ATTIVARE IL TIME STOP!</span>' : `Portiere avversario: <b>${S.boss.gkName}</b> (Potere: <em>${S.boss.power}</em>).`}
+          <b>${extra ? "SUPPLEMENTARE" : `TURNO ${S.turn}/${S.maxTurns}`} · ATTACCO</b><br>
+          Trascina o tocca la porta per mirare, poi scegli il tiro.<br>
+          ${standReady ? '<span style="color:#ffd23f; font-weight:800;">★ ENERGIA AL 100%: RAFFICA ORA PRONTA!</span>' : canTimeStop ? '<span style="color:#00e5ff; font-weight:800;">⏳ ENERGIA SUFFICIENTE: PUOI FERMARE IL TEMPO!</span>' : `Portiere: <b>${S.boss.gkName}</b> (<em>${S.boss.power}</em>).`}
         </span>
       `;
     }
@@ -920,15 +1021,15 @@
         fn: () => startTimingShot("curve")
       },
       {
-        label: canTimeStop ? "⏳ ZA WARUDO · Fermata del Tempo" : "🔒 Time Stop (Serve 70% Stand)",
-        sub: canTimeStop ? "Ferma il portiere per 2s e spiazza la difesa!" : "Raggiungi almeno il 70% di energia",
+        label: canTimeStop ? "⏳ TIME STOP · Fermata del Tempo" : "🔒 Time Stop (Serve 70% Stand)",
+        sub: canTimeStop ? "Ferma il portiere, ma il boss può resistere!" : "Raggiungi almeno il 70% di energia",
         cls: canTimeStop ? "hot" : "",
         disabled: !canTimeStop,
         fn: () => activateTimeStopKicking()
       },
       {
         label: standReady ? `👊 RAFFICA: ${S.stand.cry.split(" ")[0]}!` : "🔒 Raffica Stand (Serve 100%)",
-        sub: standReady ? "Frenesia di pugni ad altissima frequenza!" : "Carica la barra al 100%",
+        sub: standReady ? `Servono ${rushNeed()} pugni in 3 secondi!` : "Carica la barra al 100%",
         cls: standReady ? "hot" : "",
         disabled: !standReady,
         fn: () => startOraRush()
@@ -954,8 +1055,8 @@
       textEl.innerHTML = `
         <span class="who" style="background:#00e5ff; color:#0e1424; font-weight:800;">ZA WARUDO / STAR PLATINUM</span>
         <span class="t">
-          <b>«IL TEMPO SI È FERMATO!»</b> Il mondo è immobile nel silenzio astrale.<br>
-          <b>Tocca rapidamente un punto scoperto</b> della porta prima che riprenda a scorrere!
+          <b>«IL TEMPO SI È FERMATO!»</b> Il Borgo è immobile nel silenzio.<br>
+          <b>Tocca un punto della porta</b> e scaglia prima che riprenda a scorrere. Ma ${S.boss.gkName} potrebbe resistere!
         </span>
       `;
     }
@@ -966,8 +1067,9 @@
       fn: () => resolveTimeStopShot()
     }], true);
 
+    const mine = S;
     const tsTimer = setInterval(() => {
-      if (!S || S.phase !== "time_stop") {
+      if (S !== mine || !S || S.phase !== "time_stop") {
         clearInterval(tsTimer);
         return;
       }
@@ -990,7 +1092,9 @@
     const targetX = S.aimX;
     const targetY = S.aimY;
     const distFromGk = Math.hypot(S.keeperX - targetX, S.keeperY - targetY);
-    const saved = distFromGk < 22 && Math.random() < 0.25;
+    // il boss resiste al tempo fermo: più forte con gli atti, molto più facile se miri vicino a lui
+    const resist = 0.12 + 0.06 * S.boss.act + (distFromGk < 24 ? 0.25 : 0);
+    const saved = Math.random() < resist;
 
     S.anim = {
       t0: performance.now(),
@@ -1005,8 +1109,8 @@
       done: () => {
         if (saved) {
           playJoJoSfx("ora");
-          if (window.toast) window.toast(`${S.boss.gkName} reagisce miracolosamente!`, "warn", "🛡️");
-          showShotResult(false, `<b>PARATO!</b> Con uno sforzo titanico, ${S.boss.gkName} ha deviato la sfera sul filo dei secondi.`);
+          if (window.toast) window.toast(`${S.boss.gkName} resiste al tempo fermo!`, "warn", "🛡️");
+          showShotResult(false, `<b>PARATO!</b> Con uno sforzo titanico, ${S.boss.gkName} si libera dal fermo tempo e devia la sfera.`);
         } else {
           playJoJoSfx("goal");
           S.myScore++;
@@ -1025,13 +1129,14 @@
     S.phase = "timing";
     S.shotType = type;
     S.cursor = 0;
+    S.cursorDir = 1;
     const textEl = $("text");
     if (textEl) {
       textEl.innerHTML = `
         <span class="who" style="background:#7c4dff; color:#fff; font-weight:800;">Tempismo & Hamon</span>
         <span class="t">
-          <b>BLOCCA IL CURSORE NEL CENTRO PER UN TIRO PERFETTO!</b><br>
-          ${type === "curve" ? "Traiettoria ad effetto: bypassa il raggio di guardia del portiere!" : "Tiro diretto ad alta velocità penetrante!"}
+          <b>PREMI IL PULSANTE QUANDO IL CURSORE È AL CENTRO!</b><br>
+          ${type === "curve" ? "Traiettoria ad effetto: gira attorno al raggio di guardia del portiere." : "Tiro diretto ad alta velocità."}
         </span>
       `;
     }
@@ -1041,7 +1146,8 @@
   function fireNormalShot() {
     if (!S || S.phase !== "timing") return;
     const diff = Math.abs(S.cursor - 0.5) * 2;
-    const perfect = diff < 0.22;
+    const stand = S.stand;
+    const perfect = diff < stand.perfectWin;
     const good = diff < 0.55;
     S.phase = "anim";
     renderButtons([], true);
@@ -1052,11 +1158,9 @@
     const isCurve = S.shotType === "curve";
     const curveOffset = isCurve ? (S.curveOffset || (S.aimX > 160 ? 35 : -35)) : 0;
 
-    let diveX = S.keeperX;
-    let diveY = S.keeperY;
-    const r = Math.random();
-
-    if (r < 0.5) {
+    let diveX, diveY;
+    if (Math.random() < boss.skill) {
+      // il portiere "legge" il tiro
       diveX = S.aimX + rnd(-18, 18);
       diveY = S.aimY + rnd(-12, 12);
     } else {
@@ -1065,11 +1169,12 @@
     }
 
     const distFromGk = Math.hypot(diveX - S.aimX, diveY - S.aimY);
+    const cs = isCurve ? stand.curveSave : 1;
     let saved = false;
     if (perfect) {
-      saved = distFromGk < 18 && Math.random() < 0.15;
+      saved = !stand.perfectFree && distFromGk < 18 && Math.random() < 0.15 * cs;
     } else if (isCurve) {
-      saved = distFromGk < 22 && Math.random() < 0.35;
+      saved = distFromGk < 22 && Math.random() < 0.35 * cs;
     } else if (good) {
       saved = distFromGk < 32;
     } else {
@@ -1089,16 +1194,17 @@
         if (saved) {
           playJoJoSfx("ora");
           S.shake = 10;
+          addMeter(8);
           if (window.toast) window.toast(`${boss.gkName} intercetta la sfera!`, "warn", "🛡️");
           showShotResult(false, `<b>PARATO!</b> ${boss.gkName} respinge la sfera con l'aura di ${boss.stand}.`);
         } else {
           playJoJoSfx("goal");
           S.myScore++;
           S.shake = 20;
-          S.standMeter = Math.min(100, S.standMeter + (perfect ? 40 : 25));
+          addMeter(perfect ? 40 : 25);
           spawnParticles(S.aimX, S.aimY, perfect ? "#ffd23f" : "#00e5ff", 20);
           if (window.toast) window.toast(perfect ? "★ TIRO HAMON CRITICO! GOOOL!" : "GOOOL STAND!", "goal", "★");
-          showShotResult(true, perfect ? `<b>TIRO PERFETTO AL 100%!</b> Una saetta Hamon spacca la barriera di ${boss.gkName}!` : `<b>GOOOL!</b> Traiettoria imparabile per ${boss.gkName}!`);
+          showShotResult(true, perfect ? `<b>TIRO PERFETTO!</b> Una saetta Hamon spacca la barriera di ${boss.gkName}!` : `<b>GOOOL!</b> Traiettoria imparabile per ${boss.gkName}!`);
         }
       }
     };
@@ -1114,6 +1220,7 @@
     updateMatchHUD();
     playJoJoSfx("ora");
     S.shake = 15;
+    const need = rushNeed();
 
     if (window.triggerAnimeCutin) {
       try {
@@ -1131,16 +1238,17 @@
       textEl.innerHTML = `
         <span class="who" style="background:#e040fb; color:#fff; font-weight:800;">${S.stand.name}</span>
         <span class="t">
-          <b>RAFFICA ORA IN CORSO! TOCCA CONTINUAMENTE LO SCHERMO!</b><br>
-          Pugni sferrati: <b id="jRushCount" style="color:#ffd23f; font-size:18px;">0</b> · Potenza: <b id="jRushPwr" style="color:#00e5ff;">100%</b>
+          <b>RAFFICA IN CORSO! TOCCA VELOCE LO SCHERMO!</b><br>
+          Pugni: <b id="jRushCount" style="color:#ffd23f; font-size:18px;">0</b> / ${need} · Potenza: <b id="jRushPwr" style="color:#00e5ff;">100%</b>
         </span>
       `;
     }
 
     renderButtons([{ label: `👊 ${S.stand.cry.split(" ")[0]}! (TOCCA VELOCE)`, cls: "hot", fn: tapOraRush }], true);
 
+    const mine = S;
     const timerInt = setInterval(() => {
-      if (!S || S.phase !== "ora_rush") {
+      if (S !== mine || !S || S.phase !== "ora_rush") {
         clearInterval(timerInt);
         return;
       }
@@ -1171,7 +1279,8 @@
     renderButtons([], true);
 
     const hits = S.rushClicks;
-    const success = hits >= 8;
+    const need = rushNeed();
+    const success = hits >= need;
     S.shake = 26;
 
     S.anim = {
@@ -1193,9 +1302,9 @@
           saveProg(prog);
           spawnParticles(S.aimX, S.aimY, "#ffd23f", 30);
           if (window.toast) window.toast("★ RAFFICA ORA DEVASTANTE!", "goal", "👊");
-          showShotResult(true, `<b>${S.stand.cry}!</b> Con <b>${hits} pugni spirituali</b> hai spazzato via ${S.boss.gkName} distruggendo la rete!`);
+          showShotResult(true, `<b>${S.stand.cry}</b> Con <b>${hits} pugni spirituali</b> hai spazzato via ${S.boss.gkName} e la rete!`);
         } else {
-          showShotResult(false, `<b>INSUFFICIENTE!</b> Solo ${hits} colpi: la difesa avversaria ha attutito la raffica.`);
+          showShotResult(false, `<b>INSUFFICIENTE!</b> Solo ${hits} pugni su ${need}: la difesa avversaria ha attutito la raffica.`);
         }
       }
     };
@@ -1210,11 +1319,7 @@
         <span class="t">${desc}</span>
       `;
     }
-
-    setTimeout(() => {
-      if (!S) return;
-      startDefenseTurn();
-    }, 1600);
+    later(startDefenseTurn, 1600);
   }
 
   // --- FASE DIFENSIVA INTERATTIVA & PARRY ---
@@ -1223,14 +1328,14 @@
     S.phase = "def_charge";
     const boss = S.boss;
     S.defShieldX = 160;
-    S.defParrySuccess = false;
+    S.parryLock = 0;
 
     const textEl = $("text");
     if (textEl) {
       textEl.innerHTML = `
         <span class="who" style="background:#d50000; color:#fff; font-weight:800;">${boss.user}</span>
         <span class="t">
-          <b>CONTROFFENSIVA STAND DI ${boss.user.toUpperCase()}!</b><br>
+          <b>CONTROFFENSIVA DI ${boss.short}!</b><br>
           «${boss.standCry}» Preparati a intercettare il tiro con il tuo Stand in porta!
         </span>
       `;
@@ -1240,11 +1345,14 @@
     S.shake = 10;
 
     renderButtons([{ label: "🛡️ PREPARATI ALLA PARATA", cls: "hot", fn: launchBossAttack }], true);
-
-    setTimeout(() => {
-      if (S && S.phase === "def_charge") launchBossAttack();
-    }, 1200);
+    later(() => { if (S.phase === "def_charge") launchBossAttack(); }, 1200);
   }
+
+  function defProgress() {
+    if (!S || !S.defBall) return 0;
+    return (performance.now() - S.defBall.t0) / S.defBall.dur;
+  }
+  const parryTol = () => 38 - (S.boss.act - 1) * 2 + S.stand.parryTol;
 
   function launchBossAttack() {
     if (!S || S.phase !== "def_charge") return;
@@ -1253,12 +1361,13 @@
 
     const boss = S.boss;
     const targetX = rnd(85, 235);
+    const dur = Math.max(850, 1500 - boss.speed * 120);
 
     S.defBall = {
       t0: performance.now(),
-      dur: Math.max(900, 1500 - boss.speed * 120),
+      dur: dur,
       x0: 160, y0: 50,
-      x1: targetX, y1: 175,
+      x1: targetX, y1: 158,
       x: 160, y: 50,
       targetX: targetX
     };
@@ -1268,51 +1377,80 @@
       textEl.innerHTML = `
         <span class="who" style="background:#ff1744; color:#fff; font-weight:800;">TIRO AVVERSARIO IN VOLO!</span>
         <span class="t">
-          <b>TRASCINA LO SHIELD SULLA TRAIETTORIA</b> e tocca <b>STAND PARRY</b> per riflettere il tiro!
+          <b>Sposta lo scudo sotto la palla</b> e premi <b>PARATA</b> quando il cerchio si stringe. Se non pari, è gol per loro!
         </span>
       `;
     }
 
     renderButtons([
-      { label: "🛡️ STAND PARRY (PARATA)", cls: "hot", fn: attemptParry },
-      { label: "◀ Sposta Sinistra", fn: () => { S.defShieldX = Math.max(80, S.defShieldX - 45); } },
-      { label: "▶ Sposta Destra", fn: () => { S.defShieldX = Math.min(240, S.defShieldX + 45); } }
+      { label: "🛡️ STAND PARRY (PARATA)", cls: "hot", fn: () => attemptParry() },
+      { label: "◀ Sposta Sinistra", fn: () => { if (S) S.defShieldX = Math.max(80, S.defShieldX - 45); } },
+      { label: "▶ Sposta Destra", fn: () => { if (S) S.defShieldX = Math.min(240, S.defShieldX + 45); } }
     ]);
+
+    // rete di sicurezza: se il frame loop si ferma, la fase non resta mai appesa
+    later(() => { if (S.phase === "def_parry") resolveDefenseResult(false); }, dur + 900);
+  }
+
+  // controllo continuo: tiro arrivato in porta senza parata = gol subito
+  function updateDefense() {
+    if (!S || S.phase !== "def_parry" || !S.defBall) return;
+    if (defProgress() > 1.08) resolveDefenseResult(false);
   }
 
   function attemptParry() {
     if (!S || S.phase !== "def_parry" || !S.defBall) return;
     const now = performance.now();
-    const p = (now - S.defBall.t0) / S.defBall.dur;
+    if (now < S.parryLock) return;
+    const p = defProgress();
     const distFromShield = Math.abs(S.defShieldX - S.defBall.targetX);
+    const tol = parryTol();
+    const from = S.stand.parryFrom;
 
-    if (distFromShield < 38 && p > 0.55 && p < 1.05) {
-      S.defParrySuccess = true;
+    if (distFromShield < tol && p > from && p < 1.05) {
       playJoJoSfx("ora");
       S.shake = 18;
-      S.standMeter = Math.min(100, S.standMeter + 40);
-      updateMatchHUD();
-      spawnParticles(S.defShieldX, 175, "#ffd23f", 20);
+      addMeter(40);
+      spawnParticles(S.defShieldX, 158, "#ffd23f", 20);
       resolveDefenseResult(true, true);
-    } else if (distFromShield < 55 && p > 0.5) {
+    } else if (distFromShield < tol + 17 && p > from - 0.05) {
       playJoJoSfx("kick");
       S.shake = 10;
-      S.standMeter = Math.min(100, S.standMeter + 15);
-      updateMatchHUD();
+      addMeter(15);
       resolveDefenseResult(true, false);
+    } else {
+      // parata fuori finestra: feedback e piccola penalità (energia e breve blocco)
+      S.parryLock = now + 450;
+      S.shake = 6;
+      playJoJoSfx("kick");
+      addMeter(-8);
+      const why = p <= from - 0.05 ? "TROPPO PRESTO!" : distFromShield >= tol + 17 ? "SCUDO FUORI POSTO!" : "TROPPO TARDI!";
+      S.fx.push({ t: why + " -8%", x: S.defShieldX, y: 138, c: "#ff5c8a", life: 1 });
+      if (window.toast) window.toast(`Parata sbagliata: ${why.toLowerCase()} (-8% energia)`, "warn", "⚠️");
     }
   }
 
   function resolveDefenseResult(saved, isPerfect) {
-    if (!S) return;
+    if (!S || S.phase !== "def_parry") return;
     S.phase = "anim";
+    S.defBall = null;
     renderButtons([], true);
     const boss = S.boss;
+
+    // lo Stand spadaccino può affettare un tiro che sarebbe gol
+    if (!saved && Math.random() < S.stand.slice) {
+      playJoJoSfx("ora");
+      S.shake = 12;
+      addMeter(10);
+      if (window.toast) window.toast("Tiro AFFETTATO!", "goal", "🗡️");
+      showDefResult(true, `<b>AFFETTATO!</b> ${S.stand.name} ha tagliato in due il tiro di ${boss.stand} un attimo prima della linea!`);
+      return;
+    }
 
     if (saved) {
       if (isPerfect) {
         if (window.toast) window.toast("★ PERFECT STAND COUNTER!", "goal", "🛡️");
-        showDefResult(true, `<b>PERFECT STAND COUNTER!</b> Hai riflesso il tiro di ${boss.stand} guadagnando +40% di energia Stand!`);
+        showDefResult(true, `<b>PERFECT STAND COUNTER!</b> Hai riflesso il tiro di ${boss.stand} guadagnando energia Stand!`);
       } else {
         if (window.toast) window.toast("Tiro respinto con successo!", "goal", "🧤");
         showDefResult(true, `<b>RESPINTO!</b> Il tuo Stand ha deviato la sfera oltre la traversa.`);
@@ -1321,7 +1459,7 @@
       playJoJoSfx("time_stop");
       S.oppScore++;
       S.shake = 18;
-      if (window.toast) window.toast(`GOL DI ${boss.user.toUpperCase()}!`, "warn", "⚡");
+      if (window.toast) window.toast(`GOL DI ${boss.short}!`, "warn", "⚡");
       showDefResult(false, `<b>GOL AVVERSARIO!</b> Il potere <em>${boss.power}</em> ha superato la guardia difensiva.`);
     }
   }
@@ -1335,16 +1473,135 @@
         <span class="t">${desc}</span>
       `;
     }
+    later(nextTurn, 1600);
+  }
 
-    setTimeout(() => {
-      if (!S) return;
+  // dopo ogni turno: avanti, supplementare, rigori o fine
+  function nextTurn() {
+    if (!S) return;
+    if (S.turn < S.maxTurns) {
       S.turn++;
-      if (S.turn > S.maxTurns) {
-        endMatch();
-      } else {
-        startTurn();
+      startTurn();
+    } else if (S.myScore !== S.oppScore) {
+      endMatch();
+    } else if (S.turn === S.maxTurns) {
+      // pareggio dopo 5 turni: un turno supplementare
+      S.turn++;
+      if (window.toast) window.toast("Pareggio! Si va al SUPPLEMENTARE", "warn", "⏱️");
+      startTurn();
+    } else {
+      startPenalties();
+    }
+  }
+
+  // --- RIGORI SEMPLICI (dopo supplementare ancora pari) ---
+  const PEN_DIRS = [
+    { d: -1, label: "◀ Angolo sinistro" },
+    { d: 0, label: "● Centro" },
+    { d: 1, label: "▶ Angolo destro" }
+  ];
+
+  function startPenalties() {
+    if (!S) return;
+    S.pen = { round: 1, my: null, opp: null };
+    if (window.toast) window.toast("Ancora pari: RIGORI!", "warn", "🥅");
+    penShootUI();
+  }
+
+  function penShootUI() {
+    if (!S) return;
+    S.phase = "pen_shoot";
+    S.keeperX = 160; S.keeperY = 100; S.ball = null; S.anim = null;
+    updateMatchHUD();
+    const textEl = $("text");
+    if (textEl) {
+      textEl.innerHTML = `
+        <span class="who" style="background:#7c4dff; color:#fff; font-weight:800;">RIGORI · giro ${S.pen.round}</span>
+        <span class="t"><b>Dove tiri?</b> ${S.boss.gkName} proverà a indovinare l'angolo.</span>
+      `;
+    }
+    renderButtons(PEN_DIRS.map((o) => ({ label: o.label, cls: o.d === 0 ? "hot" : "", fn: () => penShoot(o.d) })));
+  }
+
+  function penShoot(d) {
+    if (!S || S.phase !== "pen_shoot") return;
+    S.phase = "anim";
+    renderButtons([], true);
+    playJoJoSfx("kick");
+    const guess = Math.random() < S.boss.skill * 0.4 ? d : [-1, 0, 1][Math.floor(Math.random() * 3)];
+    const goal = guess !== d;
+    S.anim = {
+      t0: performance.now(), dur: 600,
+      bx0: 160, by0: 190, bx1: 160 + d * 70, by1: 80,
+      kx0: S.keeperX, ky0: S.keeperY, kx1: 160 + guess * 70, ky1: 95,
+      curve: 0,
+      done: () => {
+        S.pen.my = goal;
+        if (goal) { playJoJoSfx("goal"); spawnParticles(160 + d * 70, 80, "#ffd23f", 20); } else { playJoJoSfx("ora"); }
+        S.shake = 14;
+        showPenText(goal ? "<b>GOL!</b> Rigore a segno." : `<b>PARATO!</b> ${S.boss.gkName} ha indovinato l'angolo.`, goal);
+        later(penDefUI, 1400);
       }
-    }, 1600);
+    };
+  }
+
+  function showPenText(html, ok) {
+    const textEl = $("text");
+    if (textEl) {
+      textEl.innerHTML = `
+        <span class="who" style="background:${ok ? "#ffd23f" : "#d50000"}; color:${ok ? "#0e1424" : "#fff"}; font-weight:800;">Rigori</span>
+        <span class="t">${html}</span>
+      `;
+    }
+  }
+
+  function penDefUI() {
+    if (!S) return;
+    S.phase = "pen_def";
+    const textEl = $("text");
+    if (textEl) {
+      textEl.innerHTML = `
+        <span class="who" style="background:#d50000; color:#fff; font-weight:800;">RIGORI · tocca a ${S.boss.short}</span>
+        <span class="t"><b>Dove ti tuffi?</b> Indovina l'angolo del tiro avversario.</span>
+      `;
+    }
+    renderButtons(PEN_DIRS.map((o) => ({ label: o.label.replace("Angolo", "Tuffo"), cls: o.d === 0 ? "hot" : "", fn: () => penDive(o.d) })));
+  }
+
+  function penDive(d) {
+    if (!S || S.phase !== "pen_def") return;
+    S.phase = "anim";
+    renderButtons([], true);
+    const bossDir = [-1, 0, 1][Math.floor(Math.random() * 3)];
+    const sliced = bossDir !== d && Math.random() < S.stand.slice * 0.5;
+    const saved = bossDir === d || sliced;
+    S.anim = {
+      t0: performance.now(), dur: 600,
+      bx0: 160, by0: 60, bx1: 160 + bossDir * 70, by1: 150,
+      kx0: S.keeperX, ky0: S.keeperY, kx1: S.keeperX, ky1: S.keeperY,
+      curve: 0,
+      done: () => {
+        S.pen.opp = !saved;
+        S.shake = 14;
+        if (saved) { playJoJoSfx("ora"); } else { playJoJoSfx("time_stop"); }
+        showPenText(saved ? (sliced ? "<b>AFFETTATO!</b> Il tuo Stand taglia il tiro al volo." : "<b>PARATO!</b> Hai indovinato il tuffo.") : `<b>GOL AVVERSARIO.</b> ${S.boss.short} ha spiazzato la tua difesa.`, saved);
+        later(penCompare, 1400);
+      }
+    };
+  }
+
+  function penCompare() {
+    if (!S) return;
+    const m = !!S.pen.my, o = !!S.pen.opp;
+    if (m !== o || S.pen.round >= 5) {
+      const iWin = m !== o ? m : Math.random() < 0.5;
+      if (iWin) S.myScore++; else S.oppScore++;
+      updateMatchHUD();
+      endMatch();
+      return;
+    }
+    S.pen.round++;
+    penShootUI();
   }
 
   // --- CONCLUSIONE PARTITA ---
@@ -1353,18 +1610,20 @@
     const boss = S.boss;
     const win = S.myScore > S.oppScore;
     const prog = loadProg();
+    S.firstClear = false;
 
     if (win) {
+      // monete solo alla prima vittoria dell'atto
       if (S.bossIdx >= prog.actCleared) {
+        S.firstClear = true;
         prog.actCleared = Math.min(5, S.bossIdx + 1);
         if (prog.actCleared >= 5) prog.trophyJoJo = true;
+        if (typeof window.addCoins === "function") window.addCoins(boss.rewardCoins);
       }
+      prog.standExp = (prog.standExp || 0) + 1;
       saveProg(prog);
-      if (typeof window.addCoins === "function") {
-        window.addCoins(boss.rewardCoins);
-      }
       playJoJoSfx("goal");
-      triggerJoJoPose("STAND RETIRED!", `HAI SCONFITTO ${boss.user.toUpperCase()}!`, () => {
+      triggerJoJoPose("STAND RETIRED!", `HAI SCONFITTO ${boss.short}!`, () => {
         renderEndScreen(true);
       });
     } else {
@@ -1374,7 +1633,9 @@
   }
 
   function renderEndScreen(win) {
+    if (!S) return;
     const boss = S.boss;
+    const coinsTxt = S.firstClear ? `+${boss.rewardCoins} Monete del Borgo` : "Atto già superato: nessuna moneta";
     const alt = activateJoJoStage();
     if (alt) {
       alt.style.display = "flex";
@@ -1384,14 +1645,14 @@
         <div style="position:absolute; inset:0; background:${win ? "linear-gradient(135deg, #1b0a2a 0%, #31114d 60%, #10061e 100%)" : "linear-gradient(135deg, #2a0808 0%, #450a0a 60%, #1a0505 100%)"};"></div>
         <div class="jojo-menace" style="top:20px; left:20px; font-size:32px;">${win ? "ゴゴゴ" : "ドドド"}</div>
         <div style="position:relative; z-index:2; padding:16px; display:flex; flex-direction:column; justify-content:flex-end; height:100%; box-sizing:border-box;">
-          <div style="font-family:var(--display); font-size:22px; color:${win ? "#ffd23f" : "#ff1744"}; text-shadow:2px 2px 0 #000, 0 0 14px ${win ? "#e040fb" : "#ff1744"};">
+          <div style="font-family:var(--display); font-size:20px; color:${win ? "#ffd23f" : "#ff1744"}; text-shadow:2px 2px 0 #000, 0 0 14px ${win ? "#e040fb" : "#ff1744"};">
             ${win ? "★ STAND RETIRED! VITTORIA!" : "SCONFITTA SPIRITUALE"}
           </div>
           <div style="font-size:13px; font-weight:800; color:#fff; margin-top:2px;">
-            LEO MORETTI ${S.myScore} – ${S.oppScore} ${boss.user.toUpperCase()}
+            ${heroInfo().name.toUpperCase()} ${S.myScore} – ${S.oppScore} ${boss.short}
           </div>
           <div style="font-size:11px; color:${win ? "#a7f3d0" : "#fca5a5"}; margin-top:4px;">
-            ${win ? `Potere di ${boss.stand} infranto! +${boss.rewardCoins} Monete del Borgo` : `Il potere ${boss.power} ha avuto la meglio. Riprova!`}
+            ${win ? `Potere di ${boss.stand} infranto! ${coinsTxt}` : `Il potere ${boss.power} ha avuto la meglio. Riprova!`}
           </div>
         </div>
       `;
@@ -1403,9 +1664,9 @@
         textEl.innerHTML = `
           <span class="who" style="background:#ffd23f; color:#0e1424; font-weight:800;">Vittoria Stand!</span>
           <span class="t">
-            <b>VITTORIA SCHIACCIANTE: ${S.myScore} – ${S.oppScore}!</b><br>
+            <b>VITTORIA: ${S.myScore} – ${S.oppScore}!</b><br>
             Hai sconfitto <b>${boss.user}</b> e infranto il potere di <em>${boss.stand}</em>!<br>
-            Ricompensa: <b style="color:#ffd23f;">+${boss.rewardCoins} Monete del Borgo</b> accreditate al tuo club.
+            <b style="color:#ffd23f;">${coinsTxt}</b>${S.firstClear ? " accreditate al tuo club." : "."}
           </span>
         `;
       } else {
@@ -1413,21 +1674,22 @@
           <span class="who" style="background:#d50000; color:#fff; font-weight:800;">Sconfitta Stand</span>
           <span class="t">
             <b>SCONFITTA: ${S.myScore} – ${S.oppScore}.</b><br>
-            ${boss.user}: «Non hai ancora la stoffa per affrontare la nostra stirpe!»<br>
-            Allena le tue pose, potenzia l'energia Hamon e riprova la scalata.
+            ${boss.short}: «Non hai ancora la stoffa per affrontare la nostra stirpe!»<br>
+            Allena le pose, potenzia l'energia e riprova la scalata.
           </span>
         `;
       }
     }
 
+    const bi = S.bossIdx;
     const btns = [
       {
-        label: win ? "★ Prosegui la Saga JoJo" : "🔄 Riprova questa Battaglia",
+        label: win ? "★ Prosegui la Saga" : "🔄 Riprova questa Battaglia",
         cls: "hot",
-        fn: () => (win ? showHub() : initMatchState(S.bossIdx))
+        fn: () => (win ? showHub() : initMatchState(bi))
       },
       {
-        label: "◂ Torna all'Hub JoJo",
+        label: "◂ Torna all'Hub",
         cls: "pick",
         fn: showHub
       }
@@ -1441,6 +1703,8 @@
     stopMatchLoop();
     function loop() {
       if (!S || !$("jojoCv")) return;
+      updateDefense();
+      if (!S) return;
       drawMatchCanvas();
       animFrameId = requestAnimationFrame(loop);
     }
@@ -1566,7 +1830,7 @@
       ctx.font = "bold 11px sans-serif";
       ctx.fillStyle = "#00e5ff";
       ctx.textAlign = "center";
-      ctx.fillText("TIME STOP · 2.0s", 160, 160);
+      ctx.fillText(`TIME STOP · ${Math.max(0, S.timeStopRemaining).toFixed(1)}s`, 160, 160);
       ctx.restore();
     }
 
@@ -1630,6 +1894,7 @@
 
     // 13. DISEGNO EFFETTI PARTICELLE
     drawParticles(ctx);
+    drawFx(ctx);
 
     // 14. FLASH PUGNI SPETTRALI DURANTE RAFFICA ORA
     if (S.phase === "ora_rush") {
@@ -1774,12 +2039,19 @@
     ctx.stroke();
     ctx.restore();
 
+    // etichetta fissa in basso al centro (mai sopra il portiere)
     const distGk = Math.hypot(S.keeperX - ax, S.keeperY - ay);
     const isSafe = distGk > 36 || Math.abs(curveOffset) > 24;
+    const lab = isSafe ? "TRAIETTORIA LIBERA" : "ATTENZIONE: PORTIERE";
     ctx.font = "bold 8px sans-serif";
     ctx.textAlign = "center";
+    const lw = ctx.measureText(lab).width + 12;
+    ctx.fillStyle = "rgba(10,4,20,0.78)";
+    ctx.beginPath();
+    rrect(ctx, 160 - lw / 2, 146, lw, 13, 5);
+    ctx.fill();
     ctx.fillStyle = isSafe ? "#7dffa6" : "#ff8a8a";
-    ctx.fillText(isSafe ? "TRAIETTORIA LIBERA" : "ATTENZIONE STAND GUARD", ax, ay - 20);
+    ctx.fillText(lab, 160, 155.5);
 
     ctx.restore();
   }
@@ -1792,27 +2064,28 @@
 
     ctx.save();
     ctx.fillStyle = "rgba(14, 4, 26, 0.94)";
-    ctx.fillRect(60, 166, 200, 18);
+    ctx.fillRect(60, 148, 200, 18);
     ctx.strokeStyle = "#e040fb";
     ctx.lineWidth = 2;
-    ctx.strokeRect(60, 166, 200, 18);
+    ctx.strokeRect(60, 148, 200, 18);
 
     ctx.fillStyle = "rgba(0, 229, 255, 0.45)";
-    ctx.fillRect(60 + 200 * 0.38, 168, 200 * 0.24, 14);
+    ctx.fillRect(60 + 200 * 0.38, 150, 200 * 0.24, 14);
 
     ctx.fillStyle = "#ffd23f";
-    ctx.fillRect(60 + 200 * 0.46, 168, 200 * 0.08, 14);
+    const pw = S.stand.perfectWin;
+    ctx.fillRect(60 + 200 * (0.5 - pw / 2), 150, 200 * pw, 14);
 
     const cx = 60 + S.cursor * 200;
     ctx.fillStyle = "#fff";
     ctx.shadowColor = "#e040fb";
     ctx.shadowBlur = 8;
-    ctx.fillRect(cx - 3, 164, 6, 22);
+    ctx.fillRect(cx - 3, 146, 6, 22);
 
     ctx.font = "bold 8px sans-serif";
     ctx.textAlign = "center";
     ctx.fillStyle = "#fff";
-    ctx.fillText("PREMI AL CENTRO (PERFECT CRITICO!)", 160, 160);
+    ctx.fillText("PREMI IL PULSANTE AL CENTRO (PERFECT!)", 160, 143);
     ctx.restore();
   }
 
@@ -1846,7 +2119,7 @@
     ctx.strokeStyle = "#ffd23f";
     ctx.lineWidth = 2.5;
     ctx.beginPath();
-    ctx.roundRect(shX - 32, 168, 64, 18, 6);
+    rrect(ctx, shX - 32, 149, 64, 18, 6);
     ctx.fill();
     ctx.stroke();
 
@@ -1854,13 +2127,13 @@
     ctx.strokeStyle = p > 0.7 ? "#7dffa6" : "#00e5ff";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(shX, 175, ringRadius, 0, Math.PI * 2);
+    ctx.arc(shX, 158, ringRadius, 0, Math.PI * 2);
     ctx.stroke();
 
     ctx.font = "bold 9px 'Dela Gothic One', sans-serif";
     ctx.textAlign = "center";
     ctx.fillStyle = "#fff";
-    ctx.fillText("STAND SHIELD", shX, 181);
+    ctx.fillText("STAND SHIELD", shX, 162);
 
     ctx.restore();
   }
@@ -1911,6 +2184,27 @@
     ctx.restore();
   }
 
+  // --- TESTI FLUTTUANTI (feedback) ---
+  function drawFx(ctx) {
+    if (!S || !S.fx) return;
+    for (let i = S.fx.length - 1; i >= 0; i--) {
+      const f = S.fx[i];
+      f.life -= 0.02;
+      f.y -= 0.5;
+      if (f.life <= 0) { S.fx.splice(i, 1); continue; }
+      ctx.save();
+      ctx.globalAlpha = Math.min(1, f.life * 1.6);
+      ctx.font = "bold 11px 'Dela Gothic One', Impact, sans-serif";
+      ctx.textAlign = "center";
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "#000";
+      ctx.strokeText(f.t, clamp(f.x, 70, 250), f.y);
+      ctx.fillStyle = f.c;
+      ctx.fillText(f.t, clamp(f.x, 70, 250), f.y);
+      ctx.restore();
+    }
+  }
+
   // --- PARTICELLE ---
   function drawParticles(ctx) {
     if (!S || !S.particles) return;
@@ -1938,4 +2232,12 @@
   // Esposizione Globale
   window.openJoJoAdventure = openJoJoAdventure;
   window.openJoJoStandMode = openJoJoAdventure;
+  if (DEBUG) {
+    window.__jojo = {
+      get S() { return S; },
+      loadProg, saveProg, STAND_BOSSES, HERO_STANDS, heroInfo,
+      setScore: (a, b) => { if (S) { S.myScore = a; S.oppScore = b; updateMatchHUD(); } },
+      setMeter: (v) => { if (S) { S.standMeter = v; updateMatchHUD(); if (S.phase === "aim") updateAimButtons(); } }
+    };
+  }
 })();
