@@ -300,6 +300,26 @@
     }
   }
 
+  function activateJoJoStage() {
+    if (window.setView) window.setView({ kind: "jojo" });
+    const cv = $("cv");
+    if (cv) cv.hidden = true;
+    const alt = $("stageAlt");
+    if (alt) {
+      alt.hidden = false;
+      alt.style.display = "block";
+      alt.style.position = "absolute";
+      alt.style.inset = "0";
+      alt.style.width = "100%";
+      alt.style.height = "100%";
+      alt.style.overflow = "hidden";
+      alt.style.zIndex = "10";
+      alt.style.margin = "0";
+      alt.style.padding = "0";
+    }
+    return alt;
+  }
+
   // Avvio Hub JoJo
   function openJoJoAdventure(onBack) {
     injectJoJoStyles();
@@ -312,24 +332,18 @@
     S = null;
     const prog = loadProg();
 
-    const cv = $("cv");
-    if (cv) cv.hidden = true;
-    const alt = $("stageAlt");
+    const alt = activateJoJoStage();
     if (alt) {
-      alt.hidden = false;
       alt.style.display = "flex";
       alt.style.flexDirection = "column";
       alt.style.justifyContent = "flex-end";
-      alt.style.position = "relative";
-      alt.style.overflow = "hidden";
-      alt.style.zIndex = "10";
       alt.innerHTML = `
         <div style="position:absolute; inset:0; background:linear-gradient(135deg, #1b0a2a 0%, #31114d 50%, #10061e 100%);"></div>
         <div class="jojo-menace" style="top:20px; left:25px;">ゴゴゴ</div>
         <div class="jojo-menace" style="top:45px; right:35px; font-size:32px;">ゴゴゴ</div>
         <div class="jojo-menace" style="bottom:70px; left:40px; font-size:20px;">ドドド</div>
         <div style="position:absolute; inset:0; background:radial-gradient(circle at center, rgba(224,64,251,0.2) 0%, transparent 70%); pointer-events:none;"></div>
-        <div style="position:relative; z-index:2; padding:16px; text-shadow:0 2px 4px #000;">
+        <div style="position:relative; z-index:2; padding:16px; text-shadow:0 2px 4px #000; box-sizing:border-box;">
           <div style="font-family:var(--display); font-size:18px; color:#ffd23f; letter-spacing:1px; text-shadow:2px 2px 0 #b3202c, 0 0 10px #e040fb;">
             ★ LE BIZZARRE AVVENTURE DI RONDINE FC ★
           </div>
@@ -400,8 +414,10 @@
       cls: "pick",
       fn: () => {
         stopMatchLoop();
+        if (window.setView) window.setView({ kind: "scene", bg: "title" });
+        if (window.closeAltStage) window.closeAltStage();
         const alt2 = $("stageAlt");
-        if (alt2) { alt2.hidden = true; alt2.style.display = "none"; }
+        if (alt2) { alt2.hidden = true; alt2.style.display = "none"; alt2.innerHTML = ""; }
         const cv2 = $("cv");
         if (cv2) cv2.hidden = false;
         if (typeof onExitCb === "function") onExitCb();
@@ -435,6 +451,24 @@
 
   function showStandSelection() {
     const prog = loadProg();
+    const curStand = HERO_STANDS.find((s) => s.id === prog.currentStand) || HERO_STANDS[0];
+    const alt = activateJoJoStage();
+    if (alt) {
+      alt.style.display = "flex";
+      alt.style.flexDirection = "column";
+      alt.style.justifyContent = "flex-end";
+      alt.innerHTML = `
+        <div style="position:absolute; inset:0; background:linear-gradient(135deg, #120822 0%, #2a0845 60%, #0d0519 100%);"></div>
+        <div class="jojo-menace" style="top:15px; right:20px; font-size:28px;">ゴゴゴ</div>
+        <div style="position:relative; z-index:2; padding:16px; display:flex; flex-direction:column; justify-content:flex-end; height:100%; box-sizing:border-box;">
+          <div style="color:#ba68c8; font-size:11px; font-weight:800; text-transform:uppercase;">STAND ATTUALMENTE RISVEGLIATO</div>
+          <div style="font-family:var(--display); font-size:22px; color:${curStand.color}; text-shadow:2px 2px 0 #000, 0 0 12px ${curStand.color};">${curStand.name}</div>
+          <div style="color:#ffd23f; font-size:12px; font-weight:800; margin-top:2px;">Grido di battaglia: ${curStand.cry}</div>
+          <div style="color:#e1bee7; font-size:11px; margin-top:4px;">${curStand.desc}</div>
+        </div>
+      `;
+    }
+
     const textEl = $("text");
     if (textEl) {
       textEl.innerHTML = `
@@ -464,6 +498,22 @@
 
   function showPoseTraining() {
     const prog = loadProg();
+    const alt = activateJoJoStage();
+    if (alt) {
+      alt.style.display = "flex";
+      alt.style.flexDirection = "column";
+      alt.style.justifyContent = "flex-end";
+      alt.innerHTML = `
+        <div style="position:absolute; inset:0; background:linear-gradient(135deg, #2b1055 0%, #4c1d95 50%, #1e0b36 100%);"></div>
+        <div class="jojo-menace" style="top:20px; left:20px; font-size:32px;">ドドド</div>
+        <div style="position:relative; z-index:2; padding:16px; display:flex; flex-direction:column; justify-content:flex-end; height:100%; box-sizing:border-box;">
+          <div style="color:#ffd23f; font-size:12px; font-weight:800; text-transform:uppercase;">DOJO DELLE POSE & HAMON</div>
+          <div style="font-family:var(--display); font-size:22px; color:#e040fb; text-shadow:2px 2px 0 #000;">ENERGIA SPIRITUALE LIV. ${prog.standLevel}</div>
+          <div style="color:#00e5ff; font-size:12px; font-weight:700; margin-top:2px;">Bonus Velocità Carica: +${(prog.standLevel - 1) * 20}%</div>
+        </div>
+      `;
+    }
+
     const textEl = $("text");
     const cost = prog.standLevel * 25;
     if (textEl) {
@@ -523,6 +573,21 @@
   }
 
   function showJoJoGuide() {
+    const alt = activateJoJoStage();
+    if (alt) {
+      alt.style.display = "flex";
+      alt.style.flexDirection = "column";
+      alt.style.justifyContent = "flex-end";
+      alt.innerHTML = `
+        <div style="position:absolute; inset:0; background:linear-gradient(135deg, #10061e 0%, #1b0a2a 60%, #31114d 100%);"></div>
+        <div class="jojo-menace" style="bottom:20px; right:20px; font-size:28px;">ゴゴゴ</div>
+        <div style="position:relative; z-index:2; padding:16px; display:flex; flex-direction:column; justify-content:flex-end; height:100%; box-sizing:border-box;">
+          <div style="font-family:var(--display); font-size:20px; color:#ffd23f; text-shadow:2px 2px 0 #b3202c;">REGOLE DEL COMBATTIMENTO STAND</div>
+          <div style="color:#e1bee7; font-size:12px; margin-top:4px;">Punta alla porta, carica la barra con tiri o pose e distruggi i boss con la Raffica ORA!</div>
+        </div>
+      `;
+    }
+
     const textEl = $("text");
     if (textEl) {
       textEl.innerHTML = `
@@ -541,6 +606,20 @@
 
   function showStageSelect() {
     const prog = loadProg();
+    const alt = activateJoJoStage();
+    if (alt) {
+      alt.style.display = "flex";
+      alt.style.flexDirection = "column";
+      alt.style.justifyContent = "flex-end";
+      alt.innerHTML = `
+        <div style="position:absolute; inset:0; background:linear-gradient(135deg, #1b0a2a 0%, #31114d 50%, #10061e 100%);"></div>
+        <div style="position:relative; z-index:2; padding:16px; display:flex; flex-direction:column; justify-content:flex-end; height:100%; box-sizing:border-box;">
+          <div style="font-family:var(--display); font-size:20px; color:#ffd23f; text-shadow:2px 2px 0 #b3202c;">ARCHIVIO DEGLI ATTI SUPERATI</div>
+          <div style="color:#e1bee7; font-size:12px; margin-top:4px;">Seleziona un boss già affrontato per rivivere la sfida con il tuo Stand potenziato.</div>
+        </div>
+      `;
+    }
+
     const btns = [];
     for (let i = 0; i <= Math.min(4, prog.actCleared); i++) {
       const b = STAND_BOSSES[i];
@@ -560,13 +639,13 @@
     const prog = loadProg();
     const stand = HERO_STANDS.find((s) => s.id === prog.currentStand) || HERO_STANDS[0];
 
-    const alt = $("stageAlt");
+    const alt = activateJoJoStage();
     if (alt) {
       alt.innerHTML = `
         <div style="position:absolute; inset:0; background:linear-gradient(135deg, #1b0a2a 0%, #31114d 50%, #10061e 100%);"></div>
         <div class="jojo-menace" style="top:25px; left:20px;">ゴゴゴ</div>
         <div class="jojo-menace" style="top:30px; right:20px;">ドドド</div>
-        <div style="position:relative; z-index:2; padding:16px; display:flex; flex-direction:column; justify-content:flex-end; height:100%;">
+        <div style="position:relative; z-index:2; padding:16px; display:flex; flex-direction:column; justify-content:flex-end; height:100%; box-sizing:border-box;">
           <div style="color:#e040fb; font-weight:800; font-size:12px; text-transform:uppercase;">INCONTRO CON L'UTENTE STAND</div>
           <div style="font-family:var(--display); font-size:22px; color:#ffd23f; text-shadow:2px 2px 0 #b3202c;">${boss.user}</div>
           <div style="color:#00e5ff; font-weight:700; font-size:13px; margin-top:2px;">Stand: ${boss.stand} (${boss.power})</div>
@@ -643,19 +722,34 @@
       maxTurns: 5,
       myScore: 0,
       oppScore: 0,
-      standMeter: 40 + (prog.standLevel - 1) * 15,
-      phase: "aim", // aim, timing, ora_rush, def, anim
+      standMeter: 45 + (prog.standLevel - 1) * 15,
+      phase: "aim", // aim, timing, ora_rush, time_stop, def_charge, def_parry, anim
       aimX: 160,
-      aimY: 100,
+      aimY: 95,
+      curveOffset: 0,
+      shotType: "normal",
       keeperX: 160,
-      keeperY: 105,
+      keeperY: 100,
       keeperDir: 1,
       rushClicks: 0,
       rushTimer: 0,
       cursor: 0,
       cursorDir: 1,
+      timeStopRemaining: 0,
+      timeStopActive: false,
+      defShieldX: 160,
+      defBall: null,
+      defParrySuccess: false,
       ball: null,
-      anim: null
+      anim: null,
+      shake: 0,
+      particles: [],
+      menaceRunes: [
+        { x: 38, y: 30, text: "ゴゴゴ", rot: -0.1 },
+        { x: 268, y: 38, text: "ドドド", rot: 0.15 },
+        { x: 24, y: 135, text: "ゴゴ", rot: -0.05 },
+        { x: 282, y: 142, text: "ズズズ", rot: 0.1 }
+      ]
     };
 
     setupMatchDOM();
@@ -663,56 +757,116 @@
   }
 
   function setupMatchDOM() {
-    const alt = $("stageAlt");
+    const alt = activateJoJoStage();
     if (!alt) return;
-    alt.hidden = false;
     alt.style.display = "block";
-    alt.style.position = "relative";
-    alt.style.width = "320px";
-    alt.style.height = "200px";
-    alt.style.margin = "0 auto";
-    alt.style.overflow = "hidden";
 
     alt.innerHTML = `
       <div class="jojo-hud">
         <span>TURNO <b id="jTurn">1/5</b></span>
-        <span><b>LEO</b> <b id="jScore">0 – 0</b> <b style="color:#ff1744;" id="jBossName">${S.boss.user.split(" ")[0]}</b></span>
-        <span style="color:#ffd23f;">★ STAND</span>
+        <span><b>LEO</b> <b id="jScore" style="color:#00e5ff;">0 – 0</b> <b style="color:#ff1744;" id="jBossName">${S.boss.user.split(" ")[0]}</b></span>
+        <span style="color:#ffd23f;">★ STAND LV.${loadProg().standLevel}</span>
       </div>
-      <canvas id="jojoCv" width="320" height="200" style="display:block; width:100%; height:100%;"></canvas>
+      <canvas id="jojoCv" width="320" height="200" style="display:block; width:100%; height:100%; touch-action:none; user-select:none; -webkit-user-select:none;"></canvas>
       <div class="jojo-stand-bar">
         <div class="jojo-stand-row">
           <span>ENERGIA STAND (${S.stand.name})</span>
-          <span id="jMeterVal">40%</span>
+          <span id="jMeterVal">45%</span>
         </div>
         <div class="jojo-meter">
-          <i class="jojo-meter-fill" id="jMeterFill" style="width:40%; background:linear-gradient(90deg, #7c4dff, #e040fb 70%, #ffd23f 100%);"></i>
+          <i class="jojo-meter-fill" id="jMeterFill" style="width:45%; background:linear-gradient(90deg, #7c4dff, #e040fb 70%, #ffd23f 100%);"></i>
         </div>
       </div>
     `;
 
     const cv = $("jojoCv");
     if (cv) {
-      cv.onclick = (e) => {
-        if (!S) return;
+      let isDragging = false;
+
+      const getCvCoords = (e) => {
         const rect = cv.getBoundingClientRect();
-        const x = ((e.clientX - rect.left) / rect.width) * 320;
-        const y = ((e.clientY - rect.top) / rect.height) * 200;
+        const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+        const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+        return {
+          x: clamp(((clientX - rect.left) / rect.width) * 320, 10, 310),
+          y: clamp(((clientY - rect.top) / rect.height) * 200, 10, 190)
+        };
+      };
+
+      const handlePointerDown = (e) => {
+        if (!S) return;
+        const pt = getCvCoords(e);
+        isDragging = true;
 
         if (S.phase === "aim") {
-          S.aimX = clamp(x, 70, 250);
-          S.aimY = clamp(y, 55, 145);
+          S.aimX = clamp(pt.x, 65, 255);
+          S.aimY = clamp(pt.y, 45, 140);
           playJoJoSfx("hamon");
+          spawnParticles(S.aimX, S.aimY, "#ffd23f", 6);
           updateAimButtons();
+        } else if (S.phase === "time_stop") {
+          S.aimX = clamp(pt.x, 65, 255);
+          S.aimY = clamp(pt.y, 45, 140);
+          playJoJoSfx("hamon");
+          spawnParticles(S.aimX, S.aimY, "#00e5ff", 8);
         } else if (S.phase === "timing") {
           fireNormalShot();
         } else if (S.phase === "ora_rush") {
           tapOraRush();
+        } else if (S.phase === "def_parry") {
+          S.defShieldX = clamp(pt.x, 70, 250);
+          attemptParry();
         }
       };
+
+      const handlePointerMove = (e) => {
+        if (!S || !isDragging) return;
+        const pt = getCvCoords(e);
+
+        if (S.phase === "aim") {
+          S.aimX = clamp(pt.x, 65, 255);
+          S.aimY = clamp(pt.y, 45, 140);
+          S.curveOffset = clamp((pt.x - 160) * 0.35, -45, 45);
+        } else if (S.phase === "time_stop") {
+          S.aimX = clamp(pt.x, 65, 255);
+          S.aimY = clamp(pt.y, 45, 140);
+        } else if (S.phase === "def_parry") {
+          S.defShieldX = clamp(pt.x, 70, 250);
+        }
+      };
+
+      const handlePointerUp = () => {
+        isDragging = false;
+      };
+
+      cv.onmousedown = handlePointerDown;
+      cv.onmousemove = handlePointerMove;
+      window.addEventListener("mouseup", handlePointerUp);
+
+      cv.ontouchstart = (e) => { e.preventDefault(); handlePointerDown(e); };
+      cv.ontouchmove = (e) => { e.preventDefault(); handlePointerMove(e); };
+      cv.ontouchend = handlePointerUp;
     }
 
     startMatchLoop();
+  }
+
+  function spawnParticles(x, y, color, count) {
+    if (!S || !S.particles) return;
+    for (let i = 0; i < count; i++) {
+      const ang = Math.random() * Math.PI * 2;
+      const spd = rnd(1, 3.5);
+      S.particles.push({
+        x: x,
+        y: y,
+        vx: Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd,
+        color: color,
+        r: rnd(2, 4.5),
+        life: 1.0,
+        decay: rnd(0.03, 0.07)
+      });
+    }
   }
 
   function updateMatchHUD() {
@@ -729,6 +883,9 @@
     S.phase = "aim";
     S.anim = null;
     S.ball = null;
+    S.shotType = "normal";
+    S.timeStopActive = false;
+    S.curveOffset = 0;
     updateMatchHUD();
     updateAimButtons();
   }
@@ -736,33 +893,42 @@
   function updateAimButtons() {
     if (!S) return;
     const standReady = S.standMeter >= 100;
+    const canTimeStop = S.standMeter >= 70;
     const textEl = $("text");
+
     if (textEl) {
       textEl.innerHTML = `
         <span class="who" style="background:#7c4dff; color:#fff; font-weight:800;">${S.stand.name}</span>
         <span class="t">
-          <b>TURNO ${S.turn}/${S.maxTurns} · FASE D'ATTACCO</b><br>
-          Tocca la porta per posizionare il mirino, poi decidi come scatenare il tuo Stand!<br>
-          ${standReady ? '<span style="color:#ffd23f; font-weight:800;">⚡ ENERGIA STAND AL 100%: RAFFICA ORA PRONTA!</span>' : `Attenzione al potere avversario: <em>${S.boss.power}</em>.`}
+          <b>TURNO ${S.turn}/${S.maxTurns} · FASE ATTACCO STAND</b><br>
+          Trascina o tocca la porta per mirare e imprimere la traiettoria ad effetto Hamon!<br>
+          ${standReady ? '<span style="color:#ffd23f; font-weight:800;">★ ENERGIA STAND AL 100%: RAFFICA ORA DEVASTANTE PRONTA!</span>' : canTimeStop ? '<span style="color:#00e5ff; font-weight:800;">⏳ ENERGIA STAND SUFFICIENTE: PUOI ATTIVARE IL TIME STOP!</span>' : `Portiere avversario: <b>${S.boss.gkName}</b> (Potere: <em>${S.boss.power}</em>).`}
         </span>
       `;
     }
 
     const btns = [
       {
-        label: "⚡ Tiro Tecnico Stand",
-        sub: "Barra del tempismo (+25% Stand)",
+        label: "⚡ Tiro Tecnico Hamon",
+        sub: "Tempismo concentrato (+25% Stand)",
         cls: "hot",
-        fn: () => startTimingShot()
+        fn: () => startTimingShot("normal")
       },
       {
-        label: "🧘 Posa Bizzarra di Concentrazione",
-        sub: "+45% Carica Stand, traiettoria più precisa",
-        fn: () => doConcentrationPose()
+        label: "🌀 Tiro ad Effetto Curvo",
+        sub: "Gira attorno al blocco Stand del portiere",
+        fn: () => startTimingShot("curve")
       },
       {
-        label: standReady ? `🔥 RAFFICA: ${S.stand.cry.split(" ")[0]}!` : "🔒 Raffica Stand (Serve 100%)",
-        sub: standReady ? "Tocca a raffica per distruggere il portiere!" : "Carica la barra al 100%",
+        label: canTimeStop ? "⏳ ZA WARUDO · Fermata del Tempo" : "🔒 Time Stop (Serve 70% Stand)",
+        sub: canTimeStop ? "Ferma il portiere per 2s e spiazza la difesa!" : "Raggiungi almeno il 70% di energia",
+        cls: canTimeStop ? "hot" : "",
+        disabled: !canTimeStop,
+        fn: () => activateTimeStopKicking()
+      },
+      {
+        label: standReady ? `👊 RAFFICA: ${S.stand.cry.split(" ")[0]}!` : "🔒 Raffica Stand (Serve 100%)",
+        sub: standReady ? "Frenesia di pugni ad altissima frequenza!" : "Carica la barra al 100%",
         cls: standReady ? "hot" : "",
         disabled: !standReady,
         fn: () => startOraRush()
@@ -772,88 +938,182 @@
     renderButtons(btns);
   }
 
-  function doConcentrationPose() {
+  // --- ATTIVAZIONE TIME STOP ---
+  function activateTimeStopKicking() {
     if (!S || S.phase !== "aim") return;
-    playJoJoSfx("hamon");
-    S.standMeter = Math.min(100, S.standMeter + 45);
+    S.standMeter = Math.max(0, S.standMeter - 70);
     updateMatchHUD();
-    triggerJoJoPose("POSA SHONEN!", "+45% ENERGIA SPIRITUALE!", () => {
-      updateAimButtons();
-    });
-  }
+    S.phase = "time_stop";
+    S.timeStopActive = true;
+    S.timeStopRemaining = 2.4;
+    playJoJoSfx("time_stop");
+    S.shake = 12;
 
-  function startTimingShot() {
-    if (!S || S.phase !== "aim") return;
-    S.phase = "timing";
-    S.cursor = 0;
     const textEl = $("text");
     if (textEl) {
       textEl.innerHTML = `
-        <span class="who" style="background:#7c4dff; color:#fff; font-weight:800;">Tempismo Stand</span>
+        <span class="who" style="background:#00e5ff; color:#0e1424; font-weight:800;">ZA WARUDO / STAR PLATINUM</span>
         <span class="t">
-          Ferma la barra luminosa al centro per massimizzare la velocità del tiro! (Tocca la porta o il pulsante).
+          <b>«IL TEMPO SI È FERMATO!»</b> Il mondo è immobile nel silenzio astrale.<br>
+          <b>Tocca rapidamente un punto scoperto</b> della porta prima che riprenda a scorrere!
         </span>
       `;
     }
-    renderButtons([{ label: "👟 SCAGLIA IL PALLONE!", cls: "hot", fn: fireNormalShot }], true);
+
+    renderButtons([{
+      label: "⚡ SCAGLIA DURANTE IL FERMO TEMPO!",
+      cls: "hot",
+      fn: () => resolveTimeStopShot()
+    }], true);
+
+    const tsTimer = setInterval(() => {
+      if (!S || S.phase !== "time_stop") {
+        clearInterval(tsTimer);
+        return;
+      }
+      S.timeStopRemaining -= 0.1;
+      if (S.timeStopRemaining <= 0) {
+        clearInterval(tsTimer);
+        resolveTimeStopShot();
+      }
+    }, 100);
   }
 
-  function fireNormalShot() {
-    if (!S || S.phase !== "timing") return;
-    const diff = Math.abs(S.cursor - 0.5) * 2;
-    const perfect = diff < 0.25;
+  function resolveTimeStopShot() {
+    if (!S || S.phase !== "time_stop") return;
     S.phase = "anim";
+    S.timeStopActive = false;
+    playJoJoSfx("stand_summon");
+    S.shake = 16;
     renderButtons([], true);
-    playJoJoSfx("ora");
 
-    // Risoluzione tiro
-    const boss = S.boss;
-    const r = Math.random();
-    let diveX = S.keeperX;
-    let diveY = S.keeperY;
-
-    if (r < 0.4) {
-      diveX = S.aimX + rnd(-20, 20);
-      diveY = S.aimY + rnd(-15, 15);
-    } else {
-      diveX = rnd(80, 240);
-      diveY = rnd(60, 140);
-    }
-
-    const distFromGk = Math.hypot(diveX - S.aimX, diveY - S.aimY);
-    const saved = !perfect && distFromGk < 35;
+    const targetX = S.aimX;
+    const targetY = S.aimY;
+    const distFromGk = Math.hypot(S.keeperX - targetX, S.keeperY - targetY);
+    const saved = distFromGk < 22 && Math.random() < 0.25;
 
     S.anim = {
       t0: performance.now(),
-      dur: 600,
+      dur: 650,
       bx0: 160, by0: 190,
-      bx1: S.aimX, by1: S.aimY,
+      bx1: targetX, by1: targetY,
       kx0: S.keeperX, ky0: S.keeperY,
-      kx1: diveX, ky1: diveY,
+      kx1: saved ? targetX : (targetX > 160 ? 110 : 210),
+      ky1: saved ? targetY : 100,
+      curve: 0,
+      isTimeStop: true,
       done: () => {
         if (saved) {
           playJoJoSfx("ora");
-          if (window.toast) window.toast(`${boss.gkName} para il tiro!`, "warn", "🛡️");
-          showShotResult(false, `<b>PARATO!</b> ${boss.gkName} ha usato il suo Stand per intercettare la traiettoria.`);
+          if (window.toast) window.toast(`${S.boss.gkName} reagisce miracolosamente!`, "warn", "🛡️");
+          showShotResult(false, `<b>PARATO!</b> Con uno sforzo titanico, ${S.boss.gkName} ha deviato la sfera sul filo dei secondi.`);
         } else {
           playJoJoSfx("goal");
           S.myScore++;
-          S.standMeter = Math.min(100, S.standMeter + 30);
-          if (window.toast) window.toast("GOOOL STAND!", "goal", "★");
-          showShotResult(true, `<b>GOOOL!</b> La traiettoria perfora la difesa spirituale di ${boss.gkName}!`);
+          S.shake = 22;
+          spawnParticles(targetX, targetY, "#00e5ff", 24);
+          if (window.toast) window.toast("★ GOL NEL TEMPO FERMATO!", "goal", "⏳");
+          showShotResult(true, `<b>GOOOL! «TOKI WA UGOKIDASU!»</b> Il tempo riprende a scorrere mentre la rete si squarcia!`);
         }
       }
     };
   }
 
+  // --- TIRO TECNICO & CURVO ---
+  function startTimingShot(type) {
+    if (!S || S.phase !== "aim") return;
+    S.phase = "timing";
+    S.shotType = type;
+    S.cursor = 0;
+    const textEl = $("text");
+    if (textEl) {
+      textEl.innerHTML = `
+        <span class="who" style="background:#7c4dff; color:#fff; font-weight:800;">Tempismo & Hamon</span>
+        <span class="t">
+          <b>BLOCCA IL CURSORE NEL CENTRO PER UN TIRO PERFETTO!</b><br>
+          ${type === "curve" ? "Traiettoria ad effetto: bypassa il raggio di guardia del portiere!" : "Tiro diretto ad alta velocità penetrante!"}
+        </span>
+      `;
+    }
+    renderButtons([{ label: "👟 SCAGLIA IL TIRO STAND!", cls: "hot", fn: fireNormalShot }], true);
+  }
+
+  function fireNormalShot() {
+    if (!S || S.phase !== "timing") return;
+    const diff = Math.abs(S.cursor - 0.5) * 2;
+    const perfect = diff < 0.22;
+    const good = diff < 0.55;
+    S.phase = "anim";
+    renderButtons([], true);
+    playJoJoSfx("kick");
+    S.shake = perfect ? 18 : 8;
+
+    const boss = S.boss;
+    const isCurve = S.shotType === "curve";
+    const curveOffset = isCurve ? (S.curveOffset || (S.aimX > 160 ? 35 : -35)) : 0;
+
+    let diveX = S.keeperX;
+    let diveY = S.keeperY;
+    const r = Math.random();
+
+    if (r < 0.5) {
+      diveX = S.aimX + rnd(-18, 18);
+      diveY = S.aimY + rnd(-12, 12);
+    } else {
+      diveX = rnd(80, 240);
+      diveY = rnd(60, 135);
+    }
+
+    const distFromGk = Math.hypot(diveX - S.aimX, diveY - S.aimY);
+    let saved = false;
+    if (perfect) {
+      saved = distFromGk < 18 && Math.random() < 0.15;
+    } else if (isCurve) {
+      saved = distFromGk < 22 && Math.random() < 0.35;
+    } else if (good) {
+      saved = distFromGk < 32;
+    } else {
+      saved = distFromGk < 45 || Math.random() < 0.45;
+    }
+
+    S.anim = {
+      t0: performance.now(),
+      dur: perfect ? 500 : 650,
+      bx0: 160, by0: 190,
+      bx1: S.aimX, by1: S.aimY,
+      kx0: S.keeperX, ky0: S.keeperY,
+      kx1: diveX, ky1: diveY,
+      curve: curveOffset,
+      isPerfect: perfect,
+      done: () => {
+        if (saved) {
+          playJoJoSfx("ora");
+          S.shake = 10;
+          if (window.toast) window.toast(`${boss.gkName} intercetta la sfera!`, "warn", "🛡️");
+          showShotResult(false, `<b>PARATO!</b> ${boss.gkName} respinge la sfera con l'aura di ${boss.stand}.`);
+        } else {
+          playJoJoSfx("goal");
+          S.myScore++;
+          S.shake = 20;
+          S.standMeter = Math.min(100, S.standMeter + (perfect ? 40 : 25));
+          spawnParticles(S.aimX, S.aimY, perfect ? "#ffd23f" : "#00e5ff", 20);
+          if (window.toast) window.toast(perfect ? "★ TIRO HAMON CRITICO! GOOOL!" : "GOOOL STAND!", "goal", "★");
+          showShotResult(true, perfect ? `<b>TIRO PERFETTO AL 100%!</b> Una saetta Hamon spacca la barriera di ${boss.gkName}!` : `<b>GOOOL!</b> Traiettoria imparabile per ${boss.gkName}!`);
+        }
+      }
+    };
+  }
+
+  // --- RAFFICA ORA ORA ORA ---
   function startOraRush() {
     if (!S || S.phase !== "aim") return;
     S.phase = "ora_rush";
     S.rushClicks = 0;
-    S.rushTimer = 3.0; // 3 secondi di raffica
+    S.rushTimer = 3.2;
     S.standMeter = 0;
     updateMatchHUD();
     playJoJoSfx("ora");
+    S.shake = 15;
 
     if (window.triggerAnimeCutin) {
       try {
@@ -871,8 +1131,8 @@
       textEl.innerHTML = `
         <span class="who" style="background:#e040fb; color:#fff; font-weight:800;">${S.stand.name}</span>
         <span class="t">
-          <b>RAFFICA STAND ATTIVA!</b> TOCCA RAPIDAMENTE IL PULSANTE O LA PORTA!<br>
-          Pugni sferrati: <b id="jRushCount" style="color:#ffd23f; font-size:16px;">0</b> (Supera quota 10 per un gol inarrestabile!)
+          <b>RAFFICA ORA IN CORSO! TOCCA CONTINUAMENTE LO SCHERMO!</b><br>
+          Pugni sferrati: <b id="jRushCount" style="color:#ffd23f; font-size:18px;">0</b> · Potenza: <b id="jRushPwr" style="color:#00e5ff;">100%</b>
         </span>
       `;
     }
@@ -896,8 +1156,13 @@
     if (!S || S.phase !== "ora_rush") return;
     S.rushClicks++;
     playJoJoSfx("ora");
+    S.shake = 8;
+    spawnParticles(160 + rnd(-40, 40), 100 + rnd(-30, 30), "#e040fb", 4);
+
     const cEl = $("jRushCount");
+    const pEl = $("jRushPwr");
     if (cEl) cEl.textContent = S.rushClicks;
+    if (pEl) pEl.textContent = `${Math.min(999, 100 + S.rushClicks * 50)}%`;
   }
 
   function resolveOraRush() {
@@ -907,14 +1172,18 @@
 
     const hits = S.rushClicks;
     const success = hits >= 8;
+    S.shake = 26;
 
     S.anim = {
       t0: performance.now(),
-      dur: 700,
+      dur: 750,
       bx0: 160, by0: 190,
       bx1: S.aimX, by1: S.aimY,
       kx0: S.keeperX, ky0: S.keeperY,
-      kx1: S.aimX > 160 ? 80 : 240, ky1: 120, // Il portiere viene scagliato via
+      kx1: S.aimX > 160 ? 60 : 260,
+      ky1: 120,
+      curve: 0,
+      isRush: true,
       done: () => {
         if (success) {
           playJoJoSfx("goal");
@@ -922,10 +1191,11 @@
           const prog = loadProg();
           prog.oraWins++;
           saveProg(prog);
-          if (window.toast) window.toast("★ RAFFICA ORA DISTRUTTIVA!", "goal", "👊");
-          showShotResult(true, `<b>${S.stand.cry}!</b> Con ${hits} pugni spirituali hai spazzato via ${S.boss.gkName} e strappato la rete!`);
+          spawnParticles(S.aimX, S.aimY, "#ffd23f", 30);
+          if (window.toast) window.toast("★ RAFFICA ORA DEVASTANTE!", "goal", "👊");
+          showShotResult(true, `<b>${S.stand.cry}!</b> Con <b>${hits} pugni spirituali</b> hai spazzato via ${S.boss.gkName} distruggendo la rete!`);
         } else {
-          showShotResult(false, `<b>INSUFFICIENTE!</b> Solo ${hits} colpi: la difesa avversaria ha assorbito la raffica.`);
+          showShotResult(false, `<b>INSUFFICIENTE!</b> Solo ${hits} colpi: la difesa avversaria ha attutito la raffica.`);
         }
       }
     };
@@ -936,7 +1206,7 @@
     const textEl = $("text");
     if (textEl) {
       textEl.innerHTML = `
-        <span class="who" style="background:${isGoal ? "#ffd23f" : "#d50000"}; color:#0e1424; font-weight:800;">Risultato Azione</span>
+        <span class="who" style="background:${isGoal ? "#ffd23f" : "#d50000"}; color:#0e1424; font-weight:800;">${isGoal ? "GOOOL!" : "Azione Respinta"}</span>
         <span class="t">${desc}</span>
       `;
     }
@@ -944,63 +1214,116 @@
     setTimeout(() => {
       if (!S) return;
       startDefenseTurn();
-    }, 1500);
+    }, 1600);
   }
 
-  // Turno difensivo: parare il tiro dello Stand avversario
+  // --- FASE DIFENSIVA INTERATTIVA & PARRY ---
   function startDefenseTurn() {
     if (!S) return;
-    S.phase = "def";
+    S.phase = "def_charge";
     const boss = S.boss;
+    S.defShieldX = 160;
+    S.defParrySuccess = false;
+
     const textEl = $("text");
     if (textEl) {
       textEl.innerHTML = `
         <span class="who" style="background:#d50000; color:#fff; font-weight:800;">${boss.user}</span>
         <span class="t">
-          <b>CONTROFFENSIVA STAND!</b> ${boss.user} scatena <em>${boss.stand}</em>!<br>
-          «${boss.standCry}» Scegli dove posizionare il tuo difensore per bloccare l'attacco.
+          <b>CONTROFFENSIVA STAND DI ${boss.user.toUpperCase()}!</b><br>
+          «${boss.standCry}» Preparati a intercettare il tiro con il tuo Stand in porta!
+        </span>
+      `;
+    }
+
+    playJoJoSfx("stand_summon");
+    S.shake = 10;
+
+    renderButtons([{ label: "🛡️ PREPARATI ALLA PARATA", cls: "hot", fn: launchBossAttack }], true);
+
+    setTimeout(() => {
+      if (S && S.phase === "def_charge") launchBossAttack();
+    }, 1200);
+  }
+
+  function launchBossAttack() {
+    if (!S || S.phase !== "def_charge") return;
+    S.phase = "def_parry";
+    playJoJoSfx("time_stop");
+
+    const boss = S.boss;
+    const targetX = rnd(85, 235);
+
+    S.defBall = {
+      t0: performance.now(),
+      dur: Math.max(900, 1500 - boss.speed * 120),
+      x0: 160, y0: 50,
+      x1: targetX, y1: 175,
+      x: 160, y: 50,
+      targetX: targetX
+    };
+
+    const textEl = $("text");
+    if (textEl) {
+      textEl.innerHTML = `
+        <span class="who" style="background:#ff1744; color:#fff; font-weight:800;">TIRO AVVERSARIO IN VOLO!</span>
+        <span class="t">
+          <b>TRASCINA LO SHIELD SULLA TRAIETTORIA</b> e tocca <b>STAND PARRY</b> per riflettere il tiro!
         </span>
       `;
     }
 
     renderButtons([
-      { label: "🛡️ Tuffo a Sinistra", fn: () => resolveDefense(0) },
-      { label: "🛡️ Blocco Centrale", fn: () => resolveDefense(1) },
-      { label: "🛡️ Tuffo a Destra", fn: () => resolveDefense(2) }
+      { label: "🛡️ STAND PARRY (PARATA)", cls: "hot", fn: attemptParry },
+      { label: "◀ Sposta Sinistra", fn: () => { S.defShieldX = Math.max(80, S.defShieldX - 45); } },
+      { label: "▶ Sposta Destra", fn: () => { S.defShieldX = Math.min(240, S.defShieldX + 45); } }
     ]);
   }
 
-  function resolveDefense(choice) {
-    if (!S || S.phase !== "def") return;
+  function attemptParry() {
+    if (!S || S.phase !== "def_parry" || !S.defBall) return;
+    const now = performance.now();
+    const p = (now - S.defBall.t0) / S.defBall.dur;
+    const distFromShield = Math.abs(S.defShieldX - S.defBall.targetX);
+
+    if (distFromShield < 38 && p > 0.55 && p < 1.05) {
+      S.defParrySuccess = true;
+      playJoJoSfx("ora");
+      S.shake = 18;
+      S.standMeter = Math.min(100, S.standMeter + 40);
+      updateMatchHUD();
+      spawnParticles(S.defShieldX, 175, "#ffd23f", 20);
+      resolveDefenseResult(true, true);
+    } else if (distFromShield < 55 && p > 0.5) {
+      playJoJoSfx("kick");
+      S.shake = 10;
+      S.standMeter = Math.min(100, S.standMeter + 15);
+      updateMatchHUD();
+      resolveDefenseResult(true, false);
+    }
+  }
+
+  function resolveDefenseResult(saved, isPerfect) {
+    if (!S) return;
     S.phase = "anim";
     renderButtons([], true);
-
-    const zonesX = [95, 160, 225];
-    const realDir = Math.floor(Math.random() * 3);
-    const saved = choice === realDir;
     const boss = S.boss;
 
-    S.anim = {
-      t0: performance.now(),
-      dur: 600,
-      bx0: 160, by0: 190,
-      bx1: zonesX[realDir], by1: 100,
-      kx0: 160, ky0: 105,
-      kx1: zonesX[choice], ky1: 105,
-      done: () => {
-        if (saved) {
-          playJoJoSfx("ora");
-          S.standMeter = Math.min(100, S.standMeter + 20);
-          if (window.toast) window.toast("PARATA STAND PERFETTA!", "goal", "🛡️");
-          showDefResult(true, `<b>PARATA PROVVIDENZIALE!</b> Il tuo Stand ha respinto il tiro di ${boss.stand}!`);
-        } else {
-          playJoJoSfx("time_stop");
-          S.oppScore++;
-          if (window.toast) window.toast(`GOL DI ${boss.user.toUpperCase()}!`, "warn", "⚡");
-          showDefResult(false, `<b>GOL AVVERSARIO!</b> Il potere ${boss.power} ha eluso la guardia difensiva.`);
-        }
+    if (saved) {
+      if (isPerfect) {
+        if (window.toast) window.toast("★ PERFECT STAND COUNTER!", "goal", "🛡️");
+        showDefResult(true, `<b>PERFECT STAND COUNTER!</b> Hai riflesso il tiro di ${boss.stand} guadagnando +40% di energia Stand!`);
+      } else {
+        if (window.toast) window.toast("Tiro respinto con successo!", "goal", "🧤");
+        showDefResult(true, `<b>RESPINTO!</b> Il tuo Stand ha deviato la sfera oltre la traversa.`);
       }
-    };
+    } else {
+      playJoJoSfx("time_stop");
+      S.oppScore++;
+      S.shake = 18;
+      if (window.toast) window.toast(`GOL DI ${boss.user.toUpperCase()}!`, "warn", "⚡");
+      showDefResult(false, `<b>GOL AVVERSARIO!</b> Il potere <em>${boss.power}</em> ha superato la guardia difensiva.`);
+    }
   }
 
   function showDefResult(saved, desc) {
@@ -1008,7 +1331,7 @@
     const textEl = $("text");
     if (textEl) {
       textEl.innerHTML = `
-        <span class="who" style="background:#7c4dff; color:#fff; font-weight:800;">Fase Difensiva</span>
+        <span class="who" style="background:${saved ? "#7c4dff" : "#d50000"}; color:#fff; font-weight:800;">${saved ? "Parata Riuscita!" : "Gol Subito"}</span>
         <span class="t">${desc}</span>
       `;
     }
@@ -1021,10 +1344,10 @@
       } else {
         startTurn();
       }
-    }, 1500);
+    }, 1600);
   }
 
-  // Conclusione partita
+  // --- CONCLUSIONE PARTITA ---
   function endMatch() {
     stopMatchLoop();
     const boss = S.boss;
@@ -1041,16 +1364,39 @@
         window.addCoins(boss.rewardCoins);
       }
       playJoJoSfx("goal");
-      triggerJoJoPose("VITTORIA BIZZARRA!", `+${boss.rewardCoins} MONETE DEL BORGO!`, () => {
+      triggerJoJoPose("STAND RETIRED!", `HAI SCONFITTO ${boss.user.toUpperCase()}!`, () => {
         renderEndScreen(true);
       });
     } else {
+      playJoJoSfx("time_stop");
       renderEndScreen(false);
     }
   }
 
   function renderEndScreen(win) {
     const boss = S.boss;
+    const alt = activateJoJoStage();
+    if (alt) {
+      alt.style.display = "flex";
+      alt.style.flexDirection = "column";
+      alt.style.justifyContent = "flex-end";
+      alt.innerHTML = `
+        <div style="position:absolute; inset:0; background:${win ? "linear-gradient(135deg, #1b0a2a 0%, #31114d 60%, #10061e 100%)" : "linear-gradient(135deg, #2a0808 0%, #450a0a 60%, #1a0505 100%)"};"></div>
+        <div class="jojo-menace" style="top:20px; left:20px; font-size:32px;">${win ? "ゴゴゴ" : "ドドド"}</div>
+        <div style="position:relative; z-index:2; padding:16px; display:flex; flex-direction:column; justify-content:flex-end; height:100%; box-sizing:border-box;">
+          <div style="font-family:var(--display); font-size:22px; color:${win ? "#ffd23f" : "#ff1744"}; text-shadow:2px 2px 0 #000, 0 0 14px ${win ? "#e040fb" : "#ff1744"};">
+            ${win ? "★ STAND RETIRED! VITTORIA!" : "SCONFITTA SPIRITUALE"}
+          </div>
+          <div style="font-size:13px; font-weight:800; color:#fff; margin-top:2px;">
+            LEO MORETTI ${S.myScore} – ${S.oppScore} ${boss.user.toUpperCase()}
+          </div>
+          <div style="font-size:11px; color:${win ? "#a7f3d0" : "#fca5a5"}; margin-top:4px;">
+            ${win ? `Potere di ${boss.stand} infranto! +${boss.rewardCoins} Monete del Borgo` : `Il potere ${boss.power} ha avuto la meglio. Riprova!`}
+          </div>
+        </div>
+      `;
+    }
+
     const textEl = $("text");
     if (textEl) {
       if (win) {
@@ -1090,7 +1436,7 @@
     renderButtons(btns);
   }
 
-  // Disegno su Canvas
+  // ================= MOTORE GRAFICO SHONEN MANGA (CANVAS) =================
   function startMatchLoop() {
     stopMatchLoop();
     function loop() {
@@ -1107,51 +1453,151 @@
     const ctx = cv.getContext("2d");
     const now = performance.now();
 
-    ctx.clearRect(0, 0, 320, 200);
+    let shakeX = 0, shakeY = 0;
+    if (S.shake > 0) {
+      shakeX = (Math.random() - 0.5) * S.shake;
+      shakeY = (Math.random() - 0.5) * S.shake;
+      S.shake *= 0.88;
+      if (S.shake < 0.5) S.shake = 0;
+    }
 
-    // Sfondo campo scuro shonen
-    const bgGrad = ctx.createLinearGradient(0, 0, 0, 200);
-    bgGrad.addColorStop(0, "#120822");
-    bgGrad.addColorStop(0.5, "#250c40");
-    bgGrad.addColorStop(1, "#0d0519");
-    ctx.fillStyle = bgGrad;
-    ctx.fillRect(0, 0, 320, 200);
+    ctx.save();
+    ctx.translate(shakeX, shakeY);
 
-    // Porta con aura violacea JoJo
-    ctx.strokeStyle = "#e040fb";
-    ctx.lineWidth = 3;
-    ctx.strokeRect(60, 50, 200, 100);
+    const isTs = S.timeStopActive;
+    if (isTs) {
+      ctx.fillStyle = "#040b17";
+      ctx.fillRect(0, 0, 320, 200);
+    } else {
+      const bg = ctx.createLinearGradient(0, 0, 0, 130);
+      bg.addColorStop(0, "#0d0417");
+      bg.addColorStop(0.5, "#23073d");
+      bg.addColorStop(1, "#10051e");
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, 320, 130);
 
-    // Rete
-    ctx.strokeStyle = "rgba(224, 64, 251, 0.2)";
+      // Luna crescente anime
+      ctx.fillStyle = "#fff9c4";
+      ctx.shadowColor = "#e040fb";
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.arc(260, 32, 14, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = "#1b0730";
+      ctx.beginPath();
+      ctx.arc(254, 30, 12, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 2. Campo con Griglia Prospettica 3D & Linee Hamon
+    const pitchGrad = ctx.createLinearGradient(0, 110, 0, 200);
+    pitchGrad.addColorStop(0, isTs ? "#061325" : "#1a0b2e");
+    pitchGrad.addColorStop(1, isTs ? "#020712" : "#0d0317");
+    ctx.fillStyle = pitchGrad;
+    ctx.fillRect(0, 110, 320, 90);
+
+    ctx.strokeStyle = isTs ? "rgba(0,229,255,0.25)" : "rgba(224,64,251,0.28)";
     ctx.lineWidth = 1;
-    for (let x = 60; x <= 260; x += 15) {
-      ctx.beginPath(); ctx.moveTo(x, 50); ctx.lineTo(x, 150); ctx.stroke();
+    for (let x = -80; x <= 400; x += 32) {
+      ctx.beginPath();
+      ctx.moveTo(160, 105);
+      ctx.lineTo(x, 200);
+      ctx.stroke();
     }
-    for (let y = 50; y <= 150; y += 15) {
-      ctx.beginPath(); ctx.moveTo(60, y); ctx.lineTo(260, y); ctx.stroke();
-    }
-
-    // Pattugliamento portiere
-    if (S.phase === "aim" || S.phase === "timing") {
-      S.keeperX += S.boss.speed * 0.45 * S.keeperDir;
-      if (S.keeperX > 225) S.keeperDir = -1;
-      if (S.keeperX < 95) S.keeperDir = 1;
-      S.keeperY = 105;
+    for (let y = 115; y <= 200; y += 16) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(320, y);
+      ctx.stroke();
     }
 
-    // Animazione traiettoria
+    ctx.strokeStyle = isTs ? "#00e5ff" : "#ffd23f";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(55, 108, 210, 85);
+
+    // 3. Porta Prospettica con Effetto Neon Manga
+    ctx.strokeStyle = isTs ? "#00e5ff" : "#e040fb";
+    ctx.lineWidth = 3;
+    ctx.shadowColor = isTs ? "#00e5ff" : "#e040fb";
+    ctx.shadowBlur = 10;
+    ctx.strokeRect(60, 48, 200, 68);
+    ctx.shadowBlur = 0;
+
+    ctx.strokeStyle = isTs ? "rgba(0,229,255,0.18)" : "rgba(224,64,251,0.2)";
+    ctx.lineWidth = 1;
+    for (let x = 60; x <= 260; x += 12) {
+      ctx.beginPath();
+      ctx.moveTo(x, 48);
+      ctx.lineTo(x - (x - 160) * 0.12, 116);
+      ctx.stroke();
+    }
+    for (let y = 48; y <= 116; y += 12) {
+      ctx.beginPath();
+      ctx.moveTo(60, y);
+      ctx.lineTo(260, y);
+      ctx.stroke();
+    }
+
+    // 4. Onomatopee Manga "GOGOGO" Fluttuanti sullo Sfondo
+    ctx.font = "bold 13px 'Dela Gothic One', Impact, sans-serif";
+    ctx.fillStyle = isTs ? "rgba(0,229,255,0.35)" : "rgba(224,64,251,0.45)";
+    S.menaceRunes.forEach((r, idx) => {
+      const bob = Math.sin(now * 0.003 + idx) * 3;
+      ctx.save();
+      ctx.translate(r.x, r.y + bob);
+      ctx.rotate(r.rot);
+      ctx.fillText(r.text, 0, 0);
+      ctx.restore();
+    });
+
+    // 5. Orologio Etereo Gigante in caso di TIME STOP
+    if (isTs) {
+      ctx.save();
+      ctx.strokeStyle = "rgba(0,229,255,0.4)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(160, 90, 60, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(160, 90); ctx.lineTo(160, 45);
+      ctx.moveTo(160, 90); ctx.lineTo(195, 80);
+      ctx.stroke();
+      ctx.font = "bold 11px sans-serif";
+      ctx.fillStyle = "#00e5ff";
+      ctx.textAlign = "center";
+      ctx.fillText("TIME STOP · 2.0s", 160, 160);
+      ctx.restore();
+    }
+
+    // 6. Animazione Pattugliamento Portiere
+    if (!isTs && (S.phase === "aim" || S.phase === "timing")) {
+      S.keeperX += S.boss.speed * 0.42 * S.keeperDir;
+      if (S.keeperX > 220) S.keeperDir = -1;
+      if (S.keeperX < 100) S.keeperDir = 1;
+      S.keeperY = 100;
+    }
+
+    // 7. Risoluzione Animazione Traiettoria Palla
     if (S.anim) {
       const a = S.anim;
       const p = Math.min(1, (now - a.t0) / a.dur);
       const ease = 1 - Math.pow(1 - p, 2);
+      const curveY = Math.sin(p * Math.PI) * (a.curve || 0);
+
       S.ball = {
-        x: a.bx0 + (a.bx1 - a.bx0) * p,
+        x: a.bx0 + (a.bx1 - a.bx0) * p + curveY,
         y: a.by0 + (a.by1 - a.by0) * p,
-        r: Math.max(6, 13 - 6 * p)
+        r: Math.max(5, 12 - 7 * p)
       };
+
       S.keeperX = a.kx0 + (a.kx1 - a.kx0) * ease;
       S.keeperY = a.ky0 + (a.ky1 - a.ky0) * ease;
+
+      if (Math.random() < 0.6) {
+        spawnParticles(S.ball.x, S.ball.y, a.isTimeStop ? "#00e5ff" : a.isPerfect ? "#ffd23f" : "#e040fb", 2);
+      }
+
       if (p >= 1) {
         const cb = a.done;
         S.anim = null;
@@ -1159,80 +1605,331 @@
       }
     }
 
-    // Disegna Portiere Stand
-    const kx = S.keeperX, ky = S.keeperY;
-    const isDef = S.phase === "def";
-    const kCol = isDef ? "#7c4dff" : S.boss.color;
-    const kAura = isDef ? "#b388ff" : S.boss.aura;
+    // 8. DISEGNO STAND AVVERSARIO & BOSS
+    drawStandBossAvatar(ctx, S.boss, S.keeperX, S.keeperY, now, isTs);
 
-    // Aura Stand dietro
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(kx, ky, 24, 0, Math.PI * 2);
-    ctx.fillStyle = kAura;
-    ctx.globalAlpha = 0.35 + Math.sin(now * 0.008) * 0.15;
-    ctx.fill();
+    // 9. DISEGNO FASE DIFENSIVA / PARRY
+    if (S.phase === "def_parry" && S.defBall) {
+      drawDefensePhase(ctx, now);
+    }
+
+    // 10. DISEGNO MIRINO & TRAIETTORIA HAMON EFFETTO (In attacco)
+    if (S.phase === "aim" || S.phase === "time_stop") {
+      drawAimAndCurveTrajectory(ctx, now);
+    }
+
+    // 11. BARRA TEMPISMO SHONEN
+    if (S.phase === "timing") {
+      drawTimingMeter(ctx);
+    }
+
+    // 12. PALLA IN VOLO CON AURA DI ROTAZIONE
+    if (S.ball) {
+      drawSpinningBall(ctx, S.ball.x, S.ball.y, S.ball.r, now);
+    }
+
+    // 13. DISEGNO EFFETTI PARTICELLE
+    drawParticles(ctx);
+
+    // 14. FLASH PUGNI SPETTRALI DURANTE RAFFICA ORA
+    if (S.phase === "ora_rush") {
+      drawOraBarrageFists(ctx, now);
+    }
+
     ctx.restore();
+  }
 
-    // Sprite Portiere
-    ctx.fillStyle = kCol;
+  // --- RENDERING AVATAR STAND BOSS PERSONALIZZATO ---
+  function drawStandBossAvatar(ctx, boss, x, y, now, isFrozen) {
+    ctx.save();
+
+    const auraPulse = Math.sin(now * 0.007) * 4;
+    const auraGrad = ctx.createRadialGradient(x, y - 20, 10, x, y - 20, 48 + auraPulse);
+    auraGrad.addColorStop(0, boss.aura);
+    auraGrad.addColorStop(0.6, boss.color + "55");
+    auraGrad.addColorStop(1, "transparent");
+    ctx.fillStyle = auraGrad;
     ctx.beginPath();
-    ctx.arc(kx, ky - 6, 13, 0, Math.PI * 2);
+    ctx.arc(x, y - 20, 50 + auraPulse, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillRect(kx - 11, ky + 6, 22, 26);
+
+    ctx.fillStyle = boss.color;
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 1.5;
+
+    ctx.beginPath();
+    ctx.moveTo(x - 28, y - 10);
+    ctx.lineTo(x - 42, y - 28);
+    ctx.lineTo(x - 18, y - 38);
+    ctx.lineTo(x, y - 28);
+    ctx.lineTo(x + 18, y - 38);
+    ctx.lineTo(x + 42, y - 28);
+    ctx.lineTo(x + 28, y - 10);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    if (boss.id === "dio_brando") {
+      ctx.fillStyle = "#ffd700";
+      ctx.beginPath();
+      ctx.arc(x, y - 34, 13, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#00e5ff";
+      ctx.fillRect(x - 8, y - 37, 4, 4);
+      ctx.fillRect(x + 4, y - 37, 4, 4);
+    } else if (boss.id === "kira_yoshi") {
+      ctx.fillStyle = "#ec407a";
+      ctx.beginPath();
+      ctx.arc(x, y - 34, 12, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(x - 10, y - 42); ctx.lineTo(x - 6, y - 52); ctx.lineTo(x - 2, y - 44);
+      ctx.moveTo(x + 2, y - 44); ctx.lineTo(x + 6, y - 52); ctx.lineTo(x + 10, y - 42);
+      ctx.fill();
+      ctx.stroke();
+    } else if (boss.id === "diavolo_boss") {
+      ctx.fillStyle = "#d50000";
+      ctx.beginPath();
+      ctx.arc(x, y - 34, 13, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#ff5252";
+      ctx.beginPath();
+      ctx.arc(x, y - 44, 5, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.fillStyle = boss.color;
+      ctx.beginPath();
+      ctx.arc(x, y - 34, 13, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    }
 
     ctx.fillStyle = "#fff";
-    ctx.fillRect(kx - 6, ky - 10, 4, 4);
-    ctx.fillRect(kx + 2, ky - 10, 4, 4);
+    ctx.shadowColor = "#ffd23f";
+    ctx.shadowBlur = 8;
+    ctx.fillRect(x - 6, y - 37, 4, 3);
+    ctx.fillRect(x + 2, y - 37, 4, 3);
+    ctx.shadowBlur = 0;
 
-    ctx.font = "bold 9px sans-serif";
+    ctx.fillStyle = "#1e0b36";
+    ctx.fillRect(x - 9, y + 2, 18, 22);
+    ctx.fillStyle = "#ffcc80";
+    ctx.beginPath();
+    ctx.arc(x, y - 2, 8, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.font = "bold 8px 'Dela Gothic One', sans-serif";
     ctx.textAlign = "center";
     ctx.fillStyle = "#ffd23f";
-    ctx.fillText(isDef ? S.stand.name : S.boss.gkName, kx, ky - 22);
+    ctx.shadowColor = "#000";
+    ctx.shadowBlur = 4;
+    ctx.fillText(`${boss.gkName}`, x, y - 48);
+    ctx.shadowBlur = 0;
 
-    // Mirino Stand
-    if (S.phase === "aim" || S.phase === "timing" || S.phase === "ora_rush") {
-      ctx.strokeStyle = S.standMeter >= 100 ? "#ffd23f" : "#00e5ff";
+    ctx.restore();
+  }
+
+  // --- DISEGNO MIRINO & TRAIETTORIA CURVA AD EFFETTO HAMON ---
+  function drawAimAndCurveTrajectory(ctx, now) {
+    ctx.save();
+    const ax = S.aimX, ay = S.aimY;
+    const curveOffset = S.curveOffset || 0;
+
+    ctx.strokeStyle = S.timeStopActive ? "#00e5ff" : "#ffd23f";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4, 4]);
+
+    ctx.beginPath();
+    ctx.moveTo(160, 190);
+    const cx = 160 + (ax - 160) * 0.5 + curveOffset;
+    const cy = 190 + (ay - 190) * 0.5 - 15;
+    ctx.quadraticCurveTo(cx, cy, ax, ay);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    const pT = (now * 0.002) % 1;
+    const px = Math.pow(1 - pT, 2) * 160 + 2 * (1 - pT) * pT * cx + Math.pow(pT, 2) * ax;
+    const py = Math.pow(1 - pT, 2) * 190 + 2 * (1 - pT) * pT * cy + Math.pow(pT, 2) * ay;
+    ctx.fillStyle = S.timeStopActive ? "#00e5ff" : "#fff";
+    ctx.beginPath();
+    ctx.arc(px, py, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    const rot = now * 0.004;
+    ctx.save();
+    ctx.translate(ax, ay);
+    ctx.rotate(rot);
+
+    ctx.strokeStyle = S.timeStopActive ? "#00e5ff" : S.standMeter >= 100 ? "#ffd23f" : "#e040fb";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, 0, 14, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(-20, 0); ctx.lineTo(20, 0);
+    ctx.moveTo(0, -20); ctx.lineTo(0, 20);
+    ctx.stroke();
+    ctx.restore();
+
+    const distGk = Math.hypot(S.keeperX - ax, S.keeperY - ay);
+    const isSafe = distGk > 36 || Math.abs(curveOffset) > 24;
+    ctx.font = "bold 8px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillStyle = isSafe ? "#7dffa6" : "#ff8a8a";
+    ctx.fillText(isSafe ? "TRAIETTORIA LIBERA" : "ATTENZIONE STAND GUARD", ax, ay - 20);
+
+    ctx.restore();
+  }
+
+  // --- BARRA TEMPISMO SHONEN ---
+  function drawTimingMeter(ctx) {
+    S.cursor += 0.028 * S.cursorDir;
+    if (S.cursor >= 1) { S.cursor = 1; S.cursorDir = -1; }
+    if (S.cursor <= 0) { S.cursor = 0; S.cursorDir = 1; }
+
+    ctx.save();
+    ctx.fillStyle = "rgba(14, 4, 26, 0.94)";
+    ctx.fillRect(60, 166, 200, 18);
+    ctx.strokeStyle = "#e040fb";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(60, 166, 200, 18);
+
+    ctx.fillStyle = "rgba(0, 229, 255, 0.45)";
+    ctx.fillRect(60 + 200 * 0.38, 168, 200 * 0.24, 14);
+
+    ctx.fillStyle = "#ffd23f";
+    ctx.fillRect(60 + 200 * 0.46, 168, 200 * 0.08, 14);
+
+    const cx = 60 + S.cursor * 200;
+    ctx.fillStyle = "#fff";
+    ctx.shadowColor = "#e040fb";
+    ctx.shadowBlur = 8;
+    ctx.fillRect(cx - 3, 164, 6, 22);
+
+    ctx.font = "bold 8px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#fff";
+    ctx.fillText("PREMI AL CENTRO (PERFECT CRITICO!)", 160, 160);
+    ctx.restore();
+  }
+
+  // --- DISEGNO FASE DIFENSIVA / PARRY ---
+  function drawDefensePhase(ctx, now) {
+    ctx.save();
+    const b = S.defBall;
+    const p = Math.min(1, (now - b.t0) / b.dur);
+    const currX = b.x0 + (b.targetX - b.x0) * p;
+    const currY = b.y0 + (b.y1 - b.y0) * p;
+    b.x = currX;
+    b.y = currY;
+
+    ctx.fillStyle = "#ff1744";
+    ctx.shadowColor = "#ff1744";
+    ctx.shadowBlur = 14;
+    ctx.beginPath();
+    ctx.arc(currX, currY, 9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    ctx.strokeStyle = "rgba(255, 23, 68, 0.5)";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(b.x0, b.y0);
+    ctx.lineTo(currX, currY);
+    ctx.stroke();
+
+    const shX = S.defShieldX;
+    ctx.fillStyle = "rgba(124, 77, 255, 0.7)";
+    ctx.strokeStyle = "#ffd23f";
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.roundRect(shX - 32, 168, 64, 18, 6);
+    ctx.fill();
+    ctx.stroke();
+
+    const ringRadius = Math.max(12, 60 * (1 - p));
+    ctx.strokeStyle = p > 0.7 ? "#7dffa6" : "#00e5ff";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(shX, 175, ringRadius, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.font = "bold 9px 'Dela Gothic One', sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#fff";
+    ctx.fillText("STAND SHIELD", shX, 181);
+
+    ctx.restore();
+  }
+
+  // --- PALLA IN ROTAZIONE CON FIAMME ---
+  function drawSpinningBall(ctx, x, y, r, now) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(now * 0.015);
+
+    ctx.fillStyle = "#ffd23f";
+    ctx.shadowColor = "#e040fb";
+    ctx.shadowBlur = 16;
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    ctx.fillStyle = "#1e0b36";
+    ctx.beginPath();
+    ctx.arc(0, 0, r * 0.45, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // --- PUGNI SPETTRALI RAFFICA ORA ORA ORA ---
+  function drawOraBarrageFists(ctx, now) {
+    ctx.save();
+    const count = 7;
+    for (let i = 0; i < count; i++) {
+      const fx = rnd(80, 240);
+      const fy = rnd(60, 140);
+      const fs = rnd(12, 22);
+
+      ctx.fillStyle = i % 2 === 0 ? "rgba(124, 77, 255, 0.85)" : "rgba(224, 64, 251, 0.85)";
+      ctx.strokeStyle = "#ffd23f";
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.arc(S.aimX, S.aimY, 11, 0, Math.PI * 2);
+      ctx.arc(fx, fy, fs, 0, Math.PI * 2);
+      ctx.fill();
       ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(S.aimX - 16, S.aimY); ctx.lineTo(S.aimX + 16, S.aimY);
-      ctx.moveTo(S.aimX, S.aimY - 16); ctx.lineTo(S.aimX, S.aimY + 16);
-      ctx.stroke();
+
+      ctx.font = "bold 11px Impact, sans-serif";
+      ctx.fillStyle = "#fff";
+      ctx.textAlign = "center";
+      ctx.fillText("ORA!", fx, fy + 4);
     }
+    ctx.restore();
+  }
 
-    // Barra tempismo
-    if (S.phase === "timing") {
-      S.cursor += 0.024 * S.cursorDir;
-      if (S.cursor >= 1) { S.cursor = 1; S.cursorDir = -1; }
-      if (S.cursor <= 0) { S.cursor = 0; S.cursorDir = 1; }
+  // --- PARTICELLE ---
+  function drawParticles(ctx) {
+    if (!S || !S.particles) return;
+    for (let i = S.particles.length - 1; i >= 0; i--) {
+      const p = S.particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life -= p.decay;
 
-      ctx.fillStyle = "rgba(18, 6, 32, 0.9)";
-      ctx.fillRect(70, 168, 180, 14);
-      ctx.strokeStyle = "#e040fb";
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(70, 168, 180, 14);
+      if (p.life <= 0) {
+        S.particles.splice(i, 1);
+        continue;
+      }
 
-      // Zona verde ideale
-      ctx.fillStyle = "#00e5ff";
-      ctx.fillRect(70 + 180 * 0.38, 169, 180 * 0.24, 12);
-
-      // Cursore
-      ctx.fillStyle = "#ffd23f";
-      const cx = 70 + S.cursor * 180;
-      ctx.fillRect(cx - 3, 166, 6, 18);
-    }
-
-    // Palla in volo
-    if (S.ball) {
       ctx.save();
+      ctx.globalAlpha = p.life;
+      ctx.fillStyle = p.color;
       ctx.beginPath();
-      ctx.arc(S.ball.x, S.ball.y, S.ball.r, 0, Math.PI * 2);
-      ctx.fillStyle = "#ffd23f";
-      ctx.shadowColor = "#e040fb";
-      ctx.shadowBlur = 14;
+      ctx.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
