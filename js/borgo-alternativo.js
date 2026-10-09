@@ -28,6 +28,8 @@
       clues: [], // "catena_ruggine", "carta_nautica", "orma_bagnata"
       beaconsLit: [false, false, false],
       derbyWon: false,
+      derbyRewarded: false, // monete/cosmetico del Derby già riscossi (una tantum)
+      ngPlus: 0, // numero di Nuove partite+
       talked: {},
       heroPos: { x: 280, y: 320, dir: "down" },
       ballPos: { x: 295, y: 320, vx: 0, vy: 0, inAir: 0 },
@@ -42,7 +44,15 @@
       if (raw) {
         const d = JSON.parse(raw);
         if (d && typeof d.act === "number") {
-          return Object.assign(defaultState(), d);
+          const st = Object.assign(defaultState(), d);
+          st.act = clamp(Math.round(st.act) || 1, 1, 5);
+          // Migrazione: il Derby non può risultare vinto prima dell'Atto V (vecchio baco), ma le monete erano già state date
+          if (st.derbyWon && st.act < 5) { st.derbyWon = false; st.derbyRewarded = true; }
+          if (st.derbyWon) st.derbyRewarded = true;
+          if (!Array.isArray(st.shells)) st.shells = [];
+          if (!Array.isArray(st.barrels)) st.barrels = [];
+          if (!Array.isArray(st.beaconsLit)) st.beaconsLit = [false, false, false];
+          return st;
         }
       }
     } catch (e) {}
@@ -303,11 +313,11 @@
   const SHELL_LOCS = [
     { x: 3, y: 7, clue: "Dietro il basamento del Faro d'Ossidiana (Nord-Ovest)" },
     { x: 10, y: 21, clue: "In fondo al pontile di legno bagnato (Sud-Ovest)" },
-    { x: 39, y: 5, clue: "Dentro l'anfratto della Grotta delle Sirene (Nord-Est, Bassa Marea)" },
+    { x: 39, y: 5, clue: "Dentro l'anfratto della Grotta delle Sirene (Nord-Est, Bassa Marea)", tidal: true },
     { x: 40, y: 14, clue: "Vicino alla rete destra del Terrazzo dei Marosi (Est)" },
     { x: 25, y: 6, clue: "Nel vicolo tra la Locanda «La Prua Sommersa» e il Cantiere" },
     { x: 18, y: 15, clue: "Nascosta dietro le nasse di corda lungo i pontili" },
-    { x: 22, y: 22, clue: "Sulla secca di sabbia emersa (Sud, Bassa Marea)" },
+    { x: 22, y: 22, clue: "Sulla secca di sabbia emersa (Sud, Bassa Marea)", tidal: true },
     { x: 35, y: 18, clue: "Incagliata nello scoglio del guardalinee sul Terrazzo" }
   ];
 
@@ -335,7 +345,8 @@
   let activeInstance = null;
 
   function openCalaTramontana(returnCallback) {
-    if (activeInstance) activeInstance.destroy();
+    if (activeInstance) activeInstance.destroy({ silent: true });
+    registerCosmetic();
 
     const state = loadState();
     const hero = getHero();
@@ -374,11 +385,11 @@
           </div>
         </div>
         <div class="cala-header-actions">
-          <button type="button" class="cala-btn-small" id="calaTideBtn" title="Alterna Marea">🌊 Marea: <b id="calaTideLabel">${state.tide.toUpperCase()}</b></button>
-          <button type="button" class="cala-btn-small" id="calaQuestsBtn" title="Missioni, Trama e Indizi Conchiglie">📋 Missioni & Indizi</button>
-          <button type="button" class="cala-btn-small" id="calaMirrorBtn" title="Specchio della Locanda">🪞 Campione</button>
-          <button type="button" class="cala-btn-small" id="calaDiaryBtn" title="Diario dei Colpi di Scena">📜 Atti & Trama</button>
-          <button type="button" class="cala-btn-close" id="calaCloseBtn" title="Torna al Gioco">✕ Esci</button>
+          <button type="button" class="cala-btn-small" id="calaTideBtn" title="Alterna Marea" aria-label="Alterna Marea"><span aria-hidden="true">🌊</span><span class="cala-lbl">Marea:</span> <b id="calaTideLabel">${state.tide.toUpperCase()}</b></button>
+          <button type="button" class="cala-btn-small" id="calaQuestsBtn" title="Missioni, Trama e Indizi Conchiglie" aria-label="Missioni e Indizi"><span aria-hidden="true">📋</span><span class="cala-lbl">Missioni & Indizi</span></button>
+          <button type="button" class="cala-btn-small" id="calaMirrorBtn" title="Specchio della Locanda" aria-label="Campione (Specchio)"><span aria-hidden="true">🪞</span><span class="cala-lbl">Campione</span></button>
+          <button type="button" class="cala-btn-small" id="calaDiaryBtn" title="Diario dei Colpi di Scena" aria-label="Atti e Trama"><span aria-hidden="true">📜</span><span class="cala-lbl">Atti & Trama</span></button>
+          <button type="button" class="cala-btn-close" id="calaCloseBtn" title="Torna al Gioco" aria-label="Esci"><span aria-hidden="true">✕</span> Esci</button>
         </div>
       </div>
 
@@ -441,6 +452,7 @@
 
     // Inizializza Motore di Gioco
     activeInstance = new CalaTramontanaEngine(modal, state, hero, returnCallback);
+    if (/[?&]debug/.test(location.search)) window.__cala = { get inst() { return activeInstance; } };
   }
 
   // ---------- STILI CSS INIETTATI ----------
@@ -452,6 +464,8 @@
       .cala-modal {
         position: fixed;
         inset: 0;
+        height: 100vh;
+        height: 100dvh;
         z-index: 99999;
         background: #09111e;
         color: #f1f5f9;
@@ -460,7 +474,8 @@
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         user-select: none;
         -webkit-user-select: none;
-        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: auto;
       }
       .cala-header {
         display: flex;
@@ -471,12 +486,16 @@
         border-bottom: 2px solid #0284c7;
         gap: 8px;
         flex-shrink: 0;
+        flex-wrap: wrap;
       }
       .cala-title-box {
         display: flex;
         align-items: center;
         gap: 10px;
+        min-width: 0;
+        flex: 1 1 220px;
       }
+      .cala-title-box > div { min-width: 0; }
       .cala-icon {
         font-size: 26px;
       }
@@ -486,10 +505,16 @@
         font-weight: 800;
         color: #38bdf8;
         letter-spacing: .5px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
       .cala-sub {
         font-size: 12px;
         color: #94a3b8;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
       .cala-sub b {
         color: #f8fafc;
@@ -498,6 +523,9 @@
         display: flex;
         gap: 6px;
         align-items: center;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        max-width: 100%;
       }
       .cala-btn-small {
         background: #1e293b;
@@ -511,6 +539,8 @@
         align-items: center;
         gap: 4px;
         transition: all .15s;
+        white-space: nowrap;
+        flex-shrink: 0;
       }
       .cala-btn-small:hover {
         background: #0284c7;
@@ -527,6 +557,8 @@
         font-weight: bold;
         cursor: pointer;
         transition: all .15s;
+        white-space: nowrap;
+        flex-shrink: 0;
       }
       .cala-btn-close:hover {
         background: #dc2626;
@@ -537,6 +569,7 @@
         display: flex;
         overflow: hidden;
         position: relative;
+        min-height: 260px;
       }
       .cala-canvas-wrap {
         flex: 1;
@@ -550,7 +583,11 @@
       #calaCanvas {
         width: 100%;
         height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        aspect-ratio: 8 / 5;
         object-fit: contain;
+        object-position: 50% 50%;
         image-rendering: pixelated;
         display: block;
       }
@@ -735,6 +772,7 @@
         display: flex;
         flex-direction: column;
         gap: 8px;
+        min-height: 0;
       }
       .cala-speaker-name {
         font-weight: 800;
@@ -790,20 +828,95 @@
         line-height: 1.35;
       }
 
+      /* Mobile: header compatta, missione compatta in alto, dialogo come bottom-sheet sopra il canvas */
       @media (max-width: 768px) {
-        .cala-body {
-          flex-direction: column;
-        }
+        .cala-header { padding: 6px 8px; gap: 6px; }
+        .cala-title-box { flex: 1 1 100%; gap: 8px; }
+        .cala-icon { font-size: 22px; }
+        .cala-title { font-size: 14px; }
+        .cala-sub { font-size: 11px; }
+        .cala-header-actions { width: 100%; flex-wrap: nowrap; justify-content: space-between; gap: 4px; }
+        .cala-btn-small { min-width: 38px; height: 36px; padding: 4px 8px; font-size: 15px; justify-content: center; }
+        .cala-btn-small .cala-lbl { display: none; }
+        .cala-btn-small b { font-size: 12px; }
+        .cala-btn-close { height: 36px; padding: 4px 12px; margin-left: auto; }
+
+        .cala-body { flex-direction: column; }
         .cala-sidebar {
+          order: -1;
           width: 100%;
-          height: 190px;
+          height: auto;
+          flex: 0 0 auto;
+          overflow: visible;
           border-left: none;
-          border-top: 2px solid #1e293b;
-          padding: 8px;
+          border-bottom: 2px solid #1e293b;
+          padding: 6px 8px;
+          gap: 4px 8px;
+          flex-direction: row;
+          flex-wrap: wrap;
+          align-items: center;
         }
-        .cala-dialogue-text {
-          font-size: 12px;
+        .cala-act-badge { font-size: 10px; padding: 3px 6px; flex: 0 0 auto; }
+        .cala-location { font-size: 12px; flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .cala-quest-card { flex: 1 1 100%; padding: 5px 8px; gap: 0; }
+        .cala-quest-title, .cala-quest-marina { display: none; }
+        .cala-quest-main { font-size: 12px; line-height: 1.3; }
+        .cala-stats-bar { flex: 1 1 100%; flex-direction: row; justify-content: space-between; gap: 6px; padding: 4px 8px; font-size: 11px; }
+        .cala-stats-bar { flex-wrap: wrap; }
+        .cala-stats-bar > div { white-space: nowrap; min-width: 0; }
+        .cala-hints { display: none; }
+
+        .cala-canvas-wrap { align-items: flex-start; }
+        #calaCanvas { object-position: 50% 0; }
+
+        .cala-dialogue-box {
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          z-index: 40;
+          flex: none;
+          max-height: 58%;
+          overflow: hidden;
+          border-radius: 14px 14px 0 0;
+          border-width: 2px 0 0 0;
+          border-top-color: #38bdf8;
+          background: rgba(17, 30, 51, 0.97);
+          box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.55);
+          padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+          gap: 6px;
         }
+        .cala-dialogue-box.idle { display: none; }
+        .cala-dialogue-text { font-size: 12px; flex: 1 1 auto; min-height: 56px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .cala-dialogue-choices { flex: 0 0 auto; max-height: 45%; overflow-y: auto; }
+        .cala-speaker-name { flex: 0 0 auto; }
+        .cala-choice-btn { padding: 9px 10px; min-height: 36px; flex: 0 0 auto; }
+        .cala-toast { max-width: 92%; text-align: center; }
+      }
+      /* Telefono in orizzontale: canvas a sinistra, riepilogo a destra, dialogo sul canvas */
+      @media (max-width: 768px) and (max-height: 520px) {
+        .cala-sub { display: none; }
+        .cala-header { flex-wrap: nowrap; padding: 4px 8px; }
+        .cala-title-box { flex: 1 1 0; }
+        .cala-header-actions { width: auto; flex-wrap: nowrap; }
+        .cala-btn-close { margin-left: 4px; }
+        .cala-body { flex-direction: row; min-height: 200px; }
+        .cala-sidebar {
+          order: 0;
+          width: 180px;
+          flex: 0 0 180px;
+          flex-direction: column;
+          align-items: stretch;
+          overflow-y: auto;
+          border-bottom: none;
+          border-left: 2px solid #1e293b;
+        }
+        .cala-location { flex: none; white-space: normal; }
+        .cala-stats-bar { flex: none; flex-direction: column; }
+        .cala-quest-card { flex: none; }
+        .cala-dialogue-box { right: 180px; max-height: 80%; border-radius: 12px 12px 0 0; }
+        .cala-canvas-wrap { align-items: center; }
+        #calaCanvas { object-position: 50% 50%; }
       }
     `;
     document.head.appendChild(st);
@@ -825,7 +938,10 @@
       this.keys = {};
       this.frame = 0;
       this.running = true;
+      this.destroyed = false;
       this.toastTimer = 0;
+      this.timers = new Set();
+      this.shot = this.freshShot();
 
       // Coordinate telecamera e interpolazione
       this.camX = this.state.heroPos.x - 320;
@@ -867,16 +983,37 @@
       this.updateHUD();
       this.startLoop();
 
-      // Incipit automatico se primo avvio
-      if (this.state.act === 1 && this.state.step === 0) {
+      // Incipit automatico finché la sfida di Severino non è stata accettata
+      if (this.state.act === 1 && this.state.step < 2) {
         this.startAct1();
+      } else {
+        this.restoreDialogue();
       }
+    }
+
+    // setTimeout che non sopravvive alla chiusura della modale
+    later(fn, ms) {
+      const id = setTimeout(() => {
+        this.timers.delete(id);
+        if (!this.destroyed) fn();
+      }, ms);
+      this.timers.add(id);
+      return id;
+    }
+
+    freshShot() {
+      return { bell: false, barrels: {}, beacons: false };
     }
 
     setupDOM() {
       const q = (s) => this.modal.querySelector(s);
 
       q("#calaCloseBtn").onclick = () => this.destroy();
+      // Dopo un click col puntatore il bottone perde il focus: Spazio/Invio tornano a calciare/parlare
+      this.modal.addEventListener("click", (e) => {
+        const btn = e.target.closest && e.target.closest("button");
+        if (btn && e.detail > 0) btn.blur();
+      });
       q("#calaTideBtn").onclick = () => this.toggleTide();
       if (q("#calaQuestsBtn")) q("#calaQuestsBtn").onclick = () => this.openQuestLog();
       q("#calaMirrorBtn").onclick = () => this.openMirror();
@@ -897,14 +1034,24 @@
         };
         btn.addEventListener("touchstart", (e) => { e.preventDefault(); setDir(true); });
         btn.addEventListener("touchend", (e) => { e.preventDefault(); setDir(false); });
+        btn.addEventListener("touchcancel", () => setDir(false));
         btn.addEventListener("mousedown", () => setDir(true));
         btn.addEventListener("mouseup", () => setDir(false));
+        btn.addEventListener("mouseleave", () => setDir(false));
+        btn.addEventListener("blur", () => setDir(false));
+        btn.addEventListener("contextmenu", (e) => { e.preventDefault(); setDir(false); });
       });
     }
 
     setupControls() {
       this.onKeyDown = (e) => {
+        // Fase di cattura + stopPropagation: i tasti non arrivano ai listener globali del gioco sotto la modale
+        // (es. Invio/Spazio/1-9 che cliccherebbero i bottoni del menu nascosto)
+        e.stopPropagation();
         this.keys[e.key] = true;
+        // Su un bottone (scelte del dialogo, header...) Invio/Spazio devono attivare il bottone, non il gioco
+        const onBtn = !!(e.target && e.target.closest && e.target.closest("button, a, input, select, textarea"));
+        if ((e.key === " " || e.key === "Enter") && onBtn) return;
         if (e.key === " " || e.key === "k" || e.key === "K") {
           e.preventDefault();
           this.kickBall();
@@ -922,8 +1069,13 @@
         this.keys[e.key] = false;
       };
 
-      window.addEventListener("keydown", this.onKeyDown);
+      // Se la finestra perde il fuoco o il tab va in background nessun tasto resta "premuto"
+      this.releaseKeys = () => { this.keys = {}; };
+
+      window.addEventListener("keydown", this.onKeyDown, true);
       window.addEventListener("keyup", this.onKeyUp);
+      window.addEventListener("blur", this.releaseKeys);
+      document.addEventListener("visibilitychange", this.releaseKeys);
     }
 
     toast(msg) {
@@ -938,21 +1090,45 @@
     toggleTide() {
       this.state.tide = this.state.tide === "bassa" ? "alta" : "bassa";
       this.map = createMapMatrix(this.state.tide);
+      this.rescueFromWater();
       this.modal.querySelector("#calaTideLabel").textContent = this.state.tide.toUpperCase();
       saveState(this.state);
       sfx("whistle");
       this.toast(`La marea è ora ${this.state.tide.toUpperCase()}! ${this.state.tide === "bassa" ? "Le secche e la grotta sono accessibili!" : "L'acqua sale sui pontili!"}`);
     }
 
+    // Se la marea cambia sotto i piedi di eroe, pallone o Zanna, li sposta sul tile camminabile più vicino
+    rescueFromWater() {
+      const fix = (o) => {
+        if (this.canWalkAt(o.x, o.y)) return;
+        const tx0 = Math.floor(o.x / TS), ty0 = Math.floor(o.y / TS);
+        let best = null, bd = Infinity;
+        for (let ty = 1; ty < MH - 1; ty++) {
+          for (let tx = 1; tx < MW - 1; tx++) {
+            const cx = tx * TS + TS / 2, cy = ty * TS + TS / 2;
+            if (!this.canWalkAt(cx, cy)) continue;
+            const d = Math.abs(tx - tx0) + Math.abs(ty - ty0);
+            if (d < bd) { bd = d; best = [cx, cy]; }
+          }
+        }
+        if (best) { o.x = best[0]; o.y = best[1]; if ("vx" in o) { o.vx = 0; o.vy = 0; } }
+      };
+      fix(this.state.heroPos);
+      fix(this.state.ballPos);
+      fix(this.dog);
+      this.camX = clamp(this.state.heroPos.x - 320, 0, MW * TS - 640);
+      this.camY = clamp(this.state.heroPos.y - 200, 0, MH * TS - 400);
+    }
+
     openMirror() {
-      // Salva e apri editor del campione
-      saveState(this.state);
-      this.destroy();
-      if (typeof window.heroEditor === "function") {
-        window.heroEditor(() => openCalaTramontana(this.returnCallback));
-      } else {
-        alert("Editor del Campione accessibile dal menu principale.");
+      // Salva e apri l'editor del campione; la chiusura silenziosa evita di richiamare il menu di ritorno
+      if (typeof window.heroEditor !== "function") {
+        this.toast("L'editor del Campione si apre dal menu principale.");
+        return;
       }
+      const back = this.returnCallback;
+      this.destroy({ silent: true });
+      window.heroEditor(() => openCalaTramontana(back));
     }
 
     openStoryDiary() {
@@ -978,7 +1154,7 @@
     // ---------- TRAMA, ATTI & COLPI DI SCENA ----------
     startAct1() {
       this.state.act = 1;
-      this.state.step = 1;
+      this.state.step = Math.max(1, this.state.step || 0);
       saveState(this.state);
 
       this.setDialogue(
@@ -986,6 +1162,7 @@
         `«Benvenuto a Cala Tramontana, ${esc(this.hero.name)}. Pochi riescono a trovare questo molo tra le nebbie. Vedi quel campetto a strapiombo sul mare? È il <b>Terrazzo dei Marosi</b>. Da quarant'anni nessuno riesce a calciare contro le correnti senza farsi portar via il pallone. Fammi vedere cosa sa fare il tuo tiro <em>«${esc(this.hero.shotName)}»</em>: colpisci uno dei barili galleggianti!»`,
         [
           { label: "«Accetto la sfida, Capitano!»", fn: () => {
+            this.acceptAct1Challenge();
             this.toast("Obiettivo: Raggiungi il Terrazzo dei Marosi a est e calcia contro i barili!");
             this.closeDialogue();
           }},
@@ -1001,12 +1178,21 @@
         "Capitan Severino",
         `«Lungo la banchina c'è <b>Marina la Calafata</b> che ripara scafi e cuce palloni di cuoio pesante. Verso il Terrazzo vigila <b>Don Vindice</b> col suo fischietto d'avorio. E tra gli scogli della Grotta vive <b>Sibilla</b>, che legge le sorti nei coralli. Non avvicinarti al Faro vecchio dopo il tramonto: Maestro Enea dice che vi aleggiano presenze strane...»`,
         [
-          { label: "«Vado a esplorare il borgo!»", fn: () => this.closeDialogue() }
+          { label: "«Vado a esplorare il borgo!»", fn: () => { this.acceptAct1Challenge(); this.closeDialogue(); } }
         ]
       );
     }
 
+    // La sfida dei barili vale solo dopo aver ascoltato Severino
+    acceptAct1Challenge() {
+      if (this.state.act === 1 && this.state.step < 2) {
+        this.state.step = 2;
+        saveState(this.state);
+      }
+    }
+
     triggerAct2PlotTwist() {
+      if (this.state.act !== 1) return;
       // Colpo di scena 2: Appare l'Ombra dello Specchio
       this.state.act = 2;
       this.state.weather = "nebbia";
@@ -1028,6 +1214,7 @@
     }
 
     triggerAct3Sabotage() {
+      if (this.state.act !== 2) return;
       // Colpo di scena 3: Sabotaggio del Faro
       this.state.act = 3;
       saveState(this.state);
@@ -1048,11 +1235,13 @@
     }
 
     triggerAct4Storm() {
+      if (this.state.act !== 3) return;
       // Colpo di scena 4: La Notte della Burrasca
       this.state.act = 4;
       this.state.weather = "burrasca";
       this.state.tide = "alta";
       this.map = createMapMatrix("alta");
+      this.rescueFromWater();
       saveState(this.state);
       sfx("goal");
 
@@ -1071,9 +1260,11 @@
     }
 
     triggerAct5Derby() {
+      if (this.state.act !== 4) return;
       // Colpo di scena 5: Il Grande Derby dei Corsari
       this.state.act = 5;
       saveState(this.state);
+      this.updateHUD();
 
       this.setDialogue(
         "Corrado «Onda Nera»",
@@ -1087,14 +1278,22 @@
     }
 
     startDerbyMinigame() {
+      // Il Derby si gioca solo nell'Atto V
+      if (this.state.act !== 5) {
+        this.toast("Il Derby non è ancora in programma: prima salva il gozzo di Severino!");
+        this.restoreDialogue();
+        return;
+      }
       this.toast("INIZIA IL DERBY DELLA GABBIA DEI MAROSI!");
       let heroGoals = 0;
       let rivalGoals = 0;
       let turn = 1;
+      let busy = false;
 
       const playTurn = () => {
+        busy = false;
         if (turn > 3) {
-          if (heroGoals >= rivalGoals) {
+          if (heroGoals > rivalGoals) {
             this.winDerby(heroGoals, rivalGoals);
           } else {
             this.loseDerby(heroGoals, rivalGoals);
@@ -1107,6 +1306,8 @@
           `Punteggio: <b>${this.hero.name} ${heroGoals} - ${rivalGoals} Corrado</b>.<br>Le onde si infrangono sui pali di legno! Il vento spira a 25 nodi. Come decidi di calciare il tuo ${esc(this.hero.shotName)}?`,
           [
             { label: "⚡ Tiro teso a mezza altezza controvento", fn: () => {
+              if (busy) return;
+              busy = true;
               const ok = Math.random() > 0.3;
               if (ok) {
                 heroGoals++;
@@ -1119,9 +1320,11 @@
               // Risposta di Corrado
               if (Math.random() > 0.45) rivalGoals++;
               turn++;
-              setTimeout(playTurn, 1000);
+              this.later(playTurn, 1000);
             }},
             { label: "🌀 Parabola a giro sopra la barriera di scogli", fn: () => {
+              if (busy) return;
+              busy = true;
               const ok = Math.random() > 0.25;
               if (ok) {
                 heroGoals++;
@@ -1133,7 +1336,7 @@
               }
               if (Math.random() > 0.5) rivalGoals++;
               turn++;
-              setTimeout(playTurn, 1000);
+              this.later(playTurn, 1000);
             }}
           ]
         );
@@ -1143,32 +1346,45 @@
     }
 
     winDerby(hG, rG) {
+      if (this.state.act !== 5) return;
+      const first = !this.state.derbyRewarded;
       this.state.derbyWon = true;
-      this.state.coinsEarned += 200;
+      this.state.derbyRewarded = true;
+      if (first) this.state.coinsEarned += 200;
       saveState(this.state);
       sfx("goal");
+      this.updateHUD();
 
-      // Ricompensa monete globali
-      try {
-        if (typeof window.addCoins === "function") window.addCoins(200);
-        const api = window.__borgoApi;
-        if (api && typeof api.bCos === "function") api.bCos("oltremare");
-      } catch (e) {}
+      // Ricompensa (una tantum): monete globali e Maglia d'Oltremare (cosmetico "story", letto dal salvataggio di Cala)
+      if (first) {
+        try {
+          if (typeof window.addCoins === "function") window.addCoins(200);
+        } catch (e) {}
+        registerCosmetic();
+      }
+
+      const reward = first
+        ? `Capitan Severino ti cinge con la <b>Fascia del Timoniere</b> e ti consegna la <b>Maglia d'Oltremare</b> (la trovi nell'editor del Campione) e <b>200 monete</b>!`
+        : `Capitan Severino sorride: il tuo premio resta tuo, ma l'onore della Gabbia si rinnova ogni volta!`;
 
       this.setDialogue(
         "TRIONFO A CALA TRAMONTANA!",
-        `<b>RISULTATO FINALE: ${esc(this.hero.name)} ${hG} - ${rG} Corrado</b><br><br>I marinai e le mastre d'ascia scendono sui pontili festeggiando con le lampare accese! Capitan Severino ti cinge con la <b>Fascia del Timoniere</b> e ti consegna la <b>Maglia dei Corsari d'Oltremare</b> e <b>200 monete</b>!<br><br>«Hai domato le tre correnti, ${esc(this.hero.name)}. Questo borgo non sarà mai più dimenticato!»`,
+        `<b>RISULTATO FINALE: ${esc(this.hero.name)} ${hG} - ${rG} Corrado</b><br><br>I marinai e le mastre d'ascia scendono sui pontili festeggiando con le lampare accese! ${reward}<br><br>«Hai domato le tre correnti, ${esc(this.hero.name)}. Questo borgo non sarà mai più dimenticato!»`,
         [
           { label: "🌊 Continua a esplorare Cala Tramontana", fn: () => this.closeDialogue() },
+          { label: "🔁 Nuova partita+", fn: () => this.confirmNewGamePlus() },
           { label: "🏠 Torna al Menu Principale", fn: () => this.destroy() }
         ]
       );
     }
 
     loseDerby(hG, rG) {
+      const tie = hG === rG;
       this.setDialogue(
         "Corrado «Onda Nera»",
-        `«${rG} a ${hG} per i Corsari. Hai fegato, ${esc(this.hero.name)}, ma le correnti oggi erano con noi. Riprova quando hai studiato meglio il rimbalzo sugli scogli!»`,
+        tie
+          ? `«${hG} a ${rG}: pari, ${esc(this.hero.name)}. Il pari non basta per la Gabbia dei Marosi: serve un tiro in più della mia ciurma. Riprova!»`
+          : `«${rG} a ${hG} per i Corsari. Hai fegato, ${esc(this.hero.name)}, ma le correnti oggi erano con noi. Riprova quando hai studiato meglio il rimbalzo sugli scogli!»`,
         [
           { label: "Sfida di nuovo Corrado!", fn: () => this.startDerbyMinigame() },
           { label: "Torna al borgo ad allenarti", fn: () => this.closeDialogue() }
@@ -1176,9 +1392,52 @@
       );
     }
 
+    // ---------- NUOVA PARTITA+ ----------
+    confirmNewGamePlus() {
+      this.setDialogue(
+        "Nuova partita+",
+        `Ricominci la storia dall'Atto I con la marea e il meteo ripristinati. <b>Conservi</b> conchiglie, potenziamento del pallone, monete e Maglia d'Oltremare.`,
+        [
+          { label: "🔁 Ricomincia dall'Atto I", fn: () => this.startNewGamePlus() },
+          { label: "Annulla", fn: () => this.restoreDialogue() }
+        ]
+      );
+    }
+
+    startNewGamePlus() {
+      const st = this.state;
+      st.act = 1;
+      st.step = 0;
+      st.tide = "bassa";
+      st.weather = "brezza";
+      st.barrels = [];
+      st.clues = [];
+      st.beaconsLit = [false, false, false];
+      st.derbyWon = false;
+      st.talked = {};
+      st.ngPlus = (st.ngPlus || 0) + 1;
+      st.heroPos = { x: 280, y: 320, dir: "down" };
+      st.ballPos = { x: 295, y: 320, vx: 0, vy: 0, inAir: 0 };
+      this.map = createMapMatrix(st.tide);
+      this.dog.x = st.heroPos.x - 20;
+      this.dog.y = st.heroPos.y;
+      this.dog.fetching = false;
+      this.shot = this.freshShot();
+      this.camX = st.heroPos.x - 320;
+      this.camY = st.heroPos.y - 200;
+      const lbl = this.modal.querySelector("#calaTideLabel");
+      if (lbl) lbl.textContent = st.tide.toUpperCase();
+      saveState(st);
+      this.updateHUD();
+      this.toast(`Nuova partita+ #${st.ngPlus}: la storia ricomincia!`);
+      this.startAct1();
+    }
+
     // ---------- DIALOGHI & UI ----------
-    setDialogue(speaker, text, choices) {
+    setDialogue(speaker, text, choices, idle) {
       const q = (s) => this.modal.querySelector(s);
+      // "idle" = riepilogo di stato: su mobile resta nascosto, il dialogo vero è un bottom-sheet sul canvas
+      q("#calaDialogueBox").classList.toggle("idle", !!idle);
       q("#calaSpeaker").textContent = speaker;
       q("#calaDialogue").innerHTML = text;
 
@@ -1252,7 +1511,7 @@
       }
       if (act === 5) {
         if (this.state.derbyWon) {
-          return `<b>Atto V Completato!</b> Hai sconfitto Corrado nella Gabbia dei Marosi e conquistato la maglia d'Oltremare! Puoi esplorare liberamente e trovare tutte le 8 conchiglie nere.`;
+          return `<b>Atto V Completato!</b> Hai sconfitto Corrado nella Gabbia dei Marosi e conquistato la maglia d'Oltremare! Puoi esplorare liberamente e trovare tutte le 8 conchiglie nere, oppure ricominciare con la <b>Nuova partita+</b>.`;
         }
         return `<b>Atto V:</b> Raggiungi Corrado «Onda Nera» sul <b>Terrazzo dei Marosi</b> e battilo nella sfida dei rigori della Gabbia dei Marosi!`;
       }
@@ -1313,6 +1572,9 @@
           label: `⭐ «Consegna 4 Conchiglie a Marina (${shellCount}/4 pronte)»`,
           fn: () => this.deliverShellsToMarina()
         });
+      }
+      if (this.state.act === 5 && this.state.derbyWon) {
+        choices.push({ label: "🔁 Nuova partita+", fn: () => this.confirmNewGamePlus() });
       }
       choices.push({
         label: `🌊 «Alterna Marea (Attuale: ${this.state.tide.toUpperCase()})»`,
@@ -1440,6 +1702,9 @@
           fn: () => this.deliverShellsToMarina()
         });
       }
+      if (this.state.act === 5 && this.state.derbyWon) {
+        choices.push({ label: "🔁 Nuova partita+", fn: () => this.confirmNewGamePlus() });
+      }
       choices.push({
         label: "📋 Missioni, Guida & Indizi Conchiglie",
         fn: () => this.openQuestLog()
@@ -1448,7 +1713,8 @@
       this.setDialogue(
         "Cala Tramontana",
         `Ti trovi a <b>${area}</b>.<br><br><b>${info.mainObj}</b><br><small style="color:#fcd34d">${info.marinaObj}</small>`,
-        choices
+        choices,
+        true
       );
     }
 
@@ -1514,31 +1780,35 @@
       b.vx = vx;
       b.vy = vy;
       b.inAir = 22;
+      this.shot = this.freshShot(); // ogni tiro può far scattare ogni bersaglio una sola volta
 
       const upgradeNote = (this.state.shotUpgrade || this.state.marinaShellsDelivered) ? " (Tiro Potenziato!)" : "";
       this.toast(`Tiro di ${this.hero.name}! ⚽${upgradeNote}`);
 
       // Verifica se colpisce bersagli speciali
       this.checkBallTargets();
-      setTimeout(() => this.checkBallTargets(), 280);
+      this.later(() => this.checkBallTargets(), 280);
     }
 
     checkBallTargets() {
       const b = this.state.ballPos;
       const btx = Math.floor(b.x / TS);
       const bty = Math.floor(b.y / TS);
+      const shot = this.shot || (this.shot = this.freshShot());
 
       // 1. Campana del Faro (x: 5, y: 6)
-      if (Math.hypot(b.x - (5 * TS + 12), b.y - (6 * TS + 12)) < 32 || (btx === 5 && bty === 6)) {
+      if (!shot.bell && (Math.hypot(b.x - (5 * TS + 12), b.y - (6 * TS + 12)) < 32 || (btx === 5 && bty === 6))) {
+        shot.bell = true;
         sfx("post");
-        this.toast("RINTOCCO! La Campana del Faro risuona nel golfo! 🔔");
         if (this.state.act === 3) {
           this.toast("HAI SPEZZATO LA CATENA DEL FARO COL TUO TIRO!");
-          setTimeout(() => this.triggerAct4Storm(), 1200);
+          this.later(() => this.triggerAct4Storm(), 1200);
+        } else {
+          this.toast("RINTOCCO! La Campana del Faro risuona nel golfo! 🔔");
         }
       }
 
-      // 2. Barili di catrame: controlla coordinate esatte [x, y] e tile mappa
+      // 2. Barili di catrame: [x, y] sulla mappa (l'ultimo indice [38,15] è quello del Terrazzo dei Marosi)
       const barrelCoords = [
         [8, 13],  // m[13][8]
         [18, 13], // m[13][18]
@@ -1546,30 +1816,41 @@
         [38, 15], // m[15][38] (Terrazzo dei Marosi!)
         [5, 11]   // m[11][5]
       ];
-      const isBarrelTile = (this.map[bty] && this.map[bty][btx] === "B") ||
-        (this.map[bty] && (this.map[bty][btx - 1] === "B" || this.map[bty][btx + 1] === "B")) ||
-        barrelCoords.some(([bx, by]) => Math.hypot(b.x - (bx * TS + 12), b.y - (by * TS + 12)) < 26);
+      const hitIdx = barrelCoords.findIndex(([bx, by]) =>
+        (bty === by && Math.abs(btx - bx) <= 1) || Math.hypot(b.x - (bx * TS + 12), b.y - (by * TS + 12)) < 26);
 
-      if (isBarrelTile) {
+      if (hitIdx !== -1 && !shot.barrels[hitIdx]) {
+        shot.barrels[hitIdx] = true;
         sfx("kick");
         this.state.coinsEarned += 10;
         saveState(this.state);
-        this.toast("Barile centrato! +10 Monete del Borgo! 🎯");
         this.updateHUD();
 
+        // Atto I: conta solo il barile del Terrazzo, dopo aver accettato la sfida di Severino
         if (this.state.act === 1) {
-          this.triggerAct2PlotTwist();
+          if (hitIdx === 3 && this.state.step >= 2) {
+            this.toast("Barile centrato! +10 Monete del Borgo! 🎯");
+            this.triggerAct2PlotTwist();
+          } else if (hitIdx === 3) {
+            this.toast("Bel colpo! +10 Monete. Ma prima ascolta la sfida di Capitan Severino!");
+          } else {
+            this.toast("Barile centrato! +10 Monete. Per la sfida di Severino serve il barile del Terrazzo dei Marosi (a est)!");
+          }
+        } else {
+          this.toast("Barile centrato! +10 Monete del Borgo! 🎯");
         }
       }
 
       // 3. Bracieri della burrasca nel capitolo 4
-      if (this.state.act === 4 && btx >= 36 && bty >= 13 && bty <= 18) {
+      if (!shot.beacons && this.state.act === 4 && btx >= 36 && bty >= 13 && bty <= 18) {
+        shot.beacons = true;
         sfx("goal");
         this.state.beaconsLit[0] = true;
         this.state.beaconsLit[1] = true;
         this.state.beaconsLit[2] = true;
+        saveState(this.state);
         this.toast("BRACIERI ACCESI! Il gozzo di Severino vede il molo ed è salvo! 🔥");
-        setTimeout(() => this.triggerAct5Derby(), 1500);
+        this.later(() => this.triggerAct5Derby(), 1500);
       }
     }
 
@@ -1583,7 +1864,7 @@
         // Controlla conchiglie vicine
         const ptx = Math.floor(p.x / TS);
         const pty = Math.floor(p.y / TS);
-        const sIdx = SHELL_LOCS.findIndex((s, i) => !this.state.shells.includes(i) && Math.abs(s.x - ptx) <= 1 && Math.abs(s.y - pty) <= 1);
+        const sIdx = SHELL_LOCS.findIndex((s, i) => !this.state.shells.includes(i) && !(s.tidal && this.state.tide !== "bassa") && Math.abs(s.x - ptx) <= 1 && Math.abs(s.y - pty) <= 1);
         if (sIdx !== -1) {
           this.collectShell(sIdx);
           return;
@@ -1644,18 +1925,28 @@
           `«Tu... hai la stessa fiamma negli occhi che avevo io nel '79. Non lasciare che i mercanti spengano la voce del faro. Dimostra che il tuo tiro può salvare Cala Tramontana!»`,
           [
             { label: "«Lo salverò, te lo giuro!»", fn: () => {
-              this.triggerAct3Sabotage();
+              if (this.state.act === 2) {
+                this.triggerAct3Sabotage();
+              } else {
+                this.toast("L'Ombra annuisce e svanisce nella nebbia.");
+                this.closeDialogue();
+              }
             }},
             { label: "🧭 «Cosa sta accadendo al borgo?»", fn: () => this.showCurrentStoryStep() }
           ]
         );
       } else if (near.id === "corrado") {
+        const derbyReady = this.state.act === 5;
         this.setDialogue(
           c.name,
-          `«La Gabbia è pronta. Dimostrami che la tua fama non è solo sabbia al vento!»`,
+          derbyReady
+            ? `«La Gabbia è pronta. Dimostrami che la tua fama non è solo sabbia al vento!»`
+            : `«Sento odore di burrasca, ${esc(this.hero.name)}. Prima pensa al gozzo di Severino: la Gabbia dei Marosi aspetta chi sa accendere i tre fuochi. Poi ne riparliamo.»`,
           [
-            { label: "«Giochiamo subito il Derby!»", fn: () => this.startDerbyMinigame() },
-            { label: "🧭 «Di cosa si tratta questo Derby?»", fn: () => this.showCurrentStoryStep() }
+            ...(derbyReady ? [{ label: "«Giochiamo subito il Derby!»", fn: () => this.startDerbyMinigame() }] : []),
+            ...(derbyReady && this.state.derbyWon ? [{ label: "🔁 Nuova partita+", fn: () => this.confirmNewGamePlus() }] : []),
+            { label: "🧭 «Di cosa si tratta questo Derby?»", fn: () => this.showCurrentStoryStep() },
+            ...(derbyReady ? [] : [{ label: "«Ci vediamo dopo la tempesta»", fn: () => this.closeDialogue() }])
           ]
         );
       } else if (near.id === "eneas") {
@@ -1705,7 +1996,7 @@
       // Raccolta automatica conchiglie toccate dal giocatore (raggio 22px)
       SHELL_LOCS.forEach((s, idx) => {
         if (this.state.shells.includes(idx)) return;
-        if (s.x > 36 && this.state.tide !== "bassa") return;
+        if (s.tidal && this.state.tide !== "bassa") return;
         const dist = Math.hypot(p.x - (s.x * TS + 12), p.y - (s.y * TS + 12));
         if (dist < 22) {
           this.collectShell(idx);
@@ -2023,7 +2314,7 @@
       // Disegna conchiglie non ancora raccolte con luccichio d'abisso
       SHELL_LOCS.forEach((s, idx) => {
         if (this.state.shells.includes(idx)) return;
-        if (s.x > 36 && this.state.tide !== "bassa") return; // Nascosta dall'alta marea
+        if (s.tidal && this.state.tide !== "bassa") return; // Nascosta dall'alta marea
 
         const sx = s.x * TS - cx + 12;
         const sy = s.y * TS - cy + 12;
@@ -2297,17 +2588,26 @@
     }
 
     // ---------- DISTRUZIONE E CHIUSURA PULITA ----------
-    destroy() {
+    // opts.silent: chiude senza richiamare il returnCallback (es. apertura Specchio o riapertura della modale)
+    destroy(opts) {
+      if (this.destroyed) return;
+      this.destroyed = true;
       this.running = false;
-      window.removeEventListener("keydown", this.onKeyDown);
+      try { saveState(this.state); } catch (e) {}
+      window.removeEventListener("keydown", this.onKeyDown, true);
       window.removeEventListener("keyup", this.onKeyUp);
+      window.removeEventListener("blur", this.releaseKeys);
+      document.removeEventListener("visibilitychange", this.releaseKeys);
+      clearTimeout(this.toastTimer);
+      this.timers.forEach((id) => clearTimeout(id));
+      this.timers.clear();
 
       if (this.modal && this.modal.parentNode) {
         this.modal.parentNode.removeChild(this.modal);
       }
-      activeInstance = null;
+      if (activeInstance === this) activeInstance = null;
 
-      if (this.returnCallback) {
+      if (this.returnCallback && !(opts && opts.silent)) {
         this.returnCallback();
       }
     }
@@ -2317,10 +2617,28 @@
   window.openCalaTramontana = openCalaTramontana;
   window.openBorgoAlternativo = openCalaTramontana;
 
-  // Aggiungi a window.__borgoApi se presente
-  function hookBorgoApi() {
+  // Maglia d'Oltremare: cosmetico "story" (posseduto se il Derby è stato vinto), letto dal salvataggio di Cala
+  function registerCosmetic() {
+    try {
+      const api = window.__borgoApi;
+      if (!api || !api.COSM || api.COSM.oltremare) return;
+      api.COSM.oltremare = {
+        kind: "shirt",
+        label: "Maglia d'Oltremare",
+        val: "#0e5a8a",
+        from: "Vinci il Derby della Gabbia dei Marosi a Cala Tramontana",
+        story: () => {
+          try { const d = JSON.parse(localStorage.getItem(K_SAVE) || "null"); return !!(d && (d.derbyWon || d.derbyRewarded)); } catch (e) { return false; }
+        }
+      };
+    } catch (e) {}
+  }
+
+  // Aggiungi a window.__borgoApi: al massimo 40 tentativi (~12 s), poi smette
+  function hookBorgoApi(tries) {
     const api = window.__borgoApi;
     if (api && api.MN_BORGO_BTN && Array.isArray(api.MN_BORGO_BTN)) {
+      registerCosmetic();
       api.MN_BORGO_BTN.push(() => ({
         label: "🌊 Battello per Cala Tramontana",
         sub: "Il borgo marino alternativo del tuo campione",
@@ -2329,10 +2647,10 @@
           if (typeof window.borgo === "function") window.borgo();
         })
       }));
-    } else {
-      setTimeout(hookBorgoApi, 300);
+    } else if ((tries || 0) < 40) {
+      setTimeout(() => hookBorgoApi((tries || 0) + 1), 300);
     }
   }
-  hookBorgoApi();
+  hookBorgoApi(0);
 
 })();
