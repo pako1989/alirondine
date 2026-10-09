@@ -35,6 +35,7 @@
       ballPos: { x: 295, y: 320, vx: 0, vy: 0, inAir: 0 },
       coinsEarned: 0,
       bestChallenge: 0,
+      derbyStats: { played: 0, wins: 0, best: 0 }, // statistiche Derby (solo informative)
     };
   }
 
@@ -52,6 +53,8 @@
           if (!Array.isArray(st.shells)) st.shells = [];
           if (!Array.isArray(st.barrels)) st.barrels = [];
           if (!Array.isArray(st.beaconsLit)) st.beaconsLit = [false, false, false];
+          const ds = st.derbyStats && typeof st.derbyStats === "object" ? st.derbyStats : {};
+          st.derbyStats = { played: Math.max(0, Math.round(+ds.played) || 0), wins: Math.max(0, Math.round(+ds.wins) || 0), best: Math.max(0, Math.round(+ds.best) || 0) };
           return st;
         }
       }
@@ -341,6 +344,20 @@
     return list;
   }
 
+  // Ritratto come data-URL dal motore principale; null se non disponibile (si usa l'emoji)
+  function calaPortraitUrl(id, ch) {
+    try {
+      const api = window.__borgoApi;
+      if (!api || typeof api.portraitImg !== "function") return "";
+      let spec;
+      if (ch) {
+        spec = { name: ch.name, tag: "", hair: ch.hair, style: ch.style, skin: ch.skin, eye: "#2a1a0a", bg: [ch.shirt, ch.accent || "#ffd23f"], shirt: ch.shirt };
+        if (ch.beard) spec.beard = true;
+      }
+      return api.portraitImg(id, spec) || "";
+    } catch (e) { return ""; }
+  }
+
   // ---------- MODALE / SCHERMATA COMPLETA ----------
   let activeInstance = null;
 
@@ -429,7 +446,7 @@
           </div>
 
           <div class="cala-dialogue-box" id="calaDialogueBox">
-            <div class="cala-speaker-name" id="calaSpeaker">Capitan Severino</div>
+            <div class="cala-speaker-row"><div class="cala-portrait" id="calaPortrait" hidden></div><div class="cala-speaker-name" id="calaSpeaker">Capitan Severino</div></div>
             <div class="cala-dialogue-text" id="calaDialogue">«Il vento cambia, ragazzo. La marea si ritira e scopre cose che questo mare ha tenuto nascoste per quarant'anni. Cammina per il molo e tira quella palla: voglio sentire se il tuo piede ha sale o solo parole.»</div>
             <div class="cala-dialogue-choices" id="calaChoices"></div>
           </div>
@@ -918,6 +935,37 @@
         .cala-canvas-wrap { align-items: center; }
         #calaCanvas { object-position: 50% 50%; }
       }
+
+      /* Ritratto di chi parla */
+      .cala-speaker-row { display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #1e293b; padding-bottom: 4px; flex: 0 0 auto; min-width: 0; }
+      .cala-speaker-row .cala-speaker-name { border-bottom: none; padding-bottom: 0; flex: 1 1 auto; min-width: 0; }
+      .cala-portrait { flex: 0 0 auto; width: 52px; height: 52px; border-radius: 10px; border: 2px solid #38bdf8; background: #16325c center/cover no-repeat; image-rendering: auto; display: flex; align-items: center; justify-content: center; font-size: 26px; overflow: hidden; }
+      .cala-portrait[hidden] { display: none; }
+      /* Derby */
+      @media (max-width: 768px) and (min-height: 521px) { .cala-dialogue-box.derby { max-height: 90%; } .cala-dialogue-box.derby .cala-dialogue-text { flex: 0 0 auto; overflow: visible; min-height: 0; } .cala-dialogue-box.derby .cala-dialogue-choices { max-height: none; } }
+      .cala-dby-score { font-weight: 800; color: #fde68a; font-size: 13px; }
+      .cala-dby-cond { display: flex; flex-wrap: wrap; gap: 4px 10px; margin: 4px 0; font-size: 12px; color: #bae6fd; }
+      .cala-dby-wind b { color: #fcd34d; }
+      .cala-dby-goal { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); height: 46px; margin: 6px 0; border: 3px solid #e2e8f0; border-bottom: none; border-radius: 6px 6px 0 0; background: repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0 2px, transparent 2px 10px), #0c4a6e; }
+      .cala-dby-goal > i { display: flex; align-items: center; justify-content: center; font-style: normal; font-size: 18px; border-right: 1px dashed rgba(255,255,255,0.18); }
+      .cala-dby-goal > i:last-of-type { border-right: none; }
+      .cala-dby-ball { position: absolute; bottom: 4px; font-size: 18px; transform: translateX(-50%); transition: left .35s ease-out, bottom .35s ease-out; }
+      .cala-dby-keeper { position: absolute; top: 2px; font-size: 20px; transform: translateX(-50%); transition: left .3s ease-out; }
+      .cala-dby-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+      .cala-dby-grid .cala-choice-btn { text-align: center; padding: 8px 4px; font-size: 12px; min-height: 38px; }
+      .cala-dby-label { font-size: 11px; color: #94a3b8; margin: 2px 0 0; }
+      .cala-dby-meter { position: relative; height: 22px; border-radius: 11px; border: 1px solid #334155; background: linear-gradient(90deg, #475569 0 30%, #22c55e 30% 55%, #eab308 55% 82%, #ef4444 82% 100%); overflow: hidden; margin: 4px 0; }
+      .cala-dby-needle { position: absolute; top: 0; bottom: 0; width: 4px; background: #fff; box-shadow: 0 0 6px #000; }
+      .cala-dby-stop { background: #0ea5e9 !important; border-color: #38bdf8 !important; font-weight: 800; min-height: 42px; }
+      @media (max-width: 768px) {
+        .cala-portrait { width: 38px; height: 38px; font-size: 20px; border-radius: 8px; }
+        .cala-dby-goal { height: 36px; margin: 4px 0; }
+        .cala-dby-goal > i { font-size: 15px; }
+        .cala-dby-cond { font-size: 11px; margin: 2px 0; }
+        .cala-dby-grid .cala-choice-btn { padding: 6px 2px; min-height: 36px; font-size: 11px; }
+        .cala-dby-meter { height: 18px; }
+      }
+      @media (max-width: 768px) and (max-height: 520px) { .cala-portrait { width: 30px; height: 30px; font-size: 16px; } }
     `;
     document.head.appendChild(st);
   }
@@ -1277,6 +1325,8 @@
       );
     }
 
+    // ---------- DERBY (Atto V): minigioco con vento, marea, mira/potenza, portiere con lettura limitata ----------
+    // Round = tuo tiro + parata sul tiro di Corrado. 3 round; se pari, supplementari a oltranza (max 5) e poi si chiude.
     startDerbyMinigame() {
       // Il Derby si gioca solo nell'Atto V
       if (this.state.act !== 5) {
@@ -1285,64 +1335,177 @@
         return;
       }
       this.toast("INIZIA IL DERBY DELLA GABBIA DEI MAROSI!");
-      let heroGoals = 0;
-      let rivalGoals = 0;
-      let turn = 1;
-      let busy = false;
-
-      const playTurn = () => {
-        busy = false;
-        if (turn > 3) {
-          if (heroGoals > rivalGoals) {
-            this.winDerby(heroGoals, rivalGoals);
-          } else {
-            this.loseDerby(heroGoals, rivalGoals);
-          }
-          return;
-        }
-
-        this.setDialogue(
-          `Derby · Turno ${turn} di 3`,
-          `Punteggio: <b>${this.hero.name} ${heroGoals} - ${rivalGoals} Corrado</b>.<br>Le onde si infrangono sui pali di legno! Il vento spira a 25 nodi. Come decidi di calciare il tuo ${esc(this.hero.shotName)}?`,
-          [
-            { label: "⚡ Tiro teso a mezza altezza controvento", fn: () => {
-              if (busy) return;
-              busy = true;
-              const ok = Math.random() > 0.3;
-              if (ok) {
-                heroGoals++;
-                sfx("goal");
-                this.toast("RETE! Il pallone gonfia la rete marina!");
-              } else {
-                sfx("post");
-                this.toast("PALO! Il vento ha deviato la sfera!");
-              }
-              // Risposta di Corrado
-              if (Math.random() > 0.45) rivalGoals++;
-              turn++;
-              this.later(playTurn, 1000);
-            }},
-            { label: "🌀 Parabola a giro sopra la barriera di scogli", fn: () => {
-              if (busy) return;
-              busy = true;
-              const ok = Math.random() > 0.25;
-              if (ok) {
-                heroGoals++;
-                sfx("goal");
-                this.toast("GOL FANTASTICO! Traiettoria imparabile!");
-              } else {
-                sfx("kick");
-                this.toast("PARATA! Corrado vola sulla linea d'onda!");
-              }
-              if (Math.random() > 0.5) rivalGoals++;
-              turn++;
-              this.later(playTurn, 1000);
-            }}
-          ]
-        );
+      const run = (this._derby = { hG: 0, rG: 0, round: 1, lastZone: -1, tide: "bassa", wind: { dir: 0, str: 0 }, rock: -1, meter: false, pow: 0, busy: false });
+      const live = () => this._derby === run && !this.destroyed;
+      const hn = esc(this.hero.name);
+      const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+      const ZN = ["a sinistra", "al centro", "a destra"];
+      const ZX = [-0.66, 0, 0.66];
+      const zoneOf = (x) => (x < -0.33 ? 0 : x < 0.33 ? 1 : 2);
+      const readP = () => 0.3 + 0.04 * Math.min(3, this.state.ngPlus || 0);
+      
+      const newConditions = () => {
+        if (run.round === 1) run.tide = Math.random() < 0.5 ? "alta" : "bassa";
+        else if (Math.random() < 0.6) run.tide = run.tide === "alta" ? "bassa" : "alta";
+        const str = Math.floor(Math.random() * 4); // 0..3 => 0, 10, 20, 30 nodi
+        run.wind = { dir: str ? (Math.random() < 0.5 ? -1 : 1) : 0, str };
+        run.rock = run.tide === "alta" ? Math.floor(Math.random() * 3) : -1;
+      };
+      const roundLabel = () => (run.round <= 3 ? `Turno ${run.round} di 3` : `Supplementare ${run.round - 3}`);
+      const windHtml = () => {
+        const w = run.wind;
+        if (!w.str) return `💨 <b>Calma piatta</b> (0 nodi)`;
+        return `💨 <b>${w.dir < 0 ? "◀".repeat(w.str) : "▶".repeat(w.str)} ${w.str * 10} nodi</b> spinge ${w.dir < 0 ? "a sinistra" : "a destra"}`;
+      };
+      const tideHtml = () => (run.tide === "alta" ? `🌊 <b>Marea alta</b>: pallone pesante${run.rock >= 0 ? `, scoglio ${ZN[run.rock]}` : ""}` : `🏖️ <b>Marea bassa</b>: sabbia soda, campo libero`);
+      const hud = (label) =>
+        `<div class="cala-dby-score">${esc(label)} · ${hn} ${run.hG} - ${run.rG} Corrado</div>` +
+        `<div class="cala-dby-cond"><span class="cala-dby-wind" id="calaDbyWind">${windHtml()}</span><span id="calaDbyTide">${tideHtml()}</span></div>` +
+        `<div class="cala-dby-goal" id="calaDbyGoal">${[0, 1, 2].map((i) => `<i>${run.rock === i ? "🪨" : ""}</i>`).join("")}<span class="cala-dby-keeper" id="calaDbyKeeper" style="left:50%">🧤</span><span class="cala-dby-ball" id="calaDbyBall" style="left:50%">⚽</span></div>`;
+      const choicesBox = () => this.modal.querySelector("#calaChoices");
+      const addBtn = (box, label, fn, cls) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "cala-choice-btn" + (cls ? " " + cls : "");
+        b.innerHTML = label;
+        b.onclick = () => { if (live() && !run.busy) fn(); };
+        box.appendChild(b);
+        return b;
+      };
+      const place = (ballX, up, keeperZone) => {
+        const bl = this.modal.querySelector("#calaDbyBall");
+        const kp = this.modal.querySelector("#calaDbyKeeper");
+        const pct = (x) => Math.max(2, Math.min(98, 50 + x * 50));
+        this.later(() => {
+          if (bl && ballX != null) { bl.style.left = pct(ballX) + "%"; if (up) bl.style.bottom = "34px"; }
+          if (kp && keeperZone != null) kp.style.left = pct(ZX[keeperZone]) + "%";
+        }, 30);
+      };
+      const finish = () => {
+        const win = run.hG > run.rG;
+        const ds = this.state.derbyStats;
+        ds.played++;
+        if (win) ds.wins++;
+        ds.best = Math.max(ds.best, run.hG - run.rG);
+        saveState(this.state);
+        this._derby = null;
+        if (win) this.winDerby(run.hG, run.rG); else this.loseDerby(run.hG, run.rG);
+      };
+      const nextAfterRound = () => {
+        if (run.round >= 3 && (run.hG !== run.rG || run.round >= 8)) return finish();
+        if (run.round === 3) this.toast("Pari dopo i tre turni: SUPPLEMENTARI!");
+        run.round++;
+        shootPhase();
       };
 
-      playTurn();
+      // ---- Fase 1: il tuo tiro (mira -> potenza)
+      const shootPhase = () => {
+        run.busy = false;
+        run.meter = false;
+        newConditions();
+        this.setDialogue(`Derby · ${roundLabel()}`, hud(roundLabel()) + `Tocca a te con il tuo ${esc(this.hero.shotName)}. Il vento sposta la palla, l'ago della potenza la lancia. Corrado legge solo qualcosa di te.`, []);
+        const box = choicesBox();
+        const lab = (t) => { const d = document.createElement("div"); d.className = "cala-dby-label"; d.textContent = t; box.appendChild(d); };
+        const grid = (kind) => {
+          const g = document.createElement("div");
+          g.className = "cala-dby-grid";
+          box.appendChild(g);
+          ["◀ sx", "● centro", "dx ▶"].forEach((t, z) => addBtn(g, t, () => powerPhase(z, kind)));
+        };
+        lab("Rasoterra: poco vento, ma teme gli scogli");
+        grid("raso");
+        lab("Pallonetto: scavalca gli scogli, ma il vento lo porta via");
+        grid("pall");
+      };
+
+      const powerPhase = (zone, kind) => {
+        run.busy = false;
+        this.setDialogue(`Derby · ${roundLabel()}`, hud(roundLabel()) + `Mira ${ZN[zone]}, ${kind === "raso" ? "rasoterra" : "pallonetto"}. Ferma l'ago: verde e giallo vanno bene, grigio è una carezza, rosso è un missile (forse verso il mare).<div class="cala-dby-meter"><div class="cala-dby-needle" id="calaDbyNeedle" style="left:0"></div></div>`, []);
+        const t0 = performance.now();
+        run.meter = true;
+        run.pow = 0;
+        const tick = () => {
+          if (!live() || !run.meter) return;
+          const nd = this.modal.querySelector("#calaDbyNeedle");
+          if (!nd) { run.meter = false; return; }
+          const ph = ((performance.now() - t0) / 1400) % 2;
+          run.pow = ph < 1 ? ph : 2 - ph;
+          nd.style.left = `calc(${run.pow * 100}% - 2px)`;
+          this.later(tick, 30);
+        };
+        tick();
+        addBtn(choicesBox(), "🦵 CALCIA!", () => { run.meter = false; run.busy = true; resolveShot(zone, kind, run.pow); }, "cala-dby-stop");
+      };
+
+      const resolveShot = (zone, kind, pow) => {
+        const lift = kind === "pall";
+        const p = run.tide === "alta" ? pow * 0.92 : pow;
+        const w = run.wind;
+        const drift = w.dir * w.str * (1.25 - 0.7 * p) * (lift ? 0.26 : 0.15);
+        const fx = ZX[zone] + drift + (Math.random() - 0.5) * 0.12;
+        const fz = zoneOf(fx);
+        // portiere: legge il vento, ma della tua mira sa solo che tendi a ripetere la zona
+        let dive;
+        if (Math.random() < readP()) dive = fz;
+        else {
+          const wts = [1, 1, 1];
+          if (run.lastZone >= 0) wts[run.lastZone] += 1.2;
+          let r = Math.random() * (wts[0] + wts[1] + wts[2]);
+          dive = 0;
+          while (dive < 2 && r >= wts[dive]) { r -= wts[dive]; dive++; }
+        }
+        run.lastZone = zone;
+        let goal = false;
+        let ballX = fx;
+        let up = false;
+        let msg;
+        if (pow > 0.95) { up = true; msg = pick(["Missile sopra la traversa: l'ultimo avvistamento è al largo di Capo Sirena. 🚀", "Troppa potenza: il pallone saluta i gabbiani e non torna."]); }
+        else if (Math.abs(fx) > 1.0) msg = `Fuori ${fx < 0 ? "a sinistra" : "a destra"}: ${w.str ? "il vento ha fatto il suo mestiere" : "senza vento, nessuna scusa"}.`;
+        else if (Math.abs(fx) > 0.88) msg = "PALO! Il legno vibra, il pubblico pure. Dentro di un dito, fuori di un dito, comunque fuori.";
+        else if (!lift && run.rock === fz) { ballX = ZX[fz]; msg = "Lo scoglio fa da difensore: il pallone rimbalza via. Almeno è un difensore che non si lamenta."; }
+        else if (lift && pow < 0.35) { dive = fz; ballX = ZX[fz]; msg = "Pallonetto troppo piano: Corrado lo aspetta con le mani sui fianchi e lo raccoglie con eleganza."; }
+        else if (dive === fz && Math.random() < (lift ? 0.7 : 0.9) * (run.tide === "alta" ? 0.85 : 1) && !(pow > 0.82 && fz !== 1 && Math.random() < 0.45)) msg = "PARATA! Corrado vola sulla linea d'onda e ci mette i guanti, l'ego e mezzo metro di gomito.";
+        else { goal = true; msg = dive === fz ? "Corrado ci arriva con le dita ma il pallone ha più fretta: RETE!" : "RETE! Il portiere si tuffa dalla parte sbagliata, in compenso con grande dignità."; }
+        if (goal) { run.hG++; sfx("goal"); } else sfx(Math.abs(fx) > 0.88 && Math.abs(fx) <= 1 ? "post" : "kick");
+        this.updateHUD();
+        this.setDialogue(`Derby · ${roundLabel()}`, hud(roundLabel()) + `<b>${goal ? "GOL!" : "Niente da fare."}</b> ${msg}`, []);
+        place(ballX, up, dive);
+        this.later(() => { run.busy = false; if (live()) addBtn(choicesBox(), "Avanti: tira Corrado ▶", rivalPhase); }, 450);
+      };
+
+      // ---- Fase 2: tiro di Corrado, tu pari
+      const rivalPhase = () => {
+        run.busy = false;
+        const lift = Math.random() < 0.3;
+        const az = Math.random() < 0.2 ? 1 : Math.random() < 0.5 ? 0 : 2;
+        const pow = 0.45 + Math.random() * 0.55;
+        const p = run.tide === "alta" ? pow * 0.92 : pow;
+        const w = run.wind;
+        const fx = ZX[az] + w.dir * w.str * (1.25 - 0.7 * p) * (lift ? 0.26 : 0.15) + (Math.random() - 0.5) * 0.12;
+        const fz = zoneOf(fx);
+        // indizio: Corrado guarda verso la zona che vuole colpire, ma ogni tanto bluffa
+        const cue = Math.random() < 0.6 ? az : pick([0, 1, 2].filter((z) => z !== az));
+        this.setDialogue("Derby · Corrado calcia", hud(roundLabel()) + `Corrado sistema il pallone e guarda <b>${ZN[cue]}</b>. Sguardo sincero o bluff? Tienine conto, e fai i conti col vento: dove ti tuffi?`, []);
+        const g = document.createElement("div");
+        g.className = "cala-dby-grid";
+        choicesBox().appendChild(g);
+        ["◀ sx", "● centro", "dx ▶"].forEach((t, z) => addBtn(g, "🧤 " + t, () => {
+          run.busy = true;
+          let goal = false;
+          let msg;
+          if (pow > 0.97) msg = "Corrado cannoneggia in orbita: il pallone atterra forse a Malta.";
+          else if (Math.abs(fx) > 1.0) msg = "Fuori! Il vento ha tradito il Capitano dei Corsari. Lui dirà che era un effetto voluto.";
+          else if (Math.abs(fx) > 0.88) msg = "PALO! Corrado si porta le mani ai capelli. Tu fingi di averlo previsto.";
+          else if (z === fz && Math.random() < (run.tide === "alta" ? 0.78 : 0.88)) msg = "PARATA! Hai letto vento e sguardo come un vecchio lupo di molo.";
+          else { goal = true; msg = z === fz ? "Ci arrivi con la punta delle dita, ma la marea ti rallenta: gol dei Corsari." : "Gol dei Corsari: ti sei tuffato con convinzione, peccato dal lato sbagliato."; }
+          if (goal) { run.rG++; sfx("post"); } else sfx("kick");
+          this.setDialogue("Derby · Corrado calcia", hud(roundLabel()) + `<b>${goal ? "Rete dei Corsari." : "Respinto!"}</b> ${msg}`, []);
+          place(fx, pow > 0.97, z);
+          this.later(() => { run.busy = false; if (live()) addBtn(choicesBox(), run.round >= 3 && run.hG === run.rG ? "Avanti ▶" : run.round >= 3 ? "Fischio finale ▶" : "Avanti: prossimo turno ▶", nextAfterRound); }, 450);
+        }));
+      };
+
+      shootPhase();
     }
 
     winDerby(hG, rG) {
@@ -1383,8 +1546,8 @@
       this.setDialogue(
         "Corrado «Onda Nera»",
         tie
-          ? `«${hG} a ${rG}: pari, ${esc(this.hero.name)}. Il pari non basta per la Gabbia dei Marosi: serve un tiro in più della mia ciurma. Riprova!»`
-          : `«${rG} a ${hG} per i Corsari. Hai fegato, ${esc(this.hero.name)}, ma le correnti oggi erano con noi. Riprova quando hai studiato meglio il rimbalzo sugli scogli!»`,
+          ? `«${hG} a ${rG} anche dopo i rigori: la Gabbia dei Marosi non perdona i pareggi, ${esc(this.hero.name)}. Ma devo ammettere che hai tenuto duro. Riprova!»`
+          : `«${rG} a ${hG} per i Corsari. Hai fegato, ${esc(this.hero.name)}, ma le correnti oggi erano con noi. Guarda meglio il vento e la marea: il mare non bluffa, io sì!»`,
         [
           { label: "Sfida di nuovo Corrado!", fn: () => this.startDerbyMinigame() },
           { label: "Torna al borgo ad allenarti", fn: () => this.closeDialogue() }
@@ -1438,8 +1601,10 @@
       const q = (s) => this.modal.querySelector(s);
       // "idle" = riepilogo di stato: su mobile resta nascosto, il dialogo vero è un bottom-sheet sul canvas
       q("#calaDialogueBox").classList.toggle("idle", !!idle);
+      q("#calaDialogueBox").classList.toggle("derby", /^Derby\b/.test(String(speaker)) && !!this._derby);
       q("#calaSpeaker").textContent = speaker;
       q("#calaDialogue").innerHTML = text;
+      this.setPortrait(speaker);
 
       const cBox = q("#calaChoices");
       cBox.innerHTML = "";
@@ -1455,6 +1620,36 @@
           cBox.appendChild(btn);
         });
       }
+    }
+
+    // Ritratto di chi parla: usa il ritratto della storia principale (window.__borgoApi.portraitImg) con ripiego su emoji
+    setPortrait(speaker) {
+      const el = this.modal.querySelector("#calaPortrait");
+      if (!el) return;
+      let ch = null;
+      const nm = String(speaker || "");
+      for (const k in CHARS) if (CHARS[k].name === nm) ch = CHARS[k];
+      if (!ch && /^Derby\b/.test(nm)) ch = CHARS.corrado;
+      if (!ch && /^TRIONFO/.test(nm)) ch = CHARS.severino;
+      let emoji = "";
+      let url = "";
+      if (ch && ch.isDog) emoji = "🐕";
+      else if (ch) {
+        emoji = "🧑";
+        url = calaPortraitUrl("cala_" + ch.id, ch);
+      } else if (this.hero && nm === this.hero.name) {
+        emoji = "⚽";
+        url = calaPortraitUrl("hero", null);
+      } else if (/Diario/.test(nm)) emoji = "📖";
+      else if (/Missioni/.test(nm)) emoji = "📋";
+      else if (/Indizi/.test(nm)) emoji = "🐚";
+      el.textContent = "";
+      el.style.backgroundImage = "";
+      el.classList.remove("has-img");
+      if (!emoji && !url) { el.hidden = true; return; }
+      el.hidden = false;
+      if (url) { el.style.backgroundImage = `url(${url})`; el.classList.add("has-img"); }
+      else el.textContent = emoji;
     }
 
     closeDialogue() {
