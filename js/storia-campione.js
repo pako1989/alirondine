@@ -227,8 +227,33 @@
     glow(g, 160, 104, 120, "90,235,210", 0.14);
     fogBand(g, W, 150, H, f, ["#2a3a58", "#16203a"]);
   }
+  function bgMunicipio(g, W, H, f) {
+    grad(g, 0, 0, W, H, ["#3a2822", "#5a4034"]);
+    R(g, 0, 118, W, 82, "#3a2616"); R(g, 0, 116, W, 3, "#8a5a34"); for (let i = 0; i < 16; i++) { R(g, i * 20 + 3, 124, 14, 70, "#46301c"); R(g, i * 20 + 3, 124, 14, 1, "#6a4a2c"); }
+    R(g, 20, 26, 84, 82, "#1a1008"); grad(g, 25, 31, 74, 72, ["#cfd3ea", "#a9afd8"]); R(g, 61, 31, 2, 72, "#1a1008"); R(g, 25, 65, 74, 2, "#1a1008");
+    for (let i = 0; i < 4; i++) { const x = ((i * 47 + f * 0.2) % 90) - 10; g.fillStyle = "rgba(255,255,255,.25)"; g.beginPath(); g.ellipse(25 + (x % 74), 44 + i * 14, 18, 4, 0, 0, 7); g.fill(); }
+    // lo stemma del Comune: scudo blu con montagna e lampada
+    g.fillStyle = "#e9a64a"; g.beginPath(); g.moveTo(166, 28); g.lineTo(214, 28); g.lineTo(214, 66); g.lineTo(190, 92); g.lineTo(166, 66); g.closePath(); g.fill();
+    g.fillStyle = "#1b2f7a"; g.beginPath(); g.moveTo(170, 32); g.lineTo(210, 32); g.lineTo(210, 64); g.lineTo(190, 86); g.lineTo(170, 64); g.closePath(); g.fill();
+    g.fillStyle = "#e8ecf6"; g.beginPath(); g.moveTo(174, 66); g.lineTo(190, 42); g.lineTo(206, 66); g.closePath(); g.fill(); glow(g, 190, 52, 16, "127,227,208", 0.7); R(g, 189, 50, 3, 3, "#bff7ea");
+    R(g, 146, 24, 5, 70, "#c8422e"); R(g, 232, 24, 5, 70, "#c8422e"); R(g, 151, 24, 14, 6, "#d9a441"); R(g, 218, 24, 14, 6, "#d9a441");
+    for (let i = 0; i < 7; i++) { R(g, 14 + i * 44, 150, 28, 14, "#2a1a10"); R(g, 14 + i * 44, 140, 28, 12, "#3a2616"); R(g, 14 + i * 44, 140, 28, 1, "#6a4a2c"); }
+    R(g, 0, 176, W, 24, "#2c1a1e"); R(g, 0, 176, W, 2, "#d9a441");
+    glow(g, 160, 8, 120, "255,200,110", 0.42 + 0.05 * Math.sin(f / 18));
+  }
+  function bgArchivio(g, W, H, f) {
+    grad(g, 0, 0, W, H, ["#05070d", "#0e1422", "#131b2c"]);
+    [[0, 0], [W - 96, 0]].forEach(([x0]) => { R(g, x0, 14, 96, 176, "#1a130c"); for (let r = 0; r < 5; r++) { R(g, x0, 18 + r * 34, 96, 3, "#3a2816"); for (let i = 0; i < 12; i++) { const h = 14 + (hash(r * 13 + i + x0) % 10); R(g, x0 + 3 + i * 8, 18 + r * 34 + 31 - h, 6, h, ["#c8553d", "#3a6a9c", "#e0a23a", "#e8e0c8", "#5a7a4a", "#7a4a6a"][hash(r * 7 + i * 3 + x0) % 6]); } } });
+    g.strokeStyle = "#2a3350"; g.lineWidth = 1; g.beginPath(); g.moveTo(96, 190); g.lineTo(140, 120); g.moveTo(W - 96, 190); g.lineTo(W - 140, 120); g.stroke();
+    R(g, 138, 20, 44, 100, "#0a0e1a");
+    const br = 0.5 + 0.25 * Math.sin(f / 22);
+    g.save(); g.globalCompositeOperation = "lighter"; g.strokeStyle = `rgba(90,235,210,${br})`; g.lineWidth = 2; g.beginPath(); g.moveTo(160, 20); g.lineTo(154, 46); g.lineTo(166, 66); g.lineTo(156, 92); g.lineTo(162, 118); g.stroke(); g.restore();
+    glow(g, 160, 70, 80, "90,235,210", 0.22 + 0.06 * Math.sin(f / 22));
+    R(g, 158, 0, 2, 22, "#1a1008"); g.fillStyle = "#e0a23a"; g.beginPath(); g.moveTo(148, 34); g.lineTo(172, 34); g.lineTo(164, 22); g.lineTo(156, 22); g.fill(); glow(g, 160, 38, 90, "255,200,110", 0.4 + 0.05 * Math.sin(f / 15));
+    R(g, 0, 176, W, 24, "#10151f"); R(g, 0, 176, W, 1, "#2a3350");
+  }
   let FOTO = null;
-  const BGS = { vl_paese: bgPaese, vl_campo: bgCampo, vl_miniera: bgMiniera, vl_interno: bgInterno, vl_foto: bgFoto, vl_latte: bgLatte, vl_spogliatoi: bgSpogliatoi, vl_gallerie: bgGallerie, vl_quattro: bgQuattro };
+  const BGS = { vl_paese: bgPaese, vl_campo: bgCampo, vl_miniera: bgMiniera, vl_interno: bgInterno, vl_foto: bgFoto, vl_latte: bgLatte, vl_spogliatoi: bgSpogliatoi, vl_gallerie: bgGallerie, vl_quattro: bgQuattro, vl_municipio: bgMunicipio, vl_archivio: bgArchivio };
   const prevBg = window.renderDetailedBg;
   window.renderDetailedBg = function (kind, g, W, H, frame) {
     if (BGS[kind]) { safe(() => BGS[kind](g, W || 320, H || 200, frame || 0)); return true; }
@@ -244,8 +269,9 @@
   //             capitolo 2:  g=nebbia calpestabile  i=piastrelle dello spogliatoio  (oggetti) G=nebbia fitta  A=ancora (lanterna)  U=pallone  E=pietra d'eco
   //                          W=parete di legno  K=armadietto  Z=porta interna  d=cancello verso il basso
   //             capitolo 3:  Q=cristallo di fase  D=porta di lumina  R=carrello  M=maglia appesa  N=maglia vuota  H=elmetto del minatore  P=parete incisa
-  const FLOORS = ',p:"=y;_-gi';
-  const SOLID = "afrehtlknFumvqwx><^bozjXYCGAUEWKZdQDRMNHP";
+  //             capitolo 4:  c=tappeto del Municipio  (oggetti) S=scaffale di faldoni  T=scrivania/tavolo  B=cassetti del Registro  O=tassello (pennino, timbro, sigillo, stemma)  J=vetrina  L=scala dell'archivio
+  const FLOORS = ',p:"=y;_-gic';
+  const SOLID = "afrehtlknFumvqwx><^bozjXYCGAUEWKZdQDRMNHPSTBOJL";
   const isFloor = (c) => !!c && FLOORS.includes(c);
   const ZX = { map: null, under: null, meta: null, id: "", cvs: null };
   const at = (tx, ty) => (ZX.map && ZX.map[ty] && ZX.map[ty][tx]) || "a";
@@ -268,6 +294,7 @@
     else if (f === ";") { P(sx, sy, 16, 16, (tx + ty) % 2 ? "#a8573f" : "#a05039"); if (r < 0.2) P(sx + 5, sy + 8, 3, 1, "#8a4632"); }
     else if (f === "_") { P(sx, sy, 16, 16, (tx + ty) % 2 ? "#2d3142" : "#313648"); if (r < 0.3) P(sx + 3 + ((r * 100) | 0) % 9, sy + 4 + ((r * 77) | 0) % 8, 2, 1, "#454b60"); }
     else if (f === "g") { const n = MOOD >= 2; P(sx, sy, 16, 16, n ? "#3c4678" : "#cdd1ea"); P(sx + 1, sy + 1, 14, 14, n ? "#46508a" : "#dde1f4"); if (r < 0.3) P(sx + 4 + ((r * 77) | 0) % 7, sy + 5 + ((r * 41) | 0) % 6, 2, 1, n ? "#8d9be0" : "#7fe3d0"); const w = (frNow() / 3 + tx * 11 + ty * 7) % 30; P(sx + w - 8, sy + 3 + (tx + ty) % 9, 8, 1, n ? "#59649e" : "#f4f6ff"); }
+    else if (f === "c") { P(sx, sy, 16, 16, (tx + ty) % 2 ? "#6a2a34" : "#732f3a"); P(sx, sy, 16, 1, "#8a4450"); if (at(tx - 1, ty) !== "c") P(sx, sy, 2, 16, "#d9a441"); if (at(tx + 1, ty) !== "c") P(sx + 14, sy, 2, 16, "#d9a441"); if (r < 0.2) P(sx + 6, sy + 7, 3, 2, "#82414c"); }
     else if (f === "i") { P(sx, sy, 16, 16, (tx + ty) % 2 ? "#8c93a6" : "#9aa1b3"); P(sx, sy, 16, 1, "#b4bacb"); P(sx, sy + 15, 16, 1, "#6a7084"); P(sx + 15, sy, 1, 16, "#6a7084"); if (r < 0.12) P(sx + 5, sy + 6, 3, 2, "#7a8196"); }
     else if (f === "-") { floorPaint("_", sx, sy, tx, ty); const v = (at(tx, ty - 1) === "-" || at(tx, ty + 1) === "-") && at(tx - 1, ty) !== "-" && at(tx + 1, ty) !== "-"; if (v) { P(sx + 3, sy, 2, 16, "#6a6f80"); P(sx + 11, sy, 2, 16, "#6a6f80"); for (let i = 0; i < 4; i++) P(sx + 1, sy + i * 4 + 1, 14, 2, "#4a3626"); } else { P(sx, sy + 3, 16, 2, "#6a6f80"); P(sx, sy + 11, 16, 2, "#6a6f80"); for (let i = 0; i < 4; i++) P(sx + i * 4 + 1, sy + 1, 2, 14, "#4a3626"); } }
   }
@@ -2258,7 +2285,7 @@
       if (s === 6) return "Galleria Quattro: va' a OVEST lungo i binari fino al portiere con le mani fasciate. In ALTO, le 11 maglie.";
       if (s === 7) return "Attraversa la porta di luce a EST fino alla Camera del Minuto e parla con l'arbitro, al centro.";
       if (s === 8) return "Risali: cancello con la freccia in su, in ALTO al centro (poi su per le Gallerie fino all'Imbocco).";
-      return "Capitolo concluso. Il Capitolo 4 non è ancora pronto: il Registro del Municipio ti aspetta. Intanto raccogli le schegge e parla con tutti.";
+      return "Capitolo concluso. Il Capitolo 4, Il Registro, ti aspetta: dal menu Vallombra scegli «Inizia il capitolo 4». Intanto raccogli le schegge e parla con tutti.";
     };
 
     // ---- stato dei cristalli di fase (4 cristalli: toccarne uno cambia anche i vicini)
@@ -2964,7 +2991,7 @@
       X.finishChapter(N, "miniera"); setStep(N, 9);
       note("Il Registro del Municipio, quarto cassetto: Cornelio mi ha dato le chiavi. Un uomo con il cappotto grigio e i guanti bianchi è arrivato in funivia.");
       const rw = reward("vl_ch3", { coins: 50, cos: "vl_stemma_miniera" });
-      X.say(sw([["voce", "CAPITOLO 3 · LA MINIERA DELLA LUCE · CONCLUSO"], ["voce", (rw.length ? rw.join(" · ") + ". " : "") + "Il Capitolo 4 non è ancora pronto: il Registro del Municipio, quarto cassetto, ti aspetta. Nel frattempo puoi tornare in miniera, raccogliere le ultime schegge, giocare la partitella con il Turno di Giorno e parlare con tutti."]], BG.M), done);
+      X.say(sw([["voce", "CAPITOLO 3 · LA MINIERA DELLA LUCE · CONCLUSO"], ["voce", (rw.length ? rw.join(" · ") + ". " : "") + "Il Capitolo 4 ti aspetta: il Registro del Municipio, quarto cassetto. Dal menu di Vallombra scegli «Inizia il capitolo 4». Nel frattempo puoi tornare in miniera, raccogliere le ultime schegge, giocare la partitella con il Turno di Giorno e parlare con tutti."]], BG.M), done);
     }
 
     // ---- oggetti e personaggi
@@ -3001,6 +3028,874 @@
       ],
     };
   });
+
+  // ================================================================== CAPITOLO 4 · IL REGISTRO
+  addChapter(function (X) {
+    const { T, F, say, ask, done, go, note, setStep, reward, hero, esc } = X;
+    const N = 4, S = () => X.stepOf(N), has = (k) => F.is(k);
+    const BG = { P: "vl_paese", C: "vl_campo", M: "vl_miniera", U: "vl_municipio", A: "vl_archivio", Q: "vl_quattro" };
+    const sw = (lines, bg) => lines.map((l) => (l.length > 2 ? l : [l[0], l[1], bg]));
+    const chip = (a) => a[Math.floor(Math.random() * a.length)];
+    const tono = () => F.get("tono", "ironico");
+    const tl = (o) => ["hero", o[tono()] || o.ironico || o.sicuro];
+    const zoneNow = () => X.api.trZone();
+    const inM = () => zoneNow() === "vl_municipio" || zoneNow() === "vl_archivio";
+    const toast = (m) => X.api.trToast(m);
+    const guida = () => F.get("guida", "bianca");
+    const compId = () => (guida() === "agata" ? "vl_agata" : "vl_bianca");
+    const otherId = () => (guida() === "agata" ? "vl_bianca" : "vl_agata");
+    const compName = () => (guida() === "agata" ? "Agata" : "Bianca");
+    const remoId = () => (has("remo_bet") && has("m1_win") ? "vl_remo_ns" : "vl_remo");
+    const ettoreOn = () => F.get("told", "") === "mirtilla";
+    const PH = () => F.get("ph", 0);
+    const delegate = (id) => { const p = X.talkOf(id, N); if (p) p(); else done(); };
+    const bgHere = () => (zoneNow() === "vl_archivio" ? BG.A : zoneNow() === "vl_municipio" ? BG.U : X.bgNow());
+
+    // ---- personaggi nuovi
+    const cast = (id, name, o, bio) => X.cast(id, Object.assign({ name }, o), bio);
+    cast("vl_vermiglio", "Ing. Lucio Vermiglio", { tag: "gray", hair: "#b9bdc9", style: "slick", skin: "#e8d6c4", glasses: true, bg: ["#1c1f2a", "#cfd3dc"], shirt: "#5b6073" }, "Ingegnere della Società Lumen. Cappotto grigio e guanti bianchi, anche d'estate: «per principio, non mi piace lasciare impronte». Parla piano come i medici e come chi non ha mai alzato la voce con nessuno, perché non ne ha mai avuto bisogno.");
+    cast("vl_sigillo", "Avv. Ilaria Sigillo", { tag: "", hair: "#1a1a22", style: "bun", skin: "#d9a57a", glasses: true, bg: ["#2a1f3a", "#c8a2e0"], shirt: "#3a2a5a" }, "L'avvocata della Società Lumen. Fa notare subito che il suo cognome è anche la sua professione, perché i clienti ridono sempre al secondo incontro. Porta un decreto in cartellina e un orologio che va sempre cinque minuti avanti, per gli altri.");
+    cast("vl_corvi", "Ornello Corvi", { tag: "gray", hair: "#d8d8e0", style: "messy", skin: "#e0c6a8", glasses: true, bg: ["#2a2a1f", "#c8b878"], shirt: "#4a4a3a" }, "Segretario comunale in pensione da quindici anni, ma ancora al suo sportello perché nessuno ha avuto il coraggio di dirglielo. Ha la voce di un cancello e il timbro più veloce della valle. Ufficio Anagrafe, Stato Civile, Tributi, Oggetti Smarriti e, il giovedì, Pesi e Misure.");
+    cast("vl_ottavia", "Ottavia Rovedo", { tag: "gray", hair: "#d0d0d8", style: "bun", skin: "#c98f63", bg: ["#3a1f1f", "#e0a23a"], shirt: "#8a3a2a", cap: "#d9a441" }, "Nonna di Bianca. Per quarant'anni minatrice, caposquadra del turno di notte. Dice di essere sopravvissuta «per distrazione». Ogni martedì si siede nell'atrio del Municipio con il numero 15 in mano, e aspetta.");
+    X.lanDef("vl_ottavia", { name: "Ottavia Rovedo", role: "La caposquadra che si dimenticò di contarsi", met: "ottavia_met" });
+    X.cos("vl_stemma_registro", { kind: "acc", label: "Stemma del Registro", val: "#d9a441", from: "Concludi il capitolo 4 di Vallombra" });
+    X.cos("vl_fascia_registro", { kind: "acc", label: "Fascia dell'Archivista", val: "#8a3a4a", from: "Raccogli tutte le schegge di lumina al Municipio" });
+    X.cos("vl_inchiostro", { kind: "hairc", label: "Capelli Inchiostro", val: "#2a4a8a", from: "Raccogli tutte le schegge di lumina nell'Archivio" });
+
+    const mood = (s) => (s >= 5 ? 1 : 0);
+
+    // ---- obiettivi: sempre con la direzione e che cosa cercare
+    const goal = (s) => {
+      if (s === 0) return "Parla con Cornelio, il sindaco, nell'atrio del Municipio (CENTRO, ai piedi dello scalone).";
+      if (s === 1) return "Sala del Consiglio: passaggio a EST dell'atrio. Parla con l'uomo in cappotto grigio, in fondo, vicino al tavolo.";
+      if (s === 2) return "Ufficio Anagrafe: passaggio a OVEST dell'atrio. Parla con Corvi, il segretario, in fondo allo sportello.";
+      if (s === 3) {
+        const ph = PH();
+        if (ph >= 1) return "Archivio, in BASSO a destra: la scena col cassetto IV è in corso. Parla con chi è con te (Corvi, la compagna, i due ospiti).";
+        const miss = [!has("cl_a") ? "bacheca del pianerottolo (ALTO)" : "", !has("cl_b") ? "vetrina del sindaco (Municipio, ufficio a NORD-OVEST)" : "", !has("cl_c") ? "Corvi" : ""].filter(Boolean);
+        if (!has("arch_in")) return "Scendi all'Archivio: scala con la freccia in giù, in ALTO in fondo allo scalone (NORD).";
+        return miss.length ? "Archivio: servono 3 indizi per i 4 tasselli. Cerca: " + miss.join(", ") + "." : "Archivio, in BASSO: metti in ordine i 4 tasselli (a sinistra), poi tira il IV cassetto (a destra).";
+      }
+      if (s === 4) return "Risali nell'atrio: Ottavia Rovedo è seduta sulla panca a EST (lato destro dell'atrio), con il numero 15 in mano.";
+      if (s === 5) return "Esci dal Municipio: cancello con la freccia in giù, in BASSO (SUD) dell'atrio. Fuori in piazza ti aspettano.";
+      return "Capitolo concluso. Il Capitolo 5, a Cima Alta, non è ancora pronto: nel frattempo raccogli le schegge, gioca con gli impiegati e parla con tutti.";
+    };
+
+    // ---- stato dei tasselli (pennino, timbro, sigillo, stemma) e soluzione
+    const SYM = ["Pennino", "Timbro", "Sigillo", "Stemma"], SOL = [0, 2, 3, 1], DISC_MAX = 7;
+    const tw = (i) => F.get("tw" + i, i);
+    const orderStr = () => [0, 1, 2, 3].map((i) => SYM[tw(i)]).join(" · ");
+    const rightN = () => [0, 1, 2, 3].filter((i) => tw(i) === SOL[i]).length;
+
+    // ---- tessere nuove
+    const CASS = ["#c8553d", "#3a6a9c", "#e0a23a", "#e8e0c8", "#5a7a4a", "#7a4a6a"];
+    X.PAINT.S = function (sx, sy, tx, ty) {
+      floorPaint(undAt(tx, ty), sx, sy, tx, ty); P(sx, sy - 2, 16, 18, "#4a3322"); P(sx, sy - 2, 16, 1, "#6a4c30");
+      for (let r = 0; r < 3; r++) {
+        const y = sy + r * 5 + 3; P(sx + 1, y + 1, 14, 1, "#2a1c10");
+        for (let i = 0; i < 7; i++) { const h = 3 + (hash(tx * 7 + ty * 3 + r * 5 + i) % 3); P(sx + 1 + i * 2, y - h + 1, 2, h, CASS[hash(tx * 3 + ty + r * 11 + i * 5) % 6]); }
+      }
+      P(sx, sy + 14, 16, 2, "#00000044");
+    };
+    X.PAINT.T = function (sx, sy, tx, ty, fr) {
+      floorPaint(undAt(tx, ty), sx, sy, tx, ty); const felt = ZX.id === "vl_municipio" && tx >= 28 && ty >= 12;
+      P(sx, sy + 3, 16, 10, felt ? "#2f5a3e" : "#7a4f2a"); P(sx, sy + 3, 16, 2, felt ? "#4a7a58" : "#a8764a"); P(sx, sy + 13, 16, 3, "#00000033");
+      if (!felt) { P(sx + 1, sy + 13, 2, 3, "#4a3322"); P(sx + 13, sy + 13, 2, 3, "#4a3322"); }
+      const k = hash(tx * 5 + ty * 9) % 5;
+      if (k === 0) { P(sx + 3, sy + 5, 6, 5, "#f2e8d0"); P(sx + 4, sy + 6, 4, 1, "#6a5a4a"); P(sx + 4, sy + 8, 3, 1, "#6a5a4a"); }
+      else if (k === 1) { P(sx + 10, sy + 5, 3, 4, "#1c2236"); P(sx + 11, sy + 3, 1, 3, "#e8e0c8"); }
+      else if (k === 2) { P(sx + 4, sy + 5, 8, 3, "#e8e0c8"); P(sx + 5, sy + 6, 5, 1, "#8a7a5a"); }
+    };
+    X.PAINT.B = function (sx, sy, tx, ty, fr) {
+      floorPaint(undAt(tx, ty), sx, sy, tx, ty); const n = tx - 31, open = n === 3 && F.is("cass_open"), g = GP;
+      P(sx, sy - 2, 16, 18, "#56607a"); P(sx, sy - 2, 16, 1, "#8a94b0"); P(sx + 1, sy, 14, 14, "#46506a");
+      P(sx + 2, sy + 2, 12, 11, open ? "#10141f" : "#5a6684"); P(sx + 2, sy + 2, 12, 1, "#7a88a8");
+      if (open) { P(sx + 3, sy + 5, 10, 7, "#e0d8b8"); P(sx + 3, sy + 5, 10, 1, "#b8ae88"); P(sx + 5, sy + 7, 6, 1, "#8a7a5a"); }
+      else { P(sx + 5, sy + 7, 6, 2, "#d8d2b8"); P(sx + 7, sy + 4, 2, 2, "#2a2f44"); }
+      g.fillStyle = "#e8e0c8"; g.font = "bold 5px sans-serif"; g.textAlign = "center"; g.fillText(["I", "II", "III", "IV"][Math.max(0, Math.min(3, n))], sx + 8, sy + 14); g.textAlign = "left";
+      if (n === 3 && !open) { g.save(); g.globalCompositeOperation = "lighter"; glow(g, sx + 8, sy + 8, 14, "255,210,120", 0.22 + 0.06 * Math.sin(fr / 14)); g.restore(); }
+    };
+    X.PAINT.O = function (sx, sy, tx, ty, fr) {
+      floorPaint(undAt(tx, ty), sx, sy, tx, ty); const i = tx - 25, st = tw(Math.max(0, Math.min(3, i))), g = GP, ok = F.is("cass_open");
+      P(sx + 1, sy + 3, 14, 13, "#2a2f44"); P(sx + 1, sy + 3, 14, 1, "#5a6384"); P(sx + 2, sy + 5, 12, 9, "#161a2a");
+      g.save(); g.globalCompositeOperation = "lighter"; g.fillStyle = `rgba(255,210,120,${ok ? 0.34 : 0.14 + 0.05 * Math.sin(fr / 12 + i)})`; g.beginPath(); g.arc(sx + 8, sy + 9, 8, 0, 7); g.fill(); g.restore();
+      if (st === 0) { g.fillStyle = "#e8ecf6"; g.beginPath(); g.moveTo(sx + 8, sy + 5); g.lineTo(sx + 11, sy + 11); g.lineTo(sx + 8, sy + 13); g.lineTo(sx + 5, sy + 11); g.closePath(); g.fill(); P(sx + 8, sy + 7, 1, 4, "#161a2a"); }
+      else if (st === 1) { P(sx + 6, sy + 5, 4, 4, "#c8a26a"); P(sx + 7, sy + 5, 2, 1, "#e8d09a"); P(sx + 4, sy + 9, 8, 3, "#3a2a1c"); P(sx + 4, sy + 9, 8, 1, "#6a4a2c"); }
+      else if (st === 2) { g.fillStyle = "#c8422e"; g.beginPath(); g.arc(sx + 8, sy + 9, 4.5, 0, 7); g.fill(); g.fillStyle = "#8a2a1e"; g.beginPath(); g.arc(sx + 8, sy + 9, 2.4, 0, 7); g.fill(); P(sx + 6, sy + 7, 1, 1, "#ff9a86"); }
+      else { g.fillStyle = "#d9a441"; g.beginPath(); g.moveTo(sx + 4, sy + 5); g.lineTo(sx + 12, sy + 5); g.lineTo(sx + 12, sy + 10); g.lineTo(sx + 8, sy + 14); g.lineTo(sx + 4, sy + 10); g.closePath(); g.fill(); g.fillStyle = "#1b2f7a"; g.beginPath(); g.moveTo(sx + 5, sy + 6); g.lineTo(sx + 11, sy + 6); g.lineTo(sx + 11, sy + 10); g.lineTo(sx + 8, sy + 13); g.lineTo(sx + 5, sy + 10); g.closePath(); g.fill(); P(sx + 8, sy + 7, 1, 3, "#e8ecf6"); }
+      for (let k = 0; k < 4; k++) P(sx + 3 + k * 3, sy + 14, 2, 1, k === st ? "#ffd98a" : "#3a4256");
+    };
+    X.PAINT.J = function (sx, sy, tx, ty, fr) {
+      floorPaint(undAt(tx, ty), sx, sy, tx, ty); const g = GP, stem = ZX.id === "vl_municipio" && tx === 9 && ty === 4;
+      P(sx, sy - 2, 16, 18, "#4a3322"); P(sx + 1, sy - 1, 14, 15, "#10141f"); P(sx + 1, sy - 1, 14, 15, "#9fb8d033");
+      if (stem) { g.fillStyle = "#d9a441"; g.beginPath(); g.moveTo(sx + 3, sy + 1); g.lineTo(sx + 13, sy + 1); g.lineTo(sx + 13, sy + 8); g.lineTo(sx + 8, sy + 13); g.lineTo(sx + 3, sy + 8); g.closePath(); g.fill(); g.fillStyle = "#1b2f7a"; g.beginPath(); g.moveTo(sx + 4, sy + 2); g.lineTo(sx + 12, sy + 2); g.lineTo(sx + 12, sy + 8); g.lineTo(sx + 8, sy + 12); g.lineTo(sx + 4, sy + 8); g.closePath(); g.fill(); g.fillStyle = "#e8ecf6"; g.beginPath(); g.moveTo(sx + 5, sy + 8); g.lineTo(sx + 8, sy + 4); g.lineTo(sx + 11, sy + 8); g.fill(); }
+      else { P(sx + 6, sy + 9, 4, 4, "#d9a441"); P(sx + 5, sy + 4, 6, 5, "#e8c35a"); P(sx + 4, sy + 5, 1, 3, "#e8c35a"); P(sx + 11, sy + 5, 1, 3, "#e8c35a"); P(sx + 6, sy + 5, 1, 2, "#fff1b8"); }
+      P(sx + 2, sy - 1, 1, 15, "#ffffff22");
+    };
+    X.PAINT.L = function (sx, sy, tx, ty, fr) {
+      floorPaint(undAt(tx, ty), sx, sy, tx, ty); P(sx, sy, 16, 16, "#120e0a");
+      for (let i = 0; i < 4; i++) { P(sx + i, sy + i * 4, 16 - i * 2, 3, i % 2 ? "#3a2a1c" : "#4a3626"); P(sx + i, sy + i * 4, 16 - i * 2, 1, "#6a4c30"); }
+      P(sx, sy, 2, 16, "#5a3a22"); P(sx + 14, sy, 2, 16, "#5a3a22"); g2(GP, "d", sx, sy);
+    };
+
+    function vignette(g) { const gr = g.createRadialGradient(160, 100, 40, 160, 100, 190); gr.addColorStop(0, "rgba(2,6,16,0)"); gr.addColorStop(1, "rgba(2,6,16,.58)"); g.fillStyle = gr; g.fillRect(0, 0, 320, 200); }
+    function motes(g, d, n, a) { for (let i = 0; i < n; i++) { const x = ((i * 53 + d.fr * 0.15) % 340) - 10, y = ((i * 71 + Math.sin(d.fr / 60 + i) * 8) % 220) - 10; R(g, x, y, 1, 1, `rgba(${a || "160,255,235"},.5)`); } }
+    function extraLights(g, cx, cy) {
+      g.save(); g.globalCompositeOperation = "lighter"; const t0x = Math.floor(cx / TS), t0y = Math.floor(cy / TS), fr = frNow();
+      for (let ty = t0y; ty <= t0y + 13; ty++) for (let tx = t0x; tx <= t0x + 21; tx++) {
+        const ch = at(tx, ty), x = tx * TS - cx + 8, y = ty * TS - cy + 8;
+        if (ch === "l") glow(g, x, y - 4, 30, ZX.id === "vl_municipio" ? "255,205,130" : "255,200,120", ZX.id === "vl_municipio" ? 0.26 : 0.34);
+        else if (ch === "O") glow(g, x, y, 16, "255,210,120", 0.2);
+        else if (ch === "J") glow(g, x, y, 14, "255,230,170", 0.16);
+        else if (ch === "L") glow(g, x, y, 16, "255,190,110", 0.14);
+      }
+      g.restore();
+    }
+
+    const zones = {
+      vl_municipio: {
+        name: "Vallombra · Il Municipio", short: "Il Municipio", sub: "Sportelli, verbali e un sindaco che non sa sussurrare", w: 36, h: 26, start: [17, 20], theme: "torino", bg: "vl_municipio",
+        item: ["Scheggia di lumina", "Schegge"], itemCos: "vl_fascia_registro", items: [[3, 19], [33, 8], [7, 5], [23, 17]],
+        act: { n: "Leggi", J: "Guarda la vetrina", T: "Guarda la scrivania", S: "Guarda gli scaffali", b: "Guarda la panca", l: "Guarda la lampada", x: "Guarda le casse", L: "Scendi all'Archivio", d: "Esci in piazza" },
+        areas: [[12, 11, 23, 21, "L'atrio"], [15, 4, 20, 10, "Lo scalone"], [6, 4, 13, 9, "L'ufficio del sindaco"], [2, 11, 10, 20, "L'Ufficio Anagrafe"], [25, 7, 34, 21, "La Sala del Consiglio"]],
+        hints: (s) => ({
+          "L'atrio": s >= 5 ? "L'uscita è in BASSO (SUD). Sulla panca a EST, Ottavia." : "Ovest: Anagrafe. Est: Sala del Consiglio. Nord: scalone e scala dell'Archivio. Un albo pretorio e un eliminacode.",
+          "Lo scalone": s >= 3 ? "In fondo, in ALTO, la scala con la freccia in giù porta all'Archivio." : "Una passatoia bordeaux e, in fondo, una scala con la freccia in giù: l'Archivio, chiuso a chiave.",
+          "L'ufficio del sindaco": "Scaffali di discorsi numerati e una vetrina con lo stemma del Comune: la didascalia può servire.",
+          "L'Ufficio Anagrafe": "Uno sportello lungo, scaffali di moduli e Corvi in fondo, a destra. Orario: quando c'è.",
+          "La Sala del Consiglio": "Un lungo tavolo col panno verde, quattordici sedie e lo stemma alla parete. Qui si decide. Quasi.",
+          "Il Municipio": "Il Municipio di Vallombra.",
+        }),
+        intro: [["voce", "Il Municipio di Vallombra ha un orologio sul frontone fermo alle undici e dieci, un cartello «ORARIO DI SPORTELLO: QUANDO C'È» e un odore di cera, di carta e di decisioni rimandate."], ["voce", "L'atrio è una sala col soffitto alto e le panche di legno. A ovest l'Anagrafe, a est la Sala del Consiglio, in fondo allo scalone una scala che scende: l'Archivio."]],
+        npcs: (s) => {
+          const ph = PH(), arch = s === 3 && ph >= 3, o = [{ id: "vl_ottavia", at: [21, 14] }, { id: "vl_corvi", at: [9, 15] }];
+          if (s === 3 && ph < 3) o.push({ id: "vl_cornelio", at: [28, 10] }); else if (!arch) o.push({ id: "vl_cornelio", at: [17, 17] });
+          if (s <= 3 && !arch) o.push({ id: "vl_vermiglio", at: [30, 10] }, { id: "vl_sigillo", at: [32, 10] });
+          if (s <= 2) o.push({ id: compId(), at: [15, 18] });
+          if (s <= 3 && !arch && guida() === "bianca") o.push({ id: "vl_agata", at: [19, 12] });
+          if (s <= 3 && !arch && guida() === "agata") o.push({ id: "vl_bianca", at: [20, 19] });
+          if (s >= 4) o.push({ id: "vl_bianca", at: [19, 15] }, { id: "vl_agata", at: [14, 19] });
+          if (s >= 3 && s <= 5) o.push({ id: "vl_noemi", at: [13, 17] });
+          if (ettoreOn() && s <= 5) o.push({ id: "vl_ettore", at: [13, 14] }, { id: "vl_viola", at: [14, 14] });
+          if (F.get("fosco", "su") !== "giu") o.push({ id: "vl_fosco", at: [21, 19] });
+          return o;
+        },
+        build(L) {
+          const { lay, put } = L;
+          lay(0, 0, 35, 25, "W");
+          lay(12, 11, 23, 21, ","); lay(15, 12, 20, 20, "c");
+          lay(15, 4, 20, 10, ","); lay(17, 5, 18, 10, "c");
+          lay(6, 4, 13, 9, "="); lay(14, 7, 14, 8, "=");
+          lay(2, 11, 10, 20, "="); lay(11, 15, 11, 16, "=");
+          lay(25, 7, 34, 21, "="); lay(27, 9, 32, 19, "c"); lay(24, 14, 24, 15, "=");
+          put(17, 4, "L"); put(18, 4, "L"); put(17, 22, "d"); put(18, 22, "d");
+          // atrio
+          [[22, 13], [22, 14], [22, 15]].forEach(([x, y]) => put(x, y, "b"));
+          put(13, 12, "n"); put(13, 15, "n"); put(13, 11, "J"); put(22, 11, "J");
+          [[13, 20], [22, 20], [15, 11], [20, 11]].forEach(([x, y]) => put(x, y, "l"));
+          // ufficio del sindaco
+          lay(6, 4, 7, 4, "S"); put(9, 4, "J"); lay(8, 6, 10, 6, "T"); put(12, 8, "x"); put(12, 9, "x"); put(13, 9, "x"); put(6, 9, "l");
+          // anagrafe
+          lay(3, 14, 8, 14, "T"); lay(3, 12, 9, 12, "S"); put(2, 17, "x"); put(2, 18, "x"); put(4, 18, "b"); put(5, 18, "b"); put(2, 13, "l"); put(10, 19, "l");
+          // sala del consiglio
+          lay(28, 12, 31, 16, "T"); [[26, 9], [26, 10], [26, 19], [34, 19]].forEach(([x, y]) => put(x, y, "b")); put(30, 7, "n");
+          [[25, 8], [34, 9], [25, 20], [34, 20]].forEach(([x, y]) => put(x, y, "l"));
+        },
+        decor(cx, cy, d) {
+          const g = GP, X_ = d.X, Y_ = d.Y, fr = d.fr;
+          plaque(g, "MUNICIPIO DI VALLOMBRA", X_(17.5) + 8, Y_(11) - 4);
+          plaque(g, "UFFICIO ANAGRAFE · quando c'è", X_(6) + 8, Y_(11) + 2);
+          plaque(g, "SALA DEL CONSIGLIO", X_(29.5) + 8, Y_(7) + 2);
+          plaque(g, "UFFICIO DEL SINDACO", X_(10) + 8, Y_(4) - 2);
+          // l'orologio dell'atrio, fermo alle undici e dieci
+          const ccx = X_(17.5) + 8, ccy = Y_(11) + 9; if (onScr(ccx, ccy)) { g.fillStyle = "#efe6cf"; g.beginPath(); g.arc(ccx, ccy, 6, 0, 7); g.fill(); g.strokeStyle = "#2a2f44"; g.lineWidth = 1; g.stroke(); g.beginPath(); g.moveTo(ccx, ccy); g.lineTo(ccx + Math.sin(0.35) * 5, ccy - Math.cos(0.35) * 5); g.moveTo(ccx, ccy); g.lineTo(ccx + Math.sin(5.5) * 3, ccy - Math.cos(5.5) * 3); g.stroke(); }
+          // il display dell'eliminacode: sempre 14
+          const ex = X_(13) + 8, ey = Y_(15) + 4; if (onScr(ex, ey)) { R(g, ex - 7, ey - 5, 14, 8, "#0a0f1c"); g.fillStyle = "#ff7a4a"; g.font = "bold 7px sans-serif"; g.textAlign = "center"; g.fillText("14", ex, ey + 2); g.textAlign = "left"; }
+          motes(g, d, 6, "255,230,170");
+        },
+        top(cx, cy, d) { const g = GP; moodTint(g); tileLights(g, cx, cy); extraLights(g, cx, cy); },
+      },
+
+      vl_archivio: {
+        name: "Vallombra · L'Archivio", short: "L'Archivio", sub: "Faldoni, polvere e una crepa che brilla", w: 38, h: 26, start: [17, 3], theme: "puntanera", bg: "vl_archivio", moodMin: 1,
+        item: ["Scheggia di lumina", "Schegge"], itemCos: "vl_inchiostro", items: [[8, 14], [34, 16], [27, 22], [20, 3]],
+        act: { n: "Leggi la bacheca", S: "Guarda gli scaffali", T: "Guarda il tavolo", B: "Guarda il cassetto", O: "Gira il tassello", C: "Guarda la lumina", E: "Ascolta la pietra", x: "Guarda le casse", l: "Guarda la lampada", "^": "Risali all'atrio" },
+        areas: [[14, 2, 21, 5, "Il pianerottolo"], [3, 6, 36, 18, "La sala degli scaffali"], [23, 19, 36, 24, "La Sala del Registro"]],
+        hints: (s) => {
+          const d = F.get("disc", 0), ph = PH();
+          return {
+            "Il pianerottolo": "La scala torna all'atrio (ALTO). Sul muro la bacheca con le regole dell'archivista: leggila. Il sindaco, sopra, parla ancora.",
+            "La sala degli scaffali": ph >= 3 ? "Gli ospiti sono scesi: parla con loro." : `Scaffali di faldoni; al CENTRO il tavolo di consultazione. Attraverso il tubo della stufa arriva la voce di Cornelio (minuto ${Math.min(d + 1, DISC_MAX)} di ${DISC_MAX}).`,
+            "La Sala del Registro": has("cass_open") ? "Il IV cassetto è aperto. Parla con chi è con te." : "I 4 tasselli a sinistra (toccali per cambiare simbolo), l'armadio a destra: il IV cassetto è l'ultimo.",
+            "L'Archivio": "L'Archivio comunale, sotto il Municipio.",
+          };
+        },
+        intro: [
+          ["voce", "La scala scende per ventitré gradini, ciascuno con un'opinione diversa sull'umidità. In fondo, un pianerottolo, una lampada appesa a un gancio e un odore di cantina, di carta vecchia e di qualcosa di tiepido che non dovrebbe esserci."],
+          ["voce", "L'Archivio è una sala lunga come un fienile, con scaffali fino al soffitto e faldoni etichettati a mano: «TRIBUTI 1962», «CANI (CENSIMENTO)», «LAMENTELE (VARIE)», «LAMENTELE (VARIE II)». Nel muro, a est, una crepa fa trasudare una luce turchese: la lumina è arrivata fin qui, passando sotto le case."],
+          ["voce", "Dal soffitto, attraverso il tubo della stufa, scende ovattata la voce di Cornelio: «…e dunque, riassumendo il mio riassunto…»"],
+        ],
+        npcs: (s) => {
+          const ph = PH(), o = [];
+          if (s >= 3 && ph < 7) {
+            const c = compId();
+            if (ph === 0) o.push({ id: c, at: [19, 4] });
+            else o.push({ id: c, at: [27, 22] });
+            if (ph >= 2 && ph < 7) o.push({ id: "vl_corvi", at: [30, 22] });
+            if (ph >= 3 && guida() === "bianca") o.push({ id: "vl_agata", at: [25, 22] });
+            if (ph >= 3) o.push({ id: "vl_vermiglio", at: [26, 18] }, { id: "vl_sigillo", at: [31, 18] }, { id: "vl_cornelio", at: [33, 18] });
+          }
+          return o;
+        },
+        build(L) {
+          const { lay, put } = L;
+          lay(0, 0, 37, 25, "a");
+          lay(14, 2, 21, 5, "i"); put(17, 1, "^"); put(18, 1, "^");
+          lay(3, 6, 36, 18, "i");
+          lay(29, 19, 30, 19, "i"); lay(24, 20, 35, 24, "i");
+          lay(3, 6, 13, 6, "S"); lay(22, 6, 36, 6, "S");
+          [6, 10, 24, 28, 32].forEach((x) => { lay(x, 8, x, 12, "S"); lay(x, 15, x, 17, "S"); });
+          lay(14, 13, 18, 14, "T");
+          lay(25, 24, 28, 24, "O"); lay(31, 24, 34, 24, "B");
+          put(15, 5, "n");
+          [[14, 3], [21, 3], [3, 10], [36, 10], [3, 17], [36, 17], [24, 21], [35, 21]].forEach(([x, y]) => put(x, y, "l"));
+          [[36, 13], [3, 13], [24, 23], [35, 23]].forEach(([x, y]) => put(x, y, "C"));
+          [[12, 17], [12, 16], [20, 17]].forEach(([x, y]) => put(x, y, "x"));
+          [[35, 8], [4, 12]].forEach(([x, y]) => put(x, y, "E"));
+        },
+        decor(cx, cy, d) {
+          const g = GP, X_ = d.X, Y_ = d.Y;
+          plaque(g, "ARCHIVIO COMUNALE", X_(17.5) + 8, Y_(2) + 2);
+          plaque(g, "REGISTRO · I-IV", X_(31) + 32, Y_(23) + 2);
+          plaque(g, "TASSELLI", X_(25) + 32, Y_(23) + 2);
+          motes(g, d, 18);
+        },
+        top(cx, cy, d) { const g = GP; moodTint(g); tileLights(g, cx, cy); extraLights(g, cx, cy); vignette(g); },
+      },
+    };
+
+    // ---- ritocchi alle zone dei capitoli precedenti (attivi quando il capitolo 4 è sbloccato)
+    X.patch("vl_paese", N, {
+      act: { w: "Entra nel Municipio" },
+      hints: () => ({ "Vallombra Alta": "Il Municipio ha la porta blu sul lato destro della piazza, in basso (SUD-EST), sotto il tetto con la neve." }),
+      build(L) { L.put(32, 18, "w"); },
+      decor(cx, cy, d) { plaque(GP, "MUNICIPIO", d.X(32) + 8, d.Y(16) + 6); },
+      npcs: (list, s) => list.filter((n) => !(n.id === "vl_noemi" && s >= 3 && s <= 5)),
+    });
+
+    // ================= scene
+    const cornelioInfo = () => F.get("cornelio_t", "silenzio");
+
+    // ---- atrio: Cornelio e l'inizio
+    function cornelio() {
+      if (!inM()) return delegate("vl_cornelio");
+      const z = zoneNow(), s = S();
+      if (z === "vl_archivio") return arcTalk("vl_cornelio");
+      if (s === 0) return cornelioStart();
+      if (s === 1) return say(sw([["vl_cornelio", "Alla Sala del Consiglio, a est. Guarda l'ingegnere e non nominare il cassetto: l'educazione, con certa gente, è un'arma. Io intanto limo il discorso. Sono a tre pagine e mezza, ho tagliato il paragrafo sulle marmotte."]], BG.U), done);
+      if (s === 2) return say(sw([["vl_cornelio", "Corvi è a ovest, all'Anagrafe, dietro lo sportello. Non chiamarlo «signor Corvi», non chiamarlo «segretario»: chiamalo «dottore». Si offende, ma si ammorbidisce."]], BG.U), done);
+      if (s === 3) return say(sw([["vl_cornelio", chip(["(senza fermarsi, con la mano che fa un cerchio) …e quindi, passando al terzo punto del mio secondo punto, che è in realtà il quarto…", "(a voce bassa, tra una frase e l'altra) Quanti minuti? Dimmi che ne ho ancora. Ho già detto tutto quel che so della storia del larice.", "(solenne, voltandosi verso la Sala) …e per concludere il preambolo, che si distingue dalla premessa per un'unghia…"])]], BG.U), done);
+      const o = [{ label: "Come stai, sindaco?", fn: () => say(sw([["vl_cornelio", s >= 5 ? chip(["Ho parlato dodici minuti, ieri. Quello che non ho detto, stavolta, l'hanno detto i fogli. Mi sento come un cappello che ha finalmente trovato la testa.", "Non sono più il sindaco dei discorsi lunghi. Sono il sindaco di una cosa sola: il cassetto. Ci si abitua."]) : chip(["Dopo un discorso di quel genere ho il fiato di un soffietto bucato. Ma la voce, per una volta, era solo mia.", "Ho incrociato lo sguardo di Corvi, in archivio. Siamo due vecchi ladri di silenzio che si guardano. Non è un legame; è un'assicurazione."])]], BG.U), done) }];
+      ask("vl_cornelio", s >= 5 ? "«Siamo ancora qui. È già una vittoria da bar.»" : "«Dimmi, dimmi. Ho la voce sciolta e la coscienza ancora in lavorazione.»", o, BG.U);
+    }
+    function cornelioStart() {
+      const t = cornelioInfo(), fun = F.get("funivia", "aperta");
+      const dorm = t === "verita" ? "Dopo la piazza ho dormito tre ore. Per un sindaco è un record: di solito dormo in consiglio." : t === "comp" ? "Ho dormito con il guanto sul comodino. Il sogno aveva un finale, per una volta, ed era noiosissimo: nessuno mi chiamava vigliacco." : "Non ho dormito. Ho preparato un discorso di quattro minuti e mezzo, il più breve della mia carriera. Mi sento svenire.";
+      say(sw([
+        ["voce", "L'atrio del Municipio profuma di cera e di decisioni rimandate. Cornelio ti aspetta ai piedi dello scalone, con la fascia tricolore messa di sbieco e un fascio di fogli sotto il braccio. Ha l'aria di chi ha provato un discorso, l'ha buttato e ne ha trovato uno più corto."],
+        ["vl_cornelio", dorm],
+        ["vl_cornelio", "Sono arrivati stamattina, con la prima corsa. Due. L'uomo coi guanti bianchi è l'ingegner Lucio Vermiglio, della Società Lumen: la stessa che ventisei anni fa chiuse la miniera «per esaurimento del filone». Con lui un'avvocata, la dottoressa Ilaria Sigillo, e un decreto: «verifica conservativa dell'archivio comunale», efficace da mezzogiorno. Dopo mezzogiorno, quel che sta nell'archivio è «sotto sigillo»: non si tocca, non si legge, non si porta via."],
+        ["vl_cornelio", fun === "chiusa" ? "Teodora giura che la funivia era chiusa con tre lucchetti. La cabina li ha ignorati con una certa eleganza." : "Teodora ha tenuto la funivia aperta, come avevi voluto. Nel registro ha segnato «ARRIVATO» a matita, in segno di dubbio."],
+        tl({ sicuro: "Allora non c'è tempo da perdere. Cominciamo.", attento: "Guanti bianchi, mezzogiorno, un decreto. Chi arriva con tanto anticipo vuole anticipare qualcuno.", ironico: "Un decreto con orario: la burocrazia ha finalmente trovato qualcosa da rispettare." }),
+        ["vl_cornelio", "Il quarto cassetto del Registro ha due serrature. Questa (la chiave col nastro rosso, quella che hai) apre la porta dell'Archivio, in fondo allo scalone. Il cassetto si apre con una combinazione di quattro tasselli, e la combinazione la sapeva uno solo: il segretario comunale, Corvi. Corvi è in pensione da quindici anni, ma è ancora allo sportello, perché nessuno ha avuto il cuore di dirglielo."],
+        ["vl_cornelio", "Prima di tutto, però, vai a guardare l'uomo. La Sala del Consiglio è a est. Non nominare il cassetto: guarda, ascolta, sii educato. Io intanto preparo l'unica arma che ho: un discorso. Sette minuti, se mi lasciano. Dopo, se serve, ne invento altri."],
+      ], BG.U), () => { setStep(N, 1); note("Cap. 4: alla Società Lumen serve l'archivio prima di mezzogiorno. Cornelio mi manda a guardare l'ingegnere, nella Sala del Consiglio (EST)."); done(); });
+    }
+
+    // ---- la Sala del Consiglio: Vermiglio e Sigillo
+    function vermiglio() {
+      if (!inM()) return done();
+      const z = zoneNow(), s = S();
+      if (z === "vl_archivio") return arcTalk("vl_vermiglio");
+      if (s === 0) return say(sw([["vl_vermiglio", "Il sindaco è nell'atrio, mi dicono. Parli prima con lui, mi raccomando: sono un uomo che rispetta le gerarchie. Dopo venga pure. Mi trova qui. Il Municipio, a quest'ora, è l'unico posto in cui si sta in piedi con comodo."]], BG.U), done);
+      if (s === 1) return vermiglioPrima();
+      return say(sw([["vl_vermiglio", chip(["Il tempo, {n}, è l'unica cosa che un archivio possieda in abbondanza. Lo usi bene: a mezzogiorno si chiude.", "Ho sentito che il sindaco ha preso la parola. Un oratore di razza: ne ho conosciuti pochi capaci di parlare tanto senza lasciare traccia.", "Prego, si accomodi. Le sedie del Consiglio sono comode, e l'ho sempre trovato indicativo."])]], BG.U), done);
+    }
+    function vermiglioPrima() {
+      const fun = F.get("funivia", "aperta"), arb = F.get("arbitro", "prag");
+      say(sw([
+        ["voce", "La Sala del Consiglio ha un lungo tavolo col panno verde, quattordici sedie, lo stemma del Comune alla parete e un'aria di verbali che si ripetono. In fondo, in piedi accanto alla finestra, un uomo in cappotto grigio guarda il Latte come si guarda un bilancio. Ha i guanti bianchi, uno dei quali sta sistemando con cura sull'altro."],
+        ["vl_vermiglio", fun === "chiusa" ? "Mi dicono che la funivia fosse chiusa. L'ho trovata ugualmente disponibile. A Vallombra le cose sono più accomodanti delle persone." : "Ottima, la vostra funivia. La cabina è salita da sola, a quanto pare: ero l'unico passeggero e l'unico a non sorprendermene."],
+        ["vl_sigillo", "Dottoressa Ilaria Sigillo, studio legale Sigillo & Sigillo. Il mio cognome è anche la mia professione. Lo faccio notare subito, perché i clienti ridono sempre al secondo incontro."],
+        ["vl_vermiglio", "Lucio Vermiglio, ingegnere. Società Lumen. Lei è il Campione, {n}. Ho sentito il suo nome alla radio, ieri sera, alle diciotto e quarantatré. Strano: i nomi, di solito, li conosco prima che qualcuno li pronunci."],
+        ["vl_vermiglio", "Mi chiedevo cosa facesse un campione in una valle che ha dimenticato il calcio. Poi ho letto il suo numero: {num}. Ho pensato: ecco, un numero che non compare in nessuna formazione. È un difetto di compilazione, immagino. Si corregge con una nota a margine."],
+        ["voce", "Parla piano, come i medici e come chi non ha mai alzato la voce con nessuno perché non ne ha mai avuto bisogno. Non sorride: sistema l'angolo della bocca, ogni tanto, come si raddrizza un quadro."],
+        ["vl_sigillo", "Mezzogiorno, Campione. Il decreto è efficace a mezzogiorno. Dopo quell'ora, l'archivio e il suo contenuto sono sotto sequestro conservativo. Per la «bonifica documentale». Siamo molto fieri del termine."],
+        ["vl_vermiglio", "I guanti? Per principio. Non mi piace lasciare impronte."],
+      ], BG.U), () => ask("voce", "L'ingegnere ti guarda e aspetta, come chi sa già cosa dirai e vuole sentirlo lo stesso. Cosa rispondi?", [
+        { label: "«Vallombra non ha niente da nascondere, ingegnere.»", sub: "Fermo", fn: () => vermP("fermo") },
+        { label: "«Lei c'era, ventisei anni fa.»", sub: "Accusa", fn: () => vermP("accuso") },
+        { label: "«I guanti: per il pane o per il sarto?»", sub: "Ironia", fn: () => vermP("ironia") },
+      ], BG.U));
+      void arb;
+    }
+    function vermP(w) {
+      F.set("verm", w);
+      const a = w === "fermo" ? [["vl_vermiglio", "Nessuno ha niente da nascondere. È solo che alcuni lo nascondono meglio, e altri lo nascondono in un cassetto. Il tempo, poi, fa il resto: lo trasforma in cassetto per tutti."]]
+        : w === "accuso" ? [["voce", "Per un istante, appena, l'angolo della bocca dell'ingegnere non si raddrizza."], ["vl_vermiglio", "Ero giovane e molto zelante. Ricordo la partita: un disastro sportivo. La squadra se ne andò dal campo prima del fischio. Non è una colpa: è un fatto, e i fatti, a differenza delle opinioni, hanno il pregio di non invecchiare."]]
+          : [["vl_vermiglio", "Per il pane. Lo mangio tre volte l'anno, in occasioni solenni. Il resto del tempo mi nutro di contratti."], ["vl_sigillo", "Il pane è un contratto, in fondo: farina contro denaro. Lo dico per il verbale."]];
+      say(sw([...a,
+        ["vl_vermiglio", "A mezzogiorno il Comune ci consegnerà l'archivio. Se ha qualcosa da cercare, {n}, ha tempo fino ad allora. La gentilezza, a Vallombra, si misura all'orario: mi dicono che sia l'unica moneta che non si svaluta."],
+        ["voce", "Esci dalla Sala con la sensazione di aver parlato con una persona che ha appena smesso di sorridere per rispetto di te. Fuori, Cornelio ti fa un cenno: l'Anagrafe, a ovest."],
+      ], BG.U), () => {
+        setStep(N, 2); note("L'ing. Lucio Vermiglio (guanti bianchi) e l'avv. Sigillo: sequestro conservativo dell'archivio a mezzogiorno. Mi serve Corvi, all'Anagrafe (OVEST), per la combinazione.");
+        done();
+      });
+    }
+    function sigillo() {
+      if (zoneNow() === "vl_archivio") return arcTalk("vl_sigillo");
+      say(sw([["vl_sigillo", chip(["Il decreto non ammette repliche prima di mezzogiorno. Dopo mezzogiorno non ammette nemmeno la parola «replica».", "Ho cinque minuti di anticipo sull'orologio e dodici di vantaggio sulla vostra pazienza. Non è una minaccia: è un'agenda.", "Non ho nulla contro i campioni. Ho molto contro i cassetti che si aprono da soli."])]], BG.U), done);
+    }
+
+    // ---- l'Anagrafe: Corvi
+    function corvi() {
+      if (!inM()) return delegate("vl_corvi");
+      const z = zoneNow(), s = S();
+      if (z === "vl_archivio") return arcTalk("vl_corvi");
+      if (s <= 1) return say(sw([["vl_corvi", "Prossimo! No, aspetti. Non è il suo turno. Non è il turno di nessuno. Torni quando ha parlato con il sindaco: e non mi faccia quella faccia, ho le palpebre allenate."]], BG.U), done);
+      if (s === 2) return corviScena();
+      const o = [
+        { label: "Ripetimi la regola", sub: "Il sigillo e il timbro", fn: () => say(sw([["vl_corvi", "Il sigillo non va mai accanto al timbro: la ceralacca si macchia. Una regola semplice, scritta nel 1981. Nessuno l'ha mai letta; tutti l'hanno rispettata per sbaglio."]], BG.U), done) },
+        { label: "Il Modulo 27-bis?", fn: () => say(sw([["vl_corvi", chip(["Il 27-bis esiste, ora. Ne ho stampate tre copie e le ho archiviate sotto «Varie, ma importanti».", "Il 27-bis l'ho inventato apposta. Verrà sicuramente ricordato come il più breve e il più inutile degli atti della mia carriera."])]], BG.U), done) },
+      ];
+      if (s >= 4) o.push({ label: "Sfida: Anagrafe contro Tributi", sub: "Un tempo, nel cortile del Municipio", fn: matchImpiegati });
+      ask("vl_corvi", s >= 4 ? "«Il cassetto è aperto, il sindaco ha parlato. Ho un po' di tempo libero, per la prima volta dal 1998.»" : "«Siediti sulla sedia bassa: serve a farti sentire più piccolo del regolamento.»", o, BG.U);
+    }
+    function corviScena() {
+      say(sw([
+        ["voce", "Lo sportello dell'Ufficio Anagrafe è lungo come un banco di macelleria. Dietro, un uomo molto magro con un timbro in ogni mano e una cesoia a ghigliottina per i moduli. Sul vetro un cartello: «ORARIO: QUANDO C'È. CHIUSO PER LUTTO TUTTI I GIOVEDÌ». Il campanello è una campana da mucca. Non la suoni: lo guardi, e lui timbra qualcosa a caso per farti capire che c'è."],
+        ["vl_corvi", "Prossimo! (non alza gli occhi) Modulo 27-bis in triplice copia, marca da bollo, fotografia a mezzo busto e una ragione di vita."],
+        tl({ sicuro: "Non ho il 27-bis. Ho una chiave.", attento: "Il 27-bis non risulta in nessun elenco dei moduli comunali.", ironico: "La ragione di vita ce l'ho. La marca da bollo me la presta qualcuno?" }),
+        ["vl_corvi", "Il 27-bis non esiste. L'ho inventato adesso, e infatti non ne ho una copia. Ornello Corvi, segretario comunale dal 1981. In pensione dal 2009, ma nessuno ha avuto il coraggio di dirmelo: ci ha pensato l'orario, e l'orario, quassù, non si sa più chi lo faccia."],
+        ["voce", "Gli mostri la chiave di ferro col nastro rosso. Il timbro che stava per calare si ferma a mezz'aria, come un gabbiano che ha sentito un rumore."],
+        ["vl_corvi", "…La chiave del sindaco. Quella del cassetto IV. (posa i timbri, uno per uno, come si posano le armi) L'ultima volta che l'ho vista in giro ero più giovane di tutti. Adesso sono più vecchio di tutti. In mezzo c'è stato un quarto di secolo di niente."],
+        ["vl_corvi", "Per aprire un cassetto ci vuole «legittimo interesse», e l'interesse si prova con una prova. Che prova ha, giovane?"],
+      ], BG.U), () => {
+        const o = [];
+        if (has("fischietto")) o.push({ label: "Il fischietto dei minatori", sub: "Me l'ha dato Cornelio", cls: "hot", fn: () => corviProva("fischietto") });
+        o.push({ label: "La parola dell'arbitro", sub: "«Quarto cassetto, prima che arrivino»", cls: "hot", fn: () => corviProva("arbitro") });
+        o.push({ label: "Il mio nome sulla fotografia", sub: "In inchiostro di lumina, anno 1998", cls: "hot", fn: () => corviProva("foto") });
+        if (has("maglia_vista")) o.push({ label: "La maglia bianca col mio numero", sub: "«Per chi arriva»", cls: "hot", fn: () => corviProva("maglia") });
+        ask("vl_corvi", "«Allora? Il regolamento è chiaro: una prova.»", o.slice(0, 4), BG.U);
+      });
+    }
+    function corviProva(k) {
+      F.set("corvi_prova", k);
+      const a = {
+        fischietto: ["vl_corvi", "(lo prende con due dita, come si prende un uccello) Il fischietto del turno di notte. L'ho sentito suonare una volta sola, e quella volta non sono riuscito a uscire dall'ufficio per ore. Va bene: legittimo. Più che legittimo."],
+        arbitro: ["vl_corvi", "Gaudenzio. (la voce gli si incrina e diventa il gracchio più umano che tu abbia mai sentito) Lui l'ha detto? Allora anche lui ha ancora una voce, da qualche parte. Io non l'ho più sentita da quando venne a consegnarmi il referto, tremando come un fischietto nel vento."],
+        foto: ["vl_corvi", "Il suo nome, in lumina. (lunga pausa) Quella fotografia ha una dedica sul retro, lo sapeva? «A chi arriva.» L'ha scritta Aurelio Brinzi di suo pugno, con la mia penna. Gliel'avevo prestata. Non me l'ha mai restituita."],
+        maglia: ["vl_corvi", "Il numero tredici. Aurelio venne da me, quel mattino, a chiedere se si potesse registrare all'anagrafe un giocatore che non c'era ancora. Gli dissi di no, per regolamento. Lui rise e disse: «Allora lo registro io»."],
+      }[k];
+      say(sw([a,
+        ["vl_corvi", "Va bene. Il cassetto IV si apre con quattro tasselli: Pennino, Timbro, Sigillo e Stemma, le quattro cose di una scrivania onesta. L'ordine lo stabilii io, nel 1981, in un regolamento che nessuno ha mai letto. Una regola ve la dico gratis perché la ceralacca mi sta antipatica: il sigillo non va mai accanto al timbro, o si macchia. Le altre due sono scritte: una sul pianerottolo dell'Archivio, e una, dicono, nella vetrina del sindaco. Cornelio la legge ogni mattina senza sapere cosa legge."],
+        ["vl_corvi", "Un'altra cosa. Ho scritto una bugia, una volta. La racconterò quando sarà il momento, se avrò il coraggio. E se avrete ancora tempo."],
+        ["voce", "La campana da mucca suona da sola, un colpo. Corvi la guarda con rimprovero, come un cane che abbia parlato fuori turno."],
+      ], BG.U), () => {
+        F.set("cl_c", true); setStep(N, 3);
+        note("Regola di Corvi: il sigillo non va mai accanto al timbro. I tasselli sono Pennino, Timbro, Sigillo e Stemma. Altri indizi: bacheca dell'Archivio e vetrina del sindaco.");
+        done();
+      });
+    }
+
+    // ---- oggetti dell'atrio e degli uffici
+    function oggettoMuni({ ch, tx, ty }) {
+      const T_ = {
+        n: () => (tx === 13 && ty === 12 ? "L'albo pretorio. «AVVISO: la via principale resta chiusa al transito fino a data da destinarsi. Il transito, nel frattempo, è invitato a non transitare.» Sotto, a penna: «L'abbiamo chiusa due volte, la via, e due volte si è riaperta da sola»." : tx === 13 && ty === 15 ? "L'eliminacode: un totem rosso con un display che segna «14» da ventisei anni. Il biglietto successivo sporge dalla fessura, il numero 15, ingiallito. Su un lato qualcuno ha scritto a pennarello: «È inutile aspettare. Aspetto lo stesso»." : "L'ordine del giorno della Sala del Consiglio. Punto 1: approvazione del verbale. Punto 2: approvazione del verbale del verbale. Punto 3: varie ed eventuali. Punto 4: il punto 3."),
+        J: () => (tx === 9 && ty === 4 ? null : "Una vetrina con tre Coppe dei Tre Versanti: due di latta, una d'argento. Il cartellino dice: «Vinte dai nostri». Sotto, in piccolo, a matita: «(i nostri, quando erano più numerosi)»."),
+        T: () => (ty === 14 ? "Lo sportello lungo dell'Anagrafe: timbri in fila come soldatini, un registro dei nati, un registro dei morti e uno dei «né l'uno né l'altro (varie)»." : ty === 6 ? "La scrivania del sindaco: una pila di discorsi con un fermacarte a forma di larice. Il discorso in cima s'intitola «Sulla necessità, o forse sull'inutilità, dell'idea di rotatoria»." : "Il lungo tavolo del Consiglio, col panno verde consumato davanti a ogni sedia. Ogni sedia ha una targhetta; quella del sindaco ha un cuscino."),
+        S: () => (ty === 12 ? "Scaffali di moduli: «NASCITA», «MORTE», «ORTI (PERMESSI)», «ORTI (DIVIETI)», «VARIE», «VARIE (RIPOSTE)». Un modulo ha un post-it: «NON COMPILARE. Già compilato da te»." : "Gli scaffali del sindaco: discorsi rilegati in tela, numerati e datati. Il n. 11 si intitola «Perché non parlo mai dei fatti»."),
+        b: () => (ty >= 13 && ty <= 15 && tx === 22 ? "Una panca di legno consumata dall'attesa. In mezzo ci si siede in tre, ai lati in due, e al centro, per tradizione, c'è sempre una sedia di meno." : "Una panca. Il legno ha un solco a forma di persona, e il solco ha l'aria di aspettare qualcuno."),
+        l: () => "Una lampada a olio col vetro appannato e dentro un seme di lumina che batte piano. Le lampade del Municipio non si spengono mai: dicono sia per risparmiare sul fiammifero.",
+        x: () => "Scatoloni di discorsi del sindaco, numerati e datati dal 1998 a oggi. Su uno c'è scritto «DA NON RILEGGERE», su un altro «DA NON RILEGGERE MAI», su un terzo, a matita: «ma rileggere questo».",
+      }[ch];
+      if (ch === "J" && tx === 9 && ty === 4) return clueB();
+      const txt = T_ ? T_() : null; if (!txt) return done();
+      say(sw([["voce", txt]], BG.U), done);
+    }
+    function clueB() {
+      const first = !has("cl_b"); F.set("cl_b", true);
+      say(sw([
+        ["voce", "La vetrina del sindaco custodisce lo stemma del Comune, esposto dal 1931: uno scudo blu con la montagna bianca e una lampada turchese. Sotto, una didascalia ingiallita, scritta a penna d'oca."],
+        ["voce", "«LO STEMMA STA NEL MEZZO: NÉ PRIMO, NÉ ULTIMO. IL COMUNE NON APRE IL CAMMINO E NON LO CHIUDE: LO ACCOMPAGNA.»"],
+        ...(first ? [["hero", "Né primo né ultimo. Il Comune sta in mezzo, come sempre."]] : []),
+      ], BG.U), () => { note("Vetrina del sindaco: lo Stemma sta nel mezzo, né primo né ultimo."); done(); });
+    }
+    function esci() {
+      const s = S();
+      go("vl_paese", 32, 19);
+      if (s === 5 && !has("fin4")) return finaleHook();
+      X.api.trToast("Di nuovo in piazza");
+    }
+
+    // ---- verso l'Archivio
+    function scala() {
+      const s = S();
+      if (s < 3) return say(sw([["voce", "La porta dell'Archivio ha una serratura grossa come un pugno e un cartello: «ACCESSO SU AUTORIZZAZIONE DEL SEGRETARIO». Con la chiave del sindaco puoi aprirla, ma Corvi non ti ha ancora autorizzato: parla prima con lui, a ovest."]], BG.U), done);
+      if (s >= 4) return go("vl_archivio", 17, 3);
+      if (!has("arch_in")) return archStart();
+      go("vl_archivio", 17, 3);
+    }
+    function archStart() {
+      F.set("arch_in", true);
+      say(sw([
+        ["voce", "Giri la chiave col nastro rosso. La serratura scatta con un suono di ossa che si rimettono a posto. Dalla Sala del Consiglio, a est, si sente aprire una porta: è Cornelio, con il fascio di fogli e il fiato pieno."],
+        ["vl_cornelio", "(a voce altissima, per coprire il rumore della scala) SIGNORI! SIGNORE! EGREGIA AVVOCATA! INGEGNERE! PERMETTETEMI, PRIMA DI OGNI VERIFICA, UN BREVE INCISO SULLA STORIA DI QUESTO COMUNE, CHE CONTA MILLECENTO METRI DI ALTITUDINE E NOVECENTOQUARANTATRÉ ANNI DI SFORTUNA AMMINISTRATIVA!"],
+        ["vl_vermiglio", "(da dietro la porta, con un tono di gentilezza chirurgica) Il sindaco ha un'eloquenza di cui ero stato avvisato."],
+        ["vl_sigillo", "Segno l'ora."],
+        ["vl_cornelio", "(in lontananza, già nel mezzo del primo paragrafo) …E DUNQUE, nel trecentoquindicesimo anno dalla fondazione del primo lampione…"],
+        ["voce", "La porta si chiude. Hai il tempo di un discorso: sette minuti, se Cornelio tiene. Scendi."],
+      ], BG.U), () => { note("Cornelio tiene a bada l'ingegnere con un discorso di sette minuti. Ho il tempo di aprire il cassetto IV, giù in Archivio."); go("vl_archivio", 17, 3); });
+    }
+
+    // ---- l'Archivio: indizi e oggetti
+    function bacheca() {
+      const first = !has("cl_a"); F.set("cl_a", true);
+      say(sw([
+        ["voce", "Una bacheca di sughero sul pianerottolo, con un solo foglio ingiallito, scritto in una grafia a macchina da scrivere e rifinito a penna."],
+        ["voce", "«REGOLE DELL'ARCHIVISTA (ed. 1981). 1. Prima si scrive, col pennino. 2. Poi si chiude, col sigillo. 3. Poi si convalida, col timbro. 4. Non si salta mai un passaggio: nemmeno per fretta, nemmeno per amore.» In calce, a mano: «O. C.»."],
+        ...(first ? [[compId(), guida() === "bianca" ? "Pennino, sigillo, timbro. Come montare un motore: prima si smonta, poi si ingrassa, poi si dice che è colpa di qualcun altro." : "Un ordine di tre passaggi. Lo annoto: è un vincolo, e un vincolo è l'inizio di ogni soluzione."]] : []),
+      ], BG.A), () => { note("Bacheca dell'Archivio: prima il Pennino, poi il Sigillo, poi il Timbro."); done(); });
+    }
+    function lockHint() {
+      const miss = [!has("cl_a") ? "la bacheca sul pianerottolo (ALTO)" : "", !has("cl_b") ? "la vetrina nell'ufficio del sindaco (al piano di sopra, NORD-OVEST)" : "", !has("cl_c") ? "Corvi" : ""].filter(Boolean);
+      if (miss.length) return `Ci mancano indizi: ${miss.join(", ")}.`;
+      return "Abbiamo tutto: prima il pennino, poi il sigillo, poi il timbro; lo stemma sta in mezzo (né primo né ultimo); il sigillo non tocca il timbro. Prova a metterli in fila da sinistra a destra.";
+    }
+    function tassello({ tx }) {
+      const i = tx - 25; if (i < 0 || i > 3) return done();
+      if (has("cass_open")) return say(sw([["voce", "I tasselli sono fermi nell'ordine giusto: Pennino, Sigillo, Stemma, Timbro. Il cassetto, adesso, non fa più storie."]], BG.A), done);
+      const press = () => { F.set("tw" + i, (tw(i) + 1) % 4); done(); toast("Tasselli: " + orderStr()); };
+      if (!has("tw_seen")) {
+        F.set("tw_seen", true);
+        return say(sw([
+          ["voce", "Quattro tasselli di ottone su quattro pedane, appoggiati a una lastra di marmo: ciascuno mostra un simbolo che cambia a ogni tocco. Pennino, Timbro, Sigillo, Stemma. Quattro posti, quattro simboli, un ordine solo."],
+          [compId(), guida() === "bianca" ? "Sono ruote dentate senza dentini. Ci vuole l'ordine giusto: devono incastrarsi da sinistra a destra, uno dopo l'altro, senza ripetizioni. Se sbagli, il cassetto lo sente." : "Una permutazione di quattro elementi: ventiquattro combinazioni. Con gli indizi, una sola. Ma ogni tentativo sbagliato costa: sopra, Cornelio sta bruciando i suoi minuti."],
+          ["voce", "Il tentativo si fa al cassetto IV, a destra: se i tasselli non sono giusti ti dice quanti sono al posto giusto. Ma ogni prova sbagliata è un minuto di discorso in meno."],
+        ], BG.A), press);
+      }
+      press();
+    }
+    function armadio({ tx }) {
+      const n = tx - 31; if (n < 0 || n > 3) return done();
+      if (n < 3) return say(sw([["voce", ["Il cassetto I: «FESTE PATRONALI 1971-1994». Dentro, quattordici programmi a stampa e una nota: «Il fuoco d'artificio del '84 non è stato un incidente ma una sorpresa».", "Il cassetto II: «OBBLIGAZIONI DEL COMUNE». Dentro, solo ricevute di cioccolata e una cambiale in lire a nome di un certo «Brumasecca, C.».", "Il cassetto III: «LAMENTELE (DEFINITIVE)». È pieno. Nessuno ha mai osato aprire il V."][n]]], BG.A), done);
+      if (has("cass_open")) return say(sw([["voce", "Il IV cassetto è aperto e vuoto. Sul fondo, un cerchio più chiaro nella polvere, dove stavano i fascicoli. Li hai in tasca, o li ha chi li ha."]], BG.A), done);
+      const k = rightN(), d = F.get("disc", 0);
+      if (k === 4) return aperto();
+      const nd = F.add("disc", 1);
+      const frase = k === 0 ? "Il cassetto non si muove: nessun tassello al posto giusto." : `Il cassetto vibra, poi si ferma: ${k} tassell${k === 1 ? "o" : "i"} su 4 al posto giusto.`;
+      void d;
+      const dopo = () => { done(); toast(`Minuto ${Math.min(nd + 1, DISC_MAX)} di ${DISC_MAX} del discorso`); };
+      if (nd >= DISC_MAX) return say(sw([["voce", frase], ["voce", "Dal soffitto la voce di Cornelio si spezza: «…e con questo… signori… io… (tossisce)». Silenzio. Poi passi sulla scala."]], BG.A), () => { F.set("tardi", true); F.set("ph", 1); F.set("cass_open", true); apertoTardi(); });
+      const hint = nd === 2 || nd === 4 ? [[compId(), lockHint()]] : [];
+      say(sw([["voce", `${frase} Di sopra, attraverso il tubo della stufa: «…e quindi, riassumendo il mio riassunto del riassunto…» (minuto ${nd} di ${DISC_MAX})`], ...hint], BG.A), dopo);
+    }
+    function aperto() {
+      F.set("cass_open", true); F.set("ph", 1);
+      const m = reward("vl_p4", { coins: 8 });
+      say(sw([
+        ["voce", "L'ultimo tassello scatta nella sua sede. Pennino, Sigillo, Stemma, Timbro: un ordine che pare scritto per una persona onesta con un sistema. Dalla lastra di marmo sale un tintinnio di molle, come un orologio che si ricorda di essere un orologio."],
+        ["voce", "Il IV cassetto scivola fuori con un sospiro di legno e di polvere. Dentro, legati da un nastro rosso sbiadito, quattro fascicoli. Sul primo, a stampatello: «PRATICA 98/43 · NON DISPERDERE»."],
+        ...(m.length ? [["voce", m.join(" · ") + "."]] : []),
+      ], BG.A), docs);
+    }
+    function apertoTardi() {
+      say(sw([
+        ["vl_corvi", "(compare dal buio, con una lampada in mano, e posa le dita su quattro tasselli con una velocità da pianista) Pennino, sigillo, stemma, timbro. Come nel regolamento. Il cassetto si apre così."],
+        ["voce", "Il IV cassetto scivola fuori. Dentro, legati da un nastro rosso sbiadito, quattro fascicoli. «PRATICA 98/43 · NON DISPERDERE»."],
+      ], BG.A), docs);
+    }
+    function docs() {
+      const b = guida() === "bianca", ag = guida() === "agata";
+      say(sw([
+        ["voce", "Primo fascicolo. «REFERTO DI GARA · Finale della Coppa dei Tre Versanti · Direttore di gara: G. Fischietti.» In calce, a matita, una riga tremante: «al 43' fischio senza fallo, per ordine ricevuto». Sul retro, incollata con la colla di allora, una ricevuta: «Ricevo dalla Società Lumen S.p.A. la somma di lire diciottomilioni per prestazioni di arbitraggio. F.to: ing. L. Vermiglio per la Società. F.to: G. Fischietti, residente a Cima Alta, presso V. Valanga.»"],
+        ["voce", "La firma dell'ingegnere è tutta in tondo, di quelle che ti insegnano a scuola; la V ha due ricci, uno dentro l'altro, come un gancio."],
+        [compId(), b ? "Valanga. Come il capitano dei Camosci. …Sarà un cognome diffuso, lassù. Ci sono più Valanga a Cima Alta che grilli." : "«Presso V. Valanga.» Cognome comune a Cima Alta: lo annoto. Le coincidenze, in un archivio, costano meno di tutto il resto."],
+        ["voce", "Secondo fascicolo. «ORDINE DI SERVIZIO N. 43 · Società Lumen S.p.A. · Alla direzione di cantiere. Oggetto: assestamento livello 3. Si dispone la carica di assestamento per le ore 18:43 di sabato, in concomitanza con la finale (popolazione all'aperto). Il turno di notte è confermato: nessuna comunicazione al personale. Il sinistro dovrà risultare accidentale. Nulla osta: L.V.»"],
+        ["voce", "Terzo fascicolo. «VERBALE DELL'ABBANDONO · Al 43° del secondo tempo la squadra degli Stambecchi lasciò il campo senza giustificazione, in preda al panico…» Il resto della pagina è quasi bianco: l'inchiostro del testo è sbiadito fino a un'ombra color tè. Sopravvive soltanto la firma, in nero fitto: «O. Corvi, segretario»; e sotto, in una grafia più piccola e più antica: «sotto dettatura»."],
+        ["voce", "Quarto fascicolo. «POLIZZA 98/0043 · Mutua Alterna · Contraente: Società Lumen S.p.A.» Una clausola, la dodicesima, è sottolineata a matita: «Qualora sia accertato il dolo, la Compagnia è tenuta a rimborsare al Comune le spese di bonifica definitiva dell'impianto, mediante riempimento con malta cementizia, dall'imbocco al IV livello.»"],
+        ag ? ["vl_agata", "(piano, senza guardarti) Questa polizza… la conosco. Cioè: ne conosco una uguale. (si schiarisce la gola) Va archiviata bene. Ha un valore."] : [compId(), "Una polizza. Cemento «dall'imbocco al IV livello». Non so cosa significhi, ma ho un brutto presentimento. I presentimenti, nel mio mestiere, di solito sono bulloni che si allentano."],
+        tl({ sicuro: "Qui c'è tutto. Un ordine, una ricevuta, una bugia sbiadita.", attento: "L'ordine non è firmato per esteso. La ricevuta sì.", ironico: "Un archivio che ha custodito tutto e non ha detto niente per ventisei anni: un modello di professionalità." }),
+      ], BG.A), () => {
+        note("IV cassetto: referto di Fischietti con ricevuta firmata Vermiglio (presso V. Valanga, Cima Alta); Ordine di servizio n. 43 (turno di notte confermato); verbale dell'abbandono con inchiostro sbiadito, 'sotto dettatura'; polizza con la clausola 12 (bonifica con cemento).");
+        F.set("ph", 2); corviConf();
+      });
+    }
+    function corviConf() {
+      const tardi = has("tardi");
+      say(sw([
+        ...(tardi ? [] : [["voce", "Passi leggeri sulla scala. Il rumore non è di scarpe: è di un uomo che ha imparato a scendere piano per non farsi sentire dalla propria coscienza. Corvi compare nel cono di luce della lampada, con una chiave nella tasca del grembiule e le palpebre abbassate."]]),
+        ["vl_corvi", "Il terzo fascicolo. Quello bianco. (si avvicina, e per una volta la voce da cancello suona da persona) Il verbale dell'abbandono l'ho scritto io, giovane. Dettato, alle sei di mattina, in questa stanza, da un uomo con i guanti bianchi, che aspettava in piedi col cappotto addosso."],
+        ["vl_corvi", "Ero giovane. Avevo un posto e un mutuo. Mi dissero: «Una pagina, signor segretario, una sola, e il Comune avrà un contributo per il campo». Scrissi. Ma sapevo cosa fare dell'inchiostro. L'inchiostro ferrogallico di cantina, mescolato con aceto, dura venticinque anni. Poi sparisce."],
+        ["vl_corvi", "Ho scritto la bugia con l'inchiostro che sbiadisce e conservato la verità nei documenti che durano. Ho aspettato che la bugia sparisse da sola. È sparita. Il paese se la ricorda lo stesso. Le bugie, vedi, hanno un inchiostro migliore delle verità: restano in bocca anche quando non sono più sulla carta."],
+        ["voce", "Si toglie gli occhiali, li pulisce con il grembiule, li rimette. Sotto, gli occhi sono quelli di un bambino che ha rotto un vetro ventisei anni fa e sta ancora aspettando di essere sgridato."],
+      ], BG.A), () => ask("vl_corvi", "«Dimmi tu che cosa sono, adesso. Mi basta una parola.»", [
+        { label: "«Un testimone. L'unico con la penna.»", sub: "Fiducia", fn: () => corviPick("testimone") },
+        { label: "«Poteva dirlo vent'anni fa.»", sub: "Rimprovero", fn: () => corviPick("rimprovero") },
+        { label: "«Venga con noi, adesso. Basta così.»", sub: "Presenza", fn: () => corviPick("presenza") },
+      ], BG.A));
+    }
+    function corviPick(w) {
+      F.set("corvi_t", w);
+      const a = w === "testimone" ? [["vl_corvi", "Un testimone. (assapora la parola come un liquore) In ventisei anni nessuno mi ha chiamato così. Mi hanno chiamato «Dottore», «Signor Corvi», «Quello dello sportello». Testimone mi manca come un guanto spaiato."]]
+        : w === "rimprovero" ? [["vl_corvi", "Sì. Potevo. Lo so, lo so. (chiude gli occhi) Ogni anno mi dicevo «l'anno prossimo». Dopo vent'anni ho smesso di dirmelo per vergogna: l'anno prossimo è diventato una scusa con la barba."]]
+          : [["vl_corvi", "Con voi. (si schiarisce la gola due volte) Non so se so camminare dalla parte giusta. Ho sempre camminato dalla parte dello sportello."]];
+      say(sw([...a, ["voce", "Dalla scala, in cima, una voce stanca: «…e per tutte queste ragioni, io direi, signori… (si sente un tonfo di sedia)». Poi, nel silenzio, il rumore netto di un tacco sottile."]], BG.A), () => { F.set("ph", 3); note("Corvi ha scritto il verbale falso 'sotto dettatura' con inchiostro che sbiadisce. Ora è un testimone."); arrivo(); });
+    }
+    function arrivo() {
+      const tardi = has("tardi"), ag = guida() === "agata";
+      say(sw([
+        ["voce", "Passi sulla scala: due paia. Uno è un tacco sottile; l'altro non fa rumore, e per questo lo senti. Dietro, un passo lento e stanco: il sindaco, con la fascia in mano come un fazzoletto."],
+        ["vl_cornelio", tardi ? "Sette minuti, ingegnere! Ho parlato sette minuti e mezzo. (ansima) È il record del Comune, e il mio, e il vostro." : "Scusate… non ho… più… argomenti. L'ultimo era il larice. Ho finito con il larice."],
+        ["vl_sigillo", tardi ? "Tre minuti al mezzogiorno. E il sequestro, ricordo al sindaco, decorre indipendentemente dal suo fiato." : "Dodici meno cinque. Il sequestro decorre tra cinque minuti, indipendentemente dal suo fiato, sindaco."],
+        ["vl_vermiglio", "(si ferma in cima al cono di luce, a un passo dal cassetto aperto) Ah. Il Registro. Quarto cassetto. (e per la prima volta, nella sua voce, una cosa che somiglia a un respiro) Lei è una persona molto efficiente, {n}. Io, alla sua età, ero soltanto molto zelante."],
+        ...(ag ? [] : [["voce", "Dietro di loro, con una cartella contro il petto, scende Agata. Non incrocia il tuo sguardo. Si ferma all'ultimo gradino come davanti a un esame che non ha studiato."]]),
+        ["vl_vermiglio", "Il cassetto è aperto, vedo, e sono presenti i fascicoli. Dottoressa Sigillo, prego."],
+        ["vl_sigillo", "Da questo momento il materiale è sotto sequestro conservativo, ai sensi del decreto. Consegnare."],
+        ["vl_vermiglio", "Un momento, avvocata. Il Campione ha l'aria di chi vorrebbe dire qualcosa. Gli conceda pure di parlare: è un'abitudine di questo luogo, dicono, e l'ho sempre trovata affascinante."],
+      ], BG.A), () => { F.set("ph", 4); F.set("cl_i", 0); F.set("cl_e", 0); conf(0); });
+    }
+
+    // ---- il confronto: tre affermazioni, quattro documenti
+    const DOCS = {
+      referto: ["Il referto di Fischietti", "Con la ricevuta incollata"],
+      ordine: ["L'Ordine di servizio n. 43", "«Il turno di notte è confermato»"],
+      verbale: ["Il verbale dell'abbandono", "L'inchiostro sbiadito"],
+      polizza: ["La polizza 98/0043", "Con la clausola 12"],
+    };
+    const CL = [
+      { who: "vl_vermiglio", q: "Cominciamo dal principio, {n}. Quella sera il turno di notte era a casa. La miniera era vuota. Una carica di assestamento non fa male a nessuno, se nessuno c'è. Mi mostri un solo documento che dica il contrario.", p: "Che prova metti sul tavolo?", order: ["referto", "ordine", "polizza", "verbale"], ok: "ordine", h: "Cerca il foglio che parla del turno di notte: chi doveva restare, e chi non doveva sapere.",
+        good: () => [["voce", "Posi l'Ordine di servizio sul tavolo e lo leggi ad alta voce, sillaba per sillaba, come un notaio col raffreddore. «Il turno di notte è confermato. Nessuna comunicazione al personale. Il sinistro dovrà risultare accidentale.»"], ["vl_sigillo", "(a mezza voce) Ingegnere…"], ["vl_vermiglio", "Un ordine di servizio è una bozza di intenzioni. Le intenzioni, {n}, non hanno mai fatto crollare niente."], ["voce", "Lo dice con calma, ma il guanto che regge il cappotto stringe una piega in più."]],
+        bad: { referto: "Un arbitro che si fece pagare per un fischio sbagliato. Interessante, ma non dice chi fosse in galleria: il campo e la miniera sono due luoghi distinti, anche a Vallombra.", polizza: "Una polizza dimostra che qualcuno aveva un contratto. Non chi stesse sotto terra. Non confonda le assicurazioni con le anagrafi.", verbale: "Il verbale dell'abbandono riguarda la squadra, non il turno. Mi sorprende: lei è venuto qui per il turno di notte, o sbaglio?" } },
+      { who: "vl_vermiglio", q: "Passiamo alla squadra. C'è un verbale, nello stesso cassetto, scritto dal segretario comunale in persona: gli Stambecchi lasciarono il campo al 43° del secondo tempo, in preda al panico. Un atto pubblico. Vorrà contestare un atto pubblico?", p: "Quale foglio gli opponi?", order: ["verbale", "polizza", "referto", "ordine"], ok: "verbale", h: "Cerca il foglio in cui l'inchiostro è sparito: e la riga, accanto alla firma, che dice come fu scritto.",
+        good: () => { const w = F.get("corvi_t", "testimone"); return [["hero", "Quell'atto pubblico è bianco, ingegnere. L'inchiostro è sbiadito. Resta la firma e una riga: «sotto dettatura»."], ["vl_corvi", w === "rimprovero" ? "L'ho scritto io, con l'inchiostro che sparisce. L'ha dettato lei, ingegnere, in questa stanza, alle sei di una mattina di ventisei anni fa. Con i guanti. Dovevo dirlo vent'anni fa; lo dico adesso." : w === "presenza" ? "L'ho scritto io, con l'inchiostro che sparisce. L'ha dettato lei, ingegnere, in questa stanza, alle sei di una mattina di ventisei anni fa. Con i guanti. Io sono qui, e resto qui." : "L'ho scritto io, con l'inchiostro che sparisce. L'ha dettato lei, ingegnere, in questa stanza, alle sei di una mattina di ventisei anni fa. Con i guanti. Lo dico da testimone, adesso."], ["vl_vermiglio", "Un vecchio impiegato che ricorda di aver detto una bugia. Che comodo."], ["vl_corvi", "Comodo? Mi è costato ventisei anni."]]; },
+        bad: { referto: "Un fischio storto non è una squadra che ha paura. Non risponde alla mia domanda: ne risponde a un'altra, più interessante, e più dannosa per l'arbitro.", ordine: "Un ordine di servizio della Società non cambia quel che un segretario ha verbalizzato. Cerchi meglio.", polizza: "Una polizza non verbalizza niente sul campo da calcio. A meno che lei non intenda assicurare il pallone." } },
+      { who: "vl_vermiglio", q: "E veniamo alla ricevuta: quella firma tutta in tondo. Un arbitro che ha preso soldi è un testimone senza credito, e un pezzo di carta lo scrive chiunque. Mi dimostri che quella V a due ricci è la mia.", p: "Come lo dimostri?", order: ["polizza", "referto", "verbale", "ordine"], ok: "referto", h: "Cerca il foglio con la firma intera: e confrontala con quella in calce al decreto dell'avvocata.",
+        good: () => { const arb = F.get("arbitro", "prag"); return [["hero", "Avvocata, mi presta il decreto? Quello a firma dell'ingegnere, per il sequestro."], ["voce", "Sigillo esita, poi lo porge con due dita, come un biglietto del tram. Lo appoggi accanto alla ricevuta. Le due firme si guardano da trenta centimetri e ventisei anni di distanza: la stessa V, lo stesso doppio ricciolo, lo stesso tondo di scuola."], ["vl_corvi", "Il tondo di scuola. Quello l'ho visto sul pagamento del Comune per la bonifica del campo, nel '98. Stesso gancio."], ["vl_sigillo", "(a bassa voce, controllando l'orologio che non c'entra) …Ingegnere."], ["voce", arb === "acc" ? "Ripensi all'arbitro, alla sua Camera del Minuto, alle parole dure che gli hai detto: la ricevuta gli dà ragione e torto insieme. Lui ha preso la busta. Ma è un uomo che l'ha anche conservata." : arb === "comp" ? "Ripensi all'arbitro, alla sua Camera del Minuto, a quello che gli hai detto: «il peso è di chi ha dato l'ordine». Eccolo, il peso, sul tavolo, con una V a due ricci." : "Ripensi all'arbitro, alla sua Camera del Minuto: la prova che gli avevi chiesto è qui, davanti a tutti, con la sua firma accanto a quella di chi pagava."]]; },
+        bad: { ordine: "Il mio «Nulla osta» sull'ordine è soltanto una sigla, L.V.: potrebbe essere di chiunque. Luigi Vecchi. Lucia Viola. Non mi pare un argomento.", polizza: "La polizza riguarda un contratto tra due società, non la mia mano. Non lo dico io: lo dice il diritto.", verbale: "Il verbale porta la firma di Corvi, non la mia. Sceglie con cura i suoi testimoni, {n}: ma li sceglie male." } },
+    ];
+    function conf(i) {
+      if (i >= CL.length) return confEnd();
+      const c = CL[i];
+      say(sw([[c.who, c.q]], BG.A), () => confAsk(i));
+    }
+    function confAsk(i) {
+      const c = CL[i];
+      ask("voce", c.p || "Che prova metti sul tavolo?", c.order.map((k) => ({ label: DOCS[k][0], sub: DOCS[k][1], cls: "hot", fn: () => confPick(i, k) })), BG.A);
+    }
+    function confPick(i, k) {
+      const c = CL[i];
+      if (k === c.ok) { return say(sw(c.good(), BG.A), () => { F.set("cl_i", i + 1); conf(i + 1); }); }
+      const e = F.add("cl_e", 1), here = F.add("cl_w" + i, 1);
+      const hint = here >= 2 ? [[compId(), c.h]] : [];
+      say(sw([["vl_vermiglio", c.bad[k]], ...hint], BG.A), () => confAsk(i));
+    }
+    function confEnd() {
+      const e = F.get("cl_e", 0), perfect = e === 0, tardi = has("tardi");
+      F.set("conf_ok", perfect);
+      const m = perfect ? reward("vl_conf", { coins: 10 }) : [];
+      note(perfect ? "Ho smontato le tre affermazioni di Vermiglio senza sbagliare un colpo." : `Ho smontato le tre affermazioni di Vermiglio (con ${e} ${e === 1 ? "inciampo" : "inciampi"}).`);
+      say(sw([
+        ["voce", "Cala un silenzio da interno di cassaforte. Dal tubo della stufa non scende più nessuna voce: il sindaco, in fondo alla scala, si è seduto sull'ultimo gradino con la testa tra le mani, e non ha più niente da riassumere."],
+        ...(m.length ? [["voce", m.join(" · ") + "."]] : []),
+        ["voce", "Vermiglio si toglie un guanto bianco. Sotto, la mano è quella di un uomo qualsiasi, con un neo vicino al pollice. Si frega il polso, piano, come chi scopre di averne uno."],
+        ["vl_vermiglio", perfect ? "Complimenti. Ho perso un'udienza in un sotterraneo, davanti a un campione di calcio e a un segretario in pensione. La racconterò: ma non a tutti." : "Vedo che la mia posizione è meno solida di quanto sperassi, ma più solida di quanto sperate voi."],
+        ...(tardi ? [["vl_vermiglio", "Il sindaco ha esaurito gli argomenti al minuto sette. Ne ha inventato un altro al minuto otto. Poi ha ceduto. Anche questo, in fondo, è un modo di resistere."]] : []),
+        ["vl_vermiglio", "Ma mi permetta di essere onesto, giacché oggi lo siamo tutti. Quei fogli sono gravi, per me e per la Società. Non sono gravi per tutti allo stesso modo. Dottoressa Sassi: lo spiega lei al nostro amico, o lo faccio io?"],
+      ], BG.A), () => { F.set("ph", 5); reveal(); });
+    }
+
+    // ---- la rivelazione di Agata e la scelta
+    function reveal() {
+      F.set("ph", 6);
+      const ag = guida() === "agata", comp = has("compass"), told = F.get("told", "segreto");
+      say(sw([
+        ["voce", ag ? "Agata, accanto a te, smette di respirare per una frazione di secondo. Poi mette la cartella a terra, con una cura che non ha mai avuto per niente." : "Agata, all'ultimo gradino, posa la cartella a terra con una cura che non ha mai avuto per niente."],
+        ["vl_agata", "È vero. (a te, in faccia) Non lavoro soltanto per l'Università. Da novembre sono perito incaricato della Mutua Alterna: la compagnia che nel '98 pagò alla Società Lumen il sinistro della miniera. Quando è emerso il sospetto di un dolo, mi hanno mandata qui a cercare. A Vallombra sono da marzo. «Geologa» è vero: ho un master, due cani e una paura dei sismografi. Non è vero che ero qui per caso."],
+        ["vl_agata", comp ? "La bussola era vera: l'ago seguiva la luce, non il nord. Non ti ho mentito sull'ago. Ti ho mentito sul portafoglio." : "Non ti ho mentito sulla lumina: quella, la misuro sul serio. Ti ho mentito su chi mi pagava per misurarla."],
+        ...(ag ? [["vl_agata", "Eri con me nella miniera. Ho sentito la roccia cantare e ho pensato che avrei dovuto dirtelo. Poi non ho più trovato il momento: o ne avevo troppo."]] : [[compId(), "Agata. …Tu lavori per l'assicurazione? (la voce di Bianca non è arrabbiata: è peggio, è sorpresa) Io ti ho prestato la chiave inglese."]]),
+        ...(told === "teodora" ? [["vl_agata", "Teodora mi ha raccontato di Aurelio, una sera, al registro. Io le ho detto che lavoravo sulle rocce. Era vero. Ma non tutto."]] : []),
+        ["vl_agata", "La clausola 12. (alza la polizza) Se il dolo viene accertato, la Mutua non solo si rivale sulla Società: deve sostenere i costi di bonifica definitiva. Riempire la miniera di malta cementizia, dall'imbocco al IV livello. Per sempre. Sarebbe la fine di tutto ciò che brilla là sotto. E della Squadra, immagino, comunque si chiami quello che c'è in fondo alla Quattro."],
+        ["vl_vermiglio", "Si dice così: «la Mutua risarcisce, il Comune è tranquillo, la miniera sparisce sotto quattromila tonnellate di cemento con la benedizione del sindaco». Io perdo, certo: pago una penale. Ma la penale non è un crollo. Il cemento, invece, sì. Per quello, {n}, sono pronto a pagare. Le consiglio la dottoressa: è l'atto più rapido e più elegante."],
+        ["vl_agata", "Io non lo decido. Se me le dai, la Mutua apre la pratica; ho trenta giorni per far cambiare la perizia, e li userò tutti, e non ti prometto che basteranno. Se le tieni tu, nessuno ti obbligherà a niente. Se vuoi che il paese sappia… (guarda Corvi, poi Cornelio) il paese ha sentito troppo poco per troppo tempo."],
+        ["vl_sigillo", "Il sequestro decorre tra quattro minuti. Tutto ciò che esce da questo sotterraneo dopo quell'ora è sottrazione di atto pubblico. Siete pregati di decidere con la solennità del caso."],
+      ], BG.A), scelta);
+    }
+    function scelta() {
+      ask("voce", "I fascicoli del IV cassetto sono sul tavolo di consultazione. A chi li affidi?", [
+        { label: "Ad Agata, per la via legale", sub: "Deposito ufficiale · rischio: la bonifica col cemento", cls: "hot", fn: () => esito("agata") },
+        { label: "Li tieni tu", sub: "Nessuno ne sa niente · rischio: la caccia", cls: "hot", fn: () => esito("tenute") },
+        { label: "A Noemi, in diretta", sub: "Il paese sa tutto · rischio: la reazione", cls: "hot", fn: () => esito("radio") },
+      ], BG.A);
+    }
+    function esito(w) {
+      F.set("prove", w); F.set("prove_agata", w === "agata"); F.set("prove_tenute", w === "tenute"); F.set("prove_radio", w === "radio");
+      const c = cornelioInfo(), tardi = has("tardi");
+      if (w === "agata") {
+        say(sw([
+          ["vl_agata", "(prende i fascicoli con due mani, come si prende un vaso antico) Li porto a un notaio, a Milano, con copia conforme. Il deposito sarà ufficiale. Nessuno potrà dire che li ho scritti io."],
+          ["vl_vermiglio", "(un applauso con i guanti, uno solo, piano) Brava. Un atto di fiducia vale più di un'idea. Il resto, lo vedremo nelle clausole."],
+          ["vl_agata", "(senza guardarlo) Io le clausole le leggo meglio di lei, ingegnere. Ho trenta giorni. Li userò tutti."],
+          ["vl_cornelio", c === "verita" ? "La miniera non si cementa finché c'è un sindaco che sa dire «no» in sette minuti. Con una pausa per il larice." : "Se mi chiedono la firma sul cemento, la darò quando avrò finito di leggere. Comincio ora. Al ritmo dei miei discorsi, ho tempo."],
+          ["voce", "Sigillo guarda l'orologio: manca un minuto. Mette il sigillo al cassetto vuoto con un gesto veloce, un po' stanco. È la prima volta che si vede, in lei, qualcosa di simile alla fretta."],
+        ], BG.A), () => { X.lanAdd("vl_agata"); finisciScelta("Le prove sono ad Agata, che le deposita da un notaio: la Mutua apre la pratica e potrebbe cementare la miniera. Ha trenta giorni per impedirlo."); });
+      } else if (w === "tenute") {
+        say(sw([
+          ["voce", "Pieghi i quattro fascicoli, uno dentro l'altro, e li infili sotto la maglia, contro la pelle. Carta vecchia, tiepida, che sa di cantina. Nessuno ti ferma."],
+          ["vl_sigillo", "Il sequestro decorre tra tre minuti. Tutto ciò che esce da qui…"],
+          ["vl_cornelio", "(si alza, con tutta la fascia tricolore, la voce che sta tornando) Il Municipio è mio fino a mezzogiorno, avvocata. Ho una fascia e la uso: fuori tutti, a nome del Comune dichiaro l'archivio… in manutenzione. Per ragioni di umidità. Sette minuti di umidità."],
+          ["vl_vermiglio", "Si fa presto a dire «ce le teniamo». Ma sa cosa succede alle prove che nessuno ha il coraggio di consegnare? Diventano fogli di carta. Stasera, {n}, avrò il piacere di invitarla a cena. Non verrà. Io apparecchio lo stesso."],
+          ["vl_agata", "Io non te le toglierò. Ma tienile dove nessuno le troverà: neppure io."],
+          ...(guida() === "bianca" ? [["vl_bianca", "Le portiamo in officina. Nessuno apre un cassetto di ruote dentate, se non lo sa."]] : []),
+        ], BG.A), () => finisciScelta("Ho tenuto le prove io: nessuno ne sa niente. Vermiglio mi ha invitato 'a cena, stasera': mi sta cercando."));
+      } else {
+        const noemi = "vl_noemi";
+        say(sw([
+          ["voce", "Pieghi i fascicoli e sali la scala di corsa, tre gradini alla volta. In cima, nel corridoio, c'è già Noemi Etere con il microfono portatile e una cuffia di traverso: aveva sentito il silenzio del sindaco e capito che il silenzio, per una radio, è una notizia."],
+          [noemi, "Hai trenta secondi, il cavo è corto e il sindaco ha già esaurito le batterie. Dimmi che cosa c'è sul tavolo, e dimmelo come se parlassi a una persona sola."],
+        ], BG.A), () => { go("vl_municipio", 17, 6); radioScena(); });
+        return;
+      }
+    }
+    function radioScena() {
+      const noemi = "vl_noemi", intervista = F.get("intervista", false);
+      say(sw([
+        [noemi, intervista ? "Radio Nebbia, qui Noemi Etere. Sono in diretta dal Municipio di Vallombra, e l'ospite è ancora lei: {n}, che alle diciotto e quarantatré ci ha già tenuto compagnia. Stavolta, mi dicono, ha un cassetto." : "Radio Nebbia, qui Noemi Etere. Sono in diretta dal Municipio di Vallombra. Il meteo è sempre quello: nebbia. Ma stamattina, nel quarto cassetto dell'archivio, la nebbia ha trovato una carta."],
+        ["voce", "Leggi i fascicoli al microfono, uno dopo l'altro. Il referto di Fischietti. L'Ordine di servizio n. 43. La ricevuta diciottomilioni. Il verbale dell'abbandono, bianco. Attraverso gli altoparlanti dell'albo pretorio, e dalle radio della piazza, la voce di Noemi esce nella valle."],
+        ["vl_vermiglio", "(sulla scala, con calma ghiacciata) La pubblicazione di atti sotto sequestro è un reato, {n}. Lo dico come cortesia, non come minaccia."],
+        ["vl_sigillo", "Pubblicazione prima del termine. Sarà un piacere sporgere denuncia contro la radio, il sindaco, il campione e il gabbiano che passava."],
+        [noemi, "(in onda, senza abbassare la voce) Ingegnere, ho una buona notizia: ci ascoltano in centoventi. Sono gli abitanti di Vallombra e l'ultimo gabbiano. Sono tutti molto attenti."],
+        ["voce", "Dalla piazza sale un rumore che non è un applauso, né un coro: è il rumore di un paese che per ventisei anni ha tenuto il fiato e finalmente lo lascia andare, tutti insieme."],
+        ["vl_cornelio", "…Io, per il verbale, dichiaro che il Comune è d'accordo con la radio. Il Comune non ha mai avuto un portavoce così efficace, e lo dico con una certa invidia."],
+      ], BG.U), () => { X.lanAdd("vl_noemi"); finisciScelta("Ho dato le prove a Noemi: le ha lette in diretta a tutta la valle. Vermiglio e la Sigillo minacciano denunce."); });
+    }
+    function finisciScelta(txt) {
+      F.set("ph", 7); setStep(N, 4); note(txt);
+      note("Agata lavora per la Mutua Alterna: la clausola 12 prevede il cemento nella miniera se il dolo è accertato.");
+      if (zoneNow() !== "vl_municipio") go("vl_municipio", 17, 6);
+      say(sw([
+        ["voce", "Quando risali nell'atrio sono le dodici meno due. Il Municipio ha il suo aspetto di sempre: cera, carta e decisioni rimandate. Ma il rumore è cambiato, come cambia il rumore di un edificio dopo che qualcuno ha detto una verità: più sordo, più vero."],
+        ["voce", "Sulla panca a est, sotto l'eliminacode, la vecchia signora che aspetta il suo numero ha posato i ferri da calza. Ti sta guardando. Hai la sensazione che ti stia guardando da ventisei anni."],
+      ], BG.U), done);
+    }
+    function arcTalk(id) {
+      if (S() === 3 && PH() >= 1 && PH() < 7) return resume();
+      if (S() !== 3 && id === "vl_cornelio") return done();
+      done();
+    }
+    function resume() {
+      const ph = PH();
+      if (ph === 1) return docs();
+      if (ph === 2) return corviConf();
+      if (ph === 3) return arrivo();
+      if (ph === 4) return conf(F.get("cl_i", 0));
+      if (ph === 5) return reveal();
+      if (ph === 6) return scelta();
+      done();
+    }
+
+    // ---- Ottavia Rovedo
+    function ottavia() {
+      if (!inM()) return done();
+      F.set("ottavia_met", true);
+      const s = S();
+      if (s < 4) return ottaviaPre();
+      if (s === 4) return ottaviaScena();
+      const L1 = ["Tengo il biglietto, ma non per aspettare: per ricordare. Sono due cose che si assomigliano da lontano e si distinguono da vicino.", "Gedeone mi ha fatto avere un panino. Il pane è duro, il ripieno è il conto: quindici. È il miglior panino della mia vita.", "Bianca ha preso l'elmetto dalla cantina. Mi ha detto: «Nonna, è un secchio». Le ho detto: «È un elmetto». Ha detto: «È un secchio con un'idea»."];
+      say(sw([["vl_ottavia", chip(L1)]], BG.U), done);
+    }
+    function ottaviaPre() {
+      const o = [
+        { label: "Chi sta aspettando, signora?", fn: () => say(sw([["vl_ottavia", "Il mio turno. A Vallombra il turno è lungo: ho il numero 15 in mano da ventisei anni. L'eliminacode è fermo sul 14. Non mi dispiace: nel frattempo ho fatto diciassette maglioni."]], BG.U), done) },
+        { label: "Il numero 15?", fn: () => say(sw([["vl_ottavia", "Il quindici è mio. Il resto lo sa il registro. Passi a trovarmi quando avrà aperto il cassetto: avremo un po' da dirci."]], BG.U), done) },
+      ];
+      ask("vl_ottavia", "«Siediti, giovane, o stai in piedi con grazia: il pavimento è del Comune.»", o, BG.U);
+    }
+    function ottaviaScena() {
+      const g = F.get("gedeone", "taci"), c = compId(), bi = guida() === "bianca";
+      say(sw([
+        ["voce", "Ottavia Rovedo ha ottantuno anni, uno scialle lilla, i ferri da calza in grembo e il biglietto dell'eliminacode stretto fra due dita. Sotto lo scialle, appesa a un cordino, si intravede una striscia di stoffa rossa: la striscia di un elmetto. Siede in mezzo alla panca, che a Vallombra è il modo di dire che si occupa un posto per sempre."],
+        ["vl_ottavia", "Siediti. (batte la mano sul legno) Io non ho mai scelto di essere interrogata: ho scelto di essere seduta. Tu sei {n}. Lo ha detto la radio, e prima della radio una lampada che si è accesa da sola nel mio salotto. Ho ottantuno anni e non mi stupisco più delle lampade."],
+        ["vl_ottavia", "Il numero 15. (alza il biglietto) Quella notte eravamo in quindici, nel turno: quattordici uomini e io, la caposquadra. Aurelio Brinzi, il capitano, quel ragazzo con la fascia e il fischietto da minatore tra i denti, gridò «Contali, Ottavia!» mentre spingeva l'ultimo su per la scala del condotto. Io contai. Dodici. Tredici. Quattordici. Poi il botto."],
+        ["vl_ottavia", "Non mi sono contata. Da ventisei anni dico «quattordici», e tutti annuiscono, e io penso: «ne manca uno». Ne manca sempre uno. Ero io. Sono uscita per ultima e nessuno dice quanto manca a chi esce per ultimo."],
+        ["vl_ottavia", g === "verita" ? "Gedeone Roccia mi ha mandato a dire, con il nipote del fornaio, che il conto torna. «Quindici», ha scritto. Ho pianto sul brodo. Il brodo ne ha avuto un vantaggio." : "Gedeone Roccia, dicono, è giù da qualche parte e conta ancora. Ha sempre contato male, poverino: non per scarsa testa, per eccesso di cuore."],
+        ["vl_ottavia", "Aurelio mi disse un'altra cosa, mentre mi spingeva. Mi disse: «Dica a mia sorella che la lettera arriverà dopo.» Io non l'ho mai detto a Teodora. Avevo paura di farla sperare. A cinquantacinque anni, si ha paura di tutto, tranne che di quello che serve."],
+      ], BG.U), () => ask("vl_ottavia", "Ottavia ti guarda con gli occhi di chi ha aspettato di essere ascoltata più a lungo di chi parla. Cosa rispondi?", [
+        { label: "«Lo dirò io a Teodora.»", sub: "Prendi il compito", fn: () => ottaviaPick("dirai") },
+        { label: "«Il suo conto è quindici, signora. Da oggi.»", sub: "Le rendi il conto", fn: () => ottaviaPick("conto") },
+        { label: "«Lei non deve niente a nessuno.»", sub: "La liberi", fn: () => ottaviaPick("nulla") },
+      ], BG.U));
+      void c; void bi;
+    }
+    function ottaviaPick(w) {
+      F.set("ottavia_t", w);
+      const bi = guida() === "bianca";
+      const a = w === "dirai" ? [["vl_ottavia", "Ecco: un compito. È più leggero di una promessa e pesa lo stesso. Grazie, giovane. Le parole di Aurelio non andavano portate da una vecchia: andavano portate da qualcuno che arriva."]]
+        : w === "conto" ? [["vl_ottavia", "Quindici. (assapora il numero) Quindici. Detto da te suona come un nome. …Non lo dirò più «quattordici». Lo dirò a Gedeone, al fornaio, al gabbiano."]]
+          : [["vl_ottavia", "Si deve sempre, giovane. Con le persone vive si salda a rate: un panino, una tisana, una buona parola. Ma sei gentile. Mi ricordi qualcuno che aveva i capelli in disordine e una fascia da capitano."]];
+      say(sw([...a,
+        ["voce", bi ? "Bianca si ferma a tre passi dalla panca, con le mani nere di grasso e gli occhi più lucidi di una chiave inglese appena tolta dall'olio." : "Bianca, che qualcuno è andato a chiamare in officina, entra nell'atrio con le mani nere di grasso. Si ferma a tre passi dalla panca, come davanti a una porta che ha sempre visto chiusa."],
+        bi ? ["vl_bianca", "Io ti ho tenuto la corda là sotto, nel buio, e pensavo di tenere la corda a uno che scende. Invece la tenevo a mia nonna. (guarda l'elmetto sotto lo scialle) L'elmetto con la striscia rossa. Il «secchio» di cantina. Non ho mai chiesto perché."] : ["vl_bianca", "Mi hanno detto in officina che la nonna parlava con una lampada. Ho pensato: finalmente un'idea sua. (guarda lo scialle, la striscia rossa) L'elmetto del secchio. Non ho mai chiesto perché."],
+        ["vl_ottavia", "Era l'ultimo dei miei, tesoro. Gliel'ho dato io. «Tienilo come un secchio», dissi. Era più semplice che dirti «tienilo come una colpa»."],
+        ["vl_bianca", "Mia nonna è viva perché undici scemi in maglia blu e ambra hanno tenuto aperta una porta. Io sono nata perché loro l'hanno tenuta aperta. Questo è… un debito, ecco. Non so a chi si paga. Alla Squadra, immagino: e per ora, alla persona che li sta andando a cercare."],
+        tl({ sicuro: "Allora dammi una mano: tieni la corda anche di qui.", attento: "Non è un debito, Bianca. È una parentela: si eredita, e non si salda, si passa.", ironico: "Prendo solo pagamenti in bulloni. Ma ne ho bisogno pochi." }),
+        ["vl_bianca", "Da oggi vengo dove vai. Non per fare la guardia del corpo: per fare quello che fa una meccanica. Tenere insieme le cose finché reggono. E poi aggiustarle con più cattiveria."],
+        ["vl_ottavia", "Tieni, giovane. (ti porge il biglietto con il numero 15, ingiallito) Non è un regalo: è un incarico. Se qualcuno chiama il quindici, rispondi tu."],
+      ], BG.U), () => {
+        F.set("bianca_debito", true); X.lanAdd("vl_bianca"); X.lanAdd("vl_ottavia"); F.set("biglietto15", true);
+        note("Ottavia Rovedo, nonna di Bianca, era la caposquadra del turno di notte: quindici persone, non quattordici. Bianca ha un debito di vita con la Squadra. Aurelio aveva detto a Ottavia: 'la lettera arriverà dopo'.");
+        setStep(N, 5); done();
+      });
+    }
+
+    // ---- la piazza: il finale del capitolo
+    function finaleHook() {
+      F.set("fin4", true);
+      const rad = has("prove_radio"), ag = has("prove_agata"), keep = has("prove_tenute"), rem = remoId(), su = F.get("fosco", "su") !== "giu";
+      say(sw([
+        ["voce", rad ? "La piazza della Lanterna è piena come per la Coppa. Mezzo paese è venuto a sentire dal vivo quello che ha già sentito dalla radio. Qualcuno ha tirato fuori le sedie, qualcuno ha portato il thermos, e Mirtilla ha invitato tutti a una cioccolata chiamata «Nebbia Chiarita»." : ag ? "La piazza della Lanterna è piena come per la Coppa: i giornali non ci sono, ma c'è Mirtilla, che ha già sentito tutto da tre fonti diverse e ne sa di più di tutte." : "La piazza della Lanterna è silenziosa come un palcoscenico a luci spente. Qualcuno ti guarda dalle finestre, qualcuno dalle porte. Mirtilla, per una volta, non dice niente: porge una tazza e basta."],
+        ["vl_teodora", "Il registro. Alle 12:05 la cabina è ripartita con due passeggeri: un ingegnere in cappotto grigio e un'avvocata con una cartellina. Il biglietto dell'ingegnere dice «Vallombra – Cima Alta, sola andata». Non ho segnato «PARTITO». Ho segnato «PARTITO (PER ORA)»."],
+        ...(keep ? [["vl_teodora", "Dicono che stasera qualcuno dovrà andare a una cena. Non andare."]] : []),
+        ["vl_teodora", rad ? "E, giovane, ho sentito la radio. Aurelio… (si ferma) …ha una sorella che da ventisei anni scrive «ARRIVATO» a matita perché ha paura che l'inchiostro gli dia ragione." : "E, giovane, ho sentito le voci. Aurelio… (si ferma) …ha una sorella che da ventisei anni scrive «ARRIVATO» a matita perché ha paura che l'inchiostro gli dia ragione."],
+        ["vl_noemi", "Radio Nebbia, qui Noemi. Meteo: nebbia. Notizie: Cima Alta ha ritirato la tregua. Derby con i Camosci al Campo Alto, sabato. Il nuovo main sponsor dei Camosci è, cito, «Lumen Energie Alpine». Il capitano Valanga dichiara: «Giocheremo con gli occhiali». Il portiere dei Camosci dichiara: «Giocheremo con lo sponsor»."],
+        ["voce", rem === "vl_remo_ns" ? "Remo è sulla banchina della cabina, con Tonio. Gli occhiali da sole sono in tasca, nel taschino, e la mano sulla tasca come su un cuore." : "Remo è sulla banchina della cabina, con Tonio. Gli occhiali da sole sono dove sono sempre stati, e dietro le lenti il suo sguardo non si capisce."],
+        [rem, "Ho sentito il nome. Quello dell'arbitro. (non scherza: è la prima volta che non ha una battuta pronta) Non lo so dire. Non so che cosa significhi. So soltanto che sabato si gioca a casa mia, e che voglio che veniate. Senza Società, se potete. Con la Società, se dovete."],
+        ["vl_tonio", "Il capitano non si toglie gli occhiali da ieri. Dice che servono, ma non dice a cosa."],
+        ...(su ? [["vl_fosco", "Ho spolverato anche il Municipio. L'armadietto, però, è rimasto il migliore. Quando si finirà questa storia, l'armadietto numero tredici lo lucido io, e ci appendo il tuo nome."]] : [["voce", "Fosco non c'è: è giù, con Berto, a ripetere «ottantanove» senza perdere la voce. Mirtilla gli tiene il panino delle sei, da qualche parte, in un tovagliolo."]]),
+        ["voce", "In cima al sentiero, i lampioni si accendono uno dopo l'altro, in pieno giorno. Il Lampionaio, in cima all'ultimo, ha la lavagna sollevata sopra la testa. Scrive, per tutti, a lettere grandi: «ORA I CAMOSCI. E LA LETTERA CHE NON È MAI ARRIVATA.»"],
+      ], BG.P), fineCapitolo);
+    }
+    function fineCapitolo() {
+      X.finishChapter(N, "registro"); setStep(N, 6);
+      note("Cima Alta: derby sabato, con i Camosci sponsorizzati dalla Società Lumen. Ottavia: la lettera di Aurelio 'arriverà dopo'. Remo ha sentito il nome dell'arbitro.");
+      const rw = reward("vl_ch4", { coins: 50, cos: "vl_stemma_registro" });
+      X.say(sw([["voce", "CAPITOLO 4 · IL REGISTRO · CONCLUSO"], ["voce", (rw.length ? rw.join(" · ") + ". " : "") + "Il Capitolo 5, a Cima Alta, non è ancora pronto. Nel frattempo puoi tornare al Municipio, raccogliere le ultime schegge, giocare con gli impiegati e parlare con tutti."]], BG.P), done);
+    }
+
+    // ---- compagni, Noemi, ospiti
+    function compagnoMuni(id) {
+      const z = zoneNow(), s = S(), isB = id === "vl_bianca";
+      if (z === "vl_archivio" && s === 3 && PH() >= 1 && PH() < 7) return resume();
+      if (z === "vl_archivio") {
+        if (id !== compId()) return done();
+        const o = [{ label: "Che facciamo ora?", sub: "Un consiglio", fn: () => say(sw([[id, has("cass_open") ? "Il cassetto è aperto. Leggi con calma, che noi teniamo il tempo." : lockHint()]], BG.A), done) }];
+        return ask(id, isB ? "«Dimmi tu: io faccio i bulloni, tu fai le combinazioni.»" : "«Dimmi tu: io leggo gli indizi, tu li metti in fila.»", o, BG.A);
+      }
+      if (s <= 2) {
+        const L1 = isB ? ["Un municipio è un'officina di moduli. I bulloni sono timbri, le chiavi inglesi sono avvocati. Ho una fifa blu.", "Ho portato la chiave inglese anche qui. Non si sa mai: i cassetti hanno le viti, no?"] : ["Un decreto per la «bonifica documentale». Parole che nelle mie relazioni suonano come «distruzione di prove». Lo annoto.", "L'archivio di un comune è un sedimento: strati di carta come strati di roccia. Ma io, qui, non ho il martello."];
+        return say(sw([[id, chip(L1)]], BG.U), done);
+      }
+      if (s === 3) return say(sw([[id, id === "vl_agata" ? "Io vado di sotto. Prima o poi dovrai sapere. (distoglie lo sguardo) Prima o poi dirò." : "Tieni la chiave, io tengo l'occhio sulla Sala. Se l'ingegnere si muove, urlo. Con una voce da meccanica."]], BG.U), done);
+      // dopo il cassetto
+      const pr = F.get("prove", "tenute");
+      if (id === "vl_agata") {
+        const o = [{ label: "Come stai?", fn: () => say(sw([["vl_agata", pr === "agata" ? "Il notaio ha detto: «Trenta giorni». Ho risposto: «Ne ho venti di troppo.» Mi ha guardata come si guarda una persona che dice la verità per sbaglio." : pr === "radio" ? "Mi sono tolta il cartellino della Mutua e l'ho appeso alla bacheca dell'albo, dove Corvi appende le cose che non vuole perdere. Se serve, lo riprendo." : "Non hai voluto darmele. Ti capisco. Io avrei fatto lo stesso, se non avessi un contratto: ecco cosa vuol dire un contratto."]], BG.U), done) }];
+        return ask("vl_agata", "«Se vuoi dirmi che sono una bugiarda, fallo adesso. Poi non ho più tempo di essere imbarazzata.»", o, BG.U);
+      }
+      say(sw([["vl_bianca", chip(["Mia nonna mi ha detto che ha avuto una vita lunga perché si è dimenticata di morire. Io le ho detto che ha avuto una vita lunga perché non ha mai chiesto il permesso.", "Ho un debito, adesso. Mi piace: ha il peso giusto, come un bullone da dodici."])]], BG.U), done);
+    }
+    function noemi() {
+      const z = zoneNow(), s = S();
+      if (!inM()) { if (s >= 6) return say(sw([["vl_noemi", chip(["Radio Nebbia, qui Noemi. Meteo: nebbia, con possibilità di derby. Cima Alta, dicono, ha rimesso a posto le porte.", "Ieri ho letto un nome alla radio e per un attimo ho sentito la valle ascoltarmi. Poi è tornato il meteo: ma io ho ancora la pelle d'oca."])]], BG.P), done); return delegate("vl_noemi"); }
+      if (z === "vl_archivio") return done();
+      const pr = F.get("prove", "");
+      say(sw([["vl_noemi", s === 3 ? "Resto qui, con il microfono staccato e le orecchie accese. Il tuo sindaco sta parlando da cinque minuti: è la trasmissione più lunga che abbia mai ascoltato in diretta." : s === 4 ? "Se mai ti serve la radio, ci sono. Dico «se mai» per scaramanzia: tra un'ora potrei dover chiedere io qualcosa a te." : pr === "radio" ? "Ho letto un nome ad alta voce e per un attimo mi è sembrato che la valle mi ascoltasse. Poi è tornato il meteo, ma io ho ancora la pelle d'oca." : "Quando vuoi che qualcosa si sappia, io ho il microfono. Quando vuoi che si sappia con calma, ho anche la camomilla."]], BG.U), done);
+    }
+    function ettore() {
+      if (!inM()) return delegate("vl_ettore");
+      const rispetto = F.get("ettore_t", "") === "rispetto";
+      say(sw([["vl_ettore", rispetto ? "Siamo qui in qualità di pubblico. Telecamera spenta. Quaderno acceso: ho scritto «oggi il Municipio si è comportato bene» e poi ho cancellato «bene», che sapeva di recensione." : "Io non sto filmando. Sto… (tiene la telecamera dietro la schiena) …conservando l'immagine nella memoria interna. Sì. È un'espressione tecnica."]], BG.U), done);
+    }
+    function viola() {
+      if (!inM()) return delegate("vl_viola");
+      say(sw([["vl_viola", chip(["Ettore ha un quaderno e una teoria: la teoria è che in un municipio si nascondano più misteri che in una grotta. Io credo che abbia ragione, e mi dà fastidio.", "Qui il silenzio ha il peso della carta. Meglio così: la telecamera non gliela avrei mai perdonata."])]], BG.U), done);
+    }
+    function fosco() {
+      if (!inM()) return delegate("vl_fosco");
+      say(sw([["vl_fosco", chip(["Teodora mi ha mandato a spolverare il Municipio: dice che se c'è un posto che ha bisogno di uno straccio è questo. Ha ragione, e non mi paga.", "Gli archivi mi piacciono: cose in ordine, ognuna col suo posto. La mia vita, fino a ieri, era un armadietto. Adesso è un cassetto. Un passo avanti.", "Berto direbbe: «Se c'è una scala, la scendi». Io ho paura delle scale, ma mi fido del suo consiglio. Non scendo oggi."])]], BG.U), done);
+    }
+    function teodoraT() {
+      if (inM() || S() < 6) return delegate("vl_teodora");
+      say(sw([["vl_teodora", chip(["Cima Alta, il biglietto di Vermiglio. L'ho tenuto da parte. Se una cabina può partire a vuoto per ventisei anni, un biglietto può aspettare una settimana.", "La lettera. Se esiste, arriverà. Aurelio non era uno che prometteva a vuoto: era uno che aspettava la fine di una frase.", "Ho scritto «PARTITO (PER ORA)» a penna. Per la prima volta ho paura che l'inchiostro mi dia ragione."])]], BG.P), done);
+    }
+    function remoT(id) {
+      if (inM()) return done();
+      delegate(id);
+    }
+
+    // ---- partitella facoltativa: Anagrafe contro Tributi
+    function matchImpiegati() {
+      const first = !has("m4_played");
+      say(sw([["vl_corvi", first ? "Ogni anno l'Anagrafe sfida i Tributi nel cortile, dietro il Municipio. Un tempo solo, porte di scatoloni, arbitro la campana da mucca. Chi vince offre il caffè, chi perde compila il modulo. Non c'è mai stato un pareggio: la burocrazia non li prevede." : "Un'altra? Il caffè lo offro io. Il modulo di sconfitta lo stampiamo in due copie."]], BG.U), () => X.playMatch({
+        id: "vl4", chap: "Vallombra · Cortile del Municipio", mate: compName(),
+        intro: "Partitella nel cortile del Municipio, un tempo solo: <em>i Tributi</em> contro di te e " + compName() + ". Le porte sono due scatoloni, il pallone è un faldone arrotolato e il fischio, dicono, è della campana da mucca.",
+        team: (t, st) => ({ vs: "i Tributi", name: "Tributi", color: "#c8a24a", defs: [["Il Ragioniere", t(st.drib * 0.78)], ["La Protocollista", t(st.drib * 0.8)], ["L'Usciere", t(st.drib * 0.82)]], atk: [["Il Geometra", t(st.tiro * 0.82)], ["La Protocollista", t(st.tiro * 0.8)]], gk: ["L'Ufficiale Stato Civile", t(st.tiro * 0.93)], power: t(st.tiro * 0.78), special: ["LA PRATICA URGENTE", t(st.tiro * 1.08)] }),
+        done: (r) => {
+          F.set("m4_played", true); if (r.win) F.set("m4_win", true);
+          const msg = r.win ? reward("vl_m4_win", { coins: 10 }) : [];
+          note(r.win ? `Partitella nel cortile del Municipio vinta ${r.a}–${r.b}.` : `Partitella nel cortile del Municipio ${r.a}–${r.b}.`);
+          X.say(sw([["voce", `Finisce ${r.a}–${r.b}.${msg.length ? " " + msg.join(" · ") + "." : ""}`], ["vl_corvi", r.win ? "Il caffè lo offro io. Ma il modulo di sconfitta, quello sì, lo stampo ugualmente: serve da ricordo." : "Il caffè lo offri tu. Il modulo lo compiliamo insieme, in triplice copia, con una bella calligrafia."]], BG.U), done);
+        },
+      }));
+    }
+
+    // ---- oggetti dell'Archivio
+    function oggettoArch({ ch, tx, ty }) {
+      const T_ = {
+        S: ["Faldoni a perdita d'occhio, etichettati a mano: «TRIBUTI 1962», «CANI (CENSIMENTO)», «LAMENTELE (VARIE)», «LAMENTELE (VARIE II)». Un faldone, in basso, è etichettato semplicemente «LA VERITÀ (parziale)». È vuoto.", "Uno scaffale di registri dei nati. Sulla costa di uno, qualcuno ha scritto «Aurelio Brinzi · cl. 1971» e poi, più piano, «ora sarebbe più vecchio di me».", "Il settore «Opere pubbliche». Un faldone riporta: «Rotatoria (progetto, 11 versioni)». Un altro: «Rotatoria (consuntivo)». Un terzo: «Rotatoria (perché no)»."],
+        T: ["Il tavolo di consultazione. Un registro aperto sull'ultima firma di consultazione: «O. Corvi, 14 maggio 1998». Sotto, nessun altro nome, nemmeno quello del tempo.", "Il tavolo ha una scanalatura a forma di mano, consumata da chi ha consultato qualcosa in fretta. L'ultimo graffio è fresco: stamattina, forse."],
+        C: ["La lumina filtra dalla crepa nel muro, come un respiro. È la stessa pietra della miniera: arriva qui passando sotto le case, come una radice.", "Un grappolo di lumina grande come un pugno, tiepido. Quando lo guardi dritto, si ritira; di lato, no."],
+        E: ["Una pietra che trasuda un brusio. Una voce di donna, lontana, dice «un attimo, che il sindaco sta finendo» e poi ride, e poi più nulla. L'archivio, qui, ha un'eco di sala d'attesa.", "Dalla pietra sale un battito di timbri, a ritmo di marcia, poi un «Prossimo!» ventisei anni fa, poi di nuovo la polvere."],
+        x: ["Casse di carte da buttare. In cima, una scritta: «DA BUTTARE NEL 2005». Qualcuno ha corretto: «DA BUTTARE NEL 2006». Poi «2007». Poi ha lasciato perdere.", "Una cassa con un'etichetta ormai illeggibile e un panino fossilizzato con la scritta «CORVI». Meglio non toccare."],
+        l: ["Una lampada a olio appesa a un gancio, con un seme di lumina che batte piano. Si accende quando passi e si spegne quando ti allontani, con un rispetto da maggiordomo."],
+      }[ch];
+      if (!T_) return done();
+      say(sw([["voce", chip(T_)]], BG.A), done);
+    }
+
+    // ---- oggetti e personaggi
+    const obj = {
+      "vl_paese:w": () => { go("vl_municipio", 17, 21); },
+      "vl_municipio:d": esci, "vl_municipio:L": scala,
+      "vl_municipio:n": oggettoMuni, "vl_municipio:J": oggettoMuni, "vl_municipio:T": oggettoMuni, "vl_municipio:S": oggettoMuni, "vl_municipio:b": oggettoMuni, "vl_municipio:l": oggettoMuni, "vl_municipio:x": oggettoMuni,
+      "vl_archivio:^": () => go("vl_municipio", 17, 6), "vl_archivio:n": bacheca, "vl_archivio:O": tassello, "vl_archivio:B": armadio,
+      "vl_archivio:S": oggettoArch, "vl_archivio:T": oggettoArch, "vl_archivio:C": oggettoArch, "vl_archivio:E": oggettoArch, "vl_archivio:x": oggettoArch, "vl_archivio:l": oggettoArch,
+    };
+    const talk = {
+      vl_cornelio: cornelio, vl_vermiglio: vermiglio, vl_sigillo: sigillo, vl_corvi: corvi, vl_ottavia: ottavia, vl_noemi: noemi, vl_ettore: ettore, vl_viola: viola, vl_fosco: fosco, vl_teodora: teodoraT,
+      vl_bianca: () => (inM() ? compagnoMuni("vl_bianca") : delegate("vl_bianca")), vl_agata: () => (inM() ? compagnoMuni("vl_agata") : delegate("vl_agata")),
+      vl_remo: () => remoT("vl_remo"), vl_remo_ns: () => remoT("vl_remo_ns"),
+    };
+
+    return {
+      n: N, title: "Il Registro", sub: "Un cassetto, quattro tasselli e un'ora di tempo", start: "vl_municipio", zones, talk, obj, goal, mood,
+      news: (id, s) => {
+        if (!inM()) return X.newsOf(id, N);
+        if (zoneNow() === "vl_archivio") return s === 3 && PH() >= 1 && PH() < 7 && [compId(), "vl_vermiglio", "vl_corvi", "vl_cornelio", "vl_agata"].includes(id);
+        if (id === "vl_cornelio") return s === 0;
+        if (id === "vl_vermiglio") return s === 1;
+        if (id === "vl_corvi") return s === 2;
+        if (id === "vl_ottavia") return s === 4;
+        return false;
+      },
+      intro: () => [
+        ["voce", "All'alba la lumina della miniera si è spenta come una brace che ha finito il suo lavoro; il sentiero dei Lampioni è rimasto acceso, per cortesia. Il paese si sveglia a rate, tra finestre che si accendono e gabbiani che non fanno commenti.", BG.P],
+        ["voce", "Nella tasca hai una chiave di ferro, annerita, con un nastro rosso. Pesa come un compito in classe. Cornelio ti ha dato appuntamento al Municipio, «prima che arrivino»: e «loro», a quanto pare, sono arrivati con la prima corsa, hanno dormito al Rifugio e ordinato una tisana senza zucchero e senza nome.", BG.P],
+        ["voce", "A Vallombra il Municipio ha un orologio sul frontone fermo alle undici e dieci. Nessuno sa chi l'abbia fermato. Si sospetta il Comune, che da sempre è in ritardo di principio.", BG.U],
+      ],
+    };
+  });
+
 
   // ------------------------------------------------------------------ debug e avvio
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
