@@ -15039,8 +15039,6 @@
       { head: "Gioca" },
       { label: "Storia", sub: `Le stagioni di Leo · ${mnPct(mnStoria())}%`, fn: menuStoria },
       { label: "Il Borgo Storto", sub: "Spin-off GDR a turni", cls: "hot", fn: () => openBorgoStorto(title) },
-      { label: "🌊 Cala Tramontana", sub: heroLoad() ? `Il borgo alternativo con ${heroLoad().name}` : "Il borgo alternativo del tuo campione", cls: "hot", fn: () => { if (window.openCalaTramontana) window.openCalaTramontana(title); } },
-      { label: "★ JoJo · Stand Soccer Battle", sub: "Le Bizzarre Avventure di Rondine: Star Rondine & ORA ORA ORA!", cls: "hot", fn: () => { if (window.openJoJoAdventure) window.openJoJoAdventure(title); } },
       { label: "Borgo e trasferte", sub: `A piedi per il paese · ${mnPct(mnBorgo())}%`, fn: menuBorgo },
       { label: "Modalità", sub: `Tutte le modalità · ${mnPct(mnModi())}%`, fn: modes },
       { label: "Saghe e minigiochi", sub: "Blue Lock, Noir, Multiverso, Stadio 3D, Panda, Faro…", cls: "hot", fn: menuSaghe },
