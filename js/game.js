@@ -25213,7 +25213,14 @@
     if (!chBack) chBack = S;
     S = borgoPlayer(); if (h) { heroCast(h); S.st = heroBias(S.st, h); }
     const t = (v) => Math.max(4, Math.round(v)), key = "ap_" + cfg.id;
-    TEAMS[key] = cfg.team(t, S.st); statsBox();
+    TEAMS[key] = cfg.team(t, S.st); { const T = TEAMS[key]; if (!T.color) T.color = T.col || "#3fa7ff"; if (!T.vs) T.vs = T.name || "gli avversari"; if (!T.name) T.name = T.vs;
+      const A = Number(T.atk) || t(S.st.tiro), D = Number(T.def) || t(S.st.contrasto || 12), V = Number(T.vel) || A;
+      if (!Array.isArray(T.defs)) T.defs = [["Il Muro", t(D * 0.95)], ["Il Mastino", t(D)], ["Il Lungo", t(D * 1.05)]];
+      if (!Array.isArray(T.atk)) T.atk = [["Il Fulmine", t(A * 0.95)], ["Il Cecchino", t(V * 0.9)]];
+      if (!Array.isArray(T.gk)) T.gk = ["Il Gigante", t(D * 1.1)];
+      if (!T.power) T.power = t(A * 0.9);
+      if (T.special === undefined || (T.special && !Array.isArray(T.special))) T.special = Array.isArray(T.specials) && T.specials[0] ? [String(T.specials[0]), t(A * 1.2)] : null; }
+      statsBox();
     startMatch({ match: key, chap: cfg.chap, quick: true, min: cfg.min || 45, mate: cfg.mate || "Tommy", mateGeneric: !!cfg.mateGeneric, us: cfg.us || "Borgo", intro: cfg.intro, hero: h || undefined,
       onEnd: () => { const [a, b] = M.score, rc = mRecap(); M = null; $("matchHud").hidden = true; if (chBack) S = chBack; chBack = null; sfx(a > b ? "goal" : "crowd"); if (a > b) jingle("win"); cfg.onDone({ a, b, win: a > b, recap: rc }); } });
     chap(cfg.chap);
