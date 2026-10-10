@@ -1077,7 +1077,7 @@
   function playMatch(o) {
     castHero(); inMatch = true;
     api.matchPick({
-      alt: o.alt, oppNames: o.oppNames, squad: o.squad, azPitch: o.azPitch, cageMut: o.cageMut, cageTarget: o.cageTarget,
+      alt: o.alt, oppNames: o.oppNames, squad: o.squad, azPitch: o.azPitch, cageMut: o.cageMut, cageTarget: o.cageTarget, homeKit: o.homeKit, cageField: o.cageField,
       id: o.id, chap: o.chap, intro: T(o.intro), mate: o.mate || "Kira", mateGeneric: true,
       us: o.us || "I Falchi d'Acciaio", min: o.min || 45, team: o.team, venue: o.venue || VENUE_ALC, hero: undefined,
       onDone: (r) => {

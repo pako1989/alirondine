@@ -1306,7 +1306,7 @@
   function playMatch(o) {
     castHero(); inMatch = true;
     api.matchPick({
-      alt: o.alt, oppNames: o.oppNames, squad: o.squad, azPitch: o.azPitch, cageMut: o.cageMut, cageTarget: o.cageTarget,
+      alt: o.alt, oppNames: o.oppNames, squad: o.squad, azPitch: o.azPitch, cageMut: o.cageMut, cageTarget: o.cageTarget, homeKit: o.homeKit, cageField: o.cageField,
       id: o.id, chap: o.chap, intro: T(o.intro), mate: o.mate || "Celia", mateGeneric: true,
       us: o.us || "I Corvi Ribelli", min: o.min || 45, team: o.team, venue: o.venue || VENUE_KRO, hero: undefined,
       onDone: (r) => {
@@ -2332,7 +2332,7 @@
     function startMatch2() {
       X.playMatch({
         id: "kb_match_2",
-        alt: "cage,az", azPitch: "campo", cageTarget: 5,
+        alt: "cage,az", azPitch: "campo", cageTarget: 5, homeKit: ["#7c2d12", "#f5f5f4"], cageField: 2,
         chap: "Kronenburg · Il Giudizio delle Segrete",
         us: "I Corvi di {n}",
         mate: "Celia",

@@ -414,7 +414,7 @@
   const COS = { kit: KITS, ball: BALLS, field: FIELDS, tag: TAGS };
   const cosItem = (k, i) => { const it = COS[k][i]; return typeof it === "string" ? { n: it, p: i ? 1 : 0 } : it; };
   const cosOwned = (k, i) => EXT.cos.own[k].indexOf(i) >= 0 || (cosItem(k, i).p === 0 && gateOk(cosItem(k, i).gate));
-  const myTag = () => TAGS[EXT.cos.tag] || "RON";
+  const myTag = () => (sagaOv && sagaOv.tag) || TAGS[EXT.cos.tag] || "RON";
   function addGt(n) { EXT.gt += n; saveExt(); }
   // monete del gioco: SOLO via window.addCoins e SOLO alla prima vittoria (chiave unica per sfida)
   function giveCoin(key, n) {
@@ -667,7 +667,7 @@
 
   // ---------------------------------------------------------------- partita
   function mkTeam(team, lv) {
-    const sq = squadDefs(), kt = KITS[EXT.cos.kit] || KITS[0];
+    const sq = squadDefs(), kt = kitOf();
     return SLOT.map((s, i) => {
       const h = team === 0 ? sq[i] : null;
       return {
@@ -681,7 +681,10 @@
     });
   }
 
-  const squadDefs = () => EXT.squad.map((id) => POOL[id] || POOL.leo);
+  let sagaOv = null; // partita di saga: squadra, divisa, tag e campo propri (null = Gabbia normale)
+  const squadDefs = () => (sagaOv && sagaOv.squad ? sagaOv.squad : EXT.squad.map((id) => POOL[id] || POOL.leo));
+  const kitOf = () => (sagaOv && sagaOv.kit ? { k: sagaOv.kit, k2: sagaOv.kit2 } : KITS[EXT.cos.kit] || KITS[0]);
+  const fieldOf = () => (sagaOv && sagaOv.field != null ? FIELDS[sagaOv.field] : FIELDS[EXT.cos.field]) || FIELDS[0];
   const MODFX = { wet: { frc: 0.9935 }, rubber: { e: 1.0 }, narrow: { mh: 42 }, wide: { mh: 72 }, heavy: { frc: 0.979 }, turbo: { spd: 1.12 }, gold: { bank: 2 }, grint: { gr: 2 } };
 
   // cfg: { mode, lv, li, di, mod, target, secs, lives, oppSpd, passive, daily, boss }
@@ -1332,7 +1335,7 @@
     const P = G.pen, gw = Math.min(cw * 0.84, 340), gh = gw * 0.46, gx = (cw - gw) / 2, gy = Math.max(84, ch * 0.15), fy = gy + gh;
     P.rect = { x: gx, y: gy, w: gw, h: gh };
     const key = [gx, gy, gw, gh].map(Math.round).join(","); if (P.uiKey !== key && root) { P.uiKey = key; const pz = root.querySelector(".cgd-pz"); if (pz) { pz.style.left = gx + "px"; pz.style.top = gy + "px"; pz.style.width = gw + "px"; pz.style.height = gh + "px"; } }
-    const fld = FIELDS[EXT.cos.field] || FIELDS[0];
+    const fld = fieldOf();
     let gr = g.createLinearGradient(0, 0, 0, ch); gr.addColorStop(0, fld.sky[0]); gr.addColorStop(0.5, "#2b2f42"); gr.addColorStop(1, "#171b27"); g.fillStyle = gr; g.fillRect(0, 0, cw, ch);
     g.fillStyle = "#3c3f4d"; g.fillRect(0, gy - 30, cw, gh + 34);
     g.strokeStyle = "rgba(0,0,0,.35)"; g.lineWidth = 1;
@@ -1347,7 +1350,7 @@
     g.strokeStyle = "rgba(255,255,255,.28)"; g.lineWidth = 1;
     for (let x = gx; x <= gx + gw; x += 9) { g.beginPath(); g.moveTo(x, gy); g.lineTo(x, fy); g.stroke(); }
     for (let y = gy; y <= fy; y += 9) { g.beginPath(); g.moveTo(gx, y); g.lineTo(gx + gw, y); g.stroke(); }
-    const sq = squadDefs(), kt = KITS[EXT.cos.kit] || KITS[0], oc = { kit: G.lv.kit, kit2: G.lv.kit2, skin: G.lv.skin[0], hair: "#1f1a17" };
+    const sq = squadDefs(), kt = kitOf(), oc = { kit: G.lv.kit, kit2: G.lv.kit2, skin: G.lv.skin[0], hair: "#1f1a17" };
     const ours = (i) => { const h = sq[i % 3]; return { kit: kt.k || h.kit, kit2: kt.k2 || h.kit2, skin: h.skin, hair: h.hair }; };
     const person = (x, y, sc, c, face, ph, rot) => { g.save(); g.translate(x, y); if (rot) g.rotate(rot); g.scale(sc, sc); drawPlayer(g, { x: 0, y: 0, vx: 0, vy: 0, ph: ph || 0, dash: 0, face, kit: c.kit, kit2: c.kit2, skin: c.skin, hair: c.hair, name: "", wind: 0, stun: 0 }, false, G.tick); g.restore(); };
     const zx = (c) => gx + gw / 2 + c * gw * 0.33, zy = (r) => gy + gh * (r ? 0.36 : 0.76);
@@ -1433,8 +1436,8 @@
     g.fillStyle = "#0a0e17"; g.fillRect(0, 0, cw, ch);
     if (!G) return;
     if (G.mode === "pen") { renderPen(g, cw, ch); return; }
-    const bgk = G.fx.mh0 + "|" + EXT.cos.field;
-    if (!bgCache || bgCache._n !== bgk) { bgCache = buildBg(G.fx.mh0, FIELDS[EXT.cos.field] || FIELDS[0]); bgCache._n = bgk; }
+    const bgk = G.fx.mh0 + "|" + (sagaOv && sagaOv.field != null ? "s" + sagaOv.field : EXT.cos.field);
+    if (!bgCache || bgCache._n !== bgk) { bgCache = buildBg(G.fx.mh0, fieldOf()); bgCache._n = bgk; }
     const b = G.ball;
     let s = Math.min(cw / (CW + 30), ch / (CH + 30));
     if (cw > ch) s = Math.max(s, Math.min(cw / (CW + 30), ch / 620)); // in orizzontale ingrandisce e segue la palla
@@ -2176,7 +2179,7 @@
     timers.forEach(clearTimeout); timers = [];
     cleanup.forEach((fn) => { try { fn(); } catch (e) { /* ignora */ } }); cleanup = [];
     if (root) { root.remove(); root = null; }
-    cv = cx = ui = stage = null; G = null;
+    cv = cx = ui = stage = null; G = null; sagaOv = null;
     input.jx = input.jy = input.kx = input.ky = 0; input.charging = false;
     const cb = onExitCb; onExitCb = null;
     if (silent !== true && typeof cb === "function") { try { cb(); } catch (e) { console.error(e); } }
@@ -2239,6 +2242,7 @@
     const lv = Object.assign({ name: "Avversari", tag: "AVV", kit: "#64748b", kit2: "#0f172a", skin: ["#d9a679", "#c68642", "#e8b88c"], names: ["Primo", "Secondo", "Terzo"], spd: 0.95, react: 16, dash: 0.005, noise: 28, bank: 0.2, target: 6, read: 0.3, mut: "", mutKey: "", hint: "", win: "" }, o.lv || {});
     let cfg = null;
     openCage(function () { if (typeof o.onExit === "function") { try { o.onExit(cfg && cfg.sagaRes ? cfg.sagaRes : null); } catch (e) { console.error(e); } } }, {});
+    sagaOv = { squad: Array.isArray(o.squad) && o.squad.length >= 3 ? o.squad.slice(0, 3).map((q, i) => Object.assign({}, POOL[["leo", "nico", "dario"][i]], q, { tr: "" })) : null, kit: o.kit || null, kit2: o.kit2 || "#f8fafc", tag: o.tag || "", field: o.field == null ? null : o.field };
     cfg = { kind: "saga", mode: "tour", lv, li: -1, target: o.target, title: o.title || lv.name, back: function () { closeAll(); } };
     launch(cfg);
   }

@@ -25281,7 +25281,9 @@
     const r = Math.max(0.6, Math.min(1.6, (num(T.atk, mine) + num(T.def, mine) + num(T.vel, mine)) / 3 / Math.max(8, mine))), cl = (v, a, b) => Math.max(a, Math.min(b, v));
     const N = Array.isArray(cfg.oppNames) && cfg.oppNames.length >= 5 ? cfg.oppNames : [T.gk[0], T.defs[0][0], T.defs[1][0], T.defs[2][0], T.atk[0][0]];
     trSavePos(); document.body.classList.remove("borgo");
-    window.__cageHd.sagaMatch({ title: cfg.chap, target: cfg.cageTarget || 6,
+    const mc = (() => { const k = Object.keys(CAST).find((x) => x.endsWith("_" + String(cfg.mate || "").toLowerCase())); return (k && CAST[k]) || {}; })(), hk = cfg.homeKit || ["#1d4ed8", "#f8fafc"];
+    const sqd = [{ name: (h && h.name) || "Campione", skin: (h && h.skin) || "#e8b88c", hair: (h && h.hair) || "#2b1d14", spd: 4.9 }, { name: cfg.mate || "Compagno", skin: mc.skin || "#e8b88c", hair: mc.hair || "#2b1d14", spd: 4.8 }, { name: (cfg.squad && cfg.squad[0]) || "Titano", skin: "#c68642", hair: "#1f1a17", spd: 4.5 }];
+    window.__cageHd.sagaMatch({ title: cfg.chap, target: cfg.cageTarget || 6, squad: sqd, kit: hk[0], kit2: hk[1], tag: String(cfg.us || "RON").replace(/^(i|il|la|le|gli|lo|l')\s*/i, "").slice(0, 3).toUpperCase(), field: cfg.cageField,
       lv: { name: T.name, tag: String(T.name).replace(/^(i|il|la|le|gli|lo|l')\s*/i, "").slice(0, 3).toUpperCase(), kit: /^#[0-9a-f]{6}$/i.test(T.color) ? T.color : "#64748b", kit2: "#0f172a", names: [N[1], N[2], N[4]],
         spd: cl(0.86 + 0.1 * r, 0.88, 1.04), react: Math.round(cl(26 - 12 * r, 9, 24)), noise: Math.round(cl(38 - 14 * r, 18, 36)), read: cl(0.1 + 0.35 * r, 0.1, 0.55), bank: cl(0.1 + 0.12 * r, 0.1, 0.3), mutKey: cfg.cageMut || "" },
       onExit: (res) => { const a = res ? res.a : 0, b = res ? res.c : 1; cfg.onDone({ a, b, win: a > b, recap: "", cage: true }); } });

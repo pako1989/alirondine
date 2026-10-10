@@ -1104,7 +1104,7 @@
   function playMatch(o) {
     castHero(); inMatch = true;
     api.matchPick({
-      alt: o.alt, oppNames: o.oppNames, squad: o.squad, azPitch: o.azPitch, cageMut: o.cageMut, cageTarget: o.cageTarget, bg: "omb_arena_gabbia",
+      alt: o.alt, oppNames: o.oppNames, squad: o.squad, azPitch: o.azPitch, cageMut: o.cageMut, cageTarget: o.cageTarget, homeKit: o.homeKit, cageField: o.cageField, bg: "omb_arena_gabbia",
       id: o.id, chap: o.chap, intro: T(o.intro), mate: o.mate || "Milo", mateGeneric: true,
       us: o.us || "I Ribelli delle Ombre", min: o.min || 45, team: o.team, venue: o.venue || VENUE_OMB, weather: o.weather || "pioggia", hero: undefined,
       onDone: (r) => {
@@ -1551,7 +1551,7 @@
     function startMatchCage1() {
       X.playMatch({
         id: "omb_match_1",
-        alt: "cage,az", azPitch: "campo", cageMut: "wet", cageTarget: 5,
+        alt: "cage,az", azPitch: "campo", cageMut: "wet", cageTarget: 5, homeKit: ["#0e7490", "#0f172a"], cageField: 3,
         chap: "Il Circuito delle Ombre · La Gabbia delle Onde",
         us: "I Ribelli delle Ombre",
         mate: "Milo",
