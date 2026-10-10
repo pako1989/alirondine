@@ -144,7 +144,7 @@
     o = obj(o);
     const m = {
       v: 1, ch: clampI(o.ch, 1, 99, 1), step: {}, flags: {}, rew: {}, done: {},
-      zone: "", clues: [], log: [], intro: {}, wins: clampI(o.wins, 0, 1e6, 0), losses: clampI(o.losses, 0, 1e6, 0)
+      zone: "", maxCh: clampI(o.maxCh, 0, 99, 0), clues: [], log: [], intro: {}, wins: clampI(o.wins, 0, 1e6, 0), losses: clampI(o.losses, 0, 1e6, 0)
     };
     const st = obj(o.step);
     Object.keys(st).slice(0, 99).forEach((k) => { const n = clampI(k, 1, 99, 0); if (n) m.step[n] = clampI(st[k], 0, 99, 0); });
@@ -1059,6 +1059,13 @@
           sub: c.title,
           cls: m.ch === n ? "hot" : "",
           fn: () => {
+            if (m.done[n]) {
+              // rigioca: il capitolo riparte da capo dalla sua prima zona (ricompense già prese non si ripetono)
+              m.maxCh = Math.max(m.maxCh | 0, m.ch);
+              m.step[n] = 0; delete m.intro["ch" + n];
+              const zk = c.zones && Object.keys(c.zones)[0];
+              if (zk) { m.zone = zk; const sp = ZONES[zk] && ZONES[zk].spec.start; if (sp) api.trRec().pos[zk] = [sp[0] * TS + 8, sp[1] * TS + 12]; }
+            }
             m.ch = n;
             save();
             continueStory();
@@ -1112,6 +1119,7 @@
     const m = mem();
     m.done[n] = String(ending || "ok").slice(0, 30);
     if (m.ch <= n) m.ch = n + 1;
+    if (m.maxCh > m.ch) m.ch = m.maxCh;
     save();
   }
 
