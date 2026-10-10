@@ -1190,7 +1190,7 @@
         name: "Fortezza San Giuda · Darsena del Molo Nero", short: "Molo della Darsena", sub: "Nebbia, container industriali e riflettori alogeni",
         w: 40, h: 26, start: [19, 21], theme: "torino", bg: "omb_darsena_notte",
         item: ["Microchip Ombra", "Microchip"], itemCos: "omb_maschera_notte",
-        items: [[3, 5], [36, 5], [10, 17], [29, 17]],
+        items: [[3, 9], [36, 9], [10, 17], [29, 17]],
         areas: [
           [2, 2, 14, 10, "La Banchina del Nadir"],
           [26, 2, 38, 10, "La Saracinesca dei Magazzini"],
@@ -1653,7 +1653,7 @@
         name: "Livello 2 · Magazzini Blindati della Fortezza", short: "Magazzini Blindati", sub: "Container criogenici, barriere laser e nastri trasportatori",
         w: 38, h: 24, start: [4, 18], theme: "torino", bg: "omb_magazzini_laser",
         item: ["Wafer Criogenico", "Wafer"], itemCos: "omb_cintura_chimera",
-        items: [[6, 6], [32, 6], [12, 16], [28, 16]],
+        items: [[6, 10], [32, 10], [12, 16], [28, 16]],
         areas: [
           [2, 2, 14, 10, "Il Settore Frigorifero"],
           [24, 2, 35, 10, "L'Uscita verso il Laboratorio"],
@@ -1969,7 +1969,7 @@
         name: "Livello 3 · Suite Panoramica della Lanterna Nera", short: "Suite Panoramica", sub: "Vetrate a picco sulle onde burrascose, caminetti e valigette di banconote",
         w: 38, h: 22, start: [19, 19], theme: "torino", bg: "omb_suite_tempesta",
         item: ["Sigillo di Don Renzo", "Sigilli"], itemCos: "omb_mantello_ombre",
-        items: [[5, 5], [32, 5], [10, 15], [27, 15]],
+        items: [[5, 10], [32, 5], [10, 15], [27, 15]],
         areas: [
           [10, 2, 28, 8, "Il Tavolo del Ricatto"],
           [2, 2, 8, 10, "La Cella d'Ebano"]
