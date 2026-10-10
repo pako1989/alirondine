@@ -343,32 +343,20 @@
   const P = (x, y, w, h, c) => { GP.fillStyle = c; GP.fillRect(x, y, w, h); };
   const frNow = () => safe(() => (typeof window.fr === "function" ? window.fr() : performance.now() / 16), 0);
 
-  const ZX = { map: null, id: "" };
-  const at = (tx, ty) => {
-    const m = ZX.map; if (!m || !m.layers) return " ";
-    const l0 = m.layers[0], l1 = m.layers[1];
-    return (l1 && l1[ty] && l1[ty][tx] && l1[ty][tx] !== " " ? l1[ty][tx] : (l0 && l0[ty] && l0[ty][tx]) || " ");
-  };
-  const undAt = (tx, ty) => {
-    const m = ZX.map; if (!m || !m.layers || !m.layers[0]) return ",";
-    return (m.layers[0][ty] && m.layers[0][ty][tx]) || ",";
-  };
+  const ZX = { map: null, id: "", under: null };
+  const at = (tx, ty) => (ZX.map && ZX.map[ty] && ZX.map[ty][tx]) || " ";
+  const undAt = (tx, ty) => (ZX.under && ZX.under[ty] && ZX.under[ty][tx]) || ",";
 
   function makeLayers(w, h) {
-    const l0 = [], l1 = [];
-    for (let y = 0; y < h; y++) { l0.push(new Array(w).fill(",")); l1.push(new Array(w).fill(" ")); }
-    return {
-      l0, l1,
-      lay(x0, y0, x1, y1, ch, top) {
-        const t = top ? l1 : l0;
-        for (let y = Math.max(0, y0); y <= Math.min(h - 1, y1); y++) {
-          for (let x = Math.max(0, x0); x <= Math.min(w - 1, x1); x++) t[y][x] = ch;
-        }
-      },
-      put(x, y, ch, top) {
-        if (x >= 0 && x < w && y >= 0 && y < h) (top ? l1 : l0)[y][x] = ch;
-      }
+    const m = ZX.map, u = Array.from({ length: h }, () => Array(w).fill(","));
+    ZX.under = u;
+    const put = (x, y, ch, top) => {
+      if (m[y] && x >= 0 && x < w && y >= 0 && y < h) { m[y][x] = ch; if (!top) u[y][x] = ch; }
     };
+    const lay = (x0, y0, x1, y1, ch, top) => {
+      for (let y = Math.max(0, y0); y <= Math.min(h - 1, y1); y++) for (let x = Math.max(0, x0); x <= Math.min(w - 1, x1); x++) put(x, y, ch, top);
+    };
+    return { lay, put };
   }
 
   function floorPaint(f, sx, sy, tx, ty) {
@@ -478,7 +466,7 @@
       n: 0, title: "", sub: "", goal: null,
       zones: {}, act: {}, obj: {}, talk: {}
     };
-    fn({
+    const chObj = {
       setMeta: (n, title, sub) => { ch.n = n; ch.title = title; ch.sub = sub; },
       setGoal: (fnGoal) => { ch.goal = fnGoal; },
       cast: (id, c, bio) => {
@@ -494,9 +482,12 @@
       obj: (key, fnObj) => { ch.obj[key] = fnObj; },
       talk: (id, fnTalk) => { ch.talk[id] = fnTalk; },
       XTOOLS
-    });
+    };
+    fn(chObj);
+    if (chObj.zones) ch.zones = chObj.zones;
+    ["talk", "obj", "act"].forEach((k) => { if (chObj[k] && typeof chObj[k] === "object") ch[k] = chObj[k]; });
     CHAPTERS[ch.n] = ch;
-    Object.keys(ch.zones).forEach((zid) => registerZone(zid, ch.n, ch.zones[zid]));
+    registerChapterZones(ch);
   }
 
   function activeChapter() {
@@ -564,14 +555,21 @@
 
   const CAST_OK = (id) => !!(api && api.CAST && api.CAST[id]);
 
+  let UITOK = 0;
   function say(lines, then) {
     if (!Array.isArray(lines) || !lines.length) { if (typeof then === "function") then(); return; }
     castHero();
     const bg = bgNow();
-    api.trSay(lines.map((l) => api.L(l[0] === "hero" ? "hero" : l[0], T(l[1]), l[2] || bg)), then || done);
+    const tok = ++UITOK;
+    api.trSay(lines.map((l) => api.L(l[0] === "hero" ? "hero" : l[0], T(l[1]), l[2] || bg)), () => {
+      if (typeof then !== "function" || then === done) { done(); return; }
+      then();
+      if (UITOK === tok && !inMatch) done();
+    });
   }
 
   function ask(who, prompt, opts, bg) {
+    UITOK++;
     castHero();
     api.trAsk(
       who, T(prompt),
@@ -1073,7 +1071,7 @@
         name: "Valle d'Ambra · Sala delle Mappe", short: "Sala delle Mappe", sub: "Rotte temporali e simulazioni celesti",
         w: 32, h: 24, start: [3, 12], theme: "torino", bg: "chr_mezzogiorno",
         item: ["Astrolabio d'Oro", "Astrolabi"],
-        items: [[16, 6]],
+        items: [[16, 4]],
         act: {
           T: "Consulta la mappa dell'Eclisse",
           P: "Raccogli il Frammento di Mezzogiorno",
@@ -1437,6 +1435,21 @@
     }, 400);
   }
 
+  function installHooks() {
+    const desc = Object.getOwnPropertyDescriptor(window, "trTalkHook");
+    const chained = !(desc && desc.set);
+    const prev = chained ? window.trTalkHook : null;
+    window.trTalkHook = function (id) {
+      const zr = zoneRec();
+      if (zr && zr.Z.npcs.some((n) => n.id === id)) {
+        const c = CHAPTERS[zr.ch] || activeChapter();
+        const f = c && c.talk && c.talk[id];
+        if (f) { castHero(); f(); return true; }
+      }
+      return chained && typeof prev === "function" ? prev(id) : false;
+    };
+  }
+
   function init() {
     const a = window.__borgoApi;
     if (!a || !a.TRZ || !a.trGo || !a.play || !a.scene || !a.match) {
@@ -1448,6 +1461,7 @@
     COS_Q.splice(0).forEach(([id, d]) => { if (a.COSM && !a.COSM[id]) a.COSM[id] = d; });
     PENDING.splice(0).forEach(registerChapterZones);
     setupExitButton();
+    installHooks();
   }
 
   function openMain(opts) {
