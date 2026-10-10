@@ -1302,11 +1302,12 @@
 
   // ------------------------------------------------------------------ Partita Tattica Narrativa
   let inMatch = false;
+  const VENUE_KRO = { ads: [["BASTIONE DI KRONENBURG", "#3f3f46"], ["GUARDIA D'ACCIAIO", "#52525b"], ["CORTE DEI GRIFONI", "#7c2d12"], ["PREGHIERA E FERRO", "#27272a"]], crowd: ["#27272a", "#52525b", "#78716c", "#44403c", "#a8a29e"], tint: "rgba(30,34,44,.3)", glow: "203,213,225" };
   function playMatch(o) {
     castHero(); inMatch = true;
     api.match({
       id: o.id, chap: o.chap, intro: T(o.intro), mate: o.mate || "Celia", mateGeneric: true,
-      us: o.us || "I Corvi Ribelli", min: o.min || 45, team: o.team, hero: undefined,
+      us: o.us || "I Corvi Ribelli", min: o.min || 45, team: o.team, venue: o.venue || VENUE_KRO, hero: undefined,
       onDone: (r) => {
         inMatch = false;
         const m = mem();

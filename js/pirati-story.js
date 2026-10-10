@@ -840,11 +840,12 @@
 
   // ------------------------------------------------------------------ Partita Tattica tra le Nubi
   let inMatch = false;
+  const VENUE_PIR = { ads: [["I BUCANIERI DEL VENTO", "#7c2d12"], ["RUM E SALE", "#92400e"], ["TAVERNA DEL MOLO", "#1e3a5f"], ["MAPPE DEL TESORO", "#14532d"]], crowd: ["#7c2d12", "#1e3a5f", "#e8e0d0", "#b45309", "#f0c9a0"], tint: "rgba(255,170,80,.12)", glow: "255,190,110" };
   function playMatch(o) {
     castHero(); inMatch = true;
     api.match({
       id: o.id, chap: o.chap, intro: T(o.intro), mate: o.mate || "Morgana", mateGeneric: true,
-      us: o.us || "I Bucanieri del Vento", min: o.min || 45, team: o.team, hero: undefined,
+      us: o.us || "I Bucanieri del Vento", min: o.min || 45, team: o.team, venue: o.venue || VENUE_PIR, hero: undefined,
       onDone: (r) => {
         inMatch = false;
         const m = mem();

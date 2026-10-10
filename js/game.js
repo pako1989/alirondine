@@ -11001,13 +11001,15 @@
     // palla: ombra
     if (!m.anim) { const bx = m.poss === "us" ? 60 + (m.zone - 1) * 55 : 260 - (m.zone - 1) * 55; g.fillStyle = "rgba(0,0,0,.3)"; g.beginPath(); g.ellipse(bx + 2, 108, 4, 1.6, 0, 0, 7); g.fill(); }
     // tribuna in alto e cartelloni in basso
-    gxCrowd(4, 2, hype, [gxTeam().c1, gxTeam().c2, gxTeam().opp, "#e8e0d0", "#f0c9a0"], m.step && m.step.final && gxHeavy() ? [gxTeam().c1, gxTeam().c2] : null);
-    const ads = [["TRATTORIA MORETTI", "#b3202c"], ["EDICOLA PINA", "#1d3fa3"], ["GELATI TONINO", "#ff9ec0"], ["PESCE FRESCO", "#2f7a4a"]];
+    const V = m.step && m.step.venue;
+    gxCrowd(4, 2, hype, V && V.crowd ? V.crowd : [gxTeam().c1, gxTeam().c2, gxTeam().opp, "#e8e0d0", "#f0c9a0"], m.step && m.step.final && gxHeavy() ? [gxTeam().c1, gxTeam().c2] : null);
+    const ads = V && V.ads ? V.ads : [["TRATTORIA MORETTI", "#b3202c"], ["EDICOLA PINA", "#1d3fa3"], ["GELATI TONINO", "#ff9ec0"], ["PESCE FRESCO", "#2f7a4a"]];
     const off = (frame * 0.25) % 480;
     g.save(); g.beginPath(); g.rect(0, 183, W, 11); g.clip();
     for (let i = -1; i < 5; i++) { const [t, c] = ads[(i + 4) % 4], x = i * 120 - off % 120; px(x, 183, 118, 11, c); g.fillStyle = "#fff"; g.font = "bold 7px sans-serif"; g.textAlign = "center"; g.fillText(t, x + 59, 191); }
     g.restore(); g.textAlign = "left";
-    if (gxHeavy()) { g.save(); g.globalCompositeOperation = "lighter"; gxGlow(10, 0, 40, "255,250,220", 0.25); gxGlow(310, 0, 40, "255,250,220", 0.25); g.restore(); }
+    if (gxHeavy()) { g.save(); g.globalCompositeOperation = "lighter"; gxGlow(10, 0, 40, V && V.glow ? V.glow : "255,250,220", 0.25); gxGlow(310, 0, 40, V && V.glow ? V.glow : "255,250,220", 0.25); if (V && V.glow2) { gxGlow(110, 0, 36, V.glow2, 0.2); gxGlow(210, 0, 36, V.glow2, 0.2); } g.restore(); }
+    if (V && V.tint) { g.fillStyle = V.tint; g.fillRect(0, 0, W, H); }
   }
   // ---------- porta vista da dietro: riflettori e flash ----------
   function saGoal(a, bulge) {
@@ -11266,9 +11268,10 @@
     const T = C.T;
     const sky = g.createLinearGradient(0, -40, 0, 70); sky.addColorStop(0, "#050a1e"); sky.addColorStop(1, "#23457a"); g.fillStyle = sky; g.fillRect(-60, -60, W + 120, 140);
     for (let i = 0; i < 30; i++) px((i * 83) % (W + 80) - 40, (i * 29) % 40 - 30, 1, 1, (frame / 12 + i) % 4 < 1 ? "#fff" : "#8aa0d0");
-    gxCrowd(40, 7, hype, [T.c1, T.c2, T.c1, "#e8e0d0", "#f0c9a0", T.opp], M && M.step && M.step.final && C.kind !== "kick" && C.kind !== "card" ? [T.c1, T.c2] : null);
+    const V = M && M.step && M.step.venue;
+    gxCrowd(40, 7, hype, V && V.crowd ? V.crowd : [T.c1, T.c2, T.c1, "#e8e0d0", "#f0c9a0", T.opp], M && M.step && M.step.final && C.kind !== "kick" && C.kind !== "card" ? [T.c1, T.c2] : null);
     gxFlag(30, 30, T.c1, T.c2, 0); gxFlag(140, 28, T.c1, T.c2, 1.5); gxFlag(250, 30, T.c1, T.c2, 3);
-    const ads = [["TRATTORIA MORETTI", "#b3202c"], ["EDICOLA PINA", "#1d3fa3"], ["GELATI TONINO", "#ff9ec0"], ["PESCE FRESCO", "#2f7a4a"]];
+    const ads = V && V.ads ? V.ads : [["TRATTORIA MORETTI", "#b3202c"], ["EDICOLA PINA", "#1d3fa3"], ["GELATI TONINO", "#ff9ec0"], ["PESCE FRESCO", "#2f7a4a"]];
     for (let i = -1; i < 5; i++) { const [t, c] = ads[(i + 4) % 4], x = i * 110 - 20; px(x, 89, 108, 12, c); g.fillStyle = "#fff"; g.font = "bold 8px sans-serif"; g.textAlign = "center"; g.fillText(t, x + 54, 98); } g.textAlign = "left";
     const gr = g.createLinearGradient(0, 100, 0, 220); gr.addColorStop(0, "#2f9e55"); gr.addColorStop(1, "#15502a"); g.fillStyle = gr; g.fillRect(-60, 100, W + 120, 160);
     for (let i = 0; i < 6; i++) px(-60, 104 + i * 18 + i * i * 1.5, W + 120, 6 + i * 1.5, "rgba(255,255,255,.05)");
@@ -11276,6 +11279,7 @@
     g.beginPath(); g.ellipse(160, 160, 70, 16, 0, 0, 7); g.stroke();
     gxTower(12, 6); gxTower(308, 6);
     if (gxHeavy()) { gxBeam(12, 4, -0.5, 240, 40, 0.09); gxBeam(308, 4, 0.5, 240, 40, 0.09); }
+    if (V && V.tint) { g.fillStyle = V.tint; g.fillRect(-60, -60, W + 120, 320); }
   }
   function gxWrap(txt, maxW) { const words = txt.split(" "), lines = [""]; words.forEach((w) => { const t = (lines[lines.length - 1] + " " + w).trim(); if (g.measureText(t).width > maxW && lines[lines.length - 1]) lines.push(w); else lines[lines.length - 1] = t; }); return lines; }
   function gxCelDone() { const C = CEL; CEL = null; if (C && C.done) C.done(); }
@@ -25222,7 +25226,7 @@
       if (!T.power) T.power = t(A * 0.9);
       if (T.special === undefined || (T.special && !Array.isArray(T.special))) T.special = Array.isArray(T.specials) && T.specials[0] ? [String(T.specials[0]), t(A * 1.2)] : null; }
       statsBox();
-    startMatch({ match: key, chap: cfg.chap, quick: true, min: cfg.min || 45, mate: cfg.mate || "Tommy", mateGeneric: !!cfg.mateGeneric, us: cfg.us || "Borgo", intro: cfg.intro, hero: h || undefined,
+    startMatch({ match: key, chap: cfg.chap, quick: true, min: cfg.min || 45, mate: cfg.mate || "Tommy", mateGeneric: !!cfg.mateGeneric, us: cfg.us || "Borgo", intro: cfg.intro, venue: cfg.venue || undefined, forceMeteo: cfg.weather || undefined, hero: h || undefined,
       onEnd: () => { const [a, b] = M.score, rc = mRecap(); M = null; $("matchHud").hidden = true; if (chBack) S = chBack; chBack = null; sfx(a > b ? "goal" : "crowd"); if (a > b) jingle("win"); cfg.onDone({ a, b, win: a > b, recap: rc }); } });
     chap(cfg.chap);
   }
