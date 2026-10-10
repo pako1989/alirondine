@@ -927,7 +927,7 @@
         name: "Arcipelago Celeste · Porto di Nembocroce", short: "Moli di Nembocroce", sub: "Isole galleggianti, banchine e navi solari",
         w: 40, h: 26, start: [19, 21], theme: "torino", bg: "pi_porto_celeste",
         item: ["Doppietta Celeste", "Doppiette"], itemCos: "pi_tricorno_corsaro",
-        items: [[3, 5], [36, 5], [10, 17], [29, 17]],
+        items: [[3, 9], [36, 9], [10, 17], [29, 17]],
         areas: [
           [2, 2, 14, 10, "Il Molo delle Scialuppe"],
           [26, 2, 38, 10, "La Passerella Interrotta"],
