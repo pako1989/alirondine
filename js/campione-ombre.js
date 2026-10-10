@@ -1926,7 +1926,7 @@
           }
         },
         "omb_lab_silvia:d": () => {
-          go("omb_magazzini", 29, 4);
+          go("omb_magazzini", 29, 3);
         },
         "omb_hangar_droni:<": () => {
           go("omb_magazzini", 34, 12);
@@ -2637,6 +2637,11 @@
     }
 
     const tr = api.trRec();
+    // salvataggi rimasti incastrati dentro i container dei Magazzini: riporta sul passaggio
+    if (curZ === "omb_magazzini" && tr.pos[curZ]) {
+      const tx = Math.floor(tr.pos[curZ][0] / TS), ty = Math.floor(tr.pos[curZ][1] / TS);
+      if (ty >= 4 && ty <= 8 && ((tx >= 4 && tx <= 12) || (tx >= 25 && tx <= 33))) tr.pos[curZ] = [29 * TS + 8, 3 * TS + 8];
+    }
     if (!tr.pos[curZ]) {
       tr.pos[curZ] = [startPos[0] * TS + 8, startPos[1] * TS + 12];
     }
