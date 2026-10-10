@@ -13,6 +13,7 @@
   const KEY = "ali-di-rondine.kronenburg-story";
   const TS = 16;
   let tries = 0, api = null, EXIT = null;
+  const CAST_Q = []; // personaggi registrati prima che __borgoApi sia pronto
 
   // ------------------------------------------------------------------ Utilità
   const safe = (fn, d) => { try { return fn(); } catch (e) { return d; } };
@@ -936,6 +937,7 @@
     frNow, refreshZone, bgNow,
     zone: registerZone,
     cast: (id, c, bio) => {
+      if (!api) { CAST_Q.push([id, c, bio]); return; }
       if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c);
       if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio;
     },
@@ -1709,6 +1711,7 @@
       return;
     }
     api = a;
+    CAST_Q.splice(0).forEach(([id, c, bio]) => { if (a.CAST && !a.CAST[id]) a.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && a.BIO && !a.BIO[id]) a.BIO[id] = bio; });
     setupExitButton();
   }
 
