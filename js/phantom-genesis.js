@@ -151,41 +151,204 @@
   // ------------------------------------------------------------------ Scanner Sinaptico (Mako Vision Overlay)
   let scannerActive = false;
   let scannerAlpha = 0;
-  function toggleScanner() {
-    scannerActive = !scannerActive;
-    sfxMakoResonance();
-    if (api && api.trToast) {
-      api.trToast(scannerActive ? "👁️ Scanner Sinaptico ATTIVO (Mako Vision)" : "👁️ Scanner Sinaptico DISATTIVATO");
+
+  function updateScannerBtnUI() {
+    const bScan = document.getElementById("bScan");
+    if (bScan) {
+      bScan.textContent = scannerActive ? "👁️ Scan: ON" : "👁️ Scan";
+      bScan.style.background = scannerActive ? "linear-gradient(180deg, #064e3b 0%, #022c22 100%)" : "";
+      bScan.style.borderColor = scannerActive ? "#10b981" : "";
+      bScan.style.color = scannerActive ? "#34d399" : "";
+      bScan.style.boxShadow = scannerActive ? "0 0 10px rgba(16,185,129,0.7)" : "";
+      bScan.setAttribute("title", scannerActive ? "Scanner Sinaptico ATTIVO (Clicca per spegnere)" : "Attiva Scanner Sinaptico (Mako Vision)");
     }
   }
 
-  function drawScannerOverlay(g, W, H) {
-    if (scannerActive && scannerAlpha < 0.45) scannerAlpha = Math.min(0.45, scannerAlpha + 0.04);
-    if (!scannerActive && scannerAlpha > 0) scannerAlpha = Math.max(0, scannerAlpha - 0.05);
+  function ensurePadControls() {
+    const padacts = document.querySelector(".padacts");
+    if (!padacts) return;
+    let bScan = document.getElementById("bScan");
+    if (!bScan) {
+      bScan = document.createElement("button");
+      bScan.type = "button";
+      bScan.id = "bScan";
+      bScan.className = "pad";
+      bScan.textContent = "👁️ Scan";
+      bScan.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleScanner();
+      };
+      const bMenu = document.getElementById("bMenu");
+      if (bMenu) padacts.insertBefore(bScan, bMenu);
+      else padacts.appendChild(bScan);
+    }
+    updateScannerBtnUI();
+  }
+
+  function toggleScanner() {
+    scannerActive = !scannerActive;
+    sfxMakoResonance();
+    updateScannerBtnUI();
+    const curZid = zoneRec() ? api.trZone() : "";
+    const target = getCurrentScannerTarget(curZid);
+    if (scannerActive) {
+      if (api && api.trToast) api.trToast("👁️ Scanner Sinaptico ATTIVO: Segui i segnali luminosi!");
+      const textDiv = document.getElementById("text");
+      if (textDiv) {
+        textDiv.innerHTML = `<div style="border-left:3px solid #10b981; padding-left:8px; line-height:1.4;">
+          <b style="color:#34d399;">👁️ SCANNER SINAPTICO: ATTIVO (Mako Vision)</b><br>
+          🎯 <b>Obiettivo Rilevato:</b> ${target ? target.hint : "Analisi frequenze in corso..."}<br>
+          <span style="color:var(--dim); font-size:12px;">Segui il mirino verde e la scia energetica tratteggiata. Avvicinati all'oggetto o alla persona e premi <b>Azione</b> per scansionare ed estrarre dati!</span>
+        </div>`;
+      }
+    } else {
+      if (api && api.trToast) api.trToast("👁️ Scanner Sinaptico DISATTIVATO");
+      if (api && api.trHint) api.trHint();
+    }
+  }
+
+  function getCurrentScannerTarget(zid) {
+    const c = activeChapter();
+    if (!c) return null;
+    const st = stepOf(c.n);
+    if (!zid && api) zid = api.trZone();
+    if (zid === "pg_bassifondi") {
+      if (st === 0) return { tx: 6, ty: 7, label: "Kael Buster", hint: "Parla con Kael Buster al barile in fiamme", color: "#f97316" };
+      if (st === 1) return { tx: 12, ty: 4, label: "Dott.ssa Maya", hint: "Parla con la Dott.ssa Maya a nord per attivare il Synchro-Nav", color: "#38bdf8" };
+      if (st === 2) return { tx: 20, ty: 3, label: "Materia Saetta", hint: "Segnale Mako a est (X:20, Y:3)! Raggiungi il canale ed esaminala", color: "#10b981" };
+      if (st === 3) return { tx: 18, ty: 8, label: "Rin la Strillona", hint: "Porta la Materia Saetta a Rin per incastonarla", color: "#eab308" };
+      return { tx: 23, ty: 8, label: "Cancello Shin-Nerv", hint: "Pattuglia Shin-Nerv al cancello! Parla con Kael o vai al cancello", color: "#ef4444" };
+    }
+    if (zid === "pg_reattore") {
+      if (st === 0) return { tx: 6, ty: 7, label: "Dott.ssa Maya", hint: "Consulta Maya all'ingresso del reattore", color: "#38bdf8" };
+      if (st === 1) return { tx: 12, ty: 11, label: "Terminali MAGI", hint: "Interagisci con i terminali MAGI per il bypass", color: "#ea580c" };
+      if (st === 2) return { tx: 10, ty: 4, label: "Vasca LCL", hint: "Preleva la Materia Barriera dalla vasca criogenica", color: "#10b981" };
+      return { tx: 23, ty: 8, label: "Apostolo Sachiel-X", hint: "Infrangi l'AT-Field di Sachiel-X davanti al portone!", color: "#ef4444" };
+    }
+    if (zid === "pg_arena_palazzo") {
+      return { tx: 12, ty: 5, label: "Kurogane (Ala Nera)", hint: "Raggiungi il Trono d'Ossidiana per il duello finale!", color: "#eab308" };
+    }
+    return null;
+  }
+
+  function drawScannerOverlay(g, W, H, cx, cy, zid) {
+    if (scannerActive && scannerAlpha < 0.45) scannerAlpha = Math.min(0.45, scannerAlpha + 0.05);
+    if (!scannerActive && scannerAlpha > 0) scannerAlpha = Math.max(0, scannerAlpha - 0.06);
     if (scannerAlpha <= 0) return;
 
     g.save();
-    // Tinta verde Mako / ciano cibernetico
-    g.fillStyle = `rgba(16, 185, 129, ${scannerAlpha * 0.35})`;
+    // 1. Tinta Mako / ciano cibernetico
+    g.fillStyle = `rgba(16, 185, 129, ${scannerAlpha * 0.32})`;
     g.fillRect(0, 0, W, H);
 
-    // Griglia esagonale / linee di scansione
-    g.strokeStyle = `rgba(52, 211, 153, ${scannerAlpha * 0.7})`;
+    // 2. Linea orizzontale di scansione
+    const scanY = (Date.now() * 0.09) % H;
+    g.strokeStyle = `rgba(52, 211, 153, ${scannerAlpha * 0.75})`;
     g.lineWidth = 1;
-    const time = Date.now() * 0.002;
-    const scanY = (Date.now() * 0.08) % H;
-
-    // Linea orizzontale di scansione
     g.beginPath();
     g.moveTo(0, scanY);
     g.lineTo(W, scanY);
     g.stroke();
 
-    // Riquadri di rilevamento dati agli angoli
+    const target = getCurrentScannerTarget(zid);
+    let distTiles = 0;
+    let compass = "";
+    if (target && api) {
+      const tr = api.trRec();
+      const pos = tr && tr.pos && tr.pos[zid];
+      if (pos) {
+        const px = pos[0], py = pos[1];
+        const ptx = px / TS, pty = py / TS;
+        const dx = target.tx - ptx, dy = target.ty - pty;
+        distTiles = Math.max(1, Math.round(Math.hypot(dx, dy)));
+        if (Math.abs(dx) > Math.abs(dy)) compass = dx > 0 ? "Est ▶" : "◀ Ovest";
+        else compass = dy > 0 ? "Sud ▼" : "▲ Nord";
+
+        // Scia energetica Mako tratteggiata tra giocatore e bersaglio
+        if (cx !== undefined && cy !== undefined) {
+          const psx = px - cx;
+          const psy = py - cy;
+          const tsx = target.tx * TS - cx + 8;
+          const tsy = target.ty * TS - cy + 8;
+          g.save();
+          g.setLineDash([4, 4]);
+          g.lineDashOffset = -(Date.now() * 0.02) % 8;
+          g.strokeStyle = "rgba(52, 211, 153, 0.45)";
+          g.lineWidth = 1.5;
+          g.beginPath();
+          g.moveTo(psx, psy);
+          g.lineTo(tsx, tsy);
+          g.stroke();
+          g.restore();
+        }
+      }
+    }
+
+    // 3. Scanner HUD Banner in alto
+    g.fillStyle = "rgba(2, 6, 23, 0.92)";
+    g.fillRect(4, 3, W - 8, 24);
+    g.strokeStyle = distTiles > 0 && distTiles <= 2 ? "#fde047" : "#10b981";
+    g.lineWidth = 1;
+    g.strokeRect(4, 3, W - 8, 24);
+
     g.font = "bold 7px monospace";
-    g.fillStyle = `rgba(52, 211, 153, ${scannerAlpha * 1.8})`;
-    g.fillText("SYNC: 100% · AT-FIELD DETECT", 8, 14);
-    g.fillText("MAKO-FLOW: OPTIMAL", W - 92, 14);
+    g.fillStyle = "#34d399";
+    g.textAlign = "left";
+    g.fillText(`👁️ SCANNER: ATTIVO [${distTiles > 0 ? distTiles + "m " + compass : "In scansione"}] · Clicca Scan per spegnere`, 8, 12);
+    g.fillStyle = distTiles > 0 && distTiles <= 2 ? "#fde047" : "#f8fafc";
+    g.fillText(distTiles > 0 && distTiles <= 2 ? `🎯 BERSAGLIO RAGGIUNTO! Premi AZIONE su ${target.label}` : `🎯 TARGET: ${target ? target.hint : "Nessuna anomalia energetica rilevata"}`, 8, 22);
+
+    // 4. Mirino olografico sul bersaglio
+    if (target && cx !== undefined && cy !== undefined) {
+      const sx = target.tx * TS - cx + 8;
+      const sy = target.ty * TS - cy + 8;
+      const time = Date.now() * 0.005;
+
+      if (sx >= -15 && sx <= W + 15 && sy >= -15 && sy <= H + 15) {
+        const r = 12 + Math.sin(time * 3) * 3;
+        g.strokeStyle = target.color || "#10b981";
+        g.lineWidth = 1.5;
+        g.beginPath();
+        g.arc(sx, sy, r, 0, Math.PI * 2);
+        g.stroke();
+
+        [0, Math.PI / 2, Math.PI, Math.PI * 1.5].forEach((a) => {
+          const cos = Math.cos(a + time), sin = Math.sin(a + time);
+          g.beginPath();
+          g.moveTo(sx + cos * (r - 2), sy + sin * (r - 2));
+          g.lineTo(sx + cos * (r + 4), sy + sin * (r + 4));
+          g.stroke();
+        });
+
+        g.fillStyle = "rgba(15, 23, 42, 0.88)";
+        g.fillRect(sx - 38, sy - 23, 76, 10);
+        g.strokeStyle = target.color || "#10b981";
+        g.strokeRect(sx - 38, sy - 23, 76, 10);
+        g.font = "bold 6px sans-serif";
+        g.fillStyle = target.color || "#34d399";
+        g.textAlign = "center";
+        g.fillText(`⚡ ${target.label}`, sx, sy - 15);
+      } else {
+        const angle = Math.atan2(sy - H / 2, sx - W / 2);
+        const arrowX = Math.max(16, Math.min(W - 16, W / 2 + Math.cos(angle) * (W / 2 - 20)));
+        const arrowY = Math.max(34, Math.min(H - 16, H / 2 + Math.sin(angle) * (H / 2 - 24)));
+        g.save();
+        g.translate(arrowX, arrowY);
+        g.rotate(angle);
+        g.fillStyle = target.color || "#10b981";
+        g.beginPath();
+        g.moveTo(8, 0); g.lineTo(-6, -5); g.lineTo(-6, 5); g.closePath();
+        g.fill();
+        g.strokeStyle = "#ffffff"; g.stroke();
+        g.restore();
+        g.font = "bold 6px monospace";
+        g.fillStyle = "#ffffff";
+        g.textAlign = "center";
+        g.fillText(`${distTiles}m`, arrowX, Math.min(H - 6, arrowY + 12));
+      }
+    }
+
     g.restore();
   }
 
@@ -713,7 +876,17 @@
       bus: "cancello", busLabel: "Esci dal Settore Zero",
       item: spec.item || ["Sfera Mako", "Sfere"], items: spec.items || [],
       bld: [], npcs: [], areas: spec.areas || [], hints: {}, pitch: [-20, -20, 1, 1],
-      solid: SOLID, act: Object.assign({}, spec.act || {}), intro: [],
+      solid: SOLID,
+      act: Object.assign({
+        M: "⚡ Raccogli Materia",
+        X: "🖥️ Terminale MAGI",
+        B: "🔥 Barile Ribelle",
+        ">": "🚪 Cancello",
+        "<": "🚪 Torna indietro",
+        "W": "👑 Trono",
+        "H": "🧪 Vasca LCL"
+      }, spec.actLabels || {}),
+      intro: [],
       me: () => {
         const c = api.CAST.hero || api.CAST.leo;
         return Object.assign({}, c, { shirt: "#0f172a", eye: "#10b981" });
@@ -746,19 +919,109 @@
     };
 
     const dd = (cx, cy) => ({ X: (tx) => tx * TS - cx, Y: (ty) => ty * TS - cy, fr: frNow() });
-    Z.decor = function (cx, cy) { if (spec.decor) spec.decor(cx, cy, dd(cx, cy)); };
+    Z.decor = function (cx, cy) {
+      if (spec.decor) spec.decor(cx, cy, dd(cx, cy));
+      if (api) {
+        ensurePadControls();
+        const tr = api.trRec();
+        const pos = tr && tr.pos && tr.pos[zid];
+        if (pos) {
+          const px = pos[0], py = pos[1];
+          const c = activeChapter();
+          if (c && c.n === 1 && stepOf(1) === 2 && zid === "pg_bassifondi") {
+            const dist = Math.hypot(px - (20 * TS + 8), py - (3 * TS + 8));
+            if (dist < 28) {
+              const b = document.getElementById("bAct");
+              if (b) { b.textContent = "⚡ Estrai Materia Saetta"; b.disabled = false; }
+            }
+          }
+        }
+      }
+    };
+
     Z.top = function (cx, cy) {
       if (spec.top) spec.top(cx, cy, dd(cx, cy));
       const cv = document.getElementById("cv");
-      if (cv) drawScannerOverlay(cv.getContext("2d"), cv.width, cv.height);
+      if (cv) drawScannerOverlay(cv.getContext("2d"), cv.width, cv.height, cx, cy, zid);
     };
 
     Z.onObj = function (ch, tx, ty) {
+      const posKey = tx + "," + ty;
+      // 1. Prova prima il chapter obj se presente
       const c = activeChapter();
-      if (!c || !c.obj) return false;
-      const fn = c.obj[zid + ":" + ch + ":" + tx + "," + ty] || c.obj[zid + ":" + ch] || c.obj[ch];
-      if (!fn) return false;
-      fn({ ch, tx, ty, zid });
+      if (c && c.obj) {
+        const fn = c.obj[zid + ":" + ch + ":" + posKey] || c.obj[zid + ":" + posKey] || c.obj[zid + ":" + ch] || c.obj[posKey] || c.obj[ch];
+        if (typeof fn === "function") { fn({ ch, tx, ty, zid }); return true; }
+      }
+      // 2. Prova spec.act con coordinate
+      if (spec.act && typeof spec.act[posKey] === "function") {
+        spec.act[posKey]({ ch, tx, ty, zid });
+        return true;
+      }
+      // 3. Prova spec.act con carattere del tile
+      if (spec.act && typeof spec.act[ch] === "function") {
+        spec.act[ch]({ ch, tx, ty, zid });
+        return true;
+      }
+      // 4. Default contestualizzati e sicuri per Phantom Genesis (MAI ricadere nei default del Borgo marino):
+      if (ch === "B") {
+        if (scannerActive) {
+          sfxMakoResonance();
+          say([
+            ["voce", "👁️ [ANALISI SCANNER · BARILE TERMICO]\nFrequenza termica: 340°C. La cellula ribelle di Kael utilizza questo fuoco schermato per mascherare la firma calorica contro i droni aerei Shin-Nerv.", "pg_bassifondi"],
+            ["pg_kael", "«Lo Scanner funziona a meraviglia! Questo barile ci tiene caldi e invisibili ai radar. Sfruttalo per scaldarti tra una missione e l'altra.»"]
+          ], done);
+        } else {
+          say([["pg_kael", "«Il fuoco di questo barile tiene lontana l'umidità del reattore. Fatti forza, ragazzo. Con lo Scanner Sinaptico acceso potrai persino studiare la schermatura termica!»"]], done);
+        }
+        return true;
+      }
+      if (ch === "M") {
+        const st = stepOf(c ? c.n : 1);
+        if (st === 2) {
+          say([
+            ["voce", "👁️ [ANOMALIA ENERGETICA AGGANCIATA]\nLe frequenze dello Scanner Sinaptico risuonano con la grata metallica. Tra i tralicci metallici bagnati dalla pioggia, un cristallo azzurro pulsa a ritmo frenetico!", "pg_bassifondi"],
+            ["hero", "«Ecco la Materia Saetta! L'energia Mako è talmente densa che fa rizzare i capelli.»"]
+          ], () => {
+            setStep(1, 3);
+            sfxGlassAwakening();
+            if (api && api.trToast) api.trToast("⚡ Materia Saetta Recuperata!");
+            note("Ho recuperato la Materia Saetta dal condotto Mako grazie allo Scanner Sinaptico. Devo portarla a Rin la Strillona a est per montarla sugli scarpini.");
+            done();
+          });
+        } else if (st < 2) {
+          say([["voce", "La conduttura Mako emette scintille violente a 10.000 Volt. Parla prima con Kael e con la Dott.ssa Maya a nord per attivare il Synchro-Nav ed estrarre la Materia in sicurezza!", "pg_bassifondi"]], done);
+        } else {
+          say([["voce", "La conduttura Mako è ora silente e stabile. La Materia Saetta è già incastonata nei tuoi scarpini!", "pg_bassifondi"]], done);
+        }
+        return true;
+      }
+      if (ch === "X") {
+        if (scannerActive) {
+          sfxMakoResonance();
+          const m = mem();
+          say([
+            ["voce", `👁️ [ANALISI SCANNER · TERMINALE MAGI]\nStato: Collegamento attivo con il palmare del Campione.\nTasso di Sincronia: ${m.synchro}% · Materie connesse: ${m.materias.length}\nCanale Mako: Frequenza anomala rilevata a Est (X:20, Y:3).`, "pg_bassifondi"],
+            ["pg_maya", "«Il segnale è perfetto. Il palmare riceve tutte le tracce Mako del settore in tempo reale!»"]
+          ], done);
+        } else {
+          say([["pg_maya", "«Questo terminale MAGI portatile riceve i parametri biologici del tuo tiro. Attiva lo Scanner Sinaptico (Mako Vision) per rivelare i flussi energetici!»"]], done);
+        }
+        return true;
+      }
+      if (ch === "H") {
+        say([["voce", "Una capsula criogenica colma di fluido LCL arancione. I sensori biologici mantengono il soggetto in stasi cinetica.", "pg_reattore"]], done);
+        return true;
+      }
+      if (ch === ">" || ch === "<") {
+        say([["voce", "Un varco blindato presidiato dalla sicurezza della Shin-Nerv.", "pg_bassifondi"]], done);
+        return true;
+      }
+      if (ch === "W") {
+        say([["voce", "Il Trono d'Ossidiana della Shin-Nerv sovrasta il campo sacro.", "pg_arena_palazzo"]], done);
+        return true;
+      }
+      say([["voce", "Un impianto industriale nei bassifondi del Settore Zero. Nulla di anomalo rilevato a queste coordinate.", bgNow()]], done);
       return true;
     };
 
@@ -781,13 +1044,25 @@
 
   function zoneMenu() {
     const c = activeChapter(), h = hero();
+    const curZid = zoneRec() ? api.trZone() : "";
+    const target = getCurrentScannerTarget(curZid);
     api.trAsk(
       "voce",
-      `<b>Phantom Genesis</b> · ${esc(c ? "Capitolo " + c.n + " · " + c.title : "")}<br><span style="color:var(--dim)">${esc(goalNow())}<br>Sincronia: ${mem().synchro}% · Materie: ${mem().materias.length} · Monete: ${bal()}${h ? " · " + esc(h.name) : ""}</span>`,
+      `<b>Phantom Genesis</b> · ${esc(c ? "Capitolo " + c.n + " · " + c.title : "")}<br><span style="color:var(--dim)">${esc(goalNow())}<br>${scannerActive ? "👁️ <b>Scanner Sinaptico: ATTIVO</b> (" + (target ? target.hint : "In scansione") + ")" : "👁️ Scanner Sinaptico: Spento"}<br>Sincronia: ${mem().synchro}% · Materie: ${mem().materias.length} · Monete: ${bal()}${h ? " · " + esc(h.name) : ""}</span>`,
       [
-        { label: "📱 Synchro-Nav & Materie", sub: "Materie equipaggiate, diario e sincronia", cls: "hot", fn: () => notebook(zoneMenu, true) },
-        { label: scannerActive ? "👁️ Disattiva Scanner Sinaptico" : "👁️ Attiva Scanner Sinaptico (Mako Vision)", sub: "Evidenzia cavi energetici e segreti nascosti", fn: () => { toggleScanner(); zoneMenu(); } },
-        { label: "Esci dalla Saga", sub: "I progressi restano salvati", cls: "hot", fn: leave }
+        { label: "◂ Torna a esplorare", sub: scannerActive ? "Scanner ATTIVO · Segui i segnali luminosi sul campo" : "Riprendi a camminare nella zona", cls: "hot", fn: done },
+        {
+          label: scannerActive ? "👁️ Disattiva Scanner Sinaptico" : "👁️ Attiva Scanner Sinaptico (Mako Vision)",
+          sub: scannerActive ? "Spegni la visione energetica" : "Attiva la visuale Mako ed esci subito per seguire il segnale",
+          cls: scannerActive ? "" : "hot",
+          fn: () => {
+            toggleScanner();
+            if (scannerActive) done();
+            else zoneMenu();
+          }
+        },
+        { label: "📱 Synchro-Nav & Materie", sub: "Materie equipaggiate, diario e sincronia", fn: () => notebook(zoneMenu, true) },
+        { label: "Esci dalla Saga", sub: "I progressi restano salvati", fn: leave }
       ],
       bgNow()
     );
@@ -1057,6 +1332,59 @@
       bg: ["#451a03", "#f59e0b"], shirt: "#78350f"
     }, "Orfana dei vicoli industriali. Vende sfere di Materia grezza recuperate dai canali di scolo Mako e sa sempre quali pattuglie di androidi stanno setacciando il distretto.");
 
+    function collectMateriaStep2() {
+      const s = S();
+      if (s === 2) {
+        say([
+          ["voce", "👁️ [ANOMALIA ENERGETICA AGGANCIATA]\nLe frequenze dello Scanner Sinaptico risuonano con la grata metallica. Tra i tralicci metallici bagnati dalla pioggia, un cristallo azzurro pulsa a ritmo frenetico!", "pg_bassifondi"],
+          ["hero", "«Ecco la Materia Saetta! L'energia Mako è talmente densa che fa rizzare i capelli.»"]
+        ], () => {
+          setStep(N, 3);
+          sfxGlassAwakening();
+          if (api && api.trToast) api.trToast("⚡ Materia Saetta Recuperata!");
+          note("Ho recuperato la Materia Saetta dal condotto Mako grazie allo Scanner Sinaptico. Devo portarla a Rin la Strillona a est per montarla sugli scarpini.");
+          done();
+        });
+      } else if (s < 2) {
+        say([["voce", "La conduttura Mako emette scintille violente a 10.000 Volt. Parla prima con Kael e con la Dott.ssa Maya a nord per attivare il Synchro-Nav ed estrarre la Materia in sicurezza!", "pg_bassifondi"]], done);
+      } else {
+        say([["voce", "La conduttura Mako è ora silente e stabile. La Materia Saetta è già incastonata nei tuoi scarpini!", "pg_bassifondi"]], done);
+      }
+    }
+
+    function handleBarile() {
+      if (scannerActive) {
+        sfxMakoResonance();
+        say([
+          ["voce", "👁️ [ANALISI SCANNER · BARILE RIBELLE]\nFrequenza termica: 340°C. La cellula ribelle di Kael utilizza questo fuoco schermato per mascherare la firma calorica contro i droni aerei Shin-Nerv.", "pg_bassifondi"],
+          ["pg_kael", "«Lo Scanner funziona alla perfezione! Questo barile ci tiene caldi e invisibili ai radar. Sfruttalo per scaldarti tra una missione e l'altra.»"]
+        ], done);
+      } else {
+        say([["pg_kael", "«Il fuoco di questo barile tiene lontana l'umidità del reattore. Fatti forza, ragazzo. Con lo Scanner Sinaptico acceso potrai persino studiare la schermatura termica!»"]], done);
+      }
+    }
+
+    function handleTerminaleMagi() {
+      if (scannerActive) {
+        sfxMakoResonance();
+        const m = mem();
+        say([
+          ["voce", `👁️ [ANALISI SCANNER · TERMINALE MAGI-PORTATILE]\nStato: Connesso al palmare del Campione.\nTasso di Sincronia: ${m.synchro}% · Materie registrate: ${m.materias.length}\nCanale Mako: Frequenza anomala rilevata a Est (X:20, Y:3).`, "pg_bassifondi"],
+          ["pg_maya", "«Il collegamento con il palmare è perfetto! Segui la traccia energetica verso est per scovare la Materia Saetta!»"]
+        ], done);
+      } else {
+        say([["pg_maya", "«Questo terminale MAGI portatile riceve i parametri biologici del tuo tiro. Attiva lo Scanner Sinaptico (Mako Vision) dal pulsante rapido per rivelare i flussi energetici!»"]], done);
+      }
+    }
+
+    function handleGateStep4() {
+      if (S() >= 4) {
+        matchCapitolo1();
+      } else {
+        say([["voce", "Il cancello blindato per il Reattore è sigillato dai protocolli Shin-Nerv. Parla prima con Kael, Maya e Rin per completare il risveglio e prepararti!", "pg_bassifondi"]], done);
+      }
+    }
+
     const chDef = {
       n: 1, title: "Il Risveglio nel Settore Zero",
       sub: "L'Eclissi, il braccio di Kael e la prima Materia Saetta",
@@ -1074,6 +1402,16 @@
         ["voce", "Apri gli occhi sul selciato bagnato dalla pioggia. Nelle tue mani c'è un pallone segnato da rune fluorescenti che pulsano a ritmo del tuo battito cardiaco.", "pg_bassifondi"],
         ["pg_kael", "«Ehi, pivello! Sei vivo o devo buttarti nel canale Mako con gli altri scarti della Federazione? Alzati, le sirene stanno già suonando!»", "pg_bassifondi"]
       ],
+      obj: {
+        "5,7": () => handleBarile(),
+        "B": () => handleBarile(),
+        "11,4": () => handleTerminaleMagi(),
+        "X": () => handleTerminaleMagi(),
+        "20,3": () => collectMateriaStep2(),
+        "M": () => collectMateriaStep2(),
+        "23,8": () => handleGateStep4(),
+        ">": () => handleGateStep4()
+      },
       talk: {
         pg_kael: () => {
           const s = S();
@@ -1110,17 +1448,18 @@
               ["pg_maya", "«Incredibile... Il tuo battito cardiaco e la rotazione di quella sfera sono perfettamente in fase. Tasso di sincronia: 99.8%!»"],
               ["hero", "«La dottoressa? Kael mi ha detto che puoi aiutarmi.»"],
               ["pg_maya", "«Ascoltami bene: hai dentro di te il 'Genoma del Risveglio'. La Shin-Nerv usa il Flusso Vitale Mako per creare gli Apostoli, ma tu puoi risvegliare la tua Persona Calcistica.»"],
-              ["pg_maya", "«Ho installato il protocollo 'Synchro-Nav' sul tuo palmare. Ora attiva lo Scanner Sinaptico (Mako Vision) e trova la 'Materia Saetta' nascosta nel canale di scolo a est!»"]
+              ["pg_maya", "«Ho configurato il protocollo 'Synchro-Nav' sul tuo palmare e attivato lo Scanner Sinaptico (Mako Vision). Guarda il mirino verde e la scia: rileva la 'Materia Saetta' a est (X:20, Y:3)! Seguila e premi Azione per estrarla!»"]
             ], () => {
               setStep(N, 2);
+              scannerActive = true;
               sfxGlassAwakening();
-              note("Maya ha configurato il Synchro-Nav. Devo usare lo Scanner Sinaptico per individuare la Materia Saetta a est.");
+              note("Maya ha attivato lo Scanner Sinaptico. La Materia Saetta è segnalata a est (X:20, Y:3).");
               done();
             });
             return;
           }
           if (s === 2) {
-            say([["pg_maya", "«Premi il tasto dello Scanner Sinaptico nel menu o esamina la cassa energetica a est per estrarre la Materia!»"]], done);
+            say([["pg_maya", "«Usa il pulsante rapido [Scan: ON] in basso a destra per orientarti: segui la scia energetica fino alla grata del condotto Mako a est (X:20, Y:3) e premi Azione per estrarre la Materia!»"]], done);
             return;
           }
           say([["pg_maya", "«Sii prudente. Se la Shin-Nerv scopre che possiedi la Materia Saetta, invierà l'Apostolo in persona.»"]], done);
@@ -1173,28 +1512,25 @@
             // Uscita a destra
             Ls.put(23, 8, ">");
           },
+          actLabels: {
+            "B": "🔥 Barile Ribelle",
+            "X": "🖥️ Terminale MAGI",
+            "M": "⚡ Condotto Mako",
+            ">": "🚪 Cancello Shin-Nerv",
+            "5,7": "🔥 Barile Ribelle",
+            "11,4": "🖥️ Terminale MAGI",
+            "20,3": "⚡ Condotto Mako",
+            "23,8": "🚪 Cancello Shin-Nerv"
+          },
           act: {
-            "20,3": () => {
-              if (S() === 2) {
-                say([
-                  ["voce", "Attivi lo Scanner Sinaptico. Tra i tralicci metallici del canale, una sfera azzurrina pulsa a ritmo frenetico.", "pg_bassifondi"],
-                  ["hero", "«Ecco la Materia Saetta! L'energia Mako è talmente densa che fa rizzare i capelli.»"]
-                ], () => {
-                  setStep(N, 3);
-                  note("Ho recuperato la Materia Saetta. Devo portarla a Rin per montarla sugli scarpini.");
-                  done();
-                });
-              } else {
-                say([["voce", "Una conduttura Mako che rilascia vapori caldi ed elettricità statica.", "pg_bassifondi"]], done);
-              }
-            },
-            "23,8": () => {
-              if (S() >= 4) {
-                matchCapitolo1();
-              } else {
-                say([["voce", "Il cancello blindato per il Reattore è sigillato dai protocolli Shin-Nerv.", "pg_bassifondi"]], done);
-              }
-            }
+            "5,7": () => handleBarile(),
+            "B": () => handleBarile(),
+            "11,4": () => handleTerminaleMagi(),
+            "X": () => handleTerminaleMagi(),
+            "20,3": () => collectMateriaStep2(),
+            "M": () => collectMateriaStep2(),
+            "23,8": () => handleGateStep4(),
+            ">": () => handleGateStep4()
           }
         }
       }
@@ -1243,6 +1579,23 @@
       bg: ["#450a0a", "#ef4444"], shirt: "#020617"
     }, "Il Colosso Biomeccanico a guardia del Nucleo Centrale. Non parla: emette una risonanza a frequenza di terrore e proietta un AT-Field impenetrabile a qualsiasi tiro umano ordinario.");
 
+    function collectLclBarrier() {
+      if (S() === 2) {
+        say([
+          ["voce", "Dalla valvola di sfiato della capsula LCL cola una goccia di fluido cristallizzato color smeraldo.", "pg_reattore"],
+          ["hero", "«La Materia Barriera LCL! Questa sfera proietta uno scudo quantico identico all'AT-Field!»"]
+        ], () => {
+          addMateria("mat_barriera", "Materia Barriera LCL", "Annulla i contropiedi avversari e rafforza i contrasti difensivi", "#10b981");
+          setStep(N, 3);
+          sfxEvaAlarm();
+          note("Ho ottenuto la Materia Barriera LCL. L'Apostolo Sachiel-X si è materializzato davanti al portone!");
+          done();
+        });
+      } else {
+        say([["voce", "La capsula pulsa di luce arancione. Un ragazzo all'interno sembra sognare una partita infinita.", "pg_reattore"]], done);
+      }
+    }
+
     const chDef = {
       n: 2, title: "Il Reattore del Terzo Impatto",
       sub: "Vasche LCL, terminali MAGI e il duello contro Sachiel-X",
@@ -1259,6 +1612,27 @@
         ["voce", "Nell'aria si avverte l'odore metallico del liquido LCL e il ronzio sinistro dei supercomputer MAGI.", "pg_reattore"],
         ["pg_maya", "«Siamo dentro. Questa è la forgia dove trasformano l'anima dei campioni in batterie cinetiche.»", "pg_reattore"]
       ],
+      obj: {
+        "9,11": () => magiConsole("Melchior", "alpha"),
+        "12,11": () => magiConsole("Balthasar", "beta"),
+        "15,11": () => magiConsole("Casper", "synchro"),
+        "X": ({ tx }) => {
+          if (tx <= 10) magiConsole("Melchior", "alpha");
+          else if (tx <= 13) magiConsole("Balthasar", "beta");
+          else magiConsole("Casper", "synchro");
+        },
+        "10,4": () => collectLclBarrier(),
+        "14,4": () => collectLclBarrier(),
+        "H": () => collectLclBarrier(),
+        "23,8": () => {
+          if (S() >= 3) matchCapitolo2();
+          else say([["voce", "La barriera dell'Apostolo blocca il passaggio con una scarica elettrica. Disattiva prima i MAGI ed estrai la Materia Barriera!", "pg_reattore"]], done);
+        },
+        ">": () => {
+          if (S() >= 3) matchCapitolo2();
+          else say([["voce", "La barriera dell'Apostolo blocca il passaggio con una scarica elettrica. Disattiva prima i MAGI ed estrai la Materia Barriera!", "pg_reattore"]], done);
+        }
+      },
       talk: {
         pg_maya: () => {
           const s = S();
@@ -1325,29 +1699,38 @@
             // Ingresso e uscita
             Ls.put(0, 8, "<"); Ls.put(23, 8, ">");
           },
+          actLabels: {
+            "X": "🖥️ Terminale MAGI",
+            "H": "🧪 Vasca LCL",
+            ">": "🚪 Portone dell'Apostolo",
+            "<": "🚪 Torna ai Bassifondi",
+            "9,11": "🖥️ MAGI-1 Melchior",
+            "12,11": "🖥️ MAGI-2 Balthasar",
+            "15,11": "🖥️ MAGI-3 Casper",
+            "10,4": "🧪 Vasca LCL Alpha",
+            "14,4": "🧪 Vasca LCL Beta",
+            "23,8": "🚪 Portone dell'Apostolo",
+            "0,8": "🚪 Torna ai Bassifondi"
+          },
           act: {
             "9,11": () => magiConsole("Melchior", "alpha"),
             "12,11": () => magiConsole("Balthasar", "beta"),
             "15,11": () => magiConsole("Casper", "synchro"),
-            "10,4": () => {
-              if (S() === 2) {
-                say([
-                  ["voce", "Dalla valvola di sfiato della capsula LCL cola una goccia di fluido cristallizzato color smeraldo.", "pg_reattore"],
-                  ["hero", "«La Materia Barriera LCL! Questa sfera proietta uno scudo quantico identico all'AT-Field!»"]
-                ], () => {
-                  addMateria("mat_barriera", "Materia Barriera LCL", "Annulla i contropiedi avversari e rafforza i contrasti difensivi", "#10b981");
-                  setStep(N, 3);
-                  sfxEvaAlarm();
-                  note("Ho ottenuto la Materia Barriera LCL. L'Apostolo Sachiel-X si è materializzato davanti al portone!");
-                  done();
-                });
-              } else {
-                say([["voce", "La capsula pulsa di luce arancione. Un ragazzo all'interno sembra sognare una partita infinita.", "pg_reattore"]], done);
-              }
+            "X": ({ tx, ty }) => {
+              if (tx === 9 || tx === 10) magiConsole("Melchior", "alpha");
+              else if (tx === 12 || tx === 13) magiConsole("Balthasar", "beta");
+              else magiConsole("Casper", "synchro");
             },
+            "10,4": () => collectLclBarrier(),
+            "14,4": () => collectLclBarrier(),
+            "H": () => collectLclBarrier(),
             "23,8": () => {
               if (S() >= 3) matchCapitolo2();
-              else say([["voce", "La barriera dell'Apostolo blocca il passaggio con una scarica elettrica.", "pg_reattore"]], done);
+              else say([["voce", "La barriera dell'Apostolo blocca il passaggio con una scarica elettrica. Disattiva prima i MAGI ed estrai la Materia Barriera!", "pg_reattore"]], done);
+            },
+            ">": () => {
+              if (S() >= 3) matchCapitolo2();
+              else say([["voce", "La barriera dell'Apostolo blocca il passaggio con una scarica elettrica. Disattiva prima i MAGI ed estrai la Materia Barriera!", "pg_reattore"]], done);
             }
           }
         }
@@ -1439,6 +1822,16 @@
         ["voce", "Al centro del campo, un uomo solitario con una lunga ala meccanica piumata d'argento fa rimbalzare una sfera nera come la notte.", "pg_arena_palazzo"],
         ["pg_kurogane", "«Ti aspettavo, {n}. Il tuo tasso di sincronia è perfetto... Sei degno di essere la mia metà mancante.»", "pg_arena_palazzo"]
       ],
+      obj: {
+        "12,3": () => {
+          if (S() >= 2) matchFinaleKurogane();
+          else say([["voce", "Il Trono d'Ossidiana emette una pulsazione gravitazionale che fa tremare il campo.", "pg_arena_palazzo"]], done);
+        },
+        "W": () => {
+          if (S() >= 2) matchFinaleKurogane();
+          else say([["voce", "Il Trono d'Ossidiana emette una pulsazione gravitazionale che fa tremare il campo.", "pg_arena_palazzo"]], done);
+        }
+      },
       talk: {
         pg_kurogane: () => {
           const s = S();
@@ -1482,6 +1875,10 @@
             Ls.lay(4, 4, 19, 11, "q"); // Campo interno d'ossidiana
             Ls.put(12, 3, "W"); // Il Trono
             Ls.put(12, 15, "d");
+          },
+          actLabels: {
+            "W": "👑 Trono d'Ossidiana",
+            "12,3": "👑 Trono d'Ossidiana"
           },
           act: {
             "12,3": () => {

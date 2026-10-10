@@ -8896,7 +8896,14 @@
     let target = t ? { kind: "npc", id: t.id, label: "Parla" } : null;
     if (!target) {
       const tx = Math.floor(fx / TS), ty = Math.floor(fy / TS), ch = TW.map[ty] && TW.map[ty][tx];
-      const za = TW.z.act || {}; if (ch && ("DSBONM".includes(ch) || za[ch])) target = { kind: "obj", ch, tx, ty, id: ch + tx + "," + ty, label: za[ch] || { D: "Entra", S: "Aspetta il bus", B: "Sali in barca", O: "Guarda", N: "Leggi", M: "Guarda" }[ch] };
+      const za = TW.z.act || {};
+      const actLabel = typeof za === "function" ? za(ch, tx, ty) : (za[tx + "," + ty] || za[ch]);
+      const isCustomSaga = TW.id && (TW.id.startsWith("pg_") || TW.id.startsWith("kr_") || TW.id.startsWith("pi_") || TW.id.startsWith("al_") || TW.id.startsWith("ch_"));
+      if (ch && ("DSBONM".includes(ch) || actLabel || (isCustomSaga && !TR_SOLID.includes(ch)))) {
+        let defLabel = { D: "Entra", S: "Aspetta il bus", B: "Sali in barca", O: "Guarda", N: "Leggi", M: "Guarda" }[ch];
+        if (isCustomSaga) defLabel = "Esamina";
+        target = { kind: "obj", ch, tx, ty, id: ch + tx + "," + ty, label: actLabel || defLabel };
+      }
     }
     TW.target = target;
     const key = target ? target.id + target.label : "";
@@ -8979,6 +8986,12 @@
   function trObj(ch, tx, ty) {
     if (TW.z.onObj && TW.z.onObj(ch, tx, ty)) return;
     if (TW.z.local && beObj(ch, tx, ty)) return;
+    if (TW.id && (TW.id.startsWith("pg_") || TW.id.startsWith("kr_") || TW.id.startsWith("pi_") || TW.id.startsWith("al_") || TW.id.startsWith("ch_"))) {
+      if (TW.z.obj && TW.z.obj[ch]) return trSay([L("voce", pick(TW.z.obj[ch]))]);
+      const actMsg = TW.z.act && (TW.z.act[tx + "," + ty] || TW.z.act[ch]);
+      if (actMsg && typeof actMsg === "string") return trSay([L("voce", `${actMsg} · Nessuna anomalia riscontrata.`)]);
+      return trSay([L("voce", "Nessun segnale rilevante da questa postazione.")]);
+    }
     if (ch === "S" || ch === "B") return trBus(true);
     if (TW.z.obj && TW.z.obj[ch]) return trSay([L("voce", pick(TW.z.obj[ch]))]);
     if (ch === "O") return trSay([L("voce", pick(["La fontana della piazzetta. Un gabbiano ci fa il bagno con l'aria di chi paga le tasse.", "Lanci una monetina: «Fa' che la focaccia sia calda». Gilda, da lontano: «Lo è sempre».", "Sul bordo della fontana qualcuno ha inciso: «Topi 3 – Resto del mondo 0»."]))]);
