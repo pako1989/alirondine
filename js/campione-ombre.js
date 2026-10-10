@@ -1103,7 +1103,8 @@
   const VENUE_OMB = { ads: [["SINDACATO DELLE OMBRE", "#0f172a"], ["LANTERNA NERA", "#0e7490"], ["QUOTE TRUCCATE 1.01", "#7f1d1d"], ["VIETATO FILMARE", "#1e293b"]], crowd: ["#0f172a", "#164e63", "#334155", "#1e1b4b", "#475569"], ground: ["#2b3a4d", "#334558"], line: "#38bdf8cc", grid: "rgba(56,189,248,.08)", tint: "rgba(5,18,45,.34)", glow: "56,189,248", glow2: "250,204,21" };
   function playMatch(o) {
     castHero(); inMatch = true;
-    api.match({
+    api.matchPick({
+      alt: o.alt, oppNames: o.oppNames, squad: o.squad, bg: "omb_arena_gabbia",
       id: o.id, chap: o.chap, intro: T(o.intro), mate: o.mate || "Milo", mateGeneric: true,
       us: o.us || "I Ribelli delle Ombre", min: o.min || 45, team: o.team, venue: o.venue || VENUE_OMB, weather: o.weather || "pioggia", hero: undefined,
       onDone: (r) => {
@@ -2440,6 +2441,9 @@
       X.playMatch({
         id: "omb_match_final",
         chap: "Il Circuito delle Ombre · Il Derby Supremo della Tempesta",
+        alt: "hd",
+        oppNames: ["Il Custode Nero", "Cavaliere Grigio", "Cavaliere d'Ebano", "L'Algoritmo", "Madame V"],
+        squad: ["Zoran", "Titano", "Milo"],
         us: "I Ribelli delle Ombre",
         mate: "Kaelen",
         min: 45,

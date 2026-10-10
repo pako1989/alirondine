@@ -1076,7 +1076,8 @@
   const VENUE_ALC = { ads: [["I FALCHI D'ACCIAIO", "#7f1d1d"], ["SCAMBIO EQUIVALENTE", "#4c1d95"], ["CERCHIO DI TRASMUTAZIONE", "#0f766e"], ["LABORATORIO CENTRALE", "#334155"]], crowd: ["#7f1d1d", "#334155", "#e8e0d0", "#a16207", "#f0c9a0"], tint: "rgba(120,60,160,.12)", glow: "190,150,255", glow2: "255,120,100" };
   function playMatch(o) {
     castHero(); inMatch = true;
-    api.match({
+    api.matchPick({
+      alt: o.alt, oppNames: o.oppNames, squad: o.squad,
       id: o.id, chap: o.chap, intro: T(o.intro), mate: o.mate || "Kira", mateGeneric: true,
       us: o.us || "I Falchi d'Acciaio", min: o.min || 45, team: o.team, venue: o.venue || VENUE_ALC, hero: undefined,
       onDone: (r) => {
@@ -2228,6 +2229,9 @@
     function startFinalMatch() {
       X.playMatch({
         id: "al_match_final",
+        alt: "hd",
+        oppNames: ["Soldato dell'Occhio", "Homunculus Nero", "Homunculus Rosso", "Chimera di Vane", "Vane"],
+        squad: ["L'Armatura", "Armstrong", "Olivier"],
         chap: "Central Command · Il Giorno Promesso",
         us: "L'Alleanza d'Acciaio",
         mate: "Royden",

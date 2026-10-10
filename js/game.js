@@ -25234,7 +25234,35 @@
       onEnd: () => { const [a, b] = M.score, rc = mRecap(); M = null; $("matchHud").hidden = true; if (chBack) S = chBack; chBack = null; sfx(a > b ? "goal" : "crowd"); if (a > b) jingle("win"); cfg.onDone({ a, b, win: a > b, recap: rc }); } });
     chap(cfg.chap);
   }
-  window.__borgoApi = { match: apiMatch, timing: bTiming, play, chap, scene: (bg, who, html, opts, title) => { view = { kind: "scene", bg, speaker: who }; if (title) chap(title); text(who || "voce", html); buttons(opts, true); }, portraitImg, TRZ, MN_BORGO_BTN, CAST, BIO, seeCard, trGo, trAsk, trSay, trResume, L, trToast, TR_IDS, NPCS, trLevel, trZone: () => (TW ? TW.id : null), trExitTo, trRec, todayKey, hq: HQ_API, COSM, bCos };
+  // Partita di saga con Action Soccer 2D HD: stessa cfg di apiMatch, stesso onDone({a,b,win,recap}). Ritorna false se il motore non c'è.
+  function apiMatchHd(cfg) {
+    if (!window.__actionHd || !window.__actionHd.ut || !window.__actionHd.start) return false;
+    const h = cfg.hero === undefined ? heroLoad() : cfg.hero;
+    let st = borgoPlayer().st; try { if (h) st = heroBias(st, h); } catch {}
+    const t = (v) => Math.max(4, Math.round(v)), T = cfg.team(t, st) || {}, cl = (v, a, b) => Math.max(a, Math.min(b, v));
+    const mine = (st.tiro + st.drib + st.pass + st.contr) / 4, num = (v, d) => (Number.isFinite(+v) && +v > 0 ? +v : d);
+    const theirs = (num(T.atk, mine) + num(T.def, mine) + num(T.vel, mine)) / 3, pw = cl(Math.round(30 + 14 * (theirs / Math.max(8, mine))), 30, 50);
+    const q = cl(38 + mine * 1.1, 40, 80), PROF = { p: [-14, -14, -14, -2, -14, 16, 0], d: [-2, -6, -8, -2, 14, -20, 4], c: [2, -4, 0, 14, -2, -20, 10], a: [8, 10, 12, -4, -14, -20, -2] }, SK = ["spd", "pow", "acc", "pas", "def", "gk", "sta"];
+    const card = (name, role, bonus) => ({ id: "", name, role, rar: "", lv: 1, stats: Object.fromEntries(SK.map((k, j) => [k, cl(Math.round(q + (bonus || 0) + PROF[role][j]), 20, 92)])) });
+    const hn = (h && h.name) || "Campione", mn = cfg.mate || "Tommy", sq = cfg.squad || ["Portiere", "Difensore", "Terzino"];
+    const team = [card(sq[0] || "Portiere", "p", 0), card(sq[1] || "Difensore", "d", 0), card(sq[2] || "Terzino", "d", 0), card(mn, "c", 4), card(hn, "a", 8)];
+    const oppNames = (T.names && T.names.length >= 5) ? T.names : ((cfg.oppNames && cfg.oppNames.length >= 5) ? cfg.oppNames : [(T.gk && T.gk[0]) || "Portiere", ...((T.defs || []).map((d) => d[0])), ...((T.atk || []).map((a) => a[0]))].filter((x) => typeof x === "string").slice(0, 5));
+    trSavePos(); document.body.classList.remove("borgo");
+    window.__actionHd.start({ mode: "ut", team, title: cfg.chap, opp: { name: T.name || "Avversari", pw, kit: T.color || T.col, names: oppNames.length >= 5 ? oppNames : undefined },
+      onExit: (res) => { const a = res ? res.a : 0, b = res ? res.c : 1; cfg.onDone({ a, b, win: a > b, recap: "", hd: true }); } });
+    return true;
+  }
+  // propone la partita alternativa (cfg.alt = "hd") accanto a quella a turni: stesso esito per la storia
+  function apiMatchPick(cfg) {
+    if (!cfg.alt || !window.__actionHd || !window.__actionHd.ut) return apiMatch(cfg);
+    const kinds = { hd: { label: "⚽ Calcio d'azione 2D HD", sub: "5 contro 5 dall'alto, muovi tu il Campione in tempo reale", fn: () => { if (!apiMatchHd(cfg)) apiMatch(cfg); } } };
+    const alts = String(cfg.alt).split(",").filter((k) => kinds[k]);
+    if (!alts.length) return apiMatch(cfg);
+    view = { kind: "scene", bg: cfg.bg || "stadium", speaker: null }; chap(cfg.chap);
+    text("voce", `<b>Come vuoi giocare questa partita?</b><br><span style="color:var(--dim)">Esito e ricompense della storia sono uguali: cambia solo come giochi.</span>`);
+    buttons([{ label: "🎮 Partita a turni", sub: "Scegli le mosse una alla volta", cls: "hot", fn: () => apiMatch(cfg) }, ...alts.map((k) => kinds[k])]);
+  }
+  window.__borgoApi = { match: apiMatch, matchPick: apiMatchPick, timing: bTiming, play, chap, scene: (bg, who, html, opts, title) => { view = { kind: "scene", bg, speaker: who }; if (title) chap(title); text(who || "voce", html); buttons(opts, true); }, portraitImg, TRZ, MN_BORGO_BTN, CAST, BIO, seeCard, trGo, trAsk, trSay, trResume, L, trToast, TR_IDS, NPCS, trLevel, trZone: () => (TW ? TW.id : null), trExitTo, trRec, todayKey, hq: HQ_API, COSM, bCos };
   if (/[?&]debug/.test(location.search)) window.__borgoDbg = { get BW() { return BW; }, get B() { return B; }, BLD, borgo, borgoMap, borgoDoor, borgoOpenLevel };
   try { if (window.__storyNav && window.__storyNav.seedFromSaveState) window.__storyNav.seedFromSaveState(S); } catch {}
   title();
