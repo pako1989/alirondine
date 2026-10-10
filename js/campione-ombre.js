@@ -830,7 +830,7 @@
     castHero();
     const list = zr.spec.npcs ? zr.spec.npcs(stepOf(c.n)) : [];
     const hints = Object.assign({}, typeof zr.spec.hints === "function" ? zr.spec.hints(stepOf(c.n)) : zr.spec.hints || {});
-    zr.Z.npcs = list.filter((n) => CAST_OK(n.id));
+    zr.Z.npcs = list.filter((n) => CAST_OK(n.id)).map((n) => (n.at ? n : { ...n, at: [n.x, n.y] }));
     const gl = goalNow();
     [...new Set([...(zr.spec.areas || []).map((a) => a[4]), zr.spec.short])].forEach((k) => {
       if (k) hints[k] = (gl ? "Obiettivo: " + gl + " · " : "") + (hints[k] || "");
