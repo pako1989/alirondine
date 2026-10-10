@@ -457,6 +457,61 @@
     return true;
   }
 
+  // ------------------------------------------------------------------ Sfondi delle scene
+  const RR = (g, x, y, w, h, c) => { g.fillStyle = c; g.fillRect(x, y, w, h); };
+  function colonnato(g, W, base, col, cap) {
+    for (let x = 6; x < W; x += 38) { RR(g, x, base - 40, 14, 40, col); RR(g, x - 2, base - 44, 18, 5, cap); }
+    RR(g, 0, base - 2, W, 4, cap);
+  }
+  function bgChrAlba(g, W, H, f) {
+    grad(g, 0, 0, W, H, ["#0c4a6e", "#0e7490", "#f59e0b"]);
+    const sy = 70 + Math.sin(f / 90) * 3;
+    glow(g, 230, sy, 70, "253,224,71", 0.55);
+    g.fillStyle = "#fef08a"; g.beginPath(); g.arc(230, sy, 15, 0, 7); g.fill();
+    g.fillStyle = "#064e3b"; g.beginPath(); g.moveTo(0, 130); g.lineTo(70, 80); g.lineTo(140, 125); g.lineTo(210, 90); g.lineTo(320, 130); g.lineTo(320, 200); g.lineTo(0, 200); g.fill();
+    colonnato(g, W, 140, "#a7f3d0", "#6ee7b7");
+    grad(g, 0, 142, W, 58, ["#047857", "#022c22"]);
+    for (let i = 0; i < 14; i++) RR(g, (i * 53 + f * 0.2) % W, 150 + (i * 17) % 40, 2, 2, "rgba(253,224,71,.7)");
+  }
+  function bgChrMezzogiorno(g, W, H, f) {
+    grad(g, 0, 0, W, H, ["#1d4ed8", "#38bdf8", "#fde68a"]);
+    glow(g, 160, 40, 90, "255,255,255", 0.6);
+    g.fillStyle = "#fffbeb"; g.beginPath(); g.arc(160, 40, 18, 0, 7); g.fill();
+    RR(g, 0, 100, W, 60, "#fcd34d");
+    g.fillStyle = "#b45309";
+    for (let i = 0; i < 8; i++) { RR(g, 10 + i * 40, 80, 24, 80, "#f59e0b"); RR(g, 8 + i * 40, 76, 28, 6, "#fef3c7"); }
+    RR(g, 0, 160, W, 40, "#92400e");
+    for (let x = 0; x < W; x += 20) RR(g, x, 160, 1, 40, "#78350f");
+  }
+  function bgChrCrepuscolo(g, W, H, f) {
+    grad(g, 0, 0, W, H, ["#1e1b4b", "#7e22ce", "#f43f5e", "#fb923c"]);
+    glow(g, 80, 120, 80, "251,146,60", 0.6);
+    for (let i = 0; i < 24; i++) RR(g, (i * 71) % W, (i * 37) % 70, 1, 1, "#fef9c3");
+    g.fillStyle = "#1c1033";
+    g.beginPath(); g.moveTo(0, 150); g.lineTo(40, 110); g.lineTo(60, 150); g.lineTo(130, 95); g.lineTo(190, 150); g.lineTo(250, 105); g.lineTo(320, 150); g.lineTo(320, 200); g.lineTo(0, 200); g.fill();
+    for (let i = 0; i < 5; i++) { RR(g, 30 + i * 60, 128, 8, 40, "#312e81"); RR(g, 27 + i * 60, 124, 14, 5, "#4c1d95"); }
+    RR(g, 0, 168, W, 32, "#0f0a1f");
+  }
+  function bgChrPortale(g, W, H, f) {
+    grad(g, 0, 0, W, H, ["#020617", "#1e1b4b", "#0f172a"]);
+    for (let i = 0; i < 30; i++) RR(g, (i * 97) % W, (i * 53) % 150, 1, 1, "#e0e7ff");
+    const pulse = 0.5 + 0.2 * Math.sin(f / 15);
+    glow(g, 160, 100, 95, "56,189,248", pulse);
+    g.strokeStyle = "#38bdf8"; g.lineWidth = 3;
+    g.beginPath(); g.ellipse(160, 100, 46, 66, 0, 0, 7); g.stroke();
+    g.strokeStyle = "#e879f9"; g.lineWidth = 2;
+    g.beginPath(); g.ellipse(160, 100, 36 + Math.sin(f / 12) * 3, 54, 0, 0, 7); g.stroke();
+    RR(g, 0, 166, W, 34, "#0b1020");
+    for (let x = 0; x < W; x += 24) RR(g, x, 166, 1, 34, "#312e81");
+  }
+  const CHR_BGS = { chr_alba: bgChrAlba, chr_mezzogiorno: bgChrMezzogiorno, chr_crepuscolo: bgChrCrepuscolo, chr_portale: bgChrPortale };
+  const prevBg = window.renderDetailedBg;
+  window.renderDetailedBg = function (kind, g, W, H, frame) {
+    const fn = CHR_BGS[kind];
+    if (fn) { safe(() => fn(g, W || 320, H || 200, frame || 0)); return true; }
+    return typeof prevBg === "function" ? prevBg.apply(this, arguments) : false;
+  };
+
   // ------------------------------------------------------------------ Sistema Zone e Capitoli
   const CHAPTERS = {};
   const ZONES = {};
@@ -586,12 +641,11 @@
     const zr = ZONES[zid]; if (!zr) return;
     const m = mem(); m.zone = zid; save();
     castHero();
-    if (api && api.trRec) api.trRec().seen[zid] = true;
-    if (api && api.trGo) api.trGo(zid);
-    if (Number.isFinite(tx) && Number.isFinite(ty)) {
-      const B = api.borgoLoad ? api.borgoLoad() : null;
-      if (B) { B.x = tx * TS + 8; B.y = ty * TS + 12; if (api.borgoSave) api.borgoSave(); }
+    if (api && api.trRec) {
+      const tr = api.trRec(); tr.seen[zid] = true;
+      if (Number.isFinite(tx) && Number.isFinite(ty)) tr.pos[zid] = [tx * TS + 8, ty * TS + 12];
     }
+    if (api && api.trGo) api.trGo(zid);
     refreshZone();
   }
 
@@ -1476,11 +1530,38 @@
       return;
     }
     castHero();
-    const c = activeChapter(), m = mem();
+    hub();
+  }
+
+  function enterWorld() {
+    const m = mem();
     const curZ = m.zone && ZONES[m.zone] ? m.zone : "chr_santuario_alba";
     const zr = ZONES[curZ];
     const startPos = (zr && zr.spec.start) || [18, 13];
-    go(curZ, startPos[0], startPos[1]);
+    const pos = api.trRec().pos[curZ];
+    if (pos) go(curZ); else go(curZ, startPos[0], startPos[1]);
+  }
+
+  function hub() {
+    castHero();
+    const h = hero(), c = activeChapter(), m = mem();
+    const html = `<b>⏳ Chrono-Break · Il Tempio dei Tre Tempi</b><br>${esc(h.name)} · n. ${esc(h.num)} (Crononauta della Rondine)<br><span style="color:var(--dim)">«${esc(h.shotName || "CHRONO-BURST")}»</span><br><br><span style="color:#38bdf8">Capitolo ${c.n} · ${esc(c.title)}</span><br><span style="color:var(--dim)">${esc(goalNow())}</span>`;
+    api.scene("chr_alba", "voce", html, [
+      { label: "Continua il Viaggio ▸", sub: `Capitolo ${c.n} · ${c.title}`, cls: "hot", fn: enterWorld },
+      { label: "⏳ Diario Temporale & Frammenti", sub: `Frammenti raccolti: ${m.clues.length}/3`, fn: () => notebook(hub, false) },
+      { label: "📜 I Tre Capitoli della Saga", sub: "Visualizza i capitoli e i paradossi temporali", fn: chaptersList },
+      { label: "◂ Esci", fn: () => { const back = EXIT || window.title; EXIT = null; if (typeof back === "function") back(); } }
+    ], "Chrono-Break");
+  }
+
+  function chaptersList() {
+    const m = mem();
+    const rows = Object.keys(CHAPTERS).map(Number).sort((a, b) => a - b).map((n) => {
+      const c = CHAPTERS[n];
+      const st = m.done[n] ? "✔ concluso" : (n === m.ch ? "▸ in corso" : (n < m.ch ? "✔" : "🔒 bloccato"));
+      return `<b>Capitolo ${n} · ${esc(c.title)}</b> <span style="color:var(--dim)">${st}<br>${esc(c.sub)}</span>`;
+    }).join("<br><br>");
+    api.scene("chr_alba", "voce", rows, [{ label: "◂ Indietro", fn: hub }], "Chrono-Break · Capitoli");
   }
 
   // Esportazione Globale dell'API
