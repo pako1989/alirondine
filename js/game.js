@@ -25213,6 +25213,7 @@
     if (!chBack) chBack = S;
     S = borgoPlayer(); if (h) { heroCast(h); S.st = heroBias(S.st, h); }
     const t = (v) => Math.max(4, Math.round(v)), key = "ap_" + cfg.id;
+    { const mn = cfg.mate || "Tommy"; if (!MATE_ID[mn]) { const lc = "_" + mn.toLowerCase(), id = cfg.mateId || Object.keys(CAST).find((k) => k.endsWith(lc)); if (id && CAST[id]) MATE_ID[mn] = id; } }
     TEAMS[key] = cfg.team(t, S.st); { const T = TEAMS[key]; if (!T.color) T.color = T.col || "#3fa7ff"; if (!T.vs) T.vs = T.name || "gli avversari"; if (!T.name) T.name = T.vs;
       const A = Number(T.atk) || t(S.st.tiro), D = Number(T.def) || t(S.st.contrasto || 12), V = Number(T.vel) || A;
       if (!Array.isArray(T.defs)) T.defs = [["Il Muro", t(D * 0.95)], ["Il Mastino", t(D)], ["Il Lungo", t(D * 1.05)]];
