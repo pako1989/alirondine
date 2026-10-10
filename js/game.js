@@ -15092,7 +15092,7 @@
       { label: "Dove andare adesso?", sub: "Un consiglio senza spoiler da Pina", cls: fresh0 ? "" : "pick", fn: () => guDove(title) },
     ]);
   }
-  function menuSaghe() {
+  function menuSaghe() { // vuoto-sale-fix-v2
     view = { kind: "scene", bg: "title" }; chap("Saghe e minigiochi");
     text("voce", "<b>Saghe e minigiochi</b><br>Storie speciali e giochi a parte. Ognuna si gioca per conto suo.");
     buttons([
