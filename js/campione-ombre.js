@@ -1167,6 +1167,12 @@
     }, "Capo dei gorilla armati e della sorveglianza notturna con visore termico.");
 
     // Ricompensa cosmetica esclusiva Capitolo 1
+    X.cos("omb_fascia_cunicoli", { kind: "acc", label: "Fascia dei Cunicoli Idraulici", val: "#38bdf8", from: "Raccogli tutti i Dossier Cifrati nei Cunicoli Idraulici" });
+    X.cos("omb_sciarpa_gabbia", { kind: "acc", label: "Sciarpa della Gabbia delle Onde", val: "#22d3ee", from: "Raccogli tutti gli oggetti della Gabbia delle Onde" });
+    X.cos("omb_stemma_laboratorio", { kind: "acc", label: "Stemma del Laboratorio di Silvia", val: "#a78bfa", from: "Raccogli tutti gli oggetti del Laboratorio di Silvia" });
+    X.cos("omb_fascia_droni", { kind: "acc", label: "Fascia dell'Hangar dei Droni", val: "#f59e0b", from: "Raccogli tutte le Batterie Drone nell'Hangar" });
+    X.cos("omb_sciarpa_ebano", { kind: "acc", label: "Sciarpa della Cella d'Ebano", val: "#94a3b8", from: "Raccogli tutti i frammenti nella Cella d'Ebano" });
+    X.cos("omb_stemma_arena", { kind: "acc", label: "Stemma dell'Arena Panoramica", val: "#facc15", from: "Raccogli tutti i Trofei Dorati nell'Arena Panoramica" });
     X.cos("omb_maschera_notte", { kind: "acc", label: "Visore Notturno delle Ombre & Cravatta Nera", val: "#38bdf8", from: "Completa il Capitolo 1 del Circuito delle Ombre" });
 
     const goal = (s) => ({
@@ -1237,7 +1243,7 @@
       omb_cunicoli: {
         name: "Sotterranei della Fortezza · I Cunicoli Idraulici", short: "I Cunicoli Idraulici", sub: "Grate metalliche, tubature gocciolanti e frequenze satellitari",
         w: 36, h: 22, start: [18, 19], theme: "torino", bg: "omb_cunicoli_sotterranei",
-        item: ["Dossier Cifrato", "Dossier"],
+        item: ["Dossier Cifrato", "Dossier"], itemCos: "omb_fascia_cunicoli",
         items: [[4, 4], [31, 4], [9, 14], [26, 14]],
         areas: [
           [2, 2, 14, 9, "La Sala Pompe Sommersa"],
@@ -1281,7 +1287,7 @@
       omb_gabbia: {
         name: "Scogliera Cieca · La Gabbia delle Onde", short: "La Gabbia delle Onde", sub: "Il campo d'acciaio a bordo mare: onde, riflettori e scommesse",
         w: 38, h: 24, start: [19, 21], theme: "torino", bg: "omb_arena_gabbia",
-        item: ["Tessera del Club", "Tessere"],
+        item: ["Tessera del Club", "Tessere"], itemCos: "omb_sciarpa_gabbia",
         items: [[4, 4], [33, 4], [8, 17], [29, 17]],
         areas: [
           [2, 2, 12, 10, "La Passerella di Madame V"],
@@ -1692,7 +1698,7 @@
       omb_lab_silvia: {
         name: "Livello 2 · Laboratorio Chimera", short: "Laboratorio Chimera", sub: "Schermi olografici, capsule criogeniche e codice predittivo",
         w: 34, h: 20, start: [17, 17], theme: "torino", bg: "omb_cunicoli_sotterranei",
-        item: ["Chip Echo", "Chip"],
+        item: ["Chip Echo", "Chip"], itemCos: "omb_stemma_laboratorio",
         items: [[4, 4], [29, 4], [10, 14], [24, 14]],
         areas: [
           [2, 2, 14, 8, "Il Banco Olografico"],
@@ -1726,7 +1732,7 @@
       omb_hangar_droni: {
         name: "Livello 2 · Hangar di Collaudo dei Droni", short: "Hangar dei Droni", sub: "Pareti magnetiche, riflettori stroboscopici e sicurezza armata",
         w: 36, h: 22, start: [18, 19], theme: "torino", bg: "omb_magazzini_laser",
-        item: ["Batteria Droni", "Batterie"],
+        item: ["Batteria Droni", "Batterie"], itemCos: "omb_fascia_droni",
         items: [[5, 5], [30, 5], [10, 15], [25, 15]],
         areas: [
           [6, 6, 29, 16, "Il Rettangolo di Prova"]
@@ -2012,7 +2018,7 @@
       omb_cella_ebano: {
         name: "Livello 3 · La Cella d'Ebano di Kaelen", short: "La Cella d'Ebano", sub: "Pareti di grafite, campo di forza e ritagli di giornale del 2017",
         w: 30, h: 18, start: [15, 15], theme: "torino", bg: "omb_cunicoli_sotterranei",
-        item: ["Maschera Spezzata", "Frammenti"],
+        item: ["Maschera Spezzata", "Frammenti"], itemCos: "omb_sciarpa_ebano",
         items: [[4, 4], [25, 4], [8, 12], [21, 12]],
         areas: [
           [4, 4, 25, 12, "Il Confinamento di Kaelen"]
@@ -2042,7 +2048,7 @@
       omb_arena_panoramica: {
         name: "Livello 3 · L'Arena dei Riflettori Alti", short: "Arena Panoramica", sub: "Ponte sospeso tra le torri: vento fortissimo e parapetti d'acciaio",
         w: 38, h: 24, start: [4, 12], theme: "torino", bg: "omb_suite_tempesta",
-        item: ["Trofeo Dorato", "Trofei"],
+        item: ["Trofeo Dorato", "Trofei"], itemCos: "omb_stemma_arena",
         items: [[6, 6], [32, 6], [10, 17], [27, 17]],
         areas: [
           [6, 6, 31, 18, "Il Campo Sospeso"]
