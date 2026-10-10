@@ -405,10 +405,146 @@
     R(g, W - 20, 122, 4, 36, "#94a3b8");
   }
 
+  // Sfondo: Sotterranei dell'Ouroboros (Canali tossici, ruggine e vapori)
+  function bgAlchimiaSotterranei(g, W, H, f) {
+    grad(g, 0, 0, W, H, ["#022c22", "#064e3b", "#020617"]);
+    // Volta in mattoni umidi
+    R(g, 0, 0, W, 75, "#0f172a");
+    for (let x = 0; x < W; x += 24) {
+      R(g, x, 0, 1, 75, "#020617");
+      R(g, 0, 30, W, 1, "#020617");
+      R(g, 0, 55, W, 1, "#020617");
+    }
+    // Tubazioni di scarto con fumo tossico
+    R(g, 0, 60, W, 10, "#1f2937");
+    [70, 160, 250].forEach((px) => {
+      R(g, px, 68, 6, 18, "#374151");
+      // Goccia che cade
+      const dropY = 86 + ((f * 1.2 + px) % 50);
+      g.fillStyle = "#34d399";
+      g.beginPath(); g.arc(px + 3, dropY, 2, 0, Math.PI * 2); g.fill();
+    });
+
+    // Canale di liquame chimico verde fluorescente
+    R(g, 0, 140, W, 60, "#064e3b");
+    for (let i = 0; i < 5; i++) {
+      const wy = 145 + i * 10;
+      const wx = (Math.sin(f * 0.05 + i) * 20);
+      g.fillStyle = "rgba(52, 211, 153, 0.45)";
+      g.fillRect(wx, wy, W, 3);
+    }
+    glow(g, 160, 170, 70, "52,211,153", 0.35);
+
+    // Passerella grigliata di ferro
+    R(g, 0, 120, W, 20, "#111827");
+    for (let x = 0; x < W; x += 12) {
+      R(g, x, 120, 2, 20, "#374151");
+    }
+  }
+
+  // Sfondo: Fortezza di Briggs (Bastione Innevato del Nord & Bufera)
+  function bgAlchimiaBriggs(g, W, H, f) {
+    grad(g, 0, 0, W, H, ["#0c192c", "#1e293b", "#334155"]);
+    // Sagoma titanica della parete della fortezza
+    R(g, 0, 30, W, 110, "#0f172a");
+    // Cannone ferroviario titanico sulla sommità
+    R(g, 90, 20, 140, 16, "#1e293b");
+    R(g, 70, 16, 30, 24, "#334155");
+    R(g, 220, 24, 60, 8, "#475569"); // Canna del cannone
+
+    // Feritoie illuminate con luce calda
+    [30, 80, 160, 240, 290].forEach((fx) => {
+      R(g, fx, 60, 10, 8, "#f59e0b");
+      R(g, fx, 85, 10, 8, "#f59e0b");
+      glow(g, fx + 5, 64, 18, "245,158,11", 0.4);
+    });
+
+    // Spalto ghiacciato inferiore
+    R(g, 0, 140, W, 60, "#e2e8f0");
+    R(g, 0, 140, W, 4, "#cbd5e1");
+
+    // Fitta bufera di neve con raffiche orizzontali veloci
+    g.fillStyle = "#ffffff";
+    for (let i = 0; i < 70; i++) {
+      const sx = (i * 29 - f * 3.5 + Math.sin(f * 0.1 + i) * 8) % W;
+      const sy = (i * 23 + f * 1.8) % H;
+      R(g, (sx + W) % W, sy, (i % 3 === 0 ? 3 : 2), (i % 3 === 0 ? 2 : 1), "rgba(255,255,255,0.75)");
+    }
+  }
+
+  // Sfondo: Quartier Generale Supremo (Central Command di Vane)
+  function bgAlchimiaComando(g, W, H, f) {
+    grad(g, 0, 0, W, H, ["#0a1428", "#172554", "#1e3a8a"]);
+    // Colonne dorate scanalate
+    [25, 95, 225, 295].forEach((cx) => {
+      R(g, cx - 8, 20, 16, 130, "#1e293b");
+      R(g, cx - 10, 18, 20, 5, "#ca8a04");
+      R(g, cx - 10, 145, 20, 5, "#ca8a04");
+      R(g, cx - 1, 20, 2, 130, "#fde047");
+    });
+
+    // Grande stendardo imperiale dell'Esercito al centro
+    R(g, 135, 25, 50, 85, "#1d4ed8");
+    R(g, 135, 105, 25, 15, "#1d4ed8");
+    R(g, 145, 35, 30, 30, "#facc15"); // Aquila alchemica dorata
+    glow(g, 160, 50, 45, "250,204,21", 0.45);
+
+    // Pavimento a scacchiera di marmo lucido
+    R(g, 0, 150, W, 50, "#0f172a");
+    for (let x = 0; x < W; x += 20) {
+      for (let y = 150; y < H; y += 16) {
+        if (((x / 20) + (y / 16)) % 2 === 0) {
+          R(g, x, y, 20, 16, "#e2e8f0");
+        }
+      }
+    }
+  }
+
+  // Sfondo: La Porta della Verità (La Dimensione Eterea)
+  function bgAlchimiaVerita(g, W, H, f) {
+    // Spazio bianco puro e infinito
+    grad(g, 0, 0, W, H, ["#ffffff", "#f8fafc", "#f1f5f9"]);
+
+    // La titanica Porta di Pietra al centro
+    const px = 110, py = 15, pw = 100, ph = 155;
+    R(g, px, py, pw, ph, "#334155");
+    R(g, px + 4, py + 4, pw - 8, ph - 8, "#1e293b");
+    // Fessura tra le due ante
+    R(g, px + pw / 2 - 1, py + 4, 2, ph - 8, "#020617");
+
+    // Bassorilievo dell'Albero della Vita / Sefirot sulla porta
+    g.strokeStyle = "#94a3b8"; g.lineWidth = 1.5;
+    const mx = px + pw / 2;
+    for (let r = 0; r < 5; r++) {
+      const ry = py + 25 + r * 25;
+      g.beginPath(); g.arc(mx - 20, ry, 5, 0, Math.PI * 2); g.stroke();
+      g.beginPath(); g.arc(mx + 20, ry, 5, 0, Math.PI * 2); g.stroke();
+      g.beginPath(); g.moveTo(mx - 20, ry); g.lineTo(mx + 20, ry); g.stroke();
+    }
+    // Bagliore etereo dagli interstizi della porta
+    glow(g, mx, py + ph / 2, 60, "56,189,248", 0.5 + 0.15 * Math.sin(f * 0.08));
+
+    // La sagoma della "Verità" seduta a gambe incrociate davanti alla porta
+    const tx = 160, ty = 145;
+    g.fillStyle = "#0f172a";
+    // Corpo stilizzato
+    g.beginPath(); g.arc(tx, ty - 16, 7, 0, Math.PI * 2); g.fill(); // testa
+    g.beginPath(); g.ellipse(tx, ty - 5, 10, 12, 0, 0, Math.PI * 2); g.fill(); // torso
+    g.beginPath(); g.ellipse(tx - 9, ty + 6, 8, 4, 0.4, 0, Math.PI * 2); g.fill(); // gamba sx
+    g.beginPath(); g.ellipse(tx + 9, ty + 6, 8, 4, -0.4, 0, Math.PI * 2); g.fill(); // gamba dx
+    // Il sorriso bianco della Verità
+    g.strokeStyle = "#ffffff"; g.lineWidth = 1.5;
+    g.beginPath(); g.arc(tx, ty - 16, 4, 0.2, Math.PI - 0.2); g.stroke();
+  }
+
   const BGS = {
     al_distretto: bgAlchimiaDistretto,
     al_laboratorio: bgAlchimiaLaboratorio,
-    al_arena: bgAlchimiaArena
+    al_arena: bgAlchimiaArena,
+    al_sotterranei: bgAlchimiaSotterranei,
+    al_briggs: bgAlchimiaBriggs,
+    al_comando: bgAlchimiaComando,
+    al_verita: bgAlchimiaVerita
   };
 
   const prevBg = window.renderDetailedBg;
@@ -450,8 +586,8 @@
   //   ^ > < d = cancelli ad ingranaggi pneumatici
   //   P = cerchio di trasmutazione inciso sul pavimento
   //   J = vetrata industriale a rombi
-  const FLOORS = ',pc:wy';
-  const SOLID = 'ABSTblnFkWx^><dPJ';
+  const FLOORS = ',pc:wyg"q_';
+  const SOLID = 'ABSTblnFkWx^><dPJCMOH';
   const isFloor = (ch) => !!ch && FLOORS.includes(ch);
 
   const ZX = { map: null, under: null, id: "", cvs: null };
@@ -498,6 +634,25 @@
       P(sx, sy, 16, 16, (tx + ty) % 2 ? "#1c1917" : "#292524");
       if (tx % 5 === 0) P(sx, sy, 1, 16, "rgba(56, 189, 248, 0.45)");
       if (ty % 5 === 0) P(sx, sy, 16, 1, "rgba(56, 189, 248, 0.45)");
+    } else if (f === "g") {
+      // Canale tossico verde smeraldo
+      P(sx, sy, 16, 16, (tx + ty) % 2 ? "#064e3b" : "#047857");
+      P(sx, sy + 6, 16, 2, "#34d399");
+      if (r < 0.3) P(sx + 4, sy + 10, 3, 2, "#6ee7b7");
+    } else if (f === '"') {
+      // Neve di Briggs
+      P(sx, sy, 16, 16, (tx + ty) % 2 ? "#e2e8f0" : "#f1f5f9");
+      P(sx + 3, sy + 5, 2, 2, "#cbd5e1");
+      if (r < 0.2) P(sx + 8, sy + 10, 3, 2, "#93c5fd");
+    } else if (f === "_") {
+      // Marmo di Central Command
+      P(sx, sy, 16, 16, (tx + ty) % 2 ? "#f8fafc" : "#e2e8f0");
+      P(sx, sy, 16, 1, "#cbd5e1");
+      if ((tx + ty) % 4 === 0) P(sx + 7, sy + 7, 2, 2, "#facc15");
+    } else if (f === "q") {
+      // Spazio bianco della Verità
+      P(sx, sy, 16, 16, "#ffffff");
+      if ((tx + ty) % 3 === 0) P(sx + 8, sy + 8, 1, 1, "#e2e8f0");
     }
   }
 
@@ -636,6 +791,32 @@
       P(sx + 2, sy + 2, 12, 12, "#0ea5e9");
       P(sx + 7, sy, 2, 16, "#1e293b");
       P(sx, sy + 7, 16, 2, "#1e293b");
+    },
+    C(sx, sy, tx, ty) {
+      floorPaint(undAt(tx, ty), sx, sy, tx, ty);
+      P(sx + 2, sy + 6, 12, 8, "#334155");
+      P(sx + 4, sy + 2, 8, 4, "#1e293b");
+      P(sx + 6, sy - 2, 4, 6, "#64748b");
+    },
+    M(sx, sy, tx, ty, fr) {
+      floorPaint(undAt(tx, ty), sx, sy, tx, ty);
+      P(sx + 1, sy + 2, 14, 12, "#1e293b");
+      P(sx + 3, sy + 4, 10, 8, "#334155");
+      const fl = Math.sin(fr / 8 + tx) * 2;
+      P(sx + 6, sy + 6 + fl, 4, 4, "#38bdf8");
+    },
+    O(sx, sy, tx, ty) {
+      floorPaint("q", sx, sy, tx, ty);
+      P(sx + 1, sy, 14, 16, "#1e293b");
+      P(sx + 3, sy + 2, 10, 12, "#0f172a");
+      P(sx + 7, sy + 2, 2, 12, "#94a3b8");
+    },
+    H(sx, sy, tx, ty, fr) {
+      floorPaint(undAt(tx, ty), sx, sy, tx, ty);
+      P(sx + 2, sy + 1, 12, 14, "#064e3b");
+      P(sx + 4, sy + 3, 8, 10, "#022c22");
+      const glowCol = (fr >> 4) % 2 === 0 ? "#34d399" : "#10b981";
+      P(sx + 6, sy + 5, 4, 6, glowCol);
     },
     ">": (sx, sy, tx, ty) => gateTile(">", sx, sy, tx, ty),
     "<": (sx, sy, tx, ty) => gateTile("<", sx, sy, tx, ty),
@@ -877,7 +1058,11 @@
       return `• <b>${esc(parts[1] || "Formula")}</b>: <span style="color:var(--dim)">${esc(parts[2] || "")}</span>`;
     }).join("<br>") || "<span style='color:var(--dim)'>Ancora nessuna formula decifrata. Esplora i laboratori e le officine.</span>";
 
-    const html = `<b>${esc(h.name)}</b> · n. ${esc(h.num)} (Alchimista d'Acciaio)<br><span style="color:var(--dim)">Trasmutazione Personale: «${esc(h.shotName || "Il Colpo dell'Acciaio")}»</span><br><br><b>Formule & Ricerche Alchemiche</b><br>${formRows}<br><br><span style="color:var(--dim)">Vittorie nell'Arena: ${m.wins} · Sconfitte: ${m.losses}</span>`;
+    const cChim = F.get("scelta_chimera") === "purifica" ? "Compassione & Purificazione dell'anima" : F.get("scelta_chimera") === "cura" ? "Estrazione Matrice per l'Armatura" : "In attesa di decisione";
+    const cBrig = F.get("briggs_tattica") === "ferocia" ? "Assalto Frontale di Briggs" : F.get("briggs_tattica") === "scienza" ? "Sabotaggio Criogenico Scientifico" : "In attesa di decisione";
+    const cEnd = F.get("finale_alchimia") === "sacrificio_umano" ? "Lo Scambio Equivalente Perfetto (Corpo Umano ripristinato)" : F.get("finale_alchimia") === "filosofo_supremo" ? "Il Filosofo d'Acciaio Supremo (Governo della nuova Repubblica)" : F.get("finale_alchimia") === "liberta_errante" ? "I Falchi della Libertà (Viaggio senza catene)" : "In corso";
+
+    const html = `<b>${esc(h.name)}</b> · n. ${esc(h.num)} (Alchimista d'Acciaio)<br><span style="color:var(--dim)">Trasmutazione Personale: «${esc(h.shotName || "Il Colpo dell'Acciaio")}»</span><br><br><b>Formule & Ricerche Alchemiche</b><br>${formRows}<br><br><b>Scelte Morali & Filosofiche</b><br>• <b>Dilemma della Chimera (Cap.2):</b> <span style="color:var(--dim)">${cChim}</span><br>• <b>Tattica del Nord (Cap.3):</b> <span style="color:var(--dim)">${cBrig}</span><br>• <b>Epilogo della Verità (Cap.4):</b> <span style="color:var(--dim)">${cEnd}</span><br><br><span style="color:var(--dim)">Vittorie nell'Arena: ${m.wins} · Sconfitte: ${m.losses}</span>`;
 
     if (inZone) {
       api.trAsk("voce", html, [{ label: "◂ Torna a esplorare", fn: done }], bgNow());
@@ -1422,6 +1607,765 @@
     };
   });
 
+  // ============================================================================
+  // CAPITOLO 2 · I SOTTERRANEI DELL'OUROBOROS & LA FONDERIA DELLE CHIMERE
+  // ============================================================================
+  addChapter(function (X) {
+    const { T, F, say, ask, done, go, note, setStep, once, reward, hero, esc, addFormula, triggerTransmutationFx } = X;
+    const N = 2, S = () => X.stepOf(N);
+
+    // Personaggi del Capitolo 2
+    X.cast("al_armstrong", {
+      name: "Magg. Armstrong", tag: "muscoli", hair: "#facc15", style: "slick", skin: "#fed7aa", eye: "#1d4ed8",
+      beard: true, bg: ["#1e3a8a", "#facc15"], shirt: "#1e40af"
+    }, "Il Maggiore Valen Armstrong. Fisico statuario scolpito nella roccia, baffi d'oro a manubrio e un'alchimia artistica tramandata nella sua famiglia da generazioni! Piange di commozione davanti al coraggio e flette i muscoli con scintille dorate.");
+
+    X.cast("al_envi", {
+      name: "Envy", tag: "homunculus", hair: "#064e3b", style: "long", skin: "#d1fae5", eye: "#a855f7",
+      bg: ["#022c22", "#10b981"], shirt: "#022c22"
+    }, "L'Ombra dell'Invidia. Homunculus sadico e mutaforma che disprezza i mortali. Si insinua nei condotti fognari per sorvegliare la produzione delle chimere.");
+
+    X.cast("al_chimera", {
+      name: "La Chimera dei Canali", tag: "bestia", hair: "#71717a", style: "messy", skin: "#94a3b8", eye: "#ef4444",
+      bg: ["#064e3b", "#ef4444"], shirt: "#18181b"
+    }, "Una creatura nata dalla fusione alchemica clandestina di piastre metalliche e materia biologica. Emette versi strazianti di dolore.");
+
+    X.cos("al_stemma_armstrong", { kind: "acc", label: "Medaglione dei Muscoli d'Oro Armstrong", val: "#facc15", from: "Completa il Capitolo 2 di Alchimia d'Acciaio" });
+
+    const goal = (s) => ({
+      0: "Esplora i Sotterranei dell'Ouroboros (scendi dalla botola sotto la stazione).",
+      1: "Incontra il Maggiore Armstrong presso la passerella dei condotti chimici.",
+      2: "Usa la Trasmutazione Decompositiva per forzare la grata di ferro arrugginita.",
+      3: "Affronta la Chimera nella Fonderia e compi la tua Scelta Morale (Purificazione o Cura).",
+      4: "Sventa l'imboscata di Envy e decifra la mappa dei nodi verso il nord.",
+      5: "Disputa la Partita Tattica nei Canali contro le Chimere d'Acciaio!",
+      6: "Capitolo 2 concluso! Prepara la spedizione verso la Fortezza di Briggs."
+    }[s] || "Capitolo 2 concluso. Esplora i sotterranei e raccogli le scaglie d'automail.");
+
+    const zones = {
+      al_sotterranei: {
+        name: "Eisenstadt · I Canali dell'Ouroboros", short: "I Sotterranei", sub: "Acque tossiche luminescenti, vapori e condotti segreti",
+        w: 38, h: 26, start: [19, 21], theme: "torino", bg: "al_sotterranei",
+        item: ["Scaglia d'Automail", "Scaglie"], itemCos: "al_stemma_armstrong",
+        items: [[4, 5], [33, 5], [8, 16], [30, 16]],
+        areas: [
+          [2, 2, 14, 12, "Il Serbatoio di Mercurio"],
+          [22, 2, 35, 12, "La Fonderia delle Chimere"],
+          [14, 12, 23, 22, "La Passerella Centrale"]
+        ],
+        hints: () => ({
+          "Il Serbatoio di Mercurio": "Viti senza fine e liquame verde fluorescente che fluisce verso il centro della città.",
+          "La Fonderia delle Chimere": "Vasche metalliche dove l'esercito sintetizza creature biologiche d'assalto.",
+          "La Passerella Centrale": "Griglie di ferro sospese sulle acque tossiche. Il Maggiore Armstrong è di guardia."
+        }),
+        act: {
+          H: "Esamina la vasca delle chimere", M: "Osserva la turbina a vapore",
+          B: "Guarda il forno di fusione", "^": "Entra nella Fonderia", d: "Risali alla Stazione"
+        },
+        build(Ls) {
+          Ls.lay(0, 0, 37, 1, "A");
+          Ls.lay(0, 0, 1, 25, "A");
+          Ls.lay(36, 0, 37, 25, "A");
+          Ls.lay(0, 24, 37, 25, "A");
+
+          // Canali di scolo tossici laterali
+          Ls.lay(2, 2, 12, 23, "g");
+          Ls.lay(24, 2, 34, 23, "g");
+
+          // Passerella centrale di ferro
+          Ls.lay(14, 2, 22, 23, "c");
+
+          // Ponti di collegamento
+          Ls.lay(8, 8, 28, 9, "c");
+          Ls.lay(8, 16, 28, 17, "c");
+
+          // Turbina e forni
+          Ls.put(6, 4, "M"); Ls.put(30, 4, "M");
+          Ls.put(18, 4, "H"); Ls.put(19, 4, "H");
+
+          // Uscita verso l'alto (stazione)
+          Ls.put(18, 23, "d"); Ls.put(19, 23, "d");
+        },
+        npcs(s) {
+          const list = [];
+          list.push({ id: "al_armstrong", at: [18, 14] });
+          if (s >= 3) list.push({ id: "al_chimera", at: [8, 8] });
+          if (s >= 4) list.push({ id: "al_envi", at: [28, 8] });
+          return list;
+        }
+      }
+    };
+
+    function armstrongTalk() {
+      const s = S();
+      if (s === 0 || s === 1) {
+        return say([
+          ["al_armstrong", "AH! Ti stavo osservando mentre scendevi quelle scale con passo agile e possente, {n}!"],
+          ["hero", "Maggiore Armstrong! Il Colonnello Royden mi ha detto che presidiavate questo settore sotterraneo."],
+          ["al_armstrong", "(Si strappa la giacca militare con un movimento teatrale, mostrando pettorali lucidi e scintille dorate che esplodono nell'aria!)"],
+          ["al_armstrong", "QUESTI MUSCOLI E QUESTA TECNICA ALCHEMICA DI SCOGLIERA SONO STATI TRAMANDATI NELLA FAMIGLIA ARMSTRONG DA GENERAZIONI!"],
+          ["al_armstrong", "Ma la situazione è disperata... I condotti di scarico a nord sono stati sigillati da una grata di ghisa arricchita. Dietro quella grata l'esercito sta conducendo esperimenti immorali sulle chimere!"],
+          ["hero", "Posso aprire la grata in un secondo. Guarda."],
+        ], () => {
+          setStep(N, 2);
+          done();
+        });
+      }
+
+      if (s === 2) {
+        return ask("al_armstrong", "«Vuoi usare la tua trasmutazione a mani nude sulla grata di ghisa, {n}?»", [
+          {
+            label: "⚗️ [DECOMPOSIZIONE ALCHEMICA]: Sbriciola la grata a palmo aperto!",
+            cls: "hot",
+            fn: () => {
+              triggerTransmutationFx(() => {
+                setStep(N, 3);
+                note("Grata dei sotterranei sbriciolata con la decomposizione alchemica.");
+                addFormula("decomposizione", "Trasmutazione Decompositiva", "Fase intermedia dell'alchimia: spezzare i legami molecolari della materia solida.");
+                say([
+                  ["voce", "Colpisci la grata con il palmo. Fulmini azzurri attraversano la struttura e la ghisa si frantuma in polvere fine come sabbia!"],
+                  ["al_armstrong", "(Piange lacrime di pura commozione) CHE SPLENDORE! CHE FORZA MAGNIFICA! La via per la Fonderia è aperta!"],
+                ], done);
+              });
+            }
+          }
+        ]);
+      }
+
+      return say([
+        ["al_armstrong", "Proteggerò la tua ritirata con le mie sculture di pietra! Mostra alle chimere la superiorità dello spirito umano!"],
+      ], done);
+    }
+
+    function chimeraTalk() {
+      const s = S();
+      if (s === 3) {
+        return say([
+          ["al_chimera", "(Emette un lamento straziante, i suoi occhi rossi ti fissano implorando pietà... La creatura soffre atrocemente a causa dell'innesto di piastre metalliche nel corpo)."],
+          ["hero", "Povera creatura... L'Esercito l'ha trasformata in un'arma biologica sacrificabile."],
+        ], () => {
+          ask("al_chimera", "«Come decidi di agire, {n}? Questa scelta segnerà il tuo cammino alchemico.»", [
+            {
+              label: "🌿 [SCELTA A: PURIFICAZIONE]: Libera l'anima della chimera e poni fine alla sua agonia.",
+              cls: "hot",
+              fn: () => {
+                F.set("scelta_chimera", "purifica");
+                setStep(N, 4);
+                note("Scelta Morale: Hai purificato la chimera con compassione.");
+                say([
+                  ["voce", "Poggi delicatamente la mano sulla fronte della creatura. Un bagliore azzurro e dorato ne scioglie il tormento, restituendola alla pace della terra."],
+                  ["al_armstrong", "(Si inginocchia commosso) Non hai usato la violenza... hai scelto la pietà. La famiglia Armstrong non dimenticherà la tua nobiltà d'animo."],
+                ], done);
+              }
+            },
+            {
+              label: "🔬 [SCELTA B: DATI SCIENTIFICI]: Estrai la matrice per sintetizzare una cura per l'Armatura.",
+              cls: "hot",
+              fn: () => {
+                F.set("scelta_chimera", "cura");
+                setStep(N, 4);
+                note("Scelta Morale: Hai estratto la matrice biologica per salvare l'Armatura d'Ebano.");
+                addFormula("matrice_biologica", "Matrice Cellulare Rigenerativa", "Dati preziosi per tentare di ripristinare un corpo umano perduto.");
+                say([
+                  ["voce", "Con mano ferma estrai i componenti alchemici della matrice prima che svaniscano."],
+                  ["al_armstrong", "Una scelta pragmatica e coraggiosa. Se questi dati possono salvare l'Armatura d'Ebano, il sacrificio non sarà stato vano."],
+                ], done);
+              }
+            }
+          ]);
+        });
+      }
+
+      return say([["al_chimera", "(La vasca è ora silenziosa e purificata)"]], done);
+    }
+
+    function enviTalk() {
+      const s = S();
+      if (s === 4) {
+        return say([
+          ["al_envi", "Maledetti moscerini umani! Come avete osato toccare i miei giocattoli?!"],
+          ["hero", "Envy! L'Ombra dell'Ouroboros!"],
+          ["al_envi", "Ahahah! Credete davvero di aver fermato il Cerchio? Questa fonderia era solo un distaccamento secondario! I veri preparativi per il Giorno Promesso si stanno già compiendo a nord, nella Fortezza Innevata di Briggs!"],
+          ["hero", "Briggs?! Il confine ghiacciato dell'Impero!"],
+          ["al_envi", "Esatto! Ma prima di arrivarci dovrete superare la mia guardia sul campo da gioco dei canali!"],
+        ], () => {
+          setStep(N, 5);
+          startMatchCh2();
+        });
+      }
+
+      if (s === 5) {
+        return say([["al_envi", "Le chimere vi faranno a pezzi sull'acqua tossica!"]], () => startMatchCh2());
+      }
+
+      return say([["al_envi", "Maledizione... La pagherete a Briggs!"]], done);
+    }
+
+    function startMatchCh2() {
+      X.playMatch({
+        id: "al_match_2",
+        chap: "Eisenstadt · Il Derby delle Chimere",
+        us: "I Falchi d'Acciaio",
+        mate: "Armstrong",
+        min: 45,
+        intro: "Scontro nei Canali dell'Ouroboros! Il tuo Campione {n} e il Maggiore Armstrong affrontano la Legione delle Chimere di Envy!",
+        team: (t, st) => ({
+          name: "Legione Ouroboros",
+          col: "#064e3b",
+          style: "Attacco Famelico & Tattiche Mutaforma",
+          atk: t(st.atk * 1.15),
+          def: t(st.def * 1.1),
+          vel: t(st.vel * 1.2),
+          specials: ["Balzo Bestiale", "Bava Corrosiva"]
+        }),
+        done: (r) => {
+          if (r.win) {
+            setStep(N, 6);
+            X.finishChapter(N, "vittoria_sotterranei");
+            note("Vittoria nei Sotterranei: Envy è fuggito verso la Fortezza di Briggs!");
+            const rewMsg = reward("al_ch2_win", {
+              coins: 500,
+              cos: "al_stemma_armstrong"
+            });
+            say([
+              ["voce", "GOL FANTASTICO! Con una spettacolare combinazione tra la spinta muscolare di Armstrong e il tuo tiro speciale «{tiro}», la palla sfonda la rete tossica!"],
+              ["al_envi", "Non finisce qui, maledetti mocciosi! Il Generale Olivier a Briggs vi stritolerà nel ghiaccio!"],
+              ["al_armstrong", "TRIONFO! Ora dobbiamo prendere l'espresso del nord prima che la bufera chiuda i passi di montagna!"],
+              ["voce", `CAPITOLO 2 CONCLUSO! ${rewMsg.join(" · ")}. Il Capitolo 3 alla Fortezza di Briggs ti attende!`],
+            ], () => {
+              go("al_sotterranei", 18, 20);
+            });
+          } else {
+            say([["al_armstrong", "Non arrenderti, {n}! I muscoli della perseveranza non cedono mai! Riprova la partita!"]], done);
+          }
+        }
+      });
+    }
+
+    const obj = {
+      "al_sotterranei:d": () => { go("al_distretto", 20, 20); },
+      "al_sotterranei:M": () => { say([["voce", "Una massiccia turbina a vapore che aspira le acque reflue dei laboratori militari."]], done); },
+      "al_sotterranei:H": () => { say([["voce", "La vasca di contenimento biologico. Residui di metallo liquido e composti organici ancora incandescenti."]], done); }
+    };
+
+    const talk = {
+      al_armstrong: armstrongTalk,
+      al_chimera: chimeraTalk,
+      al_envi: enviTalk
+    };
+
+    return {
+      n: N,
+      title: "I Sotterranei dell'Ouroboros",
+      sub: "La tana delle chimere, il Maggiore Armstrong e il dilemma morale",
+      start: "al_sotterranei",
+      zones,
+      talk,
+      obj,
+      goal,
+      intro: () => [
+        ["voce", "CAPITOLO 2 · I SOTTERRANEI DELL'OUROBOROS", "al_sotterranei"],
+        ["voce", "Sotto le strade ferrate di Eisenstadt scorre un dedalo di canali mefitici. L'acqua tossica verde smeraldo illumina le pareti di pietra corrosa.", "al_sotterranei"],
+        ["voce", "Tra i sibili dei vapori, una figura monumentale e scintillante fa risuonare i propri passi metallici sulla passerella di ferro...", "al_sotterranei"]
+      ]
+    };
+  });
+
+  // ============================================================================
+  // CAPITOLO 3 · LA FORTEZZA DELLE NEVI DI BRIGGS
+  // ============================================================================
+  addChapter(function (X) {
+    const { T, F, say, ask, done, go, note, setStep, once, reward, hero, esc, addFormula, triggerTransmutationFx } = X;
+    const N = 3, S = () => X.stepOf(N);
+
+    // Personaggi di Briggs
+    X.cast("al_olivier", {
+      name: "Gen. Olivier", tag: "regina_ghiaccio", hair: "#fde047", style: "long", skin: "#f8fafc", eye: "#0284c7",
+      bg: ["#0f172a", "#38bdf8"], shirt: "#0f172a"
+    }, "Il Generale Olivier Mira Armstrong. La Regina del Ghiaccio di Briggs. Comanda la frontiera settentrionale con una sciabola affilata come un rasoio e una disciplina che non ammette debolezze: «A Briggs i deboli muoiono e i forti sopravvivono. Dimostrami che non sei un parassita della capitale!»");
+
+    X.cast("al_sloth", {
+      name: "Sloth il Colosso", tag: "colosso", hair: "#18181b", style: "messy", skin: "#71717a", eye: "#ef4444",
+      bg: ["#18181b", "#ef4444"], shirt: "#27272a"
+    }, "L'Homunculus della Pigrizia. Un gigante di muscoli d'acciaio che scava le gallerie del Cerchio Continentale. Si lamenta continuamente della fatica («Che noia... che fatica... vi schiaccio e vado a dormire...») ma possiede una velocità e un impatto inarrestabili.");
+
+    X.cos("al_mantello_briggs", { kind: "acc", label: "Mantello di Briggs con Pelliccia di Lupo", val: "#e2e8f0", from: "Completa il Capitolo 3 di Alchimia d'Acciaio" });
+
+    const goal = (s) => ({
+      0: "Raggiungi il Bastione di Briggs e presentati al Generale Olivier.",
+      1: "Affronta il test della Tormenta: usa la trasmutazione termica sul cannone ghiacciato.",
+      2: "Esamina la breccia nelle trincee scavata da Sloth il Colosso.",
+      3: "Scegli la tua Strategia Morale (Attacco Frontale o Sabotaggio Criogenico).",
+      4: "Disputa la Partita del Gelo contro i Guardiani del Nord!",
+      5: "Capitolo 3 concluso! Olivier ti consegna i documenti per l'assalto a Central Command."
+    }[s] || "Capitolo 3 concluso. Esplora la fortezza e raccogli le scaglie d'automail.");
+
+    const zones = {
+      al_briggs: {
+        name: "Briggs · La Fortezza delle Nevi", short: "Bastione di Briggs", sub: "Ghiaccio eterno, cannoni giganti e la disciplina del Nord",
+        w: 40, h: 26, start: [20, 21], theme: "torino", bg: "al_briggs",
+        item: ["Scaglia d'Automail", "Scaglie"], itemCos: "al_mantello_briggs",
+        items: [[3, 5], [36, 5], [10, 18], [29, 18]],
+        areas: [
+          [1, 1, 15, 12, "La Batteria dei Cannoni Titanici"],
+          [24, 1, 38, 12, "Il Posto di Comando di Olivier"],
+          [12, 13, 28, 23, "Il Campo Ghiacciato di Parata"]
+        ],
+        hints: () => ({
+          "La Batteria dei Cannoni Titanici": "Bocche da fuoco calibro cento puntate sulla frontiera artica.",
+          "Il Posto di Comando di Olivier": "Mappe tattiche delle trincee e una stufa a carbone che arde giorno e notte.",
+          "Il Campo Ghiacciato di Parata": "Lastre di permafrost sferzate dal blizzard polare."
+        }),
+        act: {
+          C: "Osserva il cannone titanico", W: "Guarda lo scranno di comando",
+          B: "Scaldati alla stufa del nord", d: "Torna alla Stazione"
+        },
+        build(Ls) {
+          Ls.lay(0, 0, 39, 2, "A");
+          Ls.lay(0, 0, 1, 25, "A");
+          Ls.lay(38, 0, 39, 25, "A");
+          Ls.lay(0, 24, 39, 25, "A");
+
+          // Neve compatta
+          Ls.lay(2, 3, 37, 23, '"');
+          // Lastroni di ghiaccio
+          Ls.lay(14, 6, 26, 20, ":");
+
+          // Cannoni a nord
+          Ls.put(6, 4, "C"); Ls.put(10, 4, "C");
+          Ls.put(30, 4, "C"); Ls.put(34, 4, "C");
+
+          // Scranno di Olivier
+          Ls.put(20, 4, "W");
+
+          // Stufe
+          Ls.put(12, 10, "B"); Ls.put(28, 10, "B");
+
+          // Uscita
+          Ls.put(19, 24, "d"); Ls.put(20, 24, "d");
+        },
+        npcs(s) {
+          const list = [];
+          list.push({ id: "al_olivier", at: [20, 6] });
+          if (s >= 2) list.push({ id: "al_sloth", at: [8, 14] });
+          return list;
+        }
+      }
+    };
+
+    function olivierTalk() {
+      const s = S();
+      if (s === 0) {
+        return say([
+          ["al_olivier", "Chi ha fatto entrare questo pivello della capitale nel mio forte?! E perché indossa una divisa con il numero {num}?"],
+          ["hero", "Sono {n}, Generale Olivier. Royden e vostro fratello Valen mi hanno inviato qui."],
+          ["al_olivier", "(Poggia la punta della sciabola a terra con sguardo glaciale) Valen pensa col cuore e Royden con l'ambizione. Io penso con la sopravvivenza."],
+          ["al_olivier", "Se vuoi che io ascolti le tue teorie sul Cerchio Nazionale, devi prima renderti utile. Il permafrost ha congelato la culatta del nostro cannone difensivo principale. Se non lo sblocchi, sei solo zavorra."],
+        ], () => {
+          setStep(N, 1);
+          done();
+        });
+      }
+
+      if (s === 1) {
+        return ask("al_olivier", "«Usa la tua alchimia sul cannone titanico, se ne sei capace!»", [
+          {
+            label: "⚗️ [TRASMUTAZIONE TERMICA]: Genera una reazione esotermica per sciogliere il ghiaccio!",
+            cls: "hot",
+            fn: () => {
+              triggerTransmutationFx(() => {
+                setStep(N, 2);
+                note("Cannone di Briggs sbloccato con la trasmutazione termica.");
+                say([
+                  ["voce", "Tocchi l'acciaio del cannone. Un'ondata di vapore bollente avvolge la culatta e i blocchi di ghiaccio evaporano all'istante!"],
+                  ["al_olivier", "(Un sorriso appena accennato) Niente male. Sai fare qualcosa oltre alle chiacchiere."],
+                  ["al_olivier", "Ora guarda verso le trincee esterne: una creatura titanica sta scavando un tunnel direttamente sotto le nostre fondamenta. Si fa chiamare Sloth."],
+                ], done);
+              });
+            }
+          }
+        ]);
+      }
+
+      if (s === 3) {
+        return ask("al_olivier", "«Come intendiamo affrontare questo mostro, {n}?»", [
+          {
+            label: "⚔️ [SCELTA A: ATTACCO FRONTALE]: Affronta Sloth col Muro d'Acciaio dimostrando ferocia!",
+            cls: "hot",
+            fn: () => {
+              F.set("briggs_tattica", "ferocia");
+              setStep(N, 4);
+              note("Scelta Tattica: Attacco frontale contro Sloth col supporto dell'artiglieria.");
+              say([
+                ["al_olivier", "Questo è lo spirito di Briggs! Niente ritirate, niente scuse! Schiacciamolo sul campo!"],
+              ], () => startMatchCh3());
+            }
+          },
+          {
+            label: "❄️ [SCELTA B: SABOTAGGIO CRIOGENICO]: Congela le falde acquifere per intrappolarlo nel permafrost!",
+            cls: "hot",
+            fn: () => {
+              F.set("briggs_tattica", "scienza");
+              setStep(N, 4);
+              note("Scelta Tattica: Sabotaggio criogenico alchemico per bloccare Sloth.");
+              addFormula("criogenia", "Matrice di Ghiaccio Esecutivo", "Capacità di abbattere istantaneamente la temperatura della materia circostante.");
+              say([
+                ["al_olivier", "Un piano brillante e chirurgico. Riduciamo a zero le perdite umane. In campo!"],
+              ], () => startMatchCh3());
+            }
+          }
+        ]);
+      }
+
+      if (s === 4) {
+        return say([["al_olivier", "I soldati di Briggs sono schierati sul campo di ghiaccio. Vinci questa sfida e marceremo su Central Command!"]], () => startMatchCh3());
+      }
+
+      return say([["al_olivier", "Ottimo lavoro, {n}. I treni corazzati sono pronti. È ora di regolare i conti con Vane nella capitale!"]], done);
+    }
+
+    function slothTalk() {
+      const s = S();
+      if (s === 2) {
+        return say([
+          ["al_sloth", "Uuuh... che noia scavare... che fatica combattere... Devo finire il tunnel per il Giorno Promesso... Ma voi siete fastidiosi... vi calpesto..."],
+        ], () => {
+          setStep(N, 3);
+          done();
+        });
+      }
+      return say([["al_sloth", "Che sonno... che freddo..."]], done);
+    }
+
+    function startMatchCh3() {
+      X.playMatch({
+        id: "al_match_3",
+        chap: "Briggs · La Battaglia della Tormenta",
+        us: "I Falchi d'Acciaio",
+        mate: "Olivier",
+        min: 45,
+        intro: "Duello sui Ghiacci di Briggs! Il tuo Campione {n} e il Generale Olivier affrontano la Corazza Titanica di Sloth!",
+        team: (t, st) => ({
+          name: "Colossi di Briggs",
+          col: "#334155",
+          style: "Impatto Pesante & Carica Devastante",
+          atk: t(st.atk * 1.25),
+          def: t(st.def * 1.35),
+          vel: t(st.vel * 0.8),
+          specials: ["Sfondamento del Permafrost", "Slancio Titanico"]
+        }),
+        done: (r) => {
+          if (r.win) {
+            setStep(N, 5);
+            X.finishChapter(N, "vittoria_briggs");
+            note("Vittoria a Briggs: Sloth è stato respinto e l'armata del nord si unisce alla rivolta!");
+            const rewMsg = reward("al_ch3_win", {
+              coins: 600,
+              cos: "al_mantello_briggs"
+            });
+            say([
+              ["voce", "GOOOL INCREDIBILE! Il tuo tiro «{tiro}» attraversa la tormenta come una meteora infuocata, mandando in frantumi la barriera di ghiaccio di Sloth!"],
+              ["al_olivier", "VITTORIA! Soldati di Briggs, ammainate la bandiera dei traditori! Oggi marciamo insieme su Central Command!"],
+              ["voce", `CAPITOLO 3 CONCLUSO! ${rewMsg.join(" · ")}. Il Capitolo 4 (Gran Finale) ti attende!`],
+            ], () => {
+              go("al_briggs", 20, 20);
+            });
+          } else {
+            say([["al_olivier", "A Briggs chi cade si rialza subito! Riorganizza la squadra e rimettiti in piedi!"]], done);
+          }
+        }
+      });
+    }
+
+    const obj = {
+      "al_briggs:d": () => { go("al_distretto", 20, 20); },
+      "al_briggs:C": () => { say([["voce", "Un titanico cannone ferroviario calibro 100. Puntamento d'acciaio impeccabile sulla cresta montuosa."]], done); }
+    };
+
+    const talk = {
+      al_olivier: olivierTalk,
+      al_sloth: slothTalk
+    };
+
+    return {
+      n: N,
+      title: "La Fortezza delle Nevi",
+      sub: "Il Generale Olivier, il Colosso di Briggs e la marcia sulla Capitale",
+      start: "al_briggs",
+      zones,
+      talk,
+      obj,
+      goal,
+      intro: () => [
+        ["voce", "CAPITOLO 3 · LA FORTEZZA DELLE NEVI DI BRIGGS", "al_briggs"],
+        ["voce", "La bufera polare sferza i bastioni d'acciaio della frontiera settentrionale. Blocchi di ghiaccio perenne scricchiolano sotto gli stivali ferrati.", "al_briggs"],
+        ["voce", "In cima alla fortezza, con la sciabola sguainata, il Generale Olivier Mira Armstrong ti osserva senza battere ciglio...", "al_briggs"]
+      ]
+    };
+  });
+
+  // ============================================================================
+  // CAPITOLO 4 · IL GIORNO PROMESSO & LA PORTA DELLA VERITÀ (IL GRAN FINALE)
+  // ============================================================================
+  addChapter(function (X) {
+    const { T, F, say, ask, done, go, note, setStep, once, reward, hero, esc, addFormula, triggerTransmutationFx } = X;
+    const N = 4, S = () => X.stepOf(N);
+
+    // Personaggi del Capitolo Finale
+    X.cast("al_vane", {
+      name: "Com. Supremo Vane", tag: "fuhrer", hair: "#0f172a", style: "slick", skin: "#e2e8f0", eye: "#ef4444",
+      beard: true, bg: ["#1e3a8a", "#ef4444"], shirt: "#0284c7"
+    }, "Il Comandante Supremo Vane (ispirato a King Bradley). Sorriso cortese e glaciale da gentiluomo di mezza età. Nasconde sotto la benda l'Occhio Supremo dell'Ouroboros: una velocità sovrumana capace di prevedere ogni traiettoria di tiro.");
+
+    X.cast("al_verita", {
+      name: "La Verità", tag: "dio", hair: "#ffffff", style: "buzz", skin: "#0f172a", eye: "#ffffff",
+      bg: ["#ffffff", "#020617"], shirt: "#ffffff"
+    }, "L'Entità Onnisciente della Porta. «Io sono ciò che voi chiamate Mondo, o forse Universo, o forse Dio, o forse Verità... e sono anche Te!».");
+
+    X.cos("al_corona_verita", { kind: "acc", label: "Corona Alchemica del Filosofo d'Acciaio", val: "#38bdf8", from: "Completa la Saga dell'Alchimia d'Acciaio" });
+
+    const goal = (s) => ({
+      0: "Fai irruzione nella Sala del Comando Supremo di Central Command.",
+      1: "Confronta il Comandante Supremo Vane e svela l'Occhio dell'Ouroboros.",
+      2: "Disputa la Battaglia Finale del Giorno Promesso per distruggere il Cerchio!",
+      3: "Varcare la Porta della Verità nello Spazio Bianco Etereo.",
+      4: "Compi la tua Scelta Finale davanti alla Verità (Scambio Equivalente, Filosofo o Libertà).",
+      5: "Saga Completata con successo! Vivi l'epilogo del tuo Campione."
+    }[s] || "Saga dell'Alchimia d'Acciaio completata! Hai salvato il mondo.");
+
+    const zones = {
+      al_comando: {
+        name: "Central Command · La Sala del Trono", short: "Sala del Trono", sub: "Marmi dorati, stendardi dell'Esercito e il trono del Fuhrer",
+        w: 38, h: 26, start: [19, 21], theme: "torino", bg: "al_comando",
+        item: ["Scaglia d'Automail", "Scaglie"], itemCos: "al_corona_verita",
+        items: [[4, 4], [33, 4]],
+        areas: [
+          [2, 2, 35, 10, "Il Trono del Comandante Supremo"],
+          [14, 11, 23, 22, "La Navata di Marmo"]
+        ],
+        hints: () => ({
+          "Il Trono del Comandante Supremo": "Uno scranno d'oro e ferro con la scacchiera del regno.",
+          "La Navata di Marmo": "Pavimento a scacchiera bianco e nero dove si decide il destino del continente."
+        }),
+        act: {
+          W: "Guarda il trono imperiale", P: "Osserva il sigillo dell'Ouroboros",
+          d: "Torna alla Stazione"
+        },
+        build(Ls) {
+          Ls.lay(0, 0, 37, 1, "A");
+          Ls.lay(0, 0, 1, 25, "A");
+          Ls.lay(36, 0, 37, 25, "A");
+          Ls.lay(0, 24, 37, 25, "A");
+
+          // Pavimento a scacchi di marmo
+          Ls.lay(2, 2, 35, 23, "_");
+
+          // Tappeto imperiale centrale
+          Ls.lay(17, 3, 20, 23, "c");
+
+          // Trono imperiale
+          Ls.put(18, 4, "W"); Ls.put(19, 4, "W");
+
+          // Colonne dorate
+          [[8, 6], [29, 6], [8, 14], [29, 14]].forEach(([cx, cy]) => Ls.put(cx, cy, "T"));
+
+          // Uscita
+          Ls.put(18, 23, "d"); Ls.put(19, 23, "d");
+        },
+        npcs(s) {
+          const list = [];
+          list.push({ id: "al_vane", at: [18, 6] });
+          list.push({ id: "al_royden", at: [14, 12] });
+          list.push({ id: "al_armatura", at: [23, 12] });
+          return list;
+        }
+      },
+
+      al_verita: {
+        name: "La Dimensione Eterea · La Porta della Verità", short: "La Porta della Verità", sub: "Lo spazio bianco infinito dove risiede la Verità Assoluta",
+        w: 36, h: 24, start: [18, 18], theme: "torino", bg: "al_verita",
+        areas: [[10, 2, 26, 16, "La Porta di Pietra Monumentale"]],
+        hints: () => ({
+          "La Porta di Pietra Monumentale": "Un bassorilievo dell'Albero della Vita. Dietro di essa si cela la conoscenza universale."
+        }),
+        act: { O: "Tocca la Porta della Verità" },
+        build(Ls) {
+          Ls.lay(0, 0, 35, 23, "q");
+          // La Porta monumentale
+          Ls.put(17, 4, "O"); Ls.put(18, 4, "O");
+        },
+        npcs(s) {
+          return [{ id: "al_verita", at: [18, 8] }];
+        }
+      }
+    };
+
+    function vaneTalk() {
+      const s = S();
+      if (s === 0 || s === 1) {
+        return say([
+          ["al_vane", "Benvenuti a Central Command, giovani ribelli."],
+          ["hero", "Vane! Il vostro piano è giunto al capolinea. I nodi del cerchio a Briggs e nei sotterranei sono stati disattivati!"],
+          ["al_vane", "(Sorride con calma imperturbabile, poi slaccia lentamente la benda di cuoio sull'occhio sinistro...)"],
+          ["voce", "Sotto la benda appare un'iride rossa con il serpente Ouroboros che si morde la coda: L'Occhio Supremo!"],
+          ["al_vane", "Pensate davvero che un simile disegno possa fallire per mano di ragazzini con delle nozioni di chimica? Io vedo ogni particella dell'aria, ogni contrazione dei vostri muscoli, ogni traiettoria del pallone."],
+          ["al_royden", "Vane! Risponderai dell'alto tradimento verso la patria!"],
+          ["al_vane", "Allora dimostratelo sul rettangolo della storia. Se il vostro tiro speciale «{tiro}» può superare il mio Occhio Supremo... il continente sarà vostro!"],
+        ], () => {
+          setStep(N, 2);
+          startFinalMatch();
+        });
+      }
+
+      if (s === 2) {
+        return say([["al_vane", "Il Giorno Promesso inizia adesso!"]], () => startFinalMatch());
+      }
+
+      return say([["al_vane", "(In ginocchio, l'Occhio Supremo infranto) Incredibile... La volontà umana... supera il calcolo perfetto..."]], done);
+    }
+
+    function startFinalMatch() {
+      X.playMatch({
+        id: "al_match_final",
+        chap: "Central Command · Il Giorno Promesso",
+        us: "L'Alleanza d'Acciaio",
+        mate: "Royden",
+        min: 45,
+        intro: "LA BATTAGLIA FINALE! Il tuo Campione {n}, Royden e l'Armatura sfidano l'Armata dell'Occhio Supremo di Vane per salvare milioni di vite!",
+        team: (t, st) => ({
+          name: "Armata dell'Ouroboros",
+          col: "#ef4444",
+          style: "Preveggenza Totale & Forza Homunculus",
+          atk: t(st.atk * 1.4),
+          def: t(st.def * 1.45),
+          vel: t(st.vel * 1.35),
+          specials: ["Sguardo Preveggente", "Lama Fulminea"]
+        }),
+        done: (r) => {
+          if (r.win) {
+            setStep(N, 3);
+            note("Vittoria Leggendaria contro il Comandante Vane! Il Cerchio Nazionale è infranto.");
+            say([
+              ["voce", "GOOOOOL SUPREMO! Batti le mani, concentri l'intera energia della tua anima e scagli il tuo tiro leggendario «{tiro}»!"],
+              ["voce", "La sfera d'acciaio perfora la preveggenza dell'Occhio di Vane ed esplode nella rete, innescando un lampo di luce accecante!"],
+              ["voce", "Il mondo attorno a te si dissolve in un silenzio assoluto... Ti ritrovi all'improvviso in una distesa bianca infinita."],
+            ], () => {
+              go("al_verita", 18, 16);
+            });
+          } else {
+            say([["al_royden", "Non farti ipnotizzare dal suo occhio, {n}! Concentrati sulla purezza del tuo tiro e ritenta!"]], done);
+          }
+        }
+      });
+    }
+
+    function veritaTalk() {
+      const s = S();
+      if (s === 3 || s === 4) {
+        return say([
+          ["al_verita", "Benvenuto di nuovo, {n}. È passato del tempo dall'ultima volta che sei stato qui."],
+          ["hero", "La Porta della Verità... Sei tu."],
+          ["al_verita", "Io sono ciò che voi chiamate Mondo, o forse Universo, o forse Dio, o forse Verità... e sono anche Te!"],
+          ["al_verita", "Hai sconfitto Vane e salvato milioni di anime dal sacrificio. Ma conosci la legge fondamentale dell'esistenza: lo Scambio Equivalente."],
+          ["al_verita", "Cosa sei disposto a cedere per concludere il tuo cammino? Cosa desideri davvero nel profondo del tuo cuore?"],
+        ], () => {
+          ask("al_verita", "«Quale sarà la tua Scelta Finale, Alchimista d'Acciaio?»", [
+            {
+              label: "🌟 [FINALE 1: LO SCAMBIO EQUIVALENTE]: Sacrifica per sempre l'Alchimia per restituire il corpo umano all'Armatura!",
+              cls: "hot",
+              fn: () => {
+                F.set("finale_alchimia", "sacrificio_umano");
+                setStep(N, 5);
+                X.finishChapter(N, "finale_sacrificio_umano");
+                note("FINALE 1 RAGGIUNTO: Hai rinunciato all'alchimia per ridare il corpo umano all'amico.");
+                const rew = reward("al_end_1", { coins: 1000, cos: "al_corona_verita" });
+                triggerTransmutationFx(() => {
+                  say([
+                    ["al_verita", "(Ride con un sorriso caloroso e radioso) Risposta corretta, Campione! Hai compreso che l'Alchimia non è niente in confronto ai legami del cuore umano!"],
+                    ["al_verita", "Prendi la tua ricompensa. La Porta si chiude... per sempre!"],
+                    ["voce", "Torni a Central Command. L'Armatura d'Ebano si sgretola in un soffio di vento e al suo posto c'è un ragazzo in carne ed ossa che respira a pieni polmoni!"],
+                    ["al_kira", "(Scoppia a piangere abbracciandovi entrambi) Ce l'hai fatta, {n}... Ce l'hai fatta!"],
+                    ["hero", "Non posso più trasmutare la materia... ma il mio tiro a pallone e le mie gambe sono tutte mie. Ed è l'unica cosa di cui ho bisogno."],
+                    ["voce", `SAGA COMPLETATA! FINALE 1: LO SCAMBIO EQUIVALENTE. ${rew.join(" · ")}`],
+                  ], () => {
+                    go("al_distretto", 20, 20);
+                  });
+                });
+              }
+            },
+            {
+              label: "👑 [FINALE 2: IL FILOSOFO D'ACCIAIO]: Mantieni la conoscenza e diventa il nuovo Guardiano dell'Impero con Royden!",
+              cls: "hot",
+              fn: () => {
+                F.set("finale_alchimia", "filosofo_supremo");
+                setStep(N, 5);
+                X.finishChapter(N, "finale_filosofo_supremo");
+                note("FINALE 2 RAGGIUNTO: Sei diventato il Gran Maestro Alchimista dell'Impero.");
+                const rew = reward("al_end_2", { coins: 1000, cos: "al_corona_verita" });
+                say([
+                  ["al_verita", "Hai scelto il fardello della guida e della saggezza universale. Che tu possa usare questo potere per non creare altri mostri."],
+                  ["voce", "Rientri trionfante a Central Command. Royden viene nominato Comandante Supremo della nuova repubblica e ti incorona Gran Maestro Alchimista."],
+                  ["al_royden", "Insieme costruiremo un mondo dove la scienza è al servizio della pace e non della guerra."],
+                  ["voce", `SAGA COMPLETATA! FINALE 2: IL FILOSOFO D'ACCIAIO. ${rew.join(" · ")}`],
+                ], () => {
+                  go("al_distretto", 20, 20);
+                });
+              }
+            },
+            {
+              label: "🌍 [FINALE 3: I FALCHI DELLA LIBERTÀ]: Rifiuta cariche e gloria: parti per un viaggio libero con Kira oltre i confini!",
+              cls: "hot",
+              fn: () => {
+                F.set("finale_alchimia", "liberta_errante");
+                setStep(N, 5);
+                X.finishChapter(N, "finale_liberta_errante");
+                note("FINALE 3 RAGGIUNTO: Hai scelto la libertà assoluta, viaggiando oltre i confini.");
+                const rew = reward("al_end_3", { coins: 1000, cos: "al_corona_verita" });
+                say([
+                  ["al_verita", "Nessuna corona, nessuna carica... solo la terra aperta sotto i tuoi piedi. Una scelta degna di chi ha compreso la libertà."],
+                  ["voce", "Lasci Central Command senza attendere le medaglie. Alla stazione di Eisenstadt sali sull'espresso insieme a Kira e ai tuoi amici."],
+                  ["al_kira", "Allora, capitano... dove andiamo adesso col tuo tiro speciale?"],
+                  ["hero", "Dappertutto, Kira. Dappertutto ci sia un campo e della gente pronta a sognare."],
+                  ["voce", `SAGA COMPLETATA! FINALE 3: I FALCHI DELLA LIBERTÀ. ${rew.join(" · ")}`],
+                ], () => {
+                  go("al_distretto", 20, 20);
+                });
+              }
+            }
+          ]);
+        });
+      }
+
+      return say([["al_verita", "La Verità è sempre dentro di te."]], done);
+    }
+
+    const obj = {
+      "al_comando:d": () => { go("al_distretto", 20, 20); },
+      "al_verita:O": () => { say([["voce", "La titanica Porta della Verità. Emana una calma e una solennità infinita."]], done); }
+    };
+
+    const talk = {
+      al_vane: vaneTalk,
+      al_verita: veritaTalk
+    };
+
+    return {
+      n: N,
+      title: "Il Giorno Promesso",
+      sub: "La battaglia finale contro il Comandante Supremo e la Scelta davanti alla Verità",
+      start: "al_comando",
+      zones,
+      talk,
+      obj,
+      goal,
+      intro: () => [
+        ["voce", "CAPITOLO 4 · IL GIORNO PROMESSO", "al_comando"],
+        ["voce", "Central Command. La capitale è immersa nel silenzio dell'eclissi. Nella grandiosa Sala del Trono, il Comandante Supremo Vane attende sulla sua scacchiera imperiale...", "al_comando"],
+        ["voce", "È il momento della resa dei conti finale per il tuo Campione {n}!", "al_comando"]
+      ]
+    };
+  });
+
   // ------------------------------------------------------------------ Interfaccia Principale & Schermate
   function leaveToModes() {
     const back = EXIT || window.title;
@@ -1447,19 +2391,20 @@
 
     castHero();
     const c = activeChapter(), m = mem(), allDone = c && m.done[c.n];
+    const isCompletedAll = !!m.done[4];
 
     api.scene(
-      "al_distretto", "voce",
-      `<b>⚗️ L'Alchimia d'Acciaio · Il Cerchio Proibito</b><br>${esc(h.name)} · n. ${esc(h.num)} (Alchimista d'Acciaio)<br><span style="color:var(--dim)">«${esc(h.shotName || "Il Colpo dell'Acciaio")}»</span><br><br><span style="color:#38bdf8">${c ? esc("Capitolo " + c.n + " · " + c.title) : ""}</span><br><span style="color:var(--dim)">${allDone ? "Capitolo 1 concluso! Il prossimo capitolo ti attende." : esc(goalNow())}</span>`,
+      (c && c.start) || "al_distretto", "voce",
+      `<b>⚗️ L'Alchimia d'Acciaio · Il Cerchio Proibito</b><br>${esc(h.name)} · n. ${esc(h.num)} (Alchimista d'Acciaio)<br><span style="color:var(--dim)">«${esc(h.shotName || "Il Colpo dell'Acciaio")}»</span><br><br><span style="color:#38bdf8">${c ? esc("Capitolo " + c.n + " · " + c.title) : ""}</span><br><span style="color:var(--dim)">${isCompletedAll ? "🌟 Tutta la saga è stata completata con successo! Puoi rigiocare o esplorare il mondo." : (allDone ? "Capitolo completato! Il prossimo capitolo ti attende." : esc(goalNow()))}</span>`,
       [
         {
-          label: allDone ? "Esplora Eisenstadt" : c && !m.intro["ch" + c.n] ? "Inizia il Capitolo 1" : "Continua la Storia",
+          label: isCompletedAll ? "Esplora il Mondo Alchemico" : (c && !m.intro["ch" + c.n] ? (c.n > 1 ? `Inizia il Capitolo ${c.n}` : "Inizia la Storia") : "Continua la Storia"),
           sub: c ? `Capitolo ${c.n} · ${c.title}` : "",
           cls: "hot",
           fn: continueStory
         },
-        { label: "Diario di Flamel", sub: `Formule ${m.formulas.length} · Ricerche di ${h.name}`, fn: () => notebook(openMain, false) },
-        { label: "Capitoli della Saga", sub: "I capitoli e le trasmutazioni", fn: chaptersList },
+        { label: "Diario di Flamel", sub: `Formule ${m.formulas.length} · Ricerche e Scelte`, fn: () => notebook(openMain, false) },
+        { label: "Capitoli della Saga", sub: "I 4 capitoli e i finali raggiunti", fn: chaptersList },
         { label: "◂ Torna alle Modalità", fn: leaveToModes }
       ],
       "Alchimia d'Acciaio"
@@ -1494,12 +2439,12 @@
       if (c && (n === 1 || m.done[n - 1] || m.ch >= n)) {
         rows.push(`${m.done[n] ? "✓" : "▸"} <b>Capitolo ${n}</b> · ${esc(c.title)} <span style="color:var(--dim)">${esc(m.done[n] ? "completato" : c.sub || "")}</span>`);
       } else {
-        rows.push(`<span style="color:var(--dim)">• Capitolo ${n} · Prossimamente</span>`);
+        rows.push(`<span style="color:var(--dim)">• Capitolo ${n} · Bloccato</span>`);
       }
     }
     api.scene(
       "al_arena", "voce",
-      `<b>I Capitoli di Alchimia d'Acciaio</b><br>${rows.join("<br>")}<br><br><span style="color:var(--dim)">Il principio dello Scambio Equivalente governa ogni trasmutazione.</span>`,
+      `<b>I Capitoli di Alchimia d'Acciaio (4 Capitoli)</b><br>${rows.join("<br>")}<br><br><span style="color:var(--dim)">Le tue scelte morali plasmano il destino dell'Armatura d'Ebano e della Capitale.</span>`,
       [
         { label: "Ricomincia da Capo", sub: "Azzera progressi (monete e oggetti restano tuoi)", fn: resetConfirm },
         { label: "◂ Indietro", fn: openMain }
@@ -1511,7 +2456,7 @@
   function resetConfirm() {
     api.scene(
       "al_distretto", "voce",
-      "<b>Ricominciare la Saga Alchemica?</b><br>I progressi della storia e le formule raccolte verranno azzerate. Le monete e gli accessori riscattati rimarranno nel tuo guardaroba.",
+      "<b>Ricominciare la Saga Alchemica?</b><br>Tutti e 4 i capitoli e le formule raccolte verranno azzerati. Le monete e gli accessori riscattati rimarranno nel tuo guardaroba.",
       [
         { label: "Sì, azzera e ricomincia", cls: "hot", fn: () => { MEM = norm({}); save(); openMain(); } },
         { label: "◂ Annulla", fn: chaptersList }
