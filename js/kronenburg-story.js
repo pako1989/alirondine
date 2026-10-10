@@ -721,7 +721,31 @@
   function addChapter(fn) {
     const X = Object.assign({}, XTOOLS);
     const c = fn(X);
-    if (c && c.n) CHAPTERS[c.n] = c;
+    if (!c || !c.n) return;
+    CHAPTERS[c.n] = c;
+    if (api) registerChapterZones(c); else PENDING.push(c);
+  }
+
+  const PENDING = [];
+  const COS_Q = [];
+  function registerChapterZones(c) {
+    Object.keys(c.zones || {}).forEach((zid) => registerZone(c.n, zid, c.zones[zid]));
+  }
+
+  // dialoghi dei PNG: solo quelli della zona corrente, il resto passa alla catena esistente
+  function installHooks() {
+    const desc = Object.getOwnPropertyDescriptor(window, "trTalkHook");
+    const chained = !(desc && desc.set); // con accessor (cage-borgo.js) la catena la fa il setter
+    const prev = chained ? window.trTalkHook : null;
+    window.trTalkHook = function (id) {
+      const zr = zoneRec();
+      if (zr && zr.Z.npcs.some((n) => n.id === id)) {
+        const c = CHAPTERS[zr.ch] || activeChapter();
+        const f = c && c.talk && c.talk[id];
+        if (f) { castHero(); f(); return true; }
+      }
+      return chained && typeof prev === "function" ? prev(id) : false;
+    };
   }
 
   const activeChapter = () => {
@@ -942,7 +966,8 @@
       if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio;
     },
     cos: (id, d) => {
-      if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d;
+      if (!api) { COS_Q.push([id, d]); return; }
+      if (api.COSM && !api.COSM[id]) api.COSM[id] = d;
     }
   };
 
@@ -1712,6 +1737,9 @@
     }
     api = a;
     CAST_Q.splice(0).forEach(([id, c, bio]) => { if (a.CAST && !a.CAST[id]) a.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && a.BIO && !a.BIO[id]) a.BIO[id] = bio; });
+    COS_Q.splice(0).forEach(([id, d]) => { if (a.COSM && !a.COSM[id]) a.COSM[id] = d; });
+    installHooks();
+    PENDING.splice(0).forEach(registerChapterZones);
     setupExitButton();
   }
 
