@@ -1640,9 +1640,9 @@
     X.cos("omb_cintura_chimera", { kind: "acc", label: "Cintura Tattica delle Ombre & Ologramma Chimera", val: "#38bdf8", from: "Completa il Capitolo 2 del Circuito delle Ombre" });
 
     const goal = (s) => ({
-      0: "Usa la Chiave Magnetica di Zoran per accedere ai Magazzini Blindati al Livello 2.",
-      1: "Attiva il Visore delle Ombre per disattivare la Barriera Laser di Victor.",
-      2: "Raggiungi il Laboratorio Olografico ed incontra Silvia Moretti «Chimera».",
+      0: "Vai verso il centro dei Magazzini (a EST, oltre i container) e parla con Victor, davanti alla barriera laser.",
+      1: "Parla con Victor, al centro del corridoio laser: usa il Visore delle Ombre per spegnere la barriera.",
+      2: "Barriera spenta! Esci dalla porta blindata a NORD (in alto a destra) per il Laboratorio di Silvia.",
       3: "Prendi la decisione etica: Sabotaggio Criogenico dei server o Salvataggio delle Telemetrie?",
       4: "Scendi nell'Hangar dei Droni e sconfiggi la Pattuglia Nera di Victor!",
       5: "Capitolo 2 concluso! Ricevi la Card d'Accesso alla Suite Panoramica."
@@ -1690,7 +1690,7 @@
         },
         npcs: (s) => {
           const list = [];
-          if (s >= 1) list.push({ id: "omb_victor", x: 18, y: 12, dir: "down", name: "Victor (Sicurezza)" });
+          list.push({ id: "omb_victor", x: 18, y: 12, dir: "down", name: "Victor (Sicurezza)" });
           return list;
         }
       },
@@ -1762,7 +1762,7 @@
 
     function victorTalkCh2() {
       const s = S();
-      if (s === 1) {
+      if (s === 0 || s === 1) {
         return ask("omb_victor", "«Victor blocca il corridoio con la barriera laser! Come agisci, {n}?»", [
           {
             label: "👁️ [VISORE DELLE OMBRE]: Scansiona e sovraccarica i relè laser!",
@@ -1913,7 +1913,7 @@
       obj: {
         "omb_magazzini:^": () => {
           if (S() < 2) {
-            say([["voce", "La barriera laser è attiva. Parla con Victor o usa il Visore delle Ombre per neutralizzarla!"]], done);
+            say([["voce", "La barriera laser è attiva. Vai da Victor, al centro del corridoio, e usa il Visore delle Ombre per neutralizzarla!"]], done);
           } else {
             go("omb_lab_silvia", 17, 16);
           }
