@@ -426,13 +426,15 @@
     O(sx, sy, tx, ty, fr) {
       floorPaint(undAt(tx, ty), sx, sy, tx, ty);
       const cx = sx + 8, cy = sy + 8;
-      const ang = (fr * 0.05 + tx * 2 + ty) % (Math.PI * 2);
-      GP.strokeStyle = "#f59e0b"; GP.lineWidth = 2;
-      GP.beginPath(); GP.arc(cx, cy, 6, 0, 7); GP.stroke();
-      GP.beginPath();
-      GP.moveTo(cx + Math.cos(ang) * 7, cy + Math.sin(ang) * 7);
-      GP.lineTo(cx - Math.cos(ang) * 7, cy - Math.sin(ang) * 7);
-      GP.stroke();
+      const ang = (fr * 0.03 * (tx % 2 ? 1 : -1)) % (Math.PI * 2);
+      GP.fillStyle = "#b45309";
+      for (let k = 0; k < 8; k++) {
+        const a = ang + k * Math.PI / 4;
+        GP.save(); GP.translate(cx, cy); GP.rotate(a); GP.fillRect(-1.5, -7.5, 3, 4); GP.restore();
+      }
+      GP.fillStyle = "#f59e0b"; GP.beginPath(); GP.arc(cx, cy, 5.5, 0, 7); GP.fill();
+      GP.fillStyle = "#78350f"; GP.beginPath(); GP.arc(cx, cy, 2.2, 0, 7); GP.fill();
+      GP.fillStyle = "#fde68a"; GP.fillRect(cx - 4, cy - 4, 2, 2);
     },
     T(sx, sy, tx, ty) {
       floorPaint(undAt(tx, ty), sx, sy, tx, ty);
