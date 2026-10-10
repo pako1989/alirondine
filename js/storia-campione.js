@@ -607,7 +607,7 @@
 
   // ------------------------------------------------------------------ cassetta degli attrezzi per i capitoli
   let inMatch = false;
-  const VENUE_VAL = { ads: [["STAMBECCHI DI VALLOMBRA", "#14532d"], ["LATTE DELL'ALTA VALLE", "#e2e8f0"], ["MINIERA DI LUMINA", "#92400e"], ["FORMAGGI DEL PASSO", "#a16207"]], crowd: ["#14532d", "#78350f", "#e8e0d0", "#475569", "#f0c9a0"], tint: "rgba(180,200,230,.1)", glow: "235,245,255" };
+  const VENUE_VAL = { ads: [["STAMBECCHI DI VALLOMBRA", "#14532d"], ["LATTE DELL'ALTA VALLE", "#e2e8f0"], ["MINIERA DI LUMINA", "#92400e"], ["FORMAGGI DEL PASSO", "#a16207"]], crowd: ["#14532d", "#78350f", "#e8e0d0", "#475569", "#f0c9a0"], ground: ["#4f7a52", "#5a8a5c"], patches: "rgba(240,246,252,.55)", tint: "rgba(180,200,230,.1)", glow: "235,245,255" };
   function playMatch(o) {
     castHero(); inMatch = true;
     api.match({ id: o.id, chap: o.chap, intro: T(o.intro), mate: o.mate, mateGeneric: true, us: o.us || "Stambecchi", min: o.min || 45, team: o.team, venue: o.venue || VENUE_VAL, hero: undefined,

@@ -1093,7 +1093,7 @@
 
   // ------------------------------------------------------------------ Partita Narrativa nella Gabbia
   let inMatch = false;
-  const VENUE_OMB = { ads: [["SINDACATO DELLE OMBRE", "#0f172a"], ["LANTERNA NERA", "#0e7490"], ["QUOTE TRUCCATE 1.01", "#7f1d1d"], ["VIETATO FILMARE", "#1e293b"]], crowd: ["#0f172a", "#164e63", "#334155", "#1e1b4b", "#475569"], tint: "rgba(5,18,45,.34)", glow: "56,189,248", glow2: "250,204,21" };
+  const VENUE_OMB = { ads: [["SINDACATO DELLE OMBRE", "#0f172a"], ["LANTERNA NERA", "#0e7490"], ["QUOTE TRUCCATE 1.01", "#7f1d1d"], ["VIETATO FILMARE", "#1e293b"]], crowd: ["#0f172a", "#164e63", "#334155", "#1e1b4b", "#475569"], ground: ["#2b3a4d", "#334558"], line: "#38bdf8cc", grid: "rgba(56,189,248,.08)", tint: "rgba(5,18,45,.34)", glow: "56,189,248", glow2: "250,204,21" };
   function playMatch(o) {
     castHero(); inMatch = true;
     api.match({

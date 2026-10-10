@@ -1085,16 +1085,19 @@
   function ball(x, y, r) { g.fillStyle = "#fff"; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); g.fillStyle = "#222"; g.beginPath(); g.arc(x, y, r * 0.35, 0, 7); g.fill(); for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2 + frame / 20; g.beginPath(); g.arc(x + Math.cos(a) * r * 0.75, y + Math.sin(a) * r * 0.75, r * 0.2, 0, 7); g.fill(); } }
 
   function drawPitch() {
-    const gnd = M && M.step && M.step.sand ? ["#e2c07a", "#ebcd8c"] : M && M.meteo === "neve" ? ["#dfe8f2", "#eef3f9"] : ["#2f9e55", "#34a95c"];
+    const V = M && M.step && M.step.venue;
+    const gnd = V && V.ground ? V.ground : M && M.step && M.step.sand ? ["#e2c07a", "#ebcd8c"] : M && M.meteo === "neve" ? ["#dfe8f2", "#eef3f9"] : ["#2f9e55", "#34a95c"];
     pvGround(gnd);
-    if (SET.gfx === "campo" && !(M && M.step && M.step.sand) && !(M && M.meteo === "neve")) {
+    if (V && V.patches) { g.save(); g.beginPath(); g.rect(10, 20, 300, 160); g.clip(); g.fillStyle = V.patches; for (let i = 0; i < 26; i++) { const x = 14 + (i * 97) % 292, y = 24 + (i * 53) % 152, w = 10 + (i * 7) % 18; g.beginPath(); g.ellipse(x, y, w, w / 3, 0, 0, 7); g.fill(); } g.restore(); }
+    if (V && V.grid) { g.save(); g.strokeStyle = V.grid; g.lineWidth = 1; for (let x = 10; x <= 310; x += 20) { g.beginPath(); g.moveTo(x, 20); g.lineTo(x, 180); g.stroke(); } for (let y = 20; y <= 180; y += 20) { g.beginPath(); g.moveTo(10, y); g.lineTo(310, y); g.stroke(); } g.restore(); }
+    if (SET.gfx === "campo" && !V?.ground && !(M && M.step && M.step.sand) && !(M && M.meteo === "neve")) {
       g.save(); g.beginPath(); g.rect(10, 20, 300, 160); g.clip();
       for (let i = 0; i < 10; i++) if (i % 2 === 0) px(10 + i * 30, 20, 30, 160, "rgba(8,48,24,.12)");
       for (let i = 0; i < 6; i++) px(12, 26 + i * 25, 296, 1, "rgba(210,255,205,.045)");
       const shade = g.createLinearGradient(10, 0, 310, 0); shade.addColorStop(0, "rgba(5,24,15,.2)"); shade.addColorStop(0.5, "rgba(255,255,220,.06)"); shade.addColorStop(1, "rgba(5,24,15,.2)"); g.fillStyle = shade; g.fillRect(10, 20, 300, 160);
       g.restore();
     }
-    g.strokeStyle = M && M.meteo === "neve" ? "#c9302ccc" : "#ffffffcc"; g.lineWidth = 2;
+    g.strokeStyle = V && V.line ? V.line : M && M.meteo === "neve" ? "#c9302ccc" : "#ffffffcc"; g.lineWidth = 2;
     g.strokeRect(10, 20, 300, 160); g.beginPath(); g.moveTo(160, 20); g.lineTo(160, 180); g.stroke();
     g.beginPath(); g.arc(160, 100, 22, 0, 7); g.stroke();
     g.strokeRect(10, 60, 36, 80); g.strokeRect(274, 60, 36, 80);
@@ -11273,7 +11276,7 @@
     gxFlag(30, 30, T.c1, T.c2, 0); gxFlag(140, 28, T.c1, T.c2, 1.5); gxFlag(250, 30, T.c1, T.c2, 3);
     const ads = V && V.ads ? V.ads : [["TRATTORIA MORETTI", "#b3202c"], ["EDICOLA PINA", "#1d3fa3"], ["GELATI TONINO", "#ff9ec0"], ["PESCE FRESCO", "#2f7a4a"]];
     for (let i = -1; i < 5; i++) { const [t, c] = ads[(i + 4) % 4], x = i * 110 - 20; px(x, 89, 108, 12, c); g.fillStyle = "#fff"; g.font = "bold 8px sans-serif"; g.textAlign = "center"; g.fillText(t, x + 54, 98); } g.textAlign = "left";
-    const gr = g.createLinearGradient(0, 100, 0, 220); gr.addColorStop(0, "#2f9e55"); gr.addColorStop(1, "#15502a"); g.fillStyle = gr; g.fillRect(-60, 100, W + 120, 160);
+    const gr = g.createLinearGradient(0, 100, 0, 220); gr.addColorStop(0, V && V.ground ? V.ground[1] : "#2f9e55"); gr.addColorStop(1, V && V.ground ? V.ground[0] : "#15502a"); g.fillStyle = gr; g.fillRect(-60, 100, W + 120, 160);
     for (let i = 0; i < 6; i++) px(-60, 104 + i * 18 + i * i * 1.5, W + 120, 6 + i * 1.5, "rgba(255,255,255,.05)");
     g.strokeStyle = "rgba(255,255,255,.55)"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(-60, 112); g.lineTo(W + 60, 112); g.stroke();
     g.beginPath(); g.ellipse(160, 160, 70, 16, 0, 0, 7); g.stroke();
@@ -18906,6 +18909,7 @@
   }
   // ---------- campi di gioco diversi per ogni sede ----------
   function pvGround(gnd) {
+    if (M && M.step && M.step.venue && M.step.venue.ground) { px(0, 0, W, H, gnd[0]); for (let i = 0; i < 8; i++) px(i * 40, 0, 20, H, gnd[1]); return; }
     if (!gxOn() || !M || (M.step && M.step.sand) || M.meteo === "neve") { px(0, 0, W, H, gnd[0]); for (let i = 0; i < 8; i++) px(i * 40, 0, 20, H, gnd[1]); return; }
     const h = pvHash(String(M.team || "") + (M.step && M.step.chap || "")), pal = [["#2f9e55", "#34a95c"], ["#3a9a48", "#44a852"], ["#2a8c4c", "#319957"], ["#4a9a3e", "#56a646"]][h % 4], pat = (h >> 3) % 5;
     px(0, 0, W, H, pal[0]);
