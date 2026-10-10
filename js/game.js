@@ -25215,6 +25215,17 @@
     } catch (e) { return null; } finally { if (tmp) delete CAST[id]; }
   }
   // partita breve per i moduli a piedi (js/storia-campione.js): squadra avversaria su misura, il campione in campo; onDone({a,b,win,recap}) a fine partita
+  // squadra avversaria di saga: completa i dati mancanti (nomi da cfg.oppNames: portiere, 3 difensori/centrali, punta)
+  function apiTeam(key, cfg, st, t) {
+    const T = TEAMS[key] = cfg.team(t, st); if (!T.color) T.color = T.col || "#3fa7ff"; if (!T.vs) T.vs = T.name || "gli avversari"; if (!T.name) T.name = T.vs;
+    const A = Number(T.atk) || t(st.tiro), D = Number(T.def) || t(st.contrasto || 12), V = Number(T.vel) || A, N = Array.isArray(cfg.oppNames) && cfg.oppNames.length >= 5 ? cfg.oppNames : null;
+    if (!Array.isArray(T.defs)) T.defs = [[N ? N[1] : "Il Muro", t(D * 0.95)], [N ? N[2] : "Il Mastino", t(D)], [N ? N[3] : "Il Lungo", t(D * 1.05)]];
+    if (!Array.isArray(T.atk)) T.atk = [[N ? N[4] : "Il Fulmine", t(A * 0.95)], [N ? N[3] : "Il Cecchino", t(V * 0.9)]];
+    if (!Array.isArray(T.gk)) T.gk = [N ? N[0] : "Il Gigante", t(D * 1.1)];
+    if (!T.power) T.power = t(A * 0.9);
+    if (T.special === undefined || (T.special && !Array.isArray(T.special))) T.special = Array.isArray(T.specials) && T.specials[0] ? [String(T.specials[0]), t(A * 1.2)] : null;
+    return T;
+  }
   function apiMatch(cfg) {
     const h = cfg.hero === undefined ? heroLoad() : cfg.hero;
     trSavePos(); document.body.classList.remove("borgo");
@@ -25222,13 +25233,7 @@
     S = borgoPlayer(); if (h) { heroCast(h); S.st = heroBias(S.st, h); }
     const t = (v) => Math.max(4, Math.round(v)), key = "ap_" + cfg.id;
     { const mn = cfg.mate || "Tommy"; if (!MATE_ID[mn]) { const lc = "_" + mn.toLowerCase(), id = cfg.mateId || Object.keys(CAST).find((k) => k.endsWith(lc)); if (id && CAST[id]) MATE_ID[mn] = id; } }
-    TEAMS[key] = cfg.team(t, S.st); { const T = TEAMS[key]; if (!T.color) T.color = T.col || "#3fa7ff"; if (!T.vs) T.vs = T.name || "gli avversari"; if (!T.name) T.name = T.vs;
-      const A = Number(T.atk) || t(S.st.tiro), D = Number(T.def) || t(S.st.contrasto || 12), V = Number(T.vel) || A;
-      if (!Array.isArray(T.defs)) T.defs = [["Il Muro", t(D * 0.95)], ["Il Mastino", t(D)], ["Il Lungo", t(D * 1.05)]];
-      if (!Array.isArray(T.atk)) T.atk = [["Il Fulmine", t(A * 0.95)], ["Il Cecchino", t(V * 0.9)]];
-      if (!Array.isArray(T.gk)) T.gk = ["Il Gigante", t(D * 1.1)];
-      if (!T.power) T.power = t(A * 0.9);
-      if (T.special === undefined || (T.special && !Array.isArray(T.special))) T.special = Array.isArray(T.specials) && T.specials[0] ? [String(T.specials[0]), t(A * 1.2)] : null; }
+    apiTeam(key, cfg, S.st, t);
       statsBox();
     startMatch({ match: key, chap: cfg.chap, quick: true, min: cfg.min || 45, mate: cfg.mate || "Tommy", mateGeneric: !!cfg.mateGeneric, us: cfg.us || "Borgo", intro: cfg.intro, venue: cfg.venue || undefined, forceMeteo: cfg.weather || undefined, hero: h || undefined,
       onEnd: () => { const [a, b] = M.score, rc = mRecap(); M = null; $("matchHud").hidden = true; if (chBack) S = chBack; chBack = null; sfx(a > b ? "goal" : "crowd"); if (a > b) jingle("win"); cfg.onDone({ a, b, win: a > b, recap: rc }); } });
@@ -25252,11 +25257,26 @@
       onExit: (res) => { const a = res ? res.a : 0, b = res ? res.c : 1; cfg.onDone({ a, b, win: a > b, recap: "", hd: true }); } });
     return true;
   }
+  // Partita di saga in Calcio d'azione 3 contro 3 (usa azStartSagaMatch)
+  function apiMatchAz(cfg) {
+    if (!window.azStartSagaMatch) return false;
+    const h = cfg.hero === undefined ? heroLoad() : cfg.hero;
+    let st = borgoPlayer().st; try { if (h) st = heroBias(st, h); } catch {}
+    const t = (v) => Math.max(4, Math.round(v)), key = "ap_" + cfg.id;
+    apiTeam(key, cfg, st, t);
+    trSavePos(); document.body.classList.remove("borgo");
+    if (!chBack) chBack = S;
+    const names = [(h && h.name) || "Campione", cfg.mate || "Compagno", (cfg.squad && cfg.squad[0]) || "Titano"];
+    window.azStartSagaMatch(key, { pitch: cfg.azPitch || "campo", roles: [], customDiff: false }, (a, c) => { if (chBack) S = chBack; chBack = null; cfg.onDone({ a, b: c, win: a > c, recap: "", az: true }); });
+    if (AZ && AZ.cz) AZ.cz.names = names;
+    return true;
+  }
   // propone la partita alternativa (cfg.alt = "hd") accanto a quella a turni: stesso esito per la storia
   function apiMatchPick(cfg) {
-    if (!cfg.alt || !window.__actionHd || !window.__actionHd.ut) return apiMatch(cfg);
-    const kinds = { hd: { label: "⚽ Calcio d'azione 2D HD", sub: "5 contro 5 dall'alto, muovi tu il Campione in tempo reale", fn: () => { if (!apiMatchHd(cfg)) apiMatch(cfg); } } };
-    const alts = String(cfg.alt).split(",").filter((k) => kinds[k]);
+    if (!cfg.alt) return apiMatch(cfg);
+    const kinds = { hd: { label: "⚽ Action Soccer 2D HD", sub: "5 contro 5 dall'alto, muovi tu il Campione in tempo reale", fn: () => { if (!apiMatchHd(cfg)) apiMatch(cfg); } },
+      az: { label: "⚡ Calcio d'azione 3 contro 3", sub: "Partita veloce in tempo reale, tiro a carica", fn: () => { if (!apiMatchAz(cfg)) apiMatch(cfg); } } };
+    const alts = String(cfg.alt).split(",").filter((k) => kinds[k] && (k !== "hd" || (window.__actionHd && window.__actionHd.ut)) && (k !== "az" || window.azStartSagaMatch));
     if (!alts.length) return apiMatch(cfg);
     view = { kind: "scene", bg: cfg.bg || "stadium", speaker: null }; chap(cfg.chap);
     text("voce", `<b>Come vuoi giocare questa partita?</b><br><span style="color:var(--dim)">Esito e ricompense della storia sono uguali: cambia solo come giochi.</span>`);

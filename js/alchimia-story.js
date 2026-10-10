@@ -1077,7 +1077,7 @@
   function playMatch(o) {
     castHero(); inMatch = true;
     api.matchPick({
-      alt: o.alt, oppNames: o.oppNames, squad: o.squad,
+      alt: o.alt, oppNames: o.oppNames, squad: o.squad, azPitch: o.azPitch,
       id: o.id, chap: o.chap, intro: T(o.intro), mate: o.mate || "Kira", mateGeneric: true,
       us: o.us || "I Falchi d'Acciaio", min: o.min || 45, team: o.team, venue: o.venue || VENUE_ALC, hero: undefined,
       onDone: (r) => {
@@ -1503,6 +1503,7 @@
     function startAlchemicMatch() {
       X.playMatch({
         id: "al_match_1",
+        alt: "az", azPitch: "erba",
         chap: "Eisenstadt · Il Torneo di Mercurio",
         us: "I Falchi d'Acciaio",
         mate: "Kira",
@@ -1806,6 +1807,7 @@
     function startMatchCh2() {
       X.playMatch({
         id: "al_match_2",
+        alt: "az", azPitch: "erba",
         chap: "Eisenstadt · Il Derby delle Chimere",
         us: "I Falchi d'Acciaio",
         mate: "Armstrong",
@@ -2042,6 +2044,7 @@
     function startMatchCh3() {
       X.playMatch({
         id: "al_match_3",
+        alt: "az", azPitch: "erba",
         chap: "Briggs · La Battaglia della Tormenta",
         us: "I Falchi d'Acciaio",
         mate: "Olivier",
@@ -2229,7 +2232,7 @@
     function startFinalMatch() {
       X.playMatch({
         id: "al_match_final",
-        alt: "hd",
+        alt: "hd,az", azPitch: "erba",
         oppNames: ["Soldato dell'Occhio", "Homunculus Nero", "Homunculus Rosso", "Chimera di Vane", "Vane"],
         squad: ["L'Armatura", "Armstrong", "Olivier"],
         chap: "Central Command · Il Giorno Promesso",

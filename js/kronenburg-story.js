@@ -1306,7 +1306,7 @@
   function playMatch(o) {
     castHero(); inMatch = true;
     api.matchPick({
-      alt: o.alt, oppNames: o.oppNames, squad: o.squad,
+      alt: o.alt, oppNames: o.oppNames, squad: o.squad, azPitch: o.azPitch,
       id: o.id, chap: o.chap, intro: T(o.intro), mate: o.mate || "Celia", mateGeneric: true,
       us: o.us || "I Corvi Ribelli", min: o.min || 45, team: o.team, venue: o.venue || VENUE_KRO, hero: undefined,
       onDone: (r) => {
@@ -1863,6 +1863,7 @@
     function startBattleMatch() {
       X.playMatch({
         id: "kb_match_1",
+        alt: "az", azPitch: "campo",
         chap: "Kronenburg · Il Giudizio d'Ossidiana",
         us: "I Corvi di {n}",
         mate: "Celia",
@@ -2331,6 +2332,7 @@
     function startMatch2() {
       X.playMatch({
         id: "kb_match_2",
+        alt: "az", azPitch: "campo",
         chap: "Kronenburg · Il Giudizio delle Segrete",
         us: "I Corvi di {n}",
         mate: "Celia",
@@ -2737,6 +2739,7 @@
     function startMatch3() {
       X.playMatch({
         id: "kb_match_3",
+        alt: "az", azPitch: "campo",
         chap: "Kronenburg · La Battaglia della Tormenta",
         us: "I Liberatori di {n}",
         mate: "Celia",
@@ -3077,7 +3080,7 @@
     function startMatch4() {
       X.playMatch({
         id: "kb_match_4",
-        alt: "hd",
+        alt: "hd,az", azPitch: "erba",
         oppNames: ["Custode dell'Eclisse", "Custode Scarlatto", "Custode d'Ossidiana", "Cavaliere del Geass", "Lord Malakar"],
         squad: ["Damas", "Mastro Baelor", "Lady Vespera"],
         chap: "Kronenburg · L'Eclisse Celeste Finale",

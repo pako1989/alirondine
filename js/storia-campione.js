@@ -610,7 +610,7 @@
   const VENUE_VAL = { ads: [["STAMBECCHI DI VALLOMBRA", "#14532d"], ["LATTE DELL'ALTA VALLE", "#e2e8f0"], ["MINIERA DI LUMINA", "#92400e"], ["FORMAGGI DEL PASSO", "#a16207"]], crowd: ["#14532d", "#78350f", "#e8e0d0", "#475569", "#f0c9a0"], ground: ["#4f7a52", "#5a8a5c"], patches: "rgba(240,246,252,.55)", tint: "rgba(180,200,230,.1)", glow: "235,245,255" };
   function playMatch(o) {
     castHero(); inMatch = true;
-    api.match({ id: o.id, chap: o.chap, intro: T(o.intro), mate: o.mate, mateGeneric: true, us: o.us || "Stambecchi", min: o.min || 45, team: o.team, venue: o.venue || VENUE_VAL, hero: undefined,
+    api.matchPick({ alt: o.alt, oppNames: o.oppNames, squad: o.squad, azPitch: o.azPitch, id: o.id, chap: o.chap, intro: T(o.intro), mate: o.mate, mateGeneric: true, us: o.us || "Stambecchi", min: o.min || 45, team: o.team, venue: o.venue || VENUE_VAL, hero: undefined,
       onDone: (r) => { inMatch = false; const m = mem(); if (r.win) m.wins++; else if (r.a < r.b) m.losses++; save(); refreshZone(); o.done(r); } });
   }
   function finishChapter(n, ending) { const m = mem(); m.done[n] = String(ending || "ok").slice(0, 24); if (m.ch <= n) m.ch = n + 1; save(); }
@@ -1136,7 +1136,7 @@
     }
     function matchOne(friendly) {
       X.playMatch({
-        id: "vl1", chap: "Vallombra · Il Campo Sospeso", mate: "Bianca",
+        id: "vl1", alt: "az", azPitch: "erba", chap: "Vallombra · Il Campo Sospeso", mate: "Bianca",
         intro: "Partita di presentazione al Campo Sospeso contro <em>i Camosci di Cima Alta</em>, un tempo solo. Dietro le porte c'è il Latte: se il pallone va lungo, torna da solo. Bianca gioca con te e controlla la cabina tre con un orecchio.",
         team: (t, s) => ({ vs: "i Camosci di Cima Alta", name: "Camosci di Cima Alta", color: "#c8e82a", defs: [["Gisella Cima", t(s.drib * 0.74)], ["Il Bufalo", t(s.drib * 0.8)], ["Tonio Fiocco", t(s.drib * 0.78)]], atk: [["Remo Valanga", t(s.tiro * 0.86)], ["Gisella Cima", t(s.tiro * 0.72)]], gk: ["Tonio Fiocco", t(s.tiro * 0.92)], power: t(s.tiro * 0.74), special: ["VALANGA DI CIMA ALTA", t(s.tiro * 1.08)] }),
         done: (r) => matchFine(r, friendly),
@@ -1748,7 +1748,7 @@
     // ---- Remo
     function camosciFriendly() {
       X.playMatch({
-        id: "vl2c", chap: "Vallombra · Il Campo Sospeso", mate: "Bianca",
+        id: "vl2c", alt: "az", azPitch: "erba", chap: "Vallombra · Il Campo Sospeso", mate: "Bianca",
         intro: "Rivincita amichevole contro <em>i Camosci di Cima Alta</em>, un tempo solo. Dietro le porte il Latte aspetta; il pallone, se va lungo, torna.",
         team: (t, s) => ({ vs: "i Camosci di Cima Alta", name: "Camosci di Cima Alta", color: "#c8e82a", defs: [["Gisella Cima", t(s.drib * 0.74)], ["Il Bufalo", t(s.drib * 0.8)], ["Tonio Fiocco", t(s.drib * 0.78)]], atk: [["Remo Valanga", t(s.tiro * 0.86)], ["Gisella Cima", t(s.tiro * 0.72)]], gk: ["Tonio Fiocco", t(s.tiro * 0.92)], power: t(s.tiro * 0.74), special: ["VALANGA DI CIMA ALTA", t(s.tiro * 1.08)] }),
         done: (r) => { const msg = r.win ? reward("vl_m1_win", { coins: 10 }) : []; X.say(sw([["voce", `Amichevole finita ${r.a}–${r.b}.${msg.length ? " " + msg.join(" · ") + "." : ""}`], [remoId(), r.win ? "Un'altra? Va bene. Mi sto abituando a perdere. Non dirlo ai miei." : "Rivincita finita. Sono ancora il re della terrazza. Ma ho sentito il campo respirare."]], BG.C), done); },
@@ -1907,7 +1907,7 @@
     function matchMarmotte(friendly) {
       const help = remoHelps();
       X.playMatch({
-        id: "vl2", chap: "Vallombra · Coppa dei Tre Versanti", mate: help ? "Remo" : "Bianca",
+        id: "vl2", alt: "hd,az", azPitch: "erba", chap: "Vallombra · Coppa dei Tre Versanti", mate: help ? "Remo" : "Bianca",
         intro: `Prima partita ufficiale della Coppa dei Tre Versanti contro <em>le Marmotte di Valle Fonda</em>, un tempo solo. ${help ? "Remo dei Camosci gioca con te per oggi" : "Bianca gioca con te"}, e dietro le porte il Latte tiene il fiato.`,
         team: (t, s) => ({ vs: "le Marmotte di Valle Fonda", name: "Marmotte di Valle Fonda", color: "#9a7a4a", defs: [["Rosalba Tana", t(s.drib * 0.8)], ["Pina Tana", t(s.drib * 0.84)], ["Il Tasso", t(s.drib * 0.82)]], atk: [["Rosalba Tana", t(s.tiro * 0.9)], ["Ugo Sotterra", t(s.tiro * 0.8)]], gk: ["Orsolina Tana", t(s.tiro * 0.97)], power: t(s.tiro * 0.8), special: ["IL RISVEGLIO DELLE MARMOTTE", t(s.tiro * 1.12)] }),
         done: (r) => matchFine2(r, friendly),
@@ -3838,7 +3838,7 @@
     function matchImpiegati() {
       const first = !has("m4_played");
       say(sw([["vl_corvi", first ? "Ogni anno l'Anagrafe sfida i Tributi nel cortile, dietro il Municipio. Un tempo solo, porte di scatoloni, arbitro la campana da mucca. Chi vince offre il caffè, chi perde compila il modulo. Non c'è mai stato un pareggio: la burocrazia non li prevede." : "Un'altra? Il caffè lo offro io. Il modulo di sconfitta lo stampiamo in due copie."]], BG.U), () => X.playMatch({
-        id: "vl4", chap: "Vallombra · Cortile del Municipio", mate: compName(),
+        id: "vl4", alt: "az", azPitch: "campo", chap: "Vallombra · Cortile del Municipio", mate: compName(),
         intro: "Partitella nel cortile del Municipio, un tempo solo: <em>i Tributi</em> contro di te e " + compName() + ". Le porte sono due scatoloni, il pallone è un faldone arrotolato e il fischio, dicono, è della campana da mucca.",
         team: (t, st) => ({ vs: "i Tributi", name: "Tributi", color: "#c8a24a", defs: [["Il Ragioniere", t(st.drib * 0.78)], ["La Protocollista", t(st.drib * 0.8)], ["L'Usciere", t(st.drib * 0.82)]], atk: [["Il Geometra", t(st.tiro * 0.82)], ["La Protocollista", t(st.tiro * 0.8)]], gk: ["L'Ufficiale Stato Civile", t(st.tiro * 0.93)], power: t(st.tiro * 0.78), special: ["LA PRATICA URGENTE", t(st.tiro * 1.08)] }),
         done: (r) => {

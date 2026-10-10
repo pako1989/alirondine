@@ -1104,7 +1104,7 @@
   function playMatch(o) {
     castHero(); inMatch = true;
     api.matchPick({
-      alt: o.alt, oppNames: o.oppNames, squad: o.squad, bg: "omb_arena_gabbia",
+      alt: o.alt, oppNames: o.oppNames, squad: o.squad, azPitch: o.azPitch, bg: "omb_arena_gabbia",
       id: o.id, chap: o.chap, intro: T(o.intro), mate: o.mate || "Milo", mateGeneric: true,
       us: o.us || "I Ribelli delle Ombre", min: o.min || 45, team: o.team, venue: o.venue || VENUE_OMB, weather: o.weather || "pioggia", hero: undefined,
       onDone: (r) => {
@@ -1551,6 +1551,7 @@
     function startMatchCage1() {
       X.playMatch({
         id: "omb_match_1",
+        alt: "az", azPitch: "campo",
         chap: "Il Circuito delle Ombre · La Gabbia delle Onde",
         us: "I Ribelli delle Ombre",
         mate: "Milo",
@@ -1863,6 +1864,7 @@
     function startMatchHangar() {
       X.playMatch({
         id: "omb_match_2",
+        alt: "az", azPitch: "campo",
         chap: "Il Circuito delle Ombre · L'Hangar dei Droni",
         us: "I Ribelli delle Ombre",
         mate: "Silvia",
@@ -2441,7 +2443,7 @@
       X.playMatch({
         id: "omb_match_final",
         chap: "Il Circuito delle Ombre · Il Derby Supremo della Tempesta",
-        alt: "hd",
+        alt: "hd,az", azPitch: "campo",
         oppNames: ["Il Custode Nero", "Cavaliere Grigio", "Cavaliere d'Ebano", "L'Algoritmo", "Madame V"],
         squad: ["Zoran", "Titano", "Milo"],
         us: "I Ribelli delle Ombre",

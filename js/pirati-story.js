@@ -843,7 +843,8 @@
   const VENUE_PIR = { ads: [["I BUCANIERI DEL VENTO", "#7c2d12"], ["RUM E SALE", "#92400e"], ["TAVERNA DEL MOLO", "#1e3a5f"], ["MAPPE DEL TESORO", "#14532d"]], crowd: ["#7c2d12", "#1e3a5f", "#e8e0d0", "#b45309", "#f0c9a0"], ground: ["#b98f55", "#cfa766"], line: "#fff4d6cc", patches: "rgba(120,80,40,.18)", tint: "rgba(255,170,80,.12)", glow: "255,190,110" };
   function playMatch(o) {
     castHero(); inMatch = true;
-    api.match({
+    api.matchPick({
+      alt: o.alt, oppNames: o.oppNames, squad: o.squad, azPitch: o.azPitch,
       id: o.id, chap: o.chap, intro: T(o.intro), mate: o.mate || "Morgana", mateGeneric: true,
       us: o.us || "I Bucanieri del Vento", min: o.min || 45, team: o.team, venue: o.venue || VENUE_PIR, hero: undefined,
       onDone: (r) => {
@@ -1179,6 +1180,7 @@
     function startMatchPirate1() {
       X.playMatch({
         id: "pi_match_1",
+        alt: "az", azPitch: "molo",
         chap: "I Pirati Celesti · Il Derby delle Nuvole",
         us: "I Bucanieri del Vento",
         mate: "Morgana",
