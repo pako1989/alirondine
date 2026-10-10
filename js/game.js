@@ -15105,9 +15105,6 @@
     view = { kind: "scene", bg: "title" }; chap("Saghe e minigiochi");
     text("voce", "<b>Saghe e minigiochi</b><br>Storie speciali e giochi a parte. Ognuna si gioca per conto suo.");
     buttons([
-      { head: "Novità · la notte del Molo" },
-      { label: "🌙 La Caletta che non c'è", sub: "A piedi tra molo, vicolo e una cala che esiste solo con la marea bassa. Tre colpi di scena.", cls: "hot", fn: () => { if (window.openCalettaNascosta) window.openCalettaNascosta(menuSaghe); } },
-      { label: "⚽ Derby delle Lampare", sub: "4 contro 4 giocato sulla sabbia: passaggio calibrato, vento e Tiro di Elio", cls: "hot", fn: () => { if (window.openDerbyLampare) window.openDerbyLampare(menuSaghe); } },
       { head: "✨ Nuova Suite Gameplay 2D HD" },
       { label: "✨ Arena 2D HD · Hub Completo", sub: "Le 4 modalità 2D HD in un posto solo", cls: "hot", fn: () => { if (window.openArena2DHDModal) window.openArena2DHDModal(menuSaghe); } },
       { label: "🛡️ Rondine Emblem · RPG Tattico 2D HD", sub: "RPG tattico a griglia: 10 capitoli con storia, ritratti e sfondi, anteprima dei danni, stelle", cls: "hot", fn: () => { if (window.openTacticalEmblemMode) window.openTacticalEmblemMode(menuSaghe); } },
@@ -15181,7 +15178,6 @@
     text("voce", `<b>Borgo e trasferte</b> ${mnBar(mnPct(mnBorgo()))}<br>${p ? `Conchiglie ${p.shells}/8 · Costumi e oggetti ${p.cosHave}/${p.cosAll} · ${trOk ? `Ricordi delle trasferte ${p.got}/${p.items}` : "Trasferte: ???"}` : ""}<br><span style="color:var(--dim)">Il Borgo si gira a piedi. Le trasferte partono dalla fermata del pullman${trOk ? "" : ", più avanti nella storia"}.</span>`);
     buttons([
       { label: "Borgo Marino", sub: "Esplora il paese a piedi", cls: "hot", fn: borgo },
-      { label: "🌙 La Caletta che non c'è", sub: "Il sentiero di notte, a piedi, fino al campo che la marea scopre", cls: "hot", fn: () => { if (window.openCalettaNascosta) window.openCalettaNascosta(menuBorgo); } },
       { label: "Plastico 3D del Borgo", sub: "Diorama tridimensionale con caruggi, porto e faro", cls: "hot", fn: () => dioramaBorgo(menuBorgo) },
       ...MN_BORGO_BTN.map(mnObj).filter(Boolean),
       { label: "◂ Menu", fn: title },
@@ -15192,8 +15188,6 @@
     const tr = readJSON(TOUR, { titles: 0 }), co = readJSON(COACH, { w: 0, played: 0 });
     text("voce", `<b>Modalità di Gioco</b> ${mnBar(mnPct(mnModi()))}<br>Scegli tra tornei speciali, saghe investigative, multiverso o sfide calcistiche. Tutte indipendenti dal salvataggio principale.`);
     buttons([
-      { label: "🌙 La Caletta che non c'è", sub: "Esplorazione a piedi, di notte, con colpi di scena", cls: "hot", fn: () => { if (window.openCalettaNascosta) window.openCalettaNascosta(modes); } },
-      { label: "⚽ Derby delle Lampare", sub: "Calcio giocato 4v4: vento, traversoni e Tiro di Elio", cls: "hot", fn: () => { if (window.openDerbyLampare) window.openDerbyLampare(modes); } },
       { label: "✨ Arena 2D HD del Borgo", sub: "Suite Completa: Emblem, Action Soccer, Gabbia del Molo e Matchday Director", cls: "hot", fn: () => { if (window.openArena2DHDModal) window.openArena2DHDModal(modes); } },
       { label: "★ JoJo · Stand Soccer Battle", sub: "Le Bizzarre Avventure di Rondine: Star Rondine & ORA ORA ORA!", cls: "hot", fn: () => { if (window.openJoJoAdventure) window.openJoJoAdventure(modes); } },
       { label: "🌊 Cala Tramontana · Il Borgo del Tuo Campione", sub: heroLoad() ? `Esplora a piedi il borgo alternativo con ${heroLoad().name}` : "Modalità a piedi nel borgo marino alternativo per il tuo campione", cls: "hot", fn: () => { if (window.openCalaTramontana) window.openCalaTramontana(modes); } },
