@@ -843,11 +843,8 @@
   function say(lines, then) {
     if (!Array.isArray(lines) || !lines.length) { if (typeof then === "function") then(); return; }
     castHero();
-    const pl = lines.map(([who, text]) => {
-      const sp = who === "hero" ? "hero" : who;
-      return api.L(sp, T(text), "night");
-    });
-    api.play(pl, then);
+    const bg = bgNow();
+    api.trSay(lines.map((l) => api.L(l[0] === "hero" ? "hero" : l[0], T(l[1]), l[2] || bg)), then || done);
   }
 
   function ask(who, text, buttons) {
@@ -861,14 +858,27 @@
     api.trAsk(who === "hero" ? "hero" : who, T(text), opts, bgNow());
   }
 
-  const done = () => { refreshZone(); if (api && api.trDone) api.trDone(); };
-  const go = (zid, tx, ty) => {
+  const done = () => { refreshZone(); if (api && api.trResume) api.trResume(); };
+
+  function go(zid, tx, ty) {
+    const tr = api && api.trRec ? api.trRec() : null;
+    if (tr) tr.pos[zid] = [tx * TS + 8, ty * TS + 12];
+    enterZone(zid);
+  }
+
+  function enterZone(zid) {
+    const zr = ZONES[zid]; if (!zr) return;
+    const m = mem(); m.zone = zid; save();
     castHero();
-    if (api && api.trGo) {
-      api.trGo(zid, tx, ty);
-      setTimeout(() => safe(refreshZone), 0);
+    if (api && api.trRec) api.trRec().seen[zid] = true;
+    if (api && api.trGo) api.trGo(zid);
+    refreshZone();
+    if (!m.intro[zid]) {
+      m.intro[zid] = 1; save();
+      if (zr.spec.intro && zr.spec.intro.length) return say(zr.spec.intro, done);
     }
-  };
+    if (api && api.trToast) api.trToast(zr.spec.short);
+  }
 
   function reward(key, o) {
     const m = mem();
@@ -887,16 +897,30 @@
       name: spec.name,
       short: spec.short || spec.name,
       sub: spec.sub || "",
+      need: 0,
       w: spec.w,
       h: spec.h,
       start: spec.start || [2, 2],
       theme: spec.theme || "torino",
+      bus: "cancello",
+      busLabel: "Esci dalla Lanterna Nera",
       bg: spec.bg || "omb_darsena_notte",
-      areas: spec.areas || [],
-      act: spec.act || {},
+      item: spec.item || ["Microchip Ombra", "Microchip"],
+      itemCos: spec.itemCos,
       items: spec.items || [],
+      bld: [],
       npcs: [],
-      hints: {}
+      areas: spec.areas || [],
+      hints: {},
+      pitch: [-20, -20, 1, 1],
+      doors: [],
+      solid: SOLID,
+      act: Object.assign({}, spec.act || {}),
+      intro: [],
+      me: () => {
+        const c = (api && api.CAST && (api.CAST.hero || api.CAST.leo)) || {};
+        return Object.assign({}, c, { eye: (hero() && hero().eye) || "#38bdf8" });
+      }
     };
 
     if (spec.item) {
@@ -1019,22 +1043,33 @@
   }
 
   function chaptersList() {
-    const m = mem(), rows = [];
+    const m = mem(), rows = [], btns = [];
     for (let n = 1; n <= 4; n++) {
       const c = CHAPTERS[n];
-      if (c && (n === 1 || m.done[n - 1] || m.ch >= n)) {
+      const isUnlocked = n === 1 || m.done[n - 1] || m.ch >= n;
+      if (c && isUnlocked) {
         rows.push(`${m.done[n] ? "✓" : "▸"} <b>Capitolo ${n}</b> · ${esc(c.title)} <span style="color:var(--dim)">${esc(m.done[n] ? "completato" : c.sub || "")}</span>`);
+        btns.push({
+          label: `${m.done[n] ? "Rigioca" : "Gioca"} Cap. ${n} ▸`,
+          sub: c.title,
+          cls: m.ch === n ? "hot" : "",
+          fn: () => {
+            m.ch = n;
+            save();
+            continueStory();
+          }
+        });
       } else {
         rows.push(`<span style="color:var(--dim)">• Capitolo ${n} · Bloccato</span>`);
       }
     }
+    btns.push({ label: "Ricomincia da Capo", sub: "Azzera progressi (monete e cosmetici restano salvati)", fn: resetConfirm });
+    btns.push({ label: "◂ Indietro", fn: openMain });
+
     api.scene(
       "omb_darsena_notte", "voce",
-      `<b>I Capitoli del Circuito delle Ombre (4 Capitoli)</b><br>${rows.join("<br>")}<br><br><span style="color:var(--dim)">Le tue decisioni balistiche e morali determinano quale dei 4 epiloghi riscriverà il destino del calcio.</span>`,
-      [
-        { label: "Ricomincia da Capo", sub: "Azzera progressi (monete e cosmetici restano salvati)", fn: resetConfirm },
-        { label: "◂ Indietro", fn: openMain }
-      ],
+      `<b>I Capitoli del Circuito delle Ombre (4 Capitoli)</b><br>${rows.join("<br>")}<br><br><span style="color:var(--dim)">Seleziona un capitolo per giocare oppure continua l'infiltrazione.</span>`,
+      btns,
       "Il Circuito delle Ombre"
     );
   }
@@ -1479,7 +1514,12 @@
           });
           say([
             ["voce", `<b>🏆 CAPITOLO 1 COMPLETATO CON SUCCESSO!</b><br>Hai espugnato la Gabbia delle Onde e conquistato il rispetto di Zoran!<br><br><span style="color:#38bdf8">${rewMsg}</span><br>La strada verso i livelli superiori della Fortezza Cieca è aperta!`]
-          ], done);
+          ], () => {
+            ask("omb_zoran", "«La strada per i Magazzini Blindati (Capitolo 2) è libera. Vuoi procedere subito o esplorare ancora la Gabbia?»", [
+              { label: "Avanti ▸ Inizia il Capitolo 2 (Magazzini Blindati)", cls: "hot", fn: () => { mem().ch = 2; save(); continueStory(); } },
+              { label: "Resta nella Gabbia ad esplorare", fn: done }
+            ]);
+          });
         });
       }
       return say([
@@ -1830,7 +1870,12 @@
               ["voce", `GOOOOL! Con un bolide «{tiro}» pieghi le mani del portiere robotico! La Pattuglia Nera è sconfitta!`],
               ["omb_silvia", `«Ce l'abbiamo fatta! L'ascensore della Suite Panoramica è sbloccato. Kaelen Vance è lassù... andiamo a prenderlo!»`],
               ["voce", `<b>🏆 CAPITOLO 2 COMPLETATO!</b><br><span style="color:#38bdf8">${rewMsg}</span><br>Accesso al Livello 3 (La Suite del Ricatto) sbloccato!`]
-            ], done);
+            ], () => {
+              ask("omb_silvia", "«L'ascensore per il Livello 3 (Capitolo 3: La Suite Panoramica) è pronto. Saliamo subito?»", [
+                { label: "Avanti ▸ Sali al Capitolo 3 (La Suite del Ricatto)", cls: "hot", fn: () => { mem().ch = 3; save(); continueStory(); } },
+                { label: "Resta nei Magazzini ad esplorare", fn: done }
+              ]);
+            });
           } else {
             say([
               ["omb_victor", "«I droni di Victor hanno respinto i tuoi tiri! Silvia ti incoraggia: <i>«Non farti intimidire dai radar! Calcia radente negli angoli ciechi!»</i>"]
@@ -2152,7 +2197,12 @@
               ["omb_don_renzo", `«No... i miei capitali... le mie scommesse... è finita!»`],
               ["omb_kaelen", `«Madame Vera è fuggita verso il Tetto Supremo con l'elicottero. Dobbiamo salire lassù prima che decolli!»`],
               ["voce", `<b>🏆 CAPITOLO 3 COMPLETATO!</b><br><span style="color:#38bdf8">${rewMsg}</span><br>La porta verso il Tetto Supremo della Falesia Cieca è spalancata!`]
-            ], done);
+            ], () => {
+              ask("omb_kaelen", "«La botola per il Tetto Supremo (Capitolo 4: Gran Finale) è aperta! Saliamo a fermare Madame Vera?»", [
+                { label: "Avanti ▸ Sali al Capitolo 4 (La Finale sul Tetto)", cls: "hot", fn: () => { mem().ch = 4; save(); continueStory(); } },
+                { label: "Resta nella Suite ad esplorare", fn: done }
+              ]);
+            });
           } else {
             say([
               ["omb_don_renzo", "«I Guardiani d'Oro hanno bloccato il contropiede! Kaelen ti porge la mano nella bufera: <i>«Non mollare, {n}! Combina la rotazione con la mia sponda e la palla entra!»</i>"]
@@ -2401,6 +2451,13 @@
     function showFinalEpilogue(finKey, rewMsg) {
       const h = hero();
       const nm = (h && h.name) || "Campione";
+      const onEndEpilogue = () => {
+        ask("hero", "La saga de «Il Circuito delle Ombre» si conclude qui. Cosa vuoi fare adesso?", [
+          { label: "📜 Consulta i Capitoli & Epiloghi raggiunti ▸", cls: "hot", fn: chaptersList },
+          { label: "📁 Apri il Fascicolo delle Ombre & Telemetrie", fn: () => notebook(openMain, false) },
+          { label: "◂ Torna alle Modalità", fn: leave }
+        ]);
+      };
 
       if (finKey === "verita") {
         say([
@@ -2410,7 +2467,7 @@
           ["omb_kaelen", `(sorridendo alla luce dell'alba) «Dopo sette anni di incubo... il calcio è di nuovo libero. Grazie, ${nm}.»`],
           ["hero", `«Torniamo a casa. Al Borgo Marino c'è un campo che ci aspetta per giocare a calcio vero!»`],
           ["voce", `<b>🏆 EPILOGO 1: LA LANTERNA SPEZZATA RAGGIUNTO!</b><br><span style="color:#38bdf8">${rewMsg}</span><br>Hai salvato lo sport e sei tornato a casa da autentica leggenda!`]
-        ], done);
+        ], onEndEpilogue);
       } else if (finKey === "sovrano") {
         say([
           ["voce", `GOOOOL AL 90° MINUTO! Il boato dei marinai e dei corsari fa tremare la roccaforte!`],
@@ -2418,7 +2475,7 @@
           ["omb_zoran", `«I Titani d'Acciaio sono al tuo servizio, Campione!»`],
           ["omb_madame_v", `(lasciando la fortezza su una lancia con amaro rispetto) «Hai vinto tu, ragazzo. Sei diventato il vero sovrano del mare.»`],
           ["voce", `<b>👑 EPILOGO 2: IL SIGNORE DELL'ATOLLO RAGGIUNTO!</b><br><span style="color:#38bdf8">${rewMsg}</span><br>Hai fondato la prima Lega Libera Indipendente del Mediterraneo!`]
-        ], done);
+        ], onEndEpilogue);
       } else if (finKey === "corsari") {
         say([
           ["voce", `GOL LEGGENDARIO ALL'INCROCIO DEI PALI! Fischio finale sul tetto della fortezza!`],
@@ -2426,7 +2483,7 @@
           ["omb_kaelen", `(al timone dell'Albatros mentre taglia le onde dell'alba verso la Corsica) «Niente federazioni corrotte, niente contratti capestro. Fondiamo scuole calcio libere su ogni isola!»`],
           ["hero", `(guardando la fortezza svanire nella nebbia) «Il nostro vero viaggio comincia adesso!»`],
           ["voce", `<b>🤝 EPILOGO 3: IL PATTO DEI CORSARI RAGGIUNTO!</b><br><span style="color:#38bdf8">${rewMsg}</span><br>Hai acceso la rivoluzione del calcio popolare in mare aperto!`]
-        ], done);
+        ], onEndEpilogue);
       } else {
         say([
           ["voce", `RETE TRIONFALE AL 90°! Il pallone piega i riflettori e chiude la partita del secolo!`],
@@ -2434,7 +2491,7 @@
           ["hero", `«Leo sarà orgoglioso di te, Silvia. La famiglia Moretti ha regalato il futuro al nostro quartiere.»`],
           ["omb_kaelen", `«E la mia scuola calcio al molo adotterà il programma fin da domani mattina!»`],
           ["voce", `<b>🧬 EPILOGO 4: LA CHIMERA REDENTA RAGGIUNTO!</b><br><span style="color:#38bdf8">${rewMsg}</span><br>Hai riportato Silvia a casa e donato la scienza al Borgo Marino!`]
-        ], done);
+        ], onEndEpilogue);
       }
     }
 
@@ -2502,13 +2559,16 @@
       if (api && api.scene) {
         api.scene(
           "omb_darsena_notte", "voce",
-          "<b>Il Circuito delle Ombre</b><br>Questa modalità è riservata al tuo <b>Campione Personalizzato</b>.<br>Crea prima il tuo Campione scegliendo nome, maglia, numero e tiro speciale!",
+          "<b>Il Circuito delle Ombre · L'Atollo della Falesia Cieca</b><br>Questa saga noir notturna è cucita su misura per il tuo <b>Campione Personalizzato</b>.<br>Crea o personalizza prima il tuo Campione scegliendo nome, occhi, maglia, numero e tiro speciale!",
           [
             {
-              label: "Crea il Tuo Campione", cls: "hot",
-              fn: () => { if (window.openHeroStoryMenu) window.openHeroStoryMenu(EXIT); }
+              label: "✨ Crea o Personalizza il Campione ▸", cls: "hot",
+              fn: () => {
+                if (typeof window.heroEditor === "function") window.heroEditor(openMain);
+                else if (window.openHeroStoryMenu) window.openHeroStoryMenu(openMain);
+              }
             },
-            { label: "◂ Indietro", fn: leave }
+            { label: "◂ Torna alle Modalità", fn: leave }
           ],
           "Il Circuito delle Ombre"
         );
@@ -2516,24 +2576,54 @@
       return;
     }
 
-    const c = activeChapter();
-    const curZ = (c && c.zones && Object.keys(c.zones)[0]) || "omb_darsena";
-    const startPos = (c && c.zones && c.zones[curZ] && c.zones[curZ].start) || [19, 21];
+    castHero();
+    const c = activeChapter(), m = mem(), curDone = c && m.done[c.n];
+    const isCompletedAll = !!m.done[4];
 
-    if (!mem().intro[c.n]) {
-      mem().intro[c.n] = 1; save();
+    api.scene(
+      "omb_darsena_notte", "voce",
+      `<b>🌃 Il Circuito delle Ombre · L'Atollo della Falesia Cieca</b><br>${esc(h.name)} · n. ${esc(h.num)} (Infiltrato alla Lanterna Nera)<br><span style="color:var(--dim)">«${esc(h.shotName || "Il Tiro delle Ombre")}»</span><br><br><span style="color:#38bdf8">${c ? esc("Capitolo " + c.n + " · " + c.title) : ""}</span><br><span style="color:var(--dim)">${isCompletedAll ? "🌟 Tutta la saga è stata completata con successo! Puoi rigiocare i capitoli o esplorare le ambientazioni." : (curDone ? "Capitolo completato! Il prossimo capitolo ti attende." : esc(goalNow()))}</span>`,
+      [
+        {
+          label: isCompletedAll ? "Esplora la Fortezza Clandestina ▸" : (c && !m.intro["ch" + c.n] ? (c.n > 1 ? `Inizia il Capitolo ${c.n} ▸` : "Inizia l'Infiltrazione ▸") : "Continua l'Infiltrazione ▸"),
+          sub: c ? `Capitolo ${c.n} · ${c.title}` : "",
+          cls: "hot",
+          fn: continueStory
+        },
+        { label: "📁 Fascicolo Ombre & Indagini", sub: `Dossier ${m.clues.length} · Decisioni morali e telemetrie`, fn: () => notebook(openMain, false) },
+        { label: "📜 I Capitoli della Saga (1-4)", sub: "Visualizza i capitoli e i finali raggiunti", fn: chaptersList },
+        { label: "◂ Torna alle Modalità", fn: leave }
+      ],
+      "Il Circuito delle Ombre"
+    );
+  }
+
+  function continueStory() {
+    const c = activeChapter(), m = mem(); if (!c) return;
+    const isNew = !m.intro["ch" + c.n];
+    const curZ = (m.zone && ZONES[m.zone]) ? m.zone : ((c.zones && Object.keys(c.zones)[0]) || "omb_darsena");
+    const zr = ZONES[curZ];
+    const startPos = (zr && zr.spec.start) || [19, 21];
+
+    if (isNew) {
+      m.intro["ch" + c.n] = 1; save();
       castHero();
       api.scene(
         "omb_darsena_notte", "voce",
-        `<b>Atollo della Falesia Cieca · Mezzanotte</b><br>La Caligo ligure cancella la costa. Sei sbarcato dal peschereccio nero Nadir convocato con un invito anonimo in ceralacca.<br>Ma appena scendi a terra, una saracinesca d'acciaio crolla sull'acqua sigillando l'uscita.<br><br><b>«Benvenuto alla Lanterna Nera, ${esc(h.name)} (N.${esc(h.num)})... qui il calcio non serve per le cartoline. Serve per sopravvivere.»</b>`,
+        `<b>Atollo della Falesia Cieca · Capitolo ${c.n}</b><br><b>${esc(c.title)}</b><br><br>${c.n === 1 ? `La Caligo ligure cancella la costa. Sei sbarcato dal peschereccio nero Nadir convocato con un invito anonimo in ceralacca.<br>Ma appena scendi a terra, una saracinesca d'acciaio crolla sull'acqua sigillando l'uscita.<br><br><b>«Benvenuto alla Lanterna Nera, ${esc(hero().name)} (N.${esc(hero().num)})... qui il calcio non serve per le cartoline. Serve per sopravvivere.»</b>` : `L'infiltrazione prosegue verso i settori interni della roccaforte. I riflettori cercano la tua sagoma.`}`,
         [
-          { label: "Inizia l'Infiltrazione ▸", cls: "hot", fn: () => go(curZ, startPos[0], startPos[1]) }
+          { label: "Avanti ▸ Entra nel Settore", cls: "hot", fn: () => go(curZ, startPos[0], startPos[1]) }
         ],
         "Il Circuito delle Ombre"
       );
-    } else {
-      go(curZ, startPos[0], startPos[1]);
+      return;
     }
+
+    const tr = api.trRec();
+    if (!tr.pos[curZ]) {
+      tr.pos[curZ] = [startPos[0] * TS + 8, startPos[1] * TS + 12];
+    }
+    enterZone(curZ);
   }
 
   function init() {

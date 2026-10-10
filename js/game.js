@@ -4937,7 +4937,7 @@
     heroSum(); heroButtons();
   }
   function heroOptions() {
-    const own = cosOwned(), of = (kind) => own.filter((k) => COSM[k].kind === kind).map((k) => [COSM[k].val, COSM[k].label.replace(/^(Capelli|Taglio a|Tiro:) /, "")]);
+    const own = cosOwned(), of = (kind) => own.filter((k) => COSM[k] && COSM[k].kind === kind).map((k) => [COSM[k].val, COSM[k].label.replace(/^(Capelli|Taglio a|Tiro:) /, "")]);
     // un solo elemento per valore: due cosmetici con lo stesso colore bloccavano il ciclo e nascondevano tutti quelli dopo
     const uq = (l) => { const seen = new Set(); return l.filter(([v]) => !seen.has(v) && seen.add(v)); };
     return {
@@ -4955,7 +4955,14 @@
     const o = heroOptions(), h = HE.h;
     const cyc = (k, label) => { const list = o[k], i = Math.max(0, list.findIndex(([v]) => v === h[k])), cur = list[i] || list[0]; return { label: `${label}: ${cur[1]} ▸`, sub: `${i + 1} di ${list.length}`, fn: () => { const nx = list[(i + 1) % list.length]; const oldShot = H_SHOTS[h.shot].label.toUpperCase(); h[k] = nx[0]; if (k === "shot" && (!h.shotName || h.shotName.startsWith(oldShot))) { h.shotName = `${H_SHOTS[h.shot].label.toUpperCase()} DI ${h.name.toUpperCase()}`; $("hShot").value = h.shotName; } heroCast(h); heroSum(); heroButtons(); } }; };
     buttons([cyc("style", "Capelli"), cyc("hair", "Colore"), cyc("eye", "Occhi"), cyc("skin", "Pelle"), cyc("shirt", "Maglia"), cyc("acc", "Accessorio"), cyc("shot", "Tiro"),
-      { label: "Salva il campione", sub: "Usalo in Carriera e nella sua Storia", cls: "hot", fn: () => { HE.h.v = 1; writeJSON(HERO, HE.h); heroCast(HE.h); view = { kind: "scene", bg: "end", speaker: "hero", chibi: true }; text("hero", `<b>${esc(HE.h.name)}</b>, numero ${HE.h.num}, pronto a scendere in campo. Il tiro speciale si chiama <em>${esc(HE.h.shotName)}</em>.<br><span style="color:var(--dim)">${heroWhere}</span>`); buttons([{ label: "⭐ Vivi la Storia del tuo Campione ▸", sub: `La saga inedita di ${HE.h.name}`, cls: "hot", fn: () => { if (window.openHeroStoryMenu) window.openHeroStoryMenu(HE.back); } }, { label: "🌊 Cala Tramontana · Borgo del Campione ▸", sub: `Esplora il borgo marino alternativo a piedi con ${HE.h.name}`, cls: "hot", fn: () => { if (window.openCalaTramontana) window.openCalaTramontana(HE.back); } }, { label: "Gioca la Carriera", fn: career }, { label: "Torneo dei rigori", fn: tournament }, { label: "◂ Indietro", fn: HE.back }]); } },
+      { label: "Avanti ▸ Salva il Campione", sub: "Conferma ed entra in campo", cls: "hot", fn: () => { HE.h.v = 1; writeJSON(HERO, HE.h); heroCast(HE.h); view = { kind: "scene", bg: "end", speaker: "hero", chibi: true }; text("hero", `<b>${esc(HE.h.name)}</b>, numero ${HE.h.num}, pronto a scendere in campo con occhi <b>${(H_EYE[HE.h.eye] || "personalizzati").toLowerCase()}</b>. Il tiro speciale si chiama <em>${esc(HE.h.shotName)}</em>.<br><span style="color:var(--dim)">${heroWhere}</span>`); buttons([
+        ...(window.__campioneOmbre ? [{ label: "🌃 Gioca «Il Circuito delle Ombre» ▸", sub: `Nuova saga noir notturna con ${HE.h.name}`, cls: "hot", fn: () => window.__campioneOmbre.open({ onExit: HE.back }) }] : []),
+        { label: "⭐ Vivi la Storia del tuo Campione ▸", sub: `La saga inedita di ${HE.h.name}`, cls: "hot", fn: () => { if (window.openHeroStoryMenu) window.openHeroStoryMenu(HE.back); } },
+        { label: "🌊 Cala Tramontana · Borgo del Campione ▸", sub: `Esplora il borgo marino alternativo a piedi con ${HE.h.name}`, cls: "hot", fn: () => { if (window.openCalaTramontana) window.openCalaTramontana(HE.back); } },
+        { label: "Gioca la Carriera", fn: career },
+        { label: "Torneo dei rigori", fn: tournament },
+        { label: "◂ Indietro", fn: HE.back }
+      ]); } },
       { label: "◂ Indietro", sub: "Senza salvare", fn: HE.back }]);
   }
   function drawHeroChibi() {
@@ -8723,7 +8730,7 @@
     const m = Array.from({ length: z.h }, () => Array(z.w).fill("."));
     const fill = (x0, y0, x1, y1, ch) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (m[y] && x >= 0 && x < z.w) m[y][x] = ch; };
     z.build(m, fill);
-    z.bld.forEach((b) => { fill(b.x, b.y, b.x + b.w - 1, b.y + b.h - 1, "#"); if (b.door) m[b.door[1]][b.door[0]] = "D"; });
+    (z.bld || []).forEach((b) => { fill(b.x, b.y, b.x + b.w - 1, b.y + b.h - 1, "#"); if (b.door) m[b.door[1]][b.door[0]] = "D"; });
     return m;
   }
   const TR_SOLID = "~#TSGMORWLNHBDW";
@@ -8808,7 +8815,7 @@
     if (TW.id !== "caruggi") { const pz = z.pitch || (TW.id === "puntanera" ? [8, 6, 12, 6] : [14, 8, 9, 5]); g.strokeStyle = "#ffffffaa"; g.lineWidth = 1; g.strokeRect(pz[0] * TS - cx + 0.5, pz[1] * TS - cy + 0.5, pz[2] * TS - 1, pz[3] * TS - 1); g.beginPath(); g.moveTo((pz[0] + pz[2] / 2) * TS - cx + 0.5, pz[1] * TS - cy); g.lineTo((pz[0] + pz[2] / 2) * TS - cx + 0.5, (pz[1] + pz[3]) * TS - cy); g.stroke(); }
     else { g.strokeStyle = "#ffffffaa"; g.lineWidth = 1; g.strokeRect(23 * TS - cx + 0.5, 11 * TS - cy + 0.5, 8 * TS - 1, 5 * TS - 1); }
     trDecor(cx, cy); if (z.decor) z.decor(cx, cy);
-    z.bld.forEach((b) => {
+    (z.bld || []).forEach((b) => {
       const x = b.x * TS - cx, y = b.y * TS - cy, w = b.w * TS, h = b.h * TS;
       if (x > W + 20 || y > H + 60 || x + w < -20 || y + h < -10) return;
       const fh = TW.id === "caruggi" ? Math.min(2, b.h - 1) : 1;
@@ -8887,7 +8894,7 @@
   function trPickups() {
     const tx = Math.floor(TW.x / TS), ty = Math.floor((TW.y - 4) / TS), r = trRec(), z = TW.z;
     const got = r.got[TW.id] || (r.got[TW.id] = []);
-    z.items.forEach(([x, y], i) => {
+    (z.items || []).forEach(([x, y], i) => {
       if (x !== tx || y !== ty || got.includes(i)) return;
       got.push(i); addCoins(3); sfx("kick");
       if (got.length === z.items.length) { const c = bCos(z.itemCos); addCoins(15); sfx("goal"); trToast(`${z.item[1]} tutte! +15 monete${c ? ` · Sbloccato: ${COSM[z.itemCos].label}` : ""}`); }
@@ -8905,7 +8912,7 @@
     const pos = r.pos[id];
     if (pos && !TR_SOLID.includes(trTile(pos[0], pos[1]))) { TW.x = pos[0]; TW.y = pos[1]; } else { TW.x = z.start[0] * TS + 8; TW.y = z.start[1] * TS + 12; }
     const first = !r.seen[id]; r.seen[id] = true; if (first) { if (!r.first || typeof r.first !== "object") r.first = {}; r.first[id] = todayKey(); } borgoSave();
-    if (first) return trSay(z.intro.map(([w, t]) => L(w, t)), () => { trResume(); trToast(`Benvenuto: ${z.short}!`); });
+    if (first && z.intro && z.intro.length) return trSay(z.intro.map(([w, t]) => L(w, t)), () => { trResume(); trToast(`Benvenuto: ${z.short}!`); });
     trResume(); trToast(`${z.short} · bentornato`);
   }
   function trResume() {
@@ -8967,7 +8974,7 @@
       const msg = { caruggi: "Bacheca del porto. «Cercasi portiere per i Topi dei Caruggi. Requisiti: coraggio, ginocchia, nessuna mamma che guarda.» Sotto, a penna: «Nico Ferri NO, tifa per il Borgo».", puntanera: "Bacheca del Comune. «Ordinanza n. 74: è vietato l'uso di sandali durante le gare di pesca. Retroattiva.» Firmato: il Sindaco.", isola: "Bacheca dei frati. «Orario delle preghiere: mattina, sera, e ogni volta che tira Fra' Tarcisio.»" }[TW.id];
       return trSay([L("voce", msg || TW.z.board || "Una bacheca. Vuota, ma piena di speranza.")]);
     }
-    const b = TW.z.bld.find((x) => x.door && x.door[0] === tx && x.door[1] === ty); if (!b) return;
+    const b = (TW.z.bld || []).find((x) => x.door && x.door[0] === tx && x.door[1] === ty); if (!b) return;
     const DOOR = {
       libreria: "La libreria del Professor Ansaldo. Dentro c'è un odore di carta e di caffè dimenticato. Su uno scaffale, un almanacco del 1987 è aperto alla pagina della Rondine. Qualcuno l'ha sottolineata a matita.",
       focacceria: "Il forno di Gilda. Sul bancone una teglia enorme, lucida d'olio. Il cartello dice: «La focaccia non si prenota. Si merita.»",
