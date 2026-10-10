@@ -210,7 +210,7 @@
     const h = hero(), C = api && api.CAST;
     if (!h || !C) return;
     C.hero = {
-      name: h.name, tag: "corsaro", hair: h.hair, style: h.style, skin: h.skin, eye: "#38bdf8",
+      name: h.name, tag: "corsaro", hair: h.hair, style: h.style, skin: h.skin, eye: h.eye || "#38bdf8",
       bg: ["#0369a1", "#0284c7"], shirt: "#0284c7", num: String(h.num), acc: h.acc,
       cap: h.acc === "cappellino" ? "#0369a1" : h.acc === "berretto" ? "#075985" : undefined
     };

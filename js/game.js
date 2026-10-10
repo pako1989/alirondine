@@ -4867,6 +4867,7 @@
   const HERO = "ali-di-rondine.campione";
   const H_STYLES = { spiky: "Spettinati", messy: "Ribelli", buzz: "Rasati", slick: "Tirati indietro", long: "Lunghi", bun: "Chignon" };
   const H_HAIR = { "#2b1d14": "Castano", "#111111": "Nero", "#e8d08a": "Biondo", "#b8452a": "Rosso", "#9a9a9a": "Grigio" };
+  const H_EYE = { "#2a1a0a": "Castano scuro", "#5a3818": "Nocciola", "#2563eb": "Azzurro", "#0284c7": "Celeste", "#16a34a": "Verde smeraldo", "#15803d": "Verde scuro", "#475569": "Grigio", "#111827": "Nero", "#d97706": "Ambra", "#9333ea": "Viola" };
   const H_SKIN = ["#f5d6b8", "#f2c9a0", "#e0ac7e", "#b9804f", "#8a5a3a"];
   const H_SHIRT = { "#ff4d5a": "Rossa", "#1f5fbf": "Blu", "#f2f2f2": "Bianca", "#1e9e4a": "Verde" };
   const H_ACC = { none: "Nessuno" };
@@ -4890,12 +4891,12 @@
     fischietto:{ kind: "acc", label: "Fischietto sequestrato al Notaio", val: "fischietto", from: "Finale «Fischio pulito»", story: () => getList(ENDS).includes("Stagione 4 · Fischio pulito") },
   });
   const cosOwned = () => { const b = B || borgoLoad(); return Object.keys(COSM).filter((k) => (COSM[k].story ? COSM[k].story() : b.cos.includes(k))); };
-  const heroDefault = () => ({ v: 1, name: "Luca", style: "spiky", hair: "#2b1d14", skin: "#f2c9a0", shirt: "#ff4d5a", acc: "none", num: 9, shot: "saetta", shotName: "SAETTA DI LUCA" });
+  const heroDefault = () => ({ v: 1, name: "Luca", style: "spiky", hair: "#2b1d14", eye: "#2a1a0a", skin: "#f2c9a0", shirt: "#ff4d5a", acc: "none", num: 9, shot: "saetta", shotName: "SAETTA DI LUCA" });
   const heroLoad = () => { const h = readJSON(HERO, null); return h && h.v === 1 && h.name ? { ...heroDefault(), ...h } : null; };
   window.heroLoad = heroLoad;
   window.heroEditor = heroEditor;
   function heroCast(h) {
-    CAST.hero = { name: h.name, tag: "", hair: h.hair, style: h.style, skin: h.skin, eye: "#2a1a0a", bg: [h.shirt, "#ffd23f"], shirt: h.shirt, num: String(h.num), acc: h.acc, cap: h.acc === "cappellino" ? "#ffd23f" : h.acc === "berretto" ? "#26324a" : undefined };
+    CAST.hero = { name: h.name, tag: "", hair: h.hair, style: h.style, skin: h.skin, eye: h.eye || "#2a1a0a", bg: [h.shirt, "#ffd23f"], shirt: h.shirt, num: String(h.num), acc: h.acc, cap: h.acc === "cappellino" ? "#ffd23f" : h.acc === "berretto" ? "#26324a" : undefined };
   }
   // Il campione in campo: M.hero (partite), T.hero (rigori)
   const heroOn = () => !!(M && M.hero);
@@ -4942,6 +4943,7 @@
     return {
       style: uq([...Object.entries(H_STYLES), ...of("style").map(([v, l]) => [v, l[0].toUpperCase() + l.slice(1)])]),
       hair: uq([...Object.entries(H_HAIR), ...of("hairc")]),
+      eye: uq([...Object.entries(H_EYE), ...of("eyec")]),
       skin: H_SKIN.map((c, i) => [c, `Tono ${i + 1}`]),
       shirt: uq([...Object.entries(H_SHIRT), ...of("shirt")]),
       acc: uq([...Object.entries(H_ACC), ...of("acc")]),
@@ -4952,7 +4954,7 @@
   function heroButtons() {
     const o = heroOptions(), h = HE.h;
     const cyc = (k, label) => { const list = o[k], i = Math.max(0, list.findIndex(([v]) => v === h[k])), cur = list[i] || list[0]; return { label: `${label}: ${cur[1]} ▸`, sub: `${i + 1} di ${list.length}`, fn: () => { const nx = list[(i + 1) % list.length]; const oldShot = H_SHOTS[h.shot].label.toUpperCase(); h[k] = nx[0]; if (k === "shot" && (!h.shotName || h.shotName.startsWith(oldShot))) { h.shotName = `${H_SHOTS[h.shot].label.toUpperCase()} DI ${h.name.toUpperCase()}`; $("hShot").value = h.shotName; } heroCast(h); heroSum(); heroButtons(); } }; };
-    buttons([cyc("style", "Capelli"), cyc("hair", "Colore"), cyc("skin", "Pelle"), cyc("shirt", "Maglia"), cyc("acc", "Accessorio"), cyc("shot", "Tiro"),
+    buttons([cyc("style", "Capelli"), cyc("hair", "Colore"), cyc("eye", "Occhi"), cyc("skin", "Pelle"), cyc("shirt", "Maglia"), cyc("acc", "Accessorio"), cyc("shot", "Tiro"),
       { label: "Salva il campione", sub: "Usalo in Carriera e nella sua Storia", cls: "hot", fn: () => { HE.h.v = 1; writeJSON(HERO, HE.h); heroCast(HE.h); view = { kind: "scene", bg: "end", speaker: "hero", chibi: true }; text("hero", `<b>${esc(HE.h.name)}</b>, numero ${HE.h.num}, pronto a scendere in campo. Il tiro speciale si chiama <em>${esc(HE.h.shotName)}</em>.<br><span style="color:var(--dim)">${heroWhere}</span>`); buttons([{ label: "⭐ Vivi la Storia del tuo Campione ▸", sub: `La saga inedita di ${HE.h.name}`, cls: "hot", fn: () => { if (window.openHeroStoryMenu) window.openHeroStoryMenu(HE.back); } }, { label: "🌊 Cala Tramontana · Borgo del Campione ▸", sub: `Esplora il borgo marino alternativo a piedi con ${HE.h.name}`, cls: "hot", fn: () => { if (window.openCalaTramontana) window.openCalaTramontana(HE.back); } }, { label: "Gioca la Carriera", fn: career }, { label: "Torneo dei rigori", fn: tournament }, { label: "◂ Indietro", fn: HE.back }]); } },
       { label: "◂ Indietro", sub: "Senza salvare", fn: HE.back }]);
   }

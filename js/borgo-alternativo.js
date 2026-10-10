@@ -378,7 +378,7 @@
           hair: hero.hair,
           style: hero.style,
           skin: hero.skin,
-          eye: "#2a1a0a",
+          eye: hero.eye || "#2a1a0a",
           bg: [hero.shirt, "#ffd23f"],
           shirt: hero.shirt,
           num: String(hero.num),

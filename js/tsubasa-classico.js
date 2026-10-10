@@ -70,7 +70,7 @@
   function castHero(h) {
     try {
       const api = window.__borgoApi;
-      if (api && api.CAST && h) api.CAST.hero = { name: h.name, tag: "", hair: h.hair, style: h.style, skin: h.skin, eye: "#2a1a0a", bg: [h.shirt, "#ffd23f"], shirt: h.shirt, num: String(h.num), acc: h.acc };
+      if (api && api.CAST && h) api.CAST.hero = { name: h.name, tag: "", hair: h.hair, style: h.style, skin: h.skin, eye: h.eye || "#2a1a0a", bg: [h.shirt, "#ffd23f"], shirt: h.shirt, num: String(h.num), acc: h.acc };
     } catch (e) { /* ok */ }
   }
 
