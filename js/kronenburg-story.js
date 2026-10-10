@@ -94,9 +94,44 @@
         osc.type = "triangle";
         osc.frequency.setValueAtTime(freq, now + i * 0.09);
         g.gain.setValueAtTime(0.2, now + i * 0.09);
-        g.gain.exponentialRampToValueAtTime(0.005, now + i * 0.09 + 0.35);
+        g.exponentialRampToValueAtTime(0.005, now + i * 0.09 + 0.35);
         osc.connect(g); g.connect(ctx.destination);
         osc.start(now + i * 0.09); osc.stop(now + i * 0.09 + 0.35);
+      });
+    } catch (e) {}
+  }
+
+  function sfxGeassShatter() {
+    const ctx = getAudioCtx(); if (!ctx) return;
+    try {
+      const now = ctx.currentTime;
+      [880, 1174.66, 1760, 2349.32].forEach((freq, i) => {
+        const osc = ctx.createOscillator(), g = ctx.createGain();
+        osc.type = "square";
+        osc.frequency.setValueAtTime(freq, now + i * 0.04);
+        osc.frequency.exponentialRampToValueAtTime(110, now + i * 0.04 + 0.35);
+        g.gain.setValueAtTime(0.16 / (i + 1), now + i * 0.04);
+        g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.04 + 0.4);
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(now + i * 0.04); osc.stop(now + i * 0.04 + 0.4);
+      });
+    } catch (e) {}
+  }
+
+  function sfxDramaticRevelation() {
+    const ctx = getAudioCtx(); if (!ctx) return;
+    try {
+      const now = ctx.currentTime;
+      [130.81, 164.81, 196.0, 261.63].forEach((freq) => {
+        const osc = ctx.createOscillator(), g = ctx.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(freq, now);
+        osc.frequency.exponentialRampToValueAtTime(freq * 1.02, now + 0.8);
+        g.gain.setValueAtTime(0.01, now);
+        g.gain.linearRampToValueAtTime(0.2, now + 0.1);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
+        osc.connect(g); g.connect(ctx.destination);
+        osc.start(now); osc.stop(now + 1.4);
       });
     } catch (e) {}
   }
@@ -418,10 +453,225 @@
     });
   }
 
+  // Sfondo: Le Catacombe dei Dannati & Prigioni di Pietra Nera (Capitolo 2)
+  function bgKronenburgSotterranei(g, W, H, f) {
+    grad(g, 0, 0, W, H, ["#020617", "#09101d", "#022c22"]);
+    // Arcate di pietra stillanti umidità
+    for (let i = 0; i < 4; i++) {
+      const ax = 15 + i * 85;
+      g.strokeStyle = "#1e293b"; g.lineWidth = 4;
+      g.beginPath(); g.arc(ax + 35, 75, 42, Math.PI, 0); g.stroke();
+      R(g, ax, 75, 8, 125, "#0f172a");
+      R(g, ax + 62, 75, 8, 125, "#0f172a");
+    }
+    // Celle di ferro con sbarre verticali
+    [60, 210].forEach((cx) => {
+      R(g, cx, 50, 52, 90, "#050a14");
+      for (let bx = cx + 4; bx < cx + 50; bx += 8) {
+        R(g, bx, 50, 2, 90, "#334155");
+      }
+      // Catena arrugginita che pende
+      g.strokeStyle = "#64748b"; g.lineWidth = 1.5;
+      g.beginPath(); g.moveTo(cx + 26, 40); g.lineTo(cx + 26, 75); g.stroke();
+    });
+    // Canale di scolo sulfureo con acque luminescenti verde smeraldo
+    R(g, 0, 160, W, 40, "#022c22");
+    g.fillStyle = "rgba(16, 185, 129, 0.45)";
+    g.fillRect(0, 170, W, 25);
+    for (let x = 0; x < W; x += 24) {
+      const woff = Math.sin(f * 0.12 + x * 0.2) * 2;
+      R(g, x, 175 + woff, 14, 2, "#34d399");
+    }
+    // Torce al fosforo verde/blu sui pilastri
+    [45, 135, 225, 295].forEach((tx, ti) => {
+      R(g, tx - 2, 88, 4, 12, "#1e293b");
+      const fl = Math.sin(f * 0.2 + ti * 2) * 2;
+      glow(g, tx, 84, 24 + fl, "16,185,129", 0.6);
+      g.fillStyle = "#34d399"; g.beginPath(); g.arc(tx, 84, 4 + fl * 0.3, 0, 7); g.fill();
+      g.fillStyle = "#a7f3d0"; g.beginPath(); g.arc(tx, 84, 2, 0, 7); g.fill();
+    });
+  }
+
+  // Sfondo: La Sala del Trono d'Ebano & Banchetto dei Traditori (Capitolo 2)
+  function bgKronenburgSalatrono(g, W, H, f) {
+    grad(g, 0, 0, W, H, ["#090514", "#1e102a", "#0f0814"]);
+    // Enorme rosone gotico con luna di sangue al centro
+    g.fillStyle = "#2e1065";
+    g.beginPath(); g.arc(160, 52, 44, 0, Math.PI * 2); g.fill();
+    glow(g, 160, 52, 55, "239,68,68", 0.35);
+    g.fillStyle = "#ef4444"; g.beginPath(); g.arc(160, 52, 22, 0, Math.PI * 2); g.fill();
+    // Telaio di pietra del rosone
+    g.strokeStyle = "#4c1d95"; g.lineWidth = 2.5;
+    for (let a = 0; a < 8; a++) {
+      const ang = (a * Math.PI) / 4;
+      g.beginPath(); g.moveTo(160, 52); g.lineTo(160 + Math.cos(ang) * 44, 52 + Math.sin(ang) * 44); g.stroke();
+    }
+    // Arazzi nobiliari cremisi scuro ai lati
+    [10, 50, W - 64, W - 24].forEach((ax) => {
+      R(g, ax, 20, 16, 95, "#831843");
+      R(g, ax + 2, 22, 12, 90, "#9f1239");
+      R(g, ax + 6, 30, 4, 30, "#fbbf24");
+    });
+    // Trono delle Spade rialzato al centro su gradini d'ossidiana
+    for (let st = 0; st < 4; st++) {
+      R(g, 120 - st * 8, 120 + st * 7, 80 + st * 16, 7, (st % 2 === 0 ? "#18181b" : "#27272a"));
+    }
+    // Scranno del Trono
+    R(g, 144, 82, 32, 42, "#09090b");
+    R(g, 140, 78, 40, 5, "#dc2626");
+    // Lame delle spade incastonate nello schienale
+    for (let s = 0; s < 6; s++) {
+      R(g, 138 + s * 8, 64 + (s % 2) * 5, 2, 18, "#cbd5e1");
+    }
+    // Candelabri a 6 braccia con fiammelle dorate
+    [85, 235].forEach((cx, ci) => {
+      R(g, cx - 2, 105, 4, 32, "#78350f");
+      for (let b = -2; b <= 2; b++) {
+        const bx = cx + b * 7, by = 102;
+        const fl = Math.sin(f * 0.22 + ci * 2 + b) * 1.5;
+        glow(g, bx, by, 14, "251,191,36", 0.45);
+        g.fillStyle = "#fef08a"; g.fillRect(bx - 1, by - 3 + fl * 0.3, 2, 4);
+      }
+    });
+    // Pavimento a specchio con riflessi d'ossidiana
+    R(g, 0, 150, W, 50, "#050508");
+    for (let x = 0; x < W; x += 32) {
+      R(g, x, 150, 1, 50, "#27272a");
+      R(g, 0, 172, W, 1, "#27272a");
+    }
+  }
+
+  // Sfondo: Il Bastione dei Ghiacci Eterni (Capitolo 3)
+  function bgKronenburgBastionegelo(g, W, H, f) {
+    grad(g, 0, 0, W, H, ["#030712", "#0c182d", "#082f49"]);
+    // Cielo polare con riflessi di aurora boreale azzurra e verde
+    glow(g, 120, 30, 75, "34,211,238", 0.25);
+    glow(g, 220, 25, 80, "52,211,153", 0.2);
+    // Vette di ghiaccio e abisso marino in lontananza
+    g.fillStyle = "#021626";
+    g.beginPath();
+    g.moveTo(0, 110); g.lineTo(60, 45); g.lineTo(130, 95); g.lineTo(210, 35); g.lineTo(280, 85); g.lineTo(W, 60); g.lineTo(W, 130); g.lineTo(0, 130);
+    g.fill();
+    // Mura del bastione ricoperte di brina e stalattiti
+    R(g, 0, 115, W, 38, "#0f172a");
+    for (let i = 0; i < 18; i++) {
+      if (i % 2 === 0) R(g, i * 18, 105, 12, 12, "#1e293b");
+      // Stalattiti di ghiaccio
+      g.fillStyle = "#bae6fd";
+      g.beginPath(); g.moveTo(i * 18 + 4, 117); g.lineTo(i * 18 + 6, 125); g.lineTo(i * 18 + 8, 117); g.fill();
+    }
+    // Balista d'assedio congelata a sinistra
+    R(g, 35, 122, 28, 14, "#334155");
+    R(g, 46, 112, 6, 24, "#475569");
+    g.strokeStyle = "#94a3b8"; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(25, 118); g.lineTo(73, 118); g.stroke();
+    // Spalti innevati inferiori
+    R(g, 0, 150, W, 50, "#081320");
+    // Bufera di neve polare diagonale
+    g.fillStyle = "#e0f2fe";
+    for (let i = 0; i < 60; i++) {
+      const sx = (i * 31 - f * 2.8 + Math.sin(f * 0.05 + i) * 12 + W * 10) % W;
+      const sy = (i * 23 + f * 1.6) % H;
+      R(g, sx, sy, (i % 4 === 0 ? 3 : 1.5), (i % 4 === 0 ? 2 : 1), "rgba(224,242,254,0.75)");
+    }
+  }
+
+  // Sfondo: La Fucina Nera & Officine d'Assedio (Capitolo 3)
+  function bgKronenburgFucina(g, W, H, f) {
+    grad(g, 0, 0, W, H, ["#180804", "#2a1005", "#130906"]);
+    // Fornace monumentale al centro con fuoco e colate incandescenti
+    R(g, 100, 30, 120, 110, "#1c1917");
+    // Bocca della fornace ad arco
+    g.fillStyle = "#7c2d12";
+    g.beginPath(); g.arc(160, 85, 36, Math.PI, 0); g.rect(124, 85, 72, 45); g.fill();
+    // Fuoco magico azzurro/arancio pulsante
+    const fl = Math.sin(f * 0.25) * 4;
+    glow(g, 160, 100, 48 + fl, "249,115,22", 0.6);
+    glow(g, 160, 100, 28 + fl, "56,189,248", 0.5);
+    g.fillStyle = "#ea580c"; g.beginPath(); g.arc(160, 105, 24 + fl * 0.4, 0, 7); g.fill();
+    g.fillStyle = "#38bdf8"; g.beginPath(); g.arc(160, 105, 12 + fl * 0.2, 0, 7); g.fill();
+    // Tubazioni di vapore industriali e ingranaggi di bronzo
+    [30, W - 60].forEach((ix) => {
+      // Ingranaggio
+      g.strokeStyle = "#78350f"; g.lineWidth = 3;
+      g.beginPath(); g.arc(ix + 15, 60, 18, 0, Math.PI * 2); g.stroke();
+      // Tubo verticale
+      R(g, ix + 12, 10, 6, 130, "#44403c");
+      // Sbuffo di vapore
+      glow(g, ix + 15, 35, 18, "245,245,244", 0.35 + 0.1 * Math.sin(f * 0.2));
+    });
+    // Incudine ciclopica a destra
+    R(g, 230, 125, 28, 18, "#292524");
+    R(g, 224, 122, 40, 5, "#44403c");
+    // Griglia metallica inferiore con faville calde
+    R(g, 0, 145, W, 55, "#0c0a09");
+    for (let x = 0; x < W; x += 16) {
+      R(g, x, 145, 1, 55, "#292524");
+      R(g, 0, 165, W, 1, "#292524");
+      if ((x + Math.floor(f * 0.1)) % 32 === 0) {
+        R(g, x + 4, 175, 2, 2, "#f97316");
+      }
+    }
+  }
+
+  // Sfondo: La Guglia dell'Eclisse Celeste (Capitolo 4 Finale)
+  function bgKronenburgGuglia(g, W, H, f) {
+    grad(g, 0, 0, W, H, ["#020208", "#0f051d", "#1e1035"]);
+    // Mare di nubi tempestose sotto la guglia
+    g.fillStyle = "rgba(30, 27, 75, 0.75)";
+    for (let i = 0; i < 8; i++) {
+      const cx = (i * 48 + f * 0.3) % (W + 60) - 30;
+      g.beginPath(); g.arc(cx, 150 + Math.sin(f * 0.05 + i) * 6, 35, 0, Math.PI * 2); g.fill();
+    }
+    // L'ECLISSE SOLARE CELESTE: Anello di fuoco cremisi & viola con disco nero al centro
+    const ex = 160, ey = 60;
+    glow(g, ex, ey, 72, "225,29,72", 0.65);
+    glow(g, ex, ey, 45, "168,85,247", 0.8);
+    glow(g, ex, ey, 28, "251,191,36", 0.9);
+    // Corona di raggi dell'eclisse
+    g.strokeStyle = "rgba(244, 63, 94, 0.85)"; g.lineWidth = 2;
+    for (let a = 0; a < 16; a++) {
+      const ang = (a * Math.PI) / 8 + f * 0.01;
+      const len = 26 + (Math.sin(f * 0.15 + a) * 6);
+      g.beginPath(); g.moveTo(ex + Math.cos(ang) * 20, ey + Math.sin(ang) * 20);
+      g.lineTo(ex + Math.cos(ang) * (20 + len), ey + Math.sin(ang) * (20 + len)); g.stroke();
+    }
+    // Disco oscuro della luna nera
+    g.fillStyle = "#030206";
+    g.beginPath(); g.arc(ex, ey, 19, 0, Math.PI * 2); g.fill();
+    // Colonne gotiche spezzate ai due lati della piattaforma
+    [25, 65, W - 75, W - 35].forEach((px, pi) => {
+      R(g, px, 90 + pi * 8, 14, 80, "#18181b");
+      R(g, px - 2, 86 + pi * 8, 18, 5, "#27272a");
+    });
+    // Altare della Pietra delle Sentenze al centro
+    R(g, 136, 126, 48, 22, "#09090b");
+    R(g, 132, 124, 56, 4, "#27272a");
+    // Pietra del Geass fluttuante sull'altare
+    const pfl = Math.sin(f * 0.15) * 3;
+    glow(g, 160, 114 + pfl, 26, "239,68,68", 0.85);
+    g.fillStyle = "#ef4444";
+    g.beginPath();
+    g.moveTo(160, 106 + pfl); g.lineTo(166, 114 + pfl); g.lineTo(160, 122 + pfl); g.lineTo(154, 114 + pfl);
+    g.closePath(); g.fill();
+    g.fillStyle = "#fef08a"; g.fillRect(159, 113 + pfl, 2, 2);
+    // Pavimento d'ossidiana riflettente
+    R(g, 0, 148, W, 52, "#050308");
+    for (let x = 0; x < W; x += 28) {
+      R(g, x, 148, 1, 52, "#312e81");
+      R(g, 0, 170, W, 1, "#312e81");
+    }
+  }
+
   const BGS = {
     kb_corte: bgKronenburgCorte,
     kb_biblioteca: bgKronenburgBiblioteca,
-    kb_arena: bgKronenburgArena
+    kb_arena: bgKronenburgArena,
+    kb_sotterranei: bgKronenburgSotterranei,
+    kb_salatrono: bgKronenburgSalatrono,
+    kb_bastionegelo: bgKronenburgBastionegelo,
+    kb_fucina: bgKronenburgFucina,
+    kb_guglia: bgKronenburgGuglia
   };
 
   const prevBg = window.renderDetailedBg;
@@ -464,14 +714,12 @@
   //   u v q m = portoni ad arco in quercia e ferro
   //   J = vetrata istoriata gotica
   //   P = leggio con il Libro delle Sentenze
-  const FLOORS = ',pc:wy';
-  const SOLID = 'ABSTblnFkWx^><duvqmJP';
+  const FLOORS = ',pc:wyesg';
+  const SOLID = 'ABSTblnFkWx^><duvqmJPCGEHRM';
   const isFloor = (ch) => !!ch && FLOORS.includes(ch);
-
   const ZX = { map: null, under: null, id: "", cvs: null };
   const at = (tx, ty) => (ZX.map && ZX.map[ty] && ZX.map[ty][tx]) || "A";
   const undAt = (tx, ty) => (ZX.under && ZX.under[ty] && ZX.under[ty][tx]) || ",";
-
   let GP = null;
   const P = (x, y, w, h, c) => { GP.fillStyle = c; GP.fillRect(x, y, w, h); };
   const frNow = () => Math.floor(performance.now() / 16);
@@ -516,6 +764,23 @@
       P(sx, sy, 16, 16, (tx + ty) % 2 ? "#090d16" : "#0d131f");
       if (tx % 6 === 0) P(sx, sy, 1, 16, "rgba(239, 68, 68, 0.4)");
       if (ty % 6 === 0) P(sx, sy, 16, 1, "rgba(239, 68, 68, 0.4)");
+    } else if (f === "e") {
+      // Marmo d'ossidiana lucido a specchio
+      P(sx, sy, 16, 16, (tx + ty) % 2 ? "#030712" : "#090d16");
+      P(sx, sy, 16, 1, "#1e293b");
+      P(sx + 15, sy, 1, 16, "#020617");
+      if ((tx * 3 + ty) % 5 === 0) P(sx + 8, sy + 8, 2, 2, "rgba(239, 68, 68, 0.4)");
+    } else if (f === "s") {
+      // Scisto umido delle catacombe
+      P(sx, sy, 16, 16, (tx + ty) % 2 ? "#0a101d" : "#0f172a");
+      P(sx + 3, sy + 4, 3, 2, "#064e3b");
+      if (r < 0.2) P(sx + 9, sy + 10, 2, 2, "#10b981");
+    } else if (f === "g") {
+      // Griglia metallica della fucina
+      P(sx, sy, 16, 16, (tx + ty) % 2 ? "#18181b" : "#27272a");
+      P(sx, sy + 7, 16, 2, "#09090b");
+      P(sx + 7, sy, 2, 16, "#09090b");
+      if (r < 0.25) P(sx + 8, sy + 8, 2, 2, "#f97316");
     }
   }
 
@@ -663,6 +928,80 @@
       P(sx + 4, sy + 4, 8, 8, "#6366f1");
       P(sx + 7, sy, 2, 16, "#0f172a");
       P(sx, sy + 7, 16, 2, "#0f172a");
+    },
+    C(sx, sy, tx, ty) {
+      floorPaint(undAt(tx, ty), sx, sy, tx, ty);
+      // Gabbia di ferro per prigionieri
+      P(sx + 1, sy + 1, 14, 14, "#0f172a");
+      for (let i = 2; i <= 14; i += 3) {
+        P(sx + i, sy + 1, 1, 14, "#475569");
+      }
+      P(sx + 1, sy + 7, 14, 2, "#334155");
+      P(sx + 7, sy + 7, 2, 2, "#cbd5e1"); // Lucchetto
+    },
+    O(sx, sy, tx, ty, fr) {
+      floorPaint(undAt(tx, ty), sx, sy, tx, ty);
+      // Condotto di zolfo con griglia
+      P(sx + 2, sy + 2, 12, 12, "#042f2e");
+      P(sx + 3, sy + 3, 10, 10, "#064e3b");
+      const fl = Math.sin(fr / 7 + tx * 2 + ty) * 1.5;
+      GP.fillStyle = "rgba(16, 185, 129, 0.75)";
+      GP.beginPath(); GP.arc(sx + 8, sy + 8, 4 + fl * 0.4, 0, 7); GP.fill();
+      GP.fillStyle = "#a7f3d0";
+      P(sx + 7, sy + 7, 2, 2, "#a7f3d0");
+    },
+    G(sx, sy, tx, ty, fr) {
+      floorPaint(undAt(tx, ty), sx, sy, tx, ty);
+      // Ingranaggio industriale di bronzo
+      P(sx + 3, sy + 3, 10, 10, "#78350f");
+      P(sx + 5, sy + 5, 6, 6, "#92400e");
+      P(sx + 7, sy + 7, 2, 2, "#fbbf24");
+      const ang = (fr / 12 + tx) % 4;
+      if (ang < 2) {
+        P(sx + 7, sy + 1, 2, 3, "#d97706");
+        P(sx + 7, sy + 12, 2, 3, "#d97706");
+      } else {
+        P(sx + 1, sy + 7, 3, 2, "#d97706");
+        P(sx + 12, sy + 7, 3, 2, "#d97706");
+      }
+    },
+    H(sx, sy, tx, ty, fr) {
+      floorPaint("e", sx, sy, tx, ty);
+      // Altare della Pietra delle Sentenze
+      P(sx + 2, sy + 5, 12, 9, "#18181b");
+      P(sx + 1, sy + 4, 14, 2, "#27272a");
+      const fl = Math.sin(fr / 8 + tx) * 1.2;
+      GP.fillStyle = "#ef4444";
+      GP.beginPath();
+      GP.moveTo(sx + 8, sy + 1 + fl * 0.3);
+      GP.lineTo(sx + 11, sy + 4);
+      GP.lineTo(sx + 8, sy + 7);
+      GP.lineTo(sx + 5, sy + 4);
+      GP.closePath(); GP.fill();
+      GP.fillStyle = "#fef08a"; P(sx + 7, sy + 3, 2, 2, "#fef08a");
+    },
+    E(sx, sy, tx, ty) {
+      floorPaint(undAt(tx, ty), sx, sy, tx, ty);
+      // Balista da bastione congelata
+      P(sx + 3, sy + 5, 10, 8, "#334155");
+      P(sx + 6, sy + 2, 4, 12, "#475569");
+      P(sx + 1, sy + 4, 14, 2, "#94a3b8");
+      P(sx + 7, sy + 1, 2, 2, "#bae6fd"); // Brina
+    },
+    R(sx, sy, tx, ty) {
+      floorPaint(undAt(tx, ty), sx, sy, tx, ty);
+      // Tavola del Banchetto Reale
+      P(sx + 1, sy + 2, 14, 12, "#451a03");
+      P(sx + 2, sy + 3, 12, 10, "#7f1d1d"); // Tovaglia scarlatta
+      P(sx + 4, sy + 5, 3, 3, "#facc15"); // Calice oro
+      P(sx + 9, sy + 5, 3, 3, "#e2e8f0"); // Piatto argento
+    },
+    M(sx, sy, tx, ty) {
+      // Arazzo ducale cremisi
+      P(sx + 1, sy, 14, 16, "#831843");
+      P(sx + 2, sy + 1, 12, 14, "#9f1239");
+      P(sx + 5, sy + 4, 6, 8, "#fbbf24"); // Sigillo d'oro
+      P(sx + 7, sy + 6, 2, 4, "#0f172a");
     },
     u: (sx, sy, tx, ty) => doorTile(sx, sy, "#7f1d1d"),
     v: (sx, sy, tx, ty) => doorTile(sx, sy, "#1e3a8a"),
@@ -920,7 +1259,39 @@
       return `• <b>${esc(parts[1] || "Indizio")}</b>: <span style="color:var(--dim)">${esc(parts[2] || "")}</span>`;
     }).join("<br>") || "<span style='color:var(--dim)'>Nessuna prova ancora raccolta. Esplora la Fortezza e usa l'Occhio di Geass.</span>";
 
-    const html = `<b>${esc(h.name)}</b> · n. ${esc(h.num)} (Erede del Sigillo)<br><span style="color:var(--dim)">Tiro Risvegliato: «${esc(h.shotName || "Il Tiro della Corona")}»</span><br><br><b>Codice delle Sentenze & Prove</b><br>${cluesRows}<br><br><span style="color:var(--dim)">Vittorie in Arena: ${m.wins} · Sconfitte: ${m.losses}</span>`;
+    const cPrig = F.get("scelta_prigioni") === "geass_boia"
+      ? "Comando Assoluto su Brutus (Sottomissione Geass)"
+      : F.get("scelta_prigioni") === "sabotaggio_zolfo"
+        ? "Sabotaggio Condotti di Zolfo (Astuzia Deduttiva)"
+        : "In attesa d'indagine";
+
+    const cAll = F.get("alleanza_nobile") === "lyanna"
+      ? "Patto d'Ombra con Lady Lyanna (Cospirazione Machiavellica)"
+      : F.get("alleanza_nobile") === "zero"
+        ? "La Giustizia Assoluta di Zero (Nessun compromesso nobiliare)"
+        : "In attesa d'indagine";
+
+    const cVesp = F.get("duello_vespera") === "verita"
+      ? "Verità dell'Ala Scarlatta (Confessione delle Origini)"
+      : F.get("duello_vespera") === "logica"
+        ? "Contro-Deduzione Logica (Smascherato il complotto di corte)"
+        : "In attesa d'indagine";
+
+    const cTact = F.get("fucina_tattica") === "distruggi_armi"
+      ? "Incursione alle Fucine (Armeria ducale distrutta)"
+      : F.get("fucina_tattica") === "potenzia_tiro"
+        ? "Tacchetti d'Ossidiana & Tiro Termico (Potenziamento estremo)"
+        : "In attesa d'indagine";
+
+    const cEnd = F.get("finale_kronenburg") === "zero_requiem"
+      ? "ZERO REQUIEM · Il Sacrificio del Corvo (Repubblica Libera & Leggenda nell'Ombra)"
+      : F.get("finale_kronenburg") === "imperatore_ossidiana"
+        ? "IL NUOVO IMPERATORE · La Corona d'Ossidiana (Dominio d'Acciaio & Ordine Assoluto)"
+        : F.get("finale_kronenburg") === "volo_rondine"
+          ? "IL VOLO DELLA RONDINE · Libertà Errante (Pietra infranta & Ritorno sui Campi)"
+          : "In corso d'investigazione";
+
+    const html = `<b>${esc(h.name)}</b> · n. ${esc(h.num)} (Erede del Sigillo)<br><span style="color:var(--dim)">Tiro Risvegliato: «${esc(h.shotName || "Il Tiro della Corona")}»</span><br><br><b>Codice delle Sentenze & Prove</b><br>${cluesRows}<br><br><b>Scelte Morali & Intrighi Politici</b><br>• <b>Dilemma delle Segrete (Cap. 2):</b> <span style="color:var(--dim)">${cPrig}</span><br>• <b>Alleanza di Corte (Cap. 2):</b> <span style="color:var(--dim)">${cAll}</span><br>• <b>Interrogatorio di Vespera (Cap. 3):</b> <span style="color:var(--dim)">${cVesp}</span><br>• <b>Strategia del Gelo (Cap. 3):</b> <span style="color:var(--dim)">${cTact}</span><br>• <b>Epilogo del Trono (Cap. 4):</b> <span style="color:var(--dim)">${cEnd}</span><br><br><span style="color:var(--dim)">Vittorie in Arena: ${m.wins} · Sconfitte: ${m.losses}</span>`;
 
     if (inZone) {
       api.trAsk("voce", html, [{ label: "◂ Torna a esplorare", fn: done }], bgNow());
@@ -957,6 +1328,7 @@
     get api() { return api; }, TS, T, esc, hash, rnd, safe, F, mem, save, stepOf, setStep, note, once,
     reward, coinsGive, bal, hero, castHero, say, ask, done, go, enterZone, playMatch, finishChapter,
     addClue, triggerGeassVisualFx, sfxGeassHeartbeat, sfxGeassResonance, sfxClueFound,
+    sfxGeassShatter, sfxDramaticRevelation,
     P: (x, y, w, h, c) => P(x, y, w, h, c), glow, grad, floorPaint, drawTile, makeLayers,
     frNow, refreshZone, bgNow,
     zone: registerZone,
@@ -1273,8 +1645,26 @@
 
       if (s === 7) {
         return say([
-          ["kb_celia", "Hai sconfitto i campioni di Malakar sull'ossidiana e scosso le fondamenta di Kronenburg. Ma Malakar non accetterà la sconfitta così facilmente... Il Capitolo 2 ci porterà nel cuore della sua Sala del Trono."],
-        ], done);
+          ["kb_celia", "Hai sconfitto i campioni di Malakar sull'ossidiana e scosso le fondamenta di Kronenburg. Ma Malakar non accetterà la sconfitta così facilmente... I suoi fedelissimi hanno gettato i testimoni nelle Catacombe sotterranee e convocato un concilio d'emergenza nella Sala del Trono."],
+        ], () => {
+          ask("kb_celia", "«Sei pronto a calarti nei sotterranei di Kronenburg per iniziare il Capitolo 2, {n}?»", [
+            {
+              label: "⚔️ «Scendiamo subito nelle Catacombe!»",
+              cls: "hot",
+              fn: () => {
+                setStep(N, 8);
+                const m = mem();
+                if (m.ch <= 1) m.ch = 2;
+                save();
+                continueStory();
+              }
+            },
+            {
+              label: "«Voglio esplorare ancora la Corte d'Armi»",
+              fn: done
+            }
+          ]);
+        });
       }
 
       return say([
@@ -1594,6 +1984,1150 @@
     };
   });
 
+  // ============================================================================
+  // CAPITOLO 2 · LA SCACCHIERA DI SANGUE & I SOTTERRANEI DELLE OMBRE
+  // ============================================================================
+  addChapter(function (X) {
+    const { T, F, say, ask, done, go, note, setStep, once, reward, hero, esc, addClue, triggerGeassVisualFx, sfxGeassHeartbeat, sfxGeassShatter, sfxDramaticRevelation } = X;
+    const N = 2, S = () => X.stepOf(N);
+
+    // Personaggi del Capitolo 2
+    X.cast("kb_lyanna", {
+      name: "Lady Lyanna", tag: "nobiltà", hair: "#1c1917", style: "long", skin: "#fdf4ff", eye: "#e11d48",
+      bg: ["#4c0519", "#f43f5e"], shirt: "#881337"
+    }, "Sorellastra del Duca Malakar. Sguardo tagliente da vipera reale in abito di seta cremisi. Odia il fratello quanto te, ma il suo fine ultimo è reclamare il trono per sé: «Nella politica di Kronenburg o vinci o muori. Non c'è terra di mezzo, numero {num}».");
+
+    X.cast("kb_rennick", {
+      name: "Rennick l'Ombra", tag: "spia", hair: "#475569", style: "hood", skin: "#cbd5e1", eye: "#065f46",
+      bg: ["#022c22", "#10b981"], shirt: "#064e3b"
+    }, "Capo della rete clandestina dei Corvi nei bassifondi. Un maestro di veleni e chiavi contraffatte che si muove silenzioso come fumo nelle catacombe.");
+
+    X.cast("kb_brutus", {
+      name: "Brutus il Boia", tag: "carceriere", hair: "#0f172a", style: "buzz", skin: "#94a3b8", eye: "#dc2626",
+      beard: true, bg: ["#18181b", "#7f1d1d"], shirt: "#020617"
+    }, "Colosso in armatura d'ebano forgiata a becco di corvo. Custode delle chiavi delle prigioni e fedelissimo esecutore delle sentenze capitali di Malakar.");
+
+    X.cast("kb_prigioniero", {
+      name: "Damas il Dissidente", tag: "anziano", hair: "#e2e8f0", style: "messy", skin: "#f1f5f9", eye: "#0284c7",
+      beard: true, bg: ["#09101d", "#38bdf8"], shirt: "#1e293b"
+    }, "Anziano cancelliere di Re Alden. Rinchiuso nella cella dei dannati per essersi rifiutato di apporre il sigillo di stato sul decreto di incoronazione di Malakar.");
+
+    // Cosmetico speciale Capitolo 2
+    X.cos("kb_maschera_zero", { kind: "acc", label: "Maschera di Zero & Visiera Cremisi", val: "#18181b", from: "Completa il Capitolo 2 di Kronenburg" });
+
+    const goal = (s) => ({
+      0: "Parla con Rennick l'Ombra nelle Catacombe per individuare la cella di Damas.",
+      1: "Affronta Brutus il Boia alla Cella dei Dannati: usa il Geass o sabota i condotti di zolfo.",
+      2: "Interroga Damas il Dissidente nella cella per recuperare il testamento di Re Alden.",
+      3: "Sali attraverso il passaggio segreto (a nord) fino alla Sala del Trono d'Ebano.",
+      4: "Interroga Lady Lyanna al Banchetto Mascherato: scegli se stringere un patto d'ombra o rifiutare.",
+      5: "Incontra Lady Vespera nella Sala del Trono per formalizzare il mandato d'arresto.",
+      6: "Scendi in campo contro i Boia delle Segrete e la Guardia Nera del Duca!",
+      7: "Capitolo 2 completato! Parla con Celia per pianificare la marcia verso il Bastione dei Ghiacci."
+    }[s] || "Capitolo 2 concluso. Esplora le catacombe e raccogli i sigilli nascosti.");
+
+    const zones = {
+      // 1. Catacombe dei Dannati
+      kb_sotterranei: {
+        name: "Kronenburg · Catacombe dei Dannati", short: "Le Catacombe", sub: "Prigioni di pietra nera, zolfo e catene",
+        w: 38, h: 26, start: [18, 22], theme: "torino", bg: "kb_sotterranei",
+        item: ["Sigillo di Corvo", "Sigilli"], itemCos: "kb_maschera_zero",
+        items: [[4, 4], [33, 4], [6, 18], [31, 18]],
+        areas: [
+          [2, 2, 14, 12, "Il Settore delle Gabbie"],
+          [22, 2, 35, 12, "I Condotti di Zolfo"],
+          [14, 10, 23, 20, "L'Atrio del Boia"],
+          [16, 2, 21, 6, "La Scala per il Trono"]
+        ],
+        hints: () => ({
+          "Il Settore delle Gabbie": "Celle di ferro incassate nella pietra stillante. Qui giacciono i testimoni del regicidio.",
+          "I Condotti di Zolfo": "Grate da cui fuoriescono esalazioni verdastre luminescenti. Rennick si nasconde tra le ombre.",
+          "L'Atrio del Boia": "Un grande braciere illumina il banco degli strumenti di tortura e l'ascia di Brutus.",
+          "La Scala per il Trono": "Un passaggio ad arco in quercia ferrata che conduce direttamente sotto la Sala del Trono."
+        }),
+        act: {
+          C: "Esamina le sbarre della cella", O: "Osserva il condotto di zolfo",
+          B: "Scaldati al braciere verde", x: "Ispeziona le casse di catene",
+          "^": "Sali alla Sala del Trono", d: "Torna alla Corte d'Armi"
+        },
+        build(Ls) {
+          Ls.lay(0, 0, 37, 1, "A");
+          Ls.lay(0, 0, 1, 25, "A");
+          Ls.lay(36, 0, 37, 25, "A");
+          Ls.lay(0, 24, 37, 25, "A");
+          // Pavimento in scisto umido
+          Ls.lay(2, 2, 35, 23, "s");
+          // Condotti di zolfo
+          Ls.lay(4, 3, 12, 3, "O");
+          Ls.lay(24, 3, 32, 3, "O");
+          // Celle di contenimento a ovest
+          Ls.put(4, 6, "C"); Ls.put(8, 6, "C"); Ls.put(12, 6, "C");
+          // Bracieri
+          Ls.put(14, 12, "B"); Ls.put(23, 12, "B");
+          // Casse
+          Ls.put(4, 20, "x"); Ls.put(32, 20, "x");
+          // Passaggio nord verso la Sala del Trono
+          Ls.put(18, 1, "^"); Ls.put(19, 1, "^");
+          // Uscita sud
+          Ls.put(18, 24, "d"); Ls.put(19, 24, "d");
+        },
+        npcs(s) {
+          const list = [];
+          list.push({ id: "kb_celia", at: [14, 20] });
+          if (s >= 0) list.push({ id: "kb_rennick", at: [28, 5] });
+          if (s <= 1) list.push({ id: "kb_brutus", at: [8, 8] });
+          if (s >= 1) list.push({ id: "kb_prigioniero", at: [8, 5] });
+          return list;
+        }
+      },
+      // 2. Sala del Trono d'Ebano
+      kb_salatrono: {
+        name: "Kronenburg · Sala del Trono d'Ebano", short: "Sala del Trono", sub: "Trono delle Tre Corone, arazzi cremisi e nobili",
+        w: 40, h: 26, start: [19, 22], theme: "torino", bg: "kb_salatrono",
+        item: ["Sigillo di Corvo", "Sigilli"],
+        items: [[3, 5], [36, 5], [10, 16], [29, 16]],
+        areas: [
+          [16, 2, 23, 8, "Il Trono delle Spade"],
+          [2, 8, 14, 20, "Il Tavolo del Banchetto"],
+          [26, 8, 37, 20, "La Loggia dei Giudici"],
+          [16, 18, 23, 24, "L'Ingresso d'Onore"]
+        ],
+        hints: () => ({
+          "Il Trono delle Spade": "Lo scranno reale forgiato con l'acciaio dei condottieri sconfitti. Il trono è attualmente vacante.",
+          "Il Tavolo del Banchetto": "Coppe dorate, frutta candita e vino speziato. Lady Lyanna osserva i convitati da dietro una maschera.",
+          "La Loggia dei Giudici": "Lady Vespera analizza documenti legali mentre le guardie d'onore vigilano.",
+          "L'Ingresso d'Onore": "Portoni ad arco vigilati da sentinelle con alabarde nere."
+        }),
+        act: {
+          W: "Ammira il Trono delle Spade", R: "Esamina il calice di vino dorato",
+          M: "Osserva l'arazzo nobiliare", l: "Guarda il candelabro d'oro",
+          d: "Scendi alle Catacombe"
+        },
+        build(Ls) {
+          Ls.lay(0, 0, 39, 1, "A");
+          Ls.lay(0, 0, 1, 25, "A");
+          Ls.lay(38, 0, 39, 25, "A");
+          Ls.lay(0, 24, 39, 25, "A");
+          // Pavimento in marmo nero a specchio
+          Ls.lay(2, 2, 37, 23, "e");
+          // Tappeto imperiale centrale
+          Ls.lay(18, 4, 21, 23, "c");
+          // Il Trono in alto
+          Ls.put(19, 3, "W"); Ls.put(20, 3, "W");
+          // Arazzi ai lati del trono
+          Ls.put(15, 2, "M"); Ls.put(24, 2, "M");
+          // Tavoli del banchetto
+          Ls.lay(4, 10, 12, 10, "R");
+          Ls.lay(4, 14, 12, 14, "R");
+          // Candelabri
+          [[16, 6], [23, 6], [16, 16], [23, 16]].forEach(([cx, cy]) => Ls.put(cx, cy, "l"));
+          // Passaggio sud
+          Ls.put(19, 24, "d"); Ls.put(20, 24, "d");
+        },
+        npcs(s) {
+          const list = [];
+          list.push({ id: "kb_celia", at: [22, 21] });
+          if (s >= 3) list.push({ id: "kb_lyanna", at: [8, 12] });
+          if (s >= 5) list.push({ id: "kb_vespera", at: [30, 12] });
+          if (s >= 6) list.push({ id: "kb_malakar", at: [19, 5] });
+          return list;
+        }
+      }
+    };
+
+    // Dialoghi Capitolo 2
+    function celiaTalk2() {
+      const s = S();
+      if (s === 0) {
+        return say([
+          ["kb_celia", "Siamo scesi nelle viscere di Kronenburg, {n}."],
+          ["hero", "L'aria qui puzza di zolfo e muffa millenaria."],
+          ["kb_celia", "Malakar crede di aver soffocato la ribellione rinchiudendo qui i vecchi consiglieri di Re Alden. Rennick l'Ombra, il capo dei nostri informatori, è appostato vicino ai condotti di zolfo a nord-est. Parla con lui per localizzare la cella di Damas."],
+        ], done);
+      }
+      if (s === 7) {
+        return say([
+          ["kb_celia", "La vittoria sui Boia delle Segrete ha spalancato le porte della verità. Abbiamo il testamento autentico di Re Alden."],
+          ["hero", "Malakar non ha più alcuna legittimità legale al trono."],
+          ["kb_celia", "Eppure è fuggito verso nord, al Bastione dei Ghiacci Eterni, dove il Generale Voss comanda l'esercito d'assedio. Il Capitolo 3 ci attende nella tormenta artica."],
+        ], () => {
+          if (CHAPTERS[3]) {
+            ask("kb_celia", "«Sei pronto a marciare verso il Bastione dei Ghiacci per il Capitolo 3, {n}?»", [
+              {
+                label: "❄️ «Marciamo verso il Bastione dei Ghiacci!»",
+                cls: "hot",
+                fn: () => {
+                  setStep(N, 8);
+                  const m = mem();
+                  if (m.ch <= 2) m.ch = 3;
+                  save();
+                  X.continueStory();
+                }
+              },
+              { label: "«Voglio esplorare ancora la Sala del Trono»", fn: done }
+            ]);
+          } else {
+            done();
+          }
+        });
+      }
+      return say([
+        ["kb_celia", "Ricorda: Lady Lyanna è pericolosa quanto suo fratello. Non lasciarti abbagliare dalla sua maschera di seta."],
+      ], done);
+    }
+
+    function rennickTalk() {
+      const s = S();
+      if (s === 0) {
+        return say([
+          ["kb_rennick", "Shhh! Abbassa la voce, numero {num}. I ratti qui dentro hanno orecchie ben pagate dal Duca."],
+          ["hero", "Cerco Damas il Dissidente. Dov'è rinchiuso?"],
+          ["kb_rennick", "Nella Cella dei Dannati, a ovest. Ma c'è un problema grosso: Brutus il Boia d'Acciaio fa la ronda davanti alle sbarre con un'ascia bipenne. Non puoi avvicinarti senza essere fatto a pezzi."],
+        ], () => {
+          setStep(N, 1);
+          note("Rennick ha indicato la Cella dei Dannati: Brutus il Boia sbarra la via.");
+          done();
+        });
+      }
+      return say([
+        ["kb_rennick", "Se hai bisogno di vie di fuga, i condotti portano dritti al fiume sotterraneo."],
+      ], done);
+    }
+
+    function brutusTalk() {
+      const s = S();
+      if (s !== 1) return say([["kb_brutus", "Nessuno parla con i condannati senza un ordine scritto con sigillo di cera nera."]], done);
+      return ask("kb_brutus", "«Chi osa avvicinarsi alla Cella dei Dannati?! Fai un altro passo e ti stacco la testa dal collo, plebeo!»", [
+        {
+          label: "👁️ [ATTIVA IL GEASS]: «In ginocchio! Getta l'ascia e spalanca la cella per sempre!»",
+          cls: "hot",
+          fn: () => {
+            triggerGeassVisualFx(() => {
+              sfxGeassShatter();
+              F.set("scelta_prigioni", "geass_boia");
+              setStep(N, 2);
+              addClue("brutus_geass", "Sottomissione di Brutus", "Il colosso è stato piegato dal Geass e ha consegnato le chiavi maestre delle segrete.");
+              note("Brutus il Boia sottomesso dal comando assoluto del Geass.");
+              say([
+                ["voce", "L'ala scarlatta balena nel tuo occhio sinistro. L'ascia di Brutus cade al suolo con un frastuono metallico rimbombante."],
+                ["kb_brutus", "(Occhi vitrei cerchiati di rosso) Ordine... ricevuto... Il volere vostro... è legge assoluta... Ecco la chiave delle segrete..."],
+                ["voce", "Brutus sfila la catena e spalanca la grata di ferro della cella di Damas."],
+              ], done);
+            });
+          }
+        },
+        {
+          label: "🧪 [SABOTAGGIO DEI CONDOTTI]: Rompi la valvola di zolfo per addormentare i carcerieri!",
+          fn: () => {
+            F.set("scelta_prigioni", "sabotaggio_zolfo");
+            setStep(N, 2);
+            addClue("sabotaggio_zolfo", "Astuzia dei Condotti", "Hai saturato il settore con i vapori soporiferi, neutralizzando i carcerieri senza usare il Geass.");
+            note("Carcerieri neutralizzati con astuzia attraverso le esalazioni di zolfo.");
+            say([
+              ["voce", "Con un calcio ben assestato forzi la valvola del condotto. Una nube densa di zolfo verde invade l'atrio."],
+              ["kb_brutus", "Cosa... soffoco... non respiro... allarme..."],
+              ["voce", "Brutus barcolla e crolla a terra svenuto sul selciato umido. La chiave della cella scivola dalla sua cintura!"],
+            ], done);
+          }
+        }
+      ]);
+    }
+
+    function damasTalk() {
+      const s = S();
+      if (s === 2) {
+        return say([
+          ["kb_prigioniero", "Sei... sei tu? Il giovane con il numero {num} sul petto... Credevo che nessuno avrebbe più osato sfidare Malakar."],
+          ["hero", "Damas, sono venuto a liberarti. Mastro Baelor mi ha detto che tu possiedi l'unica copia autentica del testamento reale."],
+          ["kb_prigioniero", "(Solleva una pietra mobile sotto il suo giaciglio) È qui. Re Alden sapeva che Malakar tramava nell'ombra. Questo rotolo di pergamena con il Sigillo delle Tre Corone disereda Malakar e nomina te e l'ordine dei Corvi garanti della corona!"],
+          ["hero", "Questa è la fine per il Duca. Con questo documento, la legge è dalla nostra parte."],
+          ["kb_prigioniero", "Attento, ragazzo. Lady Lyanna ha convocato i baroni nella Sala del Trono per un banchetto mascherato. Vuole farsi proclamare reggente al posto del fratello. Sali dalla scala a nord e smascherala!"],
+        ], () => {
+          setStep(N, 3);
+          addClue("testamento_alden", "Il Testamento di Re Alden", "Documento sovrano originale con il Sigillo d'Oro che disereda Malakar.");
+          note("Recuperato il Testamento autentico di Re Alden.");
+          done();
+        });
+      }
+      return say([
+        ["kb_prigioniero", "Prendi quel rotolo e mostralo ai giudici. Che la giustizia trionfi su Kronenburg!"],
+      ], done);
+    }
+
+    function lyannaTalk() {
+      const s = S();
+      if (s < 4) return say([["kb_lyanna", "Un ospite non annunciato al mio banchetto? Le mie guardie dovrebbero essere più attente."]], done);
+      if (s === 4) {
+        return say([
+          ["kb_lyanna", "Ti stavo osservando, {n}. Hai sconfitto i campioni sull'ossidiana e fatto fuggire mio fratello dai bastioni. Notevole."],
+          ["hero", "Ho il testamento di Re Alden, Lady Lyanna. La farsa di casa Valecorvo è finita."],
+          ["kb_lyanna", "(Sorride enigmaticamente, portando il calice d'oro alle labbra) Mio fratello è un bruto senza visione, {n}. Ma tu ed io possiamo accordarci. Tu mi consegni il testamento e mi proclami Regina Reggente... e in cambio io concederò ai Corvi e alla tua gente l'amnistia totale e le terre del borgo!"],
+        ], () => {
+          ask("kb_lyanna", "«Qual è la tua risposta, {n}? Vuoi essere il braccio armato del mio nuovo impero, o un martire dimenticato?»", [
+            {
+              label: "👑 [PATTO D'OMBRA]: «Accetto l'alleanza con te, Lyanna: rovesciamo Malakar dall'interno!»",
+              cls: "hot",
+              fn: () => {
+                sfxDramaticRevelation();
+                F.set("alleanza_nobile", "lyanna");
+                setStep(N, 5);
+                addClue("patto_lyanna", "Patto con Lady Lyanna", "Hai stretto un patto machiavellico con la sorellastra del Duca per il controllo del trono.");
+                note("Patto d'Ombra suggellato con Lady Lyanna nella Sala del Trono.");
+                say([
+                  ["kb_lyanna", "Scelta saggia. La politica è un gioco crudele e tu hai appena giocato la mossa vincente. Lady Vespera sta arrivando: la convinceremo insieme."],
+                ], done);
+              }
+            },
+            {
+              label: "⚖️ [LA GIUSTIZIA DI ZERO]: «Rifiuto! Nessun re, nessun tiranno: il potere tornerà al popolo!»",
+              fn: () => {
+                sfxGeassHeartbeat();
+                F.set("alleanza_nobile", "zero");
+                setStep(N, 5);
+                addClue("giustizia_zero", "La Giustizia di Zero", "Hai respinto ogni compromesso con la nobiltà corrotta, proclamando la sovranità popolare.");
+                note("Rifiutato il patto con Lyanna: fedeltà assoluta all'ideale della Repubblica libera.");
+                say([
+                  ["kb_lyanna", "(I suoi occhi brillano d'ira fredda) Sei un idealista pericoloso, {n}. Vedremo quanto durerà la tua purezza sul campo di battaglia!"],
+                ], done);
+              }
+            }
+          ]);
+        });
+      }
+      return say([
+        ["kb_lyanna", "La scacchiera si sta muovendo velocemente... Preparati al confronto con i giudici."],
+      ], done);
+    }
+
+    function vesperaTalk2() {
+      const s = S();
+      if (s < 5) return say([["kb_vespera", "Il tribunale sta esaminando le prove fornite nel Capitolo 1."]], done);
+      if (s === 5) {
+        return say([
+          ["kb_vespera", "Campione {n}, ho esaminato il documento di Damas. Il sigillo di cera è autentico al cento per cento. Re Alden non ha mai designato Malakar come successore."],
+          ["hero", "Allora emetti il mandato di cattura immediato."],
+          ["kb_vespera", "È già firmato. Ma Malakar ha ordinato alla sua Guardia Nera e ai Boia d'élite di occupare l'accesso alla roccaforte per sbarrarci il passo. Dovrai guidare i Corvi in campo e spezzare le loro linee d'acciaio!"],
+        ], () => {
+          setStep(N, 6);
+          note("Lady Vespera ha emesso il mandato di cattura contro Malakar: pronti per la sfida tattica.");
+          done();
+        });
+      }
+      return say([
+        ["kb_vespera", "I campioni della Guardia Nera ti aspettano al varco. Spezza la loro formazione!"],
+      ], done);
+    }
+
+    function malakarTalk2() {
+      return say([
+        ["kb_malakar", "Credete di aver vinto perché avete trovato un pezzo di carta nelle segrete?! La corona appartiene a chi ha la forza di tenerla sul capo! Boia d'ebano, massacrateli!"],
+      ], () => {
+        startMatch2();
+      });
+    }
+
+    function startMatch2() {
+      X.playMatch({
+        id: "kb_match_2",
+        chap: "Kronenburg · Il Giudizio delle Segrete",
+        us: "I Corvi di {n}",
+        mate: "Celia",
+        min: 45,
+        intro: "Partita decisiva per il controllo delle segrete e della Sala del Trono! Il tuo Campione {n} sfida la Guardia Nera dei Boia!",
+        team: (t, st) => ({
+          name: "Guardia Nera dei Boia",
+          col: "#18181b",
+          style: "Marcatura a Uomo Spietata & Contrasto di Ferro",
+          atk: t(st.atk * 1.1),
+          def: t(st.def * 1.3),
+          vel: t(st.vel * 0.95),
+          specials: ["Mannaia d'Ebano", "Gabbia d'Acciaio"]
+        }),
+        done: (r) => {
+          if (r.win) {
+            setStep(N, 7);
+            finishChapter(N, "liberazione_segrete");
+            note("Vittoria schiacciante contro la Guardia Nera: segrete liberate e Sala del Trono conquistata!");
+            const rewMsg = reward("kb_ch2_win", {
+              coins: 500,
+              cos: "kb_maschera_zero"
+            });
+            say([
+              ["voce", "RETEEE! Un fendente imparabile scagliato dal tuo tiro «{tiro}» piega le mani del portiere in armatura e squarcia la rete delle ombre!"],
+              ["voce", "La Guardia Nera depone le armi. I prigionieri politici escono dalle celle tra grida di giubilo per il Campione {n}!"],
+              ["kb_celia", "La prima fortezza è caduta. Malakar è in fuga verso il Bastione dei Ghiacci Eterni."],
+              ["voce", `CAPITOLO 2 CONCLUSO CON SUCCESSO! ${rewMsg.join(" · ")}`],
+            ], () => {
+              go("kb_salatrono", 19, 15);
+            });
+          } else {
+            say([
+              ["kb_lyanna", "La Guardia Nera ha retto l'urto. Riorganizza le tue linee tattiche e riprova!"],
+            ], done);
+          }
+        }
+      });
+    }
+
+    const obj = {
+      "kb_sotterranei:^": () => go("kb_salatrono", 19, 22),
+      "kb_sotterranei:d": () => go("kb_corte", 19, 21),
+      "kb_salatrono:d": () => go("kb_sotterranei", 18, 4),
+      "kb_sotterranei:C": () => {
+        if (S() < 2) say([["voce", "La cella di Damas è sbarrata da catene pesanti. Brutus il Boia sorveglia l'ingresso con la sua ascia."]], done);
+        else say([["voce", "La cella è ora aperta. Damas è stato liberato e ha consegnato il testamento autentico."]], done);
+      },
+      "kb_sotterranei:O": () => say([["voce", "Dalla grata sale un vapore denso di zolfo con bagliori verdi fosforescenti."]], done),
+      "kb_sotterranei:B": () => say([["voce", "Il braciere arde con carbone fossile e zolfo, scaldando a stento la pietra ghiacciata."]], done),
+      "kb_salatrono:W": () => say([["voce", "Il Trono delle Tre Corone. Centinaia di lame forgiate a freddo compongono lo schienale: il simbolo del potere assoluto di Kronenburg."]], done),
+      "kb_salatrono:R": () => say([["voce", "Tavola imbandita per il banchetto dei nobili: calici d'oro zecchino e vassoi d'argento carichi di spezie orientali."]], done),
+      "kb_salatrono:M": () => say([["voce", "Un antico arazzo di seta cremisi intessuto con fili d'oro. Raffigura il Corvo Imperiale che artiglia la corona."]], done)
+    };
+
+    const talk = {
+      kb_celia: celiaTalk2,
+      kb_rennick: rennickTalk,
+      kb_brutus: brutusTalk,
+      kb_prigioniero: damasTalk,
+      kb_lyanna: lyannaTalk,
+      kb_vespera: vesperaTalk2,
+      kb_malakar: malakarTalk2
+    };
+
+    return {
+      n: N,
+      title: "La Scacchiera di Sangue",
+      sub: "I sotterranei delle ombre, il testamento di pietra e il banchetto mascherato",
+      start: "kb_sotterranei",
+      zones,
+      talk,
+      obj,
+      goal,
+      intro: () => [
+        ["voce", "KRONENBURG · CAPITOLO 2: LA SCACCHIERA DI SANGUE", "kb_sotterranei"],
+        ["voce", "Scendendo per i condotti segreti dell'Archivio, raggiungi le viscere buie della fortezza: le Catacombe dei Dannati.", "kb_sotterranei"],
+        ["voce", "Mentre nelle prigioni risuona il gocciolio dell'acqua sulfurea e il gemito dei dissidenti incatenati, al piano superiore nella Sala del Trono i nobili festeggiano dietro maschere di velluto.", "kb_sotterranei"],
+        ["voce", "Celia ti accompagna nell'oscurità: è tempo di liberare i testimoni della verità e ribaltare la scacchiera!", "kb_sotterranei"]
+      ]
+    };
+  });
+
+  // ============================================================================
+  // CAPITOLO 3 · LA FORTEZZA DI GHIACCIO & IL GIURAMENTO DI VALECORVO
+  // ============================================================================
+  addChapter(function (X) {
+    const { T, F, say, ask, done, go, note, setStep, once, reward, hero, esc, addClue, triggerGeassVisualFx, sfxGeassHeartbeat, sfxGeassShatter, sfxDramaticRevelation } = X;
+    const N = 3, S = () => X.stepOf(N);
+
+    // Personaggi del Capitolo 3
+    X.cast("kb_voss", {
+      name: "Gen. Voss", tag: "comandante", hair: "#94a3b8", style: "short", skin: "#cbd5e1", eye: "#0284c7",
+      beard: true, bg: ["#082f49", "#38bdf8"], shirt: "#0f172a"
+    }, "Comandante supremo delle legioni d'inverno di Kronenburg. Veterano di cento campagne vestito di corazza polare e mantello di lupo artico: «La pietà è una debolezza che congela il sangue prima del nemico. Dimostrami che la tua fama non è solo polvere da sparo, numero {num}».");
+
+    X.cast("kb_merrick", {
+      name: "Merrick il Fabbro", tag: "artigiano", hair: "#b45309", style: "messy", skin: "#d97706", eye: "#f59e0b",
+      beard: true, bg: ["#180804", "#ea580c"], shirt: "#451a03"
+    }, "Mastro forgiatore della Fucina Nera. Conosce il segreto per fondere il minerale d'ossidiana con le sfere da gioco per generare traiettorie rotanti capaci di perforare qualsiasi barriera difensiva.");
+
+    X.cast("kb_soldato_ghiaccio", {
+      name: "Sentinella Polare", tag: "guardia", hair: "#334155", style: "buzz", skin: "#e2e8f0",
+      cap: "#0f172a", bg: ["#030712", "#0284c7"], shirt: "#082f49"
+    }, "Balestriere d'élite schierato sugli spalti ghiacciati a guardia delle batterie d'assedio.");
+
+    // Cosmetico speciale Capitolo 3
+    X.cos("kb_corona_ghiaccio", { kind: "acc", label: "Diadema dei Ghiacci d'Ossidiana", val: "#0284c7", from: "Completa il Capitolo 3 di Kronenburg" });
+
+    const goal = (s) => ({
+      0: "Parla con Celia sul Bastione dei Ghiacci per pianificare la neutralizzazione delle difese di Voss.",
+      1: "Scendi nella Fucina Nera e consulta Merrick per superare le armature d'acciaio runico.",
+      2: "Scegli la strategia nella Fucina: sabotare l'armeria ducale o forgiare i tacchetti termici.",
+      3: "Torna agli spalti: affronta Lady Vespera nel duello deduttivo psicologico sulla verità del Geass.",
+      4: "Raggiungi il Generale Voss davanti alle baliste polari sul precipizio.",
+      5: "Affronta il Generale Voss: usa l'Occhio di Geass per sfidarlo al duello d'onore.",
+      6: "Scendi in campo nella tormenta artica contro la Legione dei Ghiacci di Voss!",
+      7: "Capitolo 3 completato! Parla con Celia per intraprendere la salita alla Guglia dell'Eclisse."
+    }[s] || "Capitolo 3 concluso. Esplora il bastione e raccogli i sigilli nascosti.");
+
+    const zones = {
+      // 1. Il Bastione dei Ghiacci Eterni
+      kb_bastionegelo: {
+        name: "Kronenburg · Bastione dei Ghiacci", short: "Bastione dei Ghiacci", sub: "Spalti sferzati da bufera artica e baliste",
+        w: 40, h: 26, start: [19, 21], theme: "torino", bg: "kb_bastionegelo",
+        item: ["Sigillo di Corvo", "Sigilli"], itemCos: "kb_corona_ghiaccio",
+        items: [[3, 5], [36, 5], [11, 17], [28, 17]],
+        areas: [
+          [2, 2, 14, 10, "La Batteria delle Baliste"],
+          [26, 2, 38, 10, "Il Precipizio sul Mare Artico"],
+          [14, 1, 23, 6, "La Porta della Fucina Nera"],
+          [12, 12, 28, 23, "Il Piazzale della Tormenta"]
+        ],
+        hints: () => ({
+          "La Batteria delle Baliste": "Colossali macchine belliche puntate verso la vallata, coperte di ghiaccioli e catene.",
+          "Il Precipizio sul Mare Artico": "Uno strapiombo di roccia nera su onde gelide in tempesta. Il vento soffia a raffiche furiose.",
+          "La Porta della Fucina Nera": "Un massiccio portale di ferro battuto da cui esce fumo acre e bagliori arancioni.",
+          "Il Piazzale della Tormenta": "Piattaforma ghiacciata dove i soldati di Voss pattugliano con corazze artiche."
+        }),
+        act: {
+          E: "Esamina la balista congelata", B: "Scalda le dita al braciere polare",
+          x: "Ispeziona i dardi pesanti", "^": "Entra nella Fucina Nera",
+          d: "Torna alla Sala del Trono"
+        },
+        build(Ls) {
+          Ls.lay(0, 0, 39, 1, "A");
+          Ls.lay(0, 0, 1, 25, "A");
+          Ls.lay(38, 0, 39, 25, "A");
+          Ls.lay(0, 24, 39, 25, "A");
+          // Selciato ghiacciato
+          Ls.lay(2, 2, 37, 23, ":");
+          // Baliste d'assedio sugli spalti
+          Ls.put(5, 4, "E"); Ls.put(10, 4, "E"); Ls.put(30, 4, "E"); Ls.put(34, 4, "E");
+          // Bracieri polari
+          Ls.put(14, 8, "B"); Ls.put(25, 8, "B");
+          Ls.put(8, 18, "B"); Ls.put(31, 18, "B");
+          // Casse
+          Ls.put(4, 12, "x"); Ls.put(35, 12, "x");
+          // Portone Fucina a nord
+          Ls.put(19, 1, "^"); Ls.put(20, 1, "^");
+          // Uscita sud
+          Ls.put(19, 24, "d"); Ls.put(20, 24, "d");
+        },
+        npcs(s) {
+          const list = [];
+          list.push({ id: "kb_celia", at: [16, 18] });
+          if (s >= 0) list.push({ id: "kb_soldato_ghiaccio", at: [7, 6] });
+          if (s >= 3) list.push({ id: "kb_vespera", at: [28, 14] });
+          if (s >= 4) list.push({ id: "kb_voss", at: [20, 6] });
+          return list;
+        }
+      },
+      // 2. La Fucina Nera
+      kb_fucina: {
+        name: "Kronenburg · La Fucina Nera", short: "La Fucina Nera", sub: "Incudini titaniche, colate incandescenti e vapore",
+        w: 38, h: 26, start: [18, 22], theme: "torino", bg: "kb_fucina",
+        item: ["Sigillo di Corvo", "Sigilli"],
+        items: [[4, 4], [33, 4], [8, 18], [29, 18]],
+        areas: [
+          [12, 2, 25, 10, "La Fornace Primordiale"],
+          [2, 4, 10, 16, "Il Banco degli Ingranaggi"],
+          [27, 4, 35, 16, "La Grande Incudine"],
+          [14, 16, 23, 23, "L'Officina degli Scarpini"]
+        ],
+        hints: () => ({
+          "La Fornace Primordiale": "Una bocca di fuoco azzurro e arancio dove ribolle il minerale d'ossidiana fuso.",
+          "Il Banco degli Ingranaggi": "Ruote dentate di bronzo e pistoni di vapore ad alta pressione.",
+          "La Grande Incudine": "Merrick il Fabbro batte il ferro con un maglio che fa tremare le pareti.",
+          "L'Officina degli Scarpini": "Tavoli da lavoro con cuoio rinforzato e lamine d'acciaio termico."
+        }),
+        act: {
+          G: "Osserva l'ingranaggio di bronzo", B: "Guarda la colata di fuoco",
+          T: "Esamina i progetti delle armature", x: "Ispeziona i lingotti d'ossidiana",
+          d: "Torna al Bastione dei Ghiacci"
+        },
+        build(Ls) {
+          Ls.lay(0, 0, 37, 1, "A");
+          Ls.lay(0, 0, 1, 25, "A");
+          Ls.lay(36, 0, 37, 25, "A");
+          Ls.lay(0, 24, 37, 25, "A");
+          // Pavimento a griglia metallica
+          Ls.lay(2, 2, 35, 23, "g");
+          // Fornace monumentale
+          Ls.put(18, 3, "B"); Ls.put(19, 3, "B");
+          // Ingranaggi rotanti
+          Ls.put(5, 8, "G"); Ls.put(32, 8, "G");
+          // Condotti di vapore
+          Ls.put(5, 14, "O"); Ls.put(32, 14, "O");
+          // Tavoli da lavoro
+          Ls.put(12, 12, "T"); Ls.put(25, 12, "T");
+          // Casse lingotti
+          Ls.put(8, 20, "x"); Ls.put(29, 20, "x");
+          // Uscita sud
+          Ls.put(18, 24, "d"); Ls.put(19, 24, "d");
+        },
+        npcs(s) {
+          const list = [];
+          list.push({ id: "kb_merrick", at: [20, 10] });
+          if (s >= 1) list.push({ id: "kb_kaelen", at: [10, 12] });
+          return list;
+        }
+      }
+    };
+
+    // Dialoghi Capitolo 3
+    function celiaTalk3() {
+      const s = S();
+      if (s === 0) {
+        return say([
+          ["kb_celia", "Siamo in cima al mondo, {n}. Il vento qui taglia la pelle come schegge di vetro."],
+          ["hero", "Malakar si nasconde oltre questa bufera?"],
+          ["kb_celia", "Il Generale Voss difende la gola con le sue legioni corazzate. Le loro armature sono state forgiate nella Fucina Nera con un trattamento termico che respinge i colpi convenzionali. Dobbiamo consultare Merrick il Fabbro Eretico nella Fucina (il portone a nord) per trovare il punto debole."],
+        ], done);
+      }
+      if (s === 7) {
+        return say([
+          ["kb_celia", "Il Generale Voss ha ceduto. Non ci sono più truppe o barriere tra noi e il traditore."],
+          ["hero", "Dov'è Malakar adesso?"],
+          ["kb_celia", "È salito oltre il limite delle nuvole, sulla Guglia dell'Eclisse Celeste. Ha portato con sé la Pietra delle Sentenze per risvegliare il Geass proibito del Dominio Assoluto. Se non lo fermiamo all'apice dell'Eclisse, la mente di ogni cittadino del regno verrà sottomessa per sempre."],
+        ], () => {
+          if (CHAPTERS[4]) {
+            ask("kb_celia", "«Sei pronto a salire sulla Guglia dell'Eclisse per la resa dei conti finale, {n}?»", [
+              {
+                label: "⚡ «Saliamo alla Guglia dell'Eclisse Celeste!»",
+                cls: "hot",
+                fn: () => {
+                  setStep(N, 8);
+                  const m = mem();
+                  if (m.ch <= 3) m.ch = 4;
+                  save();
+                  X.continueStory();
+                }
+              },
+              { label: "«Voglio esplorare ancora il Bastione dei Ghiacci»", fn: done }
+            ]);
+          } else {
+            done();
+          }
+        });
+      }
+      return say([
+        ["kb_celia", "Vespera sta analizzando ogni tua singola parola. Nei duelli dell'intelletto, la verità detta con calma è più letale di una lama."],
+      ], done);
+    }
+
+    function merrickTalk() {
+      const s = S();
+      if (s === 0) return say([["kb_merrick", "Attento a dove metti i piedi! Il metallo fuso non perdona i distratti."]], done);
+      if (s === 1) {
+        return say([
+          ["kb_merrick", "Campione {n}! Kaelen mi ha parlato di te. Ho visto il tuo tiro speciale «{tiro}» durante le eliminatorie."],
+          ["hero", "Merrick, le armature della Legione dei Ghiacci di Voss sono troppo pesanti. Dobbiamo ribaltare la situazione."],
+          ["kb_merrick", "Ho due opzioni sul banco, figliolo. Posso farti saltare i serbatoi di pece delle fornaci ducali, distruggendo i rifornimenti delle legioni. Oppure posso montare sui tuoi scarpini dei ramponi d'acciaio termico fusi con ossidiana pura: il tuo tiro sprigionerà un'energia incandescente che brucerà il ghiaccio di Voss!"],
+        ], () => {
+          ask("kb_merrick", "«Quale tattica scegli per affrontare la Legione dei Ghiacci, {n}?»", [
+            {
+              label: "💥 [INCURSIONE ALLE FUCINE]: Sabota le fornaci ducali per disarmare le legioni!",
+              cls: "hot",
+              fn: () => {
+                sfxGeassShatter();
+                F.set("fucina_tattica", "distruggi_armi");
+                setStep(N, 2);
+                addClue("fucine_sabotate", "Sabotaggio delle Fucine", "Le riserve di armi e corazze pesanti di Malakar sono state distrutte.");
+                note("Sabotate le riserve d'armi imperiali nella Fucina Nera.");
+                say([
+                  ["kb_merrick", "Fatto! I serbatoi di pece sono stati sabotati. Le legioni di Voss combatteranno senza armature di rinforzo."],
+                ], () => { setStep(N, 3); done(); });
+              }
+            },
+            {
+              label: "🔥 [TACCHETTI D'OSSIDIANA]: Forgia i ramponi d'acciaio termico per potenziare «{tiro}»!",
+              fn: () => {
+                sfxDramaticRevelation();
+                F.set("fucina_tattica", "potenzia_tiro");
+                setStep(N, 2);
+                addClue("tacchetti_termici", "Tacchetti d'Ossidiana Termica", "Scarpini potenziati con minerali ardenti per una trazione micidiale sul ghiaccio.");
+                note("Forgiati i tacchetti d'ossidiana termica per massimizzare la potenza di {tiro}.");
+                say([
+                  ["kb_merrick", "Ecco a te! Lamine incandescenti forgiate a mano. Quando calcerai la sfera sul campo di ghiaccio, lascerai una scia di fuoco fuso!"],
+                ], () => { setStep(N, 3); done(); });
+              }
+            }
+          ]);
+        });
+      }
+      return say([
+        ["kb_merrick", "Torna sugli spalti e fai vedere a Voss di che pasta è fatto il tuo tiro!"],
+      ], done);
+    }
+
+    function vesperaTalk3() {
+      const s = S();
+      if (s < 3) return say([["kb_vespera", "Sto conducendo accertamenti topografici sul bastione."]], done);
+      if (s === 3) {
+        return say([
+          ["kb_vespera", "{n}, fermati. Dobbiamo parlare."],
+          ["hero", "Lady Vespera. Credevo avessimo concordato che Malakar è il traditore."],
+          ["kb_vespera", "(Toglie gli occhiali, pulendoli con un fazzoletto di seta nera) Ho analizzato ogni singola discrepanza delle ultime quarantotto ore. La guardia della biblioteca che apre il portale senza opporre resistenza. Brutus il Boia che crolla in ginocchio fissandoti negli occhi. Tu non sei semplicemente un atleta prodigioso col numero {num}."],
+          ["hero", "Cosa stai insinuando?"],
+          ["kb_vespera", "Tu possiedi un potere che viola ogni legge della natura umana: l'Occhio di Geass. Nei tomi proibiti di Baelor è descritto come la maledizione dei Sovrani di Sangue. Dimmi la verità: stai usando questo potere per liberare Kronenburg... o per sostituirti a Malakar e diventare il nuovo padrone della nostra volontà?"],
+        ], () => {
+          ask("kb_vespera", "«Rispondi, {n}: qual è la vera natura del tuo scopo?»", [
+            {
+              label: "👁️ [LA VERITÀ DELL'ALA SCARLATTA]: «Il Geass è un fardello, non un trono. Il mio solo fine è restituire la libertà alla gente!»",
+              cls: "hot",
+              fn: () => {
+                sfxDramaticRevelation();
+                F.set("duello_vespera", "verita");
+                setStep(N, 4);
+                addClue("verita_geass", "Confessione dell'Ala Scarlatta", "Lady Vespera ha compreso la purezza del tuo ideale e si è schierata totalmente al tuo fianco.");
+                note("Lady Vespera convinta dalla sincerità dell'ideale: alleanza indissolubile con il Tribunale.");
+                say([
+                  ["kb_vespera", "(Ripone gli occhiali con un cenno solenne del capo) Ho guardato le tue pupille mentre pronunciavi queste parole. Nessun battito accelerato, nessun tremito della voce. Ti credo, {n}. Il Tribunale delle Sentenze è con te: va' da Voss e spezza l'ultima difesa di Malakar."],
+                ], done);
+              }
+            },
+            {
+              label: "🧠 [CONTRO-DEDUZIONE LOGICA]: «Chi ha creato i tiranni? Voi con i vostri codici ciechi! La mia logica è la sola salvezza!»",
+              fn: () => {
+                sfxGeassHeartbeat();
+                F.set("duello_vespera", "logica");
+                setStep(N, 4);
+                addClue("logica_zero", "Trionfo della Pura Deduzione", "Hai demolito le certezze legalistiche di Vespera costringendola a riconoscere il fallimento delle leggi attuali.");
+                note("Trionfo dialettico su Lady Vespera: la Giudice cede davanti alla realtà dei fatti.");
+                say([
+                  ["kb_vespera", "(Un sorriso amaro le increspa le labbra) Spietato, brillante e matematicamente ineccepibile. Sei la medicina amara di cui questo regno aveva disperatamente bisogno."],
+                ], done);
+              }
+            }
+          ]);
+        });
+      }
+      return say([
+        ["kb_vespera", "Generale Voss ti aspetta sulla terrazza dei ghiacci. Mettilo alle strette."],
+      ], done);
+    }
+
+    function vossTalk() {
+      const s = S();
+      if (s < 4) return say([["kb_voss", "Non ho tempo per i ribelli mentre la bufera imperversa."]], done);
+      if (s === 4 || s === 5) {
+        return say([
+          ["kb_voss", "Dunque sei tu il corvo che ha sconvolto la fortezza."],
+          ["hero", "Generale Voss. Malakar ti sta usando come scudo per fuggire alla sua condanna."],
+          ["kb_voss", "Il mio giuramento è verso la Corona, ragazzo! Finché respiro, nessuno oltrepasserà questo bastione!"],
+        ], () => {
+          ask("kb_voss", "«Sguaina la tua fede se ne hai una, numero {num}!»", [
+            {
+              label: "👁️ [ATTIVA IL GEASS]: «Nel nome del vero Re: affrontami in campo aperto con la tua legione!»",
+              cls: "hot",
+              fn: () => {
+                triggerGeassVisualFx(() => {
+                  sfxGeassShatter();
+                  setStep(N, 6);
+                  note("Generale Voss costretto dal Geass ad accettare la sfida sul campo di ghiaccio.");
+                  say([
+                    ["voce", "L'ala scarlatta squarcia la tormenta di neve. Il Generale Voss sobbalza, i suoi occhi azzurri si tingono di cremisi."],
+                    ["kb_voss", "Io... accetto il comando d'onore! Legione dei Ghiacci, allineatevi sull'arena artica!"],
+                  ], () => {
+                    startMatch3();
+                  });
+                });
+              }
+            },
+            {
+              label: "«Accetta la sfida leale: se vinco, abbassi le armi!»",
+              fn: () => {
+                setStep(N, 6);
+                say([
+                  ["kb_voss", "Un vero guerriero non rifiuta mai un duello d'onore. Ci vediamo sul manto di ghiaccio!"],
+                ], () => {
+                  startMatch3();
+                });
+              }
+            }
+          ]);
+        });
+      }
+      return say([
+        ["kb_voss", "Sei stato un avversario degno... La via per la Guglia è aperta."],
+      ], done);
+    }
+
+    function startMatch3() {
+      X.playMatch({
+        id: "kb_match_3",
+        chap: "Kronenburg · La Battaglia della Tormenta",
+        us: "I Liberatori di {n}",
+        mate: "Celia",
+        min: 45,
+        intro: "Scontro titanico sul campo di ghiaccio perenne! Il tuo Campione {n} sfida la Legione d'Inverno del Generale Voss!",
+        team: (t, st) => ({
+          name: "Legione dei Ghiacci di Voss",
+          col: "#0284c7",
+          style: "Pressione Totale Artica & Muro Polare",
+          atk: t(st.atk * 1.15),
+          def: t(st.def * 1.35),
+          vel: t(st.vel * 1.05),
+          specials: ["Muro di Banchisa", "Carica Polare"]
+        }),
+        done: (r) => {
+          if (r.win) {
+            setStep(N, 7);
+            finishChapter(N, "caduta_bastione_ghiaccio");
+            note("Vittoria memorabile contro la Legione dei Ghiacci di Voss: Bastione artico espugnato!");
+            const rewMsg = reward("kb_ch3_win", {
+              coins: 650,
+              cos: "kb_corona_ghiaccio"
+            });
+            say([
+              ["voce", "GOL ECCEZIONALE! Calciata tra le folate di neve dal tuo tiro «{tiro}», la sfera traccia un solco di fuoco nell'aria e sfonda l'incrocio dei pali congelato!"],
+              ["voce", "I legionari di Voss abbassano gli stendardi in segno di rispetto per il Campione {n}."],
+              ["kb_voss", "(Inchinandosi con la mano sul petto) Ho combattuto quarant'anni, ma non ho mai visto una volontà così incrollabile. La via per la Guglia è tua."],
+              ["kb_celia", "Ora resta solo Malakar. La resa dei conti sotto l'Eclisse Celeste ti aspetta."],
+              ["voce", `CAPITOLO 3 CONCLUSO CON SUCCESSO! ${rewMsg.join(" · ")}`],
+            ], () => {
+              go("kb_bastionegelo", 19, 15);
+            });
+          } else {
+            say([
+              ["kb_voss", "Il ghiaccio di Valecorvo non si scioglie così facilmente! Riposati e riprova, {n}!"],
+            ], done);
+          }
+        }
+      });
+    }
+
+    const obj = {
+      "kb_bastionegelo:^": () => go("kb_fucina", 18, 22),
+      "kb_bastionegelo:d": () => go("kb_salatrono", 19, 22),
+      "kb_fucina:d": () => go("kb_bastionegelo", 19, 4),
+      "kb_bastionegelo:E": () => say([["voce", "Colossale balista da guerra in legno di frassino e acciaio runico. I dardi pesanti sono intrisi di pece infiammabile."]], done),
+      "kb_bastionegelo:B": () => say([["voce", "Il braciere polare arde con fiamma azzurrina che resiste alle folate furiose della bufera."]], done),
+      "kb_fucina:G": () => say([["voce", "Un ingranaggio monumentale in bronzo massiccio che trasmette il moto alle pompe idrauliche dell'officina."]], done),
+      "kb_fucina:B": () => say([["voce", "La fornace primaria della fortezza: il metallo d'ossidiana fuso brilla come lava pura nel cuore della pietra."]], done),
+      "kb_fucina:O": () => say([["voce", "I tubi di scarico sfiatano vapore caldissimo con un sibilo ritmico che fa vibrare le incudini."]], done)
+    };
+
+    const talk = {
+      kb_celia: celiaTalk3,
+      kb_merrick: merrickTalk,
+      kb_vespera: vesperaTalk3,
+      kb_voss: vossTalk,
+      kb_soldato_ghiaccio: () => say([["kb_soldato_ghiaccio", "Il Generale Voss difende questa fortezza da quando ero bambino. Se lo sconfiggi sul campo, il regno è tuo."]], done),
+      kb_kaelen: () => say([["kb_kaelen", "Tutto l'Ordine dei Corvi è pronto a sostenerti per l'assalto finale alla Guglia!"]], done)
+    };
+
+    return {
+      n: N,
+      title: "La Fortezza di Ghiaccio",
+      sub: "La morsa del generale Voss, il fuoco d'ossidiana e l'interrogatorio delle verità",
+      start: "kb_bastionegelo",
+      zones,
+      talk,
+      obj,
+      goal,
+      intro: () => [
+        ["voce", "KRONENBURG · CAPITOLO 3: LA FORTEZZA DI GHIACCIO", "kb_bastionegelo"],
+        ["voce", "Sopra i ghiacciai perenni del nord si erge il Bastione dei Ghiacci Eterni: una muraglia di pietra e ghiaccio a picco sull'oceano polare.", "kb_bastionegelo"],
+        ["voce", "Lord Malakar si è rifugiato qui tra le legioni del Generale Voss e i magli incandescenti della Fucina Nera.", "kb_bastionegelo"],
+        ["voce", "Il tuo Campione {n} affronta la prova più gelida dell'intelletto e della forza: rompere la barriera d'inverno prima che cali l'Eclisse finale!", "kb_bastionegelo"]
+      ]
+    };
+  });
+
+  // ============================================================================
+  // CAPITOLO 4 · L'ECLISSE DEI CORVI · IL VERDETTO FINALE
+  // ============================================================================
+  addChapter(function (X) {
+    const { T, F, say, ask, done, go, note, setStep, once, reward, hero, esc, addClue, triggerGeassVisualFx, sfxGeassHeartbeat, sfxGeassResonance, sfxGeassShatter, sfxDramaticRevelation } = X;
+    const N = 4, S = () => X.stepOf(N);
+
+    // Personaggi del Capitolo 4
+    X.cast("kb_malakar_geass", {
+      name: "Imp. Malakar", tag: "usurpatore", hair: "#0f172a", style: "slick", skin: "#cbd5e1", eye: "#dc2626",
+      beard: true, bg: ["#450a0a", "#dc2626"], shirt: "#18181b"
+    }, "Lord Malakar asceso a Imperatore dell'Eclisse. Ha incastonato nella propria fronte una scheggia della Pietra delle Sentenze, risvegliando un Geass corrotto: «Se il mondo non vuole inginocchiarsi con le leggi, piegherò le loro menti una per una!»");
+
+    X.cast("kb_oracolo", {
+      name: "La Pietra delle Sentenze", tag: "reliquia", hair: "#ef4444", style: "short", skin: "#fef08a", eye: "#fef08a",
+      bg: ["#020208", "#dc2626"], shirt: "#1e1b4b"
+    }, "L'eco cosmica e millenaria racchiusa nel cristallo d'ossidiana di Kronenburg. La fonte originale del potere del Geass.");
+
+    // Cosmetico epico finale della Saga
+    X.cos("kb_aura_geass", { kind: "acc", label: "Aura Fiammeggiante dell'Ala Scarlatta", val: "#ef4444", from: "Completa la Saga di Kronenburg" });
+
+    const goal = (s) => ({
+      0: "Avanza verso l'Altare della Pietra delle Sentenze e affronta Lord Malakar sotto l'Eclisse.",
+      1: "Sostieni il duello ideologico e lo scontro delle volontà con Malakar.",
+      2: "Consulta Celia e i tuoi alleati (Vespera, Gareth, Lyanna) riuniti sulla Guglia.",
+      3: "Scendi in campo per la Finale delle Finali: La Partita dell'Eclisse Celeste!",
+      4: "Vittoria memorabile! Frantuma la barriera oscura di Malakar con «{tiro}».",
+      5: "IL VERDETTO SUPREMO: Scegli il destino del Trono e l'epilogo di Kronenburg!",
+      6: "Saga di Kronenburg completata! Raccogli la gloria e le ricompense leggendarie."
+    }[s] || "Saga di Kronenburg completata con successo! Esplora liberamente tutte le ambientazioni.");
+
+    const zones = {
+      // La Guglia dell'Eclisse Celeste
+      kb_guglia: {
+        name: "Kronenburg · Guglia dell'Eclisse Celeste", short: "Guglia dell'Eclisse", sub: "La cima sopra le nubi, altare cosmico e trono",
+        w: 42, h: 28, start: [20, 24], theme: "torino", bg: "kb_guglia",
+        item: ["Sigillo di Corvo", "Sigilli"], itemCos: "kb_aura_geass",
+        items: [[3, 6], [38, 6], [10, 18], [31, 18]],
+        areas: [
+          [16, 4, 25, 12, "L'Altare della Pietra"],
+          [2, 8, 14, 22, "La Terrazza d'Occidente"],
+          [27, 8, 39, 22, "La Terrazza d'Oriente"],
+          [17, 20, 24, 26, "La Scala del Firmamento"]
+        ],
+        hints: () => ({
+          "L'Altare della Pietra": "Un cerchio d'ossidiana al centro della sommità. La Pietra delle Sentenze pulsa come un cuore cosmico cremisi.",
+          "La Terrazza d'Occidente": "Colonne di pietra gotica spezzate a picco sul mare di nuvole illuminate dalla corona solare.",
+          "La Terrazza d'Oriente": "Spalti rialzati dove i tuoi compagni e i giudici osservano il verdetto della storia.",
+          "La Scala del Firmamento": "La scalinata di marmo nero che sale dal Bastione dei Ghiacci."
+        }),
+        act: {
+          H: "Osserva la Pietra delle Sentenze", B: "Scaldati al braciere dell'Eclisse",
+          W: "Ammira il trono supremo", d: "Torna al Bastione dei Ghiacci"
+        },
+        build(Ls) {
+          Ls.lay(0, 0, 41, 1, "A");
+          Ls.lay(0, 0, 1, 27, "A");
+          Ls.lay(40, 0, 41, 27, "A");
+          Ls.lay(0, 26, 41, 27, "A");
+          // Pavimento a specchio d'ossidiana
+          Ls.lay(2, 2, 39, 25, "e");
+          // Cerchio centrale dell'altare
+          Ls.lay(17, 6, 24, 13, "c");
+          // Pietra delle Sentenze
+          Ls.put(20, 8, "H"); Ls.put(21, 8, "H");
+          // Colonne spezzate
+          Ls.put(6, 6, "A"); Ls.put(6, 12, "A"); Ls.put(6, 18, "A");
+          Ls.put(35, 6, "A"); Ls.put(35, 12, "A"); Ls.put(35, 18, "A");
+          // Bracieri cosmici
+          Ls.put(14, 6, "B"); Ls.put(27, 6, "B");
+          Ls.put(14, 15, "B"); Ls.put(27, 15, "B");
+          // Trono supremo a nord
+          Ls.put(20, 3, "W"); Ls.put(21, 3, "W");
+          // Uscita sud
+          Ls.put(20, 26, "d"); Ls.put(21, 26, "d");
+        },
+        npcs(s) {
+          const list = [];
+          list.push({ id: "kb_celia", at: [18, 18] });
+          if (s <= 4) list.push({ id: "kb_malakar_geass", at: [20, 7] });
+          if (s >= 2) {
+            list.push({ id: "kb_vespera", at: [12, 14] });
+            list.push({ id: "kb_gareth", at: [29, 14] });
+            list.push({ id: "kb_lyanna", at: [32, 16] });
+          }
+          return list;
+        }
+      }
+    };
+
+    // Dialoghi Capitolo 4
+    function celiaTalk4() {
+      const s = S();
+      if (s === 0) {
+        return say([
+          ["kb_celia", "Guardati intorno, {n}. Siamo sopra le nuvole."],
+          ["hero", "L'Eclisse solare... il cielo sembra una ferita aperta."],
+          ["kb_celia", "Questa è la fine e il principio di tutto. Malakar attende al centro dell'altare. Ha assorbito la scheggia del Geass. Se lasci che la campana dell'eclisse rintocchi, nessuno potrà più ribellarsi. Avanza verso di lui e affrontalo!"],
+        ], done);
+      }
+      if (s === 2) {
+        return say([
+          ["kb_celia", "Tutti coloro che hai incontrato nel tuo cammino sono qui. La Giudice Vespera, Sir Gareth, Lady Lyanna. Nessuno di loro può combattere al tuo posto: la finale si gioca sul campo d'ossidiana tra te e i campioni dell'Eclisse."],
+        ], done);
+      }
+      if (s === 6) {
+        const ep = F.get("finale_kronenburg") || "liberta";
+        return say([
+          ["kb_celia", `Il tuo verdetto è scritto nelle stelle, {n}. Qualunque sia la via che hai scelto, la leggenda del tuo numero {num} e del tuo tiro «{tiro}» non verrà mai dimenticata.`],
+        ], done);
+      }
+      return say([
+        ["kb_celia", "L'Occhio del Geass brilla al culmine della sua potenza... Guida la sfera alla vittoria!"],
+      ], done);
+    }
+
+    function malakarGeassTalk() {
+      const s = S();
+      if (s === 0 || s === 1) {
+        return say([
+          ["kb_malakar_geass", "Sei arrivato fin qui, minuscolo parassita col numero {num}."],
+          ["hero", "È finita, Malakar. Tutte le tue fortezze sono cadute. Il testamento di Re Alden è pubblico e la corte ti ha disconosciuto."],
+          ["kb_malakar_geass", "(Scende dai gradini dell'altare, mentre un'aura di fiamme cremisi gli avvolge lo sguardo) La corte? Il popolo? Sono formiche che strisciano nella polvere! Con questo frammento di Geass io non ho bisogno di titoli o consensi: io ordinerò loro di amarmi, e loro si getteranno ai miei piedi sorridendo!"],
+          ["hero", "Questo non è regnare, Malakar. Questa è la follia di chi ha paura di essere un uomo ordinario."],
+          ["kb_malakar_geass", "Allora sottomettiti anche tu! Sull'Arena dell'Eclisse, i miei campioni immortali divoreranno la tua anima!"],
+        ], () => {
+          setStep(N, 2);
+          note("Lord Malakar affrontato sulla Guglia: pronta la partita dell'Eclisse Celeste.");
+          done();
+        });
+      }
+      if (s === 2) {
+        return ask("kb_malakar_geass", "«Hai il coraggio di scendere in campo per la finale della storia del mondo, {n}?»", [
+          {
+            label: "⚡ «Scendo in campo! Frantumerò la tua illusione con «{tiro}»!»",
+            cls: "hot",
+            fn: () => {
+              setStep(N, 3);
+              startMatch4();
+            }
+          },
+          {
+            label: "«Voglio prima consultare i miei compagni»",
+            fn: done
+          }
+        ]);
+      }
+      if (s === 4) {
+        // Scena della Vittoria & Il Momento del Verdetto Finale!
+        return showFinalVerdictChoice();
+      }
+      return say([
+        ["kb_malakar_geass", "(A terra sconfitto, mentre il suo Geass si disgrega in faville scarlatte) Maledetto... come hai potuto... superare la perfezione dell'Eclisse..."],
+      ], done);
+    }
+
+    function showFinalVerdictChoice() {
+      sfxDramaticRevelation();
+      ask("kb_celia", "«La vittoria è tua, {n}. Malakar è sconfitto e l'Eclisse volge al termine. La Pietra delle Sentenze e la Corona delle Tre Corone sono nelle tue mani. Qual è il tuo verdetto supremo per il destino di Kronenburg?»", [
+        {
+          label: "🖤 [ZERO REQUIEM]: Assumi su di te l'odio del mondo, distruggi la tirannia e dona la repubblica al popolo!",
+          cls: "hot",
+          fn: () => {
+            F.set("finale_kronenburg", "zero_requiem");
+            setStep(N, 5);
+            addClue("epilogo_zero_requiem", "Zero Requiem: Il Sacrificio", "Hai abbattuto la corona e affidato Kronenburg a una repubblica libera guidata da Lady Vespera, scomparendo nell'ombra con Celia.");
+            note("EPILOGO SCELTO: ZERO REQUIEM · Il Sacrificio del Corvo.");
+            finishChapter(N, "zero_requiem");
+            showEndingScene("zero_requiem");
+          }
+        },
+        {
+          label: "👑 [IL NUOVO IMPERATORE]: Indossa la Corona d'Ossidiana sul Trono delle Spade e fonda un'era di ordine assoluto!",
+          cls: "hot",
+          fn: () => {
+            F.set("finale_kronenburg", "imperatore_ossidiana");
+            setStep(N, 5);
+            addClue("epilogo_imperatore", "Il Nuovo Imperatore d'Ossidiana", "Sei salito al Trono delle Tre Corone, instaurando un regno di disciplina ferrea e invincibilità assoluta.");
+            note("EPILOGO SCELTO: IL NUOVO IMPERATORE · La Corona d'Ossidiana.");
+            finishChapter(N, "imperatore_ossidiana");
+            showEndingScene("imperatore_ossidiana");
+          }
+        },
+        {
+          label: "🕊️ [IL VOLO DELLA RONDINE]: Frantuma per sempre la Pietra delle Sentenze, sciogli il Geass e torna libero sui campi!",
+          cls: "hot",
+          fn: () => {
+            F.set("finale_kronenburg", "volo_rondine");
+            setStep(N, 5);
+            addClue("epilogo_volo_rondine", "Il Volo della Rondine: Libertà", "Hai distrutto la Pietra magica spezzando ogni catena, tornando a essere un campione errante insieme a Celia.");
+            note("EPILOGO SCELTO: IL VOLO DELLA RONDINE · La Rinuncia al Trono.");
+            finishChapter(N, "volo_rondine");
+            showEndingScene("volo_rondine");
+          }
+        }
+      ]);
+    }
+
+    function showEndingScene(endingKey) {
+      const rewMsg = reward("kb_saga_complete", {
+        coins: 1000,
+        cos: "kb_aura_geass"
+      });
+
+      if (endingKey === "zero_requiem") {
+        say([
+          ["voce", "🖤 EPILOGO: ZERO REQUIEM · IL SACRIFICIO DEL CORVO"],
+          ["hero", "«La catena dell'odio si spezza qui. Il trono di Kronenburg non esisterà mai più. Lady Vespera, Damas, Mastro Baelor: questo paese appartiene alla sua gente.»"],
+          ["kb_vespera", "(Trattiene a stento l'emozione, inchinandosi profondamente) Avete liberato il popolo da secoli di buio, Campione. Il vostro nome non sarà su una lapide di re... ma nei canti di ogni piazza libera."],
+          ["kb_celia", "(Ti prende la mano mentre il sole riemerge dall'Eclisse) Il patto è sciolto, mio complice. Ora siamo due ombre libere nel vento dell'alba."],
+          ["voce", `SAGA DI KRONENBURG COMPLETATA! ${rewMsg.join(" · ")}`],
+        ], () => {
+          setStep(N, 6);
+          go("kb_guglia", 20, 20);
+        });
+      } else if (endingKey === "imperatore_ossidiana") {
+        say([
+          ["voce", "👑 EPILOGO: IL NUOVO IMPERATORE · LA CORONA D'OSSIDIANA"],
+          ["hero", "«I deboli cercano padroni, i tiranni cercano servi. Io sarò la legge incrollabile che nessuno potrà mai corrompere!»"],
+          ["kb_gareth", "(Sfodera la spada bianca e la posa al suolo) Salve a voi, Sire d'Acciaio! I cavalieri di Kronenburg obbediranno al vostro comando fino alla fine dei giorni!"],
+          ["kb_lyanna", "(Sorride ammirata) Una mossa degna del più grande stratega della storia. L'Impero delle Tre Corone dominerà il continente sotto la vostra bandiera."],
+          ["kb_celia", "Che tu sia re o ribelle, il mio sguardo sarà sempre al tuo fianco, mio sovrano."],
+          ["voce", `SAGA DI KRONENBURG COMPLETATA! ${rewMsg.join(" · ")}`],
+        ], () => {
+          setStep(N, 6);
+          go("kb_guglia", 20, 20);
+        });
+      } else {
+        say([
+          ["voce", "🕊️ EPILOGO: IL VOLO DELLA RONDINE · LA LIBERTÀ ERRANTE"],
+          ["hero", "«Nessun uomo dovrebbe possedere il comando sulla mente di un altro. Questo potere finisce oggi!»"],
+          ["voce", "Con un colpo potente e perfetto scagliato dal tuo tiro «{tiro}», la sfera impatta contro la Pietra delle Sentenze. Il cristallo millenario esplode in un milione di schegge di luce che svaniscono nel vento!"],
+          ["kb_celia", "(I suoi occhi brillano di una gioia pura mai vista prima) Ho vissuto mille anni aspettando questo momento. Finalmente... siamo entrambi liberi."],
+          ["kb_vespera", "La leggenda del Campione numero {num} rimarrà scolpita nella memoria di ogni bambino che calcerà un pallone sulle coste."],
+          ["voce", `SAGA DI KRONENBURG COMPLETATA! ${rewMsg.join(" · ")}`],
+        ], () => {
+          setStep(N, 6);
+          go("kb_guglia", 20, 20);
+        });
+      }
+    }
+
+    function startMatch4() {
+      X.playMatch({
+        id: "kb_match_4",
+        chap: "Kronenburg · L'Eclisse Celeste Finale",
+        us: "L'Ordine dei Corvi Sovrani",
+        mate: "Celia",
+        min: 45,
+        intro: "LA FINALE ASSOLUTA! Il tuo Campione {n} sfida i Custodi dell'Eclisse Eterna guidati dal Geass di Lord Malakar!",
+        team: (t, st) => ({
+          name: "Custodi dell'Eclisse di Malakar",
+          col: "#dc2626",
+          style: "Dominio Mentale & Attacco Devastante",
+          atk: t(st.atk * 1.3),
+          def: t(st.def * 1.35),
+          vel: t(st.vel * 1.15),
+          specials: ["Distorsione d'Eclisse", "Comando Assoluto"]
+        }),
+        done: (r) => {
+          if (r.win) {
+            setStep(N, 4);
+            note("VITTORIA LEGGENDARIA NELLA FINALE DELL'ECLISSE! Malakar e la sua guardia oscura sono caduti!");
+            say([
+              ["voce", "GOOOOOOOL LEGGENDARIOOOO! Con un tiro sovrannaturale sprigionato dalla tua volontà e dal tuo colpo «{tiro}», la sfera squarcia l'eclisse e frantuma la rete di luce cremisi!"],
+              ["voce", "Il sole riemerge dal disco di luna nera. La tirannia di Malakar è spezzata per sempre!"],
+            ], () => {
+              showFinalVerdictChoice();
+            });
+          } else {
+            say([
+              ["kb_malakar_geass", "Il tuo Geass ha vacillato davanti all'Eclisse! Riorganizza il tuo spirito e sfida di nuovo il destino!"],
+            ], done);
+          }
+        }
+      });
+    }
+
+    const obj = {
+      "kb_guglia:d": () => go("kb_bastionegelo", 19, 21),
+      "kb_guglia:H": () => {
+        if (S() < 5) say([["voce", "La Pietra delle Sentenze fluttua sull'altare emettendo un ronzio armonico cremisi. È il cuore pulsante del potere del Geass."]], done);
+        else say([["voce", "L'altare dell'Eclisse: testimone del verdetto finale pronunciato dal Campione {n}."]], done);
+      },
+      "kb_guglia:W": () => say([["voce", "Il trono supremo della vetta: da quassù lo sguardo abbraccia l'intero continente fino all'orizzonte marino."]], done),
+      "kb_guglia:B": () => say([["voce", "I bracieri della guglia ardono con fiamme purpuree, nutrite dal vento astrale dell'Eclisse."]], done)
+    };
+
+    const talk = {
+      kb_celia: celiaTalk4,
+      kb_malakar_geass: malakarGeassTalk,
+      kb_vespera: () => say([["kb_vespera", "Il tribunale è pronto a registrare il tuo verdetto nella storia di Kronenburg."]], done),
+      kb_gareth: () => say([["kb_gareth", "Il mio onore è riscattato grazie a te, {n}. Seguirò la via che indicherai."]], done),
+      kb_lyanna: () => say([["kb_lyanna", "Hai dimostrato di saper giocare sulla scacchiera meglio di qualsiasi re o duca."]], done)
+    };
+
+    return {
+      n: N,
+      title: "L'Eclisse dei Corvi · Il Verdetto Finale",
+      sub: "L'eclisse celeste, lo scontro delle due volontà assolute e i finali delle Tre Corone",
+      start: "kb_guglia",
+      zones,
+      talk,
+      obj,
+      goal,
+      intro: () => [
+        ["voce", "KRONENBURG · CAPITOLO 4: L'ECLISSE DEI CORVI", "kb_guglia"],
+        ["voce", "Sopra l'oceano di nubi, la Guglia dell'Eclisse tocca il cielo scuro dove la luna nera divora il sole in una corona di fuoco scarlatto.", "kb_guglia"],
+        ["voce", "Lord Malakar ti attende sull'altare cosmico con il Geass del Dominio Assoluto risvegliato.", "kb_guglia"],
+        ["voce", "La resa dei conti suprema è giunta: con Celia e i tuoi alleati al fianco, scendi in campo per decidere il futuro del mondo!", "kb_guglia"]
+      ]
+    };
+  });
+
   // ------------------------------------------------------------------ Interfaccia Principale & Schermate
   function leaveToModes() {
     const back = EXIT || window.title;
@@ -1618,20 +3152,29 @@
     }
 
     castHero();
-    const c = activeChapter(), m = mem(), allDone = c && m.done[c.n];
+    const c = activeChapter(), m = mem(), isSagaComplete = !!(m.done[4]), curDone = c && m.done[c.n];
+    const statusText = isSagaComplete
+      ? "👑 <b>Saga di Kronenburg Completata!</b> Tutti i 4 capitoli e il verdetto finale sono stati raggiunti."
+      : curDone
+        ? `Capitolo ${c.n} concluso con successo! Il prossimo capitolo ti attende.`
+        : esc(goalNow());
 
     api.scene(
-      "kb_corte", "voce",
-      `<b>👑 Kronenburg · Il Patto delle Tre Corone</b><br>${esc(h.name)} · n. ${esc(h.num)} (Erede del Sigillo)<br><span style="color:var(--dim)">«${esc(h.shotName || "Il Tiro della Corona")}»</span><br><br><span style="color:#f87171">${c ? esc("Capitolo " + c.n + " · " + c.title) : ""}</span><br><span style="color:var(--dim)">${allDone ? "Capitolo 1 concluso con successo! Il prossimo capitolo ti attende." : esc(goalNow())}</span>`,
+      "kb_salatrono", "voce",
+      `<b>👑 Kronenburg · Il Patto delle Tre Corone</b><br>${esc(h.name)} · n. ${esc(h.num)} (Erede del Sigillo)<br><span style="color:var(--dim)">«${esc(h.shotName || "Il Tiro della Corona")}»</span><br><br><span style="color:#f87171">${c ? esc("Capitolo " + c.n + " · " + c.title) : ""}</span><br><span style="color:var(--dim)">${statusText}</span>`,
       [
         {
-          label: allDone ? "Esplora Kronenburg" : c && !m.intro["ch" + c.n] ? "Inizia il Capitolo 1" : "Continua la Storia",
+          label: isSagaComplete
+            ? "Esplora Kronenburg"
+            : c && !m.intro["ch" + c.n]
+              ? `Inizia il Capitolo ${c.n}`
+              : "Continua la Storia",
           sub: c ? `Capitolo ${c.n} · ${c.title}` : "",
           cls: "hot",
           fn: continueStory
         },
         { label: "Codice delle Sentenze", sub: `Prove ${m.clues.length} · Indagini di ${h.name}`, fn: () => notebook(openMain, false) },
-        { label: "Capitoli della Saga", sub: "I capitoli e i finali raggiunti", fn: chaptersList },
+        { label: "Capitoli della Saga", sub: "Esplora, seleziona o rigioca i capitoli", fn: chaptersList },
         { label: "◂ Torna alle Modalità", fn: leaveToModes }
       ],
       "Kronenburg"
@@ -1660,22 +3203,36 @@
   }
 
   function chaptersList() {
-    const m = mem(), rows = [];
+    const m = mem(), opts = [];
     for (let n = 1; n <= 4; n++) {
       const c = CHAPTERS[n];
-      if (c && (n === 1 || m.done[n - 1] || m.ch >= n)) {
-        rows.push(`${m.done[n] ? "✓" : "▸"} <b>Capitolo ${n}</b> · ${esc(c.title)} <span style="color:var(--dim)">${esc(m.done[n] ? "completato" : c.sub || "")}</span>`);
+      const isUnlocked = (n === 1 || m.done[n - 1] || m.ch >= n);
+      if (c && isUnlocked) {
+        opts.push({
+          label: `${m.done[n] ? "✓" : "▸"} Capitolo ${n}: ${c.title}`,
+          sub: m.done[n] ? `Completato (${m.done[n]}) · Clicca per giocare` : (c.sub || "In corso"),
+          cls: m.ch === n ? "hot" : "",
+          fn: () => {
+            m.ch = n;
+            save();
+            continueStory();
+          }
+        });
       } else {
-        rows.push(`<span style="color:var(--dim)">• Capitolo ${n} · Prossimamente</span>`);
+        opts.push({
+          label: `• Capitolo ${n}: ${c ? c.title : "Prossimamente"}`,
+          sub: "Completa il capitolo precedente per sbloccarlo",
+          disabled: true
+        });
       }
     }
+    opts.push({ label: "Ricomincia da Capo", sub: "Azzera capitoli e indagini (monete e cosmetici restano salvati)", fn: resetConfirm });
+    opts.push({ label: "◂ Indietro", fn: openMain });
+
     api.scene(
-      "kb_arena", "voce",
-      `<b>I Capitoli di Kronenburg</b><br>${rows.join("<br>")}<br><br><span style="color:var(--dim)">Le scelte morali e l'uso dell'Occhio di Geass determinano il destino del trono.</span>`,
-      [
-        { label: "Ricomincia da Capo", sub: "Azzera scelte e indagini (monete e oggetti restano tuoi)", fn: resetConfirm },
-        { label: "◂ Indietro", fn: openMain }
-      ],
+      "kb_salatrono", "voce",
+      `<b>👑 I Capitoli di Kronenburg</b><br>La saga tattica e investigativa in 4 capitoli completi. Scelte morali, deduzioni e l'Occhio di Geass determinano il destino del trono.<br><br><span style="color:var(--dim)">Seleziona un capitolo sbloccato per entrarvi:</span>`,
+      opts,
       "Kronenburg · Capitoli"
     );
   }
