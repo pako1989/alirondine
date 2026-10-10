@@ -3826,7 +3826,7 @@
   const borgoFresh = () => ({ v: 1, x: 19 * TS + 8, y: 16 * TS + 12, dir: "down", night: false, shells: [], cos: [], q: { glove: 0, acc: 0, muro: 0, secret: false, kids: 0, beach: 0, rocco: 0, kidsL: 0, beachL: 0, roccoL: 0, capre: 0, goats: [], faro: 0, trav: 0, travDone: false, pesca: 0, bomb: 0, post: 0, postL: [], quiz: 0, pall: 0, pallDone: false, nino: 0, ninoDone: false, btour: 0, bcup: 0, xmas: 0 }, ep: {}, seen: {} });
   const borgoLoad = () => { const b = readJSON(BORGO, null); if (!b || b.v !== 1 || typeof b.x !== "number") return borgoFresh(); const f = borgoFresh(); const q = { ...f.q, ...(b.q || {}) }; if (!Array.isArray(q.goats)) q.goats = []; if (!Array.isArray(q.postL)) q.postL = []; return { ...f, ...b, q, ep: b.ep || {}, seen: b.seen || {}, shells: b.shells || [], cos: b.cos || [] }; };
   const borgoSave = () => { if (B) writeJSON(BORGO, B); };
-  const bCos = (id) => { if (!B.cos.includes(id)) { B.cos.push(id); borgoSave(); return true; } return false; };
+  const bCos = (id) => { if (!id) return false; if (!B.cos.includes(id)) { B.cos.push(id); borgoSave(); return true; } return false; };
   const BL = (who, t) => L(who, t, "borgo");
   function borgoMap() {
     const m = Array.from({ length: MH }, () => Array(MW).fill("."));
@@ -8897,7 +8897,7 @@
     (z.items || []).forEach(([x, y], i) => {
       if (x !== tx || y !== ty || got.includes(i)) return;
       got.push(i); addCoins(3); sfx("kick");
-      if (got.length === z.items.length) { const c = bCos(z.itemCos); addCoins(15); sfx("goal"); trToast(`${z.item[1]} tutte! +15 monete${c ? ` · Sbloccato: ${COSM[z.itemCos].label}` : ""}`); }
+      if (got.length === z.items.length) { const c = bCos(z.itemCos); addCoins(15); sfx("goal"); trToast(`${z.item[1]} tutte! +15 monete${c && COSM[z.itemCos] ? ` · Sbloccato: ${COSM[z.itemCos].label}` : ""}`); }
       else trToast(`${z.item[0]}! +3 monete (${got.length}/${z.items.length})`);
       borgoSave();
     });
