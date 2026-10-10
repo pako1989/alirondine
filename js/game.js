@@ -21835,6 +21835,7 @@
   }
   TRX.push(() => { const r = azRec(), s = azSeaRec(r), h = Object.keys(r.hard || {}).length, o = r.objN || 0, p = Object.keys(r.pitW || {}).length;
     return [{ name: "Stagione del Borgo", kind: "cup", c: "#e8b04a", got: s.good >= 1, part: `${Math.min(s.good, 1)}/1`, hint: "Chiudi una stagione del Borgo con almeno tre vittorie" }, { name: "Duro come il marmo", kind: "star", c: "#b0a0e8", got: h >= 3, part: `${Math.min(h, 3)}/3`, hint: "Batti tre squadre in difficoltà Duro" }, { name: "Sfide a obiettivo", kind: "star", c: "#ff9e3d", got: o >= 5, part: `${Math.min(o, 5)}/5`, hint: "Centra cinque obiettivi nelle sfide" }, { name: "Tutti i campi", kind: "star", c: "#57d68d", got: p >= 5, part: `${Math.min(p, 5)}/5`, hint: "Vinci su ognuno dei campi" }]; });
+  if (/[?&]debug/.test(location.search)) window.__azState = () => AZ;
   if (/[?&]debug/.test(location.search)) window.__az15 = { AZ_PIT, AZ_OBJ, azOpt, azSetOpt, azSetup15, azSeaRec, azSeaMenu, azPrep, azRoles, AZN, azAbUse, azTick15, azEv, get AZ() { return AZ; } };
   // ================= v14 · MENU: categorie richiudibili, badge «nuovo», «cosa fare ora», promemoria di backup, tasti da 44px =================
   // Si aggancia a buttons(): le stesse voci con le stesse condizioni di sblocco, solo raggruppate e marcate. Chiave propria: ali-di-rondine.menu.
