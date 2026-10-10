@@ -15116,6 +15116,7 @@
       ...(window.__piratiStory ? [window.__piratiStory.menuEntry(menuSaghe)] : []),
       ...(window.__alchimiaStory ? [window.__alchimiaStory.menuEntry(menuSaghe)] : []),
       ...(window.__kronenburgStory ? [window.__kronenburgStory.menuEntry(menuSaghe)] : []),
+      ...(window.__legaOmbre ? [window.__legaOmbre.menuEntry(menuSaghe)] : []),
             ...(window.__chronoStory ? [window.__chronoStory.menuEntry(menuSaghe)] : []),
       ...(window.__storiaCampione ? [window.__storiaCampione.menuEntry(menuSaghe)] : []),
       { label: "⭐ La Leggenda del Tuo Campione", sub: heroLoad() ? `La saga esclusiva di ${heroLoad().name} (N.${heroLoad().num})` : "Crea il tuo campione e scendi in campo!", cls: "hot", fn: () => { if (window.openHeroStoryMenu) window.openHeroStoryMenu(menuSaghe); } },
@@ -15195,6 +15196,7 @@
       ...(window.__piratiStory ? [window.__piratiStory.menuEntry(modes)] : []),
       ...(window.__alchimiaStory ? [window.__alchimiaStory.menuEntry(modes)] : []),
       ...(window.__kronenburgStory ? [window.__kronenburgStory.menuEntry(modes)] : []),
+      ...(window.__legaOmbre ? [window.__legaOmbre.menuEntry(modes)] : []),
             ...(window.__chronoStory ? [window.__chronoStory.menuEntry(modes)] : []),
       ...(window.__storiaCampione ? [window.__storiaCampione.menuEntry(modes)] : []),
       ...(window.__moloSettimana ? [{ label: "🏆 Settimana del Molo", sub: window.__moloSettimana.info().sub, cls: "hot", fn: () => window.__moloSettimana.open({ onExit: modes }) }] : []),
@@ -21866,7 +21868,7 @@
     ["Partite", /Settimana del Molo/],
     ["Collezioni e curiosità", /Diario del Corriere/],
     ["Calcio d'azione e arcade", /Arena 2D|Biliardino|Cabinato|Stadio 3D|Corsa della Panda|Gozzo di Baciccia|Gabbia sul Molo|Tsubasa|Supereroi/],
-    ["Saghe e GDR", /Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break/],
+    ["Saghe e GDR", /Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre/],
     ["Collezioni e curiosità", /Gashapon|Roster & Talenti|Diorama|Fumetto|Leggende del passato|Bianco e Nero|Quartier Generale/],
   ];
   const MN_EXP = { "Partite": 12, "Allenamento": 6, "Storie e ricordi": 8 }; // quante voci ha la categoria a tutto sbloccato: le mancanti appaiono come «???»
