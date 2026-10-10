@@ -2612,7 +2612,13 @@
   function continueStory() {
     const c = activeChapter(), m = mem(); if (!c) return;
     const isNew = !m.intro["ch" + c.n];
-    const curZ = (m.zone && ZONES[m.zone]) ? m.zone : ((c.zones && Object.keys(c.zones)[0]) || "omb_darsena");
+    let curZ = (m.zone && ZONES[m.zone]) ? m.zone : ((c.zones && Object.keys(c.zones)[0]) || "omb_darsena");
+    // capitolo nuovo appena iniziato: parti dalla sua prima zona, non da quella del capitolo precedente
+    if (c.n > 1 && c.zones && !c.zones[curZ] && stepOf(c.n) === 0 && ZONES[Object.keys(c.zones)[0]]) {
+      curZ = Object.keys(c.zones)[0]; m.zone = curZ; save();
+      const sp = ZONES[curZ].spec.start || [19, 21]; const tr0 = api.trRec();
+      tr0.pos[curZ] = [sp[0] * TS + 8, sp[1] * TS + 12];
+    }
     const zr = ZONES[curZ];
     const startPos = (zr && zr.spec.start) || [19, 21];
 
