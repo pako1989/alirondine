@@ -4959,6 +4959,7 @@
     const cyc = (k, label) => { const list = o[k], i = Math.max(0, list.findIndex(([v]) => v === h[k])), cur = list[i] || list[0]; return { label: `${label}: ${cur[1]} ▸`, sub: `${i + 1} di ${list.length}`, fn: () => { const nx = list[(i + 1) % list.length]; const oldShot = H_SHOTS[h.shot].label.toUpperCase(); h[k] = nx[0]; if (k === "shot" && (!h.shotName || h.shotName.startsWith(oldShot))) { h.shotName = `${H_SHOTS[h.shot].label.toUpperCase()} DI ${h.name.toUpperCase()}`; $("hShot").value = h.shotName; } heroCast(h); heroSum(); heroButtons(); } }; };
     buttons([cyc("style", "Capelli"), cyc("hair", "Colore"), cyc("eye", "Occhi"), cyc("skin", "Pelle"), cyc("shirt", "Maglia"), cyc("acc", "Accessorio"), cyc("shot", "Tiro"),
       { label: "Avanti ▸ Salva il Campione", sub: "Conferma ed entra in campo", cls: "hot", fn: () => { HE.h.v = 1; writeJSON(HERO, HE.h); heroCast(HE.h); view = { kind: "scene", bg: "end", speaker: "hero", chibi: true }; text("hero", `<b>${esc(HE.h.name)}</b>, numero ${HE.h.num}, pronto a scendere in campo con occhi <b>${(H_EYE[HE.h.eye] || "personalizzati").toLowerCase()}</b>. Il tiro speciale si chiama <em>${esc(HE.h.shotName)}</em>.<br><span style="color:var(--dim)">${heroWhere}</span>`); buttons([
+        ...(window.__chronoStory ? [{ label: "⏳ Gioca «Chrono-Break · Il Tempio dei Tre Tempi» ▸", sub: `Nuova saga di viaggi nel tempo con ${HE.h.name}`, cls: "hot", fn: () => window.__chronoStory.open({ onExit: HE.back }) }] : []),
         ...(window.__campioneOmbre ? [{ label: "🌃 Gioca «Il Circuito delle Ombre» ▸", sub: `Nuova saga noir notturna con ${HE.h.name}`, cls: "hot", fn: () => window.__campioneOmbre.open({ onExit: HE.back }) }] : []),
         { label: "⭐ Vivi la Storia del tuo Campione ▸", sub: `La saga inedita di ${HE.h.name}`, cls: "hot", fn: () => { if (window.openHeroStoryMenu) window.openHeroStoryMenu(HE.back); } },
         { label: "🌊 Cala Tramontana · Borgo del Campione ▸", sub: `Esplora il borgo marino alternativo a piedi con ${HE.h.name}`, cls: "hot", fn: () => { if (window.openCalaTramontana) window.openCalaTramontana(HE.back); } },
@@ -15106,6 +15107,7 @@
       ...(window.__piratiStory ? [window.__piratiStory.menuEntry(menuSaghe)] : []),
       ...(window.__alchimiaStory ? [window.__alchimiaStory.menuEntry(menuSaghe)] : []),
       ...(window.__kronenburgStory ? [window.__kronenburgStory.menuEntry(menuSaghe)] : []),
+      ...(window.__chronoStory ? [window.__chronoStory.menuEntry(menuSaghe)] : []),
       ...(window.__storiaCampione ? [window.__storiaCampione.menuEntry(menuSaghe)] : []),
       { label: "⭐ La Leggenda del Tuo Campione", sub: heroLoad() ? `La saga esclusiva di ${heroLoad().name} (N.${heroLoad().num})` : "Crea il tuo campione e scendi in campo!", cls: "hot", fn: () => { if (window.openHeroStoryMenu) window.openHeroStoryMenu(menuSaghe); } },
       { label: "★ JoJo · Stand Soccer Battle", sub: "Le Bizzarre Avventure di Rondine: Star Rondine & ORA ORA ORA!", cls: "hot", fn: () => { if (window.openJoJoAdventure) window.openJoJoAdventure(menuSaghe); } },
@@ -15184,6 +15186,7 @@
       ...(window.__piratiStory ? [window.__piratiStory.menuEntry(modes)] : []),
       ...(window.__alchimiaStory ? [window.__alchimiaStory.menuEntry(modes)] : []),
       ...(window.__kronenburgStory ? [window.__kronenburgStory.menuEntry(modes)] : []),
+      ...(window.__chronoStory ? [window.__chronoStory.menuEntry(modes)] : []),
       ...(window.__storiaCampione ? [window.__storiaCampione.menuEntry(modes)] : []),
       ...(window.__moloSettimana ? [{ label: "🏆 Settimana del Molo", sub: window.__moloSettimana.info().sub, cls: "hot", fn: () => window.__moloSettimana.open({ onExit: modes }) }] : []),
       ...(window.__diarioScoperte ? [{ label: "📰 Il Diario del Corriere", sub: window.__diarioScoperte.info().sub, cls: "hot", fn: () => window.__diarioScoperte.open({ onExit: modes }) }] : []),
@@ -21154,6 +21157,7 @@
     if (A.charge >= 0) A.charge = Math.min(60, A.charge + 1);
     azTick15(A);
     if (window.azProTick) window.azProTick(A);
+    if (window.chronoAzTick) window.chronoAzTick(A);
     if (A.sw) azSwTick(A); const l = azMe(A);
     [...A.us, ...A.them].forEach((p) => { p.lock--; p.cd--; p.slide--; p.boost = (p.boost | 0) - 1; p.shield = (p.shield | 0) - 1; });
     // Leo
@@ -21239,6 +21243,7 @@
     if (A.owner) { g.strokeStyle = "rgba(255,255,255,.7)"; g.beginPath(); g.ellipse(A.owner.x, A.owner.y + 9, 6, 2.6, 0, 0, 7); g.stroke(); }
     g.fillStyle = "rgba(0,0,0,.22)"; g.beginPath(); g.ellipse(A.ball.x + 1, A.ball.y + 3, 4, 1.8, 0, 0, 7); g.fill(); ball(A.ball.x, A.ball.y, 4);
     if (A.opt && A.opt.pro && window.azProDrawEffects) window.azProDrawEffects(A, g, W, H);
+    if (window.chronoAzDrawEffects) window.chronoAzDrawEffects(A, g, W, H);
     azOver15(A);
     if (A.charge >= 0 && A.owner === l) { const my = azAimOf(A, l), ty = my == null ? 101 + (A.gk[1].y < 101 ? 13 : -13) : 101 + my * AZ_AIMY, cl = my == null ? "rgba(255,255,255,.75)" : "#ffd23f"; g.save(); g.setLineDash([3, 4]); g.strokeStyle = my == null ? "rgba(255,255,255,.35)" : "rgba(255,210,63,.6)"; g.lineWidth = 1; g.beginPath(); g.moveTo(A.ball.x, A.ball.y); g.lineTo(AZ_R, ty); g.stroke(); g.restore(); g.fillStyle = cl; g.beginPath(); g.moveTo(AZ_R - 1, ty); g.lineTo(AZ_R - 8, ty - 4); g.lineTo(AZ_R - 8, ty + 4); g.closePath(); g.fill(); g.beginPath(); g.arc(AZ_R + 3, ty, 2.5, 0, 7); g.fill(); g.font = "bold 7px sans-serif"; g.textAlign = "right"; g.fillText(my == null ? "AUTO" : my ? (my < 0 ? "ALTO" : "BASSO") : "CENTRO", AZ_R - 10, ty + (my === 1 ? 10 : -6)); g.textAlign = "left"; }
     if (A.charge > 4) { px(l.x - 12, l.y - 18, 24, 4, "#000a"); px(l.x - 11, l.y - 17, 22 * A.charge / 60, 2, A.charge >= 45 ? (A.en >= 50 ? "#ffd23f" : "#ff4d5a") : "#9be2ff"); }
