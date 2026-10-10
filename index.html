@@ -54,10 +54,40 @@
     </div>
     <div class="guts" title="Grinta"><i id="hGuts"></i></div>
     <div class="field-radar" id="fieldRadar" title="Radar del campo da gioco (Zone 1-5)">
-      <div class="radar-zone" data-zone="1"><span class="radar-num">1</span></div>
+      <div class="radar-zone" data-zone="1"><span class="radar-num">1</span><span class="radar-lbl">Difesa</span></div>
+      <div class="radar-zone" data-zone="2"><span class="radar-num">2</span><span class="radar-lbl">Mediana</span></div>
+      <div class="radar-zone" data-zone="3"><span class="radar-num">3</span><span class="radar-lbl">Regia</span></div>
+      <div class="radar-zone" data-zone="4"><span class="radar-num">4</span><span class="radar-lbl">Trequarti</span></div>
+      <div class="radar-zone" data-zone="5"><span class="radar-num">5</span><span class="radar-lbl">Area</span></div>
+      <div class="radar-ball" id="radarBall">⚽</div>
     </div>
   </div>
+  <div class="box" id="text" aria-live="polite"></div>
+  <div class="choices" id="choices"></div>
+  <div class="box stats" id="stats"></div>
+  <div id="ovl" hidden><div class="ovlwrap"><div id="ovlText"></div><div class="choices one" id="ovlCh"></div></div></div>
+  <div class="foot">Leo Moretti · Rondine FC · il gioco si salva da solo a ogni capitolo</div>
 </div>
+<div id="toasts" aria-live="polite"></div>
+<div id="eventLog" role="log" aria-label="Cronologia eventi"></div>
+<div id="saveIndicator" role="status" aria-live="polite">Salvataggio...</div>
+
+<!-- Modal integrato per Il Borgo Storto -->
+<div id="borgoModal" hidden style="position:fixed; inset:0; z-index:9999; background:var(--sky); display:none; flex-direction:column;">
+  <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:#14243d; border-bottom:2px solid var(--gold); gap:8px;">
+    <div style="font-weight:bold; color:var(--gold); font-size:15px; display:flex; align-items:center; gap:8px;">
+      <span>🌀 Il Borgo Storto</span>
+      <span style="font-size:12px; color:var(--dim); font-weight:normal;">(GDR a turni · Spin-off)</span>
+    </div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <a href="borgo-storto.html" target="_blank" class="mute" style="text-decoration:none; padding:4px 8px;" title="Apri in una nuova scheda">↗ Scheda</a>
+      <button type="button" class="mute" id="closeBorgoBtn" style="background:#b3202c; color:#fff; border-color:#ff4d5a; font-weight:bold; padding:4px 10px;">✕ Torna ad Ali di Rondine</button>
+    </div>
+  </div>
+  <iframe id="borgoIframe" src="about:blank" style="flex:1; width:100%; border:none; background:#0e1424;"></iframe>
+</div>
+
+<!-- Script modulari -->
 <script src="js/slots.js?v=66"></script>
 <script src="js/three.standalone.js?v=66"></script>
 <script src="js/stadium3d.js?v=66"></script>
@@ -117,7 +147,94 @@
 <script src="js/tsubasa-classico.js?v=1"></script>
 <script>
 var homeBtn = document.getElementById("homeBtn");
-if (homeBtn) homeBtn.onclick = function(){ if (window.title) window.title(); };
+if (homeBtn) {
+  homeBtn.onclick = function () {
+    if (window.title) window.title();
+    if (window.toast) window.toast("Menu Principale", "info", "🏠");
+  };
+}
+var btn3d = document.getElementById("btn3d");
+if (btn3d) {
+  btn3d.onclick = function () {
+    if (window.openStadium3D) window.openStadium3D();
+  };
+}
+var optBtn = document.getElementById("optBtn");
+var topOptPanel = document.getElementById("topOptPanel");
+if (optBtn && topOptPanel) {
+  optBtn.onclick = function () {
+    topOptPanel.hidden = !topOptPanel.hidden;
+    optBtn.classList.toggle("active", !topOptPanel.hidden);
+  };
+}
+var perkToggleBtn = document.getElementById("perkToggleBtn");
+var perkToggleLbl = document.getElementById("perkToggleLbl");
+function syncPerkBtn() {
+  var isEnabled = localStorage.getItem("rondine_recruit_perks") !== "off";
+  if (perkToggleLbl) perkToggleLbl.textContent = isEnabled ? "Perk: ON" : "Perk: OFF";
+  if (perkToggleBtn) {
+    perkToggleBtn.style.color = isEnabled ? "#38bdf8" : "#94a3b8";
+    perkToggleBtn.style.borderColor = isEnabled ? "#38bdf8" : "#475569";
+  }
+}
+syncPerkBtn();
+if (perkToggleBtn) {
+  perkToggleBtn.onclick = function () {
+    var cur = localStorage.getItem("rondine_recruit_perks") !== "off";
+    var next = cur ? "off" : "on";
+    localStorage.setItem("rondine_recruit_perks", next);
+    syncPerkBtn();
+    if (window.toast) {
+      window.toast(next === "on" ? "Perk Reclute in partita ATTIVATI (Max 1 a match)" : "Perk Reclute in partita DISATTIVATI", "info", "⚡");
+    }
+  };
+}
+var manualBtn = document.getElementById("manualBtn");
+if (manualBtn) {
+  manualBtn.onclick = function () {
+    if (topOptPanel) topOptPanel.hidden = true;
+    if (optBtn) optBtn.classList.remove("active");
+    if (window.openManualeRondine) window.openManualeRondine();
+  };
+}
+var borgoAltBtn = document.getElementById("borgoAltBtn");
+if (borgoAltBtn) {
+  borgoAltBtn.onclick = function () {
+    if (topOptPanel) topOptPanel.hidden = true;
+    if (optBtn) optBtn.classList.remove("active");
+    if (window.openCalaTramontana) window.openCalaTramontana();
+  };
+}
+window.openBorgoStortoModal = function () {
+  var m = document.getElementById("borgoModal");
+  var fr = document.getElementById("borgoIframe");
+  if (!m || !fr) return;
+  fr.src = "borgo-storto.html";
+  m.hidden = false;
+  m.style.display = "flex";
+};
+window.closeBorgoStortoModal = function () {
+  var m = document.getElementById("borgoModal");
+  var fr = document.getElementById("borgoIframe");
+  if (!m || !fr) return;
+  m.hidden = true;
+  m.style.display = "none";
+  fr.src = "about:blank";
+  if (window.toast) window.toast("Sei tornato a Borgo Marino", "info", "⚽");
+};
+var closeBtn = document.getElementById("closeBorgoBtn");
+if (closeBtn) closeBtn.onclick = window.closeBorgoStortoModal;
+window.addEventListener("message", function (e) {
+  if (e.data && e.data.type === "closeBorgo") {
+    window.closeBorgoStortoModal();
+  }
+});
+
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  addEventListener("load", function () {
+    navigator.serviceWorker.register("sw.js").catch(function () {});
+  });
+}
 </script>
 </body>
 </html>
