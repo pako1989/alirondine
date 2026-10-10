@@ -2260,6 +2260,16 @@
       });
     }
 
+    function gateEnds(opts, conds, again) {
+      const ok = conds.map(Boolean);
+      if (ok.filter(Boolean).length < 2) return opts;
+      return opts.map((o, i) => ok[i] ? o : {
+        label: "🔒 ??? · Finale non raggiungibile",
+        sub: "Dipende dalle scelte fatte durante la storia: rigioca la saga con scelte diverse per scoprirlo",
+        fn: () => say([["voce", "Con le scelte che hai fatto questo finale non si apre. Ricomincia la saga dal menu per vederlo."]], again)
+      });
+    }
+
     function veritaTalk() {
       const s = S();
       if (s === 3 || s === 4) {
@@ -2270,7 +2280,7 @@
           ["al_verita", "Hai sconfitto Vane e salvato milioni di anime dal sacrificio. Ma conosci la legge fondamentale dell'esistenza: lo Scambio Equivalente."],
           ["al_verita", "Cosa sei disposto a cedere per concludere il tuo cammino? Cosa desideri davvero nel profondo del tuo cuore?"],
         ], () => {
-          ask("al_verita", "«Quale sarà la tua Scelta Finale, Alchimista d'Acciaio?»", [
+          const _opts = [
             {
               label: "🌟 [FINALE 1: LO SCAMBIO EQUIVALENTE]: Sacrifica per sempre l'Alchimia per restituire il corpo umano all'Armatura!",
               cls: "hot",
@@ -2333,7 +2343,9 @@
                 });
               }
             }
-          ]);
+          ];
+          const ch = F.get("scelta_chimera"), br = F.get("briggs_tattica");
+          ask("al_verita", "«Quale sarà la tua Scelta Finale, Alchimista d'Acciaio?»", gateEnds(_opts, [ch === "purifica", br === "scienza" || ch === "cura", br === "ferocia" || ch === "cura"], veritaTalk));
         });
       }
 

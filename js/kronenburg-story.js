@@ -2971,9 +2971,19 @@
       ], done);
     }
 
+    function gateEnds(opts, conds, again) {
+      const ok = conds.map(Boolean);
+      if (ok.filter(Boolean).length < 2) return opts;
+      return opts.map((o, i) => ok[i] ? o : {
+        label: "🔒 ??? · Finale non raggiungibile",
+        sub: "Dipende dalle scelte fatte durante la storia: rigioca la saga con scelte diverse per scoprirlo",
+        fn: () => say([["voce", "Con le scelte che hai fatto questo finale non si apre. Ricomincia la saga dal menu per vederlo."]], again)
+      });
+    }
+
     function showFinalVerdictChoice() {
       sfxDramaticRevelation();
-      ask("kb_celia", "«La vittoria è tua, {n}. Malakar è sconfitto e l'Eclisse volge al termine. La Pietra delle Sentenze e la Corona delle Tre Corone sono nelle tue mani. Qual è il tuo verdetto supremo per il destino di Kronenburg?»", [
+      const _opts = [
         {
           label: "🖤 [ZERO REQUIEM]: Assumi su di te l'odio del mondo, distruggi la tirannia e dona la repubblica al popolo!",
           cls: "hot",
@@ -3010,7 +3020,13 @@
             showEndingScene("volo_rondine");
           }
         }
-      ]);
+      ];
+      const g = (k) => F.get(k);
+      ask("kb_celia", "«La vittoria è tua, {n}. Malakar è sconfitto e l'Eclisse volge al termine. La Pietra delle Sentenze e la Corona delle Tre Corone sono nelle tue mani. Qual è il tuo verdetto supremo per il destino di Kronenburg?»", gateEnds(_opts, [
+        g("alleanza_nobile") === "zero" || g("duello_vespera") === "verita",
+        g("scelta_prigioni") === "geass_boia" || g("fucina_tattica") === "potenzia_tiro" || g("duello_vespera") === "logica",
+        g("scelta_prigioni") === "sabotaggio_zolfo" || g("fucina_tattica") === "distruggi_armi" || g("alleanza_nobile") === "lyanna"
+      ], showFinalVerdictChoice));
     }
 
     function showEndingScene(endingKey) {

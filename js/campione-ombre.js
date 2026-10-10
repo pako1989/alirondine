@@ -2362,8 +2362,19 @@
       ], done);
     }
 
+    function gateEnds(opts, conds, again) {
+      const ok = conds.map(Boolean);
+      if (ok.filter(Boolean).length < 2) return opts;
+      return opts.map((o, i) => ok[i] ? o : {
+        label: "🔒 ??? · Finale non raggiungibile",
+        sub: "Dipende dalle scelte fatte durante la storia: rigioca la saga con scelte diverse per scoprirlo",
+        fn: () => say([["voce", "Con le scelte che hai fatto questo finale non si apre. Ricomincia la saga dal menu per vederlo."]], again)
+      });
+    }
+
     function chooseFinalDestiny() {
-      ask("hero", "Le tue scelte hanno condotto a questo istante. Quale destino scegli per la Lanterna Nera?", [
+      const c2 = F.get("scelta_ch2"), b3 = F.get("bivio_ch3");
+      const _opts = [
         {
           label: "🌟 [FINALE 1 · LA LANTERNA SPEZZATA]: Verità & Giustizia mondiali!",
           sub: "Maya diffonde le prove in diretta satellitare, arresto dei boss e ritorno da eroe puro",
@@ -2413,7 +2424,8 @@
             ], done);
           }
         }
-      ]);
+      ];
+      ask("hero", "Le tue scelte hanno condotto a questo istante. Quale destino scegli per la Lanterna Nera?", gateEnds(_opts, [c2 === "telemetria" || b3 === "giustizia", b3 === "giustizia" || c2 === "sabotaggio", b3 === "corsari", c2 === "telemetria"], chooseFinalDestiny));
     }
 
     function startFinalMatch() {
