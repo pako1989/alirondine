@@ -25,9 +25,9 @@
       short: spec.short || spec.name,
       sub: spec.sub || "",
       need: 0,
-      w: spec.w || 40,
-      h: spec.h || 26,
-      start: spec.start || [20, 16],
+      w: spec.w || 48,
+      h: spec.h || 32,
+      start: spec.start || [24, 20],
       theme: "torino",
       bus: "cancello",
       busLabel: "Esci dal Vuoto di Sale",
@@ -40,18 +40,23 @@
     };
     Z.tile = function (ch, sx, sy, tx, ty) {
       var g = document.getElementById("cv").getContext("2d");
-      var salt = (tx * 13 + ty * 7) % 6;
-      var cols = ["#e2e8f0", "#cbd5e1", "#f1f5f9", "#d6d3d1", "#e7e5e4", "#fafaf9"];
-      g.fillStyle = cols[salt];
+      var n = (tx * 17 + ty * 11) % 8;
+      var cols = ["#f8fafc","#e2e8f0","#cbd5e1","#f1f5f9","#d6d3d1","#e7e5e4","#fafaf9","#f5f5f4"];
+      g.fillStyle = cols[n];
       g.fillRect(sx, sy, 16, 16);
-      if (ch === "A") { g.fillStyle = "#78350f"; g.fillRect(sx, sy, 16, 16); }
-      if (ch === "C") { g.fillStyle = "#fbbf24"; g.beginPath(); g.arc(sx + 8, sy + 8, 4, 0, Math.PI * 2); g.fill(); }
-      if (ch === "D") { g.fillStyle = "#92400e"; g.fillRect(sx, sy + 6, 16, 4); }
+      if (ch === "A") { g.fillStyle = "#7c2d12"; g.fillRect(sx, sy, 16, 16); }
+      if (ch === "C") {
+        g.fillStyle = "#fbbf24";
+        g.beginPath(); g.arc(sx+8, sy+8, 5, 0, Math.PI*2); g.fill();
+        g.fillStyle = "#fef3c7"; g.fillRect(sx+6, sy+4, 2, 4);
+      }
+      if (ch === "D") { g.fillStyle = "#92400e"; g.fillRect(sx, sy+5, 16, 6); }
+      if (ch === "W") { g.fillStyle = "#1e293b"; g.fillRect(sx, sy, 16, 16); }
     };
     Z.menu = function () {
       var m = mem();
-      api.trAsk("voce", "<b>Vuoto di Sale</b><br>Frammenti: " + (m.memories || 0) + "<br>Il sale ricorda tutto.", [
-        { label: "Diario", fn: function () { api.trAsk("voce", "Frammenti raccolti: " + (m.memories || 0), [{ label: "Indietro", fn: function () { api.trGo(zid); } }]); } },
+      api.trAsk("voce", "<b>Vuoto di Sale</b><br>Frammenti: " + (m.memories||0) + "<br>Capitolo 1: " + (m.ch1done ? "concluso" : "in corso"), [
+        { label: "Diario del Sale", fn: function () { api.trAsk("voce", "Frammenti: " + (m.memories||0), [{ label: "Indietro", fn: function () { api.trGo(zid); } }]); } },
         { label: "Esci", cls: "hot", fn: leave }
       ]);
     };
@@ -78,7 +83,7 @@
     var m = mem();
     api.scene("sale_citta", "voce", "<b>Cronache del Vuoto di Sale</b><br>" + h.name + " · n. " + h.num + "<br><span style=\"color:#fbbf24\">Il sale ricorda cio che tu hai dimenticato.</span>", [
       { label: "Entra nelle Dune di Sale", cls: "hot", fn: function () { enterZone("vs_dune"); } },
-      { label: "Diario del Sale", sub: "Frammenti: " + (m.memories || 0), fn: function () { api.scene("sale_diario", "voce", "Frammenti raccolti: " + (m.memories || 0), [{ label: "Indietro", fn: openMain }]); } },
+      { label: "Diario del Sale", sub: "Frammenti: " + (m.memories||0), fn: function () { api.scene("sale_diario", "voce", "Frammenti: " + (m.memories||0), [{ label: "Indietro", fn: openMain }]); } },
       { label: "Torna", fn: leave }
     ], "Vuoto di Sale");
   }
@@ -92,15 +97,15 @@
       name: "Dune di Sale Bianco",
       short: "Dune di Sale",
       sub: "Il vento porta voci dimenticate",
-      w: 42, h: 28,
-      start: [21, 18],
+      w: 48, h: 32,
+      start: [24, 20],
       npcs: [
-        { id: "vs_lira", at: [12, 10] },
-        { id: "vs_orrin", at: [30, 20] },
-        { id: "vs_kael", at: [18, 8] },
-        { id: "vs_signora", at: [26, 12] }
+        { id: "vs_lira", at: [14, 12] },
+        { id: "vs_orrin", at: [34, 22] },
+        { id: "vs_kael", at: [20, 8] },
+        { id: "vs_signora", at: [30, 14] }
       ],
-      areas: [[6, 6, 16, 14, "La Carovana di Lira"], [24, 14, 36, 24, "I Cristalli di Orrin"], [14, 4, 24, 10, "La Miniera di Kael"], [22, 8, 32, 16, "La Signora dei Contratti"]]
+      areas: [[8, 6, 18, 16, "La Carovana di Lira"], [26, 16, 40, 26, "I Cristalli di Orrin"], [16, 4, 26, 12, "La Miniera di Kael"], [24, 10, 36, 18, "La Signora dei Contratti"]]
     });
 
     if (a.CAST) {
@@ -113,7 +118,7 @@
     var prev = window.trTalkHook;
     window.trTalkHook = function (id) {
       if (id === "vs_lira") {
-        api.scene("sale_dune", "vs_lira", "Il vento di sale porta il tuo nome, Campione. Non sei il primo ad arrivare. Le dune si spostano. La Citta di Cristallo e a est, ma il sale rivela solo a chi e disposto a perdere un ricordo.", [{ label: "Capito", fn: function () { api.trGo("vs_dune"); } }]);
+        api.scene("sale_dune", "vs_lira", "Il vento di sale porta il tuo nome, Campione. Non sei il primo ad arrivare. Le dune si spostano sotto i piedi della carovana aerea. La Citta di Cristallo e a est, ma il sale rivela solo a chi e disposto a perdere un ricordo.", [{ label: "Capito", fn: function () { api.trGo("vs_dune"); } }]);
         return true;
       }
       if (id === "vs_orrin") {
@@ -122,13 +127,13 @@
       }
       if (id === "vs_kael") {
         var m = mem();
-        api.scene("sale_miniera", "vs_kael", "Le memorie solidificate... le sento. Alcune sono tue. Alcune sono di qualcuno che ti assomiglia troppo. Non fidarti del sale quando ti parla con la tua voce.", [{ label: "Raccogli un frammento", cls: "hot", fn: function () { m.memories = (m.memories || 0) + 1; memSet(m); api.trGo("vs_dune"); } }]);
+        api.scene("sale_miniera", "vs_kael", "Le memorie solidificate... le sento. Alcune sono tue. Alcune sono di qualcuno che ti assomiglia troppo. Non fidarti del sale quando ti parla con la tua voce.", [{ label: "Raccogli un frammento", cls: "hot", fn: function () { m.memories = (m.memories||0)+1; memSet(m); api.trGo("vs_dune"); } }]);
         return true;
       }
       if (id === "vs_signora") {
         api.scene("sale_citta", "vs_signora", "Sei arrivato, Campione. Il Contratto di Memoria e pronto. Firmando, il sale ti mostrera la verita: qualcuno ha gia vissuto questa storia. Forse sei tu. Forse sei l ultimo.", [
           { label: "Firma il Contratto", cls: "hot", fn: function () {
-            var m = mem(); m.ch1done = true; m.memories = (m.memories || 0) + 1; memSet(m);
+            var m = mem(); m.ch1done = true; m.memories = (m.memories||0)+1; memSet(m);
             api.scene("sale_citta", "voce", "<b>Contratto firmato.</b><br>Il cristallo si frantuma. Una voce dice: Non sei il primo. Non sarai l ultimo.<br><br>Per un istante vedi te stesso in un altro tempo che firma e poi dimentica.<br><br><b>Capitolo 1 concluso.</b>", [{ label: "Torna alle dune", fn: function () { api.trGo("vs_dune"); } }]);
           } },
           { label: "Chiedi il prezzo", fn: function () { api.scene("sale_citta", "vs_signora", "Il prezzo e un ricordo che credevi tuo. Dopo la firma saprai se era davvero tuo.", [{ label: "Firma", cls: "hot", fn: function () { api.trGo("vs_dune"); } }]); } }
@@ -140,7 +145,7 @@
   }
 
   window.__vuotoSaleStory = {
-    version: 3,
+    version: 4,
     open: openMain,
     menuEntry: function (back) {
       var h = hero();
