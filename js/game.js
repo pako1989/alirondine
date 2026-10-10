@@ -25271,12 +25271,29 @@
     if (AZ && AZ.cz) AZ.cz.names = names;
     return true;
   }
+  // Partita di saga nella Gabbia del Molo (street cage): 3 contro 3 a rimbalzo, primo a cfg.cageTarget gol
+  function apiMatchCage(cfg) {
+    if (!window.__cageHd || !window.__cageHd.sagaMatch) return false;
+    const h = cfg.hero === undefined ? heroLoad() : cfg.hero;
+    let st = borgoPlayer().st; try { if (h) st = heroBias(st, h); } catch {}
+    const t = (v) => Math.max(4, Math.round(v)), T = apiTeam("ap_" + cfg.id, cfg, st, t);
+    const mine = (st.tiro + st.drib + st.pass + st.contr) / 4, num = (v, d) => (Number.isFinite(+v) && +v > 0 ? +v : d);
+    const r = Math.max(0.6, Math.min(1.6, (num(T.atk, mine) + num(T.def, mine) + num(T.vel, mine)) / 3 / Math.max(8, mine))), cl = (v, a, b) => Math.max(a, Math.min(b, v));
+    const N = Array.isArray(cfg.oppNames) && cfg.oppNames.length >= 5 ? cfg.oppNames : [T.gk[0], T.defs[0][0], T.defs[1][0], T.defs[2][0], T.atk[0][0]];
+    trSavePos(); document.body.classList.remove("borgo");
+    window.__cageHd.sagaMatch({ title: cfg.chap, target: cfg.cageTarget || 6,
+      lv: { name: T.name, tag: String(T.name).replace(/^(i|il|la|le|gli|lo|l')\s*/i, "").slice(0, 3).toUpperCase(), kit: /^#[0-9a-f]{6}$/i.test(T.color) ? T.color : "#64748b", kit2: "#0f172a", names: [N[1], N[2], N[4]],
+        spd: cl(0.86 + 0.1 * r, 0.88, 1.04), react: Math.round(cl(26 - 12 * r, 9, 24)), noise: Math.round(cl(38 - 14 * r, 18, 36)), read: cl(0.1 + 0.35 * r, 0.1, 0.55), bank: cl(0.1 + 0.12 * r, 0.1, 0.3), mutKey: cfg.cageMut || "" },
+      onExit: (res) => { const a = res ? res.a : 0, b = res ? res.c : 1; cfg.onDone({ a, b, win: a > b, recap: "", cage: true }); } });
+    return true;
+  }
   // propone la partita alternativa (cfg.alt = "hd") accanto a quella a turni: stesso esito per la storia
   function apiMatchPick(cfg) {
     if (!cfg.alt) return apiMatch(cfg);
     const kinds = { hd: { label: "⚽ Action Soccer 2D HD", sub: "5 contro 5 dall'alto, muovi tu il Campione in tempo reale", fn: () => { if (!apiMatchHd(cfg)) apiMatch(cfg); } },
+      cage: { label: "🥅 La Gabbia", sub: "3 contro 3 a rimbalzo, primo a segnare vince", fn: () => { if (!apiMatchCage(cfg)) apiMatch(cfg); } },
       az: { label: "⚡ Calcio d'azione 3 contro 3", sub: "Partita veloce in tempo reale, tiro a carica", fn: () => { if (!apiMatchAz(cfg)) apiMatch(cfg); } } };
-    const alts = String(cfg.alt).split(",").filter((k) => kinds[k] && (k !== "hd" || (window.__actionHd && window.__actionHd.ut)) && (k !== "az" || window.azStartSagaMatch));
+    const alts = String(cfg.alt).split(",").filter((k) => kinds[k] && (k !== "hd" || (window.__actionHd && window.__actionHd.ut)) && (k !== "az" || window.azStartSagaMatch) && (k !== "cage" || (window.__cageHd && window.__cageHd.sagaMatch)));
     if (!alts.length) return apiMatch(cfg);
     view = { kind: "scene", bg: cfg.bg || "stadium", speaker: null }; chap(cfg.chap);
     text("voce", `<b>Come vuoi giocare questa partita?</b><br><span style="color:var(--dim)">Esito e ricompense della storia sono uguali: cambia solo come giochi.</span>`);

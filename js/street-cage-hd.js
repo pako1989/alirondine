@@ -2081,6 +2081,15 @@
   function showResult() {
     uiState = "result";
     const cfg = G.cfg, k = cfg.kind, m = G.mode, [a, c] = G.score;
+    if (k === "saga") { // partita di una saga: nessun progresso del torneo, solo l'esito per la storia
+      const win = a > c, draw = a === c, nm = (cfg.lv && cfg.lv.name) || "Avversari";
+      cfg.sagaRes = { a, c, win };
+      showUi(`<h2>${win ? "Vittoria!" : draw ? "Pareggio" : "Sconfitta"}</h2><div class="cgd-score"><span style="color:#7dd3fc">${a}</span> - <span style="color:#fdba74">${c}</span></div>
+        <p class="cgd-sub" style="text-align:center">${esc(cfg.title || nm)}</p><div class="cgd-quote">${esc(win ? (cfg.lv.win || "La Gabbia ha parlato.") : "Il muro è ancora lì. E la storia anche.")}</div>
+        <button class="cgd-btn" data-a="sagago">Continua</button>`);
+      act({ sagago: () => closeAll() });
+      return;
+    }
     const before = newOpenChapters(), win = a > c, draw = a === c;
     let st = 0, coins = 0, gt = 0, title = win ? "Vittoria!" : draw ? "Pareggio" : "Sconfitta", extra = "", quote = "", btns = "", map = {};
     PROG.pts += a; PROG.bestCombo = Math.max(PROG.bestCombo, G.stats.bestCombo); EXT.stat.trab += G.stats.trab;
@@ -2224,7 +2233,17 @@
   }
   window.openStreetCageMode = function (onExit) { openCage(onExit, null); };
   // API per il Borgo camminabile e per altri moduli: screen = hub|tour|boss|free|surv|time|pen|train|season|cup|daily|squad|cos|diary|opts|bossfight (+ opp)
+  // partita di saga nella Gabbia: opts { lv: {name, tag, kit, kit2, names[3], spd, react, noise, read, bank, mutKey, win}, target, title, onExit(res) }, res = {a, c, win} oppure null se abbandona
+  function sagaMatch(o) {
+    o = o || {};
+    const lv = Object.assign({ name: "Avversari", tag: "AVV", kit: "#64748b", kit2: "#0f172a", skin: ["#d9a679", "#c68642", "#e8b88c"], names: ["Primo", "Secondo", "Terzo"], spd: 0.95, react: 16, dash: 0.005, noise: 28, bank: 0.2, target: 6, read: 0.3, mut: "", mutKey: "", hint: "", win: "" }, o.lv || {});
+    let cfg = null;
+    openCage(function () { if (typeof o.onExit === "function") { try { o.onExit(cfg && cfg.sagaRes ? cfg.sagaRes : null); } catch (e) { console.error(e); } } }, {});
+    cfg = { kind: "saga", mode: "tour", lv, li: -1, target: o.target, title: o.title || lv.name, back: function () { closeAll(); } };
+    launch(cfg);
+  }
   window.__cageHd = {
+    sagaMatch: sagaMatch,
     start: function (opts) { opts = opts || {}; openCage(opts.onExit, opts); },
     info: function () { dailyEnsure(); return { unread: unreadCount(), dailyLeft: EXT.daily.done.filter((x) => !x).length, season: !!(SEA && SEA.active && !SEA.done), cup: !!(CUP && CUP.active && !CUP.done), stars: LEVELS.map((_, i) => starsOf(i)), bosses: BOSSES.filter((b) => bossDone(b.id)).length, titles: EXT.stat.titles, cups: EXT.stat.cups, gt: EXT.gt, open: openTeams(false).length, chapters: EXT.read.length }; },
     // arruolamento "narrativo" (missioni del Borgo): come leggere la pagina del Diario, ma senza gettone né soglie

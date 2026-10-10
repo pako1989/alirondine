@@ -844,7 +844,7 @@
   function playMatch(o) {
     castHero(); inMatch = true;
     api.matchPick({
-      alt: o.alt, oppNames: o.oppNames, squad: o.squad, azPitch: o.azPitch,
+      alt: o.alt, oppNames: o.oppNames, squad: o.squad, azPitch: o.azPitch, cageMut: o.cageMut, cageTarget: o.cageTarget,
       id: o.id, chap: o.chap, intro: T(o.intro), mate: o.mate || "Morgana", mateGeneric: true,
       us: o.us || "I Bucanieri del Vento", min: o.min || 45, team: o.team, venue: o.venue || VENUE_PIR, hero: undefined,
       onDone: (r) => {
