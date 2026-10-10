@@ -5515,6 +5515,15 @@
       sec("audio", "Audio", "Suoni, musica, voci, volumi"),
       sec("aspetto", "Grafica e aspetto", "Carte 3D, temi, animazioni, filtro retrò, testo grande"),
       { label: "Ripristina predefinite", sub: "Anni '90, tutto attivo", fn: () => { SET = setDefault(); save(); again("Impostazioni ripristinate."); } },
+      { label: "🔄 Aggiorna app", sub: "Forza il refresh e aggiorna la versione", cls: "hot", fn: () => {
+          if (confirm("Aggiornare l'app? La pagina verrà ricaricata.")) {
+            if (navigator.serviceWorker) {
+              navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+            }
+            if (caches) caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+            setTimeout(() => location.reload(true), 300);
+          }
+        } },
       { label: "◂ Indietro", fn: () => { settings._sec = ""; back(); } },
     ]);
   }
@@ -15107,8 +15116,7 @@
       ...(window.__piratiStory ? [window.__piratiStory.menuEntry(menuSaghe)] : []),
       ...(window.__alchimiaStory ? [window.__alchimiaStory.menuEntry(menuSaghe)] : []),
       ...(window.__kronenburgStory ? [window.__kronenburgStory.menuEntry(menuSaghe)] : []),
-      ...(window.__vuotoSaleStory ? [window.__vuotoSaleStory.menuEntry(menuSaghe)] : []),
-      ...(window.__chronoStory ? [window.__chronoStory.menuEntry(menuSaghe)] : []),
+            ...(window.__chronoStory ? [window.__chronoStory.menuEntry(menuSaghe)] : []),
       ...(window.__storiaCampione ? [window.__storiaCampione.menuEntry(menuSaghe)] : []),
       { label: "⭐ La Leggenda del Tuo Campione", sub: heroLoad() ? `La saga esclusiva di ${heroLoad().name} (N.${heroLoad().num})` : "Crea il tuo campione e scendi in campo!", cls: "hot", fn: () => { if (window.openHeroStoryMenu) window.openHeroStoryMenu(menuSaghe); } },
       { label: "★ JoJo · Stand Soccer Battle", sub: "Le Bizzarre Avventure di Rondine: Star Rondine & ORA ORA ORA!", cls: "hot", fn: () => { if (window.openJoJoAdventure) window.openJoJoAdventure(menuSaghe); } },
@@ -15187,8 +15195,7 @@
       ...(window.__piratiStory ? [window.__piratiStory.menuEntry(modes)] : []),
       ...(window.__alchimiaStory ? [window.__alchimiaStory.menuEntry(modes)] : []),
       ...(window.__kronenburgStory ? [window.__kronenburgStory.menuEntry(modes)] : []),
-      ...(window.__vuotoSaleStory ? [window.__vuotoSaleStory.menuEntry(modes)] : []),
-      ...(window.__chronoStory ? [window.__chronoStory.menuEntry(modes)] : []),
+            ...(window.__chronoStory ? [window.__chronoStory.menuEntry(modes)] : []),
       ...(window.__storiaCampione ? [window.__storiaCampione.menuEntry(modes)] : []),
       ...(window.__moloSettimana ? [{ label: "🏆 Settimana del Molo", sub: window.__moloSettimana.info().sub, cls: "hot", fn: () => window.__moloSettimana.open({ onExit: modes }) }] : []),
       ...(window.__diarioScoperte ? [{ label: "📰 Il Diario del Corriere", sub: window.__diarioScoperte.info().sub, cls: "hot", fn: () => window.__diarioScoperte.open({ onExit: modes }) }] : []),
@@ -21859,7 +21866,7 @@
     ["Partite", /Settimana del Molo/],
     ["Collezioni e curiosità", /Diario del Corriere/],
     ["Calcio d'azione e arcade", /Arena 2D|Biliardino|Cabinato|Stadio 3D|Corsa della Panda|Gozzo di Baciccia|Gabbia sul Molo|Tsubasa|Supereroi/],
-    ["Saghe e GDR", /Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Vuoto di Sale|Cronache del Vuoto/],
+    ["Saghe e GDR", /Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break/],
     ["Collezioni e curiosità", /Gashapon|Roster & Talenti|Diorama|Fumetto|Leggende del passato|Bianco e Nero|Quartier Generale/],
   ];
   const MN_EXP = { "Partite": 12, "Allenamento": 6, "Storie e ricordi": 8 }; // quante voci ha la categoria a tutto sbloccato: le mancanti appaiono come «???»
