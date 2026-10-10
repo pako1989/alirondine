@@ -1156,9 +1156,9 @@
             [18, 10, 23, 15, "Cancello di Sicurezza", "Barriera d'acciaio che conduce al Reattore Centrale"]
           ],
           npcs: (step) => [
-            { id: "pg_kael", x: 6, y: 7, dir: "down" },
-            { id: "pg_maya", x: 12, y: 4, dir: "right" },
-            { id: "pg_rin", x: 18, y: 8, dir: "left" }
+            { id: "pg_kael", at: [6, 7], dir: "down" },
+            { id: "pg_maya", at: [12, 4], dir: "right" },
+            { id: "pg_rin", at: [18, 8], dir: "left" }
           ],
           build: (Ls) => {
             // Mura esterne
@@ -1310,8 +1310,8 @@
             [19, 6, 23, 10, "Portone dell'Apostolo", "La soglia d'ossidiana che conduce all'Arena"]
           ],
           npcs: (step) => [
-            { id: "pg_maya", x: 6, y: 7, dir: "right" },
-            { id: "pg_kael", x: 4, y: 9, dir: "up" }
+            { id: "pg_maya", at: [6, 7], dir: "right" },
+            { id: "pg_kael", at: [4, 9], dir: "up" }
           ],
           build: (Ls) => {
             Ls.lay(0, 0, 23, 0, "#"); Ls.lay(0, 15, 23, 15, "#");
@@ -1473,7 +1473,7 @@
             [2, 2, 22, 14, "Il Campo d'Ossidiana", "Lo stadio sacro dove si decide il Terzo Impatto"]
           ],
           npcs: (step) => [
-            { id: "pg_kurogane", x: 12, y: 5, dir: "down" }
+            { id: "pg_kurogane", at: [12, 5], dir: "down" }
           ],
           build: (Ls) => {
             Ls.lay(0, 0, 23, 0, "#"); Ls.lay(0, 15, 23, 15, "#");

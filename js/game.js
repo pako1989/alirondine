@@ -8748,7 +8748,7 @@
   }
   const TR_SOLID = "~#TSGMORWLNHBDW";
   const trTile = (x, y) => { const tx = Math.floor(x / TS), ty = Math.floor(y / TS); return (TW.map[ty] && TW.map[ty][tx]) || "R"; };
-  const trNpcs = () => TW.z.npcs.filter((n) => !n.when || n.when(TW.prog)).map((n) => ({ ...n, x: n.at[0] * TS + 8, y: n.at[1] * TS + 12 }));
+  const trNpcs = () => TW.z.npcs.filter((n) => !n.when || n.when(TW.prog)).map((n) => { const at = Array.isArray(n.at) ? n.at : [typeof n.x === "number" ? n.x : 0, typeof n.y === "number" ? n.y : 0]; return { ...n, at, x: at[0] * TS + 8, y: at[1] * TS + 12 }; });
 
   // --- disegno ---
   function trDrawTile0(ch, sx, sy, tx, ty) {
