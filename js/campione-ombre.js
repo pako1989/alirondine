@@ -974,9 +974,14 @@
 
     Z.onObj = function (ch, tx, ty) {
       const c = activeChapter();
-      if (!c || !c.obj) return false;
-      const fn = c.obj[zid + ":" + ch + ":" + tx + "," + ty] || c.obj[zid + ":" + ch] || c.obj[ch];
-      if (!fn) return false;
+      const fn = c && c.obj && (c.obj[zid + ":" + ch + ":" + tx + "," + ty] || c.obj[zid + ":" + ch] || c.obj[ch]);
+      if (!fn) {
+        // oggetto decorativo senza scena propria: mai lasciar passare al motore base (apriva "Borghi e trasferte")
+        const lbl = spec.act && spec.act[ch];
+        if (!lbl) return false;
+        api.trToast(lbl + ": niente di rilevante, qui.");
+        return true;
+      }
       fn({ ch, tx, ty, zid });
       return true;
     };
