@@ -133,6 +133,117 @@
   }
 
 
+  // ---------------------------------------------------------------- stile CARTONE ANIMATO (forme esagerate, linee spesse, ombre a due toni, tanti dettagli)
+  function cartoon(g, id, c, expr) {
+    const h = hash(id + "#toon"), b = (n, k) => (h >>> n) % k, T = traits(id, c);
+    const skin = c.skin || "#e0b48a", hair = c.hair || "#2b1d14", eyeC = c.eye || "#3a2a1a", shirt = c.shirt || (c.bg && c.bg[1]) || "#3f5fbf", st = c.style || "messy";
+    const ink = dark(skin, 0.78), sk2 = mix(skin, 0.24, "#7a3a4a"), sk3 = lite(skin, 0.28), hd = dark(hair, 0.42), hl = lite(hair, 0.4), sh2 = dark(shirt, 0.3), sh3 = lite(shirt, 0.22);
+    const shape = b(0, 4), hw = 15 + b(2, 4), hh = 20 + b(4, 4), nose = b(6, 4), eyeT = b(8, 4), ears = 3.5 + b(10, 3) * 0.8, mw = 5 + b(12, 3), brow = 1.8 + b(14, 3) * 0.6, collar = b(16, 4), older = !!c.older || c.tag === "gray" || T.older;
+    const happy = expr === "smile" || expr === "grin", angry = expr === "angry", sad = expr === "sad", wide = expr === "surprised", blink = expr === "blink";
+    g.lineJoin = "round"; g.lineCap = "round";
+    const out = (w) => { g.lineWidth = w || 2.2; g.strokeStyle = ink; g.stroke(); };
+    // --- capelli dietro
+    const longH = st === "long" || st === "codino" || st === "bun" || st === "ponytail";
+    if (longH) {
+      g.beginPath(); g.moveTo(-hw - 5, -6); g.bezierCurveTo(-hw - 12, 18, -hw - 8, 40, -hw + 2, st === "long" ? 50 : 30); g.lineTo(hw - 2, st === "long" ? 50 : 30); g.bezierCurveTo(hw + 8, 40, hw + 12, 18, hw + 5, -6); g.closePath(); g.fillStyle = hd; g.fill(); out(2);
+      g.strokeStyle = dark(hair, 0.6); g.lineWidth = 1; for (let i = 0; i < 5; i++) { g.beginPath(); g.moveTo(-hw - 4 + i * 2, 6 + i * 4); g.quadraticCurveTo(-hw - 6, 26, -hw + i * 2, 44); g.stroke(); g.beginPath(); g.moveTo(hw + 4 - i * 2, 6 + i * 4); g.quadraticCurveTo(hw + 6, 26, hw - i * 2, 44); g.stroke(); }
+    }
+    if (st === "bun") { g.beginPath(); g.arc(0, -hh - 9, 9, 0, 7); g.fillStyle = hair; g.fill(); out(2); g.strokeStyle = hl; g.lineWidth = 1.4; g.beginPath(); g.arc(-2, -hh - 11, 5, Math.PI * 1.1, Math.PI * 1.7); g.stroke(); }
+    if (st === "codino" || st === "ponytail") { g.beginPath(); g.moveTo(hw, -6); g.bezierCurveTo(hw + 16, -4, hw + 14, 22, hw + 6, 30); g.bezierCurveTo(hw + 4, 18, hw + 4, 4, hw - 2, 0); g.closePath(); g.fillStyle = hair; g.fill(); out(2); g.fillStyle = "#c0392b"; g.fillRect(hw + 2, -6, 5, 5); }
+    // --- busto: spalle, pieghe, colletto
+    const sw = 32 + b(18, 3) * 2;
+    g.beginPath(); g.moveTo(-sw - 4, 64); g.bezierCurveTo(-sw - 2, 44, -sw + 6, 36, -9, 32); g.lineTo(9, 32); g.bezierCurveTo(sw - 6, 36, sw + 2, 44, sw + 4, 64); g.closePath(); g.fillStyle = shirt; g.fill(); out(2.4);
+    g.save(); g.clip(); g.fillStyle = sh2; g.beginPath(); g.moveTo(8, 32); g.bezierCurveTo(20, 40, 30, 48, sw + 6, 64); g.lineTo(sw + 6, 30); g.closePath(); g.fill(); g.fillStyle = sh3; g.beginPath(); g.ellipse(-sw + 8, 46, 6, 12, -0.5, 0, 7); g.fill(); g.restore();
+    g.strokeStyle = sh2; g.lineWidth = 1.2; [[-18, 44, -14, 58], [16, 46, 20, 60], [-4, 50, -2, 62]].forEach(([a, b2, c2, d]) => { g.beginPath(); g.moveTo(a, b2); g.quadraticCurveTo(a + 4, (b2 + d) / 2, c2, d); g.stroke(); }); // pieghe della maglia
+    g.beginPath(); g.rect(-6, 20, 12, 14); g.fillStyle = sk2; g.fill(); out(2); // collo
+    if (collar === 0) { g.beginPath(); g.moveTo(-10, 32); g.quadraticCurveTo(0, 40, 10, 32); g.lineWidth = 3; g.strokeStyle = sh3; g.stroke(); g.lineWidth = 1.6; g.strokeStyle = ink; g.stroke(); } // girocollo
+    else if (collar === 1) { g.beginPath(); g.moveTo(-10, 32); g.lineTo(0, 44); g.lineTo(10, 32); g.fillStyle = sk2; g.fill(); out(1.8); } // scollo a V
+    else if (collar === 2) { [[-1, -12], [1, 12]].forEach(([sd, x]) => { g.beginPath(); g.moveTo(0, 36); g.lineTo(x, 30); g.lineTo(x + sd * 4, 40); g.closePath(); g.fillStyle = sh3; g.fill(); out(1.6); }); g.fillStyle = ink; [42, 48].forEach((y) => { g.beginPath(); g.arc(0, y, 1.1, 0, 7); g.fill(); }); } // polo con bottoni
+    else { g.beginPath(); g.moveTo(-14, 30); g.bezierCurveTo(-18, 20, 18, 20, 14, 30); g.bezierCurveTo(8, 38, -8, 38, -14, 30); g.fillStyle = sh2; g.fill(); out(1.8); g.strokeStyle = sh3; g.lineWidth = 1; g.beginPath(); g.moveTo(-3, 38); g.lineTo(-4, 48); g.moveTo(3, 38); g.lineTo(4, 48); g.stroke(); } // felpa col cappuccio
+    if (c.num && g.getTransform().a > 0) { g.font = "900 12px Arial Black, sans-serif"; g.textAlign = "center"; g.lineWidth = 3; g.strokeStyle = ink; g.strokeText(String(c.num).slice(0, 2), 20, 56); g.fillStyle = sh3; g.fillText(String(c.num).slice(0, 2), 20, 56); g.textAlign = "left"; }
+    // --- orecchie
+    [-1, 1].forEach((sd) => { g.beginPath(); g.ellipse(sd * (hw + 1), 6, ears, ears + 2.5, sd * 0.15, 0, 7); g.fillStyle = skin; g.fill(); out(2); g.strokeStyle = sk2; g.lineWidth = 1.2; g.beginPath(); g.arc(sd * (hw + 1), 6, ears * 0.5, sd > 0 ? -1.2 : Math.PI - 1.9, sd > 0 ? 1.2 : Math.PI + 1.9); g.stroke(); });
+    // --- testa: quattro forme esagerate
+    const head = () => { g.beginPath();
+      if (shape === 0) g.ellipse(0, 3, hw + 1, hh, 0, 0, 7); // tonda
+      else if (shape === 1) { g.moveTo(-hw + 3, -hh + 4); g.bezierCurveTo(-hw - 1, 0, -hw - 3, hh, 0, hh + 4); g.bezierCurveTo(hw + 3, hh, hw + 1, 0, hw - 3, -hh + 4); g.bezierCurveTo(hw - 6, -hh - 3, -hw + 6, -hh - 3, -hw + 3, -hh + 4); } // a pera: mascella larga
+      else if (shape === 2) { g.moveTo(-hw - 2, -4); g.bezierCurveTo(-hw - 3, -hh - 4, hw + 3, -hh - 4, hw + 2, -4); g.bezierCurveTo(hw + 1, 14, 7, hh + 3, 0, hh + 3); g.bezierCurveTo(-7, hh + 3, -hw - 1, 14, -hw - 2, -4); } // a fagiolo: fronte larga, mento stretto
+      else { g.moveTo(-hw, -hh + 2); g.lineTo(-hw - 1, 12); g.quadraticCurveTo(-hw, hh + 2, -6, hh + 3); g.lineTo(6, hh + 3); g.quadraticCurveTo(hw, hh + 2, hw + 1, 12); g.lineTo(hw, -hh + 2); g.quadraticCurveTo(0, -hh - 6, -hw, -hh + 2); } // squadrata
+      g.closePath(); };
+    head(); g.fillStyle = skin; g.fill();
+    g.save(); head(); g.clip();
+    g.fillStyle = sk2; g.beginPath(); g.moveTo(hw * 0.62, -hh - 4); g.bezierCurveTo(hw * 0.95, -2, hw * 0.85, 12, hw * 0.3, hh + 6); g.lineTo(hw + 6, hh + 6); g.lineTo(hw + 6, -hh - 4); g.closePath(); g.fill(); g.beginPath(); g.ellipse(0, hh + 2, hw * 0.7, 4, 0, 0, 7); g.fill(); // ombra a due toni sul lato e sotto il mento
+    g.fillStyle = sk3; g.beginPath(); g.ellipse(-hw * 0.45, -8, 5, 3, -0.3, 0, 7); g.fill(); g.beginPath(); g.ellipse(-hw * 0.55, 10, 3.5, 2, -0.2, 0, 7); g.fill(); // luce su fronte e zigomo
+    g.restore(); head(); out(2.6);
+    if (b(20, 4) === 0) { g.strokeStyle = sk2; g.lineWidth = 1.2; g.beginPath(); g.moveTo(-1.5, hh + 1); g.quadraticCurveTo(0, hh - 1, 1.5, hh + 1); g.stroke(); } // fossetta sul mento
+    // barba o barba corta
+    if (c.beard) { g.beginPath(); g.moveTo(-hw + 1, 6); g.bezierCurveTo(-hw, hh + 2, -6, hh + 8, 0, hh + 8); g.bezierCurveTo(6, hh + 8, hw, hh + 2, hw - 1, 6); g.bezierCurveTo(8, 12, 4, 17, 0, 16); g.bezierCurveTo(-4, 17, -8, 12, -hw + 1, 6); g.fillStyle = hair; g.fill(); out(2); g.strokeStyle = hd; g.lineWidth = 1; [-3, -2, 2, 3].forEach((i) => { g.beginPath(); g.moveTo(i * 3.6, 14 + Math.abs(i)); g.lineTo(i * 3.9, hh + 4); g.stroke(); }); g.strokeStyle = hl; g.lineWidth = 1.2; g.beginPath(); g.moveTo(-8, hh); g.quadraticCurveTo(-4, hh + 4, 0, hh + 4); g.stroke(); }
+    else if (b(22, 5) === 0) { g.fillStyle = "rgba(40,30,30,.18)"; for (let i = 0; i < 26; i++) { const a = Math.PI * (0.15 + i / 26 * 0.7), r = hh - 2 - (i % 3) * 2; g.fillRect(Math.cos(a) * (hw - 3) - 0.5, 4 + Math.sin(a) * r * 0.7, 1, 1); } } // barba di un giorno
+    // --- occhi
+    const ey = 2 + b(24, 3), eg = 6.5 + b(26, 3) * 0.8;
+    [-1, 1].forEach((sd) => {
+      const x = sd * eg, ew = [5, 5.2, 3.6, 5.6][eyeT] * (wide ? 1.2 : 1), eh = [6, 4.5, 3.6, 4.2][eyeT] * (wide ? 1.3 : 1);
+      if (blink || (happy && expr === "grin")) { g.strokeStyle = ink; g.lineWidth = 2.2; g.beginPath(); g.arc(x, ey + 1.5, ew * 0.85, Math.PI * 1.15, Math.PI * 1.85); g.stroke(); return; }
+      g.beginPath(); g.ellipse(x, ey, ew, eh, sd * (eyeT === 3 ? 0.12 : 0), 0, 7); g.fillStyle = "#fffdf8"; g.fill(); out(1.8);
+      g.save(); g.beginPath(); g.ellipse(x, ey, ew, eh, 0, 0, 7); g.clip();
+      const px2 = x - sd * 0.6 + (angry ? sd * -0.4 : 0), py2 = ey + (sad ? 1 : 0.4), ir = ew * (wide ? 0.45 : 0.62);
+      g.fillStyle = eyeC; g.beginPath(); g.arc(px2, py2, ir, 0, 7); g.fill(); g.fillStyle = dark(eyeC, 0.6); g.beginPath(); g.arc(px2, py2, ir * 0.55, 0, 7); g.fill();
+      g.fillStyle = "#fff"; g.beginPath(); g.arc(px2 - ir * 0.35, py2 - ir * 0.4, ir * 0.32, 0, 7); g.fill();
+      if (eyeT === 1) { g.fillStyle = skin; g.fillRect(x - ew - 1, ey - eh - 1, ew * 2 + 2, eh * 0.9); g.strokeStyle = ink; g.lineWidth = 2; g.beginPath(); g.moveTo(x - ew, ey - eh * 0.1); g.lineTo(x + ew, ey - eh * 0.1); g.stroke(); } // palpebre a mezz'asta
+      g.restore();
+      g.strokeStyle = ink; g.lineWidth = 2.6; g.beginPath(); g.ellipse(x, ey, ew + 0.4, eh + 0.3, 0, Math.PI * 1.1, Math.PI * 1.9); g.stroke(); // palpebra superiore marcata
+      if (older) { g.strokeStyle = sk2; g.lineWidth = 1; g.beginPath(); g.moveTo(x + sd * (ew + 1), ey + 1); g.lineTo(x + sd * (ew + 4), ey + 3); g.moveTo(x + sd * (ew + 1), ey + 3); g.lineTo(x + sd * (ew + 4), ey + 6); g.stroke(); g.beginPath(); g.arc(x, ey + eh + 1.5, ew * 0.7, 0.3, Math.PI - 0.3); g.stroke(); } // zampe di gallina e borse
+      if (sad) { g.fillStyle = "#8fd3ff"; g.beginPath(); g.moveTo(x + sd * 2, ey + eh + 1); g.quadraticCurveTo(x + sd * 4, ey + eh + 6, x + sd * 2, ey + eh + 7); g.quadraticCurveTo(x, ey + eh + 6, x + sd * 2, ey + eh + 1); g.fill(); }
+    });
+    // --- sopracciglia spesse ed espressive
+    [-1, 1].forEach((sd) => {
+      const x = sd * eg, y = ey - 8 - (wide ? 3 : 0) - (sad ? 1 : 0), tIn = angry ? 3.5 : sad ? -3 : (b(28, 3) - 1) * 0.8;
+      g.beginPath(); g.moveTo(x - sd * 5.5, y + 1.5 - tIn * (sd > 0 ? 0 : 0)); g.quadraticCurveTo(x, y - 2.5, x + sd * 5, y + 1); g.lineTo(x + sd * 4.6, y + 1 + brow); g.quadraticCurveTo(x, y - 2.5 + brow, x - sd * 5.2, y + 1.5 + brow); g.closePath();
+      g.save(); g.translate(x - sd * 5.5, y + 1.5); g.rotate(sd * tIn * 0.08); g.translate(-(x - sd * 5.5), -(y + 1.5)); g.fillStyle = older && c.tag === "gray" ? lite(hair, 0.1) : dark(hair, 0.25); g.fill(); g.lineWidth = 1; g.strokeStyle = ink; g.stroke(); g.restore();
+    });
+    if (older) { g.strokeStyle = sk2; g.lineWidth = 1.1; [-1, 0, 1].forEach((i) => { g.beginPath(); g.moveTo(-6, ey - 14 + i * 2.5); g.quadraticCurveTo(0, ey - 15 + i * 2.5, 6, ey - 14 + i * 2.5); g.stroke(); }); } // rughe sulla fronte
+    // --- naso con carattere
+    g.beginPath();
+    if (nose === 0) { g.ellipse(0.5, 11, 3.2, 2.8, 0, 0, 7); g.fillStyle = mix(skin, 0.18, "#c06060"); g.fill(); out(1.6); g.fillStyle = sk3; g.beginPath(); g.arc(-0.6, 10, 1, 0, 7); g.fill(); } // a bottone
+    else if (nose === 1) { g.moveTo(-1.5, 3); g.quadraticCurveTo(2, 7, 7.5, 13); g.quadraticCurveTo(4, 16, -1.5, 14.5); g.quadraticCurveTo(-2.5, 9, -1.5, 3); g.fillStyle = mix(skin, 0.1, "#c06060"); g.fill(); out(1.8); g.strokeStyle = sk3; g.lineWidth = 1.2; g.beginPath(); g.moveTo(0, 6); g.lineTo(3, 11); g.stroke(); } // lungo e appuntito
+    else if (nose === 2) { g.moveTo(-1, 3); g.bezierCurveTo(-5, 10, -4, 16, 1, 15.5); g.bezierCurveTo(6, 16, 6, 10, 2, 4); g.fillStyle = mix(skin, 0.12, "#c06060"); g.fill(); out(1.8); g.fillStyle = sk2; [-1.4, 3].forEach((nx) => { g.beginPath(); g.ellipse(nx, 14, 1, 0.6, 0, 0, 7); g.fill(); }); } // a patata
+    else { g.moveTo(-1, 2); g.quadraticCurveTo(5, 6, 4.5, 13); g.quadraticCurveTo(2, 15.5, -1.5, 14); g.quadraticCurveTo(-2, 8, -1, 2); g.fillStyle = mix(skin, 0.1, "#c06060"); g.fill(); out(1.8); g.strokeStyle = sk2; g.lineWidth = 1; g.beginPath(); g.moveTo(0, 6); g.lineTo(1.5, 11); g.stroke(); } // aquilino
+    if (older && !c.beard) { g.strokeStyle = sk2; g.lineWidth = 1.1; [-1, 1].forEach((sd) => { g.beginPath(); g.moveTo(sd * 5, 13); g.quadraticCurveTo(sd * 8, 18, sd * 6, 22); g.stroke(); }); } // pieghe naso-bocca
+    // --- bocca espressiva
+    const my = 19 + b(30, 2);
+    if (expr === "grin") { g.beginPath(); g.moveTo(-mw - 1, my - 1); g.quadraticCurveTo(0, my + 10, mw + 1, my - 1); g.closePath(); g.fillStyle = "#5a1a22"; g.fill(); out(2); g.save(); g.clip(); g.fillStyle = "#fff"; g.fillRect(-mw, my - 1, mw * 2, 3); g.fillStyle = "#e0606a"; g.beginPath(); g.ellipse(0, my + 6, mw * 0.6, 2.4, 0, 0, 7); g.fill(); g.restore(); }
+    else if (happy) { g.beginPath(); g.moveTo(-mw, my); g.quadraticCurveTo(0, my + 5, mw, my); g.strokeStyle = ink; g.lineWidth = 2.2; g.stroke(); [-1, 1].forEach((sd) => { g.beginPath(); g.moveTo(sd * mw, my); g.lineTo(sd * (mw + 1.4), my - 1.4); g.stroke(); }); }
+    else if (angry) { g.beginPath(); g.moveTo(-mw, my + 1); g.lineTo(mw, my); g.lineTo(mw - 1, my + 4); g.lineTo(-mw + 1, my + 4); g.closePath(); g.fillStyle = "#fff"; g.fill(); out(1.8); g.strokeStyle = ink; g.lineWidth = 0.8; for (let i = -2; i <= 2; i++) { g.beginPath(); g.moveTo(i * 2, my + 0.6); g.lineTo(i * 2, my + 4); g.stroke(); } g.beginPath(); g.moveTo(-mw, my + 2.4); g.lineTo(mw, my + 2.2); g.stroke(); }
+    else if (sad) { g.beginPath(); g.moveTo(-mw + 1, my + 3); g.quadraticCurveTo(0, my - 2, mw - 1, my + 3); g.strokeStyle = ink; g.lineWidth = 2.2; g.stroke(); }
+    else if (wide) { g.beginPath(); g.ellipse(0, my + 1.5, 3, 4, 0, 0, 7); g.fillStyle = "#5a1a22"; g.fill(); out(1.8); }
+    else { const k = b(1, 3); g.beginPath(); if (k === 0) { g.moveTo(-mw + 1, my); g.quadraticCurveTo(0, my + 2.5, mw - 1, my - 0.5); } else if (k === 1) { g.moveTo(-mw + 2, my); g.lineTo(mw - 2, my); } else { g.moveTo(-mw + 1, my + 0.5); g.quadraticCurveTo(-1, my - 1.5, mw - 1, my + 1); } g.strokeStyle = ink; g.lineWidth = 2; g.stroke(); g.strokeStyle = sk2; g.lineWidth = 1.2; g.beginPath(); g.moveTo(-2, my + 3.4); g.quadraticCurveTo(0, my + 4.4, 2, my + 3.4); g.stroke(); }
+    if (T.freckles) { g.fillStyle = mix(skin, 0.45, "#8a4a2a"); [[-9, 10], [-11, 12], [-8, 13], [9, 10], [11, 12], [8, 13]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 0.8, 0, 7); g.fill(); }); }
+    if (T.mole) { g.fillStyle = dark(skin, 0.6); g.beginPath(); g.arc(-8, my + 1, 0.9, 0, 7); g.fill(); }
+    // --- capelli davanti: masse a ciocche con ombra sotto, riflessi e fili
+    if (!c.cap) {
+      const top = -hh - (st === "buzz" ? 0 : 5);
+      const mass = () => { g.beginPath();
+        if (st === "buzz") { g.moveTo(-hw - 1, -4); g.bezierCurveTo(-hw - 2, top - 4, hw + 2, top - 4, hw + 1, -4); g.bezierCurveTo(hw - 4, -12, -hw + 4, -12, -hw - 1, -4); }
+        else if (st === "slick") { g.moveTo(-hw - 2, 2); g.bezierCurveTo(-hw - 4, top - 6, hw + 4, top - 6, hw + 2, 2); g.bezierCurveTo(hw - 2, -10, hw * 0.2, -16, -hw + 3, -10); g.bezierCurveTo(-hw + 1, -6, -hw - 1, -2, -hw - 2, 2); }
+        else if (st === "spiky") { g.moveTo(-hw - 3, 2); const n = 7; for (let i = 0; i <= n; i++) { const a = Math.PI * (0.95 + i / n * 1.1), r = i % 2 ? hh + 13 : hh + 2; g.lineTo(Math.cos(a) * (hw + 4) * (r / (hh + 6)), -2 + Math.sin(a) * r); } g.lineTo(hw + 3, 2); g.bezierCurveTo(hw - 2, -8, -hw + 2, -8, -hw - 3, 2); }
+        else if (st === "cresta") { g.moveTo(-hw - 1, -4); g.bezierCurveTo(-hw - 2, top + 2, hw + 2, top + 2, hw + 1, -4); g.bezierCurveTo(hw - 4, -11, -hw + 4, -11, -hw - 1, -4); }
+        else { g.moveTo(-hw - 3, 4); g.bezierCurveTo(-hw - 6, top - 6, hw + 6, top - 6, hw + 3, 4); // frangia a ciocche
+          const n = 5, dir = [1, -1, 0, 1][T.fringe]; for (let i = n; i >= 0; i--) { const x0 = -hw + (2 * hw) * (i / n); g.quadraticCurveTo(x0 + 3, -14, x0 - dir * 3, -6 + (i % 2) * 3); } g.closePath(); }
+        g.closePath(); };
+      mass(); g.fillStyle = hair; g.fill();
+      g.save(); mass(); g.clip(); g.fillStyle = hd; g.beginPath(); g.ellipse(hw * 0.5, -4, hw * 0.8, 8, -0.3, 0, 7); g.fill(); g.restore(); // ombra sotto le ciocche
+      mass(); out(2.4);
+      if (st === "cresta") { g.beginPath(); g.moveTo(-4, top + 4); g.lineTo(-2, top - 14); g.lineTo(2, top - 10); g.lineTo(4, top - 16); g.lineTo(6, top + 4); g.closePath(); g.fillStyle = hair; g.fill(); out(2); }
+      if (st === "messy") { for (let i = 0; i < 2 + T.tuft; i++) { g.beginPath(); g.moveTo(-6 + i * 6, top + 1); g.quadraticCurveTo(-4 + i * 6, top - 9, 3 + i * 6, top - 7); g.quadraticCurveTo(0 + i * 6, top - 2, 1 + i * 6, top + 2); g.fillStyle = hair; g.fill(); out(1.6); } }
+      if (st === "buzz") { g.fillStyle = hd; for (let i = 0; i < 30; i++) { const a = Math.PI * (1.05 + (i / 30) * 0.9), r = hh - 1 - (i % 3) * 2.5; g.fillRect(Math.cos(a) * (hw - 1) - 0.5, Math.sin(a) * r - 2, 1, 1); } }
+      if (st !== "buzz") { g.save(); mass(); g.clip(); g.strokeStyle = hl; g.lineWidth = 2.4; g.beginPath(); g.arc(-3, top + 16, 12, Math.PI * 1.15, Math.PI * 1.5); g.stroke(); g.lineWidth = 1.2; g.beginPath(); g.arc(-3, top + 18, 9, Math.PI * 1.2, Math.PI * 1.45); g.stroke(); g.restore(); } // riflessi
+      if (st !== "buzz") { g.save(); mass(); g.clip(); g.strokeStyle = dark(hair, 0.55); g.lineWidth = 0.9; for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(-hw + 4 + i * 7, top + 3); g.quadraticCurveTo(-hw + 6 + i * 7, top + 9, -hw + 3 + i * 7, -8); g.stroke(); } g.restore(); } // fili, solo dentro i capelli
+    }
+    // --- accessori
+    if (c.glasses) { [-1, 1].forEach((sd) => { g.beginPath(); g.ellipse(sd * eg, ey, 6.4, 5.6, 0, 0, 7); g.lineWidth = 1.9; g.strokeStyle = "#1a1a22"; g.stroke(); g.lineWidth = 1; g.strokeStyle = "rgba(255,255,255,.8)"; g.beginPath(); g.moveTo(sd * eg - 3, ey - 3); g.lineTo(sd * eg - 1, ey - 4.5); g.stroke(); }); g.lineWidth = 2.4; g.strokeStyle = "#1a1a22"; g.beginPath(); g.moveTo(-eg + 6, ey - 1); g.quadraticCurveTo(0, ey - 3, eg - 6, ey - 1); g.stroke(); }
+    if (c.shades) { [-1, 1].forEach((sd) => { g.beginPath(); g.ellipse(sd * eg, ey, 6.8, 4.6, 0, 0, 7); g.fillStyle = "#111"; g.fill(); out(1.8); g.fillStyle = "rgba(255,255,255,.35)"; g.fillRect(sd * eg - 4, ey - 3, 3, 1.4); }); g.fillStyle = "#111"; g.fillRect(-eg + 6, ey - 1.5, (eg - 6) * 2, 1.8); }
+    if (c.cap) { g.beginPath(); g.moveTo(-hw - 3, -5); g.bezierCurveTo(-hw - 2, -hh - 12, hw + 2, -hh - 12, hw + 3, -5); g.closePath(); g.fillStyle = c.cap; g.fill(); out(2.4); g.save(); g.clip(); g.fillStyle = dark(c.cap, 0.3); g.fillRect(4, -hh - 14, hw, hh); g.restore(); g.beginPath(); g.ellipse(-8, -5, hw + 6, 4, -0.06, 0, 7); g.fillStyle = dark(c.cap, 0.15); g.fill(); out(2.2); g.beginPath(); g.arc(0, -hh - 3, 4, 0, 7); g.fillStyle = lite(c.cap, 0.5); g.fill(); out(1.4); g.beginPath(); g.arc(0, -hh - 11, 1.6, 0, 7); g.fillStyle = c.cap; g.fill(); out(1.2); }
+  }
   // ---------------------------------------------------------------- stile FUMETTO «linea chiara» (contorni neri netti, colori pieni, facce da caratterista)
   function comic(g, id, c, expr) {
     const T = traits(id, c), h = hash(id + "*"), b = (n, k) => (h >>> n) % k;
@@ -266,8 +377,8 @@
     const sm = g.imageSmoothingEnabled; g.imageSmoothingEnabled = false; g.drawImage(cv, -36, -32, 72, 100); g.imageSmoothingEnabled = sm;
   }
   window.__faceStyles = {
-    list: [["classic", "Classico"], ["anime", "Anime"], ["pixel", "Pixel 16-bit"], ["comic", "Fumetto"], ["manga", "Manga"], ["acquerello", "Acquerello"], ["illustrato", "Illustrato"]],
-    draw(style, g, id, c, expr) { if (!c || !c.skin) return false; g.save(); try { if (style === "anime") anime(g, id, c, expr); else if (style === "illustrato") anime(g, id, c, expr, true); else if (style === "comic") comic(g, id, c, expr); else if (style === "manga") manga(g, id, c, expr); else if (style === "acquerello") acquerello(g, id, c, expr); else if (style === "pixel") pixel(g, id, c, expr); else { g.restore(); return false; } } catch (e) { g.restore(); return false; } g.restore(); return true; },
+    list: [["classic", "Classico"], ["anime", "Anime"], ["pixel", "Pixel 16-bit"], ["comic", "Fumetto"], ["manga", "Manga"], ["acquerello", "Acquerello"], ["illustrato", "Illustrato"], ["cartone", "Cartone animato"]],
+    draw(style, g, id, c, expr) { if (!c || !c.skin) return false; g.save(); try { if (style === "anime") anime(g, id, c, expr); else if (style === "illustrato") anime(g, id, c, expr, true); else if (style === "cartone") cartoon(g, id, c, expr); else if (style === "comic") comic(g, id, c, expr); else if (style === "manga") manga(g, id, c, expr); else if (style === "acquerello") acquerello(g, id, c, expr); else if (style === "pixel") pixel(g, id, c, expr); else { g.restore(); return false; } } catch (e) { g.restore(); return false; } g.restore(); return true; },
     traits,
   };
 })();
