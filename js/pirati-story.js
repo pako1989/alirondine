@@ -1273,6 +1273,540 @@
     };
   });
 
+  // ============================================================================
+  // CAPITOLO 2 · L'ISOLA DEI RELITTI & IL FARO DELLE CORRENTI
+  // ============================================================================
+  addChapter(function (X) {
+    const { T, F, say, ask, done, go, note, setStep, reward, hero, addRoute, triggerWindHookVisualFx, sfxWindBurst, sfxPirateCannon } = X;
+    const N = 2, S = () => X.stepOf(N);
+
+    // Cast Personaggi Capitolo 2
+    X.cast("pi_barbanube", {
+      name: "Cap. Barbanube", tag: "eremita", hair: "#94a3b8", style: "long", skin: "#d97706", eye: "#1e3a8a",
+      bg: ["#334155", "#94a3b8"], shirt: "#475569"
+    }, "Vecchio corsaro eremita custode del Faro delle Correnti. Conosce i segreti delle correnti ascensionali e delle antiche civiltà del cielo.");
+
+    X.cos("pi_giacca_vento", { kind: "shirt", label: "Giacca dei Corsari del Vento", val: "#0369a1", from: "Completa il Capitolo 2 dei Pirati Celesti" });
+
+    const goal = (s) => ({
+      0: "Parla con il Cap. Morgana sul ponte dei relitti per valutare i danni al timone.",
+      1: "Usa il Gancio di Vento per superare i coralli fluttuanti verso il Faro delle Correnti.",
+      2: "Parla con il vecchio Capitan Barbanube per accendere la grande lente solare.",
+      3: "Affronta le fregate corsare di Drake che assediano la torre del Faro!",
+      4: "Capitolo 2 completato! Il Faro delle Correnti è acceso: via libera verso il Cimitero delle Nubi."
+    }[s] || "Veleggia verso la prossima isola sospesa.");
+
+    const zones = {
+      pi_relitti: {
+        name: "L'Isola dei Relitti Celesti", short: "I Relitti Celesti", sub: "Scafi incagliati nei coralli fluttuanti e venti impetuosi",
+        w: 38, h: 26, start: [18, 22], theme: "torino", bg: "pi_porto_celeste",
+        item: ["Bussola Celestiale", "Bussole"], itemCos: "pi_giacca_vento",
+        items: [[4, 6], [32, 6], [8, 16], [28, 16]],
+        areas: [
+          [2, 2, 14, 10, "La Chiglia Spezzata"],
+          [24, 2, 36, 10, "I Coralli Fluttuanti"],
+          [14, 1, 24, 8, "La Passerella del Faro"]
+        ],
+        act: {
+          C: "Ispeziona il cannone di bordata", B: "Esamina la lanterna di prua",
+          X: "Forziere dei relitti", b: "Cassa di provviste",
+          "^": "Sali alla Torre del Faro", d: "Torna a Nembocroce"
+        },
+        build(Ls) {
+          Ls.lay(0, 0, 37, 1, "A"); Ls.lay(0, 0, 1, 25, "A");
+          Ls.lay(36, 0, 37, 25, "A"); Ls.lay(0, 24, 37, 25, "A");
+          Ls.lay(2, 2, 35, 23, "_");
+          Ls.lay(3, 3, 8, 8, "~"); Ls.lay(28, 3, 34, 8, "~");
+          Ls.put(18, 1, "^"); Ls.put(19, 1, "^");
+          Ls.put(6, 14, "C"); Ls.put(30, 14, "C");
+          Ls.put(10, 18, "X"); Ls.put(26, 18, "B");
+        },
+        npcs(s) {
+          const list = [];
+          list.push({ id: "pi_morgana", at: [18, 18] });
+          list.push({ id: "pi_kidd", at: [12, 18] });
+          return list;
+        }
+      },
+      pi_faro: {
+        name: "Il Faro delle Correnti Ascendenti", short: "Torre del Faro", sub: "La lente monumentale e la vista su tutto l'arcipelago",
+        w: 36, h: 24, start: [18, 20], theme: "torino", bg: "pi_taverna_vento",
+        item: ["Cristallo Solare", "Cristalli"],
+        items: [[6, 6], [29, 6], [10, 14]],
+        areas: [
+          [10, 2, 25, 8, "La Lente di Cristallo"],
+          [4, 10, 32, 20, "La Balconata della Vedetta"]
+        ],
+        act: {
+          T: "Esamina la Lente Solare", B: "Osserva la lanterna solare",
+          K: "Manovra l'ingranaggio del faro", d: "Scendi ai relitti"
+        },
+        build(Ls) {
+          Ls.lay(0, 0, 35, 1, "A"); Ls.lay(0, 0, 1, 23, "A");
+          Ls.lay(34, 0, 35, 23, "A"); Ls.lay(0, 22, 35, 23, "A");
+          Ls.lay(2, 2, 33, 21, "_");
+          Ls.put(18, 4, "T"); // Grande lente solare
+          Ls.put(18, 22, "d");
+          Ls.put(8, 10, "B"); Ls.put(26, 10, "B");
+        },
+        npcs(s) {
+          const list = [];
+          list.push({ id: "pi_barbanube", at: [18, 10] });
+          return list;
+        }
+      }
+    };
+
+    const talk = {
+      pi_morgana: () => {
+        if (S() === 0) {
+          say([
+            ["pi_morgana", "«Che tempesta! Il nostro timone è incrinato e le correnti dell'abisso ci stanno trascinando giù verso la nebbia tossica.»"],
+            ["hero", "«C'è un faro lassù sulla scogliera sospesa. Se accendiamo la lente, le correnti termiche ci riporteranno in quota!»"],
+            ["pi_morgana", "«Geniale! Prendi il Gancio di Vento e sali alla Torre del Faro (X:18, Y:1). Parla con il vecchio Barbanube!»"]
+          ], () => {
+            setStep(N, 1);
+            note("Devo salire alla Torre del Faro con il Gancio di Vento per riaccendere la lente solare.");
+            done();
+          });
+        } else {
+          say([["pi_morgana", "«Sali alla Torre del Faro (X:18, Y:1) e accendi la lente termica!»"]], done);
+        }
+      },
+      pi_kidd: () => {
+        say([["pi_kidd", "«Ho calibrato la molla del tuo Gancio di Vento: ora ti agganci anche ai coralli azzurri senza slittare!»"]], done);
+      },
+      pi_barbanube: () => {
+        if (S() < 1) {
+          say([["pi_barbanube", "«Chi osa disturbare la solitudine dei cieli?»"]], done);
+          return;
+        }
+        if (S() === 1) {
+          say([
+            ["pi_barbanube", "«Un giovane cannoniere con la fiamma nel petto! Cerchi la via per il Cimitero delle Nubi?»"],
+            ["hero", "«Dobbiamo riaccendere la lente per salvare il Gabbiano d'Oro dal risucchio!»"],
+            ["pi_barbanube", "«La lente è pronta, ma guarda verso nord: le fregate corazzate di Drake hanno circondato la torre! Vogliono spegnere la nostra luce per sempre.»"],
+            ["hero", "«Allora schieriamoci sul molo del faro e spazziamo via la flotta imperiale con i nostri tiri!»"]
+          ], () => {
+            setStep(N, 2);
+            note("Barbanube ha allineato la lente solare. Le fregate di Drake assediano il faro: dobbiamo vincere la partita!");
+            done();
+          });
+        } else if (S() === 2) {
+          ask("pi_barbanube", "«I cannoni nemici puntano sulla torre! Sei pronto a guidare i corsari contro la flotta corazzata?»", [
+            {
+              label: "⚽ Sfida la Flotta Corazzata delle Correnti!",
+              cls: "hot",
+              fn: () => {
+                X.playMatch({
+                  id: "pi_match_ch2",
+                  chap: "Capitolo 2 · La Battaglia del Faro delle Correnti",
+                  intro: "I galeoni di Drake sparano raffiche di vento balistico! Impugna il pallone e sfrutta le correnti ascensionali!",
+                  mate: "Morgana",
+                  squad: ["Cap. Morgana", "Kidd il Nostromo"],
+                  oppNames: ["Comandante Corazzato", "Fregata di Ferro 1", "Fregata di Ferro 2", "Cannoniere Aereo", "Baluardo Imperiale"],
+                  team: (t, st) => ({ name: "Fregate di Ferro", color: "#1e3a8a", atk: 26, def: 27, vel: 25 }),
+                  done: (r) => {
+                    if (r.win) {
+                      sfxPirateCannon();
+                      sfxWindBurst();
+                      say([
+                        ["pi_barbanube", "«UN GOL DA LEGGENDARI! La palla ha tracciato una scia di fuoco solare che ha accecato i loro cannonieri!»"],
+                        ["pi_morgana", "«Le fregate stanno battendo in ritirata! Le vele del Gabbiano d'Oro si sono gonfiate di vento caldo!»"],
+                        ["hero", "«Rotta verso il Cimitero delle Nubi (Capitolo 3)!»"]
+                      ], () => {
+                        reward("pi_ch2_rew", { coins: 300 });
+                        addRoute("rotta_correnti", "La Rotta delle Correnti Ascendenti", "Valico termico che permette di risalire sopra le nubi tossiche verso il Cimitero.");
+                        finishChapter(2, "faro_acceso");
+                        setStep(N, 3);
+                        note("Abbiamo sconfitto la flotta di Drake e acceso il Faro delle Correnti! Capitolo 2 completato.");
+                        ask("hero", "Il Faro delle Correnti risplende e la via per il Capitolo 3 è spalancata! Vuoi fare rotta subito verso il Cimitero delle Nubi?", [
+                          {
+                            label: "☁️ Fai rotta al Cimitero delle Nubi (Capitolo 3)",
+                            cls: "hot",
+                            fn: () => go("pi_cimitero", 18, 22)
+                          },
+                          { label: "Rimani al Faro", fn: done }
+                        ]);
+                      });
+                    } else {
+                      say([["pi_barbanube", "«Le loro formazioni serrate ci hanno respinto. Ricalibra il tiro e riproviamo!»"]], done);
+                    }
+                  }
+                });
+              }
+            },
+            { label: "Mi preparo ancora", fn: done }
+          ]);
+        } else {
+          say([["pi_barbanube", "«Il faro splende per tutti i cuori liberi. La rotta del Capitolo 3 è aperta!»"]], done);
+        }
+      }
+    };
+
+    const obj = {
+      "pi_relitti:^": () => go("pi_faro", 18, 20),
+      "pi_relitti:d": () => go("pi_porto", 19, 21),
+      "pi_faro:d": () => go("pi_relitti", 18, 4),
+      "pi_relitti:B": () => say([["voce", "Lanterna di prua alimentata ad aurore boreali."]], done),
+      "pi_faro:B": () => say([["voce", "Riflettore solare di bronzo lucidato."]], done)
+    };
+
+    return {
+      n: N,
+      title: "L'Isola dei Relitti & Il Faro delle Correnti",
+      sub: "La fuga dall'abisso e l'accensione della lente termica",
+      start: "pi_relitti",
+      zones,
+      talk,
+      obj,
+      goal,
+      intro: () => [
+        ["voce", "I PIRATI DELLA TEMPESTA CELESTE · CAPITOLO 2", "pi_porto_celeste"],
+        ["voce", "Una tempesta magnetica ha scaraventato il Gabbiano d'Oro contro i coralli dell'Isola dei Relitti Celesti.", "pi_porto_celeste"],
+        ["voce", "Sotto di voi ruggisce il baratro delle nubi tossiche: l'unica speranza è scalare la torre del faro e accendere la grande lente!", "pi_porto_celeste"]
+      ]
+    };
+  });
+
+  // ============================================================================
+  // CAPITOLO 3 · IL CIMITERO DELLE NUBI & IL NIDO DEL LEVIATANO
+  // ============================================================================
+  addChapter(function (X) {
+    const { T, F, say, ask, done, go, note, setStep, reward, hero, addRoute, triggerWindHookVisualFx, sfxWindBurst, sfxPirateCannon } = X;
+    const N = 3, S = () => X.stepOf(N);
+
+    // Cast Personaggi Capitolo 3
+    X.cast("pi_corsaro_grigio", {
+      name: "Il Corsaro Grigio", tag: "rinnegato", hair: "#111827", style: "spiky", skin: "#cbd5e1", eye: "#ef4444",
+      bg: ["#020617", "#ef4444"], shirt: "#1e293b"
+    }, "Un tempo compagno di scorribande di Morgana, ora ha venduto la sua anima e la sua flotta all'Ammiraglio Drake in cambio del monopolio sui tesori dell'abisso.");
+
+    const goal = (s) => ({
+      0: "Parla con Anemona sul ponte di vedetta del Cimitero delle Nubi.",
+      1: "Usa il Gancio di Vento per raggiungere la Chiglia Fantasma al centro del cimitero.",
+      2: "Smaschera il tradimento del Corsaro Grigio prima che svegli il Leviatano.",
+      3: "Sconfiggi la ciurma dei Corsari Fantasma e doma il Leviatano dei Cieli!",
+      4: "Capitolo 3 completato! Il Leviatano ci scorta verso il Grande Ciclone dell'Arcipelago Sospeso."
+    }[s] || "Veleggia nel vortice.");
+
+    const zones = {
+      pi_cimitero: {
+        name: "Il Cimitero delle Nubi Purpuree", short: "Cimitero delle Nubi", sub: "Galeoni spettrali sospesi nel silenzio dell'etere",
+        w: 38, h: 26, start: [18, 22], theme: "torino", bg: "pi_taverna_vento",
+        item: ["Perla del Leviatano", "Perle"],
+        items: [[4, 4], [33, 4], [8, 16], [29, 16]],
+        areas: [
+          [2, 2, 14, 10, "Il Timone Spettrale"],
+          [24, 2, 36, 10, "La Gabbia del Leviatano"],
+          [14, 1, 24, 8, "Il Santuario di Giada"]
+        ],
+        act: {
+          C: "Cannone fantasma", B: "Lanterna d'ectoplasma",
+          X: "Forziere delle anime", b: "Barile di polvere nera",
+          "^": "Avanza verso il Nido", d: "Torna al Faro"
+        },
+        build(Ls) {
+          Ls.lay(0, 0, 37, 1, "A"); Ls.lay(0, 0, 1, 25, "A");
+          Ls.lay(36, 0, 37, 25, "A"); Ls.lay(0, 24, 37, 25, "A");
+          Ls.lay(2, 2, 35, 23, "_");
+          Ls.lay(10, 4, 26, 10, "~");
+          Ls.put(18, 2, "^");
+          Ls.put(8, 14, "C"); Ls.put(28, 14, "C");
+          Ls.put(18, 18, "B");
+        },
+        npcs(s) {
+          const list = [];
+          list.push({ id: "pi_anemona", at: [18, 20] });
+          list.push({ id: "pi_corsaro_grigio", at: [18, 8] });
+          return list;
+        }
+      }
+    };
+
+    const talk = {
+      pi_anemona: () => {
+        if (S() === 0) {
+          say([
+            ["pi_anemona", "«Guardate lassù tra le nebbie viola... È la nave del Corsaro Grigio! Si diceva che fosse affondata vent'anni fa!»"],
+            ["hero", "«C'è un'energia strana... come il battito di un cuore gigantesco.»"],
+            ["pi_anemona", "«È il Leviatano dei Cieli! Il Corsaro Grigio sta cercando di incatenarlo per conto di Drake. Dobbiamo fermarlo subito!»"]
+          ], () => {
+            setStep(N, 1);
+            note("Il Corsaro Grigio sta tentando di incatenare il Leviatano dei Cieli al centro del cimitero (X:18, Y:8).");
+            done();
+          });
+        } else {
+          say([["pi_anemona", "«Raggiungi il Corsaro Grigio a nord (X:18, Y:8) e spezza le sue catene magnetiche!»"]], done);
+        }
+      },
+      pi_corsaro_grigio: () => {
+        if (S() < 1) {
+          say([["pi_corsaro_grigio", "«Non intromettetevi, mocciosi! La gloria appartiene a chi piega i mostri del cielo!»"]], done);
+          return;
+        }
+        if (S() === 1) {
+          say([
+            ["pi_corsaro_grigio", "«Ah, Morgana e il suo nuovo prodigio con il tiro speciale! Drake mi ha promesso metà dell'impero se consegno il Leviatano.»"],
+            ["hero", "«Vendere una creatura sacra per un pugno di metallo è il crimine peggiore per un pirata del cielo!»"],
+            ["pi_corsaro_grigio", "«Parole da sognatori! Scendete sul ponte di poppa: la mia ciurma di fantasmi vi cancellerà dal cielo!»"]
+          ], () => {
+            setStep(N, 2);
+            note("Ho sfidato il Corsaro Grigio: dobbiamo sconfiggere la sua ciurma spettrale per liberare il Leviatano.");
+            done();
+          });
+        } else if (S() === 2) {
+          ask("pi_corsaro_grigio", "«Le catene stanno per chiudersi! Sei pronto per la partita spettrale tra le nubi purpuree?»", [
+            {
+              label: "⚽ Sfida la Ciurma Spettrale del Corsaro Grigio!",
+              cls: "hot",
+              fn: () => {
+                X.playMatch({
+                  id: "pi_match_ch3",
+                  chap: "Capitolo 3 · La Battaglia del Cimitero delle Nubi",
+                  intro: "I Corsari Fantasma scivolano tra le nubi senza produrre rumore! Scatena il tiro della Rondine per rompere il loro sigillo!",
+                  mate: "Morgana",
+                  squad: ["Cap. Morgana", "Anemona", "Kidd il Nostromo"],
+                  oppNames: ["Corsaro Grigio", "Spettro di Prua", "Ombra del Timone", "Marinaio Spettrale", "Colosso Ectoplasmatico"],
+                  team: (t, st) => ({ name: "Corsari Spettrali", color: "#450a0a", atk: 30, def: 31, vel: 30 }),
+                  done: (r) => {
+                    if (r.win) {
+                      sfxPirateCannon();
+                      sfxWindBurst();
+                      say([
+                        ["pi_corsaro_grigio", "«M-maledizione... Il Leviatano ha spezzato le catene... e ora vi riconosce come suoi protettori!»"],
+                        ["pi_morgana", "«Il Leviatano ci spalanca le sue ali immense! Salite a bordo: ci trasporterà dritti nell'occhio del Grande Ciclone (Capitolo 4)!»"],
+                        ["hero", "«La rotta finale verso il Tesoro del Vento Eterno è tracciata!»"]
+                      ], () => {
+                        reward("pi_ch3_rew", { coins: 400 });
+                        addRoute("rotta_leviatano", "La Rotta del Leviatano Bianco", "Il maestoso volo attraverso la tempesta magnetica fino all'occhio del ciclone.");
+                        finishChapter(3, "leviatano_liberato");
+                        setStep(N, 3);
+                        note("Abbiamo sconfitto il Corsaro Grigio e liberato il Leviatano! Capitolo 3 completato: il finale ci aspetta.");
+                        ask("hero", "Il Leviatano apre la via per il Capitolo 4: Il Cuore del Vento Eterno! Vuoi salire subito?", [
+                          {
+                            label: "🌪️ Vola al Cuore del Vento Eterno (Capitolo 4)",
+                            cls: "hot",
+                            fn: () => go("pi_ciclone", 18, 20)
+                          },
+                          { label: "Rimani nel Cimitero", fn: done }
+                        ]);
+                      });
+                    } else {
+                      say([["pi_corsaro_grigio", "«I vostri spiriti sono stati inghiottiti dalla nebbia! Provate ancora se avete coraggio!»"]], done);
+                    }
+                  }
+                });
+              }
+            },
+            { label: "Un momento di respiro", fn: done }
+          ]);
+        } else {
+          say([["pi_corsaro_grigio", "«Il Leviatano vi ha scelti... Avanzate verso il Grande Ciclone.»"]], done);
+        }
+      }
+    };
+
+    const obj = {
+      "pi_cimitero:^": () => go("pi_ciclone", 18, 20),
+      "pi_cimitero:d": () => go("pi_faro", 18, 20),
+      "pi_cimitero:B": () => say([["voce", "La lanterna ectoplasmatica illumina le sagome del passato."]], done)
+    };
+
+    return {
+      n: N,
+      title: "Il Cimitero delle Nubi & Il Nido del Leviatano",
+      sub: "Il tradimento del Corsaro Grigio e il risveglio dell'essere celestiale",
+      start: "pi_cimitero",
+      zones,
+      talk,
+      obj,
+      goal,
+      intro: () => [
+        ["voce", "I PIRATI DELLA TEMPESTA CELESTE · CAPITOLO 3", "pi_porto_celeste"],
+        ["voce", "Oltre la cortina delle aurore boreali giace il Cimitero delle Nubi: qui riposano le navi che hanno osato sfidare il Leviatano.", "pi_porto_celeste"],
+        ["voce", "Un'antica alleanza spezzata sta per essere rivelata...", "pi_porto_celeste"]
+      ]
+    };
+  });
+
+  // ============================================================================
+  // CAPITOLO 4 · L'ARCIPELAGO SOSPESO & IL CUORE DEL VENTO ETERNO
+  // ============================================================================
+  addChapter(function (X) {
+    const { T, F, say, ask, done, go, note, setStep, reward, hero, addRoute, triggerWindHookVisualFx, sfxWindBurst, sfxPirateCannon } = X;
+    const N = 4, S = () => X.stepOf(N);
+
+    X.cos("pi_corona_cieli", { kind: "acc", label: "Corona del Re dei Cieli Liberi", val: "#facc15", from: "Completa tutti i 4 Capitoli dei Pirati Celesti" });
+
+    function epilogoPiratiTotale() {
+      api.scene("pi_porto_celeste", "hero", `<b>I PIRATI DELLA TEMPESTA CELESTE · COMPLETATO AL 100%!</b><br><br>
+Hai guidato il Gabbiano d'Oro attraverso tutte le isole fluttuanti, sconfitto la Flotta di Ferro dell'Ammiraglio Drake e conquistato la Rosa dei Venti Suprema!<br><br>
+• <b>Sbloccato:</b> Corona del Re dei Cieli Liberi & Titolo di <em>Corsaro dell'Aurora Eterna</em>.<br>
+• <b>Rotte Registrate:</b> 4 su 4 rotte leggendarie nel Log Pose!<br><br>
+<span style="color:var(--dim)">Puoi rigiocare tutti i capitoli dalla selezione rotte in qualsiasi momento. Il cielo è per sempre libero!</span>`, [
+        { label: "⚓ Gloria Eterna ai Corsari (Menu Principale)", cls: "hot", fn: () => openMain() }
+      ], "Vittoria dei Cieli");
+    }
+
+    const goal = (s) => ({
+      0: "Raggiungi il centro del Grande Ciclone per confrontarti con l'Ammiraglio Drake.",
+      1: "Scegli il destino dell'Arcipelago Sospeso: libertà per tutti o dominio piratesco.",
+      2: "Scendi sull'Arena del Vento Eterno e sconfiggi l'Ammiraglia di Drake nella Partita Finale!",
+      3: "Saga Completata! Il Tesoro delle Sette Tempeste risplende nel cielo!"
+    }[s] || "Trionfo totale.");
+
+    const zones = {
+      pi_ciclone: {
+        name: "L'Occhio del Grande Ciclone · Il Cuore del Tesoro", short: "Occhio del Ciclone", sub: "L'altare d'oro fluttuante dove riposa la Rosa dei Venti Suprema",
+        w: 38, h: 26, start: [18, 22], theme: "torino", bg: "pi_taverna_vento",
+        item: ["Rosa dei Venti d'Oro", "Rose d'Oro"],
+        items: [[6, 6], [31, 6], [10, 16], [27, 16]],
+        areas: [
+          [10, 2, 26, 8, "L'Altare della Rosa dei Venti"],
+          [4, 10, 34, 20, "Il Ponte dell'Ammiraglia"]
+        ],
+        act: {
+          T: "La Rosa dei Venti Suprema", B: "Lanterna d'oro solare",
+          C: "Cannone imperiale gigante", d: "Torna al Cimitero"
+        },
+        build(Ls) {
+          Ls.lay(0, 0, 37, 1, "A"); Ls.lay(0, 0, 1, 25, "A");
+          Ls.lay(36, 0, 37, 25, "A"); Ls.lay(0, 24, 37, 25, "A");
+          Ls.lay(2, 2, 35, 23, "_");
+          Ls.put(18, 4, "T"); // Altare dorato
+          Ls.put(18, 22, "d");
+          Ls.put(8, 12, "C"); Ls.put(28, 12, "C");
+          Ls.put(14, 18, "B"); Ls.put(22, 18, "B");
+        },
+        npcs(s) {
+          const list = [];
+          list.push({ id: "pi_drake", at: [18, 8] });
+          list.push({ id: "pi_morgana", at: [14, 14] });
+          return list;
+        }
+      }
+    };
+
+    const talk = {
+      pi_drake: () => {
+        if (S() === 0) {
+          say([
+            ["pi_drake", "«Dunque siete arrivati fin qui, nel cuore dell'abisso. Ma la Rosa dei Venti Suprema non apparterrà mai a una ciurma di anarchici!»"],
+            ["hero", "«L'aria, il vento e il pallone appartengono a tutti, Drake! Non puoi imprigionare i cieli con le tue catene di ferro!»"],
+            ["pi_drake", "«Senza ordine c'è solo il caos! Se siete così sicuri della vostra libertà, dimostratelo sull'Arena dell'Etere: l'Ammiraglia Suprema vi spazzerà via!»"]
+          ], () => {
+            ask("pi_drake", "«Se dovessi cadere... cosa farai della Rosa dei Venti Suprema?»", [
+              {
+                label: "🕊️ Condividerò la rotta con ogni isola e ogni equipaggio",
+                fn: () => {
+                  F.set("finale_pirati", "liberta_totale");
+                  say([["pi_drake", "«Un sogno utopico... ma vediamo se saprete conquistarlo sul campo!»"]], () => {
+                    setStep(N, 1);
+                    note("Ho scelto il finale della Libertà Totale: donare la Rosa dei Venti a tutti i popoli.");
+                    done();
+                  });
+                }
+              },
+              {
+                label: "👑 Conquisterò il titolo di Re Incontrastato dei Cieli",
+                fn: () => {
+                  F.set("finale_pirati", "re_dei_cieli");
+                  say([["pi_drake", "«Un sovrano dei pirati... Almeno hai l'ambizione di un vero comandante!»"]], () => {
+                    setStep(N, 1);
+                    note("Ho scelto il finale del Re dei Cieli: diventare il dominatore dell'Arcipelago Sospeso.");
+                    done();
+                  });
+                }
+              }
+            ]);
+          });
+        } else if (S() === 1) {
+          ask("pi_drake", "«La Tempesta Suprema infuria! Sei pronto a calciare per il destino dell'Arcipelago Sospeso?»", [
+            {
+              label: "⚽ Inizia la Battaglia Finale dell'Arcipelago Sospeso!",
+              cls: "hot",
+              fn: () => {
+                X.playMatch({
+                  id: "pi_match_ch4_final",
+                  chap: "Capitolo 4 · La Partita Finale del Grande Ciclone",
+                  intro: "L'Ammiraglia di Drake schiera i Campioni della Flotta di Ferro! Tutto il vento dei sette cieli vibra sul tuo tiro!",
+                  mate: "Morgana",
+                  squad: ["Cap. Morgana", "Kidd il Nostromo", "Anemona"],
+                  oppNames: ["Ammiraglio Drake", "Corazzata Suprema 1", "Corazzata Suprema 2", "Interceptor del Vento", "Baluardo d'Oro"],
+                  team: (t, st) => ({ name: "Armata di Ferro Celeste", color: "#1e3a8a", atk: 35, def: 36, vel: 35 }),
+                  done: (r) => {
+                    if (r.win) {
+                      sfxPirateCannon();
+                      sfxWindBurst();
+                      const fin = F.get("finale_pirati") || "liberta_totale";
+                      if (fin === "liberta_totale") {
+                        say([
+                          ["pi_drake", "«I-incredibile... Quel tiro ha spaccato in due il cannone principale della nostra ammiraglia...»"],
+                          ["pi_morgana", "«ABBIAMO VINTO! Guardate l'orizzonte: la Rosa dei Venti si è illuminata e tutte le isole cantano per la libertà!»"],
+                          ["hero", "«I cieli sono di tutti! Lunga vita alla ciurma del Gabbiano d'Oro!»"]
+                        ], () => {
+                          reward("pi_ch4_rew", { coins: 1000 });
+                          addRoute("rotta_vento_eterno", "La Rotta del Vento Eterno", "Il leggendario tracciato che collega tutte le isole celesti in pace e libertà.");
+                          finishChapter(4, "liberta_totale");
+                          setStep(N, 2);
+                          note("Ho trionfato nella Partita Finale del Grande Ciclone! I Pirati della Tempesta Celeste è completato al 100%.");
+                          epilogoPiratiTotale();
+                        });
+                      } else {
+                        say([
+                          ["pi_drake", "«Vi inchino la spada, Vostra Altezza... Sei tu il vero Re dei Cieli.»"],
+                          ["pi_morgana", "«Salutate il nostro Re, ciurma! Il suo tiro guiderà ogni vela nell'infinito!»"]
+                        ], () => {
+                          reward("pi_ch4_rew", { coins: 1000 });
+                          addRoute("rotta_re_cieli", "La Rotta del Trono Celeste", "La corona dei mari aerei conquistata sul campo.");
+                          finishChapter(4, "re_dei_cieli");
+                          setStep(N, 2);
+                          note("Ho conquistato il titolo di Re dei Cieli! I Pirati della Tempesta Celeste completato al 100%.");
+                          epilogoPiratiTotale();
+                        });
+                      }
+                    } else {
+                      say([["pi_drake", "«Le vostre speranze sono state spazzate via dal vento! Provate ancora, se avete fiato!»"]], done);
+                    }
+                  }
+                });
+              }
+            },
+            { label: "Ricomponiamo le fila", fn: done }
+          ]);
+        } else {
+          say([["pi_drake", "«Hai vinto la Tempesta, Campione. La leggenda ti appartiene.»"]], done);
+        }
+      },
+      pi_morgana: () => {
+        say([["pi_morgana", "«Siamo con te fino all'ultimo tiro, {n}! Mostra a Drake la vera potenza del vento libero!»"]], done);
+      }
+    };
+
+    const obj = {
+      "pi_ciclone:d": () => go("pi_cimitero", 18, 20),
+      "pi_ciclone:B": () => say([["voce", "La lanterna d'oro solare illumina l'altare della Rosa dei Venti."]], done),
+      "pi_ciclone:T": () => say([["voce", "La leggendaria Rosa dei Venti Suprema irradia una calda luce aurorale."]], done)
+    };
+
+    return {
+      n: N,
+      title: "L'Arcipelago Sospeso & Il Cuore del Vento Eterno",
+      sub: "La sfida finale contro l'Ammiraglio Drake e la conquista del tesoro",
+      start: "pi_ciclone",
+      zones,
+      talk,
+      obj,
+      goal,
+      intro: () => [
+        ["voce", "I PIRATI DELLA TEMPESTA CELESTE · CAPITOLO 4", "pi_porto_celeste"],
+        ["voce", "Siete penetrati nell'occhio del Grande Ciclone: qui il vento tace e l'aria vibra di pura energia dorata.", "pi_porto_celeste"],
+        ["voce", "L'Ammiraglia di Ferro vi attende per l'ultimo, definitivo duello aereo!", "pi_porto_celeste"]
+      ]
+    };
+  });
+
   // ------------------------------------------------------------------ Interfaccia Principale & Schermate
   function leaveToModes() {
     const back = EXIT || window.title;
