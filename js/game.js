@@ -1007,11 +1007,12 @@
     if (kind === "villa") { for (let i = 0; i < 3; i++) { const x = 60 + i * 100; px(x - 1, 0, 2, 22, "#caa24a"); g.fillStyle = "#ffe7a0"; g.beginPath(); g.arc(x, 28, 7 + Math.sin(frame / 20 + i), 0, 7); g.fill(); } px(20, 50, 44, 60, "#caa24a"); px(24, 54, 36, 52, "#3a1f2a"); }
     if (kind === "borgo") borgoBackdrop();
   }
+  function portraitShirt(id, c) { return { leo: "#ff4d5a", nico: "#3fa7ff", tommy: "#ff4d5a", kenji: "#1d3fa3", dario: "#1b1b1b", valli: "#222", ruggeri: "#34465f", papa: "#e8e0d0", sara: "#ffd23f", rita: "#8a4b6b", ines: "#5a1a3a", bruno: "#3a1450", lina: "#16223f", gigi: "#ff4d5a", fede: "#1d3fa3", marta: "#1d3fa3", aldo: "#10182e", sho: "#ffffff", jojo: "#ffd23f", bellandi: "#b3202c", vitale: "#b3202c", mazza: "#3a3a44", nonna: "#6b8cff" }[id] || c.shirt || "#555"; }
   function portrait0(id, x, y, s, flip) {
     const c = CAST[id]; if (!c || !c.skin) return;
     const breathe = Math.sin(frame / 30) * 0.5;
     g.save(); g.translate(x, y + breathe); g.scale(flip ? -s : s, s);
-    const shirt = { leo: "#ff4d5a", nico: "#3fa7ff", tommy: "#ff4d5a", kenji: "#1d3fa3", dario: "#1b1b1b", valli: "#222", ruggeri: "#34465f", papa: "#e8e0d0", sara: "#ffd23f", rita: "#8a4b6b", ines: "#5a1a3a", bruno: "#3a1450", lina: "#16223f", gigi: "#ff4d5a", fede: "#1d3fa3", marta: "#1d3fa3", aldo: "#10182e", sho: "#ffffff", jojo: "#ffd23f", bellandi: "#b3202c", vitale: "#b3202c", mazza: "#3a3a44", nonna: "#6b8cff" }[id] || c.shirt || "#555";
+    const shirt = portraitShirt(id, c);
     g.fillStyle = shirt; g.beginPath(); g.moveTo(-34, 60); g.quadraticCurveTo(0, 26, 34, 60); g.fill();
     const num = { leo: "10", tommy: "8", gigi: "17" }[id] || c.num;
     if (num) { g.fillStyle = shirt === "#f2f2f2" || shirt === "#ffd23f" ? "#1b1b1b" : "#fff"; g.font = "bold 12px sans-serif"; g.textAlign = "center"; g.fillText(num, 0, 56); g.textAlign = "left"; }
@@ -5275,7 +5276,7 @@
   };
   // 15l · Partita classica: quattro aggiunte, ognuna spegnibile (spente = regole di prima)
   const SET_PC = { coppie: ["Schemi a coppie avanzati", "Con grande intesa, ogni compagno sblocca un secondo tiro in coppia (intesa 14)"], rete: ["Rete strappata", "Un tiro potentissimo può bucare la rete: cut-in speciale, un po' di grinta e il conto delle reti strappate"], star: ["Fuoriclasse rivali", "Il capitano avversario carica lo speciale con una frase sua e un cut-in nei colori della squadra"], gkf: ["Portieri che si stancano", "Più tiri affronta, più un portiere cala (il tuo e il loro); all'intervallo recupera"], duelli: ["Duelli 1 contro 1", "Dribbling in attacco (zona 3+): leggi il difensore e scegli finta, scatto o protezione"], area: ["Comandi in area", "Parata, pugno o uscita: li scegli tu col tuo portiere, e anche il portiere avversario li usa"], tempo: ["Tiro a tempo", "Ferma la barra al momento giusto: preciso = tiro più forte, sbagliato = più debole"], fiato: ["Grinta di riserva", "A secco puoi tirare lo stesso (più debole); rifiatare ridà almeno 10"], spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
-  const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false, dis: false, cardView: "holo3d", mangaView: "comic", trophyView: "3d", bgArt: "detailed", confetti: true, proActionFx: true, tsubasa: false, windWeather: true, azDiff: "norm", azCtl: "joystick", azPowerUps: true, azAimAssist: true });
+  const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false, dis: false, cardView: "holo3d", mangaView: "comic", trophyView: "3d", bgArt: "detailed", confetti: true, proActionFx: true, tsubasa: false, windWeather: true, azDiff: "norm", azCtl: "joystick", azPowerUps: true, azAimAssist: true, faces: "classic" });
   function setLoad() {
     const d = setDefault(), s = readJSON(SETK, null);
     if (!s || s.v !== 1) return d;
@@ -5291,6 +5292,7 @@
     if (res.azCtl === undefined) res.azCtl = "joystick";
     if (res.azPowerUps === undefined) res.azPowerUps = true;
     if (res.azAimAssist === undefined) res.azAimAssist = true;
+    if (!["classic", "anime", "pixel"].includes(res.faces)) res.faces = "classic";
     return res;
   }
   let SET = setLoad();
@@ -5393,6 +5395,7 @@
       { label: `Scene speciali: ${SET.speed} ▸`, sub: "normale · veloce · salta (tocca la scena per saltarla)", fn: () => { SET.speed = { normale: "veloce", veloce: "salta", salta: "normale" }[SET.speed] || "normale"; save(); again(); } },
       { label: `Animazioni: ${SET.anim ? "sì" : "no"}`, sub: "Tiri, esultanze, fischio d'inizio e finale, coppa, cartellini · tocca per saltarle", fn: () => { SET.anim = !SET.anim; save(); again(); } },
       { label: `Tema visivo: ${(window.THEMES && window.THEMES.find(t => (localStorage.getItem("ali-di-rondine.theme") || "classic") === t.id) || { name: "Classico Rondine" }).name} ▸`, sub: "Classico · Gazzetta Vintage · Neon Costa · Arcade Retrò", fn: () => { if (window.cycleTheme) window.cycleTheme(); again(); } },
+      { label: `Stile dei volti: ${{ classic: "Classico", anime: "Anime", pixel: "Pixel 16-bit" }[SET.faces] || "Classico"} ▸`, sub: SET.faces === "anime" ? "Volti in stile anime, diversi per ogni personaggio, in tutte le storie" : SET.faces === "pixel" ? "Ritratti in pixel art alla JRPG a 16 bit, in tutte le storie" : "I ritratti originali · tocca per provare Anime o Pixel 16-bit", fn: () => { SET.faces = { classic: "anime", anime: "pixel", pixel: "classic" }[SET.faces] || "anime"; try { Object.keys(PORT_IMG).forEach((k) => delete PORT_IMG[k]); } catch {} save(); again(); } },
       { label: `Grafica: ${SET.gfx === "classica" ? "Classica" : "Migliorata"} ▸`, sub: SET.gfx === "classica" ? "Aspetto originale retrò, senza effetti aggiuntivi" : "Luci, cielo e mare animati, particelle, riflettori e pubblico", fn: () => { SET.gfx = SET.gfx === "classica" ? "migliorata" : "classica"; GX.low = false; GX.auto = false; GX.slow = 0; save(); again(); } },
       { label: `Dissolvenze e card di capitolo: ${SET.dis ? "sì" : "no"}`, sub: "Schermata col titolo e sfumature a ogni cambio scena", fn: () => { SET.dis = !SET.dis; save(); again(); } },
       { label: `Filtro retrò: ${SET.crt ? "sì" : "no"}`, sub: "Righe e bordi curvi, come la tv della trattoria", fn: () => { SET.crt = !SET.crt; save(); again(); } },
@@ -18985,7 +18988,17 @@
   }
   function text(who, html) { text1(who, html); try { GX.emo.x = pvExpr(html); } catch {} }
   const PV_STYLE = { itpomba: "bald", a1birillo: "curly", itmomolo: "curly", ittamb: "afro", a1gegia: "ponytail", itchiara: "ponytail" };
+  function faceStyle() { const f = SET.faces; return (f === "anime" || f === "pixel") && window.__faceStyles ? f : null; }
   function portrait(id, x, y, s, flip) {
+    const fs = faceStyle(), fc = CAST[id];
+    if (fs && fc && fc.skin) { // stile dei volti alternativo (Impostazioni → Grafica)
+      const e = GX.emo, mine = e && e.who === id && id === view.speaker;
+      const ex = mine ? (e.x || (e.k === "shock" ? "surprised" : e.k === "anger" ? "angry" : e.k === "sparkle" ? "smile" : null)) : null;
+      const blink = fs === "anime" && gxAnimOk() && (frame + id.length * 17) % 180 < 6;
+      g.save(); g.translate(x, y + (gxAnimOk() ? Math.sin(frame / 30) * 0.5 : 0)); g.scale(flip ? -s : s, s);
+      const ok = window.__faceStyles.draw(fs, g, id, { ...fc, shirt: portraitShirt(id, fc), num: { leo: "10", tommy: "8", gigi: "17" }[id] || fc.num }, blink ? "blink" : ex);
+      g.restore(); if (ok) return;
+    }
     portrait1(id, x, y, s, flip);
     const c = CAST[id]; if (!c || !c.skin || !gxOn()) return;
     const st = PV_STYLE[id], e = GX.emo, ex = e && e.x && e.who === id && id === view.speaker && s >= 1.4 && view.kind === "scene" ? e.x : null;
@@ -25328,7 +25341,7 @@
   function portraitImg(id, spec) {
     let tmp = false;
     try {
-      if (id in PORT_IMG) return PORT_IMG[id];
+      const pk = id + "|" + (SET.faces || "classic"); if (pk in PORT_IMG) return PORT_IMG[pk];
       let c = CAST[id];
       if (!(c && c.skin) && spec && spec.skin) { CAST[id] = c = spec; tmp = true; } // personaggio senza scheda: ritratto dal profilo passato, senza registrarlo
       if (!c || !c.skin) return null;
@@ -25336,7 +25349,7 @@
       const og = o.getContext("2d"), main = g, sp = view.speaker;
       og.fillStyle = c.bg ? c.bg[0] : "#121929"; og.fillRect(0, 0, 96, 96);
       try { g = og; view.speaker = null; portrait(id, 48, 38, 1.15, false); } finally { g = main; view.speaker = sp; }
-      const u = o.toDataURL("image/png"); if (id !== "hero") PORT_IMG[id] = u; return u;
+      const u = o.toDataURL("image/png"); if (id !== "hero") PORT_IMG[pk] = u; return u;
     } catch (e) { return null; } finally { if (tmp) delete CAST[id]; }
   }
   // partita breve per i moduli a piedi (js/storia-campione.js): squadra avversaria su misura, il campione in campo; onDone({a,b,win,recap}) a fine partita
