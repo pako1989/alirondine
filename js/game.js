@@ -4912,7 +4912,7 @@
   window.heroLoad = heroLoad;
   window.heroEditor = heroEditor;
   function heroCast(h) {
-    CAST.hero = { name: h.name, tag: "", hair: h.hair, style: h.style, skin: h.skin, eye: h.eye || "#2a1a0a", bg: [h.shirt, "#ffd23f"], shirt: h.shirt, num: String(h.num), acc: h.acc, cap: h.acc === "cappellino" ? "#ffd23f" : h.acc === "berretto" ? "#26324a" : undefined };
+    CAST.hero = { name: h.name, tag: "", hair: h.hair, style: h.style, skin: h.skin, eye: h.eye || "#2a1a0a", bg: [h.shirt, "#ffd23f"], shirt: h.shirt, num: String(h.num), acc: h.acc, accId: h.accId && COSM[h.accId] && COSM[h.accId].val === h.acc ? h.accId : undefined, cap: h.acc === "cappellino" ? "#ffd23f" : h.acc === "berretto" ? "#26324a" : undefined };
   }
   // Il campione in campo: M.hero (partite), T.hero (rigori)
   const heroOn = () => !!(M && M.hero);
@@ -15164,16 +15164,23 @@
       ...(fresh0 ? [{ label: "Nuova partita", sub: "Stagione 1 · circa 30–40 minuti", cls: "hot", fn: () => { S = fresh(); run(); } }] : []),
       { head: "Gioca" },
       { label: "Storia", sub: `Le stagioni di Leo · ${mnPct(mnStoria())}%`, fn: menuStoria },
-      ...(window.__salone ? [((t) => ({ label: "🏛️ Salone delle Saghe", sub: `${t.n} saghe · ${t.run} in corso · finali ${t.fe}/${t.te}`, cls: "hot", fn: () => window.__salone.open(title) }))(window.__salone.summary())] : []),
+      ((t) => ({ label: "🏛️ Salone delle Saghe", sub: t ? `${t.n} saghe · ${t.run} in corso · finali ${t.fe}/${t.te}` : "Tutte le saghe a schede, con copertine e finali", cls: "hot", fn: () => salGo("open") }))(salSum()),
       { label: "Partite e modalità", sub: `Carriera, tornei, arcade · ${mnPct(mnModi())}%`, fn: modes },
       { label: "Borgo e trasferte", sub: `A piedi per il paese · ${mnPct(mnBorgo())}%`, fn: menuBorgo },
       { head: "Il tuo Campione" },
-      ...(window.__salone ? [((t) => ({ label: "👕 Guardaroba", sub: `${t.cosOwned}/${t.cosTot} capi, colori e accessori`, fn: () => window.__salone.guardaroba(title) }))(window.__salone.summary()), ((t) => ({ label: "🏆 Album dei finali", sub: `${t.fe}/${t.te} timbri`, fn: () => window.__salone.album(title) }))(window.__salone.summary())] : []),
+      ((t) => ({ label: "👕 Guardaroba", sub: t ? `${t.cosOwned}/${t.cosTot} capi, colori e accessori` : "Prova e indossa capi, colori e accessori", fn: () => salGo("guardaroba") }))(salSum()),
+      ((t) => ({ label: "🏆 Album dei finali", sub: t ? `${t.fe}/${t.te} timbri` : "Un timbro per ogni finale trovato", fn: () => salGo("album") }))(salSum()),
       { head: "Altro" },
       { label: "Altro…", sub: "Minigiochi, collezioni, enciclopedia, guide", fn: menuAltro },
       { label: "Impostazioni", sub: `${(DIFF[SET.diff] || DIFF.normale)[0]} · salvataggi · grafica`, fn: menuImp },
     ]);
+    TITLE_BOX = $("choices").firstElementChild;
   }
+  // il Salone si carica dopo game.js: la home mostra subito le sue porte e, appena è pronto, aggiorna i numeri
+  let TITLE_BOX = null;
+  function salSum() { try { return window.__salone ? window.__salone.summary() : null; } catch { return null; } }
+  function salGo(k) { if (window.__salone) return window.__salone[k](title); if (window.toast) window.toast("Un attimo: il Salone si sta ancora aprendo…", "info", "🏛️"); }
+  window.__titleRefresh = () => { if (TITLE_BOX && TITLE_BOX.isConnected && view && view.bg === "title") title(); };
   function menuAltro() {
     view = { kind: "scene", bg: "title" }; chap("Altro");
     text("voce", "<b>Altro</b><br>Minigiochi, collezioni, guide e strumenti.");
@@ -19001,6 +19008,17 @@
   function text(who, html) { text1(who, html); try { GX.emo.x = pvExpr(html); } catch {} }
   const PV_STYLE = { itpomba: "bald", a1birillo: "curly", itmomolo: "curly", ittamb: "afro", a1gegia: "ponytail", itchiara: "ponytail" };
   function faceStyle() { const f = SET.faces; return f && f !== "classic" && window.__faceStyles ? f : null; }
+  // accessori negli stili alternativi dei volti: occhiali e cappelli diventano parte del volto, quelli classici usano il loro disegno, gli altri (a colore) si ricavano dal nome
+  const ACC_CLASSIC = /^(auricolare|bandana|sciarpa|fascia|corvo|stella|grembiule|garofano|fischietto|pescatore|coroncina|maschera|coppola|piuma|fasciasind|amodoro|natale|borsa|calzini|braccialetto)$/;
+  function faceAcc(fc) {
+    const a = fc.acc; if (!a || typeof a !== "string") return {};
+    if (a === "occhiali") return { glasses: true, acc: "" };
+    if (a === "occhialisole") return { shades: true, acc: "" };
+    if (a === "cappellino" || a === "berretto") return { acc: "" };
+    if (ACC_CLASSIC.test(a)) return { accFn: (ctx, part) => { const og = g; g = ctx; ctx.save(); try { portraitAcc(a, part); } catch {} ctx.restore(); g = og; } };
+    const e = fc.accId && COSM[fc.accId] ? COSM[fc.accId] : COSM[a] && COSM[a].kind === "acc" ? COSM[a] : Object.values(COSM).find((q) => q.kind === "acc" && q.val === a);
+    return { accLbl: e ? e.label : a, accCol: a[0] === "#" ? a : null };
+  }
   function portrait(id, x, y, s, flip) {
     const fs = faceStyle(), fc = CAST[id];
     if (fs && fc && fc.skin) { // stile dei volti alternativo (Impostazioni → Grafica)
@@ -19008,7 +19026,7 @@
       const ex = mine ? (e.x || (e.k === "shock" ? "surprised" : e.k === "anger" ? "angry" : e.k === "sparkle" ? "smile" : null)) : null;
       const blink = fs === "anime" && gxAnimOk() && (frame + id.length * 17) % 180 < 6;
       g.save(); g.translate(x, y + (gxAnimOk() ? Math.sin(frame / 30) * 0.5 : 0)); g.scale(flip ? -s : s, s);
-      const ok = window.__faceStyles.draw(fs, g, id, { ...fc, shirt: portraitShirt(id, fc), num: { leo: "10", tommy: "8", gigi: "17" }[id] || fc.num }, blink ? "blink" : ex);
+      const ok = window.__faceStyles.draw(fs, g, id, { ...fc, ...faceAcc(fc), shirt: portraitShirt(id, fc), num: { leo: "10", tommy: "8", gigi: "17" }[id] || fc.num }, blink ? "blink" : ex);
       g.restore(); if (ok) return;
     }
     portrait1(id, x, y, s, flip);

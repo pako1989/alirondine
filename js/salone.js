@@ -144,7 +144,7 @@
 @media (max-width:360px){.salOv .grid{grid-template-columns:1fr 1fr;gap:8px}.salOv .prev{grid-template-columns:110px 1fr}.salOv .prev canvas{width:110px;height:110px}}`;
     document.head.appendChild(st);
   }
-  let OV = null, BACK = null;
+  let OV = null, BACK = null; const BK = { sal: null, alb: null, gua: null }; // ogni schermata ricorda da dove si era entrati
   function shell(title) { css(); close(); OV = document.createElement("div"); OV.className = "salOv"; OV.innerHTML = `<div class="wrap"><div class="bar"><h2>${title}</h2><button type="button" class="x" aria-label="Chiudi">✕</button></div><div class="body"></div></div>`; OV.querySelector(".x").onclick = () => { const b = BACK; close(); if (typeof b === "function") b(); }; document.body.appendChild(OV); return OV.querySelector(".body"); }
   function close() { if (OV) { OV.remove(); OV = null; } }
 
@@ -157,7 +157,7 @@
     return { n: list.length, run: st.filter(([, x]) => x.started && !x.finished).length, fin: st.filter(([, x]) => x.finished).length, fe, te };
   }
   function openSalone(back) {
-    BACK = back || BACK; const body = shell("🏛️ Salone delle Saghe"), r = rec(), tt = totals();
+    if (back) BK.sal = back; BACK = BK.sal; const body = shell("🏛️ Salone delle Saghe"), r = rec(), tt = totals();
     const list = SAGAS.filter(available).map((s) => ({ s, x: state(s) }));
     const lastS = list.find((o) => o.s.id === r.last);
     let html = `<p class="sum">${tt.n} saghe · ${tt.run} in corso · ${tt.fin} concluse · finali trovati ${tt.fe}/${tt.te}</p>`;
@@ -176,8 +176,8 @@
     body.querySelectorAll("[data-st]").forEach((b) => (b.onclick = () => { FILT.st = b.dataset.st; openSalone(); }));
     body.querySelectorAll("[data-g]").forEach((b) => (b.onclick = () => { FILT.g = b.dataset.g; openSalone(); }));
     body.querySelectorAll(".card,.cont").forEach((b) => (b.onclick = () => detail(SAGAS.find((s) => s.id === b.dataset.id))));
-    body.querySelector('[data-go="album"]').onclick = () => openAlbum(() => openSalone(BACK));
-    body.querySelector('[data-go="guarda"]').onclick = () => openGuardaroba(() => openSalone(BACK));
+    body.querySelector('[data-go="album"]').onclick = () => openAlbum(() => openSalone());
+    body.querySelector('[data-go="guarda"]').onclick = () => openGuardaroba(() => openSalone());
   }
   function detail(s) {
     if (!s || !OV) return; const x = state(s), r = rec(); r.seen[s.id] = 1; recSave(r);
@@ -186,14 +186,14 @@
     sh.innerHTML = `<div class="box"><img alt="" src="${cover(s)}"><div class="in"><h3>${s.e} ${esc(s.t)}</h3><div>${s.g.map((k) => `<span class="tag" style="background:${GEN[k][1]}">${GEN[k][0]}</span>`).join("")}</div><p>${esc(s.d)}</p><p style="color:#c9d2ea;font-size:13px">${x.finished ? "✓ Saga conclusa." : x.started ? `In corso · capitolo ${x.ch}${s.ch ? ` di ${s.ch}` : ""}${x.doneN ? ` · ${x.doneN} capitoli conclusi` : ""}.` : "Non l'hai ancora iniziata."}${s.ch ? ` ${s.ch} capitoli.` : ""}</p>${ends}<div class="act"><button type="button" class="ghost">◂ Indietro</button><button type="button" class="play">${x.started ? "Continua ▸" : "Gioca ▸"}</button></div></div></div>`;
     sh.onclick = (e) => { if (e.target === sh) sh.remove(); };
     sh.querySelector(".ghost").onclick = () => sh.remove();
-    sh.querySelector(".play").onclick = () => play(s, () => openSalone(BACK));
+    sh.querySelector(".play").onclick = () => play(s, () => openSalone());
     OV.appendChild(sh);
   }
   const endRow = (found, title, sub) => `<div class="end${found ? " f" : ""}"><div class="seal">${found ? "FINALE<br>TROVATO" : "?"}</div><div><b>${found ? esc(title) : "???"}</b><span>${found ? esc(sub) : "Indizio: " + esc(sub)}</span></div></div>`;
 
   // ---------------------------------------------------------------- ALBUM DEI FINALI
   function openAlbum(back) {
-    BACK = back || BACK; const body = shell("🏆 Album dei finali"), tt = totals();
+    if (back) BK.alb = back; BACK = BK.alb; const body = shell("🏆 Album dei finali"), tt = totals();
     let html = `<p class="sum">Un timbro per ogni finale trovato. Quelli mancanti hanno un indizio, senza svelare troppo. Totale: <b>${tt.fe}/${tt.te}</b>.</p>`;
     const story = safe(() => api().storyEndings(), []);
     if (story.length) {
@@ -212,8 +212,8 @@
   const kindOf = (c) => (c && KIND[c.kind] ? c.kind : "other");
   const GF = { kind: "shirt", src: "", sel: null };
   function openGuardaroba(back) {
-    BACK = back || BACK; const body = shell("👕 Guardaroba"), A = api(), C = A.COSM || {}, own = new Set(safe(() => A.cosOwned(), [])), h = hero();
-    if (!h) { body.innerHTML = `<p class="sum">Il Guardaroba veste il tuo Campione. Prima crealo: nome, numero, look e tiro speciale.</p><div class="big"><button type="button" data-hero>⭐ Crea il tuo Campione<small>Ci vuole un minuto</small></button></div>`; body.querySelector("[data-hero]").onclick = () => { close(); if (window.heroEditor) window.heroEditor(() => openGuardaroba(BACK)); }; return; }
+    if (back) BK.gua = back; BACK = BK.gua; const body = shell("👕 Guardaroba"), A = api(), C = A.COSM || {}, own = new Set(safe(() => A.cosOwned(), [])), h = hero();
+    if (!h) { body.innerHTML = `<p class="sum">Il Guardaroba veste il tuo Campione. Prima crealo: nome, numero, look e tiro speciale.</p><div class="big"><button type="button" data-hero>⭐ Crea il tuo Campione<small>Ci vuole un minuto</small></button></div>`; body.querySelector("[data-hero]").onclick = () => { close(); if (window.heroEditor) window.heroEditor(() => openGuardaroba()); }; return; }
     const ids = Object.keys(C), order = safe(() => A.cosOrder(), []).filter((k) => C[k]);
     const recent = order.slice(-6).reverse();
     const inK = ids.filter((k) => kindOf(C[k]) === GF.kind && (!GF.src || srcOf(k) === GF.src));
@@ -232,7 +232,7 @@
     body.querySelectorAll("[data-src]").forEach((b) => (b.onclick = () => { GF.src = b.dataset.src; openGuardaroba(); }));
     body.querySelectorAll("[data-id]").forEach((b) => (b.onclick = () => { GF.sel = b.dataset.id; openGuardaroba(); OV.scrollTop = 0; }));
     const un = body.querySelector("[data-unsel]"); if (un) un.onclick = () => { GF.sel = null; openGuardaroba(); };
-    const wr = body.querySelector("[data-wear]"); if (wr) wr.onclick = () => { const c = C[sel], f = KIND[kindOf(c)][1], nh = Object.assign({}, h, { [f]: c.val }); A.heroSave(nh); GF.sel = null; if (window.toast) window.toast("Indossato: " + c.label, "success", "👕"); openGuardaroba(); };
+    const wr = body.querySelector("[data-wear]"); if (wr) wr.onclick = () => { const c = C[sel], f = KIND[kindOf(c)][1], nh = Object.assign({}, h, { [f]: c.val }); if (f === "acc") nh.accId = sel; A.heroSave(nh); GF.sel = null; if (window.toast) window.toast("Indossato: " + c.label, "success", "👕"); openGuardaroba(); };
   }
   function worn(h, c) { const f = KIND[kindOf(c)][1]; return !!(f && h[f] === c.val); }
   function item(k, c, owned, h) {
@@ -244,7 +244,7 @@
     const A = api(), g = cv.getContext("2d"); if (!A || !A.portraitTo) return;
     const gr = g.createLinearGradient(0, 0, 0, 300); gr.addColorStop(0, "#24386b"); gr.addColorStop(1, "#0b1026"); g.fillStyle = gr; g.fillRect(0, 0, 300, 300);
     g.fillStyle = "rgba(255,210,63,.12)"; g.beginPath(); g.arc(150, 120, 110, 0, 7); g.fill();
-    const look = Object.assign({}, h); if (c && KIND[kindOf(c)][1]) look[KIND[kindOf(c)][1]] = c.val;
+    const look = Object.assign({}, h); if (c && KIND[kindOf(c)][1]) { look[KIND[kindOf(c)][1]] = c.val; if (KIND[kindOf(c)][1] === "acc") look.accId = GF.sel; }
     safe(() => { A.heroCast(look); A.portraitTo(g, "hero", 150, 112, 2.25); }); safe(() => A.heroCast(h));
     if (c && kindOf(c) === "shot") { g.fillStyle = "#ffd23f"; g.font = "bold 18px sans-serif"; g.textAlign = "center"; g.fillText("⚡ " + (c.label || ""), 150, 288); }
   }
@@ -254,4 +254,5 @@
     summary: () => safe(() => { const t = totals(), A = api(), C = (A && A.COSM) || {}; return Object.assign(t, { cosOwned: safe(() => A.cosOwned().length, 0), cosTot: Object.keys(C).length }); }, { n: 0, run: 0, fin: 0, fe: 0, te: 0, cosOwned: 0, cosTot: 0 }),
     SAGAS,
   };
+  try { if (window.__titleRefresh) window.__titleRefresh(); } catch {}
 })();
