@@ -163,15 +163,27 @@
   }
   function activateTsubasaStage() {
     injectStyle();
-    try { if (window.setView) window.setView({ kind: "tsubasa" }); } catch (e) {}
+    try { if (window.setView) window.setView({ kind: "tsubasa_dom" }); } catch (e) {}
     const cv = document.getElementById("cv");
     if (cv) cv.hidden = true;
     const alt = document.getElementById("stageAlt");
-    if (alt) { alt.hidden = false; alt.style.display = "block"; alt.style.position = "relative"; alt.style.overflow = "hidden"; alt.style.zIndex = "10"; alt.innerHTML = ""; }
+    if (alt) {
+      alt.hidden = false;
+      alt.style.display = "block";
+      alt.style.position = "absolute";
+      alt.style.inset = "0";
+      alt.style.width = "100%";
+      alt.style.height = "100%";
+      alt.style.overflow = "hidden";
+      alt.style.zIndex = "10";
+      alt.innerHTML = "";
+    }
     return alt;
   }
   function leaveStage() {
     try { if (window.closeAltStage) window.closeAltStage(); } catch (e) {}
+    const cv = document.getElementById("cv");
+    if (cv) cv.hidden = false;
   }
 
   function pips(prog) {

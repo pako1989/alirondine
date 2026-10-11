@@ -1253,7 +1253,7 @@
       view.kind === "multiverse" ||
       view.kind === "bluelock" ||
       view.kind === "noir" ||
-      view.kind === "tsubasa" ||
+      view.kind === "tsubasa_dom" ||
       view.kind === "thrones" ||
       view.kind === "futurama" ||
       view.kind === "citadel" ||
@@ -1396,6 +1396,10 @@
   }
 
   cv.addEventListener("click", (e) => {
+    if (cutin && cutin.held) {
+      anCineEnd(cutin);
+      return;
+    }
     if (view.kind === "panda" && PANDA && !PANDA.over) {
       const rect = cv.getBoundingClientRect();
       const clickX = ((e.clientX - rect.left) / rect.width) * W;
@@ -1853,16 +1857,23 @@
     const real = Math.floor(Math.random() * 3), honest = Math.random() < clamp(0.62 - hLv() * 0.12, 0.38, 0.7);
     const shown = honest ? real : (real + 1 + Math.floor(Math.random() * 2)) % 3;
     $("choices").innerHTML = ""; sfx("special");
-    anCine({ who: heroId(), text: "DUELLO", c1: "#101840", c2: "#ffd23f", t: 40, d: 40, cine: "opp", done: () => {
+    const onDuelReady = () => {
+      cutin = null;
       view = { kind: "match" };
       say(`<b>${esc(d.name)}</b> ${DUEL_DEF[shown][1]}. Che mossa fai?`);
       buttons(DUEL_ME.map((m, i) => ({ label: m[0], sub: m[1], fn: () => {
         const r = (real - i + 3) % 3; // 0 = la tua mossa batte la sua, 1 = perde, 2 = pareggio
         M.duelP = r === 0 ? 0.96 : r === 1 ? 0.04 : null;
         const msg = (r === 0 ? `<b>${m[0]}!</b> Aveva scelto ${DUEL_DEF[real][0]}: lo bruci sul tempo.` : r === 1 ? `<b>${m[0]}…</b> ma lui aveva scelto ${DUEL_DEF[real][0]} e ti legge.` : `<b>${m[0]}</b> contro ${DUEL_DEF[real][0]}: nessuno dei due cede, decide il talento.`) + "<br>";
+        cutin = null;
         act("drib", d); try { $("text").querySelector(".t").insertAdjacentHTML("afterbegin", msg); } catch {}
       } })));
-    } });
+    };
+    if (an11On()) {
+      anCine({ who: heroId(), text: "DUELLO", c1: "#101840", c2: "#ffd23f", t: 40, d: 40, dur: 40, autoHold: false, cine: "opp", done: onDuelReady });
+    } else {
+      onDuelReady();
+    }
   }
   function recruitPerksEnabled() {
     try {
@@ -4959,6 +4970,7 @@
     const cyc = (k, label) => { const list = o[k], i = Math.max(0, list.findIndex(([v]) => v === h[k])), cur = list[i] || list[0]; return { label: `${label}: ${cur[1]} ▸`, sub: `${i + 1} di ${list.length}`, fn: () => { const nx = list[(i + 1) % list.length]; const oldShot = H_SHOTS[h.shot].label.toUpperCase(); h[k] = nx[0]; if (k === "shot" && (!h.shotName || h.shotName.startsWith(oldShot))) { h.shotName = `${H_SHOTS[h.shot].label.toUpperCase()} DI ${h.name.toUpperCase()}`; $("hShot").value = h.shotName; } heroCast(h); heroSum(); heroButtons(); } }; };
     buttons([cyc("style", "Capelli"), cyc("hair", "Colore"), cyc("eye", "Occhi"), cyc("skin", "Pelle"), cyc("shirt", "Maglia"), cyc("acc", "Accessorio"), cyc("shot", "Tiro"),
       { label: "Avanti ▸ Salva il Campione", sub: "Conferma ed entra in campo", cls: "hot", fn: () => { HE.h.v = 1; writeJSON(HERO, HE.h); heroCast(HE.h); view = { kind: "scene", bg: "end", speaker: "hero", chibi: true }; text("hero", `<b>${esc(HE.h.name)}</b>, numero ${HE.h.num}, pronto a scendere in campo con occhi <b>${(H_EYE[HE.h.eye] || "personalizzati").toLowerCase()}</b>. Il tiro speciale si chiama <em>${esc(HE.h.shotName)}</em>.<br><span style="color:var(--dim)">${heroWhere}</span>`); buttons([
+        ...(window.__abissoStory ? [{ label: "⚓ Gioca «Abisso di Dunwich · Il Patto delle Onde Nere» ▸", sub: `Nuova saga dark oceanica Lovecraftiana con ${HE.h.name}`, cls: "hot", fn: () => window.__abissoStory.open({ onExit: HE.back }) }] : []),
         ...(window.__ragnarokStory ? [{ label: "🔥 Gioca «Ragnarok Ball · Il Fuoco di Fimbulwinter» ▸", sub: `Nuova saga norrena tra ghiaccio e fiamme con ${HE.h.name}`, cls: "hot", fn: () => window.__ragnarokStory.open({ onExit: HE.back }) }] : []),
         ...(window.__belovodiaStory ? [{ label: "❄️ Gioca «Belovodia · La Città delle Acque Bianche» ▸", sub: `Nuova saga slava tra tundra e aurora con ${HE.h.name}`, cls: "hot", fn: () => window.__belovodiaStory.open({ onExit: HE.back }) }] : []),
         ...(window.__bilanciaFeudi ? [{ label: "⚖️ Gioca «La Bilancia delle Tre Corone» ▸", sub: `Nuova saga feudale tattica con ${HE.h.name}`, cls: "hot", fn: () => window.__bilanciaFeudi.open({ onExit: HE.back }) }] : []),
@@ -14099,7 +14111,8 @@
   // entra al posto del vecchio primo piano (occhi + cut-in) per gli speciali
   function anCine(c) {
     if (!an11On()) return withEyes(c.who, () => { cutin = c; });
-    cutin = { ...c, t: 999, d: 999, f: 0, D: AN_D(150), shk: false, seed: Math.floor(Math.random() * 1000) };
+    const duration = c.dur || c.d || 150;
+    cutin = { ...c, t: 999, d: 999, f: 0, D: AN_D(duration), shk: false, seed: Math.floor(Math.random() * 1000) };
     sfx("special");
   }
   function drawCutin() {
@@ -14244,7 +14257,15 @@
     }
     px(0, 0, W, 10, "#000");
     const capH = anCapBar(L.cap(N, c), c.c2);
-    if (!c.held) { c.f++; if (c.f >= D) { c.f = D; c.held = true; c.heldAt = performance.now(); } }
+    if (!c.held) {
+      c.f++;
+      if (c.f >= D) {
+        if (c.autoHold === false) return anCineEnd(c);
+        c.f = D;
+        c.held = true;
+        c.heldAt = performance.now();
+      }
+    }
     if (c.held) { anTapHint(H - capH - 20, "tocca per continuare ▸"); if (performance.now() - c.heldAt > 5000) anCineEnd(c); }
   }
 
@@ -15164,6 +15185,7 @@
       { label: "👟 Street Football · La Gabbia del Molo", sub: "3 contro 3 da strada: sponde sui muri, Trabucco, 4 livelli", cls: "hot", fn: () => { if (window.openStreetCageMode) window.openStreetCageMode(menuSaghe); } },
       { label: "📋 Matchday Director 2D HD", sub: "Fai il Mister: modulo, cambi, discorso all'intervallo, pagella", cls: "hot", fn: () => { if (window.openMatchDirectorHD) window.openMatchDirectorHD(menuSaghe); } },
       { head: "Saghe Ispirate & Speciali" },
+      ...(window.__abissoStory ? [window.__abissoStory.menuEntry(menuSaghe)] : []),
       ...(window.__ragnarokStory ? [window.__ragnarokStory.menuEntry(menuSaghe)] : []),
       ...(window.__belovodiaStory ? [window.__belovodiaStory.menuEntry(menuSaghe)] : []),
       ...(window.__bilanciaFeudi ? [window.__bilanciaFeudi.menuEntry(menuSaghe)] : []),
@@ -15249,6 +15271,7 @@
       { label: "✨ Arena 2D HD del Borgo", sub: "Suite Completa: Emblem, Action Soccer, Gabbia del Molo e Matchday Director", cls: "hot", fn: () => { if (window.openArena2DHDModal) window.openArena2DHDModal(modes); } },
       { label: "★ JoJo · Stand Soccer Battle", sub: "Le Bizzarre Avventure di Rondine: Star Rondine & ORA ORA ORA!", cls: "hot", fn: () => { if (window.openJoJoAdventure) window.openJoJoAdventure(modes); } },
       { label: "🌊 Cala Tramontana · Il Borgo del Tuo Campione", sub: heroLoad() ? `Esplora a piedi il borgo alternativo con ${heroLoad().name}` : "Modalità a piedi nel borgo marino alternativo per il tuo campione", cls: "hot", fn: () => { if (window.openCalaTramontana) window.openCalaTramontana(modes); } },
+      ...(window.__abissoStory ? [window.__abissoStory.menuEntry(modes)] : []),
       ...(window.__ragnarokStory ? [window.__ragnarokStory.menuEntry(modes)] : []),
       ...(window.__belovodiaStory ? [window.__belovodiaStory.menuEntry(modes)] : []),
       ...(window.__campioneOmbre ? [window.__campioneOmbre.menuEntry(modes)] : []),
