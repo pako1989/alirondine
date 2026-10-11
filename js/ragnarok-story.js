@@ -1875,7 +1875,7 @@
       }
       ask("rag_surtr_ombra", "Perché volete riaccendere ciò che gli dei stessi hanno lasciato morire? Nel silenzio di Fimbulwinter regna la pace eterna. Se riporterete il sole, riporterete il sangue, le lacrime e la guerra!", [
         { label: "⚔️ La vita vale la lotta! Calciamo per il destino!", cls: "hot", fn: startMatch3 },
-        { label: "◂ Devo riflettere con i compagni", fn: () => {} }
+        { label: "◂ Devo riflettere con i compagni", fn: () => done() }
       ]);
     }
 
@@ -2103,7 +2103,7 @@
         sfxValkyrie();
         return ask("rag_custode_vuoto", "Campione dei mortali, sei giunto all'Ombelico del Cosmo. Se calcerai la Sfera nel cratere riporterai la vita con tutte le sue sofferenze; se la cederai a me, i Nove Regni godranno di un sonno perfetto. Sei pronto a dimostrare la tua volontà sul campo della leggenda?", [
           { label: "☀️ Sfida i Custodi dell'Eterno Silenzio!", cls: "hot", fn: startMatch4 },
-          { label: "◂ Consulta i compagni di squadra", fn: () => {} }
+          { label: "◂ Consulta i compagni di squadra", fn: () => done() }
         ]);
       }
       if (s === 3) {
