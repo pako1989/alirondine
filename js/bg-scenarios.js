@@ -4066,6 +4066,98 @@
     paperGrain(g, W, H, f, 0.07);
   }
 
+  // ---------------------------------------------------------------- CAPITOLO 2 · XILOGRAFIA (crema, nero, rosso)
+  const XK = "#1d1a17", XC = "#efe5cf", XR = "#a8231f";
+  function hatch(g, x, y, w, h, gap, col, slope) { g.save(); g.beginPath(); g.rect(x, y, w, h); g.clip(); g.strokeStyle = col; g.lineWidth = 1; g.beginPath(); for (let i = -h; i < w + h; i += gap) { g.moveTo(x + i, y); g.lineTo(x + i + h * (slope || 1), y + h); } g.stroke(); g.restore(); }
+  function cardShape(g, x, y, w, h, suit, red, rot) {
+    g.save(); g.translate(x, y); g.rotate(rot || 0);
+    px(g, -w / 2 + 2, -h / 2 + 2, w, h, "rgba(29,26,23,.45)"); px(g, -w / 2, -h / 2, w, h, "#f8f2e2"); g.strokeStyle = XK; g.lineWidth = 1; g.strokeRect(-w / 2 + 0.5, -h / 2 + 0.5, w - 1, h - 1);
+    g.fillStyle = red ? XR : XK; g.font = `bold ${Math.round(h * 0.42)}px serif`; g.textAlign = "center"; g.fillText(suit, 0, h * 0.15); g.font = `bold ${Math.round(h * 0.18)}px serif`; g.fillText(suit, -w / 2 + 4, -h / 2 + h * 0.2); g.textAlign = "left"; g.restore();
+  }
+  function bgCorte(g, W, H, f) {
+    px(g, 0, 0, W, H, XC); hatch(g, 0, 0, W, 70, 5, "rgba(29,26,23,.18)", 0.6);
+    // sole inciso
+    g.strokeStyle = XK; g.lineWidth = 1; g.beginPath(); g.arc(270, 34, 16, 0, Math.PI * 2); g.stroke(); for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2 + f / 300; g.beginPath(); g.moveTo(270 + Math.cos(a) * 19, 34 + Math.sin(a) * 19); g.lineTo(270 + Math.cos(a) * 25, 34 + Math.sin(a) * 25); g.stroke(); }
+    // castello di carte (torri di carte appoggiate a triangolo)
+    const fall = since("lb_corte", 0) < 70 ? Math.sin(since("lb_corte", 0) / 4) * 0.12 * (1 - since("lb_corte", 0) / 70) : 0;
+    for (let lv = 0; lv < 4; lv++) for (let i = 0; i < 4 - lv; i++) { const cx = 112 + i * 26 + lv * 13, cy = 116 - lv * 30; cardShape(g, cx - 6, cy, 16, 30, lv % 2 ? "♥" : "♠", lv % 2 === 1, -0.33 + fall); cardShape(g, cx + 6, cy, 16, 30, lv % 2 ? "♠" : "♥", lv % 2 === 0, 0.33 - fall); }
+    px(g, 180, 4, 2, 16, XK); g.fillStyle = XR; g.beginPath(); g.moveTo(182, 4); g.lineTo(196, 8 + Math.sin(f / 8) * 2); g.lineTo(182, 13); g.fill();
+    // terreno
+    px(g, 0, 132, W, 68, "#e2d6bb"); for (let i = 0; i < 9; i++) px(g, 0, 140 + i * 7, W, 1, "rgba(29,26,23,.25)");
+    // rose dipinte (a sinistra) e il giardiniere
+    for (let i = 0; i < 7; i++) { const x = 12 + i * 12, y = 122 + (i % 2) * 6, painted = since("lb_corte", 1) < 200 && i < 4; circ(g, x, y, 4, painted ? XK : XR); g.strokeStyle = XC; g.beginPath(); g.arc(x, y, 2, 0, 5); g.stroke(); px(g, x, y + 4, 1, 8, XK); }
+    px(g, 92, 108, 10, 18, "#f8f2e2"); g.strokeStyle = XK; g.strokeRect(92.5, 108.5, 9, 17); g.fillStyle = XR; g.font = "bold 8px serif"; g.fillText("7", 94, 120); circ(g, 97, 104, 4, "#f2d0b0"); px(g, 100, 112, 8, 2, XK); px(g, 106, 110, 3, 3, since("lb_corte", 1) < 200 ? XK : XR);
+    // soldato di picche di guardia (a destra) — saluta se toccato
+    const sal = since("lb_corte", 2) < 60;
+    px(g, 250, 96, 16, 30, "#f8f2e2"); g.strokeStyle = XK; g.strokeRect(250.5, 96.5, 15, 29); g.fillStyle = XK; g.font = "bold 12px serif"; g.fillText("♠", 253, 116); circ(g, 258, 91, 5, "#f2d0b0"); px(g, 254, 86, 8, 3, XK);
+    px(g, 268, sal ? 82 : 92, 2, sal ? 16 : 30, XK); if (sal) px(g, 264, 82, 6, 2, XK); else { g.fillStyle = XK; g.beginPath(); g.moveTo(266, 92); g.lineTo(269, 84); g.lineTo(272, 92); g.fill(); }
+    // fontana con le carte che galleggiano
+    ell(g, 200, 150, 30, 8, XK); ell(g, 200, 149, 27, 6, "#3a332c"); for (let i = 0; i < 3; i++) cardShape(g, 188 + i * 12, 148 + Math.sin(f / 20 + i) * 1.5, 6, 9, i % 2 ? "♥" : "♠", i % 2, Math.sin(f / 30 + i) * 0.4);
+    px(g, 198, 120, 4, 26, XK); for (let i = 0; i < 6; i++) px(g, 199 + Math.sin(f / 6 + i) * 6, 118 - ((f / 2 + i * 5) % 26), 1, 2, "rgba(29,26,23,.6)");
+    // bandierine
+    for (let i = 0; i < 12; i++) { const x = 6 + i * 27; g.fillStyle = i % 2 ? XR : XK; g.beginPath(); g.moveTo(x, 4); g.lineTo(x + 12, 4); g.lineTo(x + 6, 14 + Math.sin(f / 10 + i)); g.fill(); }
+    // il Jolly che fa capolino (tocca: fa una capriola)
+    const jr = since("lb_corte", 3) < 50 ? since("lb_corte", 3) / 50 * Math.PI * 2 : 0;
+    g.save(); g.translate(300, 150); g.rotate(jr); px(g, -5, -10, 10, 14, XR); px(g, -5, -10, 5, 14, XK); circ(g, 0, -14, 4, "#f2d0b0"); g.fillStyle = XR; g.beginPath(); g.moveTo(-6, -17); g.lineTo(-10, -24); g.lineTo(0, -18); g.lineTo(10, -24); g.lineTo(6, -17); g.fill(); g.restore();
+    paperGrain(g, W, H, f, 0.08);
+  }
+  function bgTrono(g, W, H, f) {
+    px(g, 0, 0, W, H, "#2a2420"); hatch(g, 0, 0, W, H, 4, "rgba(239,229,207,.08)", 1);
+    // vetrate a forma di semi
+    [["♠", 60, false], ["♥", 260, true]].forEach(([s, x, red], i) => { px(g, x - 22, 16, 44, 70, XC); g.strokeStyle = XK; g.lineWidth = 2; g.strokeRect(x - 22, 16, 44, 70); hatch(g, x - 20, 18, 40, 66, 6, "rgba(29,26,23,.25)", -1); g.fillStyle = red ? XR : XK; g.font = "bold 34px serif"; g.textAlign = "center"; g.fillText(s, x, 64); g.textAlign = "left"; if (since("lb_trono", i) < 90) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, x, 50, 50, "239,229,207", 0.4); g.restore(); } });
+    // tappeto rosso e trono
+    g.fillStyle = XR; g.beginPath(); g.moveTo(140, 200); g.lineTo(180, 200); g.lineTo(170, 110); g.lineTo(150, 110); g.fill(); hatch(g, 140, 110, 40, 90, 5, "rgba(29,26,23,.3)", 0.2);
+    px(g, 136, 50, 48, 64, XK); px(g, 142, 56, 36, 52, XC); g.fillStyle = XK; g.font = "bold 26px serif"; g.textAlign = "center"; g.fillText("♠", 160, 92); g.textAlign = "left"; px(g, 132, 44, 56, 8, XR);
+    // il leggio con l'invito sigillato
+    px(g, 218, 120, 6, 50, XK); px(g, 204, 112, 34, 12, XC); g.strokeStyle = XK; g.strokeRect(204.5, 112.5, 33, 11); circ(g, 221, 118, 3, XR);
+    if (since("lb_trono", 2) < 80) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 221, 118, 24, "255,200,160", 0.5); g.restore(); }
+    // candelabri
+    [[100, 130], [222, 74]].forEach(([x, y], i) => { px(g, x - 1, y, 3, 40, XC); const on = !toggled("lb_trono", 3) || i; if (on) { ell(g, x, y - 4 + Math.sin(f / 7 + i), 2, 5, "#ffcf6a"); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, x, y - 4, 26, "255,200,120", 0.3); g.restore(); } });
+    paperGrain(g, W, H, f, 0.05);
+  }
+  function bgLabirinto(g, W, H, f) {
+    px(g, 0, 0, W, H, "#2a2420");
+    // cielo notturno inciso e luna
+    hatch(g, 0, 0, W, 90, 3, "rgba(239,229,207,.12)", 0.3);
+    const moon = since("lb_labirinto", 0) < 150; circ(g, 60, 34, 18, XC); if (!moon) circ(g, 68, 30, 16, "#2a2420"); hatch(g, 42, 16, 36, 36, 5, "rgba(29,26,23,.2)", 1);
+    for (let i = 0; i < 20; i++) px(g, (i * 71) % W, (i * 23) % 80, 1, 1, (f / 20 + i) % 6 < 1 ? XC : "rgba(239,229,207,.5)");
+    // siepi in prospettiva (corridoio)
+    g.fillStyle = "#3a5a3a"; g.beginPath(); g.moveTo(0, 60); g.lineTo(120, 92); g.lineTo(120, 150); g.lineTo(0, 200); g.fill();
+    g.beginPath(); g.moveTo(W, 60); g.lineTo(200, 92); g.lineTo(200, 150); g.lineTo(W, 200); g.fill();
+    hatch(g, 0, 60, 120, 140, 4, "rgba(29,26,23,.55)", -0.5); hatch(g, 200, 60, 120, 140, 4, "rgba(29,26,23,.55)", 0.5);
+    px(g, 120, 92, 80, 58, "#2f4a30"); hatch(g, 120, 92, 80, 58, 3, "rgba(29,26,23,.5)", 1);
+    g.fillStyle = "#cfc3a6"; g.beginPath(); g.moveTo(120, 150); g.lineTo(200, 150); g.lineTo(W, 200); g.lineTo(0, 200); g.fill(); for (let i = 0; i < 6; i++) px(g, 0, 156 + i * 8, W, 1, "rgba(29,26,23,.3)");
+    // la tana del Gommapane, in fondo: due occhietti
+    ell(g, 160, 140, 16, 8, XK); const peek = since("lb_labirinto", 1) < 120;
+    if (peek) { ell(g, 160, 134, 12, 9, "#b8b0a8"); circ(g, 156, 132, 2, XK); circ(g, 164, 132, 2, XK); px(g, 157, 137, 6, 1, XK); } else if ((f / 60 | 0) % 3 !== 0) { circ(g, 155, 139, 1.5, XC); circ(g, 165, 139, 1.5, XC); }
+    // fiume d'inchiostro che scorre in primo piano
+    const dam = since("lb_labirinto", 2) < 100;
+    g.fillStyle = XK; g.beginPath(); g.moveTo(0, 176); for (let x = 0; x <= W; x += 10) g.lineTo(x, 176 + Math.sin(x / 20 + f / (dam ? 60 : 12)) * 3); g.lineTo(W, 196); g.lineTo(0, 196); g.fill();
+    for (let i = 0; i < 10; i++) px(g, (i * 37 + f * (dam ? 0.1 : 1.2)) % W, 184 + (i % 3) * 3, 6, 1, XC);
+    // rose nere sulle siepi
+    for (let i = 0; i < 6; i++) { const x = 20 + i * 15, y = 100 + i * 12, b = since("lb_labirinto", 3) < 80 ? 1.5 : 1; circ(g, x, y, 3 * b, i % 2 ? XR : XC); circ(g, W - x, y, 3 * b, i % 2 ? XC : XR); }
+    paperGrain(g, W, H, f, 0.05);
+  }
+  function bgTorneo(g, W, H, f) {
+    px(g, 0, 0, W, H, XC); hatch(g, 0, 0, W, 40, 6, "rgba(29,26,23,.15)", 0.4);
+    // tribune incise piene di carte-tifosi
+    for (let r = 0; r < 4; r++) { px(g, 0, 40 + r * 16, W, 15, r % 2 ? "#e2d6bb" : "#d8cbac"); for (let i = 0; i < 26; i++) { const x = 4 + i * 12 + (r % 2) * 6, jump = since("lb_torneo", 0) < 90 ? Math.abs(Math.sin(f / 4 + i)) * 4 : 0; px(g, x, 44 + r * 16 - jump, 7, 10, (i + r) % 3 ? "#f8f2e2" : XR); g.strokeStyle = XK; g.strokeRect(x + 0.5, 44.5 + r * 16 - jump, 6, 9); } }
+    // palco reale con lo stendardo della Regina
+    px(g, 128, 22, 64, 24, XK); px(g, 132, 26, 56, 18, XR); g.fillStyle = XC; g.font = "bold 14px serif"; g.textAlign = "center"; g.fillText("♠", 160, 41); g.textAlign = "left";
+    const flap = since("lb_torneo", 1) < 120 ? 3 : 1; for (let i = 0; i < 2; i++) { const x = i ? 196 : 112; px(g, x, 2, 2, 30, XK); g.fillStyle = XR; g.beginPath(); g.moveTo(x + 2, 2); for (let k = 0; k <= 5; k++) g.lineTo(x + 2 + k * 3, 4 + Math.sin(f / 8 * flap + k) * flap); g.lineTo(x + 17, 14); g.lineTo(x + 2, 14); g.fill(); }
+    // campo inciso
+    px(g, 0, 104, W, 96, "#e6dac0"); for (let i = 0; i < 8; i++) hatch(g, i * 40, 104, 20, 96, 6, "rgba(29,26,23,.12)", 0.2);
+    g.strokeStyle = XK; g.lineWidth = 1.5; g.strokeRect(16, 112, 288, 82); g.beginPath(); g.moveTo(160, 112); g.lineTo(160, 194); g.stroke(); g.beginPath(); g.ellipse(160, 153, 22, 12, 0, 0, Math.PI * 2); g.stroke();
+    // la porta della Regina (a destra): una saracinesca di carte
+    const shut = !toggled("lb_torneo", 2); px(g, 290, 128, 22, 50, "rgba(29,26,23,.15)"); g.strokeStyle = XK; g.strokeRect(290.5, 128.5, 21, 49); if (shut) for (let i = 0; i < 4; i++) cardShape(g, 301, 136 + i * 11, 18, 10, i % 2 ? "♥" : "♠", i % 2, 0);
+    // tabellone «0 : 0 dal 1450»
+    px(g, 24, 80, 50, 22, XK); g.fillStyle = since("lb_torneo", 3) < 120 ? XR : XC; g.font = "bold 9px monospace"; g.fillText(since("lb_torneo", 3) < 120 ? "MAI!" : "0 : 0", 34, 94); g.fillStyle = XC; g.font = "6px serif"; g.fillText("subiti dal 1450", 27, 101);
+    // il Jolly telecronista con il cono
+    px(g, 250, 82, 12, 16, XR); px(g, 250, 82, 6, 16, XK); circ(g, 256, 78, 4, "#f2d0b0"); g.fillStyle = XK; g.beginPath(); g.moveTo(262, 80); g.lineTo(276, 74); g.lineTo(276, 86); g.fill();
+    if (since("lb_torneo", 4) < 100) { g.fillStyle = XK; g.font = "bold 8px serif"; g.fillText("CHE PARATAAA!", 230, 70); }
+    paperGrain(g, W, H, f, 0.07);
+  }
+
   // elementi interattivi: [x, y, w, h, frase, azione?("tog" = acceso/spento)]
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
@@ -4103,6 +4195,33 @@
       [232, 18, 80, 100, "🧱 La casa di mattoni: la bandiera rosa di Mattone sventola più forte quando la guardi."],
       [90, 98, 34, 22, "🔢 Il tabellone: per un attimo segna «???». Questa partita non ha ancora un finale."],
       [0, 118, 320, 14, "🎏 Le bandierine: sventolano tutte insieme, come un tifo che non sa per chi."],
+    ] },
+    lb_corte: { draw: bgCorte, hot: [
+      [100, 20, 110, 116, "🃏 Il castello di carte: lo tocchi e trema tutto. Nessuno respira finché non smette."],
+      [0, 108, 90, 26, "🌹 Le rose: il Sette di Cuori le ridipinge di nero. «È un libro inciso, signore: il rosso costa caro.»"],
+      [244, 76, 32, 52, "♠ Il Due di Picche saluta con la lancia. Poi si accorge che non sei la Regina e fa finta di grattarsi."],
+      [286, 130, 30, 40, "🤡 Il Jolly fa una capriola. «Io posso essere qualsiasi carta. Oggi sono di buonumore.»"],
+      [170, 112, 60, 46, "⛲ La fontana: dentro galleggiano carte bagnate. Una è un asso. Nessuno ha il coraggio di prenderlo."],
+    ] },
+    lb_trono: { draw: bgTrono, hot: [
+      [38, 16, 44, 70, "♠ La vetrata di Picche si accende. Sotto, inciso: «Chi non perde mai, non finisce mai»."],
+      [238, 16, 44, 70, "♥ La vetrata di Cuori brilla. È quella del Fante: c'è un cuore inciso a mano, un po' storto."],
+      [200, 108, 42, 20, "✉️ L'invito sigillato: «Il Torneo delle Fiabe accetta uno sfidante. Uno solo. Da trentanove anni»."],
+      [90, 110, 22, 60, "🕯️ Il candelabro: lo spegni e lo riaccendi. Le ombre delle carte si inchinano.", "tog"],
+      [132, 44, 56, 70, "👑 Il trono di Picche. Il cuscino è consumato da una parte sola: la Regina si siede sempre di sbieco, pronta a scattare."],
+    ] },
+    lb_labirinto: { draw: bgLabirinto, hot: [
+      [40, 14, 44, 42, "🌙 La luna incisa: per un attimo si fa piena, poi torna a spicchio, come se avesse cambiato idea."],
+      [140, 124, 40, 24, "👀 La tana: due occhietti. Poi una testolina grigia e tonda che ti guarda e sparisce. Era tonda. Molto tonda."],
+      [0, 172, 320, 26, "〰️ Il fiume d'inchiostro: scorre lento. Se ci fosse un MURO, a monte, si fermerebbe."],
+      [0, 90, 100, 80, "🌹 Le rose sulle siepi sbocciano quando le guardi. Sono incise: profumano di legno."],
+    ] },
+    lb_torneo: { draw: bgTorneo, hot: [
+      [0, 40, 110, 62, "📣 Le tribune di carte: saltano tutte insieme. Fa un rumore di mazzo mescolato."],
+      [106, 0, 108, 46, "🚩 Lo stendardo di Picche: sventola più forte. La Regina, da qualche parte, ha sentito."],
+      [286, 126, 30, 54, "🥅 La porta della Regina: una saracinesca di carte. La apri e la chiudi: dietro c'è un muro. Non le serve una porta: le serve un muro.", "tog"],
+      [20, 78, 58, 26, "🔢 Il tabellone: «Gol subiti dalla Regina: 0, dal 1450». Lo tocchi e scrive «MAI!» da solo, offeso."],
+      [242, 66, 40, 34, "🎙️ Il Jolly telecronista prova il cono: «CHE PARATAAA!». Non c'era nessun tiro. Si allena."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };

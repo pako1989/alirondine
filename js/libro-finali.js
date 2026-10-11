@@ -263,7 +263,16 @@
       if (ZX.stk === "acq" && rnd(tx, ty, 5) < 0.3) { P(sx + 5, sy + 3, 2, 2, "#e8806a"); P(sx + 11, sy + 1, 2, 2, "#e8806a"); P(sx + 13, sy + 6, 2, 2, "#e8806a"); }
     },
     h(sx, sy, tx, ty) { // siepe
-      const st = ZX.st; P(sx, sy, 16, 16, st.tree); P(sx, sy, 16, 3, st.tree2);
+      const st = ZX.st;
+      if (ZX.stk === "xil") { // siepe incisa: nero pieno con il tratteggio a sgorbia e la cima tondeggiante
+        P(sx, sy, 16, 16, "#2a2620"); GP.strokeStyle = "rgba(239,229,207,.55)"; GP.lineWidth = 1; GP.beginPath();
+        for (let i = -16; i < 16; i += 4) { GP.moveTo(sx + i + (ty % 2) * 2, sy + 16); GP.lineTo(sx + i + 10 + (ty % 2) * 2, sy + 4); } GP.stroke();
+        if (at(tx, ty - 1) !== "h") { P(sx, sy, 16, 4, "#efe5cf"); GP.fillStyle = "#2a2620"; GP.beginPath(); for (let i = 0; i < 4; i++) GP.arc(sx + 2 + i * 4, sy + 4, 2.5, Math.PI, 0); GP.fill(); }
+        if (at(tx, ty + 1) !== "h") P(sx, sy + 14, 16, 2, "#1d1a17");
+        if ((tx * 7 + ty * 3) % 11 === 0) { GP.fillStyle = st.accent; GP.beginPath(); GP.arc(sx + 8, sy + 9, 2, 0, 7); GP.fill(); }
+        return;
+      }
+      P(sx, sy, 16, 16, st.tree); P(sx, sy, 16, 3, st.tree2);
       for (let i = 0; i < 5; i++) P(sx + ((tx * 3 + i * 5) % 14), sy + 4 + ((ty + i * 3) % 10), 2, 2, ZX.stk === "xil" ? "#efe5cf" : st.tree2);
       if (ZX.stk === "xil" && (tx + ty) % 3 === 0) P(sx + 7, sy + 7, 2, 2, st.accent);
       outline(sx, sy, 16, 16, tx, ty);
@@ -527,6 +536,7 @@
       if (w === sp.need) {
         F.set("wr_" + sp.id, true);
         setTiles(sp.area[0], sp.area[1], sp.area[2], sp.area[3], sp.to);
+        (sp.extra || []).forEach((e) => setTiles(e[0], e[1], e[2], e[3], e[4]));
         splash((sp.area[0] + sp.area[2]) / 2, (sp.area[1] + sp.area[3]) / 2);
         const after = () => (sp.then ? sp.then() : done());
         return say(sp.ok || [["voce", `Scrivi ${WORDS[w].w}. L'inchiostro corre sulla pagina e la pagina ti dà ragione.`]], after);
@@ -561,7 +571,7 @@
       spec.build(Ls);
       // parole già raccolte, pagine già scritte, lettere già lette
       Object.keys(spec.words || {}).forEach((k) => { const [x, y] = k.split(",").map(Number); if (knows(spec.words[k]) || F.is("wd_" + zid + "_" + k.replace(",", "_"))) Ls.put(x, y, undAt(x, y)); else Ls.put(x, y, "*"); });
-      (spec.writes || []).forEach((sp) => { if (F.is("wr_" + sp.id)) Ls.lay(sp.area[0], sp.area[1], sp.area[2], sp.area[3], sp.to); });
+      (spec.writes || []).forEach((sp) => { if (F.is("wr_" + sp.id)) { Ls.lay(sp.area[0], sp.area[1], sp.area[2], sp.area[3], sp.to); (sp.extra || []).forEach((e) => Ls.lay(e[0], e[1], e[2], e[3], e[4])); } });
       if (spec.letter) { const [x, y] = spec.letter.at; Ls.put(x, y, mem().lett.includes(spec.letter.n) ? undAt(x, y) : "&"); }
       if (spec.after) spec.after(Ls);
       refreshSoon();
