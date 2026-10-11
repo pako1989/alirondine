@@ -4749,7 +4749,7 @@
     px(g, 240, 150, 3, 30, "#4a3420"); px(g, 226, 146, 40, 10, "#7a6040"); g.fillStyle = "#2a1a10"; g.font = "bold 6px Georgia, serif"; g.fillText("← SALICI 2mg", 229, 153);
   }
   function bgMuRovine(g, W, H, f) {
-    vgrad(g, 0, 0, W, 100, ["#c8b890", "#e0d0a8", "#e8dcb8"]);
+    vgrad(g, 0, 0, W, 100, ["#c8b890", "#e0d0a8", "#e8dcb8"]); vgrad(g, 0, 96, W, 104, ["#8aa06a", "#6a8a4a"]);
     // le gradinate crepate a semicerchio, piene di fiori
     for (let r = 0; r < 5; r++) { g.strokeStyle = r % 2 ? "#8a8478" : "#7a7468"; g.lineWidth = 9; g.beginPath(); g.arc(160, 200, 190 - r * 12, Math.PI * 1.05, Math.PI * 1.95); g.stroke(); }
     for (let i = 0; i < 40; i++) { const a = Math.PI * (1.08 + (i / 40) * 0.84), r = 170 - (i % 5) * 12; circ(g, 160 + Math.cos(a) * r, 200 + Math.sin(a) * r, 2, ["#e8c46a", "#d86a6a", "#e8e2d4", "#b07ae0"][i % 4]); }
@@ -4763,6 +4763,51 @@
     const pass = since("mu_rovine", 1); const bx = pass < 90 ? x + pass * 1.2 : x, by = pass < 90 ? y - 6 + pass * 0.15 : y - 16; circ(g, bx, by, 7, "#9a9488"); g.strokeStyle = "#5a5248"; g.lineWidth = 1; g.beginPath(); g.arc(bx, by, 7, 0, Math.PI * 2); g.stroke();
     // petali e pollini
     for (let i = 0; i < 20; i++) px(g, (i * 47 + f * 0.6) % W, (i * 31 + Math.sin(f / 30 + i) * 6) % 170, 2, 1.5, "rgba(255,240,200,.8)");
+  }
+  function bgMuCavo(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#14120e", "#1e1a16", "#2a241c"]);
+    // il corridoio dentro il muro che si perde nel buio (prospettiva)
+    g.fillStyle = "#2e2a22"; g.beginPath(); g.moveTo(0, 0); g.lineTo(120, 70); g.lineTo(120, 140); g.lineTo(0, H); g.fill(); g.beginPath(); g.moveTo(W, 0); g.lineTo(200, 70); g.lineTo(200, 140); g.lineTo(W, H); g.fill();
+    for (let i = 0; i < 8; i++) { const k = i / 8; g.strokeStyle = `rgba(0,0,0,${0.3 + k * 0.3})`; g.lineWidth = 1; g.beginPath(); g.moveTo(120 * k, 70 * k); g.lineTo(120 * k, H - 60 * k); g.stroke(); g.beginPath(); g.moveTo(W - 120 * k, 70 * k); g.lineTo(W - 120 * k, H - 60 * k); g.stroke(); }
+    px(g, 120, 70, 80, 70, "#0a0806");
+    // gli scaffali dell'archivio con il nastro rosso (toccali: un documento cade)
+    [[20, 40], [250, 40]].forEach(([x, y]) => { px(g, x, y, 50, 110, "#3a2a1a"); for (let r = 0; r < 4; r++) { px(g, x + 3, y + 4 + r * 26, 44, 22, "#1a120a"); for (let k = 0; k < 8; k++) px(g, x + 5 + k * 5, y + 6 + r * 26, 4, 20, ["#6a3a2a", "#8a7a5a", "#4a4a5a", "#a8322a"][(k + r) % 4]); } });
+    const fall = since("mu_cavo", 0); if (fall < 80) { g.save(); g.translate(60, 60 + fall * 1.4); g.rotate(fall / 10); px(g, -8, -5, 16, 10, "#e8dcc0"); px(g, -6, -3, 12, 1, "#5a4a3a"); px(g, -6, 0, 9, 1, "#5a4a3a"); g.restore(); }
+    // il tavolo del Patto con la lanterna (toccala: si accende)
+    px(g, 110, 160, 100, 10, "#5a3a20"); px(g, 116, 170, 6, 30, "#3a2410"); px(g, 198, 170, 6, 30, "#3a2410"); px(g, 130, 150, 50, 12, "#e8dcc0"); px(g, 132, 152, 46, 1, "#5a4a3a"); px(g, 132, 155, 30, 1, "#5a4a3a"); px(g, 168, 157, 8, 4, "#a8322a");
+    const on = !toggled("mu_cavo", 1); px(g, 196, 140, 8, 12, "#2a2a2a"); px(g, 197, 142, 6, 7, on ? "#ffcf7a" : "#3a3a3a"); if (on) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 200, 146, 60, "255,180,90", 0.45); g.restore(); }
+    // polvere nella luce
+    for (let i = 0; i < 24; i++) px(g, 150 + Math.sin(f / 40 + i) * 50, (i * 17 + f * 0.2) % 160, 1, 1, "rgba(255,220,170,.5)");
+  }
+  function bgMuPalazzo(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#2a0e14", "#4a1a22", "#2a0e14"]);
+    // colonne di marmo e arazzi con lo stemma (un muro con la corona)
+    [20, 90, 230, 300].forEach((x) => { px(g, x - 9, 0, 18, H, "#d8d0c0"); px(g, x - 9, 0, 4, H, "rgba(255,255,255,.3)"); px(g, x + 5, 0, 4, H, "rgba(0,0,0,.2)"); });
+    [[130, 10], [190, 10]].forEach(([x, y]) => { px(g, x - 18, y, 36, 60, "#6a1a24"); px(g, x - 18, y + 58, 36, 4, "#c9a227"); px(g, x - 10, y + 24, 20, 14, "#8a8478"); px(g, x - 8, y + 18, 16, 6, "#c9a227"); });
+    // lo scranno del Prevosto e Grifo che sorride (toccalo: il sorriso trema)
+    px(g, 130, 90, 60, 70, "#6a1a24"); px(g, 130, 90, 60, 4, "#c9a227"); px(g, 124, 150, 72, 14, "#c9a227");
+    const tremble = since("mu_palazzo", 0) < 90 ? Math.sin(f) * 1 : 0; circ(g, 160 + tremble, 118, 10, "#f0d0b0"); px(g, 150, 108, 20, 5, "#e8e0d0"); px(g, 148, 128, 24, 24, "#6a1a24"); g.strokeStyle = "#5a2a2a"; g.lineWidth = 1.2; g.beginPath(); g.arc(160 + tremble, 120, 4, 0.2, Math.PI - 0.2); g.stroke(); px(g, 155, 115, 2, 2, "#2a2a2a"); px(g, 163, 115, 2, 2, "#2a2a2a");
+    for (let i = 0; i < 5; i++) circ(g, 152 + i * 4, 150, 1.5, "#c9a227");
+    // il lampadario acceso (toccalo: si spegne)
+    const on = !toggled("mu_palazzo", 1); for (let i = 0; i < 7; i++) { const x = 130 + i * 10; px(g, x, 4, 1, 10, "#c9a227"); circ(g, x, 16, 2.5, on ? "#fff6c8" : "#5a5a5a"); } if (on) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 160, 16, 70, "255,230,170", 0.3); g.restore(); }
+    // il grano del Consiglio
+    for (let i = 0; i < 5; i++) { px(g, 236 + (i % 3) * 22, 160 - Math.floor(i / 3) * 18, 20, 18, "#8a6a3a"); px(g, 236 + (i % 3) * 22, 160 - Math.floor(i / 3) * 18, 20, 3, "#c9a85a"); }
+    vgrad(g, 0, 176, W, 24, ["#5a1a24", "#3a0e14"]);
+  }
+  function bgMuFinale(g, W, H, f) {
+    // l'alba sul muro, il Portone e i Colossi in fila come una squadra
+    vgrad(g, 0, 0, W, 130, ["#3a4a7a", "#d88a6a", "#ffd07a", "#fff0c8"]);
+    g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 160, 120, 100, "255,220,150", 0.6); g.restore(); circ(g, 160, 124, 20, "#fff6d8");
+    px(g, 0, 70, W, 70, "#6a6458"); for (let r = 0; r < 7; r++) for (let i = 0; i < 12; i++) px(g, i * 28 + (r % 2) * 14, 72 + r * 10, 27, 9, (i + r) % 3 ? "#726c60" : "#665f54"); for (let i = 0; i < 12; i++) px(g, i * 28, 62, 16, 10, "#6a6458");
+    // la città sul muro che guarda (toccala: esulta)
+    const cheer = since("mu_finale", 0) < 150; for (let i = 0; i < 40; i++) { const y = 56 - (cheer ? Math.abs(Math.sin(f / 4 + i)) * 4 : 0); px(g, i * 8 + 2, y, 5, 6, ["#a8322a", "#e8e2d4", "#3a3a42", "#c9a227"][i % 4]); px(g, i * 8 + 3, y - 3, 3, 3, "#d9b38c"); }
+    // il Portone aperto con la luce dentro (toccalo: tre colpi)
+    px(g, 130, 96, 60, 44, "#fff0c8"); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 160, 120, 50, "255,240,200", 0.5); g.restore(); px(g, 116, 96, 14, 44, "#3a2a1e"); px(g, 190, 96, 14, 44, "#3a2a1e");
+    if (since("mu_finale", 1) < 90) { g.fillStyle = "#3a2a1e"; g.font = "bold 10px Georgia, serif"; g.fillText("TOC TOC TOC", 128, 92); }
+    vgrad(g, 0, 140, W, 60, ["#7a9a5a", "#5a7a42"]);
+    // i Colossi in fila, con i numeri sulla schiena, girati verso il muro
+    [[30, "14"], [90, "7"], [230, "9"], [290, "1"]].forEach(([x, n], i) => muColosso(g, x, 196, 0.62, f, { ph: i, num: n }));
+    for (let i = 0; i < 14; i++) px(g, (i * 41 + f * 0.5) % W, (i * 23 + Math.sin(f / 20 + i) * 4) % 140, 2, 1.5, "rgba(255,240,200,.85)");
   }
   // elementi interattivi: [x, y, w, h, frase, azione?("tog" = acceso/spento)]
   const LB = {
@@ -5006,6 +5051,21 @@
       [118, 12, 84, 30, "🪨 Il tabellone di pietra: «SALICI 3 · CINTA 2». E sotto, quasi cancellato: «arrivederci a primavera»."],
       [120, 80, 80, 100, "🗿 Il Colosso inginocchiato spinge il pallone di pietra verso di te. Un passaggio, lentissimo. Duecento anni per un passaggio."],
       [0, 50, 320, 60, "🌼 Le gradinate crepate sono piene di fiori. Ci stavano migliaia di persone. Adesso ci sta la primavera."],
+    ] },
+    mu_cavo: { draw: bgMuCavo, hot: [
+      [18, 38, 56, 116, "📜 Dallo scaffale dei Primi Prevosti cade un documento. Il sigillo è rotto da tempo: qualcuno l'ha già letto, e rimesso a posto."],
+      [190, 136, 18, 20, "🕯️ La lanterna del tavolo del Patto: la spegni, la riaccendi. Nel buio il muro respira davvero.", "tog"],
+      [126, 146, 60, 18, "📖 Il Patto della Cinta, aperto all'ultima pagina: «Si sveglieranno quando si giocherà di nuovo la Partita di Primavera»."],
+    ] },
+    mu_palazzo: { draw: bgMuPalazzo, hot: [
+      [140, 96, 40, 60, "🙂 Il sorriso del Prevosto Grifo trema, per un istante. Poi torna perfetto."],
+      [124, 2, 76, 20, "💡 Il lampadario del Consiglio: lo spegni e la sala diventa quasi onesta.", "tog"],
+      [232, 120, 70, 60, "🌾 Il grano della riserva del Consiglio. Pieno. Nella Città Bassa le razioni sono dimezzate."],
+    ] },
+    mu_finale: { draw: bgMuFinale, hot: [
+      [0, 40, 320, 30, "🙌 La città sul muro esulta. Per la prima volta guarda fuori, e non ha paura."],
+      [126, 92, 68, 50, "🚪 Il Portone: tre colpi, poi una risata dall'altra parte. Una risata vecchia di duecento anni."],
+      [0, 130, 320, 70, "🗿 I Colossi in fila, con i numeri sulla schiena: 14, 7, 9, 1. Una squadra che aspetta di entrare in campo."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };

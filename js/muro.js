@@ -430,7 +430,7 @@
     const stealthOn = () => spec.stealth && (!spec.stealthWhen || safe(() => spec.stealthWhen(stepOf(chN)), true));
     if (spec.stealth) Z.tick = function (px, py, dt) { if (!stealthOn() || api.trZone() !== zid) return null; return stealthTick(zid, spec, px, py, Math.min(0.05, dt || 0.016)); };
     Z.decor = function (cx, cy) { safe(drawStatues); if (spec.decor) safe(() => spec.decor(GP, cx, cy, dd(cx, cy))); };
-    Z.top = function (cx, cy) { if (spec.top) safe(() => spec.top(GP, cx, cy, dd(cx, cy))); if (stealthOn()) safe(() => drawColossi(GP, zid, spec, cx, cy, frNow())); safe(() => mood(GP, frNow())); if (stealthOn()) safe(() => stealthHud(GP)); };
+    Z.top = function (cx, cy) { if (spec.top) safe(() => spec.top(GP, cx, cy, dd(cx, cy))); chainFor(ZONES[zid]).forEach((cc) => { const p = cc.n !== chN && cc.patch && cc.patch[zid]; if (p && p.top) safe(() => p.top(GP, cx, cy, dd(cx, cy), stepOf(cc.n))); }); if (stealthOn()) safe(() => drawColossi(GP, zid, spec, cx, cy, frNow())); safe(() => mood(GP, frNow())); if (stealthOn()) safe(() => stealthHud(GP)); };
     Z.onObj = function (ch, tx, ty) {
       let f = null;
       chainFor(ZONES[zid]).some((c) => { f = c.obj && (c.obj[zid + ":" + ch + ":" + tx + "," + ty] || c.obj[zid + ":" + ch]); return !!f; });
