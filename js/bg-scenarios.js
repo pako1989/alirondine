@@ -3889,3 +3889,269 @@
 
   console.log("✓ Motore Scenari e Sfondi 2D Dettagliati caricato con successo");
 })();
+
+// ================= IL LIBRO CHE MANGIAVA I FINALI · sfondi di scena (chiavi lb_*) =================
+// Ogni sfondo ha elementi interattivi: si toccano sul disegno durante i dialoghi e rispondono con una frase
+// (e spesso con un'azione: una candela che si spegne, un gufo che sbatte le palpebre, un mulino che accelera).
+// I puntini luminosi segnalano cosa si può toccare. Il tocco non fa avanzare il dialogo.
+(function () {
+  "use strict";
+  function px(g, x, y, w, h, col) { g.fillStyle = col; g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); }
+  function circ(g, x, y, r, col) { g.fillStyle = col; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill(); }
+  function ell(g, x, y, rx, ry, col, rot) { g.fillStyle = col; g.beginPath(); g.ellipse(x, y, rx, ry, rot || 0, 0, Math.PI * 2); g.fill(); }
+  function vgrad(g, x, y, w, h, stops) { const gr = g.createLinearGradient(x, y, x, y + h); stops.forEach((s, i) => gr.addColorStop(i / (stops.length - 1), s)); g.fillStyle = gr; g.fillRect(x, y, w, h); }
+  function glowB(g, x, y, r, rgb, a) { const gr = g.createRadialGradient(x, y, 1, x, y, r); gr.addColorStop(0, `rgba(${rgb},${a})`); gr.addColorStop(1, `rgba(${rgb},0)`); g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2); }
+  // macchia d'acquerello: ellissi sovrapposte trasparenti
+  function blot(g, x, y, r, rgb, a, seed) { for (let i = 0; i < 4; i++) { const k = (seed || 1) * 7 + i * 13; ell(g, x + Math.sin(k) * r * 0.25, y + Math.cos(k) * r * 0.2, r * (0.7 + 0.1 * i), r * (0.45 + 0.08 * i), `rgba(${rgb},${a})`, k); } }
+  function paperGrain(g, W, H, f, a) { for (let i = 0; i < 70; i++) px(g, (i * 97 + 13) % W, (i * 61 + 7) % H, 1, 1, i % 2 ? `rgba(120,90,50,${a})` : `rgba(255,255,255,${a})`); }
+  function letterRain(g, W, H, f, col, n) { g.font = "8px Georgia, serif"; const L = "ABCDEFGHILMNOPQRSTUVZ"; for (let i = 0; i < (n || 14); i++) { const x = (i * 53 + Math.sin(f / 50 + i) * 12) % W, y = (i * 37 + f * (0.25 + (i % 3) * 0.1)) % H; g.fillStyle = col; g.save(); g.translate(x, y); g.rotate(Math.sin(f / 30 + i)); g.fillText(L[i % L.length], 0, 0); g.restore(); } }
+
+  const S = { last: { k: "", t: 0, W: 320, H: 200 }, cap: null, capT: 0, act: {} };
+  const now = () => performance.now();
+  // frame trascorsi dall'ultima volta che un elemento è stato toccato (Infinity se mai)
+  const since = (k, i) => { const t = S.act[k + ":" + i]; return t ? (now() - t) / 16 : Infinity; };
+  const toggled = (k, i) => !!S.act["tog:" + k + ":" + i];
+
+  // ---------------------------------------------------------------- COPERTINA (titolo della saga)
+  function bgCopertina(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#1a1220", "#2a1c1a", "#1a120e"]);
+    // finestra con pioggia
+    px(g, 228, 14, 74, 70, "#0e1626"); px(g, 228, 14, 74, 2, "#5a3a22"); px(g, 228, 82, 74, 3, "#5a3a22"); px(g, 263, 14, 2, 70, "#5a3a22"); px(g, 228, 47, 74, 2, "#5a3a22");
+    for (let i = 0; i < 18; i++) { const x = 230 + (i * 17) % 70, y = 16 + ((i * 29 + f * 1.6) % 64); px(g, x, y, 1, 4, "rgba(170,200,255,.45)"); }
+    if (since("lb_copertina", 3) < 160) { g.font = "italic 7px Georgia, serif"; g.fillStyle = `rgba(200,220,255,${0.8 - since("lb_copertina", 3) / 200})`; g.fillText("aiuto", 238, 40); g.fillText("finisci", 268, 64); }
+    // scrivania
+    vgrad(g, 0, 120, W, 80, ["#5a3420", "#3a2014"]); for (let i = 0; i < 6; i++) px(g, 0, 128 + i * 12, W, 1, "rgba(0,0,0,.18)");
+    // candela
+    const lit = !toggled("lb_copertina", 0), fl = Math.sin(f / 6) * 1.5;
+    px(g, 40, 92, 10, 30, "#efe6cf"); px(g, 36, 120, 18, 4, "#8a6a3a");
+    if (lit) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 45, 86, 70, "255,190,110", 0.4); g.restore(); ell(g, 45, 86 + fl * 0.3, 3, 7, "#ffcf6a"); ell(g, 45, 88, 1.5, 3, "#fff6d0"); }
+    else { for (let i = 0; i < 4; i++) ell(g, 45 + Math.sin(f / 20 + i) * 4, 84 - i * 6 - (f % 40) / 4, 3, 2, "rgba(200,200,210,.25)"); }
+    // il libro chiuso, grande, con il morso
+    const bx = 92, by = 96;
+    px(g, bx + 4, by + 6, 140, 52, "rgba(0,0,0,.4)");
+    px(g, bx, by, 140, 52, "#6a1f2a"); px(g, bx, by, 140, 4, "#8a2f3a"); px(g, bx, by + 48, 140, 4, "#4a141c");
+    px(g, bx + 136, by + 4, 6, 46, "#f4ecd8"); for (let i = 0; i < 9; i++) px(g, bx + 137, by + 6 + i * 5, 4, 1, "#cdbf9f");
+    g.strokeStyle = "#d9b45a"; g.lineWidth = 1; g.strokeRect(bx + 6, by + 6, 126, 40);
+    g.fillStyle = "#e8c66a"; g.font = "bold 9px Georgia, serif"; g.textAlign = "center"; g.fillText("IL LIBRO CHE", bx + 70, by + 22); g.fillText("MANGIAVA I FINALI", bx + 70, by + 34); g.textAlign = "left";
+    // morso sull'angolo
+    g.fillStyle = "#2a1c1a"; g.beginPath(); g.arc(bx + 140, by, 12, Math.PI / 2, Math.PI); g.lineTo(bx + 140, by); g.fill();
+    for (let i = 0; i < 4; i++) px(g, bx + 128 + i * 3, by + 10 - (i % 2) * 2, 2, 2, "#2a1c1a");
+    if (since("lb_copertina", 2) < 90) { g.strokeStyle = "rgba(255,230,140,.8)"; g.beginPath(); g.arc(bx + 138, by + 2, 15, 0, Math.PI * 2); g.stroke(); }
+    // calamaio e piuma
+    px(g, 262, 118, 16, 12, "#1a1a2a"); px(g, 264, 114, 12, 5, "#2a2a3a"); ell(g, 270, 116, 5, 1.5, "#3a2a6a");
+    const bob = Math.sin(f / 18) * (since("lb_copertina", 1) < 120 ? 4 : 1);
+    g.strokeStyle = "#e8e0d0"; g.lineWidth = 2; g.beginPath(); g.moveTo(270, 116); g.quadraticCurveTo(290, 80 + bob, 300, 66 + bob); g.stroke(); px(g, 292, 70 + bob, 8, 2, "#f8f2e2");
+    // gatto addormentato su una pila di libri
+    px(g, 6, 130, 28, 6, "#5a7fa8"); px(g, 8, 124, 24, 6, "#c0644a"); px(g, 5, 118, 26, 6, "#d9a441");
+    const awake = since("lb_copertina", 4) < 140, st = awake ? Math.sin(since("lb_copertina", 4) / 10) * 2 : 0;
+    ell(g, 18, 112 - st, 11, 6, "#3a3a44"); circ(g, 10, 108 - st, 5, "#3a3a44"); px(g, 6, 102 - st, 3, 4, "#3a3a44"); px(g, 12, 102 - st, 3, 4, "#3a3a44");
+    if (awake) { px(g, 8, 107 - st, 2, 2, "#ffd23f"); px(g, 12, 107 - st, 2, 2, "#ffd23f"); } else { g.fillStyle = "rgba(255,255,255,.6)"; g.font = "7px sans-serif"; g.fillText("z", 22, 100 - (f / 10) % 8); }
+    letterRain(g, W, 120, f, "rgba(232,198,106,.25)", 10);
+    paperGrain(g, W, H, f, 0.06);
+  }
+  // ---------------------------------------------------------------- LIBRERIA «IL SEGNALIBRO» (prologo)
+  function bgLibreria(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#3a2418", "#2a180f"]);
+    // scaffali
+    for (let s = 0; s < 2; s++) { const x0 = s ? 214 : 0, w = 106; px(g, x0, 10, w, 120, "#4a2c1a"); for (let r = 0; r < 4; r++) { px(g, x0, 36 + r * 28, w, 3, "#2a180f"); for (let b = 0; b < 12; b++) { const bw = 5 + ((b * 7 + r * 3 + s) % 4), bh = 18 + ((b * 5 + r) % 6), cols = ["#8a2f3a", "#2f5a7a", "#c99a3a", "#3a6a4a", "#6a4a8a", "#d8c8a8"]; px(g, x0 + 4 + b * 8.5, 36 + r * 28 - bh, bw, bh, cols[(b + r * 2 + s) % cols.length]); px(g, x0 + 4 + b * 8.5, 36 + r * 28 - bh + 3, bw, 1, "rgba(255,230,160,.4)"); } } }
+    // vetrina sulla strada con la pioggia
+    px(g, 112, 14, 96, 78, "#0e1626"); vgrad(g, 114, 16, 92, 74, ["#1a2a44", "#0e1626"]);
+    px(g, 112, 14, 96, 3, "#6a4a2a"); px(g, 112, 90, 96, 4, "#6a4a2a"); px(g, 158, 14, 3, 80, "#6a4a2a");
+    for (let i = 0; i < 6; i++) { const lx = 120 + i * 15; glowB(g, lx, 70, 10, "255,200,120", 0.2); }
+    for (let i = 0; i < 26; i++) { const x = 114 + (i * 23) % 92, y = 16 + ((i * 31 + f * 2) % 74); px(g, x, y, 1, 5, "rgba(170,200,255,.5)"); }
+    g.fillStyle = "rgba(232,198,106,.85)"; g.font = "italic 8px Georgia, serif"; g.textAlign = "center"; g.fillText("Il Segnalibro", 160, 30); g.textAlign = "left";
+    // campanello sopra la porta
+    const ring = since("lb_libreria", 0) < 50 ? Math.sin(since("lb_libreria", 0)) * 4 * (1 - since("lb_libreria", 0) / 50) : 0;
+    g.save(); g.translate(104, 16); g.rotate(ring / 10); px(g, -1, 0, 2, 6, "#c9a227"); ell(g, 0, 10, 5, 5, "#e8c66a"); g.restore();
+    // pavimento e tappeto
+    vgrad(g, 0, 130, W, 70, ["#5a3a24", "#3a2414"]); ell(g, 160, 170, 110, 18, "#7a2a2a"); ell(g, 160, 170, 98, 13, "#8a3a2a");
+    // leggio con il libro che brilla
+    px(g, 154, 128, 12, 40, "#3a2414"); px(g, 132, 118, 56, 14, "#f4ecd8"); px(g, 159, 118, 2, 14, "#cdbf9f");
+    g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 160, 118, 46 + Math.sin(f / 15) * 6 + (since("lb_libreria", 3) < 80 ? 20 : 0), "255,215,140", 0.45); g.restore();
+    letterRain(g, W, H, f, "rgba(255,215,140,.35)", 8);
+    // cartello «torno subito»
+    px(g, 252, 136, 54, 26, "#e8d6b0"); px(g, 252, 136, 54, 2, "#6a4a2a"); g.fillStyle = "#3a2414"; g.font = "7px Georgia, serif"; g.fillText("Torno subito", 257, 147); g.fillText("(dal 1987)", 262, 157);
+    // lampada
+    px(g, 20, 140, 4, 40, "#2a1a10"); ell(g, 22, 140, 14, 6, "#c99a3a"); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 22, 146, 40, "255,200,120", toggled("lb_libreria", 4) ? 0.05 : 0.35); g.restore();
+    paperGrain(g, W, H, f, 0.05);
+  }
+  // ---------------------------------------------------------------- RADURA DELLA PRIMA PAGINA (acquerello)
+  function bgRadura(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#f6e6c8", "#f4ecd8", "#e8f0d8"]);
+    // sole a macchia d'inchiostro dorato
+    const sp = since("lb_radura", 0) < 120 ? 1 + 0.25 * Math.sin(since("lb_radura", 0) / 6) : 1;
+    blot(g, 262, 40, 22 * sp, "246,190,90", 0.22, 3); circ(g, 262, 40, 12 * sp, "rgba(246,190,90,.55)");
+    // colline ad acquerello
+    blot(g, 60, 112, 90, "150,190,130", 0.35, 1); blot(g, 210, 118, 110, "130,175,120", 0.35, 2); blot(g, 320, 110, 70, "160,200,140", 0.3, 4);
+    // il grande libro aperto all'orizzonte: le pagine fanno da prato
+    g.fillStyle = "#fbf7ec"; g.beginPath(); g.moveTo(10, 150); g.quadraticCurveTo(80, 128, 160, 142); g.quadraticCurveTo(240, 128, 310, 150); g.lineTo(310, 200); g.lineTo(10, 200); g.fill();
+    g.strokeStyle = "rgba(59,58,74,.25)"; g.lineWidth = 1; for (let i = 0; i < 5; i++) { g.beginPath(); g.moveTo(26, 160 + i * 8); g.quadraticCurveTo(90, 146 + i * 8, 150, 156 + i * 8); g.stroke(); g.beginPath(); g.moveTo(170, 156 + i * 8); g.quadraticCurveTo(230, 146 + i * 8, 294, 160 + i * 8); g.stroke(); }
+    px(g, 159, 142, 2, 58, "rgba(59,58,74,.3)");
+    // il fiume bianco: un pezzo di pagina mangiato
+    g.fillStyle = "#ffffff"; g.beginPath(); g.moveTo(186, 150); g.lineTo(204, 148); g.lineTo(214, 200); g.lineTo(194, 200); g.fill();
+    for (let i = 0; i < 6; i++) px(g, 186 + i * 3, 148 + i * 9, 2, 2, "rgba(59,58,74,.4)");
+    // mulino a vento di carta
+    const mv = since("lb_radura", 2) < 200 ? 0.25 : 0.04;
+    S.mill = (S.mill || 0) + mv;
+    px(g, 60, 88, 10, 36, "#e8d6b0"); px(g, 58, 84, 14, 6, "#c0644a");
+    for (let i = 0; i < 4; i++) { const a = S.mill + i * Math.PI / 2; g.save(); g.translate(65, 88); g.rotate(a); px(g, 0, -1, 22, 4, "#fbf7ec"); g.strokeStyle = "rgba(59,58,74,.4)"; g.strokeRect(0, -1, 22, 4); g.restore(); }
+    // coniglio di carta che saltella
+    const hop = since("lb_radura", 1) < 80 ? Math.abs(Math.sin(since("lb_radura", 1) / 8)) * 14 : Math.abs(Math.sin(f / 30)) * 2;
+    const rx = 112 + (since("lb_radura", 1) < 80 ? since("lb_radura", 1) / 2 : 0);
+    ell(g, rx, 146, 7, 2, "rgba(0,0,0,.12)"); ell(g, rx, 138 - hop, 7, 5, "#fbf7ec"); circ(g, rx + 6, 133 - hop, 4, "#fbf7ec"); px(g, rx + 5, 124 - hop, 2, 7, "#fbf7ec"); px(g, rx + 8, 125 - hop, 2, 6, "#fbf7ec"); px(g, rx + 7, 132 - hop, 1, 1, "#3b3a4a");
+    g.strokeStyle = "rgba(59,58,74,.45)"; g.beginPath(); g.ellipse(rx, 138 - hop, 7, 5, 0, 0, Math.PI * 2); g.stroke();
+    // lettere che cadono come petali (toccate: si radunano in una parola)
+    if (since("lb_radura", 3) < 150) { g.font = "bold 12px Georgia, serif"; g.fillStyle = `rgba(59,58,74,${Math.min(1, (150 - since("lb_radura", 3)) / 60)})`; g.textAlign = "center"; g.fillText("C'ERA UNA VOLTA", 160, 70); g.textAlign = "left"; }
+    else letterRain(g, W, 140, f, "rgba(59,58,74,.35)", 16);
+    // fiori
+    for (let i = 0; i < 16; i++) { const x = 14 + i * 19, y = 166 + (i * 7) % 24; circ(g, x, y, 2, ["#f2a5b8", "#ffe28a", "#c9a7f2", "#ffffff"][i % 4]); px(g, x, y + 2, 1, 4, "#7aab6e"); }
+    paperGrain(g, W, H, f, 0.08);
+  }
+  // ---------------------------------------------------------------- BOSCO DEL LUPO (acquerello al tramonto)
+  function bgBosco(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#f2c9a8", "#d9a8b8", "#8a7aa8"]);
+    blot(g, 80, 30, 40, "255,220,170", 0.25, 5);
+    // alberi lontani e vicini
+    for (let i = 0; i < 9; i++) { const x = i * 40 + 10, h = 70 + (i * 17) % 30; ell(g, x, 150 - h, 22, h * 0.6, "rgba(90,110,120,.35)"); }
+    vgrad(g, 0, 140, W, 60, ["#6a8a6a", "#4a6a50"]);
+    for (let i = 0; i < 5; i++) { const x = [12, 70, 250, 300, 190][i]; px(g, x - 3, 70, 7, 80, "#5a4030"); blot(g, x, 70, 30, "70,110,80", 0.55, i + 7); }
+    // la casetta del Lupo
+    const smoke = since("lb_bosco", 0) < 120 ? 2 : 1;
+    px(g, 120, 104, 70, 46, "#c49a6a"); for (let i = 0; i < 6; i++) px(g, 120, 108 + i * 7, 70, 1, "rgba(80,50,25,.4)");
+    g.fillStyle = "#8a3a2a"; g.beginPath(); g.moveTo(112, 106); g.lineTo(155, 76); g.lineTo(198, 106); g.fill();
+    px(g, 170, 80, 10, 18, "#7a6a5a");
+    for (let i = 0; i < 4 * smoke; i++) { const t = ((f / 60 + i / (4 * smoke)) % 1); ell(g, 175 + Math.sin(t * 6 + i) * 6, 76 - t * 50, 4 + t * 8, 3 + t * 5, `rgba(240,240,250,${0.45 * (1 - t)})`); }
+    px(g, 148, 124, 14, 26, "#5a3a22"); px(g, 128, 114, 12, 10, "#ffe7a3"); px(g, 170, 114, 12, 10, "#ffe7a3"); px(g, 133, 114, 1, 10, "#5a3a22"); px(g, 175, 114, 1, 10, "#5a3a22");
+    g.fillStyle = "#3b3a4a"; g.font = "italic 6px Georgia, serif"; g.fillText("Sig. Lupo", 140, 100);
+    // gufo sul ramo
+    const blink = since("lb_bosco", 1) < 40 || (f % 220) < 6;
+    px(g, 236, 66, 40, 3, "#5a4030"); ell(g, 254, 56, 8, 11, "#8a7060"); circ(g, 250, 52, 3.5, "#fff6d0"); circ(g, 258, 52, 3.5, "#fff6d0");
+    if (blink) { px(g, 246, 52, 8, 1, "#3b3a4a"); px(g, 254, 52, 8, 1, "#3b3a4a"); } else { circ(g, 250, 52, 1.5, "#3b3a4a"); circ(g, 258, 52, 1.5, "#3b3a4a"); }
+    px(g, 252, 47, 2, 3, "#d9a441"); px(g, 248, 43, 2, 3, "#8a7060"); px(g, 258, 43, 2, 3, "#8a7060");
+    // lucciole
+    const many = since("lb_bosco", 2) < 200 ? 26 : 10;
+    for (let i = 0; i < many; i++) { const x = (i * 47 + Math.sin(f / 40 + i) * 20 + 320) % 320, y = 120 + Math.sin(f / 30 + i * 2) * 30 + (i % 3) * 10; g.save(); g.globalCompositeOperation = "lighter"; glowB(g, x, y, 6, "255,240,150", (Math.sin(f / 10 + i) + 1) * 0.25); g.restore(); }
+    // funghi
+    for (let i = 0; i < 4; i++) { const x = 40 + i * 22, grow = since("lb_bosco", 3) < 100 && i === 2 ? 1.6 : 1; px(g, x - 1, 166 - 6 * grow, 3, 6 * grow, "#f4ecd8"); g.fillStyle = "#d9534f"; g.beginPath(); g.ellipse(x, 166 - 6 * grow, 6 * grow, 4 * grow, 0, Math.PI, 0); g.fill(); circ(g, x - 2, 163 - 6 * grow, 1, "#fff"); }
+    // sentiero buio
+    g.fillStyle = "rgba(20,18,28,.55)"; g.beginPath(); g.moveTo(286, 200); g.quadraticCurveTo(300, 160, 320, 150); g.lineTo(320, 200); g.fill();
+    if (since("lb_bosco", 4) < 120) { circ(g, 304, 168, 1.5, "#ffd23f"); circ(g, 309, 168, 1.5, "#ffd23f"); }
+    paperGrain(g, W, H, f, 0.07);
+  }
+  // ---------------------------------------------------------------- CAMPO DEI TRE PORCELLINI
+  function bgCampo3p(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#cfe3f2", "#eef4f0"]);
+    blot(g, 60, 26, 26, "255,255,255", 0.6, 2); blot(g, 220, 18, 30, "255,255,255", 0.6, 6);
+    vgrad(g, 0, 120, W, 80, ["#a2cf8b", "#8abd75"]);
+    for (let i = 0; i < 8; i++) px(g, i * 40, 120, 20, 80, "rgba(255,255,255,.07)");
+    g.strokeStyle = "rgba(255,255,255,.75)"; g.lineWidth = 1.5; g.strokeRect(20, 130, 280, 62); g.beginPath(); g.moveTo(160, 130); g.lineTo(160, 192); g.stroke(); g.beginPath(); g.ellipse(160, 161, 20, 10, 0, 0, Math.PI * 2); g.stroke();
+    // casa di paglia (traballa)
+    const wob = since("lb_campo3p", 0) < 90 ? Math.sin(since("lb_campo3p", 0) / 3) * 3 : Math.sin(f / 40) * 0.6;
+    g.save(); g.translate(52, 118); g.rotate(wob / 40);
+    px(g, -26, -34, 52, 34, "#e8c46a"); for (let i = -26; i < 26; i += 3) px(g, i, -34, 1, 34, "rgba(150,110,40,.35)");
+    g.fillStyle = "#d9b04a"; g.beginPath(); g.moveTo(-32, -32); g.lineTo(0, -56); g.lineTo(32, -32); g.fill(); px(g, -6, -18, 12, 18, "#8a6a3a"); g.restore();
+    // casa di legno
+    px(g, 132, 70, 56, 48, "#b98a5a"); for (let i = 0; i < 7; i++) px(g, 132, 74 + i * 7, 56, 1, "rgba(80,50,25,.45)");
+    g.fillStyle = "#7a4a2a"; g.beginPath(); g.moveTo(126, 72); g.lineTo(160, 48); g.lineTo(194, 72); g.fill(); px(g, 153, 96, 14, 22, "#5a3a22");
+    const lit = toggled("lb_campo3p", 1); px(g, 138, 82, 10, 8, lit ? "#ffe7a3" : "#4a3a2a"); px(g, 172, 82, 10, 8, lit ? "#ffe7a3" : "#4a3a2a");
+    // casa di mattoni con la bandiera
+    px(g, 238, 64, 64, 54, "#c0644a"); for (let r = 0; r < 9; r++) { px(g, 238, 68 + r * 6, 64, 1, "rgba(120,40,30,.45)"); for (let c = 0; c < 8; c++) px(g, 240 + c * 8 + (r % 2) * 4, 64 + r * 6, 1, 6, "rgba(120,40,30,.35)"); }
+    g.fillStyle = "#8a3a2a"; g.beginPath(); g.moveTo(232, 66); g.lineTo(270, 40); g.lineTo(308, 66); g.fill(); px(g, 262, 94, 16, 24, "#5a3a22");
+    const fw = since("lb_campo3p", 2) < 120 ? 3 : 1; px(g, 284, 20, 2, 26, "#5a5a5a");
+    g.fillStyle = "#f2a5b8"; g.beginPath(); g.moveTo(286, 20); for (let i = 0; i <= 6; i++) g.lineTo(286 + i * 4, 22 + Math.sin(f / 8 * fw + i) * 2 * fw); g.lineTo(310, 32); g.lineTo(286, 32); g.fill();
+    // tabellone
+    px(g, 92, 100, 30, 18, "#2a2a33"); px(g, 94, 102, 26, 14, "#101018"); g.fillStyle = since("lb_campo3p", 3) < 120 ? "#ff8a3d" : "#ffd23f"; g.font = "bold 8px monospace"; g.fillText(since("lb_campo3p", 3) < 120 ? "???" : "0:0", 98, 113);
+    // bandierine sulla staccionata
+    for (let i = 0; i < 14; i++) { const x = 8 + i * 22, y = 124 + Math.sin(i) * 2, sw = since("lb_campo3p", 4) < 100 ? Math.sin(f / 4 + i) * 3 : 0; g.fillStyle = ["#f2a5b8", "#ffe28a", "#8fb8d8", "#c9a7f2"][i % 4]; g.beginPath(); g.moveTo(x, y); g.lineTo(x + 10, y); g.lineTo(x + 5 + sw, y + 8); g.fill(); }
+    paperGrain(g, W, H, f, 0.07);
+  }
+
+  // elementi interattivi: [x, y, w, h, frase, azione?("tog" = acceso/spento)]
+  const LB = {
+    lb_copertina: { draw: bgCopertina, hot: [
+      [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
+      [256, 60, 50, 70, "🪶 Calamaio: l'inchiostro respira. La piuma si muove, come se volesse finire una frase."],
+      [214, 92, 34, 26, "📕 Il morso sull'angolo: netto, dritto. Non sembrano denti. Sembra il taglio di un pennino."],
+      [228, 14, 74, 70, "🌧️ Finestra: le gocce sul vetro, per un attimo, formano delle parole."],
+      [0, 96, 40, 44, "🐈 Il gatto della libreria: apre un occhio, ti giudica, decide che vai bene."],
+    ] },
+    lb_libreria: { draw: bgLibreria, hot: [
+      [94, 14, 20, 30, "🔔 Il campanello della porta: suona da solo quando entra qualcuno che sa leggere."],
+      [112, 14, 96, 78, "🌧️ La vetrina: fuori piove sul vicolo. Dentro, i libri si tengono caldi a vicenda."],
+      [0, 10, 100, 120, "📚 Scaffale delle fiabe: «Cenerentola (ultima pagina strappata)», «Pollicino (finale mancante)», «Biancaneve (si interrompe a metà)»."],
+      [130, 110, 60, 30, "📖 Il leggio: un libro aperto che brilla. Le righe scorrono come se qualcuno lo stesse leggendo ad alta voce."],
+      [6, 128, 34, 56, "💡 La lampada da lettura: la accendi e la spegni. Clic. Clic. Le ombre dei libri ti salutano.", "tog"],
+      [250, 134, 58, 30, "🪧 «Torno subito (dal 1987)». Sotto, a matita: «Ada P.». Una calligrafia minuta."],
+    ] },
+    lb_radura: { draw: bgRadura, hot: [
+      [236, 14, 54, 52, "☀️ Il sole è una macchia d'inchiostro dorato. Lo tocchi: si allarga un poco, come una risata."],
+      [98, 118, 40, 34, "🐇 Un coniglio di carta: saltella via. Dietro di sé lascia piccole virgole sul prato."],
+      [40, 60, 52, 66, "🌬️ Il mulino di carta: gira più forte quando qualcuno lo guarda."],
+      [60, 40, 200, 30, "🍂 Le lettere cadono come petali. Per un attimo si mettono in fila: «C'ERA UNA VOLTA»."],
+      [182, 146, 36, 54, "⬜ Il fiume bianco: un pezzo di pagina mangiato. Ci vorrebbe un PONTE."],
+    ] },
+    lb_bosco: { draw: bgBosco, hot: [
+      [112, 74, 86, 76, "🏡 La casetta del Sig. Lupo: dal camino esce fumo profumato di tè alla bergamotto."],
+      [236, 38, 40, 32, "🦉 Il gufo: sbatte le palpebre in ritardo, come chi rilegge una frase."],
+      [0, 100, 110, 50, "✨ Lucciole: toccale e se ne accendono altre, come virgole luminose."],
+      [30, 150, 90, 24, "🍄 Funghi: uno cresce di colpo, offeso di non essere stato notato prima."],
+      [282, 140, 38, 60, "🌑 Il sentiero buio: due occhi gialli. Non è il Lupo. Il Lupo è in casa, a piangere."],
+    ] },
+    lb_campo3p: { draw: bgCampo3p, hot: [
+      [20, 60, 70, 64, "🌾 La casa di paglia: traballa anche se nessuno soffia. Per abitudine."],
+      [126, 46, 70, 74, "🪵 La casa di legno: accendi e spegni le finestre. Dentro, qualcuno ripassa la tattica.", "tog"],
+      [232, 18, 80, 100, "🧱 La casa di mattoni: la bandiera rosa di Mattone sventola più forte quando la guardi."],
+      [90, 98, 34, 22, "🔢 Il tabellone: per un attimo segna «???». Questa partita non ha ancora un finale."],
+      [0, 118, 320, 14, "🎏 Le bandierine: sventolano tutte insieme, come un tifo che non sa per chi."],
+    ] },
+  };
+  window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
+
+  function drawMarkers(g, k, f) {
+    const def = LB[k]; if (!def || !def.hot) return;
+    def.hot.forEach((h, i) => {
+      if (since(k, i) < 60) return;
+      const x = h[0] + h[2] / 2, y = h[1] + h[3] / 2, a = 0.35 + 0.25 * Math.sin(f / 14 + i * 1.7);
+      g.save(); g.globalCompositeOperation = "lighter"; glowB(g, x, y, 7, "255,240,190", a); g.restore();
+      px(g, x - 1, y - 3, 2, 6, `rgba(255,255,255,${a + 0.2})`); px(g, x - 3, y - 1, 6, 2, `rgba(255,255,255,${a + 0.2})`);
+    });
+  }
+  function drawCaption(g, W) {
+    if (!S.cap) return; const age = (now() - S.capT) / 16; if (age > 230) { S.cap = null; return; }
+    const a = Math.min(1, (230 - age) / 30);
+    g.save(); g.font = "9px Georgia, serif";
+    const words = S.cap.split(" "), out = []; let line = "";
+    words.forEach((w) => { const t = line ? line + " " + w : w; if (g.measureText(t).width > W - 28) { out.push(line); line = w; } else line = t; }); if (line) out.push(line);
+    const h = out.length * 11 + 8;
+    g.globalAlpha = a; px(g, 6, 4, W - 12, h, "rgba(251,247,236,.94)"); px(g, 6, 4, W - 12, 1, "#3b3a4a"); px(g, 6, 3 + h, W - 12, 1, "#3b3a4a");
+    g.fillStyle = "#2a2838"; out.forEach((l, i) => g.fillText(l, 13, 15 + i * 11));
+    g.restore();
+  }
+  let bound = false;
+  function bind() {
+    if (bound) return; const cv = document.getElementById("cv"); if (!cv) return; bound = true;
+    cv.addEventListener("pointerdown", (e) => {
+      const L = S.last; if (!LB[L.k] || now() - L.t > 250) return;
+      const r = cv.getBoundingClientRect(), x = ((e.clientX - r.left) / r.width) * L.W, y = ((e.clientY - r.top) / r.height) * L.H;
+      const hot = LB[L.k].hot || []; let idx = -1;
+      for (let i = hot.length - 1; i >= 0; i--) { const h = hot[i]; if (x >= h[0] && x <= h[0] + h[2] && y >= h[1] && y <= h[1] + h[3]) { idx = i; break; } }
+      if (idx < 0) return;
+      const h = hot[idx]; S.act[L.k + ":" + idx] = now(); if (h[5] === "tog") S.act["tog:" + L.k + ":" + idx] = !S.act["tog:" + L.k + ":" + idx];
+      S.cap = h[4]; S.capT = now();
+      try { if (window.__libroFinali && window.__libroFinali.SFX) window.__libroFinali.SFX.page(); } catch (er) {}
+    });
+  }
+  const prev = window.renderDetailedBg;
+  window.renderDetailedBg = function (kind, g, W, H, frame) {
+    const def = LB[kind];
+    if (def) {
+      bind();
+      W = W || 320; H = H || 200; const f = frame || 0;
+      try { def.draw(g, W, H, f); } catch (e) { px(g, 0, 0, W, H, "#f4ecd8"); }
+      S.last = { k: kind, t: now(), W, H };
+      try { drawMarkers(g, kind, f); drawCaption(g, W); } catch (e) {}
+      return true;
+    }
+    return typeof prev === "function" ? prev.apply(this, arguments) : false;
+  };
+})();
