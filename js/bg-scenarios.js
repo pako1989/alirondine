@@ -4687,6 +4687,52 @@
     [[50, 30, "232,160,64"], [120, 22, "159,224,255"], [200, 22, "255,90,58"], [270, 30, "63,200,255"]].forEach(([x, y, c], i) => crCrystal(g, x, y, 7, c, f + i * 25, true));
     crTilt(g, W, H);
   }
+  // ---------------------------------------------------------------- IL MURO (mu_*) · pietra, pioggia, vento e Colossi
+  function muColosso(g, x, y, s, f, o) { // un Colosso in piedi, visto da lontano
+    o = o || {}; const col = o.col || "#7a7468", dk = o.dk || "#4e4a42", st = Math.sin(f / 30 + (o.ph || 0)) * 2 * s;
+    px(g, x - 12 * s, y - 24 * s + st, 9 * s, 24 * s - st, dk); px(g, x + 3 * s, y - 24 * s - st, 9 * s, 24 * s + st, dk);
+    px(g, x - 17 * s, y - 64 * s, 34 * s, 42 * s, col); px(g, x + 7 * s, y - 64 * s, 10 * s, 42 * s, "rgba(0,0,0,.15)");
+    px(g, x - 26 * s, y - 60 * s - st, 9 * s, 34 * s, dk); px(g, x + 17 * s, y - 60 * s + st, 9 * s, 34 * s, dk);
+    px(g, x - 11 * s, y - 84 * s, 22 * s, 21 * s, col); px(g, x - 6 * s, y - 76 * s, 4 * s, 3 * s, o.eye || "#ffcf7a"); px(g, x + 2 * s, y - 76 * s, 4 * s, 3 * s, o.eye || "#ffcf7a");
+    g.save(); g.globalCompositeOperation = "lighter"; glowB(g, x, y - 75 * s, 14 * s, "255,200,120", 0.35); g.restore();
+    px(g, x - 15 * s, y - 44 * s, 7 * s, 3 * s, "rgba(70,100,50,.7)");
+    if (o.num) { g.fillStyle = dk; g.font = `bold ${Math.round(10 * s)}px Georgia, serif`; g.textAlign = "center"; g.fillText(o.num, x, y - 38 * s); g.textAlign = "left"; }
+  }
+  function bgMuBassa(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#14161e", "#22242e", "#2e2a2e"]);
+    // il muro enorme che chiude il cielo
+    px(g, 0, 0, W, 70, "#3a3630"); for (let r = 0; r < 7; r++) for (let i = 0; i < 12; i++) px(g, i * 30 + (r % 2) * 15, r * 10, 29, 9, (i + r) % 3 ? "#423d36" : "#38342e"); px(g, 0, 68, W, 3, "rgba(0,0,0,.5)");
+    // il Grande Portone (toccalo: tre colpi dall'altra parte)
+    const knock = since("mu_bassa", 0); px(g, 220, 20, 60, 52, "#3a2a1e"); for (let i = 0; i < 6; i++) px(g, 222 + i * 10, 20, 1, 52, "rgba(0,0,0,.4)"); px(g, 220, 34, 60, 3, "#4a4a52"); px(g, 220, 56, 60, 3, "#4a4a52");
+    if (knock < 90) { const k = Math.floor(knock / 25); g.fillStyle = "#e8e2d4"; g.font = "bold 10px Georgia, serif"; g.fillText(["TOC", "TOC  TOC", "TOC  TOC  TOC"][Math.min(2, k)], 222, 16); }
+    // tetti e case della Città Bassa con le finestre accese
+    [[0, 100, 70], [62, 88, 60], [118, 104, 50], [164, 92, 66], [226, 102, 58], [278, 90, 50]].forEach(([x, y, w], i) => { g.fillStyle = "#2a2226"; g.beginPath(); g.moveTo(x - 4, y); g.lineTo(x + w / 2, y - 18); g.lineTo(x + w + 4, y); g.fill(); px(g, x, y, w, 200 - y, i % 2 ? "#4a3a32" : "#3e322c"); for (let k = 0; k < 3; k++) { const on = (i * 3 + k + (toggled("mu_bassa", 1) ? 1 : 0)) % 3 !== 0; px(g, x + 8 + k * 16, y + 14, 7, 8, on ? "#ffcf7a" : "#2a2a34"); if (on) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, x + 11 + k * 16, y + 18, 10, "255,200,110", 0.35); g.restore(); } } });
+    // l'insegna della Lanterna Storta che dondola
+    const sw = Math.sin(f / 30) * 0.15; g.save(); g.translate(140, 128); g.rotate(sw); px(g, -24, 0, 48, 14, "#5a2a2a"); g.fillStyle = "#ffcf7a"; g.font = "bold 7px Georgia, serif"; g.textAlign = "center"; g.fillText("LANTERNA STORTA", 0, 10); g.textAlign = "left"; g.restore();
+    // Nives nel vicolo, col cappuccio (toccala: si gira)
+    const nv = since("mu_bassa", 2) < 120; px(g, 296, 150, 12, 26, "#3a3a42"); circ(g, 302, 146, 6, "#3a3a42"); if (nv) { circ(g, 301, 147, 4, "#d9a679"); px(g, 299, 146, 1, 1, "#2a6a5a"); px(g, 302, 146, 1, 1, "#2a6a5a"); }
+    // selciato bagnato con i riflessi
+    vgrad(g, 0, 176, W, 24, ["#2a262a", "#1a181c"]); for (let i = 0; i < 14; i++) px(g, (i * 31 + 7) % W, 182 + (i % 3) * 5, 10, 1, "rgba(255,200,120,.3)");
+    // pioggia
+    g.strokeStyle = "rgba(170,190,230,.35)"; g.lineWidth = 1; g.beginPath(); for (let i = 0; i < 70; i++) { const x = (i * 37 + f * 1.3) % (W + 20) - 10, y = (i * 53 + f * 6) % (H + 10) - 5; g.moveTo(x, y); g.lineTo(x - 2, y + 8); } g.stroke();
+  }
+  function bgMuMuro(g, W, H, f) {
+    // il cielo grande, la Terra di Fuori verde e la nebbia, i Colossi lontani
+    vgrad(g, 0, 0, W, 110, ["#7a9ac8", "#bcd0e0", "#e8e0d0"]);
+    for (let i = 0; i < 5; i++) { const x = ((i * 90 + f * 0.12) % (W + 120)) - 60; ell(g, x, 24 + (i % 3) * 14, 34, 9, "rgba(255,255,255,.75)"); }
+    vgrad(g, 0, 90, W, 50, ["#7a9a6a", "#5a7a4a"]); for (let i = 0; i < 40; i++) px(g, (i * 23) % W, 96 + (i * 7) % 40, 2, 5, "rgba(40,70,30,.4)");
+    const wave = since("mu_muro", 0) < 200; [[50, 112, 0.42, "7"], [150, 104, 0.3, ""], [260, 114, 0.48, ""]].forEach(([x, y, s, n], i) => { muColosso(g, x + Math.sin(f / 300 + i) * 6, y, s, f, { ph: i, num: n }); if (wave && i === 0) { px(g, x - 26 * s, y - 92 * s, 8 * s, 30 * s, "#4e4a42"); } });
+    for (let i = 0; i < 4; i++) { const x = ((i * 120 + f * 0.25) % (W + 160)) - 80; ell(g, x, 118 + (i % 2) * 10, 60, 7, "rgba(230,235,230,.35)"); }
+    // il Camminamento: lastre, parapetto con i merli, lo stendardo che sbatte
+    px(g, 0, 134, W, 66, "#8a8478"); for (let r = 0; r < 4; r++) for (let i = 0; i < 12; i++) px(g, i * 28 + (r % 2) * 14, 138 + r * 15, 27, 14, (i + r) % 2 ? "#958e80" : "#827c70");
+    px(g, 0, 124, W, 12, "#6a6458"); for (let i = 0; i < 11; i++) px(g, i * 32, 114, 18, 12, "#6a6458"); px(g, 0, 124, W, 2, "#9a9488");
+    const fl = Math.sin(f / 5) * 4 + (since("mu_muro", 1) < 60 ? 6 : 0); px(g, 286, 70, 3, 66, "#3a2a1a"); g.fillStyle = "#a8322a"; g.beginPath(); g.moveTo(289, 72); g.lineTo(318, 76 + fl); g.lineTo(289, 92); g.fill();
+    // il pallone sul campo e la porta (toccalo: rimbalza)
+    px(g, 30, 150, 40, 30, "rgba(255,255,255,.15)"); g.strokeStyle = "#e8e2d4"; g.lineWidth = 2; g.strokeRect(30, 150, 40, 30);
+    const bj = since("mu_muro", 2) < 60 ? Math.abs(Math.sin(since("mu_muro", 2) / 6)) * 14 : 0; circ(g, 160, 176 - bj, 5, "#fff"); g.strokeStyle = "#222"; g.lineWidth = 1; g.beginPath(); g.arc(160, 176 - bj, 5, 0, Math.PI * 2); g.stroke();
+    // vento: strisce e foglie
+    for (let i = 0; i < 16; i++) px(g, (i * 53 + f * (2 + (i % 3))) % (W + 40) - 20, (i * 29) % 190, 12 + (i % 4) * 4, 1, "rgba(255,255,255,.35)");
+  }
   // elementi interattivi: [x, y, w, h, frase, azione?("tog" = acceso/spento)]
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
@@ -4907,6 +4953,18 @@
       [70, 150, 160, 40, "🙌 Il gruppo esulta: Bram, Vela, Trillo, Aira e tu. Anche il fabbro, sì. Quasi sorride."],
       [100, 150, 120, 30, "⚽ Il pallone fa una curva strana e si illumina. Quella è Aira, dicono."],
       [30, 10, 260, 40, "🌅 I quattro Cristalli nel cielo dell'alba: Terra, Vento, Fuoco, Acqua. Brillano come non brillavano da ottant'anni."],
+    ] },
+    mu_bassa: { draw: bgMuBassa, hot: [
+      [218, 18, 64, 56, "🚪 Il Grande Portone. Appoggi l'orecchio: dall'altra parte, tre colpi. TOC, TOC, TOC. Come un calcio d'inizio."],
+      [0, 80, 320, 70, "🪟 Le finestre della Città Bassa si accendono e si spengono: qualcuno ha ancora l'olio per la lampada, qualcuno no.", "tog"],
+      [288, 136, 26, 44, "🧥 Nives, nel vicolo. Si gira, ti guarda un istante, e torna a far finta di non esserci."],
+      [112, 120, 56, 24, "🍺 L'insegna della Lanterna Storta dondola sotto la pioggia: minestra, birra scura, nessuna domanda."],
+    ] },
+    mu_muro: { draw: bgMuMuro, hot: [
+      [20, 40, 70, 80, "🗿 Il Colosso numero 7 alza un braccio. Saluta? Si stiracchia? Nessuno, sul muro, ha il coraggio di rispondere."],
+      [282, 66, 40, 30, "🚩 Lo stendardo della Guardia sbatte nel vento come un applauso a una mano sola."],
+      [148, 160, 26, 24, "⚽ Il pallone rimbalza da solo: il vento, quassù, ha voglia di giocare."],
+      [0, 88, 320, 40, "🌫️ La Terra di Fuori: erba alta fino all'orizzonte e nebbia che cammina più piano dei Colossi."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };

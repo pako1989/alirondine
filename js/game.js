@@ -8839,6 +8839,7 @@
       TW.walk += dt * 12; trPickups(); try { beStepT(); } catch {}
       if (now - TW.saved > 2500) { TW.saved = now; trSavePos(); }
     }
+    if (z.tick) { try { const rr = z.tick(TW.x, TW.y, dt, !!(dx || dy)); if (rr && rr.length === 2) { TW.x = rr[0]; TW.y = rr[1]; } } catch {} } // zone delle saghe: logica per fotogramma (es. furtività)
     const cx = clamp(Math.round(TW.x - W / 2), 0, Math.max(0, z.w * TS - W)), cy = clamp(Math.round(TW.y - H / 2), 0, Math.max(0, z.h * TS - H));
     const t0x = Math.floor(cx / TS), t0y = Math.floor(cy / TS);
     for (let ty = t0y; ty <= t0y + Math.ceil(H / TS); ty++) for (let tx = t0x; tx <= t0x + Math.ceil(W / TS); tx++) { const row = TW.map[ty]; if (row && row[tx]) trDrawTile(row[tx], tx * TS - cx, ty * TS - cy, tx, ty); }
@@ -15275,6 +15276,7 @@
       ...(window.__libroFinali ? [window.__libroFinali.menuEntry(modes)] : []),
       ...(window.__doppioTurno ? [window.__doppioTurno.menuEntry(modes)] : []),
       ...(window.__cristalli ? [window.__cristalli.menuEntry(modes)] : []),
+      ...(window.__muro ? [window.__muro.menuEntry(modes)] : []),
       ...(window.__abissoStory ? [window.__abissoStory.menuEntry(modes)] : []),
       ...(window.__ragnarokStory ? [window.__ragnarokStory.menuEntry(modes)] : []),
       ...(window.__belovodiaStory ? [window.__belovodiaStory.menuEntry(modes)] : []),
@@ -21971,7 +21973,7 @@
     ["Partite", /Settimana del Molo/],
     ["Collezioni e curiosità", /Diario del Corriere/],
     ["Calcio d'azione e arcade", /Arena 2D|Biliardino|Cabinato|Stadio 3D|Corsa della Panda|Gozzo di Baciccia|Gabbia sul Molo|Tsubasa|Supereroi/],
-    ["Saghe e GDR", /Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis|Libro che Mangiava i Finali|Doppio Turno|Cristalli del Campo/],
+    ["Saghe e GDR", /Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis|Libro che Mangiava i Finali|Doppio Turno|Cristalli del Campo|Il Muro/],
     ["Collezioni e curiosità", /Gashapon|Roster & Talenti|Diorama|Fumetto|Leggende del passato|Bianco e Nero|Quartier Generale/],
   ];
   const MN_EXP = { "Partite": 12, "Allenamento": 6, "Storie e ricordi": 8 }; // quante voci ha la categoria a tutto sbloccato: le mancanti appaiono come «???»
