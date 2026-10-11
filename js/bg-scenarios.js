@@ -4494,6 +4494,97 @@
     paperGrain(g, W, H, f, 0.03);
   }
 
+  // ---------------------------------------------------------------- CRISTALLI DEL CAMPO (cr_*) · stile JRPG a 16 bit, luce HD-2D
+  function crIsle(g, x, y, w, h, top, rock, f, k) { // un'isola sospesa: erba sopra, roccia a punta sotto, radici che pendono
+    g.fillStyle = rock; g.beginPath(); g.moveTo(x, y); g.lineTo(x + w, y); g.lineTo(x + w * 0.8, y + h * 0.5); g.lineTo(x + w * 0.55, y + h); g.lineTo(x + w * 0.35, y + h * 0.6); g.lineTo(x + w * 0.15, y + h * 0.45); g.closePath(); g.fill();
+    g.fillStyle = "rgba(0,0,0,.18)"; g.beginPath(); g.moveTo(x + w * 0.5, y); g.lineTo(x + w, y); g.lineTo(x + w * 0.8, y + h * 0.5); g.lineTo(x + w * 0.55, y + h); g.closePath(); g.fill();
+    px(g, x - 2, y - 3, w + 4, 5, top); px(g, x - 2, y - 3, w + 4, 1, "rgba(255,255,255,.25)");
+    for (let i = 0; i < 3; i++) px(g, x + w * (0.25 + i * 0.2), y + h * 0.4, 1, 6 + Math.sin(f / 30 + i + (k || 0)) * 2, "rgba(60,40,20,.6)");
+  }
+  function crCloud(g, x, y, s, a) { g.fillStyle = `rgba(255,255,255,${a})`; [[0, 0, 14], [12, -5, 11], [24, 0, 13], [12, 4, 12]].forEach(([dx, dy, r]) => { g.beginPath(); g.arc(x + dx * s, y + dy * s, r * s, 0, Math.PI * 2); g.fill(); }); }
+  function crCrystal(g, x, y, h, col, f, lit) {
+    const b = Math.sin(f / 30) * 2; if (lit) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, x, y + b, h * 1.6, col, 0.45 + 0.1 * Math.sin(f / 20)); g.restore(); }
+    g.fillStyle = lit ? `rgba(${col},.95)` : "rgba(150,150,170,.8)"; g.beginPath(); g.moveTo(x, y - h + b); g.lineTo(x + h * 0.42, y + b); g.lineTo(x, y + h * 0.9 + b); g.lineTo(x - h * 0.42, y + b); g.closePath(); g.fill();
+    g.fillStyle = "rgba(255,255,255,.5)"; g.beginPath(); g.moveTo(x, y - h + b); g.lineTo(x, y + h * 0.9 + b); g.lineTo(x - h * 0.42, y + b); g.closePath(); g.fill();
+    g.strokeStyle = "rgba(255,255,255,.9)"; g.lineWidth = 1; g.beginPath(); g.moveTo(x, y - h + b); g.lineTo(x + h * 0.42, y + b); g.lineTo(x, y + h * 0.9 + b); g.lineTo(x - h * 0.42, y + b); g.closePath(); g.stroke();
+  }
+  function crTilt(g, W, H) { // la sfocatura «miniatura» ai bordi della scena (finta, a strisce semitrasparenti)
+    vgrad(g, 0, 0, W, 22, ["rgba(255,240,220,.18)", "rgba(255,240,220,0)"]); vgrad(g, 0, H - 22, W, 22, ["rgba(20,10,30,0)", "rgba(20,10,30,.3)"]);
+  }
+  function bgCrBorgo(g, W, H, f) {
+    // tramonto, isole lontane, il borgo in primo piano con il campo
+    vgrad(g, 0, 0, W, 130, ["#3a2a6a", "#c0507a", "#f0904a", "#ffd07a"]);
+    g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 230, 96, 60, "255,200,120", 0.6); g.restore(); circ(g, 230, 96, 16, "#fff0c0");
+    crCloud(g, (f * 0.1) % (W + 80) - 40, 40, 1, 0.35); crCloud(g, (f * 0.06 + 200) % (W + 80) - 40, 64, 0.8, 0.3);
+    const ship = since("cr_borgo", 3) < 240 ? since("cr_borgo", 3) : -1;
+    crIsle(g, 30 + Math.sin(f / 90) * 2, 70, 50, 34, "#6a8a4a", "#7a5a6a", f, 1); crIsle(g, 250, 52 + Math.sin(f / 80) * 2, 40, 26, "#6a8a4a", "#7a5a6a", f, 2); crIsle(g, 120, 84 + Math.sin(f / 70 + 1) * 2, 28, 18, "#6a8a4a", "#7a5a6a", f, 3);
+    if (ship >= 0) { const x = ship * 1.6 - 20; px(g, x, 50, 22, 4, "#8a5a3a"); ell(g, x + 11, 45, 13, 5, "#9aa5b1"); }
+    // l'isola del borgo
+    g.fillStyle = "#5a4a3a"; g.beginPath(); g.moveTo(0, 150); g.lineTo(W, 150); g.lineTo(W, 200); g.lineTo(0, 200); g.fill();
+    vgrad(g, 0, 128, W, 30, ["#7ab84a", "#5f9a3e"]);
+    // case con i tetti colorati e le finestre accese
+    [[20, "#3f6a9a"], [70, "#b8452a"], [250, "#5a5a62"]].forEach(([x, roof], i) => { px(g, x, 104, 44, 26, "#efe2c8"); g.fillStyle = roof; g.beginPath(); g.moveTo(x - 4, 106); g.lineTo(x + 22, 88); g.lineTo(x + 48, 106); g.fill(); px(g, x + 18, 116, 9, 14, "#6a3a1a"); const lit = i !== 1 || toggled("cr_borgo", 0); [6, 32].forEach((wx) => { px(g, x + wx, 110, 7, 7, lit ? "#ffd98a" : "#4a5a7a"); if (lit) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, x + wx + 3, 113, 10, "255,210,120", 0.4); g.restore(); } }); });
+    // fumo dal camino della fucina
+    for (let i = 0; i < 4; i++) circ(g, 290 + Math.sin(f / 20 + i) * 3, 84 - i * 8 - (f / 5 % 8), 3 + i, `rgba(220,220,220,${0.4 - i * 0.08})`); px(g, 286, 84, 6, 10, "#6a4a3a");
+    // la Lampada del Campo e il campo
+    const lamp = since("cr_borgo", 1) < 120 ? 1 : 0.45 + 0.15 * Math.sin(f / 9);
+    px(g, 158, 98, 3, 34, "#3a2a20"); crCrystal(g, 159, 94, 9, "255,190,90", f, true); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 159, 94, 40, "255,200,110", lamp * 0.5); g.restore();
+    vgrad(g, 100, 150, 130, 40, ["#4f9a3e", "#3f8a34"]); g.strokeStyle = "rgba(255,255,255,.6)"; g.lineWidth = 1; g.strokeRect(104, 154, 122, 32); g.beginPath(); g.moveTo(165, 154); g.lineTo(165, 186); g.stroke();
+    const bx = 165 + Math.sin(f / 25) * 40 + (since("cr_borgo", 2) < 60 ? since("cr_borgo", 2) : 0), by = 170 - Math.abs(Math.sin(f / 10)) * 6; circ(g, bx, by, 3, "#ffffff");
+    // Trillo, il mufflo con le ali, che svolazza sulla bancarella
+    const tx = 60, ty = 150 + Math.sin(f / 8) * 3, wing = Math.sin(f / 3) > 0 ? 4 : 1; circ(g, tx, ty, 7, "#ffffff"); circ(g, tx - 3, ty - 2, 1, "#2a2a6a"); circ(g, tx + 3, ty - 2, 1, "#2a2a6a"); px(g, tx - 11, ty - 4 - wing, 5, wing + 2, "#e8e0ff"); px(g, tx + 6, ty - 4 - wing, 5, wing + 2, "#e8e0ff");
+    if (since("cr_borgo", 4) < 120) { g.fillStyle = "#fff"; g.font = "bold 8px Georgia, serif"; g.fillText("frrr!", tx + 10, ty - 10); }
+    crTilt(g, W, H);
+  }
+  function bgCrBosco(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#0e2a2a", "#1a3a2a", "#12261c"]);
+    // raggi di luce tra le foglie
+    g.save(); g.globalCompositeOperation = "lighter"; for (let i = 0; i < 4; i++) { const x = 30 + i * 80 + Math.sin(f / 100 + i) * 10; g.fillStyle = "rgba(200,255,200,.06)"; g.beginPath(); g.moveTo(x, 0); g.lineTo(x + 20, 0); g.lineTo(x + 60, H); g.lineTo(x + 30, H); g.fill(); } g.restore();
+    // tronchi antichi su tre piani (parallasse)
+    [[0.4, "#1a2a1e", 38], [0.7, "#24382a", 30], [1, "#2e4a30", 24]].forEach(([d, col, w], k) => { for (let i = 0; i < 5; i++) { const x = (i * 90 + k * 37) % (W + 60) - 30; px(g, x, 0, w * d, H, col); px(g, x + w * d - 3, 0, 3, H, "rgba(0,0,0,.2)"); } });
+    // le radici che pendono e il tappeto di foglie
+    vgrad(g, 0, 160, W, 40, ["#1f3a22", "#14281a"]); for (let i = 0; i < 40; i++) px(g, (i * 37) % W, 162 + (i * 11) % 34, 3, 1, "rgba(120,180,90,.4)");
+    // la trivella di Ferrogrigio nella radura (toccala: tossisce)
+    const cough = since("cr_bosco", 0) < 60; px(g, 200, 110, 40, 56, "#4a4a52"); px(g, 200, 110, 40, 4, "#8a8a9a"); px(g, 206, 120, 28, 18, "#2a2a33"); const lv = (f / 3) % 16; px(g, 208, 136 - lv, 24, lv, cough ? "#ff5a5a" : "#ffb347"); g.fillStyle = "#c0392b"; g.font = "bold 9px sans-serif"; g.fillText("FG·4", 206, 156);
+    if (cough) for (let i = 0; i < 4; i++) circ(g, 220 + i * 6, 104 - i * 8, 4 + i, "rgba(150,150,150,.5)"); else { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 220, 130, 30, "255,180,70", 0.3); g.restore(); }
+    // l'albero inciso con il canto
+    px(g, 60, 60, 34, 120, "#3a4a2a"); px(g, 66, 96, 22, 30, "#2a3a1e"); g.fillStyle = since("cr_bosco", 1) < 150 ? "#ffe9a0" : "rgba(200,220,160,.6)"; g.font = "italic 6px Georgia, serif"; g.fillText("Quattro accesi", 64, 106); g.fillText("e il quinto", 66, 114); g.fillText("gioca con noi", 64, 122);
+    // lucciole (toccale: si raccolgono in un cerchio)
+    const gather = since("cr_bosco", 2) < 180; g.save(); g.globalCompositeOperation = "lighter";
+    for (let i = 0; i < 40; i++) { const a = i / 40 * Math.PI * 2 + f / 60, x = gather ? 150 + Math.cos(a) * 30 : (i * 53 + Math.sin(f / 40 + i) * 20) % W, y = gather ? 80 + Math.sin(a) * 30 : (i * 31 + Math.cos(f / 50 + i) * 15) % 160, tw = Math.max(0, Math.sin(f / 15 + i)); if (tw > 0.2) { glowB(g, x, y, 6, "200,255,120", tw * 0.6); px(g, x, y, 1.5, 1.5, "#eaffb0"); } }
+    g.restore();
+    // lo stagno
+    ell(g, 290, 186, 40, 8, "#0a1e22"); for (let i = 0; i < 3; i++) px(g, 260 + i * 20 + Math.sin(f / 20 + i) * 3, 184, 6, 1, "rgba(200,255,150,.4)");
+    crTilt(g, W, H);
+  }
+  function bgCrGrotta(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#1a120a", "#2a1e14", "#3a2a1a"]);
+    // stalattiti
+    for (let i = 0; i < 18; i++) { const x = i * 19 + 5, h = 18 + (i * 7) % 26; g.fillStyle = "#2e241a"; g.beginPath(); g.moveTo(x - 6, 0); g.lineTo(x + 6, 0); g.lineTo(x, h); g.fill(); if (i % 3 === 0) circ(g, x, h + ((f / 2 + i * 20) % 60), 1, "rgba(200,170,120,.6)"); }
+    // il Grande Cristallo della Terra (toccalo: pulsa)
+    const lit = toggled("cr_grotta", 0) ? false : true; crCrystal(g, 160, 82, since("cr_grotta", 0) < 30 ? 44 + since("cr_grotta", 0) * 0.2 : 44, "232,160,64", f, lit);
+    px(g, 128, 126, 64, 10, "#5a4a3a"); px(g, 128, 126, 64, 2, "#8a7a6a");
+    // i golem seduti (toccali: aprono gli occhi)
+    [[50, 118], [270, 118]].forEach(([x, y], i) => { px(g, x - 14, y, 28, 30, "#6a5a4a"); px(g, x - 10, y - 16, 20, 18, "#7a6a5a"); px(g, x - 20, y + 6, 8, 18, "#6a5a4a"); px(g, x + 12, y + 6, 8, 18, "#6a5a4a"); const eye = since("cr_grotta", 1 + i) < 120 ? "#ffb347" : "#3a2a1a"; px(g, x - 6, y - 10, 3, 3, eye); px(g, x + 3, y - 10, 3, 3, eye); if (eye !== "#3a2a1a") { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, x, y - 9, 12, "255,180,70", 0.5); g.restore(); } g.fillStyle = "#3a2a1a"; g.font = "bold 9px serif"; g.fillText("1", x - 3, y + 16); });
+    // cristalli d'ambra alle pareti e il lago color tè
+    [[20, 170, 14], [96, 160, 10], [230, 164, 12], [300, 172, 16]].forEach(([x, y, h], i) => crCrystal(g, x, y, h, "232,160,64", f + i * 40, true));
+    vgrad(g, 0, 178, W, 22, ["#3a2a14", "#22180c"]); for (let i = 0; i < 6; i++) px(g, (i * 60 + f / 2) % W, 186 + (i % 2) * 6, 12, 1, "rgba(255,200,120,.3)");
+    crTilt(g, W, H);
+  }
+  function bgCrCielo(g, W, H, f) {
+    // il ponte della Rondine Grigia in volo, tra le nuvole
+    vgrad(g, 0, 0, W, H, ["#3a6ab8", "#7cb4ef", "#cfe6ff"]);
+    for (let i = 0; i < 7; i++) crCloud(g, ((i * 70 - f * (0.4 + (i % 3) * 0.3)) % (W + 120) + W + 120) % (W + 120) - 60, 30 + (i * 37) % 120, 0.7 + (i % 3) * 0.3, 0.6);
+    crIsle(g, 230 + Math.sin(f / 90) * 4, 60, 60, 40, "#7ab84a", "#7a6a8a", f, 4); crIsle(g, 40, 100 + Math.sin(f / 70) * 3, 34, 22, "#7ab84a", "#7a6a8a", f, 5);
+    // il pallone d'aria e il timone
+    ell(g, 160, 18, 150, 26, "#9aa5b1"); ell(g, 140, 10, 110, 10, "#c9d1d8"); for (let i = 0; i < 5; i++) px(g, 40 + i * 60, 30, 1, 120, "#5a3a2a");
+    px(g, 0, 150, W, 50, "#8a5a3a"); for (let i = 0; i < 6; i++) px(g, 0, 152 + i * 8, W, 1, "rgba(0,0,0,.25)"); px(g, 0, 148, W, 4, "#c9a227");
+    const wheel = since("cr_cielo", 0) < 90 ? since("cr_cielo", 0) / 8 : f / 120; g.save(); g.translate(270, 140); g.rotate(wheel); g.strokeStyle = "#6a3a1a"; g.lineWidth = 3; g.beginPath(); g.arc(0, 0, 16, 0, Math.PI * 2); g.stroke(); for (let i = 0; i < 8; i++) { g.rotate(Math.PI / 4); px(g, -1, 0, 2, 22, "#6a3a1a"); } g.restore();
+    // la bandiera rossa al vento e la bussola d'ottone
+    const fl = Math.sin(f / 6) * 3; g.fillStyle = "#c0392b"; g.beginPath(); g.moveTo(20, 60); g.lineTo(50, 64 + fl); g.lineTo(20, 74); g.fill(); px(g, 18, 56, 2, 94, "#5a3a2a");
+    circ(g, 80, 140, 10, "#c9a227"); circ(g, 80, 140, 8, "#f0e6c8"); const na = since("cr_cielo", 1) < 120 ? f / 3 : Math.sin(f / 40) * 0.3; g.save(); g.translate(80, 140); g.rotate(na); px(g, -1, -7, 2, 7, "#c0392b"); px(g, -1, 0, 2, 7, "#2a2a33"); g.restore();
+    crTilt(g, W, H);
+  }
   // elementi interattivi: [x, y, w, h, frase, azione?("tog" = acceso/spento)]
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
@@ -4657,6 +4748,31 @@
       [0, 12, 320, 60, "📣 Il pubblico: metà verde acqua, metà mattone. Saltano tutti. Per motivi opposti."],
       [120, 96, 80, 44, "🧤 Il portiere: si butta da una parte prima ancora che tu tiri. Ti conosce. O conosce il 14."],
       [4, 156, 126, 36, "🎧 La cuffia: «Non tirare. Passalo.» La tua voce, di tre anni fa."],
+    ] },
+    cr_borgo: { draw: bgCrBorgo, hot: [
+      [70, 100, 50, 30, "🪟 Il Municipio: le finestre si accendono e si spengono. Nonna Ortensia sta cercando gli occhiali.", "tog"],
+      [146, 84, 26, 50, "💡 La Lampada del Campo: per un attimo brilla forte, come una volta. Poi torna a tremare."],
+      [100, 150, 130, 40, "⚽ Il campo del borgo: il pallone scappa da solo verso la porta. Anche lui ha voglia di giocare."],
+      [0, 30, 320, 50, "✈️ Un'aeronave passa lontana tra le isole. Grigia, con una bandiera rossa."],
+      [46, 136, 30, 28, "🐑 Trillo svolazza sulla bancarella: «frrr! Mele del cielo, gratis per gli eroi!»"],
+    ] },
+    cr_bosco: { draw: bgCrBosco, hot: [
+      [196, 104, 48, 64, "⚙️ La trivella di Ferrogrigio tossisce e sputa fumo grigio. Dentro, luce d'ambra che non le appartiene."],
+      [56, 92, 42, 40, "🌳 L'albero inciso: «Quattro accesi a guardia del cielo, e il quinto gioca con noi sul prato»."],
+      [100, 30, 120, 100, "✨ Le lucciole si radunano in cerchio, come giocatori prima del calcio d'inizio."],
+      [250, 176, 70, 20, "💧 Lo stagno nero: le lucciole ci si specchiano e diventano il doppio."],
+    ] },
+    cr_grotta: { draw: bgCrGrotta, hot: [
+      [130, 34, 60, 96, "💎 Il Cristallo della Terra: lo tocchi e si spegne, poi si riaccende. Come un cuore che ha deciso di continuare.", "tog"],
+      [30, 96, 42, 56, "🗿 Il golem di sinistra apre gli occhi color ambra. Ti guarda. Torna a dormire."],
+      [250, 96, 42, 56, "🗿 Il golem di destra apre gli occhi. Sul petto ha un 1: il numero dei portieri."],
+      [0, 178, 320, 22, "🍵 Il lago color tè: sul fondo, palloni di pietra lasciati come offerte dagli antichi giocatori."],
+    ] },
+    cr_cielo: { draw: bgCrCielo, hot: [
+      [248, 118, 44, 44, "🛞 Il timone della Rondine Grigia: lo giri e l'aeronave vira. Vela, da qualche parte: «EHI!»"],
+      [68, 128, 24, 24, "🧭 La bussola d'ottone gira come impazzita. Poi punta verso un'isola che non c'è sulle mappe."],
+      [14, 54, 40, 24, "🚩 La bandiera rossa della Rondine Grigia: schiocca al vento come un applauso."],
+      [200, 40, 100, 70, "🏝️ Un'isola sospesa: sotto, le radici pendono nel vuoto come capelli spettinati."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
