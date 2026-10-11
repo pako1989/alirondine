@@ -561,9 +561,28 @@
   const ZONES = {};
 
   function registerZone(chNum, zid, spec) {
-    const Z = Object.assign({ id: zid, act: {}, npcs: [], items: spec.items || [], item: spec.item || ["Moneta del Dragone", "Monete"] }, spec);
+    const shortName = spec.short || spec.name || "Zona";
+    const Z = Object.assign({
+      id: zid,
+      name: spec.name || shortName,
+      short: shortName,
+      sub: spec.sub || "",
+      w: spec.w || 25,
+      h: spec.h || 15,
+      areas: spec.areas || [[0, 0, spec.w || 25, spec.h || 15, shortName]],
+      hints: spec.hints || { [shortName]: spec.sub || "" },
+      act: {},
+      npcs: [],
+      items: spec.items || [],
+      item: spec.item || ["Moneta del Dragone", "Monete"],
+      bus: "portale",
+      busLabel: "Torna al Santuario"
+    }, spec);
     Z.w = spec.w || 25;
     Z.h = spec.h || 15;
+    Z.short = shortName;
+    Z.areas = spec.areas || [[0, 0, Z.w, Z.h, shortName]];
+    Z.hints = spec.hints || { [shortName]: spec.sub || "" };
     Z.items = spec.items || [];
     Z.item = spec.item || ["Moneta del Dragone", "Monete"];
     Z.npcs = (spec.npcs || []).map((n) => {
@@ -991,6 +1010,12 @@ Durante l'esplorazione del Regno delle Sette Lame, tocca il pulsante <b>⚔️ S
           sub: "Torii vermigli, petali cadenti e lo spirito antico del calcio feudale",
           w: 25, h: 15, start: [8, 8], theme: "torino", bg: "sh_dojo",
           isCustomSaga: true,
+          areas: [
+            [2, 2, 10, 6, "Padiglione del Tè", "Il padiglione dei samurai con vista sui ciliegi"],
+            [10, 2, 22, 6, "I Ciliegi Fioriti", "La pioggia di petali cremisi che cade sull'erba"],
+            [6, 8, 18, 14, "Il Dojo Centrale", "La sabbia sacra dove si addestrano i ronin"],
+            [20, 6, 24, 10, "Il Grande Torii", "La soglia d'uscita verso le province dello Shogunato"]
+          ],
           act: {
             "8,7": "Parla con il Maestro Hayato",
             "18,4": "Parla con Lady Tomoe",
@@ -1189,6 +1214,12 @@ Durante l'esplorazione del Regno delle Sette Lame, tocca il pulsante <b>⚔️ S
           sub: "Botteghe di fabbri, lanterne di carta rossa, ponti arcuati e guardie d'élite",
           w: 25, h: 15, start: [2, 7], theme: "torino", bg: "sh_tempio",
           isCustomSaga: true,
+          areas: [
+            [2, 2, 10, 8, "Locanda delle Lanterne", "Il vicolo buio dove si nascondono i ninja"],
+            [14, 2, 22, 8, "Forgia di Muramasa", "L'incudine e il focolare dove bruciano le anime"],
+            [8, 9, 16, 13, "Ponte sul Fiume", "Il ponte arcuato presidiato dal possente Benkei"],
+            [18, 10, 24, 14, "Gradinata del Tempio", "L'accesso monumentale al Tempio del Loto Nero"]
+          ],
           act: {
             "6,6": "Parla con la Kunoichi Hanzo",
             "18,6": "Interroga Mastro Muramasa alla forgia",
@@ -1396,6 +1427,11 @@ Durante l'esplorazione del Regno delle Sette Lame, tocca il pulsante <b>⚔️ S
           sub: "Statua monumentale del Buddha d'ombra, campana bronzea e incenso cerimoniale",
           w: 25, h: 15, start: [2, 7], theme: "torino", bg: "sh_tempio",
           isCustomSaga: true,
+          areas: [
+            [8, 2, 16, 8, "Altare del Buddha d'Ombra", "La monumentale effigie sacra del tempio"],
+            [2, 6, 8, 12, "Campana Bronzea", "La campana dei rintocchi d'addio di Tomoe"],
+            [8, 10, 16, 14, "Porta della Fortezza", "Il portone d'ossidiana sbarrato dal Generale Raiden"]
+          ],
           act: {
             "12,5": "Esamina la Statua del Buddha d'Ombra",
             "6,8": "Raccogli la pergamena lasciata da Tomoe",
@@ -1585,6 +1621,11 @@ Hai trionfato su ogni prova: hai liberato Lady Tomoe, spezzato la maledizione de
           sub: "Stendardi imperiali, armatura del dragone nero e il trono di pietra lunare",
           w: 25, h: 15, start: [2, 7], theme: "torino", bg: "sh_arena_eclisse",
           isCustomSaga: true,
+          areas: [
+            [8, 2, 16, 8, "Il Trono dello Shogun", "Il seggio di pietra lunare dove siede Kurogane"],
+            [2, 2, 8, 8, "Armeria Sacra", "La teca custodita dove riposa la Katana del Dragone"],
+            [6, 9, 18, 14, "Arena dell'Eclisse", "Lo stadio sacro illuminato dalla luna di sangue"]
+          ],
           act: {
             "12,7": "Parla con Lady Tomoe liberata",
             "6,4": "Estrai la Katana del Dragone Celeste dall'armeria",

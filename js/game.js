@@ -8879,10 +8879,11 @@
     trTarget();
     if (area !== TW.area) { TW.area = area; trHint(); }
   }
-  function trArea() { const tx = Math.floor(TW.x / TS), ty = Math.floor((TW.y - 4) / TS); const a = TW.z.areas.find(([x0, y0, x1, y1]) => tx >= x0 && tx <= x1 && ty >= y0 && ty <= y1); return a ? a[4] : TW.z.short; }
+  function trArea() { const tx = Math.floor(TW.x / TS), ty = Math.floor((TW.y - 4) / TS); const a = (TW.z.areas || []).find(([x0, y0, x1, y1]) => tx >= x0 && tx <= x1 && ty >= y0 && ty <= y1); return a ? a[4] : (TW.z.short || TW.z.name || "Zona"); }
   function trHint() {
     if (view.kind !== "trasf") return;
-    text("voce", `<b>${esc(TW.area)}</b> · ${esc(TW.z.hints[TW.area] || "")} <span style="color:var(--dim)">Frecce per muoverti, <em>Parla</em> vicino a qualcuno. ${TW.z.tail ? esc(TW.z.tail) : TW.z.local ? (TW.z.boat ? "Per tornare: Baciccia e la sua barca, o il Menu." : "Le frecce gialle ai bordi portano nelle altre zone.") : `Per tornare al Borgo: la fermata${TW.z.bus === "battello" ? ", cioè la barca," : ""} o il Menu.`}</span>`);
+    const hints = typeof TW.z.hints === "function" ? TW.z.hints() : (TW.z.hints || {});
+    text("voce", `<b>${esc(TW.area)}</b> · ${esc(hints[TW.area] || TW.z.sub || "")} <span style="color:var(--dim)">Frecce per muoverti, <em>Parla</em> vicino a qualcuno. ${TW.z.tail ? esc(TW.z.tail) : TW.z.local ? (TW.z.boat ? "Per tornare: Baciccia e la sua barca, o il Menu." : "Le frecce gialle ai bordi portano nelle altre zone.") : `Per tornare al Borgo: la fermata${TW.z.bus === "battello" ? ", cioè la barca," : ""} o il Menu.`}</span>`);
   }
   function trTry(nx, ny) {
     nx = clamp(nx, 6, TW.z.w * TS - 6); ny = clamp(ny, 8, TW.z.h * TS - 2);
