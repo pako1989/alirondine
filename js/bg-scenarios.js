@@ -1408,6 +1408,508 @@
     }
   }
 
+  // --- 8. BELOVODIA · IL BORGO INNEVATO DELLE MASCHERE ---
+  function drawDetailedBelovodiaVillaggio(g, W, H, f) {
+    // Cielo notturno boreale profondo
+    const sky = g.createLinearGradient(0, 0, 0, 95);
+    sky.addColorStop(0, "#030712");
+    sky.addColorStop(0.5, "#081528");
+    sky.addColorStop(1, "#0f2744");
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, 95);
+
+    // Aurora boreale sinuosa e vibrante
+    g.save();
+    g.globalCompositeOperation = "screen";
+    for (let a = 0; a < 3; a++) {
+      const grad = g.createLinearGradient(0, 10, 0, 65);
+      const col = a === 0 ? "rgba(16, 185, 129, " : a === 1 ? "rgba(6, 182, 212, " : "rgba(168, 85, 247, ";
+      grad.addColorStop(0, col + "0)");
+      grad.addColorStop(0.5, col + (0.28 + 0.08 * Math.sin(f * 0.04 + a)) + ")");
+      grad.addColorStop(1, col + "0)");
+      g.fillStyle = grad;
+      g.beginPath();
+      g.moveTo(0, 45 + a * 8);
+      for (let x = 0; x <= W; x += 16) {
+        const y = 25 + a * 10 + Math.sin(x * 0.02 + f * 0.03 + a * 1.5) * 12 + Math.cos(x * 0.04 - f * 0.02) * 6;
+        g.lineTo(x, y);
+      }
+      g.lineTo(W, 85);
+      g.lineTo(0, 85);
+      g.closePath();
+      g.fill();
+    }
+    g.restore();
+
+    // Stelle scintillanti
+    for (let s = 0; s < 24; s++) {
+      const sx = (s * 37 + 11) % W;
+      const sy = (s * 19 + 7) % 55;
+      const sa = 0.4 + 0.5 * Math.sin(f * 0.08 + s);
+      px(g, sx, sy, 1, 1, `rgba(255,255,255,${sa})`);
+    }
+
+    // Luna fredda d'inverno
+    g.fillStyle = "rgba(254, 243, 199, 0.15)";
+    g.beginPath(); g.arc(265, 32, 18, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#fef3c7";
+    g.beginPath(); g.arc(265, 32, 10, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#081528";
+    g.beginPath(); g.arc(269, 30, 8, 0, Math.PI * 2); g.fill(); // Mezzaluna
+
+    // Taiga di pini e betulle sullo sfondo all'orizzonte
+    for (let tr = 0; tr < W; tr += 14) {
+      const th = 22 + (tr % 7) * 4;
+      g.fillStyle = "#071322";
+      g.beginPath();
+      g.moveTo(tr + 7, 78 - th);
+      g.lineTo(tr, 78);
+      g.lineTo(tr + 14, 78);
+      g.closePath();
+      g.fill();
+      // Neve sulle cime degli alberi
+      px(g, tr + 6, 78 - th, 2, 4, "#cbd5e1");
+    }
+
+    // Pendio di neve soffice intermedia
+    const hillGrad = g.createLinearGradient(0, 75, 0, 115);
+    hillGrad.addColorStop(0, "#cbd5e1");
+    hillGrad.addColorStop(0.4, "#94a3b8");
+    hillGrad.addColorStop(1, "#475569");
+    g.fillStyle = hillGrad;
+    g.beginPath();
+    g.moveTo(0, 85);
+    g.quadraticCurveTo(W * 0.35, 78, W * 0.65, 84);
+    g.quadraticCurveTo(W * 0.85, 88, W, 82);
+    g.lineTo(W, 115);
+    g.lineTo(0, 115);
+    g.closePath();
+    g.fill();
+
+    // Izba 1 (Bottega di Boris a sinistra)
+    px(g, 16, 70, 72, 42, "#3b2314");
+    // Tronchi orizzontali intagliati
+    for (let ty = 74; ty < 112; ty += 6) {
+      px(g, 16, ty, 72, 1, "#27150c");
+      px(g, 16, ty + 1, 72, 1, "#4a2c19");
+    }
+    // Tetto spiovente di legno con spesso strato di neve candida
+    g.fillStyle = "#27150c";
+    g.beginPath(); g.moveTo(8, 70); g.lineTo(52, 42); g.lineTo(94, 70); g.closePath(); g.fill();
+    g.fillStyle = "#f8fafc";
+    g.beginPath(); g.moveTo(6, 69); g.lineTo(52, 38); g.lineTo(96, 69); g.lineTo(94, 74); g.lineTo(52, 44); g.lineTo(8, 74); g.closePath(); g.fill();
+    // Comignolo in pietra e fumo animato
+    px(g, 68, 40, 10, 18, "#475569");
+    px(g, 66, 38, 14, 3, "#64748b");
+    for (let sm = 0; sm < 4; sm++) {
+      const sx = 72 + Math.sin(f * 0.08 + sm) * (6 + sm * 3);
+      const sy = 34 - sm * 8 - (f * 0.4 % 8);
+      const sr = 3 + sm * 1.8;
+      g.fillStyle = `rgba(241, 245, 249, ${0.45 - sm * 0.1})`;
+      g.beginPath(); g.arc(sx, sy, sr, 0, Math.PI * 2); g.fill();
+    }
+    // Finestrella illuminata con calda luce ambrata
+    px(g, 36, 82, 16, 16, "#f59e0b");
+    px(g, 38, 84, 12, 12, "#fef08a");
+    px(g, 43, 82, 2, 16, "#78350f");
+    px(g, 36, 89, 16, 2, "#78350f");
+    // Porta in legno scuro
+    px(g, 62, 86, 14, 26, "#1f1209");
+    px(g, 64, 88, 10, 24, "#2e1a0e");
+    px(g, 71, 98, 2, 3, "#fbbf24"); // Maniglia d'ottone
+
+    // Izba 2 (A destra, mezza nascosta)
+    px(g, 225, 76, 75, 38, "#3b2314");
+    for (let ty = 80; ty < 114; ty += 6) {
+      px(g, 225, ty, 75, 1, "#27150c");
+    }
+    g.fillStyle = "#f8fafc";
+    g.beginPath(); g.moveTo(218, 76); g.lineTo(262, 48); g.lineTo(306, 76); g.lineTo(304, 81); g.lineTo(262, 54); g.lineTo(220, 81); g.closePath(); g.fill();
+    px(g, 248, 86, 14, 14, "#f59e0b");
+    px(g, 250, 88, 10, 10, "#fde68a");
+
+    // Steccato di rami di betulla
+    for (let fx = 95; fx < 220; fx += 18) {
+      px(g, fx, 96, 3, 14, "#e2e8f0");
+      px(g, fx + 1, 98, 1, 10, "#475569");
+    }
+    px(g, 92, 101, 130, 2, "#94a3b8");
+    px(g, 92, 106, 130, 2, "#94a3b8");
+
+    // Suolo innevato del villaggio (primo piano)
+    const snowGrad = g.createLinearGradient(0, 110, 0, H);
+    snowGrad.addColorStop(0, "#e2e8f0");
+    snowGrad.addColorStop(0.3, "#cbd5e1");
+    snowGrad.addColorStop(0.8, "#94a3b8");
+    snowGrad.addColorStop(1, "#64748b");
+    g.fillStyle = snowGrad;
+    g.fillRect(0, 110, W, H - 110);
+
+    // Sentiero calpestato e orme nel ghiaccio
+    g.fillStyle = "rgba(71, 85, 105, 0.4)";
+    g.beginPath();
+    g.moveTo(70, 112);
+    g.quadraticCurveTo(120, 135, 160, 150);
+    g.quadraticCurveTo(200, 165, 230, 200);
+    g.lineTo(190, 200);
+    g.quadraticCurveTo(150, 160, 105, 135);
+    g.quadraticCurveTo(55, 120, 50, 112);
+    g.closePath();
+    g.fill();
+
+    // Pozzo sacro gelato al centro
+    px(g, 136, 122, 28, 18, "#334155");
+    px(g, 138, 120, 24, 4, "#64748b");
+    // Tettoia pozzo in tronchi
+    px(g, 138, 108, 3, 14, "#3b2314");
+    px(g, 159, 108, 3, 14, "#3b2314");
+    g.fillStyle = "#f8fafc";
+    g.beginPath(); g.moveTo(132, 108); g.lineTo(150, 96); g.lineTo(168, 108); g.closePath(); g.fill();
+    // Giaccioli pendenti
+    [136, 142, 148, 154, 160].forEach((ix, i) => {
+      px(g, ix, 108, 2, 4 + (i % 3) * 2, "#bae6fd");
+    });
+
+    // Lanterna a stelo di ferro con luce calda oscillante
+    const lanX = 185, lanY = 130;
+    px(g, lanX, lanY, 3, 28, "#1e293b");
+    px(g, lanX - 4, lanY - 6, 11, 8, "#0f172a");
+    // Fiamma e alone dorato
+    const flicker = Math.sin(f * 0.15) * 2;
+    const lGrad = g.createRadialGradient(lanX + 1, lanY - 2, 1, lanX + 1, lanY - 2, 24 + flicker);
+    lGrad.addColorStop(0, "rgba(251, 191, 36, 0.65)");
+    lGrad.addColorStop(0.5, "rgba(245, 158, 11, 0.25)");
+    lGrad.addColorStop(1, "rgba(245, 158, 11, 0)");
+    g.fillStyle = lGrad;
+    g.fillRect(lanX - 25, lanY - 28, 52, 52);
+    px(g, lanX - 1, lanY - 4, 3, 4, "#fef08a");
+
+    // Fiocchi di neve che scendono lenti e poetici
+    g.fillStyle = "rgba(255, 255, 255, 0.85)";
+    for (let flk = 0; flk < 42; flk++) {
+      const fx = (flk * 29 + f * 0.6 + Math.sin(f * 0.05 + flk) * 12) % W;
+      const fy = (flk * 17 + f * 1.2) % H;
+      const sz = flk % 4 === 0 ? 2 : 1;
+      px(g, fx, fy, sz, sz, "rgba(255, 255, 255, 0.8)");
+    }
+  }
+
+  // --- 9. BELOVODIA · L'ATELIER DELLE MASCHERE DI NONNO BORIS ---
+  function drawDetailedBelovodiaBottega(g, W, H, f) {
+    // Mura di tronchi pesanti in legno di pino stagionato
+    const wallGrad = g.createLinearGradient(0, 0, 0, 130);
+    wallGrad.addColorStop(0, "#27150c");
+    wallGrad.addColorStop(0.5, "#3d2214");
+    wallGrad.addColorStop(1, "#4e2b19");
+    g.fillStyle = wallGrad;
+    g.fillRect(0, 0, W, 130);
+    // Scanalature dei tronchi orizzontali
+    for (let y = 14; y < 130; y += 16) {
+      px(g, 0, y, W, 2, "#180c06");
+      px(g, 0, y + 2, W, 1, "#5a331e");
+    }
+
+    // Pavimento in assi rustiche di legno massiccio
+    const floorGrad = g.createLinearGradient(0, 130, 0, H);
+    floorGrad.addColorStop(0, "#331a0e");
+    floorGrad.addColorStop(0.5, "#422313");
+    floorGrad.addColorStop(1, "#241209");
+    g.fillStyle = floorGrad;
+    g.fillRect(0, 130, W, H - 130);
+    for (let x = 0; x < W; x += 26) {
+      px(g, x, 130, 1, H - 130, "#190c06");
+    }
+
+    // Tradizionale tappeto ricamato slavo rosso carminio e oro al centro
+    px(g, 70, 142, 180, 52, "#7f1d1d");
+    px(g, 72, 144, 176, 48, "#991b1b");
+    // Bordura geometrica dorata
+    g.strokeStyle = "#fbbf24";
+    g.lineWidth = 1.5;
+    g.strokeRect(76, 148, 168, 40);
+    for (let rx = 82; rx < 240; rx += 14) {
+      px(g, rx, 166, 4, 4, "#fbbf24");
+      px(g, rx + 2, 168, 1, 1, "#fef08a");
+    }
+
+    // Finestra piombata a sinistra con tormenta notturna fuori e ragnatela di brina
+    px(g, 18, 22, 48, 64, "#0f172a");
+    g.fillStyle = "#091220";
+    g.fillRect(20, 24, 44, 60);
+    // Luce azzurra notturna
+    const winGrad = g.createLinearGradient(20, 24, 20, 84);
+    winGrad.addColorStop(0, "rgba(56, 189, 248, 0.35)");
+    winGrad.addColorStop(1, "rgba(15, 23, 42, 0.8)");
+    g.fillStyle = winGrad;
+    g.fillRect(20, 24, 44, 60);
+    // Telaio in legno scuro e traversi
+    px(g, 18, 22, 48, 3, "#27150c");
+    px(g, 18, 83, 48, 4, "#27150c");
+    px(g, 41, 24, 3, 60, "#27150c");
+    px(g, 20, 52, 44, 3, "#27150c");
+    // Cristalli di brina agli angoli della finestra
+    px(g, 22, 26, 6, 2, "#e0f2fe");
+    px(g, 22, 28, 2, 6, "#e0f2fe");
+    px(g, 58, 26, 5, 2, "#e0f2fe");
+
+    // Rastrelliera delle Maschere Ancestrali sulla parete centrale
+    px(g, 85, 28, 145, 6, "#27150c");
+    px(g, 85, 62, 145, 6, "#27150c");
+
+    // Maschera 1: Maschera del Falco d'Argento (Centrale)
+    const mfx = 150, mfy = 36;
+    g.fillStyle = "#e2e8f0";
+    g.beginPath();
+    g.moveTo(mfx, mfy);
+    g.lineTo(mfx + 10, mfy + 4);
+    g.lineTo(mfx + 6, mfy + 18);
+    g.lineTo(mfx, mfy + 24); // Becco
+    g.lineTo(mfx - 6, mfy + 18);
+    g.lineTo(mfx - 10, mfy + 4);
+    g.closePath();
+    g.fill();
+    // Occhi dorati splendenti
+    px(g, mfx - 4, mfy + 8, 2, 2, "#fbbf24");
+    px(g, mfx + 2, mfy + 8, 2, 2, "#fbbf24");
+    // Piume incise d'argento
+    px(g, mfx - 7, mfy + 2, 4, 2, "#94a3b8");
+    px(g, mfx + 3, mfy + 2, 4, 2, "#94a3b8");
+
+    // Maschera 2: Maschera dell'Orso di Pietra (A sinistra)
+    const mox = 110, moy = 38;
+    g.fillStyle = "#57534e";
+    g.beginPath();
+    g.arc(mox, moy + 8, 9, 0, Math.PI * 2);
+    g.fill();
+    // Orecchie tonde
+    px(g, mox - 9, moy, 4, 4, "#44403c");
+    px(g, mox + 5, moy, 4, 4, "#44403c");
+    // Muso e zanne
+    px(g, mox - 3, moy + 8, 6, 5, "#292524");
+    px(g, mox - 2, moy + 12, 1, 2, "#f8fafc");
+    px(g, mox + 1, moy + 12, 1, 2, "#f8fafc");
+
+    // Maschera 3: Maschera della Lepre delle Tempeste (A destra)
+    const mlx = 195, mly = 35;
+    g.fillStyle = "#f1f5f9";
+    g.beginPath();
+    g.ellipse(mlx, mly + 10, 7, 9, 0, 0, Math.PI * 2);
+    g.fill();
+    // Orecchie lunghe ritte
+    px(g, mlx - 4, mly - 6, 2, 10, "#e2e8f0");
+    px(g, mlx + 2, mly - 6, 2, 10, "#e2e8f0");
+    px(g, mlx - 3, mly - 4, 1, 6, "#f472b6");
+    px(g, mlx + 3, mly - 4, 1, 6, "#f472b6");
+    px(g, mlx - 3, mly + 7, 2, 2, "#38bdf8");
+    px(g, mlx + 1, mly + 7, 2, 2, "#38bdf8");
+
+    // Maschere minori della seconda mensola
+    [95, 130, 170, 205].forEach((mx, i) => {
+      const col = ["#78350f", "#b45309", "#451a03", "#713f12"][i];
+      px(g, mx, 70, 14, 16, col);
+      px(g, mx + 3, 74, 2, 2, "#fef08a");
+      px(g, mx + 9, 74, 2, 2, "#fef08a");
+      px(g, mx + 5, 80, 4, 2, "#1c1917");
+    });
+
+    // Banco di lavoro di Boris con scalpelli e trucioli a sinistra
+    px(g, 15, 115, 65, 38, "#451a03");
+    px(g, 12, 112, 70, 5, "#5c2406");
+    // Scalpelli e sgorbie di metallo sul tavolo
+    px(g, 22, 109, 14, 2, "#cbd5e1");
+    px(g, 18, 109, 4, 3, "#78350f"); // Manico
+    px(g, 42, 108, 16, 2, "#cbd5e1");
+    px(g, 38, 108, 4, 3, "#78350f");
+    // Blocco di legno in lavorazione
+    px(g, 62, 104, 12, 10, "#d97706");
+    // Trucioli arricciati caduti sul tavolo e sul pavimento
+    px(g, 30, 114, 3, 2, "#fde68a");
+    px(g, 50, 114, 4, 2, "#fde68a");
+    px(g, 25, 155, 4, 2, "#fde68a");
+    px(g, 45, 158, 3, 2, "#fde68a");
+
+    // Grande stufa russa in ghisa a destra con fuoco ardente
+    const stx = 245, sty = 78;
+    px(g, stx, sty, 55, 68, "#18181b");
+    px(g, stx - 3, sty + 4, 61, 4, "#27272a");
+    px(g, stx + 12, 38, 12, 40, "#27272a"); // Canna fumaria
+    // Bocca del focolare con griglia e fiamme animate
+    px(g, stx + 12, sty + 25, 30, 24, "#09090b");
+    const flameFlicker = Math.sin(f * 0.2) * 2;
+    // Riverbero caldo intorno alla stufa
+    const stoveGlow = g.createRadialGradient(stx + 27, sty + 37, 2, stx + 27, sty + 37, 55 + flameFlicker);
+    stoveGlow.addColorStop(0, "rgba(249, 115, 22, 0.75)");
+    stoveGlow.addColorStop(0.4, "rgba(234, 88, 12, 0.35)");
+    stoveGlow.addColorStop(1, "rgba(180, 83, 9, 0)");
+    g.fillStyle = stoveGlow;
+    g.fillRect(stx - 20, sty - 10, 95, 95);
+    // Fiamma viva
+    g.fillStyle = "#ef4444";
+    g.beginPath();
+    g.moveTo(stx + 16, sty + 45);
+    g.lineTo(stx + 27, sty + 28 + flameFlicker);
+    g.lineTo(stx + 38, sty + 45);
+    g.closePath();
+    g.fill();
+    g.fillStyle = "#fbbf24";
+    g.beginPath();
+    g.moveTo(stx + 21, sty + 45);
+    g.lineTo(stx + 27, sty + 32 + flameFlicker * 0.5);
+    g.lineTo(stx + 33, sty + 45);
+    g.closePath();
+    g.fill();
+    // Griglia metallica
+    px(g, stx + 18, sty + 30, 1, 15, "#27272a");
+    px(g, stx + 27, sty + 30, 1, 15, "#27272a");
+    px(g, stx + 36, sty + 30, 1, 15, "#27272a");
+
+    // Teiera / Samovar fumante sopra la stufa
+    px(g, stx + 32, sty - 10, 14, 12, "#d97706");
+    px(g, stx + 30, sty - 8, 2, 6, "#b45309"); // Manico
+    px(g, stx + 45, sty - 7, 4, 3, "#b45309"); // Beccuccio
+    // Vapore sottile
+    px(g, stx + 46, sty - 12 - (f % 6), 2, 2, "rgba(254, 243, 199, 0.6)");
+  }
+
+  // --- 10. BELOVODIA · LA RADURA SACRA DELLE BETULLE ---
+  function drawDetailedBelovodiaRadura(g, W, H, f) {
+    // Cielo polare notturno con aurora boreale travolgente
+    const sky = g.createLinearGradient(0, 0, 0, 100);
+    sky.addColorStop(0, "#020617");
+    sky.addColorStop(0.5, "#061324");
+    sky.addColorStop(1, "#0c213c");
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, 100);
+
+    // Grande cortina di aurora boreale verde smeraldo e lilla
+    g.save();
+    g.globalCompositeOperation = "screen";
+    for (let l = 0; l < 4; l++) {
+      const grad = g.createLinearGradient(0, 5, 0, 80);
+      const alpha = 0.35 + 0.12 * Math.sin(f * 0.035 + l * 1.8);
+      grad.addColorStop(0, `rgba(16, 185, 129, 0)`);
+      grad.addColorStop(0.4, l % 2 ? `rgba(16, 185, 129, ${alpha})` : `rgba(192, 132, 252, ${alpha * 0.9})`);
+      grad.addColorStop(0.8, `rgba(56, 189, 248, ${alpha * 0.7})`);
+      grad.addColorStop(1, `rgba(6, 182, 212, 0)`);
+      g.fillStyle = grad;
+      g.beginPath();
+      g.moveTo(0, 20 + l * 6);
+      for (let x = 0; x <= W; x += 12) {
+        const y = 15 + l * 10 + Math.sin(x * 0.025 + f * 0.025 + l) * 14 + Math.cos(x * 0.05 - f * 0.015) * 8;
+        g.lineTo(x, y);
+      }
+      g.lineTo(W, 90);
+      g.lineTo(0, 90);
+      g.closePath();
+      g.fill();
+    }
+    g.restore();
+
+    // Luna d'argento fredda che sbuca tra le nubi
+    g.fillStyle = "rgba(248, 250, 252, 0.2)";
+    g.beginPath(); g.arc(60, 35, 22, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#f8fafc";
+    g.beginPath(); g.arc(60, 35, 12, 0, Math.PI * 2); g.fill();
+
+    // Foresta di maestose Betulle d'Argento sullo sfondo
+    for (let bx = 10; bx < W; bx += 22) {
+      const bh = 75 + (bx % 5) * 6;
+      // Tronco candido di betulla
+      px(g, bx, 100 - bh, 5, bh, "#f8fafc");
+      // Macchie nere orizzontali caratteristiche della corteccia di betulla
+      for (let py = 100 - bh + 6; py < 95; py += 10) {
+        px(g, bx + 1, py, 3, 2, "#1e293b");
+        if (py % 20 === 0) px(g, bx, py + 4, 2, 2, "#0f172a");
+      }
+      // Rami spogli innevati
+      px(g, bx - 6, 100 - bh + 14, 6, 2, "#e2e8f0");
+      px(g, bx + 5, 100 - bh + 22, 8, 2, "#e2e8f0");
+    }
+
+    // Suolo innevato della radura sacra
+    const fieldGrad = g.createLinearGradient(0, 95, 0, H);
+    fieldGrad.addColorStop(0, "#cbd5e1");
+    fieldGrad.addColorStop(0.3, "#94a3b8");
+    fieldGrad.addColorStop(0.7, "#64748b");
+    fieldGrad.addColorStop(1, "#334155");
+    g.fillStyle = fieldGrad;
+    g.fillRect(0, 95, W, H - 95);
+
+    // Rettangolo del campo di gioco inciso nella brina ghiacciata
+    g.strokeStyle = "rgba(186, 230, 253, 0.75)";
+    g.lineWidth = 1.5;
+    g.strokeRect(24, 115, W - 48, H - 128);
+
+    // Cerchio di centrocampo e linea mediana
+    g.beginPath();
+    g.moveTo(W / 2, 115);
+    g.lineTo(W / 2, H - 13);
+    g.stroke();
+    g.beginPath();
+    g.arc(W / 2, 155, 24, 0, Math.PI * 2);
+    g.stroke();
+
+    // Runa ancestrale del Falco nel cerchio di centrocampo
+    g.fillStyle = "rgba(56, 189, 248, 0.35)";
+    g.beginPath();
+    g.moveTo(W / 2, 142);
+    g.lineTo(W / 2 + 12, 155);
+    g.lineTo(W / 2, 168);
+    g.lineTo(W / 2 - 12, 155);
+    g.closePath();
+    g.fill();
+
+    // Porte cerimoniali da calcio ricavate da tronchi ritorti e maestose corna di cervo
+    // Porta sinistra
+    px(g, 18, 134, 4, 42, "#451a03");
+    px(g, 18, 132, 12, 4, "#5c2406");
+    // Corna di cervo innevate montate sulla traversa
+    px(g, 22, 126, 2, 8, "#e2e8f0");
+    px(g, 24, 124, 4, 2, "#cbd5e1");
+    px(g, 26, 122, 2, 3, "#cbd5e1");
+    // Rete di rami e corda
+    g.strokeStyle = "rgba(226, 232, 240, 0.4)";
+    g.lineWidth = 1;
+    for (let netY = 136; netY < 176; netY += 6) {
+      g.beginPath(); g.moveTo(12, netY); g.lineTo(18, netY); g.stroke();
+    }
+
+    // Porta destra
+    px(g, W - 22, 134, 4, 42, "#451a03");
+    px(g, W - 30, 132, 12, 4, "#5c2406");
+    px(g, W - 24, 126, 2, 8, "#e2e8f0");
+    px(g, W - 28, 124, 4, 2, "#cbd5e1");
+    px(g, W - 28, 122, 2, 3, "#cbd5e1");
+    for (let netY = 136; netY < 176; netY += 6) {
+      g.beginPath(); g.moveTo(W - 18, netY); g.lineTo(W - 22, netY); g.stroke();
+    }
+
+    // Due grandi bracieri cerimoniali ardenti ai lati
+    [32, W - 32].forEach((bx) => {
+      px(g, bx - 6, 110, 12, 8, "#18181b");
+      px(g, bx - 8, 108, 16, 3, "#27272a");
+      const bFl = Math.sin(f * 0.2 + bx) * 2;
+      // Bagliore
+      const bGlow = g.createRadialGradient(bx, 104, 1, bx, 104, 22);
+      bGlow.addColorStop(0, "rgba(249, 115, 22, 0.7)");
+      bGlow.addColorStop(1, "rgba(249, 115, 22, 0)");
+      g.fillStyle = bGlow;
+      g.fillRect(bx - 22, 84, 44, 44);
+      // Fiamma
+      g.fillStyle = "#ef4444";
+      g.beginPath(); g.moveTo(bx - 4, 108); g.lineTo(bx, 97 + bFl); g.lineTo(bx + 4, 108); g.closePath(); g.fill();
+      g.fillStyle = "#fef08a";
+      g.beginPath(); g.moveTo(bx - 2, 108); g.lineTo(bx, 101 + bFl * 0.5); g.lineTo(bx + 2, 108); g.closePath(); g.fill();
+    });
+
+    // Tormenta con fiocchi di neve e cristalli di ghiaccio brillanti
+    for (let sn = 0; sn < 36; sn++) {
+      const sx = (sn * 23 + f * 1.4 + Math.sin(f * 0.06 + sn) * 16) % W;
+      const sy = (sn * 13 + f * 1.8) % H;
+      px(g, sx, sy, (sn % 5 === 0 ? 2 : 1), (sn % 5 === 0 ? 2 : 1), "rgba(240, 249, 255, 0.8)");
+    }
+  }
+
   // INTERAZIONE TOUCH/CLICK CON GLI ELEMENTI DELLO SFONDO (SCENIC INTERACTION)
   function setupScenicCanvasInteraction() {
     const cv = document.getElementById("cv");
@@ -1421,7 +1923,7 @@
       if (!v || v.kind !== "scene") return;
 
       const bg = v.bg || "";
-      if (!bg.startsWith("feudi_")) return;
+      if (!bg.startsWith("feudi_") && !bg.startsWith("bv_")) return;
 
       const rect = cv.getBoundingClientRect();
       const W = cv.width || 320, H = cv.height || 200;
@@ -1431,7 +1933,40 @@
       const toast = window.__borgoApi.trToast || window.toast;
       const sfx = window.sfx || (() => {});
 
-      if (bg === "feudi_consiglio") {
+      if (bg === "bv_villaggio") {
+        if (clickY < 55 && clickX > W * 0.55) {
+          if (toast) toast("💨 Comignolo fumante: «L'odore di legno di betulla bruciato e té caldo scalda l'aria gelida di Belovodia.»");
+        } else if (clickX < 90 && clickY > 80) {
+          if (toast) toast("🪵 Bottega di Nonno Boris: «L'insegna di legno intagliato a forma di lupo dondola sotto la neve.»");
+        } else if (Math.abs(clickX - W / 2) < 40 && clickY > 120) {
+          if (toast) toast("❄️ Pozzo di pietra gelato: «L'acqua sotto la lastra di ghiaccio riflette le aurore del nord.»");
+        } else if (clickX > W - 80 && clickY > 90) {
+          if (toast) toast("🌲 Sentiero delle Betulle: «Oltre i tronchi bianchi si estende la foresta silente dello Zar Moroz.»");
+        } else if (clickY < 60 && clickX < W * 0.45) {
+          if (toast) toast("🌌 Aurora Boreale di Belovodia: «Lame di luce verde smeraldo danzano tra le costellazioni polari.»");
+        }
+      } else if (bg === "bv_bottega") {
+        if (clickX > W - 85 && clickY > 70) {
+          if (toast) toast("🔥 Stufa in ghisa: «Il fuoco di ceppi scoppietta allegro, sciogliendo la brina dai vetri dell'izba.»");
+          sfx("kick");
+        } else if (clickX < 100 && clickY > 95) {
+          if (toast) toast("🪓 Banco di lavoro di Boris: «Sgorbie, scalpelli e trucioli profumati di corteccia d'argento.»");
+        } else if (clickY < 75 && Math.abs(clickX - W / 2) < 65) {
+          if (toast) toast("🎭 Rastrelliera delle Maschere: «Volti di falchi, orsi e lepri sembrano osservarti nell'ombra calda.»");
+        } else if (clickX < 60 && clickY < 90) {
+          if (toast) toast("🪟 Finestra con brina: «La neve si accumula lenta contro i piccoli vetri piombati.»");
+        }
+      } else if (bg === "bv_radura") {
+        if (Math.abs(clickX - W / 2) < 55 && clickY < 95) {
+          if (toast) toast("🥅 Porte di rami e corna: «Intrecciate a mano dai boscaioli per sfidare gli spiriti del gelo.»");
+        } else if (clickY < 60) {
+          if (toast) toast("🌌 Aurora Boreale: «Fasci di luce cosmica illuminano il manto di neve incontaminata.»");
+        } else if (clickX < 70 && clickY > 90) {
+          if (toast) toast("🌲 Betulle Guardiane: «I tronchi d'argento delimitano il confine sacro della radura.»");
+        } else if (clickY > 120) {
+          if (toast) toast("⚽ Ghiaccio del campo: «Il terreno è scivoloso e imprevedibile, ideale per tiri radenti e cariche a sorpresa!»");
+        }
+      } else if (bg === "feudi_consiglio") {
         if (clickY < H * 0.55 && Math.abs(clickX - W / 2) < 55) {
           if (toast) toast("⚖️ Bilancia del Giudizio: «Ogni piatto pesa il valore delle tue convinzioni.»");
           if (window.__bilanciaFeudi && window.__bilanciaFeudi.sfxScalesBalance) window.__bilanciaFeudi.sfxScalesBalance();
@@ -1486,6 +2021,15 @@
     setupScenicCanvasInteraction();
 
     switch (kind) {
+      case "bv_villaggio":
+        drawDetailedBelovodiaVillaggio(g, W, H, f);
+        return true;
+      case "bv_bottega":
+        drawDetailedBelovodiaBottega(g, W, H, f);
+        return true;
+      case "bv_radura":
+        drawDetailedBelovodiaRadura(g, W, H, f);
+        return true;
       case "feudi_consiglio":
         drawDetailedFeudiConsiglio(g, W, H, f);
         return true;
