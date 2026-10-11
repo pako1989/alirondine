@@ -135,7 +135,7 @@
         half: "f", name: "Doppio Turno · Porto Livido", short: "Porto Livido", sub: "Il porto, la sera, la tua città", bg: "dt_porto",
         w: 40, h: 26, start: [8, 18], itemCos: "dt_marea", items: [[2, 22], [37, 22], [20, 10], [35, 14]],
         areas: [[24, 12, 33, 19, "Il Bar Marea"], [3, 11, 12, 18, "L'ingresso del personale"], [13, 19, 23, 24, "Il recinto dello stadio"], [0, 7, 39, 9, "La banchina"], [1, 10, 38, 24, "Porto Livido"]],
-        act: { u: "Siediti al tavolino", l: "Guarda le lucine", i: "Guarda le reti", c: "Guarda la barca", f: "Guarda il recinto", n: "Leggi il cartello", q: "Entra nel Bar Marea", x: "Guarda le casse", Q: "Guarda il cancello dello stadio" },
+        act: { ">": "Verso il luna park", u: "Siediti al tavolino", l: "Guarda le lucine", i: "Guarda le reti", c: "Guarda la barca", f: "Guarda il recinto", n: "Leggi il cartello", q: "Entra nel Bar Marea", x: "Guarda le casse", Q: "Guarda il cancello dello stadio" },
         flavor: {
           u: ["Un tavolino del Bar Marea. Sotto il bicchiere, un sottobicchiere disegnato a pennarello verde: un campo da calcio e un 14.", "Ti siedi. Il mare fa il suo rumore. Per un attimo ti sembra di essere già stato seduto qui mille volte."],
           l: "Lucine colorate sui fili. Una è fulminata da sempre. Nessuno la cambia: dicono che porta fortuna al porto.",
@@ -156,7 +156,7 @@
           house(24, 12, 10, 5, { roof: "#3a2a2e", wall: "#7a3b2e", door: [28, 16, "q"], lights: true }); [[25, 18], [28, 18], [32, 18]].forEach(([x, y]) => put(x, y, "u"));
           house(4, 12, 8, 5, { roof: "#c9d6d3", wall: "#eef2f1", door: [7, 16, "e"] }); put(11, 17, "K");
           lay(13, 20, 23, 20, "f"); put(16, 19, "n"); put(18, 21, "Q"); lay(13, 21, 17, 24, ","); lay(19, 21, 23, 24, ",");
-          [[3, 10], [13, 10], [23, 10], [36, 10]].forEach(([x, y]) => put(x, y, "l")); put(15, 8, "i"); put(16, 8, "i"); put(37, 12, "x"); put(38, 12, "x");
+          [[3, 10], [13, 10], [23, 10], [35, 10]].forEach(([x, y]) => put(x, y, "l")); put(39, 10, ">"); put(39, 11, ">"); put(15, 8, "i"); put(16, 8, "i"); put(37, 12, "x"); put(38, 12, "x");
         },
         decor(g, cx, cy, d) { plaque(g, "BAR MAREA", d.X(29), d.Y(12) - 2, true); plaque(g, "INGRESSO DEL PERSONALE", d.X(8), d.Y(12) - 2, true); plaque(g, "STADIO DEL PORTO ↓", d.X(18) + 8, d.Y(22) + 4, true); },
       },
@@ -280,6 +280,7 @@
       "dt_campo:>": () => go("dt_atrio", 1, 9),
       "dt_campo:P": () => say([["voce", `Il tabellone: «VALTORRE FC — ${X.mem().done[N] || S() >= 5 ? "presentazione conclusa" : "in attesa"}». Sotto, piccolo: «Conformità della squadra: ${X.mem().conf}%».`]]),
       "dt_porto:K": () => { if (S() < 6) return say([["voce", "L'armadietto 7, dal lato di fuori. È chiuso a chiave."]]); if (S() >= 6) X.plant("n_stadio"); X.locker(() => { if (S() === 6 && X.mem().notes.n_stadio && X.mem().notes.n_stadio.st !== "new") setStep(N, 7); done(); }); },
+      "dt_porto:>": () => say([["voce", "Il vicolo che porta al vecchio luna park. Stasera è buio pesto, e Nina ti chiama dal bar. Un'altra sera."]]),
       "dt_porto:e": () => say([["dt_pio", S() >= 6 ? "Turno finito, {num}. Si rientra domani alle otto. Le regole sono regole. Le ho scritte io, cioè: me le hanno scritte." : "Da qui si entra nel Complesso. Ma ci sei appena uscito."]]),
     };
     function news(id, s) {

@@ -4403,6 +4403,45 @@
     paperGrain(g, W, H, f, 0.04);
   }
 
+  function bgDtGiostre(g, W, H, f) {
+    vgrad(g, 0, 0, W, 130, ["#120c1e", "#2a1838", "#4a2a4a"]);
+    for (let i = 0; i < 22; i++) px(g, (i * 53) % W, (i * 31) % 70, 1, 1, (f / 25 + i) % 6 < 1 ? "#fff" : "rgba(255,255,255,.35)");
+    // la ruota panoramica ferma (gira se toccata)
+    const rot = since("dt_giostre", 0) < 200 ? f / 60 : 0.3; g.strokeStyle = "#7a5a8a"; g.lineWidth = 2; g.beginPath(); g.arc(70, 66, 44, 0, Math.PI * 2); g.stroke();
+    for (let i = 0; i < 8; i++) { const a = rot + i * Math.PI / 4, x = 70 + Math.cos(a) * 44, y = 66 + Math.sin(a) * 44; g.beginPath(); g.moveTo(70, 66); g.lineTo(x, y); g.stroke(); px(g, x - 5, y, 10, 8, ["#ffd36b", "#ff7a7a", "#7ae0ff"][i % 3]); }
+    px(g, 64, 66, 12, 64, "#3a2a4a");
+    // la giostra dei cavalli con il Cartografo dentro (lucine)
+    px(g, 140, 96, 90, 40, "#3a2a4a"); g.fillStyle = "#c0392b"; g.beginPath(); g.moveTo(132, 98); g.lineTo(185, 70); g.lineTo(238, 98); g.fill(); for (let i = 0; i < 6; i++) { const on = since("dt_giostre", 1) < 150 ? (Math.floor(f / 6) + i) % 2 : 1; circ(g, 142 + i * 16, 98, 2.5, on ? "#ffd36b" : "#4a3a5a"); }
+    for (let i = 0; i < 4; i++) { const b = Math.sin(f / 20 + i) * (since("dt_giostre", 1) < 150 ? 4 : 0); px(g, 150 + i * 20, 108 + b, 10, 8, "#e8e0d0"); px(g, 154 + i * 20, 102 + b, 2, 26, "#c9a227"); }
+    // la gabbia di rete (campetto da strada)
+    px(g, 246, 80, 70, 56, "rgba(40,30,50,.6)"); g.strokeStyle = "rgba(200,200,220,.55)"; g.lineWidth = 1; for (let x = 246; x <= 316; x += 7) { g.beginPath(); g.moveTo(x, 80); g.lineTo(x, 136); g.stroke(); } for (let y = 80; y <= 136; y += 7) { g.beginPath(); g.moveTo(246, y); g.lineTo(316, y); g.stroke(); }
+    if (since("dt_giostre", 2) < 60) { circ(g, 260 + since("dt_giostre", 2) * 0.8, 120 - Math.abs(Math.sin(since("dt_giostre", 2) / 6)) * 20, 3, "#fff"); }
+    // terreno e graffiti verdi sul recinto dello stadio
+    px(g, 0, 136, W, 64, "#3a3236"); for (let i = 0; i < 9; i++) px(g, i * 36, 136, 1, 64, "rgba(0,0,0,.3)");
+    px(g, 0, 150, W, 20, "#eef2f1"); px(g, 0, 150, W, 3, "#2a9d8f");
+    g.fillStyle = since("dt_giostre", 3) < 150 ? "#5af06a" : "#3ac05a"; g.font = "900 13px Impact, sans-serif"; g.fillText("IL 14 NON È MORTO", 70, 166);
+    // il cartello «chiuso per sempre» (si gira: «riapre presto»)
+    px(g, 14, 170, 60, 18, "#e8d6b0"); g.fillStyle = "#3a2414"; g.font = "bold 7px sans-serif"; g.fillText(toggled("dt_giostre", 4) ? "RIAPRE PRESTO" : "CHIUSO", 22, 182);
+    paperGrain(g, W, H, f, 0.04);
+  }
+  function bgDtArchivio(g, W, H, f) {
+    px(g, 0, 0, W, H, "#0e1a1a");
+    // scaffali infiniti di faldoni in prospettiva
+    for (let k = 0; k < 6; k++) { const x = 20 + k * 50, h = 120 - k * 6; px(g, x, 30 + k * 3, 30, h, "#1f2f2e"); for (let r = 0; r < 6; r++) for (let i = 0; i < 4; i++) px(g, x + 3 + i * 7, 34 + k * 3 + r * 18, 5, 14, (r + i + k) % 5 === 0 ? "#2a9d8f" : "#cfd6c8"); }
+    // il terminale che mostra il registro
+    px(g, 120, 120, 80, 50, "#cfd6c8"); px(g, 126, 124, 68, 38, "#04140f"); g.fillStyle = "#5af0c8"; g.font = "bold 5px monospace";
+    const L = since("dt_archivio", 0) < 200 ? ["REGISTRO ARMADIETTO 7", "#031 blu  UFFICIO", "#032 verde FUORI", "#033 verde ??? (14)", "#034 blu  UFFICIO"] : ["REGISTRO ARMADIETTO 7", "accesso riservato", "", "> _", ""];
+    L.forEach((t, i) => g.fillText(t, 130, 132 + i * 7));
+    // il registratore a bobine (la Voce)
+    px(g, 220, 132, 60, 34, "#3a3a44"); const spin = since("dt_archivio", 1) < 200 ? f / 8 : 0; [236, 264].forEach((cx) => { g.save(); g.translate(cx, 146); g.rotate(spin); circ(g, 0, 0, 9, "#1a1a22"); px(g, -1, -9, 2, 18, "#5a5a66"); px(g, -9, -1, 18, 2, "#5a5a66"); g.restore(); });
+    if (since("dt_archivio", 1) < 200) { g.fillStyle = "#ffb347"; g.font = "italic 6px sans-serif"; g.fillText("«…sono io. Se mi senti…»", 214, 176); }
+    // neon che sfarfalla sopra
+    const nf = (f % 120) < 6 ? 0.2 : 1; px(g, 60, 8, 200, 4, `rgba(200,255,240,${nf})`); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 160, 12, 90, "200,255,240", 0.15 * nf); g.restore();
+    // la porta numero 8 aperta, alle spalle
+    px(g, 6, 120, 30, 60, "#eef2f1"); px(g, 10, 124, 22, 56, toggled("dt_archivio", 2) ? "#1a1a1a" : "#7f8f8b"); g.fillStyle = "#2b3a3a"; g.font = "bold 8px sans-serif"; g.fillText("8", 18, 140);
+    paperGrain(g, W, H, f, 0.03);
+  }
+
   // elementi interattivi: [x, y, w, h, frase, azione?("tog" = acceso/spento)]
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
@@ -4536,6 +4575,19 @@
       [196, 18, 118, 86, "🏟️ Il vecchio Stadio del Porto: i fari si accendono per un attimo. Qualcuno, lì dentro, ha ancora le chiavi."],
       [80, 104, 60, 44, "⛵ Una barca si abbassa all'improvviso: un gabbiano ci è salito sopra con tutta la sua autorità."],
       [146, 132, 38, 34, "🚪 L'ingresso del personale del Complesso: bianco, pulito, fuori posto tra i muri di mattoni."],
+    ] },
+    dt_giostre: { draw: bgDtGiostre, hot: [
+      [24, 20, 92, 92, "🎡 La ruota panoramica è ferma da tre anni. La tocchi e, per un attimo, gira. Qualcuno ha ancora la corrente."],
+      [132, 66, 108, 70, "🎠 La giostra dei cavalli: si accende, i cavalli salgono e scendono. Dentro c'è una luce di schermi: il covo del Cartografo."],
+      [244, 78, 74, 60, "🥅 La gabbia di rete: un pallone rimbalza da solo contro la rete. «Qui si gioca senza regole. Cioè: con le nostre»."],
+      [60, 152, 200, 18, "🟩 «IL 14 NON È MORTO». La vernice verde è ancora fresca."],
+      [10, 168, 68, 22, "🪧 Il cartello del luna park: lo giri. «CHIUSO» da una parte, «RIAPRE PRESTO» dall'altra.", "tog"],
+    ] },
+    dt_archivio: { draw: bgDtArchivio, hot: [
+      [118, 118, 84, 54, "🖥️ Il terminale mostra il registro dell'Armadietto 7: chi ha messo ogni biglietto, e con che inchiostro."],
+      [214, 128, 70, 52, "📼 Il registratore a bobine: le bobine girano. Una voce, piano: «…sono io. Se mi senti…». Poi silenzio."],
+      [4, 118, 36, 64, "🚪 La porta numero 8: la apri e la chiudi. Dall'altra parte, il ronzio del Reparto Morale.", "tog"],
+      [20, 26, 290, 90, "🗂️ Faldoni a perdita d'occhio: «Procedura Duale · contratti». Uno ha il tuo numero sulla costola. E sotto, a matita, un 14."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };

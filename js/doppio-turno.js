@@ -233,10 +233,15 @@
   const activeChapter = () => { const m = mem(); let best = null; Object.keys(CHAPTERS).map(Number).sort((a, b) => a - b).forEach((n) => { if (n <= m.ch) best = CHAPTERS[n]; }); return best || CHAPTERS[1] || null; };
   const CAST_OK = (id) => !!(api && api.CAST && api.CAST[id]);
   const goalNow = () => { const c = activeChapter(); return c && c.goal ? T(c.goal(stepOf(c.n))) : ""; };
+  // capitoli «attivi» su una zona: quello che l'ha creata e i successivi già sbloccati (dal più recente). I successivi possono
+  // ritoccare la zona con def.patch[zid] = { npcs(step, lista) }, e i loro talk/obj hanno la precedenza.
+  const chainFor = (zr) => { const m = mem(); return Object.keys(CHAPTERS).map(Number).filter((n) => n >= zr.ch && n <= m.ch).sort((a, b) => b - a).map((n) => CHAPTERS[n]); };
   function refreshZone() {
     const zr = zoneRec(); if (!zr) return;
     const c = CHAPTERS[zr.ch]; castHero();
-    const s = stepOf(c.n); zr.Z.npcs = (zr.spec.npcs ? zr.spec.npcs(s) : []).filter((n) => CAST_OK(n.id));
+    const s = stepOf(c.n); let list = zr.spec.npcs ? zr.spec.npcs(s) : [];
+    chainFor(zr).slice().reverse().forEach((cc) => { const p = cc.n !== zr.ch && cc.patch && cc.patch[api.trZone()]; if (p && p.npcs) list = p.npcs(stepOf(cc.n), list); });
+    zr.Z.npcs = list.filter((n) => CAST_OK(n.id));
     const hints = Object.assign({}, typeof zr.spec.hints === "function" ? zr.spec.hints(s) : zr.spec.hints || {}), gl = goalNow();
     [...new Set([...(zr.spec.areas || []).map((a) => a[4]), zr.spec.short])].forEach((k) => { if (k) hints[k] = `[${zr.spec.half === "d" ? "DENTRO" : "FUORI"}] ` + (gl ? "Obiettivo: " + gl + " · " : "") + (hints[k] || ""); });
     zr.Z.hints = hints;
@@ -359,8 +364,8 @@
     Z.decor = function (cx, cy) { if (spec.decor) safe(() => spec.decor(GP, cx, cy, dd(cx, cy))); };
     Z.top = function (cx, cy) { if (spec.top) safe(() => spec.top(GP, cx, cy, dd(cx, cy))); safe(() => topFx(GP)); };
     Z.onObj = function (ch, tx, ty) {
-      const c = CHAPTERS[chN];
-      const f = c && c.obj && (c.obj[zid + ":" + ch + ":" + tx + "," + ty] || c.obj[zid + ":" + ch]);
+      let f = null;
+      chainFor(ZONES[zid]).some((c) => { f = c.obj && (c.obj[zid + ":" + ch + ":" + tx + "," + ty] || c.obj[zid + ":" + ch]); return !!f; });
       if (f) { f({ ch, tx, ty, zid }); return true; }
       if (ch === "K") { locker(done); return true; }
       const flav = spec.flavor && (spec.flavor[tx + "," + ty] || spec.flavor[ch]);
@@ -480,7 +485,7 @@
     const desc = Object.getOwnPropertyDescriptor(window, "trTalkHook");
     const chained = !(desc && desc.set);
     const prev = chained ? window.trTalkHook : null;
-    const mineC = (id) => { const zr = zoneRec(); if (!zr || !zr.Z.npcs.some((n) => n.id === id)) return null; const c = CHAPTERS[zr.ch]; return c && c.talk && c.talk[id] ? c : null; };
+    const mineC = (id) => { const zr = zoneRec(); if (!zr || !zr.Z.npcs.some((n) => n.id === id)) return null; return chainFor(zr).find((c) => c.talk && c.talk[id]) || null; };
     window.trTalkHook = function (id) { const c = mineC(id); if (c) { castHero(); safe(() => c.talk[id](), null); return true; } return chained && typeof prev === "function" ? prev(id) : false; };
     const prevNews = window.trNewsHook;
     window.trNewsHook = function (id) { const c = zoneRec() && mineC(id); if (c) return c.news ? !!safe(() => c.news(id, stepOf(c.n)), false) : false; return typeof prevNews === "function" ? prevNews(id) : null; };
