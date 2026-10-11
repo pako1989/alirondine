@@ -22030,7 +22030,7 @@
     try {
       const ch = ($("chap") || {}).textContent || "", e = MN_IDS.find(([n]) => ch.startsWith(n));
       if (e && list.some((b) => b && b.label === "◂ Menu")) return mnDressMenu(e[1], list);
-      if (ch === "" && list.some((b) => b && b.label === "Dove andare adesso?") && list.some((b) => b && b.label === "Impostazioni")) return mnDressTitle(list);
+      if (ch === "" && list.some((b) => b && (b.label === "Dove andare adesso?" || b.label === "Altro…")) && list.some((b) => b && b.label === "Impostazioni")) return mnDressTitle(list);
     } catch {}
     return list;
   }
