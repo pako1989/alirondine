@@ -549,7 +549,10 @@
       px(g, sx, sy, TS, TS, "#451a03");
       px(g, sx + 1, sy + 1, 14, 6, "#b91c1c");
       px(g, sx + 3, sy + 8, 10, 6, "#fbbf24");
+    } else {
+      return false;
     }
+    return true;
   }
 
   function makeLayers(w, h) {
@@ -1025,27 +1028,27 @@
   // ------------------------------------------------------------------ Inizializzazione Cast Feudale
   function registerCast() {
     XTOOLS.cast("fe_benedict", {
-      name: "Benedict", tag: "Stratega", hair: "#cbd5e1", style: "slick", skin: "#f8fafc", eye: "#475569",
+      name: "Benedict", tag: "Stratega", hair: "#cbd5e1", style: "slick", skin: "#e8c9a8", eye: "#475569",
       shirt: "#1e3a8a", bg: ["#1e3a8a", "#93c5fd"], num: "4"
     }, "Stratega supremo di Casa Wolffort. Freddo calcolatore di Utilità, devoto alla prosperità del feudo.");
 
     XTOOLS.cast("fe_roland", {
-      name: "Principe Roland", tag: "Erede di Glenbrook", hair: "#ca8a04", style: "spiky", skin: "#fef08a", eye: "#2563eb",
+      name: "Principe Roland", tag: "Erede di Glenbrook", hair: "#ca8a04", style: "spiky", skin: "#f0c9a0", eye: "#2563eb",
       shirt: "#2563eb", bg: ["#1d4ed8", "#ffd23f"], num: "7"
     }, "Principe cadetto di Glenbrook e migliore amico del Campione. Simbolo ardente di Moralità e rettitudine.");
 
     XTOOLS.cast("fe_frederica", {
-      name: "Lady Frederica", tag: "Spirito dei Roselliani", hair: "#f472b6", style: "long", skin: "#fdf2f8", eye: "#0284c7",
+      name: "Lady Frederica", tag: "Spirito dei Roselliani", hair: "#f472b6", style: "long", skin: "#f6d9c4", eye: "#0284c7",
       shirt: "#db2777", bg: ["#9d174d", "#fbcfe8"], num: "11"
     }, "Giovane nobildonna Aesfrost legata al popolo dei Roselliani. Simbolo di Libertà e riscatto.");
 
     XTOOLS.cast("fe_erador", {
-      name: "Comandante Erador", tag: "Baluardo", hair: "#94a3b8", style: "buzz", skin: "#e2e8f0", eye: "#334155",
+      name: "Comandante Erador", tag: "Baluardo", hair: "#94a3b8", style: "buzz", skin: "#d9a77a", eye: "#334155",
       shirt: "#b91c1c", bg: ["#991b1b", "#fbbf24"], num: "5"
     }, "Veterano delle mura e gigante dal cuore leale. Difensore incrollabile dei Wolffort.");
 
     XTOOLS.cast("fe_avlora", {
-      name: "Generale Avlora", tag: "Spada d'Acciaio", hair: "#18181b", style: "slick", skin: "#f4f4f5", eye: "#dc2626",
+      name: "Generale Avlora", tag: "Spada d'Acciaio", hair: "#18181b", style: "slick", skin: "#e2b99a", eye: "#dc2626",
       shirt: "#450a0a", bg: ["#7f1d1d", "#f87171"], num: "10"
     }, "La più temuta stratega d'assalto del Ducato d'Acciaio. Imbattuta sul campo.");
 
@@ -1131,6 +1134,21 @@
     enterZone(curZ);
   }
 
+  function installHooks() {
+    const desc = Object.getOwnPropertyDescriptor(window, "trTalkHook");
+    const chained = !(desc && desc.set);
+    const prev = chained ? window.trTalkHook : null;
+    window.trTalkHook = function (id) {
+      const zr = zoneRec();
+      if (zr && zr.Z.npcs.some((n) => n.id === id)) {
+        const c = CHAPTERS[zr.ch] || activeChapter();
+        const f = c && c.talk && c.talk[id];
+        if (typeof f === "function") { castHero(); f(); return true; }
+      }
+      return chained && typeof prev === "function" ? prev(id) : false;
+    };
+  }
+
   function init() {
     const a = window.__borgoApi;
     if (!a || !a.TRZ || !a.trGo || !a.play || !a.scene || !a.match) {
@@ -1146,6 +1164,7 @@
     COS_Q.splice(0).forEach(([id, d]) => { if (a.COSM && !a.COSM[id]) a.COSM[id] = d; });
     PENDING.splice(0).forEach(addChapter);
     setupCouncilFloatingButton();
+    installHooks();
   }
 
   // ============================================================================
