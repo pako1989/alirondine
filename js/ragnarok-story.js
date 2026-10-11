@@ -704,6 +704,15 @@
   }
 
   // ------------------------------------------------------------------ Strumenti per i Capitoli
+  const RV = (ads, crowd, ground, line, tint, glow, glow2) => ({ ads, crowd, ground, line, tint, glow, glow2, grid: "rgba(255,255,255,.06)" });
+  const VENUES = {
+    rag_match_1: RV([["JARL RAGNAR", "#7c2d12"], ["DRAKKAR & FIGLI", "#1e3a8a"], ["IDROMELE DEL FIORDO", "#92400e"], ["RUNE DEL GELO", "#0e7490"]], ["#7c2d12", "#1e3a8a", "#e2e8f0", "#92400e", "#cbd5e1"], ["#cfe3f2", "#dbeafe"], "#1e3a8aee", "rgba(147,197,253,.16)", "147,197,253", "250,204,21"),
+    rag_match_2: RV([["FUCINE DI BROKK", "#7f1d1d"], ["MARTELLI SINDRI", "#78350f"], ["ORO DEI NANI", "#a16207"], ["INCUDINE VIVA", "#44403c"]], ["#44403c", "#7f1d1d", "#a16207", "#57534e", "#d6d3d1"], ["#3b2a22", "#4a3328"], "#fdba74dd", "rgba(120,30,0,.22)", "249,115,22", "250,204,21"),
+    rag_match_3: RV([["OMBRA DI SURTR", "#450a0a"], ["CENERE & BRACE", "#44403c"], ["MAGMA CLUB", "#7c2d12"], ["FIMBULWINTER", "#1e293b"]], ["#292524", "#450a0a", "#57534e", "#7f1d1d", "#a8a29e"], ["#44403c", "#57534e"], "#f87171cc", "rgba(60,20,20,.3)", "239,68,68", "251,146,60"),
+    rag_match_4: RV([["OMBELICO DEL COSMO", "#a16207"], ["SFERA DI LUCE", "#ca8a04"], ["YGGDRASIL", "#14532d"], ["I NOVE REGNI", "#1e3a8a"]], ["#a16207", "#ca8a04", "#e2e8f0", "#14532d", "#fde68a"], ["#e7d5a6", "#f0e0b3"], "#92400ecc", "rgba(253,224,71,.14)", "253,224,71", "147,197,253")
+  };
+  const WEATHER = { rag_match_1: "neve", rag_match_2: "sereno", rag_match_3: "vento", rag_match_4: "neve" };
+
   const XTOOLS = {
     stepOf, setStep, note, addRune, T, F, esc, say, ask, done, reward,
     sfxHorn: sfxRagnarokHorn, sfxDrum: sfxRagnarokDrum, sfxLava: sfxRagnarokLavaCrack, sfxValkyrie: sfxRagnarokValkyrie,
@@ -720,6 +729,10 @@
     },
     playMatch: (cfg) => {
       inMatch = true;
+      if (typeof cfg.intro === "string") cfg.intro = T(cfg.intro);
+      if (!cfg.venue && VENUES[cfg.id]) cfg.venue = VENUES[cfg.id];
+      if (!cfg.weather && WEATHER[cfg.id]) cfg.weather = WEATHER[cfg.id];
+      if (!cfg.homeKit) cfg.homeKit = ["#7c2d12", "#e2e8f0"];
       const prevDone = cfg.done;
       cfg.onDone = (res) => {
         inMatch = false;
