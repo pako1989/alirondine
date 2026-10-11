@@ -21711,6 +21711,8 @@
     sabbia: { n: "Sabbia", fx: { spd: 0.9, fr: 0.972, tk: -0.03, nz: 0.02, sh: 0.96 }, ok: () => seasonDone(1), why: "La spiaggia di Tano: il pallone affonda, l'orgoglio no. Ogni scatto costa il doppio e dura la metà." },
     fango: { n: "Fango e pioggia", fx: { spd: 0.94, fr: 0.992, tk: 0.05, nz: 0.03, sh: 1.03, rain: true }, ok: () => seasonDone(2), why: "Il campetto allagato dopo tre giorni di pioggia. Le pozzanghere hanno già un nome. La palla scivola, i contrasti anche." },
     notte: { n: "Notte con i fari", fx: { spd: 1, fr: 0.985, tk: 0, nz: 0.02, sh: 1.06, night: true }, ok: () => seasonDone(3), why: "Si gioca di notte, coi fari dei pescherecci puntati sul campo. Più luce di così non l'ha mai avuta nessuno." },
+    neve: { n: "Neve del Nord", fx: { spd: 0.95, fr: 0.99, tk: 0.03, nz: 0.02, sh: 1, snow: true }, ok: () => true, why: "Il campo di Fimbul sotto la neve: il fiato si congela, il pallone scivola e i Lupi ringhiano." },
+    cenere: { n: "Cenere e braci", fx: { spd: 0.97, fr: 0.988, tk: 0.04, nz: 0.02, sh: 1.03, ash: true }, ok: () => true, why: "Terra bruciata e braci sospese nell'aria. Qui la fine del mondo è solo un tempo supplementare." },
     molo: { n: "Molo al tramonto", fx: { spd: 1.05, fr: 0.99, tk: 0.02, nz: 0.01, sh: 1.08, sunset: true, dock: true }, ok: () => true, why: "La banchina in pietra affacciata sul golfo dorato. Se calci troppo forte la palla finisce in mare con uno splash!" },
   };
   const AZ_PITS = ["erba", "campo", "sabbia", "fango", "notte", "molo"];
@@ -21792,7 +21794,7 @@
   function azBg15(A) {
     if (A.opt && A.opt.pitch === "molo" && window.azProDrawPitchMolo) return window.azProDrawPitchMolo(A, g, W, H);
     const p = A.opt ? A.opt.pitch : "erba", rain = A.pit.rain, night = A.pit.night;
-    const base = p === "sabbia" ? ["#d9bd78", "#d2b46c"] : rain ? ["#42703f", "#3b6638"] : night ? ["#1f6b3d", "#237444"] : ["#2f9e55", "#34a95c"];
+    const base = p === "neve" ? ["#dfe9f2", "#d3e0ec"] : p === "cenere" ? ["#3b3432", "#443b38"] : p === "sabbia" ? ["#d9bd78", "#d2b46c"] : rain ? ["#42703f", "#3b6638"] : night ? ["#1f6b3d", "#237444"] : ["#2f9e55", "#34a95c"];
     px(0, 0, W, H, base[0]); for (let i = 0; i < 8; i++) px(i * 40, 0, 20, H, base[1]);
     if (rain) for (let i = 0; i < 9; i++) { g.fillStyle = "rgba(40,30,15,.28)"; g.beginPath(); g.ellipse(30 + (i * 83) % 270, AZ_UP + 12 + (i * 47) % (AZ_DN - AZ_UP - 20), 16, 5, 0, 0, 7); g.fill(); }
     if (p === "campo") { px(0, 0, W, AZ_UP - 2, "#3a2f25"); px(0, AZ_DN + 2, W, H - AZ_DN - 2, "#3a2f25"); px(0, 0, AZ_L - 2, H, "#3a2f25"); px(AZ_R + 2, 0, W - AZ_R - 2, H, "#3a2f25"); }
@@ -21803,6 +21805,8 @@
     if (A.gold) { g.strokeStyle = "#ffd23f"; g.lineWidth = 2; g.beginPath(); g.arc(A.ball.x, A.ball.y, 6 + Math.sin(A.t / 6) * 1.5, 0, 7); g.stroke(); }
     A.puL.forEach((u) => { const c = AZ_PUN[u.ty]; if (u.life < 120 && Math.floor(u.life / 8) % 2) return; g.fillStyle = c[1]; g.beginPath(); g.arc(u.x, u.y, 6 + Math.sin(A.t / 8) * 0.8, 0, 7); g.fill(); g.strokeStyle = "#0008"; g.lineWidth = 1; g.stroke(); g.fillStyle = "#0a1a30"; g.font = "bold 8px sans-serif"; g.textAlign = "center"; g.fillText(c[0], u.x, u.y + 3); });
     if (A.pit.night) { g.fillStyle = "rgba(5,15,40,.5)"; g.fillRect(0, 0, W, H); const pr = g.globalCompositeOperation; g.globalCompositeOperation = "lighter"; [[60, 101], [260, 101], [160, 101]].forEach(([x, y]) => { const gr = g.createRadialGradient(x, y, 6, x, y, 120); gr.addColorStop(0, "rgba(255,240,170,.32)"); gr.addColorStop(1, "rgba(255,240,170,0)"); g.fillStyle = gr; g.fillRect(0, 0, W, H); }); g.globalCompositeOperation = pr; }
+    if (A.pit.snow) { g.fillStyle = "rgba(255,255,255,.85)"; for (let i = 0; i < 50; i++) { const x = (i * 47 + Math.sin(A.t / 30 + i) * 8 + A.t * 0.4) % W, y = (i * 31 + A.t * (0.9 + (i % 3) * 0.4)) % H; g.fillRect(x, y, 2, 2); } g.fillStyle = "rgba(150,190,230,.1)"; g.fillRect(0, 0, W, H); }
+    if (A.pit.ash) { g.fillStyle = "rgba(255,120,40,.9)"; for (let i = 0; i < 36; i++) { const x = (i * 59 + Math.sin(A.t / 25 + i) * 10) % W, y = H - ((i * 37 + A.t * (0.5 + (i % 4) * 0.3)) % H); g.fillRect(x, y, 2, 2); } g.fillStyle = "rgba(120,30,10,.12)"; g.fillRect(0, 0, W, H); }
     if (A.pit.rain) { g.strokeStyle = "rgba(200,220,255,.45)"; g.lineWidth = 1; g.beginPath(); for (let i = 0; i < 46; i++) { const x = (i * 53 + A.t * 3) % W, y = (i * 29 + A.t * 7) % H; g.moveTo(x, y); g.lineTo(x - 2, y + 7); } g.stroke(); g.fillStyle = "rgba(40,55,80,.18)"; g.fillRect(0, 0, W, H); }
     if (A.obj) { const ok = A.obj.ok(A.sc[0], A.sc[1], A); g.font = "bold 7px sans-serif"; g.textAlign = "right"; g.fillStyle = ok && A.t > 60 ? "#9be28f" : "#fff"; g.fillText(`OBIETTIVO: ${A.obj.txt}`, 314, 193); g.textAlign = "left"; }
   }
