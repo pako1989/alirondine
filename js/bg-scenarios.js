@@ -2580,7 +2580,7 @@
     g.lineTo(drakX + 86, drakY + 6);
     g.closePath();
     g.fill();
-    px(drakX + 98, drakY - 6, 2, 2, "#ea580c"); // Occhio di drago fuso
+    px(g, drakX + 98, drakY - 6, 2, 2, "#ea580c"); // Occhio di drago fuso
     // Scudi rotondi vichinghi lungo la murata
     for (let s = 0; s < 5; s++) {
       const sx = drakX + 22 + s * 11;

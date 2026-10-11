@@ -564,49 +564,73 @@
     };
   }
 
+  const EXIT_CH = "^><du";
   function registerZone(chN, id, Z) {
     if (!api || !api.TRZ) return;
     const rec = {
       ch: chN, Z, id,
-      build(m, fill) {
-        ZX.map = m; ZX.id = id;
-        fill("A");
-        const Ls = makeLayers(Z.w, Z.h);
-        Z.build(Ls);
-      },
-      tile: drawTile,
       npcs() {
         const s = stepOf(chN);
-        return typeof Z.npcs === "function" ? Z.npcs(s) : (Z.npcs || []);
+        const l = typeof Z.npcs === "function" ? Z.npcs(s) : (Z.npcs || []);
+        return l.filter((n) => api.CAST && api.CAST[n.id]).map((n) => (n.at ? n : { ...n, at: [n.x, n.y] }));
       },
-      onObj(o) {
+      onObj(ch, tx, ty) {
         const c = CHAPTERS[chN] || activeChapter();
-        const key = `${id}:${o}`;
-        if (c && c.obj && c.obj[key]) { castHero(); c.obj[key](); return true; }
-        return false;
+        const o = (c && c.obj) || {};
+        const fn = o[`${id}:${ch}:${tx},${ty}`] || o[`${id}:${tx},${ty}`] || o[`${id}:${ch}`];
+        if (typeof fn !== "function") return false;
+        castHero(); fn({ ch, tx, ty, zid: id }); return true;
       }
     };
     ZONES[id] = rec;
-    api.TRZ[id] = {
-      name: Z.name, short: Z.short || Z.name, sub: Z.sub || "",
-      w: Z.w, h: Z.h, bg: Z.bg || "rag_fiordo", theme: Z.theme || "torino",
-      build: rec.build, tile: rec.tile, npcs: rec.npcs,
-      items: Z.item || ["Pietra Runica", "Pietre"],
-      onObj: (o) => rec.onObj(o)
+    // Etichette dei pulsanti: ogni lettera con un gestore deve avere la sua (anche B, S, D, O, N, M)
+    const act = Object.assign({}, Z.act || {});
+    const c0 = CHAPTERS[chN];
+    Object.keys((c0 && c0.obj) || {}).forEach((k) => {
+      if (k.indexOf(id + ":") !== 0) return;
+      const ch = k.slice(id.length + 1);
+      if (ch.length === 1 && !act[ch]) act[ch] = EXIT_CH.includes(ch) ? "Passa oltre" : "Esamina";
+    });
+    const T0 = {
+      name: Z.name, short: Z.short || Z.name, sub: Z.sub || "", need: 0,
+      w: Z.w, h: Z.h, start: Z.start || [2, 2], theme: Z.theme || "torino", bg: Z.bg || "rag_fiordo",
+      bus: "cancello", busLabel: "Lascia Midgard",
+      item: Z.item || ["Pietra Runica", "Pietre"], itemCos: Z.itemCos, items: Z.items || [],
+      bld: [], npcs: [], areas: Z.areas || [], hints: {}, pitch: [-20, -20, 1, 1],
+      solid: SOLID, act, intro: [],
+      me() {
+        const c = api.CAST.hero || api.CAST.leo || {};
+        return Object.assign({}, c);
+      },
+      build(m, fill) {
+        ZX.map = m; ZX.id = id;
+        fill(0, 0, Z.w - 1, Z.h - 1, ",");
+        Z.build(makeLayers(Z.w, Z.h));
+        T0.npcs = rec.npcs();
+      },
+      tile: drawTile,
+      onObj: (ch, tx, ty) => rec.onObj(ch, tx, ty),
+      menu() {
+        api.trAsk("voce", "<b>Ragnarok Ball</b><br><span style=\"color:var(--dim)\">Il Fuoco di Fimbulwinter</span>", [
+          { label: "◂ Torna a esplorare", cls: "hot", fn: () => api.trResume() },
+          { label: "Menu della saga", sub: "Diario, capitoli, progressi", fn: () => api.trExitTo(() => openMain()) },
+          { label: "Esci da Ragnarok Ball", sub: "I progressi restano salvati", fn: () => leaveToModes() }
+        ], bgNow());
+      }
     };
+    T0.npcs = rec.npcs();
+    rec.T = T0;
+    api.TRZ[id] = T0;
   }
 
   function zoneRec() {
-    const TW = window.TW;
-    return TW && TW.id && ZONES[TW.id] ? ZONES[TW.id] : null;
+    const z = api && api.trZone ? api.trZone() : null;
+    return z && ZONES[z] ? ZONES[z] : null;
   }
 
   function refreshZone() {
-    const TW = window.TW;
-    if (!TW || !TW.z || !zoneRec()) return;
-    const zr = zoneRec(), c = CHAPTERS[zr.ch] || activeChapter();
-    TW.npcs = zr.npcs();
-    if (typeof TW.loadNpcs === "function") TW.loadNpcs();
+    const zr = zoneRec();
+    if (zr && zr.T) zr.T.npcs = zr.npcs();
   }
 
   function enterZone(zid, x, y) {
@@ -636,8 +660,11 @@
     save();
   }
 
+  let UITOK = 0;
   function say(lines, onDone, bg) {
     if (!api) return;
+    const tok = ++UITOK, cb = onDone;
+    onDone = (typeof cb !== "function" || cb === done) ? cb : () => { cb(); if (UITOK === tok && !inMatch && zoneRec()) done(); };
     const items = lines.map(([who, txt]) => ({
       who,
       text: esc(T(txt)).replace(/\n/g, "<br>"),
@@ -648,6 +675,7 @@
 
   function ask(who, prompt, opts, bg) {
     if (!api) return;
+    UITOK++;
     api.trAsk(
       who,
       esc(T(prompt)).replace(/\n/g, "<br>"),
@@ -1342,7 +1370,7 @@
         ], done);
       }
       if (s === 2 || s === 3) {
-        const inForgia = !!(window.TW && window.TW.id === "rag_forgia");
+        const inForgia = !!(api.trZone && api.trZone() === "rag_forgia");
         if (inForgia) {
           if (s === 2) setStep(N, 3);
           return ask("rag_brokk", "«Sei giunto nella nostra forgia cerimoniale, {n}. Pronto a vedere se i tuoi nuovi tacchetti reggono l'impatto col muro dei Nani?»", [
@@ -2479,7 +2507,7 @@
         if (h) h.click();
         return;
       }
-      if (zoneRec()) { api.trLeave(); openMain(); }
+      if (zoneRec()) { api.trExitTo(() => openMain()); }
     };
     document.body.appendChild(btn);
     setInterval(() => {
