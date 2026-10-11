@@ -107,7 +107,7 @@
   // Pavimenti: , terra · : selciato · + lastre · - campo · " tappeto · = assi · ; erba alta (nasconde)
   const SOLID = "atryqwcsxflbgjnkopmeuzd";
   const isFloor = (ch) => !!ch && FLOORS.includes(ch);
-  const ZX = { map: null, under: null, meta: null, id: "", rg: REG.bassa, rk: "bassa", lights: [] };
+  const ZX = { map: null, under: null, meta: null, id: "", rg: REG.bassa, rk: "bassa", lights: [], statues: [] };
   const at = (tx, ty) => (ZX.map && ZX.map[ty] && ZX.map[ty][tx]) || "a";
   const undAt = (tx, ty) => (ZX.under && ZX.under[ty] && ZX.under[ty][tx]) || ",";
   let GP = null;
@@ -194,18 +194,12 @@
     l(sx, sy, tx, ty, fr) { floorPaint(undAt(tx, ty), sx, sy, tx, ty); shadow(sx, sy, 3); P(sx + 7, sy + 2, 2, 13, "#2a2a2a"); P(sx + 4, sy - 2, 8, 6, "#1a1a1a"); P(sx + 5, sy - 1, 6, 4, "#ffcf7a"); light(sx + 8, sy + 1, 26 + Math.sin(fr / 10 + tx) * 2, "255,190,100", 0.5); },
     b(sx, sy, tx, ty) { floorPaint(undAt(tx, ty), sx, sy, tx, ty); shadow(sx, sy, 7); P(sx + 1, sy + 6, 14, 3, "#6a4a30"); P(sx + 2, sy + 9, 2, 5, "#3a2a1a"); P(sx + 12, sy + 9, 2, 5, "#3a2a1a"); },
     g(sx, sy, tx, ty) { floorPaint(undAt(tx, ty), sx, sy, tx, ty); P(sx + 2, sy + 2, 12, 12, "rgba(255,255,255,.18)"); for (let i = 3; i < 14; i += 3) { P(sx + i, sy + 2, 1, 12, "rgba(255,255,255,.45)"); P(sx + 2, sy + i, 12, 1, "rgba(255,255,255,.45)"); } P(sx + 1, sy + 1, 14, 2, "#e8e2d4"); },
-    j(sx, sy, tx, ty, fr) { P(sx, sy, 16, 16, "#4a4440"); P(sx, sy + 7, 16, 2, "rgba(0,0,0,.3)"); const c = ZX.standCol || ["#a8322a", "#5a5a62", "#e8e2d4"]; for (let i = 0; i < 2; i++) for (let k = 0; k < 2; k++) { const jmp = (Math.floor(fr / 12) + tx + i) % 5 === 0 ? 1 : 0; P(sx + 2 + i * 7, sy + 2 + k * 8 - jmp, 5, 5, c[(tx + i + k) % c.length]); P(sx + 3 + i * 7, sy + 1 + k * 8 - jmp, 3, 2, "#d9b38c"); } },
+    j(sx, sy, tx, ty, fr) { if (ZX.standCol === "empty") { P(sx, sy, 16, 16, (tx + ty) % 2 ? "#7a7468" : "#6e685c"); P(sx, sy + 7, 16, 2, "rgba(0,0,0,.3)"); P(sx, sy, 16, 1, "rgba(255,255,255,.15)"); if (rnd(tx, ty, 6) < 0.35) P(sx + 3 + (tx % 3) * 3, sy + 10, 4, 3, "#5f8a45"); if (rnd(tx, ty, 8) < 0.15) P(sx + 9, sy + 3, 2, 2, ["#e8c46a", "#d86a6a", "#e8e2d4"][tx % 3]); return; } P(sx, sy, 16, 16, "#4a4440"); P(sx, sy + 7, 16, 2, "rgba(0,0,0,.3)"); const c = ZX.standCol || ["#a8322a", "#5a5a62", "#e8e2d4"]; for (let i = 0; i < 2; i++) for (let k = 0; k < 2; k++) { const jmp = (Math.floor(fr / 12) + tx + i) % 5 === 0 ? 1 : 0; P(sx + 2 + i * 7, sy + 2 + k * 8 - jmp, 5, 5, c[(tx + i + k) % c.length]); P(sx + 3 + i * 7, sy + 1 + k * 8 - jmp, 3, 2, "#d9b38c"); } },
     n(sx, sy, tx, ty) { floorPaint(undAt(tx, ty), sx, sy, tx, ty); shadow(sx, sy, 4); P(sx + 7, sy + 7, 2, 8, "#3a2a1a"); P(sx + 2, sy + 1, 12, 8, "#8a7050"); P(sx + 2, sy + 1, 12, 1, "#aa9070"); P(sx + 4, sy + 4, 8, 1, "#2a1a10"); P(sx + 4, sy + 6, 6, 1, "#2a1a10"); },
     k(sx, sy, tx, ty, fr) { floorPaint(undAt(tx, ty), sx, sy, tx, ty); shadow(sx, sy, 7); P(sx + 2, sy + 4, 2, 11, "#4a3420"); P(sx + 12, sy + 4, 2, 11, "#4a3420"); GP.save(); GP.translate(sx + 8, sy + 8); GP.rotate(fr / 80); GP.strokeStyle = "#6a4a30"; GP.lineWidth = 2; GP.beginPath(); GP.arc(0, 0, 5, 0, 7); GP.stroke(); for (let i = 0; i < 4; i++) { GP.rotate(Math.PI / 2); GP.fillStyle = "#6a4a30"; GP.fillRect(-1, -7, 2, 7); } GP.restore(); P(sx + 1, sy + 13, 14, 1, "#8a8a9a"); },
-    o(sx, sy, tx, ty, fr) { // un Colosso addormentato, seduto, enorme (la statua sporge sulle file di sopra)
+    o(sx, sy, tx, ty) { // un Colosso addormentato (2x2): qui solo il pavimento, la statua la disegna drawStatues() sopra le tessere
       floorPaint(undAt(tx, ty), sx, sy, tx, ty);
-      if (at(tx - 1, ty) === "o" || at(tx, ty + 1) === "o") return; // si disegna dalla tessera in basso a sinistra del gruppo
-      const x = sx + (at(tx + 1, ty) === "o" ? 16 : 8), y = sy + 16, sk = ZX.sketched && ZX.sketched(tx, ty);
-      GP.fillStyle = "rgba(0,0,0,.3)"; GP.beginPath(); GP.ellipse(x, y - 2, 22, 6, 0, 0, 7); GP.fill();
-      GP.fillStyle = "#7a7468"; GP.fillRect(x - 18, y - 16, 36, 14); GP.fillRect(x - 14, y - 44, 28, 30); GP.fillStyle = "#6a645a"; GP.fillRect(x - 22, y - 30, 8, 22); GP.fillRect(x + 14, y - 30, 8, 22); GP.fillStyle = "#7a7468"; GP.fillRect(x - 9, y - 60, 18, 17);
-      GP.fillStyle = "rgba(60,90,40,.7)"; GP.fillRect(x - 12, y - 42, 10, 4); GP.fillRect(x + 4, y - 58, 6, 3); GP.fillRect(x - 18, y - 6, 12, 3);
-      GP.fillStyle = "#3a3630"; GP.fillRect(x - 5, y - 53, 3, 1); GP.fillRect(x + 2, y - 53, 3, 1);
-      if (sk) { GP.fillStyle = "#e8e2d4"; GP.font = "bold 8px Georgia, serif"; GP.textAlign = "center"; GP.fillText("✎", x, y - 64); GP.textAlign = "left"; }
+      if (at(tx - 1, ty) !== "o" && at(tx, ty + 1) !== "o" && ZX.statues.length < 12) ZX.statues.push([sx + (at(tx + 1, ty) === "o" ? 16 : 8), sy + 16, tx, ty]);
     },
     p(sx, sy, tx, ty) { floorPaint(undAt(tx, ty), sx, sy, tx, ty); shadow(sx, sy, 6); const c = ZX.rk === "palazzo" ? "#d8d0c0" : "#7a7468"; P(sx + 3, sy - 4, 10, 18, c); P(sx + 3, sy - 4, 3, 18, "rgba(255,255,255,.2)"); P(sx + 10, sy - 4, 3, 18, "rgba(0,0,0,.2)"); P(sx + 2, sy - 6, 12, 3, c); P(sx + 2, sy + 12, 12, 3, c); },
     m(sx, sy, tx, ty) { floorPaint(undAt(tx, ty), sx, sy, tx, ty); shadow(sx, sy, 7); [[3, 9, 5, 4], [8, 6, 6, 5], [5, 11, 7, 4], [10, 11, 4, 3]].forEach(([x, y, w, h], i) => { P(sx + x, sy + y, w, h, i % 2 ? "#6a645a" : "#7a7468"); P(sx + x, sy + y, w, 1, "rgba(255,255,255,.2)"); }); },
@@ -221,6 +215,17 @@
     d(sx, sy, tx, ty) { floorPaint(undAt(tx, ty), sx, sy, tx, ty); P(sx + 1, sy, 14, 16, "#4a3420"); for (let i = 0; i < 3; i++) { P(sx + 2, sy + 2 + i * 5, 12, 4, "#2a1a10"); for (let k = 0; k < 5; k++) P(sx + 3 + k * 2, sy + 2 + i * 5, 1.5, 4, ["#8a3a2a", "#c9a227", "#5a6a8a", "#d8c8a0"][(tx + i + k) % 4]); } },
     ">": (sx, sy, tx, ty) => arrowTile(">", sx, sy, tx, ty), "<": (sx, sy, tx, ty) => arrowTile("<", sx, sy, tx, ty), "^": (sx, sy, tx, ty) => arrowTile("^", sx, sy, tx, ty), v: (sx, sy, tx, ty) => arrowTile("v", sx, sy, tx, ty),
   };
+  function drawStatues() { // i Colossi addormentati, seduti, enormi: sporgono sulle file di sopra
+    ZX.statues.forEach(([x, y, tx, ty]) => {
+      const sk = ZX.sketched && ZX.sketched(tx, ty);
+      GP.fillStyle = "rgba(0,0,0,.3)"; GP.beginPath(); GP.ellipse(x, y - 2, 22, 6, 0, 0, 7); GP.fill();
+      GP.fillStyle = "#7a7468"; GP.fillRect(x - 18, y - 16, 36, 14); GP.fillRect(x - 14, y - 44, 28, 30); GP.fillStyle = "#6a645a"; GP.fillRect(x - 22, y - 30, 8, 22); GP.fillRect(x + 14, y - 30, 8, 22); GP.fillStyle = "#7a7468"; GP.fillRect(x - 9, y - 60, 18, 17);
+      GP.fillStyle = "rgba(0,0,0,.15)"; GP.fillRect(x + 4, y - 44, 10, 30); GP.fillStyle = "rgba(60,90,40,.7)"; GP.fillRect(x - 12, y - 42, 10, 4); GP.fillRect(x + 4, y - 58, 6, 3); GP.fillRect(x - 18, y - 6, 12, 3);
+      GP.fillStyle = "#3a3630"; GP.fillRect(x - 5, y - 53, 3, 1); GP.fillRect(x + 2, y - 53, 3, 1);
+      if (sk) { GP.fillStyle = "#e8e2d4"; GP.font = "bold 9px Georgia, serif"; GP.textAlign = "center"; GP.fillText("✎", x, y - 64); GP.textAlign = "left"; }
+    });
+    ZX.statues.length = 0;
+  }
   function arrowTile(ch, sx, sy, tx, ty) {
     floorPaint(undAt(tx, ty), sx, sy, tx, ty); const b = Math.sin(frNow() / 8) * 1.5;
     GP.fillStyle = "#e8c46a"; GP.strokeStyle = "rgba(0,0,0,.5)"; GP.lineWidth = 1; GP.beginPath();
@@ -253,7 +258,7 @@
     if (R.fx === "rain") { g.strokeStyle = "rgba(170,190,230,.32)"; g.lineWidth = 1; g.beginPath(); for (let i = 0; i < 46; i++) { const x = (i * 47 + fr * 1.6) % 340 - 10, y = (i * 71 + fr * 5) % 210 - 5; g.moveTo(x, y); g.lineTo(x - 2, y + 7); } g.stroke(); }
     else PART.forEach((p) => {
       if (R.fx === "wind") { p.x += 1.4 + p.s * 1.6; p.y += Math.sin(fr / 30 + p.p) * 0.3; g.fillStyle = p.s > 0.5 ? "rgba(255,255,255,.3)" : "rgba(200,180,150,.7)"; g.fillRect(p.x, p.y, p.s > 0.5 ? 9 + p.s * 8 : 2, 1); }
-      else if (R.fx === "fog") { p.x += 0.15 + p.s * 0.2; g.fillStyle = `rgba(220,225,220,${0.05 + p.s * 0.06})`; g.beginPath(); g.ellipse(p.x, p.y, 40 + p.s * 30, 10 + p.s * 6, 0, 0, 7); g.fill(); }
+      else if (R.fx === "fog") { if (p.s > 0.45) return; p.x += 0.15 + p.s * 0.2; g.fillStyle = `rgba(220,225,220,${0.03 + p.s * 0.05})`; g.beginPath(); g.ellipse(p.x, p.y, 40 + p.s * 30, 10 + p.s * 6, 0, 0, 7); g.fill(); }
       else { p.y += 0.05 + p.s * 0.05; p.x += Math.sin(fr / 80 + p.p) * 0.15; g.fillStyle = `rgba(255,220,170,${0.2 + p.s * 0.3})`; g.fillRect(p.x, p.y, 1, 1); }
       if (p.x > 340) p.x = -40; if (p.y > 205) p.y = -5;
     });
@@ -424,7 +429,7 @@
     const dd = (cx, cy) => ({ X: (tx) => tx * TS - cx, Y: (ty) => ty * TS - cy, fr: frNow() });
     const stealthOn = () => spec.stealth && (!spec.stealthWhen || safe(() => spec.stealthWhen(stepOf(chN)), true));
     if (spec.stealth) Z.tick = function (px, py, dt) { if (!stealthOn() || api.trZone() !== zid) return null; return stealthTick(zid, spec, px, py, Math.min(0.05, dt || 0.016)); };
-    Z.decor = function (cx, cy) { if (spec.decor) safe(() => spec.decor(GP, cx, cy, dd(cx, cy))); };
+    Z.decor = function (cx, cy) { safe(drawStatues); if (spec.decor) safe(() => spec.decor(GP, cx, cy, dd(cx, cy))); };
     Z.top = function (cx, cy) { if (spec.top) safe(() => spec.top(GP, cx, cy, dd(cx, cy))); if (stealthOn()) safe(() => drawColossi(GP, zid, spec, cx, cy, frNow())); safe(() => mood(GP, frNow())); if (stealthOn()) safe(() => stealthHud(GP)); };
     Z.onObj = function (ch, tx, ty) {
       let f = null;

@@ -4733,6 +4733,37 @@
     // vento: strisce e foglie
     for (let i = 0; i < 16; i++) px(g, (i * 53 + f * (2 + (i % 3))) % (W + 40) - 20, (i * 29) % 190, 12 + (i % 4) * 4, 1, "rgba(255,255,255,.35)");
   }
+  function bgMuFuori(g, W, H, f) {
+    vgrad(g, 0, 0, W, 120, ["#8aa0b8", "#b8c4c8", "#d8d8cc"]);
+    // il muro, lontano, una riga grigia sull'orizzonte
+    px(g, 0, 70, W, 26, "#6a6a66"); for (let i = 0; i < 20; i++) px(g, i * 16, 64, 9, 6, "#6a6a66");
+    vgrad(g, 0, 96, W, 104, ["#6a8a52", "#4a6a3a", "#3a5a2e"]);
+    // i Colossi nella nebbia (toccali: si fermano e si girano)
+    const turn = since("mu_fuori", 0) < 150; [[60, 150, 0.7, "9"], [200, 132, 0.5, "7"], [290, 160, 0.8, ""]].forEach(([x, y, s, n], i) => muColosso(g, x + (turn ? 0 : Math.sin(f / 200 + i) * 20), y, s, f, { ph: i, num: turn ? n : "", eye: turn ? "#ff8a5a" : "#ffcf7a" }));
+    // l'erba alta in primo piano che ondeggia (toccala: ti nascondi)
+    const hide = since("mu_fuori", 1) < 150; for (let i = 0; i < 90; i++) { const x = (i * 7) % W, h = 26 + (i * 13) % 22 + (hide ? 18 : 0), sw = Math.sin(f / 25 + i * 0.3) * 4; g.strokeStyle = i % 3 ? "#5f8a45" : "#4a7034"; g.lineWidth = 2; g.beginPath(); g.moveTo(x, H); g.quadraticCurveTo(x + sw * 0.5, H - h * 0.6, x + sw, H - h); g.stroke(); }
+    if (hide) { g.fillStyle = "rgba(10,20,10,.4)"; g.fillRect(0, 0, W, H); g.fillStyle = "#e8e2d4"; g.font = "bold 9px Georgia, serif"; g.fillText("(trattieni il respiro)", 12, H - 70); }
+    // la nebbia che scorre
+    for (let i = 0; i < 6; i++) { const x = ((i * 90 + f * 0.3) % (W + 200)) - 100; ell(g, x, 120 + (i % 3) * 18, 90, 12, "rgba(230,232,228,.35)"); }
+    // il cartello «Borgo dei Salici»
+    px(g, 240, 150, 3, 30, "#4a3420"); px(g, 226, 146, 40, 10, "#7a6040"); g.fillStyle = "#2a1a10"; g.font = "bold 6px Georgia, serif"; g.fillText("← SALICI 2mg", 229, 153);
+  }
+  function bgMuRovine(g, W, H, f) {
+    vgrad(g, 0, 0, W, 100, ["#c8b890", "#e0d0a8", "#e8dcb8"]);
+    // le gradinate crepate a semicerchio, piene di fiori
+    for (let r = 0; r < 5; r++) { g.strokeStyle = r % 2 ? "#8a8478" : "#7a7468"; g.lineWidth = 9; g.beginPath(); g.arc(160, 200, 190 - r * 12, Math.PI * 1.05, Math.PI * 1.95); g.stroke(); }
+    for (let i = 0; i < 40; i++) { const a = Math.PI * (1.08 + (i / 40) * 0.84), r = 170 - (i % 5) * 12; circ(g, 160 + Math.cos(a) * r, 200 + Math.sin(a) * r, 2, ["#e8c46a", "#d86a6a", "#e8e2d4", "#b07ae0"][i % 4]); }
+    // il tabellone di pietra (toccalo: le lettere si illuminano)
+    const lit = since("mu_rovine", 0) < 150; px(g, 120, 14, 80, 26, "#6a645a"); px(g, 120, 14, 80, 3, "#8a8478"); g.fillStyle = lit ? "#ffe9a0" : "#d8d0c0"; g.font = "bold 8px Georgia, serif"; g.textAlign = "center"; g.fillText("SALICI 3 · CINTA 2", 160, 30); g.font = "6px Georgia, serif"; g.fillText(lit ? "arrivederci a primavera" : "· · ·", 160, 37); g.textAlign = "left";
+    if (lit) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 160, 28, 50, "255,230,160", 0.4); g.restore(); }
+    // il campo e il Colosso inginocchiato con il pallone di pietra (toccalo: ti passa il pallone)
+    vgrad(g, 0, 130, W, 70, ["#7a9a5a", "#5a7a42"]); g.strokeStyle = "rgba(255,255,255,.35)"; g.lineWidth = 1.5; g.strokeRect(40, 140, 240, 54);
+    const x = 160, y = 172; px(g, x - 30, y - 14, 60, 18, "#7a7468"); px(g, x - 22, y - 60, 44, 48, "#7a7468"); px(g, x - 14, y - 86, 28, 28, "#827c70"); px(g, x - 34, y - 46, 12, 34, "#6a645a"); px(g, x + 22, y - 46, 12, 34, "#6a645a"); px(g, x - 8, y - 74, 4, 2, "#3a3630"); px(g, x + 4, y - 74, 4, 2, "#3a3630");
+    px(g, x - 20, y - 54, 10, 4, "rgba(60,90,40,.7)"); g.fillStyle = "#4e4a42"; g.font = "bold 11px Georgia, serif"; g.textAlign = "center"; g.fillText("14", x, y - 30); g.textAlign = "left";
+    const pass = since("mu_rovine", 1); const bx = pass < 90 ? x + pass * 1.2 : x, by = pass < 90 ? y - 6 + pass * 0.15 : y - 16; circ(g, bx, by, 7, "#9a9488"); g.strokeStyle = "#5a5248"; g.lineWidth = 1; g.beginPath(); g.arc(bx, by, 7, 0, Math.PI * 2); g.stroke();
+    // petali e pollini
+    for (let i = 0; i < 20; i++) px(g, (i * 47 + f * 0.6) % W, (i * 31 + Math.sin(f / 30 + i) * 6) % 170, 2, 1.5, "rgba(255,240,200,.8)");
+  }
   // elementi interattivi: [x, y, w, h, frase, azione?("tog" = acceso/spento)]
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
@@ -4965,6 +4996,16 @@
       [282, 66, 40, 30, "🚩 Lo stendardo della Guardia sbatte nel vento come un applauso a una mano sola."],
       [148, 160, 26, 24, "⚽ Il pallone rimbalza da solo: il vento, quassù, ha voglia di giocare."],
       [0, 88, 320, 40, "🌫️ La Terra di Fuori: erba alta fino all'orizzonte e nebbia che cammina più piano dei Colossi."],
+    ] },
+    mu_fuori: { draw: bgMuFuori, hot: [
+      [20, 40, 300, 120, "🗿 I Colossi si fermano e girano la testa. Sulla schiena di uno leggi un numero: 9. Poi riprendono a camminare."],
+      [0, 150, 320, 50, "🌾 Ti abbassi nell'erba alta e trattieni il respiro. I Colossi guardano oltre."],
+      [222, 140, 50, 40, "🪧 Un cartello: «← BORGO DEI SALICI · 2 miglia». A ovest non c'è nessun borgo. Solo erba."],
+    ] },
+    mu_rovine: { draw: bgMuRovine, hot: [
+      [118, 12, 84, 30, "🪨 Il tabellone di pietra: «SALICI 3 · CINTA 2». E sotto, quasi cancellato: «arrivederci a primavera»."],
+      [120, 80, 80, 100, "🗿 Il Colosso inginocchiato spinge il pallone di pietra verso di te. Un passaggio, lentissimo. Duecento anni per un passaggio."],
+      [0, 50, 320, 60, "🌼 Le gradinate crepate sono piene di fiori. Ci stavano migliaia di persone. Adesso ci sta la primavera."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
