@@ -4625,6 +4625,68 @@
     for (let i = 0; i < 30; i++) px(g, (i * 53 + Math.sin(f / 15 + i) * 6) % W, H - ((i * 37 + f * (0.6 + (i % 4) * 0.3)) % H), 2, 2, `rgba(255,${130 + (i % 5) * 20},40,.85)`);
     crTilt(g, W, H);
   }
+  function bgCrAcqua(g, W, H, f) {
+    vgrad(g, 0, 0, W, 110, ["#0e3a5a", "#1e6a9a", "#7cc8e8"]);
+    // il tempio mezzo sommerso
+    px(g, 90, 40, 140, 70, "#4a8aa8"); px(g, 90, 40, 140, 3, "#bfeefc"); g.fillStyle = "#5a9ab8"; g.beginPath(); g.moveTo(80, 40); g.lineTo(160, 12); g.lineTo(240, 40); g.fill();
+    for (let i = 0; i < 6; i++) px(g, 100 + i * 22, 50, 8, 60, "#6aaac8");
+    crCrystal(g, 160, 66, 14, "63,200,255", f, !toggled("cr_acqua", 0));
+    // il mare con le onde e i riflessi del cristallo
+    vgrad(g, 0, 100, W, 100, ["#2878a8", "#1e5a8a", "#0e3a5a"]);
+    for (let r = 0; r < 6; r++) for (let i = 0; i < 9; i++) { const x = ((i * 40 + f * (0.3 + r * 0.1) + r * 17) % (W + 40)) - 20, y = 108 + r * 15; g.strokeStyle = `rgba(255,255,255,${0.35 - r * 0.04})`; g.lineWidth = 1; g.beginPath(); g.arc(x, y, 8, Math.PI * 1.1, Math.PI * 1.9); g.stroke(); }
+    g.save(); g.globalCompositeOperation = "lighter"; for (let i = 0; i < 8; i++) px(g, 150 + Math.sin(f / 20 + i) * 6, 110 + i * 10, 20 - i * 2, 2, "rgba(120,220,255,.35)"); g.restore();
+    // i tre cristalli dell'enigma (toccali: si accendono a turno)
+    const k = since("cr_acqua", 1); [[40, 150, "232,160,64"], [280, 150, "159,224,255"], [160, 182, "255,90,58"]].forEach(([x, y, c], i) => { const on = k < 180 && k > i * 40; crCrystal(g, x, y, 10, c, f + i * 30, true); if (on) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, x, y, 34, c, 0.6); g.restore(); } });
+    // il granchio portiere sullo scoglio
+    ell(g, 260, 186, 24, 8, "#5a6a6a"); const cx = 260 + Math.sin(f / 10) * 8 + (since("cr_acqua", 2) < 30 ? 10 : 0); ell(g, cx, 176, 7, 4, "#e05a3a"); px(g, cx - 11, 172, 4, 3, "#e05a3a"); px(g, cx + 7, 172, 4, 3, "#e05a3a"); px(g, cx - 2, 171, 1, 2, "#111"); px(g, cx + 2, 171, 1, 2, "#111");
+    // bolle
+    for (let i = 0; i < 16; i++) { g.strokeStyle = "rgba(200,250,255,.5)"; g.beginPath(); g.arc((i * 47 + Math.sin(f / 30 + i) * 5) % W, H - ((i * 29 + f * 0.6) % 100), 1.5 + (i % 3), 0, Math.PI * 2); g.stroke(); }
+    crTilt(g, W, H);
+  }
+  function bgCrCapitale(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#1a0e2a", "#3a2050", "#6a3a6a"]);
+    // la cupola d'oro che ronza (toccala: si incrina)
+    const crack = since("cr_capitale", 0) < 240; g.save(); g.globalCompositeOperation = "lighter"; for (let i = 0; i < 5; i++) { g.strokeStyle = `rgba(255,210,120,${0.2 - i * 0.03})`; g.lineWidth = 2; g.beginPath(); g.arc(160, 220, 190 + i * 10 + Math.sin(f / 20 + i), Math.PI, 0); g.stroke(); } g.restore();
+    if (crack) { g.strokeStyle = "rgba(255,255,255,.8)"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(80, 60); g.lineTo(100, 80); g.lineTo(92, 96); g.moveTo(100, 80); g.lineTo(124, 84); g.stroke(); }
+    // torri e palazzi dorati
+    [[10, 90, 40], [60, 70, 30], [250, 80, 36], [290, 100, 30]].forEach(([x, y, w]) => { px(g, x, y, w, 200 - y, "#c9a227"); px(g, x + w - 4, y, 4, 200 - y, "rgba(0,0,0,.2)"); g.fillStyle = "#8a6a1a"; g.beginPath(); g.moveTo(x - 3, y); g.lineTo(x + w / 2, y - 18); g.lineTo(x + w + 3, y); g.fill(); for (let k = 0; k < 4; k++) px(g, x + 6, y + 12 + k * 20, w - 12, 6, (f / 30 + k + x) % 5 < 1 ? "#fff6c8" : "#ffd98a"); });
+    // lo Stadio della Corona
+    ell(g, 160, 150, 110, 36, "#8a6a1a"); ell(g, 160, 150, 92, 26, "#3f7a3a"); g.strokeStyle = "rgba(255,255,255,.6)"; g.lineWidth = 1; g.beginPath(); g.ellipse(160, 150, 86, 22, 0, 0, Math.PI * 2); g.stroke(); g.beginPath(); g.moveTo(160, 128); g.lineTo(160, 172); g.stroke();
+    for (let i = 0; i < 40; i++) { const a = i / 40 * Math.PI * 2, x = 160 + Math.cos(a) * 102, y = 150 + Math.sin(a) * 31, cheer = since("cr_capitale", 1) < 150 ? Math.abs(Math.sin(f / 4 + i)) * 3 : 0; px(g, x - 2, y - 3 - cheer, 4, 4, ["#c9a227", "#6a1a3a", "#ffffff"][i % 3]); }
+    // la statua del re (toccala: ti guarda)
+    px(g, 140, 60, 40, 8, "#c9a227"); px(g, 150, 30, 20, 30, "#e8c060"); circ(g, 160, 24, 9, "#f0d070"); px(g, 152, 12, 16, 5, "#c9a227"); const eye = since("cr_capitale", 2) < 90 ? "#c0392b" : "#8a6a1a"; px(g, 156, 22, 2, 2, eye); px(g, 162, 22, 2, 2, eye);
+    crTilt(g, W, H);
+  }
+  function bgCrTrono(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#0a0614", "#1e1030", "#2a1a3a"]);
+    // colonne di cristallo nero piene di luce rubata
+    [20, 70, 250, 300].forEach((x, i) => { px(g, x - 10, 0, 20, H, "#14101e"); px(g, x - 10, 0, 3, H, "rgba(255,255,255,.08)"); for (let k = 0; k < 5; k++) { const y = (k * 47 + f * (0.4 + i * 0.1)) % H; circ(g, x + Math.sin(f / 20 + k) * 4, y, 3, ["rgba(232,160,64,.8)", "rgba(159,224,255,.8)", "rgba(255,90,58,.8)", "rgba(63,200,255,.8)"][(k + i) % 4]); } });
+    // il tappeto porpora e il trono
+    g.fillStyle = "#6a1a3a"; g.beginPath(); g.moveTo(140, H); g.lineTo(180, H); g.lineTo(168, 110); g.lineTo(152, 110); g.fill(); px(g, 150, 110, 20, 2, "#c9a227");
+    px(g, 136, 40, 48, 74, "#6a1a3a"); px(g, 136, 40, 48, 4, "#c9a227"); px(g, 130, 96, 60, 16, "#c9a227"); px(g, 146, 50, 28, 40, "#8a2a4a");
+    // il re sul trono (toccalo: invecchia per un istante)
+    const old = since("cr_trono", 0) < 90; circ(g, 160, 62, 9, old ? "#d8c8b0" : "#f2d8c0"); px(g, 150, 70, 20, 24, "#6a1a3a"); px(g, 151, 51, 18, 4, "#c9a227"); for (let i = 0; i < 3; i++) px(g, 152 + i * 7, 47, 3, 4, "#c9a227"); px(g, 152, 64, 16, 10, old ? "#ffffff" : "#e8e8e8");
+    // la gabbia di luce con Aira (toccala: Aira alza la mano)
+    const ax = 110, ay = 150; g.strokeStyle = `rgba(255,240,180,${0.5 + 0.2 * Math.sin(f / 10)})`; g.lineWidth = 1.5; for (let i = 0; i < 7; i++) { g.beginPath(); g.moveTo(ax - 15 + i * 5, ay - 34); g.lineTo(ax - 15 + i * 5, ay + 14); g.stroke(); }
+    px(g, ax - 5, ay - 8, 10, 14, "#3fa7ff"); circ(g, ax, ay - 14, 6, "#f2d0b8"); px(g, ax - 7, ay - 22, 14, 5, "#d9d4e8"); if (since("cr_trono", 1) < 120) { px(g, ax + 5, ay - 20, 3, 10, "#f2d0b8"); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, ax + 6, ay - 22, 14, "255,240,180", 0.6); g.restore(); }
+    // i quattro frammenti sui piedistalli
+    [[200, 150, "232,160,64"], [225, 170, "159,224,255"], [250, 150, "255,90,58"], [275, 170, "63,200,255"]].forEach(([x, y, c], i) => { px(g, x - 6, y + 6, 12, 14, "#c9a227"); crCrystal(g, x, y, 8, c, f + i * 20, !toggled("cr_trono", 2)); });
+    crTilt(g, W, H);
+  }
+  function bgCrFinale(g, W, H, f) {
+    // l'alba su Calcistea: isole, mare di nuvole e una partita sul prato
+    vgrad(g, 0, 0, W, 140, ["#3a4a9a", "#e88aa0", "#ffd07a", "#fff0c0"]);
+    g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 160, 120, 90, "255,220,150", 0.6); g.restore(); circ(g, 160, 120, 22, "#fff6d8");
+    for (let i = 0; i < 6; i++) crCloud(g, ((i * 70 + f * 0.2) % (W + 100)) - 50, 120 + (i * 11) % 30, 1, 0.75);
+    crIsle(g, 20, 70 + Math.sin(f / 80) * 2, 50, 30, "#7ab84a", "#8a6a7a", f, 7); crIsle(g, 250, 60 + Math.sin(f / 70) * 2, 50, 30, "#7ab84a", "#8a6a7a", f, 8);
+    vgrad(g, 0, 150, W, 50, ["#6ab84a", "#4f9a3e"]); g.strokeStyle = "rgba(255,255,255,.6)"; g.lineWidth = 1; g.strokeRect(60, 156, 200, 36);
+    // i giocatori: il gruppo al completo (toccali: esultano)
+    const jump = since("cr_finale", 0) < 120; [["#3f5fbf", 90], ["#3fa7ff", 120], ["#a8862a", 150], ["#7a4ab0", 180], ["#ffffff", 210]].forEach(([c, x], i) => { const y = 176 - (jump ? Math.abs(Math.sin(f / 5 + i)) * 6 : 0); px(g, x - 3, y - 6, 6, 8, c); circ(g, x, y - 9, 3, "#f0d0b0"); });
+    const bx = 160 + Math.sin(f / 18) * 60, by = 172 - Math.abs(Math.sin(f / 9)) * 12; circ(g, bx, by, 3, "#fff"); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, bx, by, 10, "255,240,180", since("cr_finale", 1) < 120 ? 0.8 : 0.3); g.restore();
+    // i quattro cristalli nel cielo
+    [[50, 30, "232,160,64"], [120, 22, "159,224,255"], [200, 22, "255,90,58"], [270, 30, "63,200,255"]].forEach(([x, y, c], i) => crCrystal(g, x, y, 7, c, f + i * 25, true));
+    crTilt(g, W, H);
+  }
   // elementi interattivi: [x, y, w, h, frase, azione?("tog" = acceso/spento)]
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
@@ -4825,6 +4887,26 @@
       [20, 96, 72, 56, "🔨 Il martello cade sull'incudine: DONG. Scintille dappertutto. Bram sorride per la prima volta da giorni."],
       [96, 84, 48, 50, "🔥 Il Cristallo del Fuoco tra le catene: lo tocchi e la luce si spegne, poi torna, più rossa.", "tog"],
       [0, 150, 320, 50, "🌋 Il fiume di lava: dentro, ogni tanto, un riflesso a forma di pallone."],
+    ] },
+    cr_acqua: { draw: bgCrAcqua, hot: [
+      [140, 44, 40, 44, "💧 Il Cristallo dell'Acqua: lo tocchi e trattiene la marea. Poi la lascia andare, come un respiro.", "tog"],
+      [20, 130, 280, 66, "✨ I tre cristalli dell'enigma si accendono a turno: ambra, cielo, brace. Prima ciò che sorregge, poi ciò che solleva, poi ciò che scalda."],
+      [236, 166, 50, 26, "🦀 Il granchio portiere si butta a destra. Para un'onda. Esulta."],
+    ] },
+    cr_capitale: { draw: bgCrCapitale, hot: [
+      [40, 20, 120, 80, "🛡️ La cupola d'oro: la tocchi e si incrina. Da fuori, per un attimo, entra l'odore del vento vero."],
+      [50, 110, 220, 80, "🏟️ Lo Stadio della Corona: le tribune saltano tutte insieme. Per la prima volta da trent'anni, senza il cartello «APPLAUSI»."],
+      [140, 4, 40, 64, "🗿 La statua d'oro del re: gli occhi si accendono di rosso e ti guardano. Poi tornano d'oro."],
+    ] },
+    cr_trono: { draw: bgCrTrono, hot: [
+      [130, 40, 60, 74, "👑 Il re sul trono: per un istante i suoi capelli diventano bianchi. Ottant'anni, in un battito di ciglia."],
+      [90, 110, 40, 70, "✋ Nella gabbia di luce, Aira alza la mano. Un passaggio filtrante. Sai già dove andrà il pallone."],
+      [188, 130, 100, 60, "💎 I quattro frammenti dei Cristalli: li tocchi e si spengono, poi si riaccendono, liberi.", "tog"],
+    ] },
+    cr_finale: { draw: bgCrFinale, hot: [
+      [70, 150, 160, 40, "🙌 Il gruppo esulta: Bram, Vela, Trillo, Aira e tu. Anche il fabbro, sì. Quasi sorride."],
+      [100, 150, 120, 30, "⚽ Il pallone fa una curva strana e si illumina. Quella è Aira, dicono."],
+      [30, 10, 260, 40, "🌅 I quattro Cristalli nel cielo dell'alba: Terra, Vento, Fuoco, Acqua. Brillano come non brillavano da ottant'anni."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
