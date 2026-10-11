@@ -188,6 +188,14 @@
     else if (f === ";") { grassBase(sx, sy, tx, ty); texture(sx, sy, tx, ty); const cols = ZX.stk === "xil" ? [st.accent, st.ink] : ZX.stk === "mat" ? ["#9b9b96", "#bdbdb7"] : ["#f2a5b8", "#ffe28a", "#ffffff", "#c9a7f2"]; for (let i = 0; i < 3; i++) { const x = sx + 2 + ((tx * 7 + i * 5) % 12), y = sy + 2 + ((ty * 5 + i * 7) % 12); P(x, y, 2, 2, cols[(tx + ty + i) % cols.length]); } }
     else if (f === "=") { P(sx, sy, 16, 16, ZX.stk === "mat" ? "#e9e8e1" : "#b98a5a"); for (let i = 0; i < 4; i++) P(sx, sy + i * 4 + 3, 16, 1, ZX.stk === "xil" ? st.ink : "rgba(70,45,25,.5)"); P(sx + 1, sy, 1, 16, "rgba(70,45,25,.35)"); P(sx + 14, sy, 1, 16, "rgba(70,45,25,.35)"); if (ZX.stk === "acq") { GP.fillStyle = "rgba(59,58,74,.65)"; GP.font = "bold 5px serif"; GP.fillText("PONTE".charAt((tx + ty) % 5), sx + 6, sy + 10); } }
     else if (f === "-") { const c = st.pitch; P(sx, sy, 16, 16, tx % 2 ? c[0] : c[1]); texture(sx, sy, tx, ty); }
+    else if (f === "+" && ZX.plus) { // tegole del tetto (o pavimento colorato della zona)
+      const c = ZX.plus; P(sx, sy, 16, 16, c[0]); for (let r = 0; r < 4; r++) { P(sx, sy + r * 4 + 3, 16, 1, c[1]); GP.fillStyle = c[1]; for (let k = 0; k < 2; k++) { GP.beginPath(); GP.arc(sx + 4 + k * 8 + (r % 2) * 4, sy + r * 4 + 3, 3, 0, Math.PI); GP.fill(); } }
+      if (ZX.stk === "fum") { P(sx + 15, sy, 1, 16, "rgba(0,0,0,.35)"); P(sx, sy + 15, 16, 1, "rgba(0,0,0,.35)"); }
+    }
+    else if (f === "+" && ZX.stk === "fum") { // marciapiede a fumetto: lastre chiare con le fughe a inchiostro
+      P(sx, sy, 16, 16, "#ece6d6"); P(sx + 15, sy, 1, 16, "#111"); P(sx, sy + 15, 16, 1, "#111"); P(sx, sy, 15, 1, "rgba(255,255,255,.7)");
+      if (rnd(tx, ty, 4) < 0.3) for (let y = 3; y < 14; y += 4) for (let x = 3 + (y % 8 ? 2 : 0); x < 14; x += 4) P(sx + x, sy + y, 1, 1, "rgba(0,0,0,.18)");
+    }
     else if (f === "+") { P(sx, sy, 16, 16, (tx + ty) % 2 ? st.stone : st.path2); P(sx, sy, 16, 1, "rgba(0,0,0,.12)"); P(sx, sy, 1, 16, "rgba(0,0,0,.08)"); if (ZX.stk === "fum") P(sx + 7, sy + 7, 2, 2, "rgba(0,0,0,.18)"); }
     else if (f === '"') { P(sx, sy, 16, 16, ZX.stk === "xil" ? "#a8231f" : ZX.stk === "fum" ? "#e63946" : "#a5584a"); P(sx, sy + 2, 16, 1, "rgba(255,240,200,.35)"); P(sx, sy + 13, 16, 1, "rgba(255,240,200,.35)"); }
     else if (f === "'") { P(sx, sy, 16, 16, st.blank); GP.fillStyle = "rgba(60,60,80,.28)"; for (let i = 0; i < 3; i++) P(sx + 2, sy + 3 + i * 4, 6 + ((tx * 3 + ty + i) % 8), 1, "rgba(60,60,80,.25)"); }
@@ -566,7 +574,7 @@
     };
     Object.defineProperty(Z, "tail", { enumerable: true, configurable: true, get: () => "Menu in basso: il Segnalibro e Chiudi il libro." });
     Z.build = function (m) {
-      ZX.map = m; ZX.id = zid; ZX.stk = stk; ZX.st = STY[stk]; ZX.wordAt = wordAt; GP = document.getElementById("cv").getContext("2d");
+      ZX.map = m; ZX.id = zid; ZX.stk = stk; ZX.st = STY[stk]; ZX.wordAt = wordAt; ZX.plus = spec.plus || null; GP = document.getElementById("cv").getContext("2d");
       const Ls = makeLayers(spec.w, spec.h); Ls.lay(0, 0, spec.w - 1, spec.h - 1, ",");
       spec.build(Ls);
       // parole già raccolte, pagine già scritte, lettere già lette
@@ -576,7 +584,7 @@
       if (spec.after) spec.after(Ls);
       refreshSoon();
     };
-    Z.tile = function (ch, sx, sy, tx, ty) { GP = GP || document.getElementById("cv").getContext("2d"); if (ZX.id !== zid) { ZX.id = zid; ZX.stk = stk; ZX.st = STY[stk]; ZX.wordAt = wordAt; } return drawTile(ch, sx, sy, tx, ty); };
+    Z.tile = function (ch, sx, sy, tx, ty) { GP = GP || document.getElementById("cv").getContext("2d"); if (ZX.id !== zid) { ZX.id = zid; ZX.stk = stk; ZX.st = STY[stk]; ZX.wordAt = wordAt; ZX.plus = spec.plus || null; } return drawTile(ch, sx, sy, tx, ty); };
     const dd = (cx, cy) => ({ X: (tx) => tx * TS - cx, Y: (ty) => ty * TS - cy, fr: frNow() });
     Z.decor = function (cx, cy) { if (spec.decor) safe(() => spec.decor(GP, cx, cy, dd(cx, cy))); };
     Z.top = function (cx, cy) { if (spec.top) safe(() => spec.top(GP, cx, cy, dd(cx, cy))); safe(() => topFx(GP, cx, cy)); };

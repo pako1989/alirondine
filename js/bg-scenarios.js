@@ -4158,6 +4158,79 @@
     paperGrain(g, W, H, f, 0.07);
   }
 
+  // ---------------------------------------------------------------- CAPITOLO 3 · FUMETTO (contorni neri, retino, colori pieni)
+  const FK = "#111111";
+  function halftone(g, x, y, w, h, col, step, r) { g.fillStyle = col; for (let yy = y; yy < y + h; yy += step) for (let xx = x + ((yy - y) / step % 2) * step / 2; xx < x + w; xx += step) { g.beginPath(); g.arc(xx, yy, r, 0, Math.PI * 2); g.fill(); } }
+  function boxO(g, x, y, w, h, fill, lw) { px(g, x, y, w, h, fill); g.strokeStyle = FK; g.lineWidth = lw || 2; g.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1); }
+  function bubble(g, x, y, w, h, txt, tailX, tailY, col) {
+    g.fillStyle = col || "#ffffff"; g.strokeStyle = FK; g.lineWidth = 2; g.beginPath(); g.ellipse(x, y, w / 2, h / 2, 0, 0, Math.PI * 2); g.fill(); g.stroke();
+    if (tailX != null) { g.beginPath(); g.moveTo(x - 5, y + h / 2 - 2); g.lineTo(tailX, tailY); g.lineTo(x + 5, y + h / 2 - 2); g.fill(); g.stroke(); g.fillRect(x - 5, y + h / 2 - 5, 10, 4); }
+    if (txt) { g.fillStyle = FK; g.font = "bold 9px sans-serif"; g.textAlign = "center"; g.fillText(txt, x, y + 3); g.textAlign = "left"; }
+  }
+  function boom(g, x, y, r, txt, col, rot) { g.save(); g.translate(x, y); g.rotate(rot || -0.15); g.fillStyle = col || "#ffd95a"; g.strokeStyle = FK; g.lineWidth = 2; g.beginPath(); for (let i = 0; i < 24; i++) { const rr = i % 2 ? r * 0.62 : r, a = i / 24 * Math.PI * 2; g.lineTo(Math.cos(a) * rr * 1.3, Math.sin(a) * rr * 0.8); } g.closePath(); g.fill(); g.stroke(); g.font = `900 ${Math.round(r * 0.6)}px Impact, sans-serif`; g.textAlign = "center"; g.fillStyle = "#e63946"; g.lineWidth = 3; g.strokeStyle = "#fff"; g.strokeText(txt, 0, r * 0.22); g.fillText(txt, 0, r * 0.22); g.textAlign = "left"; g.restore(); }
+  function bgVignette(g, W, H, f) {
+    px(g, 0, 0, W, H, "#7cc4ff"); halftone(g, 0, 0, W, 90, "rgba(255,255,255,.35)", 8, 1.5);
+    // palazzi a fumetto
+    const B = [[0, 40, 60, "#e63946"], [56, 20, 54, "#ffd95a"], [106, 52, 46, "#4aa3df"], [208, 30, 56, "#7ed957"], [260, 46, 60, "#f28482"]];
+    B.forEach(([x, y, w, c], i) => { boxO(g, x, y, w, 130 - y + 20, c, 3); for (let r = 0; r < 4; r++) for (let k = 0; k < 3; k++) { const lit = (i + r + k) % 3 === 0 || (since("lb_vignette", 1) < 150 && i === 3); boxO(g, x + 8 + k * (w - 16) / 3, y + 10 + r * 20, (w - 16) / 3 - 4, 12, lit ? "#fff4b0" : "#2b2d42", 1.5); } });
+    // il cartellone del cinema (BOOM!) al centro dietro
+    boxO(g, 150, 10, 60, 40, "#fffbea", 3); g.fillStyle = FK; g.font = "bold 8px sans-serif"; g.fillText("STASERA:", 158, 24); g.fillStyle = "#e63946"; g.font = "900 11px Impact, sans-serif"; g.fillText("IL FINALE!", 156, 40); if (since("lb_vignette", 0) < 120) { g.strokeStyle = FK; g.lineWidth = 3; g.beginPath(); g.moveTo(152, 42); g.lineTo(208, 18); g.stroke(); }
+    // strada gialla
+    px(g, 0, 150, W, 50, "#ffd95a"); g.strokeStyle = FK; g.lineWidth = 3; g.beginPath(); g.moveTo(0, 150); g.lineTo(W, 150); g.stroke(); halftone(g, 0, 156, W, 44, "rgba(0,0,0,.12)", 6, 1.2);
+    for (let i = 0; i < 6; i++) px(g, i * 60 + ((f / 2) % 60), 174, 30, 4, "#fff");
+    // balloon rubati che volano via legati a un filo
+    for (let i = 0; i < 5; i++) { const x = 30 + i * 62 + Math.sin(f / 30 + i) * 6, y = 70 + Math.sin(f / 22 + i * 2) * 6 - (since("lb_vignette", 2) < 120 ? since("lb_vignette", 2) / 2 : 0); g.strokeStyle = FK; g.lineWidth = 1; g.beginPath(); g.moveTo(x, y + 9); g.lineTo(x + 4, y + 50); g.stroke(); bubble(g, x, y, 34, 18, ["…", "ciao!", "?!", "aiuto", "eh?"][i]); }
+    // Didascalia: il riquadro giallo dei narratori
+    boxO(g, 4, 156, 120, 16, "#ffd95a", 2); g.fillStyle = FK; g.font = "italic bold 8px sans-serif"; g.fillText(since("lb_vignette", 3) < 150 ? "INTANTO, DA QUALCHE PARTE…" : "NELLA CITTÀ DELLE VIGNETTE…", 9, 167);
+    // passante muto che gesticola
+    const gst = since("lb_vignette", 4) < 90 ? Math.sin(since("lb_vignette", 4) / 3) * 6 : 0;
+    boxO(g, 270, 158, 12, 20, "#7ed957", 2); g.fillStyle = "#8d5524"; g.beginPath(); g.arc(276, 152, 6, 0, 7); g.fill(); g.strokeStyle = FK; g.stroke(); g.lineWidth = 2; g.beginPath(); g.moveTo(270, 162); g.lineTo(262, 150 + gst); g.moveTo(282, 162); g.lineTo(290, 150 - gst); g.stroke();
+    boom(g, 230, 128, 20, "BOOM!", "#ffd95a", -0.2 + Math.sin(f / 40) * 0.05);
+    paperGrain(g, W, H, f, 0.04);
+  }
+  function bgTipografia(g, W, H, f) {
+    px(g, 0, 0, W, H, "#5d6d7e"); halftone(g, 0, 0, W, H, "rgba(0,0,0,.12)", 7, 1.4);
+    // finestroni industriali
+    for (let i = 0; i < 3; i++) { boxO(g, 20 + i * 100, 12, 70, 50, "#bfe3ff", 3); g.strokeStyle = FK; g.lineWidth = 2; g.beginPath(); g.moveTo(55 + i * 100, 12); g.lineTo(55 + i * 100, 62); g.moveTo(20 + i * 100, 37); g.lineTo(90 + i * 100, 37); g.stroke(); }
+    // il grande torchio con la ruota che gira
+    const sp = since("lb_tipografia", 0) < 160 ? 4 : 1;
+    boxO(g, 110, 80, 100, 70, "#2c3e50", 3); boxO(g, 120, 70, 80, 14, "#e63946", 2);
+    g.save(); g.translate(230, 100); g.rotate(f / 40 * sp); g.strokeStyle = FK; g.lineWidth = 3; g.fillStyle = "#ffd95a"; g.beginPath(); g.arc(0, 0, 18, 0, Math.PI * 2); g.fill(); g.stroke(); for (let i = 0; i < 6; i++) { g.beginPath(); g.moveTo(0, 0); g.lineTo(Math.cos(i) * 18, Math.sin(i) * 18); g.stroke(); } g.restore();
+    // fogli che escono dal torchio
+    for (let i = 0; i < 4; i++) { const t = ((f * 0.6 * (sp > 1 ? 2 : 1) + i * 30) % 120) / 120; boxO(g, 120 + t * 160, 150 - Math.sin(t * Math.PI) * 30, 26, 18, "#fffbea", 1.5); g.fillStyle = FK; g.font = "bold 6px sans-serif"; g.fillText(["BOOM", "FINE", "SBAM", "???"][i], 123 + t * 160, 161 - Math.sin(t * Math.PI) * 30); }
+    // cassettiere dei caratteri mobili
+    boxO(g, 10, 100, 80, 70, "#8b5a2b", 3); for (let r = 0; r < 4; r++) for (let k = 0; k < 5; k++) { boxO(g, 14 + k * 15, 104 + r * 16, 13, 13, since("lb_tipografia", 1) < 120 && (r + k) % 2 ? "#ffd95a" : "#a87a4a", 1); g.fillStyle = FK; g.font = "bold 8px serif"; g.fillText("ABCDEFGHILMNOPQRSTUV"[(r * 5 + k) % 20], 17 + k * 15, 114 + r * 16); }
+    // il foglio dell'ordine appeso (prova!)
+    const sw = Math.sin(f / 20) * 0.05; g.save(); g.translate(280, 120); g.rotate(sw); boxO(g, -16, 0, 32, 40, "#fffbea", 2); g.fillStyle = FK; g.font = "bold 5px sans-serif"; g.fillText("ORDINE", -11, 9); g.fillText("senza ultima", -14, 18); g.fillText("pagina", -9, 25); g.fillStyle = "#e63946"; g.font = "italic bold 9px serif"; g.fillText("N.", -6, 36); g.restore();
+    if (since("lb_tipografia", 2) < 120) boom(g, 280, 108, 14, "!", "#ffd95a", 0.2);
+    // pavimento
+    px(g, 0, 170, W, 30, "#2b2d42"); for (let i = 0; i < 10; i++) px(g, i * 34, 170, 2, 30, FK);
+    boom(g, 60, 180, 14, "CLANG!", "#7cc4ff", 0.1 + (since("lb_tipografia", 3) < 60 ? 0.3 : 0));
+    paperGrain(g, W, H, f, 0.04);
+  }
+  function bgTetti(g, W, H, f) {
+    // tramonto a fumetto con il retino
+    const gr = g.createLinearGradient(0, 0, 0, 140); gr.addColorStop(0, "#ff9f43"); gr.addColorStop(1, "#ffd95a"); g.fillStyle = gr; g.fillRect(0, 0, W, 140); halftone(g, 0, 0, W, 140, "rgba(230,57,70,.25)", 7, 1.6);
+    g.fillStyle = "#fff4b0"; g.strokeStyle = FK; g.lineWidth = 3; g.beginPath(); g.arc(250, 60, 24, 0, Math.PI * 2); g.fill(); g.stroke();
+    // nuvolette-piattaforma
+    for (let i = 0; i < 4; i++) { const x = 40 + i * 80 + Math.sin(f / 50 + i) * 6, y = 40 + (i % 2) * 22; bubble(g, x, y, 54, 22, since("lb_tetti", 1) < 120 ? ["FINE?", "NO!", "MAI", "…"][i] : "", null, null, "#ffffff"); }
+    // skyline di tetti
+    const R = [[0, 120, 70], [64, 104, 60], [118, 126, 52], [166, 98, 70], [230, 116, 90]];
+    R.forEach(([x, y, w], i) => { boxO(g, x, y, w, 200 - y, ["#4aa3df", "#e63946", "#7ed957", "#2b2d42", "#f28482"][i], 3); g.fillStyle = FK; g.beginPath(); g.moveTo(x, y); g.lineTo(x + w / 2, y - 14); g.lineTo(x + w, y); g.fill(); boxO(g, x + w - 16, y - 22, 10, 14, "#8b5a2b", 2); });
+    // antenna che sfrigola
+    g.strokeStyle = FK; g.lineWidth = 2; g.beginPath(); g.moveTo(200, 98); g.lineTo(200, 66); g.moveTo(190, 72); g.lineTo(210, 72); g.moveTo(192, 80); g.lineTo(208, 80); g.stroke();
+    if (since("lb_tetti", 2) < 90 || (f % 200) < 8) { boom(g, 200, 58, 12, "BZZ", "#7cc4ff", 0.3); }
+    // l'ombra del Narratore in cima al tetto più alto (si volta quando la tocchi)
+    const turn = since("lb_tetti", 0) < 120;
+    px(g, 192, 72 + 26, 16, 0, FK);
+    g.fillStyle = FK; g.beginPath(); g.moveTo(186, 98); g.lineTo(214, 98); g.lineTo(206, 60); g.lineTo(194, 60); g.fill(); g.beginPath(); g.arc(200, 54, 7, 0, Math.PI * 2); g.fill(); px(g, 190, 46, 20, 3, FK); px(g, 194, 38, 12, 9, FK);
+    if (turn) { px(g, 196, 52, 3, 2, "#ffd95a"); px(g, 202, 52, 3, 2, "#ffd95a"); }
+    // pagina che vola (si strappa da un bordo)
+    const t = (f % 300) / 300; g.save(); g.translate(20 + t * 300, 150 - Math.sin(t * Math.PI) * 60); g.rotate(t * 6); boxO(g, -8, -10, 16, 20, "#fffbea", 1.5); g.restore();
+    if (since("lb_tetti", 3) < 120) boom(g, 70, 150, 18, "RRRIP!", "#ffffff", -0.2);
+    paperGrain(g, W, H, f, 0.04);
+  }
+
   // elementi interattivi: [x, y, w, h, frase, azione?("tog" = acceso/spento)]
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
@@ -4222,6 +4295,25 @@
       [286, 126, 30, 54, "🥅 La porta della Regina: una saracinesca di carte. La apri e la chiudi: dietro c'è un muro. Non le serve una porta: le serve un muro.", "tog"],
       [20, 78, 58, 26, "🔢 Il tabellone: «Gol subiti dalla Regina: 0, dal 1450». Lo tocchi e scrive «MAI!» da solo, offeso."],
       [242, 66, 40, 34, "🎙️ Il Jolly telecronista prova il cono: «CHE PARATAAA!». Non c'era nessun tiro. Si allena."],
+    ] },
+    lb_vignette: { draw: bgVignette, hot: [
+      [150, 10, 60, 40, "🎬 Il cinema: «STASERA: IL FINALE!». Qualcuno ci ha tirato una riga sopra. Una riga dritta."],
+      [208, 30, 56, 120, "🏢 Il palazzo verde: accendi tutte le finestre. In ogni finestra un vicino ti saluta. Senza dire niente: gli hanno rubato i balloon."],
+      [10, 52, 300, 40, "💬 I balloon rubati volano via legati a un filo. Ognuno ha dentro una parola che qualcuno non ha potuto dire."],
+      [4, 154, 122, 20, "🟨 La didascalia gialla cambia da sola: «INTANTO, DA QUALCHE PARTE…». Le didascalie sono le portinaie dei fumetti."],
+      [256, 140, 40, 42, "🤷 Un passante muto gesticola. Vuol dire: «Hanno preso anche il mio buongiorno»."],
+    ] },
+    lb_tipografia: { draw: bgTipografia, hot: [
+      [110, 70, 140, 80, "⚙️ Il grande torchio: lo tocchi e accelera. Stampa pagine nuove al ritmo di un cuore emozionato."],
+      [10, 100, 80, 70, "🔠 I caratteri mobili: si illuminano come una tastiera. A, B, C… manca solo la F di FINE."],
+      [262, 112, 36, 52, "📝 L'ordine appeso: «Rilegare senza l'ultima pagina». Firmato con una N elegante, piena di riccioli."],
+      [40, 166, 50, 30, "🔧 CLANG! Una chiave inglese cade da sola. In tipografia le cose cadono quando hanno qualcosa da dire."],
+    ] },
+    lb_tetti: { draw: bgTetti, hot: [
+      [180, 30, 40, 70, "🎩 La sagoma sul tetto più alto: si volta. Due occhi gialli. Poi torna a guardare la città, come se la stesse raccontando."],
+      [10, 24, 300, 40, "☁️ Le nuvolette galleggiano sopra i tetti. Toccale e si riempiono: «FINE?» «NO!» «MAI» «…»."],
+      [186, 60, 30, 40, "📡 L'antenna: BZZ. Capta una voce lontanissima che legge ad alta voce. È una voce di donna."],
+      [0, 120, 160, 80, "📄 Una pagina si strappa dal bordo del libro e vola via: RRRIP! Il libro sta perdendo pezzi."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
