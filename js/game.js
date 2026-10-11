@@ -2156,7 +2156,7 @@
     }
     const tmMul = M.tmGo ? M.tmMul || 1 : 1, tmN = M.tmGo ? (M.tmMul > 1 ? "<b>Coordinazione perfetta!</b> " : M.tmMul < 1 ? "<span style=\"color:var(--dim)\">Colpita male…</span> " : "") : ""; M.tmGo = false; M.tmMul = 1;
     const t = TEAMS[M.team], st = S.st, mk = M.carrier, sp = kind === "hero" ? heroShot() : kind === "mate" ? mateShot(mk) : SHOTS[kind];
-    const sid = mk ? (MATE_ID[mk] && CAST[MATE_ID[mk]] ? MATE_ID[mk] : (M && M.mateGeneric ? heroId() : "tommy")) : heroId();
+    const sid = mk ? (MATE_ID[mk] && CAST[MATE_ID[mk]] ? MATE_ID[mk] : (M && (M.mateGeneric || (mk !== "Tommy" && !MATE_ID[mk] && /^ap_/.test(String(M.match || M.team || "")))) ? heroId() : "tommy")) : heroId();
     M.carrier = null;
     if (M.cup && sp) M.cup.specialUsed = true;
     spend(sp ? sp.cost : 10); tick(2, 4); sfx("kick");
@@ -25313,7 +25313,7 @@
     if (!chBack) chBack = S;
     S = borgoPlayer(); if (h) { heroCast(h); S.st = heroBias(S.st, h); }
     const t = (v) => Math.max(4, Math.round(v)), key = "ap_" + cfg.id;
-    { const mn = cfg.mate || "Tommy"; if (!MATE_ID[mn]) { const lc = "_" + mn.toLowerCase(), id = cfg.mateId || Object.keys(CAST).find((k) => k.endsWith(lc)); if (id && CAST[id]) MATE_ID[mn] = id; } }
+    { const mn = cfg.mate || "Tommy"; if (!MATE_ID[mn]) { const lc = "_" + mn.toLowerCase(), fw = mn.toLowerCase().split(/[ ,]/)[0], nm = (k) => String((CAST[k] && CAST[k].name) || "").toLowerCase(), id = cfg.mateId || Object.keys(CAST).find((k) => k.endsWith(lc) || nm(k) === mn.toLowerCase()) || Object.keys(CAST).find((k) => /_/.test(k) && (k.endsWith("_" + fw) || nm(k).split(/[ ,]/)[0] === fw)); if (id && CAST[id]) MATE_ID[mn] = id; } }
     apiTeam(key, cfg, S.st, t);
       statsBox();
     startMatch({ match: key, chap: cfg.chap, quick: true, min: cfg.min || 45, mate: cfg.mate || "Tommy", mateGeneric: !!cfg.mateGeneric, us: cfg.us || "Borgo", intro: cfg.intro, venue: cfg.venue || undefined, forceMeteo: cfg.weather || undefined, hero: h || undefined,
