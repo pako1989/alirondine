@@ -1066,7 +1066,8 @@
     if (view.speaker && CAST[view.speaker] && CAST[view.speaker].skin) {
       const c = CAST[view.speaker];
       const grd = g.createRadialGradient(160, 100, 10, 160, 100, 140);
-      grd.addColorStop(0, c.bg[1] + "88"); grd.addColorStop(1, "transparent");
+      const bgCol = (c.bg && c.bg[1]) || (c.bg && c.bg[0]) || c.shirt || "#3fa7ff";
+      grd.addColorStop(0, bgCol + "88"); grd.addColorStop(1, "transparent");
       g.fillStyle = grd; g.fillRect(0, 0, W, H);
       if (view.chibi) portrait(view.speaker, 130, 84, 1.7); else portrait(view.speaker, 160, 110, 2.2);
       if (view.chibi && view.speaker === "hero") drawHeroChibi();

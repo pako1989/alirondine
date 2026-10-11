@@ -97,7 +97,8 @@
       api.CAST.hero = Object.assign({}, h, {
         role: "Il Campione dell'Abisso",
         shirt: h.shirt || "#0284c7",
-        eye: h.eye || "#38bdf8"
+        eye: h.eye || "#38bdf8",
+        bg: h.bg || ["#020617", "#0284c7"]
       });
     }
   }
@@ -113,12 +114,12 @@
 
   // ------------------------------------------------------------------ Cast & Personaggi di Dunwich
   const CAST_Q = [
-    ["abi_silas", { name: "Silas il Palombaro", tag: "Palombaro dell'Abisso", skin: "#c89d7c", hair: "#64748b", style: "corto", eye: "#38bdf8", shirt: "#0f766e" }, "Veterano delle immersioni profonde a Dunwich. Porta un antico scafandro in rame con incisioni runiche."],
-    ["abi_barnaby", { name: "Capitan Barnaby", tag: "Comandante della Sirena Spezzata", skin: "#b48a60", hair: "#e2e8f0", style: "lungo", eye: "#0284c7", shirt: "#1e293b" }, "Burbero capitano di mare con la barba incrostata di sale e la pipa in radica. Comanda la ciurma dei pescatori di Dunwich."],
-    ["abi_armitage", { name: "Dottor Armitage", tag: "Erudito di Archeologia Marina", skin: "#e2c09c", hair: "#94a3b8", style: "ordinato", eye: "#475569", shirt: "#334155" }, "Studioso giunto dal continente per decifrare i tomi ricoperti di balani e le misteriose rune della Coppa delle Onde Nere."],
-    ["abi_nora", { name: "Nora la Guardiana", tag: "Custode del Faro delle Maree", skin: "#dab490", hair: "#b45309", style: "coda", eye: "#06b6d4", shirt: "#ca8a04" }, "Veglia sull'antica torre ottagonale del Faro di Dunwich dopo l'oscura scomparsa del padre tra i flutti."],
-    ["abi_jonah", { name: "Jonah dei Fondali", tag: "Pescatore d'Alto Mare", skin: "#a87850", hair: "#1e293b", style: "corto", eye: "#0369a1", shirt: "#0369a1" }, "Pescatore veterano che conosce ogni secca, ogni scoglio e ogni canto ingannevole che sale dalla fossa marina."],
-    ["abi_corvo", { name: "Marinaio Corvo", tag: "Vedetta del Frangiflutti", skin: "#c49a74", hair: "#0f172a", style: "bandana", eye: "#334155", shirt: "#0f172a" }, "Silenziosa vedetta che scruta le onde e batte i rintocchi della campana al salire della marea."]
+    ["abi_silas", { name: "Silas il Palombaro", tag: "Palombaro dell'Abisso", skin: "#c89d7c", hair: "#64748b", style: "corto", eye: "#38bdf8", shirt: "#0f766e", bg: ["#042f2e", "#0f766e"] }, "Veterano delle immersioni profonde a Dunwich. Porta un antico scafandro in rame con incisioni runiche."],
+    ["abi_barnaby", { name: "Capitan Barnaby", tag: "Comandante della Sirena Spezzata", skin: "#b48a60", hair: "#e2e8f0", style: "lungo", eye: "#0284c7", shirt: "#1e293b", bg: ["#020617", "#0369a1"] }, "Burbero capitano di mare con la barba incrostata di sale e la pipa in radica. Comanda la ciurma dei pescatori di Dunwich."],
+    ["abi_armitage", { name: "Dottor Armitage", tag: "Erudito di Archeologia Marina", skin: "#e2c09c", hair: "#94a3b8", style: "ordinato", eye: "#475569", shirt: "#334155", bg: ["#0f172a", "#334155"] }, "Studioso giunto dal continente per decifrare i tomi ricoperti di balani e le misteriose rune della Coppa delle Onde Nere."],
+    ["abi_nora", { name: "Nora la Guardiana", tag: "Custode del Faro delle Maree", skin: "#dab490", hair: "#b45309", style: "coda", eye: "#06b6d4", shirt: "#ca8a04", bg: ["#451a03", "#ca8a04"] }, "Veglia sull'antica torre ottagonale del Faro di Dunwich dopo l'oscura scomparsa del padre tra i flutti."],
+    ["abi_jonah", { name: "Jonah dei Fondali", tag: "Pescatore d'Alto Mare", skin: "#a87850", hair: "#1e293b", style: "corto", eye: "#0369a1", shirt: "#0369a1", bg: ["#082f49", "#0284c7"] }, "Pescatore veterano che conosce ogni secca, ogni scoglio e ogni canto ingannevole che sale dalla fossa marina."],
+    ["abi_corvo", { name: "Marinaio Corvo", tag: "Vedetta del Frangiflutti", skin: "#c49a74", hair: "#0f172a", style: "bandana", eye: "#334155", shirt: "#0f172a", bg: ["#020617", "#1e293b"] }, "Silenziosa vedetta che scruta le onde e batte i rintocchi della campana al salire della marea."]
   ];
 
   // ------------------------------------------------------------------ Sfondi Dettagliati (renderDetailedBg)
