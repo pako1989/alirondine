@@ -602,6 +602,7 @@
       const h = hero(), c = activeChapter(), m = mem();
       return { label: "🧱 Il Muro", cls: "hot", fn: () => openMain({ onExit: back }), sub: h ? `${h.name} · ${c ? "Capitolo " + c.n + (m.done[c.n] ? " concluso" : " in corso") : "saga"} · Colossi, ricognizioni, partite sul muro` : "Crea prima il tuo campione · i Colossi aspettano" };
     },
+    endings() { const m = mem(); return Object.keys(ENDINGS).map((k) => ({ id: k, title: ENDINGS[k][0], desc: ENDINGS[k][1], found: m.ends.includes(k) })); },
     info() { const m = mem(); return { ch: m.ch, step: Object.assign({}, m.step), done: Object.assign({}, m.done), ends: m.ends.slice(), flags: Object.assign({}, m.flags), lore: m.lore.slice(), guardia: m.guardia, consiglio: m.consiglio, fuori: m.fuori, trust: m.trust, caught: m.caught }; },
     _dbg: /[?&]debug\b/.test(location.search || "") ? { mem, ZONES, CHAPTERS, ZX, go, F, LORE, STL } : undefined,
   };

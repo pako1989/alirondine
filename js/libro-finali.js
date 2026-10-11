@@ -787,6 +787,7 @@
       return { label: "📖 Il Libro che Mangiava i Finali", cls: "hot", fn: () => openMain({ onExit: back }),
         sub: h ? `${h.name} · ${c ? "Capitolo " + c.n + (m.done[c.n] ? " concluso" : " in corso") : "fiaba e mistero"} · fiaba meta-narrativa` : "Crea prima il tuo campione · fiaba meta-narrativa a capitoli" };
     },
+    endings() { const m = mem(); return Object.keys(ENDINGS).map((k) => ({ id: k, title: ENDINGS[k][0], desc: ENDINGS[k][1], found: m.ends.includes(k) })); },
     info() { const m = mem(); return { ch: m.ch, step: Object.assign({}, m.step), done: Object.assign({}, m.done), words: m.words.slice(), marg: m.marg.length, lett: m.lett.slice(), ends: m.ends.slice(), cheat: m.cheat }; },
     _dbg: /[?&]debug\b/.test(location.search || "") ? { mem, ZONES, CHAPTERS, ZX, reload, go, setStep, F, at } : undefined,
   };

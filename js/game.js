@@ -3842,7 +3842,7 @@
   const borgoFresh = () => ({ v: 1, x: 19 * TS + 8, y: 16 * TS + 12, dir: "down", night: false, shells: [], cos: [], q: { glove: 0, acc: 0, muro: 0, secret: false, kids: 0, beach: 0, rocco: 0, kidsL: 0, beachL: 0, roccoL: 0, capre: 0, goats: [], faro: 0, trav: 0, travDone: false, pesca: 0, bomb: 0, post: 0, postL: [], quiz: 0, pall: 0, pallDone: false, nino: 0, ninoDone: false, btour: 0, bcup: 0, xmas: 0 }, ep: {}, seen: {} });
   const borgoLoad = () => { const b = readJSON(BORGO, null); if (!b || b.v !== 1 || typeof b.x !== "number") return borgoFresh(); const f = borgoFresh(); const q = { ...f.q, ...(b.q || {}) }; if (!Array.isArray(q.goats)) q.goats = []; if (!Array.isArray(q.postL)) q.postL = []; return { ...f, ...b, q, ep: b.ep || {}, seen: b.seen || {}, shells: b.shells || [], cos: b.cos || [] }; };
   const borgoSave = () => { if (B) writeJSON(BORGO, B); };
-  const bCos = (id) => { if (!id) return false; if (!B.cos.includes(id)) { B.cos.push(id); borgoSave(); return true; } return false; };
+  const bCos = (id) => { if (!id) return false; if (!B) B = borgoLoad(); if (!Array.isArray(B.cos)) B.cos = []; if (!B.cos.includes(id)) { B.cos.push(id); borgoSave(); return true; } return false; };
   const BL = (who, t) => L(who, t, "borgo");
   function borgoMap() {
     const m = Array.from({ length: MH }, () => Array(MW).fill("."));
@@ -15164,25 +15164,36 @@
       ...(fresh0 ? [{ label: "Nuova partita", sub: "Stagione 1 · circa 30–40 minuti", cls: "hot", fn: () => { S = fresh(); run(); } }] : []),
       { head: "Gioca" },
       { label: "Storia", sub: `Le stagioni di Leo · ${mnPct(mnStoria())}%`, fn: menuStoria },
-      { label: "Il Borgo Storto", sub: "Spin-off GDR a turni", cls: "hot", fn: () => openBorgoStorto(title) },
+      ...(window.__salone ? [((t) => ({ label: "🏛️ Salone delle Saghe", sub: `${t.n} saghe · ${t.run} in corso · finali ${t.fe}/${t.te}`, cls: "hot", fn: () => window.__salone.open(title) }))(window.__salone.summary())] : []),
+      { label: "Partite e modalità", sub: `Carriera, tornei, arcade · ${mnPct(mnModi())}%`, fn: modes },
       { label: "Borgo e trasferte", sub: `A piedi per il paese · ${mnPct(mnBorgo())}%`, fn: menuBorgo },
-      { label: "Modalità", sub: `Tutte le modalità · ${mnPct(mnModi())}%`, fn: modes },
-      { label: "Saghe e minigiochi", sub: "Ragnarok Ball, Belovodia, Blue Lock, Noir, Multiverso, Stadio 3D…", cls: "hot", fn: menuSaghe },
-      { head: "Esplora" },
-      { label: "Collezioni", sub: `Trofei, figurine, finali · ${mnPct(mnColl())}%`, fn: extras },
-      { label: "Enciclopedia del Borgo", sub: "Personaggi, schede e carte", fn: () => borgoEncyclopedia(title) },
-      { label: "Albero delle scelte", sub: "Bivi e finali alternativi", fn: () => choiceTree(title) },
-      { label: "Log dei dialoghi", sub: "Rileggi le ultime battute", fn: () => { if (window.openDialogueLog) window.openDialogueLog(); } },
-      { head: "Aiuto & Guide" },
-      { label: "📖 Manuale del Rondine FC", sub: "Guida ufficiale · Meccaniche, Meteo Vento e Perk Reclute", cls: "hot", fn: () => manualeRondine(title) },
+      { head: "Il tuo Campione" },
+      ...(window.__salone ? [((t) => ({ label: "👕 Guardaroba", sub: `${t.cosOwned}/${t.cosTot} capi, colori e accessori`, fn: () => window.__salone.guardaroba(title) }))(window.__salone.summary()), ((t) => ({ label: "🏆 Album dei finali", sub: `${t.fe}/${t.te} timbri`, fn: () => window.__salone.album(title) }))(window.__salone.summary())] : []),
+      { head: "Altro" },
+      { label: "Altro…", sub: "Minigiochi, collezioni, enciclopedia, guide", fn: menuAltro },
       { label: "Impostazioni", sub: `${(DIFF[SET.diff] || DIFF.normale)[0]} · salvataggi · grafica`, fn: menuImp },
-      { label: "Dove andare adesso?", sub: "Un consiglio senza spoiler da Pina", cls: fresh0 ? "" : "pick", fn: () => guDove(title) },
+    ]);
+  }
+  function menuAltro() {
+    view = { kind: "scene", bg: "title" }; chap("Altro");
+    text("voce", "<b>Altro</b><br>Minigiochi, collezioni, guide e strumenti.");
+    buttons([
+      { label: "Minigiochi e arcade", sub: "Stadio 3D, biliardino, cabinato, gozzo, Panda, Arena 2D HD…", cls: "hot", fn: menuSaghe },
+      { label: "Il Borgo Storto", sub: "Spin-off GDR a turni", fn: () => openBorgoStorto(menuAltro) },
+      { label: "Collezioni", sub: `Trofei, figurine, finali · ${mnPct(mnColl())}%`, fn: extras },
+      { label: "Enciclopedia del Borgo", sub: "Personaggi, schede e carte", fn: () => borgoEncyclopedia(menuAltro) },
+      { label: "Albero delle scelte", sub: "Bivi e finali alternativi", fn: () => choiceTree(menuAltro) },
+      { label: "Log dei dialoghi", sub: "Rileggi le ultime battute", fn: () => { if (window.openDialogueLog) window.openDialogueLog(); } },
+      { label: "📖 Manuale del Rondine FC", sub: "Meccaniche, meteo, perk delle reclute", fn: () => manualeRondine(menuAltro) },
+      { label: "Dove andare adesso?", sub: "Un consiglio senza spoiler da Pina", fn: () => guDove(menuAltro) },
+      { label: "◂ Menu", cls: "pick", fn: title },
     ]);
   }
   function menuSaghe() { // vuoto-sale-fix-v2
-    view = { kind: "scene", bg: "title" }; chap("Saghe e minigiochi");
-    text("voce", "<b>Saghe e minigiochi</b><br>Storie speciali e giochi a parte. Ognuna si gioca per conto suo.");
+    view = { kind: "scene", bg: "title" }; chap("Minigiochi e arcade");
+    text("voce", "<b>Minigiochi e arcade</b><br>Giochi a parte e saghe classiche. Tutte le saghe, con copertine e avanzamento, sono nel Salone delle Saghe.");
     buttons([
+      ...(window.__salone ? [{ label: "🏛️ Salone delle Saghe", sub: "Tutte le saghe a schede", cls: "hot", fn: () => window.__salone.open(menuSaghe) }] : []),
       { head: "✨ Nuova Suite Gameplay 2D HD" },
       { label: "✨ Arena 2D HD · Hub Completo", sub: "Le 4 modalità 2D HD in un posto solo", cls: "hot", fn: () => { if (window.openArena2DHDModal) window.openArena2DHDModal(menuSaghe); } },
       { label: "🛡️ Rondine Emblem · RPG Tattico 2D HD", sub: "RPG tattico a griglia: 10 capitoli con storia, ritratti e sfondi, anteprima dei danni, stelle", cls: "hot", fn: () => { if (window.openTacticalEmblemMode) window.openTacticalEmblemMode(menuSaghe); } },
@@ -15222,7 +15233,7 @@
       { label: "🚗 La Corsa della Panda 30", sub: "Consegna la focaccia calda con Nonna", fn: () => { if (window.openPanda3D) window.openPanda3D(menuSaghe); } },
       { label: "📋 Bacheca Incarichi (Quest Board)", sub: "Missioni secondarie, sviluppo legami e reclutamento FC", cls: "hot", fn: () => { if (window.openQuestBoard) window.openQuestBoard(menuSaghe); } },
       { label: "🛡️ Roster & Talenti", sub: "Compagni ed equipaggiamento del Borgo", fn: () => { if (window.openRosterTalentsModal) window.openRosterTalentsModal(); } },
-      { label: "◂ Menu", cls: "pick", fn: title },
+      { label: "◂ Altro", cls: "pick", fn: menuAltro },
     ]);
   }
   function menuStoria() {
@@ -15276,6 +15287,7 @@
       { label: "✨ Arena 2D HD del Borgo", sub: "Suite Completa: Emblem, Action Soccer, Gabbia del Molo e Matchday Director", cls: "hot", fn: () => { if (window.openArena2DHDModal) window.openArena2DHDModal(modes); } },
       { label: "★ JoJo · Stand Soccer Battle", sub: "Le Bizzarre Avventure di Rondine: Star Rondine & ORA ORA ORA!", cls: "hot", fn: () => { if (window.openJoJoAdventure) window.openJoJoAdventure(modes); } },
       { label: "🌊 Cala Tramontana · Il Borgo del Tuo Campione", sub: heroLoad() ? `Esplora a piedi il borgo alternativo con ${heroLoad().name}` : "Modalità a piedi nel borgo marino alternativo per il tuo campione", cls: "hot", fn: () => { if (window.openCalaTramontana) window.openCalaTramontana(modes); } },
+      ...(window.__salone ? [{ label: "🏛️ Salone delle Saghe", sub: "Tutte le saghe a schede, con copertine, avanzamento e finali", cls: "hot", fn: () => window.__salone.open(modes) }] : []),
       ...(window.__libroFinali ? [window.__libroFinali.menuEntry(modes)] : []),
       ...(window.__doppioTurno ? [window.__doppioTurno.menuEntry(modes)] : []),
       ...(window.__cristalli ? [window.__cristalli.menuEntry(modes)] : []),
@@ -21989,7 +22001,7 @@
     ["Partite", /Settimana del Molo/],
     ["Collezioni e curiosità", /Diario del Corriere/],
     ["Calcio d'azione e arcade", /Arena 2D|Biliardino|Cabinato|Stadio 3D|Corsa della Panda|Gozzo di Baciccia|Gabbia sul Molo|Tsubasa|Supereroi/],
-    ["Saghe e GDR", /Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis|Libro che Mangiava i Finali|Doppio Turno|Cristalli del Campo|Il Muro/],
+    ["Saghe e GDR", /Salone delle Saghe|Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis|Libro che Mangiava i Finali|Doppio Turno|Cristalli del Campo|Il Muro/],
     ["Collezioni e curiosità", /Gashapon|Roster & Talenti|Diorama|Fumetto|Leggende del passato|Bianco e Nero|Quartier Generale/],
   ];
   const MN_EXP = { "Partite": 12, "Allenamento": 6, "Storie e ricordi": 8 }; // quante voci ha la categoria a tutto sbloccato: le mancanti appaiono come «???»
@@ -25445,7 +25457,7 @@
     text("voce", `<b>Come vuoi giocare questa partita?</b><br><span style="color:var(--dim)">Esito e ricompense della storia sono uguali: cambia solo come giochi.</span>`);
     buttons([{ label: "🎮 Partita a turni", sub: "Scegli le mosse una alla volta", cls: "hot", fn: () => apiMatch(cfg) }, ...alts.map((k) => kinds[k])]);
   }
-  window.__borgoApi = { match: apiMatch, matchPick: apiMatchPick, timing: bTiming, play, chap, scene: (bg, who, html, opts, title) => { view = { kind: "scene", bg, speaker: who }; if (title) chap(title); text(who || "voce", html); buttons(opts, true); }, portraitImg, TRZ, MN_BORGO_BTN, CAST, BIO, seeCard, trGo, trAsk, trSay, trResume, L, trToast, TR_IDS, NPCS, trLevel, trZone: () => (TW ? TW.id : null), trExitTo, trRec, todayKey, hq: HQ_API, COSM, bCos };
+  window.__borgoApi = { match: apiMatch, matchPick: apiMatchPick, timing: bTiming, play, chap, scene: (bg, who, html, opts, title) => { view = { kind: "scene", bg, speaker: who }; if (title) chap(title); text(who || "voce", html); buttons(opts, true); }, portraitImg, TRZ, MN_BORGO_BTN, CAST, BIO, seeCard, trGo, trAsk, trSay, trResume, L, trToast, TR_IDS, NPCS, trLevel, trZone: () => (TW ? TW.id : null), trExitTo, trRec, todayKey, hq: HQ_API, COSM, bCos, cosOwned: () => { try { return cosOwned(); } catch { return []; } }, heroSave: (h) => { writeJSON(HERO, h); heroCast(h); }, heroCast, storyEndings: () => { const got = getList(ENDS); return ENDINGS.map(([t, grp, hint]) => ({ title: t, group: grp, hint, found: got.includes(t) })); }, coins: () => bCoins(), openBorgoStorto: (back) => openBorgoStorto(back), cosOrder: () => { try { return ((B || borgoLoad()).cos || []).slice(); } catch { return []; } }, portraitTo: (ctx, id, x, y, sc) => { const main = g, sp = view.speaker; try { g = ctx; view.speaker = null; portrait(id, x, y, sc, false); } finally { g = main; view.speaker = sp; } } };
   if (/[?&]debug/.test(location.search)) window.__borgoDbg = { get BW() { return BW; }, get B() { return B; }, BLD, borgo, borgoMap, borgoDoor, borgoOpenLevel };
   try { if (window.__storyNav && window.__storyNav.seedFromSaveState) window.__storyNav.seedFromSaveState(S); } catch {}
   title();

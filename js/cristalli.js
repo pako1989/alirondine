@@ -656,6 +656,7 @@
       const h = hero(), c = activeChapter(), m = mem();
       return { label: "💎 Cristalli del Campo", cls: "hot", fn: () => openMain({ onExit: back }), sub: h ? `${h.name} · ${c ? "Capitolo " + c.n + (m.done[c.n] ? " concluso" : " in corso") : "JRPG"} · mestieri, aeronave, battaglie ATB` : "Crea prima il tuo campione · JRPG a 16 bit" };
     },
+    endings() { const m = mem(); return Object.keys(ENDINGS).map((k) => ({ id: k, title: ENDINGS[k][0], desc: ENDINGS[k][1], found: m.ends.includes(k) })); },
     info() { const m = mem(); return { ch: m.ch, step: Object.assign({}, m.step), done: Object.assign({}, m.done), ends: m.ends.slice(), flags: Object.assign({}, m.flags), jobs: Object.assign({}, m.jobs), unl: m.unl.slice(), party: m.party.slice(), lore: m.lore.slice(), luce: m.luce, ferro: m.ferro, corona: m.corona, trust: m.trust }; },
     _dbg: /[?&]debug\b/.test(location.search || "") ? { mem, ZONES, CHAPTERS, ZX, go, F, LORE, PLACES, fly } : undefined,
   };

@@ -524,6 +524,7 @@
       const h = hero(), c = activeChapter(), m = mem();
       return { label: "🪞 Doppio Turno", cls: "hot", fn: () => openMain({ onExit: back }), sub: h ? `${h.name} · ${c ? "Capitolo " + c.n + (m.done[c.n] ? " concluso" : " in corso") : "mistero"} · due metà, un contratto` : "Crea prima il tuo campione · mistero a due metà" };
     },
+    endings() { const m = mem(); return Object.keys(ENDINGS).map((k) => ({ id: k, title: ENDINGS[k][0], desc: ENDINGS[k][1], found: m.ends.includes(k) })); },
     info() { const m = mem(); return { ch: m.ch, step: Object.assign({}, m.step), done: Object.assign({}, m.done), facts: { d: m.facts.d.slice(), f: m.facts.f.slice() }, notes: JSON.parse(JSON.stringify(m.notes)), conf: m.conf, ends: m.ends.slice(), flags: Object.assign({}, m.flags) }; },
     _dbg: /[?&]debug\b/.test(location.search || "") ? { mem, ZONES, CHAPTERS, ZX, go, F, FACTS, NOTES } : undefined,
   };
