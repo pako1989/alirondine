@@ -320,6 +320,18 @@
       btns.push({ label: "🏆 Epilogo & Riconoscimenti", sub: "Rileggi l'articolo de L'Eco del Tirreno", cls: "hot", fn: () => showEpilogue(hero, prog) });
     }
     btns.push({
+      label: "🔥 Ragnarok Ball · Il Fuoco di Fimbulwinter ▸",
+      sub: "Saga norrena tra ghiaccio e fiamme, Furia Berserker e Pietra Fusa con " + (hero.name || "il Campione"),
+      cls: "hot",
+      fn: () => { if (window.__ragnarokStory) window.__ragnarokStory.open({ onExit: () => window.openHeroStoryMenu(onBack) }); }
+    });
+    btns.push({
+      label: "❄️ Belovodia · La Città delle Acque Bianche ▸",
+      sub: "Saga leggendaria nella tundra e aurora boreale con " + (hero.name || "il Campione"),
+      cls: "hot",
+      fn: () => { if (window.__belovodiaStory) window.__belovodiaStory.open({ onExit: () => window.openHeroStoryMenu(onBack) }); }
+    });
+    btns.push({
       label: "⚖️ La Bilancia delle Tre Corone ▸",
       sub: "Saga tattica feudale (Triangle Strategy) con " + (hero.name || "il Campione"),
       cls: "hot",

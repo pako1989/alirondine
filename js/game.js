@@ -4959,6 +4959,8 @@
     const cyc = (k, label) => { const list = o[k], i = Math.max(0, list.findIndex(([v]) => v === h[k])), cur = list[i] || list[0]; return { label: `${label}: ${cur[1]} ▸`, sub: `${i + 1} di ${list.length}`, fn: () => { const nx = list[(i + 1) % list.length]; const oldShot = H_SHOTS[h.shot].label.toUpperCase(); h[k] = nx[0]; if (k === "shot" && (!h.shotName || h.shotName.startsWith(oldShot))) { h.shotName = `${H_SHOTS[h.shot].label.toUpperCase()} DI ${h.name.toUpperCase()}`; $("hShot").value = h.shotName; } heroCast(h); heroSum(); heroButtons(); } }; };
     buttons([cyc("style", "Capelli"), cyc("hair", "Colore"), cyc("eye", "Occhi"), cyc("skin", "Pelle"), cyc("shirt", "Maglia"), cyc("acc", "Accessorio"), cyc("shot", "Tiro"),
       { label: "Avanti ▸ Salva il Campione", sub: "Conferma ed entra in campo", cls: "hot", fn: () => { HE.h.v = 1; writeJSON(HERO, HE.h); heroCast(HE.h); view = { kind: "scene", bg: "end", speaker: "hero", chibi: true }; text("hero", `<b>${esc(HE.h.name)}</b>, numero ${HE.h.num}, pronto a scendere in campo con occhi <b>${(H_EYE[HE.h.eye] || "personalizzati").toLowerCase()}</b>. Il tiro speciale si chiama <em>${esc(HE.h.shotName)}</em>.<br><span style="color:var(--dim)">${heroWhere}</span>`); buttons([
+        ...(window.__ragnarokStory ? [{ label: "🔥 Gioca «Ragnarok Ball · Il Fuoco di Fimbulwinter» ▸", sub: `Nuova saga norrena tra ghiaccio e fiamme con ${HE.h.name}`, cls: "hot", fn: () => window.__ragnarokStory.open({ onExit: HE.back }) }] : []),
+        ...(window.__belovodiaStory ? [{ label: "❄️ Gioca «Belovodia · La Città delle Acque Bianche» ▸", sub: `Nuova saga slava tra tundra e aurora con ${HE.h.name}`, cls: "hot", fn: () => window.__belovodiaStory.open({ onExit: HE.back }) }] : []),
         ...(window.__bilanciaFeudi ? [{ label: "⚖️ Gioca «La Bilancia delle Tre Corone» ▸", sub: `Nuova saga feudale tattica con ${HE.h.name}`, cls: "hot", fn: () => window.__bilanciaFeudi.open({ onExit: HE.back }) }] : []),
         ...(window.__shogunStory ? [{ label: "⚔️ Gioca «Shogun Eclipse · Il Regno delle Sette Lame» ▸", sub: `Nuova saga feudale epica con ${HE.h.name}`, cls: "hot", fn: () => window.__shogunStory.open({ onExit: HE.back }) }] : []),
         ...(window.__chronoStory ? [{ label: "⏳ Gioca «Chrono-Break · Il Tempio dei Tre Tempi» ▸", sub: `Nuova saga di viaggi nel tempo con ${HE.h.name}`, cls: "hot", fn: () => window.__chronoStory.open({ onExit: HE.back }) }] : []),
@@ -15139,7 +15141,7 @@
       { label: "Il Borgo Storto", sub: "Spin-off GDR a turni", cls: "hot", fn: () => openBorgoStorto(title) },
       { label: "Borgo e trasferte", sub: `A piedi per il paese · ${mnPct(mnBorgo())}%`, fn: menuBorgo },
       { label: "Modalità", sub: `Tutte le modalità · ${mnPct(mnModi())}%`, fn: modes },
-      { label: "Saghe e minigiochi", sub: "Blue Lock, Noir, Multiverso, Stadio 3D, Panda, Faro…", cls: "hot", fn: menuSaghe },
+      { label: "Saghe e minigiochi", sub: "Ragnarok Ball, Belovodia, Blue Lock, Noir, Multiverso, Stadio 3D…", cls: "hot", fn: menuSaghe },
       { head: "Esplora" },
       { label: "Collezioni", sub: `Trofei, figurine, finali · ${mnPct(mnColl())}%`, fn: extras },
       { label: "Enciclopedia del Borgo", sub: "Personaggi, schede e carte", fn: () => borgoEncyclopedia(title) },
@@ -15162,6 +15164,8 @@
       { label: "👟 Street Football · La Gabbia del Molo", sub: "3 contro 3 da strada: sponde sui muri, Trabucco, 4 livelli", cls: "hot", fn: () => { if (window.openStreetCageMode) window.openStreetCageMode(menuSaghe); } },
       { label: "📋 Matchday Director 2D HD", sub: "Fai il Mister: modulo, cambi, discorso all'intervallo, pagella", cls: "hot", fn: () => { if (window.openMatchDirectorHD) window.openMatchDirectorHD(menuSaghe); } },
       { head: "Saghe Ispirate & Speciali" },
+      ...(window.__ragnarokStory ? [window.__ragnarokStory.menuEntry(menuSaghe)] : []),
+      ...(window.__belovodiaStory ? [window.__belovodiaStory.menuEntry(menuSaghe)] : []),
       ...(window.__bilanciaFeudi ? [window.__bilanciaFeudi.menuEntry(menuSaghe)] : []),
       ...(window.__campioneOmbre ? [window.__campioneOmbre.menuEntry(menuSaghe)] : []),
       ...(window.__shogunStory ? [window.__shogunStory.menuEntry(menuSaghe)] : []),
@@ -15169,7 +15173,7 @@
       ...(window.__piratiStory ? [window.__piratiStory.menuEntry(menuSaghe)] : []),
       ...(window.__alchimiaStory ? [window.__alchimiaStory.menuEntry(menuSaghe)] : []),
       ...(window.__kronenburgStory ? [window.__kronenburgStory.menuEntry(menuSaghe)] : []),
-            ...(window.__chronoStory ? [window.__chronoStory.menuEntry(menuSaghe)] : []),
+      ...(window.__chronoStory ? [window.__chronoStory.menuEntry(menuSaghe)] : []),
       ...(window.__storiaCampione ? [window.__storiaCampione.menuEntry(menuSaghe)] : []),
       { label: "⭐ La Leggenda del Tuo Campione", sub: heroLoad() ? `La saga esclusiva di ${heroLoad().name} (N.${heroLoad().num})` : "Crea il tuo campione e scendi in campo!", cls: "hot", fn: () => { if (window.openHeroStoryMenu) window.openHeroStoryMenu(menuSaghe); } },
       { label: "★ JoJo · Stand Soccer Battle", sub: "Le Bizzarre Avventure di Rondine: Star Rondine & ORA ORA ORA!", cls: "hot", fn: () => { if (window.openJoJoAdventure) window.openJoJoAdventure(menuSaghe); } },
@@ -15245,15 +15249,15 @@
       { label: "✨ Arena 2D HD del Borgo", sub: "Suite Completa: Emblem, Action Soccer, Gabbia del Molo e Matchday Director", cls: "hot", fn: () => { if (window.openArena2DHDModal) window.openArena2DHDModal(modes); } },
       { label: "★ JoJo · Stand Soccer Battle", sub: "Le Bizzarre Avventure di Rondine: Star Rondine & ORA ORA ORA!", cls: "hot", fn: () => { if (window.openJoJoAdventure) window.openJoJoAdventure(modes); } },
       { label: "🌊 Cala Tramontana · Il Borgo del Tuo Campione", sub: heroLoad() ? `Esplora a piedi il borgo alternativo con ${heroLoad().name}` : "Modalità a piedi nel borgo marino alternativo per il tuo campione", cls: "hot", fn: () => { if (window.openCalaTramontana) window.openCalaTramontana(modes); } },
+      ...(window.__ragnarokStory ? [window.__ragnarokStory.menuEntry(modes)] : []),
+      ...(window.__belovodiaStory ? [window.__belovodiaStory.menuEntry(modes)] : []),
       ...(window.__campioneOmbre ? [window.__campioneOmbre.menuEntry(modes)] : []),
       ...(window.__shogunStory ? [window.__shogunStory.menuEntry(modes)] : []),
       ...(window.__phantomGenesis ? [window.__phantomGenesis.menuEntry(modes)] : []),
       ...(window.__piratiStory ? [window.__piratiStory.menuEntry(modes)] : []),
       ...(window.__alchimiaStory ? [window.__alchimiaStory.menuEntry(modes)] : []),
       ...(window.__kronenburgStory ? [window.__kronenburgStory.menuEntry(modes)] : []),
-      ...(window.__belovodiaStory ? [window.__belovodiaStory.menuEntry(modes)] : []),
-      ...(window.__ragnarokStory ? [window.__ragnarokStory.menuEntry(modes)] : []),
-            ...(window.__chronoStory ? [window.__chronoStory.menuEntry(modes)] : []),
+      ...(window.__chronoStory ? [window.__chronoStory.menuEntry(modes)] : []),
       ...(window.__storiaCampione ? [window.__storiaCampione.menuEntry(modes)] : []),
       ...(window.__moloSettimana ? [{ label: "🏆 Settimana del Molo", sub: window.__moloSettimana.info().sub, cls: "hot", fn: () => window.__moloSettimana.open({ onExit: modes }) }] : []),
       ...(window.__diarioScoperte ? [{ label: "📰 Il Diario del Corriere", sub: window.__diarioScoperte.info().sub, cls: "hot", fn: () => window.__diarioScoperte.open({ onExit: modes }) }] : []),
@@ -21924,7 +21928,7 @@
     ["Partite", /Settimana del Molo/],
     ["Collezioni e curiosità", /Diario del Corriere/],
     ["Calcio d'azione e arcade", /Arena 2D|Biliardino|Cabinato|Stadio 3D|Corsa della Panda|Gozzo di Baciccia|Gabbia sul Molo|Tsubasa|Supereroi/],
-    ["Saghe e GDR", /Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok/],
+    ["Saghe e GDR", /Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis/],
     ["Collezioni e curiosità", /Gashapon|Roster & Talenti|Diorama|Fumetto|Leggende del passato|Bianco e Nero|Quartier Generale/],
   ];
   const MN_EXP = { "Partite": 12, "Allenamento": 6, "Storie e ricordi": 8 }; // quante voci ha la categoria a tutto sbloccato: le mancanti appaiono come «???»
@@ -21962,7 +21966,7 @@
     const out = [...top];
     MN_ORDER.forEach((c) => {
       let arr = cats[c]; if (MN_EXP[c]) { const real = (arr || []).filter((b) => b && b.label !== "???"), lock = (arr || []).find((b) => b && b.label === "???") || { label: "???", sub: "Si sblocca più avanti nella storia", disabled: true, fn: () => {} }; arr = [...real, ...Array.from({ length: Math.max(0, MN_EXP[c] - real.length) }, () => ({ ...lock }))]; }
-      if (!arr || !arr.length) return; const nNew = arr.filter((b) => b._new).length, open = rec.open[c] === undefined ? (c === "Partite" || nNew > 0) : !!rec.open[c];
+      if (!arr || !arr.length) return; const nNew = arr.filter((b) => b._new).length, open = rec.open[c] === undefined ? (c === "Partite" || c === "Saghe e GDR" || nNew > 0) : !!rec.open[c];
       out.push({ label: `${open ? "▾" : "▸"} ${c}`, sub: `${arr.filter((b) => !b.disabled).length} ${arr.filter((b) => !b.disabled).length === 1 ? "voce" : "voci"}${arr.some((b) => b.disabled) ? ` · ${arr.filter((b) => b.disabled).length} da sbloccare` : ""}${nNew ? ` · ${nNew} ${nNew === 1 ? "nuova" : "nuove"}` : ""}`, cls: "mnsec" + (nNew ? " mnew" : ""), fn: () => { const r = mnRec2(); r.open[c] = !open; mnSave2(r); modes(); } });
       if (open) out.push(...arr);
     });

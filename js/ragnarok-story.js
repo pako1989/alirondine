@@ -2293,15 +2293,46 @@
   function openMain(opts) {
     opts = opts || {};
     if (opts.onExit) EXIT = opts.onExit;
+    if (!api) {
+      if (window.__borgoApi) init();
+      if (!api) {
+        setTimeout(() => openMain(opts), 100);
+        return;
+      }
+    }
     if (!hero()) {
       if (api && api.scene) {
         api.scene(
           "title", "voce",
-          "<b>Ragnarok Ball · Il Fuoco di Fimbulwinter</b><br><br>Prima di calciare la Sfera di Pietra Fusa nel gelo eterno, devi creare il tuo Campione nell'Editor!<br>Scegli il tuo nome, il tuo numero e il tuo tiro speciale.",
+          "<b>Ragnarok Ball · Il Fuoco di Fimbulwinter</b><br><br>Nel gelo eterno di Fimbulwinter, le Valchirie cercano un guerriero per calciare la Sfera di Pietra Fusa.<br>Puoi risvegliare subito l'Einherjar Leggendario oppure personalizzare il tuo Campione nell'Editor!",
           [
             {
-              label: "⭐ Crea il tuo Campione nell'Editor",
+              label: "⚡ Risveglia l'Einherjar Leggendario (Avvio Rapido)",
               cls: "hot",
+              fn: () => {
+                const defaultHero = {
+                  v: 1,
+                  name: "Einherjar",
+                  num: 9,
+                  hair: "#f59e0b",
+                  style: "lungi",
+                  skin: "#e0b48a",
+                  eye: "#f59e0b",
+                  shirt: "#991b1b",
+                  acc: "nessuno",
+                  shot: "martello",
+                  shotName: "COLPO DEL VULCANO"
+                };
+                if (typeof window.writeJSON === "function") {
+                  window.writeJSON("ali-di-rondine.hero", defaultHero);
+                } else {
+                  try { localStorage.setItem("ali-di-rondine.hero", JSON.stringify(defaultHero)); } catch (e) {}
+                }
+                openMain(opts);
+              }
+            },
+            {
+              label: "⭐ Crea il tuo Campione nell'Editor",
               fn: () => {
                 if (typeof window.heroEditor === "function") {
                   window.heroEditor(() => openMain(opts));
@@ -2504,14 +2535,18 @@
         cls: "hot",
         fn: () => openMain({ onExit: back }),
         sub: h
-          ? `${h.name} · ${c ? "Capitolo " + c.n + (m.done[c.n] ? " concluso" : " in corso") : "Mito Norreno, Furia Berserker e Crepe Telluriche"}`
-          : "Crea prima il tuo campione · Saga norrena tra ghiaccio e fiamme"
+          ? `${h.name} · ${c ? "Capitolo " + c.n + (m.done[c.n] ? " concluso" : " in corso") : "Mito Norreno, Furia Berserker e Crepe Telluriche · 4 Capitoli"}`
+          : "Saga norrena tra ghiaccio e lava · Gioca subito o con il tuo Campione · 4 Capitoli"
       };
     },
     info() {
       const m = mem();
       return { ch: m.ch, step: Object.assign({}, m.step), done: Object.assign({}, m.done), runes: m.runes.length, finale: m.finale };
     }
+  };
+
+  window.openRagnarokStory = function (onBack) {
+    if (window.__ragnarokStory) window.__ragnarokStory.open({ onExit: onBack });
   };
 
   if (document.readyState === "loading") {
