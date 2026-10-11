@@ -453,7 +453,49 @@
       P(sx + 3, sy + 11, 2, 4, "#27150c");
       P(sx + 11, sy + 11, 2, 4, "#27150c");
     },
+    I(sx, sy, tx, ty, fr) {
+      floorPaint(undAt(tx, ty), sx, sy, tx, ty);
+      // Incudine Titanica di Brokk in meteorite
+      P(sx + 2, sy + 7, 12, 8, "#292524");
+      P(sx + 1, sy + 5, 14, 3, "#475569");
+      P(sx + 2, sy + 4, 12, 1, "#94a3b8"); // Piano battuto
+      // Martello di meteorite appoggiato
+      P(sx + 9, sy + 1, 4, 3, "#1c1917");
+      P(sx + 10, sy + 4, 2, 4, "#78350f");
+      // Scintilla magmatica pulsante
+      if ((fr + tx * 3) % 4 === 0) P(sx + 5, sy + 2, 2, 2, "#fef08a");
+    },
+    S(sx, sy, tx, ty, fr) {
+      floorPaint(undAt(tx, ty), sx, sy, tx, ty);
+      // Fornace a cupola dei Nani
+      P(sx + 1, sy + 3, 14, 13, "#292524");
+      P(sx + 2, sy + 1, 12, 3, "#44403c");
+      // Bocca ardente con metallo fuso
+      P(sx + 4, sy + 7, 8, 7, "#0c0a09");
+      const fl = Math.sin(fr / 3 + tx) * 2;
+      P(sx + 5, sy + 8 + fl, 6, 5, "#ea580c");
+      P(sx + 6, sy + 9 + fl, 4, 3, "#fef08a");
+      // Tubo del soffietto
+      P(sx + 7, sy, 2, 2, "#78350f");
+    },
+    M(sx, sy, tx, ty) {
+      floorPaint(undAt(tx, ty), sx, sy, tx, ty);
+      // Monolite di meteorite grezzo
+      P(sx + 3, sy + 2, 10, 14, "#1c1917");
+      P(sx + 4, sy + 3, 8, 12, "#292524");
+      P(sx + 5, sy + 5, 2, 3, "#38bdf8"); // Venatura di cobalto
+      P(sx + 8, sy + 9, 3, 2, "#f59e0b"); // Venatura d'oro
+    },
+    L(sx, sy, tx, ty, fr) {
+      // Cascata / colata di lava attiva
+      P(sx, sy, 16, 16, "#1c1917");
+      const fl = Math.sin(fr / 4 + ty) * 2;
+      P(sx + 3, sy, 10, 16, "#ea580c");
+      P(sx + 5 + fl, sy, 6, 16, "#f97316");
+      P(sx + 7 + fl, sy, 2, 16, "#fef08a");
+    },
     u: (sx, sy, tx, ty) => doorTile(sx, sy, "#7f1d1d"),
+    q: (sx, sy, tx, ty) => doorTile(sx, sy, "#1e293b"),
     ">": (sx, sy, tx, ty) => gateTile(">", sx, sy, tx, ty),
     "<": (sx, sy, tx, ty) => gateTile("<", sx, sy, tx, ty),
     "^": (sx, sy, tx, ty) => gateTile("^", sx, sy, tx, ty),
@@ -718,6 +760,9 @@
           for (let y = 1; y < 21; y++) { put(0, y, "A"); put(23, y, "A"); }
           // Varco nord per l'Arena del Gelo e della Brace
           put(11, 0, "^"); put(12, 0, "^"); put(13, 0, "^");
+          // Varco ovest verso le Fucine di Nidavellir
+          lay(0, 11, 4, 11, "p");
+          put(0, 11, "<");
           // La Grande Casa dello Jarl (a sinistra)
           lay(2, 2, 8, 6, "A");
           put(5, 6, "u"); // Portone sala del mead
@@ -1093,6 +1138,11 @@
         if (S() < 3) say([["voce", "L'accesso all'Arena cerimoniale è sbarrato dalle guardie. Ottieni prima il permesso dello Jarl Ragnar."]], done);
         else go("rag_arena", 12, 18);
       },
+      "rag_fiordo:<": () => {
+        const m = mem();
+        if (!m.done[1]) say([["voce", "La voragine verso le Fucine di Nidavellir è bloccata da lastroni di ghiaccio. Supera prima la prova di Ragnar nel Capitolo 1."]], done);
+        else go("rag_fucine", 14, 11);
+      },
       "rag_fiordo:W": esaminaAltareMagmatico,
       "rag_fiordo:F": () => say([["voce", "Il braciere votivo lavico: le fiamme ardono di una luce rosso rubino, sciogliendo la neve all'intorno."]], done),
       "rag_fiordo:T": () => say([["voce", "Il maestoso Totem con corna d'alce: incisioni runiche brillano dolcemente nel buio del Fimbulwinter."]], done),
@@ -1119,6 +1169,381 @@
         rag_sigrid: sigridTalk1,
         rag_ragnar: ragnarTalk1,
         rag_guerriero: guerrieroTalk1
+      },
+      obj
+    };
+  });
+
+  // ==========================================================================
+  // CAPITOLO 2: LE FUCINE DI NIDAVELLIR
+  // ==========================================================================
+  addChapter(function (X) {
+    const { T, F, sfxHorn, sfxDrum, sfxLava, sfxValkyrie, note, setStep, addRune, reward, go } = X;
+    const N = 2, S = () => X.stepOf(N);
+
+    // Cast del Capitolo 2
+    X.cast("rag_brokk", {
+      name: "Brokk il Fabbro", tag: "fabbro", hair: "#1c1917", style: "braids", skin: "#b45309", eye: "#ea580c",
+      beard: true, bg: ["#0c0a09", "#ea580c"], shirt: "#451a03"
+    }, "Leggendario mastro forgiatore delle caverne di Nidavellir. Barba nera intrecciata con anelli d'oro puro, grembiule di cuoio indurito dalle colate di lava e martello in ferro di meteorite. Tempra i tacchetti del Campione nel fango primordiale.");
+
+    X.cast("rag_sindri", {
+      name: "Sindri l'Orafo", tag: "orafo", hair: "#78350f", style: "buzz", skin: "#d97706", eye: "#38bdf8",
+      beard: true, bg: ["#1c1917", "#f59e0b"], shirt: "#78350f"
+    }, "Fratello di Brokk, meticoloso e raffinato cesellatore. Indossa occhiali con lenti d'ambra vulcanica per scorgere le imperfezioni delle rune. Teme lo sporco e la polvere di cenere ma ama l'armonia del gioco.");
+
+    X.cast("rag_guardia_nano", {
+      name: "Sentinella di Nidavellir", tag: "sentinella", hair: "#475569", style: "messy", skin: "#94a3b8", eye: "#f59e0b",
+      beard: true, bg: ["#1e293b", "#ea580c"], shirt: "#334155"
+    }, "Guerriero nano in pesante cotta di maglia di bronzo dorato. Custodisce l'accesso al Ponte dei Fiumi di Magma.");
+
+    // Cosmetico Capitolo 2: Tacchetti Forgiati di Brokk
+    X.cos("rag_tacchetti_magma", {
+      id: "rag_tacchetti_magma",
+      label: "Tacchetti Forgiati di Brokk",
+      sub: "Tacchetti d'acciaio meteoritico temprati nel fango primordiale e riscaldati dal fuoco di Nidavellir.",
+      cat: "scarpe",
+      val: 0
+    });
+
+    // Definizione Zone Capitolo 2
+    const zones = {
+      rag_fucine: {
+        name: "Le Fucine dei Nani Sotterranei", short: "Fucine di Brokk",
+        sub: "Incudine di meteorite, fiumi di lava e calore primordiale nelle viscere della terra",
+        w: 16, h: 14, start: [14, 11], bg: "rag_fucine", theme: "torino",
+        item: ["Scoria di Meteorite", "Scorie"],
+        build(Ls) {
+          const { lay, put } = Ls;
+          // Pavimento in lastre di basalto e pietra lavica
+          lay(0, 0, 15, 13, "m");
+          // Mura di roccia basaltica
+          for (let x = 0; x < 16; x++) { put(x, 0, "A"); put(x, 13, "A"); }
+          for (let y = 1; y < 13; y++) { put(0, y, "A"); put(15, y, "A"); }
+          // Varco a est di ritorno al Fiordo
+          put(15, 11, ">");
+          // Varco a nord verso il Ponte di Magma
+          put(8, 0, "^");
+          // Incudine Titanica di Brokk al centro
+          put(8, 6, "I");
+          // Fornace a cupola e soffietti a sinistra
+          put(2, 3, "S"); put(3, 3, "S");
+          // Canali di lava che scorrono sui bordi
+          for (let y = 2; y <= 10; y++) { put(1, y, "l"); put(14, y, "l"); }
+          // Monolite di meteorite grezzo
+          put(12, 3, "M");
+          // Bracieri nanici e panche
+          put(5, 2, "F"); put(11, 2, "F");
+          put(6, 10, "b"); put(10, 10, "b");
+        },
+        npcs(s) {
+          const list = [];
+          list.push({ id: "rag_brokk", at: [8, 5] });
+          list.push({ id: "rag_sindri", at: [4, 4] });
+          list.push({ id: "rag_kara", at: [12, 8] });
+          list.push({ id: "rag_guardia_nano", at: [8, 1] });
+          return list;
+        }
+      },
+      rag_ponte: {
+        name: "Il Ponte dei Fiumi di Magma", short: "Ponte di Magma",
+        sub: "Arco di roccia sospeso su cascate di lava fusa e vapori incandescenti",
+        w: 18, h: 16, start: [8, 14], bg: "rag_ponte", theme: "torino",
+        item: ["Pietra Pomice Fusa", "Pomici"],
+        build(Ls) {
+          const { lay, put } = Ls;
+          // Lava fusa su tutta la caverna
+          lay(0, 0, 17, 15, "l");
+          // Roccia perimetrale
+          for (let x = 0; x < 18; x++) { put(x, 0, "A"); put(x, 15, "A"); }
+          for (let y = 1; y < 15; y++) { put(0, y, "A"); put(17, y, "A"); }
+          // Il Ponte centrale in basalto battuto
+          lay(7, 1, 10, 14, "p");
+          // Parapetto con monoliti e bracieri
+          for (let y = 2; y <= 13; y += 3) {
+            put(6, y, "T"); put(11, y, "T");
+          }
+          // Varchi
+          put(8, 15, "d"); put(9, 15, "d"); // Verso fucine
+          put(8, 0, "^"); put(9, 0, "^");   // Verso l'Arena Forgia
+        },
+        npcs(s) {
+          const list = [];
+          list.push({ id: "rag_sindri", at: [9, 9] });
+          list.push({ id: "rag_guardia_nano", at: [8, 2] });
+          return list;
+        }
+      },
+      rag_forgia: {
+        name: "L'Arena delle Scintille di Nidavellir", short: "Arena della Forgia",
+        sub: "Campo cerimoniale dei nani: basalto levigato, porte d'ossidiana e colonne di fuoco",
+        w: 24, h: 22, start: [12, 19], bg: "rag_forgia", theme: "torino",
+        item: ["Lingotto di Meteorite", "Lingotti"],
+        build(Ls) {
+          const { lay, put } = Ls;
+          // Basalto perimetrale
+          lay(0, 0, 23, 21, "m");
+          for (let x = 0; x < 24; x++) { put(x, 0, "A"); put(x, 21, "A"); }
+          for (let y = 1; y < 21; y++) { put(0, y, "A"); put(23, y, "A"); }
+          // Campo di calcio cerimoniale
+          lay(4, 4, 19, 16, "y");
+          // Linea mediana e canali di lava
+          for (let x = 4; x <= 19; x++) put(x, 10, "l");
+          // Porte cerimoniali in ossidiana e catene
+          put(11, 3, "G"); put(12, 3, "G");
+          put(11, 17, "G"); put(12, 17, "G");
+          // Bracieri ardenti
+          put(3, 4, "F"); put(20, 4, "F");
+          put(3, 16, "F"); put(20, 16, "F");
+          // Monoliti
+          put(3, 10, "M"); put(20, 10, "M");
+          // Varco sud verso il Ponte
+          put(12, 21, "d");
+        },
+        npcs(s) {
+          const list = [];
+          list.push({ id: "rag_brokk", at: [10, 11] });
+          list.push({ id: "rag_sindri", at: [14, 11] });
+          list.push({ id: "rag_kara", at: [12, 7] });
+          return list;
+        }
+      }
+    };
+
+    // Dialoghi Capitolo 2
+    function brokkTalk2() {
+      const s = S();
+      if (s === 0) {
+        sfxDrum();
+        return say([
+          ["rag_brokk", "(Scaglia il martello con un colpo assordante sull'incudine, facendo schizzare scintille dorate) Chi osa disturbare il ritmo di Brokk? I nani non forgiano per i deboli di cuore."],
+          ["hero", "Sono {n}. La Valchiria Kara e lo Jarl Ragnar mi hanno mandato qui. Ho la Sfera di Pietra Fusa, ma il permafrost rende i miei tacchetti insicuri contro le difese nane."],
+          ["rag_brokk", "(Ti squadra i piedi, poi accarezza la barba con soddisfazione) Uno che capisce l'importanza dell'attrezzo! Quei tacchetti di cuoio mortale non reggerebbero un solo tiro della Furia Berserker."],
+          ["rag_brokk", "Vieni all'Incudine Titanica al centro della sala. Con il fango primordiale e il ferro di meteorite temprerò per te una calzatura degna di calciare su un lago di magma!"],
+        ], () => {
+          setStep(N, 1);
+          note("Incontro con Brokk: il fabbro accetta di temprare i tacchetti del Campione con fango primordiale.");
+          done();
+        });
+      }
+      if (s === 1) {
+        return say([
+          ["rag_brokk", "L'Incudine Titanica è pronta. Esaminala e scegli come infondere la fiamma nei tuoi nuovi tacchetti."],
+        ], done);
+      }
+      if (s === 2 || s === 3) {
+        const inForgia = !!(window.TW && window.TW.id === "rag_forgia");
+        if (inForgia) {
+          if (s === 2) setStep(N, 3);
+          return ask("rag_brokk", "«Sei giunto nella nostra forgia cerimoniale, {n}. Pronto a vedere se i tuoi nuovi tacchetti reggono l'impatto col muro dei Nani?»", [
+            {
+              label: "⚽ «Fischia l'inizio del Torneo della Fornace!»",
+              cls: "hot",
+              fn: startMatch2
+            },
+            { label: "«Sto saggiando la presa sul basalto»", fn: done }
+          ]);
+        }
+        return say([
+          ["rag_brokk", "I tacchetti sono forgiati! Ora attraversa il Ponte dei Fiumi di Magma a nord. La mia squadra di forgiatori ti aspetta nell'Arena di Nidavellir."],
+        ], done);
+      }
+      return say([
+        ["rag_brokk", "Per tutti i metalli di Midgard! Il tuo tiro «{tiro}» ha scosso le fondamenta di Nidavellir. Ti sei guadagnato la salita verso la Piana di Vigrid!"],
+      ], done);
+    }
+
+    function sindriTalk2() {
+      const s = S();
+      if (s === 0 || s === 1) {
+        return say([
+          ["rag_sindri", "Attento dove metti i piedi! Quella cenere sul pavimento è piena di scorie di meteorite non raffinate... e spero che le tue mani siano pulite prima di toccare l'incudine di mio fratello!"],
+          ["rag_sindri", "Brokk è rude, ma la sua tempra col fango primordiale è la migliore dei Nove Regni."],
+        ], done);
+      }
+      if (s === 2) {
+        return ask("rag_sindri", "«Vedo i tacchetti brillare di luce ambrata. Il Ponte di Magma a nord è pronto per essere attraversato. Vuoi avanzare verso l'Arena sotterranea?»", [
+          {
+            label: "🌉 «Attraversiamo il Ponte di Magma!»",
+            cls: "hot",
+            fn: () => go("rag_ponte", 8, 13)
+          },
+          { label: "«Studio ancora le colate di lava»", fn: done }
+        ]);
+      }
+      if (s === 3) {
+        return say([
+          ["rag_sindri", "L'Arena delle Scintille è perfetta: zero polvere, solo basalto levigato a specchio e catene d'oro. Dai il massimo sul campo, Campione!"],
+        ], done);
+      }
+      return say([
+        ["rag_sindri", "Che partita spettacolare! Persino il mio martello ha vibrato all'unisono con il tuo tiro."],
+      ], done);
+    }
+
+    function karaTalk2() {
+      const s = S();
+      if (s < 2) {
+        return say([
+          ["rag_kara", "Le profondità di Nidavellir custodiscono il fuoco primordiale che forgiò Mjolnir e Gungnir. Lascia che Brokk consacri il tuo calcio."],
+        ], done);
+      }
+      return say([
+        ["rag_kara", "Sento la Runa Uruz pulsare nella roccia. I nani riconoscono la grandezza solo in chi sa resistere alle fiamme."],
+      ], done);
+    }
+
+    function guardiaNanoTalk2() {
+      const s = S();
+      if (s < 2) {
+        return say([
+          ["rag_guardia_nano", "L'accesso al Ponte di Magma è riservato a chi possiede tacchetti temprati. Parla con mastro Brokk."],
+        ], done);
+      }
+      return ask("rag_guardia_nano", "«I cancelli verso il Ponte di Magma sono aperti. Vuoi proseguire?»", [
+        {
+          label: "🔥 «Avanzo verso l'Arena delle Scintille!»",
+          cls: "hot",
+          fn: () => go("rag_ponte", 8, 13)
+        },
+        { label: "«Resto ancora nella bottega»", fn: done }
+      ]);
+    }
+
+    function esaminaIncudineBrokk() {
+      if (S() !== 1) {
+        return say([["voce", "L'Incudine Titanica di Brokk: la superficie in ferro di meteorite è levigata da millenni di colpi, emanando un calore magnetico."]], done);
+      }
+      sfxLava();
+      ask("voce", "Mastro Brokk versa il fango primordiale fuso sopra i tuoi tacchetti. Come decidi di imprimere la tua volontà nel metallo incandescente?", [
+        {
+          label: "🔥 «Furia della Lava: tempra il metallo per spaccare ogni difesa con impatto vulcanico!»",
+          sub: "Via della Furia Inarrestabile (scelta morale per i finali multipli)",
+          cls: "hot",
+          fn: () => {
+            F.set("rag_scelta_2", "furia");
+            concludiTempra("furia");
+          }
+        },
+        {
+          label: "ᚱ «Equilibrio delle Rune: incidi il sigillo di Mjolnir per dominare i rimbalzi sulla roccia»",
+          sub: "Via della Precisione Divina (scelta morale per i finali multipli)",
+          cls: "hot",
+          fn: () => {
+            F.set("rag_scelta_2", "saggezza");
+            concludiTempra("saggezza");
+          }
+        },
+        {
+          label: "⚒️ «Lega dei Nani: tempra i tacchetti con la tenacia di chi lavora nelle ombre per proteggere la luce»",
+          sub: "Via della Solidarietà dei Nove Regni (scelta morale per i finali multipli)",
+          fn: () => {
+            F.set("rag_scelta_2", "popolo");
+            concludiTempra("popolo");
+          }
+        }
+      ]);
+    }
+
+    function concludiTempra(scelta) {
+      sfxDrum();
+      addRune("uruz_forgia", "Runa Uruz della Roccia Fusa", "Raddoppia l'aderenza sulle superfici laviche e potenzia la resistenza ai contrasti.");
+      setStep(N, 2);
+      const descScelta = scelta === "furia"
+        ? "Hai fuso i tacchetti nella lava viva, ottenendo una carica fisica devastante in ogni contrasto."
+        : scelta === "saggezza"
+          ? "Hai cesellato le rune di Thor nel ferro meteoritico, garantendo traiettorie telecomandate anche a piena potenza."
+          : "Hai consacrato i tacchetti all'onore del lavoro nanico, unendo la forza del sottosuolo alla tua causa.";
+      note(`RUNA URUZ RISVEGLIATA (${scelta.toUpperCase()}): ${descScelta}`);
+
+      say([
+        ["voce", "TSSSSS! Una nuvola di vapore dorato si sprigiona dall'incudine mentre Brokk immerge i tacchetti nel fango primordiale!"],
+        ["rag_brokk", "(Solleva il martello con un cenno fiero) Ecco fatto! L'acciaio di Nidavellir ora è parte dei tuoi piedi, {n}."],
+        ["hero", "Sento il terreno come se fosse incollato alla suola... posso scattare e cambiare direzione su qualsiasi lastra di roccia o ghiaccio!"],
+        ["rag_sindri", "Ora andiamo all'Arena delle Scintille oltre il ponte a nord. La sfida dei nani non aspetta!"],
+      ], done);
+    }
+
+    function startMatch2() {
+      sfxHorn();
+      X.playMatch({
+        id: "rag_match_2",
+        alt: "hd,az", azPitch: "neve",
+        oppNames: ["Brokk il Bastione", "Sindri il Fulmine", "Martello di Pietra", "Fonderia Viva", "Guardiano di Bronzo"],
+        squad: ["Kara la Valchiria", "Sigrid la Scalda", "Einherjar del Fiordo"],
+        chap: "Ragnarok Ball · Il Torneo della Fornace",
+        us: "Gli Eletti della Brace",
+        mate: "Kara la Valchiria",
+        min: 45,
+        intro: "TORNEO DI NIDAVELLIR! Il tuo Campione {n} affronta la muraglia dei Nani Forgiatori tra canali di lava e porte d'ossidiana!",
+        team: (t, st) => ({
+          name: "I Forgiatori di Nidavellir",
+          col: "#ea580c",
+          style: "Pressing Asfissiante, Muro d'Acciaio & Fendenti Sismici",
+          atk: t(st.atk * 1.15),
+          def: t(st.def * 1.3),
+          vel: t(st.vel * 1.1),
+          specials: ["Incudine d'Ossidiana", "Colata Sulfurea"]
+        }),
+        done: (r) => {
+          if (r.win) {
+            setStep(N, 4);
+            note("VITTORIA NELLA FORNACE DI NIDAVELLIR! Brokk e i suoi nani riconoscono la superiorità del Campione.");
+            const rewMsg = reward("rag_ch2_complete", {
+              coins: 350,
+              cos: "rag_tacchetti_magma"
+            });
+            finishChapter(N, "brokk_battuto");
+            say([
+              ["voce", "GOOOOOOOOOOOL MONUMENTALEEEE! Con una staffilata tellurica potenziata dai tacchetti di Brokk, la Sfera di Pietra Fusa spacca la barriera nanica e fa risuonare la rete di catene con un boato sismico!"],
+              ["rag_brokk", "(Si toglie il grembiule con una risata roboante) Per gli occhi di Mimir! Non vedevo un tiro simile da quando Thor scagliò il fulmine contro il Serpente del Mondo."],
+              ["rag_sindri", "I tacchetti hanno retto alla perfezione! Nessuna crepa, solo pura potenza incisa nel metallo."],
+              ["rag_kara", "Nidavellir si inchina al tuo coraggio, {n}. Il cuore della terra è con noi. Ora la via verso la superficie, verso la tremenda Piana di Vigrid, è dischiusa!"],
+              ["voce", `CAPITOLO 2 COMPLETATO! ${rewMsg.join(" · ")}`],
+            ], () => {
+              go("rag_fucine", 8, 8);
+            });
+          } else {
+            say([
+              ["rag_brokk", "La barriera di bronzo ha respinto il tuo tiro! Ricalibra il baricentro sui tacchetti e riprova, Campione!"],
+            ], done);
+          }
+        }
+      });
+    }
+
+    const obj = {
+      "rag_fucine:>": () => go("rag_fiordo", 1, 11),
+      "rag_fucine:^": () => {
+        if (S() < 2) say([["voce", "L'accesso al Ponte di Magma è sbarrato: devi prima temprare i tuoi tacchetti all'Incudine di Brokk."]], done);
+        else go("rag_ponte", 8, 14);
+      },
+      "rag_fucine:I": esaminaIncudineBrokk,
+      "rag_fucine:S": () => say([["voce", "La grande Fornace dei Nani: fiumi di bronzo e ferro di meteorite fusi ribollono all'interno."]], done),
+      "rag_fucine:M": () => say([["voce", "Un gigantesco blocco di meteorite grezzo: venature d'oro e cobalto brillano nella roccia nera."]], done),
+      "rag_fucine:F": () => say([["voce", "Bracieri a colonna scolpiti nel basalto delle profondità."]], done),
+      "rag_ponte:d": () => go("rag_fucine", 8, 2),
+      "rag_ponte:^": () => {
+        if (S() === 2) setStep(N, 3);
+        go("rag_forgia", 12, 19);
+      },
+      "rag_ponte:T": () => say([["voce", "Pilastrini del ponte istoriati con le gesta dei primi forgiatori di Asgard."]], done),
+      "rag_forgia:d": () => go("rag_ponte", 8, 2),
+      "rag_forgia:G": () => say([["voce", "Le porte della Fornace: blocchi monolitici di ossidiana pura con catene d'oro e ferro."]], done),
+      "rag_forgia:F": () => say([["voce", "Colonne di fuoco che illuminano l'Arena sotterranea."]], done),
+      "rag_forgia:M": () => say([["voce", "Monoliti cerimoniali della gloria nanica."]], done)
+    };
+
+    return {
+      n: 2,
+      title: "Le Fucine di Nidavellir",
+      sub: "Il regno sotterraneo dei nani, l'Incudine di Brokk e il Torneo della Fornace",
+      zones,
+      talk: {
+        rag_brokk: brokkTalk2,
+        rag_sindri: sindriTalk2,
+        rag_kara: karaTalk2,
+        rag_guardia_nano: guardiaNanoTalk2
       },
       obj
     };

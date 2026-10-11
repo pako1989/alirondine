@@ -2848,11 +2848,237 @@
     }
   }
 
+  // --- 16. RAGNAROK BALL · LE FUCINE DEI NANI SOTTERRANEI (CAPITOLO 2) ---
+  function drawDetailedRagnarokFucine(g, W, H, f) {
+    // Volta cavernosa sotterranea in basalto nero e riflessi rosso cupo
+    const cavGrad = g.createLinearGradient(0, 0, 0, H);
+    cavGrad.addColorStop(0, "#09090b");
+    cavGrad.addColorStop(0.5, "#1c1917");
+    cavGrad.addColorStop(1, "#450a0a");
+    g.fillStyle = cavGrad;
+    g.fillRect(0, 0, W, H);
+
+    // Stalattiti di basalto e roccia lavica dalla volta
+    for (let st = 8; st < W; st += 20) {
+      const sl = 18 + (st % 5) * 6;
+      g.fillStyle = "#1c1917";
+      g.beginPath();
+      g.moveTo(st, 0);
+      g.lineTo(st + 6, sl);
+      g.lineTo(st + 12, 0);
+      g.closePath();
+      g.fill();
+      px(g, st + 5, sl - 4, 2, 4, "#ea580c"); // Goccia di magma
+    }
+
+    // Colate verticali di lava sulle pareti rocciose sullo sfondo
+    [45, W - 60].forEach((lx) => {
+      const lavaG = g.createLinearGradient(lx, 0, lx, H);
+      lavaG.addColorStop(0, "rgba(234, 88, 12, 0.4)");
+      lavaG.addColorStop(0.6, "rgba(249, 115, 22, 0.85)");
+      lavaG.addColorStop(1, "rgba(254, 240, 138, 0.95)");
+      g.fillStyle = lavaG;
+      g.fillRect(lx, 15, 14, H - 35);
+      px(g, lx + 4, 15, 6, H - 35, "#fef08a");
+    });
+
+    // Fornace nanica a cupola a sinistra
+    const fnX = 25, fnY = H - 85;
+    px(g, fnX, fnY, 65, 65, "#292524");
+    px(g, fnX - 4, fnY - 4, 73, 6, "#44403c");
+    // Bocca della fornace ardente
+    g.fillStyle = "#ea580c";
+    g.beginPath();
+    g.arc(fnX + 32, fnY + 36, 18, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = "#fef08a";
+    g.beginPath();
+    g.arc(fnX + 32, fnY + 36, 10, 0, Math.PI * 2);
+    g.fill();
+    // Tubo di sfogo del vapore
+    px(g, fnX + 24, fnY - 24, 16, 24, "#44403c");
+    // Fumo sulfureo
+    for (let sm = 0; sm < 4; sm++) {
+      const sx = fnX + 32 + Math.sin(f * 0.1 + sm) * (4 + sm * 3);
+      const sy = fnY - 26 - sm * 8 - (f * 0.4 % 8);
+      g.fillStyle = `rgba(249, 115, 22, ${0.4 - sm * 0.08})`;
+      g.beginPath(); g.arc(sx, sy, 3 + sm * 1.5, 0, Math.PI * 2); g.fill();
+    }
+
+    // Incudine Titanica di Brokk in ferro di meteorite al centro
+    const anX = W / 2, anY = H - 55;
+    // Base di pietra
+    px(g, anX - 35, anY + 12, 70, 24, "#292524");
+    px(g, anX - 38, anY + 8, 76, 5, "#44403c");
+    // Corpo dell'incudine
+    g.fillStyle = "#475569";
+    g.beginPath();
+    g.moveTo(anX - 25, anY + 8);
+    g.lineTo(anX - 35, anY - 8);
+    g.lineTo(anX - 45, anY - 8); // Corno dell'incudine
+    g.lineTo(anX + 35, anY - 8);
+    g.lineTo(anX + 25, anY + 8);
+    g.closePath();
+    g.fill();
+    px(g, anX - 30, anY - 10, 60, 3, "#94a3b8"); // Piano battuto
+    // Martello di meteorite appoggiato
+    px(g, anX + 8, anY - 22, 18, 12, "#1c1917");
+    px(g, anX + 15, anY - 32, 4, 14, "#78350f");
+
+    // Scintille incandescenti che schizzano dall'incudine
+    for (let sp = 0; sp < 25; sp++) {
+      const spx = (anX + Math.sin(f * 0.2 + sp * 1.5) * (20 + (sp % 4) * 12));
+      const spy = (anY - 10 - Math.abs(Math.cos(f * 0.2 + sp)) * (15 + (sp % 3) * 10));
+      px(g, spx, spy, 2, 2, (sp % 2 === 0 ? "#fef08a" : "#ea580c"));
+    }
+
+    // Pavimento della caverna con lastre di basalto e pozzanghere di lava
+    const fGrad = g.createLinearGradient(0, H - 25, 0, H);
+    fGrad.addColorStop(0, "#1c1917");
+    fGrad.addColorStop(1, "#0c0a09");
+    g.fillStyle = fGrad;
+    g.fillRect(0, H - 25, W, 25);
+  }
+
+  // --- 17. RAGNAROK BALL · IL PONTE DEI FIUMI DI MAGMA (CAPITOLO 2) ---
+  function drawDetailedRagnarokPonte(g, W, H, f) {
+    // Volta basaltica con riflessi infernali
+    const sky = g.createLinearGradient(0, 0, 0, 75);
+    sky.addColorStop(0, "#0c0a09");
+    sky.addColorStop(0.7, "#291307");
+    sky.addColorStop(1, "#451a03");
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, 75);
+
+    // Stalattiti rocciose
+    for (let st = 12; st < W; st += 24) {
+      const sl = 14 + (st % 4) * 6;
+      g.fillStyle = "#1c1917";
+      g.beginPath();
+      g.moveTo(st, 0); g.lineTo(st + 6, sl); g.lineTo(st + 12, 0);
+      g.closePath(); g.fill();
+    }
+
+    // Fiume di Magma ribollente sottostante
+    const lavaGrad = g.createLinearGradient(0, 75, 0, H);
+    lavaGrad.addColorStop(0, "#c2410c");
+    lavaGrad.addColorStop(0.4, "#ea580c");
+    lavaGrad.addColorStop(0.8, "#f97316");
+    lavaGrad.addColorStop(1, "#fef08a");
+    g.fillStyle = lavaGrad;
+    g.fillRect(0, 75, W, H - 75);
+
+    // Onde e bolle di lava che scoppiano
+    for (let b = 0; b < 12; b++) {
+      const bx = (b * 28 + f * 0.8) % W;
+      const by = 85 + (b * 9) % (H - 95);
+      const br = 3 + Math.sin(f * 0.15 + b) * 2;
+      g.fillStyle = "#fef08a";
+      g.beginPath(); g.arc(bx, by, br, 0, Math.PI * 2); g.fill();
+    }
+
+    // Ponte di pietra lavica ad arco massiccio al centro
+    const pY = 115;
+    g.fillStyle = "#1c1917";
+    g.beginPath();
+    g.moveTo(0, pY + 12);
+    g.quadraticCurveTo(W / 2, pY - 14, W, pY + 12);
+    g.lineTo(W, pY + 28);
+    g.quadraticCurveTo(W / 2, pY + 4, 0, pY + 28);
+    g.closePath();
+    g.fill();
+    // Parapetto di pietra con rune scolpite
+    px(g, 0, pY - 4, W, 4, "#292524");
+    for (let rx = 15; rx < W; rx += 25) {
+      px(g, rx, pY - 2, 4, 2, "#f59e0b"); // Runa brillante
+      px(g, rx - 2, pY - 8, 4, 6, "#44403c"); // Pilastrino
+    }
+
+    // Vapori sulfurei e scintille che salgono dal fiume
+    for (let sp = 0; sp < 25; sp++) {
+      const spx = (sp * 27 + Math.sin(f * 0.08 + sp) * 22) % W;
+      const spy = H - ((sp * 14 + f * 1.5) % (H - 60));
+      px(g, spx, spy, 2, 2, "#fef08a");
+    }
+  }
+
+  // --- 18. RAGNAROK BALL · L'ARENA DELLE SCINTILLE DI NIDAVELLIR (CAPITOLO 2) ---
+  function drawDetailedRagnarokForgia(g, W, H, f) {
+    // Volta sotterranea titanica con archi nanici
+    const bgGrad = g.createLinearGradient(0, 0, 0, 80);
+    bgGrad.addColorStop(0, "#0c0a09");
+    bgGrad.addColorStop(0.6, "#1c1917");
+    bgGrad.addColorStop(1, "#3c1505");
+    g.fillStyle = bgGrad;
+    g.fillRect(0, 0, W, 80);
+
+    // Archi nanici scolpiti a tutto sesto
+    g.strokeStyle = "#292524";
+    g.lineWidth = 5;
+    [W * 0.25, W * 0.75].forEach((ax) => {
+      g.beginPath();
+      g.arc(ax, 45, 35, Math.PI, 0);
+      g.stroke();
+    });
+
+    // Campo di gioco cerimoniale in basalto scuro levigato
+    const fGrad = g.createLinearGradient(0, 75, 0, H);
+    fGrad.addColorStop(0, "#292524");
+    fGrad.addColorStop(0.5, "#1c1917");
+    fGrad.addColorStop(1, "#0c0a09");
+    g.fillStyle = fGrad;
+    g.fillRect(0, 75, W, H - 75);
+
+    // Canali perimetrali di lava che illuminano il campo
+    px(g, 15, 78, W - 30, 4, "#ea580c");
+    px(g, 18, 79, W - 36, 2, "#fef08a");
+
+    // Linea di metà campo di lava dorata
+    const midY = 135;
+    px(g, 25, midY, W - 50, 2, "#f59e0b");
+    g.fillStyle = "#fef08a";
+    g.beginPath(); g.arc(W / 2, midY, 12, 0, Math.PI * 2); g.stroke();
+
+    // Porte cerimoniali in ossidiana e corna naniche
+    [32, W - 42].forEach((gx) => {
+      px(g, gx - 4, 90, 8, 44, "#0f172a"); // Ossidiana
+      px(g, gx - 12, 86, 24, 6, "#1e293b");
+      px(g, gx - 10, 84, 4, 4, "#d97706"); // Runa d'oro
+      px(g, gx + 6, 84, 4, 4, "#d97706");
+      // Rete di catene di ferro
+      px(g, gx - 6, 94, 12, 38, "rgba(148, 163, 184, 0.3)");
+    });
+
+    // Bracieri nanici a colonna
+    [15, W - 25].forEach((bx) => {
+      px(g, bx - 2, 98, 16, 22, "#292524");
+      px(g, bx - 4, 95, 20, 4, "#44403c");
+      const fl = Math.sin(f * 0.18 + bx) * 4;
+      g.fillStyle = "#ea580c";
+      g.beginPath();
+      g.moveTo(bx - 2, 95);
+      g.quadraticCurveTo(bx + 6, 78 + fl, bx + 14, 95);
+      g.closePath();
+      g.fill();
+      px(g, bx + 4, 88 + fl, 4, 5, "#fef08a");
+    });
+
+    // Scintille che danzano sopra il campo
+    for (let sp = 0; sp < 25; sp++) {
+      const spx = (sp * 33 + Math.sin(f * 0.07 + sp) * 18) % W;
+      const spy = (H - ((sp * 17 + f * 1.6) % H));
+      px(g, spx, spy, 2, 2, (sp % 2 === 0 ? "#fef08a" : "#f97316"));
+    }
+  }
+
   // Esportazione funzioni per fallback diretto
   window.drawRagnarokScenario = function (kind, g, W, H, f) {
     if (kind === "rag_fiordo") { drawDetailedRagnarokFiordo(g, W, H, f); return true; }
     if (kind === "rag_sala") { drawDetailedRagnarokSala(g, W, H, f); return true; }
     if (kind === "rag_arena") { drawDetailedRagnarokArena(g, W, H, f); return true; }
+    if (kind === "rag_fucine") { drawDetailedRagnarokFucine(g, W, H, f); return true; }
+    if (kind === "rag_ponte") { drawDetailedRagnarokPonte(g, W, H, f); return true; }
+    if (kind === "rag_forgia") { drawDetailedRagnarokForgia(g, W, H, f); return true; }
     return false;
   };
 
@@ -3053,6 +3279,29 @@
         } else {
           if (toast) toast("⚽ Terreno Cerimoniale: «Permafrost duro come il ferro e lastre laviche roventi: qui si forgia la leggenda!»");
         }
+      } else if (bg === "rag_fucine") {
+        if (Math.abs(clickX - W / 2) < 40 && clickY > 100) {
+          if (toast) toast("🔨 Incudine Titanica di Brokk: «Forgiata con ferro di meteorite caduto prima del tempo degli dei.»");
+          if (window.__ragnarokStory && window.__ragnarokStory.sfxDrum) window.__ragnarokStory.sfxDrum();
+        } else if (clickX < 90 && clickY > 80) {
+          if (toast) toast("🔥 Fornace dei Nani: «Colate di metallo incandescente e fango primordiale per temprare i tacchetti.»");
+        } else {
+          if (toast) toast("🌋 Caverne di Nidavellir: «Nelle viscere della terra il freddo del Fimbulwinter non può penetrare.»");
+        }
+      } else if (bg === "rag_ponte") {
+        if (Math.abs(clickY - 115) < 25) {
+          if (toast) toast("🌉 Ponte di Pietra Lavica: «Un arco millenario sospeso sopra i fiumi ribollenti di magma.»");
+        } else {
+          if (toast) toast("🌋 Fiumi di Magma Fuso: «Il sangue caldo di Ymir scorre indomito nelle profondità oscure.»");
+        }
+      } else if (bg === "rag_forgia") {
+        if (clickX < 60 || clickX > W - 60) {
+          if (toast) toast("🥅 Porte in Ossidiana Nanica: «Intarsi d'oro runico e catene di ferro temprate nel fuoco.»");
+        } else if (Math.abs(clickY - 135) < 20) {
+          if (toast) toast("⚡ Canali di Lava Cerimoniali: «Definiscono i confini sacri della Fornace di Nidavellir.»");
+        } else {
+          if (toast) toast("⚽ Arena delle Scintille: «Basalto levigato che moltiplica la velocità di rotazione della sfera!»");
+        }
       }
     });
   }
@@ -3072,6 +3321,15 @@
         return true;
       case "rag_arena":
         drawDetailedRagnarokArena(g, W, H, f);
+        return true;
+      case "rag_fucine":
+        drawDetailedRagnarokFucine(g, W, H, f);
+        return true;
+      case "rag_ponte":
+        drawDetailedRagnarokPonte(g, W, H, f);
+        return true;
+      case "rag_forgia":
+        drawDetailedRagnarokForgia(g, W, H, f);
         return true;
       case "bv_villaggio":
         drawDetailedBelovodiaVillaggio(g, W, H, f);
