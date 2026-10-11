@@ -15273,6 +15273,7 @@
       { label: "★ JoJo · Stand Soccer Battle", sub: "Le Bizzarre Avventure di Rondine: Star Rondine & ORA ORA ORA!", cls: "hot", fn: () => { if (window.openJoJoAdventure) window.openJoJoAdventure(modes); } },
       { label: "🌊 Cala Tramontana · Il Borgo del Tuo Campione", sub: heroLoad() ? `Esplora a piedi il borgo alternativo con ${heroLoad().name}` : "Modalità a piedi nel borgo marino alternativo per il tuo campione", cls: "hot", fn: () => { if (window.openCalaTramontana) window.openCalaTramontana(modes); } },
       ...(window.__libroFinali ? [window.__libroFinali.menuEntry(modes)] : []),
+      ...(window.__doppioTurno ? [window.__doppioTurno.menuEntry(modes)] : []),
       ...(window.__abissoStory ? [window.__abissoStory.menuEntry(modes)] : []),
       ...(window.__ragnarokStory ? [window.__ragnarokStory.menuEntry(modes)] : []),
       ...(window.__belovodiaStory ? [window.__belovodiaStory.menuEntry(modes)] : []),
@@ -21963,7 +21964,7 @@
     ["Partite", /Settimana del Molo/],
     ["Collezioni e curiosità", /Diario del Corriere/],
     ["Calcio d'azione e arcade", /Arena 2D|Biliardino|Cabinato|Stadio 3D|Corsa della Panda|Gozzo di Baciccia|Gabbia sul Molo|Tsubasa|Supereroi/],
-    ["Saghe e GDR", /Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis|Libro che Mangiava i Finali/],
+    ["Saghe e GDR", /Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis|Libro che Mangiava i Finali|Doppio Turno/],
     ["Collezioni e curiosità", /Gashapon|Roster & Talenti|Diorama|Fumetto|Leggende del passato|Bianco e Nero|Quartier Generale/],
   ];
   const MN_EXP = { "Partite": 12, "Allenamento": 6, "Storie e ricordi": 8 }; // quante voci ha la categoria a tutto sbloccato: le mancanti appaiono come «???»

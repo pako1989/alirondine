@@ -4324,6 +4324,85 @@
     paperGrain(g, W, H, f, 0.05);
   }
 
+  // ================= DOPPIO TURNO · sfondi di scena (chiavi dt_*) =================
+  // Il Dentro: bianco, verde acqua, neon e sorrisi obbligatori. Il Fuori: Porto Livido di sera, lucine e mare scuro.
+  const DT = "#2a9d8f", DK = "#2b3a3a";
+  function neonFlicker(f) { return (f % 260) < 3 || ((f + 90) % 410) < 2 ? 0.55 : 1; }
+  function smileyPoster(g, x, y, w, h, txt) { px(g, x, y, w, h, "#ffffff"); px(g, x, y, w, 6, DT); g.strokeStyle = DT; g.lineWidth = 1.5; g.beginPath(); g.arc(x + w / 2, y + h / 2 + 2, w * 0.18, 0.2, Math.PI - 0.2); g.stroke(); px(g, x + w / 2 - w * 0.12, y + h / 2 - 3, 2, 2, DK); px(g, x + w / 2 + w * 0.1, y + h / 2 - 3, 2, 2, DK); if (txt) { g.fillStyle = DK; g.font = "bold 5px sans-serif"; g.textAlign = "center"; g.fillText(txt, x + w / 2, y + h - 3); g.textAlign = "left"; } }
+  function bgDtAtrio(g, W, H, f) {
+    const nf = neonFlicker(f);
+    px(g, 0, 0, W, H, "#f4f6f5"); px(g, 0, 0, W, 16, "#e2e9e7");
+    for (let i = 0; i < 6; i++) { px(g, 20 + i * 52, 4, 36, 4, `rgba(220,255,248,${nf})`); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 38 + i * 52, 8, 26, "200,255,240", 0.2 * nf); g.restore(); }
+    px(g, 0, 118, W, 4, DT);
+    // parete con il logo e i manifesti
+    g.fillStyle = DT; g.font = "900 18px system-ui, sans-serif"; g.textAlign = "center"; g.fillText("VALTORRE", 160, 50); g.font = "bold 7px system-ui, sans-serif"; g.fillText("FOOTBALL CLUB · IL DENTRO È PIÙ BELLO", 160, 62); g.textAlign = "left";
+    smileyPoster(g, 20, 30, 34, 44, "SORRIDI"); smileyPoster(g, 266, 30, 34, 44, since("dt_atrio", 2) < 120 ? "ANCORA" : "SEI DENTRO");
+    // l'ascensore (si apre se toccato)
+    const op = since("dt_atrio", 0) < 120 ? Math.min(1, since("dt_atrio", 0) / 20) * (since("dt_atrio", 0) > 90 ? (120 - since("dt_atrio", 0)) / 30 : 1) : 0;
+    px(g, 128, 70, 64, 50, "#c9d1cf"); px(g, 132, 74, 56, 46, "#2b3a3a"); px(g, 132, 74, 28 - op * 26, 46, "#aeb8b5"); px(g, 160 + op * 26, 74, 28 - op * 26, 46, "#aeb8b5"); px(g, 152, 64, 16, 5, "#1a1a1a"); g.fillStyle = "#5af0c8"; g.font = "bold 5px monospace"; g.fillText("-0+", 154, 68);
+    // pavimento lucido
+    vgrad(g, 0, 122, W, 78, ["#e2e9e7", "#cfd9d6"]); for (let i = 0; i < 10; i++) px(g, i * 36, 122, 1, 78, "rgba(43,58,58,.08)"); g.fillStyle = "rgba(255,255,255,.35)"; g.fillRect(128, 124, 64, 30);
+    // bancone della reception con il campanello
+    px(g, 20, 120, 80, 30, "#ffffff"); px(g, 20, 120, 80, 3, DT); circ(g, 84, 116, 4, since("dt_atrio", 1) < 40 ? "#ffd23f" : "#c9a227"); px(g, 80, 118, 8, 2, "#8a948f");
+    // pianta perfettamente potata
+    px(g, 252, 124, 20, 20, "#ffffff"); circ(g, 262, 110, 14, "#5a9a72"); circ(g, 262, 110, 9, since("dt_atrio", 3) < 100 ? "#7fc49a" : "#5a9a72");
+    // fontanella
+    px(g, 220, 130, 16, 22, "#dfe6e4"); px(g, 222, 118, 12, 14, "#9fd8f0");
+    paperGrain(g, W, H, f, 0.03);
+  }
+  function bgDtUffici(g, W, H, f) {
+    const nf = neonFlicker(f + 50);
+    px(g, 0, 0, W, H, "#eef2f1"); for (let i = 0; i < 5; i++) px(g, 10 + i * 64, 6, 44, 4, `rgba(220,255,248,${nf})`);
+    // moquette verde
+    vgrad(g, 0, 110, W, 90, ["#467f62", "#3a7658"]);
+    // file di cubicoli con i terminali
+    for (let i = 0; i < 5; i++) { const x = 8 + i * 64, on = (i + Math.floor(f / 50)) % 3 !== 0; px(g, x, 86, 56, 36, "#b9c7c3"); px(g, x, 86, 56, 4, "#dfe9e7"); px(g, x + 14, 64, 28, 24, "#cfd6c8"); px(g, x + 17, 67, 22, 16, "#0e2a24"); if (on) { px(g, x + 19, 70, 12, 1, "#5af0c8"); px(g, x + 19, 73, 16, 1, "#5af0c8"); px(g, x + 19, 76, 8, 1, "#5af0c8"); } if (since("dt_uffici", 0) < 100 && i === 2) { g.fillStyle = "#5af0c8"; g.font = "bold 5px monospace"; g.fillText("CHI SEI?", x + 18, 80); } }
+    // la finestra senza vista
+    px(g, 120, 18, 80, 36, "#ffffff"); px(g, 122, 20, 76, 32, since("dt_uffici", 1) < 120 ? "#bfe3ff" : "#f4f6f5"); g.fillStyle = "rgba(43,58,58,.4)"; g.font = "italic 6px sans-serif"; g.fillText(since("dt_uffici", 1) < 120 ? "(per un attimo: il mare)" : "(finestra decorativa)", 130, 40);
+    // macchina del caffè e distributore d'acqua
+    px(g, 280, 124, 22, 40, "#3a3a44"); px(g, 284, 128, 14, 8, "#1a1a22"); px(g, 286, 130, 4, 2, "#ff5a5a"); if (since("dt_uffici", 2) < 120) for (let i = 0; i < 3; i++) circ(g, 291 + Math.sin(f / 8 + i) * 2, 118 - ((f / 2 + i * 6) % 18), 2, "rgba(255,255,255,.5)");
+    px(g, 6, 120, 18, 44, "#dfe6e4"); px(g, 8, 108, 14, 14, "#9fd8f0"); if (since("dt_uffici", 3) < 60) circ(g, 15, 116 - (since("dt_uffici", 3) % 12), 2, "#ffffff");
+    // la porta numero otto
+    px(g, 236, 56, 26, 66, "#d3dcd9"); px(g, 240, 60, 18, 58, since("dt_uffici", 4) < 120 ? "#7f8f8b" : "#c9d1cf"); g.fillStyle = DK; g.font = "bold 7px sans-serif"; g.fillText("8", 246, 76);
+    paperGrain(g, W, H, f, 0.03);
+  }
+  function bgDtCampo(g, W, H, f) {
+    px(g, 0, 0, W, H, "#f4f6f5");
+    // maxischermo che chiede di sorridere
+    px(g, 92, 8, 136, 40, DK); px(g, 96, 12, 128, 32, "#0e2a24"); g.fillStyle = "#5af0c8"; g.font = "900 14px system-ui, sans-serif"; g.textAlign = "center"; g.fillText(since("dt_campo", 0) < 120 ? "BRAVO, " + (((typeof window.heroLoad === "function" && window.heroLoad()) || {}).num || "") + "!" : ["SORRIDI", "OBBEDISCI", "SORRIDI", "GIOCA"][Math.floor(f / 90) % 4], 160, 34); g.textAlign = "left";
+    // tribune bianche quasi vuote, con sagome di cartone
+    for (let r = 0; r < 3; r++) { px(g, 0, 52 + r * 14, W, 13, r % 2 ? "#dfe6e4" : "#e9ede8"); for (let i = 0; i < 20; i++) if ((i * 7 + r * 3) % 5 === 0) { const turn = since("dt_campo", 1) < 120; px(g, 8 + i * 16, 54 + r * 14, 6, 9, turn ? "#ff9f43" : "#9aa5b1"); circ(g, 11 + i * 16, 53 + r * 14, 3, "#e0b48a"); } }
+    // il campo bianco con le righe verde acqua
+    vgrad(g, 0, 100, W, 100, ["#d9efe6", "#cfe8de"]); g.strokeStyle = DT; g.lineWidth = 2; g.strokeRect(14, 106, 292, 88); g.beginPath(); g.moveTo(160, 106); g.lineTo(160, 194); g.stroke(); g.beginPath(); g.ellipse(160, 150, 24, 12, 0, 0, Math.PI * 2); g.stroke();
+    for (let x = 14; x < 306; x += 12) px(g, x, 106, 1, 88, "rgba(42,157,143,.1)");
+    // la cuffia sulla panchina (la tocchi: si accende)
+    px(g, 260, 170, 40, 8, "#ffffff"); g.strokeStyle = DK; g.lineWidth = 2; g.beginPath(); g.arc(280, 168, 7, Math.PI, 0); g.stroke(); circ(g, 273, 168, 3, DK); circ(g, 287, 168, 3, DK); if (since("dt_campo", 2) < 120) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 280, 166, 18, "90,240,200", 0.5); g.restore(); }
+    // la tribuna della direttrice con il vetro
+    px(g, 8, 20, 70, 28, "#ffffff"); px(g, 12, 24, 62, 20, since("dt_campo", 3) < 120 ? "#bfeee6" : "#9fd8f0"); circ(g, 42, 36, 4, "#f0d0b8"); px(g, 39, 30, 7, 3, "#d9d4c8");
+    paperGrain(g, W, H, f, 0.03);
+  }
+  function bgDtPorto(g, W, H, f) {
+    // cielo al tramonto che diventa sera
+    vgrad(g, 0, 0, W, 110, ["#2a1838", "#7a3b52", "#ffb347"]);
+    for (let i = 0; i < 16; i++) px(g, (i * 71) % W, (i * 23) % 50, 1, 1, (f / 30 + i) % 5 < 1 ? "#fff" : "rgba(255,255,255,.4)");
+    // il vecchio stadio in lontananza, con i fari spenti (si accendono per un attimo)
+    px(g, 200, 52, 110, 50, "#2a1f2e"); for (let i = 0; i < 4; i++) { px(g, 206 + i * 28, 28, 3, 26, "#2a1f2e"); px(g, 202 + i * 28, 24, 11, 6, since("dt_porto", 2) < 90 ? "#fff6c8" : "#3a2f3e"); if (since("dt_porto", 2) < 90) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 207 + i * 28, 27, 30, "255,240,200", 0.4); g.restore(); } }
+    g.fillStyle = "rgba(255,200,120,.5)"; g.font = "bold 6px sans-serif"; g.fillText("STADIO DEL PORTO · PROPRIETÀ VALTORRE", 204, 98);
+    // mare scuro con i riflessi
+    vgrad(g, 0, 110, W, 60, ["#22345a", "#1b2a4a"]); for (let i = 0; i < 14; i++) px(g, (i * 41 + f * 0.4) % W, 116 + (i % 4) * 11, 10, 1, "rgba(255,190,120,.35)");
+    // barche che dondolano
+    for (let i = 0; i < 3; i++) { const x = 30 + i * 60, b = Math.sin(f / 30 + i) * 2 - (since("dt_porto", 3) < 60 && i === 1 ? 4 : 0); g.fillStyle = ["#c0392b", "#e8e0d0", "#2c7fb8"][i]; g.beginPath(); g.moveTo(x, 130 + b); g.lineTo(x + 34, 130 + b); g.lineTo(x + 28, 142 + b); g.lineTo(x + 6, 142 + b); g.fill(); px(g, x + 16, 112 + b, 1, 18, "#e8e0d0"); }
+    // banchina e il Bar Marea con l'insegna al neon
+    px(g, 0, 160, W, 40, "#4a3f45"); for (let i = 0; i < 12; i++) px(g, i * 28, 160, 1, 40, "rgba(0,0,0,.3)");
+    px(g, 200, 120, 112, 44, "#7a3b2e"); px(g, 200, 116, 112, 6, "#3a2a2e"); px(g, 216, 132, 22, 32, "#2a1a10"); px(g, 248, 130, 50, 20, "#ffcf7a");
+    const neon = since("dt_porto", 0) < 120 ? (Math.floor(f / 6) % 2 ? 1 : 0.3) : neonFlicker(f) ; g.fillStyle = `rgba(255,120,160,${neon})`; g.font = "900 11px system-ui, sans-serif"; g.fillText("BAR MAREA", 236, 128); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 266, 124, 30, "255,120,160", 0.25 * neon); g.restore();
+    // le lucine sui fili
+    for (let k = 0; k < 2; k++) { g.strokeStyle = "rgba(0,0,0,.6)"; g.lineWidth = 1; g.beginPath(); g.moveTo(0, 100 + k * 8); g.quadraticCurveTo(100, 122 + k * 8, 200, 104 + k * 8); g.stroke(); for (let i = 0; i < 12; i++) { const t = i / 11, x = t * 200, y = 100 + k * 8 + Math.sin(t * Math.PI) * 11; const on = since("dt_porto", 1) < 150 ? (Math.floor(f / 8) + i) % 2 : 1; circ(g, x, y, 2, on ? ["#ffd36b", "#ff7a7a", "#7ae0ff"][(i + k) % 3] : "#3a3a44"); } }
+    // l'ingresso del personale del Complesso (bianco, fuori posto)
+    px(g, 150, 136, 30, 28, "#eef2f1"); px(g, 156, 142, 18, 22, "#aeb8b5"); px(g, 150, 136, 30, 3, DT);
+    paperGrain(g, W, H, f, 0.04);
+  }
+
   // elementi interattivi: [x, y, w, h, frase, azione?("tog" = acceso/spento)]
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
@@ -4431,6 +4510,32 @@
       [112, 14, 96, 78, "🌅 L'alba sulla città. Passano tre rondini. La pioggia è finita."],
       [126, 108, 68, 30, "📕 Il libro, chiuso. Il titolo adesso è intero: «Il Libro delle Partite che Finiscono Bene»."],
       [250, 134, 58, 30, "🪧 Il cartello sulla porta: lo giri. «APERTO» da una parte, «Torno subito» dall'altra.", "tog"],
+    ] },
+    dt_atrio: { draw: bgDtAtrio, hot: [
+      [128, 64, 64, 56, "🛗 L'ascensore: le porte si aprono da sole, su nessuno. «Ding», dice. È gentile. È sempre gentile."],
+      [70, 108, 24, 16, "🛎️ Il campanello della reception: lo suoni e da qualche parte, lontano, qualcuno sorride a comando."],
+      [262, 26, 42, 52, "🙂 Il manifesto «SEI DENTRO»: per un istante cambia scritta. Hai letto «ANCORA»?"],
+      [244, 92, 36, 52, "🪴 Una pianta potata al millimetro. Tocchi una foglia: è vera. Ti stupisce più del dovuto."],
+    ] },
+    dt_uffici: { draw: bgDtUffici, hot: [
+      [136, 62, 50, 36, "🖥️ Un terminale: scrive da solo «CHI SEI?». Poi cancella. Poi scrive «BUONGIORNO»."],
+      [120, 16, 82, 40, "🪟 La finestra decorativa: per un attimo, dietro, vedi il mare. Poi torna bianca."],
+      [276, 110, 30, 56, "☕ La macchina del caffè fa il caffè «Conformità»: gusto neutro, temperatura perfetta."],
+      [4, 104, 24, 62, "💧 Il distributore d'acqua fa una bolla. Unico rumore libero del reparto."],
+      [232, 52, 34, 72, "🚪 La porta numero 8. Nella pianta ufficiale le porte del piano sono sette."],
+    ] },
+    dt_campo: { draw: bgDtCampo, hot: [
+      [92, 8, 136, 40, "📺 Il maxischermo ti fa i complimenti col tuo numero. Non ricordi di averglielo detto."],
+      [0, 50, 320, 44, "🧍 Le sagome di cartone in tribuna si girano tutte verso di te. Arancioni, per un istante. Poi grigie."],
+      [252, 156, 56, 28, "🎧 La cuffia sulla panchina si accende da sola: dentro, un respiro."],
+      [8, 18, 72, 32, "🪟 La tribuna della direttrice: un vetro, un sorriso, una tazza bianca."],
+    ] },
+    dt_porto: { draw: bgDtPorto, hot: [
+      [230, 116, 76, 20, "🍹 L'insegna del Bar Marea lampeggia: è Nina che la accende e la spegne per dire «sono aperta»."],
+      [0, 92, 200, 30, "💡 Le lucine sui fili: si accendono a onde, come un coro che non sa le parole."],
+      [196, 18, 118, 86, "🏟️ Il vecchio Stadio del Porto: i fari si accendono per un attimo. Qualcuno, lì dentro, ha ancora le chiavi."],
+      [80, 104, 60, 44, "⛵ Una barca si abbassa all'improvviso: un gabbiano ci è salito sopra con tutta la sua autorità."],
+      [146, 132, 38, 34, "🚪 L'ingresso del personale del Complesso: bianco, pulito, fuori posto tra i muri di mattoni."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
