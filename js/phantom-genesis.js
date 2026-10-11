@@ -216,18 +216,34 @@
     if (zid === "pg_bassifondi") {
       if (st === 0) return { tx: 6, ty: 7, label: "Kael Buster", hint: "Parla con Kael Buster al barile in fiamme", color: "#f97316" };
       if (st === 1) return { tx: 12, ty: 4, label: "Dott.ssa Maya", hint: "Parla con la Dott.ssa Maya a nord per attivare il Synchro-Nav", color: "#38bdf8" };
-      if (st === 2) return { tx: 20, ty: 3, label: "Materia Saetta", hint: "Segnale Mako a est (X:20, Y:3)! Raggiungi il canale ed esaminala", color: "#10b981" };
+      if (st === 2) return { tx: 20, ty: 3, label: "Materia Saetta", hint: "Segnale Mako a est (X:20, Y:3)! Raggiungi il canale ed estraila", color: "#10b981" };
       if (st === 3) return { tx: 18, ty: 8, label: "Rin la Strillona", hint: "Porta la Materia Saetta a Rin per incastonarla", color: "#eab308" };
-      return { tx: 23, ty: 8, label: "Cancello Shin-Nerv", hint: "Pattuglia Shin-Nerv al cancello! Parla con Kael o vai al cancello", color: "#ef4444" };
+      if (st === 4) return { tx: 23, ty: 8, label: "Pattuglia Shin-Nerv", hint: "Sconfiggi la pattuglia nemica al cancello a est!", color: "#ef4444" };
+      return { tx: 23, ty: 8, label: "Cancello Reattore", hint: "Varca il cancello (X:23, Y:8) per avanzare al Capitolo 2!", color: "#10b981" };
     }
     if (zid === "pg_reattore") {
       if (st === 0) return { tx: 6, ty: 7, label: "Dott.ssa Maya", hint: "Consulta Maya all'ingresso del reattore", color: "#38bdf8" };
-      if (st === 1) return { tx: 12, ty: 11, label: "Terminali MAGI", hint: "Interagisci con i terminali MAGI per il bypass", color: "#ea580c" };
-      if (st === 2) return { tx: 10, ty: 4, label: "Vasca LCL", hint: "Preleva la Materia Barriera dalla vasca criogenica", color: "#10b981" };
-      return { tx: 23, ty: 8, label: "Apostolo Sachiel-X", hint: "Infrangi l'AT-Field di Sachiel-X davanti al portone!", color: "#ef4444" };
+      if (st === 1) {
+        if (!F.is("magi_alpha")) return { tx: 9, ty: 11, label: "MAGI Melchior", hint: "Interagisci con MAGI Melchior (X:9, Y:11 · Frequenza Alpha)", color: "#ea580c" };
+        if (!F.is("magi_beta")) return { tx: 12, ty: 11, label: "MAGI Balthasar", hint: "Interagisci con MAGI Balthasar (X:12, Y:11 · Frequenza Beta)", color: "#ea580c" };
+        return { tx: 15, ty: 11, label: "MAGI Casper", hint: "Interagisci con MAGI Casper (X:15, Y:11 · Frequenza Synchro)", color: "#ea580c" };
+      }
+      if (st === 2) return { tx: 10, ty: 4, label: "Vasca LCL", hint: "Preleva la Materia Barriera dalla vasca a nord (X:10, Y:4)!", color: "#10b981" };
+      if (st === 3) return { tx: 20, ty: 8, label: "Apostolo Sachiel-X", hint: "Infrangi l'AT-Field di Sachiel-X davanti al portone!", color: "#ef4444" };
+      return { tx: 23, ty: 8, label: "Portone dell'Apostolo", hint: "Avanza verso il portone a est per salire alla Sala del Trono (Capitolo 3)!", color: "#10b981" };
     }
     if (zid === "pg_arena_palazzo") {
-      return { tx: 12, ty: 5, label: "Kurogane (Ala Nera)", hint: "Raggiungi il Trono d'Ossidiana per il duello finale!", color: "#eab308" };
+      if (st === 0) return { tx: 12, ty: 5, label: "Kurogane (Ala Nera)", hint: "Raggiungi Kurogane al centro della cattedrale d'ossidiana", color: "#eab308" };
+      if (st === 1) return { tx: 12, ty: 5, label: "Scelta del Destino", hint: "Parla con Kurogane e compi la tua Scelta Morale sul calcio", color: "#f59e0b" };
+      if (st === 2) return { tx: 12, ty: 5, label: "Duello Terzo Impatto", hint: "Affronta Kurogane sul campo sacro e spezza l'Ala Nera!", color: "#ef4444" };
+      return { tx: 12, ty: 5, label: "Kurogane Sconfitto", hint: "Parla con Kurogane o avanza nella piazza per il Capitolo 4!", color: "#10b981" };
+    }
+    if (zid === "pg_settore_rinato") {
+      if (st === 0) return { tx: 8, ty: 7, label: "Kael Buster", hint: "Festeggia con Kael e Maya nella nuova Piazza del Sole", color: "#f97316" };
+      if (st === 1) return { tx: 12, ty: 3, label: "Monumento Genesis", hint: "Scansiona la stele al centro (X:12, Y:3) per estrarre la Materia Genesis!", color: "#10b981" };
+      if (st === 2) return { tx: 4, ty: 11, label: "Rin la Strillona", hint: "Porta la Materia Genesis a Rin al chiosco a ovest per montarla!", color: "#eab308" };
+      if (st === 3) return { tx: 12, ty: 5, label: "Kurogane Risvegliato", hint: "Sfida Kurogane nella grandiosa Partita del Quarto Impatto a centrocampo!", color: "#38bdf8" };
+      return { tx: 12, ty: 5, label: "Trionfo Totale", hint: "Saga Completata! Neo-Gaia e il calcio sono per sempre liberi!", color: "#10b981" };
     }
     return null;
   }
@@ -620,10 +636,72 @@
     });
   }
 
+  // Sfondo: La Piazza del Sole · Settore Zero Rinato (Capitolo 4 · Festa e Cielo Aperto)
+  function bgSettoreRinato(g, W, H, f) {
+    // Cielo azzurro limpido con aurora dorata di sole
+    grad(g, 0, 0, W, H, ["#0284c7", "#38bdf8", "#bae6fd", "#fef08a"]);
+
+    // Sole raggiante in alto al centro
+    glow(g, W / 2, 35, 45, "253,224,71", 0.7);
+    g.fillStyle = "#fef08a";
+    g.beginPath(); g.arc(W / 2, 35, 18, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#ffffff";
+    g.beginPath(); g.arc(W / 2, 35, 10, 0, Math.PI * 2); g.fill();
+
+    // Raggi solari che scendono verso il basso
+    g.fillStyle = "rgba(254, 240, 138, 0.18)";
+    for (let r = -3; r <= 3; r++) {
+      g.beginPath();
+      g.moveTo(W / 2 + r * 15, 35);
+      g.lineTo(W / 2 + r * 45 - 20, H);
+      g.lineTo(W / 2 + r * 45 + 20, H);
+      g.closePath();
+      g.fill();
+    }
+
+    // Le paratie metalliche della vecchia città alta aperte ai lati (simbolo di liberazione)
+    R(g, 0, 0, 35, 110, "#1e293b");
+    R(g, W - 35, 0, 35, 110, "#1e293b");
+    R(g, 35, 0, 6, 110, "#334155");
+    R(g, W - 41, 0, 6, 110, "#334155");
+
+    // Bandiere e festoni colorati della libertà che sventolano
+    const bannerColors = ["#ef4444", "#10b981", "#3b82f6", "#eab308", "#ec4899"];
+    for (let b = 0; b < 8; b++) {
+      const bx = 42 + b * 32;
+      const by = 80 + Math.sin(f * 0.1 + b) * 4;
+      g.fillStyle = bannerColors[b % bannerColors.length];
+      g.beginPath();
+      g.moveTo(bx, by);
+      g.lineTo(bx + 14, by + 4);
+      g.lineTo(bx + 7, by + 18);
+      g.closePath();
+      g.fill();
+    }
+
+    // Prato verde e campo sportivo rinnovato
+    R(g, 0, 120, W, 80, "#15803d");
+    R(g, 0, 120, W, 4, "#22c55e");
+    // Linee bianche del campo
+    g.strokeStyle = "rgba(255, 255, 255, 0.8)";
+    g.lineWidth = 1.5;
+    g.strokeRect(30, 130, W - 60, 60);
+    g.beginPath(); g.arc(W / 2, 160, 20, 0, Math.PI * 2); g.stroke();
+
+    // Petali e coriandoli festosi portati dal vento
+    for (let c = 0; c < 20; c++) {
+      const cx = (c * 27 + f * 1.5) % W;
+      const cy = 60 + ((c * 37 + f * 0.8) % 130);
+      g.fillStyle = bannerColors[(c * 3) % bannerColors.length];
+      g.fillRect(cx, cy, 2.5, 2.5);
+    }
+  }
+
   const BGS = {
     pg_bassifondi: bgBassifondi,
     pg_reattore: bgReattore,
-    pg_palazzo_arena: bgPalazzoArena
+    pg_palazzo_arena: bgPalazzoArena,
+    pg_settore_rinato: bgSettoreRinato
   };
 
   const prevBg = window.renderDetailedBg;
@@ -652,6 +730,14 @@
   function P(x, y, w, h, c) { GP.fillStyle = c; GP.fillRect(x, y, w, h); }
 
   function floorPaint(ch, sx, sy, tx, ty) {
+    if (ch === "g") {
+      // Prato verde smeraldo naturale rinato dal Flusso Vitale
+      P(sx, sy, 16, 16, "#15803d");
+      P(sx + 2, sy + 3, 2, 2, "#22c55e");
+      P(sx + 8, sy + 10, 2, 2, "#4ade80");
+      P(sx + 12, sy + 4, 1, 2, "#166534");
+      return;
+    }
     if (ch === "q" || ch === "m") {
       // Lastre d'acciaio industriale scuro rivettate
       P(sx, sy, 16, 16, "#090d16");
@@ -726,6 +812,13 @@
       P(sx + 1, sy, 14, 16, "#0f172a");
       P(sx + 3, sy + 2, 10, 12, "#ea580c");
       P(sx + 6, sy + 5, 4, 6, "#ffedd5");
+    },
+    W: (sx, sy) => {
+      // Trono d'Ossidiana / Monumento Sacro della Rinascita
+      P(sx + 1, sy + 1, 14, 15, "#0f172a");
+      P(sx + 3, sy + 3, 10, 11, "#450a0a");
+      P(sx + 5, sy + 5, 6, 7, "#eab308");
+      P(sx + 7, sy + 7, 2, 3, "#ffffff");
     },
     ">": (sx, sy) => { P(sx + 1, sy + 3, 14, 10, "#059669"); P(sx + 9, sy + 6, 4, 4, "#ffffff"); },
     "<": (sx, sy) => { P(sx + 1, sy + 3, 14, 10, "#059669"); P(sx + 3, sy + 6, 4, 4, "#ffffff"); },
@@ -860,8 +953,17 @@
     const m = mem(); m.zone = zid; save();
     castHero();
     api.trRec().seen[zid] = true;
+    const tr = api.trRec();
+    if (tr && tr.pos && (!tr.pos[zid] || (tr.pos[zid][0] === 0 && tr.pos[zid][1] === 0))) {
+      tr.pos[zid] = [zr.spec.start[0] * TS + 8, zr.spec.start[1] * TS + 12];
+    }
     api.trGo(zid);
     refreshZone();
+    const c = CHAPTERS[zr.ch] || activeChapter();
+    if (c && !m.intro["ch" + c.n] && typeof c.intro === "function") {
+      m.intro["ch" + c.n] = 1; save();
+      return api.play(c.intro().map(([w, t, bg]) => api.L(w, T(t), bg || zr.spec.bg || "pg_bassifondi")), done);
+    }
     if (!m.intro[zid]) {
       m.intro[zid] = 1; save();
       if (zr.spec.intro && zr.spec.intro.length) return say(zr.spec.intro, done);
@@ -933,6 +1035,20 @@
             if (dist < 28) {
               const b = document.getElementById("bAct");
               if (b) { b.textContent = "⚡ Estrai Materia Saetta"; b.disabled = false; }
+            }
+          }
+          if (c && c.n === 2 && stepOf(2) === 2 && zid === "pg_reattore") {
+            const dist = Math.hypot(px - (10 * TS + 8), py - (4 * TS + 8));
+            if (dist < 28) {
+              const b = document.getElementById("bAct");
+              if (b) { b.textContent = "🧪 Preleva Materia Barriera"; b.disabled = false; }
+            }
+          }
+          if (c && c.n === 4 && stepOf(4) === 1 && zid === "pg_settore_rinato") {
+            const dist = Math.hypot(px - (12 * TS + 8), py - (3 * TS + 8));
+            if (dist < 28) {
+              const b = document.getElementById("bAct");
+              if (b) { b.textContent = "☀️ Estrai Materia Genesis"; b.disabled = false; }
             }
           }
         }
@@ -1013,15 +1129,23 @@
         say([["voce", "Una capsula criogenica colma di fluido LCL arancione. I sensori biologici mantengono il soggetto in stasi cinetica.", "pg_reattore"]], done);
         return true;
       }
-      if (ch === ">" || ch === "<") {
-        say([["voce", "Un varco blindato presidiato dalla sicurezza della Shin-Nerv.", "pg_bassifondi"]], done);
+      if (ch === ">" || ch === "<" || ch === "d") {
+        say([["voce", "Un varco blindato che conduce al settore successivo della megastruttura.", bgNow()]], done);
         return true;
       }
       if (ch === "W") {
-        say([["voce", "Il Trono d'Ossidiana della Shin-Nerv sovrasta il campo sacro.", "pg_arena_palazzo"]], done);
+        if (zid === "pg_settore_rinato") {
+          say([["voce", "Il Monumento della Rinascita brilla radioso nel vento della libertà.", "pg_settore_rinato"]], done);
+        } else {
+          say([["voce", "Il Trono d'Ossidiana della Shin-Nerv sovrasta il campo sacro.", "pg_arena_palazzo"]], done);
+        }
         return true;
       }
-      say([["voce", "Un impianto industriale nei bassifondi del Settore Zero. Nulla di anomalo rilevato a queste coordinate.", bgNow()]], done);
+      if (ch === "K") {
+        say([["voce", "Una cassa di rifornimenti ed equipaggiamento della resistenza.", bgNow()]], done);
+        return true;
+      }
+      say([["voce", "Struttura cibernetica di Neo-Gaia. I sensori del Synchro-Nav rilevano parametri stabili.", bgNow()]], done);
       return true;
     };
 
@@ -1378,6 +1502,17 @@
     }
 
     function handleGateStep4() {
+      if (S() >= 5) {
+        ask("hero", "Il cancello blindato per il Reattore Centrale è spalancato. Vuoi avanzare nel Capitolo 2: Il Reattore del Terzo Impatto?", [
+          {
+            label: "🚀 Avanza al Reattore Mako (Capitolo 2)",
+            cls: "hot",
+            fn: () => go("pg_reattore", 2, 8)
+          },
+          { label: "Rimani nei Bassifondi", fn: done }
+        ]);
+        return;
+      }
       if (S() >= 4) {
         matchCapitolo1();
       } else {
@@ -1554,7 +1689,14 @@
               X.finishChapter(1, "cancello_espugnato");
               setStep(1, 5);
               note("Abbiamo sconfitto la pattuglia Shin-Nerv. Il Capitolo 1 è completato: il varco per il Reattore è spalancato!");
-              done();
+              ask("hero", "La pattuglia Shin-Nerv è stata sgominata! Il varco per il Reattore Centrale è aperto. Vuoi accedere subito al Capitolo 2?", [
+                {
+                  label: "🚀 Avanza al Reattore del Terzo Impatto (Capitolo 2)",
+                  cls: "hot",
+                  fn: () => go("pg_reattore", 2, 8)
+                },
+                { label: "Esplora ancora i Bassifondi", fn: done }
+              ]);
             });
           } else {
             say([["pg_kael", "«Accidenti, i loro circuiti hanno retto! Riprenditi, proviamo un altro schema d'attacco!»"]], done);
@@ -1580,20 +1722,35 @@
     }, "Il Colosso Biomeccanico a guardia del Nucleo Centrale. Non parla: emette una risonanza a frequenza di terrore e proietta un AT-Field impenetrabile a qualsiasi tiro umano ordinario.");
 
     function collectLclBarrier() {
-      if (S() === 2) {
+      if (scannerActive) {
+        sfxMakoResonance();
         say([
-          ["voce", "Dalla valvola di sfiato della capsula LCL cola una goccia di fluido cristallizzato color smeraldo.", "pg_reattore"],
-          ["hero", "«La Materia Barriera LCL! Questa sfera proietta uno scudo quantico identico all'AT-Field!»"]
+          ["voce", "👁️ [ANALISI SCANNER · VASCA CRIOGENICA LCL]\nFluido: Liquido traspirante ossigenato ad alta densità sintetica.\nSoggetto: Campione della Federazione in stasi cinetica protetta.\nSensori: Rilevata condensazione di 'Materia Barriera LCL' nella valvola di spurgo a nord!", "pg_reattore"]
         ], () => {
-          addMateria("mat_barriera", "Materia Barriera LCL", "Annulla i contropiedi avversari e rafforza i contrasti difensivi", "#10b981");
-          setStep(N, 3);
-          sfxEvaAlarm();
-          note("Ho ottenuto la Materia Barriera LCL. L'Apostolo Sachiel-X si è materializzato davanti al portone!");
-          done();
+          if (S() === 2) doExtractBarrier();
         });
-      } else {
-        say([["voce", "La capsula pulsa di luce arancione. Un ragazzo all'interno sembra sognare una partita infinita.", "pg_reattore"]], done);
+        return;
       }
+      if (S() === 2) {
+        doExtractBarrier();
+      } else if (S() < 2) {
+        say([["voce", "La capsula pulsa di refrigerante ad altissima pressione. Disattiva prima i tre supercomputer MAGI (Melchior, Balthasar, Casper) lungo la passerella per sbloccare la valvola!", "pg_reattore"]], done);
+      } else {
+        say([["voce", "La capsula è stabilizzata. La Materia Barriera LCL è già incastonata nei tuoi scarpini!", "pg_reattore"]], done);
+      }
+    }
+
+    function doExtractBarrier() {
+      say([
+        ["voce", "Dalla valvola di sfiato della capsula LCL cola una goccia di fluido cristallizzato color smeraldo denso e scintillante.", "pg_reattore"],
+        ["hero", "«La Materia Barriera LCL! Questa sfera proietta uno scudo quantico identico all'AT-Field!»"]
+      ], () => {
+        addMateria("mat_barriera", "Materia Barriera LCL", "Annulla i contropiedi avversari e rafforza i contrasti difensivi", "#10b981");
+        setStep(N, 3);
+        sfxEvaAlarm();
+        note("Ho ottenuto la Materia Barriera LCL. L'Apostolo Sachiel-X si è materializzato a guardia del portone a est!");
+        done();
+      });
     }
 
     const chDef = {
@@ -1603,8 +1760,8 @@
       goal: (s) => (
         s === 0 ? "Avanza nel Nucleo del Reattore e parla con la Dott.ssa Maya." :
         s === 1 ? "Decifra i tre terminali MAGI (Melchior, Balthasar, Casper) per disattivare il refrigerante." :
-        s === 2 ? "Raccogli la 'Materia Barriera LCL' vicino alle vasche criogeniche." :
-        s === 3 ? "Affronta l'Apostolo Sachiel-X all'ingresso della Sala del Trono!" :
+        s === 2 ? "Raccogli la 'Materia Barriera LCL' vicino alle vasche criogeniche a nord (X:10, Y:4)." :
+        s === 3 ? "Affronta l'Apostolo Sachiel-X all'ingresso della Sala del Trono (X:20, Y:8)!" :
         "Capitolo 2 completato · Accesso al Palazzo delle Maschere sbloccato!"
       ),
       intro: () => [
@@ -1624,14 +1781,10 @@
         "10,4": () => collectLclBarrier(),
         "14,4": () => collectLclBarrier(),
         "H": () => collectLclBarrier(),
-        "23,8": () => {
-          if (S() >= 3) matchCapitolo2();
-          else say([["voce", "La barriera dell'Apostolo blocca il passaggio con una scarica elettrica. Disattiva prima i MAGI ed estrai la Materia Barriera!", "pg_reattore"]], done);
-        },
-        ">": () => {
-          if (S() >= 3) matchCapitolo2();
-          else say([["voce", "La barriera dell'Apostolo blocca il passaggio con una scarica elettrica. Disattiva prima i MAGI ed estrai la Materia Barriera!", "pg_reattore"]], done);
-        }
+        "0,8": () => handleGateBackToSectorZero(),
+        "<": () => handleGateBackToSectorZero(),
+        "23,8": () => handleGateToPalace(),
+        ">": () => handleGateToPalace()
       },
       talk: {
         pg_maya: () => {
@@ -1640,8 +1793,8 @@
             say([
               ["pg_maya", "«Guarda quelle vasche... Non contengono cloni sintetici: sono i corpi dei campioni della scorsa generazione!»"],
               ["hero", "«Tutti quegli atleti scomparsi... Li tengono in coma per alimentare l'AT-Field della città alta?»"],
-              ["pg_maya", "«Esattamente. Per aprire la paratia blindata dobbiamo hackerare i tre terminali MAGI: Melchior, Balthasar e Casper.»"],
-              ["pg_maya", "«Interagisci con i terminali arancioni esagonali lungo la passerella e immetti la sequenza armonica corretta!»"]
+              ["pg_maya", "«Esattamente. Per aprire la paratia blindata dobbiamo hackerare i tre terminali MAGI: Melchior (X:9), Balthasar (X:12) e Casper (X:15).»"],
+              ["pg_maya", "«Interagisci con i terminali arancioni esagonali lungo la passerella e immetti le sequenze armoniche!»"]
             ], () => {
               setStep(N, 1);
               note("Devo decifrare i tre terminali MAGI lungo la passerella per disattivare il sistema di contenimento.");
@@ -1650,20 +1803,20 @@
             return;
           }
           if (s === 1) {
-            say([["pg_maya", "«Melchior richiede la frequenza Alpha, Balthasar la frequenza Beta e Casper il codice del Risveglio!»"]], done);
+            say([["pg_maya", "«Melchior a sinistra richiede la frequenza Alpha, Balthasar al centro la frequenza Beta e Casper a destra la frequenza Synchro!»"]], done);
             return;
           }
           if (s === 2) {
-            say([["pg_maya", "«Ottimo! Ora preleva la Materia Barriera LCL dalla vasca centrale prima che Sachiel-X si risvegli!»"]], done);
+            say([["pg_maya", "«Ottimo! Ora preleva la Materia Barriera LCL dalla vasca centrale a nord (X:10, Y:4) prima che Sachiel-X si risvegli!»"]], done);
             return;
           }
-          if (s >= 3) {
-            say([["pg_maya", "«Sachiel-X è davanti a noi! Infrangi il suo AT-Field prima che la pressione faccia esplodere la cupola!»"]], () => {
+          if (s === 3) {
+            say([["pg_maya", "«Sachiel-X è davanti a noi a guardia del portone! Infrangi il suo AT-Field con la Materia Barriera!»"]], () => {
               matchCapitolo2();
             });
             return;
           }
-          say([["pg_maya", "«La sincronia regge, ma dobbiamo sbrigarci!»"]], done);
+          say([["pg_maya", "«Sachiel-X è caduto! Il portone per la Cattedrale d'Ossidiana è aperto, possiamo salire al Capitolo 3!»"]], done);
         },
 
         pg_kael: () => {
@@ -1671,6 +1824,15 @@
             ["pg_kael", "«Il mio braccio idraulico sta tremando per la pressione di questo posto. Chiunque abbia progettato questo scempio merita di assaggiare il mio scarpino sul muso.»"],
             ["hero", "«Non ci fermeremo finché non avremo liberato ogni singolo ragazzo da quelle vasche.»"]
           ], done);
+        },
+
+        pg_sachiel: () => {
+          say([
+            ["pg_sachiel", "«...GROOAAAR... S-SYNCHRO... DETECTED... MORTALI... NON... PASSERETE...»"],
+            ["hero", "«Sachiel-X! Abbiamo la Materia Barriera: il tuo AT-Field non fermerà la nostra determinazione!»"]
+          ], () => {
+            matchCapitolo2();
+          });
         }
       },
       zones: {
@@ -1683,10 +1845,16 @@
             [8, 10, 16, 14, "Banco Terminali MAGI", "Supercomputer a logica tripartita"],
             [19, 6, 23, 10, "Portone dell'Apostolo", "La soglia d'ossidiana che conduce all'Arena"]
           ],
-          npcs: (step) => [
-            { id: "pg_maya", at: [6, 7], dir: "right" },
-            { id: "pg_kael", at: [4, 9], dir: "up" }
-          ],
+          npcs: (step) => {
+            const list = [
+              { id: "pg_maya", at: [6, 7], dir: "right" },
+              { id: "pg_kael", at: [4, 9], dir: "up" }
+            ];
+            if (step === 3) {
+              list.push({ id: "pg_sachiel", at: [20, 8], dir: "left" });
+            }
+            return list;
+          },
           build: (Ls) => {
             Ls.lay(0, 0, 23, 0, "#"); Ls.lay(0, 15, 23, 15, "#");
             Ls.lay(0, 0, 0, 15, "#"); Ls.lay(23, 0, 23, 15, "#");
@@ -1717,34 +1885,60 @@
             "12,11": () => magiConsole("Balthasar", "beta"),
             "15,11": () => magiConsole("Casper", "synchro"),
             "X": ({ tx, ty }) => {
-              if (tx === 9 || tx === 10) magiConsole("Melchior", "alpha");
-              else if (tx === 12 || tx === 13) magiConsole("Balthasar", "beta");
+              if (tx <= 10) magiConsole("Melchior", "alpha");
+              else if (tx <= 13) magiConsole("Balthasar", "beta");
               else magiConsole("Casper", "synchro");
             },
             "10,4": () => collectLclBarrier(),
             "14,4": () => collectLclBarrier(),
             "H": () => collectLclBarrier(),
-            "23,8": () => {
-              if (S() >= 3) matchCapitolo2();
-              else say([["voce", "La barriera dell'Apostolo blocca il passaggio con una scarica elettrica. Disattiva prima i MAGI ed estrai la Materia Barriera!", "pg_reattore"]], done);
-            },
-            ">": () => {
-              if (S() >= 3) matchCapitolo2();
-              else say([["voce", "La barriera dell'Apostolo blocca il passaggio con una scarica elettrica. Disattiva prima i MAGI ed estrai la Materia Barriera!", "pg_reattore"]], done);
-            }
+            "0,8": () => handleGateBackToSectorZero(),
+            "<": () => handleGateBackToSectorZero(),
+            "23,8": () => handleGateToPalace(),
+            ">": () => handleGateToPalace()
           }
         }
       }
     };
 
-    function magiConsole(name, codeKey) {
-      if (S() !== 1) {
-        say([["voce", `Terminale MAGI [${name}]: I circuiti sono operativi e monitorano il reattore.`, "pg_reattore"]], done);
+    function handleGateBackToSectorZero() {
+      ask("hero", "Vuoi tornare ai Bassifondi del Settore Zero?", [
+        { label: "🚪 Torna ai Bassifondi", fn: () => go("pg_bassifondi", 22, 8) },
+        { label: "Rimani nel Reattore", fn: done }
+      ]);
+    }
+
+    function handleGateToPalace() {
+      if (S() >= 4) {
+        ask("hero", "Sachiel-X è stato sconfitto. Il portone conduce alla Cattedrale d'Ossidiana. Vuoi avanzare nel Capitolo 3: L'Eclissi delle Maschere?", [
+          { label: "👑 Sali alla Sala del Trono (Capitolo 3)", cls: "hot", fn: () => go("pg_arena_palazzo", 12, 13) },
+          { label: "Rimani nel Reattore", fn: done }
+        ]);
         return;
       }
-      ask("pg_maya", `Terminale MAGI [${name}]: Seleziona il codice di bypass armonico:`, [
+      if (S() >= 3) {
+        matchCapitolo2();
+      } else {
+        say([["voce", "La barriera di Sachiel-X blocca il passaggio con una scarica elettrica a 50.000 Volt. Disattiva prima i tre supercomputer MAGI ed estrai la Materia Barriera LCL dalle vasche a nord!", "pg_reattore"]], done);
+      }
+    }
+
+    function magiConsole(name, codeKey) {
+      if (S() !== 1) {
+        say([["voce", `Terminale MAGI [${name}]: I circuiti sono operativi e monitorano il reattore. Bypass: ${F.is("magi_" + codeKey) ? "ATTIVO" : "NON NECESSARIO"}.`, "pg_reattore"]], done);
+        return;
+      }
+      if (F.is("magi_" + codeKey)) {
+        say([["voce", `Terminale MAGI [${name}]: Codice già immesso. Bypass confermato!`, "pg_reattore"]], done);
+        return;
+      }
+      const freqLabel = codeKey === "alpha" ? "Alpha 7.83 Hz" : codeKey === "beta" ? "Beta 14.1 Hz" : "Synchro 33.8 Hz";
+      const promptText = scannerActive
+        ? `👁️ [ANALISI SCANNER · SUPERCOMPUTER MAGI]\nTerminale: ${name}\nFrequenza Richiesta: ${freqLabel}\nSeleziona il codice di bypass armonico:`
+        : `Terminale MAGI [${name}]: Seleziona il codice di bypass armonico:`;
+      ask("pg_maya", promptText, [
         {
-          label: "⚡ Frequenza Sincrona 100%", cls: "hot",
+          label: `⚡ Immetti Frequenza Sincrona ${freqLabel} 100%`, cls: "hot",
           fn: () => {
             sfxMakoResonance();
             F.set("magi_" + codeKey, true);
@@ -1752,11 +1946,12 @@
               setStep(N, 2);
               sfxGlassAwakening();
               say([
-                ["voce", "I tre monitor MAGI lampeggiano all'unisono: 'BYPASS AUTORIZZATO - SISTEMA DI RAFFREDDAMENTO IN PAUSA'.", "pg_reattore"],
-                ["pg_maya", "«Ce l'abbiamo fatta! Ora preleva la Materia Barriera dalla vasca a nord prima che scatti l'allarme!»"]
+                ["voce", "I tre monitor MAGI lampeggiano all'unisono in verde smeraldo: 'BYPASS AUTORIZZATO · SISTEMA DI RAFFREDDAMENTO IN PAUSA'.", "pg_reattore"],
+                ["pg_maya", "«Ce l'abbiamo fatta! La pressione è scesa a zero. Ora preleva la Materia Barriera LCL dalla vasca criogenica a nord (X:10, Y:4) prima che scatti l'allarme!»"]
               ], done);
             } else {
-              say([["voce", `Codice registrato per ${name}. Mancano ancora gli altri terminali.`, "pg_reattore"]], done);
+              const remaining = [!F.is("magi_alpha") && "Melchior (X:9)", !F.is("magi_beta") && "Balthasar (X:12)", !F.is("magi_synchro") && "Casper (X:15)"].filter(Boolean).join(", ");
+              say([["voce", `Codice registrato per ${name}. Terminali ancora da bypassare: ${remaining}.`, "pg_reattore"]], done);
             }
           }
         },
@@ -1782,7 +1977,14 @@
               X.finishChapter(2, "sachiel_infranto");
               setStep(2, 4);
               note("Abbiamo sconfitto Sachiel-X. La verità è svelata: il leggendario Kurogane è l'artefice dell'algoritmo Shin-Nerv. La finale ci aspetta.");
-              done();
+              ask("hero", "Sachiel-X è stato sgominato! Il portone d'ossidiana è aperto. Vuoi salire subito al Capitolo 3: L'Eclissi delle Maschere?", [
+                {
+                  label: "👑 Sali alla Sala del Trono (Capitolo 3)",
+                  cls: "hot",
+                  fn: () => go("pg_arena_palazzo", 12, 13)
+                },
+                { label: "Rimani nel Reattore", fn: done }
+              ]);
             });
           } else {
             say([["pg_maya", "«L'AT-Field ha respinto la sfera! Mantieni la concentrazione e sfrutta la Materia Barriera al momento giusto!»"]], done);
@@ -1815,7 +2017,7 @@
         s === 0 ? "Raggiungi il Trono d'Ossidiana e affronta Kurogane." :
         s === 1 ? "Compi la tua Scelta Morale sul destino del Flusso Vitale." :
         s === 2 ? "Disputa la Finale Suprema per la liberazione dei Bassifondi!" :
-        "Saga completata · Il Destino del Calcio è nelle tue mani!"
+        "Capitolo 3 completato · La via per la Rinascita dei Bassifondi è aperta!"
       ),
       intro: () => [
         ["voce", "Sali l'ultima gradinata d'ossidiana. Davanti a te si spalanca una cattedrale gotica sospesa sopra una Luna di Sangue cosmica.", "pg_arena_palazzo"],
@@ -1823,14 +2025,10 @@
         ["pg_kurogane", "«Ti aspettavo, {n}. Il tuo tasso di sincronia è perfetto... Sei degno di essere la mia metà mancante.»", "pg_arena_palazzo"]
       ],
       obj: {
-        "12,3": () => {
-          if (S() >= 2) matchFinaleKurogane();
-          else say([["voce", "Il Trono d'Ossidiana emette una pulsazione gravitazionale che fa tremare il campo.", "pg_arena_palazzo"]], done);
-        },
-        "W": () => {
-          if (S() >= 2) matchFinaleKurogane();
-          else say([["voce", "Il Trono d'Ossidiana emette una pulsazione gravitazionale che fa tremare il campo.", "pg_arena_palazzo"]], done);
-        }
+        "12,3": () => handleTronoOssidiana(),
+        "W": () => handleTronoOssidiana(),
+        "12,15": () => handlePortaReattore(),
+        "d": () => handlePortaReattore()
       },
       talk: {
         pg_kurogane: () => {
@@ -1856,6 +2054,18 @@
             return;
           }
           epilogoDialogo();
+        },
+
+        pg_kael: () => {
+          say([
+            ["pg_kael", "«Siamo con te fino all'ultimo secondo, Campione! Fagli sentire la rabbia e l'orgoglio di chi non si è mai arreso!»"]
+          ], done);
+        },
+
+        pg_maya: () => {
+          say([
+            ["pg_maya", "«Il tuo tasso di sincronia è al 100%! L'Ala Nera di Kurogane può essere spezzata solo dalla passione autentica!»"]
+          ], done);
         }
       },
       zones: {
@@ -1865,30 +2075,64 @@
           areas: [
             [2, 2, 22, 14, "Il Campo d'Ossidiana", "Lo stadio sacro dove si decide il Terzo Impatto"]
           ],
-          npcs: (step) => [
-            { id: "pg_kurogane", at: [12, 5], dir: "down" }
-          ],
+          npcs: (step) => {
+            const list = [{ id: "pg_kurogane", at: [12, 5], dir: "down" }];
+            if (step >= 1) {
+              list.push({ id: "pg_kael", at: [9, 11], dir: "up" }, { id: "pg_maya", at: [15, 11], dir: "up" });
+            }
+            return list;
+          },
           build: (Ls) => {
             Ls.lay(0, 0, 23, 0, "#"); Ls.lay(0, 15, 23, 15, "#");
             Ls.lay(0, 0, 0, 15, "#"); Ls.lay(23, 0, 23, 15, "#");
             Ls.lay(1, 1, 22, 14, "c"); // Pavimento cerimoniale scarlatto
             Ls.lay(4, 4, 19, 11, "q"); // Campo interno d'ossidiana
             Ls.put(12, 3, "W"); // Il Trono
-            Ls.put(12, 15, "d");
+            Ls.put(12, 15, "d"); // Porta per il reattore
           },
           actLabels: {
             "W": "👑 Trono d'Ossidiana",
-            "12,3": "👑 Trono d'Ossidiana"
+            "12,3": "👑 Trono d'Ossidiana",
+            "d": "🚪 Torna al Reattore",
+            "12,15": "🚪 Torna al Reattore"
           },
           act: {
-            "12,3": () => {
-              if (S() >= 2) matchFinaleKurogane();
-              else say([["voce", "Il Trono d'Ossidiana emette una pulsazione gravitazionale che fa tremare il campo.", "pg_arena_palazzo"]], done);
-            }
+            "12,3": () => handleTronoOssidiana(),
+            "W": () => handleTronoOssidiana(),
+            "12,15": () => handlePortaReattore(),
+            "d": () => handlePortaReattore()
           }
         }
       }
     };
+
+    function handleTronoOssidiana() {
+      if (scannerActive) {
+        sfxMakoResonance();
+        say([
+          ["voce", "👁️ [ANALISI SCANNER · TRONO D'OSSIDIANA]\nReliquia: Generatore centrale dell'AT-Field planetario Shin-Nerv.\nFrequenza: Sovraccarico di Volontà.\nKurogane governa il destino della città alta da questo scranno.", "pg_arena_palazzo"]
+        ], () => {
+          if (S() >= 2) matchFinaleKurogane();
+          else if (S() === 1) sceltaFinaleKurogane();
+          else say([["pg_kurogane", "«Non toccare il Trono finché non avrai risposto alla mia domanda sul destino del calcio.»"]], done);
+        });
+        return;
+      }
+      if (S() >= 2) {
+        matchFinaleKurogane();
+      } else if (S() === 1) {
+        sceltaFinaleKurogane();
+      } else {
+        say([["voce", "Il Trono d'Ossidiana pulsa di energia oscura. Parla con Kurogane a centrocampo prima di toccarlo!", "pg_arena_palazzo"]], done);
+      }
+    }
+
+    function handlePortaReattore() {
+      ask("hero", "Vuoi tornare al Nucleo del Reattore Shin-Nerv?", [
+        { label: "🏭 Torna al Reattore Mako", fn: () => go("pg_reattore", 22, 8) },
+        { label: "Rimani nella Sala del Trono", fn: done }
+      ]);
+    }
 
     function sceltaFinaleKurogane() {
       ask("pg_kurogane", "Qual è la risposta del tuo Cuore, {n}?", [
@@ -1951,7 +2195,14 @@
                 X.finishChapter(3, "liberta_rondine");
                 setStep(3, 3);
                 note("Kurogane è stato sconfitto. La Shin-Nerv è caduta e il cielo splende di nuovo sul Settore Zero! Epilogo della Libertà raggiunto.");
-                done();
+                ask("hero", "Le piastre d'acciaio del cielo si sono spalancate! La folla dei Bassifondi festeggia la libertà. Vuoi scendere nella piazza per il Capitolo 4: Il Quarto Impatto?", [
+                  {
+                    label: "☀️ Avanza al Capitolo 4 · La Rinascita dei Bassifondi",
+                    cls: "hot",
+                    fn: () => go("pg_settore_rinato", 12, 13)
+                  },
+                  { label: "Rimani nella Sala del Trono", fn: done }
+                ]);
               });
             } else {
               say([
@@ -1963,7 +2214,14 @@
                 X.finishChapter(3, "giudizio_luce");
                 setStep(3, 3);
                 note("Kurogane ha compreso il valore della passione. Il Flusso Vitale scorre di nuovo nel pianeta! Epilogo della Luce raggiunto.");
-                done();
+                ask("hero", "Il Flusso Vitale circola ora libero attraverso tutti i cuori! Vuoi scendere nella piazza del sole per il Capitolo 4: Il Quarto Impatto?", [
+                  {
+                    label: "☀️ Avanza al Capitolo 4 · La Rinascita dei Bassifondi",
+                    cls: "hot",
+                    fn: () => go("pg_settore_rinato", 12, 13)
+                  },
+                  { label: "Rimani nella Sala del Trono", fn: done }
+                ]);
               });
             }
           } else {
@@ -1976,7 +2234,269 @@
     function epilogoDialogo() {
       const fin = F.get("finale_pg") === "giudizio_luce" ? "Il Giudizio di Luce (Flusso Vitale Purificato)" : "Il Volo della Rondine Ribelle (Sole sui Bassifondi)";
       say([
-        ["voce", `<b>Saga Completata</b> · Finale Raggiunto: <b>${esc(fin)}</b><br>I Bassifondi del Settore Zero celebrano il trionfo del Tuo Campione! Tutte le ricompense, le Materie e i progressi sono stati archiviati nel tuo Synchro-Nav.`, "pg_bassifondi"]
+        ["voce", `<b>Capitolo 3 Concluso</b> · Finale: <b>${esc(fin)}</b><br>Kurogane è stato redento. Puoi avanzare al Capitolo 4 per celebrare la Rinascita nella Piazza del Sole!`, "pg_arena_palazzo"]
+      ], () => {
+        ask("hero", "Vuoi scendere nella Piazza del Sole per il Capitolo 4?", [
+          { label: "☀️ Avanza al Capitolo 4", cls: "hot", fn: () => go("pg_settore_rinato", 12, 13) },
+          { label: "Resta qui", fn: done }
+        ]);
+      });
+    }
+
+    return chDef;
+  });
+
+  // ============================================================================
+  // CAPITOLO 4 · IL QUARTO IMPATTO & LA RINASCITA DEI BASSIFONDI
+  // ============================================================================
+  addChapter(function (X) {
+    const { T, F, say, ask, done, go, note, setStep, once, reward, hero, esc, addMateria, sfxGlassAwakening, sfxMakoResonance, sfxAllOutBreak } = X;
+    const N = 4, S = () => X.stepOf(N);
+
+    // Cast Kurogane Risvegliato / Redento
+    X.cast("pg_kurogane_libero", {
+      name: "Kurogane Risvegliato", tag: "maestro", hair: "#e2e8f0", style: "long", skin: "#f8fafc", eye: "#38bdf8",
+      bg: ["#0284c7", "#38bdf8"], shirt: "#0f172a"
+    }, "Il leggendario Campione dall'Ala Nera, ora liberato dal freddo algoritmo Shin-Nerv. Ha riscoperto il battito del cuore umano e gioca con un sorriso radioso per celebrare la rinascita di Neo-Gaia.");
+
+    const chDef = {
+      n: 4, title: "La Rinascita dei Bassifondi",
+      sub: "La Piazza del Sole, la Materia Genesis Stellare e la Partita del Quarto Impatto",
+      start: "pg_settore_rinato",
+      goal: (s) => (
+        s === 0 ? "Parla con Kael Buster e Maya nella Piazza del Sole." :
+        s === 1 ? "Usa lo Scanner Sinaptico sul Monumento della Rinascita per estrarre la Materia Genesis." :
+        s === 2 ? "Porta la Materia Genesis a Rin la Strillona al chiosco festivo a ovest." :
+        s === 3 ? "Sfida Kurogane Risvegliato a centrocampo nella Partita del Quarto Impatto!" :
+        "Saga completata al 100% · Leggenda Eterna di Neo-Gaia raggiunta!"
+      ),
+      intro: () => [
+        ["voce", "La luce del sole inonda la terra per la prima volta. La piastra d'acciaio della città alta è aperta e una brezza tiepida accarezza i vicoli.", "pg_settore_rinato"],
+        ["voce", "Dove prima c'erano fango e scarichi Mako, ora cresce erba smeraldo naturale. Ragazzi e ragazze corrono felici calciando palloni colorati.", "pg_settore_rinato"],
+        ["pg_kael", "«Guardati intorno, Campione! Questo non è più il Settore Zero... È il giorno zero di un mondo libero!»", "pg_settore_rinato"]
+      ],
+      obj: {
+        "12,3": () => handleMonumentoGenesis(),
+        "W": () => handleMonumentoGenesis(),
+        "4,11": () => handleChioscoRin(),
+        "K": () => handleChioscoRin(),
+        "12,15": () => handlePortaPalazzo(),
+        "d": () => handlePortaPalazzo()
+      },
+      talk: {
+        pg_kael: () => {
+          const s = S();
+          if (s === 0) {
+            say([
+              ["pg_kael", "«{n}! Non avrei mai creduto di vedere questo giorno. Il mio braccio idraulico non ha mai vibrato con così tanta gioia!»"],
+              ["hero", "«Tutti i ragazzi delle vasche... Sono liberi?»"],
+              ["pg_kael", "«Tutti quanti! E stanno già allacciando gli scarpini. Ma parla con Maya: i suoi sensori hanno registrato qualcosa di incredibile nel Monumento al centro della piazza.»"]
+            ], () => {
+              setStep(N, 1);
+              note("Kael mi ha accolto nella Piazza del Sole. Devo consultare la Dott.ssa Maya per scoprire cosa nasconde il Monumento della Rinascita.");
+              done();
+            });
+            return;
+          }
+          if (s === 1) {
+            say([["pg_kael", "«Attiva lo Scanner Sinaptico dal pulsante rapido e scansiona la stele al centro del campo (X:12, Y:3)!»"]], done);
+            return;
+          }
+          if (s === 2) {
+            say([["pg_kael", "«Hai preso la Materia Genesis! Corri da Rin al chiosco a ovest per incastonarla!»"]], done);
+            return;
+          }
+          if (s >= 3) {
+            say([["pg_kael", "«Kurogane ti aspetta a centrocampo! Oggi non combattiamo per la vita... Giochiamo per il puro amore del calcio!»"]], done);
+            return;
+          }
+        },
+        pg_maya: () => {
+          const s = S();
+          if (s <= 1) {
+            say([
+              ["pg_maya", "«{n}, i livelli di Mako su tutta la città si sono stabilizzati in un'armonia perfetta a 432 Hz!»"],
+              ["pg_maya", "«Al centro di questa piazza, dove prima c'era lo scarico del reattore, il Flusso Vitale ha generato l'ultima reliquia: la 'Materia Genesis Stellare'.»"],
+              ["pg_maya", "«Usa lo Scanner Sinaptico (Mako Vision) per localizzare la frequenza armonica sul Monumento della Rinascita a nord (X:12, Y:3) ed estraila!»"]
+            ], () => {
+              setStep(N, 1);
+              note("Maya mi ha guidato verso la Materia Genesis Stellare all'interno del Monumento della Rinascita.");
+              done();
+            });
+            return;
+          }
+          if (s === 2) {
+            say([["pg_maya", "«Porta subito la Materia Genesis a Rin la Strillona. Con quell'energia nei tuoi scarpini, il tuo tiro {tiro} raggiungerà la velocità della luce!»"]], done);
+            return;
+          }
+          say([["pg_maya", "«I tuoi parametri biologici sono leggendari. Sei il vero campione del risveglio.»"]], done);
+        },
+        pg_rin: () => {
+          const s = S();
+          if (s === 2) {
+            say([
+              ["pg_rin", "«CAMPIONE! Hai davvero trovato la Materia Genesis Stellare?! È... È meravigliosa, riflette tutti i colori dell'iride!»"],
+              ["hero", "«Puoi incastonarla sui miei scarpini per l'ultima volta?»"],
+              ["pg_rin", "«Ci puoi scommettere le mie scorte di rame! Dammi trenta secondi... Cacciavite Mako, saldatura a plasma... ED ECCO FATTO!»"],
+              ["pg_rin", "«Guarda come brillano! Sotto i tacchetti hai il battito stesso della Terra. Kurogane ti aspetta a centrocampo, fagli vedere di cosa siamo capaci noialtri dei Bassifondi!»"]
+            ], () => {
+              addMateria("mat_genesis", "Materia Genesis Stellare", "Aura arcobaleno universale che potenzia Attacco, Difesa e Velocità al massimo", "#f59e0b");
+              setStep(N, 3);
+              sfxGlassAwakening();
+              note("Rin ha incastonato la Materia Genesis Stellare nei miei scarpini. Kurogane mi aspetta a centrocampo per la Partita del Quarto Impatto!");
+              done();
+            });
+            return;
+          }
+          if (s < 2) {
+            say([["pg_rin", "«Vendo magliette con la Rondine Ribelle e souvenir del risveglio! Trova la Materia Genesis e te la monterò all'istante!»"]], done);
+            return;
+          }
+          say([["pg_rin", "«Fai il tifo da impazzire per {n}! Vogliamo un gol da cineteca sotto l'incrocio dei pali!»"]], done);
+        },
+        pg_kurogane: () => {
+          const s = S();
+          if (s < 3) {
+            say([
+              ["pg_kurogane", "«Che calore incredibile ha questo sole... Per cinquant'anni ho vissuto nel gelo dell'ossidiana, convinto che il cuore fosse solo un difetto di fabbrica.»"],
+              ["hero", "«Ora vedi la bellezza di ogni respiro, Kurogane?»"],
+              ["pg_kurogane", "«Sì, {n}. E voglio onorarla. Recupera la Materia Genesis con il tuo palmare, prepara i tuoi scarpini e affrontami in una partita senza odio, dove conterà solo la bellezza del gioco.»"]
+            ], done);
+            return;
+          }
+          if (s === 3) {
+            say([
+              ["pg_kurogane", "«Sei pronto, Campione di Neo-Gaia? Non ci sono barriere, né gabbie Shin-Nerv. Solo undici contro undici, un pallone e novanta minuti di pura passione!»"],
+              ["hero", "«Pronto da una vita, Kurogane. Che vinca il calcio libero!»"]
+            ], () => {
+              matchCapitolo4();
+            });
+            return;
+          }
+          epilogoTotaleSaga();
+        }
+      },
+      zones: {
+        pg_settore_rinato: {
+          name: "La Piazza del Sole · Settore Zero Rinato", short: "Settore Rinato", sub: "Cielo limpido, erba vera e la celebrazione di Neo-Gaia",
+          w: 24, h: 16, start: [12, 13], bg: "pg_settore_rinato",
+          areas: [
+            [2, 2, 22, 5, "Monumento della Rinascita", "La stele del nuovo mondo baciata dalla luce del sole"],
+            [4, 6, 20, 12, "Il Nuovo Campo Smeraldo", "Erba naturale risorta dal Flusso Vitale"],
+            [1, 10, 6, 14, "Chiosco Festivo di Rin", "Artigianato ribelle e gadget celebrativi"]
+          ],
+          npcs: (step) => [
+            { id: "pg_kael", at: [8, 7], dir: "right" },
+            { id: "pg_maya", at: [16, 7], dir: "left" },
+            { id: "pg_rin", at: [4, 11], dir: "right" },
+            { id: "pg_kurogane", at: [12, 5], dir: "down" }
+          ],
+          build: (Ls) => {
+            Ls.lay(0, 0, 23, 0, "#"); Ls.lay(0, 15, 23, 15, "#");
+            Ls.lay(0, 0, 0, 15, "#"); Ls.lay(23, 0, 23, 15, "#");
+            Ls.lay(1, 1, 22, 14, "g"); // Erba naturale
+            Ls.lay(4, 5, 19, 12, "="); // Linee del campo bianco
+            Ls.put(12, 3, "W"); // Monumento della Rinascita
+            Ls.put(4, 11, "K"); // Chiosco di Rin
+            Ls.put(12, 15, "d"); // Uscita
+          },
+          actLabels: {
+            "W": "☀️ Monumento della Rinascita",
+            "12,3": "☀️ Monumento della Rinascita",
+            "K": "🎁 Chiosco Festivo di Rin",
+            "4,11": "🎁 Chiosco Festivo di Rin",
+            "d": "🚪 Torna al Palazzo delle Maschere",
+            "12,15": "🚪 Torna al Palazzo delle Maschere"
+          },
+          act: {
+            "12,3": () => handleMonumentoGenesis(),
+            "W": () => handleMonumentoGenesis(),
+            "4,11": () => handleChioscoRin(),
+            "K": () => handleChioscoRin(),
+            "12,15": () => handlePortaPalazzo(),
+            "d": () => handlePortaPalazzo()
+          }
+        }
+      }
+    };
+
+    function handleMonumentoGenesis() {
+      if (scannerActive) {
+        sfxMakoResonance();
+        say([
+          ["voce", "👁️ [ANALISI SCANNER · MONUMENTO DELLA RINASCITA]\nFrequenza: Armonica Solare 432 Hz\nComposizione: Monolite di granito naturale e quarzo Mako purificato.\nSensori: Rilevata 'Materia Genesis Stellare' nel cuore della stele!", "pg_settore_rinato"]
+        ], () => {
+          if (S() === 1) estraiMateriaGenesis();
+        });
+        return;
+      }
+      if (S() === 1) {
+        estraiMateriaGenesis();
+      } else if (S() < 1) {
+        say([["voce", "Il Monumento della Rinascita brilla alla luce del sole. Parla con Kael e Maya per iniziare i festeggiamenti!", "pg_settore_rinato"]], done);
+      } else {
+        say([["voce", "La stele del Monumento risuona dolcemente nel vento. La Materia Genesis Stellare è già nei tuoi scarpini!", "pg_settore_rinato"]], done);
+      }
+    }
+
+    function estraiMateriaGenesis() {
+      say([
+        ["voce", "Toccando la stele, una luce calda color oro e zaffiro si riversa nelle tue mani. Un cristallo sferico perfetto si materializza dal granito!", "pg_settore_rinato"],
+        ["hero", "«La Materia Genesis Stellare! Sento l'energia di tutta Neo-Gaia scorrere dentro di me!»"]
+      ], () => {
+        addMateria("mat_genesis", "Materia Genesis Stellare", "Aura arcobaleno universale che potenzia Attacco, Difesa e Velocità al massimo", "#f59e0b");
+        setStep(N, 2);
+        sfxGlassAwakening();
+        note("Ho estratto la Materia Genesis Stellare dal Monumento della Rinascita. Devo portarla a Rin la Strillona a ovest.");
+        done();
+      });
+    }
+
+    function handleChioscoRin() {
+      say([["pg_rin", "«Benvenuto al chiosco della libertà! Parla direttamente con me per incastonare la Materia o festeggiare la liberazione!»", "pg_settore_rinato"]], done);
+    }
+
+    function handlePortaPalazzo() {
+      ask("hero", "Vuoi tornare al Palazzo delle Maschere o al Reattore?", [
+        { label: "👑 Torna al Palazzo delle Maschere", fn: () => go("pg_arena_palazzo", 12, 13) },
+        { label: "🏭 Torna al Reattore Shin-Nerv", fn: () => go("pg_reattore", 22, 8) },
+        { label: "Rimani nella Piazza del Sole", fn: done }
+      ]);
+    }
+
+    function matchCapitolo4() {
+      X.playMatch({
+        id: "ch4_genesis_final", chap: "Capitolo 4 · La Partita del Quarto Impatto · La Finale di Neo-Gaia",
+        intro: "Kurogane Risvegliato scende in campo con i Maestri del Risveglio! Nessuna barriera: solo classe sopraffina, tiri spettacolari e la festa di tutti i Bassifondi!",
+        mate: "Kael Buster", squad: ["Kael Buster", "Dott.ssa Maya", "Rin la Strillona"],
+        oppNames: ["Kurogane Risvegliato", "Maestro del Flusso", "Campione dell'Alba", "Portiere della Luce", "Ala del Vento"],
+        team: (t, st) => ({ name: "I Maestri del Risveglio", color: "#38bdf8", atk: 35, def: 34, vel: 36 }),
+        done: (r) => {
+          if (r.win) {
+            sfxAllOutBreak();
+            sfxGlassAwakening();
+            say([
+              ["pg_kurogane", "«UN GOL INCREDIBILE! Il tuo tiro {tiro} ha lasciato una scia d'arcobaleno che ha illuminato l'intero orizzonte!»", "pg_settore_rinato"],
+              ["pg_kael", "«CAMPIONE DEL MONDO! Campione dei Bassifondi, di Neo-Gaia e di ogni anima che ha osato sognare!»", "pg_settore_rinato"],
+              ["pg_maya", "«I terminali MAGI confermano: il Quarto Impatto ha donato la pace eterna al pianeta. Sei la nostra leggenda immortale, {n}!»", "pg_settore_rinato"]
+            ], () => {
+              reward("ch4_final_reward", { coins: 1000 });
+              X.finishChapter(4, "leggenda_neo_gaia");
+              setStep(4, 4);
+              note("Ho trionfato nella Partita del Quarto Impatto! La saga di Phantom Genesis è completata al 100%: ho liberato il mondo e conquistato il titolo di Salvatore di Neo-Gaia.");
+              epilogoTotaleSaga();
+            });
+          } else {
+            say([["pg_kurogane", "«Che giocata meravigliosa! Riprendi fiato, Campione: oggi giochiamo fino al tramonto, riproviamo quando vuoi!»"]], done);
+          }
+        }
+      });
+    }
+
+    function epilogoTotaleSaga() {
+      const h = hero() || { name: "Campione", num: 9 };
+      say([
+        ["voce", `<b>🏆 PHANTOM GENESIS · SAGA COMPLETATA AL 100%!</b><br><br><b>${esc(h.name)}</b> (N. ${esc(h.num)}) è ufficialmente proclamato <b>Salvatore di Neo-Gaia & Signore delle Materie</b>!<br>I quattro capitoli sono stati tutti espugnati, tutte le Materie sono forgiate nei tuoi scarpini e la luce del sole splende per sempre sui Bassifondi.<br><br>Puoi continuare a esplorare liberamente tutte le zone tramite il Synchro-Nav o disputare nuove amichevoli in ogni momento!`, "pg_settore_rinato"]
       ], done);
     }
 
@@ -2006,15 +2526,15 @@
 
     api.scene(
       "pg_bassifondi", "voce",
-      `<b>Phantom Genesis</b> · Il Reattore delle Maschere<br>${esc(h.name)}, n. ${esc(h.num)} · «${esc(h.shotName || "COLPO DEL RISVEGLIO")}»<br><span style="color:var(--dim)">${c ? esc("Capitolo " + c.n + " · " + c.title) : ""}<br>${allDone ? (nextOk ? "Il prossimo capitolo ti attende nel Reattore." : "Saga completata con successo!") : esc(goalNow())}</span>`,
+      `<b>Phantom Genesis</b> · Il Reattore delle Maschere<br>${esc(h.name)}, n. ${esc(h.num)} · «${esc(h.shotName || "COLPO DEL RISVEGLIO")}»<br><span style="color:var(--dim)">${c ? esc("Capitolo " + c.n + " · " + c.title) : ""}<br>${allDone ? (nextOk ? "Il prossimo capitolo ti attende nel Reattore." : "Saga completata con successo! Neo-Gaia è libera!") : esc(goalNow())}</span>`,
       [
         {
-          label: allDone && !nextOk ? "Torna nel Settore Zero" : c && !m.intro["ch" + c.n] ? (c.n > 1 ? `Inizia il Capitolo ${c.n}` : "Comincia la Saga") : "Continua l'Infiltrazione",
+          label: allDone && !nextOk ? "Torna nella Piazza del Sole" : c && !m.intro["ch" + c.n] ? (c.n > 1 ? `Inizia il Capitolo ${c.n}` : "Comincia la Saga") : "Continua l'Infiltrazione",
           sub: c ? `Capitolo ${c.n} · ${c.title}` : "", cls: "hot",
           fn: continueStory
         },
         { label: "📱 Synchro-Nav & Materie", sub: `Materie ${m.materias.length} · Sincronia ${m.synchro}%`, fn: () => notebook(openMain, false) },
-        { label: "Capitoli & Bivi", sub: "Riepilogo delle puntate e finali", fn: chaptersList },
+        { label: "Capitoli & Bivi", sub: "Riepilogo delle 4 puntate e finali", fn: chaptersList },
         { label: "◂ Modalità", fn: leaveToModes }
       ],
       "Phantom Genesis"
@@ -2023,7 +2543,7 @@
 
   function chaptersList() {
     const m = mem(), rows = [];
-    for (let n = 1; n <= 3; n++) {
+    for (let n = 1; n <= 4; n++) {
       const c = CHAPTERS[n];
       rows.push(c && (n === 1 || m.done[n - 1] || m.ch >= n) ? `${m.done[n] ? "✓" : "▸"} <b>Capitolo ${n}</b> · ${esc(c.title)} <span style="color:var(--dim)">${esc(m.done[n] ? "completato" : c.sub || "")}</span>` : `<span style="color:var(--dim)">• Capitolo ${n} · ???</span>`);
     }
