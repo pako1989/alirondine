@@ -479,6 +479,13 @@
   function P(x, y, w, h, c) { GP.fillStyle = c; GP.fillRect(x, y, w, h); }
 
   function floorPaint(ch, sx, sy, tx, ty) {
+    if (ch === "=") {
+      // Ponticello o passerella di legno laccato
+      P(sx, sy, 16, 16, "#78350f");
+      P(sx + 1, sy + 1, 14, 14, "#92400e");
+      P(sx, sy + 7, 16, 2, "#451a03");
+      return;
+    }
     if (ch === "g") {
       // Giardino zen con sabbia rastrellata o erba dorata
       P(sx, sy, 16, 16, "#14281d");
@@ -504,10 +511,17 @@
   }
 
   function solidPaint(ch, sx, sy, tx, ty) {
+    if (ch === "~") {
+      // Canale d'acqua del giardino o fiume sacro
+      P(sx, sy, 16, 16, "#0c4a6e");
+      P(sx + 2, sy + 4, 12, 4, "#0284c7");
+      P(sx + 4, sy + 10, 8, 3, "#38bdf8");
+      return;
+    }
     if (ch === "T") {
       // Grande Portale Torii vermiglio sacro
       P(sx, sy, 16, 16, "#991b1b");
-      P(sx + 2, sy, 12, 4, "#dc2626");
+      P(sx + 2, sy + 12, 4, "#dc2626");
       P(sx + 4, sy + 4, 8, 12, "#7f1d1d");
       P(sx + 6, sy + 6, 4, 10, "#b91c1c");
       return;
@@ -528,7 +542,7 @@
       return;
     }
     if (ch === "B") {
-      // Ponte ad arco di legno laccato rosso
+      // Balustra o altare cerimoniale laccato rosso
       P(sx, sy, 16, 16, "#991b1b");
       P(sx + 1, sy + 4, 14, 8, "#b91c1c");
       P(sx + 2, sy + 2, 12, 2, "#fca5a5");
@@ -576,13 +590,15 @@
       items: spec.items || [],
       item: spec.item || ["Moneta del Dragone", "Monete"],
       bus: "portale",
-      busLabel: "Torna al Santuario"
+      busLabel: "Torna al Santuario",
+      solid: spec.solid || "wW#TCLM~B"
     }, spec);
     Z.w = spec.w || 25;
     Z.h = spec.h || 15;
     Z.short = shortName;
     Z.areas = spec.areas || [[0, 0, Z.w, Z.h, shortName]];
     Z.hints = spec.hints || { [shortName]: spec.sub || "" };
+    Z.solid = spec.solid || "wW#TCLM~B";
     Z.items = spec.items || [];
     Z.item = spec.item || ["Moneta del Dragone", "Monete"];
     Z.npcs = (spec.npcs || []).map((n) => {
@@ -763,7 +779,15 @@
     if (!api || !api.trGo) return;
     castHero();
     mem().zone = zid; save();
-    api.trGo(zid, tx, ty);
+    const zr = ZONES[zid];
+    const sPos = zr && zr.spec && zr.spec.start ? zr.spec.start : [12, 10];
+    const tr = api.trRec();
+    if (typeof tx === "number" && typeof ty === "number") {
+      tr.pos[zid] = [Math.round(tx * TS + 8), Math.round(ty * TS + 12)];
+    } else if (!tr.pos[zid]) {
+      tr.pos[zid] = [sPos[0] * TS + 8, sPos[1] * TS + 12];
+    }
+    api.trGo(zid, typeof tx === "number" ? tx : sPos[0], typeof ty === "number" ? ty : sPos[1]);
     ensurePadControls();
   }
 
@@ -896,9 +920,11 @@ Durante l'esplorazione del Regno delle Sette Lame, tocca il pulsante <b>⚔️ S
     if (!c) return;
     const m = mem();
     const curZ = (m.zone && ZONES[m.zone] && ZONES[m.zone].ch === c.n) ? m.zone : (c.start || "sh_giardino");
+    const zr = ZONES[curZ];
+    const sPos = zr && zr.spec && zr.spec.start ? zr.spec.start : [12, 10];
     const tr = api.trRec();
-    if (!tr.pos[curZ]) {
-      tr.pos[curZ] = [8 * TS, 8 * TS];
+    if (!tr.pos[curZ] || (curZ === "sh_giardino" && tr.pos[curZ][0] <= 145 && tr.pos[curZ][1] <= 135)) {
+      tr.pos[curZ] = [sPos[0] * TS + 8, sPos[1] * TS + 12];
     }
     go(curZ, tr.pos[curZ][0] / TS, tr.pos[curZ][1] / TS);
   }
@@ -915,7 +941,12 @@ Durante l'esplorazione del Regno delle Sette Lame, tocca il pulsante <b>⚔️ S
         cls: isCur ? "hot" : "",
         fn: () => {
           m.ch = num; save();
-          go(c.start || "sh_giardino", 8, 8);
+          const targetZ = c.start || "sh_giardino";
+          const zr = ZONES[targetZ];
+          const sPos = zr && zr.spec && zr.spec.start ? zr.spec.start : [12, 10];
+          const tr = api.trRec();
+          tr.pos[targetZ] = [sPos[0] * TS + 8, sPos[1] * TS + 12];
+          go(targetZ, sPos[0], sPos[1]);
         }
       };
     });
@@ -1008,7 +1039,7 @@ Durante l'esplorazione del Regno delle Sette Lame, tocca il pulsante <b>⚔️ S
           name: "Santuario di Kage-no-Mori · Giardino dei Ciliegi",
           short: "Giardino dei Ciliegi",
           sub: "Torii vermigli, petali cadenti e lo spirito antico del calcio feudale",
-          w: 25, h: 15, start: [8, 8], theme: "torino", bg: "sh_dojo",
+          w: 25, h: 15, start: [12, 10], theme: "torino", bg: "sh_dojo",
           isCustomSaga: true,
           areas: [
             [2, 2, 10, 6, "Padiglione del Tè", "Il padiglione dei samurai con vista sui ciliegi"],
@@ -1025,6 +1056,7 @@ Durante l'esplorazione del Regno delle Sette Lame, tocca il pulsante <b>⚔️ S
             T: "Esamina il Torii Sacro",
             C: "Ammira il Ciliegio Centenario",
             L: "Osserva la Lanterna di Pietra",
+            "=": "Attraversa il Ponte di Legno Rosso",
             B: "Attraversa il Ponte di Legno Rosso",
             M: "Ammira la Statua del Dragone di Giada"
           },
@@ -1043,7 +1075,7 @@ Durante l'esplorazione del Regno delle Sette Lame, tocca il pulsante <b>⚔️ S
             Ls.put(4, 3, "C"); Ls.put(20, 3, "C"); Ls.put(4, 11, "C"); Ls.put(20, 11, "C");
             Ls.put(10, 4, "L"); Ls.put(14, 4, "L"); Ls.put(10, 10, "L"); Ls.put(14, 10, "L");
             Ls.put(12, 12, "M"); // Statua del Drago
-            Ls.put(16, 8, "B"); // Ponte di legno
+            Ls.put(16, 8, "="); // Ponte di legno
           },
           npcs: [
             { id: "sh_hayato", at: [8, 7], dir: "down" },
@@ -1229,6 +1261,7 @@ Durante l'esplorazione del Regno delle Sette Lame, tocca il pulsante <b>⚔️ S
             "1,7": "Torna al Giardino dei Ciliegi",
             T: "Esamina l'insegna della bottega",
             L: "Osserva la lanterna di carta",
+            "=": "Attraversa il ponte arcuato",
             B: "Attraversa il ponte arcuato",
             M: "Ammira il braciere sacro"
           },
@@ -1236,14 +1269,14 @@ Durante l'esplorazione del Regno delle Sette Lame, tocca il pulsante <b>⚔️ S
             for (let y = 0; y < 15; y++) {
               for (let x = 0; x < 25; x++) {
                 if (x === 0 || x === 24 || y === 0 || y === 14) Ls.put(x, y, "w");
-                else if (y === 10 || y === 11) Ls.put(x, y, "g"); // Fiume/canale d'acqua
+                else if (y === 10 || y === 11) Ls.put(x, y, "~"); // Fiume/canale d'acqua sacro
                 else if (x >= 4 && x <= 8 && y >= 3 && y <= 6) Ls.put(x, y, "q"); // Locanda Hanzo
                 else if (x >= 16 && x <= 20 && y >= 3 && y <= 6) Ls.put(x, y, "q"); // Forgia Muramasa
                 else Ls.put(x, y, ",");
               }
             }
             Ls.put(1, 7, "T"); Ls.put(23, 12, "T");
-            Ls.put(12, 10, "B"); Ls.put(12, 11, "B"); // Ponte sul fiume
+            Ls.put(12, 10, "="); Ls.put(12, 11, "="); // Ponte sul fiume
             Ls.put(5, 7, "L"); Ls.put(9, 7, "L"); Ls.put(15, 7, "L"); Ls.put(19, 7, "L");
             Ls.put(18, 6, "M"); // Braciere della forgia
           },

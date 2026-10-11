@@ -8887,8 +8887,20 @@
   }
   function trTry(nx, ny) {
     nx = clamp(nx, 6, TW.z.w * TS - 6); ny = clamp(ny, 8, TW.z.h * TS - 2);
-    for (const [ox, oy] of [[-5, -4], [5, -4], [-5, 2], [5, 2]]) { const c = trTile(nx + ox, ny + oy); if (TR_SOLID.includes(c) || (TW.z.solid && TW.z.solid.includes(c))) return false; }
-    for (const n of trNpcs()) if (Math.abs(nx - n.x) < 11 && Math.abs(ny - n.y) < 8) return false;
+    for (const [ox, oy] of [[-5, -4], [5, -4], [-5, 2], [5, 2]]) {
+      const c = trTile(nx + ox, ny + oy);
+      if (TR_SOLID.includes(c) || (TW.z.solid && TW.z.solid.includes(c))) return false;
+    }
+    for (const n of trNpcs()) {
+      const curInside = Math.abs(TW.x - n.x) < 11 && Math.abs(TW.y - n.y) < 8;
+      const newInside = Math.abs(nx - n.x) < 11 && Math.abs(ny - n.y) < 8;
+      if (newInside) {
+        if (!curInside) return false;
+        const curDist = Math.hypot(TW.x - n.x, TW.y - n.y);
+        const newDist = Math.hypot(nx - n.x, ny - n.y);
+        if (newDist <= curDist) return false;
+      }
+    }
     TW.x = nx; TW.y = ny; return true;
   }
   function trTarget() {
@@ -8901,9 +8913,9 @@
       const za = TW.z.act || {};
       const actLabel = typeof za === "function" ? za(ch, tx, ty) : (za[tx + "," + ty] || za[ch]);
       const isCustomSaga = TW.id && (TW.id.startsWith("pg_") || TW.id.startsWith("kr_") || TW.id.startsWith("pi_") || TW.id.startsWith("al_") || TW.id.startsWith("ch_") || TW.id.startsWith("sh_") || (TW.z && TW.z.isCustomSaga));
-      if (ch && ("DSBONM".includes(ch) || actLabel || (isCustomSaga && !TR_SOLID.includes(ch)))) {
+      if (ch && ("DSBONM".includes(ch) || actLabel || (isCustomSaga && (za[ch] || za[tx + "," + ty] || "TXMWBH<>".includes(ch))))) {
         let defLabel = { D: "Entra", S: "Aspetta il bus", B: "Sali in barca", O: "Guarda", N: "Leggi", M: "Guarda" }[ch];
-        if (isCustomSaga) defLabel = "Esamina";
+        if (isCustomSaga) defLabel = actLabel || "Esamina";
         target = { kind: "obj", ch, tx, ty, id: ch + tx + "," + ty, label: actLabel || defLabel };
       }
     }
@@ -8924,15 +8936,34 @@
       borgoSave();
     });
   }
-
   // --- partenza, ritorno, comandi ---
-  function trGo(id) {
+  function trGo(id, tx, ty) {
     const z = TRZ[id], r = trRec();
     borgoSave(); if (!BW) BW = { keys: {}, walk: 0, saved: 0 }; BW.active = false; BW.keys = {};
     TW = { id, z, map: null, x: 0, y: 0, dir: "down", walk: 0, saved: 0, t: 0, active: true, prog: prog() };
     TW.map = trMap(z);
+    let defX = z.start ? (z.start[0] * TS + 8) : 8 * TS + 8;
+    let defY = z.start ? (z.start[1] * TS + 12) : 8 * TS + 12;
+    if (typeof tx === "number" && typeof ty === "number") {
+      defX = Math.round(tx * TS + 8);
+      defY = Math.round(ty * TS + 12);
+      r.pos[id] = [defX, defY];
+    }
     const pos = r.pos[id];
-    if (pos && !TR_SOLID.includes(trTile(pos[0], pos[1]))) { TW.x = pos[0]; TW.y = pos[1]; } else { TW.x = z.start[0] * TS + 8; TW.y = z.start[1] * TS + 12; }
+    let ok = false;
+    if (pos && Array.isArray(pos) && pos.length >= 2) {
+      const px = pos[0], py = pos[1];
+      const c = trTile(px, py);
+      const isSolid = TR_SOLID.includes(c) || (z.solid && z.solid.includes(c));
+      const inNpc = trNpcs().some((n) => Math.abs(px - n.x) < 11 && Math.abs(py - n.y) < 8);
+      if (!isSolid && !inNpc && px >= 6 && px <= z.w * TS - 6 && py >= 8 && py <= z.h * TS - 2) {
+        TW.x = px; TW.y = py; ok = true;
+      }
+    }
+    if (!ok) {
+      TW.x = defX; TW.y = defY;
+      r.pos[id] = [defX, defY];
+    }
     const first = !r.seen[id]; r.seen[id] = true; if (first) { if (!r.first || typeof r.first !== "object") r.first = {}; r.first[id] = todayKey(); } borgoSave();
     if (first && z.intro && z.intro.length) return trSay(z.intro.map(([w, t]) => L(w, t)), () => { trResume(); trToast(`Benvenuto: ${z.short}!`); });
     trResume(); trToast(`${z.short} · bentornato`);
@@ -8948,7 +8979,10 @@
     c.querySelectorAll("[data-d]").forEach((b) => {
       const d = b.dataset.d, on = (e) => { e.preventDefault(); BW.keys[d] = true; b.classList.add("on"); try { b.setPointerCapture(e.pointerId); } catch {} };
       const off = () => { BW.keys[d] = false; b.classList.remove("on"); };
-      b.addEventListener("pointerdown", on); ["pointerup", "pointercancel", "lostpointercapture"].forEach((ev) => b.addEventListener(ev, off));
+      b.addEventListener("pointerdown", on);
+      b.addEventListener("touchstart", on, { passive: false });
+      b.addEventListener("mousedown", on);
+      ["pointerup", "pointercancel", "lostpointercapture", "touchend", "touchcancel", "mouseup"].forEach((ev) => b.addEventListener(ev, off));
       b.addEventListener("contextmenu", (e) => e.preventDefault());
     });
     $("bAct").onclick = trAction; $("bMenu").onclick = trMenu;
