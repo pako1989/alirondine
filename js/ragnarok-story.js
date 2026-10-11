@@ -763,6 +763,9 @@
           // Varco ovest verso le Fucine di Nidavellir
           lay(0, 11, 4, 11, "p");
           put(0, 11, "<");
+          // Varco est verso la Piana di Vigrid
+          lay(19, 11, 23, 11, "p");
+          put(23, 11, ">");
           // La Grande Casa dello Jarl (a sinistra)
           lay(2, 2, 8, 6, "A");
           put(5, 6, "u"); // Portone sala del mead
@@ -1143,6 +1146,11 @@
         if (!m.done[1]) say([["voce", "La voragine verso le Fucine di Nidavellir è bloccata da lastroni di ghiaccio. Supera prima la prova di Ragnar nel Capitolo 1."]], done);
         else go("rag_fucine", 14, 11);
       },
+      "rag_fiordo:>": () => {
+        const m = mem();
+        if (!m.done[2]) say([["voce", "Il passo montano verso la Piana di Vigrid è sepolto dalle nevi perenni. Tempra prima i tuoi tacchetti a Nidavellir nel Capitolo 2."]], done);
+        else go("rag_vigrid", 12, 19);
+      },
       "rag_fiordo:W": esaminaAltareMagmatico,
       "rag_fiordo:F": () => say([["voce", "Il braciere votivo lavico: le fiamme ardono di una luce rosso rubino, sciogliendo la neve all'intorno."]], done),
       "rag_fiordo:T": () => say([["voce", "Il maestoso Totem con corna d'alce: incisioni runiche brillano dolcemente nel buio del Fimbulwinter."]], done),
@@ -1297,6 +1305,8 @@
           put(3, 16, "F"); put(20, 16, "F");
           // Monoliti
           put(3, 10, "M"); put(20, 10, "M");
+          // Varco nord verso la Piana di Vigrid
+          put(11, 0, "^"); put(12, 0, "^");
           // Varco sud verso il Ponte
           put(12, 21, "d");
         },
@@ -1529,6 +1539,11 @@
       },
       "rag_ponte:T": () => say([["voce", "Pilastrini del ponte istoriati con le gesta dei primi forgiatori di Asgard."]], done),
       "rag_forgia:d": () => go("rag_ponte", 8, 2),
+      "rag_forgia:^": () => {
+        const m = mem();
+        if (!m.done[2]) say([["voce", "La via di risalita verso la superficie è bloccata. Vinci prima la prova del Torneo della Fornace."]], done);
+        else go("rag_vigrid", 12, 19);
+      },
       "rag_forgia:G": () => say([["voce", "Le porte della Fornace: blocchi monolitici di ossidiana pura con catene d'oro e ferro."]], done),
       "rag_forgia:F": () => say([["voce", "Colonne di fuoco che illuminano l'Arena sotterranea."]], done),
       "rag_forgia:M": () => say([["voce", "Monoliti cerimoniali della gloria nanica."]], done)
@@ -1544,6 +1559,731 @@
         rag_sindri: sindriTalk2,
         rag_kara: karaTalk2,
         rag_guardia_nano: guardiaNanoTalk2
+      },
+      obj
+    };
+  });
+
+  // ==========================================================================
+  // CAPITOLO 3: LA PIANA DI VIGRID (IL BIFROST FRANTUMATO E LA VERITÀ DEL LIMBO)
+  // ==========================================================================
+  addChapter(function (X) {
+    const { T, F, sfxHorn, sfxDrum, sfxLava, sfxValkyrie, note, setStep, addRune, reward, go } = X;
+    const N = 3, S = () => X.stepOf(N);
+
+    // Cast del Capitolo 3
+    X.cast("rag_surtr_ombra", {
+      name: "Ombra di Surtr", tag: "spettro", hair: "#ea580c", style: "spiky", skin: "#1c1917", eye: "#fef08a",
+      beard: true, bg: ["#09090b", "#ea580c"], shirt: "#450a0a"
+    }, "Spettro millenario dell'armata del fuoco caduto sulla Piana di Vigrid. Custodisce le ceneri dell'antica fine del mondo ed è convinto che il silenzio di Fimbulwinter sia preferibile al ritorno di un nuovo ciclo di sofferenza.");
+
+    // Cosmetico Capitolo 3: Mantello delle Piume di Corvo
+    X.cos("rag_mantello_corvo", {
+      id: "rag_mantello_corvo",
+      label: "Mantello delle Piume di Corvo",
+      sub: "Mantello sciamanico intessuto con piume di corvo boreale, scaglie di basalto e rune d'argento da Sigrid la Scalda.",
+      cat: "maglia",
+      val: 0
+    });
+
+    // Definizione Zone Capitolo 3
+    const zones = {
+      rag_vigrid: {
+        name: "La Piana di Vigrid sotto la Cenere", short: "Piana di Vigrid",
+        sub: "Distesa sterminata di basalto e permafrost dove caddero dei ed eroi del passato",
+        w: 24, h: 22, start: [12, 19], bg: "rag_vigrid", theme: "torino",
+        item: ["Cenere Primordiale", "Ceneri"],
+        build(Ls) {
+          const { lay, put } = Ls;
+          // Cenere e permafrost di base
+          lay(0, 0, 23, 21, "c");
+          // Fessura tellurica orizzontale
+          lay(2, 12, 21, 12, "l");
+          // Strade di lastre laviche
+          lay(11, 4, 13, 20, "y");
+          lay(4, 11, 19, 13, "y");
+          // Rocce basaltiche perimetrali
+          for (let x = 0; x < 24; x++) { put(x, 0, "A"); put(x, 21, "A"); }
+          for (let y = 1; y < 21; y++) { put(0, y, "A"); put(23, y, "A"); }
+          // Varco sud verso il Fiordo
+          put(12, 21, "d");
+          // Varco ovest verso i Frammenti del Bifrost
+          lay(0, 11, 4, 11, "p");
+          put(0, 11, "<");
+          // Varco nord verso il Cerchio di Cenere
+          put(11, 0, "^"); put(12, 0, "^"); put(13, 0, "^");
+          // Totem con corna d'alce e bracieri
+          put(6, 6, "T"); put(18, 6, "T");
+          put(6, 16, "T"); put(18, 16, "T");
+          put(9, 10, "F"); put(15, 10, "F");
+          put(9, 14, "F"); put(15, 14, "F");
+          // Monoliti del crepuscolo e scudi infranti
+          put(4, 4, "M"); put(20, 4, "M");
+          put(4, 18, "J"); put(20, 18, "J");
+          // Altare delle ceneri
+          put(12, 8, "W");
+        },
+        npcs(s) {
+          const list = [];
+          if (s === 0) {
+            list.push({ id: "rag_kara", at: [12, 14] });
+            list.push({ id: "rag_sigrid", at: [10, 16] });
+            list.push({ id: "rag_ragnar", at: [14, 16] });
+            list.push({ id: "rag_brokk", at: [8, 17] });
+          } else if (s === 1) {
+            list.push({ id: "rag_sigrid", at: [6, 12] });
+            list.push({ id: "rag_ragnar", at: [14, 15] });
+            list.push({ id: "rag_brokk", at: [12, 16] });
+          } else if (s === 2) {
+            list.push({ id: "rag_ragnar", at: [12, 6] });
+            list.push({ id: "rag_brokk", at: [10, 7] });
+            list.push({ id: "rag_sigrid", at: [14, 7] });
+          } else if (s === 3) {
+            list.push({ id: "rag_kara", at: [12, 3] });
+            list.push({ id: "rag_ragnar", at: [10, 5] });
+            list.push({ id: "rag_sigrid", at: [14, 5] });
+            list.push({ id: "rag_brokk", at: [8, 6] });
+          } else {
+            list.push({ id: "rag_kara", at: [12, 12] });
+            list.push({ id: "rag_sigrid", at: [10, 14] });
+            list.push({ id: "rag_ragnar", at: [14, 14] });
+            list.push({ id: "rag_brokk", at: [12, 16] });
+          }
+          return list;
+        }
+      },
+      rag_bifrost: {
+        name: "I Frammenti del Bifrost Frantumato", short: "Rovine del Bifrost",
+        sub: "Monoliti di cristallo prismatico sospesi sul baratro cosmico",
+        w: 18, h: 16, start: [9, 13], bg: "rag_bifrost", theme: "torino",
+        item: ["Frammento di Prisma", "Prismi"],
+        build(Ls) {
+          const { lay, put } = Ls;
+          // Pavimento etereo e lastre cosmiche
+          lay(0, 0, 17, 15, ":");
+          lay(4, 3, 13, 13, "p");
+          lay(6, 5, 11, 11, "y");
+          // Baratro cosmico perimetrale
+          for (let x = 0; x < 18; x++) { put(x, 0, "A"); put(x, 15, "A"); }
+          for (let y = 1; y < 15; y++) { put(0, y, "A"); put(17, y, "A"); }
+          // Varco sud di ritorno a Vigrid
+          put(9, 15, "d");
+          // Monolite Centrale delle Rivelazioni
+          put(9, 6, "M");
+          // Cristalli del ponte e colonne runiche
+          put(5, 5, "R"); put(13, 5, "R");
+          put(5, 11, "R"); put(13, 11, "R");
+          put(7, 3, "b"); put(11, 3, "b");
+          put(9, 9, "F");
+        },
+        npcs(s) {
+          const list = [];
+          list.push({ id: "rag_kara", at: [9, 8] });
+          list.push({ id: "rag_sigrid", at: [7, 8] });
+          return list;
+        }
+      },
+      rag_cerchio_cenere: {
+        name: "L'Arena degli Spettri di Vigrid", short: "Cerchio di Cenere",
+        sub: "Il cerchio sacro di battaglia dove riposano le armi dell'ultimo scontro",
+        w: 24, h: 22, start: [12, 19], bg: "rag_cerchio_cenere", theme: "torino",
+        item: ["Favilla di Vigrid", "Faville"],
+        build(Ls) {
+          const { lay, put } = Ls;
+          // Cenere e basalto duro
+          lay(0, 0, 23, 21, "c");
+          // Rettangolo di gioco
+          lay(3, 3, 20, 18, "m");
+          // Fessura tellurica centrale
+          for (let x = 4; x <= 19; x++) put(x, 10, "l");
+          // Recinzione di monoliti
+          for (let x = 0; x < 24; x++) { put(x, 0, "A"); put(x, 21, "A"); }
+          for (let y = 1; y < 21; y++) { put(0, y, "A"); put(23, y, "A"); }
+          // Porte cerimoniali in teschi e ossa
+          put(11, 3, "G"); put(12, 3, "G");
+          put(11, 18, "G"); put(12, 18, "G");
+          // Bracieri cerimoniali e totem
+          put(3, 4, "F"); put(20, 4, "F");
+          put(3, 17, "F"); put(20, 17, "F");
+          put(3, 10, "T"); put(20, 10, "T");
+          // Varco sud verso la Piana
+          put(12, 21, "d");
+          // Varco nord verso Yggdrasil
+          put(11, 0, "^"); put(12, 0, "^");
+        },
+        npcs(s) {
+          const list = [];
+          if (s < 4) {
+            list.push({ id: "rag_surtr_ombra", at: [12, 10] });
+            list.push({ id: "rag_ragnar", at: [8, 17] });
+            list.push({ id: "rag_brokk", at: [6, 16] });
+            list.push({ id: "rag_sigrid", at: [16, 17] });
+            list.push({ id: "rag_kara", at: [18, 16] });
+          } else {
+            list.push({ id: "rag_kara", at: [12, 5] });
+            list.push({ id: "rag_sigrid", at: [10, 7] });
+            list.push({ id: "rag_ragnar", at: [14, 7] });
+            list.push({ id: "rag_brokk", at: [12, 9] });
+          }
+          return list;
+        }
+      }
+    };
+
+    // Dialoghi Capitolo 3
+    function karaTalk3() {
+      const s = S();
+      if (s === 0) {
+        sfxValkyrie();
+        return say([
+          ["rag_kara", "Siamo giunti a Vigrid, {n}. Qui un tempo si riunirono dei, giganti e guerrieri per l'ultima battaglia."],
+          ["hero", "L'aria è densa di cenere rovente e neve boreale. Sento il terreno vibrare sotto i tacchetti forgiati da Brokk."],
+          ["rag_kara", "Prima di sfidare gli Spettri del Cerchio a nord, dobbiamo recarci a ovest, tra i Frammenti del Bifrost Frantumato."],
+          ["rag_kara", "C'è un'antica memoria che devo mostrarti sul Monolite delle Rivelazioni. Seguimi attraverso il varco a sinistra (<)."],
+        ], () => { setStep(N, 1); refreshZone(); });
+      }
+      if (s === 1) {
+        return say([
+          ["rag_kara", "Il varco per i Frammenti del Bifrost è a ovest (<). Io e Sigrid ti aspettiamo dinanzi al Monolite cosmico."],
+        ], done);
+      }
+      if (s === 2) {
+        return say([
+          ["rag_kara", "Esamina il Monolite di pietra stellare al centro [M]. Tocca le sue incisioni con la Sfera di Pietra Fusa."],
+        ], done);
+      }
+      if (s === 3) {
+        return say([
+          ["rag_kara", "Ora conosci la verità, {n}: il Ragnarok è già accaduto, e questo mondo è un limbo congelato. Ma la Sfera conserva la scintilla per decidere il futuro."],
+          ["rag_kara", "L'Ombra di Surtr presidia il Cerchio di Cenere a nord (^). Sconfiggila con la Furia Berserker e apri la via per Yggdrasil!"],
+        ], done);
+      }
+      say([
+        ["rag_kara", "La Piana di Vigrid è purificata! La colonna di luce cosmica verso le Radici Celesti di Yggdrasil è aperta a nord (^)."],
+      ], done);
+    }
+
+    function sigridTalk3() {
+      const s = S();
+      sfxDrum();
+      if (s === 0 || s === 1) {
+        return say([
+          ["rag_sigrid", "(Batte il tamburo sciamanico con ritmo cupo e solenne) «Un'era di asce, un'era di spade... gli scudi si spaccano, un'era di tempeste prima che il mondo crolli.»"],
+          ["rag_sigrid", "Munin avverte fremiti di dolore tra i cristalli del Bifrost a ovest. Qualcosa di immenso è sepolto laggiù, {n}."],
+        ], done);
+      }
+      if (s === 2) {
+        return say([
+          ["rag_sigrid", "Avvicinati al Monolite [M]. La voce degli antichi scaldi risuonerà nella tua mente."],
+        ], done);
+      }
+      if (s === 3) {
+        return say([
+          ["rag_sigrid", "(Ti porge il Mantello delle Piume di Corvo) Indossa le ali della memoria, {n}. Quando calci la Sfera, lascia che il tamburo guidi la traiettoria tra i crepacci!"],
+        ], done);
+      }
+      say([
+        ["rag_sigrid", "I canti dell'antico Asgard stanno risorgendo dalla cenere. Yggdrasil ci attende lassù, oltre il cerchio di fuoco!"],
+      ], done);
+    }
+
+    function ragnarTalk3() {
+      const s = S();
+      sfxHorn();
+      if (s < 3) {
+        return say([
+          ["rag_ragnar", "(Posa la pesante ascia sul terreno di basalto) Questa terra puzza di battaglie titaniche. Il mio sangue di lupo ribolle a ogni passo!"],
+          ["rag_ragnar", "Qualunque cosa ci riveli quel vecchio ponte di cristallo, ricorda una cosa: un vero guerriero norreno non china la testa davanti al fato."],
+        ], done);
+      }
+      if (s === 3) {
+        return say([
+          ["rag_ragnar", "Limbo o no, fantasmi o mortali, se quegli spettri del fuoco pensano di sbarrarci il cammino assaggeranno i miei contrasti d'orso!"],
+          ["rag_ragnar", "Entriamo nel Cerchio di Cenere e spacchiamo la loro difesa con le Crepe Telluriche!"],
+        ], done);
+      }
+      say([
+        ["rag_ragnar", "Che vittoria epica! Quell'Ombra di Surtr non si aspettava che dei guerrieri di Midgard potessero calciare pietra fusa con tanta rabbia!"],
+      ], done);
+    }
+
+    function brokkTalk3() {
+      sfxDrum();
+      say([
+        ["rag_brokk", "(Esamina il terreno con perizia nanica) La cenere di Vigrid è compatta ma sotto ci sono vene di magma vivo."],
+        ["rag_brokk", "I tacchetti forgiati all'Incudine stanno mordendo la roccia alla perfezione. Quando colpisci la palla con la Furia, il contraccolpo spaccherà il campo esattamente a metà!"],
+      ], done);
+    }
+
+    // Colpo di scena 1: Rivelazione temporale al Monolite del Bifrost
+    function esaminaMonoliteBifrost() {
+      sfxValkyrie();
+      sfxLava();
+      say([
+        ["voce", "Tocchi la superficie gelida e levigata del Monolite prismatico con la Sfera di Pietra Fusa..."],
+        ["voce", "I cristalli del Bifrost si accendono di una luce abbagliante: visioni di cieli in fiamme, il lupo Fenrir che spezza le catene, il serpente Jormungandr che avvelena gli oceani... e poi il nulla. Un silenzio infinito."],
+        ["rag_kara", "(Gli occhi d'argento della Valchiria brillano di lacrime divine) «Non posso più celarvelo, Campione {n}. Non siamo alla vigilia del Ragnarok.»"],
+        ["hero", "Kara... cosa intendi? Abbiamo appena traversato le fucine per prepararci alla battaglia finale..."],
+        ["rag_kara", "«Il Ragnarok è GIÀ accaduto. Mille inverni fa. Gli dei sono caduti, Asgard è stata ridotta in cenere e il sole primordiale è morto.»"],
+        ["rag_kara", "«Midgard non è il mondo dei viventi: è un limbo congelato nel silenzio di Fimbulwinter. Noi siamo solo echi, anime che combattono all'infinito per non dissolversi nell'oblio cosmico.»"],
+        ["rag_ragnar", "(Sbarra gli occhi, sconvolto e furente) Per gli dei caduti! Dunque io... i miei compagni... siamo solo ombre in un sonno senza fine?! Dobbiamo arrenderci a questo gelo?! No!"],
+        ["rag_brokk", "Un momento! Se tutto è polvere e ombra, da dove viene questa Sfera di Pietra Fusa che continua a bruciare ai piedi del Campione?!"],
+        ["rag_sigrid", "(Batte il tamburo sciamanico con ritmo potente) Brokk ha ragione! La Sfera è il Cuore del Sole originale, strappato dal crepuscolo e affidato a un mortale con il sangue ancora caldo e indomito!"],
+        ["rag_kara", "«Sigrid dice il vero. Questo limbo non è eterno: se vincerai la prova del Cerchio di Cenere contro gli Spettri di Surtr e salirai su Yggdrasil, potrai calciare la Sfera nel Cuore del Mondo e decidere il destino di tutti i Nove Regni!»"],
+        ["voce", "Una scarica tellurica pervade il tuo corpo: la Runa THURISAZ (ᚦ) - Runa del Tuono e della Furia Tellurica - si illumina sul tuo petto!"],
+      ], () => {
+        addRune("thurisaz");
+        setStep(N, 3);
+        note("COLPO DI SCENA: Il Ragnarok è già avvenuto! Il mondo è un limbo congelato. Risvegliata la Runa Thurisaz.");
+        refreshZone();
+      });
+    }
+
+    function surtrTalk3() {
+      if (S() < 3) {
+        return say([
+          ["rag_surtr_ombra", "Non avete ancora compreso la verità di questo luogo. Andate al Bifrost prima di pretendere il giudizio del fuoco."],
+        ], done);
+      }
+      ask("rag_surtr_ombra", "Perché volete riaccendere ciò che gli dei stessi hanno lasciato morire? Nel silenzio di Fimbulwinter regna la pace eterna. Se riporterete il sole, riporterete il sangue, le lacrime e la guerra!", [
+        { label: "⚔️ La vita vale la lotta! Calciamo per il destino!", cls: "hot", fn: startMatch3 },
+        { label: "◂ Devo riflettere con i compagni", fn: () => {} }
+      ]);
+    }
+
+    function startMatch3() {
+      sfxHorn();
+      sfxDrum();
+      X.playMatch({
+        id: "rag_match_3",
+        alt: "hd,az", azPitch: "cenere",
+        oppNames: ["Ombra di Surtr", "Falena di Cenere", "Spettro di Magma", "Colosso di Zolfo", "Guerriero del Crepuscolo"],
+        squad: ["Sigrid la Scalda", "Ragnar Zanna-di-Ferro", "Brokk il Fabbro"],
+        chap: "Ragnarok Ball · La Battaglia di Vigrid",
+        us: "Gli Eletti della Brace",
+        mate: "Ragnar Zanna-di-Ferro",
+        min: 50,
+        intro: "BATTAGLIA DEGLI SPETTRI DI VIGRID! Sul campo di cenere ardente, la Furia Berserker spacca la roccia creando crepe telluriche invalicabili!",
+        team: (t, st) => ({
+          name: "Gli Spettri del Crepuscolo",
+          col: "#450a0a",
+          style: "Fiamme Eteree, Pressing Spettrale & Barriera di Cenere",
+          atk: t(st.atk * 1.25),
+          def: t(st.def * 1.25),
+          vel: t(st.vel * 1.2),
+          specials: ["Fiammata di Surtr", "Voragine di Zolfo"]
+        }),
+        done: (r) => {
+          if (r.win) {
+            setStep(N, 4);
+            note("VITTORIA CONTRO GLI SPETTRI DI SURTR! Vigrid è liberata dalla morsa del crepuscolo eterno.");
+            const rewMsg = reward("rag_ch3_complete", {
+              coins: 400,
+              cos: "rag_mantello_corvo"
+            });
+            finishChapter(N, "vigrid_liberata");
+            say([
+              ["voce", "GOOOOOOOOOOOL LEGGENDARIOOOOO! Il tiro «{tiro}» scaglia la Sfera di Pietra Fusa oltre la barriera di spettri, squarciando il Cerchio di Cenere con una crepa tellurica monumentale!"],
+              ["rag_surtr_ombra", "(Lo spettro si dissolve lentamente in una pioggia di faville) «La vostra... fiamma... non è quella della distruzione. È il calore dei vivi che rifiuta di arrendersi. Salite su Yggdrasil, campioni...»"],
+              ["rag_ragnar", "(Urla di trionfo sollevando l'ascia al cielo) Abbiamo spezzato le catene del silenzio! Nessuno spettro del crepuscolo può fermare la nostra squadra!"],
+              ["rag_kara", "La via verso la sommità dell'Albero del Mondo è finalmente aperta. Lassù, al Cratere del Sole, prenderai la decisione che cambierà per sempre il cosmo."],
+              ["rag_sigrid", "La Scalda canterà questo giorno per l'eternità! Guarda a nord: le radici cosmiche di Yggdrasil si illuminano d'aurore dorate."],
+              ["voce", `CAPITOLO 3 COMPLETATO! ${rewMsg.join(" · ")}`],
+            ], () => {
+              go("rag_vigrid", 12, 19);
+            });
+          } else {
+            say([
+              ["rag_surtr_ombra", "La vostra fiamma si è affievolita sul permafrost di Vigrid. Il silenzio vi avvolge... ma potete riprovare se il vostro cuore arde ancora."],
+            ], done);
+          }
+        }
+      });
+    }
+
+    const obj = {
+      "rag_vigrid:d": () => go("rag_fiordo", 22, 11),
+      "rag_vigrid:<": () => go("rag_bifrost", 9, 13),
+      "rag_vigrid:^": () => {
+        if (S() < 3) say([["voce", "Il Cerchio di Cenere è sigillato dalle fiamme spettrali. Consulta prima il Monolite del Bifrost a ovest (<)."]], done);
+        else go("rag_cerchio_cenere", 12, 19);
+      },
+      "rag_vigrid:T": () => say([["voce", "Il possente Totem delle Corna d'Alce: intagliato nel legno prima del Ragnarok, sfida la bufera di cenere."]], done),
+      "rag_vigrid:F": () => say([["voce", "Bracieri votivi delle Ceneri: le fiamme ardono di un rosso intenso in memoria degli eroi caduti."]], done),
+      "rag_vigrid:M": () => say([["voce", "Monoliti di basalto intrisi dell'antico potere degli dei boreali."]], done),
+      "rag_vigrid:W": () => say([["voce", "L'Altare delle Ceneri: qui la Sfera risuona con il battito sotterraneo di Midgard."]], done),
+      "rag_bifrost:d": () => go("rag_vigrid", 4, 11),
+      "rag_bifrost:M": esaminaMonoliteBifrost,
+      "rag_bifrost:R": () => say([["voce", "Colonne di cristallo del Bifrost: riflettono aurore cangianti e memorie perdute."]], done),
+      "rag_bifrost:F": () => say([["voce", "Fuoco celeste che galleggia nel vuoto del baratro cosmico."]], done),
+      "rag_cerchio_cenere:d": () => go("rag_vigrid", 12, 2),
+      "rag_cerchio_cenere:^": () => {
+        const m = mem();
+        if (!m.done[3]) say([["voce", "L'accesso a Yggdrasil è sbarrato. Sconfiggi prima gli Spettri del Crepuscolo nel Cerchio di Cenere."]], done);
+        else go("rag_yggdrasil", 11, 17);
+      },
+      "rag_cerchio_cenere:G": () => say([["voce", "Porte cerimoniali formate da teschi d'alce e scudi del crepuscolo."]], done),
+      "rag_cerchio_cenere:F": () => say([["voce", "Colonne ardenti del Cerchio di Battaglia."]], done),
+      "rag_cerchio_cenere:T": () => say([["voce", "Totem che tremano al passaggio della Sfera di Pietra Fusa."]], done)
+    };
+
+    return {
+      n: 3,
+      title: "La Piana di Vigrid",
+      sub: "I Frammenti del Bifrost Frantumato, la rivelazione del Limbo e la Battaglia di Vigrid",
+      zones,
+      talk: {
+        rag_kara: karaTalk3,
+        rag_sigrid: sigridTalk3,
+        rag_ragnar: ragnarTalk3,
+        rag_brokk: brokkTalk3,
+        rag_surtr_ombra: surtrTalk3
+      },
+      obj
+    };
+  });
+
+  // ==========================================================================
+  // CAPITOLO 4: L'ALBERO DEL MONDO E IL SOLE RINATO (LA SCELTA DIVINA DEI NOVE REGNI)
+  // ==========================================================================
+  addChapter(function (X) {
+    const { T, F, sfxHorn, sfxDrum, sfxLava, sfxValkyrie, note, setStep, addRune, reward, go } = X;
+    const N = 4, S = () => X.stepOf(N);
+
+    // Cast del Capitolo 4
+    X.cast("rag_custode_vuoto", {
+      name: "Il Guardiano del Silenzio", tag: "guardiano", hair: "#e0f2fe", style: "flowing", skin: "#0f172a", eye: "#38bdf8",
+      beard: false, bg: ["#020617", "#0284c7"], shirt: "#0369a1"
+    }, "L'Avatar del Fimbulwinter e custode dell'Eterno Silenzio. Veglia sul Cratere del Sole in cima a Yggdrasil per preservare la quiete incorrotta del mondo congelato.");
+
+    // Cosmetico Capitolo 4: Corona Solare delle Rune
+    X.cos("rag_corona_solare", {
+      id: "rag_corona_solare",
+      label: "Corona Solare delle Rune",
+      sub: "Corona regale intrecciata con rami dorati di Yggdrasil, diamanti boreali e il fuoco immortale del Sole Rinato.",
+      cat: "cappello",
+      val: 0
+    });
+
+    // Definizione Zone Capitolo 4
+    const zones = {
+      rag_yggdrasil: {
+        name: "Le Radici Celesti di Yggdrasil", short: "Radici di Yggdrasil",
+        sub: "Tronco titanico dell'Albero del Mondo avvolto da aurore boreali e stelle primordiali",
+        w: 22, h: 20, start: [11, 17], bg: "rag_yggdrasil", theme: "torino",
+        item: ["Linfa Dorata", "Gocce"],
+        build(Ls) {
+          const { lay, put } = Ls;
+          // Spazio cosmico e radici lignee dorate
+          lay(0, 0, 21, 19, ":");
+          lay(7, 2, 14, 18, "p");
+          lay(9, 4, 12, 16, "y");
+          // Pareti cosmiche
+          for (let x = 0; x < 22; x++) { put(x, 0, "A"); put(x, 19, "A"); }
+          for (let y = 1; y < 19; y++) { put(0, y, "A"); put(21, y, "A"); }
+          // Varco sud verso il Cerchio di Cenere
+          put(11, 19, "d");
+          // Varco nord verso il Cratere del Sole
+          put(10, 0, "^"); put(11, 0, "^");
+          // Monoliti celesti e altari
+          put(8, 4, "W"); put(13, 4, "W");
+          put(6, 9, "R"); put(15, 9, "R");
+          put(8, 14, "F"); put(13, 14, "F");
+          put(11, 8, "M");
+        },
+        npcs(s) {
+          const list = [];
+          list.push({ id: "rag_sigrid", at: [9, 13] });
+          list.push({ id: "rag_ragnar", at: [13, 13] });
+          list.push({ id: "rag_brokk", at: [8, 15] });
+          list.push({ id: "rag_kara", at: [11, 11] });
+          return list;
+        }
+      },
+      rag_cratere_sole: {
+        name: "Il Cratere del Sole di Pietra Fusa", short: "Cratere del Sole",
+        sub: "Il culmine dell'universo: il santuario dove riposa il destino di Midgard",
+        w: 24, h: 22, start: [12, 19], bg: "rag_cratere_sole", theme: "torino",
+        item: ["Brace del Sole", "Braci"],
+        build(Ls) {
+          const { lay, put } = Ls;
+          // Cenere e magma dorato cosmico
+          lay(0, 0, 23, 21, "c");
+          lay(4, 4, 19, 17, "m");
+          // Cratere circolare di magma solare
+          lay(8, 7, 15, 14, "l");
+          lay(10, 9, 13, 12, "y");
+          // Limiti cosmici
+          for (let x = 0; x < 24; x++) { put(x, 0, "A"); put(x, 21, "A"); }
+          for (let y = 1; y < 21; y++) { put(0, y, "A"); put(23, y, "A"); }
+          // Porte solari
+          put(11, 3, "G"); put(12, 3, "G");
+          put(11, 18, "G"); put(12, 18, "G");
+          // Altare del Sole al centro
+          put(11, 10, "W"); put(12, 10, "W");
+          // Bracieri del firmamento
+          put(5, 5, "F"); put(18, 5, "F");
+          put(5, 16, "F"); put(18, 16, "F");
+          put(7, 10, "T"); put(16, 10, "T");
+          // Varco sud verso le Radici
+          put(12, 21, "d");
+        },
+        npcs(s) {
+          const list = [];
+          if (s < 4) {
+            list.push({ id: "rag_custode_vuoto", at: [12, 9] });
+            list.push({ id: "rag_kara", at: [10, 16] });
+            list.push({ id: "rag_sigrid", at: [8, 17] });
+            list.push({ id: "rag_ragnar", at: [14, 16] });
+            list.push({ id: "rag_brokk", at: [16, 17] });
+          } else {
+            list.push({ id: "rag_kara", at: [11, 8] });
+            list.push({ id: "rag_sigrid", at: [9, 10] });
+            list.push({ id: "rag_ragnar", at: [14, 10] });
+            list.push({ id: "rag_brokk", at: [12, 12] });
+          }
+          return list;
+        }
+      }
+    };
+
+    // Dialoghi Capitolo 4
+    function yggdrasilTalk4() {
+      const s = S();
+      if (s === 0) {
+        sfxValkyrie();
+        sfxDrum();
+        return say([
+          ["rag_sigrid", "(Fa risuonare il tamburo sciamanico all'unisono con le radici di Yggdrasil) Guarda, {n}! Le rune Kenaz, Uruz e Thurisaz stanno convergendo in una sola luce dorata!"],
+          ["rag_kara", "È la Runa SOWILO (ᛋ) - il Sole Rinato e la Vittoria Finale. L'Albero del Mondo riconosce il tuo cuore."],
+          ["rag_ragnar", "Siamo in cima al cosmo, amici miei! Oltre quel varco a nord c'è il Cratere del Sole. Nessun timore: scendiamo in campo uniti!"],
+          ["rag_brokk", "I tacchetti vibrano d'oro e fuoco primordiale. Sei pronto per l'ultimo match, Campione?"],
+        ], () => {
+          addRune("sowilo");
+          setStep(N, 1);
+          refreshZone();
+        });
+      }
+      say([
+        ["rag_kara", "Il Cratere del Sole è dinnanzi a noi a nord (^). Il Guardiano del Silenzio attende il calcio d'inizio supremo."],
+      ], done);
+    }
+
+    function custodeTalk4() {
+      const s = S();
+      if (s < 3) {
+        sfxValkyrie();
+        return ask("rag_custode_vuoto", "Campione dei mortali, sei giunto all'Ombelico del Cosmo. Se calcerai la Sfera nel cratere riporterai la vita con tutte le sue sofferenze; se la cederai a me, i Nove Regni godranno di un sonno perfetto. Sei pronto a dimostrare la tua volontà sul campo della leggenda?", [
+          { label: "☀️ Sfida i Custodi dell'Eterno Silenzio!", cls: "hot", fn: startMatch4 },
+          { label: "◂ Consulta i compagni di squadra", fn: () => {} }
+        ]);
+      }
+      if (s === 3) {
+        verdettoFinaleDivino();
+      }
+    }
+
+    function startMatch4() {
+      sfxHorn();
+      sfxValkyrie();
+      sfxLava();
+      X.playMatch({
+        id: "rag_match_4",
+        alt: "hd,az", azPitch: "neve",
+        oppNames: ["Guardiano del Silenzio", "Sfinge di Brina", "Ombra della Nebbia", "Golem di Permafrost", "Spettro dell'Aurora"],
+        squad: ["Kara la Valchiria", "Ragnar Zanna-di-Ferro", "Sigrid la Scalda", "Brokk il Fabbro"],
+        chap: "Ragnarok Ball · La Partita del Crepuscolo Cosmico",
+        us: "I Risvegliatori dell'Alba",
+        mate: "Kara la Valchiria",
+        min: 60,
+        intro: "LA PARTITA SUPREMA DEL CREPUSCOLO COSMICO! Kara spiega le ali d'argento, Ragnar carica con le piastre d'orso, Brokk e Sigrid supportano il Campione {n} con la Sfera di Pietra Fusa contro i Custodi del Silenzio!",
+        team: (t, st) => ({
+          name: "I Custodi dell'Eterno Silenzio",
+          col: "#0284c7",
+          style: "Gelo Astrale, Muro dell'Aurora & Barriera di Permafrost",
+          atk: t(st.atk * 1.35),
+          def: t(st.def * 1.35),
+          vel: t(st.vel * 1.3),
+          specials: ["Sguardo di Brina", "Glaciazione Cosmica"]
+        }),
+        done: (r) => {
+          if (r.win) {
+            setStep(N, 3);
+            note("VITTORIA NELLA PARTITA DEL CREPUSCOLO COSMICO! I Custodi del Silenzio si inchinano. È giunto il momento del Verdetto Divino.");
+            say([
+              ["voce", "GOOOOOOOOOOOOOOOOOOL DELL'UNIVERSOOOOOOOO! Con il tiro leggendario «{tiro}» la Sfera di Pietra Fusa frantuma la barriera di permafrost ed entra al centro del Cratere del Sole in un'esplosione d'oro e fuoco celeste!"],
+              ["rag_custode_vuoto", "(Cade in ginocchio, illuminato dal calore solare) «Avete vinto... il verdetto cosmico non appartiene più al Fimbulwinter. Spetta a te, Campione {n}, decidere la sorte dei Nove Regni...»"],
+            ], verdettoFinaleDivino);
+          } else {
+            say([
+              ["rag_custode_vuoto", "Il ghiaccio dell'Aurora ha respinto la vostra carica. Riscaldate nuovamente i vostri spiriti e riprovate, Campione."],
+            ], done);
+          }
+        }
+      });
+    }
+
+    // Colpo di scena 2: La Scelta Morale Divina dei Nove Regni
+    function verdettoFinaleDivino() {
+      sfxValkyrie();
+      sfxDrum();
+      api.scene(
+        "rag_cratere_sole", "voce",
+        `<b>LA SCELTA MORALE DIVINA DEI NOVE REGNI</b><br><br>` +
+        `Sei in piedi sul bordo del Cratere del Sole. Tra i tuoi piedi riposa la Sfera di Pietra Fusa, pulsante di tutta l'energia solare primordiale.<br><br>` +
+        `<b>Kara la Valchiria:</b> <i>«{n}, l'intero universo trattiene il respiro. Quale destino sceglierai per Midgard e per tutti noi?»</i><br><br>` +
+        `<b>Sigrid:</b> <i>«Qualunque sia il tuo verdetto, sarà inciso nelle rune eterne.»</i><br>` +
+        `<b>Ragnar:</b> <i>«Siamo con te fino alla fine, fratello di ferro!»</i><br>` +
+        `<b>Brokk:</b> <i>«Parla col tuo cuore, Campione!»</i>`,
+        [
+          {
+            label: "🔥 1. Riattivare il Ciclo della Vita (Il Risveglio di Midgard)",
+            cls: "hot",
+            fn: () => epilogoScelto("vita_rinata")
+          },
+          {
+            label: "❄️ 2. Lasciarlo Dormire in Pace (La Quiete Eterna di Fimbulwinter)",
+            fn: () => epilogoScelto("quiete_eterna")
+          },
+          {
+            label: "⚖️ 3. L'Eterno Guardiano dell'Equilibrio (La Sentinella delle Braci)",
+            fn: () => epilogoScelto("guardiano_equilibrio")
+          }
+        ],
+        "Il Giudizio degli Dei"
+      );
+    }
+
+    function epilogoScelto(tipo) {
+      const m = mem();
+      m.finale = tipo; save();
+
+      if (tipo === "vita_rinata") {
+        sfxHorn();
+        sfxLava();
+        note("FINALE DIVINO: Riattivato il Ciclo della Vita. Il sole è rinato su Midgard!");
+        const rewMsg = reward("rag_ch4_complete", {
+          coins: 1000,
+          cos: "rag_corona_solare"
+        });
+        finishChapter(N, "vita_rinata");
+        say([
+          ["hero", "(Carichi la gamba e calci con tutta la Furia la Sfera nel centro del cuore vulcanico di Yggdrasil!) «Midgard vivrà di nuovo! Nessun freddo spegnerà il coraggio dei mortali!»"],
+          ["voce", "BOOOOOOOOOOM! Una colonna solare d'oro zecchino erutta dal cratere e sale nel cielo boreale, disperdendo la cenere e il Fimbulwinter in un tripudio di luce calda!"],
+          ["voce", "Sotto di voi i ghiacci millenari del Fiordo si sciolgono in fiumi limpidi. L'erba verde smeraldo germoglia sulle scogliere, i fiori di tundra sbocciano e il canto degli uccelli risveglia il mondo."],
+          ["rag_ragnar", "(Alza al cielo il corno colmo d'idromele dorato, con lacrime di gioia) Il sole! Guardate il sole! I nostri clan torneranno a navigare, a seminare e a vivere!"],
+          ["rag_brokk", "(Batte il martello di meteorite che ora risplende d'oro puro) Forgerò aratri, navi e armature per la nuova era dei mortali!"],
+          ["rag_sigrid", "(Intona l'inno più bello che Midgard abbia mai ascoltato) «Sorge il sole dalle acque chiare, l'aquila plana sui torrenti del monte... Il Campione ha riportato la vita!»"],
+          ["rag_kara", "(Le sue ali d'argento si tingono di piume dorate) Hai scelto il fardello più grande e più nobile, {n}: la vita con le sue passioni e le sue sfide. Sei il «Risvegliatore di Soli»!"],
+          ["voce", `SAGA RAGNAROK BALL COMPLETATA! FINALE 1: IL RISVEGLIO DI MIDGARD ✦ ${rewMsg.join(" · ")}`],
+        ], () => {
+          showEpilogoFinalScene("vita_rinata");
+        });
+      } else if (tipo === "quiete_eterna") {
+        sfxValkyrie();
+        note("FINALE DIVINO: Lasciato dormire in pace. Midgard riposa nella quiete eterna.");
+        const rewMsg = reward("rag_ch4_complete", {
+          coins: 1000,
+          cos: "rag_corona_solare"
+        });
+        finishChapter(N, "quiete_eterna");
+        say([
+          ["hero", "(Trattieni la Sfera e la adagi delicatamente sul cuscino di neve cosmica) «Il mondo ha sofferto abbastanza guerre, tradimenti e fiamme. Riposa in pace, Midgard. Nessuno soffrirà più.»"],
+          ["voce", "La fiamma violenta della Sfera si placa in una calda luce d'ambra dolce che illumina il permafrost senza bruciarlo. Un senso infinito di serenità e grazia scende su tutti i Nove Regni."],
+          ["voce", "Nessuna guerra turbierà più questa pace immacolata. I ghiacci si trasformano in cristalli trasparenti sotto una maestosa aurora boreale eterna."],
+          ["rag_kara", "(Depone la spada d'argento e chiude gli occhi con un sospiro di gratitudine) «Hai donato la pace che perfino gli dei avevano negato ai mortali. Sei il «Signore del Silenzio».»"],
+          ["rag_sigrid", "I poeti canteranno il tuo nome nel riposo eterno dei campioni, dove non esistono più lacrime né inverni solitari."],
+          ["rag_ragnar", "Riposo... una tregua degna dei più grandi eroi. Onore a te, Campione."],
+          ["rag_brokk", "Un santuario incorrotto. La nostra opera rimarrà intatta per sempre."],
+          ["voce", `SAGA RAGNAROK BALL COMPLETATA! FINALE 2: LA QUIETE ETERNA ✦ ${rewMsg.join(" · ")}`],
+        ], () => {
+          showEpilogoFinalScene("quiete_eterna");
+        });
+      } else {
+        sfxHorn();
+        sfxDrum();
+        note("FINALE DIVINO: L'Eterno Guardiano dell'Equilibrio. Custode immortale tra brina e lava.");
+        const rewMsg = reward("rag_ch4_complete", {
+          coins: 1000,
+          cos: "rag_corona_solare"
+        });
+        finishChapter(N, "guardiano_equilibrio");
+        say([
+          ["hero", "(Conficchi la Sfera sul monolite centrale tra la lava e il ghiaccio) «Non spegnerò il fuoco né distruggerò il gelo. Rimarrò qui come sentinella, affinché gli spiriti possano misurarsi in eterno nella lealtà del gioco e dell'onore!»"],
+          ["voce", "Un cerchio perfetto di fuoco e permafrost si stabilizza attorno a Yggdrasil: un equilibrio cosmico dove la fiamma scalda senza distruggere e il ghiaccio protegge senza pietrificare."],
+          ["rag_ragnar", "(Posa la mano sulla tua spalla con fierezza titanica) Io rimarrò al tuo fianco come tuo capitano! La squadra dell'Equilibrio non conoscerà mai la sconfitta!"],
+          ["rag_brokk", "E io continuerò a temprare tacchetti e sfere fusi per tutti i campioni che saliranno quassù a sfidarci!"],
+          ["rag_sigrid", "La ballata dell'Equilibrio non avrà mai fine: ogni partita celebrerà il coraggio dei guerrieri di Midgard!"],
+          ["rag_kara", "«Sei il «Guardiano delle Braci», custode immortale dei confini del mondo. Gli dei si inchinano alla tua fermezza!»"],
+          ["voce", `SAGA RAGNAROK BALL COMPLETATA! FINALE 3: IL GUARDIANO DELL'EQUILIBRIO ✦ ${rewMsg.join(" · ")}`],
+        ], () => {
+          showEpilogoFinalScene("guardiano_equilibrio");
+        });
+      }
+    }
+
+    function showEpilogoFinalScene(tipo) {
+      const h = hero();
+      const tit = tipo === "vita_rinata"
+        ? "🔥 IL RISVEGLIO DI MIDGARD (IL SOLE È RINATO)"
+        : tipo === "quiete_eterna"
+        ? "❄️ LA QUIETE ETERNA (IL SANTUARIO DELLA PACE)"
+        : "⚖️ IL GUARDIANO DELLE BRACI (L'ETERNO EQUILIBRIO)";
+
+      const desc = tipo === "vita_rinata"
+        ? "Il ghiaccio del Fimbulwinter si è sciolto, i mari sono tornati navigabili e la primavera germoglia sulle rive del Fiordo. Il tuo Campione viene acclamato come il Risvegliatore di Soli!"
+        : tipo === "quiete_eterna"
+        ? "Il cosmo ha trovato la pace serena e inviolabile. Le anime degli eroi riposano nella gloria imperitura sotto l'infinita aurora boreale, senza più dolore né guerra."
+        : "Sulla vetta di Yggdrasil hai istituito il santuario dell'onore immortale, dove il fuoco e il ghiaccio convivono in perfetto equilibrio sotto la tua eterna custodia.";
+
+      api.scene(
+        "rag_cratere_sole", "voce",
+        `<b>TRIONFO DELLA SAGA · RAGNAROK BALL</b><br><br>` +
+        `Campione: <b>${h ? esc(h.name) : "Campione"}</b> · N.${h ? h.num : 9}<br>` +
+        `Tiro Speciale: <b>${h ? esc(h.shotName || "COLPO DEL VULCANO") : "COLPO DEL VULCANO"}</b><br><br>` +
+        `<b>VERDETTO DEI NOVE REGNI:</b><br><span style="color:#fef08a;font-size:15px">${tit}</span><br><br>` +
+        `<i>${desc}</i><br><br>` +
+        `👑 <b>Corona Solare delle Rune</b> sbloccata nel Guardaroba!<br>` +
+        `ᛋ Tutte le 4 Rune Divine (Kenaz, Uruz, Thurisaz, Sowilo) sono state incise nella leggenda.`,
+        [
+          { label: "📖 Consulta il Diario Runico", cls: "hot", fn: journalView },
+          { label: "◂ Torna alle Modalità", fn: () => leaveToModes() }
+        ],
+        "Vittoria Mitica"
+      );
+    }
+
+    const obj = {
+      "rag_yggdrasil:d": () => go("rag_cerchio_cenere", 12, 2),
+      "rag_yggdrasil:^": () => {
+        if (S() < 1) say([["voce", "Raccogli prima la risonanza della Runa Sowilo ascoltando i compagni di squadra."]], done);
+        else go("rag_cratere_sole", 12, 19);
+      },
+      "rag_yggdrasil:W": () => say([["voce", "L'Altare Celestiale di Yggdrasil: la corteccia pulsa di linfa dorata e calore solare."]], done),
+      "rag_yggdrasil:M": () => say([["voce", "Monolite dell'antico Asgard scolpito prima del grande silenzio."]], done),
+      "rag_yggdrasil:R": () => say([["voce", "Rune cosmiche che brillano con la luce delle aurore boreali."]], done),
+      "rag_yggdrasil:F": () => say([["voce", "Bracieri dell'alba cosmica: faville di fuoco primordiale."]], done),
+      "rag_cratere_sole:d": () => go("rag_yggdrasil", 11, 2),
+      "rag_cratere_sole:W": () => {
+        if (S() >= 3) verdettoFinaleDivino();
+        else say([["voce", "Il Cratere del Sole: la Sfera di Pietra Fusa attende la conclusione del match per il verdetto divino."]], done);
+      },
+      "rag_cratere_sole:G": () => say([["voce", "Le porte del firmamento forgiate con l'oro primordiale di Yggdrasil."]], done),
+      "rag_cratere_sole:F": () => say([["voce", "Fiamme solari dell'aurora cosmica."]], done),
+      "rag_cratere_sole:T": () => say([["voce", "Totem celesti che vegliano sull'equilibrio del mondo."]], done)
+    };
+
+    return {
+      n: 4,
+      title: "Il Sole Rinato e il Verdetto dei Nove Regni",
+      sub: "La salita su Yggdrasil, la Partita del Crepuscolo Cosmico e la Scelta Morale Divina",
+      zones,
+      talk: {
+        rag_sigrid: yggdrasilTalk4,
+        rag_ragnar: yggdrasilTalk4,
+        rag_brokk: yggdrasilTalk4,
+        rag_kara: yggdrasilTalk4,
+        rag_custode_vuoto: custodeTalk4
       },
       obj
     };
@@ -1641,13 +2381,23 @@
       ? m.log.slice(-6).map((l) => `· ${esc(l)}`).join("<br>")
       : "<i>Nessuna memoria trascritta.</i>";
 
+    const finaleNote = m.finale
+      ? `<br><br><b>DESTINO DEI NOVE REGNI:</b><br><span style="color:#fef08a">✦ ${
+          m.finale === "vita_rinata"
+            ? "🔥 Il Risveglio di Midgard (Ciclo della Vita Riattivato)"
+            : m.finale === "quiete_eterna"
+            ? "❄️ La Quiete Eterna di Fimbulwinter (Pace Inviolabile)"
+            : "⚖️ L'Eterno Guardiano dell'Equilibrio (La Sentinella delle Braci)"
+        }</span>`
+      : "";
+
     api.scene(
       "rag_sala", "voce",
       `<b>DIARIO DELLE RUNE DI FIMBULWINTER</b><br><br>` +
       `Guerriero: <b>${h ? esc(h.name) : "Campione"}</b> · N.${h ? h.num : 9}<br>` +
       `Tiro Speciale: <b>${h ? esc(h.shotName || "COLPO DEL VULCANO") : "COLPO DEL VULCANO"}</b><br><br>` +
       `<div style="max-height:180px;overflow-y:auto;text-align:left;padding:8px;background:rgba(0,0,0,0.4);border-radius:8px">` +
-      `<b>PROGRESSO SAGA:</b><br>${chInfo}<br><br>` +
+      `<b>PROGRESSO SAGA:</b><br>${chInfo}${finaleNote}<br><br>` +
       `<b>RUNE DIVINE OTTENUTE:</b><br>${runeList}<br><br>` +
       `<b>ULTIME MEMORIE DELLA SCALDA:</b><br>${logHistory}` +
       `</div>`,
@@ -1711,7 +2461,7 @@
   function setupDetailedBgFallback() {
     const prev = window.renderDetailedBg;
     window.renderDetailedBg = function (kind, g, W, H, f) {
-      if (kind === "rag_fiordo" || kind === "rag_sala" || kind === "rag_arena") {
+      if (kind && kind.startsWith("rag_")) {
         if (typeof window.drawRagnarokScenario === "function") {
           return window.drawRagnarokScenario(kind, g, W, H, f);
         }
@@ -1743,6 +2493,10 @@
     version: 1,
     addChapter,
     open: openMain,
+    sfxHorn: sfxRagnarokHorn,
+    sfxDrum: sfxRagnarokDrum,
+    sfxLava: sfxRagnarokLavaCrack,
+    sfxValkyrie: sfxRagnarokValkyrie,
     menuEntry(back) {
       const h = hero(), c = activeChapter(), m = mem();
       return {
@@ -1756,7 +2510,7 @@
     },
     info() {
       const m = mem();
-      return { ch: m.ch, step: Object.assign({}, m.step), done: Object.assign({}, m.done), runes: m.runes.length };
+      return { ch: m.ch, step: Object.assign({}, m.step), done: Object.assign({}, m.done), runes: m.runes.length, finale: m.finale };
     }
   };
 

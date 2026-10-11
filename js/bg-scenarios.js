@@ -3071,6 +3071,419 @@
     }
   }
 
+  // --- 17. RAGNAROK BALL · LA PIANA DI VIGRID SOTTO IL CIELO DI CENERE (CAPITOLO 3) ---
+  function drawDetailedRagnarokVigrid(g, W, H, f) {
+    // Cielo plumbeo e cremisi solcato da nubi di cenere vulcanica
+    const sky = g.createLinearGradient(0, 0, 0, H * 0.65);
+    sky.addColorStop(0, "#09090b");
+    sky.addColorStop(0.35, "#271212");
+    sky.addColorStop(0.7, "#581c1c");
+    sky.addColorStop(1, "#9a3412");
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, H * 0.65);
+
+    // Aurore boreali di cenere e fuoco che serpeggiano nel cielo
+    for (let au = 0; au < 3; au++) {
+      const wave = Math.sin(f * 0.04 + au) * 16;
+      g.fillStyle = au === 0 ? "rgba(225, 29, 72, 0.2)" : au === 1 ? "rgba(249, 115, 22, 0.25)" : "rgba(254, 240, 138, 0.15)";
+      g.beginPath();
+      g.moveTo(0, 20 + au * 14 + wave);
+      g.bezierCurveTo(W * 0.35, 10 + au * 10 - wave, W * 0.7, 35 + au * 12 + wave, W, 18 + au * 14);
+      g.lineTo(W, 35 + au * 14);
+      g.bezierCurveTo(W * 0.7, 50 + au * 12 + wave, W * 0.35, 25 + au * 10 - wave, 0, 35 + au * 14 + wave);
+      g.closePath();
+      g.fill();
+    }
+
+    // Vulcani boreali lontani con colate di magma
+    const v1X = W * 0.28, v1Y = H * 0.65;
+    g.fillStyle = "#1c1917";
+    g.beginPath();
+    g.moveTo(v1X - 70, v1Y);
+    g.lineTo(v1X - 8, v1Y - 45);
+    g.lineTo(v1X + 12, v1Y - 45);
+    g.lineTo(v1X + 80, v1Y);
+    g.closePath();
+    g.fill();
+    // Colata di lava dal cratere
+    px(g, v1X - 4, v1Y - 45, 10, 5, "#fef08a");
+    px(g, v1X - 2, v1Y - 40, 6, 25, "#ea580c");
+
+    const v2X = W * 0.78;
+    g.fillStyle = "#18181b";
+    g.beginPath();
+    g.moveTo(v2X - 60, v1Y);
+    g.lineTo(v2X, v1Y - 38);
+    g.lineTo(v2X + 65, v1Y);
+    g.closePath();
+    g.fill();
+    px(g, v2X - 2, v1Y - 38, 5, 20, "#f97316");
+
+    // Fumo sulfureo che sale dai vulcani
+    for (let sm = 0; sm < 6; sm++) {
+      const sx = v1X + Math.sin(f * 0.08 + sm) * (6 + sm * 3);
+      const sy = v1Y - 48 - sm * 7 - (f * 0.3 % 7);
+      g.fillStyle = `rgba(68, 64, 60, ${0.45 - sm * 0.06})`;
+      g.beginPath(); g.arc(sx, sy, 4 + sm * 1.5, 0, Math.PI * 2); g.fill();
+    }
+
+    // Terreno della Piana di Vigrid: permafrost nero, basalto e crepe
+    const grGrad = g.createLinearGradient(0, H * 0.65, 0, H);
+    grGrad.addColorStop(0, "#292524");
+    grGrad.addColorStop(0.4, "#1c1917");
+    grGrad.addColorStop(1, "#0c0a09");
+    g.fillStyle = grGrad;
+    g.fillRect(0, H * 0.65, W, H * 0.35);
+
+    // Crepa tellurica fiammeggiante sul terreno
+    const crY = H * 0.78;
+    g.fillStyle = "#ea580c";
+    g.beginPath();
+    g.moveTo(10, crY + 4);
+    g.lineTo(W * 0.3, crY - 3);
+    g.lineTo(W * 0.55, crY + 5);
+    g.lineTo(W * 0.85, crY - 2);
+    g.lineTo(W - 15, crY + 3);
+    g.lineTo(W * 0.85, crY + 1);
+    g.lineTo(W * 0.55, crY + 8);
+    g.lineTo(W * 0.3, crY - 1);
+    g.closePath();
+    g.fill();
+    // Centro rovente della crepa
+    px(g, W * 0.28, crY - 2, W * 0.44, 2, "#fef08a");
+
+    // Totem con corna d'alce e rune a sinistra
+    const totX = 35, totY = H - 75;
+    px(g, totX, totY, 14, 60, "#44403c");
+    px(g, totX + 2, totY + 4, 10, 52, "#292524");
+    // Corna d'alce ramificate
+    g.fillStyle = "#e2e8f0";
+    g.beginPath();
+    g.moveTo(totX + 7, totY);
+    g.lineTo(totX - 18, totY - 18);
+    g.lineTo(totX - 14, totY - 12);
+    g.lineTo(totX - 22, totY - 8);
+    g.lineTo(totX + 7, totY + 4);
+    g.lineTo(totX + 36, totY - 8);
+    g.lineTo(totX + 28, totY - 12);
+    g.lineTo(totX + 32, totY - 18);
+    g.closePath();
+    g.fill();
+    // Rune pulsanti dorate sul tronco del totem
+    const tPulse = 0.5 + 0.5 * Math.sin(f * 0.15);
+    g.fillStyle = `rgba(245, 158, 11, ${tPulse})`;
+    px(g, totX + 5, totY + 14, 4, 6, g.fillStyle);
+    px(g, totX + 5, totY + 28, 4, 6, g.fillStyle);
+    px(g, totX + 5, totY + 42, 4, 6, g.fillStyle);
+
+    // Braciere votivo delle Ceneri a destra
+    const brX = W - 45, brY = H - 55;
+    px(g, brX, brY + 10, 18, 30, "#292524");
+    px(g, brX - 3, brY + 6, 24, 5, "#44403c");
+    const bfl = Math.sin(f * 0.2) * 4;
+    g.fillStyle = "#ea580c";
+    g.beginPath();
+    g.moveTo(brX - 2, brY + 6);
+    g.quadraticCurveTo(brX + 9, brY - 14 + bfl, brX + 20, brY + 6);
+    g.closePath();
+    g.fill();
+    px(g, brX + 6, brY - 4 + bfl, 6, 6, "#fef08a");
+
+    // Cenere e fiocchi di neve mescolati che cadono insieme
+    for (let p = 0; p < 45; p++) {
+      const px_ = (p * 23 + Math.sin(f * 0.05 + p) * 20) % W;
+      const py_ = (p * 13 + f * 1.2) % H;
+      if (p % 3 === 0) {
+        px(g, px_, py_, 2, 2, "#fef08a"); // Scintilla di magma
+      } else if (p % 3 === 1) {
+        px(g, px_, py_, 2, 2, "#ea580c"); // Brace ardente
+      } else {
+        px(g, px_, py_, 2, 2, "#e2e8f0"); // Fiocco di neve boreale
+      }
+    }
+  }
+
+  // --- 18. RAGNAROK BALL · I FRAMMENTI DEL BIFROST FRANTUMATO (CAPITOLO 3) ---
+  function drawDetailedRagnarokBifrost(g, W, H, f) {
+    // Spazio etereo cosmico: buio profondo con nebulose celesti e vapori
+    const cosGrad = g.createLinearGradient(0, 0, 0, H);
+    cosGrad.addColorStop(0, "#030712");
+    cosGrad.addColorStop(0.4, "#0f172a");
+    cosGrad.addColorStop(0.8, "#1e1b4b");
+    cosGrad.addColorStop(1, "#3b0764");
+    g.fillStyle = cosGrad;
+    g.fillRect(0, 0, W, H);
+
+    // Aurore cosmiche del Bifrost che serpeggiano
+    const colors = ["rgba(56, 189, 248, 0.25)", "rgba(168, 85, 247, 0.25)", "rgba(52, 211, 153, 0.2)"];
+    colors.forEach((col, idx) => {
+      const off = Math.sin(f * 0.03 + idx * 2) * 20;
+      g.fillStyle = col;
+      g.beginPath();
+      g.moveTo(0, 30 + idx * 22 + off);
+      g.bezierCurveTo(W * 0.4, 15 + idx * 18 - off, W * 0.7, 50 + idx * 20 + off, W, 25 + idx * 22);
+      g.lineTo(W, 45 + idx * 22);
+      g.bezierCurveTo(W * 0.7, 70 + idx * 20 + off, W * 0.4, 35 + idx * 18 - off, 0, 50 + idx * 22 + off);
+      g.closePath();
+      g.fill();
+    });
+
+    // Monoliti di Cristallo Prismatico del Bifrost fluttuanti nel vuoto
+    const crystals = [
+      { x: 45, y: 75, w: 26, h: 55, rot: -0.15, col: "#38bdf8" },
+      { x: W - 55, y: 80, w: 28, h: 60, rot: 0.18, col: "#ec4899" },
+      { x: W * 0.24, y: 45, w: 18, h: 40, rot: 0.08, col: "#34d399" },
+      { x: W * 0.76, y: 50, w: 20, h: 44, rot: -0.12, col: "#fbbf24" }
+    ];
+    crystals.forEach((cr, i) => {
+      const fl = Math.sin(f * 0.06 + i) * 6;
+      g.save();
+      g.translate(cr.x, cr.y + fl);
+      g.rotate(cr.rot);
+      // Corpo del cristallo prisma
+      g.fillStyle = cr.col;
+      g.globalAlpha = 0.65;
+      g.beginPath();
+      g.moveTo(0, -cr.h / 2);
+      g.lineTo(cr.w / 2, 0);
+      g.lineTo(0, cr.h / 2);
+      g.lineTo(-cr.w / 2, 0);
+      g.closePath();
+      g.fill();
+      // Riflesso brillante interno
+      g.fillStyle = "#ffffff";
+      g.globalAlpha = 0.85;
+      g.beginPath();
+      g.moveTo(0, -cr.h / 2);
+      g.lineTo(cr.w / 4, 0);
+      g.lineTo(0, cr.h / 4);
+      g.closePath();
+      g.fill();
+      g.restore();
+    });
+    g.globalAlpha = 1.0;
+
+    // Basamento roccioso fluttuante al centro
+    const bGrad = g.createLinearGradient(0, H - 75, 0, H);
+    bGrad.addColorStop(0, "#1e293b");
+    bGrad.addColorStop(0.5, "#0f172a");
+    bGrad.addColorStop(1, "#020617");
+    g.fillStyle = bGrad;
+    g.fillRect(W * 0.15, H - 65, W * 0.7, 65);
+    px(g, W * 0.15 - 4, H - 68, W * 0.7 + 8, 4, "#334155");
+
+    // Monolite Centrale delle Rivelazioni (La Runa Thurisaz)
+    const mX = W / 2, mY = H - 55;
+    px(g, mX - 16, mY - 35, 32, 60, "#334155");
+    px(g, mX - 14, mY - 33, 28, 56, "#1e293b");
+    px(g, mX - 18, mY + 22, 36, 6, "#475569");
+    // Runa Thurisaz luminosa incisa
+    const rPulse = 0.6 + 0.4 * Math.sin(f * 0.12);
+    g.fillStyle = `rgba(56, 189, 248, ${rPulse})`;
+    px(g, mX - 4, mY - 24, 3, 30, g.fillStyle); // Asta verticale
+    px(g, mX - 1, mY - 18, 8, 3, g.fillStyle);
+    px(g, mX + 5, mY - 15, 3, 8, g.fillStyle);
+    px(g, mX - 1, mY - 7, 8, 3, g.fillStyle);
+
+    // Stelle e polvere di cristallo scintillante
+    for (let st = 0; st < 35; st++) {
+      const sx = (st * 41 + Math.sin(f * 0.05 + st) * 10) % W;
+      const sy = (st * 17) % (H - 50);
+      const bright = (st + f) % 6 === 0 ? "#ffffff" : (st % 2 ? "#38bdf8" : "#f472b6");
+      px(g, sx, sy, 2, 2, bright);
+    }
+  }
+
+  // --- 19. RAGNAROK BALL · IL CERCHIO DI CENERE E SPETTRI DI VIGRID (CAPITOLO 3) ---
+  function drawDetailedRagnarokCerchioCenere(g, W, H, f) {
+    // Cielo cupo di battaglia con bagliori rossastri all'orizzonte
+    const cSky = g.createLinearGradient(0, 0, 0, 85);
+    cSky.addColorStop(0, "#09090b");
+    cSky.addColorStop(0.5, "#1c1917");
+    cSky.addColorStop(1, "#450a0a");
+    g.fillStyle = cSky;
+    g.fillRect(0, 0, W, 85);
+
+    // Campo cerimoniale degli Spettri: basalto e lastroni di cenere dura
+    const cFloor = g.createLinearGradient(0, 80, 0, H);
+    cFloor.addColorStop(0, "#1c1917");
+    cFloor.addColorStop(0.5, "#292524");
+    cFloor.addColorStop(1, "#0c0a09");
+    g.fillStyle = cFloor;
+    g.fillRect(0, 80, W, H - 80);
+
+    // Grande Crepa Tellurica di metà campo: spacca in due il rettangolo di gioco
+    const midY = 125;
+    g.fillStyle = "#ea580c";
+    g.beginPath();
+    g.moveTo(20, midY);
+    g.lineTo(W * 0.35, midY - 6);
+    g.lineTo(W * 0.65, midY + 5);
+    g.lineTo(W - 20, midY - 2);
+    g.lineTo(W * 0.65, midY + 8);
+    g.lineTo(W * 0.35, midY - 2);
+    g.closePath();
+    g.fill();
+    px(g, 25, midY - 1, W - 50, 2, "#fef08a"); // Cuore fuso ribollente
+
+    // Porte cerimoniali in ossidiana e corna titaniche
+    [30, W - 50].forEach((gx) => {
+      px(g, gx, 90, 20, 48, "#292524");
+      px(g, gx - 2, 86, 24, 6, "#44403c");
+      // Corna sopra la traversa
+      px(g, gx - 4, 80, 6, 8, "#e2e8f0");
+      px(g, gx + 18, 80, 6, 8, "#e2e8f0");
+      // Rete di catene
+      px(g, gx + 4, 94, 12, 38, "rgba(234, 88, 12, 0.25)");
+    });
+
+    // Monoliti degli Einherjar a guardia del perimetro
+    [W * 0.25, W * 0.75].forEach((mx) => {
+      px(g, mx - 6, 68, 12, 28, "#44403c");
+      px(g, mx - 4, 70, 8, 24, "#292524");
+      px(g, mx - 2, 74, 4, 6, "#ea580c");
+    });
+
+    // Scintille telluriche che salgono dalla crepa
+    for (let sp = 0; sp < 25; sp++) {
+      const spx = (sp * 31 + Math.sin(f * 0.1 + sp) * 12) % (W - 40) + 20;
+      const spy = midY - ((sp * 7 + f * 1.4) % 45);
+      px(g, spx, spy, 2, 2, (sp % 2 === 0 ? "#fef08a" : "#ea580c"));
+    }
+  }
+
+  // --- 20. RAGNAROK BALL · LE RADICI CELESTI DI YGGDRASIL (CAPITOLO 4) ---
+  function drawDetailedRagnarokYggdrasil(g, W, H, f) {
+    // Spazio cosmico: aurore boreali stellari e cielo infinito
+    const ySky = g.createLinearGradient(0, 0, 0, H);
+    ySky.addColorStop(0, "#030712");
+    ySky.addColorStop(0.35, "#1e1b4b");
+    ySky.addColorStop(0.7, "#431407");
+    ySky.addColorStop(1, "#7c2d12");
+    g.fillStyle = ySky;
+    g.fillRect(0, 0, W, H);
+
+    // Aurore cosmiche spettacolari cremisi, smeraldo e oro
+    const aurCols = ["rgba(239, 68, 68, 0.25)", "rgba(52, 211, 153, 0.25)", "rgba(251, 191, 36, 0.3)"];
+    aurCols.forEach((col, idx) => {
+      const off = Math.sin(f * 0.04 + idx * 1.8) * 18;
+      g.fillStyle = col;
+      g.beginPath();
+      g.moveTo(0, 15 + idx * 16 + off);
+      g.bezierCurveTo(W * 0.35, 5 + idx * 14 - off, W * 0.65, 30 + idx * 18 + off, W, 10 + idx * 16);
+      g.lineTo(W, 30 + idx * 16);
+      g.bezierCurveTo(W * 0.65, 50 + idx * 18 + off, W * 0.35, 20 + idx * 14 - off, 0, 32 + idx * 16 + off);
+      g.closePath();
+      g.fill();
+    });
+
+    // Tronco e titaniche radici dell'Albero del Mondo Yggdrasil
+    const trW = 75;
+    const trGrad = g.createLinearGradient(W / 2 - trW / 2, 0, W / 2 + trW / 2, 0);
+    trGrad.addColorStop(0, "#27150c");
+    trGrad.addColorStop(0.3, "#451a03");
+    trGrad.addColorStop(0.7, "#78350f");
+    trGrad.addColorStop(1, "#27150c");
+    g.fillStyle = trGrad;
+    g.beginPath();
+    g.moveTo(W / 2 - trW / 2, 0);
+    g.lineTo(W / 2 - trW * 0.7, H);
+    g.lineTo(W / 2 + trW * 0.7, H);
+    g.lineTo(W / 2 + trW / 2, 0);
+    g.closePath();
+    g.fill();
+
+    // Vene di linfa solare e fuoco che pulsano nella corteccia
+    const sapPulse = 0.6 + 0.4 * Math.sin(f * 0.1);
+    g.fillStyle = `rgba(251, 191, 36, ${sapPulse})`;
+    for (let v = 0; v < 4; v++) {
+      const vx = W / 2 - 25 + v * 16;
+      g.beginPath();
+      g.moveTo(vx, 0);
+      g.bezierCurveTo(vx + 6, H * 0.35, vx - 6, H * 0.7, vx + 10, H);
+      g.lineTo(vx + 13, H);
+      g.bezierCurveTo(vx - 3, H * 0.7, vx + 9, H * 0.35, vx + 3, 0);
+      g.closePath();
+      g.fill();
+    }
+
+    // Radici secondarie che si diramano ai lati
+    g.strokeStyle = "#451a03";
+    g.lineWidth = 14;
+    g.beginPath();
+    g.moveTo(W / 2 - 30, H * 0.5);
+    g.quadraticCurveTo(W * 0.25, H * 0.65, 10, H);
+    g.stroke();
+    g.beginPath();
+    g.moveTo(W / 2 + 30, H * 0.5);
+    g.quadraticCurveTo(W * 0.75, H * 0.65, W - 10, H);
+    g.stroke();
+
+    // Foglie argentee dell'Albero che cadono
+    for (let lf = 0; lf < 25; lf++) {
+      const lx = (lf * 37 + Math.sin(f * 0.05 + lf) * 15) % W;
+      const ly = (lf * 19 + f * 1.1) % H;
+      px(g, lx, ly, 3, 2, (lf % 2 === 0 ? "#e2e8f0" : "#38bdf8"));
+    }
+  }
+
+  // --- 21. RAGNAROK BALL · IL CRATERE DEL SOLE DI PIETRA FUSA (CAPITOLO 4) ---
+  function drawDetailedRagnarokCratereSole(g, W, H, f) {
+    // Firmamento cosmico che si rischiara per l'alba primordiale
+    const sGrad = g.createLinearGradient(0, 0, 0, H);
+    sGrad.addColorStop(0, "#0c0a09");
+    sGrad.addColorStop(0.3, "#450a0a");
+    sGrad.addColorStop(0.65, "#9a3412");
+    sGrad.addColorStop(1, "#f59e0b");
+    g.fillStyle = sGrad;
+    g.fillRect(0, 0, W, H);
+
+    // Grande colonna di luce solare che sale dal centro del cratere
+    const colPulse = 0.7 + 0.3 * Math.sin(f * 0.15);
+    const lGrad = g.createLinearGradient(W / 2 - 40, 0, W / 2 + 40, 0);
+    lGrad.addColorStop(0, "rgba(254, 240, 138, 0)");
+    lGrad.addColorStop(0.5, `rgba(254, 240, 138, ${colPulse})`);
+    lGrad.addColorStop(1, "rgba(254, 240, 138, 0)");
+    g.fillStyle = lGrad;
+    g.fillRect(W / 2 - 45, 0, 90, H);
+
+    // Bordo circolare del cratere di roccia basaltica
+    const cY = H - 55;
+    g.fillStyle = "#1c1917";
+    g.beginPath();
+    g.ellipse(W / 2, cY + 15, W * 0.44, 38, 0, 0, Math.PI * 2);
+    g.fill();
+
+    // Calotta interna ribollente di magma solare
+    g.fillStyle = "#ea580c";
+    g.beginPath();
+    g.ellipse(W / 2, cY + 15, W * 0.36, 26, 0, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = "#fef08a";
+    g.beginPath();
+    g.ellipse(W / 2, cY + 15, W * 0.22, 14, 0, 0, Math.PI * 2);
+    g.fill();
+
+    // La Sfera di Pietra Fusa sospesa al centro del cratere
+    const sY = cY - 18 + Math.sin(f * 0.12) * 5;
+    g.fillStyle = "#ea580c";
+    g.beginPath();
+    g.arc(W / 2, sY, 14, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = "#fef08a";
+    g.beginPath();
+    g.arc(W / 2, sY, 7, 0, Math.PI * 2);
+    g.fill();
+
+    // Fasci di faville e luce che si irradiano dalla Sfera
+    for (let ray = 0; ray < 8; ray++) {
+      const ang = (ray / 8) * Math.PI * 2 + f * 0.03;
+      const rx = W / 2 + Math.cos(ang) * (20 + (ray % 2) * 10);
+      const ry = sY + Math.sin(ang) * (20 + (ray % 2) * 10);
+      px(g, rx, ry, 2, 2, "#ffffff");
+    }
+  }
+
   // Esportazione funzioni per fallback diretto
   window.drawRagnarokScenario = function (kind, g, W, H, f) {
     if (kind === "rag_fiordo") { drawDetailedRagnarokFiordo(g, W, H, f); return true; }
@@ -3079,6 +3492,11 @@
     if (kind === "rag_fucine") { drawDetailedRagnarokFucine(g, W, H, f); return true; }
     if (kind === "rag_ponte") { drawDetailedRagnarokPonte(g, W, H, f); return true; }
     if (kind === "rag_forgia") { drawDetailedRagnarokForgia(g, W, H, f); return true; }
+    if (kind === "rag_vigrid") { drawDetailedRagnarokVigrid(g, W, H, f); return true; }
+    if (kind === "rag_bifrost") { drawDetailedRagnarokBifrost(g, W, H, f); return true; }
+    if (kind === "rag_cerchio_cenere") { drawDetailedRagnarokCerchioCenere(g, W, H, f); return true; }
+    if (kind === "rag_yggdrasil") { drawDetailedRagnarokYggdrasil(g, W, H, f); return true; }
+    if (kind === "rag_cratere_sole") { drawDetailedRagnarokCratereSole(g, W, H, f); return true; }
     return false;
   };
 
@@ -3302,6 +3720,55 @@
         } else {
           if (toast) toast("⚽ Arena delle Scintille: «Basalto levigato che moltiplica la velocità di rotazione della sfera!»");
         }
+      } else if (bg === "rag_vigrid") {
+        if (clickX < 70 && clickY > 90) {
+          if (toast) toast("🦌 Totem delle Corna d'Alce: «Intagliato nel legno runico prima del grande silenzio: le corna sfidano la bufera di cenere.»");
+          if (window.__ragnarokStory && window.__ragnarokStory.sfxHorn) window.__ragnarokStory.sfxHorn();
+        } else if (clickX > W - 70 && clickY > 100) {
+          if (toast) toast("🕯️ Braciere delle Ceneri: «Fiamme votive accese in memoria degli eroi caduti nella prima fine del mondo.»");
+          sfx("kick");
+        } else if (Math.abs(clickY - 145) < 25) {
+          if (toast) toast("🌋 Crepa Tellurica di Vigrid: «La fessura ribolle di magma primordiale: pronta per la Furia Berserker!»");
+          if (window.__ragnarokStory && window.__ragnarokStory.sfxLava) window.__ragnarokStory.sfxLava();
+        } else if (clickY < 75) {
+          if (toast) toast("🌋 Cielo di Cenere e Vulcani: «La cenere ardente copre il firmamento di un manto rosso sangue.»");
+        } else {
+          if (toast) toast("❄️ Piana Desolata di Vigrid: «Il campo della battaglia cosmica, congelato in un limbo infinito.»");
+        }
+      } else if (bg === "rag_bifrost") {
+        if (Math.abs(clickX - W / 2) < 40 && clickY > 80) {
+          if (toast) toast("ᚦ Monolite delle Rivelazioni: «Vi è incisa la terribile verità: il Ragnarok è già accaduto, il mondo è un limbo congelato!»");
+          if (window.__ragnarokStory && window.__ragnarokStory.sfxValkyrie) window.__ragnarokStory.sfxValkyrie();
+        } else if (clickX < 90 || clickX > W - 90) {
+          if (toast) toast("🌈 Frammenti del Bifrost: «Monoliti prismatici del ponte arcobaleno infranto che riflettono aurore cosmiche.»");
+        } else {
+          if (toast) toast("🌌 Voragine Astrale: «Sotto le rovine del ponte si apre il vuoto che separa i Nove Regni.»");
+        }
+      } else if (bg === "rag_cerchio_cenere") {
+        if (Math.abs(clickY - 125) < 25) {
+          if (toast) toast("💥 Crepe Telluriche del Cerchio: «Il tiro Berserker spacca la roccia isolando i difensori avversari!»");
+          if (window.__ragnarokStory && window.__ragnarokStory.sfxLava) window.__ragnarokStory.sfxLava();
+        } else if (clickX < 60 || clickX > W - 60) {
+          if (toast) toast("🥅 Porte in Teschi e Drakkar: «Ossa titaniche e scudi del crepuscolo che segnano la meta dell'onore.»");
+        } else {
+          if (toast) toast("⚽ Rettangolo di Cenere: «La terra tremante dove solo i veri cuori indomiti possono prevalere.»");
+        }
+      } else if (bg === "rag_yggdrasil") {
+        if (Math.abs(clickX - W / 2) < 55) {
+          if (toast) toast("🌳 Radici Celesti di Yggdrasil: «Vene dorate e linfa di fuoco puro: l'Albero regge ancora la speranza dei Nove Regni.»");
+          if (window.__ragnarokStory && window.__ragnarokStory.sfxDrum) window.__ragnarokStory.sfxDrum();
+        } else if (clickY < 75) {
+          if (toast) toast("🌌 Aurora Boreale Stellare: «Luce eterna che danza tra i rami cosmici sopra il Fimbulwinter.»");
+        } else {
+          if (toast) toast("🍃 Foglie d'Argento Cadute: «Ogni foglia racchiude una memoria del tempo prima del silenzio.»");
+        }
+      } else if (bg === "rag_cratere_sole") {
+        if (Math.abs(clickX - W / 2) < 45 && clickY < 140) {
+          if (toast) toast("☀️ Cratere del Sole di Pietra: «Il cuore fuso del mondo: calcia qui la Sfera per decidere il fato di Midgard!»");
+          if (window.__ragnarokStory && window.__ragnarokStory.sfxHorn) window.__ragnarokStory.sfxHorn();
+        } else {
+          if (toast) toast("👑 Altare del Giudizio Divino: «Kara, Sigrid, Brokk e Ragnar attendono il tuo verdetto epico.»");
+        }
       }
     });
   }
@@ -3330,6 +3797,21 @@
         return true;
       case "rag_forgia":
         drawDetailedRagnarokForgia(g, W, H, f);
+        return true;
+      case "rag_vigrid":
+        drawDetailedRagnarokVigrid(g, W, H, f);
+        return true;
+      case "rag_bifrost":
+        drawDetailedRagnarokBifrost(g, W, H, f);
+        return true;
+      case "rag_cerchio_cenere":
+        drawDetailedRagnarokCerchioCenere(g, W, H, f);
+        return true;
+      case "rag_yggdrasil":
+        drawDetailedRagnarokYggdrasil(g, W, H, f);
+        return true;
+      case "rag_cratere_sole":
+        drawDetailedRagnarokCratereSole(g, W, H, f);
         return true;
       case "bv_villaggio":
         drawDetailedBelovodiaVillaggio(g, W, H, f);
