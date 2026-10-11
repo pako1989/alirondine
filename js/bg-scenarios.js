@@ -2481,6 +2481,381 @@
     }
   }
 
+  // --- 13. RAGNAROK BALL · IL FIORDO DELLE DRAKKAR (CAPITOLO 1) ---
+  function drawDetailedRagnarokFiordo(g, W, H, f) {
+    // Cielo crepuscolare di Fimbulwinter: cenere vulcanica, viola scuro e bagliori boreali
+    const sky = g.createLinearGradient(0, 0, 0, 95);
+    sky.addColorStop(0, "#0c0a09");
+    sky.addColorStop(0.4, "#26101c");
+    sky.addColorStop(0.8, "#450a0a");
+    sky.addColorStop(1, "#1c1917");
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, 95);
+
+    // Aurora cremisi del Ragnarok (il fuoco degli dei caduti)
+    g.save();
+    g.globalCompositeOperation = "screen";
+    for (let a = 0; a < 3; a++) {
+      const col = a === 0 ? "rgba(239, 68, 68, " : a === 1 ? "rgba(249, 115, 22, " : "rgba(168, 85, 247, ";
+      const grad = g.createLinearGradient(0, 10, 0, 75);
+      grad.addColorStop(0, col + "0)");
+      grad.addColorStop(0.5, col + (0.32 + 0.1 * Math.sin(f * 0.05 + a)) + ")");
+      grad.addColorStop(1, col + "0)");
+      g.fillStyle = grad;
+      g.beginPath();
+      g.moveTo(0, 40 + a * 8);
+      for (let x = 0; x <= W; x += 16) {
+        const y = 20 + a * 12 + Math.sin(x * 0.025 + f * 0.04 + a * 1.3) * 14 + Math.cos(x * 0.04 - f * 0.02) * 6;
+        g.lineTo(x, y);
+      }
+      g.lineTo(W, 85);
+      g.lineTo(0, 85);
+      g.closePath();
+      g.fill();
+    }
+    g.restore();
+
+    // Vette vulcaniche aguzze innevate all'orizzonte
+    for (let tr = 0; tr < W; tr += 18) {
+      const th = 26 + (tr % 5) * 6;
+      g.fillStyle = "#1c1917";
+      g.beginPath();
+      g.moveTo(tr + 9, 82 - th);
+      g.lineTo(tr, 82);
+      g.lineTo(tr + 18, 82);
+      g.closePath();
+      g.fill();
+      // Neve e brina sulle vette
+      px(g, tr + 8, 82 - th, 3, 5, "#e2e8f0");
+      // Cratere fumante occasionale
+      if (tr % 54 === 0) {
+        px(g, tr + 8, 82 - th, 2, 2, "#f97316");
+      }
+    }
+
+    // Pack ghiacciato e mare nero con crepe laviche
+    const iceGrad = g.createLinearGradient(0, 80, 0, H);
+    iceGrad.addColorStop(0, "#334155");
+    iceGrad.addColorStop(0.5, "#1e293b");
+    iceGrad.addColorStop(1, "#0f172a");
+    g.fillStyle = iceGrad;
+    g.fillRect(0, 80, W, H - 80);
+
+    // Crepe laviche luminose sotto la banchisa
+    for (let l = 0; l < 4; l++) {
+      const lx = 30 + l * 75;
+      const ly = 100 + l * 20;
+      g.strokeStyle = "rgba(249, 115, 22, 0.65)";
+      g.lineWidth = 2;
+      g.beginPath();
+      g.moveTo(lx, ly);
+      g.lineTo(lx + 25, ly + 8);
+      g.lineTo(lx + 45, ly + 4);
+      g.lineTo(lx + 65, ly + 12);
+      g.stroke();
+      px(g, lx + 24, ly + 7, 3, 3, "#fef08a");
+    }
+
+    // La Maestosa Drakkar Vichinga incagliata a destra
+    const drakX = W - 110, drakY = 88;
+    // Scafo in legno scuro
+    g.fillStyle = "#27150c";
+    g.beginPath();
+    g.moveTo(drakX, drakY + 28);
+    g.quadraticCurveTo(drakX + 45, drakY + 44, drakX + 90, drakY + 18);
+    g.lineTo(drakX + 96, drakY + 8);
+    g.lineTo(drakX + 75, drakY + 18);
+    g.lineTo(drakX + 15, drakY + 20);
+    g.closePath();
+    g.fill();
+    // Fasciame di pino scuro
+    px(g, drakX + 18, drakY + 22, 60, 2, "#451a03");
+    px(g, drakX + 22, drakY + 26, 52, 2, "#451a03");
+    // Testa di drago intagliata sulla prua
+    g.fillStyle = "#78350f";
+    g.beginPath();
+    g.moveTo(drakX + 90, drakY + 18);
+    g.lineTo(drakX + 104, drakY - 4);
+    g.lineTo(drakX + 100, drakY - 8);
+    g.lineTo(drakX + 86, drakY + 6);
+    g.closePath();
+    g.fill();
+    px(drakX + 98, drakY - 6, 2, 2, "#ea580c"); // Occhio di drago fuso
+    // Scudi rotondi vichinghi lungo la murata
+    for (let s = 0; s < 5; s++) {
+      const sx = drakX + 22 + s * 11;
+      const sy = drakY + 21;
+      g.fillStyle = s % 2 ? "#991b1b" : "#f59e0b";
+      g.beginPath(); g.arc(sx, sy, 4, 0, Math.PI * 2); g.fill();
+      px(g, sx - 1, sy - 1, 2, 2, "#1c1917"); // Umbone
+    }
+    // Albero maestro e vela strappata
+    px(g, drakX + 48, drakY - 14, 3, 36, "#3b1a0a");
+    g.fillStyle = "rgba(153, 27, 27, 0.75)";
+    g.beginPath();
+    g.moveTo(drakX + 32, drakY - 12);
+    g.lineTo(drakX + 64, drakY - 12);
+    g.lineTo(drakX + 58, drakY + 6);
+    g.lineTo(drakX + 36, drakY + 4);
+    g.closePath();
+    g.fill();
+
+    // Casa Lunga dello Jarl a sinistra
+    px(g, 12, 85, 80, 48, "#27150c");
+    for (let ty = 88; ty < 132; ty += 7) {
+      px(g, 12, ty, 80, 1, "#1c0b03");
+      px(g, 12, ty + 1, 80, 1, "#3b1a0a");
+    }
+    // Tetto spiovente di legno con neve spessa e teste d'alce
+    g.fillStyle = "#1c0b03";
+    g.beginPath(); g.moveTo(4, 85); g.lineTo(52, 54); g.lineTo(98, 85); g.closePath(); g.fill();
+    g.fillStyle = "#f8fafc";
+    g.beginPath(); g.moveTo(2, 84); g.lineTo(52, 50); g.lineTo(100, 84); g.lineTo(98, 89); g.lineTo(52, 56); g.lineTo(4, 89); g.closePath(); g.fill();
+    // Corna d'alce sul colmo del tetto
+    px(g, 48, 44, 8, 4, "#e2e8f0");
+    px(g, 46, 40, 3, 5, "#cbd5e1");
+    px(g, 55, 40, 3, 5, "#cbd5e1");
+    // Porta e finestrelle illuminate
+    px(g, 44, 102, 16, 31, "#451a03");
+    px(g, 46, 104, 12, 29, "#78350f");
+    px(g, 54, 116, 2, 4, "#f59e0b");
+    px(g, 22, 98, 12, 12, "#ea580c");
+    px(g, 24, 100, 8, 8, "#fef08a");
+    px(g, 72, 98, 12, 12, "#ea580c");
+    px(g, 74, 100, 8, 8, "#fef08a");
+
+    // Braciere votivo monumentale al centro-sinistra con fiamme animate
+    const brX = 135, brY = 135;
+    px(g, brX - 8, brY + 12, 22, 14, "#292524");
+    px(g, brX - 11, brY + 8, 28, 5, "#44403c");
+    // Fiamme laviche
+    const fl = Math.sin(f * 0.15) * 3;
+    g.fillStyle = "#ea580c";
+    g.beginPath();
+    g.moveTo(brX - 7, brY + 8);
+    g.quadraticCurveTo(brX + 3, brY - 14 + fl, brX + 13, brY + 8);
+    g.closePath();
+    g.fill();
+    g.fillStyle = "#fef08a";
+    g.beginPath();
+    g.moveTo(brX - 3, brY + 8);
+    g.quadraticCurveTo(brX + 3, brY - 6 + fl, brX + 9, brY + 8);
+    g.closePath();
+    g.fill();
+
+    // Fumo denso e faville incandescenti che salgono
+    for (let sm = 0; sm < 6; sm++) {
+      const sx = brX + 3 + Math.sin(f * 0.08 + sm) * (6 + sm * 4);
+      const sy = brY - 8 - sm * 11 - (f * 0.5 % 10);
+      const sr = 3 + sm * 2;
+      g.fillStyle = `rgba(249, 115, 22, ${0.4 - sm * 0.06})`;
+      g.beginPath(); g.arc(sx, sy, sr, 0, Math.PI * 2); g.fill();
+    }
+
+    // Fiocchi di neve mescolati a scintille di magma
+    for (let i = 0; i < 40; i++) {
+      const sx = (i * 29 + f * 1.2 + Math.sin(f * 0.06 + i) * 14) % W;
+      const sy = (i * 17 + f * 1.6) % H;
+      if (i % 3 === 0) {
+        px(g, sx, sy, 2, 2, "#f97316"); // Favilla di lava
+      } else {
+        px(g, sx, sy, 1, 1, "rgba(248, 250, 252, 0.85)"); // Neve
+      }
+    }
+  }
+
+  // --- 14. RAGNAROK BALL · LA SALA DEL MEAD DI RAGNAR (CAPITOLO 1) ---
+  function drawDetailedRagnarokSala(g, W, H, f) {
+    // Interno della Casa Lunga in quercia affumicata e penombra calda
+    const bgGrad = g.createLinearGradient(0, 0, 0, H);
+    bgGrad.addColorStop(0, "#1c0b03");
+    bgGrad.addColorStop(0.6, "#27150c");
+    bgGrad.addColorStop(1, "#120702");
+    g.fillStyle = bgGrad;
+    g.fillRect(0, 0, W, H);
+
+    // Travi monumentali verticali e diagonali del soffitto vichingo
+    g.fillStyle = "#1c0b03";
+    for (let bx = 20; bx < W; bx += 70) {
+      px(g, bx, 0, 8, H - 40, "#140702");
+      px(g, bx + 2, 0, 4, H - 40, "#27150c");
+    }
+    // Capriate del tetto a spiovente
+    g.strokeStyle = "#140702";
+    g.lineWidth = 6;
+    g.beginPath();
+    g.moveTo(0, 30); g.lineTo(W / 2, 8); g.lineTo(W, 30);
+    g.stroke();
+
+    // Camino monumentale in pietra basaltica al centro
+    const fireX = W / 2, fireY = H - 65;
+    px(g, fireX - 45, fireY - 35, 90, 75, "#292524");
+    px(g, fireX - 48, fireY - 38, 96, 6, "#44403c");
+    px(g, fireX - 35, fireY - 15, 70, 55, "#0c0a09"); // Bocca camino
+    // Ceppi giganteschi ardenti
+    px(g, fireX - 25, fireY + 22, 50, 10, "#451a03");
+    px(g, fireX - 22, fireY + 18, 44, 6, "#78350f");
+
+    // Fuoco del camino con fiamme animate ad alta luminosità
+    const fl = Math.sin(f * 0.18) * 4;
+    g.fillStyle = "#ea580c";
+    g.beginPath();
+    g.moveTo(fireX - 24, fireY + 24);
+    g.quadraticCurveTo(fireX, fireY - 22 + fl, fireX + 24, fireY + 24);
+    g.closePath();
+    g.fill();
+    g.fillStyle = "#f59e0b";
+    g.beginPath();
+    g.moveTo(fireX - 16, fireY + 24);
+    g.quadraticCurveTo(fireX, fireY - 12 + fl, fireX + 16, fireY + 24);
+    g.closePath();
+    g.fill();
+    g.fillStyle = "#fef08a";
+    g.beginPath();
+    g.moveTo(fireX - 8, fireY + 24);
+    g.quadraticCurveTo(fireX, fireY - 2 + fl, fireX + 8, fireY + 24);
+    g.closePath();
+    g.fill();
+
+    // Maestose corna d'alce e teschio sopra la cappa del camino
+    px(g, fireX - 8, fireY - 45, 16, 8, "#e2e8f0");
+    g.fillStyle = "#cbd5e1";
+    g.beginPath();
+    g.moveTo(fireX - 8, fireY - 45);
+    g.quadraticCurveTo(fireX - 36, fireY - 65, fireX - 44, fireY - 50);
+    g.lineTo(fireX - 36, fireY - 42);
+    g.closePath();
+    g.fill();
+    g.beginPath();
+    g.moveTo(fireX + 8, fireY - 45);
+    g.quadraticCurveTo(fireX + 36, fireY - 65, fireX + 44, fireY - 50);
+    g.lineTo(fireX + 36, fireY - 42);
+    g.closePath();
+    g.fill();
+
+    // Scudi tondi vichinghi appesi lungo le pareti
+    [-100, -65, 65, 100].forEach((dx, idx) => {
+      const sx = fireX + dx, sy = 65;
+      g.fillStyle = idx % 2 === 0 ? "#991b1b" : "#b45309";
+      g.beginPath(); g.arc(sx, sy, 12, 0, Math.PI * 2); g.fill();
+      px(g, sx - 2, sy - 2, 4, 4, "#1c1917");
+      px(g, sx - 1, sy - 1, 2, 2, "#f59e0b");
+    });
+
+    // Stendardi con il corvo di Odino
+    [-130, 130].forEach((dx) => {
+      const stX = fireX + dx, stY = 40;
+      px(g, stX - 10, stY, 20, 52, "#7f1d1d");
+      px(g, stX - 6, stY + 12, 12, 16, "#1c1917"); // Sagoma corvo
+      px(g, stX - 10, stY + 52, 10, 6, "#7f1d1d");
+    });
+
+    // Tavolo di quercia massiccia in primo piano
+    px(g, 35, H - 36, W - 70, 36, "#3b1a0a");
+    px(g, 30, H - 38, W - 60, 4, "#5c2406");
+    // Boccali e corni d'idromele sul tavolo
+    px(g, 65, H - 48, 8, 11, "#78350f");
+    px(g, 66, H - 49, 6, 2, "#fef08a"); // Schiuma idromele
+    px(g, W - 85, H - 48, 8, 11, "#78350f");
+    px(g, W - 84, H - 49, 6, 2, "#fef08a");
+  }
+
+  // --- 15. RAGNAROK BALL · L'ARENA DEL GELO E DELLA BRACE (CAPITOLO 1) ---
+  function drawDetailedRagnarokArena(g, W, H, f) {
+    // Cielo cupo solcato da fumi vulcanici e aurore purpuree
+    const sky = g.createLinearGradient(0, 0, 0, 85);
+    sky.addColorStop(0, "#09090b");
+    sky.addColorStop(0.5, "#1c1917");
+    sky.addColorStop(1, "#450a0a");
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, 85);
+
+    // Aurore sismiche e fiamme all'orizzonte
+    g.save();
+    g.globalCompositeOperation = "screen";
+    const auroraGrad = g.createLinearGradient(0, 10, 0, 65);
+    auroraGrad.addColorStop(0, "rgba(239, 68, 68, 0)");
+    auroraGrad.addColorStop(0.5, `rgba(249, 115, 22, ${0.35 + 0.1 * Math.sin(f * 0.05)})`);
+    auroraGrad.addColorStop(1, "rgba(239, 68, 68, 0)");
+    g.fillStyle = auroraGrad;
+    g.fillRect(0, 15, W, 50);
+    g.restore();
+
+    // Campo di permafrost tagliato da crepacci lavici
+    const arenaGrad = g.createLinearGradient(0, 75, 0, H);
+    arenaGrad.addColorStop(0, "#475569");
+    arenaGrad.addColorStop(0.4, "#334155");
+    arenaGrad.addColorStop(1, "#1c1917");
+    g.fillStyle = arenaGrad;
+    g.fillRect(0, 75, W, H - 75);
+
+    // Grande Crepa Tellurica fiammeggiante a metà campo (Furia Berserker)
+    const midY = 135;
+    g.strokeStyle = "#ea580c";
+    g.lineWidth = 3;
+    g.beginPath();
+    g.moveTo(20, midY);
+    for (let x = 20; x <= W - 20; x += 25) {
+      const y = midY + Math.sin(x * 0.08 + f * 0.05) * 6 + ((x % 50 === 0) ? 8 : -4);
+      g.lineTo(x, y);
+    }
+    g.stroke();
+
+    // Bagliore di lava all'interno della crepa
+    g.strokeStyle = "#fef08a";
+    g.lineWidth = 1;
+    g.beginPath();
+    g.moveTo(35, midY + 1);
+    for (let x = 35; x <= W - 35; x += 30) {
+      const y = midY + Math.sin(x * 0.08 + f * 0.05) * 5;
+      g.lineTo(x, y);
+    }
+    g.stroke();
+
+    // Porte cerimoniali da calcio in legno di drakkar e ossa giganti
+    [35, W - 45].forEach((gx) => {
+      px(g, gx - 3, 92, 6, 42, "#451a03");
+      px(g, gx - 10, 88, 20, 5, "#78350f");
+      // Ossa di balena ricurve
+      px(g, gx - 14, 80, 5, 12, "#e2e8f0");
+      px(g, gx + 9, 80, 5, 12, "#e2e8f0");
+      // Rete di funi di canapa
+      px(g, gx - 6, 95, 12, 36, "rgba(254, 243, 199, 0.25)");
+    });
+
+    // Bracieri rituali giganti agli angoli
+    [15, W - 25].forEach((bx) => {
+      px(g, bx, 105, 14, 18, "#292524");
+      const fl = Math.sin(f * 0.16 + bx) * 3;
+      g.fillStyle = "#ea580c";
+      g.beginPath();
+      g.moveTo(bx, 105);
+      g.quadraticCurveTo(bx + 7, 88 + fl, bx + 14, 105);
+      g.closePath();
+      g.fill();
+      px(g, bx + 5, 96 + fl, 4, 6, "#fef08a");
+    });
+
+    // Faville telluriche e fiocchi di cenere
+    for (let sp = 0; sp < 35; sp++) {
+      const spx = (sp * 31 + Math.sin(f * 0.06 + sp) * 20) % W;
+      const spy = (H - ((sp * 19 + f * 1.5) % H));
+      if (sp % 2 === 0) {
+        px(g, spx, spy, 2, 2, "#f97316");
+      } else {
+        px(g, spx, spy, 1, 1, "rgba(226, 232, 240, 0.8)");
+      }
+    }
+  }
+
+  // Esportazione funzioni per fallback diretto
+  window.drawRagnarokScenario = function (kind, g, W, H, f) {
+    if (kind === "rag_fiordo") { drawDetailedRagnarokFiordo(g, W, H, f); return true; }
+    if (kind === "rag_sala") { drawDetailedRagnarokSala(g, W, H, f); return true; }
+    if (kind === "rag_arena") { drawDetailedRagnarokArena(g, W, H, f); return true; }
+    return false;
+  };
+
   // INTERAZIONE TOUCH/CLICK CON GLI ELEMENTI DELLO SFONDO (SCENIC INTERACTION)
   function setupScenicCanvasInteraction() {
     const cv = document.getElementById("cv");
@@ -2494,7 +2869,7 @@
       if (!v || v.kind !== "scene") return;
 
       const bg = v.bg || "";
-      if (!bg.startsWith("feudi_") && !bg.startsWith("bv_")) return;
+      if (!bg.startsWith("feudi_") && !bg.startsWith("bv_") && !bg.startsWith("rag_")) return;
 
       const rect = cv.getBoundingClientRect();
       const W = cv.width || 320, H = cv.height || 200;
@@ -2642,6 +3017,42 @@
         } else if (clickY >= 75) {
           if (toast) toast("⚔️ Arena di Sabbia Dorata: «Dove il destino di tutte le casate viene sigillato!»");
         }
+      } else if (bg === "rag_fiordo") {
+        if (clickX > W - 110 && clickY > 70) {
+          if (toast) toast("🐉 Prua della Drakkar: «La testa di drago intagliata nel pino nero sfida il pack ghiacciato da millenni.»");
+          if (window.__ragnarokStory && window.__ragnarokStory.sfxHorn) window.__ragnarokStory.sfxHorn();
+        } else if (clickX < 100 && clickY > 70) {
+          if (toast) toast("🪵 Casa Lunga dello Jarl: «Travi imponenti e fumo di pece: qui si raduna il clan dei Lupi di Ragnar.»");
+        } else if (clickY < 55) {
+          if (toast) toast("🌌 Aurora Cremisi di Fimbulwinter: «Ceneri incandescenti e fiamme celesti dipingono il cielo degli dei caduti.»");
+        } else if (Math.abs(clickX - 135) < 35 && clickY > 120) {
+          if (toast) toast("🔥 Braciere Votivo Lavico: «Faville di magma primordiale che riscaldano il respiro dei mortali.»");
+          sfx("kick");
+        } else {
+          if (toast) toast("❄️ Pack Ghiacciato di Midgard: «Sotto la banchisa si intravedono le vene fiammeggianti della terra.»");
+        }
+      } else if (bg === "rag_sala") {
+        if (Math.abs(clickX - W / 2) < 45 && clickY < 140) {
+          if (toast) toast("🔥 Camino Monumentale: «Ceppi titanici e fiamme vive: il calore tiene lontana la morsa del Fimbulwinter.»");
+          sfx("kick");
+        } else if (clickY < 85 && (clickX < 100 || clickX > W - 100)) {
+          if (toast) toast("🛡️ Scudi dei Guerrieri Einherjar: «Emblemi di lupi, orsi e corvi scalfiti dalle battaglie del Ragnarok.»");
+        } else if (clickY > H - 50) {
+          if (toast) toast("🍺 Tavolata dello Jarl: «Corni colmi di idromele speziato per temprare il cuore dei campioni.»");
+        } else {
+          if (toast) toast("🦅 Stendardo del Corvo: «Munin veglia sulla sala, ricordando che il tempo degli eroi è giunto.»");
+        }
+      } else if (bg === "rag_arena") {
+        if (Math.abs(clickY - 135) < 25) {
+          if (toast) toast("🌋 Crepa Tellurica Fiammeggiante: «Il terreno è spaccato a metà: la Furia Berserker blocca gli avversari nella loro metà campo!»");
+          if (window.__ragnarokStory && window.__ragnarokStory.sfxLava) window.__ragnarokStory.sfxLava();
+        } else if (clickX < 60 || clickX > W - 60) {
+          if (toast) toast("🥅 Porte in Ossa e Drakkar: «Travi di quercia marina e costole di balena boreale.»");
+        } else if (clickY < 70) {
+          if (toast) toast("🌌 Cielo di Cenere e Aurora: «Le Valchirie osservano ogni contrasto dall'alto di Vigrid.»");
+        } else {
+          if (toast) toast("⚽ Terreno Cerimoniale: «Permafrost duro come il ferro e lastre laviche roventi: qui si forgia la leggenda!»");
+        }
       }
     });
   }
@@ -2653,6 +3064,15 @@
     setupScenicCanvasInteraction();
 
     switch (kind) {
+      case "rag_fiordo":
+        drawDetailedRagnarokFiordo(g, W, H, f);
+        return true;
+      case "rag_sala":
+        drawDetailedRagnarokSala(g, W, H, f);
+        return true;
+      case "rag_arena":
+        drawDetailedRagnarokArena(g, W, H, f);
+        return true;
       case "bv_villaggio":
         drawDetailedBelovodiaVillaggio(g, W, H, f);
         return true;
