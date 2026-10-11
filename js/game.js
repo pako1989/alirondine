@@ -1499,7 +1499,7 @@
       return;
     }
 
-    const c = $("choices"); c.innerHTML = ""; c.className = "choices" + (one || list.length === 1 ? " one" : "");
+    const c = $("choices"); c.innerHTML = ""; c.className = "choices" + (one || list.length === 1 ? " one" : ""); c.style.display = ""; c.style.gridTemplateColumns = ""; c.style.gap = "";
     list.forEach((o) => {
       if (o && o.head) { const h = document.createElement("div"); h.className = "head"; h.textContent = o.head; c.appendChild(h); return; }
       const b = document.createElement("button"); b.type = "button";
@@ -4169,7 +4169,7 @@
     const heroBtnHtml = h
       ? `<div class="pad-row"><button type="button" class="pad" id="bHero" title="Cambia personaggio tra Leo e ${esc(h.name)}">${B.useHero ? '👤 ' + esc(h.name.slice(0, 6)) : '👤 Leo'}</button><button type="button" class="pad" id="bMenu">Menu</button></div>`
       : `<button type="button" class="pad" id="bMenu">Menu</button>`;
-    c.innerHTML = `<div class="padwrap"><div class="dpad"><span></span><button type="button" class="pad" data-d="up" aria-label="Su">▲</button><span></span><button type="button" class="pad" data-d="left" aria-label="Sinistra">◀</button><span></span><button type="button" class="pad" data-d="right" aria-label="Destra">▶</button><span></span><button type="button" class="pad" data-d="down" aria-label="Giù">▼</button><span></span></div><div class="padacts"><button type="button" class="pad act" id="bAct" disabled>Parla</button>${heroBtnHtml}</div></div>`;
+    c.style.display = c.style.gridTemplateColumns = c.style.gap = ""; c.innerHTML = `<div class="padwrap"><div class="dpad"><span></span><button type="button" class="pad" data-d="up" aria-label="Su">▲</button><span></span><button type="button" class="pad" data-d="left" aria-label="Sinistra">◀</button><span></span><button type="button" class="pad" data-d="right" aria-label="Destra">▶</button><span></span><button type="button" class="pad" data-d="down" aria-label="Giù">▼</button><span></span></div><div class="padacts"><button type="button" class="pad act" id="bAct" disabled>Parla</button>${heroBtnHtml}</div></div>`;
     c.querySelectorAll("[data-d]").forEach((b) => {
       const d = b.dataset.d, on = (e) => { e.preventDefault(); BW.keys[d] = true; b.classList.add("on"); try { b.setPointerCapture(e.pointerId); } catch {} };
       const off = () => { BW.keys[d] = false; b.classList.remove("on"); };
@@ -8995,7 +8995,7 @@
     view = { kind: "trasf" }; chap(TW.z.name);
     BW.keys = {}; TW.tkey = null; TW.area = null; TW.t = 0; TW.prog = prog();
     const c = $("choices"); c.className = "choices one";
-    c.innerHTML = `<div class="padwrap"><div class="dpad"><span></span><button type="button" class="pad" data-d="up" aria-label="Su">▲</button><span></span><button type="button" class="pad" data-d="left" aria-label="Sinistra">◀</button><span></span><button type="button" class="pad" data-d="right" aria-label="Destra">▶</button><span></span><button type="button" class="pad" data-d="down" aria-label="Giù">▼</button><span></span></div><div class="padacts"><button type="button" class="pad act" id="bAct" disabled>Parla</button><button type="button" class="pad" id="bMenu">Menu</button></div></div>`;
+    c.style.display = c.style.gridTemplateColumns = c.style.gap = ""; c.innerHTML = `<div class="padwrap"><div class="dpad"><span></span><button type="button" class="pad" data-d="up" aria-label="Su">▲</button><span></span><button type="button" class="pad" data-d="left" aria-label="Sinistra">◀</button><span></span><button type="button" class="pad" data-d="right" aria-label="Destra">▶</button><span></span><button type="button" class="pad" data-d="down" aria-label="Giù">▼</button><span></span></div><div class="padacts"><button type="button" class="pad act" id="bAct" disabled>Parla</button><button type="button" class="pad" id="bMenu">Menu</button></div></div>`;
     c.querySelectorAll("[data-d]").forEach((b) => {
       const d = b.dataset.d, on = (e) => { e.preventDefault(); BW.keys[d] = true; b.classList.add("on"); try { b.setPointerCapture(e.pointerId); } catch {} };
       const off = () => { BW.keys[d] = false; b.classList.remove("on"); };
