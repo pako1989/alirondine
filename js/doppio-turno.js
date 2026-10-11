@@ -107,7 +107,7 @@
   // Solidi: a muro · d scrivania con terminale · k divisorio · x schedario/casse · p pianta · K armadietto 7 · e ascensore · q porta · Q porta con codice
   //         n manifesto · b panchina · g porta da calcio · j tribuna · w acqua (mare / distributore) · f ringhiera · l lampione · u tavolino · y casa · c barca
   //         C giostra · i reti da pesca · P tabellone · Y scrivania della direttrice · Z colonna · F fontana · V macchina del caffè
-  const SOLID = "adkxpKeqQnbgjwfluycCiPYZFV";
+  const SOLID = "adkxpKeqQnbgjwfluycCiPYZFVI";
   const isFloor = (ch) => !!ch && FLOORS.includes(ch);
   const ZX = { map: null, under: null, meta: null, id: "", st: STY.den, stk: "den" };
   const at = (tx, ty) => (ZX.map && ZX.map[ty] && ZX.map[ty][tx]) || "a";
@@ -132,6 +132,7 @@
     if (f === ",") { P(sx, sy, 16, 16, st.cob[(hash(tx * 3 + ty * 7) % 3)]); for (let i = 0; i < 4; i++) { const ox = (i % 2) * 8 + ((ty % 2) * 4), oy = Math.floor(i / 2) * 8; P(sx + ox, sy + oy, 7, 7, "rgba(255,255,255,.05)"); P(sx + ox, sy + oy + 6, 7, 1, "rgba(0,0,0,.25)"); } }
     else if (f === ":") { P(sx, sy, 16, 16, st.plank[(tx + ty) % 2]); for (let i = 0; i < 4; i++) P(sx, sy + i * 4 + 3, 16, 1, "rgba(0,0,0,.3)"); if (r < 0.2) P(sx + 5, sy + 1, 1, 1, "#2a1a10"); }
     else if (f === "+") { P(sx, sy, 16, 16, st.walk[(tx + ty) % 2]); P(sx, sy + 15, 16, 1, "rgba(0,0,0,.25)"); P(sx + 15, sy, 1, 16, "rgba(0,0,0,.2)"); }
+    else if (f === "-" && ZX.grass) { P(sx, sy, 16, 16, tx % 2 ? "#2f5a32" : "#35623a"); for (let i = 0; i < 4; i++) P(sx + ((tx * 5 + i * 4) % 15), sy + ((ty * 7 + i * 5) % 12), 1, 4, "rgba(150,200,110,.5)"); if (r < 0.08) P(sx + 6, sy + 6, 3, 3, "rgba(220,220,180,.35)"); }
     else if (f === "-") { P(sx, sy, 16, 16, tx % 2 ? st.pitch[0] : st.pitch[1]); if (r < 0.1) P(sx + 4, sy + 9, 4, 1, "rgba(255,255,255,.08)"); }
     else if (f === '"') { P(sx, sy, 16, 16, "#6a2f3a"); P(sx, sy + 2, 16, 1, "rgba(255,200,120,.25)"); }
     else if (f === "=") { P(sx, sy, 16, 16, "#3a3236"); P(sx, sy + 7, 16, 2, "#c9b48a"); }
@@ -202,6 +203,7 @@
     Y(sx, sy, tx, ty) { floorPaint(undAt(tx, ty), sx, sy, tx, ty); P(sx, sy + 6, 16, 8, "#ffffff"); P(sx, sy + 6, 16, 1, "#2a9d8f"); P(sx + 2, sy + 3, 5, 4, "#e9ede8"); P(sx + 10, sy + 2, 2, 5, "#2a9d8f"); P(sx + 9, sy + 1, 4, 2, "#5a9a72"); },
     Z(sx, sy, tx, ty) { floorPaint(undAt(tx, ty), sx, sy, tx, ty); P(sx + 3, sy, 10, 16, D() ? "#ffffff" : "#5a4b52"); P(sx + 3, sy, 2, 16, "rgba(0,0,0,.08)"); P(sx + 11, sy, 2, 16, "rgba(0,0,0,.15)"); },
     F(sx, sy, tx, ty, fr) { floorPaint(undAt(tx, ty), sx, sy, tx, ty); GP.fillStyle = D() ? "#dfe6e4" : "#6e6268"; GP.beginPath(); GP.arc(sx + 8, sy + 9, 7, 0, 7); GP.fill(); GP.fillStyle = D() ? "#9fd8f0" : "#22345a"; GP.beginPath(); GP.arc(sx + 8, sy + 9, 5, 0, 7); GP.fill(); P(sx + 7, sy + 2 + (fr / 10 | 0) % 3, 2, 3, "#bfeefc"); },
+    I(sx, sy, tx, ty, fr) { floorPaint(undAt(tx, ty), sx, sy, tx, ty); GP.save(); GP.globalCompositeOperation = "lighter"; glow(GP, sx + 8, sy + 8, 14, "255,240,180", 0.3 + 0.2 * Math.sin(fr / 15)); GP.restore(); GP.fillStyle = "#ffffff"; GP.beginPath(); GP.arc(sx + 8, sy + 8, 3, 0, 7); GP.fill(); }, // il dischetto del rigore
     V(sx, sy, tx, ty, fr) { floorPaint(undAt(tx, ty), sx, sy, tx, ty); P(sx + 3, sy + 1, 10, 14, "#3a3a44"); P(sx + 4, sy + 2, 8, 4, "#1a1a22"); P(sx + 5, sy + 3, 3, 1, "#ff5a5a"); P(sx + 6, sy + 9, 4, 4, "#e9ede8"); if ((fr / 60 | 0) % 2) P(sx + 7, sy + 7 - (fr / 6 | 0) % 4, 1, 2, "rgba(255,255,255,.5)"); },
     ">": (sx, sy, tx, ty) => arrowTile(">", sx, sy, tx, ty), "<": (sx, sy, tx, ty) => arrowTile("<", sx, sy, tx, ty), "^": (sx, sy, tx, ty) => arrowTile("^", sx, sy, tx, ty), v: (sx, sy, tx, ty) => arrowTile("v", sx, sy, tx, ty),
   };
@@ -355,11 +357,13 @@
     };
     Object.defineProperty(Z, "tail", { enumerable: true, configurable: true, get: () => "Menu in basso: il Fascicolo ed Esci." });
     Z.build = function (m) {
-      ZX.map = m; ZX.id = zid; ZX.stk = stk; ZX.st = STY[stk]; ZX.unread = () => unreadFor(spec.half).length > 0; GP = document.getElementById("cv").getContext("2d");
+      ZX.map = m; ZX.id = zid; ZX.stk = stk; ZX.st = STY[stk]; ZX.grass = !!spec.grass; ZX.unread = () => unreadFor(spec.half).length > 0; GP = document.getElementById("cv").getContext("2d");
       const Ls = makeLayers(spec.w, spec.h); Ls.lay(0, 0, spec.w - 1, spec.h - 1, spec.half === "d" ? "+" : ",");
-      spec.build(Ls); refreshSoon();
+      spec.build(Ls);
+      chainFor(ZONES[zid]).slice().reverse().forEach((cc) => { const p = cc.n !== chN && cc.patch && cc.patch[zid]; if (p && p.build) p.build(Ls); });
+      refreshSoon();
     };
-    Z.tile = function (ch, sx, sy, tx, ty) { GP = GP || document.getElementById("cv").getContext("2d"); if (ZX.id !== zid) { ZX.id = zid; ZX.stk = stk; ZX.st = STY[stk]; ZX.unread = () => unreadFor(spec.half).length > 0; } return drawTile(ch, sx, sy, tx, ty); };
+    Z.tile = function (ch, sx, sy, tx, ty) { GP = GP || document.getElementById("cv").getContext("2d"); if (ZX.id !== zid) { ZX.id = zid; ZX.stk = stk; ZX.st = STY[stk]; ZX.grass = !!spec.grass; ZX.unread = () => unreadFor(spec.half).length > 0; } return drawTile(ch, sx, sy, tx, ty); };
     const dd = (cx, cy) => ({ X: (tx) => tx * TS - cx, Y: (ty) => ty * TS - cy, fr: frNow() });
     Z.decor = function (cx, cy) { if (spec.decor) safe(() => spec.decor(GP, cx, cy, dd(cx, cy))); };
     Z.top = function (cx, cy) { if (spec.top) safe(() => spec.top(GP, cx, cy, dd(cx, cy))); safe(() => topFx(GP)); };
@@ -432,6 +436,7 @@
     if (!def || !def.n || CHAPTERS[def.n]) return;
     CHAPTERS[def.n] = def;
     Object.keys(def.zones || {}).forEach((zid) => registerZone(def.n, zid, def.zones[zid]));
+    Object.keys(def.patch || {}).forEach((zid) => { const p = def.patch[zid]; if (p.act && ZONES[zid]) Object.assign(ZONES[zid].Z.act, p.act); });
   }
 
   function leaveToModes() { const back = EXIT || window.title; EXIT = null; api.trExitTo(typeof back === "function" ? back : null); }

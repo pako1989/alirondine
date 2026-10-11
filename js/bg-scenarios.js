@@ -4442,6 +4442,58 @@
     paperGrain(g, W, H, f, 0.03);
   }
 
+  function bgDtSala(g, W, H, f) {
+    px(g, 0, 0, W, H, "#081010");
+    // pareti di schermi con la tua faccia (un occhio, una bocca, un numero)
+    for (let r = 0; r < 3; r++) for (let i = 0; i < 8; i++) { const x = 8 + i * 38, y = 10 + r * 30, on = (i + r + Math.floor(f / 40)) % 4 !== 0; px(g, x, y, 32, 24, "#1a2a28"); px(g, x + 2, y + 2, 28, 20, on ? "#0e3a32" : "#05100e"); if (on) { const k = (i * 3 + r) % 3; g.fillStyle = "#5af0c8"; if (k === 0) { circ(g, x + 16, y + 12, 5, "#5af0c8"); circ(g, x + 16, y + 12, 2, "#0e3a32"); } else if (k === 1) { g.fillRect(x + 9, y + 12, 14, 2); } else { g.font = "bold 9px monospace"; g.textAlign = "center"; g.fillText(String(((typeof window.heroLoad === "function" && window.heroLoad()) || {}).num || "?"), x + 16, y + 16); g.textAlign = "left"; } } }
+    if (since("dt_sala", 0) < 120) { g.fillStyle = "rgba(255,179,71,.35)"; g.fillRect(0, 0, W, 100); }
+    // il grande registratore a bobine al centro
+    px(g, 100, 112, 120, 60, "#2a2a33"); px(g, 100, 112, 120, 4, "#3a3a44"); const sp = since("dt_sala", 1) < 240 ? f / 6 : f / 60;
+    [130, 190].forEach((cx) => { g.save(); g.translate(cx, 138); g.rotate(sp); circ(g, 0, 0, 20, "#111"); circ(g, 0, 0, 16, "#3a2a1a"); circ(g, 0, 0, 4, "#888"); for (let i = 0; i < 3; i++) { g.rotate(Math.PI * 2 / 3); px(g, -1, 4, 2, 10, "#888"); } g.restore(); });
+    g.strokeStyle = "#3a2a1a"; g.lineWidth = 2; g.beginPath(); g.moveTo(130, 158); g.lineTo(160, 166); g.lineTo(190, 158); g.stroke();
+    px(g, 150, 160, 20, 8, "#ff5a5a");
+    // microfono con la luce rossa REC
+    px(g, 252, 130, 4, 50, "#5a5a66"); ell(g, 254, 124, 8, 12, "#3a3a44"); circ(g, 270, 112, 4, (Math.floor(f / 20) % 2 || since("dt_sala", 2) < 120) ? "#ff3a3a" : "#4a1a1a"); g.fillStyle = "#ff5a5a"; g.font = "bold 6px sans-serif"; g.fillText("REC", 262, 106);
+    // la sedia vuota davanti al microfono
+    px(g, 40, 150, 30, 6, "#2a9d8f"); px(g, 40, 128, 4, 22, "#2a9d8f"); px(g, 44, 156, 3, 20, "#5a6560"); px(g, 64, 156, 3, 20, "#5a6560");
+    if (since("dt_sala", 3) < 120) { g.fillStyle = "rgba(234,246,243,.7)"; g.font = "italic 7px sans-serif"; g.fillText("(qui, tre anni fa, eri seduto tu)", 22, 190); }
+    paperGrain(g, W, H, f, 0.03);
+  }
+  function bgDtStadio(g, W, H, f) {
+    vgrad(g, 0, 0, W, 110, ["#05060e", "#141a30", "#1e2440"]);
+    for (let i = 0; i < 30; i++) px(g, (i * 67) % W, (i * 29) % 60, 1, 1, "rgba(255,255,255,.6)");
+    // tribune vecchie e scrostate, con i seggiolini mancanti
+    for (let r = 0; r < 4; r++) { px(g, 0, 50 + r * 12, W, 11, r % 2 ? "#3a2f3e" : "#33293a"); for (let i = 0; i < 32; i++) if ((i * 7 + r * 5) % 4) px(g, 3 + i * 10, 52 + r * 12, 6, 6, ["#7a3b2e", "#c9a227", "#7a3b2e", "#e8e0d0"][(i + r) % 4]); }
+    g.fillStyle = "rgba(201,162,39,.7)"; g.font = "900 9px system-ui, sans-serif"; g.fillText("P O R T O   L I V I D O   F C", 96, 46);
+    // i fari: accesi dal Cartografo (toccali: si spengono e si riaccendono)
+    const on = !toggled("dt_stadio", 0); [[20, 10], [300, 10]].forEach(([x, y]) => { px(g, x - 2, y, 4, 40, "#2a2a33"); px(g, x - 10, y - 6, 20, 8, on ? "#fff6c8" : "#3a3a44"); if (on) { g.save(); g.globalCompositeOperation = "lighter"; g.fillStyle = "rgba(255,246,200,.08)"; g.beginPath(); g.moveTo(x - 10, y); g.lineTo(x + 10, y); g.lineTo(160 + (x - 160) * 0.2, 200); g.lineTo(160 + (x - 160) * 0.6, 200); g.fill(); g.restore(); } });
+    // il prato incolto e il dischetto del rigore che brilla
+    vgrad(g, 0, 100, W, 100, on ? ["#3a6a3a", "#2a5a2a"] : ["#1a2a1a", "#122012"]); for (let i = 0; i < 40; i++) px(g, (i * 37) % W, 104 + (i * 13) % 90, 1, 4, "rgba(120,170,90,.6)");
+    g.strokeStyle = "rgba(255,255,255,.5)"; g.lineWidth = 1.5; g.strokeRect(100, 110, 120, 60); g.strokeRect(130, 110, 60, 22);
+    px(g, 134, 100, 52, 12, "rgba(255,255,255,.12)"); g.strokeStyle = "#e8e0d0"; g.strokeRect(134, 96, 52, 14);
+    const pulse = 0.4 + 0.3 * Math.sin(f / 15) + (since("dt_stadio", 1) < 120 ? 0.4 : 0); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 160, 150, 22, "255,240,180", pulse); g.restore(); circ(g, 160, 150, 3, "#ffffff");
+    // il pallone vecchio, sgonfio, ancora lì
+    circ(g, 176, 156, 5, since("dt_stadio", 2) < 90 ? "#ffffff" : "#c9c0b0"); g.strokeStyle = "#555"; g.lineWidth = 1; g.beginPath(); g.arc(176, 156, 5, 0, Math.PI * 2); g.stroke();
+    // lo striscione strappato
+    px(g, 30, 176, 110, 14, "#7a3b2e"); g.fillStyle = "#ffcf7a"; g.font = "bold 7px sans-serif"; g.fillText(since("dt_stadio", 3) < 150 ? "SEMPRE CON TE, 14" : "SEMPRE CON TE, ..", 38, 186);
+    paperGrain(g, W, H, f, 0.04);
+  }
+  function bgDtRigore(g, W, H, f) {
+    // il dischetto in prima persona: la porta, il portiere, il pubblico diviso in due colori
+    vgrad(g, 0, 0, W, 90, ["#eef2f1", "#cfe3df"]);
+    for (let r = 0; r < 4; r++) for (let i = 0; i < 40; i++) { const x = i * 8 + (r % 2) * 4, left = x < 160, jump = since("dt_rigore", 0) < 120 ? Math.abs(Math.sin(f / 5 + i)) * 3 : 0; px(g, x, 20 + r * 14 - jump, 6, 10, left ? (r % 2 ? "#2a9d8f" : "#9aa5b1") : (r % 2 ? "#7a3b2e" : "#ffcf7a")); }
+    vgrad(g, 0, 90, W, 110, ["#d9efe6", "#bfe0d2"]);
+    px(g, 70, 80, 180, 6, "#ffffff"); px(g, 70, 80, 6, 70, "#ffffff"); px(g, 244, 80, 6, 70, "#ffffff"); g.strokeStyle = "rgba(43,58,58,.18)"; g.lineWidth = 1; for (let x = 76; x < 244; x += 8) { g.beginPath(); g.moveTo(x, 86); g.lineTo(x, 150); g.stroke(); } for (let y = 86; y < 150; y += 8) { g.beginPath(); g.moveTo(76, y); g.lineTo(244, y); g.stroke(); }
+    // il portiere che si sposta (si butta se toccato)
+    const dive = since("dt_rigore", 1) < 40 ? since("dt_rigore", 1) * 2 : 0, gx = 160 + Math.sin(f / 18) * 14 - dive;
+    px(g, gx - 8, 112, 16, 22, "#e07a3a"); circ(g, gx, 106, 6, "#d9b38c"); px(g, gx - 16, 114, 8, 4, "#e07a3a"); px(g, gx + 8, 114, 8, 4, "#e07a3a");
+    // il pallone sul dischetto
+    circ(g, 160, 182, 9, "#ffffff"); g.strokeStyle = "#2b3a3a"; g.lineWidth = 1.5; g.beginPath(); g.arc(160, 182, 9, 0, Math.PI * 2); g.stroke(); circ(g, 160, 182, 3, "#2b3a3a");
+    // la cuffia che ronza
+    if (since("dt_rigore", 2) < 120 || (f % 160) < 40) { px(g, 6, 160, 120, 30, "rgba(14,26,26,.85)"); g.fillStyle = "#5af0c8"; g.font = "bold 7px sans-serif"; g.fillText("LA VOCE: «Non tirare. Passalo.»", 12, 178); for (let i = 0; i < 12; i++) { const hh = 2 + Math.abs(Math.sin(f / 3 + i)) * 6; px(g, 12 + i * 3, 168 - hh / 2, 2, hh, "#5af0c8"); } }
+    paperGrain(g, W, H, f, 0.03);
+  }
+
   // elementi interattivi: [x, y, w, h, frase, azione?("tog" = acceso/spento)]
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
@@ -4588,6 +4640,23 @@
       [214, 128, 70, 52, "📼 Il registratore a bobine: le bobine girano. Una voce, piano: «…sono io. Se mi senti…». Poi silenzio."],
       [4, 118, 36, 64, "🚪 La porta numero 8: la apri e la chiudi. Dall'altra parte, il ronzio del Reparto Morale.", "tog"],
       [20, 26, 290, 90, "🗂️ Faldoni a perdita d'occhio: «Procedura Duale · contratti». Uno ha il tuo numero sulla costola. E sotto, a matita, un 14."],
+    ] },
+    dt_sala: { draw: bgDtSala, hot: [
+      [0, 6, 320, 94, "📺 Gli schermi: un occhio, una bocca, il tuo numero. Tutti ti guardano. Per un attimo si colorano d'arancio, come un tramonto sul porto."],
+      [100, 108, 120, 64, "📼 Il registratore grande: le bobine girano veloci. La voce che ne esce è la tua."],
+      [244, 100, 34, 82, "🎙️ Il microfono: la luce REC si accende. Qualcuno, qui, ha parlato a lungo. E poi ha detto «basta»."],
+      [30, 120, 50, 60, "🪑 La sedia davanti al microfono: verde acqua, consumata su un bracciolo solo. Il tuo."],
+    ] },
+    dt_stadio: { draw: bgDtStadio, hot: [
+      [8, 0, 30, 50, "💡 I fari dello stadio: li spegni e li riaccendi. Il Cartografo ruba bene la corrente.", "tog"],
+      [140, 136, 40, 30, "⚪ Il dischetto del rigore. Brilla. Ci sei già stato. Tre anni fa. Ultimo minuto."],
+      [166, 146, 20, 20, "⚽ Un pallone vecchio, sgonfio. Lo tocchi e per un attimo torna bianco, nuovo, pronto."],
+      [26, 172, 118, 22, "🏳️ Lo striscione strappato: «SEMPRE CON TE, 14». Nessuno l'ha mai tolto."],
+    ] },
+    dt_rigore: { draw: bgDtRigore, hot: [
+      [0, 12, 320, 60, "📣 Il pubblico: metà verde acqua, metà mattone. Saltano tutti. Per motivi opposti."],
+      [120, 96, 80, 44, "🧤 Il portiere: si butta da una parte prima ancora che tu tiri. Ti conosce. O conosce il 14."],
+      [4, 156, 126, 36, "🎧 La cuffia: «Non tirare. Passalo.» La tua voce, di tre anni fa."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
