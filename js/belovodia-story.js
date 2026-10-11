@@ -812,6 +812,9 @@
           // Palizzata perimetrale
           for (let y = 1; y < 21; y++) { put(0, y, "A"); put(23, y, "A"); }
           lay(0, 21, 23, 21, "A");
+          // Varco ovest per il Lago dei Silenzi
+          lay(0, 11, 11, 11, "p");
+          put(0, 11, "<");
 
           // Izba di Boris (a sinistra)
           lay(2, 4, 8, 7, "A");
@@ -1150,6 +1153,11 @@
         if (S() < 3) say([["voce", "La via verso la Radura del Gelo è bloccata: devi prima ottenere la Maschera del Falco da Nonno Boris."]], done);
         else go("bv_radura", 12, 18);
       },
+      "bv_villaggio:<": () => {
+        const m = mem();
+        if (!m.done[1]) say([["voce", "Il sentiero verso il Lago dei Silenzi è sferzato da raffiche gelide. Completa prima la prova del Capitolo 1."]], done);
+        else go("bv_lago", 22, 11);
+      },
       "bv_villaggio:F": () => say([["voce", "Il pozzo sacro di pietra: la superficie è coperta da una lastra di ghiaccio spesso, ma sotto l'acqua pulsa di luce verdina."]], done),
       "bv_villaggio:B": () => say([["voce", "I rami di conifera scoppiettano nel braciere, diffondendo un profumo resinoso e un calore ristoratore."]], done),
       "bv_villaggio:k": () => say([["voce", "L'idolo di legno antico dello Zar Moroz: le corna di cervo innevate vegliano silenziose sul villaggio."]], done),
@@ -1187,6 +1195,360 @@
         ["voce", "Inghiottito da una tormenta sovrannaturale mentre calciavi sulle coste liguri, ti risvegli tra fitte foreste di betulle d'argento.", "bv_villaggio"],
         ["voce", "Davanti a te sorge Belovodia: un borgo immoto fuori dal tempo, prigioniero dell'Inverno Eterno dello Zar Moroz.", "bv_villaggio"],
         ["voce", "Per trovare la via del ritorno e scaldare il cuore della foresta, dovrai imparare l'arte delle Maschere Ancestrali!", "bv_villaggio"]
+      ]
+    };
+  });
+
+  // ------------------------------------------------------------------ CAPITOLO 2: LE ACQUE DEL SILENZIO
+  addChapter(function (X) {
+    const { T, F, say, ask, done, go, note, setStep, reward, esc, addMask, sfxMask, sfxWind, sfxCrack } = X;
+    const N = 2, S = () => X.stepOf(N);
+
+    // Personaggi Capitolo 2
+    X.cast("bv_dama", {
+      name: "Dama delle Betulle", tag: "rusalka", hair: "#e2e8f0", style: "long", skin: "#f0cbaf", eye: "#06b6d4",
+      bg: ["#082f49", "#38bdf8"], shirt: "#0284c7"
+    }, "Spirito delle sorgenti lacustri addormentate sotto il ghiaccio. Una figura diafana dai lunghi capelli argentei che compare nei riflessi dell'aurora: «Chi cerca il disgelo deve essere pronto a sopportare il peso delle lacrime».");
+
+    X.cast("bv_yakov", {
+      name: "Yakov il Lupo Grigio", tag: "boiardo", hair: "#64748b", style: "messy", skin: "#c68642", eye: "#d97706",
+      beard: true, bg: ["#1e293b", "#b45309"], shirt: "#334155"
+    }, "Antico boiardo custode del Lago dei Silenzi. Statura da gigante, coperto da un mantello di pelliccia di lupo e corazza di cuoio. Portiere insormontabile che veglia sul sonno dello Zar per impedire che antichi rimorsi si risveglino.");
+
+    // Cosmetico Capitolo 2
+    X.cos("bv_maschera_orso", {
+      id: "bv_maschera_orso",
+      label: "Maschera dell'Orso di Belovodia",
+      sub: "Maschera scolpita nella roccia e nel legno nodoso con zanne d'avorio boreale.",
+      cat: "cappello",
+      val: 0
+    });
+
+    const goal = (s) => {
+      if (s === 0) return "Raggiungi la riva del Lago dei Silenzi a ovest del villaggio e parla con Nadezhda.";
+      if (s === 1) return "Esamina il riflesso della luna sul lago e ascolta la Dama delle Betulle.";
+      if (s === 2) return "Entra nel capanno dei pescatori ed esplora la Caverna di Brina.";
+      if (s === 3) return "Avvicinati all'altare dell'Orso e armonizzati con la roccia millenaria.";
+      if (s === 4) return "Sfida Yakov e i Lupi Grigi nella partita cerimoniale sul Lago Specchio.";
+      return "Hai sconfitto i Lupi Grigi! La via per la Fortezza di Cenere a nord è aperta.";
+    };
+
+    // Zone del Capitolo 2
+    const zones = {
+      bv_lago: {
+        name: "Il Lago dei Silenzi", short: "Lago Specchio di Ghiaccio",
+        sub: "Specchio d'acqua traslucido con crepe azzurrine, pontili e canneti",
+        w: 24, h: 22, start: [22, 11], bg: "bv_lago", theme: "torino",
+        item: ["Frammento di Salgemma", "Salgemma"],
+        build(Ls) {
+          const { lay, put } = Ls;
+          // Neve sulle sponde
+          lay(0, 0, 23, 21, ",");
+          // Superficie del lago di ghiaccio vivo calpestabile
+          lay(7, 3, 21, 18, ":");
+
+          // Rive boscose nord e sud
+          lay(0, 0, 23, 1, "A");
+          lay(0, 20, 23, 21, "A");
+          for (let y = 1; y < 21; y++) put(0, y, "A");
+
+          // Pontile in legno di pino
+          lay(1, 11, 7, 11, "p");
+          lay(3, 7, 6, 12, "p");
+
+          // Capanno del pescatore a ovest
+          lay(1, 5, 5, 7, "A");
+          put(4, 7, "u"); // Porta della caverna
+          put(2, 6, "J"); // Finestra
+          put(5, 8, "l"); // Lanterna
+
+          // Canneti e totem
+          put(10, 2, "x"); put(16, 2, "x");
+          put(12, 19, "k"); // Idolo
+          put(6, 13, "B");  // Braciere
+
+          // Uscita est verso il villaggio
+          put(23, 11, ">");
+        },
+        npcs(s) {
+          const list = [];
+          list.push({ id: "bv_nadia", at: [18, 11] });
+          if (s >= 1 && s <= 3) list.push({ id: "bv_dama", at: [14, 10] });
+          if (s >= 2) list.push({ id: "bv_yakov", at: [8, 9] });
+          return list;
+        }
+      },
+
+      bv_caverna: {
+        name: "La Caverna di Brina", short: "La Tana di Yakov",
+        sub: "Stalattiti di ghiaccio azzurro, braciere ardente e altare dell'Orso",
+        w: 16, h: 14, start: [8, 11], bg: "bv_caverna", theme: "torino",
+        item: ["Cristallo di Brina", "Cristalli"],
+        build(Ls) {
+          const { lay, put } = Ls;
+          // Mura di roccia della caverna
+          lay(0, 0, 15, 13, "A");
+          // Pavimento in lastre di pietra e brina
+          lay(1, 1, 14, 12, "w");
+          lay(4, 3, 11, 9, ":");
+
+          // Stalattiti perimetrali
+          put(2, 2, "A"); put(13, 2, "A");
+          put(2, 11, "A"); put(13, 11, "A");
+
+          // Altare della Maschera dell'Orso al centro
+          put(8, 4, "H");
+
+          // Focolare centrale
+          put(8, 8, "B");
+          put(5, 5, "x"); put(10, 5, "x"); // Ceppi e pelli
+          put(5, 9, "b"); put(11, 9, "b");
+
+          // Porta sud di uscita sul pontile del lago
+          put(8, 12, "d");
+        },
+        npcs(s) {
+          const list = [];
+          if (s <= 3) list.push({ id: "bv_yakov", at: [6, 5] });
+          return list;
+        }
+      }
+    };
+
+    // Dialoghi Capitolo 2
+    function nadiaTalk2() {
+      const s = S();
+      if (s === 0) {
+        return say([
+          ["bv_nadia", "Siamo al Lago dei Silenzi, {n}. D'inverno qui le acque non scorrono più: sono una lastra di cristallo spessa dieci braccia."],
+          ["hero", "Sento un canto malinconico... come una voce che sale da sotto il ghiaccio."],
+          ["bv_nadia", "È la Dama delle Betulle. Prima del grande gelo era la custode di queste rive. Guarda al centro del lago, dove la luna si specchia tra le crepe."],
+        ], () => {
+          setStep(N, 1);
+          note("Arrivo al Lago dei Silenzi: la voce della Rusalka risuona tra le crepe di ghiaccio.");
+          done();
+        });
+      }
+      if (s === 1) {
+        return say([
+          ["bv_nadia", "Cammina piano sul ghiaccio vivo verso il centro. La Dama si manifesta a chi porta il cuore puro."],
+        ], done);
+      }
+      if (s === 2) {
+        return say([
+          ["bv_nadia", "Yakov ti attende nella caverna dietro il capanno. È testardo come un tronco di quercia, ma rispetta chi non ha paura di guardarlo negli occhi."],
+        ], done);
+      }
+      if (s === 3) {
+        return say([
+          ["bv_nadia", "L'altare dell'Orso è pronto. Sintonizzati con la roccia per acquisire la forza d'impatto."],
+        ], done);
+      }
+      if (s === 4) {
+        return ask("bv_nadia", "«La Meute dei Lupi è schierata sul lago ghiacciato. Con la Maschera del Falco e quella dell'Orso puoi sfondare il loro muro difensivo!»", [
+          {
+            label: "⚡ «Iniziamo la partita contro Yakov!»",
+            cls: "hot",
+            fn: startMatch2
+          },
+          { label: "«Aspetta, voglio ripassare gli schemi»", fn: done }
+        ]);
+      }
+      return say([
+        ["bv_nadia", "Hai piegato il muro di Yakov! Mai nessun calciatore aveva superato la sua guardia sul lago."],
+      ], done);
+    }
+
+    function damaTalk2() {
+      const s = S();
+      if (s === 1) {
+        sfxCrack();
+        return say([
+          ["bv_dama", "(Emerge dal riflesso del ghiaccio in una nube di brina argentea) Chi calpesta le mie acque con scarpe con i tacchetti e sguardo di fiamma?"],
+          ["hero", "Sono {n}. Cerco la via per risvegliare la foresta e liberare Belovodia dalla prigionia del freddo."],
+          ["bv_dama", "Il disgelo... una parola dolce e crudele. Sai perché Moroz ha ghiacciato il nostro mondo? Perché il disgelo porta con sé il tempo che fugge, e con il tempo il dolore della perdita."],
+          ["bv_dama", "Yakov, l'antico boiardo, difende la caverna sacra. Nella sua tana riposa la Maschera dell'Orso. Ma attento: l'Orso dona una forza titanica, ma può indurire il cuore di chi lo indossa fino a renderlo di pietra."],
+        ], () => {
+          setStep(N, 2);
+          note("Incontro con la Dama delle Betulle: svelata la tentazione della forza dell'Orso.");
+          done();
+        });
+      }
+      return say([
+        ["bv_dama", "«Ascolta il gemito dell'acqua sotto il ghiaccio... non spezzare il mondo con la sola furia, {n}.»"],
+      ], done);
+    }
+
+    function yakovTalk2() {
+      const s = S();
+      if (s === 2) {
+        return say([
+          ["bv_yakov", "(Ti sovrasta di due teste, stringendo pugni grandi come incudini) Dunque sei tu il viandante col numero {num} che ha sbaragliato le guardie con il Falco."],
+          ["hero", "Yakov. Abbiamo bisogno della Maschera dell'Orso per attraversare la gola verso la Fortezza."],
+          ["bv_yakov", "La Fortezza di Moroz è un santuario del riposo eterno! Se la primavera torna, la mia gente invecchierà, soffrirà, morirà! Finché il lago resta gelato, nessuno perderà mai nulla."],
+          ["hero", "Ma vivere nel ghiaccio senza domani non è pace, Yakov. È solo una tomba che non sa di esserlo."],
+          ["bv_yakov", "(Stringe la mascella, colpito) Parole audaci per chi gioca con un pallone. L'altare dell'Orso è lì dietro. Prova a sollevare la maschera: se il tuo spirito non è abbastanza saldo, il peso della pietra ti spezzerà le ginocchia."],
+        ], () => {
+          setStep(N, 3);
+          done();
+        });
+      }
+      if (s === 3) {
+        return say([
+          ["bv_yakov", "Avvicinati all'altare al centro della caverna. Mostrami se hai la statura per reggere la Maschera dell'Orso."],
+        ], done);
+      }
+      if (s === 4) {
+        return ask("bv_yakov", "«I miei difensori sono pronti sul Lago Specchio. Nessun tiro è mai passato attraverso i miei guantoni di pelo di lupo. Sei pronto alla prova?»", [
+          {
+            label: "⚽ «Scendiamo in campo, Yakov!»",
+            cls: "hot",
+            fn: startMatch2
+          },
+          { label: "«Dammi ancora un minuto»", fn: done }
+        ]);
+      }
+      return say([
+        ["bv_yakov", "(Si toglie i guantoni, guardandosi le mani tremanti) Il tuo tiro «{tiro}»... ha fatto vibrare il ghiaccio fino al fondo del lago. Forse... avevi ragione tu."],
+      ], done);
+    }
+
+    function esaminaAltareOrso() {
+      if (S() !== 3) {
+        return say([["voce", "L'altare dell'Orso di Pietra: pelli spesse di lupo e rune boreali intagliate nella roccia."]], done);
+      }
+      sfxBelovodiaCrack();
+      ask("voce", "La Maschera dell'Orso di Pietra irradia una forza tellurica incontenibile. Come decidi di accogliere il suo potere?", [
+        {
+          label: "💧 «Unisco la forza dell'orso alla pietà per la Dama e le acque addormentate»",
+          sub: "Via della Grazia Spirituale (scelta morale per il finale)",
+          cls: "hot",
+          fn: () => {
+            F.set("bv_scelta_2", "spirito");
+            concludiSintonizzazioneOrso("spirito");
+          }
+        },
+        {
+          label: "🐻 «Accetto la sfida di Yakov: forza brutale e contrasti di ferro sul ghiaccio!»",
+          sub: "Via della Volontà e Potenza Indomita (scelta morale per il finale)",
+          cls: "hot",
+          fn: () => {
+            F.set("bv_scelta_2", "volonta");
+            concludiSintonizzazioneOrso("volonta");
+          }
+        },
+        {
+          label: "🛡️ «Prometto di difendere ogni casa del borgo contro la solitudine dell'inverno»",
+          sub: "Via del Popolo di Belovodia (scelta morale per il finale)",
+          fn: () => {
+            F.set("bv_scelta_2", "popolo");
+            concludiSintonizzazioneOrso("popolo");
+          }
+        }
+      ]);
+    }
+
+    function concludiSintonizzazioneOrso(scelta) {
+      sfxMask();
+      addMask("orso", "La Maschera dell'Orso di Pietra", "Conferisce contrasti rocciosi, protezione della palla e tiri carichi di potenza d'urto.");
+      setStep(N, 4);
+      const descScelta = scelta === "spirito"
+        ? "Hai mitigato la ferocia dell'orso con il rispetto per gli spiriti d'acqua, unendo terra e ghiaccio."
+        : scelta === "volonta"
+          ? "Hai abbracciato la potenza pura dei boiardi, pronto a sfondare qualsiasi blocco con la forza fisica."
+          : "Hai consacrato la forza granitica alla difesa della gente comune contro l'abbandono.";
+      note(`MASCHERA DELL'ORSO RISVEGLIATA (${scelta.toUpperCase()}): ${descScelta}`);
+
+      say([
+        ["voce", "La terra sotto i tuoi piedi trema! La Maschera dell'Orso si salda alla tua figura: una stazza titanica e una solidità incrollabile pervadono i tuoi muscoli."],
+        ["bv_yakov", "(Osserva a bocca aperta) Non ha vacillato. La roccia lo riconosce."],
+        ["hero", "Sento ogni contrasto come se fossi un bastione d'acciaio. Nessun avversario potrà più togliermi il pallone dai piedi!"],
+        ["bv_yakov", "Allora vieni sul lago. La mia squadra non si tirerà indietro!"],
+      ], () => {
+        go("bv_lago", 8, 9);
+      });
+    }
+
+    function startMatch2() {
+      sfxWind();
+      X.playMatch({
+        id: "bv_match_2",
+        alt: "hd,az", azPitch: "neve",
+        oppNames: ["Yakov il Muro", "Artiglio Bianco", "Zanna d'Acciaio", "Bufera dei Lupi", "Lupo Nero"],
+        squad: ["Nadezhda", "Dama delle Betulle", "Sentinella Boreale"],
+        chap: "Belovodia · La Sfida del Lago Specchio",
+        us: "I Cacciatori del Disgelo",
+        mate: "Nadezhda",
+        min: 45,
+        intro: "SECONDA SFIDA DI BELOVODIA! Il tuo Campione {n} affronta la Meute dei Lupi guidata dall'insormontabile portiere Yakov!",
+        team: (t, st) => ({
+          name: "I Lupi Grigi di Yakov",
+          col: "#475569",
+          style: "Difesa D'Acciaio & Contrasti Fisici Pesanti",
+          atk: t(st.atk * 1.15),
+          def: t(st.def * 1.3),
+          vel: t(st.vel * 1.05),
+          specials: ["Muro della Tana", "Carica del Lupo"]
+        }),
+        done: (r) => {
+          if (r.win) {
+            setStep(N, 5);
+            note("VITTORIA LEGGENDARIA SUL LAGO! Yakov e la sua guardia sono stati battuti sul ghiaccio.");
+            const rewMsg = reward("bv_ch2_complete", {
+              coins: 300,
+              cos: "bv_maschera_orso"
+            });
+            finishChapter(N, "orso_superato");
+            say([
+              ["voce", "GOOOOOOOL INARRESTABILEEEE! Con un colpo titanico caricato dalla Maschera dell'Orso e dal tuo tiro «{tiro}», la sfera sfonda i guantoni di Yakov e gonfia la rete tra gli applausi dell'aurora!"],
+              ["bv_yakov", "Sei... formidabile, ragazzo. La mia corazza non ha potuto nulla contro la tua passione."],
+              ["bv_dama", "(Sorride dolcemente dalla riva del lago) Il ghiaccio del lago comincia a respirare... avete aperto il varco per la Fortezza di Cenere a nord."],
+              ["bv_nadia", "Prendi la chiave dei cancelli, {n}. Il Capitolo 3 ci porterà nel cuore della Fonderia di Cenere!"],
+              ["voce", `CAPITOLO 2 COMPLETATO! ${rewMsg.join(" · ")}`],
+            ], () => {
+              go("bv_lago", 18, 11);
+            });
+          } else {
+            say([
+              ["bv_yakov", "La nostra difesa non cede così facilmente! Rialzati, raccogli la grinta e riprova!"],
+            ], done);
+          }
+        }
+      });
+    }
+
+    const obj = {
+      "bv_lago:>": () => go("bv_villaggio", 1, 11),
+      "bv_lago:u": () => go("bv_caverna", 8, 11),
+      "bv_lago:k": () => say([["voce", "L'antico idolo dei lupi: scolpito nella corteccia per ricordare che chi rispetta il branco non sarà mai solo nella notte."]], done),
+      "bv_lago:B": () => say([["voce", "Le braci ardenti del pontile proteggono i pescatori dal gelo che sale dall'abisso."]], done),
+
+      "bv_caverna:d": () => go("bv_lago", 4, 8),
+      "bv_caverna:H": esaminaAltareOrso,
+      "bv_caverna:B": () => say([["voce", "Il focolare della caverna di Yakov: il grasso di pino arde lentamente, riscaldando le stalattiti."]], done),
+      "bv_caverna:b": () => say([["voce", "Una panca grezza intagliata in un tronco d'abete colossale."]], done)
+    };
+
+    const talk = {
+      bv_nadia: nadiaTalk2,
+      bv_dama: damaTalk2,
+      bv_yakov: yakovTalk2
+    };
+
+    return {
+      n: N,
+      title: "Le Acque del Silenzio · La Maschera dell'Orso",
+      sub: "Il Lago Specchio di Ghiaccio, la Rusalka e la sfida alla meute di Yakov",
+      start: "bv_lago",
+      zones,
+      talk,
+      obj,
+      goal,
+      intro: () => [
+        ["voce", "BELOVODIA · CAPITOLO 2: LE ACQUE DEL SILENZIO", "bv_lago"],
+        ["voce", "A ovest del villaggio, il sentiero si apre sul Lago dei Silenzi: una distesa di cristallo immota sotto la luce fredda della luna.", "bv_lago"],
+        ["voce", "Yakov il Lupo Grigio e la spettrale Dama delle Betulle custodiscono l'antica Caverna di Brina.", "bv_lago"],
+        ["voce", "Per avanzare verso il cuore dell'inverno, dovrai dimostrare di possedere sia la visione del falco sia la forza dell'orso!", "bv_lago"]
       ]
     };
   });

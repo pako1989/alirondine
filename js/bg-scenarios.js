@@ -1910,6 +1910,206 @@
     }
   }
 
+  // --- 11. BELOVODIA · IL LAGO SPECCHIO DI GHIACCIO ---
+  function drawDetailedBelovodiaLago(g, W, H, f) {
+    // Cielo notturno freddo con sfumature di cobalto
+    const sky = g.createLinearGradient(0, 0, 0, 90);
+    sky.addColorStop(0, "#020617");
+    sky.addColorStop(0.5, "#0b1a30");
+    sky.addColorStop(1, "#172554");
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, 90);
+
+    // Aurora boreale specchiata
+    g.save();
+    g.globalCompositeOperation = "screen";
+    for (let a = 0; a < 2; a++) {
+      const grad = g.createLinearGradient(0, 10, 0, 70);
+      grad.addColorStop(0, "rgba(6, 182, 212, 0)");
+      grad.addColorStop(0.5, `rgba(56, 189, 248, ${0.25 + 0.08 * Math.sin(f * 0.04 + a)})`);
+      grad.addColorStop(1, "rgba(6, 182, 212, 0)");
+      g.fillStyle = grad;
+      g.beginPath();
+      g.moveTo(0, 35 + a * 12);
+      for (let x = 0; x <= W; x += 16) {
+        const y = 20 + a * 12 + Math.sin(x * 0.03 + f * 0.03) * 10;
+        g.lineTo(x, y);
+      }
+      g.lineTo(W, 80);
+      g.lineTo(0, 80);
+      g.closePath();
+      g.fill();
+    }
+    g.restore();
+
+    // Luna piena bianca e gelida
+    g.fillStyle = "rgba(248, 250, 252, 0.25)";
+    g.beginPath(); g.arc(230, 30, 20, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#f8fafc";
+    g.beginPath(); g.arc(230, 30, 12, 0, Math.PI * 2); g.fill();
+
+    // Rive rocciose e abeti innevati lontani
+    for (let rx = 0; rx < W; rx += 18) {
+      const ph = 18 + (rx % 4) * 4;
+      g.fillStyle = "#091424";
+      g.beginPath();
+      g.moveTo(rx + 9, 78 - ph);
+      g.lineTo(rx, 78);
+      g.lineTo(rx + 18, 78);
+      g.closePath();
+      g.fill();
+      px(g, rx + 8, 78 - ph, 2, 4, "#cbd5e1");
+    }
+
+    // Superficie del Lago di Ghiaccio (specchio riflettente traslucido)
+    const iceGrad = g.createLinearGradient(0, 78, 0, H);
+    iceGrad.addColorStop(0, "#0284c7");
+    iceGrad.addColorStop(0.3, "#0369a1");
+    iceGrad.addColorStop(0.7, "#075985");
+    iceGrad.addColorStop(1, "#0c4a6e");
+    g.fillStyle = iceGrad;
+    g.fillRect(0, 78, W, H - 78);
+
+    // Riflesso della luna sul ghiaccio
+    g.fillStyle = "rgba(240, 249, 255, 0.25)";
+    g.beginPath();
+    g.ellipse(230, 115, 16, 32, 0, 0, Math.PI * 2);
+    g.fill();
+
+    // Crepe bianche e azzurro chiaro che attraversano il lago
+    g.strokeStyle = "rgba(186, 230, 253, 0.65)";
+    g.lineWidth = 1.5;
+    g.beginPath();
+    g.moveTo(30, 95); g.lineTo(85, 118); g.lineTo(140, 112); g.lineTo(190, 145); g.lineTo(260, 140);
+    g.moveTo(85, 118); g.lineTo(105, 155); g.lineTo(80, 185);
+    g.moveTo(140, 112); g.lineTo(165, 90);
+    g.stroke();
+
+    // Pontile in legno di pino a sinistra
+    px(g, 10, 105, 75, 18, "#3b2314");
+    px(g, 10, 103, 75, 3, "#5c2406");
+    for (let pxX = 20; pxX < 85; pxX += 16) {
+      px(g, pxX, 122, 4, 38, "#27150c");
+      px(g, pxX + 1, 105, 2, 55, "#180c06");
+    }
+
+    // Capanno del pescatore di Yakov sulla riva sinistra
+    px(g, 0, 75, 45, 34, "#3b2314");
+    g.fillStyle = "#f8fafc";
+    g.beginPath(); g.moveTo(0, 75); g.lineTo(22, 54); g.lineTo(48, 75); g.closePath(); g.fill();
+    px(g, 18, 86, 12, 23, "#180c06");
+    // Lanterna appesa al pontile con alone caldo
+    const lx = 78, ly = 100;
+    px(g, lx, ly, 3, 10, "#1e293b");
+    const lGlow = g.createRadialGradient(lx + 1, ly + 8, 1, lx + 1, ly + 8, 22);
+    lGlow.addColorStop(0, "rgba(251, 191, 36, 0.75)");
+    lGlow.addColorStop(1, "rgba(245, 158, 11, 0)");
+    g.fillStyle = lGlow;
+    g.fillRect(lx - 20, ly - 12, 42, 42);
+    px(g, lx - 2, ly + 6, 7, 6, "#0f172a");
+    px(g, lx, ly + 8, 3, 3, "#fef08a");
+
+    // Canneti ghiacciati a destra
+    for (let cx = W - 55; cx < W; cx += 8) {
+      px(g, cx, 88 + (cx % 3) * 6, 2, 38, "#64748b");
+      px(g, cx - 1, 88 + (cx % 3) * 6, 4, 2, "#bae6fd");
+    }
+
+    // Neve leggera che cade
+    for (let i = 0; i < 30; i++) {
+      const nx = (i * 31 + f * 0.7) % W;
+      const ny = (i * 19 + f * 1.3) % H;
+      px(g, nx, ny, 1, 1, "rgba(255,255,255,0.75)");
+    }
+  }
+
+  // --- 12. BELOVODIA · LA CAVERNA DI BRINA ---
+  function drawDetailedBelovodiaCaverna(g, W, H, f) {
+    // Volta rocciosa della caverna in blu cobalto scuro e ghiaccio
+    const cavGrad = g.createLinearGradient(0, 0, 0, H);
+    cavGrad.addColorStop(0, "#030712");
+    cavGrad.addColorStop(0.4, "#0f172a");
+    cavGrad.addColorStop(1, "#0284c7");
+    g.fillStyle = cavGrad;
+    g.fillRect(0, 0, W, H);
+
+    // Stalattiti di ghiaccio pendenti dalla volta
+    for (let st = 10; st < W; st += 18) {
+      const sl = 22 + (st % 6) * 5;
+      g.fillStyle = "#bae6fd";
+      g.beginPath();
+      g.moveTo(st, 0);
+      g.lineTo(st + 6, sl);
+      g.lineTo(st + 12, 0);
+      g.closePath();
+      g.fill();
+      px(g, st + 5, 0, 2, sl - 4, "#e0f2fe");
+    }
+
+    // Stalagmiti dal pavimento
+    for (let sm = 25; sm < W; sm += 26) {
+      const sh = 16 + (sm % 4) * 4;
+      g.fillStyle = "#38bdf8";
+      g.beginPath();
+      g.moveTo(sm, H);
+      g.lineTo(sm + 5, H - sh);
+      g.lineTo(sm + 10, H);
+      g.closePath();
+      g.fill();
+      px(g, sm + 4, H - sh + 2, 2, sh - 2, "#e0f2fe");
+    }
+
+    // Pavimento della caverna coperto di lastre di pietra e brina
+    const fGrad = g.createLinearGradient(0, 135, 0, H);
+    fGrad.addColorStop(0, "#1e293b");
+    fGrad.addColorStop(0.5, "#0f172a");
+    fGrad.addColorStop(1, "#020617");
+    g.fillStyle = fGrad;
+    g.fillRect(0, 135, W, H - 135);
+
+    // Grande altare della Maschera dell'Orso al centro
+    const ax = W / 2 - 40, ay = 85;
+    px(g, ax, ay, 80, 48, "#18181b");
+    px(g, ax - 4, ay, 88, 5, "#27272a");
+    // Pelli di lupo e orso stese sull'altare
+    px(g, ax + 8, ay + 6, 64, 18, "#451a03");
+    px(g, ax + 12, ay + 8, 56, 14, "#78350f");
+
+    // Maschera dell'Orso di Pietra scolpita ed esposta al centro
+    const mx = W / 2, my = ay - 14;
+    g.fillStyle = "#57534e";
+    g.beginPath();
+    g.arc(mx, my + 10, 16, 0, Math.PI * 2);
+    g.fill();
+    // Orecchie d'orso
+    px(g, mx - 15, my - 2, 7, 7, "#44403c");
+    px(g, mx + 8, my - 2, 7, 7, "#44403c");
+    // Occhi ambrati ardenti
+    const eyeFlicker = Math.sin(f * 0.15) * 0.5;
+    px(g, mx - 7, my + 6, 4, 3, "#f59e0b");
+    px(g, mx + 3, my + 6, 4, 3, "#f59e0b");
+    px(g, mx - 5, my + 7, 1, 1, "#fef08a");
+    px(g, mx + 5, my + 7, 1, 1, "#fef08a");
+    // Zanne bianche
+    px(g, mx - 4, my + 18, 2, 4, "#f8fafc");
+    px(g, mx + 2, my + 18, 2, 4, "#f8fafc");
+
+    // Braciere acceso di fronte all'altare
+    const bx = W / 2, by = 155;
+    px(g, bx - 14, by, 28, 12, "#18181b");
+    const bGlow = g.createRadialGradient(bx, by - 4, 2, bx, by - 4, 45);
+    bGlow.addColorStop(0, "rgba(249, 115, 22, 0.75)");
+    bGlow.addColorStop(1, "rgba(234, 88, 12, 0)");
+    g.fillStyle = bGlow;
+    g.fillRect(bx - 45, by - 48, 90, 90);
+    // Fiamma
+    const bFl = Math.sin(f * 0.2) * 3;
+    g.fillStyle = "#ef4444";
+    g.beginPath(); g.moveTo(bx - 10, by); g.lineTo(bx, by - 16 + bFl); g.lineTo(bx + 10, by); g.closePath(); g.fill();
+    g.fillStyle = "#fbbf24";
+    g.beginPath(); g.moveTo(bx - 5, by); g.lineTo(bx, by - 10 + bFl * 0.5); g.lineTo(bx + 5, by); g.closePath(); g.fill();
+  }
+
   // INTERAZIONE TOUCH/CLICK CON GLI ELEMENTI DELLO SFONDO (SCENIC INTERACTION)
   function setupScenicCanvasInteraction() {
     const cv = document.getElementById("cv");
@@ -1965,6 +2165,26 @@
           if (toast) toast("🌲 Betulle Guardiane: «I tronchi d'argento delimitano il confine sacro della radura.»");
         } else if (clickY > 120) {
           if (toast) toast("⚽ Ghiaccio del campo: «Il terreno è scivoloso e imprevedibile, ideale per tiri radenti e cariche a sorpresa!»");
+        }
+      } else if (bg === "bv_lago") {
+        if (clickX < 90 && clickY > 90) {
+          if (toast) toast("🪵 Pontile dei Pescatori: «Le assi scricchiolano sotto gli stivali nel silenzio del lago.»");
+        } else if (Math.abs(clickX - 230) < 40 && clickY > 80 && clickY < 150) {
+          if (toast) toast("💎 Riflesso della Luna sul Ghiaccio: «Sotto la lastra azzurra sembra muoversi l'ombra di una Rusalka...»");
+          sfx("chime");
+        } else if (clickX > W - 70 && clickY > 80) {
+          if (toast) toast("🌾 Canneti ghiacciati: «Steli rigidi di giunco incrostati di brina argentina.»");
+        } else if (clickY < 60) {
+          if (toast) toast("🌌 Aurora sul Lago: «Lampi di luce boreale si specchiano sulle acque addormentate.»");
+        }
+      } else if (bg === "bv_caverna") {
+        if (Math.abs(clickX - W / 2) < 50 && clickY > 70 && clickY < 135) {
+          if (toast) toast("🎭 Altare della Maschera dell'Orso: «L'idolo di pietra emana un calore profondo e titanico.»");
+          sfx("kick");
+        } else if (clickY < 55) {
+          if (toast) toast("❄️ Stalattiti di Brina: «Ghiaccioli traslucidi pendono dalla volta di roccia scura.»");
+        } else if (Math.abs(clickX - W / 2) < 40 && clickY >= 135) {
+          if (toast) toast("🔥 Focolare della Caverna: «Ceppi di pino ardono spargendo un profumo di resina e brace.»");
         }
       } else if (bg === "feudi_consiglio") {
         if (clickY < H * 0.55 && Math.abs(clickX - W / 2) < 55) {
@@ -2029,6 +2249,12 @@
         return true;
       case "bv_radura":
         drawDetailedBelovodiaRadura(g, W, H, f);
+        return true;
+      case "bv_lago":
+        drawDetailedBelovodiaLago(g, W, H, f);
+        return true;
+      case "bv_caverna":
+        drawDetailedBelovodiaCaverna(g, W, H, f);
         return true;
       case "feudi_consiglio":
         drawDetailedFeudiConsiglio(g, W, H, f);
