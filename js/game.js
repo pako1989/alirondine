@@ -25281,6 +25281,11 @@
     closeAltStage: () => closeAltStage()
   };
   window.title = () => title();
+  // pulsante rapido nel pannello Opzioni in alto: cambia lo stile dei volti con un tocco
+  const FACE_ORDER = ["classic", "cartone", "anime", "illustrato", "pixel", "comic", "manga", "acquerello"], FACE_NAME = { classic: "Classico", cartone: "Cartone", anime: "Anime", illustrato: "Illustrato", pixel: "Pixel", comic: "Fumetto", manga: "Manga", acquerello: "Acquerello" };
+  const facesLbl = () => { const l = $("facesLbl"); if (l) l.textContent = "Volti: " + (FACE_NAME[SET.faces] || "Classico"); };
+  window.cycleFaces = () => { const i = FACE_ORDER.indexOf(SET.faces); SET.faces = FACE_ORDER[(i + 1) % FACE_ORDER.length]; try { Object.keys(PORT_IMG).forEach((k) => delete PORT_IMG[k]); } catch {} writeJSON(SETK, SET); facesLbl(); if (window.toast) window.toast("Stile dei volti: " + FACE_NAME[SET.faces], "info", "🎭"); };
+  if ($("facesBtn")) { $("facesBtn").onclick = window.cycleFaces; facesLbl(); }
   window.setView = (v) => { view = v; };
   window.getView = () => view;
   window.closeAltStage = () => closeAltStage();
