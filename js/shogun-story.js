@@ -561,9 +561,11 @@
   const ZONES = {};
 
   function registerZone(chNum, zid, spec) {
-    const Z = Object.assign({ id: zid, act: {}, npcs: [] }, spec);
+    const Z = Object.assign({ id: zid, act: {}, npcs: [], items: spec.items || [], item: spec.item || ["Moneta del Dragone", "Monete"] }, spec);
     Z.w = spec.w || 25;
     Z.h = spec.h || 15;
+    Z.items = spec.items || [];
+    Z.item = spec.item || ["Moneta del Dragone", "Monete"];
     Z.npcs = (spec.npcs || []).map((n) => {
       const at = Array.isArray(n.at) ? n.at : [Math.round((n.x || 0) / TS), Math.round((n.y || 0) / TS)];
       return { ...n, at };

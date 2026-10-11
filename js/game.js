@@ -8845,7 +8845,7 @@
     });
     // oggetti da raccogliere
     const got = r.got[TW.id] || [];
-    z.items.forEach(([tx, ty], i) => {
+    (z.items || []).forEach(([tx, ty], i) => {
       if (got.includes(i)) return;
       const x = tx * TS - cx + 8, y = ty * TS - cy + 9 + Math.sin(frame / 12 + i) * 1.2;
       if (TW.id === "caruggi") { px(x - 4, y - 5, 8, 10, "#f5e6c8"); px(x - 3, y - 4, 6, 5, "#c8553d"); px(x - 3, y + 2, 6, 1, "#555"); }
