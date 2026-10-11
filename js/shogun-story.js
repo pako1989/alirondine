@@ -562,12 +562,39 @@
 
   function registerZone(chNum, zid, spec) {
     const Z = Object.assign({ id: zid, act: {}, npcs: [] }, spec);
+    Z.w = spec.w || 25;
+    Z.h = spec.h || 15;
+    Z.npcs = (spec.npcs || []).map((n) => {
+      const at = Array.isArray(n.at) ? n.at : [Math.round((n.x || 0) / TS), Math.round((n.y || 0) / TS)];
+      return { ...n, at };
+    });
     ZONES[zid] = { ch: chNum, Z, spec };
 
-    Z.build = function (Ls) {
-      if (spec.build) spec.build(Ls);
-      // Garantisce mappa navigabile e coerente
-      const m = mem();
+    Z.build = function (m, fill) {
+      ZX.map = m; ZX.id = zid;
+      const cv = document.getElementById("cv");
+      if (cv) GP = cv.getContext("2d");
+      const Ls = {
+        lay: (x0, y0, x1, y1, ch) => {
+          for (let y = y0; y <= y1; y++) {
+            for (let x = x0; x <= x1; x++) {
+              if (m[y] && x >= 0 && x < (Z.w || 25)) m[y][x] = ch;
+            }
+          }
+        },
+        put: (x, y, ch) => {
+          if (m[y] && x >= 0 && x < (Z.w || 25)) m[y][x] = ch;
+        }
+      };
+      if (spec.build) spec.build(Ls, m, fill);
+    };
+
+    Z.tile = function (ch, sx, sy, tx, ty) {
+      const cv = document.getElementById("cv");
+      if (cv) GP = cv.getContext("2d");
+      if (isFloor(ch)) { floorPaint(ch, sx, sy, tx, ty); return true; }
+      solidPaint(ch, sx, sy, tx, ty);
+      return true;
     };
 
     Z.top = function (cx, cy) {
@@ -960,6 +987,7 @@ Durante l'esplorazione del Regno delle Sette Lame, tocca il pulsante <b>⚔️ S
           name: "Santuario di Kage-no-Mori · Giardino dei Ciliegi",
           short: "Giardino dei Ciliegi",
           sub: "Torii vermigli, petali cadenti e lo spirito antico del calcio feudale",
+          w: 25, h: 15, start: [8, 8], theme: "torino", bg: "sh_dojo",
           isCustomSaga: true,
           act: {
             "8,7": "Parla con il Maestro Hayato",
@@ -991,9 +1019,9 @@ Durante l'esplorazione del Regno delle Sette Lame, tocca il pulsante <b>⚔️ S
             Ls.put(16, 8, "B"); // Ponte di legno
           },
           npcs: [
-            { id: "sh_hayato", x: 8 * TS, y: 7 * TS, name: "Maestro Hayato", dir: "down" },
-            { id: "sh_tomoe", x: 18 * TS, y: 4 * TS, name: "Lady Tomoe", dir: "left" },
-            { id: "sh_ronin_boss", x: 22 * TS, y: 8 * TS, name: "Kage-Maru", dir: "left" }
+            { id: "sh_hayato", at: [8, 7], dir: "down" },
+            { id: "sh_tomoe", at: [18, 4], dir: "left" },
+            { id: "sh_ronin_boss", at: [22, 8], dir: "left" }
           ]
         }
       },
@@ -1157,6 +1185,7 @@ Durante l'esplorazione del Regno delle Sette Lame, tocca il pulsante <b>⚔️ S
           name: "Il Borgo dei Samurai · Quartiere delle Lanterne",
           short: "Borgo dei Samurai",
           sub: "Botteghe di fabbri, lanterne di carta rossa, ponti arcuati e guardie d'élite",
+          w: 25, h: 15, start: [2, 7], theme: "torino", bg: "sh_tempio",
           isCustomSaga: true,
           act: {
             "6,6": "Parla con la Kunoichi Hanzo",
@@ -1186,9 +1215,9 @@ Durante l'esplorazione del Regno delle Sette Lame, tocca il pulsante <b>⚔️ S
             Ls.put(18, 6, "M"); // Braciere della forgia
           },
           npcs: [
-            { id: "sh_hanzo", x: 6 * TS, y: 6 * TS, name: "Kunoichi Hanzo", dir: "down" },
-            { id: "sh_muramasa", x: 18 * TS, y: 6 * TS, name: "Mastro Muramasa", dir: "down" },
-            { id: "sh_benkei", x: 12 * TS, y: 12 * TS, name: "Monaco Benkei", dir: "up" }
+            { id: "sh_hanzo", at: [6, 6], dir: "down" },
+            { id: "sh_muramasa", at: [18, 6], dir: "down" },
+            { id: "sh_benkei", at: [12, 12], dir: "up" }
           ]
         }
       },
@@ -1363,6 +1392,7 @@ Durante l'esplorazione del Regno delle Sette Lame, tocca il pulsante <b>⚔️ S
           name: "Il Tempio del Loto Nero · La Navata Sacra",
           short: "Tempio del Loto",
           sub: "Statua monumentale del Buddha d'ombra, campana bronzea e incenso cerimoniale",
+          w: 25, h: 15, start: [2, 7], theme: "torino", bg: "sh_tempio",
           isCustomSaga: true,
           act: {
             "12,5": "Esamina la Statua del Buddha d'Ombra",
@@ -1390,8 +1420,8 @@ Durante l'esplorazione del Regno delle Sette Lame, tocca il pulsante <b>⚔️ S
             Ls.put(4, 4, "L"); Ls.put(20, 4, "L"); Ls.put(4, 11, "L"); Ls.put(20, 11, "L");
           },
           npcs: [
-            { id: "sh_hayato", x: 18 * TS, y: 8 * TS, name: "Maestro Hayato", dir: "left" },
-            { id: "sh_generale_kuro", x: 12 * TS, y: 13 * TS, name: "Gen. Raiden", dir: "up" }
+            { id: "sh_hayato", at: [18, 8], dir: "left" },
+            { id: "sh_generale_kuro", at: [12, 13], dir: "up" }
           ]
         }
       },
@@ -1551,6 +1581,7 @@ Hai trionfato su ogni prova: hai liberato Lady Tomoe, spezzato la maledizione de
           name: "Fortezza d'Ossidiana · La Sala del Trono Eclissato",
           short: "Sala del Trono",
           sub: "Stendardi imperiali, armatura del dragone nero e il trono di pietra lunare",
+          w: 25, h: 15, start: [2, 7], theme: "torino", bg: "sh_arena_eclisse",
           isCustomSaga: true,
           act: {
             "12,7": "Parla con Lady Tomoe liberata",
@@ -1578,8 +1609,8 @@ Hai trionfato su ogni prova: hai liberato Lady Tomoe, spezzato la maledizione de
             Ls.put(4, 2, "L"); Ls.put(20, 2, "L"); Ls.put(4, 12, "L"); Ls.put(20, 12, "L");
           },
           npcs: [
-            { id: "sh_tomoe", x: 12 * TS, y: 7 * TS, name: "Lady Tomoe", dir: "up" },
-            { id: "sh_kurogane", x: 12 * TS, y: 4 * TS, name: "Shogun Kurogane", dir: "down" }
+            { id: "sh_tomoe", at: [12, 7], dir: "up" },
+            { id: "sh_kurogane", at: [12, 4], dir: "down" }
           ]
         }
       },
