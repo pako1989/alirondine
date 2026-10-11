@@ -4585,6 +4585,46 @@
     circ(g, 80, 140, 10, "#c9a227"); circ(g, 80, 140, 8, "#f0e6c8"); const na = since("cr_cielo", 1) < 120 ? f / 3 : Math.sin(f / 40) * 0.3; g.save(); g.translate(80, 140); g.rotate(na); px(g, -1, -7, 2, 7, "#c0392b"); px(g, -1, 0, 2, 7, "#2a2a33"); g.restore();
     crTilt(g, W, H);
   }
+  function bgCrCitta(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#7cb4ef", "#bfe3ff", "#eaf6ff"]);
+    for (let i = 0; i < 5; i++) crCloud(g, ((i * 90 + f * 0.15) % (W + 120)) - 60, 150 + (i * 13) % 40, 1.2, 0.8);
+    // la città su tre terrazze di marmo
+    crIsle(g, 20, 120, 280, 60, "#8fcf7a", "#a89a88", f, 6);
+    [[40, 92, 50], [110, 70, 60], [200, 84, 70]].forEach(([x, y, w], i) => { px(g, x, y, w, 120 - y, "#f2f0ea"); px(g, x, y, w, 2, "#ffffff"); px(g, x + w - 4, y, 4, 120 - y, "rgba(0,0,0,.08)"); g.fillStyle = ["#3f6a9a", "#5a8aba", "#3f6a9a"][i]; g.beginPath(); g.moveTo(x - 4, y); g.lineTo(x + w / 2, y - 16); g.lineTo(x + w + 4, y); g.fill(); for (let k = 0; k < 3; k++) px(g, x + 8 + k * (w / 3), y + 10, 6, 8, "#7aa8d8"); });
+    // i mulini (toccali: girano più forte)
+    const sp = since("cr_citta", 0) < 150 ? f / 6 : f / 30; [[65, 74], [240, 66]].forEach(([x, y], i) => { px(g, x - 2, y, 4, 18, "#e8e4dc"); g.save(); g.translate(x, y); g.rotate(sp + i); for (let k = 0; k < 4; k++) { g.rotate(Math.PI / 2); px(g, -2, -20, 4, 18, "#ffffff"); px(g, -2, -20, 4, 3, "#3f6a9a"); } g.restore(); });
+    // il Tempio del Vento con il Cristallo azzurro
+    px(g, 128, 40, 64, 30, "#f2f0ea"); for (let i = 0; i < 5; i++) px(g, 132 + i * 13, 44, 4, 26, "#e4e2dc"); g.fillStyle = "#ffffff"; g.beginPath(); g.moveTo(122, 40); g.lineTo(160, 22); g.lineTo(198, 40); g.fill();
+    crCrystal(g, 160, 52, 12, "159,224,255", f, toggled("cr_citta", 1) ? false : true);
+    // gli aquiloni dei tifosi (toccali: volano)
+    const fly = since("cr_citta", 2) < 200 ? since("cr_citta", 2) : 0; [[30, 30, "#e05a3a"], [280, 24, "#ffd36b"], [250, 50, "#3f6a9a"]].forEach(([x, y, c], i) => { const yy = y + Math.sin(f / 20 + i) * 4 - fly * 0.2; g.fillStyle = c; g.beginPath(); g.moveTo(x, yy - 8); g.lineTo(x + 6, yy); g.lineTo(x, yy + 8); g.lineTo(x - 6, yy); g.fill(); g.strokeStyle = "rgba(60,60,60,.5)"; g.lineWidth = 0.6; g.beginPath(); g.moveTo(x, yy + 8); g.quadraticCurveTo(x + 10, yy + 40, x - 4, 120); g.stroke(); });
+    // petali al vento
+    for (let i = 0; i < 18; i++) px(g, (i * 61 + f * (1 + (i % 3) * 0.5)) % W, (i * 37 + Math.sin(f / 15 + i) * 8) % 140, 2, 1.5, "rgba(255,180,200,.85)");
+    // la nave d'oro del re che passa lontana
+    if (since("cr_citta", 3) < 300) { const x = W - since("cr_citta", 3) * 1.2; ell(g, x, 18, 18, 6, "#c9a227"); px(g, x - 12, 22, 24, 4, "#8a6a1a"); }
+    crTilt(g, W, H);
+  }
+  function bgCrForgia(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#1a0806", "#3a1008", "#7a2a10"]);
+    // fumo e ciminiere
+    for (let i = 0; i < 5; i++) { const x = 20 + i * 70; px(g, x, 30, 14, 90, "#1a1418"); px(g, x - 2, 28, 18, 4, "#2a2226"); for (let k = 0; k < 4; k++) circ(g, x + 7 + Math.sin(f / 30 + k + i) * 4, 24 - k * 9 - (f / 4 % 9), 5 + k * 2, `rgba(60,50,50,${0.5 - k * 0.1})`); }
+    // la corazzata di Kael (toccala: accende i fari)
+    const on = since("cr_forgia", 0) < 150; g.fillStyle = "#2a2a33"; g.beginPath(); g.moveTo(150, 70); g.lineTo(300, 70); g.lineTo(280, 96); g.lineTo(170, 96); g.closePath(); g.fill(); ell(g, 225, 50, 70, 20, "#3a3a44"); px(g, 160, 68, 130, 3, "#c0392b");
+    for (let i = 0; i < 6; i++) { px(g, 176 + i * 18, 78, 6, 5, on ? "#fff6c8" : "#ffb347"); if (on) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 179 + i * 18, 80, 14, "255,240,200", 0.4); g.restore(); } }
+    g.fillStyle = "#c0392b"; g.font = "bold 12px sans-serif"; g.fillText("FG", 214, 56);
+    // il fiume di lava
+    vgrad(g, 0, 150, W, 50, ["#ff7a2a", "#e04a10", "#a02a08"]); for (let i = 0; i < 10; i++) px(g, (i * 41 + f * 0.8) % W, 156 + (i * 7) % 36, 14, 2, "rgba(255,230,120,.7)");
+    g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 160, 170, 160, "255,120,40", 0.25); g.restore();
+    // l'incudine gigante con il martello (toccala: colpo e scintille)
+    const hit = since("cr_forgia", 1); px(g, 30, 124, 60, 16, "#4a4a52"); px(g, 22, 124, 12, 8, "#4a4a52"); px(g, 44, 140, 32, 12, "#3a3a42"); px(g, 30, 124, 60, 2, "#8a8a9a");
+    const ang = hit < 20 ? -1.2 + hit * 0.06 : -0.2; g.save(); g.translate(70, 104); g.rotate(ang); px(g, -2, 0, 4, 26, "#6a4a2a"); px(g, -9, -6, 18, 9, "#5a5a62"); g.restore();
+    if (hit < 30) for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI - Math.PI, r = hit * 1.5; px(g, 60 + Math.cos(a) * r, 122 + Math.sin(a) * r * 0.6, 2, 2, "#ffd36b"); }
+    // il Cristallo del Fuoco in catene
+    const lit = toggled("cr_forgia", 2); crCrystal(g, 120, 108, 16, "255,90,58", f, !lit); g.strokeStyle = "#5a5a62"; g.lineWidth = 2; [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => { g.beginPath(); g.moveTo(120, 108); g.lineTo(120 + a * 30, 108 + b * 22); g.stroke(); });
+    // braci che salgono
+    for (let i = 0; i < 30; i++) px(g, (i * 53 + Math.sin(f / 15 + i) * 6) % W, H - ((i * 37 + f * (0.6 + (i % 4) * 0.3)) % H), 2, 2, `rgba(255,${130 + (i % 5) * 20},40,.85)`);
+    crTilt(g, W, H);
+  }
   // elementi interattivi: [x, y, w, h, frase, azione?("tog" = acceso/spento)]
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
@@ -4773,6 +4813,18 @@
       [68, 128, 24, 24, "🧭 La bussola d'ottone gira come impazzita. Poi punta verso un'isola che non c'è sulle mappe."],
       [14, 54, 40, 24, "🚩 La bandiera rossa della Rondine Grigia: schiocca al vento come un applauso."],
       [200, 40, 100, 70, "🏝️ Un'isola sospesa: sotto, le radici pendono nel vuoto come capelli spettinati."],
+    ] },
+    cr_citta: { draw: bgCrCitta, hot: [
+      [40, 50, 50, 50, "🌬️ Il mulino gira più forte: il vento ha visto che lo guardavi."],
+      [140, 30, 40, 40, "💎 Il Cristallo del Vento: lo tocchi e trattiene il respiro. Poi lo lascia andare, piano.", "tog"],
+      [0, 10, 320, 50, "🪁 Gli aquiloni dei tifosi tirano i fili e salgono, salgono, come se volessero vedere la partita dall'alto."],
+      [220, 0, 100, 30, "⛵ Una nave d'oro, lontana, con lo stemma del re. Va verso est. Verso la capitale."],
+    ] },
+    cr_forgia: { draw: bgCrForgia, hot: [
+      [150, 30, 150, 66, "🚢 La corazzata di Kael accende i fari. Per un attimo la Forgia sembra giorno."],
+      [20, 96, 72, 56, "🔨 Il martello cade sull'incudine: DONG. Scintille dappertutto. Bram sorride per la prima volta da giorni."],
+      [96, 84, 48, 50, "🔥 Il Cristallo del Fuoco tra le catene: lo tocchi e la luce si spegne, poi torna, più rossa.", "tog"],
+      [0, 150, 320, 50, "🌋 Il fiume di lava: dentro, ogni tanto, un riflesso a forma di pallone."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };

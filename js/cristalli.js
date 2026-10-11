@@ -110,8 +110,8 @@
   const FLOORS = ',:+-"=';
   // Solidi: a muro/roccia · t albero · r masso · y casa · q porta · w acqua (o lava nella Forgia) · c Grande Cristallo · s Cristallo di salvataggio
   //         x forziere · f staccionata · l lanterna · b panca · g porta da calcio · j tribuna · n cartello · k incudine · o statua · p colonna
-  //         m grappolo di cristalli · e vuoto del cielo · i aeronave all'ormeggio · u bancarella · z botte e casse
-  const SOLID = "atryqwcsxflbgjnkopmeiuz";
+  //         m grappolo di cristalli · e vuoto del cielo · i aeronave all'ormeggio · u bancarella · z botte e casse · h timone
+  const SOLID = "atryqwcsxflbgjnkopmeiuzh";
   const isFloor = (ch) => !!ch && FLOORS.includes(ch);
   const ZX = { map: null, under: null, meta: null, id: "", rg: REG.borgo, rk: "borgo", lights: [], ships: [] };
   const at = (tx, ty) => (ZX.map && ZX.map[ty] && ZX.map[ty][tx]) || "a";
@@ -254,6 +254,7 @@
     },
     u(sx, sy, tx, ty) { floorPaint(undAt(tx, ty), sx, sy, tx, ty); shadow(sx, sy, 8); P(sx + 1, sy + 7, 14, 7, "#8a5a3a"); P(sx + 1, sy + 7, 14, 1, "#c99a5a"); const c = ["#e05a3a", "#ffd36b", "#7ac84a", "#ff8aa8"]; for (let i = 0; i < 3; i++) { GP.fillStyle = c[(tx + i) % 4]; GP.beginPath(); GP.arc(sx + 4 + i * 4, sy + 6, 2, 0, 7); GP.fill(); } P(sx, sy - 2, 16, 3, (tx % 2) ? "#c0392b" : "#e8e0d0"); },
     z(sx, sy, tx, ty) { floorPaint(undAt(tx, ty), sx, sy, tx, ty); shadow(sx, sy, 7); if ((tx + ty) % 2) { P(sx + 3, sy + 3, 10, 12, "#7a4e2a"); P(sx + 3, sy + 5, 10, 1, "#4a3a2a"); P(sx + 3, sy + 11, 10, 1, "#4a3a2a"); P(sx + 3, sy + 3, 10, 1, "#9a6e3a"); } else { P(sx + 2, sy + 4, 12, 10, "#9a6e3a"); P(sx + 2, sy + 4, 12, 1, "#c99a5a"); P(sx + 7, sy + 4, 1, 10, "rgba(0,0,0,.3)"); P(sx + 2, sy + 9, 12, 1, "rgba(0,0,0,.3)"); } },
+    h(sx, sy, tx, ty, fr) { floorPaint(undAt(tx, ty), sx, sy, tx, ty); shadow(sx, sy, 6); P(sx + 7, sy + 8, 2, 7, "#5a3a20"); GP.save(); GP.translate(sx + 8, sy + 6); GP.rotate(Math.sin(fr / 60) * 0.4); GP.strokeStyle = "#8a5a2a"; GP.lineWidth = 2; GP.beginPath(); GP.arc(0, 0, 5.5, 0, 7); GP.stroke(); for (let i = 0; i < 4; i++) { GP.rotate(Math.PI / 4); GP.fillStyle = "#8a5a2a"; GP.fillRect(-0.7, -8, 1.4, 16); } GP.restore(); P(sx + 7, sy + 5, 2, 2, "#c9a227"); },
     ">": (sx, sy, tx, ty) => arrowTile(">", sx, sy, tx, ty), "<": (sx, sy, tx, ty) => arrowTile("<", sx, sy, tx, ty), "^": (sx, sy, tx, ty) => arrowTile("^", sx, sy, tx, ty), v: (sx, sy, tx, ty) => arrowTile("v", sx, sy, tx, ty),
   };
   function drawShips(fr) { // la «Rondine Grigia» all'ormeggio, che ondeggia appena
@@ -455,7 +456,7 @@
   function fly(fromZone) {
     const M7 = window.__crMode7; if (!M7 || !M7.start) return say([["voce", "La mappa del mondo non si è caricata. Ricarica la pagina e riprova."]]);
     const m = mem(), list = Object.keys(PLACES).map((id) => Object.assign({ id }, PLACES[id])).filter((p) => !p.hidden || !p.hidden());
-    const here = list.find((p) => p.zone === fromZone);
+    const here = list.find((p) => p.zone === fromZone) || list.find((p) => p.zone === "cr_borgo") || list[0];
     const startAt = m.ship || (here ? { x: here.x - 30, y: here.y + 20, a: -0.6 } : { x: 100, y: 100, a: 0 });
     SFX.ship(); inMatch = true;
     api.scene("cr_cielo", "voce", "La Rondine Grigia prende il volo.", [{ label: "◂ Torna a terra", fn: done }], "Rondine Grigia");
@@ -466,6 +467,16 @@
     });
   }
 
+  // l'aeronave: volare, oppure salire sul ponte (dove il gruppo chiacchiera tra un'isola e l'altra)
+  function shipMenu(zid) {
+    const deck = ZONES.cr_nave && zid !== "cr_nave" && ZONES.cr_nave.ch <= mem().ch;
+    if (!deck) return fly(zid);
+    ask("cr_vela", "La Rondine Grigia è pronta. Dove si va, Guerriero?", [
+      { label: "✈ Prendi il volo", sub: "La mappa del mondo", cls: "hot", fn: () => fly(zid) },
+      { label: "Sali sul ponte", sub: "Parla con il gruppo, cambia i mestieri", fn: () => { F.set("deck_from", zid); go("cr_nave", 8, 7); } },
+      { label: "Resta a terra", fn: done },
+    ]);
+  }
   function registerZone(chN, zid, spec) {
     const rk = spec.region || "borgo";
     const syncZX = () => { ZX.id = zid; ZX.rk = rk; ZX.rg = REG[rk]; ZX.crystalCol = spec.crystal || "#ffd36b"; ZX.clusterCol = spec.cluster || spec.crystal || "#ffb347"; ZX.standCol = spec.stands; ZX.chestOpen = (tx, ty) => F.is(chestKey(zid, tx, ty)); ZX.crystalDim = spec.dim ? () => !!safe(() => spec.dim(stepOf(chN)), false) : null; };
@@ -473,7 +484,7 @@
       name: spec.name, short: spec.short, sub: spec.sub || "", need: 0, w: spec.w, h: spec.h, start: spec.start, theme: "torino", isCustomSaga: true,
       bus: "uscita", busLabel: "Esci dalla saga",
       item: spec.item || ["Frammento di luce", "Frammenti"], itemCos: spec.itemCos, items: spec.items || [], bld: [], npcs: [], areas: spec.areas || [], hints: {}, pitch: spec.pitch || [-20, -20, 1, 1],
-      solid: SOLID, act: Object.assign({ s: "Tocca il cristallo azzurro", x: "Apri il forziere", i: "Sali sull'aeronave" }, spec.act || {}), intro: [],
+      solid: SOLID, act: Object.assign({ s: "Tocca il cristallo azzurro", x: "Apri il forziere", i: "Sali sull'aeronave", h: "Prendi il timone" }, spec.act || {}), intro: [],
       me: () => { const c = api.CAST.hero || api.CAST.leo; return Object.assign({}, c); },
       drawItem(x, y, i) {
         const g = GP || document.getElementById("cv").getContext("2d"), f = frNow();
@@ -499,7 +510,7 @@
       if (f) { f({ ch, tx, ty, zid }); return true; }
       if (ch === "s") { saveCrystal(done); return true; }
       if (ch === "x") { const def = spec.chests && spec.chests[tx + "," + ty]; openChest(zid, tx, ty, def || { coins: 10 }); return true; }
-      if (ch === "i") { if (!F.is("ship")) { say([["voce", "Un'aeronave all'ormeggio. Non è tua. Non ancora."]]); return true; } fly(zid); return true; }
+      if (ch === "i" || ch === "h") { if (!F.is("ship")) { say([["voce", "Un'aeronave all'ormeggio. Non è tua. Non ancora."]]); return true; } shipMenu(zid); return true; }
       const flav = spec.flavor && (spec.flavor[tx + "," + ty] || spec.flavor[ch]);
       if (flav) { say([["voce", Array.isArray(flav) ? pick(flav) : flav]], done); return true; }
       if (Z.act[tx + "," + ty] || Z.act[ch]) { say([["voce", "Niente di speciale. Ma la luce, qui, è bellissima."]], done); return true; }
