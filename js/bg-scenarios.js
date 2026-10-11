@@ -4231,6 +4231,99 @@
     paperGrain(g, W, H, f, 0.04);
   }
 
+  // ---------------------------------------------------------------- CAPITOLO 4 · MATITA (grafite su carta bianca, cose non finite)
+  const MP = "#f6f5ef", MG = "#5a5a58";
+  function sketchLine(g, x1, y1, x2, y2, a, w) { g.strokeStyle = `rgba(70,70,70,${a == null ? 0.7 : a})`; g.lineWidth = w || 1; g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2 + 1, y2 - 1); g.stroke(); g.globalAlpha = 0.4; g.beginPath(); g.moveTo(x1 + 1, y1 + 1); g.lineTo(x2, y2 + 1); g.stroke(); g.globalAlpha = 1; }
+  function sketchRect(g, x, y, w, h, a) { sketchLine(g, x, y, x + w, y, a); sketchLine(g, x + w, y, x + w, y + h, a); sketchLine(g, x + w, y + h, x, y + h, a); sketchLine(g, x, y + h, x, y, a); }
+  function graphiteHatch(g, x, y, w, h, gap, a) { g.save(); g.beginPath(); g.rect(x, y, w, h); g.clip(); g.strokeStyle = `rgba(80,80,80,${a || 0.25})`; g.lineWidth = 1; g.beginPath(); for (let i = -h; i < w; i += gap) { g.moveTo(x + i, y + h); g.lineTo(x + i + h * 0.6, y); } g.stroke(); g.restore(); }
+  function eraserEdge(g, W, H, f, side) { // il Bianco che avanza dai bordi
+    const t = (Math.sin(f / 90) + 1) / 2, wv = 26 + t * 14;
+    const gr = g.createLinearGradient(side ? W : 0, 0, side ? W - wv * 2 : wv * 2, 0); gr.addColorStop(0, "#ffffff"); gr.addColorStop(0.5, "rgba(255,255,255,.85)"); gr.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = gr; g.fillRect(side ? W - wv * 2 : 0, 0, wv * 2, H);
+    for (let i = 0; i < 12; i++) { const y = (i * 37 + f * 0.3) % H, x = side ? W - wv - (i % 3) * 6 : wv + (i % 3) * 6; px(g, x, y, 3, 2, "rgba(255,190,200,.8)"); }
+  }
+  function bgBozza(g, W, H, f) {
+    px(g, 0, 0, W, H, MP); for (let y = 12; y < H; y += 12) px(g, 0, y, W, 1, "rgba(120,140,190,.18)");
+    // gli schizzi delle fiabe passate: la casa di paglia, il castello di carte, il palazzo a fumetti
+    sketchRect(g, 24, 92, 50, 40); sketchLine(g, 18, 94, 49, 66); sketchLine(g, 49, 66, 80, 94); graphiteHatch(g, 26, 94, 46, 36, 4, 0.18);
+    for (let lv = 0; lv < 3; lv++) for (let i = 0; i < 3 - lv; i++) { const cx = 120 + i * 22 + lv * 11, cy = 120 - lv * 26; sketchLine(g, cx - 10, cy + 12, cx, cy - 12); sketchLine(g, cx, cy - 12, cx + 10, cy + 12); }
+    sketchRect(g, 232, 60, 60, 80); for (let r = 0; r < 3; r++) for (let k = 0; k < 3; k++) sketchRect(g, 240 + k * 17, 70 + r * 22, 10, 12, 0.4);
+    if (since("lb_bozza", 0) < 120) { g.fillStyle = "rgba(255,217,90,.45)"; g.fillRect(233, 61, 58, 78); }
+    // il campione abbozzato (la Bozza), metà disegnato
+    const wave = since("lb_bozza", 1) < 90 ? Math.sin(since("lb_bozza", 1) / 4) * 8 : 0;
+    g.strokeStyle = "rgba(70,70,70,.8)"; g.lineWidth = 1.5; g.beginPath(); g.arc(186, 120, 8, 0, Math.PI * 2); g.stroke(); sketchRect(g, 178, 130, 16, 22); sketchLine(g, 182, 152, 180, 170); sketchLine(g, 190, 152, 192, 170); sketchLine(g, 194, 134, 204, 120 + wave, 0.5);
+    g.setLineDash([2, 3]); sketchLine(g, 178, 134, 168, 148, 0.4); g.setLineDash([]);
+    g.fillStyle = "rgba(70,70,70,.7)"; g.font = "italic 7px Georgia, serif"; g.fillText("(da finire)", 170, 182);
+    // la matita gigante che disegna da sola
+    const mx = 100 + Math.sin(f / 40) * 60 + (since("lb_bozza", 2) < 100 ? 30 : 0), my = 40 + Math.cos(f / 33) * 10;
+    g.save(); g.translate(mx, my); g.rotate(0.7); px(g, -4, -40, 8, 34, "#e8c46a"); px(g, -4, -46, 8, 6, "#f2a5b8"); px(g, -4, -48, 8, 2, "#9a9a95"); g.fillStyle = "#e8d6b0"; g.beginPath(); g.moveTo(-4, -6); g.lineTo(4, -6); g.lineTo(0, 4); g.fill(); px(g, -1, 1, 2, 3, MG); g.restore();
+    // la linea che lascia
+    g.strokeStyle = "rgba(70,70,70,.35)"; g.beginPath(); for (let i = 0; i < 40; i++) { const tt = (f - i * 3) / 40; g.lineTo(100 + Math.sin(tt) * 60 + 6, 40 + Math.cos((f - i * 3) / 33) * 10 + 6); } g.stroke();
+    // briciole di gomma
+    for (let i = 0; i < 10; i++) px(g, 30 + (i * 29) % 260, 178 + (i % 3) * 6, 3, 2, since("lb_bozza", 3) < 80 ? "rgba(255,170,190,.9)" : "rgba(255,190,200,.6)");
+    eraserEdge(g, W, H, f, 0); eraserEdge(g, W, H, f, 1);
+  }
+  function bgMargine(g, W, H, f) {
+    // a sinistra: la pagina a matita. A destra: oltre il bordo, la libreria vera, enorme e calda
+    px(g, 0, 0, W, H, MP); for (let y = 12; y < H; y += 12) px(g, 0, y, 200, 1, "rgba(120,140,190,.18)"); px(g, 30, 0, 1, H, "rgba(200,30,58,.35)");
+    vgrad(g, 200, 0, 120, H, ["#2a180f", "#4a2c1a"]);
+    g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 270, 40, 70, "255,200,120", toggled("lb_margine", 0) ? 0.1 : 0.35); g.restore();
+    ell(g, 270, 30, 18, 8, "#c99a3a"); px(g, 268, 0, 4, 22, "#2a1a10");
+    // il bordo della pagina, spesso, con l'ombra
+    px(g, 196, 0, 6, H, "#e6e2d6"); px(g, 202, 0, 3, H, "rgba(0,0,0,.35)");
+    g.fillStyle = "rgba(90,90,90,.8)"; g.font = "italic 9px Georgia, serif"; g.fillText("pag. 213", 150, 190);
+    // un dito gigantesco che tiene la pagina (si sposta se toccato)
+    const fy = since("lb_margine", 1) < 120 ? 20 : 0;
+    g.fillStyle = "#e0b48a"; g.beginPath(); g.ellipse(232, 150 + fy, 26, 44, -0.2, 0, Math.PI * 2); g.fill(); g.fillStyle = "#f2d0b0"; g.beginPath(); g.ellipse(222, 120 + fy, 14, 10, -0.2, 0, Math.PI * 2); g.fill();
+    // scaffali sfocati nella libreria
+    for (let i = 0; i < 6; i++) px(g, 214 + i * 17, 70, 12, 30, ["#8a2f3a", "#2f5a7a", "#c99a3a", "#3a6a4a", "#6a4a8a", "#d8c8a8"][i]);
+    // la scrivania dell'Autrice a matita
+    sketchRect(g, 40, 120, 90, 8); sketchLine(g, 46, 128, 46, 170); sketchLine(g, 124, 128, 124, 170); sketchRect(g, 70, 104, 30, 16, 0.5);
+    g.fillStyle = "rgba(70,70,70,.7)"; g.font = "italic 7px Georgia, serif"; g.fillText(since("lb_margine", 2) < 150 ? "«Torno subito» — A." : "una tazza di caffè, fredda", 50, 100);
+    // pioggia sulla vetrina, al di là
+    for (let i = 0; i < 12; i++) px(g, 210 + (i * 23) % 100, (i * 31 + f * 2) % 60, 1, 4, "rgba(170,200,255,.4)");
+    eraserEdge(g, 200, H, f, 0);
+  }
+  function bgUltima(g, W, H, f) {
+    px(g, 0, 0, W, H, MP);
+    // tribune appena accennate, piene di personaggi a matita (si animano se toccate)
+    for (let r = 0; r < 3; r++) { sketchLine(g, 0, 44 + r * 16, W, 44 + r * 16, 0.35); for (let i = 0; i < 22; i++) { const x = 10 + i * 14 + (r % 2) * 7, jump = since("lb_ultima", 0) < 120 ? Math.abs(Math.sin(f / 5 + i)) * 4 : 0; g.strokeStyle = "rgba(70,70,70,.55)"; g.beginPath(); g.arc(x, 36 + r * 16 - jump, 3, 0, Math.PI * 2); g.stroke(); sketchLine(g, x, 39 + r * 16 - jump, x, 43 + r * 16 - jump, 0.5); } }
+    // un colore alla volta: i personaggi che hai aiutato
+    const COL = [["#c0644a", 40], ["#4a5a7a", 70], ["#1d1a17", 210], ["#ffd95a", 250], ["#c81e3a", 280]];
+    COL.forEach(([c, x], i) => { circ(g, x, 36 + (i % 3) * 16, 3.5, c); });
+    // campo a matita
+    sketchRect(g, 16, 96, 288, 96, 0.6); sketchLine(g, 160, 96, 160, 192, 0.5); g.strokeStyle = "rgba(70,70,70,.5)"; g.beginPath(); g.ellipse(160, 144, 24, 12, 0, 0, Math.PI * 2); g.stroke();
+    graphiteHatch(g, 16, 96, 288, 96, 9, 0.08);
+    // le porte: una disegnata, l'altra ancora da disegnare
+    sketchRect(g, 6, 128, 10, 32); g.setLineDash([3, 3]); sketchRect(g, 304, 128, 10, 32, 0.4); g.setLineDash([]);
+    if (since("lb_ultima", 1) < 150) { g.fillStyle = "rgba(255,217,90,.5)"; g.fillRect(305, 129, 8, 30); }
+    // il tabellone senza numeri
+    sketchRect(g, 136, 4, 48, 20); g.fillStyle = "rgba(70,70,70,.8)"; g.font = "bold 10px Georgia, serif"; g.textAlign = "center"; g.fillText(since("lb_ultima", 2) < 120 ? "? – ?" : "FINE", 160, 18); g.textAlign = "left";
+    // il pallone: unico oggetto colorato
+    const bx = 160 + Math.sin(f / 30) * 4, by = 144; circ(g, bx, by, 5, "#ffffff"); g.strokeStyle = "#111"; g.lineWidth = 1; g.beginPath(); g.arc(bx, by, 5, 0, Math.PI * 2); g.stroke(); circ(g, bx, by, 1.6, "#111");
+    if (since("lb_ultima", 3) < 100) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, bx, by, 30, "255,230,150", 0.6); g.restore(); }
+    eraserEdge(g, W, H, f, 0); eraserEdge(g, W, H, f, 1);
+  }
+  function bgAlba(g, W, H, f) {
+    // la libreria all'alba: la pioggia è finita
+    vgrad(g, 0, 0, W, H, ["#3a2418", "#2a180f"]);
+    px(g, 112, 14, 96, 78, "#0e1626"); vgrad(g, 114, 16, 92, 74, ["#ffb370", "#ffd59e", "#bfe3ff"]);
+    px(g, 112, 14, 96, 3, "#6a4a2a"); px(g, 112, 90, 96, 4, "#6a4a2a"); px(g, 158, 14, 3, 80, "#6a4a2a");
+    circ(g, 184, 74, 10, "rgba(255,240,200,.9)");
+    if (since("lb_alba", 0) < 160) for (let i = 0; i < 3; i++) { const x = 120 + ((f * 0.6 + i * 40) % 90), y = 40 + i * 8 + Math.sin(f / 8 + i) * 2; px(g, x, y, 4, 1, "#2a2a2a"); px(g, x - 2, y - 1, 2, 1, "#2a2a2a"); px(g, x + 4, y - 1, 2, 1, "#2a2a2a"); }
+    g.save(); g.globalCompositeOperation = "lighter"; g.fillStyle = "rgba(255,210,150,.12)"; g.beginPath(); g.moveTo(114, 92); g.lineTo(206, 92); g.lineTo(260, 200); g.lineTo(60, 200); g.fill(); g.restore();
+    for (let s = 0; s < 2; s++) { const x0 = s ? 214 : 0; px(g, x0, 10, 106, 120, "#4a2c1a"); for (let r = 0; r < 4; r++) { px(g, x0, 36 + r * 28, 106, 3, "#2a180f"); for (let b = 0; b < 12; b++) px(g, x0 + 4 + b * 8.5, 36 + r * 28 - 20, 6, 20, ["#8a2f3a", "#2f5a7a", "#c99a3a", "#3a6a4a", "#6a4a8a", "#d8c8a8"][(b + r * 2 + s) % 6]); } }
+    vgrad(g, 0, 130, W, 70, ["#5a3a24", "#3a2414"]); ell(g, 160, 170, 110, 18, "#7a2a2a");
+    // il libro chiuso sul leggio, con il titolo intero
+    px(g, 154, 128, 12, 40, "#3a2414"); px(g, 128, 112, 64, 20, "#6a1f2a"); px(g, 128, 112, 64, 3, "#8a2f3a");
+    g.fillStyle = "#e8c66a"; g.font = "bold 5px Georgia, serif"; g.textAlign = "center"; g.fillText("IL LIBRO DELLE PARTITE", 160, 121); g.fillText("CHE FINISCONO BENE", 160, 128); g.textAlign = "left";
+    if (since("lb_alba", 1) < 120) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 160, 120, 40, "255,215,140", 0.4); g.restore(); }
+    // il segnalibro rosso che spunta
+    px(g, 170, 130, 3, 14 + Math.sin(f / 20) * 1.5, "#c81e3a");
+    // il cartello girato: «APERTO»
+    const flip = toggled("lb_alba", 2); px(g, 252, 136, 54, 26, "#e8d6b0"); px(g, 252, 136, 54, 2, "#6a4a2a"); g.fillStyle = "#3a2414"; g.font = "bold 9px Georgia, serif"; g.fillText(flip ? "Torno subito" : "APERTO", flip ? 256 : 262, 153);
+    paperGrain(g, W, H, f, 0.05);
+  }
+
   // elementi interattivi: [x, y, w, h, frase, azione?("tog" = acceso/spento)]
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
@@ -4314,6 +4407,30 @@
       [10, 24, 300, 40, "☁️ Le nuvolette galleggiano sopra i tetti. Toccale e si riempiono: «FINE?» «NO!» «MAI» «…»."],
       [186, 60, 30, 40, "📡 L'antenna: BZZ. Capta una voce lontanissima che legge ad alta voce. È una voce di donna."],
       [0, 120, 160, 80, "📄 Una pagina si strappa dal bordo del libro e vola via: RRRIP! Il libro sta perdendo pezzi."],
+    ] },
+    lb_bozza: { draw: bgBozza, hot: [
+      [228, 56, 68, 88, "✏️ Il palazzo a fumetti, a matita: per un attimo si colora di giallo. Si ricorda com'era."],
+      [164, 104, 46, 82, "👋 La Bozza ti saluta con una mano che è ancora solo una riga. «Da finire», c'è scritto sotto."],
+      [40, 20, 180, 50, "✏️ La matita gigante disegna da sola. Ogni tanto si ferma, come se aspettasse un suggerimento."],
+      [20, 170, 280, 24, "🩷 Briciole di gomma: il Bianco è passato di qui. Odorano di quaderno nuovo."],
+      [0, 0, 40, 200, "⬜ Il Bianco, dal bordo: cancella piano, con pazienza. Non è cattivo. È solo quello che succede alle storie lasciate a metà."],
+    ] },
+    lb_margine: { draw: bgMargine, hot: [
+      [250, 10, 40, 40, "💡 Di là dal bordo, la lampada della libreria vera. La spegni e la riaccendi. È enorme. È calda.", "tog"],
+      [200, 100, 70, 100, "☝️ Un dito gigantesco tiene ferma la pagina. Qualcuno, fuori, sta leggendo. Si sposta appena, come per non disturbare."],
+      [40, 90, 100, 80, "🪑 La scrivania dell'Autrice, a matita. Sopra, una tazza e un biglietto: «Torno subito» — A."],
+      [140, 180, 50, 16, "📄 «pag. 213». L'ultima pagina numerata del libro. Dopo, i numeri finiscono."],
+    ] },
+    lb_ultima: { draw: bgUltima, hot: [
+      [0, 26, 320, 50, "📣 Le tribune a matita si alzano tutte: sono i personaggi delle fiabe. Ti fanno il tifo con la voce che gli hai ridato."],
+      [300, 124, 18, 40, "🥅 La porta di destra è solo tratteggiata. Diventerà vera quando qualcuno ci segnerà dentro."],
+      [134, 2, 52, 24, "🔢 Il tabellone: «? – ?». Poi, per un istante, «FINE». Poi di nuovo «? – ?»."],
+      [146, 130, 28, 28, "⚽ Il pallone: l'unica cosa colorata della pagina. Brilla quando lo guardi."],
+    ] },
+    lb_alba: { draw: bgAlba, hot: [
+      [112, 14, 96, 78, "🌅 L'alba sulla città. Passano tre rondini. La pioggia è finita."],
+      [126, 108, 68, 30, "📕 Il libro, chiuso. Il titolo adesso è intero: «Il Libro delle Partite che Finiscono Bene»."],
+      [250, 134, 58, 30, "🪧 Il cartello sulla porta: lo giri. «APERTO» da una parte, «Torno subito» dall'altra.", "tog"],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
