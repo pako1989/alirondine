@@ -818,21 +818,48 @@
     const h = hero() || { name: "Campione", num: 9, shotName: "COLPO DEL FALCO", shot: "saetta" };
     castHero();
 
+    const m = mem();
+    const cM = (m.convictions && m.convictions.moralita) || 0;
+    const cU = (m.convictions && m.convictions.utilita) || 0;
+    const cL = (m.convictions && m.convictions.liberta) || 0;
+    let stanceLabel = "⚖️ Bilanciamento Neutro";
+    let stanceBonus = "Formazione bilanciata dei Tre Feudi";
+    let spdBonus = 0;
+    let defBonus = 0;
+    let atkBonus = 0;
+
+    if (cM >= cU && cM >= cL && cM > 0) {
+      stanceLabel = "⚖️ Vantaggio Feudale · Moralità";
+      stanceBonus = "Schieramento del Baluardo Leale: Erador & Roland alzano il muro difensivo (+Resistenza e contrasti)!";
+      defBonus = 2;
+    } else if (cU >= cL && cU > 0) {
+      stanceLabel = "📜 Vantaggio Feudale · Utilità";
+      stanceBonus = "Calcolo Strategico di Benedict: linee corte, contropiedi millimetrici e tiri calibrati sul palo lontano!";
+      atkBonus = 2;
+    } else if (cL > 0) {
+      stanceLabel = "🕊️ Vantaggio Feudale · Libertà";
+      stanceBonus = "Vento di Rivolta dei Roselliani: Frederica ispira scatti brucianti sulle fasce e dribbling imprevedibili!";
+      spdBonus = 0.4;
+    }
+
     const homeSquad = [
-      { name: h.name, skin: h.skin || "#f2c9a0", hair: h.hair || "#2b1d14", spd: 5.3 },
-      { name: "Roland", skin: "#fed7aa", hair: "#ca8a04", spd: 5.4 },
-      { name: "Frederica", skin: "#fde2e4", hair: "#f472b6", spd: 5.0 },
-      { name: "Erador", skin: "#e2e8f0", hair: "#94a3b8", spd: 4.6 }
+      { name: h.name, skin: h.skin || "#f2c9a0", hair: h.hair || "#2b1d14", spd: 5.3 + spdBonus },
+      { name: "Roland", skin: "#fed7aa", hair: "#ca8a04", spd: 5.4 + spdBonus },
+      { name: "Frederica", skin: "#fde2e4", hair: "#f472b6", spd: 5.0 + spdBonus },
+      { name: "Erador", skin: "#e2e8f0", hair: "#94a3b8", spd: 4.6 + spdBonus }
     ];
 
     const opps = Array.isArray(cfg.oppNames) && cfg.oppNames.length >= 5
       ? cfg.oppNames
       : ["Portiere Corazzato", "Cavaliere di Ferro", "Lanciere dei Feudi", "Alfiere d'Acciaio", "Campione d'Assalto"];
 
+    const baseIntro = (cfg.intro || "Sfida tattica sui campi d'elevazione dei Tre Feudi!").replace("{tiro}", h.shotName || "COLPO DEL FALCO");
+    const richIntro = `${baseIntro}<br><span style="color:#fde047;font-size:12px;display:inline-block;margin-top:4px;"><b>${stanceLabel}</b>: ${stanceBonus}</span>`;
+
     const matchCfg = {
       id: "feudi_" + (cfg.id || hash(cfg.title || "match")),
       chap: cfg.title || "Il Torneo del Giudizio dei Feudi",
-      intro: (cfg.intro || "Sfida tattica sui campi d'elevazione dei Tre Feudi!").replace("{tiro}", h.shotName || "COLPO DEL FALCO"),
+      intro: richIntro,
       us: "Casa Wolffort & I Custodi",
       mate: cfg.mate || "Roland",
       mateGeneric: true,
@@ -842,8 +869,8 @@
         name: cfg.teamName || "Legione d'Acciaio",
         color: cfg.teamCol || "#1e293b",
         col: cfg.teamCol || "#1e293b",
-        atk: cfg.atk || 26,
-        def: cfg.def || 27,
+        atk: Math.max(15, (cfg.atk || 26) - defBonus),
+        def: Math.max(15, (cfg.def || 27) - atkBonus),
         vel: cfg.vel || 25,
         power: 27,
         special: [cfg.specialName || "CARICA DEI FEUDI", 29]
@@ -856,8 +883,11 @@
         if (win) {
           sfxFeudalFanfare();
           mem().wins = (mem().wins || 0) + 1;
+          mem().tokens = (mem().tokens || 0) + 1;
+          if (window.toast) window.toast("Vittoria Feudale! +1 Gettone del Giudizio 🪙", "info", "⚖️");
         } else {
           mem().losses = (mem().losses || 0) + 1;
+          if (window.toast) window.toast("Sconfitta sul campo d'armi. Riprova o adatta la strategia!", "warn", "🛡️");
         }
         save();
         if (typeof cfg.done === "function") {

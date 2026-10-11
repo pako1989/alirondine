@@ -15135,6 +15135,7 @@
       ...(has && STORY[has.step] ? [{ label: "Continua", sub: STORY[has.step].chap, cls: "hot", fn: () => { S = has; run(); } }] : []),
       ...(fresh0 ? [{ label: "Nuova partita", sub: "Stagione 1 · circa 30–40 minuti", cls: "hot", fn: () => { S = fresh(); run(); } }] : []),
       { head: "Gioca" },
+      { label: "⚖️ La Bilancia delle Tre Corone", sub: "Nuova saga feudale tattica (Triangle Strategy) per il tuo Campione", cls: "hot", fn: () => { if (window.__bilanciaFeudi) window.__bilanciaFeudi.open({ onExit: title }); } },
       { label: "Storia", sub: `Le stagioni di Leo · ${mnPct(mnStoria())}%`, fn: menuStoria },
       { label: "Il Borgo Storto", sub: "Spin-off GDR a turni", cls: "hot", fn: () => openBorgoStorto(title) },
       { label: "Borgo e trasferte", sub: `A piedi per il paese · ${mnPct(mnBorgo())}%`, fn: menuBorgo },
@@ -15212,6 +15213,7 @@
       { label: "Stagione 7", sub: load(SAVE6) ? "L'ultimo muro, con il tuo Leo" : "L'ultimo muro · il finale della saga", cls: seasonDone(7) ? "" : "hot", fn: pickS7 },
       s8Btn(),
       s9Btn(),
+      { label: "⚖️ La Bilancia delle Tre Corone", sub: "Nuova saga tattica ispirata a Triangle Strategy con il tuo Campione", cls: "hot", fn: () => { if (window.__bilanciaFeudi) window.__bilanciaFeudi.open({ onExit: menuStoria }); } },
       { label: "🕵️ Noir · Il Peschereccio Fantasma", sub: "Nuova saga investigativa con Lina · True Detective & Breaking Bad", cls: "hot", fn: () => { if (window.openNoirStoryMenu) window.openNoirStoryMenu(menuStoria); } },
       { label: "🌌 Multiverso · La Panda Quantistica", sub: "Nuova saga demenziale con Nonna · Rick & Morty, Futurama e Game of Thrones", cls: "hot", fn: () => { if (window.openMultiverseMenu) window.openMultiverseMenu(menuStoria); } },
       { label: "⛵ La Notte del Faro", sub: "Saga narrativa speciale · Il torneo sulla scogliera", cls: "hot", fn: () => { if (window.openFaroStoryMenu) window.openFaroStoryMenu(menuStoria); } },
@@ -15241,6 +15243,7 @@
     const tr = readJSON(TOUR, { titles: 0 }), co = readJSON(COACH, { w: 0, played: 0 });
     text("voce", `<b>Modalità di Gioco</b> ${mnBar(mnPct(mnModi()))}<br>Scegli tra tornei speciali, saghe investigative, multiverso o sfide calcistiche. Tutte indipendenti dal salvataggio principale.`);
     buttons([
+      { label: "⚖️ La Bilancia delle Tre Corone", sub: "Nuova saga feudale tattica (Triangle Strategy) con il tuo Campione · 4 Capitoli", cls: "hot", fn: () => { if (window.__bilanciaFeudi) window.__bilanciaFeudi.open({ onExit: modes }); } },
       { label: "✨ Arena 2D HD del Borgo", sub: "Suite Completa: Emblem, Action Soccer, Gabbia del Molo e Matchday Director", cls: "hot", fn: () => { if (window.openArena2DHDModal) window.openArena2DHDModal(modes); } },
       { label: "★ JoJo · Stand Soccer Battle", sub: "Le Bizzarre Avventure di Rondine: Star Rondine & ORA ORA ORA!", cls: "hot", fn: () => { if (window.openJoJoAdventure) window.openJoJoAdventure(modes); } },
       { label: "🌊 Cala Tramontana · Il Borgo del Tuo Campione", sub: heroLoad() ? `Esplora a piedi il borgo alternativo con ${heroLoad().name}` : "Modalità a piedi nel borgo marino alternativo per il tuo campione", cls: "hot", fn: () => { if (window.openCalaTramontana) window.openCalaTramontana(modes); } },

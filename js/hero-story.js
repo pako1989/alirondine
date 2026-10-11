@@ -319,6 +319,12 @@
     if (prog.won) {
       btns.push({ label: "🏆 Epilogo & Riconoscimenti", sub: "Rileggi l'articolo de L'Eco del Tirreno", cls: "hot", fn: () => showEpilogue(hero, prog) });
     }
+    btns.push({
+      label: "⚖️ La Bilancia delle Tre Corone ▸",
+      sub: "Saga tattica feudale (Triangle Strategy) con " + (hero.name || "il Campione"),
+      cls: "hot",
+      fn: () => { if (window.__bilanciaFeudi) window.__bilanciaFeudi.open({ onExit: () => window.openHeroStoryMenu(onBack) }); }
+    });
     btns.push({ label: "🎨 Modifica il Campione", sub: "Look, nome o tiro", fn: () => openEditor(hero, () => window.openHeroStoryMenu(onBack)) });
     btns.push({ label: "◂ Torna al Menu", fn: () => { if (onBack) onBack(); else if (eng.title) eng.title(); } });
     eng.buttons(btns, true);
