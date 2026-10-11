@@ -5292,7 +5292,7 @@
     if (res.azCtl === undefined) res.azCtl = "joystick";
     if (res.azPowerUps === undefined) res.azPowerUps = true;
     if (res.azAimAssist === undefined) res.azAimAssist = true;
-    if (!["classic", "anime", "pixel"].includes(res.faces)) res.faces = "classic";
+    if (!["classic", "anime", "illustrato", "pixel", "comic", "manga", "acquerello"].includes(res.faces)) res.faces = "classic";
     return res;
   }
   let SET = setLoad();
@@ -5395,7 +5395,7 @@
       { label: `Scene speciali: ${SET.speed} ▸`, sub: "normale · veloce · salta (tocca la scena per saltarla)", fn: () => { SET.speed = { normale: "veloce", veloce: "salta", salta: "normale" }[SET.speed] || "normale"; save(); again(); } },
       { label: `Animazioni: ${SET.anim ? "sì" : "no"}`, sub: "Tiri, esultanze, fischio d'inizio e finale, coppa, cartellini · tocca per saltarle", fn: () => { SET.anim = !SET.anim; save(); again(); } },
       { label: `Tema visivo: ${(window.THEMES && window.THEMES.find(t => (localStorage.getItem("ali-di-rondine.theme") || "classic") === t.id) || { name: "Classico Rondine" }).name} ▸`, sub: "Classico · Gazzetta Vintage · Neon Costa · Arcade Retrò", fn: () => { if (window.cycleTheme) window.cycleTheme(); again(); } },
-      { label: `Stile dei volti: ${{ classic: "Classico", anime: "Anime", pixel: "Pixel 16-bit" }[SET.faces] || "Classico"} ▸`, sub: SET.faces === "anime" ? "Volti in stile anime, diversi per ogni personaggio, in tutte le storie" : SET.faces === "pixel" ? "Ritratti in pixel art alla JRPG a 16 bit, in tutte le storie" : "I ritratti originali · tocca per provare Anime o Pixel 16-bit", fn: () => { SET.faces = { classic: "anime", anime: "pixel", pixel: "classic" }[SET.faces] || "anime"; try { Object.keys(PORT_IMG).forEach((k) => delete PORT_IMG[k]); } catch {} save(); again(); } },
+      { label: `Stile dei volti: ${{ classic: "Classico", anime: "Anime", illustrato: "Illustrato", pixel: "Pixel 16-bit", comic: "Fumetto", manga: "Manga", acquerello: "Acquerello" }[SET.faces] || "Classico"} ▸`, sub: ({ anime: "Volti in stile anime, diversi per ogni personaggio", pixel: "Ritratti in pixel art alla JRPG a 16 bit", comic: "Fumetto a linea chiara: contorni netti, facce da caratterista", manga: "Bianco e nero, chine e retini, come una tavola stampata", acquerello: "Colori lavati e morbidi, grana della carta", illustrato: "Occhi piccoli e tratti più realistici: naso, labbra, palpebre" }[SET.faces] || "I ritratti originali") + " · tocca per cambiare (7 stili)", fn: () => { SET.faces = { classic: "anime", anime: "illustrato", illustrato: "pixel", pixel: "comic", comic: "manga", manga: "acquerello", acquerello: "classic" }[SET.faces] || "anime"; try { Object.keys(PORT_IMG).forEach((k) => delete PORT_IMG[k]); } catch {} save(); again(); } },
       { label: `Grafica: ${SET.gfx === "classica" ? "Classica" : "Migliorata"} ▸`, sub: SET.gfx === "classica" ? "Aspetto originale retrò, senza effetti aggiuntivi" : "Luci, cielo e mare animati, particelle, riflettori e pubblico", fn: () => { SET.gfx = SET.gfx === "classica" ? "migliorata" : "classica"; GX.low = false; GX.auto = false; GX.slow = 0; save(); again(); } },
       { label: `Dissolvenze e card di capitolo: ${SET.dis ? "sì" : "no"}`, sub: "Schermata col titolo e sfumature a ogni cambio scena", fn: () => { SET.dis = !SET.dis; save(); again(); } },
       { label: `Filtro retrò: ${SET.crt ? "sì" : "no"}`, sub: "Righe e bordi curvi, come la tv della trattoria", fn: () => { SET.crt = !SET.crt; save(); again(); } },
@@ -18988,7 +18988,7 @@
   }
   function text(who, html) { text1(who, html); try { GX.emo.x = pvExpr(html); } catch {} }
   const PV_STYLE = { itpomba: "bald", a1birillo: "curly", itmomolo: "curly", ittamb: "afro", a1gegia: "ponytail", itchiara: "ponytail" };
-  function faceStyle() { const f = SET.faces; return (f === "anime" || f === "pixel") && window.__faceStyles ? f : null; }
+  function faceStyle() { const f = SET.faces; return f && f !== "classic" && window.__faceStyles ? f : null; }
   function portrait(id, x, y, s, flip) {
     const fs = faceStyle(), fc = CAST[id];
     if (fs && fc && fc.skin) { // stile dei volti alternativo (Impostazioni → Grafica)

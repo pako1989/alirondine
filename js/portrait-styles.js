@@ -25,8 +25,9 @@
   }
 
   // ---------------------------------------------------------------- stile ANIME
-  function anime(g, id, c, expr) {
-    const T = traits(id, c), skin = c.skin || "#e0b48a", hair = c.hair || "#2b1d14", eyeC = c.eye || "#3a2a1a", shirt = c.shirt || (c.bg && c.bg[1]) || "#3f5fbf";
+  function anime(g, id, c, expr, real) {
+    const T = Object.assign({}, traits(id, c)), skin = c.skin || "#e0b48a", hair = c.hair || "#2b1d14", eyeC = c.eye || "#3a2a1a", shirt = c.shirt || (c.bg && c.bg[1]) || "#3f5fbf";
+    if (real) { T.eyeW *= 0.62; T.eyeGap += 0.4; T.eyeY += 0.6; T.chin = T.chin === 1 ? 2 : T.chin; T.lash = 0; }
     const line = dark(skin, 0.62), shade = mix(skin, 0.22, "#a04a5a"), hairD = dark(hair, 0.35), hairL = lite(hair, 0.32), st = c.style || "messy";
     const longHair = st === "long" || st === "codino" || st === "bun" || st === "ponytail";
     g.lineJoin = "round"; g.lineCap = "round";
@@ -65,20 +66,21 @@
     // occhi
     const blink = expr === "blink", wide = expr === "surprised", sad = expr === "sad", angry = expr === "angry", happy = expr === "smile" || expr === "grin";
     [-1, 1].forEach((sd) => {
-      const ex = sd * T.eyeGap, ey = T.eyeY, ew = T.eyeW * (wide ? 1.12 : 1), eh = [7, 5.4, 6.4, 4.8][T.eye] * (wide ? 1.2 : 1);
+      const ex = sd * T.eyeGap, ey = T.eyeY, ew = T.eyeW * (wide ? 1.12 : 1), eh = [7, 5.4, 6.4, 4.8][T.eye] * (wide ? 1.2 : 1) * (real ? 0.45 : 1);
       if (blink || happy && expr === "grin") { g.strokeStyle = line; g.lineWidth = 1.6; g.beginPath(); g.arc(ex, ey + 1, ew * 0.8, Math.PI * 1.1, Math.PI * 1.9); g.stroke(); return; }
       // bianco
       g.fillStyle = "#fbf8f4"; g.beginPath(); g.ellipse(ex, ey, ew, eh, 0, 0, 7); g.fill();
       // iride sfumata, pupilla, riflessi
       g.save(); g.beginPath(); g.ellipse(ex, ey, ew, eh, 0, 0, 7); g.clip();
       const ir = g.createLinearGradient(0, ey - eh, 0, ey + eh); ir.addColorStop(0, dark(eyeC, 0.45)); ir.addColorStop(0.6, eyeC); ir.addColorStop(1, lite(eyeC, 0.45));
-      g.fillStyle = ir; g.beginPath(); g.ellipse(ex + sd * -0.4, ey + 0.6, ew * 0.74, eh * 0.98, 0, 0, 7); g.fill();
+      g.fillStyle = ir; g.beginPath(); g.ellipse(ex + sd * -0.4, ey + (real ? 0.2 : 0.6), ew * (real ? 0.55 : 0.74), eh * (real ? 1.15 : 0.98), 0, 0, 7); g.fill();
       g.fillStyle = dark(eyeC, 0.7); g.beginPath(); g.ellipse(ex + sd * -0.4, ey + 0.8, ew * 0.28, eh * 0.42, 0, 0, 7); g.fill();
       g.fillStyle = "rgba(0,0,0,.25)"; g.fillRect(ex - ew, ey - eh, ew * 2, eh * 0.45);
       g.restore();
-      g.fillStyle = "#fff"; g.beginPath(); g.arc(ex - 1.6, ey - 1.6, 1.5, 0, 7); g.fill(); g.beginPath(); g.arc(ex + 1.6, ey + 2.2, 0.8, 0, 7); g.fill();
+      if (real) { g.fillStyle = "rgba(255,255,255,.9)"; g.beginPath(); g.arc(ex - 0.8, ey - 0.6, 0.6, 0, 7); g.fill(); g.strokeStyle = dark(skin, 0.3); g.lineWidth = 0.7; g.beginPath(); g.ellipse(ex, ey - 1.2, ew + 0.6, eh + 1.8, 0, Math.PI * 1.15, Math.PI * 1.85); g.stroke(); } // piega della palpebra
+      else { g.fillStyle = "#fff"; g.beginPath(); g.arc(ex - 1.6, ey - 1.6, 1.5, 0, 7); g.fill(); g.beginPath(); g.arc(ex + 1.6, ey + 2.2, 0.8, 0, 7); g.fill(); }
       // ciglia superiori spesse, inferiori sottili
-      g.strokeStyle = dark(hair, 0.55); g.lineWidth = 2; g.beginPath(); g.ellipse(ex, ey, ew + 0.3, eh + 0.2, 0, Math.PI * 1.05, Math.PI * 1.95); g.stroke();
+      g.strokeStyle = dark(hair, 0.55); g.lineWidth = real ? 1.1 : 2; g.beginPath(); g.ellipse(ex, ey, ew + 0.3, eh + 0.2, 0, Math.PI * 1.05, Math.PI * 1.95); g.stroke();
       if (T.lash) { g.lineWidth = 1.2; g.beginPath(); g.moveTo(ex + sd * (ew - 0.5), ey - eh * 0.6); g.lineTo(ex + sd * (ew + 2.2), ey - eh * 0.95); g.stroke(); }
       g.strokeStyle = line; g.lineWidth = 0.8; g.beginPath(); g.ellipse(ex, ey, ew, eh, 0, Math.PI * 0.15, Math.PI * 0.85); g.stroke();
       if (sad) { g.fillStyle = "#8fd3ff"; g.beginPath(); g.ellipse(ex + sd * 2, ey + eh + 3, 1.2, 2, 0, 0, 7); g.fill(); }
@@ -94,6 +96,7 @@
     if (T.nose === 0) { g.beginPath(); g.moveTo(1, 12); g.lineTo(-0.5, 15); g.stroke(); }
     else if (T.nose === 1) { g.beginPath(); g.moveTo(1.5, 10); g.quadraticCurveTo(2.5, 14, 0, 15.5); g.stroke(); }
     else { g.fillStyle = dark(skin, 0.18); g.beginPath(); g.moveTo(0, 11); g.lineTo(2.5, 15); g.lineTo(-1, 15.5); g.closePath(); g.fill(); }
+    if (real) { g.fillStyle = mix(skin, 0.2, "#7a3a3a"); g.globalAlpha = 0.55; g.beginPath(); g.moveTo(1.5, 6); g.quadraticCurveTo(3.5, 12, 2.5, 15); g.lineTo(0.5, 15); g.closePath(); g.fill(); g.globalAlpha = 1; g.fillStyle = dark(skin, 0.45); [-1.6, 1.6].forEach((nx) => { g.beginPath(); g.ellipse(nx, 15.2, 0.9, 0.5, 0, 0, 7); g.fill(); }); g.fillStyle = "rgba(0,0,0,.06)"; [-1, 1].forEach((sd) => { g.beginPath(); g.ellipse(sd * (fw - 4), 14, 3, 6, 0, 0, 7); g.fill(); }); } // ombra del naso, narici, zigomi
     // bocca
     g.strokeStyle = dark(skin, 0.6); g.lineWidth = 1.3; const my = 20.5;
     if (expr === "grin") { g.fillStyle = "#7a2a3a"; g.beginPath(); g.moveTo(-5, my - 1); g.quadraticCurveTo(0, my + 7, 5, my - 1); g.closePath(); g.fill(); g.fillStyle = "#fff"; g.fillRect(-3.5, my - 0.8, 7, 1.6); }
@@ -104,6 +107,7 @@
     else if (T.mouth === 2) { g.beginPath(); g.moveTo(-3, my); g.quadraticCurveTo(0, my + 1.2, 3, my - 0.6); g.stroke(); }
     else if (T.mouth === 3) { g.beginPath(); g.moveTo(-2.5, my + 0.5); g.lineTo(2.5, my + 0.5); g.stroke(); g.fillStyle = "rgba(200,80,100,.35)"; g.fillRect(-2, my + 1.4, 4, 1.2); }
     else { g.beginPath(); g.moveTo(-3, my); g.quadraticCurveTo(0, my + 2, 3, my); g.stroke(); }
+    if (real && !expr) { g.fillStyle = mix(skin, 0.35, "#b04a4a"); g.globalAlpha = 0.5; g.beginPath(); g.ellipse(0, my + 1.6, 3, 1.1, 0, 0, 7); g.fill(); g.globalAlpha = 1; } // labbro inferiore
     // capelli davanti: calotta + frangia a ciocche
     if (st !== "buzz" || !c.cap) {
       const top = st === "buzz" ? -19 : st === "cresta" ? -20 : -24;
@@ -193,6 +197,57 @@
     if (c.cap) { g.beginPath(); g.moveTo(-fw - 2, -6); g.quadraticCurveTo(-fw, -fh - 8, 0, -fh - 8); g.quadraticCurveTo(fw, -fh - 8, fw + 2, -6); g.closePath(); fill(c.cap); g.beginPath(); g.ellipse(-7, -6, fw + 4, 3.4, -0.06, 0, 7); fill(c.cap); }
   }
   // ---------------------------------------------------------------- stile PIXEL 16-bit (dal volto anime, a bassa risoluzione)
+
+  // ---------------------------------------------------------------- stili «dipinti» (dal volto anime, rielaborato su una tela a parte e messo in cache)
+  // la tela copre il riquadro locale x -36..36, y -40..62 (quello del ritratto) a doppia risoluzione
+  const SC = 3, OW = 72 * SC, OH = 102 * SC, OX = 36 * SC, OY = 40 * SC, FX_CACHE = {};
+  function offscreen(key, draw, post) {
+    let cv = FX_CACHE[key]; if (cv) return cv;
+    cv = document.createElement("canvas"); cv.width = OW; cv.height = OH; const o = cv.getContext("2d");
+    o.translate(OX, OY); o.scale(SC, SC); draw(o); o.setTransform(1, 0, 0, 1, 0, 0);
+    post(o, cv); FX_CACHE[key] = cv; const ks = Object.keys(FX_CACHE); if (ks.length > 160) delete FX_CACHE[ks[0]];
+    return cv;
+  }
+  const fxKey = (st, id, c, expr) => st + "|" + id + "|" + (expr || "") + "|" + (c.skin || "") + (c.hair || "") + (c.shirt || "") + (c.style || "") + (c.cap || "") + (c.num || "");
+  const lum = (r, g2, b) => (0.299 * r + 0.587 * g2 + 0.114 * b) / 255;
+  // MANGA: bianco e nero, chine e retini a puntini come una tavola stampata
+  function manga(g, id, c, expr) {
+    const cv = offscreen(fxKey("manga", id, c, expr), (o) => anime(o, id, Object.assign({}, c, { num: "" }), expr), (o) => {
+      const d = o.getImageData(0, 0, OW, OH), p = d.data, A = (x, y) => (x < 0 || y < 0 || x >= OW || y >= OH ? 0 : p[(y * OW + x) * 4 + 3]), out = new Uint8ClampedArray(p.length);
+      for (let y = 0; y < OH; y++) for (let x = 0; x < OW; x++) {
+        const i = (y * OW + x) * 4; if (p[i + 3] < 100) { if (A(x - 1, y) > 100 || A(x + 1, y) > 100 || A(x, y - 1) > 100 || A(x, y + 1) > 100) { out[i + 3] = 255; } continue; } // contorno a china
+        const L = lum(p[i], p[i + 1], p[i + 2]); let v; const xs = (x / 1.5) | 0, ys = (y / 1.5) | 0;
+        const j = Math.min(OW - 1, x + 1), k2 = Math.min(OH - 1, y + 1), Lr = lum(p[(y * OW + j) * 4], p[(y * OW + j) * 4 + 1], p[(y * OW + j) * 4 + 2]), Ld = lum(p[(k2 * OW + x) * 4], p[(k2 * OW + x) * 4 + 1], p[(k2 * OW + x) * 4 + 2]);
+        if (Math.abs(L - Lr) > 0.16 || Math.abs(L - Ld) > 0.16) { out[i] = out[i + 1] = out[i + 2] = 15; out[i + 3] = 255; continue; } // linee interne a china
+        if (L > 0.6) v = 255; // bianco carta (anche la pelle)
+        else if (L > 0.45) v = (xs % 4 === 0 && ys % 4 === 0) ? 30 : 255; // retino leggero
+        else if (L > 0.3) v = (xs % 3 === 0 && ys % 3 === 0) || ((xs + 1) % 3 === 0 && (ys + 1) % 3 === 0) ? 25 : 255; // retino fitto
+        else if (L > 0.17) v = (xs - ys) % 4 === 0 ? 15 : 255; // tratteggio obliquo
+        else v = 15; // nero pieno
+        out[i] = out[i + 1] = out[i + 2] = v; out[i + 3] = 255;
+      }
+      d.data.set(out); o.putImageData(d, 0, 0);
+    });
+    g.drawImage(cv, -OX / SC, -OY / SC, OW / SC, OH / SC);
+  }
+  // ACQUERELLO: colori lavati e morbidi, bordi che «sbavano», grana della carta
+  function acquerello(g, id, c, expr) {
+    const cv = offscreen(fxKey("acq", id, c, expr), (o) => { o.filter = "blur(1.6px) saturate(1.25)"; anime(o, id, Object.assign({}, c, { num: "" }), expr); o.filter = "none"; }, (o) => {
+      const d = o.getImageData(0, 0, OW, OH), p = d.data, src = new Uint8ClampedArray(p), h = hash(id) % 1000;
+      const at = (x, y, k) => src[(Math.min(OH - 1, y) * OW + Math.min(OW - 1, x)) * 4 + k];
+      for (let y = 0; y < OH; y++) for (let x = 0; x < OW; x++) {
+        const i = (y * OW + x) * 4; if (src[i + 3] < 30) { p[i + 3] = 0; continue; }
+        // macchie di colore a bassa frequenza (il pennello non stende mai uniforme) e grana della carta
+        const blot = 0.96 + 0.05 * Math.sin(x * 0.06 + h + Math.sin(y * 0.045 + h) * 2.2), grain = 0.98 + 0.03 * Math.sin(x * 1.7 + y * 2.3 + h) * Math.sin(x * 0.9 - y * 1.3);
+        // il pigmento si accumula dove il colore cambia (bordi scuri e irregolari)
+        const diff = Math.abs(at(x + 1, y, 0) - src[i]) + Math.abs(at(x, y + 1, 1) - src[i + 1]) + Math.abs(at(x + 1, y + 1, 2) - src[i + 2]), pool = diff > 70 ? 0.72 : diff > 35 ? 0.86 : 1;
+        for (let k = 0; k < 3; k++) p[i + k] = Math.min(255, (src[i + k] * 0.86 + 255 * 0.14) * blot * grain * pool);
+        p[i + 3] = src[i + 3] < 160 ? src[i + 3] * 0.85 : 255;
+      }
+      o.putImageData(d, 0, 0);
+    });
+    g.drawImage(cv, -OX / SC, -OY / SC, OW / SC, OH / SC);
+  }
   const PX_CACHE = {};
   function pixel(g, id, c, expr) {
     const key = id + "|" + (expr || "") + "|" + (c.skin || "") + (c.hair || "") + (c.shirt || "") + (c.style || "") + (c.cap || "") + (c.num || "");
@@ -211,8 +266,8 @@
     const sm = g.imageSmoothingEnabled; g.imageSmoothingEnabled = false; g.drawImage(cv, -36, -32, 72, 100); g.imageSmoothingEnabled = sm;
   }
   window.__faceStyles = {
-    list: [["classic", "Classico"], ["anime", "Anime"], ["comic", "Fumetto"], ["pixel", "Pixel 16-bit"]],
-    draw(style, g, id, c, expr) { if (!c || !c.skin) return false; g.save(); try { if (style === "anime") anime(g, id, c, expr); else if (style === "comic") comic(g, id, c, expr); else if (style === "pixel") pixel(g, id, c, expr); else { g.restore(); return false; } } catch (e) { g.restore(); return false; } g.restore(); return true; },
+    list: [["classic", "Classico"], ["anime", "Anime"], ["pixel", "Pixel 16-bit"], ["comic", "Fumetto"], ["manga", "Manga"], ["acquerello", "Acquerello"], ["illustrato", "Illustrato"]],
+    draw(style, g, id, c, expr) { if (!c || !c.skin) return false; g.save(); try { if (style === "anime") anime(g, id, c, expr); else if (style === "illustrato") anime(g, id, c, expr, true); else if (style === "comic") comic(g, id, c, expr); else if (style === "manga") manga(g, id, c, expr); else if (style === "acquerello") acquerello(g, id, c, expr); else if (style === "pixel") pixel(g, id, c, expr); else { g.restore(); return false; } } catch (e) { g.restore(); return false; } g.restore(); return true; },
     traits,
   };
 })();
