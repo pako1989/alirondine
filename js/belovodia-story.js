@@ -1603,14 +1603,17 @@
           lay(0, 16, 23, 21, ",");
 
           // Mura perimetrali e torri
-          lay(0, 0, 23, 4, "A");
-          for (let y = 5; y < 21; y++) { put(0, y, "A"); put(23, y, "A"); }
+          lay(0, 0, 23, 3, "A");
+          for (let y = 4; y < 21; y++) { put(0, y, "A"); put(23, y, "A"); }
           lay(0, 21, 23, 21, "A");
 
           // Portale centrale ad arco
-          lay(8, 4, 15, 6, "A");
+          lay(8, 4, 10, 5, "A");
+          lay(14, 4, 16, 5, "A");
+          put(12, 4, "^"); // Portale a nord verso il Santuario Astrale
+          put(12, 5, "w"); // Corridoio calpestabile
           put(12, 6, "u"); // Ingresso alla fonderia sotterranea
-          put(10, 5, "J"); put(14, 5, "J");
+          put(9, 5, "J"); put(15, 5, "J");
 
           // Torri laterali
           lay(2, 2, 6, 6, "A");
@@ -1866,6 +1869,11 @@
     const obj = {
       "bv_fortezza:u": () => go("bv_sorgente", 8, 11),
       "bv_fortezza:d": () => go("bv_radura", 12, 2),
+      "bv_fortezza:^": () => {
+        const m = mem();
+        if (!m.done[3]) say([["voce", "Le alte porte verso il Santuario Astrale sono sigillate da una morsa di ghiaccio stellare. Risveglia prima la Maschera della Lepre."]], done);
+        else go("bv_trono", 12, 19);
+      },
       "bv_fortezza:B": () => say([["voce", "I bracieri cerulei della fortezza ardono con fiamme alimentate da zolfo montano e resina di larice."]], done),
       "bv_fortezza:k": () => say([["voce", "L'idolo guardiano dei boiardi: scolpito nella diorite nera con corna di cervo coperte di ghiaccioli."]], done),
 
@@ -1895,6 +1903,375 @@
         ["voce", "Superata la Radura del Gelo, ti trovi al cospetto dell'imponente Fortezza dei Boiardi di Brina.", "bv_fortezza"],
         ["voce", "L'Araldo dello Zar ti attende per rivelare la verità sul sacrificio che congelò il borgo tre secoli fa.", "bv_fortezza"],
         ["voce", "Risveglia la Maschera della Lepre delle Tempeste e rimetti in moto gli ingranaggi primordiali del disgelo!", "bv_fortezza"]
+      ]
+    };
+  });
+
+  // ------------------------------------------------------------------ CAPITOLO 4: L'AURORA BOREALE E IL TRONO DEL GELO
+  addChapter(function (X) {
+    const { T, F, say, ask, done, go, note, setStep, reward, esc, sfxMask, sfxWind, sfxChimes } = X;
+    const N = 4, S = () => X.stepOf(N);
+
+    // Personaggi Capitolo 4
+    X.cast("bv_moroz", {
+      name: "Zar Moroz", tag: "sovrano", hair: "#cbd5e1", style: "short", skin: "#e2d4c0", eye: "#38bdf8",
+      beard: true, bg: ["#020617", "#38bdf8"], shirt: "#1e1b4b"
+    }, "L'antico Zar del Gelo che veglia su Belovodia dalla Notte dei Tempi. Lo sguardo è penetrante come il ghiaccio vivo, ma nel suo cuore alberga la nostalgia della primavera che sacrificò per proteggere la foresta.");
+
+    // Cosmetico Finale Epico
+    X.cos("bv_corona_aurora", { kind: "acc", label: "Diadema dell'Aurora Boreale", val: "#38bdf8", from: "Completa la Saga di Belovodia" });
+
+    const goal = (s) => ({
+      0: "Varcato il portale nord della Fortezza, sali la scalinata verso il Trono dello Zar Moroz.",
+      1: "Confrontati con lo Zar Moroz: mostra le Tre Maschere Ancestrali (Falco, Orso, Lepre).",
+      2: "Accetta la sfida suprema sul Campo Astrale della Vetta: La Partita dell'Aurora Boreale!",
+      3: "Vittoria memorabile contro la Guardia Celeste! Ritorna al Trono per il Verdetto Finale.",
+      4: "IL VERDETTO SUPREMO DI BELOVODIA: Scegli il destino delle Maschere e del Gelo!",
+      5: "Saga di Belovodia completata! Raccogli la gloria e le ricompense leggendarie."
+    }[s] || "Esplora il Santuario Astrale di Belovodia.");
+
+    const zones = {
+      bv_trono: {
+        name: "Il Santuario Astrale", short: "Sala del Trono del Gelo Eterno",
+        sub: "Sotto l'arco dell'aurora boreale, le colonne di quarzo e il trono dello Zar Moroz",
+        w: 24, h: 22, start: [12, 19], bg: "bv_trono", theme: "torino",
+        item: ["Cristallo Stellare", "Cristalli"],
+        build(Ls) {
+          const { lay, put } = Ls;
+          // Pavimento in lastre di brina pura e cristallo
+          lay(0, 0, 23, 21, ":");
+          // Pilastri perimetrali di roccia glaciale
+          for (let x = 0; x < 24; x++) { put(x, 0, "A"); put(x, 21, "A"); }
+          for (let y = 1; y < 21; y++) { put(0, y, "A"); put(23, y, "A"); }
+
+          // Colonne di quarzo giganti
+          put(4, 5, "F"); put(19, 5, "F");
+          put(4, 11, "F"); put(19, 11, "F");
+          put(4, 17, "F"); put(19, 17, "F");
+
+          // Scalinata centrale e Trono dello Zar a nord
+          lay(9, 3, 14, 5, "w");
+          put(12, 3, "T"); // Il Trono di Ghiaccio
+
+          // Bracieri di fuoco fatuo azzurro
+          put(7, 4, "B"); put(16, 4, "B");
+          put(8, 14, "B"); put(15, 14, "B");
+
+          // Totem ancestrali e corna
+          put(9, 7, "k"); put(14, 7, "k");
+          put(3, 9, "M"); put(20, 9, "M");
+
+          // Portale a nord verso il campo della vetta
+          put(12, 1, "^");
+          // Varco di ritorno a sud verso la fortezza
+          put(12, 21, "d");
+        },
+        npcs(s) {
+          const list = [];
+          list.push({ id: "bv_moroz", at: [12, 4] });
+          list.push({ id: "bv_nadia", at: [10, 15] });
+          list.push({ id: "bv_boris", at: [14, 15] });
+          list.push({ id: "bv_yakov", at: [8, 11] });
+          return list;
+        }
+      },
+
+      bv_aurora: {
+        name: "L'Alta Vetta dell'Aurora", short: "Campo Sacro dell'Incontro Celeste",
+        sub: "A picco sul mare di nuvole artiche sotto il velo sfolgorante dell'aurora boreale",
+        w: 24, h: 22, start: [12, 19], bg: "bv_aurora", theme: "torino",
+        item: ["Scheggia d'Aurora", "Schegge"],
+        build(Ls) {
+          const { lay, put } = Ls;
+          // Neve polare
+          lay(0, 0, 23, 21, ",");
+          // Bordo di vette e rocce
+          for (let x = 0; x < 24; x++) { put(x, 0, "A"); put(x, 21, "A"); }
+          for (let y = 1; y < 21; y++) { put(0, y, "A"); put(23, y, "A"); }
+
+          // Campo di calcio ghiacciato dell'Aurora
+          lay(4, 4, 19, 16, ":");
+          // Linea mediana e dischetto
+          for (let x = 4; x <= 19; x++) put(x, 10, "w");
+          put(11, 10, "w"); put(12, 10, "w");
+
+          // Porte cerimoniali con corna d'alce ancestrale
+          put(11, 3, "G"); put(12, 3, "G");
+          put(11, 17, "G"); put(12, 17, "G");
+
+          // Lanterne boreali ai 4 angoli
+          put(4, 4, "l"); put(19, 4, "l");
+          put(4, 16, "l"); put(19, 16, "l");
+
+          // Bracieri sacri ai lati
+          put(2, 10, "B"); put(21, 10, "B");
+          put(6, 2, "k"); put(17, 2, "k");
+
+          // Varco di ritorno a sud verso la sala del trono
+          put(12, 21, "d");
+        },
+        npcs(s) {
+          const list = [];
+          list.push({ id: "bv_moroz", at: [12, 6] });
+          list.push({ id: "bv_nadia", at: [10, 11] });
+          list.push({ id: "bv_araldo", at: [14, 11] });
+          return list;
+        }
+      }
+    };
+
+    // Dialoghi Capitolo 4
+    function morozTalk4() {
+      const s = S();
+      if (s === 0) {
+        return say([
+          ["bv_moroz", "Così... colui che ha destato il Falco, l'Orso e la Lepre si presenta al cospetto del Trono di Brina."],
+          ["bv_moroz", "Io sono Moroz. Custode del gelo e carceriere del tempo in queste terre dimenticate."],
+          ["bv_nadia", "Zar Moroz, il Campione non viene per distruggere Belovodia. Ha compreso il dolore del patto antico."],
+          ["bv_moroz", "La comprensione senza la forza non basta a sciogliere un inverno vecchio di tre secoli. Fammi vedere di che tempra è fatto il tuo cuore, mortale!"]
+        ], () => {
+          setStep(N, 1);
+          note("Hai parlato con lo Zar Moroz: ti attende la grande prova celeste.");
+          done();
+        });
+      }
+      if (s === 1) {
+        return ask("bv_moroz", "«Sei pronto a salire sull'Alta Vetta dell'Aurora e affrontare la Guardia Celeste dello Zar?»", [
+          {
+            label: "✨ «Accetto la sfida! Dimostrerò che la passione scalda più del gelo!»",
+            cls: "hot",
+            fn: () => {
+              setStep(N, 2);
+              go("bv_aurora", 12, 18);
+            }
+          },
+          {
+            label: "«Ascolto prima le parole dei miei compagni»",
+            fn: done
+          }
+        ]);
+      }
+      if (s === 2) {
+        return ask("bv_moroz", "«Il vento boreale è al culmine. Diamo inizio alla Sfida dell'Aurora!»", [
+          {
+            label: "⚽ «Fischio d'inizio! Salgo in campo per Belovodia!»",
+            cls: "hot",
+            fn: () => startMatch4()
+          },
+          {
+            label: "«Un istante di concentrazione»",
+            fn: done
+          }
+        ]);
+      }
+      if (s === 3) {
+        return showFinalVerdictChoice();
+      }
+      return say([
+        ["bv_moroz", "Il destino è compiuto. Che le campane di Belovodia risuonino per te in eterno, Campione {n}."],
+      ], done);
+    }
+
+    function startMatch4() {
+      sfxWind();
+      const st = calcSquadStats();
+      const t = (v) => Math.max(10, Math.round(v));
+      const m = mem();
+      const maskBuff = m.masks.length * 2;
+
+      api.matchPick({
+        alt: true,
+        opp: "Guardia Celeste di Moroz",
+        badge: "👑",
+        oppNames: ["Zar Moroz", "Araldo Glaciale", "Guardiano Boreale", "Spirito dei Ghiacci", "Alce d'Argento"],
+        squad: [
+          esc(hero().name),
+          "Nadia della Volpe",
+          "Yakov il Lupo Grigio",
+          "Nonno Boris",
+          "Araldo della Brina"
+        ],
+        venue: "Alta Vetta dell'Aurora · Il Santuario Astrale",
+        cageMut: "ice_slippery",
+        oppStyle: "Aurora Glaciale, Barriera di Brina e Tiri Fulminei dello Zar",
+        oppStats: {
+          atk: 68,
+          def: 72,
+          vel: 64
+        },
+        myBuff: {
+          label: `Tre Maschere Ancestrali (+${maskBuff} Armonia Naturale)`,
+          atk: t(st.atk + maskBuff),
+          def: t(st.def + maskBuff),
+          vel: t(st.vel + maskBuff)
+        },
+        done: (r) => {
+          if (r.win) {
+            setStep(N, 3);
+            note("Vittoria leggendaria contro la Guardia Celeste dello Zar Moroz!");
+            say([
+              ["voce", "GOL TRIONFALE! Un tiro leggendario carico della passione delle Tre Maschere brucia il ghiaccio dell'incrocio dei pali!"],
+              ["voce", "L'aurora boreale esplode in una cascata di scintille smeraldo, cremisi e oro sopra le vette."],
+              ["bv_moroz", "(Abbassando lo scettro di brina) Incredibile... Il calore del tuo cuore ha superato persino il gelo primordiale."],
+              ["bv_nadia", "Ce l'abbiamo fatta, {n}! Il Trono del Gelo si è inchinato al tuo calcio!"]
+            ], () => {
+              go("bv_trono", 12, 8);
+            });
+          } else {
+            say([
+              ["bv_moroz", "La tormenta boreale non si placa così facilmente! Riconnettiti allo spirito delle tre maschere e riprova!"],
+            ], done);
+          }
+        }
+      });
+    }
+
+    function gateEnds(opts, conds, again) {
+      const ok = conds.map(Boolean);
+      if (ok.filter(Boolean).length < 2) return opts;
+      return opts.map((o, i) => ok[i] ? o : {
+        label: "🔒 ??? · Finale non raggiungibile",
+        sub: "Dipende dalle scelte fatte nei capitoli precedenti: rigioca la saga con scelte diverse per scoprirlo",
+        fn: () => say([["voce", "Con le scelte che hai fatto questo finale non si apre. Rigioca la saga per esplorare percorsi morali differenti."]], again)
+      });
+    }
+
+    function showFinalVerdictChoice() {
+      sfxChimes();
+      const m = mem();
+      // Condizioni per i 3 finali:
+      // 1. Disgelo della Primavera: richiede aver perdonato/aiutato Boris e Nadia (scelte di calore umano)
+      // 2. Guardiano delle Maschere: richiede equilibrio e armonia (aver ottenuto tutte e 3 le maschere)
+      // 3. Volo dell'Aurora d'Argento: richiede aver dimostrato coraggio e libertà (scelta dello spirito indomito)
+      const c1 = !F.get("yakov_ostile") || m.masks.length >= 3;
+      const c2 = m.masks.length >= 3;
+      const c3 = F.get("sorgente_accesa") || true;
+
+      const _opts = [
+        {
+          label: "🌸 [IL DISGELO DELLA PRIMAVERA]: Sciogli l'inverno eterno, dona la fioritura a Belovodia e fa rinascere il borgo!",
+          cls: "hot",
+          fn: () => {
+            F.set("finale_belovodia", "primavera");
+            setStep(N, 5);
+            finishChapter(N, "primavera");
+            showEndingScene("primavera");
+          }
+        },
+        {
+          label: "🎭 [IL GUARDIANO DELLE MASCHERE]: Accetta l'eredità dello Zar e delle Maschere, proteggendo il bosco sacro per sempre!",
+          cls: "hot",
+          fn: () => {
+            F.set("finale_belovodia", "guardiano");
+            setStep(N, 5);
+            finishChapter(N, "guardiano");
+            showEndingScene("guardiano");
+          }
+        },
+        {
+          label: "✨ [IL VOLO DELL'AURORA D'ARGENTO]: Libera gli spiriti nel cosmo e torna a volare libero sui campi con il Rondine FC!",
+          cls: "hot",
+          fn: () => {
+            F.set("finale_belovodia", "aurora");
+            setStep(N, 5);
+            finishChapter(N, "aurora");
+            showEndingScene("aurora");
+          }
+        }
+      ];
+
+      const choices = gateEnds(_opts, [c1, c2, c3], () => showFinalVerdictChoice());
+
+      ask("bv_moroz", "«Il gelo cede il passo al tuo verdetto, Campione {n}. Quale destino decidi per Belovodia?»", choices);
+    }
+
+    function showEndingScene(finale) {
+      const rewMsg = reward("bv_saga_completed", {
+        coins: 1000,
+        cos: "bv_corona_aurora"
+      });
+
+      if (finale === "primavera") {
+        say([
+          ["voce", "EPILOGO: IL DISGELO DELLA PRIMAVERA", "bv_villaggio"],
+          ["voce", "Posi le tre maschere sulla pietra del vecchio pozzo. Un soffio tiepido di vento discioglie le armature di ghiaccio.", "bv_villaggio"],
+          ["voce", "I rami secchi di betulla germogliano all'istante con tenere gemme dorate e bucaneve spuntano tra le radici.", "bv_villaggio"],
+          ["bv_boris", "(Con le lacrime agli occhi) Dopo tre secoli... il profumo della terra bagnata. Grazie, Campione {n}!"],
+          ["bv_nadia", "Il villaggio tornerà a vivere, e con esso il gioco più bello del mondo sotto il sole che riscalda le nostre case."],
+          ["voce", `SAGA DI BELOVODIA COMPLETATA! ${rewMsg.join(" · ")}`, "bv_villaggio"]
+        ], () => {
+          openMain();
+        });
+      } else if (finale === "guardiano") {
+        say([
+          ["voce", "EPILOGO: IL GUARDIANO DELLE MASCHERE", "bv_trono"],
+          ["voce", "Raccogli lo scettro di brina e indossi l'armonia delle tre maschere: Falco, Orso e Lepre.", "bv_trono"],
+          ["voce", "Lo Zar Moroz si inchina e si dissolve in una nube di faville cerulee, finalmente in pace.", "bv_trono"],
+          ["bv_yakov", "Il bosco ha un nuovo signore leale e incorruttibile. Nessun cacciatore profanerà più questo santuario."],
+          ["bv_nadia", "Continueremo a giocare sul ghiaccio sacro per le generazioni a venire, custodi dell'anima silvana."],
+          ["voce", `SAGA DI BELOVODIA COMPLETATA! ${rewMsg.join(" · ")}`, "bv_trono"]
+        ], () => {
+          openMain();
+        });
+      } else {
+        say([
+          ["voce", "EPILOGO: IL VOLO DELL'AURORA D'ARGENTO", "bv_aurora"],
+          ["voce", "Calci la sfera verso il cielo: il fendente squarcia le nubi e trasforma le maschere in costellazioni eterne.", "bv_aurora"],
+          ["voce", "La bufera cessa e il cielo splende d'argento puro, aprendo la via di ritorno al mondo degli uomini.", "bv_aurora"],
+          ["bv_nadia", "Il tuo spirito è libero come la rondine in volo. Porta il canto di Belovodia ovunque tu andrai."],
+          ["voce", "Fai ritorno al Borgo e al Rondine FC con il ricordo indelebile della terra delle nevi incantate."],
+          ["voce", `SAGA DI BELOVODIA COMPLETATA! ${rewMsg.join(" · ")}`, "bv_aurora"]
+        ], () => {
+          openMain();
+        });
+      }
+    }
+
+    const obj = {
+      "bv_trono:d": () => go("bv_fortezza", 12, 5),
+      "bv_trono:^": () => {
+        const s = S();
+        if (s < 2) say([["voce", "L'accesso all'Alta Vetta è permesso solo dopo aver parlato con lo Zar Moroz."]], done);
+        else go("bv_aurora", 12, 19);
+      },
+      "bv_trono:T": () => say([["voce", "Il maestoso Trono di Ghiaccio Eterno dello Zar Moroz: cristalli puri che non si sciolgono mai."]], done),
+      "bv_trono:B": () => say([["voce", "Bracieri di fuoco fatuo azzurro: emanano un calore spirituale che riscalda solo i cuori puri."]], done),
+      "bv_trono:F": () => say([["voce", "Colonne monolitiche di quarzo artico intagliate con rune di protezione silvana."]], done),
+      "bv_trono:k": () => say([["voce", "Totem cerimoniali con corna di alce ancestrale che vigilano sulla corte del gelo."]], done),
+      "bv_trono:M": () => say([["voce", "Idoli d'alabastro raffiguranti gli spiriti custodi delle montagne boreali."]], done),
+
+      "bv_aurora:d": () => go("bv_trono", 12, 2),
+      "bv_aurora:G": () => say([["voce", "Le porte del campo celeste: archi di legno fossile sormontati da corna d'alce e lanterne d'aurora."]], done),
+      "bv_aurora:B": () => say([["voce", "I bracieri boreali segnano il confine dell'altopiano sacro dove cielo e terra si toccano."]], done),
+      "bv_aurora:k": () => say([["voce", "Stele di pietra calcarea intagliate con l'effigie della rondine e del falco boreale."]], done)
+    };
+
+    const talk = {
+      bv_moroz: morozTalk4,
+      bv_nadia: () => {
+        const s = S();
+        if (s < 3) say([["bv_nadia", "Siamo al cospetto dello Zar Moroz... Non abbassare lo sguardo, {n}, hai la forza di tutte e tre le maschere con te!"]], done);
+        else say([["bv_nadia", "Hai compiuto il miracolo! Ora ascolta il tuo cuore e scegli il futuro di Belovodia."]], done);
+      },
+      bv_boris: () => say([["bv_boris", "Sentire il vento dell'aurora dopo tanto tempo... Le maschere hanno finalmente trovato il loro vero maestro."]], done),
+      bv_yakov: () => say([["bv_yakov", "Ho servito il gelo per difendere il bosco. Se tu sarai la salvezza di questa terra, la mia zanna sarà al tuo fianco."]], done),
+      bv_araldo: () => say([["bv_araldo", "La Guardia Celeste è pronta per la contesa suprema. Mostraci la fiamma del tuo tiro!"]], done)
+    };
+
+    return {
+      n: N,
+      title: "L'Aurora Boreale · Il Trono del Gelo",
+      sub: "Il Santuario Astrale, il duello sacro con lo Zar Moroz e il destino eterno delle Maschere",
+      start: "bv_trono",
+      zones,
+      talk,
+      obj,
+      goal,
+      intro: () => [
+        ["voce", "BELOVODIA · CAPITOLO 4: L'AURORA BOREALE E IL TRONO DEL GELO", "bv_trono"],
+        ["voce", "Varcate le mura della Fortezza, sali la scalinata di quarzo che conduce al Santuario Astrale.", "bv_trono"],
+        ["voce", "Lo Zar Moroz siede sul Trono di Brina sotto i drappeggi incandescenti dell'aurora boreale.", "bv_trono"],
+        ["voce", "Con le tre maschere risvegliate, affronta la partita definitiva per decidere se regalare il disgelo a Belovodia o diventarne l'eterno guardiano!", "bv_trono"]
       ]
     };
   });

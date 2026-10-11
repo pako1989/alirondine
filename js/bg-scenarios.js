@@ -2288,6 +2288,199 @@
     px(g, 25, 136, 5, 14, "#fef08a");
   }
 
+  // --- 15. BELOVODIA · IL SANTUARIO ASTRALE & IL TRONO DEL GELO ---
+  function drawDetailedBelovodiaTrono(g, W, H, f) {
+    // Cielo artico con stelle pulsanti e aurora stellare
+    const sky = g.createLinearGradient(0, 0, 0, 95);
+    sky.addColorStop(0, "#020617");
+    sky.addColorStop(0.5, "#0b1329");
+    sky.addColorStop(1, "#1e1b4b");
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, 95);
+
+    // Velo di aurora boreale azzurro-indaco ondulante
+    for (let i = 0; i < 4; i++) {
+      const aGrad = g.createRadialGradient(W / 2 + Math.sin(f * 0.04 + i) * 50, 25 + i * 15, 10, W / 2, 35, 110);
+      aGrad.addColorStop(0, "rgba(56, 189, 248, 0.45)");
+      aGrad.addColorStop(0.5, "rgba(129, 140, 248, 0.25)");
+      aGrad.addColorStop(1, "rgba(2, 6, 23, 0)");
+      g.fillStyle = aGrad;
+      g.fillRect(0, 0, W, 95);
+    }
+
+    // Stelle scintillanti
+    for (let s = 0; s < 30; s++) {
+      const sx = (s * 31 + 17) % W;
+      const sy = (s * 19 + 7) % 85;
+      const sa = Math.sin(f * 0.12 + s) * 0.4 + 0.6;
+      px(g, sx, sy, 1, 1, `rgba(255, 255, 255, ${sa})`);
+      if (s % 6 === 0) px(g, sx - 1, sy, 3, 1, `rgba(186, 230, 253, ${sa * 0.8})`);
+    }
+
+    // Pilastri ciclopici di quarzo ghiacciato ai lati
+    [20, 55, W - 60, W - 25].forEach((px0, pi) => {
+      px(g, px0 - 8, 25, 16, 115, "#1e293b");
+      px(g, px0 - 6, 27, 12, 110, "#334155");
+      px(g, px0 - 4, 30, 4, 100, "#38bdf8");
+      // Cristalli e riflessi
+      px(g, px0 - 2, 35 + (pi * 12) % 30, 2, 18, "#e0f2fe");
+      // Capitello runico
+      px(g, px0 - 12, 22, 24, 6, "#64748b");
+      px(g, px0 - 10, 20, 20, 2, "#f8fafc");
+    });
+
+    // Pavimento della sala del trono: lastre di brina pura e cristallo nero
+    const floorGrad = g.createLinearGradient(0, 95, 0, H);
+    floorGrad.addColorStop(0, "#0f172a");
+    floorGrad.addColorStop(0.4, "#020617");
+    floorGrad.addColorStop(1, "#030712");
+    g.fillStyle = floorGrad;
+    g.fillRect(0, 95, W, H - 95);
+
+    // Scalinata monumentale al centro verso il Trono
+    for (let st = 0; st < 6; st++) {
+      const sy = 125 - st * 6;
+      const sw = 90 - st * 8;
+      px(g, W / 2 - sw / 2, sy, sw, 5, "#334155");
+      px(g, W / 2 - sw / 2, sy, sw, 1, "#e2e8f0"); // Bordo innevato
+    }
+
+    // Il Trono di Ghiaccio Eterno
+    const tx = W / 2, ty = 72;
+    // Spalliera del trono a forma di corna di cervo e guglie di brina
+    px(g, tx - 22, ty - 24, 44, 48, "#0284c7");
+    px(g, tx - 18, ty - 22, 36, 44, "#0369a1");
+    px(g, tx - 12, ty - 18, 24, 38, "#075985");
+    // Guglie di brina aguzze
+    px(g, tx - 20, ty - 32, 5, 12, "#bae6fd");
+    px(g, tx + 15, ty - 32, 5, 12, "#bae6fd");
+    px(g, tx - 6, ty - 38, 12, 18, "#e0f2fe");
+    // Sedile
+    px(g, tx - 16, ty + 12, 32, 10, "#1e293b");
+    px(g, tx - 14, ty + 10, 28, 3, "#f8fafc");
+
+    // Sagoma dello Zar Moroz assiso sul trono
+    px(g, tx - 8, ty - 8, 16, 22, "#1e1b4b"); // Manto blu notte
+    px(g, tx - 5, ty - 14, 10, 8, "#e2d4c0"); // Volto austero
+    px(g, tx - 9, ty - 22, 18, 9, "#38bdf8"); // Corona di cristallo di ghiaccio
+    px(g, tx - 10, ty + 2, 20, 16, "#cbd5e1"); // Barba canuta fluente
+    // Occhi cerulei luminosi
+    const morozGlow = (f % 20 < 10) ? "#7dd3fc" : "#38bdf8";
+    px(g, tx - 3, ty - 12, 2, 2, morozGlow);
+    px(g, tx + 1, ty - 12, 2, 2, morozGlow);
+
+    // Bracieri di fuoco fatuo azzurro ai piedi del trono
+    [tx - 42, tx + 42].forEach((bx) => {
+      px(g, bx - 3, 115, 6, 14, "#475569");
+      const fl = Math.sin(f * 0.3 + bx) * 2;
+      const bGlow = g.createRadialGradient(bx, 110, 1, bx, 110, 16);
+      bGlow.addColorStop(0, "rgba(56, 189, 248, 0.85)");
+      bGlow.addColorStop(1, "rgba(56, 189, 248, 0)");
+      g.fillStyle = bGlow;
+      g.fillRect(bx - 16, 95, 32, 32);
+      px(g, bx - 2, 108 + fl, 4, 6, "#e0f2fe");
+    });
+
+    // Campo da gioco runico tracciato sul pavimento di ghiaccio vivo
+    px(g, 40, 148, W - 80, 42, "rgba(56, 189, 248, 0.15)");
+    g.strokeStyle = "#38bdf8";
+    g.lineWidth = 1;
+    g.strokeRect(40, 148, W - 80, 42);
+    // Linea mediana e cerchio
+    g.beginPath();
+    g.moveTo(W / 2, 148); g.lineTo(W / 2, 190);
+    g.stroke();
+    g.beginPath();
+    g.arc(W / 2, 169, 14, 0, Math.PI * 2);
+    g.stroke();
+  }
+
+  // --- 16. BELOVODIA · L'ALTA VETTA DELL'AURORA BOREALE (CAMPO FINALE) ---
+  function drawDetailedBelovodiaAurora(g, W, H, f) {
+    // Cielo cosmico dell'altopiano polare con aurora boreale fiammeggiante
+    const sky = g.createLinearGradient(0, 0, 0, 110);
+    sky.addColorStop(0, "#030712");
+    sky.addColorStop(0.3, "#0c1737");
+    sky.addColorStop(0.7, "#064e3b");
+    sky.addColorStop(1, "#042f2e");
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, 110);
+
+    // Fasce d'aurora boreale fluttuanti (verde smeraldo, turchese, magenta)
+    for (let a = 0; a < 5; a++) {
+      const ay = 15 + a * 14;
+      const aWave = Math.sin(f * 0.05 + a * 0.8) * 22;
+      const cGrad = g.createLinearGradient(0, ay - 15, 0, ay + 30);
+      cGrad.addColorStop(0, "rgba(16, 185, 129, 0)");
+      cGrad.addColorStop(0.5, a % 2 === 0 ? "rgba(52, 211, 153, 0.6)" : "rgba(56, 189, 248, 0.55)");
+      cGrad.addColorStop(0.8, a === 3 ? "rgba(244, 114, 182, 0.45)" : "rgba(16, 185, 129, 0.2)");
+      cGrad.addColorStop(1, "rgba(2, 6, 23, 0)");
+      g.fillStyle = cGrad;
+      g.beginPath();
+      g.moveTo(0, ay + aWave);
+      g.quadraticCurveTo(W / 4, ay - aWave * 1.2, W / 2, ay + aWave * 0.8);
+      g.quadraticCurveTo((3 * W) / 4, ay + 20 - aWave, W, ay - aWave);
+      g.lineTo(W, ay + 45);
+      g.lineTo(0, ay + 45);
+      g.closePath();
+      g.fill();
+    }
+
+    // Catena montuosa delle Vette d'Argento all'orizzonte
+    for (let p = 0; p < 7; p++) {
+      const px0 = p * 50 - 20;
+      const ph = 50 + ((p * 23) % 35);
+      g.fillStyle = "#0f172a";
+      g.beginPath();
+      g.moveTo(px0, 105);
+      g.lineTo(px0 + 35, 105 - ph);
+      g.lineTo(px0 + 70, 105);
+      g.closePath();
+      g.fill();
+      // Calotta di ghiaccio eterno
+      g.fillStyle = "#f8fafc";
+      g.beginPath();
+      g.moveTo(px0 + 25, 105 - ph * 0.7);
+      g.lineTo(px0 + 35, 105 - ph);
+      g.lineTo(px0 + 45, 105 - ph * 0.7);
+      g.closePath();
+      g.fill();
+    }
+
+    // Altopiano ghiacciato (campo sacro della Prova dell'Aurora)
+    const fieldGrad = g.createLinearGradient(0, 105, 0, H);
+    fieldGrad.addColorStop(0, "#1e293b");
+    fieldGrad.addColorStop(0.2, "#0e7490");
+    fieldGrad.addColorStop(0.5, "#0891b2");
+    fieldGrad.addColorStop(1, "#155e75");
+    g.fillStyle = fieldGrad;
+    g.fillRect(0, 105, W, H - 105);
+
+    // Riflessi d'aurora sul ghiaccio vivo
+    for (let r = 0; r < 6; r++) {
+      const rx = (r * 52 + f * 0.5) % W;
+      px(g, rx, 115 + r * 12, 38, 2, "rgba(165, 243, 252, 0.45)");
+    }
+
+    // Porte cerimoniali con corna di alce ancestrale e lanterne azzurre
+    [25, W - 35].forEach((gx) => {
+      px(g, gx - 2, 98, 4, 30, "#475569");
+      px(g, gx - 8, 96, 16, 4, "#64748b");
+      // Corna di cervo fossile
+      px(g, gx - 12, 88, 6, 10, "#e2e8f0");
+      px(g, gx + 6, 88, 6, 10, "#e2e8f0");
+      // Lanterna boreale
+      px(g, gx - 1, 102, 2, 4, "#38bdf8");
+    });
+
+    // Schegge di neve boreale che fluttuano verso l'alto spinte dal vento spirituale
+    for (let sp = 0; sp < 35; sp++) {
+      const spx = (sp * 29 + Math.sin(f * 0.08 + sp) * 25) % W;
+      const spy = (H - ((sp * 17 + f * 1.8) % H));
+      px(g, spx, spy, 1, 1, "rgba(224, 242, 254, 0.9)");
+    }
+  }
+
   // INTERAZIONE TOUCH/CLICK CON GLI ELEMENTI DELLO SFONDO (SCENIC INTERACTION)
   function setupScenicCanvasInteraction() {
     const cv = document.getElementById("cv");
@@ -2383,6 +2576,28 @@
         } else if (clickX < 75 && clickY < 85) {
           if (toast) toast("⚙️ Ingranaggi Titanici: «Le ruote di bronzo della fonderia sono parzialmente bloccate dal ghiaccio.»");
         }
+      } else if (bg === "bv_trono") {
+        if (Math.abs(clickX - W / 2) < 35 && clickY > 40 && clickY < 95) {
+          if (toast) toast("👑 Lo Zar Moroz sul Trono di Brina: «Gli occhi cerulei scrutano ogni tuo battito di cuore.»");
+          sfx("whistle");
+        } else if (clickY < 50) {
+          if (toast) toast("🌌 Volta Astrale di Belovodia: «L'aurora boreale pulsa in armonia con le tre maschere sacre.»");
+          sfx("chime");
+        } else if (clickX < 65 || clickX > W - 65) {
+          if (toast) toast("🏛️ Colonne di Quarzo Glaciale: «Monoliti millenari che sorreggono il peso dell'inverno eterno.»");
+        } else if (clickY >= 140) {
+          if (toast) toast("⚽ Campo Runico del Gelo: «Il cerchio sacro dove si decide il destino della primavera.»");
+        }
+      } else if (bg === "bv_aurora") {
+        if (clickY < 80) {
+          if (toast) toast("✨ Fiamme dell'Aurora Boreale: «I veli verdi e cremisi riscaldano l'aria sopra le vette.»");
+          sfx("chime");
+        } else if (clickX < 50 || clickX > W - 50) {
+          if (toast) toast("🦌 Porte dell'Alce Ancestrale: «Intagliate nel corno fossile a guardia del cielo.»");
+        } else if (clickY >= 105) {
+          if (toast) toast("🏔️ Altopiano del Disgelo: «Sotto la crosta di ghiaccio la terra comincia a germogliare.»");
+          sfx("crowd");
+        }
       } else if (bg === "feudi_consiglio") {
         if (clickY < H * 0.55 && Math.abs(clickX - W / 2) < 55) {
           if (toast) toast("⚖️ Bilancia del Giudizio: «Ogni piatto pesa il valore delle tue convinzioni.»");
@@ -2458,6 +2673,12 @@
         return true;
       case "bv_sorgente":
         drawDetailedBelovodiaSorgente(g, W, H, f);
+        return true;
+      case "bv_trono":
+        drawDetailedBelovodiaTrono(g, W, H, f);
+        return true;
+      case "bv_aurora":
+        drawDetailedBelovodiaAurora(g, W, H, f);
         return true;
       case "feudi_consiglio":
         drawDetailedFeudiConsiglio(g, W, H, f);
