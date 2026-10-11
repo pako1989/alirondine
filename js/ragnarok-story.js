@@ -11,7 +11,7 @@
 
   const KEY = "ali-di-rondine.ragnarok";
   const TS = 16;
-  let tries = 0, api = null, inMatch = false;
+  let tries = 0, api = null, inMatch = false, EXIT = null;
   const CAST_Q = [];
   const COS_Q = [];
   const PENDING = [];
