@@ -119,7 +119,11 @@
     ["abi_armitage", { name: "Dottor Armitage", tag: "Erudito di Archeologia Marina", skin: "#e2c09c", hair: "#94a3b8", style: "ordinato", eye: "#475569", shirt: "#334155", bg: ["#0f172a", "#334155"] }, "Studioso giunto dal continente per decifrare i tomi ricoperti di balani e le misteriose rune della Coppa delle Onde Nere."],
     ["abi_nora", { name: "Nora la Guardiana", tag: "Custode del Faro delle Maree", skin: "#dab490", hair: "#b45309", style: "coda", eye: "#06b6d4", shirt: "#ca8a04", bg: ["#451a03", "#ca8a04"] }, "Veglia sull'antica torre ottagonale del Faro di Dunwich dopo l'oscura scomparsa del padre tra i flutti."],
     ["abi_jonah", { name: "Jonah dei Fondali", tag: "Pescatore d'Alto Mare", skin: "#a87850", hair: "#1e293b", style: "corto", eye: "#0369a1", shirt: "#0369a1", bg: ["#082f49", "#0284c7"] }, "Pescatore veterano che conosce ogni secca, ogni scoglio e ogni canto ingannevole che sale dalla fossa marina."],
-    ["abi_corvo", { name: "Marinaio Corvo", tag: "Vedetta del Frangiflutti", skin: "#c49a74", hair: "#0f172a", style: "bandana", eye: "#334155", shirt: "#0f172a", bg: ["#020617", "#1e293b"] }, "Silenziosa vedetta che scruta le onde e batte i rintocchi della campana al salire della marea."]
+    ["abi_corvo", { name: "Marinaio Corvo", tag: "Vedetta del Frangiflutti", skin: "#c49a74", hair: "#0f172a", style: "bandana", eye: "#334155", shirt: "#0f172a", bg: ["#020617", "#1e293b"] }, "Silenziosa vedetta che scruta le onde e batte i rintocchi della campana al salire della marea."],
+    ["abi_cormac", { name: "Mastro Cormac", tag: "Carpentiere dei Relitti", skin: "#b48a60", hair: "#334155", style: "bandana", eye: "#f59e0b", shirt: "#78350f", bg: ["#1c1917", "#78350f"] }, "Signore delle secche e dei galeoni affondati. Forgia porte e traverse usando chiodi navali e legname di relitti centenari."],
+    ["abi_cordelia", { name: "Cordelia la Tuffatrice", tag: "Cercatrice delle Secche", skin: "#e0b48a", hair: "#0284c7", style: "corto", eye: "#38bdf8", shirt: "#0f766e", bg: ["#042f2e", "#0f766e"] }, "Intrepida tuffatrice delle maree basse. Si cala nei ventri delle navi sommerse alla ricerca di reliquie e gemme."],
+    ["abi_eldon", { name: "Eldon l'Araldo", tag: "Custode dei Leviatani", skin: "#a8a29e", hair: "#f8fafc", style: "lungo", eye: "#06b6d4", shirt: "#1e1b4b", bg: ["#020617", "#1e1b4b"] }, "Antico sacerdote delle maree profonde. Custodisce il Tempio Sommerso e la coppa d'ossidiana forgiata dai primi abitanti del golfo."],
+    ["abi_titano", { name: "Titano d'Ossidiana", tag: "Campione delle Fosse", skin: "#57534e", hair: "#0f172a", style: "elmo", eye: "#38bdf8", shirt: "#0369a1", bg: ["#020617", "#0369a1"] }, "Gigantesco difensore della fossa abissale. La sua parata blocca le onde e spezza i tiri più potenti."]
   ];
 
   // ------------------------------------------------------------------ Sfondi Dettagliati (renderDetailedBg)
@@ -254,11 +258,110 @@
     g.fillText("LEVIATANI D'ABISSO", W - 97, H * 0.46 + 7);
   }
 
+  function bgSalaFaro(g, W, H, f) {
+    g.fillStyle = "#020617"; g.fillRect(0, 0, W, H);
+    const sky = g.createLinearGradient(0, 0, 0, H * 0.65);
+    sky.addColorStop(0, "#082f49"); sky.addColorStop(1, "#0369a1");
+    g.fillStyle = sky; g.fillRect(20, 10, W - 40, H * 0.55);
+    g.strokeStyle = "rgba(186,230,253,0.3)"; g.lineWidth = 1;
+    for (let i = 0; i < 20; i++) {
+      const rx = (i * 23 + f * 4) % (W - 40) + 20;
+      const ry = (i * 19 + f * 6) % (H * 0.55) + 10;
+      g.beginPath(); g.moveTo(rx, ry); g.lineTo(rx - 3, ry + 12); g.stroke();
+    }
+    g.strokeStyle = "#0f172a"; g.lineWidth = 6;
+    g.strokeRect(20, 10, W - 40, H * 0.55);
+    for (let x = 60; x < W - 40; x += 50) { g.beginPath(); g.moveTo(x, 10); g.lineTo(x, 10 + H * 0.55); g.stroke(); }
+    g.fillStyle = "#78350f"; g.fillRect(W * 0.38, H * 0.55, W * 0.24, 30);
+    g.fillStyle = "#b45309"; g.fillRect(W * 0.42, H * 0.52, W * 0.16, 8);
+    glow(g, W / 2, H * 0.35, 75, "16,185,129", 0.55 + 0.15 * Math.sin(f / 10));
+    g.fillStyle = "#10b981"; g.beginPath(); g.arc(W / 2, H * 0.35, 26, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#a7f3d0"; g.beginPath(); g.arc(W / 2, H * 0.35, 14, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = "#ffffff"; g.lineWidth = 1.5;
+    g.beginPath(); g.arc(W / 2, H * 0.35, 20, 0, Math.PI * 2); g.stroke();
+    g.beginPath(); g.arc(W / 2, H * 0.35, 8, 0, Math.PI * 2); g.stroke();
+    g.fillStyle = "#0f172a"; g.fillRect(0, H * 0.72, W, H * 0.28);
+    g.fillStyle = "#1e293b"; for (let y = H * 0.72; y < H; y += 12) g.fillRect(0, y, W, 1);
+  }
+
+  function bgRelitti(g, W, H, f) {
+    const sky = g.createLinearGradient(0, 0, 0, H * 0.55);
+    sky.addColorStop(0, "#030712"); sky.addColorStop(0.5, "#0b192c"); sky.addColorStop(1, "#0f2537");
+    g.fillStyle = sky; g.fillRect(0, 0, W, H * 0.55);
+    glow(g, 60, 40, 35, "186,230,253", 0.25);
+    g.fillStyle = "#cbd5e1"; g.beginPath(); g.arc(60, 40, 10, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#082f49"; g.fillRect(0, H * 0.5, W, H * 0.5);
+    for (let p = 0; p < 4; p++) {
+      const px = (p * 85 + 20) % W, py = H * 0.65 + (p * 18) % 35;
+      glow(g, px, py, 22, "6,182,212", 0.4);
+      g.fillStyle = "#06b6d4"; g.beginPath(); g.ellipse(px, py, 14, 5, 0, 0, Math.PI * 2); g.fill();
+    }
+    g.fillStyle = "#1c1917";
+    g.beginPath(); g.moveTo(20, H * 0.75); g.lineTo(90, H * 0.55); g.lineTo(130, H * 0.75); g.fill();
+    g.strokeStyle = "#292524"; g.lineWidth = 4;
+    g.beginPath(); g.moveTo(80, H * 0.62); g.lineTo(60, H * 0.25); g.stroke();
+    g.strokeStyle = "rgba(168,162,158,0.4)"; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(60, H * 0.25); g.quadraticCurveTo(75, H * 0.45, 100, H * 0.6); g.stroke();
+    g.beginPath(); g.moveTo(W - 120, H * 0.78); g.lineTo(W - 40, H * 0.52); g.lineTo(W - 10, H * 0.8); g.fill();
+    g.strokeStyle = "#292524"; g.lineWidth = 3;
+    g.beginPath(); g.moveTo(W - 60, H * 0.55); g.lineTo(W - 50, H * 0.28); g.stroke();
+    g.fillStyle = "#0c0a09"; g.fillRect(0, H * 0.82, W, H * 0.18);
+  }
+
+  function bgFossa(g, W, H, f) {
+    g.fillStyle = "#04101e"; g.fillRect(0, 0, W, H);
+    g.fillStyle = "#1e293b";
+    g.fillRect(W * 0.15, 0, 16, H * 0.7); g.fillRect(W * 0.75, 0, 16, H * 0.7);
+    g.fillRect(W * 0.15, H * 0.2, W * 0.65, 12);
+    g.strokeStyle = "#64748b"; g.lineWidth = 3;
+    g.beginPath(); g.moveTo(W * 0.5, H * 0.2); g.lineTo(W * 0.5, H * 0.45); g.stroke();
+    glow(g, W * 0.5, H * 0.55, 45, "245,158,11", 0.35);
+    g.fillStyle = "#b45309";
+    g.beginPath(); g.arc(W * 0.5, H * 0.52, 22, Math.PI, 0); g.lineTo(W * 0.5 + 24, H * 0.7); g.lineTo(W * 0.5 - 24, H * 0.7); g.closePath(); g.fill();
+    g.fillStyle = "#0284c7"; g.beginPath(); g.arc(W * 0.5, H * 0.58, 8, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#bae6fd"; g.fillRect(W * 0.5 - 4, H * 0.58 - 4, 3, 3);
+    g.fillStyle = "#020617"; g.fillRect(0, H * 0.75, W, H * 0.25);
+    g.fillStyle = "rgba(226,232,240,0.15)";
+    for (let s = 0; s < 3; s++) {
+      const sy = H * 0.35 - ((f * 1.5 + s * 25) % 40);
+      g.beginPath(); g.arc(W * 0.25 + Math.sin(f / 10 + s) * 6, sy, 8 + s * 3, 0, Math.PI * 2); g.fill();
+    }
+  }
+
+  function bgTempio(g, W, H, f) {
+    const deep = g.createLinearGradient(0, 0, 0, H);
+    deep.addColorStop(0, "#020617"); deep.addColorStop(0.5, "#031c33"); deep.addColorStop(1, "#03456b");
+    g.fillStyle = deep; g.fillRect(0, 0, W, H);
+    g.save(); g.globalAlpha = 0.25;
+    g.fillStyle = "#38bdf8";
+    const levX = ((f * 0.8) % (W + 200)) - 100;
+    g.beginPath(); g.ellipse(levX, 45, 65, 18, -0.05, 0, Math.PI * 2); g.fill();
+    g.beginPath(); g.moveTo(levX - 60, 45); g.lineTo(levX - 95, 30); g.lineTo(levX - 95, 60); g.fill();
+    g.restore();
+    g.strokeStyle = "rgba(56,189,248,0.45)"; g.lineWidth = 2.5;
+    g.beginPath(); g.arc(W / 2, H * 0.65, 130, Math.PI, 0); g.stroke();
+    g.fillStyle = "#0f172a";
+    g.fillRect(30, H * 0.35, 24, H * 0.5); g.fillRect(W - 54, H * 0.35, 24, H * 0.5);
+    glow(g, 42, H * 0.55, 20, "56,189,248", 0.5 + 0.15 * Math.sin(f / 8));
+    glow(g, W - 42, H * 0.55, 20, "56,189,248", 0.5 + 0.15 * Math.cos(f / 8));
+    g.fillStyle = "#38bdf8";
+    g.fillRect(40, H * 0.45, 4, 8); g.fillRect(40, H * 0.6, 4, 8);
+    g.fillRect(W - 44, H * 0.45, 4, 8); g.fillRect(W - 44, H * 0.6, 4, 8);
+    g.fillStyle = "#090d16"; g.fillRect(0, H * 0.75, W, H * 0.25);
+    g.strokeStyle = "#38bdf8"; g.lineWidth = 1;
+    g.strokeRect(40, H * 0.82, W - 80, H * 0.14);
+    g.beginPath(); g.arc(W / 2, H * 0.89, 16, 0, Math.PI * 2); g.stroke();
+  }
+
   const BGS = {
     abi_molo: bgMolo,
     abi_taverna: bgTaverna,
     abi_faro: bgFaro,
-    abi_arena: bgArena
+    abi_arena: bgArena,
+    abi_sala_faro: bgSalaFaro,
+    abi_relitti: bgRelitti,
+    abi_fossa: bgFossa,
+    abi_tempio: bgTempio
   };
 
   const prevBg = window.renderDetailedBg;
@@ -808,12 +911,12 @@
 
   function chaptersList() {
     const m = mem(), rows = [];
-    for (let n = 1; n <= 4; n++) {
+    for (let n = 1; n <= 3; n++) {
       const c = CHAPTERS[n];
       if (c && (n === 1 || m.done[n - 1] || m.ch >= n)) {
         rows.push(`${m.done[n] ? "✓" : "▸"} <b>Capitolo ${n}</b> · ${esc(c.title)} <span style="color:var(--dim)">${esc(m.done[n] ? "completato" : c.sub || "")}</span>`);
       } else {
-        rows.push(`<span style="color:var(--dim)">• Capitolo ${n} · ??? (In arrivo)</span>`);
+        rows.push(`<span style="color:var(--dim)">• Capitolo ${n} · ???</span>`);
       }
     }
     api.scene(
@@ -1139,10 +1242,8 @@
       "abi_faro:<": () => X.go("abi_molo", 38, 12),
       "abi_faro:w": () => {
         const s = X.stepOf(N);
-        if (s >= 4 || X.F.is("key_faro")) {
-          X.say([
-            ["voce", "Inserisci la Chiave di Rame vinta da Capitan Barnaby: il pesante portone di ferro del Faro si apre cigolando verso la sala superiore! (Il Capitolo 2 ti porterà in cima alla torre!)"]
-          ], X.done);
+        if (s >= 4 || X.F.is("key_faro") || (X.mem().done && X.mem().done[1])) {
+          X.go("abi_sala_faro", 16, 18);
         } else {
           X.say([
             ["voce", "Il portone in ferro massiccio del Faro è sprangato con tre lucchetti d'ottone massiccio. Solo Capitan Barnaby possiede la chiave della lente."]
@@ -1348,6 +1449,522 @@
         ["voce", "Il vecchio traghetto a vapore attracca con un gemito di ferro contro la banchina di pietra nera. Una nebbia salmastra e densa avvolge ogni cosa.", "abi_molo"],
         ["hero", "Quindi questa è Dunwich... L'odore di salsedine e catrame qui è diverso da qualunque altro porto. Sembra quasi vivo.", "abi_molo"],
         ["voce", "In lontananza, sulla scogliera, la luce del Faro delle Maree Nere ruota nel buio, proiettando una lama di luce color smeraldo. La tua avventura ha inizio.", "abi_molo"]
+      ]
+    };
+  });
+
+  // ===================================================================================================
+  // CAPITOLO 2: LA LENTE DI FRESNEL E IL CIMITERO DEI RELITTI
+  // ===================================================================================================
+  addChapter(function (X) {
+    const N = 2;
+
+    const zones = {
+      // 1. SALA DELLA LENTE DI FRESNEL (32 x 22)
+      abi_sala_faro: {
+        name: "Dunwich · La Sala della Lente",
+        short: "Sala della Lente",
+        sub: "In cima alla torre ottagonale: ingranaggi, prismi e maree",
+        w: 32, h: 22, start: [16, 18], theme: "torino", bg: "abi_sala_faro",
+        item: ["Scheggia di Prisma Ottico", "Schegge"],
+        items: [[8, 12], [24, 12]],
+        act: {
+          D: "Torna alla Terrazza del Faro",
+          F: "Esamina la Grande Lente",
+          s: "Leggi il Diario del Custode",
+          ">": "Scala per il Cimitero dei Relitti"
+        },
+        build(L) {
+          L.lay(0, 0, 31, 21, "p");
+          L.lay(0, 0, 31, 1, "h");
+          L.lay(0, 0, 1, 21, "h");
+          L.lay(30, 0, 31, 21, "h");
+          L.lay(0, 20, 31, 21, "h");
+          L.put(16, 20, "D");
+          L.lay(14, 6, 18, 9, "h");
+          L.put(16, 8, "F");
+          L.put(10, 8, "s");
+          L.put(6, 4, "l"); L.put(25, 4, "l"); L.put(6, 16, "l"); L.put(25, 16, "l");
+          L.put(8, 6, "x"); L.put(23, 6, "b");
+          L.put(30, 10, ">"); L.put(30, 11, ">");
+        },
+        npcs(step) {
+          const l = [];
+          l.push({ id: "abi_nora", x: 18, y: 11 });
+          return l;
+        }
+      },
+
+      // 2. IL CIMITERO DELLE NAVI (42 x 26)
+      abi_relitti: {
+        name: "Dunwich · Il Cimitero delle Navi",
+        short: "Cimitero dei Relitti",
+        sub: "Bassa marea, galeoni spezzati, alghe fosforescenti e rottami",
+        w: 42, h: 26, start: [4, 18], theme: "torino", bg: "abi_relitti",
+        item: ["Doblone Incrostato di Corallo", "Dobloni"],
+        items: [[18, 18], [32, 10], [10, 8]],
+        act: {
+          "<": "Ritorna alla Scala del Faro",
+          A: "Grande Ancora del Brigantino",
+          k: "Carcassa della Nave Ammiraglia",
+          b: "Cassa di Attrezzi del Carpentiere",
+          s: "Cartello delle Secche",
+          "^": "Verso la Stazione Palombari"
+        },
+        build(L) {
+          L.lay(0, 0, 41, 25, "_");
+          L.lay(8, 6, 14, 8, "~");
+          L.lay(24, 16, 30, 18, "~");
+          L.lay(0, 0, 41, 2, "~");
+          L.lay(6, 10, 36, 21, "y");
+          L.lay(14, 4, 28, 5, "W");
+          L.lay(2, 6, 5, 12, "W");
+          L.lay(36, 8, 39, 14, "W");
+          L.put(10, 12, "A"); L.put(32, 14, "A");
+          L.put(8, 16, "k"); L.put(34, 18, "k");
+          L.put(20, 6, "t"); L.put(22, 6, "t");
+          L.put(18, 12, "b"); L.put(24, 12, "x");
+          L.put(6, 16, "s");
+          L.put(0, 17, "<"); L.put(0, 18, "<"); L.put(0, 19, "<");
+          L.put(20, 0, "^"); L.put(21, 0, "^");
+        },
+        npcs(step) {
+          const l = [];
+          l.push({ id: "abi_cordelia", x: 14, y: 15 });
+          l.push({ id: "abi_cormac", x: 26, y: 12 });
+          return l;
+        }
+      }
+    };
+
+    const obj = {
+      // Sala della Lente
+      "abi_sala_faro:D:16,20": () => X.go("abi_faro", 21, 12),
+      "abi_sala_faro:F": () => {
+        const s = X.stepOf(N);
+        if (s >= 3 || X.F.is("lente_cristallo")) {
+          X.say([
+            ["voce", "La Lente di Cristallo Abissale è stata riposizionata al centro del meccanismo ottico! I fasci di luce riflettono ora una pura luminosità smeraldo concentrata verso l'abisso."]
+          ], X.done);
+        } else {
+          X.say([
+            ["voce", "L'alloggiamento di bronzo centrale della Lente è vuoto. Qualcuno ha rimosso la gemma di rifrazione con uno scalpello navale!"]
+          ], X.done);
+        }
+      },
+      "abi_sala_faro:s": () => {
+        X.say([
+          ["voce", "DIARIO DEL CUSTODE (1924): «La tempesta risponde solo al richiamo dei relitti. Cormac ha portato la Gemma della Lente nelle secche per proteggere la sua ciurma. Se qualcuno vuole recuperarla, dovrà batterlo sul campo delle carcasse.»"]
+        ], () => {
+          if (X.stepOf(N) === 0) X.setStep(N, 1);
+          X.done();
+        });
+      },
+      "abi_sala_faro:>": () => X.go("abi_relitti", 4, 18),
+
+      // Cimitero dei Relitti
+      "abi_relitti:<": () => X.go("abi_sala_faro", 29, 10),
+      "abi_relitti:A": () => {
+        X.say([
+          ["voce", "L'ancora arrugginita della fregata reale 'Leviathan'. Sotto le marre è incisa una profezia: «Solo chi unisce vento e marea placherà l'ira dei fondali.»"]
+        ], X.done);
+      },
+      "abi_relitti:k": () => {
+        X.say([
+          ["voce", "La chiglia spezzata di un veliero pirata. Le reti da pesca usate come porte da calcio sono ancora tese tra le costolature di quercia."]
+        ], X.done);
+      },
+      "abi_relitti:s": () => {
+        X.say([
+          ["voce", "CARTELLO DELLE SECCHE: «Terreno insidioso. Chi scivola perde la palla. Chi domina il rimbalzo comanda il Cimitero.»"]
+        ], X.done);
+      },
+      "abi_relitti:^": () => {
+        if (X.stepOf(N) >= 3 || X.mem().done[2]) {
+          X.go("abi_fossa", 18, 20);
+        } else {
+          X.say([
+            ["voce", "La passerella verso la Stazione dei Palombari è bloccata da una pesante catena navale. Serve il permesso di Mastro Cormac."]
+          ], X.done);
+        }
+      }
+    };
+
+    const talk = {
+      abi_nora() {
+        const s = X.stepOf(N);
+        if (s === 0) {
+          X.say([
+            ["abi_nora", "Guarda, {n}! L'alloggiamento della lente è stato violato. Qualcuno ha portato via la Gemma di Rifrazione Ottica!"],
+            ["hero", "Chi potrebbe aver fatto una cosa del genere mentre la tempesta infuria?"],
+            ["abi_nora", "Leggi il diario di mio padre sul leggio a sinistra. Diceva che Mastro Cormac e la ciurma dei relitti temevano che la luce attirasse qualcosa di mostruoso."],
+            ["abi_nora", "Usa la botola a est: conduce alla scala delle scogliere che scende dritta nel Cimitero delle Navi!"]
+          ], X.done);
+        } else if (s === 1) {
+          X.say([
+            ["abi_nora", "Scendi nel Cimitero dei Relitti dalla botola a est. Trova Mastro Cormac e riporta qui la Gemma dell'Abisso!"]
+          ], X.done);
+        } else if (s >= 3) {
+          X.say([
+            ["abi_nora", "Hai recuperato la Gemma da Cormac! Guardala: vibra di pura energia oceanica. Ora il portone della Stazione dei Palombari a nord dei relitti è aperto. Silas ti aspetta per l'immersione finale!"]
+          ], X.done);
+        }
+      },
+
+      abi_cordelia() {
+        X.say([
+          ["abi_cordelia", "Attento a dove metti i piedi, {n}! La sabbia delle secche nasconde ferrivecchi e spine di murena."],
+          ["hero", "Cordelia, dov'è Mastro Cormac? Ho bisogno della Gemma della Lente."],
+          ["abi_cordelia", "(indica il centro del relitto) È lì al centro della carlinga. Cormac non molla mai nulla senza prima una partita. Ma tu hai il tiro della leggenda: fagli vedere di cosa sei capace!"]
+        ], () => {
+          X.reward("doblone_cordelia", { relic: "Doblone delle Secche di Cordelia" });
+          X.done();
+        });
+      },
+
+      abi_cormac() {
+        const s = X.stepOf(N);
+        if (s <= 1) {
+          X.say([
+            ["abi_cormac", "(batte il martello pesante su una lastra d'acciaio con un clangore sordo) Quindi sei tu il Campione che fa tanto rumore a Dunwich."],
+            ["hero", "Cormac, devi restituire la Gemma della Lente. Senza di essa il faro è cieco e la città è in pericolo."],
+            ["abi_cormac", "In pericolo? La luce del faro stava risvegliando il leviatano dormiente nella fossa! Ma se pensi di poter reggere l'impatto con la mia ciurma, dimostramelo qui, sulla sabbia dei relitti."],
+            ["abi_cormac", "Una partita tre contro tre tra queste carcasse. Se vinci, ti consegno la Gemma e la chiave per scendere nella Fossa dei Palombari!"]
+          ], () => {
+            X.setStep(N, 2);
+            X.done();
+          });
+        } else if (s === 2) {
+          X.ask("abi_cormac", "La marea sta per salire, {n}. Pronto a disputare la Sfida delle Secche tra le carcasse dei velieri?", [
+            {
+              label: "⚽ Gioca la Sfida delle Secche!",
+              cls: "hot",
+              fn: () => startChapter2Match()
+            },
+            {
+              label: "Un attimo, studio il terreno dei relitti",
+              fn: () => X.done()
+            }
+          ]);
+        } else {
+          X.say([
+            ["abi_cormac", "Hai giocato una partita incredibile. Sfruttare i rimbalzi sulle lamiere è un'arte che solo i veri lupi di mare conoscono. La Gemma è tua, ragazzo!"]
+          ], X.done);
+        }
+      }
+    };
+
+    function startChapter2Match() {
+      X.sfxFogHorn();
+      X.playMatch({
+        id: "dunwich_cap2_match",
+        chap: "Dunwich · La Sfida delle Secche",
+        intro: "Partita estrema tra gli scheletri dei velieri affondati! Mastro Cormac e i Pirati dei Relitti sfidano il tuo Campione {n} su un campo di sabbia salmastra e rimbalzi metallici.",
+        oppNames: ["Cormac", "Cordelia", "Gancio d'Acciaio", "Tritone di Ferro", "Marea Nera"],
+        us: "Leviatani Dunwich",
+        team: (t, st) => ({
+          name: "I Pirati dei Relitti",
+          col: "#78350f",
+          style: "Rimbalzi sulle Lamiere, Scivolate nel Fango & Tackle d'Acciaio",
+          atk: t(((st && st.tiro) || 14) * 1.15),
+          def: t(((st && st.contrasto) || 12) * 1.25),
+          vel: t(((st && st.drib) || 12) * 1.1),
+          gk: ["Cormac", t(15)],
+          defs: [["Gancio", t(14)], ["Tritone", t(14)], ["Rottame", t(13)]],
+          atk: [["Cordelia", t(14)], ["Marea", t(14)]]
+        }),
+        done: (r) => {
+          if (r.win || r.a >= r.b) {
+            X.sfxAbyssalBell();
+            X.F.set("lente_cristallo", true);
+            X.finishChapter(N, "trionfo");
+            X.setStep(N, 3);
+
+            const rew = X.reward("cap2_vittoria", {
+              coins: 200,
+              relic: "Lente di Cristallo Abissale"
+            });
+
+            X.say([
+              ["voce", `<b>VITTORIA SULLE SECCHE!</b><br>Risultato finale: ${r.a} – ${r.b}!<br>${rew.join(" · ")}`],
+              ["abi_cormac", "Per mille gorgoni! Quel tiro speciale {shot} è rimbalzato sulla paratia d'acciaio piegando il metallo! Non ho mai visto tanta precisione."],
+              ["abi_cormac", "Prendi: questa è la Lente di Cristallo. E con essa, il lasciapassare per la Stazione dei Palombari a nord. Silas ha preparato la Campana d'Immersione."],
+              ["hero", "Grazie, Cormac. Ho imparato molto a giocare con voi tra queste navi."],
+              ["voce", "CAPITOLO 2 · LA LENTE DI FRESNEL E IL CIMITERO DEI RELITTI · CONCLUSO!<br>Il Capitolo 3 ti aspetta: scendi nella Fossa oceanica per la finale leggendaria contro i Leviatani!"]
+            ], () => {
+              X.go("abi_sala_faro", 16, 14);
+            });
+          } else {
+            X.say([
+              ["abi_cormac", "Il fango non perdona, ragazzo! Scalda bene i quadricipiti e riprova: noi siamo qui a forgiare ferro!"]
+            ], X.done);
+          }
+        }
+      });
+    }
+
+    return {
+      n: N,
+      title: "La Lente di Fresnel e il Cimitero dei Relitti",
+      sub: "La sala superiore del faro, la mappa delle maree e la sfida tra i relitti",
+      start: "abi_sala_faro",
+      zones,
+      talk,
+      obj,
+      goal: (s) => {
+        if (s === 0) return "Sali nella Sala della Lente del Faro e leggi il diario del custode.";
+        if (s === 1) return "Scendi dalla botola a est verso il Cimitero delle Navi e trova Cormac.";
+        if (s === 2) return "Sfida Mastro Cormac e la ciurma nella Sfida delle Secche!";
+        return "Capitolo 2 concluso! Dirigiti a nord verso la Stazione dei Palombari.";
+      },
+      intro: () => [
+        ["voce", "LA TORRE DEL FARO · ORE 23:40 · RAFFICHE DI BURRASCA", "abi_sala_faro"],
+        ["voce", "La Chiave di Rame scatta con precisione. La porta in ferro si spalanca sulla camera superiore della torre ottagonale.", "abi_sala_faro"],
+        ["hero", "L'odore di olio e mercurio qui è pungente... Ma la grande lente al centro della sala è spenta e priva del suo cuore.", "abi_sala_faro"],
+        ["voce", "Nora ti raggiunge con la lanterna sollevata. La verità su Dunwich sta per essere svelata.", "abi_sala_faro"]
+      ]
+    };
+  });
+
+  // ===================================================================================================
+  // CAPITOLO 3: IL TEMPIO SOMMERSO DEI LEVIATANI
+  // ===================================================================================================
+  addChapter(function (X) {
+    const N = 3;
+
+    const zones = {
+      // 1. LA STAZIONE DEI PALOMBARI (36 x 24)
+      abi_fossa: {
+        name: "Dunwich · La Stazione dei Palombari",
+        short: "Stazione Palombari",
+        sub: "Argani a vapore, tubi d'ossigeno e la grande campana d'immersione",
+        w: 36, h: 24, start: [18, 20], theme: "torino", bg: "abi_fossa",
+        item: ["Valvola di Bronzo Pressurizzata", "Valvole"],
+        items: [[8, 14], [28, 14]],
+        act: {
+          k: "Entra nella Campana d'Immersione",
+          d: "Ritorna ai Moli di Dunwich",
+          t: "Argano a Vapore",
+          x: "Manometri di Pressione",
+          s: "Tavola di Decompressione"
+        },
+        build(L) {
+          L.lay(0, 0, 35, 23, ",");
+          L.lay(0, 0, 35, 6, "~");
+          L.lay(12, 7, 24, 11, "~");
+          L.lay(15, 6, 21, 14, "=");
+          L.lay(0, 7, 14, 7, "r");
+          L.lay(22, 7, 35, 7, "r");
+          L.put(18, 9, "k");
+          L.put(6, 12, "t"); L.put(30, 12, "t");
+          L.put(8, 12, "x"); L.put(28, 12, "x");
+          L.put(12, 16, "l"); L.put(24, 16, "l");
+          L.put(18, 16, "c");
+          L.put(12, 18, "s");
+          L.put(17, 23, "d"); L.put(18, 23, "d"); L.put(19, 23, "d");
+        },
+        npcs(step) {
+          const l = [];
+          l.push({ id: "abi_silas", x: 14, y: 12 });
+          l.push({ id: "abi_nora", x: 22, y: 12 });
+          return l;
+        }
+      },
+
+      // 2. IL TEMPIO SOMMERSO DEI LEVIATANI (44 x 28)
+      abi_tempio: {
+        name: "Dunwich · Il Tempio Sommerso dei Leviatani",
+        short: "Tempio dei Leviatani",
+        sub: "La cupola idrodinamica d'aria nelle profondità della Fossa Oceanica",
+        w: 44, h: 28, start: [22, 24], theme: "torino", bg: "abi_tempio",
+        item: ["Scheggia di Corallo dell'Abisso", "Coralli"],
+        items: [[10, 10], [34, 10], [22, 6]],
+        act: {
+          k: "Risali con la Campana d'Immersione",
+          C: "Braciere di Fuoco Blu Sottomarino",
+          s: "Monolite del Patto Primordiale",
+          b: "Porta in Pietra Lavica",
+          h: "Colonna Megalitica"
+        },
+        build(L) {
+          L.lay(0, 0, 43, 27, "c");
+          L.lay(0, 0, 43, 3, "~");
+          L.lay(0, 0, 3, 27, "~");
+          L.lay(40, 0, 43, 27, "~");
+          L.lay(6, 6, 37, 21, "y");
+          L.put(8, 6, "h"); L.put(35, 6, "h");
+          L.put(8, 21, "h"); L.put(35, 21, "h");
+          L.put(8, 7, "C"); L.put(35, 7, "C");
+          L.put(8, 20, "C"); L.put(35, 20, "C");
+          L.put(6, 13, "b"); L.put(6, 14, "b");
+          L.put(37, 13, "b"); L.put(37, 14, "b");
+          L.put(22, 5, "s");
+          L.put(22, 25, "k");
+        },
+        npcs(step) {
+          const l = [];
+          l.push({ id: "abi_eldon", x: 22, y: 14 });
+          l.push({ id: "abi_titano", x: 28, y: 14 });
+          return l;
+        }
+      }
+    };
+
+    const obj = {
+      // Stazione Palombari
+      "abi_fossa:k": () => {
+        X.sfxAbyssalBell();
+        X.say([
+          ["voce", "Chiudi il pesante portello di bronzo della Campana d'Immersione. Il verricello a vapore cigola, e la campana sprofonda tra le onde oscure della Fossa delle Sirene..."]
+        ], () => {
+          X.go("abi_tempio", 22, 24);
+        });
+      },
+      "abi_fossa:d": () => X.go("abi_molo", 20, 2),
+      "abi_fossa:s": () => {
+        X.say([
+          ["voce", "TAVOLA DI DECOMPRESSIONE: «Profondità 400 braccia. Solo chi padroneggia il respiro della marea e la rotazione del pallone resiste alla pressione.»"]
+        ], X.done);
+      },
+
+      // Tempio Sommerso
+      "abi_tempio:k": () => {
+        X.say([
+          ["voce", "Entri nella Campana d'Immersione: i cavi d'acciaio ti riportano alla superficie, alla Stazione dei Palombari di Dunwich."]
+        ], () => {
+          X.go("abi_fossa", 18, 18);
+        });
+      },
+      "abi_tempio:s": () => {
+        X.say([
+          ["voce", "MONOLITE DEL PATTO PRIMORDIALE: «Quando le onde minacciano la terraferma, undici campioni scendono nelle profondità per misurarsi con i guardiani dell'abisso. Il vincitore eredita il respiro delle maree.»"]
+        ], X.done);
+      },
+      "abi_tempio:C": () => {
+        X.say([
+          ["voce", "Il braciere sottomarino brucia con fiamme di luce bluastra. Il calore che emana non brucia: trasmette una calma oceanica assoluta."]
+        ], X.done);
+      }
+    };
+
+    const talk = {
+      abi_silas() {
+        X.say([
+          ["abi_silas", "È il momento, {n}. Hai recuperato la Lente, domato i relitti e unito Dunwich. La campana d'ottone è pronta a calarti nella Fossa."],
+          ["hero", "Silas, cosa troverò laggiù?"],
+          ["abi_silas", "L'Araldo Eldon e i Leviatani. Sono i guardiani che da millenni mettono alla prova i migliori calciatori del mondo. Gioca con il cuore e scatena {shot}!"]
+        ], X.done);
+      },
+
+      abi_eldon() {
+        const s = X.stepOf(N);
+        if (s <= 1) {
+          X.say([
+            ["abi_eldon", "(la tunica intessuta di scaglie d'argento ondeggia senza peso) Ti aspettavo, figlio della terraferma. Sento la melodia di {shot} che fa tremare le colonne del tempio."],
+            ["hero", "Sono sceso per chiudere il patto e placare la tempesta che minaccia la città."],
+            ["abi_eldon", "Nobile intento. Ma qui le parole svaniscono come bolle d'aria: solo la maestria nel governare la sfera tra le correnti può spezzare l'incantesimo."],
+            ["abi_eldon", "Sei pronto a sfidare gli Antichi Leviatani nella Partita Suprema dell'Abisso?"]
+          ], () => {
+            X.setStep(N, 2);
+            X.done();
+          });
+        } else if (s === 2) {
+          X.ask("abi_eldon", "Le acque si aprono per il giudizio definitivo. Scendi in campo contro i Leviatani?", [
+            {
+              label: "⚽ Gioca la Finale dei Leviatani!",
+              cls: "hot",
+              fn: () => startFinalMatch()
+            },
+            {
+              label: "Un momento di concentrazione",
+              fn: () => X.done()
+            }
+          ]);
+        } else {
+          X.say([
+            ["abi_eldon", "Tu hai domato le maree, {n}. Da questo giorno in poi, Dunwich è sotto la tua eterna protezione!"]
+          ], X.done);
+        }
+      },
+
+      abi_titano() {
+        X.say([
+          ["abi_titano", "La mia parata è il muro della fossa marina. Per segnarmi dovrai imprimere al pallone la forza di un'onda anomala!"]
+        ], X.done);
+      }
+    };
+
+    function startFinalMatch() {
+      X.sfxFogHorn();
+      X.playMatch({
+        id: "dunwich_cap3_match",
+        chap: "Dunwich · La Battaglia dei Leviatani",
+        intro: "LA FINALISSIMA SUPREMA DELL'ABISSO! Nel Tempio Sommerso circondato da una cupola d'acqua marina, il tuo Campione {n} affronta l'Araldo Eldon e il colossale Titano d'Ossidiana per il destino di Dunwich!",
+        oppNames: ["Titano d'Ossidiana", "Eldon l'Araldo", "Corrente d'Abisso", "Vortice Oscuro", "Spirito della Fossa"],
+        us: "I Campioni di Dunwich",
+        team: (t, st) => ({
+          name: "Gli Antichi Leviatani",
+          col: "#0284c7",
+          style: "Vortici Idrodinamici, Barriere d'Ossidiana & Tiro dei Gorghi",
+          atk: t(((st && st.tiro) || 14) * 1.3),
+          def: t(((st && st.contrasto) || 12) * 1.35),
+          vel: t(((st && st.drib) || 12) * 1.2),
+          gk: ["Titano", t(16)],
+          defs: [["Corrente", t(15)], ["Vortice", t(15)], ["Spirito", t(14)]],
+          atk: [["Eldon", t(15)], ["Abisso", t(15)]]
+        }),
+        done: (r) => {
+          if (r.win || r.a >= r.b) {
+            X.sfxAbyssalBell();
+            X.F.set("patto_completato", true);
+            X.finishChapter(N, "trionfo");
+            X.setStep(N, 3);
+
+            const rew = X.reward("cap3_vittoria", {
+              coins: 300,
+              relic: "Sigillo d'Oro dei Leviatani"
+            });
+
+            X.say([
+              ["voce", `<b>TRIONFO SUPREMO NELL'ABISSO!</b><br>Risultato finale: ${r.a} – ${r.b}!<br>${rew.join(" · ")}`],
+              ["abi_eldon", "È finita... La sfera ha squarciato la barriera d'ossidiana! Il tiro {shot} risuonerà nei millenni a venire come l'inno di vittoria di {n}!"],
+              ["abi_eldon", "La tempesta si placa. Ricevi il Sigillo d'Oro dei Leviatani: sei ufficialmente il SIGNORE SUPREMO DELLE MAREE."],
+              ["voce", "Le acque della cupola risplendono di luce bianca dorata. Risali in superficie con la campana d'immersione..."],
+              ["abi_silas", "(sulla banchina, tra la folla festante) Guardate in alto! Il Faro! Il Faro di Dunwich è tornato a risplendere di luce bianca pura!"],
+              ["abi_barnaby", "Ha vinto! Per tutte le correnti del mare, il nostro ragazzo ha domato l'Abisso! Stasera alla Taverna il sidro scorre a fiumi in onore di {n}!"],
+              ["abi_nora", "Mio padre... la città... tutti noi siamo salvi grazie al tuo coraggio e al tuo talento calcistico. Grazie, {n}!"],
+              ["voce", "SAGA «ABISSO DI DUNWICH · IL PATTO DELLE ONDE NERE» COMPLETATA CON SUCCESSO!<br>Tutti i capitoli sono stati conquistati. Puoi continuare a esplorare liberamente Dunwich, i suoi moli, il Faro, i relitti e il tempio sommerso!"]
+            ], () => {
+              X.go("abi_molo", 16, 16);
+            });
+          } else {
+            X.say([
+              ["abi_eldon", "La pressione dei gorghi è implacabile. Ritrova la concentrazione, Campione: i Leviatani attendono la tua vera grandezza!"]
+            ], X.done);
+          }
+        }
+      });
+    }
+
+    return {
+      n: N,
+      title: "Il Tempio Sommerso dei Leviatani",
+      sub: "La discesa nella campana d'immersione, l'abisso e la finale contro gli Antichi",
+      start: "abi_fossa",
+      zones,
+      talk,
+      obj,
+      goal: (s) => {
+        if (s === 0) return "Raggiungi la Stazione dei Palombari e parla con Silas.";
+        if (s === 1) return "Entra nella Campana d'Immersione e scendi nel Tempio Sommerso.";
+        if (s === 2) return "Affronta gli Antichi Leviatani nella Finalissima dell'Abisso!";
+        return "SAGA COMPLETATA! Sei il Signore Supremo delle Maree di Dunwich.";
+      },
+      intro: () => [
+        ["voce", "STAZIONE PALOMBARI · ORE 02:15 · LA NOTTE DEL PATTO", "abi_fossa"],
+        ["voce", "I verricelli a vapore sbuffano fumo bianco nella notte fredda. Davanti a te, la botola circolare della campana d'ottone è pronta ad accoglierti.", "abi_fossa"],
+        ["hero", "È arrivato il momento. Quattrocento braccia sotto la superficie del mare per chiudere questa partita una volta per tutte.", "abi_fossa"],
+        ["abi_silas", "Tutta la città crede in te, {n}. Fai brillare la luce della vittoria nelle profondità!", "abi_fossa"]
       ]
     };
   });
