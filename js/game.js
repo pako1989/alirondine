@@ -4959,6 +4959,7 @@
     const cyc = (k, label) => { const list = o[k], i = Math.max(0, list.findIndex(([v]) => v === h[k])), cur = list[i] || list[0]; return { label: `${label}: ${cur[1]} ▸`, sub: `${i + 1} di ${list.length}`, fn: () => { const nx = list[(i + 1) % list.length]; const oldShot = H_SHOTS[h.shot].label.toUpperCase(); h[k] = nx[0]; if (k === "shot" && (!h.shotName || h.shotName.startsWith(oldShot))) { h.shotName = `${H_SHOTS[h.shot].label.toUpperCase()} DI ${h.name.toUpperCase()}`; $("hShot").value = h.shotName; } heroCast(h); heroSum(); heroButtons(); } }; };
     buttons([cyc("style", "Capelli"), cyc("hair", "Colore"), cyc("eye", "Occhi"), cyc("skin", "Pelle"), cyc("shirt", "Maglia"), cyc("acc", "Accessorio"), cyc("shot", "Tiro"),
       { label: "Avanti ▸ Salva il Campione", sub: "Conferma ed entra in campo", cls: "hot", fn: () => { HE.h.v = 1; writeJSON(HERO, HE.h); heroCast(HE.h); view = { kind: "scene", bg: "end", speaker: "hero", chibi: true }; text("hero", `<b>${esc(HE.h.name)}</b>, numero ${HE.h.num}, pronto a scendere in campo con occhi <b>${(H_EYE[HE.h.eye] || "personalizzati").toLowerCase()}</b>. Il tiro speciale si chiama <em>${esc(HE.h.shotName)}</em>.<br><span style="color:var(--dim)">${heroWhere}</span>`); buttons([
+        ...(window.__bilanciaFeudi ? [{ label: "⚖️ Gioca «La Bilancia delle Tre Corone» ▸", sub: `Nuova saga feudale tattica con ${HE.h.name}`, cls: "hot", fn: () => window.__bilanciaFeudi.open({ onExit: HE.back }) }] : []),
         ...(window.__shogunStory ? [{ label: "⚔️ Gioca «Shogun Eclipse · Il Regno delle Sette Lame» ▸", sub: `Nuova saga feudale epica con ${HE.h.name}`, cls: "hot", fn: () => window.__shogunStory.open({ onExit: HE.back }) }] : []),
         ...(window.__chronoStory ? [{ label: "⏳ Gioca «Chrono-Break · Il Tempio dei Tre Tempi» ▸", sub: `Nuova saga di viaggi nel tempo con ${HE.h.name}`, cls: "hot", fn: () => window.__chronoStory.open({ onExit: HE.back }) }] : []),
         ...(window.__campioneOmbre ? [{ label: "🌃 Gioca «Il Circuito delle Ombre» ▸", sub: `Nuova saga noir notturna con ${HE.h.name}`, cls: "hot", fn: () => window.__campioneOmbre.open({ onExit: HE.back }) }] : []),
@@ -8912,7 +8913,7 @@
       const tx = Math.floor(fx / TS), ty = Math.floor(fy / TS), ch = TW.map[ty] && TW.map[ty][tx];
       const za = TW.z.act || {};
       const actLabel = typeof za === "function" ? za(ch, tx, ty) : (za[tx + "," + ty] || za[ch]);
-      const isCustomSaga = TW.id && (TW.id.startsWith("pg_") || TW.id.startsWith("kr_") || TW.id.startsWith("pi_") || TW.id.startsWith("al_") || TW.id.startsWith("ch_") || TW.id.startsWith("sh_") || (TW.z && TW.z.isCustomSaga));
+      const isCustomSaga = TW.id && (TW.id.startsWith("pg_") || TW.id.startsWith("kr_") || TW.id.startsWith("pi_") || TW.id.startsWith("al_") || TW.id.startsWith("ch_") || TW.id.startsWith("sh_") || TW.id.startsWith("feudi_") || TW.id.startsWith("bf_") || (TW.z && TW.z.isCustomSaga));
       if (ch && ("DSBONM".includes(ch) || actLabel || (isCustomSaga && (za[ch] || za[tx + "," + ty] || "TXMWBH<>".includes(ch))))) {
         let defLabel = { D: "Entra", S: "Aspetta il bus", B: "Sali in barca", O: "Guarda", N: "Leggi", M: "Guarda" }[ch];
         if (isCustomSaga) defLabel = actLabel || "Esamina";
@@ -9022,7 +9023,7 @@
   function trObj(ch, tx, ty) {
     if (TW.z.onObj && TW.z.onObj(ch, tx, ty)) return;
     if (TW.z.local && beObj(ch, tx, ty)) return;
-    if (TW.id && (TW.id.startsWith("pg_") || TW.id.startsWith("kr_") || TW.id.startsWith("pi_") || TW.id.startsWith("al_") || TW.id.startsWith("ch_") || TW.id.startsWith("sh_") || (TW.z && TW.z.isCustomSaga))) {
+    if (TW.id && (TW.id.startsWith("pg_") || TW.id.startsWith("kr_") || TW.id.startsWith("pi_") || TW.id.startsWith("al_") || TW.id.startsWith("ch_") || TW.id.startsWith("sh_") || TW.id.startsWith("feudi_") || TW.id.startsWith("bf_") || (TW.z && TW.z.isCustomSaga))) {
       if (TW.z.obj && TW.z.obj[ch]) return trSay([L("voce", pick(TW.z.obj[ch]))]);
       const actMsg = TW.z.act && (TW.z.act[tx + "," + ty] || TW.z.act[ch]);
       if (actMsg && typeof actMsg === "string") return trSay([L("voce", `${actMsg} · Nessuna anomalia riscontrata.`)]);
@@ -15161,6 +15162,7 @@
       { label: "👟 Street Football · La Gabbia del Molo", sub: "3 contro 3 da strada: sponde sui muri, Trabucco, 4 livelli", cls: "hot", fn: () => { if (window.openStreetCageMode) window.openStreetCageMode(menuSaghe); } },
       { label: "📋 Matchday Director 2D HD", sub: "Fai il Mister: modulo, cambi, discorso all'intervallo, pagella", cls: "hot", fn: () => { if (window.openMatchDirectorHD) window.openMatchDirectorHD(menuSaghe); } },
       { head: "Saghe Ispirate & Speciali" },
+      ...(window.__bilanciaFeudi ? [window.__bilanciaFeudi.menuEntry(menuSaghe)] : []),
       ...(window.__campioneOmbre ? [window.__campioneOmbre.menuEntry(menuSaghe)] : []),
       ...(window.__shogunStory ? [window.__shogunStory.menuEntry(menuSaghe)] : []),
       ...(window.__phantomGenesis ? [window.__phantomGenesis.menuEntry(menuSaghe)] : []),

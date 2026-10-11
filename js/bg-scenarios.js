@@ -825,12 +825,682 @@
     g.strokeRect(48, 150, W - 96, 36);
   }
 
+  // --- 7. SCENARI FEUDALI: LA BILANCIA DELLE TRE CORONE (TRIANGLE STRATEGY) ---
+
+  // Helper per recuperare statistiche e scelte della Bilancia dei Feudi
+  function getFeudiState() {
+    try {
+      if (window.__bilanciaFeudi && typeof window.__bilanciaFeudi.info === "function") {
+        return window.__bilanciaFeudi.info();
+      }
+    } catch (e) {}
+    return { ch: 1, step: {}, done: {}, convictions: { moralita: 10, utilita: 10, liberta: 10 }, clues: 0, tokens: 3 };
+  }
+
+  // 7A. GRAN SALA DEL CONSIGLIO & LA BILANCIA DELLE CONVINZIONI
+  function drawDetailedFeudiConsiglio(g, W, H, f) {
+    const st = getFeudiState();
+    const cM = (st.convictions && st.convictions.moralita) || 10;
+    const cU = (st.convictions && st.convictions.utilita) || 10;
+    const cL = (st.convictions && st.convictions.liberta) || 10;
+
+    // Parete in pietra scura gotica con volte a ogiva
+    const wallGrad = g.createLinearGradient(0, 0, 0, 130);
+    wallGrad.addColorStop(0, "#09090b");
+    wallGrad.addColorStop(0.5, "#18181b");
+    wallGrad.addColorStop(1, "#27272a");
+    g.fillStyle = wallGrad;
+    g.fillRect(0, 0, W, 130);
+
+    // Colonne gotiche con capitelli scolpiti
+    [24, 76, W - 76, W - 24].forEach((cx) => {
+      px(g, cx - 7, 0, 14, 130, "#1f2937");
+      px(g, cx - 5, 0, 10, 130, "#374151");
+      px(g, cx - 2, 0, 4, 130, "#4b5563");
+      px(g, cx - 9, 22, 18, 6, "#6b7280");
+    });
+
+    // Tre grandi vetrate ogivali decorate
+    const windows = [
+      { x: 44, col1: "#1d4ed8", col2: "#93c5fd", label: "Glenbrook" },
+      { x: W / 2 - 20, col1: "#b91c1c", col2: "#fbbf24", label: "Wolffort" },
+      { x: W - 84, col1: "#db2777", col2: "#fbcfe8", label: "Roselliani" }
+    ];
+
+    windows.forEach((win) => {
+      // Fascia ogivale
+      g.fillStyle = "#111827";
+      g.fillRect(win.x - 2, 8, 44, 72);
+      // Arco superiore
+      g.beginPath();
+      g.arc(win.x + 20, 20, 20, Math.PI, 0);
+      g.fill();
+
+      // Vetro colorato luminoso
+      const winGrad = g.createLinearGradient(win.x, 10, win.x, 76);
+      winGrad.addColorStop(0, win.col1);
+      winGrad.addColorStop(1, win.col2);
+      g.fillStyle = winGrad;
+      g.fillRect(win.x + 2, 20, 36, 56);
+      g.beginPath();
+      g.arc(win.x + 20, 20, 16, Math.PI, 0);
+      g.fill();
+
+      // Nervature in piombo della vetrata
+      px(g, win.x + 19, 10, 2, 66, "rgba(0,0,0,0.5)");
+      px(g, win.x + 2, 38, 36, 2, "rgba(0,0,0,0.5)");
+      px(g, win.x + 2, 54, 36, 2, "rgba(0,0,0,0.5)");
+
+      // Fascio di luce volumetrico inclinato che scende sul pavimento
+      const rayGrad = g.createLinearGradient(win.x + 20, 20, win.x - 30, H);
+      rayGrad.addColorStop(0, "rgba(254, 240, 138, 0.22)");
+      rayGrad.addColorStop(1, "rgba(254, 240, 138, 0)");
+      g.fillStyle = rayGrad;
+      g.beginPath();
+      g.moveTo(win.x + 2, 20);
+      g.lineTo(win.x + 38, 20);
+      g.lineTo(win.x + 10, H);
+      g.lineTo(win.x - 50, H);
+      g.closePath();
+      g.fill();
+    });
+
+    // Pavimento in lastre di marmo bicolore scuro e dorato
+    const floorGrad = g.createLinearGradient(0, 130, 0, H);
+    floorGrad.addColorStop(0, "#271202");
+    floorGrad.addColorStop(0.5, "#3b1e08");
+    floorGrad.addColorStop(1, "#180a01");
+    g.fillStyle = floorGrad;
+    g.fillRect(0, 130, W, H - 130);
+
+    for (let x = 0; x < W; x += 32) {
+      px(g, x, 130, 1, H - 130, "rgba(251, 191, 36, 0.15)");
+    }
+    for (let y = 130; y < H; y += 18) {
+      px(g, 0, y, W, 1, "rgba(251, 191, 36, 0.12)");
+    }
+
+    // Bracieri ardenti laterali con particelle di scintille
+    [20, W - 20].forEach((bx, idx) => {
+      px(g, bx - 8, 88, 16, 22, "#3f3f46");
+      px(g, bx - 12, 84, 24, 5, "#27272a");
+      const flameH = 16 + Math.sin(f / 6 + idx * 2.5) * 4;
+      const fl = g.createRadialGradient(bx, 80, 2, bx, 80, flameH);
+      fl.addColorStop(0, "#fef08a");
+      fl.addColorStop(0.4, "#f97316");
+      fl.addColorStop(1, "rgba(220, 38, 38, 0)");
+      g.fillStyle = fl;
+      g.beginPath();
+      g.arc(bx, 80, flameH, 0, Math.PI * 2);
+      g.fill();
+
+      // Scintille che salgono
+      for (let s = 0; s < 3; s++) {
+        const sy = 70 - ((f * 1.5 + s * 14 + idx * 7) % 36);
+        const sx = bx + Math.sin(f / 8 + s + idx) * 6;
+        px(g, sx, sy, 2, 2, "#fde047");
+      }
+    });
+
+    // LA MONUMENTALE BILANCIA DELLE CONVINZIONI
+    const bx = W / 2, by = 60;
+    // Fusto centrale in oro brunito
+    px(g, bx - 4, by - 26, 8, 70, "#eab308");
+    px(g, bx - 2, by - 24, 4, 66, "#fef08a");
+    // Base a zampa di leone
+    px(g, bx - 16, by + 40, 32, 6, "#ca8a04");
+    px(g, bx - 20, by + 44, 40, 4, "#a16207");
+
+    // Inclinazione fisica reale del braccio basata sulla prevalenza tra Utilità e Moralità/Libertà
+    const convDiff = (cU - (cM + cL) / 2) * 0.015;
+    const tilt = Math.max(-0.25, Math.min(0.25, convDiff)) + Math.sin(f / 35) * 0.02;
+
+    g.save();
+    g.translate(bx, by - 16);
+    g.rotate(tilt);
+
+    // Braccio orizzontale in bronzo dorato
+    px(g, -58, -3, 116, 6, "#ca8a04");
+    px(g, -56, -2, 112, 3, "#fef08a");
+    // Perno centrale con gemma del Falco
+    g.fillStyle = "#dc2626";
+    g.beginPath();
+    g.arc(0, 0, 5, 0, Math.PI * 2);
+    g.fill();
+
+    // Catenelle e Piatto Sinistro (Moralità & Libertà)
+    g.strokeStyle = "#eab308";
+    g.lineWidth = 1.2;
+    g.beginPath();
+    g.moveTo(-52, 0); g.lineTo(-62, 28);
+    g.moveTo(-52, 0); g.lineTo(-42, 28);
+    g.stroke();
+    // Piatto d'oro sinistro
+    px(g, -66, 28, 28, 4, "#ca8a04");
+    px(g, -64, 29, 24, 2, "#fef08a");
+    // Gettoni d'Oro impilati sul piatto sinistro in base a Moralità/Libertà
+    const leftCoins = Math.min(5, Math.max(1, Math.floor((cM + cL) / 10)));
+    for (let c = 0; c < leftCoins; c++) {
+      px(g, -56 + (c % 2) * 4, 26 - c * 2, 8, 2, "#fbbf24");
+    }
+
+    // Catenelle e Piatto Destro (Utilità)
+    g.beginPath();
+    g.moveTo(52, 0); g.lineTo(42, 28);
+    g.moveTo(52, 0); g.lineTo(62, 28);
+    g.stroke();
+    // Piatto d'oro destro
+    px(g, 38, 28, 28, 4, "#ca8a04");
+    px(g, 40, 29, 24, 2, "#fef08a");
+    // Gettoni d'Oro impilati sul piatto destro in base a Utilità
+    const rightCoins = Math.min(5, Math.max(1, Math.floor(cU / 8)));
+    for (let c = 0; c < rightCoins; c++) {
+      px(g, 48 + (c % 2) * 4, 26 - c * 2, 8, 2, "#fbbf24");
+    }
+
+    g.restore();
+
+    // GRANDE TAVOLO DEL CONSIGLIO DEI SETTE FEUDI
+    g.fillStyle = "#3b1e08";
+    g.beginPath();
+    g.ellipse(W / 2, 162, 102, 28, 0, 0, Math.PI * 2);
+    g.fill();
+    g.strokeStyle = "#854d0e";
+    g.lineWidth = 2.5;
+    g.stroke();
+
+    // Mappa tattica srotolata al centro del tavolo
+    px(g, W / 2 - 36, 150, 72, 22, "#fef3c7");
+    px(g, W / 2 - 34, 152, 68, 18, "#fde68a");
+    // Fiumi e confini tracciati sulla pergamena
+    px(g, W / 2 - 24, 156, 16, 2, "#2563eb");
+    px(g, W / 2 - 8, 158, 28, 2, "#2563eb");
+    // Gettoni delle truppe
+    px(g, W / 2 - 18, 154, 5, 5, "#dc2626"); // Wolffort
+    px(g, W / 2 + 6, 156, 5, 5, "#1e3a8a");  // Glacefort
+    px(g, W / 2 + 18, 158, 5, 5, "#ca8a04"); // Glenbrook
+
+    // Calamaio con piuma d'oca e candela sul tavolo
+    px(g, W / 2 + 42, 152, 6, 6, "#18181b");
+    px(g, W / 2 + 45, 145, 2, 8, "#e2e8f0");
+  }
+
+  // 7B. IL MASTIO DI CASTEL WOLFFORT & IL BORGO MEDIEVALE
+  function drawDetailedFeudiMastio(g, W, H, f) {
+    const st = getFeudiState();
+    const cM = (st.convictions && st.convictions.moralita) || 10;
+    const cU = (st.convictions && st.convictions.utilita) || 10;
+    const cL = (st.convictions && st.convictions.liberta) || 10;
+
+    // Cielo alpino con nuvole che traslano
+    const sky = g.createLinearGradient(0, 0, 0, 95);
+    sky.addColorStop(0, "#172554");
+    sky.addColorStop(0.6, "#2563eb");
+    sky.addColorStop(1, "#93c5fd");
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, 95);
+
+    // Nuvole soffici
+    const cloudShift = (f * 0.2) % (W + 80);
+    [[-40, 24, 70, 16], [120, 16, 85, 18], [240, 32, 60, 14]].forEach(([cx, cy, cw, ch]) => {
+      const rx = (cx + cloudShift) % (W + 80) - 40;
+      g.fillStyle = "rgba(255, 255, 255, 0.45)";
+      g.beginPath();
+      g.ellipse(rx, cy, cw / 2, ch / 2, 0, 0, Math.PI * 2);
+      g.fill();
+    });
+
+    // Cime montuose innevate sullo sfondo
+    g.fillStyle = "#cbd5e1";
+    g.beginPath();
+    g.moveTo(0, 75);
+    g.lineTo(45, 30); g.lineTo(100, 70);
+    g.lineTo(165, 22); g.lineTo(235, 76);
+    g.lineTo(W, 36); g.lineTo(W, 95); g.lineTo(0, 95);
+    g.closePath();
+    g.fill();
+    // Nevai illuminati
+    g.fillStyle = "#f8fafc";
+    g.beginPath();
+    g.moveTo(45, 30); g.lineTo(58, 44); g.lineTo(34, 44); g.closePath(); g.fill();
+    g.beginPath();
+    g.moveTo(165, 22); g.lineTo(182, 38); g.lineTo(152, 38); g.closePath(); g.fill();
+
+    // CASE E PALAZZI DEL BORGO SOTTOSTANTE (Elementi Scenografici Ricchi)
+    const villageHouses = [
+      { x: 12, w: 32, h: 26, roof: "#b45309", wall: "#d6d3d1" },
+      { x: 50, w: 26, h: 22, roof: "#9a3412", wall: "#e7e5e4" },
+      { x: 236, w: 36, h: 28, roof: "#7c2d12", wall: "#d6d3d1" },
+      { x: 278, w: 30, h: 24, roof: "#b45309", wall: "#e7e5e4" }
+    ];
+
+    villageHouses.forEach((h) => {
+      // Parete casa
+      px(g, h.x, 68 - (h.h - 22), h.w, h.h, h.wall);
+      // Travi in legno verticali tipiche dei borghi
+      for (let tx = h.x + 4; tx < h.x + h.w - 2; tx += 8) {
+        px(g, tx, 68 - (h.h - 22), 2, h.h, "#78350f");
+      }
+      // Tetto a spiovente
+      g.fillStyle = h.roof;
+      g.beginPath();
+      g.moveTo(h.x - 3, 68 - (h.h - 22));
+      g.lineTo(h.x + h.w / 2, 54 - (h.h - 22));
+      g.lineTo(h.x + h.w + 3, 68 - (h.h - 22));
+      g.closePath();
+      g.fill();
+      // Comignolo con fumo che sale
+      px(g, h.x + h.w - 8, 48 - (h.h - 22), 4, 8, "#57534e");
+      for (let sm = 0; sm < 3; sm++) {
+        const smY = 46 - (h.h - 22) - ((f + sm * 12) % 24);
+        const smX = h.x + h.w - 6 + Math.sin(f / 10 + sm) * 4;
+        px(g, smX, smY, 3, 3, "rgba(226, 232, 240, 0.45)");
+      }
+      // Finestre illuminate
+      px(g, h.x + 6, 74 - (h.h - 22), 5, 6, "#fef08a");
+      px(g, h.x + h.w - 11, 74 - (h.h - 22), 5, 6, "#fef08a");
+    });
+
+    // Mura merlate del Mastio di Castel Wolffort in primo piano
+    g.fillStyle = "#64748b";
+    g.fillRect(0, 68, W, 46);
+    // Merli regolari
+    for (let x = 0; x < W; x += 22) {
+      px(g, x, 54, 13, 15, "#475569");
+      px(g, x + 2, 56, 9, 2, "#94a3b8");
+    }
+
+    // Pavimentazione in ciottoli del Cortile d'Armi
+    const ground = g.createLinearGradient(0, 114, 0, H);
+    ground.addColorStop(0, "#78716c");
+    ground.addColorStop(1, "#44403c");
+    g.fillStyle = ground;
+    g.fillRect(0, 114, W, H - 114);
+
+    // Stendardi araldici sventolanti mossi dal vento (Colore basato sulla scelta!)
+    const bannerColor = cM > cU && cM > cL ? "#1d4ed8" : cL > cU ? "#db2777" : "#b91c1c";
+    [64, W - 64].forEach((bx, idx) => {
+      // Asta dello stendardo
+      px(g, bx - 1, 26, 3, 58, "#1e293b");
+      // Pomello dorato
+      px(g, bx - 2, 24, 5, 4, "#fbbf24");
+      // Drappo che ondeggia
+      const sway = Math.sin(f / 12 + idx * 1.8) * 5;
+      g.fillStyle = bannerColor;
+      g.beginPath();
+      g.moveTo(bx + 2, 28);
+      g.lineTo(bx + 32 + sway, 30);
+      g.lineTo(bx + 26 + sway, 52);
+      g.lineTo(bx + 2, 48);
+      g.closePath();
+      g.fill();
+      // Emblema del Falco al centro
+      px(g, bx + 12 + sway * 0.5, 36, 7, 7, "#fef08a");
+    });
+
+    // Sentinella in ronda sui bastioni (passante animato)
+    const guardWalk = Math.sin(f / 30) * 28;
+    const gx = W / 2 + guardWalk;
+    px(g, gx, 48, 5, 8, "#94a3b8");  // Busto armatura
+    px(g, gx + 1, 44, 3, 4, "#cbd5e1"); // Elmo
+    px(g, gx + 6, 42, 1, 14, "#ca8a04"); // Asta alabarda
+    px(g, gx + 5, 40, 3, 4, "#e2e8f0"); // Lama alabarda
+
+    // Fucina del fabbro (in basso a sinistra) con braci e scintille
+    px(g, 22, 132, 24, 18, "#1e293b");
+    px(g, 26, 128, 16, 5, "#ea580c");
+    px(g, 30, 126, 8, 4, "#fef08a");
+    // Incudine
+    px(g, 54, 136, 12, 10, "#334155");
+    px(g, 50, 134, 20, 4, "#64748b");
+    // Scintille del martello
+    if (f % 24 < 8) {
+      px(g, 58 + (f % 5), 130 - (f % 4), 2, 2, "#fde047");
+      px(g, 62 - (f % 6), 128 - (f % 5), 2, 2, "#f97316");
+    }
+
+    // Carro di rifornimenti e sacchi di grano (in basso a destra)
+    px(g, W - 58, 136, 36, 14, "#78350f");
+    // Ruota cerchiata
+    g.strokeStyle = "#451a03"; g.lineWidth = 2;
+    g.beginPath(); g.arc(W - 48, 150, 7, 0, Math.PI * 2); g.stroke();
+    g.beginPath(); g.arc(W - 28, 150, 7, 0, Math.PI * 2); g.stroke();
+    // Sacchi di grano/sale
+    px(g, W - 54, 130, 10, 8, "#fef3c7");
+    px(g, W - 42, 128, 12, 10, "#fde68a");
+    px(g, W - 32, 131, 8, 7, "#fef3c7");
+  }
+
+  // 7C. LA FORTEZZA DELLE DIGHE DI GLENBROOK & LE CHIUSE FLUVIALI
+  function drawDetailedFeudiGlenbrook(g, W, H, f) {
+    const st = getFeudiState();
+    const voto2 = (st.done && st.done[2]) || "";
+    const isFlooded = voto2.includes("utilita");
+
+    // Cielo drammatico sul fiume
+    const sky = g.createLinearGradient(0, 0, 0, 75);
+    sky.addColorStop(0, "#082f49");
+    sky.addColorStop(0.7, "#0284c7");
+    sky.addColorStop(1, "#7dd3fc");
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, 75);
+
+    // Torri della Diga di Glenbrook
+    px(g, 32, 16, 52, 85, "#334155");
+    px(g, 36, 18, 44, 83, "#475569");
+    px(g, W - 84, 16, 52, 85, "#334155");
+    px(g, W - 80, 18, 44, 83, "#475569");
+
+    // Finestrelle delle torri di guardia
+    [32, W - 84].forEach((tx) => {
+      px(g, tx + 14, 28, 6, 10, "#0f172a");
+      px(g, tx + 32, 28, 6, 10, "#0f172a");
+      px(g, tx + 22, 50, 8, 12, "#fef08a");
+    });
+
+    // Ruota idraulica in legno che gira (animata)
+    const wx = 94, wy = 88;
+    g.save();
+    g.translate(wx, wy);
+    g.rotate(f * 0.04);
+    g.strokeStyle = "#78350f"; g.lineWidth = 3;
+    g.beginPath(); g.arc(0, 0, 16, 0, Math.PI * 2); g.stroke();
+    for (let a = 0; a < 6; a++) {
+      const ang = (a * Math.PI) / 3;
+      px(g, Math.cos(ang) * 6, Math.sin(ang) * 6, 8, 2, "#451a03");
+    }
+    g.restore();
+
+    // Il grande ponte di pietra centrale con parapetti
+    px(g, 0, 78, W, 26, "#64748b");
+    px(g, 0, 80, W, 3, "#94a3b8");
+    for (let x = 10; x < W; x += 18) {
+      px(g, x, 72, 8, 8, "#475569");
+    }
+
+    // Cascate del fiume: se alluvione attivata, cateratte aperte e piena violenta!
+    const waterGrad = g.createLinearGradient(0, 104, 0, H);
+    if (isFlooded) {
+      waterGrad.addColorStop(0, "#0369a1");
+      waterGrad.addColorStop(0.5, "#0284c7");
+      waterGrad.addColorStop(1, "#38bdf8");
+    } else {
+      waterGrad.addColorStop(0, "#0284c7");
+      waterGrad.addColorStop(0.5, "#0369a1");
+      waterGrad.addColorStop(1, "#075985");
+    }
+    g.fillStyle = waterGrad;
+    g.fillRect(0, 104, W, H - 104);
+
+    // Onde e schiuma fluviale volumetrica animata
+    for (let y = 108; y < H; y += 10) {
+      const spd = isFlooded ? 6 : 10;
+      const waveOffset = Math.sin(f / spd + y) * 16;
+      px(g, 15 + waveOffset, y, 90, isFlooded ? 3 : 2, "rgba(240, 249, 255, 0.6)");
+      px(g, 140 + waveOffset, y, 110, isFlooded ? 4 : 2, "rgba(224, 242, 254, 0.5)");
+    }
+
+    // Barche da pesca dei civili lungo la riva o chiatte d'evacuazione
+    const boatX = 220 + Math.sin(f / 16) * 4;
+    px(g, boatX, 154, 38, 8, "#78350f");
+    px(g, boatX - 4, 152, 8, 8, "#9a3412");
+    px(g, boatX + 34, 152, 8, 8, "#9a3412");
+    // Lanterna sulla barca
+    px(g, boatX + 16, 146, 4, 8, "#18181b");
+    px(g, boatX + 17, 148, 2, 4, "#fef08a");
+  }
+
+  // 7D. LE MINIERE DI CRISTALLO & SALE DI GLACEFORT
+  function drawDetailedFeudiGlacefort(g, W, H, f) {
+    const st = getFeudiState();
+    const ch3Done = !!(st.done && st.done[3]);
+
+    // Caverna oscura profonda
+    const caveGrad = g.createLinearGradient(0, 0, 0, H);
+    caveGrad.addColorStop(0, "#020617");
+    caveGrad.addColorStop(0.4, "#0f172a");
+    caveGrad.addColorStop(1, "#1e293b");
+    g.fillStyle = caveGrad;
+    g.fillRect(0, 0, W, H);
+
+    // Stalattiti di sale candido e cristallo pendenti dalla volta
+    for (let x = 8; x < W; x += 18) {
+      const sh = 18 + ((x * 7) % 28);
+      g.fillStyle = (x % 36 === 0) ? "#e0f2fe" : "#94a3b8";
+      g.beginPath();
+      g.moveTo(x, 0);
+      g.lineTo(x + 9, 0);
+      g.lineTo(x + 4.5, sh);
+      g.closePath();
+      g.fill();
+    }
+
+    // Grandi cristalli di salgemma fosforescenti con bagliore radiale pulsante
+    const crystals = [
+      { x: 38, y: 88, r: 20 },
+      { x: 110, y: 70, r: 24 },
+      { x: 210, y: 80, r: 22 },
+      { x: 285, y: 72, r: 26 }
+    ];
+
+    crystals.forEach((cr, idx) => {
+      const pulse = Math.sin(f / 15 + idx * 2) * 4;
+      const glow = g.createRadialGradient(cr.x, cr.y, 2, cr.x, cr.y, cr.r + pulse);
+      glow.addColorStop(0, "rgba(56, 189, 248, 0.75)");
+      glow.addColorStop(0.6, "rgba(14, 165, 233, 0.25)");
+      glow.addColorStop(1, "rgba(14, 165, 233, 0)");
+      g.fillStyle = glow;
+      g.beginPath();
+      g.arc(cr.x, cr.y, cr.r + pulse, 0, Math.PI * 2);
+      g.fill();
+
+      // Cristallo sfaccettato solido
+      g.fillStyle = "#e0f2fe";
+      g.beginPath();
+      g.moveTo(cr.x, cr.y - 14);
+      g.lineTo(cr.x + 8, cr.y);
+      g.lineTo(cr.x, cr.y + 14);
+      g.lineTo(cr.x - 8, cr.y);
+      g.closePath();
+      g.fill();
+      px(g, cr.x - 2, cr.y - 6, 4, 12, "#ffffff");
+    });
+
+    // Pavimento in lastre di sale compatto e polvere bianca
+    px(g, 0, 134, W, H - 134, "#64748b");
+    px(g, 0, 138, W, 4, "#f1f5f9");
+
+    // Binario in ferro con traverse in legno per i carrelli minerari
+    px(g, 0, 156, W, 3, "#334155");
+    px(g, 0, 170, W, 3, "#334155");
+    for (let x = 4; x < W; x += 16) {
+      px(g, x, 153, 5, 22, "#451a03");
+    }
+
+    // Carrello minerario carico di cristalli
+    const cartX = 148;
+    px(g, cartX, 142, 34, 16, "#1e293b");
+    // Cristalli scintillanti nel carrello
+    px(g, cartX + 4, 138, 8, 6, "#38bdf8");
+    px(g, cartX + 14, 136, 10, 8, "#e0f2fe");
+    px(g, cartX + 22, 139, 8, 5, "#38bdf8");
+    // Ruote ferrate
+    px(g, cartX + 4, 156, 6, 6, "#0f172a");
+    px(g, cartX + 24, 156, 6, 6, "#0f172a");
+
+    // Catene spezzate se il Capitolo 3 è concluso (Impatto visivo della Libertà!)
+    if (ch3Done) {
+      px(g, 72, 162, 14, 3, "#fbbf24");
+      px(g, 90, 164, 12, 3, "#fbbf24");
+      // Bandiera rosa dei Roselliani piantata sulla roccia
+      px(g, 42, 114, 2, 28, "#78350f");
+      g.fillStyle = "#f472b6";
+      g.beginPath();
+      g.moveTo(44, 116); g.lineTo(60, 122); g.lineTo(44, 128); g.closePath(); g.fill();
+    }
+  }
+
+  // 7E. L'ANFITEATRO DEL GRAN GIUDIZIO (CAPITOLO 4 · IL COLOSSEO DEI FEUDI)
+  function drawDetailedFeudiColosseo(g, W, H, f) {
+    // Cielo dorato imperiale del tramonto
+    const sky = g.createLinearGradient(0, 0, 0, 68);
+    sky.addColorStop(0, "#78350f");
+    sky.addColorStop(0.5, "#d97706");
+    sky.addColorStop(1, "#fde68a");
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, 68);
+
+    // Archi monumentali del Colosseo Imperiale a doppio ordine
+    g.fillStyle = "#e7e5e4";
+    px(g, 0, 44, W, 48, "#d6d3d1");
+    for (let x = 10; x < W; x += 28) {
+      g.fillStyle = "#1c1917";
+      g.beginPath();
+      g.moveTo(x, 82);
+      g.lineTo(x, 56);
+      g.arc(x + 9, 56, 9, Math.PI, 0);
+      g.lineTo(x + 18, 82);
+      g.closePath();
+      g.fill();
+
+      // Folla animata negli spalti che incita i campioni
+      const crowdCol = ["#b91c1c", "#1d4ed8", "#ca8a04", "#db2777"][(x + Math.floor(f / 20)) % 4];
+      px(g, x + 3, 62 + (f % 6 > 3 ? 1 : 0), 4, 4, crowdCol);
+      px(g, x + 11, 62 + (f % 6 <= 3 ? 1 : 0), 4, 4, "#fbbf24");
+    }
+
+    // Tribuna Reale dei Tre Regni al centro con baldacchino damascato
+    const cx = W / 2;
+    px(g, cx - 44, 30, 88, 26, "#451a03");
+    // Bandiere delle tre potenze affiancate
+    px(g, cx - 36, 34, 22, 18, "#b91c1c"); // Wolffort
+    px(g, cx - 11, 34, 22, 18, "#1d4ed8"); // Glenbrook
+    px(g, cx + 14, 34, 22, 18, "#0284c7"); // Glacefort
+    // Corona imperiale dorata scolpita sul frontone
+    px(g, cx - 8, 24, 16, 7, "#fbbf24");
+    px(g, cx - 5, 22, 10, 3, "#fef08a");
+
+    // Il campo di sabbia dorata per la finale suprema
+    const sandGrad = g.createLinearGradient(0, 92, 0, H);
+    sandGrad.addColorStop(0, "#fef08a");
+    sandGrad.addColorStop(0.3, "#fde047");
+    sandGrad.addColorStop(1, "#ca8a04");
+    g.fillStyle = sandGrad;
+    g.fillRect(0, 92, W, H - 92);
+
+    // Linee bianche di calce del rettangolo di gioco
+    g.strokeStyle = "rgba(255, 255, 255, 0.85)";
+    g.lineWidth = 2;
+    g.strokeRect(18, 108, W - 36, H - 120);
+    // Cerchio di centrocampo e linea mediana
+    g.beginPath();
+    g.moveTo(W / 2, 108); g.lineTo(W / 2, H - 12);
+    g.stroke();
+    g.beginPath();
+    g.arc(W / 2, 148, 22, 0, Math.PI * 2);
+    g.stroke();
+
+    // Coriandoli dorati festosi nell'aria
+    for (let c = 0; c < 8; c++) {
+      const confX = (cx - 100 + (c * 31 + f * 1.2) % 200);
+      const confY = 40 + ((c * 17 + f * 0.9) % 120);
+      px(g, confX, confY, 2, 3, (c % 2 ? "#fbbf24" : "#ffffff"));
+    }
+  }
+
+  // INTERAZIONE TOUCH/CLICK CON GLI ELEMENTI DELLO SFONDO (SCENIC INTERACTION)
+  function setupScenicCanvasInteraction() {
+    const cv = document.getElementById("cv");
+    if (!cv || cv.__feudiScenicBound) return;
+    cv.__feudiScenicBound = true;
+
+    cv.addEventListener("pointerdown", (e) => {
+      // Verifichiamo se siamo in visualizzazione di scena o dialogo
+      if (!window.__borgoApi || typeof window.view === "undefined") return;
+      const v = window.view;
+      if (!v || v.kind !== "scene") return;
+
+      const bg = v.bg || "";
+      if (!bg.startsWith("feudi_")) return;
+
+      const rect = cv.getBoundingClientRect();
+      const W = cv.width || 320, H = cv.height || 200;
+      const clickX = ((e.clientX - rect.left) / rect.width) * W;
+      const clickY = ((e.clientY - rect.top) / rect.height) * H;
+
+      const toast = window.__borgoApi.trToast || window.toast;
+      const sfx = window.sfx || (() => {});
+
+      if (bg === "feudi_consiglio") {
+        if (clickY < H * 0.55 && Math.abs(clickX - W / 2) < 55) {
+          if (toast) toast("⚖️ Bilancia del Giudizio: «Ogni piatto pesa il valore delle tue convinzioni.»");
+          if (window.__bilanciaFeudi && window.__bilanciaFeudi.sfxScalesBalance) window.__bilanciaFeudi.sfxScalesBalance();
+        } else if (clickY > H * 0.65) {
+          if (toast) toast("📜 Tavolo del Gran Consiglio: «I trattati di Norzelia e le mappe dei tre feudi.»");
+        } else if (clickX < 55) {
+          if (toast) toast("🪟 Vetrata di Glenbrook: «Lo zaffiro e l'onore del principe Roland.»");
+        } else if (clickX > W - 55) {
+          if (toast) toast("🪟 Vetrata di Rosellia: «Il quarzo rosa e la speranza di Frederica.»");
+        }
+      } else if (bg === "feudi_mastio") {
+        if (clickX < 70 && clickY > 115) {
+          if (toast) toast("🔨 La Forgia d'Acciaio: «Il fuoco arde giorno e notte per le armate dei Wolffort!»");
+          sfx("kick");
+        } else if (clickY < 75 && Math.abs(clickX - W / 2) < 50) {
+          if (toast) toast("🛡️ Sentinella dei Bastioni: «Il Mastio è sicuro, Lord Custode!»");
+        } else if (clickX > W - 70 && clickY > 115) {
+          if (toast) toast("🌾 Carro delle Provviste: «Sacchi di grano e riserve per il lungo assedio.»");
+        } else if (clickY > 50 && clickY < 95) {
+          if (toast) toast("🏘️ Il Borgo di Castel Wolffort: «I tetti fumanti delle case cittadine.»");
+        }
+      } else if (bg === "feudi_glenbrook") {
+        if (clickY > 105) {
+          if (toast) toast("🌊 Le Chiuse Fluviali: «Il flusso impetuoso del fiume che alimenta le valli.»");
+          sfx("crowd");
+        } else if (clickX < 85 && clickY < 95) {
+          if (toast) toast("🗼 La Torre Idraulica: «Gli argani controllano le paratie di Glenbrook.»");
+        } else if (clickX > W - 90 && clickY > 135) {
+          if (toast) toast("⛵ Banchina dei Pescatori: «Le barche del popolo fluviale ormeggiate.»");
+        }
+      } else if (bg === "feudi_glacefort") {
+        if (clickY < 75) {
+          if (toast) toast("💎 Grotte di Cristallo: «Stalattiti di salgemma pura che brillano nel gelo.»");
+        } else if (clickX > 130 && clickX < 195 && clickY > 130) {
+          if (toast) toast("🛤️ Binari Minerari: «Vagonetti colmi di minerale sottratto alle cave.»");
+        }
+      } else if (bg === "feudi_colosseo") {
+        if (clickY < 75) {
+          if (toast) toast("👑 Tribuna Reale dei Feudi: «I sovrani di Norzelia attendono il campione.»");
+          if (window.__bilanciaFeudi && window.__bilanciaFeudi.sfxFeudalFanfare) window.__bilanciaFeudi.sfxFeudalFanfare();
+        } else if (clickY >= 75) {
+          if (toast) toast("⚔️ Arena di Sabbia Dorata: «Dove il destino di tutte le casate viene sigillato!»");
+        }
+      }
+    });
+  }
+
   // --- DISPATCHER PRINCIPALE DEGLI SCENARI ---
   window.renderDetailedBg = function (kind, g, W, H, frame) {
     if (!window.isBgArtDetailed()) return false;
     const f = frame || 0;
+    setupScenicCanvasInteraction();
 
     switch (kind) {
+      case "feudi_consiglio":
+        drawDetailedFeudiConsiglio(g, W, H, f);
+        return true;
+      case "feudi_mastio":
+        drawDetailedFeudiMastio(g, W, H, f);
+        return true;
+      case "feudi_glenbrook":
+        drawDetailedFeudiGlenbrook(g, W, H, f);
+        return true;
+      case "feudi_glacefort":
+        drawDetailedFeudiGlacefort(g, W, H, f);
+        return true;
+      case "feudi_colosseo":
+        drawDetailedFeudiColosseo(g, W, H, f);
+        return true;
       case "trattoria":
       case "museo":
       case "posta":
