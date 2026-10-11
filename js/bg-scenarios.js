@@ -2110,6 +2110,184 @@
     g.beginPath(); g.moveTo(bx - 5, by); g.lineTo(bx, by - 10 + bFl * 0.5); g.lineTo(bx + 5, by); g.closePath(); g.fill();
   }
 
+  // --- 13. BELOVODIA · LA FORTEZZA DEI BOIARDI DI BRINA ---
+  function drawDetailedBelovodiaFortezza(g, W, H, f) {
+    // Cielo notturno tempestoso violaceo
+    const sky = g.createLinearGradient(0, 0, 0, 95);
+    sky.addColorStop(0, "#090514");
+    sky.addColorStop(0.5, "#180d2b");
+    sky.addColorStop(1, "#2e1065");
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, 95);
+
+    // Vento polare e nubi scure animate
+    for (let c = 0; c < 3; c++) {
+      const cx = ((c * 120 + f * 0.6) % (W + 80)) - 40;
+      g.fillStyle = "rgba(15, 23, 42, 0.45)";
+      g.beginPath();
+      g.ellipse(cx, 35 + c * 15, 60, 20, 0, 0, Math.PI * 2);
+      g.fill();
+    }
+
+    // Sagoma delle torri della Fortezza di Brina
+    // Torre sinistra
+    px(g, 15, 30, 48, 85, "#1e293b");
+    px(g, 11, 24, 56, 7, "#334155");
+    // Merlature sinistra
+    [15, 29, 43, 57].forEach((mx) => px(g, mx, 18, 8, 8, "#334155"));
+    px(g, 11, 23, 56, 2, "#f8fafc"); // Neve sopra
+
+    // Torre destra
+    px(g, W - 63, 30, 48, 85, "#1e293b");
+    px(g, W - 67, 24, 56, 7, "#334155");
+    [W - 63, W - 49, W - 35, W - 21].forEach((mx) => px(g, mx, 18, 8, 8, "#334155"));
+    px(g, W - 67, 23, 56, 2, "#f8fafc");
+
+    // Mastio centrale monumentale con arco d'ingresso
+    px(g, 63, 45, W - 126, 70, "#0f172a");
+    px(g, 60, 42, W - 120, 5, "#334155");
+    // Portale ad arco
+    const gx = W / 2;
+    g.fillStyle = "#020617";
+    g.beginPath();
+    g.arc(gx, 88, 22, Math.PI, 0);
+    g.lineTo(gx + 22, 120);
+    g.lineTo(gx - 22, 120);
+    g.closePath();
+    g.fill();
+    // Saracinesca in ferro battuto
+    g.strokeStyle = "#475569";
+    g.lineWidth = 1.5;
+    for (let lx = gx - 18; lx <= gx + 18; lx += 6) {
+      g.beginPath(); g.moveTo(lx, 75); g.lineTo(lx, 115); g.stroke();
+    }
+    px(g, gx - 20, 92, 40, 3, "#475569");
+    px(g, gx - 20, 105, 40, 3, "#475569");
+
+    // Stendardi cerulei dello Zar Moroz appesi ai bastioni
+    [32, W - 48].forEach((sx) => {
+      px(g, sx, 45, 16, 32, "#0369a1");
+      px(g, sx + 2, 47, 12, 28, "#0284c7");
+      px(g, sx + 6, 52, 4, 14, "#bae6fd"); // Runa di brina
+    });
+
+    // Fiaccole con fiamme cerulee
+    [24, W - 32, gx - 32, gx + 32].forEach((fx) => {
+      px(g, fx - 2, 65, 4, 12, "#334155");
+      const fl = Math.sin(f * 0.25 + fx) * 1.5;
+      const fGlow = g.createRadialGradient(fx, 62, 1, fx, 62, 14);
+      fGlow.addColorStop(0, "rgba(56, 189, 248, 0.75)");
+      fGlow.addColorStop(1, "rgba(56, 189, 248, 0)");
+      g.fillStyle = fGlow;
+      g.fillRect(fx - 14, 48, 28, 28);
+      px(g, fx - 1, 60 + fl, 3, 4, "#e0f2fe");
+    });
+
+    // Cortile d'armi inferiore (lastricato di pietra ciclopica e neve)
+    const courtGrad = g.createLinearGradient(0, 115, 0, H);
+    courtGrad.addColorStop(0, "#1e293b");
+    courtGrad.addColorStop(0.3, "#0f172a");
+    courtGrad.addColorStop(1, "#020617");
+    g.fillStyle = courtGrad;
+    g.fillRect(0, 115, W, H - 115);
+
+    // Lastre di pietra con neve tra le fessure
+    for (let x = 0; x < W; x += 32) {
+      px(g, x, 115, 1, H - 115, "#334155");
+      px(g, 0, 145, W, 1, "#334155");
+      px(g, 0, 175, W, 1, "#334155");
+    }
+
+    // Bufera impetuosa con schegge di neve
+    for (let b = 0; b < 45; b++) {
+      const bx = (b * 27 + f * 2.2 + Math.sin(f * 0.08 + b) * 20) % W;
+      const by = (b * 19 + f * 1.6) % H;
+      px(g, bx, by, (b % 4 === 0 ? 3 : 1), 1, "rgba(240, 249, 255, 0.85)");
+    }
+  }
+
+  // --- 14. BELOVODIA · LA FONDERIA DI CENERE E SORGENTE PRIMORDIALE ---
+  function drawDetailedBelovodiaSorgente(g, W, H, f) {
+    // Volta rocciosa vulcanico-glaciale
+    const sky = g.createLinearGradient(0, 0, 0, 80);
+    sky.addColorStop(0, "#180804");
+    sky.addColorStop(0.5, "#2e1208");
+    sky.addColorStop(1, "#0c1a2d");
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, 80);
+
+    // Ingranaggi ciclopici di bronzo antico nelle pareti
+    [45, W - 55].forEach((gx, gi) => {
+      const gRot = (f * 0.03 * (gi === 0 ? 1 : -1));
+      px(g, gx - 22, 22, 44, 44, "#78350f");
+      px(g, gx - 16, 28, 32, 32, "#92400e");
+      px(g, gx - 8, 36, 16, 16, "#d97706");
+      // Denti ingranaggio
+      px(g, gx - 3, 16, 6, 8, "#b45309");
+      px(g, gx - 3, 62, 6, 8, "#b45309");
+      px(g, gx - 26, 39, 8, 6, "#b45309");
+      px(g, gx + 18, 39, 8, 6, "#b45309");
+      // Ghiaccioli che bloccano i denti
+      px(g, gx - 2, 22, 4, 8, "#bae6fd");
+    });
+
+    // Focolare della fonderia e canali di magma/brace calda
+    const forgeGrad = g.createLinearGradient(0, 80, 0, H);
+    forgeGrad.addColorStop(0, "#1c1917");
+    forgeGrad.addColorStop(0.4, "#292524");
+    forgeGrad.addColorStop(1, "#0c0a09");
+    g.fillStyle = forgeGrad;
+    g.fillRect(0, 80, W, H - 80);
+
+    // Bacino termale fumante al centro con acqua turchese calda
+    const poolGrad = g.createLinearGradient(0, 110, 0, 175);
+    poolGrad.addColorStop(0, "#06b6d4");
+    poolGrad.addColorStop(0.5, "#0891b2");
+    poolGrad.addColorStop(1, "#0e7490");
+    g.fillStyle = poolGrad;
+    g.beginPath();
+    g.ellipse(W / 2, 142, 75, 32, 0, 0, Math.PI * 2);
+    g.fill();
+    g.strokeStyle = "rgba(165, 243, 252, 0.65)";
+    g.lineWidth = 2;
+    g.stroke();
+
+    // Vapore termale denso che sale sinuoso procedurale
+    for (let st = 0; st < 6; st++) {
+      const sx = W / 2 - 50 + st * 20 + Math.sin(f * 0.08 + st) * 10;
+      const sy = 135 - st * 12 - (f * 0.5 % 15);
+      const sr = 8 + st * 3.5;
+      g.fillStyle = `rgba(240, 253, 250, ${0.35 - st * 0.05})`;
+      g.beginPath();
+      g.arc(sx, sy, sr, 0, Math.PI * 2);
+      g.fill();
+    }
+
+    // Altare della Maschera della Lepre delle Tempeste a destra del bacino
+    const ax = W - 65, ay = 118;
+    px(g, ax, ay, 45, 32, "#292524");
+    px(g, ax - 3, ay, 51, 4, "#44403c");
+    // Maschera della Lepre con orecchie e occhi celesti
+    const lx = ax + 22, ly = ay - 10;
+    g.fillStyle = "#f8fafc";
+    g.beginPath(); g.ellipse(lx, ly + 8, 8, 10, 0, 0, Math.PI * 2); g.fill();
+    // Orecchie ritte
+    px(g, lx - 5, ly - 8, 3, 11, "#e2e8f0");
+    px(g, lx + 2, ly - 8, 3, 11, "#e2e8f0");
+    px(g, lx - 4, ly - 6, 1, 7, "#f472b6");
+    px(g, lx + 3, ly - 6, 1, 7, "#f472b6");
+    // Occhi turchesi
+    const eyeFl = (f % 24 < 12) ? "#38bdf8" : "#7dd3fc";
+    px(g, lx - 4, ly + 6, 2, 2, eyeFl);
+    px(g, lx + 2, ly + 6, 2, 2, eyeFl);
+
+    // Canali incandescenti con brace a sinistra
+    px(g, 15, 120, 25, 45, "#7c2d12");
+    px(g, 18, 124, 19, 38, "#c2410c");
+    px(g, 22, 130, 11, 26, "#ea580c");
+    px(g, 25, 136, 5, 14, "#fef08a");
+  }
+
   // INTERAZIONE TOUCH/CLICK CON GLI ELEMENTI DELLO SFONDO (SCENIC INTERACTION)
   function setupScenicCanvasInteraction() {
     const cv = document.getElementById("cv");
@@ -2186,6 +2364,25 @@
         } else if (Math.abs(clickX - W / 2) < 40 && clickY >= 135) {
           if (toast) toast("🔥 Focolare della Caverna: «Ceppi di pino ardono spargendo un profumo di resina e brace.»");
         }
+      } else if (bg === "bv_fortezza") {
+        if (clickY < 65 && (clickX < 70 || clickX > W - 70)) {
+          if (toast) toast("🏰 Torri della Fortezza di Brina: «Le merlature sono incrostate di ghiaccio spesso dieci spanne.»");
+        } else if (Math.abs(clickX - W / 2) < 45 && clickY > 60 && clickY < 125) {
+          if (toast) toast("⚔️ Portale dei Boiardi: «La saracinesca di ferro protegge il passaggio verso la Fonderia.»");
+          sfx("kick");
+        } else if (clickY >= 125) {
+          if (toast) toast("🛡️ Cortile d'Armi: «I lastroni neri risuonano sotto i passi dei campioni.»");
+        }
+      } else if (bg === "bv_sorgente") {
+        if (Math.abs(clickX - W / 2) < 60 && clickY > 105 && clickY < 175) {
+          if (toast) toast("♨️ Bacino Termale: «L'acqua calda e turchese emana nuvole dense di vapore primordiale.»");
+          sfx("crowd");
+        } else if (clickX > W - 70 && clickY > 80) {
+          if (toast) toast("🎭 Altare della Maschera della Lepre: «Il legno leggero freme con la rapidità del vento.»");
+          sfx("chime");
+        } else if (clickX < 75 && clickY < 85) {
+          if (toast) toast("⚙️ Ingranaggi Titanici: «Le ruote di bronzo della fonderia sono parzialmente bloccate dal ghiaccio.»");
+        }
       } else if (bg === "feudi_consiglio") {
         if (clickY < H * 0.55 && Math.abs(clickX - W / 2) < 55) {
           if (toast) toast("⚖️ Bilancia del Giudizio: «Ogni piatto pesa il valore delle tue convinzioni.»");
@@ -2255,6 +2452,12 @@
         return true;
       case "bv_caverna":
         drawDetailedBelovodiaCaverna(g, W, H, f);
+        return true;
+      case "bv_fortezza":
+        drawDetailedBelovodiaFortezza(g, W, H, f);
+        return true;
+      case "bv_sorgente":
+        drawDetailedBelovodiaSorgente(g, W, H, f);
         return true;
       case "feudi_consiglio":
         drawDetailedFeudiConsiglio(g, W, H, f);

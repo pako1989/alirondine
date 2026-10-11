@@ -897,6 +897,7 @@
           // Cerchio di betulle perimetrale
           for (let x = 0; x < 24; x++) { put(x, 0, "A"); put(x, 21, "A"); }
           for (let y = 1; y < 21; y++) { put(0, y, "A"); put(23, y, "A"); }
+          put(12, 0, "^"); // Cancello nord verso la Fortezza
 
           // Campo di calcio cerimoniale innevato
           lay(4, 4, 19, 16, "y");
@@ -918,7 +919,7 @@
 
           // Totem e idoli
           put(7, 2, "M"); put(16, 2, "M");
-          put(12, 1, "k");
+          put(10, 2, "k");
 
           // Varco di ritorno a sud
           put(12, 21, "d");
@@ -1170,6 +1171,11 @@
       "bv_bottega:M": () => say([["voce", "Maschere di volpi, gufi e lupi intagliate con maestria: sembrano respirare nella penombra dorata."]], done),
 
       "bv_radura:d": () => go("bv_villaggio", 12, 1),
+      "bv_radura:^": () => {
+        const m = mem();
+        if (!m.done[2]) say([["voce", "I cancelli verso la Fortezza di Cenere a nord sono sbarrati da catene di ghiaccio. Completa prima la prova del Lago."]], done);
+        else go("bv_fortezza", 12, 19);
+      },
       "bv_radura:G": () => say([["voce", "Le porte del campo cerimoniale: rami di betulla intrecciati a maestose corna di cervo fossile."]], done),
       "bv_radura:B": () => say([["voce", "I bracieri cerimoniali della radura segnano il confine sacro dove le leggi degli spiriti incontrano il gioco del calcio."]], done)
     };
@@ -1549,6 +1555,346 @@
         ["voce", "A ovest del villaggio, il sentiero si apre sul Lago dei Silenzi: una distesa di cristallo immota sotto la luce fredda della luna.", "bv_lago"],
         ["voce", "Yakov il Lupo Grigio e la spettrale Dama delle Betulle custodiscono l'antica Caverna di Brina.", "bv_lago"],
         ["voce", "Per avanzare verso il cuore dell'inverno, dovrai dimostrare di possedere sia la visione del falco sia la forza dell'orso!", "bv_lago"]
+      ]
+    };
+  });
+
+  // ------------------------------------------------------------------ CAPITOLO 3: LA FONDERIA DI CENERE
+  addChapter(function (X) {
+    const { T, F, say, ask, done, go, note, setStep, reward, esc, addMask, sfxMask, sfxWind, sfxChimes } = X;
+    const N = 3, S = () => X.stepOf(N);
+
+    // Personaggi Capitolo 3
+    X.cast("bv_araldo", {
+      name: "Araldo di Moroz", tag: "araldo", hair: "#38bdf8", style: "slick", skin: "#e2d4c0", eye: "#0284c7",
+      beard: true, bg: ["#1e1b4b", "#38bdf8"], shirt: "#0f172a"
+    }, "L'austero araldo dello Zar del Gelo. Indossa una corazza cesellata di ghiaccio trasparente e un diadema con corna di cervo. Voce profonda che risuona come una campana di bronzo nei meandri della fortezza.");
+
+    // Cosmetico Capitolo 3
+    X.cos("bv_maschera_lepre", {
+      id: "bv_maschera_lepre",
+      label: "Maschera della Lepre di Belovodia",
+      sub: "Maschera aerodinamica in corteccia d'argento con orecchie tese e occhi celesti.",
+      cat: "cappello",
+      val: 0
+    });
+
+    const goal = (s) => {
+      if (s === 0) return "Raggiungi la Fortezza di Brina a nord della radura e parla con Nadezhda.";
+      if (s === 1) return "Ascolta la rivelazione dell'Araldo dello Zar sul grande portale.";
+      if (s === 2) return "Scendi nei sotterranei ed esplora la Fonderia di Cenere.";
+      if (s === 3) return "Esamina l'altare della Maschera della Lepre e armonizzati con la rapidità del vento.";
+      if (s === 4) return "Affronta i Cavalieri della Brina dell'Araldo sul campo d'armi della fortezza.";
+      return "Hai trionfato sulla Fonderia! Le Tre Maschere sono riunite: il Santuario Cosmico ti attende!";
+    };
+
+    // Zone del Capitolo 3
+    const zones = {
+      bv_fortezza: {
+        name: "La Fortezza di Brina", short: "I Bastioni dei Boiardi",
+        sub: "Mura ciclopiche, stendardi del gelo e cortile d'armi sotto la tormenta",
+        w: 24, h: 22, start: [12, 19], bg: "bv_fortezza", theme: "torino",
+        item: ["Stendardo di Brina", "Stendardi"],
+        build(Ls) {
+          const { lay, put } = Ls;
+          // Pavimento in lastre di pietra scura del cortile
+          lay(0, 0, 23, 21, "w");
+          // Neve sui bordi
+          lay(0, 16, 23, 21, ",");
+
+          // Mura perimetrali e torri
+          lay(0, 0, 23, 4, "A");
+          for (let y = 5; y < 21; y++) { put(0, y, "A"); put(23, y, "A"); }
+          lay(0, 21, 23, 21, "A");
+
+          // Portale centrale ad arco
+          lay(8, 4, 15, 6, "A");
+          put(12, 6, "u"); // Ingresso alla fonderia sotterranea
+          put(10, 5, "J"); put(14, 5, "J");
+
+          // Torri laterali
+          lay(2, 2, 6, 6, "A");
+          lay(17, 2, 21, 6, "A");
+
+          // Bracieri cerulei
+          put(7, 9, "B"); put(16, 9, "B");
+          put(4, 14, "B"); put(19, 14, "B");
+
+          // Cannoni/idoli di pietra e stendardi
+          put(9, 7, "M"); put(14, 7, "M");
+          put(5, 11, "k"); put(18, 11, "k");
+
+          // Varco di ritorno a sud verso la radura
+          put(12, 21, "d");
+        },
+        npcs(s) {
+          const list = [];
+          list.push({ id: "bv_nadia", at: [10, 15] });
+          list.push({ id: "bv_guardia", at: [14, 15] });
+          if (s >= 1 && s <= 4) list.push({ id: "bv_araldo", at: [12, 8] });
+          return list;
+        }
+      },
+
+      bv_sorgente: {
+        name: "La Fonderia di Cenere", short: "Sorgente Primordiale del Disgelo",
+        sub: "Fiumi di vapore caldo, ingranaggi titanici di bronzo e acqua termale",
+        w: 16, h: 14, start: [8, 11], bg: "bv_sorgente", theme: "torino",
+        item: ["Ingranaggio di Bronzo", "Ingranaggi"],
+        build(Ls) {
+          const { lay, put } = Ls;
+          // Roccia vulcanica scura
+          lay(0, 0, 15, 13, "A");
+          // Pavimento termale
+          lay(1, 1, 14, 12, "w");
+
+          // Bacino termale di vapore caldo al centro
+          lay(6, 5, 9, 8, ":");
+
+          // Ingranaggi di bronzo titanici alle pareti
+          put(3, 3, "T"); put(12, 3, "T");
+          put(2, 6, "M"); put(13, 6, "M");
+
+          // Altare della Maschera della Lepre delle Tempeste
+          put(12, 5, "H");
+
+          // Focolari di lava/brace
+          put(3, 9, "B"); put(12, 9, "B");
+          put(5, 11, "b"); put(10, 11, "b");
+
+          // Porta di risalita a sud
+          put(8, 12, "d");
+        },
+        npcs(s) {
+          const list = [];
+          if (s <= 3) list.push({ id: "bv_araldo", at: [8, 4] });
+          return list;
+        }
+      }
+    };
+
+    // Dialoghi Capitolo 3
+    function nadiaTalk3() {
+      const s = S();
+      if (s === 0) {
+        return say([
+          ["bv_nadia", "Siamo davanti alla Fortezza dei Boiardi di Brina. Da qui Moroz un tempo governava tutte le valli del nord."],
+          ["hero", "Guarda la saracinesca... è coperta da rune di fuoco e brina."],
+          ["bv_nadia", "L'Araldo dello Zar ci sta osservando dall'arco monumentale. Non ha mai aperto quei cancelli a nessuno negli ultimi cent'anni."],
+        ], () => {
+          setStep(N, 1);
+          note("Arrivo alla Fortezza di Brina: l'Araldo dello Zar si staglia sui bastioni.");
+          done();
+        });
+      }
+      if (s === 1) {
+        return say([
+          ["bv_nadia", "Avanza verso il portale e parla con l'Araldo, {n}. Con il Falco e l'Orso abbiamo il diritto di chiedere udienza."],
+        ], done);
+      }
+      if (s === 2) {
+        return say([
+          ["bv_nadia", "Le parole dell'Araldo... sono vere? I nostri antenati hanno pregato per il freddo eterno? Dobbiamo scendere nella Fonderia e scoprire la verità."],
+        ], done);
+      }
+      if (s === 3) {
+        return say([
+          ["bv_nadia", "Sento il calore del vapore termale salire dalle grate. L'altare della Lepre è nei sotterranei."],
+        ], done);
+      }
+      if (s === 4) {
+        return ask("bv_nadia", "«I Cavalieri della Brina sono schierati nel cortile. Sei pronto per la partita della Fortezza?»", [
+          {
+            label: "⚡ «Scendiamo in campo contro l'Araldo!»",
+            cls: "hot",
+            fn: startMatch3
+          },
+          { label: "«Sto concentrando la grinta»", fn: done }
+        ]);
+      }
+      return say([
+        ["bv_nadia", "Abbiamo sconfitto i cavalieri! La Fonderia si è rimessa in moto: il calore primordiale si sta diffondendo sotto le fondamenta di Belovodia!"],
+      ], done);
+    }
+
+    function araldoTalk3() {
+      const s = S();
+      if (s === 1) {
+        return say([
+          ["bv_araldo", "(La sua voce d'acciaio risuona nel cortile come una campana) Fermati, Campione delle Rondini. Conosco le maschere che porti sul petto."],
+          ["hero", "Araldo. Apri la via per la Fonderia. Belovodia merita di vedere sciogliersi la morsa del ghiaccio e tornare alla luce."],
+          ["bv_araldo", "(Scende solennemente le scale di pietra) Voi mortali siete accecati dalla vostra stessa impazienza. Credete davvero che lo Zar Moroz sia un tiranno crudele che vi tiene in catene?"],
+          ["hero", "Ha congelato un intero popolo fuori dal tempo."],
+          ["bv_araldo", "Perché FURONO LORO A SUPPLICALO! Trecento inverni fa, una piaga mortale stava strappando via ogni neonato e ogni raccolto. Gli anziani di Belovodia si inginocchiarono nella neve e chiesero a Moroz: «Congelaci! Ferma il battito del tempo prima che la morte divori l'ultimo di noi!»"],
+          ["bv_araldo", "Moroz esaudì la loro preghiera per pietà. Se scioglierai il gelo, il tempo mortale riprenderà la sua corsa. La gente invecchierà, si ammalerà e soffrirà. Sei pronto ad assumerti questa responsabilità col tuo pallone da gioco?"],
+          ["hero", "La vita senza tempo non è vera vita, Araldo. Il dolore fa parte della primavera, così come i germogli che sbocciano dopo il buio."],
+          ["bv_araldo", "(Ti fissa con intensità) Parole coraggiose. Scendi nella Fonderia allora. La Maschera della Lepre delle Tempeste attende di giudicare se la tua rapidità è pari alla tua convinzione."],
+        ], () => {
+          setStep(N, 2);
+          note("Rivelazione dell'Araldo: l'inverno eterno fu richiesto dagli avi del borgo per salvarsi dalla morte.");
+          done();
+        });
+      }
+      if (s === 2) {
+        return say([
+          ["bv_araldo", "La porta per i sotterranei termali è aperta. Scendi ed esamina l'altare della Lepre."],
+        ], done);
+      }
+      if (s === 3) {
+        return say([
+          ["bv_araldo", "La Maschera della Lepre delle Tempeste richiede riflessi istantanei e agilità pura. Armonizzati con il vapore dell'altare."],
+        ], done);
+      }
+      if (s === 4) {
+        return ask("bv_araldo", "«I Cavalieri della Brina impugnano le lance cerulee sul cortile d'armi. Hai la rapidità necessaria per superare la nostra linea?»", [
+          {
+            label: "⚽ «Fischia il calcio d'inizio!»",
+            cls: "hot",
+            fn: startMatch3
+          },
+          { label: "«Un momento ancora»", fn: done }
+        ]);
+      }
+      return say([
+        ["bv_araldo", "(Posa la spada cerulea a terra, inchinandosi) Il tuo tiro «{tiro}» possiede la rapidità del lampo e il calore della terra. Lo Zar Moroz ti attende sul Trono Astrale dell'Aurora."],
+      ], done);
+    }
+
+    function esaminaAltareLepre() {
+      if (S() !== 3) {
+        return say([["voce", "L'altare della Lepre delle Tempeste: avvolto da spire di vapore turchese e calore geotermico."]], done);
+      }
+      sfxChimes();
+      ask("voce", "La Maschera della Lepre delle Tempeste vibra con un'energia cinetica elettrizzante. Qual è la tua promessa interiore prima di indossarla?", [
+        {
+          label: "🌌 «Sussurro alle acque termali il Canto dell'Aurora: il disgelo sarà dolce e sacro»",
+          sub: "Via della Grazia Spirituale (scelta morale per il finale)",
+          cls: "hot",
+          fn: () => {
+            F.set("bv_scelta_3", "spirito");
+            concludiSintonizzazioneLepre("spirito");
+          }
+        },
+        {
+          label: "🔥 «Accendo la fonderia con la passione del mio tiro «{tiro}» per bruciare ogni catena!»",
+          sub: "Via della Volontà e Passione Umana (scelta morale per il finale)",
+          cls: "hot",
+          fn: () => {
+            F.set("bv_scelta_3", "volonta");
+            concludiSintonizzazioneLepre("volonta");
+          }
+        },
+        {
+          label: "🤝 «Prometto a Boris, Nadia e Yakov che affronteremo il futuro insieme senza paura»",
+          sub: "Via del Popolo di Belovodia (scelta morale per il finale)",
+          fn: () => {
+            F.set("bv_scelta_3", "popolo");
+            concludiSintonizzazioneLepre("popolo");
+          }
+        }
+      ]);
+    }
+
+    function concludiSintonizzazioneLepre(scelta) {
+      sfxMask();
+      addMask("lepre", "La Maschera della Lepre delle Tempeste", "Conferisce dribbling fulminei, cambi di direzione immediati e velocità raddoppiata sul bagnato.");
+      setStep(N, 4);
+      const descScelta = scelta === "spirito"
+        ? "Hai invocato l'armonia della luce boreale per guidare i tuoi passi leggeri attraverso il vapore."
+        : scelta === "volonta"
+          ? "Hai riscaldato la sorgente sotterranea con la foga del tuo cuore, risvegliando gli ingranaggi dormienti."
+          : "Hai legato il tuo scatto alla protezione e rinascita di tutti gli abitanti di Belovodia.";
+      note(`MASCHERA DELLA LEPRE RISVEGLIATA (${scelta.toUpperCase()}): ${descScelta}`);
+
+      say([
+        ["voce", "Un soffio d'aria tiepida fa ruotare le piume della maschera! Sentire i tuoi piedi leggeri come foglie nel vento: sul campo nessuno potrà più prevedere le tue finte!"],
+        ["bv_araldo", "Le Tre Maschere Ancestrali... Falco, Orso e Lepre. Non vedevo una simile trinità armonizzarsi su un mortale dall'epoca della fondazione."],
+        ["hero", "La fonderia respira di nuovo! Andiamo sul cortile: è tempo di decidere il destino di questo castello."],
+      ], () => {
+        go("bv_fortezza", 12, 14);
+      });
+    }
+
+    function startMatch3() {
+      sfxWind();
+      X.playMatch({
+        id: "bv_match_3",
+        alt: "hd,az", azPitch: "neve",
+        oppNames: ["L'Araldo di Moroz", "Lama Gelata", "Cenere Bianca", "Sentinella Boreale", "Drago di Vento"],
+        squad: ["Nadezhda", "Yakov", "Dama delle Betulle"],
+        chap: "Belovodia · La Fonderia di Cenere",
+        us: "I Cacciatori del Disgelo",
+        mate: "Nadezhda",
+        min: 45,
+        intro: "TERZA SFIDA DI BELOVODIA! Il tuo Campione {n} affronta i Cavalieri della Brina dell'Araldo nella Fortezza!",
+        team: (t, st) => ({
+          name: "I Cavalieri della Brina di Moroz",
+          col: "#0f172a",
+          style: "Pressione Totale, Velocità & Rovesciate Boreali",
+          atk: t(st.atk * 1.25),
+          def: t(st.def * 1.2),
+          vel: t(st.vel * 1.2),
+          specials: ["Raffica di Cenere", "Muraglia di Cristallo"]
+        }),
+        done: (r) => {
+          if (r.win) {
+            setStep(N, 5);
+            note("VITTORIA NELLA FORTEZZA DI BRINA! L'Araldo e i suoi cavalieri sono caduti davanti alla Trinità delle Maschere.");
+            const rewMsg = reward("bv_ch3_complete", {
+              coins: 400,
+              cos: "bv_maschera_lepre"
+            });
+            finishChapter(N, "lepre_superata");
+            say([
+              ["voce", "GOOOOOOOL LEGGENDARIOOOO! Con una sequenza travolgente orchestrata dalla Maschera della Lepre e rifinita dal tuo tiro «{tiro}», la sfera manda in frantumi la barriera dell'Araldo!"],
+              ["bv_araldo", "(Si rialza guardando il cielo) Gli ingranaggi della fonderia girano di nuovo... il ghiaccio della vetta si sta incrinando."],
+              ["bv_nadia", "{n}, guarda lassù! L'aurora boreale ha aperto una scala di luce che porta alla Guglia Suprema dello Zar Moroz!"],
+              ["bv_boris", "È giunto il momento del verdetto finale. Il Capitolo 4 ti attende per decidere l'era di Belovodia!"],
+              ["voce", `CAPITOLO 3 COMPLETATO! ${rewMsg.join(" · ")}`],
+            ], () => {
+              go("bv_fortezza", 12, 14);
+            });
+          } else {
+            say([
+              ["bv_araldo", "La tormenta della fortezza ha avuto la meglio! Riorganizza i tuoi alleati e ritenta la prova!"],
+            ], done);
+          }
+        }
+      });
+    }
+
+    const obj = {
+      "bv_fortezza:u": () => go("bv_sorgente", 8, 11),
+      "bv_fortezza:d": () => go("bv_radura", 12, 2),
+      "bv_fortezza:B": () => say([["voce", "I bracieri cerulei della fortezza ardono con fiamme alimentate da zolfo montano e resina di larice."]], done),
+      "bv_fortezza:k": () => say([["voce", "L'idolo guardiano dei boiardi: scolpito nella diorite nera con corna di cervo coperte di ghiaccioli."]], done),
+
+      "bv_sorgente:d": () => go("bv_fortezza", 12, 7),
+      "bv_sorgente:H": esaminaAltareLepre,
+      "bv_sorgente:T": () => say([["voce", "Gli ingranaggi titanici di bronzo della fonderia: il calore termale ne sta sciogliendo lentamente i blocchi di brina."]], done),
+      "bv_sorgente:B": () => say([["voce", "Canali di brace ardente scavati nel pavimento per convogliare il vapore della sorgente."]], done)
+    };
+
+    const talk = {
+      bv_nadia: nadiaTalk3,
+      bv_araldo: araldoTalk3,
+      bv_guardia: () => say([["bv_guardia", "Le tre maschere si sono inchinate a te... persino i bastioni sembrano più caldi oggi."]], done)
+    };
+
+    return {
+      n: N,
+      title: "La Fonderia di Cenere · La Maschera della Lepre",
+      sub: "La Fortezza dei Boiardi, la grande rivelazione sul gelo e la corsa verso la vetta",
+      start: "bv_fortezza",
+      zones,
+      talk,
+      obj,
+      goal,
+      intro: () => [
+        ["voce", "BELOVODIA · CAPITOLO 3: LA FONDERIA DI CENERE", "bv_fortezza"],
+        ["voce", "Superata la Radura del Gelo, ti trovi al cospetto dell'imponente Fortezza dei Boiardi di Brina.", "bv_fortezza"],
+        ["voce", "L'Araldo dello Zar ti attende per rivelare la verità sul sacrificio che congelò il borgo tre secoli fa.", "bv_fortezza"],
+        ["voce", "Risveglia la Maschera della Lepre delle Tempeste e rimetti in moto gli ingranaggi primordiali del disgelo!", "bv_fortezza"]
       ]
     };
   });
