@@ -3,7 +3,7 @@
 // Prima di ogni pagina il Narratore scrive una parola-regola contro di te (NEBBIA, SPECCHIO, PIOGGIA, CANCELLA, FINE)
 // e tu ne scegli una dal tuo pennino: le parole raccolte nella saga sono il tuo mazzo. Ogni parola del Narratore ha la sua
 // parola contraria (LUCE, DRITTO, SOLE, PENNA, ANCORA). Le altre danno un vantaggio (SOFFIO, DOPPIO, LARGA, MURO, APERTO, PONTE).
-// Comandi: trascina il dito sul campo (il Campione va verso il dito), TIRA, PASSA. Da tastiera: frecce, Spazio (tira), X (passa).
+// Comandi: levetta virtuale (appoggi il dito dove vuoi e trascini: il Campione va in quella direzione), TIRA, PASSA. Da tastiera: frecce, Spazio (tira), X (passa).
 // Uso: window.__lbPartitaScritta.start({ title, hero:{name,skin,hair,shirt}, mate:{name,skin,hair,shirt}, words:[id...], opp:{name,boss}, onDone({a,b,win,recap}) })
 (function () {
   "use strict";
@@ -102,7 +102,7 @@
     if (!S || !S.run) return;
     const b = S.ball, h = S.hero;
     if (kind === "tira") {
-      if (b.own === h) { const aim = 120 + (h.x - 120) * 0.25 + (S.ptr ? (S.ptr.x - h.x) * 0.2 : 0); shoot(h, 7, aim); }
+      if (b.own === h) { const aim = 120 + (h.x - 120) * 0.25 + (S.ptr ? (S.ptr.x - S.ptr.ax) * 0.8 : 0); shoot(h, 7, aim); }
       else if (b.own === S.mate) shoot(S.mate, 6.6, 120);
       else { h.dash = 18; pop("ZOOM!", h.x, h.y - 12, "#3fa7ff"); }
     } else if (kind === "passa") {
@@ -119,7 +119,7 @@
     const mir = bossOn("specchio") ? -1 : 1;
     let sp = speedOf(h) * ((h.dash | 0) > 0 ? 1.7 : 1); if (h.dash > 0) h.dash--;
     if (dx || dy) { const d = Math.hypot(dx, dy); h.x += dx * mir / d * sp; h.y += dy / d * sp; h.dir = Math.atan2(dy, dx * mir); }
-    else if (S.ptr) { const tx = mir === 1 ? S.ptr.x : 240 - S.ptr.x; moveTo(h, tx, S.ptr.y, sp); }
+    else if (S.ptr) { const jx = S.ptr.x - S.ptr.ax, jy = S.ptr.y - S.ptr.ay, jl = Math.hypot(jx, jy); if (jl > 3) { const f = Math.min(1, jl / 16) * sp; h.x += jx * mir / jl * f; h.y += jy / jl * f; h.dir = Math.atan2(jy, jx * mir); } }
   }
   function ai() {
     const b = S.ball, h = S.hero, m = S.mate, [o1, o2] = S.opp;
@@ -235,7 +235,12 @@
     if (bossOn("pioggia")) { g.strokeStyle = "rgba(60,90,160,.5)"; g.lineWidth = 1; g.beginPath(); for (let i = 0; i < 50; i++) { const x = (i * 37 + S.t * 3) % W, y = (i * 53 + S.t * 7) % H; g.moveTo(x, y); g.lineTo(x - 3, y + 8); } g.stroke(); }
     if (bossOn("specchio")) { g.fillStyle = "rgba(160,200,255,.12)"; g.fillRect(0, 0, W / 2, H); g.strokeStyle = "rgba(60,90,160,.5)"; g.setLineDash([4, 4]); g.beginPath(); g.moveTo(120, 0); g.lineTo(120, H); g.stroke(); g.setLineDash([]); }
     // dito
-    if (S.ptr && S.run) { g.strokeStyle = "rgba(17,17,17,.35)"; g.lineWidth = 1.5; g.beginPath(); g.arc(S.ptr.x, S.ptr.y, 10, 0, 7); g.stroke(); }
+    if (S.ptr && S.run) { // la levetta virtuale: base dove hai appoggiato il dito, pomello che segue il dito
+      const jx = S.ptr.x - S.ptr.ax, jy = S.ptr.y - S.ptr.ay, jl = Math.hypot(jx, jy), k = jl > 24 ? 24 / jl : 1;
+      g.fillStyle = "rgba(17,17,17,.10)"; g.beginPath(); g.arc(S.ptr.ax, S.ptr.ay, 26, 0, 7); g.fill(); g.strokeStyle = "rgba(17,17,17,.45)"; g.lineWidth = 2; g.beginPath(); g.arc(S.ptr.ax, S.ptr.ay, 26, 0, 7); g.stroke();
+      g.fillStyle = "rgba(17,17,17,.55)"; g.beginPath(); g.arc(S.ptr.ax + jx * k, S.ptr.ay + jy * k, 11, 0, 7); g.fill();
+    }
+    if (S.run && S.hero) { const hx = S.hero.x, hy = S.hero.y - 20 + Math.sin(S.t / 6) * 1.5; g.fillStyle = "#ffd23f"; g.strokeStyle = "#111"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(hx - 6, hy - 7); g.lineTo(hx + 6, hy - 7); g.lineTo(hx, hy); g.closePath(); g.fill(); g.stroke(); }
     // onomatopee
     S.fx = S.fx.filter((f) => f.t > 0);
     S.fx.forEach((f) => { f.t--; f.y -= 0.4; g.save(); g.translate(f.x, f.y); g.rotate(-0.12); g.font = "900 12px Impact, sans-serif"; g.textAlign = "center"; g.lineWidth = 3; g.strokeStyle = "#fff"; g.strokeText(f.txt, 0, 0); g.fillStyle = f.col; g.fillText(f.txt, 0, 0); g.restore(); });
@@ -306,8 +311,8 @@
     document.body.appendChild(el); S.el = el;
     const cv = el.querySelector("canvas"); S.g = cv.getContext("2d"); S.g.scale(2, 2);
     const toLocal = (e) => { const r = cv.getBoundingClientRect(); return { x: ((e.clientX - r.left) / r.width) * W, y: ((e.clientY - r.top) / r.height) * H }; };
-    cv.addEventListener("pointerdown", (e) => { e.preventDefault(); S.ptr = toLocal(e); try { cv.setPointerCapture(e.pointerId); } catch (er) {} });
-    cv.addEventListener("pointermove", (e) => { if (S && S.ptr) S.ptr = toLocal(e); });
+    cv.addEventListener("pointerdown", (e) => { e.preventDefault(); const q = toLocal(e); S.ptr = { ax: q.x, ay: q.y, x: q.x, y: q.y }; try { cv.setPointerCapture(e.pointerId); } catch (er) {} });
+    cv.addEventListener("pointermove", (e) => { if (S && S.ptr) { const q = toLocal(e); S.ptr.x = q.x; S.ptr.y = q.y; } });
     ["pointerup", "pointercancel", "lostpointercapture"].forEach((ev) => cv.addEventListener(ev, () => { if (S) S.ptr = null; }));
     el.querySelector(".tira").addEventListener("pointerdown", (e) => { e.preventDefault(); act("tira"); });
     el.querySelector(".passa").addEventListener("pointerdown", (e) => { e.preventDefault(); act("passa"); });
@@ -318,7 +323,7 @@
     kickoff(0); hud();
     // spiegazione iniziale
     const ov = document.createElement("div"); ov.className = "ov";
-    ov.innerHTML = `<div class="card"><h3>${esc(o.title || "La Partita Scritta")}</h3><p>Tre <b>pagine</b> da 35 secondi. Prima di ogni pagina il Narratore scrive una parola contro di te, e tu ne scegli una dal tuo pennino.</p><p><b>Trascina il dito</b> sul campo: il Campione va verso il dito. <b>TIRA</b> calcia verso la porta in alto (senza palla: scatto). <b>PASSA</b> serve il compagno (senza palla: lo chiama sul pallone).</p><p>Ogni parola del Narratore ha una contraria (★). Vinci con più gol alla fine della terza pagina.</p></div>`;
+    ov.innerHTML = `<div class="card"><h3>${esc(o.title || "La Partita Scritta")}</h3><p>Tre <b>pagine</b> da 35 secondi. Prima di ogni pagina il Narratore scrive una parola contro di te, e tu ne scegli una dal tuo pennino.</p><p><b>Levetta</b>: appoggia il dito <b>dove vuoi</b> sul campo (anche in basso, lontano dal Campione) e trascinalo: il Campione va in quella direzione. Il Campione ha la freccia gialla sopra la testa. <b>TIRA</b> calcia verso la porta in alto (senza palla: scatto). <b>PASSA</b> serve il compagno (senza palla: lo chiama sul pallone).</p><p>Ogni parola del Narratore ha una contraria (★). Vinci con più gol alla fine della terza pagina.</p></div>`;
     const bt = document.createElement("button"); bt.type = "button"; bt.className = "tira"; bt.textContent = "Volta la prima pagina ▸"; bt.onclick = () => { ov.remove(); choosePage(); }; ov.appendChild(bt);
     el.appendChild(ov);
     loop();

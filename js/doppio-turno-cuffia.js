@@ -61,7 +61,7 @@
     const h = S.hero; if (h.down > 0) { h.down--; return; } let dx = 0, dy = 0;
     if (S.keys.ArrowLeft) dx -= 1; if (S.keys.ArrowRight) dx += 1; if (S.keys.ArrowUp) dy -= 1; if (S.keys.ArrowDown) dy += 1;
     const sp = speedOf(h) * ((h.dash | 0) > 0 ? 1.7 : 1); if (h.dash > 0) h.dash--;
-    if (dx || dy) { const d = Math.hypot(dx, dy); h.x += dx / d * sp; h.y += dy / d * sp; h.dir = Math.atan2(dy, dx); } else if (S.ptr) moveTo(h, S.ptr.x, S.ptr.y, sp);
+    if (dx || dy) { const d = Math.hypot(dx, dy); h.x += dx / d * sp; h.y += dy / d * sp; h.dir = Math.atan2(dy, dx); } else if (S.ptr) { const jx = S.ptr.x - S.ptr.ax, jy = S.ptr.y - S.ptr.ay, jl = Math.hypot(jx, jy); if (jl > 3) { const f = Math.min(1, jl / 16) * sp; h.x += jx / jl * f; h.y += jy / jl * f; h.dir = Math.atan2(jy, jx); } }
   }
   function ai() {
     const b = S.ball, h = S.hero, m = S.mate, [o1, o2] = S.opp;
@@ -153,7 +153,12 @@
     chibi(g, S.gk1, "#5a5a6a", "#d9b38c", "#2b1d14", "", b.own === S.gk1);
     g.fillStyle = "#fff"; g.strokeStyle = "#2b3a3a"; g.lineWidth = 1.5; g.beginPath(); g.arc(b.x, b.y, 3.5, 0, 7); g.fill(); g.stroke();
     if (S.slowOpp > 0) { S.slowOpp--; g.fillStyle = "rgba(42,157,143,.08)"; g.fillRect(0, 0, W, H); }
-    if (S.ptr && S.run) { g.strokeStyle = "rgba(43,58,58,.3)"; g.lineWidth = 1.5; g.beginPath(); g.arc(S.ptr.x, S.ptr.y, 10, 0, 7); g.stroke(); }
+    if (S.ptr && S.run) { // la levetta virtuale: base dove hai appoggiato il dito, pomello che segue il dito
+      const jx = S.ptr.x - S.ptr.ax, jy = S.ptr.y - S.ptr.ay, jl = Math.hypot(jx, jy), k = jl > 24 ? 24 / jl : 1;
+      g.fillStyle = "rgba(43,58,58,.10)"; g.beginPath(); g.arc(S.ptr.ax, S.ptr.ay, 26, 0, 7); g.fill(); g.strokeStyle = "rgba(43,58,58,.45)"; g.lineWidth = 2; g.beginPath(); g.arc(S.ptr.ax, S.ptr.ay, 26, 0, 7); g.stroke();
+      g.fillStyle = "rgba(43,58,58,.55)"; g.beginPath(); g.arc(S.ptr.ax + jx * k, S.ptr.ay + jy * k, 11, 0, 7); g.fill();
+    }
+    if (S.run && S.hero) { const hx = S.hero.x, hy = S.hero.y - 20 + Math.sin(S.t / 6) * 1.5; g.fillStyle = "#ffd23f"; g.strokeStyle = "#111"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(hx - 6, hy - 7); g.lineTo(hx + 6, hy - 7); g.lineTo(hx, hy); g.closePath(); g.fill(); g.stroke(); }
     S.fx = S.fx.filter((f) => f.t > 0); S.fx.forEach((f) => { f.t--; f.y -= 0.4; g.font = "bold 9px sans-serif"; g.textAlign = "center"; g.lineWidth = 3; g.strokeStyle = "#0e1a1a"; g.strokeText(f.txt, f.x, f.y); g.fillStyle = f.col; g.fillText(f.txt, f.x, f.y); g.textAlign = "left"; });
     if (S.flash && S.flash.t > 0) { S.flash.t--; g.font = "900 26px system-ui, sans-serif"; g.textAlign = "center"; g.lineWidth = 4; g.strokeStyle = "#0e1a1a"; g.strokeText(S.flash.txt, 120, 186); g.fillStyle = S.flash.c; g.fillText(S.flash.txt, 120, 186); g.textAlign = "left"; }
     // la Voce: riquadro con onda sonora e tempo dell'ordine
@@ -197,8 +202,8 @@
     document.body.appendChild(el); S.el = el; S.confEl = el.querySelector(".conf i"); S.cadiBtn = el.querySelector(".cadi");
     const cv = el.querySelector("canvas"); S.g = cv.getContext("2d"); S.g.scale(2, 2);
     const toLocal = (e) => { const r = cv.getBoundingClientRect(); return { x: ((e.clientX - r.left) / r.width) * W, y: ((e.clientY - r.top) / r.height) * H }; };
-    cv.addEventListener("pointerdown", (e) => { e.preventDefault(); S.ptr = toLocal(e); try { cv.setPointerCapture(e.pointerId); } catch (er) {} });
-    cv.addEventListener("pointermove", (e) => { if (S && S.ptr) S.ptr = toLocal(e); });
+    cv.addEventListener("pointerdown", (e) => { e.preventDefault(); const q = toLocal(e); S.ptr = { ax: q.x, ay: q.y, x: q.x, y: q.y }; try { cv.setPointerCapture(e.pointerId); } catch (er) {} });
+    cv.addEventListener("pointermove", (e) => { if (S && S.ptr) { const q = toLocal(e); S.ptr.x = q.x; S.ptr.y = q.y; } });
     ["pointerup", "pointercancel", "lostpointercapture"].forEach((ev) => cv.addEventListener(ev, () => { if (S) S.ptr = null; }));
     el.querySelector(".tira").addEventListener("pointerdown", (e) => { e.preventDefault(); act("tira"); });
     el.querySelector(".passa").addEventListener("pointerdown", (e) => { e.preventDefault(); act("passa"); });
@@ -209,7 +214,7 @@
     window.addEventListener("keydown", S.kd, true); window.addEventListener("keyup", S.ku, true);
     kickoff(0); hud();
     const ov = document.createElement("div"); ov.className = "ov";
-    ov.innerHTML = `<div class="card"><h3>${esc(o.title || "La Partita in Cuffia")}</h3><p>Due tempi da 40 secondi. <b>Trascina il dito</b> sul campo per muoverti, <b>TIRA</b> verso la porta in alto, <b>PASSA</b> al compagno.</p><p>Nella cuffia c'è una <b>Voce</b>. Ogni tanto ti dà un ordine, con una barra di tempo. Puoi obbedire o no: il calcio resta calcio, ma la Voce prende nota. E anche la storia.</p></div>`;
+    ov.innerHTML = `<div class="card"><h3>${esc(o.title || "La Partita in Cuffia")}</h3><p>Due tempi da 40 secondi. <b>Levetta</b>: appoggia il dito dove vuoi sul campo e trascinalo nella direzione in cui correre (il Campione ha la freccia gialla), <b>TIRA</b> verso la porta in alto, <b>PASSA</b> al compagno.</p><p>Nella cuffia c'è una <b>Voce</b>. Ogni tanto ti dà un ordine, con una barra di tempo. Puoi obbedire o no: il calcio resta calcio, ma la Voce prende nota. E anche la storia.</p></div>`;
     const bt = document.createElement("button"); bt.type = "button"; bt.className = "passa"; bt.textContent = "Indossa la cuffia ▸"; bt.onclick = () => { ov.remove(); S.run = true; snd.whistle(); }; ov.appendChild(bt); el.appendChild(ov);
     loop(); return true;
   }
