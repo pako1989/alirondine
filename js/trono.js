@@ -95,6 +95,12 @@
   // a chi appartiene uno stendardo: la zona dichiara spec.banners = { "x,y": "casata" } (o una casata per tutti)
   function bannerOf(k, zid, tx, ty) { const z = (k || K).zone(zid), b = z && z.spec && z.spec.banners; const id = b && (typeof b === "string" ? b : b[tx + "," + ty] || b.def); return CASATE[id] ? id : "tasso"; }
   function cred(k) { return Math.max(0, Math.min(10, +(k || K).F.get("tc_cred", 5) || 0)); }
+  // gli «stadi» delle partite a scelta: valgono per la Partita a turni e per Action Soccer HD (cartelloni, pubblico, prato, luce)
+  K.STADI = {
+    cortile: { ads: [["CASA TASSO", "#6a5a3a"], ["MAI SOTTO NESSUNO", "#3a2a1a"], ["STALLE DELLA ROCCA", "#8a6a3a"], ["CHI PERDE PULISCE", "#5a3a22"]], crowd: ["#6a5a3a", "#e8d8b0", "#8a8478", "#5a4a3a", "#c8a050"], ground: ["#a8865a", "#9c7c52"], line: "#f0e4c8cc", grid: "rgba(90,60,30,.08)", tint: "rgba(255,200,140,.08)", glow: "255,210,140", sky: ["#5a7a9a", "#c8d8e0"], wall: ["#8a8478", "#5e584c"], fx: { fr: 0.972 } }, // terra battuta: la palla si ferma prima
+    rovo: { ads: [["CASA ROVOARDENTE", "#a83a1a"], ["BRUCIA, E RICRESCE", "#2a0e06"], ["TERRE BRUCIATE", "#c84a1a"], ["NIENTE PATTI", "#5a1a0a"]], crowd: ["#a83a1a", "#ffb84a", "#3a1a0a", "#c84a1a", "#ffd27a"], ground: ["#4a3a32", "#54423a"], line: "#ffb84acc", grid: "rgba(255,120,40,.08)", tint: "rgba(255,110,40,.12)", glow: "255,140,60", sky: ["#2a0e06", "#8a3a1a"], wall: ["#3a2a22", "#1a100a"], fx: { spd: 1.1, wind: 0.025 } }, // braci: tutti più veloci, il vento caldo sposta la palla
+    neve: { ads: [["CASA GELANEVE", "#5a7a9a"], ["L'INVERNO RICORDA", "#2a3a4a"], ["TORNEO DEL TRONO", "#8a6a1a"], ["OLTRE LA BARRIERA", "#3a5a7a"]], crowd: ["#e8f0f8", "#5a7a9a", "#8a6a1a", "#c8d8e8", "#6a5a3a"], ground: ["#dfe9f2", "#d0dcea"], line: "#5a7a9acc", grid: "rgba(90,120,150,.08)", tint: "rgba(200,225,255,.12)", glow: "220,235,255", sky: ["#5a7a9a", "#c8d8e8"], wall: ["#c8d8e8", "#8a9aaa"], fx: { fr: 0.99, spd: 0.92 } }, // neve: palla che scivola, gambe pesanti
+  };
   K.CASATE = CASATE; K.cred = () => cred(K); K.setCred = (v) => K.F.set("tc_cred", Math.max(0, Math.min(10, Math.round(v))));
   // la partita del Concilio, con la credibilità che passa da una partita all'altra e i tradimenti che la saga ricorda
   K.concilio = (o, done) => K.ownMatch(window.__concilio.start, Object.assign({ cred: cred(K), usSigil: CASATE.tasso.s, usColor: CASATE.tasso.c }, o, { done: (r) => {

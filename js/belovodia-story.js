@@ -735,6 +735,8 @@
     },
     playMatch: (cfg) => {
       inMatch = true;
+      if (!cfg.venue || typeof cfg.venue !== "object") cfg.venue = { ads: [["BELOVODIA", "#78350f"], ["LE TRE MASCHERE", "#1e293b"], ["TAIGA DELLE BETULLE", "#e2e8f0"], ["AURORA BOREALE", "#0f766e"]], crowd: ["#e2e8f0", "#78350f", "#0f766e", "#cbd5e1", "#451a03"], ground: ["#d8e4ee", "#cad8e4"], line: "#1e293bcc", grid: "rgba(30,41,59,.06)", tint: "rgba(180,240,220,.10)", glow: "160,255,220", sky: ["#0a1a2a", "#1e4a5a"], fx: { fr: 0.99, spd: 0.94 } };
+      if (!cfg.weather) cfg.weather = "neve"; if (!cfg.cageMut) cfg.cageMut = "wet";
       const prevDone = cfg.done;
       cfg.onDone = (res) => {
         inMatch = false;

@@ -311,7 +311,7 @@
       X.playMatch({
         id: "lb_regina", mate: mateName(), us: "Gli Sfidanti", chap: "Il Libro · {n} contro la Regina di Picche", bg: "lb_torneo",
         intro: `Torneo delle Fiabe, finale unica. {n} e ${mateName()} contro le Carte di Picche. In porta, la Regina: zero gol subiti dal 1450.`,
-        venue: { ads: [["TORNEO DELLE FIABE", "#1d1a17"], ["PICCHE SEMPRE", "#a8231f"], ["CARTE DAL 1450", "#3a332c"], ["IL JOLLY VI SALUTA", "#a8231f"]], crowd: ["#1d1a17", "#a8231f", "#efe5cf", "#3a332c", "#cfc3a6"], ground: ["#e6dac0", "#d9ccaf"], line: "#1d1a17cc", grid: "rgba(29,26,23,.06)", tint: "rgba(239,229,207,.10)", glow: "239,229,207" },
+        venue: { ads: [["TORNEO DELLE FIABE", "#1d1a17"], ["PICCHE SEMPRE", "#a8231f"], ["CARTE DAL 1450", "#3a332c"], ["IL JOLLY VI SALUTA", "#a8231f"]], crowd: ["#1d1a17", "#a8231f", "#efe5cf", "#3a332c", "#cfc3a6"], ground: ["#e6dac0", "#d9ccaf"], line: "#1d1a17cc", grid: "rgba(29,26,23,.06)", tint: "rgba(239,229,207,.10)", glow: "239,229,207", fx: { spd: 1.04 } },
         oppNames: ["Regina di Picche", "Fante di Cuori", "Re di Picche", "Dieci di Picche", "Asso di Picche"],
         team: (t, s) => ({ name: "Le Carte di Picche", vs: "le Carte di Picche", color: "#1d1a17", defs: [["Fante di Cuori", t(s.drib * 0.95)], ["Re di Picche", t(s.drib * 0.85)], ["Dieci di Picche", t(s.drib * 0.8)]], atk: [["Asso di Picche", t(s.tiro * 0.9)], ["Dieci di Picche", t(s.tiro * 0.75)]], gk: ["Regina di Picche", t(s.tiro * 1.2)], power: t(s.tiro * 0.85), special: ["Parata Imbattuta", t(s.tiro * 1.1)] }),
         done: (r) => {

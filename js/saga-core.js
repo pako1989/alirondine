@@ -657,11 +657,14 @@
       const nm = o.oppTeam || "Avversari", k = (o.oppPower || 0.95) * ((DIFFS[mem().diff] || DIFFS.normale).team / 0.95);
       return (t, s) => { s = s || {}; const b = Number(s.tiro) || 12, d = Number(s.drib || s.contrasto) || b; return { name: nm, vs: o.oppVs || nm, color: o.oppColor || "#5a5a6a", atk: t(b * k), def: t(d * k), vel: t(b * k), names: Array.isArray(o.oppNames) ? o.oppNames.slice() : undefined }; };
     }
+    // lo «stadio» della saga (cfg.stadium): campo, cartelloni, pubblico, meteo e regole valgono per tutte le partite a scelta,
+    // in tutte le modalità: venue (Partita a turni e Action Soccer HD, con venue.fx per le regole), weather, azPitch (Calcio d'azione), cageField/cageMut (Gabbia)
+    const ST = obj(cfg.stadium);
     function playMatch(o) {
       castHero(); inMatch = true;
       api.matchPick({
-        alt: o.alt, oppNames: o.oppNames, squad: o.squad, azPitch: o.azPitch, cageMut: o.cageMut, cageTarget: o.cageTarget, homeKit: o.homeKit, cageField: o.cageField,
-        force: o.force !== false && !!o.alt && !/,/.test(o.alt), id: o.id, chap: o.chap ? T(o.chap) : TITLE, intro: o.intro ? T(o.intro) : "", mate: o.mate, mateGeneric: true, us: o.us, min: o.min || 45, team: o.team || defTeam(o), venue: o.venue, weather: o.weather, bg: o.bg, hero: undefined,
+        alt: o.alt, oppNames: o.oppNames, squad: o.squad, azPitch: o.azPitch || ST.azPitch, cageMut: o.cageMut || ST.cageMut, cageTarget: o.cageTarget, homeKit: o.homeKit, cageField: o.cageField != null ? o.cageField : ST.cageField,
+        force: o.force !== false && !!o.alt && !/,/.test(o.alt), id: o.id, chap: o.chap ? T(o.chap) : TITLE, intro: o.intro ? T(o.intro) : "", mate: o.mate, mateGeneric: true, us: o.us, min: o.min || 45, team: o.team || defTeam(o), venue: o.venue || ST.venue, weather: o.weather || ST.weather, bg: o.bg, hero: undefined,
         onDone: (r) => { inMatch = false; const m = mem(); if (r.win) m.wins++; else if (r.a < r.b) m.losses++; save(); refreshZone(); safe(() => o.done(r), null); },
       });
     }

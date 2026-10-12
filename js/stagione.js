@@ -16,6 +16,7 @@
   if (window.__stagione || !window.__sagaCore) return;
   const TS = 16, ORE = ["08:00", "12:00", "16:00", "19:00"], FASCE = ["mattina", "mezzogiorno", "pomeriggio", "sera"], TOD = ["alba", "giorno", "tramonto", "notte"];
   const E = window.__sagaCore.create({
+    stadium: { azPitch: "lago", cageField: 1, cageMut: "wet", venue: { ads: [["LAGO LUNGO", "#3a6a8a"], ["DOMENICA 14 MAGGIO", "#ff5a7a"], ["VIDEOTECA ADA", "#e8c84a"], ["PLAY ▶", "#1a1a1a"]], crowd: ["#3a6a8a", "#e8c84a", "#ff5a7a", "#6a9a5a", "#e8e8f0"], ground: ["#6a9a5a", "#649454"], line: "#f4f0e4cc", grid: "rgba(255,255,255,.05)", tint: "rgba(255,120,160,.08)", glow: "255,200,220", sky: ["#3a2a5a", "#8a6ab0"], fx: { spd: 1 } } }, // lo stadio della saga: campo, cartelloni, meteo e regole per tutte le partite a scelta
     id: "stagione", key: "ali-di-rondine.stagione", title: "Stagione Infinita", icon: "📼", bg: "sf_titolo", chapters: 3,
     menuSub: "La stessa domenica, ancora e ancora. Una finale su videocassetta, e i fantasmi delle partite già giocate",
     theme: { accent: "#e8c84a", ink: "#f0ece0", paper: "rgba(16,16,24,.9)", font: "'Courier New', monospace", chipBg: "#1a1a24ee", chipBorder: "#ff5a7a" },

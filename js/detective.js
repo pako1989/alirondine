@@ -14,6 +14,7 @@
   if (window.__detective || !window.__sagaCore) return;
   const TS = 16;
   const E = window.__sagaCore.create({
+    stadium: { azPitch: "notte", cageField: 3, cageMut: "wet", weather: "pioggia", venue: { ads: [["QUESTURA DI PORTAGRIGIA", "#2a2a3a"], ["LEGA DELLE CITTÀ", "#6a5a4a"], ["GAZZETTA DEL PORTO", "#d8b46a"], ["PIOVE, NATURALMENTE", "#3a4a5a"]], crowd: ["#2a2a3a", "#6a5a4a", "#d8b46a", "#8a8a9a", "#3a4a5a"], ground: ["#3a5a42", "#34523c"], line: "#e8e2d4cc", grid: "rgba(200,200,220,.05)", tint: "rgba(60,70,90,.22)", glow: "200,210,230", sky: ["#14161c", "#3a4250"], fx: { fr: 0.99 } } }, // lo stadio della saga: campo, cartelloni, meteo e regole per tutte le partite a scelta
     id: "detective", key: "ali-di-rondine.detective", title: "Detective di Campo", icon: "🕵️", bg: "dc_citta", chapters: 4,
     menuSub: "indagini, prove, la Moviola e partite truccate",
     theme: { accent: "#d8b46a", ink: "#efe6d2", paper: "rgba(24,20,18,.88)", font: "Georgia, serif", chipBg: "#2a2622ee", chipBorder: "#b89a5a" },

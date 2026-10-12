@@ -276,7 +276,7 @@
         id: "cr_torneo", alt: "hd,cage,az", force: false, mate: "Aira", squad: ["Bram", "Capitana Vela Ruggine"], us: "Rondine Grigia FC", homeKit: ["#3f5fbf", "#c9a227"], azPitch: "cielo", cageField: 1,
         chap: "Cristalli del Campo · Torneo dei Venti", bg: "cr_citta", intro: "Torneo dei Venti nell'arena della Città Sospesa: la Rondine Grigia FC di {n} contro gli Aquiloni di Gallo Libeccio. Il vento soffia da ovest.",
         oppNames: ["Nonno Maestrale", "Brezza", "Tramontana", "Scirocco", "Gallo Libeccio"],
-        venue: { ads: [["TORNEO DEI VENTI", "#3f6a9a"], ["AERIA", "#ffffff"], ["GLI AQUILONI", "#e05a3a"], ["VENTO DA OVEST", "#3f6a9a"]], crowd: ["#ffffff", "#bfe3ff", "#3f6a9a", "#e05a3a", "#ffffff"], ground: ["#68c463", "#5fb85a"], line: "#ffffffcc", grid: "rgba(255,255,255,.06)", tint: "rgba(200,230,255,.12)", glow: "220,240,255" },
+        venue: { ads: [["TORNEO DEI VENTI", "#3f6a9a"], ["AERIA", "#ffffff"], ["GLI AQUILONI", "#e05a3a"], ["VENTO DA OVEST", "#3f6a9a"]], crowd: ["#ffffff", "#bfe3ff", "#3f6a9a", "#e05a3a", "#ffffff"], ground: ["#68c463", "#5fb85a"], line: "#ffffffcc", grid: "rgba(255,255,255,.06)", tint: "rgba(200,230,255,.12)", glow: "220,240,255", fx: { wind: 0.025 } },
         team: (t, s) => ({ name: "Aquiloni", vs: "gli Aquiloni", color: "#ffffff", atk: t(s.tiro * 0.92), def: t(s.drib * 0.9), vel: t(s.tiro * 0.98), names: ["Nonno Maestrale", "Brezza", "Tramontana", "Scirocco", "Gallo Libeccio"] }),
         done: (r) => {
           if (r.win) F.set("c2_torneo_win", true);

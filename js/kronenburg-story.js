@@ -1302,7 +1302,7 @@
 
   // ------------------------------------------------------------------ Partita Tattica Narrativa
   let inMatch = false;
-  const VENUE_KRO = { ads: [["BASTIONE DI KRONENBURG", "#3f3f46"], ["GUARDIA D'ACCIAIO", "#52525b"], ["CORTE DEI GRIFONI", "#7c2d12"], ["PREGHIERA E FERRO", "#27272a"]], crowd: ["#27272a", "#52525b", "#78716c", "#44403c", "#a8a29e"], tint: "rgba(30,34,44,.3)", glow: "203,213,225" };
+  const VENUE_KRO = { ads: [["BASTIONE DI KRONENBURG", "#3f3f46"], ["GUARDIA D'ACCIAIO", "#52525b"], ["CORTE DEI GRIFONI", "#7c2d12"], ["PREGHIERA E FERRO", "#27272a"]], crowd: ["#27272a", "#52525b", "#78716c", "#44403c", "#a8a29e"], tint: "rgba(30,34,44,.3)", glow: "203,213,225", fx: { fr: 0.978, spd: 0.98 } };
   function playMatch(o) {
     castHero(); inMatch = true;
     api.matchPick({

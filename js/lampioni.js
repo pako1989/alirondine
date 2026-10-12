@@ -14,6 +14,7 @@
   if (window.__lampioni || !window.__sagaCore) return;
   const TS = 16;
   const E = window.__sagaCore.create({
+    stadium: { azPitch: "notte", cageField: 2, cageMut: "narrow", venue: { ads: [["SANLUME", "#3a3a6a"], ["FESTA DEI LAMPIONI", "#ffd27a"], ["BOTTEGA DI FIAMMETTA", "#5a3a2a"], ["OSTERIA DELLA FESTA", "#6a2a2a"]], crowd: ["#3a3a6a", "#ffd27a", "#6a7ab8", "#5a3a2a", "#e8d8b0"], ground: ["#2a4a3a", "#305040"], line: "#ffd27acc", grid: "rgba(255,210,122,.05)", tint: "rgba(20,20,70,.28)", glow: "255,200,110", sky: ["#05050f", "#1a1a3a"], fx: { spd: 0.97 } } }, // lo stadio della saga: campo, cartelloni, meteo e regole per tutte le partite a scelta
     id: "lampioni", key: "ali-di-rondine.lampioni", title: "La Notte dei Lampioni", icon: "🏮", bg: "nl_titolo", chapters: 3,
     menuSub: "Un paese al buio, dodici lampioni da accendere e una partita con le ombre dei giocatori di un tempo",
     theme: { accent: "#ffd27a", ink: "#f4ecd8", paper: "rgba(10,10,26,.9)", font: "Georgia, serif", chipBg: "#14142aee", chipBorder: "#ffd27a" },

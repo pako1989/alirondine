@@ -692,7 +692,7 @@
 
   // ------------------------------------------------------------------ Partita sul Campo con Eco Temporale
   let inMatch = false;
-  const VENUE_CHR = { ads: [["SANTUARIO DEL TEMPO", "#0284c7"], ["ANELLO DI QUARZO", "#f59e0b"], ["PARADOSSO ZERO", "#7c3aed"], ["IL REGNO DEI TRAMONTI", "#ea580c"]], crowd: ["#0284c7", "#f59e0b", "#7c3aed", "#1e293b", "#38bdf8"], tint: "rgba(2,132,199,.25)", glow: "56,189,248" };
+  const VENUE_CHR = { ads: [["SANTUARIO DEL TEMPO", "#0284c7"], ["ANELLO DI QUARZO", "#f59e0b"], ["PARADOSSO ZERO", "#7c3aed"], ["IL REGNO DEI TRAMONTI", "#ea580c"]], crowd: ["#0284c7", "#f59e0b", "#7c3aed", "#1e293b", "#38bdf8"], tint: "rgba(2,132,199,.25)", glow: "56,189,248", fx: { spd: 1.07 } };
 
   function playMatch(o) {
     castHero(); inMatch = true;

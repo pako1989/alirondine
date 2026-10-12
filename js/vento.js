@@ -17,6 +17,7 @@
   const WND = { ang: 0, str: 0.5, target: 0, t: 0, gust: 0, warn: 0, gdir: 0, pushed: 0, sheltered: false, seeds: [] };
 
   const E = window.__sagaCore.create({
+    stadium: { azPitch: "erba", cageField: 1, cageMut: "rubber", weather: "vento", venue: { ads: [["VALLE DEL VENTO GENTILE", "#5a9a7a"], ["TÈ DELLA NONNA", "#e8a0b0"], ["MULINI A VENTO", "#c8a040"], ["SOFFIO ROSA", "#e870a0"]], crowd: ["#e8a0b0", "#a0d8e8", "#c8e8a0", "#f0e0a0", "#ffffff"], ground: ["#8ac87a", "#82c072"], line: "#ffffffcc", grid: "rgba(255,255,255,.05)", tint: "rgba(255,230,240,.10)", glow: "255,220,235", sky: ["#a0c8f0", "#f0e0f0"], fx: { wind: 0.02 } } }, // lo stadio della saga: campo, cartelloni, meteo e regole per tutte le partite a scelta
     id: "vento", key: "ali-di-rondine.vento", title: "La Valle del Vento Gentile", icon: "🍃", bg: "ve_valle", chapters: 3,
     menuSub: "mulini, spiriti, folate e la partita Col Vento",
     theme: { accent: "#8cc76a", ink: "#fbf6e6", paper: "rgba(28,44,38,.85)", font: "Georgia, serif", chipBg: "#2c4a3cee", chipBorder: "#cfe6b0" },

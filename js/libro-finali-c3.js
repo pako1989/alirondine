@@ -202,7 +202,7 @@
         id: "lb_balloon", alt: "az,hd,cage", force: false, mate: "Didascalia", squad: ["Virgola", "Signor Riquadro", "Strillo"], us: "I Cittadini Muti", homeKit: ["#ffd95a", "#111111"], azPitch: "vignetta", cageField: 3,
         chap: "Il Libro · {n} contro la Banda dei Balloon", bg: "lb_vignette",
         intro: "Nella Piazza dei Riquadri, {n} e Didascalia contro la Banda dei Balloon. In palio: tutte le parole rubate della città.",
-        venue: { ads: [["CITTÀ DELLE VIGNETTE", "#e63946"], ["BOOM! BIBITE", "#3fa7ff"], ["STRISCE QUOTIDIANE", "#111111"], ["SBAM SPORT", "#b8902a"]], crowd: ["#ffd95a", "#3fa7ff", "#e63946", "#7ed957", "#fffbea"], ground: ["#55c26b", "#62d077"], line: "#111111cc", tint: "rgba(255,217,90,.08)", glow: "255,240,180" },
+        venue: { ads: [["CITTÀ DELLE VIGNETTE", "#e63946"], ["BOOM! BIBITE", "#3fa7ff"], ["STRISCE QUOTIDIANE", "#111111"], ["SBAM SPORT", "#b8902a"]], crowd: ["#ffd95a", "#3fa7ff", "#e63946", "#7ed957", "#fffbea"], ground: ["#55c26b", "#62d077"], line: "#111111cc", tint: "rgba(255,217,90,.08)", glow: "255,240,180", fx: { spd: 1.05 } },
         oppNames: ["Capitan Balloon", "Bolla", "Strillo", "Sbam", "Fumetto"],
         team: (t, s) => ({ name: "La Banda dei Balloon", vs: "la Banda dei Balloon", color: "#3fa7ff", atk: t(s.tiro * 0.92), def: t(s.drib * 0.9), vel: t(s.tiro * 0.9), gk: ["Bolla", t(s.tiro * 0.95)] }),
         done: (r) => {

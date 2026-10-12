@@ -1073,7 +1073,7 @@
 
   // ------------------------------------------------------------------ Partita Narrativa Alchemica
   let inMatch = false;
-  const VENUE_ALC = { ads: [["I FALCHI D'ACCIAIO", "#7f1d1d"], ["SCAMBIO EQUIVALENTE", "#4c1d95"], ["CERCHIO DI TRASMUTAZIONE", "#0f766e"], ["LABORATORIO CENTRALE", "#334155"]], crowd: ["#7f1d1d", "#334155", "#e8e0d0", "#a16207", "#f0c9a0"], tint: "rgba(120,60,160,.12)", glow: "190,150,255", glow2: "255,120,100" };
+  const VENUE_ALC = { ads: [["I FALCHI D'ACCIAIO", "#7f1d1d"], ["SCAMBIO EQUIVALENTE", "#4c1d95"], ["CERCHIO DI TRASMUTAZIONE", "#0f766e"], ["LABORATORIO CENTRALE", "#334155"]], crowd: ["#7f1d1d", "#334155", "#e8e0d0", "#a16207", "#f0c9a0"], tint: "rgba(120,60,160,.12)", glow: "190,150,255", glow2: "255,120,100", fx: { spd: 1.04 } };
   function playMatch(o) {
     castHero(); inMatch = true;
     api.matchPick({

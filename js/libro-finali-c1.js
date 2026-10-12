@@ -287,7 +287,7 @@
       X.playMatch({
         id: "lb_porcellini", alt: "az", azPitch: "carta", mate: "Lupo", squad: ["Virgola"], us: "La Squadra del Lupo", homeKit: ["#4a5a7a", "#f4ecd8"],
         chap: "Il Libro · Lupo e {n} contro i Tre Porcellini", bg: "lb_campo3p",
-        venue: { ads: [["CASA DI MATTONI", "#c0644a"], ["TÈ DEL SIG. LUPO", "#4a5a7a"], ["PAGLIA & FIGLI", "#b8902a"], ["LEGNAMI LEGNO", "#8a5a3a"]], crowd: ["#f2a5b8", "#e8c46a", "#b98a5a", "#c0644a", "#fbf7ec"], ground: ["#93c47d", "#a2cf8b"], tint: "rgba(244,236,216,.14)", glow: "255,230,180" },
+        venue: { ads: [["CASA DI MATTONI", "#c0644a"], ["TÈ DEL SIG. LUPO", "#4a5a7a"], ["PAGLIA & FIGLI", "#b8902a"], ["LEGNAMI LEGNO", "#8a5a3a"]], crowd: ["#f2a5b8", "#e8c46a", "#b98a5a", "#c0644a", "#fbf7ec"], ground: ["#93c47d", "#a2cf8b"], tint: "rgba(244,236,216,.14)", glow: "255,230,180", fx: { fr: 0.978 } },
         intro: "Sul campo di carta disegnato a righello, il Lupo, {n} e Virgola contro i Tre Porcellini. Chi vince decide il finale della fiaba.",
         oppNames: ["Mattone", "Paglia", "Legno", "Ricciolo", "Grugno"],
         team: (t, s) => ({ name: "I Tre Porcellini", vs: "i Tre Porcellini", color: "#f2a5b8", atk: t(s.tiro * 0.85), def: t(s.drib * 0.85), vel: t(s.tiro * 0.8), gk: ["Mattone", t(s.tiro * 0.95)] }),

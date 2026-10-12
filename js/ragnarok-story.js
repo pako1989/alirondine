@@ -732,6 +732,7 @@
       if (typeof cfg.intro === "string") cfg.intro = T(cfg.intro);
       if (!cfg.venue && VENUES[cfg.id]) cfg.venue = VENUES[cfg.id];
       if (!cfg.weather && WEATHER[cfg.id]) cfg.weather = WEATHER[cfg.id];
+      if (cfg.venue && typeof cfg.venue === "object" && !cfg.venue.fx) cfg.venue = Object.assign({}, cfg.venue, { fx: cfg.azPitch === "cenere" ? { spd: 1.08, wind: 0.02 } : { fr: 0.99, spd: 0.94 } }); // ghiaccio: palla che scivola · lava: tutti più veloci, aria calda
       if (!cfg.homeKit) cfg.homeKit = ["#7c2d12", "#e2e8f0"];
       const prevDone = cfg.done;
       cfg.onDone = (res) => {

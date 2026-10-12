@@ -813,8 +813,7 @@
     grid: "rgba(254,240,138,.10)",
     tint: "rgba(30,20,10,.25)",
     glow: "234,179,8",
-    glow2: "220,38,38"
-  };
+    glow2: "220,38,38", fx: { fr: 0.975, spd: 0.97 } };
 
   function playFeudalMatch(cfg) {
     if (!api || !api.match) return;
@@ -881,6 +880,7 @@
       venue: cfg.venue || VENUE_FEUDI,
       weather: cfg.weather || "sereno",
       alt: "hd,cage,az",
+      azPitch: "lizza", cageMut: "heavy",
       onDone: (res) => {
         const win = !!res.win;
         if (win) {

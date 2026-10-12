@@ -824,6 +824,8 @@
       alt: "hd,cage", // Disponibile in tutte e tre le modalità (A Turni, Action Soccer HD, Gabbia del Molo)!
       cageTarget: 5,
       cageField: "trabucco",
+      azPitch: "dojo", cageMut: "turbo", weather: cfg.weather || (/ponte|pioggia/i.test(cfg.chap || "") ? "pioggia" : undefined),
+      venue: { ads: [["SHOGUNATO DELL'ECLISSE", "#991b1b"], ["VIA DELLA LAMA", "#1a1410"], ["DOJO DEI RONIN", "#c8a040"], ["FIORI DI CILIEGIO", "#e8a0b0"]], crowd: ["#991b1b", "#fde047", "#1a1410", "#e8dcc0", "#e8a0b0"], ground: ["#c8b878", "#bcae70"], line: "#1a1410cc", grid: "rgba(26,20,16,.08)", tint: "rgba(255,200,180,.08)", glow: "255,170,150", sky: ["#2a0e1a", "#c86a5a"], wall: ["#3a2418", "#1a1008"], fx: { spd: 1.06, fr: 0.98 } },
       oppNames: cfg.oppNames || ["Shogun Kurogane", "Guardia Mascherata 1", "Guardia Mascherata 2", "Arciere d'Ombra", "Colosso d'Ossidiana"],
       team: cfg.team || ((t, st) => ({ name: "Samurai dell'Eclisse", color: "#18181b", atk: 24, def: 25, vel: 23 })),
       onDone: (res) => {

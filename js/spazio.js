@@ -15,6 +15,7 @@
   const TS = 16;
   let paintV = null; // la vetrata stellata, condivisa da V (si guarda) e U (solo decorazione)
   const E = window.__sagaCore.create({
+    stadium: { azPitch: "orbita", cageField: 2, cageMut: "rubber", venue: { ads: [["STAZIONE ORBITALE 7", "#2a6ac8"], ["PIZZA DI ANDROMEDA", "#e85a3a"], ["GRAVITÀ RIDOTTA", "#7af0c8"], ["BLOP TI SALUTA", "#a85ad8"]], crowd: ["#7af0c8", "#2a6ac8", "#e85a3a", "#a85ad8", "#e8e8f0"], ground: ["#2e4a6a", "#34507a"], line: "#7af0c8cc", grid: "rgba(122,240,200,.08)", tint: "rgba(30,40,90,.25)", glow: "122,240,200", sky: ["#02030a", "#0a1430"], fx: { fr: 0.993, spd: 1.02 } } }, // lo stadio della saga: campo, cartelloni, meteo e regole per tutte le partite a scelta
     id: "spazio", key: "ali-di-rondine.spazio", title: "Calcio Spaziale: Stazione Orbitale 7", icon: "🚀", bg: "so_stazione", chapters: 3,
     menuSub: "La gravità cambia in ogni modulo e il pallone non cade mai",
     theme: { accent: "#7af0c8", ink: "#e8f4ff", paper: "rgba(10,16,34,.88)", font: "'Trebuchet MS', sans-serif", chipBg: "#0a1830ee", chipBorder: "#7af0c8" },

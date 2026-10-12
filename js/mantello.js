@@ -23,6 +23,7 @@
   };
   const FXS = { t: -999, txt: "", cap: null, capT: -999 };
   const E = window.__sagaCore.create({
+    stadium: { azPitch: "vignetta", cageField: 0, cageMut: "rubber", venue: { ads: [["KABOOM!", "#e83a3a"], ["SARTORIA NONNA TILDE", "#8a1a2a"], ["METROPOLENTA", "#2a4a8a"], ["POW! SBAM!", "#ffd23f"]], crowd: ["#8a1a2a", "#ffd23f", "#2a4a8a", "#e83a3a", "#ffffff"], ground: ["#55c26b", "#62d077"], line: "#111111cc", grid: "rgba(0,0,0,.08)", tint: "rgba(255,240,200,.06)", glow: "255,230,120", sky: ["#2a4a8a", "#8ab8f0"], fx: { spd: 1.06 } } }, // lo stadio della saga: campo, cartelloni, meteo e regole per tutte le partite a scelta
     id: "mantello", key: "ali-di-rondine.mantello", title: "Il Mantello Granata", icon: "🦸", bg: "mg_titolo", chapters: 4,
     menuSub: "Un mantello, tre forme, cattivi ridicoli e partite a bottoni con i superpoteri",
     theme: { accent: "#d82a3a", ink: "#fff8e8", paper: "rgba(20,16,40,.9)", font: "'Trebuchet MS', 'Comic Sans MS', sans-serif", chipBg: "#2a1030ee", chipBorder: "#ffd23f" },

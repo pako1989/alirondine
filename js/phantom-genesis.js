@@ -1220,8 +1220,7 @@
   const VENUE_PG = {
     ads: [["SHIN-NERV GEOFRONT", "#0f172a"], ["MAKO REACTOR 0", "#022c22"], ["PHANTOM CORPS", "#450a0a"], ["SYNCHRO-BALL LEAGUE", "#1e1b4b"]],
     crowd: ["#020617", "#0f172a", "#1e293b", "#064e3b", "#450a0a"],
-    tint: "rgba(16, 185, 129, 0.15)", glow: "52, 211, 153"
-  };
+    tint: "rgba(16, 185, 129, 0.15)", glow: "52, 211, 153", fx: { fr: 0.99, spd: 1.05 } };
 
   // Battaglia Tattica Cinematografica "Shin-Persona & AT-Field"
   function startTacticalShinPersonaMatch(o) {
@@ -1369,7 +1368,7 @@
           sub: "Muovi tu il Campione con analogico/WASD sul campo industriale in tempo reale",
           fn: () => {
             api.matchPick({
-              alt: "hd,cage",
+              alt: "hd,cage", azPitch: "neon", cageMut: "rubber",
               squad: ["Portiere Mecha", "Kael Buster", "Maya Akagi"],
               oppNames: o.oppNames || ["Apostolo Sachiel", "Androide 01", "Androide 02", "Drone Alfa", "Guardiano Core"],
               id: o.id, chap: o.chap, intro: T(o.intro), mate: "Kael", mateGeneric: true,

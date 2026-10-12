@@ -25,6 +25,7 @@
     return `<b>🏆 Il Tabellone delle Cento Scuole</b><br><span style="color:var(--dim)">Quarti di finale</span>${b.quarti.map((m) => row(...m)).join("")}<br><span style="color:var(--dim)">Semifinali</span>${b.semi.map((m) => row(...m)).join("")}<br><span style="color:var(--dim)">Finale</span>${row(...b.finale)}${b.finale[2] ? `<br><b style="color:#ffd23f">Campioni: ${b.finale[2]}</b>` : ""}`;
   }
   const E = window.__sagaCore.create({
+    stadium: { azPitch: "campo", cageField: 0, cageMut: "narrow", venue: { ads: [["TORNEO DELLE CENTO SCUOLE", "#c83a3a"], ["CLUB DI CALCIO", "#2a4a8a"], ["MENSA DELLA SCUOLA", "#e8c84a"], ["SPIRITO DI SQUADRA", "#3a8a5a"]], crowd: ["#c83a3a", "#2a4a8a", "#e8c84a", "#ffffff", "#3a8a5a"], ground: ["#3fa05a", "#38984f"], line: "#ffffffcc", grid: "rgba(255,255,255,.05)", tint: "rgba(255,210,180,.06)", glow: "255,220,190", sky: ["#5a8ad8", "#c8e0f8"], fx: { spd: 1.03 } } }, // lo stadio della saga: campo, cartelloni, meteo e regole per tutte le partite a scelta
     id: "torneo", key: "ali-di-rondine.torneo", title: "Il Torneo delle Cento Scuole", icon: "🏆", bg: "ts_porto", chapters: 3,
     menuSub: "Il panettiere, la postina, i gemelli bagnini e una partita a fumetti",
     theme: { accent: "#e83a3a", ink: "#fbf6ea", paper: "rgba(24,20,18,.88)", font: "'Trebuchet MS', sans-serif", chipBg: "#2a1a18ee", chipBorder: "#e83a3a" },

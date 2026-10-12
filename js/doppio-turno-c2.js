@@ -222,7 +222,7 @@
         id: "dt_torneo", alt: "az,hd,cage", force: false, mate: "Bruno Tessari", squad: ["Ofelia Sanz", "Guardiano Pio"], us: "Reparto Morale", homeKit: ["#2a9d8f", "#eef2f1"], azPitch: "bianco", cageField: 0,
         chap: "Doppio Turno · Torneo dei Reparti", bg: "dt_campo", intro: "Torneo dei Reparti al Campo Bianco: il Reparto Morale di {n} e Bruno contro le Risorse Umane.",
         oppNames: ["Selezione", "Colloquio", "Benefit", "Welfare", "Capo del Personale"],
-        venue: { ads: [["VALTORRE FC", "#2a9d8f"], ["SORRIDI", "#2b3a3a"], ["PROCEDURA DUALE", "#2a9d8f"], ["IL DENTRO È PIÙ BELLO", "#5a6560"]], crowd: ["#9aa5b1", "#dfe6e4", "#2a9d8f", "#cfd6c8", "#9aa5b1"], ground: ["#d9efe6", "#cfe8de"], line: "#2a9d8fcc", grid: "rgba(42,157,143,.08)", tint: "rgba(220,255,248,.10)", glow: "200,255,240" },
+        venue: { ads: [["VALTORRE FC", "#2a9d8f"], ["SORRIDI", "#2b3a3a"], ["PROCEDURA DUALE", "#2a9d8f"], ["IL DENTRO È PIÙ BELLO", "#5a6560"]], crowd: ["#9aa5b1", "#dfe6e4", "#2a9d8f", "#cfd6c8", "#9aa5b1"], ground: ["#d9efe6", "#cfe8de"], line: "#2a9d8fcc", grid: "rgba(42,157,143,.08)", tint: "rgba(220,255,248,.10)", glow: "200,255,240", fx: { spd: 0.97 } },
         team: (t, s) => ({ name: "Risorse Umane", vs: "le Risorse Umane", color: "#e07a3a", atk: t(s.tiro * 0.85), def: t(s.drib * 0.85), vel: t(s.tiro * 0.85) }),
         done: (r) => { if (r.win) reward("dt_c2_torneo", { coins: 20 }); say([["voce", `Torneo dei Reparti: ${r.a} a ${r.b}.`], ["dt_bruno", r.win ? "Abbiamo vinto! Sorrisi di oggi: 1.300! Record!" : "Abbiamo perso. Ma sorridendo. Conta lo stesso, vero? Vero?"]]); },
       });

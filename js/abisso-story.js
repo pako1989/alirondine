@@ -788,14 +788,13 @@
       ground: ["#064e3b", "#047857"],
       patches: "rgba(56,189,248,.35)",
       tint: "rgba(2,132,199,.15)",
-      glow: "56,189,248"
-    };
+      glow: "56,189,248", fx: { fr: 0.99, spd: 0.93 } };
 
     api.matchPick({
       alt: o.alt,
       oppNames: o.oppNames || ["Barnaby", "Jonah", "Corvo", "Silas", "Marea"],
       squad: o.squad,
-      azPitch: "neve",
+      azPitch: "fondale",
       homeKit: "#0284c7",
       id: o.id || "dunwich_cup",
       chap: o.chap || "Abisso di Dunwich · Coppa delle Onde Nere",

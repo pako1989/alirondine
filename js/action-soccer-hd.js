@@ -470,11 +470,16 @@
     g.translate(MX, MT);
     const r = seeded(77);
     // ---- mare in alto
+    const T = THEME, glow = T && /^\d+,\d+,\d+$/.test(T.glow || "") ? T.glow.split(",").map(Number) : null, sh = (k) => (glow ? `rgb(${glow.map((v) => Math.round(v * k)).join(",")})` : null);
     let gr = g.createLinearGradient(0, -MT, 0, -40);
-    gr.addColorStop(0, "#0a2c47"); gr.addColorStop(1, "#1b6d8c");
+    gr.addColorStop(0, T ? (T.sky && T.sky[0]) || sh(0.16) || "#1a1a2a" : "#0a2c47"); gr.addColorStop(1, T ? (T.sky && T.sky[1]) || sh(0.42) || "#3a3a4a" : "#1b6d8c");
     g.fillStyle = gr; g.fillRect(-MX, -MT, bw, MT - 30);
+    if (T) { // niente mare del Molo: il cielo della saga con qualche luce, e le sagome del suo mondo all'orizzonte
+      for (let i = 0; i < 60; i++) { g.fillStyle = `rgba(${glow ? glow.join(",") : "255,240,200"},${0.15 + r() * 0.35})`; g.fillRect(-MX + r() * bw, -MT + 6 + r() * (MT - 90), 2, 2); }
+      g.fillStyle = sh(0.1) || "#121218"; for (let x = -MX; x < bw - MX; x += 46 + r() * 30) { const h = 30 + r() * 70; g.fillRect(x, -48 - h, 26 + r() * 30, h); }
+    }
     g.strokeStyle = "rgba(255,255,255,.14)"; g.lineWidth = 2;
-    for (let i = 0; i < 70; i++) {
+    for (let i = 0; i < (T ? 0 : 70); i++) {
       const x = -MX + r() * bw, y = -MT + 10 + r() * (MT - 70), l = 18 + r() * 40;
       g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + l / 2, y - 4, x + l, y); g.stroke();
     }
@@ -488,22 +493,22 @@
       g.fillStyle = sail; g.beginPath(); g.moveTo(3, -56); g.lineTo(30, -6); g.lineTo(3, -6); g.closePath(); g.fill();
       g.restore();
     };
-    boat(150, -120, 1, "#b91c1c", "#fef3c7"); boat(520, -135, 0.8, "#1d4ed8", "#fde68a");
-    boat(900, -118, 1.1, "#15803d", "#e0f2fe"); boat(1210, -140, 0.75, "#a16207", "#fecaca");
+    if (!T) { boat(150, -120, 1, "#b91c1c", "#fef3c7"); boat(520, -135, 0.8, "#1d4ed8", "#fde68a");
+    boat(900, -118, 1.1, "#15803d", "#e0f2fe"); boat(1210, -140, 0.75, "#a16207", "#fecaca"); }
     // banchina in pietra
     gr = g.createLinearGradient(0, -48, 0, 2);
-    gr.addColorStop(0, "#8b7355"); gr.addColorStop(1, "#5a4630");
+    gr.addColorStop(0, T ? (T.wall && T.wall[0]) || sh(0.5) || "#6a6458" : "#8b7355"); gr.addColorStop(1, T ? (T.wall && T.wall[1]) || sh(0.28) || "#3a3630" : "#5a4630");
     g.fillStyle = gr; g.fillRect(-MX, -48, bw, 52);
     g.strokeStyle = "rgba(0,0,0,.25)"; g.lineWidth = 1;
     for (let x = -MX; x < bw; x += 38) { g.beginPath(); g.moveTo(x, -48); g.lineTo(x, 4); g.stroke(); }
     for (let x = 0; x < W; x += 170) { g.fillStyle = "#2b2118"; g.fillRect(x + 40, -50, 12, 14); g.fillStyle = "#facc15"; g.fillRect(x + 40, -50, 12, 4); }
     // lucine
-    for (let x = -MX; x < bw - MX; x += 28) { g.fillStyle = (x / 28) % 2 ? "#fde68a" : "#fb7185"; g.beginPath(); g.arc(x, -26 + Math.sin(x * 0.05) * 4, 3, 0, 7); g.fill(); }
+    for (let x = -MX; x < bw - MX; x += 28) { g.fillStyle = T ? `rgb(${glow ? glow.join(",") : "255,230,160"})` : (x / 28) % 2 ? "#fde68a" : "#fb7185"; g.beginPath(); g.arc(x, -26 + Math.sin(x * 0.05) * 4, 3, 0, 7); g.fill(); }
     // ---- tribunetta in basso
     gr = g.createLinearGradient(0, H - 6, 0, H + MB);
     gr.addColorStop(0, "#1b2433"); gr.addColorStop(1, "#0b1019");
     g.fillStyle = gr; g.fillRect(-MX, H - 6, bw, MB + 10);
-    const cols = ["#f87171", "#60a5fa", "#fde047", "#a3e635", "#e879f9", "#fb923c", "#f1f5f9", "#38bdf8"];
+    const cols = T && Array.isArray(T.crowd) && T.crowd.length ? T.crowd : ["#f87171", "#60a5fa", "#fde047", "#a3e635", "#e879f9", "#fb923c", "#f1f5f9", "#38bdf8"];
     for (let row = 0; row < 7; row++) {
       const y0 = H + 34 + row * 17;
       g.fillStyle = row % 2 ? "#212c40" : "#273349"; g.fillRect(-MX, y0 - 4, bw, 15);
@@ -517,9 +522,10 @@
     g.fillStyle = "#10261c"; g.fillRect(-MX, -30, MX + 4, H + 60); g.fillRect(W - 4, -30, MX + 4, H + 60);
     for (let i = 0; i < 160; i++) { g.fillStyle = r() > 0.5 ? "#17402b" : "#0d2217"; g.beginPath(); g.arc(-MX + r() * (MX), -20 + r() * (H + 40), 5 + r() * 8, 0, 7); g.fill(); g.beginPath(); g.arc(W + r() * MX, -20 + r() * (H + 40), 5 + r() * 8, 0, 7); g.fill(); }
     // ---- erba
-    g.fillStyle = "#1f7a38"; g.fillRect(0, 6, W, H - 12);
+    const GR = T && Array.isArray(T.ground) ? T.ground : null;
+    g.fillStyle = GR ? GR[0] : "#1f7a38"; g.fillRect(0, 6, W, H - 12);
     for (let i = 0, x = 0; x < W; x += 75, i++) {
-      g.fillStyle = i % 2 ? "rgba(255,255,255,.055)" : "rgba(0,0,0,.07)"; g.fillRect(x, 6, 75, H - 12);
+      g.fillStyle = GR ? (i % 2 ? GR[1] || GR[0] : GR[0]) : i % 2 ? "rgba(255,255,255,.055)" : "rgba(0,0,0,.07)"; g.fillRect(x, 6, 75, H - 12);
     }
     for (let i = 0; i < 4200; i++) {
       g.fillStyle = r() > 0.5 ? "rgba(255,255,255,.07)" : "rgba(0,30,0,.12)";
@@ -532,20 +538,21 @@
       g.fillStyle = rg; g.fillRect(x - 92, y - 92, 184, 184);
     });
     // cartelloni
-    const ads = ["TRATTORIA DA ZIA PINA", "FRITTO MISTO DEL MOLO", "PESCHERIA GEMMA", "OFFICINA SCIROCCO", "CALZATURE TRE SALTI", "FARO CAFFÈ", "PANIFICIO ALBA"];
-    const adCols = ["#b91c1c", "#1d4ed8", "#a16207", "#0f766e", "#7e22ce", "#be123c", "#15803d"];
+    const TA = T && Array.isArray(T.ads) && T.ads.length ? T.ads : null;
+    const ads = TA ? TA.map((a) => String(a[0])) : ["TRATTORIA DA ZIA PINA", "FRITTO MISTO DEL MOLO", "PESCHERIA GEMMA", "OFFICINA SCIROCCO", "CALZATURE TRE SALTI", "FARO CAFFÈ", "PANIFICIO ALBA"];
+    const adCols = TA ? TA.map((a) => a[1] || "#333") : ["#b91c1c", "#1d4ed8", "#a16207", "#0f766e", "#7e22ce", "#be123c", "#15803d"];
     g.textAlign = "center"; g.textBaseline = "middle";
     for (let i = 0; i < 7; i++) {
       const x = 12 + i * 168, w = 160;
       [[8, 24], [H - 32, 24]].forEach(([y, h]) => {
-        g.fillStyle = adCols[i]; g.fillRect(x, y, w, h);
+        g.fillStyle = adCols[i % adCols.length]; g.fillRect(x, y, w, h);
         g.fillStyle = "rgba(255,255,255,.18)"; g.fillRect(x, y, w, 4);
         g.strokeStyle = "#0b1019"; g.lineWidth = 2; g.strokeRect(x, y, w, h);
-        g.fillStyle = "#fff"; g.font = "bold 12px system-ui"; g.fillText(ads[(i + (y > 100 ? 3 : 0)) % ads.length], x + w / 2, y + h / 2 + 1);
+        g.fillStyle = TA && /^#(f|e)/i.test(adCols[i % adCols.length]) ? "#1a1a1a" : "#fff"; g.font = "bold 12px system-ui"; g.fillText(ads[(i + (y > 100 ? 3 : 0)) % ads.length], x + w / 2, y + h / 2 + 1);
       });
     }
     // ---- linee
-    g.strokeStyle = "rgba(255,255,255,.9)"; g.lineWidth = 3; g.lineJoin = "round";
+    g.strokeStyle = T && T.line ? T.line : "rgba(255,255,255,.9)"; g.lineWidth = 3; g.lineJoin = "round";
     g.strokeRect(XL, YT, LEN, YB - YT);
     g.beginPath(); g.moveTo(W / 2, YT); g.lineTo(W / 2, YB); g.stroke();
     g.beginPath(); g.arc(W / 2, H / 2, 92, 0, 7); g.stroke();
@@ -568,8 +575,9 @@
       g.beginPath(); g.moveTo(x0, GT); g.lineTo(x1, GT); g.lineTo(x1, GB); g.lineTo(x0, GB); g.stroke();
       g.fillStyle = "#fff"; g.beginPath(); g.arc(x0, GT, 5, 0, 7); g.arc(x0, GB, 5, 0, 7); g.fill();
     });
+    if (T && T.tint) { g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = "source-atop"; g.fillStyle = T.tint; g.fillRect(0, 0, bw, bh); g.restore(); } // la luce della saga su tutto lo stadio
     // ---- luce del campo (personalizzazione)
-    const pit = X.look.pitch;
+    const pit = T ? "" : X.look.pitch;
     if (pit === "tramonto" || pit === "notte") {
       g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
       g.globalCompositeOperation = "source-atop";
@@ -656,6 +664,7 @@
     M.ctl = M.tm[0][3];
     M.tm[1].forEach((p) => { p.spd *= M.D.spd * opp.spd; p.tkMul = opp.tkl; if (o.opass === 2 && !p.isGK) p.frozen = true; if (o.opass === 1) p.spd *= 0.5; });
     M.tm[0].forEach((p) => { p.spd *= M.D.usr; });
+    if (THEME && THEME.fx && +THEME.fx.spd) M.pl.forEach((p) => { p.spd *= +THEME.fx.spd; }); // le regole del campo della saga: tutti più lenti (neve) o più veloci (braci)
     if (o.mode === "train") M.grinta = 100;
     setupKickoff(0);
     return M;
@@ -1175,7 +1184,8 @@
       }
       if (ang) { const c = Math.cos(ang), s = Math.sin(ang); const nx = b.vx * c - b.vy * s, ny = b.vx * s + b.vy * c; b.vx = nx; b.vy = ny; }
     }
-    const f = ground ? FR : 0.995;
+    const TF = THEME && THEME.fx, f = ground ? (TF && +TF.fr) || FR : 0.995;
+    if (TF && TF.wind && !b.owner && Math.hypot(b.vx, b.vy) > 0.6) b.vy += +TF.wind; // vento di traverso sul campo della saga
     b.vx *= f; b.vy *= f;
     b.x += b.vx; b.y += b.vy;
     if (b.z > 0 || b.vz > 0) {
@@ -2461,7 +2471,7 @@
   //   sta (resistenza/grinta) consumo del fiato nello scatto x(1 -/+ 18%), recupero +/- 14%  (vale per chi stai muovendo)
   // Niente salvataggi propri: il risultato esce solo da onExit(res) = {win, draw, a, c, scorers[], shots[], saves[]} (null se abbandoni).
   const UTK = { spd: 0.06, pow: 0.06, acc: 0.3, pasV: 0.05, pasE: 9, def: 0.2, gk: 0.12, rx: 2, sta: 0.18 };
-  let utCfg = null;
+  let utCfg = null, THEME = null; // THEME: lo «stadio» della saga (stesso formato di venue della partita a turni: ads, crowd, ground, line, tint, glow, sky)
   const utF = (v) => clamp(((v === undefined || v === null || isNaN(+v) ? 50 : +v) - 50) / 50, -1, 1);
   function utNorm(team) {
     const out = [];
@@ -2482,7 +2492,7 @@
   }
   function utBegin(opts) {
     const team = utNorm(opts.team), opp = utOpp(opts.opp), diff = opts.diff !== undefined ? clamp(opts.diff | 0, 0, 2) : ((opts.opp && opts.opp.pw) || 36) <= 31 ? 0 : (opts.opp && opts.opp.pw) >= 47 ? 2 : 1;
-    utCfg = { onExit: typeof opts.onExit === "function" ? opts.onExit : null, team, opp, diff, res: null, title: opts.title || "" };
+    utCfg = { onExit: typeof opts.onExit === "function" ? opts.onExit : null, team, opp, diff, res: null, title: opts.title || "" }; THEME = opts.theme && typeof opts.theme === "object" ? opts.theme : null; bgCache = null;
     onExitCb = null; uiState = "menu"; utLineup();
   }
   const utChip = (k, v) => `<span style="display:inline-block;margin:1px 5px 1px 0;white-space:nowrap">${k} <b style="color:#fde047">${Math.round(v)}</b></span>`;
@@ -2722,7 +2732,7 @@
     cv = cx = ui = stage = null; M = null;
     input.jx = input.jy = input.kx = input.ky = 0; input.charging = false;
     const cb = onExitCb; onExitCb = null;
-    const uc = utCfg; utCfg = null;
+    const uc = utCfg; utCfg = null; if (THEME) { THEME = null; bgCache = null; }
     if (silent !== true && uc && typeof uc.onExit === "function") { try { uc.onExit(uc.res); } catch (e) { console.error(e); } return; }
     if (silent !== true && typeof cb === "function") { try { cb(); } catch (e) { console.error(e); } }
   }

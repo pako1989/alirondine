@@ -154,7 +154,7 @@
         id: "mu_torneo", alt: "az,cage,hd", force: false, mate: "Teo Pietralunga", squad: ["Comandante Ilse Morra"], us: "Guardia del Muro", homeKit: ["#a8322a", "#e8e2d4"], azPitch: "camminamento", cageField: 2,
         chap: "Il Muro · Torneo della Cinta", bg: "mu_muro", intro: "Torneo della Cinta sul Camminamento: la Guardia del Muro di {n} e Teo contro i Quartieri della Città Bassa. Il vento soffia da nord.",
         oppNames: ["Fornaio Bruno", "Lavandaia Gisa", "Ciabattino Nello", "Portalettere Ada", "Maestro Pietro"],
-        venue: { ads: [["TORNEO DELLA CINTA", "#a8322a"], ["CINTAVECCHIA", "#e8e2d4"], ["IL MURO CI PROTEGGE", "#6a1a24"], ["GUARDIA DEL MURO", "#a8322a"]], crowd: ["#a8322a", "#5a5a62", "#e8e2d4", "#6a6458", "#8a3a2a"], ground: ["#8a8478", "#827c70"], line: "#e8e2d4cc", grid: "rgba(0,0,0,.06)", tint: "rgba(255,220,180,.08)", glow: "255,220,170" },
+        venue: { ads: [["TORNEO DELLA CINTA", "#a8322a"], ["CINTAVECCHIA", "#e8e2d4"], ["IL MURO CI PROTEGGE", "#6a1a24"], ["GUARDIA DEL MURO", "#a8322a"]], crowd: ["#a8322a", "#5a5a62", "#e8e2d4", "#6a6458", "#8a3a2a"], ground: ["#8a8478", "#827c70"], line: "#e8e2d4cc", grid: "rgba(0,0,0,.06)", tint: "rgba(255,220,180,.08)", glow: "255,220,170", fx: { wind: 0.02 } },
         team: (t, s) => ({ name: "Quartieri", vs: "i Quartieri", color: "#6a6458", atk: t(s.tiro * 0.9), def: t(s.drib * 0.9), vel: t(s.tiro * 0.92), names: ["Fornaio Bruno", "Lavandaia Gisa", "Ciabattino Nello", "Portalettere Ada", "Maestro Pietro"] }),
         done: (r) => {
           if (r.win) X.reward("mu_c2_torneo", { coins: 35 });
