@@ -14,7 +14,7 @@
   if (window.__detective || !window.__sagaCore) return;
   const TS = 16;
   const E = window.__sagaCore.create({
-    id: "detective", key: "ali-di-rondine.detective", title: "Detective di Campo", icon: "🕵️", bg: "dc_citta", chapters: 3,
+    id: "detective", key: "ali-di-rondine.detective", title: "Detective di Campo", icon: "🕵️", bg: "dc_citta", chapters: 4,
     menuSub: "indagini, prove, la Moviola e partite truccate",
     theme: { accent: "#d8b46a", ink: "#efe6d2", paper: "rgba(24,20,18,.88)", font: "Georgia, serif", chipBg: "#2a2622ee", chipBorder: "#b89a5a" },
     stats: { fiuto: [-9, 20, 0, "Fiuto da detective"], agata: [-9, 9, 0, "Fiducia di Agata"], lega: [0, 99, 0, "Pressione della Lega"] },

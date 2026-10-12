@@ -5726,6 +5726,15 @@
     if (since("cc_grotta", 1) < 120) for (let k = 1; k < 7; k++) { g.strokeStyle = `rgba(200,168,255,${0.5 - k * 0.07})`; g.lineWidth = 1.5; g.beginPath(); g.arc(gx, gy - 10, 20 + k * 14 + since("cc_grotta", 1) * 0.4, 0, 7); g.stroke(); }
     const n = since("cc_grotta", 2) < 100 ? 8 : 3; for (let i = 0; i < n; i++) { const y = (f * 2 + i * 37) % 160; px(g, 40 + i * 33, y, 1.5, 4, "rgba(180,200,255,.7)"); }
   }
+  function bgDcTribunale(g, W, H, f) {
+    // il Tribunale sportivo: legno scuro, la bilancia dipinta, il martelletto, il garofano di Valli (tocca)
+    vgrad(g, 0, 0, W, H, ["#2a1c14", "#4a3020"]); for (let i = 0; i < 8; i++) px(g, i * 42, 0, 3, 120, "rgba(0,0,0,.25)");
+    g.strokeStyle = "#d8b46a"; g.lineWidth = 2; const tilt = since("dc_tribunale", 0) < 120 ? Math.sin(since("dc_tribunale", 0) / 10) * 0.3 : 0; g.save(); g.translate(160, 40); px(g, -1, -8, 2, 40, "#d8b46a"); g.rotate(tilt); g.beginPath(); g.moveTo(-40, 0); g.lineTo(40, 0); g.stroke(); [-40, 40].forEach((x) => { g.beginPath(); g.moveTo(x, 0); g.lineTo(x - 10, 18); g.lineTo(x + 10, 18); g.closePath(); g.stroke(); }); g.restore();
+    px(g, 90, 100, 140, 40, "#5a3a22"); px(g, 90, 100, 140, 4, "#7a5a3a"); circ(g, 160, 92, 8, "#e8c4a0"); px(g, 152, 82, 16, 6, "#c8c8d0"); px(g, 150, 100, 20, 12, "#1a1a1a");
+    const hit = since("dc_tribunale", 1) < 30; g.save(); g.translate(200, 96); g.rotate(hit ? -0.8 + since("dc_tribunale", 1) / 30 * 0.8 : -0.3); px(g, -2, -14, 4, 14, "#6a4a2a"); px(g, -7, -18, 14, 7, "#5a3a22"); g.restore(); if (hit) { g.fillStyle = "#fff"; g.font = "900 12px Georgia, serif"; g.fillText("TOC!", 214, 84); }
+    const vx = 50, vy = 150; px(g, vx, vy, 14, 28, "#2a4a3a"); circ(g, vx + 7, vy - 6, 7, "#e8c4a0"); px(g, vx, vy - 13, 14, 4, "#c8c8c8"); const fl = since("dc_tribunale", 2) < 100; circ(g, vx + 11, vy + (fl ? 12 + since("dc_tribunale", 2) * 0.3 : 4), 3, "#e83a3a");
+    px(g, 0, 180, W, 20, "#2a1a10");
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -6367,6 +6376,11 @@
       [0, 100, 320, 60, "💎 I cristalli nelle pareti si accendono uno dopo l'altro: verde, azzurro, arancio, viola. I colori dei quattro cristalli, e uno in più."],
       [130, 80, 60, 80, "🔊 Il Guardiano parla, e la sua voce rimbalza sulle pareti sette volte. All'ultima, sembra la tua."],
       [0, 0, 320, 100, "💧 Le gocce cadono dalle stalattiti a tempo, come un metronomo. Fosco giura che suonano il tema delle Cronache."],
+    ] },
+    dc_tribunale: { draw: bgDcTribunale, hot: [
+      [110, 15, 100, 50, "⚖ La bilancia dipinta sul muro oscilla, piano. Poi si ferma in equilibrio. La giudice dice che lo fa da sola, quando qualcuno mente."],
+      [185, 75, 40, 35, "🔨 TOC! Il martelletto batte sul banco. Nell'aula cala un silenzio così profondo che si sente piovere su tutta Portagrigia."],
+      [40, 130, 40, 60, "🌺 Il garofano del Presidente Valli scivola dall'occhiello e cade per terra. Lui non lo raccoglie."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
