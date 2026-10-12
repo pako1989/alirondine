@@ -4810,6 +4810,108 @@
     for (let i = 0; i < 14; i++) px(g, (i * 41 + f * 0.5) % W, (i * 23 + Math.sin(f / 20 + i) * 4) % 140, 2, 1.5, "rgba(255,240,200,.85)");
   }
   // elementi interattivi: [x, y, w, h, frase, azione?("tog" = acceso/spento)]
+  // ---------------------------------------------------------------- LA VALLE DEL VENTO GENTILE (chiavi ve_*)
+  function veSky(g, W, H, top, bot, f, n) { vgrad(g, 0, 0, W, H, [top, bot]); for (let i = 0; i < (n || 5); i++) { const x = ((i * 83 + f * 0.15) % (W + 80)) - 40, y = 14 + (i * 23) % 50; ell(g, x, y, 26, 8, "rgba(255,255,255,.8)"); ell(g, x + 14, y - 5, 16, 8, "rgba(255,255,255,.8)"); ell(g, x - 12, y + 2, 12, 5, "rgba(255,255,255,.7)"); } }
+  function veMill(g, x, y, s, f, spd) { px(g, x - 7 * s, y - 34 * s, 14 * s, 34 * s, "#ece2c8"); px(g, x + 2 * s, y - 34 * s, 5 * s, 34 * s, "rgba(0,0,0,.08)"); g.fillStyle = "#a04a32"; g.beginPath(); g.moveTo(x - 9 * s, y - 33 * s); g.lineTo(x, y - 44 * s); g.lineTo(x + 9 * s, y - 33 * s); g.fill(); px(g, x - 2 * s, y - 8 * s, 4 * s, 8 * s, "#5a3a22"); g.save(); g.translate(x, y - 34 * s); g.rotate(f * spd); for (let i = 0; i < 4; i++) { g.rotate(Math.PI / 2); px(g, -1 * s, 0, 2 * s, 22 * s, "#6a4a2a"); px(g, 1 * s, 4 * s, 7 * s, 17 * s, "rgba(244,236,214,.95)"); } g.restore(); circ(g, x, y - 34 * s, 2 * s, "#3a2a1a"); }
+  function veSoffio(g, x, y, r, f, i, col) { const b = Math.sin(f / 10 + i) * 2; ell(g, x, y + r + 2, r * 0.8, r * 0.25, "rgba(0,0,0,.15)"); circ(g, x, y - b, r, col || "#f6f6fa"); for (let k = 0; k < 6; k++) circ(g, x + Math.cos(k + f / 25) * r * 0.85, y - b + Math.sin(k + f / 25) * r * 0.85, r * 0.4, col || "#f6f6fa"); px(g, x - r * 0.4, y - b - r * 0.2, r * 0.2, r * 0.35, "#2a2a30"); px(g, x + r * 0.2, y - b - r * 0.2, r * 0.2, r * 0.35, "#2a2a30"); }
+  function veSeeds(g, W, H, f, k) { for (let i = 0; i < 18; i++) { const x = (i * 47 + f * (k || 0.6)) % (W + 20) - 10, y = (i * 31 + Math.sin(f / 30 + i) * 10 + f * 0.1) % H; px(g, x, y, 1.5, 1.5, "rgba(255,255,255,.9)"); g.strokeStyle = "rgba(255,255,255,.6)"; g.lineWidth = 0.5; for (let j = 0; j < 4; j++) { g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(j * 1.6 + f / 40) * 2.4, y + Math.sin(j * 1.6 + f / 40) * 2.4); g.stroke(); } } }
+  function bgVeValle(g, W, H, f) {
+    const still = toggled("ve_valle", 0);
+    veSky(g, W, H, "#8cc8ec", "#e8f4f0", f);
+    // colline a strati e i mulini della valle (toccali: si fermano, o ripartono)
+    g.fillStyle = "#9ac87a"; g.beginPath(); g.moveTo(0, 110); g.quadraticCurveTo(80, 70, 170, 100); g.quadraticCurveTo(250, 80, W, 96); g.lineTo(W, H); g.lineTo(0, H); g.fill();
+    g.fillStyle = "#86ba62"; g.beginPath(); g.moveTo(0, 130); g.quadraticCurveTo(120, 106, 200, 126); g.quadraticCurveTo(270, 112, W, 124); g.lineTo(W, H); g.lineTo(0, H); g.fill();
+    [[40, 106, 0.8], [118, 96, 0.7], [210, 104, 0.9], [276, 98, 0.75]].forEach(([x, y, s], i) => veMill(g, x, y, s, f, still ? 0 : 0.02 + i * 0.004));
+    // il villaggio: case bianche con i tetti rossi e i panni stesi
+    [[60, 150, 40, "#f2ead8"], [110, 146, 34, "#ece0c8"], [170, 152, 44, "#f6eedc"], [232, 148, 36, "#ece0c8"]].forEach(([x, y, w, c]) => { px(g, x, y - 22, w, 22, c); g.fillStyle = "#c0543a"; g.beginPath(); g.moveTo(x - 4, y - 22); g.lineTo(x + w / 2, y - 36); g.lineTo(x + w + 4, y - 22); g.fill(); px(g, x + w / 2 - 4, y - 12, 8, 12, "#6a4a2a"); px(g, x + 5, y - 18, 6, 6, "#7aa0c0"); });
+    g.strokeStyle = "#6a5a4a"; g.lineWidth = 0.6; g.beginPath(); g.moveTo(150, 128); g.quadraticCurveTo(166, 134, 182, 128); g.stroke(); ["#e85a4a", "#ffd23f", "#7ab8d8"].forEach((c, i) => { const sw = Math.sin(f / 15 + i) * 2; px(g, 154 + i * 9 + sw, 131, 6, 8, c); });
+    vgrad(g, 0, 166, W, 34, ["#7ab05a", "#5a9044"]);
+    // il sentiero e il bambino con l'aquilone (toccalo: l'aquilone sale)
+    const up = since("ve_valle", 1) < 160 ? Math.min(40, since("ve_valle", 1) / 2) : 0, kx = 270 + Math.sin(f / 40) * 8, ky = 60 - up + Math.sin(f / 25) * 4;
+    g.strokeStyle = "rgba(255,255,255,.7)"; g.lineWidth = 0.6; g.beginPath(); g.moveTo(286, 182); g.quadraticCurveTo(280, 120, kx, ky + 8); g.stroke();
+    g.fillStyle = "#e85a4a"; g.beginPath(); g.moveTo(kx, ky - 8); g.lineTo(kx + 7, ky); g.lineTo(kx, ky + 9); g.lineTo(kx - 7, ky); g.fill(); px(g, kx - 0.5, ky - 8, 1, 17, "#ffd23f");
+    px(g, 283, 172, 6, 10, "#3a7ab8"); circ(g, 286, 169, 3, "#e8c09a");
+    veSeeds(g, W, H, f, still ? 0.1 : 0.7);
+  }
+  function bgVePrato(g, W, H, f) {
+    veSky(g, W, H, "#9cd4f0", "#f0f8ec", f, 4);
+    g.fillStyle = "#3e7a3a"; for (let i = 0; i < 14; i++) circ(g, i * 26, 98 + (i % 3) * 4, 20, i % 2 ? "#3e7a3a" : "#4f9444"); // il bosco in fondo
+    vgrad(g, 0, 104, W, 96, ["#8cc764", "#6aa84a"]);
+    // le porte del prato: due archi di rami intrecciati
+    [[30, 150], [290, 150]].forEach(([x, y]) => { g.strokeStyle = "#7a5a32"; g.lineWidth = 3; g.beginPath(); g.moveTo(x - 10, y + 16); g.lineTo(x - 10, y - 6); g.quadraticCurveTo(x, y - 18, x + 10, y - 6); g.lineTo(x + 10, y + 16); g.stroke(); px(g, x - 8, y + 2, 16, 1, "rgba(255,255,255,.4)"); });
+    // l'erba alta che ondeggia
+    for (let i = 0; i < 60; i++) { const x = (i * 23) % W, y = 120 + (i * 13) % 76, sw = Math.sin(f / 22 + i) * 3; g.strokeStyle = i % 2 ? "#5a9a40" : "#78b452"; g.lineWidth = 1.2; g.beginPath(); g.moveTo(x, y + 8); g.quadraticCurveTo(x + sw * 0.5, y + 2, x + sw, y - 4); g.stroke(); }
+    // i Soffi che giocano a pallone (tocca il pallone: lo calciano in alto)
+    const kick = since("ve_prato", 0), bx = 150 + Math.sin(f / 30) * 50, by = kick < 70 ? 150 - Math.sin(kick / 70 * Math.PI) * 60 : 156 - Math.abs(Math.sin(f / 9)) * 8;
+    [[110, 160, 9], [190, 156, 11], [150, 170, 7], [230, 166, 8]].forEach(([x, y, r], i) => veSoffio(g, x + Math.sin(f / 40 + i) * 14, y, r, f, i));
+    circ(g, bx, by, 5, "#fff"); circ(g, bx, by, 1.8, "#222");
+    // il Soffio grande che dorme sotto l'albero (toccalo: sbadiglia)
+    const yawn = since("ve_prato", 1) < 90; veSoffio(g, 56, 132, 18, f / 3, 9, "#eceef4"); if (yawn) { ell(g, 56, 136, 6, 4 + Math.sin(since("ve_prato", 1) / 10) * 2, "#6a4a5a"); } else { px(g, 48, 128, 4, 1.5, "#2a2a30"); px(g, 60, 128, 4, 1.5, "#2a2a30"); }
+    veSeeds(g, W, H, f, 0.5);
+  }
+  function bgVeMulino(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#5a3e26", "#7a5636", "#4a3220"]);
+    // le travi e la grande ruota dentata che gira (toccala: si ferma)
+    for (let i = 0; i < 6; i++) px(g, i * 60, 0, 10, H, "rgba(0,0,0,.18)");
+    const stop = toggled("ve_mulino", 0); g.save(); g.translate(230, 70); g.rotate(stop ? 0 : f / 60); g.strokeStyle = "#8a6a40"; g.lineWidth = 6; g.beginPath(); g.arc(0, 0, 38, 0, 7); g.stroke(); for (let i = 0; i < 12; i++) { g.rotate(Math.PI / 6); px(g, -3, -46, 6, 10, "#8a6a40"); } px(g, -3, -38, 6, 76, "#6a4a2a"); px(g, -38, -3, 76, 6, "#6a4a2a"); g.restore(); circ(g, 230, 70, 6, "#3a2a1a");
+    // la macina e la farina che scende come neve nella luce
+    px(g, 60, 140, 90, 24, "#9a9488"); px(g, 60, 140, 90, 4, "#b8b2a6"); ell(g, 105, 136, 40, 8, "#a8a294");
+    g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 110, 40, 90, "255,230,170", 0.35); g.restore();
+    for (let i = 0; i < 40; i++) px(g, 70 + (i * 37) % 90 + Math.sin(f / 30 + i) * 4, (i * 29 + f * 0.4) % 140, 1, 1, "rgba(255,250,235,.8)");
+    // i sacchi di farina con il timbro di Mulinella (tocca: un Soffio fa capolino)
+    [[20, 160], [44, 166], [262, 160], [286, 168]].forEach(([x, y]) => { ell(g, x, y, 14, 18, "#e8dcc0"); px(g, x - 5, y - 2, 10, 6, "rgba(160,74,50,.6)"); });
+    if (since("ve_mulino", 1) < 120) veSoffio(g, 44, 146, 6, f, 2);
+    vgrad(g, 0, 182, W, 18, ["#3a2614", "#2a1a0e"]);
+  }
+  function bgVeBosco(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#0e2218", "#183424", "#0e1e14"]);
+    for (let i = 0; i < 9; i++) { const x = i * 40 - 10; px(g, x + 10, 0, 14 + (i % 3) * 4, H, i % 2 ? "#1a2e20" : "#14281a"); }
+    // il sentiero che sale verso la Casa che Cammina (si vede lontana, con il comignolo)
+    g.fillStyle = "#2a3a2a"; g.beginPath(); g.moveTo(130, H); g.lineTo(150, 110); g.lineTo(170, 110); g.lineTo(190, H); g.fill();
+    const walk = Math.sin(f / 20) * 2; px(g, 146, 70 + walk, 28, 24, "#6a5a4a"); px(g, 142, 64 + walk, 36, 8, "#8a4a32"); px(g, 164, 54 + walk, 5, 12, "#4a4a52"); px(g, 150, 76 + walk, 6, 6, "#ffd98a"); px(g, 148, 94, 3, 10 + walk, "#4a3a2a"); px(g, 168, 94, 3, 10 - walk, "#4a3a2a");
+    for (let i = 0; i < 4; i++) circ(g, 167 + Math.sin(f / 15 + i) * 3, 50 - i * 6 - (f / 4 % 6), 2 + i, "rgba(200,200,210,.4)");
+    // le lucciole (toccale: si radunano)
+    const call = since("ve_bosco", 0) < 140; for (let i = 0; i < 26; i++) { const tx = call ? 90 + Math.sin(i) * 20 : (i * 47) % W, ty = call ? 120 + Math.cos(i) * 14 : 40 + (i * 31) % 140, x = tx + Math.sin(f / 30 + i) * 6, y = ty + Math.cos(f / 40 + i) * 5, a = 0.4 + 0.5 * Math.sin(f / 10 + i * 3); if (a > 0.15) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, x, y, 6, "220,255,140", a * 0.6); g.restore(); px(g, x, y, 1.5, 1.5, `rgba(240,255,180,${a})`); } }
+    // i piccoli spiriti verdi sui rami (toccali: girano la testa tutti insieme)
+    const turn = since("ve_bosco", 1) < 80; [[40, 60], [260, 50], [290, 120], [24, 140]].forEach(([x, y], i) => { circ(g, x, y, 5, "#cfe6b0"); px(g, x - 2 + (turn ? 2 : 0), y - 1, 1.2, 2, "#1a2a1a"); px(g, x + 1 + (turn ? 2 : 0), y - 1, 1.2, 2, "#1a2a1a"); });
+  }
+  function bgVeCasa(g, W, H, f) {
+    // dentro la Casa che Cammina: tutto ondeggia appena, perché la casa sta camminando
+    const sway = Math.sin(f / 24) * 1.5; g.save(); g.translate(0, sway);
+    vgrad(g, 0, -4, W, H + 8, ["#4a2e22", "#6a4430", "#3a2418"]);
+    px(g, 20, 20, 70, 50, "#2a3a5a"); for (let i = 0; i < 5; i++) px(g, 20 + i * 14, 20, 1, 50, "#5a3a22"); px(g, 20, 44, 70, 2, "#5a3a22"); px(g, 28 - (f / 2 % 70), 40, 30, 8, "rgba(80,110,70,.6)");
+    // scaffali con barattoli di vento (toccali: uno si stappa)
+    for (let r = 0; r < 3; r++) { px(g, 210, 20 + r * 30, 96, 3, "#8a6a40"); for (let k = 0; k < 6; k++) { const x = 214 + k * 15, y = 4 + r * 30, open = since("ve_casa", 0) < 90 && r === 1 && k === 2; px(g, x, y, 10, 14, "rgba(200,230,240,.5)"); px(g, x + 1, y - 3, 8, 3, open ? "rgba(0,0,0,0)" : "#a07a4a"); for (let s = 0; s < 3; s++) px(g, x + 2 + Math.sin(f / 10 + k + s) * 2, y + 3 + s * 3, 6, 1, "rgba(255,255,255,.6)"); if (open) for (let s = 0; s < 6; s++) px(g, x + 4 + Math.sin(f / 5 + s) * 8, y - 6 - s * 4, 3, 1, "rgba(255,255,255,.7)"); } }
+    // Brace, lo spirito del fuoco nel camino (toccalo: sbuffa)
+    px(g, 110, 110, 100, 70, "#5a4a3a"); px(g, 124, 124, 72, 56, "#1a0e0a"); const puff = since("ve_casa", 1) < 60;
+    for (let i = 0; i < 7; i++) { const h = 14 + Math.abs(Math.sin(f / 6 + i)) * 14 + (puff ? 14 : 0); ell(g, 136 + i * 8, 176 - h / 2, 5, h / 2, i % 2 ? "#ff8a2a" : "#ffb83a"); }
+    ell(g, 160, 156, 14, 12, "#ffd36b"); px(g, 154, 152, 3, 4, "#2a1a0e"); px(g, 164, 152, 3, 4, "#2a1a0e"); if (puff) ell(g, 160, 162, 4, 3, "#2a1a0e"); else px(g, 156, 161, 8, 1.5, "#2a1a0e");
+    g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 160, 150, 90, "255,150,60", 0.4); g.restore();
+    g.restore();
+  }
+  function bgVeColle(g, W, H, f) {
+    veSky(g, W, H, "#f0a070", "#ffe0b0", f, 3);
+    circ(g, 250, 90, 22, "#fff0c0"); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 250, 90, 80, "255,210,140", 0.4); g.restore();
+    g.fillStyle = "#8a9a5a"; g.beginPath(); g.moveTo(0, H); g.lineTo(0, 140); g.quadraticCurveTo(140, 60, 320, 120); g.lineTo(W, H); g.fill();
+    // l'erba piegata tutta da una parte: il vento qui non smette mai (o quasi)
+    for (let i = 0; i < 70; i++) { const x = (i * 19) % W, y = 120 + (i * 11) % 80, sw = 4 + Math.sin(f / 12 + i) * 2; g.strokeStyle = "#6a7a40"; g.lineWidth = 1; g.beginPath(); g.moveTo(x, y + 6); g.lineTo(x + sw, y - 2); g.stroke(); }
+    // Mormorio, il Soffio grandissimo, seduto in cima (toccalo: apre un occhio)
+    const eye = since("ve_colle", 0) < 120; ell(g, 150, 84, 46, 34, "#eceef4"); for (let k = 0; k < 10; k++) circ(g, 150 + Math.cos(k * 0.63) * 40, 84 + Math.sin(k * 0.63) * 30, 12, "#eceef4");
+    px(g, 132, 76, 8, eye ? 7 : 2, "#2a2a30"); px(g, 160, 76, 8, 2, "#2a2a30"); px(g, 144, 94, 12, 2, "#9a9aa8");
+    // la vecchia sciarpa del custode al collo di Mormorio, che sventola (tocca)
+    const fl = Math.sin(f / 6) * 4; g.fillStyle = "#c0543a"; g.beginPath(); g.moveTo(120, 104); g.lineTo(180, 104); g.lineTo(184, 110); g.lineTo(122, 112); g.fill(); g.beginPath(); g.moveTo(178, 106); g.lineTo(206, 100 + fl); g.lineTo(204, 110 + fl); g.lineTo(180, 112); g.fill();
+    veSeeds(g, W, H, f, 1.2);
+  }
+  function bgVeFinale(g, W, H, f) {
+    veSky(g, W, H, "#7ac0ec", "#fff4d8", f, 6);
+    g.fillStyle = "#86ba62"; g.beginPath(); g.moveTo(0, 120); g.quadraticCurveTo(160, 90, W, 120); g.lineTo(W, H); g.lineTo(0, H); g.fill();
+    [[30, 118, 0.7], [90, 110, 0.6], [230, 110, 0.6], [290, 118, 0.7]].forEach(([x, y, s], i) => veMill(g, x, y, s, f, 0.05 + i * 0.01));
+    // tutti in campo: la valle, i Soffi e (lassù) un aquilone per ogni mulino. Tocca il cielo: un aquilone in più
+    const more = since("ve_finale", 0) < 200 ? 1 : 0; for (let i = 0; i < 5 + more; i++) { const x = 40 + i * 50 + Math.sin(f / 30 + i) * 8, y = 30 + (i % 3) * 12 + Math.cos(f / 25 + i) * 4; g.fillStyle = ["#e85a4a", "#ffd23f", "#7ab8d8", "#c77dff", "#8cc76a", "#ff9a3a"][i]; g.beginPath(); g.moveTo(x, y - 7); g.lineTo(x + 6, y); g.lineTo(x, y + 8); g.lineTo(x - 6, y); g.fill(); }
+    vgrad(g, 0, 150, W, 50, ["#8cc764", "#6aa84a"]);
+    for (let i = 0; i < 8; i++) { const x = 30 + i * 36, jump = Math.abs(Math.sin(f / 8 + i)) * (since("ve_finale", 1) < 160 ? 8 : 2); if (i % 2) veSoffio(g, x, 170 - jump, 7, f, i); else { px(g, x - 3, 164 - jump, 6, 10, ["#3a7ab8", "#e85a4a", "#3a8a7a", "#ffd23f"][i % 4]); circ(g, x, 161 - jump, 3.5, "#e8c09a"); } }
+    veSeeds(g, W, H, f, 0.8);
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -5066,6 +5168,41 @@
       [0, 40, 320, 30, "🙌 La città sul muro esulta. Per la prima volta guarda fuori, e non ha paura."],
       [126, 92, 68, 50, "🚪 Il Portone: tre colpi, poi una risata dall'altra parte. Una risata vecchia di duecento anni."],
       [0, 130, 320, 70, "🗿 I Colossi in fila, con i numeri sulla schiena: 14, 7, 9, 1. Una squadra che aspetta di entrare in campo."],
+    ] },
+    ve_valle: { draw: bgVeValle, hot: [
+      [20, 50, 280, 60, "🌬️ I mulini di Mulinella: li fermi con lo sguardo, e il silenzio pesa. Li lasci andare, e la valle ricomincia a respirare.", "tog"],
+      [258, 40, 40, 140, "🪁 L'aquilone sale, sale, finché il filo è teso come una corda di violino. Il bambino ride senza voltarsi."],
+      [146, 124, 40, 20, "👕 I panni stesi ballano. Tre colori che, da lontano, sembrano una bandiera."],
+    ] },
+    ve_prato: { draw: bgVePrato, hot: [
+      [100, 120, 120, 50, "⚽ I Soffi calciano il pallone altissimo. Nessuno lo riprende. A loro non importa: ridono lo stesso."],
+      [30, 104, 52, 46, "😴 Il Soffio grande sbadiglia. Dentro la bocca, per un attimo, vedi un cielo pieno di stelle."],
+      [10, 130, 40, 40, "🌿 La porta di rami intrecciati. Qualcuno ci ha legato un nastro rosso, sbiadito dal sole di molti anni."],
+    ] },
+    ve_mulino: { draw: bgVeMulino, hot: [
+      [190, 30, 80, 80, "⚙️ La grande ruota dentata. Quando si ferma, si sente il mulino trattenere il fiato.", "tog"],
+      [20, 140, 50, 40, "🌾 Dietro un sacco di farina spunta un Soffio, impolverato di bianco. Starnutisce una nuvola, e scappa."],
+      [60, 130, 90, 34, "🪨 La macina gira solo con il vento. Sotto, in un incavo, qualcuno ha inciso: «P.L. custode»."],
+    ] },
+    ve_bosco: { draw: bgVeBosco, hot: [
+      [60, 60, 200, 120, "✨ Le lucciole ti si radunano intorno, come per mostrarti la strada. Poi si spengono tutte insieme, e si riaccendono più avanti."],
+      [10, 40, 300, 30, "👀 Gli spiritelli verdi sui rami girano la testa tutti insieme. Guardano la Casa che Cammina."],
+      [140, 50, 40, 60, "🏠 La Casa che Cammina, lontana, fa un passo. Poi un altro. Il comignolo sbuffa come chi ha fretta ma non vuole darlo a vedere."],
+    ] },
+    ve_casa: { draw: bgVeCasa, hot: [
+      [210, 0, 100, 90, "🫙 Un barattolo si stappa da solo: ne esce un filo di vento che sa di mare. Ottone lo richiude in fretta. «Quello è di giugno. Non è ancora il suo momento»"],
+      [130, 130, 60, 50, "🔥 Brace sbuffa. «Non toccarmi. Sono un fuoco antico e terribile.» Poi si scalda le mani da solo, tutto contento."],
+      [20, 20, 70, 50, "🪟 Dalla finestra il bosco scorre piano: la casa cammina, e il paesaggio le corre dietro."],
+    ] },
+    ve_colle: { draw: bgVeColle, hot: [
+      [100, 50, 100, 70, "👁️ Mormorio apre un occhio. È grande come una finestra, e dentro c'è una partita di tanti anni fa."],
+      [176, 96, 34, 20, "🧣 La sciarpa rossa del vecchio custode sventola al collo di Mormorio. È l'unica cosa, sul colle, che non sta mai ferma."],
+      [220, 70, 60, 40, "☀️ Il sole si appoggia sulla linea delle colline. Da qui si vedono tutti i mulini della valle, e quanti ne girano ancora."],
+    ] },
+    ve_finale: { draw: bgVeFinale, hot: [
+      [0, 10, 320, 60, "🪁 Un aquilone in più. Non è di nessuno. Lo tiene il vento."],
+      [0, 150, 320, 50, "🙌 Tutti in campo: la valle, i Soffi, i forestieri. Si salta per un gol, si salta anche per un gol sbagliato."],
+      [10, 90, 300, 40, "🌬️ Le pale dei mulini girano tutte insieme, alla stessa velocità. Come se respirassero d'accordo."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
