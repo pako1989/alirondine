@@ -5048,6 +5048,33 @@
     px(g, 140, 150, 50, 6, "#6a4a2a"); px(g, 150, 136, 30, 14, "#c9a227"); px(g, 150, 136, 30, 3, "#e8c84a"); g.fillStyle = "#3a2a1a"; g.font = "italic 6px Georgia, serif"; g.fillText("per Ada", 155, 146);
     vgrad(g, 0, 170, W, 30, ["#3a2414", "#2a1a0e"]);
   }
+  function bgEpRiva(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#e8907a", "#f8c8a0", "#f8e8c8"]);
+    circ(g, 70, 96, 16, "#fff4d0"); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 70, 96, 60, "255,200,150", 0.35); g.restore();
+    // il mare d'ottobre (tocca: arriva un'onda più lunga)
+    vgrad(g, 0, 100, W, 50, ["#6a9aa8", "#4a7a8a"]); const big = since("ep_riva", 0) < 80 ? Math.sin(since("ep_riva", 0) / 25 * Math.PI) * 10 : 0;
+    for (let i = 0; i < 5; i++) px(g, (i * 70 + f * 0.3) % W, 112 + i * 7, 30, 1, "rgba(255,255,255,.35)");
+    vgrad(g, 0, 148 - big, W, 52 + big, ["#e8d0a0", "#d8c090"]); px(g, 0, 146 - big, W, 3, "rgba(255,255,255,.6)");
+    // gli ombrelloni chiusi e le cabine a righe (tocca la numero 7: il lucchetto luccica)
+    for (let i = 0; i < 6; i++) { const x = 30 + i * 46; px(g, x, 150, 2, 26, "#6a4a2a"); px(g, x - 2, 146, 6, 14, ["#e85a3a", "#3a8ac8", "#ffd23f"][i % 3]); }
+    for (let i = 0; i < 5; i++) { const x = 190 + i * 24; px(g, x, 152, 20, 34, "#f4ecdc"); for (let k = 0; k < 4; k++) px(g, x + k * 5, 152, 2.5, 34, i % 2 ? "#3a8ac8" : "#e85a3a"); g.fillStyle = "#3a2a1a"; g.font = "bold 7px Georgia, serif"; g.fillText(String(5 + i), x + 7, 162); if (i === 2) { px(g, x + 8, 172, 4, 5, "#c9a227"); if (since("ep_riva", 1) < 60) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, x + 10, 174, 10, "255,230,150", 0.6); g.restore(); } } }
+    // lo Stadio del Mare in fondo, con il tabellone (tocca)
+    px(g, 250, 82, 64, 22, "#a89a88"); px(g, 262, 72, 40, 12, "#2a2a2a"); g.fillStyle = "#ffd23f"; g.font = "bold 6px monospace"; g.fillText(since("ep_riva", 2) < 120 ? "1 · 0 ?" : "1974", 268, 80);
+    for (let i = 0; i < 5; i++) { const x = (i * 67 + f * 0.6) % (W + 40) - 20, y = 40 + (i % 3) * 14 + Math.sin(f / 20 + i) * 3; g.strokeStyle = "#3a3a3a"; g.lineWidth = 1; g.beginPath(); g.moveTo(x - 5, y); g.quadraticCurveTo(x - 2, y - 3, x, y); g.quadraticCurveTo(x + 2, y - 3, x + 5, y); g.stroke(); }
+  }
+  function bgEp1974(g, W, H, f) {
+    // lo Stadio del Mare nel 1974: pellicola a colori, troppo calda, gente ovunque
+    vgrad(g, 0, 0, W, H, ["#5aaae8", "#a8d8f0"]); for (let r = 0; r < 5; r++) for (let i = 0; i < 40; i++) { px(g, i * 8, 30 + r * 12, 6, 8, ["#e85a3a", "#ffd23f", "#3a8ac8", "#f4ecdc", "#7a2a2a"][(i + r) % 5]); px(g, i * 8 + 1, 27 + r * 12 - (since("ep_1974", 0) < 100 && (i + r) % 3 === 0 ? 3 : 0), 4, 4, "#e0b48a"); }
+    vgrad(g, 0, 92, W, 108, ["#4fa04a", "#3a8a3a"]); for (let i = 0; i < 8; i++) px(g, i * 40, 92, 20, 108, "rgba(255,255,255,.06)");
+    g.strokeStyle = "rgba(255,255,240,.8)"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(160, 92); g.lineTo(160, 200); g.stroke(); g.beginPath(); g.ellipse(160, 140, 34, 12, 0, 0, 7); g.stroke();
+    // il tabellone di gesso (tocca: cambia, poi torna)
+    px(g, 120, 4, 80, 20, "#2a2a2a"); g.fillStyle = "#f4ecdc"; g.font = "bold 9px monospace"; g.textAlign = "center"; g.fillText(since("ep_1974", 1) < 60 ? "VALD 2 · RIV 1" : "VALD 1 · RIV 2", 160, 18); g.textAlign = "left";
+    // la panchina con il Capitano in cardigan e il ragazzo in porta (tocca)
+    px(g, 20, 150, 50, 8, "#6a4a2a"); px(g, 36, 134, 10, 16, "#7a2a2a"); circ(g, 41, 130, 5, "#e0b890"); px(g, 36, 125, 10, 3, "#b8b8b8");
+    px(g, 280, 140, 10, 16, "#3a7a3a"); circ(g, 285, 136, 5, "#d9a679"); px(g, 280, 130, 10, 6, "#3a2a1a"); if (since("ep_1974", 2) < 100) { px(g, 276, 144, 4, 4, "#3a7a3a"); px(g, 290, 144, 4, 4, "#3a7a3a"); }
+    g.save(); g.globalCompositeOperation = "soft-light"; g.fillStyle = "rgba(255,150,60,.35)"; g.fillRect(0, 0, W, H); g.restore();
+    for (let i = 0; i < 30; i++) px(g, (i * 97 + f * 3) % W, (i * 61 + f) % H, 1.5, 1.5, "rgba(255,240,200,.15)");
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -5389,6 +5416,16 @@
       [140, 10, 40, 40, "🖼️ Una foto storta si raddrizza da sola. È quella del 1974, al mare. Il Capitano ride, e accanto a lui, sfocata, una ragazza con i capelli bianchi."],
       [220, 100, 50, 70, "🔥 La stufa scoppietta. Tecla dice che il nonno ci parlava, la sera. «Le diceva i risultati. Le piacevano i pareggi»."],
       [40, 104, 70, 66, "🪑 La poltrona del Capitano, vuota. Ha la forma di chi ci si è seduto per sessant'anni. Nessuno ci si siede. Non ancora."],
+    ] },
+    ep_riva: { draw: bgEpRiva, hot: [
+      [0, 100, 320, 50, "🌊 Un'onda più lunga delle altre arriva fino agli ombrelloni chiusi. Si ritira lasciando una conchiglia rotta e un tappo di bottiglia del 1974."],
+      [236, 150, 24, 40, "🔒 La cabina numero 7. Il lucchetto è nuovo, la porta vecchissima. Qualcuno ha chiuso dentro un ricordo."],
+      [250, 66, 64, 40, "🏟️ Il tabellone dello Stadio del Mare, lontano. Per un istante sembra dire «1 · 0», e un punto interrogativo. Poi è di nuovo solo ruggine."],
+    ] },
+    ep_1974: { draw: bgEp1974, hot: [
+      [0, 20, 320, 70, "🙌 La folla del 1974 si alza in piedi tutta insieme. Gli ombrelli da sole volano in aria. Qualcuno, in quarta fila, resta seduto."],
+      [116, 0, 88, 26, "🧮 Il tabellone di gesso esita. Per un secondo dice «2 · 1». Poi torna a dire la verità."],
+      [270, 120, 30, 40, "🧤 Il ragazzo in porta si stringe i guanti di lana della nonna. Gli tremano le gambe. Dalla panchina, un uomo in cardigan gli fa un pollice in su."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };

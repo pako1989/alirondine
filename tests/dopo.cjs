@@ -24,4 +24,26 @@ async function c1(w) {
   const i = await L.info(page); if (!i.done[1]) errors.push("capitolo 1 non concluso: " + JSON.stringify(i.step));
   L.check(`Dopo il Campione · capitolo 1 (${w} px)`, errors); await browser.close();
 }
-(async () => { await c1(390); await c1(320); })().catch((e) => { console.error("✗ dopo:", e.message); process.exit(1); });
+async function c2(w) {
+  const save = { v: 1, ch: 2, step: { 1: 5 }, done: { 1: "guardava" }, intro: { ch1: 1, ep_valdorsa: 1, ep_campo: 1 }, st: { ada: 3, squadra: 2 } };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await page.evaluate(() => window.__dopo.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 2")); await L.advance(page);
+  const bad = await L.reachAll(page, "ep_riva"); if (bad.length) errors.push("ep_riva irraggiungibile: " + bad.join(", "));
+  if (w === 390) await L.shot(page, "ep_riva");
+  await L.talk(page, "ep_ada"); await L.advance(page);
+  await L.goAct(page, 12, 18); await L.advance(page); await L.talk(page, "ep_sandro"); await L.advance(page); await L.goAct(page, 10, 12); await L.advance(page);
+  await L.talk(page, "ep_ada"); await L.advance(page, ["Mostrami il 1974"]); if (w === 390) await L.shot(page, "ep_riva_leggenda");
+  for (const [x, y] of [[34, 14], [39, 8], [33, 6]]) { await L.goAct(page, x, y); await L.advance(page); }
+  await page.waitForTimeout(300); await L.advance(page);
+  await L.goAct(page, 12, 18); await L.advance(page); await L.talk(page, "ep_sandro"); await L.advance(page, ["Mostracelo"]); await L.goAct(page, 10, 12); await L.advance(page);
+  await L.talk(page, "ep_sandro"); await L.advance(page, ["Guarda con gli occhi di Sandro"]); if (w === 390) await L.shot(page, "ep_riva_verita");
+  await L.talk(page, "ep_sandro74"); await page.evaluate(() => window.T_.click("Gioca il secondo tempo")); await page.waitForTimeout(500); await leave(page); await page.waitForTimeout(1500);
+  if (w === 390) await L.shot(page, "ep_match_1974");
+  await page.evaluate(() => { const S = window.__sagaCore.pitchState; S.a = 1; S.b = 2; S.finish(); }); await page.waitForTimeout(200); await leave(page); await L.advance(page);
+  await L.talk(page, "ep_sandro"); await L.advance(page); await L.goAct(page, 26, 17); await L.advance(page); await L.goAct(page, 18, 10); await L.advance(page); await L.goAct(page, 10, 12); await L.advance(page);
+  await L.talk(page, "ep_sandro"); await L.advance(page);
+  await L.talk(page, "ep_ada"); await L.advance(page, ["Diciamo la verità"]);
+  const i = await L.info(page); if (!i.done[2]) errors.push("capitolo 2 non concluso: " + JSON.stringify(i.step)); if (!i.flags.ep_pallone74_dato) errors.push("commissione del pallone non chiusa");
+  L.check(`Dopo il Campione · capitolo 2 (${w} px)`, errors); await browser.close();
+}
+(async () => { await c1(390); await c1(320); await c2(390); await c2(320); })().catch((e) => { console.error("✗ dopo:", e.message); process.exit(1); });
