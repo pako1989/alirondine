@@ -8,17 +8,17 @@
     const { F, say, ask, done, go, setStep, bond, learnLore, finishChapter, quest, questDone, questState } = K;
     const N = 1, S = () => K.stepOf(N);
 
-    K.cast("ve_gualdo", { name: "Mastro Gualdo", tag: "gray", hair: "#e8e4dc", style: "buzz", skin: "#e0b48a", eye: "#4a5a6a", bg: ["#5a3e26", "#ece2c8"], shirt: "#8a6a4a", beard: true },
+    K.cast("ve_gualdo", { acc: ["paglia"], name: "Mastro Gualdo", tag: "gray", hair: "#e8e4dc", style: "buzz", skin: "#e0b48a", eye: "#4a5a6a", bg: ["#5a3e26", "#ece2c8"], shirt: "#8a6a4a", beard: true },
       "Il mugnaio di Mulinella. Brontola con i mulini, con il tempo e con la farina; con le persone, solo il martedì. Ha scritto lui l'annuncio per il nuovo custode del prato, e da allora controlla la strada ogni mattina.");
-    K.cast("ve_selva", { name: "Selva Ventura", tag: "", hair: "#b0502a", style: "codino", skin: "#f0c8a0", eye: "#3a7a6a", bg: ["#2c4a3c", "#7ab8d8"], shirt: "#3a8a7a" },
+    K.cast("ve_selva", { acc: ["sciarpa"], name: "Selva Ventura", tag: "", hair: "#b0502a", style: "codino", skin: "#f0c8a0", eye: "#3a7a6a", bg: ["#2c4a3c", "#7ab8d8"], shirt: "#3a8a7a" },
       "Costruisce alianti e aquiloni in un laboratorio che sa di colla e di legno di tiglio. Vola sopra la valle con il suo aliante, il Gabbiano, e conosce ogni corrente per nome. Da qualche mese il Gabbiano non si alza più.");
-    K.cast("ve_tisi", { name: "Nonna Tisi", tag: "gray", hair: "#f2f2f2", style: "bun", skin: "#d9a679", eye: "#5a4a3a", bg: ["#6a3a2a", "#f6eedc"], shirt: "#c0543a" },
+    K.cast("ve_tisi", { acc: ["fiore"], name: "Nonna Tisi", tag: "gray", hair: "#f2f2f2", style: "bun", skin: "#d9a679", eye: "#5a4a3a", bg: ["#6a3a2a", "#f6eedc"], shirt: "#c0543a" },
       "Tiene la locanda «Il Ventaglio». Cucina zuppe che curano tutto tranne la nostalgia, e per quella ha un liquore di more. Dice di aver visto i Soffi da bambina, e di non aver mai smesso di vederli.");
-    K.cast("ve_dora", { name: "Ingegnera Dora Ferraglia", tag: "", hair: "#2a2a2a", style: "slick", skin: "#f2d8c0", eye: "#5a6a7a", glasses: true, bg: ["#2a3040", "#c9a227"], shirt: "#4a5a6a" },
+    K.cast("ve_dora", { acc: ["chiave", "taccuino"], name: "Ingegnera Dora Ferraglia", tag: "", hair: "#2a2a2a", style: "slick", skin: "#f2d8c0", eye: "#5a6a7a", glasses: true, bg: ["#2a3040", "#c9a227"], shirt: "#4a5a6a" },
       "Della Compagnia delle Turbine, venuta dalla città con un anemometro d'ottone e una valigia piena di progetti. Misura il vento ovunque vada. È gentile, precisa, e convinta che il vento vada «messo da parte, come il grano».");
-    K.cast("ve_sbuffo", { name: "Sbuffo", tag: "", hair: "#f6f6fa", style: "buzz", skin: "#f6f6fa", eye: "#2a2a30", bg: ["#8cc764", "#f6f6fa"], shirt: "#e8eef4" },
+    K.cast("ve_sbuffo", { acc: "", name: "Sbuffo", tag: "", hair: "#f6f6fa", style: "buzz", skin: "#f6f6fa", eye: "#2a2a30", bg: ["#8cc764", "#f6f6fa"], shirt: "#e8eef4" },
       "Un Soffio: uno spirito del vento grande come un pallone, fatto di nebbia e di risate. È il capitano dei Soffi del prato. Non parla, ma si capisce benissimo cosa vuole: giocare.");
-    K.cast("ve_soffio", { name: "Un Soffio", tag: "", hair: "#f6f6fa", style: "buzz", skin: "#f6f6fa", eye: "#2a2a30", bg: ["#8cc764", "#f6f6fa"], shirt: "#e8eef4" },
+    K.cast("ve_soffio", { acc: "", name: "Un Soffio", tag: "", hair: "#f6f6fa", style: "buzz", skin: "#f6f6fa", eye: "#2a2a30", bg: ["#8cc764", "#f6f6fa"], shirt: "#e8eef4" },
       "Un piccolo spirito del vento. Profuma di bucato e di erba tagliata. Se lo guardi troppo, diventa trasparente per timidezza.");
 
     K.cos("ve_c1", { kind: "shirt", label: "Maglia del custode del prato", val: "#5a8a4a", from: "Completa il Capitolo 1 de La Valle del Vento Gentile" });

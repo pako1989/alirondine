@@ -9,19 +9,19 @@
     const { F, say, ask, done, go, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 1, S = () => K.stepOf(N);
 
-    K.cast("ep_ada", { name: "Ada Lunetta", tag: "", hair: "#d8d8e8", style: "codino", skin: "#f2e2d4", eye: "#5a7aa8", bg: ["#2a2a3a", "#e8b86a"], shirt: "#3a5a3a" },
+    K.cast("ep_ada", { acc: ["guanti"], name: "Ada Lunetta", tag: "", hair: "#d8d8e8", style: "codino", skin: "#f2e2d4", eye: "#5a7aa8", bg: ["#2a2a3a", "#e8b86a"], shirt: "#3a5a3a" },
       "Portiera del Valdorsa nel 1928. Ha ancora vent'anni, da quasi ottanta. Nessuno sa perché, nemmeno lei: un giorno ha smesso di invecchiare, e il mondo ha continuato senza aspettarla. Parla poco, ricorda tutto e capisce tardi.");
-    K.cast("ep_bruno", { name: "Bruno Arcieri, 1928", tag: "", hair: "#3a2a1a", style: "messy", skin: "#e8c4a0", eye: "#4a3a2a", bg: ["#3a2a20", "#7a2a2a"], shirt: "#7a2a2a" },
+    K.cast("ep_bruno", { acc: ["fascia"], name: "Bruno Arcieri, 1928", tag: "", hair: "#3a2a1a", style: "messy", skin: "#e8c4a0", eye: "#4a3a2a", bg: ["#3a2a20", "#7a2a2a"], shirt: "#7a2a2a" },
       "Il Capitano a diciott'anni: le scarpe del padre, la maglia granata cucita dalla madre, un sorriso che arriva prima di lui. Ancora non sa che diventerà una leggenda. Sa solo che vuole giocare.");
-    K.cast("ep_tecla", { name: "Tecla Arcieri", tag: "", hair: "#6a3a2a", style: "bun", skin: "#e8c8a8", eye: "#4a3a2a", glasses: true, bg: ["#3a2a20", "#e8b86a"], shirt: "#5a4a6a" },
+    K.cast("ep_tecla", { acc: ["taccuino"], name: "Tecla Arcieri", tag: "", hair: "#6a3a2a", style: "bun", skin: "#e8c8a8", eye: "#4a3a2a", glasses: true, bg: ["#3a2a20", "#e8b86a"], shirt: "#5a4a6a" },
       "La nipote del Capitano. Fa la bibliotecaria a Bologna, è tornata per il funerale. Ha trovato in soffitta una scatola di latta con scritto «per Ada». Non l'ha aperta.");
-    K.cast("ep_carlo", { name: "Carlo del Bar Sport", tag: "gray", hair: "#e0e0e0", style: "buzz", skin: "#d9a679", eye: "#3a3a2a", bg: ["#3a2a20", "#c8a87a"], shirt: "#6a5a4a", beard: true },
+    K.cast("ep_carlo", { acc: ["grembiule"], name: "Carlo del Bar Sport", tag: "gray", hair: "#e0e0e0", style: "buzz", skin: "#d9a679", eye: "#3a3a2a", bg: ["#3a2a20", "#c8a87a"], shirt: "#6a5a4a", beard: true },
       "Gestisce il Bar Sport di Valdorsa da sessant'anni. Ha visto giocare il Capitano dal 1952 in poi. Il suo caffè è terribile, le sue storie no.");
     K.cast("ep_nino", { name: "Nino Fava", tag: "", hair: "#e8a040", style: "spiky", skin: "#f0d0b0", eye: "#3a6a8a", bg: ["#7a2a2a", "#f4ecdc"], shirt: "#7a2a2a" },
       "Attaccante della nuova squadra di Valdorsa. Parla più veloce di quanto corra, e corre veloce. Crede che Ada sia un fantasma. Lo spera, un po'.");
-    K.cast("ep_lia", { name: "Lia Sereni", tag: "", hair: "#1a1a2a", style: "long", skin: "#d9a679", eye: "#2a4a3a", bg: ["#7a2a2a", "#f4ecdc"], shirt: "#7a2a2a" },
+    K.cast("ep_lia", { acc: ["guanti"], name: "Lia Sereni", tag: "", hair: "#1a1a2a", style: "long", skin: "#d9a679", eye: "#2a4a3a", bg: ["#7a2a2a", "#f4ecdc"], shirt: "#7a2a2a" },
       "Portiera della nuova squadra di Valdorsa. Seria, precisa, si allena da sola all'alba. Vuole parare come Ada. Non vuole che Ada lo sappia.");
-    K.cast("ep_gelindo", { name: "Gelindo delle Fornaci, 1928", tag: "", hair: "#1a1a1a", style: "buzz", skin: "#c68642", eye: "#2a2a2a", bg: ["#3a2a20", "#5a5a62"], shirt: "#5a5a62", beard: true },
+    K.cast("ep_gelindo", { acc: ["coppola"], name: "Gelindo delle Fornaci, 1928", tag: "", hair: "#1a1a1a", style: "buzz", skin: "#c68642", eye: "#2a2a2a", bg: ["#3a2a20", "#5a5a62"], shirt: "#5a5a62", beard: true },
       "Capitano delle Fornaci, la squadra dei mattonai. Spalle larghe come un forno, mani piene di calce. Il primo avversario della storia del Valdorsa.");
 
     K.cos("ep_c1", { kind: "shirt", label: "Maglia granata del 1928", val: "#7a2a2a", from: "Completa il Capitolo 1 di Dopo il Campione" });

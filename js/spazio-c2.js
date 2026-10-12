@@ -11,11 +11,11 @@
     const { F, say, ask, done, go, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 2, S = () => K.stepOf(N);
 
-    K.cast("so_mira", { name: "Mira Zetta, ingegnera", tag: "", hair: "#e85a3a", style: "ponytail", skin: "#c68642", eye: "#2a4a2a", bg: ["#2a1e1e", "#e8a83a"], shirt: "#e8a83a" },
+    K.cast("so_mira", { acc: ["chiave"], name: "Mira Zetta, ingegnera", tag: "", hair: "#e85a3a", style: "ponytail", skin: "#c68642", eye: "#2a4a2a", bg: ["#2a1e1e", "#e8a83a"], shirt: "#e8a83a" },
       "L'ingegnera della stazione. Ha una chiave inglese per ogni giorno della settimana e le chiama per nome. Parla con le macchine più volentieri che con le persone, perché «le macchine almeno ammettono quando sono rotte».");
-    K.cast("so_primula", { name: "Primula Verdi, botanica", tag: "", hair: "#5a8a3a", style: "long", skin: "#f0d0b0", eye: "#3a6a3a", bg: ["#1a3a30", "#7ae86a"], shirt: "#d8c8a8" },
+    K.cast("so_primula", { acc: ["fiore"], name: "Primula Verdi, botanica", tag: "", hair: "#5a8a3a", style: "long", skin: "#f0d0b0", eye: "#3a6a3a", bg: ["#1a3a30", "#7ae86a"], shirt: "#d8c8a8" },
       "Cura la Serra idroponica e parla alle piante, una per una, ogni mattina. Sostiene che i pomodori spaziali capiscano l'italiano ma rispondano in tedesco.");
-    K.cast("so_fattorina", { name: "Capitana Margherita dei Fattorini", tag: "", hair: "#2a1a1a", style: "bob", skin: "#d9a679", eye: "#3a2a1a", bg: ["#3a1a0a", "#e85a3a"], shirt: "#e85a3a" },
+    K.cast("so_fattorina", { acc: ["borsa"], name: "Capitana Margherita dei Fattorini", tag: "", hair: "#2a1a1a", style: "bob", skin: "#d9a679", eye: "#3a2a1a", bg: ["#3a1a0a", "#e85a3a"], shirt: "#e85a3a" },
       "Capitana dei Fattorini di Andromeda: consegnano pizze in tutta la galassia, garantite calde entro mille anni luce. Quando arrivano a destinazione sfidano sempre la squadra locale. Dicono che fa parte del servizio.");
     K.cos("so_c2", { kind: "acc", label: "Casco di vetro", val: "#c8f0ff", from: "Capitolo 2 di Calcio Spaziale" });
     K.cos("so_pizza", { kind: "shirt", label: "Maglia dei Fattorini di Andromeda", val: "#e85a3a", from: "Batti I Fattorini di Andromeda" });

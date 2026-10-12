@@ -9,15 +9,15 @@
     const { F, say, ask, done, go, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 1, S = () => K.stepOf(N);
 
-    K.cast("dc_agata", { name: "Ispettrice Agata Brina", tag: "", hair: "#5a2a2a", style: "long", skin: "#f0d0b0", eye: "#3a5a4a", bg: ["#2a2622", "#d8b46a"], shirt: "#6a5a4a" },
+    K.cast("dc_agata", { acc: ["lente", "sciarpa"], name: "Ispettrice Agata Brina", tag: "", hair: "#5a2a2a", style: "long", skin: "#f0d0b0", eye: "#3a5a4a", bg: ["#2a2622", "#d8b46a"], shirt: "#6a5a4a" },
       "Ispettrice della Questura di Portagrigia, sezione «cose strane». Impermeabile sempre bagnato, una fisarmonica sotto il braccio, caramelle alla liquirizia in tasca. Risolve i casi pensando ad altro. Con la Lega delle Città ha un conto aperto, ma non ne parla.");
     K.cast("dc_tonio", { name: "Tonio Borraccia", tag: "gray", hair: "#d8d8d8", style: "buzz", skin: "#c68642", eye: "#3a3a2a", bg: ["#3a2a1e", "#c8a888"], shirt: "#3a4a6a", beard: true },
       "Magazziniere del Portagrigia da trentadue anni, adesso in pensione al bancone del Caffè Fuorigioco. Riconosce un pallone dal rumore che fa quando rimbalza.");
     K.cast("dc_ugo", { name: "Ugo Nastro", tag: "", hair: "#3a3a3a", style: "slick", skin: "#e8c8a8", eye: "#4a4a5a", glasses: true, bg: ["#1e1a18", "#b89a5a"], shirt: "#4a4a52" },
       "Custode della Sala Moviola dello stadio. Conserva ogni partita dal 1971 su nastri etichettati a mano. Parla ai proiettori come ad animali domestici.");
-    K.cast("dc_sereno", { name: "Guardalinee Sereno Pace", tag: "", hair: "#8a6a4a", style: "messy", skin: "#f2d8c0", eye: "#5a6a7a", bg: ["#1a1a1a", "#ffd23f"], shirt: "#1a1a1a" },
+    K.cast("dc_sereno", { acc: ["fischietto"], name: "Guardalinee Sereno Pace", tag: "", hair: "#8a6a4a", style: "messy", skin: "#f2d8c0", eye: "#5a6a7a", bg: ["#1a1a1a", "#ffd23f"], shirt: "#1a1a1a" },
       "Guardalinee della Lega da sei stagioni, mai una protesta, mai una polemica. Da qualche settimana dorme poco e si mangia le unghie.");
-    K.cast("dc_nina", { name: "Nina Rotativa", tag: "", hair: "#2a1a3a", style: "bun", skin: "#d9a679", eye: "#3a2a1a", bg: ["#2a2a3a", "#e8e2d4"], shirt: "#5a3a5a" },
+    K.cast("dc_nina", { acc: ["taccuino"], name: "Nina Rotativa", tag: "", hair: "#2a1a3a", style: "bun", skin: "#d9a679", eye: "#3a2a1a", bg: ["#2a2a3a", "#e8e2d4"], shirt: "#5a3a5a" },
       "Cronista della Gazzetta di Portagrigia. Scrive di calcio e di misteri, a volte nello stesso articolo. Ha più fonti che amici, e le tratta meglio.");
 
     K.evidence("cucitura", { t: "Il pallone con la cucitura rossa", d: "Tonio Borraccia: i palloni del Portagrigia hanno tutti una cucitura rossa, fatta a mano da lui. «Quello del secondo tempo non ce l'aveva»", icon: "⚽", short: "Dalla memoria di Tonio" });

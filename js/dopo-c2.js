@@ -10,13 +10,13 @@
     const { F, say, ask, done, go, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 2, S = () => K.stepOf(N), TS = 16;
 
-    K.cast("ep_sandro", { name: "Sandro Mareggi", tag: "gray", hair: "#d0d0d0", style: "slick", skin: "#c68642", eye: "#3a5a6a", bg: ["#2a5a7a", "#e8a87a"], shirt: "#e8e0d0" },
+    K.cast("ep_sandro", { acc: ["guanti"], name: "Sandro Mareggi", tag: "gray", hair: "#d0d0d0", style: "slick", skin: "#c68642", eye: "#3a5a6a", bg: ["#2a5a7a", "#e8a87a"], shirt: "#e8e0d0" },
       "Il proprietario del Bagno Sandro, alla Riva dei Pini. Nel 1974 aveva diciassette anni ed era il portiere del Valdorsa nella finale della Coppa del Mare. Da allora non ha più parato un pallone, nemmeno per gioco.");
-    K.cast("ep_sandro74", { name: "Sandro, 1974", tag: "", hair: "#3a2a1a", style: "long", skin: "#d9a679", eye: "#3a5a6a", bg: ["#e8a050", "#7a2a2a"], shirt: "#3a7a3a" },
+    K.cast("ep_sandro74", { acc: ["guanti"], name: "Sandro, 1974", tag: "", hair: "#3a2a1a", style: "long", skin: "#d9a679", eye: "#3a5a6a", bg: ["#e8a050", "#7a2a2a"], shirt: "#3a7a3a" },
       "Diciassette anni, i capelli lunghi come si usava, i guanti di lana della nonna. Il portiere più giovane della storia del Valdorsa. Il più spaventato, anche.");
-    K.cast("ep_bruno74", { name: "Bruno Arcieri, 1974", tag: "gray", hair: "#b8b8b8", style: "messy", skin: "#e0b890", eye: "#4a3a2a", bg: ["#e8a050", "#7a2a2a"], shirt: "#7a2a2a" },
+    K.cast("ep_bruno74", { acc: ["fischietto"], name: "Bruno Arcieri, 1974", tag: "gray", hair: "#b8b8b8", style: "messy", skin: "#e0b890", eye: "#4a3a2a", bg: ["#e8a050", "#7a2a2a"], shirt: "#7a2a2a" },
       "Il Capitano a sessantaquattro anni, allenatore del Valdorsa. I capelli grigi, la stessa maglia granata (adesso con il cardigan sopra), lo stesso sorriso che arriva prima di lui.");
-    K.cast("ep_cronista74", { name: "Il cronista della Gazzetta, 1974", tag: "", hair: "#1a1a1a", style: "slick", skin: "#e8c8a8", eye: "#3a3a3a", shades: true, bg: ["#e8a050", "#3a3a3a"], shirt: "#c8b08a" },
+    K.cast("ep_cronista74", { acc: ["taccuino", "coppola"], name: "Il cronista della Gazzetta, 1974", tag: "", hair: "#1a1a1a", style: "slick", skin: "#e8c8a8", eye: "#3a3a3a", shades: true, bg: ["#e8a050", "#3a3a3a"], shirt: "#c8b08a" },
       "Basettoni, camicia a fiori, una macchina da scrivere portatile. Scrive gli articoli prima che finiscano le partite, «per risparmiare tempo».");
     K.cos("ep_c2", { kind: "shirt", label: "Maglia della Coppa del Mare 1974", val: "#e8a050", from: "Completa il Capitolo 2 di Dopo il Campione" });
     K.cos("ep_conchiglia", { kind: "hairc", label: "Capelli Sole del '74", val: "#e8b83a", from: "Trova tutte le foglie d'oro alla Riva dei Pini" });

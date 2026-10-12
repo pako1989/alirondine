@@ -10,9 +10,9 @@
     const { F, say, ask, done, go, setStep, bond, learnLore, finishChapter, quest, questDone, questState } = K;
     const N = 2, S = () => K.stepOf(N), TS = 16;
 
-    K.cast("ve_ottone", { name: "Mago Ottone", tag: "", hair: "#e8d080", style: "long", skin: "#f2d8c0", eye: "#4a6aaa", bg: ["#3a2a4a", "#e8d080"], shirt: "#5a3a7a" },
+    K.cast("ve_ottone", { acc: ["stella"], name: "Mago Ottone", tag: "", hair: "#e8d080", style: "long", skin: "#f2d8c0", eye: "#4a6aaa", bg: ["#3a2a4a", "#e8d080"], shirt: "#5a3a7a" },
       "Il padrone della Casa che Cammina. Mago, collezionista di venti, vanitoso come un pavone e gentile come un nonno. Ha paura che le cose belle finiscano, e allora le chiude nei barattoli.");
-    K.cast("ve_brace", { name: "Brace", tag: "", hair: "#ff6a2a", style: "spiky", skin: "#ffb83a", eye: "#2a1a0e", bg: ["#3a1a0e", "#ffb83a"], shirt: "#ff8a2a" },
+    K.cast("ve_brace", { acc: "", name: "Brace", tag: "", hair: "#ff6a2a", style: "spiky", skin: "#ffb83a", eye: "#2a1a0e", bg: ["#3a1a0e", "#ffb83a"], shirt: "#ff8a2a" },
       "Lo spirito del fuoco che muove la Casa che Cammina. Brontola, minaccia di spegnersi ogni due minuti, e non lo fa mai. Gli piacciono le bucce d'arancia e le storie che finiscono bene.");
     K.cos("ve_c2", { kind: "shirt", label: "Mantella della Casa che Cammina", val: "#5a3a7a", from: "Completa il Capitolo 2 de La Valle del Vento Gentile" });
     K.cos("ve_barattolo", { kind: "acc", label: "Stemma del barattolo di giugno", val: "#7ab8d8", from: "Riporta a Ottone il vento di giugno" });

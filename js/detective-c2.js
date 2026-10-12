@@ -11,9 +11,9 @@
     const { F, say, ask, done, go, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 2, S = () => K.stepOf(N), TS = 16;
 
-    K.cast("dc_valli", { name: "Presidente Tommaso Valli", tag: "gray", hair: "#c8c8c8", style: "slick", skin: "#e8c4a0", eye: "#4a5a4a", bg: ["#1a3a2a", "#2a7a4a"], shirt: "#2a4a3a" },
+    K.cast("dc_valli", { acc: ["garofano"], name: "Presidente Tommaso Valli", tag: "gray", hair: "#c8c8c8", style: "slick", skin: "#e8c4a0", eye: "#4a5a4a", bg: ["#1a3a2a", "#2a7a4a"], shirt: "#2a4a3a" },
       "Presidente del Valfonda, la «favola» della Lega. Un vecchio commerciante di stoffe che ha comprato la squadra del suo paese per amore. Da quando la favola è cominciata, non dorme più.");
-    K.cast("dc_ombra", { name: "L'uomo con l'ombrello rosso", tag: "", hair: "#1a1a1a", style: "slick", skin: "#d9b08c", eye: "#2a2a2a", shades: true, bg: ["#1a1a1a", "#c0392b"], shirt: "#1a1a1a" },
+    K.cast("dc_ombra", { acc: "", name: "L'uomo con l'ombrello rosso", tag: "", hair: "#1a1a1a", style: "slick", skin: "#d9b08c", eye: "#2a2a2a", shades: true, bg: ["#1a1a1a", "#c0392b"], shirt: "#1a1a1a" },
       "Cappotto nero, occhiali scuri anche di notte, un ombrello rosso sempre chiuso. Cammina come chi non ha mai dovuto chiedere permesso.");
     K.evidence("nastro87", { t: "Il nastro del 1987", d: "Portagrigia–Valfonda 1987, 0-3: tre gol dopo tre rimesse. Stesso trucco, trentacinque anni prima. Qualcuno lo ha rubato per non farlo confrontare.", icon: "📼", short: "Dal magazzino del porto" });
     K.evidence("ricevute", { t: "Le ricevute della Lega", d: "Bonifici dalla «Lega delle Città · Fondo Promozione» al Valfonda, sempre il giorno dopo una vittoria. Firmati: T. Vanni, segretario.", icon: "🧾", short: "Dal magazzino del porto" });

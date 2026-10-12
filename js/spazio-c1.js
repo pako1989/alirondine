@@ -9,17 +9,17 @@
     const { F, say, ask, done, go, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 1, S = () => K.stepOf(N);
 
-    K.cast("so_gru", { name: "Comandante Ortensia Gru", tag: "", hair: "#c8c8d8", style: "bun", skin: "#e8c8a8", eye: "#3a5a8a", bg: ["#0a1830", "#e8a83a"], shirt: "#2a3a6a", glasses: true },
+    K.cast("so_gru", { acc: ["visiera"], name: "Comandante Ortensia Gru", tag: "", hair: "#c8c8d8", style: "bun", skin: "#e8c8a8", eye: "#3a5a8a", bg: ["#0a1830", "#e8a83a"], shirt: "#2a3a6a", glasses: true },
       "Comandante della Stazione Orbitale 7 da undici anni. Ama i regolamenti, i moduli in triplice copia e le statistiche. La statistica che odia di più: 412 giorni senza un evento degno di nota. Ha deciso di rimediare con un torneo di calcio.");
-    K.cast("so_arbi", { name: "ARBI-9", tag: "gray", hair: "#5a6478", style: "buzz", skin: "#a8b0c0", eye: "#e83a6a", bg: ["#0a1830", "#a8b0c0"], shirt: "#3a4458" },
+    K.cast("so_arbi", { acc: ["fischietto"], name: "ARBI-9", tag: "gray", hair: "#5a6478", style: "buzz", skin: "#a8b0c0", eye: "#e83a6a", bg: ["#0a1830", "#a8b0c0"], shirt: "#3a4458" },
       "Robot arbitro di serie 9, comprato usato da un torneo di bocce. Ha un fischietto integrato e un solo baco: fischia fuorigioco a qualunque cosa sia fuori posto. Porte, palloni, cuochi. Una volta, la Luna.");
-    K.cast("so_blop", { name: "Blop", tag: "", hair: "#5ac84a", style: "bald", skin: "#7ae86a", eye: "#1a3a1a", bg: ["#3a3040", "#7ae86a"], shirt: "#e8e8f0" },
+    K.cast("so_blop", { acc: ["grembiule"], name: "Blop", tag: "", hair: "#5ac84a", style: "bald", skin: "#7ae86a", eye: "#1a3a1a", bg: ["#3a3040", "#7ae86a"], shirt: "#e8e8f0" },
       "Il cuoco della stazione: un alieno gelatinoso, verde e trasparente. Si vede cosa ha mangiato a pranzo. Cucina zuppe che, a gravità zero, scappano dal piatto. Sogna di giocare a centrocampo: «Sono morbido, ma determinato».");
-    K.cast("so_quattro", { name: "Quattrobraccia", tag: "", hair: "#3a2a6a", style: "spiky", skin: "#8a9ae8", eye: "#e8e84a", bg: ["#242a44", "#8a9ae8"], shirt: "#e8a83a" },
+    K.cast("so_quattro", { acc: ["guanti", "chiave"], name: "Quattrobraccia", tag: "", hair: "#3a2a6a", style: "spiky", skin: "#8a9ae8", eye: "#e8e84a", bg: ["#242a44", "#8a9ae8"], shirt: "#e8a83a" },
       "Tecnico delle pareti esterne, quattro braccia e nessuna fretta. Fa yoga a testa in giù nel settore a gravità invertita. In porta sarebbe imbattibile, se solo non si distraesse a salutare con tutte e quattro le mani.");
-    K.cast("so_nonna", { name: "NONNA (computer di bordo)", tag: "", hair: "#e8e8f0", style: "bun", skin: "#9ad8f0", eye: "#2a6ac8", glasses: true, bg: ["#0a1830", "#9ad8f0"], shirt: "#5a7aa8" },
+    K.cast("so_nonna", { acc: ["cuffie"], name: "NONNA (computer di bordo)", tag: "", hair: "#e8e8f0", style: "bun", skin: "#9ad8f0", eye: "#2a6ac8", glasses: true, bg: ["#0a1830", "#9ad8f0"], shirt: "#5a7aa8" },
       "Il computer di bordo. Il suo nome tecnico è N.O.N.N.A. (Nucleo Operativo Navigazione e Nutrimento Automatico). Controlla l'aria, la rotta e la gravità. Ti chiede sempre se hai mangiato. E se hai messo la maglia della salute.");
-    K.cast("so_bullone", { name: "BU-1, capitano dei Bulloni", tag: "gray", hair: "#5a6478", style: "buzz", skin: "#c8ccd8", eye: "#e8a83a", bg: ["#2a3448", "#e8a83a"], shirt: "#8a94a8" },
+    K.cast("so_bullone", { acc: ["chiave"], name: "BU-1, capitano dei Bulloni", tag: "gray", hair: "#5a6478", style: "buzz", skin: "#c8ccd8", eye: "#e8a83a", bg: ["#2a3448", "#e8a83a"], shirt: "#8a94a8" },
       "Il capo dei robot di manutenzione. Sono in otto e si chiamano tutti BU, numerati. Giocano a calcio di nascosto nella palestra, di notte, con un bullone al posto del pallone.");
     K.cos("so_c1", { kind: "shirt", label: "Tuta della Stazione 7", val: "#e8e8f0", from: "Capitolo 1 di Calcio Spaziale" });
     K.cos("so_bulloni", { kind: "hairc", label: "Capelli Bullone d'oro", val: "#e8c84a", from: "Trova tutti i bulloni d'oro dell'hangar" });

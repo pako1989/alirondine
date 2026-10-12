@@ -11,7 +11,7 @@
     const { F, say, ask, done, go, setStep, bond, learnLore, finishChapter } = K;
     const N = 3, S = () => K.stepOf(N), TS = 16, st = (k) => K.stat(k);
 
-    K.cast("ve_mormorio", { name: "Mormorio", tag: "gray", hair: "#eceef4", style: "buzz", skin: "#eceef4", eye: "#3a3a48", bg: ["#a8b86a", "#eceef4"], shirt: "#c0543a" },
+    K.cast("ve_mormorio", { acc: "", name: "Mormorio", tag: "gray", hair: "#eceef4", style: "buzz", skin: "#eceef4", eye: "#3a3a48", bg: ["#a8b86a", "#eceef4"], shirt: "#c0543a" },
       "Il Soffio più grande della valle: una nuvola bianca alta come una casa, che dorme in cima al Colle del Vento. Al collo porta una sciarpa rossa, vecchia, che sventola anche quando il vento non c'è.");
     K.cos("ve_c3", { kind: "shirt", label: "Maglia Col Vento", val: "#8cc76a", from: "Completa La Valle del Vento Gentile" });
     K.cos("ve_gabbiano", { kind: "shirt", label: "Maglia del Gabbiano", val: "#7ab8d8", from: "Finale «Il vento torna»" });

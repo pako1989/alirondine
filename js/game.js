@@ -1016,7 +1016,7 @@
     g.fillStyle = shirt; g.beginPath(); g.moveTo(-34, 60); g.quadraticCurveTo(0, 26, 34, 60); g.fill();
     const num = { leo: "10", tommy: "8", gigi: "17" }[id] || c.num;
     if (num) { g.fillStyle = shirt === "#f2f2f2" || shirt === "#ffd23f" ? "#1b1b1b" : "#fff"; g.font = "bold 12px sans-serif"; g.textAlign = "center"; g.fillText(num, 0, 56); g.textAlign = "left"; }
-    if (c.acc) portraitAcc(c.acc, "body");
+    const AL = accOf(id, c); AL.forEach((a) => portraitAcc(a, "body"));
     px(-6, 22, 12, 10, c.skin);
     g.fillStyle = c.skin; g.beginPath(); g.ellipse(0, 4, 20, 24, 0, 0, 7); g.fill();
     g.fillStyle = c.hair;
@@ -1042,9 +1042,57 @@
     if (c.glasses) { g.strokeStyle = "#222"; g.lineWidth = 1.5; g.strokeRect(-14, -4, 12, 11); g.strokeRect(2, -4, 12, 11); px(-2, 1, 4, 1.5, "#222"); }
     if (c.beard) { g.fillStyle = c.hair + "cc"; g.beginPath(); g.ellipse(0, 20, 14, 8, 0, 0, Math.PI); g.fill(); }
     if (c.scar) { g.strokeStyle = "#b35a5a"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(10, -6); g.lineTo(15, 10); g.stroke(); }
-    if (c.acc) portraitAcc(c.acc, "head");
+    AL.forEach((a) => portraitAcc(a, "head"));
     px(-4, 16, 8, 2, "#8a3b3b");
     g.restore();
+  }
+  // ACCESSORI DEI PERSONAGGI: c.acc può essere uno o più (lista). Chi non ne ha li riceve dalla descrizione, ma solo quando
+  // il mestiere o l'oggetto è chiaro (al massimo due): cuoco → grembiule, arbitro → fischietto, portiere → guanti…
+  // c.acc: "" (o c.noAcc) = nessun accessorio, nemmeno automatico. Il Campione e Leo non ne ricevono mai di automatici.
+  const ACC_AUTO = [
+    [/\b(cuoc[oa]|chef|pizzaiol)/, "grembiule"], [/\b(barist[ai]|gestisce il bar|oste\b|locandier)/, "grembiule"],
+    [/\b(arbitr[oa]|guardalinee|robot arbitro)/, "fischietto"], [/\b(allenatore|allenatrice|il mister)\b/, "fischietto"],
+    [/(?<!da )\b(portiere|portiera)\b/, "guanti"], [/\b(pescator[ei]|peschereccio)/, "pescatore"],
+    [/\b(ingegner[ea]|meccanic[oa]|tecnico delle|chiave inglese)/, "chiave"], [/\b(ispettrice|ispettore|detective|commissari[oa])\b/, "lente"],
+    [/\b(giornalist[ai]|cronista|reporter|bibliotecari[ao])/, "taccuino"], [/\b(dj|telecronist[ai]|speaker|conduce (la|una) radio|computer di bordo)/, "cuffie"],
+    [/\b(botanic[ao]|fioraia|giardinier[ea]|parla alle piante)/, "fiore"], [/\b(contadin[oa]|mietitur|fattore)\b/, "paglia"],
+    [/\b(comandante)\b/, "visiera"], [/\b(re|regina|sovran[oa]|imperatore|imperatrice)\b(?! del)/, "corona"],
+    [/\b(campione del mondo|medaglia d'oro|pallone d'oro)/, "medaglia"], [/\b(astronaut[ae])/, "casco"], [/\bsciarpa\b/, "sciarpa"],
+  ];
+  const ACC_CACHE = {};
+  function accOf(id, c) {
+    if (!c) return [];
+    if (c.acc !== undefined && c.acc !== null) return [].concat(c.acc).filter(Boolean);
+    if (c.noAcc || id === "hero" || id === "leo") return [];
+    if (ACC_CACHE[id]) return ACC_CACHE[id];
+    const t = String(BIO[id] || "").toLowerCase(), out = [];
+    const HATS = /^(pescatore|paglia|visiera|corona|casco|coppola)$/; // chi ha già un cappello non ne riceve un altro
+    for (const [re, a] of ACC_AUTO) { if (out.length >= 2) break; if (re.test(t) && !out.includes(a) && !(c.cap && HATS.test(a))) out.push(a); }
+    if (out.includes("lente") && out.includes("taccuino")) out.splice(out.indexOf("taccuino"), 1);
+    return (ACC_CACHE[id] = out);
+  }
+  // i disegni degli accessori nuovi (coordinate del ritratto classico: viso al centro, spalle sotto)
+  function portraitAccS(a, part) {
+    const ol = (w) => { g.lineWidth = w || 1.2; g.strokeStyle = "#1a1a1a"; g.stroke(); };
+    if (part === "body") {
+      if (a === "chiave") { g.save(); g.translate(24, 42); g.rotate(-0.7); px(-2, -2, 4, 18, "#9aa4b0"); g.fillStyle = "#9aa4b0"; g.beginPath(); g.arc(0, -4, 5, 0, 7); g.fill(); px(-2, -10, 4, 5, "#3a4458"); px(-1, 2, 2, 12, "#c8ccd8"); g.restore(); return true; }
+      if (a === "guanti") { [[-27, 49], [27, 49]].forEach(([x, y]) => { g.fillStyle = "#e8e2d4"; g.beginPath(); g.ellipse(x, y, 7, 6, 0, 0, 7); g.fill(); ol(1); px(x - 6, y + 4, 12, 3, "#3a8a4a"); for (let i = -1; i <= 1; i++) px(x + i * 3 - 0.5, y - 7, 2, 4, "#e8e2d4"); }); return true; }
+      if (a === "lente") { g.strokeStyle = "#6a4a2a"; g.lineWidth = 3; g.beginPath(); g.moveTo(20, 54); g.lineTo(26, 44); g.stroke(); g.fillStyle = "rgba(200,230,255,.55)"; g.beginPath(); g.arc(28, 38, 7, 0, 7); g.fill(); g.strokeStyle = "#c9a227"; g.lineWidth = 2; g.stroke(); px(25, 35, 3, 2, "#fff"); return true; }
+      if (a === "taccuino") { px(-31, 38, 13, 16, "#f4ecdc"); px(-31, 38, 13, 3, "#b3202c"); for (let i = 0; i < 3; i++) px(-29, 44 + i * 3, 9, 1, "#7a7a8a"); g.strokeStyle = "#e8a83a"; g.lineWidth = 2; g.beginPath(); g.moveTo(-18, 36); g.lineTo(-14, 52); g.stroke(); return true; }
+      if (a === "medaglia") { g.fillStyle = "#1d3fa3"; g.beginPath(); g.moveTo(-8, 26); g.lineTo(0, 38); g.lineTo(8, 26); g.lineTo(4, 26); g.lineTo(0, 32); g.lineTo(-4, 26); g.closePath(); g.fill(); g.fillStyle = "#f2c230"; g.beginPath(); g.arc(0, 42, 6, 0, 7); g.fill(); ol(1); px(-1, 39, 2, 6, "#c9a227"); return true; }
+      if (a === "occhiali" || a === "casco" || a === "visiera" || a === "cuffie" || a === "fiore" || a === "paglia" || a === "corona") return true;
+    }
+    if (part === "head") {
+      if (a === "occhiali") { g.strokeStyle = "#222"; g.lineWidth = 1.5; g.strokeRect(-14, -4, 12, 11); g.strokeRect(2, -4, 12, 11); px(-2, 1, 4, 1.5, "#222"); return true; }
+      if (a === "casco") { g.fillStyle = "rgba(200,240,255,.16)"; g.beginPath(); g.arc(0, 2, 31, 0, 7); g.fill(); g.strokeStyle = "rgba(220,245,255,.85)"; g.lineWidth = 2; g.stroke(); g.fillStyle = "rgba(255,255,255,.6)"; g.beginPath(); g.ellipse(-14, -16, 6, 3, -0.6, 0, 7); g.fill(); px(-22, 28, 44, 5, "#c8ccd8"); return true; }
+      if (a === "visiera") { g.fillStyle = "#1a2a4a"; g.beginPath(); g.ellipse(0, -14, 23, 12, 0, Math.PI, 0); g.fill(); px(-23, -15, 46, 4, "#1a2a4a"); g.fillStyle = "#0e1830"; g.beginPath(); g.ellipse(0, -10, 24, 5, 0, 0, Math.PI); g.fill(); px(-4, -24, 8, 6, "#f2c230"); px(-2, -22, 4, 2, "#1a2a4a"); return true; }
+      if (a === "cuffie") { g.strokeStyle = "#2a2a3a"; g.lineWidth = 3.5; g.beginPath(); g.arc(0, 0, 25, Math.PI * 1.05, Math.PI * 1.95); g.stroke(); [-1, 1].forEach((sd) => { px(sd * 24 - 4, -4, 8, 14, "#3a3a4a"); px(sd * 24 - 3, -2, 6, 10, "#7af0c8"); }); g.strokeStyle = "#3a3a4a"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(-22, 8); g.quadraticCurveTo(-18, 20, -6, 18); g.stroke(); px(-8, 16, 4, 3, "#3a3a4a"); return true; }
+      if (a === "fiore") { const x = 15, y = -20; ["#ff9ec0", "#ff9ec0", "#ffb8d0", "#ff9ec0", "#ffb8d0"].forEach((col, i) => { const t = i / 5 * 6.28; g.fillStyle = col; g.beginPath(); g.arc(x + Math.cos(t) * 4, y + Math.sin(t) * 4, 3.4, 0, 7); g.fill(); }); g.fillStyle = "#ffd23f"; g.beginPath(); g.arc(x, y, 2.6, 0, 7); g.fill(); px(x - 9, y + 3, 6, 3, "#57b045"); return true; }
+      if (a === "paglia") { g.fillStyle = "#e8c878"; g.beginPath(); g.ellipse(0, -14, 36, 7, 0, 0, 7); g.fill(); ol(1); g.beginPath(); g.ellipse(0, -20, 19, 11, 0, Math.PI, 0); g.fill(); ol(1); px(-19, -19, 38, 3, "#b3202c"); for (let i = 0; i < 6; i++) px(-30 + i * 11, -15, 6, 1, "#c8a858"); return true; }
+      if (a === "corona") { g.fillStyle = "#f2c230"; g.beginPath(); g.moveTo(-15, -20); for (let i = 0; i <= 4; i++) { g.lineTo(-15 + i * 7.5, -20 - (i % 2 ? 6 : 13)); if (i < 4) g.lineTo(-11 + i * 7.5, -22); } g.lineTo(15, -20); g.closePath(); g.fill(); ol(1); [-7.5, 7.5].forEach((x) => { g.fillStyle = "#e83a6a"; g.beginPath(); g.arc(x, -24, 1.8, 0, 7); g.fill(); }); return true; }
+      if (a === "chiave" || a === "guanti" || a === "lente" || a === "taccuino" || a === "medaglia") return true;
+    }
+    return false;
   }
   // Accessori del campione (coordinate del ritratto)
   function portraitAcc(a, part) {
@@ -3944,7 +3992,7 @@
     if (night) { g.fillStyle = "rgba(10,16,48,.35)"; g.fillRect(0, 0, W, H); }
     if (bEvent() === "natale") for (let i = 0; i < 60; i++) px(((i * 37 + frame * 0.3) % W + W) % W, (i * 53 + frame * (0.4 + (i % 4) * 0.25)) % H, 2, 2, "#ffffffcc");
   }
-  function chibi(x, y, c, dir, ph) {
+  function chibi(x, y, c, dir, ph) { const SA = [].concat(c.acc || []); // uno o più accessori
     const hair = c.hair || "#333", skin = c.skin || "#f0c9a0", shirt = c.shirt || "#ff4d5a";
     g.fillStyle = "#0004"; g.beginPath(); g.ellipse(x, y, 6, 2.5, 0, 0, 7); g.fill();
     const l = Math.round(Math.sin(ph || 0) * 1.5);
@@ -3959,23 +4007,23 @@
     if (c.style === "messy") { px(x - 6, y - 24, 3, 3, hair); px(x + 3, y - 24, 3, 3, hair); }
     if (c.style === "cresta") px(x - 1, y - 27, 3, 5, hair);
     if (c.style === "codino") px(dir === "left" ? x + 4 : x - 7, y - 20, 3, 6, hair);
-    const capV = c.cap || (c.acc === "cappellino" ? "#ffd23f" : c.acc === "berretto" ? "#26324a" : null);
+    const capV = c.cap || (SA.includes("cappellino") ? "#ffd23f" : SA.includes("berretto") ? "#26324a" : null);
     if (capV) { const cc = typeof capV === "string" ? capV : "#1d3fa3"; px(x - 5, y - 24, 10, 3, cc); if (dir !== "up") px(dir === "left" ? x - 8 : x - 2, y - 22, dir === "down" ? 0 : 6, 2, cc); }
-    if (c.acc === "bandana") px(x - 5, y - 21, 10, 2, "#d62a2a");
-    if (c.acc === "cappellino") { px(x - 6, y - 25, 12, 3, "#ffd23f"); px(x - 7, y - 23, 14, 1, "#e0a800"); }
+    if (SA.includes("bandana")) px(x - 5, y - 21, 10, 2, "#d62a2a");
+    if (SA.includes("cappellino")) { px(x - 6, y - 25, 12, 3, "#ffd23f"); px(x - 7, y - 23, 14, 1, "#e0a800"); }
     if (dir !== "up") {
       const ex = dir === "left" ? [-4] : dir === "right" ? [2] : [-3, 1];
       ex.forEach((e) => px(x + e, y - 18, 2, 2, "#222"));
       if (c.glasses) px(x - 4, y - 19, 8, 1, "#222");
       if (c.beard) px(x - 4, y - 15, 8, 2, hair);
     }
-    if (c.acc === "fascia") px(x - 7, y - 11, 2, 2, "#ffd23f");
-    if (c.acc === "sciarpa") { px(x - 5, y - 14, 10, 2, "#b3202c"); px(x + 1, y - 12, 2, 3, "#ffd23f"); }
-    if (c.acc === "corvo" && dir !== "up") px(x - 3, y - 11, 2, 2, "#111");
-    if (c.acc === "stella") { px(x - 4, y - 1, 3, 1, "#ffd23f"); px(x + 1, y - 1, 3, 1, "#ffd23f"); }
-    if (c.acc === "grembiule" && dir !== "up") px(x - 4, y - 11, 8, 7, "#f2f2f2");
-    if (c.acc === "fischietto" && dir !== "up") px(x - 1, y - 11, 2, 2, "#c0c0c8");
-    if (c.acc === "garofano" && dir !== "up") px(x - 4, y - 12, 2, 2, "#e0303a");
+    if (SA.includes("fascia")) px(x - 7, y - 11, 2, 2, "#ffd23f");
+    if (SA.includes("sciarpa")) { px(x - 5, y - 14, 10, 2, "#b3202c"); px(x + 1, y - 12, 2, 3, "#ffd23f"); }
+    if (SA.includes("corvo") && dir !== "up") px(x - 3, y - 11, 2, 2, "#111");
+    if (SA.includes("stella")) { px(x - 4, y - 1, 3, 1, "#ffd23f"); px(x + 1, y - 1, 3, 1, "#ffd23f"); }
+    if (SA.includes("grembiule") && dir !== "up") px(x - 4, y - 11, 8, 7, "#f2f2f2");
+    if (SA.includes("fischietto") && dir !== "up") px(x - 1, y - 11, 2, 2, "#c0c0c8");
+    if (SA.includes("garofano") && dir !== "up") px(x - 4, y - 12, 2, 2, "#e0303a");
     chibiAcc(x, y, c, dir);
   }
   function borgoDrawTile0(ch, sx, sy, tx, ty) {
@@ -6202,6 +6250,7 @@
     return true;
   }
   function portraitAccX(a, part) {
+    if (portraitAccS(a, part)) return true;
     if (typeof a === "string" && a[0] === "#") return portraitAccHex(a, part);
     if (portraitAccPc(a, part) || portraitAccV9(a, part) || portraitAcc9(a, part)) return true;
     if (part === "head") {
@@ -19038,15 +19087,19 @@
   const PV_STYLE = { itpomba: "bald", a1birillo: "curly", itmomolo: "curly", ittamb: "afro", a1gegia: "ponytail", itchiara: "ponytail" };
   function faceStyle() { const f = SET.faces; return f && f !== "classic" && window.__faceStyles ? f : null; }
   // accessori negli stili alternativi dei volti: occhiali e cappelli diventano parte del volto, quelli classici usano il loro disegno, gli altri (a colore) si ricavano dal nome
-  const ACC_CLASSIC = /^(auricolare|bandana|sciarpa|fascia|corvo|stella|grembiule|garofano|fischietto|pescatore|coroncina|maschera|coppola|piuma|fasciasind|amodoro|natale|borsa|calzini|braccialetto)$/;
-  function faceAcc(fc) {
-    const a = fc.acc; if (!a || typeof a !== "string") return {};
-    if (a === "occhiali") return { glasses: true, acc: "" };
-    if (a === "occhialisole") return { shades: true, acc: "" };
-    if (a === "cappellino" || a === "berretto") return { acc: "" };
-    if (ACC_CLASSIC.test(a)) return { accFn: (ctx, part) => { const og = g; g = ctx; ctx.save(); try { portraitAcc(a, part); } catch {} ctx.restore(); g = og; } };
-    const e = fc.accId && COSM[fc.accId] ? COSM[fc.accId] : COSM[a] && COSM[a].kind === "acc" ? COSM[a] : Object.values(COSM).find((q) => q.kind === "acc" && q.val === a);
-    return { accLbl: e ? e.label : a, accCol: a[0] === "#" ? a : null };
+    const ACC_CLASSIC = /^(auricolare|bandana|sciarpa|fascia|corvo|stella|grembiule|garofano|fischietto|pescatore|coroncina|maschera|coppola|piuma|fasciasind|amodoro|natale|borsa|calzini|braccialetto|casco|visiera|chiave|cuffie|fiore|guanti|paglia|lente|taccuino|medaglia|corona|occhiali)$/;
+  function faceAcc(fc, id) {
+    const L = accOf(id, fc); if (!L.length) return {};
+    const out = { acc: "" }, cl = [];
+    L.forEach((a) => {
+      if (a === "occhialisole") out.shades = true;
+      else if (a === "occhiali") out.glasses = true;
+      else if (a === "cappellino" || a === "berretto") {}
+      else if (ACC_CLASSIC.test(a)) cl.push(a);
+      else if (!out.accLbl) { const e = fc.accId && COSM[fc.accId] ? COSM[fc.accId] : COSM[a] && COSM[a].kind === "acc" ? COSM[a] : Object.values(COSM).find((q) => q.kind === "acc" && q.val === a); out.accLbl = e ? e.label : a; out.accCol = a[0] === "#" ? a : null; out.acc = a; }
+    });
+    if (cl.length) { out.acc = out.acc || cl[0]; out.accFn = (ctx, part) => { const og = g; g = ctx; cl.forEach((a) => { ctx.save(); try { portraitAcc(a, part); } catch {} ctx.restore(); }); g = og; }; }
+    return out;
   }
   function portrait(id, x, y, s, flip) {
     const fs = faceStyle(), fc = CAST[id];
@@ -19055,7 +19108,7 @@
       const ex = mine ? (e.x || (e.k === "shock" ? "surprised" : e.k === "anger" ? "angry" : e.k === "sparkle" ? "smile" : null)) : null;
       const blink = fs === "anime" && gxAnimOk() && (frame + id.length * 17) % 180 < 6;
       g.save(); g.translate(x, y + (gxAnimOk() ? Math.sin(frame / 30) * 0.5 : 0)); g.scale(flip ? -s : s, s);
-      const ok = window.__faceStyles.draw(fs, g, id, { ...fc, ...faceAcc(fc), shirt: portraitShirt(id, fc), num: { leo: "10", tommy: "8", gigi: "17" }[id] || fc.num }, blink ? "blink" : ex);
+      const ok = window.__faceStyles.draw(fs, g, id, { ...fc, ...faceAcc(fc, id), shirt: portraitShirt(id, fc), num: { leo: "10", tommy: "8", gigi: "17" }[id] || fc.num }, blink ? "blink" : ex);
       g.restore(); if (ok) return;
     }
     portrait1(id, x, y, s, flip);

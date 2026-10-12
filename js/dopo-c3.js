@@ -10,9 +10,9 @@
     const { F, say, ask, done, go, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 3, S = () => K.stepOf(N), st = (k) => K.stat(k);
 
-    K.cast("ep_bruno89", { name: "Bruno Arcieri, 1989", tag: "gray", hair: "#f0f0f0", style: "buzz", skin: "#e0b890", eye: "#4a3a2a", glasses: true, bg: ["#1a1a3a", "#7a2a2a"], shirt: "#7a2a2a" },
+    K.cast("ep_bruno89", { acc: ["sciarpa"], name: "Bruno Arcieri, 1989", tag: "gray", hair: "#f0f0f0", style: "buzz", skin: "#e0b890", eye: "#4a3a2a", glasses: true, bg: ["#1a1a3a", "#7a2a2a"], shirt: "#7a2a2a" },
       "Il Capitano a settantanove anni, con gli occhiali spessi e la sciarpa granata anche d'estate. Tutti i pomeriggi gioca a «RONDINE '89» nel bar della stazione. Ha il record. Nessuno sa perché ci tenga tanto.");
-    K.cast("ep_rita", { name: "Rita della stazione", tag: "", hair: "#8a4a6a", style: "bun", skin: "#e8c4a0", eye: "#4a3a5a", bg: ["#1a1a3a", "#e83a8a"], shirt: "#3a3a5a" },
+    K.cast("ep_rita", { acc: ["grembiule"], name: "Rita della stazione", tag: "", hair: "#8a4a6a", style: "bun", skin: "#e8c4a0", eye: "#4a3a5a", bg: ["#1a1a3a", "#e83a8a"], shirt: "#3a3a5a" },
       "Gestisce il bar della stazione di Valdorsa da quando i treni passavano ogni ora. Adesso ne passano tre al giorno. La sala giochi l'ha tenuta aperta per un cliente solo, finché c'è stato.");
     K.cos("ep_c3", { kind: "shirt", label: "Maglia granata di oggi", val: "#8a2a3a", from: "Completa Dopo il Campione" });
     K.cos("ep_ricordo", { kind: "acc", label: "Stemma della scatola di latta", val: "#c9a227", from: "Finale «Il viaggio continua»" });
