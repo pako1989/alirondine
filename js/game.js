@@ -8958,7 +8958,20 @@
         const c = CAST[n.id], face = TW.target && TW.target.id === n.id ? (TW.x < n.x - 4 ? "left" : TW.x > n.x + 4 ? "right" : "down") : n.face || gxIdleFace(n);
         chibi(sx, sy + (n.walk ? 0 : gxIdleY(n)), { ...c, shirt: c.shirt || { dario: "#16325c" }[n.id] || "#555" }, face, n.walk || 0);
         if (trNews(n.id)) { px(sx - 4, sy - 38, 9, 11, "#ffd23f"); g.fillStyle = "#2a1a00"; g.font = "bold 9px sans-serif"; g.textAlign = "center"; g.fillText("!", sx + 0.5, sy - 29); g.textAlign = "left"; }
-      } else chibi(sx, sy, z.me ? z.me() : { ...CAST.leo, shirt: "#ff4d5a", num: "10" }, TW.dir, (dx || dy) ? TW.walk : 0);
+      } else {
+        const me = z.me ? z.me() : { ...CAST.leo, shirt: "#ff4d5a", num: "10" }, fx = z.heroFx ? z.heroFx() : null, ph = (dx || dy) ? TW.walk : 0;
+        if (!fx) chibi(sx, sy, me, TW.dir, ph);
+        else { // l'eroe trasformato: più grande o più piccolo, sospeso in volo, con il mantello che sventola
+          const s = fx.s || 1, hy = fx.dy ? fx.dy + Math.sin(frame / 12) * 1.5 : 0;
+          if (hy) { g.fillStyle = "#0003"; g.beginPath(); g.ellipse(sx, sy, 6 * s, 2.5 * s, 0, 0, 7); g.fill(); }
+          g.save(); g.translate(sx, sy - hy); g.scale(s, s);
+          if (fx.cape && TW.dir !== "up") { const fl = Math.sin(frame / 6) * ((dx || dy) ? 3 : 1), side = TW.dir === "left" ? 1 : TW.dir === "right" ? -1 : 0; g.fillStyle = fx.cape; g.beginPath(); g.moveTo(-5, -14); g.lineTo(5, -14); g.lineTo(6 + side * 4 + fl, -1); g.lineTo(-6 + side * 4 - fl, -1); g.closePath(); g.fill(); }
+          chibi(0, 0, me, TW.dir, ph);
+          if (fx.cape && TW.dir === "up") { const fl = Math.sin(frame / 6) * ((dx || dy) ? 3 : 1); g.fillStyle = fx.cape; g.beginPath(); g.moveTo(-5, -14); g.lineTo(5, -14); g.lineTo(7 + fl, 0); g.lineTo(-7 - fl, 0); g.closePath(); g.fill(); g.fillStyle = "rgba(0,0,0,.18)"; g.fillRect(-1, -13, 2, 12); }
+          if (fx.aura) { g.globalCompositeOperation = "lighter"; g.strokeStyle = fx.aura; g.lineWidth = 1; g.globalAlpha = 0.5 + 0.3 * Math.sin(frame / 8); g.beginPath(); g.ellipse(0, -12, 10, 15, 0, 0, 7); g.stroke(); }
+          g.restore();
+        }
+      }
     });
     trTop(cx, cy); if (z.top) z.top(cx, cy);
     // HUD
@@ -8982,8 +8995,10 @@
   }
   function trTry(nx, ny) {
     nx = clamp(nx, 6, TW.z.w * TS - 6); ny = clamp(ny, 8, TW.z.h * TS - 2);
+    const pass = typeof TW.z.pass === "function" ? TW.z.pass() || "" : TW.z.pass || ""; // tessere attraversabili in questo momento (es. le forme dell'eroe)
     for (const [ox, oy] of [[-5, -4], [5, -4], [-5, 2], [5, 2]]) {
       const c = trTile(nx + ox, ny + oy);
+      if (pass.includes(c)) continue;
       if (TR_SOLID.includes(c) || (TW.z.solid && TW.z.solid.includes(c))) return false;
     }
     for (const n of trNpcs()) {
@@ -22105,7 +22120,7 @@
     ["Partite", /Settimana del Molo/],
     ["Collezioni e curiosità", /Diario del Corriere/],
     ["Calcio d'azione e arcade", /Arena 2D|Biliardino|Cabinato|Stadio 3D|Corsa della Panda|Gozzo di Baciccia|Gabbia sul Molo|Tsubasa|Supereroi/],
-    ["Saghe e GDR", /Salone delle Saghe|Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis|Libro che Mangiava i Finali|Doppio Turno|Cristalli del Campo|Il Muro|Valle del Vento Gentile|Detective di Campo|Dopo il Campione|Calcio Spaziale|Torneo delle Cento Scuole|Cronache del Pallone di Cristallo/],
+    ["Saghe e GDR", /Salone delle Saghe|Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis|Libro che Mangiava i Finali|Doppio Turno|Cristalli del Campo|Il Muro|Valle del Vento Gentile|Detective di Campo|Dopo il Campione|Calcio Spaziale|Torneo delle Cento Scuole|Cronache del Pallone di Cristallo|Mantello Granata/],
     ["Collezioni e curiosità", /Gashapon|Roster & Talenti|Diorama|Fumetto|Leggende del passato|Bianco e Nero|Quartier Generale/],
   ];
   const MN_EXP = { "Partite": 12, "Allenamento": 6, "Storie e ricordi": 8 }; // quante voci ha la categoria a tutto sbloccato: le mancanti appaiono come «???»

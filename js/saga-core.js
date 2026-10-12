@@ -471,6 +471,8 @@
         item: spec.item || cfg.item || ["Piuma", "Piume"], itemCos: spec.itemCos, items: spec.items || [], bld: [], npcs: [], areas: spec.areas || [], hints: {}, pitch: spec.pitch || [-20, -20, 1, 1],
         solid: SOLID, act: Object.assign({ [REST.ch]: REST.label, x: "Apri il baule" }, obj(cfg.act), spec.act || {}), intro: [],
         me: () => { const c = api.CAST.hero || api.CAST.leo; return Object.assign({}, c); },
+        pass: () => (cfg.pass ? safe(() => cfg.pass(K, zid), "") || "" : ""), // tessere che l'eroe può attraversare adesso (forme, poteri)
+        heroFx: cfg.heroFx ? () => safe(() => cfg.heroFx(K, zid), null) : null, // l'aspetto dell'eroe in esplorazione: { s: scala, dy: volo, cape: colore, aura }
         drawItem(x, y, i) {
           const g = ctx(), f = frNow();
           if (cfg.drawItem) return safe(() => cfg.drawItem(g, x, y, i, f, K));

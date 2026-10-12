@@ -34,7 +34,7 @@ async function setup(o = {}) {
     T.btns = () => [...document.querySelectorAll("#choices button")].filter((b) => b.offsetParent !== null).map((b) => ({ b, t: b.innerText.replace(/\s+/g, " ").trim(), d: b.disabled }));
     T.walk = () => document.body.classList.contains("borgo") && window.__ali.view && window.__ali.view.kind === "trasf";
     T.click = (re) => { const x = T.btns().find((o) => !o.d && new RegExp(re, "i").test(o.t)); if (!x) return false; x.b.click(); return x.t; };
-    T.solidAt = (m, z, x, y) => { const c = m[y] && m[y][x]; if (c === undefined) return true; return "~#TSGMORWLNHBDW".includes(c) || (z.solid && z.solid.includes(c)); };
+    T.solidAt = (m, z, x, y) => { const c = m[y] && m[y][x]; if (c === undefined) return true; if (typeof z.pass === "function" && (z.pass() || "").includes(c)) return false; return "~#TSGMORWLNHBDW".includes(c) || (z.solid && z.solid.includes(c)); };
     T.npcTiles = () => { const TW = window.__tr.TW; return (TW.z.npcs || []).filter((n) => !n.ghost).map((n) => n.at); };
     T.bfs = (m, z, sx, sy, npcs) => {
       const H = m.length, W = m[0].length, seen = Array.from({ length: H }, () => Array(W).fill(false)), q = [[sx, sy]]; seen[sy][sx] = true;

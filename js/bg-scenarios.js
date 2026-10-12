@@ -5451,6 +5451,56 @@
     const jump = since("cc_finale", 2) < 60 ? Math.abs(Math.sin(since("cc_finale", 2) / 6)) * 14 : 0;
     [["#8a9aaa", "#c8a040"], ["#5a3a8a", "#3a2a5a"], ["#3a7a5a", "#1a1a1a"], ["#2a2a5a", "#c8c8d8"]].forEach(([b, h], i) => { const x = 100 + i * 36, y = 140 - (i % 2 ? jump : jump * 0.7); px(g, x, y, 10, 18, b); circ(g, x + 5, y - 5, 5, "#e8c4a0"); px(g, x, y - 10, 10, 4, h); });
   }
+  // ---- IL MANTELLO GRANATA: fumetto americano (retino a punti, contorni neri, scoppi «POW!»)
+  function mgDots(g, x, y, w, h, col, st) { g.fillStyle = col; for (let yy = y; yy < y + h; yy += st) for (let xx = x + ((yy / st) % 2 ? st / 2 : 0); xx < x + w; xx += st) g.fillRect(xx, yy, st * 0.4, st * 0.4); }
+  function mgBurst(g, x, y, r0, r1, txt, col, s) { s = s == null ? 1 : s; g.save(); g.translate(x, y); g.scale(s, s); g.rotate(-0.12); g.fillStyle = "#ffd23f"; g.beginPath(); for (let i = 0; i < 20; i++) { const a = (i / 20) * Math.PI * 2, r = i % 2 ? r0 : r1; g.lineTo(Math.cos(a) * r, Math.sin(a) * r); } g.closePath(); g.fill(); g.strokeStyle = "#121212"; g.lineWidth = 2; g.stroke(); g.font = `900 ${Math.round(r0 * 0.9)}px Impact, sans-serif`; g.textAlign = "center"; g.lineWidth = 3; g.strokeStyle = "#fff"; g.strokeText(txt, 0, r0 * 0.3); g.fillStyle = col || "#d82a3a"; g.fillText(txt, 0, r0 * 0.3); g.textAlign = "left"; g.restore(); }
+  function mgCap(g, x, y, txt) { g.font = "bold 8px 'Comic Sans MS', 'Trebuchet MS', sans-serif"; const w = g.measureText(txt).width + 10; g.fillStyle = "#121212"; g.fillRect(x + 2, y + 2, w, 13); g.fillStyle = "#ffe84a"; g.fillRect(x, y, w, 13); g.strokeStyle = "#121212"; g.lineWidth = 1; g.strokeRect(x, y, w, 13); g.fillStyle = "#121212"; g.fillText(txt, x + 5, y + 9.5); }
+  function mgHero(g, x, y, s, f, fly) { // il Mantello Granata disegnato a fumetto, con il mantello che sventola
+    const b = fly ? Math.sin(f / 10) * 3 : 0; g.save(); g.translate(x, y + b); g.scale(s, s);
+    g.fillStyle = "#8a1a2a"; g.beginPath(); g.moveTo(-6, -22); g.lineTo(6, -22); g.lineTo(14 + Math.sin(f / 6) * 4, 4); g.lineTo(-14 - Math.sin(f / 7) * 4, 6); g.closePath(); g.fill(); g.strokeStyle = "#121212"; g.lineWidth = 1.5; g.stroke();
+    g.fillStyle = "#2a2a3a"; g.fillRect(-5, -2, 4, 12); g.fillRect(1, -2, 4, 12); g.fillStyle = "#8a1a2a"; g.fillRect(-7, -20, 14, 19); g.strokeRect(-7, -20, 14, 19); g.fillStyle = "#ffd23f"; g.beginPath(); g.arc(0, -14, 3, 0, 7); g.fill();
+    g.fillStyle = "#e0ac7e"; g.beginPath(); g.arc(0, -27, 7, 0, 7); g.fill(); g.stroke(); g.fillStyle = "#2b1d14"; g.beginPath(); g.arc(0, -29, 7, Math.PI, 0); g.fill(); g.fillStyle = "#121212"; g.fillRect(-6, -28, 12, 3); g.fillStyle = "#fff"; g.fillRect(-4, -27.5, 2, 1.5); g.fillRect(2, -27.5, 2, 1.5); g.restore(); }
+  function bgMgTitolo(g, W, H, f) {
+    // la copertina dell'albo: raggi, la città, il Mantello in volo, il titolo a fumetto (tocca)
+    g.fillStyle = "#f6e24a"; g.fillRect(0, 0, W, H); g.save(); g.translate(W / 2, H / 2); for (let i = 0; i < 24; i++) { g.fillStyle = i % 2 ? "#ffd23f" : "#f6e24a"; g.beginPath(); g.moveTo(0, 0); const a = i / 24 * Math.PI * 2 + f / 400; g.lineTo(Math.cos(a) * 400, Math.sin(a) * 400); g.lineTo(Math.cos(a + 0.26) * 400, Math.sin(a + 0.26) * 400); g.closePath(); g.fill(); } g.restore();
+    mgDots(g, 0, 0, W, H, "rgba(216,42,42,.18)", 6);
+    for (let i = 0; i < 9; i++) { const x = i * 38 - 6, h = 40 + (i * 37) % 50; px(g, x, H - h, 34, h, ["#3a2a5a", "#5a3a6a", "#2a3a6a"][i % 3]); for (let k = 0; k < 4; k++) px(g, x + 5 + (k % 2) * 14, H - h + 8 + Math.floor(k / 2) * 14, 7, 7, (i + k + Math.floor(f / 60)) % 3 ? "#ffe84a" : "#2a1a3a"); }
+    const zoom = since("mg_titolo", 0) < 60; mgHero(g, 160 + Math.sin(f / 50) * 30, 92, zoom ? 2.2 : 1.6, f, true);
+    g.save(); g.translate(160, 34); g.rotate(-0.05); g.font = "900 26px Impact, sans-serif"; g.textAlign = "center"; g.lineWidth = 6; g.strokeStyle = "#121212"; g.strokeText("IL MANTELLO GRANATA", 0, 0); g.fillStyle = "#d82a3a"; g.fillText("IL MANTELLO GRANATA", 0, 0); g.textAlign = "left"; g.restore();
+    mgCap(g, 8, 52, "N° 1 · L. 100 · METROPOLENTA");
+    if (since("mg_titolo", 1) < 70) mgBurst(g, 60, 130, 18, 30, "POW!", "#d82a3a", Math.min(1, since("mg_titolo", 1) / 8));
+    if (since("mg_titolo", 2) < 90) { const t = since("mg_titolo", 2); px(g, 250, 120 - t * 0.3, 40, 26, "#fff"); g.strokeStyle = "#121212"; g.lineWidth = 1.5; g.strokeRect(250, 120 - t * 0.3, 40, 26); g.fillStyle = "#121212"; g.font = "bold 7px sans-serif"; g.fillText("BIP!", 262, 136 - t * 0.3); }
+  }
+  function bgMgPiazza(g, W, H, f) {
+    // Piazza dei Bottoni: il Canale Grande, il ponte alzato, l'edicola, il tram che canta (tocca)
+    vgrad(g, 0, 0, W, 110, ["#7ac8f0", "#e8f4f8"]); mgDots(g, 0, 0, W, 110, "rgba(40,120,200,.12)", 6);
+    for (let i = 0; i < 8; i++) { const x = i * 42 - 10, h = 50 + (i * 23) % 30; px(g, x, 110 - h, 40, h, ["#e8a87a", "#f0d8c8", "#d8a0a8", "#e8c87a"][i % 4]); px(g, x - 2, 106 - h, 44, 6, "#c8302a"); for (let k = 0; k < 3; k++) px(g, x + 6 + k * 11, 120 - h, 6, 9, "#3a5a8a"); }
+    vgrad(g, 0, 110, W, 90, ["#c8c0b0", "#b0a898"]); px(g, 140, 110, 40, 90, "#2a8ad8"); for (let i = 0; i < 8; i++) px(g, 144 + (i * 9 + f * 0.4) % 32, 120 + i * 10, 6, 1, "rgba(255,255,255,.6)");
+    const down = since("mg_piazza", 0) < 120; g.fillStyle = "#8a5a3a"; if (down) px(g, 136, 140, 48, 6, "#8a5a3a"); else { g.save(); g.translate(138, 146); g.rotate(-1.1); g.fillRect(0, -3, 26, 6); g.restore(); g.save(); g.translate(182, 146); g.rotate(1.1 + Math.PI); g.fillRect(0, -3, 26, 6); g.restore(); }
+    px(g, 40, 128, 40, 36, "#2a6a3a"); px(g, 36, 122, 48, 8, "#1a4a2a"); for (let i = 0; i < 3; i++) px(g, 44 + i * 12, 134, 9, 12, ["#f4ecdc", "#ffd23f", "#e8a8c8"][i]); g.fillStyle = "#121212"; g.font = "bold 5px sans-serif"; g.fillText("CORRIERE", 44, 128);
+    if (since("mg_piazza", 1) < 100) { mgCap(g, 20, 170, "EXTRA! RUBATA LA COPPA!"); }
+    const tx = since("mg_piazza", 2) < 160 ? 340 - since("mg_piazza", 2) * 2.4 : 340; px(g, tx, 150, 70, 26, "#e8c84a"); px(g, tx, 150, 70, 5, "#c8302a"); for (let k = 0; k < 4; k++) px(g, tx + 6 + k * 16, 157, 10, 8, "#c8e8ff"); if (tx < 330) { g.fillStyle = "#121212"; g.font = "bold 7px sans-serif"; g.fillText("♪ DIN DON ♪", tx + 8, 146); }
+    mgHero(g, 250, 104, 1, f, true);
+  }
+  function bgMgSartoria(g, W, H, f) {
+    // la sartoria: manichini, la macchina da cucire, l'armadio con tre lucchetti (tocca)
+    vgrad(g, 0, 0, W, H, ["#f0d8c8", "#d8b8a8"]); mgDots(g, 0, 0, W, H, "rgba(138,26,42,.08)", 6); px(g, 0, 150, W, 50, "#a8784a");
+    [[40, "#3a6ab8"], [80, "#e8c84a"], [120, "#5aa84a"]].forEach(([x, c], i) => { px(g, x + 6, 130, 2, 22, "#5a3a2a"); px(g, x, 96, 14, 34, c); circ(g, x + 7, 92, 5, "#c8a888"); if (since("mg_sartoria", 1) < 60 && i === 1) { g.save(); g.translate(x + 7, 110); g.rotate(Math.sin(since("mg_sartoria", 1) / 3) * 0.3); g.restore(); mgBurst(g, x + 7, 80, 9, 15, "SWISH", "#3a6ab8"); } });
+    const open = since("mg_sartoria", 0) < 140; px(g, 220, 60, 70, 92, "#5a3a2a"); g.strokeStyle = "#121212"; g.lineWidth = 2; g.strokeRect(220, 60, 70, 92);
+    if (open) { px(g, 224, 64, 62, 84, "#2a1a1a"); g.fillStyle = "#8a1a2a"; g.beginPath(); g.moveTo(242, 72); g.lineTo(268, 72); g.lineTo(276 + Math.sin(f / 8) * 3, 140); g.lineTo(234 - Math.sin(f / 8) * 3, 140); g.closePath(); g.fill(); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 255, 105, 40, "255,80,80", 0.3); g.restore(); circ(g, 255, 80, 3, "#ffd23f"); }
+    else { px(g, 254, 64, 2, 84, "#3a2a1a"); [80, 105, 130].forEach((y) => { px(g, 250, y, 10, 8, "#c8a040"); px(g, 252, y - 4, 6, 5, "rgba(0,0,0,0)"); g.strokeStyle = "#c8a040"; g.beginPath(); g.arc(255, y, 3, Math.PI, 0); g.stroke(); }); }
+    px(g, 150, 120, 50, 30, "#3a3a3a"); px(g, 160, 104, 30, 16, "#2a2a2a"); const needle = since("mg_sartoria", 2) < 90 ? Math.abs(Math.sin(f / 2)) * 5 : 0; px(g, 178, 120 + needle, 2, 6, "#c8c8c8"); if (needle) { g.fillStyle = "#121212"; g.font = "900 9px Impact, sans-serif"; g.fillText("TAC-TAC-TAC", 150, 98); }
+  }
+  function bgMgTetti(g, W, H, f) {
+    // i tetti al tramonto: tegole, comignoli, antenne, piccioni e Bullone (tocca)
+    vgrad(g, 0, 0, W, 120, ["#3a2a6a", "#e88a5a"]); mgDots(g, 0, 0, W, 120, "rgba(255,200,120,.1)", 6); circ(g, 250, 90, 22, "#ffb85a");
+    for (let i = 0; i < 6; i++) { const x = i * 60 - 20, y = 110 + (i % 2) * 14; g.fillStyle = i % 2 ? "#a83a2a" : "#c84a3a"; g.beginPath(); g.moveTo(x, H); g.lineTo(x, y + 20); g.lineTo(x + 32, y); g.lineTo(x + 64, y + 20); g.lineTo(x + 64, H); g.closePath(); g.fill(); g.strokeStyle = "#121212"; g.lineWidth = 1.5; g.stroke(); for (let k = 0; k < 4; k++) { g.strokeStyle = "rgba(0,0,0,.2)"; g.beginPath(); g.moveTo(x + 4, y + 30 + k * 12); g.lineTo(x + 60, y + 30 + k * 12); g.stroke(); } }
+    [[70, 96], [190, 104]].forEach(([x, y], i) => { px(g, x, y, 12, 20, "#7a4a3a"); const smoke = since("mg_tetti", 0) < 100 ? 2 : 1; for (let k = 0; k < 4 * smoke; k++) circ(g, x + 6 + Math.sin(f / 20 + k) * 4, y - 6 - ((f * 0.4 + k * 12) % 50), 3 + k % 3, "rgba(230,230,240,.5)"); });
+    px(g, 130, 60, 2, 50, "#3a3a4a"); px(g, 118, 64, 26, 2, "#3a3a4a"); px(g, 122, 72, 18, 2, "#3a3a4a");
+    const fly = since("mg_tetti", 1) < 90; [[120, 60], [128, 58], [138, 60]].forEach(([x, y], i) => { const yy = fly ? y - since("mg_tetti", 1) * (0.6 + i * 0.2) : y; const xx = fly ? x + since("mg_tetti", 1) * (i - 1) : x; circ(g, xx, yy, 3, "#8a8a9a"); px(g, xx + 2, yy - 2, 2, 1, "#e8a83a"); });
+    if (fly) mgBurst(g, 160, 40, 10, 17, "FRRR!", "#3a3a6a");
+    const bx = 240, by = 124, bb = since("mg_tetti", 2) < 60 ? Math.abs(Math.sin(since("mg_tetti", 2) / 4)) * 6 : 0; px(g, bx, by - bb, 22, 16, "#b8c4d0"); px(g, bx + 4, by - 4 - bb, 4, 4, "#6a7a8a"); px(g, bx + 14, by - 4 - bb, 4, 4, "#6a7a8a"); px(g, bx + 5, by + 5 - bb, 4, 3, "#3a8ac8"); px(g, bx + 13, by + 5 - bb, 4, 3, "#3a8ac8"); px(g, bx + 4, by + 16, 3, 6, "#6a7a8a"); px(g, bx + 15, by + 16, 3, 6, "#6a7a8a"); if (bb) { g.fillStyle = "#fff"; g.font = "900 9px Impact, sans-serif"; g.fillText("BIP! BOP!", bx - 8, by - 12); }
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -5957,6 +6007,26 @@
       [90, 50, 140, 70, "💠 I quattro cristalli girano più veloci, come bambini in girotondo. Ridono? I cristalli non ridono. Questi sì."],
       [0, 0, 320, 140, "❄ Una nevicata dolce, poi un sole, poi foglie: le stagioni passano tutte, in un minuto, per farsi vedere."],
       [90, 110, 150, 60, "🙌 Il gruppo salta insieme, come dopo un gol. Il Re del Silenzio li guarda. Poi, timidamente, salta anche lui."],
+    ] },
+    mg_titolo: { draw: bgMgTitolo, hot: [
+      [100, 40, 120, 90, "🦸 Il Mantello Granata si avvicina, sempre più grande, come se volesse uscire dalla copertina. Poi ci ripensa: c'è il prezzo stampato sopra."],
+      [20, 100, 90, 60, "💥 POW! Un pugno di carta colpisce un cattivo di carta. Il cattivo di carta si offende, e si stropiccia."],
+      [230, 90, 80, 60, "🤖 Una nuvoletta sale da sola dal fondo della pagina: «BIP!». È Bullone. Si è infilato nell'albo."],
+    ] },
+    mg_piazza: { draw: bgMgPiazza, hot: [
+      [130, 120, 60, 40, "🌉 Il ponte si abbassa, cigolando… per un attimo. Poi si rialza. Era un piccione che ci si è seduto sopra."],
+      [30, 115, 60, 55, "📰 Gilda attacca alla vetrina l'edizione straordinaria: «EXTRA! RUBATA LA COPPA!». La carta è ancora calda di stampa."],
+      [0, 140, 320, 40, "🚋 Passa il tram 7, che canta. Davvero: il conducente ha messo un altoparlante. «Din don, prossima fermata: avventura»."],
+    ] },
+    mg_sartoria: { draw: bgMgSartoria, hot: [
+      [220, 60, 70, 92, "🚪 L'armadio si apre da solo, con un cigolio da film. Dentro, il mantello granata fluttua un poco. Poi si richiude, timido."],
+      [30, 85, 110, 60, "👔 Un manichino si gira verso di te. «Swish». Nonna Tilde: «È il vento». Non c'è vento."],
+      [145, 100, 60, 50, "🧵 La macchina da cucire parte da sola: tac-tac-tac. Cuce un bottone d'oro su un pezzo di stoffa granata. Poi si ferma, soddisfatta."],
+    ] },
+    mg_tetti: { draw: bgMgTetti, hot: [
+      [60, 50, 160, 70, "💨 Dai comignoli esce un fumo che sa di ragù. Poi di caffè. Poi di torta di mele. I tetti di Metropolenta, la domenica, sono un menu."],
+      [110, 45, 40, 30, "🐦 I piccioni dell'antenna volano via tutti insieme, FRRR! Uno torna indietro: aveva dimenticato una briciola."],
+      [230, 100, 40, 45, "🤖 Bullone salta sul posto: «BIP! BOP!». Vuol dire «sono qui», oppure «ho stirato un piccione». Meglio non chiedere."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
