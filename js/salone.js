@@ -51,7 +51,7 @@
     { id: "cittadella", t: "La Cittadella", e: "🧪", g: ["scifi", "commedia"], fn: "openCitadelStoryMenu", key: "ali-di-rondine.citadel-v3", cover: "night", d: "Squad builder con cinque varianti di Leo e un portale." },
     { id: "bluelock", t: "La Gabbia dell'Ego", e: "🔥", g: ["sport"], fn: "openBlueLockMode", key: "ali-di-rondine.bluelock-v2", cover: "locker", d: "Torneo dei Predatori: ego contro altruismo." },
     { id: "tsubasa", t: "Il Tiro Combinato", e: "⚡", g: ["sport"], fn: "openTsubasaMenu", key: "ali-di-rondine.tsubasa-v3", cover: "stadium", d: "Tiri a effetto, parate dal palo e un torneo da campioni." },
-    { id: "jojo", t: "Stand Soccer Battle", e: "★", g: ["sport", "commedia"], fn: "openJoJoAdventure", key: "ali-di-rondine.jojo-stand-v1", cover: "stadium", d: "Le bizzarre avventure di Rondine." },
+    { id: "jojo", t: "Stand Soccer Battle", e: "★", g: ["sport", "commedia"], mod: "__jojoSalone", ch: 5, fn: "openJoJoAdventure", key: "ali-di-rondine.jojo-stand-v1", cover: "stadium", d: "Le bizzarre avventure di Rondine." },
     { id: "emblem", t: "Rondine Emblem", e: "🛡️", g: ["tattica"], fn: "openTacticalEmblemMode", cover: "stadium", d: "RPG tattico a griglia: dieci capitoli con storia e ritratti." },
     { id: "leggenda", t: "La Leggenda del Tuo Campione", e: "⭐", g: ["avventura"], mod: "__heroStory", ch: 4, fn: "openHeroStoryMenu", key: "ali-di-rondine.hero-story", cover: "stadium", d: "La saga esclusiva del tuo Campione." },
     { id: "cala", t: "Cala Tramontana", e: "🌊", g: ["avventura"], fn: "openCalaTramontana", key: "ali-di-rondine.cala-tramontana", cover: "beach", d: "Esplora a piedi il borgo marino alternativo con il tuo Campione." },

@@ -2652,6 +2652,11 @@
   // Esposizione Globale
   window.openJoJoAdventure = openJoJoAdventure;
   window.openJoJoStandMode = openJoJoAdventure;
+  // Salone delle Saghe: avanzamento reale (atti superati su 5)
+  window.__jojoSalone = {
+    info() { const c = loadProg().actCleared, d = {}; for (let i = 1; i <= c; i++) d[i] = 1; return { ch: Math.min(c + 1, 5), done: d }; },
+    menuEntry(back) { return { fn: () => openJoJoAdventure(back) }; }
+  };
   if (DEBUG) {
     window.__jojo = {
       get S() { return S; },
