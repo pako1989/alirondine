@@ -135,10 +135,10 @@ async function comandi(w) {
   const m1 = await S("const r = [S.mate.y, S.hero.y]; S.ptr = null; S.release('passa'); return r;");
   if (!m0[2] || !(m1[0] < m0[0] - 10) || Math.abs(m1[1] - m0[1]) > 6) errors.push("il compagno non si guida: " + JSON.stringify([m0, m1]));
   // contrasto: senza palla, avversario vicino → il pulsante diventa CONTRASTO e la scivolata ruba il pallone
-  await S("S.opp.forEach((q) => { q.stun = 0; }); const q = S.opp[0]; S.ball.own = q; S.ball.cd = 0; q.x = S.hero.x; q.y = S.hero.y - 30; S.ph = null; S.chg = null;"); await page.waitForTimeout(200);
+  await S("S.opp.forEach((q) => { q.stun = 0; }); const q = S.opp[0]; S.ball.own = q; S.ball.cd = 0; q.x = S.hero.x; q.y = S.hero.y - 30; S.ball.x = q.x; S.ball.y = q.y + 7; S.ph = null; S.chg = null;"); await page.waitForTimeout(200);
   const lb = await page.evaluate(() => document.querySelector(".scPitch .tira").textContent); if (lb !== "CONTRASTO") errors.push("senza palla il pulsante non dice CONTRASTO: " + lb);
   if (w === 390) await L.shot(page, "so_contrasto");
-  await page.evaluate(() => { window.__rnd = Math.random; Math.random = () => 0.1; }); await S("S.hero.stun = 0; S.ball.own = S.opp[0]; S.opp[0].x = S.hero.x; S.opp[0].y = S.hero.y - 20; S.press('tira');"); await page.waitForTimeout(450);
+  await page.evaluate(() => { window.__rnd = Math.random; Math.random = () => 0.1; }); await S("S.hero.stun = 0; S.hero.slide = 0; S.ph = null; S.chg = null; const q = S.opp[0]; S.opp[1].x = S.XL + 10; S.opp[1].y = S.GY0 + 20; S.mate.x = S.XR - 10; S.mate.y = S.GY0 + 30; q.stun = 0; q.x = S.hero.x; q.y = S.hero.y - 20; S.ball.own = q; S.ball.x = q.x; S.ball.y = q.y + 7; S.press('tira');"); await page.waitForTimeout(450);
   const tk = await S("Math.random = window.__rnd; return [S.ball.own === S.hero, S.data.tackles | 0];"); if (!tk[0] || tk[1] < 1) errors.push("il contrasto non ruba il pallone: " + JSON.stringify(tk));
   if (w === 390) await L.shot(page, "so_comandi");
   await S("S.finish();"); await page.waitForTimeout(200); await leave(page);
