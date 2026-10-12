@@ -11,9 +11,9 @@
 
     K.cast("so_gru", { acc: ["visiera"], name: "Comandante Ortensia Gru", tag: "", hair: "#c8c8d8", style: "bun", skin: "#e8c8a8", eye: "#3a5a8a", bg: ["#0a1830", "#e8a83a"], shirt: "#2a3a6a", glasses: true },
       "Comandante della Stazione Orbitale 7 da undici anni. Ama i regolamenti, i moduli in triplice copia e le statistiche. La statistica che odia di più: 412 giorni senza un evento degno di nota. Ha deciso di rimediare con un torneo di calcio.");
-    K.cast("so_arbi", { acc: ["fischietto"], name: "ARBI-9", tag: "gray", hair: "#5a6478", style: "buzz", skin: "#a8b0c0", eye: "#e83a6a", bg: ["#0a1830", "#a8b0c0"], shirt: "#3a4458" },
+    K.cast("so_arbi", { shape: "robot", acc: ["fischietto"], name: "ARBI-9", tag: "gray", hair: "#5a6478", style: "buzz", skin: "#a8b0c0", eye: "#e83a6a", bg: ["#0a1830", "#a8b0c0"], shirt: "#3a4458" },
       "Robot arbitro di serie 9, comprato usato da un torneo di bocce. Ha un fischietto integrato e un solo baco: fischia fuorigioco a qualunque cosa sia fuori posto. Porte, palloni, cuochi. Una volta, la Luna.");
-    K.cast("so_blop", { acc: ["grembiule"], name: "Blop", tag: "", hair: "#5ac84a", style: "bald", skin: "#7ae86a", eye: "#1a3a1a", bg: ["#3a3040", "#7ae86a"], shirt: "#e8e8f0" },
+    K.cast("so_blop", { shape: "blob", acc: ["grembiule"], name: "Blop", tag: "", hair: "#5ac84a", style: "bald", skin: "#7ae86a", eye: "#1a3a1a", bg: ["#3a3040", "#7ae86a"], shirt: "#e8e8f0" },
       "Il cuoco della stazione: un alieno gelatinoso, verde e trasparente. Si vede cosa ha mangiato a pranzo. Cucina zuppe che, a gravità zero, scappano dal piatto. Sogna di giocare a centrocampo: «Sono morbido, ma determinato».");
     K.cast("so_quattro", { acc: ["guanti", "chiave"], name: "Quattrobraccia", tag: "", hair: "#3a2a6a", style: "spiky", skin: "#8a9ae8", eye: "#e8e84a", bg: ["#242a44", "#8a9ae8"], shirt: "#e8a83a" },
       "Tecnico delle pareti esterne, quattro braccia e nessuna fretta. Fa yoga a testa in giù nel settore a gravità invertita. In porta sarebbe imbattibile, se solo non si distraesse a salutare con tutte e quattro le mani.");

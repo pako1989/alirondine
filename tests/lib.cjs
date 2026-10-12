@@ -13,7 +13,7 @@ const HERO = { v: 1, name: "Rondo", num: 7, style: "messy", hair: "#2b1d14", eye
 
 async function setup(o = {}) {
   const browser = await chromium.launch({ executablePath: EXE, args: ["--no-sandbox"] });
-  const page = await browser.newPage({ viewport: { width: o.w || 390, height: o.h || 800 } });
+  const page = await browser.newPage({ viewport: { width: o.w || 390, height: o.h || 800 }, deviceScaleFactor: o.dpr || 1 });
   const errors = [];
   page.on("console", (m) => { if (m.type() === "error") errors.push("console: " + m.text()); });
   page.on("pageerror", (e) => errors.push("pageerror: " + e.message + "\n" + (e.stack || "").split("\n").slice(0, 3).join("\n")));

@@ -14,7 +14,7 @@
       "La sarta di via dei Bottoni. Ha cucito le maglie di tutte le squadre di Metropolenta per cinquant'anni. Tiene gli spilli in bocca anche quando parla, e non ne ha mai ingoiato uno. Dice. Ha un armadio che non apre mai.");
     K.cast("mg_gilda", { acc: ["taccuino"], name: "Gilda Flash, fotoreporter", tag: "", hair: "#2a1a3a", style: "bob", skin: "#e8c4a0", eye: "#2a5a3a", bg: ["#1a1a3a", "#ffd23f"], shirt: "#e8c84a" },
       "Fotoreporter del Corriere di Metropolenta. Ha fotografato tutto: incendi di caldarroste, gatti sindaci, un tram volante (era un tram su un ponte). Le manca solo una foto: quella di un vero supereroe.");
-    K.cast("mg_bullone", { acc: ["cuffie"], name: "Bullone, robot-tostapane", tag: "", hair: "#8a9aa8", style: "buzz", skin: "#b8c4d0", eye: "#3a8ac8", bg: ["#2a3a4a", "#9ad8ff"], shirt: "#6a7a8a" },
+    K.cast("mg_bullone", { shape: "tostapane", acc: ["cuffie"], name: "Bullone, robot-tostapane", tag: "", hair: "#8a9aa8", style: "buzz", skin: "#b8c4d0", eye: "#3a8ac8", bg: ["#2a3a4a", "#9ad8ff"], shirt: "#6a7a8a" },
       "Il robot di Nonna Tilde: un tostapane con le gambe, costruito per stirare le maglie. Stira benissimo. Tosta anche le maglie, ogni tanto. Dice solo «bip» e «bop», ma con un'espressività che commuove.");
     K.cast("mg_tonno", { acc: ["bandana"], name: "Tonno, capo dei Panchinari", tag: "", hair: "#3a2a1a", style: "buzz", skin: "#e0b890", eye: "#3a2a1a", bg: ["#1a2a4a", "#3a6ab8"], shirt: "#3a6ab8", beard: true },
       "Capo dei Panchinari: tre giocatori che non sono mai entrati in campo, in nessuna partita, mai. Si sono offesi. Adesso rubano le coppe, per sapere che effetto fa tenerne una in mano.");

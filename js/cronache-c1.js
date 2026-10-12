@@ -17,7 +17,7 @@
       "Mago della Torre sul Colle. Conosce trecento incantesimi e non ne ricorda nessuno senza gli occhiali. Senza occhiali ha lanciato «Vento» su una mucca: la mucca adesso vive in cima a un albero, ed è felice.");
     K.cast("cc_contadina", { acc: ["paglia"], name: "Gemma, contadina", tag: "", hair: "#8a4a2a", style: "long", skin: "#e8b88a", eye: "#3a3a2a", bg: ["#0e1446", "#7ab860"], shirt: "#c8584a" },
       "Coltiva i campi intorno a Prato Lungo. Da quando le stagioni si sono fermate, il grano non cresce e non secca: resta lì, a metà, come una domanda.");
-    K.cast("cc_rovo", { name: "Capo dei Guardiani di Rovo", tag: "", hair: "#2a4a1a", style: "spiky", skin: "#8a6a4a", eye: "#e8c84a", bg: ["#1a2a1a", "#5a8a3a"], shirt: "#5a3a2a" },
+    K.cast("cc_rovo", { shape: "rovo", name: "Capo dei Guardiani di Rovo", tag: "", hair: "#2a4a1a", style: "spiky", skin: "#8a6a4a", eye: "#e8c84a", bg: ["#1a2a1a", "#5a8a3a"], shirt: "#5a3a2a" },
       "Il più vecchio dei Guardiani di Rovo, gli spiriti spinosi che proteggono il Cristallo dell'Erba. Da quando il cristallo si spegne non riconoscono più nessuno: difendono il campo da tutti, anche da chi vuole aiutarli.");
     K.cos("cc_c1", { kind: "shirt", label: "Mantello azzurro del viandante", val: "#2a4ab8", from: "Capitolo 1 delle Cronache del Pallone di Cristallo" });
     K.cos("cc_schegge1", { kind: "hairc", label: "Capelli Cristallo d'Erba", val: "#7af0c8", from: "Trova tutte le schegge della mappa del mondo" });

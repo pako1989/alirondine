@@ -16,9 +16,9 @@
       "Tiene la locanda «Il Ventaglio». Cucina zuppe che curano tutto tranne la nostalgia, e per quella ha un liquore di more. Dice di aver visto i Soffi da bambina, e di non aver mai smesso di vederli.");
     K.cast("ve_dora", { acc: ["chiave", "taccuino"], name: "Ingegnera Dora Ferraglia", tag: "", hair: "#2a2a2a", style: "slick", skin: "#f2d8c0", eye: "#5a6a7a", glasses: true, bg: ["#2a3040", "#c9a227"], shirt: "#4a5a6a" },
       "Della Compagnia delle Turbine, venuta dalla città con un anemometro d'ottone e una valigia piena di progetti. Misura il vento ovunque vada. È gentile, precisa, e convinta che il vento vada «messo da parte, come il grano».");
-    K.cast("ve_sbuffo", { acc: "", name: "Sbuffo", tag: "", hair: "#f6f6fa", style: "buzz", skin: "#f6f6fa", eye: "#2a2a30", bg: ["#8cc764", "#f6f6fa"], shirt: "#e8eef4" },
+    K.cast("ve_sbuffo", { shape: "nuvola", acc: "", name: "Sbuffo", tag: "", hair: "#f6f6fa", style: "buzz", skin: "#f6f6fa", eye: "#2a2a30", bg: ["#8cc764", "#f6f6fa"], shirt: "#e8eef4" },
       "Un Soffio: uno spirito del vento grande come un pallone, fatto di nebbia e di risate. È il capitano dei Soffi del prato. Non parla, ma si capisce benissimo cosa vuole: giocare.");
-    K.cast("ve_soffio", { acc: "", name: "Un Soffio", tag: "", hair: "#f6f6fa", style: "buzz", skin: "#f6f6fa", eye: "#2a2a30", bg: ["#8cc764", "#f6f6fa"], shirt: "#e8eef4" },
+    K.cast("ve_soffio", { shape: "nuvola", acc: "", name: "Un Soffio", tag: "", hair: "#f6f6fa", style: "buzz", skin: "#f6f6fa", eye: "#2a2a30", bg: ["#8cc764", "#f6f6fa"], shirt: "#e8eef4" },
       "Un piccolo spirito del vento. Profuma di bucato e di erba tagliata. Se lo guardi troppo, diventa trasparente per timidezza.");
 
     K.cos("ve_c1", { kind: "shirt", label: "Maglia del custode del prato", val: "#5a8a4a", from: "Completa il Capitolo 1 de La Valle del Vento Gentile" });
