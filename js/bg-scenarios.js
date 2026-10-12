@@ -5398,6 +5398,25 @@
     for (let i = 0; i < 16; i++) { const a = 0.4 + 0.5 * Math.sin(f / 15 + i * 2); if (a > 0.3) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, (i * 53 + Math.sin(f / 40 + i) * 20) % W, 40 + (i * 31) % 120, 5, "220,255,150", a); g.restore(); } }
     if (since("cc_bosco", 2) < 120) { ccWin(g, 100, 20, 120, 22); g.fillStyle = "#fff"; g.font = "bold 8px monospace"; g.fillText("CHI VA LA'?", 116, 35); }
   }
+  function bgCcPorto(g, W, H, f) {
+    // il porto di Sale Antico: case bianche, il Garbino senza vele, Rubi che salta sulle bitte (tocca)
+    vgrad(g, 0, 0, W, 90, ["#7ab8e8", "#c8e0f0"]); for (let i = 0; i < 6; i++) { const x = 10 + i * 52; px(g, x, 50, 40, 40, "#f4f4f8"); px(g, x - 3, 44, 46, 8, "#3a6ab8"); px(g, x + 15, 70, 10, 20, "#3a4a6a"); }
+    vgrad(g, 0, 90, W, 110, ["#2a7ac8", "#1a4a8a"]); for (let i = 0; i < 12; i++) px(g, (i * 37 + f * 0.3) % W, 100 + (i * 13) % 90, 10, 1, "rgba(255,255,255,.4)");
+    const sail = since("cc_porto", 0) < 140; px(g, 140, 120, 120, 26, "#6a4a2a"); px(g, 140, 120, 120, 4, "#8a6a4a"); [160, 200, 240].forEach((x) => { px(g, x, 60, 3, 62, "#5a4a3a"); if (sail) { g.fillStyle = "#f4ecdc"; g.beginPath(); g.moveTo(x + 3, 64); g.quadraticCurveTo(x + 26, 80, x + 3, 112); g.closePath(); g.fill(); } }); g.fillStyle = "#f4f4f8"; g.beginPath(); g.moveTo(260, 122); g.lineTo(276, 112); g.lineTo(270, 130); g.closePath(); g.fill();
+    const rx = 30 + Math.abs(((f * 1.5) % 180) - 90), ry = 130 - Math.abs(Math.sin(f / 7)) * 14; px(g, 20, 140, 100, 8, "#8a7a6a"); for (let i = 0; i < 4; i++) px(g, 26 + i * 26, 132, 6, 8, "#4a3a2a"); px(g, rx, ry, 8, 14, "#3a7a5a"); circ(g, rx + 4, ry - 4, 4, "#c68642"); px(g, rx, ry - 8, 8, 3, "#c82a2a");
+    if (since("cc_porto", 1) < 100) { ccWin(g, rx - 10, ry - 40, 80, 20); g.fillStyle = "#fff"; g.font = "bold 7px monospace"; g.fillText("NON HO RUBATO!", rx - 4, ry - 27); }
+    if (since("cc_porto", 2) < 120) for (let i = 0; i < 6; i++) { const x = 290 - i * 14 + (f % 20), y = 40 + Math.sin(f / 10 + i) * 6; g.strokeStyle = "#fff"; g.lineWidth = 1; g.beginPath(); g.moveTo(x - 4, y); g.quadraticCurveTo(x - 2, y - 3, x, y); g.quadraticCurveTo(x + 2, y - 3, x + 4, y); g.stroke(); }
+  }
+  function bgCcIsola(g, W, H, f) {
+    // l'isola del Cristallo del Mare: il campo nella sabbia, il cristallo sullo scoglio, i Silenti in fila (tocca)
+    vgrad(g, 0, 0, W, 80, ["#5ab8f0", "#c8e8f8"]); vgrad(g, 0, 70, W, 130, ["#2a8ad8", "#1a5a9a"]);
+    g.fillStyle = "#e8d8a8"; g.beginPath(); g.ellipse(160, 160, 150, 50, 0, 0, 7); g.fill(); g.strokeStyle = "rgba(255,255,255,.7)"; g.lineWidth = 1.5; g.setLineDash([4, 3]); g.strokeRect(70, 135, 180, 46); g.beginPath(); g.moveTo(160, 135); g.lineTo(160, 181); g.stroke(); g.setLineDash([]);
+    const lit = (() => { try { return !!window.__cronache.info().flags.cristallo_cc_isola; } catch (e) { return false; } })();
+    px(g, 140, 90, 40, 30, "#6a6a7a"); ccCrystal(g, 160, 74, 14, "#5ab8ff", lit || since("cc_isola", 0) < 60, f);
+    for (let i = 0; i < 4; i++) { const x = 100 + i * 34, y = 150; px(g, x, y, 9, 18, "#4a4a5a"); circ(g, x + 4.5, y - 5, 5, "#c8c8d0"); if (since("cc_isola", 1) < 90 && i === 0) { px(g, x + 1, y - 7, 7, 3, "#2a2a3a"); } }
+    if (since("cc_isola", 1) < 90) { ccWin(g, 70, 112, 90, 20); g.fillStyle = "#fff"; g.font = "bold 7px monospace"; g.fillText("( . . . )", 92, 125); }
+    if (since("cc_isola", 2) < 120) { const t = since("cc_isola", 2); g.strokeStyle = "rgba(255,255,255,.8)"; g.lineWidth = 2; g.beginPath(); g.moveTo(0, 120 + t * 0.2); g.quadraticCurveTo(160, 110 + t * 0.2, 320, 120 + t * 0.2); g.stroke(); }
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -5879,6 +5898,16 @@
       [140, 100, 40, 60, "💠 Il cristallo spento manda un lampo verde, debole come un battito. Ti ha sentito."],
       [0, 140, 320, 60, "🌿 Le spine dei rovi si muovono tutte insieme, come se respirassero. Poi si fermano, ad ascoltare."],
       [90, 15, 140, 30, "👁 Tra i rami, due occhi gialli. Poi quattro. Poi otto. I Guardiani di Rovo."],
+    ] },
+    cc_porto: { draw: bgCcPorto, hot: [
+      [140, 60, 120, 90, "⛵ Per un istante, sul Garbino, compaiono le vele: bianche, gonfie. Poi spariscono. Era un ricordo della nave."],
+      [20, 100, 120, 50, "🏃 Rubi salta da una bitta all'altra, con le vele piegate sotto il braccio. «Non ho rubato niente!», grida. Nessuno gli ha chiesto niente."],
+      [220, 20, 100, 50, "🕊 I gabbiani volano controvento. Ma il vento non c'è. Volano lo stesso, per abitudine."],
+    ] },
+    cc_isola: { draw: bgCcIsola, hot: [
+      [140, 55, 40, 60, "💠 Il cristallo sullo scoglio manda un lampo azzurro. Il mare intorno si calma, come chi trattiene il fiato."],
+      [90, 135, 140, 40, "🧍 I Silenti, in fila, immobili. Il primo alza una mano: ( . . . ). È un saluto. Credo."],
+      [0, 100, 320, 30, "🌊 La marea scende ancora: il campo nella sabbia diventa più grande. Il mare vuole vedere la partita."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
