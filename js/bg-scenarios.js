@@ -5692,6 +5692,32 @@
     const fade = since("nl_alba", 1) < 160 ? since("nl_alba", 1) / 160 : 0.3; g.save(); g.globalAlpha = 1 - fade; for (let i = 0; i < 5; i++) nlShade(g, 90 + i * 35, 170 - fade * 30, 0.8, f + i * 15, String([9, 3, 1, 7, 13][i])); g.restore();
     if (since("nl_alba", 2) < 120) for (let i = 0; i < 30; i++) { const t = since("nl_alba", 2); px(g, (i * 31 + t) % W, 200 - ((t * 1.5 + i * 13) % 200), 2, 2, "#fff4c8"); }
   }
+  // ---- IL TORNEO DEI MONDI: l'eclissi, le tredici porte, l'Eclisse
+  const TM_COL = ["#e83a3a", "#9ad8ff", "#d82a3a", "#e8c84a", "#ffd27a", "#7ab86a", "#d8b46a", "#c8a878", "#5a8ad8", "#8a8a9a", "#b88aff", "#6a6aaa", "#c8742a"];
+  function tmEclipse(g, x, y, r, f, k) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, x, y, r * 2.4 * (k || 1), "255,210,63", 0.35); g.restore(); circ(g, x, y, r, "#ffe8a0"); circ(g, x + r * 0.28 * Math.cos(f / 200), y - r * 0.12, r * 0.92, "#0a0618"); g.strokeStyle = "rgba(255,232,160,.8)"; g.lineWidth = 1.5; g.beginPath(); g.arc(x, y, r, 0, 7); g.stroke(); }
+  function tmPortal(g, x, y, col, open, f, i) { px(g, x - 10, y - 26, 20, 34, "#1a1030"); g.strokeStyle = open ? col : "#4a4a5a"; g.lineWidth = 2; g.beginPath(); g.ellipse(x, y - 9, 8, 15, 0, 0, 7); g.stroke(); if (open) { for (let k = 0; k < 3; k++) { g.strokeStyle = col + "88"; g.lineWidth = 1; g.beginPath(); g.ellipse(x, y - 9, 6 - k * 1.6, 12 - k * 3.4, (f / 30 + k + i) % 6.28, 0, 4); g.stroke(); } g.save(); g.globalCompositeOperation = "lighter"; glowB(g, x, y - 9, 18, "200,170,255", 0.25); g.restore(); } }
+  function bgTmTitolo(g, W, H, f) {
+    // la copertina: l'eclissi sopra un cerchio di tredici porte (tocca)
+    vgrad(g, 0, 0, W, H, ["#05030f", "#2a1a4a"]); for (let i = 0; i < 60; i++) px(g, (i * 71) % W, (i * 37) % H, 1, 1, `rgba(230,220,255,${0.3 + 0.4 * Math.sin(f / 18 + i)})`);
+    tmEclipse(g, 160, 60, 24, f, since("tm_titolo", 0) < 120 ? 1.6 : 1);
+    for (let i = 0; i < 13; i++) { const a = Math.PI * (0.08 + (i / 12) * 0.84), x = 160 - Math.cos(a) * 140, y = 170 - Math.sin(a) * 40; tmPortal(g, x, y, TM_COL[i], since("tm_titolo", 1) < 150 ? true : (i + Math.floor(f / 60)) % 3 !== 0, f, i); }
+    g.font = "900 18px 'Trebuchet MS', sans-serif"; g.textAlign = "center"; g.fillStyle = "#ffd23f"; g.shadowColor = "#ffb84a"; g.shadowBlur = 10; g.fillText("IL TORNEO DEI MONDI", 160, 24); g.shadowBlur = 0; g.textAlign = "left";
+    if (since("tm_titolo", 2) < 120) for (let i = 0; i < 13; i++) { const t = since("tm_titolo", 2) / 120, a = i / 13 * 6.28 + t * 3; circ(g, 160 + Math.cos(a) * 60 * t, 60 + Math.sin(a) * 40 * t, 3, TM_COL[i]); }
+  }
+  function bgTmAtrio(g, W, H, f) {
+    // l'Atrio: la piazza fuori dal tempo, le porte in fila, il Custode di nuvola d'oro (tocca)
+    vgrad(g, 0, 0, W, 120, ["#0a0618", "#3a2a6a"]); tmEclipse(g, 260, 34, 16, f);
+    px(g, 0, 120, W, 80, "#2a1a4a"); for (let i = 0; i < 10; i++) px(g, i * 34, 120 + (i % 2) * 2, 32, 2, "rgba(200,170,255,.15)");
+    for (let i = 0; i < 7; i++) tmPortal(g, 22 + i * 46, 116, TM_COL[i * 2 % 13], since("tm_atrio", 0) < 120 || i % 3 !== 1, f, i);
+    const cb = Math.sin(f / 20) * 3; g.fillStyle = "#ffe8a0"; [[-10, 0, 10], [10, 0, 10], [0, -8, 13], [0, 8, 10]].forEach(([dx, dy, r]) => { g.beginPath(); g.arc(160 + dx, 160 + dy + cb, r, 0, 7); g.fill(); }); px(g, 154, 156 + cb, 3, 3, "#5a3a8a"); px(g, 163, 156 + cb, 3, 3, "#5a3a8a"); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 160, 160, since("tm_atrio", 1) < 90 ? 60 : 34, "255,232,160", 0.3); g.restore();
+    if (since("tm_atrio", 2) < 100) { const t = since("tm_atrio", 2); for (let i = 0; i < 6; i++) { const x = 30 + i * 52, y = 175 - Math.abs(Math.sin(t / 8 + i)) * 10; circ(g, x, y, 4, TM_COL[(i * 3) % 13]); } }
+  }
+  function bgTmEclisse(g, W, H, f) {
+    // l'Eclisse: undici sagome dagli occhi d'oro, il sole nero, le porte che tremano (tocca)
+    vgrad(g, 0, 0, W, H, ["#020108", "#1a0e30"]); tmEclipse(g, 160, 50, 30, f, since("tm_eclisse", 0) < 100 ? 2 : 1.2);
+    px(g, 0, 140, W, 60, "#140a24"); const n = 11; for (let i = 0; i < n; i++) { const x = 20 + i * 27, y = 150 + (i % 2) * 6 + Math.sin(f / 25 + i) * 2; g.globalAlpha = 0.85; g.fillStyle = "#2a1a4a"; g.beginPath(); g.ellipse(x, y, 7, 16, 0, 0, 7); g.fill(); g.beginPath(); g.arc(x, y - 18, 6, 0, 7); g.fill(); g.globalAlpha = 1; const blink = since("tm_eclisse", 1) < 80 ? Math.floor(f / 6 + i) % 2 : 1; if (blink) { px(g, x - 3, y - 20, 2, 2, "#ffd23f"); px(g, x + 1, y - 20, 2, 2, "#ffd23f"); } }
+    if (since("tm_eclisse", 2) < 140) for (let i = 0; i < 40; i++) { const t = since("tm_eclisse", 2); px(g, (i * 31 + t * 1.5) % W, 140 - ((t * 1.2 + i * 17) % 140), 2, 2, "#ffd23f"); }
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -6313,6 +6339,21 @@
       [0, 100, 320, 70, "🏮 I lampioni si spengono uno dopo l'altro, da sinistra a destra, come candele dopo una torta. L'ultimo fa un piccolo inchino."],
       [70, 120, 200, 70, "👥 Le Ombre diventano trasparenti, piano piano, e poi luce. Salutano tutte con la mano. L'ombra numero tredici saluta con due."],
       [0, 0, 320, 200, "✨ Dall'erba si alzano scintille d'oro, verso il sole che sorge. Sanlume si sveglia, e non sa ancora che notte c'è stata."],
+    ] },
+    tm_titolo: { draw: bgTmTitolo, hot: [
+      [120, 20, 80, 80, "🌒 L'eclissi si stringe, e l'anello d'oro diventa più grande, come un occhio che si apre."],
+      [0, 120, 320, 70, "🚪 Le tredici porte si accendono tutte insieme, ognuna del colore del suo mondo. Poi si spengono quelle che non ti conoscono ancora."],
+      [100, 40, 120, 60, "✨ Tredici scintille escono dall'eclissi e girano in tondo, come tredici palloni in un girotondo."],
+    ] },
+    tm_atrio: { draw: bgTmAtrio, hot: [
+      [0, 80, 320, 50, "🚪 Le porte vibrano: da una arriva un «bip», da un'altra un carillon, da un'altra ancora il rumore di una videocassetta."],
+      [130, 130, 60, 60, "☁ Il Custode delle Porte si gonfia di luce d'oro, contento di vederti. Il cappuccio, però, non se lo toglie."],
+      [0, 160, 320, 40, "⚽ Tredici palloni rimbalzano sul pavimento dell'Atrio, uno per mondo, ognuno con il suo rimbalzo."],
+    ] },
+    tm_eclisse: { draw: bgTmEclisse, hot: [
+      [110, 10, 100, 90, "🌑 Il sole nero si allarga. Per un attimo tutto l'Atrio è buio, tranne gli occhi d'oro dell'Eclisse."],
+      [0, 120, 320, 60, "👁 Gli occhi d'oro dell'Eclisse si accendono e si spengono a turno, come un applauso silenzioso."],
+      [0, 0, 320, 200, "✨ Dal campo salgono scintille d'oro, verso l'eclissi: sono i gol di tutte le saghe, dice il Custode."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
