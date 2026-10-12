@@ -463,6 +463,20 @@
       const t = GRV.cv.getContext("2d"); t.clearRect(0, 0, cv.width, cv.height); t.drawImage(cv, 0, 0);
       g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = "#05060c"; g.fillRect(0, 0, cv.width, cv.height); g.translate(cv.width / 2, cv.height / 2); g.rotate(GRV.ang); g.drawImage(GRV.cv, -cv.width / 2, -cv.height / 2); g.restore();
     }
+    // BUIO E LUCI (luce dinamica): spec.buio = 0..1 (o funzione di K) copre la zona di buio; spec.luci(K) → [[tx, ty, raggio in caselle, "r,g,b"?], …]
+    // e la luce dell'eroe (spec.heroLight caselle, 3 se non indicato) bucano il buio con aloni morbidi. Si vede solo ciò che è illuminato.
+    let BUIO_CV = null;
+    function buio(g, spec, cx, cy) {
+      const a = typeof spec.buio === "function" ? +safe(() => spec.buio(K), 0) : +spec.buio || 0; if (a <= 0.01) return;
+      const W = 320, H = 200; BUIO_CV = BUIO_CV || document.createElement("canvas"); if (BUIO_CV.width !== W) { BUIO_CV.width = W; BUIO_CV.height = H; }
+      const b = BUIO_CV.getContext("2d"); b.globalCompositeOperation = "source-over"; b.clearRect(0, 0, W, H); b.fillStyle = `rgba(4,6,18,${Math.min(0.97, a)})`; b.fillRect(0, 0, W, H);
+      b.globalCompositeOperation = "destination-out";
+      const hole = (x, y, r, k) => { const gr = b.createRadialGradient(x, y, r * 0.25, x, y, r); gr.addColorStop(0, `rgba(0,0,0,${k})`); gr.addColorStop(1, "rgba(0,0,0,0)"); b.fillStyle = gr; b.fillRect(x - r, y - r, r * 2, r * 2); };
+      const p = api.trPos && api.trPos(), fl = 1 + Math.sin(frNow() / 7) * 0.03; if (p) hole(p[0] - cx, p[1] - cy - 8, (spec.heroLight || 3) * TS * fl, 1);
+      const L = spec.luci ? arr(safe(() => spec.luci(K), [])) : []; L.forEach(([tx, ty, r]) => hole(tx * TS + 8 - cx, ty * TS + 8 - cy, (r || 3) * TS * (1 + Math.sin(frNow() / 9 + tx) * 0.04), 1));
+      g.drawImage(BUIO_CV, 0, 0);
+      g.save(); g.globalCompositeOperation = "lighter"; L.forEach(([tx, ty, r, rgb]) => glow(g, tx * TS + 8 - cx, ty * TS + 8 - cy, (r || 3) * TS * 0.8, rgb || "255,200,120", 0.16)); if (p) glow(g, p[0] - cx, p[1] - cy - 8, (spec.heroLight || 3) * TS * 0.6, "255,220,160", 0.1); g.restore();
+    }
     function registerZone(chN, zid, spec) {
       const rk = spec.region && REG[spec.region] ? spec.region : REG_FIRST;
       const syncZX = () => { const es = eraSpec(zid), rk2 = es && es.region && REG[es.region] ? es.region : rk; ZX.id = zid; ZX.rk = rk2; ZX.rg = REG[rk2]; ZX.era = es; ZX.eraName = eraOf(zid); ZX.spec = spec; ZX.standCol = spec.stands; ZX.chestOpen = (tx, ty) => F.is(chestKey(zid, tx, ty)); };
@@ -517,6 +531,7 @@
         PLUG.forEach((p) => p.top && safe(() => p.top(GP, zid, spec, cx, cy, d, K)));
         safe(() => gravView(GP));
         safe(() => mood(GP, frNow()));
+        safe(() => buio(GP, spec, cx, cy));
         if (spec.hud) safe(() => spec.hud(GP, K, stepOf(chN)));
         PLUG.forEach((p) => p.hud && safe(() => p.hud(GP, zid, spec, K)));
       };

@@ -4118,6 +4118,16 @@
     return { eyes: [[-9, 2], [9, 2]], r: 4.5, my: 18, ink: "#2a1a10" };
   };
   SHAPE_CHIBI.gatto = function (x, y, c, dir, ph) { const l = ph ? Math.sin(ph) * 1 : 0, tl = Math.sin(frame / 15 + x) * 2; g.fillStyle = "#0003"; g.beginPath(); g.ellipse(x, y, 6, 2, 0, 0, 7); g.fill(); const col = c.skin || "#e8963a"; px(x - 5, y - 6, 10, 5, col); px(x - 5, y - 2, 2, 2 + l, col); px(x + 3, y - 2, 2, 2 - l, col); px(dir === "left" ? x + 4 : x - 6, y - 10 + tl * 0.3, 2, 6, col); const hx = dir === "left" ? x - 6 : dir === "right" ? x + 1 : x - 3; px(hx, y - 11, 6, 6, col); px(hx, y - 13, 2, 2, col); px(hx + 4, y - 13, 2, 2, col); if (dir !== "up") { px(hx + 1, y - 9, 1, 1, c.eye || "#3a8a3a"); px(hx + 4, y - 9, 1, 1, c.eye || "#3a8a3a"); } px(x - 2, y - 6, 4, 1, c.hair || "#c86a1a"); };
+  SHAPE_PORTRAIT.ombra = function (c, f) { // un'ombra gentile: sagoma scura e morbida, occhi di luce, fili di fumo (colori: skin = corpo, eye = occhi, shirt = maglia d'epoca)
+    const b = Math.sin(f / 25) * 2; g.save(); g.translate(0, b); g.globalAlpha = 0.9;
+    const gr = g.createLinearGradient(0, -40, 0, 64); gr.addColorStop(0, c.skin || "#3a3a5a"); gr.addColorStop(1, "rgba(30,30,60,0)"); g.fillStyle = gr;
+    g.beginPath(); g.moveTo(-32, 64); g.quadraticCurveTo(-30, 28, -16, 22); g.quadraticCurveTo(-26, -6, -18, -22); g.quadraticCurveTo(0, -42, 18, -22); g.quadraticCurveTo(26, -6, 16, 22); g.quadraticCurveTo(30, 28, 32, 64); g.closePath(); g.fill();
+    if (c.shirt) { g.globalAlpha = 0.45; g.fillStyle = c.shirt; g.beginPath(); g.moveTo(-26, 60); g.quadraticCurveTo(0, 28, 26, 60); g.closePath(); g.fill(); g.fillStyle = "#fff"; g.font = "bold 11px sans-serif"; g.textAlign = "center"; if (c.num) g.fillText(c.num, 0, 54); g.textAlign = "left"; }
+    g.globalAlpha = 0.5; g.strokeStyle = "rgba(200,210,255,.5)"; g.lineWidth = 1.5; for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(-10 + i * 10, -30); g.quadraticCurveTo(-14 + i * 10 + Math.sin(f / 10 + i) * 6, -44, -8 + i * 10, -54 - (f % 30) / 3); g.stroke(); }
+    g.restore(); g.save(); g.globalCompositeOperation = "lighter"; [[-8, 0 + b], [8, 0 + b]].forEach(([x0, y0]) => { const gg = g.createRadialGradient(x0, y0, 1, x0, y0, 9); gg.addColorStop(0, "rgba(255,230,150,.7)"); gg.addColorStop(1, "rgba(255,230,150,0)"); g.fillStyle = gg; g.fillRect(x0 - 9, y0 - 9, 18, 18); }); g.restore();
+    return { eyes: [[-8, b], [8, b]], r: 4, my: 13 + b, ink: "#fff4c8" };
+  };
+  SHAPE_CHIBI.ombra = function (x, y, c, dir) { const b = Math.sin(frame / 18 + x) * 1.5; g.save(); g.globalAlpha = 0.8; g.fillStyle = c.skin || "#3a3a5a"; g.beginPath(); g.ellipse(x, y - 11 + b, 6, 11, 0, 0, 7); g.fill(); g.globalAlpha = 0.4; g.beginPath(); g.ellipse(x, y - 1, 5, 2, 0, 0, 7); g.fill(); g.restore(); if (dir !== "up") { px(x - 3, y - 16 + b, 2, 2, c.eye || "#ffe8a0"); px(x + 1, y - 16 + b, 2, 2, c.eye || "#ffe8a0"); } };
   function chibi(x, y, c, dir, ph) { const SA = [].concat(c.acc || []); // uno o più accessori
     if (c.shape && SHAPE_CHIBI[c.shape]) return SHAPE_CHIBI[c.shape](x, y, c, dir, ph || 0);
     const hair = c.hair || "#333", skin = c.skin || "#f0c9a0", shirt = c.shirt || "#ff4d5a";
@@ -22270,7 +22280,7 @@
     ["Partite", /Settimana del Molo/],
     ["Collezioni e curiosità", /Diario del Corriere/],
     ["Calcio d'azione e arcade", /Arena 2D|Biliardino|Cabinato|Stadio 3D|Corsa della Panda|Gozzo di Baciccia|Gabbia sul Molo|Tsubasa|Supereroi/],
-    ["Saghe e GDR", /Salone delle Saghe|Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis|Libro che Mangiava i Finali|Doppio Turno|Cristalli del Campo|Il Muro|Valle del Vento Gentile|Detective di Campo|Dopo il Campione|Calcio Spaziale|Torneo delle Cento Scuole|Cronache del Pallone di Cristallo|Mantello Granata|Stagione Infinita/],
+    ["Saghe e GDR", /Salone delle Saghe|Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis|Libro che Mangiava i Finali|Doppio Turno|Cristalli del Campo|Il Muro|Valle del Vento Gentile|Detective di Campo|Dopo il Campione|Calcio Spaziale|Torneo delle Cento Scuole|Cronache del Pallone di Cristallo|Mantello Granata|Stagione Infinita|Notte dei Lampioni/],
     ["Collezioni e curiosità", /Gashapon|Roster & Talenti|Diorama|Fumetto|Leggende del passato|Bianco e Nero|Quartier Generale/],
   ];
   const MN_EXP = { "Partite": 12, "Allenamento": 6, "Storie e ricordi": 8 }; // quante voci ha la categoria a tutto sbloccato: le mancanti appaiono come «???»

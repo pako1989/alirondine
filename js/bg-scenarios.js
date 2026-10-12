@@ -5626,6 +5626,38 @@
     const cx = 280, cy = 70, purr = since("sf_lunedi", 2) < 90; px(g, cx - 14, cy + 8, 34, 5, "#8a6a4a"); px(g, cx - 8, cy - 4, 18, 12, "#e8963a"); px(g, cx + 8, cy - 10, 10, 9, "#e8963a"); px(g, cx + 8, cy - 13, 3, 3, "#e8963a"); px(g, cx + 15, cy - 13, 3, 3, "#e8963a"); px(g, cx - 12 + Math.sin(f / 15) * 2, cy - 2, 4, 10, "#e8963a"); if (purr) { g.fillStyle = "#fff"; g.font = "bold 8px 'Courier New', monospace"; g.fillText("rrrrr…", cx - 10, cy - 18); }
     g.font = "bold 9px 'Courier New', monospace"; g.fillStyle = "#fff"; g.fillText("LUN 08:01", W - 70, 16);
   }
+  // ---- LA NOTTE DEI LAMPIONI: notte di collina, lampioni, lucciole, ombre gentili
+  function nlLamp(g, x, y, on, f) { px(g, x - 1.5, y, 3, 46, "#1a1a22"); px(g, x - 6, y - 4, 12, 3, "#1a1a22"); px(g, x - 5, y - 14, 10, 10, on ? "#ffd27a" : "#2a2a3a"); g.fillStyle = "#1a1a22"; g.beginPath(); g.moveTo(x - 7, y - 14); g.lineTo(x, y - 20); g.lineTo(x + 7, y - 14); g.closePath(); g.fill(); if (on) { px(g, x - 1, y - 12 + Math.sin(f / 5) * 0.6, 2, 6, "#fff4c8"); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, x, y - 9, 34, "255,200,110", 0.4); g.restore(); } }
+  function nlFireflies(g, W, H, f, n) { for (let i = 0; i < n; i++) { const a = 0.35 + 0.5 * Math.sin(f / 12 + i * 2.1); if (a > 0.3) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, (i * 53 + Math.sin(f / 40 + i) * 18 + W) % W, 40 + (i * 37 + Math.cos(f / 50 + i) * 10) % (H - 60), 4, "220,255,150", a); g.restore(); } } }
+  function nlShade(g, x, y, s, f, num) { const b = Math.sin(f / 25) * 2; g.save(); g.translate(x, y + b); g.scale(s, s); g.globalAlpha = 0.75; g.fillStyle = "#3a3a6a"; g.beginPath(); g.ellipse(0, 0, 9, 20, 0, 0, 7); g.fill(); g.beginPath(); g.arc(0, -22, 7, 0, 7); g.fill(); g.globalAlpha = 0.4; px(g, -7, -6, 14, 10, "#8a2a2a"); g.globalAlpha = 1; px(g, -4, -24, 2, 2, "#ffe8a0"); px(g, 2, -24, 2, 2, "#ffe8a0"); if (num) { g.fillStyle = "#fff"; g.font = "bold 7px sans-serif"; g.fillText(num, -3, 2); } g.restore(); }
+  function bgNlTitolo(g, W, H, f) {
+    // la copertina: la collina di notte, i lampioni che si accendono uno a uno lungo la strada (tocca)
+    vgrad(g, 0, 0, W, H, ["#0a0a2a", "#2a2a5a"]); for (let i = 0; i < 50; i++) px(g, (i * 71) % W, (i * 29) % 110, 1, 1, `rgba(230,230,255,${0.4 + 0.4 * Math.sin(f / 20 + i)})`); circ(g, 260, 40, 14, "#f4ecd8");
+    g.fillStyle = "#14142a"; g.beginPath(); g.moveTo(0, 150); g.quadraticCurveTo(160, 80, 320, 140); g.lineTo(320, 200); g.lineTo(0, 200); g.closePath(); g.fill();
+    const n = since("nl_titolo", 0) < 200 ? Math.min(6, Math.floor(since("nl_titolo", 0) / 25) + 1) : 3 + Math.floor(f / 90) % 4; for (let i = 0; i < 6; i++) nlLamp(g, 30 + i * 52, 140 - Math.sin((i / 5) * Math.PI) * 40, i < n, f);
+    g.font = "bold 20px Georgia, serif"; g.textAlign = "center"; g.fillStyle = "#ffd27a"; g.shadowColor = "#ffb84a"; g.shadowBlur = 10; g.fillText("La Notte dei Lampioni", 160, 34); g.shadowBlur = 0; g.textAlign = "left";
+    nlFireflies(g, W, H, f, since("nl_titolo", 1) < 120 ? 30 : 12);
+    if (since("nl_titolo", 2) < 140) nlShade(g, 160, 150, 1.6, f, "9");
+  }
+  function bgNlBorgo(g, W, H, f) {
+    // la piazza di Sanlume: tavoli della festa, bandierine, i quattro lampioni, Tobia con la candela (tocca)
+    let lit = 0; try { lit = window.__lampioni.info().flags ? Object.keys(window.__lampioni.info().flags).filter((k) => /^lamp_nl_borgo/.test(k)).length : 0; } catch (e) {}
+    vgrad(g, 0, 0, W, H, ["#0a0a22", "#1a1a3a"]); for (let i = 0; i < 6; i++) { px(g, i * 56, 60, 50, 60, "#2a2a3a"); g.fillStyle = "#1a1a2a"; g.beginPath(); g.moveTo(i * 56 - 4, 60); g.lineTo(i * 56 + 25, 40); g.lineTo(i * 56 + 54, 60); g.closePath(); g.fill(); px(g, i * 56 + 18, 80, 10, 12, (i + Math.floor(f / 120)) % 3 ? "#ffb85a" : "#2a2a3a"); }
+    px(g, 0, 120, W, 80, "#2a2a32"); for (let i = 0; i < 3; i++) { px(g, 60 + i * 80, 150, 60, 6, "#5a3a2a"); px(g, 64 + i * 80, 156, 3, 14, "#3a2a1a"); px(g, 113 + i * 80, 156, 3, 14, "#3a2a1a"); }
+    for (let i = 0; i < 14; i++) { const x = 20 + i * 21, y = 108 + Math.sin(i / 13 * Math.PI) * 8; g.fillStyle = ["#e83a3a", "#ffd27a", "#3a8ac8", "#5aa84a"][i % 4]; g.beginPath(); g.moveTo(x, y); g.lineTo(x + 8, y); g.lineTo(x + 4, y + 8); g.closePath(); g.fill(); }
+    const all = since("nl_borgo", 0) < 100; [[20, 104], [100, 104], [220, 104], [300, 104]].forEach(([x, y], i) => nlLamp(g, x, y, all || i < lit, f));
+    const tx = 40 + Math.abs(((f * 0.4) % 240) - 120) * 2, ty = 160; px(g, tx, ty, 8, 16, "#6a5a4a"); circ(g, tx + 4, ty - 4, 4, "#e0b890"); px(g, tx + 8, ty + 2, 2, 6, "#f4ecd8"); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, tx + 9, ty, since("nl_borgo", 1) < 90 ? 30 : 14, "255,190,100", 0.5); g.restore();
+    if (since("nl_borgo", 2) < 120) nlShade(g, 160, 150, 1.4, f, "9");
+    nlFireflies(g, W, H, f, 10);
+  }
+  function bgNlBottega(g, W, H, f) {
+    // la bottega di Fiammetta: orologi che ticchettano, lampade appese, la lanterna della nonna (tocca)
+    vgrad(g, 0, 0, W, H, ["#2a1a10", "#4a3020"]); for (let i = 0; i < 7; i++) { const x = 20 + i * 44, sw = Math.sin(f / 40 + i) * 3; px(g, x + sw, 0, 1, 26 + (i % 3) * 8, "#5a4a3a"); circ(g, x + sw, 30 + (i % 3) * 8, 7, ["#c8a040", "#a87a3a", "#8a6a4a"][i % 3]); }
+    for (let i = 0; i < 5; i++) { const x = 30 + i * 24; circ(g, x, 90, 9, "#e8dcc0"); g.strokeStyle = "#3a2a1a"; g.lineWidth = 1; g.beginPath(); g.arc(x, 90, 9, 0, 7); g.stroke(); const a = (f / (since("nl_bottega", 0) < 80 ? 4 : 30)) + i; g.beginPath(); g.moveTo(x, 90); g.lineTo(x + Math.cos(a) * 6, 90 + Math.sin(a) * 6); g.stroke(); }
+    px(g, 0, 140, W, 60, "#5a3a22"); px(g, 180, 120, 120, 24, "#6a4a2a");
+    const on = since("nl_bottega", 1) < 160; px(g, 228, 96, 18, 24, "#c8a040"); px(g, 231, 99, 12, 16, on ? "#ffd27a" : "#3a3a3a"); px(g, 234, 90, 6, 6, "#a87a3a"); if (on) { px(g, 236, 104 + Math.sin(f / 5), 2, 6, "#fff4c8"); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 237, 107, 40, "255,200,110", 0.45); g.restore(); }
+    const fx = 120, fy = 112, rub = since("nl_bottega", 2) < 90; px(g, fx, fy, 10, 28, "#5a3a2a"); circ(g, fx + 5, fy - 5, 6, "#f0d0b0"); px(g, fx - 3, fy - 6, 3, 14, "#c8642a"); px(g, fx + 10, fy - 6, 3, 14, "#c8642a"); if (rub) px(g, fx + 12, fy + 8 + Math.sin(f / 3) * 3, 8, 4, "#e8e8e8");
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -6212,6 +6244,21 @@
       [0, 90, 320, 30, "🚆 Passa il treno delle sei. Dal finestrino qualcuno saluta, e dal binario qualcuno risponde. Stavolta nessuno parte di nascosto."],
       [40, 20, 240, 50, "🍂 Le foglie cadono in un ordine nuovo. Una con il buco a forma di cuore cade per prima. È la prima volta."],
       [255, 50, 50, 40, "🐈 Il gatto rosso fa le fusa sul davanzale, forte come un motore. Lunedì gli piace."],
+    ] },
+    nl_titolo: { draw: bgNlTitolo, hot: [
+      [0, 80, 320, 90, "🏮 I lampioni della strada si accendono uno dopo l'altro, dalla valle al paese, come una fila di lucciole educate."],
+      [0, 0, 320, 200, "✨ Le lucciole si alzano tutte insieme dall'erba della collina e fanno un cerchio intorno alla luna."],
+      [130, 110, 60, 70, "👤 Sulla strada compare un'ombra con il numero nove sulla maglia. Ti saluta. Poi scompare nel buio, ridendo senza rumore."],
+    ] },
+    nl_borgo: { draw: bgNlBorgo, hot: [
+      [0, 80, 320, 50, "🏮 Per un attimo tutti e quattro i lampioni della piazza si accendono insieme. Poi si spengono di nuovo. Stavano provando."],
+      [20, 140, 280, 50, "🕯 Tobia il campanaro fa il giro della piazza con la candela, e la fiammella diventa più grande quando passa vicino a te."],
+      [120, 110, 80, 70, "👤 Al centro della piazza, tra i tavoli della festa, un'ombra gentile si siede e aspetta. Ha freddo ai piedi."],
+    ] },
+    nl_bottega: { draw: bgNlBottega, hot: [
+      [10, 70, 130, 40, "🕰 Gli orologi della bottega accelerano tutti insieme, come se avessero fretta di arrivare a mezzanotte."],
+      [215, 85, 45, 40, "🏮 La lanterna della nonna si accende da sola, piccola piccola, appena la guardi. Poi fa finta di niente."],
+      [105, 95, 40, 50, "🧽 Fiammetta lucida la lanterna con il panno di velluto, in cerchio, come le ha insegnato la nonna: «Mai contro il verso dell'ottone»."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
