@@ -5658,6 +5658,21 @@
     const on = since("nl_bottega", 1) < 160; px(g, 228, 96, 18, 24, "#c8a040"); px(g, 231, 99, 12, 16, on ? "#ffd27a" : "#3a3a3a"); px(g, 234, 90, 6, 6, "#a87a3a"); if (on) { px(g, 236, 104 + Math.sin(f / 5), 2, 6, "#fff4c8"); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 237, 107, 40, "255,200,110", 0.45); g.restore(); }
     const fx = 120, fy = 112, rub = since("nl_bottega", 2) < 90; px(g, fx, fy, 10, 28, "#5a3a2a"); circ(g, fx + 5, fy - 5, 6, "#f0d0b0"); px(g, fx - 3, fy - 6, 3, 14, "#c8642a"); px(g, fx + 10, fy - 6, 3, 14, "#c8642a"); if (rub) px(g, fx + 12, fy + 8 + Math.sin(f / 3) * 3, 8, 4, "#e8e8e8");
   }
+  function bgNlBosco(g, W, H, f) {
+    // il bosco delle lucciole: tronchi neri, il sentiero, i lampioni lungo la strada, un'ombra che corre in tondo (tocca)
+    vgrad(g, 0, 0, W, H, ["#050a14", "#0f1a1a"]); for (let i = 0; i < 12; i++) { const x = (i * 29) % W, w = 8 + (i % 3) * 5; px(g, x, 0, w, H, ["#0a140e", "#0e1a12", "#081008"][i % 3]); }
+    g.fillStyle = "#2a2418"; g.beginPath(); g.moveTo(130, H); g.quadraticCurveTo(170, 140, 150, 100); g.quadraticCurveTo(140, 70, 175, 40); g.lineTo(185, 40); g.quadraticCurveTo(150, 70, 165, 100); g.quadraticCurveTo(185, 140, 190, H); g.closePath(); g.fill();
+    [[118, 150], [200, 110], [140, 70]].forEach(([x, y], i) => nlLamp(g, x, y, since("nl_bosco", 0) < 140 || i < 1 + Math.floor(f / 150) % 3, f));
+    nlFireflies(g, W, H, f, since("nl_bosco", 1) < 120 ? 34 : 14);
+    if (since("nl_bosco", 2) < 140) { const a = since("nl_bosco", 2) / 12; nlShade(g, 240 + Math.cos(a) * 30, 140 + Math.sin(a) * 12, 1.1, f, "7"); }
+  }
+  function bgNlCapanna(g, W, H, f) {
+    // la capanna di Nonna Lucia: il camino, il gatto sulla sedia, il barattolo con la fiammella madre (tocca)
+    vgrad(g, 0, 0, W, H, ["#1a120c", "#3a2618"]); for (let i = 0; i < 6; i++) { const x = 30 + i * 46; px(g, x, 0, 1, 20 + (i % 2) * 10, "#4a3a2a"); px(g, x - 5, 20 + (i % 2) * 10, 10, 12, "#6a5a3a"); }
+    px(g, 220, 70, 80, 80, "#4a3a2a"); px(g, 234, 96, 52, 54, "#140a06"); const fl = since("nl_capanna", 0) < 100 ? 1.6 : 1; for (let i = 0; i < 5; i++) { g.fillStyle = ["#ff8a3a", "#ffd27a", "#ff5a2a"][i % 3]; g.beginPath(); g.ellipse(250 + i * 5, 140 - Math.abs(Math.sin(f / 6 + i)) * 14 * fl, 4, 10 * fl, 0, 0, 7); g.fill(); } g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 260, 130, 60 * fl, "255,150,60", 0.3); g.restore();
+    px(g, 0, 150, W, 50, "#2a1a10"); px(g, 60, 120, 40, 6, "#5a3a22"); px(g, 64, 126, 4, 24, "#4a2a18"); px(g, 92, 126, 4, 24, "#4a2a18"); const purr = since("nl_capanna", 2) < 90; px(g, 66, 108, 26, 12, "#8a8a8a"); px(g, 86, 102, 10, 9, "#8a8a8a"); px(g, 86, 99, 3, 3, "#8a8a8a"); px(g, 93, 99, 3, 3, "#8a8a8a"); if (purr) { g.fillStyle = "#f0e0c0"; g.font = "bold 8px Georgia, serif"; g.fillText("rrr…", 72, 96); }
+    const jx = 160, jy = 120, beat = 1 + Math.sin(f / (since("nl_capanna", 1) < 120 ? 4 : 14)) * 0.3; px(g, jx - 9, jy - 18, 18, 24, "rgba(200,220,255,.25)"); px(g, jx - 10, jy - 22, 20, 4, "#8a6a4a"); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, jx, jy - 6, 22 * beat, "255,210,120", 0.6); g.restore(); circ(g, jx, jy - 6, 3 * beat, "#fff4c8");
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -6259,6 +6274,16 @@
       [10, 70, 130, 40, "🕰 Gli orologi della bottega accelerano tutti insieme, come se avessero fretta di arrivare a mezzanotte."],
       [215, 85, 45, 40, "🏮 La lanterna della nonna si accende da sola, piccola piccola, appena la guardi. Poi fa finta di niente."],
       [105, 95, 40, 50, "🧽 Fiammetta lucida la lanterna con il panno di velluto, in cerchio, come le ha insegnato la nonna: «Mai contro il verso dell'ottone»."],
+    ] },
+    nl_bosco: { draw: bgNlBosco, hot: [
+      [100, 50, 130, 120, "🏮 I lampioni del sentiero si accendono tutti insieme, per un istante, come per mostrarti la strada. Poi tornano a dormire."],
+      [0, 0, 320, 200, "✨ Le lucciole si alzano a centinaia e fanno una scia verso il vecchio campo. Una si ferma sul tuo naso. Poi riparte."],
+      [200, 110, 100, 70, "👤 Un'ombra con il numero sette corre in tondo tra gli alberi, velocissima. Non trova l'uscita perché va troppo veloce per vederla."],
+    ] },
+    nl_capanna: { draw: bgNlCapanna, hot: [
+      [220, 80, 80, 70, "🔥 Il fuoco nel camino si alza, come se qualcuno ci avesse soffiato sopra una storia. Nonna Lucia lo guarda: «Fa così quando c'è ospite»."],
+      [140, 90, 40, 40, "🫙 La fiammella madre nel barattolo batte più forte, come un cuore. Ti ha riconosciuto: hai la lanterna di Fiammetta."],
+      [55, 95, 50, 35, "🐈 Il gatto sulla sedia apre un occhio, ti valuta, fa le fusa. Hai superato l'esame."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
