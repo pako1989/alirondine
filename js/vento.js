@@ -36,6 +36,16 @@
         lead: "D5 - F5 - A5 - D6 - | Bb5 - A5 G5 F5 - D5 - | C5 - F5 - A5 - C6 - | E6 - D6 C6 G5 - - - | D5 - F5 - A5 - D6 - | F6 - E6 D6 Bb5 - - - | C6 - D6 - E6 - G6 - | A5 - - - - - - -",
         bass: "R . R . 5 . R . R . R . 5 . 8 .", bv: 0.12, arp: "1 5 8 5 1 5 8 5 1 5 8 5 1 5 8 5", aw: "square", av: 0.014, drum: "k . h . s . h . k k h . s . h h", dv: 0.38 },
     },
+    // ospiti da altre saghe (compaiono solo se quella saga l'hai già giocata)
+    cameos: [
+      { id: "dc_agata", zone: "ve_locanda", at: [12, 10], when: (K) => !!(K.otherSaga("ali-di-rondine.detective") || {}).done?.[1], lines: [
+        ["dc_agata", "Assistente! Cioè: custode. Sono in ferie. Le prime in diciannove anni. Il medico ha detto «aria buona». Qui l'aria è buonissima, quando c'è."],
+        ["dc_agata", "Nessun caso, giuro. Tranne uno piccolo: un piccione ruba il pane a Nonna Tisi tutte le mattine alle sette e un quarto. Ho già un sospettato. Ha le ali."],
+        ["ve_tisi", "Ispettrice, è un piccione."], ["dc_agata", "Tutti i colpevoli sono qualcosa, signora. Liquirizia?"]] },
+      { id: "mu_teo", zone: "ve_prato", at: [30, 19], when: (K) => !!(K.otherSaga("ali-di-rondine.muro") || {}).done?.[1], lines: [
+        ["mu_teo", "{n}? Sei tu? Sono uscito dal muro, alla fine. Ho camminato tre settimane verso sud, e guarda: un prato dove gli spiriti giocano a pallone."],
+        ["mu_teo", "L'avevo sempre detto che fuori il cielo era più grande. Qui è enorme. Torno a casa e non mi crederà nessuno. Nives sì. Nives crede solo alle cose impossibili."]] },
+    ],
     musicBg: { ve_bosco: "vento_notte", ve_casa: "vento_notte", ve_colle: "vento_colle", ve_finale: "vento_colle" },
     regions: {
       valle: { grass: ["#7fb35a", "#86ba5f", "#78ad54"], path: ["#d8c08a", "#ccb47e"], stone: ["#b8b0a0", "#aca494"], wall: ["#c8b898", "#bcac8c"], water: ["#4a9ac8", "#54a4d2"], tall: "#6aa04a", tree: ["#3e7a3a", "#4f9444", "#7ab85a"], tint: "255,236,200", tintA: 0.07, fx: "", dark: 0.06 },

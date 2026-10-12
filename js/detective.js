@@ -30,6 +30,17 @@
         lead: ". . . . E5 . . . | . . F5 . E5 . . . | . . . . C5 . D5 . | B4 - - - G#4 - - -",
         bass: "R . R . R . R . R . R . R . R .", bv: 0.1, arp: "1 . 5 . 8 . 5 . 1 . 5 . 8 . 5 .", aw: "triangle", av: 0.024, drum: "k . . h . . h . k . . h s . h .", dv: 0.3 },
     },
+    cameos: [
+      { id: "ve_selva", zone: "dc_caffe", at: [5, 8], when: (K) => !!(K.otherSaga("ali-di-rondine.vento") || {}).done?.[1], lines: [
+        ["ve_selva", "{n}! Che ci fai qui, con la stampella? Io vendo aquiloni in città. Qui il vento c'è sempre, ma arriva solo dalle strade: gira gli angoli come un gatto."],
+        ["ve_selva", "Il Gabbiano l'ho parcheggiato sul tetto del Grand Hotel. Non dirlo al portiere: secondo lui gli aquiloni sono «ospiti senza prenotazione»."]] },
+      { id: "cr_aira", zone: "dc_stadio", at: [12, 20], when: (K) => !!(K.otherSaga("ali-di-rondine.cristalli") || {}).done?.[1], lines: [
+        ["cr_aira", "Guerriero della Luce! …Cioè, {n}. Scusa, vizio di regno. Sono venuta a vedere la finale della Lega: da noi le partite si giocano con i Cristalli, qui con la pioggia."],
+        ["cr_aira", "Un consiglio da una che ha visto un impero truccare le stelle: guarda sempre chi non guarda la partita. Il colpevole è quasi sempre in tribuna."]] },
+      { id: "lb_virgola", zone: "dc_questura", at: [4, 9], when: (K) => !!(K.otherSaga("ali-di-rondine.libro-finali") || {}).done?.[1], lines: [
+        ["lb_virgola", "Sono una virgola. Lo so, in Questura non se ne vedono molte. Agata mi ha chiamata per un interrogatorio: dice che i colpevoli parlano senza fermarsi, e serve qualcuno che li fermi."],
+        ["dc_agata", "È bravissima. Ieri ha messo una pausa nel posto giusto e il sospettato ha confessato da solo. Per riempire il silenzio."]] },
+    ],
     musicBg: { dc_moviola: "detective_tesa", dc_porto: "detective_tesa", dc_hotel: "detective_tesa" },
     regions: {
       citta: { grass: ["#3a3e44", "#40444a", "#363a40"], path: ["#2e3238", "#33373d"], stone: ["#5a5a5e", "#525256"], wall: ["#5a4a44", "#4e403a"], water: ["#1e2a3a", "#243246"], tall: "#3a5a3a", tree: ["#1f3a2a", "#2a4a34", "#3a5a40"], column: "#8a8478", tint: "200,170,255", tintA: 0.1, fx: "rain", dark: 0.3 },

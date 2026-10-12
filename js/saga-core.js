@@ -39,6 +39,8 @@
 //  - «NELLA PUNTATA PRECEDENTE»: chi torna dopo qualche ora ritrova tre righe di riassunto.
 //  - MUSICHE: cfg.music = { tema: { bpm, chords, lead, bass, arp, drum… } } (stesso formato dei temi di game.js), cfg.musicMain = tema
 //    delle zone e delle scene della saga (gli sfondi col prefisso di cfg.bg); spec.music cambia il tema di una zona; o.music in una partita.
+//  - OSPITI DA ALTRE SAGHE: cfg.cameos = [{ id, zone, at: [tx, ty], when(K), lines: [[chi, testo], …] | talk(K) }]. Un personaggio
+//    di un'altra saga compare solo se quella saga l'hai già giocata (K.otherSaga("ali-di-rondine.muro") legge il suo salvataggio).
 //  - FINALI CON INDIZIO: endings: { id: [titolo, descrizione, indizio] }; l'indizio si legge nel diario e nell'Album.
 // Kit di partita: window.__sagaCore.pitch(o) è una partitella 2+portiere contro 2+portiere, con levetta, TIRA e PASSA,
 // presentazione, intervallo e risultato, tutta personalizzabile con ganci (vento, regole, filtri, ostacoli, eventi).
@@ -292,6 +294,7 @@
       const c = CHAPTERS[zr.ch]; castHero();
       const s = stepOf(c.n); let list = zr.spec.npcs ? zr.spec.npcs(s) : [];
       chainFor(zr).slice().reverse().forEach((cc) => { const p = cc.n !== zr.ch && cc.patch && cc.patch[api.trZone()]; if (p && p.npcs) list = p.npcs(stepOf(cc.n), list); });
+      arr(cfg.cameos).forEach((c) => { if (c.zone === api.trZone() && !list.some((n) => n.id === c.id) && safe(() => c.when(K), false)) list.push({ id: c.id, at: c.at, cameo: true }); });
       zr.Z.npcs = list.filter((n) => CAST_OK(n.id));
       const hints = Object.assign({}, typeof zr.spec.hints === "function" ? zr.spec.hints(s) : zr.spec.hints || {}), gl = goalNow(), tip = typeof zr.spec.tip === "function" ? zr.spec.tip(s) : zr.spec.tip || "";
       [...new Set([...(zr.spec.areas || []).map((a) => a[4]), zr.spec.short])].forEach((k) => { if (k) hints[k] = (gl ? "Obiettivo: " + gl + " · " : "") + (tip ? tip + " " : "") + (hints[k] || ""); });
@@ -608,7 +611,7 @@
     // -------------------------------------------------------------- kit per i capitoli
     const K = {
       get api() { return api; }, ID, TITLE, TS, T, esc, hash, rnd, pick, safe, F, mem, save, stepOf, setStep, note, once, reward, coinsGive, bal, hero, castHero, stat, bond,
-      say, ask, done, go, enterZone, quest, questDone, questState, evidence: (id, d) => { EVID[id] = d; }, giveClue, hasClue, present, loreList: () => Object.keys(LORE).map((k) => [k, LORE[k]]), enterDoor, leaveInterior, travelMenu, timeNow, playMatch, ownMatch, finishChapter, setTiles, SFX, tone, noise, glow, frNow, refreshZone, bgNow, journal, leave, lines, learnLore, ENDINGS, ZX, light, later, shadow, at, undAt, isFloor, floorPaint, ground, TH,
+      say, ask, done, go, enterZone, otherSaga: (key) => safe(() => JSON.parse(localStorage.getItem(key) || "null"), null), quest, questDone, questState, evidence: (id, d) => { EVID[id] = d; }, giveClue, hasClue, present, loreList: () => Object.keys(LORE).map((k) => [k, LORE[k]]), enterDoor, leaveInterior, travelMenu, timeNow, playMatch, ownMatch, finishChapter, setTiles, SFX, tone, noise, glow, frNow, refreshZone, bgNow, journal, leave, lines, learnLore, ENDINGS, ZX, light, later, shadow, at, undAt, isFloor, floorPaint, ground, TH,
       P: (x, y, w, h, c) => { ctx(); P(x, y, w, h, c); }, get g() { return ctx(); },
       zone: (zid) => ZONES[zid] || null, inZone: (zid) => !!(api && api.trZone() === zid),
       scene: (ls, then, bg) => api.play(lines(ls, bg || BG0), then),
@@ -633,9 +636,13 @@
       const chained = !(desc && desc.set);
       const prev = chained ? window.trTalkHook : null;
       const mineC = (id) => { const zr = zoneRec(); if (!zr || !zr.Z.npcs.some((n) => n.id === id)) return null; return chainFor(zr).find((c) => c.talk && c.talk[id]) || null; };
-      window.trTalkHook = function (id) { const c = mineC(id); if (c) { castHero(); safe(() => c.talk[id](), null); return true; } return chained && typeof prev === "function" ? prev(id) : false; };
+      const cameoOf = (id) => { const zr = zoneRec(); if (!zr || !zr.Z.npcs.some((n) => n.id === id && n.cameo)) return null; return arr(cfg.cameos).find((c) => c.id === id && c.zone === api.trZone()) || null; };
+      window.trTalkHook = function (id) {
+        const cm = cameoOf(id); if (cm) { castHero(); F.set("cameo_" + id, true); safe(() => (cm.talk ? cm.talk(K) : say(cm.lines)), null); return true; }
+        const c = mineC(id); if (c) { castHero(); safe(() => c.talk[id](), null); return true; } return chained && typeof prev === "function" ? prev(id) : false;
+      };
       const prevNews = window.trNewsHook;
-      window.trNewsHook = function (id) { const c = zoneRec() && mineC(id); if (c) return c.news ? !!safe(() => c.news(id, stepOf(c.n)), false) : false; return typeof prevNews === "function" ? prevNews(id) : null; };
+      window.trNewsHook = function (id) { if (cameoOf(id)) return !F.is("cameo_" + id); const c = zoneRec() && mineC(id); if (c) return c.news ? !!safe(() => c.news(id, stepOf(c.n)), false) : false; return typeof prevNews === "function" ? prevNews(id) : null; };
       PENDING.splice(0).forEach(addChapter);
       safe(() => { Object.keys(obj(cfg.music)).forEach((id) => api.musicTheme && api.musicTheme(id, cfg.music[id])); const pre = (String(BG0).match(/^[a-z]+_/) || [])[0]; if (pre && cfg.musicMain && api.musicBg) api.musicBg(pre, cfg.musicMain); Object.keys(obj(cfg.musicBg)).forEach((k) => api.musicBg && api.musicBg(k, cfg.musicBg[k])); });
       chip();
