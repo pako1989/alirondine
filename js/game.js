@@ -1036,6 +1036,12 @@
     if (c.style === "bob") { g.beginPath(); g.ellipse(0, -10, 25, 17, 0, Math.PI, 0); g.fill(); g.beginPath(); g.ellipse(-21, 6, 5, 15, 0.08, 0, 7); g.fill(); g.beginPath(); g.ellipse(21, 6, 5, 15, -0.08, 0, 7); g.fill(); px(-18, -12, 36, 6, c.hair); }
     if (c.style === "ponytail" || hs === "ponytail") { g.beginPath(); g.ellipse(0, -12, 22, 14, 0, Math.PI, 0); g.fill(); g.beginPath(); g.ellipse(25, 4, 5, 17, 0.25, 0, 7); g.fill(); px(19, -12, 6, 5, "#ff4d5a"); px(-22, -12, 6, 10, c.hair); }
     if (c.style === "twintails") { g.beginPath(); g.ellipse(0, -12, 22, 14, 0, Math.PI, 0); g.fill(); [-1, 1].forEach((d) => { g.beginPath(); g.ellipse(d * 27, 2, 6, 16, d * 0.3, 0, 7); g.fill(); px(d * 22 - 3, -12, 6, 4, "#ff9ec0"); }); }
+    if (c.style === "curly") { const n = 8; for (let i = 0; i < n; i++) { const a2 = Math.PI + (i / (n - 1)) * Math.PI; g.beginPath(); g.arc(Math.cos(a2) * 21, -6 + Math.sin(a2) * 15, 7, 0, 7); g.fill(); } }
+    if (c.style === "side") { g.beginPath(); g.ellipse(0, -11, 22, 14, 0, Math.PI, 0); g.fill(); g.beginPath(); g.moveTo(-22, -6); g.quadraticCurveTo(-6, -24, 18, -10); g.lineTo(6, -16); g.quadraticCurveTo(-10, -8, -22, -2); g.closePath(); g.fill(); }
+    if (c.style === "ordinato") { g.beginPath(); g.ellipse(0, -12, 22, 14, 0, Math.PI, 0); g.fill(); px(-22, -12, 6, 10, c.hair); px(-2, -24, 2, 12, "rgba(255,255,255,.18)"); }
+    if (c.style === "hood") { g.fillStyle = c.hair; g.beginPath(); g.moveTo(-28, 30); g.quadraticCurveTo(-30, -30, 0, -32); g.quadraticCurveTo(30, -30, 28, 30); g.lineTo(20, 30); g.quadraticCurveTo(22, -16, 0, -18); g.quadraticCurveTo(-22, -16, -20, 30); g.closePath(); g.fill(); }
+    if (c.style === "bandana") { g.beginPath(); g.ellipse(0, -11, 22, 14, 0, Math.PI, 0); g.fill(); px(-22, -14, 44, 6, "#c83a3a"); g.fillStyle = "#c83a3a"; g.beginPath(); g.moveTo(20, -12); g.lineTo(30, -4); g.lineTo(26, -14); g.closePath(); g.fill(); }
+    if (c.style === "elmo") { g.fillStyle = "#8a8a9a"; g.beginPath(); g.ellipse(0, -10, 24, 18, 0, Math.PI, 0); g.fill(); px(-24, -12, 48, 5, "#6a6a7a"); px(-2, -30, 4, 18, "#c8a040"); g.fillStyle = c.hair; }
     if (c.style === "braids") { g.beginPath(); g.ellipse(0, -10, 22, 15, 0, Math.PI, 0); g.fill(); [-1, 1].forEach((d) => { for (let k = 0; k < 5; k++) { g.beginPath(); g.arc(d * 21, -2 + k * 8, 4.5, 0, 7); g.fill(); } px(d * 21 - 3, 36, 6, 3, "#ffd23f"); }); }
     const capV = c.cap || (c.acc === "cappellino" ? "#ffd23f" : c.acc === "berretto" ? "#26324a" : null); // il cappello vale anche dove il campione è ricostruito senza «cap»
     if (capV) { const cc = typeof capV === "string" ? capV : "#1d3fa3"; g.fillStyle = cc; g.beginPath(); g.ellipse(0, -13, 23, 13, 0, Math.PI, 0); g.fill(); px(-2, -15, 30, 4, cc); px(-4, -24, 8, 3, "#ffffff55"); }
@@ -4148,6 +4154,11 @@
     if (c.style === "ponytail" || c.style === "coda") px(dir === "left" ? x + 4 : x - 7, y - 22, 3, 8, hair);
     if (c.style === "twintails") { px(x - 8, y - 22, 3, 7, hair); px(x + 5, y - 22, 3, 7, hair); }
     if (c.style === "braids") { px(x - 7, y - 22, 2, 11, hair); px(x + 5, y - 22, 2, 11, hair); }
+    if (c.style === "curly") { px(x - 6, y - 25, 3, 3, hair); px(x - 2, y - 26, 3, 3, hair); px(x + 2, y - 25, 3, 3, hair); px(x - 7, y - 22, 2, 3, hair); px(x + 5, y - 22, 2, 3, hair); }
+    if (c.style === "side") px(x - 6, y - 24, 8, 2, hair);
+    if (c.style === "hood") { px(x - 7, y - 24, 14, 3, hair); px(x - 7, y - 22, 2, 10, hair); px(x + 5, y - 22, 2, 10, hair); }
+    if (c.style === "bandana") px(x - 5, y - 21, 10, 2, "#c83a3a");
+    if (c.style === "elmo") { px(x - 6, y - 25, 12, 4, "#8a8a9a"); px(x - 1, y - 28, 2, 3, "#c8a040"); }
     if (c.style === "lungo" || c.style === "flowing") { px(x - 6, y - 22, 2, 9, hair); px(x + 4, y - 22, 2, 9, hair); }
     const capV = c.cap || (SA.includes("cappellino") ? "#ffd23f" : SA.includes("berretto") ? "#26324a" : null);
     if (capV) { const cc = typeof capV === "string" ? capV : "#1d3fa3"; px(x - 5, y - 24, 10, 3, cc); if (dir !== "up") px(dir === "left" ? x - 8 : x - 2, y - 22, dir === "down" ? 0 : 6, 2, cc); }
