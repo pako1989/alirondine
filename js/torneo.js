@@ -86,6 +86,7 @@
       // una bancarella del mercato (pane, frutta, sciarpe della squadra)
       K(K, sx, sy, tx, ty) { K.ground(sx, sy, tx, ty); K.P(sx + 1, sy + 6, 14, 9, "#a8784a"); K.P(sx, sy + 1, 16, 5, tx % 2 ? "#e83a3a" : "#3a8ac8"); for (let i = 0; i < 3; i++) K.P(sx + 3 + i * 4, sy + 7, 3, 3, ["#e8c84a", "#e85a3a", "#7ac84a"][(i + tx) % 3]); },
     },
+    guest: { id: "ts_iole", lines: [["ts_iole", "{n}! Ho preso il pullman per il Borgo Marino. Il pullman giusto, stavolta. Che bel campetto avete: mi viene voglia di fischiare."], ["ts_iole", "Se la Via Lunga ti manca, ricordati: tre passaggi senza guardare, e il terzo tira. Vale anche qui."]] },
     cameos: [
       { id: "so_blop", zone: "ts_piazza", at: [20, 15], when: (K) => !!(K.otherSaga("ali-di-rondine.spazio") || {}).done?.[1], lines: [
         ["so_blop", "Blop! {n}! Sono sceso con la navetta della domenica per il torneo! Ho portato la zuppa. È scappata in piazza. Se la vedi, è arancione e molto veloce."],

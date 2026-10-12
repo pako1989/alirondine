@@ -37,6 +37,7 @@
         bass: "R . R . 5 . R . R . R . 5 . 8 .", bv: 0.12, arp: "1 5 8 5 1 5 8 5 1 5 8 5 1 5 8 5", aw: "square", av: 0.014, drum: "k . h . s . h . k k h . s . h h", dv: 0.38 },
     },
     // ospiti da altre saghe (compaiono solo se quella saga l'hai già giocata)
+    guest: { id: "ve_sbuffo", lines: [["ve_sbuffo", "Fff! (Lo spirito del vento ti gira intorno tre volte e ti scompiglia i capelli. È il suo modo di dire «ciao».)"], ["voce", "Un Soffio della Valle del Vento Gentile. Profuma di bucato e di erba tagliata. Al Borgo Marino trova il vento di mare: lo annusa, curioso."]] },
     cameos: [
       { id: "dc_agata", zone: "ve_locanda", at: [12, 10], when: (K) => !!(K.otherSaga("ali-di-rondine.detective") || {}).done?.[1], lines: [
         ["dc_agata", "Assistente! Cioè: custode. Sono in ferie. Le prime in diciannove anni. Il medico ha detto «aria buona». Qui l'aria è buonissima, quando c'è."],

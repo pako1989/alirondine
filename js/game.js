@@ -3976,6 +3976,24 @@
     { id: "settimio", at: [47, 17], when: () => bOpen("stadio") }, { id: "anselmo", at: [34, 28], night: true, when: () => bOpen("molo") },
     { id: "dario", at: [4, 23], when: () => { const p = BW.prog || prog(); return p.n >= 3 || (p.n === 2 && p.f.end2 !== "meta"); } },
   ];
+  // OSPITI AL BORGO: i personaggi delle saghe finite passano a trovarti nel Borgo Marino (premio delle saghe, non cambia le partite).
+  // window.__borgoGuests.add({ id, when: () => bool, lines: [[chi, testo], …] | () => [...] }): il posto si sceglie da solo,
+  // vicino alla piazza, su una casella libera.
+  const GUESTS = [], G_ANCH = [[15, 11], [19, 12], [24, 12], [12, 15], [20, 17], [26, 15], [10, 10], [29, 13]];
+  function guestAt(gi) {
+    const g = GUESTS[gi]; if (g.pos && g.pos.ok) return g.pos.at;
+    const m = BW && BW.map; if (!m) return (g.pos = { at: G_ANCH[gi % G_ANCH.length], ok: false }).at;
+    const taken = new Set(NPCS.filter((n) => !n.guest).map((n) => n.at.join(",")).concat(GUESTS.filter((x, k) => k < gi && x.pos && x.pos.ok).map((x) => x.pos.at.join(","))));
+    const free = (x, y) => m[y] && m[y][x] && !SOLID.includes(m[y][x]) && !taken.has(x + "," + y) && !taken.has(x + 1 + "," + y) && !taken.has(x - 1 + "," + y);
+    const [ax, ay] = G_ANCH[gi % G_ANCH.length];
+    for (let r = 0; r < 8; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue; if (free(ax + dx, ay + dy)) return (g.pos = { at: [ax + dx, ay + dy], ok: true }).at; }
+    return (g.pos = { at: [ax, ay], ok: true }).at;
+  }
+  window.__borgoGuests = {
+    add(def) { if (!def || !def.id || GUESTS.some((x) => x.id === def.id)) return; const gi = GUESTS.push(Object.assign({}, def)) - 1, n = { id: def.id, guest: true, day: true, when: () => { try { return !!def.when() && !!CAST[def.id]; } catch (e) { return false; } } }; Object.defineProperty(n, "at", { get: () => guestAt(gi), enumerable: true }); NPCS.push(n); },
+    talk(id) { const gst = GUESTS.find((x) => x.id === id); if (!gst) return false; let ls = typeof gst.lines === "function" ? gst.lines() : gst.lines; ls = (ls || []).map((l) => L(l[0], String(l[1]).replace(/\{n\}/g, (readJSON(HERO, null) || {}).name || "Campione"))); bSay(ls); return true; },
+    list: () => GUESTS.map((x) => ({ id: x.id, on: (() => { try { return !!x.when(); } catch (e) { return false; } })() })),
+  };
   const npcList = () => NPCS.filter((n) => (!n.day || !B.night) && (!n.night || B.night) && (!n.when || n.when())).map((n) => ({ ...n, x: n.at[0] * TS + 8, y: n.at[1] * TS + 12 }));
   function npcNews(id) {
     if (typeof window.questBoardNpcHasNews === "function" && window.questBoardNpcHasNews(id)) return true;
@@ -4614,6 +4632,7 @@
 
   // ---------- dialoghi ----------
   function borgoTalk(id) {
+    if (window.__borgoGuests.talk(id)) return;
     if (beTalkB(id)) return;
     if (typeof window.questBoardTalk === "function" && window.questBoardTalk(id, bSay, bAsk, BL, borgoResume)) return;
     if (borgoTalkX(id)) return;

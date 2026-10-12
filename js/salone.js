@@ -177,10 +177,93 @@
 @media (max-width:360px){.salOv .grid{grid-template-columns:1fr 1fr;gap:8px}.salOv .prev{grid-template-columns:110px 1fr}.salOv .prev canvas{width:110px;height:110px}}`;
     document.head.appendChild(st);
   }
-  let OV = null, BACK = null; const BK = { sal: null, alb: null, gua: null, per: null }; // ogni schermata ricorda da dove si era entrati
+  let OV = null, BACK = null; const BK = { sal: null, alb: null, gua: null, per: null, sg: null, cin: null }; // ogni schermata ricorda da dove si era entrati
   function shell(title) { css(); close(); OV = document.createElement("div"); OV.className = "salOv"; OV.innerHTML = `<div class="wrap"><div class="bar"><h2>${title}</h2><button type="button" class="x" aria-label="Chiudi">✕</button></div><div class="body"></div></div>`; OV.querySelector(".x").onclick = () => { const b = BACK; close(); if (typeof b === "function") b(); }; document.body.appendChild(OV); return OV.querySelector(".body"); }
   function close() { if (OV) { OV.remove(); OV = null; } }
 
+  // ---------------------------------------------------------------- SALA GIOCHI
+  // I motori di partita originali delle saghe, da giocare liberi. Si sbloccano finendo il primo capitolo della saga;
+  // finire la saga (almeno un finale) sblocca anche la sfida del suo «boss». Non danno premi: solo il record.
+  const SGK = "ali-di-rondine.salagiochi";
+  const sgRec = () => { const r = safe(() => JSON.parse(localStorage.getItem(SGK) || "null"), null) || {}; r.w = r.w || {}; r.p = r.p || {}; r.diff = r.diff || "normale"; return r; };
+  const sgSave = (r) => safe(() => localStorage.setItem(SGK, JSON.stringify(r)), null);
+  const heroLook = () => { const h = safe(() => JSON.parse(localStorage.getItem("ali-di-rondine.campione") || "null"), null) || {}; return { name: h.name || "Campione", skin: h.skin || "#e0ac7e", hair: h.hair || "#2b1d14", shirt: h.shirt || "#1f5fbf" }; };
+  const P = (name, skin, hair, st) => ({ name, skin, hair, st });
+  const MACHINES = [
+    { id: "vignette", t: "Vignette", e: "🗯️", saga: "torneo", eng: "__vignette", d: "La partita a fumetti del Torneo delle Cento Scuole: vista di lato, ad azioni, con le tecniche di squadra.",
+      opp: [{ name: "I Gabbiani del Porto", color: "#3a6ab8", style: "pressing", players: [P("Gil", "#d9a679", "#2a2a2a"), P("Moli", "#e8c4a0", "#5a3a1a"), P("Rete", "#c68642", "#1a1a1a")] }, { name: "Collegio San Biagio", color: "#6a3a8a", style: "difensiva", players: [P("Biagio", "#f0d0b0", "#3a2a1a"), P("Fra", "#e0b890", "#1a1a1a"), P("Dodo", "#d9a679", "#8a5a2a")] }],
+      boss: { name: "Accademia del Faro", color: "#1a2a5a", style: "contropiede", players: [{ id: "ts_ettore", name: "Ettore", skin: "#e0b890", hair: "#1a1a2a" }, P("Marino", "#e8c4a0", "#2a1a1a"), P("Scotti", "#d9a679", "#3a2a1a")] },
+      opts: (o, h, boss) => ({ title: `Vignette · contro ${o.name}`, us: h.name, actions: boss ? 10 : 8, opp: o, mates: [{ id: "ts_tito", name: "Tito", skin: "#e8b88a", hair: "#3a2a1a" }, { id: "ts_alba", name: "Alba", skin: "#f0d0b0", hair: "#c8642a" }], techniques: ["tiro3", "muro", "ombra"] }) },
+    { id: "atb", t: "ATB", e: "💠", saga: "cronache", eng: "__atb", d: "La battaglia a turni delle Cronache del Pallone di Cristallo: barre del tempo attivo, comandi, magie e fiato.",
+      opp: [{ name: "Guardiani di Rovo", color: "#5a3a2a", style: "difensiva", players: [P("Rovo", "#8a6a4a", "#2a4a1a", { tiro: 12, pass: 11, dif: 14, vel: 10 }), P("Spina", "#7a5a3a", "#3a5a1a"), P("Ortica", "#8a7a4a", "#4a6a2a"), P("Cardo", "#6a5a3a", "#5a3a6a")] }, { name: "I Silenti", color: "#3a3a4a", style: "equilibrata", players: [P("Il Muto", "#c8c8d0", "#3a3a4a", { tiro: 13, pass: 14, dif: 13, vel: 13 }), P("Quieto", "#c8c8d0", "#2a2a3a"), P("Zitto", "#c8c8d0", "#4a4a5a"), P("Sussurro", "#c8c8d0", "#5a5a6a")] }],
+      boss: { name: "Il Re del Silenzio", color: "#2a2a5a", style: "difensiva", players: [P("Il Re", "#d8c8b8", "#c8c8d8", { tiro: 15, pass: 15, dif: 18, vel: 13 }), P("Il Muto", "#c8c8d0", "#3a3a4a", { tiro: 14, pass: 14, dif: 14, vel: 13 }), P("Quieto", "#c8c8d0", "#2a2a3a"), P("Zitto", "#c8c8d0", "#4a4a5a")] },
+      opts: (o, h, boss) => ({ title: `ATB · contro ${o.name}`, us: "Il gruppo", half: boss ? 80 : 70, theme: boss ? "stelle" : "prato", items: 3, heroSt: { tiro: 16, pass: 14, dif: 12, vel: 15 }, heroSpells: ["luce"], heroMp: 18, opp: o,
+        party: [{ id: "cc_lyra", name: "Lyra", skin: "#f0d0b0", hair: "#c8a040", st: { tiro: 12, pass: 13, dif: 19, vel: 13 }, spells: ["cura"], mp: 16 }, { id: "cc_fosco", name: "Fosco", skin: "#e8c4a0", hair: "#3a2a5a", st: { tiro: 10, pass: 16, dif: 9, vel: 11 }, spells: ["vento", "gelo", "fuoco"], mp: 34 }, { id: "cc_rubi", name: "Rubi", skin: "#c68642", hair: "#1a1a1a", st: { tiro: 14, pass: 13, dif: 15, vel: 19 }, spells: [], mp: 0 }] }) },
+    { id: "bottoni", t: "Super-Bottoni", e: "🔘", saga: "mantello", eng: "__bottoni", d: "Il calcio a bottoni del Mantello Granata: la fionda, le carambole, i superpoteri e i contro-poteri dei cattivi.", power: true,
+      opp: [{ name: "I Panchinari", color: "#3a6ab8", style: "contropiede", players: [P("Tonno", "#e0b890", "#3a2a1a"), P("Ciuffo", "#f0c8a0", "#e8c84a"), P("Mezzala", "#d9a679", "#1a1a1a"), P("Riserva", "#e8c4a0", "#5a3a2a")] }, { name: "Madame Colla", color: "#8aa83a", style: "difensiva", oppPower: "colla", players: [P("Colla", "#f0d8c0", "#e8e0a0"), P("Mastice", "#d9a679", "#5a4a3a"), P("Gomma", "#e8c4a0", "#3a2a1a"), P("Ventosa", "#c68642", "#1a1a1a")] }],
+      boss: { name: "Il Dottor Fuorigioco", color: "#1a1a1a", style: "pressing", oppPower: "specchio", players: [P("Dottore", "#e8d0b8", "#e8e8e8"), P("Bandierina", "#d9a679", "#3a3a3a"), P("Linea", "#e8c4a0", "#1a1a1a"), P("Moviola", "#c68642", "#5a3a2a")] },
+      opts: (o, h, boss, pw) => ({ title: `Super-Bottoni · contro ${o.name}`, us: h.name, usColor: "#8a1a2a", power: pw || "fulmine", oppPower: o.oppPower || "", shots: boss ? 8 : 6, opp: o, mates: [{ name: "Bullone", skin: "#b8c4d0", hair: "#8a9aa8" }, { name: "Gilda", skin: "#e8c4a0", hair: "#2a1a3a" }, { name: "Tilde", skin: "#f0d0b0", hair: "#e8e8f0" }] }) },
+    { id: "nastro", t: "Il Nastro", e: "📼", saga: "stagione", eng: "__nastro", d: "La finale su videocassetta di Stagione Infinita: bivi, fantasmi e riavvolgimenti. Qui ogni partita è una cassetta nuova.",
+      opp: [{ name: "I Pescatori", color: "#3a8a8a", style: "equilibrata" }, { name: "Real Lago", color: "#5a8ad8", style: "pressing" }],
+      boss: { name: "La Domenica Infinita", color: "#ff5a7a", style: "pressing" },
+      opts: (o, h, boss) => ({ title: `Il Nastro · contro ${o.name}`, us: h.name, usColor: "#e8c84a", seed: "sala" + Date.now(), memory: {}, rewinds: boss ? 1 : 2, actions: boss ? 8 : 6, mates: [{ name: "Gigi" }, { name: "Vale" }], opp: o }) },
+  ];
+  function sgState(m) { const s = SAGAS.find((x) => x.id === m.saga), x = s ? state(s) : null; return { s, open: !!(x && (x.doneN >= 1)), boss: !!(x && x.endsFound > 0) }; }
+  function openSalaGiochi(back) {
+    if (back) BK.sg = back; BACK = BK.sg; const body = shell("🕹️ Sala Giochi"), r = sgRec(), D = window.__sagaCore && window.__sagaCore.DIFFS;
+    let html = `<p class="sum">I motori di partita originali delle saghe, da giocare liberi. Finisci il primo capitolo di una saga per accendere il suo cabinato; finisci la saga per sfidare il suo boss.</p>`;
+    html += `<div class="row">${["storia", "normale", "sfida"].map((k) => `<button type="button" class="chip${r.diff === k ? " on" : ""}" data-diff="${k}">${D && D[k] ? D[k].label : k}</button>`).join("")}</div>`;
+    html += MACHINES.map((m) => { const st = sgState(m), w = r.w[m.id] || 0, p = r.p[m.id] || 0;
+      return `<div class="psec${st.boss ? " gold" : ""}" data-m="${m.id}"><div class="pe">${st.open ? m.e : "🔒"}</div><div><b>${esc(m.t)}</b><span>${st.open ? esc(m.d) : `Si accende finendo il primo capitolo di «${esc(st.s ? st.s.t : m.saga)}».`}</span></div><div class="n">${st.open ? `${w}/${p}` : ""}</div></div>`; }).join("");
+    body.innerHTML = html;
+    body.querySelectorAll("[data-diff]").forEach((b) => (b.onclick = () => { const r2 = sgRec(); r2.diff = b.dataset.diff; sgSave(r2); openSalaGiochi(); }));
+    body.querySelectorAll("[data-m]").forEach((b) => (b.onclick = () => { const m = MACHINES.find((x) => x.id === b.dataset.m); if (sgState(m).open) sgMachine(m); }));
+  }
+  function sgMachine(m) {
+    const body = shell(`${m.e} ${m.t}`), st = sgState(m), list = m.opp.map((o, i) => ({ o, i, boss: false })).concat(st.boss ? [{ o: m.boss, i: 9, boss: true }] : []);
+    let html = `<p class="sum">${esc(m.d)}</p><div class="sec">Scegli l'avversario</div>`;
+    html += list.map(({ o, i, boss }) => `<div class="psec${boss ? " gold" : ""}" data-o="${i}"><div class="pe">${boss ? "👑" : "⚽"}</div><div><b>${esc(o.name)}</b><span>${boss ? "La sfida del boss della saga" : `Carattere: ${esc(o.style || "equilibrata")}`}${o.oppPower ? ` · contro-potere: ${esc(o.oppPower)}` : ""}</span></div><div class="n">▶</div></div>`).join("");
+    if (!st.boss) html += `<p class="sum">👑 Il boss si sblocca finendo la saga «${esc(st.s ? st.s.t : "")}».</p>`;
+    if (m.power) html += `<div class="sec">Il tuo potere</div><div class="row">${["fulmine", "gigante", "calamita", "gelo", "doppio"].map((k, j) => `<button type="button" class="chip${j === 0 ? " on" : ""}" data-pw="${k}">${k}</button>`).join("")}</div>`;
+    html += `<div class="big"><button type="button" data-back="1">◂ Torna alla Sala Giochi<small>Tutti i cabinati</small></button></div>`;
+    body.innerHTML = html; let pw = "fulmine";
+    body.querySelectorAll("[data-pw]").forEach((b) => (b.onclick = () => { pw = b.dataset.pw; body.querySelectorAll("[data-pw]").forEach((x) => x.classList.toggle("on", x === b)); }));
+    body.querySelector("[data-back]").onclick = () => openSalaGiochi();
+    body.querySelectorAll("[data-o]").forEach((b) => (b.onclick = () => { const it = list.find((x) => String(x.i) === b.dataset.o); sgPlay(m, it.o, it.boss, pw); }));
+  }
+  function sgPlay(m, o, boss, pw) {
+    const eng = window[m.eng], C = window.__sagaCore, r = sgRec(); if (!eng || !eng.start) return;
+    close(); if (C && C.setCur) C.setCur(boss && r.diff === "storia" ? "normale" : r.diff, o.style);
+    const opts = Object.assign(m.opts(o, heroLook(), boss, pw), { oppStyle: o.style, heroLook: heroLook(), winTitle: boss ? "BOSS SCONFITTO!" : "VITTORIA!", onDone: (res) => { const r2 = sgRec(); r2.p[m.id] = (r2.p[m.id] || 0) + 1; if (res.win) r2.w[m.id] = (r2.w[m.id] || 0) + 1; if (boss && res.win) r2.boss = Object.assign(r2.boss || {}, { [m.id]: 1 }); sgSave(r2); sgMachine(m); } });
+    const ok = safe(() => eng.start(opts), false); if (ok === false) { if (C && C.endMatch) C.endMatch(); sgMachine(m); }
+  }
+  // ---------------------------------------------------------------- CINETECA
+  // Rivedi i finali che hai trovato: lo sfondo animato della saga, la grana della pellicola e il racconto del finale.
+  function openCineteca(back) {
+    if (back) BK.cin = back; BACK = BK.cin; const body = shell("🎬 Cineteca");
+    const list = SAGAS.filter(available).map((s) => ({ s, x: state(s) })).filter(({ x }) => x.ends && x.ends.length);
+    const found = list.reduce((n, { x }) => n + x.endsFound, 0);
+    let html = `<p class="sum">Le scene dei finali che hai trovato, da rivedere quando vuoi. ${found ? `${found} film in archivio.` : "Ancora nessun film: finisci una saga per riempire la Cineteca."}</p>`;
+    list.forEach(({ s, x }) => { if (!x.endsFound) return; html += `<div class="sec">${s.e} ${esc(s.t)}<span>${x.endsFound}/${x.ends.length}</span></div>`; html += x.ends.map((e) => (e.found ? `<div class="psec" data-s="${s.id}" data-e="${esc(e.id)}"><div class="pe">🎞️</div><div><b>${esc(e.title)}</b><span>Guarda il film del finale</span></div><div class="n">▶</div></div>` : `<div class="psec" style="opacity:.5"><div class="pe">❔</div><div><b>Pellicola mancante</b><span>${esc(e.hint || "Un finale ancora da trovare.")}</span></div></div>`)).join(""); });
+    body.innerHTML = html;
+    body.querySelectorAll("[data-e]").forEach((b) => (b.onclick = () => { const s = SAGAS.find((x) => x.id === b.dataset.s), e = state(s).ends.find((x) => x.id === b.dataset.e); if (e) film(s, e, () => openCineteca()); }));
+  }
+  function film(s, e, back) {
+    close(); const LBG = window.__lbBg && window.__lbBg.LB, pf = PFX[s.id], key = [`${pf}_finale`, `${pf}_fine`, s.cover].find((k) => LBG && LBG[k]) || s.cover;
+    const ov = document.createElement("div"); ov.className = "salOv"; ov.style.cssText = "display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#050505;padding:12px";
+    ov.innerHTML = `<canvas width="640" height="400" style="width:min(100%,560px);height:auto;flex:none;border-radius:6px;background:#000"></canvas><div class="txt" style="width:min(100%,560px);min-height:96px;font:15px/1.5 Georgia,serif;color:#f0e8d8;text-align:center"></div><button type="button" style="min-height:44px;padding:8px 18px;border-radius:10px;border:2px solid #ffd23f;background:#1a1a1a;color:#ffd23f;font:800 14px sans-serif">◂ Torna alla Cineteca</button>`;
+    document.body.appendChild(ov); const cv = ov.querySelector("canvas"), g = cv.getContext("2d"), txt = ov.querySelector(".txt"); let f = 0, raf = 0, n = 0;
+    const full = `${e.title}\n\n${e.desc}`;
+    const loop = () => { if (!ov.isConnected) return; f++; g.setTransform(2, 0, 0, 2, 0, 0); g.fillStyle = "#000"; g.fillRect(0, 0, 320, 200);
+      safe(() => LBG[key].draw(g, 320, 200, f), null);
+      g.fillStyle = "rgba(40,30,10,.18)"; g.fillRect(0, 0, 320, 200); for (let i = 0; i < 40; i++) { g.fillStyle = `rgba(255,255,255,${Math.random() * 0.12})`; g.fillRect(Math.random() * 320, Math.random() * 200, 1, 1); } if (f % 47 < 2) { g.fillStyle = "rgba(255,255,255,.2)"; g.fillRect(Math.random() * 320, 0, 1, 200); }
+      g.fillStyle = "#000"; g.fillRect(0, 0, 320, 14); g.fillRect(0, 186, 320, 14); for (let i = 0; i < 16; i++) { g.fillStyle = "#2a2a2a"; g.fillRect(6 + i * 20 - (f % 20), 4, 8, 6); g.fillRect(6 + i * 20 - (f % 20), 190, 8, 6); }
+      if (f % 2 === 0 && n < full.length) { n++; txt.innerHTML = esc(full.slice(0, n)).replace(/\n/g, "<br>").replace(/^([^<]*)/, "<b style='color:#ffd23f;font:900 17px sans-serif;letter-spacing:1px'>$1</b>"); }
+      raf = requestAnimationFrame(loop); };
+    raf = requestAnimationFrame(loop);
+    ov.querySelector("button").onclick = () => { cancelAnimationFrame(raf); ov.remove(); back(); };
+    cv.onclick = () => { n = full.length; };
+  }
   // ---------------------------------------------------------------- SALONE
   const FILT = { st: "tutte", g: "" };
   function totals() {
@@ -196,6 +279,7 @@
     let html = `<p class="sum">${tt.n} saghe · ${tt.run} in corso · ${tt.fin} concluse · finali trovati ${tt.fe}/${tt.te}</p>`;
     if (lastS) html += `<div class="cont" data-id="${lastS.s.id}"><img alt="" src="${cover(lastS.s)}"><div><b>▸ Continua: ${esc(lastS.s.t)}</b>${lastS.x.finished ? "Conclusa · rigioca o cerca gli altri finali" : `Capitolo ${lastS.x.ch}${lastS.s.ch ? ` di ${lastS.s.ch}` : ""}`}</div></div>`;
     html += `<div class="big"><button type="button" data-go="album">🏆 Album dei finali<small>${tt.fe}/${tt.te} timbri</small></button><button type="button" data-go="guarda">👕 Guardaroba<small>Prova e indossa ciò che hai sbloccato</small></button></div>`;
+    html += `<div class="big"><button type="button" data-go="sala">🕹️ Sala Giochi<small>I motori di partita delle saghe, liberi</small></button><button type="button" data-go="cine">🎬 Cineteca<small>Rivedi i finali trovati</small></button></div>`;
     { const pt = safe(() => perTotals(), null); if (pt) html += `<div class="big"><button type="button" data-go="per">👥 Album dei personaggi<small>${pt.seen}/${pt.tot} incontrati · carte d'oro per le saghe concluse</small></button></div>`; }
     html += `<div class="row">${[["tutte", "Tutte"], ["corso", "In corso"], ["nuove", "Da iniziare"], ["concluse", "Concluse"]].map(([k, l]) => `<button type="button" class="chip${FILT.st === k ? " on" : ""}" data-st="${k}">${l}</button>`).join("")}</div>`;
     html += `<div class="row">${[["", "Tutti i generi"], ...Object.entries(GEN).map(([k, v]) => [k, v[0]])].map(([k, l]) => `<button type="button" class="chip${FILT.g === k ? " on" : ""}" data-g="${k}">${l}</button>`).join("")}</div>`;
@@ -213,6 +297,8 @@
     body.querySelector('[data-go="album"]').onclick = () => openAlbum(() => openSalone());
     body.querySelector('[data-go="guarda"]').onclick = () => openGuardaroba(() => openSalone());
     const pg = body.querySelector('[data-go="per"]'); if (pg) pg.onclick = () => openPersonaggi(() => openSalone());
+    body.querySelector('[data-go="sala"]').onclick = () => openSalaGiochi(() => openSalone());
+    body.querySelector('[data-go="cine"]').onclick = () => openCineteca(() => openSalone());
   }
   function detail(s) {
     if (!s || !OV) return; const x = state(s), r = rec(); r.seen[s.id] = 1; recSave(r);
@@ -354,7 +440,7 @@
   }
 
   window.__salone = {
-    open: (back) => openSalone(back), album: (back) => openAlbum(back), guardaroba: (back) => openGuardaroba(back), close, personaggi: (back) => openPersonaggi(back), personaggiStato: () => safe(() => perTotals(), null),
+    open: (back) => openSalone(back), album: (back) => openAlbum(back), salaGiochi: (back) => openSalaGiochi(back), cineteca: (back) => openCineteca(back), guardaroba: (back) => openGuardaroba(back), close, personaggi: (back) => openPersonaggi(back), personaggiStato: () => safe(() => perTotals(), null),
     summary: () => safe(() => { const t = totals(), A = api(), C = (A && A.COSM) || {}; return Object.assign(t, { cosOwned: safe(() => A.cosOwned().length, 0), cosTot: Object.keys(C).length }); }, { n: 0, run: 0, fin: 0, fe: 0, te: 0, cosOwned: 0, cosTot: 0 }),
     SAGAS,
   };

@@ -66,6 +66,7 @@
       // l'antenna della radio, con la luce rossa «IN ONDA»
       R(K, sx, sy, tx, ty, fr) { K.ground(sx, sy, tx, ty); K.later((g, cx, cy) => { const x = tx * TS - cx + 8, y = ty * TS - cy + 14; g.strokeStyle = "#5a5a6a"; g.lineWidth = 1.2; g.beginPath(); g.moveTo(x - 5, y); g.lineTo(x, y - 30); g.lineTo(x + 5, y); g.moveTo(x - 3, y - 12); g.lineTo(x + 3, y - 12); g.moveTo(x - 2, y - 20); g.lineTo(x + 2, y - 20); g.stroke(); if (Math.floor(fr / 30) % 2) { g.fillStyle = "#ff3a3a"; g.beginPath(); g.arc(x, y - 31, 2, 0, 7); g.fill(); K.light(x, y - 31, 10, "255,60,60", 0.5); } }); },
     },
+    guest: { id: "sf_gatto", lines: [["sf_gatto", "Miao."], ["voce", "Il gatto rosso di Lago Lungo. Oggi è qui. Domani chissà: anche adesso, è l'unico che non sta mai dove stava ieri."]] },
     cameos: [
       { id: "mg_tilde", zone: "sf_piazza", at: [30, 9], when: (K) => !!(K.otherSaga("ali-di-rondine.mantello") || {}).done?.[1], lines: [
         ["mg_tilde", "[pensa] {n}! Sono venuta per la finale. Mi sembra di essere già venuta. Ieri. O stamattina. Sarà l'età. (Ti guarda bene.) …O no?"],

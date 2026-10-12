@@ -122,6 +122,7 @@
       if (f === ":") { K.P(sx, sy, 16, 16, R.path[(tx + ty) % 2]); K.P(sx, sy + 7, 16, 2, "rgba(0,0,0,.2)"); if ((tx + ty) % 3 === 0) { K.P(sx + 7, sy + 7, 2, 2, (Math.floor(K.frNow() / 12) - tx) % 6 === 0 ? "#7af0c8" : "#2a5a5a"); } return true; }
       return false;
     },
+    guest: { id: "so_blop", lines: [["so_blop", "Blop! {n}! Sono sceso con la navetta per assaggiare la cucina del Borgo. Qui la zuppa sta ferma nel piatto. È stranissimo. Bellissimo."], ["so_blop", "Ho chiesto al pescatore se i pesci galleggiano anche qui. Ha detto sì, ma solo nel mare. Che pianeta organizzato."]] },
     cameos: [
       { id: "dc_agata", zone: "so_mensa", at: [15, 8], when: (K) => !!(K.otherSaga("ali-di-rondine.detective") || {}).done?.[1], lines: [
         ["dc_agata", "{n}. Non chiedermi come sono arrivata quassù. Diciamo che indago su un furto di gravità. Il sospettato numero uno è il cuoco: troppo gelatinoso per essere innocente."],

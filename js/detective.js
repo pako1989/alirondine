@@ -30,6 +30,7 @@
         lead: ". . . . E5 . . . | . . F5 . E5 . . . | . . . . C5 . D5 . | B4 - - - G#4 - - -",
         bass: "R . R . R . R . R . R . R . R .", bv: 0.1, arp: "1 . 5 . 8 . 5 . 1 . 5 . 8 . 5 .", aw: "triangle", av: 0.024, drum: "k . . h . . h . k . . h s . h .", dv: 0.3 },
     },
+    guest: { id: "dc_nina", lines: [["dc_nina", "{n}! Nina Rotativa, cronaca sportiva. Sono qui per un servizio sui campetti di paese. Il vostro è il più bello che ho visto. Non scriverlo, però: gli altri si offendono."]] },
     cameos: [
       { id: "ve_selva", zone: "dc_caffe", at: [5, 8], when: (K) => !!(K.otherSaga("ali-di-rondine.vento") || {}).done?.[1], lines: [
         ["ve_selva", "{n}! Che ci fai qui, con la stampella? Io vendo aquiloni in città. Qui il vento c'è sempre, ma arriva solo dalle strade: gira gli angoli come un gatto."],

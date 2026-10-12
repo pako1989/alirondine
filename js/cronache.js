@@ -68,6 +68,7 @@
       J(K, sx, sy, tx, ty, fr) { const R = K.ZX.rg; K.P(sx, sy, 16, 16, R.water[(tx + ty) % 2]); const w = Math.floor(fr / 20 + tx + ty) % 4; K.P(sx + 2 + w * 3, sy + 5 + ((tx * 3) % 7), 5, 1, "rgba(255,255,255,.45)"); },
     },
     floorPaint(K, f, sx, sy, tx, ty) { if (f === "J") { K.P(sx, sy, 16, 16, K.ZX.rg.water[(tx + ty) % 2]); return true; } return false; },
+    guest: { id: "cc_fosco", lines: [["cc_fosco", "{n}! Un incantesimo di Vento mi ha portato fin qui. O forse ho sbagliato strada. Con gli occhiali, però, il Borgo si vede benissimo."], ["cc_fosco", "Lyra e Rubi ti salutano. Rubi ha detto «non ho rubato niente». Nessuno gli aveva chiesto niente."]] },
     cameos: [
       { id: "ts_iole", zone: "cc_prato", at: [26, 15], when: (K) => !!(K.otherSaga("ali-di-rondine.torneo") || {}).done?.[1], lines: [
         ["ts_iole", "{n}! Che ci fai in un mondo con le stagioni ferme? Io? Ho preso il pullman sbagliato. Succede, alla mia età. Però qui hanno un bel campo, anche se l'erba è grigia."],

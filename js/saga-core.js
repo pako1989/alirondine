@@ -808,6 +808,7 @@
       _dbg: /[?&]debug\b/.test(location.search || "") ? { mem, ZONES, CHAPTERS, ZX, go, F, LORE, K } : undefined,
     };
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
+    registerGuest(cfg, mem);
     return { api: pub, K };
   }
 
@@ -1096,5 +1097,7 @@
   }
   let PITCH = null;
 
-  window.__sagaCore = { version: 1, create, pitch, filter, get pitchState() { return PITCH; }, get cur() { return Object.assign({}, CUR, { opts: DIFFS[CUR.diff] || DIFFS.normale }); }, endMatch: () => { CUR = { diff: "normale", style: "" }; }, util: { safe, esc, hash, rnd, pick, tone, noise, frNow } };
+  // ospiti al Borgo: cfg.guest = { id, lines } → il personaggio passa a trovarti nel Borgo Marino quando la saga ha almeno un finale
+  function registerGuest(cfg, mem) { if (!cfg.guest) return; const go = (n) => { if (window.__borgoGuests) window.__borgoGuests.add({ id: cfg.guest.id, lines: cfg.guest.lines, when: () => safe(() => mem().ends.length > 0, false) }); else if (n < 60) setTimeout(() => go(n + 1), 250); }; go(0); }
+  window.__sagaCore = { version: 1, create, pitch, filter, get pitchState() { return PITCH; }, get cur() { return Object.assign({}, CUR, { opts: DIFFS[CUR.diff] || DIFFS.normale }); }, endMatch: () => { CUR = { diff: "normale", style: "" }; }, setCur: (diff, style) => { CUR = { diff: DIFFS[diff] ? diff : "normale", style: STYLES[style] ? style : "" }; }, DIFFS, STYLES, util: { safe, esc, hash, rnd, pick, tone, noise, frNow } };
 })();

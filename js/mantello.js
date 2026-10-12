@@ -91,6 +91,7 @@
       // l'edicola dei giornali (il Corriere di Metropolenta)
       E(K, sx, sy, tx, ty) { K.ground(sx, sy, tx, ty); K.P(sx + 1, sy + 4, 14, 11, "#2a6a3a"); K.P(sx, sy + 1, 16, 4, "#1a4a2a"); for (let i = 0; i < 3; i++) K.P(sx + 2 + i * 4.5, sy + 6, 3.5, 5, ["#f4ecdc", "#ffd23f", "#e8a8c8"][(i + tx) % 3]); K.P(sx + 2, sy + 7.5, 3.5, 0.8, "#121212"); },
     },
+    guest: { id: "mg_bullone", lines: [["mg_bullone", "BIP! BOP! (Ti stira la maglia, con affetto. Poi stira un gabbiano, che non la prende bene.)"], ["voce", "Nonna Tilde gli ha cucito un mantellino granata. Bullone lo fa svolazzare apposta ogni volta che passa qualcuno."]] },
     cameos: [
       { id: "cc_fosco", zone: "mg_piazza", at: [5, 14], when: (K) => !!(K.otherSaga("ali-di-rondine.cronache") || {}).done?.[1], lines: [
         ["cc_fosco", "{n}! Sono arrivato con un incantesimo di Vento, ho sbagliato mondo. Qui la gente vola col mantello e nessuno fa una piega. Nel mio mondo almeno ci vuole un cristallo."],
