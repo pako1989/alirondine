@@ -119,7 +119,7 @@
     }
     function useTech() {
       const ph = techPhase(), k = techs.find((x) => TECH[x].when === ph); if (!k || S.spirit < 100) return;
-      S.spirit = 0; S.data.tecniche++; const T = TECH[k]; say(0, T.name + "!!"); S.panel = { t: 100, txt: T.name, sub: T.sub, tech: T.sfx, next: null }; const prev = S.phase; S.phase = "panel"; hud(); tone(220, 0.5, "sawtooth", 0.05);
+      S.spirit = 0; S.data.tecniche++; (S.data.usate = S.data.usate || {})[k] = 1; const T = TECH[k]; say(0, T.name + "!!"); S.panel = { t: 100, txt: T.name, sub: T.sub, tech: T.sfx, next: null }; const prev = S.phase; S.phase = "panel"; hud(); tone(220, 0.5, "sawtooth", 0.05);
       S.panel.next = () => { if (ph === "run") { S.phase = "run"; S.defs.forEach((d) => (d.spun = 1)); S.x = Math.max(S.x, S.len - 60); } else if (ph === "shot") { S.phase = "aim"; shoot(true); } else if (ph === "def") { S.phase = "def"; S.lane = S.olane; S.ox = HX + 20; tackle(); } labels(); };
       void prev;
     }

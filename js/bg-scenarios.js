@@ -5325,6 +5325,28 @@
     if (since("ts_faro", 2) < 120) { g.fillStyle = "#141414"; g.font = "bold 8px sans-serif"; g.fillText("ART. 4: IN CAMPO NON SI RIDE", 100, 196); }
     tsInk(g, W, H);
   }
+  function bgTsFinale(g, W, H, f) {
+    // la finale di sera: quattro riflettori, la tribuna piena, il tamburo, le due squadre a centrocampo (tocca)
+    vgrad(g, 0, 0, W, 70, ["#0a1028", "#1a2a5a"]); for (let i = 0; i < 30; i++) px(g, (i * 53) % W, (i * 17) % 40, 1, 1, "rgba(255,255,255,.7)");
+    const cols = ["#e83a3a", "#3a6ab8", "#e8c84a", "#7ac84a", "#a85ac8", "#3ac8c8", "#e8883a", "#1a2a5a"]; for (let r = 0; r < 3; r++) for (let i = 0; i < 16; i++) { px(g, i * 20, 40 + r * 10, 20, 10, cols[(i + r) % 8]); px(g, i * 20 + 6, 34 + r * 10 - (since("ts_finale", 0) < 90 && (i + r) % 2 ? 4 : Math.abs(Math.sin(f / 10 + i)) * 1.5), 8, 8, "#e0b890"); }
+    vgrad(g, 0, 72, W, 128, ["#3a8a32", "#2a6a2a"]); g.strokeStyle = "rgba(255,255,255,.85)"; g.lineWidth = 2; g.strokeRect(14, 84, 292, 108); g.beginPath(); g.moveTo(160, 84); g.lineTo(160, 192); g.stroke(); g.beginPath(); g.arc(160, 138, 22, 0, 7); g.stroke();
+    [[20, 10], [300, 10]].forEach(([x, y]) => { px(g, x - 2, y, 4, 40, "#5a5a6a"); px(g, x - 10, y - 6, 20, 8, "#f4f4ff"); g.save(); g.globalCompositeOperation = "lighter"; g.fillStyle = "rgba(255,250,220,.12)"; g.beginPath(); g.moveTo(x - 8, y); g.lineTo(160 - 120, 200); g.lineTo(160 + 120, 200); g.lineTo(x + 8, y); g.closePath(); g.fill(); g.restore(); });
+    // le due squadre in fila a centrocampo (tocca: si stringono la mano)
+    for (let i = 0; i < 5; i++) { const sh = since("ts_finale", 1) < 100 ? 6 : 0; px(g, 110 + i * 10 + sh, 128, 7, 14, "#e83a3a"); circ(g, 113.5 + i * 10 + sh, 124, 3.5, "#e0b890"); px(g, 168 + i * 10 - sh, 128, 7, 14, "#1a2a5a"); circ(g, 171.5 + i * 10 - sh, 124, 3.5, "#e0b890"); }
+    if (since("ts_finale", 2) < 120 || Math.floor(f / 20) % 4 === 0) { g.fillStyle = "#fff"; g.font = "900 12px Impact, sans-serif"; g.fillText("BUM!", 260, 32); }
+    tsInk(g, W, H);
+  }
+  function bgTsFesta(g, W, H, f) {
+    // la festa in piazza: lanterne, coriandoli, Tito con la coppa, il Tabellone con «Campioni: quelli che ridono» (tocca)
+    vgrad(g, 0, 0, W, H, ["#1a1a3a", "#5a2a3a"]); for (let i = 0; i < 12; i++) { const x = 14 + i * 27, y = 24 + Math.sin(i) * 6; g.strokeStyle = "#3a2a1a"; g.lineWidth = 1; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, y); g.stroke(); circ(g, x, y + 5, 6, ["#e83a3a", "#e8c84a", "#7ac84a", "#3a8ac8"][i % 4]); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, x, y + 5, 14, "255,220,150", 0.35); g.restore(); }
+    px(g, 0, 130, W, 70, "#c8b898"); px(g, 120, 50, 80, 50, "#1e3a2a"); g.strokeStyle = "#c8a060"; g.lineWidth = 3; g.strokeRect(120, 50, 80, 50); g.fillStyle = "#f4ecdc"; g.font = "bold 7px sans-serif"; g.fillText("CAMPIONI:", 128, 66); g.fillStyle = "#ffd23f"; g.fillText("QUELLI CHE", 128, 78); g.fillText("RIDONO", 128, 90);
+    const t = since("ts_festa", 0) < 80 ? Math.abs(Math.sin(f / 5)) * 10 : 0; px(g, 60, 140 - t, 18, 30, "#f4ecdc"); circ(g, 69, 132 - t, 8, "#e8b88a"); px(g, 62, 112 - t, 14, 12, "#c8ccd8"); px(g, 58, 114 - t, 4, 6, "#c8ccd8"); px(g, 76, 114 - t, 4, 6, "#c8ccd8");
+    for (let i = 0; i < 4; i++) { const x = 200 + i * 22, y = 150 + Math.sin(f / 8 + i) * 4; px(g, x, y, 10, 20, ["#e83a3a", "#3a5a8a", "#e83a3a", "#1a2a5a"][i]); circ(g, x + 5, y - 5, 5, "#e0b890"); }
+    for (let i = 0; i < 50; i++) { const x = (i * 37 + Math.sin(f / 40 + i) * 15) % W, y = (i * 23 + f * (0.4 + (i % 3) * 0.2)) % H; px(g, x, y, 3, 2, ["#e83a3a", "#e8c84a", "#7ac84a", "#3a8ac8", "#fff"][i % 5]); }
+    if (since("ts_festa", 1) < 100) { g.fillStyle = "#fff"; g.font = "900 14px Impact, sans-serif"; g.fillText("PANE A FORMA DI PALLONE!", 60, 120); }
+    if (since("ts_festa", 2) < 120) { g.fillStyle = "#ffd23f"; g.font = "900 12px Impact, sans-serif"; g.fillText("L'ANNO PROSSIMO SI TORNA!", 170, 196); }
+    tsInk(g, W, H);
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -5771,6 +5793,16 @@
       [240, 0, 50, 100, "🗼 La luce del faro gira, anche di giorno. Il fascio passa sul campo e illumina Ettore, da solo, per un istante."],
       [20, 130, 280, 50, "🏃 Ettore corre lungo la linea di fondo. Avanti e indietro. Avanti e indietro. Non guarda nessuno."],
       [90, 186, 160, 14, "📜 L'articolo 4 del regolamento dell'Accademia, dipinto sul muretto: «In campo non si ride». Qualcuno, con un pennarello, ha disegnato una faccina che sorride."],
+    ] },
+    ts_finale: { draw: bgTsFinale, hot: [
+      [0, 30, 320, 40, "🙌 Tutta la tribuna si alza insieme, otto colori in un'onda sola. Il tamburo in fondo accelera."],
+      [100, 115, 120, 35, "🤝 Le due squadre si stringono la mano a centrocampo. Ettore stringe la tua un secondo più del necessario."],
+      [240, 15, 60, 30, "🥁 BUM. Il tamburo. Nessuno sa chi lo suoni. Nadia giura che è la maestra Iole, da giovane, che è venuta a vedere."],
+    ] },
+    ts_festa: { draw: bgTsFesta, hot: [
+      [50, 100, 40, 70, "🏆 Tito solleva la coppa d'argento e fa un salto. La piazza trema. Il forno, dalla panetteria, sbuffa d'orgoglio."],
+      [40, 105, 240, 20, "🥖 Pane a forma di pallone per tutti. Uno rotola giù dalla piazza fino al mare. Lo mangia un gabbiano, felice."],
+      [160, 180, 160, 20, "📣 «L'ANNO PROSSIMO SI TORNA!» lo gridano tutti insieme, anche quelli dell'Accademia."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
