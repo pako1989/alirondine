@@ -5304,6 +5304,27 @@
     if (since("ts_campo", 2) < 120) { g.fillStyle = "#141414"; g.font = "900 14px Impact, sans-serif"; g.fillText("CENTO SCUOLE! CENTO SCUOLE!", 50, 70); }
     tsInk(g, W, H);
   }
+  function bgTsMercato(g, W, H, f) {
+    // il mercato: tende a strisce, cassette di frutta, Alba in bicicletta tra la folla (tocca)
+    vgrad(g, 0, 0, W, 50, ["#8ad0f0", "#f4e8c8"]); px(g, 0, 50, W, 150, "#d8c8a8");
+    const cols = ["#e83a3a", "#3a8ac8", "#7ac84a", "#e8c84a"]; for (let i = 0; i < 6; i++) { const x = i * 56; for (let k = 0; k < 4; k++) px(g, x + k * 13, 56, 13, 16, k % 2 ? "#f4ecdc" : cols[i % 4]); px(g, x + 2, 72, 48, 30, "#a8784a"); for (let k = 0; k < 6; k++) circ(g, x + 8 + k * 7, 76, 3, ["#f0a070", "#e85a3a", "#7ac84a", "#e8c84a"][(k + i) % 4]); }
+    for (let i = 0; i < 5; i++) { const x = ((i * 83 + f * (0.25 + i * 0.05)) % (W + 30)) - 15, y = 130 + (i % 3) * 14; px(g, x, y, 9, 18, ["#e8a8c8", "#3a6ab8", "#f4ecdc", "#7ac84a", "#e8883a"][i]); circ(g, x + 4.5, y - 5, 5, "#e0b890"); }
+    // Alba in bicicletta (tocca: accelera)
+    const bx = since("ts_mercato", 0) < 80 ? (since("ts_mercato", 0) * 5) % (W + 40) - 20 : ((f * 1.2) % (W + 40)) - 20; g.strokeStyle = "#141414"; g.lineWidth = 1.5; [bx, bx + 22].forEach((x) => { g.beginPath(); g.arc(x, 182, 7, 0, 7); g.stroke(); }); px(g, bx, 176, 22, 2, "#e8c84a"); px(g, bx + 8, 160, 8, 14, "#3a5a8a"); circ(g, bx + 12, 155, 5, "#f0d0b0"); px(g, bx + 9, 150, 8, 3, "#c8642a");
+    if (since("ts_mercato", 1) < 100) { g.fillStyle = "#141414"; g.font = "900 13px Impact, sans-serif"; g.fillText("PESCHE! PESCHE!", 30, 118); }
+    if (since("ts_mercato", 2) < 120) for (let i = 0; i < 8; i++) circ(g, 250 + i * 6, 100 - Math.abs(Math.sin(f / 8 + i)) * 20, 3, "#f0a070");
+    tsInk(g, W, H);
+  }
+  function bgTsFaro(g, W, H, f) {
+    // il campo del Faro: le linee perfette, il faro bianco e blu, Ettore che corre da solo (tocca)
+    vgrad(g, 0, 0, W, 90, ["#f0b080", "#f8e0c0"]); circ(g, 70, 70, 20, "#ffe8a0"); vgrad(g, 0, 70, W, 30, ["#2a7ab8", "#3a8ac8"]);
+    px(g, 250, 20, 24, 80, "#f4ecdc"); for (let k = 0; k < 4; k++) px(g, 250, 28 + k * 20, 24, 7, "#1a2a5a"); px(g, 246, 10, 32, 12, "#1a2a5a"); if (since("ts_faro", 0) < 140 || Math.floor(f / 50) % 2) { g.fillStyle = "rgba(255,240,180,.4)"; g.beginPath(); g.moveTo(262, 16); g.lineTo(140, 0); g.lineTo(140, 30); g.closePath(); g.fill(); }
+    vgrad(g, 0, 100, W, 100, ["#4f9a3e", "#3a8a32"]); for (let i = 0; i < 10; i++) px(g, i * 32, 100, 16, 100, "rgba(255,255,255,.05)"); g.strokeStyle = "#fff"; g.lineWidth = 2; g.strokeRect(10, 108, 300, 86);
+    const ex = 40 + ((f * 0.9) % 240), back = Math.floor(f * 0.9 / 240) % 2, x = back ? 280 - ((f * 0.9) % 240) : ex; px(g, x, 150, 9, 18, "#1a2a5a"); circ(g, x + 4.5, 145, 5, "#e0b890"); px(g, x, 140, 9, 3, "#1a1a2a");
+    if (since("ts_faro", 1) < 100) { g.fillStyle = "#141414"; g.font = "900 11px Impact, sans-serif"; g.fillText("ANCORA UN GIRO.", x - 20, 132); }
+    if (since("ts_faro", 2) < 120) { g.fillStyle = "#141414"; g.font = "bold 8px sans-serif"; g.fillText("ART. 4: IN CAMPO NON SI RIDE", 100, 196); }
+    tsInk(g, W, H);
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -5740,6 +5761,16 @@
       [0, 30, 320, 40, "🙌 La tribunetta si alza in piedi. Sono quaranta persone, ma fanno il rumore di quattrocento."],
       [120, 110, 80, 60, "⚽ Un tiro dal centrocampo attraversa tutto il campo e finisce in rete. Lo ha tirato un bambino della tribuna, scavalcando la recinzione. Applausi."],
       [40, 60, 240, 16, "📣 «CENTO SCUOLE! CENTO SCUOLE!» Il coro è lo stesso da cinquant'anni. Anche le parole."],
+    ] },
+    ts_mercato: { draw: bgTsMercato, hot: [
+      [0, 140, 320, 60, "🚲 Alba passa in bicicletta tra la folla, senza toccare nessuno. Un cane la insegue per tre bancarelle, poi si arrende e si siede."],
+      [0, 50, 320, 60, "🍑 «PESCHE! PESCHE!» Bruna grida dal banco della frutta. Nessuno sa se vende pesche o se sta facendo il tifo."],
+      [230, 70, 80, 50, "🍑 Una cassetta di pesche si rovescia. Le pesche rotolano verso la piazza come una squadra in contropiede."],
+    ] },
+    ts_faro: { draw: bgTsFaro, hot: [
+      [240, 0, 50, 100, "🗼 La luce del faro gira, anche di giorno. Il fascio passa sul campo e illumina Ettore, da solo, per un istante."],
+      [20, 130, 280, 50, "🏃 Ettore corre lungo la linea di fondo. Avanti e indietro. Avanti e indietro. Non guarda nessuno."],
+      [90, 186, 160, 14, "📜 L'articolo 4 del regolamento dell'Accademia, dipinto sul muretto: «In campo non si ride». Qualcuno, con un pennarello, ha disegnato una faccina che sorride."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };

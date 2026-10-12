@@ -32,4 +32,31 @@ async function c1(w) {
   const i = await L.info(page); if (!i.done[1]) errors.push("capitolo 1 non concluso: " + JSON.stringify(i.step)); if (i.flags.tb_q0 !== "La Via Lunga") errors.push("tabellone non aggiornato");
   L.check(`Il Torneo delle Cento Scuole · capitolo 1 (${w} px)`, errors); await browser.close();
 }
-(async () => { await c1(390); await c1(320); })().catch((e) => { console.error("✗ torneo:", e.message); process.exit(1); });
+async function c2(w) {
+  const save = { v: 1, ch: 2, step: { 1: 5 }, done: { 1: "mano" }, diffSet: true, intro: { ch1: 1, ts_piazza: 1, ts_spiaggia: 1, ts_campo: 1 }, st: { squadra: 5, rivale: 2 }, flags: { ts_tec_tiro3: true, ts_maglia: true, tb_q0: "La Via Lunga", tb_q2: "Collegio San Biagio", tb_q3: "Accademia del Faro", ts_lettere: true, ts_l_vigile: true, ts_l_turista: true, ts_l_pescatore: true } };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await L.stubMatch(page, true);
+  await page.evaluate(() => window.__torneo.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 2")); await L.advance(page);
+  for (const z of ["ts_mercato", "ts_faro", "ts_piazza", "ts_spiaggia"]) { const bad = await L.reachAll(page, z); if (bad.length) errors.push(z + " irraggiungibile: " + bad.join(", ")); }
+  await L.talk(page, "ts_nadia"); await L.advance(page);
+  await L.goAct(page, 19, 25); await L.advance(page); await L.talk(page, "ts_rocco"); await L.advance(page, ["In fila"]);
+  await L.goAct(page, 39, 10); await L.advance(page); if ((await L.zone(page)) !== "ts_faro") errors.push("non si va al faro");
+  if (w === 390) await L.shot(page, "ts_faro");
+  await L.talk(page, "ts_ettore"); await L.advance(page, ["Gioca l'amichevole"]); await page.waitForTimeout(200); await L.advance(page);
+  const lm = await page.evaluate(() => window.__lastMatch); if (!lm || lm.mate !== "Alba Corsi, postina") errors.push("amichevole sbagliata: " + JSON.stringify(lm));
+  await page.evaluate(() => window.__torneo._dbg.K.go("ts_mercato", 2, 9)); await page.waitForTimeout(500); await L.advance(page);
+  if (w === 390) await L.shot(page, "ts_mercato");
+  await L.talk(page, "ts_alba"); await L.advance(page, ["Insegnamela"]);
+  for (const id of ["ts_venditore", "ts_fioraia"]) { await L.talk(page, id); await L.advance(page); }
+  await L.talk(page, "ts_bruna"); await L.advance(page, ["Prendetelo"]);
+  const i1 = await L.info(page); if (i1.flags.tb_q1 !== "Ragazzi del Mercato") errors.push("il prestito del campo non cambia il tabellone: " + i1.flags.tb_q1);
+  await L.goAct(page, 0, 8); await L.advance(page); await L.goAct(page, 0, 12); await L.advance(page);
+  await L.talk(page, "ts_iole"); await page.evaluate(() => window.T_.click("Gioca la semifinale")); await page.waitForTimeout(500); await vgStart(page); await page.waitForTimeout(800);
+  const st = await page.evaluate(() => window.__vignette.state.o); if (st.opp.name !== "Ragazzi del Mercato" || !st.techniques.includes("muro") || !st.techniques.includes("ombra")) errors.push("semifinale sbagliata: " + JSON.stringify([st.opp.name, st.techniques]));
+  await vgEnd(page, 2, 1); await L.advance(page);
+  await page.evaluate(() => window.__torneo._dbg.K.go("ts_faro", 2, 10)); await page.waitForTimeout(500); await L.advance(page);
+  await L.talk(page, "ts_ettore"); await L.advance(page, ["Stasera vieni a cena"]);
+  const i = await L.info(page); if (!i.done[2]) errors.push("capitolo 2 non concluso: " + JSON.stringify(i.step)); if (i.flags.tb_s0 !== "La Via Lunga") errors.push("tabellone della semifinale non aggiornato");
+  L.check(`Il Torneo delle Cento Scuole · capitolo 2 (${w} px)`, errors); await browser.close();
+}
+(async () => { await c1(390); await c1(320); await c2(390); await c2(320); })().catch((e) => { console.error("✗ torneo:", e.message); process.exit(1); });
