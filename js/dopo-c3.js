@@ -38,7 +38,7 @@
     const zones = {
       ep_stazione: {
         region: "inverno", name: "Dopo il Campione · La stazione di Valdorsa", short: "La stazione di Valdorsa", sub: "D'inverno, tre treni al giorno", bg: "ep_stazione", time: "tramonto", travel: [20, 4],
-        w: 40, h: 24, start: [20, 4], itemCos: "ep_neve", items: [[2, 21], [37, 21], [3, 3], [36, 3]],
+        w: 40, h: 24, start: [20, 4], itemCos: "ep_neve", items: [[2, 17], [37, 17], [3, 3], [36, 3]],
         areas: [[12, 8, 27, 14, "Il bar della stazione"], [0, 17, 39, 22, "I binari"], [0, 0, 39, 23, "La stazione"]],
         act: { q: "Entra", n: "Leggi l'orario", b: "Siediti", l: "Guarda il lampione", t: "Guarda l'albero", "^": "Torna in paese", f: "Guarda la staccionata", p: "Guarda la pensilina" },
         flavor: {
@@ -50,7 +50,7 @@
           p: "La pensilina della stazione, ghisa e vetro. Sotto, un uomo con il cappotto aspettava sempre la corriera delle cinque. Così dicono.",
         },
         intro: [["voce", "Valdorsa d'inverno. La neve copre il paese come un lenzuolo su un mobile che non si usa. La stazione è in fondo alla valle: tre treni al giorno, un bar, una pensilina di ghisa."], ["voce", "Ada è sotto la pensilina, con un gettone da sala giochi in mano. Lo gira tra le dita come una moneta portafortuna."]],
-        npcs: (s) => [...(s <= 1 ? [{ id: "ep_ada", at: [21, 15] }] : []), { id: "ep_nino", at: [8, 15] }, { id: "ep_lia", at: [31, 15] }],
+        npcs: (s) => [...(s <= 1 ? [{ id: "ep_ada", at: [25, 15] }] : []), { id: "ep_nino", at: [8, 15] }, { id: "ep_lia", at: [31, 15] }],
         build(L) {
           const { lay, put, house } = L;
           lay(0, 0, 39, 0, "t"); lay(0, 0, 0, 23, "t"); lay(39, 0, 39, 23, "t"); lay(0, 23, 39, 23, "t"); put(19, 0, "^"); put(20, 0, "^");
