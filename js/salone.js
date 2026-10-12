@@ -197,6 +197,7 @@
     { id: "vignette", t: "Vignette", e: "🗯️", saga: "torneo", eng: "__vignette", d: "La partita a fumetti del Torneo delle Cento Scuole: vista di lato, ad azioni, con le tecniche di squadra.",
       opp: [{ name: "I Gabbiani del Porto", color: "#3a6ab8", style: "pressing", players: [P("Gil", "#d9a679", "#2a2a2a"), P("Moli", "#e8c4a0", "#5a3a1a"), P("Rete", "#c68642", "#1a1a1a")] }, { name: "Collegio San Biagio", color: "#6a3a8a", style: "difensiva", players: [P("Biagio", "#f0d0b0", "#3a2a1a"), P("Fra", "#e0b890", "#1a1a1a"), P("Dodo", "#d9a679", "#8a5a2a")] }],
       boss: { name: "Accademia del Faro", color: "#1a2a5a", style: "contropiede", players: [{ id: "ts_ettore", name: "Ettore", skin: "#e0b890", hair: "#1a1a2a" }, P("Marino", "#e8c4a0", "#2a1a1a"), P("Scotti", "#d9a679", "#3a2a1a")] },
+      cup: ["I Gabbiani del Porto", "Ragazzi del Mercato", "Le Lanterne", "Collegio San Biagio", "Scuola dei Pescatori", "Real Ciabatta", "Accademia del Faro"],
       opts: (o, h, boss) => ({ title: `Vignette · contro ${o.name}`, us: h.name, actions: boss ? 10 : 8, opp: o, mates: [{ id: "ts_tito", name: "Tito", skin: "#e8b88a", hair: "#3a2a1a" }, { id: "ts_alba", name: "Alba", skin: "#f0d0b0", hair: "#c8642a" }], techniques: ["tiro3", "muro", "ombra"] }) },
     { id: "atb", t: "ATB", e: "💠", saga: "cronache", eng: "__atb", d: "La battaglia a turni delle Cronache del Pallone di Cristallo: barre del tempo attivo, comandi, magie e fiato.",
       opp: [{ name: "Guardiani di Rovo", color: "#5a3a2a", style: "difensiva", players: [P("Rovo", "#8a6a4a", "#2a4a1a", { tiro: 12, pass: 11, dif: 14, vel: 10 }), P("Spina", "#7a5a3a", "#3a5a1a"), P("Ortica", "#8a7a4a", "#4a6a2a"), P("Cardo", "#6a5a3a", "#5a3a6a")] }, { name: "I Silenti", color: "#3a3a4a", style: "equilibrata", players: [P("Il Muto", "#c8c8d0", "#3a3a4a", { tiro: 13, pass: 14, dif: 13, vel: 13 }), P("Quieto", "#c8c8d0", "#2a2a3a"), P("Zitto", "#c8c8d0", "#4a4a5a"), P("Sussurro", "#c8c8d0", "#5a5a6a")] }],
@@ -233,17 +234,53 @@
     html += list.map(({ o, i, boss }) => `<div class="psec${boss ? " gold" : ""}" data-o="${i}"><div class="pe">${boss ? "👑" : "⚽"}</div><div><b>${esc(o.name)}</b><span>${boss ? "La sfida del boss della saga" : `Carattere: ${esc(o.style || "equilibrata")}`}${o.oppPower ? ` · contro-potere: ${esc(o.oppPower)}` : ""}</span></div><div class="n">▶</div></div>`).join("");
     if (!st.boss) html += `<p class="sum">👑 Il boss si sblocca finendo la saga «${esc(st.s ? st.s.t : "")}».</p>`;
     if (m.power) html += `<div class="sec">Il tuo potere</div><div class="row">${["fulmine", "gigante", "calamita", "gelo", "doppio"].map((k, j) => `<button type="button" class="chip${j === 0 ? " on" : ""}" data-pw="${k}">${k}</button>`).join("")}</div>`;
-    html += `<div class="big"><button type="button" data-back="1">◂ Torna alla Sala Giochi<small>Tutti i cabinati</small></button></div>`;
+    const cups = (sgRec().cup || {})[m.id] || 0;
+    html += `<div class="big"><button type="button" data-cup="1">🏆 Torneo a eliminazione<small>Quarti, semifinale e finale di fila · coppe vinte: ${cups}</small></button><button type="button" data-back="1">◂ Torna alla Sala Giochi<small>Tutti i cabinati</small></button></div>`;
     body.innerHTML = html; let pw = "fulmine";
+    body.querySelector("[data-cup]").onclick = () => sgCup(m, pw);
     body.querySelectorAll("[data-pw]").forEach((b) => (b.onclick = () => { pw = b.dataset.pw; body.querySelectorAll("[data-pw]").forEach((x) => x.classList.toggle("on", x === b)); }));
     body.querySelector("[data-back]").onclick = () => openSalaGiochi();
     body.querySelectorAll("[data-o]").forEach((b) => (b.onclick = () => { const it = list.find((x) => String(x.i) === b.dataset.o); sgPlay(m, it.o, it.boss, pw); }));
   }
-  function sgPlay(m, o, boss, pw) {
+  function sgPlay(m, o, boss, pw, after) {
     const eng = window[m.eng], C = window.__sagaCore, r = sgRec(); if (!eng || !eng.start) return;
     close(); if (C && C.setCur) C.setCur(boss && r.diff === "storia" ? "normale" : r.diff, o.style);
-    const opts = Object.assign(m.opts(o, heroLook(), boss, pw), { oppStyle: o.style, heroLook: heroLook(), winTitle: boss ? "BOSS SCONFITTO!" : "VITTORIA!", onDone: (res) => { const r2 = sgRec(); r2.p[m.id] = (r2.p[m.id] || 0) + 1; if (res.win) r2.w[m.id] = (r2.w[m.id] || 0) + 1; if (boss && res.win) r2.boss = Object.assign(r2.boss || {}, { [m.id]: 1 }); sgSave(r2); sgMachine(m); } });
+    const opts = Object.assign(m.opts(o, heroLook(), boss, pw), { oppStyle: o.style, heroLook: heroLook(), winTitle: boss ? "BOSS SCONFITTO!" : "VITTORIA!", onDone: (res) => { const r2 = sgRec(); r2.p[m.id] = (r2.p[m.id] || 0) + 1; if (res.win) r2.w[m.id] = (r2.w[m.id] || 0) + 1; if (boss && res.win) r2.boss = Object.assign(r2.boss || {}, { [m.id]: 1 }); sgSave(r2); if (after) after(res); else sgMachine(m); } });
     const ok = safe(() => eng.start(opts), false); if (ok === false) { if (C && C.endMatch) C.endMatch(); sgMachine(m); }
+  }
+  // TORNEO A ELIMINAZIONE: otto squadre, tre turni. Le altre partite del tabellone si giocano «da sole» (a sorte).
+  function sgCup(m, pw) {
+    const st = sgState(m), pool = (m.cup || m.opp.map((o) => o.name).concat(["I Ragazzi del Molo", "La Banda del Faro", "Gli Ultimi Arrivati", "Le Riserve d'Oro"])).slice();
+    const finalOpp = st.boss ? m.boss : Object.assign({}, m.opp[m.opp.length - 1], { style: "pressing" }), named = (n) => m.opp.find((o) => o.name === n) || (m.boss.name === n ? m.boss : null);
+    const shuffle = (a) => a.map((x) => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map((p) => p[1]);
+    const others = shuffle(pool.filter((n) => n !== finalOpp.name)).slice(0, 6); while (others.length < 6) others.push(["La Squadra Misteriosa", "Gli Ultimi Arrivati", "Le Riserve d'Oro", "I Ragazzi del Molo", "La Banda del Faro", "Il Real Nebbia"][others.length]); const teams = ["Tu", ...others, finalOpp.name]; // il favorito sta dall'altra parte del tabellone
+    const T = { m, pw, round: 0, teams, res: [[], [], []], alive: teams.slice() };
+    const mk = (name, k) => { const base = named(name) || Object.assign({}, m.opp[k % m.opp.length]); return Object.assign({}, base, { name, style: k === 2 ? "pressing" : base.style || "equilibrata" }); };
+    const step = () => {
+      const r = T.round; if (r > 2) return;
+      const pairs = []; for (let i = 0; i < T.alive.length; i += 2) pairs.push([T.alive[i], T.alive[i + 1]]);
+      const mine = pairs.find((p) => p.includes("Tu")), opp = mine[0] === "Tu" ? mine[1] : mine[0];
+      cupBoard(T, `${["Quarti di finale", "Semifinale", "FINALE"][r]}: Tu contro ${opp}`, "Gioca ▸", () => {
+        sgPlay(m, mk(opp, r === 2 ? 2 : r), r === 2 && st.boss, pw, (res) => {
+          const next = []; pairs.forEach(([a, b]) => { const w = [a, b].includes("Tu") ? (res.win ? "Tu" : (a === "Tu" ? b : a)) : a === finalOpp.name ? a : b === finalOpp.name ? b : Math.random() < 0.5 ? a : b; next.push(w); T.res[r].push([a, b, w]); });
+          T.alive = next; T.round++;
+          if (!res.win) return cupBoard(T, `Eliminato ${["ai quarti", "in semifinale", "in finale"][r]}. Il torneo continua senza di te: vince ${T.alive.length === 1 ? T.alive[0] : "chi lo merita"}.`, "◂ Torna al cabinato", () => sgMachine(m));
+          if (T.round > 2) { const r2 = sgRec(); r2.cup = Object.assign(r2.cup || {}, { [m.id]: ((r2.cup || {})[m.id] || 0) + 1 }); sgSave(r2); return cupBoard(T, "🏆 HAI VINTO IL TORNEO!", "◂ Torna al cabinato", () => sgMachine(m)); }
+          step();
+        });
+      });
+    };
+    step();
+  }
+  function cupBoard(T, title, btn, fn) {
+    const body = shell(`🏆 Torneo · ${T.m.t}`), row = (a, b, w) => `<div style="display:flex;justify-content:space-between;gap:6px;padding:4px 8px;border-bottom:1px dashed #ffffff22"><span style="${w ? (w === a ? "color:#ffd23f;font-weight:800" : "opacity:.45;text-decoration:line-through") : ""}">${esc(a)}</span><span style="opacity:.5">vs</span><span style="${w ? (w === b ? "color:#ffd23f;font-weight:800" : "opacity:.45;text-decoration:line-through") : ""}">${esc(b)}</span></div>`;
+    let html = `<p class="sum"><b>${esc(title)}</b></p>`;
+    const qs = []; for (let i = 0; i < 8; i += 2) qs.push([T.teams[i], T.teams[i + 1]]);
+    html += `<div class="sec">Quarti</div>` + qs.map(([a, b]) => { const r = T.res[0].find((x) => x[0] === a); return row(a, b, r && r[2]); }).join("");
+    if (T.round >= 1) html += `<div class="sec">Semifinali</div>` + (T.res[1].length ? T.res[1].map((x) => row(...x)).join("") : [0, 2].map((i) => row(T.alive[i] || "?", T.alive[i + 1] || "?")).join(""));
+    if (T.round >= 2) html += `<div class="sec">Finale</div>` + (T.res[2].length ? T.res[2].map((x) => row(...x)).join("") : row(T.alive[0] || "?", T.alive[1] || "?"));
+    html += `<div class="big"><button type="button" data-go="1">${esc(btn)}<small>${esc(T.m.t)}</small></button></div>`;
+    body.innerHTML = html; body.querySelector("[data-go]").onclick = fn;
   }
   // ---------------------------------------------------------------- CINETECA
   // Rivedi i finali che hai trovato: lo sfondo animato della saga, la grana della pellicola e il racconto del finale.

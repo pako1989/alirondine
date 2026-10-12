@@ -43,7 +43,9 @@
     const hero = Object.assign({ name: "Tu", skin: "#e0ac7e", hair: "#2b1d14" }, o.heroLook || {});
     const mates = (o.mates || []).slice(0, 3);
     const oppP = ((o.opp && o.opp.players) || [{ name: "Avversario" }]).slice(0, 4);
-    const power = POW[o.power] ? o.power : "", opow = OPOW[o.oppPower] ? o.oppPower : "";
+    // o.powers = [..]: i poteri girano (uno dopo l'altro, a ogni uso) e la barra riparte da metà
+    const powers = Array.isArray(o.powers) ? o.powers.filter((k) => POW[k]) : null, opow = OPOW[o.oppPower] ? o.oppPower : "";
+    let power = powers && powers.length ? powers[0] : POW[o.power] ? o.power : "", pIdx = 0;
     const S = { o, a: 0, b: 0, turn: 0, shots: o.shots || 8, extra: 0, who: 0, phase: "intro", t: 0, fx: [], panel: null, cap: null, meter: 0, ometer: 0, armed: "", curse: "", frozen: false, bonus: false, aim: null, data: { tiri: 0, tocchi: 0, poteri: 0, pow: 0 }, over: false };
     STATE = S;
     // ------------------------------------------------------------ interfaccia
@@ -165,6 +167,7 @@
       if (!power || S.meter < 100 || S.who !== 0 || S.phase !== "aim" || S.armed) return;
       S.meter = 0; S.armed = power; S.data.poteri++; (S.data.usati = S.data.usati || {})[power] = 1;
       const P = POW[power]; S.panel = { t: 90, txt: P.name + "!", sub: P.sub, col: usCol, sfx: P.sfx, next: () => { S.phase = "aim"; hud(); } }; S.phase = "panel"; tone(220, 0.5, "sawtooth", 0.05, 880); hud();
+      if (powers && powers.length > 1) { pIdx = (pIdx + 1) % powers.length; power = powers[pIdx]; S.meter = 50; S.nextPow = power; }
     }
     function oppCurse() { // il cattivo usa il suo contro-potere
       S.ometer = 0; S.curse = opow; const P = OPOW[opow];
@@ -284,8 +287,8 @@
       const res = { a: quit ? 0 : S.a, b: quit ? Math.max(1, S.b) : S.b, win: !quit && S.a > S.b, quit: !!quit, data: S.data };
       card(quit ? "Partita abbandonata" : res.win ? o.winTitle || "VITTORIA!" : S.a === S.b ? "Pareggio" : "Sconfitta", `<p class="big">${S.a} – ${S.b}</p><p>Tiri ${S.data.tiri} · Tocchi di palla ${S.data.tocchi} · Carambole ${S.data.pow} · Poteri ${S.data.poteri}</p>`, "Continua ▸", () => { cancelAnimationFrame(S.raf); window.removeEventListener("keydown", kd, true); el.remove(); STATE = null; if (C && C.endMatch) C.endMatch(); try { (o.onDone || (() => {}))(res); } catch (e) { console.error(e); } });
     }
-    S.finish = finish; S.flick = flick; S.usePower = usePower; S.D = D; S.ball = ball;
-    const pw = power ? `<p><b>Il tuo potere: ${POW[power].name}</b> — ${POW[power].sub}. La barra si riempie toccando il pallone e con le carambole; piena, premi <b>POTERE</b> prima di tirare.</p>` : "";
+    S.finish = finish; S.flick = flick; S.usePower = usePower; S.D = D; S.ball = ball; Object.defineProperty(S, "power", { get: () => power });
+    const pw = powers && powers.length > 1 ? `<p><b>I poteri della squadra</b>, a turno: ${powers.map((k) => POW[k].name).join(" → ")}. Dopo ogni potere usato arriva il successivo, e la barra riparte da metà.</p>` : power ? `<p><b>Il tuo potere: ${POW[power].name}</b> — ${POW[power].sub}. La barra si riempie toccando il pallone e con le carambole; piena, premi <b>POTERE</b> prima di tirare.</p>` : "";
     const opw = opow ? `<p><b>Attento al cattivo: ${OPOW[opow].name}</b> — ${OPOW[opow].sub}, quando la sua barra è piena.</p>` : "";
     card(o.title || "Super-Bottoni", `${o.intro || ""}<p><b>Come si gioca</b>: tocca uno dei tuoi bottoni, <b>tira indietro</b> come una fionda e lascia. Più tiri, più va forte. Spingi il pallone nella porta in alto. Poi tocca a loro.</p>${pw}${opw}<p style="opacity:.8;font-size:12px">${S.shots} tiri a testa · avversari: ${esc(style)}</p>`, "Fischio d'inizio ▸", () => { S.phase = "aim"; S.who = 0; say("Tocca a te! Tira indietro un bottone."); hud(); });
     hud(); loop();

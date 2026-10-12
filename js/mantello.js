@@ -23,7 +23,7 @@
   };
   const FXS = { t: -999, txt: "", cap: null, capT: -999 };
   const E = window.__sagaCore.create({
-    id: "mantello", key: "ali-di-rondine.mantello", title: "Il Mantello Granata", icon: "🦸", bg: "mg_titolo", chapters: 3,
+    id: "mantello", key: "ali-di-rondine.mantello", title: "Il Mantello Granata", icon: "🦸", bg: "mg_titolo", chapters: 4,
     menuSub: "Un mantello, tre forme, cattivi ridicoli e partite a bottoni con i superpoteri",
     theme: { accent: "#d82a3a", ink: "#fff8e8", paper: "rgba(20,16,40,.9)", font: "'Trebuchet MS', 'Comic Sans MS', sans-serif", chipBg: "#2a1030ee", chipBorder: "#ffd23f" },
     stats: { fama: [0, 99, 0, "Fama del Mantello Granata"], segreto: [-9, 9, 0, "Identità segreta"] },

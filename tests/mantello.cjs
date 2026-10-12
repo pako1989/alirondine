@@ -98,4 +98,20 @@ async function c3(w) {
   const n = await page.evaluate(() => window.__mantello._dbg.K.mem().ends.length); if (n < 4) errors.push("finali trovati " + n + " su 4");
   L.check(`Il Mantello Granata · capitolo 3 e i 4 finali (${w} px)`, errors); await browser.close();
 }
-(async () => { await c1(390); await c1(320); await c2(390); await c2(320); await c3(390); await c3(320); })().catch((e) => { console.error("✗ mantello:", e.message); process.exit(1); });
+async function c4(w) {
+  const save = { v: 1, ch: 4, step: { 1: 5, 2: 5, 3: 5 }, done: { 1: "segreto", 2: "amica", 3: "eroe" }, ends: ["eroe"], diffSet: true, intro: { ch1: 1, ch2: 1, ch3: 1, mg_piazza: 1, mg_sartoria: 1 }, st: { fama: 12 }, flags: { mg_mantello: true, forma_volo: true, forma_mini: true, forma_gigante: true, party_mg_bullone: true, party_mg_gilda: true, mg_colla_amica: true } };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await page.evaluate(() => window.__mantello.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 4")); await L.advance(page);
+  await L.goAct(page, 6, 6); await L.advance(page); await L.talk(page, "mg_tilde"); await L.advance(page); await L.goAct(page, 10, 12); await L.advance(page);
+  await L.talk(page, "mg_brace"); await L.advance(page);
+  await page.evaluate(() => window.__mantello._dbg.K.setForm("volo", true));
+  await L.talk(page, "mg_tonno"); await L.advance(page); await L.talk(page, "mg_colla"); await L.advance(page);
+  await L.talk(page, "mg_senza"); await page.evaluate(() => window.T_.click("Sfida con la Lega")); await page.waitForTimeout(500); await btStart(page); await page.waitForTimeout(300);
+  // i poteri girano: dopo il Fulmine arriva il Gigante
+  const p = await page.evaluate(() => { const S = window.__bottoni.state, a = S.power; S.meter = 100; S.usePower(); return [a, S.power, S.meter]; }); if (p.join() !== "fulmine,gigante,50") errors.push("i poteri non girano: " + p);
+  await page.waitForTimeout(1800); await btEnd(page, 3, 1); await L.advance(page);
+  await L.talk(page, "mg_senza"); await L.advance(page, ["Nonna Tilde ve ne cuce"]);
+  const i = await L.info(page); if (!i.done[4]) errors.push("capitolo bonus non concluso: " + JSON.stringify(i.step));
+  L.check(`Il Mantello Granata · capitolo bonus «La Lega» (${w} px)`, errors); await browser.close();
+}
+(async () => { await c1(390); await c1(320); await c2(390); await c2(320); await c3(390); await c3(320); await c4(390); await c4(320); })().catch((e) => { console.error("✗ mantello:", e.message); process.exit(1); });

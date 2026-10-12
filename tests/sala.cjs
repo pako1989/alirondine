@@ -46,4 +46,22 @@ async function ospiti(w) {
   const txt = await page.evaluate(() => document.body.innerText); if (!/BIP/.test(txt)) errors.push("la battuta dell'ospite non compare");
   void ok; L.check(`Ospiti al Borgo (${w} px)`, errors); await browser.close();
 }
-(async () => { await run(390); await run(320); await ospiti(390); })().catch((e) => { console.error("✗ sala:", e.message); process.exit(1); });
+async function torneo(w) {
+  const extra = { "ali-di-rondine.torneo": { v: 1, ch: 3, step: { 1: 7, 2: 7, 3: 5 }, done: { 1: "a", 2: "b", 3: "festa" }, ends: ["festa"], diffSet: true, flags: {} } };
+  const { browser, page, errors } = await L.setup({ w, extra });
+  await page.evaluate(() => window.__salone.salaGiochi(() => {})); await page.waitForTimeout(200);
+  await page.evaluate(() => document.querySelector('.salOv [data-m="vignette"]').click()); await page.waitForTimeout(200);
+  await page.evaluate(() => document.querySelector(".salOv [data-cup]").click()); await page.waitForTimeout(200);
+  const q = await page.evaluate(() => document.querySelectorAll(".salOv .sec").length); if (q < 1) errors.push("il tabellone non compare");
+  if (w === 390) await L.shot(page, "sala_torneo");
+  for (let r = 0; r < 3; r++) {
+    await page.evaluate(() => document.querySelector(".salOv [data-go]").click()); await page.waitForTimeout(400);
+    await page.evaluate(() => document.querySelector(".vgOv .ov button").click()); await page.waitForTimeout(200);
+    await page.evaluate(() => { const S = window.__vignette.state; S.a = 2; S.b = 0; S.finish(); }); await page.waitForTimeout(200);
+    await page.evaluate(() => document.querySelector(".vgOv .ov button").click()); await page.waitForTimeout(300);
+  }
+  const t = await page.evaluate(() => document.querySelector(".salOv .sum").textContent); if (!/HAI VINTO IL TORNEO/.test(t)) errors.push("il torneo non si vince: " + t);
+  const rec = await page.evaluate(() => JSON.parse(localStorage.getItem("ali-di-rondine.salagiochi") || "{}")); if (!rec.cup || rec.cup.vignette !== 1) errors.push("coppa non registrata: " + JSON.stringify(rec.cup));
+  L.check(`Sala Giochi · torneo a eliminazione (${w} px)`, errors); await browser.close();
+}
+(async () => { await run(390); await run(320); await ospiti(390); await torneo(390); await torneo(320); })().catch((e) => { console.error("✗ sala:", e.message); process.exit(1); });
