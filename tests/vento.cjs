@@ -26,4 +26,16 @@ async function c3(end) {
   const i = await L.info(page); if (!i.ends.includes(end)) errors.push("finale non trovato: " + end + " · " + JSON.stringify(i.ends));
   L.check(`Vento · finale «${end}»`, errors); await browser.close();
 }
-(async () => { await c1(390); await c1(320); for (const e of ["vento", "custode", "turbine", "soffio"]) await c3(e); })().catch((e) => { console.error("✗ vento:", e.message); process.exit(1); });
+async function teiera(w) {
+  const base = { v: 1, ch: 3, step: { 1: 4, 2: 6, 3: 3 }, done: { 1: "promessa", 2: "ok" }, flags: { ve_chiave: true, ve_turbina_prova: true }, intro: { ch1: 1, ch2: 1, ch3: 1, ve_valle: 1, ve_prato: 1, ve_bosco: 1, ve_colle: 1 }, zone: "ve_prato", st: {} };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save: base });
+  await page.evaluate(() => window.__vento.open()); await page.evaluate(() => window.T_.click("Continua la storia")); await L.advance(page);
+  await L.talk(page, "ve_tisi"); await L.advance(page);
+  { const bad = await L.reachAll(page, "ve_prato"); if (bad.length) errors.push("ve_prato irraggiungibile: " + bad.join(", ")); }
+  const ids = await page.evaluate(() => window.__tr.TW.z.npcs.map((n) => n.id).filter((id) => /soffio_/.test(id)).join()); if (ids !== "ve_soffio_rosa,ve_soffio_azzurro,ve_soffio_verde") errors.push("Soffi della missione: " + ids);
+  await L.talk(page, "ve_soffio_verde"); await L.advance(page); if ((await L.info(page)).flags.ve_teiera_trovata) errors.push("il Soffio sbagliato vale come giusto");
+  if (w === 390) await L.shot(page, "ve_soffi");
+  await L.talk(page, "ve_soffio_rosa"); await L.advance(page); if (!(await L.info(page)).flags.ve_teiera_trovata) errors.push("il Soffio della teiera non si ritrova");
+  L.check(`Vento · il Soffio della teiera (${w} px)`, errors); await browser.close();
+}
+(async () => { await teiera(390); await teiera(320); await c1(390); await c1(320); for (const e of ["vento", "custode", "turbine", "soffio"]) await c3(e); })().catch((e) => { console.error("✗ vento:", e.message); process.exit(1); });

@@ -86,6 +86,14 @@ async function c3(w) {
   }
   i = await L.info(page); if (!i.done[3]) errors.push("capitolo 3 non concluso: " + JSON.stringify(i.step));
   const n = await page.evaluate(() => window.__cronache._dbg.K.mem().ends.length); if (n < 4) errors.push("finali trovati " + n + " su 4");
+  // la grotta segreta: si apre dopo aver finito la saga, con il boss ATB
+  await page.evaluate(() => window.__cronache._dbg.K.go("cc_mondo", 31, 15)); await page.waitForTimeout(400); await L.advance(page);
+  await L.goAct(page, 31, 14); await L.advance(page); if ((await L.zone(page)) !== "cc_grotta") errors.push("la grotta non si apre: " + (await L.zone(page)));
+  { const bad = await L.reachAll(page, "cc_grotta"); if (bad.length) errors.push("cc_grotta irraggiungibile: " + bad.join(", ")); }
+  if (w === 390) await L.shot(page, "cc_grotta");
+  await L.talk(page, "cc_eco"); await page.evaluate(() => window.T_.click("Sfida il Guardiano")); await page.waitForTimeout(500); await atbStart(page); await page.waitForTimeout(300);
+  await atbEnd(page, 2, 1); await L.advance(page);
+  if (!(await L.info(page)).flags.cc_eco_vinto) errors.push("boss dell'Eco non registrato");
   L.check(`Le Cronache del Pallone di Cristallo · capitolo 3 e i 4 finali (${w} px)`, errors); await browser.close();
 }
 (async () => { await c1(390); await c1(320); await c2(390); await c2(320); await c3(390); await c3(320); })().catch((e) => { console.error("✗ cronache:", e.message); process.exit(1); });

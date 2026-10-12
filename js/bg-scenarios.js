@@ -5718,6 +5718,14 @@
     px(g, 0, 140, W, 60, "#140a24"); const n = 11; for (let i = 0; i < n; i++) { const x = 20 + i * 27, y = 150 + (i % 2) * 6 + Math.sin(f / 25 + i) * 2; g.globalAlpha = 0.85; g.fillStyle = "#2a1a4a"; g.beginPath(); g.ellipse(x, y, 7, 16, 0, 0, 7); g.fill(); g.beginPath(); g.arc(x, y - 18, 6, 0, 7); g.fill(); g.globalAlpha = 1; const blink = since("tm_eclisse", 1) < 80 ? Math.floor(f / 6 + i) % 2 : 1; if (blink) { px(g, x - 3, y - 20, 2, 2, "#ffd23f"); px(g, x + 1, y - 20, 2, 2, "#ffd23f"); } }
     if (since("tm_eclisse", 2) < 140) for (let i = 0; i < 40; i++) { const t = since("tm_eclisse", 2); px(g, (i * 31 + t * 1.5) % W, 140 - ((t * 1.2 + i * 17) % 140), 2, 2, "#ffd23f"); }
   }
+  function bgCcGrotta(g, W, H, f) {
+    // la Grotta dell'Eco: stalattiti, cristalli nelle pareti, il Guardiano viola, le gocce che cadono a tempo (tocca)
+    vgrad(g, 0, 0, W, H, ["#0a0618", "#1a1030"]); g.fillStyle = "#2a2040"; for (let i = 0; i < 14; i++) { const x = i * 24 + 6; g.beginPath(); g.moveTo(x, 0); g.lineTo(x + 10, 0); g.lineTo(x + 5, 22 + (i * 13) % 26); g.closePath(); g.fill(); }
+    px(g, 0, 160, W, 40, "#1a1424"); const cols = ["#c8a8ff", "#7af0c8", "#5ab8ff", "#ff8a5a"]; for (let i = 0; i < 8; i++) { const x = 20 + i * 40, y = 120 + (i % 3) * 14, on = since("grotta_any", 0) < 0 || Math.sin(f / 30 + i) > -0.3 || since("cc_grotta", 0) < 100; ccCrystal(g, x, y, 6 + (i % 3) * 2, cols[i % 4], on, f); }
+    const gx = 160, gy = 120, b = Math.sin(f / 25) * 2; g.globalAlpha = 0.85; g.fillStyle = "#3a2a6a"; g.beginPath(); g.ellipse(gx, gy + b, 12, 26, 0, 0, 7); g.fill(); g.beginPath(); g.arc(gx, gy - 28 + b, 9, 0, 7); g.fill(); g.globalAlpha = 1; px(g, gx - 4, gy - 30 + b, 2, 2, "#c8a8ff"); px(g, gx + 2, gy - 30 + b, 2, 2, "#c8a8ff");
+    if (since("cc_grotta", 1) < 120) for (let k = 1; k < 7; k++) { g.strokeStyle = `rgba(200,168,255,${0.5 - k * 0.07})`; g.lineWidth = 1.5; g.beginPath(); g.arc(gx, gy - 10, 20 + k * 14 + since("cc_grotta", 1) * 0.4, 0, 7); g.stroke(); }
+    const n = since("cc_grotta", 2) < 100 ? 8 : 3; for (let i = 0; i < n; i++) { const y = (f * 2 + i * 37) % 160; px(g, 40 + i * 33, y, 1.5, 4, "rgba(180,200,255,.7)"); }
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -6354,6 +6362,11 @@
       [110, 10, 100, 90, "🌑 Il sole nero si allarga. Per un attimo tutto l'Atrio è buio, tranne gli occhi d'oro dell'Eclisse."],
       [0, 120, 320, 60, "👁 Gli occhi d'oro dell'Eclisse si accendono e si spengono a turno, come un applauso silenzioso."],
       [0, 0, 320, 200, "✨ Dal campo salgono scintille d'oro, verso l'eclissi: sono i gol di tutte le saghe, dice il Custode."],
+    ] },
+    cc_grotta: { draw: bgCcGrotta, hot: [
+      [0, 100, 320, 60, "💎 I cristalli nelle pareti si accendono uno dopo l'altro: verde, azzurro, arancio, viola. I colori dei quattro cristalli, e uno in più."],
+      [130, 80, 60, 80, "🔊 Il Guardiano parla, e la sua voce rimbalza sulle pareti sette volte. All'ultima, sembra la tua."],
+      [0, 0, 320, 100, "💧 Le gocce cadono dalle stalattiti a tempo, come un metronomo. Fosco giura che suonano il tema delle Cronache."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };

@@ -33,7 +33,37 @@
     function allShards() { // il segreto: tutte le schegge del mondo (gli oggetti raccolti in ogni zona della saga)
       try { const r = K.api.trRec(), Z = K.api.TRZ; return ITEMZ.every((z) => { const n = (Z[z] && Z[z].items || []).length; return !n || ((r.got && r.got[z]) || []).length >= n; }); } catch (e) { return false; }
     }
+    K.cast("cc_eco", { shape: "ombra", name: "Il Guardiano dell'Eco", tag: "", skin: "#3a2a6a", eye: "#c8a8ff", bg: ["#05030f", "#c8a8ff"], shirt: "#c8a8ff", num: "5" },
+      "Nella grotta sotto la mappa del mondo riposa l'eco di tutte le partite giocate per i cristalli. Il Guardiano è fatto di quell'eco: ripete le mosse di chiunque l'abbia sfidato, ma un poco più forte. Dicono che sia il quinto giocatore del Re del Silenzio, quello che nessuno ha mai visto.");
+    K.cos("cc_eco_aura", { kind: "acc", label: "Aura dell'Eco", val: "#c8a8ff", from: "Batti il Guardiano dell'Eco nella grotta segreta" });
+    K.cos("cc_eco_capelli", { kind: "hairc", label: "Capelli Cristallo Nero", val: "#3a2a6a", from: "Trova tutte le schegge della Grotta dell'Eco" });
+    const ecoBoss = () => K.ownMatch(window.__atb.start, {
+      oppStyle: "pressing", title: "La Grotta dell'Eco · contro il Guardiano", us: "Il gruppo", half: 90, theme: "stelle", items: 5,
+      heroSt: { tiro: 18, pass: 16, dif: 14, vel: 17 }, heroSpells: ["luce"], heroMp: 24,
+      party: [{ id: "cc_lyra", name: "Lyra", skin: "#f0d0b0", hair: "#c8a040", st: { tiro: 15, pass: 14, dif: 20, vel: 14 }, spells: ["cura", "luce"], mp: 20 }, { id: "cc_fosco", name: "Fosco", skin: "#e8c4a0", hair: "#3a2a5a", st: { tiro: 11, pass: 17, dif: 10, vel: 12 }, spells: ["vento", "gelo", "fuoco"], mp: 40 }, { id: "cc_rubi", name: "Rubi", skin: "#c68642", hair: "#1a1a1a", st: { tiro: 15, pass: 14, dif: 16, vel: 20 }, spells: [], mp: 0 }],
+      opp: { name: "L'Eco", color: "#3a2a6a", players: [{ name: "Il Guardiano", skin: "#3a2a6a", hair: "#c8a8ff", st: { tiro: 18, pass: 17, dif: 19, vel: 16 } }, { name: "Eco di Rovo", skin: "#5a4a3a", hair: "#2a4a1a", st: { tiro: 15, pass: 14, dif: 17, vel: 14 } }, { name: "Eco del Muto", skin: "#c8c8d0", hair: "#3a3a4a", st: { tiro: 15, pass: 16, dif: 15, vel: 15 } }, { name: "Eco del Re", skin: "#d8c8b8", hair: "#c8c8d8", st: { tiro: 16, pass: 16, dif: 18, vel: 14 } }] },
+      intro: "<p>Il boss segreto. Il Guardiano dell'Eco ripete le mosse di tutti quelli che hai battuto, un poco più forte: Rovo, il Muto, il Re. Usa tutte le magie del gruppo.</p>", winTitle: "L'ECO TACE",
+      done: (r) => {
+        if (!r.win) return K.scene([["cc_eco", "(La voce rimbalza su tutte le pareti, ripetuta sette volte.) …Ancora… ancora… ancora…"]], () => K.enterZone("cc_grotta"), "cc_grotta");
+        const msg = K.reward("eco:cc", { coins: 150, cos: ["cc_eco_aura"] }); F.set("cc_eco_vinto", true);
+        K.scene([["voce", "L'ultimo tiro rimbalza sulle pareti della grotta e torna indietro come un'eco: dentro la porta. Il Guardiano si inchina, e la grotta, per la prima volta, è silenziosa."], ["cc_eco", "[felice] …Grazie. Ripetevo le partite degli altri da secoli. Questa era tua. Questa la ricorderò."], ["voce", msg.join(" · ")]], () => K.enterZone("cc_grotta"), "cc_grotta");
+      },
+    });
     const zones = {
+      cc_grotta: {
+        region: "torre", name: "Le Cronache · La Grotta dell'Eco", short: "La Grotta dell'Eco", sub: "Il segreto sotto la mappa del mondo", bg: "cc_grotta", time: "notte", travel: [13, 16],
+        w: 26, h: 18, start: [13, 16], itemCos: "cc_eco_capelli", items: [[2, 2], [23, 2], [3, 14]],
+        buio: 0.88, heroLight: 2.6, luci: () => [[6, 6, 2.2, "180,140,255"], [19, 6, 2.2, "180,140,255"], [13, 3, 3, "200,170,255"], [4, 12, 1.6, "120,240,200"], [22, 12, 1.6, "255,140,90"]],
+        areas: [[0, 0, 25, 17, "La Grotta dell'Eco"]], act: { v: "Torna sulla mappa del mondo" },
+        intro: [["voce", "La Grotta dell'Eco: buio, gocce che cadono a tempo, e cristalli nelle pareti che si accendono quando passi. Ogni tuo passo torna indietro sette volte."], ["voce", "In fondo, su un piedistallo di cristallo nero, una sagoma viola. Ti aspetta da quando hai riacceso il quarto cristallo."]],
+        npcs: () => [{ id: "cc_eco", at: [13, 5] }],
+        build(L) {
+          const { lay, put } = L;
+          lay(0, 0, 25, 17, "a"); lay(1, 1, 24, 16, "+"); [[5, 4, 7, 8], [18, 4, 20, 8], [9, 10, 16, 11]].forEach(([a, b, c, d]) => { for (let x = a; x <= c; x++) for (let y = b; y <= d; y++) if ((x + y) % 2) put(x, y, "R"); });
+          put(13, 17, "v"); lay(12, 2, 14, 3, "+"); put(13, 3, "Y");
+        },
+      },
+
       cc_vulcano: {
         region: "fuoco", name: "Le Cronache · La Montagna di Fuoco", short: "La Montagna di Fuoco", sub: "Lava, forge e un rigore da tirare", bg: "cc_vulcano", time: "tramonto", travel: [15, 18],
         w: 30, h: 20, start: [15, 18], items: [[3, 3], [26, 3], [3, 16]],
@@ -100,6 +130,7 @@
       K.scene([...lines, ["voce", `${msg.join(" · ")}<br><span style="color:var(--dim)">Finali trovati: ${K.mem().ends.length} su 4. Dal menu «Capitoli» puoi rigiocare per scoprire gli altri.</span>`]], () => K.openMain(), "cc_finale");
     }
     const talk = {
+      cc_eco() { if (F.is("cc_eco_vinto")) return say([["cc_eco", "[felice] La tua partita la ripeto ogni notte. È la mia preferita."]]); return ask("cc_eco", "(Una voce che arriva sette volte, dalle pareti.) Sfida… sfida… sfida… Ho le mosse di Rovo, del Muto, del Re. Tutte un poco più forti. Vuoi sentire come suonano?", [{ label: "Sfida il Guardiano dell'Eco", sub: "Boss segreto · ATB", cls: "hot", fn: ecoBoss }, { label: "Non ancora", fn: done }], "cc_grotta"); },
       cc_ermete() {
         if (S() === 0) return say([["cc_ermete", "Due cristalli accesi. La primavera è arrivata e il vento è tornato. Ma l'estate non viene, e l'inverno nemmeno. Mancano il Fuoco e le Stelle."], ["cc_ermete", "Il Cristallo del Fuoco è nella Montagna di Fuoco, a nord-est. Lo custodisce una fabbra, Brunilde. Dicono che per riaccenderlo serva un rigore. Uno solo. Ma tirato da chi ha paura."], ["cc_lyra", "(da dietro di te, piano) …Chi ha paura."]], () => { setStep(N, 1); quest("cc_fuoco", "Il Cristallo del Fuoco", "Nella Montagna di Fuoco, a nord-est della mappa del mondo."); done(); });
         return say([["cc_ermete", "Vai, vai. Le stagioni aspettano. Io aspetto con loro, da qui."]]);
@@ -128,13 +159,15 @@
         : [["voce", "Vai tu sul dischetto. Il pallone pesa come ferro, il cristallo ti guarda. Hai paura? Un po'. Abbastanza."], ["voce", "Tiri. Gol. Il Cristallo del Fuoco si accende, arancione come un tramonto d'estate. Sulla cima della montagna appare un ponte di luce, verso le nuvole."], ["cc_lyra", "(piano) Grazie. …Un giorno lo tirerò io. Un giorno."]], () => { K.refreshZone(); done(); }, "cc_vulcano");
     }
     const obj = {
+      "cc_mondo:G": () => (K.mem().ends.length > 0 ? go("cc_grotta", 13, 16) : say([["voce", "Una grotta chiusa da una lastra di cristallo nero. Dentro, qualcosa ripete i tuoi passi. Si aprirà quando le stagioni saranno ripartite (finisci la saga)."]])), "cc_grotta:v": () => go("cc_mondo", 31, 15),
+      "cc_grotta:Y": () => say([["voce", "Un cristallo nero, freddo. Dentro, piccolissime, si vedono tutte le partite giocate per i quattro cristalli. In replica."]]),
       "cc_mondo:F": () => go("cc_vulcano", 15, 18), "cc_vulcano:v": () => go("cc_mondo", 40, 6),
       "cc_mondo:C": () => (F.is("cristallo_cc_vulcano") ? go("cc_stelle", 15, 17) : say([["voce", "Un castello tra le nuvole. Non c'è modo di arrivarci: nessuna scala, nessun ponte. Non ancora."]])), "cc_stelle:v": () => go("cc_mondo", 22, 4),
       "cc_vulcano:Y": () => say([["voce", F.is("cristallo_cc_vulcano") ? "Il Cristallo del Fuoco brilla, caldo, arancione. Dentro, un pallone che rotola su una traversa, per sempre." : "Il cristallo è spento, nero come carbone. Sul dischetto. Aspetta un rigore."]]),
       "cc_stelle:Y": () => say([["voce", F.is("cristallo_cc_stelle") ? "Il Cristallo delle Stelle brilla, e con lui tutte le costellazioni delle tribune." : "Il cristallo sopra la porta del Re è spento. Le stelle intorno aspettano."]]),
     };
     const patch = {
-      cc_mondo: { build(L) { L.put(40, 5, "F"); L.lay(37, 6, 40, 6, ":"); L.lay(37, 7, 37, 15, ":"); L.put(22, 3, "C"); L.lay(22, 4, 22, 14, ":"); } },
+      cc_mondo: { build(L) { L.put(31, 14, "G"); L.put(40, 5, "F"); L.lay(37, 6, 40, 6, ":"); L.lay(37, 7, 37, 15, ":"); L.put(22, 3, "C"); L.lay(22, 4, 22, 14, ":"); } },
     };
     return { n: N, title: "Le Stelle e il Fuoco", sub: "La Montagna di Fuoco, il rigore di Lyra, lo Stadio delle Stelle", goal, start: "cc_prato", introBg: "cc_vulcano", zones, talk, obj, patch,
       intro: () => [["voce", "Due cristalli brillano, e il mondo si è mosso un poco: primavera e vento. Ma l'estate non arriva. L'inverno nemmeno."], ["voce", "Il gruppo torna a Prato Lungo per un consiglio. Ermete ha la mappa sul tavolo, e due cerchi rossi: la Montagna di Fuoco, e un castello che sulla mappa non c'era mai stato."]] };

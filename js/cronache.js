@@ -32,7 +32,7 @@
       fuoco: { grass: ["#5a3a2a", "#603e2c", "#563626"], path: ["#8a5a3a", "#825434"], stone: ["#6a4a3a", "#644434"], wall: ["#3a1a10", "#34160e"], water: ["#e85a1a", "#f06a2a"], tall: "#8a4a2a", tree: ["#3a2a1a", "#4a3a2a", "#2a1a10"], tint: "255,140,60", tintA: 0.14, fx: "sparks", dark: 0.18 },
       casa: { grass: ["#a8784a", "#a07244", "#b07e4e"], path: ["#c89a6a", "#c09262"], stone: ["#d8c8a8", "#d0c0a0"], wall: ["#e8d0a8", "#e0c8a0"], water: ["#4a7a9a", "#5484a4"], tall: "#6a8a4a", tint: "255,200,140", tintA: 0.14, fx: "dust", dark: 0.16 },
     },
-    floors: "J", solid: "RPQYKUXZFC",
+    floors: "J", solid: "RPQYKUXZFCG",
     rest: { ch: "s", label: "Riposa alla locanda", text: "Il gruppo riposa. Fosco russa con gli occhiali sul naso, Lyra dorme con la spada accanto, Rubi non dorme affatto: conta le stelle. (Il gioco salva da solo: qui puoi rileggere le Cronache.)" },
     texts: { chestOpen: "Apri il forziere.", chestEmpty: "Il forziere è vuoto. Sul fondo, inciso: «chi cerca, gioca».", nothing: "Niente. Ma il vento porta l'odore di un campo lontano.", noHero: "I cristalli aspettano un campione. Prima crea il tuo Campione.", chapters: "Tre cristalli da riaccendere. Le scelte del gruppo cambiano il finale." },
     journal: { name: "Le Cronache", sub: "Il gruppo, i cristalli, le magie, i finali" },
@@ -44,7 +44,7 @@
     },
     heroLook: (h, K) => ({ bg: ["#0e1446", "#9ad8ff"], shirt: K.F.is("cc_mantello") ? "#2a4ab8" : h.shirt }),
     heroTitle: (K) => (K.F.is("cc_mantello") ? "custode dei cristalli" : "viandante"),
-    act: { q: "Entra", F: "Sali sulla Montagna di Fuoco", C: "Entra nello Stadio delle Stelle", Z: "Entra nel bosco", R: "Guarda le montagne", P: "Entra nel paese", Q: "Entra nella torre", Y: "Tocca il cristallo", K: "Entra nel porto", U: "Sbarca sull'isola", X: "Guarda il forziere antico", "^": "Esci", v: "Esci", "<": "Esci", ">": "Esci" },
+    act: { q: "Entra", F: "Sali sulla Montagna di Fuoco", C: "Entra nello Stadio delle Stelle", Z: "Entra nel bosco", R: "Guarda le montagne", P: "Entra nel paese", Q: "Entra nella torre", Y: "Tocca il cristallo", K: "Entra nel porto", U: "Sbarca sull'isola", X: "Guarda il forziere antico", G: "Entra nella Grotta dell'Eco", "^": "Esci", v: "Esci", "<": "Esci", ">": "Esci" },
     musicMain: "cronache",
     music: {
       // un tema da mappa del mondo: ottoni (onda quadra), archi (triangolo), passo di marcia
@@ -63,6 +63,8 @@
       Z(K, sx, sy, tx, ty, fr) { K.ground(sx, sy, tx, ty); const g = K.g; [[3, 9], [8, 6], [12, 10]].forEach(([x, y]) => { g.fillStyle = "#1a4a2a"; g.beginPath(); g.arc(sx + x, sy + y, 4, 0, 7); g.fill(); }); const lit = K.F.is("cristallo_cc_bosco"); g.fillStyle = lit ? "#7af0c8" : "#8a9aaa"; g.fillRect(sx + 7, sy + 11, 2, 3); if (lit) K.light(sx + 8, sy + 12, 12, "122,240,200", 0.4); },
       F(K, sx, sy, tx, ty, fr) { K.ground(sx, sy, tx, ty); const g = K.g; g.fillStyle = "#5a3a2a"; g.beginPath(); g.moveTo(sx, sy + 15); g.lineTo(sx + 6, sy + 2); g.lineTo(sx + 10, sy + 2); g.lineTo(sx + 16, sy + 15); g.closePath(); g.fill(); K.P(sx + 6, sy + 1, 4, 3, K.F.is("cristallo_cc_vulcano") ? "#ff8a5a" : "#c84a1a"); K.P(sx + 7 + Math.sin(fr / 10) * 1, sy - 3 - (fr / 8) % 4, 2, 2, "rgba(120,120,120,.6)"); K.light(sx + 8, sy + 2, 14, "255,120,40", 0.5); },
       C(K, sx, sy, tx, ty, fr) { K.ground(sx, sy, tx, ty); K.later((g, cx, cy) => { const x = tx * TS - cx, y = ty * TS - cy + Math.sin(fr / 30) * 2; g.fillStyle = "#3a3a7a"; g.fillRect(x + 2, y - 6, 12, 12); g.fillRect(x, y - 10, 4, 8); g.fillRect(x + 12, y - 10, 4, 8); g.fillStyle = "#c8a8ff"; g.fillRect(x + 6, y - 2, 4, 6); for (let i = 0; i < 3; i++) g.fillRect(x + 2 + i * 6, y - 14 + (i % 2) * 2, 1, 1); K.light(x + 8, y, 18, "200,170,255", 0.4); }); },
+      // la Grotta dell'Eco: una bocca di roccia con un cristallo nero che pulsa (si apre dopo aver finito la saga)
+      G(K, sx, sy, tx, ty, fr) { K.ground(sx, sy, tx, ty); const g = K.g; g.fillStyle = "#4a4a5a"; g.beginPath(); g.moveTo(sx, sy + 16); g.lineTo(sx + 3, sy + 3); g.lineTo(sx + 13, sy + 2); g.lineTo(sx + 16, sy + 16); g.closePath(); g.fill(); g.fillStyle = "#0a0a14"; g.beginPath(); g.ellipse(sx + 8, sy + 12, 4, 5, 0, Math.PI, 0); g.fillRect(sx + 4, sy + 12, 8, 4); g.fill(); const on = K.mem().ends.length > 0; if (on) { K.P(sx + 7, sy + 5 + Math.sin(fr / 12), 2, 3, "#c8a8ff"); K.light(sx + 8, sy + 8, 14, "180,140,255", 0.5); } },
       X(K, sx, sy, tx, ty) { K.ground(sx, sy, tx, ty); K.P(sx + 2, sy + 6, 12, 9, "#8a5a2a"); K.P(sx + 2, sy + 6, 12, 3, "#a87a3a"); K.P(sx + 7, sy + 8, 2, 3, "#ffd23f"); },
       // il mare navigabile (Capitolo 2, con la nave): acqua con le onde, ci si passa sopra
       J(K, sx, sy, tx, ty, fr) { const R = K.ZX.rg; K.P(sx, sy, 16, 16, R.water[(tx + ty) % 2]); const w = Math.floor(fr / 20 + tx + ty) % 4; K.P(sx + 2 + w * 3, sy + 5 + ((tx * 3) % 7), 5, 1, "rgba(255,255,255,.45)"); },

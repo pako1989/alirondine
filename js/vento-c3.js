@@ -46,6 +46,8 @@
       g.fillStyle = "#c9a227"; g.beginPath(); g.arc(x, y - 50, 3, 0, 7); g.fill();
     }
 
+    [["ve_soffio_rosa", "Un Soffio rosato", "#ffd0d8", "Il Soffio della teiera di Nonna Tisi: piccolo, rosato come un tramonto, con una macchia a forma di mezzaluna sulla pancia. Raffredda il tè soffiando, da trent'anni."], ["ve_soffio_azzurro", "Un Soffio azzurro", "#c8e8ff", "Un Soffio selvatico: grande, azzurro, con le guance sempre gonfie. Gli piace scompigliare i capelli e scappare."], ["ve_soffio_verde", "Un Soffio verdolino", "#d8f8c8", "Un Soffio selvatico che sa d'erba tagliata. Ha una stella sulla pancia e l'aria di chi fa sempre domande."]].forEach(([id, name, skin, bio]) => K.cast(id, { shape: "nuvola", acc: "", name, tag: "", hair: skin, skin, eye: "#2a2a30", bg: ["#8cc764", skin], shirt: skin }, bio));
+    K.cos("ve_teiera", { kind: "acc", label: "Sciarpa alla camomilla", val: "sciarpa", from: "Ritrova il Soffio della teiera di Nonna Tisi" });
     const zones = {
       ve_colle: {
         music: "vento_colle",
@@ -162,7 +164,15 @@
         return say([["ve_mormorio", "Il vento è tornato. Lo senti? Gioca anche lui."]]);
       },
       ve_gualdo() { return say([["ve_gualdo", "Gli scarpini del '70. Mi stanno ancora. Un po' stretti sulle dita, ma sono le dita che sono cresciute, non gli scarpini."]]); },
-      ve_tisi() { return say([["ve_tisi", "Zuppa per tutti, dopo la partita. Anche per i Soffi: a loro piace il vapore."]]); },
+      // missione degli spiriti: riconoscere il Soffio della teiera dall'aspetto (rosato, con la mezzaluna sulla pancia)
+      ve_tisi() {
+        if (S() >= 3 && !F.is("ve_teiera_cerca") && !F.is("ve_teiera_trovata")) return say([["ve_tisi", "[triste] Oh, caro. Il mio Soffio della teiera è scappato. Quello che soffia sul tè per raffreddarlo, da trent'anni. Si è unito a due Soffi selvatici e adesso girano per il prato."], ["ve_tisi", "[pensa] Lo riconosci così: è rosato come un tramonto, più piccolo degli altri, e ha una macchia a forma di mezzaluna sulla pancia. Gli altri due non sono cattivi, ma sono… selvatici. Non portarmi quelli."]], () => { F.set("ve_teiera_cerca", true); K.quest("ve_teiera", "Il Soffio della teiera", "Rosato come un tramonto, piccolo, con la mezzaluna sulla pancia. Gira per il prato con due Soffi selvatici."); K.refreshZone(); done(); });
+        if (F.is("ve_teiera_cerca") && !F.is("ve_teiera_trovata")) return say([["ve_tisi", "Rosato come un tramonto, più piccolo degli altri, con la mezzaluna sulla pancia. Gira per il prato, ai margini."]]);
+        return say([["ve_tisi", F.is("ve_teiera_trovata") ? "[felice] Il Soffio della teiera è tornato! Il tè è di nuovo alla temperatura giusta. Tieni, ti ho fatto una sciarpa: profuma di camomilla." : "Zuppa per tutti, dopo la partita. Anche per i Soffi: a loro piace il vapore."]]);
+      },
+      ve_soffio_rosa() { F.set("ve_teiera_trovata", true); F.set("ve_teiera_cerca", false); K.questDone("ve_teiera"); bond("gioia", 1); const msg = K.reward("ve_teiera", { coins: 50, cos: ["ve_teiera"] }); K.scene([["ve_soffio_rosa", "[felice] Fff… (Piccolo, rosato, con una mezzaluna bianca sulla pancia. Appena ti vede, ti soffia sul naso: è tiepido, sa di tè.)"], ["voce", `È lui: il Soffio della teiera. Ti segue fino da Nonna Tisi, girandoti intorno come un gatto. ${msg.join(" · ")}`]], () => { K.refreshZone(); done(); }, "ve_prato"); },
+      ve_soffio_azzurro() { return say([["ve_soffio_azzurro", "[furbo] FFFFF! (Un Soffio azzurro, grande, con le guance gonfie. Ti scompiglia i capelli e scappa ridendo. Niente mezzaluna. Ed è tutt'altro che rosato.)"]]); },
+      ve_soffio_verde() { return say([["ve_soffio_verde", "[sorpreso] Fff? (Un Soffio verdolino, che sa d'erba tagliata. Ti guarda con aria interrogativa. Sulla pancia ha una stella, non una mezzaluna.)"]]); },
       ve_ottone() { return say([["ve_ottone", F.is("ve_ottone_promessa") || F.is("ve_giugno_libero") ? "Ho portato un barattolo. Uno solo. Se oggi il vento torna, lo apro. Promesso. Brace è testimone." : "Sono venuto a vedere. Non ho portato barattoli. Quasi nessuno."]]); },
     };
     function wake() {
@@ -195,7 +205,7 @@
     };
     const patch = {
       ve_prato: {
-        npcs: (s, list) => (s >= 3 ? [{ id: "ve_mormorio", at: [9, 10] }, { id: "ve_selva", at: [14, 14] }, { id: "ve_gualdo", at: [16, 8] }, { id: "ve_tisi", at: [26, 15] }, { id: "ve_ottone", at: [27, 8] }, { id: "ve_dora", at: [30, 12] }, { id: "ve_sbuffo", at: [21, 11] }, { id: "ve_soffio", at: [19, 14] }] : [...list.filter((n) => n.id !== "ve_selva" && n.id !== "ve_gualdo"), ...(s === 0 ? [{ id: "ve_selva", at: [20, 4] }] : [])]),
+        npcs: (s, list) => (s >= 3 ? [{ id: "ve_mormorio", at: [9, 10] }, { id: "ve_selva", at: [14, 14] }, { id: "ve_gualdo", at: [16, 8] }, { id: "ve_tisi", at: [26, 15] }, { id: "ve_ottone", at: [27, 8] }, { id: "ve_dora", at: [30, 12] }, { id: "ve_sbuffo", at: [21, 11] }, { id: "ve_soffio", at: [19, 14] }, ...(F.is("ve_teiera_cerca") && !F.is("ve_teiera_trovata") ? [{ id: "ve_soffio_rosa", at: [33, 18], route: [[33, 18], [36, 18], [36, 20], [33, 20]], speed: 0.25, pause: 40 }, { id: "ve_soffio_azzurro", at: [8, 18], route: [[8, 18], [11, 18], [11, 20], [8, 20]], speed: 0.3, pause: 50 }, { id: "ve_soffio_verde", at: [34, 5], route: [[34, 5], [37, 5], [37, 7], [34, 7]], speed: 0.28, pause: 30 }] : [])] : [...list.filter((n) => n.id !== "ve_selva" && n.id !== "ve_gualdo"), ...(s === 0 ? [{ id: "ve_selva", at: [20, 4] }] : [])]),
         build(L) { L.put(22, 0, "^"); L.put(23, 0, "^"); L.lay(22, 1, 23, 5, ":"); },
         act: { "^": "Sali al Colle del Vento" },
       },
