@@ -4912,6 +4912,60 @@
     for (let i = 0; i < 8; i++) { const x = 30 + i * 36, jump = Math.abs(Math.sin(f / 8 + i)) * (since("ve_finale", 1) < 160 ? 8 : 2); if (i % 2) veSoffio(g, x, 170 - jump, 7, f, i); else { px(g, x - 3, 164 - jump, 6, 10, ["#3a7ab8", "#e85a4a", "#3a8a7a", "#ffd23f"][i % 4]); circ(g, x, 161 - jump, 3.5, "#e8c09a"); } }
     veSeeds(g, W, H, f, 0.8);
   }
+  // ---------------------------------------------------------------- DETECTIVE DI CAMPO (chiavi dc_*)
+  function dcRain(g, W, H, f, a) { g.strokeStyle = `rgba(180,200,240,${a || 0.35})`; g.lineWidth = 1; g.beginPath(); for (let i = 0; i < 70; i++) { const x = (i * 47 + f * 1.4) % (W + 20) - 10, y = (i * 71 + f * 6) % (H + 20) - 10; g.moveTo(x, y); g.lineTo(x - 2, y + 8); } g.stroke(); }
+  function dcNeon(g, txt, x, y, col, on) { g.save(); g.font = "bold 10px Georgia, serif"; if (on) { g.globalCompositeOperation = "lighter"; g.shadowColor = `rgb(${col})`; g.shadowBlur = 10; } g.fillStyle = on ? `rgb(${col})` : "rgba(90,80,90,.8)"; g.fillText(txt, x, y); g.restore(); }
+  function bgDcCitta(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#0e0c18", "#1e1a2e", "#14121c"]);
+    // palazzi con finestre accese (tocca una finestra: si spegne)
+    [[0, 40, 60], [56, 24, 70], [124, 50, 50], [172, 18, 76], [246, 36, 74]].forEach(([x, y, w], i) => { px(g, x, y, w, 150, i % 2 ? "#2a2634" : "#24202e"); for (let r = 0; r < 8; r++) for (let c = 0; c < Math.floor(w / 14); c++) { const off = toggled("dc_citta", 0) && i === 3 && r === 2; if ((r * 7 + c * 3 + i) % 4) px(g, x + 5 + c * 14, y + 8 + r * 16, 7, 9, off ? "#1a1824" : (r + c + i) % 3 ? "#ffd98a" : "#7ac8ff"); } });
+    // l'insegna del Caffè Fuorigioco che sfarfalla (tocca: si riaccende)
+    const flick = since("dc_citta", 1) < 60 || Math.sin(f / 25) > -0.6 || f % 97 > 5; dcNeon(g, "CAFFÈ FUORIGIOCO", 40, 116, "255,110,150", flick); dcNeon(g, "HOTEL", 200, 60, "255,210,120", true);
+    // la strada bagnata con i riflessi
+    vgrad(g, 0, 150, W, 50, ["#1a1a22", "#0e0e14"]); for (let i = 0; i < 8; i++) px(g, i * 44 + 10, 172, 24, 2, "rgba(240,240,220,.35)");
+    g.save(); g.globalAlpha = 0.25; g.scale(1, -0.35); dcNeon(g, "CAFFÈ FUORIGIOCO", 40, -500, "255,110,150", flick); g.restore();
+    // l'ombrello rosso all'angolo (toccalo: si chiude e sparisce)
+    const gone = since("dc_citta", 2) < 200; if (!gone) { g.fillStyle = "#c0392b"; g.beginPath(); g.arc(284, 150, 14, Math.PI, 0); g.fill(); px(g, 283, 150, 2, 22, "#222"); px(g, 278, 160, 12, 16, "#1a1a1a"); }
+    dcRain(g, W, H, f);
+  }
+  function bgDcQuestura(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#2a2420", "#3a322a", "#221e1a"]);
+    // la lavagna con i fili rossi (tocca: un filo si sposta)
+    px(g, 20, 20, 150, 100, "#3a4a3a"); px(g, 18, 18, 154, 4, "#6a4a2a"); [[40, 40], [90, 34], [140, 50], [60, 90], [130, 96]].forEach(([x, y], i) => { px(g, x - 9, y - 7, 18, 14, "#f2ead8"); px(g, x - 6, y - 4, 12, 2, "#5a4a3a"); px(g, x - 1, y - 9, 2, 2, "#c0392b"); });
+    const sw = since("dc_questura", 0) < 80 ? Math.sin(since("dc_questura", 0) / 6) * 6 : 0; g.strokeStyle = "#c0392b"; g.lineWidth = 1; g.beginPath(); g.moveTo(40, 40); g.lineTo(90, 34); g.lineTo(140, 50 + sw); g.lineTo(130, 96); g.lineTo(60, 90); g.lineTo(40, 40); g.moveTo(90, 34); g.lineTo(60, 90); g.stroke();
+    // la scrivania di Agata: fisarmonica, liquirizia, lampada (tocca la fisarmonica: suona)
+    px(g, 180, 130, 130, 10, "#5a3a22"); px(g, 186, 140, 6, 40, "#3a2412"); px(g, 298, 140, 6, 40, "#3a2412");
+    const play = since("dc_questura", 1) < 90, open = play ? 8 + Math.sin(f / 4) * 6 : 6; px(g, 200, 110, 16, 20, "#8a2a2a"); for (let i = 0; i < 5; i++) px(g, 216 + i * open / 5, 112, 2, 16, "#2a1a1a"); px(g, 216 + open, 110, 16, 20, "#8a2a2a"); if (play) for (let i = 0; i < 3; i++) { g.fillStyle = "#e8e2d4"; g.font = "10px serif"; g.fillText("♪", 240 + i * 12, 100 - ((f + i * 20) % 40) / 2); }
+    px(g, 270, 100, 3, 30, "#2a2a2a"); g.fillStyle = "#3a6a4a"; g.beginPath(); g.moveTo(262, 100); g.lineTo(282, 100); g.lineTo(276, 90); g.lineTo(268, 90); g.fill(); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 272, 110, 50, "255,220,150", 0.35); g.restore();
+    // la finestra con la pioggia
+    px(g, 200, 20, 90, 70, "#0e1626"); px(g, 244, 20, 2, 70, "#5a3a22"); px(g, 200, 54, 90, 2, "#5a3a22"); for (let i = 0; i < 14; i++) px(g, 202 + (i * 13) % 86, 22 + (i * 17 + f * 1.5) % 66, 1, 5, "rgba(170,200,255,.5)");
+  }
+  function bgDcMoviola(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#121014", "#1e1a18", "#0e0c0e"]);
+    // gli scaffali di nastri (tocca: un nastro cade)
+    for (let r = 0; r < 6; r++) for (let c = 0; c < 10; c++) px(g, 6 + c * 9, 10 + r * 26, 7, 20, ["#3a3a44", "#5a4a3a", "#2a3a4a"][(r + c) % 3]); for (let r = 0; r < 6; r++) px(g, 4, 30 + r * 26, 94, 2, "#5a3a22");
+    const fall = since("dc_moviola", 0); if (fall < 60) px(g, 50, 40 + fall * 2, 7, 20, "#5a4a3a");
+    // il fascio del proiettore sullo schermo, con la polvere
+    g.save(); g.globalCompositeOperation = "lighter"; g.fillStyle = "rgba(255,240,200,.12)"; g.beginPath(); g.moveTo(130, 150); g.lineTo(200, 20); g.lineTo(310, 20); g.lineTo(310, 130); g.closePath(); g.fill(); g.restore();
+    px(g, 200, 20, 110, 110, "#d8d0c0"); const paused = toggled("dc_moviola", 1), ff = paused ? 0 : f;
+    px(g, 205, 25, 100, 100, "#4a5a3a"); g.fillStyle = "#c0392b"; g.beginPath(); g.arc(230 + (ff % 120) / 2, 80, 3, 0, 7); g.fill(); g.fillStyle = "#2a7a4a"; g.beginPath(); g.arc(250 + (ff % 120) / 3, 70, 3, 0, 7); g.fill(); g.fillStyle = "#fff"; g.beginPath(); g.arc(240 + (ff % 120) / 2.5, 76, 1.6, 0, 7); g.fill();
+    g.fillStyle = "rgba(255,255,255,.1)"; for (let y = 25; y < 125; y += 3) g.fillRect(205, y, 100, 1); if (paused) { g.fillStyle = "#ffd36b"; g.font = "bold 9px monospace"; g.fillText("❚❚ PAUSA", 210, 120); }
+    // il proiettore (toccalo: pausa)
+    px(g, 110, 140, 40, 26, "#3a3a3a"); g.fillStyle = "#5a5a5a"; g.beginPath(); g.arc(118, 136, 10, 0, 7); g.arc(142, 136, 10, 0, 7); g.fill(); g.save(); g.translate(118, 136); g.rotate(ff / 10); px(g, -1, -9, 2, 18, "#2a2a2a"); g.restore(); g.save(); g.translate(142, 136); g.rotate(ff / 10); px(g, -1, -9, 2, 18, "#2a2a2a"); g.restore();
+    for (let i = 0; i < 20; i++) px(g, 160 + (i * 37 + f * 0.3) % 140, 30 + (i * 23) % 100, 1, 1, "rgba(255,240,200,.6)");
+  }
+  function bgDcStadio(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#0c0e18", "#1a1e2c", "#121420"]);
+    // le tribune vuote e i fari (tocca un faro: si accende)
+    for (let r = 0; r < 6; r++) px(g, 0, 40 + r * 12, W, 10, r % 2 ? "#3a3e4a" : "#34384a"); for (let i = 0; i < 40; i++) px(g, (i * 8) % W, 42 + (i % 6) * 12, 5, 4, "#4a4e5a");
+    const lit = toggled("dc_stadio", 0); [[30, 10], [290, 10]].forEach(([x, y]) => { px(g, x - 2, y, 4, 40, "#5a5a62"); px(g, x - 12, y - 6, 24, 10, lit ? "#fff6d8" : "#4a4a52"); if (lit) { g.save(); g.globalCompositeOperation = "lighter"; g.fillStyle = "rgba(255,250,220,.12)"; g.beginPath(); g.moveTo(x - 12, y); g.lineTo(x + 12, y); g.lineTo(160 + (x - 160) * 0.2, 200); g.lineTo(160 + (x - 160) * 0.6, 200); g.fill(); g.restore(); } });
+    // il campo allagato con le linee
+    vgrad(g, 0, 112, W, 88, ["#2a4a2a", "#1e3a20"]); g.strokeStyle = "rgba(240,240,220,.5)"; g.lineWidth = 1; g.beginPath(); g.moveTo(160, 112); g.lineTo(160, 200); g.stroke(); g.beginPath(); g.ellipse(160, 150, 40, 14, 0, 0, 7); g.stroke();
+    for (let i = 0; i < 10; i++) { g.fillStyle = "rgba(160,190,230,.18)"; g.beginPath(); g.ellipse((i * 61) % W, 130 + (i * 17) % 60, 18, 3, 0, 0, 7); g.fill(); }
+    // la sciarpa grigia dimenticata (tocca) e il segno rosso al posto 14
+    px(g, 92, 54, 16, 3, "#8a8a92"); px(g, 100, 57, 3, 8, "#8a8a92"); g.fillStyle = "#c0392b"; g.beginPath(); g.arc(220, 66, 2, 0, 7); g.fill();
+    dcRain(g, W, H, f, 0.3);
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -5203,6 +5257,26 @@
       [0, 10, 320, 60, "🪁 Un aquilone in più. Non è di nessuno. Lo tiene il vento."],
       [0, 150, 320, 50, "🙌 Tutti in campo: la valle, i Soffi, i forestieri. Si salta per un gol, si salta anche per un gol sbagliato."],
       [10, 90, 300, 40, "🌬️ Le pale dei mulini girano tutte insieme, alla stessa velocità. Come se respirassero d'accordo."],
+    ] },
+    dc_citta: { draw: bgDcCitta, hot: [
+      [172, 50, 76, 20, "💡 Una finestra si spegne. Dietro la tenda, un'ombra con un cappello. Poi più niente.", "tog"],
+      [30, 100, 130, 24, "🍸 L'insegna del Caffè Fuorigioco sfarfalla, poi si riaccende piena. Dentro, qualcuno ride di una partita del 1982."],
+      [266, 130, 40, 50, "☂️ L'ombrello rosso si chiude. Chi lo teneva sparisce dietro l'angolo, senza fretta. Come chi sa di non essere seguito."],
+    ] },
+    dc_questura: { draw: bgDcQuestura, hot: [
+      [20, 20, 150, 100, "🧶 Un filo rosso si stacca da una puntina e va a legarsi a un'altra foto. Agata, senza voltarsi: «Lo fa da solo. Si fida di me»."],
+      [196, 104, 50, 30, "🪗 Tocchi la fisarmonica: tre note storte. Agata alza un sopracciglio. «Ecco. Adesso so chi è stato. Scherzo. Però quasi»."],
+      [200, 20, 90, 70, "🌧️ Dalla finestra si vede la piazza. La pioggia cancella le orme. Per fortuna i detective non seguono le orme: seguono le persone."],
+    ] },
+    dc_moviola: { draw: bgDcMoviola, hot: [
+      [6, 10, 92, 160, "📼 Cade un nastro: «Portagrigia–Valfonda, 1987». Stesso risultato: 0-3. Ugo lo rimette a posto senza dire niente. Tu te lo segni."],
+      [200, 20, 110, 110, "⏸️ Fermo immagine. Su un fotogramma qualunque, si vede benissimo una cosa che a velocità normale non c'è.", "tog"],
+      [100, 120, 60, 50, "🎞️ Il proiettore ronza. Ugo gli dà una pacca, come a un cavallo. «Brava, Lucia». Il proiettore si chiama Lucia."],
+    ] },
+    dc_stadio: { draw: bgDcStadio, hot: [
+      [10, 0, 300, 40, "💡 I fari si accendono uno a uno. Lo stadio vuoto, illuminato, sembra in attesa di una partita che nessuno ha ancora deciso.", "tog"],
+      [86, 50, 26, 18, "🧣 La sciarpa grigia è fradicia. Sul cartellino: «Tifosi Grigi, dal 1961». Qualcuno se n'è andato prima dei tre gol. Beato lui."],
+      [210, 56, 22, 20, "🔴 Posto 14, fila B: un segno di vernice rossa, rotondo. Come la punta di un ombrello appoggiato per un'ora."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };

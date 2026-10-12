@@ -15299,6 +15299,7 @@
       ...(window.__libroFinali ? [window.__libroFinali.menuEntry(modes)] : []),
       ...(window.__doppioTurno ? [window.__doppioTurno.menuEntry(modes)] : []),
       ...(window.__cristalli ? [window.__cristalli.menuEntry(modes)] : []),
+      ...(window.__detective ? [window.__detective.menuEntry(modes)] : []),
       ...(window.__vento ? [window.__vento.menuEntry(modes)] : []),
       ...(window.__muro ? [window.__muro.menuEntry(modes)] : []),
       ...(window.__abissoStory ? [window.__abissoStory.menuEntry(modes)] : []),
@@ -22021,7 +22022,7 @@
     ["Partite", /Settimana del Molo/],
     ["Collezioni e curiosità", /Diario del Corriere/],
     ["Calcio d'azione e arcade", /Arena 2D|Biliardino|Cabinato|Stadio 3D|Corsa della Panda|Gozzo di Baciccia|Gabbia sul Molo|Tsubasa|Supereroi/],
-    ["Saghe e GDR", /Salone delle Saghe|Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis|Libro che Mangiava i Finali|Doppio Turno|Cristalli del Campo|Il Muro|Valle del Vento Gentile/],
+    ["Saghe e GDR", /Salone delle Saghe|Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis|Libro che Mangiava i Finali|Doppio Turno|Cristalli del Campo|Il Muro|Valle del Vento Gentile|Detective di Campo/],
     ["Collezioni e curiosità", /Gashapon|Roster & Talenti|Diorama|Fumetto|Leggende del passato|Bianco e Nero|Quartier Generale/],
   ];
   const MN_EXP = { "Partite": 12, "Allenamento": 6, "Storie e ricordi": 8 }; // quante voci ha la categoria a tutto sbloccato: le mancanti appaiono come «???»

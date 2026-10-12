@@ -28,6 +28,8 @@
 //      { room: "casa"|"bottega"|"mulino"|"locanda", name, who: [{ id, at }], id, chest, flavor } → si entra in una stanza
 //                                                  arredata in automatico (diversa per ogni casa), con i personaggi da parlarci
 //      { to: "zona", at: [tx, ty] }              → si entra in un interno disegnato a mano
+//  - PROVE: K.evidence(id, { t, d, icon }) le definisce, K.giveClue(id) le dà, K.hasClue(id); K.present({ who, prompt, ok: [id], right(id), wrong(id), bg })
+//    apre la scelta «Presenta la prova» (stile aula di tribunale): si sceglie un indizio tra quelli raccolti. Si leggono nel diario.
 //  - COMMISSIONI: K.quest(id, titolo, descrizione) per darle, K.questDone(id) per chiuderle; si leggono nel diario.
 //  - INTERNI: si entra davvero nelle case. Nella zona esterna spec.doors = { "x,y": "id_interno" } (o { to, at, locked(K) }),
 //    l'interno è una zona con interior: true; la freccia «v» (o spec.exits) riporta fuori, davanti alla porta giusta.
@@ -345,7 +347,7 @@
     }
     function endingsHtml() { const m = mem(); return Object.keys(ENDINGS).map((k) => (m.ends.includes(k) ? `✓ <b>${esc(ENDINGS[k][0])}</b> <span style="color:var(--dim)">${esc(ENDINGS[k][1])}</span>` : `<span style='color:var(--dim)'>• ??? ${ENDINGS[k][2] ? "· " + esc(ENDINGS[k][2]) : ""}</span>`)).join("<br>"); }
     function journal(back, inZone) {
-      const html = journalHtml() + questsHtml();
+      const html = journalHtml() + cluesHtml() + questsHtml();
       if (inZone) return api.trAsk("voce", html, [{ label: "◂ Indietro", fn: back }], bgNow());
       api.scene(BG0, "voce", html, [{ label: "◂ Indietro", fn: back }], JN());
     }
@@ -448,15 +450,17 @@
         act: Object.assign({ B: "Guarda il letto", H: "Scaldati al camino", D: "Apri la credenza", T: "Guarda il tavolo", L: "Sfoglia i libri", W: "Guarda dalla finestra", z: "Guarda le casse", b: "Siediti", v: "Esci" }, d.act || {}),
         flavor: Object.assign({}, ROOM_TXT, obj(cfg.roomText), d.flavor || {}),
         build(L) {
-          const { lay, put } = L, floor = kind === "bottega" ? "+" : kind === "mulino" ? ":" : "=";
+          const { lay, put } = L, floor = kind === "bottega" || kind === "ufficio" || kind === "spogliatoio" ? "+" : kind === "mulino" ? ":" : "=";
           lay(0, 0, W - 1, Hh - 1, floor); lay(0, 0, W - 1, 1, "a"); lay(0, 0, 0, Hh - 1, "a"); lay(W - 1, 0, W - 1, Hh - 1, "a"); lay(0, Hh - 1, W - 1, Hh - 1, "a"); put(door[0], door[1], "v");
           [3 + (hs % 3), 15 - (hs % 2)].forEach((x) => put(x, 1, "W"));
-          if (kind !== "bottega") lay(7, 6, 12, 8, '"');
+          if (kind !== "bottega" && kind !== "spogliatoio") lay(7, 6, 12, 8, '"');
           const corner = (hs >> 3) % 2; // l'arredamento cambia lato da casa a casa
           const L0 = corner ? 2 : 16, L1 = corner ? 16 : 2;
           if (kind === "casa") { put(10, 1, "H"); put(L0, 3, "B"); put(L0, 4, "B"); if (r("d") < 0.7) put(L0 + (corner ? 2 : -2), 2, "D"); put(L1, 5, "T"); put(L1 + (corner ? -1 : 1), 5, "T"); if (r("l") < 0.6) { put(L1, 2, "L"); put(L1 + (corner ? -1 : 1), 2, "L"); } put(L1, 6, "b"); if (r("z") < 0.5) put(corner ? 18 : 1, 10, "z"); }
           else if (kind === "bottega") { for (let x = 2; x <= 17; x += 2) put(x, 2, r("s" + x) < 0.5 ? "D" : "L"); lay(4, 5, 15, 5, "T"); put(9, 5, floor); put(10, 5, floor); [[2, 9], [3, 9], [17, 9], [16, 10]].forEach(([x, y]) => put(x, y, "z")); }
           else if (kind === "mulino") { put(L1, 1, "H"); [[2, 3], [3, 3], [2, 4], [16, 3], [17, 3], [17, 4], [16, 9], [17, 9], [2, 9]].forEach(([x, y]) => put(x, y, "z")); put(L0 === 2 ? 5 : 14, 6, "T"); put(10, 3, "p"); }
+          else if (kind === "ufficio") { [[2, 2], [3, 2], [16, 2], [17, 2]].forEach(([x, y]) => put(x, y, "D")); [[5, 4], [6, 4], [13, 4], [14, 4], [5, 8], [6, 8], [13, 8], [14, 8]].forEach(([x, y]) => put(x, y, "T")); [[5, 5], [13, 5], [5, 9], [13, 9]].forEach(([x, y]) => put(x, y, "b")); put(L1, 10, "L"); put(L1 + (corner ? -1 : 1), 10, "L"); }
+          else if (kind === "spogliatoio") { for (let x = 2; x <= 17; x++) if (x !== 10 && x % 3) put(x, 2, "D"); [[4, 6], [5, 6], [6, 6], [13, 6], [14, 6], [15, 6]].forEach(([x, y]) => put(x, y, "b")); put(2, 10, "z"); put(17, 9, "z"); }
           else { put(10, 1, "H"); [[4, 4], [15, 4], [4, 9], [15, 9]].forEach(([x, y]) => { put(x, y, "T"); put(x + 1, y, "T"); put(x, y + 1, "b"); }); [[2, 2], [17, 2], [2, 3]].forEach(([x, y]) => put(x, y, "z")); }
           if (d.chest) put(18, 10, "x");
           if (d.build) d.build(L, K);
@@ -480,6 +484,18 @@
     function questsHtml() {
       const ids = Object.keys(QUESTS).filter((k) => questState(k)); if (!ids.length) return "";
       return "<br><br><b>Commissioni</b><br>" + ids.map((k) => (questState(k) === 2 ? `✓ <span style="color:var(--dim)">${esc(QUESTS[k].title)}</span>` : `• <b>${esc(QUESTS[k].title)}</b> · ${esc(T(QUESTS[k].desc))}`)).join("<br>");
+    }
+
+    // prove e indizi (per le saghe di indagine, ma non solo)
+    const EVID = {};
+    const hasClue = (id) => F.get("ev_" + id) === true;
+    function giveClue(id, quiet) { if (!EVID[id] || hasClue(id)) return false; F.set("ev_" + id, true); if (!quiet) { SFX.ding(); if (api && api.trToast) safe(() => api.trToast("Nuova prova: " + EVID[id].t)); } note("Prova: " + EVID[id].t); return true; }
+    function cluesHtml() { const ids = Object.keys(EVID).filter(hasClue); if (!Object.keys(EVID).length) return ""; return `<br><br><b>Prove</b> (${ids.length}/${Object.keys(EVID).length})<br>` + (ids.length ? ids.map((k) => `${EVID[k].icon || "🔎"} <b>${esc(EVID[k].t)}</b><br><span style="color:var(--dim)">${esc(T(EVID[k].d))}</span>`).join("<br>") : "<span style='color:var(--dim)'>Nessuna, per ora.</span>"); }
+    function present(o) {
+      const ids = Object.keys(EVID).filter(hasClue), ok = [].concat(o.ok || []);
+      const opts = ids.map((id) => ({ label: `${EVID[id].icon || "🔎"} ${EVID[id].t}`, sub: EVID[id].short || "", fn: () => { if (ok.includes(id)) { SFX.choice(); if (o.right) o.right(id); } else { SFX.warn(); if (o.wrong) o.wrong(id); } } }));
+      if (o.back) opts.push({ label: "◂ Non ancora", sub: "Torna a cercare prove", fn: o.back });
+      ask(o.who || "voce", `${o.prompt || "Quale prova presenti?"}\n\nPRESENTA LA PROVA · ${ids.length} raccolte`, opts.length ? opts : [{ label: "Non hai ancora prove", fn: o.back || done }], o.bg);
     }
 
     // -------------------------------------------------------------- interni: entrare e uscire dalle case
@@ -590,7 +606,7 @@
     // -------------------------------------------------------------- kit per i capitoli
     const K = {
       get api() { return api; }, ID, TITLE, TS, T, esc, hash, rnd, pick, safe, F, mem, save, stepOf, setStep, note, once, reward, coinsGive, bal, hero, castHero, stat, bond,
-      say, ask, done, go, enterZone, quest, questDone, questState, loreList: () => Object.keys(LORE).map((k) => [k, LORE[k]]), enterDoor, leaveInterior, travelMenu, timeNow, playMatch, ownMatch, finishChapter, setTiles, SFX, tone, noise, glow, frNow, refreshZone, bgNow, journal, leave, lines, learnLore, ENDINGS, ZX, light, later, shadow, at, undAt, isFloor, floorPaint, ground, TH,
+      say, ask, done, go, enterZone, quest, questDone, questState, evidence: (id, d) => { EVID[id] = d; }, giveClue, hasClue, present, loreList: () => Object.keys(LORE).map((k) => [k, LORE[k]]), enterDoor, leaveInterior, travelMenu, timeNow, playMatch, ownMatch, finishChapter, setTiles, SFX, tone, noise, glow, frNow, refreshZone, bgNow, journal, leave, lines, learnLore, ENDINGS, ZX, light, later, shadow, at, undAt, isFloor, floorPaint, ground, TH,
       P: (x, y, w, h, c) => { ctx(); P(x, y, w, h, c); }, get g() { return ctx(); },
       zone: (zid) => ZONES[zid] || null, inZone: (zid) => !!(api && api.trZone() === zid),
       scene: (ls, then, bg) => api.play(lines(ls, bg || BG0), then),

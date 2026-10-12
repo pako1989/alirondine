@@ -22,6 +22,8 @@
   const GEN = { fantasy: ["Fantasy", "#7a4ab0"], mistero: ["Mistero", "#2c6a9a"], scifi: ["Fantascienza", "#1f8a8a"], storico: ["Storico", "#a8622a"], commedia: ["Commedia", "#c9921a"], sport: ["Sport anime", "#c0392b"], avventura: ["Avventura", "#3f8a3f"], dramma: ["Drammatico", "#6a5a7a"], tattica: ["Tattica", "#5a6a3a"] };
   // mod: oggetto window con menuEntry/info · fn: funzione window da chiamare con (indietro) · ch: capitoli totali (se noti)
   const SAGAS = [
+    { id: "detective", t: "Detective di Campo", e: "🕵️", g: ["mistero", "dramma"], mod: "__detective", key: "ali-di-rondine.detective", ch: 3, cover: "dc_citta", d: "Partite truccate nella Lega delle Città. Infortunato, il Campione fa l'assistente di un'ispettrice eccentrica: prove, interrogatori e la Moviola.",
+      hints: { chiuso: "Sempre possibile, alla fine.", pulita: "Servono tutte le prove e la piena fiducia di Agata.", vendetta: "Lascia che sia Agata a decidere, quando è più arrabbiata.", campo: "Segreto: tanto fiuto, nessuna accusa sbagliata e tutte le moviole risolte." } },
     { id: "vento", t: "La Valle del Vento Gentile", e: "🍃", g: ["avventura", "dramma"], mod: "__vento", key: "ali-di-rondine.vento", ch: 3, cover: "ve_valle", d: "Un villaggio di mulini, gli spiriti del prato e un vento che sta smettendo di soffiare. Case in cui si entra, folate che spingono e la partita Col Vento.",
       hints: { vento: "Sempre possibile, alla fine.", turbine: "Serve un patto forte con la Compagnia delle Turbine.", custode: "Resta, quando la valle te lo chiede.", soffio: "Segreto: tutti i Soffi, la piena fiducia di Selva e il Quaderno quasi completo." } },
     { id: "muro", t: "Il Muro", e: "🧱", g: ["dramma", "mistero"], mod: "__muro", key: "ali-di-rondine.muro", ch: 3, cover: "mu_muro", d: "L'ultima città, chiusa da un muro altissimo. Fuori, i Colossi di pietra. Ricognizioni furtive, la Partita sul Muro e un segreto vecchio di duecento anni.",
@@ -59,7 +61,7 @@
     { id: "cala", t: "Cala Tramontana", e: "🌊", g: ["avventura"], fn: "openCalaTramontana", key: "ali-di-rondine.cala-tramontana", cover: "beach", d: "Esplora a piedi il borgo marino alternativo con il tuo Campione." },
     { id: "borgostorto", t: "Il Borgo Storto", e: "🌀", g: ["commedia", "tattica"], api: "openBorgoStorto", cover: "beach", d: "Lo spin-off GDR a turni del Borgo Marino." },
   ];
-  const NEWEST = ["vento", "muro", "cristalli", "doppio", "libro"];
+  const NEWEST = ["detective", "vento", "muro", "cristalli", "doppio", "libro"];
   const modOf = (s) => (s.mod ? window[s.mod] : null);
   const available = (s) => (s.mod ? !!window[s.mod] : s.fn ? typeof window[s.fn] === "function" : !!(api() && api()[s.api]));
   function state(s) {
