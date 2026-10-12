@@ -5347,6 +5347,57 @@
     if (since("ts_festa", 2) < 120) { g.fillStyle = "#ffd23f"; g.font = "900 12px Impact, sans-serif"; g.fillText("L'ANNO PROSSIMO SI TORNA!", 170, 196); }
     tsInk(g, W, H);
   }
+  // ---- Le Cronache del Pallone di Cristallo: pixel grossi, finestre blu, cristalli che brillano
+  function ccWin(g, x, y, w, h) { const gr = g.createLinearGradient(0, y, 0, y + h); gr.addColorStop(0, "#2a3aa8"); gr.addColorStop(1, "#0a1060"); g.fillStyle = gr; g.fillRect(x, y, w, h); g.strokeStyle = "#e8e8ff"; g.lineWidth = 2; g.strokeRect(x + 1, y + 1, w - 2, h - 2); }
+  function ccCrystal(g, x, y, s, col, lit, f) { const b = Math.sin(f / 20 + x) * 2; g.fillStyle = lit ? col : "#6a7080"; g.beginPath(); g.moveTo(x, y - s + b); g.lineTo(x + s * 0.6, y + b); g.lineTo(x, y + s + b); g.lineTo(x - s * 0.6, y + b); g.closePath(); g.fill(); g.fillStyle = "rgba(255,255,255,.55)"; g.fillRect(x - s * 0.25, y - s * 0.5 + b, s * 0.2, s * 0.6); if (lit) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, x, y + b, s * 2.4, "255,255,255", 0.25); g.restore(); } }
+  function bgCcTitolo(g, W, H, f) {
+    // il titolo: quattro cristalli sopra un campo, uno solo che brilla (tocca: si accendono tutti per un attimo)
+    vgrad(g, 0, 0, W, H, ["#0a0a3a", "#3a2a6a"]); for (let i = 0; i < 60; i++) px(g, (i * 53) % W, (i * 31) % 110, 1, 1, `rgba(255,255,255,${0.3 + (i % 3) * 0.2})`);
+    vgrad(g, 0, 130, W, 70, ["#3a7a3a", "#1a4a2a"]); g.strokeStyle = "rgba(255,255,255,.4)"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(40, 200); g.lineTo(100, 130); g.lineTo(220, 130); g.lineTo(280, 200); g.stroke(); g.beginPath(); g.moveTo(160, 130); g.lineTo(160, 200); g.stroke();
+    const all = since("cc_titolo", 0) < 100; [["#7af0c8", 70], ["#5ab8ff", 130], ["#c8a8ff", 190], ["#ff8a5a", 250]].forEach(([c, x], i) => ccCrystal(g, x, 70 + Math.sin(i) * 8, 16, c, all || i === 0, f));
+    ccWin(g, 60, 150, 200, 34); g.fillStyle = "#fff"; g.font = "bold 11px monospace"; g.textAlign = "center"; g.fillText("LE CRONACHE DEL", 160, 164); g.fillText("PALLONE DI CRISTALLO", 160, 178); g.textAlign = "left";
+    if (since("cc_titolo", 1) < 120) { g.fillStyle = "#ffd23f"; g.font = "bold 9px monospace"; g.fillText("▶ NUOVA PARTITA", 112, 140); }
+    if (since("cc_titolo", 2) < 100) circ(g, 160 + Math.sin(f / 10) * 60, 120 - Math.abs(Math.sin(f / 8)) * 30, 5, "#fff");
+  }
+  function bgCcPrato(g, W, H, f) {
+    // Prato Lungo: tetti di paglia, il mulino fermo, il campo grigio (tocca: il mulino prova a girare)
+    vgrad(g, 0, 0, W, 90, ["#e8b080", "#f4e0c0"]); for (let i = 0; i < 5; i++) { const x = 20 + i * 64; px(g, x, 70, 44, 30, "#e8d8b0"); g.fillStyle = "#c8a050"; g.beginPath(); g.moveTo(x - 6, 72); g.lineTo(x + 22, 52); g.lineTo(x + 50, 72); g.closePath(); g.fill(); px(g, x + 16, 84, 12, 16, "#6a4a2a"); }
+    px(g, 270, 40, 20, 60, "#d8c8a8"); const r = since("cc_prato", 0) < 120 ? since("cc_prato", 0) / 20 : 0.3; g.save(); g.translate(280, 46); g.rotate(r); g.fillStyle = "#8a6a4a"; for (let k = 0; k < 4; k++) { g.rotate(Math.PI / 2); g.fillRect(-2, 0, 4, 26); } g.restore();
+    const lit = (() => { try { return !!window.__cronache.info().flags.cristallo_cc_bosco; } catch (e) { return false; } })();
+    px(g, 0, 100, W, 100, lit ? "#5ab84a" : "#9a9a92"); g.strokeStyle = "rgba(255,255,255,.6)"; g.lineWidth = 1.5; g.strokeRect(30, 112, 260, 76); g.beginPath(); g.moveTo(160, 112); g.lineTo(160, 188); g.stroke();
+    if (lit || since("cc_prato", 1) < 100) for (let i = 0; i < 20; i++) px(g, 40 + (i * 37) % 240, 120 + (i * 23) % 60, 2, 2, ["#ff9ec0", "#ffd23f", "#fff"][i % 3]);
+    px(g, 60, 140, 8, 16, "#5a4a8a"); circ(g, 64, 135, 5, "#e8c4a0"); px(g, 60, 146, 8, 4, "#e8e8e8"); if (since("cc_prato", 2) < 100) { ccWin(g, 70, 112, 110, 22); g.fillStyle = "#fff"; g.font = "bold 8px monospace"; g.fillText("L'ERBA CANTAVA...", 76, 126); }
+  }
+  function bgCcMondo(g, W, H, f) {
+    // la mappa del mondo vista da un'aquila: isole, montagne, boschi, la torre viola (tocca)
+    px(g, 0, 0, W, H, "#2a6ac8"); for (let i = 0; i < 30; i++) px(g, (i * 41 + f * 0.3) % W, (i * 23) % H, 6, 1, "rgba(255,255,255,.35)");
+    g.fillStyle = "#7ab860"; g.beginPath(); g.ellipse(160, 100, 130, 80, 0.1, 0, 7); g.fill(); g.fillStyle = "#e8d8a8"; g.beginPath(); g.ellipse(160, 100, 136, 86, 0.1, 0, 7); g.globalCompositeOperation = "destination-over"; g.fill(); g.globalCompositeOperation = "source-over";
+    for (let i = 0; i < 9; i++) { const x = 100 + i * 14, y = 60 + (i % 2) * 6; g.fillStyle = "#7a6a5a"; g.beginPath(); g.moveTo(x - 8, y + 10); g.lineTo(x, y - 6); g.lineTo(x + 8, y + 10); g.closePath(); g.fill(); px(g, x - 2, y - 6, 4, 3, "#fff"); }
+    for (let i = 0; i < 12; i++) circ(g, 200 + (i % 4) * 9, 120 + Math.floor(i / 4) * 8, 5, "#1a4a2a");
+    px(g, 228, 70, 8, 20, "#4a3a6a"); g.fillStyle = "#2a1a4a"; g.beginPath(); g.moveTo(226, 70); g.lineTo(232, 60); g.lineTo(238, 70); g.closePath(); g.fill(); if (since("cc_mondo", 0) < 120 || Math.floor(f / 30) % 2) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 232, 74, 14, "200,150,255", 0.6); g.restore(); }
+    px(g, 90, 120, 6, 6, "#e8d8b0"); px(g, 98, 118, 6, 6, "#e8d8b0"); g.fillStyle = "#c8584a"; g.fillRect(89, 117, 8, 3); g.fillRect(97, 115, 8, 3);
+    if (since("cc_mondo", 1) < 140) { const t = since("cc_mondo", 1); g.fillStyle = "#3a2a1a"; g.beginPath(); g.moveTo(40 + t, 160); g.lineTo(60 + t, 160); g.lineTo(56 + t, 166); g.lineTo(44 + t, 166); g.closePath(); g.fill(); px(g, 49 + t, 150, 2, 10, "#5a4a3a"); px(g, 51 + t, 150, 8, 7, "#f4ecdc"); }
+    const ex = 170 + Math.sin(f / 60) * 60, ey = 40 + Math.cos(f / 50) * 10; g.fillStyle = since("cc_mondo", 2) < 100 ? "#ffd23f" : "#3a3a3a"; g.beginPath(); g.moveTo(ex - 8, ey); g.quadraticCurveTo(ex - 4, ey - 4, ex, ey); g.quadraticCurveTo(ex + 4, ey - 4, ex + 8, ey); g.fill();
+    ccWin(g, 8, 8, 92, 20); g.fillStyle = "#fff"; g.font = "bold 8px monospace"; g.fillText("VERDEMARE", 16, 21);
+  }
+  function bgCcTorre(g, W, H, f) {
+    // la Torre di Fosco: libri, stelle dalla finestra, pozioni che bollono, Fosco che cerca a tentoni (tocca)
+    vgrad(g, 0, 0, W, H, ["#2a1a4a", "#4a3a6a"]); circ(g, 160, 60, 40, "#0a0a2a"); for (let i = 0; i < 20; i++) px(g, 130 + (i * 17) % 60, 30 + (i * 11) % 60, 1, 1, "#fff"); g.strokeStyle = "#8a6a4a"; g.lineWidth = 4; g.beginPath(); g.arc(160, 60, 40, 0, 7); g.stroke(); g.beginPath(); g.moveTo(160, 20); g.lineTo(160, 100); g.moveTo(120, 60); g.lineTo(200, 60); g.stroke();
+    for (let r = 0; r < 4; r++) for (let i = 0; i < 8; i++) { px(g, 10 + i * 10, 40 + r * 34, 8, 26, ["#c8584a", "#3a6ab8", "#7ab860", "#e8c84a", "#a85ac8"][(i + r) % 5]); px(g, 230 + i * 10, 40 + r * 34, 8, 26, ["#3a6ab8", "#e8c84a", "#c8584a", "#7ab860", "#a85ac8"][(i + r) % 5]); }
+    px(g, 120, 150, 80, 8, "#6a4a2a"); [130, 155, 180].forEach((x, i) => { px(g, x, 136, 10, 14, ["#7af0c8", "#c88aff", "#ff8a5a"][i]); const b = (f / 6 + i * 7) % 20; circ(g, x + 5, 132 - b, 2, `rgba(255,255,255,${0.6 - b / 40})`); });
+    const fx = 100 + Math.sin(f / 40) * 30 + (since("cc_torre", 1) < 80 ? Math.sin(f / 3) * 4 : 0); px(g, fx, 160, 12, 24, "#4a3a8a"); circ(g, fx + 6, 154, 6, "#e8c4a0"); px(g, fx, 146, 12, 4, "#3a2a5a"); if (since("cc_torre", 1) < 80) { ccWin(g, fx + 14, 130, 70, 20); g.fillStyle = "#fff"; g.font = "bold 7px monospace"; g.fillText("OCCHIALI??", fx + 20, 143); }
+    if (since("cc_torre", 2) < 100) for (let i = 0; i < 12; i++) px(g, 140 + i * 5, 40 + Math.sin(f / 5 + i) * 10, 2, 2, "#ffd23f");
+  }
+  function bgCcBosco(g, W, H, f) {
+    // il Bosco di Rovo: luce verde a fili, spine che respirano, il cristallo spento sul piedistallo (tocca)
+    vgrad(g, 0, 0, W, H, ["#0a2a1a", "#1a4a2a"]); for (let i = 0; i < 6; i++) { g.fillStyle = "rgba(160,255,160,.07)"; g.beginPath(); g.moveTo(40 + i * 50, 0); g.lineTo(60 + i * 50, 0); g.lineTo(90 + i * 50, H); g.lineTo(60 + i * 50, H); g.closePath(); g.fill(); }
+    for (let i = 0; i < 10; i++) { const x = (i * 37) % W, h = 120 + (i % 3) * 30; px(g, x, H - h, 10, h, "#2a1a0a"); circ(g, x + 5, H - h, 24, "#1a4a2a"); }
+    const lit = (() => { try { return !!window.__cronache.info().flags.cristallo_cc_bosco; } catch (e) { return false; } })();
+    px(g, 148, 140, 24, 30, "#7a7a8a"); ccCrystal(g, 160, 120, 14, "#7af0c8", lit || since("cc_bosco", 0) < 60, f);
+    g.strokeStyle = "#3a5a1a"; g.lineWidth = 2; for (let i = 0; i < 8; i++) { const x = 20 + i * 40, s = Math.sin(f / 30 + i) * 3 + (since("cc_bosco", 1) < 80 ? 6 : 0); g.beginPath(); g.moveTo(x, H); g.quadraticCurveTo(x + s, H - 30, x + 10, H - 50 - s); g.stroke(); for (let k = 0; k < 3; k++) { g.beginPath(); g.moveTo(x + 4, H - 15 - k * 12); g.lineTo(x + 10, H - 19 - k * 12); g.stroke(); } }
+    for (let i = 0; i < 16; i++) { const a = 0.4 + 0.5 * Math.sin(f / 15 + i * 2); if (a > 0.3) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, (i * 53 + Math.sin(f / 40 + i) * 20) % W, 40 + (i * 31) % 120, 5, "220,255,150", a); g.restore(); } }
+    if (since("cc_bosco", 2) < 120) { ccWin(g, 100, 20, 120, 22); g.fillStyle = "#fff"; g.font = "bold 8px monospace"; g.fillText("CHI VA LA'?", 116, 35); }
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -5803,6 +5854,31 @@
       [50, 100, 40, 70, "🏆 Tito solleva la coppa d'argento e fa un salto. La piazza trema. Il forno, dalla panetteria, sbuffa d'orgoglio."],
       [40, 105, 240, 20, "🥖 Pane a forma di pallone per tutti. Uno rotola giù dalla piazza fino al mare. Lo mangia un gabbiano, felice."],
       [160, 180, 160, 20, "📣 «L'ANNO PROSSIMO SI TORNA!» lo gridano tutti insieme, anche quelli dell'Accademia."],
+    ] },
+    cc_titolo: { draw: bgCcTitolo, hot: [
+      [40, 40, 240, 60, "💠 Per un istante i quattro cristalli brillano tutti insieme: verde, azzurro, viola, arancio. Poi tre si spengono di nuovo."],
+      [100, 130, 120, 14, "▶ Il cursore lampeggia su «NUOVA PARTITA». Da qualche parte, un vecchio cabinato fa bip."],
+      [100, 90, 120, 40, "⚽ Un pallone attraversa il campo da solo, rimbalzando. Sembra che cerchi qualcuno con cui giocare."],
+    ] },
+    cc_prato: { draw: bgCcPrato, hot: [
+      [260, 20, 40, 80, "🌀 Il mulino prova a girare. Fa mezzo giro, cigola, si ferma. Senza stagioni non c'è vento."],
+      [30, 110, 260, 80, "🌼 Per un attimo, sul campo grigio, spuntano fiori di tutti i colori. Poi tornano grigi, come chi si è svegliato troppo presto."],
+      [50, 125, 30, 35, "👴 Ermete alza un dito e racconta, a nessuno in particolare: «L'erba cantava». Una gallina lo ascolta."],
+    ] },
+    cc_mondo: { draw: bgCcMondo, hot: [
+      [220, 55, 25, 40, "🗼 La luce viola della torre di Fosco lampeggia: tre corte, una lunga. È un segnale. O forse Fosco ha inciampato nell'interruttore."],
+      [20, 140, 80, 40, "⛵ Una nave passa lontano, sul mare. La vela è piena di un vento che qui non c'è."],
+      [110, 25, 120, 30, "🦅 Un'aquila attraversa la mappa. Vista da lassù, la Terra è un campo da calcio enorme, con le montagne come tribune."],
+    ] },
+    cc_torre: { draw: bgCcTorre, hot: [
+      [120, 20, 80, 80, "🔭 Dalla finestra rotonda si vedono le stelle. Una si muove. Fosco dice che è un cristallo che chiama."],
+      [80, 140, 60, 50, "🧙 Fosco cerca gli occhiali a tentoni, e trova un pallone, una tazza e una mucca di pezza. Niente occhiali."],
+      [130, 30, 70, 40, "✨ Le stelle del soffitto si accendono tutte insieme. Fosco giura che non ha fatto niente. Ha fatto qualcosa."],
+    ] },
+    cc_bosco: { draw: bgCcBosco, hot: [
+      [140, 100, 40, 60, "💠 Il cristallo spento manda un lampo verde, debole come un battito. Ti ha sentito."],
+      [0, 140, 320, 60, "🌿 Le spine dei rovi si muovono tutte insieme, come se respirassero. Poi si fermano, ad ascoltare."],
+      [90, 15, 140, 30, "👁 Tra i rami, due occhi gialli. Poi quattro. Poi otto. I Guardiani di Rovo."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };

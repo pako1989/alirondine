@@ -8987,6 +8987,7 @@
       if (TR_SOLID.includes(c) || (TW.z.solid && TW.z.solid.includes(c))) return false;
     }
     for (const n of trNpcs()) {
+      if (n.ghost) continue; // i compagni che ti seguono non bloccano il passo
       const curInside = Math.abs(TW.x - n.x) < 11 && Math.abs(TW.y - n.y) < 8;
       const newInside = Math.abs(nx - n.x) < 11 && Math.abs(ny - n.y) < 8;
       if (newInside) {
@@ -9001,7 +9002,7 @@
   function trTarget() {
     const [vx, vy] = DIRV[TW.dir] || [0, 1];
     const fx = TW.x + vx * 13, fy = TW.y - 2 + vy * 13, npcs = trNpcs();
-    const t = npcs.find((n) => Math.hypot(n.x - fx, n.y - fy) < 13) || npcs.find((n) => Math.hypot(n.x - TW.x, n.y - TW.y) < 19);
+    const t = npcs.find((n) => Math.hypot(n.x - fx, n.y - fy) < 13 && (!n.ghost || Math.hypot(n.x - TW.x, n.y - TW.y) > 9)) || npcs.find((n) => !n.ghost && Math.hypot(n.x - TW.x, n.y - TW.y) < 19); // ai compagni che ti seguono si parla guardandoli
     let target = t ? { kind: "npc", id: t.id, label: "Parla" } : null;
     if (!target) {
       const tx = Math.floor(fx / TS), ty = Math.floor(fy / TS), ch = TW.map[ty] && TW.map[ty][tx];
@@ -22104,7 +22105,7 @@
     ["Partite", /Settimana del Molo/],
     ["Collezioni e curiosità", /Diario del Corriere/],
     ["Calcio d'azione e arcade", /Arena 2D|Biliardino|Cabinato|Stadio 3D|Corsa della Panda|Gozzo di Baciccia|Gabbia sul Molo|Tsubasa|Supereroi/],
-    ["Saghe e GDR", /Salone delle Saghe|Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis|Libro che Mangiava i Finali|Doppio Turno|Cristalli del Campo|Il Muro|Valle del Vento Gentile|Detective di Campo|Dopo il Campione|Calcio Spaziale|Torneo delle Cento Scuole/],
+    ["Saghe e GDR", /Salone delle Saghe|Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis|Libro che Mangiava i Finali|Doppio Turno|Cristalli del Campo|Il Muro|Valle del Vento Gentile|Detective di Campo|Dopo il Campione|Calcio Spaziale|Torneo delle Cento Scuole|Cronache del Pallone di Cristallo/],
     ["Collezioni e curiosità", /Gashapon|Roster & Talenti|Diorama|Fumetto|Leggende del passato|Bianco e Nero|Quartier Generale/],
   ];
   const MN_EXP = { "Partite": 12, "Allenamento": 6, "Storie e ricordi": 8 }; // quante voci ha la categoria a tutto sbloccato: le mancanti appaiono come «???»

@@ -338,6 +338,8 @@
       const s = stepOf(c.n), es = eraSpec(api.trZone()); let list = es ? (es.npcs ? es.npcs(s) : []) : zr.spec.npcs ? zr.spec.npcs(s) : [];
       chainFor(zr).slice().reverse().forEach((cc) => { const p = cc.n !== zr.ch && cc.patch && cc.patch[api.trZone()]; if (p && p.npcs) list = p.npcs(stepOf(cc.n), list); });
       arr(cfg.cameos).forEach((c) => { if (c.zone === api.trZone() && !list.some((n) => n.id === c.id) && safe(() => c.when(K), false)) list.push({ id: c.id, at: c.at, cameo: true }); });
+      // IL GRUPPO: i compagni di cfg.party(K) camminano in fila dietro al Campione (non bloccano, ci si parla guardandoli)
+      if (cfg.party && !zr.spec.noParty) arr(safe(() => cfg.party(K), [])).forEach((id, i) => { if (!list.some((n) => n.id === id)) { const p = api.trPos && api.trPos(); list.push({ id, ghost: true, follower: i, at: p ? [Math.floor(p[0] / TS), Math.floor((p[1] - 4) / TS)] : zr.spec.start }); } });
       zr.Z.npcs = list.filter((n) => CAST_OK(n.id));
       const hints = Object.assign({}, typeof zr.spec.hints === "function" ? zr.spec.hints(s) : zr.spec.hints || {}), gl = goalNow(), tip = typeof zr.spec.tip === "function" ? zr.spec.tip(s) : zr.spec.tip || "";
       [...new Set([...(zr.spec.areas || []).map((a) => a[4]), zr.spec.short])].forEach((k) => { if (k) hints[k] = (gl ? "Obiettivo: " + gl + " · " : "") + (tip ? tip + " " : "") + (hints[k] || ""); });
@@ -422,6 +424,19 @@
       });
       return null;
     }
+    const TRAIL = { zid: "", pts: [] };
+    function followTick(zid) {
+      const zr = ZONES[zid], me = api.trPos && api.trPos(); if (!zr || !zr.Z.npcs || !me) return null;
+      const fol = zr.Z.npcs.filter((n) => n.ghost); if (!fol.length) return null;
+      if (TRAIL.zid !== zid || !TRAIL.pts.length || Math.hypot(me[0] - TRAIL.pts[0][0], me[1] - TRAIL.pts[0][1]) > 40) { TRAIL.zid = zid; TRAIL.pts = [[me[0], me[1]]]; }
+      const moved = Math.hypot(me[0] - TRAIL.pts[0][0], me[1] - TRAIL.pts[0][1]) >= 1.2; if (moved) { TRAIL.pts.unshift([me[0], me[1]]); if (TRAIL.pts.length > 90) TRAIL.pts.length = 90; }
+      fol.forEach((n) => {
+        const i = Math.min(TRAIL.pts.length - 1, (n.follower + 1) * 11), p = TRAIL.pts[i], q = TRAIL.pts[Math.max(0, i - 3)];
+        n.px = p[0]; n.py = p[1]; n.at = [Math.floor(p[0] / TS), Math.floor((p[1] - 4) / TS)];
+        if (moved && i > 0) { const dx = q[0] - p[0], dy = q[1] - p[1]; if (Math.abs(dx) + Math.abs(dy) > 0.5) n.face = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : dy > 0 ? "down" : "up"; n.wph = (n.wph || 0) + 0.25; n.walk = n.wph; } else n.walk = 0;
+      });
+      return null;
+    }
     const GRV = { zid: "", x: 0, y: 0, vx: 0, vy: 0, ang: 0, mode: "" };
     function gravOf(spec, chN, zid) { const es = zid ? eraSpec(zid) : null, g = es && es.gravity !== undefined ? es.gravity : spec.gravity; return String((typeof g === "function" ? safe(() => g(K, stepOf(chN)), "") : g) || ""); }
     function gravFree(x, y) { for (const [ox, oy] of [[-5, -4], [5, -4], [-5, 2], [5, 2]]) { const c = at(Math.floor((x + ox) / TS), Math.floor((y + oy) / TS)); if (c === undefined || c === null || SOLID.includes(c) || "~#TSGMORWLNHBDW".includes(c)) return false; } return true; }
@@ -489,7 +504,7 @@
       //  - flip: la gravità è girata, la visuale ruota di 180° e i comandi restano quelli dello schermo.
       // meccaniche per-zona: spec.tick (movimento del Campione, può spostarlo) e i plugin della saga
       const ticks = []; if (spec.__exitTick) ticks.push((px, py) => spec.__exitTick(px, py)); if (spec.tick) ticks.push((px, py, dt) => spec.tick(px, py, dt, K, stepOf(chN))); PLUG.forEach((p) => { if (p.tick) ticks.push((px, py, dt) => p.tick(zid, spec, px, py, dt, K)); }); if (spec.gravity || (spec.eras && Object.values(spec.eras).some((e) => e.gravity))) ticks.unshift((px, py) => gravTick(zid, spec, chN, px, py));
-      ticks.push(() => walkTick(zid));
+      ticks.push(() => walkTick(zid)); ticks.push(() => followTick(zid));
       if (ticks.length) Z.tick = function (px, py, dt, moving) { if (api.trZone() !== zid) return null; let r = null; ticks.forEach((t) => { const q = safe(() => t(r ? r[0] : px, r ? r[1] : py, Math.min(0.05, dt || 0.016), moving), null); if (q && q.length === 2) r = q; }); return r; };
       Z.decor = function (cx, cy) { const d = dd(cx, cy); ZX.decor.splice(0).forEach((fn) => safe(() => fn(GP, cx, cy, d))); if (spec.decor) safe(() => spec.decor(GP, cx, cy, d, K)); };
       Z.top = function (cx, cy) {
