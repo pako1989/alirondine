@@ -15,8 +15,9 @@
   const dark = (c, k) => mix(c, k, "#1a0f14"), lite = (c, k) => mix(c, k, "#ffffff");
 
   // tratti del viso dall'id: sempre uguali per lo stesso personaggio
+  const fid = (id, c) => id + (c && c.face ? "|" + c.face : ""); // il Campione può scegliere il volto: cambia il seme dei tratti
   function traits(id, c) {
-    const h = hash(id), b = (n, k) => (h >>> n) % k;
+    const h = hash(fid(id, c)), b = (n, k) => (h >>> n) % k;
     return {
       fw: 15.5 + b(0, 5) * 0.9, chin: b(2, 3), eye: b(4, 4), eyeW: 5.0 + b(6, 5) * 0.55, eyeGap: 8.5 + b(8, 3) * 0.6, eyeY: 5 + b(10, 3) * 0.6,
       brow: b(12, 3), browTilt: (b(14, 5) - 2) * 0.06, nose: b(17, 3), mouth: b(19, 4), lash: b(21, 2), freckles: b(22, 7) === 0, mole: b(25, 6) === 0, fringe: b(27, 4), tuft: b(29, 3), vol: ((h >>> 3) ^ (h >>> 17)) % 3, nStr: 3 + ((h >>> 5) ^ (h >>> 23)) % 5, curly: ((h >>> 9) ^ (h >>> 26)) % 4 === 0, part: ((h >>> 11) ^ (h >>> 28)) % 3, shaved: ((h >>> 13) ^ (h >>> 30)) % 5 === 0, fringeLen: ((h >>> 1) ^ (h >>> 19)) % 3,
@@ -201,7 +202,7 @@
 
   // ---------------------------------------------------------------- stile CARTONE ANIMATO (forme esagerate, linee spesse, ombre a due toni, tanti dettagli)
   function cartoon(g, id, c, expr) {
-    const h = hash(id + "#toon"), b = (n, k) => (h >>> n) % k, T = traits(id, c);
+    const h = hash(fid(id, c) + "#toon"), b = (n, k) => (h >>> n) % k, T = traits(id, c);
     const skin = c.skin || "#e0b48a", hair = c.hair || "#2b1d14", eyeC = c.eye || "#3a2a1a", shirt = c.shirt || (c.bg && c.bg[1]) || "#3f5fbf", st = c.style || "messy";
     const ink = dark(skin, 0.78), sk2 = mix(skin, 0.24, "#7a3a4a"), sk3 = lite(skin, 0.28), hd = dark(hair, 0.42), hl = lite(hair, 0.4), sh2 = dark(shirt, 0.3), sh3 = lite(shirt, 0.22);
     const shape = b(0, 4), hw = 15 + b(2, 4), hh = 20 + b(4, 4), nose = b(6, 4), eyeT = b(8, 4), ears = 3.5 + b(10, 3) * 0.8, mw = 5 + b(12, 3), brow = 1.8 + b(14, 3) * 0.6, collar = b(16, 4), older = !!c.older || c.tag === "gray" || T.older;
@@ -323,7 +324,7 @@
   }
   // ---------------------------------------------------------------- stile FUMETTO «linea chiara» (contorni neri netti, colori pieni, facce da caratterista)
   function comic(g, id, c, expr) {
-    const T = traits(id, c), h = hash(id + "*"), b = (n, k) => (h >>> n) % k;
+    const T = traits(id, c), h = hash(fid(id, c) + "*"), b = (n, k) => (h >>> n) % k;
     const skin = c.skin || "#e0b48a", hair = c.hair || "#2b1d14", shirt = c.shirt || (c.bg && c.bg[1]) || "#3f5fbf", K = "#14100e", st = c.style || "messy";
     const fw = 15 + b(0, 5), fh = 21 + b(3, 5), jaw = b(6, 3), noseT = b(8, 4), eyeT = b(10, 3), ears = 3 + b(12, 2);
     g.lineJoin = "round"; g.lineCap = "round"; g.strokeStyle = K; g.lineWidth = 1.6;
@@ -401,7 +402,7 @@
     post(o, cv); FX_CACHE[key] = cv; const ks = Object.keys(FX_CACHE); if (ks.length > 160) delete FX_CACHE[ks[0]];
     return cv;
   }
-  const fxKey = (st, id, c, expr) => st + "|" + id + "|" + (expr || "") + "|" + (c.skin || "") + (c.hair || "") + (c.shirt || "") + (c.style || "") + (c.cap || "") + (c.num || "") + "|" + (c.acc || "") + (c.glasses ? "g" : "") + (c.shades ? "s" : "");
+  const fxKey = (st, id, c, expr) => st + "|" + id + "|" + (expr || "") + "|" + (c.skin || "") + (c.hair || "") + (c.shirt || "") + (c.style || "") + (c.cap || "") + (c.num || "") + "|" + (c.face || "") + (c.acc || "") + (c.glasses ? "g" : "") + (c.shades ? "s" : "");
   const lum = (r, g2, b) => (0.299 * r + 0.587 * g2 + 0.114 * b) / 255;
   // MANGA: bianco e nero, chine e retini a puntini come una tavola stampata
   function manga(g, id, c, expr) {
@@ -443,7 +444,7 @@
   }
   const PX_CACHE = {};
   function pixel(g, id, c, expr) {
-    const key = id + "|" + (expr || "") + "|" + (c.skin || "") + (c.hair || "") + (c.shirt || "") + (c.style || "") + (c.cap || "") + (c.num || "") + "|" + (c.acc || "") + (c.glasses ? "g" : "") + (c.shades ? "s" : "");
+    const key = id + "|" + (expr || "") + "|" + (c.skin || "") + (c.hair || "") + (c.shirt || "") + (c.style || "") + (c.cap || "") + (c.num || "") + "|" + (c.face || "") + (c.acc || "") + (c.glasses ? "g" : "") + (c.shades ? "s" : "");
     let cv = PX_CACHE[key];
     if (!cv) {
       const W = 36, H = 50; cv = document.createElement("canvas"); cv.width = W; cv.height = H; const o = cv.getContext("2d");
