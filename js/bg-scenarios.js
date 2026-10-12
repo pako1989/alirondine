@@ -5354,7 +5354,7 @@
     // il titolo: quattro cristalli sopra un campo, uno solo che brilla (tocca: si accendono tutti per un attimo)
     vgrad(g, 0, 0, W, H, ["#0a0a3a", "#3a2a6a"]); for (let i = 0; i < 60; i++) px(g, (i * 53) % W, (i * 31) % 110, 1, 1, `rgba(255,255,255,${0.3 + (i % 3) * 0.2})`);
     vgrad(g, 0, 130, W, 70, ["#3a7a3a", "#1a4a2a"]); g.strokeStyle = "rgba(255,255,255,.4)"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(40, 200); g.lineTo(100, 130); g.lineTo(220, 130); g.lineTo(280, 200); g.stroke(); g.beginPath(); g.moveTo(160, 130); g.lineTo(160, 200); g.stroke();
-    const all = since("cc_titolo", 0) < 100; [["#7af0c8", 70], ["#5ab8ff", 130], ["#c8a8ff", 190], ["#ff8a5a", 250]].forEach(([c, x], i) => ccCrystal(g, x, 70 + Math.sin(i) * 8, 16, c, all || i === 0, f));
+    const all = since("cc_titolo", 0) < 100; [["#7af0c8", 70], ["#5ab8ff", 130], ["#c8a8ff", 190], ["#ff8a5a", 250]].forEach(([c, x], i) => ccCrystal(g, x, 70 + Math.sin(i) * 8, 16, c, all || i === 0 || ccLit(["cc_bosco", "cc_isola", "cc_stelle", "cc_vulcano"][i]), f));
     ccWin(g, 60, 150, 200, 34); g.fillStyle = "#fff"; g.font = "bold 11px monospace"; g.textAlign = "center"; g.fillText("LE CRONACHE DEL", 160, 164); g.fillText("PALLONE DI CRISTALLO", 160, 178); g.textAlign = "left";
     if (since("cc_titolo", 1) < 120) { g.fillStyle = "#ffd23f"; g.font = "bold 9px monospace"; g.fillText("▶ NUOVA PARTITA", 112, 140); }
     if (since("cc_titolo", 2) < 100) circ(g, 160 + Math.sin(f / 10) * 60, 120 - Math.abs(Math.sin(f / 8)) * 30, 5, "#fff");
@@ -5416,6 +5416,40 @@
     for (let i = 0; i < 4; i++) { const x = 100 + i * 34, y = 150; px(g, x, y, 9, 18, "#4a4a5a"); circ(g, x + 4.5, y - 5, 5, "#c8c8d0"); if (since("cc_isola", 1) < 90 && i === 0) { px(g, x + 1, y - 7, 7, 3, "#2a2a3a"); } }
     if (since("cc_isola", 1) < 90) { ccWin(g, 70, 112, 90, 20); g.fillStyle = "#fff"; g.font = "bold 7px monospace"; g.fillText("( . . . )", 92, 125); }
     if (since("cc_isola", 2) < 120) { const t = since("cc_isola", 2); g.strokeStyle = "rgba(255,255,255,.8)"; g.lineWidth = 2; g.beginPath(); g.moveTo(0, 120 + t * 0.2); g.quadraticCurveTo(160, 110 + t * 0.2, 320, 120 + t * 0.2); g.stroke(); }
+  }
+  function ccLit(k) { try { return !!window.__cronache.info().flags["cristallo_" + k]; } catch (e) { return false; } }
+  function bgCcVulcano(g, W, H, f) {
+    // la Montagna di Fuoco: lava che scorre come miele, la forgia di Brunilde, il cristallo sul dischetto (tocca)
+    vgrad(g, 0, 0, W, 110, ["#3a0a10", "#c84a1a"]); g.fillStyle = "#2a1a1a"; g.beginPath(); g.moveTo(40, 110); g.lineTo(150, 18); g.lineTo(178, 18); g.lineTo(290, 110); g.closePath(); g.fill();
+    const erupt = since("cc_vulcano", 2) < 120; for (let i = 0; i < (erupt ? 18 : 6); i++) { const t = ((f * (erupt ? 2.4 : 1) + i * 37) % 90) / 90, x = 164 + Math.sin(i * 2.3) * t * (erupt ? 70 : 30), y = 18 - t * 40 + t * t * (erupt ? 60 : 30); px(g, x, y, 3, 3, i % 2 ? "#ffd23f" : "#ff6a2a"); }
+    g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 164, 20, 26, "255,140,40", 0.45); g.restore();
+    vgrad(g, 0, 110, W, 90, ["#1a0a0a", "#3a1a10"]); for (let i = 0; i < 3; i++) { g.strokeStyle = `rgba(255,${120 + i * 30},40,.85)`; g.lineWidth = 4 - i; g.beginPath(); for (let x = 0; x <= W; x += 10) { const y = 150 + i * 14 + Math.sin(x / 30 + f / 40 + i) * 5; x ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke(); }
+    const hit = since("cc_vulcano", 1) < 40; px(g, 30, 120, 50, 30, "#4a3a3a"); px(g, 36, 128, 14, 10, hit ? "#ffd23f" : "#ff6a2a"); px(g, 60, hit ? 110 : 104, 4, 18, "#8a6a4a"); px(g, 54, hit ? 106 : 100, 16, 8, "#6a6a7a");
+    if (hit) for (let i = 0; i < 8; i++) px(g, 66 + Math.cos(i) * 18 * (1 - since("cc_vulcano", 1) / 40), 116 + Math.sin(i) * 12, 2, 2, "#ffd23f");
+    const lit = ccLit("cc_vulcano"); px(g, 240, 132, 50, 4, "#e8e8e8"); px(g, 240, 108, 3, 26, "#e8e8e8"); px(g, 287, 108, 3, 26, "#e8e8e8"); ccCrystal(g, 265, 124, 9, "#ff8a3a", lit || since("cc_vulcano", 0) < 60, f);
+    if (since("cc_vulcano", 0) < 100 && !lit) { ccWin(g, 200, 80, 110, 20); g.fillStyle = "#fff"; g.font = "bold 7px monospace"; g.fillText("ASPETTA UN RIGORE", 210, 93); }
+  }
+  function bgCcStelle(g, W, H, f) {
+    // lo Stadio delle Stelle: tribune di costellazioni, il campo sospeso, il Re in porta (tocca)
+    vgrad(g, 0, 0, W, H, ["#05051a", "#1a1a4a"]); for (let i = 0; i < 70; i++) { const a = 0.4 + 0.5 * Math.sin(f / 20 + i * 1.3); px(g, (i * 71) % W, (i * 37) % 120, i % 9 ? 1 : 2, i % 9 ? 1 : 2, `rgba(230,230,255,${a})`); }
+    const cons = [[[30, 30], [50, 22], [70, 34], [64, 54], [40, 50]], [[250, 26], [270, 40], [290, 30], [280, 60]], [[140, 14], [160, 10], [180, 16]]], hot = since("cc_stelle", 1) < 120;
+    cons.forEach((c) => { g.strokeStyle = hot ? "rgba(255,230,140,.9)" : "rgba(200,200,255,.35)"; g.lineWidth = 1; g.beginPath(); c.forEach(([x, y], k) => (k ? g.lineTo(x, y) : g.moveTo(x, y))); g.stroke(); c.forEach(([x, y]) => { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, x, y, hot ? 6 : 3, "220,220,255", 0.6); g.restore(); }); });
+    g.fillStyle = "#1a3a2a"; g.beginPath(); g.ellipse(160, 160, 140, 32, 0, 0, 7); g.fill(); g.strokeStyle = "rgba(220,220,255,.7)"; g.lineWidth = 1; g.beginPath(); g.ellipse(160, 160, 120, 24, 0, 0, 7); g.stroke(); g.beginPath(); g.moveTo(160, 136); g.lineTo(160, 184); g.stroke();
+    px(g, 140, 110, 40, 3, "#e8e8ff"); px(g, 140, 110, 3, 26, "#e8e8ff"); px(g, 177, 110, 3, 26, "#e8e8ff");
+    const save = since("cc_stelle", 0) < 50, kx = save ? 145 + Math.sin(since("cc_stelle", 0) / 8) * 14 : 156; px(g, kx, 120, 9, 16, "#2a2a5a"); circ(g, kx + 4.5, 115, 5, "#d8c8b8"); px(g, kx, 108, 9, 4, "#ffd23f"); px(g, kx - 3, 124, 3, 4, "#e8e8e8"); px(g, kx + 9, 124, 3, 4, "#e8e8e8");
+    ccCrystal(g, 160, 96, 8, "#c8a8ff", ccLit("cc_stelle"), f);
+    if (save) { ccWin(g, 190, 96, 90, 20); g.fillStyle = "#fff"; g.font = "bold 7px monospace"; g.fillText("( PARATA. )", 206, 109); }
+    if (since("cc_stelle", 2) < 120) { const t = since("cc_stelle", 2); for (let i = 0; i < 3; i++) { const x = W - t * 3 - i * 20, y = 20 + t * 0.8 + i * 6; g.strokeStyle = `rgba(255,255,255,${0.8 - i * 0.2})`; g.beginPath(); g.moveTo(x, y); g.lineTo(x + 30, y - 10); g.stroke(); } }
+  }
+  function bgCcFinale(g, W, H, f) {
+    // il finale: i quattro cristalli accesi in cerchio, le stagioni che girano (tocca)
+    const sea = Math.floor(f / 160) % 4, skies = [["#8ad8a8", "#e8f8d8"], ["#5ab8f0", "#ffe8a0"], ["#c87a3a", "#f0c87a"], ["#8a9ab8", "#e8f0f8"]][sea]; vgrad(g, 0, 0, W, H, skies);
+    vgrad(g, 0, 150, W, 50, ["#4a8a3a", "#2a5a2a"]); const cols = ["#7af0c8", "#5ab8ff", "#ff8a3a", "#c8a8ff"], spin = since("cc_finale", 0) < 90 ? 6 : 1;
+    cols.forEach((c, i) => { const a = f / 80 * spin + i * Math.PI / 2; ccCrystal(g, 160 + Math.cos(a) * 60, 85 + Math.sin(a) * 26, 10, c, true, f); });
+    if (sea === 3 || since("cc_finale", 1) < 120) for (let i = 0; i < 24; i++) px(g, (i * 41 + Math.sin(f / 30 + i) * 10) % W, (f * 0.6 + i * 23) % 150, 2, 2, "#fff");
+    if (sea === 0) for (let i = 0; i < 8; i++) circ(g, 20 + i * 40, 160 + (i % 2) * 8, 3, ["#ff8aa8", "#ffd23f"][i % 2]);
+    const jump = since("cc_finale", 2) < 60 ? Math.abs(Math.sin(since("cc_finale", 2) / 6)) * 14 : 0;
+    [["#8a9aaa", "#c8a040"], ["#5a3a8a", "#3a2a5a"], ["#3a7a5a", "#1a1a1a"], ["#2a2a5a", "#c8c8d8"]].forEach(([b, h], i) => { const x = 100 + i * 36, y = 140 - (i % 2 ? jump : jump * 0.7); px(g, x, y, 10, 18, b); circ(g, x + 5, y - 5, 5, "#e8c4a0"); px(g, x, y - 10, 10, 4, h); });
   }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
@@ -5908,6 +5942,21 @@
       [140, 55, 40, 60, "💠 Il cristallo sullo scoglio manda un lampo azzurro. Il mare intorno si calma, come chi trattiene il fiato."],
       [90, 135, 140, 40, "🧍 I Silenti, in fila, immobili. Il primo alza una mano: ( . . . ). È un saluto. Credo."],
       [0, 100, 320, 30, "🌊 La marea scende ancora: il campo nella sabbia diventa più grande. Il mare vuole vedere la partita."],
+    ] },
+    cc_vulcano: { draw: bgCcVulcano, hot: [
+      [230, 100, 70, 40, "🔥 Il cristallo sul dischetto sfrigola, come una brace soffiata. Sente qualcuno avvicinarsi al dischetto."],
+      [30, 95, 50, 55, "🔨 Brunilde batte il martello sul pallone di ferro: TANG. Le scintille volano fino alla lava, e la lava le mangia."],
+      [110, 0, 110, 60, "🌋 La montagna sbuffa, e per un attimo piove fuoco d'oro. Brunilde non alza nemmeno la testa: «Starnutisce, ogni tanto»."],
+    ] },
+    cc_stelle: { draw: bgCcStelle, hot: [
+      [130, 100, 60, 40, "🧤 Il Re si tuffa su un pallone che non c'è. Para lo stesso. Nessuno applaude: è così da quarant'anni."],
+      [0, 0, 320, 70, "✨ Le costellazioni delle tribune si accendono d'oro, come una curva che si alza in piedi. Poi si rimettono a sedere."],
+      [200, 0, 120, 60, "☄ Una stella cadente attraversa lo stadio, da porta a porta. Fosco: «Era un passaggio filtrante». Rubi: «Era fuorigioco»."],
+    ] },
+    cc_finale: { draw: bgCcFinale, hot: [
+      [90, 50, 140, 70, "💠 I quattro cristalli girano più veloci, come bambini in girotondo. Ridono? I cristalli non ridono. Questi sì."],
+      [0, 0, 320, 140, "❄ Una nevicata dolce, poi un sole, poi foglie: le stagioni passano tutte, in un minuto, per farsi vedere."],
+      [90, 110, 150, 60, "🙌 Il gruppo salta insieme, come dopo un gol. Il Re del Silenzio li guarda. Poi, timidamente, salta anche lui."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };

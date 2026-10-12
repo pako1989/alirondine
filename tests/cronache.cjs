@@ -58,4 +58,34 @@ async function c2(w) {
   const i = await L.info(page); if (!i.done[2]) errors.push("capitolo 2 non concluso: " + JSON.stringify(i.step)); if (!i.flags.cristallo_cc_isola) errors.push("cristallo del mare non acceso");
   L.check(`Le Cronache del Pallone di Cristallo · capitolo 2 (${w} px)`, errors); await browser.close();
 }
-(async () => { await c1(390); await c1(320); await c2(390); await c2(320); })().catch((e) => { console.error("✗ cronache:", e.message); process.exit(1); });
+async function c3(w) {
+  const save = { v: 1, ch: 3, step: { 1: 7, 2: 7 }, done: { 1: "festa", 2: "re" }, diffSet: true, intro: { ch1: 1, ch2: 1, cc_prato: 1, cc_mondo: 1, cc_torre: 1, cc_bosco: 1, cc_porto: 1, cc_isola: 1 }, st: { gruppo: 9, luce: 5 }, flags: { party_cc_lyra: true, party_cc_fosco: true, party_cc_rubi: true, cristallo_cc_bosco: true, cristallo_cc_isola: true, cc_mantello: true, cc_nave: true } };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await page.evaluate(() => window.__cronache.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 3")); await L.advance(page);
+  await L.talk(page, "cc_ermete"); await L.advance(page);
+  await page.evaluate(() => window.__cronache._dbg.K.go("cc_mondo", 10, 21)); await page.waitForTimeout(400); await L.advance(page);
+  const m = await page.evaluate(() => [window.__tr.TW.map[5][40], window.__tr.TW.map[3][22]]); if (m.join("") !== "FC") errors.push("vulcano e castello non sulla mappa: " + m.join(""));
+  for (const z of ["cc_vulcano", "cc_stelle"]) { const bad = await L.reachAll(page, z); if (bad.length) errors.push(z + " irraggiungibile: " + bad.join(", ")); }
+  await L.goAct(page, 22, 3); await L.advance(page); if ((await L.zone(page)) !== "cc_mondo") errors.push("il castello si apre prima del fuoco");
+  await L.goAct(page, 40, 5); await L.advance(page); if ((await L.zone(page)) !== "cc_vulcano") errors.push("non si entra nel vulcano: " + (await L.zone(page)));
+  if (w === 390) await L.shot(page, "cc_vulcano");
+  await L.talk(page, "cc_fabbra"); await L.advance(page, ["Lyra. Tiralo tu"]);
+  let i = await L.info(page); if (!i.flags.cristallo_cc_vulcano || !i.flags.cc_lyra_tira) errors.push("rigore di Lyra non registrato");
+  await L.goAct(page, 15, 19); await L.advance(page); await L.goAct(page, 22, 3); await L.advance(page); if ((await L.zone(page)) !== "cc_stelle") errors.push("non si sale allo stadio delle stelle: " + (await L.zone(page)));
+  if (w === 390) await L.shot(page, "cc_stelle");
+  await L.talk(page, "cc_re"); await page.evaluate(() => window.T_.click("Gioca la partita finale")); await page.waitForTimeout(500); await atbStart(page); await page.waitForTimeout(800);
+  const pn = await page.evaluate(() => window.__atb.state.party.length); if (pn !== 4) errors.push("in finale il gruppo non è di quattro: " + pn);
+  await atbEnd(page, 1, 0); await L.advance(page);
+  i = await L.info(page); if (!i.flags.cristallo_cc_stelle) errors.push("cristallo delle stelle non acceso");
+  // il segreto: tutte le schegge del mondo
+  await page.evaluate(() => { const A = window.__tr, r = A.trRec(), Z = A.TRZ; ["cc_mondo", "cc_prato", "cc_bosco", "cc_porto", "cc_isola", "cc_vulcano", "cc_stelle"].forEach((z) => { r.got[z] = (Z[z].items || []).map((_, k) => k); }); });
+  const ends = ["Le schegge che hai raccolto", "Le stagioni ripartono", "Lyra, resta", "Le abbiamo viste tutte"];
+  for (const e of ends) {
+    await page.evaluate(() => { const K = window.__cronache._dbg.K; K.setStep(3, 3); K.enterZone("cc_stelle"); }); await page.waitForTimeout(400); await L.advance(page);
+    await L.talk(page, "cc_re"); await L.advance(page, [e]); if (w === 390 && e === ends[0]) await L.shot(page, "cc_fine");
+  }
+  i = await L.info(page); if (!i.done[3]) errors.push("capitolo 3 non concluso: " + JSON.stringify(i.step));
+  const n = await page.evaluate(() => window.__cronache._dbg.K.mem().ends.length); if (n < 4) errors.push("finali trovati " + n + " su 4");
+  L.check(`Le Cronache del Pallone di Cristallo · capitolo 3 e i 4 finali (${w} px)`, errors); await browser.close();
+}
+(async () => { await c1(390); await c1(320); await c2(390); await c2(320); await c3(390); await c3(320); })().catch((e) => { console.error("✗ cronache:", e.message); process.exit(1); });
