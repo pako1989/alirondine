@@ -668,7 +668,7 @@
   function chip() {
     if (document.getElementById("scExit")) return;
     const st = document.createElement("style");
-    st.textContent = "#scExit{position:fixed;left:8px;bottom:8px;z-index:60;display:none;min-height:36px;padding:6px 12px;border-radius:10px;border:1px solid #ffffff55;background:#1b2f7acc;color:#fff;font:700 13px/1.1 system-ui,sans-serif;letter-spacing:.2px;box-shadow:0 2px 8px #0008}#scExit.on{display:block}body.scMM #stats{margin-bottom:54px}#scExit:active{transform:translateY(1px)}";
+    st.textContent = "#scExit{position:fixed;left:8px;bottom:8px;z-index:60;display:none;min-height:36px;padding:6px 12px;border-radius:10px;border:1px solid #ffffff55;background:#1b2f7acc;color:#fff;font:700 13px/1.1 system-ui,sans-serif;letter-spacing:.2px;box-shadow:0 2px 8px #0008}#scExit.on{display:block}body.svMM #stats{margin-bottom:54px}#scExit:active{transform:translateY(1px)}";
     document.head.appendChild(st);
     const b = document.createElement("button"); b.id = "scExit"; b.type = "button"; b.textContent = "✕ Esci"; b.setAttribute("aria-label", "Esci da Vallombra");
     b.onclick = () => {
@@ -682,7 +682,7 @@
     setInterval(() => {
       const hud = document.getElementById("matchHud"), live = !!(hud && !hud.hidden);
       const on = !!((zoneRec() && document.body.classList.contains("borgo")) || (inMatch && live));
-      b.classList.toggle("on", on); document.body.classList.toggle("scMM", !!(inMatch && live)); b.textContent = inMatch && live ? "✕ Esci dalla partita" : "✕ Esci";
+      b.classList.toggle("on", on); document.body.classList.toggle("svMM", !!(inMatch && live)); b.textContent = inMatch && live ? "✕ Esci dalla partita" : "✕ Esci";
     }, 400);
   }
 

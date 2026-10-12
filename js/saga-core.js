@@ -804,7 +804,7 @@
       setInterval(() => {
         const hud = document.getElementById("matchHud"), live = !!(hud && !hud.hidden), zr = zoneRec(), own = !!document.querySelector(".scPitch");
         const on = !own && !!((zr && document.body.classList.contains("borgo")) || (inMatch && live));
-        b.classList.toggle("on", on); if (inMatch) document.body.classList.toggle("scMM", !!live); b.textContent = inMatch && live ? "✕ Esci dalla partita" : "✕ Esci";
+        b.classList.toggle("on", on); const mm = !!(inMatch && live); if (mm || b._mm) document.body.classList.toggle("scMM", mm); b._mm = mm; b.textContent = inMatch && live ? "✕ Esci dalla partita" : "✕ Esci";
       }, 400);
     }
     function init() {
