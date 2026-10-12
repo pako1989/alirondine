@@ -281,6 +281,7 @@
         else if (kind === "fog") { if (p.s > 0.45) return; p.x += 0.15 + p.s * 0.2; g.fillStyle = `rgba(225,230,225,${0.03 + p.s * 0.05})`; g.beginPath(); g.ellipse(p.x, p.y, 40 + p.s * 30, 10 + p.s * 6, 0, 0, 7); g.fill(); }
         else if (kind === "snow") { p.y += 0.3 + p.s * 0.5; p.x += Math.sin(fr / 40 + p.p) * 0.4 + wnd * 0.5; g.fillStyle = "rgba(255,255,255,.85)"; g.fillRect(p.x, p.y, 1 + (p.s > 0.6), 1 + (p.s > 0.6)); }
         else if (kind === "petals" || kind === "leaves") { p.y += 0.25 + p.s * 0.35; p.x += Math.sin(fr / 35 + p.p) * 0.6 + 0.3 + wnd; g.save(); g.translate(p.x, p.y); g.rotate(fr / 30 + p.p); g.fillStyle = kind === "petals" ? (p.s > 0.5 ? "rgba(255,200,215,.9)" : "rgba(255,240,245,.9)") : (p.s > 0.5 ? "rgba(220,160,60,.85)" : "rgba(150,170,60,.85)"); g.beginPath(); g.ellipse(0, 0, 2.4, 1.2, 0, 0, 7); g.fill(); g.restore(); }
+        else if (kind === "float") { p.x += Math.sin(fr / 90 + p.p) * 0.25 + (p.s - 0.5) * 0.2; p.y += Math.cos(fr / 110 + p.p * 2) * 0.22; g.save(); g.translate(p.x, p.y); g.rotate(fr / 60 * (p.s - 0.5) + p.p); g.fillStyle = p.s > 0.7 ? "rgba(200,240,255,.55)" : p.s > 0.35 ? "rgba(255,220,150,.45)" : "rgba(180,190,210,.4)"; g.fillRect(-1, -1, p.s > 0.7 ? 2 : 3, p.s > 0.7 ? 2 : 1.5); g.restore(); if (p.y < -5) p.y = 204; }
         else if (kind === "fireflies") { p.x += Math.sin(fr / 50 + p.p) * 0.4; p.y += Math.cos(fr / 60 + p.p) * 0.3; const a = 0.4 + 0.5 * Math.sin(fr / 12 + p.p * 3); if (a > 0.2) { g.save(); g.globalCompositeOperation = "lighter"; glow(g, p.x, p.y, 5, "220,255,140", a * 0.7); g.restore(); g.fillStyle = `rgba(240,255,180,${a})`; g.fillRect(p.x, p.y, 1, 1); } }
         else if (kind === "sparks") { p.y -= 0.4 + p.s * 0.6; p.x += Math.sin(fr / 20 + p.p) * 0.4; g.fillStyle = `rgba(255,${150 + p.s * 80 | 0},80,${0.5 + p.s * 0.4})`; g.fillRect(p.x, p.y, 1, 1); if (p.y < -5) p.y = 205; }
         else { p.y += 0.05 + p.s * 0.05; p.x += Math.sin(fr / 80 + p.p) * 0.15; g.fillStyle = `rgba(255,230,180,${0.2 + p.s * 0.3})`; g.fillRect(p.x, p.y, 1, 1); }
@@ -392,6 +393,31 @@
     function finishChapter(n, ending) { const m = mem(); m.done[n] = String(ending || "ok").slice(0, 24); if (m.ch <= n && n < NCH) m.ch = n + 1; save(); SFX.end(); }
 
     // -------------------------------------------------------------- zone sul motore TRZ
+    const GRV = { zid: "", x: 0, y: 0, vx: 0, vy: 0, ang: 0, mode: "" };
+    function gravOf(spec, chN, zid) { const es = zid ? eraSpec(zid) : null, g = es && es.gravity !== undefined ? es.gravity : spec.gravity; return String((typeof g === "function" ? safe(() => g(K, stepOf(chN)), "") : g) || ""); }
+    function gravFree(x, y) { for (const [ox, oy] of [[-5, -4], [5, -4], [-5, 2], [5, 2]]) { const c = at(Math.floor((x + ox) / TS), Math.floor((y + oy) / TS)); if (c === undefined || c === null || SOLID.includes(c) || "~#TSGMORWLNHBDW".includes(c)) return false; } return true; }
+    function gravTick(zid, spec, chN, px, py) {
+      const G = GRV, mode = gravOf(spec, chN, zid); G.mode = mode;
+      if (G.zid !== zid || Math.hypot(px - G.x, py - G.y) > 6) { G.zid = zid; G.x = px; G.y = py; G.vx = G.vy = 0; }
+      const flip = /flip/.test(mode), zero = /zero/.test(mode);
+      if (!flip && !zero) { G.x = px; G.y = py; return null; }
+      const k = (api.trKeys && api.trKeys()) || {}; let ix = (k.right ? 1 : 0) - (k.left ? 1 : 0), iy = (k.down ? 1 : 0) - (k.up ? 1 : 0);
+      if (flip) { ix = -ix; iy = -iy; } if (ix && iy) { ix *= 0.72; iy *= 0.72; }
+      if (flip && (ix || iy) && api.trFace) api.trFace(ix && !iy ? (ix > 0 ? "right" : "left") : iy > 0 ? "down" : "up");
+      if (zero) { G.vx = G.vx * 0.965 + ix * 1.5 * 0.035 * 1.6; G.vy = G.vy * 0.965 + iy * 1.5 * 0.035 * 1.6; const v = Math.hypot(G.vx, G.vy); if (v > 2.2) { G.vx *= 2.2 / v; G.vy *= 2.2 / v; } }
+      else { G.vx = ix * 1.5; G.vy = iy * 1.5; }
+      if (gravFree(G.x + G.vx, G.y)) G.x += G.vx; else G.vx = zero ? -G.vx * 0.5 : 0;
+      if (gravFree(G.x, G.y + G.vy)) G.y += G.vy; else G.vy = zero ? -G.vy * 0.5 : 0;
+      return [G.x, G.y];
+    }
+    // la visuale ruota quando la gravità è girata (animata, così si vede il «giro»)
+    function gravView(g) {
+      const want = /flip/.test(GRV.mode) && GRV.zid === ZX.id ? Math.PI : 0; GRV.ang += (want - GRV.ang) * 0.08; if (Math.abs(want - GRV.ang) < 0.01) GRV.ang = want;
+      if (GRV.ang < 0.01) return;
+      const cv = g.canvas; if (!GRV.cv || GRV.cv.width !== cv.width || GRV.cv.height !== cv.height) { GRV.cv = document.createElement("canvas"); GRV.cv.width = cv.width; GRV.cv.height = cv.height; }
+      const t = GRV.cv.getContext("2d"); t.clearRect(0, 0, cv.width, cv.height); t.drawImage(cv, 0, 0);
+      g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = "#05060c"; g.fillRect(0, 0, cv.width, cv.height); g.translate(cv.width / 2, cv.height / 2); g.rotate(GRV.ang); g.drawImage(GRV.cv, -cv.width / 2, -cv.height / 2); g.restore();
+    }
     function registerZone(chN, zid, spec) {
       const rk = spec.region && REG[spec.region] ? spec.region : REG_FIRST;
       const syncZX = () => { const es = eraSpec(zid), rk2 = es && es.region && REG[es.region] ? es.region : rk; ZX.id = zid; ZX.rk = rk2; ZX.rg = REG[rk2]; ZX.era = es; ZX.eraName = eraOf(zid); ZX.spec = spec; ZX.standCol = spec.stands; ZX.chestOpen = (tx, ty) => F.is(chestKey(zid, tx, ty)); };
@@ -429,8 +455,11 @@
       const dd = (cx, cy) => ({ X: (tx) => tx * TS - cx, Y: (ty) => ty * TS - cy, fr: frNow(), step: stepOf(chN) });
       // negli interni basta camminare sulla soglia (la freccia in basso) per uscire
       if (spec.interior) { const ex = spec.exits ? Object.keys(spec.exits) : null; let armed = false; spec.__exitTick = (px, py) => { const tx = Math.floor(px / TS), ty = Math.floor((py - 4) / TS), on = ex ? ex.includes(tx + "," + ty) : at(tx, ty) === "v"; if (!on) { armed = true; return null; } if (armed) { armed = false; setTimeout(() => safe(() => leaveInterior(zid)), 0); } return null; }; }
+      // GRAVITÀ della zona (spec.gravity: "zero" | "flip" | "zeroflip", o una funzione (K, step) che restituisce uno di questi):
+      //  - zero: si fluttua, con inerzia (i comandi spingono, e quando li lasci continui a scivolare e rimbalzi sui muri);
+      //  - flip: la gravità è girata, la visuale ruota di 180° e i comandi restano quelli dello schermo.
       // meccaniche per-zona: spec.tick (movimento del Campione, può spostarlo) e i plugin della saga
-      const ticks = []; if (spec.__exitTick) ticks.push((px, py) => spec.__exitTick(px, py)); if (spec.tick) ticks.push((px, py, dt) => spec.tick(px, py, dt, K, stepOf(chN))); PLUG.forEach((p) => { if (p.tick) ticks.push((px, py, dt) => p.tick(zid, spec, px, py, dt, K)); });
+      const ticks = []; if (spec.__exitTick) ticks.push((px, py) => spec.__exitTick(px, py)); if (spec.tick) ticks.push((px, py, dt) => spec.tick(px, py, dt, K, stepOf(chN))); PLUG.forEach((p) => { if (p.tick) ticks.push((px, py, dt) => p.tick(zid, spec, px, py, dt, K)); }); if (spec.gravity || (spec.eras && Object.values(spec.eras).some((e) => e.gravity))) ticks.unshift((px, py) => gravTick(zid, spec, chN, px, py));
       if (ticks.length) Z.tick = function (px, py, dt, moving) { if (api.trZone() !== zid) return null; let r = null; ticks.forEach((t) => { const q = safe(() => t(r ? r[0] : px, r ? r[1] : py, Math.min(0.05, dt || 0.016), moving), null); if (q && q.length === 2) r = q; }); return r; };
       Z.decor = function (cx, cy) { const d = dd(cx, cy); ZX.decor.splice(0).forEach((fn) => safe(() => fn(GP, cx, cy, d))); if (spec.decor) safe(() => spec.decor(GP, cx, cy, d, K)); };
       Z.top = function (cx, cy) {
@@ -438,6 +467,7 @@
         if (spec.top) safe(() => spec.top(GP, cx, cy, d, K));
         chainFor(ZONES[zid]).forEach((cc) => { const p = cc.n !== chN && cc.patch && cc.patch[zid]; if (p && p.top) safe(() => p.top(GP, cx, cy, d, stepOf(cc.n), K)); });
         PLUG.forEach((p) => p.top && safe(() => p.top(GP, zid, spec, cx, cy, d, K)));
+        safe(() => gravView(GP));
         safe(() => mood(GP, frNow()));
         if (spec.hud) safe(() => spec.hud(GP, K, stepOf(chN)));
         PLUG.forEach((p) => p.hud && safe(() => p.hud(GP, zid, spec, K)));
@@ -644,7 +674,7 @@
     // -------------------------------------------------------------- kit per i capitoli
     const K = {
       get api() { return api; }, ID, TITLE, TS, T, esc, hash, rnd, pick, safe, F, mem, save, stepOf, setStep, note, once, reward, coinsGive, bal, hero, castHero, stat, bond,
-      say, ask, done, go, enterZone, eraOf, filter, setEra: (zid, era) => { F.set("era_" + zid, era || ""); if (api && api.trZone() === zid) { const pos = api.trPos && api.trPos(), tr = api.trRec(); if (pos) tr.pos[zid] = pos; FX.enter = frNow(); FX.title = era && ZONES[zid].spec.eras[era] ? ZONES[zid].spec.eras[era].label || ZONES[zid].spec.short : ZONES[zid].spec.short; api.trGo(zid); refreshZone(); } }, otherSaga: (key) => safe(() => JSON.parse(localStorage.getItem(key) || "null"), null), quest, questDone, questState, evidence: (id, d) => { EVID[id] = d; }, giveClue, hasClue, present, loreList: () => Object.keys(LORE).map((k) => [k, LORE[k]]), enterDoor, leaveInterior, travelMenu, timeNow, playMatch, ownMatch, finishChapter, setTiles, SFX, tone, noise, glow, frNow, refreshZone, bgNow, journal, leave, lines, learnLore, ENDINGS, ZX, light, later, shadow, at, undAt, isFloor, floorPaint, ground, TH,
+      say, ask, done, go, enterZone, eraOf, gravity: () => GRV.mode, GRV, filter, setEra: (zid, era) => { F.set("era_" + zid, era || ""); if (api && api.trZone() === zid) { const pos = api.trPos && api.trPos(), tr = api.trRec(); if (pos) tr.pos[zid] = pos; FX.enter = frNow(); FX.title = era && ZONES[zid].spec.eras[era] ? ZONES[zid].spec.eras[era].label || ZONES[zid].spec.short : ZONES[zid].spec.short; api.trGo(zid); refreshZone(); } }, otherSaga: (key) => safe(() => JSON.parse(localStorage.getItem(key) || "null"), null), quest, questDone, questState, evidence: (id, d) => { EVID[id] = d; }, giveClue, hasClue, present, loreList: () => Object.keys(LORE).map((k) => [k, LORE[k]]), enterDoor, leaveInterior, travelMenu, timeNow, playMatch, ownMatch, finishChapter, setTiles, SFX, tone, noise, glow, frNow, refreshZone, bgNow, journal, leave, lines, learnLore, ENDINGS, ZX, light, later, shadow, at, undAt, isFloor, floorPaint, ground, TH,
       P: (x, y, w, h, c) => { ctx(); P(x, y, w, h, c); }, get g() { return ctx(); },
       zone: (zid) => ZONES[zid] || null, inZone: (zid) => !!(api && api.trZone() === zid),
       scene: (ls, then, bg) => api.play(lines(ls, bg || BG0), then),

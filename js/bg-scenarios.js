@@ -5125,6 +5125,73 @@
     if (since("ep_finale", 1) < 120) { g.fillStyle = "#3a2a1a"; g.font = "italic 8px Georgia, serif"; g.fillText("le partite non invecchiano", 70, 124); }
     for (let i = 0; i < 50; i++) px(g, (i * 61 + Math.sin(f / 50 + i) * 6) % W, (i * 41 + f * 0.5) % H, 1.5, 1.5, "rgba(255,255,255,.75)");
   }
+  // ---- Calcio Spaziale: Stazione Orbitale 7
+  function soStars(g, W, H, f, sp) { for (let i = 0; i < 120; i++) { const d = 0.2 + (i % 3) * 0.3, x = ((i * 89) % (W + 20) - f * sp * d) % (W + 20), y = (i * 53) % H; px(g, x < 0 ? x + W + 20 : x, y, i % 11 ? 1 : 2, i % 11 ? 1 : 2, i % 6 ? "rgba(220,235,255,.8)" : "#ffe8a0"); } }
+  function bgSoStazione(g, W, H, f) {
+    // la Stazione Orbitale 7 vista da fuori: la Terra sotto, l'Anello che gira, la navetta che arriva (tocca)
+    px(g, 0, 0, W, H, "#05060c"); soStars(g, W, H, f, 0.05);
+    const eg = g.createRadialGradient(160, 330, 60, 160, 330, 190); eg.addColorStop(0, "#3a8ac8"); eg.addColorStop(0.7, "#2a5a9a"); eg.addColorStop(0.92, "#7ac8f0"); eg.addColorStop(1, "rgba(122,200,240,0)"); g.fillStyle = eg; g.beginPath(); g.arc(160, 330, 190, 0, 7); g.fill();
+    for (let i = 0; i < 6; i++) { g.fillStyle = "rgba(255,255,255,.35)"; g.beginPath(); g.ellipse(((i * 70 + f * 0.1) % 400) - 40, 170 + (i % 3) * 8, 30, 4, 0, 0, 7); g.fill(); }
+    // l'Anello (ruota piano)
+    g.save(); g.translate(160, 80); g.strokeStyle = "#8a94a8"; g.lineWidth = 7; g.beginPath(); g.ellipse(0, 0, 70, 22, 0, 0, 7); g.stroke(); g.strokeStyle = "#5a6478"; g.lineWidth = 2; for (let i = 0; i < 12; i++) { const a = i / 12 * 6.28 + f / 200; g.beginPath(); g.moveTo(Math.cos(a) * 66, Math.sin(a) * 19); g.lineTo(Math.cos(a) * 74, Math.sin(a) * 25); g.stroke(); } g.restore();
+    px(g, 140, 64, 40, 32, "#c8ccd8"); px(g, 146, 70, 28, 6, "#1a3a5a"); for (let i = 0; i < 3; i++) px(g, 148 + i * 9, 71, 5, 3, (Math.floor(f / 20) + i) % 3 ? "#7af0c8" : "#1a3a5a"); px(g, 100, 76, 40, 6, "#5a6478"); px(g, 180, 76, 40, 6, "#5a6478");
+    px(g, 60, 72, 40, 16, since("so_stazione", 1) < 100 ? "#7af0c8" : "#2a6ac8"); px(g, 220, 72, 40, 16, since("so_stazione", 1) < 100 ? "#7af0c8" : "#2a6ac8"); for (let i = 0; i < 5; i++) { px(g, 62 + i * 8, 72, 1, 16, "#1a2a44"); px(g, 222 + i * 8, 72, 1, 16, "#1a2a44"); }
+    g.fillStyle = "#e8e8f0"; g.font = "bold 6px sans-serif"; g.fillText("STAZIONE ORBITALE 7", 132, 108);
+    // la navetta della domenica
+    const nx = since("so_stazione", 0) < 160 ? 260 - since("so_stazione", 0) * 0.6 : 260 + Math.sin(f / 60) * 6, ny = 40 + Math.sin(f / 40) * 3; px(g, nx, ny, 22, 8, "#d8dce8"); px(g, nx + 22, ny + 2, 4, 4, "#e85a3a"); px(g, nx + 4, ny + 2, 6, 3, "#1a3a5a"); if (f % 10 < 6) px(g, nx - 4, ny + 3, 4, 2, "#ffb347");
+    if (since("so_stazione", 2) < 120) { g.fillStyle = "#ffe84a"; g.font = "bold 7px sans-serif"; g.fillText("FUORIGIOCO!", 60, 130); }
+  }
+  function bgSoHangar(g, W, H, f) {
+    // l'hangar: vetrata sulle stelle, la navetta, il comitato di benvenuto con lo striscione (tocca)
+    px(g, 0, 0, W, 70, "#05060c"); soStars(g, W, 70, f, 0.1); for (let i = 0; i < 8; i++) px(g, i * 40, 0, 3, 70, "#5a6478"); px(g, 0, 68, W, 4, "#8a94a8");
+    px(g, 0, 72, W, 128, "#3a4458"); for (let i = 0; i < 16; i++) px(g, i * 20, 140, 1, 60, "rgba(0,0,0,.2)"); px(g, 0, 140, W, 1, "rgba(255,255,255,.08)");
+    for (let i = 0; i < 10; i++) px(g, 10 + i * 32, 150, 6, 3, (Math.floor(f / 10) - i) % 10 === 0 ? "#7af0c8" : "#2a5a5a");
+    // la navetta
+    g.fillStyle = "#d8dce8"; g.beginPath(); g.moveTo(20, 130); g.quadraticCurveTo(30, 96, 90, 98); g.lineTo(130, 112); g.lineTo(130, 130); g.closePath(); g.fill(); px(g, 40, 118, 86, 4, "#e85a3a"); px(g, 94, 104, 24, 9, "#1a3a5a");
+    if (since("so_hangar", 0) < 90) { for (let i = 0; i < 8; i++) { g.fillStyle = `rgba(230,235,245,${0.5 - i * 0.05})`; g.beginPath(); g.arc(130 + i * 6, 124 - i * 3, 6 + i * 2, 0, 7); g.fill(); } }
+    // lo striscione
+    const sw = Math.sin(f / 30) * 2; px(g, 150, 80 + sw, 164, 16, "#f4ecdc"); g.fillStyle = "#c83a6a"; g.font = "bold 7px sans-serif"; g.textAlign = "center"; g.fillText("BENVENUTO ESPERTO DI CALCIO VERO", 232, 91 + sw); g.textAlign = "left";
+    // la Comandante, ARBI-9
+    px(g, 190, 116, 12, 24, "#2a3a6a"); g.fillStyle = "#e8c8a8"; g.beginPath(); g.arc(196, 110, 6, 0, 7); g.fill(); px(g, 191, 102, 10, 4, "#c8c8d8");
+    const ab = since("so_hangar", 1) < 60 ? -4 : 0; px(g, 236, 112 + ab, 16, 28, "#8a94a8"); px(g, 238, 100 + ab, 12, 12, "#a8b0c0"); px(g, 241, 104 + ab, 3, 2, "#e83a6a"); px(g, 246, 104 + ab, 3, 2, "#e83a6a"); if (ab) { g.fillStyle = "#ffe84a"; g.font = "bold 7px sans-serif"; g.fillText("FRRRT!", 256, 104); }
+    // la Terra nella vetrata (tocca)
+    circ(g, 280, 40, 16, "#2a6ac8"); circ(g, 276, 36, 6, "#3aa86a"); if (since("so_hangar", 2) < 120) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 280, 40, 26, "122,200,255", 0.5); g.restore(); }
+  }
+  function bgSoAnello(g, W, H, f) {
+    // l'Anello: il corridoio che curva, la linea gialla, e oltre il mondo a testa in giù (tocca)
+    px(g, 0, 0, W, H, "#242a44"); px(g, 0, 0, W, 40, "#05060c"); soStars(g, W, 40, f, 0.15); px(g, 0, 160, W, 40, "#05060c");
+    for (let i = 0; i < 40; i++) { const x = (i * 13 + f * 0.3) % W; px(g, x, 162 + (i * 7) % 36, 1, 1, "rgba(220,235,255,.7)"); }
+    px(g, 0, 40, W, 4, "#8a94a8"); px(g, 0, 156, W, 4, "#8a94a8"); px(g, 0, 96, W, 14, "#525a7a");
+    for (let y = 44; y < 156; y += 8) px(g, 158, y, 4, 4, (y / 8) % 2 ? "#1a1a1a" : "#e8c84a");
+    // a sinistra un tecnico in piedi, a destra Quattrobraccia a testa in giù (tocca)
+    px(g, 70, 112, 10, 22, "#3a4458"); circ(g, 75, 106, 5, "#e8c8a8");
+    const qb = since("so_anello", 1) < 80 ? Math.sin(f / 4) * 4 : 0; px(g, 236, 66, 12, 24, "#e8a83a"); circ(g, 242, 96, 6, "#8a9ae8"); px(g, 228, 70 + qb, 8, 3, "#8a9ae8"); px(g, 248, 70 - qb, 8, 3, "#8a9ae8"); px(g, 228, 80 - qb, 8, 3, "#8a9ae8"); px(g, 248, 80 + qb, 8, 3, "#8a9ae8"); px(g, 238, 100, 8, 4, "#3a2a6a");
+    g.fillStyle = "#e8c84a"; g.font = "bold 6px sans-serif"; g.fillText("SETTORE A", 40, 54); g.save(); g.translate(280, 146); g.rotate(Math.PI); g.fillText("SETTORE B", 0, 0); g.restore();
+    if (since("so_anello", 0) < 80) { g.save(); g.translate(160, 100); g.rotate(Math.min(1, since("so_anello", 0) / 40) * Math.PI); px(g, -8, -8, 16, 16, "#ffffff"); g.restore(); }
+    if (since("so_anello", 2) < 100) { g.fillStyle = "#7af0c8"; g.font = "bold 7px sans-serif"; g.fillText("~ TENERE I CAPPELLI ~", 120, 90); }
+  }
+  function bgSoMensa(g, W, H, f) {
+    // la mensa di Blop: la zuppa che scappa, il cuoco con il retino, i tavoli con le cinture (tocca)
+    px(g, 0, 0, W, H, "#3a3040"); px(g, 0, 130, W, 70, "#5a4a3a"); circ(g, 60, 40, 18, "#05060c"); circ(g, 260, 40, 18, "#05060c"); g.strokeStyle = "#8a94a8"; g.lineWidth = 3; g.beginPath(); g.arc(60, 40, 18, 0, 7); g.stroke(); g.beginPath(); g.arc(260, 40, 18, 0, 7); g.stroke(); px(g, 254, 34, 2, 2, "#fff"); px(g, 52, 46, 2, 2, "#fff");
+    px(g, 40, 140, 80, 6, "#8a7a6a"); px(g, 200, 140, 80, 6, "#8a7a6a"); px(g, 70, 146, 4, 30, "#5a4a3a"); px(g, 236, 146, 4, 30, "#5a4a3a");
+    // la zuppa che vola e Blop che la insegue
+    const zx = 160 + Math.sin(f / 50) * 70, zy = 80 + Math.cos(f / 37) * 25; g.fillStyle = "#e8a83a"; g.beginPath(); g.ellipse(zx, zy, 10 + Math.sin(f / 8) * 2, 7 + Math.cos(f / 8) * 2, 0, 0, 7); g.fill(); for (let i = 0; i < 4; i++) circ(g, zx - 14 - i * 6, zy + Math.sin(f / 10 + i) * 3, 2 - i * 0.3, "#e8a83a");
+    const bx = zx - 50, by = 120; g.fillStyle = "rgba(122,232,106,.75)"; g.beginPath(); g.ellipse(bx, by, 14 + Math.sin(f / 6) * 2, 18 - Math.sin(f / 6) * 2, 0, 0, 7); g.fill(); px(g, bx - 5, by - 6, 3, 3, "#1a3a1a"); px(g, bx + 3, by - 6, 3, 3, "#1a3a1a"); g.strokeStyle = "#8a7a6a"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(bx + 10, by - 4); g.lineTo(bx + 30, by - 24); g.stroke(); g.strokeStyle = "rgba(255,255,255,.6)"; g.beginPath(); g.arc(bx + 34, by - 28, 6, 0, 7); g.stroke();
+    if (since("so_mensa", 0) < 60) { g.fillStyle = "#7ae86a"; g.font = "bold 9px sans-serif"; g.fillText("BLOP!", bx - 14, by - 26); }
+    if (since("so_mensa", 1) < 100) for (let i = 0; i < 12; i++) circ(g, 160 + Math.cos(i) * (since("so_mensa", 1) * 0.8), 90 + Math.sin(i) * (since("so_mensa", 1) * 0.5), 2, "#e8a83a");
+    px(g, 120, 20, 80, 14, "#1a1a2a"); g.fillStyle = "#e8a83a"; g.font = "bold 7px sans-serif"; g.textAlign = "center"; g.fillText(since("so_mensa", 2) < 90 ? "ZUPPA (SCAPPATA)" : "ZUPPA (SE LA PRENDETE)", 160, 30); g.textAlign = "left";
+  }
+  function bgSoPalestra(g, W, H, f) {
+    // la palestra a gravità zero: palloni che galleggiano, la Terra enorme dietro la vetrata (tocca)
+    px(g, 0, 0, W, H, "#05060c"); soStars(g, W, H, f, 0.04);
+    const eg = g.createRadialGradient(80, 260, 40, 80, 260, 160); eg.addColorStop(0, "#3a8ac8"); eg.addColorStop(0.85, "#2a5a9a"); eg.addColorStop(1, "rgba(122,200,240,0)"); g.fillStyle = eg; g.beginPath(); g.arc(80, 260, 160, 0, 7); g.fill();
+    g.strokeStyle = "#5a6478"; g.lineWidth = 4; for (let i = 0; i < 5; i++) { g.beginPath(); g.moveTo(i * 80, 0); g.lineTo(i * 80, H); g.stroke(); } g.beginPath(); g.moveTo(0, 100); g.lineTo(W, 100); g.stroke();
+    for (let i = 0; i < 5; i++) { const a = f / 80 + i * 1.3, x = 160 + Math.cos(a) * (60 + i * 18), y = 90 + Math.sin(a * 1.3) * (30 + i * 6); g.save(); g.translate(x, y); g.rotate(f / 30 + i); circ(g, 0, 0, 6, "#ffffff"); px(g, -2, -2, 4, 4, "#1a1a1a"); g.restore(); }
+    const hx = 200 + Math.sin(f / 70) * 30, hy = 120 + Math.cos(f / 55) * 20, rot = since("so_palestra", 0) < 80 ? since("so_palestra", 0) / 80 * 6.28 : Math.sin(f / 60) * 0.3;
+    g.save(); g.translate(hx, hy); g.rotate(rot); px(g, -6, -8, 12, 18, "#2a6ac8"); circ(g, 0, -13, 6, "#e0ac7e"); g.strokeStyle = "rgba(200,240,255,.6)"; g.lineWidth = 1; g.beginPath(); g.arc(0, -13, 8, 0, 7); g.stroke(); g.restore();
+    if (since("so_palestra", 1) < 100) { g.fillStyle = "#7af0c8"; g.font = "bold 8px sans-serif"; g.fillText("SPINTA!", 20, 100); }
+    if (since("so_palestra", 2) < 120) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 80, 160, 60, "122,200,255", 0.4); g.restore(); }
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -5491,6 +5558,31 @@
       [30, 130, 200, 56, "⚽ La nuova squadra salta nella neve tutta insieme. Nino scivola. Nessuno lo aiuta: ridono troppo."],
       [60, 112, 140, 16, "✍️ Per un attimo, nella neve del campo, sembra scritto: «le partite non invecchiano». Poi un piede ci passa sopra."],
       [250, 50, 50, 90, "🌳 La quercia sotto la neve. Sull'incisione brilla un filo di luce, come se qualcuno l'avesse appena ripassata col dito."],
+    ] },
+    so_stazione: { draw: bgSoStazione, hot: [
+      [230, 30, 60, 30, "🚀 La navetta della domenica fa un giro largo intorno alla stazione, poi punta l'hangar. Il pilota saluta dal finestrino. Sta dormendo, ma saluta."],
+      [56, 66, 210, 26, "🛰️ I pannelli solari si illuminano tutti insieme. È il modo della stazione di dire «buongiorno». Lo dice anche di notte, per confondere."],
+      [130, 100, 60, 40, "🔔 Da un oblò, piccolissimo, un fischio: «FUORIGIOCO!». ARBI-9 ha appena fischiato una cometa."],
+    ] },
+    so_hangar: { draw: bgSoHangar, hot: [
+      [20, 96, 110, 36, "💨 La navetta sbuffa vapore e il pilota russa più forte. Il vapore, a gravità bassa, resta lì a forma di nuvola per un minuto intero."],
+      [230, 96, 30, 44, "🤖 ARBI-9 fischia un fuorigioco a qualcosa. Nessuno capisce a cosa. Lui annuisce, soddisfatto."],
+      [260, 20, 40, 40, "🌍 La Terra, dietro la vetrata. Da qui sembra un pallone dimenticato in un prato nero."],
+    ] },
+    so_anello: { draw: bgSoAnello, hot: [
+      [140, 44, 40, 110, "🔄 Un foglio di carta attraversa la linea gialla, fa una capriola e continua a volare a testa in giù. Sembra soddisfatto."],
+      [220, 60, 40, 50, "🙋 Quattrobraccia, a testa in giù, ti saluta con quattro mani, una alla volta. Poi ricomincia dalla prima."],
+      [100, 80, 120, 16, "⚠️ Il cartello: «SETTORE B · GRAVITÀ INVERTITA · TENERE I CAPPELLI». Sotto, a matita: «e le zuppe»."],
+    ] },
+    so_mensa: { draw: bgSoMensa, hot: [
+      [60, 90, 60, 50, "🟢 Blop salta col retino e manca la zuppa di un centimetro. «BLOP!», dice. Che vuol dire tutto."],
+      [130, 60, 60, 50, "🍲 La zuppa esplode in dodici bollicine arancioni che vanno ognuna per conto suo. È una zuppa con molta personalità."],
+      [116, 16, 88, 22, "📋 Il menu cambia: «ZUPPA (SCAPPATA)». Poi torna come prima. Blop ha un cartellino per ogni evenienza."],
+    ] },
+    so_palestra: { draw: bgSoPalestra, hot: [
+      [170, 90, 60, 60, "🌀 Il Campione fa una capriola completa senza volerlo. Atterra su niente. Applausi dalla vetrata."],
+      [0, 80, 80, 40, "💥 Una spinta dalla parete, e attraversi tutta la palestra in un secondo. Il muro opposto arriva in fretta."],
+      [20, 120, 120, 80, "🌍 La Terra si illumina dal bordo: sta sorgendo il sole su un oceano intero. Qui l'alba dura sedici volte al giorno."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
