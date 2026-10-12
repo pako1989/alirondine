@@ -15323,6 +15323,7 @@
       ...(window.__libroFinali ? [window.__libroFinali.menuEntry(modes)] : []),
       ...(window.__doppioTurno ? [window.__doppioTurno.menuEntry(modes)] : []),
       ...(window.__cristalli ? [window.__cristalli.menuEntry(modes)] : []),
+      ...(window.__dopo ? [window.__dopo.menuEntry(modes)] : []),
       ...(window.__detective ? [window.__detective.menuEntry(modes)] : []),
       ...(window.__vento ? [window.__vento.menuEntry(modes)] : []),
       ...(window.__muro ? [window.__muro.menuEntry(modes)] : []),
@@ -22046,7 +22047,7 @@
     ["Partite", /Settimana del Molo/],
     ["Collezioni e curiosità", /Diario del Corriere/],
     ["Calcio d'azione e arcade", /Arena 2D|Biliardino|Cabinato|Stadio 3D|Corsa della Panda|Gozzo di Baciccia|Gabbia sul Molo|Tsubasa|Supereroi/],
-    ["Saghe e GDR", /Salone delle Saghe|Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis|Libro che Mangiava i Finali|Doppio Turno|Cristalli del Campo|Il Muro|Valle del Vento Gentile|Detective di Campo/],
+    ["Saghe e GDR", /Salone delle Saghe|Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis|Libro che Mangiava i Finali|Doppio Turno|Cristalli del Campo|Il Muro|Valle del Vento Gentile|Detective di Campo|Dopo il Campione/],
     ["Collezioni e curiosità", /Gashapon|Roster & Talenti|Diorama|Fumetto|Leggende del passato|Bianco e Nero|Quartier Generale/],
   ];
   const MN_EXP = { "Partite": 12, "Allenamento": 6, "Storie e ricordi": 8 }; // quante voci ha la categoria a tutto sbloccato: le mancanti appaiono come «???»
@@ -25502,7 +25503,7 @@
     text("voce", `<b>Come vuoi giocare questa partita?</b><br><span style="color:var(--dim)">Esito e ricompense della storia sono uguali: cambia solo come giochi.</span>`);
     buttons([{ label: "🎮 Partita a turni", sub: "Scegli le mosse una alla volta", cls: "hot", fn: () => apiMatch(cfg) }, ...alts.map((k) => kinds[k])]);
   }
-  window.__borgoApi = { match: apiMatch, matchPick: apiMatchPick, timing: bTiming, play, chap, scene: (bg, who, html, opts, title) => { view = { kind: "scene", bg, speaker: who }; if (title) chap(title); text(who || "voce", html); buttons(opts, true); }, portraitImg, TRZ, MN_BORGO_BTN, CAST, BIO, seeCard, trGo, trAsk, trSay, trResume, L, trToast, TR_IDS, NPCS, trLevel, trZone: () => (TW ? TW.id : null), trExitTo, trRec, todayKey, hq: HQ_API, COSM, bCos, cosOwned: () => { try { return cosOwned(); } catch { return []; } }, heroSave: (h) => { writeJSON(HERO, h); heroCast(h); }, heroCast, storyEndings: () => { const got = getList(ENDS); return ENDINGS.map(([t, grp, hint]) => ({ title: t, group: grp, hint, found: got.includes(t) })); }, coins: () => bCoins(), openBorgoStorto: (back) => openBorgoStorto(back), cosOrder: () => { try { return ((B || borgoLoad()).cos || []).slice(); } catch { return []; } }, musicTheme, musicBg, musicNow: () => MU.cur, portraitTo: (ctx, id, x, y, sc) => { const main = g, sp = view.speaker; try { g = ctx; view.speaker = null; portrait(id, x, y, sc, false); } finally { g = main; view.speaker = sp; } } };
+  window.__borgoApi = { match: apiMatch, matchPick: apiMatchPick, timing: bTiming, play, chap, scene: (bg, who, html, opts, title) => { view = { kind: "scene", bg, speaker: who }; if (title) chap(title); text(who || "voce", html); buttons(opts, true); }, portraitImg, TRZ, MN_BORGO_BTN, CAST, BIO, seeCard, trGo, trAsk, trSay, trResume, L, trToast, TR_IDS, NPCS, trLevel, trZone: () => (TW ? TW.id : null), trPos: () => (TW ? [TW.x, TW.y] : null), trExitTo, trRec, todayKey, hq: HQ_API, COSM, bCos, cosOwned: () => { try { return cosOwned(); } catch { return []; } }, heroSave: (h) => { writeJSON(HERO, h); heroCast(h); }, heroCast, storyEndings: () => { const got = getList(ENDS); return ENDINGS.map(([t, grp, hint]) => ({ title: t, group: grp, hint, found: got.includes(t) })); }, coins: () => bCoins(), openBorgoStorto: (back) => openBorgoStorto(back), cosOrder: () => { try { return ((B || borgoLoad()).cos || []).slice(); } catch { return []; } }, musicTheme, musicBg, musicNow: () => MU.cur, portraitTo: (ctx, id, x, y, sc) => { const main = g, sp = view.speaker; try { g = ctx; view.speaker = null; portrait(id, x, y, sc, false); } finally { g = main; view.speaker = sp; } } };
   if (/[?&]debug/.test(location.search)) window.__borgoDbg = { get BW() { return BW; }, get B() { return B; }, BLD, borgo, borgoMap, borgoDoor, borgoOpenLevel };
   try { if (window.__storyNav && window.__storyNav.seedFromSaveState) window.__storyNav.seedFromSaveState(S); } catch {}
   title();

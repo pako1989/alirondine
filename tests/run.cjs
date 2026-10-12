@@ -17,7 +17,7 @@ function serve() {
 (async () => {
   const srv = process.env.TEST_URL ? null : await serve();
   const only = process.argv[2] || "";
-  const files = ["smoke.cjs", "cameos.cjs", "vento.cjs", "detective.cjs"].filter((f) => f.includes(only));
+  const files = ["smoke.cjs", "cameos.cjs", "vento.cjs", "detective.cjs", "dopo.cjs"].filter((f) => f.includes(only));
   let fail = 0;
   for (const f of files) { console.log(`\n— ${f}`); const r = spawnSync(process.execPath, [path.join(__dirname, f)], { stdio: "inherit", env: { ...process.env, TEST_URL: process.env.TEST_URL || `http://localhost:${PORT}` } }); if (r.status !== 0) fail++; }
   if (srv) srv.close();

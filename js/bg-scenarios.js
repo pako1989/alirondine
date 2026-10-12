@@ -4994,6 +4994,60 @@
     px(g, 230, 20, 70, 70, "#0e1626"); px(g, 264, 20, 2, 70, "#5a3a22"); for (let i = 0; i < 12; i++) px(g, 232 + (i * 13) % 66, 22 + (i * 17 + f * 1.5) % 66, 1, 5, "rgba(170,200,255,.5)");
     vgrad(g, 0, 150, W, 50, ["#3a1418", "#1e0a0c"]);
   }
+  // ---------------------------------------------------------------- DOPO IL CAMPIONE (chiavi ep_*)
+  function epLeaves(g, W, H, f, n) { for (let i = 0; i < (n || 16); i++) { const t = (f * 0.4 + i * 37) % (H + 20), x = (i * 53 + Math.sin(f / 30 + i) * 14) % W; g.save(); g.translate(x, t - 10); g.rotate(f / 20 + i); g.fillStyle = ["#c8742a", "#e8a03a", "#a8521e"][i % 3]; g.fillRect(-2.5, -1.2, 5, 2.4); g.restore(); } }
+  function bgEpValdorsa(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#e8a070", "#f0c890", "#f8e0b0"]);
+    circ(g, 250, 70, 18, "#fff0c8"); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 250, 70, 70, "255,200,140", 0.35); g.restore();
+    // colline e il paese arrampicato
+    g.fillStyle = "#a8945a"; g.beginPath(); g.moveTo(0, 120); g.quadraticCurveTo(100, 80, 200, 110); g.quadraticCurveTo(270, 96, W, 112); g.lineTo(W, H); g.lineTo(0, H); g.fill();
+    [[40, 118], [70, 108], [100, 100], [130, 104], [180, 108], [210, 112]].forEach(([x, y], i) => { px(g, x, y - 18, 26, 18, i % 2 ? "#e8d0a8" : "#d8c0a0"); g.fillStyle = "#8a3a2a"; g.beginPath(); g.moveTo(x - 3, y - 18); g.lineTo(x + 13, y - 28); g.lineTo(x + 29, y - 18); g.fill(); px(g, x + 9, y - 12, 6, 6, (i + Math.floor(f / 90)) % 3 ? "#ffd98a" : "#7a6a5a"); });
+    // il campanile con l'orologio fermo (tocca: suona una campana)
+    px(g, 148, 60, 18, 50, "#d8c0a0"); g.fillStyle = "#7a3a2a"; g.beginPath(); g.moveTo(144, 60); g.lineTo(157, 44); g.lineTo(170, 60); g.fill(); circ(g, 157, 72, 6, "#f4ecdc"); g.strokeStyle = "#3a2a1a"; g.lineWidth = 1; g.beginPath(); g.moveTo(157, 72); g.lineTo(157, 68); g.moveTo(157, 72); g.lineTo(160, 73); g.stroke();
+    if (since("ep_valdorsa", 0) < 90) { const s = Math.sin(since("ep_valdorsa", 0) / 5) * 4; px(g, 152 + s, 84, 10, 8, "#c9a227"); }
+    // la piazza con la fontana e la ragazza con i capelli bianchi (tocca)
+    vgrad(g, 0, 150, W, 50, ["#c8a878", "#b8986a"]); px(g, 120, 152, 70, 10, "#a89a88"); px(g, 128, 146, 54, 8, "#4a7a9a");
+    const look = since("ep_valdorsa", 1) < 120; px(g, 178, 134, 8, 14, "#3a5a3a"); circ(g, 182, 130, 4, "#f2e2d4"); px(g, 178, 126, 8, 4, "#d8d8e8"); if (look) px(g, look ? 183 : 180, 129, 1.5, 1.5, "#2a2a3a");
+    // la sciarpa granata sul lampione
+    px(g, 60, 130, 2, 24, "#3a3a3a"); px(g, 56, 126, 10, 5, "#2a2a2a"); const sw = Math.sin(f / 10) * 2; px(g, 62, 138, 8, 3, "#7a2a2a"); px(g, 68 + sw, 140, 3, 8, "#7a2a2a");
+    epLeaves(g, W, H, f);
+  }
+  function bgEpCampo(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#d8784a", "#f0a868", "#f8d8a0"]);
+    g.fillStyle = "#8a7a48"; g.beginPath(); g.moveTo(0, 110); g.quadraticCurveTo(160, 90, W, 110); g.lineTo(W, H); g.lineTo(0, H); g.fill();
+    // il campo con l'erba alta e le porte storte
+    vgrad(g, 0, 120, W, 80, ["#8a9a52", "#6a7a3a"]); [[60, 130], [260, 130]].forEach(([x, y], i) => { g.strokeStyle = "#e8e2d4"; g.lineWidth = 2; g.beginPath(); g.moveTo(x - 14, y + 20); g.lineTo(x - 14 + (i ? 2 : 0), y); g.lineTo(x + 14 + (i ? 3 : 0), y - 1); g.lineTo(x + 14, y + 20); g.stroke(); });
+    for (let i = 0; i < 70; i++) { const x = (i * 19) % W, y = 130 + (i * 13) % 70, sw = Math.sin(f / 25 + i) * 2; g.strokeStyle = i % 2 ? "#7a8a3a" : "#9aaa52"; g.lineWidth = 1; g.beginPath(); g.moveTo(x, y + 6); g.lineTo(x + sw, y - 4); g.stroke(); }
+    // la quercia enorme (tocca: cade una foglia sull'incisione)
+    px(g, 140, 50, 14, 90, "#5a3e26"); [[147, 40, 46], [118, 56, 30], [176, 56, 30], [132, 26, 24], [162, 26, 24]].forEach(([x, y, r], i) => circ(g, x, y, r, ["#8a3a1a", "#b0582a", "#d88a3a"][i % 3]));
+    px(g, 143, 96, 8, 6, "#e8d8b0"); if (since("ep_campo", 0) < 120) { const t = since("ep_campo", 0); g.save(); g.translate(150 + Math.sin(t / 10) * 8, 50 + t * 0.4); g.rotate(t / 8); px(g, -3, -1.5, 6, 3, "#e8a03a"); g.restore(); }
+    // gli echi che brillano (tocca)
+    for (let i = 0; i < 3; i++) { const x = [80, 220, 40][i], y = [150, 165, 180][i], a = 0.5 + 0.4 * Math.sin(f / 12 + i * 2); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, x, y, 12, "255,230,170", a * (since("ep_campo", 1) < 90 ? 1 : 0.6)); g.restore(); }
+    epLeaves(g, W, H, f, 10);
+  }
+  function bgEp1928(g, W, H, f) {
+    // una fotografia del 1928 che prende vita: seppia, grana, bordi bianchi
+    vgrad(g, 0, 0, W, H, ["#c8b090", "#a89070"]); px(g, 10, 8, W - 20, H - 16, "#8a7458");
+    vgrad(g, 14, 12, W - 28, 80, ["#d8c8a8", "#b8a888"]); vgrad(g, 14, 92, W - 28, H - 104, ["#8a7a5a", "#6a5a3a"]);
+    // la squadra in posa (tocca: uno sbatte le palpebre)
+    for (let i = 0; i < 9; i++) { const x = 40 + i * 30, y = 120 + (i % 2) * 22, blink = since("ep_1928", 0) < 20 && i === 4; px(g, x - 6, y, 12, 22, i === 0 ? "#3a4a3a" : "#4a3a30"); circ(g, x, y - 6, 6, "#c8b090"); px(g, x - 6, y - 12, 12, 4, "#3a2a1a"); if (!blink) { px(g, x - 3, y - 7, 1.5, 1.5, "#2a2018"); px(g, x + 2, y - 7, 1.5, 1.5, "#2a2018"); } }
+    circ(g, 160, 168, 8, "#d8c8a8"); g.fillStyle = "#3a2a1a"; g.font = "italic 9px Georgia, serif"; g.textAlign = "center"; g.fillText("Valdorsa F.C. · 14 ottobre 1928", 160, 190); g.textAlign = "left";
+    // la ragazza col maglione verde in fondo, l'unica che non guarda l'obiettivo (tocca)
+    if (since("ep_1928", 1) < 160) { g.strokeStyle = "rgba(255,255,255,.6)"; g.lineWidth = 1; g.beginPath(); g.arc(40, 114, 14, 0, 7); g.stroke(); }
+    for (let i = 0; i < 40; i++) px(g, (i * 97 + f) % W, (i * 61) % H, 1, 1, "rgba(60,40,20,.35)");
+    g.save(); g.globalCompositeOperation = "saturation"; g.fillStyle = "#808080"; g.fillRect(0, 0, W, H); g.globalCompositeOperation = "color"; g.fillStyle = "rgba(160,120,70,.5)"; g.fillRect(0, 0, W, H); g.restore();
+  }
+  function bgEpCasa(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#5a3e2a", "#6a4a32", "#4a3020"]);
+    // le fotografie alle pareti (tocca: una si raddrizza)
+    for (let i = 0; i < 7; i++) { const x = 16 + i * 42, y = 18 + (i % 2) * 14, tilt = i === 3 && since("ep_casa", 0) > 60 ? 0.12 : 0; g.save(); g.translate(x + 15, y + 12); g.rotate(tilt); px(g, -15, -12, 30, 24, "#3a2a1a"); px(g, -12, -9, 24, 18, i % 2 ? "#b8a888" : "#a89878"); for (let k = 0; k < 4; k++) px(g, -9 + k * 5, -2, 3, 8, "#5a4a3a"); g.restore(); }
+    // la poltrona vuota e la stufa (tocca la stufa: scoppietta)
+    px(g, 40, 110, 70, 60, "#7a3a2a"); px(g, 40, 104, 70, 12, "#8a4a32"); px(g, 34, 120, 12, 40, "#6a2a1a"); px(g, 104, 120, 12, 40, "#6a2a1a"); px(g, 56, 126, 38, 8, "#9a5a3a");
+    px(g, 220, 100, 50, 70, "#3a3a3a"); px(g, 230, 130, 30, 22, "#1a0e0a"); const crack = since("ep_casa", 1) < 60; for (let i = 0; i < 4; i++) { const h = 6 + Math.abs(Math.sin(f / 6 + i)) * 8 + (crack ? 6 : 0); px(g, 233 + i * 6, 152 - h, 4, h, i % 2 ? "#ff8a2a" : "#ffb83a"); } g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 245, 140, 60, "255,150,60", 0.4); g.restore();
+    // la scatola di latta sul tavolino
+    px(g, 140, 150, 50, 6, "#6a4a2a"); px(g, 150, 136, 30, 14, "#c9a227"); px(g, 150, 136, 30, 3, "#e8c84a"); g.fillStyle = "#3a2a1a"; g.font = "italic 6px Georgia, serif"; g.fillText("per Ada", 155, 146);
+    vgrad(g, 0, 170, W, 30, ["#3a2414", "#2a1a0e"]);
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -5315,6 +5369,26 @@
       [120, 0, 90, 30, "💎 Il lampadario trema. Al piano di sotto, la banda della Lega prova l'inno della finale. È stonato in un modo molto costoso."],
       [30, 30, 60, 46, "🖼️ Il quadro della prima Coppa della Lega si sposta: dietro c'è una cassaforte. Grigia, piccola, con dentro trentacinque anni.", "tog"],
       [208, 114, 46, 20, "☂️ L'ombrello rosso di Vanni, appoggiato sul tavolo. Chiuso. Per la prima volta sembra solo un ombrello."],
+    ] },
+    ep_valdorsa: { draw: bgEpValdorsa, hot: [
+      [140, 40, 34, 70, "🔔 La campana suona una volta sola. In piazza tutti alzano la testa, poi tornano a fare quello che facevano. Così si saluta, a Valdorsa."],
+      [170, 120, 24, 30, "👁️ La ragazza con i capelli bianchi alza gli occhi. Per un secondo sembra avere cento anni. Poi di nuovo venti."],
+      [50, 124, 26, 30, "🧣 La sciarpa granata legata al lampione. Il nodo è stretto, di quelli che si fanno per non dimenticare."],
+    ] },
+    ep_campo: { draw: bgEpCampo, hot: [
+      [120, 20, 70, 120, "🍂 Una foglia cade, gira, e si posa proprio sull'incisione nella corteccia. Come per coprirla. O per indicarla."],
+      [30, 140, 210, 50, "✨ Gli echi brillano più forte quando li guardi. Ada dice che sono timidi: si fanno vedere solo da chi li cerca."],
+      [40, 120, 240, 30, "🥅 Le porte di legno, storte. Ottant'anni di traverse rinforzate con il fil di ferro. Ogni giro di filo è una generazione."],
+    ] },
+    ep_1928: { draw: bgEp1928, hot: [
+      [140, 100, 50, 50, "😉 Nella fotografia, uno dei ragazzi sbatte le palpebre. Il fotografo, nel 1928, se n'è lamentato tutto il giorno."],
+      [24, 96, 32, 40, "🧤 L'unica che non guarda l'obiettivo: la ragazza con il maglione verde, in fondo. Guarda il ragazzo al centro. Lui guarda lei. Nessuno dei due se n'è mai accorto."],
+      [14, 170, 290, 24, "🖋️ «Valdorsa F.C. · 14 ottobre 1928». Dietro la foto, a matita, una calligrafia storta: «e Ada, che para tutto»."],
+    ] },
+    ep_casa: { draw: bgEpCasa, hot: [
+      [140, 10, 40, 40, "🖼️ Una foto storta si raddrizza da sola. È quella del 1974, al mare. Il Capitano ride, e accanto a lui, sfocata, una ragazza con i capelli bianchi."],
+      [220, 100, 50, 70, "🔥 La stufa scoppietta. Tecla dice che il nonno ci parlava, la sera. «Le diceva i risultati. Le piacevano i pareggi»."],
+      [40, 104, 70, 66, "🪑 La poltrona del Capitano, vuota. Ha la forma di chi ci si è seduto per sessant'anni. Nessuno ci si siede. Non ancora."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };

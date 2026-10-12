@@ -41,6 +41,9 @@
 //    delle zone e delle scene della saga (gli sfondi col prefisso di cfg.bg); spec.music cambia il tema di una zona; o.music in una partita.
 //  - OSPITI DA ALTRE SAGHE: cfg.cameos = [{ id, zone, at: [tx, ty], when(K), lines: [[chi, testo], …] | talk(K) }]. Un personaggio
 //    di un'altra saga compare solo se quella saga l'hai già giocata (K.otherSaga("ali-di-rondine.muro") legge il suo salvataggio).
+//  - EPOCHE DELLE ZONE: spec.eras = { nome: { label, build(L, K), npcs(s), region, time, filter: "bn"|"seppia"|"anni70"|"pixel" } }.
+//    K.setEra(zid, nome) (o null per il presente) ricostruisce la zona com'era allora, nello stesso punto; K.eraOf(zid).
+//  - FILTRI D'EPOCA: K.filter(g, nome) colora qualsiasi tela (anche le partite): bianco e nero muto, seppia, anni '70, pixel 8-bit.
 //  - FINALI CON INDIZIO: endings: { id: [titolo, descrizione, indizio] }; l'indizio si legge nel diario e nell'Album.
 // Kit di partita: window.__sagaCore.pitch(o) è una partitella 2+portiere contro 2+portiere, con levetta, TIRA e PASSA,
 // presentazione, intervallo e risultato, tutta personalizzabile con ganci (vento, regole, filtri, ostacoli, eventi).
@@ -82,6 +85,32 @@
   const FLOORS0 = ',:+-"=;';
   const SOLID0 = "atryqwsxflbgjnpzuBHDTLW";
   const REG0 = { grass: ["#4a7a3a", "#527f3f", "#467036"], path: ["#9a8a64", "#8e7e5a"], stone: ["#8a8a80", "#808076"], wall: ["#6a5a4a", "#5e4e40"], water: ["#2a5a7a", "#30648a"], tall: "#5f8a45", tint: "255,230,190", tintA: 0.08, fx: "", dark: 0.12 };
+
+  // filtri d'epoca: si applicano a qualsiasi tela già disegnata (mondo camminabile, partite, scene)
+  let PIX = null;
+  function filter(g, kind, W, H) {
+    W = W || 320; H = H || 200; const fr = frNow();
+    if (kind === "bn" || kind === "seppia") {
+      g.save(); g.globalCompositeOperation = "saturation"; g.fillStyle = "#808080"; g.fillRect(0, 0, W, H);
+      if (kind === "seppia") { g.globalCompositeOperation = "color"; g.fillStyle = "rgba(160,120,70,.45)"; g.fillRect(0, 0, W, H); }
+      g.restore(); g.save(); // pellicola: graffi, polvere, tremolio della luce
+      g.fillStyle = `rgba(255,250,235,${0.03 + 0.03 * Math.sin(fr / 3)})`; g.fillRect(0, 0, W, H);
+      for (let i = 0; i < 3; i++) { const x = (hash(Math.floor(fr / 4) * 7 + i) % W); g.fillStyle = "rgba(255,255,255,.18)"; g.fillRect(x, 0, 1, H); }
+      for (let i = 0; i < 14; i++) { g.fillStyle = "rgba(20,15,10,.35)"; g.fillRect(hash(fr * 13 + i) % W, hash(fr * 7 + i * 3) % H, 1.5, 1.5); }
+      const vg = g.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.85); vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,.55)"); g.fillStyle = vg; g.fillRect(0, 0, W, H); g.restore();
+    } else if (kind === "anni70") {
+      g.save(); g.globalCompositeOperation = "soft-light"; g.fillStyle = "rgba(255,150,60,.35)"; g.fillRect(0, 0, W, H); g.globalCompositeOperation = "saturation"; g.fillStyle = "rgba(255,0,0,.25)"; g.fillRect(0, 0, W, H); g.restore();
+      g.save(); for (let i = 0; i < 40; i++) { g.fillStyle = `rgba(${i % 2 ? "255,240,200" : "40,20,10"},.08)`; g.fillRect(hash(fr * 11 + i) % W, hash(fr * 5 + i * 7) % H, 2, 2); }
+      const vg = g.createRadialGradient(W / 2, H / 2, H * 0.4, W / 2, H / 2, H); vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(40,20,0,.45)"); g.fillStyle = vg; g.fillRect(0, 0, W, H); g.restore();
+    } else if (kind === "pixel") {
+      const cv = g.canvas, k = 4, w = Math.max(1, Math.floor(cv.width / k)), h = Math.max(1, Math.floor(cv.height / k));
+      if (!PIX || PIX.width !== w || PIX.height !== h) { PIX = document.createElement("canvas"); PIX.width = w; PIX.height = h; PIX.g = PIX.getContext("2d"); }
+      PIX.g.imageSmoothingEnabled = true; PIX.g.clearRect(0, 0, w, h); PIX.g.drawImage(cv, 0, 0, w, h);
+      g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.imageSmoothingEnabled = false; g.drawImage(PIX, 0, 0, cv.width, cv.height); g.restore();
+      g.save(); g.globalCompositeOperation = "saturation"; g.fillStyle = "rgba(255,0,0,.35)"; g.fillRect(0, 0, W, H); g.restore();
+      g.save(); g.fillStyle = "rgba(0,0,0,.12)"; for (let y = 0; y < H; y += 2) g.fillRect(0, y, W, 1); g.restore();
+    }
+  }
 
   function create(cfg) {
     cfg = obj(cfg);
@@ -140,6 +169,9 @@
     const coinsGive = (n) => (n > 0 && typeof window.addCoins === "function" ? safe(() => { window.addCoins(n); return n; }, 0) : 0);
     const bal = () => safe(() => (typeof window.bCoins === "function" ? window.bCoins() : 0), 0);
 
+    // -------------------------------------------------------------- epoche e filtri
+    const eraOf = (zid) => { const e = F.get("era_" + zid, ""); const z = ZONES[zid]; return e && z && z.spec.eras && z.spec.eras[e] ? e : null; };
+    const eraSpec = (zid) => { const e = eraOf(zid); return e ? ZONES[zid].spec.eras[e] : null; };
     // -------------------------------------------------------------- tessere
     const REG = {}; Object.keys(obj(cfg.regions)).forEach((k) => { REG[k] = Object.assign({}, REG0, cfg.regions[k]); }); if (!Object.keys(REG).length) REG.base = Object.assign({}, REG0);
     const REG_FIRST = Object.keys(REG)[0];
@@ -256,7 +288,7 @@
       });
     }
     // ora del giorno della zona: cambia il colore della luce e accende le lanterne di sera
-    function timeNow() { const sp = ZX.spec; if (!sp || !sp.time) return "giorno"; const zr = ZONES[ZX.id]; return typeof sp.time === "function" ? safe(() => sp.time(zr ? stepOf(zr.ch) : 0, K), "giorno") : sp.time; }
+    function timeNow() { const sp = ZX.era && ZX.era.time ? ZX.era : ZX.spec; if (!sp || !sp.time) return "giorno"; const zr = ZONES[ZX.id]; return typeof sp.time === "function" ? safe(() => sp.time(zr ? stepOf(zr.ch) : 0, K), "giorno") : sp.time; }
     const TIME_FX = { alba: ["255,170,190", 0.16, "rgba(40,20,60,.10)"], tramonto: ["255,140,60", 0.2, "rgba(60,20,40,.14)"], notte: ["70,90,170", 0.0, "rgba(8,12,40,.48)"] };
     function mood(g, fr) {
       const R = ZX.rg, tod = timeNow(), tf = TIME_FX[tod];
@@ -266,6 +298,7 @@
       if (tod === "notte" && !ZX.spec?.interior) for (let i = 0; i < 18; i++) { const tw = Math.sin(fr / 20 + i * 1.7) > 0.3; if (tw) { g.fillStyle = "rgba(255,255,230,.8)"; g.fillRect((i * 97) % 320, (i * 53) % 40, 1, 1); } }
       [].concat(R.fx || []).forEach((k) => k && particles(g, fr, k));
       if (cfg.mood) safe(() => cfg.mood(g, fr, K));
+      if (ZX.era && ZX.era.filter) safe(() => filter(g, ZX.era.filter));
       if (R.tintA) { g.save(); g.globalCompositeOperation = "soft-light"; g.fillStyle = `rgba(${R.tint},${R.tintA * 2.2})`; g.fillRect(0, 0, 320, 200); g.restore(); }
       if (cfg.depthBlur !== false) safe(() => { // bordi sfocati (profondità, come nelle saghe HD-2D)
         const cv = g.canvas, cw = cv.width, chh = cv.height, s = chh / 200;
@@ -292,7 +325,7 @@
     function refreshZone() {
       const zr = zoneRec(); if (!zr) return;
       const c = CHAPTERS[zr.ch]; castHero();
-      const s = stepOf(c.n); let list = zr.spec.npcs ? zr.spec.npcs(s) : [];
+      const s = stepOf(c.n), es = eraSpec(api.trZone()); let list = es ? (es.npcs ? es.npcs(s) : []) : zr.spec.npcs ? zr.spec.npcs(s) : [];
       chainFor(zr).slice().reverse().forEach((cc) => { const p = cc.n !== zr.ch && cc.patch && cc.patch[api.trZone()]; if (p && p.npcs) list = p.npcs(stepOf(cc.n), list); });
       arr(cfg.cameos).forEach((c) => { if (c.zone === api.trZone() && !list.some((n) => n.id === c.id) && safe(() => c.when(K), false)) list.push({ id: c.id, at: c.at, cameo: true }); });
       zr.Z.npcs = list.filter((n) => CAST_OK(n.id));
@@ -361,7 +394,7 @@
     // -------------------------------------------------------------- zone sul motore TRZ
     function registerZone(chN, zid, spec) {
       const rk = spec.region && REG[spec.region] ? spec.region : REG_FIRST;
-      const syncZX = () => { ZX.id = zid; ZX.rk = rk; ZX.rg = REG[rk]; ZX.spec = spec; ZX.standCol = spec.stands; ZX.chestOpen = (tx, ty) => F.is(chestKey(zid, tx, ty)); };
+      const syncZX = () => { const es = eraSpec(zid), rk2 = es && es.region && REG[es.region] ? es.region : rk; ZX.id = zid; ZX.rk = rk2; ZX.rg = REG[rk2]; ZX.era = es; ZX.eraName = eraOf(zid); ZX.spec = spec; ZX.standCol = spec.stands; ZX.chestOpen = (tx, ty) => F.is(chestKey(zid, tx, ty)); };
       const Z = {
         name: spec.name, short: spec.short, sub: spec.sub || "", need: 0, w: spec.w, h: spec.h, start: spec.start, theme: spec.music || cfg.musicMain || "torino", isCustomSaga: true,
         bus: "uscita", busLabel: "Esci dalla saga",
@@ -379,7 +412,7 @@
       Z.build = function (m) {
         ZX.map = m; syncZX(); ctx();
         const Ls = makeLayers(spec.w, spec.h, spec.base || ","); Ls.lay(0, 0, spec.w - 1, spec.h - 1, spec.base || ",");
-        spec.build(Ls, K);
+        const es = eraSpec(zid); if (es && es.build) es.build(Ls, K); else spec.build(Ls, K);
         chainFor(ZONES[zid]).slice().reverse().forEach((cc) => { const p = cc.n !== chN && cc.patch && cc.patch[zid]; if (p && p.build) p.build(Ls, stepOf(cc.n), K); });
         spec.__doors = {};
         Ls.autos.forEach((a, i) => {
@@ -611,7 +644,7 @@
     // -------------------------------------------------------------- kit per i capitoli
     const K = {
       get api() { return api; }, ID, TITLE, TS, T, esc, hash, rnd, pick, safe, F, mem, save, stepOf, setStep, note, once, reward, coinsGive, bal, hero, castHero, stat, bond,
-      say, ask, done, go, enterZone, otherSaga: (key) => safe(() => JSON.parse(localStorage.getItem(key) || "null"), null), quest, questDone, questState, evidence: (id, d) => { EVID[id] = d; }, giveClue, hasClue, present, loreList: () => Object.keys(LORE).map((k) => [k, LORE[k]]), enterDoor, leaveInterior, travelMenu, timeNow, playMatch, ownMatch, finishChapter, setTiles, SFX, tone, noise, glow, frNow, refreshZone, bgNow, journal, leave, lines, learnLore, ENDINGS, ZX, light, later, shadow, at, undAt, isFloor, floorPaint, ground, TH,
+      say, ask, done, go, enterZone, eraOf, filter, setEra: (zid, era) => { F.set("era_" + zid, era || ""); if (api && api.trZone() === zid) { const pos = api.trPos && api.trPos(), tr = api.trRec(); if (pos) tr.pos[zid] = pos; FX.enter = frNow(); FX.title = era && ZONES[zid].spec.eras[era] ? ZONES[zid].spec.eras[era].label || ZONES[zid].spec.short : ZONES[zid].spec.short; api.trGo(zid); refreshZone(); } }, otherSaga: (key) => safe(() => JSON.parse(localStorage.getItem(key) || "null"), null), quest, questDone, questState, evidence: (id, d) => { EVID[id] = d; }, giveClue, hasClue, present, loreList: () => Object.keys(LORE).map((k) => [k, LORE[k]]), enterDoor, leaveInterior, travelMenu, timeNow, playMatch, ownMatch, finishChapter, setTiles, SFX, tone, noise, glow, frNow, refreshZone, bgNow, journal, leave, lines, learnLore, ENDINGS, ZX, light, later, shadow, at, undAt, isFloor, floorPaint, ground, TH,
       P: (x, y, w, h, c) => { ctx(); P(x, y, w, h, c); }, get g() { return ctx(); },
       zone: (zid) => ZONES[zid] || null, inZone: (zid) => !!(api && api.trZone() === zid),
       scene: (ls, then, bg) => api.play(lines(ls, bg || BG0), then),
@@ -901,5 +934,5 @@
   }
   let PITCH = null;
 
-  window.__sagaCore = { version: 1, create, pitch, get pitchState() { return PITCH; }, util: { safe, esc, hash, rnd, pick, tone, noise, frNow } };
+  window.__sagaCore = { version: 1, create, pitch, filter, get pitchState() { return PITCH; }, util: { safe, esc, hash, rnd, pick, tone, noise, frNow } };
 })();

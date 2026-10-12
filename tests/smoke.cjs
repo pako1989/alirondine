@@ -11,7 +11,7 @@ const L = require("./lib.cjs");
       const ok = await page.evaluate(() => !!document.querySelector(".salOv")); if (!ok) errors.push("Salone: non si apre " + k);
       await page.evaluate(() => document.querySelector(".salOv .x").click()); await page.waitForTimeout(150);
     }
-    const sagas = await page.evaluate(() => ["__vento", "__detective", "__muro", "__cristalli", "__doppioTurno", "__libroFinali"].filter((m) => !window[m]));
+    const sagas = await page.evaluate(() => ["__dopo", "__vento", "__detective", "__muro", "__cristalli", "__doppioTurno", "__libroFinali"].filter((m) => !window[m]));
     if (sagas.length) errors.push("saghe non caricate: " + sagas.join(", "));
     L.check(`avvio, home e Salone a ${w} px`, errors); await browser.close();
   }
