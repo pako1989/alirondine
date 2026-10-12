@@ -5554,6 +5554,48 @@
     if (since("mg_finale", 2) < 70) mgBurst(g, 70, 60, 16, 28, "HURRÀ!", "#d82a3a", Math.min(1, since("mg_finale", 2) / 8));
     mgCap(g, 8, 8, "E VISSERO TUTTI APPICCICOSAMENTE FELICI.");
   }
+  // ---- STAGIONE INFINITA: videocassetta (righe, colori che sbavano, codice temporale)
+  function sfVhs(g, W, H, f, label) {
+    g.fillStyle = "rgba(0,0,0,.14)"; for (let y = (f >> 1) % 3; y < H; y += 3) g.fillRect(0, y, W, 1);
+    const ty = (f * 0.7) % (H + 40) - 20; g.fillStyle = "rgba(255,255,255,.05)"; g.fillRect(0, ty, W, 6);
+    g.font = "bold 9px 'Courier New', monospace"; [["#ff2a6a", -1], ["#2ad8ff", 1], ["#fff", 0]].forEach(([c, dx]) => { g.fillStyle = c; g.fillText("▶ PLAY", 10 + dx, 16); g.fillText(label || "DOM 08:00", W - 74 + dx, 16); });
+  }
+  function bgSfTitolo(g, W, H, f) {
+    // la copertina della cassetta: il Lido al tramonto, il titolo, l'orologio che va avanti e indietro (tocca)
+    vgrad(g, 0, 0, W, 130, ["#2a1a3a", "#e8844a"]); circ(g, 160, 120, 34, "#ffb85a");
+    vgrad(g, 0, 120, W, 80, ["#3a6a98", "#1a3a5a"]); for (let i = 0; i < 10; i++) px(g, (i * 37 + f * 0.3) % W, 132 + (i * 13) % 60, 14, 1, "rgba(255,200,140,.35)");
+    px(g, 60, 92, 200, 30, "#3a2a2a"); for (let i = 0; i < 9; i++) px(g, 66 + i * 22, 98, 14, 4, "#5a4a3a"); [70, 250].forEach((x) => { px(g, x, 50, 3, 44, "#2a2a2a"); const on = since("sf_titolo", 1) < 120 || Math.floor(f / 40) % 4; if (on) { px(g, x - 6, 46, 15, 6, "#fff8c8"); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, x + 1, 50, 22, "255,240,180", 0.35); g.restore(); } });
+    const back = since("sf_titolo", 0) < 120; const a = (back ? -f / 6 : f / 60); circ(g, 160, 48, 15, "#f4ecdc"); g.strokeStyle = "#2a1a10"; g.lineWidth = 2; g.beginPath(); g.moveTo(160, 48); g.lineTo(160 + Math.cos(a) * 10, 48 + Math.sin(a) * 10); g.moveTo(160, 48); g.lineTo(160 + Math.cos(a / 12) * 6, 48 + Math.sin(a / 12) * 6); g.stroke();
+    g.font = "900 20px 'Courier New', monospace"; g.textAlign = "center"; [["#ff2a6a", -2], ["#2ad8ff", 2], ["#fff", 0]].forEach(([c, dx]) => { g.fillStyle = c; g.fillText("STAGIONE INFINITA", 160 + dx, 30); }); g.textAlign = "left";
+    if (since("sf_titolo", 2) < 100) { px(g, 110, 150, 100, 34, "#1a1a1a"); circ(g, 135, 167, 9, "#5a5a5a"); circ(g, 185, 167, 9, "#5a5a5a"); const r = f / 4; g.strokeStyle = "#1a1a1a"; [135, 185].forEach((x) => { g.beginPath(); g.moveTo(x, 167); g.lineTo(x + Math.cos(r) * 8, 167 + Math.sin(r) * 8); g.stroke(); }); px(g, 120, 154, 80, 6, "#e8c84a"); }
+    sfVhs(g, W, H, f, back ? "◀◀ 19:00" : "DOM 08:00");
+  }
+  function bgSfPiazza(g, W, H, f) {
+    // Piazza del Lago: i platani d'autunno, l'orologio, il barista che porta sempre lo stesso caffè (tocca)
+    vgrad(g, 0, 0, W, 110, ["#e8b88a", "#f4e0c8"]); for (let i = 0; i < 7; i++) { const x = i * 48; px(g, x, 52, 44, 58, ["#e8c8a0", "#d8b0a0", "#f0d8b8"][i % 3]); px(g, x - 2, 48, 48, 6, "#a85a3a"); for (let k = 0; k < 3; k++) px(g, x + 6 + k * 13, 66, 7, 10, "#5a4a5a"); }
+    vgrad(g, 0, 110, W, 90, ["#c8b898", "#a89878"]);
+    [[30, 90], [290, 90]].forEach(([x, y]) => { px(g, x - 3, y, 6, 40, "#5a3a2a"); circ(g, x, y - 6, 22, "#d8843a"); circ(g, x - 12, y + 2, 14, "#c8642a"); circ(g, x + 12, y, 15, "#e8a84a"); });
+    const fall = since("sf_piazza", 0) < 160 ? 14 : 5; for (let i = 0; i < fall; i++) { const t = (f * 0.6 + i * 31) % 160; px(g, (i * 41 + Math.sin(t / 12 + i) * 10) % W, 60 + t, 3, 2, ["#d8843a", "#c8642a", "#e8a84a"][i % 3]); }
+    px(g, 156, 70, 8, 70, "#5a4a3a"); circ(g, 160, 62, 14, "#f4ecdc"); g.strokeStyle = "#2a1a10"; g.lineWidth = 2; g.beginPath(); g.arc(160, 62, 14, 0, 7); g.stroke(); const back = since("sf_piazza", 2) < 90, a = back ? -f / 5 : -Math.PI / 2; g.beginPath(); g.moveTo(160, 62); g.lineTo(160 + Math.cos(a) * 10, 62 + Math.sin(a) * 10); g.moveTo(160, 62); g.lineTo(160 + 6, 62); g.stroke();
+    const bx = 60 + Math.abs(((f * 0.5) % 120) - 60); px(g, bx, 140, 10, 22, "#f4f4f4"); circ(g, bx + 5, 134, 5, "#e0b890"); px(g, bx + 9, 146, 8, 2, "#c8c8c8"); px(g, bx + 13, 142, 4, 4, "#5a3a2a"); if (since("sf_piazza", 1) < 100) { px(g, bx - 10, 112, 64, 14, "#fff"); g.fillStyle = "#1a1a1a"; g.font = "bold 8px 'Courier New', monospace"; g.fillText("«COME IERI?»", bx - 6, 122); }
+    sfVhs(g, W, H, f, back ? "◀◀ REW" : "DOM 08:00");
+  }
+  function bgSfStadio(g, W, H, f) {
+    // il Lido: tribune di legno, il tabellone di latta, le luci che si spengono una a una (tocca)
+    vgrad(g, 0, 0, W, 90, ["#2a2a4a", "#d8844a"]); for (let r = 0; r < 4; r++) { px(g, 0, 50 + r * 10, W, 8, ["#6a4a2a", "#5a3a22"][r % 2]); for (let i = 0; i < 30; i++) px(g, i * 11 + (r % 2) * 5, 52 + r * 10, 6, 4, (i * 7 + r) % 9 === 0 ? "#e8c84a" : "#8a6a4a"); }
+    vgrad(g, 0, 90, W, 110, ["#3a7a3a", "#2a5a2a"]); g.strokeStyle = "rgba(255,255,255,.5)"; g.lineWidth = 2; g.strokeRect(20, 100, 280, 90); g.beginPath(); g.moveTo(160, 100); g.lineTo(160, 190); g.stroke();
+    const off = since("sf_stadio", 0) < 200 ? Math.floor(since("sf_stadio", 0) / 40) : -1; [[20, 0], [110, 1], [210, 2], [300, 3]].forEach(([x, i]) => { px(g, x, 10, 3, 40, "#3a3a3a"); if (off < 0 || i > off) { px(g, x - 8, 6, 19, 8, "#fff8c8"); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, x + 1, 10, 28, "255,240,180", 0.3); g.restore(); } else px(g, x - 8, 6, 19, 8, "#3a3a3a"); });
+    px(g, 120, 20, 80, 24, "#1a1a1a"); g.fillStyle = "#e8c84a"; g.font = "bold 9px 'Courier New', monospace"; const sc = since("sf_stadio", 1) < 90 ? ["1 · 0", "1 · 1", "2 · 1"][Math.floor(since("sf_stadio", 1) / 30) % 3] : "0 · 0"; g.fillText("LAGO " + sc + " REAL", 124, 36);
+    const ax = 40, ay = 150, wave = since("sf_stadio", 2) < 80; px(g, ax, ay, 9, 20, "#3a4a6a"); circ(g, ax + 4.5, ay - 5, 5, "#e8c4a0"); px(g, ax - 1, ay - 10, 11, 4, "#d8d8e0"); if (wave) { px(g, ax + 9, ay - 14 + Math.sin(f / 4) * 3, 3, 12, "#e8c4a0"); px(g, ax + 9, ay - 26, 18, 12, "#e8c84a"); }
+    sfVhs(g, W, H, f, "DOM 19:00");
+  }
+  function bgSfVideoteca(g, W, H, f) {
+    // la videoteca: scaffali di cassette, il televisore a tubo, la cassetta del 1986 (tocca)
+    vgrad(g, 0, 0, W, H, ["#1a1a2a", "#2a2a3a"]); for (let r = 0; r < 6; r++) for (let i = 0; i < 22; i++) { const glow = since("sf_videoteca", 1) < 100 && r === 3 && i === 6; px(g, 6 + i * 14, 20 + r * 22, 10, 18, glow ? "#e8c84a" : ["#3a3a5a", "#5a3a3a", "#3a5a4a", "#5a5a3a"][(i + r) % 4]); px(g, 7 + i * 14, 24 + r * 22, 8, 3, "#f4ecdc"); }
+    px(g, 190, 100, 110, 80, "#3a3a3a"); const on = since("sf_videoteca", 0) < 140; px(g, 198, 108, 94, 62, on ? "#2a5a3a" : "#1a2a2a"); if (on) { const k = Math.sin(f / 20) * 30; circ(g, 245 + k, 140, 4, "#fff"); px(g, 200, 120 + ((f * 2) % 50), 90, 2, "rgba(255,255,255,.2)"); g.fillStyle = "#fff"; g.font = "bold 7px 'Courier New', monospace"; g.fillText(Math.floor(f / 30) % 2 ? "◀◀" : "▶", 204, 118); }
+    const lx = 120, rw = since("sf_videoteca", 2) < 90; px(g, lx, 140, 12, 30, "#3a3a5a"); circ(g, lx + 6, 134, 6, "#e8d0b8"); px(g, lx + 1, 132, 10, 2, "#1a1a1a"); if (rw) { px(g, lx + 12, 146, 16, 9, "#1a1a1a"); px(g, lx + 18, 140 + Math.sin(f / 3) * 3, 2, 10, "#e8c84a"); g.fillStyle = "#fff"; g.font = "bold 7px 'Courier New', monospace"; g.fillText("la matita, gira gira…", lx - 20, 128); }
+    sfVhs(g, W, H, f, "DOM 12:00");
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -6105,6 +6147,26 @@
       [80, 20, 160, 100, "🦸 Il Mantello Granata fa un giro della morte sopra la città. Il mantello soffre di vertigini, ma per stavolta fa finta di niente."],
       [0, 0, 320, 200, "🎊 Coriandoli da tutte le finestre di Metropolenta: rossi, blu, verdi. Bullone ne aspira un po' e li ristampa a forma di bottone."],
       [30, 30, 90, 70, "💥 HURRÀ! Lo scoppio di un fumetto che finisce bene. Nell'ultima vignetta, un piccione fa l'occhiolino al lettore."],
+    ] },
+    sf_titolo: { draw: bgSfTitolo, hot: [
+      [140, 30, 40, 40, "🕰 Le lancette dell'orologio girano all'indietro, velocissime. Poi si fermano sulle otto. Di nuovo."],
+      [50, 40, 220, 30, "💡 I riflettori del Lido si accendono tutti insieme, come se la finale cominciasse adesso. Il lago li riflette, e sembrano il doppio."],
+      [100, 140, 120, 50, "📼 Una videocassetta compare, e i rocchetti cominciano a girare. Sull'etichetta, scritto a mano: «Domenica»."],
+    ] },
+    sf_piazza: { draw: bgSfPiazza, hot: [
+      [0, 50, 320, 110, "🍂 Cadono le foglie dei platani. Le stesse foglie, nello stesso ordine, come ieri. Quella con il buco a forma di cuore cade sempre per ultima."],
+      [40, 105, 100, 60, "☕ Il barista porta il caffè alla signora del tavolino: «Come ieri?». La signora sorride: «Come ieri». Si ripetono tutto, anche il sorriso."],
+      [140, 40, 40, 40, "🕰 L'orologio della piazza va indietro di un minuto. Nessuno se ne accorge. Tranne te."],
+    ] },
+    sf_stadio: { draw: bgSfStadio, hot: [
+      [0, 0, 320, 50, "💡 I riflettori del Lido si spengono, uno alla volta, da sinistra a destra. Come ogni sera. Come stasera."],
+      [120, 18, 80, 28, "🔢 Il tabellone di latta cambia i numeri da solo: 1-0, 1-1, 2-1… sono i risultati di tutte le finali che hai già giocato oggi."],
+      [30, 130, 40, 50, "🚩 Ada sventola la bandiera dalla tribuna: gialla, stirata, con una toppa a forma di pallone. La sventola come se fosse l'ultima volta. Lo è sempre."],
+    ] },
+    sf_videoteca: { draw: bgSfVideoteca, hot: [
+      [190, 100, 110, 80, "📺 Il televisore si accende da solo: un'azione del Lido, avanti e indietro, avanti e indietro. Sempre la stessa. Il pallone non entra mai."],
+      [80, 80, 30, 30, "📼 Sullo scaffale, una cassetta si illumina: «Finale 1986 — ROVINATA». Brilla come se volesse essere vista."],
+      [100, 120, 60, 60, "✏ Lucio riavvolge un nastro con la matita, gira gira gira. «Il videoregistratore è rotto», dice. «Ma il nastro no. Il nastro si ricorda tutto»."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };

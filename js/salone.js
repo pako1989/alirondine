@@ -24,6 +24,8 @@
   const GEN = { fantasy: ["Fantasy", "#7a4ab0"], mistero: ["Mistero", "#2c6a9a"], scifi: ["Fantascienza", "#1f8a8a"], storico: ["Storico", "#a8622a"], commedia: ["Commedia", "#c9921a"], sport: ["Sport anime", "#c0392b"], avventura: ["Avventura", "#3f8a3f"], dramma: ["Drammatico", "#6a5a7a"], tattica: ["Tattica", "#5a6a3a"] };
   // mod: oggetto window con menuEntry/info · fn: funzione window da chiamare con (indietro) · ch: capitoli totali (se noti)
   const SAGAS = [
+    { id: "stagione", t: "Stagione Infinita", e: "📼", g: ["dramma", "mistero"], mod: "__stagione", key: "ali-di-rondine.stagione", ch: 3, cover: "sf_titolo", d: "La stessa domenica, ancora e ancora: la finale al vecchio Lido che domani chiude. Giornata che si ripete con gli orari dei personaggi, ricordi che restano, e Il Nastro: la finale su videocassetta, con i fantasmi delle partite già giocate.",
+      hints: { lunedi: "Sempre possibile, alla fine.", teo: "Serve l'amicizia piena di Teo.", ada: "Serve la fiducia piena di Ada.", gatto: "Segreto: trova il gatto in tutti e quattro i suoi posti, una domenica diversa ciascuno." } },
     { id: "mantello", t: "Il Mantello Granata", e: "🦸", g: ["commedia", "avventura"], mod: "__mantello", key: "ali-di-rondine.mantello", ch: 3, cover: "mg_titolo", d: "Un fumetto di supereroi comico: un mantello cucito da una sarta, tre forme in esplorazione (Volo, Mini, Gigante), cattivi ridicoli e Super-Bottoni, il calcio a bottoni a turni con la fionda e un superpotere diverso a ogni partita.",
       hints: { eroe: "Sempre possibile, alla fine.", lega: "Serve aver svelato la tua identità.", arbitro: "Serve tanta fama in città.", tilde: "Segreto: tutti i ritagli di stoffa della città e l'identità segreta custodita bene." } },
     { id: "cronache", t: "Le Cronache del Pallone di Cristallo", e: "💠", g: ["fantasy", "avventura"], mod: "__cronache", key: "ali-di-rondine.cronache", ch: 3, cover: "cc_titolo", d: "Un JRPG classico: quattro cristalli che tengono in moto le stagioni, un gruppo che ti segue in fila, la mappa del mondo, la nave, e partite a turni come battaglie (ATB) con fiato e magie.",
@@ -73,7 +75,7 @@
     { id: "cala", t: "Cala Tramontana", e: "🌊", g: ["avventura"], fn: "openCalaTramontana", key: "ali-di-rondine.cala-tramontana", cover: "beach", d: "Esplora a piedi il borgo marino alternativo con il tuo Campione." },
     { id: "borgostorto", t: "Il Borgo Storto", e: "🌀", g: ["commedia", "tattica"], api: "openBorgoStorto", cover: "beach", d: "Lo spin-off GDR a turni del Borgo Marino." },
   ];
-  const NEWEST = ["mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
+  const NEWEST = ["stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
   const modOf = (s) => (s.mod ? window[s.mod] : null);
   const available = (s) => (s.mod ? !!window[s.mod] : s.fn ? typeof window[s.fn] === "function" : !!(api() && api()[s.api]));
   function state(s) {
@@ -241,7 +243,7 @@
   // ---------------------------------------------------------------- ALBUM DEI PERSONAGGI
   // ogni personaggio registrato nel gioco (window.__borgoApi.BIO) diventa una carta. Si «incontra» parlandoci (seeCard del gioco).
   // Le sezioni: la Storia e Borgo Marino, i tornei e le modalità del Borgo, e una sezione per saga (riconosciuta dal prefisso degli id).
-  const PFX = { mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
+  const PFX = { stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
   const BORGO_PFX = ["sv", "rb", "sb", "cg", "hd", "md", "ac"];
   function perSections() {
     const A = api(); if (!A || !A.BIO) return [];
