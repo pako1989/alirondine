@@ -26,7 +26,7 @@
       campo: { grass: ["#3a6a3a", "#3e6e3e", "#366636"], path: ["#8a7a6a", "#827262"], stone: ["#8a8a9a", "#848494"], wall: ["#6a6a7a", "#646474"], water: ["#2a3a6a", "#30407a"], tall: "#3a6a2a", tree: ["#1a3a2a", "#2a4a32", "#1f4028"], tint: "255,210,140", tintA: 0.08, fx: "", dark: 0.08 },
       casa: { grass: ["#7a5a3a", "#745434", "#80603e"], path: ["#a8825a", "#a07a52"], stone: ["#c8b8a0", "#c0b098"], wall: ["#4a3a2a", "#443424"], water: ["#4a7a9a", "#5484a4"], tall: "#6a8a4a", tint: "255,190,110", tintA: 0.16, fx: "dust", dark: 0.12 },
     },
-    floors: "", solid: "U",
+    floors: "", solid: "UY",
     rest: { ch: "s", label: "Siediti sotto il lampione", text: "Ti siedi. Le lucciole fanno il giro del lampione, tre volte, come se contassero. (Il gioco salva da solo: qui puoi rileggere il Quaderno del Lampionaio.)" },
     texts: { chestOpen: "Apri la cassetta.", chestEmpty: "La cassetta è vuota. Odora di cera e di fiammiferi.", nothing: "Niente. Solo il buio, che però stanotte sembra in ascolto.", noHero: "Sanlume aspetta qualcuno che accenda i lampioni. Prima crea il tuo Campione.", chapters: "Tre capitoli, una notte lunghissima. Le scelte cambiano l'alba." },
     journal: { name: "Il Quaderno del Lampionaio", sub: "Lampioni, ombre, lanterne, finali" },
@@ -55,6 +55,8 @@
         bass: "R . . 5 . . R . R . . 5 . . 8 .", bv: 0.09, arp: "1 3 5 8 1 3 5 8 1 3 5 8 1 3 5 8", aw: "sine", av: 0.016, drum: "k . . h . . s . k . . h . . s .", dv: 0.14 },
     },
     paint: {
+      // il tredicesimo lampione: un palo senza vetro e senza numero, finché non si accende
+      Y(K, sx, sy, tx, ty, fr) { K.ground(sx, sy, tx, ty); K.later((g, cx, cy) => { const x = tx * TS - cx + 8, y = ty * TS - cy + 14, on = K.F.is("nl_tredici"); g.fillStyle = "#3a3a42"; g.fillRect(x - 2, y - 34, 4, 34); g.fillRect(x - 5, y - 2, 10, 3); if (on) { g.fillStyle = "#fff4c8"; g.beginPath(); g.arc(x, y - 38, 6, 0, 7); g.fill(); K.light(x, y - 38, 60, "255,240,190", 0.6); } else { g.strokeStyle = "rgba(200,200,220,.35)"; g.lineWidth = 1; g.strokeRect(x - 4, y - 42, 8, 8); } }); },
       // il lampione antico: spento (vetro scuro) o acceso (fiammella e alone)
       U(K, sx, sy, tx, ty, fr) { K.ground(sx, sy, tx, ty); K.later((g, cx, cy) => { const x = tx * TS - cx + 8, y = ty * TS - cy + 14, on = K.F.is(`lamp_${K.ZX.id}_${tx}_${ty}`); g.fillStyle = "#2a2a32"; g.fillRect(x - 1.5, y - 26, 3, 26); g.fillRect(x - 4, y - 2, 8, 3); g.fillRect(x - 5, y - 33, 10, 2); g.fillStyle = on ? "#ffd27a" : "#3a3a4a"; g.fillRect(x - 4, y - 31, 8, 7); g.fillStyle = "#2a2a32"; g.beginPath(); g.moveTo(x - 5, y - 31); g.lineTo(x, y - 36); g.lineTo(x + 5, y - 31); g.closePath(); g.fill(); if (on) { g.fillStyle = "#fff4c8"; g.fillRect(x - 1, y - 30 + Math.sin(fr / 5 + tx) * 0.5, 2, 4); K.light(x, y - 28, 22, "255,200,110", 0.5); } }); },
     },

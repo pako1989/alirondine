@@ -5673,6 +5673,25 @@
     px(g, 0, 150, W, 50, "#2a1a10"); px(g, 60, 120, 40, 6, "#5a3a22"); px(g, 64, 126, 4, 24, "#4a2a18"); px(g, 92, 126, 4, 24, "#4a2a18"); const purr = since("nl_capanna", 2) < 90; px(g, 66, 108, 26, 12, "#8a8a8a"); px(g, 86, 102, 10, 9, "#8a8a8a"); px(g, 86, 99, 3, 3, "#8a8a8a"); px(g, 93, 99, 3, 3, "#8a8a8a"); if (purr) { g.fillStyle = "#f0e0c0"; g.font = "bold 8px Georgia, serif"; g.fillText("rrr…", 72, 96); }
     const jx = 160, jy = 120, beat = 1 + Math.sin(f / (since("nl_capanna", 1) < 120 ? 4 : 14)) * 0.3; px(g, jx - 9, jy - 18, 18, 24, "rgba(200,220,255,.25)"); px(g, jx - 10, jy - 22, 20, 4, "#8a6a4a"); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, jx, jy - 6, 22 * beat, "255,210,120", 0.6); g.restore(); circ(g, jx, jy - 6, 3 * beat, "#fff4c8");
   }
+  function bgNlCampo(g, W, H, f) {
+    // il vecchio campo: le porte di legno, le Ombre in fila, il tredicesimo lampione al centro (tocca)
+    let t13 = false; try { t13 = !!window.__lampioni.info().flags.nl_tredici; } catch (e) {}
+    vgrad(g, 0, 0, W, 110, ["#0a0a26", "#2a2a5a"]); for (let i = 0; i < 40; i++) px(g, (i * 67) % W, (i * 23) % 90, 1, 1, `rgba(230,230,255,${0.4 + 0.4 * Math.sin(f / 20 + i)})`);
+    vgrad(g, 0, 110, W, 90, ["#1a3a22", "#0f2414"]); g.strokeStyle = "rgba(230,240,220,.35)"; g.lineWidth = 1.5; g.strokeRect(30, 120, 260, 70); [[30, 145], [282, 145]].forEach(([x, y]) => { px(g, x, y, 8, 22, "#6a4a2a"); });
+    [[20, 120], [300, 120]].forEach(([x, y]) => nlLamp(g, x, y - 40, true, f));
+    const on = t13 || since("nl_campo", 0) < 120; px(g, 158, 70, 4, 60, "#3a3a42"); if (on) { circ(g, 160, 66, 7, "#fff4c8"); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 160, 66, 90, "255,240,190", 0.45); g.restore(); }
+    const n = since("nl_campo", 1) < 140 ? 7 : 5; for (let i = 0; i < n; i++) nlShade(g, 70 + i * (180 / n), 160, 0.9, f + i * 20, String([9, 3, 1, 7, 5, 10, 11][i]));
+    if (since("nl_campo", 2) < 120) nlShade(g, 270, 175, 0.7, f, "");
+    nlFireflies(g, W, H, f, 10);
+  }
+  function bgNlAlba(g, W, H, f) {
+    // l'alba sulla collina: il cielo color pesca, i lampioni che si spengono, le Ombre che diventano luce (tocca)
+    vgrad(g, 0, 0, W, 130, ["#5a6aa8", "#f8b88a"]); circ(g, 160, 128, 30, "#ffe0a8"); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 160, 128, 90, "255,210,150", 0.3); g.restore();
+    g.fillStyle = "#2a3a2a"; g.beginPath(); g.moveTo(0, 140); g.quadraticCurveTo(160, 110, 320, 140); g.lineTo(320, 200); g.lineTo(0, 200); g.closePath(); g.fill();
+    const off = since("nl_alba", 0) < 200 ? Math.floor(since("nl_alba", 0) / 30) : 6; for (let i = 0; i < 6; i++) nlLamp(g, 30 + i * 52, 150 - Math.sin((i / 5) * Math.PI) * 18, i >= off, f);
+    const fade = since("nl_alba", 1) < 160 ? since("nl_alba", 1) / 160 : 0.3; g.save(); g.globalAlpha = 1 - fade; for (let i = 0; i < 5; i++) nlShade(g, 90 + i * 35, 170 - fade * 30, 0.8, f + i * 15, String([9, 3, 1, 7, 13][i])); g.restore();
+    if (since("nl_alba", 2) < 120) for (let i = 0; i < 30; i++) { const t = since("nl_alba", 2); px(g, (i * 31 + t) % W, 200 - ((t * 1.5 + i * 13) % 200), 2, 2, "#fff4c8"); }
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -6284,6 +6303,16 @@
       [220, 80, 80, 70, "🔥 Il fuoco nel camino si alza, come se qualcuno ci avesse soffiato sopra una storia. Nonna Lucia lo guarda: «Fa così quando c'è ospite»."],
       [140, 90, 40, 40, "🫙 La fiammella madre nel barattolo batte più forte, come un cuore. Ti ha riconosciuto: hai la lanterna di Fiammetta."],
       [55, 95, 50, 35, "🐈 Il gatto sulla sedia apre un occhio, ti valuta, fa le fusa. Hai superato l'esame."],
+    ] },
+    nl_campo: { draw: bgNlCampo, hot: [
+      [140, 50, 40, 80, "💡 Il palo senza numero, al centro del campo, si accende per un istante di luce bianca. Poi si spegne. Aspetta qualcosa."],
+      [50, 140, 220, 40, "👥 Le Ombre del '52 si mettono in fila a centrocampo, con i numeri sulle maglie che brillano appena: 9, 3, 1, 7…"],
+      [250, 150, 50, 45, "👤 Al bordo del campo, un'ombra piccola con una maglia senza numero tiene un pallone in mano. Guarda la partita. Non entra."],
+    ] },
+    nl_alba: { draw: bgNlAlba, hot: [
+      [0, 100, 320, 70, "🏮 I lampioni si spengono uno dopo l'altro, da sinistra a destra, come candele dopo una torta. L'ultimo fa un piccolo inchino."],
+      [70, 120, 200, 70, "👥 Le Ombre diventano trasparenti, piano piano, e poi luce. Salutano tutte con la mano. L'ombra numero tredici saluta con due."],
+      [0, 0, 320, 200, "✨ Dall'erba si alzano scintille d'oro, verso il sole che sorge. Sanlume si sveglia, e non sa ancora che notte c'è stata."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };

@@ -209,6 +209,10 @@
       opp: [{ name: "I Pescatori", color: "#3a8a8a", style: "equilibrata" }, { name: "Real Lago", color: "#5a8ad8", style: "pressing" }],
       boss: { name: "La Domenica Infinita", color: "#ff5a7a", style: "pressing" },
       opts: (o, h, boss) => ({ title: `Il Nastro · contro ${o.name}`, us: h.name, usColor: "#e8c84a", seed: "sala" + Date.now(), memory: {}, rewinds: boss ? 1 : 2, actions: boss ? 8 : 6, mates: [{ name: "Gigi" }, { name: "Vale" }], opp: o }) },
+    { id: "luci", t: "Luci", e: "🏮", saga: "lampioni", eng: "__luci", d: "La partita al buio della Notte dei Lampioni: a turni, su un campo a caselle, con le lanterne e le ombre che si vedono solo nella luce.",
+      opp: [{ name: "Il coro della chiesa", color: "#8a6a9a", style: "equilibrata" }, { name: "Le Ombre del '52", color: "#6a7ab8", style: "contropiede" }],
+      boss: { name: "Le Ombre al completo", color: "#4a4a8a", style: "pressing" },
+      opts: (o, h, boss) => ({ title: `Luci · contro ${o.name}`, us: h.name, usColor: "#ffd27a", lanterns: boss ? 2 : 3, actions: boss ? 8 : 6, mates: [{ name: "Fiammetta" }, { name: "Tobia" }], opp: o }) },
   ];
   function sgState(m) { const s = SAGAS.find((x) => x.id === m.saga), x = s ? state(s) : null; return { s, open: !!(x && (x.doneN >= 1)), boss: !!(x && x.endsFound > 0) }; }
   function openSalaGiochi(back) {

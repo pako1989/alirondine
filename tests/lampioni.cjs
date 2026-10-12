@@ -45,4 +45,29 @@ async function c2(w) {
   const i = await L.info(page); if (!i.done[2]) errors.push("capitolo 2 non concluso: " + JSON.stringify(i.step)); if (!i.flags.nl_fiammella) errors.push("niente fiammella madre");
   L.check(`La Notte dei Lampioni · capitolo 2 (${w} px)`, errors); await browser.close();
 }
-(async () => { await c1(390); await c1(320); await c2(390); await c2(320); })().catch((e) => { console.error("✗ lampioni:", e.message); process.exit(1); });
+async function c3(w) {
+  const fl = { nl_lanterna: true, nl_fiammella: true, nl_lucia_torna: true }; [["nl_borgo", [[12, 8], [22, 8], [12, 16], [22, 16]]], ["nl_bosco", [[16, 21], [8, 15], [20, 10], [26, 10], [13, 7]]]].forEach(([z, l]) => l.forEach(([x, y]) => (fl[`lamp_${z}_${x}_${y}`] = true)));
+  const save = { v: 1, ch: 3, step: { 1: 5, 2: 5 }, done: { 1: "promessa", 2: "torna" }, diffSet: true, intro: { ch1: 1, ch2: 1, nl_borgo: 1, nl_bottega: 1, nl_bosco: 1, nl_capanna: 1 }, st: { luce: 14, ombre: 9 }, flags: fl };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await page.evaluate(() => window.__lampioni.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 3")); await L.advance(page);
+  await L.goAct(page, 17, 0); await L.advance(page); if ((await L.zone(page)) !== "nl_campo") errors.push("non si sale al vecchio campo: " + (await L.zone(page)));
+  { const bad = await L.reachAll(page, "nl_campo"); if (bad.length) errors.push("nl_campo irraggiungibile: " + bad.join(", ")); }
+  // il tredicesimo lampione non si accende senza tutti i fiammiferi
+  await L.goAct(page, 15, 10); await L.advance(page); if ((await L.info(page)).flags.nl_tredici) errors.push("tredicesimo acceso senza fiammiferi");
+  for (const [x, y] of [[3, 9], [26, 9], [15, 3]]) { await L.goAct(page, x, y); await L.advance(page); } await page.waitForTimeout(400); await L.advance(page);
+  if (w === 390) await L.shot(page, "nl_campo");
+  await L.talk(page, "nl_leandro"); await page.evaluate(() => window.T_.click("Gioca la partita della festa")); await page.waitForTimeout(500); await luStart(page); await page.waitForTimeout(300);
+  const lu = await page.evaluate(() => [window.__luci.state.o.actions, window.__luci.state.o.oppStyle]); if (lu.join() !== "8,pressing") errors.push("finale sbagliata: " + lu);
+  await luEnd(page, 3, 2); await L.advance(page);
+  await page.evaluate(() => { const A = window.__tr, r = A.trRec(), Z = A.TRZ; ["nl_borgo", "nl_bosco", "nl_campo"].forEach((z) => { r.got[z] = (Z[z].items || []).map((_, k) => k); }); });
+  await L.goAct(page, 15, 10); await L.advance(page); if (!(await L.info(page)).flags.nl_tredici) errors.push("il tredicesimo lampione non si accende");
+  const ends = ["Il tredicesimo lampione brilla", "È l'alba", "Fiammetta, i lampioni", "Restate. Una notte"];
+  for (const e of ends) {
+    await page.evaluate(() => { const K = window.__lampioni._dbg.K; K.setStep(3, 2); K.enterZone("nl_campo"); }); await page.waitForTimeout(400); await L.advance(page);
+    await L.talk(page, "nl_leandro"); await L.advance(page, [e]); if (w === 390 && e === ends[0]) await L.shot(page, "nl_fine");
+  }
+  const i = await L.info(page); if (!i.done[3]) errors.push("capitolo 3 non concluso: " + JSON.stringify(i.step));
+  const n = await page.evaluate(() => window.__lampioni._dbg.K.mem().ends.length); if (n < 4) errors.push("finali trovati " + n + " su 4");
+  L.check(`La Notte dei Lampioni · capitolo 3 e i 4 finali (${w} px)`, errors); await browser.close();
+}
+(async () => { await c1(390); await c1(320); await c2(390); await c2(320); await c3(390); await c3(320); })().catch((e) => { console.error("✗ lampioni:", e.message); process.exit(1); });
