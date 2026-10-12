@@ -69,4 +69,33 @@ async function c2(w) {
   const i = await L.info(page); if (!i.done[2]) errors.push("capitolo 2 non concluso: " + JSON.stringify(i.step)); if (!i.flags.mg_colla_amica) errors.push("scelta non registrata");
   L.check(`Il Mantello Granata · capitolo 2 (${w} px)`, errors); await browser.close();
 }
-(async () => { await c1(390); await c1(320); await c2(390); await c2(320); })().catch((e) => { console.error("✗ mantello:", e.message); process.exit(1); });
+async function c3(w) {
+  const save = { v: 1, ch: 3, step: { 1: 5, 2: 5 }, done: { 1: "segreto", 2: "amica" }, diffSet: true, intro: { ch1: 1, ch2: 1, mg_piazza: 1, mg_sartoria: 1, mg_tetti: 1, mg_fabbrica: 1, mg_laboratorio: 1 }, st: { fama: 9, segreto: 2 }, flags: { mg_mantello: true, forma_volo: true, forma_mini: true, party_mg_bullone: true, party_mg_gilda: true, mg_coppa: true, mg_volto: true } };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await page.evaluate(() => window.__mantello.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 3")); await L.advance(page);
+  await L.goAct(page, 6, 6); await L.advance(page); await L.talk(page, "mg_tilde"); await L.advance(page); await L.goAct(page, 10, 12); await L.advance(page);
+  await L.goAct(page, 12, 23); await L.advance(page); if ((await L.zone(page)) !== "mg_viale") errors.push("non si arriva al viale: " + (await L.zone(page)));
+  for (const z of ["mg_torre"]) { const b = await L.reachAll(page, z); if (b.length) errors.push(z + " irraggiungibile: " + b.join(", ")); }
+  if ((await page.evaluate(() => window.T_.goAct(17, 18))) === "ok") errors.push("si passano le auto senza la forma Gigante");
+  await L.talk(page, "mg_tonno"); await L.advance(page);
+  await L.talk(page, "mg_vigile"); await L.advance(page, ["Mantello\\? Quale mantello"]);
+  await page.evaluate(() => window.__mantello._dbg.K.setForm("gigante", true));
+  const bad = await L.reachAll(page, "mg_viale"); if (bad.length) errors.push("mg_viale (gigante) irraggiungibile: " + bad.join(", "));
+  await page.evaluate(() => { const TW = window.__tr.TW; TW.x = 16 * 16 + 8; TW.y = 8 * 16 + 12; }); await page.waitForTimeout(400); if (w === 390) await L.shot(page, "mg_gigante");
+  const ok = await page.evaluate(() => window.__mantello._dbg.K.setForm("", true)); await L.advance(page); if (ok) errors.push("si torna normali sopra le auto");
+  await L.goAct(page, 17, 18); await L.advance(page); if ((await L.zone(page)) !== "mg_torre") errors.push("non si entra nella torre: " + (await L.zone(page)));
+  if (w === 390) await L.shot(page, "mg_torre");
+  await L.talk(page, "mg_dottore"); await page.evaluate(() => window.T_.click("Calamita")); await page.waitForTimeout(500); await btStart(page); await page.waitForTimeout(500);
+  const pw = await page.evaluate(() => { const S = window.__bottoni.state; S.meter = 100; S.usePower(); return [S.o.power, S.o.oppPower, S.armed]; }); if (pw.join() !== "calamita,specchio,calamita") errors.push("potere della finale sbagliato: " + pw);
+  await btEnd(page, 3, 2); await L.advance(page);
+  await page.evaluate(() => { const A = window.__tr, r = A.trRec(), Z = A.TRZ; ["mg_piazza", "mg_tetti", "mg_fabbrica", "mg_viale"].forEach((z) => { r.got[z] = (Z[z].items || []).map((_, k) => k); }); });
+  const ends = ["I ritagli di stoffa", "Metropolenta è libera", "Tutti sanno chi sono", "alla città serve un arbitro"];
+  for (const e of ends) {
+    await page.evaluate(() => { const K = window.__mantello._dbg.K; K.setStep(3, 3); K.enterZone("mg_torre"); }); await page.waitForTimeout(400); await L.advance(page);
+    await L.talk(page, "mg_dottore"); await L.advance(page, [e]); if (w === 390 && e === ends[0]) await L.shot(page, "mg_fine");
+  }
+  const i = await L.info(page); if (!i.done[3]) errors.push("capitolo 3 non concluso: " + JSON.stringify(i.step));
+  const n = await page.evaluate(() => window.__mantello._dbg.K.mem().ends.length); if (n < 4) errors.push("finali trovati " + n + " su 4");
+  L.check(`Il Mantello Granata · capitolo 3 e i 4 finali (${w} px)`, errors); await browser.close();
+}
+(async () => { await c1(390); await c1(320); await c2(390); await c2(320); await c3(390); await c3(320); })().catch((e) => { console.error("✗ mantello:", e.message); process.exit(1); });

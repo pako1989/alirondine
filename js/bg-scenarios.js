@@ -5521,6 +5521,39 @@
     if (sh) mgCap(g, 200, 120, "«PER SEMPRE ATTACCATE»");
     const ms = since("mg_laboratorio", 2) < 80; const sp = ms ? f / 3 : f / 12; px(g, 140, 150, 3, -30 + Math.sin(sp) * 4, "#8a6a4a"); if (ms) { g.fillStyle = "#121212"; g.font = "bold 7px sans-serif"; g.fillText("♪ restate qui, restate qui… ♪", 110, 40); }
   }
+  function bgMgViale(g, W, H, f) {
+    // il Viale dei Tigli: le auto in doppia fila, il vigile con il blocchetto, la Torre in fondo che fischia (tocca)
+    vgrad(g, 0, 0, W, 120, ["#f0a86a", "#f8e0b8"]); mgDots(g, 0, 0, W, 120, "rgba(216,120,60,.12)", 6);
+    px(g, 140, 10, 40, 100, "#4a3a5a"); g.fillStyle = "#3a2a4a"; g.beginPath(); g.moveTo(134, 10); g.lineTo(160, -14); g.lineTo(186, 10); g.closePath(); g.fill();
+    circ(g, 160, 40, 14, "#f4ecdc"); g.strokeStyle = "#121212"; g.lineWidth = 2; g.beginPath(); g.arc(160, 40, 14, 0, 7); g.stroke(); const spin = since("mg_viale", 2) < 60 ? f / 3 : 0.6; g.beginPath(); g.moveTo(160, 40); g.lineTo(160 + Math.cos(spin) * 9, 40 + Math.sin(spin) * 9); g.moveTo(160, 40); g.lineTo(160 + Math.cos(spin * 3 + 2) * 6, 40 + Math.sin(spin * 3 + 2) * 6); g.stroke();
+    if (Math.floor(f / 90) % 2 || since("mg_viale", 2) < 60) mgBurst(g, 200, 30, 10, 18, "FRIIIT!", "#121212");
+    for (let i = 0; i < 6; i++) { px(g, i * 60 + 4, 70, 6, 50, "#5a3a2a"); circ(g, i * 60 + 7, 66, 16, ["#4a8a3a", "#5a9a42", "#3a7a32"][i % 3]); }
+    vgrad(g, 0, 120, W, 80, ["#9a9a9a", "#7a7a7a"]); for (let i = 0; i < 9; i++) px(g, i * 40, 158, 20, 3, "#f4f4f4");
+    const lift = since("mg_viale", 0) < 90 ? Math.min(1, since("mg_viale", 0) / 12) * (1 - Math.max(0, since("mg_viale", 0) - 70) / 20) : 0;
+    for (let i = 0; i < 7; i++) { const x = i * 46 + 4, y = 132 - (i === 3 ? lift * 40 : 0), c = ["#e83a3a", "#3a8ac8", "#e8c84a", "#5aa84a"][i % 4]; px(g, x, y, 40, 16, c); px(g, x + 6, y - 9, 28, 10, c); px(g, x + 9, y - 7, 9, 7, "#c8e8ff"); px(g, x + 21, y - 7, 9, 7, "#c8e8ff"); circ(g, x + 8, y + 16, 5, "#121212"); circ(g, x + 32, y + 16, 5, "#121212"); }
+    if (lift) mgHero(g, 142 + 20, 150, 2.4, f, false);
+    const vx = 40 + Math.abs(((f * 0.4) % 200) - 100); px(g, vx, 170, 8, 18, "#e8e8f0"); circ(g, vx + 4, 165, 4, "#e0b890"); px(g, vx, 160, 8, 3, "#1a2a4a"); if (since("mg_viale", 1) < 100) mgCap(g, vx - 10, 140, "MULTA! (DI NUOVO)");
+  }
+  function bgMgTorre(g, W, H, f) {
+    // dentro la Torre dell'Orologio: ingranaggi enormi, il quadrante da dietro, il Dottore con la bandierina (tocca)
+    vgrad(g, 0, 0, W, H, ["#2a1a3a", "#5a3a4a"]); mgDots(g, 0, 0, W, H, "rgba(255,210,63,.08)", 6);
+    const gear = (x, y, r, sp, col) => { g.save(); g.translate(x, y); g.rotate(sp); g.fillStyle = col; for (let i = 0; i < 12; i++) { g.rotate(Math.PI / 6); g.fillRect(-3, -r - 6, 6, 8); } g.beginPath(); g.arc(0, 0, r, 0, 7); g.fill(); g.fillStyle = "#2a1a3a"; g.beginPath(); g.arc(0, 0, r * 0.35, 0, 7); g.fill(); g.restore(); };
+    const fast = since("mg_torre", 0) < 90 ? 4 : 1; gear(60, 60, 34, f / 120 * fast, "#c8a040"); gear(118, 92, 22, -f / 76 * fast, "#a88030"); gear(40, 150, 26, f / 90 * fast, "#8a6a2a");
+    circ(g, 240, 70, 46, "#f4ecdc"); g.strokeStyle = "#121212"; g.lineWidth = 3; g.beginPath(); g.arc(240, 70, 46, 0, 7); g.stroke(); for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; px(g, 240 + Math.cos(a) * 38 - 1, 70 + Math.sin(a) * 38 - 1, 3, 3, "#121212"); }
+    g.lineWidth = 3; g.beginPath(); g.moveTo(240, 70); g.lineTo(240 - 22, 70 - 20); g.moveTo(240, 70); g.lineTo(240 + 30, 70 + 4); g.stroke(); g.save(); g.translate(240, 70); g.font = "900 9px Impact, sans-serif"; g.textAlign = "center"; g.fillStyle = "#c8302a"; g.fillText("FUORIGIOCO", 0, 26); g.textAlign = "left"; g.restore();
+    const dx = 190, dy = 150, flag = since("mg_torre", 1) < 80; px(g, dx, dy, 12, 26, "#1a1a1a"); circ(g, dx + 6, dy - 6, 7, "#e8d0b8"); px(g, dx - 1, dy - 14, 14, 4, "#e8e8e8"); px(g, dx + 1, dy - 1, 10, 5, "#e8e8e8"); px(g, dx + 12, dy - (flag ? 26 : 6), 2, 26, "#5a3a2a"); px(g, dx + 14, dy - (flag ? 26 : 6), 14, 9, "#ffd23f");
+    if (flag) mgBurst(g, dx + 40, dy - 40, 11, 19, "FUORI!", "#c8302a");
+    if (since("mg_torre", 2) < 100) mgCap(g, 20, 176, "«AVEVO SEMPRE RAGIONE. NESSUNO APPLAUDIVA.»");
+  }
+  function bgMgFinale(g, W, H, f) {
+    // il finale: Metropolenta in festa, il Mantello che vola sopra la città, coriandoli e scoppi (tocca)
+    g.fillStyle = "#f6e24a"; g.fillRect(0, 0, W, H); g.save(); g.translate(W / 2, H); for (let i = 0; i < 18; i++) { g.fillStyle = i % 2 ? "#ffd23f" : "#f6e24a"; g.beginPath(); g.moveTo(0, 0); const a = Math.PI + i / 18 * Math.PI; g.lineTo(Math.cos(a) * 400, Math.sin(a) * 400); g.lineTo(Math.cos(a + 0.17) * 400, Math.sin(a + 0.17) * 400); g.closePath(); g.fill(); } g.restore(); mgDots(g, 0, 0, W, H, "rgba(216,42,42,.15)", 6);
+    for (let i = 0; i < 9; i++) { const x = i * 38 - 6, h = 40 + (i * 37) % 50; px(g, x, H - h, 34, h, ["#3a2a5a", "#5a3a6a", "#2a3a6a"][i % 3]); for (let k = 0; k < 4; k++) px(g, x + 5 + (k % 2) * 14, H - h + 8 + Math.floor(k / 2) * 14, 7, 7, "#ffe84a"); }
+    const n = since("mg_finale", 1) < 120 ? 60 : 24; for (let i = 0; i < n; i++) px(g, (i * 53 + Math.sin(f / 20 + i) * 12) % W, (f * (0.6 + (i % 3) * 0.2) + i * 29) % H, 3, 3, ["#d82a3a", "#3a8ac8", "#5aa84a", "#fff"][i % 4]);
+    const loop = since("mg_finale", 0) < 120 ? since("mg_finale", 0) / 120 * Math.PI * 2 : 0; mgHero(g, 160 + Math.sin(loop) * 60 + Math.sin(f / 60) * 20, 70 - Math.sin(loop * 2) * 20, 1.8, f, true);
+    if (since("mg_finale", 2) < 70) mgBurst(g, 70, 60, 16, 28, "HURRÀ!", "#d82a3a", Math.min(1, since("mg_finale", 2) / 8));
+    mgCap(g, 8, 8, "E VISSERO TUTTI APPICCICOSAMENTE FELICI.");
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -6057,6 +6090,21 @@
       [40, 90, 120, 60, "🫕 I pentoloni borbottano più forte: BLUB! Uno sa di mela, l'altro di fragola. Madame Colla dice che la colla buona si riconosce dal profumo."],
       [240, 60, 70, 60, "🖼 La foto delle quattro amiche: sotto, a penna, «Per sempre attaccate». Una delle quattro ha i capelli raccolti, come Madame Colla."],
       [100, 20, 140, 60, "🎶 Dal fondo del laboratorio, la cantilena: «Restate qui, restate qui…». Il mestolo gira da solo, a tempo di valzer."],
+    ] },
+    mg_viale: { draw: bgMgViale, hot: [
+      [120, 110, 80, 50, "🚗 Un'auto blu (si chiama Gisella, dice il vigile) si solleva da terra, sorretta da due mani enormi con i guanti granata. Poi viene riappoggiata con delicatezza. Un po' più in là."],
+      [20, 150, 120, 45, "👮 Il Vigile Puntuale fa la multa alla stessa auto per la trentacinquesima volta. L'auto, si giura, sospira."],
+      [130, 0, 100, 70, "🕰 L'orologio della Torre gira all'impazzata e poi si blocca: FRIIIT! Le «fuorigioco e un quarto». Tutta la città si ferma con un piede alzato."],
+    ] },
+    mg_torre: { draw: bgMgTorre, hot: [
+      [10, 20, 150, 170, "⚙ Gli ingranaggi accelerano, cigolando. Uno ha inciso «fuorigioco», l'altro «sempre». Insieme fanno un rumore che sembra una risata."],
+      [180, 100, 60, 80, "🚩 Il Dottore alza la bandierina, solenne: «FUORI!». Non c'è nessuno davanti a lui. La riabbassa, un po' imbarazzato."],
+      [0, 160, 320, 40, "💬 Una frase scritta col gesso sulla parete: «Avevo sempre ragione. Nessuno applaudiva». Sotto, più piccolo: «Un centimetro»."],
+    ] },
+    mg_finale: { draw: bgMgFinale, hot: [
+      [80, 20, 160, 100, "🦸 Il Mantello Granata fa un giro della morte sopra la città. Il mantello soffre di vertigini, ma per stavolta fa finta di niente."],
+      [0, 0, 320, 200, "🎊 Coriandoli da tutte le finestre di Metropolenta: rossi, blu, verdi. Bullone ne aspira un po' e li ristampa a forma di bottone."],
+      [30, 30, 90, 70, "💥 HURRÀ! Lo scoppio di un fumetto che finisce bene. Nell'ultima vignetta, un piccione fa l'occhiolino al lettore."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
