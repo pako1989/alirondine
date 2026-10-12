@@ -1,11 +1,8 @@
-// js/portrait-styles2.js - TRE STILI NUOVI DEI VOLTI (Impostazioni → Grafica → Stile dei volti)
+// js/portrait-styles2.js - DUE STILI NUOVI DEI VOLTI (Impostazioni → Grafica → Stile dei volti)
 //  - flat:  FLAT DESIGN. Niente contorni, solo forme geometriche a colori pieni, una sola ombra netta, occhi a pastiglia.
 //           Come le illustrazioni delle app: pulito, leggibile anche piccolissimo.
 //  - hd:    2D HD. Disegno vettoriale morbido ad alta definizione: pelle con sfumature calde, occlusione sotto i capelli,
 //           capelli con gradiente, riflessi a ciocche e luce di contorno, occhi con iride a raggiera e due riflessi.
-//  - vn:    VISUAL NOVEL. Busto da romanzo visivo: viso affilato, occhi grandi a strati (iride scura sopra, luminosa sotto,
-//           riflesso a stella), contorno sottile colorato, ciocche lunghe che incorniciano il viso, «anello di luce» sui
-//           capelli, guance sfumate e una divisa con giacca, colletto e cravatta nel colore del personaggio.
 // Stesso riferimento dei ritratti classici: origine al centro del viso, viso ±18 circa, spalle fino a y=60.
 // Si aggancia a window.__faceStyles (js/portrait-styles.js): draw(style, …) gestisce anche questi tre.
 (function () {
@@ -96,8 +93,6 @@
     facePath(g, fw, 26 + [0, 2, -1][T.chin], false); g.fillStyle = skin; g.fill();
     g.save(); facePath(g, fw, 26 + [0, 2, -1][T.chin], false); g.clip(); g.fillStyle = skinS; g.beginPath(); g.moveTo(3, -30); g.bezierCurveTo(fw * 0.9, -8, fw * 0.8, 12, 2, 32); g.lineTo(40, 32); g.lineTo(40, -30); g.closePath(); g.fill(); g.restore();
     if (c.beard) { g.fillStyle = hair; g.beginPath(); g.moveTo(-fw + 2, 10); g.quadraticCurveTo(-fw + 4, 29, 0, 30); g.quadraticCurveTo(fw - 4, 29, fw - 2, 10); g.quadraticCurveTo(0, 22, -fw + 2, 10); g.fill(); }
-    // guance a pallino
-    g.fillStyle = mix(skin, 0.35, "#ff6a7a"); [-1, 1].forEach((sd) => { g.beginPath(); g.arc(sd * (T.gap + 3), 14, 2.6, 0, 7); g.fill(); });
     // occhi a pastiglia, un punto bianco
     const blink = expr === "blink" || expr === "grin", wide = isWow(expr);
     [-1, 1].forEach((sd) => {
@@ -161,7 +156,6 @@
     g.save(); g.clip();
     const side = g.createLinearGradient(fw * 0.2, 0, fw + 2, 0); side.addColorStop(0, "rgba(120,40,60,0)"); side.addColorStop(1, "rgba(120,40,60,.22)"); g.fillStyle = side; g.fillRect(0, -30, 30, 60);
     const occ = g.createLinearGradient(0, -14, 0, -4); occ.addColorStop(0, "rgba(60,20,30,.35)"); occ.addColorStop(1, "rgba(60,20,30,0)"); g.fillStyle = occ; g.fillRect(-30, -16, 60, 14); // occlusione sotto la frangia
-    [-1, 1].forEach((sd) => { const bl = g.createRadialGradient(sd * (T.gap + 2.5), 14, 0, sd * (T.gap + 2.5), 14, 6); bl.addColorStop(0, `rgba(240,110,120,${expr === "smile" || expr === "grin" ? 0.42 : 0.24})`); bl.addColorStop(1, "rgba(240,110,120,0)"); g.fillStyle = bl; g.fillRect(sd * (T.gap + 2.5) - 7, 7, 14, 14); });
     g.restore();
     facePath(g, fw, chinY, false); g.strokeStyle = line; g.lineWidth = 0.9; g.stroke();
     if (c.beard) { const bg2 = g.createLinearGradient(0, 8, 0, chinY + 3); bg2.addColorStop(0, dark(hair, 0.1, 0.55)); bg2.addColorStop(1, dark(hair, 0.2)); g.fillStyle = bg2; g.beginPath(); g.moveTo(-fw + 2, 9); g.quadraticCurveTo(-fw + 4, chinY + 1, 0, chinY + 3); g.quadraticCurveTo(fw - 4, chinY + 1, fw - 2, 9); g.quadraticCurveTo(5, 23, 0, 22); g.quadraticCurveTo(-5, 23, -fw + 2, 9); g.fill(); }
@@ -245,68 +239,7 @@
   }
   function thinkBubbles(g, col) { g.fillStyle = col; [[23, -20, 2], [28, -28, 3], [35, -38, 5]].forEach(([x, y, r]) => { g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }); }
 
-  // ================================================================ VISUAL NOVEL
-  function vn(g, id, c, expr) {
-    const T = traits(id, c), st = hairOf(c), skin = c.skin || "#f0d0b8", hair = c.hair || "#2b1d14", eye = c.eye || "#3a5a9a", shirt = c.shirt || "#2a3a6a", fw = T.fw - 0.8, chinY = 28 + [0, 1, -1][T.chin];
-    const line = dark(hair, 0.55), sline = mix(skin, 0.45, "#6a2a3a"), hairD = dark(hair, 0.3), hairL = lite(hair, 0.5), skinS = mix(skin, 0.18, "#b05a7a");
-    const jacket = dark(shirt, 0.15), lapel = dark(shirt, 0.35), blouse = "#f6f4f0", tie = lum(shirt) > 0.55 ? "#c83a4a" : lite(shirt, 0.35);
-    g.lineJoin = "round"; g.lineCap = "round";
-    // capelli dietro (più lunghi e con due toni)
-    const back = g.createLinearGradient(0, -20, 0, 60); back.addColorStop(0, hairD); back.addColorStop(1, dark(hair, 0.5)); hairBack(g, st, fw, back, { tie: tie, alt: hairD });
-    if (st === "long" || st === "bob") { g.strokeStyle = line; g.lineWidth = 0.8; g.beginPath(); hairBack(g, st, fw, "rgba(0,0,0,0)", {}); }
-    // busto: camicia, giacca con revers, cravatta nel colore del personaggio
-    g.fillStyle = jacket; bodyPath(g, 37); g.fill(); g.strokeStyle = dark(shirt, 0.55); g.lineWidth = 0.9; g.stroke();
-    g.fillStyle = blouse; g.beginPath(); g.moveTo(-9, 31); g.lineTo(0, 50); g.lineTo(9, 31); g.closePath(); g.fill();
-    g.fillStyle = lapel; [-1, 1].forEach((sd) => { g.beginPath(); g.moveTo(sd * 9, 31); g.lineTo(sd * 15, 34); g.lineTo(sd * 8, 46); g.lineTo(sd * 2, 54); g.lineTo(sd * 1, 50); g.closePath(); g.fill(); g.strokeStyle = dark(shirt, 0.6); g.lineWidth = 0.7; g.stroke(); });
-    g.fillStyle = blouse; [-1, 1].forEach((sd) => { g.beginPath(); g.moveTo(0, 33); g.lineTo(sd * 9, 30); g.lineTo(sd * 6, 37); g.closePath(); g.fill(); g.strokeStyle = "#c8c4bc"; g.lineWidth = 0.6; g.stroke(); }); // colletto
-    g.fillStyle = tie; g.beginPath(); g.moveTo(-2, 35); g.lineTo(2, 35); g.lineTo(3, 48); g.lineTo(0, 52); g.lineTo(-3, 48); g.closePath(); g.fill(); g.fillStyle = dark(tie, 0.2); g.beginPath(); g.moveTo(-2.4, 33.5); g.lineTo(2.4, 33.5); g.lineTo(1.6, 36.5); g.lineTo(-1.6, 36.5); g.closePath(); g.fill();
-    g.save(); bodyPath(g, 37); g.clip(); const sh = g.createLinearGradient(-37, 0, 37, 0); sh.addColorStop(0, "rgba(255,255,255,.12)"); sh.addColorStop(0.6, "rgba(0,0,0,0)"); sh.addColorStop(1, "rgba(0,0,0,.22)"); g.fillStyle = sh; g.fillRect(-40, 28, 80, 36); g.restore();
-    if (c.num && g.getTransform().a > 0) { g.fillStyle = lite(shirt, 0.7); g.font = "700 7px Georgia, serif"; g.textAlign = "center"; g.fillText(String(c.num).slice(0, 2), -22, 52); g.textAlign = "left"; }
-    // collo
-    g.fillStyle = skinS; g.beginPath(); g.moveTo(-5.5, 20); g.lineTo(-6, 32); g.quadraticCurveTo(0, 35, 6, 32); g.lineTo(5.5, 20); g.closePath(); g.fill();
-    // orecchie (piccole, quasi coperte)
-    g.fillStyle = skin; g.strokeStyle = sline; g.lineWidth = 0.7; [-1, 1].forEach((sd) => { g.beginPath(); g.ellipse(sd * (fw + 0.5), 7, 2.6, 4.2, 0, 0, 7); g.fill(); g.stroke(); });
-    // viso affilato, ombra morbida a cel
-    facePath(g, fw, chinY, true); g.fillStyle = skin; g.fill();
-    g.save(); g.clip();
-    g.fillStyle = skinS; g.globalAlpha = 0.45; g.beginPath(); g.moveTo(fw * 0.45, -24); g.bezierCurveTo(fw * 0.85, 0, fw * 0.6, 16, 1, chinY + 2); g.lineTo(fw + 4, chinY + 2); g.lineTo(fw + 4, -24); g.closePath(); g.fill(); g.globalAlpha = 1;
-    const occ = g.createLinearGradient(0, -14, 0, -2); occ.addColorStop(0, "rgba(120,60,90,.4)"); occ.addColorStop(1, "rgba(120,60,90,0)"); g.fillStyle = occ; g.fillRect(-30, -16, 60, 14);
-    [-1, 1].forEach((sd) => { const bl = g.createRadialGradient(sd * (T.gap + 1.5), 15, 0, sd * (T.gap + 1.5), 15, 6.5); bl.addColorStop(0, `rgba(255,120,150,${expr === "smile" || expr === "grin" || expr === "sad" ? 0.55 : 0.3})`); bl.addColorStop(1, "rgba(255,120,150,0)"); g.fillStyle = bl; g.fillRect(sd * (T.gap + 1.5) - 8, 7, 16, 16); if (expr === "smile" || expr === "grin") { g.strokeStyle = "rgba(230,90,120,.5)"; g.lineWidth = 0.6; for (let k = 0; k < 3; k++) { g.beginPath(); g.moveTo(sd * (T.gap - 1 + k * 1.6), 13.5); g.lineTo(sd * (T.gap - 2 + k * 1.6), 16); g.stroke(); } } });
-    g.restore();
-    facePath(g, fw, chinY, true); g.strokeStyle = sline; g.lineWidth = 0.9; g.stroke();
-    if (c.beard) { g.fillStyle = mix(hair, 0, null, 0.75); g.beginPath(); g.moveTo(-fw + 3, 11); g.quadraticCurveTo(-fw + 5, chinY, 0, chinY + 2); g.quadraticCurveTo(fw - 5, chinY, fw - 3, 11); g.quadraticCurveTo(0, 24, -fw + 3, 11); g.fill(); }
-    // occhi grandi a strati
-    eyesDetailed(g, T, c, expr, { skin, hair, eye, line, vn: true });
-    // naso: solo un'ombra sottile
-    g.strokeStyle = mix(skin, 0.35, "#8a3a5a"); g.lineWidth = 0.8; g.beginPath(); g.moveTo(1.4, 12.5); g.lineTo(0.2, 15); g.stroke();
-    // bocca piccola
-    const my = 20.5;
-    if (expr === "grin") { g.fillStyle = "#8a2a3e"; g.beginPath(); g.moveTo(-3.6, my - 0.6); g.quadraticCurveTo(0, my + 0.2, 3.6, my - 0.6); g.quadraticCurveTo(0, my + 5.5, -3.6, my - 0.6); g.fill(); g.fillStyle = "#ff8aa0"; g.beginPath(); g.ellipse(0, my + 2.8, 1.8, 1, 0, 0, 7); g.fill(); }
-    else if (isWow(expr)) { g.fillStyle = "#8a2a3e"; g.beginPath(); g.ellipse(0, my + 0.8, 1.7, 2.3, 0, 0, 7); g.fill(); }
-    else { g.strokeStyle = mix(skin, 0.6, "#6a1a2a"); g.lineWidth = 0.95; g.beginPath(); if (expr === "smile" || T.mouth === 1 && expr !== "sad" && expr !== "angry") { g.moveTo(-2.8, my); g.quadraticCurveTo(0, my + 2, 2.8, my); } else if (expr === "sad") { g.moveTo(-2.6, my + 1.4); g.quadraticCurveTo(0, my - 0.4, 2.6, my + 1.4); } else if (expr === "angry") { g.moveTo(-3, my + 0.8); g.lineTo(3, my + 0.4); } else if (expr === "sly") { g.moveTo(-2.4, my + 0.6); g.quadraticCurveTo(1, my + 1.4, 3.4, my - 1); } else { g.moveTo(-1.8, my + 0.4); g.lineTo(1.8, my + 0.4); } g.stroke(); }
-    // capelli: due toni, ciocche appuntite, anello di luce, contorno colorato
-    if (c.cap) { g.save(); g.beginPath(); g.rect(-60, -8, 120, 80); g.clip(); }
-    const top = hairFront(g, st, fw, T, { pointy: true, len: 3 }); if (st !== "hood" && st !== "elmo") { g.fillStyle = hair; g.fill(); g.strokeStyle = line; g.lineWidth = 0.9; g.stroke(); }
-    sideLocks(g, st, fw, hair, 6); extras(g, st, fw, top, hair, line);
-    if (!c.cap && st !== "hood" && st !== "elmo") {
-      g.save(); hairFront(g, st, fw, T, { pointy: true, len: 3 }); g.clip();
-      g.fillStyle = hairD; g.globalAlpha = 0.6; g.beginPath(); g.moveTo(-fw - 4, -2); for (let i = 0; i <= 8; i++) { const x = -fw - 4 + i * ((fw * 2 + 8) / 8); g.lineTo(x, -8 + (i % 2 ? -3 : 2)); } g.lineTo(fw + 4, 10); g.lineTo(-fw - 4, 10); g.closePath(); g.fill(); g.globalAlpha = 1; // ombra a cel sotto
-      g.strokeStyle = hairL; g.lineWidth = 2.6; g.globalAlpha = 0.8; g.beginPath(); g.ellipse(0, top + 9, fw - 1, 4.5, 0, Math.PI * 1.05, Math.PI * 1.95); g.stroke(); // anello di luce
-      g.lineWidth = 1; g.globalAlpha = 0.6; for (let i = 0; i < 5; i++) { const x = -fw + 5 + i * (fw * 2 - 10) / 4; g.beginPath(); g.moveTo(x, top + 6); g.lineTo(x + 1.5, top + 12); g.stroke(); } g.globalAlpha = 1;
-      g.strokeStyle = line; g.lineWidth = 0.6; for (let i = 0; i < 5; i++) { const x = -fw + 4 + i * (fw * 2 - 8) / 4; g.beginPath(); g.moveTo(x * 0.6, top + 4); g.quadraticCurveTo(x * 0.9, top + 12, x, -9); g.stroke(); }
-      g.restore();
-      // una ciocca ribelle in cima
-      if (st !== "buzz" && st !== "slick" && st !== "ordinato") { g.fillStyle = hair; g.strokeStyle = line; g.lineWidth = 0.8; g.beginPath(); g.moveTo(-2, top + 1); g.quadraticCurveTo(3, top - 9, 9, top - 7); g.quadraticCurveTo(4, top - 4, 3, top + 2); g.closePath(); g.fill(); g.stroke(); }
-    }
-    if (c.cap) g.restore();
-    glassesHD(g, T, c);
-    if (c.cap) { g.fillStyle = c.cap; capPath(g, fw); g.fill(); g.strokeStyle = dark(c.cap, 0.55); g.lineWidth = 0.9; g.stroke(); g.fillStyle = dark(c.cap, 0.25); g.beginPath(); g.ellipse(-6, -7, fw + 6, 3.4, -0.06, 0, 7); g.fill(); g.stroke(); g.strokeStyle = lite(c.cap, 0.4); g.lineWidth = 1.6; g.beginPath(); g.arc(0, -10, fw - 2, Math.PI * 1.2, Math.PI * 1.45); g.stroke(); }
-    if (expr === "think") thinkBubbles(g, "rgba(255,255,255,.95)");
-    if (expr === "angry") { g.strokeStyle = "#e83a4a"; g.lineWidth = 1.4; const ax = fw + 2, ay = -16; [[0, 0], [1, 1]].forEach(() => {}); [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => { g.beginPath(); g.moveTo(ax + a * 1.2, ay + b * 3.5); g.quadraticCurveTo(ax + a * 1.2, ay + b * 1.2, ax + a * 3.5, ay + b * 1.2); g.stroke(); }); } // la «vena» da manga
-    if (c.accFn) { try { c.accFn(g, "body"); c.accFn(g, "head"); } catch (e) {} }
-  }
-
-  const NEW = { flat, hd, vn };
+  const NEW = { flat, hd };
   const draw0 = FS.draw.bind(FS);
   FS.draw = function (style, g, id, c, expr) {
     if (!NEW[style]) return draw0(style, g, id, c, expr);
