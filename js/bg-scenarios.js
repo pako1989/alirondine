@@ -5735,6 +5735,83 @@
     const vx = 50, vy = 150; px(g, vx, vy, 14, 28, "#2a4a3a"); circ(g, vx + 7, vy - 6, 7, "#e8c4a0"); px(g, vx, vy - 13, 14, 4, "#c8c8c8"); const fl = since("dc_tribunale", 2) < 100; circ(g, vx + 11, vy + (fl ? 12 + since("dc_tribunale", 2) * 0.3 : 4), 3, "#e83a3a");
     px(g, 0, 180, W, 20, "#2a1a10");
   }
+  // ---------------------------------------------------------------- IL TRONO DI CUOIO
+  const TC = { tasso: ["#6a5a3a", "#e8d8b0", "🦡"], corvonero: ["#2a2a3a", "#9a8ac8", "🪶"], ferroquercia: ["#8a6a1a", "#ffd27a", "🌳"], salmastra: ["#1a4a6a", "#7ad8d8", "🐙"], rovoardente: ["#a83a1a", "#ffb84a", "🔥"], gelaneve: ["#5a7a9a", "#e8f0f8", "❄️"], pietrabruna: ["#5a4a3a", "#c8b898", "⛰️"] };
+  const TC7 = ["tasso", "corvonero", "ferroquercia", "salmastra", "rovoardente", "gelaneve", "pietrabruna"];
+  function tcBanner(g, x, y, id, f, i, big) { // uno stendardo che sventola: l'onda corre lungo la stoffa
+    const [c, c2, s] = TC[id] || TC.tasso, L = big ? 26 : 18, H = big ? 34 : 24, wv = (u) => Math.sin(f / 9 - u * 4 + i) * (big ? 3 : 2) * u;
+    px(g, x - 1, y - 4, 2, H + 30, "#4a3a2a"); circ(g, x, y - 5, 2, "#c8a050");
+    g.fillStyle = c; g.beginPath(); for (let k = 0; k <= 8; k++) { const u = k / 8; g.lineTo(x + 1 + u * L, y + wv(u)); } for (let k = 8; k >= 0; k--) { const u = k / 8; g.lineTo(x + 1 + u * L, y + H + wv(u) - (k === 4 ? 5 : 0)); } g.closePath(); g.fill();
+    for (let k = 0; k < 8; k++) { const u = k / 8, sh = Math.cos(f / 9 - u * 4 + i); if (sh > 0.3) { g.fillStyle = `rgba(0,0,0,${0.2 * sh})`; g.fillRect(x + 1 + u * L, y + wv(u), L / 8 + 0.5, H - 4); } }
+    px(g, x + 1, y + wv(0), L, 2, c2); g.font = `${big ? 12 : 9}px serif`; g.textAlign = "center"; g.fillText(s, x + 1 + L / 2, y + H / 2 + 4 + wv(0.5)); g.textAlign = "left";
+  }
+  function tcTower(g, x, y, w, h, col, roof) { px(g, x, y, w, h, col); for (let k = 0; k < w; k += 6) px(g, x + k, y - 4, 4, 4, col); if (roof) { g.fillStyle = roof; g.beginPath(); g.moveTo(x - 2, y - 4); g.lineTo(x + w / 2, y - 22); g.lineTo(x + w + 2, y - 4); g.closePath(); g.fill(); } px(g, x + w / 2 - 2, y + 10, 4, 7, "rgba(20,12,6,.6)"); }
+  function tcRaven(g, x, y, f, s) { s = s || 1; const fl = Math.sin(f / 3) * 4 * s; g.fillStyle = "#121212"; g.beginPath(); g.ellipse(x, y, 5 * s, 2.5 * s, 0, 0, 7); g.fill(); g.beginPath(); g.moveTo(x - 2 * s, y); g.lineTo(x - 9 * s, y - 2 * s - fl); g.lineTo(x + 2 * s, y - 1); g.fill(); g.beginPath(); g.moveTo(x + 2 * s, y); g.lineTo(x + 9 * s, y - 2 * s - fl); g.lineTo(x - 2 * s, y - 1); g.fill(); }
+  function tcCandle(g, x, y, f, i) { px(g, x - 2, y, 4, 12, "#f4ecdc"); g.fillStyle = (Math.floor(f / 7) + i) % 2 ? "#ffb84a" : "#ffd27a"; g.beginPath(); g.ellipse(x, y - 3, 2, 4 + Math.sin(f / 5 + i), 0, 0, 7); g.fill(); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, x, y - 3, 14, "255,200,110", 0.25); g.restore(); }
+  function tcThrone(g, x, y, s, f, glow) { // il Trono di Cuoio: schienale alto a esagoni, come un pallone antico
+    g.save(); g.translate(x, y); g.scale(s, s); px(g, -22, 30, 44, 8, "#3a2410"); px(g, -18, 10, 36, 22, "#8a5a2a");
+    g.fillStyle = "#7a4a1e"; g.beginPath(); g.moveTo(-18, 12); g.lineTo(-14, -40); g.quadraticCurveTo(0, -54, 14, -40); g.lineTo(18, 12); g.closePath(); g.fill();
+    g.strokeStyle = "#e8d8b0"; g.lineWidth = 0.8; for (let r = 0; r < 4; r++) for (let q = 0; q < 3; q++) { const hx = -9 + q * 9 + (r % 2 ? 4.5 : 0), hy = -34 + r * 10; if (Math.abs(hx) > 12) continue; g.beginPath(); for (let k = 0; k < 6; k++) { const a = (k / 6) * Math.PI * 2; g.lineTo(hx + Math.cos(a) * 4.5, hy + Math.sin(a) * 4.5); } g.closePath(); g.stroke(); }
+    circ(g, 0, -50, 4, "#ffd27a"); g.restore(); if (glow) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, x, y - 10 * s, 50 * s, "255,210,120", 0.2 + 0.08 * Math.sin(f / 15)); g.restore(); }
+  }
+  function bgTcTitolo(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#1a0e06", "#4a2a14", "#2a1a0c"]);
+    for (let i = 0; i < 7; i++) tcBanner(g, 18 + i * 44, 22 + Math.abs(i - 3) * 6, TC7[i], f, i, false);
+    tcThrone(g, 160, 150, 1.3, f, true);
+    const n = since("tc_titolo", 1) < 140 ? 7 : 2; for (let i = 0; i < n; i++) tcCandle(g, 60 + i * 34, 178, f, i);
+    if (since("tc_titolo", 2) < 160) { const t = since("tc_titolo", 2); tcRaven(g, -20 + t * 2.4, 70 + Math.sin(t / 10) * 10, f, 1.4); } else tcRaven(g, 270, 120, f * 0.3, 0.9);
+    g.fillStyle = "#ffd27a"; g.font = "900 20px Georgia, serif"; g.textAlign = "center"; g.fillText("IL TRONO DI CUOIO", 160, 196); g.textAlign = "left";
+    if (since("tc_titolo", 0) < 90) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 160, 110, 90, "255,220,140", 0.35 * (1 - since("tc_titolo", 0) / 90)); g.restore(); }
+  }
+  function bgTcRocca(g, W, H, f) {
+    vgrad(g, 0, 0, W, 120, ["#8ab0d0", "#c8d8e0"]); g.fillStyle = "#6a7a4a"; g.beginPath(); g.moveTo(0, 110); for (let x = 0; x <= W; x += 20) g.lineTo(x, 96 + Math.sin(x / 40) * 10); g.lineTo(W, 120); g.lineTo(0, 120); g.fill();
+    px(g, 0, 120, W, 80, "#7a7a5a"); tcTower(g, 40, 50, 40, 80, "#8a8478", "#4a3a2a"); tcTower(g, 240, 50, 40, 80, "#8a8478", "#4a3a2a"); tcTower(g, 120, 30, 80, 100, "#9a948a", "#5a3a22"); px(g, 80, 80, 160, 50, "#8a8478"); for (let k = 80; k < 240; k += 8) px(g, k, 76, 5, 4, "#8a8478");
+    tcBanner(g, 126, 40, "tasso", f, 0, true); tcBanner(g, 176, 40, "tasso", f, 2, true);
+    const op = since("tc_rocca", 0) < 120; px(g, 146, 100, 28, 30, op ? "#2a1a0c" : "#5a3a1a"); if (!op) for (let k = 0; k < 4; k++) px(g, 148 + k * 7, 100, 2, 30, "#3a2410");
+    const hx = since("tc_rocca", 1) < 140 ? 30 + since("tc_rocca", 1) * 1.6 : 30; px(g, hx, 160, 26, 12, "#5a3a22"); px(g, hx + 20, 150, 8, 12, "#5a3a22"); px(g, hx + 3, 172, 3, 10, "#3a2410"); px(g, hx + 18, 172, 3, 10, "#3a2410");
+    const bx = 250, by = 175 - (since("tc_rocca", 2) < 60 ? Math.abs(Math.sin(since("tc_rocca", 2) / 6)) * 30 : 0); circ(g, bx, by, 5, "#8a5a2a"); g.strokeStyle = "#e8d8b0"; g.lineWidth = 0.6; g.beginPath(); g.arc(bx, by, 2.5, 0, 7); g.stroke();
+  }
+  function bgTcSala(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#2a1a0c", "#4a2e18"]); for (let i = 0; i < 6; i++) px(g, i * 60, 0, 6, 120, "#1a0e06");
+    tcBanner(g, 40, 20, "tasso", f, 0, true); tcBanner(g, 250, 20, "tasso", f, 1, true);
+    const fire = since("tc_sala", 0) < 140 ? 1.8 : 1; px(g, 120, 60, 80, 60, "#3a2a1a"); px(g, 130, 75, 60, 45, "#120a04"); for (let k = 0; k < 6; k++) { g.fillStyle = ["#ff8a2a", "#ffd27a", "#ff5a1a"][k % 3]; g.beginPath(); g.ellipse(140 + k * 8, 112, 4, (8 + Math.sin(f / 4 + k) * 4) * fire, 0, 0, 7); g.fill(); } g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 160, 105, 60 * fire, "255,160,80", 0.3); g.restore();
+    circ(g, 160, 50, 9, "#8a5a2a"); g.strokeStyle = "#e8d8b0"; g.lineWidth = 0.6; g.beginPath(); g.arc(160, 50, 5, 0, 7); g.stroke();
+    px(g, 20, 150, 280, 14, "#5a3a22"); px(g, 20, 148, 280, 3, "#7a5a3a"); for (let i = 0; i < 9; i++) px(g, 30 + i * 32, 164, 4, 24, "#3a2410");
+    const moved = since("tc_sala", 1) < 200; px(g, moved ? 250 : 286, 130, 14, 20, "#6a4a2a");
+    if (since("tc_sala", 2) < 120) { const t = since("tc_sala", 2); g.fillStyle = "#e8d8b0"; g.font = "italic 9px Georgia, serif"; g.globalAlpha = Math.min(1, t / 30); g.fillText("…di Casa Tasso", 40, 136); g.globalAlpha = 1; }
+    [70, 250].forEach((x, i) => tcCandle(g, x, 136, f, i));
+  }
+  function bgTcCapitale(g, W, H, f) {
+    vgrad(g, 0, 0, W, 130, ["#e8b878", "#f4d8a8"]); for (let i = 0; i < 7; i++) { const x = 14 + i * 44, h = 60 + (i === 3 ? 40 : (i % 2) * 14); tcTower(g, x, 130 - h, 22, h, ["#d8c8a8", "#c8b898"][i % 2], TC[TC7[i]][0]); tcBanner(g, x + 11, 130 - h - 40, TC7[i], f, i, false); }
+    px(g, 0, 130, W, 70, "#c8b898"); for (let i = 0; i < 16; i++) px(g, i * 22, 130, 1, 70, "rgba(90,60,30,.2)");
+    const n = since("tc_capitale", 0) < 160 ? 9 : 2; for (let i = 0; i < n; i++) tcRaven(g, (40 + i * 37 + f * 0.6 * (1 + i % 3)) % (W + 40) - 20, 30 + (i * 13) % 50, f + i * 7, 0.8);
+    const tx = 60, ty = 168; px(g, tx, ty, 50, 16, "#8a6a3a"); px(g, tx + 6, ty - 10, 10, 10, "#3a6a9a"); const cheers = since("tc_capitale", 1) < 90; if (cheers) { g.fillStyle = "#fff"; g.font = "bold 8px Georgia, serif"; g.fillText("SALUTE!", tx + 20, ty - 6); }
+    const b = since("tc_capitale", 2) < 120; px(g, 230, 160, 40, 26, "#6a4a2a"); circ(g, 250, 156, b ? 8 + Math.sin(f / 4) : 6, "#8a5a2a"); if (b) { g.fillStyle = "#3a2410"; g.font = "8px Georgia, serif"; g.fillText("× 7", 262, 152); }
+  }
+  function bgTcConsiglio(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#1a0e06", "#3a2414"]); for (let i = 0; i < 7; i++) tcBanner(g, 14 + i * 44, 14, TC7[i], f, i, false);
+    tcThrone(g, 160, 110, 0.8, f, since("tc_consiglio", 2) < 100); if (since("tc_consiglio", 2) >= 100) { g.fillStyle = "rgba(90,20,20,.85)"; g.beginPath(); g.moveTo(136, 60); g.quadraticCurveTo(160, 52, 184, 60); g.lineTo(190, 136); g.lineTo(130, 136); g.closePath(); g.fill(); }
+    g.fillStyle = "#5a3a22"; g.beginPath(); g.ellipse(160, 170, 110, 22, 0, 0, 7); g.fill(); g.fillStyle = "#7a5a3a"; g.beginPath(); g.ellipse(160, 166, 110, 20, 0, 0, 7); g.fill();
+    const lit = since("tc_consiglio", 0) < 200; for (let i = 0; i < 7; i++) { const a = (i / 7) * Math.PI * 2, x = 160 + Math.cos(a) * 80, y = 166 + Math.sin(a) * 12; if (lit || i % 3 === 0) tcCandle(g, x, y - 12, f, i); else px(g, x - 2, y - 12, 4, 12, "#f4ecdc"); }
+    if (since("tc_consiglio", 1) < 120) { const t = since("tc_consiglio", 1); for (let i = 0; i < 7; i++) { circ(g, 52 + i * 36, 196 - Math.min(20, t / 2), 7, i % 3 ? "#a82a2a" : "#3a3a3a"); } }
+  }
+  function bgTcArena(g, W, H, f) {
+    vgrad(g, 0, 0, W, 90, ["#7ab0e0", "#c8e0f0"]); for (let i = 0; i < 7; i++) tcTower(g, 10 + i * 46, 40, 18, 50, "#d8c8a8", TC[TC7[i]][0]);
+    px(g, 0, 70, W, 40, "#6a4a2a"); for (let r = 0; r < 4; r++) for (let i = 0; i < 40; i++) { const jump = since("tc_arena", 0) < 90 ? Math.abs(Math.sin(f / 4 + i)) * 4 : 0; circ(g, 4 + i * 8 + (r % 2) * 4, 76 + r * 9 - jump, 2.5, ["#e8c4a0", "#c68642", "#f0d0b0", "#8a5a3a"][(i + r) % 4]); }
+    vgrad(g, 0, 110, W, 90, ["#4a8a3a", "#3a7a2a"]); g.strokeStyle = "rgba(255,255,255,.7)"; g.lineWidth = 1.5; g.strokeRect(20, 118, 280, 74); g.beginPath(); g.moveTo(160, 118); g.lineTo(160, 192); g.stroke(); g.beginPath(); g.arc(160, 155, 16, 0, 7); g.stroke();
+    for (let i = 0; i < 7; i++) tcBanner(g, 16 + i * 46, 6, TC7[i], f, i, false);
+    px(g, 140, 146, 40, 16, "#5a3a22"); [146, 174].forEach((x, i) => tcCandle(g, x, 134, f, i));
+    if (since("tc_arena", 1) < 60) { g.fillStyle = "#ffd27a"; g.font = "900 14px Georgia, serif"; g.fillText("DO!", 60, 140 - since("tc_arena", 1) / 3); }
+    const bx = since("tc_arena", 2) < 80 ? 160 + since("tc_arena", 2) * 1.6 : 160, by = 155 - (since("tc_arena", 2) < 80 ? Math.sin(since("tc_arena", 2) / 80 * Math.PI) * 30 : 0); circ(g, bx, by + 18, 4, "#8a5a2a");
+  }
+  function bgTcTrono(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#2a1a0c", "#5a3a1a"]); for (let i = 0; i < 6; i++) { g.fillStyle = "rgba(255,220,140,.06)"; g.beginPath(); g.moveTo(40 + i * 50, 0); g.lineTo(60 + i * 50, 0); g.lineTo(100 + i * 40, H); g.lineTo(70 + i * 40, H); g.fill(); }
+    [[30, "tasso"], [70, "corvonero"], [230, "rovoardente"], [270, "gelaneve"]].forEach(([x, id], i) => tcBanner(g, x, 16, id, f, i, true));
+    px(g, 110, 150, 100, 10, "#4a2e18"); px(g, 120, 140, 80, 10, "#5a3a22"); px(g, 130, 130, 60, 10, "#6a4a2a");
+    tcThrone(g, 160, 100, 1.1, f, since("tc_trono", 0) < 140);
+    const dust = since("tc_trono", 1) < 160 ? 40 : 14; for (let i = 0; i < dust; i++) { const x = (i * 53 + f * 0.3) % W, y = (i * 37 + f * 0.2 * (1 + i % 3)) % H; px(g, x, y, 1, 1, "rgba(255,220,140,.6)"); }
+    if (since("tc_trono", 2) < 120) { const t = since("tc_trono", 2); for (let i = 0; i < 7; i++) circ(g, 60 + i * 34, 186 - Math.abs(Math.sin(t / 8 + i)) * 12, 5, "#8a5a2a"); }
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -6381,6 +6458,41 @@
       [110, 15, 100, 50, "⚖ La bilancia dipinta sul muro oscilla, piano. Poi si ferma in equilibrio. La giudice dice che lo fa da sola, quando qualcuno mente."],
       [185, 75, 40, 35, "🔨 TOC! Il martelletto batte sul banco. Nell'aula cala un silenzio così profondo che si sente piovere su tutta Portagrigia."],
       [40, 130, 40, 60, "🌺 Il garofano del Presidente Valli scivola dall'occhiello e cade per terra. Lui non lo raccoglie."],
+    ] },
+    tc_titolo: { draw: bgTcTitolo, hot: [
+      [120, 50, 80, 110, "👑 Il Trono di Cuoio si illumina dall'interno, come un pallone colpito dal sole. Settanta casate ci si sono sedute. Nessuna ci è rimasta."],
+      [40, 160, 240, 30, "🕯 Si accendono sette candele, una per casata. Quella di Casa Tasso è la più corta: brucia da più tempo."],
+      [0, 50, 320, 50, "🪶 Un corvo attraversa la sala portando un sigillo nel becco. A Valdoro, ogni volo è un segreto che cambia padrone."],
+    ] },
+    tc_rocca: { draw: bgTcRocca, hot: [
+      [140, 96, 40, 36, "🚪 Il portone del mastio si apre. Dentro, odore di fumo e di cuoio. Lord Ubaldo non ama le visite. Questa, forse, la aspettava."],
+      [20, 140, 80, 50, "🐎 Il cavallo della domenica trotta per il cortile. È tuo, anche se non c'è scritto da nessuna parte."],
+      [230, 150, 50, 40, "⚽ Il pallone del cortile rimbalza contro il muro: chi perde, pulisce le stalle. Da trecento anni."],
+    ] },
+    tc_sala: { draw: bgTcSala, hot: [
+      [120, 60, 80, 60, "🔥 Il camino divampa. Sopra, il primo pallone di Casa Tasso, con il rammendo di Lord Ubaldo da ragazzo."],
+      [240, 120, 60, 40, "🪑 La tua sedia, l'ultima della tavola. Qualcuno l'ha spostata avanti di un posto. Solo uno. Ma a Rocca Tasso è tantissimo."],
+      [20, 120, 120, 30, "📜 Nelle cronache della casa, una riga cancellata. Se guardi controluce, si legge ancora: «…di Casa Tasso»."],
+    ] },
+    tc_capitale: { draw: bgTcCapitale, hot: [
+      [0, 10, 320, 60, "🪶 I corvi di Corvonero si alzano tutti insieme dalla torre. Per un attimo il cielo di Altavalle è nero di segreti."],
+      [50, 150, 70, 40, "🍷 Davanti alla locanda «Al Patto Rotto», i marinai di Salmastra brindano a un patto che nessuno di loro rispetterà."],
+      [220, 140, 60, 50, "⚽ Il banco del cuoiaio di corte: «Dal Trono verrebbero sette palloni perfetti», dice. Poi si guarda intorno e non lo dice più."],
+    ] },
+    tc_consiglio: { draw: bgTcConsiglio, hot: [
+      [50, 140, 220, 40, "🕯 Le candele del Consiglio si accendono una per voto. Quelle spente sono le casate che non hai ancora convinto."],
+      [40, 180, 240, 20, "🔴 Sette sigilli di cera rotolano sul tavolo: rossi per il sì, neri per il no. La reggente non guarda mai i suoi: li conosce già."],
+      [130, 50, 60, 90, "👑 Il drappo scivola dal Trono di Cuoio, solo per un attimo. Poi una guardia lo rimette a posto, senza fare rumore."],
+    ] },
+    tc_arena: { draw: bgTcArena, hot: [
+      [0, 70, 320, 40, "📣 Le tribune saltano tutte insieme. Settanta casate di tifosi, sette colori, un solo urlo."],
+      [40, 120, 60, 40, "🎺 L'araldo suona la tromba. Fa solo il do. Lo fa benissimo."],
+      [140, 130, 40, 40, "⚽ Il pallone della finale rotola dal tavolo del Concilio verso il campo, come se avesse fretta di giocare."],
+    ] },
+    tc_trono: { draw: bgTcTrono, hot: [
+      [120, 40, 80, 110, "👑 Il Trono di Cuoio brilla. Il cuoio è caldo, come un pallone dopo una partita."],
+      [0, 0, 320, 120, "✨ La polvere d'oro della sala si alza e gira, lenta, come la nebbia di un mattino di finale."],
+      [40, 160, 240, 40, "⚽ Per un attimo, sui gradini, ti sembra di vedere sette palloni che rimbalzano. Poi non ci sono più."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
