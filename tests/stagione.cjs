@@ -52,4 +52,24 @@ async function c2(w) {
   const i = await L.info(page); if (!i.done[2]) errors.push("capitolo 2 non concluso: " + JSON.stringify(i.step));
   L.check(`Stagione Infinita · capitolo 2 (${w} px)`, errors); await browser.close();
 }
-(async () => { await c1(390); await c1(320); await c2(390); await c2(320); })().catch((e) => { console.error("✗ stagione:", e.message); process.exit(1); });
+async function c3(w) {
+  const save = { v: 1, ch: 3, step: { 1: 5, 2: 5 }, done: { 1: "verita", 2: "pronti" }, diffSet: true, intro: { ch1: 1, ch2: 1, sf_piazza: 1, sf_stadio: 1, sf_videoteca: 1 }, st: { ada: 6, teo: 3 }, flags: { giro: 6, ora: 3, mem_ada: true, mem_teo: true, mem_lucio: true, mem_mira: true, mem_gatto_0: true, mem_gatto_1: true, mem_gatto_2: true, mem_gatto_3: true, nm_0_0: "1" } };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await page.evaluate(() => window.__stagione.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 3")); await L.advance(page);
+  await L.goAct(page, 35, 12); await L.advance(page);
+  await L.talk(page, "sf_bruno"); await page.evaluate(() => window.T_.click("Gioca la finale")); await page.waitForTimeout(500);
+  const rw = await page.evaluate(() => window.__nastro.state.rewinds); if (rw !== 4) errors.push("i ricordi non danno riavvolgimenti: " + rw);
+  await naStart(page); await page.waitForFunction(() => window.__nastro.state && window.__nastro.state.phase === "bivio", null, { timeout: 8000 });
+  const gh = await page.evaluate(() => window.__nastro.state.data.fantasmi); if (!gh) errors.push("i fantasmi delle domeniche passate non si vedono");
+  await naEnd(page, 2, 1); await L.advance(page);
+  if ((await page.evaluate(() => window.__stagione._dbg.K.giro())) !== 6) errors.push("dopo la vittoria il nastro si è riavvolto");
+  const ends = ["Il gatto rosso", "Andiamo a dormire", "Accompagniamo Teo", "il campo non deve sparire"];
+  for (const e of ends) {
+    await page.evaluate(() => { const K = window.__stagione._dbg.K; K.setStep(3, 1); K.enterZone("sf_stadio"); }); await page.waitForTimeout(400); await L.advance(page);
+    await L.talk(page, "sf_ada"); await L.advance(page, [e]); if (w === 390 && e === ends[0]) await L.shot(page, "sf_fine");
+  }
+  const i = await L.info(page); if (!i.done[3]) errors.push("capitolo 3 non concluso: " + JSON.stringify(i.step));
+  const n = await page.evaluate(() => window.__stagione._dbg.K.mem().ends.length); if (n < 4) errors.push("finali trovati " + n + " su 4");
+  L.check(`Stagione Infinita · capitolo 3 e i 4 finali (${w} px)`, errors); await browser.close();
+}
+(async () => { await c1(390); await c1(320); await c2(390); await c2(320); await c3(390); await c3(320); })().catch((e) => { console.error("✗ stagione:", e.message); process.exit(1); });

@@ -5617,6 +5617,15 @@
     if (since("sf_radio", 2) < 90) for (let i = 0; i < 6; i++) { const t = since("sf_radio", 2); circ(g, 40 + i * 45, 150 - Math.abs(Math.sin(t / 8 + i)) * 14, 3, "#e8e8f0"); }
     sfVhs(g, W, H, f, "DOM 16:00");
   }
+  function bgSfLunedi(g, W, H, f) {
+    // lunedì: l'alba vera, il Lido con le luci spente, il treno che parte, il gatto sul davanzale (tocca)
+    vgrad(g, 0, 0, W, 120, ["#5a6aa8", "#f8c89a"]); circ(g, 250, 120, 26, "#ffe0a8"); vgrad(g, 0, 118, W, 82, ["#6a8ab8", "#3a5a8a"]); for (let i = 0; i < 10; i++) px(g, (i * 33 + f * 0.2) % W, 128 + (i * 11) % 60, 16, 1, "rgba(255,230,190,.45)");
+    px(g, 30, 86, 150, 32, "#4a3a3a"); for (let i = 0; i < 6; i++) px(g, 36 + i * 24, 92, 16, 4, "#6a5a4a"); [40, 170].forEach((x) => { px(g, x, 50, 3, 38, "#2a2a2a"); px(g, x - 6, 46, 15, 6, "#4a4a4a"); });
+    const tr = since("sf_lunedi", 0) < 200 ? since("sf_lunedi", 0) * 2.2 : -999; if (tr > -900) { px(g, 340 - tr, 104, 90, 14, "#c8302a"); for (let k = 0; k < 5; k++) px(g, 346 - tr + k * 17, 107, 10, 6, "#ffe8a8"); g.fillStyle = "rgba(255,255,255,.7)"; for (let k = 0; k < 4; k++) { g.beginPath(); g.arc(430 - tr + k * 9, 100 - k * 4, 4 + k, 0, 7); g.fill(); } }
+    if (since("sf_lunedi", 1) < 120) for (let i = 0; i < 4; i++) { const t = since("sf_lunedi", 1) + i * 25; px(g, 60 + (t * 1.5) % 200, 40 + Math.sin(t / 10) * 6, 4, 2, ["#d8843a", "#c8642a", "#e8a84a", "#ff9ec0"][i]); }
+    const cx = 280, cy = 70, purr = since("sf_lunedi", 2) < 90; px(g, cx - 14, cy + 8, 34, 5, "#8a6a4a"); px(g, cx - 8, cy - 4, 18, 12, "#e8963a"); px(g, cx + 8, cy - 10, 10, 9, "#e8963a"); px(g, cx + 8, cy - 13, 3, 3, "#e8963a"); px(g, cx + 15, cy - 13, 3, 3, "#e8963a"); px(g, cx - 12 + Math.sin(f / 15) * 2, cy - 2, 4, 10, "#e8963a"); if (purr) { g.fillStyle = "#fff"; g.font = "bold 8px 'Courier New', monospace"; g.fillText("rrrrr…", cx - 10, cy - 18); }
+    g.font = "bold 9px 'Courier New', monospace"; g.fillStyle = "#fff"; g.fillText("LUN 08:01", W - 70, 16);
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -6198,6 +6207,11 @@
       [130, 50, 120, 70, "📻 Dal registratore partono onde radio, rosse, che si allargano sul lago. I pesci, dice Nonno Remigio, ascoltano sempre Radio Lago."],
       [50, 25, 220, 25, "🗨 «La domenica torna sempre». Mira lo ripete sottovoce, per impararlo. Poi lo ripete forte, per il lago."],
       [0, 120, 320, 60, "🌊 Il lago fa tre piccole onde, una dopo l'altra, come un applauso educato."],
+    ] },
+    sf_lunedi: { draw: bgSfLunedi, hot: [
+      [0, 90, 320, 30, "🚆 Passa il treno delle sei. Dal finestrino qualcuno saluta, e dal binario qualcuno risponde. Stavolta nessuno parte di nascosto."],
+      [40, 20, 240, 50, "🍂 Le foglie cadono in un ordine nuovo. Una con il buco a forma di cuore cade per prima. È la prima volta."],
+      [255, 50, 50, 40, "🐈 Il gatto rosso fa le fusa sul davanzale, forte come un motore. Lunedì gli piace."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
