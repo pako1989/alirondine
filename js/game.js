@@ -7075,6 +7075,29 @@
       bass: "R . . . . . . . 5 . . . . . . .", bv: 0.13, arp: "1 3 5 8 1 3 5 8 1 3 5 8 1 3 5 8", aw: "triangle", av: 0.03, drum: "k . . . s . . . k . . . s . . .", dv: 0.35 },
   };
   const THC = {};
+  // temi delle saghe: si registrano da fuori (motore saga comune) e si collegano agli sfondi di scena (chiave intera o prefisso «ve_»)
+  const MUSBG = { mu_: "muro", cr_: "cristalli", lb_: "libro", dt_: "doppio" };
+  Object.assign(THEMES, {
+    // Il Muro: cupo e solenne, come una marcia lenta sotto la pioggia
+    muro: { bpm: 72, chords: ["Dm", "Bb", "Gm", "A", "Dm", "C", "Bb", "A"], lres: 4, lw: "triangle", lv: 0.08,
+      lead: "D5 - A4 - | F5 - E5 - | G5 - Bb5 - | A5 - - - | D5 - F5 - | E5 - C5 - | D5 - Bb4 - | A4 - - -",
+      bass: "R . . . . . . . 5 . . . . . . .", bv: 0.12, arp: "1 . 5 . 8 . 5 . 1 . 5 . 8 . 5 .", aw: "sine", av: 0.03, drum: "k . . . . . . . k . . . s . . .", dv: 0.3 },
+    // Cristalli del Campo: fanfara JRPG a 16 bit
+    cristalli: { bpm: 126, chords: ["C", "Am", "F", "G", "C", "Em", "F", "G"], lres: 2, lw: "pulse", lv: 0.05,
+      lead: "G5 - C6 - E6 - D6 C6 | B5 - G5 - A5 - B5 - | C6 - A5 - F5 - A5 C6 | D6 - - - B5 - G5 - | E6 - G6 - E6 D6 C6 - | B5 - G5 - E5 - G5 - | A5 - C6 - F6 - E6 D6 | D6 - E6 - F6 - G6 -",
+      bass: "R . 5 . 8 . 5 . R . 5 . 8 . 5 .", bv: 0.12, arp: "1 3 5 8 1 3 5 8 1 3 5 8 1 3 5 8", aw: "square", av: 0.014, drum: "k . h . s . h . k . h k s . h h", dv: 0.42 },
+    // Il Libro che Mangiava i Finali: carillon da favola, un po' storto
+    libro: { bpm: 104, spb: 12, chords: ["G", "Em", "C", "D"], lres: 2, lw: "triangle", lv: 0.07,
+      lead: "B5 - D6 - G6 - | E6 - - D6 - B5 | C6 - E6 - G6 - | F#6 - - - - -",
+      bass: "R . . 5 . . R . . 5 . .", bv: 0.08, arp: "8 5 3 8 5 3 8 5 3 8 5 3", aw: "sine", av: 0.03, drum: ". . . . . . . . . h . .", dv: 0.12 },
+    // Doppio Turno: due voci che si rincorrono (il Dentro e il Fuori)
+    doppio: { bpm: 96, chords: ["Am", "C", "G", "F"], lres: 2, lw: "pulse", lv: 0.045,
+      lead: "A5 . C6 . E6 . . . | G5 . . . E5 . D5 . | D5 . G5 . B5 . . . | C6 - - . A5 - - .",
+      bass: "R . . R . . 5 . R . . R . . 5 .", bv: 0.11, arp: "1 5 8 5 3 5 8 5 1 5 8 5 3 5 8 5", aw: "triangle", av: 0.025, drum: "k . h . s . h . k . h . s . h k", dv: 0.3 },
+  });
+  function musicTheme(id, def) { if (id && !THEMES[id] && def && Array.isArray(def.chords) && def.chords.length) THEMES[id] = def; }
+  function musicBg(key, id) { if (key && id) MUSBG[key] = id; }
+  const musicBgOf = (bg) => { const id = MUSBG[bg] || MUSBG[(String(bg).match(/^[a-z]+_/) || [])[0]]; return id && THEMES[id] ? id : null; };
   function compileTheme(id) {
     if (THC[id]) return THC[id];
     const t = THEMES[id], spb = t.spb || 16, bars = t.chords.length, len = spb * bars, ev = Array.from({ length: len }, () => []);
@@ -7210,6 +7233,7 @@
     if (k === "bacheca") return "title";
     const bg = view.bg || "title";
     if (bg === "end") return "end";
+    const sagaMus = musicBgOf(bg); if (sagaMus) return sagaMus;
     if (playing) return MOOD || MOODBG[bg] || "calm";
     if (bg === "title" || bg === "stadium" || bg === "locker") return "title";
     return MOODBG[bg] || "title";
@@ -25478,7 +25502,7 @@
     text("voce", `<b>Come vuoi giocare questa partita?</b><br><span style="color:var(--dim)">Esito e ricompense della storia sono uguali: cambia solo come giochi.</span>`);
     buttons([{ label: "🎮 Partita a turni", sub: "Scegli le mosse una alla volta", cls: "hot", fn: () => apiMatch(cfg) }, ...alts.map((k) => kinds[k])]);
   }
-  window.__borgoApi = { match: apiMatch, matchPick: apiMatchPick, timing: bTiming, play, chap, scene: (bg, who, html, opts, title) => { view = { kind: "scene", bg, speaker: who }; if (title) chap(title); text(who || "voce", html); buttons(opts, true); }, portraitImg, TRZ, MN_BORGO_BTN, CAST, BIO, seeCard, trGo, trAsk, trSay, trResume, L, trToast, TR_IDS, NPCS, trLevel, trZone: () => (TW ? TW.id : null), trExitTo, trRec, todayKey, hq: HQ_API, COSM, bCos, cosOwned: () => { try { return cosOwned(); } catch { return []; } }, heroSave: (h) => { writeJSON(HERO, h); heroCast(h); }, heroCast, storyEndings: () => { const got = getList(ENDS); return ENDINGS.map(([t, grp, hint]) => ({ title: t, group: grp, hint, found: got.includes(t) })); }, coins: () => bCoins(), openBorgoStorto: (back) => openBorgoStorto(back), cosOrder: () => { try { return ((B || borgoLoad()).cos || []).slice(); } catch { return []; } }, portraitTo: (ctx, id, x, y, sc) => { const main = g, sp = view.speaker; try { g = ctx; view.speaker = null; portrait(id, x, y, sc, false); } finally { g = main; view.speaker = sp; } } };
+  window.__borgoApi = { match: apiMatch, matchPick: apiMatchPick, timing: bTiming, play, chap, scene: (bg, who, html, opts, title) => { view = { kind: "scene", bg, speaker: who }; if (title) chap(title); text(who || "voce", html); buttons(opts, true); }, portraitImg, TRZ, MN_BORGO_BTN, CAST, BIO, seeCard, trGo, trAsk, trSay, trResume, L, trToast, TR_IDS, NPCS, trLevel, trZone: () => (TW ? TW.id : null), trExitTo, trRec, todayKey, hq: HQ_API, COSM, bCos, cosOwned: () => { try { return cosOwned(); } catch { return []; } }, heroSave: (h) => { writeJSON(HERO, h); heroCast(h); }, heroCast, storyEndings: () => { const got = getList(ENDS); return ENDINGS.map(([t, grp, hint]) => ({ title: t, group: grp, hint, found: got.includes(t) })); }, coins: () => bCoins(), openBorgoStorto: (back) => openBorgoStorto(back), cosOrder: () => { try { return ((B || borgoLoad()).cos || []).slice(); } catch { return []; } }, musicTheme, musicBg, musicNow: () => MU.cur, portraitTo: (ctx, id, x, y, sc) => { const main = g, sp = view.speaker; try { g = ctx; view.speaker = null; portrait(id, x, y, sc, false); } finally { g = main; view.speaker = sp; } } };
   if (/[?&]debug/.test(location.search)) window.__borgoDbg = { get BW() { return BW; }, get B() { return B; }, BLD, borgo, borgoMap, borgoDoor, borgoOpenLevel };
   try { if (window.__storyNav && window.__storyNav.seedFromSaveState) window.__storyNav.seedFromSaveState(S); } catch {}
   title();

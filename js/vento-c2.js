@@ -68,6 +68,7 @@
 
     const zones = {
       ve_bosco: {
+        music: "vento_notte",
         region: "bosco", name: "Il Vento Gentile · Il Bosco dei Sussurri", short: "Il Bosco dei Sussurri", sub: "Di notte, tra le lucciole", bg: "ve_bosco", time: "notte", travel: [20, 23],
         wind: { str: 0.08, turn: false },
         w: 40, h: 26, start: [20, 23], itemCos: "ve_lucciola", items: [[3, 3], [36, 4], [36, 22], [12, 13]],

@@ -23,6 +23,20 @@
     stats: { selva: [-9, 9, 0, "Fiducia di Selva"], gioia: [0, 99, 0, "Gioia della valle"], turbine: [0, 99, 0, "Patto con la Compagnia"], ottone: [-9, 9, 0, "Amicizia di Ottone"] },
     travel: true,
     item: ["Soffio", "Soffi"],
+    // musiche: un valzerino gentile per la valle, una ninna nanna per il bosco di notte, un tema che sale per il colle
+    musicMain: "vento",
+    music: {
+      vento: { bpm: 84, spb: 12, chords: ["F", "C", "Dm", "Bb", "F", "C", "Bb", "C"], lres: 2, lw: "triangle", lv: 0.085,
+        lead: "A5 - C6 - A5 G5 | G5 - - E5 - - | F5 - A5 - D6 C6 | D6 - - - - - | C6 - A5 - F5 G5 | E5 - G5 - C6 - | D6 - C6 - Bb5 A5 | G5 - - - - -",
+        bass: "R . . 5 . . R . . 5 . .", bv: 0.09, arp: "1 3 5 8 5 3 1 3 5 8 5 3", aw: "sine", av: 0.028, drum: ". . . h . . . . . h . .", dv: 0.14 },
+      vento_notte: { bpm: 68, spb: 12, chords: ["Am", "F", "C", "G"], lres: 2, lw: "sine", lv: 0.075,
+        lead: "E5 - - A5 - - | C6 - - - B5 A5 | G5 - - E5 - - | D5 - - - - -",
+        bass: "R . . . . . R . . . . .", bv: 0.08, arp: "1 5 8 5 1 5 8 5 1 5 8 5", aw: "triangle", av: 0.03, drum: ". . . . . . . . . . . .", dv: 0 },
+      vento_colle: { bpm: 100, chords: ["Dm", "Bb", "F", "C", "Dm", "Bb", "C", "A"], lres: 2, lw: "pulse", lv: 0.05,
+        lead: "D5 - F5 - A5 - D6 - | Bb5 - A5 G5 F5 - D5 - | C5 - F5 - A5 - C6 - | E6 - D6 C6 G5 - - - | D5 - F5 - A5 - D6 - | F6 - E6 D6 Bb5 - - - | C6 - D6 - E6 - G6 - | A5 - - - - - - -",
+        bass: "R . R . 5 . R . R . R . 5 . 8 .", bv: 0.12, arp: "1 5 8 5 1 5 8 5 1 5 8 5 1 5 8 5", aw: "square", av: 0.014, drum: "k . h . s . h . k k h . s . h h", dv: 0.38 },
+    },
+    musicBg: { ve_bosco: "vento_notte", ve_casa: "vento_notte", ve_colle: "vento_colle", ve_finale: "vento_colle" },
     regions: {
       valle: { grass: ["#7fb35a", "#86ba5f", "#78ad54"], path: ["#d8c08a", "#ccb47e"], stone: ["#b8b0a0", "#aca494"], wall: ["#c8b898", "#bcac8c"], water: ["#4a9ac8", "#54a4d2"], tall: "#6aa04a", tree: ["#3e7a3a", "#4f9444", "#7ab85a"], tint: "255,236,200", tintA: 0.07, fx: "", dark: 0.06 },
       prato: { grass: ["#8cc764", "#94cd6a", "#86c05e"], path: ["#e0cc96", "#d6c28c"], stone: ["#c0b8a8", "#b4ac9c"], wall: ["#8a7a5a", "#7e6e50"], water: ["#5aaad8", "#64b4e2"], tall: "#78b452", tree: ["#3a7838", "#4c9044", "#86c460"], tint: "255,246,210", tintA: 0.06, fx: "", dark: 0.04 },

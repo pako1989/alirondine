@@ -1,0 +1,28 @@
+# Test automatici: a ogni push e a ogni pull request il gioco viene aperto in Chromium,
+# si giocano le saghe nuove dall'inizio ai finali e si controlla che non ci siano errori in console.
+name: Test del gioco
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Controllo sintassi
+        run: npm run lint
+      - name: Playwright e Chromium
+        run: npm i --no-save playwright@1.49.1 && npx playwright install --with-deps chromium
+      - name: Test
+        run: npm test
+      - name: Screenshot in caso di errore
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshot-test
+          path: tests/shots/

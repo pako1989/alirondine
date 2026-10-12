@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "node server.js",
-    "lint": "node --check server.js",
+    "lint": "node --check server.js && for f in js/*.js tests/*.cjs tools/*.cjs; do node --check $f || exit 1; done",
     "build": "echo 'Build complete'",
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node tests/run.cjs",
+    "bump": "node tools/bump.cjs"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

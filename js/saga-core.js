@@ -37,6 +37,8 @@
 //  - ORA DEL GIORNO: spec.time = "alba" | "giorno" | "tramonto" | "notte" (o una funzione del passo): luci e colori cambiano.
 //  - VIAGGIO RAPIDO: cfg.travel = true e spec.travel = [tx, ty]: dal menu si torna nei luoghi già visitati.
 //  - «NELLA PUNTATA PRECEDENTE»: chi torna dopo qualche ora ritrova tre righe di riassunto.
+//  - MUSICHE: cfg.music = { tema: { bpm, chords, lead, bass, arp, drum… } } (stesso formato dei temi di game.js), cfg.musicMain = tema
+//    delle zone e delle scene della saga (gli sfondi col prefisso di cfg.bg); spec.music cambia il tema di una zona; o.music in una partita.
 //  - FINALI CON INDIZIO: endings: { id: [titolo, descrizione, indizio] }; l'indizio si legge nel diario e nell'Album.
 // Kit di partita: window.__sagaCore.pitch(o) è una partitella 2+portiere contro 2+portiere, con levetta, TIRA e PASSA,
 // presentazione, intervallo e risultato, tutta personalizzabile con ganci (vento, regole, filtri, ostacoli, eventi).
@@ -358,7 +360,7 @@
       const rk = spec.region && REG[spec.region] ? spec.region : REG_FIRST;
       const syncZX = () => { ZX.id = zid; ZX.rk = rk; ZX.rg = REG[rk]; ZX.spec = spec; ZX.standCol = spec.stands; ZX.chestOpen = (tx, ty) => F.is(chestKey(zid, tx, ty)); };
       const Z = {
-        name: spec.name, short: spec.short, sub: spec.sub || "", need: 0, w: spec.w, h: spec.h, start: spec.start, theme: "torino", isCustomSaga: true,
+        name: spec.name, short: spec.short, sub: spec.sub || "", need: 0, w: spec.w, h: spec.h, start: spec.start, theme: spec.music || cfg.musicMain || "torino", isCustomSaga: true,
         bus: "uscita", busLabel: "Esci dalla saga",
         item: spec.item || cfg.item || ["Piuma", "Piume"], itemCos: spec.itemCos, items: spec.items || [], bld: [], npcs: [], areas: spec.areas || [], hints: {}, pitch: spec.pitch || [-20, -20, 1, 1],
         solid: SOLID, act: Object.assign({ [REST.ch]: REST.label, x: "Apri il baule" }, obj(cfg.act), spec.act || {}), intro: [],
@@ -635,6 +637,7 @@
       const prevNews = window.trNewsHook;
       window.trNewsHook = function (id) { const c = zoneRec() && mineC(id); if (c) return c.news ? !!safe(() => c.news(id, stepOf(c.n)), false) : false; return typeof prevNews === "function" ? prevNews(id) : null; };
       PENDING.splice(0).forEach(addChapter);
+      safe(() => { Object.keys(obj(cfg.music)).forEach((id) => api.musicTheme && api.musicTheme(id, cfg.music[id])); const pre = (String(BG0).match(/^[a-z]+_/) || [])[0]; if (pre && cfg.musicMain && api.musicBg) api.musicBg(pre, cfg.musicMain); Object.keys(obj(cfg.musicBg)).forEach((k) => api.musicBg && api.musicBg(k, cfg.musicBg[k])); });
       chip();
       if (cfg.onReady) safe(() => cfg.onReady(K));
     }

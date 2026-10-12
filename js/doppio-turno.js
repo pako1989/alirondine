@@ -343,7 +343,7 @@
   function registerZone(chN, zid, spec) {
     const stk = spec.half === "d" ? "den" : "fuo";
     const Z = {
-      name: spec.name, short: spec.short, sub: spec.sub || "", need: 0, w: spec.w, h: spec.h, start: spec.start, theme: "torino", isCustomSaga: true,
+      name: spec.name, short: spec.short, sub: spec.sub || "", need: 0, w: spec.w, h: spec.h, start: spec.start, theme: "doppio", isCustomSaga: true,
       bus: "uscita", busLabel: "Esci dalla saga",
       item: spec.item || (spec.half === "d" ? ["Graffetta d'oro", "Graffette"] : ["Conchiglia", "Conchiglie"]), itemCos: spec.itemCos, items: spec.items || [], bld: [], npcs: [], areas: spec.areas || [], hints: {}, pitch: [-20, -20, 1, 1],
       solid: SOLID, act: Object.assign({ K: "Apri l'Armadietto 7", e: spec.half === "d" ? "Prendi l'ascensore" : "Ingresso del personale" }, spec.act || {}), intro: [],

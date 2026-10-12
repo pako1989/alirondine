@@ -48,6 +48,7 @@
 
     const zones = {
       ve_colle: {
+        music: "vento_colle",
         region: "colle", name: "Il Vento Gentile · Il Colle del Vento", short: "Il Colle del Vento", sub: "Controvento, fino in cima", bg: "ve_colle", time: (s) => (s >= 3 ? "tramonto" : "giorno"), travel: [14, 35],
         wind: { str: 0.6, turn: false, ang: Math.PI / 2, gusts: true, gustDir: Math.PI / 2, gustEvery: 4.5, gustLen: 2.4, push: 58, gustWhen: (s) => s <= 1 },
         w: 30, h: 38, start: [14, 35], itemCos: "ve_vetta", items: [[3, 30], [26, 22], [4, 12], [25, 6]],

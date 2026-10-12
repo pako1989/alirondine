@@ -406,7 +406,7 @@
     const rk = spec.region || "bassa";
     const syncZX = () => { ZX.id = zid; ZX.rk = rk; ZX.rg = REG[rk]; ZX.standCol = spec.stands; ZX.chestOpen = (tx, ty) => F.is(chestKey(zid, tx, ty)); ZX.sketched = (tx, ty) => F.is(sketchKey(zid, tx, ty)) || F.is(sketchKey(zid, tx + 1, ty)) || F.is(sketchKey(zid, tx, ty - 1)) || F.is(sketchKey(zid, tx + 1, ty - 1)); ZX.gateOpen = spec.gateOpen ? () => !!safe(() => spec.gateOpen(stepOf(chN)), false) : null; ZX.dropOut = spec.dropOut || null; };
     const Z = {
-      name: spec.name, short: spec.short, sub: spec.sub || "", need: 0, w: spec.w, h: spec.h, start: spec.start, theme: "torino", isCustomSaga: true,
+      name: spec.name, short: spec.short, sub: spec.sub || "", need: 0, w: spec.w, h: spec.h, start: spec.start, theme: "muro", isCustomSaga: true,
       bus: "uscita", busLabel: "Esci dalla saga",
       item: spec.item || ["Piuma di corvo", "Piume"], itemCos: spec.itemCos, items: spec.items || [], bld: [], npcs: [], areas: spec.areas || [], hints: {}, pitch: spec.pitch || [-20, -20, 1, 1],
       solid: SOLID, act: Object.assign({ s: "Scaldati al braciere", x: "Apri il baule", o: "Disegna il Colosso addormentato", d: "Guarda gli scaffali" }, spec.act || {}), intro: [],

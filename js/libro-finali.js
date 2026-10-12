@@ -560,7 +560,7 @@
     const stk = spec.style || "acq";
     const wordAt = (tx, ty) => (spec.words || {})[tx + "," + ty];
     const Z = {
-      name: spec.name, short: spec.short, sub: spec.sub || "", need: 0, w: spec.w, h: spec.h, start: spec.start, theme: "torino", isCustomSaga: true,
+      name: spec.name, short: spec.short, sub: spec.sub || "", need: 0, w: spec.w, h: spec.h, start: spec.start, theme: "libro", isCustomSaga: true,
       bus: "libro", busLabel: "Chiudi il libro",
       item: spec.item || ["Goccia d'inchiostro", "Gocce"], itemCos: spec.itemCos, items: spec.items || [], bld: [], npcs: [], areas: spec.areas || [], hints: {}, pitch: [-20, -20, 1, 1],
       solid: SOLID, act: Object.assign({ "*": "Raccogli la parola", "&": "Leggi la lettera", _: "Scrivi sulla pagina bianca", z: "Scrivi nel buio", Q: "Scrivi sulla porta chiusa" }, spec.act || {}), intro: [],

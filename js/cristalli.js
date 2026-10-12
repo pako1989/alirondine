@@ -481,7 +481,7 @@
     const rk = spec.region || "borgo";
     const syncZX = () => { ZX.id = zid; ZX.rk = rk; ZX.rg = REG[rk]; ZX.crystalCol = spec.crystal || "#ffd36b"; ZX.clusterCol = spec.cluster || spec.crystal || "#ffb347"; ZX.standCol = spec.stands; ZX.chestOpen = (tx, ty) => F.is(chestKey(zid, tx, ty)); ZX.crystalDim = spec.dim ? () => !!safe(() => spec.dim(stepOf(chN)), false) : null; };
     const Z = {
-      name: spec.name, short: spec.short, sub: spec.sub || "", need: 0, w: spec.w, h: spec.h, start: spec.start, theme: "torino", isCustomSaga: true,
+      name: spec.name, short: spec.short, sub: spec.sub || "", need: 0, w: spec.w, h: spec.h, start: spec.start, theme: "cristalli", isCustomSaga: true,
       bus: "uscita", busLabel: "Esci dalla saga",
       item: spec.item || ["Frammento di luce", "Frammenti"], itemCos: spec.itemCos, items: spec.items || [], bld: [], npcs: [], areas: spec.areas || [], hints: {}, pitch: spec.pitch || [-20, -20, 1, 1],
       solid: SOLID, act: Object.assign({ s: "Tocca il cristallo azzurro", x: "Apri il forziere", i: "Sali sull'aeronave", h: "Prendi il timone" }, spec.act || {}), intro: [],

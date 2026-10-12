@@ -83,6 +83,7 @@
 
     const zones = {
       dc_porto: {
+        music: "detective_tesa",
         region: "porto", name: "Detective di Campo · La Stazione e il Porto", short: "La Stazione e il Porto", sub: "Nebbia, gru, magazzini numerati", bg: "dc_porto", time: "notte", travel: [3, 12],
         w: 50, h: 26, start: [3, 12], itemCos: "dc_porto_c", items: [[2, 20], [30, 3], [48, 20], [20, 20]],
         areas: [[1, 2, 12, 8, "La Stazione Centrale"], [40, 15, 47, 20, "Il magazzino 7"], [26, 18, 38, 24, "Il molo della beneficenza"], [0, 0, 49, 25, "Il porto"]],

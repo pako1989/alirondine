@@ -20,6 +20,17 @@
     stats: { fiuto: [-9, 20, 0, "Fiuto da detective"], agata: [-9, 9, 0, "Fiducia di Agata"], lega: [0, 99, 0, "Pressione della Lega"] },
     travel: true,
     item: ["Bottone d'ottone", "Bottoni"],
+    // musiche: jazz notturno in minore per la città, un'ostinata tesa per moviola, pedinamenti e confronti
+    musicMain: "detective",
+    music: {
+      detective: { bpm: 86, spb: 12, chords: ["Dm", "Dm", "Gm", "A", "Dm", "Bb", "Gm", "A"], lres: 2, lw: "sawtooth", lv: 0.028,
+        lead: "A4 - . D5 - F5 | E5 - - D5 - . | G5 - . Bb5 - A5 | G5 - - E5 - . | F5 - . A5 - D6 | C6 - Bb5 - A5 - | G5 - F5 - E5 - | C#5 - - - - -",
+        bass: "R . . 3 . . 5 . . 8 . .", bv: 0.12, arp: "1 . . 5 . . 1 . . 5 . .", aw: "triangle", av: 0.02, drum: ". . h . h h . . h . h h", dv: 0.22 },
+      detective_tesa: { bpm: 120, chords: ["Am", "Am", "F", "E"], lres: 2, lw: "square", lv: 0.03,
+        lead: ". . . . E5 . . . | . . F5 . E5 . . . | . . . . C5 . D5 . | B4 - - - G#4 - - -",
+        bass: "R . R . R . R . R . R . R . R .", bv: 0.1, arp: "1 . 5 . 8 . 5 . 1 . 5 . 8 . 5 .", aw: "triangle", av: 0.024, drum: "k . . h . . h . k . . h s . h .", dv: 0.3 },
+    },
+    musicBg: { dc_moviola: "detective_tesa", dc_porto: "detective_tesa", dc_hotel: "detective_tesa" },
     regions: {
       citta: { grass: ["#3a3e44", "#40444a", "#363a40"], path: ["#2e3238", "#33373d"], stone: ["#5a5a5e", "#525256"], wall: ["#5a4a44", "#4e403a"], water: ["#1e2a3a", "#243246"], tall: "#3a5a3a", tree: ["#1f3a2a", "#2a4a34", "#3a5a40"], column: "#8a8478", tint: "200,170,255", tintA: 0.1, fx: "rain", dark: 0.3 },
       stadio: { grass: ["#3e5a3a", "#44603f", "#3a5636"], path: ["#4a4a4e", "#444448"], stone: ["#6a6a6e", "#626266"], wall: ["#6a6a72", "#5e5e66"], water: ["#2a4a6a", "#305474"], tall: "#4a6a3a", tint: "220,220,255", tintA: 0.08, fx: "rain", dark: 0.25 },
