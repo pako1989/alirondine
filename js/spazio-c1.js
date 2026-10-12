@@ -43,7 +43,9 @@
     const zones = {
       so_hangar: {
         region: "hangar", name: "Calcio Spaziale · L'hangar", short: "L'hangar", sub: "Stazione Orbitale 7 · modulo d'arrivo", bg: "so_hangar", time: "giorno", travel: [6, 10],
-        w: 34, h: 20, start: [6, 10], itemCos: "so_bulloni", items: [[2, 17], [31, 17], [17, 13], [31, 3], [10, 3]],
+        w: 34, h: 20, start: [6, 10], itemCos: "so_bulloni",
+        // nel Capitolo 2 il generatore è guasto: la gravità dell'hangar va e viene a singhiozzo
+        gravity: (K) => (K.F.is("so_gen_rotto") && !K.F.is("so_gen_ok") && Math.floor(K.frNow() / 300) % 3 === 2 ? "zero" : ""), items: [[2, 17], [31, 17], [17, 13], [31, 3], [10, 3]],
         areas: [[2, 4, 8, 7, "La navetta della domenica"], [20, 4, 28, 9, "La mensa di Blop"], [11, 3, 16, 6, "Le console di NONNA"], [0, 0, 33, 19, "L'hangar"]],
         act: { q: "Entra" },
         flavor: {

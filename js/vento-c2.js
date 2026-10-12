@@ -100,7 +100,7 @@
     // ---------------------------------------------------------------- la Coppa delle Turbine (partita secondaria: il modo lo scegli tu)
     function coppa() {
       K.playMatch({
-        id: "ve_coppa", alt: "az,cage,hd", force: false, mate: "Selva Ventura", squad: ["Mastro Gualdo"], us: "Mulinella", homeKit: ["#5a8a4a", "#f4efe0"], azPitch: "erba", cageField: 1,
+        id: "ve_coppa", alt: "az,cage,hd", force: false, oppTeam: "La Compagnia delle Turbine", oppColor: "#5a5a62", mate: "Selva Ventura", squad: ["Mastro Gualdo"], us: "Mulinella", homeKit: ["#5a8a4a", "#f4efe0"], azPitch: "erba", cageField: 1,
         chap: "Il Vento Gentile · La Coppa delle Turbine", bg: "ve_valle", intro: "La Coppa delle Turbine, sul prato senza vento: {n}, Selva e Gualdo contro la squadra della Compagnia. Ci sono i manifesti, c'è la banda, c'è il premio. Nessuno ride.",
         oppNames: ["Ing. Ferraglia", "Tecnico Bulloni", "Geometra Raso", "Perito Spina", "Cassiere Tondi"],
         done: (r) => {

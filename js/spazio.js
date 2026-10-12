@@ -29,7 +29,7 @@
       cupola: { grass: ["#1a2240", "#1e2644", "#161e3a"], path: ["#2a3458", "#262e52"], stone: ["#3a4468", "#343e62"], wall: ["#10162e", "#0c1228"], water: ["#0a1430", "#0e1834"], tall: "#7af0c8", tint: "120,150,255", tintA: 0.12, fx: "float", dark: 0.22 },
       mensa: { grass: ["#5a4a3a", "#5e4e3e", "#564636"], path: ["#6a5a48", "#645442"], stone: ["#7a6a58", "#746452"], wall: ["#3a3040", "#342a3a"], water: ["#3a5a7a", "#40607e"], tall: "#7ae86a", tint: "255,210,150", tintA: 0.12, fx: "float", dark: 0.16 },
     },
-    floors: "", solid: "VQJYZKIiE",
+    floors: "", solid: "VQJYZKIiEC",
     rest: { ch: "s", label: "Agganciati alla cuccetta", text: "Ti agganci alla cuccetta con le cinghie, per non volare via. NONNA abbassa le luci: «Dormi, caro. Domani c'è il torneo». (Il gioco salva da solo: qui puoi rileggere il Diario di Bordo.)" },
     texts: { chestOpen: "Apri il contenitore.", chestEmpty: "Il contenitore è vuoto. Dentro fluttua solo una briciola di cracker del 2091.", nothing: "Niente. Solo un bullone che ti gira intorno come una piccola luna.", noHero: "La Stazione 7 aspetta un esperto di calcio dalla Terra. Prima crea il tuo Campione.", chapters: "Tre capitoli, tre gravità diverse. Le scelte restano: cambiano il finale." },
     journal: { name: "Il Diario di Bordo", sub: "Equipaggio, scoperte, partite, finali" },
@@ -41,7 +41,7 @@
     },
     heroLook: (h, K) => ({ bg: ["#0a1830", "#7af0c8"], shirt: K.F.is("so_tuta") ? "#e8e8f0" : h.shirt }),
     heroTitle: (K) => (K.F.is("so_capitano") ? "capitano orbitale" : "esperto di calcio vero (presunto)"),
-    act: { V: "Guarda le stelle", Q: "Usa la console", J: "Guarda il generatore", Y: "Guarda la pianta", Z: "Afferra il pallone", K: "Guarda la cassa", E: "Guarda la cartolina", I: "Guarda la navetta", "<": "Cambia modulo", ">": "Cambia modulo" },
+    act: { C: "Afferra il nucleo", V: "Guarda le stelle", Q: "Usa la console", J: "Guarda il generatore", Y: "Guarda la pianta", Z: "Afferra il pallone", K: "Guarda la cassa", E: "Guarda la cartolina", I: "Guarda la navetta", "<": "Cambia modulo", ">": "Cambia modulo" },
     musicMain: "spazio",
     music: {
       // un tema saltellante da sintetizzatore, con l'eco: suona come una pubblicità di cereali del futuro
@@ -83,6 +83,13 @@
         K.ground(sx, sy, tx, ty); if (K.F.is(`so_ball_${K.ZX.id}_${tx}_${ty}`)) return; const g = K.g, b = Math.sin(fr / 18 + tx) * 3;
         g.fillStyle = "rgba(0,0,0,.2)"; g.beginPath(); g.ellipse(sx + 8, sy + 14, 4 - b * 0.3, 1.5, 0, 0, 7); g.fill();
         g.save(); g.translate(sx + 8, sy + 5 + b); g.rotate(fr / 25); g.fillStyle = "#fff"; g.beginPath(); g.arc(0, 0, 4, 0, 7); g.fill(); g.fillStyle = "#1a1a1a"; g.fillRect(-1.5, -1.5, 3, 3); g.restore(); K.light(sx + 8, sy + 5 + b, 14, "122,240,200", 0.4);
+      },
+      // un nucleo di gravità scappato dal generatore: una sfera viola con un anello che le gira intorno
+      C(K, sx, sy, tx, ty, fr) {
+        K.ground(sx, sy, tx, ty); if (K.F.is(`so_core_${tx}_${ty}`)) return; const g = K.g, b = Math.sin(fr / 16 + tx) * 2;
+        g.fillStyle = "rgba(0,0,0,.2)"; g.beginPath(); g.ellipse(sx + 8, sy + 14, 4, 1.5, 0, 0, 7); g.fill();
+        g.fillStyle = "#a83ae8"; g.beginPath(); g.arc(sx + 8, sy + 6 + b, 4, 0, 7); g.fill(); g.fillStyle = "#e8b8ff"; g.fillRect(sx + 6, sy + 4 + b, 2, 2);
+        g.strokeStyle = "rgba(232,184,255,.8)"; g.lineWidth = 1; g.beginPath(); g.ellipse(sx + 8, sy + 6 + b, 7, 2.5, fr / 20, 0, 7); g.stroke(); K.light(sx + 8, sy + 6 + b, 18, "168,58,232", 0.5);
       },
       // una cassa di bulloni, legata con le cinghie
       K(K, sx, sy, tx, ty) { K.ground(sx, sy, tx, ty); K.P(sx + 1, sy + 3, 14, 12, "#6a5a3a"); K.P(sx + 1, sy + 3, 14, 2, "#8a7a4a"); K.P(sx + 4, sy + 3, 2, 12, "#e8a83a"); K.P(sx + 10, sy + 3, 2, 12, "#e8a83a"); K.P(sx + 6, sy + 8, 4, 3, "#2a2a2a"); },

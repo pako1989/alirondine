@@ -119,7 +119,7 @@
     // ---------------------------------------------------------------- la partita di beneficenza (secondaria: il modo lo scegli tu)
     function beneficenza() {
       K.playMatch({
-        id: "dc_benef", alt: "az,cage,hd", force: false, mate: "Ispettrice Agata Brina", squad: ["Nina Rotativa"], us: "Questura di Portagrigia", homeKit: ["#6a5a4a", "#d8b46a"], azPitch: "notte", cageField: 1,
+        id: "dc_benef", alt: "az,cage,hd", force: false, oppTeam: "I dirigenti della Lega", oppColor: "#2a2a3a", mate: "Ispettrice Agata Brina", squad: ["Nina Rotativa"], us: "Questura di Portagrigia", homeKit: ["#6a5a4a", "#d8b46a"], azPitch: "notte", cageField: 1,
         chap: "Detective di Campo · La partita di beneficenza", bg: "dc_porto", intro: "Partita di beneficenza della Lega sul molo, tra le gru: la Questura di Portagrigia (con {n} in panchina… finché il ginocchio regge cinque minuti) contro i dirigenti della Lega.",
         oppNames: ["Segretario Vanni", "Consigliere Rossi", "Tesoriere Gallo", "Avv. Merli", "Dott. Bassi"],
         done: (r) => { F.set("dc_benef", r.win ? "vinta" : "persa"); K.reward("m:dc_benef", { coins: r.win ? 40 : 20 }); bond("lega", r.win ? 2 : 1); say([["voce", r.win ? "La Questura vince sul molo. Il segretario Vanni stringe la mano ad Agata un secondo più del necessario. Lei sorride. Lui no." : "Vincono i dirigenti della Lega. Il segretario Vanni non esulta: guarda Agata, poi guarda te, poi guarda l'orologio."], ["dc_agata", "Ha visto come tiene l'ombrello, Vanni? Chiuso, sotto il braccio. Anche sul molo. Anche senza pioggia."]]); },

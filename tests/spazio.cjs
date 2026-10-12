@@ -41,4 +41,44 @@ async function c1(w) {
   const i = await L.info(page); if (!i.done[1]) errors.push("capitolo 1 non concluso: " + JSON.stringify(i.step)); if (!i.flags.cartoline) errors.push("cartolina non presa");
   L.check(`Calcio Spaziale · capitolo 1 (${w} px)`, errors); await browser.close();
 }
-(async () => { await c1(390); await c1(320); })().catch((e) => { console.error("✗ spazio:", e.message); process.exit(1); });
+async function c2(w) {
+  const save = { v: 1, ch: 2, step: { 1: 5 }, done: { 1: "festa" }, intro: { ch1: 1, so_hangar: 1, so_anello: 1, so_palestra: 1, so_mensa: 1 }, st: { squadra: 5, arbi: 3 }, flags: { so_nome: "Le Comete Ribelli", cartoline: 1, so_cart_so_hangar: true } };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await L.stubMatch(page, true);
+  await page.evaluate(() => window.__spazio.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 2")); await L.advance(page);
+  for (const z of ["so_serra", "so_macchine", "so_hangar", "so_anello"]) { const bad = await L.reachAll(page, z); if (bad.length) errors.push(z + " irraggiungibile: " + bad.join(", ")); }
+  await L.talk(page, "so_gru"); await L.advance(page);
+  await L.goAct(page, 33, 9); await L.advance(page); await L.goAct(page, 20, 1); await L.advance(page);
+  if ((await L.zone(page)) !== "so_macchine") errors.push("non si scende in Sala Macchine: " + (await L.zone(page)));
+  await page.waitForTimeout(900); if ((await K(page, "return K.gravity()")) !== "zeroflip") errors.push("in Sala Macchine la gravità non è zero e capovolta");
+  if (w === 390) await L.shot(page, "so_macchine");
+  await L.talk(page, "so_mira"); await L.advance(page);
+  await L.goAct(page, 12, 15); await L.advance(page); await L.goAct(page, 0, 5); await L.advance(page); await L.goAct(page, 16, 19); await L.advance(page);
+  if ((await L.zone(page)) !== "so_serra") errors.push("non si scende nella Serra: " + (await L.zone(page)));
+  if (w === 390) await L.shot(page, "so_serra");
+  await L.talk(page, "so_primula"); await L.advance(page);
+  for (const [x, y] of [[9, 7], [26, 11], [6, 17], [33, 19], [3, 11]]) { await L.goAct(page, x, y); await L.advance(page); }
+  await L.goAct(page, 18, 1); await L.advance(page); await page.evaluate(() => window.__spazio._dbg.K.go("so_macchine", 12, 13)); await page.waitForTimeout(400); await L.advance(page);
+  await L.goAct(page, 3, 3); await L.advance(page); await L.goAct(page, 12, 3); await L.advance(page);
+  await page.waitForTimeout(300); if ((await K(page, "return K.gravity()")) !== "") errors.push("la gravità non è tornata normale");
+  await L.talk(page, "so_mira"); await L.advance(page);
+  await page.evaluate(() => window.__spazio._dbg.K.go("so_hangar", 8, 10)); await page.waitForTimeout(400); await L.advance(page);
+  await L.talk(page, "so_gru"); await L.advance(page);
+  await L.talk(page, "so_fattorina"); await L.advance(page, ["Gioca contro I Fattorini"]); await page.waitForTimeout(300); await L.advance(page);
+  const lm = await page.evaluate(() => window.__lastMatch); if (!lm || lm.azPitch !== "orbita" || lm.mate !== "Blop") errors.push("partita dei Fattorini sbagliata: " + JSON.stringify(lm));
+  await L.goAct(page, 11, 3); await L.advance(page, ["Resta tra noi"]);
+  const i = await L.info(page); if (!i.done[2]) errors.push("capitolo 2 non concluso: " + JSON.stringify(i.step)); if ((i.flags.cartoline | 0) < 2) errors.push("cartolina 2 non presa");
+  L.check(`Calcio Spaziale · capitolo 2 (${w} px)`, errors); await browser.close();
+}
+// le partite vere del gioco avviate da una saga (senza sostituirle): devono partire senza errori in tutti e tre i modi
+async function vere(w) {
+  for (const alt of ["az", "cage", "hd"]) {
+    const { browser, page, errors } = await L.setup({ w, ...MOD });
+    await page.evaluate(() => window.__spazio.open()); await page.evaluate(() => window.T_.click("Inizia la storia")); await L.advance(page);
+    await page.evaluate((alt) => window.__spazio._dbg.K.playMatch({ alt, azPitch: "orbita", mate: "Blop", squad: ["Quattrobraccia"], us: "Le Comete", oppTeam: "I Fattorini", oppNames: ["Margherita", "Diavola", "Capricciosa", "Marinara", "Quattro Stagioni"], intro: "prova", bg: "so_ponte", done: () => {} }), alt);
+    await page.waitForTimeout(1500); const b = await page.evaluate(() => window.T_.btns().map((x) => x.t).join(" | "));
+    if (!b) errors.push(alt + ": nessun comando a schermo"); if (w === 390) await L.shot(page, "so_vera_" + alt);
+    L.check(`Partita vera del gioco avviata da una saga: ${alt} (${w} px)`, errors); await browser.close();
+  }
+}
+(async () => { await c1(390); await c1(320); await c2(390); await c2(320); await vere(390); })().catch((e) => { console.error("✗ spazio:", e.message); process.exit(1); });

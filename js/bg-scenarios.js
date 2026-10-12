@@ -5192,6 +5192,41 @@
     if (since("so_palestra", 1) < 100) { g.fillStyle = "#7af0c8"; g.font = "bold 8px sans-serif"; g.fillText("SPINTA!", 20, 100); }
     if (since("so_palestra", 2) < 120) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 80, 160, 60, "122,200,255", 0.4); g.restore(); }
   }
+  function bgSoSerra(g, W, H, f) {
+    // la Serra idroponica: piante nelle bolle, pomodori quadrati che salgono e scendono, la goccia d'acqua (tocca)
+    px(g, 0, 0, W, 50, "#05060c"); soStars(g, W, 50, f, 0.06); circ(g, 270, 26, 12, "#d8d8c8"); circ(g, 266, 22, 3, "#b8b8a8"); px(g, 0, 48, W, 4, "#8a94a8");
+    px(g, 0, 52, W, 148, "#1a3a30"); const zero = Math.floor(f / 240) % 2 === 1;
+    for (let r = 0; r < 2; r++) for (let i = 0; i < 7; i++) { const x = 20 + i * 42, y = 90 + r * 50, b = zero ? Math.sin(f / 20 + i + r) * 6 - 6 : 0; px(g, x - 2, y + 18, 24, 4, "#3a6a5a"); g.fillStyle = "#3aa86a"; g.beginPath(); g.ellipse(x + 10, y + 6 + b, 9, 10, 0, 0, 7); g.fill(); for (let k = 0; k < 3; k++) px(g, x + 4 + k * 5, y + 2 + b + (k % 2) * 4, 4, 4, since("so_serra", 0) < 80 ? "#e8c84a" : "#e85a3a"); g.strokeStyle = "rgba(200,240,255,.35)"; g.lineWidth = 1; g.beginPath(); g.arc(x + 10, y + 6 + b, 14, 0, 7); g.stroke(); }
+    const dz = zero || since("so_serra", 1) < 120, gx = 160, gy = dz ? 172 - 12 + Math.sin(f / 9) * 3 : 178; g.fillStyle = "rgba(90,180,230,.6)"; g.beginPath(); g.ellipse(gx, gy, 40 + (dz ? Math.sin(f / 6) * 5 : 0), dz ? 14 + Math.cos(f / 7) * 3 : 6, 0, 0, 7); g.fill(); px(g, gx - 14, gy - 4, 8, 2, "rgba(255,255,255,.4)");
+    for (let i = 0; i < 4; i++) { const t = (f * 0.7 + i * 50) % 200; circ(g, 150 + Math.sin(t / 20 + i) * 30, 170 - t * 0.6, 2.5, "rgba(140,210,240,.6)"); }
+    // il nucleo viola che si nasconde tra le piante (tocca)
+    const cx = since("so_serra", 2) < 100 ? 290 : 250 + Math.sin(f / 40) * 6, cy = 120 + Math.cos(f / 30) * 4; circ(g, cx, cy, 5, "#a83ae8"); g.strokeStyle = "rgba(232,184,255,.8)"; g.beginPath(); g.ellipse(cx, cy, 9, 3, f / 20, 0, 7); g.stroke(); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, cx, cy, 16, "168,58,232", 0.5); g.restore();
+    g.fillStyle = zero ? "#7af0c8" : "#e8c84a"; g.font = "bold 7px sans-serif"; g.fillText(zero ? "GRAVITÀ: 0 g" : "GRAVITÀ: 1 g", 8, 64);
+  }
+  function bgSoMacchine(g, W, H, f) {
+    // la Sala Macchine: il generatore che gira (rosso se guasto, azzurro se aggiustato), tubi, vapore, Mira a testa in giù (tocca)
+    px(g, 0, 0, W, H, "#2a1e1e"); for (let i = 0; i < 6; i++) { px(g, i * 60, 0, 10, H, "#3a2e2a"); px(g, i * 60 + 2, 0, 2, H, "rgba(255,255,255,.06)"); } px(g, 0, 160, W, 40, "#3a2a24");
+    const ok = since("so_macchine", 0) < 200, sp = ok ? f / 18 : f / 4, col = ok ? "122,240,200" : "232,58,106";
+    g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 160, 92, 70, col, 0.35); g.restore();
+    g.strokeStyle = `rgb(${col})`; g.lineWidth = 4; g.beginPath(); g.ellipse(160, 92, 50, 18 + Math.sin(sp) * 10, sp / 3, 0, 7); g.stroke(); g.lineWidth = 2; g.beginPath(); g.ellipse(160, 92, 34, 30, -sp / 2, 0, 7); g.stroke();
+    for (let i = 0; i < 3; i++) { const a = sp + i * 2.09; circ(g, 160 + Math.cos(a) * 20, 92 + Math.sin(a) * 8, 5, "#a83ae8"); } px(g, 130, 130, 60, 30, "#4a3a34"); px(g, 136, 136, 48, 6, "#1a1a1a"); px(g, 140, 137, (f / 2) % 40, 4, `rgb(${col})`);
+    for (let k = 0; k < 5; k++) { const t = (f + k * 37) % 120; g.fillStyle = `rgba(230,220,210,${0.45 - t / 280})`; g.beginPath(); g.arc(20 + k * 70, 150 - t * 0.8, 4 + t / 12, 0, 7); g.fill(); }
+    // Mira a testa in giù con la chiave inglese (tocca)
+    const my = 50 + Math.sin(f / 30) * 6; g.save(); g.translate(260, my); g.rotate(Math.PI + (since("so_macchine", 1) < 80 ? Math.sin(f / 5) * 0.5 : 0)); px(g, -6, -10, 12, 20, "#e8a83a"); circ(g, 0, -15, 6, "#c68642"); px(g, -6, -22, 12, 4, "#e85a3a"); px(g, 6, -4, 10, 3, "#a8a8b8"); g.restore();
+    if (since("so_macchine", 2) < 100) { for (let i = 0; i < 10; i++) circ(g, 100 + i * 14 + Math.sin(f / 3 + i) * 2, 40 + Math.cos(f / 4 + i) * 6, 1.5, "#ffb347"); }
+  }
+  function bgSoPonte(g, W, H, f) {
+    // il Ponte orbitale: il campo sul tetto della stazione, la Terra sotto, la nave dei Fattorini agganciata (tocca)
+    px(g, 0, 0, W, H, "#05060c"); soStars(g, W, H, f, 0.08);
+    const eg = g.createRadialGradient(160, 320, 80, 160, 320, 230); eg.addColorStop(0, "#3a8ac8"); eg.addColorStop(0.8, "#2a5a9a"); eg.addColorStop(0.95, "#7ac8f0"); eg.addColorStop(1, "rgba(122,200,240,0)"); g.fillStyle = eg; g.fillRect(0, 0, W, H);
+    g.fillStyle = "#2e4a6a"; g.beginPath(); g.moveTo(40, 170); g.lineTo(280, 170); g.lineTo(250, 120); g.lineTo(70, 120); g.closePath(); g.fill(); g.strokeStyle = "#7af0c8"; g.lineWidth = 1.5; g.stroke(); g.beginPath(); g.moveTo(160, 120); g.lineTo(160, 170); g.stroke(); g.beginPath(); g.ellipse(160, 145, 20, 7, 0, 0, 7); g.stroke();
+    // la nave dei Fattorini, a forma di scatola della pizza
+    const ny = 40 + Math.sin(f / 40) * 3, open = since("so_ponte", 0) < 120; px(g, 200, ny, 80, 24, "#f4ecdc"); px(g, 200, ny, 80, 3, "#e85a3a"); if (open) { g.fillStyle = "#f4ecdc"; g.beginPath(); g.moveTo(200, ny); g.lineTo(280, ny); g.lineTo(270, ny - 20); g.lineTo(210, ny - 20); g.closePath(); g.fill(); circ(g, 240, ny + 8, 9, "#e8a83a"); for (let i = 0; i < 5; i++) circ(g, 234 + (i * 7) % 14, ny + 4 + (i * 5) % 9, 2, "#c83a3a"); }
+    g.fillStyle = "#e85a3a"; g.font = "bold 5px sans-serif"; g.textAlign = "center"; g.fillText("FATTORINI DI ANDROMEDA", 240, ny + 18); g.textAlign = "left";
+    // i giocatori sul ponte
+    [[110, "#2a6ac8"], [140, "#7ae86a"], [180, "#e85a3a"], [210, "#e85a3a"]].forEach(([x, c], i) => { const j = since("so_ponte", 1) < 60 ? Math.abs(Math.sin(f / 5 + i)) * 8 : Math.sin(f / 30 + i) * 2; px(g, x, 140 - j, 8, 14, c); circ(g, x + 4, 136 - j, 4, "#e0ac7e"); g.strokeStyle = "rgba(200,240,255,.6)"; g.lineWidth = 1; g.beginPath(); g.arc(x + 4, 136 - j, 6, 0, 7); g.stroke(); });
+    if (since("so_ponte", 2) < 140) { const t = since("so_ponte", 2); circ(g, 160 + t * 0.6, 140 - t * 0.5, 3, "#ffffff"); }
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -5583,6 +5618,21 @@
       [170, 90, 60, 60, "🌀 Il Campione fa una capriola completa senza volerlo. Atterra su niente. Applausi dalla vetrata."],
       [0, 80, 80, 40, "💥 Una spinta dalla parete, e attraversi tutta la palestra in un secondo. Il muro opposto arriva in fretta."],
       [20, 120, 120, 80, "🌍 La Terra si illumina dal bordo: sta sorgendo il sole su un oceano intero. Qui l'alba dura sedici volte al giorno."],
+    ] },
+    so_serra: { draw: bgSoSerra, hot: [
+      [10, 80, 300, 70, "🍅 I pomodori quadrati diventano gialli tutti insieme, per un secondo. Primula dice che è il loro modo di sorridere."],
+      [110, 150, 100, 40, "💧 La vasca diventa una goccia gigante che trema. Dentro, un pesce rosso nuota in cerchio, perfettamente tranquillo. Lui ci è abituato."],
+      [235, 100, 70, 40, "🟣 Il nucleo viola scatta via e si nasconde dietro un'altra pianta. È quello che fa di testa sua."],
+    ] },
+    so_macchine: { draw: bgSoMacchine, hot: [
+      [100, 60, 120, 70, "🌀 Il generatore cambia colore: per un attimo gira piano e azzurro, come quando funzionava. Poi ricomincia a correre."],
+      [240, 20, 50, 60, "🔧 Mira fa una capriola completa con la chiave inglese in bocca, e non perde la presa. Anni di allenamento."],
+      [80, 20, 160, 40, "✨ Una pioggia di scintille arancioni attraversa la sala senza cadere: galleggia, si spegne piano, sparisce."],
+    ] },
+    so_ponte: { draw: bgSoPonte, hot: [
+      [196, 20, 90, 50, "🍕 Il coperchio della nave si apre: è una scatola della pizza gigante. Dentro, una pizza grande come un campo da bocce. Ancora calda."],
+      [100, 120, 130, 40, "🏃 I giocatori saltano per riscaldarsi. Senza gravità, il salto dura cinque secondi. Qualcuno ne approfitta per salutare la Terra."],
+      [140, 110, 60, 50, "⚽ Un pallone parte dal ponte e se ne va verso le stelle. Nessuno lo insegue: tornerà. Forse. Tra qualche anno."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
