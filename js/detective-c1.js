@@ -208,7 +208,7 @@
         who: "dc_sereno", bg: "dc_stadio", ok: ["guardalinee"],
         prompt: "«Io ho fatto il mio lavoro. Ero concentrato sulla linea, come sempre. Il 7 era in gioco, l'ho visto benissimo. Non ho niente da nascondere.»",
         right: () => { bond("fiuto", 1); K.scene([["hero", "Concentrato sulla linea? In moviola, sul fuorigioco del 7, lei guarda la tribuna. Fotogramma centoventi. Lo vuole vedere?"], ["dc_sereno", "…"], ["dc_sereno", "Un ombrello rosso. In tribuna centrale, fila B. Quando si apriva, io non dovevo vedere. Solo per qualche minuto. Mi avevano detto che nessuno se ne sarebbe accorto."], ["dc_sereno", "Chi? Non lo so. Un biglietto, nell'armadietto. Due righe a macchina. Il resto… non posso."]], () => { K.giveClue("ombrello"); askMore(); }, "dc_stadio"); },
-        wrong: (id) => { bond("fiuto", -1); say([["dc_sereno", id === "pallone" ? "Il pallone? E io che c'entro col pallone? Io ho una bandierina, non un magazzino." : id === "numeri" ? "I numeri sulle maglie? Le maglie non le guardo, guardo le gambe. È il mio lavoro." : "Non capisco cosa vuole dire. Davvero."], ["voce", "Non era la prova giusta. Ripensa a cosa ha detto: «concentrato sulla linea»."]], interrogate); },
+        wrong: (id) => { bond("fiuto", -1); F.add("dc_wrong", 1); say([["dc_sereno", id === "pallone" ? "Il pallone? E io che c'entro col pallone? Io ho una bandierina, non un magazzino." : id === "numeri" ? "I numeri sulle maglie? Le maglie non le guardo, guardo le gambe. È il mio lavoro." : "Non capisco cosa vuole dire. Davvero."], ["voce", "Non era la prova giusta. Ripensa a cosa ha detto: «concentrato sulla linea»."]], interrogate); },
         back: done,
       });
     }

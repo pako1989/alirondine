@@ -4966,6 +4966,34 @@
     px(g, 92, 54, 16, 3, "#8a8a92"); px(g, 100, 57, 3, 8, "#8a8a92"); g.fillStyle = "#c0392b"; g.beginPath(); g.arc(220, 66, 2, 0, 7); g.fill();
     dcRain(g, W, H, f, 0.3);
   }
+  function bgDcPorto(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#121820", "#1e2630", "#141a22"]);
+    // le gru del porto (tocca: una gru gira) e i magazzini numerati
+    const rot = since("dc_porto", 0) < 120 ? Math.sin(since("dc_porto", 0) / 20) * 0.3 : 0;
+    [[60, 30], [240, 20]].forEach(([x, y], i) => { px(g, x - 3, y, 6, 110, "#4a4a52"); g.save(); g.translate(x, y + 4); g.rotate(i === 0 ? rot : 0); px(g, -40, -3, 90, 5, "#5a5a62"); px(g, 40, 0, 1, 30, "#2a2a2a"); px(g, 36, 28, 9, 6, "#c0392b"); g.restore(); });
+    [[90, "5"], [150, "6"], [210, "7"]].forEach(([x, n]) => { px(g, x, 100, 54, 40, "#4a4038"); px(g, x, 96, 54, 6, "#3a3028"); px(g, x + 18, 116, 18, 24, "#2a221c"); g.fillStyle = "#d8c8a8"; g.font = "bold 10px Georgia, serif"; g.fillText(n, x + 4, 112); });
+    // la lampada accesa nel magazzino 7 (tocca: si spegne)
+    const off = toggled("dc_porto", 1); px(g, 247, 104, 6, 6, off ? "#2a221c" : "#ffd98a"); if (!off) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 250, 108, 30, "255,200,120", 0.4); g.restore(); }
+    // il mare nero e la nebbia che passa
+    vgrad(g, 0, 140, W, 60, ["#0e1620", "#0a1018"]); for (let i = 0; i < 12; i++) px(g, (i * 31 + f * 0.3) % W, 150 + (i % 4) * 10, 14, 1, "rgba(160,190,230,.25)");
+    for (let i = 0; i < 6; i++) { g.fillStyle = "rgba(200,210,220,.07)"; g.beginPath(); g.ellipse((i * 80 + f * 0.25) % (W + 100) - 50, 120 + (i % 3) * 20, 70, 14, 0, 0, 7); g.fill(); }
+    // l'uomo con l'ombrello, lontano sul molo (tocca: sparisce nella nebbia)
+    if (since("dc_porto", 2) > 160) { px(g, 196, 128, 5, 12, "#111"); circ(g, 198, 126, 2.5, "#d9b08c"); px(g, 202, 130, 1.5, 10, "#c0392b"); }
+  }
+  function bgDcHotel(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#2a1418", "#3a1e22", "#22100e"]);
+    // pareti di legno, il lampadario (tocca: trema), il quadro della prima Coppa della Lega (tocca: si sposta, dietro la cassaforte)
+    for (let i = 0; i < 8; i++) px(g, i * 40, 0, 2, 140, "rgba(0,0,0,.25)");
+    const tr = since("dc_hotel", 0) < 80 ? Math.sin(f) * 1.5 : 0; for (let i = 0; i < 7; i++) { px(g, 130 + i * 10 + tr, 4, 1, 10, "#c9a227"); circ(g, 130 + i * 10 + tr, 16, 2.5, "#fff6c8"); } g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 160, 16, 70, "255,230,170", 0.3); g.restore();
+    const moved = toggled("dc_hotel", 1); px(g, 30, 30, 60, 46, "#3a2a1a"); if (moved) { px(g, 40, 38, 40, 30, "#5a5a62"); circ(g, 60, 53, 6, "#8a8a92"); px(g, 59, 47, 2, 6, "#3a3a42"); } px(g, moved ? 92 : 32, 32, 56, 42, "#c9a227"); px(g, moved ? 96 : 36, 36, 48, 34, "#6a4a2a"); g.fillStyle = "#e8d080"; g.beginPath(); g.moveTo((moved ? 96 : 36) + 24, 44); g.lineTo((moved ? 96 : 36) + 16, 60); g.lineTo((moved ? 96 : 36) + 32, 60); g.fill();
+    // il tavolo lungo e le cinque poltrone vuote
+    px(g, 60, 130, 200, 14, "#5a3a22"); px(g, 60, 128, 200, 3, "#7a5a32"); for (let i = 0; i < 5; i++) { px(g, 74 + i * 40, 104, 20, 26, "#6a1a24"); px(g, 74 + i * 40, 100, 20, 6, "#8a2a34"); }
+    // l'ombrello rosso appoggiato sul tavolo (tocca)
+    g.save(); g.translate(240, 126); g.rotate(-0.2); px(g, -30, -2, 34, 3, "#c0392b"); px(g, 4, -3, 4, 5, "#3a2a1a"); g.restore();
+    // la finestra sulla città, con la pioggia
+    px(g, 230, 20, 70, 70, "#0e1626"); px(g, 264, 20, 2, 70, "#5a3a22"); for (let i = 0; i < 12; i++) px(g, 232 + (i * 13) % 66, 22 + (i * 17 + f * 1.5) % 66, 1, 5, "rgba(170,200,255,.5)");
+    vgrad(g, 0, 150, W, 50, ["#3a1418", "#1e0a0c"]);
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -5277,6 +5305,16 @@
       [10, 0, 300, 40, "💡 I fari si accendono uno a uno. Lo stadio vuoto, illuminato, sembra in attesa di una partita che nessuno ha ancora deciso.", "tog"],
       [86, 50, 26, 18, "🧣 La sciarpa grigia è fradicia. Sul cartellino: «Tifosi Grigi, dal 1961». Qualcuno se n'è andato prima dei tre gol. Beato lui."],
       [210, 56, 22, 20, "🔴 Posto 14, fila B: un segno di vernice rossa, rotondo. Come la punta di un ombrello appoggiato per un'ora."],
+    ] },
+    dc_porto: { draw: bgDcPorto, hot: [
+      [20, 20, 120, 40, "🏗️ La gru gira piano, cigolando. Sul gancio penzola una cassa con la scritta «LEGA DELLE CITTÀ · FRAGILE»."],
+      [236, 96, 30, 20, "💡 Nel magazzino 7 la lampada si spegne. Poi, dopo un secondo, si riaccende. Non sei stato tu.", "tog"],
+      [186, 116, 30, 30, "☂️ L'uomo con l'ombrello si volta. Poi la nebbia lo prende, come una mano che chiude un sipario."],
+    ] },
+    dc_hotel: { draw: bgDcHotel, hot: [
+      [120, 0, 90, 30, "💎 Il lampadario trema. Al piano di sotto, la banda della Lega prova l'inno della finale. È stonato in un modo molto costoso."],
+      [30, 30, 60, 46, "🖼️ Il quadro della prima Coppa della Lega si sposta: dietro c'è una cassaforte. Grigia, piccola, con dentro trentacinque anni.", "tog"],
+      [208, 114, 46, 20, "☂️ L'ombrello rosso di Vanni, appoggiato sul tavolo. Chiuso. Per la prima volta sembra solo un ombrello."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
