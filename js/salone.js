@@ -5,6 +5,8 @@
 //  - ALBUM DEI FINALI: un timbro per ogni finale trovato (Storia principale e saghe con finali), indizi vaghi per quelli mancanti.
 //  - GUARDAROBA: anteprima grande del Campione (nello stile dei volti scelto), tutti i capi e i colori per tipo e per provenienza,
 //    «prova» e «indossa», ultimi sblocchi, e come si sblocca quello che manca.
+//  - ALBUM DEI PERSONAGGI: una carta-figurina per ogni personaggio di tutto il gioco (storia, Borgo, ogni saga), con ritratto,
+//    numero e descrizione. Chi non hai ancora incontrato è una sagoma nera. Finisci una saga e le sue carte diventano d'oro.
 // Dati: solo lettura dai moduli delle saghe (info(), endings()) e da window.__borgoApi. Salvataggio proprio: ali-di-rondine.salone
 // (solo «già visto» e «ultima saga aperta»).
 (function () {
@@ -149,10 +151,25 @@
 .salOv .it.lock{opacity:.5;filter:grayscale(.7)}.salOv .it.sel{border-color:#ffd23f;box-shadow:0 0 0 2px #ffd23f55}.salOv .it.on{border-color:#4fd1a5}
 .salOv .it .sw{width:42px;height:42px;margin:0 auto 5px;border-radius:10px;display:grid;place-items:center;font-size:22px;border:2px solid #0006}
 .salOv .it .n{font:700 11px/1.2 "M PLUS Rounded 1c",sans-serif}.salOv .it .k{position:absolute;right:5px;top:4px;font-size:11px}
+.salOv .psec{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;padding:10px 12px;border-radius:14px;background:#13213f;border:1.5px solid #ffffff22;margin-bottom:8px;cursor:pointer}
+.salOv .psec.gold{border-color:#ffd23f;background:linear-gradient(110deg,#2a2a1a,#3a3218 45%,#2a2a1a)}
+.salOv .psec .pe{font-size:26px;text-align:center}.salOv .psec b{display:block;font-size:14px}.salOv .psec span{font-size:12px;color:#c9d2ea}.salOv .psec .n{font:900 13px sans-serif;color:#ffd23f}
+.salOv .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px}
+.salOv .pc{position:relative;border-radius:12px;overflow:hidden;background:#0f1b36;border:2px solid #ffffff2a;cursor:pointer;text-align:center;padding:0 0 6px;box-shadow:0 3px 10px #0007}
+.salOv .pc img{width:100%;aspect-ratio:1;display:block;background:#0b1026}
+.salOv .pc.miss{opacity:.8}
+.salOv .pc .nm{font:800 11px/1.2 "M PLUS Rounded 1c",sans-serif;margin-top:5px;padding:0 4px;min-height:26px}
+.salOv .pc .no{position:absolute;left:5px;top:4px;font:900 10px sans-serif;color:#fff;text-shadow:0 1px 2px #000}
+.salOv .pc.gold{border-color:#ffd23f}
+.salOv .pc.gold::after,.salOv .pbig.gold::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,240,170,.45) 45%,transparent 60%);background-size:250% 100%;animation:salFoil 3.2s linear infinite;pointer-events:none}
+@keyframes salFoil{0%{background-position:120% 0}100%{background-position:-120% 0}}
+.salOv .pbig{position:relative;width:min(260px,70vw);margin:12px auto 4px;border-radius:16px;overflow:hidden;border:3px solid #ffffff44;background:#0b1026}
+.salOv .pbig.gold{border-color:#ffd23f}.salOv .pbig canvas{width:100%;display:block;aspect-ratio:1}
+.salOv .pbig .no{position:absolute;left:8px;top:6px;font:900 12px sans-serif;color:#fff;text-shadow:0 1px 3px #000}
 @media (max-width:360px){.salOv .grid{grid-template-columns:1fr 1fr;gap:8px}.salOv .prev{grid-template-columns:110px 1fr}.salOv .prev canvas{width:110px;height:110px}}`;
     document.head.appendChild(st);
   }
-  let OV = null, BACK = null; const BK = { sal: null, alb: null, gua: null }; // ogni schermata ricorda da dove si era entrati
+  let OV = null, BACK = null; const BK = { sal: null, alb: null, gua: null, per: null }; // ogni schermata ricorda da dove si era entrati
   function shell(title) { css(); close(); OV = document.createElement("div"); OV.className = "salOv"; OV.innerHTML = `<div class="wrap"><div class="bar"><h2>${title}</h2><button type="button" class="x" aria-label="Chiudi">✕</button></div><div class="body"></div></div>`; OV.querySelector(".x").onclick = () => { const b = BACK; close(); if (typeof b === "function") b(); }; document.body.appendChild(OV); return OV.querySelector(".body"); }
   function close() { if (OV) { OV.remove(); OV = null; } }
 
@@ -171,6 +188,7 @@
     let html = `<p class="sum">${tt.n} saghe · ${tt.run} in corso · ${tt.fin} concluse · finali trovati ${tt.fe}/${tt.te}</p>`;
     if (lastS) html += `<div class="cont" data-id="${lastS.s.id}"><img alt="" src="${cover(lastS.s)}"><div><b>▸ Continua: ${esc(lastS.s.t)}</b>${lastS.x.finished ? "Conclusa · rigioca o cerca gli altri finali" : `Capitolo ${lastS.x.ch}${lastS.s.ch ? ` di ${lastS.s.ch}` : ""}`}</div></div>`;
     html += `<div class="big"><button type="button" data-go="album">🏆 Album dei finali<small>${tt.fe}/${tt.te} timbri</small></button><button type="button" data-go="guarda">👕 Guardaroba<small>Prova e indossa ciò che hai sbloccato</small></button></div>`;
+    { const pt = safe(() => perTotals(), null); if (pt) html += `<div class="big"><button type="button" data-go="per">👥 Album dei personaggi<small>${pt.seen}/${pt.tot} incontrati · carte d'oro per le saghe concluse</small></button></div>`; }
     html += `<div class="row">${[["tutte", "Tutte"], ["corso", "In corso"], ["nuove", "Da iniziare"], ["concluse", "Concluse"]].map(([k, l]) => `<button type="button" class="chip${FILT.st === k ? " on" : ""}" data-st="${k}">${l}</button>`).join("")}</div>`;
     html += `<div class="row">${[["", "Tutti i generi"], ...Object.entries(GEN).map(([k, v]) => [k, v[0]])].map(([k, l]) => `<button type="button" class="chip${FILT.g === k ? " on" : ""}" data-g="${k}">${l}</button>`).join("")}</div>`;
     const shown = list.filter(({ s, x }) => (FILT.st === "tutte" || (FILT.st === "corso" && x.started && !x.finished) || (FILT.st === "nuove" && !x.started) || (FILT.st === "concluse" && x.finished)) && (!FILT.g || s.g.includes(FILT.g)));
@@ -186,6 +204,7 @@
     body.querySelectorAll(".card,.cont").forEach((b) => (b.onclick = () => detail(SAGAS.find((s) => s.id === b.dataset.id))));
     body.querySelector('[data-go="album"]').onclick = () => openAlbum(() => openSalone());
     body.querySelector('[data-go="guarda"]').onclick = () => openGuardaroba(() => openSalone());
+    const pg = body.querySelector('[data-go="per"]'); if (pg) pg.onclick = () => openPersonaggi(() => openSalone());
   }
   function detail(s) {
     if (!s || !OV) return; const x = state(s), r = rec(); r.seen[s.id] = 1; recSave(r);
@@ -211,6 +230,75 @@
     }
     SAGAS.filter(available).forEach((s) => { const x = state(s); if (!x.ends.length) return; html += `<div class="sec"><span>${s.e} ${esc(s.t)}</span><span>${x.endsFound}/${x.ends.length}</span></div><div class="ends">${x.ends.map((e) => endRow(e.found, e.title, e.found ? e.desc : (s.hints && s.hints[e.id]) || "Un finale ancora nascosto.")).join("")}</div>`; });
     body.innerHTML = html;
+  }
+
+  // ---------------------------------------------------------------- ALBUM DEI PERSONAGGI
+  // ogni personaggio registrato nel gioco (window.__borgoApi.BIO) diventa una carta. Si «incontra» parlandoci (seeCard del gioco).
+  // Le sezioni: la Storia e Borgo Marino, i tornei e le modalità del Borgo, e una sezione per saga (riconosciuta dal prefisso degli id).
+  const PFX = { spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
+  const BORGO_PFX = ["sv", "rb", "sb", "cg", "hd", "md", "ac"];
+  function perSections() {
+    const A = api(); if (!A || !A.BIO) return [];
+    const ids = Object.keys(A.BIO).filter((id) => id !== "hero" && A.BIO[id]), seen = new Set(safe(() => A.cardsSeen(), [])), byP = {};
+    Object.keys(PFX).forEach((k) => (byP[PFX[k]] = k));
+    const secs = [{ id: "storia", t: "La Storia e Borgo Marino", e: "⚽", ids: [] }, { id: "borgo", t: "Tornei e modalità del Borgo", e: "🎮", ids: [] }];
+    const sagaSec = {};
+    SAGAS.filter((x) => PFX[x.id]).forEach((x) => { sagaSec[x.id] = { id: x.id, t: x.t, e: x.e, ids: [], saga: x }; });
+    ids.forEach((id) => { const m = id.match(/^([a-z]+)_/), p = m ? m[1] : ""; if (p && byP[p] && sagaSec[byP[p]]) sagaSec[byP[p]].ids.push(id); else if (BORGO_PFX.includes(p)) secs[1].ids.push(id); else secs[0].ids.push(id); });
+    const out = secs.concat(SAGAS.map((x) => sagaSec[x.id]).filter((x) => x && x.ids.length)).filter((x) => x.ids.length);
+    out.forEach((x) => { x.seen = x.ids.filter((id) => seen.has(id)).length; x.gold = !!(x.saga && available(x.saga) && state(x.saga).finished); x.has = (id) => seen.has(id); });
+    return out;
+  }
+  function perTotals() { const ss = perSections(); return { tot: ss.reduce((a, x) => a + x.ids.length, 0), seen: ss.reduce((a, x) => a + x.seen, 0), gold: ss.filter((x) => x.gold).length }; }
+  const PF = { sec: null, f: "tutti" };
+  const nameOf = (id) => safe(() => api().CAST[id].name, null) || id;
+  // il ritratto della carta: sfondo del personaggio, volto su uno strato trasparente; chi non è incontrato resta una sagoma scura
+  const PIMG = {};
+  function perDraw(g, id, ok, W, sc, cy) {
+    const A = api(), c0 = safe(() => A.CAST[id], null), bg = ok ? (c0 && c0.bg) || ["#24386b", "#0b1026"] : ["#1a2240", "#0b1026"];
+    const gr = g.createLinearGradient(0, 0, 0, W); gr.addColorStop(0, bg[0]); gr.addColorStop(1, bg[1] || "#0b1026"); g.fillStyle = gr; g.fillRect(0, 0, W, W);
+    const t = document.createElement("canvas"); t.width = W; t.height = W; const tg = t.getContext("2d");
+    safe(() => A.portraitTo(tg, id, W / 2, cy, sc));
+    if (!ok) { tg.globalCompositeOperation = "source-atop"; tg.fillStyle = "#04050c"; tg.fillRect(0, 0, W, W); }
+    g.drawImage(t, 0, 0);
+    if (!ok) { g.fillStyle = "rgba(122,138,184,.85)"; g.font = `bold ${Math.round(W / 4)}px sans-serif`; g.textAlign = "center"; g.fillText("?", W / 2, W * 0.62); g.textAlign = "left"; }
+  }
+  function perImg(id, ok) { const k = id + (ok ? "+" : "-"); if (PIMG[k]) return PIMG[k]; const c = document.createElement("canvas"); c.width = 96; c.height = 96; perDraw(c.getContext("2d"), id, ok, 96, 1.15, 38); return (PIMG[k] = c.toDataURL("image/png")); }
+  function openPersonaggi(back) {
+    if (back) BK.per = back; BACK = BK.per; const body = shell("👥 Album dei personaggi"), ss = perSections(), tt = { tot: 0, seen: 0 };
+    ss.forEach((x) => { tt.tot += x.ids.length; tt.seen += x.seen; });
+    const sec = ss.find((x) => x.id === PF.sec);
+    let html = `<p class="sum">Una carta per ogni personaggio di Ali di Rondine. Le carte si sbloccano parlando con i personaggi; chi non hai ancora incontrato è una sagoma. Finisci una saga e le sue carte diventano <b style="color:#ffd23f">d'oro</b>.<br>Incontrati: <b>${tt.seen}/${tt.tot}</b></p><div class="pbar"><i style="width:${Math.max(2, Math.round((tt.seen / Math.max(1, tt.tot)) * 100))}%"></i></div>`;
+    if (!sec) {
+      html += `<div class="sec"><span>Sezioni</span><span>${ss.filter((x) => x.seen === x.ids.length).length}/${ss.length} complete</span></div>`;
+      html += ss.map((x) => `<div class="psec${x.gold ? " gold" : ""}" data-sec="${x.id}"><div class="pe">${x.e}</div><div><b>${esc(x.t)}</b><span>${x.gold ? "✨ Carte d'oro · " : ""}${x.seen === x.ids.length ? "Sezione completa" : x.seen ? "Ancora " + (x.ids.length - x.seen) + " da incontrare" : "Nessuno incontrato, per ora"}</span><div class="pbar"><i style="width:${Math.max(2, Math.round((x.seen / x.ids.length) * 100))}%"></i></div></div><div class="n">${x.seen}/${x.ids.length}</div></div>`).join("");
+      body.innerHTML = html;
+      body.querySelectorAll("[data-sec]").forEach((b) => (b.onclick = () => { PF.sec = b.dataset.sec; PF.f = "tutti"; openPersonaggi(); OV.scrollTop = 0; }));
+      return;
+    }
+    html += `<div class="row" style="margin-top:12px"><button type="button" class="chip" data-back>◂ Tutte le sezioni</button>${[["tutti", "Tutti"], ["visti", "Incontrati"], ["mancano", "Da incontrare"]].map(([k, l]) => `<button type="button" class="chip${PF.f === k ? " on" : ""}" data-f="${k}">${l}</button>`).join("")}</div>`;
+    html += `<div class="sec"><span>${sec.e} ${esc(sec.t)}${sec.gold ? " · ✨ oro" : ""}</span><span>${sec.seen}/${sec.ids.length}</span></div>`;
+    const list = sec.ids.map((id, i) => ({ id, n: i + 1, ok: sec.has(id) })).filter((c) => PF.f === "tutti" || (PF.f === "visti" ? c.ok : !c.ok));
+    html += `<div class="pgrid">${list.map((c) => `<div class="pc${c.ok ? "" : " miss"}${c.ok && sec.gold ? " gold" : ""}" data-pid="${esc(c.id)}"><span class="no">n. ${String(c.n).padStart(3, "0")}</span><img alt="" data-img="${esc(c.id)}" data-ok="${c.ok ? 1 : 0}"><div class="nm">${c.ok ? esc(nameOf(c.id)) : "???"}</div></div>`).join("") || `<p class="sum">Niente qui.</p>`}</div>`;
+    body.innerHTML = html;
+    body.querySelector("[data-back]").onclick = () => { PF.sec = null; openPersonaggi(); };
+    body.querySelectorAll("[data-f]").forEach((b) => (b.onclick = () => { PF.f = b.dataset.f; openPersonaggi(); }));
+    body.querySelectorAll("[data-pid]").forEach((b) => (b.onclick = () => perCard(sec, b.dataset.pid)));
+    // i ritratti si disegnano a gruppi, così la pagina si apre subito anche con cento carte
+    const imgs = [...body.querySelectorAll("[data-img]")], mine = OV;
+    (function fill(i) { if (OV !== mine) return; imgs.slice(i, i + 10).forEach((im) => { const u = safe(() => perImg(im.dataset.img, im.dataset.ok === "1"), null); if (u) im.src = u; }); if (i + 10 < imgs.length) setTimeout(() => fill(i + 10), 16); })(0);
+  }
+  function perCard(sec, id) {
+    if (!OV) return; const A = api(), ok = sec.has(id), n = sec.ids.indexOf(id) + 1, saga = sec.saga;
+    const sh = document.createElement("div"); sh.className = "sheet";
+    const enc = ok && safe(() => A.encHas(id), false);
+    sh.innerHTML = `<div class="box"><div class="pbig${ok && sec.gold ? " gold" : ""}"><span class="no">n. ${String(n).padStart(3, "0")}</span><canvas width="300" height="300"></canvas></div><div class="in"><h3>${ok ? esc(nameOf(id)) : "???"}</h3><div><span class="tag" style="background:${saga ? GEN[saga.g[0]][1] : "#2c5f8a"}">${sec.e} ${esc(sec.t)}</span>${ok && sec.gold ? '<span class="tag" style="background:#b8902a">✨ Carta d\'oro</span>' : ""}</div><p>${ok ? esc(A.BIO[id] || "") : "Non l'hai ancora incontrato. Quando ci parlerai, qui comparirà la sua storia."}</p><div class="act">${enc ? '<button type="button" class="ghost" data-enc>Enciclopedia</button>' : ""}${saga && available(saga) ? `<button type="button" class="play" data-play>${state(saga).started ? "Continua la saga" : "Gioca la saga"}</button>` : ""}<button type="button" class="ghost" data-x>Chiudi</button></div></div></div>`;
+    OV.appendChild(sh);
+    perDraw(sh.querySelector("canvas").getContext("2d"), id, ok, 300, 2.4, 118);
+    sh.onclick = (e) => { if (e.target === sh) sh.remove(); };
+    sh.querySelector("[data-x]").onclick = () => sh.remove();
+    const pl = sh.querySelector("[data-play]"); if (pl) pl.onclick = () => play(saga, () => openPersonaggi());
+    const en = sh.querySelector("[data-enc]"); if (en) en.onclick = () => { close(); if (!A.encOpen(id, () => openPersonaggi())) openPersonaggi(); };
   }
 
   // ---------------------------------------------------------------- GUARDAROBA
@@ -258,7 +346,7 @@
   }
 
   window.__salone = {
-    open: (back) => openSalone(back), album: (back) => openAlbum(back), guardaroba: (back) => openGuardaroba(back), close,
+    open: (back) => openSalone(back), album: (back) => openAlbum(back), guardaroba: (back) => openGuardaroba(back), close, personaggi: (back) => openPersonaggi(back), personaggiStato: () => safe(() => perTotals(), null),
     summary: () => safe(() => { const t = totals(), A = api(), C = (A && A.COSM) || {}; return Object.assign(t, { cosOwned: safe(() => A.cosOwned().length, 0), cosTot: Object.keys(C).length }); }, { n: 0, run: 0, fin: 0, fe: 0, te: 0, cosOwned: 0, cosTot: 0 }),
     SAGAS,
   };

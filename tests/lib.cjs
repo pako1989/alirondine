@@ -17,11 +17,12 @@ async function setup(o = {}) {
   const errors = [];
   page.on("console", (m) => { if (m.type() === "error") errors.push("console: " + m.text()); });
   page.on("pageerror", (e) => errors.push("pageerror: " + e.message + "\n" + (e.stack || "").split("\n").slice(0, 3).join("\n")));
-  await page.addInitScript(([hero, save, key]) => {
+  await page.addInitScript(([hero, save, key, extra]) => {
     if (sessionStorage.getItem("__init")) return; sessionStorage.setItem("__init", "1");
     localStorage.setItem("ali-di-rondine.campione", JSON.stringify(hero));
     if (save) localStorage.setItem(key, JSON.stringify(save)); else localStorage.removeItem(key);
-  }, [HERO, o.save || null, o.key]);
+    Object.keys(extra || {}).forEach((k) => localStorage.setItem(k, JSON.stringify(extra[k]))); // altri salvataggi di prova (setup({ extra: { chiave: valore } }))
+  }, [HERO, o.save || null, o.key, o.extra || null]);
   // solo file del gioco: le richieste esterne (font, statistiche) si bloccano, così il test non dipende dalla rete
   await page.route((u) => !String(u).startsWith(BASE), (r) => r.fulfill({ status: 200, contentType: /\.css|fonts\.googleapis/.test(r.request().url()) ? "text/css" : "text/plain", body: "" }));
   await page.goto(BASE + "/index.html?debug", { waitUntil: "domcontentloaded" });
