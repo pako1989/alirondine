@@ -71,6 +71,32 @@ async function c2(w) {
   L.check(`Calcio Spaziale · capitolo 2 (${w} px)`, errors); await browser.close();
 }
 // le partite vere del gioco avviate da una saga (senza sostituirle): devono partire senza errori in tutti e tre i modi
+async function c3(w) {
+  const save = { v: 1, ch: 3, step: { 1: 5, 2: 7 }, done: { 1: "festa", 2: "segreto" }, intro: { ch1: 1, ch2: 1, so_hangar: 1, so_anello: 1, so_palestra: 1, so_mensa: 1 }, st: { squadra: 6, arbi: 5 }, flags: { so_nome: "I Senzapeso", cartoline: 2, so_cart_so_hangar: true, so_cart_so_serra: true, so_gen_ok: true, so_nonna_amica: true } };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await page.evaluate(() => window.__spazio.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 3")); await L.advance(page);
+  for (const z of ["so_cupola", "so_palestra", "so_hangar"]) { const bad = await L.reachAll(page, z); if (bad.length) errors.push(z + " irraggiungibile: " + bad.join(", ")); }
+  await L.talk(page, "so_gru"); await L.advance(page);
+  await L.goAct(page, 33, 9); await L.advance(page); await L.goAct(page, 43, 6); await L.advance(page); await L.goAct(page, 12, 1); await L.advance(page);
+  if ((await L.zone(page)) !== "so_cupola") errors.push("non si sale nella Cupola: " + (await L.zone(page)));
+  if (w === 390) await L.shot(page, "so_cupola");
+  await L.goAct(page, 6, 16); await L.advance(page);
+  await L.talk(page, "so_gru"); await L.advance(page, ["Leggile ad alta voce"]);
+  await L.talk(page, "so_zorgo"); await L.advance(page);
+  await L.talk(page, "so_arbi"); await L.advance(page, ["Nessuno ti spegne"]);
+  await L.talk(page, "so_arbi"); await page.evaluate(() => window.T_.click("Gioca la finale")); await page.waitForTimeout(500); await leave(page); await page.waitForTimeout(1500);
+  const mate = await page.evaluate(() => window.__sagaCore.pitchState.o.mate.name); if (mate !== "Gru") errors.push("in finale non gioca la Comandante: " + mate);
+  if (w === 390) await L.shot(page, "so_finale_match");
+  await page.evaluate(() => { const S = window.__sagaCore.pitchState; S.a = 2; S.b = 1; S.finish(); }); await page.waitForTimeout(200); await leave(page); await L.advance(page);
+  const ends = ["ARBI-9 alza la mano", "Torno sulla Terra", "Resto. Sono", "NONNA, la prossima"];
+  for (const e of ends) {
+    await page.evaluate(() => { const K = window.__spazio._dbg.K; K.setStep(3, 3); K.enterZone("so_cupola"); }); await page.waitForTimeout(400); await L.advance(page);
+    await L.talk(page, "so_gru"); await L.advance(page, [e]); if (w === 390 && e === ends[0]) await L.shot(page, "so_fine");
+  }
+  const i = await L.info(page); if (!i.done[3]) errors.push("capitolo 3 non concluso: " + JSON.stringify(i.step));
+  const n = await page.evaluate(() => window.__spazio._dbg.K.mem().ends.length); if (n < 4) errors.push("finali trovati " + n + " su 4");
+  L.check(`Calcio Spaziale · capitolo 3 e i 4 finali (${w} px)`, errors); await browser.close();
+}
 async function vere(w) {
   for (const alt of ["az", "cage", "hd"]) {
     const { browser, page, errors } = await L.setup({ w, ...MOD });
@@ -81,4 +107,4 @@ async function vere(w) {
     L.check(`Partita vera del gioco avviata da una saga: ${alt} (${w} px)`, errors); await browser.close();
   }
 }
-(async () => { await c1(390); await c1(320); await c2(390); await c2(320); await vere(390); })().catch((e) => { console.error("✗ spazio:", e.message); process.exit(1); });
+(async () => { await c1(390); await c1(320); await c2(390); await c2(320); await c3(390); await c3(320); await vere(390); })().catch((e) => { console.error("✗ spazio:", e.message); process.exit(1); });

@@ -5227,6 +5227,30 @@
     [[110, "#2a6ac8"], [140, "#7ae86a"], [180, "#e85a3a"], [210, "#e85a3a"]].forEach(([x, c], i) => { const j = since("so_ponte", 1) < 60 ? Math.abs(Math.sin(f / 5 + i)) * 8 : Math.sin(f / 30 + i) * 2; px(g, x, 140 - j, 8, 14, c); circ(g, x + 4, 136 - j, 4, "#e0ac7e"); g.strokeStyle = "rgba(200,240,255,.6)"; g.lineWidth = 1; g.beginPath(); g.arc(x + 4, 136 - j, 6, 0, 7); g.stroke(); });
     if (since("so_ponte", 2) < 140) { const t = since("so_ponte", 2); circ(g, 160 + t * 0.6, 140 - t * 0.5, 3, "#ffffff"); }
   }
+  function bgSoCupola(g, W, H, f) {
+    // la Cupola d'osservazione: la Via Lattea, la nave da crociera coi finestrini pieni di tifosi, il campo fosforescente (tocca)
+    px(g, 0, 0, W, H, "#05060c"); g.save(); g.translate(160, 60); g.rotate(-0.35); const mw = g.createLinearGradient(0, -30, 0, 30); mw.addColorStop(0, "rgba(120,140,255,0)"); mw.addColorStop(0.5, "rgba(180,170,255,.28)"); mw.addColorStop(1, "rgba(120,140,255,0)"); g.fillStyle = mw; g.fillRect(-260, -30, 520, 60); g.restore(); soStars(g, W, H, f, 0.03);
+    g.strokeStyle = "rgba(200,240,255,.35)"; g.lineWidth = 2; g.beginPath(); g.arc(160, 210, 200, Math.PI, 0); g.stroke(); for (let i = 1; i < 6; i++) { g.beginPath(); g.moveTo(160, 10); g.lineTo(-40 + i * 66, 200); g.stroke(); }
+    // la Nebulosa Splendida con i finestrini (tocca: le bandierine)
+    px(g, 200, 30, 120, 36, "#e8e8f0"); px(g, 200, 30, 120, 4, "#7a3ae8"); for (let i = 0; i < 9; i++) { px(g, 206 + i * 12, 42, 8, 8, "#ffe8a0"); if (since("so_cupola", 0) < 120) px(g, 210 + i * 12, 36 + Math.sin(f / 4 + i) * 2, 3, 6, ["#e85a3a", "#7af0c8", "#e8c84a"][i % 3]); } g.fillStyle = "#7a3ae8"; g.font = "bold 5px sans-serif"; g.fillText("NEBULOSA SPLENDIDA", 222, 62);
+    // il campo con le linee fosforescenti
+    g.fillStyle = "#1a2240"; g.beginPath(); g.moveTo(30, 190); g.lineTo(290, 190); g.lineTo(250, 130); g.lineTo(70, 130); g.closePath(); g.fill(); const a = 0.5 + 0.3 * Math.sin(f / 20); g.strokeStyle = `rgba(122,240,200,${a})`; g.lineWidth = 1.5; g.stroke(); g.beginPath(); g.moveTo(160, 130); g.lineTo(160, 190); g.stroke(); g.beginPath(); g.ellipse(160, 160, 22, 8, 0, 0, 7); g.stroke();
+    // la squadra di casa e la Selezione
+    [[110, "#1a2a5a", "#e0ac7e"], [128, "#7ae86a", "#7ae86a"], [192, "#7a3ae8", "#e89ab8"], [210, "#7a3ae8", "#9ae8b8"]].forEach(([x, c, sk], i) => { const j = since("so_cupola", 1) < 60 ? Math.abs(Math.sin(f / 5 + i)) * 6 : 0; px(g, x, 152 - j, 8, 14, c); circ(g, x + 4, 148 - j, 4, sk); });
+    if (since("so_cupola", 1) < 60) { g.fillStyle = "#ffe84a"; g.font = "bold 7px sans-serif"; g.fillText("FRRRT!", 150, 124); }
+    circ(g, 60, 40, 3 + (since("so_cupola", 2) < 90 ? 4 : 0), "#ffe8a0"); if (since("so_cupola", 2) < 90) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 60, 40, 30, "255,232,160", 0.6); g.restore(); }
+  }
+  function bgSoFinale(g, W, H, f) {
+    // la festa dopo la finale: coriandoli che non cadono mai, la Terra, l'equipaggio abbracciato (tocca)
+    px(g, 0, 0, W, H, "#05060c"); soStars(g, W, H, f, 0.04);
+    const eg = g.createRadialGradient(160, 330, 80, 160, 330, 220); eg.addColorStop(0, "#3a8ac8"); eg.addColorStop(0.8, "#2a5a9a"); eg.addColorStop(0.95, "#7ac8f0"); eg.addColorStop(1, "rgba(122,200,240,0)"); g.fillStyle = eg; g.fillRect(0, 0, W, H);
+    // l'equipaggio: Gru, Blop, Quattrobraccia, ARBI-9, il Campione con la coppa
+    const crew = [[80, "#2a3a6a", "#e8c8a8", "#c8c8d8"], [115, "#e8e8f0", "#7ae86a", "#5ac84a"], [150, "#1a2a5a", "#e0ac7e", "#2b1d14"], [185, "#e8a83a", "#8a9ae8", "#3a2a6a"], [220, "#8a94a8", "#a8b0c0", "#5a6478"]];
+    crew.forEach(([x, c, sk, h], i) => { const y = 120 + Math.sin(f / 30 + i) * 6 - (since("so_finale", 0) < 100 ? Math.abs(Math.sin(f / 6 + i)) * 10 : 0); px(g, x - 6, y, 12, 20, c); circ(g, x, y - 6, 6, sk); px(g, x - 6, y - 12, 12, 4, h); if (i === 2) { px(g, x - 4, y - 30, 8, 10, "#e8c84a"); px(g, x - 7, y - 28, 3, 5, "#e8c84a"); px(g, x + 4, y - 28, 3, 5, "#e8c84a"); px(g, x - 2, y - 20, 4, 4, "#c8a83a"); } });
+    for (let i = 0; i < 40; i++) { const x = (i * 37 + Math.sin(f / 40 + i) * 20) % W, y = (i * 23 + Math.cos(f / 50 + i) * 15 + H) % H; g.save(); g.translate(x, y); g.rotate(f / 20 + i); px(g, -2, -1, 4, 2, ["#e85a3a", "#7af0c8", "#e8c84a", "#7a3ae8", "#ffffff"][i % 5]); g.restore(); }
+    if (since("so_finale", 1) < 120) { g.fillStyle = "#e8c84a"; g.font = "bold 10px sans-serif"; g.textAlign = "center"; g.fillText("CAMPIONI DELL'ORBITA!", 160, 40); g.textAlign = "left"; }
+    if (since("so_finale", 2) < 120) { g.fillStyle = "rgba(232,168,58,.9)"; for (let i = 0; i < 2; i++) circ(g, 218 + i * 6, 112 + since("so_finale", 2) * 0.3, 1.5, "#e8a83a"); }
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -5633,6 +5657,16 @@
       [196, 20, 90, 50, "🍕 Il coperchio della nave si apre: è una scatola della pizza gigante. Dentro, una pizza grande come un campo da bocce. Ancora calda."],
       [100, 120, 130, 40, "🏃 I giocatori saltano per riscaldarsi. Senza gravità, il salto dura cinque secondi. Qualcuno ne approfitta per salutare la Terra."],
       [140, 110, 60, 50, "⚽ Un pallone parte dal ponte e se ne va verso le stelle. Nessuno lo insegue: tornerà. Forse. Tra qualche anno."],
+    ] },
+    so_cupola: { draw: bgSoCupola, hot: [
+      [196, 26, 124, 44, "🎌 Mille bandierine sventolano dai finestrini della Nebulosa Splendida. Il capitano Zorgo saluta con tre occhi, uno per finestrino."],
+      [100, 130, 130, 50, "📣 ARBI-9 fischia l'inizio del riscaldamento. Poi fischia anche la fine. Sono passati due secondi. È emozionato."],
+      [40, 20, 40, 40, "⭐ Una stella si accende più forte delle altre. Primula giura che è il basilico, che dalla Serra fa il tifo con tutte le foglie."],
+    ] },
+    so_finale: { draw: bgSoFinale, hot: [
+      [60, 90, 180, 60, "🙌 L'equipaggio salta tutto insieme. Senza gravità, il salto dura un minuto. Si abbracciano a mezz'aria."],
+      [80, 20, 160, 30, "🏆 «CAMPIONI DELL'ORBITA!» Lo scrive NONNA sul tabellone di bordo, poi aggiunge: «Avete mangiato?»."],
+      [200, 90, 40, 50, "🛢️ ARBI-9 piange olio di gioia. Le gocce non cadono: gli girano intorno come piccole lune."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };

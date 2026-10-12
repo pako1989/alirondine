@@ -13,6 +13,7 @@
   "use strict";
   if (window.__spazio || !window.__sagaCore) return;
   const TS = 16;
+  let paintV = null; // la vetrata stellata, condivisa da V (si guarda) e U (solo decorazione)
   const E = window.__sagaCore.create({
     id: "spazio", key: "ali-di-rondine.spazio", title: "Calcio Spaziale: Stazione Orbitale 7", icon: "🚀", bg: "so_stazione", chapters: 3,
     menuSub: "La gravità cambia in ogni modulo e il pallone non cade mai",
@@ -29,7 +30,7 @@
       cupola: { grass: ["#1a2240", "#1e2644", "#161e3a"], path: ["#2a3458", "#262e52"], stone: ["#3a4468", "#343e62"], wall: ["#10162e", "#0c1228"], water: ["#0a1430", "#0e1834"], tall: "#7af0c8", tint: "120,150,255", tintA: 0.12, fx: "float", dark: 0.22 },
       mensa: { grass: ["#5a4a3a", "#5e4e3e", "#564636"], path: ["#6a5a48", "#645442"], stone: ["#7a6a58", "#746452"], wall: ["#3a3040", "#342a3a"], water: ["#3a5a7a", "#40607e"], tall: "#7ae86a", tint: "255,210,150", tintA: 0.12, fx: "float", dark: 0.16 },
     },
-    floors: "", solid: "VQJYZKIiEC",
+    floors: "", solid: "VQJYZKIiECU",
     rest: { ch: "s", label: "Agganciati alla cuccetta", text: "Ti agganci alla cuccetta con le cinghie, per non volare via. NONNA abbassa le luci: «Dormi, caro. Domani c'è il torneo». (Il gioco salva da solo: qui puoi rileggere il Diario di Bordo.)" },
     texts: { chestOpen: "Apri il contenitore.", chestEmpty: "Il contenitore è vuoto. Dentro fluttua solo una briciola di cracker del 2091.", nothing: "Niente. Solo un bullone che ti gira intorno come una piccola luna.", noHero: "La Stazione 7 aspetta un esperto di calcio dalla Terra. Prima crea il tuo Campione.", chapters: "Tre capitoli, tre gravità diverse. Le scelte restano: cambiano il finale." },
     journal: { name: "Il Diario di Bordo", sub: "Equipaggio, scoperte, partite, finali" },
@@ -51,13 +52,15 @@
     },
     paint: {
       // una vetrata sullo spazio: le stelle scorrono più lente delle pareti (parallasse), e ogni tanto passa una cometa
-      V(K, sx, sy, tx, ty, fr) {
+      V: (paintV = function (K, sx, sy, tx, ty, fr) {
         const g = K.g, cx = tx * TS - sx, cy = ty * TS - sy;
         K.P(sx, sy, 16, 16, "#05060c");
         for (let j = 0; j < 40; j++) { const d = j % 3 ? 0.25 : 0.12, X = (((j * 71 + 11) % 360) - cx * d) % 360, Y = (((j * 43 + 7) % 220) - cy * d) % 220, x = X < 0 ? X + 360 : X, y = Y < 0 ? Y + 220 : Y; if (x >= sx && x < sx + 16 && y >= sy && y < sy + 16) K.P(x, y, j % 9 ? 1 : 2, j % 9 ? 1 : 2, j % 5 ? "rgba(220,235,255,.8)" : "#ffe8a0"); }
         const cmx = ((fr * 1.6) % 900) - 100 - cx * 0.2, cmy = 30 - cy * 0.2 + ((fr / 900) | 0) % 3 * 40; if (cmx >= sx - 10 && cmx < sx + 16 && cmy >= sy && cmy < sy + 16) { g.fillStyle = "rgba(200,240,255,.8)"; g.fillRect(Math.max(sx, cmx), cmy, 2, 1); g.fillStyle = "rgba(200,240,255,.3)"; g.fillRect(Math.max(sx, cmx - 8), cmy, Math.min(8, cmx - sx), 1); }
         K.P(sx, sy, 16, 1, "#8a94a8"); K.P(sx, sy + 15, 16, 1, "#8a94a8"); if (tx % 3 === 0) K.P(sx, sy, 1, 16, "#8a94a8"); K.P(sx + 2, sy + 2, 3, 1, "rgba(255,255,255,.18)");
-      },
+      }),
+      // vetrata alta, solo da guardare da lontano (stesso cielo in parallasse, nessuna azione)
+      U(K, sx, sy, tx, ty, fr) { paintV(K, sx, sy, tx, ty, fr); },
       // una console di bordo con gli schermi che lampeggiano (NONNA ci parla da qui)
       Q(K, sx, sy, tx, ty, fr) {
         K.ground(sx, sy, tx, ty); K.P(sx + 1, sy + 4, 14, 11, "#3a4458"); K.P(sx + 2, sy - 2, 12, 8, "#1a2a3a"); K.P(sx + 3, sy - 1, 10, 6, (Math.floor(fr / 30 + tx) % 4) ? "#1a5a6a" : "#2a8a8a");
