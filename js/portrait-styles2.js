@@ -125,7 +125,7 @@
     if (c.shades) { g.fillStyle = "#16181f"; [-1, 1].forEach((sd) => { g.beginPath(); g.ellipse(sd * T.gap, T.eyeY + 1, 6.5, 4.5, 0, 0, 7); g.fill(); }); g.fillRect(-T.gap, T.eyeY - 0.5, T.gap * 2, 2); g.fillStyle = "rgba(255,255,255,.35)"; [-1, 1].forEach((sd) => g.fillRect(sd * T.gap - 4, T.eyeY - 1, 3, 1.5)); }
     if (c.cap) { g.fillStyle = c.cap; capPath(g, fw); g.fill(); g.fillStyle = dark(c.cap, 0.2); g.beginPath(); g.ellipse(-6, -7, fw + 6, 3.5, -0.06, 0, 7); g.fill(); g.fillStyle = lite(c.cap, 0.25); g.beginPath(); g.arc(0, -28, 2, 0, 7); g.fill(); }
     if (expr === "think") thinkBubbles(g, "rgba(255,255,255,.9)");
-    if (c.accFn) { try { c.accFn(g, "body"); c.accFn(g, "head"); } catch (e) {} }
+    cosm(g, c, T);
   }
 
   // ================================================================ 2D HD
@@ -184,7 +184,7 @@
     glassesHD(g, T, c);
     if (c.cap) { const cg = g.createLinearGradient(0, -30, 0, -6); cg.addColorStop(0, lite(c.cap, 0.2)); cg.addColorStop(1, dark(c.cap, 0.25)); g.fillStyle = cg; capPath(g, fw); g.fill(); g.strokeStyle = dark(c.cap, 0.5); g.lineWidth = 0.9; g.stroke(); const vg = g.createLinearGradient(0, -10, 0, -3); vg.addColorStop(0, dark(c.cap, 0.1)); vg.addColorStop(1, dark(c.cap, 0.45)); g.fillStyle = vg; g.beginPath(); g.ellipse(-6, -7, fw + 6, 3.6, -0.06, 0, 7); g.fill(); g.fillStyle = "rgba(255,255,255,.3)"; g.beginPath(); g.ellipse(-5, -22, 6, 2.5, -0.3, 0, 7); g.fill(); }
     if (expr === "think") thinkBubbles(g, "rgba(255,255,255,.92)");
-    if (c.accFn) { try { c.accFn(g, "body"); c.accFn(g, "head"); } catch (e) {} }
+    cosm(g, c, T);
   }
   function eyesDetailed(g, T, c, expr, P) {
     const blink = expr === "blink", wide = isWow(expr), happy = expr === "grin", sad = expr === "sad", angry = expr === "angry", vn = P.vn;
@@ -236,6 +236,10 @@
   function glassesHD(g, T, c) {
     if (c.glasses) { [-1, 1].forEach((sd) => { g.fillStyle = "rgba(200,230,255,.14)"; g.beginPath(); g.ellipse(sd * T.gap, T.eyeY, T.eyeW + 2.6, 6.4, 0, 0, 7); g.fill(); g.strokeStyle = "#2a2a34"; g.lineWidth = 1.2; g.stroke(); g.strokeStyle = "rgba(255,255,255,.6)"; g.lineWidth = 0.8; g.beginPath(); g.moveTo(sd * T.gap - 3.5, T.eyeY - 3.5); g.lineTo(sd * T.gap - 1, T.eyeY - 5); g.stroke(); }); g.strokeStyle = "#2a2a34"; g.lineWidth = 1.2; g.beginPath(); g.moveTo(-T.gap + T.eyeW + 2.4, T.eyeY - 1); g.quadraticCurveTo(0, T.eyeY - 3, T.gap - T.eyeW - 2.4, T.eyeY - 1); g.stroke(); }
     if (c.shades) { [-1, 1].forEach((sd) => { const sg = g.createLinearGradient(0, T.eyeY - 5, 0, T.eyeY + 5); sg.addColorStop(0, "#3a3a4a"); sg.addColorStop(1, "#0a0a10"); g.fillStyle = sg; g.beginPath(); g.ellipse(sd * T.gap, T.eyeY, T.eyeW + 2.6, 5.2, 0, 0, 7); g.fill(); g.fillStyle = "rgba(255,255,255,.4)"; g.beginPath(); g.ellipse(sd * T.gap - 2.5, T.eyeY - 2, 2.4, 1, -0.3, 0, 7); g.fill(); }); g.fillStyle = "#111"; g.fillRect(-T.gap, T.eyeY - 1, T.gap * 2, 1.4); }
+  }
+  function cosm(g, c, T) { // i cosmetici come negli altri stili: corone, maschere, elmi, mantelli, sciarpe, fasce… (FS.acc di portrait-styles.js)
+    if (!c.acc || typeof c.acc !== "string") return; const G = { fw: T.fw, top: -26, ey: T.eyeY, eg: T.gap };
+    try { if (FS.acc) { FS.acc(g, c, "body", G, "#1a1a22"); FS.acc(g, c, "head", G, "#1a1a22"); } else if (c.accFn) { c.accFn(g, "body"); c.accFn(g, "head"); } } catch (e) {}
   }
   function thinkBubbles(g, col) { g.fillStyle = col; [[23, -20, 2], [28, -28, 3], [35, -38, 5]].forEach(([x, y, r]) => { g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }); }
 

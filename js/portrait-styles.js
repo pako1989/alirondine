@@ -462,6 +462,6 @@
   window.__faceStyles = {
     list: [["classic", "Classico"], ["anime", "Anime"], ["pixel", "Pixel 16-bit"], ["comic", "Fumetto"], ["manga", "Manga"], ["acquerello", "Acquerello"], ["illustrato", "Illustrato"], ["cartone", "Cartone animato"]],
     draw(style, g, id, c, expr) { if (!c || !c.skin) return false; if (c.cap && typeof c.cap !== "string") c = Object.assign({}, c, { cap: "#1d3fa3" }); g.save(); try { if (style === "anime") anime(g, id, c, expr); else if (style === "illustrato") anime(g, id, c, expr, true); else if (style === "cartone") cartoon(g, id, c, expr); else if (style === "comic") comic(g, id, c, expr); else if (style === "manga") manga(g, id, c, expr); else if (style === "acquerello") acquerello(g, id, c, expr); else if (style === "pixel") pixel(g, id, c, expr); else { g.restore(); return false; } } catch (e) { g.restore(); return false; } g.restore(); return true; },
-    traits,
+    traits, acc, // acc(g, c, part, G, ink): i cosmetici negli stili alternativi (anche per gli stili di portrait-styles2 e portrait-dicebear)
   };
 })();

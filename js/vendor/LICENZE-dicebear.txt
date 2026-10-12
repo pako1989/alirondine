@@ -1,4 +1,5 @@
-DiceBear (https://www.dicebear.com) — libreria usata per lo stile dei volti «Avventuriero».
-- Codice @dicebear/core e @dicebear/collection 9.2.2: licenza MIT, © Florian Körner.
-- Stile «Adventurer»: disegni di Lisa Wischofsky, licenza CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/); remix di DiceBear.
-File generato con esbuild da @dicebear/core e @dicebear/adventurer.
+DiceBear (https://www.dicebear.com) — libreria usata per gli stili dei volti «Toon Head» e «Avventuriero».
+- Codice @dicebear/core 9.4.2: licenza MIT, © Florian Körner.
+- Stile «Toon Head»: disegni di Johan Melin (https://www.johanmelin.com), licenza CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/); remix di DiceBear.
+- Stile «Adventurer»: disegni di Lisa Wischofsky, licenza CC BY 4.0; remix di DiceBear.
+File generato con esbuild da @dicebear/core, @dicebear/toon-head e @dicebear/adventurer.
