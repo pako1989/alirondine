@@ -41,4 +41,32 @@ async function c1(w) {
   const i = await L.info(page); if (!i.done[1]) errors.push("capitolo 1 non concluso: " + JSON.stringify(i.step)); if (!i.flags.mg_coppa) errors.push("coppa non recuperata");
   L.check(`Il Mantello Granata · capitolo 1 (${w} px)`, errors); await browser.close();
 }
-(async () => { await c1(390); await c1(320); })().catch((e) => { console.error("✗ mantello:", e.message); process.exit(1); });
+async function c2(w) {
+  const save = { v: 1, ch: 2, step: { 1: 5 }, done: { 1: "segreto" }, diffSet: true, intro: { ch1: 1, mg_piazza: 1, mg_sartoria: 1, mg_tetti: 1 }, st: { fama: 5, segreto: 2 }, flags: { mg_mantello: true, forma_volo: true, party_mg_bullone: true, mg_coppa: true } };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await page.evaluate(() => window.__mantello.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 2")); await L.advance(page);
+  await L.talk(page, "mg_gilda"); await L.advance(page);
+  const party = await page.evaluate(() => window.__tr.TW.z.npcs.filter((n) => n.ghost).map((n) => n.id).join()); if (party !== "mg_bullone,mg_gilda") errors.push("Gilda non si unisce: " + party);
+  await L.goAct(page, 6, 6); await L.advance(page); await L.talk(page, "mg_tilde"); await L.advance(page); await L.goAct(page, 10, 12); await L.advance(page);
+  await page.evaluate(() => window.__mantello._dbg.K.setForm("volo", true)); await L.goAct(page, 35, 11); await L.advance(page); if ((await L.zone(page)) !== "mg_fabbrica") errors.push("non si arriva alla fabbrica: " + (await L.zone(page)));
+  // con le due forme insieme (in momenti diversi) tutto è raggiungibile
+  await page.evaluate(() => { const z = window.__borgoApi.TRZ.mg_fabbrica; z.__p = z.pass; z.pass = () => "wI"; });
+  const bad = await L.reachAll(page, "mg_fabbrica"); if (bad.length) errors.push("mg_fabbrica irraggiungibile: " + bad.join(", "));
+  await page.evaluate(() => { const z = window.__borgoApi.TRZ.mg_fabbrica; z.pass = z.__p; });
+  for (const z of ["mg_laboratorio"]) { const b = await L.reachAll(page, z); if (b.length) errors.push(z + " irraggiungibile: " + b.join(", ")); }
+  // in volo si passa il fiume ma non l'inferriata
+  await L.goAct(page, 12, 11); await L.advance(page);
+  if ((await page.evaluate(() => window.T_.goAct(22, 10))) === "ok") errors.push("si entra nel cortile senza la forma Mini");
+  await page.evaluate(() => window.__mantello._dbg.K.setForm("mini", true)); if (w === 390) await L.shot(page, "mg_fabbrica");
+  const fx = await page.evaluate(() => window.__tr.TW.z.heroFx().s); if (!(fx < 1)) errors.push("la forma Mini non rimpicciolisce: " + fx);
+  await L.goAct(page, 22, 10); await L.advance(page); if ((await L.zone(page)) !== "mg_laboratorio") errors.push("non si entra nel laboratorio: " + (await L.zone(page)));
+  if (w === 390) await L.shot(page, "mg_laboratorio");
+  await L.talk(page, "mg_colla"); await page.evaluate(() => window.T_.click("Sfida a Super-Bottoni")); await page.waitForTimeout(500); await btStart(page); await page.waitForTimeout(500);
+  // il contro-potere della Colla dimezza il tiro
+  const half = await page.evaluate(() => { const S = window.__bottoni.state; S.curse = "colla"; S.flick(0, -Math.PI / 2, 1); return Math.hypot(S.D[0].vx, S.D[0].vy); }); if (!(half > 4 && half < 6)) errors.push("la colla non dimezza il tiro: " + half);
+  await btEnd(page, 2, 1); await L.advance(page);
+  await L.talk(page, "mg_colla"); await L.advance(page, ["la colla non serve"]);
+  const i = await L.info(page); if (!i.done[2]) errors.push("capitolo 2 non concluso: " + JSON.stringify(i.step)); if (!i.flags.mg_colla_amica) errors.push("scelta non registrata");
+  L.check(`Il Mantello Granata · capitolo 2 (${w} px)`, errors); await browser.close();
+}
+(async () => { await c1(390); await c1(320); await c2(390); await c2(320); })().catch((e) => { console.error("✗ mantello:", e.message); process.exit(1); });

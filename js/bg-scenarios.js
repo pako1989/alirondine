@@ -5501,6 +5501,26 @@
     if (fly) mgBurst(g, 160, 40, 10, 17, "FRRR!", "#3a3a6a");
     const bx = 240, by = 124, bb = since("mg_tetti", 2) < 60 ? Math.abs(Math.sin(since("mg_tetti", 2) / 4)) * 6 : 0; px(g, bx, by - bb, 22, 16, "#b8c4d0"); px(g, bx + 4, by - 4 - bb, 4, 4, "#6a7a8a"); px(g, bx + 14, by - 4 - bb, 4, 4, "#6a7a8a"); px(g, bx + 5, by + 5 - bb, 4, 3, "#3a8ac8"); px(g, bx + 13, by + 5 - bb, 4, 3, "#3a8ac8"); px(g, bx + 4, by + 16, 3, 6, "#6a7a8a"); px(g, bx + 15, by + 16, 3, 6, "#6a7a8a"); if (bb) { g.fillStyle = "#fff"; g.font = "900 9px Impact, sans-serif"; g.fillText("BIP! BOP!", bx - 8, by - 12); }
   }
+  function bgMgFabbrica(g, W, H, f) {
+    // la Fabbrica di Colla: ciminiere che fanno bolle, il fiume giallo-verde, l'inferriata (tocca)
+    vgrad(g, 0, 0, W, 110, ["#a8d8e8", "#e8f0d0"]); mgDots(g, 0, 0, W, 110, "rgba(120,160,60,.12)", 6);
+    px(g, 120, 50, 160, 70, "#8a8a7a"); px(g, 116, 44, 168, 8, "#6a7a3a"); for (let k = 0; k < 6; k++) px(g, 130 + k * 24, 66, 14, 14, "#c8e05a"); g.fillStyle = "#121212"; g.font = "900 9px Impact, sans-serif"; g.fillText("COLLA SUPER", 166, 104);
+    [[140, 20], [240, 10]].forEach(([x, y], i) => { px(g, x, y, 14, 40, "#6a6a6a"); const n = since("mg_fabbrica", 0) < 120 ? 10 : 4; for (let k = 0; k < n; k++) { const t = (f * 0.5 + k * 20) % 90; g.strokeStyle = "rgba(220,240,140,.8)"; g.lineWidth = 1.5; g.beginPath(); g.arc(x + 7 + Math.sin(f / 15 + k) * 6, y - t, 3 + (k % 3), 0, 7); g.stroke(); } });
+    vgrad(g, 0, 120, W, 80, ["#c8e05a", "#9ab83a"]); for (let i = 0; i < 10; i++) { const x = (i * 37 + f * 0.25) % W; g.fillStyle = "rgba(255,255,200,.5)"; g.beginPath(); g.ellipse(x, 140 + (i * 13) % 50, 8, 2, 0, 0, 7); g.fill(); }
+    const lift = since("mg_fabbrica", 1) < 90 ? Math.min(1, since("mg_fabbrica", 1) / 15) : 0; px(g, 40, 150 - lift * 20, 14, 14, "#fff"); g.strokeStyle = "#121212"; g.lineWidth = 1.2; g.strokeRect(40, 150 - lift * 20, 14, 14); circ(g, 47, 157 - lift * 20, 6, "#fff"); if (lift) mgBurst(g, 47, 120, 9, 16, "PLOP!", "#5a8a2a");
+    for (let x = 180; x < 320; x += 6) px(g, x, 112, 2, 40, "#3a3a4a"); px(g, 180, 112, 140, 3, "#3a3a4a");
+    if (since("mg_fabbrica", 2) < 100) { const t = since("mg_fabbrica", 2); mgHero(g, 250 - Math.min(40, t) * 0, 150, t < 30 ? 1 - t / 45 : 0.35, f, false); mgBurst(g, 250, 116, 8, 14, "ZIP!", "#3a6ab8"); }
+  }
+  function bgMgLaboratorio(g, W, H, f) {
+    // il laboratorio: pentoloni che borbottano, alambicchi, la foto delle quattro amiche (tocca)
+    vgrad(g, 0, 0, W, H, ["#d8e0c0", "#b8c098"]); mgDots(g, 0, 0, W, H, "rgba(90,120,40,.1)", 6); px(g, 0, 150, W, 50, "#7a6a4a");
+    [[50, "#c8e05a"], [110, "#e8a8c8"]].forEach(([x, c], i) => { px(g, x, 120, 44, 32, "#4a4a4a"); px(g, x + 2, 116, 40, 6, c); const n = since("mg_laboratorio", 0) < 100 ? 6 : 2; for (let k = 0; k < n; k++) circ(g, x + 8 + k * 6, 112 - ((f * 0.6 + k * 9 + i * 20) % 30), 2 + k % 2, c); });
+    if (since("mg_laboratorio", 0) < 100) mgBurst(g, 80, 80, 10, 18, "BLUB!", "#5a8a2a");
+    px(g, 170, 90, 6, 30, "rgba(200,240,255,.6)"); circ(g, 173, 126, 10, "rgba(200,240,255,.6)"); px(g, 190, 100, 4, 22, "rgba(200,240,255,.6)"); circ(g, 192, 126, 7, "rgba(232,168,200,.6)");
+    const fx = 250, fy = 70, sh = since("mg_laboratorio", 1) < 120; px(g, fx, fy, 50, 38, "#f4ecdc"); g.strokeStyle = "#5a3a2a"; g.lineWidth = 3; g.strokeRect(fx, fy, 50, 38); for (let k = 0; k < 4; k++) { circ(g, fx + 9 + k * 11, fy + 16, 4, ["#e8c84a", "#c8642a", "#2a1a3a", "#e8e0a0"][k]); px(g, fx + 6 + k * 11, fy + 20, 7, 12, ["#e8a8c8", "#3a8ac8", "#5aa84a", "#c8e05a"][k]); }
+    if (sh) mgCap(g, 200, 120, "«PER SEMPRE ATTACCATE»");
+    const ms = since("mg_laboratorio", 2) < 80; const sp = ms ? f / 3 : f / 12; px(g, 140, 150, 3, -30 + Math.sin(sp) * 4, "#8a6a4a"); if (ms) { g.fillStyle = "#121212"; g.font = "bold 7px sans-serif"; g.fillText("♪ restate qui, restate qui… ♪", 110, 40); }
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -6027,6 +6047,16 @@
       [60, 50, 160, 70, "💨 Dai comignoli esce un fumo che sa di ragù. Poi di caffè. Poi di torta di mele. I tetti di Metropolenta, la domenica, sono un menu."],
       [110, 45, 40, 30, "🐦 I piccioni dell'antenna volano via tutti insieme, FRRR! Uno torna indietro: aveva dimenticato una briciola."],
       [230, 100, 40, 45, "🤖 Bullone salta sul posto: «BIP! BOP!». Vuol dire «sono qui», oppure «ho stirato un piccione». Meglio non chiedere."],
+    ] },
+    mg_fabbrica: { draw: bgMgFabbrica, hot: [
+      [120, 0, 160, 60, "🫧 Le ciminiere sbuffano bolle di colla a raffica. Una si attacca a un piccione, che resta lì, in aria, molto offeso."],
+      [20, 130, 60, 40, "⚽ Un pallone si stacca da terra: PLOP! Rimbalza due volte, felice, poi si riattacca. Non è ancora il momento."],
+      [180, 110, 140, 50, "🐜 Tra le sbarre dell'inferriata passa una figurina piccola piccola, con un mantello granata. Zip!"],
+    ] },
+    mg_laboratorio: { draw: bgMgLaboratorio, hot: [
+      [40, 90, 120, 60, "🫕 I pentoloni borbottano più forte: BLUB! Uno sa di mela, l'altro di fragola. Madame Colla dice che la colla buona si riconosce dal profumo."],
+      [240, 60, 70, 60, "🖼 La foto delle quattro amiche: sotto, a penna, «Per sempre attaccate». Una delle quattro ha i capelli raccolti, come Madame Colla."],
+      [100, 20, 140, 60, "🎶 Dal fondo del laboratorio, la cantilena: «Restate qui, restate qui…». Il mestolo gira da solo, a tempo di valzer."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };

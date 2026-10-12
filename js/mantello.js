@@ -102,7 +102,7 @@
   const K = E.K;
   function form(k) { const f = (k || K).F.get("forma", ""); return FORMS[f] ? f : ""; }
   function heroTiles() { // le tessere sotto i piedi dell'eroe (gli stessi quattro punti del controllo del passo)
-    const p = K.api.trPos(); if (!p) return []; return [[-5, -4], [5, -4], [-5, 2], [5, 2]].map(([ox, oy]) => K.at(Math.floor((p[0] + ox) / TS), Math.floor((p[1] + oy - 4) / TS)));
+    const p = K.api.trPos(); if (!p) return []; return [[-5, -4], [5, -4], [-5, 2], [5, 2]].map(([ox, oy]) => { const tx = Math.floor((p[0] + ox) / TS), ty = Math.floor((p[1] + oy - 4) / TS); return K.api.trTileAt ? K.api.trTileAt(tx, ty) : K.at(tx, ty); });
   }
   function setForm(f, quiet) {
     const cur = form(), Z = K.api.TRZ[K.api.trZone()] || {}, solid = "~#TSGMORWLNHBDW" + (Z.solid || ""), np = FORMS[f].pass || "";
