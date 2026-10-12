@@ -59,7 +59,7 @@ async function setup(o = {}) {
 }
 async function act(page) { await page.waitForTimeout(140); const t = await page.evaluate(() => { const b = document.getElementById("bAct"); const tt = b && b.textContent; if (b && !b.disabled) b.click(); return tt; }); await page.waitForTimeout(80); return t; }
 async function goAct(page, x, y) { const r = await page.evaluate(([x, y]) => window.T_.goAct(x, y), [x, y]); if (r !== "ok") throw new Error(r); return act(page); }
-async function talk(page, id) { const at = await page.evaluate((id) => window.T_.npcAt(id), id); if (!at) throw new Error("PNG assente: " + id); return goAct(page, at[0], at[1]); }
+async function talk(page, id) { let at = null; for (let i = 0; i < 30 && !at; i++) { at = await page.evaluate((id) => window.T_.npcAt(id), id); if (!at) await page.waitForTimeout(100); } if (!at) throw new Error("PNG assente: " + id); return goAct(page, at[0], at[1]); } // aspetta fino a 3 s che la zona (e il personaggio) sia pronta: su GitHub le stanze si caricano più lente
 // fa avanzare dialoghi e scelte finché si torna a camminare (o finché nessuna preferenza combacia)
 async function advance(page, prefs = [], max = 300) {
   const log = [];
