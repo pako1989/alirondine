@@ -1,6 +1,5 @@
 // js/portrait-dicebear.js - STILI DEI VOLTI CON LA LIBRERIA DICEBEAR (Impostazioni → Grafica → Stile dei volti)
 //  - db_toonhead:  «Toon Head», cartone a testa grande (Johan Melin, CC BY 4.0): acconciatura, barba, colori ed espressioni vere.
-//  - db_adventurer:«Avventuriero», chibi da JRPG (Lisa Wischofsky, CC BY 4.0).
 // La libreria (js/vendor/dicebear.js) si carica SOLO quando scegli uno di questi stili: chi non li usa non la scarica.
 // Ogni volto è un SVG costruito dai colori del personaggio (pelle, capelli, maglia) e dalla sua acconciatura; le espressioni
 // dei dialoghi ([felice], [triste]…) cambiano bocca, occhi e sopracciglia. Gli SVG diventano immagini e restano in memoria.
@@ -10,7 +9,7 @@
 (function () {
   "use strict";
   const FS = window.__faceStyles; if (!FS || FS.__db) return;
-  const SRC = "js/vendor/dicebear.js?v=3";
+  const SRC = "js/vendor/dicebear.js?v=4";
   let loading = false;
   function lib() { if (window.__dicebear) return window.__dicebear; if (!loading) { loading = true; const s = document.createElement("script"); s.src = SRC; s.onerror = () => { loading = false; }; document.head.appendChild(s); } return null; }
   const hash = (s) => { let h = 2166136261; s = String(s); for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
@@ -20,12 +19,6 @@
   const isWow = (e) => e === "surprised" || e === "wow";
   const pickV = (n, k, pre) => `${pre || "variant"}${String((k % n) + 1).padStart(2, "0")}`;
   // ---------------------------------------------------------------- opzioni per stile
-  function adventurer(c, st, e, seed) {
-    const h = hash(seed), o = { seed, skinColor: [hx(c.skin, "f2d3b1")], hairColor: [hx(c.hair, "0e0e0e")], glassesProbability: c.glasses || c.shades ? 100 : 0, earringsProbability: 0, features: ["mustache"], featuresProbability: c.beard ? 100 : 0, hairProbability: 100 };
-    o.hair = [LONG[st] ? pickV(26, h, "long") : pickV(19, h >>> 3, "short")];
-    if (e === "grin") o.mouth = ["variant23"]; else if (e === "smile") o.mouth = ["variant26"]; else if (e === "sad") o.mouth = ["variant05"]; else if (isWow(e)) o.mouth = ["variant14"];
-    return o;
-  }
   // Toon Head: quattro tagli davanti (riga di lato, undercut, a punte, chignon) e quattro lunghezze dietro
   const TH_FRONT = { messy: "spiky", spiky: "spiky", cresta: "spiky", curly: "spiky", hood: "spiky", bandana: "spiky", elmo: "undercut", buzz: "undercut", slick: "sideComed", ordinato: "sideComed", side: "sideComed", long: "sideComed", bob: "sideComed", twintails: "sideComed", braids: "sideComed", bun: "bun", ponytail: "bun", codino: "bun", afro: "spiky", dread: "spiky", undercut: "undercut", pompadour: "sideComed", mullet: "spiky", wavy: "sideComed", messybun: "bun", topknot: "bun", sidebraid: "sideComed", spacebuns: "bun" };
   const TH_BACK = { long: "longStraight", bob: "shoulderHigh", twintails: "neckHigh", braids: "longWavy", ponytail: "neckHigh", dread: "longWavy", mullet: "neckHigh", wavy: "longWavy", sidebraid: "shoulderHigh" };
@@ -41,7 +34,6 @@
   // { x, y, s }: dove sta l'immagine nel riquadro del ritratto · G: la geometria della testa per i cosmetici · H: come allargare i cosmetici della testa
   const STY = {
     db_toonhead: ["toonHead", toonhead, { x: -53, y: -53, s: 106 }, { fw: 20, top: -34, ey: 2.6, eg: 11 }, { sx: 1.08, sy: 1.38 }],
-    db_adventurer: ["adventurer", adventurer, { x: -38, y: -38, s: 76 }, { fw: 18, top: -26, ey: 3, eg: 8 }, null],
   };
   // ---------------------------------------------------------------- immagini in memoria
   const IMG = {}; let N = 0;
@@ -87,7 +79,7 @@
     g.save();
     cosmetics(g, c, "back", G, H);
     if (!img) placeholder(g, c);
-    else { if (style === "db_adventurer") { g.fillStyle = c.shirt || "#3f5fbf"; g.beginPath(); g.moveTo(-34, 62); g.quadraticCurveTo(-30, 34, -8, 30); g.lineTo(8, 30); g.quadraticCurveTo(30, 34, 34, 62); g.closePath(); g.fill(); } g.drawImage(img, P.x, P.y, P.s, P.s); }
+    else { g.drawImage(img, P.x, P.y, P.s, P.s); }
     cosmetics(g, c, "body", G, H); extras(g, c, G, style); cosmetics(g, c, "head", G, H);
     if (expr === "think") { g.fillStyle = "rgba(255,255,255,.92)"; [[24, -24, 2], [29, -32, 3], [36, -42, 5]].forEach(([x, y, r]) => { g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }); }
     g.restore(); return true;
