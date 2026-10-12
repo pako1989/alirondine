@@ -568,20 +568,27 @@
     g.translate(MX, MY);
     const r = seeded(31);
     // esterno: sera sul porto
+    const TH = sagaOv && sagaOv.theme, hexd = (h, k) => { const n = parseInt(String(h || "#444444").slice(1, 7), 16); return `rgb(${Math.round(((n >> 16) & 255) * k)},${Math.round(((n >> 8) & 255) * k)},${Math.round((n & 255) * k)})`; };
+    const TGL = TH && /^\d+,\d+,\d+$/.test(TH.glow || "") ? TH.glow : null;
     let gr = g.createLinearGradient(0, -MY, 0, CH + MY);
-    gr.addColorStop(0, fld.sky[0]); gr.addColorStop(0.5, fld.sky[1]); gr.addColorStop(1, fld.sky[2]);
+    if (TH) { const sk = TH.sky || [hexd(TH.ground && TH.ground[0], 0.2), hexd(TH.ground && TH.ground[0], 0.4)]; gr.addColorStop(0, sk[0]); gr.addColorStop(0.5, sk[1] || sk[0]); gr.addColorStop(1, sk[0]); }
+    else { gr.addColorStop(0, fld.sky[0]); gr.addColorStop(0.5, fld.sky[1]); gr.addColorStop(1, fld.sky[2]); }
     g.fillStyle = gr; g.fillRect(-MX, -MY, bw, bh);
     // container in alto
     const cc = ["#7f1d1d", "#1e3a8a", "#14532d", "#78350f", "#4c1d95", "#0f766e"];
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < (TH ? 0 : 6); i++) {
       const x = -MX + i * 108, h = 34 + (i % 3) * 8;
       g.fillStyle = cc[i]; g.fillRect(x, -60 - h * 0.2, 100, h);
       g.fillStyle = "rgba(0,0,0,.25)"; for (let k = 6; k < 100; k += 9) g.fillRect(x + k, -60 - h * 0.2, 2, h);
       g.fillStyle = "rgba(255,255,255,.08)"; g.fillRect(x, -60 - h * 0.2, 100, 4);
     }
-    g.strokeStyle = "#34415c"; g.lineWidth = 5; g.beginPath(); g.moveTo(430, -86); g.lineTo(430, -30); g.moveTo(380, -86); g.lineTo(520, -86); g.stroke();
+    if (!TH) { g.strokeStyle = "#34415c"; g.lineWidth = 5; g.beginPath(); g.moveTo(430, -86); g.lineTo(430, -30); g.moveTo(380, -86); g.lineTo(520, -86); g.stroke(); }
+    else { // l'orizzonte della saga: sagome nel colore del suo cielo, bandierine con i colori dei cartelloni
+      g.fillStyle = hexd((TH.wall && TH.wall[1]) || (TH.ground && TH.ground[0]), 0.35); for (let x = -MX; x < CW + MX; x += 40 + r() * 34) { const h = 30 + r() * 60; g.fillRect(x, -30 - h, 24 + r() * 26, h); }
+      const ac = (TH.ads || []).map((a) => a[1]); for (let x = -MX + 10; x < CW + MX; x += 22) { g.fillStyle = ac.length ? ac[Math.floor(x / 22) % ac.length] : "#fde68a"; g.beginPath(); g.moveTo(x, -26); g.lineTo(x + 10, -26); g.lineTo(x + 5, -16); g.closePath(); g.fill(); }
+    }
     // case in basso con finestre accese
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < (TH ? 0 : 6); i++) {
       const x = -MX + i * 108, h = 44 + (i * 17) % 28;
       g.fillStyle = ["#3b2f40", "#2f3a4a", "#463a34", "#2d3e3a"][i % 4]; g.fillRect(x, CH + 28, 104, h);
       for (let wx = 10; wx < 90; wx += 24) for (let wy = 8; wy < h - 6; wy += 20) { g.fillStyle = r() > 0.4 ? "#fde68a" : "#1b2231"; g.fillRect(x + wx, CH + 28 + wy, 11, 12); }
@@ -589,7 +596,7 @@
     // lampioni laterali
     [[-34, 120], [-34, 440], [-34, 760], [CW + 34, 120], [CW + 34, 440], [CW + 34, 760]].forEach(([x, y]) => {
       const rg = g.createRadialGradient(x, y, 2, x, y, 70);
-      rg.addColorStop(0, `rgba(${fld.lamp},.5)`); rg.addColorStop(1, `rgba(${fld.lamp},0)`);
+      const lamp = TGL || fld.lamp; rg.addColorStop(0, `rgba(${lamp},.5)`); rg.addColorStop(1, `rgba(${lamp},0)`);
       g.fillStyle = rg; g.fillRect(x - 70, y - 70, 140, 140);
       g.fillStyle = "#fef3c7"; g.beginPath(); g.arc(x, y, 5, 0, 7); g.fill();
     });
@@ -597,33 +604,33 @@
     const tile = 54;
     for (let ty = 0; ty < Math.ceil(CH / tile); ty++) for (let tx = 0; tx < Math.ceil(CW / tile); tx++) {
       const v = (tx + ty) % 2; const sh = 36 + v * 5 + Math.floor(r() * 5);
-      g.fillStyle = `rgb(${clamp(sh + 4 + fld.fl[0], 0, 255)},${clamp(sh + 8 + fld.fl[1], 0, 255)},${clamp(sh + 20 + fld.fl[2], 0, 255)})`; g.fillRect(tx * tile, ty * tile, tile, tile);
+      g.fillStyle = TH && TH.ground ? hexd(TH.ground[v] || TH.ground[0], 0.82 + r() * 0.08) : `rgb(${clamp(sh + 4 + fld.fl[0], 0, 255)},${clamp(sh + 8 + fld.fl[1], 0, 255)},${clamp(sh + 20 + fld.fl[2], 0, 255)})`; g.fillRect(tx * tile, ty * tile, tile, tile);
     }
     g.strokeStyle = "rgba(0,0,0,.28)"; g.lineWidth = 1.5;
     for (let x = 0; x <= CW; x += tile) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, CH); g.stroke(); }
     for (let y = 0; y <= CH; y += tile) { g.beginPath(); g.moveTo(0, y); g.lineTo(CW, y); g.stroke(); }
     // crepe
     g.strokeStyle = "rgba(0,0,0,.4)"; g.lineWidth = 1.4;
-    for (let i = 0; i < 9; i++) { let x = r() * CW, y = r() * CH; g.beginPath(); g.moveTo(x, y); for (let k = 0; k < 5; k++) { x += rnd2(r, -26, 26); y += rnd2(r, 6, 26); g.lineTo(x, y); } g.stroke(); }
+    for (let i = 0; i < (TH ? 3 : 9); i++) { let x = r() * CW, y = r() * CH; g.beginPath(); g.moveTo(x, y); for (let k = 0; k < 5; k++) { x += rnd2(r, -26, 26); y += rnd2(r, 6, 26); g.lineTo(x, y); } g.stroke(); }
     // macchie d'olio e pozzanghere
     for (let i = 0; i < 5; i++) { const x = 60 + r() * (CW - 120), y = 120 + r() * (CH - 240); g.fillStyle = "rgba(0,0,0,.2)"; g.beginPath(); g.ellipse(x, y, 20 + r() * 20, 12 + r() * 12, r() * 3, 0, 7); g.fill(); }
-    [[130, 250, 52, 20], [410, 610, 60, 22], [300, 450, 34, 14]].forEach(([x, y, rx, ry]) => {
+    (TH ? [] : [[130, 250, 52, 20], [410, 610, 60, 22], [300, 450, 34, 14]]).forEach(([x, y, rx, ry]) => {
       const pg = g.createLinearGradient(x - rx, y, x + rx, y);
       pg.addColorStop(0, "rgba(120,170,230,.28)"); pg.addColorStop(1, "rgba(250,220,150,.28)");
       g.fillStyle = pg; g.beginPath(); g.ellipse(x, y, rx, ry, 0.2, 0, 7); g.fill();
       g.strokeStyle = "rgba(255,255,255,.18)"; g.lineWidth = 1.5; g.stroke();
     });
     // segni di campo
-    g.strokeStyle = "rgba(125,211,252,.75)"; g.lineWidth = 4;
+    g.strokeStyle = TH && TH.line ? TH.line : "rgba(125,211,252,.75)"; g.lineWidth = 4;
     g.beginPath(); g.moveTo(L, CH / 2); g.lineTo(R, CH / 2); g.stroke();
     g.beginPath(); g.arc(CW / 2, CH / 2, 70, 0, 7); g.stroke();
     g.fillStyle = "rgba(125,211,252,.8)"; g.beginPath(); g.arc(CW / 2, CH / 2, 5, 0, 7); g.fill();
     g.strokeStyle = "rgba(251,146,60,.8)"; g.lineWidth = 4;
     g.beginPath(); g.arc(CW / 2, T, 110, 0, Math.PI); g.stroke();
     g.beginPath(); g.arc(CW / 2, B, 110, Math.PI, Math.PI * 2); g.stroke();
-    g.save(); g.translate(CW / 2, CH / 2); g.rotate(-Math.PI / 2); g.fillStyle = "rgba(255,255,255,.1)"; g.font = "900 46px system-ui"; g.textAlign = "center"; g.fillText("GABBIA DEL MOLO", 0, -90); g.restore();
+    g.save(); g.translate(CW / 2, CH / 2); g.rotate(-Math.PI / 2); g.fillStyle = "rgba(255,255,255,.1)"; g.font = `900 ${TH ? 34 : 46}px system-ui`; g.textAlign = "center"; g.fillText(TH && TH.ads && TH.ads[0] ? String(TH.ads[0][0]).slice(0, 22) : "GABBIA DEL MOLO", 0, -90); g.restore();
     // muri (fascia perimetrale) con mattoni e graffiti
-    g.fillStyle = "#3c3f4d";
+    g.fillStyle = TH ? hexd((TH.wall && TH.wall[0]) || (TH.ground && TH.ground[0]), TH.wall ? 0.75 : 0.45) : "#3c3f4d";
     const wall = (x, y, w, h) => { g.fillRect(x, y, w, h); };
     wall(-14, -14, CW + 28, T + 14); wall(-14, B, CW + 28, CH - B + 14); wall(-14, -14, L + 14, CH + 28); wall(R, -14, CW - R + 14, CH + 28);
     g.strokeStyle = "rgba(0,0,0,.35)"; g.lineWidth = 1;
@@ -634,8 +641,9 @@
     g.strokeStyle = "rgba(0,0,0,.45)"; g.lineWidth = 2; g.strokeRect(L - 2, T - 2, R - L + 4, B - T + 4);
     // graffiti
     const tag = (txt, x, y, rot, col, size) => { g.save(); g.translate(x, y); g.rotate(rot); g.fillStyle = col; g.font = `900 ${size}px system-ui`; g.textAlign = "center"; g.fillText(txt, 0, 0); g.restore(); };
-    tag("FORZA MOLO", 11, 200, -Math.PI / 2, "#f472b6", 14); tag("DA BEPPE ♥", 11, 480, -Math.PI / 2, "#fde047", 13); tag("RONDINE", 11, 700, -Math.PI / 2, "#38bdf8", 14);
-    tag("CIAO MAMMA", CW - 11, 230, Math.PI / 2, "#a3e635", 13); tag("1987", CW - 11, 450, Math.PI / 2, "#fb923c", 14); tag("NO PARCHEGGIO", CW - 11, 690, Math.PI / 2, "#f87171", 12);
+    if (TH && TH.ads && TH.ads.length) { const A = TH.ads, lc = (h) => (/^#(f|e|d)/i.test(h || "") ? h : hexd(h, 1.6)); [[200, 0], [480, 1], [700, 2]].forEach(([y, k]) => tag(String(A[k % A.length][0]).slice(0, 16), 11, y, -Math.PI / 2, lc(A[k % A.length][1]), 12)); [[230, 3], [450, 1], [690, 0]].forEach(([y, k]) => tag(String(A[k % A.length][0]).slice(0, 16), CW - 11, y, Math.PI / 2, lc(A[k % A.length][1]), 12)); }
+    else { tag("FORZA MOLO", 11, 200, -Math.PI / 2, "#f472b6", 14); tag("DA BEPPE ♥", 11, 480, -Math.PI / 2, "#fde047", 13); tag("RONDINE", 11, 700, -Math.PI / 2, "#38bdf8", 14);
+    tag("CIAO MAMMA", CW - 11, 230, Math.PI / 2, "#a3e635", 13); tag("1987", CW - 11, 450, Math.PI / 2, "#fb923c", 14); tag("NO PARCHEGGIO", CW - 11, 690, Math.PI / 2, "#f87171", 12); }
     // porte: bocche nei muri con rete
     [[0, T], [1, B]].forEach(([bottom, y]) => {
       const x0 = CW / 2 - mh, x1 = CW / 2 + mh, s = bottom ? 1 : -1;
@@ -1436,7 +1444,7 @@
     g.fillStyle = "#0a0e17"; g.fillRect(0, 0, cw, ch);
     if (!G) return;
     if (G.mode === "pen") { renderPen(g, cw, ch); return; }
-    const bgk = G.fx.mh0 + "|" + (sagaOv && sagaOv.field != null ? "s" + sagaOv.field : EXT.cos.field);
+    const bgk = G.fx.mh0 + "|" + (sagaOv && sagaOv.field != null ? "s" + sagaOv.field : EXT.cos.field) + (sagaOv && sagaOv.theme ? "|t" + (sagaOv.theme.ads && sagaOv.theme.ads[0] ? sagaOv.theme.ads[0][0] : "x") : "");
     if (!bgCache || bgCache._n !== bgk) { bgCache = buildBg(G.fx.mh0, fieldOf()); bgCache._n = bgk; }
     const b = G.ball;
     let s = Math.min(cw / (CW + 30), ch / (CH + 30));
@@ -2242,7 +2250,7 @@
     const lv = Object.assign({ name: "Avversari", tag: "AVV", kit: "#64748b", kit2: "#0f172a", skin: ["#d9a679", "#c68642", "#e8b88c"], names: ["Primo", "Secondo", "Terzo"], spd: 0.95, react: 16, dash: 0.005, noise: 28, bank: 0.2, target: 6, read: 0.3, mut: "", mutKey: "", hint: "", win: "" }, o.lv || {});
     let cfg = null;
     openCage(function () { if (typeof o.onExit === "function") { try { o.onExit(cfg && cfg.sagaRes ? cfg.sagaRes : null); } catch (e) { console.error(e); } } }, {});
-    sagaOv = { squad: Array.isArray(o.squad) && o.squad.length >= 3 ? o.squad.slice(0, 3).map((q, i) => Object.assign({}, POOL[["leo", "nico", "dario"][i]], q, { tr: "" })) : null, kit: o.kit || null, kit2: o.kit2 || "#f8fafc", tag: o.tag || "", field: o.field == null ? null : o.field };
+    sagaOv = { squad: Array.isArray(o.squad) && o.squad.length >= 3 ? o.squad.slice(0, 3).map((q, i) => Object.assign({}, POOL[["leo", "nico", "dario"][i]], q, { tr: "" })) : null, kit: o.kit || null, kit2: o.kit2 || "#f8fafc", tag: o.tag || "", field: o.field == null ? null : o.field, theme: o.theme && typeof o.theme === "object" ? o.theme : null }; bgCache = null;
     cfg = { kind: "saga", mode: "tour", lv, li: -1, target: o.target, title: o.title || lv.name, back: function () { closeAll(); } };
     launch(cfg);
   }
