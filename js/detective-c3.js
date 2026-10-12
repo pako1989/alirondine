@@ -74,7 +74,7 @@
     }
     function secondHalf() {
       const known = K.hasClue("pallone3") && K.hasClue("cucitura");
-      K.ownMatch(window.__moviola.rigioca, {
+      K.ownMatch(window.__moviola.rigioca, { oppStyle: "contropiede",
         title: "La finale · secondo tempo pulito", twist: "pallone", known, us: "Valfonda", opp: { name: "Capitale", kit: blue, names: ["9", "10"] }, half: 30,
         mate: { name: "Valli jr.", skin: "#e8c4a0", hair: "#5a4a3a", shirt: green }, bg: "dc_stadio",
         intro: "Il secondo tempo della finale, giocato pulito, nella tua testa e sullo schermo: il Valfonda per una volta è libero di vincere o di perdere da solo.",

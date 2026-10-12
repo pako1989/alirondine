@@ -117,7 +117,7 @@
       },
     };
     function match() {
-      K.ownMatch(window.__gravita.start, {
+      K.ownMatch(window.__gravita.start, { oppStyle: "difensiva",
         title: `Gravità zero · ${team()} – I Bulloni`, us: team(), opp: { name: "I Bulloni", kit: "#8a94a8", names: ["BU-1", "BU-2"], skins: ["#c8ccd8", "#c8ccd8"], hairs: ["#5a6478", "#5a6478"] }, half: 30,
         mate: { name: "Blop", skin: "#7ae86a", hair: "#5ac84a", shirt: "#2a6ac8" }, gk0: "#8a9ae8", shirt: "#2a6ac8", bg: "so_palestra",
         halftime: "Intervallo. Blop distribuisce zuppa in bolle. Quattrobraccia beve con due mani e applaude con le altre due. ARBI-9 fischia fuorigioco alla zuppa.",

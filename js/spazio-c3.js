@@ -54,7 +54,7 @@
     };
     function finale() {
       const gru = F.is("so_gru_gioca");
-      K.ownMatch(window.__gravita.start, {
+      K.ownMatch(window.__gravita.start, { oppStyle: "contropiede",
         title: `La finale tra le stelle · ${F.get("so_nome", "Stazione 7")} – Selezione Galattica`, us: F.get("so_nome", "Stazione 7"), half: 35, nonna: true, flipEvery: 18, hard: true,
         opp: { name: "Selezione Galattica", kit: "#7a3ae8", names: ["Zorgo", "Bleeb"], skins: ["#e89ab8", "#9ae8b8"], hairs: ["#e8e84a", "#3a1a5a"] }, gk1: "#3a1a5a",
         mate: gru ? { name: "Gru", skin: "#e8c8a8", hair: "#c8c8d8", shirt: "#2a6ac8" } : { name: "Blop", skin: "#7ae86a", hair: "#5ac84a", shirt: "#2a6ac8" }, gk0: "#8a9ae8", shirt: "#1a2a5a", bg: "so_cupola", winTitle: "CAMPIONI DELL'ORBITA!",

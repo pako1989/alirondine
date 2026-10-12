@@ -116,7 +116,7 @@
 
     // ---------------------------------------------------------------- la partita: Col Vento contro i Soffi
     function matchSoffi() {
-      K.ownMatch(window.__ventoPartita.start, {
+      K.ownMatch(window.__ventoPartita.start, { oppStyle: "equilibrata",
         title: "Col Vento · Contro i Soffi", us: "Il custode e Selva", opp: { name: "I Soffi del prato", kit: "#f0e6ff", names: ["Sbuffo", "Fiato"] }, spiritsOpp: true, calm: true, half: 35, extra: false,
         mate: { name: "Selva", skin: "#f0c8a0", hair: "#b0502a", shirt: "#3a8a7a" }, bg: "ve_prato",
         halftime: "I Soffi si siedono sull'erba a riprendere fiato. Uno si addormenta. Un altro lo sveglia soffiandogli in faccia. Ridono tutti.",

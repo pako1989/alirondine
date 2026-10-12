@@ -83,7 +83,7 @@
       },
     };
     function match1974() {
-      K.ownMatch(window.__epoche.start, {
+      K.ownMatch(window.__epoche.start, { oppStyle: "equilibrata",
         era: "1974", title: "Epoche · Coppa del Mare 1974, secondo tempo", us: "Valdorsa 1974", opp: { name: "Riviera", kit: "#3a8ac8", names: ["Marino", "Scoglio"] }, half: 30,
         mate: { name: "Bruno", skin: "#e0b890", hair: "#b8b8b8", shirt: "#7a2a2a" }, shirt: "#e8a050", bg: "ep_1974",
         halftime: "Nel ricordo di Sandro non c'è l'intervallo: c'è solo il caldo, le cicale, e la paura che sale come la marea.",

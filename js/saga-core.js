@@ -83,6 +83,15 @@
   // Solidi: a muro · t albero · r roccia · y casa · q porta · w acqua · s punto di riposo · x baule · f staccionata · l lanterna
   //         b panca · g porta da calcio · j tribuna · n cartello · p colonna · z casse · u bancarella · fiori e frecce di uscita > < ^ v
   const FLOORS0 = ',:+-"=;';
+  // DIFFICOLTÀ di ogni saga (si sceglie al primo avvio, si cambia dal menu): velocità e furbizia degli avversari, parate, monete
+  const DIFFS = {
+    storia: { label: "Storia", sub: "Per goderti la trama: avversari più lenti e meno precisi, il tuo portiere para di più", opp: 0.88, steal: 0.6, shot: 0.7, gk0: 0.15, gk1: -0.08, team: 0.82, coins: 1 },
+    normale: { label: "Normale", sub: "L'equilibrio pensato per la saga", opp: 1, steal: 1, shot: 1, gk0: 0, gk1: 0, team: 0.95, coins: 1 },
+    sfida: { label: "Sfida", sub: "Avversari più veloci e cattivi, il portiere para meno · monete × 1,5", opp: 1.1, steal: 1.3, shot: 1.15, gk0: -0.1, gk1: 0.08, team: 1.08, coins: 1.5 },
+  };
+  // il «carattere» degli avversari nelle partite del kit: equilibrata, pressing, difensiva, contropiede (e si adatta al punteggio)
+  const STYLES = { equilibrata: "equilibrati", pressing: "pressing alto", difensiva: "tutti dietro", contropiede: "contropiede" };
+  let CUR = { diff: "normale", style: "" };
   const SOLID0 = "atryqwsxflbgjnpzuBHDTLW";
   const REG0 = { grass: ["#4a7a3a", "#527f3f", "#467036"], path: ["#9a8a64", "#8e7e5a"], stone: ["#8a8a80", "#808076"], wall: ["#6a5a4a", "#5e4e40"], water: ["#2a5a7a", "#30648a"], tall: "#5f8a45", tint: "255,230,190", tintA: 0.08, fx: "", dark: 0.12 };
 
@@ -124,7 +133,7 @@
     const STATS = obj(cfg.stats), LORE = {}, ENDINGS = Object.assign({}, obj(cfg.endings));
     function norm(o) {
       o = obj(o);
-      const m = { v: 1, ch: clampI(o.ch, 1, 9, 1), step: {}, flags: {}, rew: {}, done: {}, zone: "", log: [], intro: {}, ends: [], lore: [], wins: clampI(o.wins, 0, 1e6, 0), losses: clampI(o.losses, 0, 1e6, 0), last: clampI(o.last, 0, 1e14, 0), st: {} };
+      const m = { v: 1, ch: clampI(o.ch, 1, 9, 1), step: {}, flags: {}, rew: {}, done: {}, zone: "", log: [], intro: {}, ends: [], lore: [], wins: clampI(o.wins, 0, 1e6, 0), losses: clampI(o.losses, 0, 1e6, 0), last: clampI(o.last, 0, 1e14, 0), st: {}, diff: DIFFS[o.diff] ? o.diff : "normale", diffSet: !!o.diffSet };
       Object.keys(STATS).forEach((k) => { const [a, b, d] = STATS[k]; m.st[k] = clampI(obj(o.st)[k], a, b, d); });
       const st = obj(o.step); Object.keys(st).slice(0, 20).forEach((k) => { const n = clampI(k, 1, 9, 0); if (n) m.step[n] = clampI(st[k], 0, 99, 0); });
       const fl = obj(o.flags); let c = 0;
@@ -342,7 +351,7 @@
     function ask(who, prompt, opts, bg) { api.trAsk(who, esc(T(prompt)).replace(/\n/g, "<br>"), opts.map((o) => ({ label: T(o.label), sub: o.sub ? T(o.sub) : undefined, cls: o.cls || "", disabled: !!o.disabled, fn: o.fn ? () => { if (o.big) SFX.choice(); o.fn(); } : o.fn })), bg || bgNow()); }
     function reward(key, o) {
       const msg = [];
-      once(key, () => { if (o.coins) { const n = coinsGive(o.coins); if (n) msg.push(`+${n} monete`); } (o.cos ? [].concat(o.cos) : []).forEach((id) => { const c = api.COSM && api.COSM[id] && safe(() => api.bCos(id), false) ? api.COSM[id].label : null; if (c) msg.push(`Nuovo in guardaroba: ${c}`); }); });
+      once(key, () => { if (o.coins) { const n = coinsGive(Math.round(o.coins * (DIFFS[mem().diff] || DIFFS.normale).coins)); if (n) msg.push(`+${n} monete`); } (o.cos ? [].concat(o.cos) : []).forEach((id) => { const c = api.COSM && api.COSM[id] && safe(() => api.bCos(id), false) ? api.COSM[id].label : null; if (c) msg.push(`Nuovo in guardaroba: ${c}`); }); });
       return msg;
     }
     function setTiles(x0, y0, x1, y1, ch) { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (ZX.map && ZX.map[y] && x >= 0 && x < ZX.map[y].length) { ZX.map[y][x] = ch; if (isFloor(ch) && ZX.under && ZX.under[y]) ZX.under[y][x] = ch; } }
@@ -591,7 +600,7 @@
     // -------------------------------------------------------------- partite
     // squadra avversaria predefinita per le partite del gioco (il gioco la vuole sempre: senza, il 3 contro 3 non parte)
     function defTeam(o) {
-      const nm = o.oppTeam || "Avversari", k = o.oppPower || 0.95;
+      const nm = o.oppTeam || "Avversari", k = (o.oppPower || 0.95) * ((DIFFS[mem().diff] || DIFFS.normale).team / 0.95);
       return (t, s) => { s = s || {}; const b = Number(s.tiro) || 12, d = Number(s.drib || s.contrasto) || b; return { name: nm, vs: o.oppVs || nm, color: o.oppColor || "#5a5a6a", atk: t(b * k), def: t(d * k), vel: t(b * k), names: Array.isArray(o.oppNames) ? o.oppNames.slice() : undefined }; };
     }
     function playMatch(o) {
@@ -604,7 +613,7 @@
     }
     // la partita originale della saga: o.mode(opts) deve chiamare opts.onDone({ a, b, win })
     function ownMatch(start, o) {
-      castHero(); const h = hero() || {};
+      castHero(); const h = hero() || {}; CUR = { diff: mem().diff || "normale", style: o.oppStyle || "" };
       api.scene(o.bg || bgNow(), "voce", "La partita è cominciata.", [{ label: "◂ Torna a camminare", fn: done }], T(o.title || TITLE));
       inMatch = true;
       const ok = safe(() => start(Object.assign({}, o, { title: T(o.title || ""), heroLook: { name: h.name || "Campione", skin: h.skin, hair: h.hair, shirt: o.shirt || h.shirt || TH.accent }, onDone: (r) => { inMatch = false; const m = mem(); if (r.win) m.wins++; else m.losses++; save(); refreshZone(); safe(() => o.done(r), null); } })), false);
@@ -639,9 +648,15 @@
         { label: c && !m.intro["ch" + c.n] ? (c.n > 1 ? `Inizia il Capitolo ${c.n}` : "Inizia la storia") : "Continua la storia", sub: c ? `Capitolo ${c.n} · ${c.title}` : "", cls: "hot", fn: continueStory },
         { label: JN(), sub: (cfg.journal && cfg.journal.sub) || "Persone, scoperte, finali", fn: () => journal(openMain, false) },
         ...extra,
+        { label: `Difficoltà: ${DIFFS[m.diff].label}`, sub: DIFFS[m.diff].sub, fn: () => diffMenu(openMain) },
         { label: "Capitoli", sub: "Rigioca i capitoli già sbloccati", fn: chapters },
         { label: "◂ Indietro", fn: leave },
       ], TITLE);
+    }
+    function diffMenu(back, first) {
+      const m = mem();
+      api.scene(BG0, "voce", `<b>${first ? "Prima di cominciare: come vuoi giocare le partite?" : "Difficoltà delle partite"}</b><br><span style="color:var(--dim)">Vale per tutta la saga. La puoi cambiare quando vuoi dal menu della saga. La storia e i finali non cambiano.</span>`,
+        Object.keys(DIFFS).map((k) => ({ label: (k === "normale" ? "Normale" : DIFFS[k].label) + (m.diff === k && !first ? " ✓" : ""), sub: DIFFS[k].sub, cls: k === "normale" ? "hot" : "", fn: () => { m.diff = k; m.diffSet = true; save(); back(); } })), TITLE);
     }
     function chapters() {
       const m = mem(), opts = [];
@@ -668,6 +683,7 @@
     }
     function continueStory() {
       const c = activeChapter(), m = mem(); if (!c) return;
+      if (!m.diffSet && !m.intro["ch" + c.n] && c.n === 1) return diffMenu(continueStory, true);
       if (!m.intro["ch" + c.n]) {
         m.intro["ch" + c.n] = 1; m.last = Date.now(); save();
         return api.play(lines(c.intro(), c.introBg || BG0), () => { const z = ZONES[c.start]; go(c.start, z.spec.start[0], z.spec.start[1]); });
@@ -761,6 +777,7 @@
     if (document.querySelector(".scPitch")) return false;
     o = Object.assign({ half: 40 }, o || {});
     const W = 240, VH = 360, WH = o.long || 600, XL = 30, XR = 210, GY0 = 40, GY1 = WH - 40, GW = o.goalW || 56, CX = 120;
+    const DF = DIFFS[o.diff || CUR.diff] || DIFFS.normale, STYLE0 = o.oppStyle || CUR.style || "equilibrata";
     const H = o.hooks || {}, TH = Object.assign({ accent: "#e8c46a", bg: "#14161c", panel: "#2a2c34", border: "#8a8070", ink: "#e8e2d4", font: "Georgia, serif", tira: "#a8322a", passa: "#2c5f8a" }, o.theme || {});
     const snd = {
       kick: () => tone(220, 0.08, "square", 0.07, 0, 120), goal: () => [392, 523, 659, 784].forEach((f, i) => tone(f, 0.2, "triangle", 0.08, i * 0.08)),
@@ -780,9 +797,16 @@
     }
     S.kickoff = kickoff;
     const stunned = (p) => (p.stun | 0) > 0;
+    // il carattere degli avversari, che si adatta al punteggio: chi vince nel finale si chiude, chi perde attacca
+    function styleNow() {
+      const st = typeof STYLE0 === "function" ? safe(() => STYLE0(S), "equilibrata") : STYLE0, late = S.half === 1 && S.t > S.dur * 0.5, lead = S.b - S.a;
+      if (late && lead >= 1 && st !== "contropiede") return "difensiva"; if (late && lead <= -1) return "pressing"; return STYLES[st] ? st : "equilibrata";
+    }
+    S.styleNow = () => styleNow();
     function speedOf(p) {
       let v = p === S.hero ? 1.65 : p === S.mate ? 1.4 : p.gk ? 1.25 : 1.25 * (o.hard ? 1.1 : 1);
       if (p === S.ball.own) v *= 0.9; if (stunned(p)) v *= 0.15;
+      if (p.team === 1) { v *= DF.opp; if ((p.boost | 0) > 0) { v *= 1.2; p.boost--; } }
       return H.speed ? safe(() => H.speed(S, p, v), v) : v;
     }
     const blocked = (x, y) => !!(H.blocked && safe(() => H.blocked(S, x, y), false));
@@ -821,19 +845,22 @@
       else if (b.own === h) moveTo(m, h.x < CX ? CX + 50 : CX - 50, Math.max(GY0 + 60, h.y - 80), speedOf(m));
       else if ((m.call | 0) > 0 || (b.own && b.own.team === 1 && Math.hypot(b.x - m.x, b.y - m.y) < 90) || (!b.own && Math.hypot(b.x - m.x, b.y - m.y) < Math.hypot(b.x - h.x, b.y - h.y))) { moveTo(m, b.x, b.y, speedOf(m)); if (m.call) m.call--; }
       else moveTo(m, h.x < CX ? CX + 50 : CX - 50, Math.min(GY1 - 60, Math.max(GY0 + 80, b.y - 30)), speedOf(m) * 0.8);
-      const chaser = Math.hypot(o1.x - b.x, o1.y - b.y) < Math.hypot(o2.x - b.x, o2.y - b.y) ? o1 : o2;
+      const chaser = Math.hypot(o1.x - b.x, o1.y - b.y) < Math.hypot(o2.x - b.x, o2.y - b.y) ? o1 : o2, sty = styleNow();
       S.opp.forEach((q) => {
         if (b.own === q) {
-          const blockers = [h, m].filter((r) => Math.abs(r.x - q.x) < 24 && r.y > q.y && r.y - q.y < 44);
-          if (q.y > GY1 - 120 && Math.random() < 0.055) shoot(q, 6, CX - 16 + Math.random() * 32);
-          else if (blockers.length && Math.random() < 0.04) passTo(q, q === o1 ? o2 : o1);
+          const blockers = [h, m].filter((r) => Math.abs(r.x - q.x) < 24 && r.y > q.y && r.y - q.y < 44), near = sty === "difensiva" ? 90 : 120;
+          if (q.y > GY1 - near && Math.random() < 0.055 * DF.shot) shoot(q, 6, CX - 16 + Math.random() * 32);
+          else if (blockers.length && Math.random() < (sty === "difensiva" ? 0.07 : 0.04)) passTo(q, q === o1 ? o2 : o1);
           else moveTo(q, q.x + (blockers.length ? (q.x < CX ? 20 : -20) : (CX - q.x) * 0.1), GY1, speedOf(q));
         } else if (q === chaser) moveTo(q, b.x, b.y, speedOf(q));
+        else if (sty === "pressing" && !(b.own && b.own.team === 1)) moveTo(q, b.x + (q.x < b.x ? -14 : 14), b.y - 10, speedOf(q) * 0.92); // il secondo va a raddoppiare
+        else if (sty === "difensiva" && !(b.own && b.own.team === 1)) moveTo(q, Math.max(CX - 40, Math.min(CX + 40, b.x)), GY0 + 70, speedOf(q) * 0.9); // resta davanti alla porta
+        else if (sty === "contropiede" && !(b.own && b.own.team === 1)) moveTo(q, CX + (b.x < CX ? 50 : -50), Math.min(GY1 - 110, Math.max((GY0 + GY1) / 2, b.y + 140)), speedOf(q) * 0.8); // aspetta alto, pronto a ripartire
         else moveTo(q, b.own && b.own.team === 1 ? CX + (b.x < CX ? 45 : -45) : (b.x + CX) / 2, b.own && b.own.team === 1 ? Math.min(GY1 - 60, b.y + 50) : Math.max(GY0 + 60, b.y - 60), speedOf(q) * 0.85);
       });
       const gkMove = (gk) => moveTo(gk, Math.max(CX - GW / 2 + 6, Math.min(CX + GW / 2 - 6, b.x)), gk.y, speedOf(gk)); gkMove(S.gk0); gkMove(S.gk1);
     }
-    function keeperSave(gk, b) { if (b.z > 14) return false; const sp = Math.hypot(b.vx, b.vy), pr = H.keeper ? safe(() => H.keeper(S, gk, b), null) : null; if (Math.abs(gk.x - b.x) < 12 && Math.random() < (pr != null ? pr : sp > 6.5 ? 0.42 : 0.72)) { b.own = gk; gk.hold = 0; b.cd = 10; b.z = 0; snd.save(); pop("PARATA!", gk.x, gk.y + (gk.team === 1 ? 16 : -10), "#7ac8ff"); return true; } return false; }
+    function keeperSave(gk, b) { if (b.z > 14) return false; const sp = Math.hypot(b.vx, b.vy), pr = H.keeper ? safe(() => H.keeper(S, gk, b), null) : null; if (Math.abs(gk.x - b.x) < 12 && Math.random() < (pr != null ? pr : sp > 6.5 ? 0.42 : 0.72) + (gk.team === 0 ? DF.gk0 : DF.gk1)) { b.own = gk; gk.hold = 0; b.cd = 10; b.z = 0; snd.save(); pop("PARATA!", gk.x, gk.y + (gk.team === 1 ? 16 : -10), "#7ac8ff"); return true; } return false; }
     function goal(team) {
       if (team === 0) { S.a++; S.flash = { txt: "GOL!", sub: "", t: 70 }; snd.goal(); S.recap.push(`gol nel ${S.half + 1}° tempo`); }
       else { S.b++; S.flash = { txt: "GOL LORO", sub: "", t: 60 }; snd.save(); }
@@ -847,7 +874,7 @@
         const p = b.own, a = p.dir == null ? (p.team === 0 ? -Math.PI / 2 : Math.PI / 2) : p.dir;
         b.x = p.x + Math.cos(a) * 7; b.y = p.y + 3 + Math.sin(a) * 7; b.vx = b.vy = 0; b.z = 0;
         if (stunned(p)) { b.own = null; b.vx = (Math.random() - 0.5) * 2; b.vy = (Math.random() - 0.5) * 2; b.cd = 8; return; }
-        all().forEach((q) => { if (q.team !== p.team && !q.gk && !stunned(q) && (q.tk | 0) <= 0 && Math.hypot(q.x - b.x, q.y - b.y) < 9) { const pr = q.team === 0 ? 0.55 : 0.22 * (o.hard ? 1.35 : 1); if (Math.random() < pr) { b.own = q; b.cd = 16; pop("RUBATA!", q.x, q.y - 12, TH.ink); } q.tk = 24; } });
+        all().forEach((q) => { if (q.team !== p.team && !q.gk && !stunned(q) && (q.tk | 0) <= 0 && Math.hypot(q.x - b.x, q.y - b.y) < 9) { const pr = q.team === 0 ? 0.55 : 0.22 * (o.hard ? 1.35 : 1) * DF.steal * (styleNow() === "pressing" ? 1.35 : 1); if (Math.random() < pr) { b.own = q; b.cd = 16; pop("RUBATA!", q.x, q.y - 12, TH.ink); if (q.team === 1 && styleNow() === "contropiede") S.opp.forEach((r) => (r.boost = 90)); } q.tk = 24; } });
         all().forEach((q) => { if (q.tk > 0) q.tk--; });
         if (p.gk) { const to = p.team === 0 ? (Math.random() < 0.5 ? S.hero : S.mate) : S.opp[(Math.random() * 2) | 0]; if (++p.hold > 30) { p.hold = 0; passTo(p, to); } }
         return;
@@ -904,6 +931,7 @@
       if (S.ptr && S.run) { const jx = S.ptr.x - S.ptr.ax, jy = S.ptr.y - S.ptr.ay, jl = Math.hypot(jx, jy), k = jl > 24 ? 24 / jl : 1; g.fillStyle = "rgba(255,255,255,.12)"; g.beginPath(); g.arc(S.ptr.ax, S.ptr.ay, 26, 0, 7); g.fill(); g.strokeStyle = "rgba(255,255,255,.5)"; g.lineWidth = 2; g.beginPath(); g.arc(S.ptr.ax, S.ptr.ay, 26, 0, 7); g.stroke(); g.fillStyle = "rgba(255,255,255,.55)"; g.beginPath(); g.arc(S.ptr.ax + jx * k, S.ptr.ay + jy * k, 10, 0, 7); g.fill(); }
       if (S.flash && S.flash.t > 0) { S.flash.t--; g.fillStyle = "rgba(10,12,18,.75)"; g.fillRect(0, VH / 2 - 24, W, 44); g.fillStyle = TH.accent; g.font = `900 22px ${TH.font}`; g.textAlign = "center"; g.fillText(S.flash.txt, W / 2, VH / 2 + 2); if (S.flash.sub) { g.font = "bold 10px sans-serif"; g.fillStyle = TH.ink; g.fillText(S.flash.sub, W / 2, VH / 2 + 15); } g.textAlign = "left"; }
       g.fillStyle = "rgba(10,12,18,.8)"; g.fillRect(0, 0, W, 15); g.fillStyle = TH.accent; g.font = "bold 9px sans-serif"; g.fillText(`${S.extra ? "suppl." : S.half === 0 ? "1° tempo" : "2° tempo"} · ${Math.max(0, Math.ceil((S.dur - S.t) / 60))}s`, 5, 11);
+      g.font = "bold 7px sans-serif"; g.fillStyle = "rgba(232,226,212,.75)"; g.fillText(`${DF.label.toUpperCase()} · avversari: ${STYLES[styleNow()]}`, 5, 24);
       if (H.hud) safe(() => H.hud(g, S));
     }
     function hud() { if (!S.el) return; S.el.querySelector(".n0").textContent = o.us || "Noi"; S.el.querySelector(".sc").textContent = `${S.a} – ${S.b}`; S.el.querySelector(".n1").textContent = (o.opp && o.opp.name) || "Avversari"; }
@@ -920,7 +948,7 @@
       const extra = H.result ? safe(() => H.result(S, res), "") : "";
       card(quit ? "Partita abbandonata" : res.win ? (o.winTitle || "VITTORIA!") : S.a === S.b ? "Pareggio" : "Sconfitta", `<p style="font-size:22px;font-weight:900">${S.a} – ${S.b}</p><p>Tiri ${S.shots} · Passaggi ${S.pass}${extra ? " · " + extra : ""}</p>`, "Continua ▸", () => close(res));
     }
-    function close(res) { cancelAnimationFrame(S.raf); window.removeEventListener("keydown", S.kd, true); window.removeEventListener("keyup", S.ku, true); S.el.remove(); PITCH = null; try { o.onDone(res); } catch (e) { console.error(e); } }
+    function close(res) { CUR = { diff: "normale", style: "" }; cancelAnimationFrame(S.raf); window.removeEventListener("keydown", S.kd, true); window.removeEventListener("keyup", S.ku, true); S.el.remove(); PITCH = null; try { o.onDone(res); } catch (e) { console.error(e); } }
     function loop() {
       if (S.over && !S.el.isConnected) return;
       if (S.run) {
@@ -964,7 +992,7 @@
     S.act = act; S.finish = finish; S.goal = goal; S.card = card;
     if (H.setup) safe(() => H.setup(S));
     kickoff(0); hud();
-    card(o.title || "Partita", `${o.intro || ""}<p><b>Levetta</b>: appoggia il dito dove vuoi sul campo e trascinalo; il Campione ha la freccia gialla. <b>${esc(o.tiraLabel || "TIRA")}</b> (senza palla: scatto) · <b>${esc(o.passaLabel || "PASSA")}</b> (senza palla: chiami il compagno). Si attacca verso l'alto.</p>`, "Fischio d'inizio ▸", () => { S.run = true; snd.whistle(); });
+    card(o.title || "Partita", `${o.intro || ""}<p style="opacity:.85;font-size:12.5px">Difficoltà: <b>${DF.label}</b> · avversari: <b>${STYLES[STYLES[STYLE0] ? STYLE0 : "equilibrata"]}</b></p><p><b>Levetta</b>: appoggia il dito dove vuoi sul campo e trascinalo; il Campione ha la freccia gialla. <b>${esc(o.tiraLabel || "TIRA")}</b> (senza palla: scatto) · <b>${esc(o.passaLabel || "PASSA")}</b> (senza palla: chiami il compagno). Si attacca verso l'alto.</p>`, "Fischio d'inizio ▸", () => { S.run = true; snd.whistle(); });
     css2(); PITCH = S; loop(); return true;
   }
   let PITCH = null;

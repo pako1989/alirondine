@@ -77,7 +77,7 @@
     // ---------------------------------------------------------------- la partita finale: Col Vento, per gioia
     function finale() {
       setStep(N, 4);
-      K.ownMatch(window.__ventoPartita.start, {
+      K.ownMatch(window.__ventoPartita.start, { oppStyle: "pressing",
         title: "Col Vento · La partita per gioia", us: "Mulinella e i Soffi", opp: { name: "La Compagnia delle Turbine", kit: "#4a5a6a", names: ["Ing. Ferraglia", "Bulloni"] }, rising: true, great: true, half: 45,
         mate: { name: "Selva", skin: "#f0c8a0", hair: "#b0502a", shirt: "#3a8a7a" }, bg: "ve_prato", extra: false,
         halftime: "Nell'intervallo nessuno guarda il punteggio. Gualdo racconta una barzelletta sui mugnai. Dora, dall'altra parte, ride. Si tappa la bocca, ma ormai l'ha fatto.",

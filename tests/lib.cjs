@@ -70,7 +70,7 @@ async function advance(page, prefs = [], max = 300) {
       if (T.btns().some((o) => /^Capitoli Rigioca/.test(o.t))) return { walk: true, menu: true };
       const bs = T.btns(); const names = bs.map((o) => o.t);
       for (const p of prefs) { const r = T.click(p); if (r) return { clicked: r }; }
-      for (const p of ["^Continua ▸", "^Avanti", "^Ok", "^Prosegui"]) { const r = T.click(p); if (r) return { clicked: r }; }
+      for (const p of ["^Continua ▸", "^Avanti", "^Ok", "^Prosegui", "^Normale L'equilibrio"]) { const r = T.click(p); if (r) return { clicked: r }; }
       return { stuck: names };
     }, prefs.map(String).map((s) => s.replace(/^\/|\/[a-z]*$/g, "")));
     if (st.walk) return log;

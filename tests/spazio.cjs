@@ -97,6 +97,21 @@ async function c3(w) {
   const n = await page.evaluate(() => window.__spazio._dbg.K.mem().ends.length); if (n < 4) errors.push("finali trovati " + n + " su 4");
   L.check(`Calcio Spaziale · capitolo 3 e i 4 finali (${w} px)`, errors); await browser.close();
 }
+// la difficoltà della saga (si sceglie al primo avvio) e il carattere degli avversari nelle partite del kit
+async function diff(w) {
+  const { browser, page, errors } = await L.setup({ w, ...MOD });
+  await page.evaluate(() => window.__spazio.open()); await page.evaluate(() => window.T_.click("Inizia la storia")); await page.waitForTimeout(200);
+  if (w === 390) await L.shot(page, "so_difficolta");
+  await page.evaluate(() => window.T_.click("^Sfida")); await L.advance(page);
+  const d = await K(page, "return K.mem().diff"); if (d !== "sfida") errors.push("difficoltà non salvata: " + d);
+  const msg = await K(page, "return K.reward('prova_diff', { coins: 10 })"); if (!msg.some((m) => /\+15 monete/.test(m))) errors.push("in Sfida le monete non sono × 1,5: " + JSON.stringify(msg));
+  await K(page, "K.ownMatch(window.__gravita.start, { oppStyle: 'difensiva', title: 'prova', done: () => {} })"); await page.waitForTimeout(500); await leave(page); await page.waitForTimeout(300);
+  const st = await page.evaluate(() => { const S = window.__sagaCore.pitchState; const a = S.styleNow(); S.half = 1; S.t = S.dur * 0.8; S.a = 2; S.b = 0; const b = S.styleNow(); return [a, b]; });
+  if (st[0] !== "difensiva" || st[1] !== "pressing") errors.push("carattere degli avversari sbagliato: " + JSON.stringify(st));
+  if (w === 390) await L.shot(page, "so_difficolta_partita");
+  await page.evaluate(() => window.__sagaCore.pitchState.finish()); await page.waitForTimeout(200); await leave(page); await page.waitForTimeout(300);
+  L.check(`Difficoltà Sfida e carattere degli avversari (${w} px)`, errors); await browser.close();
+}
 async function vere(w) {
   for (const alt of ["az", "cage", "hd"]) {
     const { browser, page, errors } = await L.setup({ w, ...MOD });
@@ -107,4 +122,4 @@ async function vere(w) {
     L.check(`Partita vera del gioco avviata da una saga: ${alt} (${w} px)`, errors); await browser.close();
   }
 }
-(async () => { await c1(390); await c1(320); await c2(390); await c2(320); await c3(390); await c3(320); await vere(390); })().catch((e) => { console.error("✗ spazio:", e.message); process.exit(1); });
+(async () => { await c1(390); await c1(320); await c2(390); await c2(320); await c3(390); await c3(320); await vere(390); await diff(390); await diff(320); })().catch((e) => { console.error("✗ spazio:", e.message); process.exit(1); });

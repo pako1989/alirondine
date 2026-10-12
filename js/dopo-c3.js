@@ -82,7 +82,7 @@
       },
     };
     function arcade() {
-      K.ownMatch(window.__epoche.start, {
+      K.ownMatch(window.__epoche.start, { oppStyle: "pressing",
         era: "1989", title: "RONDINE '89 · INSERT COIN", us: "1UP", opp: { name: "CPU", kit: "#3a6ae8", names: ["CPU-1", "CPU-2"] }, half: 25,
         mate: { name: "BRUNO", skin: "#e0b890", hair: "#f0f0f0", shirt: "#7a2a2a" }, shirt: "#e83a8a", bg: "ep_1989",
         halftime: "HALF TIME · Sullo schermo, una scritta lampeggia per un secondo: «A.D.A. NON MOLLARE». Poi sparisce.",
@@ -101,7 +101,7 @@
     }
     function finale() {
       setStep(N, 4);
-      K.ownMatch(window.__epoche.start, {
+      K.ownMatch(window.__epoche.start, { oppStyle: "contropiede",
         era: "oggi", title: "Epoche · Oggi: Valdorsa–Fornaci", us: "Valdorsa", opp: { name: "Fornaci", kit: "#5a5a62", names: ["Gelindo jr.", "Mattoni"] }, half: 35, ada: true,
         mate: { name: "Nino", skin: "#f0d0b0", hair: "#e8a040", shirt: "#7a2a2a" }, shirt: "#8a2a3a", bg: "ep_campo",
         halftime: "Intervallo. Lia, in panchina, guarda Ada parare. Ada le fa un cenno: secondo tempo, in porta ci vai tu. Lia diventa rossa come la maglia.",

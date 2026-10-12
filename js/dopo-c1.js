@@ -113,7 +113,7 @@
     };
 
     function match1928() {
-      K.ownMatch(window.__epoche.start, {
+      K.ownMatch(window.__epoche.start, { oppStyle: "pressing",
         era: "1928", title: "Epoche · Valdorsa–Fornaci, 1928", us: "Valdorsa 1928", opp: { name: "Fornaci", kit: "#5a5a62", names: ["Gelindo", "Mattone"] }, half: 35,
         mate: { name: "Bruno", skin: "#e8c4a0", hair: "#3a2a1a", shirt: "#7a2a2a" }, shirt: "#7a2a2a", bg: "ep_1928",
         halftime: "Intervallo. Bruno si toglie la scarpa e si massaggia il piede, di nascosto. Ada lo vede dalla porta. Non dice niente.",

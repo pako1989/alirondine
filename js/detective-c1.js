@@ -84,7 +84,7 @@
     }
     function rigioca() {
       const known = K.hasClue("guardalinee") && K.hasClue("ombrello");
-      K.ownMatch(window.__moviola.rigioca, {
+      K.ownMatch(window.__moviola.rigioca, { oppStyle: "pressing",
         title: "Rigioca l'azione chiave", twist: "guardalinee", known, us: "Portagrigia", opp: { name: "Valfonda", kit: green, names: ["7", "9"] }, half: 25,
         mate: { name: "Agata", skin: "#f0d0b0", hair: "#5a2a2a", shirt: "#6a5a4a" }, bg: "dc_stadio",
         intro: "Ricostruzione mentale dell'azione chiave: il ginocchio non fa male, nella testa. Attacchi verso l'alto. Il guardalinee è lì, a destra, con la bandierina.",
