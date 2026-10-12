@@ -23,7 +23,7 @@ async function setup(o = {}) {
     if (save) localStorage.setItem(key, JSON.stringify(save)); else localStorage.removeItem(key);
   }, [HERO, o.save || null, o.key]);
   // solo file del gioco: le richieste esterne (font, statistiche) si bloccano, così il test non dipende dalla rete
-  await page.route((u) => !String(u).startsWith(BASE), (r) => r.abort());
+  await page.route((u) => !String(u).startsWith(BASE), (r) => r.fulfill({ status: 200, contentType: /\.css|fonts\.googleapis/.test(r.request().url()) ? "text/css" : "text/plain", body: "" }));
   await page.goto(BASE + "/index.html?debug", { waitUntil: "domcontentloaded" });
   await page.waitForFunction((mod) => window.__borgoApi && window.__ali && window.__tr && (!mod || (window[mod] && window[mod]._dbg && Object.keys(window[mod]._dbg.CHAPTERS).length > 0)), o.mod || null, { timeout: 30000 });
   await page.evaluate((mod) => { window.__MOD = mod; }, o.mod || null);
