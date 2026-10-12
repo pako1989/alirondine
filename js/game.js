@@ -8843,7 +8843,7 @@
   }
   const TR_SOLID = "~#TSGMORWLNHBDW";
   const trTile = (x, y) => { const tx = Math.floor(x / TS), ty = Math.floor(y / TS); return (TW.map[ty] && TW.map[ty][tx]) || "R"; };
-  const trNpcs = () => TW.z.npcs.filter((n) => !n.when || n.when(TW.prog)).map((n) => { const at = Array.isArray(n.at) ? n.at : [typeof n.x === "number" ? n.x : 0, typeof n.y === "number" ? n.y : 0]; return { ...n, at, x: at[0] * TS + 8, y: at[1] * TS + 12 }; });
+  const trNpcs = () => TW.z.npcs.filter((n) => !n.when || n.when(TW.prog)).map((n) => { const at = Array.isArray(n.at) ? n.at : [typeof n.x === "number" ? n.x : 0, typeof n.y === "number" ? n.y : 0]; return { ...n, at, x: typeof n.px === "number" ? n.px : at[0] * TS + 8, y: typeof n.py === "number" ? n.py : at[1] * TS + 12 }; }); // px/py: personaggi che camminano (motore delle saghe)
 
   // --- disegno ---
   function trDrawTile0(ch, sx, sy, tx, ty) {
@@ -8955,8 +8955,8 @@
       const sx = Math.round(n.x - cx), sy = Math.round(n.y - cy);
       if (sx < -20 || sx > W + 20 || sy < -10 || sy > H + 30) return;
       if (n.npc) {
-        const c = CAST[n.id], face = TW.target && TW.target.id === n.id ? (TW.x < n.x - 4 ? "left" : TW.x > n.x + 4 ? "right" : "down") : gxIdleFace(n);
-        chibi(sx, sy + gxIdleY(n), { ...c, shirt: c.shirt || { dario: "#16325c" }[n.id] || "#555" }, face, 0);
+        const c = CAST[n.id], face = TW.target && TW.target.id === n.id ? (TW.x < n.x - 4 ? "left" : TW.x > n.x + 4 ? "right" : "down") : n.face || gxIdleFace(n);
+        chibi(sx, sy + (n.walk ? 0 : gxIdleY(n)), { ...c, shirt: c.shirt || { dario: "#16325c" }[n.id] || "#555" }, face, n.walk || 0);
         if (trNews(n.id)) { px(sx - 4, sy - 38, 9, 11, "#ffd23f"); g.fillStyle = "#2a1a00"; g.font = "bold 9px sans-serif"; g.textAlign = "center"; g.fillText("!", sx + 0.5, sy - 29); g.textAlign = "left"; }
       } else chibi(sx, sy, z.me ? z.me() : { ...CAST.leo, shirt: "#ff4d5a", num: "10" }, TW.dir, (dx || dy) ? TW.walk : 0);
     });
@@ -22104,7 +22104,7 @@
     ["Partite", /Settimana del Molo/],
     ["Collezioni e curiosità", /Diario del Corriere/],
     ["Calcio d'azione e arcade", /Arena 2D|Biliardino|Cabinato|Stadio 3D|Corsa della Panda|Gozzo di Baciccia|Gabbia sul Molo|Tsubasa|Supereroi/],
-    ["Saghe e GDR", /Salone delle Saghe|Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis|Libro che Mangiava i Finali|Doppio Turno|Cristalli del Campo|Il Muro|Valle del Vento Gentile|Detective di Campo|Dopo il Campione|Calcio Spaziale/],
+    ["Saghe e GDR", /Salone delle Saghe|Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis|Libro che Mangiava i Finali|Doppio Turno|Cristalli del Campo|Il Muro|Valle del Vento Gentile|Detective di Campo|Dopo il Campione|Calcio Spaziale|Torneo delle Cento Scuole/],
     ["Collezioni e curiosità", /Gashapon|Roster & Talenti|Diorama|Fumetto|Leggende del passato|Bianco e Nero|Quartier Generale/],
   ];
   const MN_EXP = { "Partite": 12, "Allenamento": 6, "Storie e ricordi": 8 }; // quante voci ha la categoria a tutto sbloccato: le mancanti appaiono come «???»

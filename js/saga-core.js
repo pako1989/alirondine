@@ -402,6 +402,26 @@
     function finishChapter(n, ending) { const m = mem(); m.done[n] = String(ending || "ok").slice(0, 24); if (m.ch <= n && n < NCH) m.ch = n + 1; save(); SFX.end(); }
 
     // -------------------------------------------------------------- zone sul motore TRZ
+    // PERSONAGGI CHE CAMMINANO: un PNG con route: [[x,y], [x,y], …] gira per la zona (speed, pause). Si ferma e si gira
+    // verso il Campione quando gli passi accanto, così ci si può sempre parlare. La posizione resta anche cambiando capitolo.
+    const WALK = {};
+    function walkTick(zid) {
+      const zr = ZONES[zid]; if (!zr || !zr.Z.npcs) return null; const me = api.trPos && api.trPos();
+      zr.Z.npcs.forEach((n) => {
+        if (!Array.isArray(n.route) || n.route.length < 2) return;
+        const k = zid + ":" + n.id, w = WALK[k] || (WALK[k] = { x: n.route[0][0] * TS + 8, y: n.route[0][1] * TS + 12, i: 1, wait: 0, ph: 0 });
+        const near = me && Math.hypot(me[0] - w.x, me[1] - w.y) < 28;
+        if (near) { n.walk = 0; n.face = Math.abs(me[0] - w.x) > Math.abs(me[1] - w.y) ? (me[0] < w.x ? "left" : "right") : me[1] < w.y ? "up" : "down"; }
+        else if (w.wait > 0) { w.wait--; n.walk = 0; }
+        else {
+          const tg = n.route[w.i % n.route.length], tx = tg[0] * TS + 8, ty = tg[1] * TS + 12, dx = tx - w.x, dy = ty - w.y, d = Math.hypot(dx, dy), sp = n.speed || 0.45;
+          if (d <= sp) { w.x = tx; w.y = ty; w.i++; w.wait = n.pause == null ? 50 : n.pause; n.walk = 0; }
+          else { w.x += (dx / d) * sp; w.y += (dy / d) * sp; n.face = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : dy > 0 ? "down" : "up"; w.ph += 0.18; n.walk = w.ph; }
+        }
+        n.px = w.x; n.py = w.y; n.at = [Math.floor(w.x / TS), Math.floor((w.y - 4) / TS)];
+      });
+      return null;
+    }
     const GRV = { zid: "", x: 0, y: 0, vx: 0, vy: 0, ang: 0, mode: "" };
     function gravOf(spec, chN, zid) { const es = zid ? eraSpec(zid) : null, g = es && es.gravity !== undefined ? es.gravity : spec.gravity; return String((typeof g === "function" ? safe(() => g(K, stepOf(chN)), "") : g) || ""); }
     function gravFree(x, y) { for (const [ox, oy] of [[-5, -4], [5, -4], [-5, 2], [5, 2]]) { const c = at(Math.floor((x + ox) / TS), Math.floor((y + oy) / TS)); if (c === undefined || c === null || SOLID.includes(c) || "~#TSGMORWLNHBDW".includes(c)) return false; } return true; }
@@ -469,6 +489,7 @@
       //  - flip: la gravità è girata, la visuale ruota di 180° e i comandi restano quelli dello schermo.
       // meccaniche per-zona: spec.tick (movimento del Campione, può spostarlo) e i plugin della saga
       const ticks = []; if (spec.__exitTick) ticks.push((px, py) => spec.__exitTick(px, py)); if (spec.tick) ticks.push((px, py, dt) => spec.tick(px, py, dt, K, stepOf(chN))); PLUG.forEach((p) => { if (p.tick) ticks.push((px, py, dt) => p.tick(zid, spec, px, py, dt, K)); }); if (spec.gravity || (spec.eras && Object.values(spec.eras).some((e) => e.gravity))) ticks.unshift((px, py) => gravTick(zid, spec, chN, px, py));
+      ticks.push(() => walkTick(zid));
       if (ticks.length) Z.tick = function (px, py, dt, moving) { if (api.trZone() !== zid) return null; let r = null; ticks.forEach((t) => { const q = safe(() => t(r ? r[0] : px, r ? r[1] : py, Math.min(0.05, dt || 0.016), moving), null); if (q && q.length === 2) r = q; }); return r; };
       Z.decor = function (cx, cy) { const d = dd(cx, cy); ZX.decor.splice(0).forEach((fn) => safe(() => fn(GP, cx, cy, d))); if (spec.decor) safe(() => spec.decor(GP, cx, cy, d, K)); };
       Z.top = function (cx, cy) {
@@ -522,7 +543,7 @@
       return {
         interior: true, region: reg, name: d.name || "Una casa", short: d.name || "Una casa", sub: d.sub || "", bg: d.bg || outer.bg, w: W, h: Hh, start, quilt: ["#c85a5a", "#5a8ac8", "#7ab86a", "#d8a83a"][hs % 4],
         intro: d.intro ? [["voce", d.intro]] : [],
-        npcs: (s) => arr(typeof d.who === "function" ? safe(() => d.who(s, K), []) : d.who).map((w, i) => ({ id: typeof w === "string" ? w : w.id, at: (w && w.at) || spots[i % spots.length] })),
+        npcs: (s) => arr(typeof d.who === "function" ? safe(() => d.who(s, K), []) : d.who).map((w, i) => ({ id: typeof w === "string" ? w : w.id, at: (w && typeof w === "object" && Array.isArray(w.at) && w.at) || spots[i % spots.length] })), // (attenzione: "testo".at è una funzione)
         chests: d.chest ? { "18,10": d.chest } : {},
         act: Object.assign({ B: "Guarda il letto", H: "Scaldati al camino", D: "Apri la credenza", T: "Guarda il tavolo", L: "Sfoglia i libri", W: "Guarda dalla finestra", z: "Guarda le casse", b: "Siediti", v: "Esci" }, d.act || {}),
         flavor: Object.assign({}, ROOM_TXT, obj(cfg.roomText), d.flavor || {}),
@@ -1051,5 +1072,5 @@
   }
   let PITCH = null;
 
-  window.__sagaCore = { version: 1, create, pitch, filter, get pitchState() { return PITCH; }, util: { safe, esc, hash, rnd, pick, tone, noise, frNow } };
+  window.__sagaCore = { version: 1, create, pitch, filter, get pitchState() { return PITCH; }, get cur() { return Object.assign({}, CUR, { opts: DIFFS[CUR.diff] || DIFFS.normale }); }, endMatch: () => { CUR = { diff: "normale", style: "" }; }, util: { safe, esc, hash, rnd, pick, tone, noise, frNow } };
 })();

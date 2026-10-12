@@ -5251,6 +5251,59 @@
     if (since("so_finale", 1) < 120) { g.fillStyle = "#e8c84a"; g.font = "bold 10px sans-serif"; g.textAlign = "center"; g.fillText("CAMPIONI DELL'ORBITA!", 160, 40); g.textAlign = "left"; }
     if (since("so_finale", 2) < 120) { g.fillStyle = "rgba(232,168,58,.9)"; for (let i = 0; i < 2; i++) circ(g, 218 + i * 6, 112 + since("so_finale", 2) * 0.3, 1.5, "#e8a83a"); }
   }
+  // ---- Il Torneo delle Cento Scuole: Portolungo, d'estate (con un tratto da manga: linee d'inchiostro e retini)
+  function tsInk(g, W, H) { g.fillStyle = "rgba(20,20,20,.05)"; for (let y = 0; y < H; y += 6) for (let x = (y / 6) % 2 ? 3 : 0; x < W; x += 6) g.fillRect(x, y, 1.2, 1.2); g.strokeStyle = "#141414"; g.lineWidth = 3; g.strokeRect(1.5, 1.5, W - 3, H - 3); }
+  function bgTsPorto(g, W, H, f) {
+    // Portolungo vista dal mare: le case colorate, il faro dell'Accademia, il campo in alto, le bandierine (tocca)
+    vgrad(g, 0, 0, W, H, ["#7ac8f0", "#f4e0b8"]); circ(g, 270, 40, 18, "#fff4c8");
+    const houses = ["#e8a87a", "#f0d070", "#e86a5a", "#8ac8a8", "#f4ecdc", "#c88ab8", "#e8c870"]; for (let i = 0; i < 12; i++) { const x = i * 28 - 4, h = 40 + (i * 13) % 26; px(g, x, 130 - h, 26, h, houses[i % 7]); px(g, x, 130 - h - 6, 26, 6, "#b8584a"); for (let k = 0; k < 2; k++) px(g, x + 5 + k * 10, 130 - h + 10, 6, 8, "#3a4a6a"); }
+    // il faro dell'Accademia (tocca: la luce gira)
+    px(g, 288, 60, 14, 70, "#f4ecdc"); for (let k = 0; k < 4; k++) px(g, 288, 66 + k * 16, 14, 6, "#1a2a5a"); px(g, 285, 52, 20, 10, "#1a2a5a"); if (since("ts_porto", 0) < 140 || Math.floor(f / 40) % 3 === 0) { g.fillStyle = "rgba(255,240,180,.35)"; g.beginPath(); g.moveTo(295, 57); g.lineTo(200, 30 + Math.sin(f / 20) * 20); g.lineTo(200, 60 + Math.sin(f / 20) * 20); g.closePath(); g.fill(); }
+    vgrad(g, 0, 130, W, 70, ["#2a8ad8", "#1a5a9a"]); for (let i = 0; i < 14; i++) px(g, (i * 37 + f * 0.4) % W, 140 + (i * 13) % 50, 12, 1.5, "rgba(255,255,255,.5)");
+    // le bandierine degli otto colori
+    const cols = ["#e83a3a", "#3a6ab8", "#e8c84a", "#7ac84a", "#a85ac8", "#3ac8c8", "#e8883a", "#1a2a5a"]; g.strokeStyle = "#3a2a1a"; g.lineWidth = 1; g.beginPath(); g.moveTo(0, 20); g.quadraticCurveTo(160, 50, 320, 20); g.stroke(); for (let i = 0; i < 20; i++) { const t = i / 19, x = t * 320, y = 20 + Math.sin(t * Math.PI) * 15 + (since("ts_porto", 1) < 80 ? Math.sin(f / 3 + i) * 3 : 0); g.fillStyle = cols[i % 8]; g.beginPath(); g.moveTo(x - 5, y); g.lineTo(x + 5, y); g.lineTo(x, y + 10); g.closePath(); g.fill(); }
+    // una barca con un pallone sopra (tocca)
+    const bx = 60 + Math.sin(f / 90) * 20 + (since("ts_porto", 2) < 100 ? since("ts_porto", 2) : 0); px(g, bx, 160, 40, 8, "#c8584a"); px(g, bx + 6, 154, 28, 6, "#f4ecdc"); circ(g, bx + 20, 150, 4, "#fff");
+    g.fillStyle = "#141414"; g.font = "900 13px Impact, sans-serif"; g.fillText("IL TORNEO DELLE CENTO SCUOLE", 70, 192); tsInk(g, W, H);
+  }
+  function bgTsPiazza(g, W, H, f) {
+    // la piazza del Tabellone: il tabellone verde, la gente, la maestra Iole con il fischietto (tocca)
+    vgrad(g, 0, 0, W, 90, ["#8ad0f0", "#f4e8c8"]); for (let i = 0; i < 9; i++) { const x = i * 38 - 6, h = 50 + (i * 17) % 24; px(g, x, 100 - h, 36, h, ["#e8a87a", "#f0d070", "#8ac8a8", "#f4ecdc", "#e86a5a"][i % 5]); px(g, x + 6, 100 - h + 12, 8, 10, "#3a4a6a"); px(g, x + 22, 100 - h + 12, 8, 10, "#3a4a6a"); }
+    px(g, 0, 100, W, 100, "#d8c8a8"); for (let i = 0; i < 20; i++) px(g, i * 16, 100, 1, 100, "rgba(0,0,0,.06)");
+    // il Tabellone
+    px(g, 108, 34, 104, 64, "#1e3a2a"); g.strokeStyle = "#c8a060"; g.lineWidth = 3; g.strokeRect(108, 34, 104, 64); px(g, 114, 96, 4, 30, "#5a3a22"); px(g, 202, 96, 4, 30, "#5a3a22");
+    g.fillStyle = "#f4ecdc"; g.font = "bold 6px sans-serif"; ["VIA LUNGA", "GABBIANI", "MERCATO", "LANTERNE", "S. BIAGIO", "PESCATORI", "CIABATTA", "ACCADEMIA"].forEach((n, i) => { g.fillStyle = i === 0 && since("ts_piazza", 0) < 120 ? "#ffd23f" : "#f4ecdc"; g.fillText(n, 114, 44 + i * 7); });
+    g.strokeStyle = "rgba(244,236,220,.6)"; g.lineWidth = 1; for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(160, 42 + i * 14); g.lineTo(170, 46 + i * 14); g.lineTo(160, 50 + i * 14); g.stroke(); } g.fillStyle = "#e83a3a"; g.fillRect(132, 26, 56, 10); g.fillStyle = "#fff"; g.font = "bold 7px sans-serif"; g.fillText("CENTO SCUOLE", 136, 34);
+    // la maestra Iole con il fischietto (tocca)
+    px(g, 60, 130, 14, 26, "#3a5a8a"); circ(g, 67, 124, 7, "#e8c4a0"); circ(g, 67, 117, 6, "#e8e8e8"); px(g, 66, 132, 2, 5, "#c0c0c8"); if (since("ts_piazza", 1) < 60) { g.fillStyle = "#141414"; g.font = "900 11px Impact, sans-serif"; g.fillText("FRRRT!", 78, 118); }
+    // la gente che passa
+    for (let i = 0; i < 4; i++) { const x = ((i * 97 + f * (0.3 + i * 0.1)) % (W + 40)) - 20, y = 150 + (i % 2) * 18; px(g, x, y, 8, 16, ["#e8a8c8", "#3a6ab8", "#7ac84a", "#e8c84a"][i]); circ(g, x + 4, y - 4, 4, "#e0b890"); }
+    if (since("ts_piazza", 2) < 120) { circ(g, 250, 120 + Math.abs(Math.sin(f / 6)) * -20, 5, "#fff"); g.strokeStyle = "#141414"; g.lineWidth = 1; g.beginPath(); g.arc(250, 120 + Math.abs(Math.sin(f / 6)) * -20, 5, 0, 7); g.stroke(); }
+    tsInk(g, W, H);
+  }
+  function bgTsSpiaggia(g, W, H, f) {
+    // la spiaggia dei bagnini: ombrelloni a strisce, la torretta, i gemelli in sincronia (tocca)
+    vgrad(g, 0, 0, W, 80, ["#7ac8f0", "#c8e8f8"]); vgrad(g, 0, 80, W, 50, ["#2a9ad8", "#3aa8e8"]); for (let i = 0; i < 12; i++) px(g, (i * 41 + f * 0.6) % W, 90 + (i * 11) % 36, 14, 1.5, "rgba(255,255,255,.6)");
+    px(g, 0, 128, W, 72, "#ead8a8"); for (let i = 0; i < 40; i++) px(g, (i * 53) % W, 132 + (i * 29) % 64, 2, 1, "rgba(160,130,80,.4)");
+    [[40, "#e83a3a"], [110, "#3a6ab8"], [200, "#e83a3a"], [270, "#7ac84a"]].forEach(([x, c]) => { px(g, x, 120, 2, 40, "#6a5a4a"); for (let k = 0; k < 4; k++) { g.fillStyle = k % 2 ? "#f4ecdc" : c; g.beginPath(); g.moveTo(x + 1, 116); g.arc(x + 1, 120, 24, Math.PI + k * Math.PI / 4, Math.PI + (k + 1) * Math.PI / 4); g.closePath(); g.fill(); } });
+    px(g, 150, 100, 4, 40, "#f4ecdc"); px(g, 168, 100, 4, 40, "#f4ecdc"); px(g, 146, 92, 30, 12, "#e83a3a"); g.fillStyle = "#fff"; g.font = "bold 6px sans-serif"; g.fillText("BAGNINI", 148, 100);
+    // i gemelli che camminano in sincronia (tocca: litigano)
+    const gx = 60 + ((f * 0.5) % 200), lit = since("ts_spiaggia", 0) < 100; [0, 14].forEach((d, i) => { const y = 160 + (lit ? Math.sin(f / 3 + i * 3) * 3 : 0); px(g, gx + d, y, 9, 18, "#e83a3a"); circ(g, gx + d + 4.5, y - 5, 5, "#c68642"); px(g, gx + d, y - 10, 9, 3, "#e8c870"); }); if (lit) { g.fillStyle = "#141414"; g.font = "900 10px Impact, sans-serif"; g.fillText("SONO IO ROCCO!", gx - 10, 140); }
+    if (since("ts_spiaggia", 1) < 120) { circ(g, 240, 170 - Math.abs(Math.sin(f / 7)) * 40, 5, "#fff"); }
+    if (since("ts_spiaggia", 2) < 120) { g.fillStyle = "rgba(255,255,255,.8)"; for (let i = 0; i < 6; i++) circ(g, 300 - i * 6, 110 - i * 3, 3 - i * 0.3, "#fff"); }
+    tsInk(g, W, H);
+  }
+  function bgTsCampo(g, W, H, f) {
+    // il Campo dei Cento: la tribunetta di otto colori, le porte nuove, i tifosi (tocca)
+    vgrad(g, 0, 0, W, 60, ["#8ad0f0", "#e8f4f8"]); const cols = ["#e83a3a", "#3a6ab8", "#e8c84a", "#7ac84a", "#a85ac8", "#3ac8c8", "#e8883a", "#1a2a5a"];
+    for (let r = 0; r < 3; r++) for (let i = 0; i < 16; i++) { px(g, i * 20, 40 + r * 10, 20, 10, cols[(i + r) % 8]); px(g, i * 20 + 6, 34 + r * 10 - (since("ts_campo", 0) < 90 && (i + r) % 2 ? 4 : 0), 8, 8, "#e0b890"); }
+    vgrad(g, 0, 72, W, 128, ["#57a446", "#4a943a"]); for (let i = 0; i < 8; i++) px(g, i * 40, 72, 20, 128, "rgba(255,255,255,.05)");
+    g.strokeStyle = "rgba(255,255,255,.85)"; g.lineWidth = 2; g.strokeRect(14, 84, 292, 108); g.beginPath(); g.moveTo(160, 84); g.lineTo(160, 192); g.stroke(); g.beginPath(); g.arc(160, 138, 22, 0, 7); g.stroke();
+    [[6, 1], [306, -1]].forEach(([x]) => { g.strokeStyle = "#fff"; g.lineWidth = 3; g.strokeRect(x, 118, 8, 40); g.strokeStyle = "rgba(255,255,255,.4)"; g.lineWidth = 0.6; for (let k = 0; k < 6; k++) { g.beginPath(); g.moveTo(x, 118 + k * 7); g.lineTo(x + 8, 118 + k * 7); g.stroke(); } });
+    if (since("ts_campo", 1) < 100) { const t = since("ts_campo", 1); circ(g, 160 + t * 1.4, 138 - Math.sin(t / 30 * Math.PI) * 30, 4, "#fff"); }
+    if (since("ts_campo", 2) < 120) { g.fillStyle = "#141414"; g.font = "900 14px Impact, sans-serif"; g.fillText("CENTO SCUOLE! CENTO SCUOLE!", 50, 70); }
+    tsInk(g, W, H);
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -5667,6 +5720,26 @@
       [60, 90, 180, 60, "🙌 L'equipaggio salta tutto insieme. Senza gravità, il salto dura un minuto. Si abbracciano a mezz'aria."],
       [80, 20, 160, 30, "🏆 «CAMPIONI DELL'ORBITA!» Lo scrive NONNA sul tabellone di bordo, poi aggiunge: «Avete mangiato?»."],
       [200, 90, 40, 50, "🛢️ ARBI-9 piange olio di gioia. Le gocce non cadono: gli girano intorno come piccole lune."],
+    ] },
+    ts_porto: { draw: bgTsPorto, hot: [
+      [280, 50, 30, 80, "🗼 Il faro dell'Accademia del Faro. La sua luce gira anche di giorno: dicono che serva a ricordare a tutti chi vince ogni anno."],
+      [0, 10, 320, 30, "🎏 Le bandierine di otto colori sventolano tutte insieme. Una, rossa, si stacca e vola verso il mare. Nessuno la riprende."],
+      [40, 140, 80, 40, "⛵ Una barca da pesca passa con un pallone sul tetto della cabina. Il pescatore lo calcia in acqua, poi lo ripesca con la rete. Un allenamento tutto suo."],
+    ] },
+    ts_piazza: { draw: bgTsPiazza, hot: [
+      [108, 34, 104, 64, "🏆 Il Tabellone. Per un attimo la scritta «VIA LUNGA» si illumina d'oro. Forse è il sole. Forse no."],
+      [50, 110, 40, 50, "🔔 La maestra Iole soffia nel fischietto di latta. Tre bambini, in fondo alla piazza, si fermano di colpo e si mettono in fila. Abitudine di quarant'anni fa."],
+      [230, 90, 40, 50, "⚽ Un pallone rimbalza da solo in mezzo alla piazza. Nessuno sa da dove sia arrivato. Il vigile lo multa."],
+    ] },
+    ts_spiaggia: { draw: bgTsSpiaggia, hot: [
+      [40, 140, 80, 50, "👯 I gemelli Sabbia si fermano, si guardano, litigano su chi è Rocco. Poi riprendono a camminare perfettamente in sincronia."],
+      [220, 120, 50, 60, "⚽ Un pallone da spiaggia vola altissimo. Lo prende un gabbiano, lo lascia cadere, lo riprende. Ha un futuro da portiere."],
+      [270, 90, 50, 40, "🌊 Un'onda più alta delle altre bagna tutti gli asciugamani della prima fila. Nessuno si arrabbia: è luglio."],
+    ] },
+    ts_campo: { draw: bgTsCampo, hot: [
+      [0, 30, 320, 40, "🙌 La tribunetta si alza in piedi. Sono quaranta persone, ma fanno il rumore di quattrocento."],
+      [120, 110, 80, 60, "⚽ Un tiro dal centrocampo attraversa tutto il campo e finisce in rete. Lo ha tirato un bambino della tribuna, scavalcando la recinzione. Applausi."],
+      [40, 60, 240, 16, "📣 «CENTO SCUOLE! CENTO SCUOLE!» Il coro è lo stesso da cinquant'anni. Anche le parole."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };

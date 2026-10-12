@@ -24,6 +24,8 @@
   const GEN = { fantasy: ["Fantasy", "#7a4ab0"], mistero: ["Mistero", "#2c6a9a"], scifi: ["Fantascienza", "#1f8a8a"], storico: ["Storico", "#a8622a"], commedia: ["Commedia", "#c9921a"], sport: ["Sport anime", "#c0392b"], avventura: ["Avventura", "#3f8a3f"], dramma: ["Drammatico", "#6a5a7a"], tattica: ["Tattica", "#5a6a3a"] };
   // mod: oggetto window con menuEntry/info · fn: funzione window da chiamare con (indietro) · ch: capitoli totali (se noti)
   const SAGAS = [
+    { id: "torneo", t: "Il Torneo delle Cento Scuole", e: "🏆", g: ["sport", "commedia"], mod: "__torneo", key: "ali-di-rondine.torneo", ch: 3, cover: "ts_porto", d: "Il panettiere, la postina, i gemelli bagnini e una vecchia maestra contro le scuole calcio della Riviera. Partite a fumetti (Vignette) con tecniche di squadra, una città viva e il Tabellone che cambia con le tue scelte.",
+      hints: { festa: "Sempre possibile, alla fine.", amicizia: "Serve il pieno rispetto di Ettore Vela.", maestra: "Serve uno spirito di squadra fortissimo.", tutte: "Segreto: tutte le tecniche usate in finale e tutte le lettere di Alba consegnate." } },
     { id: "spazio", t: "Calcio Spaziale: Stazione Orbitale 7", e: "🚀", g: ["commedia", "scifi"], mod: "__spazio", key: "ali-di-rondine.spazio", ch: 3, cover: "so_stazione", d: "La stazione più noiosa della galassia organizza un torneo e scambia il Campione per «l'esperto di calcio vero». Gravità che cambia in ogni modulo, un robot arbitro che fischia fuorigioco alle porte, partite a gravità zero.",
       hints: { casa: "Sempre possibile, alla fine.", capitano: "Serve uno spirito di squadra fortissimo.", nonna: "Serve la piena fiducia di ARBI-9.", fuorigioco: "Segreto: tutte le cartoline dalla Terra e la fiducia piena di ARBI-9." } },
     { id: "dopo", t: "Dopo il Campione", e: "🕰️", g: ["dramma", "fantasy"], mod: "__dopo", key: "ali-di-rondine.dopo", ch: 3, cover: "ep_campo", d: "Il Capitano è morto. Ada, la sua portiera che non invecchia, ripercorre i luoghi delle loro vittorie. Echi del passato e partite rigiocate con la grafica della loro epoca.",
@@ -67,7 +69,7 @@
     { id: "cala", t: "Cala Tramontana", e: "🌊", g: ["avventura"], fn: "openCalaTramontana", key: "ali-di-rondine.cala-tramontana", cover: "beach", d: "Esplora a piedi il borgo marino alternativo con il tuo Campione." },
     { id: "borgostorto", t: "Il Borgo Storto", e: "🌀", g: ["commedia", "tattica"], api: "openBorgoStorto", cover: "beach", d: "Lo spin-off GDR a turni del Borgo Marino." },
   ];
-  const NEWEST = ["spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
+  const NEWEST = ["torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
   const modOf = (s) => (s.mod ? window[s.mod] : null);
   const available = (s) => (s.mod ? !!window[s.mod] : s.fn ? typeof window[s.fn] === "function" : !!(api() && api()[s.api]));
   function state(s) {
@@ -235,7 +237,7 @@
   // ---------------------------------------------------------------- ALBUM DEI PERSONAGGI
   // ogni personaggio registrato nel gioco (window.__borgoApi.BIO) diventa una carta. Si «incontra» parlandoci (seeCard del gioco).
   // Le sezioni: la Storia e Borgo Marino, i tornei e le modalità del Borgo, e una sezione per saga (riconosciuta dal prefisso degli id).
-  const PFX = { spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
+  const PFX = { torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
   const BORGO_PFX = ["sv", "rb", "sb", "cg", "hd", "md", "ac"];
   function perSections() {
     const A = api(); if (!A || !A.BIO) return [];
