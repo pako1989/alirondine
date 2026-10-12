@@ -1,0 +1,6 @@
+DiceBear (https://www.dicebear.com) — librerie usate per gli stili dei volti «Avatar», «Lorelei» e «Avventuriero».
+- Codice @dicebear/core e @dicebear/collection 9.2.2: licenza MIT, © Florian Körner.
+- Stile «Avataaars»: disegni di Pablo Stanley (avataaars.com), liberi per uso personale e commerciale; remix di DiceBear.
+- Stile «Lorelei»: disegni di Lisa Wischofsky, licenza CC0 1.0.
+- Stile «Adventurer»: disegni di Lisa Wischofsky, licenza CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/); remix di DiceBear.
+File generato con esbuild da @dicebear/core, @dicebear/avataaars, @dicebear/lorelei, @dicebear/adventurer.
