@@ -5075,6 +5075,56 @@
     g.save(); g.globalCompositeOperation = "soft-light"; g.fillStyle = "rgba(255,150,60,.35)"; g.fillRect(0, 0, W, H); g.restore();
     for (let i = 0; i < 30; i++) px(g, (i * 97 + f * 3) % W, (i * 61 + f) % H, 1.5, 1.5, "rgba(255,240,200,.15)");
   }
+  function bgEpStazione(g, W, H, f) {
+    // la stazione di Valdorsa d'inverno: neve, pensilina di ghisa, il bar con l'insegna rosa (tocca)
+    vgrad(g, 0, 0, W, H, ["#3a3a5a", "#8a7a9a"]); circ(g, 260, 50, 14, "rgba(255,210,170,.5)");
+    for (let i = 0; i < 6; i++) { g.fillStyle = "#c8ccd8"; g.beginPath(); g.moveTo(i * 70 - 30, 120); g.lineTo(i * 70 + 20, 70 + (i % 3) * 10); g.lineTo(i * 70 + 70, 120); g.fill(); }
+    px(g, 0, 120, W, 80, "#e8ecf0"); px(g, 0, 160, W, 4, "#6a6a72"); px(g, 0, 172, W, 4, "#6a6a72"); for (let i = 0; i < 20; i++) px(g, i * 18, 158, 8, 20, "#7a6a5a");
+    // la pensilina
+    px(g, 20, 80, 130, 6, "#3a3a44"); for (let i = 0; i < 4; i++) px(g, 28 + i * 38, 86, 4, 60, "#3a3a44"); px(g, 20, 76, 130, 5, "#ffffff");
+    // il bar e la vetrina con i cabinati
+    px(g, 180, 70, 110, 76, "#d8c8a8"); px(g, 176, 62, 118, 12, "#6a4a3a"); px(g, 176, 58, 118, 5, "#ffffff");
+    px(g, 192, 96, 50, 34, since("ep_stazione", 1) < 120 ? "#3a2a6a" : "#1a1a2a"); for (let i = 0; i < 3; i++) px(g, 198 + i * 15, 104, 10, 22, since("ep_stazione", 1) < 120 ? ["#e83a8a", "#7af0ff", "#ffe84a"][i] : "#2a2a34");
+    px(g, 254, 100, 24, 46, "#5a3a2a"); px(g, 196, 78, 90, 12, "#1a1428"); g.fillStyle = (Math.floor(f / 40) % 5) ? "#e83a8a" : "#5a3a5a"; g.font = "bold 8px Georgia, serif"; g.textAlign = "center"; g.fillText("BAR · SALA GIOCHI", 241, 87); g.textAlign = "left";
+    // l'orologio della stazione (tocca: le lancette corrono alle cinque)
+    circ(g, 85, 60, 11, "#f4ecdc"); g.strokeStyle = "#2a2a2a"; g.lineWidth = 1.2; const hh = since("ep_stazione", 0) < 80 ? 5 : 4 + (f / 600) % 1;
+    g.beginPath(); g.moveTo(85, 60); g.lineTo(85 + Math.sin(hh / 6 * Math.PI) * 6, 60 - Math.cos(hh / 6 * Math.PI) * 6); g.moveTo(85, 60); g.lineTo(85 + Math.sin(f / 50) * 8, 60 - Math.cos(f / 50) * 8); g.stroke();
+    // Ada sotto la pensilina, con il gettone
+    px(g, 100, 122, 9, 18, "#5a5a6a"); circ(g, 104.5, 118, 4.5, "#e8d4c0"); px(g, 100, 112, 9, 4, "#eef2f8"); if (since("ep_stazione", 2) < 100) { circ(g, 112, 124, 2.5, "#c9a227"); g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 112, 124, 8, "255,220,120", 0.6); g.restore(); }
+    for (let i = 0; i < 70; i++) px(g, (i * 53 + Math.sin(f / 40 + i) * 8) % W, (i * 37 + f * (0.6 + (i % 3) * 0.3)) % H, 2, 2, "rgba(255,255,255,.8)");
+  }
+  function bgEp1989(g, W, H, f) {
+    // la sala giochi nel 1989: pixel grossi, cabinati accesi, il Capitano davanti a RONDINE '89 (tocca)
+    px(g, 0, 0, W, H, "#0a0a1a"); for (let y = 0; y < H; y += 8) for (let x = 0; x < W; x += 8) if ((x * 7 + y * 13) % 29 === 0) px(g, x, y, 2, 2, "#3a3a7a");
+    px(g, 0, 150, W, 50, "#1a1a3a"); for (let i = 0; i < 20; i++) px(g, i * 16, 150 + (i % 2) * 8, 8, 8, "#2a2450");
+    for (let i = 0; i < 5; i++) {
+      const x = 22 + i * 60, star = i === 2, on = star || since("ep_1989", 0) > 40 || i % 2;
+      px(g, x, 60, 44, 92, star ? "#2a1a3a" : "#2a2a5a"); px(g, x, 60, 44, 10, star ? "#e83a8a" : "#3a6ae8");
+      px(g, x + 6, 76, 32, 26, on ? "#000010" : "#1a1a1e"); if (on) for (let k = 0; k < 6; k++) px(g, x + 8 + ((f / 4 + k * 9 + i * 5) % 26), 78 + ((k * 7 + i * 3) % 20), 3, 3, ["#7af0ff", "#e83a8a", "#ffe84a", "#3ae86a"][(k + i) % 4]);
+      px(g, x + 6, 110, 32, 8, "#1a1a1a"); px(g, x + 12, 108, 4, 4, "#e83a3a"); px(g, x + 26, 108, 4, 4, "#3ae86a");
+    }
+    g.fillStyle = "#ffe84a"; g.font = "bold 7px monospace"; g.textAlign = "center"; g.fillText(since("ep_1989", 1) < 100 ? "A.D.A. NON MOLLARE" : "RONDINE '89", 164, 68); g.textAlign = "left";
+    // il Capitano, settantanove anni, che gioca
+    px(g, 152, 120, 22, 30, "#7a2a2a"); px(g, 156, 106, 14, 14, "#e0b890"); px(g, 156, 102, 14, 5, "#f0f0f0"); px(g, 157, 110, 5, 3, "#1a1a1a"); px(g, 164, 110, 5, 3, "#1a1a1a"); px(g, 148, 122, 30, 4, "#8a2a3a");
+    if (since("ep_1989", 2) < 90) { px(g, 152 + (f % 6 < 3 ? -2 : 2), 128, 6, 4, "#e0b890"); }
+    g.fillStyle = "#7af0ff"; g.font = "bold 9px monospace"; g.fillText("1UP  " + String(Math.floor(f / 5) * 10 % 1000000).padStart(6, "0"), 10, 18); g.fillStyle = (Math.floor(f / 30) % 2) ? "#e83a8a" : "#0a0a1a"; g.fillText("INSERT COIN", 230, 18);
+    g.fillStyle = "rgba(0,0,0,.18)"; for (let y = 0; y < H; y += 3) g.fillRect(0, y, W, 1);
+  }
+  function bgEpFinale(g, W, H, f) {
+    // il vecchio campo sotto la neve, oggi: la nuova squadra e la quercia (tocca)
+    vgrad(g, 0, 0, W, H, ["#8a7aa8", "#f0c8a0"]); circ(g, 60, 70, 16, "rgba(255,220,180,.7)");
+    px(g, 0, 110, W, 90, "#e8ecf0"); px(g, 30, 130, 200, 56, "#9a8a62"); g.strokeStyle = "rgba(255,255,255,.7)"; g.lineWidth = 1.2; g.strokeRect(30, 130, 200, 56); g.beginPath(); g.moveTo(130, 130); g.lineTo(130, 186); g.stroke();
+    px(g, 26, 146, 2, 22, "#ffffff"); px(g, 26, 146, 10, 2, "#ffffff"); px(g, 232, 146, 2, 22, "#ffffff"); px(g, 224, 146, 10, 2, "#ffffff");
+    // la quercia
+    px(g, 268, 80, 12, 60, "#4a3a2a"); [[274, 70, 30], [256, 84, 20], [292, 84, 20]].forEach(([x, y, r]) => circ(g, x, y, r, "#6a5a4a")); [[274, 60, 22], [258, 76, 12], [290, 76, 12]].forEach(([x, y, r]) => circ(g, x, y, r, "#eef2f8"));
+    if (since("ep_finale", 2) < 140) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 274, 110, 14, "255,220,150", 0.6); g.restore(); }
+    // la squadra: Ada in porta, Nino, Lia, il capitano
+    const team = [[40, "#d8d0e8", "#eef2f8"], [100, "#7a2a2a", "#e8a040"], [150, "#7a2a2a", "#3a2a1a"], [190, "#8a2a3a", "#5a3a2a"]];
+    team.forEach(([x, c, h], i) => { const j = since("ep_finale", 0) < 80 ? Math.abs(Math.sin(f / 6 + i)) * 6 : 0; px(g, x, 150 - j, 9, 16, c); circ(g, x + 4.5, 146 - j, 4.5, "#e8c4a0"); px(g, x, 140 - j, 9, 4, h); });
+    const bx = 130 + Math.sin(f / 30) * 40, by = 166 - Math.abs(Math.sin(f / 15)) * 10; circ(g, bx, by, 3, "#f4ecdc");
+    if (since("ep_finale", 1) < 120) { g.fillStyle = "#3a2a1a"; g.font = "italic 8px Georgia, serif"; g.fillText("le partite non invecchiano", 70, 124); }
+    for (let i = 0; i < 50; i++) px(g, (i * 61 + Math.sin(f / 50 + i) * 6) % W, (i * 41 + f * 0.5) % H, 1.5, 1.5, "rgba(255,255,255,.75)");
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -5426,6 +5476,21 @@
       [0, 20, 320, 70, "🙌 La folla del 1974 si alza in piedi tutta insieme. Gli ombrelli da sole volano in aria. Qualcuno, in quarta fila, resta seduto."],
       [116, 0, 88, 26, "🧮 Il tabellone di gesso esita. Per un secondo dice «2 · 1». Poi torna a dire la verità."],
       [270, 120, 30, 40, "🧤 Il ragazzo in porta si stringe i guanti di lana della nonna. Gli tremano le gambe. Dalla panchina, un uomo in cardigan gli fa un pollice in su."],
+    ] },
+    ep_stazione: { draw: bgEpStazione, hot: [
+      [70, 46, 30, 30, "🕰️ L'orologio della stazione. Le lancette corrono fino alle cinque, si fermano un attimo, poi tornano indietro. Come chi aspetta."],
+      [188, 92, 58, 40, "🕹️ Nella vetrina, i cabinati si accendono per un secondo tutti insieme. Poi tornano spenti, impolverati."],
+      [94, 106, 24, 40, "🪙 Ada gira il gettone tra le dita. «Arriva sempre in ritardo, ma arriva», dice. Non a te: alla neve."],
+    ] },
+    ep_1989: { draw: bgEp1989, hot: [
+      [0, 56, 320, 30, "👾 Tutti i cabinati suonano la loro musichetta insieme. Un'orchestra a 8 bit che non si è mai messa d'accordo."],
+      [140, 56, 50, 20, "📺 Sullo schermo di RONDINE '89 lampeggia una scritta: «A.D.A. NON MOLLARE». Poi sparisce."],
+      [146, 98, 34, 52, "🧓 Il Capitano preme i tasti con due dita, serissimo. Non si gira. «Di testa», borbotta. «Sempre di testa.»"],
+    ] },
+    ep_finale: { draw: bgEpFinale, hot: [
+      [30, 130, 200, 56, "⚽ La nuova squadra salta nella neve tutta insieme. Nino scivola. Nessuno lo aiuta: ridono troppo."],
+      [60, 112, 140, 16, "✍️ Per un attimo, nella neve del campo, sembra scritto: «le partite non invecchiano». Poi un piede ci passa sopra."],
+      [250, 50, 50, 90, "🌳 La quercia sotto la neve. Sull'incisione brilla un filo di luce, come se qualcuno l'avesse appena ripassata col dito."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };

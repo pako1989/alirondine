@@ -26,9 +26,10 @@
       terra: { grass: ["#9a8a62", "#a49468", "#90805a"], path: ["#8a7048", "#806640"], stone: ["#8a8478", "#7e786c"], wall: ["#6a5a44", "#5e4e3a"], water: ["#4a6a7a", "#547484"], tall: "#8a8a52", tree: ["#4a5a2a", "#5a6a32", "#6a7a3a"], tint: "255,240,210", tintA: 0.05, fx: "dust", dark: 0.05 },
       riva: { grass: ["#d8c088", "#e0c890", "#d0b880"], path: ["#c8b08a", "#beA682"], stone: ["#e8dcc8", "#dcd0bc"], wall: ["#e8a87a", "#dc9c6e"], water: ["#3a9ac8", "#44a4d2"], tall: "#8aaa52", tree: ["#2f6a3a", "#3f8448", "#5aa04e"], tint: "255,200,120", tintA: 0.12, fx: "", dark: 0.04 },
       sala: { grass: ["#2a2440", "#30284a", "#26203a"], path: ["#3a3458", "#342e50"], stone: ["#4a4468", "#443e60"], wall: ["#3a2a5a", "#302250"], water: ["#2a4a8a", "#305494"], tall: "#4a6a3a", tint: "180,120,255", tintA: 0.12, fx: "", dark: 0.25 },
+      inverno: { grass: ["#e8ecf0", "#dfe4ea", "#f0f2f4"], path: ["#a8a098", "#9e968e"], stone: ["#b8b4ac", "#aca8a0"], wall: ["#b8946a", "#ac885e"], water: ["#6a8aa8", "#7494b2"], tall: "#8a9a7a", tree: ["#4a5a4a", "#e8ecf0", "#ffffff"], tint: "200,220,255", tintA: 0.1, fx: "snow", dark: 0.14 },
       casa: { grass: ["#8a6a4a", "#846444", "#8e6e4e"], path: ["#9a7a5a", "#927252"], stone: ["#a89a88", "#9c8e7c"], wall: ["#c8a87a", "#bc9c6e"], water: ["#4a7a9a", "#5484a4"], tall: "#6a8a4a", tint: "255,210,150", tintA: 0.12, fx: "dust", dark: 0.18 },
     },
-    floors: "", solid: "O",
+    floors: "", solid: "OA",
     rest: { ch: "s", label: "Siediti alla stufa", text: "Ti siedi vicino alla stufa. Ada si siede accanto a te, ma lascia sempre un po' di spazio: per abitudine, dice, da cento anni. (Il gioco salva da solo: qui puoi rileggere il Quaderno.)" },
     texts: { chestOpen: "Apri la scatola.", chestEmpty: "La scatola è vuota. Restano l'odore di naftalina e una foglia secca.", nothing: "Niente. Ma qui, una volta, c'era qualcosa.", noHero: "Valdorsa ha bisogno di un nuovo capitano. Prima crea il tuo Campione.", chapters: "Tre luoghi, tre epoche, un Capitano. Le scelte restano: cambiano il finale." },
     journal: { name: "Il Quaderno dei Ricordi", sub: "Persone, echi del passato, le partite del Capitano, finali" },
@@ -53,6 +54,15 @@
     },
     musicBg: { ep_1928: "dopo_1928" },
     paint: {
+      // un cabinato da sala giochi: spento e impolverato oggi, acceso e lampeggiante nel 1989
+      A(K, sx, sy, tx, ty, fr) {
+        K.ground(sx, sy, tx, ty); const on = K.ZX.eraName === "1989", star = K.at(tx, ty) === "A" && tx === 10 && ty === 2;
+        K.P(sx + 1, sy - 6, 14, 21, on ? "#2a2a5a" : "#3a3a44"); K.P(sx + 1, sy - 6, 14, 3, star ? "#e83a8a" : on ? "#3a6ae8" : "#4a4a52");
+        K.P(sx + 3, sy - 2, 10, 8, on ? "#0a0a1a" : "#1a1a1e");
+        if (on) { const g = K.g; for (let i = 0; i < 4; i++) K.P(sx + 4 + ((fr / 6 + i * 3 + tx) % 8), sy + ((i * 3 + tx) % 6) - 1, 1.5, 1.5, ["#7af0ff", "#e83a8a", "#ffe84a", "#3ae86a"][i]); K.light(sx + 8, sy + 2, 18, star ? "232,58,138" : "122,240,255", 0.35); }
+        else K.P(sx + 4, sy - 1, 3, 1, "rgba(255,255,255,.15)");
+        K.P(sx + 3, sy + 8, 10, 3, "#1a1a1a"); K.P(sx + 5, sy + 8, 2, 2, on ? "#e83a3a" : "#5a3a3a"); K.P(sx + 9, sy + 8, 2, 2, on ? "#3ae86a" : "#3a5a3a");
+      },
       // un eco: un ricordo rimasto impigliato nell'aria, che luccica e respira
       e(K, sx, sy, tx, ty, fr) {
         K.ground(sx, sy, tx, ty); if (K.F.is(`eco_${K.ZX.id}_${tx}_${ty}`)) return; const g = K.g, a = 0.5 + 0.4 * Math.sin(fr / 14 + tx);
