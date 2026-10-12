@@ -1,6 +1,6 @@
 // tests/run.cjs - avvia un piccolo server statico (se non c'è già TEST_URL) e lancia tutti i test, uno dopo l'altro
 // Uso: npm test            (tutti)         ·  node tests/run.cjs vento   (solo quelli che contengono «vento»)
-const http = require("http"), fs = require("fs"), path = require("path"), { spawnSync } = require("child_process");
+const http = require("http"), fs = require("fs"), path = require("path"), { spawn } = require("child_process");
 const ROOT = path.join(__dirname, ".."), PORT = +(process.env.TEST_PORT || 8765);
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".jpg": "image/jpeg", ".json": "application/json", ".webmanifest": "application/manifest+json" };
 function serve() {
@@ -19,7 +19,8 @@ function serve() {
   const only = process.argv[2] || "";
   const files = ["smoke.cjs", "cameos.cjs", "vento.cjs", "detective.cjs", "dopo.cjs"].filter((f) => f.includes(only));
   let fail = 0;
-  for (const f of files) { console.log(`\n— ${f}`); const r = spawnSync(process.execPath, [path.join(__dirname, f)], { stdio: "inherit", env: { ...process.env, TEST_URL: process.env.TEST_URL || `http://localhost:${PORT}` } }); if (r.status !== 0) fail++; }
+  for (const f of files) { console.log(`\n— ${f}`); // spawn asincrono: con spawnSync il server qui sopra resterebbe bloccato e la pagina non si caricherebbe mai
+    const code = await new Promise((ok) => spawn(process.execPath, [path.join(__dirname, f)], { stdio: "inherit", env: { ...process.env, TEST_URL: process.env.TEST_URL || `http://localhost:${PORT}` } }).on("close", ok)); if (code !== 0) fail++; }
   if (srv) srv.close();
   console.log(fail ? `\n✗ ${fail} file di test con errori` : "\n✓ tutti i test passati"); process.exit(fail ? 1 : 0);
 })();
