@@ -324,6 +324,12 @@
     eng.buttons(btns, true);
   };
 
+  // Salone delle Saghe: avanzamento reale (capitoli 1-4 completati = chap-1) e apertura
+  window.__heroStory = {
+    info() { const c = loadProgress().chap || 1, d = {}; for (let i = 1; i < Math.min(c, 5); i++) d[i] = 1; return { ch: Math.min(c, 4), done: d }; },
+    menuEntry(back) { return { fn: () => window.openHeroStoryMenu(back) }; }
+  };
+
   function backToMenu() { window.openHeroStoryMenu(returnCallback); }
 
   // ---------- Sfida del Molo ----------
