@@ -81,6 +81,7 @@
   function flat(g, id, c, expr) {
     const T = traits(id, c), st = hairOf(c), skin = c.skin || "#e0b48a", hair = c.hair || "#2b1d14", eye = c.eye || "#2a2a2a", shirt = c.shirt || "#3f5fbf", fw = T.fw;
     const skinS = mix(skin, 0.16, "#7a3a4a"), hairS = dark(hair, 0.22), shirtS = dark(shirt, 0.2), ink = dark(skin, 0.72);
+    cosm(g, c, T, true);
     hairBack(g, st, fw, hairS, { tie: "#ff6a7a", alt: hair });
     // corpo: maglia piatta, ombra netta a destra, colletto geometrico
     g.fillStyle = shirt; bodyPath(g, 36); g.fill();
@@ -134,6 +135,7 @@
     const line = dark(skin, 0.55), hairD = dark(hair, 0.4), hairL = lite(hair, 0.45);
     g.lineJoin = "round"; g.lineCap = "round";
     // capelli dietro con gradiente
+    cosm(g, c, T, true);
     const hb = g.createLinearGradient(0, -20, 0, 56); hb.addColorStop(0, dark(hair, 0.2)); hb.addColorStop(1, dark(hair, 0.5)); hairBack(g, st, fw, hb, { tie: "#e8485a", alt: dark(hair, 0.1) });
     // corpo: maglia con pieghe sfumate e luce di contorno
     const sg = g.createLinearGradient(-36, 30, 36, 62); sg.addColorStop(0, lite(shirt, 0.18)); sg.addColorStop(0.55, shirt); sg.addColorStop(1, dark(shirt, 0.35)); g.fillStyle = sg; bodyPath(g, 36); g.fill();
@@ -237,9 +239,9 @@
     if (c.glasses) { [-1, 1].forEach((sd) => { g.fillStyle = "rgba(200,230,255,.14)"; g.beginPath(); g.ellipse(sd * T.gap, T.eyeY, T.eyeW + 2.6, 6.4, 0, 0, 7); g.fill(); g.strokeStyle = "#2a2a34"; g.lineWidth = 1.2; g.stroke(); g.strokeStyle = "rgba(255,255,255,.6)"; g.lineWidth = 0.8; g.beginPath(); g.moveTo(sd * T.gap - 3.5, T.eyeY - 3.5); g.lineTo(sd * T.gap - 1, T.eyeY - 5); g.stroke(); }); g.strokeStyle = "#2a2a34"; g.lineWidth = 1.2; g.beginPath(); g.moveTo(-T.gap + T.eyeW + 2.4, T.eyeY - 1); g.quadraticCurveTo(0, T.eyeY - 3, T.gap - T.eyeW - 2.4, T.eyeY - 1); g.stroke(); }
     if (c.shades) { [-1, 1].forEach((sd) => { const sg = g.createLinearGradient(0, T.eyeY - 5, 0, T.eyeY + 5); sg.addColorStop(0, "#3a3a4a"); sg.addColorStop(1, "#0a0a10"); g.fillStyle = sg; g.beginPath(); g.ellipse(sd * T.gap, T.eyeY, T.eyeW + 2.6, 5.2, 0, 0, 7); g.fill(); g.fillStyle = "rgba(255,255,255,.4)"; g.beginPath(); g.ellipse(sd * T.gap - 2.5, T.eyeY - 2, 2.4, 1, -0.3, 0, 7); g.fill(); }); g.fillStyle = "#111"; g.fillRect(-T.gap, T.eyeY - 1, T.gap * 2, 1.4); }
   }
-  function cosm(g, c, T) { // i cosmetici come negli altri stili: corone, maschere, elmi, mantelli, sciarpe, fasce… (FS.acc di portrait-styles.js)
+  function cosm(g, c, T, back) { // i cosmetici come negli altri stili: aura (dietro), corone, maschere, elmi, mantelli, sciarpe, fasce… (FS.acc di portrait-styles.js)
     if (!c.acc || typeof c.acc !== "string") return; const G = { fw: T.fw, top: -26, ey: T.eyeY, eg: T.gap };
-    try { if (FS.acc) { FS.acc(g, c, "body", G, "#1a1a22"); FS.acc(g, c, "head", G, "#1a1a22"); } else if (c.accFn) { c.accFn(g, "body"); c.accFn(g, "head"); } } catch (e) {}
+    try { if (back) { if (FS.acc) FS.acc(g, c, "back", G, "#1a1a22"); return; } if (FS.acc) { FS.acc(g, c, "body", G, "#1a1a22"); FS.acc(g, c, "head", G, "#1a1a22"); } else if (c.accFn) { c.accFn(g, "body"); c.accFn(g, "head"); } } catch (e) {}
   }
   function thinkBubbles(g, col) { g.fillStyle = col; [[23, -20, 2], [28, -28, 3], [35, -38, 5]].forEach(([x, y, r]) => { g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }); }
 
@@ -248,7 +250,9 @@
   FS.draw = function (style, g, id, c, expr) {
     if (!NEW[style]) return draw0(style, g, id, c, expr);
     if (!c || !c.skin) return false; if (c.cap && typeof c.cap !== "string") c = Object.assign({}, c, { cap: "#1d3fa3" });
-    g.save(); try { NEW[style](g, id, c, expr); } catch (e) { g.restore(); return false; } g.restore(); return true;
+    // le acconciature nuove (afro, dreadlock, undercut, ciuffo, mullet, onde, chignon spettinato, crocchia, treccia di lato, due chignon): base + pezzi dietro e davanti
+    const st0 = ALIAS[c.style] || c.style, NB = { afro: "buzz", dread: "buzz", undercut: "slick", pompadour: "slick", mullet: "messy", wavy: "long", messybun: "bun", topknot: "buzz", sidebraid: "slick", spacebuns: "buzz" }[st0];
+    g.save(); try { if (NB && FS.hairOver && !c.cap) FS.hairOver(g, st0, c, "back"); NEW[style](g, id, NB ? Object.assign({}, c, { style: NB }) : c, expr); if (NB && FS.hairOver && (!c.cap || st0 === "sidebraid")) FS.hairOver(g, st0, c, "front"); } catch (e) { g.restore(); return false; } g.restore(); return true;
   };
   FS.__v2 = true; FS.NEW = Object.keys(NEW);
 })();

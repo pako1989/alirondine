@@ -66,7 +66,7 @@
   }
 
   // ---------------------------------------------------------------- stile ANIME
-  function anime(g, id, c, expr, real) {
+  function anime0(g, id, c, expr, real) {
     const T = Object.assign({}, traits(id, c)), skin = c.skin || "#e0b48a", hair = c.hair || "#2b1d14", eyeC = c.eye || "#3a2a1a", shirt = c.shirt || (c.bg && c.bg[1]) || "#3f5fbf";
     if (real) { T.eyeW *= 0.62; T.eyeGap += 0.4; T.eyeY += 0.6; T.chin = T.chin === 1 ? 2 : T.chin; T.lash = 0; }
     const line = dark(skin, 0.62), shade = mix(skin, 0.22, "#a04a5a"), hairD = dark(hair, 0.35), hairL = lite(hair, 0.32), st = c.style || "messy";
@@ -200,8 +200,55 @@
   }
 
 
+
+  // ---------------------------------------------------------------- ACCONCIATURE IN PIÙ (per Anime, Illustrato, Cartone, Fumetto e, di riflesso, Manga, Acquerello, Pixel)
+  // Ogni stile conosce 9 tagli di base; le altre acconciature si appoggiano a una base e aggiungono i loro pezzi dietro
+  // (code, chignon, afro, trecce lunghe…) e davanti (ciuffo, bandana, treccia di lato…), con i colori del personaggio.
+  const HALIAS = { short: "buzz", corto: "buzz", lungo: "long", flowing: "long", coda: "ponytail", medium: "slick" };
+  const HBASE = { afro: "buzz", dread: "buzz", undercut: "slick", pompadour: "slick", mullet: "messy", wavy: "long", messybun: "bun", topknot: "buzz", sidebraid: "slick", spacebuns: "buzz",
+    bob: "slick", twintails: "slick", braids: "slick", curly: "buzz", side: "slick", ordinato: "slick", bandana: "messy", hood: "buzz", elmo: "buzz" };
+  function hairOver(g, st, c, part) {
+    const hair = c.hair || "#2b1d14", hd = dark(hair, 0.42), hl = lite(hair, 0.32), fw = 18;
+    const blob = (x, y, rx, ry, rot) => { g.beginPath(); g.ellipse(x, y, rx, ry, rot || 0, 0, 7); g.fillStyle = hair; g.fill(); g.strokeStyle = hd; g.lineWidth = 1.2; g.stroke(); };
+    const shine = (x, y, r, a0, a1) => { g.strokeStyle = hl; g.lineWidth = 1.4; g.globalAlpha = 0.7; g.beginPath(); g.arc(x, y, r, a0, a1); g.stroke(); g.globalAlpha = 1; };
+    const braid = (x0, y0, x1, y1, n, w) => { for (let i = 0; i < n; i++) { const t = i / (n - 1), x = x0 + (x1 - x0) * t, y = y0 + (y1 - y0) * t; blob(x, y, w - t * 0.8, w * 0.9 - t * 0.6, 0.4); } };
+    g.save(); g.lineJoin = "round"; g.lineCap = "round";
+    if (part === "back") {
+      if (st === "afro") { blob(0, -10, 30, 27); for (let i = 0; i < 14; i++) { const a = (i / 14) * Math.PI * 2; g.fillStyle = hair; g.beginPath(); g.arc(Math.cos(a) * 27, -10 + Math.sin(a) * 24, 6, 0, 7); g.fill(); } shine(-6, -18, 16, Math.PI * 1.1, Math.PI * 1.5); }
+      if (st === "curly") { for (let i = 0; i <= 11; i++) { const a = Math.PI * (0.92 + i / 11 * 1.16); blob(Math.cos(a) * (fw + 3), -6 + Math.sin(a) * 22, 6.5, 6); } }
+      if (st === "dread") { g.fillStyle = hd; g.beginPath(); g.ellipse(0, -10, fw + 6, 20, 0, Math.PI, 0); g.fill(); for (let i = 0; i < 9; i++) { const x = -fw - 5 + i * ((fw + 5) * 2 / 8), L = 30 + (i % 3) * 8; g.fillStyle = i % 2 ? hair : dark(hair, 0.15); g.beginPath(); g.roundRect ? g.roundRect(x - 2.4, -14, 4.8, L, 2.4) : g.rect(x - 2.4, -14, 4.8, L); g.fill(); g.strokeStyle = hd; g.lineWidth = 0.8; g.stroke(); for (let k = 0; k < L; k += 5) { g.beginPath(); g.moveTo(x - 2.4, -14 + k); g.lineTo(x + 2.4, -12 + k); g.stroke(); } } }
+      if (st === "mullet") { g.fillStyle = hair; g.beginPath(); g.moveTo(-fw + 2, 0); g.bezierCurveTo(-fw - 4, 16, -fw - 2, 30, -fw + 4, 36); g.lineTo(fw - 4, 36); g.bezierCurveTo(fw + 2, 30, fw + 4, 16, fw - 2, 0); g.closePath(); g.fill(); g.strokeStyle = hd; g.lineWidth = 1.2; g.stroke(); }
+      if (st === "wavy") { g.fillStyle = hair; g.beginPath(); g.moveTo(-fw - 4, -8); for (let y = -8; y <= 52; y += 8) g.quadraticCurveTo(-fw - 10 + ((y / 8) % 2) * 6, y + 4, -fw - 6 + ((y / 8) % 2) * 3, y + 8); g.lineTo(fw + 6, 60); for (let y = 52; y >= -8; y -= 8) g.quadraticCurveTo(fw + 10 - ((y / 8) % 2) * 6, y + 4, fw + 4, y); g.closePath(); g.fill(); g.strokeStyle = hd; g.lineWidth = 1.2; g.stroke(); }
+      if (st === "bob") { g.fillStyle = hair; g.beginPath(); g.moveTo(-fw - 5, -6); g.bezierCurveTo(-fw - 8, 10, -fw - 6, 22, -fw - 2, 24); g.lineTo(fw + 2, 24); g.bezierCurveTo(fw + 6, 22, fw + 8, 10, fw + 5, -6); g.closePath(); g.fill(); g.strokeStyle = hd; g.lineWidth = 1.2; g.stroke(); }
+      if (st === "messybun") { blob(0, -31, 10, 8); [[-8, -36, -0.6], [7, -37, 0.5], [0, -40, 0]].forEach(([x, y, r]) => { g.strokeStyle = hair; g.lineWidth = 2; g.beginPath(); g.moveTo(x * 0.4, -33); g.quadraticCurveTo(x, y - 3, x * 1.3, y + 2 * Math.sign(r || 1)); g.stroke(); }); shine(-2, -33, 6, Math.PI * 1.1, Math.PI * 1.5); }
+      if (st === "topknot") { blob(0, -32, 6, 6); g.fillStyle = "#c83a3a"; g.fillRect(-4, -27.5, 8, 2.5); shine(-1, -33, 4, Math.PI * 1.1, Math.PI * 1.6); }
+      if (st === "spacebuns") { [-1, 1].forEach((sd) => { blob(sd * 15, -25, 8, 8); shine(sd * 15 - 2, -27, 5, Math.PI * 1.1, Math.PI * 1.5); }); }
+      if (st === "hood") { g.fillStyle = hair; g.beginPath(); g.moveTo(-fw - 10, 40); g.bezierCurveTo(-fw - 14, -36, fw + 14, -36, fw + 10, 40); g.closePath(); g.fill(); g.strokeStyle = hd; g.lineWidth = 1.3; g.stroke(); }
+    } else {
+      if (st === "pompadour") { g.fillStyle = hair; g.beginPath(); g.moveTo(-12, -16); g.bezierCurveTo(-16, -36, 10, -44, 16, -30); g.bezierCurveTo(18, -22, 8, -18, 4, -16); g.closePath(); g.fill(); g.strokeStyle = hd; g.lineWidth = 1.3; g.stroke(); shine(0, -24, 12, Math.PI * 1.15, Math.PI * 1.55); }
+      if (st === "undercut") { [-1, 1].forEach((sd) => { g.fillStyle = mix(hair, 0.55, c.skin || "#e0b48a"); g.globalAlpha = 0.85; g.fillRect(sd > 0 ? fw - 4 : -fw, -12, 4, 14); g.globalAlpha = 1; }); g.fillStyle = hair; g.beginPath(); g.moveTo(-12, -14); g.bezierCurveTo(-8, -32, 14, -32, 16, -16); g.lineTo(6, -18); g.closePath(); g.fill(); g.strokeStyle = hd; g.lineWidth = 1.2; g.stroke(); }
+      if (st === "sidebraid") braid(15, -6, 21, 44, 8, 4.6);
+      if (st === "braids") { braid(-17, -2, -20, 42, 7, 4.2); braid(17, -2, 20, 42, 7, 4.2); [-20, 20].forEach((x) => { g.fillStyle = "#ffd23f"; g.fillRect(x - 3, 44, 6, 3); }); }
+      if (st === "twintails") { [-1, 1].forEach((sd) => { g.fillStyle = hair; g.beginPath(); g.moveTo(sd * 15, -16); g.bezierCurveTo(sd * 34, -14, sd * 32, 18, sd * 24, 38); g.bezierCurveTo(sd * 22, 18, sd * 22, 2, sd * 13, -8); g.closePath(); g.fill(); g.strokeStyle = hd; g.lineWidth = 1.2; g.stroke(); g.fillStyle = "#ff8fb8"; g.beginPath(); g.arc(sd * 16, -15, 3, 0, 7); g.fill(); }); }
+      if (st === "side") { g.fillStyle = hair; g.beginPath(); g.moveTo(-fw, -6); g.bezierCurveTo(-8, -22, 10, -22, fw + 1, -10); g.lineTo(fw - 2, -4); g.bezierCurveTo(6, -14, -6, -12, -fw + 2, 2); g.closePath(); g.fill(); g.strokeStyle = hd; g.lineWidth = 1.1; g.stroke(); }
+      if (st === "ordinato") { g.strokeStyle = hd; g.lineWidth = 1.2; g.beginPath(); g.moveTo(-6, -24); g.quadraticCurveTo(-7, -18, -9, -12); g.stroke(); shine(2, -16, 12, Math.PI * 1.15, Math.PI * 1.5); }
+      if (st === "bandana") { g.fillStyle = "#c83a3a"; g.beginPath(); g.moveTo(-fw - 2, -10); g.quadraticCurveTo(0, -18, fw + 2, -10); g.lineTo(fw + 2, -5); g.quadraticCurveTo(0, -13, -fw - 2, -5); g.closePath(); g.fill(); g.strokeStyle = dark("#c83a3a", 0.5); g.lineWidth = 1; g.stroke(); g.beginPath(); g.moveTo(fw, -9); g.lineTo(fw + 9, -3); g.lineTo(fw + 5, 1); g.closePath(); g.fill(); g.stroke(); g.fillStyle = "#fff"; [[-8, -11], [0, -13], [8, -11]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 0.9, 0, 7); g.fill(); }); }
+      if (st === "elmo") { g.fillStyle = "#9aa0ac"; g.beginPath(); g.moveTo(-fw - 4, -2); g.bezierCurveTo(-fw - 5, -32, fw + 5, -32, fw + 4, -2); g.closePath(); g.fill(); g.strokeStyle = "#4a505c"; g.lineWidth = 1.3; g.stroke(); g.fillStyle = "#c8a040"; g.fillRect(-2, -36, 4, 14); g.fillStyle = "#6a707c"; g.fillRect(-fw - 4, -6, 2 * fw + 8, 4); }
+      if (st === "dread") { for (let i = 0; i < 4; i++) { const x = -9 + i * 6; g.fillStyle = hair; g.beginPath(); g.roundRect ? g.roundRect(x - 2, -20, 4, 12 + (i % 2) * 4, 2) : g.rect(x - 2, -20, 4, 14); g.fill(); g.strokeStyle = hd; g.lineWidth = 0.8; g.stroke(); } }
+      if (st === "curly") { for (let i = 0; i < 5; i++) blob(-12 + i * 6, -14 + (i % 2) * 2, 4, 3.6); }
+    }
+    g.restore();
+  }
+  const withHair = (fn) => function (g, id, c, expr, real) {
+    const st0 = HALIAS[c.style] || c.style, base = HBASE[st0];
+    if (!base) return fn(g, id, c, expr, real);
+    if (!c.cap) hairOver(g, st0, c, "back");
+    fn(g, id, Object.assign({}, c, { style: base }), expr, real);
+    if (!c.cap || st0 === "sidebraid" || st0 === "braids" || st0 === "twintails") hairOver(g, st0, c, "front");
+  };
+  const anime = withHair(anime0), cartoon = withHair(cartoon0), comic = withHair(comic0);
   // ---------------------------------------------------------------- stile CARTONE ANIMATO (forme esagerate, linee spesse, ombre a due toni, tanti dettagli)
-  function cartoon(g, id, c, expr) {
+  function cartoon0(g, id, c, expr) {
     const h = hash(fid(id, c) + "#toon"), b = (n, k) => (h >>> n) % k, T = traits(id, c);
     const skin = c.skin || "#e0b48a", hair = c.hair || "#2b1d14", eyeC = c.eye || "#3a2a1a", shirt = c.shirt || (c.bg && c.bg[1]) || "#3f5fbf", st = c.style || "messy";
     const ink = dark(skin, 0.78), sk2 = mix(skin, 0.24, "#7a3a4a"), sk3 = lite(skin, 0.28), hd = dark(hair, 0.42), hl = lite(hair, 0.4), sh2 = dark(shirt, 0.3), sh3 = lite(shirt, 0.22);
@@ -323,7 +370,7 @@
     acc(g, c, "head", AG, ink);
   }
   // ---------------------------------------------------------------- stile FUMETTO «linea chiara» (contorni neri netti, colori pieni, facce da caratterista)
-  function comic(g, id, c, expr) {
+  function comic0(g, id, c, expr) {
     const T = traits(id, c), h = hash(fid(id, c) + "*"), b = (n, k) => (h >>> n) % k;
     const skin = c.skin || "#e0b48a", hair = c.hair || "#2b1d14", shirt = c.shirt || (c.bg && c.bg[1]) || "#3f5fbf", K = "#14100e", st = c.style || "messy";
     const fw = 15 + b(0, 5), fh = 21 + b(3, 5), jaw = b(6, 3), noseT = b(8, 4), eyeT = b(10, 3), ears = 3 + b(12, 2);
@@ -462,6 +509,6 @@
   window.__faceStyles = {
     list: [["classic", "Classico"], ["anime", "Anime"], ["pixel", "Pixel 16-bit"], ["comic", "Fumetto"], ["manga", "Manga"], ["acquerello", "Acquerello"], ["illustrato", "Illustrato"], ["cartone", "Cartone animato"]],
     draw(style, g, id, c, expr) { if (!c || !c.skin) return false; if (c.cap && typeof c.cap !== "string") c = Object.assign({}, c, { cap: "#1d3fa3" }); g.save(); try { if (style === "anime") anime(g, id, c, expr); else if (style === "illustrato") anime(g, id, c, expr, true); else if (style === "cartone") cartoon(g, id, c, expr); else if (style === "comic") comic(g, id, c, expr); else if (style === "manga") manga(g, id, c, expr); else if (style === "acquerello") acquerello(g, id, c, expr); else if (style === "pixel") pixel(g, id, c, expr); else { g.restore(); return false; } } catch (e) { g.restore(); return false; } g.restore(); return true; },
-    traits, acc, // acc(g, c, part, G, ink): i cosmetici negli stili alternativi (anche per gli stili di portrait-styles2 e portrait-dicebear)
+    traits, acc, HBASE, hairOver, // acc(g, c, part, G, ink): i cosmetici negli stili alternativi (anche per gli stili di portrait-styles2 e portrait-dicebear)
   };
 })();

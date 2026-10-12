@@ -1043,6 +1043,17 @@
     if (c.style === "bandana") { g.beginPath(); g.ellipse(0, -11, 22, 14, 0, Math.PI, 0); g.fill(); px(-22, -14, 44, 6, "#c83a3a"); g.fillStyle = "#c83a3a"; g.beginPath(); g.moveTo(20, -12); g.lineTo(30, -4); g.lineTo(26, -14); g.closePath(); g.fill(); }
     if (c.style === "elmo") { g.fillStyle = "#8a8a9a"; g.beginPath(); g.ellipse(0, -10, 24, 18, 0, Math.PI, 0); g.fill(); px(-24, -12, 48, 5, "#6a6a7a"); px(-2, -30, 4, 18, "#c8a040"); g.fillStyle = c.hair; }
     if (c.style === "braids") { g.beginPath(); g.ellipse(0, -10, 22, 15, 0, Math.PI, 0); g.fill(); [-1, 1].forEach((d) => { for (let k = 0; k < 5; k++) { g.beginPath(); g.arc(d * 21, -2 + k * 8, 4.5, 0, 7); g.fill(); } px(d * 21 - 3, 36, 6, 3, "#ffd23f"); }); }
+    // acconciature nuove (sbloccabili): afro, dreadlock, undercut, ciuffo anni '50, mullet, onde lunghe, chignon spettinato, crocchia, treccia di lato, due chignon
+    const cap0 = c.style === "afro" ? [0, -10, 30, 26] : null; if (cap0) { g.beginPath(); g.ellipse(cap0[0], cap0[1], cap0[2], cap0[3], 0, 0, 7); g.fill(); for (let i = 0; i < 12; i++) { const a2 = (i / 12) * Math.PI * 2; g.beginPath(); g.arc(Math.cos(a2) * 27, -10 + Math.sin(a2) * 23, 6, 0, 7); g.fill(); } g.fillStyle = c.skin; g.beginPath(); g.ellipse(0, 6, 19, 22, 0, 0, 7); g.fill(); g.fillStyle = c.hair; g.beginPath(); g.ellipse(0, -12, 20, 9, 0, Math.PI, 0); g.fill(); }
+    if (c.style === "dread") { g.beginPath(); g.ellipse(0, -11, 23, 15, 0, Math.PI, 0); g.fill(); [-26, -21, -16, 13, 18, 23].forEach((x0, i) => { px(x0, -12, 4, 30 + (i % 3) * 8, c.hair); px(x0, -6, 4, 1, "rgba(0,0,0,.25)"); px(x0, 2, 4, 1, "rgba(0,0,0,.25)"); px(x0, 10, 4, 1, "rgba(0,0,0,.25)"); }); for (let i = 0; i < 4; i++) px(-9 + i * 6, -14, 4, 7 + (i % 2) * 3, c.hair); }
+    if (c.style === "undercut") { g.beginPath(); g.ellipse(2, -14, 20, 13, 0, Math.PI, 0); g.fill(); px(-21, -10, 4, 10, c.hair + "66"); px(17, -10, 4, 10, c.hair + "66"); g.beginPath(); g.moveTo(-14, -16); g.quadraticCurveTo(-6, -30, 16, -22); g.lineTo(8, -16); g.closePath(); g.fill(); }
+    if (c.style === "pompadour") { g.beginPath(); g.ellipse(0, -12, 22, 13, 0, Math.PI, 0); g.fill(); g.beginPath(); g.moveTo(-14, -18); g.bezierCurveTo(-16, -40, 14, -46, 18, -28); g.bezierCurveTo(16, -20, 6, -18, 2, -18); g.closePath(); g.fill(); px(-6, -34, 10, 2, "rgba(255,255,255,.2)"); }
+    if (c.style === "mullet") { g.beginPath(); g.ellipse(0, -12, 23, 15, 0, Math.PI, 0); g.fill(); for (let i = 0; i < 4; i++) { g.beginPath(); g.arc(-15 + i * 10, -14, 6, 0, 7); g.fill(); } px(-22, -8, 7, 34, c.hair); px(15, -8, 7, 34, c.hair); }
+    if (c.style === "wavy") { g.beginPath(); g.ellipse(0, -10, 25, 19, 0, Math.PI, 0); g.fill(); [-1, 1].forEach((d) => { for (let k = 0; k < 6; k++) { g.beginPath(); g.arc(d * (23 + (k % 2) * 3), -6 + k * 8, 5, 0, 7); g.fill(); } }); }
+    if (c.style === "messybun") { g.beginPath(); g.ellipse(0, -12, 22, 14, 0, Math.PI, 0); g.fill(); g.beginPath(); g.arc(0, -29, 10, 0, 7); g.fill(); g.lineWidth = 2; g.strokeStyle = c.hair; [[-8, -40], [9, -40], [0, -44]].forEach(([x2, y2]) => { g.beginPath(); g.moveTo(0, -32); g.quadraticCurveTo(x2, y2, x2 * 1.4, y2 + 6); g.stroke(); }); px(-22, -12, 5, 12, c.hair); }
+    if (c.style === "topknot") { g.beginPath(); g.ellipse(0, -11, 21, 14, 0, Math.PI, 0); g.fill(); g.beginPath(); g.arc(0, -29, 7, 0, 7); g.fill(); px(-4, -24, 8, 3, "#c83a3a"); }
+    if (c.style === "sidebraid") { g.beginPath(); g.ellipse(0, -11, 22, 14, 0, Math.PI, 0); g.fill(); for (let k = 0; k < 7; k++) { g.beginPath(); g.arc(20 + k * 0.8, -4 + k * 7, 5 - k * 0.3, 0, 7); g.fill(); } px(22, 44, 6, 3, "#ffd23f"); }
+    if (c.style === "spacebuns") { g.beginPath(); g.ellipse(0, -12, 22, 14, 0, Math.PI, 0); g.fill(); [-1, 1].forEach((d) => { g.beginPath(); g.arc(d * 16, -24, 8, 0, 7); g.fill(); }); }
     const capV = c.cap || (c.acc === "cappellino" ? "#ffd23f" : c.acc === "berretto" ? "#26324a" : null); // il cappello vale anche dove il campione è ricostruito senza «cap»
     if (capV) { const cc = typeof capV === "string" ? capV : "#1d3fa3"; g.fillStyle = cc; g.beginPath(); g.ellipse(0, -13, 23, 13, 0, Math.PI, 0); g.fill(); px(-2, -15, 30, 4, cc); px(-4, -24, 8, 3, "#ffffff55"); }
     const blink = (frame + id.length * 17) % 180 < 6;
@@ -3896,6 +3907,17 @@
     pistacchio:{ kind: "hairc", label: "Capelli Verde pistacchio", val: "#8fc46a", from: "Inventa un gusto con Tonino" },
     codino:    { kind: "style", label: "Taglio a codino", val: "codino", from: "Porta le acciughe alla Nonna" },
     cresta:    { kind: "style", label: "Taglio a cresta", val: "cresta", from: "Vinci la partitella al campo" },
+    // acconciature delle saghe: si sbloccano finendo la saga (anche se l'hai finita prima che esistessero: vedi hairUnlocks)
+    hs_afro: { kind: "style", label: "Taglio afro", val: "afro", from: "Finisci la saga «Il Torneo delle Cento Scuole» (un finale qualsiasi)" },
+    hs_dread: { kind: "style", label: "Taglio dreadlock", val: "dread", from: "Finisci la saga «Dopo il Campione» (un finale qualsiasi)" },
+    hs_undercut: { kind: "style", label: "Taglio undercut", val: "undercut", from: "Finisci la saga «Calcio Spaziale» (un finale qualsiasi)" },
+    hs_pompadour: { kind: "style", label: "Taglio a ciuffo anni '50", val: "pompadour", from: "Finisci la saga «Il Mantello Granata» (un finale qualsiasi)" },
+    hs_mullet: { kind: "style", label: "Taglio mullet anni '80", val: "mullet", from: "Finisci la saga «Stagione Infinita» (un finale qualsiasi)" },
+    hs_wavy: { kind: "style", label: "Taglio a onde lunghe", val: "wavy", from: "Finisci la saga «Le Cronache del Pallone di Cristallo» (un finale qualsiasi)" },
+    hs_messybun: { kind: "style", label: "Taglio a chignon spettinato", val: "messybun", from: "Finisci la saga «La Valle del Vento Gentile» (un finale qualsiasi)" },
+    hs_topknot: { kind: "style", label: "Taglio a crocchia del samurai", val: "topknot", from: "Finisci la saga «Il Torneo dei Mondi» (un finale qualsiasi)" },
+    hs_sidebraid: { kind: "style", label: "Taglio a treccia da cavaliere", val: "sidebraid", from: "Finisci la saga «Il Trono di Cuoio» (un finale qualsiasi)" },
+    hs_spacebuns: { kind: "style", label: "Taglio a due chignon", val: "spacebuns", from: "Finisci la saga «La Notte dei Lampioni» (un finale qualsiasi)" },
     bandana:   { kind: "acc", label: "Bandana di Dario", val: "bandana", from: "Trova il nascondiglio segreto" },
     fascia:    { kind: "acc", label: "Fascia da capitano", val: "fascia", from: "Batti gli Squali di Rocco" },
     cappellino:{ kind: "acc", label: "Cappellino da spiaggia", val: "cappellino", from: "Vinci il beach soccer" },
@@ -4160,6 +4182,16 @@
     if (c.style === "bandana") px(x - 5, y - 21, 10, 2, "#c83a3a");
     if (c.style === "elmo") { px(x - 6, y - 25, 12, 4, "#8a8a9a"); px(x - 1, y - 28, 2, 3, "#c8a040"); }
     if (c.style === "lungo" || c.style === "flowing") { px(x - 6, y - 22, 2, 9, hair); px(x + 4, y - 22, 2, 9, hair); }
+    if (c.style === "afro") { px(x - 7, y - 26, 14, 6, hair); px(x - 8, y - 23, 2, 5, hair); px(x + 6, y - 23, 2, 5, hair); }
+    if (c.style === "dread") { for (let i = 0; i < 4; i++) px(x - 7 + i * 4, y - 22, 2, 10 + (i % 2) * 2, hair); }
+    if (c.style === "undercut") { px(x - 4, y - 25, 9, 2, hair); }
+    if (c.style === "pompadour") { px(x - 4, y - 26, 8, 3, hair); px(x - 2, y - 27, 5, 1, hair); }
+    if (c.style === "mullet") { px(x - 6, y - 22, 2, 8, hair); px(x + 4, y - 22, 2, 8, hair); if (dir === "up") px(x - 4, y - 14, 8, 3, hair); }
+    if (c.style === "wavy") { px(x - 7, y - 22, 3, 11, hair); px(x + 4, y - 22, 3, 11, hair); }
+    if (c.style === "messybun") { px(x - 3, y - 27, 6, 4, hair); px(x + 3, y - 28, 1, 2, hair); px(x - 4, y - 28, 1, 2, hair); }
+    if (c.style === "topknot") { px(x - 2, y - 27, 4, 4, hair); px(x - 2, y - 24, 4, 1, "#c83a3a"); }
+    if (c.style === "sidebraid") { px(dir === "left" ? x - 7 : x + 5, y - 22, 2, 12, hair); }
+    if (c.style === "spacebuns") { px(x - 7, y - 26, 4, 4, hair); px(x + 3, y - 26, 4, 4, hair); }
     const capV = c.cap || (SA.includes("cappellino") ? "#ffd23f" : SA.includes("berretto") ? "#26324a" : null);
     if (capV) { const cc = typeof capV === "string" ? capV : "#1d3fa3"; px(x - 5, y - 24, 10, 3, cc); if (dir !== "up") px(dir === "left" ? x - 8 : x - 2, y - 22, dir === "down" ? 0 : 6, 2, cc); }
     if (SA.includes("bandana")) px(x - 5, y - 21, 10, 2, "#d62a2a");
@@ -5084,7 +5116,12 @@
 
   // ================= CREA IL TUO CAMPIONE =================
   const HERO = "ali-di-rondine.campione";
-  const H_STYLES = { spiky: "Spettinati", messy: "Ribelli", buzz: "Rasati", slick: "Tirati indietro", long: "Lunghi", bun: "Chignon" };
+  const H_STYLES = { spiky: "Spettinati", messy: "Ribelli", buzz: "Rasati", slick: "Tirati indietro", long: "Lunghi", bun: "Chignon", bob: "Caschetto", ponytail: "Coda", twintails: "Codini", braids: "Trecce", curly: "Ricci", side: "Riga di lato", ordinato: "Ordinati", bandana: "Bandana" };
+  // le acconciature delle saghe: finire una saga (almeno un finale) sblocca la sua acconciatura nel guardaroba
+  const HAIR_SAGA = { hs_afro: "torneo", hs_dread: "dopo", hs_undercut: "spazio", hs_pompadour: "mantello", hs_mullet: "stagione", hs_wavy: "cronache", hs_messybun: "vento", hs_topknot: "mondi", hs_sidebraid: "trono", hs_spacebuns: "lampioni" };
+  function hairUnlocks() {
+    Object.keys(HAIR_SAGA).forEach((id) => { try { const m = JSON.parse(localStorage.getItem("ali-di-rondine." + HAIR_SAGA[id]) || "null"); if (m && Array.isArray(m.ends) && m.ends.length && COSM[id] && bCos(id) && window.toast) window.toast("Nuova acconciatura: " + COSM[id].label.replace(/^Taglio (a )?/, ""), "info", "✂️"); } catch {} });
+  }
   const H_HAIR = { "#2b1d14": "Castano", "#111111": "Nero", "#e8d08a": "Biondo", "#b8452a": "Rosso", "#9a9a9a": "Grigio" };
   const H_EYE = { "#2a1a0a": "Castano scuro", "#5a3818": "Nocciola", "#2563eb": "Azzurro", "#0284c7": "Celeste", "#16a34a": "Verde smeraldo", "#15803d": "Verde scuro", "#475569": "Grigio", "#111827": "Nero", "#d97706": "Ambra", "#9333ea": "Viola" };
   const H_SKIN = ["#f5d6b8", "#f2c9a0", "#e0ac7e", "#b9804f", "#8a5a3a"];
@@ -5141,6 +5178,7 @@
   // --- editor ---
   let HE = null;
   function heroEditor(back) {
+    hairUnlocks();
     HE = { h: heroLoad() || heroDefault(), back: back || extras };
     heroCast(HE.h);
     view = { kind: "scene", bg: "title", speaker: "hero", chibi: true }; chap("Crea il tuo campione");
@@ -11579,6 +11617,12 @@
     if (base.style === "spiky") { px(-5, -30 + by, 2, 2, hair); px(-1, -31 + by, 2, 3, hair); px(3, -30 + by, 2, 2, hair); }
     if (base.style === "messy") { px(-6, -29 + by, 3, 3, hair); px(3, -29 + by, 3, 3, hair); }
     if (base.style === "cresta") px(-1, -32 + by, 3, 5, hair);
+    if (base.style === "afro") { g.fillStyle = hair; g.beginPath(); g.ellipse(0, -26 + by, 9, 7, 0, 0, 7); g.fill(); g.fillStyle = skin; g.beginPath(); g.ellipse(0, -21.5 + by, 5.2, 4.6, 0, 0, Math.PI); g.fill(); }
+    if (base.style === "long" || base.style === "wavy" || base.style === "dread" || base.style === "mullet") { px(-6, -27 + by, 2, 10, hair); px(4, -27 + by, 2, 10, hair); }
+    if (base.style === "pompadour") { px(-4, -31 + by, 8, 3, hair); }
+    if (base.style === "messybun" || base.style === "topknot") px(-2, -32 + by, 4, 4, hair);
+    if (base.style === "spacebuns") { px(-7, -30 + by, 4, 4, hair); px(3, -30 + by, 4, 4, hair); }
+    if (base.style === "sidebraid") px(5, -24 + by, 2, 11, hair);
     if (base.cap) px(-5, -29 + by, 10, 3, typeof base.cap === "string" ? base.cap : "#1d3fa3");
     if (o.catEars) { g.fillStyle = hair; g.beginPath(); g.moveTo(-5, -28 + by); g.lineTo(-4, -33 + by); g.lineTo(-1, -28 + by); g.fill(); g.beginPath(); g.moveTo(1, -28 + by); g.lineTo(4, -33 + by); g.lineTo(5, -28 + by); g.fill(); }
     if (o.back) px(-5, -27 + by, 10, 8, hair);
@@ -25789,6 +25833,7 @@
     buttons([{ label: "🎮 Partita a turni", sub: "Scegli le mosse una alla volta", cls: "hot", fn: () => apiMatch(cfg) }, ...alts.map((k) => kinds[k])]);
   }
   window.__borgoApi = { match: apiMatch, matchPick: apiMatchPick, timing: bTiming, play, chap, scene: (bg, who, html, opts, title) => { view = { kind: "scene", bg, speaker: who }; if (title) chap(title); text(who || "voce", html); buttons(opts, true); }, portraitImg, TRZ, MN_BORGO_BTN, CAST, BIO, seeCard, trGo, trAsk, trSay, trResume, L, trToast, TR_IDS, NPCS, trLevel, trZone: () => (TW ? TW.id : null), trPos: () => (TW ? [TW.x, TW.y] : null), trTileAt: (tx, ty) => (TW && TW.map && TW.map[ty] ? TW.map[ty][tx] || null : null), trKeys: () => (BW && BW.keys) || {}, cardsSeen: () => getList(CARDS), encHas: (id) => { try { return ENC_CATS.some((c) => c.members.includes(id)); } catch { return false; } }, encOpen: (id, back) => { try { if (!ENC_CATS.some((c) => c.members.includes(id))) return false; borgoEncyclopedia(back, undefined, id); return true; } catch { return false; } }, trFace: (d) => { if (TW) TW.dir = d; }, trExitTo, trRec, todayKey, hq: HQ_API, COSM, bCos, cosOwned: () => { try { return cosOwned(); } catch { return []; } }, heroSave: (h) => { writeJSON(HERO, h); heroCast(h); }, heroCast, storyEndings: () => { const got = getList(ENDS); return ENDINGS.map(([t, grp, hint]) => ({ title: t, group: grp, hint, found: got.includes(t) })); }, coins: () => bCoins(), openBorgoStorto: (back) => openBorgoStorto(back), cosOrder: () => { try { return ((B || borgoLoad()).cos || []).slice(); } catch { return []; } }, musicTheme, musicBg, musicNow: () => MU.cur, portraitTo: (ctx, id, x, y, sc) => { const main = g, sp = view.speaker; try { g = ctx; view.speaker = null; portrait(id, x, y, sc, false); } finally { g = main; view.speaker = sp; } } };
+  try { hairUnlocks(); } catch {} // chi ha già finito delle saghe trova subito le loro acconciature
   if (/[?&]debug/.test(location.search)) window.__borgoDbg = { get BW() { return BW; }, get B() { return B; }, BLD, borgo, borgoMap, borgoDoor, borgoOpenLevel };
   try { if (window.__storyNav && window.__storyNav.seedFromSaveState) window.__storyNav.seedFromSaveState(S); } catch {}
   title();
