@@ -22,7 +22,7 @@
         const D = S.data;
         // inerzia: ogni giocatore tiene la velocità del fotogramma prima e scivola
         S.all().forEach((p) => {
-          if (p.gk) { p.lx = p.x; p.ly = p.y; return; }
+          if (p.gk || (p.slide | 0) > 0) { p.lx = p.x; p.ly = p.y; return; } // la scivolata del contrasto non scivola: va dritta
           let dx = p.x - p.lx, dy = p.y - p.ly; const k = p === S.hero ? 0.06 : 0.09;
           if (p === S.hero && D.ang > Math.PI / 2 && (dx || dy)) { dx = -dx; dy = -dy; p.x = p.lx + dx; p.y = p.ly + dy; if (p.dir != null) p.dir += Math.PI; } // comandi dello schermo, anche a testa in giù
           p.vx = p.vx * (1 - k) + dx * k * 1.15; p.vy = p.vy * (1 - k) + dy * k * 1.15;

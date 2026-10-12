@@ -112,6 +112,38 @@ async function diff(w) {
   await page.evaluate(() => window.__sagaCore.pitchState.finish()); await page.waitForTimeout(200); await leave(page); await page.waitForTimeout(300);
   L.check(`Difficoltà Sfida e carattere degli avversari (${w} px)`, errors); await browser.close();
 }
+// i comandi nuovi del kit di partita: tiro caricato, a effetto, pallonetto, dai e vai, compagno guidato
+async function comandi(w) {
+  const { browser, page, errors } = await L.setup({ w, ...MOD });
+  await page.evaluate(() => window.__spazio.open()); await page.evaluate(() => window.T_.click("Inizia la storia")); await L.advance(page);
+  const start = async () => { await K(page, "K.ownMatch(window.__gravita.start, { title: 'prova', flips: false, done: () => {} })"); await page.waitForTimeout(400); await leave(page); await page.waitForTimeout(300); };
+  const S = (fn) => page.evaluate(new Function("return (function (S) { " + fn + " })(window.__sagaCore.pitchState)"));
+  await start();
+  const give = "S.ball.own = S.hero; S.ball.cd = 0; S.hero.y = S.WH / 2; S.opp.forEach((q) => { q.x = 30; q.y = 40; q.stun = 400; });";
+  // tiro a effetto: carica e tieni la levetta di lato
+  await S(give + " S.press('tira'); S.ptr = { ax: 100, ay: 200, x: 130, y: 200 };"); await page.waitForTimeout(500);
+  const cv = await S("S.release('tira'); const r = S.ball.curve; S.ptr = null; return r;"); if (!(Math.abs(cv) > 0.05)) errors.push("tiro a effetto senza effetto: " + cv);
+  // pallonetto: levetta indietro
+  await page.waitForTimeout(300); await S(give + " S.press('tira'); S.ptr = { ax: 100, ay: 200, x: 100, y: 230 };"); await page.waitForTimeout(500);
+  const vz = await S("S.release('tira'); S.ptr = null; return S.ball.vz;"); if (!(vz > 3)) errors.push("pallonetto troppo basso: " + vz);
+  // dai e vai: PASSA tenuto con la palla
+  await page.waitForTimeout(300); await S(give + " S.mate.x = S.hero.x + 30; S.mate.y = S.hero.y - 40; S.press('passa');"); await page.waitForTimeout(600);
+  const dv = await S("const r = [S.fx.some((f) => f.txt === 'DAI E VAI!')]; S.release('passa'); return r;"); if (!dv[0]) errors.push("il dai e vai non è partito");
+  // compagno guidato: PASSA tenuto senza palla
+  await S("S.ball.own = S.opp[0]; S.opp[0].stun = 0; S.press('passa');"); await page.waitForTimeout(400);
+  const m0 = await S("S.ptr = { ax: 100, ay: 200, x: 100, y: 170 }; return [S.mate.y, S.hero.y, !!(S.ph && S.ph.ctrl)];"); await page.waitForTimeout(500);
+  const m1 = await S("const r = [S.mate.y, S.hero.y]; S.ptr = null; S.release('passa'); return r;");
+  if (!m0[2] || !(m1[0] < m0[0] - 10) || Math.abs(m1[1] - m0[1]) > 6) errors.push("il compagno non si guida: " + JSON.stringify([m0, m1]));
+  // contrasto: senza palla, avversario vicino → il pulsante diventa CONTRASTO e la scivolata ruba il pallone
+  await S("S.opp.forEach((q) => { q.stun = 0; }); const q = S.opp[0]; S.ball.own = q; S.ball.cd = 0; q.x = S.hero.x; q.y = S.hero.y - 30; S.ph = null; S.chg = null;"); await page.waitForTimeout(200);
+  const lb = await page.evaluate(() => document.querySelector(".scPitch .tira").textContent); if (lb !== "CONTRASTO") errors.push("senza palla il pulsante non dice CONTRASTO: " + lb);
+  if (w === 390) await L.shot(page, "so_contrasto");
+  await page.evaluate(() => { window.__rnd = Math.random; Math.random = () => 0.1; }); await S("S.hero.stun = 0; S.ball.own = S.opp[0]; S.opp[0].x = S.hero.x; S.opp[0].y = S.hero.y - 20; S.press('tira');"); await page.waitForTimeout(450);
+  const tk = await S("Math.random = window.__rnd; return [S.ball.own === S.hero, S.data.tackles | 0];"); if (!tk[0] || tk[1] < 1) errors.push("il contrasto non ruba il pallone: " + JSON.stringify(tk));
+  if (w === 390) await L.shot(page, "so_comandi");
+  await S("S.finish();"); await page.waitForTimeout(200); await leave(page);
+  L.check(`Comandi nuovi delle partite del kit (${w} px)`, errors); await browser.close();
+}
 async function vere(w) {
   for (const alt of ["az", "cage", "hd"]) {
     const { browser, page, errors } = await L.setup({ w, ...MOD });
@@ -122,4 +154,4 @@ async function vere(w) {
     L.check(`Partita vera del gioco avviata da una saga: ${alt} (${w} px)`, errors); await browser.close();
   }
 }
-(async () => { await c1(390); await c1(320); await c2(390); await c2(320); await c3(390); await c3(320); await vere(390); await diff(390); await diff(320); })().catch((e) => { console.error("✗ spazio:", e.message); process.exit(1); });
+(async () => { await c1(390); await c1(320); await c2(390); await c2(320); await c3(390); await c3(320); await vere(390); await diff(390); await diff(320); await comandi(390); await comandi(320); })().catch((e) => { console.error("✗ spazio:", e.message); process.exit(1); });

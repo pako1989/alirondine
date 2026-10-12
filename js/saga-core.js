@@ -824,15 +824,58 @@
       kick(p, Math.cos(ang) * sp, Math.sin(ang) * sp, d > 120); S.ball.shot = -1; S.ball.passTo = q; if (p.team === 0) S.pass++;
     }
     S.shoot = shoot; S.passTo = passTo; S.moveTo = moveTo; S.speedOf = speedOf;
-    function act(kind) {
+    // COMANDI: un tocco = come sempre. TIRA tenuto premuto carica il tiro: levetta di lato = tiro a effetto, levetta indietro = pallonetto.
+    // PASSA tenuto premuto: con la palla = dai e vai (il compagno te la ridà); senza palla = guidi il compagno con la levetta.
+    const joy = () => { if (S.ptr) { const jx = S.ptr.x - S.ptr.ax, jy = S.ptr.y - S.ptr.ay; return [Math.abs(jx) > 8 ? Math.sign(jx) : 0, Math.abs(jy) > 8 ? Math.sign(jy) : 0]; } return [(S.keys.ArrowRight ? 1 : 0) - (S.keys.ArrowLeft ? 1 : 0), (S.keys.ArrowDown ? 1 : 0) - (S.keys.ArrowUp ? 1 : 0)]; };
+    function act(kind) { press(kind); release(kind); } // compatibilità: un tocco secco
+    function press(kind) {
       if (!S.run) return;
       if (H.act && safe(() => H.act(S, kind), false)) return;
       const b = S.ball, h = S.hero;
-      if (kind === "tira") { if (b.own === h) shoot(h, 7.4, CX + (h.x - CX) * 0.2 + (S.ptr ? (S.ptr.x - S.ptr.ax) * 0.8 : 0)); else if (b.own === S.mate) shoot(S.mate, 6.8, CX); else { h.dash = 18; pop("SCATTO!", h.x, h.y - 12, "#7ac8ff"); } }
-      else if (kind === "passa") { if (b.own === h) passTo(h, S.mate); else if (b.own === S.mate) passTo(S.mate, h); else { S.mate.call = 50; pop("QUI!", S.mate.x, S.mate.y - 12, "#7ac8ff"); } }
+      if (kind === "tira") {
+        if (b.own === h) S.chg = { t: 0 };
+        else if (b.own === S.mate) shoot(S.mate, 6.8, CX);
+        else if ((h.slide | 0) <= 0 && !stunned(h) && Math.hypot(b.x - h.x, b.y - h.y) < 60) { h.slide = 16; h.dir = Math.atan2(b.y - h.y, b.x - h.x); pop("CONTRASTO!", h.x, h.y - 12, "#ff8a3d"); S.tone(160, 0.12, "sawtooth", 0.05); } // scivolata sul pallone
+        else { h.dash = 18; pop("SCATTO!", h.x, h.y - 12, "#7ac8ff"); }
+      }
+      else if (kind === "passa") { if (b.own === S.mate) { passTo(S.mate, h); return; } S.ph = { t: 0, ball: b.own === h }; }
     }
+    function release(kind) {
+      const b = S.ball, h = S.hero;
+      if (kind === "tira" && S.chg) {
+        const t = S.chg.t; S.chg = null; if (!S.run || b.own !== h) return;
+        const [jx, jy] = joy(), power = t < 8 ? 7.4 : 6.2 + Math.min(1, t / 40) * 3.4;
+        if (t >= 8 && jy > 0) { shoot(h, 5.4, CX); b.vz = 4.4; b.z = 0.5; pop("PALLONETTO!", h.x, h.y - 24, "#ffd23f"); }
+        else if (t >= 8 && jx) { shoot(h, power, CX - jx * 18); b.curve = jx * 0.11; pop("A EFFETTO!", h.x, h.y - 24, "#ffd23f"); }
+        else { shoot(h, power, CX + (h.x - CX) * 0.2 + (S.ptr ? (S.ptr.x - S.ptr.ax) * 0.8 : 0)); if (t >= 30) { S.shake = 6; pop("BOLIDE!", h.x, h.y - 24, "#ff8a3d"); } }
+      }
+      if (kind === "passa" && S.ph) {
+        const ph = S.ph; S.ph = null; if (!S.run) return;
+        if (ph.ball && !ph.done && b.own === h) passTo(h, S.mate);
+        else if (!ph.ball && !ph.ctrl) { S.mate.call = 50; pop("QUI!", S.mate.x, S.mate.y - 12, "#7ac8ff"); }
+      }
+    }
+    function holdTick() {
+      const b = S.ball, h = S.hero;
+      if (h.slide > 0) { // la scivolata: veloce verso il pallone; se lo tocchi lo rubi, se no resti a terra un momento
+        h.slide--; const sp = speedOf(h) * 2.3; step(h, h.x + Math.cos(h.dir) * sp, h.y + Math.sin(h.dir) * sp);
+        if (Math.hypot(b.x - h.x, b.y - h.y) < 11 && b.own !== h) {
+          const owner = b.own, pr = !owner ? 1 : owner.gk ? 0.15 : Math.max(0.35, Math.min(0.92, 0.75 / DF.steal));
+          if (Math.random() < pr) { if (owner) { owner.stun = 30; } b.own = h; b.cd = 14; b.passTo = null; b.curve = 0; h.slide = 0; pop("PRESA!", h.x, h.y - 14, "#4fd1a5"); S.data.tackles = (S.data.tackles | 0) + 1; }
+          else { h.slide = 0; h.stun = 20; pop("SALTATO!", h.x, h.y - 14, TH.ink); }
+        } else if (h.slide === 0) { h.stun = 18; pop("A VUOTO", h.x, h.y - 14, TH.ink); }
+      }
+      if (S.chg) { S.chg.t++; if (b.own !== h) S.chg = null; else if (S.chg.t >= 50) release("tira"); }
+      if (S.ph) {
+        S.ph.t++;
+        if (S.ph.ball && !S.ph.done && S.ph.t >= 20 && b.own === h) { S.ph.done = true; passTo(h, S.mate); h.dash = 34; S.oneTwo = 100; pop("DAI E VAI!", h.x, h.y - 14, "#7ac8ff"); }
+        if (!S.ph.ball && !S.ph.ctrl && S.ph.t >= 12) { S.ph.ctrl = true; pop("GUIDI IL COMPAGNO", S.mate.x, S.mate.y - 14, "#7ac8ff"); }
+      }
+      if (S.oneTwo > 0) { S.oneTwo--; if (b.own === S.mate && b.cd <= 0) { passTo(S.mate, h); S.oneTwo = 0; pop("…E TORNA!", S.mate.x, S.mate.y - 14, "#7ac8ff"); } }
+    }
+    S.press = press; S.release = release;
     function control() {
-      const h = S.hero; let dx = 0, dy = 0;
+      const h = S.ph && S.ph.ctrl ? S.mate : S.hero; let dx = 0, dy = 0; if ((h.slide | 0) > 0) return;
       if (S.keys.ArrowLeft) dx -= 1; if (S.keys.ArrowRight) dx += 1; if (S.keys.ArrowUp) dy -= 1; if (S.keys.ArrowDown) dy += 1;
       const sp = speedOf(h) * ((h.dash | 0) > 0 ? 1.7 : 1); if (h.dash > 0) h.dash--;
       if (dx || dy) { const d = Math.hypot(dx, dy); step(h, h.x + dx / d * sp, h.y + dy / d * sp); h.dir = Math.atan2(dy, dx); }
@@ -841,7 +884,8 @@
     function ai() {
       if (H.ai && safe(() => H.ai(S), false)) return;
       const b = S.ball, h = S.hero, m = S.mate, [o1, o2] = S.opp;
-      if (b.own === m) { const near = S.opp.some((q) => Math.hypot(q.x - m.x, q.y - m.y) < 28); if (m.y < GY0 + 130 && Math.random() < 0.05) shoot(m, 6.8, CX - 16 + Math.random() * 32); else if (near && Math.random() < 0.07) passTo(m, h); else moveTo(m, CX + Math.sin(S.t / 40) * 50, GY0 + 90, speedOf(m)); }
+      if (S.ph && S.ph.ctrl) { /* il compagno lo guidi tu */ }
+      else if (b.own === m) { const near = S.opp.some((q) => Math.hypot(q.x - m.x, q.y - m.y) < 28); if (m.y < GY0 + 130 && Math.random() < 0.05) shoot(m, 6.8, CX - 16 + Math.random() * 32); else if (near && Math.random() < 0.07) passTo(m, h); else moveTo(m, CX + Math.sin(S.t / 40) * 50, GY0 + 90, speedOf(m)); }
       else if (b.own === h) moveTo(m, h.x < CX ? CX + 50 : CX - 50, Math.max(GY0 + 60, h.y - 80), speedOf(m));
       else if ((m.call | 0) > 0 || (b.own && b.own.team === 1 && Math.hypot(b.x - m.x, b.y - m.y) < 90) || (!b.own && Math.hypot(b.x - m.x, b.y - m.y) < Math.hypot(b.x - h.x, b.y - h.y))) { moveTo(m, b.x, b.y, speedOf(m)); if (m.call) m.call--; }
       else moveTo(m, h.x < CX ? CX + 50 : CX - 50, Math.min(GY1 - 60, Math.max(GY0 + 80, b.y - 30)), speedOf(m) * 0.8);
@@ -879,6 +923,7 @@
         if (p.gk) { const to = p.team === 0 ? (Math.random() < 0.5 ? S.hero : S.mate) : S.opp[(Math.random() * 2) | 0]; if (++p.hold > 30) { p.hold = 0; passTo(p, to); } }
         return;
       }
+      if (b.curve) { b.vx += b.curve; b.curve *= 0.95; if (Math.abs(b.curve) < 0.004) b.curve = 0; } // il tiro a effetto curva
       if (H.ballForce) safe(() => H.ballForce(S, b));
       b.x += b.vx; b.y += b.vy; const fr = b.z > 0.5 ? 0.992 : 0.979; b.vx *= fr; b.vy *= fr;
       if (b.z > 0 || b.vz > 0) { b.z += b.vz; b.vz -= o.gravity || 0.16; if (b.z <= 0) { b.z = 0; b.vz = Math.abs(b.vz) > 1 ? -b.vz * 0.35 : 0; } }
@@ -889,7 +934,7 @@
       if (b.cd <= 0 && b.z < 9) {
         let best = null, bd = 9e9;
         all().forEach((q) => { if (stunned(q)) return; const d = Math.hypot(q.x - b.x, q.y - b.y), sp = Math.hypot(b.vx, b.vy), r = q.gk ? 11 : (sp > 4.5 && q !== b.passTo ? 6 : 9); if (d < r && d < bd) { best = q; bd = d; } });
-        if (best) { b.own = best; b.passTo = null; best.hold = 0; b.z = 0; if (best.gk && b.shot != null && b.shot !== best.team && Math.hypot(b.vx, b.vy) > 3) { snd.save(); pop("PARATA!", best.x, best.y - 12, "#7ac8ff"); } }
+        if (best) { b.own = best; b.passTo = null; b.curve = 0; best.hold = 0; b.z = 0; if (best.gk && b.shot != null && b.shot !== best.team && Math.hypot(b.vx, b.vy) > 3) { snd.save(); pop("PARATA!", best.x, best.y - 12, "#7ac8ff"); } }
       }
     }
     function person(g, p, look, own) {
@@ -922,6 +967,8 @@
       if (b.z > 0.5) { g.fillStyle = "rgba(0,0,0,.3)"; g.beginPath(); g.ellipse(b.x, b.y + 2, 3.5, 1.6, 0, 0, 7); g.fill(); }
       const by = b.y - b.z, br = 3.5 + Math.min(2.5, b.z / 12);
       g.fillStyle = "#fff"; g.strokeStyle = "#111"; g.lineWidth = 1.2; g.beginPath(); g.arc(b.x, by, br, 0, 7); g.fill(); g.stroke(); g.fillStyle = "#111"; g.beginPath(); g.arc(b.x, by, br * 0.34, 0, 7); g.fill();
+      if (S.chg) { const k = Math.min(1, S.chg.t / 40), hx = S.hero.x, hy = S.hero.y + 12; g.fillStyle = "rgba(0,0,0,.55)"; g.fillRect(hx - 13, hy, 26, 4); g.fillStyle = k < 0.5 ? "#ffd23f" : k < 0.9 ? "#ff8a3d" : "#ff4d5a"; g.fillRect(hx - 12, hy + 1, 24 * k, 2); }
+      if (S.ph && S.ph.ctrl) { const mx = S.mate.x, my = S.mate.y - 20 + Math.sin(S.t / 6) * 1.5; g.fillStyle = "#7ac8ff"; g.strokeStyle = "#111"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(mx - 5, my - 6); g.lineTo(mx + 5, my - 6); g.lineTo(mx, my); g.closePath(); g.fill(); g.stroke(); }
       if (H.over) safe(() => H.over(g, S));
       if (S.run) { const hx = S.hero.x, hy = S.hero.y - 20 + Math.sin(S.t / 6) * 1.5; g.fillStyle = "#ffd23f"; g.strokeStyle = "#111"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(hx - 6, hy - 7); g.lineTo(hx + 6, hy - 7); g.lineTo(hx, hy); g.closePath(); g.fill(); g.stroke(); }
       S.fx = S.fx.filter((f) => f.t > 0); S.fx.forEach((f) => { f.t--; f.y -= 0.4; g.font = `900 11px ${TH.font}`; g.textAlign = "center"; g.lineWidth = 3; g.strokeStyle = "#111"; g.strokeText(f.txt, f.x, f.y); g.fillStyle = f.col; g.fillText(f.txt, f.x, f.y); g.textAlign = "left"; });
@@ -946,17 +993,25 @@
       if (S.over) return; S.over = true; S.run = false;
       const res = { a: quit ? 0 : S.a, b: quit ? Math.max(1, S.b) : S.b, win: !quit && S.a > S.b, quit: !!quit, data: S.data };
       const extra = H.result ? safe(() => H.result(S, res), "") : "";
-      card(quit ? "Partita abbandonata" : res.win ? (o.winTitle || "VITTORIA!") : S.a === S.b ? "Pareggio" : "Sconfitta", `<p style="font-size:22px;font-weight:900">${S.a} – ${S.b}</p><p>Tiri ${S.shots} · Passaggi ${S.pass}${extra ? " · " + extra : ""}</p>`, "Continua ▸", () => close(res));
+      card(quit ? "Partita abbandonata" : res.win ? (o.winTitle || "VITTORIA!") : S.a === S.b ? "Pareggio" : "Sconfitta", `<p style="font-size:22px;font-weight:900">${S.a} – ${S.b}</p><p>Tiri ${S.shots} · Passaggi ${S.pass} · Contrasti vinti ${S.data.tackles | 0}${extra ? " · " + extra : ""}</p>`, "Continua ▸", () => close(res));
     }
     function close(res) { CUR = { diff: "normale", style: "" }; cancelAnimationFrame(S.raf); window.removeEventListener("keydown", S.kd, true); window.removeEventListener("keyup", S.ku, true); S.el.remove(); PITCH = null; try { o.onDone(res); } catch (e) { console.error(e); } }
+    // i pulsanti cambiano nome a seconda di chi ha la palla: TIRA/PASSA con la palla, CONTRASTO/CHIAMA senza
+    let LBL = "";
+    function labels() {
+      const b = S.ball, mine = b.own === S.hero || b.own === S.mate, near = Math.hypot(b.x - S.hero.x, b.y - S.hero.y) < 60, k = (mine ? "m" : near ? "n" : "f") + (b.own === S.hero ? "h" : "");
+      if (k === LBL || !S.el) return; LBL = k;
+      S.el.querySelector(".tira").textContent = mine ? o.tiraLabel || "TIRA" : near ? "CONTRASTO" : "SCATTO";
+      S.el.querySelector(".passa").textContent = mine ? o.passaLabel || "PASSA" : "CHIAMA";
+    }
     function loop() {
       if (S.over && !S.el.isConnected) return;
       if (S.run) {
-        S.t++; control(); ai(); if (H.tick) safe(() => H.tick(S)); physics();
+        S.t++; holdTick(); control(); ai(); if (H.tick) safe(() => H.tick(S)); physics();
         [S.hero, S.mate, ...S.opp].forEach((p) => { p.x = Math.max(XL + 4, Math.min(XR - 4, p.x)); p.y = Math.max(GY0 + 4, Math.min(GY1 - 4, p.y)); if (p.stun > 0) p.stun--; });
         if (S.t >= S.dur || (S.extra && S.a !== S.b)) endHalf();
       }
-      draw(); S.raf = requestAnimationFrame(loop);
+      draw(); labels(); S.raf = requestAnimationFrame(loop);
     }
     // interfaccia
     if (!document.getElementById("scPitchCss")) {
@@ -983,16 +1038,15 @@
     cv.addEventListener("pointerdown", (e) => { e.preventDefault(); const q = toLocal(e); S.ptr = { ax: q.x, ay: q.y, x: q.x, y: q.y }; try { cv.setPointerCapture(e.pointerId); } catch (er) {} });
     cv.addEventListener("pointermove", (e) => { if (S.ptr) { const q = toLocal(e); S.ptr.x = q.x; S.ptr.y = q.y; } });
     ["pointerup", "pointercancel", "lostpointercapture"].forEach((ev) => cv.addEventListener(ev, () => { S.ptr = null; }));
-    el.querySelector(".tira").addEventListener("pointerdown", (e) => { e.preventDefault(); act("tira"); });
-    el.querySelector(".passa").addEventListener("pointerdown", (e) => { e.preventDefault(); act("passa"); });
+    [["tira", ".tira"], ["passa", ".passa"]].forEach(([k, sel]) => { const bt = el.querySelector(sel); bt.addEventListener("pointerdown", (e) => { e.preventDefault(); try { bt.setPointerCapture(e.pointerId); } catch (er) {} press(k); }); ["pointerup", "pointercancel"].forEach((ev) => bt.addEventListener(ev, () => release(k))); });
     el.querySelector(".esci").onclick = () => { if (!S.over) finish(true); };
-    S.kd = (e) => { if (/^Arrow/.test(e.key)) { S.keys[e.key] = true; e.preventDefault(); e.stopPropagation(); } else if (e.key === " " || e.key === "z") { act("tira"); e.preventDefault(); e.stopPropagation(); } else if (e.key === "x") { act("passa"); e.preventDefault(); e.stopPropagation(); } };
-    S.ku = (e) => { if (/^Arrow/.test(e.key)) { S.keys[e.key] = false; e.stopPropagation(); } };
+    S.kd = (e) => { if (/^Arrow/.test(e.key)) { S.keys[e.key] = true; e.preventDefault(); e.stopPropagation(); } else if (e.key === " " || e.key === "z") { if (!e.repeat) press("tira"); e.preventDefault(); e.stopPropagation(); } else if (e.key === "x") { if (!e.repeat) press("passa"); e.preventDefault(); e.stopPropagation(); } };
+    S.ku = (e) => { if (/^Arrow/.test(e.key)) { S.keys[e.key] = false; e.stopPropagation(); } else if (e.key === " " || e.key === "z") { release("tira"); e.stopPropagation(); } else if (e.key === "x") { release("passa"); e.stopPropagation(); } };
     window.addEventListener("keydown", S.kd, true); window.addEventListener("keyup", S.ku, true);
     S.act = act; S.finish = finish; S.goal = goal; S.card = card;
     if (H.setup) safe(() => H.setup(S));
     kickoff(0); hud();
-    card(o.title || "Partita", `${o.intro || ""}<p style="opacity:.85;font-size:12.5px">Difficoltà: <b>${DF.label}</b> · avversari: <b>${STYLES[STYLES[STYLE0] ? STYLE0 : "equilibrata"]}</b></p><p><b>Levetta</b>: appoggia il dito dove vuoi sul campo e trascinalo; il Campione ha la freccia gialla. <b>${esc(o.tiraLabel || "TIRA")}</b> (senza palla: scatto) · <b>${esc(o.passaLabel || "PASSA")}</b> (senza palla: chiami il compagno). Si attacca verso l'alto.</p>`, "Fischio d'inizio ▸", () => { S.run = true; snd.whistle(); });
+    card(o.title || "Partita", `${o.intro || ""}<p style="opacity:.85;font-size:12.5px">Difficoltà: <b>${DF.label}</b> · avversari: <b>${STYLES[STYLES[STYLE0] ? STYLE0 : "equilibrata"]}</b></p><p><b>Levetta</b>: appoggia il dito dove vuoi sul campo e trascinalo; il Campione ha la freccia gialla. <b>${esc(o.tiraLabel || "TIRA")}</b>: un tocco tira, <b>tienilo premuto</b> per caricare (levetta di lato = a effetto, levetta indietro = pallonetto); senza palla diventa <b>CONTRASTO</b> (scivolata: se prendi il pallone è tuo, se sbagli resti a terra un momento) o <b>SCATTO</b> se la palla è lontana. <b>${esc(o.passaLabel || "PASSA")}</b>: un tocco passa; tenuto premuto con la palla è il <b>dai e vai</b>, senza palla <b>guidi il compagno</b> con la levetta. Si attacca verso l'alto.</p>`, "Fischio d'inizio ▸", () => { S.run = true; snd.whistle(); });
     css2(); PITCH = S; loop(); return true;
   }
   let PITCH = null;
