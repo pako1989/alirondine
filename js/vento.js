@@ -30,7 +30,7 @@
       colle: { grass: ["#a8b86a", "#b0bf70", "#a0b064"], path: ["#c8b080", "#bea676"], stone: ["#a09a8a", "#948e7e"], wall: ["#7a7468", "#6e685c"], water: ["#5a9ac8", "#64a4d2"], tall: "#98aa58", tree: ["#4a6a3a", "#5a7e44", "#7a9a52"], tint: "255,200,150", tintA: 0.1, fx: "", dark: 0.08 },
       casa: { grass: ["#a07850", "#98704a", "#a47c54"], path: ["#b08a5a", "#a88252"], stone: ["#9a8a7a", "#8e7e6e"], wall: ["#c8a87a", "#bc9c6e"], water: ["#4a8ab8", "#5494c2"], tall: "#6a8a4a", tint: "255,210,150", tintA: 0.1, fx: "dust", dark: 0.16 },
     },
-    floors: "*",
+    floors: "*", solid: "o",
     rest: { ch: "S", label: "Siediti all'altarino dei Soffi", text: "Ti siedi accanto all'altarino di pietra. Un Soffio ti si arrotola in grembo e fa le fusa come un gatto fatto d'aria. (Il gioco salva da solo: qui puoi rileggere il Quaderno.)" },
     texts: { chestOpen: "Apri la cassetta.", chestEmpty: "La cassetta è vuota. Dentro c'è solo un po' di vento vecchio.", nothing: "Niente di speciale. Solo erba, e vento.", noHero: "La valle aspetta un nuovo custode del prato. Prima crea il tuo Campione.", chapters: "Tre capitoli, una valle. Le scelte restano: cambiano il finale." },
     journal: { name: "Il Quaderno del Custode", sub: "Persone, Soffi trovati, pagine del vecchio custode, finali", html: (K) => quaderno(K) },
@@ -52,6 +52,8 @@
       },
       // il grande albero della valle (uno per zona, enorme, sporge sopra)
       O(K, sx, sy, tx, ty, fr) { K.ground(sx, sy, tx, ty); K.later((g, cx, cy) => bigTree(g, tx * TS - cx + 8, ty * TS - cy + 16, fr)); },
+      // un vecchio pallone di cuoio lasciato sull'erba
+      o(K, sx, sy, tx, ty, fr) { K.ground(sx, sy, tx, ty); K.shadow(sx, sy, 5); const g = K.g; g.fillStyle = "#c8a070"; g.beginPath(); g.arc(sx + 8, sy + 9, 5, 0, 7); g.fill(); g.strokeStyle = "#6a4a2a"; g.lineWidth = 0.8; g.beginPath(); g.arc(sx + 8, sy + 9, 5, 0, 7); g.moveTo(sx + 3, sy + 9); g.lineTo(sx + 13, sy + 9); g.moveTo(sx + 8, sy + 4); g.quadraticCurveTo(sx + 11, sy + 9, sx + 8, sy + 14); g.stroke(); },
       // l'altarino dei Soffi (punto di riposo)
       S(K, sx, sy, tx, ty, fr) {
         K.ground(sx, sy, tx, ty); K.shadow(sx, sy, 6); const g = K.g;

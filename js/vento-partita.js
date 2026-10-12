@@ -4,7 +4,7 @@
 //  - i palloni ALTI (tiri da lontano e passaggi lunghi) si piegano col vento; quelli rasoterra quasi niente;
 //  - ogni tanto arriva una FOLATA (avviso due secondi prima): un tiro da lontanissimo, nel momento giusto, diventa un gol;
 //  - chi corre col vento va più veloce, chi corre contro fatica; gli SPIRITI (i Soffi) in campo planano e il vento li porta.
-// Opzioni: o.calm (vento leggero, primo incontro) · o.fading (il vento muore piano piano durante la partita)
+// Opzioni: o.rising (il vento torna piano piano mentre si gioca: ogni gol lo aiuta) · o.calm (vento leggero, primo incontro) · o.fading (il vento muore piano piano durante la partita)
 //          o.spiritsMate (il compagno è un Soffio) · o.spiritsOpp (gli avversari sono Soffi) · o.great (Mormorio tra i pali, il vento è con te)
 // Uso: window.__ventoPartita.start({ title, us, opp:{ name, kit, names }, heroLook, onDone({ a, b, win, data }) , ... })
 (function () {
@@ -23,7 +23,8 @@
         const w = S.data.wind;
         if (--w.change <= 0) { w.change = 900; w.target = w.ang + (Math.random() < 0.5 ? 1 : -1) * (0.8 + Math.random() * 1.6); S.pop("IL VENTO GIRA!", S.hero.x, S.hero.y - 26, "#cfe6b0"); S.tone(660, 0.3, "sine", 0.04, 0, 990); }
         let d = w.target - w.ang; while (d > Math.PI) d -= Math.PI * 2; while (d < -Math.PI) d += Math.PI * 2; w.ang += d * 0.02;
-        const fade = o.fading ? Math.max(0.05, 1 - (S.half * S.dur + S.t) / (S.dur * 2) * 1.1) : 1, base = (o.calm ? 0.35 : 0.7) * fade;
+        const prog = (S.half * S.dur + S.t) / (S.dur * 2), fade = o.fading ? Math.max(0.05, 1 - prog * 1.1) : o.rising ? Math.min(1.1, 0.06 + prog * 1.1 + (S.data.joy || 0)) : 1, base = (o.calm ? 0.35 : 0.7) * fade;
+        if (o.rising && !S.data.back && fade > 0.6) { S.data.back = true; S.flash = { txt: "IL VENTO TORNA!", sub: "si gioca per gioia, e lui lo sente", t: 90 }; S.tone(523, 0.4, "triangle", 0.05); S.tone(784, 0.6, "sine", 0.04, 0.2); }
         if (w.gust <= 0 && w.warn <= 0 && --w.gustNext <= 0 && fade > 0.2) { w.warn = 120; S.tone(330, 0.2, "triangle", 0.04); }
         if (w.warn > 0 && --w.warn <= 0) { w.gust = 180; S.noise(1.2, 0.04, 500); }
         if (w.gust > 0 && --w.gust <= 0) w.gustNext = 480 + Math.random() * 300;
@@ -43,7 +44,7 @@
         S.snd.kick(); S.pop(S.data.wind.gust > 0 ? "COL VENTO!" : "TIRO ALTO!", h.x, h.y - 14, S.data.wind.gust > 0 ? "#cfe6b0" : "#ffb347"); return true;
       },
       keeper(S, gk, b) { if (o.great && gk.team === 0) return 0.9; return b.lob && b.z > 4 ? 0.3 : null; }, // i palloni alti col vento ingannano i portieri
-      onGoal(S, team) { if (team === 0 && S.data.wind.gust > 0) { S.data.wind.gustGoals++; S.flash = { txt: "GOL COL VENTO!", sub: "hai aspettato la folata giusta", t: 80 }; } S.ball.lob = false; },
+      onGoal(S, team) { if (o.rising) S.data.joy = (S.data.joy || 0) + 0.12; if (team === 0 && S.data.wind.gust > 0) { S.data.wind.gustGoals++; S.flash = { txt: "GOL COL VENTO!", sub: "hai aspettato la folata giusta", t: 80 }; } S.ball.lob = false; },
       bg(g, S, cy) { // cielo, colline e mulini che girano con il vento
         const w = S.data.wind, gr = g.createLinearGradient(0, 0, 0, 360); gr.addColorStop(0, o.dusk ? "#f0a070" : "#9cd4f0"); gr.addColorStop(1, o.dusk ? "#ffd8a0" : "#e8f4ff"); g.fillStyle = gr; g.fillRect(0, 0, 240, 360);
         for (let i = 0; i < 5; i++) { const x = ((i * 70 + S.t * w.str * 0.3 * Math.cos(w.ang)) % 300 + 300) % 300 - 30, y = 30 + i * 60 - cy * 0.1; g.fillStyle = "rgba(255,255,255,.75)"; g.beginPath(); g.ellipse(x, y, 22, 7, 0, 0, 7); g.ellipse(x + 12, y - 4, 14, 7, 0, 0, 7); g.fill(); }
@@ -81,6 +82,7 @@
         g.save(); g.translate(x, y); g.rotate(w.ang); g.strokeStyle = "#fbf6e6"; g.lineWidth = 1.5 + Math.min(2.5, w.str * 1.6); g.beginPath(); g.moveTo(-8, 0); g.lineTo(8, 0); g.lineTo(4, -3.5); g.moveTo(8, 0); g.lineTo(4, 3.5); g.stroke(); g.restore();
         g.font = "bold 8px sans-serif"; g.textAlign = "right"; g.fillStyle = "#e8e2d4"; g.fillText(`gira tra ${Math.ceil(w.change / 60)}s`, 236, 11);
         if (w.warn > 0 || w.gust > 0) { g.fillStyle = w.warn > 0 ? "rgba(120,60,20,.9)" : "rgba(40,90,60,.9)"; g.fillRect(70, 18, 100, 14); g.fillStyle = "#fbf6e6"; g.textAlign = "center"; g.fillText(w.warn > 0 ? "⚠ ARRIVA UNA FOLATA" : "🍃 FOLATA: TIRA DA LONTANO!", 120, 28); }
+        else if (o.rising && !S.data.back) { g.fillStyle = "rgba(40,90,60,.85)"; g.fillRect(70, 18, 100, 14); g.fillStyle = "#fbf6e6"; g.textAlign = "center"; g.fillText("gioca: il vento ti ascolta…", 120, 28); }
         else if (o.fading && S.data.fade < 0.35) { g.fillStyle = "rgba(60,60,70,.85)"; g.fillRect(70, 18, 100, 14); g.fillStyle = "#e8e2d4"; g.textAlign = "center"; g.fillText("il vento si sta spegnendo…", 120, 28); }
         g.textAlign = "left";
       },
