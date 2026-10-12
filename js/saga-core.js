@@ -326,6 +326,7 @@
 
     // -------------------------------------------------------------- capitoli e zone
     const CHAPTERS = {}, ZONES = {}, COS = {}, PENDING = [], PLUG = arr(cfg.plugins);
+    const PASS = Object.freeze({ pass: true }); // K.PASS: «qui risponde il capitolo prima»
     const zoneRec = () => (api ? ZONES[api.trZone()] || null : null);
     const bgNow = () => (zoneRec() && zoneRec().spec.bg) || BG0;
     const activeChapter = () => { const m = mem(); let best = null; Object.keys(CHAPTERS).map(Number).sort((a, b) => a - b).forEach((n) => { if (n <= m.ch) best = CHAPTERS[n]; }); return best || CHAPTERS[1] || null; };
@@ -733,7 +734,7 @@
     // -------------------------------------------------------------- kit per i capitoli
     const K = {
       get api() { return api; }, ID, TITLE, TS, T, esc, hash, rnd, pick, safe, F, mem, save, stepOf, setStep, note, once, reward, coinsGive, bal, hero, castHero, stat, bond,
-      say, ask, done, go, enterZone, eraOf, gravity: () => GRV.mode, GRV, filter, setEra: (zid, era) => { F.set("era_" + zid, era || ""); if (api && api.trZone() === zid) { const pos = api.trPos && api.trPos(), tr = api.trRec(); if (pos) tr.pos[zid] = pos; FX.enter = frNow(); FX.title = era && ZONES[zid].spec.eras[era] ? ZONES[zid].spec.eras[era].label || ZONES[zid].spec.short : ZONES[zid].spec.short; api.trGo(zid); refreshZone(); } }, otherSaga: (key) => safe(() => JSON.parse(localStorage.getItem(key) || "null"), null), quest, questDone, questState, evidence: (id, d) => { EVID[id] = d; }, giveClue, hasClue, present, loreList: () => Object.keys(LORE).map((k) => [k, LORE[k]]), enterDoor, leaveInterior, travelMenu, timeNow, playMatch, ownMatch, finishChapter, setTiles, SFX, tone, noise, glow, frNow, refreshZone, bgNow, journal, leave, lines, learnLore, ENDINGS, ZX, light, later, shadow, at, undAt, isFloor, floorPaint, ground, TH,
+      PASS, say, ask, done, go, enterZone, eraOf, gravity: () => GRV.mode, GRV, filter, setEra: (zid, era) => { F.set("era_" + zid, era || ""); if (api && api.trZone() === zid) { const pos = api.trPos && api.trPos(), tr = api.trRec(); if (pos) tr.pos[zid] = pos; FX.enter = frNow(); FX.title = era && ZONES[zid].spec.eras[era] ? ZONES[zid].spec.eras[era].label || ZONES[zid].spec.short : ZONES[zid].spec.short; api.trGo(zid); refreshZone(); } }, otherSaga: (key) => safe(() => JSON.parse(localStorage.getItem(key) || "null"), null), quest, questDone, questState, evidence: (id, d) => { EVID[id] = d; }, giveClue, hasClue, present, loreList: () => Object.keys(LORE).map((k) => [k, LORE[k]]), enterDoor, leaveInterior, travelMenu, timeNow, playMatch, ownMatch, finishChapter, setTiles, SFX, tone, noise, glow, frNow, refreshZone, bgNow, journal, leave, lines, learnLore, ENDINGS, ZX, light, later, shadow, at, undAt, isFloor, floorPaint, ground, TH,
       P: (x, y, w, h, c) => { ctx(); P(x, y, w, h, c); }, get g() { return ctx(); },
       zone: (zid) => ZONES[zid] || null, inZone: (zid) => !!(api && api.trZone() === zid),
       scene: (ls, then, bg) => api.play(lines(ls, bg || BG0), then),
@@ -761,7 +762,13 @@
       const cameoOf = (id) => { const zr = zoneRec(); if (!zr || !zr.Z.npcs.some((n) => n.id === id && n.cameo)) return null; return arr(cfg.cameos).find((c) => c.id === id && c.zone === api.trZone()) || null; };
       window.trTalkHook = function (id) {
         const cm = cameoOf(id); if (cm) { castHero(); F.set("cameo_" + id, true); safe(() => (cm.talk ? cm.talk(K) : say(cm.lines)), null); return true; }
-        const c = mineC(id); if (c) { castHero(); safe(() => c.talk[id](), null); return true; } return chained && typeof prev === "function" ? prev(id) : false;
+        const c = mineC(id);
+        if (c) { // un capitolo può restituire K.PASS: allora risponde il capitolo precedente che conosce quel personaggio
+          castHero(); const zr = zoneRec(), list = chainFor(zr).filter((cc) => cc.talk && cc.talk[id]);
+          for (const cc of list) { const r = safe(() => cc.talk[id](), null); if (r !== PASS) return true; }
+          done(); return true;
+        }
+        return chained && typeof prev === "function" ? prev(id) : false;
       };
       const prevNews = window.trNewsHook;
       window.trNewsHook = function (id) { if (cameoOf(id)) return !F.is("cameo_" + id); const c = zoneRec() && mineC(id); if (c) return c.news ? !!safe(() => c.news(id, stepOf(c.n)), false) : false; return typeof prevNews === "function" ? prevNews(id) : null; };

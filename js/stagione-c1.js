@@ -33,8 +33,8 @@
     // ------------------------------------------------------------ gli orari: chi sta dove, a ogni fascia
     const SCHED = {
       sf_piazza: [
-        [["sf_bruno", 6, 9], ["sf_mira", 15, 9], ["sf_teo", 24, 20]],
-        [["sf_bruno", 8, 10], ["sf_ada", 10, 10], ["sf_mira", 13, 13], ["sf_teo", 27, 9]],
+        [["sf_bruno", 8, 9], ["sf_mira", 17, 9], ["sf_teo", 24, 20]],
+        [["sf_bruno", 8, 10], ["sf_ada", 10, 10], ["sf_mira", 13, 13], ["sf_teo", 30, 10]],
         [["sf_mira", 12, 17]],
         [],
       ],

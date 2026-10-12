@@ -5596,6 +5596,27 @@
     const lx = 120, rw = since("sf_videoteca", 2) < 90; px(g, lx, 140, 12, 30, "#3a3a5a"); circ(g, lx + 6, 134, 6, "#e8d0b8"); px(g, lx + 1, 132, 10, 2, "#1a1a1a"); if (rw) { px(g, lx + 12, 146, 16, 9, "#1a1a1a"); px(g, lx + 18, 140 + Math.sin(f / 3) * 3, 2, 10, "#e8c84a"); g.fillStyle = "#fff"; g.font = "bold 7px 'Courier New', monospace"; g.fillText("la matita, gira gira…", lx - 20, 128); }
     sfVhs(g, W, H, f, "DOM 12:00");
   }
+  function bgSf1986(g, W, H, f) {
+    // la cassetta del 1986: immagini color seppia, il colpo di testa, il fruscio proprio sul gol (tocca)
+    vgrad(g, 0, 0, W, H, ["#8a6a4a", "#5a4030"]); px(g, 0, 120, W, 80, "#6a5a3a"); g.strokeStyle = "rgba(240,220,180,.5)"; g.lineWidth = 2; g.strokeRect(20, 130, 280, 60);
+    px(g, 140, 100, 70, 4, "#e8dcc0"); px(g, 140, 100, 3, 40, "#e8dcc0"); px(g, 207, 100, 3, 40, "#e8dcc0");
+    const t = (f % 240) / 240, jump = Math.sin(Math.min(1, t * 2) * Math.PI) * 30, hx = 120 + t * 40; px(g, hx, 130 - jump, 9, 18, "#c8b090"); circ(g, hx + 4, 124 - jump, 5, "#e0c8a0"); px(g, hx, 118 - jump, 9, 3, "#3a2a1a"); px(g, hx + 1, 122 - jump, 7, 2, "#2a2a2a");
+    const bx = 60 + t * 120, by = 60 + Math.abs(Math.sin(t * Math.PI)) * 40 * -1 + 60; circ(g, bx, by, 3, "#f0e8d8");
+    const noise = (t > 0.45 && t < 0.6) || since("sf_1986", 0) < 50; if (noise) for (let i = 0; i < 300; i++) px(g, Math.random() * W, Math.random() * H, 2, 1, `rgba(255,255,255,${Math.random() * 0.6})`);
+    if (since("sf_1986", 1) < 100) { g.fillStyle = "#f0e8d8"; g.font = "bold 9px 'Courier New', monospace"; g.fillText("«…È FINITA LA DOMENICA…»", 70, 30); }
+    if (since("sf_1986", 2) < 80) { px(g, 230, 140, 30, 20, "#3a3a3a"); px(g, 232, 160, 4, 20, "#3a3a3a"); px(g, 254, 160, 4, 20, "#3a3a3a"); g.save(); g.translate(245, 140); g.rotate(Math.sin(f / 6) * 0.4); px(g, -4, -16, 8, 16, "#c8b090"); g.restore(); }
+    g.fillStyle = "rgba(60,40,20,.25)"; for (let y = 0; y < H; y += 2) g.fillRect(0, y, W, 1);
+    sfVhs(g, W, H, f, "1986 90:00");
+  }
+  function bgSfRadio(g, W, H, f) {
+    // il lungolago al pomeriggio: Mira con il registratore, le onde radio sull'acqua (tocca)
+    vgrad(g, 0, 0, W, 110, ["#e8a86a", "#f4d8b0"]); vgrad(g, 0, 110, W, 90, ["#4a7aa8", "#2a4a7a"]); for (let i = 0; i < 12; i++) px(g, (i * 31 + f * 0.25) % W, 120 + (i * 13) % 70, 18, 1, "rgba(255,220,180,.4)");
+    px(g, 0, 104, W, 8, "#c8b898"); const mx = 150; px(g, mx, 74, 11, 30, "#ff5a7a"); circ(g, mx + 5.5, 66, 7, "#c68642"); px(g, mx - 1, 60, 13, 5, "#2a1a2a"); px(g, mx - 6, 63, 4, 6, "#2a2a2a"); px(g, mx + 13, 63, 4, 6, "#2a2a2a"); px(g, mx + 14, 88, 22, 14, "#3a3a3a"); circ(g, mx + 20, 95, 3, "#8a8a8a"); circ(g, mx + 30, 95, 3, "#8a8a8a");
+    const w = since("sf_radio", 0) < 140 ? 6 : 3; for (let i = 0; i < w; i++) { const r = ((f * 0.8 + i * 22) % 130); g.strokeStyle = `rgba(255,90,122,${0.6 - r / 220})`; g.lineWidth = 2; g.beginPath(); g.arc(mx + 25, 95, r, -Math.PI * 0.95, -Math.PI * 0.05); g.stroke(); }
+    if (since("sf_radio", 1) < 120) { g.fillStyle = "#fff"; g.font = "bold 9px 'Courier New', monospace"; g.fillText("«LA DOMENICA TORNA SEMPRE»", 70, 40); }
+    if (since("sf_radio", 2) < 90) for (let i = 0; i < 6; i++) { const t = since("sf_radio", 2); circ(g, 40 + i * 45, 150 - Math.abs(Math.sin(t / 8 + i)) * 14, 3, "#e8e8f0"); }
+    sfVhs(g, W, H, f, "DOM 16:00");
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -6167,6 +6188,16 @@
       [190, 100, 110, 80, "📺 Il televisore si accende da solo: un'azione del Lido, avanti e indietro, avanti e indietro. Sempre la stessa. Il pallone non entra mai."],
       [80, 80, 30, 30, "📼 Sullo scaffale, una cassetta si illumina: «Finale 1986 — ROVINATA». Brilla come se volesse essere vista."],
       [100, 120, 60, 60, "✏ Lucio riavvolge un nastro con la matita, gira gira gira. «Il videoregistratore è rotto», dice. «Ma il nastro no. Il nastro si ricorda tutto»."],
+    ] },
+    sf_1986: { draw: bgSf1986, hot: [
+      [100, 60, 140, 100, "📼 Il nastro fa «zzzt» proprio sul gol. Quando torna l'immagine sono tutti abbracciati, e un ragazzo con gli occhiali è per terra, sorridente, con la telecamera addosso."],
+      [40, 15, 240, 25, "🎙 Sotto il fruscio, una voce vecchia e calda dice qualcosa. Bisogna ascoltare bene. Molto bene."],
+      [220, 130, 60, 60, "🎥 La telecamera del 1986 cade di lato, e l'inquadratura con lei: per un attimo il cielo del Lido, storto e bellissimo."],
+    ] },
+    sf_radio: { draw: bgSfRadio, hot: [
+      [130, 50, 120, 70, "📻 Dal registratore partono onde radio, rosse, che si allargano sul lago. I pesci, dice Nonno Remigio, ascoltano sempre Radio Lago."],
+      [50, 25, 220, 25, "🗨 «La domenica torna sempre». Mira lo ripete sottovoce, per impararlo. Poi lo ripete forte, per il lago."],
+      [0, 120, 320, 60, "🌊 Il lago fa tre piccole onde, una dopo l'altra, come un applauso educato."],
     ] },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
