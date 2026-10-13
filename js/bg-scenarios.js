@@ -7382,6 +7382,217 @@
       [0, 0, 320, 120, "✨ La polvere d'oro della sala si alza e gira, lenta, come la nebbia di un mattino di finale."],
       [40, 160, 240, 40, "⚽ Per un attimo, sui gradini, ti sembra di vedere sette palloni che rimbalzano. Poi non ci sono più."],
     ] },
+    bm_titolo: {
+      draw: function (g, W, H, f) {
+        // Cielo e vette di cartoncino a strati
+        const sky = g.createLinearGradient(0, 0, 0, 140);
+        sky.addColorStop(0, "#38bdf8"); sky.addColorStop(1, "#bae6fd");
+        g.fillStyle = sky; g.fillRect(0, 0, W, H);
+        // Montagne triangolari découpage
+        g.fillStyle = "#cbd5e1";
+        g.beginPath(); g.moveTo(20, 140); g.lineTo(90, 40); g.lineTo(160, 140); g.fill();
+        g.beginPath(); g.moveTo(140, 140); g.lineTo(230, 25); g.lineTo(310, 140); g.fill();
+        g.fillStyle = "#ffffff";
+        g.beginPath(); g.moveTo(90, 40); g.lineTo(70, 70); g.lineTo(90, 65); g.lineTo(110, 70); g.closePath(); g.fill();
+        g.beginPath(); g.moveTo(230, 25); g.lineTo(205, 60); g.lineTo(230, 52); g.lineTo(255, 60); g.closePath(); g.fill();
+        // Terreno innevato a scatti
+        g.fillStyle = "#f8fafc";
+        g.fillRect(0, 130, W, 70);
+        g.strokeStyle = "#0f172a"; g.lineWidth = 2;
+        g.strokeRect(-2, 130, W + 4, 72);
+        // Pupazzo di neve e Pallone di Cartone
+        g.fillStyle = "#ffffff";
+        g.beginPath(); g.arc(70, 165, 18, 0, Math.PI * 2); g.fill(); g.stroke();
+        g.beginPath(); g.arc(70, 140, 12, 0, Math.PI * 2); g.fill(); g.stroke();
+        g.fillStyle = "#ef4444"; g.fillRect(60, 148, 20, 6);
+        g.fillStyle = "#f97316"; g.fillRect(70, 138, 10, 4);
+        // Pallone di cartone con cuciture
+        g.fillStyle = "#fef08a";
+        g.beginPath(); g.arc(220, 160, 16, 0, Math.PI * 2); g.fill(); g.stroke();
+        g.strokeStyle = "#854d0e"; g.lineWidth = 1.5;
+        g.beginPath(); g.moveTo(220, 144); g.lineTo(220, 176); g.stroke();
+        g.beginPath(); g.moveTo(204, 160); g.lineTo(236, 160); g.stroke();
+        // Fiocchi di neve stop-motion a scatti (f diviso)
+        const frameStep = (f >> 2);
+        g.fillStyle = "rgba(255,255,255,0.85)";
+        for (let i = 0; i < 24; i++) {
+          const fx = (i * 37 + frameStep * 3) % W;
+          const fy = (i * 29 + frameStep * 4) % H;
+          g.fillRect(fx, fy, 3, 3);
+        }
+        // Cartiglio del Titolo
+        g.save();
+        g.translate(160, 55);
+        g.fillStyle = "rgba(15,23,42,0.3)";
+        g.fillRect(-122, -18, 244, 40);
+        g.fillStyle = "#f8fafc";
+        g.fillRect(-125, -20, 250, 40);
+        g.strokeStyle = "#0f172a"; g.lineWidth = 2.5;
+        g.strokeRect(-125, -20, 250, 40);
+        g.fillStyle = "#0f172a";
+        g.font = "900 13px 'Trebuchet MS', system-ui, sans-serif";
+        g.textAlign = "center";
+        g.fillText("🏔️ PICCOLO BORGO DI MONTAGNA", 0, 4);
+        g.restore();
+      },
+      hot: [
+        [200, 140, 50, 50, "⚽ Il Pallone Sacro di cartone del Borgo: custodito dal 1984... o forse è qualcosa d'altro?"],
+        [50, 125, 45, 60, "⛄ Il pupazzo di neve sbilenco. Wendy gli ha annodato la sciarpa rossa."],
+        [20, 20, 280, 50, "🏔️ Le cime della Valle del Gelo: lassù la neve non si scioglie mai."]
+      ]
+    },
+    bm_piazza: {
+      draw: function (g, W, H, f) {
+        // Cielo invernale
+        g.fillStyle = "#bae6fd"; g.fillRect(0, 0, W, 100);
+        // Case del borgo a découpage
+        g.fillStyle = "#e2e8f0"; g.fillRect(10, 40, 70, 70);
+        g.fillStyle = "#0284c7"; g.beginPath(); g.moveTo(5, 40); g.lineTo(45, 15); g.lineTo(85, 40); g.fill();
+        g.strokeStyle = "#0f172a"; g.lineWidth = 1.5; g.stroke();
+        // Insegna Bar di Boris
+        g.fillStyle = "#78350f"; g.fillRect(20, 60, 50, 18);
+        g.fillStyle = "#fef08a"; g.font = "bold 8px sans-serif"; g.textAlign = "center"; g.fillText("BAR BORIS", 45, 72);
+        // Municipio a destra
+        g.fillStyle = "#fef3c7"; g.fillRect(230, 30, 80, 80);
+        g.fillStyle = "#b91c1c"; g.beginPath(); g.moveTo(225, 30); g.lineTo(270, 5); g.lineTo(315, 30); g.fill();
+        // Teca centrale
+        g.fillStyle = "#78350f"; g.fillRect(145, 115, 30, 15);
+        g.fillStyle = "rgba(186,230,253,0.6)"; g.fillRect(147, 95, 26, 22);
+        g.strokeStyle = "#0284c7"; g.strokeRect(147, 95, 26, 22);
+        g.fillStyle = "#fef08a"; g.beginPath(); g.arc(160, 106, 6, 0, 7); g.fill();
+        // Pavimento piazza innevata
+        g.fillStyle = "#f8fafc"; g.fillRect(0, 110, W, 90);
+        // Scuolabus arancione fermo
+        g.fillStyle = "#f97316"; g.fillRect(95, 125, 45, 24);
+        g.fillStyle = "#0f172a"; g.beginPath(); g.arc(105, 150, 4, 0, 7); g.arc(130, 150, 4, 0, 7); g.fill();
+      },
+      hot: [
+        [140, 90, 40, 45, "🏆 La Teca del Pallone Sacro in piazza. Valanga la fa lucidare due volte al giorno."],
+        [10, 40, 80, 70, "☕ Il Bar di Boris: da qui escono profumi irresistibili di cioccolata calda."],
+        [90, 120, 55, 35, "🚌 Lo scuolabus arancione con le catene da neve da dodici chili."]
+      ]
+    },
+    bm_bar: {
+      draw: function (g, W, H, f) {
+        // Pareti di pino chiaro e boiserie
+        g.fillStyle = "#fed7aa"; g.fillRect(0, 0, W, 130);
+        for (let x = 0; x < W; x += 16) {
+          g.strokeStyle = "rgba(180,83,9,0.15)"; g.strokeRect(x, 0, 16, 130);
+        }
+        // Bancone di legno massello
+        g.fillStyle = "#78350f"; g.fillRect(20, 90, 200, 35);
+        g.fillStyle = "#451a03"; g.fillRect(15, 87, 210, 6);
+        // Pentolone di rame fumante
+        g.fillStyle = "#ea580c"; g.beginPath(); g.arc(70, 78, 12, 0, Math.PI); g.fill();
+        // Vapore di cioccolata stop-motion
+        const vap = (f % 40) / 8;
+        g.fillStyle = "rgba(255,255,255,0.7)";
+        g.beginPath(); g.arc(70, 60 - vap * 3, 4 + vap, 0, 7); g.fill();
+        // Stufa di ghisa a destra
+        g.fillStyle = "#1e293b"; g.fillRect(245, 70, 35, 55);
+        g.fillStyle = "#f97316"; g.fillRect(255, 95, 15, 15);
+        // Bacheca dei bollettini
+        g.fillStyle = "#f8fafc"; g.fillRect(120, 25, 60, 40);
+        g.strokeStyle = "#0284c7"; g.strokeRect(120, 25, 60, 40);
+        g.fillStyle = "#0284c7"; g.font = "bold 6px sans-serif"; g.textAlign = "center"; g.fillText("BACHECA DEL BORGO", 150, 35);
+        // Pavimento cotto/assi
+        g.fillStyle = "#9a3412"; g.fillRect(0, 125, W, 75);
+      },
+      hot: [
+        [50, 65, 45, 40, "🍫 Il pentolone di rame: cioccolata calda fusa al 70% con panna montata a mano."],
+        [240, 65, 45, 65, "🔥 La stufa di ghisa di Boris: scalda il bar anche con meno venti fuori."],
+        [115, 20, 70, 50, "📜 La Bacheca delle Emergenze: i bollettini ciclostilati del Sindaco Valanga."]
+      ]
+    },
+    bm_lago: {
+      draw: function (g, W, H, f) {
+        // Cielo alpino ghiacciato
+        g.fillStyle = "#e0f2fe"; g.fillRect(0, 0, W, 80);
+        // Vette e abeti
+        for (let i = 0; i < 7; i++) {
+          const ax = i * 48;
+          g.fillStyle = "#166534";
+          g.beginPath(); g.moveTo(ax + 20, 30); g.lineTo(ax, 75); g.lineTo(ax + 40, 75); g.fill();
+          g.fillStyle = "#ffffff";
+          g.beginPath(); g.moveTo(ax + 20, 30); g.lineTo(ax + 10, 45); g.lineTo(ax + 30, 45); g.fill();
+        }
+        // Superficie del lago ghiacciato (azzurro/turchese)
+        g.fillStyle = "#38bdf8"; g.fillRect(0, 75, W, 125);
+        // Venature e crepe di ghiaccio
+        g.strokeStyle = "rgba(255,255,255,0.8)"; g.lineWidth = 1.5;
+        g.beginPath(); g.moveTo(40, 110); g.lineTo(80, 130); g.lineTo(130, 120); g.stroke();
+        g.beginPath(); g.moveTo(180, 95); g.lineTo(220, 115); g.lineTo(260, 105); g.stroke();
+        // Catasta di tronchi
+        g.fillStyle = "#78350f";
+        for (let r = 0; r < 3; r++) {
+          for (let c = 0; c < 4; c++) {
+            g.fillRect(20 + c * 14, 150 - r * 8, 12, 6);
+          }
+        }
+      },
+      hot: [
+        [100, 90, 120, 60, "⛸️ La pista di ghiaccio del Lago: le lamine scivolano che è una meraviglia."],
+        [15, 130, 65, 45, "🪵 La catasta di legna da ardere dei Boscaioli del Passo."],
+        [120, 20, 80, 50, "🌲 Gli abeti secolari della Ghiotta carichi di neve fresca."]
+      ]
+    },
+    bm_municipio: {
+      draw: function (g, W, H, f) {
+        // Moquette e pareti
+        g.fillStyle = "#fed7aa"; g.fillRect(0, 0, W, 120);
+        g.fillStyle = "#ea580c"; g.fillRect(0, 120, W, 80);
+        // Scrivania presidenziale di compensato
+        g.fillStyle = "#78350f"; g.fillRect(60, 95, 140, 40);
+        g.fillStyle = "#fef08a"; g.fillRect(80, 80, 16, 15); // coppa
+        g.fillStyle = "#b91c1c"; g.fillRect(140, 85, 20, 10); // timbri
+        // Busto del sindaco
+        g.fillStyle = "#cbd5e1"; g.beginPath(); g.arc(240, 70, 12, 0, 7); g.fill();
+        g.fillRect(235, 82, 10, 16);
+        // Radiatore misterioso
+        g.fillStyle = "#94a3b8"; g.fillRect(15, 85, 24, 30);
+        g.strokeStyle = "#475569"; g.strokeRect(15, 85, 24, 30);
+      },
+      hot: [
+        [50, 80, 150, 55, "📁 La scrivania del Sindaco Valanga piena di decreti straordinari non firmati."],
+        [10, 80, 35, 45, "🚰 Il vecchio radiatore dello scaldabagno del 1984... collegato alla teca?!"],
+        [220, 55, 45, 55, "🗿 Il busto di cartapesta del Sindaco Valanga. Ha un'espressione fiera e un po' vuota."]
+      ]
+    },
+    bm_campo: {
+      draw: function (g, W, H, f) {
+        // Notte alpina con bufera
+        g.fillStyle = "#0f172a"; g.fillRect(0, 0, W, 80);
+        // Spalti di compensato gremito
+        g.fillStyle = "#64748b"; g.fillRect(0, 50, W, 40);
+        for (let i = 0; i < 30; i++) {
+          g.fillStyle = ["#ef4444", "#38bdf8", "#fde047", "#4ade80"][i % 4];
+          g.fillRect(8 + i * 10, 45 + (i % 2) * 8, 7, 7);
+        }
+        // Campo di gioco di cartone
+        g.fillStyle = "#f1f5f9"; g.fillRect(0, 90, W, 110);
+        // Linee tratteggiate a forbice
+        g.strokeStyle = "#94a3b8"; g.lineWidth = 2; g.setLineDash([5, 5]);
+        g.strokeRect(20, 100, W - 40, 85);
+        g.setLineDash([]);
+        // Torrette fari
+        g.fillStyle = "#fef08a";
+        g.beginPath(); g.arc(30, 30, 8, 0, 7); g.fill();
+        g.beginPath(); g.arc(W - 30, 30, 8, 0, 7); g.fill();
+        // Bufera di carta
+        const frameStep = (f >> 1);
+        g.fillStyle = "rgba(255,255,255,0.9)";
+        for (let k = 0; k < 35; k++) {
+          const bx = (k * 43 + frameStep * 5) % W;
+          const by = (k * 23 + frameStep * 4) % H;
+          g.fillRect(bx, by, 3, 3);
+        }
+      },
+      hot: [
+        [30, 95, 260, 90, "⚽ Il rettangolo di gioco di compensato durante la finale di coppa."],
+        [10, 40, 300, 45, "📣 Gli spalti di cartone gremiti: i tifosi cantano sotto la bufera."],
+        [20, 20, 40, 35, "💡 I riflettori a barattolo di vetro che illuminano il turbinio di neve."]
+      ]
+    },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
 
@@ -7397,7 +7608,7 @@
   function drawCaption(g, W) {
     if (!S.cap) return; const age = (now() - S.capT) / 16; if (age > 230) { S.cap = null; return; }
     const a = Math.min(1, (230 - age) / 30);
-    g.save(); g.font = "9px Georgia, serif"; g.textAlign = "left"; g.textBaseline = "alphabetic";
+    g.save(); g.font = "9px Georgia, serif";
     const words = S.cap.split(" "), out = []; let line = "";
     words.forEach((w) => { const t = line ? line + " " + w : w; if (g.measureText(t).width > W - 28) { out.push(line); line = w; } else line = t; }); if (line) out.push(line);
     const h = out.length * 11 + 8;

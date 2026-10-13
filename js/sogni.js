@@ -24,6 +24,7 @@
     campetto: ["ali-di-rondine.campetto", "Dal Campetto al Mondiale", "#1f5fbf"], colline: ["ali-di-rondine.colline", "Master League delle Colline", "#2a6a3a"], grigio: ["ali-di-rondine.grigio", "Il Cavaliere della Notte", "#2a3040"], ducati: ["ali-di-rondine.ducati", "La Guerra dei Tre Ducati", "#c8a040"], titano: ["ali-di-rondine.titano", "Il Figlio del Titano", "#c83a2a"], quartiere: ["ali-di-rondine.quartiere", "Gli Straordinari di Quartiere", "#ff5a8a"], razzo: ["ali-di-rondine.razzo", "Razzopacco · Consegne dal Futuro", "#ff8a3a"], cavallo: ["ali-di-rondine.cavallo", "Il Cavallo Star", "#ff7aa8"], detective: ["ali-di-rondine.detective", "Detective di Campo", "#3a4a5a"],
     spazio: ["ali-di-rondine.spazio", "Calcio Spaziale", "#2a6ac8"], vento: ["ali-di-rondine.vento", "La Valle del Vento Gentile", "#5a9a7a"], dopo: ["ali-di-rondine.dopo", "Dopo il Campione", "#a8622a"], mondi: ["ali-di-rondine.mondi", "Il Torneo dei Mondi", "#2a1a4a"],
     // saghe a capitoli: il 4° elemento è il modulo che espone info() (poi si ripiega sul salvataggio)
+    montagna: ["ali-di-rondine.montagna", "Piccolo Borgo di Montagna", "#0284c7", "__montagna"],
     vallombra: ["ali-di-rondine.storia-campione", "Vallombra", "#6a8aa8", "__storiaCampione"], kronenburg: ["ali-di-rondine.kronenburg-story", "Kronenburg", "#8a1a2a", "__kronenburgStory"], pirati: ["ali-di-rondine.pirati-story", "I Pirati della Tempesta Celeste", "#2a8ac8", "__piratiStory"],
     alchimia: ["ali-di-rondine.alchimia-story", "L'Alchimia d'Acciaio", "#b0762a", "__alchimiaStory"], chrono: ["ali-di-rondine.chrono-story", "Chrono-Break", "#c8a22a", "__chronoStory"], ombre: ["ali-di-rondine.campione-ombre", "Il Circuito delle Ombre", "#1a3a5a", "__campioneOmbre"],
     ragnarok: ["ali-di-rondine.ragnarok", "Ragnarok Ball", "#9a3a1a", "__ragnarokStory"], belovodia: ["ali-di-rondine.belovodia-story", "Belovodia", "#4a7a8a", "__belovodiaStory"], bilancia: ["ali-di-rondine.bilancia-feudi", "La Bilancia delle Tre Corone", "#6a5a8a", "__bilanciaFeudi"],
@@ -88,6 +89,7 @@
   ];
   // [id, saga, rarità (c r e l), attacco, difesa, tecnica, ruolo]
   const CARDS = [
+    ["bm_boris", "montagna", "c", 50, 74, 68, "P"], ["bm_sbruffo", "montagna", "c", 46, 78, 54, "D"], ["bm_wendy", "montagna", "r", 62, 60, 80, "C"], ["bm_valanga", "montagna", "e", 76, 52, 70, "A"], ["bm_tarcisio", "montagna", "r", 82, 64, 58, "A"],
     ["sq_brina", "quartiere", "c", 60, 64, 66, "C"], ["sq_gommo", "quartiere", "c", 56, 72, 60, "D"], ["sq_scintilla", "quartiere", "r", 78, 52, 62, "A"], ["sq_ines", "quartiere", "e", 54, 84, 74, "D"],
     ["rz_ferruccio", "razzo", "c", 52, 66, 64, "C"], ["rz_timbro", "razzo", "c", 44, 78, 66, "D"], ["rz_borea", "razzo", "r", 56, 82, 70, "D"], ["rz_orsola", "razzo", "e", 80, 60, 76, "A"],
     ["cs_ugo", "cavallo", "c", 58, 50, 62, "C"], ["cs_max", "cavallo", "c", 66, 58, 64, "A"], ["cs_lucilla", "cavallo", "r", 50, 76, 72, "D"], ["cs_baldo", "cavallo", "e", 84, 54, 80, "A"],

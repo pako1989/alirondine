@@ -21,9 +21,11 @@
   const hero = () => safe(() => window.heroLoad && window.heroLoad(), null);
 
   // ---------------------------------------------------------------- il catalogo delle saghe
-  const GEN = { fantasy: ["Fantasy", "#7a4ab0"], mistero: ["Mistero", "#2c6a9a"], scifi: ["Fantascienza", "#1f8a8a"], storico: ["Storico", "#a8622a"], commedia: ["Commedia", "#c9921a"], sport: ["Sport anime", "#c0392b"], avventura: ["Avventura", "#3f8a3f"], dramma: ["Drammatico", "#6a5a7a"], tattica: ["Tattica", "#5a6a3a"] };
+  const GEN = { fantasy: ["Fantasy", "#7a4ab0"], mistero: ["Mistero", "#2c6a9a"], scifi: ["Fantascienza", "#1f8a8a"], storico: ["Storico", "#a8622a"], commedia: ["Commedia", "#c9921a"], sport: ["Sport anime", "#c0392b"], avventura: ["Avventura", "#3f8a3f"], dramma: ["Drammatico", "#6a5a7a"], tattica: ["Tattica", "#5a6a3a"], satira: ["Satira", "#0284c7"] };
   // mod: oggetto window con menuEntry/info · fn: funzione window da chiamare con (indietro) · ch: capitoli totali (se noti)
   const SAGAS = [
+    { id: "montagna", t: "Piccolo Borgo di Montagna", e: "🏔️", g: ["commedia", "satira"], mod: "__montagna", key: "ali-di-rondine.montagna", ch: 3, cover: "bm_titolo", d: "Un paesino innevato dove gli adulti vivono di tradizioni stravaganti e venerano un misterioso Pallone di Cartone. Tu sei il centravanti sceso dalla corriera delle 8:00. Ritagli: marionette di carta stop-motion a 12 fps, caricamento a molla e contrasti a forbice. E la Bacheca delle Emergenze del Comune.",
+      hints: { scaldabagno: "Serve aver trovato l'archivio del boiler nel Capitolo 2 e vinto la finale.", politica: "Serve aver sfiduciato il Sindaco e una grande fiducia del borgo.", cartone: "Sempre possibile, alla fine: alza la Coppa di cartone.", segreto: "Segreto: tutti i ritagli di cartone raccolti e l'amicizia piena di Boris." } },
     { id: "cavallo", t: "Il Cavallo Star", e: "🐴", g: ["commedia", "dramma"], mod: "__cavallo", key: "ali-di-rondine.cavallo", ch: 3, cover: "cs_titolo", d: "Baldo Criniera, cavallo e vecchia star della sitcom sul calcio «Zoccoli d'Oro», vuole tornare in onda. Tu sei la sua spalla. Ciak! Si Gioca: ogni partita si gira a scene, segui il copione o improvvisi. E dopo ogni scelta, il giornale.",
       hints: { diretta: "Serve aver vinto la finale in diretta.", serie: "Serve aver giocato la finale secondo il copione.", biografia: "Serve aver detto la verità alla stampa.", puntata: "Segreto: tutte le cassette, almeno quattro stelle del regista in finale, nessuna ripresa interrotta." } },
     { id: "razzo", t: "Razzopacco · Consegne dal Futuro", e: "🚀", g: ["commedia", "scifi"], mod: "__razzo", key: "ali-di-rondine.razzo", ch: 3, cover: "rz_titolo", d: "Ti risvegli nel 3011 e fai il corriere spaziale per una ditta sgangherata. Tubi pneumatici sopra la città, consegne a tempo, la rotta fra un pianeta di minestra e una luna di uffici. Consegna a Rete: razzetti, pacchi e pianeti che curvano i lanci.",
@@ -98,7 +100,7 @@
     { id: "cala", t: "Cala Tramontana", e: "🌊", g: ["avventura"], fn: "openCalaTramontana", key: "ali-di-rondine.cala-tramontana", cover: "beach", d: "Esplora a piedi il borgo marino alternativo con il tuo Campione." },
     { id: "borgostorto", t: "Il Borgo Storto", e: "🌀", g: ["commedia", "tattica"], api: "openBorgoStorto", cover: "beach", d: "Lo spin-off GDR a turni del Borgo Marino." },
   ];
-  const NEWEST = ["cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
+  const NEWEST = ["montagna", "cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
   const modOf = (s) => (s.mod ? window[s.mod] : null);
   const available = (s) => (s.mod ? !!window[s.mod] : s.fn ? typeof window[s.fn] === "function" : !!(api() && api()[s.api]));
   function state(s) {
@@ -271,6 +273,10 @@
       opp: [{ name: "I Geometri", color: "#ffd23f", style: "difensiva", players: [{ name: "Il Capo" }, { name: "Squadra" }], keeper: { name: "Il Metro" } }, { name: "Le Ruspe", color: "#ffd23f", style: "pressing", players: [{ name: "Betoniera" }, { name: "Gru" }], keeper: { name: "Il Pilastro" } }],
       boss: { name: "Squadra Calcestruzzo", color: "#7a7a8a", style: "pressing", players: [{ name: "Il Dottor Cemento" }, { name: "Betoniera" }], keeper: { name: "Il Pilastro" } },
       opts: (o, h, boss) => ({ title: `Combo di Squadra · contro ${o.name}`, us: "Gli Straordinari", usColor: "#ff5a8a", minutes: boss ? 90 : 60, heroes: [{ name: h.name || "Il Copione", power: "scatto" }, { name: "Brina", power: "ghiaccio" }, { name: "Soffio", power: "vento" }, { name: "Scintilla", power: "fuoco" }], opp: o, known: ["bufera", "raffica"] }) },
+    { id: "ritagli", t: "Ritagli di Cartone", e: "✂️", saga: "montagna", eng: "__ritagli", d: "La partita del Piccolo Borgo: marionette di cartone a molla stop-motion, contrasti a forbice e tiri a rimbalzo secco sulle sponde.",
+      opp: [{ name: "Ragazzi del Coro", color: "#60a5fa", style: "equilibrata", players: [{ name: "Pancrazio" }, { name: "Anacleto" }] }, { name: "Boscaioli del Passo", color: "#b45309", style: "pressing", players: [{ name: "Tarcisio" }, { name: "Tronco" }] }],
+      boss: { name: "Rappresentativa della Valle", color: "#dc2626", style: "pressing", players: [{ name: "Sindaco Valanga" }, { name: "Capitano Ghiaccio" }] },
+      opts: (o, h, boss) => ({ title: `Ritagli · contro ${o.name}`, us: "Piccolo Borgo", usColor: "#0284c7", turns: boss ? 8 : 6, hero: { name: h.name || "Tu" }, mates: [{ name: "Boris" }, { name: "Wendy" }], opp: o }) },
   ];
   function sgState(m) { const s = SAGAS.find((x) => x.id === m.saga), x = s ? state(s) : null; return { s, open: !!(x && (x.doneN >= 1)), boss: !!(x && x.endsFound > 0) }; }
   function openSalaGiochi(back) {
@@ -573,7 +579,7 @@
   // ---------------------------------------------------------------- ALBUM DEI PERSONAGGI
   // ogni personaggio registrato nel gioco (window.__borgoApi.BIO) diventa una carta. Si «incontra» parlandoci (seeCard del gioco).
   // Le sezioni: la Storia e Borgo Marino, i tornei e le modalità del Borgo, e una sezione per saga (riconosciuta dal prefisso degli id).
-  const PFX = { cavallo: "cs", razzo: "rz", quartiere: "sq", titano: "ft", ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
+  const PFX = { montagna: "bm", cavallo: "cs", razzo: "rz", quartiere: "sq", titano: "ft", ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
   const BORGO_PFX = ["sv", "rb", "sb", "cg", "hd", "md", "ac"];
   function perSections() {
     const A = api(); if (!A || !A.BIO) return [];
