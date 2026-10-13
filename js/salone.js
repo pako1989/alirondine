@@ -343,7 +343,7 @@
     if (lastS) html += `<div class="cont" data-id="${lastS.s.id}"><img alt="" src="${cover(lastS.s)}"><div><b>▸ Continua: ${esc(lastS.s.t)}</b>${lastS.x.finished ? "Conclusa · rigioca o cerca gli altri finali" : `Capitolo ${lastS.x.ch}${lastS.s.ch ? ` di ${lastS.s.ch}` : ""}`}</div></div>`;
     html += `<div class="big"><button type="button" data-go="album">🏆 Album dei finali<small>${tt.fe}/${tt.te} timbri</small></button><button type="button" data-go="guarda">👕 Guardaroba<small>Prova e indossa ciò che hai sbloccato</small></button></div>`;
     html += `<div class="big"><button type="button" data-go="sala">🕹️ Sala Giochi<small>I motori di partita delle saghe, liberi</small></button><button type="button" data-go="cine">🎬 Cineteca<small>Rivedi i finali trovati</small></button></div>`;
-    { const pt = safe(() => perTotals(), null); if (pt) html += `<div class="big"><button type="button" data-go="per">👥 Album dei personaggi<small>${pt.seen}/${pt.tot} incontrati · carte d'oro per le saghe concluse</small></button></div>`; }
+    { const pt = safe(() => perTotals(), null); if (pt) html += `<div class="big"><button type="button" data-go="per">👥 Album dei personaggi<small>${pt.seen}/${pt.tot} incontrati · carte d'oro per le saghe concluse</small></button>${window.__sogni ? `<button type="button" data-go="sogni">🃏 La Squadra dei Sogni<small>Carte da collezionare, intesa e il Torneo dei Sogni</small></button>` : ""}</div>`; }
     html += `<div class="row">${[["tutte", "Tutte"], ["corso", "In corso"], ["nuove", "Da iniziare"], ["concluse", "Concluse"]].map(([k, l]) => `<button type="button" class="chip${FILT.st === k ? " on" : ""}" data-st="${k}">${l}</button>`).join("")}</div>`;
     html += `<div class="row">${[["", "Tutti i generi"], ...Object.entries(GEN).map(([k, v]) => [k, v[0]])].map(([k, l]) => `<button type="button" class="chip${FILT.g === k ? " on" : ""}" data-g="${k}">${l}</button>`).join("")}</div>`;
     const shown = list.filter(({ s, x }) => (FILT.st === "tutte" || (FILT.st === "corso" && x.started && !x.finished) || (FILT.st === "nuove" && !x.started) || (FILT.st === "concluse" && x.finished)) && (!FILT.g || s.g.includes(FILT.g)));
@@ -360,6 +360,7 @@
     body.querySelector('[data-go="album"]').onclick = () => openAlbum(() => openSalone());
     body.querySelector('[data-go="guarda"]').onclick = () => openGuardaroba(() => openSalone());
     const pg = body.querySelector('[data-go="per"]'); if (pg) pg.onclick = () => openPersonaggi(() => openSalone());
+    const sgb = body.querySelector('[data-go="sogni"]'); if (sgb) sgb.onclick = () => { close(); window.__sogni.open(() => openSalone()); };
     body.querySelector('[data-go="sala"]').onclick = () => openSalaGiochi(() => openSalone());
     body.querySelector('[data-go="cine"]').onclick = () => openCineteca(() => openSalone());
   }
