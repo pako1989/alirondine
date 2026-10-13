@@ -5812,6 +5812,70 @@
     const dust = since("tc_trono", 1) < 160 ? 40 : 14; for (let i = 0; i < dust; i++) { const x = (i * 53 + f * 0.3) % W, y = (i * 37 + f * 0.2 * (1 + i % 3)) % H; px(g, x, y, 1, 1, "rgba(255,220,140,.6)"); }
     if (since("tc_trono", 2) < 120) { const t = since("tc_trono", 2); for (let i = 0; i < 7; i++) circ(g, 60 + i * 34, 186 - Math.abs(Math.sin(t / 8 + i)) * 12, 5, "#8a5a2a"); }
   }
+  // ---------------------------------------------------------------- DAL CAMPETTO AL MONDIALE (vignette manga: linee cinetiche, retini, scritte)
+  function cmSpeed(g, cx, cy, n, col, f, r0) { g.strokeStyle = col; for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2 + (i % 3) * 0.11, a0 = (r0 || 50) + ((i * 37 + f * 2) % 30); g.lineWidth = 1 + (i % 3); g.beginPath(); g.moveTo(cx + Math.cos(a) * a0, cy + Math.sin(a) * a0); g.lineTo(cx + Math.cos(a) * 260, cy + Math.sin(a) * 260); g.stroke(); } }
+  function cmTone(g, x, y, w, h, col) { g.fillStyle = col; for (let yy = y; yy < y + h; yy += 5) for (let xx = x + ((yy / 5) % 2) * 2.5; xx < x + w; xx += 5) { g.beginPath(); g.arc(xx, yy, 1, 0, 7); g.fill(); } }
+  function cmWord(g, t, x, y, col, sz, rot) { g.save(); g.translate(x, y); g.rotate(rot || -0.08); g.font = `900 ${sz}px Impact, 'Arial Black', sans-serif`; g.textAlign = "center"; g.lineWidth = 4; g.strokeStyle = "#111"; g.strokeText(t, 0, 0); g.fillStyle = col; g.fillText(t, 0, 0); g.restore(); }
+  function cmKid(g, x, y, s, shirt, hair, f, kick) { g.save(); g.translate(x, y); g.scale(s, s); g.lineWidth = 2; g.strokeStyle = "#111"; g.fillStyle = shirt; g.fillRect(-8, -26, 16, 24); g.strokeRect(-8, -26, 16, 24); g.strokeStyle = "#e0ac7e"; g.lineWidth = 4; g.beginPath(); g.moveTo(-4, -2); g.lineTo(-6, 18); g.moveTo(4, -2); g.lineTo(kick ? 18 + Math.sin(f / 6) * 4 : 6, kick ? 8 : 18); g.stroke(); g.fillStyle = "#e0ac7e"; g.strokeStyle = "#111"; g.lineWidth = 2; g.beginPath(); g.arc(0, -36, 10, 0, 7); g.fill(); g.stroke(); g.fillStyle = hair; g.beginPath(); g.moveTo(-11, -38); g.lineTo(-7, -50); g.lineTo(-2, -44); g.lineTo(3, -52); g.lineTo(7, -45); g.lineTo(12, -48); g.lineTo(10, -36); g.quadraticCurveTo(0, -44, -11, -38); g.fill(); g.stroke(); g.restore(); }
+  function cmBall(g, x, y, r) { circ(g, x, y, r, "#fff"); g.strokeStyle = "#111"; g.lineWidth = 1.5; g.beginPath(); g.arc(x, y, r, 0, 7); g.stroke(); g.fillStyle = "#111"; g.beginPath(); for (let k = 0; k < 5; k++) { const a = (k / 5) * Math.PI * 2 - Math.PI / 2; g.lineTo(x + Math.cos(a) * r * 0.4, y + Math.sin(a) * r * 0.4); } g.fill(); }
+  function bgCmTitolo(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#0e1628", "#1f5fbf", "#ffd23f"]); g.save(); g.globalAlpha = 0.5; cmSpeed(g, 160, 100, 46, "#fff", f); g.restore();
+    const p = since("cm_titolo", 0) < 120 ? since("cm_titolo", 0) / 120 : 1, bx = 60 + p * 200, by = 150 - Math.sin(p * Math.PI) * 110; for (let k = 1; k < 8; k++) circ(g, bx - k * 8, by + k * 3 * (p < 0.5 ? 1 : -1), 6 - k * 0.6, `rgba(255,210,63,${0.6 - k * 0.07})`); cmBall(g, bx, by, 8);
+    cmKid(g, 70, 178, 1.3, "#1f5fbf", "#2b1d14", f, since("cm_titolo", 0) < 40);
+    const cup = since("cm_titolo", 1) < 120; g.save(); g.translate(255, 100 + (cup ? Math.sin(f / 5) * 3 : 0)); g.fillStyle = "#ffd23f"; g.strokeStyle = "#111"; g.lineWidth = 2; g.beginPath(); g.moveTo(-18, -26); g.lineTo(18, -26); g.quadraticCurveTo(16, 4, 0, 8); g.quadraticCurveTo(-16, 4, -18, -26); g.fill(); g.stroke(); g.fillRect(-4, 8, 8, 14); g.strokeRect(-4, 8, 8, 14); g.fillRect(-12, 22, 24, 6); g.strokeRect(-12, 22, 24, 6); g.restore(); if (cup) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 255, 96, 60, "255,220,120", 0.4); g.restore(); }
+    cmWord(g, "DAL CAMPETTO", 160, 30, "#fff", 20, -0.06); cmWord(g, "AL MONDIALE!", 170, 54, "#ffd23f", 24, -0.06);
+    if (since("cm_titolo", 2) < 90) cmWord(g, "GOOOL!", 170, 120, "#ff6a5a", 30, 0.1);
+  }
+  function bgCmRiva(g, W, H, f) {
+    vgrad(g, 0, 0, W, 110, ["#ff9a5a", "#ffd8a0"]); circ(g, 250, 70, 26, "#fff4c8");
+    vgrad(g, 0, 100, W, 40, ["#2a7ac8", "#1a5aa8"]); for (let i = 0; i < 12; i++) px(((i * 37 + f * 0.4) % (W + 40)) - 20, 108 + (i % 4) * 7, 14, 1, "rgba(255,255,255,.5)");
+    [[30, "#e83a3a"], [90, "#3a8ad8"], [150, "#ffd23f"]].forEach(([x, c], i) => { const bob = Math.sin(f / 20 + i) * 2; g.fillStyle = c; g.beginPath(); g.moveTo(x - 14, 112 + bob); g.lineTo(x + 14, 112 + bob); g.lineTo(x + 9, 120 + bob); g.lineTo(x - 9, 120 + bob); g.closePath(); g.fill(); });
+    px(0, 136, W, 64, "#c8a878"); for (let i = 0; i < 5; i++) { px(10 + i * 62, 92 - (i % 2) * 12, 46, 46 + (i % 2) * 12, "#f4f0e4"); px(14 + i * 62, 100 - (i % 2) * 12, 8, 8, "#2a6ac8"); px(30 + i * 62, 100 - (i % 2) * 12, 8, 8, since("cm_riva", 0) < 120 && i % 2 ? "#ffd23f" : "#2a6ac8"); }
+    px(200, 150, 100, 40, "#d8b888"); [[204, 150], [292, 150]].forEach(([x, y]) => { px(x, y - 22, 2, 22, "#f4f0e4"); }); px(204, 128, 90, 2, "#f4f0e4");
+    const gl = since("cm_riva", 1) < 60; cmBall(g, gl ? 250 + since("cm_riva", 1) * 0.5 : 240, gl ? 160 - Math.sin(since("cm_riva", 1) / 60 * Math.PI) * 30 : 182, 4); if (gl && since("cm_riva", 1) > 40) cmWord(g, "GOL!", 250, 125, "#ffd23f", 16);
+    px(150, 165, 14, 10, "#6a4a2a"); circ(g, 157, 158, 6, "#c68642"); px(150, 150, 14, 4, "#c8c8c8"); if (since("cm_riva", 2) < 120) { g.fillStyle = "#fff"; g.font = "bold 8px sans-serif"; g.fillText("«Testa alta!»", 130, 145); }
+  }
+  function bgCmCampetto(g, W, H, f) {
+    vgrad(g, 0, 0, W, 80, ["#ff8a4a", "#ffc890"]); px(0, 70, W, 130, "#c8a070"); for (let i = 0; i < 80; i++) px((i * 41) % W, 72 + (i * 23) % 128, 3, 1, "rgba(90,60,30,.3)");
+    g.strokeStyle = "rgba(255,255,255,.75)"; g.lineWidth = 2; g.strokeRect(20, 90, 280, 100); g.beginPath(); g.moveTo(160, 90); g.lineTo(160, 190); g.stroke(); g.beginPath(); g.arc(160, 140, 18, 0, 7); g.stroke();
+    [[20, 120], [300, 120]].forEach(([x, y]) => { px(x - 2, y - 10, 3, 40, "#f4f0e4"); });
+    const sw = since("cm_campetto", 0) < 90; if (sw) { g.save(); g.globalAlpha = 0.5; cmSpeed(g, 160, 140, 30, "#fff", f, 30); g.restore(); cmWord(g, "TIRO DELL'AQUILA!", 160, 60, "#ffd23f", 18); }
+    cmKid(g, 120, 178, 1.1, "#1f5fbf", "#2b1d14", f, sw); cmKid(g, 280, 168, 1, "#c83a3a", "#111", f, false); px(268, 126, 24, 6, "#c83a3a");
+    if (since("cm_campetto", 1) < 100) cmWord(g, "PARATA!", 270, 110, "#ff6a5a", 16, 0.1);
+    const ag = since("cm_campetto", 2) < 140; if (ag) { const t = since("cm_campetto", 2); g.fillStyle = "#3a2a1a"; g.beginPath(); g.moveTo(40 + t * 1.8, 40); g.lineTo(20 + t * 1.8, 30 + Math.sin(t / 3) * 6); g.lineTo(44 + t * 1.8, 38); g.lineTo(68 + t * 1.8, 30 + Math.sin(t / 3) * 6); g.lineTo(48 + t * 1.8, 40); g.fill(); }
+  }
+  function bgCmProvincia(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#5aa0e8", "#c8e0f8"]); px(0, 60, W, 60, "#a8a8b0"); for (let r = 0; r < 4; r++) for (let i = 0; i < 40; i++) { const j = since("cm_provincia", 0) < 90 ? Math.abs(Math.sin(f / 4 + i)) * 4 : 0; circ(g, 4 + i * 8 + (r % 2) * 4, 70 + r * 12 - j, 3, ["#1f5fbf", "#e85a1a", "#3a8ad8", "#ffd23f", "#fff"][(i + r) % 5]); }
+    vgrad(g, 0, 120, W, 80, ["#3a9a4a", "#2f8a3e"]); g.strokeStyle = "rgba(255,255,255,.8)"; g.lineWidth = 2; g.strokeRect(14, 130, 292, 62);
+    [["RIVA AZZURRA", "#1f5fbf"], ["FIAMME DEL PORTO", "#e85a1a"], ["PONTERUGA", "#3a8ad8"]].forEach(([t, c], i) => { px(10 + i * 104, 112, 96, 14, c); g.fillStyle = "#fff"; g.font = "bold 8px sans-serif"; g.textAlign = "center"; g.fillText(t, 58 + i * 104, 122); g.textAlign = "left"; });
+    if (since("cm_provincia", 1) < 100) { g.save(); g.globalAlpha = 0.6; cmSpeed(g, 230, 160, 28, "#fff", f, 20); g.restore(); cmWord(g, "TIRO DEL LEONE!", 200, 100, "#ff8a3a", 18, 0.06); }
+    cmKid(g, 230, 186, 0.9, "#e85a1a", "#1a1a1a", f, since("cm_provincia", 1) < 100);
+    const tw = since("cm_provincia", 2) < 100; cmKid(g, 80, 188, 0.9, "#3a8ad8", "#e8c84a", f, false); cmKid(g, 100, tw ? 160 - Math.sin(since("cm_provincia", 2) / 100 * Math.PI) * 30 : 188, 0.9, "#3a8ad8", "#e8c84a", f, tw); if (tw) cmWord(g, "CATAPULTA!", 90, 110, "#7ad8ff", 16);
+  }
+  function bgCmSpogliatoio(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#2a3346", "#1a2233"]); for (let i = 0; i < 8; i++) { px(10 + i * 38, 30, 32, 110, "#3a4a6a"); px(12 + i * 38, 34, 28, 4, "#2a3a5a"); circ(g, 34 + i * 38, 80, 2, "#c8c8d0"); }
+    px(100, 40, 120, 70, "#1a2a1a"); g.strokeStyle = "#e8e8e8"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(120, 80); g.quadraticCurveTo(160, 40, 200, 70); g.stroke(); g.beginPath(); g.moveTo(150, 55); g.lineTo(140, 48); g.lineTo(160, 52); g.lineTo(180, 46); g.lineTo(168, 56); g.stroke();
+    if (since("cm_spogliatoio", 0) < 120) { g.fillStyle = "#ffd23f"; g.font = "bold 10px sans-serif"; g.fillText("TESTA ALTA", 128, 102); }
+    px(30, 150, 260, 12, "#8a6a3a"); px(30, 162, 6, 26, "#5a3a22"); px(284, 162, 6, 26, "#5a3a22");
+    const sh = since("cm_spogliatoio", 1) < 90; px(140, sh ? 120 : 138, 24, 14, "#1f5fbf"); g.fillStyle = "#fff"; g.font = "bold 9px sans-serif"; g.fillText("10", 146, sh ? 131 : 149);
+    if (since("cm_spogliatoio", 2) < 100) cmTone(g, 0, 0, W, H, "rgba(255,255,255,.08)");
+  }
+  function bgCmRitiro(g, W, H, f) {
+    vgrad(g, 0, 0, W, 100, ["#5a9ae8", "#d8ecff"]); px(40, 40, 120, 60, "#f4f0e4"); for (let i = 0; i < 8; i++) px(48 + i * 14, 50, 8, 10, "#2a6ac8"); px(40, 36, 120, 6, "#1f5fbf");
+    vgrad(g, 0, 100, W, 100, ["#3fae5a", "#2f9a4a"]); for (let i = 0; i < 10; i++) px(i * 32, 100, 16, 100, "rgba(255,255,255,.04)");
+    g.strokeStyle = "rgba(255,255,255,.8)"; g.lineWidth = 2; g.strokeRect(180, 110, 120, 70);
+    const tr = since("cm_ritiro", 0) < 100; if (tr) { const t = since("cm_ritiro", 0) / 100; for (let k = 0; k < 10; k++) circ(g, 200 + t * 80 - k * 6, 150 - Math.sin(t * 6) * 10, 4 - k * 0.3, `rgba(255,210,63,${0.7 - k * 0.06})`); cmWord(g, "COMBINAZIONE D'ORO!", 160, 90, "#ffd23f", 15); }
+    cmKid(g, 210, 182, 0.9, "#1f5fbf", "#c87a3a", f, tr); cmKid(g, 270, 182, 0.9, "#1f5fbf", "#2b1d14", f, false);
+    const fl = since("cm_ritiro", 1) < 140; px(20, 30, 2, 70, "#888"); g.fillStyle = "#1f5fbf"; g.beginPath(); g.moveTo(22, 30); for (let k = 0; k <= 6; k++) g.lineTo(22 + k * 4, 30 + Math.sin(f / (fl ? 4 : 9) + k) * 2); for (let k = 6; k >= 0; k--) g.lineTo(22 + k * 4, 44 + Math.sin(f / (fl ? 4 : 9) + k) * 2); g.fill();
+    if (since("cm_ritiro", 2) < 100) { g.fillStyle = "#fff"; g.font = "bold 8px sans-serif"; g.fillText("CONVOCATO", 60, 120); px(56, 112, 64, 1, "#fff"); }
+  }
+  function bgCmMondiale(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#1a0e2a", "#3a2a6a", "#ff8a4a"]); for (let r = 0; r < 6; r++) for (let i = 0; i < 46; i++) { const j = since("cm_mondiale", 0) < 120 ? Math.abs(Math.sin(f / 3 + i + r)) * 3 : 0; circ(g, 3 + i * 7 + (r % 2) * 3, 40 + r * 10 - j, 2.5, ["#1f5fbf", "#ffffff", "#e8e8f0", "#ffd23f", "#e83a3a", "#3a8ad8"][(i * 3 + r) % 6]); }
+    [[20, 20], [300, 20]].forEach(([x, y]) => { px(x - 2, y, 4, 30, "#888"); const gr = g.createRadialGradient(x, y, 2, x, y, 80); gr.addColorStop(0, "rgba(255,250,220,.45)"); gr.addColorStop(1, "rgba(255,250,220,0)"); g.fillStyle = gr; g.fillRect(x - 80, y - 80, 160, 160); });
+    vgrad(g, 0, 110, W, 90, ["#3fae5a", "#2f9a4a"]); g.strokeStyle = "rgba(255,255,255,.85)"; g.lineWidth = 2; g.strokeRect(12, 118, 296, 76); g.beginPath(); g.moveTo(160, 118); g.lineTo(160, 194); g.stroke(); g.beginPath(); g.arc(160, 156, 16, 0, 7); g.stroke();
+    if (since("cm_mondiale", 1) < 120) { g.save(); g.globalAlpha = 0.55; cmSpeed(g, 160, 150, 40, "#fff", f, 20); g.restore(); cmWord(g, "FUOCO DEL NORD!", 160, 104, "#7ab8ff", 18, 0.05); }
+    const cup = since("cm_mondiale", 2) < 160; if (cup) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 160, 150, 70, "255,220,120", 0.35); g.restore(); for (let i = 0; i < 24; i++) { const t = since("cm_mondiale", 2); px((i * 41 + t * (1 + i % 3)) % W, (i * 29 + t * 2) % H, 3, 3, ["#ffd23f", "#1f5fbf", "#fff", "#e83a3a"][i % 4]); } cmWord(g, "CAMPIONI!", 160, 170, "#ffd23f", 26); }
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -6458,6 +6522,41 @@
       [110, 15, 100, 50, "⚖ La bilancia dipinta sul muro oscilla, piano. Poi si ferma in equilibrio. La giudice dice che lo fa da sola, quando qualcuno mente."],
       [185, 75, 40, 35, "🔨 TOC! Il martelletto batte sul banco. Nell'aula cala un silenzio così profondo che si sente piovere su tutta Portagrigia."],
       [40, 130, 40, 60, "🌺 Il garofano del Presidente Valli scivola dall'occhiello e cade per terra. Lui non lo raccoglie."],
+    ] },
+    cm_titolo: { draw: bgCmTitolo, hot: [
+      [40, 60, 240, 120, "⚽ Il pallone sale, si ferma un attimo nel cielo e piomba giù: il Tiro dell'Aquila. In tutti i cartoni di calcio, a questo punto, parte la sigla."],
+      [225, 60, 60, 80, "🏆 La coppa del Mondiale giovanile brilla. Da Riva Azzurra sembra lontanissima. Da vicino, si sa, sono tutte più piccole."],
+      [100, 90, 140, 60, "📣 «GOOOL!»: il cronista lo urla così forte che la parola esce dalla vignetta."],
+    ] },
+    cm_riva: { draw: bgCmRiva, hot: [
+      [0, 80, 320, 30, "🏠 Le finestre di Riva Azzurra si accendono una dopo l'altra: è l'ora della cena, ma al campetto si gioca ancora."],
+      [200, 120, 110, 70, "⚽ Il pallone del campetto supera la porta di ferro e finisce sulla strada. Gol, o fuori? Al campetto, decide chi ha la voce più forte."],
+      [130, 140, 50, 40, "🧔 Bastiano alza gli occhi dalla rete un secondo solo. «Testa alta!», dice. Poi torna ai suoi nodi."],
+    ] },
+    cm_campetto: { draw: bgCmCampetto, hot: [
+      [80, 120, 100, 70, "🦅 Le linee cinetiche esplodono: «TIRO DELL'AQUILA!». Il pallone sale, sale, sale."],
+      [240, 100, 70, 80, "🧢 Saverio Muro si tuffa, col cappellino rosso: «PARATA!». Si rialza come se niente fosse."],
+      [0, 0, 320, 70, "🦅 Un'aquila vera passa sopra il campetto. Bastiano giura che viene ogni volta che qualcuno tira bene."],
+    ] },
+    cm_provincia: { draw: bgCmProvincia, hot: [
+      [0, 60, 320, 50, "📣 Le tribune del Torneo delle Province saltano tutte insieme. Rosa ha portato un tamburo. Nessuno sa da dove."],
+      [190, 120, 100, 70, "🦁 Leone Ruggeri carica il tiro: la terra sotto il suo piede si crepa. «TIRO DEL LEONE!»"],
+      [60, 120, 80, 70, "🤸 Un gemello Ponte si china, l'altro ci salta sopra e vola: «CATAPULTA!»."],
+    ] },
+    cm_spogliatoio: { draw: bgCmSpogliatoio, hot: [
+      [100, 40, 120, 70, "🖍 Sulla lavagna Bastiano ha disegnato un'aquila. Sotto, qualcuno ha scritto «TESTA ALTA» in giallo."],
+      [130, 115, 40, 40, "👕 La maglia numero dieci salta giù dall'appendiabiti, come se avesse fretta di giocare."],
+      [0, 0, 320, 200, "✨ Per un attimo lo spogliatoio si riempie di retini da fumetto: è il momento prima della partita, quello che nei cartoni dura tre puntate."],
+    ] },
+    cm_ritiro: { draw: bgCmRitiro, hot: [
+      [180, 110, 120, 80, "✨ Passaggio, di prima, di prima, tiro: «COMBINAZIONE D'ORO!». Il pallone lascia una scia dorata."],
+      [10, 20, 40, 40, "🚩 La bandiera della Nazionale si gonfia di vento: sembra che saluti."],
+      [40, 100, 100, 30, "✉️ «CONVOCATO»: la parola della lettera arrivata alla pescheria di Rosa. La rileggi ogni sera."],
+    ] },
+    cm_mondiale: { draw: bgCmMondiale, hot: [
+      [0, 30, 320, 70, "📣 Ottantamila persone, sei colori, un'onda che fa il giro dello stadio due volte."],
+      [100, 110, 120, 80, "❄️ Il Barone di Nordavia carica il «FUOCO DEL NORD!»: il pallone, dicono, diventa blu."],
+      [60, 130, 200, 70, "🏆 Coriandoli d'oro e d'azzurro piovono sul campo: «CAMPIONI!»."],
     ] },
     tc_titolo: { draw: bgTcTitolo, hot: [
       [120, 50, 80, 110, "👑 Il Trono di Cuoio si illumina dall'interno, come un pallone colpito dal sole. Settanta casate ci si sono sedute. Nessuna ci è rimasta."],
