@@ -80,19 +80,19 @@
       if (S.own) {
         if (cb && cb.shot && S.z >= cb.shot[1]) return shoot(cb.shot[0] + (S.z - cb.shot[1]) * 0.06, cb.shot[2] || I !== "trappola", cb.n, pw);
         if (!cb && sel.length === 1 && S.z >= 4 && S.wantShot) return shoot(0.42 + (S.z - 4) * 0.08, I !== "trappola", "Tiro", pw);
-        if (I === "pressing" && !(cb && cb.sp) && (sel.length === 1 ? R() < 0.5 : R() < 0.2)) { S.own = false; fx("PALLA PERSA", pw, "#ff8a7a"); tone(180, 0.3, "square", 0.04); return after(`<b>Pressing!</b> ${sel.length === 1 ? "Da solo" : "La combo è lenta"}: ${esc(opp.players[0] ? opp.players[0].name : "un avversario")} ti ruba palla.`); }
+        if (I === "pressing" && !(cb && cb.sp) && (sel.length === 1 ? R() < 0.5 - 0.06 * ((o.bonus || {}).te | 0) : R() < 0.2 - 0.04 * ((o.bonus || {}).te | 0))) { S.own = false; fx("PALLA PERSA", pw, "#ff8a7a"); tone(180, 0.3, "square", 0.04); return after(`<b>Pressing!</b> ${sel.length === 1 ? "Da solo" : "La combo è lenta"}: ${esc(opp.players[0] ? opp.players[0].name : "un avversario")} ti ruba palla.`); }
         let adv = cb ? cb.a || 1 : 1; if (I === "muro" && !(cb && cb.sm)) adv = Math.min(1, adv);
         S.z = Math.min(Z - 1, S.z + adv); if (cb && cb.frz) S.frz = cb.frz;
         fx(cb ? cb.n.toUpperCase() + "!" : "PASSAGGIO", pw); text = cb ? `<b>${esc(cb.n)}!</b> Avanzate di ${adv} ${adv === 1 ? "zona" : "zone"}${cb.frz ? `, e ${esc(opp.name)} restano congelati` : ""}.` : `Passaggio: avanzate di una zona.`;
       } else {
-        const p = (cb ? cb.steal * 0.72 : 0.3) / oppK;
+        const p = ((cb ? cb.steal * 0.72 : 0.3) + 0.04 * ((o.bonus || {}).df | 0)) / oppK;
         if (R() < p) { S.own = true; S.data.recuperi++; if (cb && cb.frz) S.frz = cb.frz; fx(cb ? cb.n.toUpperCase() + "!" : "CONTRASTO!", pw, "#7ad87a"); tone(640, 0.2, "triangle", 0.05); return after(`<b>${cb ? esc(cb.n) : "Contrasto"}!</b> Palla vostra in zona ${S.z + 1}.`); }
         fx(cb ? cb.n : "MANCATO", pw, "#ff8a7a"); text = `${cb ? `<b>${esc(cb.n)}</b>, ma` : "Contrasto a vuoto:"} non basta.`;
       }
       return opponentMove(text);
     }
     function shoot(p, ok, name, pw) {
-      S.data.tiri++; const goal = ok && R() < Math.min(0.92, p / oppK);
+      S.data.tiri++; const goal = ok && R() < Math.min(0.92, (p + 0.04 * ((o.bonus || {}).at | 0)) / oppK);
       if (goal) { S.a++; fx("GOOOL!", pw, "#ffd23f"); tone(660, 0.5, "triangle", 0.06, 1320); S.phase = "wait"; hud(); msg(`<b>GOL!</b> ${esc(name)} dalla zona ${S.z + 1}: ${esc(opp.keeper.name)} non ci arriva.`); return padNext(() => kickoff(false)); }
       S.own = false; S.z = Math.max(3, S.z - 1); fx(ok ? "PARATA!" : "TRAPPOLA!", pw, "#ff8a7a"); tone(200, 0.4, "square", 0.05);
       return after(ok ? `<b>Parata!</b> ${esc(opp.keeper.name)} blocca ${esc(name)}.` : `<b>Trappola!</b> Il tiro semplice finisce contro il muro di gambe. Serve un tiro di fuoco.`);
@@ -103,7 +103,7 @@
       if (S.frz > 0) { S.frz--; t += ` ${esc(opp.name)} sono ancora congelati.`; return after(t, true); }
       if (!S.own) {
         const I = S.intent;
-        if (I === "tiro" || S.z <= 1) { const goal = R() < 0.45 * oppK * (DF.shot || 1); if (goal) { S.b++; fx("GOL…", [], "#ff6a5a"); tone(140, 0.5, "sawtooth", 0.05); S.phase = "wait"; hud(); msg(`${t} <b>Gol di ${esc(opp.name)}.</b>`); return padNext(() => kickoff(true)); } S.own = true; S.z = 2; t += " Tirano… <b>parata!</b> Palla vostra."; return after(t, true); }
+        if (I === "tiro" || S.z <= 1) { const goal = R() < 0.45 * oppK * (DF.shot || 1) * (1 - 0.06 * ((o.bonus || {}).df | 0)); if (goal) { S.b++; fx("GOL…", [], "#ff6a5a"); tone(140, 0.5, "sawtooth", 0.05); S.phase = "wait"; hud(); msg(`${t} <b>Gol di ${esc(opp.name)}.</b>`); return padNext(() => kickoff(true)); } S.own = true; S.z = 2; t += " Tirano… <b>parata!</b> Palla vostra."; return after(t, true); }
         S.z = Math.max(0, S.z - (I === "sfonda" ? 2 : 1)); t += ` ${esc(opp.name)} ${I === "sfonda" ? "sfondano di due zone" : "avanzano"}.`;
       }
       return after(t, true);

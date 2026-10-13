@@ -214,7 +214,17 @@
   const starsOf = (id) => { const x = XPC[id] | 0; return x >= 15 ? 3 : x >= 8 ? 2 : x >= 3 ? 1 : 0; };
   const eff = (c) => { const b = starsOf(c.id) * 2; return { at: c.at + b, df: c.df + b, te: c.te + b }; };
   const ovr = (c) => { const e = eff(c); return Math.round((e.at + e.df + e.te) / 3); };
+  const roleOvr = (c) => { const e = eff(c); return Math.round(c.role === "A" ? (2 * e.at + e.te) / 3 : c.role === "C" ? (e.at + e.df + 2 * e.te) / 4 : (2 * e.df + e.te) / 3); }; // in lavagna ognuno pesa col suo ruolo: ATT per gli attaccanti, DIF per difesa e portiere, TEC per il centrocampo
   const forza = (team) => { const cs = team.map((id) => BY[id]).filter(Boolean); if (!cs.length) return 40; return Math.round(cs.reduce((s, c) => s + ovr(c), 0) / cs.length); };
+  // le STATISTICHE pesano in ogni motore: la media di ATT/DIF/TEC delle carte in squadra (con le stelle) diventa un livello 0-3
+  // (0 sotto ~57, 1 ~60, 2 ~66, 3 da ~72) che i motori trasformano in piccoli bonus: tiri/azioni, parate/difesa, passaggi/tecnica
+  const lvOf = (x) => Math.max(0, Math.min(3, Math.round((x - 54) / 6)));
+  function tiers(team) {
+    const cs = team.map((id) => BY[id]).filter(Boolean), n = cs.length || 1, sum = { at: 0, df: 0, te: 0 };
+    cs.forEach((c) => { const e = eff(c); sum.at += e.at; sum.df += e.df; sum.te += e.te; });
+    return cs.length ? { at: lvOf(sum.at / n), df: lvOf(sum.df / n), te: lvOf(sum.te / n) } : { at: 0, df: 0, te: 0 };
+  }
+  const statLine = (team) => { const T = tiers(team); return `<p class="sum" style="font-size:12px;opacity:.8">⚔️ <b>ATT ${T.at}</b>: tiri e azioni · 🛡️ <b>DIF ${T.df}</b>: parate e difesa · 🎯 <b>TEC ${T.te}</b>: passaggi, dribbling e tecnica. Le medie delle carte in squadra (livello 0-3, con le stelle) contano in ogni sfida.</p>`; };
   function gainXp(team, win, sim) {
     const r = load(), ups = [];
     team.forEach((id) => { if (!r.own.includes(id)) return; const s0 = starsOf(id); r.xp[id] = Math.min(15, (r.xp[id] | 0) + (sim ? (win ? 1 : 0) : win ? 2 : 1)); XPC = r.xp; if (starsOf(id) > s0) ups.push([id, starsOf(id)]); });
@@ -242,7 +252,7 @@
     if (back) BACK = back; const { r, nw } = sync(); const body = shell("🃏 La Squadra dei Sogni");
     const I = intesa(r.team), coins = safe(() => window.__borgoApi.coins(), 0);
     let h = `<p class="sum">Le carte dei personaggi di tutte le saghe. Si sbloccano giocando, o con le bustine. Carte: <b>${r.own.length}/${CARDS.length}</b> · monete: <b>${coins}</b>${nw.length ? ` · <b class="new">nuove: ${nw.length}</b>` : ""}</p>`;
-    h += `<div class="sec">La tua squadra · forza <b>${forza(r.team)}</b> · intesa <b>${I.n}</b>/15${I.why.length ? ` <span class="why">(${I.why.map(esc).join(", ")})</span>` : ""}</div><div class="team">${[0, 1, 2, 3, 4].map((k) => (r.team[k] ? cardHtml(r.team[k]) : `<div class="sgCard empty" data-slot="${k}"><span>+</span></div>`)).join("")}</div>`;
+    h += `<div class="sec">La tua squadra · forza <b>${forza(r.team)}</b> · intesa <b>${I.n}</b>/15${I.why.length ? ` <span class="why">(${I.why.map(esc).join(", ")})</span>` : ""}</div><div class="team">${[0, 1, 2, 3, 4].map((k) => (r.team[k] ? cardHtml(r.team[k]) : `<div class="sgCard empty" data-slot="${k}"><span>+</span></div>`)).join("")}</div>${r.team.length ? statLine(r.team) : ""}`;
     h += `<div class="big"><button type="button" data-go="tour">🏆 Torneo dei Sogni<small>${r.won.length}/8 sfide vinte · ogni sfida in un motore diverso</small></button><button type="button" data-go="pack" ${coins < PACK ? "disabled" : ""}>🎴 Bustina<small>${PACK} monete · una carta a sorpresa</small></button><button type="button" data-go="season">📅 Stagione dei Sogni<small>${r.season ? `giornata ${Math.min(7, r.season.day + 1)}/7` : "campionato a 8 squadre"}${r.titles ? ` · scudetti ${r.titles}` : ""}</small></button><button type="button" data-go="draft">🎲 Draft<small>${r.draft ? (r.draft.picks.length < 5 ? `scelta ${r.draft.picks.length + 1}/5` : "coppa in corso") : "scegli 1 carta su 3 e gioca la coppa"}${r.cups ? ` · coppe ${r.cups}` : ""}</small></button></div><p class="sum">Le carte crescono giocando: ⭐ a 3 punti esperienza, ⭐⭐ a 8, ⭐⭐⭐ a 15 (+2 a ogni statistica per stella; a tre stelle la carta dice la sua frase).</p>`;
     h += `<div class="sec">Collezione · tocca una carta per metterla in squadra o toglierla</div><div class="coll">${CARDS.slice().sort((a, b) => r.own.includes(b.id) - r.own.includes(a.id)).map((c) => cardHtml(c.id, { own: r.own.includes(c.id), sel: r.team.includes(c.id) })).join("")}</div>`;
     h += `<div class="sec">Legami tra saghe (+3 di intesa)</div><div class="links">${LINKS.map(([a, b, t]) => `<span class="${r.own.includes(a) && r.own.includes(b) ? "ok" : ""}"><b>${esc(t)}</b> ${r.own.includes(a) ? esc(name(a)) : "???"} + ${r.own.includes(b) ? esc(name(b)) : "???"}</span>`).join("")}</div>`;
@@ -272,7 +282,7 @@
   // ---------------------------------------------------------------- il Torneo dei Sogni
   function torneo() {
     const r = load(), body = shell("🏆 Torneo dei Sogni"), I = intesa(r.team), f = forza(r.team);
-    let h = `<p class="sum">Otto sfide, otto motori. La tua squadra (forza ${f}, intesa ${I.n}) dà vantaggi diversi in ogni motore. ${r.team.length < 5 ? "<b>Servono cinque carte in squadra.</b>" : ""}</p>`;
+    let h = `<p class="sum">Otto sfide, otto motori. La tua squadra (forza ${f}, intesa ${I.n}) dà vantaggi diversi in ogni motore. ${r.team.length < 5 ? "<b>Servono cinque carte in squadra.</b>" : ""}</p>${r.team.length ? statLine(r.team) : ""}`;
     h += SFIDE.map((s, i) => { const M = safe(() => window.__salone.machine(s.m), null), won = r.won.includes(i); return `<div class="sf${won ? " won" : ""}" data-i="${i}"><div class="e">${M ? M.e : "⚽"}</div><div><b>${i + 1}. ${esc(M ? M.t : s.m)}</b><span>${esc(s.opp ? s.opp.name : "I Sogni del Cristallo")} · ${esc(bonusTxt(s.m, r.team))}</span></div><div class="n">${won ? "✓" : "▶"}</div></div>`; }).join("");
     if (r.won.length >= 8) h += `<div class="big"><button type="button" data-hero="1">${r.hero ? "✓ Il Campione dei Sogni è tuo" : "🌟 Ritira la carta del Campione dei Sogni"}<small>La carta leggendaria del tuo Campione · e la Maglia dei Sogni</small></button></div>`;
     h += `<div class="big"><button type="button" data-back="1">◂ La squadra<small>Carte e collezione</small></button></div>`;
@@ -283,26 +293,42 @@
   }
   const count = (team, saga) => team.filter((id) => BY[id] && BY[id].saga === saga).length;
   function bonusTxt(m, team) {
-    const I = intesa(team).n;
-    return { vignette: `azioni +${Math.floor(I / 5)}`, bottoni: `tiri +${I >= 6 ? 1 : 0}${count(team, "mantello") ? ", superpoteri a turno" : ""}`, luci: `lanterne +${I >= 8 ? 1 : 0}`, nastro: `riavvolgimenti +${I >= 8 ? 1 : 0}`, concilio: `credibilità ${Math.min(9, 5 + Math.floor(I / 3))}, corvi ${1 + count(team, "trono")}`, lavagna: "le tue carte in lavagna", duello: `grinta ${100 + I * 4}`, gadget: `cintura ${I >= 10 ? 5 : 4} gadget`, volo: `energia ${100 + I * 3}`, combo: "quattro poteri dalle tue carte", consegna: "il compagno di volo dalle tue carte", ciak: `ciak di riserva ${I >= 8 ? 3 : 2}`, iso: `terreno ${["saline", "vetro", "ruggine"][I % 3]}`, atb: `statistiche +${Math.floor(I / 3)}` }[m] || "";
+    const I = intesa(team).n, T = tiers(team), A = T.at >= 2 ? 1 : 0;
+    return {
+      vignette: `azioni +${Math.floor(I / 5) + A} (ATT), parate +${T.df * 5}% (DIF), Spirito +${T.te * 10}% (TEC)`,
+      bottoni: `tiri +${(I >= 6 ? 1 : 0) + A} (ATT), avversari meno precisi (DIF), potere +${Math.round(T.te * 15)}% (TEC)${count(team, "mantello") ? ", superpoteri a turno" : ""}`,
+      luci: `azioni +${A} (ATT), turni +${T.df} (DIF), lanterne +${(I >= 8 ? 1 : 0) + (T.te >= 2 ? 1 : 0)} (TEC)`,
+      nastro: `azioni +${A} (ATT), riavvolgimenti +${(I >= 8 ? 1 : 0) + Math.floor((T.te + T.df) / 3)} (TEC+DIF)`,
+      concilio: `turni +${A} (ATT), credibilità ${Math.min(9, 5 + Math.floor(I / 4) + Math.ceil(T.df / 2))} (DIF), corvi ${1 + count(team, "trono") + (T.te >= 2 ? 1 : 0)} (TEC)`,
+      lavagna: "ogni carta pesa col suo ruolo: ATT, DIF, TEC",
+      duello: `grinta ${100 + I * 4 + T.at * 4} (ATT), parate e contrasti +${T.df * 1.5} (DIF), dribbling e passaggi +${T.te * 1.5} (TEC)`,
+      gadget: `tiri +${T.at * 4}% (ATT), difesa +${T.df * 6}% (DIF), cintura ${Math.min(6, 4 + (I >= 10 ? 1 : 0) + (T.te >= 2 ? 1 : 0))} gadget (TEC)`,
+      volo: `tiro +${T.at * 5}% (ATT), difesa +${T.df * 6}% (DIF), energia ${100 + I * 3 + T.te * 5} (TEC)`,
+      combo: "quattro poteri dalle tue carte, tiri (ATT), contrasti e difesa (DIF), pressing (TEC)",
+      consegna: "il compagno di volo dalle tue carte, tiri (ATT), recuperi (DIF), tempo +" + T.te * 4 + "s (TEC)",
+      ciak: `ciak di riserva ${2 + (I >= 8 ? 1 : 0) + (T.te >= 3 ? 1 : 0)} (TEC), idee riuscite con ATT/DIF/TEC`,
+      iso: `terreno ${["saline", "vetro", "ruggine"][I % 3]}, tiro +${T.at} (ATT), contrasto +${T.df} (DIF), passaggio +${T.te} (TEC)`,
+      atb: `statistiche +${Math.floor(I / 3)}, tiro +${T.at} (ATT), difesa +${T.df} (DIF), passaggio +${T.te} (TEC)`,
+    }[m] || "";
   }
   function extraFor(m, base, team, I, f, h) {
+    const T = tiers(team);
     const names = team.map((id) => ({ name: String(name(id)).split(/[ ,]/)[0], skin: (window.__borgoApi.CAST[id] || {}).skin, hair: (window.__borgoApi.CAST[id] || {}).hair }));
     return {
-      vignette: { actions: (base.actions || 8) + Math.floor(I / 5) },
-      bottoni: { shots: (base.shots || 6) + (I >= 6 ? 1 : 0), powers: count(team, "mantello") ? ["fulmine", "gigante", "calamita", "gelo", "doppio"] : undefined, mates: names.slice(0, 3) },
-      luci: { lanterns: (base.lanterns || 3) + (I >= 8 ? 1 : 0), mates: names.slice(0, 2) },
-      nastro: { rewinds: (base.rewinds || 2) + (I >= 8 ? 1 : 0), mates: names.slice(0, 2) },
-      concilio: { cred: Math.min(9, 5 + Math.floor(I / 3)), ravens: 1 + count(team, "trono"), us: "La Squadra dei Sogni" },
-      lavagna: { us: "La Squadra dei Sogni", squad: team.map((id) => ({ name: name(id), role: BY[id].role, ovr: Math.round(ovr(BY[id]) + I / 3) })).concat([{ name: h.name || "Il Campione", role: "A", ovr: f + 2 }, { name: "Il Portiere dei Sogni", role: "P", ovr: f }]) },
-      duello: { guts: 100 + I * 4, mates: names.slice(0, 3), us: "La Squadra dei Sogni" },
+      vignette: { actions: (base.actions || 8) + Math.floor(I / 5) + (T.at >= 2 ? 1 : 0) },
+      bottoni: { shots: (base.shots || 6) + (I >= 6 ? 1 : 0) + (T.at >= 2 ? 1 : 0), powers: count(team, "mantello") ? ["fulmine", "gigante", "calamita", "gelo", "doppio"] : undefined, mates: names.slice(0, 3) },
+      luci: { lanterns: (base.lanterns || 3) + (I >= 8 ? 1 : 0) + (T.te >= 2 ? 1 : 0), actions: (base.actions || 6) + (T.at >= 2 ? 1 : 0), turns: 8 + T.df, mates: names.slice(0, 2) },
+      nastro: { rewinds: (base.rewinds || 2) + (I >= 8 ? 1 : 0) + Math.floor((T.te + T.df) / 3), actions: (base.actions || 6) + (T.at >= 2 ? 1 : 0), mates: names.slice(0, 2) },
+      concilio: { cred: Math.min(9, 5 + Math.floor(I / 4) + Math.ceil(T.df / 2)), ravens: 1 + count(team, "trono") + (T.te >= 2 ? 1 : 0), turns: (base.turns || 8) + (T.at >= 2 ? 1 : 0), foresee: T.te >= 3, us: "La Squadra dei Sogni" },
+      lavagna: { us: "La Squadra dei Sogni", squad: team.map((id) => ({ name: name(id), role: BY[id].role, ovr: Math.round(roleOvr(BY[id]) + I / 3) })).concat([{ name: h.name || "Il Campione", role: "A", ovr: f + 2 }, { name: "Il Portiere dei Sogni", role: "P", ovr: f }]) },
+      duello: { guts: 100 + I * 4 + T.at * 4, mates: names.slice(0, 3), us: "La Squadra dei Sogni" },
       iso: { mates: names.slice(0, 2), us: "La Squadra dei Sogni", terrain: ["saline", "vetro", "ruggine"][I % 3] },
       combo: { heroes: team.slice(0, 4).map((id, k) => ({ name: String(name(id)).split(/[ ,]/)[0], power: ["scatto", "ghiaccio", "vento", "fuoco"][k] })), us: "La Squadra dei Sogni" },
       consegna: { mate: names[0], us: "La Squadra dei Sogni" },
-      ciak: { mates: names.slice(0, 2), us: "La Squadra dei Sogni", takes: I >= 8 ? 3 : 2 },
-      volo: { energy: 100 + I * 3, mates: names.slice(0, 1), us: "La Squadra dei Sogni" },
-      gadget: { slots: I >= 10 ? 5 : 4, mates: names.slice(0, 2), us: "La Squadra dei Sogni" },
-      atb: { heroSt: { tiro: 16 + Math.floor(I / 3), pass: 14 + Math.floor(I / 3), dif: 12 + Math.floor(I / 3), vel: 15 + Math.floor(I / 3) } },
+      ciak: { mates: names.slice(0, 2), us: "La Squadra dei Sogni", takes: 2 + (I >= 8 ? 1 : 0) + (T.te >= 3 ? 1 : 0) },
+      volo: { energy: 100 + I * 3 + T.te * 5, mates: names.slice(0, 1), us: "La Squadra dei Sogni" },
+      gadget: { slots: Math.min(6, 4 + (I >= 10 ? 1 : 0) + (T.te >= 2 ? 1 : 0)), mates: names.slice(0, 2), us: "La Squadra dei Sogni" },
+      atb: { heroSt: { tiro: 16 + Math.floor(I / 3) + T.at, pass: 14 + Math.floor(I / 3) + T.te, dif: 12 + Math.floor(I / 3) + T.df, vel: 15 + Math.floor(I / 3) + Math.floor(T.te / 2) } },
     }[m] || {};
   }
   // gioca una partita dei Sogni nel motore m; opp = avversario (se manca, quello della sfida del Torneo); onRes(res) alla fine
@@ -311,7 +337,7 @@
     const I = intesa(team).n, f = forza(team), h = safe(() => window.__salone.heroLook(), { name: "Campione" });
     const o0 = opp || M.boss || M.opp[0], base = M.opts(o0, h, hard);
     closeAll(); const C = window.__sagaCore; if (C && C.setCur) C.setCur(hard ? "sfida" : "normale", o0 && o0.style);
-    const o = Object.assign({}, base, extraFor(m, base, team, I, f, h), { title, heroLook: h, winTitle: "VITTORIA DEI SOGNI!", onDone: onRes });
+    const o = Object.assign({}, base, extraFor(m, base, team, I, f, h), { bonus: tiers(team), title, heroLook: h, winTitle: "VITTORIA DEI SOGNI!", onDone: onRes });
     if (safe(() => eng.start(o), false) === false) { if (C && C.endMatch) C.endMatch(); back(); }
     return true;
   }
@@ -402,7 +428,7 @@
     const r = load(); if (!r.draft) { r.draft = { picks: [], offer: offer([]), round: 0, opp: [], eng: [], over: null }; save(r); }
     const d = r.draft, body = shell("🎲 Draft dei Sogni"), I = intesa(d.picks);
     let h = `<p class="sum">Scegli una carta su tre, cinque volte: vale qualsiasi carta, anche quelle che non hai. Poi la coppa a eliminazione: ${ROUNDS.join(", ")}, ognuna in un motore a sorpresa. Ogni turno vinto +25 monete; chi vince la coppa <b>tiene una carta del draft</b>.</p>`;
-    h += `<div class="sec">La squadra del draft · forza <b>${d.picks.length ? forza(d.picks) : "–"}</b> · intesa <b>${I.n}</b>/15</div><div class="team">${[0, 1, 2, 3, 4].map((k) => (d.picks[k] ? cardHtml(d.picks[k]) : `<div class="sgCard empty"><span>${k + 1}</span></div>`)).join("")}</div>`;
+    h += `<div class="sec">La squadra del draft · forza <b>${d.picks.length ? forza(d.picks) : "–"}</b> · intesa <b>${I.n}</b>/15</div><div class="team">${[0, 1, 2, 3, 4].map((k) => (d.picks[k] ? cardHtml(d.picks[k]) : `<div class="sgCard empty"><span>${k + 1}</span></div>`)).join("")}</div>${d.picks.length ? statLine(d.picks) : ""}`;
     if (d.picks.length < 5) {
       h += `<div class="sec">Scelta ${d.picks.length + 1}/5 · tocca una carta</div><div class="pick">${d.offer.map((id) => cardHtml(id)).join("")}</div>`;
     } else if (d.over) {
@@ -470,5 +496,5 @@
   }
   // la Maglia dei Sogni nel guardaroba (si registra all'avvio, così resta anche dopo aver ricaricato la pagina)
   (function reg() { const A = window.__borgoApi; if (!A || !A.COSM) return setTimeout(reg, 200); if (!A.COSM.sg_maglia) A.COSM.sg_maglia = { kind: "shirt", label: "Maglia dei Sogni", val: "#7a5ad8", from: "Vinci il Torneo dei Sogni (Salone delle Saghe)" }; })();
-  window.__sogni = { open, close: closeAll, CARDS, LINKS, SFIDE, TEAMS, FRASI, intesa, forza, sync, stagione, draft, stars: (id) => { XPC = load().xp; return starsOf(id); }, _load: load };
+  window.__sogni = { open, close: closeAll, _launch: launch, _tiers: tiers, CARDS, LINKS, SFIDE, TEAMS, FRASI, intesa, forza, sync, stagione, draft, stars: (id) => { XPC = load().xp; return starsOf(id); }, _load: load };
 })();

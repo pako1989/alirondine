@@ -27,7 +27,7 @@
     const usCol = o.usColor || "#ff7a3a", opp = Object.assign({ name: "Avversari", color: "#5a6ad8", players: [], keeper: { name: "Il drone" } }, o.opp || {});
     while (opp.players.length < 2) opp.players.push({ name: ["Il primo", "Il secondo"][opp.players.length] });
     const ship = (team, x, y, p, me) => ({ team, x, y, vx: 0, vy: 0, ang: team ? Math.PI : 0, p, me: !!me, cool: 0, tube: 0, hit: 0 });
-    const S = { o, a: 0, b: 0, t: 0, el0: 0, secs: o.secs || 100, nMin: o.minutes || 90, phase: "intro", over: false, fast: 1, tgt: null, keys: {}, fx: null, shake: 0,
+    const S = { o, a: 0, b: 0, t: 0, el0: 0, secs: (o.secs || 100) + 4 * ((o.bonus || {}).te | 0), nMin: o.minutes || 90, phase: "intro", over: false, fast: 1, tgt: null, keys: {}, fx: null, shake: 0,
       ships: [ship(0, 110, 100, Object.assign({ name: "Tu" }, o.hero || o.heroLook), true), ship(0, 70, 60, Object.assign({ name: "Il compagno" }, o.mate)), ship(1, 220, 70, opp.players[0]), ship(1, 250, 130, opp.players[1])],
       keepers: [{ x: X0 + 7, y: GM }, { x: X1 - 7, y: GM }], parcel: { x: 120, y: 100, vx: 0, vy: 0, own: null, noPick: 0, last: 0, dent: 0, spin: 0 },
       rocks: [{ x: 66, y: 50, r: 7, ph: 0 }, { x: 254, y: 150, r: 7, ph: 2 }, { x: 160, y: 100, r: 5, ph: 4 }],
@@ -108,7 +108,7 @@
     function contacts() {
       const P = S.parcel, c = P.own; if (!c) return;
       S.ships.forEach((s) => { if (s.team === c.team || s.cool > 0 || c.cool > 0 || dist(s, c) > 12) return; s.cool = 26; c.cool = 18;
-        const p = s.team === 0 ? 0.55 / oppK : 0.34 * oppK * (DF.steal || 1); if (R() < p) { P.own = s; P.last = s.team; P.dent = 0; c.hit = 16; if (s.team === 0) S.data.recuperi++; tone(s.team ? 220 : 760, 0.15, "triangle", 0.05); fx(s.team ? "RUBATO!" : "RECUPERO!", s.team ? "#ff8a7a" : "#7ad87a"); }
+        const BN = o.bonus || {}, p = s.team === 0 ? (0.55 + 0.03 * (BN.df | 0)) / oppK : 0.34 * oppK * (DF.steal || 1) * (1 - 0.05 * (BN.df | 0)); if (R() < p) { P.own = s; P.last = s.team; P.dent = 0; c.hit = 16; if (s.team === 0) S.data.recuperi++; tone(s.team ? 220 : 760, 0.15, "triangle", 0.05); fx(s.team ? "RUBATO!" : "RECUPERO!", s.team ? "#ff8a7a" : "#7ad87a"); }
         else { tone(400, 0.06, "square", 0.03); } });
     }
     // ------------------------------------------------------------ cervelli
@@ -117,7 +117,7 @@
       const P = S.parcel, c = P.own, ours = c && c.team === 0, theirs = c && c.team === 1;
       // il compagno
       if (MATE !== c) { if (ours) steer(MATE, Math.min(X1 - 40, HERO.x + 70), HERO.y < GM ? 140 : 60, 1.8, 0.1); else if (theirs) steer(MATE, c.x - 8, c.y, 1.9, 0.11); else steer(MATE, P.x, P.y, 1.8, 0.1); }
-      else { const near = [OP1, OP2].some((s) => dist(s, MATE) < 16); if ((MATE.x > 214 && Math.abs(MATE.y - GM) < 60) || (near && R() < 0.05)) { const ky = S.keepers[1].y, ty = ky > GM ? GY0 + 8 : GY1 - 8; launch(MATE, Math.atan2(ty - MATE.y, X1 - MATE.x), 4.2); } else if (near && HERO.x > MATE.x && R() < 0.04) launch(MATE, Math.atan2(HERO.y - MATE.y, HERO.x - MATE.x), 3.6); else steer(MATE, X1 - 30, GM + (MATE.y < GM ? -20 : 20), 1.7, 0.1); }
+      else { const near = [OP1, OP2].some((s) => dist(s, MATE) < 16); if ((MATE.x > 214 && Math.abs(MATE.y - GM) < 60) || (near && R() < 0.05)) { const ky = S.keepers[1].y, ty = ky > GM ? GY0 + 8 : GY1 - 8; launch(MATE, Math.atan2(ty - MATE.y, X1 - MATE.x), 4.2 + 0.2 * ((o.bonus || {}).at | 0)); } else if (near && HERO.x > MATE.x && R() < 0.04) launch(MATE, Math.atan2(HERO.y - MATE.y, HERO.x - MATE.x), 3.6); else steer(MATE, X1 - 30, GM + (MATE.y < GM ? -20 : 20), 1.7, 0.1); }
       // gli avversari
       [OP1, OP2].forEach((s, i) => {
         if (s === c) {

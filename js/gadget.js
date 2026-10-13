@@ -69,7 +69,7 @@
     }
     function intents() {
       const c = car(), opts = [[c.x + 1, c.y], [c.x, c.y - 1], [c.x, c.y + 1], [c.x, c.y]].filter(([x, y]) => x < COLS && y >= 0 && y < 3).map(([x, y]) => ({ x, y }));
-      const pref = style === "difensiva" ? [3, 1, 1, 2] : style === "pressing" ? [4, 2, 2, 1] : [3, 2, 2, 1.5], taken = new Set(), aggr = Math.min(0.97, 0.8 * oppK * (DF.steal || 1));
+      const pref = style === "difensiva" ? [3, 1, 1, 2] : style === "pressing" ? [4, 2, 2, 1] : [3, 2, 2, 1.5], taken = new Set(), aggr = Math.min(0.97, 0.8 * oppK * (DF.steal || 1) * (1 - 0.04 * ((o.bonus || {}).df | 0)));
       S.ds.slice().sort((a, b) => cheb(a, c) - cheb(b, c)).forEach((d) => {
         d.int = null; if (d.stun > 0) return;
         const cand = opts.map((p, i) => ({ p, w: pref[i] })).filter(({ p }) => cheb(p, d) <= 1 && !taken.has(key(p)) && free(p.x, p.y, d));
@@ -126,7 +126,7 @@
     // dribbling: se nella casella c'è un difensore, si prova a saltarlo (sicuro se è sbilanciato o legato dalle bolas)
     function moveTo(x, y) {
       const d = S.ds.find((q) => q.x === x && q.y === y), c = car(); if (!d) { swapTo(x, y); return true; }
-      if (!(d.off > 0 || d.stun > 0 || R() < 0.42 / oppK)) { S.lostBy = d; return false; }
+      if (!(d.off > 0 || d.stun > 0 || R() < (0.42 + 0.04 * ((o.bonus || {}).te | 0)) / oppK)) { S.lostBy = d; return false; }
       d.x = c.x; d.y = c.y; d.int = null; swapTo(x, y); S.data.dribbling = (S.data.dribbling | 0) + 1; fx("DRIBBLING!", "#7ad87a"); tone(760, 0.15, "triangle", 0.05, 990); return true;
     }
     // il portatore si sposta (scambiandosi col compagno se la casella è sua); jump = col Rampino scavalca i difensori
@@ -144,7 +144,7 @@
     function shoot(lane) {
       if (S.phase !== "att" || S.over) return; const c = car(); if (c.x < 5) return;
       S.data.tiri++; S.min += 3; const dist = COLS - 1 - c.x, base = [0.9, 0.74, 0.58][dist] || 0.5, saved = lane === S.keeperDive;
-      const p = saved ? 0.1 : base / (style === "difensiva" ? 1.1 : 1) / oppK, goal = R() < p;
+      const p = saved ? 0.1 : (base + 0.04 * ((o.bonus || {}).at | 0)) / (style === "difensiva" ? 1.1 : 1) / oppK, goal = R() < p;
       tone(goal ? 660 : 200, 0.4, goal ? "triangle" : "square", 0.06, goal ? 1320 : 120);
       if (goal) { S.a++; fx("GOOOL!", "#ffd23f"); S.phase = "wait"; hud(); msg(`<b>GOL!</b> Tiro in corsia ${LANE[lane]}, il portiere ${esc(opp.keeper.name)} si tuffa ${saved ? "giusto ma non basta" : "dall'altra parte"}.`); return pad([{ l: "Avanti ▸", cls: "go", fn: defend }]); }
       fx(saved ? "PARATA!" : "FUORI!", "#ff8a7a"); S.phase = "wait"; hud();
@@ -178,7 +178,7 @@
     function block(y) {
       if (S.phase !== "def" || S.over) return; const A = S.att; S.min += 4; if (S.visor > 0) S.visor--;
       if (y === A.lane) { tone(600, 0.2, "triangle", 0.05); fx("RECUPERO!", "#7ad87a"); return recover(`<b>Letto!</b> Chiudi la corsia ${LANE[y]} e ${esc(A.who.name)} ti finisce addosso. Palla tua.`); }
-      const p = 0.45 * oppK * (DF.shot || 1) * (A.fumo ? 0.5 : 1) * (style === "contropiede" ? 1.15 : 1), goal = R() < p;
+      const p = 0.45 * oppK * (DF.shot || 1) * (1 - 0.06 * ((o.bonus || {}).df | 0)) * (A.fumo ? 0.5 : 1) * (style === "contropiede" ? 1.15 : 1), goal = R() < p;
       S.phase = "wait";
       if (goal) { S.b++; fx("GOL...", "#ff6a5a"); tone(140, 0.5, "sawtooth", 0.05); msg(`<b>GOL DI ${esc(A.who.name).toUpperCase()}.</b> È passato sulla corsia ${LANE[A.lane]}, tu chiudevi la ${LANE[y]}.`); }
       else { fx("FUORI!", "#7ad87a"); msg(`Passa sulla corsia ${LANE[A.lane]} e tira… <b>fuori!</b> ${A.fumo ? "Il fumogeno gli ha tolto la mira." : "La pioggia è dalla tua parte."}`); }

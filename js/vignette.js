@@ -50,7 +50,7 @@
     const labels = () => { const [a1, a2] = S.phase === "run" ? ["FINTA", "PASSA"] : S.phase === "aim" ? ["TIRA", "—"] : S.phase === "def" ? ["CONTRASTO", "—"] : S.phase === "dive" ? ["◀", "▶"] : ["…", "…"]; el.querySelector('[data-k="a1"]').textContent = a1; el.querySelector('[data-k="a2"]').textContent = a2; el.querySelector('[data-k="up"]').textContent = S.phase === "dive" ? "●" : "▲"; el.querySelector('[data-k="down"]').textContent = S.phase === "dive" ? "●" : "▼"; };
     function tone(f, d, type, v) { try { const A = (window.__vgAC = window.__vgAC || new (window.AudioContext || window.webkitAudioContext)()), os = A.createOscillator(), gn = A.createGain(); os.type = type || "square"; os.frequency.value = f; gn.gain.value = v || 0.04; gn.gain.exponentialRampToValueAtTime(0.0001, A.currentTime + d); os.connect(gn); gn.connect(A.destination); os.start(); os.stop(A.currentTime + d); } catch (e) {} }
     const pop = (txt, x, y, big) => S.fx.push({ txt, x, y, t: big ? 70 : 45, big });
-    const addSpirit = (n) => { S.spirit = Math.min(100, S.spirit + n); };
+    const BN = o.bonus || {}, addSpirit = (n) => { S.spirit = Math.min(100, S.spirit + n * (1 + 0.1 * (BN.te | 0))); }; // Sogni: la TECNICA carica prima lo Spirito
     const say = (side, txt) => { S.say = { side, txt, t: 80 }; }; // la nuvoletta nei primi piani (0 = noi, 1 = loro)
     // ------------------------------------------------------------ azioni
     function nextAction() {
@@ -68,7 +68,7 @@
       S.team = mates.slice(0, 2).map((m, i) => ({ p: m, lane: (S.lane + 1 + i) % 3, off: -20 + i * 30 }));
       S.speed = 2.1; labels(); hud();
     }
-    function startAim() { S.phase = "aim"; S.t = 0; S.kx = 0; S.kv = (1.1 + (style === "difensiva" ? 0.4 : 0)) * DF.opp; S.reach = 15 + DF.gk1 * 60 + (style === "difensiva" ? 4 : 0); labels(); hud(); }
+    function startAim() { S.phase = "aim"; S.t = 0; S.kx = 0; S.kv = (1.1 + (style === "difensiva" ? 0.4 : 0)) * DF.opp; S.reach = Math.max(9, 15 + DF.gk1 * 60 - 1.5 * (BN.at | 0)) + (style === "difensiva" ? 4 : 0); labels(); hud(); }
     function startDef() {
       S.phase = "def"; S.x = 0; S.lane = 1; S.olane = Math.floor(Math.random() * 3); S.ox = 300; S.ovel = (1.9 + (style === "contropiede" ? 0.6 : 0)) * DF.opp; S.osw = 0;
       S.op = oppP[Math.floor(Math.random() * oppP.length)]; say(1, pick(["Arrivo!", "Fammi spazio!", "Tocca a me!"])); labels(); hud();
@@ -112,7 +112,7 @@
       hud();
     }
     function dive(dir) {
-      if (S.phase !== "dive") return; const saved = dir === S.shotDir || (DF.gk0 > 0.1 && Math.random() < 0.15);
+      if (S.phase !== "dive") return; const saved = dir === S.shotDir || (DF.gk0 > 0.1 && Math.random() < 0.15) || Math.random() < 0.05 * (BN.df | 0);
       S.phase = "result"; S.res = { dive: dir, saved, t: 80 };
       if (saved) { pop(pick(ONO.save), W / 2, 70, true); addSpirit(14); say(0, "Presa!"); tone(300, 0.15, "triangle"); } else { S.b++; pop("GOL LORO", W / 2, 70, true); tone(160, 0.3, "sawtooth"); }
       hud(); setTimeout(nextAction, 1400);

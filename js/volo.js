@@ -104,11 +104,11 @@
         if (F.k > N - 22) { const ty = Math.max(GY0 + 6, Math.min(GY1 - 6, along(S.them, 1).y)); S.ourK.y += Math.sign(ty - S.ourK.y) * Math.min(1.2, Math.abs(ty - S.ourK.y)); }
         if (dist(S.hero, S.carrier) < 12) { S.data.intercetti++; S.own = true; S.carrier = S.hero; impact("RUBATA!", "#7ad87a"); tone(700, 0.25, "triangle", 0.05); return endFly("<b>Palla rubata in volo!</b> Hai incrociato la sua traiettoria al momento giusto."); }
         if (dist(S.mate, S.carrier) < 12 && R() < 0.35) { S.own = true; S.carrier = S.hero; S.hero.x = S.mate.x + 8; S.hero.y = S.mate.y; impact("MURO!", "#7ad87a"); return endFly(`<b>${esc(S.mate.p.name)} la ferma</b> e te la passa.`); }
-        if (F.k >= N) { const goal = R() < (Math.abs(S.ourK.y - S.carrier.y) > 10 ? 0.65 : 0.15) * oppK * (DF.shot || 1); S.data.tiri += 0; if (goal) { S.b++; impact("GOL…", "#ff6a5a"); tone(140, 0.5, "sawtooth", 0.05); S.phase = "wait"; hud(); msg(`<b>Gol di ${esc(S.carrier.p.name)}.</b> Troppo veloce, troppo in alto.`); return pad([{ l: "Ripartiamo ▸", cls: "go", fn: () => kickoff(true) }]); } impact("PARATA!", "#7ad87a"); S.own = true; S.carrier = S.hero; return endFly(`Tiro di ${esc(S.carrier.p.name)}… <b>parato!</b> Rilancio verso di te.`); }
+        if (F.k >= N) { const goal = R() < (Math.abs(S.ourK.y - S.carrier.y) > 10 ? 0.65 : 0.15) * oppK * (DF.shot || 1) * (1 - 0.06 * ((o.bonus || {}).df | 0)); S.data.tiri += 0; if (goal) { S.b++; impact("GOL…", "#ff6a5a"); tone(140, 0.5, "sawtooth", 0.05); S.phase = "wait"; hud(); msg(`<b>Gol di ${esc(S.carrier.p.name)}.</b> Troppo veloce, troppo in alto.`); return pad([{ l: "Ripartiamo ▸", cls: "go", fn: () => kickoff(true) }]); } impact("PARATA!", "#7ad87a"); S.own = true; S.carrier = S.hero; return endFly(`Tiro di ${esc(S.carrier.p.name)}… <b>parato!</b> Rilancio verso di te.`); }
       }
     }
     function shoot() {
-      S.data.tiri++; const hp = { x: S.hero.x, y: S.hero.y }, miss = Math.abs(S.theirK.y - hp.y) <= 12 && R() < 0.85, goal = !miss && R() < 0.92;
+      S.data.tiri++; const hp = { x: S.hero.x, y: S.hero.y }, miss = Math.abs(S.theirK.y - hp.y) <= 12 && R() < 0.85 - 0.05 * ((o.bonus || {}).at | 0), goal = !miss && R() < 0.92;
       S.phase = "wait"; hud();
       if (goal) { S.a++; impact("GOOOL!", "#ffd23f"); tone(660, 0.5, "triangle", 0.06, 1320); msg(`<b>GOL!</b> Entri in porta a velocità ${S.fly.sup ? "supersonica" : "folle"}: ${esc(opp.keeper.name)} vede solo la scia.`); return pad([{ l: "Ripartono loro ▸", cls: "go", fn: () => kickoff(false) }]); }
       S.data.parate++; impact("PARATA!", "#ff6a5a"); tone(200, 0.4, "square", 0.05); S.own = false; S.carrier = S.ops[0]; S.ops[0].x = X1 - 40; S.ops[0].y = 120;

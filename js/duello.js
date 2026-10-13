@@ -61,7 +61,7 @@
     function duel(k, sp) {
       S.data.duelli++; const cost = sp ? sp.cost : { drib: 8, pass: 4, uno: 10, tiro: 12 }[k]; S.guts = Math.max(0, S.guts - cost); tick(2 + R() * 4);
       if (k === "tiro" || k === "sp") return shoot(sp);
-      const base = { drib: 11, pass: 13, uno: 14 }[k], me = (base + R() * 10) * gutsK(), them = ((S.def.pow || 10) + R() * 10) * oppK + (style === "pressing" ? 1.5 : 0);
+      const BN = o.bonus || {}, base = { drib: 11, pass: 13, uno: 14 }[k] + 1.5 * (BN.te | 0), me = (base + R() * 10) * gutsK(), them = ((S.def.pow || 10) + R() * 10) * oppK + (style === "pressing" ? 1.5 : 0);
       const win = me >= them; if (win) S.data.vinti++;
       const words = { drib: win ? "DRIBBLING!" : "SCIVOLATA!", pass: win ? "PASSAGGIO!" : "INTERCETTATO!", uno: win ? "UNO-DUE!" : "CHIUSO!" }[k];
       S.anim = { kind: k, win, t: 0, dur: 70, words, who: S.def, after: () => { if (win) { S.zone = Math.min(4, S.zone + (k === "uno" ? 2 : 1)); attack(); } else { S.own = false; S.zone = Math.max(1, 4 - S.zone); defend(); } } };
@@ -70,7 +70,7 @@
     }
     function shoot(sp) {
       S.data.tiri++; if (sp) S.data.speciali++;
-      const dist = 4 - S.zone, me = ((sp ? 14 + sp.pow : 12) + R() * 10 - dist * 3) * gutsK(), kp = ((opp.keeper.pow || 12) + R() * 10) * oppK;
+      const dist = 4 - S.zone, me = ((sp ? 14 + sp.pow : 12) + 1.5 * ((o.bonus || {}).at | 0) + R() * 10 - dist * 3) * gutsK(), kp = ((opp.keeper.pow || 12) + R() * 10) * oppK;
       const goal = me > kp; const words = sp ? sp.name.toUpperCase() + "!" : "TIRO!";
       S.anim = { kind: "shot", sp, win: goal, t: 0, dur: sp ? 110 : 80, words, who: opp.keeper, after: () => { if (goal) { S.a++; S.own = false; S.zone = 2; tone(880, 0.4, "triangle", 0.07); hud(); msg(`<b>GOOOL!</b> ${sp ? esc(sp.name) + ": " : ""}la palla gonfia la rete!`); pad([{ l: "Riprendono loro ▸", cls: "go", fn: defend }]); } else { S.own = false; S.zone = 1; msg(`<b>PARATA!</b> ${esc(opp.keeper.name)} ci arriva.`); pad([{ l: "Avanti ▸", cls: "go", fn: defend }]); } } };
       tone(sp ? 300 : 400, sp ? 0.8 : 0.4, "sawtooth", 0.05, sp ? 1200 : 700); msg(`<b>${esc(words)}</b>`); pad([]); hud();
@@ -92,13 +92,13 @@
       S.data.duelli++; S.guts = Math.max(0, S.guts - { tackle: 6, block: 5, press: 3 }[k]); tick(2 + R() * 4);
       const oppMove = R() < (style === "contropiede" ? 0.6 : 0.45) ? "pass" : "drib"; // cosa fa davvero l'avversario
       const fit = (k === "tackle" && oppMove === "drib") || (k === "block" && oppMove === "pass") ? 4 : k === "press" ? 1 : -2;
-      const me = (12 + R() * 10 + fit) * gutsK(), them = ((S.def.pow || 10) + R() * 10) * oppK, win = me >= them; if (win) S.data.vinti++;
+      const me = (12 + 1.5 * ((o.bonus || {}).df | 0) + R() * 10 + fit) * gutsK(), them = ((S.def.pow || 10) + R() * 10) * oppK, win = me >= them; if (win) S.data.vinti++;
       const words = win ? { tackle: "CONTRASTO!", block: "ANTICIPO!", press: "RECUPERO!" }[k] : oppMove === "pass" ? "PASSAGGIO FILTRANTE!" : "TI SALTA!";
       S.anim = { kind: k, win, t: 0, dur: 70, words, who: S.def, def: true, after: () => { if (win) { S.own = true; S.zone = Math.max(1, 4 - S.zone); attack(); } else { S.zone = Math.min(4, S.zone + (k === "press" ? 0 : 1) + (oppMove === "pass" ? 1 : 0)); defend(); } } };
       tone(win ? 520 : 200, 0.2, win ? "triangle" : "square", 0.05); msg(win ? `<b>${words}</b> Palla tua!` : `<b>${words}</b> ${esc(S.def.name)} passa.`); pad([]); hud();
     }
     function oppShot() {
-      const ace = opp.ace && R() < 0.5, kp = (13 + R() * 10 + (o.keeperPow || 0)) * gutsK(), sh = ((ace ? 17 : 12) + R() * 10) * oppK, goal = sh > kp; tick(1 + R() * 2);
+      const ace = opp.ace && R() < 0.5, kp = (13 + R() * 10 + (o.keeperPow || 0) + 1.5 * ((o.bonus || {}).df | 0)) * gutsK(), sh = ((ace ? 17 : 12) + R() * 10) * oppK, goal = sh > kp; tick(1 + R() * 2);
       const words = ace ? (opp.ace.special || "TIRO SPECIALE").toUpperCase() + "!" : "TIRANO!"; if (!goal) S.data.parate++;
       S.anim = { kind: "oshot", win: !goal, ace, t: 0, dur: ace ? 100 : 80, words, who: ace ? opp.ace : S.def, def: true, after: () => { if (goal) { S.b++; S.own = true; S.zone = 2; tone(140, 0.5, "sawtooth", 0.05); hud(); msg(`<b>Gol di ${esc(opp.name)}.</b> Si riparte dal centro.`); pad([{ l: "Calcio d'inizio ▸", cls: "go", fn: attack }]); } else { S.own = true; S.zone = 1; msg(`<b>PARATA!</b> ${esc(o.keeperName || "Il tuo portiere")} la blocca e rilancia.`); pad([{ l: "Avanti ▸", cls: "go", fn: attack }]); } } };
       msg(`<b>${esc(words)}</b> ${ace ? esc(opp.ace.name) + " carica il suo tiro!" : ""}`); pad([]); hud();

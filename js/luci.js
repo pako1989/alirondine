@@ -22,7 +22,7 @@
     const C = window.__sagaCore, cur = (C && C.cur) || { opts: { opp: 1 }, style: "" }, DF = cur.opts || { opp: 1 }, style = o.oppStyle || cur.style || "equilibrata";
     const usCol = o.usColor || "#ffd27a", oppCol = (o.opp && o.opp.color) || "#6a7aa8";
     const mates = (o.mates || [{ name: "Fiamma" }, { name: "Lume" }]).map((m) => m.name || m);
-    const hard = DF.opp > 1.05 ? 1 : DF.opp < 0.95 ? -1 : 0, nAct = o.actions || 6, LAN = (o.lanterns || 3) - (hard > 0 ? 1 : 0) + (hard < 0 ? 1 : 0);
+    const hard = DF.opp > 1.05 ? 1 : DF.opp < 0.95 ? -1 : 0, nAct = o.actions || 6, TURNS = o.turns || 8, LAN = (o.lanterns || 3) - (hard > 0 ? 1 : 0) + (hard < 0 ? 1 : 0);
     const S = { o, a: 0, b: 0, act: -1, phase: "intro", t: 0, mode: "move", sel: -1, lit: [], turns: 0, lan: LAN, us: [], them: [], gk: 3, ball: 0, msgT: "", fx: [], over: false, extra: 0, data: { lanterne: 0, rubate: 0, perse: 0, tiri: 0 } };
     STATE = S;
     // ------------------------------------------------------------ interfaccia
@@ -40,7 +40,7 @@
     const hud = () => {
       el.querySelector(".sc").textContent = `${S.a} – ${S.b}`;
       el.querySelector(".ph").textContent = S.act < 0 ? "" : `${att() ? "ATTACCO" : "DIFESA"} · azione ${S.act + 1}${S.act >= nAct ? " (supplementare)" : `/${nAct}`}`;
-      el.querySelector(".tl").textContent = S.act < 0 ? "" : `🏮 ${S.lan} · turni ${Math.max(0, 8 - S.turns)}`;
+      el.querySelector(".tl").textContent = S.act < 0 ? "" : `🏮 ${S.lan} · turni ${Math.max(0, TURNS - S.turns)}`;
       const b = el.querySelector(".lan"); b.disabled = S.phase !== "play" || S.lan <= 0; b.classList.toggle("on", S.mode === "lan");
     };
     // ------------------------------------------------------------ luce
@@ -97,7 +97,7 @@
         t.c += sgn(car.c - t.c); t.r += sgn(car.r - t.r); });
       S.gk += sgn(Math.max(2, Math.min(4, car.c)) - S.gk) * (Math.random() < 0.7 + hard * 0.15 ? 1 : 0);
       if (S.them.some((t) => t.c === car.c && t.r === car.r)) return stolen();
-      if (S.turns >= 8) return endAction("Il tempo dell'azione è finito. La palla torna nel buio.");
+      if (S.turns >= TURNS) return endAction("Il tempo dell'azione è finito. La palla torna nel buio.");
       hud(); return true;
     }
     function stolen() { S.data.perse++; tone(140, 0.3, "sawtooth"); S.fx.push({ c: S.us[S.ball].c, r: S.us[S.ball].r, t: 40, bad: true }); return endAction("Un'ombra ti ha rubato palla, uscendo dal buio."); }
@@ -113,7 +113,7 @@
       const best = opts.sort((a, b) => score(b) - score(a))[0]; if (best) { car.c = best[0]; car.r = best[1]; }
       if (S.us.some((q) => q.c === car.c && q.r === car.r)) return won();
       if (car.r >= CH - 1) { if (GOAL.includes(car.c)) { S.b++; tone(140, 0.4, "sawtooth", 0.05); return endAction("<b>GOL DELLE OMBRE.</b> È sbucata dal buio proprio davanti alla porta."); } car.r = CH - 2; car.c += sgn(3 - car.c); }
-      if (S.turns >= 8) return endAction("L'ombra si perde nel buio: azione finita, nessun gol.");
+      if (S.turns >= TURNS) return endAction("L'ombra si perde nel buio: azione finita, nessun gol.");
       hud(); return true;
     }
     function won() { S.data.rubate++; tone(700, 0.15, "triangle"); S.fx.push({ c: S.them[0].c, r: S.them[0].r, t: 40 }); return endAction("Presa! La palla è tua: l'ombra torna nel buio, sorridendo."); }

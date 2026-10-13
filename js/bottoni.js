@@ -68,7 +68,7 @@
     };
     const say = (txt) => { S.cap = txt; S.capT = 110; };
     const burst = (txt, x, y, big, col) => S.fx.push({ txt, x, y, t: big ? 70 : 40, big, col, rot: (Math.random() - 0.5) * 0.5 });
-    const addMeter = (n) => { if (power && !S.armed) S.meter = Math.min(100, S.meter + n); };
+    const BN = o.bonus || {}, addMeter = (n) => { if (power && !S.armed) S.meter = Math.min(100, S.meter + n * (1 + 0.15 * (BN.te | 0))); };
     // ------------------------------------------------------------ dischi e campo
     const disc = (team, p, x, y, gk) => ({ team, p, x, y, vx: 0, vy: 0, r: RD, m: 1, gk: !!gk, x0: x, y0: y });
     const D = [];
@@ -176,7 +176,7 @@
     // l'intelligenza dell'avversario: sceglie il disco e il tiro che manda il pallone verso la nostra porta
     function oppShot() {
       const own = D.map((d, i) => [d, i]).filter(([d]) => d.team === 1), goalX = W / 2 + (Math.random() - 0.5) * MOUTH, goalY = H + 10;
-      const press = style === "pressing" ? 1.15 : 1, noise = Math.max(0.03, 0.22 / (DF.opp || 1) - 0.05);
+      const press = style === "pressing" ? 1.15 : 1, noise = Math.max(0.03, 0.22 / (DF.opp || 1) - 0.05) + 0.03 * (BN.df | 0);
       let best = null;
       own.forEach(([d, i]) => {
         const gx = goalX - ball.x, gy = goalY - ball.y, gd = Math.hypot(gx, gy), ux = gx / gd, uy = gy / gd, tx = ball.x - ux * (RB + RD - 1), ty = ball.y - uy * (RB + RD - 1);

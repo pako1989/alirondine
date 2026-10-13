@@ -31,7 +31,7 @@
     while (opp.players.length < 3) opp.players.push({ name: ["Il mediano", "Il terzino", "La punta"][opp.players.length] });
     const mates = (o.mates && o.mates.length ? o.mates : [{ name: "Il compagno" }, { name: "La compagna" }]).slice(0, 2); while (mates.length < 2) mates.push({ name: "Il compagno" });
     const k = (v) => Math.round(v * oppK);
-    const mk = (side, p, i, st) => Object.assign({ side, p, n: side ? i + 7 : i === 0 ? 10 : i + 4, x: 0, y: 0, fx: side ? -1 : 1, fy: 0, ct: 0, dx: 0, dy: 0 }, st);
+    const BN = o.bonus || {}, mk = (side, p, i, st0) => { const st = side ? st0 : Object.assign({}, st0, { sht: st0.sht + (BN.at | 0), tkl: st0.tkl + (BN.df | 0), pas: st0.pas + (BN.te | 0) }); return Object.assign({ side, p, n: side ? i + 7 : i === 0 ? 10 : i + 4, x: 0, y: 0, fx: side ? -1 : 1, fy: 0, ct: 0, dx: 0, dy: 0 }, st); };
     const units = [
       mk(0, hero, 0, { mov: 4, sht: 9, pas: 8, tkl: 6, spd: 10 }), mk(0, mates[0], 1, { mov: 3, sht: 6, pas: 8, tkl: 7, spd: 9 }), mk(0, mates[1], 2, { mov: 4, sht: 7, pas: 6, tkl: 8, spd: 8 }),
       mk(1, opp.players[0], 0, { mov: 4, sht: k(8), pas: k(7), tkl: k(style === "difensiva" ? 8 : 6), spd: k(10) }), mk(1, opp.players[1], 1, { mov: 3, sht: k(6), pas: k(7), tkl: k(7), spd: k(9) }), mk(1, opp.players[2], 2, { mov: style === "pressing" ? 4 : 3, sht: k(6), pas: k(6), tkl: k(8), spd: k(8) }),

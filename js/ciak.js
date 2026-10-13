@@ -82,7 +82,7 @@
         if (ok) { st = 4 + (R() < 0.5 ? 1 : 0); if (sc.k === "noi") { gol = 1; txt = "Buona la prima! La scena va come è scritta: <b>GOL</b>."; } else if (sc.k === "loro") { gol = -1; txt = "Reciti la disperazione alla perfezione. Segnano loro, come da copione. Il regista piange di gioia."; } else txt = "Scena perfetta. Nessun gol, molta emozione."; }
         else { st = 1; txt = sc.k === "loro" ? "Papera: inciampi sul cavo della telecamera. Segnano loro lo stesso." : "Papera: la scena va storta. Niente gol."; if (sc.k === "loro") gol = -1; }
       } else {
-        const d = S.idea, good = ok && R() < Math.min(0.95, d.p / oppK);
+        const d = S.idea, good = ok && R() < Math.min(0.95, (d.p + 0.04 * (((o.bonus || {})[sc.k === "noi" ? "at" : sc.k === "loro" ? "df" : "te"]) | 0)) / oppK);
         if (good) { st = d.st; if (sc.k === "loro") txt = `<b>${esc(d.n)}!</b> Fuori copione, ma il gol non arriva. Il pubblico in studio si alza in piedi.`; else if (d.g) { gol = 1; txt = `<b>${esc(d.n)}!</b> Nessuno l'aveva scritto: <b>GOL</b>. Il regista non sa se arrabbiarsi o applaudire.`; } else txt = `<b>${esc(d.n)}!</b> Niente gol, ma che spettacolo.`; }
         else { st = 1; if (sc.k === "loro") { gol = -1; txt = `${esc(d.n)}… non riesce. Segnano loro, e tu sei fuori copione.`; } else txt = `${esc(d.n)}… non riesce. Il regista si mette le mani nei capelli.`; }
       }
