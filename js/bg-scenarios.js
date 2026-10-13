@@ -6091,7 +6091,124 @@
     if (since("td_finale", 2) < 160) tdScale(g, 60, 190, 0.8, f, [0, 0, 0]);
     tdBlur(g, W, H);
   }
+  // ---------------------------------------------------------------- IL FIGLIO DEL TITANO (animazione americana: contorni neri spessi, colori piatti, impact frame)
+  function ftOut(g, fn, fill, lw) { g.beginPath(); fn(); g.fillStyle = fill; g.fill(); g.lineWidth = lw || 2.5; g.strokeStyle = "#111"; g.stroke(); }
+  function ftHero(g, x, y, s, f, suit, cape, flying) {
+    g.save(); g.translate(x, y); g.scale(s, s); if (flying) g.rotate(-0.5);
+    if (cape) ftOut(g, () => { g.moveTo(-6, -24); g.quadraticCurveTo(-20 - Math.sin(f / 6) * 4, -6, -14 - Math.sin(f / 5) * 6, 10); g.lineTo(6, -6); g.closePath(); }, cape);
+    ftOut(g, () => g.rect(-7, -26, 14, 20), suit); ftOut(g, () => { g.rect(-6, -6, 5, 14); g.rect(1, -6, 5, 14); }, "#1a1a2a");
+    ftOut(g, () => g.arc(0, -32, 7, 0, 7), "#e8c4a0"); ftOut(g, () => g.arc(0, -35, 7, Math.PI, 0), "#2a1a14", 2);
+    g.fillStyle = "#ffd23f"; g.beginPath(); g.moveTo(-3, -20); g.lineTo(3, -20); g.lineTo(0, -14); g.fill(); g.restore();
+  }
+  function ftLines(g, W, H, f, x, y, n) { g.strokeStyle = "rgba(255,255,255,.7)"; g.lineWidth = 1.5; for (let i = 0; i < (n || 14); i++) { const yy = (i * 23 + f * 3) % H, L = 20 + (i % 4) * 14; g.beginPath(); g.moveTo((x || 0) + ((i * 61 + f * 9) % W), yy); g.lineTo((x || 0) + ((i * 61 + f * 9) % W) - L, yy); g.stroke(); } }
+  function ftImpact(g, W, H, t) { if (t < 4) { g.save(); g.globalCompositeOperation = "difference"; g.fillStyle = "#fff"; g.fillRect(0, 0, W, H); g.restore(); } }
+  function ftCloud(g, x, y, s) { ftOut(g, () => { g.arc(x, y, 14 * s, 0, 7); g.moveTo(x + 30 * s, y); g.arc(x + 16 * s, y - 6 * s, 16 * s, 0, 7); g.moveTo(x + 44 * s, y); g.arc(x + 34 * s, y + 2 * s, 12 * s, 0, 7); }, "#ffffff", 2); }
+  function bgFtTitolo(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#1a2a8a", "#3a6ac8", "#8ac8ff"]); ftLines(g, W, H, f, 0, 0, 18);
+    ftCloud(g, 30, 170, 1.2); ftCloud(g, 220, 180, 1); ftHero(g, 160, 120 + Math.sin(f / 15) * 4, 2.2, f, "#c83a2a", "#ffd23f", true);
+    ftImpact(g, W, H, since("ft_titolo", 0));
+    g.font = "900 26px Impact, 'Arial Black', sans-serif"; g.textAlign = "center"; g.lineWidth = 6; g.strokeStyle = "#111"; g.strokeText("IL FIGLIO", 160, 40); g.strokeText("DEL TITANO", 160, 70); g.fillStyle = "#ffd23f"; g.fillText("IL FIGLIO", 160, 40); g.fillStyle = "#ffffff"; g.fillText("DEL TITANO", 160, 70);
+    if (since("ft_titolo", 1) < 90) { g.font = "900 18px Impact, sans-serif"; g.lineWidth = 4; g.strokeText("WHOOOSH!", 250, 120); g.fillStyle = "#ffd23f"; g.fillText("WHOOOSH!", 250, 120); }
+    if (since("ft_titolo", 2) < 120) { ftOut(g, () => g.arc(270, 40, 14, 0, 7), "#7a5ad8"); g.fillStyle = "#fff"; g.font = "bold 7px sans-serif"; g.fillText("ELYON", 270, 43); }
+  }
+  function bgFtCitta(g, W, H, f) {
+    vgrad(g, 0, 0, W, 120, ["#5aa0f0", "#c8e4ff"]); ftCloud(g, ((f * 0.2) % (W + 80)) - 60, 40, 0.8);
+    for (let i = 0; i < 7; i++) { const h = 40 + ((i * 29) % 40); ftOut(g, () => g.rect(i * 46, 120 - h, 42, h), ["#e8dcc8", "#d8c8b8", "#c8d8e8"][i % 3]); for (let k = 0; k < 3; k++) { g.fillStyle = "#3a6ac8"; g.fillRect(i * 46 + 6 + k * 12, 126 - h, 6, 8); } }
+    ftOut(g, () => g.rect(0, 120, W, 80), "#4aa04a"); g.strokeStyle = "#fff"; g.lineWidth = 2; g.strokeRect(30, 135, 260, 55);
+    const up = since("ft_citta", 0) < 90 ? Math.sin(since("ft_citta", 0) / 90 * Math.PI) * 50 : 0; ftHero(g, 160, 178 - up, 1.1, f, "#c83a2a", null, false); circ(g, 172, 150 - up, 4, "#fff");
+    if (up > 30) { g.font = "900 14px Impact"; g.textAlign = "center"; g.lineWidth = 3; g.strokeStyle = "#111"; g.strokeText("?!", 200, 100); g.fillStyle = "#ffd23f"; g.fillText("?!", 200, 100); }
+    if (since("ft_citta", 1) < 120) { ftOut(g, () => g.rect(240, 140, 30, 16), "#e8e8e8"); g.fillStyle = "#c83a2a"; g.fillRect(244, 144, 6, 6); }
+    if (since("ft_citta", 2) < 100) for (let i = 0; i < 6; i++) circ(g, 40 + i * 12, 128 - Math.abs(Math.sin(f / 4 + i)) * 6, 3, ["#c83a2a", "#ffd23f", "#3a6ac8"][i % 3]);
+  }
+  function bgFtCasa(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#6a5a8a", "#4a3a6a"]); ftOut(g, () => g.rect(0, 150, W, 50), "#8a6a4a");
+    ftOut(g, () => g.rect(200, 30, 80, 60), "#1a2a6a"); for (let i = 0; i < 12; i++) circ(g, 210 + (i * 23) % 60, 40 + (i * 17) % 40, 1, "#fff"); if (since("ft_casa", 0) < 140) { circ(g, 230, 55, 6, "#ffd23f"); circ(g, 252, 50, 4, "#ffb060"); }
+    ftOut(g, () => g.rect(60, 120, 140, 12), "#a87a4a"); ftOut(g, () => g.rect(70, 132, 8, 22), "#6a4a2a"); ftOut(g, () => g.rect(182, 132, 8, 22), "#6a4a2a");
+    ftOut(g, () => g.rect(40, 60, 40, 30), "#e8e4d8"); ftHero(g, 60, 86, 0.5, f, "#7a5ad8", null, false); if (since("ft_casa", 1) < 120) { g.fillStyle = "#fff"; g.font = "bold 7px sans-serif"; g.textAlign = "center"; g.fillText("Elyon, 20 anni fa", 60, 100); }
+    ftHero(g, 110, 150, 1.4, f, "#c83a2a", null, false); ftHero(g, 160, 150, 1.6, f, "#3a3a4a", null, false);
+    if (since("ft_casa", 2) < 90) { for (let i = 0; i < 5; i++) circ(g, 130 + Math.sin(f / 6 + i) * 4, 110 - i * 6 - (f % 20) / 3, 2, "rgba(255,255,255,.6)"); }
+  }
+  function bgFtCielo(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#2a5ac8", "#8ac8ff", "#e8f4ff"]); ftLines(g, W, H, f * 0.5, 0, 0, 10);
+    ftCloud(g, ((f * 0.4) % (W + 100)) - 80, 150, 1.4); ftCloud(g, ((f * 0.25 + 160) % (W + 100)) - 80, 60, 1); ftCloud(g, 240, 180, 1.2);
+    ftHero(g, 120, 100 + Math.sin(f / 12) * 6, 1.6, f, "#c83a2a", "#ffd23f", true); ftHero(g, 200, 80 + Math.cos(f / 14) * 5, 1.9, f, "#3a3a4a", null, true);
+    if (since("ft_cielo", 0) < 80) { const t = since("ft_cielo", 0); g.strokeStyle = "#ffd23f"; g.lineWidth = 3; g.beginPath(); g.arc(160, 110, t * 2, 0, 7); g.stroke(); }
+    if (since("ft_cielo", 1) < 100) { g.font = "900 16px Impact"; g.textAlign = "center"; g.lineWidth = 4; g.strokeStyle = "#111"; g.strokeText("SUPERSONICO!", 160, 40); g.fillStyle = "#ffd23f"; g.fillText("SUPERSONICO!", 160, 40); }
+    if (since("ft_cielo", 2) < 140) { ftOut(g, () => g.rect(20, 190, 280, 10), "#4aa04a"); for (let i = 0; i < 9; i++) ftOut(g, () => g.rect(24 + i * 31, 182, 10, 8), "#e8dcc8", 1); }
+  }
+  function bgFtPorto(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#0a1440", "#1a2a6a"]); for (let i = 0; i < 40; i++) circ(g, (i * 67) % W, (i * 29) % 100, 0.8, "#fff");
+    const s = since("ft_porto", 0) < 60 ? since("ft_porto", 0) : 60; ftOut(g, () => g.arc(220 - s * 0.5, 30 + s * 1.6, 5, 0, 7), "#c8a8ff"); g.strokeStyle = "rgba(200,170,255,.6)"; g.lineWidth = 3; g.beginPath(); g.moveTo(250, 0); g.lineTo(220 - s * 0.5, 30 + s * 1.6); g.stroke();
+    vgrad(g, 0, 130, W, 70, ["#1a3a6a", "#0a1a3a"]); for (let i = 0; i < 12; i++) px(g, (i * 37 + f * 0.3) % W, 140 + (i % 4) * 14, 14, 1.5, "rgba(200,170,255,.4)");
+    ftOut(g, () => g.rect(0, 150, 140, 14), "#6a6a72"); [20, 70, 120].forEach((x) => ftOut(g, () => g.rect(x, 164, 6, 30), "#4a4a52"));
+    if (since("ft_porto", 1) < 160) ftHero(g, 100, 150, 1.2, f, "#7a5ad8", null, false); ftHero(g, 60, 150, 1.2, f, "#c83a2a", null, false);
+    if (since("ft_porto", 2) < 100) { g.font = "900 14px Impact"; g.textAlign = "center"; g.lineWidth = 3; g.strokeStyle = "#111"; g.strokeText("SPLASH!", 200, 120); g.fillStyle = "#c8a8ff"; g.fillText("SPLASH!", 200, 120); }
+  }
+  function bgFtAgenzia(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#14183a", "#2a2e4a"]); for (let i = 0; i < 3; i++) { ftOut(g, () => g.rect(20 + i * 100, 30, 80, 60), "#0a1a2a"); g.strokeStyle = "#3aa0ff"; g.lineWidth = 1; for (let k = 0; k < 4; k++) { g.beginPath(); g.arc(60 + i * 100, 60, 8 + k * 7, 0, 7); g.stroke(); } const a = f / 20 + i; g.beginPath(); g.moveTo(60 + i * 100, 60); g.lineTo(60 + i * 100 + Math.cos(a) * 28, 60 + Math.sin(a) * 28); g.stroke(); }
+    if (since("ft_agenzia", 0) < 160) { circ(g, 160 + Math.sin(f / 30) * 10, 50, 5, "#ff3a3a"); g.fillStyle = "#ff3a3a"; g.font = "bold 7px sans-serif"; g.textAlign = "center"; g.fillText("OGGETTO IN AVVICINAMENTO", 160, 100); }
+    ftOut(g, () => g.rect(0, 140, W, 60), "#3a3e5a"); ftHero(g, 160, 170, 1.3, f, "#2a2e4a", null, false);
+    if (since("ft_agenzia", 1) < 100) { ftOut(g, () => g.rect(180, 140, 24, 16), "#e8e8e8"); g.fillStyle = "#111"; g.font = "6px sans-serif"; g.fillText("VARO?", 192, 150); }
+    if (since("ft_agenzia", 2) < 90) { ftOut(g, () => g.rect(60, 150, 20, 14), "#ff3a3a"); g.fillStyle = "#fff"; g.font = "bold 5px sans-serif"; g.fillText("NON PREMERE", 70, 159); }
+  }
+  function bgFtArena(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#0a0a2a", "#2a2a6a", "#5a4a9a"]); for (let i = 0; i < 60; i++) circ(g, (i * 53) % W, (i * 31) % H, (i % 5 === 0) ? 1.4 : 0.7, "#fff");
+    ftOut(g, () => { g.ellipse(160, 30, 120, 22, 0, 0, 7); }, "#4a3a8a", 3); for (let i = 0; i < 9; i++) circ(g, 60 + i * 25, 34, 3, (f / 10 + i) % 3 < 1 ? "#ffd23f" : "#c8a8ff");
+    ftOut(g, () => g.ellipse(160, 160, 150, 34, 0, 0, 7), "#e8f0ff", 3); g.strokeStyle = "#8a7ad8"; g.lineWidth = 2; g.beginPath(); g.moveTo(160, 128); g.lineTo(160, 192); g.stroke();
+    [[30, "#c83a2a"], [290, "#7a5ad8"]].forEach(([x, c]) => { g.strokeStyle = c; g.lineWidth = 4; g.beginPath(); g.ellipse(x, 150, 6 + Math.sin(f / 10) * 1, 18, 0, 0, 7); g.stroke(); });
+    ftHero(g, 120, 160, 1.2, f, "#c83a2a", "#ffd23f", false); ftHero(g, 200, 160, 1.6, f, "#4a3a8a", "#e8e8f8", false);
+    if (since("ft_arena", 0) < 100) { g.font = "900 16px Impact"; g.textAlign = "center"; g.lineWidth = 4; g.strokeStyle = "#111"; g.strokeText("LA PARTITA DEL CIELO", 160, 90); g.fillStyle = "#ffd23f"; g.fillText("LA PARTITA DEL CIELO", 160, 90); }
+    ftImpact(g, W, H, since("ft_arena", 1)); if (since("ft_arena", 2) < 120) for (let i = 0; i < 8; i++) circ(g, 160 + Math.cos(i) * since("ft_arena", 2), 150 + Math.sin(i) * since("ft_arena", 2) * 0.3, 2, "#ffd23f");
+  }
+  function bgFtFinale(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#2a3a8a", "#e8a070", "#ffe0b0"]); ftCloud(g, 20, 150, 1.4); ftCloud(g, 220, 160, 1.2);
+    for (let i = 0; i < 30; i++) { const x = (i * 41 + f) % W, y = (i * 23 + f * 1.4) % 120; px(g, x, y, 3, 3, ["#c83a2a", "#ffd23f", "#3a6ac8", "#7a5ad8"][i % 4]); }
+    ftHero(g, 130, 140 + Math.sin(f / 12) * 3, 1.5, f, "#c83a2a", "#ffd23f", false); ftHero(g, 180, 140 + Math.cos(f / 12) * 3, 1.8, f, "#c83a2a", null, false);
+    if (since("ft_finale", 0) < 120) { g.font = "900 18px Impact"; g.textAlign = "center"; g.lineWidth = 4; g.strokeStyle = "#111"; g.strokeText("VITTORIA!", 160, 50); g.fillStyle = "#ffd23f"; g.fillText("VITTORIA!", 160, 50); }
+    if (since("ft_finale", 1) < 140) { circ(g, 155, 100, 5, "#fff"); g.strokeStyle = "#111"; g.lineWidth = 1.5; g.beginPath(); g.arc(155, 100, 5, 0, 7); g.stroke(); }
+    if (since("ft_finale", 2) < 160) { g.fillStyle = "#111"; g.font = "italic bold 8px sans-serif"; g.textAlign = "center"; g.fillText("«Il cielo è curvo, figliolo.»", 160, 190); }
+  }
   const LB = {
+    ft_titolo: { draw: bgFtTitolo, hot: [
+      [100, 70, 120, 90, "🦸 Il Titano junior sfreccia nel cielo: la tuta rossa, il mantello giallo, la faccia di chi non ci crede ancora."],
+      [200, 100, 100, 40, "💨 WHOOOSH! Il rumore arriva dopo: il volo era più veloce."],
+      [250, 20, 50, 40, "🪐 Elyon, lontanissimo, brilla viola. Qualcuno, lassù, sta guardando."],
+    ] },
+    ft_citta: { draw: bgFtCitta, hot: [
+      [130, 120, 60, 70, "⚽ Il colpo di testa: salti, salti ancora, e non torni giù. Tre secondi."],
+      [230, 130, 50, 30, "📺 La telecamera del telegiornale locale riprende tutto. Domani sarai su ogni schermo di Altamira."],
+      [30, 110, 90, 30, "🎉 La tribuna di legno salta: i tifosi dell'Altamira non hanno mai visto un gol così."],
+    ] },
+    ft_casa: { draw: bgFtCasa, hot: [
+      [200, 30, 80, 60, "🌌 Dalla finestra, il cielo. Per un attimo vedi due soli. Poi uno solo."],
+      [30, 55, 60, 50, "🖼️ La foto di papà giovane, in un cielo con due soli. «Elyon, 20 anni fa»."],
+      [100, 100, 80, 50, "☕ Il caffè di mamma fuma sul tavolo. Nessuno lo beve: stanno tutti parlando."],
+    ] },
+    ft_cielo: { draw: bgFtCielo, hot: [
+      [80, 60, 80, 80, "🦸 Vola! Il vento ti tira, ti gira, ti solleva."],
+      [100, 20, 120, 40, "💥 SUPERSONICO! Il muro del suono si rompe con un tuono."],
+      [0, 170, 320, 30, "🏙️ Laggiù Altamira: il campo, i tetti, il negozio di papà. Piccoli come giocattoli."],
+    ] },
+    ft_porto: { draw: bgFtPorto, hot: [
+      [180, 0, 80, 80, "☄️ Una stella cade a cento metri dal molo, lasciando una scia viola."],
+      [80, 110, 60, 50, "🛡️ Vega esce dall'acqua con l'armatura che gocciola e il pallone di luce sotto il braccio."],
+      [160, 100, 80, 40, "💦 SPLASH! Il mare di Altamira si illumina di viola."],
+    ] },
+    ft_agenzia: { draw: bgFtAgenzia, hot: [
+      [20, 30, 280, 60, "📡 I radar dell'Agenzia Celeste girano piano. Un puntino rosso si avvicina."],
+      [170, 130, 40, 30, "📁 Un fascicolo: «VARO?». Vent'anni di domande senza risposta."],
+      [50, 140, 40, 30, "🔴 Il pulsante rosso con scritto «NON PREMERE». Nessuno lo preme. Mai."],
+    ] },
+    ft_arena: { draw: bgFtArena, hot: [
+      [40, 10, 240, 50, "🚀 La nave di Elyon, sopra la testa, grande come una città."],
+      [100, 120, 120, 60, "⚔️ Orione e il figlio del Titano, faccia a faccia sul campo di nuvole."],
+      [0, 130, 60, 60, "⭕ L'anello-porta della Terra gira piano, rosso come la tuta."],
+    ] },
+    ft_finale: { draw: bgFtFinale, hot: [
+      [100, 100, 120, 80, "🦸 Due Titani, fianco a fianco, sopra le nuvole."],
+      [0, 0, 320, 80, "🎊 Coriandoli rossi e gialli salgono da Altamira fino al cielo."],
+      [80, 180, 160, 20, "🗨️ «Il cielo è curvo, figliolo.»"],
+    ] },
     td_titolo: { draw: bgTdTitolo, hot: [
       [120, 140, 80, 60, "⚖️ I tre piatti della Bilancia oscillano: morale, utile, libertà. Nessuno pesa più degli altri. Per ora."],
       [100, 120, 120, 40, "✨ Un soffio di vento solleva il sale dalle saline: per un attimo l'aria brilla come vetro."],

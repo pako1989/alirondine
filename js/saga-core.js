@@ -365,7 +365,19 @@
       ov.querySelector(".x").onclick = () => { ov.remove(); back(); };
       document.body.appendChild(ov);
     }
-    function ask(who, prompt, opts, bg) { meet(who); api.trAsk(who, esc(T(prompt)).replace(/\n/g, "<br>"), opts.map((o) => ({ label: T(o.label), sub: o.sub ? T(o.sub) : undefined, cls: o.cls || "", disabled: !!o.disabled, fn: o.fn ? () => { if (o.big) SFX.choice(); o.fn(); } : o.fn })), bg || bgNow()); }
+    // SCELTE A TEMPO: ask(chi, domanda, opzioni, sfondo, { secs, def }) mostra una barra che si svuota; se non scegli in tempo,
+    // vale l'opzione numero «def» (di solito il silenzio, o l'esitazione). K.timedFire() la fa scattare subito (per i test).
+    let TIMED = null;
+    function ask(who, prompt, opts, bg, tm) {
+      meet(who); if (TIMED) { clearInterval(TIMED.iv); TIMED = null; }
+      const tok = {}; const wrap = (o) => (o.fn ? () => { if (TIMED && TIMED.tok === tok) { clearInterval(TIMED.iv); TIMED = null; } if (o.big) SFX.choice(); o.fn(); } : o.fn);
+      api.trAsk(who, esc(T(prompt)).replace(/\n/g, "<br>"), opts.map((o) => ({ label: T(o.label), sub: o.sub ? T(o.sub) : undefined, cls: o.cls || "", disabled: !!o.disabled, fn: wrap(o) })), bg || bgNow());
+      if (!tm || !tm.secs) return;
+      const def = opts[tm.def == null ? opts.length - 1 : tm.def], t0 = Date.now(), ms = tm.secs * 1000;
+      const fire = () => { if (!TIMED || TIMED.tok !== tok) return; clearInterval(TIMED.iv); TIMED = null; const bar = document.getElementById("scTimer"); if (bar) bar.remove(); SFX.choice && SFX.choice(); def.fn(); };
+      setTimeout(() => { const ch = document.getElementById("choices"); if (!ch || !TIMED || TIMED.tok !== tok) return; let bar = document.getElementById("scTimer"); if (!bar) { bar = document.createElement("div"); bar.id = "scTimer"; bar.style.cssText = "grid-column:1/-1;height:8px;border-radius:4px;background:rgba(255,255,255,.15);overflow:hidden;margin:2px 0 4px"; bar.innerHTML = '<i style="display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff5a3a,#ffd23f);transition:width .2s linear"></i>'; ch.prepend(bar); } }, 30);
+      TIMED = { tok, fire, iv: setInterval(() => { if (Date.now() - t0 > 500 && !document.getElementById("scTimer")) { clearInterval(TIMED.iv); TIMED = null; return; } const left = 1 - (Date.now() - t0) / ms, i = document.querySelector("#scTimer i"); if (i) i.style.width = Math.max(0, left * 100) + "%"; if (left <= 0) fire(); }, 100) };
+    }
     function reward(key, o) {
       const msg = [];
       once(key, () => { if (o.coins) { const n = coinsGive(Math.round(o.coins * (DIFFS[mem().diff] || DIFFS.normale).coins)); if (n) msg.push(`+${n} monete`); } (o.cos ? [].concat(o.cos) : []).forEach((id) => { const c = api.COSM && api.COSM[id] && safe(() => api.bCos(id), false) ? api.COSM[id].label : null; if (c) msg.push(`Nuovo in guardaroba: ${c}`); }); });
@@ -829,7 +841,7 @@
     // -------------------------------------------------------------- kit per i capitoli
     const K = {
       get api() { return api; }, ID, TITLE, TS, T, esc, hash, rnd, pick, safe, F, mem, save, stepOf, setStep, note, once, reward, coinsGive, bal, hero, castHero, stat, bond,
-      PASS, say, ask, done, go, enterZone, eraOf, gravity: () => GRV.mode, GRV, filter, setEra: (zid, era) => { F.set("era_" + zid, era || ""); if (api && api.trZone() === zid) { const pos = api.trPos && api.trPos(), tr = api.trRec(); if (pos) tr.pos[zid] = pos; FX.enter = frNow(); FX.title = era && ZONES[zid].spec.eras[era] ? ZONES[zid].spec.eras[era].label || ZONES[zid].spec.short : ZONES[zid].spec.short; api.trGo(zid); refreshZone(); } }, otherSaga: (key) => safe(() => JSON.parse(localStorage.getItem(key) || "null"), null), quest, questDone, questState, evidence: (id, d) => { EVID[id] = d; }, giveClue, hasClue, present, loreList: () => Object.keys(LORE).map((k) => [k, LORE[k]]), enterDoor, leaveInterior, travelMenu, timeNow, playMatch, ownMatch, finishChapter, setTiles, SFX, tone, noise, glow, frNow, refreshZone, bgNow, journal, leave, lines, learnLore, ENDINGS, ZX, light, later, shadow, at, undAt, isFloor, floorPaint, ground, TH,
+      PASS, say, ask, done, timedFire: () => TIMED && TIMED.fire(), go, enterZone, eraOf, gravity: () => GRV.mode, GRV, filter, setEra: (zid, era) => { F.set("era_" + zid, era || ""); if (api && api.trZone() === zid) { const pos = api.trPos && api.trPos(), tr = api.trRec(); if (pos) tr.pos[zid] = pos; FX.enter = frNow(); FX.title = era && ZONES[zid].spec.eras[era] ? ZONES[zid].spec.eras[era].label || ZONES[zid].spec.short : ZONES[zid].spec.short; api.trGo(zid); refreshZone(); } }, otherSaga: (key) => safe(() => JSON.parse(localStorage.getItem(key) || "null"), null), quest, questDone, questState, evidence: (id, d) => { EVID[id] = d; }, giveClue, hasClue, present, loreList: () => Object.keys(LORE).map((k) => [k, LORE[k]]), enterDoor, leaveInterior, travelMenu, timeNow, playMatch, ownMatch, finishChapter, setTiles, SFX, tone, noise, glow, frNow, refreshZone, bgNow, journal, leave, lines, learnLore, ENDINGS, ZX, light, later, shadow, at, undAt, isFloor, floorPaint, ground, TH,
       P: (x, y, w, h, c) => { ctx(); P(x, y, w, h, c); }, get g() { return ctx(); },
       zone: (zid) => ZONES[zid] || null, inZone: (zid) => !!(api && api.trZone() === zid),
       scene: (ls, then, bg) => { safe(() => arr(ls).forEach((l) => Array.isArray(l) && meet(l[0]))); return api.play(lines(ls, bg || BG0), then); },
