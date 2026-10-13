@@ -4162,8 +4162,28 @@
     return { eyes: [[-8, b], [8, b]], r: 4, my: 13 + b, ink: "#fff4c8" };
   };
   SHAPE_CHIBI.ombra = function (x, y, c, dir) { const b = Math.sin(frame / 18 + x) * 1.5; g.save(); g.globalAlpha = 0.8; g.fillStyle = c.skin || "#3a3a5a"; g.beginPath(); g.ellipse(x, y - 11 + b, 6, 11, 0, 0, 7); g.fill(); g.globalAlpha = 0.4; g.beginPath(); g.ellipse(x, y - 1, 5, 2, 0, 0, 7); g.fill(); g.restore(); if (dir !== "up") { px(x - 3, y - 16 + b, 2, 2, c.eye || "#ffe8a0"); px(x + 1, y - 16 + b, 2, 2, c.eye || "#ffe8a0"); } };
+  // OMINI PIXEL (impostazione «Omini»): al posto degli omini disegnati, 30 personaggi del pacchetto «Ninja Adventure»
+  // di Pixel-Boy e AAA (licenza CC0, vedi img/omini/LICENZA.txt), con la camminata nelle 4 direzioni. Le sagome non umane restano le nostre.
+  const OMINI = { img: null, ok: false, hero: "", heroT: -999,
+    names: ["Ragazzo", "Donna", "Anziano", "Anziana", "Paesano", "Paesana", "Bottegaio", "Pescatrice", "Contadino", "Viaggiatore", "Principessa", "Nobile", "Monaco", "Samurai", "Cacciatore", "Ispettore", "Cavaliere", "Esploratore delle nevi", "Cavernicola", "Cavernicolo", "Lottatore rosso", "Lottatore bianco", "Maestro", "Sultano", "Sciamano", "Ninja blu", "Ninja rosso", "Ninja verde", "Ninja giallo", "Samurai blu"],
+    load() { if (this.img) return; this.img = new Image(); this.img.onload = () => { this.ok = true; }; this.img.src = "img/omini/omini.png"; },
+  };
+  window.__omini = OMINI;
+  function ominoPixel(x, y, c, dir, ph) {
+    if (!OMINI.ok) { OMINI.load(); return false; }
+    if (frame - OMINI.heroT > 120) { OMINI.heroT = frame; const h = heroLoad(); OMINI.hero = (h && h.name) || ""; }
+    let i = c.omino;
+    if (i == null) { if (c.num != null && c.name && c.name === OMINI.hero) i = SET.ominoHero; else { const k = String(c.name || "") + (c.hair || "") + (c.shirt || "") + (c.skin || ""); let hsh = 7; for (let j = 0; j < k.length; j++) hsh = (hsh * 31 + k.charCodeAt(j)) >>> 0; i = 1 + (hsh % (OMINI.names.length - 1)); } }
+    i = ((i | 0) % OMINI.names.length + OMINI.names.length) % OMINI.names.length;
+    const col = { down: 0, up: 1, left: 2, right: 3 }[dir] || 0, row = ph ? Math.floor(Math.abs(ph) * 1.2) % 4 : 0;
+    g.fillStyle = "#0004"; g.beginPath(); g.ellipse(x, y, 7, 2.5, 0, 0, 7); g.fill();
+    const sm = g.imageSmoothingEnabled; g.imageSmoothingEnabled = false;
+    g.drawImage(OMINI.img, (i % 8) * 64 + col * 16, Math.floor(i / 8) * 64 + row * 16, 16, 16, Math.round(x - 12), Math.round(y - 23), 24, 24);
+    g.imageSmoothingEnabled = sm; return true;
+  }
   function chibi(x, y, c, dir, ph) { const SA = [].concat(c.acc || []); // uno o più accessori
     if (c.shape && SHAPE_CHIBI[c.shape]) return SHAPE_CHIBI[c.shape](x, y, c, dir, ph || 0);
+    if (SET.omini === "pixel" && ominoPixel(x, y, c, dir, ph)) return;
     const hair = c.hair || "#333", skin = c.skin || "#f0c9a0", shirt = c.shirt || "#ff4d5a";
     g.fillStyle = "#0004"; g.beginPath(); g.ellipse(x, y, 6, 2.5, 0, 0, 7); g.fill();
     const l = Math.round(Math.sin(ph || 0) * 1.5);
@@ -5544,6 +5564,8 @@
     if (res.azPowerUps === undefined) res.azPowerUps = true;
     if (res.azAimAssist === undefined) res.azAimAssist = true;
     if (!["classic", "flat", "hd", "anime", "pixel", "manga", "acquerello", "db_toonhead"].includes(res.faces)) res.faces = "classic";
+    if (res.omini !== "pixel") res.omini = "classici";
+    if (!(Number.isInteger(res.ominoHero) && res.ominoHero >= 0 && res.ominoHero < 30)) res.ominoHero = 0;
     return res;
   }
   let SET = setLoad();
@@ -5647,6 +5669,8 @@
       { label: `Animazioni: ${SET.anim ? "sì" : "no"}`, sub: "Tiri, esultanze, fischio d'inizio e finale, coppa, cartellini · tocca per saltarle", fn: () => { SET.anim = !SET.anim; save(); again(); } },
       { label: `Tema visivo: ${(window.THEMES && window.THEMES.find(t => (localStorage.getItem("ali-di-rondine.theme") || "classic") === t.id) || { name: "Classico Rondine" }).name} ▸`, sub: "Classico · Gazzetta Vintage · Neon Costa · Arcade Retrò", fn: () => { if (window.cycleTheme) window.cycleTheme(); again(); } },
       { label: `Stile dei volti: ${{ classic: "Classico", flat: "Flat design", hd: "2D HD", anime: "Anime", pixel: "Pixel 16-bit", manga: "Manga", acquerello: "Acquerello", db_toonhead: "Toon Head" }[SET.faces] || "Classico"} ▸`, sub: ({ flat: "Flat design: forme geometriche a colori pieni, niente contorni, pulito come un'app", hd: "2D HD: sfumature morbide, capelli con riflessi, occhi a raggiera, luce di contorno", anime: "Volti in stile anime, diversi per ogni personaggio", pixel: "Ritratti in pixel art alla JRPG a 16 bit", manga: "Bianco e nero, chine e retini, come una tavola stampata", acquerello: "Colori lavati e morbidi, grana della carta", db_toonhead: "Cartone a testa grande con espressioni vere, libreria DiceBear (Johan Melin, CC BY 4.0)" }[SET.faces] || "I ritratti originali") + " · tocca per cambiare (8 stili)", fn: () => { SET.faces = { classic: "flat", flat: "hd", hd: "anime", anime: "pixel", pixel: "manga", manga: "acquerello", acquerello: "db_toonhead", db_toonhead: "classic" }[SET.faces] || "flat"; try { Object.keys(PORT_IMG).forEach((k) => delete PORT_IMG[k]); } catch {} save(); again(); } },
+      { label: `Omini: ${SET.omini === "pixel" ? "Pixel (Ninja Adventure)" : "Classici"} ▸`, sub: SET.omini === "pixel" ? "Personaggi in pixel art che camminano nelle 4 direzioni (pacchetto libero CC0 di Pixel-Boy). Accessori e acconciature si vedono nei ritratti" : "Gli omini disegnati del gioco, con accessori e acconciature · tocca per i personaggi in pixel art", fn: () => { SET.omini = SET.omini === "pixel" ? "classici" : "pixel"; if (SET.omini === "pixel") OMINI.load(); save(); again(); } },
+      ...(SET.omini === "pixel" ? [{ label: `Il tuo omino: ${OMINI.names[SET.ominoHero] || "Ragazzo"} ▸`, sub: "Il personaggio pixel del tuo Campione · tocca per cambiarlo", fn: () => { SET.ominoHero = (SET.ominoHero + 1) % OMINI.names.length; save(); again(); } }] : []),
       { label: `Grafica: ${SET.gfx === "classica" ? "Classica" : "Migliorata"} ▸`, sub: SET.gfx === "classica" ? "Aspetto originale retrò, senza effetti aggiuntivi" : "Luci, cielo e mare animati, particelle, riflettori e pubblico", fn: () => { SET.gfx = SET.gfx === "classica" ? "migliorata" : "classica"; GX.low = false; GX.auto = false; GX.slow = 0; save(); again(); } },
       { label: `Dissolvenze e card di capitolo: ${SET.dis ? "sì" : "no"}`, sub: "Schermata col titolo e sfumature a ogni cambio scena", fn: () => { SET.dis = !SET.dis; save(); again(); } },
       { label: `Filtro retrò: ${SET.crt ? "sì" : "no"}`, sub: "Righe e bordi curvi, come la tv della trattoria", fn: () => { SET.crt = !SET.crt; save(); again(); } },

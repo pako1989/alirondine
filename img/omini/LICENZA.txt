@@ -1,0 +1,11 @@
+Omini pixel di Ali di Rondine (img/omini/omini.png)
+
+I personaggi vengono dal pacchetto «Ninja Adventure - Asset Pack» di Pixel-Boy e AAA
+(https://pixel-boy.itch.io/ninja-adventure-asset-pack), rilasciato con licenza CC0 1.0 Universal
+(pubblico dominio: uso libero, anche commerciale, senza obbligo di citazione). Li citiamo lo stesso, per ringraziare.
+
+Dal pacchetto sono state prese le prime quattro righe (camminata in 4 direzioni) di 30 personaggi,
+riunite in un unico foglio da 64×64 pixel per personaggio, 8 per riga, in quest'ordine:
+Boy, Woman, OldMan, OldWoman, Villager, Villager2, Villager3, Villager4, Villager5, Villager6,
+Princess, Noble, Monk, Samurai, Hunter, Inspector, Knight, Eskimo, Cavegirl, Caveman,
+FighterRed, FighterWhite, Master, Sultan, Shaman, NinjaBlue, NinjaRed, NinjaGreen, NinjaYellow, SamuraiBlue.
