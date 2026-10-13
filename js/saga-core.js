@@ -413,7 +413,7 @@
       zr.Z.npcs.forEach((n) => {
         if (!Array.isArray(n.route) || n.route.length < 2) return;
         const k = zid + ":" + n.id, w = WALK[k] || (WALK[k] = { x: n.route[0][0] * TS + 8, y: n.route[0][1] * TS + 12, i: 1, wait: 0, ph: 0 });
-        const near = me && Math.hypot(me[0] - w.x, me[1] - w.y) < 28;
+        const near = !n.guard && me && Math.hypot(me[0] - w.x, me[1] - w.y) < 28;
         if (near) { n.walk = 0; n.face = Math.abs(me[0] - w.x) > Math.abs(me[1] - w.y) ? (me[0] < w.x ? "left" : "right") : me[1] < w.y ? "up" : "down"; }
         else if (w.wait > 0) { w.wait--; n.walk = 0; }
         else {
@@ -424,6 +424,53 @@
         n.px = w.x; n.py = w.y; n.at = [Math.floor(w.x / TS), Math.floor((w.y - 4) / TS)];
       });
       return null;
+    }
+    // GUARDIE (furtivo): un PNG con guard: { range: caselle (4), cone: mezzo angolo (0.55), turn: fotogrammi per girarsi (se è fermo) }
+    // guarda davanti a sé con un cono di vista (fermato dai muri). Se il Campione ci resta dentro per un attimo, viene visto:
+    // torna a spec.sneakStart (o all'inizio della zona) e si chiama spec.onSeen(K, guardia). Non ti vede chi sta su una tessera
+    // di spec.hide (casse, ombre, cespugli) e, nelle zone con il buio (spec.buio), ti vede solo da metà distanza se non sei alla luce.
+    const GUARD = { zid: "", seen: 0, cool: 0, who: null };
+    const DIRS = ["down", "left", "up", "right"], FACE_A = { right: 0, down: Math.PI / 2, left: Math.PI, up: -Math.PI / 2 };
+    function guardPos(n) { return n.px != null ? [n.px, n.py] : [n.at[0] * TS + 8, n.at[1] * TS + 12]; }
+    function blocks(c) { return c === undefined || c === null || c === "y" || SOLID.includes(c) || "~#TSGMORWLNHBDW".includes(c); }
+    function sight(x0, y0, x1, y1) { const d = Math.hypot(x1 - x0, y1 - y0), n = Math.ceil(d / 5); for (let i = 1; i < n; i++) { const x = x0 + ((x1 - x0) * i) / n, y = y0 - 6 + ((y1 - y0) * i) / n; if (blocks(at(Math.floor(x / TS), Math.floor(y / TS)))) return false; } return true; }
+    function guardsOf(zid) { const zr = ZONES[zid]; return zr && zr.Z.npcs ? zr.Z.npcs.filter((n) => n.guard && n.at) : []; }
+    function inDark(spec, px, py) {
+      const a = typeof spec.buio === "function" ? +safe(() => spec.buio(K), 0) : +spec.buio || 0; if (a < 0.3) return false;
+      const L = spec.luci ? arr(safe(() => spec.luci(K), [])) : []; return !L.some(([tx, ty, r]) => Math.hypot(px - (tx * TS + 8), py - (ty * TS + 8)) < (r || 3) * TS * 0.7);
+    }
+    function guardTick(zid, spec, px, py) {
+      const gs = guardsOf(zid); if (!gs.length || window.__noGuards) return null; const G = GUARD; if (G.zid !== zid) { G.zid = zid; G.seen = 0; G.cool = 40; }
+      gs.forEach((n) => { if (n.guard.turn && !(Array.isArray(n.route) && n.route.length > 1)) n.face = DIRS[Math.floor(frNow() / n.guard.turn) % 4]; n.__alert = 0; });
+      if (G.cool > 0) { G.cool--; return null; }
+      const hid = spec.hide && spec.hide.includes(at(Math.floor(px / TS), Math.floor((py - 4) / TS))), dark = inDark(spec, px, py);
+      let by = null;
+      if (!hid) gs.forEach((n) => {
+        const [gx, gy] = guardPos(n), dx = px - gx, dy = py - gy, d = Math.hypot(dx, dy), range = (n.guard.range || 4) * TS * (dark ? 0.5 : 1);
+        if (d > range) return; let da = Math.atan2(dy, dx) - (FACE_A[n.face || "down"] || 0); while (da > Math.PI) da -= Math.PI * 2; while (da < -Math.PI) da += Math.PI * 2;
+        if (Math.abs(da) > (n.guard.cone || 0.55) && d > 12) return; if (!sight(gx, gy, px, py)) return; by = n;
+      });
+      if (by) { G.seen++; by.__alert = G.seen; G.who = by; if (G.seen === 1) safe(() => tone(520, 0.08, "square", 0.03)); }
+      else G.seen = Math.max(0, G.seen - 2);
+      if (G.seen > 22) {
+        G.seen = 0; G.cool = 70; const back = spec.sneakStart || spec.start || [1, 1], who = G.who;
+        safe(() => tone(220, 0.35, "sawtooth", 0.05)); GUARD.caught = (GUARD.caught | 0) + 1;
+        setTimeout(() => safe(() => (spec.onSeen ? spec.onSeen(K, who) : say([["voce", (cfg.texts && cfg.texts.seen) || "Ti hanno visto! Torni indietro, nell'ombra, e riprovi."]], done))), 0);
+        return [back[0] * TS + 8, back[1] * TS + 12];
+      }
+      return null;
+    }
+    // il cono di vista disegnato a raggi (si ferma sui muri): giallo, rosso quando ti sta vedendo
+    function guardDraw(g, zid, cx, cy) {
+      const gs = guardsOf(zid); if (!gs.length) return;
+      gs.forEach((n) => {
+        const [gx, gy] = guardPos(n), fa = FACE_A[n.face || "down"] || 0, cone = n.guard.cone || 0.55, range = (n.guard.range || 4) * TS, alert = n.__alert || 0, N = 14;
+        g.save(); g.beginPath(); g.moveTo(gx - cx, gy - cy - 6);
+        for (let i = 0; i <= N; i++) { const a = fa - cone + (cone * 2 * i) / N; let r = 6; while (r < range && !blocks(at(Math.floor((gx + Math.cos(a) * r) / TS), Math.floor((gy - 6 + Math.sin(a) * r) / TS)))) r += 4; g.lineTo(gx - cx + Math.cos(a) * r, gy - cy - 6 + Math.sin(a) * r); }
+        g.closePath(); const gr = g.createRadialGradient(gx - cx, gy - cy - 6, 4, gx - cx, gy - cy - 6, range);
+        const col = alert ? "255,70,50" : "255,230,120"; gr.addColorStop(0, `rgba(${col},${alert ? 0.42 : 0.26})`); gr.addColorStop(1, `rgba(${col},0)`); g.fillStyle = gr; g.fill(); g.restore();
+        if (alert > 6) { g.font = "900 12px system-ui"; g.textAlign = "center"; g.lineWidth = 3; g.strokeStyle = "#111"; g.strokeText("!", gx - cx, gy - cy - 26); g.fillStyle = alert > 14 ? "#ff4a3a" : "#ffd23f"; g.fillText("!", gx - cx, gy - cy - 26); }
+      });
     }
     const TRAIL = { zid: "", pts: [] };
     function followTick(zid) {
@@ -521,7 +568,7 @@
       //  - flip: la gravità è girata, la visuale ruota di 180° e i comandi restano quelli dello schermo.
       // meccaniche per-zona: spec.tick (movimento del Campione, può spostarlo) e i plugin della saga
       const ticks = []; if (spec.__exitTick) ticks.push((px, py) => spec.__exitTick(px, py)); if (spec.tick) ticks.push((px, py, dt) => spec.tick(px, py, dt, K, stepOf(chN))); PLUG.forEach((p) => { if (p.tick) ticks.push((px, py, dt) => p.tick(zid, spec, px, py, dt, K)); }); if (spec.gravity || (spec.eras && Object.values(spec.eras).some((e) => e.gravity))) ticks.unshift((px, py) => gravTick(zid, spec, chN, px, py));
-      ticks.push(() => walkTick(zid)); ticks.push(() => followTick(zid));
+      ticks.push(() => walkTick(zid)); ticks.push(() => followTick(zid)); ticks.push((px, py) => guardTick(zid, spec, px, py));
       if (ticks.length) Z.tick = function (px, py, dt, moving) { if (api.trZone() !== zid) return null; let r = null; ticks.forEach((t) => { const q = safe(() => t(r ? r[0] : px, r ? r[1] : py, Math.min(0.05, dt || 0.016), moving), null); if (q && q.length === 2) r = q; }); return r; };
       Z.decor = function (cx, cy) { const d = dd(cx, cy); ZX.decor.splice(0).forEach((fn) => safe(() => fn(GP, cx, cy, d))); if (spec.decor) safe(() => spec.decor(GP, cx, cy, d, K)); };
       Z.top = function (cx, cy) {
@@ -532,6 +579,7 @@
         safe(() => gravView(GP));
         safe(() => mood(GP, frNow()));
         safe(() => buio(GP, spec, cx, cy));
+        safe(() => guardDraw(GP, zid, cx, cy));
         if (spec.hud) safe(() => spec.hud(GP, K, stepOf(chN)));
         PLUG.forEach((p) => p.hud && safe(() => p.hud(GP, zid, spec, K)));
       };

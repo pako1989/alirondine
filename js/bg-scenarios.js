@@ -5828,53 +5828,53 @@
   }
   function bgCmRiva(g, W, H, f) {
     vgrad(g, 0, 0, W, 110, ["#ff9a5a", "#ffd8a0"]); circ(g, 250, 70, 26, "#fff4c8");
-    vgrad(g, 0, 100, W, 40, ["#2a7ac8", "#1a5aa8"]); for (let i = 0; i < 12; i++) px(((i * 37 + f * 0.4) % (W + 40)) - 20, 108 + (i % 4) * 7, 14, 1, "rgba(255,255,255,.5)");
+    vgrad(g, 0, 100, W, 40, ["#2a7ac8", "#1a5aa8"]); for (let i = 0; i < 12; i++) px(g, ((i * 37 + f * 0.4) % (W + 40)) - 20, 108 + (i % 4) * 7, 14, 1, "rgba(255,255,255,.5)");
     [[30, "#e83a3a"], [90, "#3a8ad8"], [150, "#ffd23f"]].forEach(([x, c], i) => { const bob = Math.sin(f / 20 + i) * 2; g.fillStyle = c; g.beginPath(); g.moveTo(x - 14, 112 + bob); g.lineTo(x + 14, 112 + bob); g.lineTo(x + 9, 120 + bob); g.lineTo(x - 9, 120 + bob); g.closePath(); g.fill(); });
-    px(0, 136, W, 64, "#c8a878"); for (let i = 0; i < 5; i++) { px(10 + i * 62, 92 - (i % 2) * 12, 46, 46 + (i % 2) * 12, "#f4f0e4"); px(14 + i * 62, 100 - (i % 2) * 12, 8, 8, "#2a6ac8"); px(30 + i * 62, 100 - (i % 2) * 12, 8, 8, since("cm_riva", 0) < 120 && i % 2 ? "#ffd23f" : "#2a6ac8"); }
-    px(200, 150, 100, 40, "#d8b888"); [[204, 150], [292, 150]].forEach(([x, y]) => { px(x, y - 22, 2, 22, "#f4f0e4"); }); px(204, 128, 90, 2, "#f4f0e4");
+    px(g, 0, 136, W, 64, "#c8a878"); for (let i = 0; i < 5; i++) { px(g, 10 + i * 62, 92 - (i % 2) * 12, 46, 46 + (i % 2) * 12, "#f4f0e4"); px(g, 14 + i * 62, 100 - (i % 2) * 12, 8, 8, "#2a6ac8"); px(g, 30 + i * 62, 100 - (i % 2) * 12, 8, 8, since("cm_riva", 0) < 120 && i % 2 ? "#ffd23f" : "#2a6ac8"); }
+    px(g, 200, 150, 100, 40, "#d8b888"); [[204, 150], [292, 150]].forEach(([x, y]) => { px(g, x, y - 22, 2, 22, "#f4f0e4"); }); px(g, 204, 128, 90, 2, "#f4f0e4");
     const gl = since("cm_riva", 1) < 60; cmBall(g, gl ? 250 + since("cm_riva", 1) * 0.5 : 240, gl ? 160 - Math.sin(since("cm_riva", 1) / 60 * Math.PI) * 30 : 182, 4); if (gl && since("cm_riva", 1) > 40) cmWord(g, "GOL!", 250, 125, "#ffd23f", 16);
-    px(150, 165, 14, 10, "#6a4a2a"); circ(g, 157, 158, 6, "#c68642"); px(150, 150, 14, 4, "#c8c8c8"); if (since("cm_riva", 2) < 120) { g.fillStyle = "#fff"; g.font = "bold 8px sans-serif"; g.fillText("«Testa alta!»", 130, 145); }
+    px(g, 150, 165, 14, 10, "#6a4a2a"); circ(g, 157, 158, 6, "#c68642"); px(g, 150, 150, 14, 4, "#c8c8c8"); if (since("cm_riva", 2) < 120) { g.fillStyle = "#fff"; g.font = "bold 8px sans-serif"; g.fillText("«Testa alta!»", 130, 145); }
   }
   function bgCmCampetto(g, W, H, f) {
-    vgrad(g, 0, 0, W, 80, ["#ff8a4a", "#ffc890"]); px(0, 70, W, 130, "#c8a070"); for (let i = 0; i < 80; i++) px((i * 41) % W, 72 + (i * 23) % 128, 3, 1, "rgba(90,60,30,.3)");
+    vgrad(g, 0, 0, W, 80, ["#ff8a4a", "#ffc890"]); px(g, 0, 70, W, 130, "#c8a070"); for (let i = 0; i < 80; i++) px(g, (i * 41) % W, 72 + (i * 23) % 128, 3, 1, "rgba(90,60,30,.3)");
     g.strokeStyle = "rgba(255,255,255,.75)"; g.lineWidth = 2; g.strokeRect(20, 90, 280, 100); g.beginPath(); g.moveTo(160, 90); g.lineTo(160, 190); g.stroke(); g.beginPath(); g.arc(160, 140, 18, 0, 7); g.stroke();
-    [[20, 120], [300, 120]].forEach(([x, y]) => { px(x - 2, y - 10, 3, 40, "#f4f0e4"); });
+    [[20, 120], [300, 120]].forEach(([x, y]) => { px(g, x - 2, y - 10, 3, 40, "#f4f0e4"); });
     const sw = since("cm_campetto", 0) < 90; if (sw) { g.save(); g.globalAlpha = 0.5; cmSpeed(g, 160, 140, 30, "#fff", f, 30); g.restore(); cmWord(g, "TIRO DELL'AQUILA!", 160, 60, "#ffd23f", 18); }
-    cmKid(g, 120, 178, 1.1, "#1f5fbf", "#2b1d14", f, sw); cmKid(g, 280, 168, 1, "#c83a3a", "#111", f, false); px(268, 126, 24, 6, "#c83a3a");
+    cmKid(g, 120, 178, 1.1, "#1f5fbf", "#2b1d14", f, sw); cmKid(g, 280, 168, 1, "#c83a3a", "#111", f, false); px(g, 268, 126, 24, 6, "#c83a3a");
     if (since("cm_campetto", 1) < 100) cmWord(g, "PARATA!", 270, 110, "#ff6a5a", 16, 0.1);
     const ag = since("cm_campetto", 2) < 140; if (ag) { const t = since("cm_campetto", 2); g.fillStyle = "#3a2a1a"; g.beginPath(); g.moveTo(40 + t * 1.8, 40); g.lineTo(20 + t * 1.8, 30 + Math.sin(t / 3) * 6); g.lineTo(44 + t * 1.8, 38); g.lineTo(68 + t * 1.8, 30 + Math.sin(t / 3) * 6); g.lineTo(48 + t * 1.8, 40); g.fill(); }
   }
   function bgCmProvincia(g, W, H, f) {
-    vgrad(g, 0, 0, W, H, ["#5aa0e8", "#c8e0f8"]); px(0, 60, W, 60, "#a8a8b0"); for (let r = 0; r < 4; r++) for (let i = 0; i < 40; i++) { const j = since("cm_provincia", 0) < 90 ? Math.abs(Math.sin(f / 4 + i)) * 4 : 0; circ(g, 4 + i * 8 + (r % 2) * 4, 70 + r * 12 - j, 3, ["#1f5fbf", "#e85a1a", "#3a8ad8", "#ffd23f", "#fff"][(i + r) % 5]); }
+    vgrad(g, 0, 0, W, H, ["#5aa0e8", "#c8e0f8"]); px(g, 0, 60, W, 60, "#a8a8b0"); for (let r = 0; r < 4; r++) for (let i = 0; i < 40; i++) { const j = since("cm_provincia", 0) < 90 ? Math.abs(Math.sin(f / 4 + i)) * 4 : 0; circ(g, 4 + i * 8 + (r % 2) * 4, 70 + r * 12 - j, 3, ["#1f5fbf", "#e85a1a", "#3a8ad8", "#ffd23f", "#fff"][(i + r) % 5]); }
     vgrad(g, 0, 120, W, 80, ["#3a9a4a", "#2f8a3e"]); g.strokeStyle = "rgba(255,255,255,.8)"; g.lineWidth = 2; g.strokeRect(14, 130, 292, 62);
-    [["RIVA AZZURRA", "#1f5fbf"], ["FIAMME DEL PORTO", "#e85a1a"], ["PONTERUGA", "#3a8ad8"]].forEach(([t, c], i) => { px(10 + i * 104, 112, 96, 14, c); g.fillStyle = "#fff"; g.font = "bold 8px sans-serif"; g.textAlign = "center"; g.fillText(t, 58 + i * 104, 122); g.textAlign = "left"; });
+    [["RIVA AZZURRA", "#1f5fbf"], ["FIAMME DEL PORTO", "#e85a1a"], ["PONTERUGA", "#3a8ad8"]].forEach(([t, c], i) => { px(g, 10 + i * 104, 112, 96, 14, c); g.fillStyle = "#fff"; g.font = "bold 8px sans-serif"; g.textAlign = "center"; g.fillText(t, 58 + i * 104, 122); g.textAlign = "left"; });
     if (since("cm_provincia", 1) < 100) { g.save(); g.globalAlpha = 0.6; cmSpeed(g, 230, 160, 28, "#fff", f, 20); g.restore(); cmWord(g, "TIRO DEL LEONE!", 200, 100, "#ff8a3a", 18, 0.06); }
     cmKid(g, 230, 186, 0.9, "#e85a1a", "#1a1a1a", f, since("cm_provincia", 1) < 100);
     const tw = since("cm_provincia", 2) < 100; cmKid(g, 80, 188, 0.9, "#3a8ad8", "#e8c84a", f, false); cmKid(g, 100, tw ? 160 - Math.sin(since("cm_provincia", 2) / 100 * Math.PI) * 30 : 188, 0.9, "#3a8ad8", "#e8c84a", f, tw); if (tw) cmWord(g, "CATAPULTA!", 90, 110, "#7ad8ff", 16);
   }
   function bgCmSpogliatoio(g, W, H, f) {
-    vgrad(g, 0, 0, W, H, ["#2a3346", "#1a2233"]); for (let i = 0; i < 8; i++) { px(10 + i * 38, 30, 32, 110, "#3a4a6a"); px(12 + i * 38, 34, 28, 4, "#2a3a5a"); circ(g, 34 + i * 38, 80, 2, "#c8c8d0"); }
-    px(100, 40, 120, 70, "#1a2a1a"); g.strokeStyle = "#e8e8e8"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(120, 80); g.quadraticCurveTo(160, 40, 200, 70); g.stroke(); g.beginPath(); g.moveTo(150, 55); g.lineTo(140, 48); g.lineTo(160, 52); g.lineTo(180, 46); g.lineTo(168, 56); g.stroke();
+    vgrad(g, 0, 0, W, H, ["#2a3346", "#1a2233"]); for (let i = 0; i < 8; i++) { px(g, 10 + i * 38, 30, 32, 110, "#3a4a6a"); px(g, 12 + i * 38, 34, 28, 4, "#2a3a5a"); circ(g, 34 + i * 38, 80, 2, "#c8c8d0"); }
+    px(g, 100, 40, 120, 70, "#1a2a1a"); g.strokeStyle = "#e8e8e8"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(120, 80); g.quadraticCurveTo(160, 40, 200, 70); g.stroke(); g.beginPath(); g.moveTo(150, 55); g.lineTo(140, 48); g.lineTo(160, 52); g.lineTo(180, 46); g.lineTo(168, 56); g.stroke();
     if (since("cm_spogliatoio", 0) < 120) { g.fillStyle = "#ffd23f"; g.font = "bold 10px sans-serif"; g.fillText("TESTA ALTA", 128, 102); }
-    px(30, 150, 260, 12, "#8a6a3a"); px(30, 162, 6, 26, "#5a3a22"); px(284, 162, 6, 26, "#5a3a22");
-    const sh = since("cm_spogliatoio", 1) < 90; px(140, sh ? 120 : 138, 24, 14, "#1f5fbf"); g.fillStyle = "#fff"; g.font = "bold 9px sans-serif"; g.fillText("10", 146, sh ? 131 : 149);
+    px(g, 30, 150, 260, 12, "#8a6a3a"); px(g, 30, 162, 6, 26, "#5a3a22"); px(g, 284, 162, 6, 26, "#5a3a22");
+    const sh = since("cm_spogliatoio", 1) < 90; px(g, 140, sh ? 120 : 138, 24, 14, "#1f5fbf"); g.fillStyle = "#fff"; g.font = "bold 9px sans-serif"; g.fillText("10", 146, sh ? 131 : 149);
     if (since("cm_spogliatoio", 2) < 100) cmTone(g, 0, 0, W, H, "rgba(255,255,255,.08)");
   }
   function bgCmRitiro(g, W, H, f) {
-    vgrad(g, 0, 0, W, 100, ["#5a9ae8", "#d8ecff"]); px(40, 40, 120, 60, "#f4f0e4"); for (let i = 0; i < 8; i++) px(48 + i * 14, 50, 8, 10, "#2a6ac8"); px(40, 36, 120, 6, "#1f5fbf");
-    vgrad(g, 0, 100, W, 100, ["#3fae5a", "#2f9a4a"]); for (let i = 0; i < 10; i++) px(i * 32, 100, 16, 100, "rgba(255,255,255,.04)");
+    vgrad(g, 0, 0, W, 100, ["#5a9ae8", "#d8ecff"]); px(g, 40, 40, 120, 60, "#f4f0e4"); for (let i = 0; i < 8; i++) px(g, 48 + i * 14, 50, 8, 10, "#2a6ac8"); px(g, 40, 36, 120, 6, "#1f5fbf");
+    vgrad(g, 0, 100, W, 100, ["#3fae5a", "#2f9a4a"]); for (let i = 0; i < 10; i++) px(g, i * 32, 100, 16, 100, "rgba(255,255,255,.04)");
     g.strokeStyle = "rgba(255,255,255,.8)"; g.lineWidth = 2; g.strokeRect(180, 110, 120, 70);
     const tr = since("cm_ritiro", 0) < 100; if (tr) { const t = since("cm_ritiro", 0) / 100; for (let k = 0; k < 10; k++) circ(g, 200 + t * 80 - k * 6, 150 - Math.sin(t * 6) * 10, 4 - k * 0.3, `rgba(255,210,63,${0.7 - k * 0.06})`); cmWord(g, "COMBINAZIONE D'ORO!", 160, 90, "#ffd23f", 15); }
     cmKid(g, 210, 182, 0.9, "#1f5fbf", "#c87a3a", f, tr); cmKid(g, 270, 182, 0.9, "#1f5fbf", "#2b1d14", f, false);
-    const fl = since("cm_ritiro", 1) < 140; px(20, 30, 2, 70, "#888"); g.fillStyle = "#1f5fbf"; g.beginPath(); g.moveTo(22, 30); for (let k = 0; k <= 6; k++) g.lineTo(22 + k * 4, 30 + Math.sin(f / (fl ? 4 : 9) + k) * 2); for (let k = 6; k >= 0; k--) g.lineTo(22 + k * 4, 44 + Math.sin(f / (fl ? 4 : 9) + k) * 2); g.fill();
-    if (since("cm_ritiro", 2) < 100) { g.fillStyle = "#fff"; g.font = "bold 8px sans-serif"; g.fillText("CONVOCATO", 60, 120); px(56, 112, 64, 1, "#fff"); }
+    const fl = since("cm_ritiro", 1) < 140; px(g, 20, 30, 2, 70, "#888"); g.fillStyle = "#1f5fbf"; g.beginPath(); g.moveTo(22, 30); for (let k = 0; k <= 6; k++) g.lineTo(22 + k * 4, 30 + Math.sin(f / (fl ? 4 : 9) + k) * 2); for (let k = 6; k >= 0; k--) g.lineTo(22 + k * 4, 44 + Math.sin(f / (fl ? 4 : 9) + k) * 2); g.fill();
+    if (since("cm_ritiro", 2) < 100) { g.fillStyle = "#fff"; g.font = "bold 8px sans-serif"; g.fillText("CONVOCATO", 60, 120); px(g, 56, 112, 64, 1, "#fff"); }
   }
   function bgCmMondiale(g, W, H, f) {
     vgrad(g, 0, 0, W, H, ["#1a0e2a", "#3a2a6a", "#ff8a4a"]); for (let r = 0; r < 6; r++) for (let i = 0; i < 46; i++) { const j = since("cm_mondiale", 0) < 120 ? Math.abs(Math.sin(f / 3 + i + r)) * 3 : 0; circ(g, 3 + i * 7 + (r % 2) * 3, 40 + r * 10 - j, 2.5, ["#1f5fbf", "#ffffff", "#e8e8f0", "#ffd23f", "#e83a3a", "#3a8ad8"][(i * 3 + r) % 6]); }
-    [[20, 20], [300, 20]].forEach(([x, y]) => { px(x - 2, y, 4, 30, "#888"); const gr = g.createRadialGradient(x, y, 2, x, y, 80); gr.addColorStop(0, "rgba(255,250,220,.45)"); gr.addColorStop(1, "rgba(255,250,220,0)"); g.fillStyle = gr; g.fillRect(x - 80, y - 80, 160, 160); });
+    [[20, 20], [300, 20]].forEach(([x, y]) => { px(g, x - 2, y, 4, 30, "#888"); const gr = g.createRadialGradient(x, y, 2, x, y, 80); gr.addColorStop(0, "rgba(255,250,220,.45)"); gr.addColorStop(1, "rgba(255,250,220,0)"); g.fillStyle = gr; g.fillRect(x - 80, y - 80, 160, 160); });
     vgrad(g, 0, 110, W, 90, ["#3fae5a", "#2f9a4a"]); g.strokeStyle = "rgba(255,255,255,.85)"; g.lineWidth = 2; g.strokeRect(12, 118, 296, 76); g.beginPath(); g.moveTo(160, 118); g.lineTo(160, 194); g.stroke(); g.beginPath(); g.arc(160, 156, 16, 0, 7); g.stroke();
     if (since("cm_mondiale", 1) < 120) { g.save(); g.globalAlpha = 0.55; cmSpeed(g, 160, 150, 40, "#fff", f, 20); g.restore(); cmWord(g, "FUOCO DEL NORD!", 160, 104, "#7ab8ff", 18, 0.05); }
-    const cup = since("cm_mondiale", 2) < 160; if (cup) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 160, 150, 70, "255,220,120", 0.35); g.restore(); for (let i = 0; i < 24; i++) { const t = since("cm_mondiale", 2); px((i * 41 + t * (1 + i % 3)) % W, (i * 29 + t * 2) % H, 3, 3, ["#ffd23f", "#1f5fbf", "#fff", "#e83a3a"][i % 4]); } cmWord(g, "CAMPIONI!", 160, 170, "#ffd23f", 26); }
+    const cup = since("cm_mondiale", 2) < 160; if (cup) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 160, 150, 70, "255,220,120", 0.35); g.restore(); for (let i = 0; i < 24; i++) { const t = since("cm_mondiale", 2); px(g, (i * 41 + t * (1 + i % 3)) % W, (i * 29 + t * 2) % H, 3, 3, ["#ffd23f", "#1f5fbf", "#fff", "#e83a3a"][i % 4]); } cmWord(g, "CAMPIONI!", 160, 170, "#ffd23f", 26); }
   }
   // ---------------------------------------------------------------- MASTER LEAGUE DELLE COLLINE (lavagne col gesso, colline, campanili)
   function mlChalk(g, x1, y1, x2, y2, col, w) { g.strokeStyle = col || "rgba(240,240,230,.8)"; g.lineWidth = w || 2; g.lineCap = "round"; g.beginPath(); for (let i = 0; i <= 8; i++) { const t = i / 8, x = x1 + (x2 - x1) * t + Math.sin(i * 3.1 + x1) * 0.7, y = y1 + (y2 - y1) * t + Math.cos(i * 2.7 + y1) * 0.7; if (i) g.lineTo(x, y); else g.moveTo(x, y); } g.stroke(); }
@@ -5920,7 +5920,143 @@
     if (since("ml_stadio", 1) < 120) { px(g, 120, 140, 80, 40, "#1e3a2a"); mlChalk(g, 130, 170, 190, 150, "#ffd23f", 2); g.fillStyle = "#f4f0e4"; g.font = "bold 8px 'Comic Sans MS'"; g.fillText("3-2-1", 140, 152); }
     if (since("ml_stadio", 2) < 160) { const t = since("ml_stadio", 2); for (let i = 0; i < 20; i++) px(g, (i * 41 + t * 1.5) % W, (i * 29 + t * 2) % 120, 3, 3, ["#2a6a3a", "#f4ecd8", "#ffd23f"][i % 3]); g.fillStyle = "#ffd23f"; g.font = "bold 16px 'Comic Sans MS'"; g.textAlign = "center"; g.fillText("SERIE COLLINA!", 160, 112); g.textAlign = "left"; }
   }
+  // ---------------------------------------------------------------- IL CAVALIERE DELLA NOTTE (noir: pioggia, neon riflessi, fari, sagome)
+  function grRain(g, W, H, f, n, a) { g.strokeStyle = `rgba(170,190,230,${a || 0.35})`; g.lineWidth = 1; g.beginPath(); for (let i = 0; i < (n || 70); i++) { const x = (i * 47 + f * 1.5) % (W + 20) - 10, y = (i * 71 + f * 6) % (H + 10) - 8; g.moveTo(x, y); g.lineTo(x - 2, y + 8); } g.stroke(); }
+  function grCity(g, W, y, f, col, seed) { for (let i = 0; i < 18; i++) { const w = 14 + ((i * 7 + seed) % 12), h = 30 + ((i * 37 + seed) % 50), x = i * 19 - 6; px(g, x, y - h, w, h, col); for (let k = 0; k < 6; k++) { if (((i * 13 + k * 7 + seed + Math.floor(f / 120)) % 5) > 1) continue; px(g, x + 3 + (k % 2) * 6, y - h + 6 + Math.floor(k / 2) * 9, 3, 4, "rgba(255,210,120,.7)"); } } }
+  function grNeon(g, x, y, t, col, f, sz) { const on = ((f + x) % 97) > 5; g.font = `900 ${sz || 11}px system-ui, sans-serif`; g.textAlign = "center"; if (on) { g.save(); g.shadowColor = col; g.shadowBlur = 8; g.fillStyle = col; g.fillText(t, x, y); g.restore(); } else { g.fillStyle = "rgba(90,90,100,.6)"; g.fillText(t, x, y); } }
+  function grPuddle(g, x, y, w, col, f) { g.fillStyle = "rgba(10,16,30,.7)"; g.beginPath(); g.ellipse(x, y, w, w * 0.25, 0, 0, 7); g.fill(); g.globalAlpha = 0.5 + 0.2 * Math.sin(f / 15 + x); g.fillStyle = col; g.fillRect(x - w * 0.5, y - 1, w * 0.6, 1.5); g.globalAlpha = 1; const r = ((f + x) % 50) / 50; g.strokeStyle = `rgba(200,220,255,${0.5 - r * 0.5})`; g.beginPath(); g.ellipse(x + 3, y, r * w * 0.6, r * w * 0.15, 0, 0, 7); g.stroke(); }
+  function grHero(g, x, y, s, f, cape) { g.save(); g.translate(x, y); g.scale(s, s); g.fillStyle = "#1a1e2a"; g.beginPath(); g.moveTo(-6, -30); g.quadraticCurveTo(-18 - Math.sin(f / 10) * 4 * (cape || 1), 0, -14, 4); g.lineTo(12, 4); g.quadraticCurveTo(14, -10, 6, -30); g.fill(); px(g, -5, -30, 10, 22, "#2a3040"); px(g, -5, -8, 4, 12, "#1a1e2a"); px(g, 1, -8, 4, 12, "#1a1e2a"); circ(g, 0, -35, 6, "#2a3040"); g.fillStyle = "#2a3040"; g.beginPath(); g.moveTo(-1, -40); g.quadraticCurveTo(-8, -51, -17, -47); g.quadraticCurveTo(-9, -45, -3, -37); g.fill(); g.fillStyle = "#c8a040"; g.beginPath(); g.moveTo(5, -37); g.lineTo(11, -35); g.lineTo(5, -33); g.fill(); px(g, -4, -36, 3, 1.5, "#e8eaf0"); px(g, 1, -36, 3, 1.5, "#e8eaf0"); g.restore(); }
+  function grSil(g, x, y, s, col, torch, f, dir) { g.save(); g.translate(x, y); g.scale(s, s); px(g, -5, -26, 10, 20, col); px(g, -4, -6, 3, 10, col); px(g, 1, -6, 3, 10, col); circ(g, 0, -30, 5, col); if (torch) { const d = dir || 1; g.fillStyle = "rgba(255,240,170,.22)"; g.beginPath(); g.moveTo(6 * d, -18); g.lineTo(70 * d, -30 + Math.sin(f / 30) * 10); g.lineTo(70 * d, 4 + Math.sin(f / 30) * 10); g.fill(); circ(g, 6 * d, -18, 2, "#fff4c0"); } g.restore(); }
+  function bgGrTitolo(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#05070d", "#141a2a", "#1a2238"]); grCity(g, W, 150, f, "#0c111c", 3);
+    const b = since("gr_titolo", 0) < 160; g.save(); g.globalCompositeOperation = "lighter"; g.fillStyle = `rgba(255,240,190,${b ? 0.22 : 0.1})`; g.beginPath(); g.moveTo(250, 160); g.lineTo(140 + Math.sin(f / 50) * 40, 0); g.lineTo(190 + Math.sin(f / 50) * 40, 0); g.fill(); g.restore();
+    if (b) { g.save(); g.translate(165 + Math.sin(f / 50) * 40, 30); g.fillStyle = "rgba(10,14,24,.85)"; g.beginPath(); g.moveTo(-26, 0); g.quadraticCurveTo(-10, -12, 0, -4); g.quadraticCurveTo(10, -12, 26, 0); g.quadraticCurveTo(10, -4, 0, 6); g.quadraticCurveTo(-10, -4, -26, 0); g.fill(); g.restore(); }
+    px(g, 0, 150, W, 50, "#0e121c"); grPuddle(g, 90, 172, 26, "#ff4a8a", f); grPuddle(g, 230, 182, 30, "#4ad8ff", f);
+    grHero(g, 160, 168, 1.6, f, since("gr_titolo", 1) < 90 ? 2 : 1);
+    grNeon(g, 160, 40, "IL CAVALIERE", "#ffd23f", f + 3, 22); grNeon(g, 160, 62, "DELLA NOTTE", "#4ad8ff", f + 11, 18);
+    if (since("gr_titolo", 2) < 120) { g.save(); g.globalAlpha = 1 - since("gr_titolo", 2) / 120; px(g, 0, 0, W, H, "rgba(220,230,255,.5)"); g.restore(); }
+    grRain(g, W, H, f, 80);
+  }
+  function bgGrPiazza(g, W, H, f) {
+    vgrad(g, 0, 0, W, 120, ["#1a1428", "#4a2a3a", "#7a4a3a"]); grCity(g, W, 110, f, "#1a1a28", 7);
+    px(g, 90, 46, 140, 70, "#3a3e4a"); for (let i = 0; i < 7; i++) px(g, 96 + i * 19, 54, 12, 50, "#2a2e3a"); px(g, 86, 40, 148, 8, "#4a4e58");
+    [[100, 20], [220, 20]].forEach(([x, y], i) => { px(g, x - 1, y, 2, 26, "#5a5e68"); px(g, x - 8, y - 6, 16, 7, "#e8e8e8"); if (since("gr_piazza", 0) < 140) { g.save(); g.globalCompositeOperation = "lighter"; g.fillStyle = "rgba(255,240,190,.16)"; g.beginPath(); g.moveTo(x - 8, y); g.lineTo(x + 8, y); g.lineTo(x + 50 * (i ? -1 : 1), 160); g.lineTo(x - 30 * (i ? -1 : 1), 160); g.fill(); g.restore(); } });
+    px(g, 0, 116, W, 84, "#2a2e38"); grPuddle(g, 60, 150, 22, "#ff4a8a", f); grPuddle(g, 160, 170, 30, "#ffd23f", f); grPuddle(g, 260, 156, 24, "#4ad8ff", f);
+    px(g, 10, 76, 60, 40, "#4a4048"); grNeon(g, 40, 90, "BAR DEL MOLO", "#ff4a8a", f, 9); px(g, 250, 80, 60, 36, "#3a4048"); grNeon(g, 280, 94, "EDICOLA", "#4ad8ff", f + 40, 9);
+    px(g, 140, 120, 40, 34, "#e8e4d8"); g.fillStyle = "#111"; g.font = "bold 7px sans-serif"; g.textAlign = "center"; g.fillText("DOMENICA", 160, 132); g.fillText("PORTO SCURO", 160, 141); if (since("gr_piazza", 1) < 200) { g.fillStyle = "#c83a3a"; g.font = "italic bold 8px sans-serif"; g.fillText("tanto perdete", 160, 151); }
+    grSil(g, 60, 186, 1, "#5a6a8a", false, f); if (since("gr_piazza", 2) < 120) { g.fillStyle = "#e8eaf0"; g.font = "bold 8px sans-serif"; g.fillText("«Qui non si vince.»", 70, 146); }
+    grRain(g, W, H, f, 70);
+  }
+  function bgGrOfficina(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#2a2018", "#3a2a1e"]); for (let i = 0; i < 8; i++) px(g, 0, 20 + i * 22, W, 1, "rgba(0,0,0,.25)");
+    const sw = Math.sin(f / 40) * 14, lx = 160 + sw; g.strokeStyle = "#222"; g.beginPath(); g.moveTo(160, 0); g.lineTo(lx, 50); g.stroke(); circ(g, lx, 54, 5, "#fff4c0"); glowB(g, lx, 60, 120, "255,220,150", 0.35);
+    px(g, 40, 120, 240, 12, "#5a3a22"); px(g, 50, 132, 8, 50, "#4a2e18"); px(g, 262, 132, 8, 50, "#4a2e18");
+    circ(g, 90, 112, 8, "#e8e4d8"); px(g, 120, 108, 30, 6, "#8a8a92"); px(g, 160, 104, 24, 14, "#3a3e48"); circ(g, 200, 112, 4, "#ffd23f");
+    if (since("gr_officina", 0) < 100) { for (let i = 0; i < 10; i++) circ(g, 200 + Math.cos(i) * since("gr_officina", 0) * 0.4, 112 - since("gr_officina", 0) * 0.3 + Math.sin(i) * 6, 1.5, "#ffd23f"); }
+    px(g, 250, 20, 50, 96, "#3a2a1e"); px(g, 252, 22, 46, 92, since("gr_officina", 1) < 160 ? "#1a1e2a" : "#4a3626"); if (since("gr_officina", 1) < 160) { g.fillStyle = "#2a3040"; g.beginPath(); g.moveTo(262, 30); g.quadraticCurveTo(254, 80, 260, 110); g.lineTo(290, 110); g.quadraticCurveTo(296, 80, 288, 30); g.fill(); }
+    px(g, 20, 30, 40, 30, "#e8e4d8"); px(g, 22, 32, 36, 26, "#8a8478"); if (since("gr_officina", 2) < 160) { grSil(g, 50, 56, 0.55, "#2a2e3a", false, f); g.fillStyle = "#e8e4d8"; g.font = "bold 7px sans-serif"; g.fillText("Grazie, A.", 38, 70); }
+    for (let i = 0; i < 20; i++) px(g, (i * 53 + f * 0.2) % W, (i * 37 + f * 0.15) % H, 1, 1, "rgba(255,220,150,.4)");
+  }
+  function bgGrMoli(g, W, H, f) {
+    vgrad(g, 0, 0, W, 100, ["#05070d", "#0e1420"]); grCity(g, W, 80, f, "#0a0e18", 11);
+    g.strokeStyle = "#2a2e38"; g.lineWidth = 3; g.beginPath(); g.moveTo(220, 100); g.lineTo(220, 20); g.lineTo(300, 20); g.stroke(); const hk = Math.sin(f / 40) * 6; g.lineWidth = 1; g.beginPath(); g.moveTo(290, 20); g.lineTo(290 + hk, 60); g.stroke(); px(g, 286 + hk, 60, 8, 4, "#5a5e68");
+    vgrad(g, 0, 96, W, 30, ["#0a1424", "#14243a"]); for (let i = 0; i < 10; i++) px(g, ((i * 41 + f * 0.3) % W), 100 + (i % 3) * 8, 12, 1, "rgba(255,220,150,.25)");
+    px(g, 0, 124, W, 76, "#1e222c"); [["#7a2a2a", 20], ["#2a4a7a", 80], ["#3a6a3a", 200], ["#8a6a2a", 260]].forEach(([c, x], i) => { px(g, x, 104 - (i % 2) * 18, 54, 40 + (i % 2) * 18, c); for (let k = 2; k < 54; k += 4) px(g, x + k, 104 - (i % 2) * 18, 1, 40 + (i % 2) * 18, "rgba(0,0,0,.25)"); });
+    const t = since("gr_moli", 0) < 200 ? since("gr_moli", 0) : 0; grSil(g, 120 + (t ? t * 0.4 : Math.sin(f / 60) * 20), 182, 1, "#3a3e4a", true, f, 1); grSil(g, 240, 180, 1, "#3a3e4a", true, f, -1);
+    if (since("gr_moli", 1) < 120) { g.fillStyle = "#ffd23f"; g.font = "900 16px system-ui"; g.textAlign = "center"; g.fillText("!", 240, 140); }
+    grPuddle(g, 180, 188, 24, "#ffd23f", f); grHero(g, 60, 190, 1, f); if (since("gr_moli", 2) < 90) { g.fillStyle = "rgba(200,200,210,.5)"; for (let i = 0; i < 6; i++) { g.beginPath(); g.arc(60 + i * 6, 170 - since("gr_moli", 2) * 0.3, 10 + since("gr_moli", 2) * 0.2, 0, 7); g.fill(); } }
+    grRain(g, W, H, f, 60);
+  }
+  function bgGrTetti(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#05070d", "#141a2a"]); circ(g, 260, 40, 16, "rgba(230,235,255,.18)"); grCity(g, W, 120, f, "#0a0e18", 21);
+    [[0, 130, 110], [120, 150, 90], [220, 120, 100]].forEach(([x, y, w], i) => { g.fillStyle = "#3a2e2e"; g.beginPath(); g.moveTo(x, y); g.lineTo(x + w / 2, y - 22); g.lineTo(x + w, y); g.lineTo(x + w, H); g.lineTo(x, H); g.fill(); for (let k = 0; k < 6; k++) px(g, x, y + 6 + k * 8, w, 1, "rgba(0,0,0,.3)"); px(g, x + w / 2 - 4, y - 34, 8, 14, "#2a2222"); if ((f / 40 + i) % 3 < 2) for (let s = 0; s < 4; s++) circ(g, x + w / 2 + Math.sin(f / 20 + s) * 3, y - 40 - s * 7 - (f % 28) / 4, 3 + s, "rgba(160,160,170,.18)"); });
+    grNeon(g, 170, 104, "PESCE FRESCO", "#7aff8a", f, 10);
+    const v = since("gr_tetti", 0) < 160 ? since("gr_tetti", 0) : -1; if (v >= 0) { g.fillStyle = "#0a0a10"; g.save(); g.translate(40 + v * 1.6, 108 - Math.sin(v / 20) * 30); g.rotate(v / 15); g.fillRect(-4, -10, 8, 16); g.restore(); }
+    grHero(g, 260, 118, 1, f, 1.5); if (since("gr_tetti", 1) < 80) { g.strokeStyle = "#c8c8d0"; g.beginPath(); g.moveTo(256, 90); g.lineTo(256 - since("gr_tetti", 1) * 2.5, 40); g.stroke(); }
+    if (since("gr_tetti", 2) < 140) { g.fillStyle = "#e8eaf0"; g.font = "bold 8px sans-serif"; g.textAlign = "center"; g.fillText("«Bel mantello, Airone.»", 80, 70); }
+    grRain(g, W, H, f, 60);
+  }
+  function bgGrDeposito(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#0c0e14", "#1a1c24"]); for (let i = 0; i < 6; i++) px(g, i * 56 + 10, 0, 6, H, "#14161e");
+    for (let r = 0; r < 3; r++) for (let i = 0; i < 9; i++) { px(g, 10 + i * 34, 60 + r * 40, 28, 30, "#5a4430"); px(g, 10 + i * 34, 60 + r * 40, 28, 2, "rgba(255,255,255,.08)"); if ((i + r) % 3 === 0) { g.fillStyle = "rgba(200,200,210,.5)"; g.font = "bold 5px sans-serif"; g.textAlign = "center"; g.fillText("NEBBIA", 24 + i * 34, 78 + r * 40); } }
+    const lx = 160 + Math.sin(f / 70) * 100; g.save(); g.globalCompositeOperation = "lighter"; g.fillStyle = "rgba(255,240,170,.14)"; g.beginPath(); g.moveTo(160, 0); g.lineTo(lx - 40, H); g.lineTo(lx + 40, H); g.fill(); g.restore();
+    if (since("gr_deposito", 0) < 160) { px(g, 120, 150, 80, 40, "#2a2a32"); g.fillStyle = "#e8e4d8"; g.font = "bold 7px sans-serif"; g.textAlign = "center"; g.fillText("CONTRATTO · FINALE", 160, 166); g.fillText("risultato: 0-2", 160, 178); }
+    grSil(g, 60, 196, 1.3, "#a83a2a", false, f); if (since("gr_deposito", 1) < 120) { g.fillStyle = "#ffd23f"; g.font = "900 14px system-ui"; g.fillText("?", 60, 140); }
+    grHero(g, 270, 196, 1.1, f); if (since("gr_deposito", 2) < 100) { const t = since("gr_deposito", 2); g.fillStyle = `rgba(190,190,200,${0.6 - t / 200})`; for (let i = 0; i < 8; i++) { g.beginPath(); g.arc(160 + Math.cos(i) * t * 0.8, 170 + Math.sin(i) * t * 0.3, 12 + t * 0.2, 0, 7); g.fill(); } }
+  }
+  function bgGrStadio(g, W, H, f) {
+    vgrad(g, 0, 0, W, 90, ["#05070d", "#141a2a"]); for (let r = 0; r < 4; r++) for (let i = 0; i < 40; i++) { const j = since("gr_stadio", 0) < 120 ? Math.abs(Math.sin(f / 4 + i)) * 3 : 0; circ(g, 4 + i * 8 + (r % 2) * 4, 56 + r * 8 - j, 2.4, ["#2a3040", "#7ab8ff", "#ffd23f", "#e8eaf0"][(i + r) % 4]); }
+    [[30, 10], [290, 10]].forEach(([x, y]) => { px(g, x - 1, y, 2, 40, "#5a5e68"); px(g, x - 10, y - 6, 20, 8, "#fff6d0"); glowB(g, x, y, 60, "255,240,190", 0.25); });
+    vgrad(g, 0, 90, W, 110, ["#1d3a26", "#204029"]); g.strokeStyle = "rgba(255,255,255,.6)"; g.lineWidth = 1.5; g.strokeRect(16, 98, 288, 96); g.beginPath(); g.moveTo(160, 98); g.lineTo(160, 194); g.stroke(); g.beginPath(); g.arc(160, 146, 16, 0, 7); g.stroke();
+    grNeon(g, 160, 30, "LA FINALE DELLA LEGA", "#ffd23f", f, 12);
+    const b = since("gr_stadio", 1) < 70 ? since("gr_stadio", 1) : -1; circ(g, b >= 0 ? 160 + b * 2 : 160, b >= 0 ? 146 - Math.sin(b / 70 * Math.PI) * 40 : 146, 4, "#fff"); if (b > 50) { g.fillStyle = "#ffd23f"; g.font = "900 18px Impact, sans-serif"; g.textAlign = "center"; g.fillText("GOL!", 280, 120); }
+    grSil(g, 120, 186, 1, "#5a6a8a", false, f); grSil(g, 210, 186, 1, "#8a8a9a", false, f); if (since("gr_stadio", 2) < 140) { g.fillStyle = "#e8eaf0"; g.font = "bold 8px sans-serif"; g.textAlign = "center"; g.fillText("«Stavolta giochiamo per vincere.»", 120, 150); }
+    grRain(g, W, H, f, 40, 0.25);
+  }
+  function bgGrTorre(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#05070d", "#0e1420", "#14243a"]); for (let i = 0; i < 40; i++) px(g, (i * 67) % W, (i * 29) % 90, 1, 1, "rgba(255,255,255,.5)");
+    px(g, 130, 40, 60, 160, "#e8e4d8"); for (let i = 0; i < 5; i++) px(g, 130, 52 + i * 30, 60, 8, "#a83a2a"); px(g, 124, 20, 72, 22, "#2a2e38"); px(g, 134, 24, 52, 14, "#fff6d0");
+    const a = f / 60, on = since("gr_torre", 0) < 220; g.save(); g.globalCompositeOperation = "lighter"; g.fillStyle = `rgba(255,240,190,${on ? 0.3 : 0.14})`; g.beginPath(); g.moveTo(160, 31); g.lineTo(160 + Math.cos(a) * 400, 31 + Math.sin(a) * 60 - 20); g.lineTo(160 + Math.cos(a) * 400, 31 + Math.sin(a) * 60 + 30); g.fill(); g.restore();
+    if (on) { g.fillStyle = "#ffd23f"; g.font = "bold 7px sans-serif"; g.textAlign = "center"; g.fillText("📻 IN ONDA: LA VERITÀ SULLA LEGA", 160, 16); }
+    vgrad(g, 0, 170, W, 30, ["#14243a", "#0a1424"]); for (let i = 0; i < 12; i++) px(g, ((i * 41 + f * 0.4) % W), 176 + (i % 3) * 6, 14, 1, "rgba(255,240,190,.25)");
+    grHero(g, 210, 60, 0.8, f, 2); if (since("gr_torre", 1) < 140) grSil(g, 100, 70, 0.8, "#8a8a9a", false, f);
+    if (since("gr_torre", 2) < 120) { const t = since("gr_torre", 2); for (let i = 0; i < 5; i++) { g.fillStyle = "#ffd23f"; g.beginPath(); g.arc(40 + i * 60, 160 - t * 0.6 - i * 4, 2, 0, 7); g.fill(); } }
+    grRain(g, W, H, f, 40, 0.25);
+  }
+  function bgGrFinale(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#2a3a5a", "#7a6a8a", "#e8b080"]); grCity(g, W, 150, f, "#1a1e2a", 5);
+    const sun = since("gr_finale", 0) < 200 ? 1 : 0.6; circ(g, 240, 150, 30, `rgba(255,220,160,${sun})`); px(g, 0, 150, W, 50, "#2a3a5a"); for (let i = 0; i < 14; i++) px(g, ((i * 31 + f * 0.3) % W), 156 + (i % 4) * 9, 18, 1, "rgba(255,220,160,.4)");
+    grHero(g, 80, 148, 1.2, f, 1); grSil(g, 120, 148, 1.1, "#5a6a8a", false, f); if (since("gr_finale", 1) < 160) grSil(g, 150, 148, 1, "#3a2e3a", false, f);
+    if (since("gr_finale", 2) < 160) { g.fillStyle = "#fff"; g.font = "bold 8px sans-serif"; g.textAlign = "center"; g.fillText("«Ha smesso di piovere.»", 160, 100); }
+    for (let i = 0; i < 6; i++) { const x = (i * 57 + f * 0.6) % (W + 40) - 20, y = 60 + Math.sin(f / 30 + i) * 8; g.strokeStyle = "rgba(20,20,30,.6)"; g.beginPath(); g.moveTo(x - 5, y); g.quadraticCurveTo(x - 2, y - 3, x, y); g.quadraticCurveTo(x + 2, y - 3, x + 5, y); g.stroke(); }
+  }
   const LB = {
+    gr_titolo: { draw: bgGrTitolo, hot: [
+      [120, 0, 120, 60, "🦅 Un'ombra con le ali aperte passa nel fascio del faro. Poi il fascio gira, e non c'è più."],
+      [130, 110, 60, 70, "🧥 Il mantello si gonfia di pioggia e di vento. Sotto, nessuno sa chi c'è."],
+      [0, 0, 320, 40, "⚡ Un lampo illumina tutta Porto Scuro per un istante: gru, tetti, insegne. Poi di nuovo buio."],
+    ] },
+    gr_piazza: { draw: bgGrPiazza, hot: [
+      [86, 0, 150, 60, "💡 I riflettori dello Stadio della Gru si accendono per un minuto, tremolando. Alfio li prova ogni sera, anche senza partite."],
+      [140, 118, 40, 40, "📜 Sul manifesto della partita qualcuno ha scritto «tanto perdete». La pioggia non riesce a cancellarlo."],
+      [40, 140, 50, 50, "🧢 Marisa, sotto il cappuccio: «Qui non si vince». Ma ha il pallone sotto il braccio lo stesso."],
+    ] },
+    gr_officina: { draw: bgGrOfficina, hot: [
+      [180, 96, 40, 30, "✨ Una scintilla dal banco: Alfio salda qualcosa che sembra un cannocchiale tagliato a metà."],
+      [250, 20, 50, 100, "🚪 L'armadio di Alfio si apre da solo di qualche centimetro. Dentro, qualcosa di grigio."],
+      [20, 30, 40, 40, "🖼️ La vecchia foto: una figura col mantello, mezza fuori dall'inquadratura. «Grazie, A.»"],
+    ] },
+    gr_moli: { draw: bgGrMoli, hot: [
+      [80, 140, 100, 60, "🔦 La ronda passa con la torcia. Guarda dove guarda lei: dietro, c'è sempre buio."],
+      [210, 120, 60, 70, "❗ La sentinella si gira di scatto. Era un gatto. Stavolta."],
+      [30, 150, 60, 50, "💨 Un fumogeno di Alfio: per un momento, sul molo, non si vede niente. Nemmeno l'Airone."],
+    ] },
+    gr_tetti: { draw: bgGrTetti, hot: [
+      [20, 60, 160, 70, "🐈‍⬛ Un'ombra salta da un tetto all'altro, leggera come un gatto. Non è un gatto."],
+      [230, 60, 60, 70, "🪝 Il rampino si aggancia al comignolo con un tintinnio. Si sale."],
+      [40, 50, 120, 30, "🗨️ Una voce di donna, dall'alto: «Bel mantello, Airone». Poi una risata."],
+    ] },
+    gr_deposito: { draw: bgGrDeposito, hot: [
+      [120, 140, 80, 50, "📄 Un contratto sul tavolo: «Finale della Lega: risultato concordato 0-2». Firmato O.B."],
+      [30, 120, 60, 80, "❓ Gancio, fermo tra le casse. Non sembra sicuro da che parte stare."],
+      [120, 150, 100, 50, "💨 Il fumo si allarga fra le casse. Quando si dirada, l'Airone è già altrove."],
+    ] },
+    gr_stadio: { draw: bgGrStadio, hot: [
+      [0, 40, 320, 50, "📣 La curva del Porto Scuro canta per la prima volta da anni. Sotto la pioggia, ma canta."],
+      [140, 120, 60, 50, "⚽ Il pallone parte dal centrocampo e finisce in rete. Gol! (Stavolta non l'aveva deciso nessuno.)"],
+      [90, 140, 60, 60, "🧢 Marisa: «Stavolta giochiamo per vincere». Si stringe la fascia al braccio."],
+    ] },
+    gr_torre: { draw: bgGrTorre, hot: [
+      [120, 10, 80, 40, "📻 La radio del faro trasmette su tutta Porto Scuro: le prove, una dopo l'altra."],
+      [80, 30, 60, 60, "🎩 Una figura in cappotto, sulla balconata del faro. Ottavio Brume guarda la città e capisce."],
+      [0, 120, 320, 50, "✨ Le finestre della città si accendono una dopo l'altra. Tutti stanno ascoltando."],
+    ] },
+    gr_finale: { draw: bgGrFinale, hot: [
+      [200, 120, 80, 40, "🌅 Dopo trecento giorni, a Porto Scuro, sorge il sole. Nessuno sa bene cosa fare."],
+      [120, 110, 60, 50, "👤 Accanto a te, qualcuno resta in silenzio. È un buon silenzio."],
+      [100, 80, 120, 30, "🗨️ «Ha smesso di piovere». Detto così, sembra una cosa piccola."],
+    ] },
+
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
       [256, 60, 50, 70, "🪶 Calamaio: l'inchiostro respira. La piuma si muove, come se volesse finire una frase."],
