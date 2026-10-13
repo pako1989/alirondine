@@ -3928,6 +3928,7 @@
     hs_corona: { kind: "style", label: "Taglio a corona di trecce", val: "corona", from: "Finisci la saga «La Guerra dei Tre Ducati» (un finale qualsiasi)" },
     hs_criniera: { kind: "style", label: "Criniera da star", val: "criniera", from: "Finisci la saga «Il Cavallo Star» (un finale qualsiasi)" },
     hs_colbacco: { kind: "style", label: "Colbacco alpino", val: "colbacco", from: "Finisci la saga «Piccolo Borgo di Montagna» (un finale qualsiasi)" },
+    hs_cowboy: { kind: "style", label: "Cappello da pistolero", val: "cowboy", from: "Finisci la saga «Per un pugno di rigori» (un finale qualsiasi)" },
     hs_antenne: { kind: "style", label: "Ciuffi ad antenna", val: "antenne", from: "Finisci la saga «Razzopacco · Consegne dal Futuro» (un finale qualsiasi)" },
     hs_scodella: { kind: "style", label: "Taglio a scodella", val: "scodella", from: "Finisci la saga «Gli Straordinari di Quartiere» (un finale qualsiasi)" },
     hs_cometa: { kind: "style", label: "Taglio a cometa", val: "cometa", from: "Finisci la saga «Il Figlio del Titano» (un finale qualsiasi)" },
@@ -5219,9 +5220,9 @@
 
   // ================= CREA IL TUO CAMPIONE =================
   const HERO = "ali-di-rondine.campione";
-  const H_STYLES = { spiky: "Spettinati", messy: "Ribelli", buzz: "Rasati", slick: "Tirati indietro", long: "Lunghi", bun: "Chignon", bob: "Caschetto", ponytail: "Coda", twintails: "Codini", braids: "Trecce", curly: "Ricci", side: "Riga di lato", ordinato: "Ordinati", bandana: "Bandana", colbacco: "Colbacco" };
+  const H_STYLES = { spiky: "Spettinati", messy: "Ribelli", buzz: "Rasati", slick: "Tirati indietro", long: "Lunghi", bun: "Chignon", bob: "Caschetto", ponytail: "Coda", twintails: "Codini", braids: "Trecce", curly: "Ricci", side: "Riga di lato", ordinato: "Ordinati", bandana: "Bandana", colbacco: "Colbacco", cowboy: "Pistolero" };
   // le acconciature delle saghe: finire una saga (almeno un finale) sblocca la sua acconciatura nel guardaroba
-  const HAIR_SAGA = { hs_afro: "torneo", hs_dread: "dopo", hs_undercut: "spazio", hs_pompadour: "mantello", hs_mullet: "stagione", hs_wavy: "cronache", hs_messybun: "vento", hs_topknot: "mondi", hs_sidebraid: "trono", hs_spacebuns: "lampioni", hs_corona: "ducati", hs_ciuffo: "grigio", hs_cometa: "titano", hs_scodella: "quartiere", hs_antenne: "razzo", hs_criniera: "cavallo", hs_colbacco: "montagna" };
+  const HAIR_SAGA = { hs_afro: "torneo", hs_dread: "dopo", hs_undercut: "spazio", hs_pompadour: "mantello", hs_mullet: "stagione", hs_wavy: "cronache", hs_messybun: "vento", hs_topknot: "mondi", hs_sidebraid: "trono", hs_spacebuns: "lampioni", hs_corona: "ducati", hs_ciuffo: "grigio", hs_cometa: "titano", hs_scodella: "quartiere", hs_antenne: "razzo", hs_criniera: "cavallo", hs_colbacco: "montagna", hs_cowboy: "pugno" };
   function hairUnlocks() {
     Object.keys(HAIR_SAGA).forEach((id) => { try { const m = JSON.parse(localStorage.getItem("ali-di-rondine." + HAIR_SAGA[id]) || "null"); if (m && Array.isArray(m.ends) && m.ends.length && COSM[id] && bCos(id) && window.toast) window.toast("Nuova acconciatura: " + COSM[id].label.replace(/^Taglio (a )?/, ""), "info", "✂️"); } catch {} });
   }

@@ -7593,6 +7593,267 @@
         [20, 20, 40, 35, "💡 I riflettori a barattolo di vetro che illuminano il turbinio di neve."]
       ]
     },
+    pr_titolo: {
+      draw: function (g, W, H, f) {
+        // Cielo e tramonto del West
+        const sky = g.createLinearGradient(0, 0, 0, 130);
+        sky.addColorStop(0, "#451a03"); sky.addColorStop(0.4, "#9a3412"); sky.addColorStop(0.8, "#ea580c"); sky.addColorStop(1, "#fde047");
+        g.fillStyle = sky; g.fillRect(0, 0, W, H);
+        // Sole al tramonto
+        g.fillStyle = "#fef08a";
+        g.beginPath(); g.arc(160, 95, 34, 0, Math.PI * 2); g.fill();
+        g.fillStyle = "rgba(254,240,138,0.25)";
+        g.beginPath(); g.arc(160, 95, 52, 0, Math.PI * 2); g.fill();
+        // Mesa e canyon all'orizzonte
+        g.fillStyle = "#78350f";
+        g.beginPath();
+        g.moveTo(0, 115); g.lineTo(40, 95); g.lineTo(85, 95); g.lineTo(110, 115);
+        g.lineTo(145, 105); g.lineTo(215, 105); g.lineTo(240, 115);
+        g.lineTo(275, 90); g.lineTo(310, 90); g.lineTo(320, 115);
+        g.lineTo(320, 140); g.lineTo(0, 140); g.closePath(); g.fill();
+        // Terreno arido
+        const ground = g.createLinearGradient(0, 125, 0, H);
+        ground.addColorStop(0, "#b45309"); ground.addColorStop(0.5, "#78350f"); ground.addColorStop(1, "#451a03");
+        g.fillStyle = ground; g.fillRect(0, 125, W, 75);
+        // Steccato del ranch in primo piano
+        g.fillStyle = "#451a03";
+        g.fillRect(10, 155, 300, 4);
+        g.fillRect(10, 170, 300, 4);
+        for (let px = 20; px <= 300; px += 45) g.fillRect(px, 145, 6, 45);
+        // Cactus in silhouette
+        g.fillStyle = "#270f03";
+        g.fillRect(35, 90, 8, 55); g.fillRect(25, 105, 10, 5); g.fillRect(25, 98, 5, 10);
+        g.fillRect(43, 112, 10, 5); g.fillRect(48, 105, 5, 10);
+        // Pallone di cuoio appoggiato allo steccato
+        g.fillStyle = "#d97706";
+        g.beginPath(); g.arc(245, 150, 14, 0, Math.PI * 2); g.fill();
+        g.strokeStyle = "#451a03"; g.lineWidth = 1.8;
+        g.stroke();
+        g.beginPath(); g.moveTo(245, 136); g.lineTo(245, 164); g.stroke();
+        g.beginPath(); g.moveTo(231, 150); g.lineTo(259, 150); g.stroke();
+        // Tumbleweed che rotola
+        const twX = (f * 1.5) % (W + 60) - 30;
+        g.save();
+        g.translate(twX, 165);
+        g.rotate(twX * 0.1);
+        g.strokeStyle = "#d97706"; g.lineWidth = 1.2;
+        for (let i = 0; i < 5; i++) { g.beginPath(); g.arc(0, 0, 8, i, i + 2); g.stroke(); }
+        g.restore();
+        // Cartiglio del Titolo
+        g.save();
+        g.translate(160, 42);
+        g.fillStyle = "rgba(41,20,12,0.85)";
+        g.fillRect(-122, -18, 244, 38);
+        g.strokeStyle = "#f59e0b"; g.lineWidth = 2.5;
+        g.strokeRect(-122, -18, 244, 38);
+        g.fillStyle = "#fef3c7";
+        g.font = "900 13px 'Trebuchet MS', serif, sans-serif";
+        g.textAlign = "center";
+        g.fillText("🤠 PER UN PUGNO DI RIGORI", 0, 4);
+        g.restore();
+      },
+      hot: [
+        [230, 135, 35, 35, "⚽ Il pallone di cuoio cucito a mano: l'unica legge che conta a El Paso."],
+        [20, 85, 40, 70, "🌵 Un antico cactus saguaro: i tiratori ci provano la mira da cinquant'anni."],
+        [130, 65, 60, 60, "☀️ Il sole cocente di mezzogiorno che infuoca i dodici passi dal dischetto."]
+      ]
+    },
+    pr_cittadina: {
+      draw: function (g, W, H, f) {
+        // Cielo polveroso
+        g.fillStyle = "#fed7aa"; g.fillRect(0, 0, W, 85);
+        // Sole alto e pallido
+        g.fillStyle = "#fef08a";
+        g.beginPath(); g.arc(260, 35, 20, 0, Math.PI * 2); g.fill();
+        // Edifici in legno della via principale
+        // Ufficio dello Sceriffo (sinistra)
+        g.fillStyle = "#78350f"; g.fillRect(10, 35, 80, 75);
+        g.fillStyle = "#451a03"; g.fillRect(8, 30, 84, 8); // tetto
+        g.fillStyle = "#29140c"; g.fillRect(35, 65, 20, 45); // porta
+        g.fillStyle = "#fde047"; // stella sulla facciata
+        g.beginPath(); g.arc(50, 48, 5, 0, Math.PI * 2); g.fill();
+        g.fillStyle = "#fef3c7"; g.font = "900 7px sans-serif"; g.textAlign = "center";
+        g.fillText("SHERIFF", 50, 60);
+        // Saloon El Palo (centro)
+        g.fillStyle = "#92400e"; g.fillRect(105, 20, 110, 90);
+        g.fillStyle = "#451a03"; g.fillRect(100, 15, 120, 10);
+        g.fillStyle = "#f59e0b"; g.font = "900 9px serif"; g.textAlign = "center";
+        g.fillText("SALOON EL PALO", 160, 35);
+        // Porte a vento del saloon
+        g.fillStyle = "#78350f"; g.fillRect(145, 65, 14, 25); g.fillRect(161, 65, 14, 25);
+        // Bottega del Becchino Barnaba (destra)
+        g.fillStyle = "#451a03"; g.fillRect(230, 40, 80, 70);
+        g.fillStyle = "#1c1917"; g.fillRect(228, 35, 84, 7);
+        g.fillStyle = "#94a3b8"; g.font = "900 7px sans-serif"; g.fillText("UNDERTAKER", 270, 55);
+        // Bare e pali di legno fuori
+        g.fillStyle = "#78350f"; g.fillRect(295, 75, 12, 30);
+        // Strada polverosa
+        const st = g.createLinearGradient(0, 105, 0, H);
+        st.addColorStop(0, "#d97706"); st.addColorStop(1, "#78350f");
+        g.fillStyle = st; g.fillRect(0, 105, W, 95);
+        // Steccato con mulo / cavallo legato
+        g.fillStyle = "#451a03"; g.fillRect(15, 140, 80, 3);
+        g.fillRect(25, 135, 4, 25); g.fillRect(75, 135, 4, 25);
+        // Botti e manifesti Wanted sul palo
+        g.fillStyle = "#78350f"; g.fillRect(115, 125, 14, 16);
+        g.fillStyle = "#fef3c7"; g.fillRect(128, 115, 10, 14); // foglio Wanted
+        g.fillStyle = "#b91c1c"; g.fillRect(130, 118, 6, 2);
+      },
+      hot: [
+        [105, 20, 110, 90, "🍻 Il Saloon El Palo: porte a vento, sarsaparilla fresca e storie di rigori leggendari."],
+        [10, 35, 80, 75, "⭐ L'Ufficio dello Sceriffo Cooper: dentro ci sono solo manette arrugginite e palloni confiscati."],
+        [230, 40, 80, 70, "⚰️ La bottega di Barnaba il Becchino: «Misuro le porte e scavo le fosse per i rigori alle stelle»."]
+      ]
+    },
+    pr_saloon: {
+      draw: function (g, W, H, f) {
+        // Interno buio e caldo del Saloon
+        const bg = g.createLinearGradient(0, 0, 0, H);
+        bg.addColorStop(0, "#29140c"); bg.addColorStop(1, "#1c0d06");
+        g.fillStyle = bg; g.fillRect(0, 0, W, H);
+        // Doghe del pavimento in legno
+        g.strokeStyle = "#451a03"; g.lineWidth = 1;
+        for (let y = 110; y < H; y += 12) {
+          g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke();
+        }
+        // Lampadario a ruota di carro con candele accese
+        g.fillStyle = "#78350f";
+        g.beginPath(); g.ellipse(160, 22, 50, 12, 0, 0, Math.PI * 2); g.fill();
+        g.strokeStyle = "#451a03"; g.lineWidth = 2; g.stroke();
+        // Candele fumanti
+        for (let i = -3; i <= 3; i++) {
+          const cx = 160 + i * 14, cy = 20 + Math.abs(i) * 1.5;
+          g.fillStyle = "#fef08a";
+          g.beginPath(); g.arc(cx, cy - 6, 2.5 + Math.sin(f / 6 + i) * 0.5, 0, Math.PI * 2); g.fill();
+        }
+        // Testa di toro imbalsamata con grandi corna
+        g.fillStyle = "#451a03";
+        g.beginPath(); g.arc(160, 52, 12, 0, Math.PI * 2); g.fill();
+        g.strokeStyle = "#fef3c7"; g.lineWidth = 2.5;
+        g.beginPath();
+        g.moveTo(148, 48); g.quadraticCurveTo(130, 30, 125, 40);
+        g.moveTo(172, 48); g.quadraticCurveTo(190, 30, 195, 40);
+        g.stroke();
+        // Bancone di noce lucidato (sinistra)
+        g.fillStyle = "#78350f"; g.fillRect(15, 90, 120, 55);
+        g.fillStyle = "#451a03"; g.fillRect(10, 85, 130, 8);
+        // Bottiglie e bicchieri sul bancone
+        g.fillStyle = "#ea580c"; g.fillRect(25, 75, 5, 10);
+        g.fillStyle = "#16a34a"; g.fillRect(35, 73, 6, 12);
+        g.fillStyle = "#ca8a04"; g.fillRect(45, 76, 5, 9);
+        // Pianoforte verticale (destra)
+        g.fillStyle = "#451a03"; g.fillRect(220, 70, 75, 70);
+        g.fillStyle = "#fef3c7"; g.fillRect(225, 105, 65, 8);
+        for (let k = 0; k < 8; k++) {
+          g.fillStyle = "#1c1917"; g.fillRect(230 + k * 7, 105, 4, 5);
+        }
+        // Tavolo da poker rotondo in primo piano
+        g.fillStyle = "#78350f";
+        g.beginPath(); g.ellipse(170, 160, 42, 18, 0, 0, Math.PI * 2); g.fill();
+        g.strokeStyle = "#451a03"; g.lineWidth = 2; g.stroke();
+        // Mazzo di carte e fiches
+        g.fillStyle = "#fef3c7"; g.fillRect(162, 154, 8, 10);
+        g.fillStyle = "#dc2626"; g.beginPath(); g.arc(178, 158, 4, 0, Math.PI * 2); g.fill();
+      },
+      hot: [
+        [15, 85, 120, 60, "🍸 Il bancone di Carmela: serve sarsaparilla ghiacciata e fagioli con pancetta."],
+        [220, 70, 75, 70, "🎹 Il pianoforte del saloon: suona da solo quando il vento entra dalle porte a vento."],
+        [135, 30, 50, 40, "🐂 Il grande teschio di toro: guarda dritto verso chi si avvicina al bancone."]
+      ]
+    },
+    pr_canyon: {
+      draw: function (g, W, H, f) {
+        // Cielo terso del canyon
+        g.fillStyle = "#f97316"; g.fillRect(0, 0, W, 70);
+        // Gole rocciose stratificate
+        g.fillStyle = "#9a3412";
+        g.beginPath();
+        g.moveTo(0, 0); g.lineTo(90, 0); g.lineTo(75, 80); g.lineTo(105, 120); g.lineTo(0, 120);
+        g.closePath(); g.fill();
+        g.beginPath();
+        g.moveTo(W, 0); g.lineTo(W - 85, 0); g.lineTo(W - 70, 75); g.lineTo(W - 110, 120); g.lineTo(W, 120);
+        g.closePath(); g.fill();
+        // Strati di roccia rossa
+        g.strokeStyle = "#7c2d12"; g.lineWidth = 2;
+        g.beginPath(); g.moveTo(0, 40); g.lineTo(80, 40); g.stroke();
+        g.beginPath(); g.moveTo(0, 75); g.lineTo(75, 75); g.stroke();
+        g.beginPath(); g.moveTo(W - 80, 45); g.lineTo(W, 45); g.stroke();
+        g.beginPath(); g.moveTo(W - 100, 80); g.lineTo(W, 80); g.stroke();
+        // Fondo del canyon (campo di rigore)
+        const ground = g.createLinearGradient(0, 100, 0, H);
+        ground.addColorStop(0, "#c2410c"); ground.addColorStop(1, "#7c2d12");
+        g.fillStyle = ground; g.fillRect(0, 100, W, 100);
+        // Linea del dischetto segnata con calce
+        g.strokeStyle = "rgba(254,243,199,0.7)"; g.lineWidth = 2;
+        g.beginPath(); g.arc(160, 150, 14, 0, Math.PI * 2); g.stroke();
+        g.fillStyle = "#fef3c7";
+        g.beginPath(); g.arc(160, 150, 3, 0, Math.PI * 2); g.fill();
+        // Pali della porta ricavati da tronchi del canyon
+        g.fillStyle = "#451a03";
+        g.fillRect(110, 65, 5, 45); g.fillRect(205, 65, 5, 45);
+        g.fillRect(110, 65, 100, 5);
+        // Avvoltoio che volteggia
+        const vx = (f * 0.8) % (W + 40) - 20;
+        const vy = 28 + Math.sin(f / 18) * 6;
+        g.strokeStyle = "#1c1917"; g.lineWidth = 1.5;
+        g.beginPath();
+        g.moveTo(vx - 8, vy); g.quadraticCurveTo(vx - 4, vy - 5, vx, vy);
+        g.quadraticCurveTo(vx + 4, vy - 5, vx + 8, vy);
+        g.stroke();
+      },
+      hot: [
+        [140, 135, 40, 35, "🎯 Il dischetto di calce nel canyon: il punto più solitario e temuto di tutta la vallata."],
+        [105, 60, 110, 55, "🥅 I pali in legno grezzo: qui i tiri rimbalzano sulle pareti di roccia e fischiano come proiettili."],
+        [20, 15, 60, 80, "🏜️ Le imponenti gole di roccia rossa: proteggono il rifugio segreto dei Desperados di Ramon."]
+      ]
+    },
+    pr_fortino: {
+      draw: function (g, W, H, f) {
+        // Cielo del tramonto finale
+        const sky = g.createLinearGradient(0, 0, 0, 90);
+        sky.addColorStop(0, "#7c2d12"); sky.addColorStop(1, "#ea580c");
+        g.fillStyle = sky; g.fillRect(0, 0, W, 90);
+        // Mura di pietra e adobe del fortino di Rio Bravo
+        g.fillStyle = "#b45309"; g.fillRect(20, 45, W - 40, 55);
+        g.fillStyle = "#78350f"; g.fillRect(15, 40, W - 30, 8); // merli
+        for (let bx = 30; bx < W - 40; bx += 28) {
+          g.clearRect(bx, 38, 12, 10);
+        }
+        // Arco centrale del fortino con campana di bronzo
+        g.fillStyle = "#78350f"; g.fillRect(135, 15, 50, 45);
+        g.fillStyle = "#451a03"; g.fillRect(145, 30, 30, 30);
+        // Campana di bronzo
+        g.fillStyle = "#eab308";
+        g.beginPath(); g.arc(160, 36, 6, 0, Math.PI, true); g.lineTo(168, 44); g.lineTo(152, 44); g.closePath(); g.fill();
+        // Stendardi strappati dal vento
+        g.fillStyle = "#dc2626";
+        g.beginPath(); g.moveTo(40, 45); g.lineTo(40, 75); g.lineTo(55, 60); g.lineTo(40, 45); g.fill();
+        g.fillStyle = "#ca8a04";
+        g.beginPath(); g.moveTo(270, 45); g.lineTo(270, 75); g.lineTo(255, 60); g.lineTo(270, 45); g.fill();
+        // Campo di rigore del torneo
+        const pitch = g.createLinearGradient(0, 100, 0, H);
+        pitch.addColorStop(0, "#92400e"); pitch.addColorStop(1, "#451a03");
+        g.fillStyle = pitch; g.fillRect(0, 100, W, 100);
+        // Porta della finale con rete
+        g.strokeStyle = "rgba(254,243,199,0.3)"; g.lineWidth = 1;
+        for (let x = 90; x <= 230; x += 14) {
+          g.beginPath(); g.moveTo(x, 65); g.lineTo(x, 115); g.stroke();
+        }
+        g.fillStyle = "#fef3c7";
+        g.fillRect(86, 62, 5, 55); g.fillRect(229, 62, 5, 55);
+        g.fillRect(86, 62, 148, 5);
+        // Spettatori sagomati sui bastioni
+        g.fillStyle = "#29140c";
+        for (let px = 25; px < W - 30; px += 18) {
+          g.beginPath(); g.arc(px, 34, 4, 0, Math.PI * 2); g.fill();
+        }
+      },
+      hot: [
+        [135, 15, 50, 45, "🔔 La campana di bronzo del fortino: quando suona mezzogiorno comincia la resa dei conti."],
+        [85, 60, 150, 60, "🏆 La porta della finale: qui si assegna la Coppa di Rio Bravo e il titolo di pistolero supremo."],
+        [20, 30, W - 40, 40, "👥 I bastioni del fortino: desperados, ranger e contadini guardano in silenzio trattenendo il fiato."]
+      ]
+    },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
 

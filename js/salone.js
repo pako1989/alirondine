@@ -24,6 +24,8 @@
   const GEN = { fantasy: ["Fantasy", "#7a4ab0"], mistero: ["Mistero", "#2c6a9a"], scifi: ["Fantascienza", "#1f8a8a"], storico: ["Storico", "#a8622a"], commedia: ["Commedia", "#c9921a"], sport: ["Sport anime", "#c0392b"], avventura: ["Avventura", "#3f8a3f"], dramma: ["Drammatico", "#6a5a7a"], tattica: ["Tattica", "#5a6a3a"], satira: ["Satira", "#0284c7"] };
   // mod: oggetto window con menuEntry/info · fn: funzione window da chiamare con (indietro) · ch: capitoli totali (se noti)
   const SAGAS = [
+    { id: "pugno", t: "Per un pugno di rigori", e: "🤠", g: ["storico", "avventura"], mod: "__pugno", key: "ali-di-rondine.pugno", ch: 3, cover: "pr_titolo", d: "Polvere, speroni e duelli dal dischetto a mezzogiorno nel villaggio di El Paso del Rigore. Stangata: duelli di rigori con tamburo revolver a sei colpi, barra di tensione e quick-draw al rintocco della campana. E i Manifesti Wanted con le taglie in dollari.",
+      hints: { sceriffo: "Serve aver difeso la legge nel Capitolo 2 e vinto la finale.", desperado: "Serve aver stretto il patto con Ramon e una taglia sopra i 300 $.", solitario: "Sempre possibile, alla fine: cavalca da solo verso il tramonto.", segreto: "Segreto: tutti i ferri di cavallo raccolti e sangue freddo altissimo." } },
     { id: "montagna", t: "Piccolo Borgo di Montagna", e: "🏔️", g: ["commedia", "satira"], mod: "__montagna", key: "ali-di-rondine.montagna", ch: 3, cover: "bm_titolo", d: "Un paesino innevato dove gli adulti vivono di tradizioni stravaganti e venerano un misterioso Pallone di Cartone. Tu sei il centravanti sceso dalla corriera delle 8:00. Ritagli: marionette di carta stop-motion a 12 fps, caricamento a molla e contrasti a forbice. E la Bacheca delle Emergenze del Comune.",
       hints: { scaldabagno: "Serve aver trovato l'archivio del boiler nel Capitolo 2 e vinto la finale.", politica: "Serve aver sfiduciato il Sindaco e una grande fiducia del borgo.", cartone: "Sempre possibile, alla fine: alza la Coppa di cartone.", segreto: "Segreto: tutti i ritagli di cartone raccolti e l'amicizia piena di Boris." } },
     { id: "cavallo", t: "Il Cavallo Star", e: "🐴", g: ["commedia", "dramma"], mod: "__cavallo", key: "ali-di-rondine.cavallo", ch: 3, cover: "cs_titolo", d: "Baldo Criniera, cavallo e vecchia star della sitcom sul calcio «Zoccoli d'Oro», vuole tornare in onda. Tu sei la sua spalla. Ciak! Si Gioca: ogni partita si gira a scene, segui il copione o improvvisi. E dopo ogni scelta, il giornale.",
@@ -100,7 +102,7 @@
     { id: "cala", t: "Cala Tramontana", e: "🌊", g: ["avventura"], fn: "openCalaTramontana", key: "ali-di-rondine.cala-tramontana", cover: "beach", d: "Esplora a piedi il borgo marino alternativo con il tuo Campione." },
     { id: "borgostorto", t: "Il Borgo Storto", e: "🌀", g: ["commedia", "tattica"], api: "openBorgoStorto", cover: "beach", d: "Lo spin-off GDR a turni del Borgo Marino." },
   ];
-  const NEWEST = ["montagna", "cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
+  const NEWEST = ["pugno", "montagna", "cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
   const modOf = (s) => (s.mod ? window[s.mod] : null);
   const available = (s) => (s.mod ? !!window[s.mod] : s.fn ? typeof window[s.fn] === "function" : !!(api() && api()[s.api]));
   function state(s) {
@@ -277,6 +279,10 @@
       opp: [{ name: "Ragazzi del Coro", color: "#60a5fa", style: "equilibrata", players: [{ name: "Pancrazio" }, { name: "Anacleto" }] }, { name: "Boscaioli del Passo", color: "#b45309", style: "pressing", players: [{ name: "Tarcisio" }, { name: "Tronco" }] }],
       boss: { name: "Rappresentativa della Valle", color: "#dc2626", style: "pressing", players: [{ name: "Sindaco Valanga" }, { name: "Capitano Ghiaccio" }] },
       opts: (o, h, boss) => ({ title: `Ritagli · contro ${o.name}`, us: "Piccolo Borgo", usColor: "#0284c7", turns: boss ? 8 : 6, hero: { name: h.name || "Tu" }, mates: [{ name: "Boris" }, { name: "Wendy" }], opp: o }) },
+    { id: "stangata", t: "Stangata", e: "🤠", saga: "pugno", eng: "__stangata", d: "La sfida dal dischetto di Per un pugno di rigori: tamburo revolver a sei colpi, mira a tensione oscillante e parate coi guanti di cuoio a mezzogiorno.",
+      opp: [{ name: "I Vice dello Sceriffo", color: "#b45309", style: "equilibrata" }, { name: "I Fuorilegge del Saloon", color: "#78350f", style: "contropiede" }],
+      boss: { name: "Ramon Sette Tiri", color: "#dc2626", style: "pressing" },
+      opts: (o, h, boss) => ({ title: `Stangata · contro ${o.name}`, us: "Il Gringo", usColor: "#ea580c", turns: boss ? 6 : 4, hero: { name: h.name || "Tu" }, opp: o }) },
   ];
   function sgState(m) { const s = SAGAS.find((x) => x.id === m.saga), x = s ? state(s) : null; return { s, open: !!(x && (x.doneN >= 1)), boss: !!(x && x.endsFound > 0) }; }
   function openSalaGiochi(back) {
@@ -579,7 +585,7 @@
   // ---------------------------------------------------------------- ALBUM DEI PERSONAGGI
   // ogni personaggio registrato nel gioco (window.__borgoApi.BIO) diventa una carta. Si «incontra» parlandoci (seeCard del gioco).
   // Le sezioni: la Storia e Borgo Marino, i tornei e le modalità del Borgo, e una sezione per saga (riconosciuta dal prefisso degli id).
-  const PFX = { montagna: "bm", cavallo: "cs", razzo: "rz", quartiere: "sq", titano: "ft", ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
+  const PFX = { pugno: "pr", montagna: "bm", cavallo: "cs", razzo: "rz", quartiere: "sq", titano: "ft", ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
   const BORGO_PFX = ["sv", "rb", "sb", "cg", "hd", "md", "ac"];
   function perSections() {
     const A = api(); if (!A || !A.BIO) return [];
