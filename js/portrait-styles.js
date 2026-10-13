@@ -205,7 +205,7 @@
   // Ogni stile conosce 9 tagli di base; le altre acconciature si appoggiano a una base e aggiungono i loro pezzi dietro
   // (code, chignon, afro, trecce lunghe…) e davanti (ciuffo, bandana, treccia di lato…), con i colori del personaggio.
   const HALIAS = { short: "buzz", corto: "buzz", lungo: "long", flowing: "long", coda: "ponytail", medium: "slick" };
-  const HBASE = { afro: "buzz", dread: "buzz", undercut: "slick", pompadour: "slick", mullet: "messy", wavy: "long", messybun: "bun", topknot: "buzz", sidebraid: "slick", spacebuns: "buzz", corona: "slick", ciuffo: "slick", cometa: "buzz",
+  const HBASE = { afro: "buzz", dread: "buzz", undercut: "slick", pompadour: "slick", mullet: "messy", wavy: "long", messybun: "bun", topknot: "buzz", sidebraid: "slick", spacebuns: "buzz", corona: "slick", ciuffo: "slick", cometa: "buzz", scodella: "buzz",
     bob: "slick", twintails: "slick", braids: "slick", curly: "buzz", side: "slick", ordinato: "slick", bandana: "messy", hood: "buzz", elmo: "buzz" };
   function hairOver(g, st, c, part) {
     const hair = c.hair || "#2b1d14", hd = dark(hair, 0.42), hl = lite(hair, 0.32), fw = 18;
@@ -228,6 +228,7 @@
       if (st === "pompadour") { g.fillStyle = hair; g.beginPath(); g.moveTo(-12, -16); g.bezierCurveTo(-16, -36, 10, -44, 16, -30); g.bezierCurveTo(18, -22, 8, -18, 4, -16); g.closePath(); g.fill(); g.strokeStyle = hd; g.lineWidth = 1.3; g.stroke(); shine(0, -24, 12, Math.PI * 1.15, Math.PI * 1.55); }
       if (st === "undercut") { [-1, 1].forEach((sd) => { g.fillStyle = mix(hair, 0.55, c.skin || "#e0b48a"); g.globalAlpha = 0.85; g.fillRect(sd > 0 ? fw - 4 : -fw, -12, 4, 14); g.globalAlpha = 1; }); g.fillStyle = hair; g.beginPath(); g.moveTo(-12, -14); g.bezierCurveTo(-8, -32, 14, -32, 16, -16); g.lineTo(6, -18); g.closePath(); g.fill(); g.strokeStyle = hd; g.lineWidth = 1.2; g.stroke(); }
       if (st === "sidebraid") braid(15, -6, 21, 44, 8, 4.6);
+      if (st === "scodella") { g.fillStyle = hair; g.beginPath(); g.moveTo(-fw - 3, -2); g.bezierCurveTo(-fw - 4, -34, fw + 4, -34, fw + 3, -2); g.lineTo(fw + 3, -8); g.lineTo(-fw - 3, -8); g.closePath(); g.fill(); g.strokeStyle = hd; g.lineWidth = 1.3; g.stroke(); g.beginPath(); g.moveTo(-fw - 2, -9); g.lineTo(fw + 2, -9); g.stroke(); shine(-2, -18, 12, Math.PI * 1.15, Math.PI * 1.5); }
       if (st === "cometa") { g.fillStyle = hair; g.beginPath(); g.moveTo(-fw + 2, -14); g.quadraticCurveTo(-6, -46, fw + 6, -44); g.quadraticCurveTo(6, -34, fw - 2, -14); g.closePath(); g.fill(); g.strokeStyle = hd; g.lineWidth = 1.3; g.stroke(); g.fillStyle = "#ffd23f"; g.beginPath(); g.moveTo(8, -42); g.quadraticCurveTo(16, -45, fw + 6, -44); g.quadraticCurveTo(14, -38, 12, -34); g.closePath(); g.fill(); shine(0, -28, 10, Math.PI * 1.15, Math.PI * 1.5); }
       if (st === "corona") { for (let i = 0; i < 9; i++) { const a = Math.PI * (1.08 + i * 0.105); blob(Math.cos(a) * (fw + 2), -12 + Math.sin(a) * 15, 4.6, 3.8, a); } shine(-4, -22, 8, Math.PI * 1.15, Math.PI * 1.5); }
       if (st === "ciuffo") { g.fillStyle = hair; g.beginPath(); g.moveTo(-fw + 1, -14); g.bezierCurveTo(-4, -26, 12, -22, fw - 1, -4); g.bezierCurveTo(fw - 3, 4, 10, 2, 6, -4); g.bezierCurveTo(1, -10, -8, -10, -fw + 2, -6); g.closePath(); g.fill(); g.strokeStyle = hd; g.lineWidth = 1.2; g.stroke(); shine(4, -12, 10, Math.PI * 1.2, Math.PI * 1.55); }

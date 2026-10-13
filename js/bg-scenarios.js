@@ -6168,7 +6168,88 @@
     if (since("ft_finale", 1) < 140) { circ(g, 155, 100, 5, "#fff"); g.strokeStyle = "#111"; g.lineWidth = 1.5; g.beginPath(); g.arc(155, 100, 5, 0, 7); g.stroke(); }
     if (since("ft_finale", 2) < 160) { g.fillStyle = "#111"; g.font = "italic bold 8px sans-serif"; g.textAlign = "center"; g.fillText("«Il cielo è curvo, figliolo.»", 160, 190); }
   }
+  // ---------------------------------------------------------------- GLI STRAORDINARI DI QUARTIERE (copertine da albo: retino, balloon, colori pop)
+  function sqDots(g, x, y, w, h, col) { g.fillStyle = col; for (let yy = y; yy < y + h; yy += 4) for (let xx = x + ((yy / 4) % 2) * 2; xx < x + w; xx += 4) { g.beginPath(); g.arc(xx, yy, 0.9, 0, 7); g.fill(); } }
+  function sqHero(g, x, y, s, col, cape, f) { g.save(); g.translate(x, y); g.scale(s, s); g.lineWidth = 2; g.strokeStyle = "#111"; if (cape) { g.fillStyle = cape; g.beginPath(); g.moveTo(-6, -22); g.quadraticCurveTo(-16 - Math.sin(f / 7) * 3, -4, -10, 6); g.lineTo(6, -4); g.closePath(); g.fill(); g.stroke(); } g.fillStyle = col; g.fillRect(-7, -24, 14, 18); g.strokeRect(-7, -24, 14, 18); g.fillStyle = "#2a2a3a"; g.fillRect(-6, -6, 5, 12); g.fillRect(1, -6, 5, 12); g.fillStyle = "#e8c4a0"; g.beginPath(); g.arc(0, -30, 7, 0, 7); g.fill(); g.stroke(); g.fillStyle = "#111"; g.fillRect(-6, -32, 12, 3); g.restore(); }
+  function sqBalloon(g, x, y, t, w) { g.font = "bold 8px sans-serif"; const ww = w || g.measureText(t).width + 12; g.fillStyle = "#fff"; g.strokeStyle = "#111"; g.lineWidth = 1.5; g.beginPath(); g.ellipse(x, y, ww / 2, 10, 0, 0, 7); g.fill(); g.stroke(); g.beginPath(); g.moveTo(x - 4, y + 9); g.lineTo(x - 8, y + 17); g.lineTo(x + 2, y + 9); g.fill(); g.fillStyle = "#111"; g.textAlign = "center"; g.fillText(t, x, y + 3); }
+  function sqWord(g, t, x, y, col, sz) { g.save(); g.translate(x, y); g.rotate(-0.08); g.font = `900 ${sz}px Impact, 'Arial Black', sans-serif`; g.textAlign = "center"; g.lineWidth = 5; g.strokeStyle = "#111"; g.strokeText(t, 0, 0); g.fillStyle = col; g.fillText(t, 0, 0); g.restore(); }
+  function bgSqTitolo(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#ff5a8a", "#ffd23f"]); sqDots(g, 0, 0, W, H, "rgba(255,255,255,.25)");
+    g.fillStyle = "#111"; g.fillRect(0, 0, W, 18); g.fillStyle = "#ffd23f"; g.font = "bold 9px sans-serif"; g.textAlign = "left"; g.fillText("N. 1 · PONTEROTTO COMICS · 1,50", 8, 12);
+    const P = [["#7ad8ff", 60], ["#3a8a6a", 110], ["#ff5a8a", 160], ["#3a5aa8", 210], ["#ff8a3a", 260]]; P.forEach(([c, x], i) => sqHero(g, x, 180 - (i === 2 ? 10 : 0) + Math.sin(f / 12 + i) * 2, i === 2 ? 1.8 : 1.4, c, i === 2 ? "#ffd23f" : null, f));
+    sqWord(g, "GLI STRAORDINARI", 160, 60, "#fff", 24); sqWord(g, "DI QUARTIERE", 160, 88, "#ffd23f", 22);
+    if (since("sq_titolo", 0) < 100) sqBalloon(g, 240, 112, "Pronti, ragazzi?");
+    if (since("sq_titolo", 1) < 80) sqWord(g, "POW!", 60, 120, "#ff5a8a", 20);
+    if (since("sq_titolo", 2) < 120) { for (let i = 0; i < 10; i++) circ(g, 160 + Math.cos(i) * since("sq_titolo", 2) * 1.2, 150 + Math.sin(i) * since("sq_titolo", 2) * 0.4, 2, ["#7ad8ff", "#ff8a3a", "#c8f0e0"][i % 3]); }
+  }
+  function bgSqQuartiere(g, W, H, f) {
+    vgrad(g, 0, 0, W, 110, ["#8ac8f0", "#ffe8c8"]); for (let i = 0; i < 8; i++) { const h = 50 + (i * 23) % 40; px(g, i * 42, 120 - h, 40, h, ["#e8a87a", "#f0d0a0", "#d89868", "#c8d8e8"][i % 4]); for (let k = 0; k < 2; k++) px(g, i * 42 + 6 + k * 18, 126 - h, 8, 10, "#3a4a6a"); g.strokeStyle = "#111"; g.lineWidth = 1.5; g.strokeRect(i * 42, 120 - h, 40, h); }
+    g.strokeStyle = "#555"; g.lineWidth = 1; g.beginPath(); g.moveTo(40, 60); g.quadraticCurveTo(80, 70, 120, 58); g.stroke(); [[52, 63, "#ff5a8a"], [70, 66, "#7ad8ff"], [90, 65, "#ffd23f"], [106, 61, "#fff"]].forEach(([x, y, c], i) => { const sw = Math.sin(f / 15 + i) * 2; px(g, x + sw, y, 8, 10, c); });
+    vgrad(g, 0, 120, W, 40, ["#3a8ac8", "#2a6aa8"]); for (let i = 0; i < 10; i++) px(g, ((i * 37 + f * 0.5) % W), 126 + (i % 3) * 10, 12, 1.5, "rgba(255,255,255,.5)");
+    if (since("sq_quartiere", 0) < 120) { px(g, 140, 128, 50, 10, "#d8f0ff"); g.strokeStyle = "#7ab8e8"; g.strokeRect(140, 128, 50, 10); }
+    px(g, 0, 160, W, 40, "#c8b8a8"); sqHero(g, 80, 194, 1.2, "#ff5a8a", null, f);
+    if (since("sq_quartiere", 1) < 100) for (let i = 0; i < 12; i++) { const a = i + f / 8; g.fillStyle = ["#c87a2a", "#e8a83a"][i % 2]; g.beginPath(); g.ellipse(250 + Math.cos(a) * since("sq_quartiere", 1) * 0.6, 170 + Math.sin(a) * 10 - since("sq_quartiere", 1) * 0.3, 3, 1.5, a, 0, 7); g.fill(); }
+    if (since("sq_quartiere", 2) < 120) sqBalloon(g, 200, 40, "♪ la radio canta sempre ♪");
+  }
+  function bgSqGarage(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#5a4a7a", "#3a2a5a"]); for (let r = 0; r < 3; r++) for (let i = 0; i < 12; i++) { const dx = Math.sin(f / 20 + i + r) * (since("sq_garage", 0) < 120 ? 3 : 0.6); g.fillStyle = "#8a8a92"; g.beginPath(); g.moveTo(14 + i * 25 + dx, 30 + r * 26); g.lineTo(32 + i * 25 + dx, 30 + r * 26); g.lineTo(28 + i * 25 + dx, 40 + r * 26); g.lineTo(14 + i * 25 + dx, 40 + r * 26); g.fill(); g.strokeStyle = "#111"; g.stroke(); }
+    px(g, 60, 130, 200, 10, "#3a8a4a"); g.strokeStyle = "#fff"; g.beginPath(); g.moveTo(160, 130); g.lineTo(160, 140); g.stroke();
+    px(g, 220, 100, 60, 30, "#222"); g.fillStyle = "#fff"; g.font = "bold 8px sans-serif"; g.textAlign = "center"; g.fillText("SQUADRA?", 250, 118);
+    sqHero(g, 120, 190, 1.4, "#c83a3a", null, f); if (since("sq_garage", 1) < 120) sqBalloon(g, 120, 120, "Il ferro mi vuole bene.");
+    if (since("sq_garage", 2) < 90) { for (let i = 0; i < 5; i++) { const t = since("sq_garage", 2); px(g, 200 - t * 1.4 + i * 6, 150 + Math.sin(i) * 4, 4, 2, "#a8a8b0"); } }
+  }
+  function bgSqCantiere(g, W, H, f) {
+    vgrad(g, 0, 0, W, 100, ["#f0c890", "#f8e8c8"]); g.strokeStyle = "#ffd23f"; g.lineWidth = 4; g.beginPath(); g.moveTo(260, 110); g.lineTo(260, 20); g.lineTo(180, 20); g.stroke(); g.lineWidth = 1; g.beginPath(); g.moveTo(190, 20); g.lineTo(190 + Math.sin(f / 30) * 6, 60); g.stroke();
+    px(g, 0, 100, W, 100, "#9a8a6a"); [[30, "#a8e0ff"], [110, "#6a6a72"], [190, "#4a4a52"]].forEach(([x, c], i) => { px(g, x, 120, 50, 40, c); g.strokeStyle = "#111"; g.lineWidth = 2; g.strokeRect(x, 120, 50, 40); });
+    if (since("sq_cantiere", 0) < 120) { for (let i = 0; i < 6; i++) circ(g, 55 + Math.sin(f / 5 + i) * 10, 118 - i * 6, 3, "rgba(255,138,58,.8)"); sqWord(g, "FSSSS!", 55, 100, "#ff8a3a", 14); }
+    if (since("sq_cantiere", 1) < 100) sqWord(g, "CLANG!", 135, 100, "#c83a3a", 14);
+    sqHero(g, 280, 190, 1.3, "#7a7a8a", null, f); if (since("sq_cantiere", 2) < 140) sqBalloon(g, 260, 140, "Metri cubi!");
+  }
+  function bgSqCampetto(g, W, H, f) {
+    vgrad(g, 0, 0, W, 80, ["#8ac8f0", "#ffe8c8"]); for (let r = 0; r < 3; r++) for (let i = 0; i < 32; i++) { const j = since("sq_campetto", 0) < 120 ? Math.abs(Math.sin(f / 4 + i)) * 3 : 0; px(g, 2 + i * 10, 50 + r * 8, 8, 6, "#c8a070"); circ(g, 6 + i * 10, 47 + r * 8 - j, 2.5, ["#f0c9a0", "#c68642", "#e0ac7e"][(i + r) % 3]); }
+    px(g, 0, 80, W, 120, "#c8a070"); g.strokeStyle = "rgba(255,255,255,.8)"; g.lineWidth = 2; g.strokeRect(20, 90, 280, 100); g.beginPath(); g.moveTo(160, 90); g.lineTo(160, 190); g.stroke();
+    ["#7ad8ff", "#3a8a6a", "#ff5a8a", "#3a5aa8", "#ff8a3a"].forEach((c, i) => sqHero(g, 60 + i * 22, 170, 1, c, null, f)); [0, 1, 2].forEach((i) => sqHero(g, 220 + i * 22, 168, 1, "#ffd23f", null, f));
+    if (since("sq_campetto", 1) < 100) sqWord(g, "FORZA PONTEROTTO!", 160, 30, "#ff5a8a", 16);
+    if (since("sq_campetto", 2) < 120) sqBalloon(g, 60, 110, "Lo sapevo io!");
+  }
+  function bgSqFinale(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#ffd23f", "#ff5a8a"]); sqDots(g, 0, 0, W, H, "rgba(255,255,255,.2)");
+    for (let i = 0; i < 40; i++) { const x = (i * 29 + f) % W, y = (i * 23 + f * 1.5) % H; px(g, x, y, 3, 3, ["#7ad8ff", "#ff8a3a", "#fff", "#3a5aa8"][i % 4]); }
+    ["#7ad8ff", "#3a8a6a", "#ff5a8a", "#3a5aa8", "#ff8a3a", "#c83a3a"].forEach((c, i) => sqHero(g, 50 + i * 44, 190 - Math.abs(Math.sin(f / 8 + i)) * 10, 1.3, c, i === 2 ? "#ffd23f" : null, f));
+    sqWord(g, "IL CAMPETTO È SALVO!", 160, 50, "#fff", 20);
+    if (since("sq_finale", 0) < 120) sqBalloon(g, 80, 90, "Gelato per tutti!"); if (since("sq_finale", 1) < 120) sqBalloon(g, 240, 100, "Pizza per tutti!"); if (since("sq_finale", 2) < 100) sqWord(g, "POW!", 160, 120, "#7ad8ff", 22);
+  }
   const LB = {
+    sq_titolo: { draw: bgSqTitolo, hot: [
+      [130, 120, 60, 80, "🦸 Il Copione in prima fila: copia il potere di chi gli sta accanto. Per ora copia la posa."],
+      [190, 95, 110, 30, "🗨️ «Pronti, ragazzi?» Nessuno è pronto. Tutti dicono di sì."],
+      [0, 0, 320, 20, "📚 Numero 1, Ponterotto Comics. Prezzo: un euro e cinquanta, o un gelato."],
+    ] },
+    sq_quartiere: { draw: bgSqQuartiere, hot: [
+      [40, 55, 90, 25, "👕 I panni stesi fra le finestre ballano col vento. Soffio è passato di qui."],
+      [130, 120, 70, 30, "🧊 Il canale gela per un attimo sotto i piedi del Copione. Poi si scioglie, gentile."],
+      [220, 150, 80, 40, "🍂 Un mucchio di foglie vola via: «Pfffff!»"],
+    ] },
+    sq_garage: { draw: bgSqGarage, hot: [
+      [10, 20, 300, 80, "🧲 Centoquarantadue ferri da stiro si girano tutti insieme verso Nonna Ines."],
+      [90, 120, 60, 80, "🗨️ «Il ferro mi vuole bene. Le persone, di meno.»"],
+      [210, 95, 70, 40, "📋 La lavagna dice «SQUADRA?». Fra poco ci sarà un punto esclamativo."],
+    ] },
+    sq_cantiere: { draw: bgSqCantiere, hot: [
+      [25, 90, 60, 70, "🔥 FSSSS! Il blocco di ghiaccio si scioglie sotto le mani di Scintilla."],
+      [105, 90, 60, 70, "🧲 CLANG! Il cassone di ferro scivola via da solo."],
+      [240, 120, 60, 80, "🗨️ Il Dottor Cemento: «Metri cubi!». È il suo modo di dire tutto."],
+    ] },
+    sq_campetto: { draw: bgSqCampetto, hot: [
+      [0, 40, 320, 40, "📣 Gli spalti di cassette della frutta saltano tutti insieme."],
+      [50, 140, 110, 50, "🦸 Gli Straordinari in fila: gelataia, trombettista, idraulico, nonna, pizzaiolo."],
+      [30, 95, 70, 25, "🗨️ La signora Pina del terzo piano: «Lo sapevo io!»"],
+    ] },
+    sq_finale: { draw: bgSqFinale, hot: [
+      [40, 75, 90, 30, "🍦 «Gelato per tutti!» Brina congela il cono prima di darlo."],
+      [190, 85, 100, 30, "🍕 «Pizza per tutti!» Scintilla cuoce dieci margherite con un battito di mani."],
+      [120, 100, 80, 40, "💥 POW! Il campetto è salvo."],
+    ] },
     ft_titolo: { draw: bgFtTitolo, hot: [
       [100, 70, 120, 90, "🦸 Il Titano junior sfreccia nel cielo: la tuta rossa, il mantello giallo, la faccia di chi non ci crede ancora."],
       [200, 100, 100, 40, "💨 WHOOOSH! Il rumore arriva dopo: il volo era più veloce."],
