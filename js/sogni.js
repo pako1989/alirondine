@@ -8,6 +8,8 @@
 //  - Il TORNEO DEI SOGNI: otto sfide, ognuna nel motore originale di una saga (Vignette, ATB, Super-Bottoni, il Nastro,
 //    Luci, il Concilio, il Duello Cinematico, la Lavagna Tattica). La squadra dà vantaggi diversi in ogni motore: grinta,
 //    credibilità, tiri, lanterne, riavvolgimenti, giocatori in lavagna. Vincere tutto vale la carta del Campione dei Sogni.
+//  - Vallombra e le saghe a capitoli (Kronenburg, Pirati, Alchimia, Chrono-Break, Ombre, Ragnarok, Belovodia, Bilancia, Shogun, Phantom, Abisso,
+//    Muro, Cristalli, Doppio Turno, Libro): carte che si sbloccano a capitolo concluso (info() della saga) e non escono mai a sorpresa prima.
 // Salvataggio proprio: ali-di-rondine.sogni { own:[id], team:[id×5], won:[sfida], packs }.
 (function () {
   "use strict";
@@ -21,7 +23,67 @@
     stagione: ["ali-di-rondine.stagione", "Stagione Infinita", "#ff5a7a"], lampioni: ["ali-di-rondine.lampioni", "La Notte dei Lampioni", "#ffd27a"], trono: ["ali-di-rondine.trono", "Il Trono di Cuoio", "#8a5a2a"],
     campetto: ["ali-di-rondine.campetto", "Dal Campetto al Mondiale", "#1f5fbf"], colline: ["ali-di-rondine.colline", "Master League delle Colline", "#2a6a3a"], grigio: ["ali-di-rondine.grigio", "Il Cavaliere della Notte", "#2a3040"], ducati: ["ali-di-rondine.ducati", "La Guerra dei Tre Ducati", "#c8a040"], detective: ["ali-di-rondine.detective", "Detective di Campo", "#3a4a5a"],
     spazio: ["ali-di-rondine.spazio", "Calcio Spaziale", "#2a6ac8"], vento: ["ali-di-rondine.vento", "La Valle del Vento Gentile", "#5a9a7a"], dopo: ["ali-di-rondine.dopo", "Dopo il Campione", "#a8622a"], mondi: ["ali-di-rondine.mondi", "Il Torneo dei Mondi", "#2a1a4a"],
+    // saghe a capitoli: il 4° elemento è il modulo che espone info() (poi si ripiega sul salvataggio)
+    vallombra: ["ali-di-rondine.storia-campione", "Vallombra", "#6a8aa8", "__storiaCampione"], kronenburg: ["ali-di-rondine.kronenburg-story", "Kronenburg", "#8a1a2a", "__kronenburgStory"], pirati: ["ali-di-rondine.pirati-story", "I Pirati della Tempesta Celeste", "#2a8ac8", "__piratiStory"],
+    alchimia: ["ali-di-rondine.alchimia-story", "L'Alchimia d'Acciaio", "#b0762a", "__alchimiaStory"], chrono: ["ali-di-rondine.chrono-story", "Chrono-Break", "#c8a22a", "__chronoStory"], ombre: ["ali-di-rondine.campione-ombre", "Il Circuito delle Ombre", "#1a3a5a", "__campioneOmbre"],
+    ragnarok: ["ali-di-rondine.ragnarok", "Ragnarok Ball", "#9a3a1a", "__ragnarokStory"], belovodia: ["ali-di-rondine.belovodia-story", "Belovodia", "#4a7a8a", "__belovodiaStory"], bilancia: ["ali-di-rondine.bilancia-feudi", "La Bilancia delle Tre Corone", "#6a5a8a", "__bilanciaFeudi"],
+    shogun: ["ali-di-rondine.shogun-story", "Shogun Eclipse", "#a02a3a", "__shogunStory"], phantom: ["ali-di-rondine.phantom-genesis", "Phantom Genesis", "#5a2a8a", "__phantomGenesis"], abisso: ["ali-di-rondine.abisso-story", "Abisso di Dunwich", "#1a4a5a", "__abissoStory"],
+    muro: ["ali-di-rondine.muro", "Il Muro", "#6a6a5a", "__muro"], cristalli: ["ali-di-rondine.cristalli", "Cristalli del Campo", "#3a9ac8", "__cristalli"], doppio: ["ali-di-rondine.doppio-turno", "Doppio Turno", "#7a7a9a", "__doppioTurno"], libro: ["ali-di-rondine.libro-finali", "Il Libro che Mangiava i Finali", "#a8782a", "__libroFinali"],
   };
+  // le carte delle saghe a capitoli (Vallombra e le altre): il 8° valore è il capitolo che le sblocca, una volta concluso.
+  // Mai nelle bustine, nei premi a sorpresa e nel Draft finché non sono guadagnate: niente anticipazioni.
+  const NEWC = [
+    // Vallombra
+    ["vl_teodora", "vallombra", "c", 52, 68, 60, "D", 1], ["vl_fosco", "vallombra", "c", 44, 72, 56, "P", 1], ["vl_mirtilla", "vallombra", "c", 56, 60, 68, "C", 1], ["vl_bianca", "vallombra", "c", 58, 66, 64, "D", 1], ["vl_cornelio", "vallombra", "c", 50, 56, 70, "C", 1],
+    ["vl_remo", "vallombra", "r", 76, 58, 66, "A", 2], ["vl_agata", "vallombra", "r", 54, 66, 76, "C", 2], ["vl_noemi", "vallombra", "c", 48, 56, 76, "C", 2], ["vl_tonio", "vallombra", "c", 40, 78, 58, "P", 2], ["vl_gisella", "vallombra", "c", 66, 62, 60, "C", 2],
+    ["vl_ettore", "vallombra", "c", 56, 50, 66, "A", 2], ["vl_viola", "vallombra", "c", 52, 56, 68, "C", 2], ["vl_rosalba", "vallombra", "c", 70, 52, 58, "A", 2],
+    ["vl_mirella", "vallombra", "c", 68, 50, 60, "A", 3], ["vl_pio", "vallombra", "c", 46, 76, 52, "D", 3], ["vl_duilio", "vallombra", "c", 52, 70, 58, "D", 3], ["vl_dina", "vallombra", "c", 58, 60, 66, "C", 3], ["vl_gedeone", "vallombra", "c", 54, 72, 56, "D", 3],
+    ["vl_berto", "vallombra", "e", 48, 84, 72, "P", 3], ["vl_lampionaio", "vallombra", "e", 62, 66, 84, "C", 3],
+    ["vl_corvi", "vallombra", "c", 40, 62, 72, "C", 4], ["vl_ottavia", "vallombra", "r", 56, 74, 70, "D", 4], ["vl_vermiglio", "vallombra", "r", 66, 70, 68, "C", 4], ["vl_sigillo", "vallombra", "r", 60, 64, 78, "C", 4],
+    ["vl_vica", "vallombra", "e", 78, 62, 76, "A", 5], ["vl_neve", "vallombra", "r", 50, 66, 74, "C", 5], ["vl_zelo", "vallombra", "c", 56, 64, 60, "D", 5],
+    // Kronenburg
+    ["kb_baelor", "kronenburg", "c", 44, 54, 78, "C", 1], ["kb_guardia", "kronenburg", "c", 50, 80, 44, "D", 1], ["kb_kaelen", "kronenburg", "c", 66, 56, 62, "A", 1], ["kb_rennick", "kronenburg", "c", 64, 52, 74, "A", 2], ["kb_brutus", "kronenburg", "c", 60, 78, 40, "P", 2],
+    ["kb_gareth", "kronenburg", "r", 72, 74, 64, "D", 2], ["kb_vespera", "kronenburg", "r", 58, 66, 84, "C", 2], ["kb_lyanna", "kronenburg", "r", 60, 56, 80, "C", 3], ["kb_voss", "kronenburg", "c", 62, 74, 64, "D", 3], ["kb_merrick", "kronenburg", "c", 52, 70, 66, "D", 3],
+    ["kb_malakar", "kronenburg", "e", 78, 70, 80, "A", 3], ["kb_celia", "kronenburg", "l", 68, 66, 90, "C", 4],
+    // Pirati della Tempesta Celeste
+    ["pi_kidd", "pirati", "c", 56, 60, 76, "C", 1], ["pi_anemona", "pirati", "c", 58, 52, 70, "C", 1], ["pi_drake", "pirati", "r", 66, 80, 68, "D", 2], ["pi_barbanube", "pirati", "e", 60, 72, 82, "C", 3], ["pi_corsaro_grigio", "pirati", "e", 74, 66, 76, "A", 3], ["pi_morgana", "pirati", "l", 84, 66, 80, "A", 4],
+    // Alchimia d'Acciaio
+    ["al_kira", "alchimia", "c", 54, 64, 76, "C", 1], ["al_armatura", "alchimia", "c", 58, 80, 50, "D", 1], ["al_knox", "alchimia", "c", 46, 56, 78, "C", 1], ["al_chimera", "alchimia", "c", 62, 64, 50, "D", 2], ["al_armstrong", "alchimia", "r", 74, 76, 52, "D", 2],
+    ["al_olivier", "alchimia", "e", 70, 82, 68, "D", 3], ["al_envi", "alchimia", "e", 72, 60, 80, "A", 3], ["al_sloth", "alchimia", "c", 60, 84, 36, "D", 3], ["al_royden", "alchimia", "l", 82, 60, 80, "A", 4],
+    // Chrono-Break
+    ["chr_elias", "chrono", "c", 44, 58, 82, "C", 1], ["chr_guardiano_alba", "chrono", "c", 68, 66, 62, "A", 1], ["chr_re_aurelio", "chrono", "r", 60, 70, 76, "C", 2], ["chr_aria", "chrono", "e", 56, 72, 88, "C", 3],
+    // Circuito delle Ombre
+    ["omb_milo", "ombre", "c", 66, 52, 70, "A", 1], ["omb_zoran", "ombre", "c", 40, 84, 50, "P", 1], ["omb_maya", "ombre", "c", 52, 56, 80, "C", 1], ["omb_victor", "ombre", "c", 62, 74, 54, "D", 2], ["omb_madame_v", "ombre", "r", 60, 64, 86, "C", 2], ["omb_silvia", "ombre", "e", 54, 60, 92, "C", 3], ["omb_don_renzo", "ombre", "r", 58, 70, 76, "C", 3],
+    // Ragnarok Ball
+    ["rag_sigrid", "ragnarok", "c", 50, 56, 78, "C", 1], ["rag_guerriero", "ragnarok", "c", 60, 70, 48, "D", 1], ["rag_brokk", "ragnarok", "c", 64, 76, 66, "D", 2], ["rag_sindri", "ragnarok", "c", 50, 62, 78, "C", 2], ["rag_ragnar", "ragnarok", "r", 82, 74, 60, "A", 2],
+    ["rag_kara", "ragnarok", "e", 74, 66, 82, "A", 3], ["rag_surtr_ombra", "ragnarok", "e", 78, 64, 70, "A", 3],
+    // Belovodia
+    ["bv_boris", "belovodia", "c", 44, 60, 80, "C", 1], ["bv_falco", "belovodia", "c", 66, 50, 76, "A", 1], ["bv_guardia", "belovodia", "c", 54, 80, 44, "D", 1], ["bv_dama", "belovodia", "c", 52, 62, 82, "C", 2], ["bv_nadia", "belovodia", "r", 70, 60, 76, "A", 2], ["bv_yakov", "belovodia", "r", 68, 78, 58, "D", 2],
+    ["bv_araldo", "belovodia", "c", 56, 66, 72, "C", 3], ["bv_moroz", "belovodia", "l", 80, 82, 84, "D", 4],
+    // Bilancia delle Tre Corone
+    ["fe_roland", "bilancia", "c", 70, 56, 68, "A", 1], ["fe_frederica", "bilancia", "c", 54, 60, 78, "C", 1], ["fe_erador", "bilancia", "r", 58, 84, 56, "D", 2], ["fe_benedict", "bilancia", "e", 64, 66, 86, "C", 3], ["fe_avlora", "bilancia", "l", 84, 72, 78, "A", 4],
+    // Shogun Eclipse
+    ["sh_ronin_boss", "shogun", "c", 70, 58, 60, "A", 1], ["sh_hanzo", "shogun", "c", 72, 52, 78, "A", 2], ["sh_muramasa", "shogun", "c", 48, 60, 82, "C", 2], ["sh_benkei", "shogun", "c", 62, 86, 40, "D", 2], ["sh_tomoe", "shogun", "r", 74, 66, 76, "C", 2],
+    ["sh_generale_kuro", "shogun", "r", 74, 78, 68, "D", 3], ["sh_hayato", "shogun", "e", 68, 72, 84, "C", 3], ["sh_kurogane", "shogun", "l", 86, 80, 78, "A", 4],
+    // Phantom Genesis
+    ["pg_kael", "phantom", "c", 66, 70, 58, "D", 1], ["pg_maya", "phantom", "c", 48, 56, 82, "C", 1], ["pg_rin", "phantom", "c", 60, 50, 70, "A", 1], ["pg_sachiel", "phantom", "r", 72, 80, 50, "D", 2], ["pg_kurogane", "phantom", "e", 82, 70, 72, "A", 3],
+    // Abisso di Dunwich
+    ["abi_silas", "abisso", "c", 52, 70, 58, "D", 1], ["abi_barnaby", "abisso", "c", 60, 66, 56, "C", 1], ["abi_armitage", "abisso", "c", 40, 52, 82, "C", 1], ["abi_jonah", "abisso", "c", 62, 58, 60, "A", 1], ["abi_corvo", "abisso", "c", 46, 62, 66, "D", 1],
+    ["abi_nora", "abisso", "r", 56, 68, 78, "C", 2], ["abi_cormac", "abisso", "c", 54, 72, 64, "D", 2], ["abi_cordelia", "abisso", "r", 68, 56, 74, "A", 2], ["abi_eldon", "abisso", "e", 64, 70, 86, "C", 3], ["abi_titano", "abisso", "l", 62, 92, 60, "P", 3],
+    // Il Muro
+    ["mu_teo", "muro", "c", 66, 60, 60, "A", 1], ["mu_nives", "muro", "c", 58, 56, 76, "C", 1], ["mu_saverio", "muro", "c", 40, 50, 74, "C", 1], ["mu_ugolino", "muro", "c", 50, 72, 56, "D", 1], ["mu_orso", "muro", "c", 46, 66, 66, "C", 2],
+    ["mu_ilse", "muro", "r", 62, 78, 66, "D", 2], ["mu_corvino", "muro", "r", 70, 60, 76, "A", 2], ["mu_grifo", "muro", "e", 60, 66, 86, "C", 3],
+    // Cristalli del Campo
+    ["cr_aira", "cristalli", "c", 64, 60, 72, "C", 1], ["cr_bram", "cristalli", "c", 50, 82, 50, "D", 1], ["cr_trillo", "cristalli", "c", 58, 56, 70, "A", 1], ["cr_ortensia", "cristalli", "c", 40, 70, 64, "P", 1],
+    ["cr_libeccio", "cristalli", "c", 72, 52, 64, "A", 2], ["cr_maestrale", "cristalli", "c", 36, 84, 60, "P", 2], ["cr_brunoferro", "cristalli", "c", 58, 82, 40, "D", 2], ["cr_vela", "cristalli", "r", 74, 58, 70, "A", 2], ["cr_kael", "cristalli", "r", 70, 78, 64, "D", 2], ["cr_zefira", "cristalli", "e", 56, 68, 88, "C", 2],
+    ["cr_gilda", "cristalli", "c", 48, 60, 68, "C", 3], ["cr_ondina", "cristalli", "r", 52, 66, 80, "C", 3], ["cr_aldeberto", "cristalli", "l", 70, 80, 84, "C", 3],
+    // Doppio Turno
+    ["dt_ofelia", "doppio", "c", 50, 56, 80, "C", 1], ["dt_nina", "doppio", "c", 56, 62, 72, "C", 1], ["dt_bruno", "doppio", "c", 60, 66, 56, "D", 1], ["dt_pio", "doppio", "c", 46, 72, 58, "D", 1], ["dt_scheggia", "doppio", "c", 72, 56, 64, "A", 2], ["dt_valtorre", "doppio", "r", 62, 66, 84, "C", 2], ["dt_cartografo", "doppio", "e", 58, 60, 90, "C", 3],
+    // Il Libro che Mangiava i Finali
+    ["lb_virgola", "libro", "c", 56, 60, 78, "C", 1], ["lb_lupo", "libro", "c", 68, 56, 64, "A", 1], ["lb_mattone", "libro", "c", 54, 76, 66, "D", 1], ["lb_nonna", "libro", "c", 44, 64, 72, "C", 1],
+    ["lb_jolly", "libro", "c", 62, 50, 80, "C", 2], ["lb_gommapane", "libro", "c", 50, 54, 66, "C", 2], ["lb_regina", "libro", "r", 46, 88, 64, "P", 2], ["lb_fante", "libro", "r", 60, 78, 56, "D", 2],
+    ["lb_didascalia", "libro", "c", 56, 56, 76, "C", 3], ["lb_balloon", "libro", "r", 70, 62, 70, "A", 3], ["lb_rilegatore", "libro", "e", 52, 66, 86, "C", 3], ["lb_narratore", "libro", "e", 60, 66, 90, "C", 3], ["lb_autrice", "libro", "l", 66, 70, 92, "C", 4],
+  ];
   // [id, saga, rarità (c r e l), attacco, difesa, tecnica, ruolo]
   const CARDS = [
     ["td_lia", "ducati", "c", 70, 54, 62, "A"], ["td_ottone", "ducati", "c", 50, 62, 72, "C"], ["td_corrado", "ducati", "r", 58, 78, 66, "D"], ["td_isotta", "ducati", "e", 64, 58, 82, "C"],
@@ -39,7 +101,7 @@
     ["ve_selva", "vento", "c", 60, 60, 66, "C"], ["ve_sbuffo", "vento", "c", 56, 66, 60, "D"], ["ve_mormorio", "vento", "r", 66, 58, 72, "A"],
     ["ep_ada", "dopo", "c", 54, 62, 70, "C"], ["ep_bruno", "dopo", "r", 72, 62, 70, "A"], ["ep_tecla", "dopo", "c", 56, 66, 64, "D"],
     ["tm_custode", "mondi", "e", 70, 70, 80, "C"], ["tm_eclisse", "mondi", "l", 80, 76, 76, "A"],
-  ].map(([id, saga, rar, at, df, te, role]) => ({ id, saga, rar, at, df, te, role }));
+  ].concat(NEWC).map(([id, saga, rar, at, df, te, role, n]) => (n ? { id, saga, rar, at, df, te, role, n } : { id, saga, rar, at, df, te, role }));
   const BY = Object.fromEntries(CARDS.map((c) => [c.id, c]));
   // la frase speciale che la carta dice quando arriva a tre stelle
   const FRASI = {
@@ -58,6 +120,29 @@
     ve_selva: "Il vento gentile soffia sempre verso la porta giusta.", ve_sbuffo: "Fffff! (Il pallone vola più leggero.)", ve_mormorio: "Ascolta: anche l'erba fa il tifo.",
     ep_ada: "In ogni epoca c'è un gol che aspetta di essere segnato.", ep_bruno: "Nel '28 si giocava col cuoio pesante. Il cuore era lo stesso.", ep_tecla: "La storia della famiglia la scriviamo in campo.",
     tm_custode: "Ogni porta si apre, prima o poi. Anche quella avversaria.", tm_eclisse: "Anche il buio ha bisogno di una squadra.",
+    // Vallombra e le altre saghe a capitoli: frasi di tre stelle, senza anticipazioni
+    vl_teodora: "L'orario è sacro. Il fuorigioco, un'opinione.", vl_fosco: "Non gioco mai. Per questo non sbaglio mai.", vl_mirtilla: "Tre tazze, un panino e il referto della partita: offro io.", vl_bianca: "Se si rompe, lo aggiusto. Se non si rompe, lo aggiusto lo stesso.", vl_cornelio: "Sarò breve. (Sette minuti dopo:) Sarò brevissimo.",
+    vl_remo: "Gli occhiali restano. Il pallone, se riesci, no.", vl_agata: "I dati dicono che segni. A volte i dati hanno ragione.", vl_noemi: "Qui Radio Nebbia: si prevede un gol, con schiarite.", vl_tonio: "Sembro una porta più piccola. Funziona sempre.", vl_gisella: "Tifo Camosci anche quando passo il pallone agli altri.",
+    vl_ettore: "Telecamere accese: oggi il mistero è la difesa.", vl_viola: "Ho filmato tutto. Soprattutto la cosa sbagliata.", vl_rosalba: "Svegliatemi al fischio d'inizio. E al gol.", vl_mirella: "Palla a me! …anzi, palla a chi sta meglio.", vl_pio: "Marco l'aria. Qualcuno deve.",
+    vl_duilio: "Il sinistro pensa, il destro corre.", vl_dina: "A solitario bara. A pallone, pure: ma meno.", vl_gedeone: "Contati tre volte. Presenti. Pronti.", vl_berto: "Un nodo a farfalla sulle dita e di qui non passa nessuno.", vl_lampionaio: "Una luce accesa al momento giusto basta.",
+    vl_corvi: "Lo sportello è chiuso. Per lei, apro.", vl_ottavia: "Quarant'anni di turni di notte: il buio mi fa compagnia.", vl_vermiglio: "Per principio, nessun principio. Firmi qui.", vl_sigillo: "Il mio cognome è la mia professione. Il suo, una clausola.", vl_vica: "Il panino c'è, la maglia anche. Tu sbrigati.",
+    vl_neve: "Presidente, albergatore, allenatore. Il giovedì, anche parroco.", vl_zelo: "Livello quattro: fischio e non discuto.",
+    kb_baelor: "Non vedo la pagina, ma ricordo la riga.", kb_guardia: "Incorruttibile. Con i denari. Con le barzellette, meno.", kb_kaelen: "La giustizia si rimette in gioco, un passaggio alla volta.", kb_rennick: "Una chiave, un'ombra, un contropiede.", kb_brutus: "Le chiavi sono mie. Il pallone, di chi lo prende.",
+    kb_gareth: "Il voto d'onore vale più del cartellino.", kb_vespera: "Ogni alibi ha una crepa. Anche il tuo fuorigioco.", kb_lyanna: "Sorrido, e intanto prendo le misure.", kb_voss: "Cento campagne, un solo schema: avanzare.", kb_merrick: "Si forgia col fuoco e si tira col piede giusto.", kb_malakar: "Il potere è una partita lunga. La gioco da sempre.", kb_celia: "Ho visto secoli di partite. Questa è tra le più belle.",
+    pi_kidd: "Un gancio di vento, un passaggio al volo.", pi_anemona: "Dall'alta coffa vedo tutto: anche dove passerai.", pi_drake: "La rotta si tiene. Anche in difesa.", pi_barbanube: "Le correnti non mentono. I portieri, a volte.", pi_corsaro_grigio: "Una vecchia ciurma conosce tutti i tuoi trucchi.", pi_morgana: "Vento in poppa e palla a me!",
+    al_kira: "Una chiave inglese e una buona idea: basta.", al_armatura: "Vuoto dentro, pieno di buon senso.", al_knox: "Ho sbagliato tante formule. Il passaggio, mai.", al_chimera: "Più pezzi, più corsa.", al_armstrong: "I muscoli sono un linguaggio. E io parlo fluentemente.", al_olivier: "Il ghiaccio non si scioglie. Il tackle nemmeno.", al_envi: "Ti copio il tiro e lo faccio meglio.", al_sloth: "Piano piano, la porta si chiude.", al_royden: "Un guanto, una scintilla, e il pallone prende fuoco.",
+    chr_elias: "Il tempo si ripara. Con pazienza e un cacciavite.", chr_guardiano_alba: "Al primo raggio, si parte.", chr_re_aurelio: "Un regno d'oro merita un gol d'oro.", chr_aria: "Aspetto da secoli. Una partita in più non mi pesa.",
+    omb_milo: "Conosco ogni condotto. Anche quello verso la porta.", omb_zoran: "Mani come tenaglie. Provaci pure.", omb_maya: "Ho sentito tutto. Soprattutto quello che non si doveva dire.", omb_victor: "Il buio per me è un campo da gioco.", omb_madame_v: "Le scommesse si chiudono quando dico io.", omb_silvia: "Ho calcolato la traiettoria: è un sogno.", omb_don_renzo: "Qui comando io. Anche il fischio.",
+    rag_sigrid: "Canto le saghe. E i gol, che sono saghe brevi.", rag_guerriero: "Uno scudo, un fiordo, nessun passo indietro.", rag_brokk: "Si batte il ferro finché è caldo.", rag_sindri: "Il dettaglio decide. Anche in area.", rag_ragnar: "Zanna di ferro, cuore di brace.", rag_kara: "Ali d'argento, giudizio imparziale.", rag_surtr_ombra: "Ceneri antiche, tiro nuovo.",
+    bv_boris: "Leggo i nodi del legno. Leggo anche i tuoi movimenti.", bv_falco: "Vedo il bersaglio da lontano. Poi lo prendo.", bv_guardia: "Sentinella del gelo: da qui non si passa.", bv_dama: "Sotto il ghiaccio, l'acqua ricorda tutto.", bv_nadia: "Veloce sui pattini, veloce di testa.", bv_yakov: "Un lupo grigio non molla l'osso. Né il pallone.", bv_araldo: "Porto proclami. Anche gol.", bv_moroz: "Il gelo è paziente. Io di più.",
+    fe_roland: "La moralità ha il piede caldo.", fe_frederica: "Libertà è un passaggio che non ti aspetti.", fe_erador: "Le mura tengono. Anch'io.", fe_benedict: "Ogni mossa ha un prezzo. Io lo conosco.", fe_avlora: "Imbattuta sul campo. Provaci.",
+    sh_ronin_boss: "Un fendente d'aria e passa il pallone.", sh_hanzo: "Silenziosa come un battito d'ala.", sh_muramasa: "Ogni lama ha una voce. Ogni maschera, un prezzo.", sh_benkei: "Il ponte è mio. Il pallone, vedremo.", sh_tomoe: "La spada protegge il fuoco. Il piede, il gol.", sh_generale_kuro: "Due lame, nessuna esitazione.", sh_hayato: "Un tempo ero un campione. Oggi, un maestro.", sh_kurogane: "Il trono è una porta. Si segna.",
+    pg_kael: "Difensore d'acciaio, ribelle di cuore.", pg_maya: "Il tuo tasso di sincronia è ottimo. Segna.", pg_rin: "Materia grezza e fiuto da mercante.", pg_sachiel: "Una risonanza a bassa frequenza. Ti arriva sul petto.", pg_kurogane: "Un'ala nera sul campo moderno.",
+    abi_silas: "Immersioni lunghe, respiro corto: la tattica giusta.", abi_barnaby: "Pipa in bocca e rotta decisa.", abi_armitage: "Ho letto tutto sui balani. Ora leggo il gioco.", abi_jonah: "Conosco ogni secca. Anche quelle del centrocampo.", abi_corvo: "Rintocco ogni onda. E ogni fischio.", abi_nora: "Il faro non si spegne se qualcuno lo guarda.", abi_cormac: "Un chiodo di nave tiene una porta. E una difesa.", abi_cordelia: "Mi tuffo dove gli altri non guardano.", abi_eldon: "Le maree portano e portano via. Anche i rigori.", abi_titano: "La mia parata ferma le onde.",
+    mu_teo: "Corro più forte di chiunque. Anche di me.", mu_nives: "Poche parole, molti passaggi.", mu_saverio: "Porto i proclami. E, ogni tanto, il pallone.", mu_ugolino: "Conosco ogni pietra per nome. E ogni avversario.", mu_orso: "Fischio piano e decido forte.", mu_ilse: "Una cicatrice per ogni partita vinta.", mu_corvino: "Pazienza finita, tiro pronto.", mu_grifo: "Mani pulite, passaggi puliti.",
+    cr_aira: "Sono caduta dal cielo. Atterro sempre in piedi.", cr_bram: "Brontolo, sbuffo, e non passa nessuno.", cr_trillo: "Fiuu! (Il pallone vola più alto.)", cr_ortensia: "Ho arbitrato sessanta partite. Ne ho viste di tutti i colori.", cr_libeccio: "Spavaldo, rapido e simpatico. A volte.", cr_maestrale: "Ho parato rigori per cinquant'anni. I piccioni, meno.", cr_brunoferro: "Due metri di ferro e un debole per i dolci.", cr_vela: "Contrabbandiera di professione, funambola di vocazione.", cr_kael: "Cappotto di ferro, nessuna fretta.", cr_zefira: "Il vento porta voci. E tiri.", cr_gilda: "Stessa ricetta da quarant'anni: funziona ancora.", cr_ondina: "Le onde rispondono. Di solito.", cr_aldeberto: "Un re vecchio e un pallone nuovo.",
+    dt_ofelia: "Conto i passi, i secondi e le porte.", dt_nina: "Dietro il bancone vedo tutto. Anche i fuorigioco.", dt_bruno: "Regole, sorrisi, e una difesa solida.", dt_pio: "Lavoro sul confine. Anche in campo.", dt_scheggia: "Gioco a piedi nudi, anche d'inverno.", dt_valtorre: "Sorriso perfetto, schema perfetto.", dt_cartografo: "Disegno mappe di posti che non ricordi.",
+    lb_virgola: "Un nastro rosso e una pausa al momento giusto.", lb_lupo: "Un tè alla bergamotto e un tiro di classe.", lb_mattone: "Capitano, regista, geometra.", lb_nonna: "Ho un gomitolo per ogni partita.", lb_jolly: "Posso essere qualsiasi carta. Oggi, la migliore.", lb_gommapane: "Mangio refusi e passaggi sbagliati.", lb_regina: "Imbattuta. E dal vivo, di più.", lb_fante: "Leale fino all'ostinazione.", lb_didascalia: "«E in quel momento, il gol.» (L'ho scritto io.)", lb_balloon: "Nuvolette ben legate e un tiro a effetto.", lb_rilegatore: "Ho cucito ogni pagina con spago cerato.", lb_narratore: "E così, la partita finì come doveva.", lb_autrice: "Firmato: A.",
   };
   // le squadre inventate della Stagione dei Sogni e del Draft
   const TEAMS = [
@@ -78,6 +163,10 @@
     ["cm_bastiano", "ml_pino", "Vecchi maestri"], ["cm_bastiano", "nl_leandro", "Il '52 e il '78"], ["tc_ysolde", "dc_agata", "Chi sa tutto"], ["cm_leone", "ts_lume", "Rivali di fuoco"],
     ["mg_bullone", "so_blop", "Ferraglia amica"], ["sf_gatto", "nl_lucia", "Le notti lunghe"], ["cc_re", "tm_eclisse", "Il silenzio e il buio"], ["ml_marta", "nl_fiammetta", "Fiori e lanterne"],
     ["tc_brunilde", "cc_lyra", "Cavaliere"], ["cm_saverio", "tc_ardo", "Muri di pietra"], ["sf_ada", "ep_ada", "Le due Ade"], ["ve_selva", "mg_tilde", "Mani gentili"], ["tm_custode", "cm_bastiano", "Chi aspetta"],
+    ["vl_agata", "dc_agata", "Le due Agate"], ["vl_bianca", "mg_bullone", "Chiavi inglesi"], ["vl_noemi", "sf_mira", "Voci alla radio"], ["vl_lampionaio", "nl_lucia", "Custodi di lampioni"], ["vl_berto", "cm_saverio", "Portieri di ferro"], ["vl_remo", "cm_leone", "Capitani di fuoco"],
+    ["vl_teodora", "chr_elias", "Custodi dell'orario"], ["vl_vica", "ts_alba", "Il paese in cucina"], ["kb_vespera", "dc_agata", "Menti deduttive"], ["kb_baelor", "tc_ysolde", "Chi sa tutto"], ["kb_gareth", "tc_gualtiero", "Cavalieri d'onore"], ["pi_anemona", "ve_selva", "Occhi sul vento"],
+    ["al_kira", "vl_bianca", "Mani nell'officina"], ["al_armatura", "gr_gancio", "Armadi gentili"], ["chr_aria", "ep_ada", "Guardiane del tempo"], ["omb_maya", "dc_nina", "Penne d'inchiesta"], ["rag_sigrid", "bv_boris", "Voci dei vecchi tempi"], ["rag_brokk", "sh_muramasa", "Mastri fabbri"],
+    ["bv_nadia", "sh_hanzo", "Volpi e ombre"], ["sh_hayato", "cm_bastiano", "Vecchi maestri"], ["fe_roland", "td_corrado", "Eredi di casate"], ["abi_nora", "nl_fiammetta", "Luci nella notte"], ["cr_aira", "ve_sbuffo", "Venute dal cielo"], ["mu_ugolino", "tc_ardo", "Muri di pietra"], ["lb_narratore", "pi_morgana", "Voci che comandano"],
   ];
   // le otto sfide del Torneo dei Sogni: cabinato della Sala Giochi (motore) e avversario
   const SFIDE = [
@@ -95,8 +184,16 @@
   const load0 = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { own: Array.isArray(r.own) ? r.own.filter((x) => BY[x]) : [], team: Array.isArray(r.team) ? r.team.filter((x) => BY[x]).slice(0, 5) : [], won: Array.isArray(r.won) ? r.won.filter((x) => typeof x === "number") : [], packs: r.packs | 0, hero: !!r.hero, xp: r.xp && typeof r.xp === "object" ? r.xp : {}, season: r.season && Array.isArray(r.season.sched) ? r.season : null, titles: r.titles | 0, draft: r.draft && Array.isArray(r.draft.picks) ? r.draft : null, cups: r.cups | 0 }; };
   const save = (r) => { XPC = r.xp || {}; safe(() => localStorage.setItem(KEY, JSON.stringify(r)), 0); };
   const sagaMem = (k) => safe(() => JSON.parse(localStorage.getItem(SAGHE[k][0]) || "null"), null);
-  function progress(k) { const m = sagaMem(k); if (!m) return { ch: 0, ends: 0 }; return { ch: Object.keys(m.done || {}).length, ends: Array.isArray(m.ends) ? m.ends.length : 0 }; }
-  const earned = (c) => { const p = progress(c.saga); return c.rar === "c" ? p.ch >= 1 : c.rar === "r" ? p.ch >= 2 : c.rar === "e" ? p.ch >= 3 || p.ends >= 1 : p.ends >= 4; };
+  function progress(k) {
+    let m = null; const mod = SAGHE[k][3];
+    if (mod) m = safe(() => { const i = window[mod].info(); return i && i.done ? i : null; }, null);
+    if (!m) m = sagaMem(k);
+    if (!m) return { ch: 0, ends: 0, done: {} };
+    return { ch: Object.keys(m.done || {}).length, ends: Array.isArray(m.ends) ? m.ends.length : 0, done: m.done || {} };
+  }
+  // le carte a capitoli (c.n) si sbloccano a capitolo concluso; le altre seguono la regola per rarità
+  const earned = (c) => { const p = progress(c.saga); if (c.n) return !!p.done[c.n]; return c.rar === "c" ? p.ch >= 1 : c.rar === "r" ? p.ch >= 2 : c.rar === "e" ? p.ch >= 3 || p.ends >= 1 : p.ends >= 4; };
+  const drop = (c) => !c.n || earned(c); // le carte a capitoli non escono a sorpresa prima di averle guadagnate
   function sync() { const r = load(); XPC = r.xp; let nw = []; CARDS.forEach((c) => { if (!r.own.includes(c.id) && earned(c)) { r.own.push(c.id); nw.push(c.id); } }); if (nw.length) save(r); return { r, nw }; }
   // ---------------------------------------------------------------- intesa e forza
   function intesa(team) {
@@ -152,7 +249,7 @@
   function toggle(id) { const r = load(); if (r.team.includes(id)) r.team = r.team.filter((x) => x !== id); else if (r.team.length < 5 && r.own.includes(id)) r.team.push(id); save(r); open(); }
   function pack() {
     const coins = safe(() => window.__borgoApi.coins(), 0); if (coins < PACK) return;
-    const r = load(), started = Object.keys(SAGHE).filter((k) => progress(k).ch >= 1), pool = CARDS.filter((c) => !r.own.includes(c.id) && (started.includes(c.saga) || c.rar === "c"));
+    const r = load(), started = Object.keys(SAGHE).filter((k) => progress(k).ch >= 1), pool = CARDS.filter((c) => drop(c) && !r.own.includes(c.id) && (started.includes(c.saga) || c.rar === "c"));
     if (!pool.length) return;
     safe(() => window.addCoins(-PACK), 0);
     const w = pool.flatMap((c) => Array(5 - RAR[c.rar][2]).fill(c)), got = w[Math.floor(Math.random() * w.length)];
@@ -223,7 +320,7 @@
     const s = SFIDE[i], r = load();
     launch(s.m, s.opp, `Torneo dei Sogni ${i + 1}/8 · ${engName(s.m)}`, r.team, i >= 6, (res) => {
       const ups = gainXp(r.team, res.win), r2 = load(); let msg = res.win ? "Sfida vinta!" : "Sfida persa: si può rigiocare.";
-      if (res.win && !r2.won.includes(i)) { r2.won.push(i); safe(() => window.addCoins(40), 0); const pool = CARDS.filter((c) => !r2.own.includes(c.id)); if (pool.length) { const got = pool[Math.floor(Math.random() * pool.length)]; r2.own.push(got.id); save(r2); return levelUps(ups, () => reveal(got.id, "Premio della sfida · +40 monete", torneo)); } }
+      if (res.win && !r2.won.includes(i)) { r2.won.push(i); safe(() => window.addCoins(40), 0); const pool = CARDS.filter((c) => drop(c) && !r2.own.includes(c.id)); if (pool.length) { const got = pool[Math.floor(Math.random() * pool.length)]; r2.own.push(got.id); save(r2); return levelUps(ups, () => reveal(got.id, "Premio della sfida · +40 monete", torneo)); } }
       save(r2); levelUps(ups, () => { torneo(); const sm = OV && OV.querySelector(".sum"); if (sm) sm.insertAdjacentHTML("afterbegin", `<b>${msg}</b> `); });
     }, torneo);
   }
@@ -274,7 +371,7 @@
       const others = s2.sched[s2.day].filter((p) => !p.includes(-1)).map(([a, b]) => { const g = simGoals(TEAMS[a].f, TEAMS[b].f); record(s2, a, b, g[0], g[1]); return `${TEAMS[a].name} ${g[0]}-${g[1]} ${TEAMS[b].name}`; });
       s2.last = `<b>Giornata ${s2.day + 1}: Sogni ${ga}-${gb} ${esc(T.name)}</b>${isSim ? " (simulata)" : ""}. ${others.map(esc).join(" · ")}.`;
       s2.day++; let prize = null;
-      if (s2.day >= 7 && ranking(s2)[0] === -1) { r2.titles++; safe(() => window.addCoins(80), 0); const pool = CARDS.filter((c) => !r2.own.includes(c.id)), rare = pool.filter((c) => c.rar !== "c"); const pick = (rare.length ? rare : pool); if (pick.length) { prize = pick[Math.floor(Math.random() * pick.length)].id; r2.own.push(prize); } else safe(() => window.addCoins(100), 0); s2.last += " <b>Scudetto dei Sogni! +80 monete.</b>"; }
+      if (s2.day >= 7 && ranking(s2)[0] === -1) { r2.titles++; safe(() => window.addCoins(80), 0); const pool = CARDS.filter((c) => drop(c) && !r2.own.includes(c.id)), rare = pool.filter((c) => c.rar !== "c"); const pick = (rare.length ? rare : pool); if (pick.length) { prize = pick[Math.floor(Math.random() * pick.length)].id; r2.own.push(prize); } else safe(() => window.addCoins(100), 0); s2.last += " <b>Scudetto dei Sogni! +80 monete.</b>"; }
       r2.season = s2; save(r2);
       const ups = gainXp(team, ga > gb, isSim);
       levelUps(ups, () => (prize ? reveal(prize, "Premio dello scudetto", stagione) : stagione()));
@@ -285,7 +382,7 @@
   // ---------------------------------------------------------------- il Draft: 1 carta su 3, cinque volte, poi la coppa a eliminazione
   const ROUNDS = ["Quarti di finale", "Semifinale", "Finale"];
   function offer(picks) {
-    const pool = CARDS.filter((c) => !picks.includes(c.id)), w = pool.flatMap((c) => Array(5 - RAR[c.rar][2]).fill(c.id)), out = [];
+    const pool = CARDS.filter((c) => drop(c) && !picks.includes(c.id)), w = pool.flatMap((c) => Array(5 - RAR[c.rar][2]).fill(c.id)), out = [];
     let n = 0; while (out.length < 3 && n++ < 200) { const id = w[Math.floor(Math.random() * w.length)]; if (!out.includes(id)) out.push(id); }
     return out;
   }
