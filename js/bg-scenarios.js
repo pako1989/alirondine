@@ -7397,7 +7397,7 @@
   function drawCaption(g, W) {
     if (!S.cap) return; const age = (now() - S.capT) / 16; if (age > 230) { S.cap = null; return; }
     const a = Math.min(1, (230 - age) / 30);
-    g.save(); g.font = "9px Georgia, serif";
+    g.save(); g.font = "9px Georgia, serif"; g.textAlign = "left"; g.textBaseline = "alphabetic";
     const words = S.cap.split(" "), out = []; let line = "";
     words.forEach((w) => { const t = line ? line + " " + w : w; if (g.measureText(t).width > W - 28) { out.push(line); line = w; } else line = t; }); if (line) out.push(line);
     const h = out.length * 11 + 8;
