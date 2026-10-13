@@ -5884,6 +5884,7 @@
       sec("regole", "Opzioni di gioco", "Tiri murati, duelli, grinta di riserva, tiro a tempo e le altre regole: accese o spente"),
       sec("audio", "Audio", "Suoni, musica, voci, volumi"),
       sec("aspetto", "Grafica e aspetto", "Carte 3D, temi, animazioni, filtro retrò, testo grande"),
+      { label: `Personaggi nelle scene: ${SET.pfit === "intero" ? "Interi" : "Grandi"} ▸`, sub: "Tocca per cambiare (Grandi / Interi)", fn: () => { SET.pfit = SET.pfit === "intero" ? "grande" : "intero"; save(); again(); } },
       { label: "Ripristina predefinite", sub: "Anni '90, tutto attivo", fn: () => { SET = setDefault(); save(); again("Impostazioni ripristinate."); } },
       { label: "🔄 Aggiorna app", sub: "Forza il refresh e aggiorna la versione", cls: "hot", fn: () => {
           if (confirm("Aggiornare l'app? La pagina verrà ricaricata.")) {
