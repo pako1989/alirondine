@@ -6219,7 +6219,159 @@
     sqWord(g, "IL CAMPETTO È SALVO!", 160, 50, "#fff", 20);
     if (since("sq_finale", 0) < 120) sqBalloon(g, 80, 90, "Gelato per tutti!"); if (since("sq_finale", 1) < 120) sqBalloon(g, 240, 100, "Pizza per tutti!"); if (since("sq_finale", 2) < 100) sqWord(g, "POW!", 160, 120, "#7ad8ff", 22);
   }
+  // ---------------------------------------------------------------- RAZZOPACCO · CONSEGNE DAL FUTURO (retrofuturo: tubi di vetro, ottone, neon, cieli viola)
+  function rzStars(g, W, H, f, n) { for (let i = 0; i < (n || 50); i++) { const x = (i * 53 + f * 0.05 * (1 + (i % 3))) % W, y = (i * 37) % H; circ(g, W - x, y, i % 7 === 0 ? 1.3 : 0.6, i % 5 === 0 ? "#ffd8a8" : "#fff"); } }
+  function rzTube(g, pts, f, col) { g.save(); g.lineJoin = "round"; g.lineCap = "round"; const path = () => { g.beginPath(); pts.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); }; path(); g.strokeStyle = "rgba(10,10,30,.35)"; g.lineWidth = 12; g.stroke(); path(); g.strokeStyle = col || "rgba(170,230,255,.35)"; g.lineWidth = 10; g.stroke(); path(); g.strokeStyle = "rgba(255,255,255,.5)"; g.lineWidth = 1.5; g.setLineDash([8, 6]); g.lineDashOffset = -f * 0.8; g.stroke(); g.setLineDash([]);
+    let L = 0; for (let i = 1; i < pts.length; i++) L += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); const at = (d) => { for (let i = 1; i < pts.length; i++) { const s = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); if (d <= s) { const k = d / s; return [pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * k, pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * k]; } d -= s; } return pts[pts.length - 1]; };
+    for (let d = 10; d < L; d += 30) { const [x, y] = at(d); px(g, x - 2, y - 6, 4, 12, "#c8a040"); } for (let c = 0; c < 2; c++) { const [x, y] = at((f * 1.4 + c * L / 2) % L); g.fillStyle = c ? "#ffd23f" : "#ff8a5a"; g.beginPath(); g.ellipse(x, y, 5, 3.5, 0, 0, 7); g.fill(); } g.restore(); }
+  function rzRocket(g, x, y, s, ang, f) { g.save(); g.translate(x, y); g.rotate(ang || 0); g.scale(s, s); g.fillStyle = f % 6 < 3 ? "#ffd23f" : "#ff8a3a"; g.beginPath(); g.moveTo(-14, -4); g.lineTo(-24 - Math.random() * 4, 0); g.lineTo(-14, 4); g.fill(); g.fillStyle = "#ff8a3a"; g.strokeStyle = "#1a1030"; g.lineWidth = 2; g.beginPath(); g.moveTo(18, 0); g.quadraticCurveTo(4, -11, -14, -8); g.lineTo(-14, 8); g.quadraticCurveTo(4, 11, 18, 0); g.fill(); g.stroke(); g.fillStyle = "#e8f6ff"; g.beginPath(); g.arc(4, 0, 4, 0, 7); g.fill(); g.stroke(); px(g, -6, -3, 4, 3, "#a8784a"); px(g, -2, 3, 5, 3, "#a8784a"); g.fillStyle = "#c8a040"; g.beginPath(); g.moveTo(-10, -8); g.lineTo(-16, -14); g.lineTo(-14, -6); g.fill(); g.beginPath(); g.moveTo(-10, 8); g.lineTo(-16, 14); g.lineTo(-14, 6); g.fill(); g.restore(); }
+  function rzBox(g, x, y, s) { px(g, x - 5 * s, y - 5 * s, 10 * s, 9 * s, "#c89a5a"); g.strokeStyle = "#5a3a1a"; g.lineWidth = 1; g.strokeRect(x - 5 * s, y - 5 * s, 10 * s, 9 * s); px(g, x - s, y - 5 * s, 2 * s, 9 * s, "#e8d8a0"); }
+  function rzSay(g, x, y, t) { g.font = "bold 8px sans-serif"; const w = g.measureText(t).width + 12; g.fillStyle = "rgba(26,16,48,.9)"; g.strokeStyle = "#c8a040"; g.lineWidth = 1.5; g.beginPath(); g.roundRect ? g.roundRect(x - w / 2, y - 9, w, 16, 6) : g.rect(x - w / 2, y - 9, w, 16); g.fill(); g.stroke(); g.fillStyle = "#ffd23f"; g.textAlign = "center"; g.fillText(t, x, y + 2); }
+  function rzFig(g, x, y, s, body, head, f, robot) { g.save(); g.translate(x, y); g.scale(s, s); const b = Math.sin(f / 10) * 1; px(g, -6, -22 + b, 12, 18, body); px(g, -5, -4, 4, 6, "#2a2a3a"); px(g, 1, -4, 4, 6, "#2a2a3a"); if (robot) { px(g, -6, -33 + b, 12, 10, head); px(g, -3, -30 + b, 2, 2, "#ff5a5a"); px(g, 2, -30 + b, 2, 2, "#ff5a5a"); px(g, -1, -38 + b, 2, 5, "#c8a040"); } else { circ(g, 0, -28 + b, 6, head); } g.restore(); }
+  function bgRzTitolo(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#1a0a3a", "#4a1a6a", "#ff7a5a"]); rzStars(g, W, H * 0.6, f, 60);
+    circ(g, 250, 60, 26, "#ffb07a"); g.strokeStyle = "rgba(255,230,180,.7)"; g.lineWidth = 2; g.beginPath(); g.ellipse(250, 60, 44, 10, -0.3, 0, 7); g.stroke();
+    for (let i = 0; i < 9; i++) { const h = 40 + ((i * 29) % 50); px(g, i * 36, H - h, 30, h, ["#2a1a4a", "#3a2a5a", "#241a44"][i % 3]); for (let k = 0; k < 3; k++) px(g, i * 36 + 4 + k * 9, H - h + 6, 5, 6, (f / 20 + i + k) % 5 < 3 ? "#ffd23f" : "#5a4a7a"); }
+    rzTube(g, [[0, 120], [90, 100], [180, 130], [320, 105]], f);
+    rzRocket(g, 60 + ((f * 1.2) % 380) - 60, 70 + Math.sin(f / 15) * 8, 1.4, -0.1, f);
+    g.font = "900 26px 'Courier New', monospace"; g.textAlign = "center"; g.lineWidth = 5; g.strokeStyle = "#1a1030"; g.strokeText("RAZZOPACCO", 160, 160); g.fillStyle = "#ff8a3a"; g.fillText("RAZZOPACCO", 160, 160);
+    g.font = "bold 10px sans-serif"; g.fillStyle = "#ffd23f"; g.fillText("CONSEGNE DAL FUTURO · ANNO 3011", 160, 178);
+    if (since("rz_titolo", 0) < 100) rzSay(g, 120, 40, "Consegniamo tutto. Prima o poi.");
+    if (since("rz_titolo", 1) < 90) { const t = since("rz_titolo", 1); rzBox(g, 160 + t * 1.5, 100 - t * 0.6 + t * t * 0.01, 1.4); }
+    if (since("rz_titolo", 2) < 120) { g.strokeStyle = `rgba(255,230,180,${1 - since("rz_titolo", 2) / 120})`; g.lineWidth = 2; g.beginPath(); g.arc(250, 60, 30 + since("rz_titolo", 2) * 0.5, 0, 7); g.stroke(); }
+  }
+  function bgRzCrio(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#c8e8ff", "#7ab8e8", "#3a5a8a"]);
+    for (let i = 0; i < 6; i++) { const x = 20 + i * 50; px(g, x, 40, 34, 110, "rgba(220,245,255,.6)"); g.strokeStyle = "#fff"; g.lineWidth = 1.5; g.strokeRect(x, 40, 34, 110); px(g, x + 4, 150, 26, 10, "#5a5a7a"); for (let k = 0; k < 8; k++) px(g, x + 3 + ((k * 11 + i * 3) % 28), 46 + ((k * 23 + i * 7) % 100), 2, 2, "#fff"); }
+    rzFig(g, 145, 140, 1.3, "#ff8a3a", "#e0ac7e", f); px(g, 120, 40, 50, 110, since("rz_crio", 0) < 80 ? "rgba(255,255,255,.05)" : "rgba(220,245,255,.4)");
+    rzFig(g, 230, 170, 1.4, "#ff8a3a", "#a8b0c0", f, true);
+    if (since("rz_crio", 1) < 100) rzSay(g, 230, 100, "Lei non è un ghiacciolo.");
+    if (since("rz_crio", 2) < 120) { g.font = "900 22px 'Courier New', monospace"; g.textAlign = "center"; g.fillStyle = "#1a1030"; g.fillText("3011", 160, 26); }
+    for (let i = 0; i < 20; i++) circ(g, (i * 31 + f * 0.3) % W, (i * 17 + f * 0.5) % H, 1, "rgba(255,255,255,.7)");
+  }
+  function bgRzCitta(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#2a0a4a", "#8a2a7a", "#ff8a5a"]); rzStars(g, W, 60, f, 30);
+    for (let i = 0; i < 10; i++) { const h = 60 + ((i * 41) % 70), x = i * 34 - 6; px(g, x, H - 40 - h, 28, h, ["#2a1a4a", "#3a2a5a", "#1a1040"][i % 3]); g.fillStyle = "#c8a040"; g.beginPath(); g.arc(x + 14, H - 40 - h, 14, Math.PI, 0); g.fill(); for (let k = 0; k < 4; k++) px(g, x + 5 + (k % 2) * 11, H - 30 - h + Math.floor(k / 2) * 14, 6, 7, (f / 25 + i * 3 + k) % 7 < 4 ? "#9af0c8" : "#3a2a5a"); }
+    vgrad(g, 0, H - 40, W, 40, ["#3ae8c8", "#1a8a8a"]); for (let i = 0; i < 12; i++) px(g, (i * 29 + f * 0.6) % W, H - 34 + (i % 3) * 10, 14, 1.5, "rgba(255,255,255,.6)");
+    rzTube(g, [[-10, 60], [80, 80], [160, 50], [240, 90], [330, 70]], f); rzTube(g, [[20, 140], [120, 120], [200, 150], [330, 125]], f + 40, "rgba(255,170,220,.3)");
+    if (since("rz_citta", 0) < 120) { const t = since("rz_citta", 0); rzFig(g, 40 + t * 2.4, 72 + Math.sin(t / 6) * 3, 0.7, "#ff8a3a", "#e0ac7e", f); }
+    if (since("rz_citta", 1) < 100) { g.fillStyle = "rgba(122,216,255,.4)"; g.beginPath(); g.moveTo(250, 160); g.lineTo(220, 100); g.lineTo(300, 100); g.fill(); g.font = "bold 8px sans-serif"; g.textAlign = "center"; g.fillStyle = "#fff"; g.fillText("OMNIPACCO", 260, 115); g.fillText("CONSEGNA PRIMA", 260, 126); }
+    if (since("rz_citta", 2) < 90) rzRocket(g, 320 - since("rz_citta", 2) * 4, 30, 0.8, Math.PI, f);
+  }
+  function bgRzSede(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#5a4a6a", "#3a2a4a"]); for (let r = 0; r < 4; r++) for (let i = 0; i < 9; i++) rzBox(g, 20 + i * 34 + (r % 2) * 10, 30 + r * 22, 1.5);
+    rzTube(g, [[0, 20], [160, 14], [320, 22]], f); px(g, 0, 150, W, 50, "#7a6a5a");
+    rzFig(g, 150, 180, 1.5, "#e8f4f0", "#f0d8c0", f); circ(g, 150, 128, 6, "#f4f4f4");
+    rzFig(g, 240, 182, 1.2, "#3a8a6a", "#7ad8a8", f);
+    if (since("rz_sede", 0) < 100) rzSay(g, 150, 100, "Assunto! Cosa ho detto di sì?");
+    if (since("rz_sede", 1) < 90) { for (let i = 0; i < 5; i++) { const t = since("rz_sede", 1); px(g, 10 + t * 3 + i * 8, 20 + Math.sin(t / 5 + i) * 4, 8, 10, "#f4f4f4"); } }
+    if (since("rz_sede", 2) < 90) { g.font = "900 14px 'Courier New', monospace"; g.textAlign = "center"; g.strokeStyle = "#c83a2a"; g.lineWidth = 2; g.save(); g.translate(240, 110); g.rotate(-0.2); g.strokeRect(-46, -12, 92, 20); g.fillStyle = "#c83a2a"; g.fillText("APPROVATO", 0, 4); g.restore(); }
+  }
+  function bgRzRazzo(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#3a2a4a", "#241a34"]); [[70, 60], [250, 60]].forEach(([x, y], i) => { circ(g, x, y, 34, "#c8a040"); circ(g, x, y, 28, "#0a0a2a"); g.save(); g.beginPath(); g.arc(x, y, 28, 0, 7); g.clip(); rzStars(g, W, H, f * (i ? 3 : 2), 40); if (i) { circ(g, x + 10 - ((f * 0.2) % 60), y + 6, 9, "#ffc86a"); } g.restore(); });
+    px(g, 100, 110, 120, 40, "#2a2a4a"); px(g, 106, 116, 108, 24, "#0a0a2a"); for (let i = 0; i < 6; i++) px(g, 112 + i * 17, 124 + Math.sin(f / 15 + i) * 5, 4, 4, ["#7ad8ff", "#ffc86a", "#d8d8e0", "#ff8a5a"][i % 4]);
+    rzFig(g, 160, 196, 1.4, "#2a2a4a", "#c68642", f); px(g, 0, 160, W, 40, "#4a3a5a");
+    if (since("rz_razzo", 0) < 100) rzSay(g, 160, 96, "Oggi niente ha preso fuoco. Ancora.");
+    if (since("rz_razzo", 1) < 80) { g.fillStyle = `rgba(255,90,90,${0.3 * (1 - since("rz_razzo", 1) / 80)})`; g.fillRect(0, 0, W, H); }
+    if (since("rz_razzo", 2) < 120) { const t = since("rz_razzo", 2); circ(g, 250 + Math.cos(t / 10) * 20, 60 + Math.sin(t / 10) * 20, 3, "#ffd23f"); }
+  }
+  function bgRzBrodo(g, W, H, f) {
+    vgrad(g, 0, 0, W, 110, ["#ffe0a0", "#ffb86a"]); for (let i = 0; i < 4; i++) circ(g, 40 + i * 80, 30 + (i % 2) * 12, 12 + i * 2, "rgba(255,255,255,.35)");
+    vgrad(g, 0, 110, W, 90, ["#f0a038", "#c8782a"]); for (let i = 0; i < 16; i++) { const x = (i * 23 + f * 0.4) % W, y = 120 + (i % 5) * 15; circ(g, x, y, 2 + (i % 3), "rgba(255,240,200,.6)"); px(g, (i * 41 + f * 0.2) % W, 130 + (i % 4) * 16, 5, 2, "#6aa83a"); }
+    px(g, 20, 120, 80, 14, "#e8c88a"); for (let i = 0; i < 6; i++) circ(g, 28 + i * 12, 127, 1.5, "#c8a060");
+    px(g, 220, 40, 50, 80, "#c8782a"); px(g, 214, 34, 62, 10, "#8a5a2a"); g.fillStyle = "rgba(255,255,255,.5)"; for (let i = 0; i < 3; i++) { const y = 30 - ((f / 2 + i * 10) % 30); circ(g, 236 + i * 9 + Math.sin(f / 10 + i) * 3, y, 4, "rgba(255,255,255,.4)"); }
+    rzTube(g, [[80, 110], [150, 70], [220, 80]], f);
+    if (since("rz_brodo", 0) < 100) { const t = since("rz_brodo", 0); g.strokeStyle = "#8a5a2a"; g.lineWidth = 4; g.beginPath(); g.moveTo(245, 40); g.lineTo(245 + Math.cos(t / 8) * 60, 150 + Math.sin(t / 8) * 10); g.stroke(); }
+    if (since("rz_brodo", 1) < 90) rzSay(g, 60, 100, "Croccante fuori, morbido dentro!");
+    if (since("rz_brodo", 2) < 90) { for (let i = 0; i < 10; i++) circ(g, 160 + Math.cos(i) * since("rz_brodo", 2), 160 - since("rz_brodo", 2) * 0.5 + Math.sin(i) * 6, 2, "rgba(255,255,255,.7)"); }
+  }
+  function bgRzLuna(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#05050f", "#1a1a2a"]); rzStars(g, W, H, f, 60); circ(g, 60, 40, 18, "#3a7ad8"); circ(g, 55, 36, 6, "#4aa84a");
+    vgrad(g, 0, 130, W, 70, ["#a8a8b0", "#7a7a82"]); [[40, 160, 16], [150, 175, 10], [260, 150, 20]].forEach(([x, y, r]) => { g.fillStyle = "#6a6a72"; g.beginPath(); g.ellipse(x, y, r, r * 0.35, 0, 0, 7); g.fill(); });
+    for (let i = 0; i < 7; i++) { px(g, 100 + i * 30, 70, 22, 70, "#7a7a8a"); for (let k = 0; k < 5; k++) px(g, 102 + i * 30, 74 + k * 13, 18, 10, "#5a5a6a"); }
+    const gx = 120 + Math.sin(f / 40) * 80; rzFig(g, gx, 150, 1, "#3a3a4a", "#c8c0d0", f); g.fillStyle = "rgba(255,230,120,.18)"; g.beginPath(); g.moveTo(gx, 128); g.lineTo(gx + (Math.cos(f / 40) > 0 ? 70 : -70), 115); g.lineTo(gx + (Math.cos(f / 40) > 0 ? 70 : -70), 150); g.fill();
+    if (since("rz_luna", 0) < 100) rzSay(g, gx, 110, "Modulo 99-Q?");
+    if (since("rz_luna", 1) < 90) { for (let i = 0; i < 8; i++) { const t = since("rz_luna", 1); px(g, 200 + Math.cos(i) * t, 100 - t * 0.4 + Math.sin(i * 2) * 10, 7, 9, "#f4f4f4"); } }
+    if (since("rz_luna", 2) < 120) { g.strokeStyle = "#c83a2a"; g.lineWidth = 2; g.save(); g.translate(60, 40); g.rotate(0.2); g.strokeRect(-26, -9, 52, 16); g.fillStyle = "#c83a2a"; g.font = "bold 9px 'Courier New', monospace"; g.textAlign = "center"; g.fillText("TIMBRATA", 0, 3); g.restore(); }
+  }
+  function bgRzArena(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#0a0a2a", "#2a1446"]); rzStars(g, W, H, f, 70);
+    g.fillStyle = "#5a3a5a"; g.beginPath(); g.ellipse(160, 150, 170, 60, 0, 0, 7); g.fill(); g.fillStyle = "#3a2a4a"; g.beginPath(); g.ellipse(160, 140, 140, 44, 0, 0, 7); g.fill();
+    g.fillStyle = "#2a6a4a"; g.beginPath(); g.ellipse(160, 140, 100, 28, 0, 0, 7); g.fill(); g.strokeStyle = "rgba(122,216,255,.6)"; g.lineWidth = 1; g.beginPath(); g.ellipse(160, 140, 30, 8, 0, 0, 7); g.stroke();
+    for (let i = 0; i < 40; i++) { const a = (i / 40) * 6.28, x = 160 + Math.cos(a) * 125, y = 140 + Math.sin(a) * 38; circ(g, x, y - Math.abs(Math.sin(f / 6 + i)) * 2, 2, ["#ff8a3a", "#7ad8ff", "#9af0c8", "#c8a8ff"][i % 4]); }
+    px(g, 250, 20, 30, 80, "#5a6ad8"); px(g, 244, 14, 42, 8, "#c8d0ff"); g.save(); g.translate(265, 10); g.scale(Math.cos(f / 20), 1); g.font = "bold 7px sans-serif"; g.textAlign = "center"; g.fillStyle = "#fff"; g.fillText("OMNIPACCO", 0, 0); g.restore();
+    if (since("rz_arena", 0) < 100) rzSay(g, 120, 80, "FORZA RAZZO! (la P è caduta)");
+    if (since("rz_arena", 1) < 90) rzRocket(g, -20 + since("rz_arena", 1) * 4, 60, 0.7, 0, f);
+    if (since("rz_arena", 2) < 120) { g.fillStyle = `rgba(255,255,200,${0.25 * (1 - since("rz_arena", 2) / 120)})`; g.beginPath(); g.moveTo(40, 0); g.lineTo(140, 140); g.lineTo(180, 140); g.fill(); }
+  }
+  function bgRzOmni(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#c8d0ff", "#8a9ad8"]); for (let i = 0; i < 4; i++) { px(g, 10 + i * 78, 10, 70, 110, "#0a0a2a"); g.save(); g.beginPath(); g.rect(10 + i * 78, 10, 70, 110); g.clip(); rzStars(g, W, H, f + i * 50, 30); g.restore(); g.strokeStyle = "#e8ecff"; g.lineWidth = 2; g.strokeRect(10 + i * 78, 10, 70, 110); }
+    px(g, 100, 140, 120, 8, "rgba(255,255,255,.6)"); g.fillStyle = "rgba(200,230,255,.35)"; g.beginPath(); g.arc(160, 128, 12, Math.PI, 0); g.lineTo(172, 140); g.lineTo(148, 140); g.fill(); circ(g, 160, 132, 7, "#a87a4a");
+    rzFig(g, 240, 190, 1.4, "#5a6ad8", "#f0d0b0", f); circ(g, 240, 140, 6, "#c83a2a");
+    if (since("rz_omni", 0) < 100) rzSay(g, 240, 112, "Il campetto non si compra.");
+    if (since("rz_omni", 1) < 90) { g.font = "bold 9px sans-serif"; g.textAlign = "center"; g.fillStyle = "#1a1030"; g.fillText("2025", 160, 156); }
+    if (since("rz_omni", 2) < 80) { g.fillStyle = `rgba(255,255,255,${0.4 * (1 - since("rz_omni", 2) / 80)})`; g.fillRect(0, 0, W, H); }
+  }
+  function bgRzFinale(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#2a0a4a", "#ff7a5a", "#ffd8a0"]); rzStars(g, W, 80, f, 30);
+    for (let i = 0; i < 30; i++) { const x = (i * 37 + f * 0.8) % W, y = (i * 29 + f * 1.5) % 150; px(g, x, y, 4, 4, ["#ff8a3a", "#ffd23f", "#7ad8ff", "#9af0c8"][i % 4]); }
+    rzFig(g, 120, 190, 1.5, "#ff8a3a", "#e0ac7e", f); rzFig(g, 170, 190, 1.4, "#e8f4f0", "#f0d8c0", f); rzFig(g, 215, 192, 1.3, "#ff8a3a", "#a8b0c0", f, true);
+    g.fillStyle = "#c8a040"; px(g, 152, 100, 36, 30, "#c8a040"); g.strokeStyle = "#8a6a20"; g.strokeRect(152, 100, 36, 30); px(g, 168, 100, 4, 30, "#ffe8a0"); g.fillStyle = "#ff5a8a"; g.beginPath(); g.ellipse(162, 98, 8, 4, -0.4, 0, 7); g.ellipse(178, 98, 8, 4, 0.4, 0, 7); g.fill();
+    if (since("rz_finale", 0) < 120) { g.font = "900 22px 'Courier New', monospace"; g.textAlign = "center"; g.lineWidth = 4; g.strokeStyle = "#1a1030"; g.strokeText("CONSEGNATO!", 160, 50); g.fillStyle = "#ffd23f"; g.fillText("CONSEGNATO!", 160, 50); }
+    if (since("rz_finale", 1) < 100) rzSay(g, 215, 120, "RECORD DI RITARDO!");
+    if (since("rz_finale", 2) < 120) rzRocket(g, 160 + Math.cos(since("rz_finale", 2) / 12) * 120, 70 + Math.sin(since("rz_finale", 2) / 12) * 20, 0.6, since("rz_finale", 2) / 12 + Math.PI / 2, f);
+  }
   const LB = {
+    rz_titolo: { draw: bgRzTitolo, hot: [
+      [20, 20, 200, 40, "🗨️ «Consegniamo tutto. Prima o poi.» È il motto. È anche una minaccia."],
+      [80, 50, 200, 60, "📦 Un pacco cade dal razzo. Qualcuno, da qualche parte, lo aspettava."],
+      [220, 30, 70, 60, "🪐 Il pianeta arancione fa un giro su se stesso. Ha tutto il tempo del mondo."],
+    ] },
+    rz_crio: { draw: bgRzCrio, hot: [
+      [115, 40, 60, 110, "🧊 La tua cella: dentro c'è ancora l'impronta della tua testa nella brina."],
+      [200, 110, 60, 80, "🤖 «Lei non è un ghiacciolo.» Ferruccio è deluso. Cercava il gusto limone."],
+      [100, 5, 120, 30, "📅 Il calendario sul muro dice 3011. Lo dice con molta sicurezza."],
+    ] },
+    rz_citta: { draw: bgRzCitta, hot: [
+      [0, 50, 320, 40, "🫧 Una capsula sfreccia nel tubo con dentro qualcuno che va al lavoro. Fsssst."],
+      [210, 95, 100, 70, "📺 L'ologramma della OmniPacco: «Consegniamo il tuo pacco prima che tu lo ordini»."],
+      [200, 15, 120, 35, "🚀 Un razzo arancione passa basso. Ha tre toppe e una gallina meccanica sul tetto."],
+    ] },
+    rz_sede: { draw: bgRzSede, hot: [
+      [110, 100, 80, 90, "🗨️ «Assunto! …A cosa ho detto di sì?» La Professoressa ha centosessantadue anni e nessuna fretta."],
+      [0, 0, 320, 30, "📄 Il tubo sputa fogli: ricevute, moduli, una cartolina dal 2990."],
+      [200, 90, 90, 40, "🟩 Timbro timbra il timbro. Approvato."],
+    ] },
+    rz_razzo: { draw: bgRzRazzo, hot: [
+      [110, 80, 100, 40, "🗨️ La Capitana Borea: «Oggi niente ha preso fuoco. Ancora.»"],
+      [100, 110, 120, 40, "🚨 La spia rossa si accende. Poi si spegne. Borea non la guarda."],
+      [215, 25, 70, 70, "🪐 Dall'oblò, un pianeta di minestra gira piano."],
+    ] },
+    rz_brodo: { draw: bgRzBrodo, hot: [
+      [200, 30, 90, 120, "🥄 La Gran Cuoca mescola l'oceano col mestolo da trecento metri."],
+      [10, 85, 110, 50, "🍞 «Croccante fuori, morbido dentro!» Capitan Crostino lo dice a tutti."],
+      [100, 140, 120, 60, "🫧 L'oceano di minestra bolle. Profuma di sedano e di domenica."],
+    ] },
+    rz_luna: { draw: bgRzLuna, hot: [
+      [60, 110, 140, 50, "🔦 Un ispettore cammina tra gli schedari: «Modulo 99-Q?»"],
+      [180, 70, 120, 60, "📄 Un cassetto si apre da solo e vola via un mucchio di moduli."],
+      [30, 15, 60, 50, "🌍 La Terra, appesa nel cielo nero, sembra un timbro blu. Qualcuno l'ha timbrata."],
+    ] },
+    rz_arena: { draw: bgRzArena, hot: [
+      [60, 65, 130, 30, "🪧 «FORZA RAZZO!» La P si è staccata durante il viaggio."],
+      [0, 40, 320, 40, "🚀 Un razzo da corriere fa il giro d'onore sopra lo stadio."],
+      [240, 0, 60, 100, "🗼 La torre della OmniPacco: «Consegniamo il futuro. E lo fatturiamo.»"],
+    ] },
+    rz_omni: { draw: bgRzOmni, hot: [
+      [200, 100, 80, 90, "🗨️ Orsola: «Il campetto non si compra. L'ho cercato.»"],
+      [140, 110, 40, 50, "⚽ Sotto la campana di vetro, un pallone sgonfio del 2025."],
+      [10, 10, 300, 110, "✨ Le finestre: tutta la galassia. Brilla un attimo, come per salutare."],
+    ] },
+    rz_finale: { draw: bgRzFinale, hot: [
+      [80, 20, 160, 40, "📦 «CONSEGNATO!» Il timbro più bello del 3011."],
+      [190, 120, 60, 80, "🤖 Ferruccio: «Record di ritardo!» È fierissimo."],
+      [145, 90, 50, 45, "🏆 La Coppa dei Corrieri: un pacco d'oro con il fiocco. Non si apre. Mai."],
+    ] },
     sq_titolo: { draw: bgSqTitolo, hot: [
       [130, 120, 60, 80, "🦸 Il Copione in prima fila: copia il potere di chi gli sta accanto. Per ora copia la posa."],
       [190, 95, 110, 30, "🗨️ «Pronti, ragazzi?» Nessuno è pronto. Tutti dicono di sì."],

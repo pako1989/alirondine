@@ -43,6 +43,8 @@
 //    di un'altra saga compare solo se quella saga l'hai già giocata (K.otherSaga("ali-di-rondine.muro") legge il suo salvataggio).
 //  - EPOCHE DELLE ZONE: spec.eras = { nome: { label, build(L, K), npcs(s), region, time, filter: "bn"|"seppia"|"anni70"|"pixel" } }.
 //    K.setEra(zid, nome) (o null per il presente) ricostruisce la zona com'era allora, nello stesso punto; K.eraOf(zid).
+//  - TUBI PNEUMATICI: spec.tubes = [{ at: [tx, ty] stazione (tessera solida, con l'azione), path: [[tx, ty], …], out: [tx, ty], when(K), shut, arrive(K), speed }]:
+//    si vola in una capsula di vetro lungo il tubo (anche sopra case e canali), i tubi si vedono sopra la zona con le capsule che corrono.
 //  - FILTRI D'EPOCA: K.filter(g, nome) colora qualsiasi tela (anche le partite): bianco e nero muto, seppia, anni '70, pixel 8-bit.
 //  - FINALI CON INDIZIO: endings: { id: [titolo, descrizione, indizio] }; l'indizio si legge nel diario e nell'Album.
 // Kit di partita: window.__sagaCore.pitch(o) è una partitella 2+portiere contro 2+portiere, con levetta, TIRA e PASSA,
@@ -510,6 +512,44 @@
       a.globalCompositeOperation = "destination-in"; const gr = a.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, "rgba(0,0,0,1)"); gr.addColorStop(0.24, "rgba(0,0,0,0)"); gr.addColorStop(0.74, "rgba(0,0,0,0)"); gr.addColorStop(1, "rgba(0,0,0,1)"); a.fillStyle = gr; a.fillRect(0, 0, w, h);
       g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(DIO, 0, 0); g.globalCompositeOperation = "soft-light"; const lg = g.createRadialGradient(w * 0.5, h * 0.35, 10, w * 0.5, h * 0.35, w * 0.7); lg.addColorStop(0, "rgba(255,235,190,.5)"); lg.addColorStop(1, "rgba(60,40,20,.25)"); g.fillStyle = lg; g.fillRect(0, 0, w, h); g.restore();
     }
+    // TUBI PNEUMATICI (spec.tubes): ogni tubo è { at: [tx, ty] la stazione (una tessera solida da usare con l'azione), path: [[tx, ty], …]
+    // le caselle che il tubo attraversa (anche sopra case, acqua e muri), out: [tx, ty] dove si scende (camminabile), when(K) → aperto?,
+    // shut: la frase se è chiuso, arrive(K) all'arrivo, speed (pixel per fotogramma, 3.2) }. Il Campione vola in una capsula di vetro e la
+    // visuale lo segue; i tubi si disegnano sopra la zona, trasparenti, con le capsule degli altri che corrono avanti e indietro.
+    // K.tubeRide(zid, i) fa partire un viaggio da codice, K.tubeBusy() dice se sei in viaggio.
+    const TUBE = { zid: "", pts: null, d: 0, L: 0, tube: null };
+    const plen = (p) => p.reduce((s, q, i) => (i ? s + Math.hypot(q[0] - p[i - 1][0], q[1] - p[i - 1][1]) : 0), 0);
+    function alongP(p, d) { for (let i = 1; i < p.length; i++) { const s = Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]); if (d <= s) { const k = s ? d / s : 0; return [p[i - 1][0] + (p[i][0] - p[i - 1][0]) * k, p[i - 1][1] + (p[i][1] - p[i - 1][1]) * k]; } d -= s; } return p[p.length - 1].slice(); }
+    const tubePts = (t) => [t.at].concat(arr(t.path), [t.out]).map(([x, y]) => [x * TS + 8, y * TS + 12]);
+    function tubeRide(zid, i) {
+      const zr = ZONES[zid], t = zr && arr(zr.spec.tubes)[i]; if (!t || TUBE.pts) return false;
+      if (t.when && !safe(() => t.when(K), false)) { say([["voce", t.shut || "Il tubo è chiuso."]], done); return false; }
+      const p = tubePts(t); TUBE.zid = zid; TUBE.pts = p; TUBE.d = 0; TUBE.L = plen(p); TUBE.tube = t; TUBE.t0 = frNow();
+      safe(() => { noise(0.5, 0.04, 900); tone(260, 0.5, "sine", 0.05, 0, 900); }); return true;
+    }
+    function tubeTick(zid) {
+      if (!TUBE.pts) return null; if (TUBE.zid !== zid) { TUBE.pts = null; return null; }
+      TUBE.d += TUBE.tube.speed || 3.2;
+      if (TUBE.d >= TUBE.L) { const t = TUBE.tube, q = TUBE.pts[TUBE.pts.length - 1].slice(); TUBE.pts = null; safe(() => tone(820, 0.16, "triangle", 0.05, 0, 420)); if (t.arrive) setTimeout(() => safe(() => t.arrive(K)), 0); return q; }
+      return alongP(TUBE.pts, TUBE.d);
+    }
+    function tubeDraw(g, zid, cx, cy) {
+      const zr = ZONES[zid], ts = zr && arr(zr.spec.tubes); if (!ts || !ts.length) return; const f = frNow();
+      ts.forEach((t, k) => {
+        const p = tubePts(t).map(([x, y]) => [x - cx, y - cy - 10]), open = !t.when || safe(() => t.when(K), false);
+        const path = () => { g.beginPath(); p.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); };
+        g.save(); g.lineJoin = "round"; g.lineCap = "round";
+        path(); g.strokeStyle = "rgba(10,20,40,.35)"; g.lineWidth = 11; g.stroke();
+        path(); g.strokeStyle = open ? "rgba(170,230,255,.32)" : "rgba(150,150,170,.3)"; g.lineWidth = 9; g.stroke();
+        path(); g.strokeStyle = "rgba(255,255,255,.55)"; g.lineWidth = 1.5; g.setLineDash([10, 6]); g.lineDashOffset = -f * 0.6; g.stroke(); g.setLineDash([]);
+        // le fasce di ottone ogni tanto, e le capsule degli altri che corrono
+        const L = plen(p); for (let d = 12; d < L; d += 26) { const [x, y] = alongP(p, d); g.fillStyle = "#c8a040"; g.fillRect(x - 1.5, y - 5, 3, 10); }
+        if (open && L > 40) for (let c = 0; c < 2; c++) { const d = ((f * 1.6 + c * L * 0.5 + k * 37) % (L * 2)), dd = d > L ? L * 2 - d : d, [x, y] = alongP(p, dd); g.fillStyle = c ? "#ffd23f" : "#ff8a5a"; g.beginPath(); g.ellipse(x, y, 4, 3, 0, 0, 7); g.fill(); g.fillStyle = "rgba(255,255,255,.7)"; g.fillRect(x - 2, y - 2, 2, 1); }
+        g.restore();
+      });
+      // la capsula del Campione: vetro e una scia di bolle d'aria
+      if (TUBE.pts && TUBE.zid === zid) { const [x, y] = alongP(TUBE.pts, TUBE.d).map((v, i) => v - (i ? cy + 12 : cx)); g.save(); g.fillStyle = "rgba(200,240,255,.35)"; g.strokeStyle = "rgba(255,255,255,.9)"; g.lineWidth = 1.5; g.beginPath(); g.ellipse(x, y - 4, 10, 13, 0, 0, 7); g.fill(); g.stroke(); g.fillStyle = "rgba(255,255,255,.75)"; g.fillRect(x - 6, y - 12, 3, 6); for (let i = 1; i < 6; i++) { const [bx, by] = alongP(TUBE.pts, Math.max(0, TUBE.d - i * 7)); g.beginPath(); g.arc(bx - cx, by - cy - 12 + Math.sin(f / 3 + i) * 2, 1.6 - i * 0.2, 0, 7); g.stroke(); } g.restore(); }
+    }
     const TRAIL = { zid: "", pts: [] };
     function followTick(zid) {
       const zr = ZONES[zid], me = api.trPos && api.trPos(); if (!zr || !zr.Z.npcs || !me) return null;
@@ -606,7 +646,7 @@
       //  - flip: la gravità è girata, la visuale ruota di 180° e i comandi restano quelli dello schermo.
       // meccaniche per-zona: spec.tick (movimento del Campione, può spostarlo) e i plugin della saga
       const ticks = []; if (spec.__exitTick) ticks.push((px, py) => spec.__exitTick(px, py)); if (spec.tick) ticks.push((px, py, dt) => spec.tick(px, py, dt, K, stepOf(chN))); PLUG.forEach((p) => { if (p.tick) ticks.push((px, py, dt) => p.tick(zid, spec, px, py, dt, K)); }); if (spec.gravity || (spec.eras && Object.values(spec.eras).some((e) => e.gravity))) ticks.unshift((px, py) => gravTick(zid, spec, chN, px, py));
-      ticks.push(() => walkTick(zid)); ticks.push(() => followTick(zid)); ticks.push((px, py) => guardTick(zid, spec, px, py));
+      ticks.push(() => walkTick(zid)); ticks.push(() => followTick(zid)); ticks.push((px, py) => guardTick(zid, spec, px, py)); if (spec.tubes) ticks.push(() => tubeTick(zid));
       if (ticks.length) Z.tick = function (px, py, dt, moving) { if (api.trZone() !== zid) return null; let r = null; ticks.forEach((t) => { const q = safe(() => t(r ? r[0] : px, r ? r[1] : py, Math.min(0.05, dt || 0.016), moving), null); if (q && q.length === 2) r = q; }); return r; };
       Z.decor = function (cx, cy) { const d = dd(cx, cy); ZX.decor.splice(0).forEach((fn) => safe(() => fn(GP, cx, cy, d))); if (spec.decor) safe(() => spec.decor(GP, cx, cy, d, K)); };
       Z.top = function (cx, cy) {
@@ -614,6 +654,7 @@
         if (spec.top) safe(() => spec.top(GP, cx, cy, d, K));
         chainFor(ZONES[zid]).forEach((cc) => { const p = cc.n !== chN && cc.patch && cc.patch[zid]; if (p && p.top) safe(() => p.top(GP, cx, cy, d, stepOf(cc.n), K)); });
         PLUG.forEach((p) => p.top && safe(() => p.top(GP, zid, spec, cx, cy, d, K)));
+        safe(() => tubeDraw(GP, zid, cx, cy));
         safe(() => gravView(GP));
         safe(() => mood(GP, frNow()));
         safe(() => buio(GP, spec, cx, cy));
@@ -628,6 +669,8 @@
         if (f) { f({ ch, tx, ty, zid }); return true; }
         const own = spec.objects && (spec.objects[tx + "," + ty] || spec.objects[ch]); if (own) { own({ ch, tx, ty, zid }, K); return true; }
         const plug = PLUG.find((p) => p.obj && p.obj(ch, tx, ty, zid, spec, K)); if (plug) return true;
+        if (TUBE.pts) return true;
+        const ti = arr(spec.tubes).findIndex((t) => t.at && t.at[0] === tx && t.at[1] === ty); if (ti >= 0) { tubeRide(zid, ti); return true; }
         const dr = (spec.doors && spec.doors[tx + "," + ty]) || (spec.__doors && spec.__doors[tx + "," + ty]);
         if (dr) { if (dr.text && !dr.to) say([["voce", dr.text]], done); else enterDoor(zid, tx, ty, dr); return true; }
         if (spec.interior && (ch === "v" || (spec.exits && spec.exits[tx + "," + ty]))) { leaveInterior(zid); return true; }
@@ -841,7 +884,7 @@
     // -------------------------------------------------------------- kit per i capitoli
     const K = {
       get api() { return api; }, ID, TITLE, TS, T, esc, hash, rnd, pick, safe, F, mem, save, stepOf, setStep, note, once, reward, coinsGive, bal, hero, castHero, stat, bond,
-      PASS, say, ask, done, timedFire: () => TIMED && TIMED.fire(), go, enterZone, eraOf, gravity: () => GRV.mode, GRV, filter, setEra: (zid, era) => { F.set("era_" + zid, era || ""); if (api && api.trZone() === zid) { const pos = api.trPos && api.trPos(), tr = api.trRec(); if (pos) tr.pos[zid] = pos; FX.enter = frNow(); FX.title = era && ZONES[zid].spec.eras[era] ? ZONES[zid].spec.eras[era].label || ZONES[zid].spec.short : ZONES[zid].spec.short; api.trGo(zid); refreshZone(); } }, otherSaga: (key) => safe(() => JSON.parse(localStorage.getItem(key) || "null"), null), quest, questDone, questState, evidence: (id, d) => { EVID[id] = d; }, giveClue, hasClue, present, loreList: () => Object.keys(LORE).map((k) => [k, LORE[k]]), enterDoor, leaveInterior, travelMenu, timeNow, playMatch, ownMatch, finishChapter, setTiles, SFX, tone, noise, glow, frNow, refreshZone, bgNow, journal, leave, lines, learnLore, ENDINGS, ZX, light, later, shadow, at, undAt, isFloor, floorPaint, ground, TH,
+      tubeRide, tubeBusy: () => !!TUBE.pts, PASS, say, ask, done, timedFire: () => TIMED && TIMED.fire(), go, enterZone, eraOf, gravity: () => GRV.mode, GRV, filter, setEra: (zid, era) => { F.set("era_" + zid, era || ""); if (api && api.trZone() === zid) { const pos = api.trPos && api.trPos(), tr = api.trRec(); if (pos) tr.pos[zid] = pos; FX.enter = frNow(); FX.title = era && ZONES[zid].spec.eras[era] ? ZONES[zid].spec.eras[era].label || ZONES[zid].spec.short : ZONES[zid].spec.short; api.trGo(zid); refreshZone(); } }, otherSaga: (key) => safe(() => JSON.parse(localStorage.getItem(key) || "null"), null), quest, questDone, questState, evidence: (id, d) => { EVID[id] = d; }, giveClue, hasClue, present, loreList: () => Object.keys(LORE).map((k) => [k, LORE[k]]), enterDoor, leaveInterior, travelMenu, timeNow, playMatch, ownMatch, finishChapter, setTiles, SFX, tone, noise, glow, frNow, refreshZone, bgNow, journal, leave, lines, learnLore, ENDINGS, ZX, light, later, shadow, at, undAt, isFloor, floorPaint, ground, TH,
       P: (x, y, w, h, c) => { ctx(); P(x, y, w, h, c); }, get g() { return ctx(); },
       zone: (zid) => ZONES[zid] || null, inZone: (zid) => !!(api && api.trZone() === zid),
       scene: (ls, then, bg) => { safe(() => arr(ls).forEach((l) => Array.isArray(l) && meet(l[0]))); return api.play(lines(ls, bg || BG0), then); },

@@ -24,6 +24,8 @@
   const GEN = { fantasy: ["Fantasy", "#7a4ab0"], mistero: ["Mistero", "#2c6a9a"], scifi: ["Fantascienza", "#1f8a8a"], storico: ["Storico", "#a8622a"], commedia: ["Commedia", "#c9921a"], sport: ["Sport anime", "#c0392b"], avventura: ["Avventura", "#3f8a3f"], dramma: ["Drammatico", "#6a5a7a"], tattica: ["Tattica", "#5a6a3a"] };
   // mod: oggetto window con menuEntry/info · fn: funzione window da chiamare con (indietro) · ch: capitoli totali (se noti)
   const SAGAS = [
+    { id: "razzo", t: "Razzopacco · Consegne dal Futuro", e: "🚀", g: ["commedia", "scifi"], mod: "__razzo", key: "ali-di-rondine.razzo", ch: 3, cover: "rz_titolo", d: "Ti risvegli nel 3011 e fai il corriere spaziale per una ditta sgangherata. Tubi pneumatici sopra la città, consegne a tempo, la rotta fra un pianeta di minestra e una luna di uffici. Consegna a Rete: razzetti, pacchi e pianeti che curvano i lanci.",
+      hints: { libera: "Serve aver vinto la Coppa.", fusione: "Serve aver ascoltato la storia di Orsola.", ritorno: "Serve aver tenuto il pacco misterioso sigillato.", pacco: "Segreto: tutti i francobolli, tutte le consegne in orario, nessuna partita lasciata a metà." } },
     { id: "quartiere", t: "Gli Straordinari di Quartiere", e: "🦸", g: ["commedia", "avventura"], mod: "__quartiere", key: "ali-di-rondine.quartiere", ch: 3, cover: "sq_titolo", d: "Cinque supereroi di serie B (una gelataia, un trombettista, un idraulico, una nonna calamita, un pizzaiolo) e tu, che copi i poteri degli altri. Combo di Squadra (i poteri si combinano e si scoprono giocando), il Copione che apre strade diverse nel quartiere, il Dottor Cemento e il suo parcheggio.",
       hints: { quartiere: "Serve aver giocato a faccia scoperta.", maschere: "Serve aver tenuto le maschere.", cemento: "Serve aver ascoltato la storia del Dottor Cemento.", fumetto: "Segreto: tutti i fumetti perduti, almeno dieci combo scoperte, nessuna partita lasciata a metà." } },
     { id: "titano", t: "Il Figlio del Titano", e: "🌠", g: ["scifi", "dramma"], mod: "__titano", key: "ali-di-rondine.titano", ch: 3, cover: "ft_titolo", d: "Scopri di avere i poteri di tuo padre, il Titano venuto da Elyon. Poi scopri perché è venuto sulla Terra. Volo a Tutto Campo (disegni col dito la traiettoria, gli avversari ti tagliano la strada), le scelte a tempo nei dialoghi, gli sfondi da animazione americana.",
@@ -93,7 +95,7 @@
     { id: "cala", t: "Cala Tramontana", e: "🌊", g: ["avventura"], fn: "openCalaTramontana", key: "ali-di-rondine.cala-tramontana", cover: "beach", d: "Esplora a piedi il borgo marino alternativo con il tuo Campione." },
     { id: "borgostorto", t: "Il Borgo Storto", e: "🌀", g: ["commedia", "tattica"], api: "openBorgoStorto", cover: "beach", d: "Lo spin-off GDR a turni del Borgo Marino." },
   ];
-  const NEWEST = ["quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
+  const NEWEST = ["razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
   const modOf = (s) => (s.mod ? window[s.mod] : null);
   const available = (s) => (s.mod ? !!window[s.mod] : s.fn ? typeof window[s.fn] === "function" : !!(api() && api()[s.api]));
   function state(s) {
@@ -254,6 +256,10 @@
       opp: [{ name: "I Fulmini dell'Agenzia", color: "#3a6ac8", style: "pressing", players: [{ name: "Capitan Fulmine" }, { name: "Tuono" }], keeper: { name: "Parafulmine" } }, { name: "Vega di Elyon", color: "#7a5ad8", style: "contropiede", players: [{ name: "Vega" }, { name: "Lumen" }], keeper: { name: "La boa" } }],
       boss: { name: "Elyon", color: "#7a5ad8", style: "pressing", players: [{ name: "Orione" }, { name: "Atlante" }], keeper: { name: "La Stella Fissa" } },
       opts: (o, h, boss) => ({ title: `Volo a Tutto Campo · contro ${o.name}`, us: h.name, usColor: "#c83a2a", minutes: boss ? 90 : 60, hero: h, mates: [{ name: "Sam" }], opp: o }) },
+    { id: "consegna", t: "Consegna a Rete", e: "🚀", saga: "razzo", eng: "__consegna", d: "La partita di Razzopacco: guidi un razzetto col dito, il pallone è un pacco, i pianeti curvano i lanci, i tubi ti portano dall'altra parte.",
+      opp: [{ name: "I Crostini", color: "#c8782a", style: "difensiva", players: [{ name: "Capitan Crostino" }, { name: "Grissino" }], keeper: { name: "Il Pane Raffermo" } }, { name: "Postini dell'Anello", color: "#3ab8c8", style: "contropiede", players: [{ name: "Saturnina" }, { name: "Rapido" }], keeper: { name: "L'Anulare" } }],
+      boss: { name: "OmniPacco Galacticos", color: "#5a6ad8", style: "pressing", players: [{ name: "Orsola Monòpoli" }, { name: "Agente Zeta" }], keeper: { name: "Il Drone Omega" } },
+      opts: (o, h, boss) => ({ title: `Consegna a Rete · contro ${o.name}`, us: "Razzopacco", usColor: "#ff8a3a", secs: boss ? 110 : 90, minutes: boss ? 90 : 60, hero: { name: h.name || "Tu" }, mate: { name: "Capitana Borea" }, opp: o, oppStyle: o.style }) },
     { id: "combo", t: "Combo di Squadra", e: "🦸", saga: "quartiere", eng: "__combo", d: "La partita degli Straordinari di Quartiere: scegli uno o due eroi a turno, i poteri si combinano, le combo si scoprono giocando.",
       opp: [{ name: "I Geometri", color: "#ffd23f", style: "difensiva", players: [{ name: "Il Capo" }, { name: "Squadra" }], keeper: { name: "Il Metro" } }, { name: "Le Ruspe", color: "#ffd23f", style: "pressing", players: [{ name: "Betoniera" }, { name: "Gru" }], keeper: { name: "Il Pilastro" } }],
       boss: { name: "Squadra Calcestruzzo", color: "#7a7a8a", style: "pressing", players: [{ name: "Il Dottor Cemento" }, { name: "Betoniera" }], keeper: { name: "Il Pilastro" } },
@@ -560,7 +566,7 @@
   // ---------------------------------------------------------------- ALBUM DEI PERSONAGGI
   // ogni personaggio registrato nel gioco (window.__borgoApi.BIO) diventa una carta. Si «incontra» parlandoci (seeCard del gioco).
   // Le sezioni: la Storia e Borgo Marino, i tornei e le modalità del Borgo, e una sezione per saga (riconosciuta dal prefisso degli id).
-  const PFX = { quartiere: "sq", titano: "ft", ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
+  const PFX = { razzo: "rz", quartiere: "sq", titano: "ft", ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
   const BORGO_PFX = ["sv", "rb", "sb", "cg", "hd", "md", "ac"];
   function perSections() {
     const A = api(); if (!A || !A.BIO) return [];

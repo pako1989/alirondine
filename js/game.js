@@ -1055,6 +1055,7 @@
     if (c.style === "sidebraid") { g.beginPath(); g.ellipse(0, -11, 22, 14, 0, Math.PI, 0); g.fill(); for (let k = 0; k < 7; k++) { g.beginPath(); g.arc(20 + k * 0.8, -4 + k * 7, 5 - k * 0.3, 0, 7); g.fill(); } px(22, 44, 6, 3, "#ffd23f"); }
     if (c.style === "spacebuns") { g.beginPath(); g.ellipse(0, -12, 22, 14, 0, Math.PI, 0); g.fill(); [-1, 1].forEach((d) => { g.beginPath(); g.arc(d * 16, -24, 8, 0, 7); g.fill(); }); }
     if (c.style === "corona") { g.beginPath(); g.ellipse(0, -11, 22, 14, 0, Math.PI, 0); g.fill(); for (let k = 0; k < 9; k++) { const a = Math.PI * (1.08 + k * 0.105); g.beginPath(); g.arc(Math.cos(a) * 21, -10 + Math.sin(a) * 17, 5, 0, 7); g.fill(); } g.fillStyle = "rgba(255,255,255,.18)"; for (let k = 0; k < 9; k += 2) { const a = Math.PI * (1.08 + k * 0.105); g.fillRect(Math.cos(a) * 21 - 2, -12 + Math.sin(a) * 17, 3, 1.5); } g.fillStyle = c.hair; }
+    if (c.style === "antenne") { g.beginPath(); g.ellipse(0, -11, 22, 14, 0, Math.PI, 0); g.fill(); g.lineWidth = 4; g.lineCap = "round"; g.strokeStyle = c.hair; [-1, 1].forEach((d) => { g.beginPath(); g.moveTo(d * 6, -22); g.quadraticCurveTo(d * 9, -40, d * 18, -44); g.stroke(); g.beginPath(); g.arc(d * 18, -44, 4.5, 0, 7); g.fill(); }); g.lineCap = "butt"; }
     if (c.style === "scodella") { g.beginPath(); g.ellipse(0, -13, 23, 16, 0, Math.PI, 0); g.fill(); g.fillRect(-23, -13, 46, 7); g.fillStyle = "rgba(0,0,0,.15)"; g.fillRect(-23, -7, 46, 1.5); g.fillStyle = c.hair; }
     if (c.style === "cometa") { g.beginPath(); g.ellipse(0, -11, 22, 14, 0, Math.PI, 0); g.fill(); g.beginPath(); g.moveTo(-16, -16); g.quadraticCurveTo(-6, -48, 22, -46); g.quadraticCurveTo(8, -36, 16, -18); g.closePath(); g.fill(); g.fillStyle = "#ffd23f"; g.beginPath(); g.moveTo(10, -44); g.quadraticCurveTo(18, -46, 22, -46); g.quadraticCurveTo(16, -40, 14, -36); g.closePath(); g.fill(); g.fillStyle = c.hair; }
     if (c.style === "ciuffo") { g.beginPath(); g.ellipse(0, -11, 22, 14, 0, Math.PI, 0); g.fill(); g.beginPath(); g.moveTo(-18, -16); g.bezierCurveTo(-4, -26, 14, -20, 20, -2); g.bezierCurveTo(16, 4, 10, 0, 6, -6); g.bezierCurveTo(0, -12, -10, -12, -18, -8); g.closePath(); g.fill(); }
@@ -3923,6 +3924,7 @@
     hs_sidebraid: { kind: "style", label: "Taglio a treccia da cavaliere", val: "sidebraid", from: "Finisci la saga «Il Trono di Cuoio» (un finale qualsiasi)" },
     hs_spacebuns: { kind: "style", label: "Taglio a due chignon", val: "spacebuns", from: "Finisci la saga «La Notte dei Lampioni» (un finale qualsiasi)" },
     hs_corona: { kind: "style", label: "Taglio a corona di trecce", val: "corona", from: "Finisci la saga «La Guerra dei Tre Ducati» (un finale qualsiasi)" },
+    hs_antenne: { kind: "style", label: "Ciuffi ad antenna", val: "antenne", from: "Finisci la saga «Razzopacco · Consegne dal Futuro» (un finale qualsiasi)" },
     hs_scodella: { kind: "style", label: "Taglio a scodella", val: "scodella", from: "Finisci la saga «Gli Straordinari di Quartiere» (un finale qualsiasi)" },
     hs_cometa: { kind: "style", label: "Taglio a cometa", val: "cometa", from: "Finisci la saga «Il Figlio del Titano» (un finale qualsiasi)" },
     hs_ciuffo: { kind: "style", label: "Taglio col ciuffo sull'occhio", val: "ciuffo", from: "Finisci la saga «Il Cavaliere della Notte» (un finale qualsiasi)" },
@@ -4245,6 +4247,7 @@
     if (c.style === "spacebuns") { px(x - 7, y - 26, 4, 4, hair); px(x + 3, y - 26, 4, 4, hair); }
     if (c.style === "corona") { px(x - 6, y - 26, 12, 2, hair); px(x - 7, y - 25, 1, 2, hair); px(x + 6, y - 25, 1, 2, hair); }
     if (c.style === "ciuffo") { px(dir === "left" ? x - 6 : x + 1, y - 22, 5, 3, hair); }
+    if (c.style === "antenne") { px(x - 5, y - 27, 1, 4, hair); px(x + 4, y - 27, 1, 4, hair); px(x - 6, y - 28, 2, 2, hair); px(x + 4, y - 28, 2, 2, hair); }
     if (c.style === "scodella") { px(x - 6, y - 24, 12, 4, hair); px(x - 6, y - 21, 1, 3, hair); px(x + 5, y - 21, 1, 3, hair); }
     if (c.style === "cometa") { px(x - 2, y - 29, 5, 5, hair); px(x + 2, y - 30, 2, 2, "#ffd23f"); }
     const capV = c.cap || (SA.includes("cappellino") ? "#ffd23f" : SA.includes("berretto") ? "#26324a" : null);
@@ -5173,7 +5176,7 @@
   const HERO = "ali-di-rondine.campione";
   const H_STYLES = { spiky: "Spettinati", messy: "Ribelli", buzz: "Rasati", slick: "Tirati indietro", long: "Lunghi", bun: "Chignon", bob: "Caschetto", ponytail: "Coda", twintails: "Codini", braids: "Trecce", curly: "Ricci", side: "Riga di lato", ordinato: "Ordinati", bandana: "Bandana" };
   // le acconciature delle saghe: finire una saga (almeno un finale) sblocca la sua acconciatura nel guardaroba
-  const HAIR_SAGA = { hs_afro: "torneo", hs_dread: "dopo", hs_undercut: "spazio", hs_pompadour: "mantello", hs_mullet: "stagione", hs_wavy: "cronache", hs_messybun: "vento", hs_topknot: "mondi", hs_sidebraid: "trono", hs_spacebuns: "lampioni", hs_corona: "ducati", hs_ciuffo: "grigio", hs_cometa: "titano", hs_scodella: "quartiere" };
+  const HAIR_SAGA = { hs_afro: "torneo", hs_dread: "dopo", hs_undercut: "spazio", hs_pompadour: "mantello", hs_mullet: "stagione", hs_wavy: "cronache", hs_messybun: "vento", hs_topknot: "mondi", hs_sidebraid: "trono", hs_spacebuns: "lampioni", hs_corona: "ducati", hs_ciuffo: "grigio", hs_cometa: "titano", hs_scodella: "quartiere", hs_antenne: "razzo" };
   function hairUnlocks() {
     Object.keys(HAIR_SAGA).forEach((id) => { try { const m = JSON.parse(localStorage.getItem("ali-di-rondine." + HAIR_SAGA[id]) || "null"); if (m && Array.isArray(m.ends) && m.ends.length && COSM[id] && bCos(id) && window.toast) window.toast("Nuova acconciatura: " + COSM[id].label.replace(/^Taglio (a )?/, ""), "info", "✂️"); } catch {} });
   }
@@ -11684,6 +11687,7 @@
     if (base.style === "sidebraid") px(5, -24 + by, 2, 11, hair);
     if (base.style === "corona") { px(-6, -30 + by, 12, 2, hair); }
     if (base.style === "ciuffo") px(0, -26 + by, 5, 3, hair);
+    if (base.style === "antenne") { px(-5, -33 + by, 1, 5, hair); px(4, -33 + by, 1, 5, hair); px(-6, -34 + by, 2, 2, hair); px(4, -34 + by, 2, 2, hair); }
     if (base.style === "scodella") px(-6, -29 + by, 12, 4, hair);
     if (base.style === "cometa") { px(-2, -33 + by, 5, 5, hair); px(2, -34 + by, 2, 2, "#ffd23f"); }
     if (base.cap) px(-5, -29 + by, 10, 3, typeof base.cap === "string" ? base.cap : "#1d3fa3");
@@ -22440,7 +22444,7 @@
     ["Partite", /Settimana del Molo/],
     ["Collezioni e curiosità", /Diario del Corriere/],
     ["Calcio d'azione e arcade", /Arena 2D|Biliardino|Cabinato|Stadio 3D|Corsa della Panda|Gozzo di Baciccia|Gabbia sul Molo|Tsubasa|Supereroi/],
-    ["Saghe e GDR", /Salone delle Saghe|Straordinari di Quartiere|Figlio del Titano|Tre Ducati|Cavaliere della Notte|Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis|Libro che Mangiava i Finali|Doppio Turno|Cristalli del Campo|Il Muro|Valle del Vento Gentile|Detective di Campo|Dopo il Campione|Calcio Spaziale|Torneo delle Cento Scuole|Cronache del Pallone di Cristallo|Mantello Granata|Stagione Infinita|Notte dei Lampioni|Torneo dei Mondi|Trono di Cuoio|Campetto al Mondiale|Master League delle Colline/],
+    ["Saghe e GDR", /Salone delle Saghe|Razzopacco|Straordinari di Quartiere|Figlio del Titano|Tre Ducati|Cavaliere della Notte|Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis|Libro che Mangiava i Finali|Doppio Turno|Cristalli del Campo|Il Muro|Valle del Vento Gentile|Detective di Campo|Dopo il Campione|Calcio Spaziale|Torneo delle Cento Scuole|Cronache del Pallone di Cristallo|Mantello Granata|Stagione Infinita|Notte dei Lampioni|Torneo dei Mondi|Trono di Cuoio|Campetto al Mondiale|Master League delle Colline/],
     ["Collezioni e curiosità", /Gashapon|Roster & Talenti|Diorama|Fumetto|Leggende del passato|Bianco e Nero|Quartier Generale/],
   ];
   const MN_EXP = { "Partite": 12, "Allenamento": 6, "Storie e ricordi": 8 }; // quante voci ha la categoria a tutto sbloccato: le mancanti appaiono come «???»
