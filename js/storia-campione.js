@@ -30,7 +30,7 @@
   const FLAG_RE = /^[a-z0-9_]{1,40}$/, REW_RE = /^[a-z0-9_:]{1,60}$/, ZONE_RE = /^[a-z0-9_]{1,24}$/;
   function norm(o) {
     o = obj(o);
-    const m = { v: 1, ch: clampI(o.ch, 1, 99, 1), step: {}, flags: {}, rew: {}, done: {}, zone: "", lan: [], log: [], intro: {}, visit: clampI(o.visit, 0, 1e6, 0), wins: clampI(o.wins, 0, 1e6, 0), losses: clampI(o.losses, 0, 1e6, 0) };
+    const m = { v: 1, ch: clampI(o.ch, 1, 99, 1), step: {}, flags: {}, rew: {}, done: {}, ends: [], zone: "", lan: [], log: [], intro: {}, visit: clampI(o.visit, 0, 1e6, 0), wins: clampI(o.wins, 0, 1e6, 0), losses: clampI(o.losses, 0, 1e6, 0) };
     const st = obj(o.step); Object.keys(st).slice(0, 99).forEach((k) => { const n = clampI(k, 1, 99, 0); if (n) m.step[n] = clampI(st[k], 0, 99, 0); });
     const fl = obj(o.flags); let c = 0;
     Object.keys(fl).forEach((k) => {
@@ -44,6 +44,7 @@
     Object.keys(obj(o.rew)).forEach((k) => { if (REW_RE.test(k) && Object.keys(m.rew).length < 200) m.rew[k] = 1; });
     const dn = obj(o.done); Object.keys(dn).forEach((k) => { const n = clampI(k, 1, 99, 0); if (n && typeof dn[k] === "string" && dn[k].length <= 24) m.done[n] = dn[k]; });
     m.zone = typeof o.zone === "string" && ZONE_RE.test(o.zone) ? o.zone : "";
+    m.ends = [...new Set(arr(o.ends).filter((x) => typeof x === "string" && /^[a-e]$/.test(x)))];
     m.lan = [...new Set(arr(o.lan).filter((x) => typeof x === "string" && FLAG_RE.test(x)))].slice(0, 60);
     m.log = arr(o.log).filter((x) => typeof x === "string").map((x) => x.slice(0, 200)).slice(-120);
     Object.keys(obj(o.intro)).forEach((k) => { if (FLAG_RE.test(k)) m.intro[k] = 1; });
@@ -462,7 +463,7 @@
   //             capitolo 3:  Q=cristallo di fase  D=porta di lumina  R=carrello  M=maglia appesa  N=maglia vuota  H=elmetto del minatore  P=parete incisa
   //             capitolo 4:  c=tappeto del Municipio  (oggetti) S=scaffale di faldoni  T=scrivania/tavolo  B=cassetti del Registro  O=tassello (pennino, timbro, sigillo, stemma)  J=vetrina  L=scala dell'archivio
   const FLOORS = ',p:"=y;_-gicsI';
-  const SOLID = "afrehtlknFumvqwx><^bozjXYCGAUEWKZdQDRMNHPSTBOJLV#%$&*790";
+  const SOLID = "afrehtlknFumvqwx><^bozjXYCGAUEWKZdQDRMNHPSTBOJLV#%$&*790123";
   const isFloor = (c) => !!c && FLOORS.includes(c);
   const ZX = { map: null, under: null, meta: null, id: "", cvs: null };
   const at = (tx, ty) => (ZX.map && ZX.map[ty] && ZX.map[ty][tx]) || "a";
@@ -629,6 +630,15 @@
 
   // ------------------------------------------------------------------ motore a capitoli
   const CHAPTERS = {}, ZONES = {}, LANDEF = {}, LAN_TOTAL = 12;
+  // i cinque finali (titolo, descrizione che si legge dopo averlo trovato); gli id del Salone sono in END_ID
+  const ENDINGS = {
+    a: ["Fischio Finale", "La verità detta ad alta voce, la Squadra del 6:43 restituita al suo paese e la Coppa consegnata con ventisei anni di ritardo. Il Latte si dirada."],
+    b: ["Il Latte Resta", "Qualcuno resta a tenere accesa la lumina, e la cabina sale vuota ogni sera. Un finale agrodolce, con un posto in panchina sempre libero."],
+    c: ["La Squadra Nuova", "Il soprannaturale resta leggenda e il club si ricostruisce con i vivi. Il Latte sparisce senza risposte, e la partita comincia."],
+    d: ["La Vendita", "La Società vince, la valle viene venduta e l'ultima corsa della cabina parte vuota. Un finale amaro con una riga di gesso."],
+    e: ["Il Minuto Perfetto", "Tutte le Lanterne, nessuna bugia, un fischio da dove nessuno se lo aspettava. Il minuto finisce esattamente quando deve."],
+  };
+  const END_ID = { a: "fischio", b: "resta", c: "squadra", d: "vendita", e: "minuto" };
   const COS = {
     vl_stambecchi: { kind: "shirt", label: "Maglia degli Stambecchi", val: "#1b2f7a", from: "Gioca la partita di presentazione a Vallombra" },
     vl_sessantatre: { kind: "shirt", label: "Maglia del 6:43", val: "#e9a64a", from: "Concludi il capitolo 1 di Vallombra" },
@@ -738,7 +748,7 @@
     const m = mem(), h = hero() || { name: "Campione", num: 9, shotName: "", shot: "saetta" };
     const clues = m.log.slice(-9).map((x) => `• ${esc(T(x))}`).join("<br>") || "<span style='color:var(--dim)'>Ancora nessuna annotazione.</span>";
     const lanN = m.lan.length;
-    const html = `<b>${esc(h.name)}</b> · n. ${esc(h.num)}<br><span style="color:var(--dim)">«${esc(h.shotName || "")}» · ${esc(SHOT[h.shot] || "un tiro tutto tuo")}</span><br><br><b>Appunti</b><br>${clues}<br><br><span style="color:var(--dim)">Lanterne accese ${lanN}/${LAN_TOTAL} · Vittorie ${m.wins} · Sconfitte ${m.losses}</span>`;
+    const html = `<b>${esc(h.name)}</b> · n. ${esc(h.num)}<br><span style="color:var(--dim)">«${esc(h.shotName || "")}» · ${esc(SHOT[h.shot] || "un tiro tutto tuo")}</span><br><br><b>Appunti</b><br>${clues}<br><br><span style="color:var(--dim)">Lanterne accese ${lanN}/${LAN_TOTAL} · Vittorie ${m.wins} · Sconfitte ${m.losses}</span>${m.done[8] ? `<br><span style="color:var(--dim)">Finali trovati ${m.ends.length}/${Object.keys(ENDINGS).length}: ${m.ends.map((k) => esc(ENDINGS[k][0])).join(" · ")}</span>` : ""}`;
     sceneOrAsk(inZone, html, [
       { label: "Le Lanterne", sub: "Chi ti ha dato una mano", fn: () => lanterne(() => notebook(back, inZone), inZone) },
       { label: "◂ Indietro", fn: back },
@@ -766,7 +776,7 @@
     castHero();
     const c = activeChapter(), m = mem(), allDone = c && m.done[c.n];
     const nextN = c ? c.n + 1 : 2, nextOk = !!CHAPTERS[nextN];
-    api.scene("vl_paese", "voce", `<b>Vallombra</b> · Il paese sopra la nebbia<br>${esc(h.name)}, n. ${esc(h.num)} · «${esc(h.shotName || "")}»<br><span style="color:var(--dim)">${c ? esc("Capitolo " + c.n + " · " + c.title) : ""}<br>${allDone ? (nextOk ? "Il prossimo capitolo ti aspetta." : "Capitolo concluso · il prossimo è in arrivo.") : esc(goalNow())}</span>`, [
+    api.scene("vl_paese", "voce", `<b>Vallombra</b> · Il paese sopra la nebbia<br>${esc(h.name)}, n. ${esc(h.num)} · «${esc(h.shotName || "")}»<br><span style="color:var(--dim)">${c ? esc("Capitolo " + c.n + " · " + c.title) : ""}<br>${allDone ? (nextOk ? "Il prossimo capitolo ti aspetta." : m.done[8] ? "La storia è conclusa · finali trovati " + m.ends.length + "/" + Object.keys(ENDINGS).length + "." : "Capitolo concluso · il prossimo è in arrivo.") : esc(goalNow())}</span>`, [
       { label: allDone && !nextOk ? "Torna a Vallombra" : c && !m.intro["ch" + c.n] ? (c.n > 1 ? `Inizia il capitolo ${c.n}` : "Comincia") : "Continua", sub: c ? `Capitolo ${c.n} · ${c.title}` : "", cls: "hot", fn: continueStory },
       { label: "Taccuino di " + h.name, sub: `Appunti e Lanterne ${m.lan.length}/${LAN_TOTAL}`, fn: () => notebook(openMain, false) },
       { label: "Capitoli", sub: "Le puntate della storia", fn: chapters },
@@ -776,9 +786,20 @@
   function chapters() {
     const m = mem(), rows = [];
     for (let n = 1; n <= 8; n++) { const c = CHAPTERS[n]; rows.push(c && (n === 1 || m.done[n - 1] || m.ch >= n) ? `${m.done[n] ? "✓" : "▸"} <b>Capitolo ${n}</b> · ${esc(c.title)} <span style="color:var(--dim)">${esc(m.done[n] ? "concluso" : c.sub || "")}</span>` : `<span style="color:var(--dim)">• Capitolo ${n} · ???</span>`); }
-    api.scene("vl_campo", "voce", `<b>Le puntate di Vallombra</b><br>${rows.join("<br>")}<br><span style="color:var(--dim)">Le scelte restano salvate: cambiano battute, alleanze e finali.</span>`, [
+    const fin = m.done[8] ? `<br><b>Finali trovati ${m.ends.length}/${Object.keys(ENDINGS).length}</b><br>${Object.keys(ENDINGS).map((k) => (m.ends.includes(k) ? `✓ <b>${esc(ENDINGS[k][0])}</b>` : "<span style='color:var(--dim)'>• ???</span>")).join("<br>")}` : "";
+    const opts = [];
+    if (m.done[8] && CHAPTERS[8] && CHAPTERS[8].replay) opts.push({ label: "Rigioca il Fischio Finale", sub: "Capitolo 8 da capo: altre scelte, senza ricominciare la saga", cls: "hot", fn: replayAsk });
+    api.scene("vl_campo", "voce", `<b>Le puntate di Vallombra</b><br>${rows.join("<br>")}${fin}<br><span style="color:var(--dim)">Le scelte restano salvate: cambiano battute, alleanze e finali.</span>`, [
+      ...opts,
       { label: "Ricomincia la storia", sub: "Cancella solo questo salvataggio", fn: resetAsk },
       { label: "◂ Indietro", fn: openMain },
+    ], "Vallombra · Capitoli");
+  }
+  // rigiocare il solo capitolo finale: i finali già trovati, le monete e i cosmetici restano; si azzerano soltanto le scelte e i progressi del capitolo 8
+  function replayAsk() {
+    api.scene("vl_campo", "voce", "<b>Rigiocare il Fischio Finale?</b><br>Il capitolo 8 ricomincia dal Campo Sospeso, con le scelte dei capitoli precedenti com'erano. I finali già trovati restano registrati, e così monete e cosmetici già ricevuti.", [
+      { label: "Sì, rigioca il capitolo 8", cls: "hot", fn: () => { const c = CHAPTERS[8], r = c.replay(); castHero(); refreshMood(); const m = mem(); m.visit++; save(); go(r[0], r[1], r[2]); } },
+      { label: "◂ No, torna indietro", fn: chapters },
     ], "Vallombra · Capitoli");
   }
   function resetAsk() {
@@ -806,9 +827,10 @@
     api.matchPick({ alt: o.alt, oppNames: o.oppNames, squad: o.squad, azPitch: o.azPitch, cageMut: o.cageMut, cageTarget: o.cageTarget, homeKit: o.homeKit, cageField: o.cageField, force: o.force, weather: o.weather, id: o.id, chap: o.chap, intro: T(o.intro), mate: o.mate, mateGeneric: true, us: o.us || "Stambecchi", min: o.min || 45, team: o.team, venue: o.venue || VENUE_VAL, hero: undefined,
       onDone: (r) => { inMatch = false; const m = mem(); if (r.win) m.wins++; else if (r.a < r.b) m.losses++; save(); refreshZone(); o.done(r); } });
   }
+  function endLog(k) { const m = mem(); if (ENDINGS[k] && !m.ends.includes(k)) { m.ends.push(k); save(); return true; } return false; }
   function finishChapter(n, ending) { const m = mem(); m.done[n] = String(ending || "ok").slice(0, 24); if (m.ch <= n) m.ch = n + 1; save(); }
   const XTOOLS = {
-    get api() { return api; }, TS, T, esc, hash, rnd, safe, F, mem, save, stepOf, setStep, note, once, reward, coinsGive, bal, hero, castHero, say, ask, done, go, enterZone, playMatch, finishChapter, lanAdd, notebook, zoneMenu, leave,
+    get api() { return api; }, TS, T, esc, hash, rnd, safe, F, mem, save, stepOf, setStep, note, once, reward, coinsGive, bal, hero, castHero, say, ask, done, go, enterZone, playMatch, finishChapter, endLog, ENDINGS, lanAdd, notebook, zoneMenu, leave,
     P: (x, y, w, h, c) => P(x, y, w, h, c), R, glow, grad, floorPaint, drawTile, makeLayers, PAINT, FLOORS, SOLID, onScr, frNow, refreshZone, bgNow,
     setFoto: (o) => { FOTO = o; }, getMood: () => MOOD, setMood: (n) => { MOOD = n; },
     lanDef: (id, d) => { LANDEF[id] = d; },
@@ -894,7 +916,9 @@
       return { label: "⛰️ Vallombra · La Storia del Campione", cls: "hot", fn: () => openMain({ onExit: back }),
         sub: h ? `${h.name} · ${c ? "Capitolo " + c.n + (m.done[c.n] ? " concluso" : " in corso") : "avventura e mistero"}` : "Crea prima il tuo campione · avventura e mistero a puntate" };
     },
-    info() { const m = mem(); return { ch: m.ch, step: Object.assign({}, m.step), done: Object.assign({}, m.done), lan: m.lan.length, flags: Object.keys(m.flags).length }; },
+    info() { const m = mem(); return { ch: Math.min(m.ch, 8), step: Object.assign({}, m.step), done: Object.assign({}, m.done), ends: m.ends.slice(), lan: m.lan.length, flags: Object.keys(m.flags).length }; },
+    // i finali, come li legge il Salone delle Saghe (id, titolo, descrizione, trovato)
+    endings() { const m = mem(); return Object.keys(ENDINGS).map((k) => ({ id: END_ID[k], title: ENDINGS[k][0], desc: ENDINGS[k][1], found: m.ends.includes(k) })); },
   };
 
   // ------------------------------------------------------------------ luci comuni (lampioni, finestre accese, lumina) e nebbia in primo piano
@@ -6922,7 +6946,7 @@
       const ult = F.get("ult7", "sudato"), win = has("m7_win"), aur = F.get("aur7", "aperto");
       note(`Cap. 7 concluso: il tiro del Minuto è entrato (2–1, ${ult === "pulito" ? "pulito" : ult === "corale" ? "tirato dalle Lanterne" : "sudato"}). Partita ${win ? "vinta" : "non vinta"}; Aurelio: ${aur === "resta" ? "forse resta" : aur === "parte" ? "forse parte" : aur === "vivi" ? "ascolta i vivi" : "decide da sé"}. Manca solo il fischio finale.`);
       const rw = reward("vl_ch7", { coins: 60, cos: "vl_tredicesimo_mg" });
-      X.say(sw([["voce", "CAPITOLO 7 · IL MINUTO SOSPESO · CONCLUSO"], ["vl_teodora", "Questa è per te: l'ha cucita Aurelio, a punti lunghi, con il filo da pesca. Stava nella tasca della giacca, ripiegata da ventisei anni. «Per il tredicesimo.» Non l'avrei mai aperta, se non me lo avesse chiesto lui."], ["voce", (rw.length ? rw.join(" · ") + ". " : "") + "Il Capitolo 8, «Fischio Finale», non è ancora pronto. Nel frattempo puoi restare al Campo Sospeso, salire sul Bordo, raccogliere le ultime schegge di lumina e parlare con tutti."]], BG.S), done);
+      X.say(sw([["voce", "CAPITOLO 7 · IL MINUTO SOSPESO · CONCLUSO"], ["vl_teodora", "Questa è per te: l'ha cucita Aurelio, a punti lunghi, con il filo da pesca. Stava nella tasca della giacca, ripiegata da ventisei anni. «Per il tredicesimo.» Non l'avrei mai aperta, se non me lo avesse chiesto lui."], ["voce", (rw.length ? rw.join(" · ") + ". " : "") + "Il Capitolo 8, «Fischio Finale», ti aspetta: manca soltanto il fischio. Nel frattempo puoi restare al Campo Sospeso, salire sul Bordo, raccogliere le ultime schegge di lumina e parlare con tutti."]], BG.S), done);
     }
     function aurelioFine() {
       const L = ["Il fischio arriverà. Quando lo sentirò saprò chi l'ha dato, e se è dritto. Adesso godiamoci l'ultimo secondo, che è il più lungo e il più mio.", "Ho una scarpa in mano e una al piede. Un piede è già di là e l'altro è ancora qui. Non è un'indecisione: è il modo in cui si cammina quando non si sa dove si mette il piede.", "Teo mi ha letto una riga del registro. Era sbagliata: l'ho corretta. Era la prima volta che correggevo qualcosa a voce."];
@@ -6977,6 +7001,878 @@
         ["voce", "Non è venuto per la partita. È venuto per vederti partire. Ognuno ha un cappotto sopra il pigiama, una lanterna in mano e quella faccia da sala d'attesa che si fa quando si è sicuri di dover aspettare, e un po' meno sicuri di dover sperare.", BG.B],
         [compId(), isB() ? "Hai la maglia? Hai il tiro? Hai i calzini spaiati, quelli fortunati? (si ferma) Io intanto ho la chiave inglese. Non c'entra niente, ma mi dà un'aria da capitano." : "Alle sei e quarantatré, con la numero uno già dall'altra parte, ho smesso di fare ipotesi. Ho cominciato a prendere appunti. Sono sempre la stessa cosa, ma con un'ansia più ordinata.", BG.B],
         ["voce", "Oltre il parapetto, a EST, il Latte è fermo e stranamente nitido. In un punto, laggiù, brilla una luce turchese con un 1 attaccato: la numero uno è arrivata. E accanto al parapetto, dove ieri non c'era niente, sono comparsi dei gradini. Di nebbia. Hanno il corrimano.", BG.B],
+      ],
+    };
+  });
+
+  // ============================================================================================================
+  // CAPITOLO 8 · FISCHIO FINALE
+  // Il Campo Sospeso all'ultimo secondo (i saluti, il fischio), la salita con la numero uno e lo stadio dei Tre Versanti
+  // (la Finale ritrovata in due tempi forzati: Action Soccer 2D HD + Calcio d'azione 3v3 sul campo «versanti»), poi il palco
+  // della Coppa: la scelta finale, con le scelte di tutti i capitoli, decide uno di cinque finali (A fischio · B resta ·
+  // C squadra · D vendita · E minuto perfetto). Perdere non blocca mai; i finali si registrano e il capitolo si può rigiocare.
+  // ============================================================================================================
+  addChapter(function (X) {
+    const { T, F, say, ask, done, go, note, setStep, reward, hero, esc } = X;
+    const N = 8, S = () => X.stepOf(N), has = (k) => F.is(k);
+    const BG = { V: "vl_versanti", S: "vl_sospeso", A: "vl_epi_a", B: "vl_epi_b", C: "vl_epi_c", D: "vl_epi_d", E: "vl_epi_e" };
+    const sw = (lines, bg) => lines.map((l) => (l.length > 2 ? l : [l[0], l[1], bg]));
+    const chip = (a) => a[Math.floor(Math.random() * a.length)];
+    const tono = () => F.get("tono", "ironico");
+    const tl = (o) => ["hero", o[tono()] || o.ironico || o.sicuro];
+    const zoneNow = () => X.api.trZone();
+    const inV = () => zoneNow() === "vl_versanti";
+    const inS = () => zoneNow() === "vl_sospeso";
+    const inC = () => inV() || inS();
+    const toast = (m) => X.api.trToast(m);
+    const guida = () => F.get("guida", "bianca");
+    const compId = () => (guida() === "agata" ? "vl_agata" : "vl_bianca");
+    const compName = () => (guida() === "agata" ? "Agata" : "Bianca");
+    const isB = () => guida() !== "agata";
+    const remoId = () => (has("remo_bet") && has("m1_win") ? "vl_remo_ns" : "vl_remo");
+    const npcId = (id) => (id === "vl_remo" ? remoId() : id);
+    const su = () => F.get("fosco", "su") !== "giu";
+    const delegate = (id) => { const p = X.talkOf(id, N); if (p) p(); else done(); };
+    const LAN = () => X.mem().lan.slice();
+    const lanN = () => LAN().length;
+    const isLan = (id) => LAN().includes(id);
+    const unset = (k) => { delete X.mem().flags[k]; X.save(); };
+    const cast = (id, name, o, bio) => X.cast(id, Object.assign({ name }, o), bio);
+    const cl = (b, a) => (isB() ? b : a);
+    const sumPts = (pts) => pts.reduce((a, b) => a + b, 0);
+    const tmg = (label, rounds, bg, react, fin) => {
+      const tm = X.timing;
+      if (typeof tm === "function") return tm(label, rounds, bg, react, fin);
+      const pts = [];
+      const next = () => {
+        if (pts.length >= rounds) return fin(pts);
+        ask("voce", `${esc(label)} · ${pts.length + 1} di ${rounds}: scegli il momento.`, [1, 2, 3].map((k) => ({ label: ["Subito", "Un attimo", "Adesso"][k - 1], fn: () => { const n = Math.random() < 0.34 ? 3 : Math.random() < 0.6 ? 2 : 1; pts.push(n); say([["voce", react(n)]], next); } })), bg);
+      };
+      next();
+    };
+
+    // ---- gli esiti che decidono i finali, dai capitoli precedenti
+    const veri = () => ["agata", "radio"].includes(F.get("prove", "tenute")) || has("prove_neve"); // le prove sono state consegnate a qualcuno
+    const remoAlly = () => isLan("vl_remo");
+    const mateName = () => (remoAlly() ? "Remo" : compName());
+    const condA = () => veri() && su() && has("cor7"); // verità consegnata + Fosco tornato su + Cornelio ha confessato
+    const dGate = () => F.get("comp6", "rifiuto") === "accetto" || (F.get("prove", "tenute") === "tenute" && !has("prove_neve")) || has("yld8");
+    const END = () => F.get("end8", "");
+    function endOf(ch) {
+      if (ch === "firma") return "d";
+      if (ch === "lumina") return "b";
+      if (ch === "vivi") return "c";
+      if (!condA()) return "b"; // la verità è incompleta: la lumina resta accesa finché non lo sarà
+      return has("perf7") && F.get("w8", "") === "campione" ? "e" : "a";
+    }
+
+    X.cos("vl_fascia_fischio", { kind: "acc", label: "Fascia del Fischio", val: "#f2f2f6", from: "Concludi il capitolo 8 di Vallombra" });
+    X.cos("vl_treversanti_mg", { kind: "shirt", label: "Maglia dei Tre Versanti", val: "#e8c25a", from: "Trova il finale «Fischio Finale» di Vallombra" });
+    X.cos("vl_sospesa_mg", { kind: "shirt", label: "Maglia Sospesa", val: "#b8f4e6", from: "Trova il finale segreto di Vallombra" });
+    X.cos("vl_fascia_lampionaio", { kind: "acc", label: "Fascia del Lampionaio", val: "#ffcf6b", from: "Trova il finale «Il Latte Resta» di Vallombra" });
+    X.cos("vl_squadranuova_mg", { kind: "shirt", label: "Maglia della Squadra Nuova", val: "#2f7ae0", from: "Trova il finale «La Squadra Nuova» di Vallombra" });
+    X.cos("vl_versanti_cap", { kind: "hairc", label: "Capelli Oro dei Versanti", val: "#f0c870", from: "Raccogli tutte le schegge di lumina allo stadio dei Tre Versanti" });
+    // la carta leggendaria di Teodora usa lo stesso volto, con un nome diverso
+    if (X.api.CAST && X.api.CAST.vl_teodora) X.cast("vl_teodora_l", Object.assign({}, X.api.CAST.vl_teodora, { name: "Teodora Brinzi · La Capocabina" }), X.api.BIO && X.api.BIO.vl_teodora);
+
+    const mood = () => 0;
+    // ---- i saluti: gli otto della squadra che si possono salutare al Campo
+    const SQ = ["vl_sasso", "vl_pio", "vl_duilio", "vl_gino", "vl_nando", "vl_oreste", "vl_mirella", "vl_tullio"];
+    const saluti = () => SQ.filter((id) => has("sl8_" + id.slice(3))).length;
+
+    // ---- obiettivi: sempre con la direzione e che cosa cercare
+    const goal = (s) => {
+      const z = zoneNow();
+      if (s === 0) {
+        if (z === "vl_bordo") return "Torna giù: i gradini di nebbia sono a EST (in fondo al sentiero), e portano al Campo Sospeso dove il minuto aspetta il fischio.";
+        return `Campo Sospeso, 89° minuto, 2–1: saluta chi vuoi (${saluti()} su 8 della squadra) e poi parla con Aurelio, al centro del Campo (EST, verso il cerchio di centrocampo), per il fischio.`;
+      }
+      if (s === 1) return "Allo stadio dei Tre Versanti: saluta chi vuoi e poi parla con l'arbitro Zelo, al CENTRO del prato (accanto al pallone), per il fischio d'inizio della Finale.";
+      if (s === 2) return "Intervallo della Finale: parla con l'arbitro Zelo, al CENTRO del prato, per il secondo tempo.";
+      if (s === 3) return "La Finale è giocata: sali sul palco della Coppa, a EST (a destra, oltre il tappeto rosso), e prendi il microfono.";
+      return "La storia è conclusa. Parla con tutti, raccogli le ultime schegge, o riprova il finale dal palco a EST. Dal menu «Capitoli» si può rigiocare tutto il capitolo 8.";
+    };
+
+    // ============================================================================================ sfondi
+    function paintVista(g, X0, Y0, wpx, hpx, f, v) {
+      g.save(); g.beginPath(); g.rect(X0, Y0, wpx, hpx); g.clip(); g.translate(X0, Y0);
+      const sk = { x: ["#4a86cf", "#9ccbee", "#e6f2fb"], a: ["#5f9fe0", "#f4d89a", "#fff1c8"], b: ["#1a2252", "#4a4f96", "#d98a78"], c: ["#3f93e6", "#a8d8f6", "#eaf6ff"], d: ["#59606e", "#8c93a2", "#b9bdc6"], e: ["#e8b24a", "#f9e29a", "#fffbe0"] }[v] || ["#4a86cf", "#9ccbee", "#e6f2fb"];
+      grad(g, 0, 0, wpx, hpx, sk);
+      if (v === "b") for (let i = 0; i < 30; i++) R(g, (i * 59) % wpx, (i * 13) % 20, 1, 1, (f / 20 + i) % 6 < 0.5 ? "#ffffff" : "#aab4e8");
+      const ridgeCol = v === "b" ? ["#2a2f66", "#1a1f4a"] : v === "d" ? ["#6f7480", "#575c68"] : v === "e" ? ["#d9a85a", "#b88a4a"] : ["#6f86b8", "#4a6296"];
+      ridge(g, wpx, 28, 20, 2.1, ridgeCol[0], v !== "d"); ridge(g, wpx, 36, 14, 5.3, ridgeCol[1], v !== "d");
+      const fog = v === "x" || v === "b" || v === "d";
+      if (!fog) { // la valle liberata: terrazze verdi, un fiume e i tre campanili
+        grad(g, 0, 34, wpx, 14, v === "e" ? ["#d9c870", "#a8b860", "#6f9a50"] : ["#8ab86a", "#5f9a58", "#3f7a4a"]);
+        for (let i = 0; i < 16; i++) { const x = (i * 47 + 20) % wpx; R(g, x, 38 + (i % 3) * 3, 10, 2, "rgba(255,255,255,.18)"); }
+        g.strokeStyle = "#7ac4e8"; g.lineWidth = 2; g.beginPath(); g.moveTo(0, 44); for (let x = 0; x <= wpx; x += 24) g.lineTo(x, 43 + Math.sin(x / 30) * 2); g.stroke();
+        [[0.18, "#e9a64a"], [0.5, "#f2d21b"], [0.82, "#c9a8ee"]].forEach(([p, c]) => { const x = wpx * p; R(g, x - 2, 30, 4, 12, "#e8e0d0"); R(g, x - 3, 28, 6, 3, c); R(g, x - 1, 24, 2, 5, c); R(g, x - 10, 40, 6, 4, "#c4a77d"); R(g, x + 6, 41, 6, 4, "#c4a77d"); R(g, x - 9, 41, 2, 2, "#ffcf6b"); R(g, x + 8, 42, 2, 2, "#ffcf6b"); });
+        fogBand(g, wpx, 40, hpx, f * 0.3, ["#eef2fb", "#dfe6f4"]);
+      } else {
+        fogBand(g, wpx, 30, hpx, f, v === "b" ? ["#6a5fa0", "#4a4380"] : v === "d" ? ["#b0b5be", "#8f95a0"] : ["#f2f4fb", "#d8def0"]);
+        if (v === "x" || v === "b") { const px_ = wpx * 0.62; glow(g, px_, 41, 30, "90,235,210", 0.5 + 0.12 * Math.sin(f / 18)); R(g, px_ - 2, 40, 5, 3, "#7fe3d0"); }
+      }
+      if (v === "e") { const gr = g.createRadialGradient(wpx / 2, 20, 4, wpx / 2, 20, 160); gr.addColorStop(0, "rgba(255,246,200,.55)"); gr.addColorStop(1, "rgba(255,246,200,0)"); g.fillStyle = gr; g.fillRect(0, 0, wpx, hpx); }
+      if (v === "d") { g.fillStyle = "rgba(60,64,74,.18)"; g.fillRect(0, 0, wpx, hpx); }
+      g.restore();
+    }
+    const SECC = (tx) => (tx < 17 ? ["#1b2f7a", "#e9a64a"] : tx < 29 ? ["#f2d21b", "#1a1a1a"] : ["#7a3fb0", "#e4d2f6"]);
+    // la finale a mezzogiorno: tribune a tre colori, bandierine, il palco con la Coppa e il Latte in fondo alla valle
+    function bgVersanti(g, W, H, f) {
+      grad(g, 0, 0, W, H, ["#3f7fcf", "#9cc9ee", "#e8f3fb"]);
+      glow(g, 252, 34, 52, "255,240,190", 0.5); g.fillStyle = "#fff6d0"; g.beginPath(); g.arc(252, 34, 11, 0, 7); g.fill();
+      for (let i = 0; i < 3; i++) { const x = ((i * 130 + f * 0.12) % 380) - 40; g.fillStyle = "rgba(255,255,255,.75)"; g.beginPath(); g.ellipse(x, 28 + i * 13, 32, 6, 0, 0, 7); g.fill(); }
+      ridge(g, W, 98, 44, 2.1, "#6f86b8", true); ridge(g, W, 112, 34, 5.3, "#4a6296", true);
+      fogBand(g, W, 104, 128, f, ["#e8edf8", "#cfd6ec"]);
+      // le tribune: tre sezioni, file di teste che ondeggiano
+      const sec = [[0, 106, "#1b2f7a", "#e9a64a"], [106, 214, "#f2d21b", "#1a1a1a"], [214, 320, "#7a3fb0", "#e4d2f6"]];
+      sec.forEach(([x0, x1, c0, c1]) => { R(g, x0, 116, x1 - x0, 34, "#7d8499"); for (let r = 0; r < 3; r++) for (let i = 0; i < Math.floor((x1 - x0) / 7); i++) { const x = x0 + 3 + i * 7, y = 120 + r * 10 + (Math.sin(f / 14 + i * 1.3 + r) > 0.75 ? -1 : 0); R(g, x, y + 3, 4, 5, (i + r) % 2 ? c0 : c1); R(g, x, y, 4, 3, ["#e8bf98", "#c98f63", "#f0c9a8", "#8a5a34"][(i * 3 + r) % 4]); } });
+      // bandierine tese sopra le tribune
+      for (let i = 0; i < 32; i++) { const x = 4 + i * 10, y = 112 + Math.sin(i / 3) * 2, c = i < 11 ? ["#1b2f7a", "#e9a64a"] : i < 21 ? ["#f2d21b", "#1a1a1a"] : ["#7a3fb0", "#e4d2f6"]; g.fillStyle = c[i % 2]; g.beginPath(); g.moveTo(x, y); g.lineTo(x + 7, y); g.lineTo(x + 3.5, y + 6); g.closePath(); g.fill(); }
+      // il prato
+      g.fillStyle = "#3f9a55"; g.beginPath(); g.moveTo(0, 150); g.lineTo(320, 150); g.lineTo(320, 200); g.lineTo(0, 200); g.closePath(); g.fill();
+      for (let i = 0; i < 8; i++) R(g, i * 40, 150, 20, 50, "rgba(255,255,255,.07)");
+      g.strokeStyle = "rgba(255,255,255,.8)"; g.lineWidth = 1; g.beginPath(); g.moveTo(0, 162); g.lineTo(320, 162); g.stroke(); g.beginPath(); g.ellipse(160, 182, 34, 10, 0, 0, 7); g.stroke();
+      // il palco con la Coppa, a destra
+      R(g, 244, 136, 70, 14, "#6a4426"); R(g, 244, 136, 70, 3, "#a8764a"); R(g, 248, 139, 62, 6, "#a8242e");
+      glow(g, 279, 126, 22, "255,220,120", 0.5 + 0.1 * Math.sin(f / 15)); R(g, 273, 116, 12, 9, "#f2c84a"); R(g, 271, 118, 2, 5, "#f2c84a"); R(g, 285, 118, 2, 5, "#f2c84a"); R(g, 277, 125, 4, 6, "#d9a82a"); R(g, 274, 131, 10, 3, "#b88a1a"); R(g, 275, 118, 2, 4, "#fff3b0");
+      for (let i = 0; i < 16; i++) { const x = (i * 71 + f * 0.6) % 320, y = (i * 37 + f * (0.5 + (i % 3) * 0.2)) % 200; R(g, x, y, 2, 3, ["#e9a64a", "#f2d21b", "#c9a8ee", "#1b2f7a"][i % 4]); }
+    }
+    // i cinque epiloghi
+    function bgEpi(g, W, H, f, v) {
+      const SK = { a: ["#5f9fe0", "#f4d89a", "#fff1c8"], b: ["#080c26", "#1b2a5a", "#4a4f96"], c: ["#3f93e6", "#a8d8f6", "#eaf6ff"], d: ["#4a4f5c", "#7b8190", "#a9adb8"], e: ["#e8b24a", "#fbe7a4", "#fffbe6"] };
+      grad(g, 0, 0, W, H, SK[v]);
+      if (v === "b") for (let i = 0; i < 60; i++) R(g, (i * 71) % W, (i * 29) % 100, 1, 1, (f / 18 + i) % 7 < 0.5 ? "#ffffff" : "#aab4e8");
+      if (v === "a" || v === "e") { glow(g, 160, 104, 90, "255,236,170", v === "e" ? 0.75 : 0.55); g.fillStyle = "#fff4c0"; g.beginPath(); g.arc(160, 106, 15, Math.PI, 0); g.fill(); }
+      if (v === "e") for (let i = 0; i < 14; i++) { const a = -Math.PI + (i / 13) * Math.PI; g.fillStyle = `rgba(255,244,190,${0.1 + 0.05 * Math.sin(f / 20 + i)})`; g.beginPath(); g.moveTo(160, 106); g.lineTo(160 + Math.cos(a - 0.05) * 260, 106 + Math.sin(a - 0.05) * 260); g.lineTo(160 + Math.cos(a + 0.05) * 260, 106 + Math.sin(a + 0.05) * 260); g.closePath(); g.fill(); }
+      ridge(g, W, 112, 46, 1.3, v === "b" ? "#2a2f66" : v === "d" ? "#6f7480" : v === "e" ? "#d9a85a" : "#5a78b0", v !== "d");
+      ridge(g, W, 126, 34, 4.1, v === "b" ? "#1a1f4a" : v === "d" ? "#575c68" : v === "e" ? "#b88a4a" : "#3e5a90", v !== "d");
+      if (v === "a" || v === "c" || v === "e") { // la valle senza nebbia: terrazze, un fiume, tre campanili
+        grad(g, 0, 128, W, 72, v === "e" ? ["#d9c870", "#a8b860", "#5f8a48"] : ["#8ab86a", "#5f9a58", "#3a7048"]);
+        g.strokeStyle = "#7ac4e8"; g.lineWidth = 3; g.beginPath(); g.moveTo(0, 150); for (let x = 0; x <= W; x += 20) g.lineTo(x, 148 + Math.sin(x / 26 + f / 80) * 3); g.stroke();
+        [[0.16, "#e9a64a"], [0.5, "#f2d21b"], [0.84, "#c9a8ee"]].forEach(([p, c]) => { const x = W * p; R(g, x - 3, 128, 6, 22, "#e8e0d0"); R(g, x - 4, 124, 8, 5, c); R(g, x - 1, 116, 2, 8, c); for (let k = 0; k < 4; k++) { R(g, x - 26 + k * 12, 150 + (k % 2) * 4, 9, 7, "#c4a77d"); R(g, x - 24 + k * 12, 152 + (k % 2) * 4, 2, 2, "#ffcf6b"); } });
+        if (v === "c") fogBand(g, W, 120, 150, f * 0.5, ["#f2f4fb", "#e0e6f4"]);
+      } else { fogBand(g, W, 118, H, f, v === "b" ? ["#6a5fa0", "#3a3470"] : ["#b0b5be", "#8a909c"]); }
+      if (v === "a") { // la numero uno scende dal cavo, con le finestre accese
+        g.strokeStyle = "#2a2f44"; g.lineWidth = 1; g.beginPath(); g.moveTo(0, 40); g.lineTo(W, 96); g.stroke();
+        const t = ((f * 0.002) % 1), cx = 40 + t * 150, cy = 40 + (cx / W) * 56; R(g, cx, cy, 1, 6, "#2a2f44"); R(g, cx - 10, cy + 5, 20, 13, "#6a4a2c"); R(g, cx - 10, cy + 5, 20, 2, "#8a6238"); R(g, cx - 7, cy + 9, 5, 5, "#7fe3d0"); R(g, cx + 2, cy + 9, 5, 5, "#7fe3d0"); glow(g, cx, cy + 12, 22, "90,235,210", 0.45);
+        for (let i = 0; i < 11; i++) { const x = 70 + i * 17, y = 178 + (i % 3) * 3; R(g, x, y, 5, 10, i % 2 ? "#1b2f7a" : "#e9a64a"); R(g, x + 1, y - 4, 3, 4, "#e0b48a"); }
+        R(g, 150, 168, 12, 3, "#d9a82a"); R(g, 152, 160, 8, 8, "#f2c84a"); glow(g, 156, 164, 20, "255,220,120", 0.5);
+      }
+      if (v === "b") { // il Latte alto, un puntino turchese e la numero uno che sale vuota
+        glow(g, 188, 150, 50, "90,235,210", 0.55 + 0.1 * Math.sin(f / 16)); R(g, 184, 148, 8, 4, "#7fe3d0");
+        g.strokeStyle = "#3a3f66"; g.lineWidth = 1; g.beginPath(); g.moveTo(10, 120); g.lineTo(188, 150); g.stroke();
+        const t = ((f * 0.0016) % 1), cx = 20 + t * 160, cy = 122 + (cx - 10) / 178 * 28; R(g, cx, cy, 1, 5, "#3a3f66"); R(g, cx - 8, cy + 4, 16, 10, "#6a4a2c"); R(g, cx - 3, cy + 7, 5, 5, "#7fe3d0"); glow(g, cx, cy + 10, 16, "90,235,210", 0.4);
+        for (let i = 0; i < 5; i++) { lampGlow(g, 24 + i * 30, 182, f + i * 5); R(g, 24 + i * 30, 184, 2, 14, "#2e3446"); }
+        R(g, 238, 168, 56, 32, "#2a2f44"); R(g, 242, 172, 48, 9, "#c8422e"); g.font = "bold 7px monospace"; g.fillStyle = "#ffd98a"; g.fillText("6:43", 255, 179);
+      }
+      if (v === "c") { // il campo vero, due porte, i vivi in pettorina
+        R(g, 0, 160, W, 40, "#3f9a55"); for (let i = 0; i < 8; i++) R(g, i * 40, 160, 20, 40, "rgba(255,255,255,.07)");
+        R(g, 22, 140, 2, 24, "#f2f2f6"); R(g, 22, 140, 22, 2, "#f2f2f6"); R(g, 280, 140, 2, 24, "#f2f2f6"); R(g, 260, 140, 22, 2, "#f2f2f6");
+        for (let i = 0; i < 6; i++) R(g, 24 + i * 3.5, 142, 1, 22, "rgba(255,255,255,.4)");
+        const bib = ["#1b2f7a", "#e9a64a", "#f2d21b", "#7a3fb0", "#2f7ae0", "#c8422e"];
+        for (let i = 0; i < 12; i++) { const x = 60 + i * 17 + Math.sin(f / 10 + i) * 2, y = 170 + (i % 3) * 5; R(g, x, y, 6, 10, bib[i % 6]); R(g, x + 1, y - 4, 4, 4, ["#e8bf98", "#c98f63", "#f0c9a8"][i % 3]); }
+        glow(g, 160, 176, 12, "255,255,255", 0.5); g.fillStyle = "#f4f2ea"; g.beginPath(); g.arc(160, 180 + Math.abs(Math.sin(f / 9)) * -6, 4, 0, 7); g.fill();
+        R(g, 112, 120, 96, 12, "#1b2f7a"); R(g, 112, 120, 96, 2, "#e9a64a"); g.font = "bold 7px sans-serif"; g.fillStyle = "#f2f6ff"; g.textAlign = "center"; g.fillText("STAMBECCHI · ISCRIZIONI APERTE", 160, 129); g.textAlign = "left";
+      }
+      if (v === "d") { // cartelli, una gru, la cabina che scende vuota e la lavagna col gesso
+        R(g, 30, 124, 60, 24, "#e8e0c8"); R(g, 30, 124, 60, 3, "#a8242e"); g.font = "bold 8px sans-serif"; g.fillStyle = "#a8242e"; g.textAlign = "center"; g.fillText("VENDESI", 60, 140); g.textAlign = "left"; R(g, 58, 148, 4, 18, "#4a4a52");
+        R(g, 230, 100, 4, 70, "#c8a02a"); R(g, 190, 100, 70, 4, "#c8a02a"); g.strokeStyle = "#8a6a1a"; g.beginPath(); g.moveTo(194, 104); g.lineTo(194, 130); g.stroke(); R(g, 190, 130, 10, 6, "#c8a02a");
+        R(g, 250, 160, 38, 14, "#c8a02a"); R(g, 256, 154, 16, 8, "#c8a02a"); R(g, 252, 172, 10, 6, "#2a2a2e"); R(g, 276, 172, 10, 6, "#2a2a2e");
+        g.strokeStyle = "#2a2f44"; g.beginPath(); g.moveTo(0, 60); g.lineTo(W, 118); g.stroke(); const t = ((f * 0.0018) % 1), cx = 280 - t * 240, cy = 60 + (cx / W) * 58; R(g, cx, cy, 1, 6, "#2a2f44"); R(g, cx - 9, cy + 5, 18, 11, "#5a4a3c"); R(g, cx - 6, cy + 8, 4, 4, "#2a2f44"); R(g, cx + 2, cy + 8, 4, 4, "#2a2f44");
+        R(g, 112, 166, 96, 30, "#1a3a2a"); R(g, 112, 166, 96, 2, "#8a6a46"); g.font = "bold 12px sans-serif"; g.fillStyle = "#cfeee6"; g.textAlign = "center"; g.fillText("ASPETTO", 160, 187); g.textAlign = "left";
+      }
+      if (v === "e") { // il tabellone a 90:00 e il fischietto d'ottone che brilla
+        R(g, 112, 16, 96, 30, "#0a1226"); R(g, 112, 16, 96, 2, "#f2c84a"); R(g, 112, 44, 96, 2, "#f2c84a"); g.font = "bold 15px monospace"; g.textAlign = "center"; g.fillStyle = `rgba(255,240,170,${0.85 + 0.15 * Math.sin(f / 12)})`; g.fillText("90:00", 160, 34); g.font = "bold 7px sans-serif"; g.fillStyle = "#7fe3d0"; g.fillText("FINE · TUTTI PRESENTI", 160, 42); g.textAlign = "left";
+        glow(g, 160, 150, 44, "255,240,170", 0.6); g.fillStyle = "#d9a82a"; g.beginPath(); g.arc(160, 154, 10, 0, 7); g.fill(); R(g, 160, 148, 20, 6, "#d9a82a"); g.fillStyle = "#2a2418"; g.beginPath(); g.arc(160, 154, 4, 0, 7); g.fill(); R(g, 144, 150, 14, 2, "#c8422e");
+        for (let i = 0; i < 30; i++) { const x = (i * 59 + f * 0.5) % W, y = (i * 31 + f * (0.4 + (i % 4) * 0.15)) % H; R(g, x, y, 2, 2, ["#f2c84a", "#7fe3d0", "#ffffff", "#e9a64a"][i % 4]); }
+      }
+    }
+    BGS.vl_versanti = bgVersanti;
+    ["a", "b", "c", "d", "e"].forEach((v) => { BGS["vl_epi_" + v] = (g, W, H, f) => bgEpi(g, W, H, f, v); });
+    try { if (window.__lbBg && window.__lbBg.register) window.__lbBg.register("vl_finale", { draw: (g, W, H, f) => bgEpi(g, W, H, f, "a") }); } catch (e) { /* senza il registro dei film si usa la copertina */ }
+
+    // ============================================================================================ tessere nuove: 1 palco con la Coppa  2 tribuna  3 tabellone
+    X.PAINT["1"] = function (sx, sy, tx, ty, fr) {
+      floorPaint(",", sx, sy, tx, ty); const g = GP;
+      const L = at(tx - 1, ty) !== "1", Rr = at(tx + 1, ty) !== "1", Tt = at(tx, ty - 1) !== "1", Bb = at(tx, ty + 1) !== "1";
+      P(sx + (L ? 1 : 0), sy + (Tt ? 1 : 0), 16 - (L ? 1 : 0) - (Rr ? 1 : 0), 16 - (Tt ? 1 : 0) - (Bb ? 1 : 0), "#6a4426");
+      if (Tt) P(sx, sy, 16, 3, "#a8764a"); if (Bb) P(sx, sy + 13, 16, 3, "#4a2c18");
+      P(sx + 2, sy + 4, 12, 8, "#a8242e"); P(sx + 2, sy + 4, 12, 1, "#d9a441"); P(sx + 2, sy + 11, 12, 1, "#d9a441");
+      if (L) { P(sx, sy + 3, 2, 12, "#8a5a34"); P(sx + 2, sy + 15, 2, 1, "#00000044"); }
+      if (tx === 44 && ty === 11) { // la Coppa dei Tre Versanti
+        g.save(); g.globalCompositeOperation = "lighter"; glow(g, sx + 8, sy + 6, 20, "255,220,120", 0.45 + 0.12 * Math.sin(fr / 14)); g.restore();
+        P(sx + 4, sy + 1, 8, 6, "#f2c84a"); P(sx + 2, sy + 2, 2, 3, "#f2c84a"); P(sx + 12, sy + 2, 2, 3, "#f2c84a"); P(sx + 7, sy + 7, 2, 4, "#d9a82a"); P(sx + 5, sy + 11, 6, 2, "#b88a1a"); P(sx + 5, sy + 2, 2, 3, "#fff3b0");
+        P(sx + 3, sy + 3, 1, 2, "#1b2f7a"); P(sx + 12, sy + 3, 1, 2, "#7a3fb0"); P(sx + 2, sy + 3, 1, 1, "#f2d21b");
+      }
+      if (tx === 44 && ty === 12) { P(sx + 7, sy + 2, 2, 12, "#3a3f50"); P(sx + 5, sy + 1, 6, 4, "#c0c4d0"); P(sx + 6, sy + 2, 4, 2, "#2a2f44"); P(sx + 5, sy + 13, 6, 2, "#2a2f44"); }
+    };
+    X.PAINT["2"] = function (sx, sy, tx, ty, fr) {
+      floorPaint(",", sx, sy, tx, ty); const c = SECC(tx);
+      P(sx, sy, 16, 16, "#7d8499"); P(sx, sy, 16, 1, "#a5acc0"); P(sx, sy + 15, 16, 1, "#5a6076");
+      for (let i = 0; i < 4; i++) {
+        const bob = Math.sin(fr / 13 + tx * 1.3 + i * 2.1 + ty) > 0.82 ? 1 : 0, x = sx + 1 + i * 4, h = hash(tx * 7 + ty * 3 + i);
+        P(x, sy + 8 - bob, 3, 5, c[(i + tx) % 2]); P(x, sy + 5 - bob, 3, 3, ["#e8bf98", "#c98f63", "#f0c9a8", "#8a5a34"][h % 4]);
+        if (h % 9 === 0) P(x + (i % 2 ? 3 : -1), sy + 3 - bob, 1, 5, c[0]); // un braccio alzato
+      }
+    };
+    X.PAINT["3"] = function (sx, sy, tx, ty) {
+      floorPaint(",", sx, sy, tx, ty); P(sx, sy, 16, 16, "#0a1226"); P(sx, sy, 16, 2, "#e9a64a"); P(sx, sy + 14, 16, 2, "#e9a64a");
+      if (at(tx - 1, ty) !== "3") P(sx, sy, 2, 16, "#e9a64a"); if (at(tx + 1, ty) !== "3") P(sx + 14, sy, 2, 16, "#e9a64a");
+    };
+    function lumi8(g, cx, cy) {
+      if (!(END() === "b" || END() === "a" || END() === "e")) return;
+      g.save(); g.globalCompositeOperation = "lighter"; const t0x = Math.floor(cx / TS), t0y = Math.floor(cy / TS), fr = X.frNow();
+      for (let ty = t0y; ty <= t0y + 13; ty++) for (let tx = t0x; tx <= t0x + 21; tx++) { const ch = at(tx, ty), x = tx * TS - cx + 8, y = ty * TS - cy + 8; if (ch === "9") glow(g, x, y, 34, "90,235,210", END() === "b" ? 0.4 : 0.22); else if (ch === "l") glow(g, x, y - 4, 22, "255,220,150", 0.25); else if (ch === "1" && tx === 44 && ty === 11) glow(g, x, y, 26, "255,225,140", 0.18 + 0.05 * Math.sin(fr / 12)); }
+      g.restore();
+    }
+    const tab8 = () => { const a = F.get("m8a_a", 0) + F.get("m8b_a", 0), b = F.get("m8a_b", 0) + F.get("m8b_b", 0); return S() >= 2 ? [a, b] : [0, 0]; };
+
+    // ============================================================================================ le zone
+    const PRE_POS = {
+      vl_zelo: [22, 12], vl_teodora: [5, 10], vl_fosco: [6, 12], vl_cornelio: [40, 8], vl_mirtilla: [14, 23], vl_noemi: [18, 7], vl_ottavia: [10, 7], vl_gedeone: [12, 23], vl_ettore: [16, 23],
+      vl_vermiglio: [33, 22], vl_sigillo: [35, 22], vl_vica: [30, 7], vl_neve: [26, 7], vl_gaudenzio: [34, 7], vl_tonio: [33, 10], vl_gisella: [33, 16],
+    };
+    const SQ_POS = { vl_berto: [12, 13], vl_aurelio: [23, 10], vl_sasso: [15, 9], vl_pio: [15, 13], vl_duilio: [15, 17], vl_gino: [18, 10], vl_nando: [18, 16], vl_oreste: [26, 10], vl_mirella: [26, 16], vl_tullio: [29, 13] };
+    const zones = {
+      vl_versanti: {
+        name: "Vallombra · Lo Stadio dei Tre Versanti", short: "Lo Stadio dei Tre Versanti", sub: "Lunedì a mezzogiorno, tre tribune e una Coppa in ritardo", w: 46, h: 27, start: [5, 13], theme: "napoli", bg: "vl_versanti", moodMin: 0,
+        item: ["Scheggia di lumina", "Schegge"], itemCos: "vl_versanti_cap", items: [[2, 24], [43, 24], [22, 25]],
+        act: { "1": "Sali sul palco della Coppa", "2": "Guarda la tribuna", "3": "Guarda il tabellone", "9": "La cabina numero uno", U: "Guarda il pallone", l: "Guarda il lampione", x: "Guarda il banchetto", b: "Guarda la panca", r: "Guarda la valle" },
+        areas: [[10, 8, 35, 18, "Il prato della Finale"], [7, 7, 38, 19, "La pista in terra rossa"], [8, 5, 37, 6, "La tribuna dei Tre Versanti"], [8, 20, 37, 21, "La tribuna sud"], [39, 8, 44, 14, "Il palco della Coppa"], [1, 9, 6, 16, "L'arrivo della cabina"], [1, 22, 44, 25, "Il piazzale dei banchetti"], [1, 4, 44, 4, "Il camminamento"]],
+        hints: (s) => ({
+          "Il prato della Finale": s <= 3 ? "Il prato della Finale, lucido come un biliardo, con le porte a OVEST e a EST. Al centro il pallone e l'arbitro Zelo." : "Il prato dopo la Finale, ancora con i coriandoli. Al centro il pallone, che nessuno ha il coraggio di sgonfiare.",
+          "La pista in terra rossa": "La pista di terra rossa che gira attorno al prato: è il camminamento dei raccattapalle e dei sindaci in ritardo.",
+          "La tribuna dei Tre Versanti": "Tre colori, tre campanili: blu notte e ambra a OVEST, giallo fluo al CENTRO, viola marmotta a EST. Tutti in piedi, alcuni con il termos.",
+          "La tribuna sud": "La tribuna sud, colma come la nord. Un signore agita una bandiera con le tre sciarpe annodate: ha capito che era la cosa giusta da fare.",
+          "Il palco della Coppa": s <= 2 ? "Il palco della Coppa, a EST oltre il tappeto rosso: un microfono con la spugna e la Coppa dei Tre Versanti, ammaccata. Per ora è presto." : s === 3 ? "Il palco della Coppa, a EST oltre il tappeto rosso: il microfono è aperto, Radio Nebbia in diretta e la Coppa che aspetta." : "Il palco della Coppa a EST: il microfono è ancora acceso. Da qui puoi riprovare il finale.",
+          "L'arrivo della cabina": "La stazione d'arrivo della numero uno, a OVEST: una pensilina, una panchina e il cavo che canta la sua nota.",
+          "Il piazzale dei banchetti": "Il piazzale dei banchetti sotto la tribuna: termos, panini, un tavolo del Rifugio Tre Tazze con il cartello «OGGI SI PAGA IN APPLAUSI».",
+          "Il camminamento": "Il camminamento sopra la valle, con i lampioni di lumina e le bandierine dei tre versanti.",
+          "Lo Stadio dei Tre Versanti": "Lo Stadio dei Tre Versanti.",
+        }),
+        intro: [
+          ["voce", "Lunedì, mezzogiorno. Lo stadio dei Tre Versanti è un anfiteatro di roccia e di assi appeso sopra la valle, a metà strada tra Vallombra, Cima Alta e Valle Fonda: tre campanili e un solo prato, per ragioni che il Comune non ha mai chiarito e tre bilanci hanno rimborsato a metà.", BG.V],
+          ["voce", "Le tribune sono piene di tre colori: blu notte e ambra a OVEST, giallo fluo al CENTRO, viola marmotta a EST. Nessuno ha capito come siano arrivati tutti in tre ore. Mirtilla sostiene di aver telefonato. Noemi di aver trasmesso. La verità, come sempre, è che ognuno ha detto all'altro «vai pure, che io arrivo» ed è arrivato per primo.", BG.V],
+          ["voce", "Sul tabellone, in cifre gialle: COPPA DEI TRE VERSANTI · FINALE. Sotto: STAMBECCHI – SELEZIONE DEI DUE VERSANTI. (Per risparmiare, il regolamento ha unito le due finaliste in una sola; Cornelio la chiama «un'idea economica ed elegante», Remo «un'idea e basta».) Il microfono sul palco, a EST, è già acceso: aspetta soltanto che finisca la partita.", BG.V],
+        ],
+        npcs: (s) => {
+          const c = compId(), e = END(), o = [], P_ = Object.assign({}, PRE_POS);
+          P_[c] = [5, 15];
+          const ids = Object.keys(P_).filter((id) => !(id === "vl_fosco" && !su()));
+          if (s >= 4) { P_.vl_zelo = [22, 12]; if (e === "d") { P_.vl_vermiglio = [37, 10]; P_.vl_sigillo = [37, 13]; } if (e === "b" || e === "d") { P_.vl_teodora = [4, 14]; } }
+          ids.forEach((id) => o.push({ id, at: P_[id] }));
+          o.push({ id: remoId(), at: remoAlly() ? [11, 9] : [30, 9] });
+          if (s >= 4 && (e === "a" || e === "e")) { Object.keys(SQ_POS).forEach((id) => o.push({ id, at: SQ_POS[id] })); const t = o.find((n) => n.id === "vl_teodora"); if (t) t.at = [22, 9]; }
+          return o;
+        },
+        build(L) {
+          const { lay, put } = L;
+          lay(0, 0, 45, 26, "a"); lay(1, 0, 44, 2, "f"); lay(1, 3, 44, 3, "r"); lay(1, 4, 44, 25, ","); lay(1, 22, 44, 25, "p");
+          lay(7, 7, 38, 19, ";"); lay(10, 8, 35, 18, "y");
+          lay(8, 5, 37, 6, "2"); lay(8, 20, 37, 21, "2"); lay(19, 5, 24, 5, "3");
+          lay(39, 11, 42, 12, "c"); lay(43, 10, 44, 13, "1"); lay(2, 12, 3, 13, "9");
+          [[3, 5], [3, 19], [41, 5], [41, 19], [6, 22], [40, 22]].forEach(([x, y]) => put(x, y, "l"));
+          [[9, 24], [10, 24], [19, 24], [20, 24], [27, 24], [28, 24]].forEach(([x, y]) => put(x, y, "x"));
+          put(30, 23, "b"); put(31, 23, "b"); put(22, 13, "U");
+        },
+        decor(cx, cy, d) {
+          const g = GP, X_ = d.X, Y_ = d.Y, fr = d.fr, e = END() || "x", s = S();
+          paintVista(g, X_(1), Y_(0), 44 * TS, 3 * TS, fr, e);
+          // le bandierine tese sul camminamento
+          for (let i = 0; i < 88; i++) { const x = X_(1) + i * 8; if (x < -10 || x > 330) continue; const y = Y_(4) + 3 + Math.sin(i / 7) * 2, c = i < 28 ? ["#1b2f7a", "#e9a64a"] : i < 58 ? ["#f2d21b", "#1a1a1a"] : ["#7a3fb0", "#e4d2f6"]; g.fillStyle = c[i % 2]; g.beginPath(); g.moveTo(x, y); g.lineTo(x + 6, y); g.lineTo(x + 3 + Math.sin(fr / 20 + i) * 1.2, y + 6); g.closePath(); g.fill(); }
+          // il prato: righe, cerchio, aree e porte con la rete
+          const x0 = X_(10) + 0.5, y0 = Y_(8) + 0.5, w = 26 * TS - 1, h = 11 * TS - 1;
+          if (x0 > -700 && x0 < 400) {
+            g.strokeStyle = "rgba(255,255,255,.85)"; g.lineWidth = 1; g.strokeRect(x0, y0, w, h); g.beginPath(); g.moveTo(x0 + w / 2, y0); g.lineTo(x0 + w / 2, y0 + h); g.stroke();
+            g.beginPath(); g.arc(x0 + w / 2, y0 + h / 2, 26, 0, 7); g.stroke(); g.strokeRect(x0, y0 + 2.5 * TS, 3.5 * TS, 6 * TS); g.strokeRect(x0 + w - 3.5 * TS, y0 + 2.5 * TS, 3.5 * TS, 6 * TS);
+            [[x0 - 7, -1], [x0 + w, 1]].forEach(([gx]) => { g.strokeStyle = "#f2f2f6"; g.lineWidth = 2; g.strokeRect(gx, y0 + 4 * TS, 7, 3 * TS); g.strokeStyle = "rgba(255,255,255,.35)"; g.lineWidth = 1; for (let k = 1; k < 3; k++) { g.beginPath(); g.moveTo(gx, y0 + 4 * TS + k * 16); g.lineTo(gx + 7, y0 + 4 * TS + k * 16); g.stroke(); } });
+          }
+          // il tabellone
+          const tx0 = X_(19), ty0 = Y_(5);
+          if (onScr(tx0, ty0)) { const [a, b] = tab8(); g.textAlign = "center"; g.fillStyle = "#e6fffa"; g.font = "bold 5px sans-serif"; g.fillText("FINALE · TRE VERSANTI", tx0 + 3 * TS, ty0 + 6); g.font = "bold 8px sans-serif"; g.fillStyle = "#f2c84a"; g.fillText(`${a} – ${b}`, tx0 + 3 * TS, ty0 + 14); g.textAlign = "left"; }
+          plaque(g, "PALCO ▸", X_(41.5), Y_(9) + 6); plaque(g, "◂ CABINA", X_(4), Y_(11) + 2);
+          if (e === "a" || e === "e") plaque(g, "1998 · TUTTI ARRIVATI", X_(40.5), Y_(14) + 6);
+          if (e === "b") { glow(g, X_(22), Y_(3), 40, "90,235,210", 0.35 + 0.1 * Math.sin(fr / 18)); plaque(g, "UN POSTO IN PANCHINA, SEMPRE LIBERO", X_(30), Y_(23) + 12); }
+          if (e === "c") plaque(g, "STAMBECCHI · ISCRIZIONI APERTE", X_(22), Y_(25) + 4);
+          if (e === "d") { plaque(g, "VENDESI · LUMEN RESORT & SPA", X_(22), Y_(23) + 12); R(g, X_(33), Y_(23), 22, 12, "#c8a02a"); R(g, X_(35), Y_(22) + 4, 8, 6, "#c8a02a"); R(g, X_(33), Y_(23) + 12, 6, 4, "#2a2a2e"); R(g, X_(33) + 14, Y_(23) + 12, 6, 4, "#2a2a2e"); }
+          if (s >= 3 && e === "") for (let i = 0; i < 18; i++) { const x = (i * 61 + fr * 0.4) % 330, y = (i * 43 + fr * (0.5 + (i % 3) * 0.2)) % 210; R(g, x, y, 2, 3, ["#e9a64a", "#f2d21b", "#c9a8ee", "#1b2f7a"][i % 4]); }
+          if (e === "e") for (let i = 0; i < 26; i++) { const x = (i * 59 + fr * 0.45) % 330, y = (i * 37 + fr * (0.4 + (i % 4) * 0.15)) % 210; R(g, x, y, 2, 2, ["#f2c84a", "#7fe3d0", "#ffffff", "#e9a64a"][i % 4]); }
+        },
+        top(cx, cy, d) {
+          const g = GP, e = END();
+          if (e === "b") { g.fillStyle = "rgba(24,26,80,.34)"; g.fillRect(0, 0, 320, 200); } else if (e === "d") { g.fillStyle = "rgba(70,74,84,.24)"; g.fillRect(0, 0, 320, 200); } else if (e === "e") { g.fillStyle = "rgba(255,226,140,.12)"; g.fillRect(0, 0, 320, 200); } else moodTint(g);
+          tileLights(g, cx, cy); lumi8(g, cx, cy);
+        },
+      },
+    };
+    // lo stadio, i saluti e il fischio avvengono nel Campo Sospeso del capitolo 7: qui cambiano soltanto i testi dei luoghi e il tabellone
+    X.patch("vl_sospeso", N, {
+      hints: () => ({
+        "Il Campo Sospeso": "Il prato dell'ultimo secondo: 89:59, due a uno. Il pallone è nella rete e la squadra aspetta il fischio, con la cortesia di chi ha aspettato ventisei anni.",
+        "Le tribune di lumi": "Le tribune di lumi, tutte accese e immobili: un pubblico che aspetta, con il fiato in gola, l'ultimo suono.",
+      }),
+      decor(cx, cy, d) {
+        if (!has("fis8")) return;
+        const g = GP, X_ = d.X, Y_ = d.Y, tx0 = X_(18), ty0 = Y_(0) + 4;
+        if (!onScr(tx0, ty0)) return;
+        R(g, tx0, ty0, 10 * TS, 24, "#0a1226"); R(g, tx0, ty0, 10 * TS, 2, "#f2c84a"); R(g, tx0, ty0 + 22, 10 * TS, 2, "#f2c84a");
+        g.font = "bold 13px monospace"; g.textAlign = "center"; g.fillStyle = "#fff3b0"; g.fillText("90:00", tx0 + 5 * TS, ty0 + 14); g.font = "bold 6px sans-serif"; g.fillStyle = "#7fe3d0"; g.fillText("STAMBECCHI 2 – 1 OMBRE · FINE", tx0 + 5 * TS, ty0 + 21); g.textAlign = "left";
+      },
+    });
+
+    // ============================================================================================ Parte I · il Campo Sospeso all'ultimo secondo
+    const SAL = {
+      vl_sasso: ["Se il fischio arriva e io sparisco, dì ai miei che la scritta sulla schiena era vera: mi hanno aspettato. Tutti. Anche tu, che sei arrivato dopo di me.", "Essere l'ultimo ad arrivare e sentirsi aspettato è come il caffè dopo una notte storta: non cambia niente e cambia tutto."],
+      vl_pio: ["Dì a mia moglie che la bandiera è la cosa più bella che abbia mai visto da un campo. Se non la trovi, ricomprane una uguale: lei capirà che sei stato tu.", "Un difensore centrale sta in mezzo, dicevo. Ho imparato che si sta in mezzo anche tra chi parte e chi resta, e che non è un brutto posto."],
+      vl_duilio: ["Appena finisce telefono a mia sorella. Se non risponde, mangio l'arrosto in memoria. Se risponde, mangio l'arrosto e basta: è un piano a prova di fischio.", "Il sinistro pensa, il destro corre: oggi si sono messi d'accordo e sono scappati insieme. È il momento più felice della mia carriera di terzino."],
+      vl_gino: ["La gomma l'ho sputata, ma la menta mi è rimasta addosso. Se vedi un fantasma che profuma di dentifricio, sono io.", "Sai che cosa ho capito? Che ventisei anni si possono masticare, ma non mandar giù. Meglio sputarli e andare."],
+      vl_nando: ["Il tram era il 4. Lo ripeto per essere sicuro di non dimenticarlo, quando succede quello che succede. Se qualcuno trova un biglietto del 4, è mio.", "Il mediano passa la palla e non viene mai citato nel racconto. Se oggi lo racconti, di' soltanto: «Nando ha passato». Mi basta."],
+      vl_oreste: ["Ho scritto la formazione definitiva su un biglietto da visita: «Squadra del 6:43. Ritirata con onore». Non ho altro da aggiungere. Anzi sì: ci sono le virgole giuste.", "Una buona formazione non si vede alla partenza: si vede quando nessuno ricorda più chi ha giocato dove. Oggi nessuno ricorda niente, e funziona."],
+      vl_mirella: ["Palla a me. Lo dirò anche dopo, in qualunque posto vada. Non lo dico per la palla: lo dico perché mi piace come suona.", "Il fulmine sul petto si è acceso quando è entrato il tuo tiro. Se mi spegnessi adesso, mi lasci almeno il fulmine."],
+      vl_tullio: ["Ho scritto «Gentile signora» e mi sono fermato lì. Mi pare un buon inizio, per una lettera che aspetta ventisei anni.", "Se non dovessi più rivederla, dille che il bacio sul colletto ha funzionato. Il geometra no: ma quello è un altro reparto."],
+    };
+    function giocatore(id) {
+      const k = id.slice(3), first = !has("sl8_" + k), t = SAL[id];
+      F.set("sl8_" + k, true);
+      say(sw([[id, T(first ? t[0] : t[1])]], BG.S), () => {
+        if (first) { const n = saluti(); toast(`Saluti: ${n} su 8`); if (n >= 8) { const m = reward("vl_c8_saluti", { coins: 8 }); if (m.length) toast(m.join(" · ")); } }
+        done();
+      });
+    }
+    function teodoraS() {
+      const L = ["Ho il registro aperto alla riga di mio fratello. Sono ventisei anni che quella riga dice «IN SOSPESO». Stasera vorrei poterla correggere con un solo verbo.", "Non ti dico «sbrigati», che sarebbe il mio mestiere. Ti dico: prenditi il tempo. Il minuto ne ha da vendere.", "Quando fischia, io guardo l'orologio. Non per l'ora: per vedere se si muove. Ho paura di quello che vedo e più paura di quello che non vedo."];
+      say(sw([["vl_teodora", chip(L)]], BG.S), done);
+    }
+    function foscoS() {
+      const L = su() ? ["Ho lo straccio in tasca. Berto mi ha detto di conservarlo: «Per quando ti servirà spolverare una cosa vera».", "Dopo il fischio io e Berto abbiamo una questione di nodi da sistemare. Ventisei anni di nodi a farfalla, e io ne ho imparato uno."]
+        : ["Resto con Berto, qualunque cosa succeda. L'ho promesso a lui e lo dico a te, che hai il fischietto.", "Ho spolverato la porta ancora una volta. Dicono che non ci sia polvere nel Latte. Io la trovo ogni volta, se ci credo abbastanza."];
+      say(sw([["vl_fosco", chip(L)]], BG.S), done);
+    }
+    function bertoS() {
+      const L = ["Ho tenuto la porta ventisei anni. Stasera la lascio aperta, senza chiuderla a chiave.", "Se il fischio arriva mi tolgo i guanti. Non ricordo come si stringe una mano senza l'odore della pelle: ho bisogno di un momento.", "Dita aperte, polso morbido. Anche un minuto che finisce è un tiro da parare."];
+      say(sw([["vl_berto", chip(L)]], BG.S), done);
+    }
+    function aurelioS() {
+      const n = saluti();
+      const pre = n >= 8 ? "Hai salutato tutti. Perfino Tullio, che parla di una signora di cui non ricorda più il nome." : n >= 4 ? "Hai salutato mezza squadra. L'altra mezza si offende con garbo." : "Prima di chiudere un minuto è buona norma salutare chi ci ha giocato dentro. Ma se hai fretta… no, non averla: il fischio è dopo.";
+      ask("vl_aurelio", `${pre} «Allora? Siamo all'ultimo secondo. Il pallone è in rete, il tabellone aspetta, e il fischio non è di nessuno finché non lo decidi.»`, [
+        { label: "Fischia il finale", sub: "89:59 · due a uno", cls: "hot", fn: fischioVia },
+        { label: "Prima saluto gli altri", sub: `Saluti ${n} su 8`, fn: done },
+      ], BG.S);
+    }
+    function fischioVia() {
+      if (has("rep8") && !has("w8")) {
+        return ask("vl_aurelio", "«Chi dà il fischio, stavolta? Lo sai che si può cambiare idea, nel Latte: è l'unico posto in cui si può.»", [
+          { label: "L'arbitro: l'ha dato storto, gli spetta darlo dritto", sub: "Gaudenzio Fischietti", fn: () => fischioScena("arbitro") },
+          { label: "Aurelio: è il suo minuto", sub: "Il capitano", fn: () => fischioScena("aurelio") },
+          ...(has("fischietto") ? [{ label: "Io: ho il fischietto dei minatori", sub: "Il tredicesimo", fn: () => fischioScena("campione") }] : []),
+          { label: "Nessuno: il campo capirà da solo", sub: "Lasciare che accada", fn: () => fischioScena("campo") },
+        ], BG.S);
+      }
+      fischioScena(F.get("fisc7", "campo"));
+    }
+    function fischioScena(w) {
+      F.set("w8", w); F.set("fis8", true); X.refreshZone();
+      const a = w === "arbitro" ? [
+        ["voce", "Gaudenzio Fischietti si toglie dalla bocca il fischietto d'ottone, dove stava dal '98, e lo guarda come si guarda una lettera che arriva con ventisei anni di ritardo. Lo porta alle labbra piano, come si porta alle labbra una tazza troppo piena."],
+        ["vl_arbitro", "L'ho dato storto una volta. (inspira) Questo è per il fallo che non c'era."],
+        ["voce", "Il fischio è corto, pulito, senza tremito: una riga tracciata col righello. È il primo fischio dritto di Gaudenzio Fischietti da ventisei anni, e si sente: anche le Ombre si voltano, come davanti a una cosa fatta bene."],
+        ["vl_arbitro", "(si guarda le mani, che non tremano) Dritto. L'ho sentito dritto. Adesso posso anche smettere di essere un'eco."],
+      ] : w === "aurelio" ? [
+        ["voce", "Aurelio ti guarda, poi guarda la tasca dove tieni l'ottone. «Mi presti il fischietto dei minatori?» Glielo dai. Lui lo prende con due dita, come si prende una cosa che ha pesato troppo sulla coscienza di un altro."],
+        ["vl_aurelio", "Il «tutti fuori» l'ho gridato, ma non l'ho mai fischiato. Cornelio non fischiò. Allora fischio io, adesso, e chi doveva sentire senta."],
+        ["voce", "Il fischio di Aurelio non è forte: è lungo, e ha dentro tutta la voce che gli è tornata. Parte da una gola, passa per un'ottava di rabbia e arriva a una nota che somiglia a «arrivederci». Dal fondo del campo i suoi dieci si voltano e sorridono, come quando si sente il proprio nome in un posto lontano."],
+      ] : w === "campione" ? [
+        ["voce", "Tutti si voltano verso di te. Nessuno lo ha detto, ma nessuno è sorpreso: è un'idea che il campo aveva già prima di te. Tiri fuori il fischietto d'ottone del turno di notte, con il nastro rosso sbiadito."],
+        ["vl_cornelio", "(sottovoce) Quel fischietto ha ventisei anni di silenzio dentro. Soffia piano: gli è rimasto il fiato di tutti."],
+        ["voce", "Soffi. Esce un fischio solo, né più forte né più lungo del necessario, pulito come un vetro dopo una nebbia. Dall'altra parte del campo i grigi fanno un cenno di cortesia, come a una buona partita."],
+        ["vl_aurelio", "Lo sapevo. Non come si sa una cosa che capita: come si sa una cosa che si è scelto di sapere. Il tredicesimo fischia. Ecco com'è fatto, il tredicesimo."],
+      ] : [
+        ["voce", "Nessuno si muove. Passa un secondo, poi un altro, e sembra che stiano sbagliando tutti. Poi la numero uno, in fondo, accende la lampada del tetto, e dal cavo che la tiene arriva la nota di sempre, ma più alta di un tono: dritta, pulita, un fischio senza bocca."],
+        ["vl_aurelio", "(a mezza voce) «Il campo capisce da solo», dicevo. Non mi credeva nessuno. Ora mi crederanno."],
+      ];
+      say(sw([
+        ["voce", "Il tabellone dice 89:59 · STAMBECCHI 2 – 1 OMBRE. Il 9 smette di girarsi, e questa volta non per rassegnazione: per rispetto. Gli undici in blu notte e ambra si dispongono in fila sul bordo dell'area; di fronte, i grigi. Tra le due file passa un silenzio così preciso che ci si potrebbe appoggiare un orologio."],
+        ["vl_aurelio", "Un secondo. Da ventisei anni è l'ultimo secondo della partita e non abbiamo mai saputo come si finisce. Si finisce in questo modo: qualcuno soffia, e il resto è niente. Il resto è il paese."],
+        ...a,
+      ], BG.S), fischioDopo);
+    }
+    function fischioDopo() {
+      const c = compId();
+      say(sw([
+        ["voce", "Il tabellone fa clic. Il 59 diventa 00, e sotto compare una parola che prima non c'era: FINE. Le tribune di lumi si spengono tutte insieme, si riaccendono, e questa volta non si spengono più: sono lumi come tutti gli altri, di una lumina che ha smesso di fare la contabile."],
+        ["vl_ombra", "(si leva un cappello che non ha, per cortesia) È stata una bella partita. Noi non abbiamo nessuno che la ricordi. Se la ricordate voi, per noi è come essere venuti."],
+        ["voce", "I grigi si scoloriscono uno per uno, con un inchino. Dove stavano resta un odore di tè e di campo bagnato. Il portiere d'ombra è l'ultimo: lascia a terra i guanti gialli, e per un attimo i guanti restano in piedi, da soli."],
+        ["vl_berto", "(si sfila il secondo guanto e, per la prima volta, lo appoggia a terra) Finito. Ho voglia di sedermi. Non ho voglia di piangere: ho una voglia ridicola di una frittata."],
+        ["vl_teodora", "(chiude il registro, lo riapre, lo richiude) Alle 6:43 l'orologio della stazione si è mosso. Lo vedo da qui, senza vederlo. Sei e quarantaquattro."],
+        [c, cl("Lo sento nei polsi: i bulloni di tutto il Latte si sono allentati di un giro. Vuol dire che sta andando bene.", "Misuro un calo di pressione: il Latte, cioè, si sta svuotando di un'idea. Non posso quantificare la mancanza. Quantifico l'assenza di peso."), BG.S],
+        ["vl_aurelio", "E adesso la parte che non è nel regolamento. Il minuto è chiuso, ma il Latte non sa che farne: ha ventisei anni di abitudine, e un'abitudine non si spegne con un fischio. Quello che ne farà dipende da quello che si dirà in pubblico, con un microfono acceso, davanti ai Tre Versanti."],
+        ["vl_aurelio", "Oggi a mezzogiorno si gioca la finale vera, quella che ci hanno rubato: Vallombra contro il resto delle valli. Giocala. E dopo, dal palco, parla: senza copione, ché i copioni li scrivono sempre gli altri."],
+        ["vl_aurelio", "Noi restiamo qui a sentire Radio Nebbia. Ho chiesto a Noemi di lasciare il canale aperto. Se senti un applauso in più, è la panchina."],
+        tl({ sicuro: "Gioco la Finale. E poi parlo.", attento: "Una Finale da giocare, un microfono da usare e un minuto che non sa ancora dove andare. Salgo.", ironico: "Ventisei anni di partita sospesa, e il prossimo appuntamento è una Finale a mezzogiorno. Il calendario di questo posto non perdona." }),
+      ], BG.S), salita);
+    }
+    function salita() {
+      setStep(N, 1); F.set("ini8", true);
+      note("Il minuto è chiuso: 90:00, due a uno. Aurelio e la squadra aspettano nel Latte. La numero uno mi porta allo stadio dei Tre Versanti, dove oggi si gioca la Finale vera. Dopo, dal palco, dovrò parlare al microfono aperto.");
+      say(sw([
+        ["voce", "La numero uno ti porta su. Ha le finestre accese e il sedile con il gagliardetto «STAMBECCHI · FINALE '98». Fuori il Latte scorre via come una coperta tirata piano; il cavo canta la sua nota sola e, a metà salita, il Campo Sospeso rimpicciolisce fino a un francobollo turchese e poi a un puntino."],
+        ["vl_teodora", "Annoto la corsa: sei e quarantacinque, salita, due persone. Questa cabina ha viaggiato vuota per ventisei anni. Oggi, per la statistica, è un record."],
+        ["voce", "In cima, la luce del giorno è di una violenza gentile. Le porte si aprono su una pensilina, una panchina e un odore di panini caldi: lo stadio dei Tre Versanti, di mezzogiorno, in anticipo di mezz'ora sulla sua fama."],
+      ], BG.S), () => { go("vl_versanti", 5, 13); });
+    }
+
+    // ============================================================================================ Parte II · lo stadio dei Tre Versanti
+    const PRE = {
+      vl_teodora: ["Ho portato il registro. Sull'ultima pagina ho lasciato una riga in bianco, per quando sapremo come finisce.", "Non ho dormito e non mi pesa. Mio fratello diceva «dormi dopo». Era il suo slogan, e ci ho creduto per ventisei anni."],
+      vl_fosco: ["Berto mi ha detto di chiamarlo dopo. Non ha un telefono. Il fatto che io creda ancora che risponderà è la cosa più bella che mi capiti in ventisei anni.", "Ho spolverato la panchina della Selezione, per sbaglio. Mi hanno ringraziato. Mi sono sentito un traditore e un cameriere."],
+      vl_mirtilla: ["Ho cinquanta termos, quarantatré panini e un cartello: «OGGI SI PAGA IN APPLAUSI». Non reggerà: c'è la cassa.", "Se perdete offro io. Se vincete offro io lo stesso. Ho una teoria sul commercio basata sul rimorso."],
+      vl_noemi: ["Qui Radio Nebbia dallo stadio dei Tre Versanti, in diretta su tutte le onde, compresa quella che non so nominare. Se qualcuno ascolta dal Latte, saluti i suoi.", "Il canale è aperto. Lo lascio aperto finché qualcuno non mi ordina di spegnerlo, e finora nessuno ha ordinato niente."],
+      vl_ottavia: ["Ho contato le tribune: tre colori, e li ho contati tre volte, perché ormai è un vizio. Tutto torna.", "Quando Aurelio gridò «tutti fuori» ero in fondo. Stamattina ho sentito la stessa voce alla radio. Identica, come un orario ferroviario."],
+      vl_gedeone: ["Il conto dei posti è giusto. Ne manca uno in prima fila, e lo tengo libero per chi arriva dopo.", "Quattordici minatori, undici in campo, un portiere di riserva e un tredicesimo: il totale non l'ho scritto. Ho paura che torni."],
+      vl_ettore: ["Ho lasciato la telecamera a casa e ho portato un taccuino con le pagine tutte bianche. Ascolterò, e scriverò dopo.", "Viola mi ha detto: «Se chiedono, di' che sei venuto per il panino». Ho risposto che è la verità numero due."],
+      vl_tonio: ["Il portiere della Selezione sono io: «Sembro una porta più piccola». Funziona sempre. Se non funziona, ho la maglia gialla e la paura che mi si veda.", "Non è la mia partita preferita. Ma è la prima che gioco senza dover odiare nessuno: un'ottima abitudine per i polpacci."],
+      vl_gisella: ["Gioco nella Selezione e tifo per entrambe. Gli arbitri lo chiamano «conflitto di interessi». Io lo chiamo «la domenica».", "Se segnate, applaudo. Se segno, fingo di non averlo fatto. Siamo gente civile."],
+      vl_vica: ["Ho portato il panino. Ho portato la maglia. Ho portato anche la pazienza, ma quella la lascio a casa: serve poco.", "Mio figlio mi guarda dal campo come quando aveva sette anni e voleva il permesso. Il permesso ce l'ha. Il panino pure."],
+      vl_neve: ["Presidente, albergatore, allenatore, oggi anche cerimoniere. Il giovedì, parroco: non è giovedì, mi sento leggero.", "La Selezione dei Due Versanti è un'idea mia e della cassa. L'idea è peggiore, la cassa è migliore."],
+      vl_gaudenzio: ["Eccomi in tribuna, in borghese. È la prima partita che guardo da spettatore: la consiglio a tutti gli arbitri, a un certo punto della vita. Sedersi.", "Mio figlio gioca contro di voi, o con voi, o in mezzo. Non riesco a seguire. È una bellissima confusione."],
+    };
+    function preTalk(id) {
+      const s = S();
+      if (s >= 4) return post(id);
+      if (id === "vl_zelo") return zelo();
+      if (id === "vl_vermiglio") return vermiglio();
+      if (id === "vl_sigillo") return sigillo();
+      if (id === "vl_cornelio") return cornelio();
+      if (id === "vl_teodora") return s === 3 ? teodoraDopo() : say(sw([["vl_teodora", chip(PRE.vl_teodora)]], BG.V), done);
+      if (id === "vl_bianca" || id === "vl_agata") return compagna(id);
+      if (id === "vl_remo" || id === "vl_remo_ns") return remo();
+      const L = PRE[id] || ["…"];
+      say(sw([[id, chip(L)]], BG.V), done);
+    }
+    function compagna(id) {
+      const b = id === "vl_bianca", s = S();
+      const L = s === 3 ? (has("m8_win") ? [b ? "Abbiamo vinto! Lo dico forte, perché i bulloni sono tutti stretti e posso permettermelo." : "Vinto. Annoto: 91% di commozione, 9% di tiro. Cancello le percentuali e annoto soltanto «Vinto»."] : [b ? "Non abbiamo vinto e non importa. Ho gridato lo stesso. Mi tremano ancora le mani, è un ottimo segno." : "Sconfitta statistica, vittoria morale. Dal punto di vista dei dati è un pareggio fra due cose che non si misurano."])
+        : b ? ["Ho serrato i bulloni della porta di sinistra. Non serve, e porta fortuna.", "Se segni grido. Se non segni grido lo stesso: me lo sono ripromesso."] : ["Ho calcolato la probabilità di vincere: 54%. Quella di commuovermi: 91%. Annoto.", "Il quaderno senza righe l'ho consegnato a Teodora. Ho solo la matita, e il tifo."];
+      say(sw([[id, chip(L)]], BG.V), done);
+    }
+    function remo() {
+      const id = remoId(), s = S(), ally = remoAlly(), sc = F.get("remo_scelta", "");
+      const L = ally
+        ? (s === 3 ? ["Giocare dalla stessa parte è strano come mangiare con la sinistra: dopo un po' ci si abitua, e il piatto è più buono.", "Mia madre ha appena applaudito. Per me. Dalla tribuna, in piedi, con il panino. Non succedeva dalla prima comunione."] : ["Gioco con voi. Voglio dire: dalla stessa parte. I miei, in tribuna, mi guardano come si guarda un camoscio che si mette a nuotare. Poi applaudono.", "Gli occhiali li ho consegnati a mia madre. Lei li ha messi nel taschino: «Per quando ti servono davvero»."])
+        : (s === 3 ? ["Un capitano non applaude volentieri, ma stavolta ho battuto le mani così forte che mi è caduto il panino.", "Bella partita. Lo dico qui, sul prato, dove nessuno del mio paese può contestarmi. Poi lo ripeto su."] : ["Capitano della Selezione dei Due Versanti: due per uno, come i saldi. Non vi regalo niente. Ma se tirate bene applaudo.", sc ? "Mio padre guarda dalla tribuna, mia madre è accanto a lui. Stanno in piedi insieme da due giorni. È la cosa più scomoda e più bella che abbia mai visto." : "Mi sono preparato tutta la settimana. Ho un pessimo presentimento: mi piace."]);
+      say(sw([[id, chip(L)]], BG.V), done);
+    }
+    function teodoraDopo() {
+      const W = has("m8_win");
+      say(sw([["vl_teodora", W ? "Abbiamo vinto la Finale e io non l'ho scritta. La matita non ha retto. Il microfono, a EST, è aperto: lo sai tu, quanto pesa. Io lo so, e non lo prenderei per tutti i registri del mondo." : "Non abbiamo vinto la Finale, e il registro non ne parla. La matita ha un suo tatto. Il microfono, a EST, è aperto: la partita è finita, ma la parola ancora no."]], BG.V), done);
+    }
+    function vermiglio() {
+      const first = !has("ver8"); F.set("ver8", true);
+      const comp = F.get("comp6", "rifiuto") === "accetto", tenute = F.get("prove", "tenute") === "tenute" && !has("prove_neve");
+      const L = [];
+      if (first) L.push(["voce", "L'ing. Vermiglio sta in piedi vicino alla tribuna delle autorità, con la cartellina sotto il braccio. Non porta il cappotto grigio: porta una sciarpa a righe viola e gialle, regalo della Selezione. Gli sta come un cappello a un pesce."]);
+      L.push(["vl_vermiglio", S() === 3 ? "La partita è finita e io ho un'offerta, che formulerò a verbale se qualcuno me lo chiede. Se nessuno me lo chiede, la formulerò lo stesso: è una questione di coerenza estetica." : comp ? "Mantengo il patto del compromesso: chiusura della miniera «con onori», targa d'ottone e funivia salva. Ma la firma finale, quella sulla valle, la chiedo dopo la Finale, con la serenità di chi ha già perso la sua." : tenute ? "Lei ha le carte e io ho gli avvocati. Siamo in una situazione di equilibrio tra due cose che pesano. Dopo la partita, se vuole, firmiamo una pace: ho un tavolino e un termos." : "Ho letto quello che ha consegnato. Non è mai gradevole sentirsi descritti con precisione. Dopo la Finale parlerò, a verbale, io: se si può dire che mi dimetto, lo dico."]);
+      L.push(["vl_vermiglio", "Il regolamento della Coppa mi permette un'offerta dopo la Finale. Chi sale sul palco con il microfono aperto può accettarla. Io non faccio pressione: faccio statistica."]);
+      say(sw(L, BG.V), done);
+    }
+    function sigillo() {
+      say(sw([["vl_sigillo", chip(S() === 3 ? ["La partita è finita. Il mio cliente ha una proposta di firma e una sciarpa nuova. In quest'ordine di importanza.", "Qualunque cosa decidiate sul palco, sarà verbalizzata. Ho una penna che non fa errori e un taccuino che non fa domande."] : ["Mi hanno prestato una sciarpa viola. La indosso con la stessa convinzione con cui indosso l'impermeabile: nessuna.", "Il regolamento dice che la Selezione può contare su un avvocato di parte. Io sono l'avvocato di parte. Sono anche la parte. È una domenica contabile."])]], BG.V), done);
+    }
+    function cornelio() {
+      const first = !has("cor8"); F.set("cor8", true);
+      const L = S() === 3 ? [first ? "Il discorso è lungo tre righe. Le ho riscritte quattordici volte. Ne è rimasto un nome, un verbo e un 'scusate'. Sono quasi pronto." : "Ho le tre righe in tasca. Se le perdo, le dico a memoria: sono più brevi dei miei respiri."]
+        : [first ? "Dal palco avrà la parola lei, non io: sono stato sindaco per ventisei anni e ho parlato per trentun'ore. Fa una media di quaranta secondi di senso a discorso." : "La fascia da sindaco me la tengo in tasca. Se parlo da sindaco, parlo male. Se parlo da portiere di riserva, forse parlo bene."];
+      say(sw([["vl_cornelio", L[0]]], BG.V), done);
+    }
+    function zelo() {
+      const s = S();
+      if (s === 1) {
+        const first = !has("zel8"); F.set("zel8", true);
+        const L = first ? [
+          ["voce", "L'arbitro Vitaliano Zelo, livello quattro, ha un fischietto a ultrasuoni e una giacchetta gialla con i polsini viola, per l'occasione. Nessuno lo sospetta di niente: ha già arbitrato tre derby con le mani in tasca e la coscienza a posto."],
+          ["vl_zelo", "Regolamento della Finale: due tempi di quarantacinque minuti, il primo con tutta la squadra in campo, il secondo a tre contro tre, per dare ai tre versanti un po' di suspense. In caso di parità, rigori. In caso di rigori, applausi."],
+          ["vl_zelo", remoAlly() ? "La Selezione dei Due Versanti ha un capitano nuovo, perché il vecchio gioca con voi. È un precedente. Annoto il precedente." : "La Selezione ha come capitano Remo Valanga. Dei Camosci. Con me, come sapete, ha un rapporto cordiale e di scarsa fiducia reciproca."],
+        ] : [["vl_zelo", "Regolamento invariato. Fischietto pronto."]];
+        return say(sw(first ? L : L, BG.V), () => ask("vl_zelo", "«Sei pronto, o ti serve un respiro? La Finale ha tutto il tempo che vuole, ma il pubblico no.»", [
+          { label: "Fischio d'inizio", sub: "Primo tempo · Action Soccer 2D HD", cls: "hot", fn: primoTempo },
+          { label: "Prima parlo con gli altri", fn: done },
+        ], BG.V));
+      }
+      if (s === 2) return ask("vl_zelo", "«Secondo tempo. Il pallone è dove lo hai lasciato, il pubblico anche. Quando vuoi.»", [
+        { label: "Torna in campo", sub: "Secondo tempo · Calcio d'azione 3v3", cls: "hot", fn: secondoTempo },
+        { label: "Un momento di respiro", fn: done },
+      ], BG.V);
+      if (s === 3) return say(sw([["vl_zelo", has("m8_win") ? "Ho fischiato la fine con una soddisfazione professionale che non provavo dal terzo derby. La Coppa è già sul palco: a EST, oltre il tappeto rosso. Il microfono lo prendi tu." : "Ho fischiato la fine con una tristezza professionale. La Coppa è sul palco comunque: a EST. Nessuno ha mai tolto la parola a chi ha perso. L'ho controllato: è nel regolamento."]], BG.V), done);
+      done();
+    }
+
+    // ---- la Finale ritrovata: due tempi forzati dalla storia (Action Soccer 2D HD + Calcio d'azione 3v3 sul campo «versanti»)
+    const VENUE_VERS = { ads: [["COPPA DEI TRE VERSANTI", "#e9a64a"], ["STAMBECCHI · CAMOSCI · MARMOTTE", "#f2d21b"], ["RIFUGIO TRE TAZZE", "#b3487a"], ["RADIO NEBBIA 91,3", "#7fe3d0"]], crowd: ["#1b2f7a", "#e9a64a", "#f2d21b", "#7a3fb0", "#f2f6ff"], ground: ["#3f9a55", "#49a85e"], line: "#ffffffcc", patches: "rgba(255,255,255,.26)", tint: "rgba(255,230,160,.07)", glow: "255,240,200", fx: { spd: 1 } };
+    const edge8 = () => Math.max(0.01, 0.1 - 0.004 * lanN() - (remoAlly() ? 0.01 : 0) - 0.01 * Math.min(3, F.get("m8_try", 0)));
+    const selezione = (t, st, e) => ({ vs: "la Selezione dei Due Versanti", name: "Selezione dei Due Versanti", color: "#f2d21b", defs: [["Terzino Camoscio", t(st.drib * 0.8 * (1 + e))], ["Centrale Marmotta", t(st.drib * 0.86 * (1 + e))], ["Mediano di Cima Fonda", t(st.drib * 0.82 * (1 + e))]], atk: [[remoAlly() ? "Capitano Marmotta" : "Remo Valanga", t(st.tiro * 0.9 * (1 + e))], ["Gisella Cima", t(st.tiro * 0.78 * (1 + e))]], gk: ["Tonio Fiocco", t(st.tiro * 0.95 * (1 + e))], power: t(st.tiro * 0.8 * (1 + e)), special: ["VALANGA DEI DUE VERSANTI", t(st.tiro * 1.1 * (1 + e))] });
+    const mate8 = () => mateName();
+    function primoTempo() {
+      F.set("m8_ini", true);
+      X.playMatch({
+        id: "vl8a", alt: "hd", force: true, weather: "sereno", venue: VENUE_VERS, homeKit: ["#1b2f7a", "#e9a64a"], chap: "Vallombra · La Finale dei Tre Versanti · 1° tempo", mate: mate8(), squad: ["Fosco", "Gedeone", "Ettore"],
+        intro: `La Finale dei Tre Versanti, primo tempo (45'): gli Stambecchi di Vallombra contro la Selezione dei Due Versanti, a mezzogiorno, con tre tribune a tre colori e Radio Nebbia in diretta. Arbitro: Vitaliano Zelo. ${mate8()} gioca con te.`,
+        team: (t, st) => selezione(t, st, edge8()),
+        done: (r) => { F.set("m8a_a", r.a); F.set("m8a_b", r.b); note(`Finale dei Tre Versanti, primo tempo: ${r.a}–${r.b}.`); intervallo(); },
+      });
+    }
+    function intervallo() {
+      setStep(N, 2); X.refreshZone();
+      const a = F.get("m8a_a", 0), b = F.get("m8a_b", 0), c = compId();
+      const lead = a > b ? "Gli Stambecchi sono avanti" : a < b ? "La Selezione è avanti" : "Si va all'intervallo in parità";
+      go("vl_versanti", 21, 11);
+      setTimeout(() => say(sw([
+        ["voce", `Fischio dell'intervallo: ${a}–${b}. ${lead}. Sul prato volano coriandoli di tre colori, qualcuno ha srotolato uno striscione («GRAZIE PER IL PANINO»), e le tre tribune si scambiano i termos con una cortesia da ambasciatori.`, BG.V],
+        ["vl_noemi", a > b ? "Qui Radio Nebbia dai Tre Versanti: Vallombra avanti all'intervallo. Se qualcuno ascolta dal Latte: il pubblico saluta con le sciarpe. Non è un modo di dire: le agita." : a < b ? "Qui Radio Nebbia: la Selezione in vantaggio, ma con un'educazione che sembra una scusa. Il pubblico di Cima Alta applaude e si guarda i piedi." : "Qui Radio Nebbia: parità all'intervallo. Il pubblico propone di dichiarare la Finale «sospesa per parità». Faccio presente che, a Vallombra, è un concetto con precedenti."],
+        ["voce", "Per un secondo, tra i fruscii della radio a transistor di Noemi, si sente una voce bassa, con la sua pausa giusta in mezzo: «Il portiere ha sbagliato posizione», dice. «Berto dice che ha ragione.» Noemi gira la manopola e sorride, senza dire niente."],
+        [c, isB() ? "Hai sentito? Ho sentito. Non ho il coraggio di dirlo ad alta voce. Lo dico con un bullone." : "Annoto l'anomalia: voce maschile, bassa, frequenza di 91,3 MHz. Fonte: la panchina del Latte. Non ho dubbi. Non ho nemmeno ipotesi.", BG.V],
+      ], BG.V), () => { note("Intervallo della Finale dei Tre Versanti. Per il secondo tempo parla con l'arbitro Zelo, al CENTRO del prato."); done(); }), 80);
+    }
+    function secondoTempo() {
+      const a = F.get("m8a_a", 0), b = F.get("m8a_b", 0), re = F.get("m8_try", 0) > 0;
+      X.playMatch({
+        id: "vl8b", alt: "az", force: true, azPitch: "versanti", weather: "sereno", venue: VENUE_VERS, homeKit: ["#1b2f7a", "#e9a64a"], chap: "Vallombra · La Finale dei Tre Versanti · 2° tempo", mate: mate8(), squad: ["Fosco", "Gedeone", "Ettore"],
+        intro: `La Finale dei Tre Versanti, secondo tempo. Primo tempo: ${a}–${b}. ${re ? "Il secondo tempo si rigioca: stavolta conosci il prato. " : ""}Il campo è lucido, le bandierine sventolano e la Coppa aspetta sul palco. ${mate8()} gioca con te.`,
+        team: (t, st) => selezione(t, st, edge8() + 0.005),
+        done: (r) => { F.set("m8b_a", r.a); F.set("m8b_b", r.b); note(`Finale dei Tre Versanti, secondo tempo: ${r.a}–${r.b}.`); finePartita(); },
+      });
+    }
+    const tot8 = () => [F.get("m8a_a", 0) + F.get("m8b_a", 0), F.get("m8a_b", 0) + F.get("m8b_b", 0)];
+    function finePartita() {
+      go("vl_versanti", 21, 11);
+      const [A, B] = tot8();
+      setTimeout(() => {
+        if (A === B) return rigori(A, B);
+        esito(A > B, A, B, false);
+      }, 80);
+    }
+    function rigori(A, B) {
+      say(sw([["voce", `Fischio finale: ${A}–${B}. Il regolamento della Coppa non ammette pareggi: si va ai rigori. Tre tiri. In porta c'è Tonio Fiocco, che si ferma in mezzo alla porta con la determinazione di chi vuole sembrare una porta più piccola.`, BG.V]], BG.V), () => {
+        tmg("Rigori", 3, "vl_versanti", (k) => (k === 3 ? "<b>" + T("{tiro}") + "!</b> Tonio si tuffa, tocca appena, e la rete trema." : k === 2 ? "<b>Quasi.</b> Tonio devia sul palo e fa un inchino per scusarsi." : "<b>Parato.</b> Tonio si rialza e dedica la parata a tutta la tribuna."), (pts) => {
+          const tot = sumPts(pts), win = tot >= 5;
+          say(sw([["voce", `Rigori: ${tot} su 9 (ne servivano 5). ${win ? "Il pallone entra, la rete si gonfia, e le tre tribune esplodono con la sincronia di tre paesi che non hanno dormito." : "Tonio blocca l'ultimo con una sola mano e un po' di vergogna. Le tribune applaudono comunque, e la Selezione chiede scusa con lo sguardo."}`, BG.V]], BG.V), () => esito(win, A, B, true));
+        });
+      });
+    }
+    function esito(win, A, B, rig) {
+      F.set("m8_win", win);
+      const m = win ? reward("vl_c8_gara", { coins: 15 }) : [];
+      const L = [
+        ["voce", `Fischio finale della Finale dei Tre Versanti: ${A}–${B}${rig ? " (ai rigori)" : ""}. ${win ? "Gli Stambecchi vincono, e lo stadio fa il rumore di un paese che si alza in piedi senza essersi consultato." : "Vince la Selezione, e il suo boato è breve, educato, quasi di scuse."}${m.length ? " " + m.join(" · ") + "." : ""}`, BG.V],
+        win ? ["vl_noemi", "Qui Radio Nebbia: vincono gli Stambecchi. Ripeto per chi ascolta dal Latte, dove le notizie arrivano in ritardo di ventisei anni: vincono gli Stambecchi."] : ["vl_noemi", "Qui Radio Nebbia: vince la Selezione. Ripeto per chi ascolta dal Latte: vince la Selezione, e il pubblico canta lo stesso, perché a Vallombra si canta anche per i perdenti."],
+      ];
+      say(sw(L, BG.V), () => {
+        if (win) return chiudiFinale();
+        ask("vl_zelo", "«La sconfitta, qui, non blocca niente: il secondo tempo si può rigiocare, oppure si lascia andare e si va al palco. Il microfono aspetta comunque.»", [
+          { label: "Rigioca il secondo tempo", sub: "Calcio d'azione 3v3 · il prato è come l'hai lasciato", cls: "hot", fn: () => { F.add("m8_try", 1); setStep(N, 2); X.refreshZone(); secondoTempo(); } },
+          { label: "Lascia andare: vai al palco", sub: "Il microfono è aperto", fn: () => { F.set("yld8", true); chiudiFinale(); } },
+        ], BG.V);
+      });
+    }
+    function chiudiFinale() {
+      setStep(N, 3); X.refreshZone();
+      const W = has("m8_win");
+      note(W ? "Finale dei Tre Versanti vinta. Il palco della Coppa è a EST, con il microfono aperto." : "Finale dei Tre Versanti persa, ma il microfono del palco resta aperto: a EST.");
+      say(sw([
+        ["vl_zelo", "Le Coppe, a Vallombra, hanno sempre avuto un debole per i colori sbagliati. Oggi la porta il portiere di riserva, perché il portiere vero è occupato altrove: Cornelio ha le tre righe e la fascia in tasca."],
+        ["voce", "Le tre tribune si alzano ancora, senza che nessuno lo chieda, e voltano la faccia verso il palco. Il tappeto rosso, a EST, è già stato steso. Radio Nebbia ha l'antenna fuori dal finestrino. In fondo al prato, un riflesso: una luce turchese, piccola, sul bordo del parapetto, che sembra ascoltare."],
+      ], BG.V), done);
+    }
+
+    // ============================================================================================ Parte III · il palco, la scelta, i cinque finali
+    const DEST = {
+      a: {
+        teodora: "Ho corretto la riga di mio fratello: «IN SOSPESO» è diventato «TORNATO». Il registro è finito. Ne ho cominciato un altro, e la prima pagina bianca non mi fa più paura.",
+        aurelio: "Ventisei anni di ultimo secondo e adesso un pranzo. Ho chiesto una cosa sola al cuoco di Mirtilla: di non chiamarmi «capitano» prima del secondo piatto. Non ce l'ha fatta nemmeno col primo.",
+        berto: "Mi sono tolto i guanti e ho stretto la mano a Fosco. Era calda. Non ricordavo che le mani fossero calde: sono rimasto fermo così per un tempo non regolamentare.",
+        fosco: "Io e Berto abbiamo litigato sui nodi: lui li fa alla vecchia, io alla nuova. Vincono entrambi. È la prima lite di ventisei anni che finisce bene.",
+        cornelio: "Ho consegnato la fascia a chi la voleva, cioè a nessuno. Faccio il portiere di riserva in una squadra che ha già un portiere. È il lavoro più onesto che abbia mai avuto.",
+        remo: () => (remoAlly() ? "Ho smesso di vincere contro tutti e ho cominciato a perdere con qualcuno. Mia madre dice che mi sta meglio, e lo dice in pubblico, che per lei è una dichiarazione di guerra al passato." : "Capitano dei Camosci e anche dei saldi: due per uno. Con la Coppa in tribuna mi sento un traditore perfetto. Ve la devo, un'altra partita."),
+        comp: () => cl("Ho serrato l'ultimo bullone del Latte e non c'era più. Mi sono sentita mancare un lavoro e trovare una vita. Il bullone lo tengo in tasca, come un portafortuna.", "Annoto: nessun dato per ciò che è successo. Il quaderno senza righe ha cominciato a riempirsi di cose senza unità di misura. Le chiamo «cose»."),
+        mirtilla: "La Società Lumen mi ha mandato una lettera di scuse con un buono da cinquanta. Il buono lo uso, la lettera la espongo accanto al cartello degli applausi.",
+        noemi: "Radio Nebbia cambia nome: «Radio Nebbia e Sole». Il sole dura sei minuti al giorno, ma è un inizio, e ho il diritto di darlo per scontato.",
+        ottavia: "Ho smesso di contare le tribune. Ne ho contate tre e mi sono fermata: ogni tanto anche la matematica sa tacere.",
+        gedeone: "Il posto in prima fila è occupato da un signore in cappotto che sorride. Non so se fargli pagare il biglietto. Mi sembra scortese e contabilmente discutibile.",
+        ettore: "Il mio documentario si intitola «Il fischio». Dura novanta minuti, e dentro ci sono novantuno panini. Nessuno sa quale sia il novantunesimo.",
+        vermiglio: "Mi sono dimesso a verbale. Ora faccio il consulente per le cose che non si vendono, e ho scoperto che sono tutte quelle importanti.",
+        sigillo: "Ho depositato tutto. Il mio cliente è cambiato: adesso è la valle. Parcella: un panino, con il prosciutto vero.",
+        zelo: "Ho arbitrato la Finale più onesta della mia carriera. Livello quattro, ma di umore alto. Chiedo di essere ricordato come «quello che ha fischiato dritto».",
+        gaudenzio: "Ho messo il fischietto in una teca. Fischio dritto, una volta, e poi basta. Ci sono arbitri che non l'hanno capito in tutta la vita.",
+        neve: "Presidente, albergatore e semplice cittadino con la tessera. Mi sta stretta e mi piace. Il giovedì faccio ancora il parroco, per abitudine.",
+        vica: "Il panino è finito e la pazienza è tornata: torna sempre quando smetti di aspettarla.",
+        tonio: "Gioco ancora come una porta più piccola. Ora dicono: «che bella porta». Lo prendo come un complimento.",
+        gisella: "Ho smesso di tifare per entrambe. Ho scelto: tifo per la domenica, che vince sempre.",
+      },
+      b: {
+        teodora: "Ogni sera alle 6:43 salgo sulla numero uno, da sola. Non è un lutto: è un appuntamento. In stazione c'è sempre una luce accesa, e non ho mai chiesto chi la accende.",
+        fosco: "Faccio la spola tra la panchina e il Latte. Berto mi aspetta dove la nebbia è un po' più calda. Gli porto il termos e la polvere: dice che è l'unico lusso.",
+        cornelio: "Faccio il custode del campo, di sera. Spolvero il pallone, che nessuno mi ha chiesto di spolverare. Chi resta fa quello che nessuno gli ha chiesto.",
+        remo: () => (remoAlly() ? "Una sera a settimana accendo anch'io una lanterna. È inutile, lo so. Ma illuminare il posto vuoto in panchina è il modo più elegante di non avere perso." : "Resto capitano e tengo il broncio. Ma in cima alla salita ho lasciato una sciarpa gialla: per chi sale la sera, se ci sta."),
+        comp: () => cl("Il lavoro più bello del mondo: stringere i bulloni di una cabina che sale vuota. Alle volte salgo anch'io, e il bullone più stretto è quello del mio cuore.", "Annoto: la cabina sale ogni sera, vuota, alle 6:43. Il mio compito è guardarla. Non avevo mai guardato nulla con tanto metodo."),
+        mirtilla: "Ho messo un posto in più al bancone del Rifugio. Nessuno lo occupa. È l'unico tavolo di Vallombra che riempie il conto di niente.",
+        noemi: "Ogni sera chiudo le trasmissioni con una canzone che non ha parole: serve a fare compagnia a chi non risponde.",
+        ottavia: "Ho aperto un registro in cui scrivo le sere: «Cabina salita, 6:43. Tutto in ordine». Mi sta bene così.",
+        gedeone: "Il conto dei posti: tutti presenti, più uno in panchina. Non lo scrivo, lo lascio libero.",
+        ettore: "Il mio taccuino ha una sola pagina scritta: «La sera, la cabina». Non lo pubblico. Lo leggo a chi si siede.",
+        vermiglio: "La Società ha sospeso tutto «in attesa di sviluppi». Gli sviluppi, qui, hanno la regolarità dei treni: arrivano alle 6:43.",
+        sigillo: "Ho archiviato la pratica come «aperta». È la prima volta che archivio qualcosa senza chiuderla. Mi sento straordinariamente leggero.",
+        zelo: "Ho segnato nel referto: «Partita sospesa dalla mancanza di una cosa». Il regolamento non prevede il termine, ma neanche lo vieta.",
+        gaudenzio: "Il fischio dritto l'ho dato. Il resto lo lascio a chi sale la sera.",
+        neve: "Il Rifugio e il Comune hanno aperto un fondo «lumina». È una cifra piccola, ma regolare, come le preghiere.",
+        vica: "Una sera salgo con il panino. Lo lascio sulla panchina. La mattina è sparito: non voglio sapere.",
+        tonio: "Ho cominciato a parare per due: quando tiro contro il vuoto, qualcuno ride dalla tribuna.",
+        gisella: "Ho segnato il primo gol senza esultare. Era una cosa che mi pareva giusta.",
+      },
+      c: {
+        teodora: "Il registro l'ho consegnato al Museo dei Tre Versanti con una sola scritta: «Leggenda». Poi sono andata ad allenare il portiere. Ho una pagina di appunti e nessun rimpianto.",
+        fosco: () => (su() ? "Alleno i difensori e ripeto a tutti la stessa frase di Berto: «Anche un minuto che finisce è un tiro da parare». Nessuno sa chi sia Berto. Applaudono lo stesso." : "Resto dalla parte della nebbia, con Berto. A volte mi arriva il rumore degli allenamenti e battiamo le mani, piano, per educazione."),
+        cornelio: "Ho consegnato le chiavi dello spogliatoio al capitano dei più giovani, che aveva i calzini spaiati: li ho scambiati con i miei. Sono più fortunati dei miei.",
+        remo: () => (remoAlly() ? "Il capitano degli Stambecchi nuovi sono io: mi hanno scelto con un sorteggio truccato a mio favore, e ho fatto finta di non averlo capito." : "Gioco ancora per i Camosci e ho promesso a mia madre che alle partite con voi non tiro forte. Finora ho mantenuto la promessa per sei minuti."),
+        comp: () => cl("Ho aperto la biglietteria con un cartello: «ISCRIZIONI APERTE, BULLONI DI SERIE». I ragazzi si iscrivono in massa, ma pretendono la chiave inglese.", "Annoto: 41 iscritti. Quarantuno è un numero che non avevo mai visto sorridere."),
+        mirtilla: "Cinquanta iscritti, nessuna tessera pronta. I termos intanto sono finiti. È un successo di organizzazione non organizzata.",
+        noemi: "Radio Nebbia trasmette gli allenamenti. Cronaca in diretta di una squadra che non sa ancora perdere: bellissima.",
+        ottavia: "Ho redatto lo statuto della Squadra Nuova: tre articoli, e il terzo dice: «Se non si capisce, si gioca».",
+        gedeone: "Il conto dei posti è ricominciato: 41. Poi 43. Poi 47. Non finisce mai: è la cosa più bella da contare.",
+        ettore: "Il documentario si chiama «Cominciamo». Dura dieci minuti, ed è tutto un inizio: ho tagliato la fine.",
+        vermiglio: "La Società ha rinunciato a Vallombra. Io ho tenuto la sciarpa viola. Gli sta, dicono.",
+        sigillo: "Ho chiuso lo studio e ho aperto una scuola calcio. Il mio primo insegnamento: «Il fuorigioco è una questione di contratti».",
+        zelo: "Ho diretto l'amichevole d'inaugurazione. Nessun giallo, nessun rosso, nessun fischio dubbio. Per la prima volta non so cosa scrivere nel referto.",
+        gaudenzio: "Alleno i giovani arbitri. Insegno a fischiare dritto. Sul fischietto, una scritta: «PER L'USO PRIVATO».",
+        neve: "Il Latte è sparito senza lasciare risposte, ma ha lasciato l'umidità. Per il resto, siamo una squadra.",
+        vica: "Ho portato il panino al primo allenamento. Lo hanno mangiato in dodici. Ne avevo preparato uno: conta il pensiero.",
+        tonio: "Gioco da riserva nella squadra nuova. Mi piace stare in panchina quando c'è qualcosa da guardare.",
+        gisella: "Gioco nella Selezione e negli Stambecchi: conflitto di interessi. Chi se ne importa, la domenica è lunga.",
+      },
+      d: {
+        teodora: "Ho firmato anch'io. Poi ho aperto il registro e sotto la mia firma ho scritto: «IN SOSPESO». L'ho lasciato sulla scrivania del Resort, aperto.",
+        fosco: () => (su() ? "Faccio il custode del cantiere. Ogni sera pulisco la polvere dal campo che non c'è più. Mi pagano per quello, e per il resto no." : "Resto con Berto, nel Latte. Sento le ruspe come un temporale lontano."),
+        cornelio: "Responsabile Accoglienza del Resort: mi hanno dato un cartellino, una cravatta viola e una poltrona. Il cartellino dice «CORNELIO · ASCOLTO». Nessuno si ferma.",
+        remo: () => (remoAlly() ? "Ho firmato per un incarico da direttore sportivo: non c'è nessuno da dirigere. Guardo la porta e conto le cose che non si vendono." : "Capitano di una Selezione che non gioca più. Mi hanno regalato un camoscio di peluche. Non so a chi darlo."),
+        comp: () => cl("Hanno smontato la numero uno e l'hanno portata via sul camion. L'ultima corsa è stata vuota. Mi sono seduta dietro, con il bullone in mano.", "Annoto la quantità di cabine: zero. Il resto non so dove annotarlo."),
+        mirtilla: "Mi hanno offerto un posto da responsabile ristorazione. Ho detto di sì per gentilezza e di no per cuore. Hanno capito solo il sì.",
+        noemi: "Radio Nebbia ora si chiama «Lumen FM». Trasmetto sul canale che conosco. A volte si sente una voce in più.",
+        ottavia: "Ho contato le ruspe: tre. Dopo, ho smesso, perché sono diventate troppe.",
+        gedeone: "Il conto dei posti mi è stato requisito. Hanno detto che serve per il bilancio. Sono rimasto con il mio senso del conto, e senza conto.",
+        ettore: "Ho girato il documentario. Si chiama «Vendesi». Non lo vede nessuno, e questo è il solo motivo per cui mi piace.",
+        vermiglio: "Ho vinto. Ho avuto la valle, la cassa e un tavolino in ferro battuto. Se qualcuno sa che cosa farne, mi telefoni.",
+        sigillo: "Atto firmato, registrato e archiviato. Se esiste una cosa più triste della perfezione, è un atto perfetto.",
+        zelo: "Ho fischiato l'ultima partita di Vallombra. Per la regolarità: nessun fallo. Per il resto: tutto.",
+        gaudenzio: "Mio figlio non gioca più. Io ho tenuto il fischietto in tasca e non lo fischio.",
+        neve: "Ho incassato e benedetto. Il giovedì, per scrupolo, ho benedetto di nuovo.",
+        vica: "Il panino lo faccio ancora, ma per noi. Su Lumen FM dicono che è un «prodotto artigianale». Ci siamo accomodati.",
+        tonio: "Gioco ancora nel parcheggio. Le porte sono i cartelli «VIETATO». Parare è facile, vietare no.",
+        gisella: "Ho messo le scarpe nel baule. Dentro, un biglietto: «Ci rivediamo domenica». Non sapevo a chi scrivere.",
+      },
+      e: {
+        teodora: "Il registro dice una sola cosa, in cima alla prima pagina bianca: «FINE. TUTTI PRESENTI». L'ho scritto con la matita, per poterlo correggere. Non lo correggerò.",
+        aurelio: "Il fischio ha cominciato a suonare nell'esatto momento in cui avevo smesso di aspettarlo: era in ritardo di ventisei anni, ed era puntualissimo.",
+        berto: "Il tredicesimo ha fischiato. Ho appoggiato i guanti sulla panchina. Nessuno li ha toccati, perché si sa: i guanti si lasciano a chi arriva dopo.",
+        fosco: "Il fischio era talmente giusto che anche la polvere si è fermata ad ascoltare. Per la prima volta ho spolverato il silenzio senza lasciare impronte.",
+        cornelio: "Ho letto le mie tre righe e ho aggiunto una quarta, a braccio: «Grazie». Non era sul copione. Era l'unica cosa che avevo scritto bene.",
+        remo: () => (remoAlly() ? "Un fischio come quello non l'avevo mai sentito: era perfetto e non somigliava a niente. Mia madre ha pianto e ha detto che era il vento. Il vento ha applaudito." : "Il fischio mi ha preso alla sprovvista. Per un attimo mi è sembrato di avere una squadra. Poi ho ricordato di averla."),
+        comp: () => cl("Il fischio è entrato nei bulloni e li ha messi tutti a posto. Non serve più stringerli. Faccio finta di cercare qualcosa da riparare.", "Annoto l'esatta durata: 3,2 secondi. Annoto anche l'emozione. Non ho una scala, e per questa volta va bene così."),
+        mirtilla: "Ho offerto una tazza a ognuno, con la stessa mano. Hanno accettato tutti, anche chi non aveva la bocca. Ho capito che sono pronti: la tazza passa attraverso e arriva comunque.",
+        noemi: "In diretta, il fischio si è sentito su tutte le frequenze, anche su quella dei cani. Ha detto il veterinario: «Era un buon fischio».",
+        ottavia: "Ho smesso di cercare l'errore nel conto: non c'era. Per la prima volta in ventisei anni, tutto torna anche senza che io lo verifichi.",
+        gedeone: "Il posto in prima fila è occupato da un Fischietto d'ottone. Non so chi l'abbia messo. Lo lascio dov'è.",
+        ettore: "Il documentario non si farà. Ho tenuto l'audio: novanta minuti di silenzio, con un fischio in fondo.",
+        vermiglio: "Il fischio è stato registrato dal mio fonometro: 91,3 decibel. Una coincidenza, immagino. Mi dimetto lo stesso.",
+        sigillo: "La Società Lumen non esiste più. Esiste un fascicolo, che ho archiviato alla voce «Minuto». Non l'ho mai aperto.",
+        zelo: "Non ho arbitrato niente. Ho solo assistito. Mi sono sentito inutile, e fiero: due cose in uno, a livello quattro.",
+        gaudenzio: "Un fischio dritto, da una bocca che non era la mia. Ho capito che la mia lezione era finita bene.",
+        neve: "Ho scritto un biglietto al Vescovo: «Il minuto è finito. Si può continuare». Ha risposto con un solo punto esclamativo.",
+        vica: "Il panino stavolta l'ho mangiato io, su una panchina, davanti a un campo vuoto e pieno. Era buonissimo.",
+        tonio: "Il fischio mi è sembrato venire dalla mia porta. Mi sono voltato. Non c'era nessuno. C'era tutto.",
+        gisella: "Ho segnato il gol più bello della carriera. Nessuno l'ha visto, e va bene: l'ha fischiato il vento.",
+      },
+    };
+    const SQD = {
+      sasso: "Il caffè è buono, e ho capito perché nessuno ne parlava: bisogna averlo aspettato ventisei anni.",
+      pio: "Ho riavuto la bandiera. L'ho appesa alla finestra di mia moglie e ho detto «Sono in ritardo». Ha detto «Lo so». Fine della discussione.",
+      duilio: "Ho telefonato a mia sorella. Ha risposto. L'arrosto l'ho mangiato in vita, non in memoria: è decisamente più caldo.",
+      gino: "Ho una gomma nuova, alla menta. Tengo la bocca chiusa per educazione e il fiato per la partita.",
+      nando: "Il tram 4 non c'è più, hanno messo il 14. Ho preso il 14. Conta l'intenzione, e conta la fermata.",
+      oreste: "Formazione definitiva: tutti. Le virgole sono giuste.",
+      mirella: "Palla a me. Lo dico anche da vivo: il fulmine sul petto è rimasto, e mi piace come suona.",
+      tullio: "La lettera comincia sempre con «Gentile signora». Ma stavolta ho trovato l'indirizzo, e un francobollo.",
+    };
+    const SQD_E = Object.assign({}, SQD, {
+      sasso: "Mi hanno aspettato in tanti. Il caffè lo bevo adesso, con un sorso lento: ha il sapore del minuto che finisce giusto.",
+      oreste: "Ho consegnato la formazione definitiva a Teodora: «Tutti presenti». Dietro, le virgole.",
+      tullio: "Ho scritto l'indirizzo sulla busta. Il fischio mi ha ricordato il resto. Spero che lei apra con la stessa pazienza con cui ha aspettato.",
+    });
+    function post(id) {
+      const k = END() || "a", key = id.replace(/^vl_/, "").replace(/_ns$/, "");
+      const sq = ["sasso", "pio", "duilio", "gino", "nando", "oreste", "mirella", "tullio"];
+      let t;
+      if (sq.includes(key)) t = (k === "e" ? SQD_E : SQD)[key];
+      else if (key === "bianca" || key === "agata") t = DEST[k].comp;
+      else t = DEST[k][key];
+      if (typeof t === "function") t = t();
+      const bgp = BG[k.toUpperCase()] || BG.V;
+      void bgp;
+      say(sw([[id, t || "Che giornata. Non ho altre parole: ho tutto il resto."]], BG.V), done);
+    }
+
+    // ---- il palco: S<3 non è ancora il momento, S==3 è la cerimonia, S>=4 si può riprovare
+    function palco() {
+      const s = S();
+      if (s < 3) return say(sw([["voce", "Il palco della Coppa: un microfono con la spugna, un tappeto rosso e la Coppa dei Tre Versanti, ammaccata in un punto che nessuno ha il coraggio di indicare. Per ora il microfono è spento: prima la Finale. Parla con l'arbitro Zelo, al CENTRO del prato."]], BG.V), done);
+      if (s === 3) return cerimonia();
+      ask("voce", `Il microfono è ancora acceso. Finale trovato: ${ENDINGS[END() || "a"][0]}. ${mem2().ends.length} su ${Object.keys(ENDINGS).length} finali trovati finora.`, [
+        { label: "Riprendi il microfono", sub: "Rivivi la scelta finale: altri finali, nessuna perdita", cls: "hot", fn: () => { unset("end8"); setStep(N, 3); X.refreshZone(); cerimonia(); } },
+        { label: "Guarda la Coppa", fn: () => say(sw([["voce", "La Coppa dei Tre Versanti è ammaccata, lucida, e ha una dedica incisa dal '98: «AGLI STAMBECCHI, QUANDO ARRIVERANNO». Sotto, più piccola, a mano: «SONO ARRIVATI»."]], BG.V), done) },
+        { label: "Lascia stare", fn: done },
+      ], BG.V);
+    }
+    const mem2 = () => X.mem();
+    function cerimonia() {
+      const W = has("m8_win"), h = hero() || { name: "Campione" }, co = has("cor7");
+      const L = [
+        ["voce", `Sul palco il tappeto rosso sa di naftalina e di pomeriggi lunghi. Le tre tribune sono un solo respiro: blu notte e ambra, giallo fluo, viola marmotta. ${W ? "La Coppa è lì, lucida, con l'ammaccatura rivolta verso il pubblico per modestia." : "La Coppa è lì anche se non l'hai vinta: la Selezione ha rifiutato di prenderla in mano, «finché non ha parlato il Campione»."}`, BG.V],
+        co ? ["vl_cornelio", "(prende il microfono, lo guarda, lo restituisce, lo riprende) Mi chiamo Cornelio. Nel '98 non ho fischiato. Ho taciuto. Scusate. Ho finito, la parola è sua."] : ["vl_cornelio", "(al microfono, sottovoce) Non ho parole che meritino un microfono. Lo passo a chi ne ha: si chiama come tutti, ma io non lo dico."],
+        ["vl_teodora", "Ti porgo il microfono con due mani, come si porge un fratello. Dì quello che vuoi: non prometto di essere d'accordo, prometto di restare in piedi."],
+        ["voce", "Il microfono ronza, come un moscone innamorato. A Radio Nebbia Noemi ha alzato il volume: ovunque ci sia una radio, in qualunque posto, qualcuno ti sta ascoltando. Anche dove la nebbia non arriva. Anche dove la nebbia è arrivata e se n'è andata."],
+        tl({ sicuro: "Ho una cosa da dire. La dico una volta.", attento: "Ho un solo minuto di parola. Lo uso bene.", ironico: "Il discorso è lungo tre righe. Per fortuna ho le idee più corte del microfono." }),
+      ];
+      say(sw(L, BG.V), scelta);
+    }
+    function scelta() {
+      const A = condA();
+      const opts = [
+        { label: "La verità, per intero", sub: A ? "Prove, nomi, fischio e tutto quello che sai" : "Tutto quello che sei riuscito a mettere insieme", cls: "hot", fn: () => epilogo(endOf("verita"), !A) },
+        { label: "Che la lumina resti accesa", sub: "Una sera alla volta, alle 6:43", fn: () => epilogo(endOf("lumina")) },
+        { label: "Che i vivi giochino, e il resto sia leggenda", sub: "Una squadra nuova, senza fantasmi", fn: () => epilogo(endOf("vivi")) },
+      ];
+      if (dGate()) opts.push({ label: "Accetto l'offerta di Vermiglio", sub: "La firma, il Resort, l'ultima corsa", fn: () => epilogo(endOf("firma")) });
+      ask("vl_teodora", "«Hai il microfono. Che cosa dici ai Tre Versanti?»", opts, BG.V);
+    }
+
+    const EPI = {
+      a: (inc) => [
+        ["voce", "Parli senza foglio. Dici i nomi: tutti, uno per uno, i quattordici e i tredici, compresi quelli che non sono mai stati in formazione. Dici dove sono finite le prove, chi le ha firmate, cos'è stata la lumina e che cosa si dovrebbe fare per saldare un debito di ventisei anni. Non è un discorso: è un appello."],
+        ["vl_vermiglio", "(dalla tribuna delle autorità, in piedi) Mi dimetto. Lo dico qui perché a verbale ci metterebbero un'ora. (a mezza voce) Ho sbagliato, in modo sistematico ed elegante."],
+        ["voce", "La Coppa viene alzata da chi non l'ha mai vinta. Sul tabellone, a lettere gialle, compare la scritta: 1998 · TUTTI ARRIVATI. A OVEST, il Latte comincia a dirarsi: prima in cima ai campanili, poi tra i lampioni, poi nelle strade. In un'ora c'è il sole, e la valle è una cartolina con tre campanili e nessuna nebbia."],
+        ["voce", "Dalla numero uno scendono in fila gli undici in blu notte e ambra, e i tre di riserva, e un portiere con i guanti in mano. Il paese li guarda scendere come si guarda un treno in ritardo di ventisei anni: con rispetto, e un po' di rancore affettuoso."],
+        ["vl_aurelio", "Siamo in ritardo. Chiediamo scusa a tutti. (guarda Teodora) A te di più. Ho un conto aperto con la tua pazienza, e lo salderò a rate."],
+        ["vl_teodora", "Hai ventisei anni da recuperare, fratello, e io ho una scrivania piena di carte. Cominciamo dalla colazione. (si asciuga la faccia con il registro) Poi vediamo."],
+        ["voce", "Cornelio consegna la fascia da sindaco a Teodora, che la guarda e la restituisce: «Tienila tu, che a me sta male». Berto e Fosco si stringono la mano, poi si abbracciano, poi litigano per un nodo. Mirella grida «Palla a me!» e per la prima volta qualcuno gliela passa."],
+        ["voce", "Al microfono resti un attimo di troppo, e qualcuno ride. Sulla Coppa c'è una nuova incisione, a mano, di Teodora: «AGLI STAMBECCHI, ARRIVATI»."],
+        tl({ sicuro: "Il minuto è finito. E ora si gioca.", attento: "Il fischio era giusto. Il resto è la normalità, e non vedevo l'ora.", ironico: "Ventisei anni di ritardo e nessuno si è nemmeno lamentato del tempo. Una squadra di gentiluomini." }),
+        ["voce", "Fine. Tutti presenti."],
+      ],
+      b: (inc) => [
+        ["voce", inc ? "Parli, e la verità non è intera: manca un pezzo, o due, e non basta perché la valle intera li sappia. Ma i pezzi che hai bastano per decidere una cosa, e la decidi." : "Parli del Latte come si parla di un parente: con affetto, con un filo di rimprovero, con la certezza che sia ancora lì. Dici che la lumina non va spenta. Che qualcuno la tenga accesa, una sera alla volta."],
+        ["vl_cornelio", "(sottovoce, al microfono) Nel '98 ho aspettato un fischio che non è arrivato. Se una luce deve restare accesa, la terrò io. Non per gloria: per il peso."],
+        ["voce", "Nessuno applaude subito. Poi uno, in tribuna, batte le mani una volta sola, a vuoto, come si bussa a una porta, e poi altri. L'applauso è lento e dura finché non si capisce che non è più per te."],
+        ["voce", "A OVEST, il Latte non si dirada: si ritira, come una marea gentile, fino al fondo della valle. Dal cavo arriva la nota di sempre. La numero uno parte da sola, alle 6:43, con le finestre accese e la panchina vuota."],
+        ["vl_teodora", "Ogni sera. Alle 6:43. Non per piangere: per salutare. (chiude il registro) La riga di Aurelio resta «IN SOSPESO». È la sola riga che non voglio correggere."],
+        ["voce", "Quella sera, sull'orlo del Latte, c'è un posto in panchina, uno solo, che nessuno occupa. Mirtilla lo spolvera. Gedeone lo conta. Fosco, se c'è, ci mette un termos. Ogni tanto, dal fondo della nebbia, arriva un applauso in più."],
+        tl({ sicuro: "Resto qui. Una sera alla volta.", attento: "Il Latte non finisce: cambia di orario.", ironico: "Un minuto sospeso, ma con la cena a orari fissi. Il paese ha trovato la sua routine." }),
+        ["voce", "Fine. Qualcuno resta."],
+      ],
+      c: (inc) => [
+        ["voce", "Parli dei vivi. Di chi ha i polpacci e il fiato e le tessere da stampare. Dici che il Latte, la lumina e le Ombre sono leggende che meritano il rispetto dei libri, non il peso dei bilanci, e che una squadra nuova può cominciare da zero: con tre colori, una porta a testa e un panino per ognuno."],
+        ["vl_neve", "(dalla tribuna, al megafono) Iscrizioni aperte! Si accettano tutti, compresi gli stranieri, i forestieri e i minorenni accompagnati da un termos."],
+        ["voce", "In un quarto d'ora ci sono quarantun iscritti, una squadra di dodici e una lista d'attesa di sei. Qualcuno appende un cartello: «STAMBECCHI · ISCRIZIONI APERTE». Nessuno lo ha stampato: l'ha scritto Mirtilla sul retro di un menù."],
+        ["voce", "A OVEST, il Latte sparisce senza dire niente, come un ospite educato che ha capito di essere di troppo. Resta l'aria, pulita, e un campo sgombro. Dalla numero uno, ferma sul cavo, la lampada si spegne con un clic piccolo piccolo."],
+        ["vl_teodora", "Il registro lo consegno al Museo. Con una sola riga di nota: «Leggenda». Poi mi fai vedere come si para, Campione. Ho un fratello che lo sapeva fare e non l'ho mai visto."],
+        ["voce", "Quella sera il campo vero ha due porte, dodici in pettorina e una palla che rotola. Non c'è nessun fischio. Qualcuno ride, e tutto comincia di nuovo."],
+        tl({ sicuro: "Fischio d'inizio. Adesso si gioca davvero.", attento: "Il passato è un libro. Il presente è una porta a testa.", ironico: "Il soprannaturale rimane una leggenda locale. Con tessera, quota e certificato medico." }),
+        ["voce", "Fine. Comincia la partita."],
+      ],
+      d: (inc) => [
+        ["voce", "Dici che accetti l'offerta. La voce ti viene piano, come una frase che non si è mai scritta. Dici che è meglio una valle viva e venduta di una nebbia bella e vuota, e senti da qualche parte una sedia che si sposta."],
+        ["vl_vermiglio", "(si alza, senza trionfalismo, con la cartellina chiusa) Prendo atto. Non sorrido: lo dico a verbale. Il Comune è ben rappresentato. La valle è in buone mani, nel senso che è in mani."],
+        ["vl_sigillo", "Qui, qui e qui. (indica tre firme su un tavolino di ferro battuto) E in fondo, dove si firma con la lingua, una riga di gesso."],
+        ["voce", "A OVEST, nel Latte, si accende una luce, poi un'altra, poi nessuna. La numero uno parte per l'ultima corsa. Vuota. Le finestre sono di un turchese stanchissimo. Scende lenta, si ferma in fondo al cavo, e un cartello compare nella nebbia: VENDESI · LUMEN RESORT & SPA."],
+        ["vl_teodora", "(a bassa voce, nessun microfono) Ho firmato anch'io. Per la piscina in cui verranno a imparare a nuotare, ché da noi non c'è mai stata acqua. (apre il registro, poi lo chiude) Non è una sconfitta. È un prezzo."],
+        ["voce", "Sulla lavagna della Società compare, a gesso, un'unica parola: ASPETTO. Nessuno l'ha scritta, ma la gente che passa la legge lo stesso. Qualcuno, più tardi, ci aggiunge una virgola. Poi un'altra, poi un punto."],
+        tl({ sicuro: "Ho scelto. Non mi piace, ma ho scelto.", attento: "Ogni firma è una porta. Qualcuno doveva chiuderla.", ironico: "La Società ha vinto. Lo dicono i cartelli, in italiano corretto e in blu." }),
+        ["voce", "Fine. Il prezzo giusto."],
+      ],
+      e: (inc) => [
+        ["voce", "Parli, e a un certo punto smetti. Ti metti due dita alle labbra, o prendi il fischietto d'ottone con il nastro rosso sbiadito. Un fischio solo, né lungo né corto, di quelli che non si dimenticano. Dal microfono esce, e Radio Nebbia lo spedisce su tutte le onde, anche su quelle dei cani."],
+        ["vl_aurelio", "(a un metro da te, con la voce che gli trema soltanto un po') Questo non è un fischio. È una parola. È «arrivederci» detta con l'esatta intonazione di «grazie»."],
+        ["voce", "Il tabellone, in fondo, scatta: 90:00 · FINE · TUTTI PRESENTI. Il Latte non si dirada: si accende. Ogni lanterna accesa lungo il camminamento fa un passo avanti, e il paese capisce che quelle luci non erano per vedere: erano per farsi vedere."],
+        ["voce", "Dalla numero uno scendono in fila gli undici e i tre e il portiere, ma stavolta nessuno è in ritardo. Il minuto finisce nell'esatto istante in cui deve, e tutti sono lì: i vivi, quelli che non erano, quelli che erano e quelli che dovevano esserci."],
+        ["vl_teodora", "(piano) Non c'è niente da correggere. Ho guardato il registro: ogni riga dice quello che deve dire. È un'esperienza sconcertante."],
+        ["vl_berto", "Dita aperte, polso morbido. L'ho sempre saputo. Non avevo mai potuto farlo con le mani."],
+        ["voce", "Sulla Coppa, in una luce che sembra di un pomeriggio d'estate trasferito a mezzogiorno, il fischietto d'ottone brilla da solo. Nessuno lo tocca. Poi, piano, qualcuno comincia ad applaudire, e dall'altra parte del campo Mirella grida «Palla a me!», che non vede l'ora."],
+        tl({ sicuro: "Il minuto è finito. E non ha lasciato niente di non detto.", attento: "Tutto al suo posto, per una volta.", ironico: "Sistemato anche il minuto. Il prossimo problema sarà il pomeriggio." }),
+        ["voce", "Fine. Il minuto perfetto."],
+      ],
+    };
+    const NOTE_END = { a: "La verità è stata detta e il Latte si è diradato.", b: "La lumina è rimasta accesa: qualcuno resta.", c: "Una squadra nuova con i vivi: il Latte è sparito.", d: "La valle è stata venduta: l'ultima corsa è partita vuota.", e: "Il minuto è finito esattamente quando doveva." };
+    const REW = { a: { coins: 60, cos: "vl_treversanti_mg" }, b: { coins: 40, cos: "vl_fascia_lampionaio" }, c: { coins: 40, cos: "vl_squadranuova_mg" }, d: { coins: 20 }, e: { coins: 100, cos: "vl_sospesa_mg" } };
+    function epilogo(k, inc) {
+      const bg = BG[k.toUpperCase()];
+      F.set("end8", k); X.refreshZone();
+      say(sw(EPI[k](inc), bg), () => chiudi(k));
+    }
+    function chiudi(k) {
+      const bg = BG[k.toUpperCase()], nuovo = X.endLog(k);
+      X.finishChapter(N, END_ID[k]); setStep(N, 4);
+      note(`Cap. 8 concluso: «${ENDINGS[k][0]}». ${NOTE_END[k]}`);
+      const rw = [].concat(reward("vl_ch8", { coins: 80, cos: "vl_fascia_fischio" }), reward("vl_end_" + k, REW[k]));
+      const ids = k === "a" || k === "e" ? ["teodora", "aurelio", "berto", "fosco", "cornelio", "remo", "comp", "vermiglio", "mirtilla"] : ["teodora", "fosco", "cornelio", "remo", "comp", "mirtilla", "noemi", "vermiglio", "zelo"];
+      const who = { teodora: "vl_teodora", aurelio: "vl_aurelio", berto: "vl_berto", fosco: "vl_fosco", cornelio: "vl_cornelio", remo: remoId(), comp: compId(), vermiglio: "vl_vermiglio", mirtilla: "vl_mirtilla", noemi: "vl_noemi", zelo: "vl_zelo" };
+      const txt = (key) => { let t = DEST[k][key]; if (typeof t === "function") t = t(); return t; };
+      const lines = ids.map((key) => [who[key], txt(key) || "…", bg]);
+      const ch = [lines.slice(0, 3), lines.slice(3, 6), lines.slice(6)];
+      const tot = mem2().ends.length, n = Object.keys(ENDINGS).length;
+      const fin = [["voce", `FINALE ${nuovo ? "TROVATO" : "RIVISTO"} · ${ENDINGS[k][0].toUpperCase()}`, bg], ["voce", `${ENDINGS[k][1]} Finali trovati ${tot}/${n}.${rw.length ? " " + rw.join(" · ") + "." : ""}`, bg], ["voce", "CAPITOLO 8 · FISCHIO FINALE · CONCLUSO. Vallombra è conclusa. Puoi restare allo stadio, parlare con tutti, raccogliere le schegge rimaste, ripetere la scelta dal palco a EST o rigiocare il capitolo dal menu «Capitoli».", bg]];
+      const R3 = () => say(sw(ch[2], bg), () => say(sw(fin, bg), () => go("vl_versanti", 41, 11)));
+      say(sw([["voce", "Qualche giorno dopo, o qualche anno, o qualche partita. Il tempo, a Vallombra, è sempre stato un termine contrattuale. Ecco dove sono finiti tutti.", bg], ...ch[0]], bg), () => say(sw(ch[1], bg), R3));
+    }
+
+    // ---- rigiocare il solo capitolo 8: si azzerano le scelte del capitolo, restano finali, monete e cosmetici
+    function replay() {
+      const fl = X.mem().flags;
+      Object.keys(fl).filter((k) => /^(sl8_|m8|end8$|w8$|fis8$|ini8$|yld8$|ver8$|cor8$|zel8$)/.test(k)).forEach((k) => { delete fl[k]; });
+      fl.rep8 = true; setStep(N, 0); X.save();
+      return ["vl_sospeso", 4, 14];
+    }
+
+    // ============================================================================================ dialoghi e oggetti
+    const flav = (arr, bg) => () => say(sw([["voce", chip(arr)]], bg || BG.V), done);
+    const V = (id, fS, fOther) => () => (inS() ? (fS ? fS() : delegate(id)) : inV() ? preTalk(id) : (fOther ? fOther() : delegate(id)));
+    const talk = {};
+    talk.vl_aurelio = () => (inS() ? aurelioS() : inV() ? preTalk("vl_aurelio") : delegate("vl_aurelio"));
+    talk.vl_berto = V("vl_berto", bertoS);
+    talk.vl_teodora = V("vl_teodora", teodoraS);
+    talk.vl_fosco = V("vl_fosco", foscoS, () => delegate("vl_fosco"));
+    SQ.forEach((id) => { talk[id] = V(id, () => giocatore(id)); });
+    ["vl_cornelio", "vl_mirtilla", "vl_noemi", "vl_ottavia", "vl_gedeone", "vl_ettore", "vl_vermiglio", "vl_sigillo", "vl_zelo", "vl_vica", "vl_neve", "vl_gaudenzio", "vl_tonio", "vl_gisella", "vl_bianca", "vl_agata", "vl_remo", "vl_remo_ns"].forEach((id) => { talk[id] = () => (inV() ? preTalk(id) : delegate(id)); });
+    const obj = {
+      "vl_versanti:1": palco,
+      "vl_versanti:2": flav(["Una fila di tifosi in blu notte e ambra agita un termos come una bandiera. Alla fila dietro, un signore in giallo fluo canta il coro sbagliato con la massima convinzione.", "La tribuna è un grande organismo con trecento teste e un solo cuore. Qualcuno in terza fila vende cioccolata sciolta, a prezzo equo.", "In prima fila un cartello: «SIAMO ARRIVATI PER PRIMI (CI HANNO DETTO PREGO)»."]),
+      "vl_versanti:3": () => { const [a, b] = tab8(); say(sw([["voce", S() <= 1 ? "Il tabellone in cifre gialle: COPPA DEI TRE VERSANTI · FINALE. STAMBECCHI 0 – 0 SELEZIONE. I numeri aspettano, con quella pazienza luminosa tipica dei tabelloni." : `Il tabellone: STAMBECCHI ${a} – ${b} SELEZIONE. Sotto, in piccolo: «GRAZIE PER IL PANINO».`]], BG.V), done); },
+      "vl_versanti:9": flav(["La stazione d'arrivo della numero uno: una pensilina, una panchina e il cavo che canta la sua nota. Sul sedile, il gagliardetto «STAMBECCHI · FINALE '98», rimesso a nuovo.", "La cabina riposa con le finestre spente: ha fatto il giro e vuole il suo caffè."]),
+      "vl_versanti:U": flav(["Il pallone della Finale: bianco, nuovo, con tre fascette colorate sul cucito. Lo senti caldo come se qualcuno lo avesse appena lasciato.", "Il pallone aspetta al centro del prato con la pazienza di tutti i palloni: la stessa degli ottimi cani."]),
+      "vl_versanti:l": flav(["Un lampione di lumina: brilla anche a mezzogiorno, solo perché non sa che il sole è già in servizio.", "Il lampione ronza piano. Se il Latte fosse una canzone, sarebbe il ritornello."]),
+      "vl_versanti:x": flav(["Il tavolo del Rifugio Tre Tazze: termos, panini e un cartello «OGGI SI PAGA IN APPLAUSI». La cassetta delle offerte contiene un bottone, due gettoni e un applauso, piegato a metà.", "Panini con la frittata, panini con il formaggio, panini con la scritta «SCHERZO». Quest'ultimo non si ordina: lo si trova."]),
+      "vl_versanti:b": flav(["La panchina della Selezione: tre posti, due coperte e una palla da tennis, che il portiere usa per scaramanzia.", "La panca è calda di sole. Qualcuno ci ha lasciato un biglietto: «SE SEGNI, SIEDITI. SE PARI, SIEDITI LO STESSO»."]),
+      "vl_versanti:r": flav(["Oltre il parapetto la valle fa il suo respiro lento. Tre campanili, un fiume che non ha fretta e, a OVEST, un puntino turchese sempre più lontano.", "Il panorama è tale che ogni parola sembra una volgarità. Tranne «panino»."]),
+    };
+
+    return {
+      n: N, title: "Fischio Finale", sub: "L'ultimo secondo, una Finale in due tempi e un microfono acceso", start: "vl_sospeso", zones, talk, obj, goal, mood, replay,
+      news: (id, s) => {
+        if (inV()) return (id === "vl_zelo" && (s === 1 || s === 2)) || (s === 3 && id === "vl_teodora");
+        if (inS()) return id === "vl_aurelio" && s === 0;
+        return X.newsOf(id, N);
+      },
+      intro: () => [
+        ["voce", "Sei e quarantatré. L'orologio alla stazione del Latte non ha ancora cambiato minuto, ma ha smesso di trattenere il fiato. Il Campo Sospeso è rimasto com'era: 89:59, due a uno, il pallone nella rete e la squadra in fila sul bordo dell'area.", BG.S],
+        ["voce", "Ti manca una cosa sola: il fischio. E dopo il fischio, la parte che nessuno ha scritto: che cosa farne di un paese, di una valle e di ventisei anni. A mezzogiorno c'è una Finale da giocare, poco più in alto, e un microfono acceso.", BG.S],
+        [compId(), isB() ? "Hai la maglia? Hai il tiro? Hai i calzini spaiati? (si interrompe) Io ho la chiave inglese, e non serve a niente. Dopo l'ultimo secondo, comunque, mi serve per le mani." : "Ho preparato un solo foglio di appunti. È bianco. Per questo ultimo capitolo, ho deciso di non prevedere niente.", BG.S],
       ],
     };
   });
