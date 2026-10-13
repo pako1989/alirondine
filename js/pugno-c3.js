@@ -194,11 +194,12 @@
       title: "Mezzogiorno di Fuoco al Fortino",
       desc: "La resa dei conti al Fortino di Rio Bravo sotto il sole accecante e la scelta che consacrerà la tua leggenda.",
       goal: () => goal(S()),
+      start: "pr_fortino",
       zones,
       talk,
       intro: () => {
         setStep(0);
-        K.teleport("pr_fortino", 4, 18);
+        return [["voce", "<b>PER UN PUGNO DI RIGORI</b> · Capitolo 3. Il fortino di Rio Bravo ti aspetta: oggi si decide la Coppa."]];
       }
     };
   }

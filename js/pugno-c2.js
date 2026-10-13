@@ -85,7 +85,7 @@
         ]);
         quest("Incontra Ramon al Canyon", "Esci dal Saloon e incamminati verso le gole del Canyon Rosso.");
         setStep(1);
-        K.teleport("pr_canyon", 4, 18);
+        K.go("pr_canyon", 4, 18);
       },
       pr_carmela(K) {
         say([["pr_carmela", "Porta questa fiaschetta di sarsaparilla a Ramon. Digli che gliela manda Carmela: gli addolcirà il carattere prima del tiro."]]);
@@ -167,11 +167,12 @@
       title: "La Notte dei Desperados",
       desc: "L'incursione notturna nel Canyon Rosso, l'incontro con Ramon Sette Tiri e il duello alla luce dei falò.",
       goal: () => goal(S()),
+      start: "pr_saloon_notte",
       zones,
       talk,
       intro: () => {
         setStep(0);
-        K.teleport("pr_saloon_notte", 7, 9);
+        return [["voce", "<b>PER UN PUGNO DI RIGORI</b> · Capitolo 2. Il Saloon di notte: pianoforte scordato, carte sul tavolo e occhi addosso."]];
       }
     };
   }

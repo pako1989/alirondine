@@ -184,11 +184,12 @@
       title: "Un cavallo, una sella e un pallone",
       desc: "L'arrivo a El Paso del Rigore, l'incontro con lo Sceriffo Cooper, Carmela e il primo duello a Stangata.",
       goal: () => goal(S()),
+      start: "pr_cittadina",
       zones,
       talk,
       intro: () => {
         setStep(0);
-        K.teleport("pr_cittadina", 4, 18);
+        return [["voce", "<b>PER UN PUGNO DI RIGORI</b> · Capitolo 1. Sei arrivato a El Paso del Rigore con un cavallo, una sella e un pallone. La via è polverosa, il sole è basso."]];
       }
     };
   }

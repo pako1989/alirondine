@@ -282,9 +282,9 @@
 <script src="js/montagna-c3.js?v=1"></script>
 <script src="js/stangata.js?v=1"></script>
 <script src="js/pugno.js?v=1"></script>
-<script src="js/pugno-c1.js?v=1"></script>
-<script src="js/pugno-c2.js?v=1"></script>
-<script src="js/pugno-c3.js?v=1"></script>
+<script src="js/pugno-c1.js?v=2"></script>
+<script src="js/pugno-c2.js?v=2"></script>
+<script src="js/pugno-c3.js?v=2"></script>
 <script src="js/salone.js?v=32"></script>
 <script src="js/sogni.js?v=12"></script>
 <script>
@@ -379,6 +379,16 @@ if ("serviceWorker" in navigator && location.protocol === "https:") {
 }
 </script>
 
-<div id="appVersion" style="position:fixed;bottom:4px;right:8px;font-size:10px;color:#666;opacity:0.7;z-index:10;pointer-events:none;">v163</div>
+<div id="appVersion" style="position:fixed;bottom:4px;right:8px;font-size:10px;color:#9aa;opacity:0.8;z-index:10;pointer-events:none;">v…</div>
+<script>
+// versione app = cache dello Service Worker (sw.js); se la versione online è più nuova di quella caricata, lo dice
+(function () {
+  var el = document.getElementById("appVersion"); if (!el) return;
+  var cur = null;
+  function show(online) { try { el.textContent = (cur ? "v" + cur : "v?") + (online && cur && online !== cur ? " · nuova v" + online + ": Impostazioni → Aggiorna app" : ""); } catch (e) {} }
+  try { if (window.caches) caches.keys().then(function (ks) { var n = ks.map(function (k) { var m = /^alirondine-v(\d+)$/.exec(k); return m ? +m[1] : 0; }); cur = Math.max.apply(null, n.concat([0])) || null; show(); }).catch(function () {}); } catch (e) {}
+  try { fetch("sw.js", { cache: "no-store" }).then(function (r) { return r.text(); }).then(function (t) { var m = /alirondine-v(\d+)/.exec(t); if (m) { if (!cur) cur = null; show(m[1]); if (!cur) el.textContent = "v" + m[1]; } }).catch(function () {}); } catch (e) {}
+})();
+</script>
 </body>
 </html>
