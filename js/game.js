@@ -1055,6 +1055,7 @@
     if (c.style === "sidebraid") { g.beginPath(); g.ellipse(0, -11, 22, 14, 0, Math.PI, 0); g.fill(); for (let k = 0; k < 7; k++) { g.beginPath(); g.arc(20 + k * 0.8, -4 + k * 7, 5 - k * 0.3, 0, 7); g.fill(); } px(22, 44, 6, 3, "#ffd23f"); }
     if (c.style === "spacebuns") { g.beginPath(); g.ellipse(0, -12, 22, 14, 0, Math.PI, 0); g.fill(); [-1, 1].forEach((d) => { g.beginPath(); g.arc(d * 16, -24, 8, 0, 7); g.fill(); }); }
     if (c.style === "corona") { g.beginPath(); g.ellipse(0, -11, 22, 14, 0, Math.PI, 0); g.fill(); for (let k = 0; k < 9; k++) { const a = Math.PI * (1.08 + k * 0.105); g.beginPath(); g.arc(Math.cos(a) * 21, -10 + Math.sin(a) * 17, 5, 0, 7); g.fill(); } g.fillStyle = "rgba(255,255,255,.18)"; for (let k = 0; k < 9; k += 2) { const a = Math.PI * (1.08 + k * 0.105); g.fillRect(Math.cos(a) * 21 - 2, -12 + Math.sin(a) * 17, 3, 1.5); } g.fillStyle = c.hair; }
+    if (c.style === "criniera") { g.beginPath(); g.ellipse(0, -11, 22, 14, 0, Math.PI, 0); g.fill(); g.beginPath(); g.moveTo(-6, -24); g.quadraticCurveTo(10, -46, 30, -30); g.quadraticCurveTo(36, -10, 30, 20); g.quadraticCurveTo(26, 34, 32, 44); g.quadraticCurveTo(18, 36, 20, 16); g.quadraticCurveTo(22, -6, 12, -18); g.closePath(); g.fill(); g.fillStyle = "rgba(255,255,255,.18)"; g.fillRect(20, -24, 3, 30); g.fillStyle = c.hair; }
     if (c.style === "antenne") { g.beginPath(); g.ellipse(0, -11, 22, 14, 0, Math.PI, 0); g.fill(); g.lineWidth = 4; g.lineCap = "round"; g.strokeStyle = c.hair; [-1, 1].forEach((d) => { g.beginPath(); g.moveTo(d * 6, -22); g.quadraticCurveTo(d * 9, -40, d * 18, -44); g.stroke(); g.beginPath(); g.arc(d * 18, -44, 4.5, 0, 7); g.fill(); }); g.lineCap = "butt"; }
     if (c.style === "scodella") { g.beginPath(); g.ellipse(0, -13, 23, 16, 0, Math.PI, 0); g.fill(); g.fillRect(-23, -13, 46, 7); g.fillStyle = "rgba(0,0,0,.15)"; g.fillRect(-23, -7, 46, 1.5); g.fillStyle = c.hair; }
     if (c.style === "cometa") { g.beginPath(); g.ellipse(0, -11, 22, 14, 0, Math.PI, 0); g.fill(); g.beginPath(); g.moveTo(-16, -16); g.quadraticCurveTo(-6, -48, 22, -46); g.quadraticCurveTo(8, -36, 16, -18); g.closePath(); g.fill(); g.fillStyle = "#ffd23f"; g.beginPath(); g.moveTo(10, -44); g.quadraticCurveTo(18, -46, 22, -46); g.quadraticCurveTo(16, -40, 14, -36); g.closePath(); g.fill(); g.fillStyle = c.hair; }
@@ -3924,6 +3925,7 @@
     hs_sidebraid: { kind: "style", label: "Taglio a treccia da cavaliere", val: "sidebraid", from: "Finisci la saga «Il Trono di Cuoio» (un finale qualsiasi)" },
     hs_spacebuns: { kind: "style", label: "Taglio a due chignon", val: "spacebuns", from: "Finisci la saga «La Notte dei Lampioni» (un finale qualsiasi)" },
     hs_corona: { kind: "style", label: "Taglio a corona di trecce", val: "corona", from: "Finisci la saga «La Guerra dei Tre Ducati» (un finale qualsiasi)" },
+    hs_criniera: { kind: "style", label: "Criniera da star", val: "criniera", from: "Finisci la saga «Il Cavallo Star» (un finale qualsiasi)" },
     hs_antenne: { kind: "style", label: "Ciuffi ad antenna", val: "antenne", from: "Finisci la saga «Razzopacco · Consegne dal Futuro» (un finale qualsiasi)" },
     hs_scodella: { kind: "style", label: "Taglio a scodella", val: "scodella", from: "Finisci la saga «Gli Straordinari di Quartiere» (un finale qualsiasi)" },
     hs_cometa: { kind: "style", label: "Taglio a cometa", val: "cometa", from: "Finisci la saga «Il Figlio del Titano» (un finale qualsiasi)" },
@@ -4146,6 +4148,45 @@
     fiamma(x, y, c, dir) { const fl = Math.sin(frame / 3 + x) * 1.5; g.fillStyle = c.shirt || "#ff6a2a"; g.beginPath(); g.moveTo(x - 7, y); g.quadraticCurveTo(x - 9, y - 10, x - 2 + fl, y - 22); g.quadraticCurveTo(x + 2, y - 12, x + 4 - fl, y - 18); g.quadraticCurveTo(x + 10, y - 8, x + 7, y); g.closePath(); g.fill(); g.fillStyle = c.skin || "#ffb83a"; g.beginPath(); g.ellipse(x, y - 6, 4.5, 6, 0, 0, 7); g.fill(); if (dir !== "up") { px(x - 3, y - 9, 2, 2, "#2a1a0e"); px(x + 1, y - 9, 2, 2, "#2a1a0e"); } },
     rovo(x, y, c, dir, ph) { const sw = ph ? Math.sin(ph) * 1 : 0; g.fillStyle = c.hair || "#2a4a1a"; [[-4, -8, 6], [4, -8, 6], [0, -14, 6]].forEach(([a0, b0, r]) => { g.beginPath(); g.arc(x + a0 + sw, y + b0, r, 0, 7); g.fill(); }); px(x - 3, y - 3, 2, 3, c.skin || "#8a6a4a"); px(x + 1, y - 3, 2, 3, c.skin || "#8a6a4a"); g.strokeStyle = c.skin || "#8a6a4a"; g.lineWidth = 1; for (let i = 0; i < 7; i++) { const a = i * 0.9; g.beginPath(); g.moveTo(x + Math.cos(a) * 7, y - 10 + Math.sin(a) * 7); g.lineTo(x + Math.cos(a) * 9, y - 10 + Math.sin(a) * 9); g.stroke(); } if (dir !== "up") { px(x - 3, y - 11, 2, 2, c.eye || "#e8c84a"); px(x + 1, y - 11, 2, 2, c.eye || "#e8c84a"); } },
   };
+  // ANIMALI DI LUSTRINO (saga «Il Cavallo Star»): cavallo e cane antropomorfi, a contorni piatti e colori pastello, con la maglia.
+  // Colori: skin = pelo, hair = criniera o orecchie, shirt = vestito, eye = occhi.
+  SHAPE_PORTRAIT.cavallo = function (c, f) {
+    const O = "#2a1a2a", fur = c.skin || "#b07a4a", mane = c.hair || "#5a3a2a", sh = c.shirt || "#f0b8c8", st = () => { g.strokeStyle = O; g.lineWidth = 2.5; g.stroke(); };
+    g.fillStyle = sh; g.beginPath(); g.moveTo(-38, 62); g.quadraticCurveTo(-36, 32, -12, 28); g.lineTo(14, 28); g.quadraticCurveTo(38, 32, 40, 62); g.closePath(); g.fill(); st();
+    g.fillStyle = "rgba(255,255,255,.35)"; g.beginPath(); g.moveTo(-6, 28); g.lineTo(0, 40); g.lineTo(6, 28); g.closePath(); g.fill();
+    g.fillStyle = fur; g.beginPath(); g.moveTo(-12, 30); g.lineTo(-9, 8); g.lineTo(12, 8); g.lineTo(14, 30); g.closePath(); g.fill(); st();
+    g.fillStyle = mane; g.beginPath(); g.moveTo(14, -34); g.quadraticCurveTo(30, -18, 26, 6); g.quadraticCurveTo(22, 20, 14, 28); g.lineTo(12, 8); g.lineTo(16, -20); g.closePath(); g.fill(); st();
+    const w = Math.floor(f / 120) % 5 === 0 ? 4 : 0;
+    [-1, 1].forEach((d) => { g.fillStyle = fur; g.beginPath(); g.moveTo(d * 6, -32); g.lineTo(d * 15, -54 + (d > 0 ? w : 0)); g.lineTo(d * 16, -30); g.closePath(); g.fill(); st(); g.fillStyle = "#f4b8c0"; g.beginPath(); g.moveTo(d * 9, -34); g.lineTo(d * 14, -48 + (d > 0 ? w : 0)); g.lineTo(d * 14, -34); g.closePath(); g.fill(); });
+    g.fillStyle = fur; g.beginPath(); g.moveTo(-16, -30); g.quadraticCurveTo(0, -44, 16, -30); g.lineTo(18, 6); g.quadraticCurveTo(24, 32, 0, 34); g.quadraticCurveTo(-24, 32, -18, 6); g.closePath(); g.fill(); st();
+    g.fillStyle = "rgba(255,255,255,.3)"; g.beginPath(); g.ellipse(0, 22, 15, 10, 0, 0, 7); g.fill(); g.fillStyle = O; g.beginPath(); g.ellipse(-6, 20, 2.5, 3.5, 0.3, 0, 7); g.ellipse(6, 20, 2.5, 3.5, -0.3, 0, 7); g.fill();
+    g.fillStyle = mane; g.beginPath(); g.moveTo(-12, -36); g.quadraticCurveTo(-4, -46, 8, -38); g.quadraticCurveTo(2, -26, -4, -18); g.quadraticCurveTo(-6, -28, -12, -36); g.closePath(); g.fill(); st();
+    g.fillStyle = "rgba(255,255,255,.25)"; g.fillRect(-12, -14, 4, 16);
+    return { eyes: [[-9, -6], [9, -6]], r: 4.5, my: 29, ink: O };
+  };
+  SHAPE_PORTRAIT.cane = function (c, f) {
+    const O = "#2a1a2a", fur = c.skin || "#e8c88a", ear = c.hair || "#a8784a", sh = c.shirt || "#a8d8f0", st = () => { g.strokeStyle = O; g.lineWidth = 2.5; g.stroke(); }, wag = Math.sin(f / 10) * 3;
+    g.fillStyle = sh; g.beginPath(); g.moveTo(-38, 62); g.quadraticCurveTo(-36, 34, -14, 30); g.lineTo(14, 30); g.quadraticCurveTo(38, 34, 40, 62); g.closePath(); g.fill(); st();
+    g.fillStyle = fur; g.beginPath(); g.ellipse(0, 2, 27, 25, 0, 0, 7); g.fill(); st();
+    [-1, 1].forEach((d) => { g.fillStyle = ear; g.beginPath(); g.ellipse(d * 27, 6 + (d > 0 ? wag * 0.5 : 0), 9, 18, d * 0.35, 0, 7); g.fill(); st(); });
+    g.fillStyle = "#fff4e0"; g.beginPath(); g.ellipse(0, 16, 14, 11, 0, 0, 7); g.fill(); st();
+    g.fillStyle = O; g.beginPath(); g.ellipse(0, 9, 5.5, 4, 0, 0, 7); g.fill(); g.fillStyle = "rgba(255,255,255,.6)"; g.fillRect(-2, 7, 2, 1.5);
+    g.fillStyle = ear; g.beginPath(); g.ellipse(-12, -12, 6, 4, 0.3, 0, 7); g.fill();
+    return { eyes: [[-10, -5], [10, -5]], r: 4.5, my: 22, ink: O };
+  };
+  SHAPE_CHIBI.cavallo = function (x, y, c, dir, ph) {
+    const l = Math.round(Math.sin(ph) * 1.5), fur = c.skin || "#b07a4a", mane = c.hair || "#5a3a2a", O = "#2a1a2a"; g.fillStyle = "#0003"; g.beginPath(); g.ellipse(x, y, 6, 2, 0, 0, 7); g.fill();
+    px(x - 4, y - 5, 3, 5 - Math.max(0, l), O); px(x + 1, y - 5, 3, 5 - Math.max(0, -l), O); px(x - 5, y - 13, 10, 8, c.shirt || "#f0b8c8"); px(x - 7, y - 12, 2, 5, fur); px(x + 5, y - 12, 2, 5, fur);
+    const hx = dir === "left" ? x - 6 : dir === "right" ? x - 2 : x - 4; px(hx, y - 25, 8, 12, fur); px(hx, y - 17, 8, 4, "#e8d0c0"); px(hx + 1, y - 28, 2, 3, fur); px(hx + 5, y - 28, 2, 3, fur);
+    px(dir === "left" ? hx + 7 : hx - 1, y - 26, 2, 10, mane); px(hx + 2, y - 26, 4, 2, mane);
+    if (dir !== "up") { px(hx + 1, y - 22, 2, 2, O); px(hx + 5, y - 22, 2, 2, O); px(hx + 2, y - 15, 1, 1, O); px(hx + 5, y - 15, 1, 1, O); }
+  };
+  SHAPE_CHIBI.cane = function (x, y, c, dir, ph) {
+    const l = Math.round(Math.sin(ph) * 1.5), fur = c.skin || "#e8c88a", ear = c.hair || "#a8784a", O = "#2a1a2a"; g.fillStyle = "#0003"; g.beginPath(); g.ellipse(x, y, 6, 2, 0, 0, 7); g.fill();
+    px(x - 4, y - 5, 3, 5 - Math.max(0, l), O); px(x + 1, y - 5, 3, 5 - Math.max(0, -l), O); px(x - 5, y - 13, 10, 8, c.shirt || "#a8d8f0"); px(x - 7, y - 12, 2, 5, fur); px(x + 5, y - 12, 2, 5, fur);
+    px(x - 5, y - 23, 10, 10, fur); px(x - 7, y - 22, 2, 7, ear); px(x + 5, y - 22, 2, 7, ear);
+    if (dir !== "up") { px(x - 2, y - 17, 4, 3, "#fff4e0"); px(x - 1, y - 18, 2, 1, O); px(x - 3, y - 21, 1, 2, O); px(x + 2, y - 21, 1, 2, O); }
+  };
   SHAPE_PORTRAIT.gatto = function (c, f) { // un gatto: orecchie, baffi, coda che si muove (colori: skin = pelo, hair = macchie, eye = occhi)
     const tail = Math.sin(f / 18) * 10; g.strokeStyle = c.skin || "#e8963a"; g.lineWidth = 7; g.lineCap = "round"; g.beginPath(); g.moveTo(22, 50); g.quadraticCurveTo(44, 30 + tail, 36, 4 + tail); g.stroke(); g.lineCap = "butt";
     g.fillStyle = c.skin || "#e8963a"; g.beginPath(); g.ellipse(0, 46, 28, 18, 0, 0, 7); g.fill();
@@ -4247,6 +4288,7 @@
     if (c.style === "spacebuns") { px(x - 7, y - 26, 4, 4, hair); px(x + 3, y - 26, 4, 4, hair); }
     if (c.style === "corona") { px(x - 6, y - 26, 12, 2, hair); px(x - 7, y - 25, 1, 2, hair); px(x + 6, y - 25, 1, 2, hair); }
     if (c.style === "ciuffo") { px(dir === "left" ? x - 6 : x + 1, y - 22, 5, 3, hair); }
+    if (c.style === "criniera") { px(x - 5, y - 26, 10, 3, hair); px(dir === "left" ? x - 7 : x + 4, y - 26, 3, 14, hair); }
     if (c.style === "antenne") { px(x - 5, y - 27, 1, 4, hair); px(x + 4, y - 27, 1, 4, hair); px(x - 6, y - 28, 2, 2, hair); px(x + 4, y - 28, 2, 2, hair); }
     if (c.style === "scodella") { px(x - 6, y - 24, 12, 4, hair); px(x - 6, y - 21, 1, 3, hair); px(x + 5, y - 21, 1, 3, hair); }
     if (c.style === "cometa") { px(x - 2, y - 29, 5, 5, hair); px(x + 2, y - 30, 2, 2, "#ffd23f"); }
@@ -5176,7 +5218,7 @@
   const HERO = "ali-di-rondine.campione";
   const H_STYLES = { spiky: "Spettinati", messy: "Ribelli", buzz: "Rasati", slick: "Tirati indietro", long: "Lunghi", bun: "Chignon", bob: "Caschetto", ponytail: "Coda", twintails: "Codini", braids: "Trecce", curly: "Ricci", side: "Riga di lato", ordinato: "Ordinati", bandana: "Bandana" };
   // le acconciature delle saghe: finire una saga (almeno un finale) sblocca la sua acconciatura nel guardaroba
-  const HAIR_SAGA = { hs_afro: "torneo", hs_dread: "dopo", hs_undercut: "spazio", hs_pompadour: "mantello", hs_mullet: "stagione", hs_wavy: "cronache", hs_messybun: "vento", hs_topknot: "mondi", hs_sidebraid: "trono", hs_spacebuns: "lampioni", hs_corona: "ducati", hs_ciuffo: "grigio", hs_cometa: "titano", hs_scodella: "quartiere", hs_antenne: "razzo" };
+  const HAIR_SAGA = { hs_afro: "torneo", hs_dread: "dopo", hs_undercut: "spazio", hs_pompadour: "mantello", hs_mullet: "stagione", hs_wavy: "cronache", hs_messybun: "vento", hs_topknot: "mondi", hs_sidebraid: "trono", hs_spacebuns: "lampioni", hs_corona: "ducati", hs_ciuffo: "grigio", hs_cometa: "titano", hs_scodella: "quartiere", hs_antenne: "razzo", hs_criniera: "cavallo" };
   function hairUnlocks() {
     Object.keys(HAIR_SAGA).forEach((id) => { try { const m = JSON.parse(localStorage.getItem("ali-di-rondine." + HAIR_SAGA[id]) || "null"); if (m && Array.isArray(m.ends) && m.ends.length && COSM[id] && bCos(id) && window.toast) window.toast("Nuova acconciatura: " + COSM[id].label.replace(/^Taglio (a )?/, ""), "info", "✂️"); } catch {} });
   }
@@ -11687,6 +11729,7 @@
     if (base.style === "sidebraid") px(5, -24 + by, 2, 11, hair);
     if (base.style === "corona") { px(-6, -30 + by, 12, 2, hair); }
     if (base.style === "ciuffo") px(0, -26 + by, 5, 3, hair);
+    if (base.style === "criniera") { px(-5, -31 + by, 10, 3, hair); px(4, -30 + by, 3, 14, hair); }
     if (base.style === "antenne") { px(-5, -33 + by, 1, 5, hair); px(4, -33 + by, 1, 5, hair); px(-6, -34 + by, 2, 2, hair); px(4, -34 + by, 2, 2, hair); }
     if (base.style === "scodella") px(-6, -29 + by, 12, 4, hair);
     if (base.style === "cometa") { px(-2, -33 + by, 5, 5, hair); px(2, -34 + by, 2, 2, "#ffd23f"); }
@@ -22444,7 +22487,7 @@
     ["Partite", /Settimana del Molo/],
     ["Collezioni e curiosità", /Diario del Corriere/],
     ["Calcio d'azione e arcade", /Arena 2D|Biliardino|Cabinato|Stadio 3D|Corsa della Panda|Gozzo di Baciccia|Gabbia sul Molo|Tsubasa|Supereroi/],
-    ["Saghe e GDR", /Salone delle Saghe|Razzopacco|Straordinari di Quartiere|Figlio del Titano|Tre Ducati|Cavaliere della Notte|Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis|Libro che Mangiava i Finali|Doppio Turno|Cristalli del Campo|Il Muro|Valle del Vento Gentile|Detective di Campo|Dopo il Campione|Calcio Spaziale|Torneo delle Cento Scuole|Cronache del Pallone di Cristallo|Mantello Granata|Stagione Infinita|Notte dei Lampioni|Torneo dei Mondi|Trono di Cuoio|Campetto al Mondiale|Master League delle Colline/],
+    ["Saghe e GDR", /Salone delle Saghe|Il Cavallo Star|Razzopacco|Straordinari di Quartiere|Figlio del Titano|Tre Ducati|Cavaliere della Notte|Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis|Libro che Mangiava i Finali|Doppio Turno|Cristalli del Campo|Il Muro|Valle del Vento Gentile|Detective di Campo|Dopo il Campione|Calcio Spaziale|Torneo delle Cento Scuole|Cronache del Pallone di Cristallo|Mantello Granata|Stagione Infinita|Notte dei Lampioni|Torneo dei Mondi|Trono di Cuoio|Campetto al Mondiale|Master League delle Colline/],
     ["Collezioni e curiosità", /Gashapon|Roster & Talenti|Diorama|Fumetto|Leggende del passato|Bianco e Nero|Quartier Generale/],
   ];
   const MN_EXP = { "Partite": 12, "Allenamento": 6, "Storie e ricordi": 8 }; // quante voci ha la categoria a tutto sbloccato: le mancanti appaiono come «???»

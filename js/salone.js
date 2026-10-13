@@ -24,6 +24,8 @@
   const GEN = { fantasy: ["Fantasy", "#7a4ab0"], mistero: ["Mistero", "#2c6a9a"], scifi: ["Fantascienza", "#1f8a8a"], storico: ["Storico", "#a8622a"], commedia: ["Commedia", "#c9921a"], sport: ["Sport anime", "#c0392b"], avventura: ["Avventura", "#3f8a3f"], dramma: ["Drammatico", "#6a5a7a"], tattica: ["Tattica", "#5a6a3a"] };
   // mod: oggetto window con menuEntry/info · fn: funzione window da chiamare con (indietro) · ch: capitoli totali (se noti)
   const SAGAS = [
+    { id: "cavallo", t: "Il Cavallo Star", e: "🐴", g: ["commedia", "dramma"], mod: "__cavallo", key: "ali-di-rondine.cavallo", ch: 3, cover: "cs_titolo", d: "Baldo Criniera, cavallo e vecchia star della sitcom sul calcio «Zoccoli d'Oro», vuole tornare in onda. Tu sei la sua spalla. Ciak! Si Gioca: ogni partita si gira a scene, segui il copione o improvvisi. E dopo ogni scelta, il giornale.",
+      hints: { diretta: "Serve aver vinto la finale in diretta.", serie: "Serve aver giocato la finale secondo il copione.", biografia: "Serve aver detto la verità alla stampa.", puntata: "Segreto: tutte le cassette, almeno quattro stelle del regista in finale, nessuna ripresa interrotta." } },
     { id: "razzo", t: "Razzopacco · Consegne dal Futuro", e: "🚀", g: ["commedia", "scifi"], mod: "__razzo", key: "ali-di-rondine.razzo", ch: 3, cover: "rz_titolo", d: "Ti risvegli nel 3011 e fai il corriere spaziale per una ditta sgangherata. Tubi pneumatici sopra la città, consegne a tempo, la rotta fra un pianeta di minestra e una luna di uffici. Consegna a Rete: razzetti, pacchi e pianeti che curvano i lanci.",
       hints: { libera: "Serve aver vinto la Coppa.", fusione: "Serve aver ascoltato la storia di Orsola.", ritorno: "Serve aver tenuto il pacco misterioso sigillato.", pacco: "Segreto: tutti i francobolli, tutte le consegne in orario, nessuna partita lasciata a metà." } },
     { id: "quartiere", t: "Gli Straordinari di Quartiere", e: "🦸", g: ["commedia", "avventura"], mod: "__quartiere", key: "ali-di-rondine.quartiere", ch: 3, cover: "sq_titolo", d: "Cinque supereroi di serie B (una gelataia, un trombettista, un idraulico, una nonna calamita, un pizzaiolo) e tu, che copi i poteri degli altri. Combo di Squadra (i poteri si combinano e si scoprono giocando), il Copione che apre strade diverse nel quartiere, il Dottor Cemento e il suo parcheggio.",
@@ -95,7 +97,7 @@
     { id: "cala", t: "Cala Tramontana", e: "🌊", g: ["avventura"], fn: "openCalaTramontana", key: "ali-di-rondine.cala-tramontana", cover: "beach", d: "Esplora a piedi il borgo marino alternativo con il tuo Campione." },
     { id: "borgostorto", t: "Il Borgo Storto", e: "🌀", g: ["commedia", "tattica"], api: "openBorgoStorto", cover: "beach", d: "Lo spin-off GDR a turni del Borgo Marino." },
   ];
-  const NEWEST = ["razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
+  const NEWEST = ["cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
   const modOf = (s) => (s.mod ? window[s.mod] : null);
   const available = (s) => (s.mod ? !!window[s.mod] : s.fn ? typeof window[s.fn] === "function" : !!(api() && api()[s.api]));
   function state(s) {
@@ -256,6 +258,10 @@
       opp: [{ name: "I Fulmini dell'Agenzia", color: "#3a6ac8", style: "pressing", players: [{ name: "Capitan Fulmine" }, { name: "Tuono" }], keeper: { name: "Parafulmine" } }, { name: "Vega di Elyon", color: "#7a5ad8", style: "contropiede", players: [{ name: "Vega" }, { name: "Lumen" }], keeper: { name: "La boa" } }],
       boss: { name: "Elyon", color: "#7a5ad8", style: "pressing", players: [{ name: "Orione" }, { name: "Atlante" }], keeper: { name: "La Stella Fissa" } },
       opts: (o, h, boss) => ({ title: `Volo a Tutto Campo · contro ${o.name}`, us: h.name, usColor: "#c83a2a", minutes: boss ? 90 : 60, hero: h, mates: [{ name: "Sam" }], opp: o }) },
+    { id: "ciak", t: "Ciak! Si Gioca", e: "🎬", saga: "cavallo", eng: "__ciak", d: "La partita del Cavallo Star: si gioca a scene, segui il copione o improvvisi, poi il ciak a tempo. Il regista dà le stelle.",
+      opp: [{ name: "Il Catering", color: "#e8d8a8", players: [{ name: "Tartina" }, { name: "Vol-au-vent" }] }, { name: "Le Comparse Vigili", color: "#5a6a9a", players: [{ name: "Vigile 1" }, { name: "Vigile 2" }] }],
+      boss: { name: "Cuccioli in Campo", color: "#7ab8e8", players: [{ name: "Max Allegria" }, { name: "Briciola" }] },
+      opts: (o, h, boss) => ({ title: `Ciak! Si Gioca · contro ${o.name}`, us: "Zoccoli d'Oro", usColor: "#f0a8c8", minutes: boss ? 90 : 60, takes: boss ? 1 : 2, hero: { name: h.name || "Tu" }, mates: [{ name: "Baldo" }, { name: "Ugo" }], opp: o }) },
     { id: "consegna", t: "Consegna a Rete", e: "🚀", saga: "razzo", eng: "__consegna", d: "La partita di Razzopacco: guidi un razzetto col dito, il pallone è un pacco, i pianeti curvano i lanci, i tubi ti portano dall'altra parte.",
       opp: [{ name: "I Crostini", color: "#c8782a", style: "difensiva", players: [{ name: "Capitan Crostino" }, { name: "Grissino" }], keeper: { name: "Il Pane Raffermo" } }, { name: "Postini dell'Anello", color: "#3ab8c8", style: "contropiede", players: [{ name: "Saturnina" }, { name: "Rapido" }], keeper: { name: "L'Anulare" } }],
       boss: { name: "OmniPacco Galacticos", color: "#5a6ad8", style: "pressing", players: [{ name: "Orsola Monòpoli" }, { name: "Agente Zeta" }], keeper: { name: "Il Drone Omega" } },
@@ -566,7 +572,7 @@
   // ---------------------------------------------------------------- ALBUM DEI PERSONAGGI
   // ogni personaggio registrato nel gioco (window.__borgoApi.BIO) diventa una carta. Si «incontra» parlandoci (seeCard del gioco).
   // Le sezioni: la Storia e Borgo Marino, i tornei e le modalità del Borgo, e una sezione per saga (riconosciuta dal prefisso degli id).
-  const PFX = { razzo: "rz", quartiere: "sq", titano: "ft", ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
+  const PFX = { cavallo: "cs", razzo: "rz", quartiere: "sq", titano: "ft", ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
   const BORGO_PFX = ["sv", "rb", "sb", "cg", "hd", "md", "ac"];
   function perSections() {
     const A = api(); if (!A || !A.BIO) return [];

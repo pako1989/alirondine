@@ -24,7 +24,7 @@ async function capelli(w) {
   await page.evaluate(() => window.__faceStyles.preload()); await page.waitForFunction(() => !!window.__dicebear, null, { timeout: 15000 });
   const bad = await page.evaluate(() => {
     const API = window.__borgoApi, out = [], g = document.createElement("canvas").getContext("2d");
-    ["bob", "ponytail", "twintails", "braids", "curly", "side", "ordinato", "bandana", "afro", "dread", "undercut", "pompadour", "mullet", "wavy", "messybun", "topknot", "sidebraid", "spacebuns", "corona", "ciuffo", "cometa", "scodella", "antenne"].forEach((st) => {
+    ["bob", "ponytail", "twintails", "braids", "curly", "side", "ordinato", "bandana", "afro", "dread", "undercut", "pompadour", "mullet", "wavy", "messybun", "topknot", "sidebraid", "spacebuns", "corona", "ciuffo", "cometa", "scodella", "antenne", "criniera"].forEach((st) => {
       const id = "t_" + st, c = { name: "x", tag: "", skin: "#e0ac7e", hair: "#2b1d14", eye: "#222", style: st, shirt: "#3f5fbf", bg: ["#123", "#fff"] }; API.CAST[id] = c;
       try { API.portraitTo(g, id, 50, 50, 1); } catch (e) { out.push("classico:" + st); }
       ["anime", "manga", "acquerello", "pixel", "flat", "hd", "db_toonhead"].forEach((sy) => { try { if (!window.__faceStyles.draw(sy, g, id, c, "smile")) out.push(sy + ":" + st); } catch (e) { out.push(sy + ":" + st + " " + e.message); } });

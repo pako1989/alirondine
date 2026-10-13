@@ -6321,7 +6321,120 @@
     if (since("rz_finale", 1) < 100) rzSay(g, 215, 120, "RECORD DI RITARDO!");
     if (since("rz_finale", 2) < 120) rzRocket(g, 160 + Math.cos(since("rz_finale", 2) / 12) * 120, 70 + Math.sin(since("rz_finale", 2) / 12) * 20, 0.6, since("rz_finale", 2) / 12 + Math.PI / 2, f);
   }
+  // ---------------------------------------------------------------- IL CAVALLO STAR (pastello, contorni piatti, satira di Lustrino)
+  const CSO = "#3a2a3a";
+  function csOut(g, path, fill, lw) { g.beginPath(); path(); g.fillStyle = fill; g.fill(); g.strokeStyle = CSO; g.lineWidth = lw || 2; g.stroke(); }
+  function csHorse(g, x, y, s, f, shirt, glasses) { g.save(); g.translate(x, y); g.scale(s, s); const b = Math.sin(f / 12) * 1;
+    csOut(g, () => { g.moveTo(-16, 0); g.quadraticCurveTo(-16, -22, -6, -24); g.lineTo(8, -24); g.quadraticCurveTo(18, -22, 18, 0); g.closePath(); }, shirt || "#f0b8c8");
+    csOut(g, () => { g.moveTo(-5, -24); g.lineTo(-4, -34); g.lineTo(6, -34); g.lineTo(7, -24); g.closePath(); }, "#b07a4a");
+    csOut(g, () => { g.moveTo(6, -56 + b); g.quadraticCurveTo(16, -48, 12, -30); g.lineTo(6, -32); g.closePath(); }, "#4a2a1a");
+    csOut(g, () => { g.moveTo(-8, -54 + b); g.quadraticCurveTo(0, -62 + b, 8, -54 + b); g.lineTo(9, -36 + b); g.quadraticCurveTo(11, -26 + b, 0, -25 + b); g.quadraticCurveTo(-11, -26 + b, -9, -36 + b); g.closePath(); }, "#b07a4a");
+    [-1, 1].forEach((d) => csOut(g, () => { g.moveTo(d * 3, -56 + b); g.lineTo(d * 8, -66 + b); g.lineTo(d * 8, -55 + b); g.closePath(); }, "#b07a4a", 1.5));
+    g.fillStyle = CSO; g.fillRect(-5, -47 + b, 2.5, 3); g.fillRect(3, -47 + b, 2.5, 3); g.fillRect(-3, -30 + b, 1.5, 2); g.fillRect(2, -30 + b, 1.5, 2);
+    if (glasses) { g.fillStyle = "#ff7aa8"; g.fillRect(-8, -49 + b, 7, 5); g.fillRect(2, -49 + b, 7, 5); g.strokeStyle = CSO; g.lineWidth = 1; g.strokeRect(-8, -49 + b, 7, 5); g.strokeRect(2, -49 + b, 7, 5); }
+    g.restore(); }
+  function csDog(g, x, y, s, f, fur, ear, shirt) { g.save(); g.translate(x, y); g.scale(s, s); const w = Math.sin(f / 6) * 2;
+    csOut(g, () => { g.moveTo(-15, 0); g.quadraticCurveTo(-15, -20, -6, -22); g.lineTo(8, -22); g.quadraticCurveTo(17, -20, 17, 0); g.closePath(); }, shirt || "#a8d8f0");
+    csOut(g, () => g.ellipse(1, -34, 12, 11, 0, 0, 7), fur || "#f0c870"); [-1, 1].forEach((d) => csOut(g, () => g.ellipse(1 + d * 12, -32 + (d > 0 ? w * 0.4 : 0), 4, 8, d * 0.3, 0, 7), ear || "#d8a040", 1.5));
+    csOut(g, () => g.ellipse(1, -28, 6, 4.5, 0, 0, 7), "#fff4e0", 1.5); g.fillStyle = CSO; g.beginPath(); g.ellipse(1, -31, 2.5, 1.8, 0, 0, 7); g.fill(); g.fillRect(-4, -38, 2, 3); g.fillRect(5, -38, 2, 3); g.restore(); }
+  function csPerson(g, x, y, s, f, shirt, hair) { g.save(); g.translate(x, y); g.scale(s, s); csOut(g, () => { g.moveTo(-12, 0); g.quadraticCurveTo(-12, -20, -4, -22); g.lineTo(6, -22); g.quadraticCurveTo(14, -20, 14, 0); g.closePath(); }, shirt); csOut(g, () => g.arc(1, -31, 9, 0, 7), "#f0d0b0"); g.fillStyle = hair || "#2a1a1a"; g.beginPath(); g.arc(1, -34, 9, Math.PI, 0); g.fill(); g.fillStyle = CSO; g.fillRect(-3, -32, 2, 2); g.fillRect(4, -32, 2, 2); g.restore(); }
+  function csBalloon(g, x, y, t) { g.font = "bold 8px 'Trebuchet MS', sans-serif"; const w = g.measureText(t).width + 14; csOut(g, () => { g.roundRect ? g.roundRect(x - w / 2, y - 10, w, 18, 9) : g.rect(x - w / 2, y - 10, w, 18); }, "#fff", 1.5); g.fillStyle = CSO; g.textAlign = "center"; g.fillText(t, x, y + 2); }
+  function csLetters(g, y, s, f) { "LUSTRINO".split("").forEach((L, i) => { g.save(); g.translate(40 + i * 32 * s, y); g.rotate(L === "T" ? 0.15 : Math.sin(f / 50 + i) * 0.01); g.fillStyle = "#fff"; g.strokeStyle = CSO; g.lineWidth = 2; g.fillRect(-10 * s, -14 * s, 20 * s, 26 * s); g.strokeRect(-10 * s, -14 * s, 20 * s, 26 * s); g.fillStyle = CSO; g.font = `900 ${18 * s}px 'Arial Black', sans-serif`; g.textAlign = "center"; g.fillText(L, 0, 6 * s); g.restore(); }); }
+  function bgCsTitolo(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#ffd8e8", "#fff4d8"]); for (let i = 0; i < 9; i++) { g.fillStyle = i % 2 ? "rgba(255,255,255,.35)" : "rgba(255,200,220,.3)"; g.beginPath(); g.moveTo(160, 200); g.lineTo(i * 40 - 20 + Math.sin(f / 60) * 10, 0); g.lineTo(i * 40 + 10 + Math.sin(f / 60) * 10, 0); g.fill(); }
+    csOut(g, () => { g.moveTo(0, 150); g.quadraticCurveTo(160, 100, 320, 150); g.lineTo(320, 200); g.lineTo(0, 200); }, "#b8e0a0"); csLetters(g, 128, 0.7, f);
+    csHorse(g, 160, 196, 1.6, f, "#f0b8c8", true);
+    g.save(); g.translate(160, 50); g.rotate(-0.05); g.font = "900 28px 'Arial Rounded MT Bold', 'Arial Black', sans-serif"; g.textAlign = "center"; g.lineWidth = 6; g.strokeStyle = CSO; g.strokeText("IL CAVALLO STAR", 0, 0); g.fillStyle = "#ff7aa8"; g.fillText("IL CAVALLO STAR", 0, 0); g.restore();
+    if (since("cs_titolo", 0) < 100) csBalloon(g, 230, 90, "Che zoccolata!");
+    if (since("cs_titolo", 1) < 60) { g.fillStyle = `rgba(255,255,255,${1 - since("cs_titolo", 1) / 60})`; g.fillRect(0, 0, W, H); }
+    if (since("cs_titolo", 2) < 120) { g.font = "bold 9px sans-serif"; g.textAlign = "center"; g.fillStyle = CSO; g.fillText("👏 APPLAUSI REGISTRATI 👏", 160, 72); }
+  }
+  function bgCsColle(g, W, H, f) {
+    vgrad(g, 0, 0, W, 120, ["#a8d8f0", "#ffe8f0"]); csOut(g, () => { g.moveTo(0, 90); g.quadraticCurveTo(120, 30, 320, 80); g.lineTo(320, 200); g.lineTo(0, 200); }, "#b8e0a0"); csLetters(g, 64, 0.55, f);
+    csOut(g, () => g.rect(190, 100, 90, 50), "#fff4f8"); csOut(g, () => { g.moveTo(184, 100); g.lineTo(235, 76); g.lineTo(286, 100); g.closePath(); }, "#ff9ec0"); for (let i = 0; i < 3; i++) csOut(g, () => g.rect(198 + i * 26, 112, 14, 14), "#a8d8f0", 1.5);
+    csOut(g, () => g.ellipse(90, 160, 60, 18, 0, 0, 7), "#8ad0f0"); g.strokeStyle = "rgba(255,255,255,.7)"; g.lineWidth = 1.5; for (let i = 0; i < 4; i++) { g.beginPath(); g.ellipse(90, 160, 20 + i * 10 + Math.sin(f / 20) * 2, 5 + i * 3, 0, 0, Math.PI); g.stroke(); }
+    if (since("cs_colle", 0) < 120) { const t = since("cs_colle", 0); csOut(g, () => g.ellipse(60 + t * 0.5, 158, 14, 5, 0, 0, 7), "#ffe08a", 1.5); }
+    if (since("cs_colle", 1) < 30) { g.fillStyle = "rgba(255,255,255,.8)"; g.fillRect(0, 0, W, H); }
+    if (since("cs_colle", 2) < 100) csBalloon(g, 120, 40, "La T è storta. Porta fortuna.");
+    for (let i = 0; i < 3; i++) { const x = 20 + i * 140; g.strokeStyle = "#c8a070"; g.lineWidth = 3; g.beginPath(); g.moveTo(x, 200); g.lineTo(x + 4, 120); g.stroke(); g.fillStyle = "#5aa86a"; for (let k = 0; k < 5; k++) { const a = -Math.PI / 2 + (k - 2) * 0.55 + Math.sin(f / 40 + i) * 0.05; g.beginPath(); g.ellipse(x + 4 + Math.cos(a) * 14, 120 + Math.sin(a) * 7, 15, 4, a, 0, 7); g.fill(); } }
+  }
+  function bgCsVilla(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#ffe8f0", "#f4d0e0"]); for (let i = 0; i < 5; i++) { csOut(g, () => g.rect(20 + i * 60, 30, 40, 50), "#ffe08a"); csOut(g, () => g.rect(26 + i * 60, 36, 28, 38), i === 2 ? "#a8d8f0" : "#fff8e8", 1.5); }
+    csOut(g, () => g.rect(0, 150, W, 50), "#e8c8b0"); csOut(g, () => { g.roundRect ? g.roundRect(30, 120, 100, 34, 10) : g.rect(30, 120, 100, 34); }, "#ff9ec0"); csPerson(g, 80, 140, 0.9, f, "#ffe08a", "#1a1a1a");
+    csHorse(g, 220, 196, 1.4, f, "#f0b8c8", true);
+    if (since("cs_villa", 0) < 100) csBalloon(g, 220, 90, "Il personaggio è meglio di me.");
+    if (since("cs_villa", 1) < 100) csBalloon(g, 80, 100, "Idea: il calcio per tartarughe!");
+    if (since("cs_villa", 2) < 120) { csOut(g, () => g.rect(146, 36, 28, 38), "#3a2a3a", 1.5); g.fillStyle = "#fff"; g.font = "bold 7px sans-serif"; g.textAlign = "center"; g.fillText("(girata)", 160, 58); }
+  }
+  function bgCsStudios(g, W, H, f) {
+    vgrad(g, 0, 0, W, 100, ["#c8e0f8", "#fff4e8"]); [[10, "#f0b8c8", "1"], [120, "#7ab8e8", "2"], [230, "#a8d8a8", "M"]].forEach(([x, c, n]) => { csOut(g, () => g.rect(x, 40, 80, 80), "#f4f0f8"); csOut(g, () => { g.moveTo(x - 4, 40); g.quadraticCurveTo(x + 40, 10, x + 84, 40); g.closePath(); }, c); g.fillStyle = CSO; g.font = "900 26px 'Arial Black', sans-serif"; g.textAlign = "center"; g.fillText(n, x + 40, 92); });
+    csOut(g, () => g.rect(0, 140, W, 60), "#e8e0d0");
+    const gx = (f * 0.6) % 420 - 50; csOut(g, () => g.rect(gx, 138, 30, 20), "#ffe08a", 1.5); g.fillStyle = CSO; g.beginPath(); g.arc(gx + 6, 160, 3, 0, 7); g.arc(gx + 24, 160, 3, 0, 7); g.fill();
+    csDog(g, 250, 196, 1.2, f, "#f0c870", "#d8a040", "#7ab8e8"); csHorse(g, 90, 196, 1.2, f, "#f0b8c8", false);
+    if (since("cs_studios", 0) < 100) csBalloon(g, 250, 130, "Ti voglio bene, Baldo!");
+    if (since("cs_studios", 1) < 100) csBalloon(g, 90, 110, "…Ciao, Max.");
+    if (since("cs_studios", 2) < 120) { g.save(); g.translate(160, 30); g.rotate(Math.sin(since("cs_studios", 2) / 5) * 0.2); g.font = "bold 10px sans-serif"; g.textAlign = "center"; g.fillStyle = CSO; g.fillText("📣 CONTA IL FINALE!", 0, 0); g.restore(); }
+  }
+  function bgCsTeatro(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#ff9a7a", "#ffd8a8", "#f4d0e0"]); csOut(g, () => g.rect(60, 40, 200, 110), "#fff4f8"); csOut(g, () => g.rect(60, 30, 200, 16), "#ff7aa8");
+    g.fillStyle = (f >> 4) % 2 ? "#ffd86a" : "#fff"; g.font = "900 10px 'Arial Black', sans-serif"; g.textAlign = "center"; g.fillText("ZOCCOLI D'ORO · IN DIRETTA", 160, 42);
+    csOut(g, () => g.rect(140, 100, 40, 50), "#3a2a3a"); for (let i = 0; i < 12; i++) { const x = 20 + i * 24; csPerson(g, x, 196, 0.7, f + i * 9, ["#ffe08a", "#a8d8f0", "#c8e8b8", "#f0b8c8"][i % 4], ["#1a1a1a", "#8a4a2a", "#e8d8a0"][i % 3]); }
+    if (since("cs_teatro", 0) < 100) { g.fillStyle = "#ff5a5a"; g.beginPath(); g.arc(250, 60, 6, 0, 7); g.fill(); g.fillStyle = CSO; g.font = "bold 9px sans-serif"; g.fillText("ON AIR", 250, 78); }
+    if (since("cs_teatro", 1) < 100) csBalloon(g, 80, 140, "Abbiamo i biglietti in prima fila!");
+    if (since("cs_teatro", 2) < 120) for (let i = 0; i < 8; i++) { const t = since("cs_teatro", 2); g.fillStyle = "#fff"; g.fillRect(100 + i * 15 + Math.sin(t / 5 + i) * 4, 60 + t * 0.6, 3, 3); }
+  }
+  function bgCsCamerino(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#f4d0e0", "#e8c0d0"]); csOut(g, () => g.rect(90, 20, 140, 100), "#fff8e8"); csOut(g, () => g.rect(100, 30, 120, 80), "#c8e0f0", 1.5);
+    for (let i = 0; i < 8; i++) { const x = 96 + i * 18, on = !(i === 2 || i === 5 || i === 6); g.fillStyle = on ? "#fff4b0" : "#a8a090"; g.beginPath(); g.arc(x, 22, 4, 0, 7); g.fill(); g.strokeStyle = CSO; g.lineWidth = 1; g.stroke(); }
+    g.save(); g.beginPath(); g.rect(100, 30, 120, 80); g.clip(); g.globalAlpha = 0.6; csHorse(g, 160, 140, 1.3, f, "#f0b8c8", false); g.restore();
+    csOut(g, () => g.rect(60, 130, 200, 20), "#d8a8c0"); csHorse(g, 160, 200, 1.1, f, "#f0b8c8", false);
+    if (since("cs_camerino", 0) < 120) csBalloon(g, 160, 100, "Tu cosa faresti?");
+    if (since("cs_camerino", 1) < 100) { csOut(g, () => g.rect(250, 60, 40, 30), "#fff", 1.5); g.fillStyle = "#8a6a4a"; g.fillRect(256, 74, 28, 10); g.fillStyle = CSO; g.font = "6px sans-serif"; g.textAlign = "center"; g.fillText("1971", 270, 70); }
+    if (since("cs_camerino", 2) < 80) { g.fillStyle = `rgba(255,244,176,${0.5 * (1 - since("cs_camerino", 2) / 80)})`; g.fillRect(0, 0, W, H); }
+  }
+  function bgCsFinale(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#ffd8e8", "#fff4d8"]); for (let i = 0; i < 40; i++) { const x = (i * 37 + f * 0.7) % W, y = (i * 23 + f * 1.3) % 160; g.fillStyle = ["#ff7aa8", "#a8d8f0", "#ffe08a", "#c8e8b8"][i % 4]; g.fillRect(x, y, 4, 6); }
+    csOut(g, () => g.rect(0, 160, W, 40), "#b8e8c0"); csDog(g, 80, 196, 1.1, f, "#f0c870", "#d8a040", "#7ab8e8"); csHorse(g, 160, 196, 1.4, f, "#a8d8f0", false); csPerson(g, 230, 196, 1.1, f, "#a8d8a8", "#2a1a3a"); csDog(g, 280, 196, 0.9, f, "#c8884a", "#6a3a2a", "#a8d8f0");
+    if (since("cs_finale", 0) < 120) { g.save(); g.translate(160, 60); g.rotate(-0.05); g.font = "900 22px 'Arial Rounded MT Bold', 'Arial Black', sans-serif"; g.textAlign = "center"; g.lineWidth = 5; g.strokeStyle = CSO; g.strokeText("TITOLI DI CODA", 0, 0); g.fillStyle = "#ff7aa8"; g.fillText("TITOLI DI CODA", 0, 0); g.restore(); }
+    if (since("cs_finale", 1) < 100) csBalloon(g, 160, 100, "La parte vera.");
+    if (since("cs_finale", 2) < 100) csBalloon(g, 80, 130, "Che bella puntata!");
+  }
   const LB = {
+    cs_titolo: { draw: bgCsTitolo, hot: [
+      [120, 90, 80, 110, "🐴 Baldo Criniera si gira verso la telecamera. «Che zoccolata!» Trent'anni, sempre la stessa."],
+      [0, 0, 320, 40, "📸 Flash! Un fotografo nascosto dietro le lettere di Lustrino."],
+      [40, 110, 240, 30, "👏 Applausi registrati. Partono anche se nessuno ha fatto niente."],
+    ] },
+    cs_colle: { draw: bgCsColle, hot: [
+      [30, 140, 120, 40, "🛟 Un materassino a forma di stella attraversa la piscina. Sopra c'è Ugo, che dorme."],
+      [180, 70, 110, 80, "📸 Un flash dalla villa di fronte. A Lustrino si fotografa anche il silenzio."],
+      [20, 40, 290, 40, "🔤 Le lettere giganti di LUSTRINO. La T è storta da quarant'anni."],
+    ] },
+    cs_villa: { draw: bgCsVilla, hot: [
+      [180, 90, 80, 110, "🐴 «Scrivete il personaggio. Il personaggio è meglio di me.»"],
+      [30, 100, 100, 60, "🛋️ Ugo, dal divano: «Idea: il calcio per tartarughe!»"],
+      [140, 30, 40, 50, "🖼️ La foto girata. Baldo con un cavallo più famoso di lui."],
+    ] },
+    cs_studios: { draw: bgCsStudios, hot: [
+      [220, 140, 70, 60, "🐶 Max Allegria: «Ti voglio bene, Baldo!» Scodinzola tanto che gira su se stesso."],
+      [60, 120, 70, 80, "🐴 Baldo: «…Ciao, Max.» È il massimo che riesce a dire."],
+      [100, 10, 120, 30, "📣 Il regista, al megafono, a un metro: «CONTA IL FINALE!»"],
+    ] },
+    cs_teatro: { draw: bgCsTeatro, hot: [
+      [230, 45, 50, 40, "🔴 ON AIR: la lucina rossa si accende. Tutta Lustrino trattiene il fiato."],
+      [20, 150, 120, 50, "🦝 Una famiglia di procioni con i biglietti in prima fila."],
+      [90, 50, 140, 40, "✨ Coriandoli di prova cadono sul tetto del Teatro 9."],
+    ] },
+    cs_camerino: { draw: bgCsCamerino, hot: [
+      [100, 30, 120, 80, "🪞 Nello specchio Baldo si guarda, ma non si vede. «Tu cosa faresti?»"],
+      [240, 50, 60, 50, "🖼️ Una foto del 1971: un puledro su un campetto di terra."],
+      [90, 10, 140, 20, "💡 Tre lampadine fulminate. «Così si vede meglio la criniera.»"],
+    ] },
+    cs_finale: { draw: bgCsFinale, hot: [
+      [0, 30, 320, 50, "🎬 Titoli di coda. Il nome della spalla è scritto grande come quello della star."],
+      [120, 90, 80, 110, "🐴 «La parte vera.» Baldo lo dice piano, senza telecamere."],
+      [40, 120, 90, 80, "🐶 Max: «Che bella puntata!» Lo dice di ogni puntata. Stavolta è vero."],
+    ] },
     rz_titolo: { draw: bgRzTitolo, hot: [
       [20, 20, 200, 40, "🗨️ «Consegniamo tutto. Prima o poi.» È il motto. È anche una minaccia."],
       [80, 50, 200, 60, "📦 Un pacco cade dal razzo. Qualcuno, da qualche parte, lo aspettava."],
