@@ -34,7 +34,7 @@
     const st = obj(o.step); Object.keys(st).slice(0, 99).forEach((k) => { const n = clampI(k, 1, 99, 0); if (n) m.step[n] = clampI(st[k], 0, 99, 0); });
     const fl = obj(o.flags); let c = 0;
     Object.keys(fl).forEach((k) => {
-      if (c >= 240 || !FLAG_RE.test(k)) return; const v = fl[k];
+      if (c >= 400 || !FLAG_RE.test(k)) return; const v = fl[k];
       if (typeof v === "boolean") m.flags[k] = v;
       else if (typeof v === "number" && Number.isFinite(v)) m.flags[k] = Math.max(-1e6, Math.min(1e6, Math.round(v)));
       else if (typeof v === "string" && v.length <= 24) m.flags[k] = v;
@@ -399,10 +399,52 @@
     [[24, 150, 7], [292, 168, 8], [60, 176, 5]].forEach(([x, y, s], i) => { glow(g, x, y, 22, "90,235,210", 0.3 + 0.1 * Math.sin(f / 20 + i)); g.fillStyle = "#3ad1b4"; g.beginPath(); g.moveTo(x - s, y + s); g.lineTo(x - s * 0.3, y - s * 1.8); g.lineTo(x + s * 0.4, y - s * 1.3); g.lineTo(x + s, y + s); g.closePath(); g.fill(); });
     fogBand(g, W, 158, H, f, ["#2a3a50", "#18202e"]);
   }
+  // capitolo 7 · il Bordo del Campo all'alba: il Latte lilla, i gradini di nebbia col corrimano, la numero uno là sotto come una stella bassa
+  function bgBordo(g, W, H, f) {
+    grad(g, 0, 0, W, H, ["#33336e", "#9a6ca6", "#f0b08c"]);
+    for (let i = 0; i < 24; i++) { const tw = (f / 24 + i) % 8 < 0.5; R(g, (i * 79) % W, (i * 31) % 60, 1, 1, tw ? "#ffffff" : "#c9bfe8"); }
+    glow(g, 236, 112, 80, "255,214,160", 0.55); g.fillStyle = "#ffe6bd"; g.beginPath(); g.arc(236, 118, 15, Math.PI, 0); g.fill();
+    ridge(g, W, 110, 40, 2.6, "#5a4a8a", true); ridge(g, W, 124, 30, 5.1, "#3e3874", true);
+    fogBand(g, W, 112, H, f, ["#d6c6e6", "#a99ad0"]);
+    // i gradini di nebbia col corrimano, a destra, che scendono verso il Latte
+    for (let i = 0; i < 7; i++) { const x = 196 + i * 16, y = 122 + i * 8; R(g, x, y, 22, 5, "#e9e2f6"); R(g, x, y + 5, 22, 2, "#b6a9d6"); }
+    g.strokeStyle = "#8a7ab8"; g.lineWidth = 1; g.beginPath(); g.moveTo(194, 118); g.lineTo(312, 176); g.stroke();
+    // la numero uno, laggiù: una stella bassa
+    glow(g, 292, 158, 36, "90,235,210", 0.45 + 0.1 * Math.sin(f / 20)); R(g, 284, 154, 16, 9, "#6a4a2c"); R(g, 286, 156, 4, 4, "#7fe3d0"); R(g, 293, 156, 4, 4, "#7fe3d0");
+    // il campo vero, a sinistra: due pali e una rete sfilacciata
+    R(g, 14, 134, 2, 34, "#f2f2f6"); R(g, 58, 134, 2, 34, "#f2f2f6"); R(g, 14, 134, 46, 2, "#f2f2f6");
+    for (let i = 0; i < 6; i++) R(g, 16 + i * 7, 136, 1, 32, "rgba(255,255,255,.35)");
+    R(g, 0, 168, W, 32, "#3c3a68"); for (let i = 0; i < 8; i++) R(g, i * 42 + 6, 172 + (i % 2) * 6, 26, 2, "#4a4880");
+    // il paese che aspetta: teste e lanterne
+    for (let i = 0; i < 18; i++) { const x = 8 + i * 17.5, y = 184 + (i % 3) * 3; g.fillStyle = "#17163a"; g.beginPath(); g.arc(x, y, 5, 0, 7); g.fill(); g.fillRect(x - 5, y, 10, 14); if (i % 3 === 1) { glow(g, x + 7, y + 4, 12, "127,227,208", 0.5); R(g, x + 5, y + 1, 4, 6, "#bff7ea"); } }
+  }
+  // capitolo 7 · il Campo Sospeso nel Latte: tribune di lumi, porte di nebbia, il tabellone fermo sull'89' e un pallone che non è mai uscito
+  function bgSospeso(g, W, H, f) {
+    grad(g, 0, 0, W, H, ["#050a1e", "#0d2146", "#1b5560"]);
+    for (let i = 0; i < 50; i++) { const tw = (f / 18 + i) % 7 < 0.5; R(g, (i * 71) % W, (i * 29) % 70, 1, 1, tw ? "#e6fffa" : "#7fe3d0"); }
+    // le tribune: due file di lumi lontani, come un pubblico che trattiene il fiato
+    for (let r = 0; r < 3; r++) for (let i = 0; i < 36; i++) { const x = 4 + i * 8.8 + (r % 2) * 4, y = 80 + r * 9, a = 0.35 + 0.3 * Math.sin(f / 30 + i * 1.7 + r); glow(g, x, y, 7, "127,227,208", a * 0.7); R(g, x - 1, y - 1, 2, 3, "#bff7ea"); }
+    // il tabellone
+    R(g, 112, 18, 96, 34, "#0a1226"); R(g, 112, 18, 96, 2, "#7fe3d0"); R(g, 112, 50, 96, 2, "#7fe3d0");
+    g.font = "bold 16px monospace"; g.textAlign = "center"; g.fillStyle = `rgba(190,255,240,${0.85 + 0.15 * Math.sin(f / 12)})`; g.fillText("89:00", 160, 37);
+    g.font = "bold 8px sans-serif"; g.fillStyle = "#e9a64a"; g.fillText("STAMBECCHI 1 – 1 OMBRE", 160, 47); g.textAlign = "left";
+    // il campo in prospettiva, color nebbia e prato
+    g.fillStyle = "#1f5d58"; g.beginPath(); g.moveTo(74, 112); g.lineTo(246, 112); g.lineTo(312, 184); g.lineTo(8, 184); g.closePath(); g.fill();
+    for (let i = 0; i < 6; i++) { g.fillStyle = i % 2 ? "rgba(127,227,208,.08)" : "rgba(0,0,0,.08)"; g.beginPath(); const a = i / 6, b = (i + 1) / 6; g.moveTo(74 - 66 * a, 112 + 72 * a); g.lineTo(246 + 66 * a, 112 + 72 * a); g.lineTo(246 + 66 * b, 112 + 72 * b); g.lineTo(74 - 66 * b, 112 + 72 * b); g.closePath(); g.fill(); }
+    g.strokeStyle = "rgba(190,255,240,.8)"; g.lineWidth = 1; g.beginPath(); g.moveTo(160, 112); g.lineTo(160, 184); g.stroke(); g.beginPath(); g.ellipse(160, 148, 28, 10, 0, 0, 7); g.stroke();
+    // le porte di nebbia luminosa
+    [[66, 1], [254, -1]].forEach(([x, d]) => { R(g, x, 94, 2, 20, "#f2f6ff"); R(g, x + d * 14, 94, 2, 20, "#f2f6ff"); R(g, Math.min(x, x + d * 14), 94, 16, 2, "#f2f6ff"); g.fillStyle = "rgba(127,227,208,.18)"; g.fillRect(Math.min(x, x + d * 14), 96, 16, 18); });
+    // il pallone, fermo a mezz'aria sopra il cerchio di centrocampo
+    const by = 120 + Math.sin(f / 30) * 2; glow(g, 160, by, 14, "255,255,255", 0.45); g.fillStyle = "#f4f2ea"; g.beginPath(); g.arc(160, by, 4, 0, 7); g.fill(); R(g, 159, by - 1, 2, 2, "#2a2f44");
+    // le sagome dei venti due giocatori, a mezz'aria, fermi
+    [[100, 140], [126, 154], [200, 150], [226, 138], [150, 134], [178, 160]].forEach(([x, y], i) => { const s = i < 3 ? "#e9a64a" : "#8a90b0"; R(g, x, y, 5, 9, s); R(g, x + 1, y - 4, 3, 4, "#d9b89a"); R(g, x - 1, y + 9, 3, 3, "#17163a"); R(g, x + 3, y + 9, 3, 3, "#17163a"); });
+    fogBand(g, W, 150, H, f, ["#1f4a5a", "#0f2a3c"]);
+    for (let i = 0; i < 18; i++) { const x = ((i * 53 + f * 0.25) % 340) - 10, y = 60 + ((i * 41 + Math.sin(f / 50 + i) * 12) % 130); R(g, x, y, 1, 1, "rgba(160,255,235,.6)"); }
+  }
   const dark2 = () => MOOD >= 1;
 
   let FOTO = null;
-  const BGS = { vl_paese: bgPaese, vl_campo: bgCampo, vl_miniera: bgMiniera, vl_interno: bgInterno, vl_foto: bgFoto, vl_latte: bgLatte, vl_spogliatoi: bgSpogliatoi, vl_gallerie: bgGallerie, vl_quattro: bgQuattro, vl_municipio: bgMunicipio, vl_archivio: bgArchivio, vl_cima: bgCima, vl_cimaalta: bgCima, vl_osteria: bgOsteria, vl_campoalto: bgCampoAlto, vl_baita: bgBaita, vl_notte: bgNotte, vl_stazione: bgStazione, vl_rimessa: bgRimessa };
+  const BGS = { vl_paese: bgPaese, vl_campo: bgCampo, vl_miniera: bgMiniera, vl_interno: bgInterno, vl_foto: bgFoto, vl_latte: bgLatte, vl_spogliatoi: bgSpogliatoi, vl_gallerie: bgGallerie, vl_quattro: bgQuattro, vl_municipio: bgMunicipio, vl_archivio: bgArchivio, vl_cima: bgCima, vl_cimaalta: bgCima, vl_osteria: bgOsteria, vl_campoalto: bgCampoAlto, vl_baita: bgBaita, vl_notte: bgNotte, vl_stazione: bgStazione, vl_rimessa: bgRimessa, vl_bordo: bgBordo, vl_sospeso: bgSospeso };
   const prevBg = window.renderDetailedBg;
   window.renderDetailedBg = function (kind, g, W, H, frame) {
     if (BGS[kind]) { safe(() => BGS[kind](g, W || 320, H || 200, frame || 0)); return true; }
@@ -420,7 +462,7 @@
   //             capitolo 3:  Q=cristallo di fase  D=porta di lumina  R=carrello  M=maglia appesa  N=maglia vuota  H=elmetto del minatore  P=parete incisa
   //             capitolo 4:  c=tappeto del Municipio  (oggetti) S=scaffale di faldoni  T=scrivania/tavolo  B=cassetti del Registro  O=tassello (pennino, timbro, sigillo, stemma)  J=vetrina  L=scala dell'archivio
   const FLOORS = ',p:"=y;_-gicsI';
-  const SOLID = "afrehtlknFumvqwx><^bozjXYCGAUEWKZdQDRMNHPSTBOJLV#%$&*";
+  const SOLID = "afrehtlknFumvqwx><^bozjXYCGAUEWKZdQDRMNHPSTBOJLV#%$&*790";
   const isFloor = (c) => !!c && FLOORS.includes(c);
   const ZX = { map: null, under: null, meta: null, id: "", cvs: null };
   const at = (tx, ty) => (ZX.map && ZX.map[ty] && ZX.map[ty][tx]) || "a";
@@ -6070,6 +6112,874 @@
   });
 
 
+
+  // ============================================================================================================
+  // CAPITOLO 7 · IL MINUTO SOSPESO
+  // Il Bordo del Campo (all'alba), i gradini di nebbia, il Campo Sospeso nel Latte (89°, 1–1): la partita che non è mai finita.
+  // Prove: il Passo (tempismo), la Formazione (deduzione), la partita in due tempi (Calcio d'azione 3v3 + Action Soccer 2D HD, forzate) e il Tiro del Minuto.
+  // ============================================================================================================
+  addChapter(function (X) {
+    const { T, F, say, ask, done, go, note, setStep, reward, hero, esc } = X;
+    const N = 7, S = () => X.stepOf(N), has = (k) => F.is(k);
+    const BG = { B: "vl_bordo", S: "vl_sospeso" };
+    const sw = (lines, bg) => lines.map((l) => (l.length > 2 ? l : [l[0], l[1], bg]));
+    const chip = (a) => a[Math.floor(Math.random() * a.length)];
+    const tono = () => F.get("tono", "ironico");
+    const tl = (o) => ["hero", o[tono()] || o.ironico || o.sicuro];
+    const zoneNow = () => X.api.trZone();
+    const MINE = ["vl_bordo", "vl_sospeso"];
+    const inC = () => MINE.includes(zoneNow());
+    const toast = (m) => X.api.trToast(m);
+    const guida = () => F.get("guida", "bianca");
+    const compId = () => (guida() === "agata" ? "vl_agata" : "vl_bianca");
+    const compName = () => (guida() === "agata" ? "Agata" : "Bianca");
+    const isB = () => guida() !== "agata";
+    const remoId = () => (has("remo_bet") && has("m1_win") ? "vl_remo_ns" : "vl_remo");
+    const npcId = (id) => (id === "vl_remo" ? remoId() : id);
+    const su = () => F.get("fosco", "su") !== "giu";
+    const rispetto = () => F.get("ettore_t", "") === "rispetto";
+    const delegate = (id) => { const p = X.talkOf(id, N); if (p) p(); else done(); };
+    const PH = () => F.get("ph7", 0);
+    const LAN = () => X.mem().lan.slice();
+    const lanN = () => LAN().length;
+    const isLan = (id) => LAN().includes(id);
+    const bgHere = () => ({ vl_bordo: BG.B, vl_sospeso: BG.S }[zoneNow()] || X.bgNow());
+    const cast = (id, name, o, bio) => X.cast(id, Object.assign({ name }, o), bio);
+    // la voce di Aurelio arriva dalla lumina finché il minuto non è chiuso
+    const av = (t) => (PH() >= 3 ? t : "(dalla lumina) " + t);
+
+    cast("vl_sasso", "Sasso Marchetti", { tag: "blue", hair: "#3a2a1a", style: "buzz", skin: "#d9a57a", eye: "#7fe3d0", bg: ["#0c1424", "#7fe3d0"], shirt: "#1b2f7a", num: "7" }, "Terzino sinistro degli Stambecchi nel '98. Sulla schiena della maglia ha scritto «aspettatemi», perché arrivava sempre ultimo ai cancelli e voleva evitare discussioni.");
+    cast("vl_nando", "Nando Zerbini", { tag: "blue", hair: "#6a4a2a", style: "messy", skin: "#e0b48a", eye: "#7fe3d0", bg: ["#0c1424", "#7fe3d0"], shirt: "#1b2f7a", num: "9" }, "Mediano. Conserva in tasca il biglietto di un tram che non esiste più, per ricordare che anche le cose finite hanno un orario.");
+    cast("vl_gino", "Gino Barbieri", { tag: "blue", hair: "#1a1a1a", style: "slick", skin: "#c98f63", eye: "#7fe3d0", bg: ["#0c1424", "#7fe3d0"], shirt: "#1b2f7a", num: "13" }, "Mediano. Mastica la stessa gomma alla menta da ventisei anni: non perde sapore, ed è un ottimo segno e un pessimo presagio.");
+    cast("vl_oreste", "Oreste Banfi", { tag: "blue", hair: "#8a5a2a", style: "long", skin: "#f0c9a8", eye: "#7fe3d0", bg: ["#0c1424", "#7fe3d0"], shirt: "#1b2f7a", num: "24", glasses: true }, "Mezzala e allenatore in seconda per vocazione: porta una matita sotto il colletto e scrive le formazioni anche quando non ci sono partite.");
+    cast("vl_tullio", "Tullio Ferrante", { tag: "blue", hair: "#b5532a", style: "cresta", skin: "#e8bf98", eye: "#7fe3d0", bg: ["#0c1424", "#7fe3d0"], shirt: "#1b2f7a", num: "26" }, "Centravanti degli Stambecchi. Prima della finale una ragazza gli ha lasciato un bacio sul colletto, per scaramanzia; da allora si chiede come sia finita con il geometra.");
+    cast("vl_ombra", "Il Dieci d'Ombra", { tag: "gray", hair: "#4a4f66", style: "slick", skin: "#9aa0b8", eye: "#cfd6f0", bg: ["#10141f", "#9aa0b8"], shirt: "#8a90b0", num: "10" }, "Il capitano della squadra avversaria del '98, come lo ricorda la lumina: senza faccia precisa, con un numero e una cortesia d'altri tempi. Vuole che la partita finisca quanto voi.");
+    cast("vl_ombra_n", "Il Nove d'Ombra", { tag: "gray", hair: "#4a4f66", style: "buzz", skin: "#9aa0b8", eye: "#cfd6f0", bg: ["#10141f", "#9aa0b8"], shirt: "#8a90b0", num: "9" }, "Il centravanti della squadra avversaria del '98: un'ombra con il vizio di toccarsi i capelli che non ha.");
+    cast("vl_ombra_p", "Il Portiere d'Ombra", { tag: "gray", hair: "#4a4f66", style: "messy", skin: "#9aa0b8", eye: "#cfd6f0", bg: ["#10141f", "#9aa0b8"], shirt: "#c8b84a", num: "1" }, "Il portiere avversario del '98, con i guanti gialli che la lumina ha ricordato meglio di tutto il resto.");
+    X.cos("vl_tredicesimo_mg", { kind: "shirt", label: "Maglia del Tredicesimo", val: "#e8eef8", from: "Concludi il capitolo 7 di Vallombra" });
+    X.cos("vl_fascia_minuto", { kind: "acc", label: "Fascia del Minuto", val: "#7fe3d0", from: "Raccogli tutte le schegge di lumina al Campo Sospeso nel Latte" });
+    X.cos("vl_bordo_cap", { kind: "hairc", label: "Capelli Lilla del Latte", val: "#b79bd8", from: "Raccogli tutte le schegge di lumina sul Bordo del Campo" });
+
+    // alba lilla sul Bordo, lumina e notte profonda nel Campo
+    const mood = () => 1;
+
+    // ---- gli undici (dieci più il Campione): dove stanno prima e dopo la Formazione
+    const CLUMP = { vl_berto: [9, 13], vl_aurelio: [22, 13], vl_duilio: [20, 12], vl_sasso: [20, 15], vl_pio: [21, 10], vl_nando: [24, 16], vl_gino: [24, 11], vl_oreste: [19, 13], vl_mirella: [26, 13], vl_tullio: [22, 16] };
+    const FORMP = { vl_berto: [9, 13], vl_sasso: [13, 9], vl_pio: [13, 13], vl_duilio: [13, 18], vl_gino: [17, 10], vl_nando: [17, 17], vl_oreste: [20, 11], vl_mirella: [20, 18], vl_tullio: [24, 13], vl_aurelio: [21, 14] };
+    const NAMES = { vl_sasso: "Sasso", vl_pio: "Pio", vl_duilio: "Duilio", vl_gino: "Gino", vl_nando: "Nando", vl_oreste: "Oreste", vl_mirella: "Mirella", vl_tullio: "Tullio", vl_berto: "Berto", vl_aurelio: "Aurelio" };
+    const SLOTS = [["sx", "Difesa · lato ALTO (a sinistra)"], ["c", "Difesa · al CENTRO"], ["dx", "Difesa · lato BASSO (a destra)"], ["ms", "Mediana · lato ALTO"], ["md", "Mediana · lato BASSO"]];
+    const SOL = ["vl_sasso", "vl_pio", "vl_duilio", "vl_gino", "vl_nando"];
+    const CLUES = {
+      vl_sasso: "Il mio lato è quello del cuore: se mi mettono a destra mi gira il fischio nelle orecchie.",
+      vl_pio: "Io non gioco ai lati. Io sto in mezzo: gli altri vanno e vengono, io resto.",
+      vl_duilio: "Io sto dall'altra parte di Sasso. Lui da un lato, io dall'altro, e in mezzo uno che non si muove.",
+      vl_gino: "Io sto a sinistra, davanti a Sasso. Nando sta davanti all'altro terzino.",
+      vl_nando: "Io faccio il mediano davanti a Duilio. Gino, quello che mastica, sta dall'altra parte.",
+    };
+    const heard = () => SOL.filter((id) => has("fc_" + id.slice(3)));
+
+    // ---- obiettivi: sempre con la direzione e che cosa cercare
+    const goal = (s) => {
+      const z = zoneNow(), ph = PH();
+      if (s === 0) return "Sul Bordo del Campo, all'alba: parla con Teodora, vicino ai gradini di nebbia, a EST (al centro della terrazza, verso destra).";
+      if (s === 1) return z === "vl_bordo" ? `Scendi nel Latte: i gradini di nebbia sono in fondo al sentiero di nebbia, a EST (freccia verso il basso). Prima, se vuoi, parla con gli alleati (${lanN()} Lanterne accese).` : "Torna sul Bordo, a OVEST, e scendi dai gradini di nebbia (EST).";
+      if (s === 2) return z === "vl_sospeso" ? "Parla con Aurelio, il capitano, al centro del Campo (EST, verso il cerchio di centrocampo)." : "Scendi nel Latte: i gradini di nebbia sono a EST, in fondo al sentiero.";
+      if (s === 3) return z === "vl_sospeso" ? "Indossa la maglia che ti aspetta sulla panchina, in BASSO a sinistra (SUD-OVEST del Campo): un gancio con un cartellino." : "Scendi nel Latte: i gradini di nebbia sono a EST.";
+      if (s === 4) return z === "vl_sospeso" ? `Schiera la squadra: ascolta Sasso, Pio, Duilio, Gino e Nando (vicino al cerchio di centrocampo, al CENTRO) e poi dillo ad Aurelio. Indizi raccolti: ${heard().length} su 5.` : "Scendi nel Latte: i gradini di nebbia sono a EST.";
+      if (s === 5) {
+        if (ph === 0) return "La squadra è schierata: parla con Aurelio, al centro del Campo, per il fischio d'inizio.";
+        if (ph === 1) return "Intervallo del Minuto: parla con Aurelio, al centro del Campo, per rientrare in campo (prima, se vuoi, scambia due parole con la panchina, in BASSO).";
+        return "Il minuto è all'ultimo secondo: parla con Aurelio, al centro del Campo, per prendere il pallone.";
+      }
+      if (s === 6) return "Il pallone ti aspetta: parla con Aurelio, al centro del Campo.";
+      return "Capitolo concluso. Il Capitolo 8 non è ancora pronto: nel frattempo raccogli le ultime schegge di lumina e parla con tutti.";
+    };
+
+    // ---- tessere nuove: 7 porta di nebbia luminosa  9 la cabina numero uno  0 il gancio con la maglia
+    X.PAINT["7"] = function (sx, sy, tx, ty, fr) {
+      floorPaint("g", sx, sy, tx, ty); const g = GP, up = at(tx, ty - 1) !== "7", dn = at(tx, ty + 1) !== "7";
+      g.save(); g.globalCompositeOperation = "lighter"; g.fillStyle = `rgba(127,227,208,${0.16 + 0.06 * Math.sin(fr / 14 + ty)})`; g.fillRect(sx, sy, 16, 16); g.restore();
+      for (let i = 2; i < 16; i += 4) P(sx + i, sy, 1, 16, "rgba(220,255,248,.45)"); for (let j = 3; j < 16; j += 4) P(sx, sy + j, 16, 1, "rgba(220,255,248,.45)");
+      P(sx + (tx < 20 ? 14 : 0), sy, 2, 16, "#f2f6ff"); if (up) P(sx, sy, 16, 2, "#f2f6ff"); if (dn) P(sx, sy + 14, 16, 2, "#f2f6ff");
+    };
+    X.PAINT["9"] = function (sx, sy, tx, ty, fr) {
+      floorPaint("g", sx, sy, tx, ty); const g = GP;
+      const L = at(tx - 1, ty) !== "9", Rr = at(tx + 1, ty) !== "9", Tt = at(tx, ty - 1) !== "9", Bb = at(tx, ty + 1) !== "9";
+      const b = 0.4 + 0.2 * Math.sin(fr / 18); g.save(); g.globalCompositeOperation = "lighter"; g.fillStyle = `rgba(90,235,210,${b * 0.5})`; g.fillRect(sx - 2, sy - 2, 20, 20); g.restore();
+      P(sx + (L ? 1 : 0), sy + (Tt ? 1 : 0), 16 - (L ? 1 : 0) - (Rr ? 1 : 0), 16 - (Tt ? 1 : 0) - (Bb ? 1 : 0), "#6a4a2c");
+      if (Tt) P(sx, sy, 16, 3, "#8a6238"); if (Bb) P(sx, sy + 13, 16, 3, "#4a3322");
+      if (Tt && L) { P(sx + 7, sy + 5, 7, 7, "#7fe3d0"); P(sx + 8, sy + 6, 5, 2, "#d8fff6"); }
+      if (Tt && Rr) { P(sx + 2, sy + 5, 7, 7, "#7fe3d0"); P(sx + 3, sy + 6, 5, 2, "#d8fff6"); }
+      if (!Tt && L) { g.fillStyle = `rgba(210,255,246,${0.7 + 0.3 * Math.sin(fr / 12)})`; g.font = "bold 11px sans-serif"; g.textAlign = "left"; g.fillText("1", sx + 12, sy + 11); }
+    };
+    X.PAINT["0"] = function (sx, sy, tx, ty, fr) {
+      floorPaint("g", sx, sy, tx, ty); const g = GP, taken = has("maglia7");
+      P(sx + 2, sy + 1, 12, 2, "#6a4a30"); P(sx + 7, sy + 1, 2, 4, "#c0c4d0");
+      if (taken) { P(sx + 4, sy + 6, 8, 1, "#00000022"); return; }
+      g.save(); g.globalCompositeOperation = "lighter"; glow(g, sx + 8, sy + 9, 16, "190,255,246", 0.35 + 0.1 * Math.sin(fr / 14)); g.restore();
+      P(sx + 3, sy + 4, 10, 11, "#f1f4ff"); P(sx + 1, sy + 4, 3, 4, "#f1f4ff"); P(sx + 12, sy + 4, 3, 4, "#f1f4ff"); P(sx + 6, sy + 3, 4, 2, "#c0c4d0"); P(sx + 3, sy + 14, 10, 1, "#b8bed0");
+      const h = hero(); g.fillStyle = "#1b2f7a"; g.font = "bold 7px sans-serif"; g.textAlign = "center"; g.fillText(String(h ? h.num : "?"), sx + 8, sy + 12); g.textAlign = "left";
+    };
+
+    function lumi7(g, cx, cy, full) {
+      g.save(); g.globalCompositeOperation = "lighter"; const t0x = Math.floor(cx / TS), t0y = Math.floor(cy / TS), fr = X.frNow();
+      for (let ty = t0y; ty <= t0y + 13; ty++) for (let tx = t0x; tx <= t0x + 21; tx++) {
+        const ch = at(tx, ty), x = tx * TS - cx + 8, y = ty * TS - cy + 8;
+        if (ch === "l") glow(g, x, y - 4, full ? 46 : 34, "127,227,208", full ? 0.55 : 0.4);
+        else if (ch === "9") glow(g, x, y, 34, "90,235,210", 0.35);
+        else if (ch === "d") glow(g, x, y, 22, "255,220,170", 0.3 + 0.1 * Math.sin(fr / 14));
+        else if (ch === "^") glow(g, x, y, 14, "255,210,120", 0.16);
+      }
+      g.restore();
+    }
+    // i lumi delle tribune e le sagome ferme dei ventidue, a mezz'aria sulla nebbia (decorazione del Campo)
+    function tribune(g, X_, Y_, fr) {
+      for (let r = 0; r < 2; r++) for (let i = 0; i < 44; i++) {
+        const x = X_(1) + i * 16 + (r % 2) * 8 + 4, y = Y_(r === 0 ? 1 : 26) + 6; if (!onScr(x, y)) continue;
+        const a = 0.35 + 0.3 * Math.sin(fr / 30 + i * 1.7 + r); g.save(); g.globalCompositeOperation = "lighter"; glow(g, x, y, 9, "127,227,208", a * 0.8); g.restore(); R(g, x - 1, y - 2, 2, 4, "#bff7ea");
+      }
+    }
+    const zones = {
+      vl_bordo: {
+        name: "Vallombra · Il Bordo del Campo", short: "Il Bordo del Campo", sub: "L'alba, un paese con i termos e dei gradini di nebbia", w: 34, h: 20, start: [3, 10], theme: "napoli", bg: "vl_bordo", moodMin: 1,
+        item: ["Scheggia di lumina", "Schegge"], itemCos: "vl_bordo_cap", items: [[3, 15], [22, 4], [28, 11]],
+        act: { d: "Scendi i gradini di nebbia", l: "Guarda il lampione", b: "Guarda la panca", x: "Guarda i termos", t: "Guarda il larice", n: "Leggi l'avviso", r: "Guarda il Latte" },
+        areas: [[2, 5, 15, 14, "Il prato del Campo"], [16, 3, 24, 16, "Il sagrato di ghiaia"], [25, 10, 31, 13, "I gradini di nebbia"], [0, 17, 33, 19, "Il parapetto sul Latte"]],
+        hints: (s) => ({
+          "Il prato del Campo": "L'angolo del Campo di tutti i giorni: una porta, l'erba rasata dal vento e il paese che finge di non guardare i gradini.",
+          "Il sagrato di ghiaia": s === 0 ? "Il sagrato di ghiaia, con il paese in cappotto sopra il pigiama. Teodora ti aspetta vicino ai gradini, a EST." : "Il sagrato di ghiaia, con il paese in cappotto sopra il pigiama. I gradini di nebbia sono a EST, in fondo al sentiero.",
+          "I gradini di nebbia": "Un sentiero di nebbia compatta che si allunga a EST nel Latte e finisce in una scala con il corrimano di luce. La freccia in basso indica la discesa.",
+          "Il parapetto sul Latte": "Oltre la ringhiera il Latte è fermo e quasi nitido. Laggiù brilla un puntino turchese con un 1 attaccato.",
+          "Il Bordo del Campo": "Il Bordo del Campo, all'alba.",
+        }),
+        intro: [
+          ["voce", "Il Campo, visto da qui, è un campo come tutti gli altri: due porte, un prato rasato dal vento e un'aria da domenica. Solo che oltre il parapetto, a EST, la nebbia ha messo i gradini."],
+          ["voce", "Sono di nebbia compatta, bianchi e lilla, con un corrimano che sembra un filo di latte rappreso. Scendono nel Latte e ci si perdono. Sul sagrato il paese ha aperto i termos e finge di non guardarli: è la sola cosa che a Vallombra si sa fare con dignità."],
+        ],
+        npcs: (s) => {
+          const lan = LAN(), c = compId();
+          const o = [{ id: "vl_teodora", at: [22, 11] }, { id: c, at: [21, 12] }, { id: "vl_vermiglio", at: [6, 16] }, { id: "vl_sigillo", at: [7, 16] }];
+          const slots = [[19, 8], [21, 8], [23, 8], [19, 14], [21, 14], [23, 14], [16, 12], [16, 8], [14, 7], [14, 13], [11, 9], [11, 12]];
+          const rest = lan.filter((id) => id !== "vl_teodora" && id !== c && id !== "vl_berto" && !(id === "vl_fosco" && !su())).map(npcId);
+          rest.slice(0, slots.length).forEach((id, i) => o.push({ id, at: slots[i] }));
+          return o;
+        },
+        build(L) {
+          const { lay, put } = L;
+          lay(0, 0, 33, 19, "a"); lay(1, 3, 24, 16, ":"); lay(2, 5, 15, 14, "y"); lay(25, 3, 32, 16, "f");
+          lay(25, 11, 30, 12, "g"); lay(25, 10, 30, 10, "G"); lay(25, 13, 30, 13, "G"); lay(0, 17, 33, 17, "r"); lay(0, 18, 33, 19, "f");
+          [[4, 4], [13, 4], [20, 4], [23, 15]].forEach(([x, y]) => put(x, y, "l"));
+          put(9, 15, "x"); put(10, 15, "x"); put(12, 15, "b"); put(13, 15, "b"); put(1, 16, "t"); put(24, 4, "t"); put(7, 4, "n");
+          put(31, 11, "d"); put(31, 12, "d");
+        },
+        decor(cx, cy, d) {
+          const g = GP, X_ = d.X, Y_ = d.Y, fr = d.fr;
+          plaque(g, "CAMPO SOSPESO · PRATO COMUNALE", X_(8) + 8, Y_(3) + 4); plaque(g, "GRADINI ▸", X_(27.5), Y_(9) + 4);
+          // il campo di tutti i giorni: una porta e un pezzo di cerchio
+          const x0 = X_(2) + 0.5, y0 = Y_(5) + 0.5; if (x0 > -300 && x0 < 400) { g.strokeStyle = "rgba(255,255,255,.7)"; g.lineWidth = 1; g.strokeRect(x0, y0, 13 * TS, 9 * TS); g.beginPath(); g.arc(x0 + 13 * TS, y0 + 4.5 * TS, 24, Math.PI / 2, Math.PI * 1.5); g.stroke(); g.strokeStyle = "#e8e8f0"; g.lineWidth = 2; g.strokeRect(x0 - 7, y0 + 3 * TS, 7, 3 * TS); }
+          // i gradini di nebbia che scendono a est oltre il cancello
+          const sx = X_(31), sy = Y_(12); if (onScr(sx, sy)) for (let i = 0; i < 4; i++) { R(g, sx + 18 + i * 14, sy + 6 + i * 6, 14, 4, "#e9e2f6"); R(g, sx + 18 + i * 14, sy + 10 + i * 6, 14, 2, "#b6a9d6"); }
+          for (let i = 0; i < 12; i++) { const x = ((i * 53 + fr * 0.2) % 340) - 10, y = ((i * 71 + Math.sin(fr / 60 + i) * 8) % 200); R(g, x, y, 1, 1, "rgba(200,255,240,.5)"); }
+        },
+        top(cx, cy, d) { const g = GP; fogFront(g, cy, 15.4, d.fr); moodTint(g); tileLights(g, cx, cy); lumi7(g, cx, cy, false); },
+      },
+
+      vl_sospeso: {
+        name: "Vallombra · Il Campo Sospeso nel Latte", short: "Il Campo Sospeso (89°)", sub: "Ottantanovesimo minuto, uno a uno, da ventisei anni", w: 46, h: 28, start: [4, 14], theme: "napoli", bg: "vl_sospeso", moodMin: 2,
+        item: ["Scheggia di lumina", "Schegge"], itemCos: "vl_fascia_minuto", items: [[3, 4], [42, 4], [26, 25]],
+        act: { "^": "Risali sul Bordo", l: "Guarda il lume della tribuna", b: "Guarda la panchina", "7": "Guarda la porta", "9": "La cabina numero uno", "0": "Il gancio con la maglia" },
+        areas: [[8, 6, 37, 21, "Il Campo Sospeso"], [8, 23, 14, 25, "La panchina"], [2, 2, 43, 4, "Le tribune di lumi"], [40, 21, 44, 25, "La numero uno"], [1, 12, 3, 15, "I gradini del Bordo"], [38, 5, 44, 20, "La porta delle Ombre"]],
+        hints: (s) => ({
+          "Il Campo Sospeso": s <= 2 ? "Un prato appeso alla nebbia. Al centro, a mezz'aria, il pallone; intorno al pallone, i giocatori fermi nell'azione di ventisei anni fa." : "Il prato dell'89° minuto. Le righe sono di luce turchese; il pallone aspetta a mezz'aria, e la squadra con lui.",
+          "La panchina": "Una panchina di legno chiaro, con i ganci per le maglie e un posto vuoto. Sul gancio più vicino al campo c'è una maglia bianca.",
+          "Le tribune di lumi": "Le tribune non hanno posti a sedere: hanno lumi di lumina che nessuno regge, a mezz'aria, in file perfette. Sembrano un pubblico che trattiene il fiato.",
+          "La numero uno": "La cabina numero uno, parcheggiata sulla nebbia come in una stazione. Dentro, la lumina pulsa piano.",
+          "I gradini del Bordo": "I gradini di nebbia da cui sei sceso. In cima, piccolissimo, il paese con i termos.",
+          "La porta delle Ombre": "La porta di rete luminosa dei grigi, a EST. Il portiere d'ombra la guarda con attenzione professionale.",
+          "Il Campo Sospeso (89°)": "Il Campo Sospeso nel Latte, ottantanovesimo minuto.",
+        }),
+        intro: [
+          ["voce", "Il Latte, da dentro, non è bianco: è un colore che non ha nome nei dizionari, tra l'argento e il turchese. Il rumore di sala d'attesa è diventato il rumore di uno stadio: quattromila persone che trattengono il fiato."],
+          ["voce", "Davanti a te il Campo Sospeso: un prato intero appeso alla nebbia, tribune fatte di lumi che nessuno regge, due porte di rete luminosa. Sul tabellone, in cifre di lumina: 89:00 · STAMBECCHI 1 – 1 OMBRE. I numeri sono fermi. Ogni tanto il 9 si gira a controllare."],
+          ["voce", "In mezzo al campo, a mezz'aria, c'è il pallone. Intorno, fermi nel gesto di un'azione di ventisei anni fa, undici giocatori in maglia blu notte e ambra e altri in grigio fumo. Poi, uno alla volta, si accorgono di te."],
+        ],
+        npcs: (s) => {
+          const ph = PH(), f = has("form_ok"), A = f ? FORMP : CLUMP, c = compId(), lan = LAN();
+          const o = Object.keys(A).map((id) => ({ id, at: A[id] }));
+          o.push({ id: "vl_ombra", at: f ? [27, 13] : [27, 12] }, { id: "vl_ombra_n", at: f ? [28, 16] : [27, 15] }, { id: "vl_ombra_p", at: [36, 13] }, { id: "vl_arbitro", at: f ? [22, 18] : [25, 14] });
+          o.push({ id: "vl_teodora", at: [22, 23] }, { id: c, at: [20, 22] });
+          o.push({ id: "vl_fosco", at: [8, 24] }, { id: "vl_cornelio", at: [11, 24] });
+          const slots = [[8, 3], [13, 3], [19, 3], [25, 3], [31, 3], [36, 3], [14, 24], [17, 24], [26, 24], [29, 24]];
+          const fixed = ["vl_teodora", c, "vl_berto", "vl_fosco", "vl_cornelio"];
+          const rest = lan.filter((id) => !fixed.includes(id)).map(npcId);
+          rest.slice(0, slots.length).forEach((id, i) => o.push({ id, at: slots[i] }));
+          void ph; void s;
+          return o;
+        },
+        build(L) {
+          const { lay, put } = L;
+          lay(0, 0, 45, 27, "G"); lay(2, 2, 43, 25, "g"); lay(8, 6, 37, 21, "y");
+          [[10, 4], [16, 4], [22, 4], [28, 4], [34, 4]].forEach(([x, y]) => put(x, y, "l"));
+          for (let y = 12; y <= 15; y++) { put(7, y, "7"); put(38, y, "7"); }
+          put(9, 23, "0"); put(10, 23, "b"); put(11, 23, "b"); put(12, 23, "b"); put(13, 23, "b");
+          lay(41, 22, 42, 23, "9");
+          put(2, 13, "^"); put(2, 14, "^");
+          [[6, 8], [6, 19], [39, 8], [39, 19]].forEach(([x, y]) => put(x, y, "l"));
+        },
+        decor(cx, cy, d) {
+          const g = GP, X_ = d.X, Y_ = d.Y, fr = d.fr;
+          tribune(g, X_, Y_, fr);
+          const x0 = X_(8) + 0.5, y0 = Y_(6) + 0.5, w = 30 * TS - 1, h = 16 * TS - 1;
+          if (x0 > -700 && x0 < 400) {
+            g.strokeStyle = "rgba(190,255,240,.9)"; g.lineWidth = 1; g.strokeRect(x0, y0, w, h); g.beginPath(); g.moveTo(x0 + w / 2, y0); g.lineTo(x0 + w / 2, y0 + h); g.stroke();
+            g.beginPath(); g.arc(x0 + w / 2, y0 + h / 2, 28, 0, 7); g.stroke(); g.strokeRect(x0, y0 + 3.5 * TS, 4 * TS, 9 * TS); g.strokeRect(x0 + w - 4 * TS, y0 + 3.5 * TS, 4 * TS, 9 * TS);
+            g.strokeRect(x0, y0 + 5.5 * TS, 1.8 * TS, 5 * TS); g.strokeRect(x0 + w - 1.8 * TS, y0 + 5.5 * TS, 1.8 * TS, 5 * TS);
+            R(g, x0 + w / 2 - 2, y0 + h / 2 - 2, 4, 4, "#e6fffa");
+            // il pallone, a mezz'aria sopra il cerchio di centrocampo
+            const bx = x0 + w / 2, by = y0 + h / 2 - 12 + Math.sin(fr / 30) * 2; g.save(); g.globalCompositeOperation = "lighter"; glow(g, bx, by, 16, "255,255,255", 0.45); g.restore(); g.fillStyle = "#f4f2ea"; g.beginPath(); g.arc(bx, by, 4, 0, 7); g.fill(); R(g, bx - 1, by - 1, 2, 2, "#2a2f44");
+          }
+          // il tabellone fermo sull'89°
+          const tx0 = X_(18), ty0 = Y_(0) + 4; if (onScr(tx0, ty0)) { R(g, tx0, ty0, 10 * TS, 24, "#0a1226"); R(g, tx0, ty0, 10 * TS, 2, "#7fe3d0"); R(g, tx0, ty0 + 22, 10 * TS, 2, "#7fe3d0"); g.font = "bold 13px monospace"; g.textAlign = "center"; g.fillStyle = `rgba(190,255,240,${0.85 + 0.15 * Math.sin(fr / 12)})`; g.fillText(PH() >= 3 ? "89:59" : "89:00", tx0 + 5 * TS, ty0 + 14); g.font = "bold 6px sans-serif"; g.fillStyle = "#e9a64a"; g.fillText(PH() >= 3 ? "STAMBECCHI 2 – 1 OMBRE" : "STAMBECCHI 1 – 1 OMBRE", tx0 + 5 * TS, ty0 + 21); g.textAlign = "left"; }
+          plaque(g, "PANCHINA ▾", X_(11.5) + 8, Y_(22) + 4); plaque(g, "RISALI ◂", X_(3), Y_(11) + 2);
+          for (let i = 0; i < 16; i++) { const x = ((i * 53 + fr * 0.25) % 340) - 10, y = ((i * 71 + Math.sin(fr / 50 + i) * 10) % 200); R(g, x, y, 1, 1, "rgba(160,255,235,.55)"); }
+        },
+        top(cx, cy, d) {
+          const g = GP; fogFront(g, cy, 25.6, d.fr); moodTint(g); tileLights(g, cx, cy); lumi7(g, cx, cy, true);
+          const gr = g.createRadialGradient(160, 100, 60, 160, 100, 210); gr.addColorStop(0, "rgba(2,8,20,0)"); gr.addColorStop(1, "rgba(2,8,20,.5)"); g.fillStyle = gr; g.fillRect(0, 0, 320, 200);
+        },
+      },
+    };
+
+    // ================= scene
+    const cl = (b, a) => (isB() ? b : a);
+    const lanLabel = () => lanN() >= 12 ? "dodici su dodici" : `${lanN()} su dodici`;
+    const sumPts = (pts) => pts.reduce((a, b) => a + b, 0);
+    const tmg = (label, rounds, bg, react, fin) => {
+      const tm = X.timing;
+      if (typeof tm === "function") return tm(label, rounds, bg, react, fin);
+      const pts = [];
+      const next = () => {
+        if (pts.length >= rounds) return fin(pts);
+        ask("voce", `${esc(label)} · ${pts.length + 1} di ${rounds}: scegli il momento.`, [1, 2, 3].map((k) => ({ label: ["Subito", "Un attimo", "Adesso"][k - 1], fn: () => { const n = Math.random() < 0.34 ? 3 : Math.random() < 0.6 ? 2 : 1; pts.push(n); say([["voce", react(n)]], next); } })), bg);
+      };
+      next();
+    };
+
+    // ---- le Lanterne: cosa dicono al Bordo (b), al Campo prima della partita (p0), all'intervallo (p1) e dopo (p2)
+    const LT = () => ({
+      vl_mirtilla: {
+        b: ["Ho portato quattro termos: due di cioccolata, uno di tè e uno di coraggio, che è vuoto. Lo riempio quando torni.", "Se la nebbia mi chiede il biglietto, le offro un cappuccino. Funziona con tutti i fantasmi educati."],
+        p0: ["Ho messo la cioccolata sulla panchina, sotto il tabellone. Dicono che il Latte non conservi i sapori. A me non l'ha detto nessuno.", "Quel signore con la fascia da capitano mi ha chiesto se nella cioccolata c'è latte. Ho risposto: «Tutto intorno a lei, capitano»."],
+        p1: ["Intervallo! Cioccolata «Nebbia Fitta», limone per chi fischia e pane per chi non mangia da ventisei anni. Offre la casa. La casa sono io, sono qui sotto, e non ho mai passato una giornata migliore."],
+        p2: ["Ho pianto nella cioccolata. Viene più salata, ma ho deciso che è una specialità: «Minuto Sospeso, con sale»."],
+      },
+      vl_fosco: {
+        b: ["Ho spolverato la scala. Non c'è polvere in cima alla nebbia, ma ho spolverato lo stesso: per educazione.", "Berto potrebbe non riconoscermi. Oppure riconoscermi e fingere di no. Sono due modi di volersi bene."],
+        p0: [su() ? "Sono sceso con le Lanterne, come una scorta di pane. Sto accanto a mio fratello: non glielo dico, perché poi si gira." : "Sono rimasto qui, come promesso. Sto a lato della panchina; da qui vedo tutto, e ho imparato a guardare senza spolverare.", "Ho in tasca lo straccio. Non lo uso. Lo tengo come un portafortuna con il profumo di cera."],
+        p1: ["Berto ha le dita fasciate di nodi a farfalla. Io ne ho imparato uno. Stamattina l'ho fatto da solo. Gli è venuto da piangere, e a me da ridere. Ho dimenticato quale dei due sia quale."],
+        p2: ["Ho spolverato la porta. Con la mano, perché lo straccio non passava. Non c'era polvere: c'era un secondo che si era posato lì."],
+      },
+      vl_noemi: {
+        b: ["Radio Nebbia, in diretta dal parapetto: oggi l'edizione dura finché dura il minuto. Meteo: lilla, con rischio di coraggio.", "Ho il microfono e il termos. Il microfono fa più rumore, il termos più bene."],
+        p0: ["Qui Radio Nebbia, trasmissione speciale dal Campo Sospeso. Non so chi ci ascolti, ma l'audience è di quattromila lumi: per la mia emittente è un record."],
+        p1: ["Intervallo, ascoltatori vicini e lontani: il tabellone dice ancora 89:00 e il pubblico applaude senza fare rumore. È una qualità che mi piacerebbe vedere nelle mie interviste."],
+        p2: ["Ho finito il commento. Per la prima volta in quarant'anni di radio non ho più niente da dire. Lo trasmetto: la gente ascolta anche il silenzio, se glielo si presenta bene."],
+      },
+      vl_cornelio: {
+        b: ["Sono venuto senza discorso. Ho provato a scriverne uno e mi è venuto un biglietto da visita. Lo porterò lì sotto, per sicurezza.", "Il dodicesimo ha un compito semplice: tenere caldi i guanti. Ho fatto pratica per ventisei anni."],
+        p0: ["Il posto del dodicesimo è in panchina. Non mi sono mai seduto così volentieri. Neanche a un consiglio comunale, dove dovrei."],
+        p1: ["Parlo con la squadra, tra poco. Non ho un discorso: ho una frase, ed è una frase breve. Per un sindaco, un atto d'eroismo."],
+        p2: ["Ho tenuto i guanti caldi. Non servivano più, ma quando mi hanno ringraziato ho avuto le mani che tremavano, e si sono riscaldate da sole."],
+      },
+      vl_ottavia: {
+        b: ["Ho contato tutti, stamattina. Anche me. È la seconda volta in ventisei anni, e si comincia a farci l'abitudine.", "Il buio non mi spaventa. Il Latte è un buio che ha scelto di essere luce: mi fa un po' pena, e un po' simpatia."],
+        p0: ["Venticinque minatori, dodici in squadra, e un portiere: la matematica del '98 non tornava mai. Stasera ritorna."],
+        p1: ["Ottantanove, uno a uno. Ho fatto il conto: all'ultimo minuto manca tutto, ma non manca nessuno."],
+        p2: ["Ho contato fino a tutti. È venuto tondo."],
+      },
+      vl_gedeone: {
+        b: ["Ho contato tre volte i gradini: sono ventuno. Un numero pari sarebbe stato più sicuro, ma non protesto.", "Il capoturno conta. Sempre. Finché qualcuno manca, conta. Oggi non manca nessuno, e mi trema il polso."],
+        p0: ["Li vedo, i ragazzi del 6:43: sono quelli che mi gridarono «TUTTI FUORI». Vorrei dire grazie e invece dico: «Siete in ritardo». Mi viene meglio."],
+        p1: ["Alla tre, io ero in fondo, al quarto livello. Quando udii il botto contai: quattordici. Tutti fuori. Mancavano loro. Adesso li conto, e sono qui."],
+        p2: ["Undici in campo, uno in panchina, due in tribuna. Tredici. Il conto torna. Non mi succedeva dal '98."],
+      },
+      vl_ettore: {
+        b: ["Ho spento la telecamera e acceso il quaderno. Sul quaderno ho scritto: «Alcune cose non si riprendono: si ricordano».", "Viola non è venuta: mi ha detto che il suo posto è dietro la lente. La lente è rimasta a casa: non ha protestato."],
+        p0: ["Ho girato per ventisei anni in cerca di un fantasma. Non immaginavo che, trovatolo, mi avrebbe chiesto se avessi un panino."],
+        p1: ["Ho preso appunti. Sono tutti vuoti, tranne uno: «Una squadra che aspetta di finire la partita è più umana di tanti vivi in ritardo»."],
+        p2: ["Il canale non ha un nuovo video. Ha una nuova pagina bianca. La intitolo «Minuto Sospeso». Nessuno la leggerà, e va bene così."],
+      },
+      vl_remo: {
+        b: ["Non scendo con gli occhiali. Voglio vedere tutti i colori che sono in fondo, anche quelli che non ci stanno bene.", "I Camosci tengono la corda dall'alto. Come sempre: se tiri tre volte, tiriamo su."],
+        p0: ["Il tabellone dice Stambecchi contro Ombre. Come capitano dei Camosci mi sento chiamato in causa, anche se le Ombre non hanno il giallo."],
+        p1: ["Tifo per voi. Lo dico qui sotto, dove nessuno del mio paese può sentirmi. Poi lo ripeto su, per le orecchie giuste."],
+        p2: ["Un capitano non applaude volentieri. Io stavolta ho battuto le mani così forte che mi è caduto il panino."],
+      },
+      vl_bianca: {
+        b: ["Ho serrato tutti i bulloni della scala di nebbia. Non so se servisse. Ma i bulloni, se glieli fai fare, si sentono utili.", "Sul corrimano c'è una scritta in lumina: «TENERE LA DESTRA». Obbedisco alla nebbia con una certa sofferenza."],
+        p0: ["La cabina numero uno è parcheggiata in fondo, a SUD-EST. Ha le gomme a terra. Nel senso che non le ha, e le ha a terra lo stesso."],
+        p1: ["Ho un'idea per la rete della porta: se la lumina regge, regge qualunque cosa. Ma se la sfioro, brilla. Lo sanno, i ragazzi?"],
+        p2: ["Se questo è un sogno, è l'unico in cui i bulloni sono tutti a posto. Vorrei restarci un altro po'."],
+      },
+      vl_agata: {
+        b: ["Il terreno, sotto i gradini, non c'è. Sotto c'è lumina pura, spessa come un pensiero. Come misura è inutile, come impressione è sublime.", "Ho portato un quaderno con le righe e uno senza. Credo che userò il secondo."],
+        p0: ["L'ago della bussola fa il giro e poi si ferma sul pallone. È la prima volta che un ago mi indica qualcosa di cui sono sicura."],
+        p1: ["Dato scientifico: non ho dato scientifico. Le tribune sono lumina a densità costante, i giocatori sono lumina a densità variabile. L'unica cosa che non è lumina è il silenzio."],
+        p2: ["Annoto: tutto. Poi cancello. Poi riscrivo solo: «Ho visto».", ],
+      },
+    });
+    function lant(id) {
+      const k = id === "vl_remo_ns" ? "vl_remo" : id, t = (LT()[k] || {}), z = zoneNow(), ph = PH();
+      const key = z === "vl_bordo" ? "b" : ph >= 2 ? "p2" : ph === 1 ? "p1" : "p0";
+      say(sw([[id, chip(t[key] || ["…"])]], bgHere()), done);
+    }
+    function compagna(id) {
+      const s = S(), b = id === "vl_bianca", z = zoneNow(), ph = PH();
+      const hint = z === "vl_bordo" ? (b ? "Io sono pronta: bulloni in tasca e una chiave inglese da portarmi in panchina. Tu devi scendere, quando vuoi." : "Pronta: bussola, quaderno e due matite. Ti seguo sui gradini, a un passo di distanza, per poterti dire cosa non guardare.")
+        : ph === 0 ? (b ? "Ho dato un'occhiata alla squadra: sono forti. E vecchi. E fermi. Sono i miei tre pregi preferiti." : "Squadra del '98, ventisei anni in sospensione: nessuna fatica fisica accumulata. Dal punto di vista statistico, avversari freschissimi.") : ph === 1 ? (b ? "Mi piace, il tuo modo di tirare. Non perché sia giusto: perché è tuo." : "Confermo l'impressione: il tuo modo di giocare è un'anomalia utile.") : (b ? "Quando il fischio arriva, io mi siedo. Lo dico a tutti: non per stanchezza." : "Il campione, in questo momento, è quasi commovente.");
+      ask(id, b ? "«Dimmi tu: io faccio i bulloni, tu fai i tiri.»" : "«Dimmi tu: io leggo gli indizi, tu li metti in fila.»", [
+        { label: "Che facciamo ora?", sub: "Un consiglio", fn: () => say(sw([[id, goal(s)]], bgHere()), done) },
+        { label: "Come va?", fn: () => say(sw([[id, hint]], bgHere()), done) },
+      ], bgHere());
+    }
+
+    // ---- il Bordo: Teodora e gli ospiti
+    function teodora() {
+      const s = S(), z = zoneNow(), ph = PH();
+      if (z === "vl_bordo" && s === 0) return teodoraBordo();
+      if (z === "vl_bordo") return say(sw([["vl_teodora", chip(s === 1 ? ["Quando sei pronto, i gradini sono a EST. Io scendo dopo di te, con il registro: l'orario, in fondo, lo tengo io.", `Hai ${lanN()} Lanterne accese su dodici. Chi ha la luce scende con te; gli altri guardano dal Bordo. Non è una punizione: è architettura.`] : ["Ho scritto «SCESO» sulla riga di Aurelio, a penna. Poi ho scritto «ASPETTATO», a matita. La penna per quello che è successo, la matita per quello che succede."])]], BG.B), done);
+      if (s <= 2) return say(sw([["vl_teodora", "Non entro in campo, ragazzo. Non ci sono mai entrata: io stavo sulla banchina, con l'orario. Mi metto sulla linea. Vai da lui, ha un'aria da uno che aspetta da ventisei anni e finge di no."]], BG.S), done);
+      const L = ph === 0 ? ["Gli ho detto «sei in ritardo» tre volte. Lui ha detto «lo so» tre volte. A quarta volta ha detto «ti voglio bene» e ho riaperto il registro.", "Sono vicina alla linea, con il registro. Se serve fischiare il tempo, ho l'orologio. Ha ricominciato a fare un rumore che non sentivo da ventisei anni: tic."]
+        : ph === 1 ? ["Il registro l'ho chiuso a metà. Non per mancanza di fiducia: perché per la prima volta non so come finisce, e mi piace.", "Mio fratello ha detto una frase, all'intervallo, e non l'ho scritta. Dovrà bastare così."]
+          : ["Non scrivo niente. Guardo. Ho sempre scritto per non guardare: stavolta guardo.", "Sai cosa si prova a vedere tuo fratello dopo ventisei anni? È come ritrovare l'orario di un treno che pensavi soppresso e scoprire che parte ogni mattina."];
+      say(sw([["vl_teodora", chip(L)]], BG.S), done);
+    }
+    function teodoraBordo() {
+      const n = lanN(), c = compId();
+      const L = [
+        ["voce", "Teodora è in piedi vicino all'inizio dei gradini, con il registro aperto e la matita dietro l'orecchio. Porta un cappotto blu notte e ambra, vecchio di ventisei anni, che le sta largo di spalle. È di Aurelio."],
+        ["vl_teodora", "È sceso alle sei e un quarto. Da solo, scalzo, con le scarpe in mano: i gradini lo hanno lasciato passare senza fare una piega. Io l'ho guardato fino all'ultimo scalino, e poi ho scritto l'ora."],
+        ["vl_teodora", "Ho capito una cosa, stanotte, tra una barricata e l'altra. I gradini non portano chiunque: portano chi ha una lanterna accesa. Ogni persona che ti ha dato una mano, e che tu hai ascoltato, ha una luce. Le luci fanno da corrimano."],
+        ["vl_teodora", n >= 12 ? "Tu le hai accese tutte e dodici. Nel registro non ho una riga per questo; la scrivo adesso, a penna." : `Tu ne hai ${n} accese su dodici. Chi ha una lanterna scende con te e resta in panchina a fare quel che sa. Chi non ce l'ha aspetta qui, sul Bordo. Non è una punizione: è architettura. E più luci scendono, più il Latte si lascia convincere.`],
+        [c, cl("Io scendo. Se serve avere un bullone in mano per sembrare importante, ne ho cinque.", "Io scendo. Il campione dei dati è unico e non ripetibile: è un'occasione scientifica che rifiuto di trattare con serenità."), BG.B],
+        tl({ sicuro: "Allora scendiamo. Un minuto da finire non aspetta.", attento: "Ventuno gradini, una squadra che aspetta e una sorella con un registro. Li conto tutti.", ironico: "Scendere nel Latte per una partita: sono finito in una commedia di buone intenzioni, e ci sto bene." }),
+        ["vl_teodora", "Parla con chi vuoi, prima. Poi, quando sei pronto, i gradini sono a EST, in fondo al sentiero di nebbia. La freccia in basso."],
+      ];
+      say(sw(L, BG.B), () => { setStep(N, 1); note("Sul Bordo del Campo: i gradini di nebbia portano nel Latte chi ha una lanterna accesa. Sono a EST, in fondo al sentiero."); done(); });
+    }
+    function vermiglio() {
+      if (!inC()) return delegate("vl_vermiglio");
+      const comp = F.get("comp6", "rifiuto"), win = F.get("ult6", "lose") === "win";
+      const L = comp === "accetto" ? ["Ho detto che non scendo. Non sono una Lanterna: sono una voce a verbale. Resto qui con il termos. Mi hanno lasciato un posto sulla panca, il più lontano: l'ho trovato commovente.", "Il verbale parla di «chiusura con onori». Stamattina non c'è nulla da chiudere: c'è una cosa da aprire, e non è nelle clausole."]
+        : win ? ["Un anno di ritardo, firmato. Resto a vedere come finisce: l'ho promesso. Non so se sia un'operazione commerciale. Credo sia una curiosità. Fa malissimo ai bilanci e bene alla schiena.", "Mi hanno detto che i gradini portano chi ha una lanterna. Io ho una torcia. Ho provato: la torcia è scesa da sola, e io no."]
+          : ["Alle sei e quarantatré avrei dovuto avere le ruspe in piazza. Ho le ruspe ferme e un termos. Ho dato ordine di aspettare. Non è nel contratto: è nella coscienza, che il contratto non prevede.", "Lei è la persona che ha spento le mie ruspe senza toccarle. È un talento che non so come mettere a bilancio."];
+      say(sw([["vl_vermiglio", chip(L)]], BG.B), done);
+    }
+    function sigillo() {
+      if (!inC()) return delegate("vl_sigillo");
+      say(sw([["vl_sigillo", chip(["Ho consultato il regolamento del Latte: non esiste. È la prima volta che l'assenza di norme mi dà fiducia.", "Il mio cliente guarda i gradini come un uomo guarda una porta aperta: con l'aria di chi sa quanto costerebbe attraversarla. Gli ho detto che il biglietto è gratuito. Non mi ha creduta.", "Se qualcosa va storto, mi trovate qui con la cartellina. Se va bene, mi trovate qui con la cartellina. La cartellina è il mio modo di stare ferma."])]], BG.B), done);
+    }
+
+    // ---- i gradini di nebbia: il Passo (tempismo breve, con aiuti progressivi)
+    function gradini() {
+      if (S() < 1) return say(sw([["voce", "I gradini di nebbia partono da qui, con la freccia in giù. Prima parla con Teodora: ha qualcosa da dire sul corrimano."]], BG.B), done);
+      if (has("pas_ok")) return go("vl_sospeso", 3, 14);
+      const f = F.get("pas_f", 0);
+      ask("vl_teodora", `«I gradini sono ventuno, il corrimano è fatto di luce. ${lanLabel() === "dodici su dodici" ? "Le tue dodici Lanterne ti reggono tutte." : `Le tue ${lanN()} Lanterne ti reggono.`} Scendi?»${f ? ` (${f} ${f === 1 ? "tentativo" : "tentativi"} falliti: il corrimano si fa più vicino)` : ""}`, [
+        { label: "Scendi nel Latte", sub: "Il Passo · 3 prove di tempismo", cls: "hot", fn: passoVia },
+        { label: "Non ancora", fn: done },
+      ], BG.B);
+    }
+    function passoVia() {
+      const first = !has("pas_ini"); F.set("pas_ini", true);
+      const L = first ? [
+        ["voce", "Il primo gradino è di nebbia compatta: ci appoggi il piede e regge, come una scala che ha deciso di crederti. Il corrimano si accende sotto la mano in segmenti turchesi, uno per ogni Lanterna che hai acceso."],
+        ["vl_teodora", "La regola è questa: un passo, e poi un altro, e non guardare mai il gradino che hai appena lasciato. Il Latte ti chiede di scendere al ritmo giusto, né prima né dopo. Se sbagli, si ricomincia: la nebbia ha pazienza."],
+      ] : [["vl_teodora", "Un passo, e poi un altro. La nebbia ha pazienza."]];
+      say(sw(L, BG.B), () => passoProva());
+    }
+    function passoProva() {
+      const f = F.get("pas_f", 0);
+      if (f >= 3) return say(sw([["voce", "Alla terza volta, il corrimano si stufa di aspettare. Le Lanterne si dispongono a catena lungo i gradini, una mano sulla spalla dell'altra, e scendono insieme in un unico passo. Ti accorgi di essere già in fondo."], ["vl_teodora", "Annoto: «sceso dalle Lanterne». La riga più lunga che abbia mai scritto, e la più bella."]], BG.B), () => passoOk(true));
+      const need = Math.max(3, 6 - f - (has("compass") ? 1 : 0) - Math.floor(lanN() / 4));
+      tmg("Il Passo", 3, "vl_bordo", (k) => (k === 3 ? "<b>Passo sicuro!</b> Il gradino diventa solido sotto la suola e il segmento del corrimano si accende." : k === 2 ? "<b>Si regge.</b> Il piede trova il gradino con mezzo secondo di ritardo, e la nebbia fa finta di niente." : "<b>Il gradino scivola.</b> Un braccio, da dietro, ti afferra il gomito: è una Lanterna. Il corrimano ti sorride a denti stretti."), (pts) => {
+        const tot = sumPts(pts);
+        if (tot >= need) return passoOk(false, tot, need);
+        F.add("pas_f", 1);
+        const f2 = F.get("pas_f", 0);
+        say(sw([["voce", `Il Passo: ${tot} su 9 (ne servivano ${need}). Risali di tre gradini, piano, con l'aria di chi ha imparato qualcosa dal pavimento.`], ["vl_teodora", f2 === 1 ? "Si può fare meglio. Il ritmo, ragazzo: non è questione di fretta, è questione di orecchio." : f2 === 2 ? "Seconda volta. Sposto il corrimano di un dito: ti verrà meglio. Dopo la terza, ci pensano le Lanterne." : "Terza volta. Scrivo che le Lanterne ti portano."]], BG.B), () => ask("vl_teodora", "«Riproviamo?»", [{ label: "Riprova il Passo", sub: "Il corrimano si fa più vicino", cls: "hot", fn: passoProva }, { label: "Un momento di respiro", fn: done }], BG.B));
+      });
+    }
+    function passoOk(auto, tot, need) {
+      F.set("pas_ok", true);
+      const m = reward("vl_c7_passo", { coins: 8 });
+      say(sw([
+        ["voce", (tot ? `Il Passo: ${tot} su 9 (ne servivano ${need}). ` : "") + "Ventuno gradini, uno dopo l'altro, e il ventunesimo è più morbido degli altri: non è un gradino, è l'inizio del Latte. Ti accoglie fino al ginocchio, tiepido, come un bagno già pronto." + (m.length ? " " + m.join(" · ") + "." : "")],
+        ["voce", "Dietro di te scendono le Lanterne, una per una, con le loro luci in mano: ognuna ha un colore diverso, e tutte insieme formano il corrimano. Più sotto, il Latte cambia suono: non è più sala d'attesa, è stadio."],
+        ["vl_teodora", "Io ti seguo. Sono l'ultima, come sempre. Ho l'orario in mano e il cuore fuori orario."],
+      ], BG.B), () => { setStep(N, 2); note("Sono sceso nel Latte, fino al Campo Sospeso. Il capitano Aurelio mi aspetta al centro del campo."); go("vl_sospeso", 3, 14); });
+    }
+
+    // ---- il Campo Sospeso: i giocatori del 6:43
+    const PL = {
+      vl_duilio: { m: "Quella sera avevo promesso a mia sorella di tornare per cena. Il minuto è sospeso e la cena pure: da qualche parte c'è un arrosto in una pentola, tenuto in caldo da ventisei anni. Spero sia venuto bene.", ready: "Eccomi al posto mio: a destra, dalla parte della panchina. Dall'altra parte c'è Sasso, che fa lo stesso lavoro con più cuore.", mid: "Il piede sinistro lo consumo prima: pensa lui. Il destro corre. Funziona così da quando avevo sette anni e un pallone più grande di me.", post: "Sai che cosa farò quando finisce? Telefono a mia sorella. Se il telefono esiste ancora. Se c'è ancora mia sorella. Se non risponde, mangio l'arrosto in memoria." },
+      vl_sasso: { m: "Sulla schiena ho scritto «aspettatemi»: l'ho scritto io, a pennarello, quella mattina. Arrivavo sempre ultimo ai cancelli e volevo evitare discussioni. Oggi, per la prima volta, mi hanno aspettato davvero.", ready: "A sinistra, lato cuore, come da regolamento. Dall'altra parte il Duilio, che dice di essere il più bello e non ha ancora dimostrato niente.", mid: "Se vinciamo o perdiamo non mi interessa: mi interessa arrivare in fondo al minuto con tutti gli amici. L'ultima volta che ho corso così, non ero in ritardo.", post: "Aspettatemi, ho scritto. Ho aspettato io, a dire il vero, ventisei anni. Ma va bene: l'ultimo ad arrivare è quello che sa meglio che ne è valsa la pena." },
+      vl_pio: { m: "La maglia piegata in tre l'ha piegata mia moglie, la sera prima. Mi aspetta con la bandiera, dice sempre. Se ha ancora la bandiera, e se sa ancora il mio numero.", ready: "In mezzo, al mio posto: da qui vedo tutto e non devo correre dietro a niente. È il segreto dei difensori centrali e dei lampioni.", mid: "Un difensore centrale è uno che si fida del compagno dietro. Io, dietro, avevo Berto. Mi fido ancora. Quando sono i ragazzi a fidarsi di me, mi cade la maglia.", post: "Se vedi una signora con una bandiera, a Vallombra, dille che il Pio è arrivato in ritardo. Lei capirà: gli orari erano sempre il suo ramo." },
+      vl_nando: { m: "Il biglietto del tram di un tram che non esiste più: lo tengo per ricordare che anche le cose finite hanno un orario. Il tram ha fatto l'ultima corsa il giorno dopo la finale. Sono sicuro che quel giorno fosse in orario.", ready: "Davanti a Duilio, dalla parte della panchina. Gino qui davanti a Sasso, che mastica e non parla. Siamo una linea, il centrocampo: una frase a due punte.", mid: "Il mediano è quello che passa la palla e non viene mai citato nel racconto. Mi va bene così. Mi ricordano come «quello che ha passato la palla a Lampo», ed è un epitaffio dignitoso.", post: "Mi sono ricordato il numero di quel tram. Il 4. Sono ventisei anni che dicevo il 3. Non cambia niente, ma ci tenevo." },
+      vl_gino: { m: "La gomma alla menta è quella di ventisei anni fa. Non perde sapore: è un ottimo segno e un pessimo presagio. Dovrei buttarla e invece le sono affezionato.", ready: "A sinistra, davanti a Sasso, dalla parte delle tribune. Nando alla mia destra, che non parla: e fa bene, io ho la gomma.", mid: "Sono il tipo che quando si emoziona mastica più forte. Guarda: sono al massimo regime. Qui sotto la mandibola ha una sua dignità.", post: "La gomma l'ho sputata. Dopo ventisei anni. Si è sciolta nell'aria come un pensiero. Ho un buco in bocca, e mi piace." },
+      vl_oreste: { m: "La matita sotto il colletto è per le formazioni. Ho scritto quella di quella sera cento volte e adesso non la ricordo più: è una delle ragioni per cui non ho gridato «aspettate». Chiedi ai cinque della difesa e della mediana: loro sanno dove stanno. Io so dove stanno gli altri.", ready: "La formazione è a posto. Per la prima volta in ventisei anni l'ho scritta e coincide con quella vera. Lo segno col pollice in su.", mid: "Appunti dell'intervallo: «Il Campione tira con il nome del tiro. Mirella ha ragione, bisogna passarla. Aurelio ha una voce che gli torna». Tre righe, e sono le tre più importanti.", post: "Ho cancellato la formazione. Ne scrivo una nuova: «Il giorno dopo». Niente nomi: solo orari." },
+      vl_mirella: { m: "Il fulmine piccolo sul petto l'ho ricamato io, storto. Palla a me, palla a me: lo dico da ventisei anni. Una volta qualcuno la dovrà pur passare, no?", ready: "Sono pronta sulla fascia. Se mi passano la palla, giuro che la passo anche io. Almeno una volta nella vita.", mid: "Ho una cosa da dirti: il tuo «{tiro}» ha un nome bello. Chiamalo come vuoi, ma tiralo piano: la porta è di nebbia, e si disfa.", post: "Mi hanno passato la palla. Tre volte. Io l'ho passata. Una volta nella vita, dicevo, e ne sono venute tre: è la prova che il Latte conta male." },
+      vl_tullio: { m: "Il colletto sporco di rossetto: un bacio fatto prima della finale, per scaramanzia. Non ricordo come si chiamasse lei, ricordo il profumo. Mi basterebbe sapere se ha avuto fortuna con il geometra.", ready: "Centravanti al mio posto. Se la palla arriva, segno; se non arriva, protesto con grazia. È il mio stile.", mid: "Sai quanti gol ho segnato in ventisei anni? Zero. Sai quanti ne ho sbagliati? Zero. Il Latte non ha statistiche, ma ha una grazia per i centravanti.", post: "Una lettera, dopo: voglio scriverle una lettera. «Gentile signora, il bacio ha funzionato. Il resto no, ma il bacio sì». È già una frase decente." },
+    };
+    function giocatore(id) {
+      const s = S(), ph = PH(), p = PL[id], nm = NAMES[id], f = has("form_ok");
+      if (!p) return done();
+      if (s <= 2) return say(sw([[id, "Parla prima col capitano, ragazzo: ha un discorso da farti e lo prepara da ventisei anni."]], BG.S), done);
+      if (ph >= 2) return say(sw([[id, T(p.post)]], BG.S), done);
+      if (ph === 1) return say(sw([[id, T(p.mid)]], BG.S), done);
+      if (f) return say(sw([[id, T(p.ready)]], BG.S), done);
+      if (CLUES[id]) {
+        const first = !has("fc_" + id.slice(3));
+        F.set("fc_" + id.slice(3), true);
+        const L = [[id, first ? p.m : "Te l'ho detto, e te lo ripeto: " + CLUES[id]]];
+        if (first) L.push([id, CLUES[id]]);
+        return say(sw(L, BG.S), () => { if (first) toast(`Indizi sulla Formazione: ${heard().length} su 5`); done(); });
+      }
+      say(sw([[id, T(p.m)]], BG.S), done);
+    }
+    function berto() {
+      const s = S(), ph = PH();
+      if (s <= 2) return say(sw([["vl_berto", "Il capitano ti vuole parlare. Io sto qui, a guardare la porta: ho ventisei anni di abitudine."]], BG.S), done);
+      const gi = F.get("fosco", "su") === "giu";
+      const L = ph >= 2 ? ["Ho parato tutto. Tranne i cinque rigori del ragazzo: quelli sono sacri e stanno nei miei sogni.", "Finisce? Finisce. (si sfila un guanto, piano) Non pensavo che avrei provato sollievo. Pensavo di provare vuoto. Invece è come svuotare una tasca: leggero, e si sente il peso di quello che c'era."]
+        : ph === 1 ? ["Non ho una fascia, ho dieci dita fasciate. A porta mia non entra niente senza lasciare il biglietto.", gi ? "Mio fratello sta in panchina, con lo straccio. Ogni tanto lo vedo che si asciuga gli occhi con il polso. Faccio finta di non vedere: è un nostro vecchio accordo." : "Mio fratello è venuto giù a trovarmi. Non è rimasto in panchina: è venuto in piedi, e si è fermato dietro la porta. Gli ho detto di non parlarmi mentre parlo. Ha fatto il segno con le dita: ha la mia scrittura anche nelle mani."]
+          : has("form_ok") ? ["Pronto. Dietro di me c'è la porta, davanti a me c'è la squadra, a destra c'è la panchina con mio fratello. In poche parole: ho tutto quel che mi serve, e non l'avevo mai capito.", "Ottantanove. Poi si dice novanta, e forse si dice anche «grazie»."]
+            : ["Ottantanove, uno a uno. Ora che sei qui sono ottantanove e mezzo.", "Il capitano spiegherà. Io ho una porta da guardare, e tu una maglia da prendere."];
+      say(sw([["vl_berto", chip(L)]], BG.S), done);
+    }
+    function foscoCampo() {
+      const ph = PH(), su_ = su(), prom = has("fosco_prom");
+      const L = ph >= 2 ? ["Ho il fazzoletto in mano. Non lo uso: lo tengo come una bandiera piccola.", "Mio fratello mi ha detto: «Sali con loro quando è finita». Gli ho risposto: «Anche tu». Ha detto: «Vedremo». Io conosco quel «vedremo», lo usava a tavola."]
+        : ph === 1 ? ["Mi ha detto che le dita gli fanno male solo quando non c'è partita. Gli ho detto che a me fanno male solo quando c'è. Siamo una famiglia ben bilanciata.", "Stai giocando bene. Lo dico da tredicesimo: l'unico che conosce a memoria la distanza fra chi gioca e chi guarda."]
+          : [su_ ? (prom ? "Una notte, ho detto. È questa. Poi risalgo con la formazione vera. Me l'ha dettata Oreste a matita." : "Sono sceso con le Lanterne. Non so se sia un permesso, un'abitudine o una benedizione. In ogni caso, sono qui.") : "Sono qui da tre capitoli: mi sembra una carriera. Mio fratello mi spiega i nodi, io gli spiego il tempo che passa.", "L'armadietto di Berto, quello che lucidavo: l'ho trovato qui, dietro la panchina. Non lo apro. Mi basta sapere che esiste."];
+      say(sw([["vl_fosco", chip(L)]], BG.S), done);
+    }
+    function cornelioCampo() {
+      const s = S(), ph = PH();
+      if (ph === 0 || s <= 2) return lant("vl_cornelio");
+      if (ph === 1 && !has("int7")) return say(sw([["vl_cornelio", "Tra poco, con la squadra, devo dire una frase. Brevissima. Una frase che ho scritto in ventisei anni e cancellato in ventisei anni. Aspetta che respiri."]], BG.S), done);
+      lant("vl_cornelio");
+    }
+    function rivale(id) {
+      const ph = PH(), s = S();
+      const L = {
+        vl_ombra: s <= 2 ? ["Ci hanno detto di vincere. Non ci hanno detto per chi.", "Noi siamo quello che la lumina ricorda di una squadra avversaria: un numero e una cortesia. Vi aspettiamo."]
+          : ph === 0 ? ["Io sono il Dieci, in grigio. Di solito siamo stati citati nel referto come «squadra B». Non ci offendiamo: ci siamo abituati. Ma questa volta vorremmo giocare bene.", "Regolamento delle Ombre: non si fa fallo di mano, non si fa fallo di ritardo e non si fa fallo di commozione, ma quest'ultimo nessuno lo rispetta."]
+            : ph === 1 ? ["Ci siamo accorti che anche noi vogliamo che finisca. Non abbiamo una casa, ma abbiamo l'idea di una casa, e basta già come fretta.", "Complimenti: giocate bene. Lo dico con un'invidia tutta italiana, cioè quasi sincera."]
+              : ["Il portiere ha detto di non aver visto il pallone. Io ho detto: «Avrà gli occhi pieni di nebbia». Tra ombre ci si capisce.", "Non è stato un gol: è stato un congedo. Grazie. Tornate a casa. (si ferma) Se ci riuscite, ricordate che c'erano anche loro, gli avversari."],
+        vl_ombra_n: ph >= 2 ? ["Nove d'Ombra. Mi tocco i capelli perché non ce li ho. Questa è la prima volta che ho avuto voglia di non farlo."] : ["Io non ho più la faccia, ma ho il vizio. Mi tocco i capelli, che non ho, quando sono nervoso. Oggi è tutta la partita."],
+        vl_ombra_p: ph >= 2 ? ["Ho i guanti gialli e le mani pulite. Non sono mai state così pulite."] : ph === 1 ? ["Sono il portiere. Faccio le parate che devo e ne sbaglio una a occhi aperti. Chi lo capisce è un gentiluomo."] : ["I guanti gialli sono l'unica cosa che la lumina ha ricordato bene. Per il resto, sono una nuvola con delle opinioni sul tuffo."],
+      }[id] || ["…"];
+      say(sw([[id, chip(L)]], BG.S), done);
+    }
+    function arbitro() {
+      const ph = PH();
+      const L = ph >= 2 ? ["Il fischio finale non è mio. Non l'ho mai fischiato, e non lo fischio adesso: è già stato fischiato una volta storto, e da me. Chi lo darà lo darà dritto. Io lo saprò dal rumore.", "Ho tenuto il fischietto in bocca per ventisei anni. L'ho tolto stanotte. Ho una voglia di parlare che non vi dico."]
+        : ph === 1 ? ["Il fischio dell'intervallo me lo hanno lasciato fare. È stato un fischio onesto: sono stato quasi felice. Quasi.", "Ho visto un fallo, laggiù. Lo giuro: l'ho visto. Non l'ho fischiato perché non c'era, ma l'ho visto lo stesso. È una novità per me."]
+          : ["Sono il direttore di gara. Anzi, l'eco del direttore di gara. Dirigo come ho diretto allora, ma senza busta: fa tutta un'altra partita.", "Il pallone è in gioco, l'ho detto io. Il fischio finale… quello aspetta chi di dovere. Non è paura. È prudenza: ho già sbagliato una volta, con quel fischietto."];
+      say(sw([["vl_arbitro", chip(L)]], BG.S), done);
+    }
+
+    // ---- Aurelio: il capitano
+    function aurelio() {
+      const s = S(), ph = PH();
+      if (s <= 2) return aurelioIncontro();
+      if (s === 3) return say(sw([["vl_aurelio", av("Prima la maglia, ragazzo. Sulla panchina, in basso a sinistra (SUD-OVEST) del campo: c'è un gancio con un cartellino. Poi parliamo di tutto il resto, che è tanto.")]], BG.S), done);
+      if (s === 4) return aurelioFormazione();
+      if (ph === 0) return aurelioInizio();
+      if (ph === 1) return has("int7") ? aurelioRientro() : intervallo();
+      if (ph === 2) return aurelioPallone();
+      aurelioFine();
+    }
+    function aurelioIncontro() {
+      const c = compId();
+      const L = [
+        ["voce", "Aurelio Brinzi ha le scarpe in mano. Le tiene appese per i lacci, come a piedi nudi sull'erba e sulla nebbia. Non ha ombra, ha una fascia da capitano un po' scucita e un modo di stare fermo che è tutto movimento trattenuto."],
+        ["vl_aurelio", av("Sei arrivato. Non sono mai stato bravo con le presentazioni: sono un dieci, non un cerimoniere. Dunque: questa è la squadra. Berto in porta, che già conosci; Pio, Duilio e Sasso dietro; Nando e Gino in mezzo; Oreste, Mirella e Tullio davanti. E io, che non so mai dove mettermi.")],
+        ["vl_berto", "Eccolo, il tredicesimo! Lo dicevo io che sarebbe arrivato in orario. (si ferma) In ritardo. Ma giusto."],
+        ["vl_aurelio", av("Ottantanovesimo minuto. Uno a uno. Palla al centro dopo un fallo che non c'era. L'arbitro ha fischiato storto e io ho gridato «la miniera!», e siamo scesi tutti. Ma la partita no: la partita è rimasta lì, a mezz'aria, ad aspettare qualcuno che la finisse. Il Latte è questo: l'eco di una partita non finita.")],
+        ["vl_aurelio", av("La lumina registra i momenti non finiti. Non è magia: è contabilità. Un minuto aperto è una pratica in sospeso, e le pratiche in sospeso, a Vallombra, durano.")],
+        ["vl_aurelio", av("Si finisce così: si gioca. Un minuto così lungo non si gioca in un colpo solo, e il regolamento del Latte lo divide in due tempi. Poi il pallone arriva dove deve arrivare, e uno di noi lo tira. L'ultimo tiro. E chi ci aiuta a tirarlo lo decidono quelli che ti hanno accompagnato fin qui, non io.")],
+        ["vl_teodora", "Non entro in campo. Non ci sono mai entrata: io stavo sulla banchina, con l'orario. Mi metto sulla linea. Se serve fischiare il tempo, ho l'orologio."],
+        ["vl_aurelio", av("Teo. Hai portato il registro. Sei rimasta uguale: sei peggiorata di pochissimo, e in meglio.")],
+        ["vl_teodora", "Smettila. Stavo per dirti che non ti trovo cambiato, ma è perché non sei cambiato di niente. (si sistema gli occhiali) Gioca. Poi parliamo: ho una colonna intera di cose da dirti, scritte a matita."],
+        [c, cl("Il capitano parla bene. Io, se mi mettessero a parlare, direi «bulloni» e poi starei zitta. Che cosa devo fare, io?", "Il capitano parla in modo concreto. Apprezzo. Io che cosa devo fare, nel suo modello?"), BG.S],
+        ["vl_aurelio", av("Tu, ragazzo, hai un lavoro solo, che si chiama tredicesimo. Prima di tutto: la maglia. Sulla panchina, in basso a sinistra, SUD-OVEST, c'è un gancio con un cartellino. L'ho lasciato per uno che sarebbe arrivato, e non ho mai saputo chi.")],
+        tl({ sicuro: "Allora la prendo. E poi giochiamo.", attento: "Un gancio, un cartellino, un nome che non c'era. Vado a vedere.", ironico: "Un capitano in fuorigioco da ventisei anni mi dà ordini sull'abbigliamento. Va bene: sono uno che ci tiene." }),
+      ];
+      say(sw(L, BG.S), () => { setStep(N, 3); note("Il capitano Aurelio mi ha spiegato il Minuto Sospeso: due tempi e un ultimo tiro. La maglia mi aspetta sulla panchina (SUD-OVEST)."); done(); });
+    }
+    function maglia() {
+      const s = S();
+      if (s < 3) return say(sw([["voce", "Una maglia bianca come una pagina, appesa a un gancio della panchina. Non è ancora il tuo turno: il capitano ha qualcosa da dirti prima."]], BG.S), done);
+      if (has("maglia7")) return say(sw([["voce", "Il gancio ora è vuoto, con il cartellino che ondeggia: «PER CHI ARRIVA». Il tuo nome, sul retro, si scalda ogni volta che passi."]], BG.S), done);
+      const old = F.get("kit", "") === "old", b = "vl_berto";
+      const L = [
+        ["voce", "Sul gancio, tra le maglie dei compagni di panca, ce n'è una bianca come una pagina, piegata male come fanno gli uomini con le cose importanti. Sul cartellino: «PER CHI ARRIVA.» Se lo giri, c'è una riga nuova in inchiostro di lumina: «PER {n} · N. {num}.»"],
+        ["voce", "La infili. Calza come se fosse stata messa via la sera prima: né larga né stretta, con la cucitura della spalla un po' più chiara dell'altra. Sul retro, a mezz'altezza, c'è già stampato un numero: il tuo. Il Latte, in questo, non sbaglia." + (old ? " La cucitura della tua maglia vecchia risponde con un filo di luce: sono fatte con lo stesso filo da pesca." : "")],
+        [b, "Ti sta come il '98 a Sasso, che vuol dire: perfetta e leggermente in ritardo. (sorride, con le dita fasciate) Benvenuto in squadra, {n}. Il tredicesimo non è chi viene dopo: è chi continua."],
+        ["vl_aurelio", av("Lo sapevo. Un numero in più non guastava mai. Adesso, per scherzo e per la verità, sei in squadra.")],
+        tl({ sicuro: "Sono pronto. Ho il numero, ho la squadra, ho il tempo.", attento: "Il numero è {num}. Lo stesso del cartellino. Lo stesso del filo. Niente avviene per caso, qui.", ironico: "Ventisei anni di attesa per una maglia che calza. Ho già avuto momenti peggiori con i negozi." }),
+      ];
+      say(sw(L, BG.S), () => { F.set("maglia7", true); setStep(N, 4); note("Ho indossato la maglia bianca col mio numero. Prima della partita Aurelio vuole che io schieri la squadra: gli indizi sono nei discorsi dei giocatori (Sasso, Pio, Duilio, Gino, Nando)."); done(); });
+    }
+
+    // ---- La Formazione (deduzione breve con aiuti progressivi)
+    function aurelioFormazione() {
+      const k = heard().length;
+      ask("vl_aurelio", `«Abbiamo un problema da ventisei anni: nessuno ricorda più dove stava. Siamo rimasti tutti nel mucchio del centrocampo, come un caffè con le briciole. Dobbiamo rimetterci in fila: tre dietro, due in mezzo. Tu hai ascoltato i cinque: dove va ciascuno?»`, [
+        { label: "Schiera la squadra", sub: `Indizi raccolti: ${k} su 5`, cls: "hot", fn: () => schiera([]) },
+        { label: "Ripassa gli indizi", sub: "Cosa hanno detto", fn: ripassa },
+        { label: "Cosa devo fare?", fn: () => say(sw([["vl_aurelio", av("Cinque posti: i tre dietro (lato ALTO, centro, lato BASSO) e i due in mezzo, davanti ai terzini. Chi sta dove lo dicono loro, ognuno a modo suo. Ascolta Sasso, Pio, Duilio, Gino e Nando, che sono vicino al cerchio di centrocampo. Oreste dice che i dettagli li sa lui. Io i dettagli li ho persi con la voce.")]], BG.S), done) },
+        { label: "Non ancora", fn: done },
+      ], BG.S);
+    }
+    function ripassa() {
+      const L = SOL.map((id) => (has("fc_" + id.slice(3)) ? `${NAMES[id]}: «${CLUES[id]}»` : `${NAMES[id]}: ancora da ascoltare`));
+      say(sw([["voce", "Appunti sulla Formazione.<br>" + L.join("<br>")]], BG.S), () => aurelioFormazione());
+    }
+    function schiera(pick) {
+      const i = pick.length;
+      if (i === 5) return verifica(pick);
+      const left = SOL.filter((id) => !pick.includes(id));
+      if (left.length === 1) return schiera(pick.concat(left));
+      const note_ = heard().map((id) => `${NAMES[id]}: «${CLUES[id]}»`).join("\n") || "Nessun indizio ancora: parla con i cinque.";
+      const picked = pick.map((id, j) => `${SLOTS[j][1]} → ${NAMES[id]}`).join(" · ");
+      ask("vl_aurelio", `«${SLOTS[i][1]}: chi ci mettiamo?»${picked ? "\n" + picked : ""}\n${note_}`, left.map((id) => ({ label: NAMES[id], fn: () => schiera(pick.concat(id)) })).concat([{ label: "Ricomincio da capo", fn: () => schiera([]) }, { label: "Aspetta, devo ascoltarli", fn: done }]), BG.S);
+    }
+    function verifica(pick) {
+      const ok = pick.filter((id, j) => id === SOL[j]).length;
+      if (ok === 5) return formazioneOk(false);
+      const f = F.add("fp_f", 1);
+      if (f >= 3) return say(sw([["voce", "Alla terza volta i cinque smettono di ascoltarti e fanno quel che il corpo sa. Sasso scatta a sinistra, Pio si pianta in mezzo, Duilio va a destra, Gino e Nando scivolano al loro posto come due chiavi in due serrature. La memoria dei piedi è più antica di quella della testa."], ["vl_oreste", "Annoto: «schierati dal corpo». Non è una formazione: è un'abitudine. Ed è la sola che conti."]], BG.S), () => formazioneOk(true));
+      const hint = f === 1 ? "Non ci siamo del tutto. Rileggi gli indizi: ognuno dice dove sta, uno rispetto a sé, uno rispetto agli altri." : "Più vicini: due o tre sono al loro posto. Parti da Pio, che sta in mezzo, e da Sasso, che sta dalla parte del cuore. Gli altri vengono da soli.";
+      say(sw([["voce", `${ok} al posto giusto su 5. I cinque si guardano, si spostano di un passo e si guardano di nuovo.`], ["vl_aurelio", av(hint)]], BG.S), () => ask("vl_aurelio", "«Riproviamo?»", [{ label: "Riprova", cls: "hot", fn: () => schiera([]) }, { label: "Ripassa gli indizi", fn: ripassa }, { label: "Un momento", fn: done }], BG.S));
+    }
+    function formazioneOk(auto) {
+      F.set("form_ok", true); setStep(N, 5);
+      const m = reward("vl_c7_form", { coins: 8 });
+      say(sw([
+        ["voce", (auto ? "" : "Cinque su cinque. ") + "La squadra si scioglie dal mucchio come un nodo che trova il filo. Sasso a sinistra, Pio in mezzo, Duilio a destra; Gino e Nando davanti a loro; Oreste, Mirella e Tullio avanti, con Aurelio al centro, le scarpe in mano. Il campo, finalmente, ha una forma." + (m.length ? " " + m.join(" · ") + "." : "")],
+        ["vl_oreste", "(guarda la formazione e sorride come uno che ha ritrovato una matita) Sta venendo bene. Per la prima volta in ventisei anni coincide con quella che avevo in testa."],
+        ["vl_aurelio", av("Ecco una squadra. Quella vera, quella che abbiamo detto di essere. Mi mancavi, formazione. Mi mancavi anche tu, ragazzo, benché non ti avessi mai incontrato.")],
+        ["voce", "Sul tabellone, il 9 si gira a controllare ancora una volta e poi resta fermo. Gli avversari, in grigio, si dispongono di fronte, con una lentezza gentile. Sul prato comincia a esserci il rumore di una partita che sta per succedere."],
+      ], BG.S), () => { note("Squadra schierata: Sasso a sinistra, Pio in mezzo, Duilio a destra, Gino e Nando a centrocampo. Aurelio aspetta il fischio d'inizio."); done(); });
+    }
+
+    // ================= la partita del Minuto: due tempi forzati dalla storia (Calcio d'azione 3v3 sul campo «sospeso» + Action Soccer 2D HD)
+    const VENUE_SOSP = { ads: [["COPPA DEI TRE VERSANTI '98", "#e9a64a"], ["MINIERA DELLA LUCE", "#7fe3d0"], ["STAMBECCHI", "#1b2f7a"], ["89:00 · SOSPESO", "#2a2f48"]], crowd: ["#7fe3d0", "#bff7ea", "#2a2f48", "#e9a64a", "#f2f6ff"], ground: ["#2b6a68", "#347571"], line: "#bff7eacc", patches: "rgba(190,255,240,.34)", tint: "rgba(90,235,210,.1)", glow: "190,255,240", fx: { spd: 0.98 } };
+    const edge7 = () => Math.max(0.01, 0.085 - 0.004 * lanN() - (has("form_ok") ? 0.01 : 0) - 0.01 * Math.min(3, F.get("m7_try", 0)));
+    const ombre = (t, st, e) => ({ vs: "le Ombre del '98", name: "Le Ombre del '98", color: "#8a90b0", defs: [["Terzino d'Ombra", t(st.drib * 0.8 * (1 + e))], ["Centrale d'Ombra", t(st.drib * 0.86 * (1 + e))], ["Mediano d'Ombra", t(st.drib * 0.82 * (1 + e))]], atk: [["Nove d'Ombra", t(st.tiro * 0.9 * (1 + e))], ["Dieci d'Ombra", t(st.tiro * 0.78 * (1 + e))]], gk: ["Portiere d'Ombra", t(st.tiro * 0.95 * (1 + e))], power: t(st.tiro * 0.8 * (1 + e)), special: ["PASSAGGIO A VUOTO", t(st.tiro * 1.1 * (1 + e))] });
+    const gk7 = () => F.get("gk7", "berto");
+    const tot7 = () => [F.get("m7a_a", 0) + F.get("m7b_a", 0), F.get("m7a_b", 0) + F.get("m7b_b", 0)];
+
+    function aurelioInizio() {
+      ask("vl_aurelio", av("«Palla al centro. Primo tempo: i primi trenta secondi del minuto, che qui ne valgono quaranta. Ho un fischio di cortesia dell'arbitro e una squadra che aspetta. Sei pronto?»"), [
+        { label: "Fischio d'inizio", sub: "Primo tempo · Calcio d'azione 3 contro 3", cls: "hot", fn: primoTempo },
+        { label: "Un momento", fn: done },
+      ], BG.S);
+    }
+    function primoTempo() {
+      const first = !has("m7_ini"); F.set("m7_ini", true);
+      const go_ = () => X.playMatch({
+        id: "vl7a", alt: "az", force: true, azPitch: "sospeso", weather: "vento", venue: VENUE_SOSP, homeKit: ["#1b2f7a", "#e9a64a"], chap: "Vallombra · Il Minuto Sospeso · 1° tempo", mate: "Aurelio", squad: ["Pio", "Duilio", "Sasso"],
+        intro: `Il Minuto Sospeso, primo tempo: Stambecchi del 6:43 contro le Ombre del '98, al Campo Sospeso. Tabellone: 89:00, uno a uno. Il pallone è a mezz'aria, il fischio d'inizio è un fischio di cortesia. Aurelio gioca con te.`,
+        team: (t, st) => ombre(t, st, edge7()),
+        done: (r) => { F.set("m7a_a", r.a); F.set("m7a_b", r.b); F.set("ph7", 1); note(`Minuto Sospeso, primo tempo: ${r.a}–${r.b}.`); halftime(); },
+      });
+      if (!first) return go_();
+      say(sw([
+        ["voce", "Il pallone, a mezz'aria sopra il cerchio di centrocampo, trema come una goccia sul punto di cadere. Dall'altra metà campo, le Ombre si dispongono con una cortesia che non ha niente di inquietante: sembrano ospiti a cena."],
+        ["vl_arbitro", "(con il fischietto in bocca, parla attraverso i denti) Ci tengo a dirlo: oggi fischio dritto. Corto. Corto. Corto. Tre volte corto: è l'unico modo che conosco per non sbagliare."],
+        ["vl_aurelio", av("Squadra: tre dietro, due in mezzo, tre davanti e io che non so mai dove stare. Ragazzo, tocca a te: la palla ti ascolta, l'arbitro ti aspetta e il Latte ci guarda. Nome del tiro, in campo.")],
+        tl({ sicuro: "Palla a me. «{tiro}» è pronto.", attento: "Quaranta minuti in trenta secondi: ritmo breve, passaggi corti, un occhio al tabellone.", ironico: "Il primo tempo dell'89° minuto. Il regolamento di questa partita ha più sfumature di un orario di Teodora." }),
+      ], BG.S), go_);
+    }
+    function halftime() {
+      const a = F.get("m7a_a", 0), b = F.get("m7a_b", 0);
+      const lead = a > b ? "Gli Stambecchi del 6:43 sono avanti" : a < b ? "Le Ombre sono avanti" : "Si va all'intervallo in parità";
+      say(sw([
+        ["voce", `Fischio di cortesia: ${a}–${b} nel primo tempo. ${lead}. Il tabellone, imperturbabile, dice ancora 89:00: ha una concezione sua del tempo, ed è l'unica a cui si può credere.`, BG.S],
+        ["vl_noemi", a > b ? "Qui Radio Nebbia, dal Campo Sospeso: gli Stambecchi del '98 sono in vantaggio! Se qualcuno ci ascolta: nessun vantaggio vale come questo, e nessun minuto è stato mai così lungo." : a < b ? "Qui Radio Nebbia: le Ombre in vantaggio, ma con una cortesia così spiccata che sembra quasi una scusa. Il pubblico, di lumi, applaude con la luce." : "Qui Radio Nebbia: parità all'intervallo. Il pubblico propone di dichiarare la partita «sospesa per pareggio». Faccio presente che lo è già, da ventisei anni."],
+        ["voce", "Sul bordo del campo, le due squadre si siedono a due panche di distanza e si guardano, in silenzio, come si guardano i vicini di una sala d'attesa che aspettano lo stesso treno."],
+      ], BG.S), () => { setStep(N, 5); note("Intervallo del Minuto Sospeso. Per proseguire parla con Aurelio, al centro del Campo."); intervallo(); });
+    }
+    // ---- l'intervallo: la confessione di Cornelio, il portiere del secondo tempo e la domanda di Aurelio
+    function intervallo() {
+      if (!has("int_a")) return confessione();
+      if (!has("int_b")) return portiere();
+      if (!has("int_c")) return domandaAurelio();
+      F.set("int7", true); done();
+    }
+    function confessione() {
+      const t = F.get("cornelio_t", "silenzio");
+      const pre = t === "verita" ? "Lo sa già il ragazzo, e lo dirò al paese: ho cominciato stamattina in piazza, con diciotto persone e due addormentati. Ora lo dico a voi, che siete quelli a cui lo devo davvero."
+        : t === "comp" ? "Mi hanno detto che avevo vent'anni e avevo paura. È vero. Ma ora ne ho quarantasei e non è più una scusa: è un fatto, e i fatti vanno detti ad alta voce."
+          : "Qualcuno si è seduto accanto a me, una volta, senza dire niente. Mi ha fatto più bene di mille discorsi. Ma il silenzio non basta: ora devo parlare.";
+      say(sw([
+        ["voce", "Sulla panchina, Cornelio si è alzato. Ha ancora la fascia da sindaco sotto il cappotto e le mani vuote; senza discorso, sembra un uomo che ha perso le chiavi di casa. La squadra, a poco a poco, gli si dispone intorno senza dire una parola."],
+        ["vl_cornelio", "Berto. Aurelio. Ragazzi. Ho un discorso da farvi e non l'ho scritto. È la prima volta in tre mandati."],
+        ["vl_cornelio", "Io ero il dodicesimo. Quello in panchina, con i guanti tenuti al caldo. Quando Aurelio ha gridato «la miniera» voi siete scesi. Io avevo in mano il fischietto, e non l'ho usato. Mi sono nascosto in un armadietto per due ore, e quando sono uscito ho lasciato che dicessero che eravate scappati. Ventisei anni. Ho fatto il sindaco al posto vostro."],
+        ["vl_cornelio", pre],
+        ["voce", "Nessuno parla. Berto si toglie lentamente un guanto, e la mano fasciata, nuda, sembra più piccola di come la ricordasse. Aurelio ha il viso che hanno i capitani quando vedono qualcuno prendersi in carico una cosa loro."],
+        ["vl_berto", "Corné. (la voce gli si incrina sul nome) Il portiere di riserva non gioca mai: tiene caldo il posto. Tu hai tenuto caldo il mio per ventisei anni. E hai fatto il sindaco malissimo, bisogna dirlo. Ma il posto è caldo."],
+        ["vl_aurelio", av("Ti ho dato un compito che non potevi fare. Sentire il botto da fuori e fischiare: è come chiedere a un campanile di correre. L'errore è stato mio, Corné. Il fischio serviva a farci coraggio, non a salvarci. Non puoi fischiare per chi hai già visto scendere.")],
+        ["vl_cornelio", "…Non so cosa dire. Di solito è il contrario: ho tanto da dire e nessuno a cui. (si schiarisce la gola) Posso soltanto chiedere una cosa. Preferirei prenderlo in mano, il pallone. È più la mia posizione."],
+        ["voce", "Il silenzio dopo la battuta è il più bello dei silenzi: quello in cui tutti, nello stesso momento, decidono di non ridere ancora. Ride per primo Pio, a bassa voce. Poi ridono tutti, e il Latte, che non è abituato, ride un po' in ritardo."],
+      ], BG.S), () => { F.set("int_a", true); F.set("cor7", true); note("Cornelio ha confessato la sua colpa alla squadra del '98, in presenza di Berto e Aurelio. Si è sentito rispondere: «il posto è caldo»."); portiere(); });
+    }
+    function portiere() {
+      ask("voce", "«Chi va in porta nel secondo tempo?» Aurelio guarda te: l'ultima parola, in squadra, è sempre del tredicesimo.", [
+        { label: "Berto: la porta è sua", sub: "Il portiere di sempre", fn: () => scegliPortiere("berto") },
+        { label: "Cornelio: ha aspettato abbastanza", sub: "Il dodicesimo entra, ventisei anni dopo", cls: "hot", fn: () => scegliPortiere("corne") },
+        { label: "Decidano loro", sub: "Come si fa in famiglia", fn: () => scegliPortiere(F.get("cornelio_t", "silenzio") === "verita" ? "corne" : "berto") },
+      ], BG.S);
+    }
+    function scegliPortiere(w) {
+      F.set("gk7", w); F.set("int_b", true);
+      const a = w === "corne" ? [
+        ["vl_berto", "(si sfila i guanti, li porge, con un nodo a farfalla ancora fatto) Prendi. Sono caldi. Non sono fortunati, ma sono onesti: parano quel che possono."],
+        ["vl_cornelio", "…Io? (guarda i guanti come si guarda una lettera che aspettavi da trent'anni) Ho ventisei anni di allenamento a stare fermo. Posso provare a muovermi."],
+        ["voce", "Cornelio indossa i guanti. Gli vanno stretti alle dita e larghi al cuore. Berto si siede in panchina con l'aria di chi cede una poltrona alla persona giusta, e si fascia le dita dell'altra mano, per abitudine."],
+      ] : [
+        ["vl_berto", "Grazie. (si rimette il guanto) Ma ti tengo i guanti da parte, Corné. Per il prossimo ventisei anni, se sarà il caso."],
+        ["vl_cornelio", "Va bene così. Faccio il dodicesimo con tutto l'onore che si può fare, in panchina, a guardare. È un onore anche quello: lo so, ho esperienza."],
+        ["voce", "Berto torna sulla linea con la schiena dritta. Cornelio si siede dov'era, ma non guarda più per terra: guarda il campo, e ha l'espressione di uno che ha finalmente il posto buono."],
+      ];
+      say(sw(a, BG.S), domandaAurelio);
+    }
+    function domandaAurelio() {
+      say(sw([
+        ["vl_aurelio", av("Ti devo dire una cosa, prima del secondo tempo. Quando il fischio arriva, la lumina si spegne e noi con lei. Oppure qualcuno resta ad accenderla. Io ho una voce sola da spendere, quando mi torna, e voglio spenderla bene.")],
+        ["vl_teodora", "(a bassa voce, dalla linea, senza smettere di guardare il registro) Non scrivere niente, io non scrivo niente. Ma ascolto."],
+        ["vl_aurelio", av("Tu, {n}, cosa faresti al posto mio?")],
+      ], BG.S), () => ask("vl_aurelio", av("«Tu, cosa faresti?»"), [
+        { label: "«Resta, se vuoi. La lumina ha bisogno di un lampionaio.»", sub: "Tenere accesa la luce", fn: () => rispostaAur("resta") },
+        { label: "«Vai. Hai già aspettato abbastanza.»", sub: "Il minuto finisce anche con te", fn: () => rispostaAur("parte") },
+        { label: "«Non so se credo a tutto questo. Penso ai vivi, al club.»", sub: "La squadra che c'è", fn: () => rispostaAur("vivi") },
+        { label: "«Decidi tu. Io gioco.»", sub: "Lasciargli la scelta", fn: () => rispostaAur("aperto") },
+      ], BG.S));
+    }
+    function rispostaAur(w) {
+      F.set("aur7", w); F.set("int_c", true); F.set("int7", true);
+      const a = w === "resta" ? [
+        ["vl_aurelio", av("Un lampionaio. (ride, per la prima volta senza voce) Non è un cattivo mestiere. Ho acceso quarantamila lampioni in ventisei anni e non ne ho mai sbagliato uno. Ma ricordati: non è una promessa. È un'ipotesi con le scarpe in mano.")],
+        ["vl_teodora", "(a mezza bocca) Le ipotesi, a matita."],
+      ] : w === "parte" ? [
+        ["vl_aurelio", av("Hai ragione. Ho aspettato abbastanza. (guarda Teodora, che finge di guardare il registro) Ho una sorella che tiene un'agenda per me da ventisei anni. Voglio leggerla di giorno.")],
+        ["vl_teodora", "(si volta di scatto) Ti ci vorrà un bel po'. Ci sono le note a margine."],
+      ] : w === "vivi" ? [
+        ["vl_aurelio", av("Capisco. Il Latte è una cosa da vecchi, e io lo sono, a modo mio. Ma i vivi hanno un club che sta in piedi con i termos e la cocciutaggine. Se non finiamo, quel club non ha un futuro: ha un fantasma. Giochiamo, allora, per chi c'è.")],
+        ["vl_pio", "Giusto. Anche noi, quando eravamo vivi, giocavamo per quelli che erano in tribuna."],
+      ] : [
+        ["vl_aurelio", av("Giusto. Il fischio lo sento già: lo capirò a tempo. Giochiamo.")],
+      ];
+      say(sw([...a,
+        ["voce", "Sul tabellone, la riga del tempo non cambia, ma sotto, in piccolo, compare una scritta che prima non c'era: «2º TEMPO». Le due squadre si alzano dalle panche, una dopo l'altra, senza fretta."],
+      ], BG.S), () => { note("All'intervallo Aurelio mi ha chiesto cosa farei al suo posto: " + (w === "resta" ? "gli ho detto di restare ad accendere la lumina." : w === "parte" ? "gli ho detto di andare, di finire il minuto con noi." : w === "vivi" ? "gli ho detto che penso ai vivi, al club che c'è." : "gli ho lasciato la scelta.")); done(); });
+    }
+    function aurelioRientro() {
+      const g = gk7() === "corne" ? "con Cornelio in porta" : "con Berto in porta";
+      ask("vl_aurelio", av(`«Secondo tempo, ${g}. La squadra è rientrata, le Ombre pure. Quando vuoi.»`), [
+        { label: "Torna in campo", sub: "Secondo tempo · Action Soccer 2D HD", cls: "hot", fn: secondoTempo },
+        { label: "Prima parlo con la panchina", fn: done },
+      ], BG.S);
+    }
+    function secondoTempo() {
+      const a = F.get("m7a_a", 0), b = F.get("m7a_b", 0), cor = gk7() === "corne", re = F.get("m7_try", 0) > 0;
+      X.playMatch({
+        id: "vl7b", alt: "hd", force: true, weather: "vento", venue: VENUE_SOSP, homeKit: ["#1b2f7a", "#e9a64a"], chap: "Vallombra · Il Minuto Sospeso · 2° tempo", mate: "Aurelio", squad: [cor ? "Cornelio" : "Berto", "Pio", "Duilio"],
+        intro: `Il Minuto Sospeso, secondo tempo (89:30 e oltre). Primo tempo: ${a}–${b}. ${re ? "Il minuto si è riavvolto: stavolta lo conosci meglio. " : ""}In porta ${cor ? "Cornelio, ventisei anni dopo, con i guanti di Berto" : "Berto, con le dita fasciate"}. Aurelio gioca con te.`,
+        team: (t, st) => ombre(t, st, edge7() + 0.005),
+        done: (r) => { F.set("m7b_a", r.a); F.set("m7b_b", r.b); F.set("ph7", 2); note(`Minuto Sospeso, secondo tempo: ${r.a}–${r.b}.`); dopoSecondo(); },
+      });
+    }
+    function dopoSecondo() {
+      const [A, B] = tot7(), win = A > B, draw = A === B;
+      F.set("m7_win", win);
+      const m = win ? reward("vl_c7_gara", { coins: 12 }) : [];
+      const L = [
+        ["voce", `Il secondo tempo si chiude con un fischio di cortesia: ${A}–${B} sui due tempi.${m.length ? " " + m.join(" · ") + "." : ""} Il tabellone non cambia (89:00, uno a uno), ma i lumi delle tribune si accendono tutti insieme e si spengono tutti insieme, come un applauso fatto di fiato.`, BG.S],
+        win ? ["vl_ombra", "Complimenti: è stata una buona partita. Noi la ricordavamo diversa. Peggiore, e nostra. Questa è migliore, ed è vostra: la teniamo cara."]
+          : draw ? ["vl_ombra", "Pari. Un pari al minuto 89 non esiste, ma noi lo inventiamo volentieri: ci siamo divertiti. Non succedeva dai tempi dei supplementari del 1991."]
+            : ["vl_ombra", "Abbiamo vinto, e ci sembra di aver rubato. Ci hanno spiegato che nel Latte la sconfitta non esiste: esiste il pallone che torna. Prego."],
+        ["vl_aurelio", av(win ? "Non basta vincere. Un minuto sospeso non si chiude con un risultato: si chiude con un gesto. Quello l'ho tenuto per ultimo: è il tiro che nessuno di noi ha mai tirato." : "Non è una sconfitta, ragazzo. Nel Latte non esistono. Esiste un minuto ancora da finire, e un gesto che lo finisce. Quello non dipende dai tempi: dipende da chi ti accompagna.")],
+      ];
+      say(sw(L, BG.S), () => { setStep(N, 6); if (win) return tiroPronto(); ask("vl_aurelio", av("«Il minuto si riavvolge, se vuoi: puoi rigiocare il secondo tempo. Oppure lo lasciamo andare, e il pallone torna dov'era.»"), [
+        { label: "Rigioca il secondo tempo", sub: "Il minuto si riavvolge · Action Soccer 2D HD", fn: () => { F.add("m7_try", 1); F.set("ph7", 1); secondoTempo(); } },
+        { label: "Lascia andare il minuto", sub: "Vai al Tiro del Minuto", cls: "hot", fn: tiroPronto },
+      ], BG.S); });
+    }
+
+    // ---- il Tiro del Minuto: il coro delle Lanterne e un tempismo con aiuti progressivi
+    function aurelioPallone() { tiroPronto(); }
+    function tiroPronto() {
+      F.set("ph7", 2);
+      ask("vl_aurelio", av("«Ottantanove e cinquantanove. Il pallone è tornato a mezz'aria, all'altezza dei tuoi occhi. Il tiro che nessuno di noi ha tirato, in ventisei anni, è qui. Tuo, se lo vuoi.»"), [
+        { label: "Prendi il pallone", sub: "Il Tiro del Minuto · 3 prove di tempismo", cls: "hot", fn: tiroVia },
+        { label: "Un momento di respiro", fn: done },
+      ], BG.S);
+    }
+    const CORO = {
+      vl_teodora: "Il registro è aperto alla riga giusta. Non scrivo niente: guardo.",
+      vl_noemi: "(a mezza voce, nel microfono) Qui Radio Nebbia: in diretta, l'ultimo secondo. Meteo: sospeso, con possibilità di fine.",
+      vl_cornelio: "(stringe i guanti) Se serve una parata, io ci sono. Dall'altra parte, per una volta.",
+      vl_fosco: "(con lo straccio in mano) Ho spolverato la porta, per dare luce a chi tira.",
+      vl_berto: "(dalla linea) Dita aperte, polso morbido. Il nodo a farfalla non ha mai tradito nessuno.",
+      vl_mirtilla: "(alza il termos) Offre la casa! Se non entra, la casa offre una seconda cioccolata.",
+      vl_ottavia: "(conta a bassa voce) Uno, due… e tutti. Tutti, tutti.",
+      vl_gedeone: "(sulle dita) Dodici, tredici… ci sei, ci siamo. Il conto torna, finalmente.",
+      vl_bianca: "(mostra la chiave inglese) Serrati tutti i bulloni. Ogni bullone al suo posto, ogni tiro al suo.",
+      vl_agata: "(posa la bussola sul prato) L'ago indica la porta. Non è un'opinione.",
+      vl_remo: "(si toglie gli occhiali da sole, con rispetto) Tira, che guardo. Dal vivo, senza lenti.",
+      vl_ettore: "(spegne la telecamera) Non filmo. Ascolto, che è meglio.",
+    };
+    function coro() {
+      const lan = LAN().filter((id) => CORO[id]);
+      const lines = lan.map((id) => [npcId(id), CORO[id]]);
+      if (lan.length >= 12) lines.push(["voce", "Dodici Lanterne su dodici. Intorno a te si forma una catena di mani, di termos, di chiavi inglesi e di quaderni: non c'è un posto vuoto. Nel Latte, un fatto simile fa un rumore preciso: è il silenzio dei posti che non mancano."]);
+      else lines.push(["voce", `${lanN()} Lanterne su dodici. Quelle accese ti stanno intorno, una per una, con le loro luci in mano: dove mancano, la nebbia resta più fitta, ma non per questo vuota.`]);
+      return lines;
+    }
+    function tiroVia() {
+      const first = !has("tiro_ini"); F.set("tiro_ini", true);
+      const L = first ? [
+        ["voce", "Il pallone è fermo davanti a te, a mezz'aria, e per la prima volta da ventisei anni sembra avere paura di cadere. La porta di rete luminosa, a EST, è ferma come un respiro trattenuto. Il portiere d'ombra, con i guanti gialli, ti guarda: non c'è ostilità. C'è aspettativa."],
+        ...coro(),
+        ["vl_aurelio", av("Quando vuoi. Non tirare per vincere: tira per finire. È una cosa diversa, e ci vogliono ventisei anni per capirlo.")],
+        tl({ sicuro: "«{tiro}». Adesso.", attento: "Un secondo, un pallone, una porta, dodici mani. Ho tutto quello che mi serve.", ironico: "Il tiro che nessuno ha tirato in ventisei anni, e lo tiro io. Se sbaglio, mi cercherete in una nuvola." }),
+      ] : [["vl_aurelio", av("Il pallone è sempre lì, a mezz'aria. Quando vuoi.")]];
+      say(sw(L, BG.S), tiroProva);
+    }
+    function tiroProva() {
+      const f = F.get("tr_f", 0);
+      if (f >= 3) return say(sw([["voce", "Alla terza volta il pallone si stufa di aspettare e ti torna sul piede da solo, come un cane che riporta un bastone. Le Lanterne, una dopo l'altra, appoggiano la mano sul tuo braccio: il tiro lo tirano insieme, e nessuno saprà mai di chi sia stata la caviglia."], ["vl_teodora", "Annoto: «tirato dalle Lanterne». Sul registro è una riga come le altre. Nel Latte è la più lunga."]], BG.S), () => tiroOk(true));
+      const need = Math.max(4, Math.min(8, 8 - Math.floor(lanN() / 4) - (has("m7_win") ? 1 : 0) - f));
+      tmg("Il Tiro del Minuto", 3, "vl_sospeso", (k) => (k === 3 ? "<b>" + T("{tiro}") + "!</b> Il pallone parte da mezz'aria con un suono come di vetro che canta." : k === 2 ? "<b>Quasi.</b> Il pallone sfiora il palo e torna indietro: nel Latte, il pallone che va lungo torna." : "<b>Alto.</b> Il pallone sale tra i lumi della tribuna, ci pensa un momento e ti ridiscende ai piedi, con un'aria di scusa."), (pts) => {
+        const tot = sumPts(pts);
+        if (tot >= need) return tiroOk(false, tot, need, f);
+        F.add("tr_f", 1);
+        const f2 = F.get("tr_f", 0);
+        say(sw([["voce", `Il Tiro del Minuto: ${tot} su 9 (ne servivano ${need}). Il pallone ti torna ai piedi: nel Latte il pallone che va lungo ritorna.`], ["vl_aurelio", av(f2 === 1 ? "Ancora. Hai tutto il minuto, che non finisce. Respira, ragazzo, e ascolta la voce di chi ti sta dietro." : f2 === 2 ? "Ancora una. Se non entra, ci mettiamo le mani insieme: ho già avvisato gli altri." : "Ci pensiamo noi.")]], BG.S), () => ask("vl_aurelio", av("«Riproviamo?»"), [{ label: "Riprova il tiro", sub: "Le Lanterne ti aiutano di più", cls: "hot", fn: tiroProva }, { label: "Un momento di respiro", fn: done }], BG.S));
+      });
+    }
+    function tiroOk(auto, tot, need, f) {
+      const m = reward("vl_c7_tiro", { coins: 10 });
+      F.set("ult7", auto ? "corale" : (f || 0) === 0 && tot >= 7 ? "pulito" : "sudato");
+      F.set("lan7", lanN());
+      const cOk = isLan("vl_cornelio") && has("cor7");
+      F.set("perf7", lanN() >= 12 && F.get("told", "segreto") !== "segreto" && F.get("funivia", "aperta") === "aperta" && has("compass") && remoId() === "vl_remo_ns" && cOk);
+      setStep(N, 6); F.set("ph7", 3);
+      X.refreshZone();
+      const L = [
+        ["voce", (tot ? `Il Tiro del Minuto: ${tot} su 9 (ne servivano ${need}). ` : "") + `{n} calcia. Il tiro è «{tiro}», ed è {tipo}. Il pallone parte da mezz'aria, dove era rimasto ventisei anni, e l'aria, che non l'aveva mai lasciato andare, lo lascia andare con un sospiro.${m.length ? " " + m.join(" · ") + "." : ""}`],
+        ["voce", "Il portiere d'ombra si tuffa. Nel punto giusto, con i guanti gialli, con tutta la professionalità del mondo. E sfiora il pallone di un dito: di un dito soltanto, quello che lascia passare. Per un attimo, la sagoma d'ombra gli si schiarisce in faccia, e si vede che sorride."],
+        ["voce", "La rete di nebbia luminosa si gonfia e non si sgonfia. Il pallone resta lì, in fondo, a mezz'aria, senza cadere: la rete lo tiene come si tiene un respiro."],
+        ["voce", "Il tabellone fa clic. Il 9 smette di girarsi. Cambia una sola cifra, quella degli Stambecchi: 89:59 · STAMBECCHI 2 – 1 OMBRE. Le tribune di lumi, tutte insieme, fanno un suono che non è un applauso: è il rumore di un teatro che si accorge di essere pieno."],
+        ["vl_gino", "(sputa la gomma, dopo ventisei anni; la gomma si scioglie nell'aria come un pensiero) Ecco. Adesso posso dirlo: c'ero."],
+        ["vl_mirella", "Me la dovevi passare. (si ferma, ride) Anche no. È entrata lo stesso. Il fulmine sul petto si è acceso."],
+        ["voce", "Poi la voce. Non quella che arrivava a pezzi dalla lumina, né quella prestata dalle radio: una voce che esce da una gola, un po' ruvida, con la sua pausa giusta in mezzo, come di uno che parla dopo una lunga astinenza."],
+        ["vl_aurelio", "Teo."],
+        ["vl_teodora", "(senza voltarsi, la matita ferma sul registro) Sono qui. Sei in ritardo. Ma sei qui."],
+        ["vl_aurelio", "L'ho tenuto fermo per ventisei anni, il minuto. Adesso non lo tengo più: lo lascio andare. Ma il gol non basta, ragazzo. Il gol non chiude il minuto. Lo chiude il fischio. E questo posto aspetta il suo da ventisei anni."],
+        ["vl_arbitro", "Il fischio non è mio. L'ho dato una volta, storto, e ho passato il resto del tempo ad aspettare che qualcuno me lo togliesse di bocca. Chi lo darà lo darà dritto. Io lo riconoscerò dal rumore."],
+        ["voce", "Aurelio si siede sul bordo del prato, per la prima volta dopo ventisei anni, e si infila una scarpa. Una sola. Poi si ferma e guarda l'altra, che ha ancora in mano, con l'aria di uno che non ha deciso quale dei due piedi vuole che arrivi per primo."],
+      ];
+      say(sw(L, BG.S), fischio);
+    }
+    function fischio() {
+      const opts = [
+        { label: "«L'arbitro: l'ha dato storto, gli spetta darlo dritto.»", sub: "Chi ha fermato il minuto lo chiude", fn: () => fischioScelto("arbitro") },
+        { label: "«Aurelio: è il suo minuto, e la sua squadra.»", sub: "Il capitano", fn: () => fischioScelto("aurelio") },
+        ...(has("fischietto") ? [{ label: "«Io: Cornelio mi ha dato il suo fischietto.»", sub: "Il tredicesimo, che continua", fn: () => fischioScelto("campione") }] : []),
+        { label: "«Nessuno in particolare: il campo capirà da solo.»", sub: "Lasciare che accada", fn: () => fischioScelto("campo") },
+      ];
+      ask("voce", "Il pallone è nella rete e il minuto aspetta. A chi, secondo te, dovrebbe toccare il fischio finale?", opts, BG.S);
+    }
+    function fischioScelto(w) {
+      F.set("fisc7", w);
+      const a = w === "arbitro" ? [["vl_arbitro", "(si leva il fischietto di bocca e lo guarda come una lettera che arriva con ventisei anni di ritardo) Allora lo so. Quando sarà il momento, saprò quale dei tre fischi è il mio."]]
+        : w === "aurelio" ? [["vl_aurelio", "Il mio minuto, la mia squadra. (annuisce piano, senza voce di troppo) Non ci avevo pensato. Ci penserò. Ho il tempo che non finisce."]]
+          : w === "campione" ? [["vl_cornelio", "(si sfila un guanto per portarsi la mano al cuore) Il suo fischietto. Quello dei minatori. Se serve un fiato per un fischio, non c'è fiato più giusto di chi è arrivato per ultimo."], ["vl_aurelio", "Il tredicesimo. (sorride) Sapevo che l'avresti detto. Non so se sarà così: so che l'hai detto."]]
+            : [["vl_aurelio", "Il campo capirà. (ride piano) Ha capito lui che ero in ritardo, in fondo, e non l'ho mai corretto."]];
+      say(sw([...a,
+        ["voce", "La numero uno, parcheggiata in fondo sulla nebbia, si accende dall'interno, finestra dopo finestra, del turchese della lumina. Dall'alto, lontanissimo, arriva la nota del cavo: una sola, lunga, che non cambia. È la nota di chi aspetta il fischio."],
+        ["vl_aurelio", "Il minuto è all'ultimo secondo, due a uno. Manca soltanto il fischio. Ci vorrà un attimo, e un coraggio che non so ancora chi abbia. Parlate con chi volete, prima: questo è il tempo dei saluti."],
+      ], BG.S), fineCapitolo);
+    }
+    function fineCapitolo() {
+      X.finishChapter(N, "sospeso"); setStep(N, 7);
+      const ult = F.get("ult7", "sudato"), win = has("m7_win"), aur = F.get("aur7", "aperto");
+      note(`Cap. 7 concluso: il tiro del Minuto è entrato (2–1, ${ult === "pulito" ? "pulito" : ult === "corale" ? "tirato dalle Lanterne" : "sudato"}). Partita ${win ? "vinta" : "non vinta"}; Aurelio: ${aur === "resta" ? "forse resta" : aur === "parte" ? "forse parte" : aur === "vivi" ? "ascolta i vivi" : "decide da sé"}. Manca solo il fischio finale.`);
+      const rw = reward("vl_ch7", { coins: 60, cos: "vl_tredicesimo_mg" });
+      X.say(sw([["voce", "CAPITOLO 7 · IL MINUTO SOSPESO · CONCLUSO"], ["vl_teodora", "Questa è per te: l'ha cucita Aurelio, a punti lunghi, con il filo da pesca. Stava nella tasca della giacca, ripiegata da ventisei anni. «Per il tredicesimo.» Non l'avrei mai aperta, se non me lo avesse chiesto lui."], ["voce", (rw.length ? rw.join(" · ") + ". " : "") + "Il Capitolo 8, «Fischio Finale», non è ancora pronto. Nel frattempo puoi restare al Campo Sospeso, salire sul Bordo, raccogliere le ultime schegge di lumina e parlare con tutti."]], BG.S), done);
+    }
+    function aurelioFine() {
+      const L = ["Il fischio arriverà. Quando lo sentirò saprò chi l'ha dato, e se è dritto. Adesso godiamoci l'ultimo secondo, che è il più lungo e il più mio.", "Ho una scarpa in mano e una al piede. Un piede è già di là e l'altro è ancora qui. Non è un'indecisione: è il modo in cui si cammina quando non si sa dove si mette il piede.", "Teo mi ha letto una riga del registro. Era sbagliata: l'ho corretta. Era la prima volta che correggevo qualcosa a voce."];
+      say(sw([["vl_aurelio", chip(L)]], BG.S), done);
+    }
+
+    // ================= porte e oggetti
+    const flav = (arr, bg) => () => say(sw([["voce", chip(arr)]], bg || bgHere()), done);
+    const oggetti = {
+      "vl_bordo:d": gradini,
+      "vl_bordo:l": flav(["Un lampione di lumina acceso nonostante il giorno. Brilla anche di mattina: ha un senso del dovere che a certi lampioni di città dovrebbe essere spiegato.", "Il lampione vibra piano, come una corda sfiorata. Sembra sapere dove state per andare."], BG.B),
+      "vl_bordo:b": flav(["Una panca con una coperta ripiegata e un biglietto: «PER CHI SI SIEDE UN ATTIMO E POI RESTA». Nessuno si è ancora seduto: tutti sono troppo in ansia.", "Una panca di legno consumata dai tifosi di ventisei stagioni. Oggi non ci siede nessuno: si sta in piedi con rispetto."], BG.B),
+      "vl_bordo:x": flav(["Una fila di termos allineati sul tavolo: cioccolata, tè, caffè, e uno con scritto «CORAGGIO (VUOTO)». Mirtilla ha un senso del dettaglio che manderebbe in crisi un notaio.", "Termos di tutte le dimensioni, alcuni con l'etichetta «NON APRIRE PRIMA DEL FISCHIO». Nessuno ha il coraggio di verificare."], BG.B),
+      "vl_bordo:t": flav(["Un larice carico di nebbia, con un nastro bianco e rosso. Qualcuno l'ha dichiarato «zona di raccoglimento» per ragioni ornamentali.", "Il larice non si muove: tiene il Bordo come tiene la roccia. Un esempio per tutti."], BG.B),
+      "vl_bordo:n": flav(["Avviso del Comune, firmato Cornelio: «Il Minuto Sospeso è stato inserito all'ordine del giorno, punto 4 bis, dopo le varie ed eventuali. Si invitano i cittadini a presentarsi con una lanterna».", "Un foglio a mano: «SI PREGA DI NON FOTOGRAFARE LA NEBBIA. NON GRADISCE. LA FA SEMBRARE GRASSA»."], BG.B),
+      "vl_bordo:r": flav(["Oltre la ringhiera, il Latte è fermo e quasi nitido. Laggiù, a destra, brilla un puntino turchese con un 1 attaccato.", "Il Latte, all'alba, ha il colore di una sciarpa che qualcuno ha dimenticato sul termosifone. Ci dorme dentro un'intera partita."], BG.B),
+      "vl_sospeso:^": () => go("vl_bordo", 30, 11),
+      "vl_sospeso:0": maglia,
+      "vl_sospeso:l": flav(["Un lume di tribuna: una lumina grossa come un pugno, appesa a mezz'aria. Quando ti avvicini, si gira come un tifoso curioso.", "Il lume brilla più forte quando il tabellone si muove. Adesso brilla più forte che mai: il tabellone non si muove da ventisei anni."], BG.S),
+      "vl_sospeso:b": flav(["La panchina del '98: legno chiaro, ganci per le maglie, un posto vuoto che non è stato mai occupato. Sul bordo, a matita, qualcuno ha scritto: «12 (RISERVA)».", "La panchina ha ancora la forma delle persone che l'hanno scaldata: Cornelio, Fosco, Oreste con la matita. Tutta storia seduta."], BG.S),
+      "vl_sospeso:7": flav(["La porta di rete luminosa: se la sfiori, fa «ahh» a bassa voce. Non è il rumore di una rete: è quello di un organo lontano.", "La traversa è di luce fredda e il palo ha una tacca, fatta da un pallone di ventisei anni fa. La lumina ricorda i colpi meglio dei muri."], BG.S),
+      "vl_sospeso:9": flav(["La numero uno è ferma sulla nebbia come in una stazione, con le luci accese di turchese. Dentro, sul sedile, il gagliardetto «STAMBECCHI · FINALE '98». L'orologio a muro segna le sei e quarantadue.", "La cabina vibra ogni volta che qualcuno dice «fischio». Sembra un animale che ha sentito il proprio nome."], BG.S),
+    };
+    const gm = (id, f) => () => (inC() ? f() : delegate(id));
+    const obj = Object.assign({}, oggetti);
+    const compOr = (id) => () => (id === compId() ? compagna(id) : lant(id));
+    const talk = {
+      vl_teodora: gm("vl_teodora", teodora), vl_vermiglio: vermiglio, vl_sigillo: sigillo,
+      vl_bianca: gm("vl_bianca", compOr("vl_bianca")), vl_agata: gm("vl_agata", compOr("vl_agata")),
+      vl_mirtilla: gm("vl_mirtilla", () => lant("vl_mirtilla")), vl_noemi: gm("vl_noemi", () => lant("vl_noemi")), vl_ottavia: gm("vl_ottavia", () => lant("vl_ottavia")),
+      vl_gedeone: gm("vl_gedeone", () => lant("vl_gedeone")), vl_ettore: gm("vl_ettore", () => lant("vl_ettore")),
+      vl_remo: gm("vl_remo", () => lant("vl_remo")), vl_remo_ns: gm("vl_remo_ns", () => lant("vl_remo_ns")),
+      vl_cornelio: gm("vl_cornelio", () => (zoneNow() === "vl_bordo" ? lant("vl_cornelio") : cornelioCampo())),
+      vl_fosco: gm("vl_fosco", () => (zoneNow() === "vl_bordo" ? lant("vl_fosco") : foscoCampo())),
+      vl_berto: gm("vl_berto", berto), vl_aurelio: gm("vl_aurelio", aurelio), vl_arbitro: gm("vl_arbitro", arbitro),
+      vl_ombra: gm("vl_ombra", () => rivale("vl_ombra")), vl_ombra_n: gm("vl_ombra_n", () => rivale("vl_ombra_n")), vl_ombra_p: gm("vl_ombra_p", () => rivale("vl_ombra_p")),
+    };
+    Object.keys(PL).forEach((id) => { talk[id] = gm(id, () => giocatore(id)); });
+    ["vl_sasso", "vl_nando", "vl_gino", "vl_oreste", "vl_tullio", "vl_pio", "vl_duilio", "vl_mirella"].forEach((id) => { talk[id] = gm(id, () => giocatore(id)); });
+
+    return {
+      n: N, title: "Il Minuto Sospeso", sub: "Un campo nel Latte, undici maglie e un minuto da restituire", start: "vl_bordo", zones, talk, obj, goal, mood,
+      news: (id, s) => {
+        if (!inC()) return X.newsOf(id, N);
+        const ph = PH();
+        if (id === "vl_teodora") return s === 0 && zoneNow() === "vl_bordo";
+        if (id === "vl_aurelio") return s === 2 || (s === 5 && (ph === 0 || ph === 2 || (ph === 1))) || s === 6 || (s === 4 && heard().length >= 5);
+        return false;
+      },
+      intro: () => [
+        ["voce", "Lunedì, sei e trentotto. L'alba ha il colore di una sciarpa dimenticata sul termosifone: lilla, con una macchia rosa dove qualcuno ha posato il caffè. Sul Campo, in cima alla terrazza, il paese ha portato i termos.", BG.B],
+        ["voce", "Non è venuto per la partita. È venuto per vederti partire. Ognuno ha un cappotto sopra il pigiama, una lanterna in mano e quella faccia da sala d'attesa che si fa quando si è sicuri di dover aspettare, e un po' meno sicuri di dover sperare.", BG.B],
+        [compId(), isB() ? "Hai la maglia? Hai il tiro? Hai i calzini spaiati, quelli fortunati? (si ferma) Io intanto ho la chiave inglese. Non c'entra niente, ma mi dà un'aria da capitano." : "Alle sei e quarantatré, con la numero uno già dall'altra parte, ho smesso di fare ipotesi. Ho cominciato a prendere appunti. Sono sempre la stessa cosa, ma con un'ansia più ordinata.", BG.B],
+        ["voce", "Oltre il parapetto, a EST, il Latte è fermo e stranamente nitido. In un punto, laggiù, brilla una luce turchese con un 1 attaccato: la numero uno è arrivata. E accanto al parapetto, dove ieri non c'era niente, sono comparsi dei gradini. Di nebbia. Hanno il corrimano.", BG.B],
+      ],
+    };
+  });
 
   // ------------------------------------------------------------------ debug e avvio
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
