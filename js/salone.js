@@ -24,6 +24,8 @@
   const GEN = { fantasy: ["Fantasy", "#7a4ab0"], mistero: ["Mistero", "#2c6a9a"], scifi: ["Fantascienza", "#1f8a8a"], storico: ["Storico", "#a8622a"], commedia: ["Commedia", "#c9921a"], sport: ["Sport anime", "#c0392b"], avventura: ["Avventura", "#3f8a3f"], dramma: ["Drammatico", "#6a5a7a"], tattica: ["Tattica", "#5a6a3a"] };
   // mod: oggetto window con menuEntry/info · fn: funzione window da chiamare con (indietro) · ch: capitoli totali (se noti)
   const SAGAS = [
+    { id: "colline", t: "Master League delle Colline", e: "📋", g: ["sport", "tattica"], mod: "__colline", key: "ali-di-rondine.colline", ch: 3, cover: "ml_titolo", d: "L'U.S. Colle Alto è ultima in classifica: tu sei il nuovo allenatore. La Lavagna Tattica (modulo, caselle, istruzioni che si battono a vicenda, cambi e pagelle), il Mercato con le figurine e i crediti, gli allenamenti, la classifica della Lega delle Colline.",
+      hints: { promozione: "Sempre possibile, alla fine.", paese: "Serve vincere senza comprare quasi nessuno, con il paese dalla tua parte.", mago: "Serve una grande fiducia della presidente e aver ascoltato il Mago Pino.", triplete: "Segreto: battere tutte le squadre della Lega e trovare tutte le figurine rare." } },
     { id: "campetto", t: "Dal Campetto al Mondiale", e: "🏆", g: ["sport", "avventura"], mod: "__campetto", key: "ali-di-rondine.campetto", ch: 3, cover: "cm_titolo", d: "Un campetto di terra dietro la pescheria, un ex nazionale che ripara reti, un portiere mai battuto e un sogno grande come un Mondiale. Il Duello Cinematico: la partita a vignette manga, con la grinta e i tiri speciali da imparare in allenamento.",
       hints: { mondiale: "Sempre possibile, alla fine.", leone: "Serve aver chiamato Leone in Nazionale.", campetto: "Serve una grande amicizia con la squadra del campetto.", amico: "Segreto: tutti i tiri speciali, tutti i palloni firmati e nessuna partita lasciata a metà." } },
     { id: "trono", t: "Il Trono di Cuoio", e: "👑", g: ["fantasy", "dramma"], mod: "__trono", key: "ali-di-rondine.trono", ch: 3, cover: "tc_titolo", d: "Sette casate, un trono cucito con il primo pallone della storia. Sei il figlio senza nome di Casa Tasso: patti di cera, voti del Consiglio, corvi e tradimenti, e il Concilio, una partita in cui i patti valgono finché qualcuno non li rompe.",
@@ -83,7 +85,7 @@
     { id: "cala", t: "Cala Tramontana", e: "🌊", g: ["avventura"], fn: "openCalaTramontana", key: "ali-di-rondine.cala-tramontana", cover: "beach", d: "Esplora a piedi il borgo marino alternativo con il tuo Campione." },
     { id: "borgostorto", t: "Il Borgo Storto", e: "🌀", g: ["commedia", "tattica"], api: "openBorgoStorto", cover: "beach", d: "Lo spin-off GDR a turni del Borgo Marino." },
   ];
-  const NEWEST = ["campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
+  const NEWEST = ["colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
   const modOf = (s) => (s.mod ? window[s.mod] : null);
   const available = (s) => (s.mod ? !!window[s.mod] : s.fn ? typeof window[s.fn] === "function" : !!(api() && api()[s.api]));
   function state(s) {
@@ -220,6 +222,10 @@
       opp: [{ name: "Il coro della chiesa", color: "#8a6a9a", style: "equilibrata" }, { name: "Le Ombre del '52", color: "#6a7ab8", style: "contropiede" }],
       boss: { name: "Le Ombre al completo", color: "#4a4a8a", style: "pressing" },
       opts: (o, h, boss) => ({ title: `Luci · contro ${o.name}`, us: h.name, usColor: "#ffd27a", lanterns: boss ? 2 : 3, actions: boss ? 8 : 6, mates: [{ name: "Fiammetta" }, { name: "Tobia" }], opp: o }) },
+    { id: "lavagna", t: "Lavagna Tattica", e: "📋", saga: "colline", eng: "__lavagna", d: "La partita dell'allenatore di Master League delle Colline: modulo, giocatori nelle caselle, istruzioni che si battono a vicenda, cambi, stamina e pagelle.",
+      opp: [{ name: "Sporting Pietrafitta", color: "#5a5a8a", style: "equilibrata", ovr: 58, instr: "possesso" }, { name: "Real Monteroso", color: "#8a2a5a", style: "contropiede", ovr: 62, instr: "contropiede" }],
+      boss: { name: "Atletico Valfonda", color: "#a83a2a", style: "pressing", ovr: 72, instr: "pressing" },
+      opts: (o, h, boss) => ({ title: `Lavagna Tattica · contro ${o.name}`, us: "U.S. Colle Alto", usColor: "#2a6a3a", scout: true, opp: o, squad: [["Bepi Sasso", "P", 58], ["Toni Vigna", "D", 56], ["Gigio Ruota", "D", 57], ["Nane Campanile", "D", 54], ["Marta Fiore", "C", 60], ["Ciccio Botte", "C", 55], ["Ines Granaio", "C", 62], ["Rino Corriera", "A", 59], ["Dodo Lampo", "A", 56], [h.name || "Il Mister", "A", 64]].map(([name, role, ovr]) => ({ name, role, ovr: boss ? ovr + 4 : ovr })) }) },
     { id: "duello", t: "Duello Cinematico", e: "🏆", saga: "campetto", eng: "__duello", d: "La partita a vignette manga di Dal Campetto al Mondiale: duelli, grinta, e i tiri speciali (Aquila, Catapulta, Combinazione d'Oro).",
       opp: [{ name: "Collegio San Marco", color: "#c83a3a", style: "difensiva", players: [{ name: "Il Capitano", pow: 10 }, { name: "Il Libero", pow: 11 }], keeper: { name: "Saverio Muro", pow: 16 } }, { name: "Fiamme del Porto", color: "#e85a1a", style: "pressing", players: [{ name: "Brace", pow: 11 }, { name: "Leone Ruggeri", pow: 14 }], keeper: { name: "Il Fornaio", pow: 14 }, ace: { name: "Leone Ruggeri", special: "Tiro del Leone" } }],
       boss: { name: "Nordavia", color: "#e8e8f0", style: "pressing", players: [{ name: "Il Barone", pow: 15 }, { name: "Gelo", pow: 13 }], keeper: { name: "Il Muro di Nordavia", pow: 17 }, ace: { name: "Il Barone", special: "Fuoco del Nord" } },
@@ -386,7 +392,7 @@
   // ---------------------------------------------------------------- ALBUM DEI PERSONAGGI
   // ogni personaggio registrato nel gioco (window.__borgoApi.BIO) diventa una carta. Si «incontra» parlandoci (seeCard del gioco).
   // Le sezioni: la Storia e Borgo Marino, i tornei e le modalità del Borgo, e una sezione per saga (riconosciuta dal prefisso degli id).
-  const PFX = { campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
+  const PFX = { colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
   const BORGO_PFX = ["sv", "rb", "sb", "cg", "hd", "md", "ac"];
   function perSections() {
     const A = api(); if (!A || !A.BIO) return [];

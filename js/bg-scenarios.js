@@ -5876,6 +5876,50 @@
     if (since("cm_mondiale", 1) < 120) { g.save(); g.globalAlpha = 0.55; cmSpeed(g, 160, 150, 40, "#fff", f, 20); g.restore(); cmWord(g, "FUOCO DEL NORD!", 160, 104, "#7ab8ff", 18, 0.05); }
     const cup = since("cm_mondiale", 2) < 160; if (cup) { g.save(); g.globalCompositeOperation = "lighter"; glowB(g, 160, 150, 70, "255,220,120", 0.35); g.restore(); for (let i = 0; i < 24; i++) { const t = since("cm_mondiale", 2); px((i * 41 + t * (1 + i % 3)) % W, (i * 29 + t * 2) % H, 3, 3, ["#ffd23f", "#1f5fbf", "#fff", "#e83a3a"][i % 4]); } cmWord(g, "CAMPIONI!", 160, 170, "#ffd23f", 26); }
   }
+  // ---------------------------------------------------------------- MASTER LEAGUE DELLE COLLINE (lavagne col gesso, colline, campanili)
+  function mlChalk(g, x1, y1, x2, y2, col, w) { g.strokeStyle = col || "rgba(240,240,230,.8)"; g.lineWidth = w || 2; g.lineCap = "round"; g.beginPath(); for (let i = 0; i <= 8; i++) { const t = i / 8, x = x1 + (x2 - x1) * t + Math.sin(i * 3.1 + x1) * 0.7, y = y1 + (y2 - y1) * t + Math.cos(i * 2.7 + y1) * 0.7; if (i) g.lineTo(x, y); else g.moveTo(x, y); } g.stroke(); }
+  function mlHills(g, W, y0, cols) { cols.forEach((c, k) => { g.fillStyle = c; g.beginPath(); g.moveTo(0, y0 + k * 14); for (let x = 0; x <= W; x += 16) g.lineTo(x, y0 + k * 14 - Math.sin(x / (40 + k * 12) + k) * (10 + k * 3)); g.lineTo(W, 200); g.lineTo(0, 200); g.closePath(); g.fill(); }); }
+  function mlTower(g, x, y, f, ring) { px(g, x, y, 16, 60, "#e8d0a0"); px(g, x - 2, y - 6, 20, 6, "#a85a2a"); g.fillStyle = "#a85a2a"; g.beginPath(); g.moveTo(x - 2, y - 6); g.lineTo(x + 8, y - 22); g.lineTo(x + 18, y - 6); g.fill(); px(g, x + 4, y + 8, 8, 10, "#3a2a1a"); const sw = ring ? Math.sin(f / 4) * 3 : 0; circ(g, x + 8 + sw, y + 16, 3, "#c8a040"); }
+  function bgMlTitolo(g, W, H, f) {
+    px(g, 0, 0, W, H, "#5a3a1a"); px(g, 10, 10, W - 20, H - 20, "#1e3a2a"); for (let i = 0; i < 50; i++) px(g, (i * 53) % W, (i * 37) % H, 24, 1, "rgba(255,255,255,.04)");
+    mlChalk(g, 30, 100, 290, 100); g.strokeStyle = "rgba(240,240,230,.8)"; g.lineWidth = 2; g.beginPath(); g.arc(160, 100, 20, 0, 7); g.stroke();
+    const t = since("ml_titolo", 0) < 160 ? since("ml_titolo", 0) / 160 : 1; mlChalk(g, 70, 150, 70 + 80 * t, 150 - 60 * t, "#ffd23f", 3); if (t > 0.9) { g.fillStyle = "#ffd23f"; g.beginPath(); g.moveTo(150, 90); g.lineTo(140, 92); g.lineTo(146, 100); g.fill(); }
+    [[70, 150], [110, 130], [200, 70], [240, 130], [160, 165]].forEach(([x, y], i) => { g.strokeStyle = i % 2 ? "#ff8a7a" : "#f4f0e4"; g.lineWidth = 2; g.beginPath(); if (i % 2) { g.moveTo(x - 5, y - 5); g.lineTo(x + 5, y + 5); g.moveTo(x + 5, y - 5); g.lineTo(x - 5, y + 5); } else g.arc(x, y, 6, 0, 7); g.stroke(); });
+    g.fillStyle = "#f4f0e4"; g.font = "bold 18px 'Comic Sans MS', system-ui"; g.textAlign = "center"; g.fillText("MASTER LEAGUE", 160, 36); g.fillStyle = "#ffd23f"; g.fillText("DELLE COLLINE", 160, 58); g.textAlign = "left";
+    if (since("ml_titolo", 1) < 120) { g.fillStyle = "rgba(240,240,230,.9)"; g.font = "bold 12px 'Comic Sans MS', system-ui"; g.fillText("3-2-1, pressing alto!", 180, 180); }
+    px(g, 270, 170, 26, 8, "#f4f0e4"); if (since("ml_titolo", 2) < 90) { g.fillStyle = "rgba(255,255,255,.3)"; g.fillRect(20, 20, W - 40, H - 40); }
+  }
+  function bgMlColle(g, W, H, f) {
+    vgrad(g, 0, 0, W, 120, ["#8ab8e8", "#f0e0b8"]); mlHills(g, W, 90, ["#8aa860", "#6a9a4a", "#5a8a3a"]);
+    for (let i = 0; i < 6; i++) { const x = 20 + i * 48, h = 30 + (i % 3) * 8; px(g, x, 130 - h, 40, h, ["#e8c890", "#f0d8a8", "#e0c088"][i % 3]); px(g, x - 2, 128 - h, 44, 4, "#a85a2a"); px(g, x + 8, 136 - h, 6, 8, "#3a2a1a"); }
+    mlTower(g, 140, 50, f, since("ml_colle", 0) < 120); if (since("ml_colle", 0) < 120) { g.fillStyle = "#fff"; g.font = "bold 9px sans-serif"; g.fillText("DON! DON!", 162, 50); }
+    px(g, 0, 150, W, 50, "#c8b090"); for (let i = 0; i < 9; i++) px(g, i * 40, 150, 1, 50, "rgba(90,60,30,.2)");
+    const bk = since("ml_colle", 1) < 120; px(g, 240, 112, 46, 34, "#f4ecd8"); px(g, 240, 108, 46, 6, "#2a6a3a"); g.fillStyle = "#2a6a3a"; g.font = "bold 7px sans-serif"; g.fillText("BAR SPORT", 245, 124); px(g, 256, 132, 12, 14, "#2a6a3a"); if (bk) { for (let k = 0; k < 3; k++) circ(g, 290 + k * 6, 118 - k * 8 - (since("ml_colle", 1) % 30) / 4, 2 + k, "rgba(255,255,255,.6)"); }
+    const ft = since("ml_colle", 2) < 90; circ(g, 60, ft ? 160 - Math.sin(since("ml_colle", 2) / 90 * Math.PI) * 30 : 182, 4, "#fff");
+  }
+  function bgMlBar(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#3a2a1a", "#5a3a22"]); for (let i = 0; i < 7; i++) px(g, i * 48, 0, 4, 120, "rgba(0,0,0,.2)");
+    px(g, 20, 20, 90, 60, "#b8875a"); [[30, 30], [56, 34], [82, 28], [34, 54], [62, 56], [88, 54]].forEach(([x, y], i) => { px(g, x, y, 16, 20, "#f4ecd8"); circ(g, x + 8, y, 2, "#c83a3a"); px(g, x + 3, y + 4, 10, 8, ["#2a6a3a", "#a83a2a", "#2a5a8a"][i % 3]); });
+    px(g, 200, 18, 90, 56, "#1a1a1a"); vgrad(g, 204, 22, 82, 48, ["#3a8a4a", "#2a6a3a"]); if (since("ml_bar", 0) < 100) { g.fillStyle = "#ffd23f"; g.font = "bold 12px sans-serif"; g.fillText("GOL!", 228, 52); } else { circ(g, 230 + Math.sin(f / 20) * 30, 46, 2, "#fff"); }
+    px(g, 40, 120, 240, 22, "#6a4a2a"); px(g, 40, 118, 240, 4, "#8a6a3a");
+    const cf = since("ml_bar", 1) < 120; px(g, 140, 100, 30, 20, "#8a8a9a"); if (cf) for (let k = 0; k < 3; k++) circ(g, 150 + k * 5, 94 - k * 6 - (since("ml_bar", 1) % 30) / 5, 2 + k, "rgba(255,255,255,.5)");
+    px(g, 90, 126, 26, 14, "#f4f0e4"); if (since("ml_bar", 2) < 140) { g.strokeStyle = "#2a2a3a"; g.lineWidth = 1; g.beginPath(); g.moveTo(94, 136); g.lineTo(104, 130); g.lineTo(112, 134); g.stroke(); g.beginPath(); g.arc(98, 131, 2, 0, 7); g.stroke(); }
+  }
+  function bgMlCitta(g, W, H, f) {
+    vgrad(g, 0, 0, W, 110, ["#c8d8e8", "#f4ecd8"]); mlHills(g, W, 85, ["#b8c8a8", "#a8b898"]);
+    for (let i = 0; i < 5; i++) { const x = 10 + i * 62; px(g, x, 100, 54, 40, "#f4ecd8"); for (let k = 0; k < 6; k++) px(g, x + k * 9, 92, 9, 10, k % 2 ? "#c83a3a" : "#f4f0e4"); }
+    px(g, 0, 140, W, 60, "#d8c8a8"); const tr = since("ml_citta", 0) < 140; const tx = tr ? 200 - since("ml_citta", 0) * 0.6 : 200; px(g, tx, 150, 40, 18, "#c83a3a"); circ(g, tx + 8, 172, 7, "#2a2a2a"); circ(g, tx + 32, 168, 5, "#2a2a2a"); px(g, tx + 24, 140, 12, 12, "#c83a3a");
+    if (since("ml_citta", 1) < 100) { g.fillStyle = "#1a1a2a"; g.font = "bold 10px sans-serif"; g.fillText("300 CREDITI!", 120, 128); }
+    const cs = since("ml_citta", 2) < 120; px(g, 70, 150, 30, 20, "#6a4a2a"); for (let k = 0; k < 4; k++) circ(g, 76 + k * 6, 148, 3, "#8a4a2a"); if (cs) for (let k = 0; k < 3; k++) circ(g, 84 + k * 4, 140 - k * 6 - (since("ml_citta", 2) % 30) / 5, 2, "rgba(255,255,255,.5)");
+  }
+  function bgMlStadio(g, W, H, f) {
+    vgrad(g, 0, 0, W, 90, ["#e8885a", "#f8d8a0"]); mlHills(g, W, 60, ["#a8885a"]);
+    px(g, 0, 70, W, 50, "#6a4a2a"); for (let r = 0; r < 4; r++) for (let i = 0; i < 40; i++) { const j = since("ml_stadio", 0) < 120 ? Math.abs(Math.sin(f / 4 + i + r)) * 3 : 0; circ(g, 4 + i * 8 + (r % 2) * 4, 76 + r * 11 - j, 3, ["#2a6a3a", "#a83a2a", "#f4ecd8", "#c88a2a", "#5a5a8a", "#2a5a8a"][(i + r * 2) % 6]); }
+    vgrad(g, 0, 120, W, 80, ["#5aa04a", "#4a9040"]); g.strokeStyle = "rgba(255,255,255,.85)"; g.lineWidth = 2; g.strokeRect(14, 128, 292, 64); g.beginPath(); g.moveTo(160, 128); g.lineTo(160, 192); g.stroke();
+    [[60, "#2a6a3a"], [260, "#a83a2a"]].forEach(([x, c]) => { px(g, x - 1, 50, 2, 24, "#888"); g.fillStyle = c; g.beginPath(); for (let k = 0; k <= 5; k++) g.lineTo(x + 1 + k * 4, 50 + Math.sin(f / 8 - k) * 1.5); for (let k = 5; k >= 0; k--) g.lineTo(x + 1 + k * 4, 60 + Math.sin(f / 8 - k) * 1.5); g.fill(); });
+    if (since("ml_stadio", 1) < 120) { px(g, 120, 140, 80, 40, "#1e3a2a"); mlChalk(g, 130, 170, 190, 150, "#ffd23f", 2); g.fillStyle = "#f4f0e4"; g.font = "bold 8px 'Comic Sans MS'"; g.fillText("3-2-1", 140, 152); }
+    if (since("ml_stadio", 2) < 160) { const t = since("ml_stadio", 2); for (let i = 0; i < 20; i++) px(g, (i * 41 + t * 1.5) % W, (i * 29 + t * 2) % 120, 3, 3, ["#2a6a3a", "#f4ecd8", "#ffd23f"][i % 3]); g.fillStyle = "#ffd23f"; g.font = "bold 16px 'Comic Sans MS'"; g.textAlign = "center"; g.fillText("SERIE COLLINA!", 160, 112); g.textAlign = "left"; }
+  }
   const LB = {
     lb_copertina: { draw: bgCopertina, hot: [
       [30, 70, 30, 56, "🕯️ Candela: «Brucia da sola, come chi legge di notte.»", "tog"],
@@ -6522,6 +6566,31 @@
       [110, 15, 100, 50, "⚖ La bilancia dipinta sul muro oscilla, piano. Poi si ferma in equilibrio. La giudice dice che lo fa da sola, quando qualcuno mente."],
       [185, 75, 40, 35, "🔨 TOC! Il martelletto batte sul banco. Nell'aula cala un silenzio così profondo che si sente piovere su tutta Portagrigia."],
       [40, 130, 40, 60, "🌺 Il garofano del Presidente Valli scivola dall'occhiello e cade per terra. Lui non lo raccoglie."],
+    ] },
+    ml_titolo: { draw: bgMlTitolo, hot: [
+      [60, 80, 120, 80, "✏️ La freccia di gesso si allunga sulla lavagna: dalla difesa all'attacco, dritta. «Palla lunga», scrive il Mago Pino. Poi la cancella: «No. Pressing»."],
+      [170, 160, 120, 30, "📋 «3-2-1, pressing alto!»: scritto in fretta, con il gesso che si spezza a metà."],
+      [20, 20, 280, 160, "🧽 Il cancellino passa sulla lavagna in una nuvola di polvere bianca. Si ricomincia: un'altra partita, un'altra tattica."],
+    ] },
+    ml_colle: { draw: bgMlColle, hot: [
+      [130, 30, 50, 90, "🔔 Il campanile di Colle Alto suona: DON! DON! Dal 1978 suona a festa solo se vince la Colle Alto."],
+      [235, 100, 60, 50, "☕ Dal Bar dello Sport esce il vapore della macchina del caffè. Il Mago Pino ne fa uno per ogni allenatore nuovo. Questo è il quindicesimo."],
+      [20, 140, 120, 60, "⚽ Un pallone rotola giù per la piazza in salita. A Colle Alto i palloni vanno sempre verso il campo: è la pendenza."],
+    ] },
+    ml_bar: { draw: bgMlBar, hot: [
+      [190, 10, 110, 70, "📺 Alla televisione del bar: GOL! Tutti si girano. È una partita del 1978, in replica. La guardano lo stesso."],
+      [130, 90, 50, 40, "☕ La macchina del caffè fischia come un arbitro. Il Mago Pino dice che è l'unico arbitro onesto delle colline."],
+      [80, 120, 50, 30, "🗒 Un tovagliolo con una tattica disegnata a penna. Sotto, c'è scritto: «1978 – funziona ancora»."],
+    ] },
+    ml_citta: { draw: bgMlCitta, hot: [
+      [140, 130, 120, 50, "🚜 Passa un trattore rosso nuovo di zecca: è del Cavalier Ottone. Sul cofano c'è scritto «Valfonda». Anche sul trattore."],
+      [100, 110, 100, 30, "💰 «300 CREDITI!»: il Cavalier Ottone sventola un assegno davanti al tendone del mercato."],
+      [60, 130, 50, 50, "🌰 Castagne arrosto: la castagnara te ne regala un cartoccio. «Per la Colle Alto», dice. «Che quest'anno ci serve forza.»"],
+    ] },
+    ml_stadio: { draw: bgMlStadio, hot: [
+      [0, 70, 320, 50, "📣 Le tribune dello Stadio delle Colline: sei paesi, sei colori, una sola voce quando entra la palla."],
+      [110, 130, 100, 60, "📋 Una lavagnetta portatile a bordo campo: 3-2-1, e una freccia gialla di gesso."],
+      [0, 90, 320, 110, "🎉 Coriandoli verdi e bianchi: «SERIE COLLINA!». Il campanile di Colle Alto si sente fin qui."],
     ] },
     cm_titolo: { draw: bgCmTitolo, hot: [
       [40, 60, 240, 120, "⚽ Il pallone sale, si ferma un attimo nel cielo e piomba giù: il Tiro dell'Aquila. In tutti i cartoni di calcio, a questo punto, parte la sigla."],
