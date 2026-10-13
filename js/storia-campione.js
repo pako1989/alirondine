@@ -252,8 +252,95 @@
     R(g, 158, 0, 2, 22, "#1a1008"); g.fillStyle = "#e0a23a"; g.beginPath(); g.moveTo(148, 34); g.lineTo(172, 34); g.lineTo(164, 22); g.lineTo(156, 22); g.fill(); glow(g, 160, 38, 90, "255,200,110", 0.4 + 0.05 * Math.sin(f / 15));
     R(g, 0, 176, W, 24, "#10151f"); R(g, 0, 176, W, 1, "#2a3350");
   }
+  // capitolo 5 · Cima Alta di giorno: sopra il Latte, chalet giallo fluo con tetti verdi, bandiere dei Camosci e la funivia che arriva
+  function chaletSil(g, x, y, w, h, f, k) {
+    const dark = MOOD >= 1;
+    R(g, x, y, w, h, dark ? "#a7bd2a" : "#d6f23a"); R(g, x, y + h - 4, w, 4, "#00000030");
+    g.fillStyle = dark ? "#1d2a24" : "#2b4a34"; g.beginPath(); g.moveTo(x - 3, y); g.lineTo(x + w / 2, y - h * 0.5); g.lineTo(x + w + 3, y); g.fill();
+    g.fillStyle = "#eef4ff"; g.beginPath(); g.moveTo(x - 3, y); g.lineTo(x + w / 2, y - h * 0.5); g.lineTo(x + w / 2, y - h * 0.5 + 3); g.lineTo(x - 1, y + 1); g.fill();
+    for (let i = 0; i < Math.max(1, Math.floor(w / 13)); i++) R(g, x + 4 + i * 12, y + 6, 6, 7, dark && (hash(k + i) % 3) ? "#ffcf6b" : "#3a4a7a");
+  }
+  function bgCima(g, W, H, f) {
+    const n = MOOD, dark = n >= 1;
+    if (dark) sky(g, W, H, f);
+    else { grad(g, 0, 0, W, H, ["#5aa6ea", "#9fd0f6", "#e3f3ff"]); glow(g, 250, 34, 50, "255,244,200", 0.55); g.fillStyle = "#fff7d8"; g.beginPath(); g.arc(250, 34, 10, 0, 7); g.fill(); }
+    ridge(g, W, 104, 46, 0.6, dark ? "#4c4a88" : "#8fa6d0", true);
+    ridge(g, W, 124, 34, 3.3, dark ? "#34376f" : "#6d86b8", true);
+    // il cavo della funivia, che sale da sinistra, e la cabina rossa
+    g.strokeStyle = "#1c2236"; g.lineWidth = 1; g.beginPath(); g.moveTo(-4, 126); g.lineTo(96, 60); g.stroke();
+    const t = ((f * 0.0019) % 1.5) - 0.25, cx = -4 + t * 100, cy = 126 - t * 66;
+    if (t > 0 && t < 1) { R(g, cx, cy, 1, 5, "#1c2236"); R(g, cx - 8, cy + 4, 16, 10, "#c8422e"); R(g, cx - 8, cy + 4, 16, 2, "#e8704e"); R(g, cx - 6, cy + 7, 5, 4, "#ffd98a"); R(g, cx + 1, cy + 7, 5, 4, "#ffd98a"); }
+    fogBand(g, W, 128, H, f, dark ? ["#b9aedc", "#8c85c0"] : ["#f2f6ff", "#cfd9f2"]);
+    chaletSil(g, 8, 150, 52, 34, f, 1); chaletSil(g, 66, 160, 34, 26, f, 2); chaletSil(g, 224, 146, 46, 40, f, 3); chaletSil(g, 276, 158, 42, 28, f, 4);
+    // bandiere dei Camosci sui pali
+    [[116, 150], [196, 150], [150, 164]].forEach(([x, y], i) => { R(g, x, y - 36, 2, 40, "#2a2f48"); const w = Math.sin(f / 18 + i * 2) * 2; g.fillStyle = "#e4ff3a"; g.beginPath(); g.moveTo(x + 2, y - 36); g.lineTo(x + 22, y - 33 + w); g.lineTo(x + 20, y - 21 + w); g.lineTo(x + 2, y - 22); g.fill(); R(g, x + 9, y - 31, 3, 6, "#1a1a1a"); R(g, x + 8, y - 33, 1, 3, "#1a1a1a"); R(g, x + 12, y - 33, 1, 3, "#1a1a1a"); });
+    R(g, 0, 186, W, 14, dark ? "#d4d8ee" : "#f4f7ff"); R(g, 0, 186, W, 1, "#b8c2e6");
+  }
+  // capitolo 5 · l'Osteria del Camoscio: assi, camino, mensola con tre Coppe e un piedistallo vuoto, foto appese, un fischietto giallo
+  function bgOsteria(g, W, H, f) {
+    grad(g, 0, 0, W, H, ["#3a2616", "#5a3a22"]);
+    for (let i = 0; i < 16; i++) R(g, i * 20, 0, 1, H, "rgba(0,0,0,.2)");
+    R(g, 0, 152, W, 48, "#2e1c10"); R(g, 0, 152, W, 4, "#8a5a34");
+    // camino
+    R(g, 14, 70, 70, 84, "#6a5a52"); R(g, 22, 90, 54, 64, "#14100c"); R(g, 12, 66, 74, 6, "#8a7a70");
+    g.save(); g.globalCompositeOperation = "lighter"; glow(g, 49, 130, 60, "255,160,70", 0.4 + 0.08 * Math.sin(f / 9)); g.restore();
+    for (let i = 0; i < 4; i++) { const h = 10 + ((f / 4 + i * 9) % 14); g.fillStyle = i % 2 ? "#ff9a2e" : "#ffd23f"; g.beginPath(); g.moveTo(34 + i * 10, 154); g.lineTo(39 + i * 10, 154 - h); g.lineTo(44 + i * 10, 154); g.fill(); }
+    // mensola con le tre Coppe e il piedistallo vuoto
+    R(g, 112, 52, 190, 5, "#2a1a0e"); R(g, 112, 52, 190, 1, "#8a5a34");
+    for (let i = 0; i < 4; i++) { const x = 130 + i * 44; if (i < 3) { g.fillStyle = "#e0b441"; g.beginPath(); g.moveTo(x - 9, 28); g.lineTo(x + 9, 28); g.lineTo(x + 5, 42); g.lineTo(x - 5, 42); g.fill(); R(g, x - 2, 42, 4, 6, "#c89a2a"); R(g, x - 8, 48, 16, 4, "#8a6a2a"); R(g, x - 6, 30, 2, 8, "#fff1b8"); } else { R(g, x - 8, 48, 16, 4, "#5a4a3a"); g.strokeStyle = "rgba(255,230,160,.5)"; g.setLineDash([2, 2]); g.strokeRect(x - 8, 26, 16, 22); g.setLineDash([]); } }
+    // foto appese, una con la figura tagliata via
+    [[118, 70, 30, 22], [160, 68, 34, 26], [206, 72, 28, 20], [250, 70, 32, 24]].forEach(([x, y, w, h], i) => { R(g, x, y, w, h, "#2a1a0e"); R(g, x + 2, y + 2, w - 4, h - 4, "#cdb78e"); for (let k = 0; k < 4; k++) { R(g, x + 5 + k * 6, y + h - 10, 4, 6, i === 1 && k === 2 ? "#cdb78e" : "#6a4a2e"); R(g, x + 6 + k * 6, y + h - 14, 3, 3, i === 1 && k === 2 ? "#cdb78e" : "#7a5a3e"); } });
+    // il fischietto giallo di plastica appeso a un chiodo
+    R(g, 272, 100, 2, 2, "#1a1008"); g.strokeStyle = "#e4c43a"; g.lineWidth = 1; g.beginPath(); g.moveTo(273, 102); g.lineTo(273, 112); g.stroke(); R(g, 268, 112, 10, 5, "#ffd23f"); R(g, 276, 113, 4, 3, "#e0a82a"); R(g, 270, 114, 2, 2, "#8a6a10");
+    // banco con boccali e specchiera
+    R(g, 100, 120, 214, 34, "#6a4426"); R(g, 100, 120, 214, 4, "#a8764a"); R(g, 100, 154, 214, 6, "#4a3322");
+    for (let i = 0; i < 6; i++) { R(g, 112 + i * 30, 106, 9, 14, "#e8e0c8"); R(g, 119 + i * 30, 109, 3, 7, "#e8e0c8"); R(g, 113 + i * 30, 106, 7, 3, "#fff6e0"); }
+    glow(g, 160, 8, 110, "255,200,110", 0.4 + 0.04 * Math.sin(f / 18)); R(g, 159, 0, 2, 14, "#1a1008"); g.fillStyle = "#e0a23a"; g.beginPath(); g.moveTo(148, 24); g.lineTo(172, 24); g.lineTo(164, 12); g.lineTo(156, 12); g.fill();
+  }
+  // capitolo 5 · il Campo Alto: tribune giallo fluo, tabellone, cartelloni dello sponsor, nebbia tutt'intorno
+  function bgCampoAlto(g, W, H, f) {
+    const dark = MOOD >= 1;
+    if (dark) sky(g, W, H, f); else { grad(g, 0, 0, W, H, ["#5aa6ea", "#9fd0f6", "#e3f3ff"]); glow(g, 262, 30, 40, "255,244,200", 0.5); }
+    ridge(g, W, 96, 40, 1.8, dark ? "#4c4a88" : "#8fa6d0", true);
+    fogBand(g, W, 100, H, f, dark ? ["#b9aedc", "#8c85c0"] : ["#f2f6ff", "#cfd9f2"]);
+    // tribune
+    [[0, 1], [W - 78, -1]].forEach(([x0, dir]) => { for (let r = 0; r < 5; r++) { const y = 70 + r * 14; R(g, x0, y, 78, 12, r % 2 ? "#d6f23a" : "#b8d42a"); R(g, x0, y, 78, 1, "#ffffff55"); for (let i = 0; i < 9; i++) if ((hash(r * 9 + i + x0) % 4) !== 0) { g.fillStyle = ["#2a2f48", "#c8422e", "#1a1a1a", "#e8e8f0"][hash(i + r) % 4]; g.beginPath(); g.arc(x0 + 6 + i * 8.5, y + 4, 2.4, 0, 7); g.fill(); } } });
+    // tabellone
+    R(g, 118, 22, 84, 30, "#10141f"); R(g, 118, 22, 84, 2, "#d6f23a"); g.textAlign = "center"; g.font = "bold 14px sans-serif"; g.fillStyle = "#ff9a2e"; g.fillText("0 - 0", 160, 44); g.font = "bold 6px sans-serif"; g.fillStyle = "#d6f23a"; g.fillText("CAMOSCI · OSPITI", 160, 32); g.textAlign = "left";
+    R(g, 156, 52, 8, 22, "#2a2f48");
+    // il prato in prospettiva e i cartelloni
+    g.fillStyle = "#3f8a4e"; g.beginPath(); g.moveTo(84, 116); g.lineTo(236, 116); g.lineTo(300, 180); g.lineTo(20, 180); g.closePath(); g.fill();
+    for (let i = 0; i < 7; i++) { g.fillStyle = i % 2 ? "#47954f" : "#3a8148"; const a = i / 7, b = (i + 1) / 7; g.beginPath(); g.moveTo(84 - 64 * a, 116 + 64 * a); g.lineTo(236 + 64 * a, 116 + 64 * a); g.lineTo(236 + 64 * b, 116 + 64 * b); g.lineTo(84 - 64 * b, 116 + 64 * b); g.closePath(); g.fill(); }
+    g.strokeStyle = "rgba(255,255,255,.8)"; g.lineWidth = 1; g.beginPath(); g.moveTo(160, 116); g.lineTo(160, 180); g.stroke(); g.beginPath(); g.ellipse(160, 148, 28, 10, 0, 0, 7); g.stroke();
+    R(g, 78, 106, 2, 10, "#e8e8f0"); R(g, 78, 106, 10, 2, "#e8e8f0"); R(g, 232, 106, 2, 10, "#e8e8f0"); R(g, 224, 106, 10, 2, "#e8e8f0");
+    for (let i = 0; i < 5; i++) { R(g, 16 + i * 60, 180, 56, 14, i % 2 ? "#1a1a1a" : "#2b4a34"); R(g, 16 + i * 60, 180, 56, 1, "#d6f23a"); g.font = "bold 7px sans-serif"; g.fillStyle = "#e4ff3a"; g.textAlign = "center"; g.fillText("LUMEN", 44 + i * 60, 190, 50); g.textAlign = "left"; }
+    if (dark) { g.save(); g.globalCompositeOperation = "lighter"; [[20, 36], [W - 20, 36]].forEach(([x, y]) => glow(g, x, y, 70, "255,240,180", 0.3)); g.restore(); }
+  }
+  // capitolo 5 · la baita del Fischio: legno scuro, stufa, una parete di fischietti, il cannocchiale alla finestra sul Campo Alto
+  function bgBaita(g, W, H, f) {
+    grad(g, 0, 0, W, H, ["#1c120a", "#38241a"]);
+    for (let i = 0; i < 16; i++) R(g, i * 20, 0, 1, H, "rgba(0,0,0,.25)");
+    R(g, 0, 156, W, 44, "#241408"); R(g, 0, 156, W, 3, "#6a4426");
+    // la parete dei fischietti
+    R(g, 14, 20, 150, 108, "#2a190d"); R(g, 14, 20, 150, 2, "#5a3a22");
+    for (let r = 0; r < 4; r++) for (let i = 0; i < 8; i++) { const x = 22 + i * 18, y = 30 + r * 24, k = r * 8 + i; R(g, x + 3, y - 5, 1, 5, "#1a1008"); if (k >= 26) continue; g.fillStyle = ["#c9ccd6", "#b08a3c", "#9aa0b0", "#d8b44a"][k % 4]; g.beginPath(); g.ellipse(x + 3, y + 5, 6, 4, 0, 0, 7); g.fill(); R(g, x + 6, y + 3, 7, 3, g.fillStyle); R(g, x + 1, y + 3, 2, 2, "#00000066"); }
+    // finestra sul crinale e luci lontane del Campo Alto
+    R(g, 190, 36, 84, 66, "#0d0905"); grad(g, 194, 40, 76, 58, dark2() ? ["#1a2150", "#3a3f78"] : ["#7fb4ee", "#dff0ff"]); R(g, 230, 40, 2, 58, "#0d0905"); R(g, 194, 68, 76, 2, "#0d0905");
+    g.fillStyle = "#4c4a88"; g.beginPath(); g.moveTo(194, 98); g.lineTo(214, 84); g.lineTo(232, 92); g.lineTo(250, 78); g.lineTo(270, 90); g.lineTo(270, 98); g.fill();
+    R(g, 245, 82, 10, 3, "#d6f23a"); glow(g, 250, 83, 14, "230,255,90", 0.4);
+    // cannocchiale su treppiede
+    R(g, 206, 100, 2, 36, "#1a1008"); R(g, 220, 100, 2, 36, "#1a1008"); R(g, 213, 100, 2, 36, "#1a1008"); g.fillStyle = "#6a5a3a"; g.beginPath(); g.moveTo(198, 92); g.lineTo(232, 80); g.lineTo(234, 86); g.lineTo(200, 98); g.fill(); R(g, 228, 79, 6, 8, "#2a2418");
+    // stufa
+    R(g, 56, 134, 52, 22, "#2e2c34"); R(g, 56, 134, 52, 3, "#4a4852"); R(g, 64, 140, 22, 12, "#0e0a08");
+    g.save(); g.globalCompositeOperation = "lighter"; glow(g, 75, 146, 40, "255,150,60", 0.4 + 0.08 * Math.sin(f / 8)); g.restore();
+    // occhiali da sole appesi a un chiodo (il paio gemello)
+    R(g, 292, 56, 2, 2, "#0a0604"); R(g, 286, 60, 12, 5, "#0a0a0a"); R(g, 298, 60, 12, 5, "#0a0a0a"); R(g, 297, 61, 2, 1, "#0a0a0a");
+    glow(g, 160, 6, 100, "255,190,100", 0.25);
+  }
+  const dark2 = () => MOOD >= 1;
+
   let FOTO = null;
-  const BGS = { vl_paese: bgPaese, vl_campo: bgCampo, vl_miniera: bgMiniera, vl_interno: bgInterno, vl_foto: bgFoto, vl_latte: bgLatte, vl_spogliatoi: bgSpogliatoi, vl_gallerie: bgGallerie, vl_quattro: bgQuattro, vl_municipio: bgMunicipio, vl_archivio: bgArchivio };
+  const BGS = { vl_paese: bgPaese, vl_campo: bgCampo, vl_miniera: bgMiniera, vl_interno: bgInterno, vl_foto: bgFoto, vl_latte: bgLatte, vl_spogliatoi: bgSpogliatoi, vl_gallerie: bgGallerie, vl_quattro: bgQuattro, vl_municipio: bgMunicipio, vl_archivio: bgArchivio, vl_cima: bgCima, vl_cimaalta: bgCima, vl_osteria: bgOsteria, vl_campoalto: bgCampoAlto, vl_baita: bgBaita };
   const prevBg = window.renderDetailedBg;
   window.renderDetailedBg = function (kind, g, W, H, frame) {
     if (BGS[kind]) { safe(() => BGS[kind](g, W || 320, H || 200, frame || 0)); return true; }
@@ -270,8 +357,8 @@
   //                          W=parete di legno  K=armadietto  Z=porta interna  d=cancello verso il basso
   //             capitolo 3:  Q=cristallo di fase  D=porta di lumina  R=carrello  M=maglia appesa  N=maglia vuota  H=elmetto del minatore  P=parete incisa
   //             capitolo 4:  c=tappeto del Municipio  (oggetti) S=scaffale di faldoni  T=scrivania/tavolo  B=cassetti del Registro  O=tassello (pennino, timbro, sigillo, stemma)  J=vetrina  L=scala dell'archivio
-  const FLOORS = ',p:"=y;_-gic';
-  const SOLID = "afrehtlknFumvqwx><^bozjXYCGAUEWKZdQDRMNHPSTBOJL";
+  const FLOORS = ',p:"=y;_-gicsI';
+  const SOLID = "afrehtlknFumvqwx><^bozjXYCGAUEWKZdQDRMNHPSTBOJLV#%";
   const isFloor = (c) => !!c && FLOORS.includes(c);
   const ZX = { map: null, under: null, meta: null, id: "", cvs: null };
   const at = (tx, ty) => (ZX.map && ZX.map[ty] && ZX.map[ty][tx]) || "a";
@@ -284,6 +371,8 @@
 
   function floorPaint(f, sx, sy, tx, ty) {
     const r = rnd(tx, ty, 1);
+    if (f === "s") { P(sx, sy, 16, 16, (tx + ty) % 2 ? "#eef3fc" : "#e6edfa"); if (r < 0.5) P(sx + 3 + ((r * 90) | 0) % 9, sy + 4 + ((r * 50) | 0) % 8, 2, 1, "#c4d0ec"); if (r > 0.8) P(sx + 9, sy + 11, 1, 1, "#c4d0ec"); return; }
+    if (f === "I") { P(sx, sy, 16, 16, (tx + ty) % 2 ? "#bfe0f4" : "#cdeaf8"); P(sx, sy, 16, 1, "#e6f6ff"); if (r < 0.4) { P(sx + 3, sy + 5, 7, 1, "#ffffff"); P(sx + 5, sy + 6, 3, 1, "#c4e4f6"); } return; }
     if (f === ",") { P(sx, sy, 16, 16, (tx + ty) % 2 ? "#6b7388" : "#727a8f"); P(sx, sy + 7, 16, 1, "#565d70"); P(sx + (ty % 2 ? 4 : 11), sy, 1, 7, "#565d70"); P(sx + (ty % 2 ? 11 : 4), sy + 8, 1, 8, "#565d70"); if (r < 0.12) P(sx + 6, sy + 10, 3, 2, "#8a93a6"); }
     else if (f === "p" && ZX.id === "vl_latte") { P(sx, sy, 16, 16, (tx + ty) % 2 ? "#b4bbe0" : "#bcc3e6"); P(sx, sy, 16, 1, "#dde1f6"); P(sx, sy + 15, 16, 1, "#8d94bf"); P(sx + 15, sy, 1, 16, "#8d94bf"); if ((tx * 3 + ty * 5) % 5 === 0) { P(sx + 6, sy + 6, 4, 4, "#6f86a8"); P(sx + 7, sy + 7, 2, 2, "#7fe3d0"); } }
     else if (f === "p") { P(sx, sy, 16, 16, (tx + ty) % 2 ? "#8d95aa" : "#949cb0"); P(sx, sy, 16, 1, "#a7aec1"); P(sx, sy + 15, 16, 1, "#6f778c"); P(sx + 15, sy, 1, 16, "#6f778c"); if ((tx * 3 + ty * 5) % 7 === 0) { P(sx + 6, sy + 6, 4, 4, "#3a6a74"); P(sx + 7, sy + 7, 2, 2, "#7fe3d0"); } }
@@ -610,7 +699,7 @@
   const VENUE_VAL = { ads: [["STAMBECCHI DI VALLOMBRA", "#14532d"], ["LATTE DELL'ALTA VALLE", "#e2e8f0"], ["MINIERA DI LUMINA", "#92400e"], ["FORMAGGI DEL PASSO", "#a16207"]], crowd: ["#14532d", "#78350f", "#e8e0d0", "#475569", "#f0c9a0"], ground: ["#4f7a52", "#5a8a5c"], patches: "rgba(240,246,252,.55)", tint: "rgba(180,200,230,.1)", glow: "235,245,255", fx: { spd: 0.97 } };
   function playMatch(o) {
     castHero(); inMatch = true;
-    api.matchPick({ alt: o.alt, oppNames: o.oppNames, squad: o.squad, azPitch: o.azPitch, cageMut: o.cageMut, cageTarget: o.cageTarget, homeKit: o.homeKit, cageField: o.cageField, id: o.id, chap: o.chap, intro: T(o.intro), mate: o.mate, mateGeneric: true, us: o.us || "Stambecchi", min: o.min || 45, team: o.team, venue: o.venue || VENUE_VAL, hero: undefined,
+    api.matchPick({ alt: o.alt, oppNames: o.oppNames, squad: o.squad, azPitch: o.azPitch, cageMut: o.cageMut, cageTarget: o.cageTarget, homeKit: o.homeKit, cageField: o.cageField, force: o.force, weather: o.weather, id: o.id, chap: o.chap, intro: T(o.intro), mate: o.mate, mateGeneric: true, us: o.us || "Stambecchi", min: o.min || 45, team: o.team, venue: o.venue || VENUE_VAL, hero: undefined,
       onDone: (r) => { inMatch = false; const m = mem(); if (r.win) m.wins++; else if (r.a < r.b) m.losses++; save(); refreshZone(); o.done(r); } });
   }
   function finishChapter(n, ending) { const m = mem(); m.done[n] = String(ending || "ok").slice(0, 24); if (m.ch <= n) m.ch = n + 1; save(); }
@@ -3079,7 +3168,7 @@
       }
       if (s === 4) return "Risali nell'atrio: Ottavia Rovedo è seduta sulla panca a EST (lato destro dell'atrio), con il numero 15 in mano.";
       if (s === 5) return "Esci dal Municipio: cancello con la freccia in giù, in BASSO (SUD) dell'atrio. Fuori in piazza ti aspettano.";
-      return "Capitolo concluso. Il Capitolo 5, a Cima Alta, non è ancora pronto: nel frattempo raccogli le schegge, gioca con gli impiegati e parla con tutti.";
+      return "Capitolo concluso. Per il Capitolo 5 vai alla Stazione di Vallombra (la cabina per Cima Alta) o usa «Continua»: nel frattempo raccogli le schegge, gioca con gli impiegati e parla con tutti.";
     };
 
     // ---- stato dei tasselli (pennino, timbro, sigillo, stemma) e soluzione
@@ -3780,7 +3869,7 @@
       X.finishChapter(N, "registro"); setStep(N, 6);
       note("Cima Alta: derby sabato, con i Camosci sponsorizzati dalla Società Lumen. Ottavia: la lettera di Aurelio 'arriverà dopo'. Remo ha sentito il nome dell'arbitro.");
       const rw = reward("vl_ch4", { coins: 50, cos: "vl_stemma_registro" });
-      X.say(sw([["voce", "CAPITOLO 4 · IL REGISTRO · CONCLUSO"], ["voce", (rw.length ? rw.join(" · ") + ". " : "") + "Il Capitolo 5, a Cima Alta, non è ancora pronto. Nel frattempo puoi tornare al Municipio, raccogliere le ultime schegge, giocare con gli impiegati e parlare con tutti."]], BG.P), done);
+      X.say(sw([["voce", "CAPITOLO 4 · IL REGISTRO · CONCLUSO"], ["voce", (rw.length ? rw.join(" · ") + ". " : "") + "Il Capitolo 5 ti aspetta a Cima Alta: prendi la cabina alla Stazione, oppure usa «Continua». Nel frattempo puoi tornare al Municipio, raccogliere le ultime schegge, giocare con gli impiegati e parlare con tutti."]], BG.P), done);
     }
 
     // ---- compagni, Noemi, ospiti
@@ -3896,6 +3985,1150 @@
       ],
     };
   });
+
+
+  // ================================================================== CAPITOLO 5 · I CAMOSCI
+  // Nuove zone: Cima Alta (il villaggio giallo fluo sopra il Latte), il Campo Alto (lo stadio dei Camosci, sede del derby) e la Baita del Fischio.
+  // Ritocca anche la stazione di Vallombra (la cabina sale a Cima Alta) via patch. Il derby si gioca in due tempi (due api.match) con
+  // la «Regola del Campo Alto»: arbitro designato dallo sponsor. Ricompense: solo monete (una tantum) e cosmetici.
+  addChapter(function (X) {
+    const { T, F, say, ask, done, go, note, setStep, reward, hero, esc } = X;
+    const N = 5, S = () => X.stepOf(N), has = (k) => F.is(k);
+    const BG = { P: "vl_paese", C: "vl_cima", O: "vl_osteria", A: "vl_campoalto", B: "vl_baita", S: "vl_spogliatoi" };
+    const sw = (lines, bg) => lines.map((l) => (l.length > 2 ? l : [l[0], l[1], bg]));
+    const chip = (a) => a[Math.floor(Math.random() * a.length)];
+    const tono = () => F.get("tono", "ironico");
+    const tl = (o) => ["hero", o[tono()] || o.ironico || o.sicuro];
+    const zoneNow = () => X.api.trZone();
+    const MINE = ["vl_cimaalta", "vl_campoalto", "vl_baita"];
+    const inC = () => MINE.includes(zoneNow());
+    const toast = (m) => X.api.trToast(m);
+    const guida = () => F.get("guida", "bianca");
+    const compId = () => (guida() === "agata" ? "vl_agata" : "vl_bianca");
+    const compName = () => (guida() === "agata" ? "Agata" : "Bianca");
+    const isB = () => guida() !== "agata";
+    const remoId = () => (has("remo_bet") && has("m1_win") ? "vl_remo_ns" : "vl_remo");
+    const remoHelps = () => has("remo_help") || has("remo_pent");
+    const delegate = (id) => { const p = X.talkOf(id, N); if (p) p(); else done(); };
+    const PH = () => F.get("ph5", 0);
+    const proofs = () => ["cl5_a", "cl5_b", "cl5_c"].filter((k) => has(k)).length;
+    const bgHere = () => ({ vl_cimaalta: BG.C, vl_campoalto: BG.A, vl_baita: BG.B }[zoneNow()] || X.bgNow());
+
+    // ---- personaggi nuovi
+    const cast = (id, name, o, bio) => X.cast(id, Object.assign({ name }, o), bio);
+    cast("vl_vica", "Ludovica «Vica» Valanga", { tag: "gold", hair: "#b5532a", style: "codino", skin: "#c98f63", bg: ["#d6f23a", "#3a2616"], shirt: "#d6f23a" }, "Ex ala dei Camosci e oggi oste dell'Osteria del Camoscio. Sa fare il panino che non contiene camoscio, la polenta del derby e il silenzio. Il silenzio le riesce meglio, e le costa di più.");
+    cast("vl_gaudenzio", "Gaudenzio Fischietti", { tag: "gray", hair: "#d8d8e0", style: "slick", skin: "#e8bf98", shades: true, beard: true, bg: ["#3a2616", "#e0a23a"], shirt: "#6a5a4a" }, "L'arbitro della finale del '98, in carne, ossa e occhiali scuri. Vive in una baita sopra Cima Alta con ventisei fischietti appesi al muro. Non fischia da allora. Guarda ogni partita col cannocchiale.");
+    cast("vl_neve", "Rag. Ruggero Neve", { tag: "gold", hair: "#f4f4f8", style: "slick", skin: "#f0c9a8", bg: ["#1c2a4a", "#e4ff3a"], shirt: "#2b4a34" }, "Presidente dei Camosci, albergatore, allenatore delle giovanili e, il giovedì, parroco supplente. Vende neve (anzi, la affitta) e sorride con tutti i denti, compresi quelli che non sono suoi.");
+    cast("vl_zelo", "Vitaliano Zelo", { tag: "", hair: "#1a1a1a", style: "buzz", skin: "#d9a57a", bg: ["#ff4fbf", "#1a1a1a"], shirt: "#ff4fbf" }, "Arbitro di livello quattro, dipendente di «Lumen Servizi Sportivi». Tuta rosa fluo, fischietto cromato, una forte opinione sul fuorigioco e nessuna sul resto. Ha ammonito un gabbiano a luglio.");
+    X.cos("vl_camoscio", { kind: "shirt", label: "Maglia Camoscio", val: "#d6f23a", from: "Concludi il capitolo 5 di Vallombra" });
+    X.cos("vl_fascia_cima", { kind: "acc", label: "Fascia dei Camosci", val: "#e4ff3a", from: "Raccogli tutte le schegge di lumina a Cima Alta" });
+    X.cos("vl_neve_cap", { kind: "hairc", label: "Capelli Neve alta", val: "#eef4ff", from: "Raccogli tutte le schegge di lumina al Campo Alto" });
+    X.cos("vl_baita_cap", { kind: "hairc", label: "Capelli Rosso camoscio", val: "#b5532a", from: "Raccogli tutte le schegge di lumina alla Baita del Fischio" });
+
+    // ---- sole fino al tramonto del derby, poi sera
+    const mood = (s) => (s >= 6 ? 1 : 0);
+
+    // ---- obiettivi: sempre con la direzione e che cosa cercare
+    const goal = (s) => {
+      const ph = PH();
+      if (s === 0) return "Cima Alta: parla con Gisella, la steward, in piazza (CENTRO della mappa, sotto il tabellone).";
+      if (s === 1) return "Il Chalet del Presidente Neve è in ALTO a destra (NORD-EST), con l'insegna dello sponsor. Parla con lui sulla terrazza, davanti alla porta.";
+      if (s === 2) return "Il Campo Alto è a EST: dalla piazza, il cancello a destra (freccia gialla). Parla con Remo sul prato.";
+      if (s === 3) return (zoneNow() === "vl_campoalto" ? "Torna in piazza (dal Campo Alto esci dal cancello a OVEST). " : "") + "L'Osteria del Camoscio è in ALTO a sinistra (NORD-OVEST), con la tenda a righe. Parla con Vica sulla soglia.";
+      if (s === 4 && zoneNow() === "vl_baita") return "Sei sul sentiero del Fischio: la baita è a EST, al centro (porta con il camino). Parla con l'uomo sul portico.";
+      if (s === 4) return "Il sentiero del Fischio parte dalla piazza di Cima Alta, in ALTO (NORD): cancello con la freccia in su. In cima c'è la baita: parla con l'uomo sul portico.";
+      if (s === 5) {
+        if (ph === 1) return "Intervallo al Campo Alto: tocca il pallone al CENTRO del prato per far ripartire la scena dello spogliatoio.";
+        if (ph === 2) return "Secondo tempo: tocca il pallone al CENTRO del prato per riprendere.";
+        if (ph === 3) return "Fischio finale: tocca il pallone al CENTRO del prato per chiudere la giornata.";
+        const away = zoneNow() !== "vl_campoalto" ? "Il Campo Alto è a EST della piazza di Cima Alta (cancello giallo). " : "";
+        const miss = [!has("cl5_a") ? "la vetrina dei trofei in piazza (ALTO, a destra del tabellone)" : "", !has("cl5_b") ? "la Sala Arbitri (porta in ALTO a destra del campo)" : "", !has("cl5_c") ? "la panchina dei Camosci (OVEST, bordo del prato)" : ""].filter(Boolean);
+        return away + "Il derby: al Campo Alto, tocca il pallone al CENTRO del prato per il calcio d'inizio. Prima, se vuoi, cerca prove sull'arbitro" + (miss.length ? ": " + miss.join(", ") : " (le hai tutte)") + ".";
+      }
+      if (s === 6) return "Si fa sera: torna a Cima Alta, alla Stazione di Cima (in BASSO a sinistra, SUD-OVEST). Vica ti aspetta in banchina, davanti alle cabine.";
+      return "Capitolo concluso. Il Capitolo 6 non è ancora pronto: nel frattempo raccogli le schegge, ripassa dai Camosci e dalla baita, parla con tutti.";
+    };
+
+    // ---- tessere nuove: V=stendardo dei Camosci  #=tabellone  %=cannocchiale  (pavimenti: s=neve  I=ghiaccio)
+    X.PAINT.V = function (sx, sy, tx, ty, fr) {
+      floorPaint(undAt(tx, ty), sx, sy, tx, ty); const g = GP, w = Math.sin(fr / 14 + tx) * 1.5;
+      P(sx + 3, sy - 14, 2, 30, "#2a2f48"); P(sx + 2, sy - 15, 4, 2, "#8a93a6");
+      g.fillStyle = "#e4ff3a"; g.beginPath(); g.moveTo(sx + 5, sy - 13); g.lineTo(sx + 15, sy - 11 + w); g.lineTo(sx + 14, sy + 1 + w); g.lineTo(sx + 5, sy + 1); g.fill();
+      P(sx + 8, sy - 7, 3, 5, "#1a1a1a"); P(sx + 7, sy - 9, 1, 3, "#1a1a1a"); P(sx + 11, sy - 9, 1, 3, "#1a1a1a");
+    };
+    X.PAINT["#"] = function (sx, sy, tx, ty, fr) {
+      floorPaint(undAt(tx, ty), sx, sy, tx, ty); const g = GP, L = at(tx - 1, ty) !== "#", Rr = at(tx + 1, ty) !== "#";
+      P(sx + (L ? 1 : 0), sy - 2, 16 - (L ? 1 : 0) - (Rr ? 1 : 0), 16, "#10141f"); P(sx + (L ? 1 : 0), sy - 2, 16, 2, "#d6f23a"); P(sx + (L ? 1 : 0), sy + 12, 16, 2, "#2a2f48");
+      const k = (tx + (ty << 1)) % 4, lit = (fr >> 5) % 3; g.fillStyle = "#ff9a2e"; g.font = "bold 8px sans-serif"; g.textAlign = "center";
+      g.fillText(ZX.id === "vl_campoalto" ? ["C", "A", "M", "·"][k] : "", sx + 8, sy + 8); g.textAlign = "left";
+      P(sx + 3, sy + 10, 2, 1, lit === 0 ? "#ffd23f" : "#3a2a10"); P(sx + 11, sy + 10, 2, 1, lit === 1 ? "#ffd23f" : "#3a2a10");
+    };
+    X.PAINT["%"] = function (sx, sy, tx, ty, fr) {
+      floorPaint(undAt(tx, ty), sx, sy, tx, ty); const g = GP;
+      P(sx + 7, sy + 7, 2, 9, "#1a1008"); P(sx + 4, sy + 14, 2, 2, "#1a1008"); P(sx + 10, sy + 14, 2, 2, "#1a1008");
+      g.fillStyle = "#6a5a3a"; g.beginPath(); g.moveTo(sx + 2, sy + 8); g.lineTo(sx + 13, sy + 2); g.lineTo(sx + 14, sy + 5); g.lineTo(sx + 3, sy + 11); g.fill(); P(sx + 12, sy + 1, 3, 5, "#2a2418"); P(sx + 1, sy + 7, 2, 4, "#c9ccd6");
+      if ((fr >> 5) % 4 === 0) P(sx + 13, sy + 2, 1, 1, "#ffffff");
+    };
+    // le gradinate del Campo Alto sono gialle e nere, non blu e ambra
+    const j0 = X.PAINT.j;
+    X.PAINT.j = function (sx, sy, tx, ty, fr) {
+      if (ZX.id !== "vl_campoalto") return j0(sx, sy, tx, ty, fr);
+      floorPaint(undAt(tx, ty), sx, sy, tx, ty); const c = (tx >> 1) % 2 ? "#e4ff3a" : "#b8d42a";
+      P(sx, sy + 3, 16, 3, "#2a2f48"); P(sx, sy + 7, 16, 5, c); P(sx, sy + 7, 16, 1, "#ffffff55"); P(sx, sy + 12, 16, 3, "#1a1a1a"); P(sx + 2, sy + 15, 2, 1, "#00000044");
+      if (hash(tx * 7 + ty) % 5 === 0) { const g = GP; g.fillStyle = ["#2a2f48", "#c8422e", "#e8e8f0"][hash(tx + ty * 3) % 3]; g.beginPath(); g.arc(sx + 8, sy + 4, 2.4, 0, 7); g.fill(); }
+    };
+
+    function motes(g, d, n, a) { for (let i = 0; i < n; i++) { const x = ((i * 53 + d.fr * 0.15) % 340) - 10, y = ((i * 71 + Math.sin(d.fr / 60 + i) * 8) % 220) - 10; R(g, x, y, 1, 1, `rgba(${a || "255,255,255"},.55)`); } }
+    function snowfall(g, d) { for (let i = 0; i < 26; i++) { const x = ((i * 47 + d.fr * (0.12 + (i % 4) * 0.03) + Math.sin(d.fr / 70 + i) * 10) % 340) - 10, y = ((i * 31 + d.fr * (0.2 + (i % 3) * 0.06)) % 215) - 8; R(g, x, y, 1 + (i % 3 === 0 ? 1 : 0), 1 + (i % 3 === 0 ? 1 : 0), "rgba(255,255,255,.7)"); } }
+    function eveningLights(g, cx, cy) {
+      g.save(); g.globalCompositeOperation = "lighter"; const t0x = Math.floor(cx / TS), t0y = Math.floor(cy / TS);
+      for (let ty = t0y; ty <= t0y + 13; ty++) for (let tx = t0x; tx <= t0x + 21; tx++) {
+        const ch = at(tx, ty), x = tx * TS - cx + 8, y = ty * TS - cy + 8;
+        if (ch === "V") glow(g, x, y - 4, 20, "230,255,80", 0.22);
+        else if (ch === "#") glow(g, x, y, 22, "255,150,50", 0.2);
+        else if (ch === "J") glow(g, x, y, 14, "255,230,170", 0.2);
+      }
+      g.restore();
+    }
+
+    const zones = {
+      vl_cimaalta: {
+        name: "Cima Alta · Il villaggio dei Camosci", short: "Cima Alta", sub: "Millenovecento metri, quattrocento abitanti e tutto giallo", w: 44, h: 28, start: [5, 22], theme: "torino", bg: "vl_cima",
+        item: ["Scheggia di lumina", "Schegge"], itemCos: "vl_fascia_cima", items: [[2, 8], [41, 6], [12, 22], [26, 23]],
+        act: { k: "Guarda la cabina", u: "Entra nell'Osteria", w: "Guarda il Chalet", v: "Guarda l'ufficio", J: "Guarda i trofei", "#": "Guarda il tabellone", V: "Guarda lo stendardo", b: "Guarda la panca", n: "Leggi la bacheca", l: "Guarda la lampada", t: "Guarda il larice", ">": "Verso il Campo Alto", "^": "Sentiero del Fischio", x: "Guarda le casse" },
+        areas: [[1, 16, 8, 23, "La Stazione di Cima"], [6, 3, 15, 9, "L'Osteria del Camoscio"], [30, 3, 39, 10, "Il Chalet Neve"], [20, 3, 25, 8, "Il sentiero del Fischio"], [14, 9, 29, 18, "La Piazza dei Camosci"], [30, 11, 42, 16, "La via del Campo Alto"], [1, 24, 42, 27, "Il Parapetto"]],
+        hints: (s) => ({
+          "La Stazione di Cima": s >= 6 ? "La banchina delle cabine, in BASSO a sinistra. Vica aspetta lì." : "La stazione d'arrivo: banchina, cabine rosse e un ufficio con le tende gialle. Il cavo sale dal Latte e si ferma qui.",
+          "L'Osteria del Camoscio": "L'osteria dei Camosci, in ALTO a sinistra: tenda a righe gialle e nere, lavagna del menu e un odore di polenta.",
+          "Il Chalet Neve": "Il Chalet del Presidente, in ALTO a destra: terrazza con gli ombrelloni gialli e, sul tetto, l'insegna dello sponsor.",
+          "Il sentiero del Fischio": s >= 4 ? "Il sentiero sale in ALTO fino a una baita sulla cresta. Il cancello è aperto." : "Un cancello con una catena e un cartello: «Proprietà privata. Non fischiare».",
+          "La Piazza dei Camosci": "La piazza: tabellone dei risultati (3 Coppe) e vetrina dei trofei in ALTO; a EST la via per il campo, a OVEST la stazione.",
+          "La via del Campo Alto": "La strada ghiaiosa che porta a EST, al cancello giallo del Campo Alto.",
+          "Il Parapetto": "Oltre la ringhiera c'è il Latte, e da qualche parte lì sotto Vallombra. Da qui il mare di nebbia sembra uno spettacolo; da giù, un problema.",
+          "Cima Alta": "Cima Alta: millenovecento metri di giallo.",
+        }),
+        intro: [
+          ["voce", "Cima Alta è così alta che il Latte, da qui, sembra una moquette. Il sole batte forte e il paese lo restituisce a tinte fosforescenti: chalet gialli come evidenziatori, tetti verdi, balconi con camosci di legno e bandiere con un camoscio nero che sembra molto sicuro di sé."],
+          ["voce", "Ovunque, un'insegna: LUMEN ENERGIE ALPINE · OFFICIAL PARTNER. È sulla stazione, sulla fontana, sulla lavagna del bar. Su un cane, no: il cane ha ancora un po' di dignità."],
+        ],
+        npcs: (s) => {
+          const o = [], ph = PH(), c = compId();
+          if (s === 0) o.push({ id: "vl_gisella", at: [21, 13] }, { id: c, at: [7, 22] });
+          if (s === 1) o.push({ id: "vl_neve", at: [34, 10] }, { id: "vl_vermiglio", at: [36, 10] }, { id: "vl_sigillo", at: [37, 10] }, { id: c, at: [33, 11] });
+          if (s >= 2 && s <= 5) { o.push({ id: c, at: [20, 14] }); if (s <= 4) o.push({ id: "vl_neve", at: [34, 10] }, { id: "vl_vermiglio", at: [36, 10] }, { id: "vl_sigillo", at: [37, 10] }); }
+          if (s >= 3 && s <= 5) o.push({ id: "vl_vica", at: [11, 10] });
+          if (s >= 2 && s <= 4) o.push({ id: "vl_gisella", at: [24, 12] });
+          if (s === 6) o.push({ id: "vl_vica", at: [6, 22] }, { id: c, at: [5, 21] });
+          if (s >= 7) o.push({ id: "vl_vica", at: [11, 10] }, { id: "vl_gisella", at: [21, 13] }, { id: c, at: [20, 14] });
+          void ph; return o;
+        },
+        build(L) {
+          const { lay, put, house } = L;
+          lay(0, 0, 43, 2, "a"); lay(0, 3, 0, 23, "a"); lay(43, 3, 43, 23, "a");
+          lay(1, 3, 42, 23, ":"); lay(1, 3, 5, 12, "s"); lay(40, 3, 42, 11, "s"); lay(14, 9, 29, 18, ",");
+          lay(1, 24, 42, 24, "r"); lay(0, 25, 43, 27, "f");
+          house(6, 3, 9, 6, { roof: "#2b4a34", wall: "#d6f23a", door: [10, 8, "u"], chim: 2, ox: 1, wood: true, snow: true });
+          house(30, 3, 10, 6, { roof: "#2b4a34", wall: "#f2f6ff", door: [34, 8, "w"], ox: 0, snow: true, shut: "#c8422e" });
+          house(1, 16, 7, 5, { roof: "#2b4a34", wall: "#d6f23a", door: [4, 20, "v"], snow: true, shut: "#1a1a1a" });
+          house(9, 17, 5, 4, { roof: "#46557a", wall: "#d6f23a", snow: true, shut: "#2b4a34" });
+          house(33, 17, 6, 5, { roof: "#2b4a34", wall: "#d6f23a", ox: 1, snow: true });
+          house(21, 19, 6, 4, { roof: "#2a3550", wall: "#d6f23a", ox: 0, shut: "#1a1a1a" });
+          put(3, 23, "k"); put(4, 23, "k"); put(5, 23, "k");
+          [[14, 9], [29, 9], [14, 18], [29, 18]].forEach(([x, y]) => put(x, y, "V"));
+          lay(16, 9, 19, 9, "#"); put(26, 9, "J"); put(27, 9, "J");
+          put(18, 19, "n"); put(16, 13, "b"); put(27, 13, "b"); put(17, 16, "b"); put(26, 16, "b");
+          [[14, 13], [29, 13], [13, 22], [31, 22]].forEach(([x, y]) => put(x, y, "l"));
+          [[8, 11], [12, 11], [31, 11], [40, 11], [36, 23], [40, 20], [16, 21], [19, 23], [29, 21], [2, 14], [41, 17]].forEach(([x, y]) => put(x, y, "t"));
+          put(43, 13, ">"); put(43, 14, ">"); put(22, 2, "^"); put(23, 2, "^");
+        },
+        decor(cx, cy, d) {
+          const g = GP, X_ = d.X, Y_ = d.Y, fr = d.fr;
+          plaque(g, "STAZIONE DI CIMA · 1.900 m", X_(4) + 8, Y_(15) + 2); plaque(g, "OSTERIA DEL CAMOSCIO", X_(10.5), Y_(2) + 8); plaque(g, "CHALET NEVE · LUMEN", X_(35), Y_(2) + 8);
+          plaque(g, "TABELLONE DELLE COPPE", X_(18) + 8, Y_(8) + 4); plaque(g, "TROFEI", X_(27) + 8, Y_(8) + 4);
+          plaque(g, "VIA DEL CAMPO ALTO ▸", X_(37), Y_(11) + 6);
+          // il cavo della funivia che arriva dal Latte, in basso a sinistra, e la cabina che scivola
+          const x0 = X_(2) - 40, y0 = Y_(27.8), x1 = X_(4.5), y1 = Y_(23) + 3; g.strokeStyle = "#1c2236"; g.lineWidth = 1; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke();
+          const t = ((fr * 0.0014) % 1.4) - 0.1, bx = x0 + (x1 - x0) * t, by = y0 + (y1 - y0) * t;
+          if (t > 0 && t < 1 && onScr(bx, by)) { R(g, bx, by, 1, 4, "#1c2236"); R(g, bx - 6, by + 4, 12, 8, "#c8422e"); R(g, bx - 6, by + 4, 12, 2, "#e8704e"); R(g, bx - 4, by + 7, 3, 3, "#ffd98a"); R(g, bx + 1, by + 7, 3, 3, "#ffd98a"); }
+          // striscione di benvenuto fra i tetti
+          const sx = X_(14) + 8, ex = X_(29) + 8, sy = Y_(8) - 6; if (onScr(sx, sy) || onScr(ex, sy)) { g.strokeStyle = "#2a2f48"; g.beginPath(); g.moveTo(sx, sy); g.quadraticCurveTo((sx + ex) / 2, sy + 10, ex, sy); g.stroke(); for (let i = 1; i < 12; i++) { const k = i / 12, px_ = sx + (ex - sx) * k, py_ = sy + 10 * 2 * k * (1 - k); g.fillStyle = i % 2 ? "#e4ff3a" : "#1a1a1a"; g.beginPath(); g.moveTo(px_ - 4, py_); g.lineTo(px_ + 4, py_); g.lineTo(px_, py_ + 7); g.fill(); } }
+          smoke(g, X_(8) + 8, Y_(3) + 2, fr); smoke(g, X_(36) + 8, Y_(3) + 2, fr + 21);
+          if (MOOD < 1) snowfall(g, d); else motes(g, d, 10, "255,230,170");
+        },
+        top(cx, cy, d) { const g = GP; fogFront(g, cy, 24.4, d.fr); moodTint(g); tileLights(g, cx, cy); eveningLights(g, cx, cy); },
+      },
+
+      vl_campoalto: {
+        name: "Cima Alta · Il Campo Alto", short: "Il Campo Alto", sub: "Lo stadio dei Camosci, sede del derby", w: 40, h: 26, start: [2, 12], theme: "napoli", bg: "vl_campoalto",
+        item: ["Scheggia di lumina", "Schegge"], itemCos: "vl_neve_cap", items: [[3, 21], [37, 21], [12, 23], [22, 23]],
+        act: { w: "Guarda lo spogliatoio", m: "Sala Arbitri", U: "Il pallone al centro", "#": "Guarda il tabellone", j: "Guarda la gradinata", b: "Guarda la panchina", T: "Guarda il tavolo", x: "Guarda le casse", "<": "Torna in paese", V: "Guarda lo stendardo", l: "Guarda il faro" },
+        areas: [[1, 3, 6, 9, "Lo spogliatoio dei Camosci"], [33, 3, 38, 9, "La Sala Arbitri"], [33, 10, 38, 18, "Il palco dello sponsor"], [2, 13, 6, 18, "La cabina di Radio Nebbia"], [8, 6, 31, 18, "Il prato del Campo Alto"], [7, 5, 32, 19, "La pista"], [8, 3, 31, 4, "Il tabellone"], [8, 20, 31, 22, "La gradinata"], [1, 21, 38, 24, "Dietro la gradinata"]],
+        hints: (s) => ({
+          "Lo spogliatoio dei Camosci": "Una baracca di legno con la porta gialla. Dentro, ganci, pettorine fluo e un coro che prova da solo.",
+          "La Sala Arbitri": "In ALTO a destra: una porta di legno con un cartello «ARBITRI · SI PREGA DI NON FISCHIARE». Si può guardare dentro.",
+          "Il palco dello sponsor": "Un palchetto di assi con tavoli, ombrelloni e il logo dello sponsor ripetuto fino alla nausea.",
+          "La cabina di Radio Nebbia": "Un tavolo, un microfono grande come un frutto e Noemi, che trasmette in diretta anche i silenzi.",
+          "Il prato del Campo Alto": s === 5 ? "Il pallone al CENTRO del prato: toccalo per cominciare (o riprendere) il derby." : "Il prato è rasato con il righello. Cinque Camosci e un gabbiano si riscaldano. Il pallone è al centro.",
+          "La pista": "La pista di terra rossa che gira attorno al prato. Sulla panchina dei Camosci (OVEST) qualcuno ha dimenticato un taccuino.",
+          "Il tabellone": "Il tabellone, in ALTO: segna CAMOSCI contro OSPITI e, in piccolo, il nome dello sponsor.",
+          "La gradinata": "Gradoni gialli e neri. Ottocento posti, di cui seicento già occupati da gente che ha portato la propria sedia.",
+          "Dietro la gradinata": "Lo spazio dietro le tribune, pieno di casse, bandiere arrotolate e panini dimenticati.",
+          "Il Campo Alto": "Il Campo Alto di Cima Alta.",
+        }),
+        intro: [
+          ["voce", "Il Campo Alto è un prato perfetto: rasato con il righello, tribune giallo fluo, ottocento posti, un tabellone elettronico e, tutto attorno, cartelloni neri con una sola parola gialla: LUMEN."],
+          ["voce", "Sull'erba c'è una scritta tracciata con la calce: BENVENUTI OSPITI (NON TROPPO). La calce è fresca; la fiducia, meno."],
+        ],
+        npcs: (s) => {
+          const o = [], ph = PH(), c = compId(), derby = s === 5;
+          if (s >= 2) o.push({ id: "vl_noemi", at: [4, 15] });
+          if (s === 2 || s === 3 || s === 4) o.push({ id: remoId(), at: [15, 10] }, { id: "vl_tonio", at: [12, 13] }, { id: "vl_zelo", at: [28, 9] }, { id: c, at: [5, 12] });
+          if (derby) {
+            o.push({ id: "vl_zelo", at: [28, 9] }, { id: "vl_tonio", at: [12, 13] }, { id: c, at: [5, 12] }, { id: "vl_cornelio", at: [8, 21] }, { id: "vl_mirtilla", at: [10, 22] });
+            if (ph <= 1) o.push({ id: remoId(), at: [15, 10] }, { id: "vl_gisella", at: [7, 14] });
+            o.push({ id: "vl_neve", at: [35, 14] }, { id: "vl_vermiglio", at: [36, 13] }, { id: "vl_sigillo", at: [37, 13] });
+            if (ph >= 1 && ph <= 3) o.push({ id: "vl_gaudenzio", at: [9, 3] });
+          }
+          if (s >= 6) o.push({ id: remoId(), at: [15, 10] }, { id: "vl_tonio", at: [12, 13] }, { id: c, at: [5, 12] });
+          return o;
+        },
+        build(L) {
+          const { lay, put, house } = L;
+          lay(0, 0, 39, 2, "a"); lay(0, 3, 0, 24, "a"); lay(39, 3, 39, 24, "a"); lay(0, 25, 39, 25, "a");
+          lay(1, 3, 38, 24, ":"); lay(7, 5, 32, 19, ";"); lay(8, 6, 31, 18, "y");
+          lay(9, 4, 30, 4, "j"); lay(9, 20, 30, 20, "j"); lay(34, 10, 38, 17, "=");
+          house(1, 3, 5, 6, { roof: "#2b4a34", wall: "#d6f23a", door: [3, 8, "w"], snow: true, shut: "#1a1a1a" });
+          house(33, 3, 5, 6, { roof: "#46557a", wall: "#cfd3e6", door: [35, 8, "m"], snow: true, shut: "#6a4a30" });
+          lay(17, 3, 20, 3, "#"); put(19, 12, "U");
+          lay(3, 14, 4, 14, "T"); put(2, 15, "x"); put(2, 16, "x");
+          lay(35, 12, 36, 12, "T"); put(34, 16, "b"); put(38, 16, "b");
+          put(6, 10, "b"); put(6, 11, "b"); put(6, 9, "b");
+          [[6, 5], [33, 5], [6, 19], [33, 19]].forEach(([x, y]) => put(x, y, "V"));
+          [[7, 4], [32, 4], [7, 22], [32, 22]].forEach(([x, y]) => put(x, y, "l"));
+          put(0, 12, "<"); put(0, 13, "<");
+        },
+        decor(cx, cy, d) {
+          const g = GP, X_ = d.X, Y_ = d.Y, fr = d.fr;
+          const x0 = X_(8) + 0.5, y0 = Y_(6) + 0.5, w = 24 * TS - 1, h = 13 * TS - 1;
+          if (x0 > -500 && x0 < 500) {
+            g.strokeStyle = "rgba(255,255,255,.85)"; g.lineWidth = 1; g.strokeRect(x0, y0, w, h); g.beginPath(); g.moveTo(x0 + w / 2, y0); g.lineTo(x0 + w / 2, y0 + h); g.stroke();
+            g.beginPath(); g.arc(x0 + w / 2, y0 + h / 2, 26, 0, 7); g.stroke(); g.strokeRect(x0, y0 + 3.5 * TS, 3 * TS, 6 * TS); g.strokeRect(x0 + w - 3 * TS, y0 + 3.5 * TS, 3 * TS, 6 * TS);
+            g.strokeStyle = "#e8e8f0"; g.lineWidth = 2; g.strokeRect(x0 - 7, y0 + 5 * TS, 7, 3 * TS); g.strokeRect(x0 + w, y0 + 5 * TS, 7, 3 * TS);
+            // cartelloni dello sponsor lungo la linea di fondo, scritta di calce sul prato
+            for (let i = 0; i < 8; i++) { const bx = x0 + 6 + i * 48, by = y0 - 6; R(g, bx, by, 44, 5, "#1a1a1a"); R(g, bx, by, 44, 1, "#d6f23a"); }
+            g.save(); g.globalAlpha = 0.55; g.fillStyle = "#ffffff"; g.font = "bold 7px sans-serif"; g.textAlign = "center"; g.fillText("BENVENUTI OSPITI (NON TROPPO)", x0 + w / 2, y0 + h - 10); g.restore(); g.textAlign = "left";
+            // coni per lo slalom
+            [0, 1, 2, 3, 4].forEach((i) => { const cxx = x0 + 52 + i * 28, cyy = y0 + 28 + ((i % 2) ? 14 : -4) + 20; g.fillStyle = "#ff7a1e"; g.beginPath(); g.moveTo(cxx - 3, cyy + 4); g.lineTo(cxx, cyy - 4); g.lineTo(cxx + 3, cyy + 4); g.fill(); R(g, cxx - 1, cyy - 1, 2, 1, "#ffffff"); });
+          }
+          plaque(g, "SPOGLIATOIO CAMOSCI", X_(3) + 8, Y_(2) + 6); plaque(g, "SALA ARBITRI", X_(35) + 8, Y_(2) + 6); plaque(g, "PALCO LUMEN", X_(36) + 8, Y_(9) + 6); plaque(g, "RADIO NEBBIA 91,3", X_(3.5), Y_(13) - 2);
+          if (MOOD < 1) snowfall(g, d);
+        },
+        top(cx, cy, d) { const g = GP; fogFront(g, cy, 24.0, d.fr); moodTint(g); tileLights(g, cx, cy); eveningLights(g, cx, cy); },
+      },
+
+      vl_baita: {
+        name: "Cima Alta · La Baita del Fischio", short: "La Baita del Fischio", sub: "Una cresta, un cannocchiale e ventisei fischietti", w: 30, h: 20, start: [2, 14], theme: "puntanera", bg: "vl_baita",
+        item: ["Scheggia di lumina", "Schegge"], itemCos: "vl_baita_cap", items: [[3, 5], [26, 15], [11, 17]],
+        act: { m: "Guarda la porta", "%": "Guarda col cannocchiale", x: "Guarda la legna", b: "Guarda la panca", t: "Guarda il larice", "<": "Torna a Cima Alta", l: "Guarda la lampada" },
+        areas: [[16, 3, 24, 11, "La baita"], [25, 6, 28, 10, "Il belvedere"], [4, 8, 9, 12, "Il laghetto gelato"], [1, 13, 15, 16, "Il sentiero"], [1, 3, 28, 18, "La cresta"]],
+        hints: (s) => ({
+          "La baita": s >= 4 ? "Una baita di tronchi con il camino acceso. Sul portico, davanti alla porta, c'è un uomo con gli occhiali da sole. Parlagli." : "Una baita di tronchi, chiusa.",
+          "Il belvedere": "Un cannocchiale su treppiede, puntato verso il Campo Alto: da qui si vede ogni gradone, ogni panchina, ogni volto.",
+          "Il laghetto gelato": "Un laghetto ghiacciato. Qualcuno ha scritto sul ghiaccio, a passi, un solo numero: 26.",
+          "Il sentiero": "Il sentiero torna a Cima Alta, a OVEST. Il cancello è in fondo a sinistra.",
+          "La cresta": "La cresta, a milleottocento e rotti metri, con il vento che fischia da solo (corto, lungo, corto).",
+          "La Baita del Fischio": "La baita di Gaudenzio.",
+        }),
+        intro: [
+          ["voce", "Il sentiero del Fischio sale a tornanti fra i larici, un cartello ogni cento metri: «PROPRIETÀ PRIVATA», «NON FISCHIARE», «NON FISCHIARE, GRAZIE», «SE FISCHI TI SENTE». In cima, sulla cresta, una baita di tronchi con il camino acceso."],
+          ["voce", "Il vento qui fischia da solo, e lo fa in codice: corto, lungo, corto."],
+        ],
+        npcs: (s) => (s >= 4 && s <= 5 ? [{ id: "vl_gaudenzio", at: [20, 11] }, { id: compId(), at: [14, 14] }] : s >= 6 ? [{ id: "vl_gaudenzio", at: [20, 11] }] : []),
+        build(L) {
+          const { lay, put, house } = L;
+          lay(0, 0, 29, 19, "a"); lay(1, 3, 28, 18, "s"); lay(1, 13, 15, 16, ":"); lay(14, 10, 22, 12, ":"); lay(4, 8, 9, 12, "I"); lay(25, 6, 28, 10, ":");
+          house(16, 3, 9, 7, { roof: "#5a3a22", wall: "#8a6238", door: [20, 9, "m"], chim: 6, wood: true, snow: true, ox: 1 });
+          put(15, 11, "x"); put(15, 12, "x"); put(19, 11, "b"); put(26, 8, "%");
+          [[2, 4], [13, 6], [27, 4], [24, 14], [7, 16], [18, 17], [5, 6], [11, 9], [22, 17], [3, 11]].forEach(([x, y]) => put(x, y, "t"));
+          put(13, 14, "l"); put(0, 14, "<"); put(0, 15, "<");
+        },
+        decor(cx, cy, d) {
+          const g = GP, X_ = d.X, Y_ = d.Y;
+          plaque(g, "BAITA DEL FISCHIO", X_(20.5), Y_(2) + 8); plaque(g, "26", X_(6.5) + 8, Y_(10) + 4);
+          snowfall(g, d);
+        },
+        top(cx, cy, d) { const g = GP; moodTint(g); tileLights(g, cx, cy); const gr = g.createRadialGradient(160, 100, 60, 160, 100, 200); gr.addColorStop(0, "rgba(10,10,30,0)"); gr.addColorStop(1, "rgba(10,10,30,.28)"); g.fillStyle = gr; g.fillRect(0, 0, 320, 200); },
+      },
+    };
+
+
+    // ---- ritocchi alle zone dei capitoli precedenti (attivi quando il capitolo 5 è sbloccato)
+    const CAMOSCI = ["vl_remo", "vl_remo_ns", "vl_tonio", "vl_gisella"];
+    ["vl_paese", "vl_campo", "vl_discesa", "vl_latte", "vl_spogliatoi", "vl_miniera"].forEach((zid) => {
+      X.patch(zid, N, {
+        npcs: (list) => list.filter((n) => !CAMOSCI.includes(n.id) && !(n.id === "vl_vica")),
+        hints: zid === "vl_paese" ? () => ({ "La Stazione Alta": "La cabina rossa, in BASSO a sinistra: da qui si sale a Cima Alta. Guardala e scegli «Sali a Cima Alta»." }) : undefined,
+      });
+    });
+    X.patch("vl_paese", N, { act: { k: "Cabina per Cima Alta" } });
+
+    // ================= scene
+    const cornelioT = () => F.get("cornelio_t", "silenzio");
+
+    // ---- Gisella: l'accredito
+    function gisella() {
+      if (!inC()) return delegate("vl_gisella");
+      const s = S(), z = zoneNow();
+      if (s === 0 && z === "vl_cimaalta") return gisellaArrivo();
+      const L = s >= 7 ? ["Lo striscione NON TOCCATE LA CABINA è pronto. Manca soltanto una parola: «giusto». La stiamo discutendo da tre ore.", "Ho consegnato a Tonio il thermos e a Remo un panino. A Remo il panino l'ha portato nostra madre, ma io lo scrivo lo stesso a mio nome."]
+        : z === "vl_campoalto" ? ["I nonni scortatori sono sei. Il più veloce fa quindici metri al minuto. È considerato un atleta.", "La regola del Campo Alto dice che l'ospite non paga. L'ospite, però, consuma: il lampione è offerto dallo sponsor, il buio è a pagamento."]
+          : ["Tifo Camosci anche quando perdiamo. Soprattutto quando perdiamo: è lì che si vede il carattere e si sente il coro.", "Il Presidente dice «benvenuto» tre volte al giorno. Lo ha registrato: lo fa suonare dal citofono quando è in bagno."];
+      say(sw([["vl_gisella", chip(L)]], bgHere()), done);
+    }
+    function gisellaArrivo() {
+      const k = F.get("remo", 1), bet = has("remo_bet") && has("m1_win"), c = compId();
+      say(sw([
+        ["voce", "Al centro della piazza, sotto il tabellone dei risultati, Gisella Cima è in piedi su una cassetta della frutta con un megafono e una pettorina gialla con scritto STEWARD (CAMOSCIO). Dietro di lei, appeso a due pali, uno striscione dipinto a mano: BENVENUTI OSPITI (NON TROPPO)."],
+        ["vl_gisella", "BENVENUTI A CIMA ALTA! (al megafono, a un metro da te) Siete a milleottocento metri, quattrocentodieci abitanti, tre Coppe in fila e un solo bar con la licenza per il camoscio. Nel panino il camoscio non c'è, c'è il nome. Ci hanno consigliato di non indagare."],
+        [c, isB() ? "Gialli. Tutti gialli. Un colore da segnale di pericolo: sarà un caso." : "Giallo fluo: nel colore, sarebbe zolfo. Tossico, ma visibile. Sarà una scelta di marketing."],
+        ["vl_gisella", "Questo è il vostro accredito: «OSPITE (NON PAGANTE)». Va portato al collo. Chi non lo porta viene scortato fuori piazza da un nonno. Ne abbiamo sei, sono gentilissimi e lentissimi: un'evasione costa ore."],
+        ["vl_gisella", "Programma: oggi, Vigilia. Domani, Vigilia della Vigilia. Sabato, derby. Prima, però, il Presidente Neve vuole darvi il benvenuto. Dice sempre «benvenuto» prima di dire «no». Il Chalet è in alto a destra, sotto l'insegna che non potete non vedere."],
+        ["vl_gisella", k === 3 && !remoHelps() ? "Remo non ha voluto riceverti. Dice che ti riceve in campo. Gli piace il dramma, e lo sa gestire." : bet ? "Remo vi aspetta al Campo Alto senza occhiali, quindi è di cattivo umore. Un umore con la luce, per una volta." : "Remo è al campo ad allenarsi. Dice che è per preparare il derby. In realtà è per non stare in piazza: ha ricevuto tre telefonate della mamma, una al minuto."],
+        tl({ sicuro: "Allora andiamo dal Presidente. Con calma e a testa alta.", attento: "Tre telefonate in un minuto. Annoto: qui c'è qualcosa di cui non si parla.", ironico: "Un benvenuto che precede un no: abbiamo già passato una dogana più sincera." }),
+      ], BG.C), () => { setStep(N, 1); note("Cima Alta, giovedì: il Presidente Neve ci aspetta al Chalet (ALTO a destra). Il derby è sabato, arbitro designato dallo sponsor Lumen."); done(); });
+    }
+
+    // ---- il Chalet: Neve, Zelo, Vermiglio e (forse) la cena
+    function neve() {
+      if (!inC()) return delegate("vl_neve");
+      const s = S();
+      if (s === 1) return neveScena();
+      if (zoneNow() === "vl_campoalto") return neveDerby();
+      const L = s >= 7 ? ["Il bilancio della giornata: un derby, due colpi di scena e una cassa del bar vuota. Direi in pareggio.", "Presidente, sì. Ma da oggi anche garante. Mi sono preso un incarico che non so ancora scrivere."]
+        : ["Benvenuti, benvenuti, benvenuti. Se vi manca qualcosa, non venite da me: mi mancherebbe qualcosa anch'io.", "La neve di quest'anno è a pagamento. Quella dell'anno prossimo è già in prelazione."];
+      say(sw([["vl_neve", chip(L)]], bgHere()), done);
+    }
+    function neveScena() {
+      const pr = F.get("prove", "tenute"), rad = pr === "radio", ag = pr === "agata";
+      say(sw([
+        ["voce", "Il Chalet Neve ha una terrazza con gli ombrelloni gialli, un'insegna a neon (LUMEN ENERGIE ALPINE · OFFICIAL PARTNER) e uno zerbino con scritto «WELCOME (CON RISERVA)». Un uomo con un sorriso a trentadue denti, venti dei quali suoi, ti viene incontro a braccia aperte."],
+        ["vl_neve", "BENVENUTI! Ruggero Neve: presidente dei Camosci, albergatore, allenatore delle giovanili e, il giovedì, parroco supplente. Vendo neve. Anzi: la affitto, con opzione di riscatto a primavera."],
+        ["vl_neve", "Il derby, dunque! Due tempi da quarantacinque, campo mio, regole mie e arbitro designato dallo sponsor, «per garantire regolarità e buonumore». È la Regola del Campo Alto: vecchia di ventisei anni, quindi antica."],
+        ["voce", "A un tavolino in disparte, un uomo in tuta rosa fluo con un fischietto cromato al collo si alza, si inchina e fischia: un colpo secco. Un cameriere ha un sussulto, un gabbiano si sposta di tre metri."],
+        ["vl_neve", "Vitaliano Zelo! Livello quattro. Ha ammonito un gabbiano, a luglio. Un professionista: il gabbiano non ha protestato."],
+        ["vl_zelo", "Il regolamento dice: ammonire chi sbaglia. Io lo applico con rigore e con un certo senso del ritmo. Qui ho un metodo: chi viene da fuori sbaglia di più."],
+        ["voce", "Al tavolo accanto, con il giornale aperto e i guanti bianchi posati sul bordo come un secondo paio di mani, l'ingegner Vermiglio. L'avvocata Sigillo gli versa un bicchiere d'acqua. Il vino non lo beve: «il vino parla, l'acqua ascolta»."],
+        ...(rad ? [["vl_vermiglio", "Ho sentito la radio, ieri. Un nome letto ad alta voce davanti a mezza valle: coraggio da dilettanti, sempre ammirevole. La Società ha già dato mandato agli avvocati. Ma sono qui per il calcio, {n}: una Coppa non si querela."], ["vl_neve", "(il sorriso perde quattro denti tutti insieme) Cima Alta ha ascoltato la radio. È un paese molto sensibile alle accuse. Specie alle accuse sulle persone di Cima Alta."]]
+          : ag ? [["vl_vermiglio", "La dottoressa Sassi, mi dicono, ha depositato dei documenti presso un notaio milanese. Trenta giorni e un po' di pazienza reciproca. La Società è paziente per natura e per bilancio. Nel frattempo, il derby: una cortesia fra vicini."], ["vl_sigillo", "Le cortesie, ingegnere, hanno sempre un costo. Segno."]]
+            : [["vl_vermiglio", "Il derby, {n}. Sono un uomo semplice: mi piace sapere come finisce una cosa prima che cominci. In un ingegnere è un difetto professionale."], ["vl_sigillo", "Per ora non segno niente. È un segno di rispetto."]]),
+        ["vl_vermiglio", "Sono lo sponsor, non l'arbitro: la differenza è un tratto di penna. Ma mi piace pensare che una Coppa sia una cosa seria, e che una cosa seria meriti qualcuno di serio a fischiarla. Il signor Zelo lo è."],
+      ], BG.C), () => ask("voce", "Neve ti guarda con un sorriso che aspetta, Zelo con un fischietto che aspetta, Vermiglio con una calma che ha già aspettato. Cosa rispondi?", [
+        { label: "«Un arbitro designato dallo sponsor? Non è la regola di nessuno.»", sub: "Protesti", fn: () => neveR("protesta") },
+        { label: "«Va benissimo. Basta che fischi giusto.»", sub: "Ironico", fn: () => neveR("ironia") },
+        { label: "«Gioco dove mi mettete. Il campo è uguale per tutti.»", sub: "Sportivo", fn: () => neveR("sport") },
+      ], BG.C));
+    }
+    function neveR(w) {
+      F.set("neve_t", w);
+      const a = w === "protesta" ? [["vl_neve", "(il sorriso resta, ma tiene una mano sul portafoglio) Protesta accolta e archiviata. Il regolamento prevede il diritto di lamentarsi, ma entro il fischio d'inizio. Dopo si sconta in ammonizione."]]
+        : w === "ironia" ? [["vl_zelo", "Giusto è un avverbio. Io preferisco i verbi: fischio, ammonisco, espello."], ["vl_neve", "Bravo, bravo! Mi piace chi ride del regolamento. Ride bene chi ride ultimo, ma il regolamento ride per ultimo e con più voce."]]
+          : [["vl_neve", "Ecco uno sportivo! Gioco dove mi mettete: magari lo mettessero nei cartelli all'ingresso. Ho già ordinato la targa."]];
+      const c = compId();
+      say(sw([...a,
+        [c, isB() ? "Un arbitro dello sponsor, uno sponsor dei guanti. Questa partita ha più cinghie che bulloni." : "Un arbitro dello sponsor. Conflitto d'interessi: nel mio mestiere lo si risolve con un terzo perito. Qui il terzo è il vento."],
+      ], BG.C), () => (pr() === "tenute" ? cenaInvito() : neveFine()));
+      function pr() { return F.get("prove", "tenute"); }
+    }
+    function cenaInvito() {
+      say(sw([
+        ["vl_vermiglio", "Un'ultima cosa. Stasera, alle venti, nel salottino privato del Chalet, cenerò da solo: mi dicono che sia una cattiva abitudine. Sarei lieto di averla ospite. Sono un uomo che parla meglio a tavola. Porti l'appetito e (non guarda la tasca, ma la tasca sente) quello che ha con sé."],
+        ["voce", "Ricordi la frase di Teodora, sul registro: «Dicono che stasera qualcuno dovrà andare a una cena. Non andare.»"],
+      ], BG.C), () => ask("voce", "L'invito è cortese e preciso come un conto.", [
+        { label: "«Non verrò. Non mangio con chi parla con i guanti.»", sub: "Rifiuti", fn: () => cena("no") },
+        { label: "«Verrò. Per ascoltare, non per firmare.»", sub: "Vai alla cena", fn: () => cena("ascolto") },
+      ], BG.C));
+    }
+    function cena(w) {
+      F.set("cena", w);
+      if (w === "no") {
+        return say(sw([
+          ["vl_vermiglio", "(si rimette il guanto con un gesto di rammarico professionale) Capisco. La tavola, qui, è apparecchiata per due: se cambia idea, la cena è fredda ma l'offerta no."],
+          [compId(), "Hai fatto bene a non andare. Un ingegnere che apparecchia è un ingegnere che costruisce."],
+        ], BG.C), neveFine);
+      }
+      say(sw([
+        ["voce", "Il salottino privato del Chalet ha un camino acceso, un tavolo per due e una lampada con il paralume a forma di camoscio. Vermiglio ti versa un bicchiere d'acqua, con i guanti, e il tuo si guarda nel suo come due cose che sanno di essere uguali."],
+        ["vl_vermiglio", "Sono fiero della Società Lumen. Un club è una macchina per far credere a mille persone che il tempo si possa fermare. Io faccio lo stesso con i cantieri: la differenza è che io mi faccio pagare."],
+        ["vl_vermiglio", "Una fondazione per gli Stambecchi: campo nuovo a Vallombra, luci, tetto, spogliatoi con l'acqua calda, settecentomila. In cambio i fascicoli del IV cassetto restano dove stanno, e la miniera si chiude con grazia. Con una cerimonia, un nastro e un panino."],
+        ["vl_vermiglio", "Non siamo mostri. Per ventisei anni abbiamo mantenuto persone che altrimenti avrebbero sofferto da sole: una madre, per dirne una, e il suo ragazzo, con una squadra e due Coppe regalate. La riconoscenza è un contratto che nessuno firma e tutti rispettano."],
+        ["voce", "Non fa nomi. Non ne ha bisogno: ti guarda come chi ha messo una moneta in un buco e sente già il tintinnio."],
+      ], "vl_interno"), () => ask("voce", "Il camino scoppietta. Sigillo, in piedi, segna qualcosa con una stilografica. Cosa rispondi?", [
+        { label: "«No. Una squadra non si compra: si costruisce.»", sub: "Rifiuti a tavola", fn: () => cenaR("rifiuto") },
+        { label: "«Mi dia tempo fino a sabato.»", sub: "Prendi tempo", fn: () => cenaR("tempo") },
+      ], "vl_interno"));
+    }
+    function cenaR(w) {
+      F.set("cena_t", w);
+      say(sw([
+        w === "rifiuto" ? ["vl_vermiglio", "Una risposta nobile e scomoda. La nobiltà, a tavola, è un piatto che si raffredda subito."] : ["vl_vermiglio", "Tempo. L'unica cosa che le sto offrendo gratis, ed è la sola che a Vallombra vale ancora qualcosa."],
+        ["vl_vermiglio", "Sabato, dopo la partita, la sua risposta mi arriverà in campo, senza bisogno di parole. Buonanotte, {n}."],
+        ["voce", "Esci nel freddo con la sensazione di aver mangiato poco e capito troppo. «Una madre e il suo ragazzo, con una squadra.» Chi?"],
+      ], "vl_interno"), () => { note("A cena Vermiglio ha offerto 700.000 per gli Stambecchi: ha detto che la Società mantiene da 26 anni 'una madre e il suo ragazzo, con una squadra'. Chi?"); neveFine(); });
+    }
+    function neveFine() {
+      note("Cima Alta: il derby è sabato, con la Regola del Campo Alto (arbitro Zelo, designato dallo sponsor). Remo è al Campo Alto, a EST.");
+      setStep(N, 2); done();
+    }
+    function neveDerby() {
+      const s = S(), ph = PH();
+      if (s === 5 && ph === 0) {
+        const pr = F.get("prove", "tenute");
+        return say(sw([["vl_neve", pr === "radio" ? "Qui a Cima Alta la radio la ascoltiamo, la capiamo e la mettiamo in cornice. Non ci piace che la si usi per dare lezioni di morale. Giochiamo, giochiamo: a fine partita ci stringeremo la mano, a Dio piacendo."
+          : chip(["Un ottimo derby, un ottimo derby! Tutti vogliono bene a tutti, soprattutto ai biglietti venduti.", "Ho fatto stampare i programmi: la formazione degli ospiti è in corpo sei. Giusto per non farla pesare."])]], BG.A), done);
+      }
+      say(sw([["vl_neve", chip(["Vede com'è bello il Campo Alto? Quel verde non è naturale: è sponsorizzato.", "Mi scusi: ho un'emozione. Non so ancora quale."])]], BG.A), done);
+    }
+    function vermigliot() {
+      if (!inC()) return delegate("vl_vermiglio");
+      const s = S();
+      if (s === 1) return neveScena();
+      say(sw([["vl_vermiglio", chip(s === 5 ? ["Il campo è stato lisciato come un foglio. Mi piace pensare che anche il risultato lo sia.", "Un derby è una questione di equilibrio: pesi che si compensano, forze che si annullano. È la mia filosofia anche per le demolizioni."] : ["Il tempo, {n}, è l'unica cosa che un archivio possieda in abbondanza. Lo usi bene.", "Non mi trovo male qui. Il silenzio, a Cima Alta, è acquistato e rilegato."])]], bgHere()), done);
+    }
+    function sigillot() {
+      if (!inC()) return delegate("vl_sigillo");
+      if (S() === 1) return neveScena();
+      say(sw([["vl_sigillo", chip(["Cinque minuti d'anticipo sull'orologio, e dodici sulla vostra pazienza. È una politica aziendale.", "Ho le firme di tre persone, un timbro e un'opinione. Segno l'opinione per ultima."])]], bgHere()), done);
+    }
+
+    // ---- Remo al Campo Alto
+    function remoOpening() {
+      const k = F.get("remo", 1), id = remoId(), ns = id === "vl_remo_ns";
+      if (k === 3 && !remoHelps()) return [[id, "Il turista che fa ombra. Ti aspettavo con un comitato di benvenuto: ho mandato i nonni. Hanno fatto cinque metri e sono già stanchi."], ["voce", ns ? "Ha il volto nudo e, a giudicare dalle occhiate, la cosa lo infastidisce parecchio." : "Gli occhiali da sole, come sempre, sembrano chiedere scusa a nessuno."]];
+      if (ns) return [[id, "Eccolo. Vedi? Niente occhiali. Mi sento nudo e osservato: colpa tua. Il campo di casa mi guarda come un parente che arriva senza telefonare."]];
+      if (remoHelps()) return [[id, "Hai visto, sul Campo Alto non c'è nemmeno un filo di Latte. Nessuno ti tiene la corda, qui. (gli scappa una smorfia) Tranquillo: la terrò io. In campo, di solito, si tiene la palla."]];
+      return [[id, "Ecco il nuovo. Ti ha dato il benvenuto Neve? Quando dice «benvenuto», controlla il portafoglio. Di solito è già vuoto."]];
+    }
+    function remo() {
+      if (!inC()) return remoT();
+      const s = S(), z = zoneNow(), id = remoId(), k = F.get("remo", 1);
+      F.set("remo_met", true);
+      if (z === "vl_campoalto" && s === 2) return remoCampo();
+      if (z === "vl_campoalto" && s === 5 && PH() === 0) return remoPre();
+      const o = [];
+      if (z === "vl_campoalto" && s >= 3) o.push({ label: "Sfida allo slalom", sub: has("slalom_ok") ? "Rigiocalo, per orgoglio" : "Tre passaggi fra i coni", fn: slalom });
+      o.push({ label: "Parla con Remo", fn: () => say(sw([[id, chip(remoLines(s, k))]], bgHere()), done) });
+      ask(id, s >= 7 ? "«Ti aspettavo. O meglio: non sapevo di aspettare, ma ti aspettavo.»" : "«Mi fai fare un tiro? Ma uno solo, che poi mi sento in obbligo.»", o, bgHere());
+    }
+    function remoLines(s, k) {
+      const sc = F.get("remo_scelta", "");
+      if (s >= 7) return sc === "verita" || sc === "due" ? ["Mio padre fischia. Dico per dire: non fischia, ha un modo di respirare con due note. È una cosa che si impara in ventisei anni e quaranta minuti.", "Ho ancora i suoi occhiali. Li porto in testa, come un cappello. Se mi guardano male dico che è moda.", "A Vica ho detto: «Anche tu mi dovevi qualcosa.» Ha risposto: «Il panino. E te l'ho dato ogni giorno.»"] : sc === "padre" ? ["Non parliamone. Giochiamo. Tre Coppe sono tre Coppe.", "Mi hai fatto un favore e un danno. Il danno ancora non lo so calcolare."] : ["Mia madre mi ha parlato a lungo. Io ho ascoltato a lungo. Il resto lo faremo a pezzi, un pezzo a domenica.", "C'è un uomo, in cima al sentiero, che porta i miei occhiali. Non gli ho ancora detto niente. Anzi: forse sì."];
+      if (s === 5) return ["Prima della partita non parlo: respiro. Dopo, parlo per due.", "Zelo oggi ha gli occhi lucidi. Non è emozione: è il rosa fluo che gli dà alla retina."];
+      return k === 3 && !remoHelps() ? ["Non farti illusioni: abbiamo tre Coppe in bacheca e un quarto posto in programma.", "Non sono tuo amico. Ma se ti serve un posto dove stare, in piazza ce n'è uno senza sponsor."] : ["Il Campo Alto è il campo di casa. È facile giocare in casa: il pubblico è tuo, il vento è tuo, la sfortuna è dell'ospite.", "Dopo il derby ti offro una polenta. Poi, se vinci, ti offro una seconda polenta. Se perdi, te ne offro tre."];
+    }
+    function remoCampo() {
+      const id = remoId(), k = F.get("remo", 1), c = compId();
+      say(sw([
+        ["voce", "Remo palleggia da solo al centro del campo, con la maglia gialla fluo dei Camosci e la faccia di uno che non dorme bene da due notti. Tonio, in porta, sembra una porta più piccola."],
+        ...remoOpening(),
+        [id, "Ascolta. Quella cosa alla radio. Il nome. Ho sentito «Fischietti, Gaudenzio». Ho sentito «residente a Cima Alta». Poi Noemi ha parlato di meteo e io sono rimasto lì, con un panino in mano, a chiedermi perché mi fosse venuto da deglutire."],
+        [id, "Qui a Cima Alta nessuno si chiama Fischietti. Ho chiesto in giro: tutti hanno cambiato argomento, persino il parroco, che è Neve, ed è un record, perché Neve cambia argomento molto più spesso che parrocchia."],
+        [id, "Mia madre tiene l'Osteria, in alto a sinistra. Con me da stamattina risponde a monosillabi. Con gli ospiti no: dice che gli ospiti non possono ricattarla con il «dimmi cos'hai». Parlale tu. A me dà la minestra, a te può dare una risposta."],
+        [c, isB() ? "«Presso V. Valanga.» Ce l'ho sulla punta delle chiavi inglesi. Non è un nome comune: è un nome di famiglia." : "«Presso V. Valanga.» Una V e un cognome. Nel mio mestiere, un'iniziale è già un indizio. Due sono una confessione."],
+      ], BG.A), () => ask("voce", "Remo ti guarda con gli occhi di chi si prepara a una domanda e ne teme la risposta. Sulla ricevuta del referto c'era scritto «presso V. Valanga». Glielo dici?", [
+        { label: "Gli dici della ricevuta", sub: "«Presso V. Valanga, Cima Alta»", cls: "hot", fn: () => remoR(true) },
+        { label: "Non ancora", sub: "Prima parli con sua madre", fn: () => remoR(false) },
+      ], BG.A));
+      void k;
+    }
+    function remoR(told) {
+      const id = remoId();
+      F.set("remo_ric", told);
+      const a = told ? [[id, "…«V. Valanga». (si siede sul pallone; è la prima volta che lo vedi seduto) Mia madre si chiama Ludovica. Ma Valanga a Cima Alta è come Rossi: ce ne sono quattro famiglie, due cugini e una zia di troppo."], ["voce", "Lo dice in fretta, come chi fischietta nel buio. Poi si alza, con un sorriso che non regge."], [id, "Non adesso. Ho una partita da vincere: se corro da mia madre adesso, la perdo comunque. Ma ti ringrazio. Non so ancora di cosa."]]
+        : [[id, "Allora vai tu. Io ho un gabbiano da dribblare e una squadra da convincere che non si vince con le parole. (guarda altrove) Si vince con gli occhiali. O senza."]];
+      say(sw([...a, ["voce", "Remo si riprende il pallone e lo rimette in gioco con un colpo secco. «Se ti va, prima o poi, sfidami allo slalom: i coni sono lì e io sono più lento di come dico.»"]], BG.A), () => {
+        note(told ? "Ho detto a Remo della ricevuta 'presso V. Valanga'. L'ha presa male, in fretta. Sua madre tiene l'Osteria (ALTO a sinistra)." : "Remo non sa della ricevuta. Sua madre Vica tiene l'Osteria (ALTO a sinistra), mi ha detto di parlarle io.");
+        setStep(N, 3); done();
+      });
+    }
+    function remoPre() {
+      const id = remoId(), sc = F.get("remo_ric", false);
+      say(sw([
+        [id, has("slalom_ok") ? "Mi hai battuto sullo slalom: non farti idee. Oggi non c'è nessun cono." : "Oggi niente chiacchiere. Mi sento come davanti al dentista: posso fare l'eroe, ma ho paura."],
+        ...(sc ? [[id, "E smettila di guardarmi come se dovessi dirmi qualcosa. Lo so che devi dirmi qualcosa. Dopo il fischio."]] : []),
+        ["voce", "Remo calcia il pallone in alto e lo riprende col petto, in quel modo che i professionisti chiamano «controllo» e i tifosi «un colpo di fortuna con stile»."],
+      ], BG.A), done);
+    }
+    function remoT() { delegate(remoId()); }
+
+    // ---- lo slalom (prova a tempismo, facoltativa)
+    function slalom() {
+      const id = remoId(), f = F.get("slalom_f", 0), need = Math.max(3, 5 - f), first = !has("slalom_met");
+      F.set("slalom_met", true);
+      const go_ = () => {
+        const tm = X.timing;
+        const fallback = (label, rounds, bg, react, fin) => { const pts = []; const next = () => { if (pts.length >= rounds) return fin(pts); ask("voce", `${esc(label)} · passaggio ${pts.length + 1} di ${rounds}: scegli il momento.`, [1, 2, 3].map((k) => ({ label: ["Subito", "Un attimo", "Adesso"][k - 1], fn: () => { const n = Math.random() < 0.34 ? 3 : Math.random() < 0.6 ? 2 : 1; pts.push(n); say([["voce", react(n)]], next); } })), bg); }; next(); };
+        (typeof tm === "function" ? tm : fallback)("Slalom", 3, "night", (k) => k === 3 ? "<b>Pulito!</b> Il cono ondeggia ma resta in piedi. Remo fischietta tra i denti." : k === 2 ? "<b>Sfiorato.</b> Il cono tossisce e si rimette dritto." : "<b>Giù.</b> Il cono rotola via con la dignità di un camoscio.", (pts) => {
+          const tot = pts.reduce((a, b) => a + b, 0);
+          if (tot >= need) {
+            F.set("slalom_ok", true); const m = reward("vl_c5_slalom", { coins: 8 });
+            return say(sw([["voce", `Slalom: ${tot} su 9${m.length ? " · " + m.join(" · ") : ""}.`], [id, chip(["Mi hai battuto a casa mia, sui miei coni, con le mie mutande. (si accorge di cosa ha detto) Colori. Con i miei colori.", "Non è stato un caso. Non è stato nemmeno un favore. È stato un sorpasso. Mi fa male dirlo: complimenti."])]], BG.A), done);
+          }
+          F.add("slalom_f", 1);
+          say(sw([["voce", `Slalom: ${tot} su 9 (ne servivano ${need}).`], [id, chip(["Sei veloce, ma i coni sono permalosi. Riprova: la seconda volta è la più educata.", "Non è una brutta prova. È una prova cortese. E la cortesia, sui coni, si paga."])]], BG.A), () => ask("voce", "Riprovi?", [{ label: "Riprova lo slalom", cls: "hot", sub: "Il tempismo diventa più indulgente", fn: slalom }, { label: "Non adesso", fn: done }], BG.A));
+        });
+      };
+      say(sw([[id, first ? "Lo slalom dei Camosci: cinque coni, tre passaggi. Il primo è veloce, il secondo è più veloce, il terzo è un'opinione. Fermi la barra nella zona verde e il pallone fa il resto. Se mi tieni il passo, ti offro una polenta. Anche se perdi, ma più piccola." : "Tre passaggi: stessa barra, stessi coni. Ti restano le gambe?"]], BG.A), go_);
+    }
+
+    // ---- indizi sull'arbitro (A: vetrina dei trofei, B: Sala Arbitri, C: taccuino di Zelo)
+    function clueA() {
+      const first = !has("cl5_a"); F.set("cl5_a", true);
+      const c = compId();
+      say(sw([
+        ["voce", "La vetrina dei trofei di Cima Alta contiene tre Coppe dei Tre Versanti e un piedistallo vuoto con la scritta «PER LA QUARTA». Sotto ogni coppa, una targhetta d'ottone con l'anno e il nome dell'arbitro."],
+        ["voce", "«ARBITRO: V. ZELO · DESIGNATO DA: LUMEN SERVIZI SPORTIVI.» Tre targhette. Tre volte lo stesso nome, lo stesso designatore e la stessa grafia a pennino: tondo, di scuola, con un gancio sulla V."],
+        ...(first ? [[c, isB() ? "Tre Coppe vinte con lo stesso arbitro e lo stesso sponsor. A un meccanico, questo ricorda una cinghia che gira sempre dallo stesso lato." : "Una serie di tre con la stessa variabile esplicativa: nel mio mestiere sarebbe un campione non randomizzato. Lo annoto."]] : []),
+      ], BG.C), () => { note("Le tre Coppe di Cima Alta: stesso arbitro (V. Zelo), stesso designatore (Lumen Servizi Sportivi). Prova A."); toast(`Prove sull'arbitro: ${proofs()} su 3`); done(); });
+    }
+    function clueB() {
+      const s = S();
+      if (s < 2) return say(sw([["voce", "La Sala Arbitri è chiusa a chiave. Quando parlerai con Remo, forse qualcuno ti darà il permesso di entrare."]], BG.A), done);
+      const first = !has("cl5_b"); F.set("cl5_b", true);
+      const c = compId();
+      say(sw([
+        ["voce", "La Sala Arbitri: un attaccapanni, una brandina, una cesta di fischietti cromati e, sul tavolino, una cartellina con la scritta «LUMEN SERVIZI SPORTIVI · DESIGNAZIONI RISERVATE»."],
+        ["voce", "Dentro, un foglio: «DERBY CIMA ALTA – VALLOMBRA · Esito indicativo: 2–1 CAMOSCI · Cartellini: 3 alla squadra ospite, 0 ai locali · Minuto consigliato per il rigore: 71'». In calce, a penna e in tondo di scuola: «Cordialità, L.V.»"],
+        ...(first ? [[c, isB() ? "«Minuto consigliato.» Questo non è un arbitro: è un orologio con la tuta rosa." : "«Esito indicativo.» Nel mio mestiere si chiamerebbe una previsione. Nel loro, una prenotazione."]] : []),
+      ], BG.A), () => { note("Sala Arbitri: designazione riservata 'esito indicativo 2–1 Camosci, 3 cartellini agli ospiti, rigore consigliato al 71'', firmata L.V. Prova B."); toast(`Prove sull'arbitro: ${proofs()} su 3`); done(); });
+    }
+    function clueC({ tx, ty }) {
+      if (!(tx === 6 && ty === 10)) return say(sw([["voce", chip(["La panchina dei Camosci: un lungo asse di legno con i nomi incisi dei titolari. In fondo, un nome grattato via e riscritto tre volte.", "Una panchina con un cuscino per il Presidente e un cartello: «NON CAMBIARE GLI ARBITRI SUL RISCALDAMENTO»."])]], BG.A), done);
+      const first = !has("cl5_c"); F.set("cl5_c", true);
+      const c = compId();
+      say(sw([
+        ["voce", "Sull'asse, infilato sotto un cuscino con il camoscio ricamato, c'è un taccuino a spirale con una copertina rosa fluo e una penna cromata legata al filo. Sul frontespizio: «V. ZELO · PROMEMORIA TECNICO»."],
+        ["voce", "Pagina uno: «Ammonire per primo il 9 ospite. Al 12'. Anche se non ha fatto niente: è un numero che porta sfortuna.» Pagina due: «Dopo i 60 minuti il fischio deve diventare corto. Se l'ospite protesta, giallo. Se ride, giallo e mezzo.»"],
+        ...(first ? [[c, isB() ? "«Giallo e mezzo.» Neanche un tornio ha mai inventato un numero così." : "«Giallo e mezzo.» Nel mio rapporto lo chiamerei «arbitrio». Un po' lessicale, un po' giuridico."]] : []),
+      ], BG.A), () => { note("Il taccuino di Zelo: 'ammonire per primo il 9 ospite al 12'', 'giallo e mezzo se ride'. Prova C."); toast(`Prove sull'arbitro: ${proofs()} su 3`); done(); });
+    }
+    function zelo() {
+      if (!inC()) return done();
+      const s = S(), ph = PH();
+      if (s === 5 && ph === 0 && proofs() >= 2 && !has("zelo_sa")) {
+        return ask("vl_zelo", "«Che c'è? Se avete qualcosa da dire, lo dite al Presidente. Se avete qualcosa da fischiare, sapete dove trovarmi.»", [
+          { label: "Mostragli le prove", sub: `Ne hai ${proofs()} su 3: cartellina, targhette, taccuino`, cls: "hot", fn: zeloSa },
+          { label: "Lascia perdere", fn: () => say(sw([["vl_zelo", "Allora fischio. È un buon sistema: chi lo ascolta, lo capisce."]], BG.A), done) },
+        ], BG.A);
+      }
+      const L = has("zelo_sa") ? ["(sudando) Il regolamento prevede il diritto di sbagliare, no? Ecco. Io lo uso con parsimonia.", "Mi hanno detto «giallo e mezzo». Io, onestamente, non so nemmeno dove si compra la mezza."]
+        : s >= 7 ? ["Il rosa fluo? Un regalo della Società. Mi han detto che mi dona. Non ho mai capito a cosa.", "Ho ancora il fischietto. Ma non so più cosa dirgli."]
+          : ["Il fuorigioco lo decido io quando lo vedo. A volte lo vedo prima.", "Il segreto di un buon arbitro? Fischiare con convinzione. Se poi si sbaglia, lo si dice con un'altra convinzione."];
+      say(sw([["vl_zelo", chip(L)]], BG.A), done);
+    }
+    function zeloSa() {
+      F.set("zelo_sa", true);
+      const c = compId(), pr = proofs();
+      say(sw([
+        ["voce", "Gli metti davanti la cartellina, le targhette fotografate e il taccuino. Zelo prende il taccuino con due dita, lo gira, lo gira ancora e lo posa come un uovo sodo."],
+        ["vl_zelo", "Io… non sono io. Cioè sono io, ma non l'ho scritto io. Cioè l'ho scritto io, ma sotto dettatura. (si accorge di cosa ha detto) Ho una famiglia. Una nonna, un cane e due rate dell'auto."],
+        [c, isB() ? "Sotto dettatura. Anche questa l'abbiamo già sentita." : "«Sotto dettatura.» Il tono, la costruzione: l'avevo già letta nel quarto fascicolo."],
+        ["vl_zelo", "Arbitrerò dritto. Giuro. Faccio i falli e le ammonizioni giuste. Ma non so se mi basta il fiato, ho già l'affanno."],
+        ["voce", `Zelo si asciuga la fronte con la manica rosa fluo e si allontana di mezzo passo, come un cane che abbia visto il veterinario${pr >= 3 ? " e il suo avvocato" : ""}.`],
+      ], BG.A), () => { note("Ho mostrato le prove a Zelo: arbitrerà più dritto. 'Sotto dettatura', ha detto."); done(); });
+    }
+
+
+    // ---- Vica, l'Osteria e il baule che si apre con un fischio
+    const FISC = [
+      { n: "PERICOLO", p: [0, 1, 0], d: "un corto, un lungo, un corto" },
+      { n: "HO CAPITO", p: [0, 0, 1], d: "due corti e un lungo" },
+      { n: "VENGO", p: [1, 0, 0], d: "un lungo e due corti" },
+    ];
+    const symOf = (a) => a.map((v) => (v ? "▬" : "●")).join("  ");
+    function vica() {
+      if (!inC()) return delegate("vl_vica");
+      const s = S();
+      if (s === 3) return vicaFlow();
+      if (s === 6) return stazioneScena();
+      const L = s >= 7 ? ["Il panino Camoscio, da oggi, contiene qualcosa: contiene una storia. Il prezzo è lo stesso.", "Mio figlio mi ha detto: «Mamma, grazie». Mi sono messa a pelare le patate per non farmi vedere. Le patate le ho già pelate stamattina: ho pelato le stesse due volte."]
+        : s === 4 ? ["Il sentiero del Fischio è dietro la piazza, in alto. Digli che ti manda il vento. Lui capisce i venti: sono gli unici che non gli chiedono di perdonarsi.", "Vai da lui. Io qui accendo la polenta e mi faccio coraggio, che è un lavoro lungo."]
+          : ["Il derby è un derby. La polenta, una polenta. Sono le cose che non cambiano: è quello che mi tiene in piedi.", "Zelo ha ordinato un panino senza camoscio. Gli ho dato quello col camoscio. Se ne è accorto solo per l'espressione."];
+      say(sw([["vl_vica", chip(L)]], bgHere()), done);
+    }
+    function vicaFlow() {
+      if (!has("vica_met")) return vicaIntro();
+      if (!has("fischi_ok")) return ask("vl_vica", "«Il baule è lì sotto, vicino al camino. Dimmi tu quando vuoi riprovare.»", [
+        { label: "Prova il baule", sub: "Il fischio in codice", cls: "hot", fn: () => fischioRound(0) },
+        { label: "Riascolta la storia", sub: "Dall'inizio", fn: vicaIntro },
+      ], BG.O);
+      if (!has("vica_t")) return baule();
+      done();
+    }
+    function vicaIntro() {
+      const c = compId(), ric = has("remo_ric");
+      F.set("vica_met", true);
+      say(sw([
+        ["voce", "L'Osteria del Camoscio ha la tenda a righe gialle e nere e una lavagna: «PANINO CAMOSCIO (non contiene camoscio, contiene fiducia) · POLENTA DEL DERBY · BIRRA (sì)». Sulla soglia, con un grembiule giallo e le braccia incrociate come due porte che si chiudono, una donna di cinquantacinque anni ti guarda senza dire niente.", BG.C],
+        ["vl_vica", "Il nuovo. Il tredici. (lo dice senza sorpresa, come chi legge un orario) Entra, che la nebbia ascolta, anche quassù. Io sono Vica. Ludovica Valanga: ala dei Camosci, anno '98, e padrona di questo posto da quando i piedi hanno smesso di ascoltarmi.", BG.C],
+        ["voce", "Dentro, l'osteria odora di polenta e di legna di larice. Su una mensola, tre Coppe dei Tre Versanti e un piedistallo vuoto; alle pareti, squadre in posa con la faccia di chi sta per vincere qualcosa. Sul bancone, appeso a un chiodo, un fischietto di plastica gialla."],
+        ["vl_vica", ric ? "Mio figlio mi ha detto che gli hai parlato di una ricevuta. Mi ha chiesto se «V. Valanga» fosse una cugina. Gli ho detto: «Chiedilo a chi sa leggere le ricevute.» Eccoti." : "Mio figlio ti ha mandato da me, e io so perché. Mi ha chiesto di un nome letto alla radio e io gli ho dato la minestra. Non è una risposta, ma scalda."],
+        ["vl_vica", "Non ti racconto il resto adesso. Non è questione di fiducia: è questione di serratura. Sotto il camino c'è un baule che non apro dal '98. L'ha chiuso Aurelio Brinzi in persona, con la mano e con un fischio: si apre solo con la frase giusta."],
+        ["vl_vica", "Aurelio era il capitano degli Stambecchi, io dei Camosci. Ci chiamavamo «Capitano» a vicenda, per scherzo, e poi sul serio. Avevamo il codice dei Tre Versanti, quello dei soccorsi alpini: lo imparano tutti i capitani il primo anno. Corto, lungo, corto: PERICOLO. Due corti e un lungo: HO CAPITO. Un lungo e due corti: VENGO."],
+        ["vl_vica", "Io non riesco più a fischiarli. Ogni volta mi esce un singhiozzo. Fischia tu, al posto mio: la serratura è a canne, ascolta, e non fa differenza tra una bocca e un'altra. Basta che sia onesta."],
+        [c, isB() ? "Un baule con un cilindro a fischio. Una cosa di precisione, più che di forza. Mi piace." : "Un meccanismo acustico a codice. Per principio, qualunque oggetto che ascolta ha un'impedenza: la trovo ragionevole."],
+      ], BG.O), () => { note("Vica Valanga: il baule dei capitani si apre con il codice di fischio dei Tre Versanti: PERICOLO (corto-lungo-corto), HO CAPITO (due corti e un lungo), VENGO (un lungo e due corti)."); fischioRound(0); });
+    }
+    function fischioRound(r, again) {
+      const f = FISC[r], c = compId(), hint = F.get("fischi_f", 0) >= 2 || again;
+      const look = r === 0 ? `${f.n}: ${symOf(f.p)}` : r === 1 ? `${f.n}: ${f.d}` : `${f.n}`;
+      say(sw([
+        ["voce", `Vica si china sul baule. Il coperchio ha una piccola bocca di ottone, da cui esce un respiro freddo. «${["Prima", "Seconda", "Terza"][r]} frase: ${f.n}.»${r === 0 ? " (Ascolta: " + symOf(f.p) + " · un cerchio è un corto, una barra è un lungo.)" : r === 1 ? " (" + f.d + ".)" : ""}`, BG.O],
+        ...(hint && r === 2 ? [[c, "È l'ultima: un lungo e due corti. Respira, poi comincia dal lungo."]] : []),
+      ], BG.O), () => fischioInput(r, [], look));
+    }
+    function fischioInput(r, cur, look) {
+      const f = FISC[r];
+      ask("voce", `${f.n} · ${cur.length} di ${f.p.length}${cur.length ? "\n" + symOf(cur) : ""}`, [
+        { label: "● Corto", sub: "Un colpo di fischio", cls: "hot", fn: () => fischioStep(r, cur, 0) },
+        { label: "▬ Lungo", sub: "Un fiato più lungo", cls: "hot", fn: () => fischioStep(r, cur, 1) },
+        { label: "↺ Riascolta", sub: "Vica lo ripete", fn: () => { F.add("fischi_r", 1); fischioRound(r, true); } },
+      ], BG.O);
+      void look;
+    }
+    function fischioStep(r, cur, v) {
+      const f = FISC[r], nx = cur.concat([v]);
+      if (nx.length < f.p.length) return fischioInput(r, nx);
+      const ok = nx.every((x, i) => x === f.p[i]);
+      if (!ok) {
+        F.add("fischi_f", 1);
+        return say(sw([
+          ["voce", "Il baule risponde con un colpo secco, da pugno su una porta. Il respiro freddo si ritira."],
+          [compId(), isB() ? "Ricomincia. Gli errori si fanno una volta: la seconda si fa la correzione." : "Un errore di sequenza. Ricomincia: la serratura non penalizza, ma non scorda."],
+        ], BG.O), () => fischioRound(r));
+      }
+      if (r < 2) return say(sw([["voce", `Il baule risponde con un clic limpido: ${FISC[r].n}, accettato. Dalla bocca di ottone sale un po' di calore, come quando si accende una stufa.`], ["vl_vica", r === 0 ? "Pericolo. L'ultima volta che l'ho sentito fischiare così ero in una curva e non sapevo ancora cosa fosse." : "Ho capito. (pausa) Anche se è passato un quarto di secolo, è così che mi ricordo: con una parola in più."]], BG.O), () => fischioRound(r + 1));
+      F.set("fischi_ok", true);
+      const m = reward("vl_c5_fischi", { coins: 8 });
+      say(sw([["voce", "Il terzo clic è il più grave. La serratura gira, i cardini sospirano e il coperchio si alza di un dito da solo."], ...(m.length ? [["voce", m.join(" · ") + "."]] : [])], BG.O), baule);
+    }
+    function baule() {
+      const c = compId(), ar = F.get("arbitro", "prag");
+      say(sw([
+        ["voce", "Il baule si apre con un sospiro di naftalina e di legno. Dentro, in ordine: una busta bianca e quadrata, con scritto a stilografica «TEO · DOPO»; una maglia gialla fluo col numero 7, piegata da ventisei anni; e una fotografia in cornice di cartone."],
+        ["voce", "Nella fotografia Vica, a ventinove anni, ride a bocca aperta in maglia dei Camosci. Sulle sue ginocchia un bambino di cinque anni stringe fra i denti un fischietto di plastica gialla. Accanto a loro la cornice è tagliata con le forbici: un uomo è stato asportato, e di lui restano soltanto un braccio e, sul polso, un paio di occhiali da sole appesi per la stanghetta."],
+        [c, isB() ? "Il braccio. Gli occhiali. (guarda il bambino) …Quegli occhiali. Li porta ancora." : "L'iconografia è chiara: ritaglio, polso, occhiali. Il bambino, anche. (si ferma) Il fischietto: lo stesso che è appeso al chiodo."],
+        ["vl_vica", "Sì. (non si volta) Il bambino è Remo. Il braccio è di suo padre. Gaudenzio Fischietti: quello del referto, quello della ricevuta «presso V. Valanga». Sono io, V. Valanga. Il cognome è mio, il resto è suo."],
+        ["vl_vica", "Quella notte, alle undici, scrisse il referto sul tavolo della cucina, con le mani che non ubbidivano. All'alba lo portò al segretario comunale e tornò a casa senza dire una parola. Si sedette in cucina e non si alzò per ore. Il giorno dopo c'era il Crollo. Il giorno dopo ancora, una persona della Società mi propose «una borsa di studio per il ragazzo»."],
+        ["vl_vica", "L'ho accettata per Remo. Poi ho capito che era un guinzaglio. Ho continuato ad accettarla per Remo, poi per abitudine, poi per vergogna. E Cima Alta ha vinto tre Coppe in fila con lo stesso arbitro e lo stesso silenzio, e nessuno ha avuto il coraggio di dire a Remo che le aveva vinte col naso nel vuoto."],
+        ["vl_vica", "In paese lo sappiamo in tre: io, Neve e il nonno Albino, che fa il guardiano. Gli altri sanno solo che l'arbitro del '98 è «quello lassù», e che a nominarlo porta sfortuna. Remo non lo sa. Gli ho detto che suo padre era partito per lavoro. Non gli ho mai detto che il lavoro era fischiare."],
+        ...(ar === "comp" ? [["vl_vica", "So che gli hai parlato, giù. L'eco, intendo. Lo so perché quella notte, e in tutte le altre, qualcosa di lui è rimasto sotto: ogni tanto, in cantina, sento tossire."]] : []),
+        ["voce", "Posa la fotografia sul bancone, con la faccia in giù, come si posa una carta da giocare che non si vuole vincere."],
+      ], BG.O), () => ask("vl_vica", "«A Remo lo dirò io, dopo il derby. O lo dirai tu. O lo dirà nessuno, e allora lo dirà il campo. Cosa ti sembra giusto?»", [
+        { label: "«Glielo dico io, prima di giocare. Ha diritto a saperlo.»", sub: "Prima del fischio", fn: () => vicaT("verita") },
+        { label: "«Aspetto il fischio finale. Poi decidi tu.»", sub: "Un patto", fn: () => vicaT("patto") },
+        { label: "«Non sta a me né a te: sta a lui, quando lo chiederà.»", sub: "Lasci a Remo la scelta", fn: () => vicaT("lui") },
+      ], BG.O));
+    }
+    function vicaT(w) {
+      F.set("vica_t", w);
+      const a = w === "verita" ? [["vl_vica", "Se glielo dici tu, dillo bene. È fragile come un vetro d'oro: fargli male è facile, curarlo no. (si asciuga le mani sul grembiule che non è bagnato) Va bene. Ma dillo con le due mani."]]
+        : w === "patto" ? [["vl_vica", "Il fischio finale. Va bene. E se non ti riesce di trattenerti, ti perdono: sono cresciuta con un uomo che non tratteneva niente, tranne la voce."]]
+          : [["vl_vica", "Quando lo chiederà. (sorride, finalmente, a metà) Hai l'aria di chi sa aspettare. È una rarità, da queste parti: ti tengo la polenta."]];
+      say(sw([...a,
+        ["vl_vica", "La lettera la consegno io a Teodora. In mano, non per posta e non per radio. Falla salire: la cabina delle sei e quarantatré, sai, sale da sola, ma qualcuno deve riceverla."],
+        ["vl_vica", "E poi… (guarda la finestra, verso il sentiero) c'è un uomo in cima al sentiero del Fischio. Non gli parlo da ventisei anni: lui non mi ha mai chiamata, io non l'ho mai cercato. Digli che ti manda il vento. Digli «corto, lungo, corto». Lui capisce."],
+        ["voce", "Vica rimette dentro la maglia numero 7 e chiude il baule. Poi, dopo un attimo, la riprende e te la porge piegata: «Questa non serve a nessuno chiusa in un baule. Prendila a fine giornata, quando avremo capito di chi è.»"],
+      ], BG.O), () => {
+        note("Remo Valanga è figlio di Gaudenzio Fischietti, l'arbitro del '98. Vica l'ha taciuto per 26 anni: la Società le pagava 'una borsa di studio'. Il padre vive nella Baita del Fischio (ALTO, sentiero a NORD).");
+        setStep(N, 4); done();
+      });
+    }
+
+    // ---- la Baita del Fischio: Gaudenzio
+    function gaudenzio() {
+      if (!inC()) return delegate("vl_gaudenzio");
+      const s = S(), z = zoneNow();
+      if (z === "vl_baita" && s === 4) return gaudScena();
+      const sc = F.get("remo_scelta", "");
+      if (z === "vl_campoalto") return say(sw([["vl_gaudenzio", chip(s === 5 ? ["(senza voltarsi, l'occhio al cannocchiale) Da qui si vede tutto. Anche il tempo che manca. Non disturbare: sto guardando mio figlio correre sul lato sbagliato dell'arbitro.", "Corto, lungo, corto. Non lo dico a nessuno. Lo dico a me, per sentire se ho ancora il fiato."] : ["Il campo è più bello visto da qui sopra. Da giù è soltanto più vicino.", "Ho il fischietto d'ottone nella tasca. Pesa quanto un pezzo di pane."])]], BG.A), done);
+      const L = s >= 7 ? (sc === "verita" || sc === "due" ? ["Mi ha chiamato per nome, con il tono di chi prova una parola in una lingua studiata per corrispondenza. Gli ho risposto allo stesso modo. Funziona, a metà. A metà va bene.", "Ho tolto dalla parete l'ultimo gancio vuoto. Non serve più aspettare un fischietto che non arriva."] : ["Aspetto. È la mia specialità. Ho vent'anni di esperienza e tutti gratis.", "Mio figlio non è venuto. Ma ha guardato: l'ho visto dal cannocchiale. Mi basta per oggi."]) : ["Da qui si vede il Campo Alto, la cabina e quasi tutta la mia colpa. Il quasi è una consolazione.", "Il vento qui fischia da solo. Io lo lascio fare: è più bravo."];
+      say(sw([["vl_gaudenzio", chip(L)]], BG.B), done);
+    }
+    function gaudScena() {
+      const ar = F.get("arbitro", "prag"), bet = has("remo_bet") && has("m1_win"), c = compId();
+      F.set("gaud_met", true);
+      const apertura = ar === "comp" ? "Lei è quello della Camera del Minuto. Mi ha detto dove mettere la voce. L'ho messa in un cassetto, sotto il letto. Non l'ho mai aperto: ma ogni notte lo sento respirare."
+        : ar === "acc" ? "Lei mi ha accusato, laggiù. Aveva ragione. (si toglie gli occhiali un istante, li rimette) Viene a ripeterlo? Si accomodi: ho tenuto una sedia, da ventisei anni, per chi doveva dirmelo."
+          : "Lei voleva la prova, non l'assoluzione. L'ha avuta: la ricevuta sta dov'è. (abbassa il cannocchiale) Ora che cosa vuole, che non sia già in un cassetto?";
+      say(sw([
+        ["voce", "Sul portico della baita un uomo siede su una sedia a dondolo con un cannocchiale in grembo. Ha settant'anni scarsi, la barba bianca come una pagina e gli occhiali da sole, scuri, in una giornata di nuvole. Alla cintura, un fischietto d'ottone che non tocca."],
+        ["voce", "Dietro di lui, attraverso la porta socchiusa, si vede una parete tappezzata di fischietti: ventisei, in file ordinate. Gli ultimi ganci sono vuoti, come in attesa."],
+        ["vl_gaudenzio", "«Corto, lungo, corto.» Mi ha mandato il vento, immagino, o Vica. Non so quale dei due sia più testardo."],
+        ["vl_gaudenzio", apertura],
+        ["vl_gaudenzio", "Non si stupisca che sappia. Quel che ho lasciato là sotto parla anche con la mia voce. A volte me ne sveglio con il sapore di ruggine."],
+        ["vl_gaudenzio", "Ventisei fischietti: uno per ogni anno che non ho fischiato. Il primo me lo sono comprato un mese dopo il Crollo. Dopo, uno a marzo, come i calendari. Mi dicono che sia un hobby, come i francobolli. Non ho mai detto di no."],
+        ["vl_gaudenzio", "Vuole la storia. Gliela dico, ma corta: la lunga ce l'ho in cassetto. Il giovedì prima della finale vennero a casa mia due uomini: un autista e un ingegnere con i guanti bianchi. Una busta, diciotto milioni e una ricevuta. Mi chiesero poco: un fischio al quarantatreesimo senza fallo, «per tenere il pubblico sul campo fino alle diciotto e quarantatré, ci sono lavori di sicurezza alle gallerie». Dissero «sicurezza». Io dissi sì. Una casa nuova, una scuola per il ragazzo."],
+        ["vl_gaudenzio", "Alle sei meno dieci, dal cerchio di centrocampo, vidi i camion della Società che salivano verso l'imbocco, e il turno di notte che non c'era sugli spalti. I minatori ci sono sempre, a una finale. Quella sera no. Capii. Troppo tardi per rifiutare, abbastanza presto per tradire."],
+        ["vl_gaudenzio", "Al quarantatreesimo fischiai. Come mi avevano chiesto: senza fallo. Ma lo feci in codice. Corto, lungo, corto: PERICOLO. Il fischio dei capitani dei Tre Versanti. L'unico che Aurelio avrebbe capito. Lui capì. (si ferma, e il cannocchiale gli trema sulle ginocchia) Capì e scese, e la squadra scese con lui. Per questo i quattordici sono usciti. Ed è per questo che gli undici non sono usciti."],
+        ["vl_gaudenzio", "Ho fischiato giusto, ragazzo, e ho fischiato la loro fine. Non ho più fischiato da allora. Né un fallo, né un compleanno. Solo il vento, qui, al mio posto."],
+        [c, isB() ? "Il fischio in codice. Il «fallo che non c'era». (piano) Il primo avviso che ha sentito il capitano… era suo." : "Dunque il «fischio storto» era un avviso cifrato. Le prove documentali sono ancora contro di lei, ma l'intenzione… cambia la lettura del verbale."],
+      ], BG.B), () => { F.set("sos_vista", true); note("Gaudenzio Fischietti, nella baita: al 43' ha fischiato corto-lungo-corto (PERICOLO) per avvisare Aurelio. Senza il suo fischio i quattordici minatori non sarebbero usciti."); gaudScelta(bet); });
+    }
+    function gaudScelta(bet) {
+      ask("voce", "L'uomo ti guarda, per quanto si possa guardare con le lenti scure. Dietro di lui, sulla soglia, la parete dei fischietti si muove al vento. Cosa gli dici?", [
+        { label: "«Suo figlio sta per giocare la quarta partita truccata e non lo sa.»", sub: "La colpa", fn: () => gaudT("colpa", bet) },
+        { label: "«Sabato serve un arbitro onesto. Non so chi chiamare, tranne uno.»", sub: "Il dovere", fn: () => gaudT("dovere", bet) },
+        { label: "«Non venga per la partita. Venga perché è suo padre.»", sub: "L'amore", fn: () => gaudT("amore", bet) },
+      ], BG.B);
+    }
+    function gaudT(w, bet) {
+      F.set("gaud_t", w);
+      const a = w === "colpa" ? [["vl_gaudenzio", "La quarta. (ripete, lento) Lo so. Lo vedo dal cannocchiale: il rosa fluo che fischia dalla parte giusta di una certa busta. Non ho mai mandato un avviso a nessuno, da allora. Neanche a lui."]]
+        : w === "dovere" ? [["vl_gaudenzio", "Un arbitro onesto. (sorride sotto la barba, e il sorriso gli viene storto, come una strada di montagna) Ce ne sarebbe uno. Ha la mano rovinata e la coscienza buona. Ma non fischia."]]
+          : [["vl_gaudenzio", "Suo padre. (la parola gli cade sul portico come un piatto) Nessuno me l'aveva più detto in questo modo. Mia madre diceva «tu sei mio figlio»; mia moglie «tu sei mio marito». Quella parola lì, la tengo in fondo."]];
+      say(sw([...a,
+        ["vl_gaudenzio", "Non scendo, ragazzo. Non per orgoglio: perché a un figlio non si può imporre un padre. Scendo se mi chiama lui. Lui, non un campione, non una Società. Se alza la mano dalla panchina e guarda verso la curva in alto a sinistra, io scendo. Il tempo di un fischietto."],
+        ["vl_gaudenzio", "Gli lasciai un paio di occhiali sul davanzale, quella mattina: ne avevo due paia, uguali. Da bambino la luce mi faceva piangere, a me. Penso che a lui no: ma li porta. Ho visto col cannocchiale che li porta, da ventisei anni. È la cosa più bella che mi resti: il figlio che porta i miei occhiali."],
+        ...(bet ? [["vl_gaudenzio", "Ho visto che da un po' non li porta più. Per una scommessa, mi dicono. Se è stato con lei che ha perso gli occhiali, ringrazi pure l'avversario: ha cominciato a guardare."]] : []),
+        ["voce", "Si porta il fischietto d'ottone alle labbra per la prima volta da ventisei anni. Non soffia. Lo tiene lì, come chi ascolta una conchiglia. Poi lo toglie."],
+        ["vl_gaudenzio", "Vada. Il derby è fra due giorni. La curva in alto a sinistra è la mia. Il resto, ormai, è del vento."],
+      ], BG.B), () => {
+        setStep(N, 5); note(w === "amore" ? "Gaudenzio scenderà se Remo gli fa cenno dalla panchina, guardando la curva in ALTO a sinistra del Campo Alto. Gli ho detto: 'venga perché è suo padre'." : "Gaudenzio scenderà solo se Remo glielo chiede: dovrà alzare la mano e guardare la curva in ALTO a sinistra del Campo Alto.");
+        done();
+      });
+    }
+    function cannocchiale() {
+      const s = S();
+      say(sw([["voce", s >= 4 ? "Guardi nel cannocchiale. Il Campo Alto sembra a portata di mano: si leggono i cartelloni dello sponsor, si contano le sedie portate da casa. Sulla panchina dei Camosci un taccuino rosa fluo spunta da sotto un cuscino. Qui sopra, ogni cosa fa meno rumore e più male." : "Un cannocchiale su treppiede, puntato verso il Campo Alto. Per ora, guardare dentro ti sembra un'indelicatezza."]], BG.B), done);
+    }
+
+
+    // ---- il derby: la Regola del Campo Alto (arbitro dello sponsor) e due tempi
+    const lean = () => (has("remo_bet") ? 1 : 0) + (remoHelps() ? 1 : 0) + (has("slalom_ok") ? 1 : 0) + (has("remo_ric") ? 1 : 0) + (F.get("remo", 1) === 3 && !remoHelps() ? -1 : 0) + (F.get("vica_t", "") === "verita" ? 1 : 0);
+    const edge1 = () => Math.max(0.02, 0.12 - 0.03 * Math.min(2, proofs()) - (has("zelo_sa") ? 0.03 : 0));
+    const edge2 = () => { const r = F.get("ref2", "zelo"); return (r === "gaud" ? -0.04 : r === "cornelio" ? 0 : Math.max(0.04, 0.13 - 0.02 * Math.min(2, proofs()))) + (F.get("remo_scelta", "") === "padre" ? 0.04 : 0); };
+    // il Campo Alto: erba rasata con la neve a chiazze, cartelloni neri e gialli dello sponsor, tifosi gialli e neri
+    const VENUE_CAM = { ads: [["LUMEN ENERGIE ALPINE", "#1a1a1a"], ["CAMOSCI DI CIMA ALTA", "#d6f23a"], ["LUMEN SERVIZI SPORTIVI", "#2a2f48"], ["POLENTA DEL DERBY", "#b5532a"]], crowd: ["#d6f23a", "#1a1a1a", "#e4ff3a", "#f2f6ff", "#2b4a34"], ground: ["#5d9a4e", "#68a656"], patches: "rgba(244,248,255,.62)", tint: "rgba(214,242,58,.07)", glow: "250,255,200", fx: { spd: 0.97 } };
+    const camosci = (t, st, e) => ({ vs: "i Camosci di Cima Alta", name: "Camosci di Cima Alta", color: "#d6f23a", defs: [["Gisella Cima", t(st.drib * 0.8 * (1 + e))], ["Il Bufalo", t(st.drib * 0.86 * (1 + e))], ["Tonio Fiocco", t(st.drib * 0.82 * (1 + e))]], atk: [["Remo Valanga", t(st.tiro * 0.92 * (1 + e))], ["Gisella Cima", t(st.tiro * 0.78 * (1 + e))]], gk: ["Tonio Fiocco", t(st.tiro * 0.96 * (1 + e))], power: t(st.tiro * 0.8 * (1 + e)), special: ["VALANGA FLUO", t(st.tiro * 1.12 * (1 + e))] });
+    function palla() {
+      const s = S(), ph = PH();
+      if (s !== 5) return say(sw([["voce", s >= 6 ? "Il pallone del derby, fermo sul dischetto, con la scritta LUMEN un po' sbiadita. Qualcuno ci ha disegnato sopra, a pennarello, due occhiali da sole." : "Un pallone nuovo di zecca, lucido come una mela, con la scritta LUMEN. Lo guardi senza toccarlo: sai che il giorno del derby sarà l'unico a non avere paura."]], BG.A), done);
+      if (ph === 0) return preDerby();
+      if (ph === 1) return halftime();
+      if (ph === 2) return secondoTempo();
+      return postMatch();
+    }
+    function preDerby() {
+      const c = compId(), pr = proofs(), zs = has("zelo_sa"), first = !has("pre5");
+      F.set("pre5", true);
+      const L = first ? [
+        ["voce", "Il pallone è sul dischetto del centrocampo. Cima Alta è venuta tutta: ottocento posti, seicento sedie portate da casa, sei nonni scortatori in prima fila con i cappelli e un coro che fa le prove da tre ore. Sul bordo del campo sventolano bandiere gialle col camoscio nero."],
+        ["vl_noemi", "Qui Radio Nebbia, in diretta dal Campo Alto! Oggi trasmettiamo l'alta quota, la bassa quota e le quote d'umore. Meteo: sole fluo, vento neutro, pronostico riservato. L'arbitro ha ammonito il pallone per precauzione."],
+        ["vl_zelo", zs ? "Il regolamento della Regola del Campo Alto: l'arbitro è designato dallo sponsor. (si schiarisce la gola, e per la prima volta si sente un po' di coscienza in quel fischietto) L'arbitro è tenuto alla correttezza." : "Regola del Campo Alto, articolo uno: l'arbitro è designato dallo sponsor. Articolo due: l'arbitro ha sempre ragione. Articolo tre: vedi articolo uno."],
+        ["voce", `Remo ti stringe la mano a centrocampo con troppo vigore e la lascia con troppo ritardo. ${pr >= 2 ? "Sul tuo taccuino, in tasca, hai prove di quanto sia sbilanciato questo campo." : "Intorno a voi, tutto sembra in ordine: ed è ciò che preoccupa."}`],
+        [c, isB() ? "Fischio d'inizio fra un minuto. Palla a me, e tu pensa a tutto il resto. Compreso l'arbitro: tienilo d'occhio." : "Inizio. Mi tengo il centrocampo; tu l'area. L'arbitro lo osservo io: ho un'idea sul suo metodo di misura."],
+      ] : [["voce", "I giocatori sono in posizione, il pubblico sta in piedi, Zelo ha il fischietto già in bocca."]];
+      say(sw(L, BG.A), () => ask("voce", "Il pallone al centro. Zelo guarda l'orologio, Remo il cielo, gli ottocento posti guardano te.", [
+        { label: "Calcio d'inizio", sub: "Primo tempo · 45'", cls: "hot", fn: primoTempo },
+        { label: "Aspetta un momento", sub: "Prima voglio guardarmi intorno", fn: done },
+      ], BG.A));
+    }
+    function primoTempo() {
+      const z = has("zelo_sa");
+      X.playMatch({
+        id: "vl5a", alt: "hd", force: true, weather: "neve", venue: VENUE_CAM, homeKit: ["#1b2f7a", "#d9a441"], chap: "Vallombra · Derby al Campo Alto · 1° tempo", mate: compName(),
+        intro: "Derby con i Camosci al Campo Alto, primo tempo (45'). <b>Regola del Campo Alto</b>: l'arbitro è designato dallo sponsor" + (z ? " (ma da quando Zelo sa che sai, fischia con la mano sul cuore)" : ", e si vede: i cartellini cadono come neve") + ". " + compName() + " gioca con te.",
+        team: (t, st) => camosci(t, st, edge1()),
+        done: (r) => {
+          F.set("m5a_a", r.a); F.set("m5a_b", r.b); F.set("ph5", 1);
+          note(`Derby, primo tempo: ${r.a}–${r.b}.`);
+          halftime();
+        },
+      });
+    }
+    function halftime() {
+      const a = F.get("m5a_a", 0), b = F.get("m5a_b", 0), c = compId(), zs = has("zelo_sa"), pr = proofs();
+      const lead = a > b ? "Gli Stambecchi sono avanti" : a < b ? "I Camosci sono avanti" : "Si va all'intervallo in parità";
+      say(sw([
+        ["voce", `Fischio dell'intervallo: ${a}–${b}. ${lead}. ${zs ? "Zelo ha arbitrato con una scrupolosità che gli costa il sudore di tre magliette." : "Zelo ha ammonito due ospiti e un gabbiano; ai locali, un sorriso."}`, BG.A],
+        ["vl_noemi", a > b ? "Qui Radio Nebbia: Vallombra avanti sul Campo Alto! Il pubblico di casa ha smesso di cantare per chiedere il regolamento. Pare che il regolamento sia sparito." : a < b ? "Qui Radio Nebbia: Camosci in vantaggio, e ci mancherebbe. Lo dico con gentilezza: il vantaggio ha un fischietto rosa fluo e una buona cognizione del cartellino." : "Qui Radio Nebbia: parità al Campo Alto. Nessuno ci crede, nemmeno l'arbitro, che controlla il referto."],
+        ["voce", "Nel tunnel degli spogliatoi, la luce è quella di una lampada a olio che ha deciso di fare la lampadina. Hai la maglia appiccicata alla schiena e il fiato di chi ha corso tanto e parlato poco."],
+        [c, isB() ? "Ho contato sei fischi storti. Sei. Ho pensato di tirargli addosso una chiave inglese: la sto tenendo per la ripresa." : `Cinque decisioni anomale su otto: il campione non è significativo, ma il trend sì. ${pr >= 2 ? "E i nostri documenti dicono lo stesso." : ""}`],
+        ["voce", "In fondo al tunnel, controluce, c'è Remo. È solo. Ha la maglia fradicia e gli occhiali da sole sulla fronte, come una corona fuori posto."],
+      ], BG.S), htRemo);
+    }
+    function htRemo() {
+      const id = remoId(), ric = has("remo_ric"), vt = F.get("vica_t", ""), ns = id === "vl_remo_ns";
+      say(sw([
+        [id, "Ho fatto il giro dei falli. Tre fischiati contro di voi che non c'erano. Un fallo di mano su Gisella: la mano era mia. Lo so, perché ce l'avevo io. (cerca le parole) Se vinciamo così, non è vincere."],
+        [id, "In curva, in alto a sinistra, c'è un vecchio con gli occhiali da sole che mi guarda da quarantacinque minuti. Ha il mio modo di correre, anche da fermo: di lato, come se si scusasse. Non lo conosco. Non so perché lo riconosco."],
+        ...(ric ? [[id, "E tu mi hai detto una cosa, ieri. «Presso V. Valanga». Ho chiesto a mia madre: ha cambiato discorso tre volte. Una volta sul meteo, una sulle patate, una sul parroco."]] : [[id, "Mia madre, stamattina, mi ha accompagnato fino al cancello e non mi ha dato il panino. Non l'ha mai fatto. Ho pensato: o è morto qualcuno o qualcuno sta per dirmi qualcosa."]]),
+        [id, "Voi due sapete. Lo vedo dalla faccia: quella di chi tiene fra le mani un oggetto che non è suo. Dimmelo, " + (ns ? "senza occhiali, a faccia nuda" : "e se ti serve, non guardo") + ". Prima del secondo tempo."],
+      ], BG.S), () => {
+        const opts = [
+          { label: "«Tuo padre è Gaudenzio Fischietti. L'arbitro del '98.»", sub: vt === "patto" ? "Rompi il patto con Vica" : "La verità, dritta", fn: () => remoR2("diretta") },
+          { label: "«Chiedilo a tua madre, a fine partita. Fidati di lei.»", sub: "Rimandi al fischio finale", fn: () => remoR2("madre") },
+          { label: "«Guarda in curva, in alto a sinistra. Poi decidi.»", sub: "Lo lasci vedere", fn: () => remoR2("curva") },
+        ];
+        if (has("sos_vista")) opts.push({ label: "«Tuo padre ha fischiato l'SOS. Per questo i quattordici sono usciti.»", sub: "Quel che sai dalla baita", cls: "hot", fn: () => remoR2("sos") });
+        ask("voce", "Remo aspetta, con il fiato corto e lo sguardo di chi si prepara al peggio e spera in un altro. Cosa fai?", opts, BG.S);
+      });
+    }
+    function decideRemo(w) {
+      const l = lean();
+      if (w === "sos") return "due";
+      if (w === "madre") return "attesa";
+      if (w === "curva") return l >= 0 ? "verita" : "padre";
+      return l >= 2 ? "verita" : "padre";
+    }
+    function remoR2(w) {
+      const id = remoId();
+      F.set("remo_sa", w);
+      if (w === "diretta" && F.get("vica_t", "") === "patto") F.set("patto_rotto", true);
+      const sc = decideRemo(w); F.set("remo_scelta", sc);
+      const a = w === "diretta" ? [
+        [id, "…No. (ride, e non c'è niente di divertente) Dimmelo un'altra volta, ma con la faccia di chi scherza."],
+        ["voce", "Non scherzi. Remo sillaba il nome come una parola in una lingua che non parla."],
+        [id, "Gaudenzio. Quello che ha preso i soldi. Quello che il paese chiama «quello lassù». Quello per cui nessuno si ferma quando passa il sentiero. (si porta una mano agli occhiali che non porta) Quello che mi ha lasciato un paio di occhiali sul davanzale. Mia madre mi ha sempre detto che erano di mio nonno."],
+      ] : w === "madre" ? [
+        [id, "A fine partita. (inspira, e il respiro gli esce a pezzi) Va bene. Se c'è una verità, aspetta i novanta minuti? Le verità sono come gli arbitri: sbagliano, ma non si possono sospendere."],
+        ["voce", "Annuisce e si mette gli occhiali sul naso. Le lenti nascondono tutto, tranne le mani, che gli tremano."],
+      ] : w === "curva" ? [
+        ["voce", "Remo alza gli occhi alla curva in alto a sinistra. Laggiù, in piedi, un uomo con gli occhiali da sole e la barba bianca ha appoggiato una mano al parapetto. Lo guarda. Non agita il braccio, non dice niente: porta la mano al volto, come per sistemarsi gli occhiali."],
+        ["voce", "Remo, a sua volta, porta la mano agli occhiali. È lo stesso gesto, con la stessa inclinazione di polso, a cinquanta metri di distanza e ventisei anni di ritardo."],
+        [id, "…Ah. (una sola sillaba, bassa) Allora è così."],
+      ] : [
+        [id, "L'SOS dei capitani? Mia madre, per svegliarmi da bambino, fischiava così: corto, lungo, corto. Diceva che era l'allarme dei Camosci. Diceva che serviva per salvare qualcuno. (lo dice piano, come uno che scopre una cosa che sapeva da sempre) Era… suo."],
+        ["voce", "Remo si siede sulla panca dello spogliatoio, a gambe larghe, con i gomiti sulle ginocchia. Per un po' fa solo respiri."],
+        [id, "Dunque mio padre non è soltanto quello che ha preso la busta. È anche quello che ha fischiato per avvisare. (guarda te) Perché non me l'ha detto nessuno? Perché dovevo scoprire prima la parte brutta?"],
+      ];
+      say(sw(a, BG.S), () => htDecisione(sc, w));
+    }
+    function htDecisione(sc, w) {
+      const id = remoId(), c = compId(), pr = proofs();
+      if (sc === "verita" || sc === "due") {
+        return say(sw([
+          [id, sc === "due" ? "Allora giochiamo la ripresa a modo mio. Con un arbitro che abbia un motivo per fischiare giusto. Il motivo ce l'ha in tribuna, in alto a sinistra." : "La ripresa la giochiamo con un arbitro che non sia dello sponsor. Che sia mio padre o l'arcangelo Gabriele, per me è uguale. (si morde un labbro) Non è vero. Non è uguale."],
+          ["voce", "Remo sale i gradini della curva, uno alla volta, con le mani lungo i fianchi, come si sale a ricevere un premio o una condanna. Il vecchio si alza. I due si guardano da due metri, entrambi con gli occhiali scuri, e per un attimo sembrano la stessa persona in due anni diversi."],
+          ["vl_gaudenzio", sc === "due" ? "Hai il passo di tua madre." : "Hai il passo di tua madre. E gli occhiali miei."],
+          [id, sc === "due" ? "Non ti chiamo papà, non ancora. Ti chiamo arbitro. Fischia giusto, una volta, per quarantacinque minuti. Il resto, poi." : "Ti chiamo come arbitro, non come padre. Il resto, dopo. Se c'è un dopo."],
+          ["vl_gaudenzio", sc === "due" ? "Quarantacinque, uno più uno meno. (la voce gli si incrina, e si accorge che si incrina) Ho un fischietto d'ottone nella tasca che aspetta da ventisei anni. Credo che sia contento."  : "Accetto il lavoro. (si tocca la tasca dove il fischietto d'ottone pesa più di un pezzo di pane) Il resto lo conservo, per quando sarà."],
+          ["voce", "Zelo, sul bordo del campo, si toglie il fischietto cromato dal collo con l'aria di chi sia stato appena tolto da una pratica. Neve spalanca le braccia: «Ma non è nel regolamento!» Vermiglio, accanto a lui, scuote piano la testa."],
+          ["vl_vermiglio", "Un cambio d'arbitro è un cambio d'arbitro. Il contratto parla di fischio, non di fischiatore. Lo lascio fare: sono curioso di sentirlo."],
+          [c, isB() ? "Si è tolto gli occhiali? Non si è tolto gli occhiali. Ha fatto bene: certe cose si fanno con le lenti scure, per non farsi vedere piangere dal pubblico." : "Ha mantenuto gli occhiali. Gli stessi, identici, di suo figlio. È una prova di identità: la più bella che abbia mai raccolto."],
+        ], BG.S), () => { F.set("ref2", "gaud"); X.lanAdd("vl_remo"); note(sc === "due" ? "Remo sa tutto, SOS compreso. Ha chiamato suo padre ad arbitrare il secondo tempo." : "Remo sa che è figlio di Gaudenzio. Ha chiamato suo padre ad arbitrare il secondo tempo, come arbitro."); F.set("ph5", 2); done(); });
+      }
+      const L = sc === "padre" ? [
+        ["voce", "Remo si rimette gli occhiali sul naso e chiude la discussione con le due mani, come si chiude una porta di vetro."],
+        [id, w === "diretta" ? "Non mi interessa. Mio padre è partito per lavoro: se faceva l'arbitro, ha fatto un lavoro come tanti. I fischietti si comprano ovunque." : "Non cambia niente. Vince chi gioca. Giochiamo. Il resto non mi riguarda, e se mi riguarda, mi riguarderà dopo."],
+        [id, "E tu, " + T("{n}") + ": non toccare Zelo. È mio. Il fischio è il mio fischio. Siamo i Camosci: ci teniamo i nostri."],
+      ] : [
+        [id, "Dopo. Lo dirà mia madre, dopo i novanta minuti. (si rimette gli occhiali con due dita) Se fischia ancora storto, lo dico io a Zelo. Non a voce: con il pallone."],
+      ];
+      say(sw(L, BG.S), () => {
+        if (pr >= 2) return ask("voce", "Hai in tasca la cartellina di Sala Arbitri, le targhette fotografate e il taccuino. Neve è lì, a due passi, e sta fingendo di leggere un programma. Gli porti le prove?", [
+          { label: "Mostra le prove a Neve", sub: `Ne hai ${pr} su 3`, cls: "hot", fn: htNeve },
+          { label: "Tieniti le prove per dopo", fn: htFine },
+        ], BG.S);
+        htFine();
+      });
+    }
+    function htNeve() {
+      const nt = F.get("neve_t", "ironia"), c = compId();
+      say(sw([
+        ["voce", "Neve prende la cartellina con la delicatezza di chi regge un piatto di brodo troppo pieno. Legge una riga, poi un'altra, poi smette di leggere e cerca il sorriso. Il sorriso è in un altro giacchetto."],
+        ["vl_neve", nt === "protesta" ? "Lei me l'aveva detto, a modo suo: «non è la regola di nessuno». Io ho risposto «protesta archiviata». (si siede) Ho archiviato un paese." : "Io… non sapevo i dettagli. Sapevo di un arbitro «professionale», uno sponsor «generoso», una gestione «oculata». Non sapevo il minuto del rigore. Il 71'. (tossisce) È il mio compleanno."],
+        ["vl_neve", "Zelo non arbitra il secondo tempo. Chiedo a Vallombra un nome di fiducia. Chi avete?"],
+        [c, isB() ? "Abbiamo il sindaco. Ha una fascia, una voce e sette minuti di discorso da fare prima di ogni fischio. È l'unico che nessuno ha mai pagato per niente." : "Il sindaco di Vallombra. Non ha conflitti d'interesse: non ha interessi. E, soprattutto, ha un orologio."],
+        ["vl_cornelio", "(compare da dietro un cartellone, con la fascia e il fiato già pronti) Per arbitrare occorre, in primo luogo, un breve inciso sulla storia del fischio, che risale, come sappiamo tutti…"],
+        ["vl_neve", "Basta così! Arbitra lei. Ma niente discorso."],
+        ["vl_cornelio", "…Solo il preambolo."],
+      ], BG.S), () => { F.set("ref2", "cornelio"); F.set("prove_neve", true); note("Neve ha tolto Zelo dal secondo tempo dopo aver visto le prove. Arbitrerà Cornelio, con fascia e preambolo."); htFine(); });
+    }
+    function htFine() {
+      const sc = F.get("remo_scelta", "");
+      if (!has("ref2")) F.set("ref2", "zelo");
+      F.set("ph5", 2);
+      note(F.get("ref2", "zelo") === "zelo" ? "Secondo tempo ancora con Zelo: la Regola del Campo Alto resta in vigore." : `Secondo tempo con ${F.get("ref2") === "cornelio" ? "Cornelio" : "Gaudenzio"} arbitro.`);
+      say(sw([["voce", sc === "padre" ? "Torni in campo nel rumore, con il fiato corto e gli occhi di Remo fissi su di te come un muro." : "Torni in campo nel rumore, con il fiato corto e un'impressione strana: qualcosa, sotto l'erba, ha cambiato inclinazione."]], BG.A), done);
+    }
+    function secondoTempo() {
+      const a = F.get("m5a_a", 0), b = F.get("m5a_b", 0), r2 = F.get("ref2", "zelo"), sc = F.get("remo_scelta", "");
+      const arb = r2 === "gaud" ? "Gaudenzio Fischietti, con un fischietto d'ottone fermo da ventisei anni" : r2 === "cornelio" ? "il sindaco Cornelio, con la fascia e un preambolo" : "ancora Zelo, con la Regola del Campo Alto";
+      X.playMatch({
+        id: "vl5b", alt: "az", force: true, azPitch: "neve", weather: "neve", venue: VENUE_CAM, chap: "Vallombra · Derby al Campo Alto · 2° tempo", mate: compName(),
+        intro: `Derby al Campo Alto, secondo tempo (45'). Primo tempo: ${a}–${b}. Arbitro: ${arb}.${sc === "padre" ? " Remo gioca arrabbiato." : sc === "verita" || sc === "due" ? " Remo gioca a testa alta, e senza risparmiarsi." : ""} ${compName()} gioca con te.`,
+        team: (t, st) => camosci(t, st, edge2()),
+        done: (r) => { F.set("m5b_a", r.a); F.set("m5b_b", r.b); F.set("ph5", 3); note(`Derby, secondo tempo: ${r.a}–${r.b}.`); postMatch(); },
+      });
+    }
+    function totale() { return [F.get("m5a_a", 0) + F.get("m5b_a", 0), F.get("m5a_b", 0) + F.get("m5b_b", 0)]; }
+    function postMatch() {
+      const [A, B] = totale();
+      if (!has("m5_set")) {
+        if (A === B && !has("m5_rig")) return shootout(A, B);
+        F.set("m5_win", A > B || F.get("m5_rig", "") === "win"); F.set("m5_set", true);
+      }
+      chiusura(A, B);
+    }
+    function shootout(A, B) {
+      const sc = F.get("remo_scelta", ""), need = 5;
+      say(sw([["voce", `Fischio finale: ${A}–${B}. Parità sul Campo Alto. Il regolamento del derby non ammette pareggi: si decide ai rigori. Tre tiri a testa, il portiere è Tonio Fiocco, che ha il viso di una porta più piccola.`, BG.A], ["vl_tonio", "Il mio lavoro è stare fermo e sembrare più piccolo. Oggi proverò a sembrare più alto."]], BG.A), () => {
+        const tm = X.timing;
+        const fb = (label, rounds, bg, react, fin) => { const pts = []; const next = () => { if (pts.length >= rounds) return fin(pts); ask("voce", `${esc(label)} · rigore ${pts.length + 1} di ${rounds}: scegli il momento.`, [1, 2, 3].map((k) => ({ label: ["Subito", "Un attimo", "Adesso"][k - 1], fn: () => { const n = Math.random() < 0.34 ? 3 : Math.random() < 0.6 ? 2 : 1; pts.push(n); say([["voce", react(n)]], next); } })), bg); }; next(); };
+        (typeof tm === "function" ? tm : fb)("Rigori", 3, "night", (k) => k === 3 ? "<b>" + T("{tiro}") + "!</b> Tonio si tuffa, tocca appena, e la rete trema." : k === 2 ? "<b>Quasi.</b> Tonio devia sul palo, e il campo trattiene il fiato." : "<b>Parato.</b> Tonio si rialza e fa il saluto ai Camosci.", (pts) => {
+          const tot = pts.reduce((a, b) => a + b, 0), win = tot >= need;
+          F.set("m5_rig", win ? "win" : "lose"); F.set("m5_win", win); F.set("m5_set", true);
+          say(sw([["voce", `Rigori: ${tot} su 9 (ne servivano ${need}). ${win ? "Il pallone entra, la rete si gonfia e il Campo Alto resta zitto un secondo intero, che a Cima Alta è un record." : "Tonio blocca l'ultimo con le due mani, come si ferma una ciotola che scivola. Il Campo Alto esplode."}`], ...(sc === "padre" && !win ? [[remoId(), "Non sono felice di vincere così. Ma non sono neanche triste."]] : [])], BG.A), () => chiusura(A, B));
+        });
+      });
+    }
+    function chiusura(A, B) {
+      const win = has("m5_win"), r2 = F.get("ref2", "zelo"), sc = F.get("remo_scelta", ""), c = compId(), id = remoId();
+      const m = win ? reward("vl_m5_win", { coins: 10 }) : [];
+      const rig = F.get("m5_rig", "");
+      const L = [
+        ["voce", `Fischio finale del derby: ${A}–${B}${rig ? (rig === "win" ? " (ai rigori, per noi)" : " (ai rigori, per loro)") : ""}. ${win ? "Gli Stambecchi vincono sul Campo Alto." : "I Camosci tengono il Campo Alto."}${m.length ? " " + m.join(" · ") + "." : ""}`, BG.A],
+        ["vl_noemi", win ? "Qui Radio Nebbia! Vallombra vince a Cima Alta, e non succedeva dalla preistoria del campionato. Ringrazio il meteo, il pubblico di casa e l'arbitro, per aver scelto il momento giusto per essere imparziale." : "Qui Radio Nebbia: i Camosci tengono il Campo Alto. Vallombra esce a testa alta, il che, a milleottocento metri, è una cosa letteralmente vera."],
+      ];
+      if (r2 === "gaud") L.push(
+        ["voce", "A centrocampo, Gaudenzio Fischietti si toglie il fischietto d'ottone dalla bocca. Gli tremano le labbra e non sa come farle smettere. Dal Campo Alto sale un applauso che parte timido, da due sedie, e poi cresce: nessuno ha capito chi sia, ma tutti hanno capito cosa ha fatto."],
+        ["voce", "Dalla tribuna scende Vica, con il grembiule giallo ancora addosso. Si ferma a un metro da lui. Si guardano per un tempo che il tabellone non sa misurare."],
+        ["vl_vica", "Hai fischiato giusto, Gaudenzio."], ["vl_gaudenzio", "Dopo ventisei anni."], ["vl_vica", "Io ne ho contati ventisei e mezzo. Vieni a mangiare: la polenta si fredda, e il ragazzo ha fame di spiegazioni."],
+      );
+      else if (r2 === "cornelio") L.push(
+        ["vl_cornelio", "Vi comunico che la partita si è svolta secondo il regolamento, il buonsenso e la mia vecchia ernia. Ho fischiato diciassette volte. Una era al gabbiano; mi è sembrato giusto."],
+        ["vl_neve", "(col sorriso a metà) Riconosco che la gestione dell'incontro è stata esemplare. Diciamo: sospetta ma esemplare."],
+      );
+      else L.push(
+        ["voce", "Zelo fischia la fine con una espressione da bollitore che cede. Il Campo Alto applaude, per abitudine, come si applaude il tempo che passa."],
+        ["vl_neve", "Un derby corretto, un derby corretto! Un derby come i derby devono essere: con tre cartellini e una buona acustica."],
+      );
+      if (sc === "padre") L.push(
+        [id, "Hai giocato bene. Anche troppo. Non mi aspetto un grazie: il grazie, se c'è, ce l'ho in tasca, e dura meno degli occhiali."],
+        ["voce", "Si allontana verso il tunnel senza voltarsi. In tribuna, in alto a sinistra, un vecchio con gli occhiali da sole è rimasto in piedi, finché il tunnel non l'ha inghiottito."],
+        ["vl_vica", "Ci pensa lui. A volte i figli si fanno scudo con le braccia dei padri, senza accorgersi che sono le stesse. Non è un figlio cattivo: è un figlio con la testa dura. È dei Valanga."],
+      );
+      else if (sc === "attesa") L.push(
+        ["voce", "Vica scende dalla tribuna con il grembiule ancora addosso e porta Remo a un lato del campo, accanto alla panchina. Da lontano si vedono due persone parlare: lei con le mani aperte, lui con le braccia incrociate. A un certo punto lei si ferma. Lui guarda la curva in alto a sinistra."],
+        ["voce", "Quando Remo ricompare, ha gli occhiali in mano. Non dice niente. Si siede sulla panchina con i gomiti sulle ginocchia, accanto a te, e per un po' non guardate nessuno."],
+        [id, "Mi ha detto tutto. Anche la parte che nessuno sapeva. Non lo odio. Non lo perdono. Per ora, lo osservo. È già un passo."],
+      );
+      else L.push(
+        [id, "Mi ha detto tutto, mio padre, con due fischi e il silenzio. (guarda in alto, verso la curva) Non so come si fa a volere bene a uno che hai conosciuto soltanto per le sue assenze. Ma imparo: imparo in fretta, di solito."],
+      );
+      if (F.get("vica_t", "") === "patto" && has("patto_rotto")) L.push(["vl_vica", "Mi avevi promesso il fischio finale. (non c'è rabbia: c'è qualcosa di più antico) Ma sapevi che a volte si deve parlare prima del fischio. Hai fatto quello che io non avrei saputo fare. Non ti ringrazio ancora: ti terrò la polenta calda."]);
+      L.push(
+        [c, isB() ? "Vorrei dire qualcosa di intelligente. Sono troppo stanca anche per le chiavi inglesi. Un derby, una famiglia, un paese: è più di quel che sopporta un turno." : "Annoto per i posteri: il campione non è mai stato più significativo. (si ferma) E io non ho mai avuto meno voglia di annotare."],
+        ["vl_vermiglio", win ? "Una vittoria sportiva è una cosa seria, {n}. Congratulazioni. Ma le vittorie, in ingegneria, sono ordinarie: si calcolano. Ci vediamo lunedì: ho l'agenda piena." : "Una sconfitta sportiva è un fatto ordinario, {n}. Si archivia. Ci vediamo lunedì: ho l'agenda piena."],
+        ["voce", "L'ingegnere si infila i guanti uno per volta, con un ritmo da orologio, e lascia il palco con Sigillo alle calcagna. Il tintinnio dei suoi passi sulle assi suona come un conto alla rovescia."],
+        ["vl_vica", "Il sole sta calando. Vieni alla Stazione di Cima, in basso a sinistra del paese: la cabina delle sei e quarantatré sale da sola, e io ho una busta da consegnare. Radio Nebbia ha già chiamato chi serve."],
+        ["vl_noemi", "Messaggio per Teodora Brinzi, capocabina di Vallombra. C'è una busta per te a Cima Alta. Il mittente ha ventisei anni di ritardo e un'ottima calligrafia. Ripeto: ventisei anni di ritardo."],
+      );
+      say(sw(L, BG.A), () => { F.set("ph5", 4); setStep(N, 6); note("Il derby è finito. Vica aspetta alla Stazione di Cima (SUD-OVEST): Radio Nebbia ha chiamato Teodora."); done(); });
+    }
+
+
+    // ---- la Stazione di Cima: la lettera di Aurelio e il gancio per il capitolo 6
+    function stazioneScena() {
+      const sc = F.get("remo_scelta", ""), su = F.get("fosco", "su") !== "giu", gau = F.get("ref2", "") === "gaud", c = compId();
+      const remoV = sc === "verita" || sc === "due" || sc === "attesa", id = remoId();
+      F.set("fin5", true);
+      say(sw([
+        ["voce", "Il sole cala sul Latte e lo tinge di rosa e di lilla. Sulla banchina di Cima Alta i lampioni si accendono uno dopo l'altro, con una cortesia in ritardo. Vica ha tolto il grembiule e messo una giacca buona, di quelle che si tirano fuori per i funerali e per i matrimoni.", BG.C],
+        ["vl_vica", "Non so se ho fatto bene a metterla. Gli abiti buoni, per me, hanno un difetto: puzzano di Occasione."],
+        ["voce", "Dal cavo arriva un canto basso, una nota sola. Poi la cabina emerge dalla nebbia, rossa nell'ultima luce, cigolando come un'orchestra di provincia. Le porte si aprono da sole, con un po' di scena."],
+        ["voce", "Scende Teodora Brinzi con il registro sotto il braccio e il berretto della compagnia. È sola: nella cabina non c'è nemmeno un posto vuoto in più."],
+        ["vl_teodora", su ? "Il biglietto me lo sono timbrato da sola. Prima volta in ventisei anni che salgo da passeggera. Ho lasciato la stazione a Fosco, con l'ordine di non toccare niente. Quindi sarà tutto sottosopra, ma in ordine." : "Il biglietto me lo sono timbrato da sola. Prima volta in ventisei anni che salgo da passeggera. Ho lasciato la stazione a Mirtilla, con l'ordine di non toccare niente. Quindi starà assaggiando le cioccolate."],
+        ["vl_teodora", "Vica Valanga."], ["vl_vica", "Teo."], ["vl_teodora", "Sei in ritardo."], ["vl_vica", "Di ventisei anni e mezzo."], ["vl_teodora", "Mezzo?"], ["vl_vica", "Li conto io."],
+        ["vl_vica", "Questa è per te. Me l'ha data tuo fratello la mattina della finale. Diceva «dopo». Non ho capito dopo cosa. Poi è arrivato un «dopo» così lungo che mi sono vergognata di consegnarla. Ti avevo detto che sarei venuta io, ricordi? Non sono venuta. Sono rimasta in ritardo."],
+        ["voce", "Teodora prende la busta bianca con la scritta «TEO · DOPO», a stilografica, e la tiene in mano come si tiene un uccello caduto dal nido. Non la apre."],
+        ["vl_teodora", "Tu leggila. (a Vica, e la voce le trema in un punto solo, nel mezzo) No: tu no. Non ce la faccio a sentire come la pronuncerai. La leggo io, ad alta voce, così, se piango, lo saprete tutti e non dovrò spiegarlo. " + T("{n}") + ", tu resta: il biglietto non te l'ho fatto pagare, in fondo."],
+      ], BG.C), () => lettera(sc, su, gau, c, remoV, id));
+    }
+    function lettera(sc, su, gau, c, remoV, id) {
+      say(sw([
+        ["voce", "Teodora apre la busta con il pollice, senza strappare. La carta è ruvida, scritta fitta, da una mano che correva avanti ai pensieri. Si schiarisce la gola come davanti a un microfono. Poi legge."],
+        ["vl_teodora", "«Teo, se stai leggendo questa, la partita è finita in un modo che non avevo previsto, e io sono in ritardo. Non è una novità: il mio ritardo ha sempre irritato la tua puntualità.»"],
+        ["vl_teodora", "«Non aspettarmi con la cabina. Aspettami con il pranzo (il tuo brodo, quello col sedano). Se tardo troppo, scrivi ARRIVATO a matita: l'inchiostro non si cancella, la matita sì, e io voglio poter correggere.»"],
+        ["vl_teodora", "«Ti ho lasciato due cose. La prima è una chiave: la trovi nella costa del tuo registro, sotto la carta. Non chiude niente. Apre, e sta alla cabina numero uno. Non chiedermi quale: lo capirai quando la vedrai.»"],
+        ["vl_teodora", "«La seconda è un posto. Nell'armadietto di Fosco c'è una maglia col numero tredici. Non è mia, non è di nessuno. È di uno che arriverà. Quando arriva, non fargli pagare il biglietto, anche se il regolamento dice di sì.»"],
+        ["vl_teodora", "«P.S. Se senti fischiare corto-lungo-corto da un posto che non è un campo, non spaventarti: è un amico che ha detto la cosa giusta nel modo sbagliato. Digli grazie per me. Tuo, anche in ritardo, Aurelio.»"],
+        ["voce", "Nessuno parla. Il cavo, sopra le teste, canta la stessa nota di prima, e per un momento sembra che la risposta venga dal fondo del Latte. Teodora piega la lettera in quattro, la mette nel registro, e con il pollice scorre lungo la costa. Si ferma. Sotto la carta incollata da ventisei anni, qualcosa è duro."],
+        ["vl_teodora", "Una chiave. (la tiene sul palmo; è piccola, scura, con un nastro rosso sbiadito) «Cabina numero uno.» Vallombra ha sei cabine. La prima è la sei: la numero uno non esiste. O non è esistita, finora."],
+      ], BG.C), () => lettera2(sc, su, gau, c, remoV, id));
+    }
+    function lettera2(sc, su, gau, c, remoV, id) {
+      const L = [];
+      if (gau) L.push(
+        ["voce", "In fondo alla banchina, appoggiato al palo dell'ultimo lampione, c'è Gaudenzio Fischietti. È sceso con la giacca della festa e gli occhiali da sole. Non ha osato avvicinarsi, e adesso non osa nemmeno andarsene."],
+        ["vl_teodora", "«Un amico che ha detto la cosa giusta nel modo sbagliato.» (si volta, lenta) Lei è quello del fischio. Quello del quarantatreesimo."],
+        ["vl_gaudenzio", "Sì. (la voce gli esce asciutta, come un lenzuolo) Ho fischiato giusto e ho fischiato la loro fine, signora. Non le chiedo niente. Non me lo merito."],
+        ["vl_teodora", "Mio fratello è sceso perché lei ha fischiato. Ed è per quello che quattordici persone hanno rivisto il cielo. Io non sono capace di perdonare e non sono capace di ringraziare, ma ho un biglietto per dire una cosa sola: grazie. È suo. Non gliela faccio pagare."],
+        ["voce", "Gaudenzio si toglie, finalmente, gli occhiali da sole. Gli occhi sono rossi, vecchi e chiari. Porta il fischietto d'ottone alle labbra e fischia, piano, tre note: corto, lungo, corto. Dal cavo, lontano, la nota risponde.", ],
+      );
+      else L.push(
+        ["vl_vica", "L'amico del P.S. lo conosci. È quello del sentiero del Fischio, quello che chiamano «lassù». È suo, il fischio del quarantatreesimo. L'ha mandato Aurelio a ringraziare? Credo di sì."],
+        ["vl_teodora", "Domani salgo da lui. A piedi: in cabina non ci sono mai riuscita a fare pace con qualcuno. Il cavo, invece, ha fatto pace da solo, e senza avvisare."],
+      );
+      if (remoV) L.push(
+        ["voce", "Dalle scale arrivano Remo e Tonio, con un thermos che sbuffa vapore e due tazze di plastica. Remo tiene gli occhiali da sole in mano, e li guarda come si guarda un oggetto che ha cambiato nome."],
+        [id, "Mia madre non ha detto niente a nessuno. Ho dedotto. (a Teodora) Signora, io sono il figlio di quello che ha fischiato. Non so ancora se sia una cosa di cui vergognarsi o di cui vantarsi. Ma se c'è da dire grazie a qualcuno, comincio io: tuo fratello ha capito un fischio, e per ventisei anni nessuno ha capito il suo."],
+        ["vl_teodora", "Non è un cognome da perdonare. È un cognome da sapere. Prendo il caffè, grazie."],
+      );
+      else L.push(["voce", "Sulla banchina, un po' lontano, c'è un ragazzo con gli occhiali da sole che guarda la cabina senza avvicinarsi. Vica lo vede e non dice niente. Gli alza una mano, a metà. Lui non la alza. Poi, di scatto, si volta e se ne va."]);
+      L.push(
+        ["vl_teodora", "Lascio ARRIVATO a matita. Come ha chiesto lui. (apre il registro e scrive, in una riga nuova, con una grafia che non ha mai avuto tanta fretta) Ma stasera aggiungo una parola a penna: PUNTUALE."],
+        [c, isB() ? "Ho il magone di un cuscinetto a sfere sotto carico. È una sensazione che non mi capita. La sto annotando." : "Le statistiche sulla puntualità, a Vallombra, sono un genere narrativo. Questa è la prima volta che ne leggo la fine felice."],
+      );
+      say(sw(L, BG.C), () => finaleHook(sc, su, gau, remoV));
+    }
+    function finaleHook(sc, su, gau, remoV) {
+      const id = remoId();
+      say(sw([
+        ["voce", "Nel buio che sale, sulla panca della banchina, la radio a transistor di Vica gracchia da sola. Una voce alta, nasale e un po' emozionata: Noemi."],
+        ["vl_noemi", "Qui Radio Nebbia, edizione straordinaria. Dal fondovalle: una colonna di mezzi pesanti della Società Lumen ha lasciato Valle Fonda diretta a Vallombra. A bordo, secondo fonti prudenti, un ordine di demolizione per la funivia e di sigillo definitivo per la miniera. Esecuzione: lunedì, ore sei e quarantatré. Il meteo: nebbia."],
+        ["vl_teodora", "Lunedì. Alle sei e quarantatré. (chiude il registro, piano) Hanno scelto l'ora della prima corsa. Hanno senso dell'umorismo, come tutti quelli che non ridono mai."],
+        ["vl_vica", "Domenica ti restituisco il campo. Lunedì, se serve, ti restituisco anche me."],
+        ...(remoV ? [[id, "I Camosci scendono con voi. Tonio ha già caricato il thermos. Gisella ha già scritto lo striscione: NON TOCCATE LA CABINA (TOCCATELA PIANO). Lo sponsor non lo vuole in tribuna. Faremo a meno dello sponsor."]]
+          : [["vl_vica", "Mio figlio ha paura di quello che resta di me. Ci penserà. Non è uno scemo: è un Valanga. I Valanga, di solito, arrivano tardi e quando arrivano portano tutto."]]),
+        ...(su ? [] : [["voce", "Da Vallombra, per radio, si sente una voce lontanissima ma inequivocabile: Mirtilla, che chiama il rifugio per un'emergenza di cioccolata."]]),
+        ["voce", "Sul pilone alto della funivia, dove il cavo passa dal Latte alla roccia, una figura in cappotto ha acceso l'ultimo lume. Regge una lavagna sollevata sopra la testa. Scrive, in lettere grandi, per tutti: «LA CABINA NUMERO UNO. LUNEDÌ.»"],
+        tl({ sicuro: "Allora lunedì andiamo a prenderci la numero uno.", attento: "Una chiave, una cabina che non esiste e un orario. Lunedì sarà una giornata piena.", ironico: "Sei cabine, una numero uno, un lunedì: la burocrazia ha trovato un nuovo modo di farsi voler bene." }),
+      ], BG.C), () => fineCapitolo(sc, gau));
+      void sc;
+    }
+    function fineCapitolo(sc, gau) {
+      X.finishChapter(N, "camosci"); setStep(N, 7);
+      X.lanAdd("vl_teodora");
+      if (sc === "attesa") F.set("remo_scelta", "verita");
+      if (sc === "verita" || sc === "due" || sc === "attesa") X.lanAdd("vl_remo");
+      note("Cap. 5 concluso: lunedì alle 6:43 la Società Lumen demolisce la funivia e sigilla la miniera. Aurelio ha lasciato una chiave per la 'cabina numero uno' nella costa del registro di Teodora.");
+      const rw = reward("vl_ch5", { coins: 50, cos: "vl_camoscio" });
+      X.say(sw([["voce", "CAPITOLO 5 · I CAMOSCI · CONCLUSO"], ["vl_vica", "Ecco la maglia, la numero 7. Non è del tredici, lo so. Ma finché il tredici non ti starà addosso del tutto, la 7 è la sua miglior imitazione. Prendila: è la Maglia Camoscio."], ["voce", (rw.length ? rw.join(" · ") + ". " : "") + "Il Capitolo 6 non è ancora pronto. Nel frattempo puoi tornare a Cima Alta, raccogliere le ultime schegge, parlare con Remo, con Vica e con tutti gli altri." + (gau ? " Gaudenzio ha lasciato la baita aperta." : "")]], BG.C), done);
+    }
+
+    // ---- porte, cabina e oggetti
+    function cabinaVallombra() {
+      const s = S();
+      ask("voce", "La cabina rossa è ferma sul binario d'attesa, agganciata al cavo. Dai finestrini si vede la nebbia e, più su, un puntino giallo fosforescente: Cima Alta. Una targhetta sul fianco dice: «SOLA ANDATA (PER ORA)».", [
+        { label: "Sali a Cima Alta", sub: s >= 7 ? "Torna dai Camosci" : s === 6 ? "La cabina delle sei e quarantatré" : "Il derby ti aspetta", cls: "hot", fn: () => go("vl_cimaalta", 5, 22) },
+        { label: "Non adesso", fn: done },
+      ], BG.P);
+    }
+    function cabinaCima() {
+      const s = S();
+      ask("voce", s === 6 ? "La cabina, ferma sulla banchina di Cima Alta. Dai finestrini si vede la nebbia e, più giù, un puntino turchese: Vallombra." : "La cabina rossa di Cima Alta, ferma sul binario. Dai finestrini si vede il Latte e, in fondo, un puntino turchese: Vallombra.", [
+        { label: "Scendi a Vallombra", sub: "Si torna quando vuoi", fn: () => go("vl_paese", 8, 21) },
+        { label: "Resta a Cima Alta", fn: done },
+      ], BG.C);
+    }
+    function sentiero() {
+      if (S() < 4) return say(sw([["voce", "Il cancello del sentiero del Fischio è chiuso con una catena e un cartello: «PROPRIETÀ PRIVATA. NON FISCHIARE.» Qualcuno ha aggiunto a pennarello: «(ma se proprio)»."]], BG.C), done);
+      go("vl_baita", 1, 14);
+    }
+    function osteriaPorta() {
+      const s = S();
+      if (s < 3) return say(sw([["voce", "L'Osteria del Camoscio è chiusa per «preparazione derby». Da dentro si sente un frullatore e una voce di donna che parla da sola con grande ritmo."]], BG.C), done);
+      say(sw([["voce", "La porta dell'Osteria è aperta. Il profumo di polenta vince su tutte le obiezioni. La titolare è davanti alla soglia."]], BG.C), done);
+    }
+    function chaletPorta() {
+      say(sw([["voce", S() === 1 ? "La porta del Chalet è aperta. Sulla terrazza ti aspettano tre persone e un cameriere." : "Il Chalet Neve: porta di larice, targa d'ottone con scritto «PRESIDENZA» e sotto, in corpo più piccolo, il logo dello sponsor. Il campanello suona la musica dei Camosci."]], BG.C), done);
+    }
+    const flav = (arr, bg) => () => say(sw([["voce", chip(arr)]], bg || bgHere()), done);
+    const oggetti = {
+      "vl_cimaalta:#": flav(["Il tabellone delle Coppe: tre colonne, tre anni, tre volte CAMOSCI. La quarta colonna è vuota e piena di aspettativa.", "Sul tabellone, in basso, una scritta a gesso: «Prossima Coppa: sabato. Cartellini: tutti pronti.»"]),
+      "vl_cimaalta:V": flav(["Un'asta con una bandiera gialla fluo e un camoscio nero. Il camoscio ha l'aria di chi sa dove andare, e non lo dice.", "Lo stendardo dei Camosci. Una pubblicità di fianco dice «Sponsor ufficiale: Lumen». Il camoscio, nel disegno, guarda altrove."]),
+      "vl_cimaalta:b": flav(["Una panca gialla con la scritta «OFFERTA DALLA SOCIETÀ». Tutto il villaggio è offerto dalla Società: l'unica cosa che non offre è la gratuità.", "Una panca fresca di vernice gialla. Chi si siede si alza con il pantalone giallo: dicono che sia un battesimo."]),
+      "vl_cimaalta:n": flav(["Bacheca: «Si cerca camoscio smarrito (vero)». «Si vende neve, trattabile». «Messa alle 18; per i tifosi dei Camosci, alle 18:05, dopo l'inno».", "Bacheca: «ASSEMBLEA STRAORDINARIA: la Società offre uno sconto sulla prossima Coppa». Qualcuno ha sbarrato «prossima» e scritto «seguente»."]),
+      "vl_cimaalta:l": flav(["Un lampione con la luce bianca a LED e il logo dello sponsor. Non brilla da solo: dipende da una bolletta. È meno poetico e più preciso.", "Un lampione a LED. Sul palo, un adesivo: «Illuminiamo il tuo futuro (a pagamento)»."]),
+      "vl_cimaalta:t": flav(["Un larice, con la neve sui rami. A Cima Alta anche gli alberi sono gialli a settembre: è l'unica concessione alla natura.", "Un larice con il tronco ricoperto di nastrini gialli. Servono a ricordare che qui si vince. Non si dice chi vince."]),
+      "vl_cimaalta:v": flav(["L'ufficio della stazione di Cima: tende gialle, un orario affisso («Partenze: quando c'è nebbia»), e un cartello di Teodora, portato qui tempo fa: «Si prega di non confondere il ritardo con la fantasia».", "L'ufficio d'arrivo della funivia. Sul bancone una campanella e un cartello: «Suonare una volta. Aspettare. Suonare ancora»."]),
+      "vl_cimaalta:x": flav(["Casse di divise dei Camosci, ordinate per taglia e per grado di fluo.", "Una cassa piena di pettorine gialle e una col cartello «PETTORINE (ALTRE)»."]),
+      "vl_campoalto:#": flav(["Il tabellone elettronico. Per ora segna 0–0, un orologio fermo e «SPONSOR UFFICIALE: LUMEN». Lo sponsor, almeno, non si è dimenticato di accendere.", "Un tabellone con due righe di lampadine: CAMOSCI e OSPITI. Gli ospiti hanno le lampadine più piccole."]),
+      "vl_campoalto:j": flav(["Le gradinate gialle e nere. Ci sono sedie portate da casa, con i nomi scritti sul retro: «NONNA ILDA», «ALDO (NON MOVERE)».", "Un gradino con un cuscino ricamato «CAMOSCI» e, sotto, in piccolo, «(ma anche Vallombra, se serve)»."]),
+      "vl_campoalto:T": flav(["Un tavolo con il microfono di Radio Nebbia, due tazze di camomilla e un bigliettino: «Silenzio. In diretta.»", "Il tavolo di Noemi: il microfono grande come un frutto e un posacenere pieno di caramelle."]),
+      "vl_campoalto:x": flav(["Casse di materiale sportivo: coni, pettorine, un pallone con scritto «ULTIMO». Il pallone, interrogato, non risponde.", "Una cassa con l'etichetta «PALLONI DI RISERVA (PER LA RISERVA)»."]),
+      "vl_campoalto:V": flav(["Lo stendardo dei Camosci, sul bordo del campo, si muove pigro. Il camoscio nero sembra voltarsi appena."]),
+      "vl_campoalto:l": flav(["Un faro con il logo dello sponsor. Di sera, dicono, illumina anche chi non ne ha bisogno.", "Il faro del Campo Alto: quattro lampade, tre accese. La quarta serve a ricordare che nessuno è perfetto."]),
+      "vl_campoalto:w": flav(["Lo spogliatoio dei Camosci: dalla porta gialla escono voci di cori sbilenchi e l'odore di canfora. Qualcuno prova l'inno dei Camosci a quattro voci. Ne vengono fuori due."]),
+      "vl_baita:x": flav(["Una catasta di legna di larice, ordinata con la precisione di chi non ha altro da contare. In cima, un biglietto: «Per Vica. Se viene».", "La legna è tagliata a misura di camino, e di un camino solo: quello della baita."], BG.B),
+      "vl_baita:b": flav(["Una panca sotto il portico, con due sedute consumate. Una, a sinistra, è più consumata dell'altra: l'altra aspetta.", "Una panca di tronchi, con un cuscino rosso scolorito. Il cuscino è per qualcuno che non è mai venuto, e continua a esserlo."], BG.B),
+      "vl_baita:t": flav(["Un larice carico di neve. Sul tronco, a altezza d'uomo, sono incisi ventisei tagli verticali. Uno per anno. Gli ultimi sono freschi.", "Un larice con un fischietto di legno appeso a un ramo. Il vento lo fa suonare: corto, lungo, corto."], BG.B),
+      "vl_baita:l": flav(["Una lampada a olio appesa al palo del portico. Si accende da sola, la sera, per cortesia verso chi cammina nel buio."], BG.B),
+    };
+    function baitaPorta() {
+      say(sw([["voce", S() >= 4 ? "La porta della baita è socchiusa: dentro, il camino acceso e la parete dei fischietti. Il padrone di casa è sul portico, accanto a te, e sembra voler restare lì." : "La porta della baita è chiusa. Da dentro non viene nessun rumore, eccetto un tintinnio, a volte, di metallo sottile mosso dal vento."]], BG.B), done);
+    }
+    function spogliatoio() {
+      say(sw([["voce", "Lo spogliatoio dei Camosci: dalla porta gialla escono voci di cori sbilenchi e un odore di canfora e di entusiasmo. Qualcuno prova l'inno dei Camosci a quattro voci. Ne vengono fuori due."]], BG.A), done);
+    }
+
+    // ---- gli altri personaggi di Cima Alta
+    function tonio() {
+      if (!inC()) return delegate("vl_tonio");
+      const s = S();
+      say(sw([["vl_tonio", chip(s >= 7 ? ["Il thermos è pronto. Ho aggiunto cioccolata di nebbia fitta. Non so che fine farà: so che farà compagnia.", "Il capitano dice «scendiamo». Io dico «scendiamo con le mutande calde». Siamo d'accordo al cinquanta per cento."] : s === 5 ? ["Il mio lavoro è stare fermo e sembrare una porta più piccola. Oggi proverò a sembrare più alta: devo rimediare con l'ingegno.", "Hanno detto che la neve di oggi è sponsorizzata. Non l'ho capito: io la prendo come viene."] : ["Il capitano non dorme da due notti. Io, da quando parlo con lui, dormo il doppio.", "A Cima Alta si diventa portieri per via della pendenza: se non ti metti in porta, rotoli."])]], bgHere()), done);
+    }
+    function noemi() {
+      if (!inC()) return delegate("vl_noemi");
+      const s = S(), pr = F.get("prove", "tenute");
+      say(sw([["vl_noemi", s === 5 ? "Mi sono piazzata qui con tavolo, microfono e termos: la postazione migliore del Campo Alto. Da dove sono vedo sia lo sponsor sia il pubblico, e per ora hanno la stessa espressione." : s >= 6 ? "Ho trasmesso la partita, la cabina, la lettera (senza nome) e il meteo. Il meteo ha preso più telefonate." : pr === "radio" ? "Qui mi guardano storto, per via del nome letto in diretta. Ma mi hanno anche portato un caffè. Cima Alta è un posto complicato: ti offende e ti nutre." : "Radio Nebbia, in trasferta! Meteo: sole giallo fluo. Attenzione agli occhi, e alle accuse."]], bgHere()), done);
+    }
+    function cornelio() {
+      if (!inC()) return delegate("vl_cornelio");
+      const t = cornelioT();
+      say(sw([["vl_cornelio", chip(["Sono qui in veste di sindaco ospite, di spettatore e, all'occorrenza, di arbitro. A Cima Alta le cariche sono come le sedie: si portano da casa.", t === "verita" ? "Ho preparato un discorso di nove minuti per il derby. L'ho ridotto a un minuto e mezzo. Mi sento come un cappello che ha perso il fiocco." : "Ho preparato un discorso. Non lo leggo: lo tengo in tasca, come un fischietto da usare solo in emergenza."])]], BG.A), done);
+    }
+    function mirtilla() {
+      if (!inC()) return delegate("vl_mirtilla");
+      say(sw([["vl_mirtilla", chip(["Ho portato la cioccolata «Nebbia Gialla». Contiene cioccolato, un tocco di cannella e un rimorso. Si vende bene.", "Il Presidente Neve mi ha detto che l'ospitalità, a Cima Alta, è gratuita. Gli ho venduto una cioccolata a prezzo pieno: gratuita non vuol dire gratis."])]], BG.A), done);
+    }
+    function comp(id) {
+      if (!inC()) return delegate(id);
+      if (id !== compId()) return delegate(id);
+      const s = S(), b = isB();
+      const o = [
+        { label: "Che facciamo ora?", sub: "Un consiglio", fn: () => say(sw([[id, goal(s)]], bgHere()), done) },
+        { label: "Cosa pensi di Cima Alta?", fn: () => say(sw([[id, chip(b ? ["Mi piace il giallo. Mi piace molto meno che sia tutto del medesimo giallo, come in una catena di montaggio.", "Una cabina che arriva in cima a un paese fluo: la prima cosa che ho pensato è stata «qui qualcuno ha paura del buio».", "Il Presidente ha più denti dei suoi stessi argomenti."] : ["Il giallo non è il colore della gioia: è il colore dell'avvertimento. Fatene quello che volete.", "Tre Coppe in fila, stesso arbitro, stesso sponsor. Lo annoto con la penna rossa.", "Il Presidente sorride a ventotto denti e mente a nessuno: è una combinazione rara."])]], bgHere()), done) },
+      ];
+      ask(id, b ? "«Dimmi tu: io faccio i bulloni, tu fai i tiri.»" : "«Dimmi tu: io leggo gli indizi, tu li metti in fila.»", o, bgHere());
+    }
+
+    // ---- oggetti e personaggi
+    const obj = Object.assign({}, oggetti, {
+      "vl_paese:k": cabinaVallombra,
+      "vl_cimaalta:k": cabinaCima, "vl_cimaalta:>": () => go("vl_campoalto", 1, 12), "vl_cimaalta:^": sentiero,
+      "vl_cimaalta:u": osteriaPorta, "vl_cimaalta:w": chaletPorta, "vl_cimaalta:J": clueA,
+      "vl_campoalto:<": () => go("vl_cimaalta", 42, 13), "vl_campoalto:m": clueB, "vl_campoalto:U": palla, "vl_campoalto:b": clueC, "vl_campoalto:w": spogliatoio,
+      "vl_baita:<": () => go("vl_cimaalta", 22, 4), "vl_baita:m": baitaPorta, "vl_baita:%": cannocchiale,
+    });
+    const talk = {
+      vl_gisella: gisella, vl_neve: neve, vl_vermiglio: vermigliot, vl_sigillo: sigillot, vl_remo: remo, vl_remo_ns: remo, vl_zelo: zelo,
+      vl_vica: vica, vl_gaudenzio: gaudenzio, vl_tonio: tonio, vl_noemi: noemi, vl_cornelio: cornelio, vl_mirtilla: mirtilla,
+      vl_bianca: () => comp("vl_bianca"), vl_agata: () => comp("vl_agata"),
+    };
+
+    return {
+      n: N, title: "I Camosci", sub: "Un derby, un fischio e una lettera in ritardo", start: "vl_cimaalta", zones, talk, obj, goal, mood,
+      news: (id, s) => {
+        if (!inC()) return X.newsOf(id, N);
+        if (id === "vl_gisella") return s === 0;
+        if (id === "vl_neve") return s === 1;
+        if (id === remoId()) return s === 2;
+        if (id === "vl_vica") return s === 3 || s === 6;
+        if (id === "vl_gaudenzio") return s === 4;
+        return false;
+      },
+      intro: () => [
+        ["voce", "La cabina sale dal Latte come un pesce che cambia idea. A mille e cento metri l'aria sa di caminetto; sopra, sa di sole, di plastica nuova e di vernice fresca. Il cavo canta una nota sola, un po' stonata, che a un orecchio fino parrebbe un avviso.", BG.P],
+        ["voce", "Cima Alta compare tutta insieme: chalet gialli come evidenziatori, tetti verdi, bandiere con un camoscio nero e, sopra la stazione, un'insegna grande quanto una casa: BENVENUTI A CIMA ALTA · 3 COPPE DI FILA (LA QUARTA IN ARRIVO). Sotto, più piccola: LUMEN ENERGIE ALPINE · OFFICIAL PARTNER.", BG.C],
+        [compId(), isB() ? "Gialli. Tutti gialli. Un colore da segnale di pericolo: sarà un caso. Ho preso la chiave inglese: non si sa mai con la vernice fresca." : "Colore Pantone «evidenziatore». In geologia sarebbe zolfo: tossico, ma vistoso. Tengo il taccuino a portata di mano.", BG.C],
+        ["voce", "È giovedì. Il derby con i Camosci è sabato, al Campo Alto, con la Regola di casa: arbitro designato dallo sponsor. Intanto, Cima Alta sorride. Sorride troppo, come chi ha un conto da pagare e un cassetto da tenere chiuso.", BG.C],
+      ],
+    };
+  });
+
 
 
   // ------------------------------------------------------------------ debug e avvio
