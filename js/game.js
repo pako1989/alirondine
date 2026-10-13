@@ -4169,18 +4169,41 @@
   const OMINI = { img: null, ok: false, hero: "", heroT: -999,
     names: ["Ragazzo", "Donna", "Anziano", "Anziana", "Paesano", "Paesana", "Bottegaio", "Pescatrice", "Contadino", "Viaggiatore", "Principessa", "Nobile", "Monaco", "Samurai", "Cacciatore", "Ispettore", "Cavaliere", "Esploratore delle nevi", "Cavernicola", "Cavernicolo", "Lottatore rosso", "Lottatore bianco", "Maestro", "Sultano", "Sciamano", "Ninja blu", "Ninja rosso", "Ninja verde", "Ninja giallo", "Samurai blu"],
     load() { if (this.img) return; this.img = new Image(); this.img.onload = () => { this.ok = true; }; this.img.src = "img/omini/omini.png"; },
+    tint: {},
+    // la maglia del Campione: nel personaggio scelto si cerca il colore più presente nella parte bassa (il vestito, esclusi contorni
+    // e pelle) e lo si sostituisce con quello della maglia, tenendo le ombre. Si calcola una volta e si ricorda.
+    shirt(i, col) {
+      const k = i + col; if (this.tint[k] !== undefined) return this.tint[k];
+      let out = null;
+      try {
+        const c = document.createElement("canvas"); c.width = 64; c.height = 64; const x = c.getContext("2d"); x.drawImage(this.img, (i % 8) * 64, Math.floor(i / 8) * 64, 64, 64, 0, 0, 64, 64);
+        const d = x.getImageData(0, 0, 64, 64), px = d.data, cnt = {};
+        const skin = (r, g, b) => r > 150 && g > 90 && b < 150 && r > g && g > b && r - b > 50;
+        for (let y = 0; y < 64; y++) { if (y % 16 < 11) continue; for (let xx = 0; xx < 64; xx++) { const o = (y * 64 + xx) * 4, r = px[o], g = px[o + 1], b = px[o + 2]; if (px[o + 3] < 200 || r + g + b < 90 || skin(r, g, b)) continue; const q = (r >> 5) + "," + (g >> 5) + "," + (b >> 5); cnt[q] = (cnt[q] || 0) + 1; } }
+        const top = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a])[0];
+        if (top) {
+          const [qr, qg, qb] = top.split(",").map((v) => v * 32 + 16), lum = (r, g, b) => 0.3 * r + 0.59 * g + 0.11 * b, L0 = lum(qr, qg, qb) || 1;
+          const tr = parseInt(col.slice(1, 3), 16), tg = parseInt(col.slice(3, 5), 16), tb = parseInt(col.slice(5, 7), 16);
+          for (let o = 0; o < px.length; o += 4) { const r = px[o], g = px[o + 1], b = px[o + 2]; if (px[o + 3] < 200 || ((o / 256) | 0) % 16 < 10) continue; if (Math.abs(r - qr) + Math.abs(g - qg) + Math.abs(b - qb) > 110 || skin(r, g, b) || r + g + b < 90) continue; const k2 = Math.max(0.45, Math.min(1.5, lum(r, g, b) / L0)); px[o] = Math.min(255, tr * k2); px[o + 1] = Math.min(255, tg * k2); px[o + 2] = Math.min(255, tb * k2); }
+          x.putImageData(d, 0, 0); out = c;
+        }
+      } catch (e) { out = null; }
+      return (this.tint[k] = out);
+    },
   };
   window.__omini = OMINI;
   function ominoPixel(x, y, c, dir, ph) {
     if (!OMINI.ok) { OMINI.load(); return false; }
     if (frame - OMINI.heroT > 120) { OMINI.heroT = frame; const h = heroLoad(); OMINI.hero = (h && h.name) || ""; }
-    let i = c.omino;
-    if (i == null) { if (c.num != null && c.name && c.name === OMINI.hero) i = SET.ominoHero; else { const k = String(c.name || "") + (c.hair || "") + (c.shirt || "") + (c.skin || ""); let hsh = 7; for (let j = 0; j < k.length; j++) hsh = (hsh * 31 + k.charCodeAt(j)) >>> 0; i = 1 + (hsh % (OMINI.names.length - 1)); } }
+    let i = c.omino, me = false;
+    if (i == null) { if (c.num != null && c.name && c.name === OMINI.hero) { i = SET.ominoHero; me = true; } else { const k = String(c.name || "") + (c.hair || "") + (c.shirt || "") + (c.skin || ""); let hsh = 7; for (let j = 0; j < k.length; j++) hsh = (hsh * 31 + k.charCodeAt(j)) >>> 0; i = 1 + (hsh % (OMINI.names.length - 1)); } }
     i = ((i | 0) % OMINI.names.length + OMINI.names.length) % OMINI.names.length;
     const col = { down: 0, up: 1, left: 2, right: 3 }[dir] || 0, row = ph ? Math.floor(Math.abs(ph) * 1.2) % 4 : 0;
     g.fillStyle = "#0004"; g.beginPath(); g.ellipse(x, y, 7, 2.5, 0, 0, 7); g.fill();
     const sm = g.imageSmoothingEnabled; g.imageSmoothingEnabled = false;
-    g.drawImage(OMINI.img, (i % 8) * 64 + col * 16, Math.floor(i / 8) * 64 + row * 16, 16, 16, Math.round(x - 12), Math.round(y - 23), 24, 24);
+    const tc = me && /^#[0-9a-f]{6}$/i.test(c.shirt || "") ? OMINI.shirt(i, c.shirt) : null;
+    if (tc) g.drawImage(tc, col * 16, row * 16, 16, 16, Math.round(x - 12), Math.round(y - 23), 24, 24);
+    else g.drawImage(OMINI.img, (i % 8) * 64 + col * 16, Math.floor(i / 8) * 64 + row * 16, 16, 16, Math.round(x - 12), Math.round(y - 23), 24, 24);
     g.imageSmoothingEnabled = sm; return true;
   }
   function chibi(x, y, c, dir, ph) { const SA = [].concat(c.acc || []); // uno o più accessori
