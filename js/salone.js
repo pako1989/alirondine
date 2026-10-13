@@ -254,9 +254,13 @@
     html += `<div class="row">${["storia", "normale", "sfida"].map((k) => `<button type="button" class="chip${r.diff === k ? " on" : ""}" data-diff="${k}">${D && D[k] ? D[k].label : k}</button>`).join("")}</div>`;
     html += MACHINES.map((m) => { const st = sgState(m), w = r.w[m.id] || 0, p = r.p[m.id] || 0;
       return `<div class="psec${st.boss ? " gold" : ""}" data-m="${m.id}"><div class="pe">${st.open ? m.e : "🔒"}</div><div><b>${esc(m.t)}</b><span>${st.open ? esc(m.d) : `Si accende finendo il primo capitolo di «${esc(st.s ? st.s.t : m.saga)}».`}</span></div><div class="n">${st.open ? `${w}/${p}` : ""}</div></div>`; }).join("");
+    html += `<div class="sec">Sfide libere · i minigiochi delle saghe<span>solo record</span></div><p class="sum">Le prove a tempismo e i rompicapo di Vallombra, in versione breve e senza premi: contano solo i record. Si accendono quando incontri la prova nella saga.</p>`;
+    html += SGC.map((c) => { const op = sgcSeen(c), b = ((r.c || {})[c.id] || {}).best;
+      return `<div class="psec" data-c="${c.id}"><div class="pe">${op ? c.e : "🔒"}</div><div><b>${op ? esc(c.t) : "Prova di Vallombra"}</b><span>${op ? esc(c.d) : "Ancora da incontrare nella saga."}</span></div><div class="n">${op && b != null ? esc(c.unit(b)) : ""}</div></div>`; }).join("");
     body.innerHTML = html;
     body.querySelectorAll("[data-diff]").forEach((b) => (b.onclick = () => { const r2 = sgRec(); r2.diff = b.dataset.diff; sgSave(r2); openSalaGiochi(); }));
     body.querySelectorAll("[data-m]").forEach((b) => (b.onclick = () => { const m = MACHINES.find((x) => x.id === b.dataset.m); if (sgState(m).open) sgMachine(m); }));
+    body.querySelectorAll("[data-c]").forEach((b) => (b.onclick = () => { const c = SGC.find((x) => x.id === b.dataset.c); if (c && sgcSeen(c)) sgcPlay(c); }));
   }
   function sgMachine(m) {
     const body = shell(`${m.e} ${m.t}`), st = sgState(m), list = m.opp.map((o, i) => ({ o, i, boss: false })).concat(st.boss ? [{ o: m.boss, i: 9, boss: true }] : []);
@@ -311,6 +315,145 @@
     if (T.round >= 2) html += `<div class="sec">Finale</div>` + (T.res[2].length ? T.res[2].map((x) => row(...x)).join("") : row(T.alive[0] || "?", T.alive[1] || "?"));
     html += `<div class="big"><button type="button" data-go="1">${esc(btn)}<small>${esc(T.m.t)}</small></button></div>`;
     body.innerHTML = html; body.querySelector("[data-go]").onclick = fn;
+  }
+  // ---------------------------------------------------------------- SFIDE LIBERE (minigiochi delle saghe)
+  // I minigiochi autonomi delle saghe, rigiocabili a piacere in versione breve: solo record personale, nessun premio e nessun bonus
+  // alle partite. Si accendono quando la prova è stata incontrata nella saga (o il suo capitolo è concluso). Salvataggio: sgRec().c = { id: { best, n } }.
+  const VLK = "ali-di-rondine.storia-campione";
+  const sgcSeen = (c) => {
+    const inf = safe(() => window.__storiaCampione.info(), null), dn = (inf && inf.done) || {};
+    const fl = safe(() => JSON.parse(localStorage.getItem(VLK) || "{}").flags, null) || {};
+    return !!dn[c.chap] || c.flags.some((k) => fl[k]);
+  };
+  function sgcCss() {
+    if (document.getElementById("sgcStyle")) return;
+    const st = document.createElement("style"); st.id = "sgcStyle";
+    st.textContent = `.salOv .sgcTrack{position:relative;height:50px;border-radius:12px;background:#0b1026;border:2px solid #ffffff33;overflow:hidden;margin:14px 0}
+.salOv .sgcZ{position:absolute;top:0;bottom:0;background:#2f9e55aa}.salOv .sgcP{position:absolute;top:0;bottom:0;background:#ffd23f}
+.salOv .sgcM{position:absolute;top:5px;bottom:5px;width:6px;margin-left:-3px;border-radius:3px;background:#fff;box-shadow:0 0 10px #fff}
+.salOv .sgcGo{width:100%;min-height:64px;border-radius:16px;border:2px solid #ffd23f;background:linear-gradient(#ffd23f,#e8a33d);color:#1a1400;font:900 20px "M PLUS Rounded 1c",sans-serif;cursor:pointer;touch-action:manipulation}
+.salOv .sgcGo:disabled{opacity:.45}.salOv .sgcLine{min-height:44px;margin:12px 0;font-size:14px;line-height:1.4;color:#e8ecf7;text-align:center}
+.salOv .sgcDots{display:flex;justify-content:center;gap:8px;font-size:22px;min-height:30px}
+.salOv .sgcDial{display:block;margin:6px auto;width:min(240px,70vw);height:auto}
+.salOv .sgcRow{display:flex;gap:10px;justify-content:center;margin:12px 0}
+.salOv .sgcBtn{flex:1;min-height:64px;max-width:150px;border-radius:14px;border:2px solid #ffffff55;background:#16294a;color:#fff;font:800 14px "M PLUS Rounded 1c",sans-serif;cursor:pointer;padding:4px;touch-action:manipulation}
+.salOv .sgcBtn.on{background:linear-gradient(#7af0ff,#2a9ac8);color:#06222c;border-color:#bff6ff;box-shadow:0 0 14px #5fe0f0}
+.salOv .sgcBtn span{display:block;font-size:26px}
+.salOv .sgcSeq{font:900 30px/1.3 sans-serif;letter-spacing:6px;text-align:center;min-height:40px;color:#ffd23f}
+.salOv .sgcHist{font-size:13px;color:#c9d2ea;margin:8px 0;line-height:1.6}
+.salOv .sgcBig{font:900 40px "Dela Gothic One",Impact,sans-serif;color:#ffd23f;text-align:center;margin:10px 0 0}`;
+    document.head.appendChild(st);
+  }
+  const sgcBeep = (seq) => {
+    try {
+      const A = new (window.AudioContext || window.webkitAudioContext)(); let t = A.currentTime + 0.05;
+      seq.forEach((v) => { const o = A.createOscillator(), g = A.createGain(); o.type = "triangle"; o.frequency.value = 1500; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.08, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + (v ? 0.38 : 0.14)); o.connect(g); g.connect(A.destination); o.start(t); o.stop(t + (v ? 0.4 : 0.16)); t += v ? 0.55 : 0.3; });
+      setTimeout(() => safe(() => A.close(), 0), 3000);
+    } catch (e) { /* senza audio si gioca lo stesso */ }
+  };
+  // Il tempismo: una barra (o una ghiera) con la zona verde e il centro oro. Come il tempismo di Vallombra: centro = 3, zona = 2, fuori = 1.
+  function sgcTiming(body, o) {
+    const pts = []; let i = 0, raf = 0, t0 = 0, stopped = false, Z = { lo: 0, w: 0.2 }, pos = 0;
+    const root = document.createElement("div"); body.appendChild(root);
+    const dial = o.kind === "dial", R = 52, C = 60;
+    const arc = (a0, a1) => { const p = (a) => [C + R * Math.sin(a * 6.2832), C - R * Math.cos(a * 6.2832)]; const [x0, y0] = p(a0), [x1, y1] = p(a1); return `M${x0.toFixed(1)} ${y0.toFixed(1)} A${R} ${R} 0 ${a1 - a0 > 0.5 ? 1 : 0} 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`; };
+    function round() {
+      stopped = false; const w = o.zone[i], lo = 0.08 + Math.random() * (0.84 - w); Z = { lo, w };
+      const pz = o.pz || 0.025, dots = pts.map((n) => (n === 3 ? "⭐" : n === 2 ? "✔️" : "✖️")).join("") + "⚪".repeat(o.rounds - pts.length);
+      root.innerHTML = `<div class="sgcDots">${dots}</div><p class="sum" style="text-align:center">${esc(o.label)} · prova ${i + 1} di ${o.rounds}</p>` + (dial
+        ? `<svg class="sgcDial" viewBox="0 0 120 120"><circle cx="60" cy="60" r="${R + 6}" fill="#0b1026" stroke="#ffffff33" stroke-width="2"/><path d="${arc(lo, lo + w)}" fill="none" stroke="#2f9e55" stroke-width="12"/><path d="${arc(lo + w / 2 - pz, lo + w / 2 + pz)}" fill="none" stroke="#ffd23f" stroke-width="12"/><line class="nd" x1="60" y1="60" x2="60" y2="12" stroke="#fff" stroke-width="3" stroke-linecap="round"/><circle cx="60" cy="60" r="6" fill="#fff"/></svg>`
+        : `<div class="sgcTrack"><i class="sgcZ" style="left:${lo * 100}%;width:${w * 100}%"></i><i class="sgcP" style="left:${(lo + w / 2 - pz) * 100}%;width:${pz * 200}%"></i><i class="sgcM"></i></div>`)
+        + `<div class="sgcLine">${esc(o.hint)}</div><button type="button" class="sgcGo">${esc(o.btn || "ORA!")}</button>`;
+      t0 = performance.now(); const m = root.querySelector(".sgcM"), nd = root.querySelector(".nd"), per = o.period[i] * 1000;
+      const at = (now) => { const t = (now - t0) / per; return dial ? t % 1 : (t % 2 < 1 ? t % 2 : 2 - (t % 2)); };
+      const frame = (now) => { if (!root.isConnected || stopped) return; pos = at(now); if (m) m.style.left = pos * 100 + "%"; if (nd) nd.setAttribute("transform", `rotate(${pos * 360} 60 60)`); raf = requestAnimationFrame(frame); };
+      raf = requestAnimationFrame(frame);
+      const go = root.querySelector(".sgcGo");
+      const stop = () => {
+        if (stopped || !root.isConnected) return; stopped = true; cancelAnimationFrame(raf); pos = at(performance.now());
+        if (m) m.style.left = pos * 100 + "%"; if (nd) nd.setAttribute("transform", `rotate(${pos * 360} 60 60)`);
+        let d = Math.abs(pos - (lo + w / 2)); if (dial) d = Math.min(d, 1 - d);
+        const n = d <= pz ? 3 : d <= w / 2 ? 2 : 1; pts.push(n); go.disabled = true;
+        root.querySelector(".sgcLine").innerHTML = `<b>${esc(o.line[n - 1])}</b>`;
+        root.querySelector(".sgcDots").innerHTML = pts.map((q) => (q === 3 ? "⭐" : q === 2 ? "✔️" : "✖️")).join("") + "⚪".repeat(o.rounds - pts.length);
+        setTimeout(() => { if (!root.isConnected) return; i++; if (i >= o.rounds) o.done(pts.reduce((a, b) => a + b, 0), pts); else round(); }, 1000);
+      };
+      go.onclick = stop;
+    }
+    round();
+  }
+  const SGC = [
+    { id: "slalom", e: "🧀", t: "Lo slalom dei Camosci", chap: 5, flags: ["slalom_met", "slalom_ok", "slalom_f"], dir: "max", unit: (b) => `${b}/15`, rule: "punti su 15",
+      d: "Cinque coni, nessuna pietà e una polenta che non è in palio: ferma la barra nella zona verde, il pallone fa il resto.",
+      run: (body, end) => sgcTiming(body, { rounds: 5, label: "Slalom", kind: "bar", zone: [0.26, 0.23, 0.2, 0.17, 0.14], period: [1.1, 1.0, 0.9, 0.8, 0.7], hint: "Ferma la barra nella zona verde: il centro oro vale tre.", btn: "ORA! ⚽", line: ["Giù. Il cono rotola via con la dignità di un camoscio.", "Sfiorato. Il cono tossisce e si rimette dritto.", "Pulito! Il cono ondeggia ma resta in piedi."], done: (s) => end(s, s >= 13 ? "Cinque coni in piedi e nemmeno un cappello perso. Qualcuno ti offrirà una polenta, prima o poi." : s >= 9 ? "Una discesa onesta: due coni hanno protestato, ma sottovoce." : "I coni sono permalosi. Riprova: la seconda volta è la più educata.") }) },
+    { id: "rigori", e: "🥅", t: "I rigori al portiere", chap: 3, flags: ["berto_f", "berto_ok"], dir: "max", unit: (b) => `${b}/15`, rule: "punti su 15",
+      d: "Cinque rigori a tempismo contro un portiere che non si schioda dalla riga. Il centro oro è un gol da copertina; la zona verde, un gol discreto.",
+      run: (body, end) => sgcTiming(body, { rounds: 5, label: "Rigore", kind: "bar", zone: [0.24, 0.21, 0.19, 0.16, 0.14], period: [1.0, 0.9, 0.8, 0.72, 0.65], hint: "Calcia quando il pallone passa sul verde.", btn: "TIRA! ⚽", line: ["Parato. Il portiere ti saluta con la mano, per cortesia.", "Palo! Il portiere sorride, il palo un po' meno.", "Gol! La rete di nebbia luminosa trema come un lenzuolo steso."], done: (s) => end(s, s >= 13 ? "Cinque rigori, quattro e mezzo da incorniciare. Il portiere chiede la rivincita per iscritto." : s >= 9 ? "Un rigorista da campetto di lusso." : "Il pallone, quando va, va bene. È il momento che ha una sua idea.") }) },
+    { id: "freno", e: "⚙️", t: "Il freno del carrello", chap: 3, flags: ["cart_f", "cart_ok"], dir: "max", unit: (b) => `${b}/12`, rule: "punti su 12",
+      d: "Un carrello da cinquecento chili e una ghiera con un punto verde: ferma la lancetta quando ci passa sopra, senza offendere il carrello.",
+      run: (body, end) => sgcTiming(body, { rounds: 4, label: "Freno", kind: "dial", zone: [0.16, 0.14, 0.12, 0.1], period: [2.4, 2.1, 1.8, 1.6], pz: 0.02, hint: "La lancetta gira: bloccala sul verde.", btn: "FRENA!", line: ["Slitta. La ghiera gira a vuoto e il carrello fa un rutto di ferro.", "Quasi. Il carrello trema, poi si accontenta.", "Clac! La ghiera scatta nel punto esatto, senza un fiato."], done: (s) => end(s, s >= 11 ? "Il carrello si è fermato con la dignità di chi cede il posto." : s >= 7 ? "Si è fermato. Con aria di chi ha vinto ai punti." : "Il carrello ha un'idea sua sul freno. Riprova con più calma.") }) },
+    { id: "cristalli", e: "💎", t: "I quattro cristalli in fase", chap: 3, flags: ["cr_seen", "p1_ok", "cr_n"], dir: "min", unit: (b) => `${b} mosse`, rule: "mosse (meno è meglio)",
+      d: "Quattro cristalli in fila: se ne tocchi uno, cambiano anche i vicini. Devono brillare tutti insieme, con meno tocchi che puoi.",
+      run: (body, end) => {
+        const eff = (s, i) => { const t = s.slice(); [i - 1, i, i + 1].forEach((j) => { if (j >= 0 && j < 4) t[j] = !t[j]; }); return t; };
+        let st; do { st = [true, true, true, true]; for (let i = 0; i < 4; i++) if (Math.random() < 0.5) st = eff(st, i); } while (st.every(Boolean));
+        let par = 9; for (let m = 0; m < 16; m++) { let t = st; let n = 0; for (let i = 0; i < 4; i++) if (m & (1 << i)) { t = eff(t, i); n++; } if (t.every(Boolean)) par = Math.min(par, n); }
+        let moves = 0; const draw = () => {
+          body.innerHTML = `<p class="sum">${esc(SGC[3].d)}</p><div class="sgcRow">${st.map((on, i) => `<button type="button" class="sgcBtn${on ? " on" : ""}" data-i="${i}"><span>${on ? "💠" : "🔹"}</span>${i + 1}°</button>`).join("")}</div><div class="sgcLine">Mosse: <b>${moves}</b> · il minimo possibile è ${par}</div><div class="big"><button type="button" data-q="1">◂ Esci<small>Torna alla Sala Giochi</small></button></div>`;
+          body.querySelectorAll("[data-i]").forEach((b) => (b.onclick = () => { st = eff(st, +b.dataset.i); moves++; if (st.every(Boolean)) { draw(); end(moves, moves <= par ? "Minimo possibile: una nota sola, bassa, che ti sale per le caviglie." : `Tutti accesi. Con ${par} mosse si poteva: la prossima volta ti viene più facile.`); } else draw(); }));
+          body.querySelector("[data-q]").onclick = () => openSalaGiochi();
+        };
+        draw();
+      } },
+    { id: "archivio", e: "🗝️", t: "I quattro tasselli dell'archivio", chap: 4, flags: ["tw_seen", "cass_open", "disc"], dir: "min", unit: (b) => `${b} tentativi`, rule: "tentativi (meno è meglio)",
+      d: "Quattro tasselli, quattro simboli, un ordine solo, nessuna ripetizione: il cassetto dice soltanto quanti tasselli sono al posto giusto.",
+      run: (body, end) => {
+        const SY = ["✒️ Pennino", "🔴 Timbro", "🏵️ Sigillo", "🛡️ Stemma"]; let sol; do { sol = [0, 1, 2, 3].sort(() => Math.random() - 0.5); } while (sol.every((v, i) => v === i));
+        const cur = [0, 1, 2, 3], hist = []; const draw = () => {
+          body.innerHTML = `<p class="sum">${esc(SGC[4].d)} Tocca un tassello per cambiare simbolo.</p><div class="sgcRow" style="flex-wrap:wrap">${cur.map((v, i) => `<button type="button" class="sgcBtn" data-i="${i}">${esc(SY[v])}</button>`).join("")}</div>`
+            + `<div class="big"><button type="button" data-try="1">Prova il cassetto<small>Tentativo ${hist.length + 1}</small></button></div><div class="sgcHist">${hist.map((h, n) => `${n + 1}. ${h[0].map((v) => SY[v].split(" ")[0]).join(" ")} → <b>${h[1]} su 4</b>`).join("<br>")}</div><div class="big"><button type="button" data-q="1">◂ Esci<small>Torna alla Sala Giochi</small></button></div>`;
+          body.querySelectorAll("[data-i]").forEach((b) => (b.onclick = () => { const i = +b.dataset.i; cur[i] = (cur[i] + 1) % 4; draw(); }));
+          body.querySelector("[data-try]").onclick = () => { const k = cur.filter((v, i) => v === sol[i]).length; hist.push([cur.slice(), k]); if (k === 4) { draw(); end(hist.length, hist.length <= 4 ? "Il cassetto scivola fuori con un sospiro di legno: conoscevi la serratura meglio di lei." : "Il cassetto cede, finalmente, con un tintinnio di molle."); } else draw(); };
+          body.querySelector("[data-q]").onclick = () => openSalaGiochi();
+        };
+        draw();
+      } },
+    { id: "fischi", e: "🎺", t: "Il baule a fischio", chap: 5, flags: ["fischi_ok", "fischi_f", "fischi_r"], dir: "min", unit: (b) => `${b} passi falsi`, rule: "passi falsi (errori e riascolti, meno è meglio)",
+      d: "Un baule che si apre solo a fischio: corto ●, lungo ▬. Tre frasi del codice dei soccorsi, e ogni frase ti dà un indizio più magro della precedente.",
+      run: (body, end) => {
+        const FR = [{ n: "PERICOLO", p: [0, 1, 0], d: "un corto, un lungo, un corto" }, { n: "HO CAPITO", p: [0, 0, 1], d: "due corti e un lungo" }, { n: "VENGO", p: [1, 0, 0], d: "un lungo e due corti" }].sort(() => Math.random() - 0.5);
+        const sym = (a) => a.map((v) => (v ? "▬" : "●")).join(" "); let r = 0, cur = [], falls = 0, shown = true;
+        const draw = () => {
+          const f = FR[r], look = r === 0 ? sym(f.p) : r === 1 ? f.d : "";
+          body.innerHTML = `<p class="sum">${esc(SGC[5].d)}</p><div class="sec">Frase ${r + 1} di 3 · ${esc(f.n)}</div><div class="sgcSeq">${shown && look ? esc(look) : "·"}</div><div class="sgcSeq" style="color:#7af0ff">${esc(sym(cur)) || "&nbsp;"} <small style="font-size:13px;letter-spacing:0">${cur.length}/${f.p.length}</small></div>`
+            + `<div class="sgcRow"><button type="button" class="sgcBtn" data-v="0"><span>●</span>Corto</button><button type="button" class="sgcBtn" data-v="1"><span>▬</span>Lungo</button></div><div class="sgcLine">Passi falsi: <b>${falls}</b></div>`
+            + `<div class="big"><button type="button" data-re="1">🔊 Riascolta<small>${r === 0 ? "Gratis alla prima frase" : "Costa un passo falso"}</small></button><button type="button" data-q="1">◂ Esci<small>Torna alla Sala Giochi</small></button></div>`;
+          body.querySelectorAll("[data-v]").forEach((b) => (b.onclick = () => {
+            cur.push(+b.dataset.v); if (cur.length < f.p.length) return draw();
+            if (cur.every((v, k) => v === f.p[k])) { cur = []; shown = true; r++; if (r >= 3) return end(falls, falls === 0 ? "Tre clic limpidi e il coperchio si alza da solo. Orecchio assoluto." : "Il terzo clic è il più grave: la serratura gira, i cardini sospirano.");  return draw(); }
+            falls++; cur = []; draw();
+          }));
+          body.querySelector("[data-re]").onclick = () => { if (r > 0) falls++; sgcBeep(f.p); cur = []; shown = true; draw(); };
+          body.querySelector("[data-q]").onclick = () => openSalaGiochi();
+        };
+        draw(); sgcBeep(FR[0].p);
+      } },
+  ];
+  function sgcPlay(c) {
+    const body = shell(`${c.e} ${c.t}`); sgcCss(); BACK = () => openSalaGiochi();
+    const end = (score, txt) => {
+      const r = sgRec(); r.c = r.c || {}; const o = r.c[c.id] || { best: null, n: 0 };
+      const old = o.best, better = old == null || (c.dir === "min" ? score < old : score > old); o.n++; if (better) o.best = score; r.c[c.id] = o; sgSave(r);
+      setTimeout(() => {
+        if (!body.isConnected) return;
+        body.innerHTML = `<div class="sgcBig">${esc(c.unit(score))}</div><p class="sum" style="text-align:center">${better ? (old == null ? "<b>Primo record!</b>" : "<b>NUOVO RECORD!</b> Il precedente era " + esc(c.unit(old)) + ".") : `Il tuo record resta ${esc(c.unit(o.best))}.`}</p><div class="sgcLine">${esc(txt)}</div>`
+          + `<div class="big"><button type="button" data-again="1">↻ Ancora<small>Un'altra prova</small></button><button type="button" data-back="1">◂ Sala Giochi<small>Tutti i cabinati</small></button></div>`;
+        body.querySelector("[data-again]").onclick = () => sgcPlay(c); body.querySelector("[data-back]").onclick = () => openSalaGiochi();
+      }, 900);
+    };
+    body.innerHTML = `<p class="sum">${esc(c.d)}</p><p class="sum">Record: <b>${(sgRec().c || {})[c.id] && (sgRec().c || {})[c.id].best != null ? esc(c.unit(sgRec().c[c.id].best)) : "nessuno"}</b> · si misura in ${esc(c.rule)}. Nessun premio: solo l'onore.</p><div class="big"><button type="button" data-go="1">▶ Comincia<small>${esc(c.t)}</small></button><button type="button" data-back="1">◂ Sala Giochi<small>Indietro</small></button></div>`;
+    body.querySelector("[data-back]").onclick = () => openSalaGiochi();
+    body.querySelector("[data-go]").onclick = () => { body.innerHTML = ""; c.run(body, end); };
   }
   // ---------------------------------------------------------------- CINETECA
   // Rivedi i finali che hai trovato: lo sfondo animato della saga, la grana della pellicola e il racconto del finale.
