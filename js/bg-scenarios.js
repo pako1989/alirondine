@@ -7851,7 +7851,7 @@
       hot: [
         [135, 15, 50, 45, "🔔 La campana di bronzo del fortino: quando suona mezzogiorno comincia la resa dei conti."],
         [85, 60, 150, 60, "🏆 La porta della finale: qui si assegna la Coppa di Rio Bravo e il titolo di pistolero supremo."],
-        [20, 30, W - 40, 40, "👥 I bastioni del fortino: desperados, ranger e contadini guardano in silenzio trattenendo il fiato."]
+        [20, 30, 280, 40, "👥 I bastioni del fortino: desperados, ranger e contadini guardano in silenzio trattenendo il fiato."]
       ]
     },
   };
