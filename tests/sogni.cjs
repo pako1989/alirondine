@@ -33,6 +33,40 @@ async function run(w) {
   await page.evaluate(() => document.querySelector('.sgOv [data-i="6"]').click()); await page.waitForTimeout(400);
   const du = await page.evaluate(() => { const S = window.__duello.state; return S ? S.gutsMax : null; }); if (du !== 124) errors.push("Duello dei Sogni, grinta: " + du);
   await page.evaluate(() => document.querySelector(".duOv .ov button").click()); await page.waitForTimeout(100); await page.evaluate(() => window.__duello.state.finish(true)); await page.waitForTimeout(200); await page.evaluate(() => document.querySelector(".duOv .ov button").click()); await page.waitForTimeout(300);
+  // le stelle: esperienza alle carte che giocano, a tre stelle la frase
+  const xp = await page.evaluate(() => window.__sogni._load().xp); if (!(xp.cm_bastiano >= 1)) errors.push("nessuna esperienza alle carte dopo le sfide: " + JSON.stringify(xp));
+  await page.evaluate(() => { const b = document.querySelector(".sgOv [data-ok]"); if (b) b.click(); }); await page.waitForTimeout(150);
+  await page.evaluate(() => { const r = window.__sogni._load(); r.xp.cm_bastiano = 15; localStorage.setItem("ali-di-rondine.sogni", JSON.stringify(r)); window.__sogni.open(); }); await page.waitForTimeout(200);
+  if (!(await page.evaluate(() => window.__sogni.stars("cm_bastiano") === 3 && !!document.querySelector('.sgOv .team .sgCard.s3[data-c="cm_bastiano"] .stars')))) errors.push("carta a tre stelle non mostrata");
+  // la Stagione dei Sogni: una giornata simulata, una giocata nel Concilio, poi fino alla fine
+  await page.evaluate(() => document.querySelector('.sgOv [data-go="season"]').click()); await page.waitForTimeout(200);
+  await page.evaluate(() => document.querySelector(".sgOv [data-sim]").click()); await page.waitForTimeout(200);
+  await page.evaluate(() => { const b = document.querySelector(".sgOv [data-ok]"); if (b) b.click(); }); await page.waitForTimeout(150);
+  let se = await page.evaluate(() => window.__sogni._load().season); if (!se || se.day !== 1 || Object.values(se.tab).some((R) => R[0] !== 1)) errors.push("Stagione: giornata simulata non registrata");
+  await page.evaluate(() => { const r = window.__sogni._load(); r.season.eng[1] = "concilio"; localStorage.setItem("ali-di-rondine.sogni", JSON.stringify(r)); window.__sogni.stagione(); }); await page.waitForTimeout(200);
+  if (w === 390) await L.shot(page, "sogni_stagione");
+  await page.evaluate(() => document.querySelector(".sgOv [data-play]").click()); await page.waitForTimeout(400);
+  if (!(await page.evaluate(() => /Stagione dei Sogni/.test(document.querySelector(".coOv").textContent)))) errors.push("Stagione: il Concilio non parte");
+  await page.evaluate(() => document.querySelector(".coOv .ov button").click()); await page.waitForTimeout(100);
+  await page.evaluate(() => { const S = window.__concilio.state; S.a = 2; S.b = 0; S.finish(); }); await page.waitForTimeout(200); await page.evaluate(() => document.querySelector(".coOv .ov button").click()); await page.waitForTimeout(300);
+  for (let k = 0; k < 3; k++) { await page.evaluate(() => { const b = document.querySelector(".sgOv [data-ok]"); if (b) b.click(); }); await page.waitForTimeout(120); }
+  se = await page.evaluate(() => window.__sogni._load().season); if (!se || se.day !== 2 || se.tab[-1][1] < 1) errors.push("Stagione: la partita giocata non conta: " + JSON.stringify(se && se.tab[-1]));
+  for (let k = 0; k < 60; k++) { const go = await page.evaluate(() => { const b = document.querySelector(".sgOv [data-ok]") || document.querySelector(".sgOv [data-sim]"); if (b) b.click(); return !!b; }); if (!go) break; await page.waitForTimeout(100); }
+  if (!(await page.evaluate(() => window.__sogni._load().season.day === 7 && !!document.querySelector(".sgOv [data-new]")))) errors.push("Stagione: non arriva alla fine");
+  if (w === 390) await L.shot(page, "sogni_stagione_fine");
+  // il Draft: cinque scelte, un turno di coppa nel Duello, la carta da tenere
+  await page.evaluate(() => window.__sogni.draft()); await page.waitForTimeout(200);
+  for (let k = 0; k < 5; k++) { await page.evaluate(() => document.querySelector(".sgOv .pick .sgCard").click()); await page.waitForTimeout(120); }
+  const dr = await page.evaluate(() => window.__sogni._load().draft); if (!dr || dr.picks.length !== 5 || new Set(dr.picks).size !== 5) errors.push("Draft: scelte sbagliate");
+  if (w === 390) await L.shot(page, "sogni_draft");
+  await page.evaluate(() => { const r = window.__sogni._load(); r.draft.eng[0] = "duello"; localStorage.setItem("ali-di-rondine.sogni", JSON.stringify(r)); window.__sogni.draft(); }); await page.waitForTimeout(200);
+  await page.evaluate(() => document.querySelector(".sgOv [data-play]").click()); await page.waitForTimeout(400);
+  await page.evaluate(() => document.querySelector(".duOv .ov button").click()); await page.waitForTimeout(100); await page.evaluate(() => { const S = window.__duello.state; S.a = 2; S.b = 0; S.finish(); }); await page.waitForTimeout(200); await page.evaluate(() => document.querySelector(".duOv .ov button").click()); await page.waitForTimeout(300);
+  for (let k = 0; k < 6; k++) { await page.evaluate(() => { const b = document.querySelector(".sgOv [data-ok]"); if (b) b.click(); }); await page.waitForTimeout(120); }
+  if ((await page.evaluate(() => window.__sogni._load().draft.round)) !== 1) errors.push("Draft: il turno vinto non conta " + JSON.stringify(await page.evaluate(() => [window.__sogni._load().draft, document.querySelector(".sgOv h2") && document.querySelector(".sgOv h2").textContent, window.__duello.state && [window.__duello.state.a, window.__duello.state.b]])));
+  await page.evaluate(() => { const r = window.__sogni._load(); r.draft.over = "win"; r.draft.picks[0] = "cc_re"; r.own = r.own.filter((x) => x !== "cc_re"); localStorage.setItem("ali-di-rondine.sogni", JSON.stringify(r)); window.__sogni.draft(); }); await page.waitForTimeout(200);
+  await page.evaluate(() => document.querySelector('.sgOv .pick.keep .sgCard[data-c="cc_re"]').click()); await page.waitForTimeout(250);
+  if (!(await page.evaluate(() => window.__sogni._load().own.includes("cc_re")))) errors.push("Draft: la carta vinta non entra in collezione");
   // tutte vinte: la carta del Campione dei Sogni e la Maglia
   await page.evaluate(() => { const r = window.__sogni._load(); r.won = [0, 1, 2, 3, 4, 5, 6, 7]; localStorage.setItem("ali-di-rondine.sogni", JSON.stringify(r)); window.__sogni.open(); }); await page.waitForTimeout(200);
   await page.evaluate(() => document.querySelector('.sgOv [data-go="tour"]').click()); await page.waitForTimeout(200); await page.evaluate(() => document.querySelector(".sgOv [data-hero]").click()); await page.waitForTimeout(300);
