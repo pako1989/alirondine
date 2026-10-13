@@ -19,11 +19,12 @@
   const SAGHE = {
     torneo: ["ali-di-rondine.torneo", "Il Torneo delle Cento Scuole", "#c83a3a"], cronache: ["ali-di-rondine.cronache", "Le Cronache del Pallone di Cristallo", "#7a4ab0"], mantello: ["ali-di-rondine.mantello", "Il Mantello Granata", "#8a1a2a"],
     stagione: ["ali-di-rondine.stagione", "Stagione Infinita", "#ff5a7a"], lampioni: ["ali-di-rondine.lampioni", "La Notte dei Lampioni", "#ffd27a"], trono: ["ali-di-rondine.trono", "Il Trono di Cuoio", "#8a5a2a"],
-    campetto: ["ali-di-rondine.campetto", "Dal Campetto al Mondiale", "#1f5fbf"], colline: ["ali-di-rondine.colline", "Master League delle Colline", "#2a6a3a"], grigio: ["ali-di-rondine.grigio", "Il Cavaliere della Notte", "#2a3040"], detective: ["ali-di-rondine.detective", "Detective di Campo", "#3a4a5a"],
+    campetto: ["ali-di-rondine.campetto", "Dal Campetto al Mondiale", "#1f5fbf"], colline: ["ali-di-rondine.colline", "Master League delle Colline", "#2a6a3a"], grigio: ["ali-di-rondine.grigio", "Il Cavaliere della Notte", "#2a3040"], ducati: ["ali-di-rondine.ducati", "La Guerra dei Tre Ducati", "#c8a040"], detective: ["ali-di-rondine.detective", "Detective di Campo", "#3a4a5a"],
     spazio: ["ali-di-rondine.spazio", "Calcio Spaziale", "#2a6ac8"], vento: ["ali-di-rondine.vento", "La Valle del Vento Gentile", "#5a9a7a"], dopo: ["ali-di-rondine.dopo", "Dopo il Campione", "#a8622a"], mondi: ["ali-di-rondine.mondi", "Il Torneo dei Mondi", "#2a1a4a"],
   };
   // [id, saga, rarità (c r e l), attacco, difesa, tecnica, ruolo]
   const CARDS = [
+    ["td_lia", "ducati", "c", 70, 54, 62, "A"], ["td_ottone", "ducati", "c", 50, 62, 72, "C"], ["td_corrado", "ducati", "r", 58, 78, 66, "D"], ["td_isotta", "ducati", "e", 64, 58, 82, "C"],
     ["gr_marisa", "grigio", "c", 64, 58, 62, "C"], ["gr_gancio", "grigio", "c", 50, 78, 52, "D"], ["gr_vela", "grigio", "e", 72, 56, 76, "A"], ["gr_alfio", "grigio", "l", 60, 70, 86, "C"],
     ["ts_tito", "torneo", "c", 66, 52, 60, "A"], ["ts_alba", "torneo", "c", 58, 60, 64, "C"], ["ts_lume", "torneo", "r", 70, 58, 66, "A"], ["ts_iole", "torneo", "e", 50, 64, 76, "C"],
     ["cc_lyra", "cronache", "c", 58, 72, 60, "D"], ["cc_fosco", "cronache", "c", 52, 50, 74, "C"], ["cc_rubi", "cronache", "r", 72, 54, 66, "A"], ["cc_re", "cronache", "l", 74, 80, 78, "D"],
@@ -42,6 +43,7 @@
   const BY = Object.fromEntries(CARDS.map((c) => [c.id, c]));
   // la frase speciale che la carta dice quando arriva a tre stelle
   const FRASI = {
+    td_lia: "Il sale è di chi lo scava. E il gol è di chi lo segna.", td_ottone: "Ho calcolato tutto. Tranne quanto mi sarei divertito.", td_corrado: "Testa alta, scarpe rotte, cuore intero.", td_isotta: "Gioco per vincere, non per comprare.",
     gr_marisa: "Se smetto di giocare, hanno vinto loro. Quindi gioco.", gr_gancio: "Un armadio in difesa non si sposta. Provaci.", gr_vela: "Ti ho rubato la palla. Te la restituisco in rete, come sempre.", gr_alfio: "Quarant'anni fa ero più veloce. Oggi sono più furbo.",
     ts_tito: "Il pane si sforna all'alba, i gol al novantesimo.", ts_alba: "Consegno i palloni come le lettere: sempre all'indirizzo giusto.", ts_lume: "Una lanterna sola non illumina il campo. Undici, sì.", ts_iole: "Oggi la lezione è una sola: passate la palla.",
     cc_lyra: "Il mio scudo è la difesa. La mia spada è il contropiede.", cc_fosco: "Non vedo la porta, ma la sento. Di solito.", cc_rubi: "Ti ho rubato la palla. Te la restituisco in rete.", cc_re: "…",
@@ -67,10 +69,11 @@
     { name: "Union Cometa", color: "#7a5ad8", style: "contropiede", f: 73, pl: ["Coda", "Chioma", "Nucleo", "Scia"] },
     { name: "I Leggendari del Faro", color: "#1a2a4a", style: "equilibrata", f: 76, pl: ["Lampo", "Vedetta", "Scoglio", "Fanale"] },
   ];
-  const ENG = ["vignette", "bottoni", "luci", "nastro", "concilio", "lavagna", "duello", "atb", "gadget"];
+  const ENG = ["vignette", "bottoni", "luci", "nastro", "concilio", "lavagna", "duello", "atb", "gadget", "iso"];
   const RAR = { c: ["Comune", "#9aa5b1", 1], r: ["Rara", "#3a8ad8", 2], e: ["Epica", "#a85ad8", 3], l: ["Leggendaria", "#ffd23f", 4] };
   // i legami tra saghe diverse: +3 di intesa se entrambi in squadra
   const LINKS = [
+    ["td_corrado", "tc_gualtiero", "Vecchi capitani"], ["td_isotta", "tc_ysolde", "Eredi che non obbediscono"], ["td_lia", "gr_vela", "Ribelli dei tetti"],
     ["gr_vela", "nl_leandro", "Ombre sui tetti"], ["gr_marisa", "ml_marta", "Capitane sotto la pioggia"], ["gr_alfio", "cm_bastiano", "I vecchi che sanno"],
     ["cm_bastiano", "ml_pino", "Vecchi maestri"], ["cm_bastiano", "nl_leandro", "Il '52 e il '78"], ["tc_ysolde", "dc_agata", "Chi sa tutto"], ["cm_leone", "ts_lume", "Rivali di fuoco"],
     ["mg_bullone", "so_blop", "Ferraglia amica"], ["sf_gatto", "nl_lucia", "Le notti lunghe"], ["cc_re", "tm_eclisse", "Il silenzio e il buio"], ["ml_marta", "nl_fiammetta", "Fiori e lanterne"],
@@ -176,7 +179,7 @@
   const count = (team, saga) => team.filter((id) => BY[id] && BY[id].saga === saga).length;
   function bonusTxt(m, team) {
     const I = intesa(team).n;
-    return { vignette: `azioni +${Math.floor(I / 5)}`, bottoni: `tiri +${I >= 6 ? 1 : 0}${count(team, "mantello") ? ", superpoteri a turno" : ""}`, luci: `lanterne +${I >= 8 ? 1 : 0}`, nastro: `riavvolgimenti +${I >= 8 ? 1 : 0}`, concilio: `credibilità ${Math.min(9, 5 + Math.floor(I / 3))}, corvi ${1 + count(team, "trono")}`, lavagna: "le tue carte in lavagna", duello: `grinta ${100 + I * 4}`, gadget: `cintura ${I >= 10 ? 5 : 4} gadget`, atb: `statistiche +${Math.floor(I / 3)}` }[m] || "";
+    return { vignette: `azioni +${Math.floor(I / 5)}`, bottoni: `tiri +${I >= 6 ? 1 : 0}${count(team, "mantello") ? ", superpoteri a turno" : ""}`, luci: `lanterne +${I >= 8 ? 1 : 0}`, nastro: `riavvolgimenti +${I >= 8 ? 1 : 0}`, concilio: `credibilità ${Math.min(9, 5 + Math.floor(I / 3))}, corvi ${1 + count(team, "trono")}`, lavagna: "le tue carte in lavagna", duello: `grinta ${100 + I * 4}`, gadget: `cintura ${I >= 10 ? 5 : 4} gadget`, iso: `terreno ${["saline", "vetro", "ruggine"][I % 3]}`, atb: `statistiche +${Math.floor(I / 3)}` }[m] || "";
   }
   function extraFor(m, base, team, I, f, h) {
     const names = team.map((id) => ({ name: String(name(id)).split(/[ ,]/)[0], skin: (window.__borgoApi.CAST[id] || {}).skin, hair: (window.__borgoApi.CAST[id] || {}).hair }));
@@ -188,6 +191,7 @@
       concilio: { cred: Math.min(9, 5 + Math.floor(I / 3)), ravens: 1 + count(team, "trono"), us: "La Squadra dei Sogni" },
       lavagna: { us: "La Squadra dei Sogni", squad: team.map((id) => ({ name: name(id), role: BY[id].role, ovr: Math.round(ovr(BY[id]) + I / 3) })).concat([{ name: h.name || "Il Campione", role: "A", ovr: f + 2 }, { name: "Il Portiere dei Sogni", role: "P", ovr: f }]) },
       duello: { guts: 100 + I * 4, mates: names.slice(0, 3), us: "La Squadra dei Sogni" },
+      iso: { mates: names.slice(0, 2), us: "La Squadra dei Sogni", terrain: ["saline", "vetro", "ruggine"][I % 3] },
       gadget: { slots: I >= 10 ? 5 : 4, mates: names.slice(0, 2), us: "La Squadra dei Sogni" },
       atb: { heroSt: { tiro: 16 + Math.floor(I / 3), pass: 14 + Math.floor(I / 3), dif: 12 + Math.floor(I / 3), vel: 15 + Math.floor(I / 3) } },
     }[m] || {};

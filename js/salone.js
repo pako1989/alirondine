@@ -24,6 +24,8 @@
   const GEN = { fantasy: ["Fantasy", "#7a4ab0"], mistero: ["Mistero", "#2c6a9a"], scifi: ["Fantascienza", "#1f8a8a"], storico: ["Storico", "#a8622a"], commedia: ["Commedia", "#c9921a"], sport: ["Sport anime", "#c0392b"], avventura: ["Avventura", "#3f8a3f"], dramma: ["Drammatico", "#6a5a7a"], tattica: ["Tattica", "#5a6a3a"] };
   // mod: oggetto window con menuEntry/info · fn: funzione window da chiamare con (indietro) · ch: capitoli totali (se noti)
   const SAGAS = [
+    { id: "ducati", t: "La Guerra dei Tre Ducati", e: "⚖️", g: ["tattica", "storico"], mod: "__ducati", key: "ali-di-rondine.ducati", ch: 3, cover: "td_titolo", d: "Tre ducati su un altopiano di sale, una coppa che decide a chi vanno le saline. Il Calcio Tattico Isometrico (terrazze, iniziativa, contrasti alle spalle), la Bilancia delle Convinzioni dove i compagni votano e tu li convinci con gli argomenti trovati esplorando, il diorama.",
+      hints: { corona: "Serve che nei voti abbia vinto più spesso la Morale.", patto: "Serve che nei voti abbia vinto più spesso l'Utile.", saline: "Serve che nei voti abbia vinto più spesso la Libertà.", pari: "Segreto: tre voti finiti in tre modi diversi, tutti i sigilli di sale e almeno tre compagni convinti." } },
     { id: "grigio", t: "Il Cavaliere della Notte", e: "🌃", g: ["mistero", "avventura"], mod: "__grigio", key: "ali-di-rondine.grigio", ch: 3, cover: "gr_titolo", d: "Porto Scuro, la pioggia, una lega truccata. Di giorno giochi nel Porto Scuro Calcio, di notte indossi il mantello dell'Airone: il furtivo con le guardie e i coni di vista, l'officina dei gadget, la partita a turni Ombre e Gadget, i tetti col rampino.",
       hints: { luce: "Serve aver dato una prova alla commissaria e vinto la finale.", ombra: "Serve aver tenuto una prova per te, o deciso di trasmetterla dal faro.", vela: "Serve l'alleanza con Vela Nera e la sua piena fiducia.", airone: "Segreto: tutte le piume d'airone, Gancio dalla tua parte e una domanda sulla foto dell'officina." } },
     { id: "colline", t: "Master League delle Colline", e: "📋", g: ["sport", "tattica"], mod: "__colline", key: "ali-di-rondine.colline", ch: 3, cover: "ml_titolo", d: "L'U.S. Colle Alto è ultima in classifica: tu sei il nuovo allenatore. La Lavagna Tattica (modulo, caselle, istruzioni che si battono a vicenda, cambi e pagelle), il Mercato con le figurine e i crediti, gli allenamenti, la classifica della Lega delle Colline.",
@@ -87,7 +89,7 @@
     { id: "cala", t: "Cala Tramontana", e: "🌊", g: ["avventura"], fn: "openCalaTramontana", key: "ali-di-rondine.cala-tramontana", cover: "beach", d: "Esplora a piedi il borgo marino alternativo con il tuo Campione." },
     { id: "borgostorto", t: "Il Borgo Storto", e: "🌀", g: ["commedia", "tattica"], api: "openBorgoStorto", cover: "beach", d: "Lo spin-off GDR a turni del Borgo Marino." },
   ];
-  const NEWEST = ["grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
+  const NEWEST = ["ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
   const modOf = (s) => (s.mod ? window[s.mod] : null);
   const available = (s) => (s.mod ? !!window[s.mod] : s.fn ? typeof window[s.fn] === "function" : !!(api() && api()[s.api]));
   function state(s) {
@@ -240,6 +242,10 @@
       opp: [{ name: "I Portuali di Gancio", color: "#a83a2a", style: "pressing", players: [{ name: "Gancio" }, { name: "Bitta" }, { name: "Cima" }], keeper: { name: "Saracinesca" } }, { name: "La banda di Vela Nera", color: "#1a1a24", style: "contropiede", players: [{ name: "Vela Nera" }, { name: "Grondaia" }, { name: "Lucernario" }], keeper: { name: "Il Comignolo" } }],
       boss: { name: "Nebbia Athletic", color: "#8a8a9a", style: "pressing", players: [{ name: "Il Capitano" }, { name: "Foschia" }, { name: "Caligine" }], keeper: { name: "Il Muro Grigio" } },
       opts: (o, h, boss) => ({ title: `Ombre e Gadget · contro ${o.name}`, us: h.name, usColor: "#5a6a8a", minutes: boss ? 90 : 60, hero: h, mates: [{ name: "Marisa" }, { name: "Gancio" }], opp: o, gadgets: ["visore", "fumo", "rampino", "scudo", "segnale", "bolas"], belt: ["visore", "fumo", "rampino", "scudo"] }) },
+    { id: "iso", t: "Calcio Tattico", e: "⚖️", saga: "ducati", eng: "__iso", d: "La partita della Guerra dei Tre Ducati: campo isometrico a terrazze, iniziativa, contrasti alle spalle e tiri dall'alto.",
+      opp: [{ name: "Esploratori di Ruggine", color: "#a83a2a", style: "pressing", players: [{ name: "Chiodo" }, { name: "Lima" }, { name: "Bullone" }], keeper: { name: "Incudine" } }, { name: "Vetrara", color: "#2a8a6a", style: "difensiva", players: [{ name: "Isotta" }, { name: "Cristallo" }, { name: "Smeriglio" }], keeper: { name: "Vetrocemento" } }],
+      boss: { name: "Ruggine", color: "#a83a2a", style: "pressing", players: [{ name: "Il Duca Ferro" }, { name: "Chiodo" }, { name: "Lima" }], keeper: { name: "Incudine" } },
+      opts: (o, h, boss) => ({ title: `Calcio Tattico · contro ${o.name}`, us: h.name, usColor: "#2a6ab8", minutes: boss ? 90 : 60, hero: h, mates: [{ name: "Corrado" }, { name: "Lia" }], opp: o, terrain: boss ? "ruggine" : o.name === "Vetrara" ? "vetro" : "saline" }) },
   ];
   function sgState(m) { const s = SAGAS.find((x) => x.id === m.saga), x = s ? state(s) : null; return { s, open: !!(x && (x.doneN >= 1)), boss: !!(x && x.endsFound > 0) }; }
   function openSalaGiochi(back) {
@@ -399,7 +405,7 @@
   // ---------------------------------------------------------------- ALBUM DEI PERSONAGGI
   // ogni personaggio registrato nel gioco (window.__borgoApi.BIO) diventa una carta. Si «incontra» parlandoci (seeCard del gioco).
   // Le sezioni: la Storia e Borgo Marino, i tornei e le modalità del Borgo, e una sezione per saga (riconosciuta dal prefisso degli id).
-  const PFX = { grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
+  const PFX = { ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
   const BORGO_PFX = ["sv", "rb", "sb", "cg", "hd", "md", "ac"];
   function perSections() {
     const A = api(); if (!A || !A.BIO) return [];

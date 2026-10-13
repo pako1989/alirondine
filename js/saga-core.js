@@ -145,6 +145,7 @@
       Object.keys(obj(o.intro)).forEach((k) => { if (FLAG_RE.test(k)) m.intro[k] = 1; });
       m.ends = [...new Set(arr(o.ends).filter((x) => typeof x === "string" && FLAG_RE.test(x)))].slice(0, 16);
       m.lore = [...new Set(arr(o.lore).filter((x) => typeof x === "string" && FLAG_RE.test(x)))].slice(0, 60);
+      m.met = [...new Set(arr(o.met).filter((x) => typeof x === "string" && FLAG_RE.test(x)))].slice(0, 80); // i personaggi incontrati (per la pagina «Personaggi»)
       return m;
     }
     let MEM = null;
@@ -350,8 +351,21 @@
     const refreshSoon = () => { clearTimeout(soon); soon = setTimeout(() => safe(refreshZone), 0); };
     const done = () => { refreshZone(); api.trResume(); };
     function lines(ls, bg) { return ls.map((l) => api.L(l[0], T(l[1]), l[2] || bg || bgNow())); }
-    function say(ls, then) { api.trSay(lines(ls), typeof then === "function" ? then : done); }
-    function ask(who, prompt, opts, bg) { api.trAsk(who, esc(T(prompt)).replace(/\n/g, "<br>"), opts.map((o) => ({ label: T(o.label), sub: o.sub ? T(o.sub) : undefined, cls: o.cls || "", disabled: !!o.disabled, fn: o.fn ? () => { if (o.big) SFX.choice(); o.fn(); } : o.fn })), bg || bgNow()); }
+    function say(ls, then) { safe(() => arr(ls).forEach((l) => Array.isArray(l) && meet(l[0]))); api.trSay(lines(ls), typeof then === "function" ? then : done); }
+    // PERSONAGGI DELLA SAGA: chi parla in un dialogo o in una scena viene «incontrato» e compare nella pagina Personaggi del menu
+    const SCAST = [];
+    function meet(id) { if (typeof id !== "string" || !SCAST.includes(id)) return; const m = mem(); if (m.met.includes(id)) return; m.met.push(id); save(); }
+    function persone(back) {
+      const m = mem(), B = window.__borgoApi || {}, C = api.CAST || {}, BIO = api.BIO || {}, met = SCAST.filter((id) => m.met.includes(id) && C[id]);
+      if (!document.getElementById("scPersCss")) { const st = document.createElement("style"); st.id = "scPersCss"; st.textContent = `.scPers{position:fixed;inset:0;z-index:330;background:rgba(10,12,18,.97);color:#f4f0e4;font-family:system-ui,sans-serif;overflow:auto}.scPers .w{max-width:520px;margin:0 auto;padding:10px 12px 30px}.scPers .bar{display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:rgba(10,12,18,.97);padding:6px 0}.scPers h2{margin:0;font:800 18px system-ui;color:var(--sc,#ffd23f)}.scPers .x{width:42px;height:42px;border-radius:8px;border:1px solid #556;background:#1c2232;color:#f4f0e4;font-size:16px}.scPers .sum{font-size:13px;opacity:.8;margin:4px 0 10px}.scPers .c{display:grid;grid-template-columns:64px 1fr;gap:10px;align-items:start;background:#161b28;border:1px solid #2c3446;border-left:3px solid var(--sc,#ffd23f);border-radius:10px;padding:8px;margin:8px 0}.scPers img,.scPers .ph{width:64px;height:64px;border-radius:8px;object-fit:cover;background:#0006;display:block}.scPers b{font-size:14px}.scPers p{margin:4px 0 0;font-size:12.5px;line-height:1.45;opacity:.9}.scPers .lock{opacity:.45}`; document.head.appendChild(st); }
+      const ov = document.createElement("div"); ov.className = "scPers"; ov.style.setProperty("--sc", TH.accent || "#ffd23f");
+      const card = (id) => { const img = safe(() => B.portraitImg && B.portraitImg(id), null), c = C[id]; return `<div class="c">${img ? `<img alt="" src="${img}">` : `<span class="ph"></span>`}<div><b>${esc(c.name || id)}</b><p>${esc(BIO[id] || "")}</p></div></div>`; };
+      const left = SCAST.length - met.length;
+      ov.innerHTML = `<div class="w"><div class="bar"><h2>👥 Personaggi · ${esc(TITLE)}</h2><button type="button" class="x" aria-label="Chiudi">✕</button></div><p class="sum">Incontrati: ${met.length} su ${SCAST.length}. Gli altri compaiono quando ci parli.</p>${met.map(card).join("")}${left ? `<div class="c lock"><span class="ph"></span><div><b>??? × ${left}</b><p>Personaggi che non hai ancora incontrato.</p></div></div>` : ""}</div>`;
+      ov.querySelector(".x").onclick = () => { ov.remove(); back(); };
+      document.body.appendChild(ov);
+    }
+    function ask(who, prompt, opts, bg) { meet(who); api.trAsk(who, esc(T(prompt)).replace(/\n/g, "<br>"), opts.map((o) => ({ label: T(o.label), sub: o.sub ? T(o.sub) : undefined, cls: o.cls || "", disabled: !!o.disabled, fn: o.fn ? () => { if (o.big) SFX.choice(); o.fn(); } : o.fn })), bg || bgNow()); }
     function reward(key, o) {
       const msg = [];
       once(key, () => { if (o.coins) { const n = coinsGive(Math.round(o.coins * (DIFFS[mem().diff] || DIFFS.normale).coins)); if (n) msg.push(`+${n} monete`); } (o.cos ? [].concat(o.cos) : []).forEach((id) => { const c = api.COSM && api.COSM[id] && safe(() => api.bCos(id), false) ? api.COSM[id].label : null; if (c) msg.push(`Nuovo in guardaroba: ${c}`); }); });
@@ -472,6 +486,18 @@
         if (alert > 6) { g.font = "900 12px system-ui"; g.textAlign = "center"; g.lineWidth = 3; g.strokeStyle = "#111"; g.strokeText("!", gx - cx, gy - cy - 26); g.fillStyle = alert > 14 ? "#ff4a3a" : "#ffd23f"; g.fillText("!", gx - cx, gy - cy - 26); }
       });
     }
+    // DIORAMA (cfg.diorama o spec.diorama): effetto «tilt-shift», come un plastico fotografato da vicino. Il bordo in alto e
+    // quello in basso si sfocano piano, il centro resta nitido; sopra, una luce calda morbida. Si spegne con spec.diorama = false.
+    let DIO = null;
+    function diorama(g, spec) {
+      const on = spec.diorama != null ? spec.diorama : cfg.diorama; if (!on) return;
+      const c = g.canvas, w = c.width, h = c.height; if (!w || !h) return;
+      DIO = DIO || document.createElement("canvas"); if (DIO.width !== w || DIO.height !== h) { DIO.width = w; DIO.height = h; }
+      const a = DIO.getContext("2d"); a.setTransform(1, 0, 0, 1, 0, 0); a.globalCompositeOperation = "source-over"; a.clearRect(0, 0, w, h);
+      a.filter = `blur(${Math.max(1, (w / 320) * 1.7)}px)`; a.drawImage(c, 0, 0); a.filter = "none";
+      a.globalCompositeOperation = "destination-in"; const gr = a.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, "rgba(0,0,0,1)"); gr.addColorStop(0.24, "rgba(0,0,0,0)"); gr.addColorStop(0.74, "rgba(0,0,0,0)"); gr.addColorStop(1, "rgba(0,0,0,1)"); a.fillStyle = gr; a.fillRect(0, 0, w, h);
+      g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(DIO, 0, 0); g.globalCompositeOperation = "soft-light"; const lg = g.createRadialGradient(w * 0.5, h * 0.35, 10, w * 0.5, h * 0.35, w * 0.7); lg.addColorStop(0, "rgba(255,235,190,.5)"); lg.addColorStop(1, "rgba(60,40,20,.25)"); g.fillStyle = lg; g.fillRect(0, 0, w, h); g.restore();
+    }
     const TRAIL = { zid: "", pts: [] };
     function followTick(zid) {
       const zr = ZONES[zid], me = api.trPos && api.trPos(); if (!zr || !zr.Z.npcs || !me) return null;
@@ -580,6 +606,7 @@
         safe(() => mood(GP, frNow()));
         safe(() => buio(GP, spec, cx, cy));
         safe(() => guardDraw(GP, zid, cx, cy));
+        safe(() => diorama(GP, spec));
         if (spec.hud) safe(() => spec.hud(GP, K, stepOf(chN)));
         PLUG.forEach((p) => p.hud && safe(() => p.hud(GP, zid, spec, K)));
       };
@@ -732,6 +759,7 @@
       const extra = cfg.zoneMenuExtra ? arr(safe(() => cfg.zoneMenuExtra(K), [])) : [];
       api.trAsk("voce", `<b>${esc(TITLE)}</b> · ${esc(c ? "Capitolo " + c.n + " · " + c.title : "")}<br><span style="color:var(--dim)">${esc(goalNow())}<br>Monete ${bal()} · ${esc(JN())}: ${m.lore.length} pagine</span>`, [
         { label: JN(), sub: (cfg.journal && cfg.journal.sub) || "Persone, scoperte, finali", cls: "hot", fn: () => journal(zoneMenu, true) },
+        { label: "👥 Personaggi", sub: "Chi hai incontrato in questa saga", fn: () => persone(zoneMenu) },
         ...(cfg.travel && !(zoneRec() && zoneRec().spec.interior) ? [{ label: "Viaggio rapido", sub: "Nei luoghi che conosci già", fn: () => travelMenu(zoneMenu) }] : []),
         ...extra,
         { label: `Esci da ${TITLE}`, sub: "Progressi e posizione restano salvati", cls: "hot", fn: leave },
@@ -752,6 +780,7 @@
       api.scene(BG0, "voce", `<b>${ICON} ${esc(TITLE)}</b><br>${esc(h.name)}${cfg.heroTitle ? " · " + esc(safe(() => cfg.heroTitle(K), "")) : ""}<br><span style="color:var(--dim)">${c ? esc("Capitolo " + c.n + " · " + c.title) : ""}<br>${esc(status)}</span>`, [
         { label: c && !m.intro["ch" + c.n] ? (c.n > 1 ? `Inizia il Capitolo ${c.n}` : "Inizia la storia") : "Continua la storia", sub: c ? `Capitolo ${c.n} · ${c.title}` : "", cls: "hot", fn: continueStory },
         { label: JN(), sub: (cfg.journal && cfg.journal.sub) || "Persone, scoperte, finali", fn: () => journal(openMain, false) },
+        { label: "👥 Personaggi", sub: `Chi hai incontrato · ${mem().met.length}`, fn: () => persone(openMain) },
         ...extra,
         { label: `Difficoltà: ${DIFFS[m.diff].label}`, sub: DIFFS[m.diff].sub, fn: () => diffMenu(openMain) },
         { label: "Capitoli", sub: "Rigioca i capitoli già sbloccati", fn: chapters },
@@ -803,9 +832,9 @@
       PASS, say, ask, done, go, enterZone, eraOf, gravity: () => GRV.mode, GRV, filter, setEra: (zid, era) => { F.set("era_" + zid, era || ""); if (api && api.trZone() === zid) { const pos = api.trPos && api.trPos(), tr = api.trRec(); if (pos) tr.pos[zid] = pos; FX.enter = frNow(); FX.title = era && ZONES[zid].spec.eras[era] ? ZONES[zid].spec.eras[era].label || ZONES[zid].spec.short : ZONES[zid].spec.short; api.trGo(zid); refreshZone(); } }, otherSaga: (key) => safe(() => JSON.parse(localStorage.getItem(key) || "null"), null), quest, questDone, questState, evidence: (id, d) => { EVID[id] = d; }, giveClue, hasClue, present, loreList: () => Object.keys(LORE).map((k) => [k, LORE[k]]), enterDoor, leaveInterior, travelMenu, timeNow, playMatch, ownMatch, finishChapter, setTiles, SFX, tone, noise, glow, frNow, refreshZone, bgNow, journal, leave, lines, learnLore, ENDINGS, ZX, light, later, shadow, at, undAt, isFloor, floorPaint, ground, TH,
       P: (x, y, w, h, c) => { ctx(); P(x, y, w, h, c); }, get g() { return ctx(); },
       zone: (zid) => ZONES[zid] || null, inZone: (zid) => !!(api && api.trZone() === zid),
-      scene: (ls, then, bg) => api.play(lines(ls, bg || BG0), then),
+      scene: (ls, then, bg) => { safe(() => arr(ls).forEach((l) => Array.isArray(l) && meet(l[0]))); return api.play(lines(ls, bg || BG0), then); },
       lore: (id, d) => { LORE[id] = d; },
-      cast: (id, c, bio) => { if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
+      cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
       ending: (id, d) => { ENDINGS[id] = d; },
@@ -830,7 +859,7 @@
         const cm = cameoOf(id); if (cm) { castHero(); F.set("cameo_" + id, true); safe(() => (cm.talk ? cm.talk(K) : say(cm.lines)), null); return true; }
         const c = mineC(id);
         if (c) { // un capitolo può restituire K.PASS: allora risponde il capitolo precedente che conosce quel personaggio
-          castHero(); const zr = zoneRec(), list = chainFor(zr).filter((cc) => cc.talk && cc.talk[id]);
+          castHero(); meet(id); const zr = zoneRec(), list = chainFor(zr).filter((cc) => cc.talk && cc.talk[id]);
           for (const cc of list) { const r = safe(() => cc.talk[id](), null); if (r !== PASS) return true; }
           done(); return true;
         }

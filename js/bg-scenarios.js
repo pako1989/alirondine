@@ -6010,7 +6010,128 @@
     if (since("gr_finale", 2) < 160) { g.fillStyle = "#fff"; g.font = "bold 8px sans-serif"; g.textAlign = "center"; g.fillText("«Ha smesso di piovere.»", 160, 100); }
     for (let i = 0; i < 6; i++) { const x = (i * 57 + f * 0.6) % (W + 40) - 20, y = 60 + Math.sin(f / 30 + i) * 8; g.strokeStyle = "rgba(20,20,30,.6)"; g.beginPath(); g.moveTo(x - 5, y); g.quadraticCurveTo(x - 2, y - 3, x, y); g.quadraticCurveTo(x + 2, y - 3, x + 5, y); g.stroke(); }
   }
+  // ---------------------------------------------------------------- LA GUERRA DEI TRE DUCATI (diorama: bordi sfocati, luce calda, bandiere dei ducati)
+  const TD_COL = { sal: "#2a6ab8", vet: "#2a8a6a", rug: "#a83a2a" };
+  let TD_BL = null;
+  function tdBlur(g, W, H) { try { const c = g.canvas, a = (TD_BL = TD_BL || document.createElement("canvas")); if (a.width !== c.width || a.height !== c.height) { a.width = c.width; a.height = c.height; } const x = a.getContext("2d"); x.globalCompositeOperation = "source-over"; x.clearRect(0, 0, a.width, a.height); x.filter = "blur(2px)"; x.drawImage(c, 0, 0); x.filter = "none"; x.globalCompositeOperation = "destination-in"; const gr = x.createLinearGradient(0, 0, 0, a.height); gr.addColorStop(0, "#000"); gr.addColorStop(0.22, "rgba(0,0,0,0)"); gr.addColorStop(0.8, "rgba(0,0,0,0)"); gr.addColorStop(1, "#000"); x.fillStyle = gr; x.fillRect(0, 0, a.width, a.height); g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.drawImage(a, 0, 0); g.restore(); } catch (e) {} }
+  function tdFlag(g, x, y, col, f, i) { px(g, x, y, 2, 30, "#5a4a3a"); g.fillStyle = col; g.beginPath(); g.moveTo(x + 2, y); for (let k = 0; k <= 6; k++) g.lineTo(x + 2 + k * 3, y + Math.sin(f / 10 + k * 0.7 + i) * 2); for (let k = 6; k >= 0; k--) g.lineTo(x + 2 + k * 3, y + 12 + Math.sin(f / 10 + k * 0.7 + i) * 2); g.fill(); }
+  function tdMan(g, x, y, s, shirt, hair, f) { g.save(); g.translate(x, y); g.scale(s, s); g.fillStyle = "rgba(0,0,0,.25)"; g.beginPath(); g.ellipse(0, 1, 7, 2.5, 0, 0, 7); g.fill(); px(g, -4, -18, 8, 12, shirt); px(g, -4, -6, 3, 6, "#3a3a3a"); px(g, 1, -6, 3, 6, "#3a3a3a"); circ(g, 0, -22, 5, "#e8c4a0"); g.fillStyle = hair; g.beginPath(); g.arc(0, -24, 5, Math.PI, 0); g.fill(); g.restore(); }
+  function tdScale(g, x, y, s, f, tilt) { g.save(); g.translate(x, y); g.scale(s, s); px(g, -8, 0, 16, 5, "#8a6a2a"); px(g, -1.5, -40, 3, 40, "#c8a040"); px(g, -26, -40, 52, 3, "#c8a040"); [-24, 0, 24].forEach((d, i) => { const dy = (tilt ? tilt[i] : 0) + Math.sin(f / 30 + i) * 1.5; g.strokeStyle = "#a8883a"; g.beginPath(); g.moveTo(d, -38); g.lineTo(d - 7, -22 + dy); g.moveTo(d, -38); g.lineTo(d + 7, -22 + dy); g.stroke(); g.fillStyle = ["#c8a040", "#4a9a6a", "#4a7ac8"][i]; g.beginPath(); g.ellipse(d, -21 + dy, 9, 3, 0, 0, 7); g.fill(); }); g.restore(); }
+  function bgTdTitolo(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#5a8ac0", "#e8d0a0", "#f4e4c4"]); for (let i = 0; i < 5; i++) { const x = ((i * 90 + f * 0.2) % (W + 80)) - 40; g.fillStyle = "rgba(255,255,255,.6)"; g.beginPath(); g.ellipse(x, 30 + i * 8, 30, 7, 0, 0, 7); g.fill(); }
+    g.fillStyle = "#c8b898"; g.beginPath(); g.moveTo(0, 130); g.lineTo(80, 110); g.lineTo(160, 125); g.lineTo(240, 105); g.lineTo(W, 120); g.lineTo(W, H); g.lineTo(0, H); g.fill(); vgrad(g, 0, 140, W, 60, ["#ece8dc", "#d8d0bc"]);
+    [[60, TD_COL.sal], [160, TD_COL.vet], [260, TD_COL.rug]].forEach(([x, c], i) => tdFlag(g, x, 98 - (i === 1 ? 6 : 0), c, f, i));
+    const t = since("td_titolo", 0) < 140 ? [Math.sin(f / 8) * 6, -Math.sin(f / 8) * 6, 0] : null; tdScale(g, 160, 186, 1.5, f, t);
+    g.font = "900 22px Georgia, serif"; g.textAlign = "center"; g.lineWidth = 4; g.strokeStyle = "#2a1e14"; g.strokeText("LA GUERRA DEI", 160, 52); g.strokeText("TRE DUCATI", 160, 78); g.fillStyle = "#ffd27a"; g.fillText("LA GUERRA DEI", 160, 52); g.fillText("TRE DUCATI", 160, 78);
+    if (since("td_titolo", 1) < 100) for (let i = 0; i < 14; i++) circ(g, 160 + Math.cos(i) * since("td_titolo", 1) * 1.2, 150 - since("td_titolo", 1) * 0.6 + Math.sin(i * 2) * 10, 1.6, "#fff");
+    if (since("td_titolo", 2) < 120) { g.fillStyle = "#2a1e14"; g.font = "italic 9px Georgia"; g.fillText("«Le decisioni grandi si pesano.»", 160, 96); }
+    tdBlur(g, W, H);
+  }
+  function bgTdSalinella(g, W, H, f) {
+    vgrad(g, 0, 0, W, 90, ["#7ab0e0", "#e8f0f4"]); vgrad(g, 0, 90, W, 110, ["#ece8dc", "#dcd4c0"]);
+    for (let i = 0; i < 8; i++) { const x = 10 + i * 40, y = 120 + (i % 3) * 18; g.fillStyle = "rgba(140,190,220,.5)"; g.fillRect(x, y, 30, 10); if ((f / 30 + i) % 6 < 1) { g.fillStyle = "#fff"; g.fillRect(x + 8, y + 3, 2, 2); } }
+    for (let i = 0; i < 5; i++) { const x = 20 + i * 62; px(g, x, 60 - (i % 2) * 10, 44, 34 + (i % 2) * 10, "#f4f2ea"); g.fillStyle = "#a83a2a"; g.beginPath(); g.moveTo(x - 4, 60 - (i % 2) * 10); g.lineTo(x + 22, 46 - (i % 2) * 10); g.lineTo(x + 48, 60 - (i % 2) * 10); g.fill(); px(g, x + 18, 76, 8, 18 - (i % 2) * 0, "#6a4a2a"); }
+    tdScale(g, 160, 170, 1.2, f, since("td_salinella", 0) < 120 ? [8, -4, -4] : null);
+    [[40, 176], [280, 172]].forEach(([x, y]) => { g.fillStyle = "#f4f2ea"; g.beginPath(); g.moveTo(x - 12, y); g.lineTo(x, y - 24); g.lineTo(x + 12, y); g.fill(); });
+    if (since("td_salinella", 1) < 100) tdMan(g, 60 + since("td_salinella", 1) * 1.5, 190, 1, TD_COL.sal, "#c87a3a", f); else tdMan(g, 230, 190, 1, TD_COL.sal, "#c87a3a", f);
+    if (since("td_salinella", 2) < 90) for (let i = 0; i < 8; i++) circ(g, 40 + Math.cos(i) * 14, 160 - since("td_salinella", 2) * 0.4 + Math.sin(i) * 8, 1.4, "#fff");
+    tdBlur(g, W, H);
+  }
+  function bgTdMiniera(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#d8d0c0", "#a89880", "#6a5a48"]); for (let i = 0; i < 4; i++) { g.fillStyle = "rgba(60,50,40,.35)"; g.beginPath(); g.ellipse(60 + i * 70, 80, 30, 60, 0, 0, 7); g.fill(); }
+    [[60, 70], [160, 60], [260, 74]].forEach(([x, y], i) => { const fl = 0.8 + 0.2 * Math.sin(f / 7 + i); glowB(g, x, y, 50, "255,210,140", 0.35 * fl); px(g, x - 3, y - 6, 6, 9, "#5a4a2a"); circ(g, x, y - 1, 2.5, "#ffd27a"); });
+    px(g, 0, 160, W, 40, "#8a7a64"); for (let i = 0; i < 3; i++) px(g, 0, 166 + i * 12, W, 2, "#5a4a3a");
+    const cx = since("td_miniera", 0) < 160 ? (since("td_miniera", 0) * 2) % (W + 40) - 20 : 200; px(g, cx, 146, 34, 16, "#6a4a2a"); px(g, cx + 4, 140, 26, 8, "#f4f2ea"); circ(g, cx + 6, 164, 4, "#3a3a3a"); circ(g, cx + 28, 164, 4, "#3a3a3a");
+    tdMan(g, 110, 160, 1.1, "#6a5a4a", "#2a1a14", f); if (since("td_miniera", 1) < 50) { g.fillStyle = "#fff"; g.font = "900 12px Georgia"; g.fillText("TOC!", 130, 120); }
+    if (since("td_miniera", 2) < 140) { g.fillStyle = "#2a1e14"; g.font = "italic 8px Georgia"; g.textAlign = "center"; g.fillText("♪ un colpo per il sale, un colpo per il pane ♪", 160, 30); }
+  }
+  function bgTdBilancia(g, W, H, f) {
+    const gr = g.createRadialGradient(160, 80, 10, 160, 80, 220); gr.addColorStop(0, "#5a4024"); gr.addColorStop(1, "#1a120a"); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+    for (let i = 0; i < 30; i++) circ(g, (i * 53 + f * 0.2) % W, (i * 37 + f * 0.1) % H, 0.8, "rgba(255,220,150,.4)");
+    const t = since("td_bilancia", 0) < 160 ? since("td_bilancia", 0) / 160 : 0; tdScale(g, 160, 170, 2.2, f, t ? [Math.sin(t * 12) * 8, -Math.sin(t * 12) * 6, Math.sin(t * 12) * 3] : null);
+    [[50, TD_COL.sal], [270, TD_COL.rug]].forEach(([x, c], i) => tdFlag(g, x, 40, c, f, i));
+    if (since("td_bilancia", 1) < 100) for (let k = 0; k < 4; k++) px(g, 120 + k * 22, 60 + since("td_bilancia", 1) * 0.8 - k * 6, 6, 6, "#e8d8a8");
+    if (since("td_bilancia", 2) < 140) { g.fillStyle = "#ffd27a"; g.font = "italic 10px Georgia"; g.textAlign = "center"; g.fillText("«Morale. Utile. Libertà.»", 160, 30); }
+  }
+  function bgTdVetrara(g, W, H, f) {
+    vgrad(g, 0, 0, W, 100, ["#ffb080", "#ffe0c0"]); for (let i = 0; i < 6; i++) { const x = 10 + i * 52, h = 50 + (i % 3) * 14; px(g, x, 100 - h, 44, h, ["#e8e4d8", "#d8e8e0", "#f0e0d0"][i % 3]); for (let k = 0; k < 3; k++) px(g, x + 6 + k * 13, 100 - h + 10, 7, 10, ["#3a8a7a", "#3a6a9a", "#c8a040"][(i + k) % 3]); }
+    g.fillStyle = "rgba(90,180,200,.5)"; g.beginPath(); g.ellipse(250, 40, 30, 22, 0, Math.PI, 0); g.fill(); g.strokeStyle = "#fff"; g.beginPath(); g.ellipse(250, 40, 30, 22, 0, Math.PI, 0); g.stroke();
+    vgrad(g, 0, 100, W, 100, ["#3a8aa0", "#2a6a8a"]); for (let i = 0; i < 14; i++) px(g, ((i * 37 + f * 0.6) % W), 110 + (i % 5) * 16, 16, 1.5, "rgba(255,230,200,.5)");
+    g.strokeStyle = "#f4f2ea"; g.lineWidth = 6; g.beginPath(); g.arc(160, 160, 60, Math.PI * 1.15, Math.PI * 1.85); g.stroke();
+    const b = since("td_vetrara", 0) < 200 ? since("td_vetrara", 0) : 100; px(g, (b * 1.4) % (W + 40) - 30, 170, 34, 6, "#2a1e14"); tdMan(g, (b * 1.4) % (W + 40) - 12, 170, 0.8, "#e8e8e8", "#2a2a2a", f);
+    if (since("td_vetrara", 1) < 90) for (let i = 0; i < 6; i++) circ(g, 250 + Math.cos(i) * 20, 40 - since("td_vetrara", 1) * 0.3 + Math.sin(i) * 8, 2, ["#3a8a7a", "#3a6a9a", "#c8a040"][i % 3]);
+    tdMan(g, 160, 112, 0.9, TD_COL.vet, "#e8d08a", f); if (since("td_vetrara", 2) < 120) { g.fillStyle = "#2a1e14"; g.font = "italic 8px Georgia"; g.textAlign = "center"; g.fillText("«Ogni cosa ha un prezzo.»", 160, 88); }
+    tdBlur(g, W, H);
+  }
+  function bgTdPalazzo(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#d8f0e8", "#a8d0c0"]); g.strokeStyle = "rgba(255,255,255,.7)"; g.lineWidth = 2; for (let i = 0; i < 9; i++) { g.beginPath(); g.moveTo(i * 40, 0); g.quadraticCurveTo(160, 60, 160, 90); g.stroke(); }
+    [[50, 150], [270, 150], [210, 160]].forEach(([x, y], i) => { px(g, x - 2, y - 30, 4, 30, "#6a4a2a"); circ(g, x, y - 40, 22, "#3a7a4a"); for (let k = 0; k < 5; k++) circ(g, x - 14 + k * 7, y - 44 + (k % 2) * 8, 3, "#ffd23f"); });
+    circ(g, 130, 160, 18, "#a8c8d8"); const fz = since("td_palazzo", 0) < 120; for (let i = 0; i < (fz ? 12 : 5); i++) circ(g, 130 + Math.sin(f / 9 + i) * 6, 150 - ((f + i * 9) % 30), 1.5, "rgba(255,255,255,.8)");
+    px(g, 0, 176, W, 24, "#e8e4d8"); tdMan(g, 180, 178, 1.1, TD_COL.vet, "#e8d08a", f);
+    if (since("td_palazzo", 1) < 140) { g.fillStyle = "#2a1e14"; g.font = "italic 8px Georgia"; g.textAlign = "center"; g.fillText("«Io gioco per vincere, non per comprare.»", 160, 30); }
+    if (since("td_palazzo", 2) < 100) { px(g, 20, 40, 60, 40, "#f4ead8"); g.strokeStyle = "#8a6a2a"; g.strokeRect(20, 40, 60, 40); g.fillStyle = "#8a6a2a"; g.font = "6px Georgia"; g.fillText("Città Libere", 50, 64); }
+  }
+  function bgTdRuggine(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#e0905a", "#f0c090", "#8a5a3a"]); g.fillStyle = "#6a3a2a"; g.beginPath(); g.moveTo(0, 120); g.lineTo(60, 70); g.lineTo(110, 100); g.lineTo(170, 50); g.lineTo(230, 90); g.lineTo(290, 60); g.lineTo(W, 110); g.lineTo(W, H); g.lineTo(0, H); g.fill();
+    px(g, 140, 30, 60, 40, "#4a3a34"); for (let i = 0; i < 4; i++) px(g, 142 + i * 15, 24, 8, 8, "#4a3a34"); px(g, 166, 50, 10, 20, "#2a1a14");
+    [[40, 150], [280, 140]].forEach(([x, y], i) => { px(g, x - 10, y - 10, 20, 20, "#3a2a24"); glowB(g, x, y - 6, 30, "255,140,60", 0.5 + 0.2 * Math.sin(f / 8 + i)); for (let k = 0; k < 6; k++) circ(g, x + Math.sin(f / 5 + k) * 6, y - 14 - ((f * 1.5 + k * 13) % 30), 1, "#ffb060"); });
+    tdFlag(g, 168, 0, TD_COL.rug, f, 0); vgrad(g, 0, 170, W, 30, ["#8a6a4a", "#6a4a34"]);
+    if (since("td_ruggine", 0) < 120) { g.fillStyle = "#fff"; g.font = "900 14px Georgia"; g.textAlign = "center"; g.fillText("CLANG!", 60, 120); }
+    tdMan(g, 170, 186, 1.3, "#5a3a34", "#2a2a2a", f); if (since("td_ruggine", 1) < 140) { g.fillStyle = "#2a1e14"; g.font = "italic 8px Georgia"; g.textAlign = "center"; g.fillText("«Il ferro non aspetta.»", 170, 150); }
+    if (since("td_ruggine", 2) < 120) for (let i = 0; i < 6; i++) tdMan(g, 20 + i * 14, 196, 0.6, "#6a5a4a", "#2a1a14", f);
+    tdBlur(g, W, H);
+  }
+  function bgTdFinale(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, ["#f0a060", "#ffd8a0", "#ece8dc"]); circ(g, 250, 70, 24, "rgba(255,240,200,.9)");
+    for (let i = 0; i < 40; i++) { const x = (i * 29 + f * 0.8) % W, y = (i * 17 + f * (0.6 + (i % 3) * 0.2)) % H; px(g, x, y, 2, 3, ["#2a6ab8", "#ffd27a", "#e8e4d8", "#2a8a6a"][i % 4]); }
+    vgrad(g, 0, 150, W, 50, ["#e8e4d8", "#d4ccb4"]); [[60, TD_COL.sal], [160, TD_COL.vet], [260, TD_COL.rug]].forEach(([x, c], i) => tdFlag(g, x, 112, c, f, i));
+    const up = since("td_finale", 0) < 120 ? Math.sin(since("td_finale", 0) / 12) * 6 : 0; g.fillStyle = "#ffd23f"; g.beginPath(); g.moveTo(148, 110 - up); g.lineTo(172, 110 - up); g.quadraticCurveTo(170, 132 - up, 160, 136 - up); g.quadraticCurveTo(150, 132 - up, 148, 110 - up); g.fill(); px(g, 156, 136 - up, 8, 12, "#c8a040");
+    [130, 160, 190].forEach((x, i) => tdMan(g, x, 186, 1.1, i === 1 ? "#c8a040" : TD_COL.sal, ["#a8a8a8", "#2b1d14", "#c87a3a"][i], f));
+    if (since("td_finale", 1) < 120) { g.fillStyle = "#2a1e14"; g.font = "italic 9px Georgia"; g.textAlign = "center"; g.fillText("«Tocca a te, capitano.»", 160, 96); }
+    if (since("td_finale", 2) < 160) tdScale(g, 60, 190, 0.8, f, [0, 0, 0]);
+    tdBlur(g, W, H);
+  }
   const LB = {
+    td_titolo: { draw: bgTdTitolo, hot: [
+      [120, 140, 80, 60, "⚖️ I tre piatti della Bilancia oscillano: morale, utile, libertà. Nessuno pesa più degli altri. Per ora."],
+      [100, 120, 120, 40, "✨ Un soffio di vento solleva il sale dalle saline: per un attimo l'aria brilla come vetro."],
+      [80, 80, 160, 30, "📜 Frate Anselmo, da qualche parte, scrive: «Le decisioni grandi si pesano»."],
+    ] },
+    td_salinella: { draw: bgTdSalinella, hot: [
+      [130, 120, 60, 60, "⚖️ La statua della Bilancia: un piatto scende, gli altri salgono. Il vento, o forse un presagio."],
+      [40, 160, 220, 40, "🏃 Lia corre attraverso la piazza, inseguita da tre bambini che vogliono un autografo."],
+      [20, 140, 40, 40, "✨ Il cono di sale scintilla al sole: si sbriciola un po' e brilla."],
+    ] },
+    td_miniera: { draw: bgTdMiniera, hot: [
+      [0, 130, 320, 40, "🛒 Un carrello pieno di sale passa sbuffando sui binari."],
+      [90, 120, 50, 50, "⛏️ Un colpo di piccone: TOC! Un pezzo di sale grande come un pallone si stacca dalla parete."],
+      [60, 10, 200, 30, "🎵 Lontano, i minatori cantano per tenere il tempo dei picconi."],
+    ] },
+    td_bilancia: { draw: bgTdBilancia, hot: [
+      [110, 60, 100, 120, "⚖️ La Bilancia trema: qualcuno, nella squadra, sta cambiando idea."],
+      [110, 40, 100, 40, "🪙 Un peso cade su un piatto. Poi un altro. Il suono rimbomba nella sala."],
+      [80, 10, 160, 30, "🗨️ «Morale. Utile. Libertà.» Tre parole, tre piatti, una squadra."],
+    ] },
+    td_vetrara: { draw: bgTdVetrara, hot: [
+      [0, 150, 320, 40, "🚣 Remo il barcaiolo passa sotto il ponte cantando: «Dall'altra parte, signore?»"],
+      [220, 10, 60, 50, "🫧 Dalla serra di vetro escono bolle colorate: Mastro Soffio prova un vetro nuovo."],
+      [130, 70, 60, 50, "👑 La Marchesa Cristallina, alla finestra: «Ogni cosa ha un prezzo»."],
+    ] },
+    td_palazzo: { draw: bgTdPalazzo, hot: [
+      [110, 130, 40, 40, "⛲ La fontana del giardino d'inverno suona come un carillon."],
+      [150, 140, 60, 50, "🌿 Isotta, fra i limoni: «Io gioco per vincere, non per comprare»."],
+      [10, 30, 80, 60, "🗺️ Una mappa vecchia nell'archivio: le Città Libere, oltre il lago."],
+    ] },
+    td_ruggine: { draw: bgTdRuggine, hot: [
+      [20, 110, 60, 60, "🔨 CLANG! La forgia di Ruggine non si ferma mai."],
+      [140, 140, 60, 60, "⚔️ Il Duca Ferro, a braccia nude: «Il ferro non aspetta»."],
+      [0, 170, 120, 30, "🧂 Arriva il carro del sale: Bruna e i minatori sono venuti a vedere la finale."],
+    ] },
+    td_finale: { draw: bgTdFinale, hot: [
+      [140, 100, 40, 50, "🏆 La Coppa dei Tre Ducati, di nuovo a Salinella dopo trent'anni."],
+      [0, 0, 320, 80, "🎊 Coriandoli bianchi, blu, verdi, rossi: anche Vetrara e Ruggine festeggiano, un po'."],
+      [30, 160, 60, 40, "⚖️ Una piccola bilancia d'ottone, in un angolo. Per una volta, è in pari."],
+    ] },
     gr_titolo: { draw: bgGrTitolo, hot: [
       [120, 0, 120, 60, "🦅 Un'ombra con le ali aperte passa nel fascio del faro. Poi il fascio gira, e non c'è più."],
       [130, 110, 60, 70, "🧥 Il mantello si gonfia di pioggia e di vento. Sotto, nessuno sa chi c'è."],

@@ -15,12 +15,12 @@
   const hash = (s) => { let h = 2166136261; s = String(s); for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
   const hx = (c, d) => { c = String(c || d || "#888888").replace("#", ""); if (c.length === 3) c = c.split("").map((x) => x + x).join(""); return /^[0-9a-f]{6}/i.test(c) ? c.slice(0, 6).toLowerCase() : String(d || "888888").replace("#", ""); };
   const ALIAS = { short: "buzz", corto: "buzz", lungo: "long", flowing: "long", coda: "ponytail", medium: "slick", afro: "curly" };
-  const LONG = { long: 1, bob: 1, ponytail: 1, codino: 1, twintails: 1, braids: 1, bun: 1, wavy: 1, dread: 1, sidebraid: 1, mullet: 1, messybun: 1, spacebuns: 1 };
+  const LONG = { long: 1, bob: 1, ponytail: 1, codino: 1, twintails: 1, braids: 1, bun: 1, wavy: 1, dread: 1, sidebraid: 1, mullet: 1, messybun: 1, spacebuns: 1, corona: 1 };
   const isWow = (e) => e === "surprised" || e === "wow";
   const pickV = (n, k, pre) => `${pre || "variant"}${String((k % n) + 1).padStart(2, "0")}`;
   // ---------------------------------------------------------------- opzioni per stile
   // Toon Head: quattro tagli davanti (riga di lato, undercut, a punte, chignon) e quattro lunghezze dietro
-  const TH_FRONT = { messy: "spiky", spiky: "spiky", cresta: "spiky", curly: "spiky", hood: "spiky", bandana: "spiky", elmo: "undercut", buzz: "undercut", slick: "sideComed", ordinato: "sideComed", side: "sideComed", long: "sideComed", bob: "sideComed", twintails: "sideComed", braids: "sideComed", bun: "bun", ponytail: "bun", codino: "bun", afro: "spiky", dread: "spiky", undercut: "undercut", pompadour: "sideComed", mullet: "spiky", wavy: "sideComed", messybun: "bun", topknot: "bun", sidebraid: "sideComed", spacebuns: "bun" };
+  const TH_FRONT = { corona: "bun", ciuffo: "sideComed", messy: "spiky", spiky: "spiky", cresta: "spiky", curly: "spiky", hood: "spiky", bandana: "spiky", elmo: "undercut", buzz: "undercut", slick: "sideComed", ordinato: "sideComed", side: "sideComed", long: "sideComed", bob: "sideComed", twintails: "sideComed", braids: "sideComed", bun: "bun", ponytail: "bun", codino: "bun", afro: "spiky", dread: "spiky", undercut: "undercut", pompadour: "sideComed", mullet: "spiky", wavy: "sideComed", messybun: "bun", topknot: "bun", sidebraid: "sideComed", spacebuns: "bun" };
   const TH_BACK = { long: "longStraight", bob: "shoulderHigh", twintails: "neckHigh", braids: "longWavy", ponytail: "neckHigh", dread: "longWavy", mullet: "neckHigh", wavy: "longWavy", sidebraid: "shoulderHigh" };
   function toonhead(c, st, e, seed) {
     const h = hash(seed), o = { seed, skinColor: [hx(c.skin, "e0b48a")], hairColor: [hx(c.hair, "2b1d14")], clothesColor: [hx(c.shirt, "3f5fbf")], clothes: [["tShirt", "shirt", "turtleNeck", "openJacket"][h % 4]],
