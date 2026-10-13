@@ -25799,6 +25799,8 @@
   const facesLbl = () => { const l = $("facesLbl"); if (l) l.textContent = "Volti: " + (FACE_NAME[SET.faces] || "Classico"); };
   window.cycleFaces = () => { const i = FACE_ORDER.indexOf(SET.faces); SET.faces = FACE_ORDER[(i + 1) % FACE_ORDER.length]; try { Object.keys(PORT_IMG).forEach((k) => delete PORT_IMG[k]); } catch {} writeJSON(SETK, SET); facesLbl(); if (window.toast) window.toast("Stile dei volti: " + FACE_NAME[SET.faces], "info", "🎭"); };
   if ($("facesBtn")) { $("facesBtn").onclick = window.cycleFaces; facesLbl(); }
+  const pfitLbl = () => { const l = $("pfitLbl"); if (l) l.textContent = "Scene: " + (SET.pfit === "intero" ? "Interi" : "Grandi"); };
+  if ($("pfitBtn")) { $("pfitBtn").onclick = () => { SET.pfit = SET.pfit === "intero" ? "grande" : "intero"; writeJSON(SETK, SET); pfitLbl(); try { if (view && view.kind === "scene") draw(); } catch {} if (window.toast) window.toast("Personaggi nelle scene: " + (SET.pfit === "intero" ? "Interi" : "Grandi"), "info", "🖼️"); }; pfitLbl(); }
   window.setView = (v) => { view = v; };
   window.getView = () => view;
   window.closeAltStage = () => closeAltStage();
