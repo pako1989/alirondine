@@ -2802,6 +2802,305 @@
     });
   }
 
+  // --- 19. LA NOTTE DEI CENTO RINTOCCHI · ROCCA CAMPANARIA ---
+  window.__cpDraw = { get Piazza() { return drawDetailedCampanaPiazza; }, get Campanile() { return drawDetailedCampanaCampanile; }, get Cantina() { return drawDetailedCampanaCantina; } };
+
+  function drawDetailedCampanaPiazza(g, W, H, f) {
+    // Cielo notturno medievale: blu cobalto e viola con luna crescente
+    const sky = g.createLinearGradient(0, 0, 0, 110);
+    sky.addColorStop(0, "#090d16");
+    sky.addColorStop(0.5, "#1e1b4b");
+    sky.addColorStop(1, "#312e81");
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, 110);
+
+    // Stelle scintillanti
+    for (let i = 0; i < 35; i++) {
+      const sx = (i * 47 + 13) % W;
+      const sy = (i * 29 + 7) % 85;
+      const sa = 0.35 + 0.35 * Math.sin(f * 0.08 + i);
+      px(g, sx, sy, 1.5, 1.5, `rgba(254, 240, 138, ${sa})`);
+    }
+
+    // Falce di luna d'argento
+    g.fillStyle = "#fef08a";
+    g.beginPath();
+    g.arc(W * 0.82, 32, 16, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = "#1e1b4b";
+    g.beginPath();
+    g.arc(W * 0.82 - 5, 29, 14, 0, Math.PI * 2);
+    g.fill();
+
+    // Sagoma delle colline e case a torre medievali sullo sfondo
+    g.fillStyle = "#0f172a";
+    g.beginPath();
+    g.moveTo(0, 100);
+    g.lineTo(45, 82);
+    g.lineTo(85, 92);
+    g.lineTo(130, 75);
+    g.lineTo(180, 88);
+    g.lineTo(240, 72);
+    g.lineTo(W, 95);
+    g.lineTo(W, 115);
+    g.lineTo(0, 115);
+    g.closePath();
+    g.fill();
+
+    // Il Campanile di Rocca Campanaria al centro-destra (alto e merlato)
+    const tx = W * 0.52, ty = 15;
+    g.fillStyle = "#334155";
+    g.fillRect(tx - 24, ty + 10, 48, 120);
+    // Pietre e cornici marcapiano
+    px(g, tx - 26, ty + 10, 52, 4, "#ca8a04");
+    px(g, tx - 25, ty + 45, 50, 3, "#ca8a04");
+    px(g, tx - 25, ty + 80, 50, 3, "#ca8a04");
+    // Merlature guelfe in cima
+    for (let m = -24; m < 24; m += 12) {
+      px(g, tx + m, ty, 8, 10, "#475569");
+    }
+    // Bifora con cavità della campana vuota (buio con debole raggio dorato)
+    g.fillStyle = "#09090b";
+    g.fillRect(tx - 14, ty + 18, 12, 22);
+    g.fillRect(tx + 2, ty + 18, 12, 22);
+    px(g, tx - 2, ty + 18, 4, 22, "#64748b");
+    // Trave della campana vuota con corda tagliata che dondola
+    px(g, tx - 12, ty + 20, 24, 3, "#78350f");
+    const ropeSway = Math.sin(f * 0.05) * 3;
+    px(g, tx + ropeSway, ty + 23, 2, 10, "#ca8a04");
+
+    // Grande orologio monumentale con lancette su mezzanotte
+    g.fillStyle = "#fef08a";
+    g.beginPath();
+    g.arc(tx, ty + 62, 12, 0, Math.PI * 2);
+    g.fill();
+    g.strokeStyle = "#854d0e";
+    g.lineWidth = 1.5;
+    g.stroke();
+    // Lancette (ore e minuti che puntano in alto)
+    px(g, tx - 0.5, ty + 53, 1, 9, "#000");
+    px(g, tx - 0.5, ty + 56, 1, 6, "#000");
+
+    // Facciata della Chiesa romanica a sinistra
+    g.fillStyle = "#1e293b";
+    g.fillRect(tx - 110, ty + 55, 86, 80);
+    // Rosone romanico
+    g.fillStyle = "#ca8a04";
+    g.beginPath();
+    g.arc(tx - 67, ty + 78, 10, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = "#09090b";
+    g.beginPath();
+    g.arc(tx - 67, ty + 78, 7, 0, Math.PI * 2);
+    g.fill();
+
+    // Sagrato in ciottoli (piano inferiore)
+    g.fillStyle = "#18181b";
+    g.fillRect(0, 115, W, H - 115);
+    // Trama ciottoli
+    for (let cy = 120; cy < H; cy += 12) {
+      px(g, 0, cy, W, 1, "rgba(82, 82, 91, 0.35)");
+    }
+    for (let cx = 10; cx < W; cx += 22) {
+      px(g, cx, 115, 1, H - 115, "rgba(82, 82, 91, 0.25)");
+    }
+
+    // Linee di gesso bianco consumato del campetto sul sagrato
+    g.strokeStyle = "rgba(254, 240, 138, 0.45)";
+    g.lineWidth = 1.5;
+    g.strokeRect(30, 130, W - 60, H - 142);
+    g.beginPath();
+    g.arc(W * 0.5, H * 0.5 + 35, 22, 0, Math.PI * 2);
+    g.stroke();
+
+    // Statua in pietra di San Fortunato con pallone (a sinistra)
+    const sx = 40, sy = 125;
+    px(g, sx, sy + 15, 16, 6, "#52525b");
+    px(g, sx + 3, sy + 4, 10, 12, "#94a3b8");
+    g.fillStyle = "#ca8a04";
+    g.beginPath(); g.arc(sx + 8, sy + 2, 4, 0, Math.PI * 2); g.fill();
+    // Pallone di pietra
+    g.fillStyle = "#f8fafc";
+    g.beginPath(); g.arc(sx + 14, sy + 8, 3, 0, Math.PI * 2); g.fill();
+
+    // Lampioni a gas con alone caldo ai lati della piazza
+    [ [20, 125], [W - 25, 125] ].forEach(([lx, ly]) => {
+      const flk = Math.sin(f * 0.2 + lx) * 3;
+      const glow = g.createRadialGradient(lx, ly - 8, 2, lx, ly - 8, 22 + flk);
+      glow.addColorStop(0, "rgba(253, 224, 71, 0.7)");
+      glow.addColorStop(0.5, "rgba(234, 179, 8, 0.2)");
+      glow.addColorStop(1, "rgba(234, 179, 8, 0)");
+      g.fillStyle = glow;
+      g.beginPath(); g.arc(lx, ly - 8, 25, 0, Math.PI * 2); g.fill();
+      px(g, lx - 1, ly - 18, 3, 24, "#451a03");
+      px(g, lx - 3, ly - 10, 7, 5, "#ca8a04");
+    });
+  }
+
+  function drawDetailedCampanaCampanile(g, W, H, f) {
+    // Sfondo interno cella campanaria: pareti in tufo e blocchi di pietra
+    const stoneGrad = g.createLinearGradient(0, 0, 0, H);
+    stoneGrad.addColorStop(0, "#0f172a");
+    stoneGrad.addColorStop(1, "#1e293b");
+    g.fillStyle = stoneGrad;
+    g.fillRect(0, 0, W, H);
+
+    // Bifora ad arco centrale verso il cielo notturno e i tetti
+    const bx = W * 0.5, by = 20, bw = 120, bh = 110;
+    // Cielo stellato visibile dall'apertura
+    const sky = g.createLinearGradient(0, by, 0, by + bh);
+    sky.addColorStop(0, "#090d16");
+    sky.addColorStop(1, "#312e81");
+    g.fillStyle = sky;
+    g.fillRect(bx - bw * 0.5, by, bw, bh);
+
+    // Tetti del borgo illuminati sotto la luna
+    g.fillStyle = "#7c2d12";
+    for (let t = 0; t < 6; t++) {
+      const tx = bx - 55 + t * 20;
+      g.beginPath();
+      g.moveTo(tx, by + bh);
+      g.lineTo(tx + 10, by + bh - 18);
+      g.lineTo(tx + 20, by + bh);
+      g.closePath();
+      g.fill();
+    }
+
+    // Arco in pietra della bifora
+    g.strokeStyle = "#64748b";
+    g.lineWidth = 6;
+    g.strokeRect(bx - bw * 0.5, by, bw, bh);
+    // Colonnina centrale romanica
+    px(g, bx - 3, by, 6, bh, "#94a3b8");
+
+    // Travature in quercia secolare incrociate sul soffitto
+    px(g, 0, 15, W, 14, "#451a03");
+    px(g, 0, 29, W, 2, "#29140c");
+    px(g, 35, 0, 16, H, "#451a03");
+    px(g, W - 51, 0, 16, H, "#451a03");
+
+    // Culla vuota della campana al centro con ganci d'acciaio
+    px(g, bx - 30, 29, 60, 6, "#78350f");
+    px(g, bx - 18, 35, 4, 18, "#94a3b8");
+    px(g, bx + 14, 35, 4, 18, "#94a3b8");
+
+    // Corde tranciate che pendono nel vuoto con nappe d'oro
+    const sway = Math.sin(f * 0.06) * 4;
+    px(g, bx - 17 + sway, 53, 2, 35, "#ca8a04");
+    px(g, bx + 15 - sway, 53, 2, 28, "#ca8a04");
+
+    // Ingranaggi monumentali dell'orologio sul lato sinistro
+    const gx = 25, gy = H - 60;
+    g.fillStyle = "#ca8a04";
+    g.beginPath(); g.arc(gx + 15, gy, 18, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#1e293b";
+    g.beginPath(); g.arc(gx + 15, gy, 12, 0, Math.PI * 2); g.fill();
+    // Denti dell'ingranaggio
+    for (let d = 0; d < 8; d++) {
+      const ang = (d * Math.PI / 4) + f * 0.02;
+      px(g, gx + 15 + Math.cos(ang) * 16 - 2, gy + Math.sin(ang) * 16 - 2, 4, 4, "#ca8a04");
+    }
+
+    // Pavimento in tavoloni di legno consumati e balaustra
+    g.fillStyle = "#29140c";
+    g.fillRect(0, H - 45, W, 45);
+    for (let y = H - 40; y < H; y += 12) {
+      px(g, 0, y, W, 1.5, "#18181b");
+    }
+
+    // Polvere di calce dorata che luccica nei raggi lunari
+    for (let p = 0; p < 20; p++) {
+      const px0 = (p * 37 + f * 0.5) % W;
+      const py0 = (p * 19 + f * 0.3) % (H - 50);
+      const pa = 0.2 + 0.3 * Math.sin(f * 0.1 + p);
+      px(g, px0, py0, 1.5, 1.5, `rgba(254, 240, 138, ${pa})`);
+    }
+  }
+
+  function drawDetailedCampanaCantina(g, W, H, f) {
+    // Volta a botte in mattoni scuri dell'Osteria del Salame e Fiasco
+    const bgGrad = g.createLinearGradient(0, 0, 0, H);
+    bgGrad.addColorStop(0, "#271c19");
+    bgGrad.addColorStop(1, "#18110f");
+    g.fillStyle = bgGrad;
+    g.fillRect(0, 0, W, H);
+
+    // Arco a mattoni a vista
+    g.strokeStyle = "rgba(180, 83, 9, 0.35)";
+    g.lineWidth = 4;
+    g.beginPath();
+    g.arc(W * 0.5, H * 0.45, W * 0.48, Math.PI, 0);
+    g.stroke();
+
+    // Camino con focolare acceso sulla sinistra
+    const cx = 35, cy = H - 85;
+    g.fillStyle = "#3f3f46";
+    g.fillRect(cx - 20, cy, 55, 75);
+    g.fillStyle = "#18181b";
+    g.fillRect(cx - 10, cy + 18, 35, 57);
+    // Fiamma viva del camino
+    const flameH = Math.sin(f * 0.18) * 4;
+    g.fillStyle = "#ea580c";
+    g.beginPath();
+    g.moveTo(cx - 5, cy + 70);
+    g.lineTo(cx + 8, cy + 35 - flameH);
+    g.lineTo(cx + 20, cy + 70);
+    g.closePath();
+    g.fill();
+    g.fillStyle = "#fde047";
+    g.beginPath();
+    g.moveTo(cx, cy + 70);
+    g.lineTo(cx + 8, cy + 45 - flameH);
+    g.lineTo(cx + 15, cy + 70);
+    g.closePath();
+    g.fill();
+    // Paiolo di rame sospeso
+    px(g, cx + 2, cy + 10, 12, 14, "#ca8a04");
+    px(g, cx + 7, cy + 4, 2, 8, "#18181b");
+
+    // Salami e soppressate appese a una trave in alto a destra
+    px(g, W * 0.45, 22, W * 0.5, 4, "#78350f");
+    for (let s = 0; s < 5; s++) {
+      const sx = W * 0.52 + s * 22;
+      px(g, sx + 4, 26, 1, 8, "#b45309"); // spago
+      g.fillStyle = "#991b1b";
+      g.beginPath();
+      g.ellipse(sx + 5, 42, 5, 10, 0.05 * s, 0, Math.PI * 2);
+      g.fill();
+      px(g, sx + 3, 38, 4, 2, "#fecdd3"); // muffa bianca nobile
+    }
+
+    // La grande botte cerchiata di Tito e Peppe (al centro-destra)
+    const bx = W * 0.58, by = H - 75;
+    g.fillStyle = "#451a03";
+    g.beginPath();
+    g.ellipse(bx, by + 28, 36, 32, 0, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = "#78350f";
+    g.beginPath();
+    g.ellipse(bx, by + 28, 32, 28, 0, 0, Math.PI * 2);
+    g.fill();
+    // Cerchi di ferro e ottone
+    g.strokeStyle = "#ca8a04";
+    g.lineWidth = 3;
+    g.beginPath(); g.ellipse(bx, by + 16, 33, 8, 0, 0, Math.PI * 2); g.stroke();
+    g.beginPath(); g.ellipse(bx, by + 40, 33, 8, 0, 0, Math.PI * 2); g.stroke();
+    // Coperta a quadri che copre la bocca della botte lasciando intravedere l'oro
+    g.fillStyle = "#fef08a";
+    px(g, bx - 14, by - 4, 28, 6, "#fef08a");
+    px(g, bx - 12, by - 2, 24, 2, "#ca8a04");
+
+    // Fiaschi impagliati di Barbera sul tavolo
+    const tx = W * 0.85, ty = H - 55;
+    px(g, tx - 15, ty + 10, 35, 8, "#78350f");
+    // Fiaschi
+    [ [tx - 8, ty], [tx + 8, ty + 2] ].forEach(([fx, fy]) => {
+      g.fillStyle = "#b45309";
+      g.beginPath(); g.arc(fx + 4, fy + 6, 6, 0, Math.PI * 2); g.fill();
+      px(g, fx + 3, fy - 4, 3, 8, "#15803d"); // collo verde
+    });
+  }
+
   // --- 13. RAGNAROK BALL · IL FIORDO DELLE DRAKKAR (CAPITOLO 1) ---
   function drawDetailedRagnarokFiordo(g, W, H, f) {
     // Cielo crepuscolare di Fimbulwinter: cenere vulcanica, viola scuro e bagliori boreali
@@ -4160,6 +4459,19 @@
         return true;
       case "bv_aurora":
         drawDetailedBelovodiaAurora(g, W, H, f);
+        return true;
+      case "cp_piazza":
+      case "cp_titolo":
+        drawDetailedCampanaPiazza(g, W, H, f);
+        return true;
+      case "cp_campanile":
+      case "cp_tetti":
+        drawDetailedCampanaCampanile(g, W, H, f);
+        return true;
+      case "cp_cantina":
+      case "cp_osteria":
+      case "cp_officina":
+        drawDetailedCampanaCantina(g, W, H, f);
         return true;
       case "gl_porto":
       case "gl_titolo":
@@ -8211,6 +8523,34 @@
     LB[k] = { draw: (g, W, H, f) => { const D = window.__glDraw; if (D && D[n]) D[n](g, W, H, f); else px(g, 0, 0, W, H, "#7c4a1d"); }, hot };
   });
   LB.gl_porto = LB.gl_titolo;
+
+  // La Notte dei Cento Rintocchi: scene con punti cliccabili visibili (scintille) e didascalia
+  [
+    ["cp_titolo", "Piazza", [
+      [35, 95, 60, 45, "🍷 Osteria del Salame e Fiasco: profumo di pane caldo, salsicce affumicate e fiaschi di Barbera."],
+      [145, 20, 75, 75, "🔔 Antico Campanile: trenta metri di tufo medievale, orologio monumentale e la cavità vuota della campana."],
+      [230, 115, 65, 50, "🏛️ Palazzo Comunale & Carabinieri: il quartier generale del Maresciallo Cacace con registri e verbali."],
+      [105, 95, 75, 35, "⚽ Sagrato del Torneo: campo in ciottoli delimitato col gesso dove si sfidano le contrade a mezzanotte."]
+    ]],
+    ["cp_campanile", "Campanile", [
+      [115, 25, 90, 70, "🔲 Cella Campanaria: le travi di quercia secolare da cui è stata calata la Campana d'Oro."],
+      [15, 90, 75, 75, "⚙️ Ingranaggio dell'Orologio: ruote dentate in bronzo e pendolo monumentale che batte i cento rintocchi."],
+      [240, 45, 70, 80, "🪟 Bifora Panoramica: vista mozzafiato sui tetti in cotto di Rocca Campanaria sotto il cielo stellato."],
+      [110, 120, 100, 45, "🪜 Scala a Chiocciola: gradini di pietra consumati da generazioni di campanari e sacrestani."]
+    ]],
+    ["cp_cantina", "Cantina", [
+      [105, 95, 80, 75, "🪵 Botte Cerchiata dei Soliti Ignoti: un enorme fusto da vino imbottito di coperte dove risuona un'eco dorata."],
+      [25, 100, 65, 65, "🔥 Camino delle Braci: il paiolo di rame diffonde aroma di sugo e castagne arrostite."],
+      [210, 35, 100, 50, "🥓 Fila di Salami Nostrani: cacciatorini e soppressate appese ad asciugare al fumo d'alloro."],
+      [215, 120, 80, 55, "🍷 Fiaschi di Barbera: bottiglie impagliate per brindare dopo la finale del sagrato."]
+    ]]
+  ].forEach(([k, n, hot]) => {
+    LB[k] = { draw: (g, W, H, f) => { const D = window.__cpDraw; if (D && D[n]) D[n](g, W, H, f); else px(g, 0, 0, W, H, "#1e1b4b"); }, hot };
+  });
+  LB.cp_piazza = LB.cp_titolo;
+  LB.cp_tetti = LB.cp_campanile;
+  LB.cp_osteria = LB.cp_cantina;
+  LB.cp_officina = LB.cp_cantina;
 
   function drawMarkers(g, k, f) {
     const def = LB[k]; if (!def || !def.hot) return;

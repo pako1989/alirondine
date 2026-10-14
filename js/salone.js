@@ -24,6 +24,8 @@
   const GEN = { fantasy: ["Fantasy", "#7a4ab0"], mistero: ["Mistero", "#2c6a9a"], scifi: ["Fantascienza", "#1f8a8a"], storico: ["Storico", "#a8622a"], commedia: ["Commedia", "#c9921a"], sport: ["Sport anime", "#c0392b"], avventura: ["Avventura", "#3f8a3f"], dramma: ["Drammatico", "#6a5a7a"], tattica: ["Tattica", "#5a6a3a"], satira: ["Satira", "#0284c7"] };
   // mod: oggetto window con menuEntry/info · fn: funzione window da chiamare con (indietro) · ch: capitoli totali (se noti)
   const SAGAS = [
+    { id: "campana", t: "La Notte dei Cento Rintocchi · Il Furto della Campana d'Oro", e: "🔔", g: ["mistero", "commedia"], mod: "__campana", key: "ali-di-rondine.campana", ch: 3, cover: "cp_titolo", d: "Il borgo medievale di Rocca Campanaria perde la sua campana d'oro alla vigilia del Torneo delle Contrade. Don Crispino grida al sacrilegio, il Maresciallo Cacace indaga con alibi assurdi e i «Soliti Ignoti» del paese si passano la refurtiva. Il nuovo motore I Cento Rintocchi (tempismo del rintocco, furtività sul sagrato e rintoccometro), il Taccuino degli Alibi e i battacchi d'ottone.",
+      hints: { banda: "Serve aver protetto i Soliti Ignoti nel Capitolo 2 e una grande fama tra i paesani.", legge: "Serve aver consegnato tutte le prove al Maresciallo Cacace e vinto la finale.", doncamillo: "Sempre possibile vincendo la finale e riconciliando Don Crispino col Sindaco.", cento: "Segreto: tutti i 12 battacchi d'ottone raccolti e rintoccometro mai al massimo in finale." } },
     { id: "galletta", t: "S.O.S. Galletta: I Bucanieri del Biscotto", e: "🏴‍☠️", g: ["commedia", "avventura"], mod: "__galletta", key: "ali-di-rondine.galletta", ch: 3, cover: "gl_titolo", d: "Arrembaggi sul ponte, pontili basculanti e la leggenda del Grande Forno tra i flutti dell'Oceano della Melassa. Arrembaggio sul Ponte: mini-calcio su un galeone in movimento che rolla e beccheggia, vento marino e rimbalzi burrosi. E il Ricettario Corsaro.",
       hints: { reale: "Serve aver stretto il patto diplomatico col Commodoro nel Capitolo 2 e vinto la finale.", bucaniere: "Serve aver issato la bandiera corsara e una grande reputazione piratesca (>50).", cuoco: "Sempre possibile, alla fine: apri la trattoria galleggiante sui sette mari.", segreto: "Segreto: tutti i biscotti d'oro raccolti e fiuto delle spezie altissimo." } },
     { id: "pugno", t: "Per un pugno di rigori", e: "🤠", g: ["storico", "avventura"], mod: "__pugno", key: "ali-di-rondine.pugno", ch: 3, cover: "pr_titolo", d: "Polvere, speroni e duelli dal dischetto a mezzogiorno nel villaggio di El Paso del Rigore. Stangata: duelli di rigori con tamburo revolver a sei colpi, barra di tensione e quick-draw al rintocco della campana. E i Manifesti Wanted con le taglie in dollari.",
@@ -104,7 +106,7 @@
     { id: "cala", t: "Cala Tramontana", e: "🌊", g: ["avventura"], fn: "openCalaTramontana", key: "ali-di-rondine.cala-tramontana", cover: "beach", d: "Esplora a piedi il borgo marino alternativo con il tuo Campione." },
     { id: "borgostorto", t: "Il Borgo Storto", e: "🌀", g: ["commedia", "tattica"], api: "openBorgoStorto", cover: "beach", d: "Lo spin-off GDR a turni del Borgo Marino." },
   ];
-  const NEWEST = ["pugno", "montagna", "cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
+  const NEWEST = ["campana", "galletta", "pugno", "montagna", "cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
   const modOf = (s) => (s.mod ? window[s.mod] : null);
   const available = (s) => (s.mod ? !!window[s.mod] : s.fn ? typeof window[s.fn] === "function" : !!(api() && api()[s.api]));
   function state(s) {
@@ -289,6 +291,10 @@
       opp: [{ name: "Corsari Sottaceto", color: "#1e3a8a", style: "equilibrata" }, { name: "Granatieri Reali", color: "#0284c7", style: "contropiede" }],
       boss: { name: "Commodoro Cracker", color: "#dc2626", style: "pressing" },
       opts: (o, h, boss) => ({ title: `Arrembaggio · contro ${o.name}`, us: "I Bucanieri", usColor: "#d97706", turns: boss ? 7 : 5, hero: { name: h.name || "Tu" }, opp: o }) },
+    { id: "rintocchi", t: "I Cento Rintocchi", e: "🔔", saga: "campana", eng: "__rintocchi", d: "La sfida notturna sul sagrato di Rocca Campanaria: tempismo del rintocco delle campane, tiri a scasso, finta del fiasco e il Rintoccometro del Maresciallo Cacace.",
+      opp: [{ name: "I Carabinieri di Cacace", color: "#1e3a8a", style: "equilibrata" }, { name: "Contrada del Gufo", color: "#1e1b4b", style: "contropiede" }],
+      boss: { name: "Campanari di San Pancrazio", color: "#ca8a04", style: "pressing" },
+      opts: (o, h, boss) => ({ title: `I Cento Rintocchi · contro ${o.name}`, us: "I Soliti Ignoti", usColor: "#ca8a04", turns: boss ? 7 : 5, hero: { name: h.name || "Tu" }, opp: o }) },
   ];
   function sgState(m) { const s = SAGAS.find((x) => x.id === m.saga), x = s ? state(s) : null; return { s, open: !!(x && (x.doneN >= 1)), boss: !!(x && x.endsFound > 0) }; }
   function openSalaGiochi(back) {
@@ -591,7 +597,7 @@
   // ---------------------------------------------------------------- ALBUM DEI PERSONAGGI
   // ogni personaggio registrato nel gioco (window.__borgoApi.BIO) diventa una carta. Si «incontra» parlandoci (seeCard del gioco).
   // Le sezioni: la Storia e Borgo Marino, i tornei e le modalità del Borgo, e una sezione per saga (riconosciuta dal prefisso degli id).
-  const PFX = { pugno: "pr", montagna: "bm", cavallo: "cs", razzo: "rz", quartiere: "sq", titano: "ft", ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
+  const PFX = { campana: "cp", galletta: "gl", pugno: "pr", montagna: "bm", cavallo: "cs", razzo: "rz", quartiere: "sq", titano: "ft", ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
   const BORGO_PFX = ["sv", "rb", "sb", "cg", "hd", "md", "ac"];
   function perSections() {
     const A = api(); if (!A || !A.BIO) return [];

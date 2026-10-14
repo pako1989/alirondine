@@ -27,6 +27,7 @@
     montagna: ["ali-di-rondine.montagna", "Piccolo Borgo di Montagna", "#0284c7", "__montagna"],
     pugno: ["ali-di-rondine.pugno", "Per un pugno di rigori", "#ea580c", "__pugno"],
     galletta: ["ali-di-rondine.galletta", "S.O.S. Galletta: I Bucanieri del Biscotto", "#d97706", "__galletta"],
+    campana: ["ali-di-rondine.campana", "La Notte dei Cento Rintocchi", "#ca8a04", "__campana"],
     vallombra: ["ali-di-rondine.storia-campione", "Vallombra", "#6a8aa8", "__storiaCampione"], kronenburg: ["ali-di-rondine.kronenburg-story", "Kronenburg", "#8a1a2a", "__kronenburgStory"], pirati: ["ali-di-rondine.pirati-story", "I Pirati della Tempesta Celeste", "#2a8ac8", "__piratiStory"],
     alchimia: ["ali-di-rondine.alchimia-story", "L'Alchimia d'Acciaio", "#b0762a", "__alchimiaStory"], chrono: ["ali-di-rondine.chrono-story", "Chrono-Break", "#c8a22a", "__chronoStory"], ombre: ["ali-di-rondine.campione-ombre", "Il Circuito delle Ombre", "#1a3a5a", "__campioneOmbre"],
     ragnarok: ["ali-di-rondine.ragnarok", "Ragnarok Ball", "#9a3a1a", "__ragnarokStory"], belovodia: ["ali-di-rondine.belovodia-story", "Belovodia", "#4a7a8a", "__belovodiaStory"], bilancia: ["ali-di-rondine.bilancia-feudi", "La Bilancia delle Tre Corone", "#6a5a8a", "__bilanciaFeudi"],
@@ -92,6 +93,10 @@
     ["gl_barbabiscotto", "galletta", "c", 54, 76, 58, "D", 1], ["gl_cannella", "galletta", "c", 60, 56, 76, "C", 1], ["gl_crusty", "galletta", "r", 74, 52, 70, "A", 1],
     ["gl_commodoro", "galletta", "r", 62, 78, 64, "D", 2], ["gl_calipso", "galletta", "e", 70, 68, 86, "C", 2],
     ["gl_lievito", "galletta", "e", 64, 74, 84, "C", 3], ["gl_kraken", "galletta", "l", 88, 76, 82, "A", 3],
+    // La Notte dei Cento Rintocchi: Il Furto della Campana d'Oro
+    ["cp_crispino", "campana", "c", 60, 72, 70, "C", 1], ["cp_cacace", "campana", "c", 48, 82, 54, "D", 1], ["cp_rosetta", "campana", "r", 68, 54, 76, "C", 1],
+    ["cp_tito", "campana", "r", 74, 52, 78, "A", 2], ["cp_peppe", "campana", "e", 78, 80, 56, "D", 2],
+    ["cp_sindaco", "campana", "c", 50, 70, 64, "D", 2], ["cp_mastro", "campana", "l", 84, 78, 86, "C", 3],
   ];
   // [id, saga, rarità (c r e l), attacco, difesa, tecnica, ruolo]
   const CARDS = [
@@ -190,6 +195,7 @@
     ["vl_teodora", "chr_elias", "Custodi dell'orario"], ["vl_vica", "ts_alba", "Il paese in cucina"], ["kb_vespera", "dc_agata", "Menti deduttive"], ["kb_baelor", "tc_ysolde", "Chi sa tutto"], ["kb_gareth", "tc_gualtiero", "Cavalieri d'onore"], ["pi_anemona", "ve_selva", "Occhi sul vento"],
     ["al_kira", "vl_bianca", "Mani nell'officina"], ["al_armatura", "gr_gancio", "Armadi gentili"], ["chr_aria", "ep_ada", "Guardiane del tempo"], ["omb_maya", "dc_nina", "Penne d'inchiesta"], ["rag_sigrid", "bv_boris", "Voci dei vecchi tempi"], ["rag_brokk", "sh_muramasa", "Mastri fabbri"],
     ["bv_nadia", "sh_hanzo", "Volpi e ombre"], ["sh_hayato", "cm_bastiano", "Vecchi maestri"], ["fe_roland", "td_corrado", "Eredi di casate"], ["abi_nora", "nl_fiammetta", "Luci nella notte"], ["cr_aira", "ve_sbuffo", "Venute dal cielo"], ["mu_ugolino", "tc_ardo", "Muri di pietra"], ["lb_narratore", "pi_morgana", "Voci che comandano"],
+    ["cp_crispino", "cp_cacace", "Guardie e Tonache"], ["cp_tito", "cp_peppe", "I Soliti Ignoti"], ["cp_rosetta", "gl_cannella", "Salumi e Gallette"],
   ];
   // le otto sfide del Torneo dei Sogni: cabinato della Sala Giochi (motore) e avversario
   const SFIDE = [
