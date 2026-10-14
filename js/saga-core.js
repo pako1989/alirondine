@@ -875,7 +875,7 @@
       if (!m.diffSet && !m.intro["ch" + c.n] && c.n === 1) return diffMenu(continueStory, true);
       if (!m.intro["ch" + c.n]) {
         m.intro["ch" + c.n] = 1; m.last = Date.now(); save();
-        return api.play(lines(c.intro(), c.introBg || BG0), () => { const z = ZONES[c.start]; go(c.start, z.spec.start[0], z.spec.start[1]); });
+        return api.play(lines(safe(() => c.intro(), null) || [["voce", c.title]], c.introBg || BG0), () => { const z = ZONES[c.start]; go(c.start, z.spec.start[0], z.spec.start[1]); });
       }
       const zid = m.zone && ZONES[m.zone] && ZONES[m.zone].ch <= m.ch ? m.zone : c.start;
       recap(() => enterZone(zid));

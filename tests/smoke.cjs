@@ -13,6 +13,11 @@ const L = require("./lib.cjs");
     }
     const sagas = await page.evaluate(() => ["__dopo", "__vento", "__detective", "__muro", "__cristalli", "__doppioTurno", "__libroFinali"].filter((m) => !window[m]));
     if (sagas.length) errors.push("saghe non caricate: " + sagas.join(", "));
+    // K.teleport non esiste nel kit di saga-core e ha già rotto «Continua» due volte: nessun capitolo deve usarlo
+    if (w === 390) {
+      const fs = require("fs"), path = require("path"), dir = path.join(__dirname, "..", "js");
+      fs.readdirSync(dir).filter((f) => /\.js$/.test(f)).forEach((f) => { if (/\bK\.teleport\b/.test(fs.readFileSync(path.join(dir, f), "utf8"))) errors.push(`${f}: K.teleport non esiste (intro: restituisci le righe e metti start:"zona" nel capitolo)`); });
+    }
     L.check(`avvio, home e Salone a ${w} px`, errors); await browser.close();
   }
 })().catch((e) => { console.error("✗ smoke:", e.message); process.exit(1); });

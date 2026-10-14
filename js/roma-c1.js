@@ -179,9 +179,10 @@
       goal: () => goal(S()),
       zones,
       talk,
+      start: "rm_suburra",
       intro: () => {
         setStep(0);
-        K.teleport("rm_suburra", 4, 18);
+        return [["voce", "Roma, 75 d.C. l'Urbe ti aspetta."]];
       }
     };
   }
