@@ -87,7 +87,7 @@ async function zone(page) { return page.evaluate(() => window.__borgoApi.trZone(
 async function reachAll(page, zid) {
   return page.evaluate((zid) => {
     const D = window[window.__MOD]._dbg, z = window.__borgoApi.TRZ[zid], spec = D.ZONES[zid].spec, m = window.__tr.trMap(z);
-    const T = window.T_, st = spec.start, npcs = (z.npcs || []).map((n) => n.at);
+    const T = window.T_, st = spec.start, npcs = (z.npcs || []).filter((n) => !n.ghost).map((n) => n.at); // i compagni che seguono (ghost) si spostano: non contano come ostacoli
     const seen = T.bfs(m, z, st[0], st[1], npcs), bad = [];
     const adj = (x, y) => [[0, 1], [0, -1], [1, 0], [-1, 0]].some(([dx, dy]) => seen[y + dy] && seen[y + dy][x + dx]);
     (spec.items || []).forEach(([x, y]) => { if (!(seen[y] && seen[y][x])) bad.push("goccia " + x + "," + y); });
