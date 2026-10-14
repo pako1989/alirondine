@@ -915,7 +915,7 @@
         const c = mineC(id);
         if (c) { // un capitolo può restituire K.PASS: allora risponde il capitolo precedente che conosce quel personaggio
           castHero(); meet(id); const zr = zoneRec(), list = chainFor(zr).filter((cc) => cc.talk && cc.talk[id]);
-          for (const cc of list) { const r = safe(() => cc.talk[id](), null); if (r !== PASS) return true; }
+          for (const cc of list) { const r = safe(() => cc.talk[id](K), null); if (r !== PASS) return true; }
           done(); return true;
         }
         return chained && typeof prev === "function" ? prev(id) : false;
