@@ -9,7 +9,8 @@
     "build": "echo 'Build complete'",
     "start": "node server.js",
     "test": "node tests/run.cjs",
-    "bump": "node tools/bump.cjs"
+    "bump": "node tools/bump.cjs",
+    "verifica": "npm run lint && node tests/run.cjs verifica"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

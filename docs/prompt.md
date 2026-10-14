@@ -2,7 +2,34 @@
 
 Un solo file: contiene regole, stato del progetto, come costruire una saga, API del kit, test e checklist. Copialo in una chat nuova (Claude Code o un'altra IA che può leggere e modificare la repo, anche con un altro account).
 
-**Come usarlo:** se Pasquale chiede di riprendere i lavori, leggi §A e §B e controlla `git log` e `ls js/`. Se chiede una saga nuova, leggi tutto e parti dal §1.
+**Come usarlo:** leggi per prima la sezione «LEGGI PRIMA». Se Pasquale chiede di riprendere i lavori, leggi §A e §B e controlla `git log` e `ls js/`. Se chiede una saga nuova, leggi tutto e parti dal §1.
+
+## ⛔ LEGGI PRIMA · 10 regole bloccanti (il resto del file è riferimento)
+1. Rispondi in italiano, telegrafico, **senza spoiler** della trama; dopo ogni pubblicazione una nota breve (cosa hai finito, cosa aggiunge).
+2. `git pull --rebase origin main` prima di ogni push; patch mirate sui file condivisi; mai `git add -A`; dopo il pull bump di `?v=` e cache `sw.js` (`node tools/bump.cjs <file>`).
+3. Usa solo funzioni che esistono nel kit `K` (§7). **`K.teleport` non esiste**: l'`intro` del capitolo restituisce righe `[["voce","testo"]]` e il capitolo ha `start: "id_zona"`.
+4. Dopo «Inizia la storia» deve comparire **«Continua ▸»** e poi la mappa. Se manca, la saga non è consegnabile.
+5. Nessuna modifica che cambi saghe, salvataggi o statistiche delle partite di storia/Carriera esistenti. `saga-core.js` solo con patch retrocompatibili.
+6. Testi: dialoghi brevi (una o due frasi per riquadro), popup leggibili; nei dialoghi `<b>`, `<em>` e `<br>` funzionano (nient'altro).
+7. Ogni sfondo e ogni punto cliccabile disegnato e verificato; zero errori in console al caricamento.
+8. Ogni PNG, oggetto e uscita raggiungibili a piedi; ogni dialogo finisce con `done()`, un altro dialogo o una partita.
+9. **Prima di consegnare lancia `npm run verifica`** e incolla l'esito (✓/✗). Poi i test della tua saga (§5).
+10. Nel report finale scrivi sempre: cosa hai fatto, quali test hai eseguito, **cosa non hai verificato**.
+
+## ✔ Verifica con un solo comando
+`npm run verifica` = controllo sintassi + avvio del gioco a 390 e 320 px + percorso nuova partita di OGNI saga (Inizia → Continua → mappa). Dura pochi minuti. Per una sola saga: `node tests/percorso.cjs <parte-del-nome>`. I test lunghi di capitolo restano `npm test` / `node tests/run.cjs <nome>`.
+
+## 🧯 Errori già visti (ripetuti da più IA)
+| Errore | Effetto | Correzione |
+|---|---|---|
+| `K.teleport(...)` nell'intro (Pugno, Galletta, Ave Calcio) | dopo «Inizia la storia» manca «Continua», niente mappa | intro = righe + `start:"zona"` |
+| `W` o altra variabile fuori scope in `bg-scenarios.js` | tutte le scene vuote | stare dentro la funzione di disegno |
+| Talk che usano `K` non passato | dialogo PNG muto | i talk ricevono `K` come parametro |
+| Dimenticare bump `?v=` / `sw.js` dopo il pull | telefoni con file vecchi | `node tools/bump.cjs <file>` dopo il pull |
+| Popup/toast che durano 3 s | testo non leggibile | ora automatico (4,5-12 s); non usare timer propri brevi |
+| `<b>` mostrato a schermo | simboli nel testo | ora supportato in `play()`; evita altri tag |
+| Pulsanti di uscita vicini ai tasti di gioco | tocchi per sbaglio | staccali e rendili meno evidenti |
+| Manifest in solo verticale | app non ruota | `orientation: any` (già fatto) |
 
 ---
 
