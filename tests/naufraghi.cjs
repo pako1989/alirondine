@@ -205,4 +205,15 @@ async function sogni(w) {
   else { const mx = await page.evaluate(() => { const S = window.__marea.state; return [S.mx, S.par.te, S.par.at]; }); if (!(mx[0] >= 3)) errors.push("bonus Marea: " + JSON.stringify(mx)); }
   L.check(`Squadra dei Sogni con i Naufraghi (${w} px)`, errors); await browser.close();
 }
-(async () => { await sogni(390); await marea(390); await marea(320); await c1(390); await c1(320); })().catch((e) => { console.error("✗ naufraghi:", e.stack); process.exit(1); });
+// cameo da altre saghe: compaiono solo se quella saga è stata giocata, su caselle libere, e parlano
+async function cameo(w) {
+  const extra = { "ali-di-rondine.razzo": { v: 1, ch: 2, step: {}, done: { 1: "x" }, ends: [], diffSet: true, flags: {} }, "ali-di-rondine.cavallo": { v: 1, ch: 2, step: {}, done: { 1: "x" }, ends: [], diffSet: true, flags: {} } };
+  const { browser, page, errors } = await L.setup({ w, extra, ...MOD });
+  await autoPag(page); await page.evaluate(() => window.__naufraghi.open()); await page.evaluate(() => window.T_.click("Inizia la storia")); await L.advance(page);
+  await clock(page, "giorno");
+  await L.talk(page, "rz_ferruccio"); await L.advance(page);
+  await page.evaluate((k) => eval(k).go("nf_laguna", 3, 11), K_); await page.waitForTimeout(500);
+  await L.talk(page, "cs_ugo"); await L.advance(page);
+  L.check(`Naufraghi del Pallone · ospiti di altre saghe (${w} px)`, errors); await browser.close();
+}
+(async () => { await cameo(390); await sogni(390); await marea(390); await marea(320); await c1(390); await c1(320); })().catch((e) => { console.error("✗ naufraghi:", e.stack); process.exit(1); });

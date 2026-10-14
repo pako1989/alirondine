@@ -186,7 +186,7 @@
       "nf_stadio:z:24,2": () => K.pagina("cocco", () => say([["voce", "Sulla cassa, appoggiato come un trofeo, c'è un pallone di cocco levigato dal mare, cucito con la fibra delle palme. Rotola meglio di quelli veri."]], done)),
     };
     return {
-      n: N, title: "Alta Marea", sub: "La scogliera, il cannocchiale, due verità, lo Stadio della Marea e la Partita Grande", goal, start: "nf_spiaggia", introBg: "nf_stadio", zones, talk, obj,
+      n: N, title: "Alta Marea", sub: "La scogliera, il cannocchiale, lo Stadio della Marea e la Partita Grande", goal, start: "nf_spiaggia", introBg: "nf_stadio", zones, talk, obj,
       intro: () => [["voce", "<b>NAUFRAGHI DEL PALLONE</b>. Episodio 3. L'ultima notte dell'isola: la marea è alta, il campo è pronto, e qualcuno, da qualche parte, ha già scelto la musica."], ["voce", "Nel registro di Gaspare, alla voce «Cose che sappiamo», c'è una riga sola: «Siamo qui»."]],
     };
   }
