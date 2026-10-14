@@ -34,7 +34,7 @@
     const zones = {
       gl_ponte: {
         region: "galeone", name: "Ponte del Galeone «Masticatore»", short: "Ponte Masticatore", sub: "Vele spiegate, timone di quercia e cannoni allineati", bg: "gl_porto", time: "giorno", travel: [6, 18],
-        w: 32, h: 22, start: [6, 18], items: [[3, 6], [28, 5], [16, 18]],
+        w: 32, h: 22, start: [7, 17], items: [[3, 6], [28, 5], [16, 17]],
         areas: [[10, 8, 22, 14, "Il ponte di comando centrale"], [0, 0, 31, 21, "Il Galeone Masticatore"]],
         flavor: {
           P: "La leva di comando della passerella basculante: azionandola il ponteggio mobile si allinea alla nave vicina.",

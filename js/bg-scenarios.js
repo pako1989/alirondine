@@ -2482,6 +2482,7 @@
   }
 
   // --- 16. S.O.S. GALLETTA · IL MOLO DELLA BISCOTTIERA ---
+  window.__glDraw = { get Porto() { return drawDetailedGallettaPorto; }, get Caracca() { return drawDetailedGallettaCaracca; }, get Arcipelago() { return drawDetailedGallettaArcipelago; } };
   function drawDetailedGallettaPorto(g, W, H, f) {
     // Cielo tropicale con sfumatura azzurra e riflessi d'oro
     const sky = g.createLinearGradient(0, 0, 0, 110);
@@ -4088,36 +4089,6 @@
           if (window.__ragnarokStory && window.__ragnarokStory.sfxHorn) window.__ragnarokStory.sfxHorn();
         } else {
           if (toast) toast("👑 Altare del Giudizio Divino: «Kara, Sigrid, Brokk e Ragnar attendono il tuo verdetto epico.»");
-        }
-      } else if (bg === "gl_porto" || bg === "gl_titolo") {
-        if (clickX < 90 && clickY > 90) {
-          if (toast) toast("🍞 Forno della Banchina: «Il calore diffonde profumo di crosta dorata e cannella in tutto il porto.»");
-        } else if (clickX > W * 0.55 && clickY < 95) {
-          if (toast) toast("🏴‍☠️ Galeone «Masticatore»: «Vele gonfie e stendardo col biscotto morsicato: pronto a salpare!»");
-        } else if (clickX > W - 70 && clickY > 120) {
-          if (toast) toast("🍯 Barili di Melassa: «Le riserve zuccherine dei bucanieri, cerchiate in ferro e cera rossa.»");
-        } else {
-          if (toast) toast("🌊 Molo della Biscottiera: «Le onde turchesi dell'Oceano della Melassa lambiscono le palafitte di quercia.»");
-        }
-      } else if (bg === "gl_caracca") {
-        if (Math.abs(clickX - W / 2) < 40 && Math.abs(clickY - 60) < 40) {
-          if (toast) toast("⚓ Oblò Panoramico: «Onde spumeggianti e spruzzi di mare visibili attraverso il cristallo di bronzo.»");
-        } else if (clickX < 60 && clickY > H - 80) {
-          if (toast) toast("🍯 Barili di Melassa Reale: «Riserve imperiali destinate alla tavola di Sua Maestà Pasticciera.»");
-        } else if (clickX > W - 60 && clickY > H - 50) {
-          if (toast) toast("🌾 Sacchi di Zucchero di Canna: «Semola finissima e vaniglia pregiata importata dall'Atollo.»");
-        } else {
-          if (toast) toast("🪵 Stiva della Caracca Reale: «Travi curve di mogano e una calda atmosfera di spezie e avventura.»");
-        }
-      } else if (bg === "gl_arcipelago") {
-        if (Math.abs(clickX - W / 2) < 50 && clickY > 60 && clickY < 120) {
-          if (toast) toast("🌋 Santuario del Gran Forno: «La bocca vulcanica primordiale che riscalda le acque dell'Atollo da secoli.»");
-        } else if (clickX > W * 0.65 && clickY > H - 60) {
-          if (toast) toast("🌴 Palma da Zucchero: «Fronde smeraldine che ondeggiano nel vento caldo del tramonto oceanico.»");
-        } else if (clickX < 80 || clickX > W - 80) {
-          if (toast) toast("🍪 Scogliere di Pietra Frollina: «Faraglioni dorati a foggia di biscotti spezzati dai flutti.»");
-        } else {
-          if (toast) toast("🌅 Atollo del Biscotto Spezzato: «Sabbia dorata e correnti calde all'ombra del Grande Forno.»");
         }
       }
     });
@@ -8216,6 +8187,30 @@
     },
   };
   window.__lbBg = { LB, since, S, register: (k, def) => { LB[k] = def; } };
+  // S.O.S. Galletta: scene dei menu con punti cliccabili visibili (scintille) e didascalia
+  [
+    ["gl_titolo", "Porto", [
+      [38, 95, 52, 42, "🍞 Forno della Banchina: il calore diffonde profumo di crosta dorata e cannella in tutto il porto."],
+      [185, 38, 72, 52, "🏴‍☠️ Galeone «Masticatore»: vele gonfie e stendardo col biscotto morsicato, pronto a salpare."],
+      [222, 118, 66, 48, "🍯 Barili di Melassa: le riserve zuccherine dei bucanieri, cerchiate in ferro e cera rossa."],
+      [100, 92, 80, 34, "🌊 Molo della Biscottiera: le onde turchesi dell'Oceano della Melassa lambiscono le palafitte di quercia."]
+    ]],
+    ["gl_caracca", "Caracca", [
+      [120, 20, 80, 80, "⚓ Oblò Panoramico: onde spumeggianti e spruzzi di mare visibili attraverso il cristallo di bronzo."],
+      [4, 118, 56, 76, "🍯 Barili di Melassa Reale: riserve imperiali destinate alla tavola di Sua Maestà Pasticciera."],
+      [262, 150, 54, 46, "🌾 Sacchi di Zucchero di Canna: semola finissima e vaniglia pregiata importata dall'Atollo."],
+      [80, 112, 150, 40, "🪵 Stiva della Caracca Reale: travi curve di mogano e calda aria di spezie e avventura."]
+    ]],
+    ["gl_arcipelago", "Arcipelago", [
+      [110, 60, 100, 60, "🌋 Santuario del Gran Forno: la bocca vulcanica primordiale che riscalda le acque dell'Atollo da secoli."],
+      [210, 140, 106, 56, "🌴 Palma da Zucchero: fronde smeraldine che ondeggiano nel vento caldo del tramonto."],
+      [2, 60, 76, 90, "🍪 Scogliere di Pietra Frollina: faraglioni dorati a foggia di biscotti spezzati dai flutti."],
+      [92, 128, 110, 50, "🌅 Atollo del Biscotto Spezzato: sabbia dorata e correnti calde all'ombra del Grande Forno."]
+    ]]
+  ].forEach(([k, n, hot]) => {
+    LB[k] = { draw: (g, W, H, f) => { const D = window.__glDraw; if (D && D[n]) D[n](g, W, H, f); else px(g, 0, 0, W, H, "#7c4a1d"); }, hot };
+  });
+  LB.gl_porto = LB.gl_titolo;
 
   function drawMarkers(g, k, f) {
     const def = LB[k]; if (!def || !def.hot) return;

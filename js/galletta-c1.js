@@ -40,7 +40,7 @@
     const zones = {
       gl_porto: {
         region: "porto", name: "Molo della Biscottiera", short: "Molo Biscottiera", sub: "Banchine di quercia, forni fumanti e gabbiani in volo", bg: "gl_porto", time: "giorno", travel: [5, 18],
-        w: 32, h: 22, start: [5, 18], items: [[2, 7], [29, 6], [14, 19]],
+        w: 32, h: 22, start: [5, 18], items: [[2, 7], [29, 7], [14, 19]],
         areas: [[10, 8, 22, 14, "Il centro della banchina di legno"], [0, 0, 31, 21, "Il Molo della Biscottiera"]],
         flavor: {
           B: "Un barile cerchiato di ferro ripieno di melassa scura profumata.",
