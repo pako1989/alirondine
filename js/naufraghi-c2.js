@@ -50,7 +50,7 @@
         w: 30, h: 20, start: [2, 10], items: [[3, 15], [26, 5]],
         areas: [[11, 3, 18, 9, "La torre"], [19, 9, 28, 16, "Il campo dei Gabbiani"], [0, 0, 29, 19, "Punta Cieca"]],
         flavor: { f: "Una staccionata ordinata: ogni asse è inchiodata con tre chiodi, non due. Chi l'ha costruita non ammette scorciatoie." },
-        doors: { "0,10": { to: "nf_laguna", at: [34, 10] }, "14,9": { to: "nf_radio", at: [7, 8], locked: (KK) => (KK.stepOf(2) < 4 ? "La porta del faro è chiusa. Sul legno, una targhetta di ottone: «SI ENTRA DOPO AVER GIOCATO»." : false) } },
+        doors: { "29,5": { to: "nf_scogliera", at: [1, 10], locked: (KK) => (KK.mem().ch < 3 ? "Un sentiero sale verso nord-est, fra gli scogli. Per ora non c'è motivo di andarci: la Voce non ha ancora detto dove." : false) }, "0,10": { to: "nf_laguna", at: [34, 10] }, "14,9": { to: "nf_radio", at: [7, 8], locked: (KK) => (KK.stepOf(2) < 4 ? "La porta del faro è chiusa. Sul legno, una targhetta di ottone: «SI ENTRA DOPO AVER GIOCATO»." : false) } },
         intro: [["voce", "Punta Cieca: una lingua di scoglio bianco di sale, con il faro nel mezzo come un faro vero che fa il faro sul serio. A est, un campo di tende ordinatissime, fuochi spenti con cura e una lavagna."], ["voce", "In cima, la luce gira. Da vicino, si sente anche un rumore: un fruscio continuo, come di una radio sintonizzata sul mare."]],
         npcs: (s) => [{ id: "nf_fiorenzo", at: [11, 10] }, { id: "nf_scoglio", at: [19, 11] }],
         build(L) {
@@ -60,7 +60,7 @@
           lay(20, 9, 28, 9, "f"); lay(20, 16, 28, 16, "f"); lay(28, 10, 28, 15, "f"); put(21, 10, "n");
           [[23, 12], [25, 13], [22, 14], [26, 11]].forEach(([x, y]) => put(x, y, "z")); [[20, 12], [20, 14]].forEach(([x, y]) => put(x, y, "l"));
           [[2, 5], [5, 7], [4, 13], [8, 15], [9, 5], [26, 4], [24, 7], [3, 16]].forEach(([x, y]) => put(x, y, "t"));
-          put(27, 5, ","); put(26, 5, ",");
+          lay(24, 5, 28, 5, ":"); put(29, 5, "J");
         },
       },
       nf_radio: {

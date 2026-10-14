@@ -103,7 +103,54 @@ async function c1(w) {
   await L.talk(page, "nf_fiorenzo"); await L.advance(page); await L.talk(page, "nf_tobia"); await L.advance(page);
   await L.goAct(page, 7, 2); await L.advance(page, [/Cosa ti serve/]);
   { const i = await info(page); if (!i.done[2] || i.done[2] !== "ascolto" || i.step[2] !== 5 || i.ch !== 3) errors.push("capitolo 2 non concluso: " + JSON.stringify([i.done, i.step, i.ch])); }
-  L.check(`Naufraghi del Pallone · capitoli 1 e 2 (${w} px)`, errors); await browser.close();
+  // ------------------------------------------------------------ capitolo 3
+  await page.evaluate(() => window.T_.click("Inizia il Capitolo 3")); await L.advance(page);
+  const chk3 = async (n, why) => { const st = await step(); if ((st[3] || 0) !== n) errors.push(why + ": step " + JSON.stringify(st)); };
+  await clock(page, "giorno");
+  await L.talk(page, "nf_bora"); await L.advance(page); await chk3(1, "Bora cap.3");
+  await L.talk(page, "nf_gaspare"); await L.advance(page, [/Costruiamola/]);
+  if (!(await page.evaluate((k) => eval(k).F.is("nf_zattera"), K_))) errors.push("zattera non registrata");
+  await L.talk(page, "nf_salvi"); await L.advance(page);
+  await L.goAct(page, 33, 12); await L.advance(page); await L.goAct(page, 29, 10); await L.advance(page);
+  await clock(page, "giorno"); await page.waitForTimeout(800);
+  await L.goAct(page, 35, 10); await L.advance(page); await clock(page, "giorno");
+  await L.goAct(page, 23, 12); await L.advance(page);
+  await L.goAct(page, 29, 5); await L.advance(page); if ((await L.zone(page)) !== "nf_scogliera") errors.push("non si va alla scogliera: " + (await L.zone(page)));
+  await clock(page, "giorno");
+  { const bad = await reachMondo(page, "nf_scogliera"); if (bad.length) errors.push("nf_scogliera irraggiungibile: " + bad.join(", ")); }
+  if (w === 390) await L.shot(page, "nf_scogliera");
+  await L.goAct(page, 29, 15); await L.advance(page); if ((await L.zone(page)) !== "nf_scogliera") errors.push("lo stadio si apre troppo presto");
+  await L.talk(page, "nf_bora"); await L.advance(page); await L.talk(page, "nf_scoglio"); await L.advance(page); await chk3(1, "Scoglio prima del cannocchiale");
+  await L.goAct(page, 14, 4); await L.advance(page); await chk3(2, "dopo il cannocchiale");
+  await L.talk(page, "nf_bora"); await L.advance(page); await L.talk(page, "nf_scoglio"); await L.advance(page); await chk3(3, "dopo la verità di Scoglio");
+  await L.goAct(page, 29, 15); await L.advance(page); if ((await L.zone(page)) !== "nf_stadio") errors.push("non si arriva allo stadio: " + (await L.zone(page)));
+  await clock(page, "giorno");
+  { const bad = await reachMondo(page, "nf_stadio"); if (bad.length) errors.push("nf_stadio irraggiungibile: " + bad.join(", ")); }
+  if (w === 390) await L.shot(page, "nf_stadio");
+  for (const id of ["nf_scoglio", "nf_bora", "nf_tobia", "nf_salvi", "nf_gaspare", "nf_fiorenzo"]) { await L.talk(page, id); await L.advance(page); }
+  await L.goAct(page, 24, 2); await L.advance(page);
+  await page.evaluate(() => { window.__W = false; window.__marea.start = (o) => { window.__mo = o; setTimeout(() => o.onDone({ a: window.__W ? 2 : 0, b: window.__W ? 1 : 2, win: window.__W, quit: false, data: {} }), 30); return true; }; });
+  await L.goAct(page, 17, 2); await L.advance(page, [/Giochiamo la Partita Grande/]); await chk3(3, "finale persa");
+  await page.evaluate(() => { window.__W = true; });
+  await L.goAct(page, 17, 2); await L.advance(page, [/Giochiamo la Partita Grande/, /Riportaci a casa/]);
+  { const i = await info(page); if (i.done[3] !== "rotta" || !i.ends.includes("rotta") || i.step[3] !== 9) errors.push("finale rotta non registrato: " + JSON.stringify([i.done, i.ends, i.step])); }
+  // gli altri finali: stesse partenze, condizioni diverse
+  const finale = async (kind, setup, pref) => {
+    await page.evaluate(([k, setup]) => { const K = eval(k); K.setStep(3, 4); K.F.set("nf_finale_vinta", true); eval(setup); K.enterZone("nf_stadio"); }, [K_, setup]);
+    await page.waitForTimeout(500); await clock(page, "giorno");
+    await L.goAct(page, 17, 2); await L.advance(page, [pref]);
+    const i = await info(page); if (!i.ends.includes(kind) || i.done[3] !== kind) errors.push("finale " + kind + " non registrato: " + JSON.stringify([i.done, i.ends]));
+  };
+  await finale("custodi", "K.bond('voce', 20)", /teniamo accesa/);
+  await finale("squadra", "K.bond('rispetto', 30); K.F.set('nf_con_scoglio', true)", /tutti insieme/);
+  await finale("lunga", "K.bond('voce', 40); { const r = K.api.trRec(); r.got = r.got || {}; Object.keys(K.api.TRZ).forEach((z) => { if (/^nf_/.test(z)) r.got[z] = (K.api.TRZ[z].items || []).map((_, i) => i); } ); }", /Portaci a casa/);
+  { const sc = await page.evaluate((k) => eval(k).conchiglie(), K_); if (!sc[1] || sc[0] !== sc[1]) errors.push("conta conchiglie: " + JSON.stringify(sc)); }
+  await page.evaluate(([k]) => { const K = eval(k); K.setStep(3, 4); K.enterZone("nf_stadio"); }, [K_]);
+  await page.evaluate(([k]) => { const K = eval(k); K.setStep(3, 3); K.F.set("nf_zattera", true); K.enterZone("nf_stadio"); }, [K_]);
+  await page.waitForTimeout(500); await clock(page, "giorno");
+  await L.goAct(page, 17, 2); await L.advance(page, [/zattera di Gaspare/]);
+  { const i = await info(page); if (!i.ends.includes("zattera") || i.ends.length !== 5) errors.push("finale zattera: " + JSON.stringify(i.ends)); }
+  L.check(`Naufraghi del Pallone · tre capitoli e cinque finali (${w} px)`, errors); await browser.close();
 }
 // il motore Marea: regole, comandi veri (tocco, trascinamento, pedana), tastiera, partita intera a pilota automatico, fine
 async function marea(w) {

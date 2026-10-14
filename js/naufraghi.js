@@ -83,7 +83,7 @@
       interno: { grass: ["#cdb58a", "#c6ae82", "#d3bc92"], path: ["#b49c70", "#ab9368"], stone: ["#a8a094", "#9e968a"], wall: ["#6b5a46", "#5f4f3d"], water: ["#2fa6c4", "#3db2cc"], tall: "#8a8a6a", tint: "255,214,160", tintA: 0.08, fx: "dust", dark: 0.04 },
       stadio: { grass: ["#e1d0a2", "#dbc99a", "#e7d6a9"], path: ["#bfae84", "#b5a47a"], stone: ["#c8b98f", "#bfb085"], wall: ["#8d7b5a", "#816f50"], water: ["#35b8c8", "#46c4d2"], tall: "#6fae52", tree: ["#2f7a3a", "#3f9a48", "#6cc35a"], tint: "255,232,180", tintA: 0.07, fx: "", dark: 0.02 },
     },
-    floors: "kmh", solid: "AEJRFCS",
+    floors: "kmh", solid: "AEJRFCSV",
     // il campo di pietra del Stadio della Marea: cella dopo cella, con le righe scavate
     floorPaint(K, f, sx, sy, tx, ty) {
       if (f !== "-") return false;
@@ -119,7 +119,7 @@
     heroLook: () => ({ bg: ["#ccfbf1", "#14b8a6"] }),
     heroTitle: (K) => (K.stat("fiducia") > 50 ? "il naufrago su cui tutti contano" : "il naufrago più curioso dell'isola"),
     act: {
-      q: "Entra", n: "Leggi il cartello", A: "Guarda il relitto", R: "Ascolta la radio", F: "Guarda il faro", J: "Vai", C: "Guarda", S: "Guarda la statua", E: "Guarda",
+      q: "Entra", n: "Leggi il cartello", A: "Guarda il relitto", R: "Ascolta la radio", F: "Guarda il faro", J: "Vai", C: "Guarda", S: "Guarda la statua", E: "Guarda", V: "Guarda col cannocchiale",
       t: "Guarda la palma", z: "Guarda le casse", g: "Guarda la porta di legno", l: "Guarda la torcia", f: "Guarda la staccionata", b: "Siediti sul tronco", "^": "Cambia zona", v: "Esci", "<": "Cambia zona", ">": "Cambia zona"
     },
     plugins: [{
@@ -207,6 +207,13 @@
         g.fillStyle = night ? "#164e63" : "#7c8c8a"; g.beginPath(); g.ellipse(sx + 8, sy + 9, 6.5, 5, 0, 0, 7); g.fill();
         g.fillStyle = night ? `rgba(110,255,230,${0.5 + 0.35 * pu})` : "rgba(255,255,255,.22)"; g.beginPath(); g.ellipse(sx + 8, sy + 8, 5, 3.6, 0, 0, 7); g.fill();
         if (night) { K.light(sx + 8, sy + 8, 22, "80,255,215", 0.5 * pu + 0.15); g.fillStyle = "rgba(220,255,250,.9)"; g.fillRect(sx + 6, sy + 7, 2, 1); }
+      },
+      // il cannocchiale della scogliera: un treppiede di ottone puntato lontano
+      V(K, sx, sy, tx, ty, fr) {
+        K.ground(sx, sy, tx, ty); K.shadow(sx, sy, 6); const g = K.g, P = K.P;
+        g.strokeStyle = "#6b4a2a"; g.lineWidth = 1.6; g.beginPath(); g.moveTo(sx + 8, sy + 8); g.lineTo(sx + 3, sy + 15); g.moveTo(sx + 8, sy + 8); g.lineTo(sx + 13, sy + 15); g.moveTo(sx + 8, sy + 8); g.lineTo(sx + 8, sy + 15); g.stroke();
+        g.save(); g.translate(sx + 8, sy + 7); g.rotate(-0.35); P(-7, -2, 14, 4, "#b8892e"); P(-7, -2, 14, 1, "#e6c46a"); P(5, -3, 4, 6, "#8a6420"); P(-9, -1, 2, 2, "#cde7f0"); g.restore();
+        if (Math.floor(fr / 40) % 3 === 0) P(sx + 12, sy + 3, 1, 1, "#fff");
       },
       // fusoliera dell'aereo: bianca con la riga blu, finestrini, un pezzo mancante
       A(K, sx, sy, tx, ty) {
