@@ -1058,6 +1058,7 @@
     if (c.style === "criniera") { g.beginPath(); g.ellipse(0, -11, 22, 14, 0, Math.PI, 0); g.fill(); g.beginPath(); g.moveTo(-6, -24); g.quadraticCurveTo(10, -46, 30, -30); g.quadraticCurveTo(36, -10, 30, 20); g.quadraticCurveTo(26, 34, 32, 44); g.quadraticCurveTo(18, 36, 20, 16); g.quadraticCurveTo(22, -6, 12, -18); g.closePath(); g.fill(); g.fillStyle = "rgba(255,255,255,.18)"; g.fillRect(20, -24, 3, 30); g.fillStyle = c.hair; }
     if (c.style === "colbacco") { g.beginPath(); g.roundRect ? g.roundRect(-24, -36, 48, 26, 6) : g.rect(-24, -36, 48, 26); g.fill(); g.fillStyle = "rgba(255,255,255,.25)"; g.fillRect(-22, -18, 44, 8); g.fillStyle = c.hair; }
     if (c.style === "coppola") { g.beginPath(); g.roundRect ? g.roundRect(-24, -32, 48, 20, 6) : g.rect(-24, -32, 48, 20); g.fill(); g.fillStyle = "rgba(0,0,0,.25)"; g.fillRect(-24, -14, 48, 4); g.fillStyle = c.hair; }
+    if (c.style === "palma") { g.beginPath(); g.ellipse(0, -11, 22, 14, 0, Math.PI, 0); g.fill(); for (let k = 0; k < 5; k++) { const a = -Math.PI / 2 + (k - 2) * 0.55; g.fillStyle = k % 2 ? "#15803d" : "#22a14a"; g.save(); g.translate(Math.cos(a) * 6, -24 + Math.sin(a) * 6); g.rotate(a); g.beginPath(); g.ellipse(9, 0, 11, 3.2, 0, 0, 7); g.fill(); g.restore(); } g.fillStyle = c.hair; }
     if (c.style === "alloro") { g.beginPath(); g.ellipse(0, -11, 22, 14, 0, Math.PI, 0); g.fill(); for (let k = 0; k < 9; k++) { const a = Math.PI * (1.08 + k * 0.105); g.fillStyle = "#15803d"; g.beginPath(); g.ellipse(Math.cos(a) * 22, -10 + Math.sin(a) * 17, 4, 2, a, 0, 7); g.fill(); } px(-3, -24, 6, 3, "#ca8a04"); g.fillStyle = c.hair; }
     if (c.style === "antenne") { g.beginPath(); g.ellipse(0, -11, 22, 14, 0, Math.PI, 0); g.fill(); g.lineWidth = 4; g.lineCap = "round"; g.strokeStyle = c.hair; [-1, 1].forEach((d) => { g.beginPath(); g.moveTo(d * 6, -22); g.quadraticCurveTo(d * 9, -40, d * 18, -44); g.stroke(); g.beginPath(); g.arc(d * 18, -44, 4.5, 0, 7); g.fill(); }); g.lineCap = "butt"; }
     if (c.style === "scodella") { g.beginPath(); g.ellipse(0, -13, 23, 16, 0, Math.PI, 0); g.fill(); g.fillRect(-23, -13, 46, 7); g.fillStyle = "rgba(0,0,0,.15)"; g.fillRect(-23, -7, 46, 1.5); g.fillStyle = c.hair; }
@@ -3932,6 +3933,7 @@
     hs_colbacco: { kind: "style", label: "Colbacco alpino", val: "colbacco", from: "Finisci la saga «Piccolo Borgo di Montagna» (un finale qualsiasi)" },
     hs_cowboy: { kind: "style", label: "Cappello da pistolero", val: "cowboy", from: "Finisci la saga «Per un pugno di rigori» (un finale qualsiasi)" },
     hs_coppola: { kind: "style", label: "Coppola dei Soliti Ignoti", val: "coppola", from: "Finisci la saga «La Notte dei Cento Rintocchi» (un finale qualsiasi)" },
+    hs_palma: { kind: "style", label: "Ciuffo a palma", val: "palma", from: "Finisci la saga «Naufraghi del Pallone» (un finale qualsiasi)" },
     hs_alloro: { kind: "style", label: "Corona d'Alloro", val: "alloro", from: "Finisci la saga «Ave Calcio! · I Gladiatori del Pallone» (un finale qualsiasi)" },
     hs_antenne: { kind: "style", label: "Ciuffi ad antenna", val: "antenne", from: "Finisci la saga «Razzopacco · Consegne dal Futuro» (un finale qualsiasi)" },
     hs_scodella: { kind: "style", label: "Taglio a scodella", val: "scodella", from: "Finisci la saga «Gli Straordinari di Quartiere» (un finale qualsiasi)" },
@@ -4298,6 +4300,7 @@
     if (c.style === "criniera") { px(x - 5, y - 26, 10, 3, hair); px(dir === "left" ? x - 7 : x + 4, y - 26, 3, 14, hair); }
     if (c.style === "colbacco") { px(x - 6, y - 28, 12, 6, hair); px(x - 5, y - 24, 10, 2, "#e2e8f0"); }
     if (c.style === "coppola") { px(x - 7, y - 27, 14, 5, hair); px(x - 6, y - 24, 12, 2, "#1c1917"); }
+    if (c.style === "palma") { px(x - 5, y - 26, 10, 3, hair); px(x - 8, y - 30, 4, 2, "#22a14a"); px(x - 3, y - 33, 3, 4, "#15803d"); px(x + 1, y - 33, 3, 4, "#22a14a"); px(x + 5, y - 30, 4, 2, "#15803d"); }
     if (c.style === "alloro") { px(x - 7, y - 27, 14, 5, hair); px(x - 6, y - 24, 12, 2, "#15803d"); }
     if (c.style === "antenne") { px(x - 5, y - 27, 1, 4, hair); px(x + 4, y - 27, 1, 4, hair); px(x - 6, y - 28, 2, 2, hair); px(x + 4, y - 28, 2, 2, hair); }
     if (c.style === "scodella") { px(x - 6, y - 24, 12, 4, hair); px(x - 6, y - 21, 1, 3, hair); px(x + 5, y - 21, 1, 3, hair); }
@@ -5226,9 +5229,9 @@
 
   // ================= CREA IL TUO CAMPIONE =================
   const HERO = "ali-di-rondine.campione";
-  const H_STYLES = { spiky: "Spettinati", messy: "Ribelli", buzz: "Rasati", slick: "Tirati indietro", long: "Lunghi", bun: "Chignon", bob: "Caschetto", ponytail: "Coda", twintails: "Codini", braids: "Trecce", curly: "Ricci", side: "Riga di lato", ordinato: "Ordinati", bandana: "Bandana", colbacco: "Colbacco", cowboy: "Pistolero", coppola: "Coppola", alloro: "Corona d'Alloro" };
+  const H_STYLES = { palma: "Ciuffo a palma", spiky: "Spettinati", messy: "Ribelli", buzz: "Rasati", slick: "Tirati indietro", long: "Lunghi", bun: "Chignon", bob: "Caschetto", ponytail: "Coda", twintails: "Codini", braids: "Trecce", curly: "Ricci", side: "Riga di lato", ordinato: "Ordinati", bandana: "Bandana", colbacco: "Colbacco", cowboy: "Pistolero", coppola: "Coppola", alloro: "Corona d'Alloro" };
   // le acconciature delle saghe: finire una saga (almeno un finale) sblocca la sua acconciatura nel guardaroba
-  const HAIR_SAGA = { hs_afro: "torneo", hs_dread: "dopo", hs_undercut: "spazio", hs_pompadour: "mantello", hs_mullet: "stagione", hs_wavy: "cronache", hs_messybun: "vento", hs_topknot: "mondi", hs_sidebraid: "trono", hs_spacebuns: "lampioni", hs_corona: "ducati", hs_ciuffo: "grigio", hs_cometa: "titano", hs_scodella: "quartiere", hs_antenne: "razzo", hs_criniera: "cavallo", hs_colbacco: "montagna", hs_cowboy: "pugno", hs_coppola: "campana", hs_alloro: "roma" };
+  const HAIR_SAGA = { hs_afro: "torneo", hs_dread: "dopo", hs_undercut: "spazio", hs_pompadour: "mantello", hs_mullet: "stagione", hs_wavy: "cronache", hs_messybun: "vento", hs_topknot: "mondi", hs_sidebraid: "trono", hs_spacebuns: "lampioni", hs_corona: "ducati", hs_ciuffo: "grigio", hs_cometa: "titano", hs_scodella: "quartiere", hs_antenne: "razzo", hs_criniera: "cavallo", hs_colbacco: "montagna", hs_cowboy: "pugno", hs_coppola: "campana", hs_alloro: "roma", hs_palma: "naufraghi" };
   function hairUnlocks() {
     Object.keys(HAIR_SAGA).forEach((id) => { try { const m = JSON.parse(localStorage.getItem("ali-di-rondine." + HAIR_SAGA[id]) || "null"); if (m && Array.isArray(m.ends) && m.ends.length && COSM[id] && bCos(id) && window.toast) window.toast("Nuova acconciatura: " + COSM[id].label.replace(/^Taglio (a )?/, ""), "info", "✂️"); } catch {} });
   }
@@ -11764,6 +11767,7 @@
     if (base.style === "criniera") { px(-5, -31 + by, 10, 3, hair); px(4, -30 + by, 3, 14, hair); }
     if (base.style === "colbacco") { px(-6, -33 + by, 12, 6, hair); px(-5, -29 + by, 10, 2, "#e2e8f0"); }
     if (base.style === "coppola") { px(-7, -32 + by, 14, 5, hair); px(-6, -29 + by, 12, 2, "#1c1917"); }
+    if (base.style === "palma") { px(-5, -31 + by, 10, 3, hair); px(-8, -35 + by, 4, 2, "#22a14a"); px(-3, -38 + by, 3, 4, "#15803d"); px(1, -38 + by, 3, 4, "#22a14a"); px(5, -35 + by, 4, 2, "#15803d"); }
     if (base.style === "alloro") { px(-7, -32 + by, 14, 5, hair); px(-6, -29 + by, 12, 2, "#15803d"); }
     if (base.style === "antenne") { px(-5, -33 + by, 1, 5, hair); px(4, -33 + by, 1, 5, hair); px(-6, -34 + by, 2, 2, hair); px(4, -34 + by, 2, 2, hair); }
     if (base.style === "scodella") px(-6, -29 + by, 12, 4, hair);

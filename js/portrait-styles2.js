@@ -251,7 +251,7 @@
     if (!NEW[style]) return draw0(style, g, id, c, expr);
     if (!c || !c.skin) return false; if (c.cap && typeof c.cap !== "string") c = Object.assign({}, c, { cap: "#1d3fa3" });
     // le acconciature nuove (afro, dreadlock, undercut, ciuffo, mullet, onde, chignon spettinato, crocchia, treccia di lato, due chignon): base + pezzi dietro e davanti
-    const st0 = ALIAS[c.style] || c.style, NB = { afro: "buzz", dread: "buzz", undercut: "slick", pompadour: "slick", mullet: "messy", wavy: "long", messybun: "bun", topknot: "buzz", sidebraid: "slick", spacebuns: "buzz", corona: "slick", ciuffo: "slick", cometa: "buzz", scodella: "buzz", antenne: "buzz", criniera: "slick" }[st0];
+    const st0 = ALIAS[c.style] || c.style, NB = { afro: "buzz", dread: "buzz", undercut: "slick", pompadour: "slick", mullet: "messy", wavy: "long", messybun: "bun", topknot: "buzz", sidebraid: "slick", spacebuns: "buzz", corona: "slick", ciuffo: "slick", cometa: "buzz", scodella: "buzz", antenne: "buzz", criniera: "slick", palma: "buzz" }[st0];
     g.save(); try { if (NB && FS.hairOver && !c.cap) FS.hairOver(g, st0, c, "back"); NEW[style](g, id, NB ? Object.assign({}, c, { style: NB }) : c, expr); if (NB && FS.hairOver && (!c.cap || st0 === "sidebraid")) FS.hairOver(g, st0, c, "front"); } catch (e) { g.restore(); return false; } g.restore(); return true;
   };
   FS.__v2 = true; FS.NEW = Object.keys(NEW);
