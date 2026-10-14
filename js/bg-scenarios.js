@@ -8600,3 +8600,142 @@
     return typeof prev === "function" ? prev.apply(this, arguments) : false;
   };
 })();
+
+// ============================================================ «Naufraghi del Pallone»: sette sfondi ad acquerello tropicale
+// Il cielo, il mare e le luci seguono l'orologio dell'isola (giorno · tramonto · notte): di notte il mare si accende di plancton.
+(function () {
+  "use strict";
+  const R = window.__lbBg; if (!R || !R.register) return;
+  const px = (g, x, y, w, h, c) => { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); };
+  const circ = (g, x, y, r, c) => { g.fillStyle = c; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); };
+  const ell = (g, x, y, rx, ry, c) => { g.fillStyle = c; g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, 7); g.fill(); };
+  const vg = (g, x, y, w, h, st) => { const gr = g.createLinearGradient(0, y, 0, y + h); st.forEach((s, i) => gr.addColorStop(i / (st.length - 1), s)); g.fillStyle = gr; g.fillRect(x, y, w, h); };
+  const glow = (g, x, y, r, rgb, a) => { const gr = g.createRadialGradient(x, y, 1, x, y, r); gr.addColorStop(0, `rgba(${rgb},${a})`); gr.addColorStop(1, `rgba(${rgb},0)`); g.save(); g.globalCompositeOperation = "lighter"; g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2); g.restore(); };
+  const rnd = (n) => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+  const fase = () => { try { const c = window.__naufraghi && window.__naufraghi.clock; const f = c && c.fase(); return f === "notte" || f === "tramonto" || f === "alba" ? f : "giorno"; } catch (e) { return "giorno"; } };
+  const SKY = { giorno: ["#5cc4f0", "#a8e2f8", "#fdf2c8"], alba: ["#7aa6e0", "#f6b8a0", "#fde9b8"], tramonto: ["#5b3f9a", "#e8788a", "#ffc070"], notte: ["#050a22", "#10204a", "#27386e"] };
+  const SEA = { giorno: ["#2cc4d4", "#0e8fb0"], alba: ["#4aa8c0", "#2a7aa0"], tramonto: ["#c8607a", "#4a3a8a"], notte: ["#0a2a50", "#06183a"] };
+  const SAND = { giorno: ["#f4e3a8", "#dcc78a"], alba: ["#eed7a8", "#cfb98a"], tramonto: ["#e8b887", "#b88a68"], notte: ["#4a4a6a", "#34344f"] };
+  function sky(g, W, hz, ph, f) {
+    vg(g, 0, 0, W, hz + 2, SKY[ph]);
+    if (ph === "notte") { for (let i = 0; i < 46; i++) { const a = 0.35 + 0.65 * Math.abs(Math.sin(f / 30 + i * 2.1)); px(g, rnd(i) * W, rnd(i + 90) * (hz - 8), 1, 1, `rgba(255,255,240,${a})`); } circ(g, 268, 28, 11, "#f5f2da"); circ(g, 272, 25, 10, "#10204a"); glow(g, 268, 28, 40, "190,210,255", 0.25); }
+    else if (ph === "tramonto" || ph === "alba") { circ(g, 226, hz - 12, 17, "#ffe7a0"); glow(g, 226, hz - 12, 70, "255,170,90", 0.45); }
+    else { circ(g, 262, 26, 13, "#fff6c4"); glow(g, 262, 26, 52, "255,240,170", 0.4); }
+    if (ph !== "notte") for (let i = 0; i < 5; i++) { const cx = (rnd(i + 5) * (W + 90) + f * (0.08 + rnd(i) * 0.06)) % (W + 90) - 45, cy = 14 + rnd(i + 12) * (hz * 0.5); ell(g, cx, cy, 24, 5, ph === "giorno" ? "rgba(255,255,255,.75)" : "rgba(255,210,190,.55)"); ell(g, cx + 12, cy - 3, 14, 4, ph === "giorno" ? "rgba(255,255,255,.8)" : "rgba(255,200,180,.55)"); }
+  }
+  function sea(g, W, y0, y1, ph, f) {
+    vg(g, 0, y0, W, y1 - y0, SEA[ph]);
+    for (let i = 0; i < 34; i++) { const y = y0 + 3 + rnd(i) * (y1 - y0 - 4), x = (rnd(i + 40) * W + f * (0.2 + rnd(i + 3) * 0.3)) % (W + 30) - 15, l = 8 + rnd(i + 9) * 16; px(g, x, y, l, 1, ph === "notte" ? "rgba(120,255,230,.25)" : ph === "tramonto" ? "rgba(255,200,170,.35)" : "rgba(255,255,255,.35)"); }
+    if (ph === "notte") for (let i = 0; i < 26; i++) { const a = 0.25 + 0.7 * Math.abs(Math.sin(f / 26 + i * 1.9)), x = rnd(i + 70) * W, y = y0 + 4 + rnd(i + 21) * (y1 - y0 - 6); px(g, x, y, 2, 2, `rgba(110,255,225,${a})`); glow(g, x + 1, y + 1, 7, "90,255,220", a * 0.35); }
+  }
+  function palm(g, x, y, h, lean, ph, f, s) {
+    const sw = Math.sin(f / 40 + x) * 2; g.strokeStyle = ph === "notte" ? "#2a2238" : "#7a5a38"; g.lineWidth = 3; g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + lean * 0.4, y - h * 0.5, x + lean, y - h); g.stroke();
+    const tx = x + lean, ty = y - h, col = ph === "notte" ? ["#12402f", "#0d3324"] : ph === "tramonto" ? ["#3a7a4a", "#2a5a3a"] : ["#2fa557", "#1f7d42"];
+    for (let i = 0; i < 7; i++) { const a = -Math.PI + i * (Math.PI / 6) + (s || 0) * 0.1, L = 22 + (i % 2) * 4; g.strokeStyle = col[i % 2]; g.lineWidth = 3; g.beginPath(); g.moveTo(tx, ty); g.quadraticCurveTo(tx + Math.cos(a) * L * 0.6, ty + Math.sin(a) * L * 0.4 - 6 + sw * 0.4, tx + Math.cos(a) * L + sw, ty + Math.sin(a) * L * 0.5 + 8); g.stroke(); }
+    circ(g, tx - 2, ty + 2, 2, "#5a3a1e"); circ(g, tx + 2, ty + 3, 2, "#5a3a1e");
+  }
+  function fire(g, x, y, f) { glow(g, x, y - 4, 40, "255,150,60", 0.5 + 0.1 * Math.sin(f / 4)); px(g, x - 8, y + 2, 16, 3, "#3a2a1a"); px(g, x - 5, y, 10, 3, "#5a3a22"); for (let i = 0; i < 4; i++) { const h = 7 + 3 * Math.sin(f / 3 + i * 2), w = 6 - i; ell(g, x - 3 + i * 2, y - h / 2, w / 2, h / 2, i % 2 ? "#ffd24a" : "#ff7a2a"); } }
+  function beam(g, cx, cy, f, len, ph) { const a = f / 55; g.save(); g.globalCompositeOperation = "lighter"; const k = Math.cos(a); const dir = k > 0 ? 1 : -1, wid = Math.abs(k); const gr = g.createLinearGradient(cx, cy, cx + dir * len, cy); gr.addColorStop(0, `rgba(255,245,190,${(ph === "notte" ? 0.55 : 0.22) * wid})`); gr.addColorStop(1, "rgba(255,245,190,0)"); g.fillStyle = gr; g.beginPath(); g.moveTo(cx, cy - 2); g.lineTo(cx + dir * len, cy - 14 * wid - 3); g.lineTo(cx + dir * len, cy + 14 * wid + 3); g.lineTo(cx, cy + 2); g.fill(); g.restore(); glow(g, cx, cy, 16, "255,240,170", ph === "notte" ? 0.6 : 0.25); }
+  function plane(g, x, y, ph) { // la coda dell'aereo piantata nella sabbia
+    g.save(); g.translate(x, y); g.rotate(-0.28); px(g, -34, -6, 60, 18, ph === "notte" ? "#5a6a86" : "#e8eef6"); px(g, -34, 6, 60, 3, "#3b82f6"); px(g, -34, -6, 60, 2, "#fff"); for (let i = 0; i < 6; i++) px(g, -26 + i * 8, -2, 4, 4, ph === "notte" ? "#fde68a" : "#7dd3fc");
+    g.fillStyle = ph === "notte" ? "#5a6a86" : "#e8eef6"; g.beginPath(); g.moveTo(24, -6); g.lineTo(40, -34); g.lineTo(46, -34); g.lineTo(40, 12); g.lineTo(24, 12); g.fill(); g.fillStyle = "#3b82f6"; g.beginPath(); g.moveTo(34, -20); g.lineTo(42, -34); g.lineTo(46, -34); g.lineTo(42, -14); g.fill(); g.restore();
+  }
+  const MIDOT = "255,255,255";
+  // ---------------------------------------------------------------- titolo
+  function titolo(g, W, H, f) {
+    const ph = "tramonto", hz = 112; sky(g, W, hz, ph, f); sea(g, W, hz, H, ph, f);
+    for (let i = 0; i < 6; i++) px(g, 168 + i * 6 + Math.sin(f / 20 + i) * 3, hz + 3 + i * 5, 44 - i * 6, 1, "rgba(255,225,170,.5)");
+    ell(g, 82, 124, 96, 20, "#2a1f3a"); ell(g, 82, 118, 80, 14, "#33284a"); ell(g, 104, 130, 74, 6, "rgba(255,255,255,.1)");
+    palm(g, 54, 118, 40, -10, "tramonto", f, 0); palm(g, 84, 114, 50, 8, "tramonto", f, 1); palm(g, 118, 120, 34, 14, "tramonto", f, 2);
+    plane(g, 94, 124, ph);
+    ell(g, 268, 128, 26, 7, "#241a3a"); px(g, 265, 106, 6, 22, "#d8d0d8"); px(g, 264, 104, 8, 3, "#8a3a3a"); beam(g, 268, 100, f, 90, "notte");
+    for (let i = 0; i < 3; i++) { const bx = (f * 0.4 + i * 90) % 360 - 20, by = 40 + i * 12 + Math.sin(f / 18 + i) * 3; g.strokeStyle = "#2a1f3a"; g.lineWidth = 1.2; g.beginPath(); g.moveTo(bx - 4, by); g.quadraticCurveTo(bx - 2, by - 3, bx, by); g.quadraticCurveTo(bx + 2, by - 3, bx + 4, by); g.stroke(); }
+    ell(g, 160, 186, 200, 20, "rgba(40,20,60,.35)");
+  }
+  // ---------------------------------------------------------------- spiaggia
+  function spiaggia(g, W, H, f) {
+    const ph = fase(), hz = 84; sky(g, W, hz, ph, f); sea(g, W, hz, 118, ph, f);
+    for (let i = 0; i < 5; i++) { const y = 106 + i * 2 + Math.sin(f / 22 + i) * 1.5; px(g, 0, y, W, 1, "rgba(255,255,255,.55)"); }
+    vg(g, 0, 118, W, 82, SAND[ph]); for (let i = 0; i < 80; i++) px(g, rnd(i) * W, 120 + rnd(i + 4) * 78, 2, 1, ph === "notte" ? "rgba(255,255,255,.07)" : "rgba(120,90,50,.12)");
+    plane(g, 70, 150, ph); palm(g, 22, 150, 56, -14, ph, f, 0); palm(g, 292, 146, 62, 12, ph, f, 1); palm(g, 248, 130, 40, 8, ph, f, 2);
+    [[130, 168], [150, 172]].forEach(([x, y]) => { px(g, x, y, 14, 10, "#8a6a3a"); px(g, x, y, 14, 2, "#a98858"); px(g, x + 6, y, 2, 10, "#6a4a22"); });
+    px(g, 200, 160, 3, 18, "#7a5a38"); px(g, 190, 160, 22, 8, "#a98858"); px(g, 192, 162, 18, 1, "#4a3418");
+    fire(g, 224, 176, f); if (ph === "notte") glow(g, 224, 176, 70, "255,170,80", 0.25);
+    if (ph === "notte") for (let i = 0; i < 4; i++) glow(g, 20 + i * 90, 124, 9, "110,255,225", 0.35 + 0.2 * Math.sin(f / 12 + i));
+  }
+  // ---------------------------------------------------------------- giungla
+  function giungla(g, W, H, f) {
+    const ph = fase(); vg(g, 0, 0, W, H, ph === "notte" ? ["#04110e", "#0a2a22", "#061a14"] : ph === "tramonto" ? ["#1a3a2a", "#2f6a3a", "#183a22"] : ["#1f6a3a", "#3fa755", "#206a35"]);
+    for (let i = 0; i < 9; i++) { const x = 10 + i * 36 + rnd(i) * 16; px(g, x, 0, 9, H, ph === "notte" ? "#1a1424" : "#5a3a22"); px(g, x + 2, 0, 2, H, "rgba(255,255,255,.12)"); for (let k = 0; k < 5; k++) { const y = 14 + k * 34 + rnd(i + k) * 10; g.strokeStyle = ph === "notte" ? "#103a2a" : "#2f9a4c"; g.lineWidth = 3; g.beginPath(); g.moveTo(x + 4, y); g.quadraticCurveTo(x - 18, y - 10, x - 24 + Math.sin(f / 40 + i) * 3, y + 10); g.moveTo(x + 4, y); g.quadraticCurveTo(x + 26, y - 12, x + 32 + Math.sin(f / 36 + k) * 3, y + 8); g.stroke(); } }
+    if (ph !== "notte") for (let i = 0; i < 4; i++) { const x = 50 + i * 70 + Math.sin(f / 80 + i) * 6; g.save(); g.globalCompositeOperation = "lighter"; g.fillStyle = ph === "giorno" ? "rgba(255,250,190,.18)" : "rgba(255,170,90,.15)"; g.beginPath(); g.moveTo(x, 0); g.lineTo(x + 24, 0); g.lineTo(x + 54, H); g.lineTo(x + 6, H); g.fill(); g.restore(); }
+    vg(g, 0, 150, W, 50, ph === "notte" ? ["#0b2a20", "#061a14"] : ["#2a5a30", "#1a3a22"]);
+    px(g, 96, 128, 52, 26, ph === "notte" ? "#4a4a62" : "#8a8a7a"); px(g, 104, 96, 36, 34, ph === "notte" ? "#4a4a62" : "#9a9a88"); circ(g, 122, 90, 9, ph === "notte" ? "#4a4a62" : "#a8a896"); px(g, 108, 104, 26, 3, "rgba(40,120,60,.55)"); px(g, 100, 140, 12, 6, "rgba(40,120,60,.55)"); circ(g, 130, 114, 6, ph === "notte" ? "#e8e0c0" : "#f6f0d8");
+    for (let i = 0; i < (ph === "notte" ? 34 : 14); i++) { const x = (rnd(i) * W + Math.sin(f / 50 + i) * 14 + W) % W, y = 40 + rnd(i + 9) * 140 + Math.cos(f / 44 + i) * 6, a = 0.3 + 0.7 * Math.abs(Math.sin(f / 18 + i * 1.7)); glow(g, x, y, 6, ph === "notte" ? "150,255,170" : "255,255,160", a * 0.8); px(g, x, y, 1, 1, "#fff"); }
+    ell(g, 214, 172, 40, 12, ph === "notte" ? "#0a3a52" : "#2aa8c0"); for (let i = 0; i < 3; i++) px(g, 190 + i * 12 + Math.sin(f / 20 + i) * 4, 170 + i * 3, 12, 1, "rgba(255,255,255,.5)");
+  }
+  // ---------------------------------------------------------------- laguna
+  function laguna(g, W, H, f) {
+    const ph = fase(), hz = 74; sky(g, W, hz, ph, f); vg(g, 0, hz, W, H - hz, ph === "notte" ? ["#0a3a58", "#062a44", "#041a30"] : ph === "tramonto" ? ["#d0708a", "#5a4a9a", "#3a2a7a"] : ["#7de8e0", "#18b8c8", "#0e8aa8"]);
+    for (let i = 0; i < 30; i++) { const x = (rnd(i) * W + f * 0.25 * (0.4 + rnd(i + 8))) % (W + 20) - 10, y = hz + 4 + rnd(i + 5) * (H - hz - 8); px(g, x, y, 10 + rnd(i + 2) * 14, 1, ph === "notte" ? "rgba(120,255,230,.22)" : "rgba(255,255,255,.35)"); }
+    // scogli e isolotti
+    [[20, 74, 46], [260, 72, 56]].forEach(([x, y, w]) => { ell(g, x, y + 4, w, 14, ph === "notte" ? "#0a1a22" : "#2a5a4a"); ell(g, x - 6, y - 4, w * 0.7, 10, ph === "notte" ? "#10281e" : "#3a7a58"); });
+    palm(g, 270, 72, 34, 8, ph, f, 0);
+    // il faro lontano
+    px(g, 148, 24, 8, 48, ph === "notte" ? "#7a7a96" : "#f4f0ea"); px(g, 148, 36, 8, 6, "#c0392b"); px(g, 148, 52, 8, 6, "#c0392b"); px(g, 146, 18, 12, 6, "#2a2a3a"); px(g, 149, 20, 6, 4, ph === "giorno" ? "#fff6c4" : "#ffe27a"); beam(g, 152, 21, f, 120, ph);
+    // pietre per attraversare
+    for (let i = 0; i < 6; i++) { const x = 34 + i * 48 + (i % 2) * 6, y = 140 + Math.sin(i * 1.7) * 14, on = ph === "notte"; ell(g, x, y + 4, 17, 6, "rgba(0,0,0,.2)"); ell(g, x, y, 16, 7, on ? "#2a4a66" : "#8a9aa0"); ell(g, x - 2, y - 2, 11, 4, on ? "#3a7a8a" : "#b0bec2"); if (on) { glow(g, x, y, 24, "110,255,225", 0.45 + 0.25 * Math.sin(f / 14 + i)); px(g, x - 6, y - 1, 3, 1, "#8affea"); px(g, x + 3, y, 3, 1, "#8affea"); } }
+  }
+  // ---------------------------------------------------------------- faro (esterno)
+  function faro(g, W, H, f) {
+    const ph = fase(), hz = 96; sky(g, W, hz, ph, f); sea(g, W, hz, H, ph, f);
+    ell(g, 160, 176, 170, 36, ph === "notte" ? "#2a2c44" : "#7a6a58"); ell(g, 160, 168, 140, 28, ph === "notte" ? "#34364e" : "#948068"); for (let i = 0; i < 14; i++) px(g, 40 + i * 18, 156 + rnd(i) * 18, 12, 2, "rgba(0,0,0,.18)");
+    const tx = 160; g.fillStyle = ph === "notte" ? "#9a9ab8" : "#f6f1e8"; g.beginPath(); g.moveTo(tx - 22, 168); g.lineTo(tx - 12, 36); g.lineTo(tx + 12, 36); g.lineTo(tx + 22, 168); g.fill();
+    [58, 94, 130].forEach((y) => { g.fillStyle = "#c0392b"; g.beginPath(); g.moveTo(tx - 12 - (y - 36) * 0.1, y); g.lineTo(tx + 12 + (y - 36) * 0.1, y); g.lineTo(tx + 12 + (y + 14 - 36) * 0.1, y + 14); g.lineTo(tx - 12 - (y + 14 - 36) * 0.1, y + 14); g.fill(); });
+    px(g, tx - 4, 150, 8, 18, "#5a3a22"); px(g, tx - 3, 154, 6, 1, "#c9a36a"); px(g, tx - 16, 28, 32, 8, "#2a2a3a"); px(g, tx - 11, 14, 22, 15, "rgba(255,240,170,.9)"); px(g, tx - 13, 10, 26, 4, "#2a2a3a"); px(g, tx - 2, 4, 4, 6, "#2a2a3a");
+    beam(g, tx, 22, f, 150, ph);
+    for (let i = 0; i < 4; i++) { const bx = (f * 0.5 + i * 80) % 340 - 10, by = 52 + i * 10 + Math.sin(f / 16 + i) * 4; g.strokeStyle = ph === "notte" ? "#c8d0e8" : "#fff"; g.lineWidth = 1.3; g.beginPath(); g.moveTo(bx - 5, by); g.quadraticCurveTo(bx - 2, by - 4, bx, by); g.quadraticCurveTo(bx + 2, by - 4, bx + 5, by); g.stroke(); }
+    for (let i = 0; i < 7; i++) { const x = (i * 52 + f * 0.6) % 330; ell(g, x, 190 + Math.sin(f / 12 + i) * 1.5, 22, 3, "rgba(255,255,255,.55)"); }
+  }
+  // ---------------------------------------------------------------- sala radio (interno del faro)
+  function radio(g, W, H, f) {
+    const ph = fase(); vg(g, 0, 0, W, H, ["#2a2418", "#3a2e1e", "#241c12"]); for (let i = 0; i < 12; i++) px(g, 0, 8 + i * 17, W, 1, "rgba(0,0,0,.2)");
+    vg(g, 0, 150, W, 50, ["#5a4426", "#3a2a16"]); for (let i = 0; i < 8; i++) px(g, i * 42, 150, 1, 50, "rgba(0,0,0,.25)");
+    // finestra tonda sul mare
+    circ(g, 266, 62, 32, "#c9a36a"); circ(g, 266, 62, 27, "#1a2a44"); g.save(); g.beginPath(); g.arc(266, 62, 27, 0, 7); g.clip(); vg(g, 238, 35, 56, 54, SKY[ph]); vg(g, 238, 66, 56, 30, SEA[ph]); if (ph === "notte") for (let i = 0; i < 12; i++) px(g, 240 + rnd(i) * 50, 38 + rnd(i + 3) * 24, 1, 1, "#fff"); beam(g, 266, 62, f, 40, ph); g.restore(); px(g, 238, 61, 56, 2, "#c9a36a"); px(g, 265, 35, 2, 54, "#c9a36a");
+    // il banco con le radio
+    px(g, 20, 112, 200, 40, "#6a4a26"); px(g, 20, 108, 200, 6, "#8a6636");
+    px(g, 34, 78, 70, 34, "#2a3a44"); px(g, 38, 82, 62, 20, "#0f1f26"); for (let i = 0; i < 5; i++) { const h = 4 + 8 * Math.abs(Math.sin(f / 9 + i * 1.3)); px(g, 44 + i * 11, 100 - h, 6, h, "#5eead4"); } circ(g, 50, 106, 4, "#c9a36a"); circ(g, 70, 106, 4, "#c9a36a"); circ(g, 90, 106, 4, "#c9a36a");
+    px(g, 120, 90, 40, 22, "#3a4a54"); circ(g, 140, 100, 8, "#0f1f26"); circ(g, 140, 100, 6, "rgba(94,234,212,.5)"); glow(g, 140, 100, 16, "94,234,212", 0.3 + 0.15 * Math.sin(f / 8));
+    px(g, 172, 96, 36, 16, "#4a3a2a"); px(g, 176, 92, 4, 4, "#c0392b"); g.strokeStyle = "#c9a36a"; g.lineWidth = 2; g.beginPath(); g.moveTo(190, 96); g.lineTo(196, 70); g.stroke();
+    // carte appese
+    px(g, 24, 20, 60, 44, "#f4ecd8"); for (let i = 0; i < 5; i++) px(g, 30, 28 + i * 7, 48, 1, "rgba(60,40,20,.4)"); g.strokeStyle = "#c0392b"; g.setLineDash([3, 2]); g.beginPath(); g.moveTo(32, 54); g.quadraticCurveTo(50, 28, 76, 44); g.stroke(); g.setLineDash([]);
+    px(g, 110, 26, 44, 34, "#e8dfc4"); px(g, 114, 30, 36, 3, "#5a4a30"); px(g, 114, 36, 28, 2, "#8a7a5a"); px(g, 114, 41, 32, 2, "#8a7a5a");
+    // cavi che pendono
+    g.strokeStyle = "#1a1a1a"; g.lineWidth = 1.5; for (let i = 0; i < 4; i++) { g.beginPath(); g.moveTo(30 + i * 58, 0); g.quadraticCurveTo(44 + i * 58, 40 + Math.sin(f / 30 + i) * 3, 60 + i * 58, 6); g.stroke(); }
+    glow(g, 180, 20, 60, "255,210,120", 0.28); circ(g, 180, 12, 4, "#ffe9a0");
+    ell(g, 238, 172, 36, 9, "#7a4a2a"); ell(g, 238, 170, 30, 6, "#9a5a34");
+  }
+  // ---------------------------------------------------------------- stadio sulla spiaggia
+  function stadio(g, W, H, f) {
+    const ph = fase(), hz = 70; sky(g, W, hz, ph, f); sea(g, W, hz, 100, ph, f);
+    vg(g, 0, 100, W, 100, SAND[ph]); for (let i = 0; i < 70; i++) px(g, rnd(i) * W, 102 + rnd(i + 4) * 96, 2, 1, ph === "notte" ? "rgba(255,255,255,.06)" : "rgba(120,90,50,.12)");
+    g.strokeStyle = "rgba(255,255,255,.55)"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(24, 186); g.lineTo(60, 120); g.lineTo(260, 120); g.lineTo(296, 186); g.closePath(); g.stroke(); g.beginPath(); g.moveTo(160, 120); g.lineTo(160, 186); g.stroke(); g.beginPath(); g.ellipse(160, 153, 28, 11, 0, 0, 7); g.stroke();
+    [[44, 112], [276, 112]].forEach(([x, y]) => { px(g, x - 14, y, 3, 36, "#7a5a38"); px(g, x + 11, y, 3, 36, "#7a5a38"); px(g, x - 14, y, 28, 3, "#7a5a38"); g.strokeStyle = "rgba(255,255,255,.4)"; g.lineWidth = 1; for (let k = 0; k < 6; k++) { g.beginPath(); g.moveTo(x - 12 + k * 5, y + 3); g.lineTo(x - 12 + k * 5, y + 36); g.stroke(); } });
+    [[20, 74], [300, 74]].forEach(([x, y], i) => palm(g, x, y + 76, 66, i ? -10 : 10, ph, f, i));
+    for (let k = 0; k < 8; k++) { const x = 70 + k * 26; px(g, x, 100, 20, 9, k % 2 ? "#a98858" : "#8a6a3a"); px(g, x, 100, 20, 2, "rgba(255,255,255,.2)"); for (let j = 0; j < 3; j++) { circ(g, x + 4 + j * 6, 98, 2.5, ["#f6c8a0", "#c68a5e", "#e8b07a"][(k + j) % 3]); px(g, x + 2 + j * 6, 100, 5, 3, ["#38bdf8", "#f87171", "#facc15"][(k * 2 + j) % 3]); } }
+    [[8, 120], [312, 120], [100, 174], [220, 174]].forEach(([x, y]) => { px(g, x - 1, y, 3, 22, "#6a4a22"); fire(g, x, y - 2, f + x); if (ph === "notte") glow(g, x, y - 4, 55, "255,170,80", 0.22); });
+    const bx = 160 + Math.sin(f / 30) * 40, by = 150 + Math.cos(f / 22) * 6; ell(g, bx, by + 5, 6, 2, "rgba(0,0,0,.3)"); circ(g, bx, by, 6, "#6a4a22"); circ(g, bx - 1, by - 1, 4.5, "#8a6636"); px(g, bx - 3, by - 2, 2, 2, "#2b1d10"); px(g, bx + 1, by - 3, 2, 2, "#2b1d10"); px(g, bx - 1, by + 1, 2, 2, "#2b1d10");
+    if (ph === "notte") for (let i = 0; i < 6; i++) glow(g, 30 + i * 54, 92, 12, "110,255,225", 0.3 + 0.2 * Math.sin(f / 13 + i));
+  }
+  const HOT = {
+    nf_titolo: [[70, 96, 64, 50, "Un pezzo d'aereo piantato nella sabbia come una forchetta in una torta. Sulla coda c'è ancora la scritta «Rondine Airlines»."], [252, 86, 34, 46, "Una luce lontana, sull'orizzonte, gira a intervalli regolari. Qualcuno la accende ogni sera."], [30, 20, 260, 40, "Stormi di gabbiani. Strano: volano sempre nella stessa direzione, come se sapessero dove andare."]],
+    nf_spiaggia: [[44, 118, 80, 56, "Il relitto. Dentro ci sono ancora i sedili, i giornali di bordo e un'arancia che ha resistito a tutto."], [196, 160, 50, 28, "Il falò dei naufraghi. Qualcuno lo tiene acceso con grande metodo e un po' di orgoglio."], [128, 164, 36, 18, "Casse di bordo. Su una c'è scritto «DELICATO». Ora non lo è più."], [0, 84, 320, 28, "Il mare, troppo azzurro per essere vero."]],
+    nf_giungla: [[96, 88, 56, 70, "Una statua coperta di muschio: un giocatore con un pallone sotto il braccio. Sul petto, uno stemma consumato."], [190, 156, 50, 28, "Uno stagno limpido. Sul fondo, qualcosa che luccica: sono conchiglie."], [14, 20, 90, 100, "Liane e felci. Si muovono anche senza vento. Ma forse è solo la tua impressione."], [250, 40, 60, 80, "Una luce che passa fra le foglie, calda e piena di polvere dorata."]],
+    nf_laguna: [[142, 14, 20, 62, "Il faro. È lontano, ma sembra più vicino ogni volta che lo guardi."], [28, 130, 270, 30, "Pietre piatte nell'acqua: fanno da ponte. Di notte brillano di una luce verde, come lucciole fredde."], [10, 40, 70, 40, "Uno scoglio con un nido di gabbiano. Dentro, un fischietto arrugginito."], [240, 40, 70, 40, "Una palma storta, piegata verso il faro come per ascoltare."]],
+    nf_faro: [[146, 148, 28, 24, "La porta del faro: legno scuro, ferro arrugginito, una maniglia a forma di pesce."], [144, 6, 32, 34, "La lanterna in cima. Gira da sola, e di notte la luce si vede fino all'orizzonte."], [30, 40, 260, 40, "Gabbiani che girano intorno alla torre. Non hanno paura di niente."], [30, 170, 120, 26, "Scogli bianchi di sale. Un'onda lunga li accarezza e se ne va."]],
+    nf_radio: [[34, 78, 70, 34, "La radio grande: lucette verdi, manopole, un fruscio che sembra un respiro."], [24, 20, 60, 44, "Una mappa appesa. La costa è disegnata a matita, con una piccola croce rossa."], [238, 36, 56, 54, "L'oblò sul mare. Il fascio di luce passa di qua ogni pochi secondi."], [170, 86, 40, 28, "Un vecchio microfono con una piccola luce rossa. Sembra acceso."]],
+    nf_stadio: [[20, 108, 50, 44, "La porta di destra: tronchi e rete da pesca. I pali sono dritti come promesso."], [64, 96, 200, 18, "Gli spalti: casse di legno, qualche tifoso e molte noci di cocco."], [130, 128, 60, 40, "Il pallone, una noce di cocco levigata dal mare. Rimbalza storto: è il suo carattere."], [250, 108, 50, 44, "La porta di sinistra. La rete è un po' bucata: i granchi la usano per entrare."]],
+  };
+  const DRAW = { nf_titolo: titolo, nf_spiaggia: spiaggia, nf_giungla: giungla, nf_laguna: laguna, nf_faro: faro, nf_radio: radio, nf_stadio: stadio };
+  Object.keys(DRAW).forEach((k) => R.register(k, { draw: (g, W, H, f) => DRAW[k](g, W, H, f), hot: HOT[k] }));
+})();
