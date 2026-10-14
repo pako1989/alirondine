@@ -40,6 +40,7 @@ async function c1(w) {
   { const bad = await reachMondo(page, "nf_spiaggia"); if (bad.length) errors.push("nf_spiaggia irraggiungibile: " + bad.join(", ")); }
   const step = async () => (await info(page)).step;
   const chk = async (n, why) => { const st = await step(); if ((st[1] || 0) !== n) errors.push(why + ": step " + JSON.stringify(st)); };
+  const chk2 = async (n, why) => { const st = await step(); if ((st[2] || 0) !== n) errors.push(why + ": step " + JSON.stringify(st)); };
   // prima di parlare con la Capitana: Salvi e Gaspare rimandano
   await L.talk(page, "nf_salvi"); await L.advance(page); await L.talk(page, "nf_gaspare"); await L.advance(page); await chk(0, "PNG prima della Capitana");
   await L.talk(page, "nf_bora"); await L.advance(page); await chk(1, "dopo la Capitana");
@@ -65,7 +66,44 @@ async function c1(w) {
   await clock(page, "notte");
   await L.goAct(page, 15, 11); await L.advance(page, [/Chi sei/]);
   { const i = await info(page); if (!i.done[1] || i.step[1] !== 5 || i.ends.length) errors.push("capitolo 1 non concluso: " + JSON.stringify([i.done, i.step, i.ends])); if (i.ch !== 2) errors.push("il capitolo 2 non si apre: " + i.ch); }
-  L.check(`Naufraghi del Pallone · capitolo 1 (${w} px)`, errors); await browser.close();
+  // ------------------------------------------------------------ capitolo 2
+  await page.evaluate(() => window.T_.click("Inizia il Capitolo 2")); await L.advance(page);
+  if ((await L.zone(page)) !== "nf_spiaggia") errors.push("cap.2: non parte dalla spiaggia: " + (await L.zone(page)));
+  await clock(page, "giorno");
+  await L.talk(page, "nf_bora"); await L.advance(page); await chk2(1, "Bora cap.2");
+  await L.talk(page, "nf_salvi"); await L.advance(page); await L.talk(page, "nf_gaspare"); await L.advance(page);
+  await L.goAct(page, 33, 12); await L.advance(page); await L.goAct(page, 29, 10); await L.advance(page);
+  if ((await L.zone(page)) !== "nf_laguna") errors.push("non si arriva alla laguna: " + (await L.zone(page)));
+  await clock(page, "giorno"); await page.waitForTimeout(700);
+  { const bad = await reachMondo(page, "nf_laguna"); if (bad.length) errors.push("nf_laguna irraggiungibile: " + bad.join(", ")); }
+  await clock(page, "giorno"); await page.waitForTimeout(700);
+  if (w === 390) await L.shot(page, "nf_laguna_giorno");
+  await L.goAct(page, 5, 7); await L.advance(page); await chk2(2, "camera di Tobia");
+  await clock(page, "notte"); await page.waitForTimeout(800);
+  if (w === 390) await L.shot(page, "nf_laguna_notte");
+  await L.talk(page, "nf_tobia"); await L.advance(page, [/Camera spenta/]); await chk2(3, "Tobia sull'isolotto");
+  if ((await page.evaluate((k) => eval(k).F.get("nf_riprese"), K_)) !== false) errors.push("scelta riprese non registrata");
+  await clock(page, "giorno"); await page.waitForTimeout(800);
+  await L.goAct(page, 35, 10); await L.advance(page);
+  if ((await L.zone(page)) !== "nf_faro") errors.push("non si arriva al faro: " + (await L.zone(page)));
+  await clock(page, "giorno");
+  { const bad = await reachMondo(page, "nf_faro"); if (bad.length) errors.push("nf_faro irraggiungibile: " + bad.join(", ")); }
+  if (w === 390) await L.shot(page, "nf_faro");
+  await L.goAct(page, 14, 9); await L.advance(page); if ((await L.zone(page)) !== "nf_faro") errors.push("la porta del faro si apre troppo presto");
+  await L.talk(page, "nf_scoglio"); await L.advance(page); await chk2(3, "Scoglio prima di Fiorenzo");
+  await L.talk(page, "nf_fiorenzo"); await L.advance(page);
+  await page.evaluate(() => { window.__W = false; window.__marea.start = (o) => { setTimeout(() => o.onDone({ a: window.__W ? 2 : 0, b: window.__W ? 1 : 2, win: window.__W, quit: false, data: {} }), 30); return true; }; });
+  await L.talk(page, "nf_scoglio"); await L.advance(page, [/Accetto la sfida/]); await chk2(3, "dopo la sfida persa");
+  await page.evaluate(() => { window.__W = true; });
+  await L.talk(page, "nf_scoglio"); await L.advance(page, [/Accetto la sfida/]); await chk2(4, "dopo la sfida vinta");
+  await L.goAct(page, 14, 9); await L.advance(page); if ((await L.zone(page)) !== "nf_radio") errors.push("non si entra nel faro: " + (await L.zone(page)));
+  await clock(page, "giorno");
+  { const bad = await reachMondo(page, "nf_radio", ["giorno"]); if (bad.length) errors.push("nf_radio irraggiungibile: " + bad.join(", ")); }
+  if (w === 390) await L.shot(page, "nf_radio");
+  await L.talk(page, "nf_fiorenzo"); await L.advance(page); await L.talk(page, "nf_tobia"); await L.advance(page);
+  await L.goAct(page, 7, 2); await L.advance(page, [/Cosa ti serve/]);
+  { const i = await info(page); if (!i.done[2] || i.done[2] !== "ascolto" || i.step[2] !== 5 || i.ch !== 3) errors.push("capitolo 2 non concluso: " + JSON.stringify([i.done, i.step, i.ch])); }
+  L.check(`Naufraghi del Pallone · capitoli 1 e 2 (${w} px)`, errors); await browser.close();
 }
 // il motore Marea: regole, comandi veri (tocco, trascinamento, pedana), tastiera, partita intera a pilota automatico, fine
 async function marea(w) {
