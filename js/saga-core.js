@@ -352,7 +352,7 @@
     let soon = 0;
     const refreshSoon = () => { clearTimeout(soon); soon = setTimeout(() => safe(refreshZone), 0); };
     const done = () => { refreshZone(); api.trResume(); };
-    function lines(ls, bg) { return ls.map((l) => api.L(l[0], T(l[1]), l[2] || bg || bgNow())); }
+    function lines(ls, bg) { return ls.map((l) => api.L(l[0], String(T(l[1])).replace(/<\/?(b|em|i|strong)>/g, "").replace(/<br\s*\/?>/g, " "), l[2] || bg || bgNow())); } // L() mostra il testo semplice: i tag HTML comparirebbero scritti
     function say(ls, then) { safe(() => arr(ls).forEach((l) => Array.isArray(l) && meet(l[0]))); api.trSay(lines(ls), typeof then === "function" ? then : done); }
     // PERSONAGGI DELLA SAGA: chi parla in un dialogo o in una scena viene «incontrato» e compare nella pagina Personaggi del menu
     const SCAST = [];

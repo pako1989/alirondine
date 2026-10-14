@@ -15,10 +15,11 @@
     t.className = `toast ${type}`;
     t.innerHTML = `<span class="icon">${icon}</span><span class="msg">${msg}</span>`;
     toastBox.appendChild(t);
-    setTimeout(() => {
-      t.classList.add("hide");
-      setTimeout(() => t.remove(), 300);
-    }, 3000);
+    // durata in base alla lunghezza (almeno 4,5 s, fino a 12 s); un tocco lo chiude
+    const txt = String(msg).replace(/<[^>]*>/g, ""), ms = Math.min(12000, Math.max(4500, 2500 + txt.length * 70));
+    let off = setTimeout(close, ms);
+    function close() { clearTimeout(off); t.classList.add("hide"); setTimeout(() => t.remove(), 300); }
+    t.addEventListener("click", close);
   }
 
   function addLog(msg) {
