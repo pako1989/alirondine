@@ -1062,6 +1062,7 @@
     if (c.style === "alloro") { g.beginPath(); g.ellipse(0, -11, 22, 14, 0, Math.PI, 0); g.fill(); for (let k = 0; k < 9; k++) { const a = Math.PI * (1.08 + k * 0.105); g.fillStyle = "#15803d"; g.beginPath(); g.ellipse(Math.cos(a) * 22, -10 + Math.sin(a) * 17, 4, 2, a, 0, 7); g.fill(); } px(-3, -24, 6, 3, "#ca8a04"); g.fillStyle = c.hair; }
     if (c.style === "antenne") { g.beginPath(); g.ellipse(0, -11, 22, 14, 0, Math.PI, 0); g.fill(); g.lineWidth = 4; g.lineCap = "round"; g.strokeStyle = c.hair; [-1, 1].forEach((d) => { g.beginPath(); g.moveTo(d * 6, -22); g.quadraticCurveTo(d * 9, -40, d * 18, -44); g.stroke(); g.beginPath(); g.arc(d * 18, -44, 4.5, 0, 7); g.fill(); }); g.lineCap = "butt"; }
     if (c.style === "scodella") { g.beginPath(); g.ellipse(0, -13, 23, 16, 0, Math.PI, 0); g.fill(); g.fillRect(-23, -13, 46, 7); g.fillStyle = "rgba(0,0,0,.15)"; g.fillRect(-23, -7, 46, 1.5); g.fillStyle = c.hair; }
+    if (c.style === "brace") { g.beginPath(); g.ellipse(0, -11, 22, 14, 0, Math.PI, 0); g.fill(); g.beginPath(); g.moveTo(-10, -20); g.quadraticCurveTo(-8, -34, 0, -48); g.quadraticCurveTo(2, -36, 8, -40); g.quadraticCurveTo(10, -30, 12, -20); g.closePath(); g.fill(); g.fillStyle = "#ff9a3a"; g.beginPath(); g.moveTo(-3, -22); g.quadraticCurveTo(-2, -32, 2, -38); g.quadraticCurveTo(6, -30, 6, -22); g.closePath(); g.fill(); g.fillStyle = "#ffd23f"; g.beginPath(); g.moveTo(0, -24); g.quadraticCurveTo(1, -30, 3, -24); g.closePath(); g.fill(); g.fillStyle = c.hair; }
     if (c.style === "cometa") { g.beginPath(); g.ellipse(0, -11, 22, 14, 0, Math.PI, 0); g.fill(); g.beginPath(); g.moveTo(-16, -16); g.quadraticCurveTo(-6, -48, 22, -46); g.quadraticCurveTo(8, -36, 16, -18); g.closePath(); g.fill(); g.fillStyle = "#ffd23f"; g.beginPath(); g.moveTo(10, -44); g.quadraticCurveTo(18, -46, 22, -46); g.quadraticCurveTo(16, -40, 14, -36); g.closePath(); g.fill(); g.fillStyle = c.hair; }
     if (c.style === "ciuffo") { g.beginPath(); g.ellipse(0, -11, 22, 14, 0, Math.PI, 0); g.fill(); g.beginPath(); g.moveTo(-18, -16); g.bezierCurveTo(-4, -26, 14, -20, 20, -2); g.bezierCurveTo(16, 4, 10, 0, 6, -6); g.bezierCurveTo(0, -12, -10, -12, -18, -8); g.closePath(); g.fill(); }
     const capV = c.cap || (c.acc === "cappellino" ? "#ffd23f" : c.acc === "berretto" ? "#26324a" : null); // il cappello vale anche dove il campione è ricostruito senza «cap»
@@ -3930,6 +3931,7 @@
     hs_spacebuns: { kind: "style", label: "Taglio a due chignon", val: "spacebuns", from: "Finisci la saga «La Notte dei Lampioni» (un finale qualsiasi)" },
     hs_corona: { kind: "style", label: "Taglio a corona di trecce", val: "corona", from: "Finisci la saga «La Guerra dei Tre Ducati» (un finale qualsiasi)" },
     hs_criniera: { kind: "style", label: "Criniera da star", val: "criniera", from: "Finisci la saga «Il Cavallo Star» (un finale qualsiasi)" },
+    hs_brace: { kind: "style", label: "Ciuffo di brace", val: "brace", from: "Finisci la saga «Dungeon di Fine Stagione» (un finale qualsiasi)" },
     hs_colbacco: { kind: "style", label: "Colbacco alpino", val: "colbacco", from: "Finisci la saga «Piccolo Borgo di Montagna» (un finale qualsiasi)" },
     hs_cowboy: { kind: "style", label: "Cappello da pistolero", val: "cowboy", from: "Finisci la saga «Per un pugno di rigori» (un finale qualsiasi)" },
     hs_coppola: { kind: "style", label: "Coppola dei Soliti Ignoti", val: "coppola", from: "Finisci la saga «La Notte dei Cento Rintocchi» (un finale qualsiasi)" },
@@ -4304,6 +4306,7 @@
     if (c.style === "alloro") { px(x - 7, y - 27, 14, 5, hair); px(x - 6, y - 24, 12, 2, "#15803d"); }
     if (c.style === "antenne") { px(x - 5, y - 27, 1, 4, hair); px(x + 4, y - 27, 1, 4, hair); px(x - 6, y - 28, 2, 2, hair); px(x + 4, y - 28, 2, 2, hair); }
     if (c.style === "scodella") { px(x - 6, y - 24, 12, 4, hair); px(x - 6, y - 21, 1, 3, hair); px(x + 5, y - 21, 1, 3, hair); }
+    if (c.style === "brace") { px(x - 2, y - 29, 5, 5, hair); px(x - 1, y - 33, 3, 4, "#ff9a3a"); px(x, y - 35, 1, 2, "#ffd23f"); }
     if (c.style === "cometa") { px(x - 2, y - 29, 5, 5, hair); px(x + 2, y - 30, 2, 2, "#ffd23f"); }
     const capV = c.cap || (SA.includes("cappellino") ? "#ffd23f" : SA.includes("berretto") ? "#26324a" : null);
     if (capV) { const cc = typeof capV === "string" ? capV : "#1d3fa3"; px(x - 5, y - 24, 10, 3, cc); if (dir !== "up") px(dir === "left" ? x - 8 : x - 2, y - 22, dir === "down" ? 0 : 6, 2, cc); }
@@ -5231,7 +5234,7 @@
   const HERO = "ali-di-rondine.campione";
   const H_STYLES = { palma: "Ciuffo a palma", spiky: "Spettinati", messy: "Ribelli", buzz: "Rasati", slick: "Tirati indietro", long: "Lunghi", bun: "Chignon", bob: "Caschetto", ponytail: "Coda", twintails: "Codini", braids: "Trecce", curly: "Ricci", side: "Riga di lato", ordinato: "Ordinati", bandana: "Bandana", colbacco: "Colbacco", cowboy: "Pistolero", coppola: "Coppola", alloro: "Corona d'Alloro" };
   // le acconciature delle saghe: finire una saga (almeno un finale) sblocca la sua acconciatura nel guardaroba
-  const HAIR_SAGA = { hs_afro: "torneo", hs_dread: "dopo", hs_undercut: "spazio", hs_pompadour: "mantello", hs_mullet: "stagione", hs_wavy: "cronache", hs_messybun: "vento", hs_topknot: "mondi", hs_sidebraid: "trono", hs_spacebuns: "lampioni", hs_corona: "ducati", hs_ciuffo: "grigio", hs_cometa: "titano", hs_scodella: "quartiere", hs_antenne: "razzo", hs_criniera: "cavallo", hs_colbacco: "montagna", hs_cowboy: "pugno", hs_coppola: "campana", hs_alloro: "roma", hs_palma: "naufraghi" };
+  const HAIR_SAGA = { hs_afro: "torneo", hs_dread: "dopo", hs_undercut: "spazio", hs_pompadour: "mantello", hs_mullet: "stagione", hs_wavy: "cronache", hs_messybun: "vento", hs_topknot: "mondi", hs_sidebraid: "trono", hs_spacebuns: "lampioni", hs_corona: "ducati", hs_ciuffo: "grigio", hs_cometa: "titano", hs_scodella: "quartiere", hs_antenne: "razzo", hs_criniera: "cavallo", hs_brace: "dungeon", hs_colbacco: "montagna", hs_cowboy: "pugno", hs_coppola: "campana", hs_alloro: "roma", hs_palma: "naufraghi" };
   function hairUnlocks() {
     Object.keys(HAIR_SAGA).forEach((id) => { try { const m = JSON.parse(localStorage.getItem("ali-di-rondine." + HAIR_SAGA[id]) || "null"); if (m && Array.isArray(m.ends) && m.ends.length && COSM[id] && bCos(id) && window.toast) window.toast("Nuova acconciatura: " + COSM[id].label.replace(/^Taglio (a )?/, ""), "info", "✂️"); } catch {} });
   }
@@ -11771,6 +11774,7 @@
     if (base.style === "alloro") { px(-7, -32 + by, 14, 5, hair); px(-6, -29 + by, 12, 2, "#15803d"); }
     if (base.style === "antenne") { px(-5, -33 + by, 1, 5, hair); px(4, -33 + by, 1, 5, hair); px(-6, -34 + by, 2, 2, hair); px(4, -34 + by, 2, 2, hair); }
     if (base.style === "scodella") px(-6, -29 + by, 12, 4, hair);
+    if (base.style === "brace") { px(-2, -33 + by, 5, 5, hair); px(-1, -37 + by, 3, 4, "#ff9a3a"); px(0, -39 + by, 1, 2, "#ffd23f"); }
     if (base.style === "cometa") { px(-2, -33 + by, 5, 5, hair); px(2, -34 + by, 2, 2, "#ffd23f"); }
     if (base.cap) px(-5, -29 + by, 10, 3, typeof base.cap === "string" ? base.cap : "#1d3fa3");
     if (o.catEars) { g.fillStyle = hair; g.beginPath(); g.moveTo(-5, -28 + by); g.lineTo(-4, -33 + by); g.lineTo(-1, -28 + by); g.fill(); g.beginPath(); g.moveTo(1, -28 + by); g.lineTo(4, -33 + by); g.lineTo(5, -28 + by); g.fill(); }
@@ -22258,6 +22262,7 @@
     fondale: { n: "Fondale sommerso", fx: { spd: 0.9, fr: 0.993, tk: 0.02, nz: 0.03, sh: 0.92, deep: true }, ok: () => true, why: "Il campo sul fondo del mare di Dunwich: si corre piano, la palla galleggia e non vuole fermarsi, i tiri perdono forza nell'acqua." },
     dojo: { n: "Dojo dei tatami", fx: { spd: 1.08, fr: 0.98, tk: 0.04, nz: 0, sh: 1.04, dojo: true }, ok: () => true, why: "Il cerchio sacro del dojo: tatami lisci, scatti fulminei, contrasti secchi come colpi di katana." },
     lizza: { n: "La lizza dei tornei", fx: { spd: 0.97, fr: 0.98, tk: 0.05, nz: 0.02, sh: 1.05, lists: true }, ok: () => true, why: "Il campo dei tornei dei feudi: terra battuta, palizzate di legno, stendardi. I contrasti sono duri come giostre a cavallo." },
+    ipogeo: { n: "Ipogeo di pietra", fx: { spd: 0.99, fr: 0.986, tk: 0.04, nz: 0.01, sh: 1.04, ash: true }, ok: () => true, why: "Il campo di pietra sotto lo Stadio Vecchio: lastre scure, torce alle pareti e rune che pulsano al centro. Il pallone rimbalza duro, i contrasti anche." },
     neon: { n: "Griglia al neon", fx: { spd: 1.06, fr: 0.992, tk: 0.01, nz: 0.01, sh: 1.1, neon: true }, ok: () => true, why: "Il campo industriale del Settore Zero: pavimento di metallo lucido e righe al neon. La palla scivola veloce e i tiri sono fucilate." },
     lago: { n: "Lungolago in VHS", fx: { spd: 1, fr: 0.986, tk: 0.02, nz: 0.03, sh: 1, vhs: true }, ok: () => true, why: "Il prato sul lungolago di Lago Lungo, ripreso da una videocassetta: righe di scansione, colori sbiaditi, e ogni tanto l'immagine salta." },
     cortile: { n: "Cortile della rocca", fx: { spd: 0.98, fr: 0.982, tk: 0.03, nz: 0.02, sh: 1.03, court: true }, ok: () => true, why: "Il cortile di Rocca Tasso: terra battuta, mura di pietra tutt'intorno e gli stendardi col tasso. La palla è pesante e rimbalza sulle mura." },
@@ -22371,6 +22376,11 @@
       for (let y = AZ_UP; y < AZ_DN; y += 20) for (let x = AZ_L; x < AZ_R; x += 40) { const v = (((x - AZ_L) / 40 + (y - AZ_UP) / 20) | 0) % 2; px(x + (v ? 0 : 20) - (v ? 0 : 20), y, v ? 40 : 40, 20, v ? "#c8b878" : "#bcae70"); g.strokeStyle = "#2a2418"; g.lineWidth = 1; g.strokeRect(x, y, 40, 20); }
       px(AZ_L - 4, AZ_UP - 4, AZ_R - AZ_L + 8, 4, "#1a1410"); px(AZ_L - 4, AZ_DN, AZ_R - AZ_L + 8, 4, "#1a1410"); g.strokeStyle = "rgba(160,30,30,.5)"; g.lineWidth = 3; g.beginPath(); g.arc((AZ_L + AZ_R) / 2, (AZ_UP + AZ_DN) / 2, 30, 0, 7); g.stroke();
       [[24, 20], [W - 24, 20]].forEach(([x, y]) => { px(x - 6, y, 12, 16, "#c83a2a"); px(x - 6, y, 12, 2, "#1a1410"); px(x - 6, y + 14, 12, 2, "#1a1410"); const gr = g.createRadialGradient(x, y + 8, 2, x, y + 8, 30); gr.addColorStop(0, "rgba(255,200,120,.35)"); gr.addColorStop(1, "rgba(255,200,120,0)"); g.fillStyle = gr; g.fillRect(x - 30, y - 22, 60, 60); });
+    }
+    if (p === "ipogeo") { // lastre di pietra scura, torce che sfarfallano agli angoli, una runa di brace al centro
+      px(0, 0, W, H, "#1a1412"); for (let y = 0; y < H; y += 16) for (let x = -16; x < W; x += 32) { const o = ((y / 16) | 0) % 2 ? 16 : 0; px(x + o + 1, y + 1, 30, 14, (((x + y) / 16) | 0) % 3 ? "#2e2724" : "#342c28"); px(x + o + 1, y + 1, 30, 1, "rgba(255,255,255,.06)"); }
+      const ra = 0.35 + 0.2 * Math.sin(A.t / 14), cx = (AZ_L + AZ_R) / 2, cy = (AZ_UP + AZ_DN) / 2; px(cx - 1, cy - 26, 2, 52, `rgba(255,140,50,${ra})`); px(cx - 26, cy - 1, 52, 2, `rgba(255,140,50,${ra})`); g.strokeStyle = `rgba(255,140,50,${ra})`; g.lineWidth = 2; g.beginPath(); g.arc(cx, cy, 20, 0, 7); g.stroke();
+      [[AZ_L + 6, AZ_UP + 2], [AZ_R - 6, AZ_UP + 2], [AZ_L + 6, AZ_DN - 2], [AZ_R - 6, AZ_DN - 2]].forEach(([x, y], i) => { const fl = 1 + Math.sin(A.t / 5 + i * 2) * 0.12, gr = g.createRadialGradient(x, y, 1, x, y, 46 * fl); gr.addColorStop(0, "rgba(255,150,60,.38)"); gr.addColorStop(1, "rgba(255,150,60,0)"); g.fillStyle = gr; g.fillRect(x - 50, y - 50, 100, 100); px(x - 1, y - 2, 3, 6, "#3a2a1a"); px(x - 2, y - 7 - Math.round(fl * 2), 5, 5, "#ff7a1a"); px(x - 1, y - 9 - Math.round(fl * 2), 3, 3, "#ffd23f"); });
     }
     if (p === "lizza") { // terra battuta, palizzata di legno, stendardi a strisce
       px(0, 0, W, H, "#5a7a3a"); px(AZ_L, AZ_UP, AZ_R - AZ_L, AZ_DN - AZ_UP, "#b8956a"); for (let i = 0; i < 50; i++) px(AZ_L + (i * 47) % (AZ_R - AZ_L), AZ_UP + (i * 31) % (AZ_DN - AZ_UP), 3, 1, "rgba(90,60,30,.25)");

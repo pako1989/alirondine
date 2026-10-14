@@ -56,7 +56,7 @@
       campo: { grass: ["#38302b", "#352d28", "#3b332e"], path: ["#4a4038", "#453b34"], stone: ["#4a403a", "#443a34"], wall: ["#2a2220", "#221b19"], water: ["#1a2a3a", "#1e3040"], tall: "#4a4034", tree: ["#2a2420", "#241e1a"], tint: "255,140,60", tintA: 0.08, fx: "sparks", dark: 0.06 },
       gallerie: { grass: ["#34302e", "#322e2c", "#383432"], path: ["#463e3a", "#403834"], stone: ["#4a423e", "#443c38"], wall: ["#2a2220", "#221b19"], water: ["#1a2a3a", "#1e3040"], tall: "#4a4034", tree: ["#2a2420", "#241e1a"], tint: "255,110,60", tintA: 0.09, fx: "sparks", dark: 0.08 },
       cisterne: { grass: ["#2a3836", "#283432", "#2e3c3a"], path: ["#364846", "#324240"], stone: ["#3a4a48", "#344442"], wall: ["#1c2a2a", "#162222"], water: ["#1a5a5a", "#1e6464"], tall: "#2a4a44", tree: ["#1c3a34", "#16302a"], tint: "80,220,190", tintA: 0.09, fx: "float", dark: 0.08 },
-      tribuna: { grass: ["#3e382e", "#3a342a", "#423c32"], path: ["#544a38", "#4e4434"], stone: ["#5a4e3a", "#544834"], wall: ["#2e2618", "#261f14"], water: ["#3a3220", "#40381e"], tall: "#5a4a2a", tree: ["#3a3020", "#30281a"], tint: "255,210,100", tintA: 0.1, fx: "sparks", dark: 0.06 },
+      tribuna: { grass: ["#3e382e", "#3a342a", "#423c32"], path: ["#544a38", "#4e4434"], stone: ["#5a4e3a", "#544834"], wall: ["#2e2618", "#261f14"], water: ["#3a3220", "#40381e"], tall: "#5a4a2a", tree: ["#3a3020", "#30281a"], tint: "255,210,100", tintA: 0.035, fx: "sparks", dark: 0.06 },
     },
     floors: "", solid: "PSEUXYZOKMANJIG",
     // pavimenti a lastre di pietra, disegnati a mano (anche sotto gli oggetti: lo usa K.ground)
@@ -187,7 +187,7 @@
     const pi = PIANI[n], reg = n === 2 ? "cisterne" : n === 3 ? "tribuna" : "gallerie";
     return Object.assign({
       region: reg, name: "Dungeon di Fine Stagione · " + pi.n, short: pi.n.replace(/^(Le|La|Il) /, ""), sub: "Tre porte, tre stanze, una Porta Grande", bg: pi.bg, time: "notte", w: 28, h: 19, start: pi.entry[0], travel: pi.entry[0],
-      buio: n === 2 ? 0.42 : n === 3 ? 0.3 : 0.34, heroLight: 3.4,
+      buio: n === 2 ? 0.42 : n === 3 ? 0.36 : 0.34, heroLight: 3.4,
       luci: () => { const on = F.is("dg_in"); return [[6, 1, 3, "255,150,60"], [10, 1, 3, "255,150,60"], [15, 1, 3, "255,150,60"], [20, 1, 3, "255,150,60"], [4, 17, 2.6, "255,140,50"], [22, 17, 2.6, "255,140,50"], [1, 9, 3, "255,220,150"], [27, 9, on && (F.get("dg_rm", 0) | 0) >= 3 ? 4 : 2, "255,150,40"], ...(on ? [[8, 1, 2.4, "200,210,230"], [13, 1, 2.4, "255,200,90"], [18, 1, 2.4, "255,110,40"]] : [])]; },
       flavor: { t: "Un tavolo scheggiato. Sopra, un bicchiere di terracotta e un biglietto: «Brindisi rimandato».", l: "Una torcia che sfrigola. Il fumo sale e non sa più dove andare." },
       build(L) {

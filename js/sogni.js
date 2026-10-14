@@ -19,6 +19,7 @@
   const safe = (fn, d) => { try { return fn(); } catch (e) { return d; } };
   // le saghe da cui vengono le carte: chiave di salvataggio, nome, colore
   const SAGHE = {
+    dungeon: ["ali-di-rondine.dungeon", "Dungeon di Fine Stagione", "#ff7a1a", "__dungeon"],
     torneo: ["ali-di-rondine.torneo", "Il Torneo delle Cento Scuole", "#c83a3a"], cronache: ["ali-di-rondine.cronache", "Le Cronache del Pallone di Cristallo", "#7a4ab0"], mantello: ["ali-di-rondine.mantello", "Il Mantello Granata", "#8a1a2a"],
     stagione: ["ali-di-rondine.stagione", "Stagione Infinita", "#ff5a7a"], lampioni: ["ali-di-rondine.lampioni", "La Notte dei Lampioni", "#ffd27a"], trono: ["ali-di-rondine.trono", "Il Trono di Cuoio", "#8a5a2a"],
     campetto: ["ali-di-rondine.campetto", "Dal Campetto al Mondiale", "#1f5fbf"], colline: ["ali-di-rondine.colline", "Master League delle Colline", "#2a6a3a"], grigio: ["ali-di-rondine.grigio", "Il Cavaliere della Notte", "#2a3040"], ducati: ["ali-di-rondine.ducati", "La Guerra dei Tre Ducati", "#c8a040"], titano: ["ali-di-rondine.titano", "Il Figlio del Titano", "#c83a2a"], quartiere: ["ali-di-rondine.quartiere", "Gli Straordinari di Quartiere", "#ff5a8a"], razzo: ["ali-di-rondine.razzo", "Razzopacco · Consegne dal Futuro", "#ff8a3a"], cavallo: ["ali-di-rondine.cavallo", "Il Cavallo Star", "#ff7aa8"], detective: ["ali-di-rondine.detective", "Detective di Campo", "#3a4a5a"],
@@ -40,6 +41,8 @@
   // le carte delle saghe a capitoli (Vallombra e le altre): il 8° valore è il capitolo che le sblocca, una volta concluso.
   // Mai nelle bustine, nei premi a sorpresa e nel Draft finché non sono guadagnate: niente anticipazioni.
   const NEWC = [
+    // Dungeon di Fine Stagione
+    ["dg_asterio", "dungeon", "c", 52, 80, 48, "D", 1], ["dg_fiamma", "dungeon", "r", 78, 46, 66, "A", 1], ["dg_meda", "dungeon", "r", 56, 60, 82, "C", 2], ["dg_ruggine", "dungeon", "e", 48, 84, 72, "D", 3],
     // Vallombra
     ["vl_teodora", "vallombra", "c", 52, 68, 60, "D", 1], ["vl_fosco", "vallombra", "c", 44, 72, 56, "P", 1], ["vl_mirtilla", "vallombra", "c", 56, 60, 68, "C", 1], ["vl_bianca", "vallombra", "c", 58, 66, 64, "D", 1], ["vl_cornelio", "vallombra", "c", 50, 56, 70, "C", 1],
     ["vl_remo", "vallombra", "r", 76, 58, 66, "A", 2], ["vl_agata", "vallombra", "r", 54, 66, 76, "C", 2], ["vl_noemi", "vallombra", "c", 48, 56, 76, "C", 2], ["vl_tonio", "vallombra", "c", 40, 78, 58, "P", 2], ["vl_gisella", "vallombra", "c", 66, 62, 60, "C", 2],
@@ -136,6 +139,7 @@
   // la frase speciale che la carta dice quando arriva a tre stelle
   const FRASI = {
     nf_gaspare: "Parate registrate: tutte. Gol subiti: li ho messi alla voce «varie».", nf_bora: "Pensa, decidi, vai. In quest'ordine, e senza panico.", nf_tobia: "Ripeto il gol al rallentatore: sembra ancora più bello.", nf_scoglio: "La partita è lunga quanto serve. Io ho tempo.",
+    dg_asterio: "Il pilastro sono io. E io non mi sposto, nemmeno per il pallone d'oro.", dg_fiamma: "Non brucio, io. Illumino. Ma se mi offendi, fumo.", dg_meda: "Non guardarmi negli occhi: passa e basta. Il pallone, intendo.", dg_ruggine: "Trent'anni di allenamento per un solo rigore. Questa volta entra.",
     sq_brina: "Gusto del giorno: vittoria. Molto fredda.", sq_gommo: "Mi allungo fino alla porta, se serve.", sq_scintilla: "Il forno sono io. E anche il tiro.", sq_ines: "Il ferro mi vuole bene. Anche il pallone, oggi.", rz_ferruccio: "E IL CORRIERE TIRA… CONSEGNATO!", rz_timbro: "Gol approvato. In triplice copia.", rz_borea: "Ho parato un asteroide. Un pallone è facile.", rz_orsola: "Come ai campetti: chi vince decide.", cs_ugo: "Idea: vinciamo. Questa funziona.", cs_max: "Che bella partita! Tutte le partite sono belle!", cs_lucilla: "Contratto firmato. Gol incluso.", cs_baldo: "Che zoccolata!",
     rm_furbio: "Un senatore non perde mai: al massimo rinvia il risultato al prossimo plebiscito.", rm_spartaco: "Gli scudi si spezzano, ma la difesa della Suburra non crolla mai!", rm_augusta: "Gli astri avevano previsto questo gol all'incrocio fin dal primo tempo.", rm_cesare: "Veni, vidi, vici: pollice verso l'alto per questo trionfo nell'arena!",
     re_evaristo: "Con tutto il rispetto: il pallone è in fuorigioco di protocollo.", re_oriele: "Una corona si porta con la schiena dritta. E con un buon paio di scarpe.", re_perla: "Un buon conto è come una buona partita: nessuno lo vede, finché non torna.", re_ulderico: "Avanti. E se non si può, avanti lo stesso.", re_scilla: "Corro più veloce della marea. Quasi sempre.", re_tullio: "Una guerra si vince con la penna. Quella di mio padre, in particolare.", re_anselmo: "Ho ottantadue anni e un gatto: governo per metà ciascuno.", re_cedro: "Secondo l'articolo tredici, il pallone è sempre in gioco.", re_brando: "La pace è una guerra che si è messa in ordine. Anche a pallone.",
@@ -192,10 +196,11 @@
     { name: "Union Cometa", color: "#7a5ad8", style: "contropiede", f: 73, pl: ["Coda", "Chioma", "Nucleo", "Scia"] },
     { name: "I Leggendari del Faro", color: "#1a2a4a", style: "equilibrata", f: 76, pl: ["Lampo", "Vedetta", "Scoglio", "Fanale"] },
   ];
-  const ENG = ["marea", "vignette", "bottoni", "luci", "nastro", "concilio", "lavagna", "duello", "atb", "gadget", "iso", "volo", "combo", "consegna", "ciak"];
+  const ENG = ["marea", "vignette", "bottoni", "luci", "nastro", "concilio", "lavagna", "duello", "atb", "gadget", "iso", "volo", "combo", "consegna", "ciak", "ipogeo"];
   const RAR = { c: ["Comune", "#9aa5b1", 1], r: ["Rara", "#3a8ad8", 2], e: ["Epica", "#a85ad8", 3], l: ["Leggendaria", "#ffd23f", 4] };
   // i legami tra saghe diverse: +3 di intesa se entrambi in squadra
   const LINKS = [
+    ["dg_fiamma", "sq_scintilla", "Scintille gemelle"], ["dg_ruggine", "cm_bastiano", "Capitani che non smettono"],
     ["sq_ines", "mg_tilde", "Nonne d'acciaio"], ["rz_ferruccio", "mg_bullone", "Bulloni postali"], ["rz_orsola", "sq_ines", "Le capitane di quartiere"], ["cs_baldo", "ft_atlante", "Leggende che tornano in campo"], ["cs_max", "sq_brina", "Sorrisi d'estate"], ["sq_scintilla", "mg_brace", "Chi gioca col fuoco"], ["sq_brina", "ve_selva", "Fresco e gentile"],
     ["ft_atlante", "cm_bastiano", "Leggende che tornano"], ["ft_vega", "so_zorgo", "Venuti dalle stelle"], ["ft_sam", "cm_pio", "I piedi per terra"],
     ["td_corrado", "tc_gualtiero", "Vecchi capitani"], ["td_isotta", "tc_ysolde", "Eredi che non obbediscono"], ["td_lia", "gr_vela", "Ribelli dei tetti"],
@@ -342,6 +347,7 @@
       combo: "quattro poteri dalle tue carte, tiri (ATT), contrasti e difesa (DIF), pressing (TEC)",
       consegna: "il compagno di volo dalle tue carte, tiri (ATT), recuperi (DIF), tempo +" + T.te * 4 + "s (TEC)",
       marea: `pedane ${3 + (T.te >= 2 ? 1 : 0)} (TEC), portiere +${T.df * 2}% (DIF), tiri più precisi (ATT)`,
+      ipogeo: `cuori ${4 + (T.df >= 2 ? 1 : 0)} (DIF), tiro +${T.at * 3}% (ATT), tempo +${T.te * 3}s (TEC)`,
       ciak: `ciak di riserva ${2 + (I >= 8 ? 1 : 0) + (T.te >= 3 ? 1 : 0)} (TEC), idee riuscite con ATT/DIF/TEC`,
       iso: `terreno ${["saline", "vetro", "ruggine"][I % 3]}, tiro +${T.at} (ATT), contrasto +${T.df} (DIF), passaggio +${T.te} (TEC)`,
       atb: `statistiche +${Math.floor(I / 3)}, tiro +${T.at} (ATT), difesa +${T.df} (DIF), passaggio +${T.te} (TEC)`,
@@ -362,6 +368,7 @@
       combo: { heroes: team.slice(0, 4).map((id, k) => ({ name: String(name(id)).split(/[ ,]/)[0], power: ["scatto", "ghiaccio", "vento", "fuoco"][k] })), us: "La Squadra dei Sogni" },
       consegna: { mate: names[0], us: "La Squadra dei Sogni" },
       marea: { mates: names.slice(0, 2), us: "La Squadra dei Sogni" },
+      ipogeo: { us: "La Squadra dei Sogni" },
       ciak: { mates: names.slice(0, 2), us: "La Squadra dei Sogni", takes: 2 + (I >= 8 ? 1 : 0) + (T.te >= 3 ? 1 : 0) },
       volo: { energy: 100 + I * 3 + T.te * 5, mates: names.slice(0, 1), us: "La Squadra dei Sogni" },
       gadget: { slots: Math.min(6, 4 + (I >= 10 ? 1 : 0) + (T.te >= 2 ? 1 : 0)), mates: names.slice(0, 2), us: "La Squadra dei Sogni" },

@@ -49,8 +49,8 @@
 
     // ---- la stanza di Asterio (partita importante): prima e dopo
     K.hooks[1] = {
-      pre: (go) => K.scene([["dg_asterio", "[felice] (Fa una riverenza, con le corna che sfiorano il soffitto.) Benvenuto nell'area di rigore. Non c'è un'area di rigore, da queste parti: c'è un labirinto. Ma io ho sempre detto «rigore» e ci siamo capiti."], ["dg_fiamma", "[pensa] Asterio gioca a uomo, ma anche a muro. E a toro. Occhio alla carica: si vede arrivare, poi non si vede più."]], go, "dg_p1"),
-      won: (r, d) => K.scene([["dg_asterio", "[triste] (È in ginocchio, con il pallone fra le corna.) Ecco. Ecco cosa succede a dare tutto. Trent'anni di marcatura, e un ragazzino mi passa in mezzo ai pilastri."]], () => ask("dg_asterio", "(Ti guarda dal basso. Non chiede niente. Lo chiede tutto.)", [
+      pre: (go) => F.is("dg_pieta1") ? go() : K.scene([["dg_asterio", "[felice] (Fa una riverenza, con le corna che sfiorano il soffitto.) Benvenuto nell'area di rigore. Non c'è un'area di rigore, da queste parti: c'è un labirinto. Ma io ho sempre detto «rigore» e ci siamo capiti."], ["dg_fiamma", "[pensa] Asterio gioca a uomo, ma anche a muro. E a toro. Occhio alla carica: si vede arrivare, poi non si vede più."]], go, "dg_p1"),
+      won: (r, d) => F.is("dg_pieta1") ? K.scene([["dg_asterio", "[ride] (Si rialza da solo, scrollando la polvere.) Ancora tu! Ormai la strada tra i pilastri la conosci meglio di me. Chiedo un cambio di pilastri."]], () => K.pianoDone(1), "dg_p1") : K.scene([["dg_asterio", "[triste] (È in ginocchio, con il pallone fra le corna.) Ecco. Ecco cosa succede a dare tutto. Trent'anni di marcatura, e un ragazzino mi passa in mezzo ai pilastri."]], () => ask("dg_asterio", "(Ti guarda dal basso. Non chiede niente. Lo chiede tutto.)", [
         { label: "Dagli la mano per rialzarsi", sub: "Pietà", big: true, fn: () => mercy(true) },
         { label: "Prendi il pallone e vai", sub: "Il torneo non aspetta", big: true, fn: () => mercy(false) },
       ], "dg_p1"), "dg_p1"),
