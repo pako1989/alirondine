@@ -42,9 +42,11 @@
     const p = (A.opt && A.opt.pitch) || "erba";
     const hasProps = (A.opt && A.opt.pu !== false) || p === "molo" || p === "sabbia" || p === "campo";
     if (hasProps) {
+      // posizioni diverse a ogni partita: due barili a specchio (stessa quota o quota opposta), lontani dalle porte
+      const bx = 55 + Math.random() * 50, by = 30 + Math.random() * 140, by2 = Math.random() < 0.5 ? by : 200 - by;
       AP.props = [
-        { type: "barrel", x: 65, y: 36, r: 7.5, wobble: 0, hp: 2, broken: false },
-        { type: "barrel", x: 255, y: 36, r: 7.5, wobble: 0, hp: 2, broken: false }
+        { type: "barrel", x: Math.round(bx), y: Math.round(by), r: 7.5, wobble: 0, hp: 2, broken: false },
+        { type: "barrel", x: Math.round(320 - bx), y: Math.round(by2), r: 7.5, wobble: 0, hp: 2, broken: false }
       ];
     } else {
       AP.props = [];
