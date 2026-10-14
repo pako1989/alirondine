@@ -8,7 +8,7 @@ async function run(w) {
   const { browser, page, errors } = await L.setup({ w, extra });
   await page.evaluate(() => window.__salone.salaGiochi(() => {})); await page.waitForTimeout(300);
   const ms = await page.evaluate(() => [...document.querySelectorAll(".salOv [data-m]")].map((b) => b.dataset.m + ":" + (b.querySelector(".pe").textContent === "🔒" ? "chiuso" : "aperto")));
-  if (ms.join() !== "vignette:chiuso,atb:chiuso,bottoni:aperto,nastro:aperto,luci:chiuso,lavagna:chiuso,duello:chiuso,concilio:chiuso,gadget:chiuso,iso:chiuso,volo:chiuso,ciak:chiuso,consegna:chiuso,combo:chiuso,ritagli:chiuso,stangata:chiuso,arrembaggio:chiuso,corona:chiuso,rintocchi:chiuso,circo:chiuso") errors.push("cabinati sbagliati: " + ms.join());
+  if (ms.join() !== "vignette:chiuso,atb:chiuso,bottoni:aperto,nastro:aperto,luci:chiuso,lavagna:chiuso,duello:chiuso,concilio:chiuso,gadget:chiuso,iso:chiuso,volo:chiuso,ciak:chiuso,consegna:chiuso,combo:chiuso,ritagli:chiuso,stangata:chiuso,arrembaggio:chiuso,corona:chiuso,rintocchi:chiuso,circo:chiuso,marea:chiuso") errors.push("cabinati sbagliati: " + ms.join());
   if (w === 390) await L.shot(page, "sala");
   // Super-Bottoni: il boss c'è (saga finita), si sceglie il potere
   await page.evaluate(() => document.querySelector('.salOv [data-m="bottoni"]').click()); await page.waitForTimeout(200);
@@ -64,4 +64,20 @@ async function torneo(w) {
   const rec = await page.evaluate(() => JSON.parse(localStorage.getItem("ali-di-rondine.salagiochi") || "{}")); if (!rec.cup || rec.cup.vignette !== 1) errors.push("coppa non registrata: " + JSON.stringify(rec.cup));
   L.check(`Sala Giochi · torneo a eliminazione (${w} px)`, errors); await browser.close();
 }
-(async () => { await run(390); await run(320); await ospiti(390); await torneo(390); await torneo(320); })().catch((e) => { console.error("✗ sala:", e.message); process.exit(1); });
+// Naufraghi del Pallone: il cabinato Marea si gioca davvero (partita intera a pilota automatico) e l'ospite Tobia arriva al Borgo
+async function marea(w) {
+  const extra = { "ali-di-rondine.naufraghi": { v: 1, ch: 3, step: { 1: 5, 2: 5, 3: 9 }, done: { 1: "audace", 2: "ascolto", 3: "rotta" }, ends: ["rotta"], diffSet: true, flags: {} } };
+  const { browser, page, errors } = await L.setup({ w, extra });
+  const gl = await page.evaluate(() => window.__borgoGuests.list()); if (!gl.some((x) => x.id === "nf_tobia" && x.on)) errors.push("Tobia non arriva al Borgo: " + JSON.stringify(gl.map((x) => x.id + x.on)));
+  await page.evaluate(() => window.__salone.salaGiochi(() => {})); await page.waitForTimeout(300);
+  const st = await page.evaluate(() => { const b = document.querySelector('.salOv [data-m="marea"]'); return b ? b.querySelector(".pe").textContent : null; }); if (st === null || st === "🔒") errors.push("cabinato Marea non aperto: " + st);
+  await page.evaluate(() => document.querySelector('.salOv [data-m="marea"]').click()); await page.waitForTimeout(200);
+  await page.evaluate(() => document.querySelector('.salOv [data-o="9"]').click()); await page.waitForTimeout(400);
+  if (!(await page.evaluate(() => !!document.querySelector(".mrOv")))) errors.push("la partita Marea non parte dal cabinato");
+  await page.click(".mrOv .goB"); await page.waitForTimeout(300);
+  await page.evaluate(() => new Promise((res) => { const S = window.__marea.state, M = window.__marea; S.autoPilot = true; let n = 0; const iv = setInterval(() => { for (let i = 0; i < 90 && !S.over; i++) M.step(S, 1 / 60); n++; if (S.over || n > 400) { clearInterval(iv); if (S.over && !S.res) S.finish(false); res(); } }, 5); }));
+  await page.waitForSelector(".mrOv .goB", { timeout: 15000 }); await page.click(".mrOv .goB"); await page.waitForTimeout(400);
+  const rec = await page.evaluate(() => JSON.parse(localStorage.getItem("ali-di-rondine.salagiochi") || "{}")); if (!rec.p || rec.p.marea !== 1) errors.push("partita Marea non registrata: " + JSON.stringify(rec.p));
+  L.check(`Sala Giochi · cabinato Marea (${w} px)`, errors); await browser.close();
+}
+(async () => { await run(390); await run(320); await ospiti(390); await torneo(390); await torneo(320); await marea(390); await marea(320); })().catch((e) => { console.error("✗ sala:", e.message); process.exit(1); });

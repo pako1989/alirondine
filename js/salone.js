@@ -309,6 +309,10 @@
       opp: [{ name: "I Legionari della Suburra", color: "#b45309", style: "equilibrata" }, { name: "I Gladiatori di Spartaco", color: "#dc2626", style: "pressing" }],
       boss: { name: "I Pretoriani Imperiali", color: "#854d0e", style: "contropiede" },
       opts: (o, h, boss) => ({ title: `Circo Massimo · contro ${o.name}`, us: "Legionari Alati", usColor: "#b91c1c", turns: boss ? 8 : 6, hero: { name: h.name || "Tu" }, opp: o }) },
+    { id: "marea", t: "Marea", e: "🌊", saga: "naufraghi", eng: "__marea", d: "La partita dell'isola: un campo di celle che si allagano mentre si gioca. Passa, tira e alza pedane asciutte prima che sparisca la tua metà.",
+      opp: [{ name: "Il Bar del Cocco", color: "#16a34a", style: "equilibrata", players: [{ name: "Cocco" }, { name: "Noce" }] }, { name: "I Granchi di Punta Cieca", color: "#dc2626", style: "pressing", players: [{ name: "Chela" }, { name: "Pinza" }] }],
+      boss: { name: "Il Riflusso", color: "#0e7490", style: "contropiede", players: [{ name: "Risacca" }, { name: "Frangente" }] },
+      opts: (o, h, boss) => ({ title: `Marea · contro ${o.name}`, us: "I Rondine", usColor: "#1d4ed8", duration: boss ? 110 : 100, hero: { name: h.name || "Tu" }, mates: [{ name: "Bora" }, { name: "Gaspare" }], opp: o }) },
   ];
   function sgState(m) { const s = SAGAS.find((x) => x.id === m.saga), x = s ? state(s) : null; return { s, open: !!(x && (x.doneN >= 1)), boss: !!(x && x.endsFound > 0) }; }
   function openSalaGiochi(back) {

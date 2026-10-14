@@ -28,6 +28,7 @@
     pugno: ["ali-di-rondine.pugno", "Per un pugno di rigori", "#ea580c", "__pugno"],
     roma: ["ali-di-rondine.roma", "Ave Calcio! · I Gladiatori del Pallone", "#b91c1c", "__roma"],
     galletta: ["ali-di-rondine.galletta", "S.O.S. Galletta: I Bucanieri del Biscotto", "#d97706", "__galletta"],
+    naufraghi: ["ali-di-rondine.naufraghi", "Naufraghi del Pallone", "#0e9aa7", "__naufraghi"],
     campana: ["ali-di-rondine.campana", "La Notte dei Cento Rintocchi", "#ca8a04", "__campana"],
     regno: ["ali-di-rondine.regno", "Cronache del Regno Ultimo", "#a82a3a", "__regno"],
     vallombra: ["ali-di-rondine.storia-campione", "Vallombra", "#6a8aa8", "__storiaCampione"], kronenburg: ["ali-di-rondine.kronenburg-story", "Kronenburg", "#8a1a2a", "__kronenburgStory"], pirati: ["ali-di-rondine.pirati-story", "I Pirati della Tempesta Celeste", "#2a8ac8", "__piratiStory"],
@@ -99,6 +100,8 @@
     ["cp_crispino", "campana", "c", 60, 72, 70, "C", 1], ["cp_cacace", "campana", "c", 48, 82, 54, "D", 1], ["cp_rosetta", "campana", "r", 68, 54, 76, "C", 1],
     ["cp_tito", "campana", "r", 74, 52, 78, "A", 2], ["cp_peppe", "campana", "e", 78, 80, 56, "D", 2],
     ["cp_sindaco", "campana", "c", 50, 70, 64, "D", 2], ["cp_mastro", "campana", "l", 84, 78, 86, "C", 3],
+    // Naufraghi del Pallone
+    ["nf_gaspare", "naufraghi", "c", 40, 78, 62, "P", 1], ["nf_bora", "naufraghi", "r", 62, 72, 80, "C", 1], ["nf_tobia", "naufraghi", "c", 70, 46, 68, "A", 2], ["nf_scoglio", "naufraghi", "e", 84, 66, 82, "A", 3],
     // Cronache del Regno Ultimo
     ["re_evaristo", "regno", "c", 44, 70, 76, "D", 1], ["re_oriele", "regno", "r", 62, 60, 82, "C", 1], ["re_brando", "regno", "r", 72, 82, 56, "D", 1],
   ];
@@ -130,6 +133,7 @@
   const BY = Object.fromEntries(CARDS.map((c) => [c.id, c]));
   // la frase speciale che la carta dice quando arriva a tre stelle
   const FRASI = {
+    nf_gaspare: "Parate registrate: tutte. Gol subiti: li ho messi alla voce «varie».", nf_bora: "Pensa, decidi, vai. In quest'ordine, e senza panico.", nf_tobia: "Ripeto il gol al rallentatore: sembra ancora più bello.", nf_scoglio: "La partita è lunga quanto serve. Io ho tempo.",
     sq_brina: "Gusto del giorno: vittoria. Molto fredda.", sq_gommo: "Mi allungo fino alla porta, se serve.", sq_scintilla: "Il forno sono io. E anche il tiro.", sq_ines: "Il ferro mi vuole bene. Anche il pallone, oggi.", rz_ferruccio: "E IL CORRIERE TIRA… CONSEGNATO!", rz_timbro: "Gol approvato. In triplice copia.", rz_borea: "Ho parato un asteroide. Un pallone è facile.", rz_orsola: "Come ai campetti: chi vince decide.", cs_ugo: "Idea: vinciamo. Questa funziona.", cs_max: "Che bella partita! Tutte le partite sono belle!", cs_lucilla: "Contratto firmato. Gol incluso.", cs_baldo: "Che zoccolata!",
     re_evaristo: "Con tutto il rispetto: il pallone è in fuorigioco di protocollo.", re_oriele: "Una corona si porta con la schiena dritta. E con un buon paio di scarpe.", re_brando: "La pace è una guerra che si è messa in ordine. Anche a pallone.",
     rm_furbio: "Un senatore non perde mai: al massimo rinvia il risultato al prossimo plebiscito.", rm_spartaco: "Gli scudi si spezzano, ma la difesa della Suburra non crolla mai!", rm_augusta: "Gli astri avevano previsto questo gol all'incrocio fin dal primo tempo.", rm_cesare: "Veni, vidi, vici: pollice verso l'alto per questo trionfo nell'arena!",
@@ -186,7 +190,7 @@
     { name: "Union Cometa", color: "#7a5ad8", style: "contropiede", f: 73, pl: ["Coda", "Chioma", "Nucleo", "Scia"] },
     { name: "I Leggendari del Faro", color: "#1a2a4a", style: "equilibrata", f: 76, pl: ["Lampo", "Vedetta", "Scoglio", "Fanale"] },
   ];
-  const ENG = ["vignette", "bottoni", "luci", "nastro", "concilio", "lavagna", "duello", "atb", "gadget", "iso", "volo", "combo", "consegna", "ciak"];
+  const ENG = ["marea", "vignette", "bottoni", "luci", "nastro", "concilio", "lavagna", "duello", "atb", "gadget", "iso", "volo", "combo", "consegna", "ciak"];
   const RAR = { c: ["Comune", "#9aa5b1", 1], r: ["Rara", "#3a8ad8", 2], e: ["Epica", "#a85ad8", 3], l: ["Leggendaria", "#ffd23f", 4] };
   // i legami tra saghe diverse: +3 di intesa se entrambi in squadra
   const LINKS = [
@@ -202,7 +206,7 @@
     ["vl_teodora", "chr_elias", "Custodi dell'orario"], ["vl_vica", "ts_alba", "Il paese in cucina"], ["kb_vespera", "dc_agata", "Menti deduttive"], ["kb_baelor", "tc_ysolde", "Chi sa tutto"], ["kb_gareth", "tc_gualtiero", "Cavalieri d'onore"], ["pi_anemona", "ve_selva", "Occhi sul vento"],
     ["al_kira", "vl_bianca", "Mani nell'officina"], ["al_armatura", "gr_gancio", "Armadi gentili"], ["chr_aria", "ep_ada", "Guardiane del tempo"], ["omb_maya", "dc_nina", "Penne d'inchiesta"], ["rag_sigrid", "bv_boris", "Voci dei vecchi tempi"], ["rag_brokk", "sh_muramasa", "Mastri fabbri"],
     ["bv_nadia", "sh_hanzo", "Volpi e ombre"], ["sh_hayato", "cm_bastiano", "Vecchi maestri"], ["fe_roland", "td_corrado", "Eredi di casate"], ["abi_nora", "nl_fiammetta", "Luci nella notte"], ["cr_aira", "ve_sbuffo", "Venute dal cielo"], ["mu_ugolino", "tc_ardo", "Muri di pietra"], ["lb_narratore", "pi_morgana", "Voci che comandano"],
-    ["cp_crispino", "cp_cacace", "Guardie e Tonache"], ["cp_tito", "cp_peppe", "I Soliti Ignoti"], ["cp_rosetta", "gl_cannella", "Salumi e Gallette"], ["re_brando", "mu_ugolino", "Muri di pietra"],
+    ["nf_bora", "nf_gaspare", "Capitana e Magazziniere"], ["cp_crispino", "cp_cacace", "Guardie e Tonache"], ["cp_tito", "cp_peppe", "I Soliti Ignoti"], ["cp_rosetta", "gl_cannella", "Salumi e Gallette"], ["re_brando", "mu_ugolino", "Muri di pietra"],
     ["rm_spartaco", "pr_sceriffo", "La Legge e la Sabbia"], ["rm_furbio", "tc_ysolde", "Senatori e Troni"],
   ];
   // le otto sfide del Torneo dei Sogni: cabinato della Sala Giochi (motore) e avversario
@@ -335,6 +339,7 @@
       volo: `tiro +${T.at * 5}% (ATT), difesa +${T.df * 6}% (DIF), energia ${100 + I * 3 + T.te * 5} (TEC)`,
       combo: "quattro poteri dalle tue carte, tiri (ATT), contrasti e difesa (DIF), pressing (TEC)",
       consegna: "il compagno di volo dalle tue carte, tiri (ATT), recuperi (DIF), tempo +" + T.te * 4 + "s (TEC)",
+      marea: `pedane ${3 + (T.te >= 2 ? 1 : 0)} (TEC), portiere +${T.df * 2}% (DIF), tiri più precisi (ATT)`,
       ciak: `ciak di riserva ${2 + (I >= 8 ? 1 : 0) + (T.te >= 3 ? 1 : 0)} (TEC), idee riuscite con ATT/DIF/TEC`,
       iso: `terreno ${["saline", "vetro", "ruggine"][I % 3]}, tiro +${T.at} (ATT), contrasto +${T.df} (DIF), passaggio +${T.te} (TEC)`,
       atb: `statistiche +${Math.floor(I / 3)}, tiro +${T.at} (ATT), difesa +${T.df} (DIF), passaggio +${T.te} (TEC)`,
@@ -354,6 +359,7 @@
       iso: { mates: names.slice(0, 2), us: "La Squadra dei Sogni", terrain: ["saline", "vetro", "ruggine"][I % 3] },
       combo: { heroes: team.slice(0, 4).map((id, k) => ({ name: String(name(id)).split(/[ ,]/)[0], power: ["scatto", "ghiaccio", "vento", "fuoco"][k] })), us: "La Squadra dei Sogni" },
       consegna: { mate: names[0], us: "La Squadra dei Sogni" },
+      marea: { mates: names.slice(0, 2), us: "La Squadra dei Sogni" },
       ciak: { mates: names.slice(0, 2), us: "La Squadra dei Sogni", takes: 2 + (I >= 8 ? 1 : 0) + (T.te >= 3 ? 1 : 0) },
       volo: { energy: 100 + I * 3 + T.te * 5, mates: names.slice(0, 1), us: "La Squadra dei Sogni" },
       gadget: { slots: Math.min(6, 4 + (I >= 10 ? 1 : 0) + (T.te >= 2 ? 1 : 0)), mates: names.slice(0, 2), us: "La Squadra dei Sogni" },

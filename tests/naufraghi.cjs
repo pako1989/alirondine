@@ -193,4 +193,16 @@ async function marea(w) {
   const q = await page.evaluate(() => window.__done); if (!q || !q.quit) errors.push("uscita non registrata " + JSON.stringify(q));
   L.check(`Marea (${w} px)`, errors); await browser.close();
 }
-(async () => { await marea(390); await marea(320); await c1(390); await c1(320); })().catch((e) => { console.error("✗ naufraghi:", e.stack); process.exit(1); });
+// Squadra dei Sogni: le quattro carte arrivano a saga conclusa, e la partita Marea parte con i bonus delle carte
+async function sogni(w) {
+  const extra = { "ali-di-rondine.naufraghi": { v: 1, ch: 3, step: { 1: 5, 2: 5, 3: 9 }, done: { 1: "audace", 2: "ascolto", 3: "rotta" }, ends: ["rotta"], diffSet: true, flags: {} } };
+  const { browser, page, errors } = await L.setup({ w, extra });
+  await page.evaluate(() => window.__sogni.open()); await page.waitForTimeout(300);
+  const own = await page.evaluate(() => window.__sogni._load().own.filter((id) => /^nf_/.test(id)).sort().join());
+  if (own !== "nf_bora,nf_gaspare,nf_scoglio,nf_tobia") errors.push("carte dei Naufraghi: " + own);
+  await page.evaluate(() => { window.__done = null; const t = ["nf_bora", "nf_scoglio", "nf_tobia", "nf_gaspare"]; window.__sogni._launch("marea", null, "Prova", t, false, (r) => { window.__done = r; }); }); await page.waitForTimeout(400);
+  if (!(await page.evaluate(() => !!document.querySelector(".mrOv")))) errors.push("Marea non parte dalla Squadra dei Sogni");
+  else { const mx = await page.evaluate(() => { const S = window.__marea.state; return [S.mx, S.par.te, S.par.at]; }); if (!(mx[0] >= 3)) errors.push("bonus Marea: " + JSON.stringify(mx)); }
+  L.check(`Squadra dei Sogni con i Naufraghi (${w} px)`, errors); await browser.close();
+}
+(async () => { await sogni(390); await marea(390); await marea(320); await c1(390); await c1(320); })().catch((e) => { console.error("✗ naufraghi:", e.stack); process.exit(1); });

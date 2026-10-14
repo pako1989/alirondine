@@ -33,7 +33,7 @@
   function newSim(o, rnd) {
     o = o || {}; rnd = rnd || Math.random;
     const par = parOpp(o), mates = o.mates || [], oppN = (o.opp && o.opp.players) || [];
-    const S = { o, par, rnd, t: 0, D: o.duration || DUR, a: 0, b: 0, phase: "play", over: false, golden: false, L: 0, bias: [0, 0], charges: CHMAX, chT: 0, pass: 0, ev: [], pause: 0, kick: 0, data: { gol: 0, pedane: 0, affondati: 0, mare: false, parate: 0 }, cells: [], P: [], ball: { x: FW / 2, y: FH / 2, vx: 0, vy: 0, car: null, last: 0, lock: 0, who: null, sink: 0 }, hint: "", seaWho: -1, sprintCd: 0 };
+    const S = { o, par, rnd, t: 0, D: o.duration || DUR, a: 0, b: 0, phase: "play", over: false, golden: false, L: 0, bias: [0, 0], charges: CHMAX + (par.te >= 2 ? 1 : 0), mx: CHMAX + (par.te >= 2 ? 1 : 0), chT: 0, pass: 0, ev: [], pause: 0, kick: 0, data: { gol: 0, pedane: 0, affondati: 0, mare: false, parate: 0 }, cells: [], P: [], ball: { x: FW / 2, y: FH / 2, vx: 0, vy: 0, car: null, last: 0, lock: 0, who: null, sink: 0 }, hint: "", seaWho: -1, sprintCd: 0 };
     for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
       const dr = Math.abs(r + 0.5 - ROWS / 2) / (ROWS / 2), dc = Math.abs(c + 0.5 - COLS / 2) / (COLS / 2);
       S.cells.push({ thr: 0.1 + 0.5 * (1 - dr) + 0.2 * (1 - dc) + 0.12 * rnd(), lvl: 0, ped: 0 });
@@ -119,7 +119,7 @@
     const ld = 0.3, tx = to.x + to.vx * ld, ty = to.y + to.vy * ld; kick(S, from, tx, ty, 170 * (speedF || 1), 0); S.rcv = to; S.pass++; S.data.passaggi = (S.data.passaggi || 0) + (from.team === 0 ? 1 : 0); return true;
   }
   function doShot(S, p, tx, ty, power, noise) {
-    kick(S, p, tx, ty, 120 + 150 * clamp(power, 0, 1), noise); S.shot = { team: p.team, t: S.t }; S.data.tiri = (S.data.tiri || 0) + (p.team === 0 ? 1 : 0);
+    kick(S, p, tx, ty, 120 + 150 * clamp(power, 0, 1), (noise || 0) * (p.team === 0 ? 1 - 0.12 * Math.min(4, S.par.at || 0) : 1)); S.shot = { team: p.team, t: S.t }; S.data.tiri = (S.data.tiri || 0) + (p.team === 0 ? 1 : 0);
   }
   function loseBall(S, from, to) { if (S.ball.car === from) { take(S, to); from.stun = Math.max(from.stun, 0.45); } }
 
@@ -186,7 +186,7 @@
     S.L = 1.45 * Math.pow(prog, 1.05) + (S.golden ? (S.t - S.D) * 0.045 : 0) + 0.05 * Math.sin(S.t / 3.1) * prog;
     S.bias[0] = Math.max(-0.35, Math.min(0.9, S.bias[0])); S.bias[1] = Math.max(-0.35, Math.min(0.9, S.bias[1]));
     S.cells.forEach((c, i) => { if (c.ped > 0) c.ped -= dt; const t = seaTarget(S, c, i), r = t > c.lvl ? 0.55 : 0.35; c.lvl += clamp(t - c.lvl, -r * dt, r * dt); });
-    S.chT += dt; if (S.charges < CHMAX && S.chT > 5) { S.charges++; S.chT = 0; } if (S.charges >= CHMAX) S.chT = 0;
+    S.chT += dt; if (S.charges < S.mx && S.chT > 5) { S.charges++; S.chT = 0; } if (S.charges >= S.mx) S.chT = 0;
     if (S.sprintCd > 0) S.sprintCd -= dt;
     if (S.pause > 0) { S.pause -= dt; if (S.phase === "goal" && S.pause <= 0) { S.phase = "play"; kickoff(S, S.kick); } return; }
     // squadre e palla
@@ -433,7 +433,7 @@
     function hud() {
       scEl.textContent = `${S.a} – ${S.b}`; const left = Math.max(0, Math.ceil(S.D - S.t)); tmEl.textContent = S.golden ? "ALTA MAREA: gol d'oro!" : `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
       const dd = [drowned(S, 0), drowned(S, 1)]; seaEl.textContent = `La tua metà: ${dd[0]}/30 · loro: ${dd[1]}/30`;
-      pdEl.innerHTML = [0, 1, 2].map((i) => `<i class="${i < S.charges ? "on" : ""}"></i>`).join("") + `<span style="margin-left:4px;font-size:11px">pedane</span>`;
+      pdEl.innerHTML = Array.from({ length: S.mx }, (_, i) => i).map((i) => `<i class="${i < S.charges ? "on" : ""}"></i>`).join("") + `<span style="margin-left:4px;font-size:11px">pedane</span>`;
     }
     function frame(now) {
       if (closed) return; const dt = clamp((now - last) / 1000, 0, 0.05); last = now; fr++;
