@@ -2481,6 +2481,326 @@
     }
   }
 
+  // --- 16. S.O.S. GALLETTA · IL MOLO DELLA BISCOTTIERA ---
+  function drawDetailedGallettaPorto(g, W, H, f) {
+    // Cielo tropicale con sfumatura azzurra e riflessi d'oro
+    const sky = g.createLinearGradient(0, 0, 0, 110);
+    sky.addColorStop(0, "#0284c7");
+    sky.addColorStop(0.5, "#38bdf8");
+    sky.addColorStop(1, "#fef3c7");
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, 110);
+
+    // Sole caldo e nuvolette alla panna
+    const sunGrad = g.createRadialGradient(W * 0.78, 38, 2, W * 0.78, 38, 32);
+    sunGrad.addColorStop(0, "#fef08a");
+    sunGrad.addColorStop(0.4, "rgba(253, 224, 71, 0.7)");
+    sunGrad.addColorStop(1, "rgba(254, 243, 199, 0)");
+    g.fillStyle = sunGrad;
+    g.beginPath(); g.arc(W * 0.78, 38, 32, 0, Math.PI * 2); g.fill();
+
+    // Nuvole soffici a ciambella
+    g.fillStyle = "rgba(255, 255, 255, 0.85)";
+    [ [40, 30, 24], [60, 26, 30], [80, 32, 22], [W - 140, 25, 26], [W - 120, 20, 32], [W - 95, 26, 22] ].forEach(([cx, cy, cr]) => {
+      g.beginPath(); g.arc(cx, cy, cr, 0, Math.PI * 2); g.fill();
+    });
+
+    // Gabbiani che volteggiano nel vento caldo
+    g.strokeStyle = "#475569";
+    g.lineWidth = 1.2;
+    for (let i = 0; i < 4; i++) {
+      const gx = (i * 85 + f * 0.6) % (W + 60) - 30;
+      const gy = 28 + Math.sin(f * 0.08 + i) * 8 + i * 9;
+      g.beginPath();
+      g.arc(gx, gy, 5, Math.PI, 0, true);
+      g.arc(gx + 9, gy, 5, Math.PI, 0, true);
+      g.stroke();
+    }
+
+    // Mare turchese spumeggiante dell'Oceano della Melassa
+    const sea = g.createLinearGradient(0, 85, 0, H);
+    sea.addColorStop(0, "#0369a1");
+    sea.addColorStop(0.3, "#0284c7");
+    sea.addColorStop(0.7, "#0c4a6e");
+    sea.addColorStop(1, "#082f49");
+    g.fillStyle = sea;
+    g.fillRect(0, 85, W, H - 85);
+
+    // Onde con creste di schiuma marina animate
+    for (let w = 0; w < 7; w++) {
+      const wy = 92 + w * 12;
+      const off = Math.sin(f * 0.05 + w) * 16;
+      g.fillStyle = "rgba(224, 242, 254, 0.45)";
+      g.fillRect((off + w * 45) % W, wy, 45, 2.5);
+      g.fillRect((off + w * 45 + 120) % W, wy + 2, 35, 1.5);
+    }
+
+    // Galeone corsaro all'orizzonte (centro-destra)
+    const gx = W * 0.68, gy = 70;
+    // Scafo
+    g.fillStyle = "#451a03";
+    g.beginPath();
+    g.moveTo(gx - 20, gy + 14);
+    g.lineTo(gx + 26, gy + 14);
+    g.lineTo(gx + 32, gy + 6);
+    g.lineTo(gx - 25, gy + 6);
+    g.closePath();
+    g.fill();
+    // Alberi e vele spiegate
+    px(g, gx - 6, gy - 20, 2, 26, "#29140c");
+    px(g, gx + 12, gy - 16, 2, 22, "#29140c");
+    g.fillStyle = "#fef3c7";
+    g.fillRect(gx - 18, gy - 18, 14, 12);
+    g.fillRect(gx + 2, gy - 14, 12, 10);
+    // Bandiera corsara con biscotto morsicato
+    g.fillStyle = "#0f172a";
+    g.fillRect(gx - 6, gy - 24, 8, 5);
+    px(g, gx - 4, gy - 23, 2, 2, "#d97706");
+
+    // Il Molo della Biscottiera (primo piano in basso e a sinistra)
+    // Palafitte immerse nell'acqua
+    for (let px0 = 15; px0 < W - 15; px0 += 36) {
+      px(g, px0, 118, 7, H - 118, "#29140c");
+      px(g, px0 + 2, 120, 3, H - 120, "#451a03");
+    }
+
+    // Tavolato del molo in legno di quercia dorata
+    g.fillStyle = "#78350f";
+    g.fillRect(0, 122, W, H - 122);
+    for (let y = 126; y < H; y += 10) {
+      px(g, 0, y, W, 1.5, "#451a03");
+    }
+
+    // Forno a cupola dei maestri fornai a sinistra sul pontile
+    const fx = 35, fy = 110;
+    // Cupola di mattoni
+    g.fillStyle = "#9a3412";
+    g.beginPath();
+    g.arc(fx + 18, fy + 8, 18, Math.PI, 0);
+    g.lineTo(fx + 36, fy + 24);
+    g.lineTo(fx, fy + 24);
+    g.closePath();
+    g.fill();
+    // Bocca del forno ardente
+    g.fillStyle = "#ea580c";
+    g.fillRect(fx + 12, fy + 12, 12, 12);
+    g.fillStyle = "#fef08a";
+    g.fillRect(fx + 15, fy + 15, 6, 6);
+    // Ciminiera fumante
+    px(g, fx + 24, fy - 10, 6, 12, "#7c2d12");
+    // Fumo alla cannella che sale roteando
+    for (let s = 0; s < 5; s++) {
+      const sx = fx + 27 + Math.sin(f * 0.08 + s) * (6 + s * 3);
+      const sy = fy - 14 - s * 12 - (f * 0.4 % 12);
+      g.fillStyle = `rgba(253, 186, 116, ${0.45 - s * 0.08})`;
+      g.beginPath(); g.arc(sx, sy, 4 + s * 2, 0, Math.PI * 2); g.fill();
+    }
+
+    // Barili di melassa cerchiati di ferro a destra
+    const bx = W - 55, by = 135;
+    px(g, bx, by, 18, 24, "#451a03");
+    px(g, bx + 2, by + 3, 14, 18, "#78350f");
+    px(g, bx, by + 5, 18, 3, "#d97706");
+    px(g, bx, by + 16, 18, 3, "#d97706");
+
+    // Grande ancora marina a destra appoggiata alla banchina
+    px(g, bx - 22, by + 2, 4, 22, "#334155");
+    g.strokeStyle = "#475569";
+    g.lineWidth = 3;
+    g.beginPath();
+    g.arc(bx - 20, by + 18, 10, 0.2, Math.PI - 0.2);
+    g.stroke();
+  }
+
+  // --- 17. S.O.S. GALLETTA · LA STIVA DELLA CARACCA REALE ---
+  function drawDetailedGallettaCaracca(g, W, H, f) {
+    // Interno della stiva in legno pregiato di mogano e rovere dorato
+    const bgGrad = g.createLinearGradient(0, 0, 0, H);
+    bgGrad.addColorStop(0, "#29140c");
+    bgGrad.addColorStop(0.5, "#451a03");
+    bgGrad.addColorStop(1, "#1c0b03");
+    g.fillStyle = bgGrad;
+    g.fillRect(0, 0, W, H);
+
+    // Travature e costole ricurve della fiancata della caracca
+    for (let x = 20; x < W; x += 45) {
+      g.fillStyle = "#1c0d06";
+      g.beginPath();
+      g.moveTo(x - 4, 0);
+      g.quadraticCurveTo(x + 12, H / 2, x - 4, H);
+      g.lineTo(x + 4, H);
+      g.quadraticCurveTo(x + 18, H / 2, x + 4, 0);
+      g.closePath();
+      g.fill();
+    }
+
+    // Pavimento a doghe inchiodate
+    g.fillStyle = "#78350f";
+    g.fillRect(0, H - 45, W, 45);
+    for (let y = H - 42; y < H; y += 9) {
+      px(g, 0, y, W, 1.5, "#451a03");
+    }
+
+    // Grande oblò rotondo di bronzo al centro che mostra l'oceano
+    const ox = W / 2, oy = 60, or = 32;
+    // Cornice di bronzo lucido con borchie
+    g.fillStyle = "#b45309";
+    g.beginPath(); g.arc(ox, oy, or + 6, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#f59e0b";
+    g.beginPath(); g.arc(ox, oy, or + 3, 0, Math.PI * 2); g.fill();
+    // Vista sul mare dall'oblò
+    g.fillStyle = "#0284c7";
+    g.beginPath(); g.arc(ox, oy, or, 0, Math.PI * 2); g.fill();
+    // Onde e schiuma marina visibili attraverso l'oblò
+    const waveY = oy + 8 + Math.sin(f * 0.06) * 6;
+    g.fillStyle = "#38bdf8";
+    g.beginPath();
+    g.arc(ox, oy, or, 0.2, Math.PI - 0.2);
+    g.fill();
+    g.fillStyle = "rgba(254, 243, 199, 0.7)";
+    g.fillRect(ox - 24, waveY, 48, 4);
+
+    // Lanterna a petrolio ad arco appesa a una catena che dondola col rollio
+    const swing = Math.sin(f * 0.05) * 10;
+    const lx = W * 0.28 + swing, ly = 42;
+    // Catena
+    px(g, W * 0.28, 0, 1.5, ly - 10, "#94a3b8");
+    // Lanterna d'ottone
+    g.fillStyle = "#d97706";
+    g.fillRect(lx - 6, ly, 12, 16);
+    g.fillStyle = "#fef08a";
+    g.fillRect(lx - 4, ly + 3, 8, 10);
+    // Alone luminoso caldo
+    const lGrad = g.createRadialGradient(lx, ly + 8, 2, lx, ly + 8, 38);
+    lGrad.addColorStop(0, "rgba(254, 240, 138, 0.45)");
+    lGrad.addColorStop(1, "rgba(254, 240, 138, 0)");
+    g.fillStyle = lGrad;
+    g.beginPath(); g.arc(lx, ly + 8, 38, 0, Math.PI * 2); g.fill();
+
+    // Barili monumentali di Melassa Imperiale e Burro cerchiati d'oro a sinistra
+    px(g, 18, H - 65, 26, 32, "#451a03");
+    px(g, 20, H - 62, 22, 26, "#78350f");
+    px(g, 18, H - 56, 26, 4, "#f59e0b");
+    px(g, 18, H - 42, 26, 4, "#f59e0b");
+
+    // Sacchi di zucchero di canna e vaniglia impilati a destra
+    for (let s = 0; s < 3; s++) {
+      g.fillStyle = "#fde047";
+      g.beginPath();
+      g.ellipse(W - 40 - s * 14, H - 24 - (s % 2) * 12, 14, 9, 0, 0, Math.PI * 2);
+      g.fill();
+      g.strokeStyle = "#b45309";
+      g.lineWidth = 1.2;
+      g.stroke();
+    }
+  }
+
+  // --- 18. S.O.S. GALLETTA · L'ATOLLO DEL BISCOTTO SPEZZATO & IL GRAN FORNO ---
+  function drawDetailedGallettaArcipelago(g, W, H, f) {
+    // Cielo dorato tropicale del tramonto oceanico
+    const sky = g.createLinearGradient(0, 0, 0, 105);
+    sky.addColorStop(0, "#ea580c");
+    sky.addColorStop(0.4, "#f97316");
+    sky.addColorStop(0.8, "#fde047");
+    sky.addColorStop(1, "#fef08a");
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, 105);
+
+    // Sole ambrato sull'orizzonte
+    g.fillStyle = "rgba(254, 243, 199, 0.9)";
+    g.beginPath(); g.arc(W / 2, 75, 28, 0, Math.PI * 2); g.fill();
+
+    // Mare dell'atollo con riflessi ambrati e onde calde
+    const sea = g.createLinearGradient(0, 80, 0, H);
+    sea.addColorStop(0, "#c2410c");
+    sea.addColorStop(0.3, "#0284c7");
+    sea.addColorStop(0.7, "#0369a1");
+    sea.addColorStop(1, "#075985");
+    g.fillStyle = sea;
+    g.fillRect(0, 80, W, H - 80);
+
+    // Scogliere di pietra frollina a foggia di biscotti spezzati ai lati
+    // Scogliera a sinistra
+    g.fillStyle = "#78350f";
+    g.beginPath();
+    g.moveTo(0, 65);
+    g.lineTo(55, 78);
+    g.lineTo(75, 110);
+    g.lineTo(40, H);
+    g.lineTo(0, H);
+    g.closePath();
+    g.fill();
+    // Briciole dorate e coralli sulla scogliera
+    px(g, 12, 72, 6, 4, "#d97706");
+    px(g, 34, 85, 8, 5, "#d97706");
+    px(g, 50, 95, 6, 6, "#f59e0b");
+
+    // Scogliera a destra
+    g.fillStyle = "#78350f";
+    g.beginPath();
+    g.moveTo(W, 60);
+    g.lineTo(W - 65, 76);
+    g.lineTo(W - 80, 115);
+    g.lineTo(W - 35, H);
+    g.lineTo(W, H);
+    g.closePath();
+    g.fill();
+    px(g, W - 45, 68, 8, 4, "#d97706");
+    px(g, W - 68, 82, 7, 5, "#f59e0b");
+
+    // Il Santuario del Gran Forno (vulcano sacro al centro dell'atollo)
+    const fx = W / 2, fy = 72;
+    // Cupola vulcanica basaltica
+    g.fillStyle = "#29140c";
+    g.beginPath();
+    g.moveTo(fx - 45, fy + 38);
+    g.lineTo(fx - 22, fy);
+    g.lineTo(fx + 22, fy);
+    g.lineTo(fx + 45, fy + 38);
+    g.closePath();
+    g.fill();
+    // Bocca del Forno Primordiale che erompe luce dorata
+    g.fillStyle = "#ea580c";
+    g.beginPath();
+    g.ellipse(fx, fy + 2, 20, 6, 0, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = "#fef08a";
+    g.beginPath();
+    g.ellipse(fx, fy + 2, 12, 3.5, 0, 0, Math.PI * 2);
+    g.fill();
+
+    // Colonna di vapore aromatico alla cannella che si innalza
+    for (let c = 0; c < 6; c++) {
+      const cy = fy - 10 - c * 13 - (f * 0.4 % 13);
+      const cx = fx + Math.sin(f * 0.07 + c) * (8 + c * 4);
+      g.fillStyle = `rgba(254, 215, 170, ${0.45 - c * 0.07})`;
+      g.beginPath(); g.arc(cx, cy, 6 + c * 3, 0, Math.PI * 2); g.fill();
+    }
+
+    // Spiaggia dorata in primo piano
+    g.fillStyle = "#fde047";
+    g.beginPath();
+    g.ellipse(W / 2, H + 10, W * 0.45, 38, 0, 0, Math.PI * 2);
+    g.fill();
+    px(g, W / 2 - 40, H - 18, 80, 2, "#eab308");
+
+    // Palma da zucchero sulla spiaggia a destra
+    const palX = W * 0.72, palY = H - 15;
+    g.strokeStyle = "#78350f";
+    g.lineWidth = 4;
+    g.beginPath();
+    g.moveTo(palX, palY);
+    g.quadraticCurveTo(palX + 12, palY - 26, palX + 6, palY - 48);
+    g.stroke();
+    // Foglie smeraldo a raggiera
+    g.fillStyle = "#15803d";
+    [ [-16, -6], [0, -14], [16, -8], [-12, 8], [12, 8] ].forEach(([lx, ly]) => {
+      g.beginPath();
+      g.ellipse(palX + 6 + lx, palY - 48 + ly, 12, 4, Math.atan2(ly, lx), 0, Math.PI * 2);
+      g.fill();
+    });
+  }
+
   // --- 13. RAGNAROK BALL · IL FIORDO DELLE DRAKKAR (CAPITOLO 1) ---
   function drawDetailedRagnarokFiordo(g, W, H, f) {
     // Cielo crepuscolare di Fimbulwinter: cenere vulcanica, viola scuro e bagliori boreali
@@ -3769,6 +4089,36 @@
         } else {
           if (toast) toast("👑 Altare del Giudizio Divino: «Kara, Sigrid, Brokk e Ragnar attendono il tuo verdetto epico.»");
         }
+      } else if (bg === "gl_porto" || bg === "gl_titolo") {
+        if (clickX < 90 && clickY > 90) {
+          if (toast) toast("🍞 Forno della Banchina: «Il calore diffonde profumo di crosta dorata e cannella in tutto il porto.»");
+        } else if (clickX > W * 0.55 && clickY < 95) {
+          if (toast) toast("🏴‍☠️ Galeone «Masticatore»: «Vele gonfie e stendardo col biscotto morsicato: pronto a salpare!»");
+        } else if (clickX > W - 70 && clickY > 120) {
+          if (toast) toast("🍯 Barili di Melassa: «Le riserve zuccherine dei bucanieri, cerchiate in ferro e cera rossa.»");
+        } else {
+          if (toast) toast("🌊 Molo della Biscottiera: «Le onde turchesi dell'Oceano della Melassa lambiscono le palafitte di quercia.»");
+        }
+      } else if (bg === "gl_caracca") {
+        if (Math.abs(clickX - W / 2) < 40 && Math.abs(clickY - 60) < 40) {
+          if (toast) toast("⚓ Oblò Panoramico: «Onde spumeggianti e spruzzi di mare visibili attraverso il cristallo di bronzo.»");
+        } else if (clickX < 60 && clickY > H - 80) {
+          if (toast) toast("🍯 Barili di Melassa Reale: «Riserve imperiali destinate alla tavola di Sua Maestà Pasticciera.»");
+        } else if (clickX > W - 60 && clickY > H - 50) {
+          if (toast) toast("🌾 Sacchi di Zucchero di Canna: «Semola finissima e vaniglia pregiata importata dall'Atollo.»");
+        } else {
+          if (toast) toast("🪵 Stiva della Caracca Reale: «Travi curve di mogano e una calda atmosfera di spezie e avventura.»");
+        }
+      } else if (bg === "gl_arcipelago") {
+        if (Math.abs(clickX - W / 2) < 50 && clickY > 60 && clickY < 120) {
+          if (toast) toast("🌋 Santuario del Gran Forno: «La bocca vulcanica primordiale che riscalda le acque dell'Atollo da secoli.»");
+        } else if (clickX > W * 0.65 && clickY > H - 60) {
+          if (toast) toast("🌴 Palma da Zucchero: «Fronde smeraldine che ondeggiano nel vento caldo del tramonto oceanico.»");
+        } else if (clickX < 80 || clickX > W - 80) {
+          if (toast) toast("🍪 Scogliere di Pietra Frollina: «Faraglioni dorati a foggia di biscotti spezzati dai flutti.»");
+        } else {
+          if (toast) toast("🌅 Atollo del Biscotto Spezzato: «Sabbia dorata e correnti calde all'ombra del Grande Forno.»");
+        }
       }
     });
   }
@@ -3839,6 +4189,16 @@
         return true;
       case "bv_aurora":
         drawDetailedBelovodiaAurora(g, W, H, f);
+        return true;
+      case "gl_porto":
+      case "gl_titolo":
+        drawDetailedGallettaPorto(g, W, H, f);
+        return true;
+      case "gl_caracca":
+        drawDetailedGallettaCaracca(g, W, H, f);
+        return true;
+      case "gl_arcipelago":
+        drawDetailedGallettaArcipelago(g, W, H, f);
         return true;
       case "feudi_consiglio":
         drawDetailedFeudiConsiglio(g, W, H, f);

@@ -24,6 +24,8 @@
   const GEN = { fantasy: ["Fantasy", "#7a4ab0"], mistero: ["Mistero", "#2c6a9a"], scifi: ["Fantascienza", "#1f8a8a"], storico: ["Storico", "#a8622a"], commedia: ["Commedia", "#c9921a"], sport: ["Sport anime", "#c0392b"], avventura: ["Avventura", "#3f8a3f"], dramma: ["Drammatico", "#6a5a7a"], tattica: ["Tattica", "#5a6a3a"], satira: ["Satira", "#0284c7"] };
   // mod: oggetto window con menuEntry/info · fn: funzione window da chiamare con (indietro) · ch: capitoli totali (se noti)
   const SAGAS = [
+    { id: "galletta", t: "S.O.S. Galletta: I Bucanieri del Biscotto", e: "🏴‍☠️", g: ["commedia", "avventura"], mod: "__galletta", key: "ali-di-rondine.galletta", ch: 3, cover: "gl_titolo", d: "Arrembaggi sul ponte, pontili basculanti e la leggenda del Grande Forno tra i flutti dell'Oceano della Melassa. Arrembaggio sul Ponte: mini-calcio su un galeone in movimento che rolla e beccheggia, vento marino e rimbalzi burrosi. E il Ricettario Corsaro.",
+      hints: { reale: "Serve aver stretto il patto diplomatico col Commodoro nel Capitolo 2 e vinto la finale.", bucaniere: "Serve aver issato la bandiera corsara e una grande reputazione piratesca (>50).", cuoco: "Sempre possibile, alla fine: apri la trattoria galleggiante sui sette mari.", segreto: "Segreto: tutti i biscotti d'oro raccolti e fiuto delle spezie altissimo." } },
     { id: "pugno", t: "Per un pugno di rigori", e: "🤠", g: ["storico", "avventura"], mod: "__pugno", key: "ali-di-rondine.pugno", ch: 3, cover: "pr_titolo", d: "Polvere, speroni e duelli dal dischetto a mezzogiorno nel villaggio di El Paso del Rigore. Stangata: duelli di rigori con tamburo revolver a sei colpi, barra di tensione e quick-draw al rintocco della campana. E i Manifesti Wanted con le taglie in dollari.",
       hints: { sceriffo: "Serve aver difeso la legge nel Capitolo 2 e vinto la finale.", desperado: "Serve aver stretto il patto con Ramon e una taglia sopra i 300 $.", solitario: "Sempre possibile, alla fine: cavalca da solo verso il tramonto.", segreto: "Segreto: tutti i ferri di cavallo raccolti e sangue freddo altissimo." } },
     { id: "montagna", t: "Piccolo Borgo di Montagna", e: "🏔️", g: ["commedia", "satira"], mod: "__montagna", key: "ali-di-rondine.montagna", ch: 3, cover: "bm_titolo", d: "Un paesino innevato dove gli adulti vivono di tradizioni stravaganti e venerano un misterioso Pallone di Cartone. Tu sei il centravanti sceso dalla corriera delle 8:00. Ritagli: marionette di carta stop-motion a 12 fps, caricamento a molla e contrasti a forbice. E la Bacheca delle Emergenze del Comune.",
@@ -283,6 +285,10 @@
       opp: [{ name: "I Vice dello Sceriffo", color: "#b45309", style: "equilibrata" }, { name: "I Fuorilegge del Saloon", color: "#78350f", style: "contropiede" }],
       boss: { name: "Ramon Sette Tiri", color: "#dc2626", style: "pressing" },
       opts: (o, h, boss) => ({ title: `Stangata · contro ${o.name}`, us: "Il Gringo", usColor: "#ea580c", turns: boss ? 6 : 4, hero: { name: h.name || "Tu" }, opp: o }) },
+    { id: "arrembaggio", t: "Arrembaggio sul Ponte", e: "🏴‍☠️", saga: "galletta", eng: "__arrembaggio", d: "La sfida sul ponte beccheggiante di S.O.S. Galletta: rollio dinamico del veliero, vento marino, bordate di cannone e scivolate di burro tra i barili di melassa.",
+      opp: [{ name: "Corsari Sottaceto", color: "#1e3a8a", style: "equilibrata" }, { name: "Granatieri Reali", color: "#0284c7", style: "contropiede" }],
+      boss: { name: "Commodoro Cracker", color: "#dc2626", style: "pressing" },
+      opts: (o, h, boss) => ({ title: `Arrembaggio · contro ${o.name}`, us: "I Bucanieri", usColor: "#d97706", turns: boss ? 7 : 5, hero: { name: h.name || "Tu" }, opp: o }) },
   ];
   function sgState(m) { const s = SAGAS.find((x) => x.id === m.saga), x = s ? state(s) : null; return { s, open: !!(x && (x.doneN >= 1)), boss: !!(x && x.endsFound > 0) }; }
   function openSalaGiochi(back) {

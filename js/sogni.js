@@ -26,6 +26,7 @@
     // saghe a capitoli: il 4° elemento è il modulo che espone info() (poi si ripiega sul salvataggio)
     montagna: ["ali-di-rondine.montagna", "Piccolo Borgo di Montagna", "#0284c7", "__montagna"],
     pugno: ["ali-di-rondine.pugno", "Per un pugno di rigori", "#ea580c", "__pugno"],
+    galletta: ["ali-di-rondine.galletta", "S.O.S. Galletta: I Bucanieri del Biscotto", "#d97706", "__galletta"],
     vallombra: ["ali-di-rondine.storia-campione", "Vallombra", "#6a8aa8", "__storiaCampione"], kronenburg: ["ali-di-rondine.kronenburg-story", "Kronenburg", "#8a1a2a", "__kronenburgStory"], pirati: ["ali-di-rondine.pirati-story", "I Pirati della Tempesta Celeste", "#2a8ac8", "__piratiStory"],
     alchimia: ["ali-di-rondine.alchimia-story", "L'Alchimia d'Acciaio", "#b0762a", "__alchimiaStory"], chrono: ["ali-di-rondine.chrono-story", "Chrono-Break", "#c8a22a", "__chronoStory"], ombre: ["ali-di-rondine.campione-ombre", "Il Circuito delle Ombre", "#1a3a5a", "__campioneOmbre"],
     ragnarok: ["ali-di-rondine.ragnarok", "Ragnarok Ball", "#9a3a1a", "__ragnarokStory"], belovodia: ["ali-di-rondine.belovodia-story", "Belovodia", "#4a7a8a", "__belovodiaStory"], bilancia: ["ali-di-rondine.bilancia-feudi", "La Bilancia delle Tre Corone", "#6a5a8a", "__bilanciaFeudi"],
@@ -87,6 +88,10 @@
     ["lb_virgola", "libro", "c", 56, 60, 78, "C", 1], ["lb_lupo", "libro", "c", 68, 56, 64, "A", 1], ["lb_mattone", "libro", "c", 54, 76, 66, "D", 1], ["lb_nonna", "libro", "c", 44, 64, 72, "C", 1],
     ["lb_jolly", "libro", "c", 62, 50, 80, "C", 2], ["lb_gommapane", "libro", "c", 50, 54, 66, "C", 2], ["lb_regina", "libro", "r", 46, 88, 64, "P", 2], ["lb_fante", "libro", "r", 60, 78, 56, "D", 2],
     ["lb_didascalia", "libro", "c", 56, 56, 76, "C", 3], ["lb_balloon", "libro", "r", 70, 62, 70, "A", 3], ["lb_rilegatore", "libro", "e", 52, 66, 86, "C", 3], ["lb_narratore", "libro", "e", 60, 66, 90, "C", 3], ["lb_autrice", "libro", "l", 66, 70, 92, "C", 4],
+    // S.O.S. Galletta: I Bucanieri del Biscotto
+    ["gl_barbabiscotto", "galletta", "c", 54, 76, 58, "D", 1], ["gl_cannella", "galletta", "c", 60, 56, 76, "C", 1], ["gl_crusty", "galletta", "r", 74, 52, 70, "A", 1],
+    ["gl_commodoro", "galletta", "r", 62, 78, 64, "D", 2], ["gl_calipso", "galletta", "e", 70, 68, 86, "C", 2],
+    ["gl_lievito", "galletta", "e", 64, 74, 84, "C", 3], ["gl_kraken", "galletta", "l", 88, 76, 82, "A", 3],
   ];
   // [id, saga, rarità (c r e l), attacco, difesa, tecnica, ruolo]
   const CARDS = [
@@ -157,6 +162,7 @@
     cr_aira: "Sono caduta dal cielo. Atterro sempre in piedi.", cr_bram: "Brontolo, sbuffo, e non passa nessuno.", cr_trillo: "Fiuu! (Il pallone vola più alto.)", cr_ortensia: "Ho arbitrato sessanta partite. Ne ho viste di tutti i colori.", cr_libeccio: "Spavaldo, rapido e simpatico. A volte.", cr_maestrale: "Ho parato rigori per cinquant'anni. I piccioni, meno.", cr_brunoferro: "Due metri di ferro e un debole per i dolci.", cr_vela: "Contrabbandiera di professione, funambola di vocazione.", cr_kael: "Cappotto di ferro, nessuna fretta.", cr_zefira: "Il vento porta voci. E tiri.", cr_gilda: "Stessa ricetta da quarant'anni: funziona ancora.", cr_ondina: "Le onde rispondono. Di solito.", cr_aldeberto: "Un re vecchio e un pallone nuovo.",
     dt_ofelia: "Conto i passi, i secondi e le porte.", dt_nina: "Dietro il bancone vedo tutto. Anche i fuorigioco.", dt_bruno: "Regole, sorrisi, e una difesa solida.", dt_pio: "Lavoro sul confine. Anche in campo.", dt_scheggia: "Gioco a piedi nudi, anche d'inverno.", dt_valtorre: "Sorriso perfetto, schema perfetto.", dt_cartografo: "Disegno mappe di posti che non ricordi.",
     lb_virgola: "Un nastro rosso e una pausa al momento giusto.", lb_lupo: "Un tè alla bergamotto e un tiro di classe.", lb_mattone: "Capitano, regista, geometra.", lb_nonna: "Ho un gomitolo per ogni partita.", lb_jolly: "Posso essere qualsiasi carta. Oggi, la migliore.", lb_gommapane: "Mangio refusi e passaggi sbagliati.", lb_regina: "Imbattuta. E dal vivo, di più.", lb_fante: "Leale fino all'ostinazione.", lb_didascalia: "«E in quel momento, il gol.» (L'ho scritto io.)", lb_balloon: "Nuvolette ben legate e un tiro a effetto.", lb_rilegatore: "Ho cucito ogni pagina con spago cerato.", lb_narratore: "E così, la partita finì come doveva.", lb_autrice: "Firmato: A.",
+    gl_barbabiscotto: "Per mille forchette! Si salpa per il gol!", gl_cannella: "Impasto all'alba e tiro al novantesimo.", gl_crusty: "KRAAA! Briciole all'incrocio dei pali! KRAAA!", gl_commodoro: "Un gol conforme al rigido protocollo imperiale.", gl_calipso: "Il vento profuma di vittoria e vaniglia.", gl_lievito: "Cotto a puntino: nell'angolino basso!", gl_kraken: "I flutti si aprono al Re dei Bucanieri!",
   };
   // le squadre inventate della Stagione dei Sogni e del Draft
   const TEAMS = [
