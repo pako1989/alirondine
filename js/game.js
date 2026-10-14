@@ -1634,7 +1634,7 @@
       seeCard(l.who);
 
       const wasSeen = window.isDialogueSeen ? window.isDialogueSeen(l.who, l.text) : true;
-      text(l.who, esc(l.text));
+      text(l.who, esc(l.text).replace(/&lt;(\/?)(b|em|i|strong)&gt;/g, "<$1$2>").replace(/&lt;br\s*\/?&gt;/g, "<br>")); // solo grassetto/corsivo/a capo consentiti nei dialoghi
 
       if (window.isStorySkipActive && window.isStorySkipActive()) {
         if (!wasSeen) {
