@@ -8739,3 +8739,176 @@
   const DRAW = { nf_titolo: titolo, nf_spiaggia: spiaggia, nf_giungla: giungla, nf_laguna: laguna, nf_faro: faro, nf_radio: radio, nf_stadio: stadio };
   Object.keys(DRAW).forEach((k) => R.register(k, { draw: (g, W, H, f) => DRAW[k](g, W, H, f), hot: HOT[k] }));
 })();
+
+// ============================================================ «Ave Calcio! · I Gladiatori del Pallone»: quattro sfondi romani
+(function () {
+  "use strict";
+  const R = window.__lbBg; if (!R || !R.register) return;
+  const px = (g, x, y, w, h, c) => { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); };
+  const circ = (g, x, y, r, c) => { g.fillStyle = c; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); };
+  const ell = (g, x, y, rx, ry, c) => { g.fillStyle = c; g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, 7); g.fill(); };
+  const vg = (g, x, y, w, h, st) => { const gr = g.createLinearGradient(0, y, 0, y + h); st.forEach((s, i) => gr.addColorStop(i / (st.length - 1), s)); g.fillStyle = gr; g.fillRect(x, y, w, h); };
+  const glow = (g, x, y, r, rgb, a) => { const gr = g.createRadialGradient(x, y, 1, x, y, r); gr.addColorStop(0, `rgba(${rgb},${a})`); gr.addColorStop(1, `rgba(${rgb},0)`); g.save(); g.globalCompositeOperation = "lighter"; g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2); g.restore(); };
+
+  function drawFire(g, x, y, f) {
+    const fl = 5 + Math.sin(f / 4 + x) * 3;
+    glow(g, x, y - 2, 18, "245,158,11", 0.4);
+    circ(g, x, y - 2, 4.5, "#f59e0b");
+    circ(g, x, y - 4 - fl * 0.4, 3, "#fef08a");
+  }
+
+  function drawCol(g, x, y, h, w) {
+    w = w || 10;
+    px(g, x - 1, y, w + 2, 3, "#fef3c7");
+    px(g, x, y + 3, w, h - 6, "#f5ebd7");
+    px(g, x + 2, y + 3, 2, h - 6, "#e8d8be");
+    px(g, x - 1, y + h - 3, w + 2, 3, "#fef3c7");
+  }
+
+  function titolo(g, W, H, f) {
+    vg(g, 0, 0, W, 110, ["#78350f", "#b91c1c", "#d97706", "#fef3c7"]);
+    vg(g, 0, 110, W, H - 110, ["#ca8a04", "#b45309", "#78350f"]);
+    circ(g, 160, 75, 28, "#fef08a");
+    glow(g, 160, 75, 60, "254,240,138", 0.35);
+    for (let i = 0; i < 9; i++) {
+      const ax = i * 38 - 10;
+      px(g, ax, 78, 8, 32, "rgba(69,26,3,.4)");
+      g.strokeStyle = "rgba(69,26,3,.4)"; g.lineWidth = 3;
+      g.beginPath(); g.arc(ax + 19, 78, 15, Math.PI, 0); g.stroke();
+    }
+    px(g, 0, 68, W, 4, "rgba(69,26,3,.45)");
+    px(g, 154, 34, 12, 76, "#ca8a04");
+    g.fillStyle = "#eab308";
+    g.beginPath(); g.moveTo(154, 34); g.lineTo(160, 16); g.lineTo(166, 34); g.fill();
+    px(g, 157, 40, 6, 60, "#a16207");
+    [[40, 120], [280, 120]].forEach(([bx, by]) => {
+      px(g, bx - 6, by, 12, 14, "#451a03");
+      drawFire(g, bx, by, f);
+    });
+    px(g, 60, 148, 200, 36, "rgba(254,243,199,.92)");
+    g.strokeStyle = "#b91c1c"; g.lineWidth = 2;
+    g.strokeRect(60, 148, 200, 36);
+    px(g, 63, 151, 194, 30, "rgba(185,28,28,.08)");
+    g.fillStyle = "#b91c1c";
+    g.font = "900 13px 'Trebuchet MS', serif";
+    g.textAlign = "center";
+    g.fillText("🏛️ AVE CALCIO! 🏛️", 160, 166);
+    g.font = "700 9px 'Trebuchet MS', serif";
+    g.fillStyle = "#78350f";
+    g.fillText("I GLADIATORI DEL PALLONE · S.P.Q.R.", 160, 178);
+  }
+
+  function suburra(g, W, H, f) {
+    vg(g, 0, 0, W, 80, ["#1e293b", "#334155", "#64748b"]);
+    vg(g, 0, 80, W, H - 80, ["#94a3b8", "#64748b", "#475569"]);
+    px(g, 0, 20, 110, 180, "#78350f");
+    px(g, 210, 20, 110, 180, "#854d0e");
+    for (let r = 0; r < 8; r++) {
+      px(g, 0, 30 + r * 18, 110, 1, "rgba(0,0,0,.25)");
+      px(g, 210, 30 + r * 18, 110, 1, "rgba(0,0,0,.25)");
+    }
+    drawCol(g, 215, 45, 120, 12);
+    px(g, 240, 75, 45, 90, "#451a03");
+    px(g, 242, 77, 41, 86, "#291305");
+    px(g, 240, 70, 45, 5, "#ca8a04");
+    [[45, 150], [65, 155], [85, 148]].forEach(([ax, ay]) => {
+      ell(g, ax, ay, 9, 14, "#ca8a04");
+      px(g, ax - 3, ay - 18, 6, 6, "#b45309");
+      g.strokeStyle = "#78350f"; g.lineWidth = 1;
+      g.beginPath(); g.arc(ax - 7, ay - 4, 4, 0, 7); g.stroke();
+    });
+    px(g, 25, 60, 50, 40, "#fef3c7");
+    px(g, 27, 62, 46, 36, "#fffbeb");
+    g.strokeStyle = "#b91c1c"; g.lineWidth = 1;
+    g.strokeRect(27, 62, 46, 36);
+    circ(g, 50, 92, 4, "#b91c1c");
+    const ly = 40 + Math.sin(f / 10) * 1.5;
+    px(g, 155, 0, 1, ly, "#0f172a");
+    circ(g, 155, ly + 6, 5, "#f59e0b");
+    glow(g, 155, ly + 6, 26, "245,158,11", 0.45);
+    vg(g, 90, 130, 130, 70, ["#475569", "#334155"]);
+    for (let i = 0; i < 12; i++) {
+      ell(g, 105 + (i % 3) * 35, 140 + Math.floor(i / 3) * 14, 15, 6, "rgba(15,23,42,.35)");
+    }
+  }
+
+  function terme(g, W, H, f) {
+    vg(g, 0, 0, W, 90, ["#0284c7", "#38bdf8", "#bae6fd"]);
+    vg(g, 0, 90, W, H - 90, ["#f8fafc", "#e2e8f0", "#cbd5e1"]);
+    for (let c = 0; c < 4; c++) {
+      drawCol(g, 25 + c * 80, 20, 140, 14);
+    }
+    px(g, 60, 110, 200, 65, "#0284c7");
+    px(g, 65, 114, 190, 57, "#38bdf8");
+    for (let w = 0; w < 5; w++) {
+      const ox = (f * 0.4 + w * 40) % 170 + 70;
+      ell(g, ox, 130 + (w % 3) * 14, 22, 3, "rgba(255,255,255,.55)");
+    }
+    for (let v = 0; v < 6; v++) {
+      const vx = 80 + v * 28 + Math.sin(f / 15 + v) * 6;
+      const vy = 95 - ((f * 0.5 + v * 22) % 65);
+      glow(g, vx, vy, 16, "255,255,255", 0.22);
+    }
+    g.strokeStyle = "#fef3c7"; g.lineWidth = 4;
+    g.strokeRect(60, 110, 200, 65);
+    px(g, 280, 75, 18, 50, "#f8fafc");
+    circ(g, 289, 68, 7, "#f8fafc");
+    ell(g, 289, 56, 4, 4, "#ca8a04");
+  }
+
+  function colosseo(g, W, H, f) {
+    vg(g, 0, 0, W, 100, ["#020617", "#0f172a", "#1e1b4b"]);
+    vg(g, 0, 100, W, H - 100, ["#d97706", "#b45309", "#78350f"]);
+    circ(g, 260, 32, 14, "#fef3c7");
+    glow(g, 260, 32, 45, "254,240,199", 0.3);
+    for (let a = 0; a < 8; a++) {
+      const x = a * 42 - 10;
+      px(g, x, 40, 10, 60, "#451a03");
+      g.strokeStyle = "#78350f"; g.lineWidth = 3;
+      g.beginPath(); g.arc(x + 21, 40, 16, Math.PI, 0); g.stroke();
+      if (a % 2 === 1) {
+        drawFire(g, x + 21, 42, f + a);
+      }
+    }
+    px(g, 0, 95, W, 6, "#78350f");
+    px(g, 125, 60, 70, 35, "#b91c1c");
+    g.strokeStyle = "#ca8a04"; g.lineWidth = 2;
+    g.strokeRect(125, 60, 70, 35);
+    px(g, 130, 56, 60, 5, "#ca8a04");
+    g.fillStyle = "#fef3c7";
+    g.font = "900 8px serif";
+    g.textAlign = "center";
+    g.fillText("TRIBUNAL IMPERIALIS", 160, 80);
+    g.strokeStyle = "rgba(254,243,199,.65)"; g.lineWidth = 2;
+    g.beginPath(); g.ellipse(160, 150, 90, 30, 0, 0, 7); g.stroke();
+    px(g, 158, 148, 4, 4, "#fef3c7");
+  }
+
+  const HOT = {
+    rm_titolo: [
+      [130, 20, 60, 90, "🏛️ L'obelisco imperiale al centro della spina del Circo Massimo. I sacerdoti dicono che porti fortuna ai tiri all'incrocio."],
+      [30, 70, 70, 60, "🦅 L'insegna della Legione con l'Aquila d'Oro: 'Chi calcia con onore non teme il tackle del centurione'."],
+      [230, 110, 60, 50, "🔥 I bracieri di fiamma viva che illuminano le gradinate di marmo e travertino."],
+      [120, 140, 80, 45, "⚽ Il pallone di cuoio cucito a mano con cui i gladiatori si sfidano nei ludi circensi."]
+    ],
+    rm_suburra: [
+      [40, 110, 50, 60, "🏺 Anfore vinarie di Falerno e Garum: i gladiatori della Suburra bevono solo succo di melagrana prima dei ludi."],
+      [20, 40, 70, 70, "📜 Un editto imperiale inchiodato alla parete di tufo: 'Cercasi attaccante con piede fatato per i ludi di Cesare'."],
+      [230, 65, 70, 95, "🏛️ L'Osteria del Falerno: piene di tacche di legno che contano i gol segnati contro i Pretoriani."]
+    ],
+    rm_terme: [
+      [80, 105, 160, 65, "💧 La vasca del calidarium: i campioni vi immergono i muscoli indolenziti dopo novanta minuti di ludi."],
+      [260, 45, 55, 85, "🏛️ La statua in marmo di un atleta che palleggia con un melone. Firmata: 'Prassitele o chi per lui'."],
+      [20, 30, 55, 90, "🌿 Colonne di travertino e vapore balsamico che profuma l'aria delle terme imperiali."]
+    ],
+    rm_colosseo: [
+      [120, 55, 80, 42, "👑 Il Palco Imperiale: velluto porpora e alloro dorato. Da qui Cesare decide il destino dei duelli."],
+      [20, 90, 80, 65, "⚔️ Gli scudi e i gambali di bronzo appoggiati al muretto dell'arena prima del fischio d'inizio."],
+      [220, 90, 80, 65, "🔥 Le fiaccole a pece ardente che proiettano ombre gigantesche sulle arcate del Colosseo."],
+      [100, 130, 120, 45, "🏟️ La sabbia dorata dell'arena battuta dai sandali e solcata dalle linee di calce viva."]
+    ]
+  };
+
+  const DRAW = { rm_titolo: titolo, rm_suburra: suburra, rm_terme: terme, rm_colosseo: colosseo };
+  Object.keys(DRAW).forEach((k) => R.register(k, { draw: (g, W, H, f) => DRAW[k](g, W, H, f), hot: HOT[k] }));
+})();

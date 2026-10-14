@@ -26,6 +26,7 @@
     // saghe a capitoli: il 4° elemento è il modulo che espone info() (poi si ripiega sul salvataggio)
     montagna: ["ali-di-rondine.montagna", "Piccolo Borgo di Montagna", "#0284c7", "__montagna"],
     pugno: ["ali-di-rondine.pugno", "Per un pugno di rigori", "#ea580c", "__pugno"],
+    roma: ["ali-di-rondine.roma", "Ave Calcio! · I Gladiatori del Pallone", "#b91c1c", "__roma"],
     galletta: ["ali-di-rondine.galletta", "S.O.S. Galletta: I Bucanieri del Biscotto", "#d97706", "__galletta"],
     campana: ["ali-di-rondine.campana", "La Notte dei Cento Rintocchi", "#ca8a04", "__campana"],
     regno: ["ali-di-rondine.regno", "Cronache del Regno Ultimo", "#a82a3a", "__regno"],
@@ -105,6 +106,7 @@
   const CARDS = [
     ["bm_boris", "montagna", "c", 50, 74, 68, "P"], ["bm_sbruffo", "montagna", "c", 46, 78, 54, "D"], ["bm_wendy", "montagna", "r", 62, 60, 80, "C"], ["bm_valanga", "montagna", "e", 76, 52, 70, "A"], ["bm_tarcisio", "montagna", "r", 82, 64, 58, "A"],
     ["pr_sceriffo", "pugno", "c", 52, 82, 60, "P"], ["pr_carmela", "pugno", "c", 60, 58, 74, "C"], ["pr_barnaba", "pugno", "c", 48, 76, 62, "D"], ["pr_doc", "pugno", "r", 64, 52, 82, "C"], ["pr_ramon", "pugno", "e", 86, 56, 78, "A"],
+    ["rm_furbio", "roma", "c", 44, 76, 68, "D"], ["rm_spartaco", "roma", "r", 82, 80, 56, "D"], ["rm_augusta", "roma", "r", 56, 52, 84, "C"], ["rm_cesare", "roma", "e", 86, 70, 82, "A"],
     ["sq_brina", "quartiere", "c", 60, 64, 66, "C"], ["sq_gommo", "quartiere", "c", 56, 72, 60, "D"], ["sq_scintilla", "quartiere", "r", 78, 52, 62, "A"], ["sq_ines", "quartiere", "e", 54, 84, 74, "D"],
     ["rz_ferruccio", "razzo", "c", 52, 66, 64, "C"], ["rz_timbro", "razzo", "c", 44, 78, 66, "D"], ["rz_borea", "razzo", "r", 56, 82, 70, "D"], ["rz_orsola", "razzo", "e", 80, 60, 76, "A"],
     ["cs_ugo", "cavallo", "c", 58, 50, 62, "C"], ["cs_max", "cavallo", "c", 66, 58, 64, "A"], ["cs_lucilla", "cavallo", "r", 50, 76, 72, "D"], ["cs_baldo", "cavallo", "e", 84, 54, 80, "A"],
@@ -130,6 +132,7 @@
   const FRASI = {
     sq_brina: "Gusto del giorno: vittoria. Molto fredda.", sq_gommo: "Mi allungo fino alla porta, se serve.", sq_scintilla: "Il forno sono io. E anche il tiro.", sq_ines: "Il ferro mi vuole bene. Anche il pallone, oggi.", rz_ferruccio: "E IL CORRIERE TIRA… CONSEGNATO!", rz_timbro: "Gol approvato. In triplice copia.", rz_borea: "Ho parato un asteroide. Un pallone è facile.", rz_orsola: "Come ai campetti: chi vince decide.", cs_ugo: "Idea: vinciamo. Questa funziona.", cs_max: "Che bella partita! Tutte le partite sono belle!", cs_lucilla: "Contratto firmato. Gol incluso.", cs_baldo: "Che zoccolata!",
     re_evaristo: "Con tutto il rispetto: il pallone è in fuorigioco di protocollo.", re_oriele: "Una corona si porta con la schiena dritta. E con un buon paio di scarpe.", re_brando: "La pace è una guerra che si è messa in ordine. Anche a pallone.",
+    rm_furbio: "Un senatore non perde mai: al massimo rinvia il risultato al prossimo plebiscito.", rm_spartaco: "Gli scudi si spezzano, ma la difesa della Suburra non crolla mai!", rm_augusta: "Gli astri avevano previsto questo gol all'incrocio fin dal primo tempo.", rm_cesare: "Veni, vidi, vici: pollice verso l'alto per questo trionfo nell'arena!",
     ft_sam: "Qualcuno deve restare coi piedi per terra. Ci penso io.", ft_cecile: "Vent'anni di domande. Questa è la risposta che preferisco.", ft_vega: "Su Elyon nessuno mi batte. Qui, a quanto pare, sì.", ft_atlante: "Il cielo è curvo, figliolo. Giralo tutto.",
     td_lia: "Il sale è di chi lo scava. E il gol è di chi lo segna.", td_ottone: "Ho calcolato tutto. Tranne quanto mi sarei divertito.", td_corrado: "Testa alta, scarpe rotte, cuore intero.", td_isotta: "Gioco per vincere, non per comprare.",
     gr_marisa: "Se smetto di giocare, hanno vinto loro. Quindi gioco.", gr_gancio: "Un armadio in difesa non si sposta. Provaci.", gr_vela: "Ti ho rubato la palla. Te la restituisco in rete, come sempre.", gr_alfio: "Quarant'anni fa ero più veloce. Oggi sono più furbo.",
@@ -200,6 +203,7 @@
     ["al_kira", "vl_bianca", "Mani nell'officina"], ["al_armatura", "gr_gancio", "Armadi gentili"], ["chr_aria", "ep_ada", "Guardiane del tempo"], ["omb_maya", "dc_nina", "Penne d'inchiesta"], ["rag_sigrid", "bv_boris", "Voci dei vecchi tempi"], ["rag_brokk", "sh_muramasa", "Mastri fabbri"],
     ["bv_nadia", "sh_hanzo", "Volpi e ombre"], ["sh_hayato", "cm_bastiano", "Vecchi maestri"], ["fe_roland", "td_corrado", "Eredi di casate"], ["abi_nora", "nl_fiammetta", "Luci nella notte"], ["cr_aira", "ve_sbuffo", "Venute dal cielo"], ["mu_ugolino", "tc_ardo", "Muri di pietra"], ["lb_narratore", "pi_morgana", "Voci che comandano"],
     ["cp_crispino", "cp_cacace", "Guardie e Tonache"], ["cp_tito", "cp_peppe", "I Soliti Ignoti"], ["cp_rosetta", "gl_cannella", "Salumi e Gallette"], ["re_brando", "mu_ugolino", "Muri di pietra"],
+    ["rm_spartaco", "pr_sceriffo", "La Legge e la Sabbia"], ["rm_furbio", "tc_ysolde", "Senatori e Troni"],
   ];
   // le otto sfide del Torneo dei Sogni: cabinato della Sala Giochi (motore) e avversario
   const SFIDE = [
