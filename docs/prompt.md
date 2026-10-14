@@ -188,7 +188,7 @@ Struttura dei file: `js/<nome>.js` (configurazione) + `js/<nome>-c1.js` … `-c4
 22. **Punti cliccabili visibili:** ogni sfondo-scena (titolo, menu della saga, capitoli) ha 3-4 punti con scintille e didascalia, registrati in `LB` (o `window.__lbBg.LB`, esempio `gl_titolo`). Niente vecchi `toast` nel gestore click: restano invisibili.
 23. **Dialoghi muti:** gli errori dentro i dialoghi dei PNG sono inghiottiti da `safe()`. Il test deve parlare con OGNI PNG (anche quelli con `K.alibi`, `K.ask`, ricompense) e proseguire fino al pulsante successivo, ascoltando `pageerror`. Dopo l'ultima battuta deve comparire un pulsante o una scheda.
 24. **Oggetti raggiungibili:** `items` è `[colonna, riga]` su un tile libero, mai dentro edifici o muri; `start` mai su un tile solido. `L.reachAll(page, zid)` deve tornare vuoto su OGNI zona (non solo il BFS delle porte).
-25. **`saga-core.js` è usato da ~30 saghe:** modificalo solo se la novità serve a più saghe, con una patch piccola e retrocompatibile (le saghe esistenti devono comportarsi come prima), poi rilancia `node tests/run.cjs saghe-vecchie` e 2-3 saghe a campione. Se la novità serve solo alla tua saga, resta nel file della tua saga.
+25. **`saga-core.js` è usato da ~30 saghe:** modificalo se la novità serve alle saghe esistenti OPPURE è nuova e utile anche per saghe future, con una patch piccola e retrocompatibile (le saghe esistenti devono comportarsi come prima), poi rilancia `node tests/run.cjs saghe-vecchie` e 2-3 saghe a campione. Se la novità serve solo alla tua saga, resta nel file della tua saga.
 26. **Percorso reale del giocatore:** dopo il push rifai, sul sito aggiornato, il percorso da nuova partita (Inizia la storia → difficoltà → Continua → primo PNG), non solo il salvataggio di prova.
 27. **Risparmio token:** test via script con output breve (✓/✗ o poche righe); pochi screenshot (intro, menu, 1-2 zone per saga), non uno per zona; non giocare a mano i capitoli se uno script li attraversa.
 
@@ -242,7 +242,7 @@ Funzioni di saghe singole (non sono del kit comune: non usarle in un'altra saga 
 **Se manca una funzione (alternative, in ordine):**
 1. Componila con quelle del kit (per esempio un oggetto raccolto = `K.F.set` + `K.say`).
 2. Aggiungila alla TUA saga nel file di configurazione (`K.<nome> = ...` come fa `K.alibi` in `campana.js`), con un nome nuovo e usandola solo lì.
-3. Se serve a più saghe, aggiungila al motore comune (`saga-core.js`) con una patch piccola e retrocompatibile, poi rilancia `saghe-vecchie` e qualche saga a campione, e aggiorna questa tabella nello stesso commit.
+3. Se serve a più saghe (anche future), aggiungila al motore comune (`saga-core.js`) con una patch piccola e retrocompatibile, poi rilancia `saghe-vecchie` e qualche saga a campione, e aggiorna questa tabella nello stesso commit.
 Le funzioni dei **talk** ricevono `K` come parametro; l'`intro` di un capitolo restituisce righe `[["voce","testo"]]` e il capitolo ha `start: "id_zona"`.
 
 ## 8 · Ordine di lavoro (per ogni saga)
