@@ -228,25 +228,26 @@
     function spawnFoes() {
       S.foes.length = 0;
       if (kind === "scheletri") { mkFoe({ k: "sk", x: 190, y: 54, sp: 40, role: "att" }); mkFoe({ k: "sk", x: 202, y: 90, sp: 36, role: "def", col: "#ff7a1a" }); }
-      else if (kind === "arpie") { mkFoe({ k: "ar", x: 178, y: 36, sp: 52, fly: true, r: 5, st: "hunt" }); mkFoe({ k: "ar", x: 184, y: 108, sp: 48, fly: true, r: 5, st: "hunt" }); }
-      else if (kind === "golem") { mkFoe({ k: "go", x: 198, y: MY, sp: 24, r: 11, role: "def", heavy: 1, armor: 0, rock: 3 }); mkFoe({ k: "sk", x: 168, y: 60, sp: 38, role: "att", col: "#8a8478" }); }
-      else if (kind === "medusa") { mkFoe({ k: "me", x: 206, y: MY, sp: 0, r: 7, role: "static", ang: Math.PI, gaze: 0, cool: 1.5, heavy: 1 }); mkFoe({ k: "sn", x: 172, y: 60, sp: 40, role: "att" }); }
+      else if (kind === "arpie") { mkFoe({ k: "ar", x: 178, y: 36, sp: 62, fly: true, r: 5, st: "hunt" }); mkFoe({ k: "ar", x: 184, y: 108, sp: 58, fly: true, r: 5, st: "hunt" }); }
+      else if (kind === "golem") { mkFoe({ k: "go", x: 198, y: MY, sp: 27, r: 11, role: "def", heavy: 1, armor: 0, rock: 3 }); mkFoe({ k: "sk", x: 168, y: 60, sp: 38, role: "att", col: "#8a8478" }); }
+      else if (kind === "medusa") { mkFoe({ k: "me", x: 206, y: MY, sp: 0, r: 7, role: "static", ang: Math.PI, gaze: 0, cool: 1.5, heavy: 1 }); mkFoe({ k: "sn", x: 172, y: 60, sp: 52, role: "att" }); }
       else if (kind === "idra") { mkFoe({ k: "id", x: 200, y: MY, sp: 32, r: 7, role: "def", spit: 3 }); mkFoe({ k: "id", x: 172, y: 50, sp: 36, r: 7, role: "att" }); }
-      else if (kind === "spettri") { mkFoe({ k: "sp", x: 186, y: 50, sp: 46, role: "att", ph: 0 }); mkFoe({ k: "sp", x: 200, y: 94, sp: 42, role: "def", ph: 1.1 }); }
-      else if (kind === "cerbero") { mkFoe({ k: "cb", x: 176, y: 72, sp: 44, r: 6, role: "att" }); S.heads = [0, 1, 2].map((i) => ({ i, x: 212, y: MY, ph: i * 2.1, w: 1.5 + i * 0.5, amp: 21, bite: 0 })); }
+      else if (kind === "spettri") { mkFoe({ k: "sp", x: 186, y: 50, sp: 56, role: "att", ph: 0 }); mkFoe({ k: "sp", x: 200, y: 94, sp: 52, role: "def", ph: 1.1 }); }
+      else if (kind === "cerbero") { mkFoe({ k: "cb", x: 176, y: 72, sp: 36, r: 6, role: "att" }); S.heads = [0, 1, 2].map((i) => ({ i, x: 212, y: MY, ph: i * 2.1, w: 1.3 + i * 0.45, amp: 20, bite: 0 })); }
       else if (kind === "minotauro") { mkFoe({ k: "mi", x: 196, y: MY, sp: 36, r: 9, role: "att", state: "norm", chT: 3 + R() * 1.2, charge: 0, dirx: -1, diry: 0, heavy: 1 }); }
-      else if (kind === "cenere") { mkFoe({ k: "ce", x: 192, y: MY, sp: 44, r: 6, role: "att", whT: 5.5, cardT: 4, chT: 5, state: "norm", dirx: -1, diry: 0 }); S.ring = null; }
+      else if (kind === "cenere") { mkFoe({ k: "ce", x: 192, y: MY, sp: 58, r: 6, role: "att", whT: 5.5, cardT: 4, chT: 5, state: "norm", dirx: -1, diry: 0 }); S.ring = null; }
     }
     function resetPositions(kick) {
       Object.assign(S.hero, { x: 30, y: MY, vx: 0, vy: 0, dash: 0, stun: 0, stone: 0, inv: 0 }); Object.assign(S.ball, { x: W / 2, y: MY, vx: 0, vy: 0, hidden: 0, owner: null });
       S.foes.forEach((f) => { f.x = f.sx; f.y = f.sy; f.vx = f.vy = 0; f.stun = 0; if (f.st) f.st = "hunt"; if (f.state) f.state = "norm"; });
       S.fx = S.fx.filter((x) => x.keep); S.ring = null; S.lastSafe = [30, MY]; S.hero.charges = M.charges;
     }
-    function addFoeLater() { if (kind === "idra" && S.foes.length < 5) mkFoe({ k: "id", x: 196, y: 40 + R() * 60, sp: 34, r: 7, role: R() < 0.5 ? "def" : "att" }); if (kind === "cerbero") { S.heads.forEach((h) => (h.w *= 1.18)); if (S.a === 1) mkFoe({ k: "cb", x: 190, y: 40, sp: 46, r: 6, role: "def" }); } }
+    function addFoeLater() { if (kind === "idra" && S.foes.length < 5) mkFoe({ k: "id", x: 196, y: 40 + R() * 60, sp: 34, r: 7, role: R() < 0.5 ? "def" : "att" }); if (kind === "cenere" && S.foes.length < 3) mkFoe({ k: "sk", x: 204, y: S.a === 1 ? 56 : 88, sp: 46, r: 6, role: "def", col: "#ff7a1a" }); if (kind === "cerbero") { S.heads.forEach((h) => (h.w *= 1.15)); if (S.a === 1) mkFoe({ k: "cb", x: 190, y: 40, sp: 46, r: 6, role: "def" }); } }
     // ---- la fisica del pallone
     function ballStep(dt) {
       const b = S.ball; if (b.hidden > 0) { b.hidden -= dt; if (b.hidden <= 0) { Object.assign(b, { x: W / 2, y: MY, vx: 0, vy: 0 }); } return; }
       if (b.owner) { const f = b.owner; b.x = f.x + (f.dir > 0 ? 3 : -3); b.y = f.y + 5; b.vx = b.vy = 0; return; }
+      { const tx0 = Math.floor(b.x / T), ty0 = Math.floor(b.y / T), c0 = at(tx0, ty0); if (c0 === "#" || c0 === "p") { let best = null, bd = 1e9; for (let yy = 1; yy < GH - 1; yy++) for (let xx = 1; xx < GW - 1; xx++) if (at(xx, yy) === ".") { const d = hyp(xx * T + 8 - b.x, yy * T + 8 - b.y); if (d < bd) { bd = d; best = [xx * T + 8, yy * T + 8]; } } if (best) { b.x = best[0]; b.y = best[1]; b.vx = b.vy = 0; } } } // palla incastrata in un muro: torna in campo
       const sp0 = hyp(b.vx, b.vy), steps = Math.max(1, Math.ceil(sp0 * dt / 3)), h = dt / steps, fr = Math.pow(0.5, h / 0.9);
       for (let i = 0; i < steps; i++) {
         b.x += b.vx * h; b.y += b.vy * h; b.vx *= fr; b.vy *= fr;
@@ -260,7 +261,7 @@
           const cx = clamp(b.x, tx * T, tx * T + T), cy = clamp(b.y, ty * T, ty * T + T), d = hyp(b.x - cx, b.y - cy);
           if (d < b.r) { let nx = b.x - cx, ny = b.y - cy; if (d < 0.01) { nx = b.x < tx * T + 8 ? -1 : 1; ny = 0; } else { nx /= d; ny /= d; } b.x = cx + nx * (b.r + 0.1); b.y = cy + ny * (b.r + 0.1); const dot = b.vx * nx + b.vy * ny; if (dot < 0) { const e = M.bounce ? 1.0 : 0.78; b.vx -= (1 + e) * dot * nx; b.vy -= (1 + e) * dot * ny; if (-dot > 30) tone(220, 0.04, "square", 0.02); } }
         }
-        b.x = clamp(b.x, 4, W - 4); b.y = clamp(b.y, 4, H - 4);
+        b.x = clamp(b.x, 4, W - 4); b.y = clamp(b.y, T + b.r, H - T - b.r);
       }
     }
     function goal(who) {
@@ -345,17 +346,17 @@
       const b = S.ball, h = S.hero; f.flap = (f.flap || 0) + dt;
       if (f.st === "hunt") { const free = !b.owner && !b.hidden; steer(f, free ? b.x : 190, free ? b.y : 60, f.sp, dt, airPass); if (free && hyp(b.x - f.x, b.y - f.y) < 9) { b.owner = f; f.st = "carry"; f.perch = [120 + R() * 90, 24 + R() * 96]; f.ct = 0; b.last = "opp"; tone(700, 0.15, "sawtooth", 0.04, 0, 1100); } }
       else if (f.st === "carry") { f.ct += dt; steer(f, f.perch[0], f.perch[1], f.sp * 1.05, dt, airPass); if (hyp(f.perch[0] - f.x, f.perch[1] - f.y) < 6 || f.ct > 3.2) { if (b.owner === f) { b.owner = null; b.vx = (R() - 0.5) * 60; b.vy = (R() - 0.5) * 60; } f.st = "cool"; f.ct = 0; } }
-      else { f.ct += dt; steer(f, 200, f.sy, f.sp, dt, airPass); if (f.ct > 1.8) f.st = "hunt"; }
+      else { f.ct += dt; steer(f, 200, f.sy, f.sp, dt, airPass); if (f.ct > 1.2) f.st = "hunt"; }
     }
     function golem(f, dt) {
       const b = S.ball; const ty = b.x > 100 ? clamp(b.y, 54, 90) : MY; steer(f, 198, ty, f.sp, dt); f.rock -= dt;
-      if (f.rock <= 0) { f.rock = 4.3; S.fx.push({ t: "rock", x: clamp(S.hero.x + S.hero.vx * 0.4, 20, W - 20), y: clamp(S.hero.y + S.hero.vy * 0.4, 16, H - 16), d: 1.0 * M.warn, life: 0 }); sfx.warn(); }
+      if (f.rock <= 0) { f.rock = 3.5; S.fx.push({ t: "rock", x: clamp(S.hero.x + S.hero.vx * 0.4, 20, W - 20), y: clamp(S.hero.y + S.hero.vy * 0.4, 16, H - 16), d: 1.0 * M.warn, life: 0 }); sfx.warn(); }
     }
     function medusa(f, dt) {
       const h = S.hero, ta = Math.atan2(h.y - f.y, h.x - f.x), da = Math.atan2(Math.sin(ta - f.ang), Math.cos(ta - f.ang)); f.ang += clamp(da, -1, 1) * Math.min(1, dt * 1.1);
       if (f.cool > 0) { f.cool -= dt; f.gaze = 0; return; }
       const d = hyp(h.x - f.x, h.y - f.y), inCone = d < 104 && Math.abs(Math.atan2(Math.sin(ta - f.ang), Math.cos(ta - f.ang))) < 0.42 && los(f.x, f.y, h.x, h.y);
-      if (inCone && !M.eye && h.stone <= 0) { f.gaze += dt * M.warn > 0 ? dt / M.warn : dt; if (f.gaze >= 0.85) { h.stone = 1.5; h.stun = Math.max(h.stun, 1.5); f.gaze = 0; f.cool = 3.2; S.shake = 0.3; tone(110, 0.5, "sawtooth", 0.07, 0, 50); say("<b>Pietrificato!</b> Ti muovi di nuovo tra poco."); } } else f.gaze = Math.max(0, f.gaze - dt * 1.5);
+      if (inCone && !M.eye && h.stone <= 0) { f.gaze += dt * M.warn > 0 ? dt / M.warn : dt; if (f.gaze >= 0.7) { h.stone = 1.5; h.stun = Math.max(h.stun, 1.5); f.gaze = 0; f.cool = 2.4; S.shake = 0.3; tone(110, 0.5, "sawtooth", 0.07, 0, 50); say("<b>Pietrificato!</b> Ti muovi di nuovo tra poco."); } } else f.gaze = Math.max(0, f.gaze - dt * 1.5);
     }
     function los(x0, y0, x1, y1) { const n = Math.ceil(hyp(x1 - x0, y1 - y0) / 4); for (let i = 1; i < n; i++) { const x = x0 + (x1 - x0) * i / n, y = y0 + (y1 - y0) * i / n; const c = at(Math.floor(x / T), Math.floor(y / T)); if (c === "#" || c === "p") return false; } return true; }
     function minotauro(f, dt) {
