@@ -132,6 +132,72 @@ async function mirta(w, label, re, flag) {
   const i = await L.info(page); if (i.flags.re_mirta !== flag) errors.push(label + ": " + JSON.stringify(i.flags));
   L.check(`Cronache del Regno Ultimo · Mirta: ${label} (${w} px)`, errors); await browser.close();
 }
+// capitolo 3: Vigilia, Cripta, Piazza d'Armi, il Duello e i quattro finali
+const SAVE3 = (st = {}, flags = {}, step = {}) => ({ v: 1, ch: 3, step: Object.assign({ 1: 5, 2: 5 }, step), done: { 1: "stendardo", 2: "indaga" }, diffSet: true, lore: ["l_patto", "l_palla"], intro: { ch1: 1, ch2: 1, re_cortile: 1, re_trono: 1, re_mura: 1, re_strada: 1, re_forte: 1, re_porto: 1, re_bosco: 1 }, st: Object.assign({ lupi: 4, gabbiani: 4, cervi: 4, fiducia: 6 }, st), flags: Object.assign({ re_mirta: "indaga", re_ind_lettera: true, re_ind_inchiostro: true, re_info_lupi: true, re_info_gabbiani: true, re_info_cervi: true, re_buco: true, re_t_lupi: true, re_t_gabbiani: true, re_t_cervi: true }, flags) });
+const K3 = () => window.__regno._dbg.K;
+async function c3(w) {
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save: SAVE3() });
+  await page.evaluate(() => window.__regno.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 3")); await L.advance(page);
+  if ((await L.zone(page)) !== "re_vigilia") errors.push("il capitolo 3 non parte dai bastioni");
+  await reach(page, errors, "re_vigilia"); if (w === 390) await L.shot(page, "re_vigilia");
+  // il cancello a est del Cortile porta ai bastioni
+  await page.evaluate(() => window.__regno._dbg.K.go("re_cortile", 16, 19)); await page.waitForTimeout(500); await L.advance(page);
+  await toLink(page, 31, 11); await page.waitForTimeout(700); await L.advance(page); if ((await L.zone(page)) !== "re_vigilia") errors.push("il Cortile non porta ai bastioni: " + (await L.zone(page)));
+  await L.talk(page, "re_fiorino"); await L.advance(page);
+  await L.talk(page, "re_mirta"); await L.advance(page);
+  await L.talk(page, "re_oriele"); await L.advance(page);
+  let i = await L.info(page); if (i.step[3] !== 1) errors.push("Oriele non apre la Vigilia: " + JSON.stringify(i.step));
+  await L.talk(page, "re_brando"); if (!(await pick(page, "Niente guerra"))) errors.push("scelta di Brando"); await L.advance(page);
+  await L.talk(page, "re_perla"); if (!(await pick(page, "Rifiutare"))) errors.push("scelta di Perla"); await L.advance(page);
+  await L.talk(page, "re_cedro"); if (!(await pick(page, "Mostrare la lettera"))) errors.push("lettera di Cedro"); if (!(await pick(page, "La tengo io"))) errors.push("scelta sulla lettera"); await L.advance(page);
+  i = await L.info(page); if (i.step[3] !== 2 || !i.flags.re_spia_vera) errors.push("i tre capi non bastano: " + JSON.stringify(i.step) + " " + i.flags.re_spia_vera);
+  // la cappella è chiusa finché Oriele non dà la chiave
+  await L.goAct(page, 14, 5); await L.advance(page); if ((await L.zone(page)) === "re_cripta") errors.push("la Cappella dovrebbe essere chiusa");
+  await L.talk(page, "re_oriele"); await L.advance(page);
+  i = await L.info(page); if (i.step[3] !== 3) errors.push("la chiave non arriva: " + JSON.stringify(i.step));
+  await L.goAct(page, 14, 5); await page.waitForTimeout(500); await L.advance(page);
+  if ((await L.zone(page)) !== "re_cripta") errors.push("non si entra nella Cripta: " + (await L.zone(page)));
+  await reach(page, errors, "re_cripta"); if (w === 390) await L.shot(page, "re_cripta");
+  await L.goAct(page, 10, 3); await L.advance(page);
+  i = await L.info(page); if (i.step[3] !== 4 || !i.lore.includes("l_cronaca")) errors.push("il segreto della Palla non conta: " + JSON.stringify(i.step));
+  await toLink(page, 10, 13); await page.waitForTimeout(700); await L.advance(page); if ((await L.zone(page)) !== "re_vigilia") errors.push("la Cripta non riporta ai bastioni");
+  await toLink(page, 29, 10); await page.waitForTimeout(700); await L.advance(page); if ((await L.zone(page)) !== "re_piazza") errors.push("i bastioni non portano alla Piazza");
+  await reach(page, errors, "re_piazza"); if (w === 390) await L.shot(page, "re_piazza");
+  for (const id of ["re_fiorino", "re_gatto", "re_anselmo", "re_tullio"]) { await L.talk(page, id); await L.advance(page); }
+  await L.talk(page, "re_evaristo"); if (!(await pick(page, "Il Duello di Corona"))) errors.push("Evaristo non apre il Duello");
+  await page.waitForTimeout(500); const ov = await page.evaluate(() => (document.querySelector(".cnOv") || {}).innerText || ""); if (!/Tullio|Corvi/.test(ov)) errors.push("con tre alleanze l'avversario sono i Corvi: " + ov.slice(0, 80));
+  await duello(page, 3, 1, errors); if (process.env.DBG) console.log("post-duello", await page.evaluate(() => window.T_.btns().map((o) => o.t))); await L.advance(page);
+  i = await L.info(page); if (i.step[3] !== 5 || !i.flags.re_vinto) errors.push("la vittoria non conta: " + JSON.stringify(i.step));
+  // i finali: uno alla volta; quello segreto è chiuso senza i requisiti
+  const ends = [["perpetuo", "Nessuna corona"], ["consiglio", "Tagliamo il filo"], ["ferro", "Il Generale ha giurato"], ["regina", "Regina, Altezza"]];
+  for (const [k, e] of ends) {
+    if (k === "ferro") { if (await page.evaluate(() => window.__regno._dbg.K.F.is("re_giuro_ferro"))) errors.push("il giuramento a Brando non doveva esserci"); await page.evaluate(() => window.__regno._dbg.K.F.set("re_giuro_ferro", true)); }
+    await page.evaluate(() => { const K = window.__regno._dbg.K; K.setStep(3, 5); K.enterZone("re_piazza"); }); await page.waitForTimeout(500); await L.advance(page);
+    if (process.env.DBG) console.log("fine", k); await L.talk(page, "re_oriele"); if (!(await pick(page, e))) errors.push("finale non selezionabile: " + k); if (process.env.DBG) console.log("picked", k, await page.evaluate(() => window.T_.btns().map((o) => o.t))); await L.advance(page);
+  }
+  i = await L.info(page); if (!i.done[3]) errors.push("capitolo 3 non concluso: " + JSON.stringify(i.step));
+  if (i.ends.length < 4) errors.push("finali trovati " + i.ends.length + " su 4: " + i.ends);
+  const own = await page.evaluate(() => window.__borgoApi.cosOwned()); ["re_c3", "re_regina", "re_consiglio", "re_ferro", "re_perpetuo"].forEach((c) => { if (!own.includes(c)) errors.push("cosmetico mancante " + c); });
+  L.check(`Cronache del Regno Ultimo · capitolo 3 e i 4 finali (${w} px)`, errors); await browser.close();
+}
+// capitolo 3 con poche alleanze: l'avversario è il campione della Casata trascurata, il finale segreto è chiuso, si può perdere e riprovare
+async function c3b(w) {
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save: SAVE3({ lupi: 0, fiducia: 1 }, { re_ind_lettera: false, re_ind_inchiostro: false }, { 3: 4 }) });
+  await page.evaluate(() => window.__regno.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 3")); await L.advance(page);
+  await page.evaluate(() => { const K = window.__regno._dbg.K; K.setStep(3, 4); K.enterZone("re_piazza"); }); await page.waitForTimeout(500); await L.advance(page);
+  await L.talk(page, "re_evaristo"); if (!(await pick(page, "Il Duello di Corona"))) errors.push("Evaristo non apre il Duello");
+  await page.waitForTimeout(500); const ov = await page.evaluate(() => (document.querySelector(".cnOv") || {}).innerText || ""); if (!/Ulderico|Lance/.test(ov)) errors.push("l'avversario dovrebbe essere dei Lupi: " + ov.slice(0, 80));
+  await duello(page, 0, 2, errors); await L.advance(page);
+  let i = await L.info(page); if (i.step[3] !== 4) errors.push("dopo una sconfitta si deve poter riprovare: " + JSON.stringify(i.step));
+  await L.talk(page, "re_evaristo"); await pick(page, "Il Duello di Corona"); await duello(page, 2, 1, errors); await L.advance(page);
+  i = await L.info(page); if (i.step[3] !== 5) errors.push("la rivincita non conta: " + JSON.stringify(i.step));
+  await L.talk(page, "re_oriele"); await page.waitForTimeout(300);
+  const dis = await page.evaluate(() => window.T_.btns().filter((o) => o.d).map((o) => o.t)); if (!dis.some((t) => /Nessuna corona/.test(t))) errors.push("il finale segreto dovrebbe essere chiuso: " + dis.join("|"));
+  if (!dis.some((t) => /Tagliamo il filo/.test(t))) errors.push("il Consiglio richiede la Cripta: " + dis.join("|"));
+  await L.advance(page, ["Regina, Altezza"]);
+  i = await L.info(page); if (!i.done[3] || i.ends.join() !== "regina") errors.push("finale della Regina non registrato: " + JSON.stringify(i.ends));
+  L.check(`Cronache del Regno Ultimo · capitolo 3, poche alleanze (${w} px)`, errors); await browser.close();
+}
 const ONLY = process.argv[2] || "";
-const RUN = [["c1", () => c1(390)], ["c1", () => c1(320)], ["c2", () => c2(390)], ["c2", () => c2(320)], ["c2b", () => c2b(390)], ["c2b", () => c2b(320)], ["mirta", () => mirta(390, "accusata", "Accusare Mirta", "accusata")], ["mirta", () => mirta(390, "difesa", "Difendere Mirta", "difesa")]];
+const RUN = [["c1", () => c1(390)], ["c1", () => c1(320)], ["c2", () => c2(390)], ["c2", () => c2(320)], ["c2b", () => c2b(390)], ["c2b", () => c2b(320)], ["c3", () => c3(390)], ["c3", () => c3(320)], ["c3b", () => c3b(390)], ["c3b", () => c3b(320)], ["mirta", () => mirta(390, "accusata", "Accusare Mirta", "accusata")], ["mirta", () => mirta(390, "difesa", "Difendere Mirta", "difesa")]];
 (async () => { for (const [n, f] of RUN) if (!ONLY || n === ONLY) await f(); })().catch((e) => { console.error("✗ regno:", e.message); process.exit(1); });

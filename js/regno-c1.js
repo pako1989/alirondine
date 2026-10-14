@@ -53,7 +53,7 @@
         flavor: { n: "L'avviso del ciambellano: «Il Duello di Corona si terrà all'alba del terzo giorno. È gradito il silenzio. È gradito anche il mutismo. Firmato: E. Cappamagna». Sotto, a matita: «Con tutto il rispetto».", F: "Una torcia di ferro, accesa tre ore prima del bisogno: a corte si accende tutto in anticipo, per non sembrare impreparati." },
         intro: [["voce", "Castelalto sorge sulla roccia come un pugno: il palazzo al centro, le torri ai lati, e davanti il Cortile delle Tre Casate, dove tre stendardi ricordano a tutti che il Regno è fatto di tre pezzi."], ["voce", "Dall'alto delle mura si sente un tamburo, lontano. Sono i Corvi di Rocca Nera, che da tre mesi assediano un angolo del Regno con molta pazienza e poche idee. Nel cortile, intanto, si apparecchia."]],
         npcs: (s) => [{ id: "re_evaristo", at: [15, 9] }, { id: "re_fiorino", at: [21, 14] }, { id: "re_mirta", at: [24, 15] }],
-        links: { "16,21": ["re_strada", 15, 2] },
+        links: { "16,21": ["re_strada", 15, 2], "31,11": ["re_vigilia", 1, 10] },
         build(L, K) {
           const { lay, put, house } = L;
           lay(0, 0, 31, 0, "a"); lay(0, 0, 0, 21, "a"); lay(31, 0, 31, 21, "a"); lay(0, 21, 31, 21, "a");
@@ -63,7 +63,7 @@
           house(25, 2, 6, 5, { door: [27, 6], roof: "#854d0e", wall: "#d8c8a8", rr: 1, lit: 1, enter: "La Cucina Reale: fumo, pentole e un paiolo grande come una barca. Dalla finestra una voce urla: «Chi ha toccato il cinghiale?!». Nessuno ha toccato il cinghiale." });
           [[6, 9], [12, 9], [19, 9], [25, 9]].forEach(([x, y]) => put(x, y, "I"));
           [[13, 8], [18, 8], [13, 14], [18, 14], [3, 16], [28, 16], [3, 9]].forEach(([x, y]) => put(x, y, "F"));
-          lay(4, 16, 9, 16, "K"); lay(22, 16, 27, 16, "K"); put(29, 8, "x"); put(2, 19, "s"); put(19, 19, "n"); if (K.hasChapter(2) && ((K.mem().done || {})[1])) put(16, 21, "v");
+          lay(4, 16, 9, 16, "K"); lay(22, 16, 27, 16, "K"); put(29, 8, "x"); put(2, 19, "s"); put(19, 19, "n"); if (K.hasChapter(2) && ((K.mem().done || {})[1])) put(16, 21, "v"); if (K.hasChapter(3) && ((K.mem().done || {})[2])) put(31, 11, ">");
         },
       },
       re_trono: {
