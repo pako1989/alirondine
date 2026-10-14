@@ -146,7 +146,25 @@ async function c3(w) {
   L.check(`Dungeon di Fine Stagione · capitolo 3 (${w} px)`, errors); await browser.close();
 }
 
+// il cabinato della Sala Giochi: una discesa breve (2 stanze, un dono in mezzo) e poi la sfida al boss (3 stanze)
+async function cab(w) {
+  const save = { v: 1, ch: 2, step: { 1: 5 }, done: { 1: "pieta" }, ends: [], diffSet: true, flags: {} };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save }); _E = errors;
+  await page.evaluate(() => window.__salone.salaGiochi(() => {})); await page.waitForTimeout(400);
+  const st = await page.evaluate(() => { const b = document.querySelector('.salOv [data-m="ipogeo"]'); return b ? b.querySelector(".pe").textContent : null; });
+  if (!st || st === "🔒") errors.push("il cabinato non si accende dopo il capitolo 1: " + st);
+  await page.evaluate(() => document.querySelector('.salOv [data-m="ipogeo"]').click()); await page.waitForTimeout(300);
+  await page.evaluate(() => document.querySelector('.salOv [data-o="0"]').click());
+  await room(page, errors, 2, 0, "cabinato 1"); await closeRoom(page);
+  await gift(page, errors); await page.waitForTimeout(300);
+  await room(page, errors, 2, 0, "cabinato 2"); await closeRoom(page); await page.waitForTimeout(500);
+  const rec = await page.evaluate(() => JSON.parse(localStorage.getItem("ali-di-rondine.salagiochi") || "null"));
+  if (rec && !((rec.w || {}).ipogeo >= 1)) errors.push("vittoria al cabinato non registrata: " + JSON.stringify(rec.w));
+  if (w === 390) await L.shot(page, "dg_cabinato");
+  L.check(`Dungeon di Fine Stagione · cabinato (${w} px)`, errors); await browser.close();
+}
+
 (async () => {
   const which = process.argv[2] || "all";
-  for (const w of [390, 320]) { if (which === "all" || which === "c1") await c1(w); if (which === "all" || which === "c2") await c2(w); if (which === "all" || which === "c3") await c3(w); }
+  for (const w of [390, 320]) { if (which === "all" || which === "c1") await c1(w); if (which === "all" || which === "c2") await c2(w); if (which === "all" || which === "c3") await c3(w); if (which === "all" || which === "cab") await cab(w); }
 })().catch((e) => { console.error(e); process.exitCode = 1; });
