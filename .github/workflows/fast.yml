@@ -1,0 +1,17 @@
+# Controllo rapido (~2 min) a ogni push: sintassi + avvio del gioco senza errori. I test lunghi stanno in test.yml.
+name: Controllo rapido
+on:
+  push:
+    branches: [main]
+jobs:
+  fast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run lint
+      - run: npm i --no-save playwright@1.49.1 && npx playwright install --with-deps chromium
+      - run: node tests/smoke.cjs

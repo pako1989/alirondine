@@ -5960,6 +5960,15 @@
     box.innerHTML = `<span class="t">Ecco il codice della <b>${esc(slotLbl())}</b>. Copialo e tienilo in un posto sicuro (una nota, un messaggio a te stesso). Contiene solo questa partita.</span><textarea class="code" id="saveCode" readonly rows="5" aria-label="Codice di salvataggio"></textarea><span class="t" id="copyMsg" style="color:var(--dim)"></span>`;
     $("saveCode").value = code;
     buttons([
+      { label: "Scarica file", sub: "Un file .txt da conservare (consigliato)", cls: "hot", fn: () => {
+        let ok = false;
+        try {
+          const d = new Date(), pad = (n) => String(n).padStart(2, "0"), name = `ali-di-rondine-backup-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.txt`;
+          const url = URL.createObjectURL(new Blob([code], { type: "text/plain" })), a = document.createElement("a");
+          a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000); ok = true;
+        } catch {}
+        $("copyMsg").textContent = ok ? "File scaricato: lo trovi nei Download del telefono." : "Non riesco a scaricare il file: usa Copia.";
+      } },
       { label: "Copia", cls: "hot", fn: async () => {
         const ta = $("saveCode"); let ok = false;
         try { if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(code); ok = true; } } catch {}
@@ -5987,6 +5996,17 @@
     box.innerHTML = `<span class="t">Incolla qui il codice che avevi esportato.</span><textarea class="code" id="saveCode" rows="5" aria-label="Incolla il codice" placeholder="ALI1:…"></textarea><span class="t" id="copyMsg" style="color:var(--red)"></span>`;
     if (typeof err === "string") $("copyMsg").textContent = err;
     buttons([
+      { label: "Scegli file…", sub: "Il file .txt scaricato con «Scarica file»", cls: "hot", fn: () => {
+        const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".txt,text/plain";
+        inp.onchange = () => {
+          const f = inp.files && inp.files[0]; if (!f) return;
+          const r = new FileReader();
+          r.onload = () => { const ta = $("saveCode"); if (ta) { ta.value = String(r.result || "").trim(); $("copyMsg").textContent = "File letto: premi Importa."; } };
+          r.onerror = () => { $("copyMsg").textContent = "Non riesco a leggere il file."; };
+          r.readAsText(f);
+        };
+        inp.click();
+      } },
       { label: "Importa", cls: "hot", fn: () => {
         const raw = $("saveCode").value;
         let data; try { data = parseCode(raw); } catch (e) { savesImport(e.message); $("saveCode").value = raw; return; }
