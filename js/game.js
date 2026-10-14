@@ -22259,6 +22259,7 @@
     cortile: { n: "Cortile della rocca", fx: { spd: 0.98, fr: 0.982, tk: 0.03, nz: 0.02, sh: 1.03, court: true }, ok: () => true, why: "Il cortile di Rocca Tasso: terra battuta, mura di pietra tutt'intorno e gli stendardi col tasso. La palla è pesante e rimbalza sulle mura." },
     orbita: { n: "Ponte orbitale", fx: { spd: 1.03, fr: 0.993, tk: 0, nz: 0.01, sh: 1.06, space: true }, ok: () => true, why: "Il ponte esterno della Stazione Orbitale 7: pannelli di metallo, la Terra sotto i piedi e la gravità al minimo. Il pallone scivola e non vuole fermarsi." },
     molo: { n: "Molo al tramonto", fx: { spd: 1.05, fr: 0.99, tk: 0.02, nz: 0.01, sh: 1.08, sunset: true, dock: true }, ok: () => true, why: "La banchina in pietra affacciata sul golfo dorato. Se calci troppo forte la palla finisce in mare con uno splash!" },
+    spiaggia: { n: "Spiaggia dei naufraghi", fx: { spd: 0.92, fr: 0.975, tk: 0, nz: 0.02, sh: 0.97, beach: true }, ok: () => true, why: "La spiaggia dell'isola: sabbia compatta, palme in fondo, e un pallone di cocco che rimbalza dove vuole. La marea lecca le linee laterali." },
   };
   const AZ_PITS = ["erba", "campo", "sabbia", "fango", "notte", "molo"];
   const AZ_MOD = [["amic", "Amichevole", "La partita di sempre", () => true], ["sfida", "Sfida a obiettivo", "Un obiettivo in più: bonus se lo centri", () => Object.keys(azRec().beat).length >= 1], ["eventi", "Partita a eventi", "Meteo, palla d'oro e altre sorprese a metà partita", () => Object.keys(azRec().beat).length >= 3]];
@@ -22354,6 +22355,12 @@
       for (let i = 0; i < 4; i++) { g.fillStyle = "rgba(180,240,255,.06)"; g.beginPath(); g.moveTo(40 + i * 80 + Math.sin(A.t / 60 + i) * 10, 0); g.lineTo(70 + i * 80 + Math.sin(A.t / 60 + i) * 10, 0); g.lineTo(30 + i * 80, H); g.lineTo(i * 80, H); g.fill(); }
       for (let i = 0; i < 10; i++) { const x = (i * 37) % W, base = i % 2 ? AZ_UP - 2 : AZ_DN + 2; g.strokeStyle = "#2a8a5a"; g.lineWidth = 2; g.beginPath(); g.moveTo(x, base); g.quadraticCurveTo(x + Math.sin(A.t / 20 + i) * 6, base + (i % 2 ? -10 : 10), x + Math.sin(A.t / 15 + i) * 4, base + (i % 2 ? -18 : 18)); g.stroke(); }
       for (let i = 0; i < 14; i++) { const x = (i * 53) % W, y = H - ((A.t * (0.4 + (i % 3) * 0.2) + i * 41) % H); g.strokeStyle = "rgba(220,250,255,.5)"; g.lineWidth = 1; g.beginPath(); g.arc(x + Math.sin(A.t / 15 + i) * 2, y, 1.5 + (i % 3), 0, 7); g.stroke(); }
+    }
+    if (p === "spiaggia") { // sabbia dorata, battigia con la schiuma, palme che oscillano, pallone di cocco
+      px(0, 0, W, H, "#e4cf92"); for (let i = 0; i < 8; i++) px(i * 40, 0, 20, H, "#dec78a"); for (let i = 0; i < 70; i++) px((i * 53) % W, AZ_UP + (i * 31) % (AZ_DN - AZ_UP), 2, 1, "rgba(120,90,40,.22)");
+      const sy = AZ_UP - 14; px(0, 0, W, sy + 6, "#2fb8cc"); for (let i = 0; i < 9; i++) px(((i * 47 + A.t * 0.35) % (W + 30)) - 15, 3 + (i * 7) % Math.max(4, sy), 18, 1, "rgba(255,255,255,.45)");
+      for (let x = 0; x < W; x += 6) px(x, sy + 3 + Math.sin(A.t / 14 + x / 11) * 2, 7, 2, "rgba(255,255,255,.7)"); px(0, sy + 8, W, 3, "rgba(120,100,60,.25)");
+      [[10, AZ_DN + 4], [W - 12, AZ_DN + 2]].forEach(([x, y], k) => { const sw = Math.sin(A.t / 40 + k) * 2; g.strokeStyle = "#7a5a38"; g.lineWidth = 3; g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + (k ? -6 : 6), y - 10, x + (k ? -3 : 3), y - 20); g.stroke(); for (let q = 0; q < 6; q++) { const a = -Math.PI + q * 0.62; g.strokeStyle = q % 2 ? "#2f8a3e" : "#3fa24a"; g.lineWidth = 2.5; g.beginPath(); g.moveTo(x + (k ? -3 : 3), y - 20); g.quadraticCurveTo(x + (k ? -3 : 3) + Math.cos(a) * 9, y - 24 + Math.sin(a) * 5 + sw * 0.4, x + (k ? -3 : 3) + Math.cos(a) * 15 + sw, y - 16 + Math.sin(a) * 4); g.stroke(); } });
     }
     if (p === "dojo") { // tatami a riquadri, bordi neri, carta di riso ai lati, una lanterna
       px(0, 0, W, H, "#e8dcc0"); for (let x = 0; x < W; x += 24) px(x, 0, 1, H, "rgba(90,70,40,.15)");

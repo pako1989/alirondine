@@ -8727,6 +8727,18 @@
     const bx = 160 + Math.sin(f / 30) * 40, by = 150 + Math.cos(f / 22) * 6; ell(g, bx, by + 5, 6, 2, "rgba(0,0,0,.3)"); circ(g, bx, by, 6, "#6a4a22"); circ(g, bx - 1, by - 1, 4.5, "#8a6636"); px(g, bx - 3, by - 2, 2, 2, "#2b1d10"); px(g, bx + 1, by - 3, 2, 2, "#2b1d10"); px(g, bx - 1, by + 1, 2, 2, "#2b1d10");
     if (ph === "notte") for (let i = 0; i < 6; i++) glow(g, 30 + i * 54, 92, 12, "110,255,225", 0.3 + 0.2 * Math.sin(f / 13 + i));
   }
+  // ---------------------------------------------------------------- finale (alba sul mare, l'isola che nuota)
+  function finale(g, W, H, f) {
+    const hz = 100; vg(g, 0, 0, W, hz + 2, ["#6a8ad8", "#f6a8a0", "#ffe3a8"]); circ(g, 160, hz - 4, 22, "#fff0b8"); glow(g, 160, hz - 4, 90, "255,200,120", 0.5);
+    for (let i = 0; i < 4; i++) { const cx = (rnd(i + 3) * (W + 80) + f * 0.1) % (W + 80) - 40; ell(g, cx, 22 + i * 14, 28, 5, "rgba(255,225,215,.7)"); }
+    vg(g, 0, hz, W, H - hz, ["#f4b8a0", "#4aa0c0", "#0e6a92"]); for (let i = 0; i < 26; i++) px(g, ((rnd(i) * W + f * 0.25) % (W + 20)) - 10, hz + 4 + rnd(i + 5) * (H - hz - 8), 10 + rnd(i + 2) * 14, 1, "rgba(255,240,210,.45)");
+    const bob = Math.sin(f / 40) * 1.5; g.save(); g.translate(0, bob);
+    ell(g, 150, 128, 78, 24, "#2a5a4a"); ell(g, 150, 124, 70, 18, "#3a7a58"); for (let i = 0; i < 7; i++) ell(g, 100 + i * 17, 118 + (i % 2) * 4, 9, 5, "#4a8e64");
+    ell(g, 236, 130, 24, 11, "#2a5a4a"); circ(g, 252, 126, 8, "#3a7a58"); px(g, 255, 124, 2, 2, "#fff8e0"); ell(g, 96, 146, 22, 6, "#2a5a4a"); ell(g, 196, 148, 22, 6, "#2a5a4a");
+    palm(g, 118, 118, 26, -6, "giorno", f, 0); palm(g, 168, 116, 30, 6, "giorno", f, 1); px(g, 146, 86, 8, 30, "#f6f1e8"); px(g, 146, 96, 8, 5, "#c0392b"); px(g, 146, 108, 8, 5, "#c0392b"); px(g, 144, 82, 12, 5, "#2a2a3a"); px(g, 147, 83, 6, 3, "#ffe27a");
+    g.restore(); for (let i = 0; i < 5; i++) { const bx = (f * 0.5 + i * 70) % 340 - 10, by = 40 + i * 9 + Math.sin(f / 16 + i) * 3; g.strokeStyle = "#5a3a4a"; g.lineWidth = 1.2; g.beginPath(); g.moveTo(bx - 4, by); g.quadraticCurveTo(bx - 2, by - 3, bx, by); g.quadraticCurveTo(bx + 2, by - 3, bx + 4, by); g.stroke(); }
+    for (let i = 0; i < 6; i++) px(g, 60 + i * 40 + Math.sin(f / 18 + i) * 3, 162 + i * 3, 30 - i * 3, 1, "rgba(255,255,255,.5)");
+  }
   const HOT = {
     nf_titolo: [[70, 96, 64, 50, "Un pezzo d'aereo piantato nella sabbia come una forchetta in una torta. Sulla coda c'è ancora la scritta «Rondine Airlines»."], [252, 86, 34, 46, "Una luce lontana, sull'orizzonte, gira a intervalli regolari. Qualcuno la accende ogni sera."], [30, 20, 260, 40, "Stormi di gabbiani. Strano: volano sempre nella stessa direzione, come se sapessero dove andare."]],
     nf_spiaggia: [[44, 118, 80, 56, "Il relitto. Dentro ci sono ancora i sedili, i giornali di bordo e un'arancia che ha resistito a tutto."], [196, 160, 50, 28, "Il falò dei naufraghi. Qualcuno lo tiene acceso con grande metodo e un po' di orgoglio."], [128, 164, 36, 18, "Casse di bordo. Su una c'è scritto «DELICATO». Ora non lo è più."], [0, 84, 320, 28, "Il mare, troppo azzurro per essere vero."]],
@@ -8734,9 +8746,10 @@
     nf_laguna: [[142, 14, 20, 62, "Il faro. È lontano, ma sembra più vicino ogni volta che lo guardi."], [28, 130, 270, 30, "Pietre piatte nell'acqua: fanno da ponte. Di notte brillano di una luce verde, come lucciole fredde."], [10, 40, 70, 40, "Uno scoglio con un nido di gabbiano. Dentro, un fischietto arrugginito."], [240, 40, 70, 40, "Una palma storta, piegata verso il faro come per ascoltare."]],
     nf_faro: [[146, 148, 28, 24, "La porta del faro: legno scuro, ferro arrugginito, una maniglia a forma di pesce."], [144, 6, 32, 34, "La lanterna in cima. Gira da sola, e di notte la luce si vede fino all'orizzonte."], [30, 40, 260, 40, "Gabbiani che girano intorno alla torre. Non hanno paura di niente."], [30, 170, 120, 26, "Scogli bianchi di sale. Un'onda lunga li accarezza e se ne va."]],
     nf_radio: [[34, 78, 70, 34, "La radio grande: lucette verdi, manopole, un fruscio che sembra un respiro."], [24, 20, 60, 44, "Una mappa appesa. La costa è disegnata a matita, con una piccola croce rossa."], [238, 36, 56, 54, "L'oblò sul mare. Il fascio di luce passa di qua ogni pochi secondi."], [170, 86, 40, 28, "Un vecchio microfono con una piccola luce rossa. Sembra acceso."]],
+    nf_finale: [[140, 78, 24, 44, "Il faro, in cima al guscio: la luce gira ancora, anche di giorno, come un saluto."], [230, 118, 36, 22, "Una testa grande come uno scoglio, con un occhio che si chiude lentamente: l'isola sorride."], [40, 150, 240, 36, "La scia sul mare: l'isola nuota piano, e dietro di sé lascia tutte le storie."]],
     nf_stadio: [[20, 108, 50, 44, "La porta di destra: tronchi e rete da pesca. I pali sono dritti come promesso."], [64, 96, 200, 18, "Gli spalti: casse di legno, qualche tifoso e molte noci di cocco."], [130, 128, 60, 40, "Il pallone, una noce di cocco levigata dal mare. Rimbalza storto: è il suo carattere."], [250, 108, 50, 44, "La porta di sinistra. La rete è un po' bucata: i granchi la usano per entrare."]],
   };
-  const DRAW = { nf_titolo: titolo, nf_spiaggia: spiaggia, nf_giungla: giungla, nf_laguna: laguna, nf_faro: faro, nf_radio: radio, nf_stadio: stadio };
+  const DRAW = { nf_titolo: titolo, nf_spiaggia: spiaggia, nf_giungla: giungla, nf_laguna: laguna, nf_faro: faro, nf_radio: radio, nf_stadio: stadio, nf_finale: finale };
   Object.keys(DRAW).forEach((k) => R.register(k, { draw: (g, W, H, f) => DRAW[k](g, W, H, f), hot: HOT[k] }));
 })();
 
