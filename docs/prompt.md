@@ -51,6 +51,7 @@ Un solo file: contiene regole, stato del progetto, come costruire una saga, API 
   - un **cabinato in Sala Giochi** (`MACHINES` in `js/salone.js`), per giocare il suo motore nuovo fuori dalla storia;
   - le **carte della Squadra dei Sogni** (`js/sogni.js`);
   - un'**acconciatura da sbloccare** (`HAIR_SAGA` in `js/game.js`);
+  - una **maglia con disegno** per il campione (opzionale, anche non tematica, con dettagli: righe, scacchi, fasce, stemma): voce `sm_<nome>` in `COSM` (`kind: "shirt"`, `val` = colore base UNICO), disegno in `SHIRT_PATS` (`js/game.js`: `t` = hoops/pin/checks/band/sash/halves, `c` = colore del motivo, `e` = stemma anchor/wheel/laurel/flame/glass/diamond), sblocco con `sm_<nome>: "<saga>"` in `HAIR_SAGA`;
   - se contestualizzato (non per forza in ogni saga), un **tiro speciale del campione**: voce `sh_<nome>` in `COSM` (`kind: "shot"`), `H_SHOTS.<nome>` con `bias` piccolo e colori `c1/c2`, formula in `heroPower`, sblocco aggiungendo `sh_<nome>: "<saga>"` in `HAIR_SAGA` (esempi: `sh_cocco`, `sh_controluce`, `sh_gravita`);
   - un **ospite al Borgo** (`cfg.guest`).
   - I finali entrano da soli nella **Cineteca**.

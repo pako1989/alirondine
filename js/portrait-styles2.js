@@ -85,7 +85,7 @@
     hairBack(g, st, fw, hairS, { tie: "#ff6a7a", alt: hair });
     // corpo: maglia piatta, ombra netta a destra, colletto geometrico
     g.fillStyle = shirt; bodyPath(g, 36); g.fill();
-    g.save(); bodyPath(g, 36); g.clip(); g.fillStyle = shirtS; g.fillRect(6, 30, 40, 40); g.restore();
+    g.save(); bodyPath(g, 36); g.clip(); g.fillStyle = shirtS; g.fillRect(6, 30, 40, 40); g.restore(); if (window.__shirtPat) { g.save(); bodyPath(g, 36); g.clip(); window.__shirtPat(g, shirt); g.restore(); }
     g.fillStyle = dark(shirt, 0.35); g.beginPath(); g.moveTo(-9, 31); g.lineTo(0, 41); g.lineTo(9, 31); g.closePath(); g.fill();
     g.fillStyle = skinS; g.fillRect(-6, 20, 12, 13); g.fillStyle = skin; g.beginPath(); g.moveTo(-6, 31); g.lineTo(0, 37); g.lineTo(6, 31); g.closePath(); g.fill();
     if (c.num && g.getTransform().a > 0) { g.fillStyle = lum(shirt) > 0.6 ? "#1a1a1a" : "#ffffff"; g.font = "800 10px system-ui, sans-serif"; g.textAlign = "center"; g.fillText(String(c.num).slice(0, 2), -20, 54); g.textAlign = "left"; }
@@ -138,7 +138,7 @@
     cosm(g, c, T, true);
     const hb = g.createLinearGradient(0, -20, 0, 56); hb.addColorStop(0, dark(hair, 0.2)); hb.addColorStop(1, dark(hair, 0.5)); hairBack(g, st, fw, hb, { tie: "#e8485a", alt: dark(hair, 0.1) });
     // corpo: maglia con pieghe sfumate e luce di contorno
-    const sg = g.createLinearGradient(-36, 30, 36, 62); sg.addColorStop(0, lite(shirt, 0.18)); sg.addColorStop(0.55, shirt); sg.addColorStop(1, dark(shirt, 0.35)); g.fillStyle = sg; bodyPath(g, 36); g.fill();
+    const sg = g.createLinearGradient(-36, 30, 36, 62); sg.addColorStop(0, lite(shirt, 0.18)); sg.addColorStop(0.55, shirt); sg.addColorStop(1, dark(shirt, 0.35)); g.fillStyle = sg; bodyPath(g, 36); g.fill(); if (window.__shirtPat) { g.save(); bodyPath(g, 36); g.clip(); window.__shirtPat(g, shirt); g.restore(); }
     g.save(); bodyPath(g, 36); g.clip();
     g.strokeStyle = dark(shirt, 0.25, 0.5); g.lineWidth = 1.2; [[-20, 44, -14, 60], [18, 42, 24, 60]].forEach(([a, b, c2, d]) => { g.beginPath(); g.moveTo(a, b); g.quadraticCurveTo((a + c2) / 2 + 3, (b + d) / 2, c2, d); g.stroke(); });
     g.strokeStyle = lite(shirt, 0.6, 0.7); g.lineWidth = 1.6; g.beginPath(); g.moveTo(-34, 60); g.bezierCurveTo(-33, 44, -24, 36, -10, 32); g.stroke();

@@ -1008,12 +1008,43 @@
     if (kind === "borgo") borgoBackdrop();
   }
   function portraitShirt(id, c) { return { leo: "#ff4d5a", nico: "#3fa7ff", tommy: "#ff4d5a", kenji: "#1d3fa3", dario: "#1b1b1b", valli: "#222", ruggeri: "#34465f", papa: "#e8e0d0", sara: "#ffd23f", rita: "#8a4b6b", ines: "#5a1a3a", bruno: "#3a1450", lina: "#16223f", gigi: "#ff4d5a", fede: "#1d3fa3", marta: "#1d3fa3", aldo: "#10182e", sho: "#ffffff", jojo: "#ffd23f", bellandi: "#b3202c", vitale: "#b3202c", mazza: "#3a3a44", nonna: "#6b8cff" }[id] || c.shirt || "#555"; }
+  // maglie a disegno: il colore base identifica il disegno (un colore unico per maglia); ogni stile dei volti chiama __shirtPat dentro la sagoma del busto
+  const SHIRT_PATS = { "#e9eef2": { t: "hoops", c: "#1d3a5f", e: "anchor" }, "#23232d": { t: "pin", c: "#8b1d2c", e: "diamond" }, "#f0efe9": { t: "checks", c: "#1b1b1b", e: "wheel" }, "#a1272f": { t: "band", c: "#e0b43a", e: "laurel" }, "#4b2e83": { t: "sash", c: "#f2c14e", e: "flame" }, "#2f5d7c": { t: "halves", c: "#c9a66b", e: "glass" } };
+  window.__shirtPat = function (g, color) {
+    const p = SHIRT_PATS[String(color || "").toLowerCase()]; if (!p) return;
+    g.save(); g.fillStyle = p.c;
+    if (p.t === "hoops") { for (let y = 31; y < 66; y += 8) g.fillRect(-40, y, 80, 3.6); }
+    else if (p.t === "pin") { for (let x = -40; x < 40; x += 6) g.fillRect(x, 28, 1.3, 40); }
+    else if (p.t === "checks") { for (let r = 0; r < 6; r++) for (let q = 0; q < 14; q++) if ((r + q) % 2) g.fillRect(-42 + q * 6, 30 + r * 6, 6, 6); }
+    else if (p.t === "band") { g.fillRect(-40, 44, 80, 5); g.fillRect(-40, 52, 80, 1.6); }
+    else if (p.t === "sash") { g.beginPath(); g.moveTo(-40, 30); g.lineTo(-27, 30); g.lineTo(40, 62); g.lineTo(27, 66); g.closePath(); g.fill(); }
+    else if (p.t === "halves") { g.fillRect(0, 28, 42, 40); }
+    // stemma sul petto, piccolo e a forme semplici
+    const e = p.e, ex = -17, ey = 43; g.strokeStyle = p.c; g.lineWidth = 1.4; g.lineCap = "round";
+    if (e === "anchor") { g.beginPath(); g.moveTo(ex, ey - 5); g.lineTo(ex, ey + 4); g.moveTo(ex - 3, ey - 2); g.lineTo(ex + 3, ey - 2); g.arc(ex, ey + 1, 4, 0.2, Math.PI - 0.2); g.stroke(); g.beginPath(); g.arc(ex, ey - 6, 1.2, 0, 7); g.stroke(); }
+    else if (e === "wheel") { g.beginPath(); g.arc(ex, ey, 4.5, 0, 7); g.stroke(); g.beginPath(); g.moveTo(ex - 4.5, ey); g.lineTo(ex + 4.5, ey); g.moveTo(ex, ey); g.lineTo(ex, ey + 4.5); g.stroke(); }
+    else if (e === "laurel") { for (let i = 0; i < 4; i++) { const yy = ey - 4 + i * 2.6; g.beginPath(); g.ellipse(ex - 3.4, yy, 1.8, 1, -0.6, 0, 7); g.fill(); g.beginPath(); g.ellipse(ex + 3.4, yy, 1.8, 1, 0.6, 0, 7); g.fill(); } }
+    else if (e === "flame") { g.beginPath(); g.moveTo(ex, ey - 6); g.quadraticCurveTo(ex + 5, ey, ex + 2, ey + 4); g.quadraticCurveTo(ex, ey + 2, ex - 2, ey + 4); g.quadraticCurveTo(ex - 4, ey - 1, ex, ey - 6); g.fill(); }
+    else if (e === "glass") { g.beginPath(); g.moveTo(ex - 4, ey - 5); g.lineTo(ex + 4, ey - 5); g.lineTo(ex, ey); g.lineTo(ex + 4, ey + 5); g.lineTo(ex - 4, ey + 5); g.lineTo(ex, ey); g.closePath(); g.fill(); }
+    else if (e === "diamond") { g.beginPath(); g.moveTo(ex, ey - 4.5); g.lineTo(ex + 3.5, ey); g.lineTo(ex, ey + 4.5); g.lineTo(ex - 3.5, ey); g.closePath(); g.fill(); }
+    g.restore();
+  };
+  // stessa idea per l'omino a pixel (corpo 10x8 in x-5, y-13)
+  function shirtPx(x, y, color) {
+    const p = SHIRT_PATS[String(color || "").toLowerCase()]; if (!p) return; const X = x - 5, Y = y - 13;
+    if (p.t === "hoops") { px(X, Y + 1, 10, 1, p.c); px(X, Y + 4, 10, 1, p.c); px(X, Y + 7, 10, 1, p.c); }
+    else if (p.t === "pin") { for (let i = 0; i < 10; i += 3) px(X + i, Y, 1, 8, p.c); }
+    else if (p.t === "checks") { for (let r = 0; r < 4; r++) for (let q = 0; q < 5; q++) if ((r + q) % 2) px(X + q * 2, Y + r * 2, 2, 2, p.c); }
+    else if (p.t === "band") { px(X, Y + 3, 10, 2, p.c); }
+    else if (p.t === "sash") { for (let i = 0; i < 8; i++) px(X + i, Y + i, 2, 1, p.c); }
+    else if (p.t === "halves") { px(x, Y, 5, 8, p.c); }
+  }
   function portrait0(id, x, y, s, flip) {
     const c = CAST[id]; if (!c || !c.skin) return;
     const breathe = Math.sin(frame / 30) * 0.5;
     g.save(); g.translate(x, y + breathe); g.scale(flip ? -s : s, s);
     const shirt = portraitShirt(id, c);
-    g.fillStyle = shirt; g.beginPath(); g.moveTo(-34, 60); g.quadraticCurveTo(0, 26, 34, 60); g.fill();
+    g.fillStyle = shirt; g.beginPath(); g.moveTo(-34, 60); g.quadraticCurveTo(0, 26, 34, 60); g.fill(); g.save(); g.clip(); window.__shirtPat(g, shirt); g.restore();
     const num = { leo: "10", tommy: "8", gigi: "17" }[id] || c.num;
     if (num) { g.fillStyle = shirt === "#f2f2f2" || shirt === "#ffd23f" ? "#1b1b1b" : "#fff"; g.font = "bold 12px sans-serif"; g.textAlign = "center"; g.fillText(num, 0, 56); g.textAlign = "left"; }
     const AL = accOf(id, c); AL.forEach((a) => portraitAcc(a, "body"));
@@ -4268,7 +4299,7 @@
     g.fillStyle = "#0004"; g.beginPath(); g.ellipse(x, y, 6, 2.5, 0, 0, 7); g.fill();
     const l = Math.round(Math.sin(ph || 0) * 1.5);
     px(x - 4, y - 6, 3, 6 - Math.max(0, l), "#2a2a3a"); px(x + 1, y - 6, 3, 6 - Math.max(0, -l), "#2a2a3a");
-    px(x - 5, y - 13, 10, 8, shirt); px(x - 7, y - 12, 2, 6, skin); px(x + 5, y - 12, 2, 6, skin);
+    px(x - 5, y - 13, 10, 8, shirt); shirtPx(x, y, shirt); px(x - 7, y - 12, 2, 6, skin); px(x + 5, y - 12, 2, 6, skin);
     if (c.num) { g.fillStyle = "#fff"; g.font = "bold 6px sans-serif"; g.textAlign = "center"; if (dir === "up") g.fillText(c.num, x, y - 7); g.textAlign = "left"; }
     px(x - 5, y - 22, 10, 9, skin);
     px(x - 5, y - 23, 10, dir === "up" ? 9 : 4, hair);
@@ -5235,9 +5266,9 @@
   const HERO = "ali-di-rondine.campione";
   const H_STYLES = { spiky: "Spettinati", messy: "Ribelli", buzz: "Rasati", slick: "Tirati indietro", long: "Lunghi", bun: "Chignon", bob: "Caschetto", ponytail: "Coda", twintails: "Codini", braids: "Trecce", curly: "Ricci", side: "Riga di lato", ordinato: "Ordinati", bandana: "Bandana" };
   // le acconciature delle saghe: finire una saga (almeno un finale) sblocca la sua acconciatura nel guardaroba
-  const HAIR_SAGA = { hs_borsalino: "milano", hs_afro: "torneo", hs_dread: "dopo", hs_undercut: "spazio", hs_pompadour: "mantello", hs_mullet: "stagione", hs_wavy: "cronache", hs_messybun: "vento", hs_topknot: "mondi", hs_sidebraid: "trono", hs_spacebuns: "lampioni", hs_corona: "ducati", hs_ciuffo: "grigio", hs_cometa: "titano", hs_scodella: "quartiere", hs_antenne: "razzo", hs_criniera: "cavallo", hs_brace: "dungeon", hs_colbacco: "montagna", hs_cowboy: "pugno", hs_coppola: "campana", hs_alloro: "roma", hs_palma: "naufraghi", sh_cocco: "naufraghi", sh_controluce: "milano", sh_gravita: "titano" };
+  const HAIR_SAGA = { hs_borsalino: "milano", hs_afro: "torneo", hs_dread: "dopo", hs_undercut: "spazio", hs_pompadour: "mantello", hs_mullet: "stagione", hs_wavy: "cronache", hs_messybun: "vento", hs_topknot: "mondi", hs_sidebraid: "trono", hs_spacebuns: "lampioni", hs_corona: "ducati", hs_ciuffo: "grigio", hs_cometa: "titano", hs_scodella: "quartiere", hs_antenne: "razzo", hs_criniera: "cavallo", hs_brace: "dungeon", hs_colbacco: "montagna", hs_cowboy: "pugno", hs_coppola: "campana", hs_alloro: "roma", hs_palma: "naufraghi", sh_cocco: "naufraghi", sh_controluce: "milano", sh_gravita: "titano", sm_marinaio: "naufraghi", sm_gessato: "milano", sm_scacchi: "gp", sm_gladiatore: "roma", sm_dungeon: "dungeon", sm_secolo: "tempo" };
   function hairUnlocks() {
-    Object.keys(HAIR_SAGA).forEach((id) => { try { const m = JSON.parse(localStorage.getItem("ali-di-rondine." + HAIR_SAGA[id]) || "null"); if (m && Array.isArray(m.ends) && m.ends.length && COSM[id] && bCos(id) && window.toast) window.toast(COSM[id].kind === "shot" ? "Nuovo tiro: " + COSM[id].label.replace(/^Tiro: /, "") : "Nuova acconciatura: " + COSM[id].label.replace(/^Taglio (a )?/, ""), "info", COSM[id].kind === "shot" ? "⚽" : "✂️"); } catch {} });
+    Object.keys(HAIR_SAGA).forEach((id) => { try { const m = JSON.parse(localStorage.getItem("ali-di-rondine." + HAIR_SAGA[id]) || "null"); if (m && Array.isArray(m.ends) && m.ends.length && COSM[id] && bCos(id) && window.toast) window.toast(COSM[id].kind === "shot" ? "Nuovo tiro: " + COSM[id].label.replace(/^Tiro: /, "") : COSM[id].kind === "shirt" ? "Nuova maglia: " + COSM[id].label : "Nuova acconciatura: " + COSM[id].label.replace(/^Taglio (a )?/, ""), "info", COSM[id].kind === "shot" ? "⚽" : COSM[id].kind === "shirt" ? "👕" : "✂️"); } catch {} });
   }
   const H_HAIR = { "#2b1d14": "Castano", "#111111": "Nero", "#e8d08a": "Biondo", "#b8452a": "Rosso", "#9a9a9a": "Grigio" };
   const H_EYE = { "#2a1a0a": "Castano scuro", "#5a3818": "Nocciola", "#2563eb": "Azzurro", "#0284c7": "Celeste", "#16a34a": "Verde smeraldo", "#15803d": "Verde scuro", "#475569": "Grigio", "#111827": "Nero", "#d97706": "Ambra", "#9333ea": "Viola" };
@@ -6574,6 +6605,14 @@
     sh_cocco:      { kind: "shot", label: "Tiro: Cocco", val: "cocco", from: "Finisci la saga «Naufraghi del Pallone» (un finale qualsiasi)" },
     sh_controluce: { kind: "shot", label: "Tiro: Controluce", val: "controluce", from: "Finisci la saga «Operazione Fuorigioco Noir · Milano 1954» (un finale qualsiasi)" },
     sh_gravita:    { kind: "shot", label: "Tiro: Gravità Zero", val: "gravita", from: "Finisci la saga «Il Figlio del Titano» (un finale qualsiasi)" },
+  });
+  Object.assign(COSM, {
+    sm_marinaio: { kind: "shirt", label: "Maglia a righe del naufrago", val: "#e9eef2", from: "Finisci la saga «Naufraghi del Pallone» (un finale qualsiasi)" },
+    sm_gessato:  { kind: "shirt", label: "Maglia gessata Noir", val: "#23232d", from: "Finisci la saga «Operazione Fuorigioco Noir · Milano 1954» (un finale qualsiasi)" },
+    sm_scacchi:  { kind: "shirt", label: "Maglia a scacchi del Gran Premio", val: "#f0efe9", from: "Finisci la saga «Gran Premio del Pallone» (un finale qualsiasi)" },
+    sm_gladiatore: { kind: "shirt", label: "Tunica rossa e oro", val: "#a1272f", from: "Finisci la saga «Ave Calcio! · I Gladiatori del Pallone» (un finale qualsiasi)" },
+    sm_dungeon:  { kind: "shirt", label: "Maglia viola con fascia dorata", val: "#4b2e83", from: "Finisci la saga «Dungeon di Fine Stagione» (un finale qualsiasi)" },
+    sm_secolo:   { kind: "shirt", label: "Maglia bicolore del Centenario", val: "#2f5d7c", from: "Finisci la saga «Rondine 1938-2038» (un finale qualsiasi)" },
   });
   H_SHOTS.cocco = { label: "Cocco", sub: "Rimbalza sulla sabbia · Tiro +2, Dribbling +2, Contrasto −2", bias: { tiro: 2, drib: 2, contr: -2 }, c1: "#2f9e5b", c2: "#f2e4b8", cos: "sh_cocco" };
   H_SHOTS.controluce = { label: "Controluce", sub: "Il portiere non lo vede · Tiro +3, Passaggio +1, Contrasto −3", bias: { tiro: 3, pass: 1, contr: -3 }, c1: "#2b2b3a", c2: "#ffb347", cos: "sh_controluce" };

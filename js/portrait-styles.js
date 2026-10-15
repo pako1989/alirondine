@@ -81,7 +81,7 @@
     if (st === "codino" || st === "ponytail") { g.fillStyle = hair; g.beginPath(); g.ellipse(T.fw + 8, 8, 6, 16, -0.25, 0, 7); g.fill(); g.strokeStyle = hairD; g.lineWidth = 1.2; g.stroke(); }
     // collo e spalle
     g.fillStyle = shade; g.fillRect(-6, 22, 12, 14);
-    g.fillStyle = shirt; g.beginPath(); g.moveTo(-36, 62); g.quadraticCurveTo(-32, 36, -10, 32); g.lineTo(10, 32); g.quadraticCurveTo(32, 36, 36, 62); g.closePath(); g.fill();
+    g.fillStyle = shirt; g.beginPath(); g.moveTo(-36, 62); g.quadraticCurveTo(-32, 36, -10, 32); g.lineTo(10, 32); g.quadraticCurveTo(32, 36, 36, 62); g.closePath(); g.fill(); if (window.__shirtPat) { g.save(); g.clip(); window.__shirtPat(g, shirt); g.restore(); }
     g.strokeStyle = dark(shirt, 0.5); g.lineWidth = 1.4; g.stroke();
     g.fillStyle = dark(shirt, 0.25); g.beginPath(); g.moveTo(-10, 32); g.lineTo(0, 42); g.lineTo(10, 32); g.lineTo(6, 32); g.lineTo(0, 38); g.lineTo(-6, 32); g.closePath(); g.fill(); // colletto
     g.fillStyle = lite(shirt, 0.18); g.beginPath(); g.moveTo(-30, 50); g.quadraticCurveTo(-26, 38, -12, 34); g.lineTo(-14, 38); g.quadraticCurveTo(-24, 42, -26, 52); g.closePath(); g.fill();
