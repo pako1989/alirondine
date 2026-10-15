@@ -5233,7 +5233,7 @@
 
   // ================= CREA IL TUO CAMPIONE =================
   const HERO = "ali-di-rondine.campione";
-  const H_STYLES = { palma: "Ciuffo a palma", spiky: "Spettinati", messy: "Ribelli", buzz: "Rasati", slick: "Tirati indietro", long: "Lunghi", bun: "Chignon", bob: "Caschetto", ponytail: "Coda", twintails: "Codini", braids: "Trecce", curly: "Ricci", side: "Riga di lato", ordinato: "Ordinati", bandana: "Bandana", colbacco: "Colbacco", cowboy: "Pistolero", coppola: "Coppola", alloro: "Corona d'Alloro", borsalino: "Borsalino Noir" };
+  const H_STYLES = { spiky: "Spettinati", messy: "Ribelli", buzz: "Rasati", slick: "Tirati indietro", long: "Lunghi", bun: "Chignon", bob: "Caschetto", ponytail: "Coda", twintails: "Codini", braids: "Trecce", curly: "Ricci", side: "Riga di lato", ordinato: "Ordinati", bandana: "Bandana" };
   // le acconciature delle saghe: finire una saga (almeno un finale) sblocca la sua acconciatura nel guardaroba
   const HAIR_SAGA = { hs_borsalino: "milano", hs_afro: "torneo", hs_dread: "dopo", hs_undercut: "spazio", hs_pompadour: "mantello", hs_mullet: "stagione", hs_wavy: "cronache", hs_messybun: "vento", hs_topknot: "mondi", hs_sidebraid: "trono", hs_spacebuns: "lampioni", hs_corona: "ducati", hs_ciuffo: "grigio", hs_cometa: "titano", hs_scodella: "quartiere", hs_antenne: "razzo", hs_criniera: "cavallo", hs_brace: "dungeon", hs_colbacco: "montagna", hs_cowboy: "pugno", hs_coppola: "campana", hs_alloro: "roma", hs_palma: "naufraghi" };
   function hairUnlocks() {
