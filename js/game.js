@@ -11,43 +11,43 @@
     nico:    { name: "Nico", tag: "blue", hair: "#e8a33d", style: "messy", skin: "#f5d0ae", eye: "#224", bg: ["#3fa7ff", "#9be2ff"], cap: true },
     sara:    { name: "Sara", tag: "gold", hair: "#5a2a1e", style: "long", skin: "#f3cfb0", eye: "#3b2415", bg: ["#ffb3c7", "#ffe3a8"], glasses: true },
     tommy:   { name: "Tommy", tag: "blue", hair: "#111", style: "buzz", skin: "#b9804f", eye: "#1a1a1a", bg: ["#57d68d", "#c4f7a1"] },
-    ruggeri: { name: "Mister Ruggeri", tag: "gray", hair: "#c9c9cf", style: "slick", skin: "#e8bf98", eye: "#2a2a2a", bg: ["#56657d", "#a7b4c9"], beard: true },
-    papa:    { name: "Papà", tag: "gray", hair: "#6b5b4b", style: "slick", skin: "#e9be95", eye: "#2a2a2a", bg: ["#9a6b3f", "#e2b27a"], beard: true },
+    ruggeri: { name: "Mister Ruggeri", tag: "gray", hair: "#c9c9cf", style: "slick", skin: "#e8bf98", eye: "#2a2a2a", bg: ["#56657d", "#a7b4c9"], beard: "baffi" },
+    papa:    { name: "Papà", tag: "gray", hair: "#6b5b4b", style: "slick", skin: "#e9be95", eye: "#2a2a2a", bg: ["#9a6b3f", "#e2b27a"], beard: "incolta" },
     valli:   { name: "Signor Valli", tag: "", hair: "#1a1a1a", style: "slick", skin: "#e6c3a2", eye: "#000", bg: ["#1a0f24", "#4a1f3c"], shades: true },
     kenji:   { name: "Kenji Arata", tag: "blue", hair: "#dfe8ff", style: "long", skin: "#f1d4bd", eye: "#4a6bd1", bg: ["#1c2a6b", "#6b8cff"] },
     dario:   { name: "Dario", tag: "", hair: "#2b1d14", style: "spiky", skin: "#e9bf96", eye: "#2a1a0a", bg: ["#2a0b0f", "#8a1c2a"], scar: true },
     rita:    { name: "Rita", tag: "gold", hair: "#8a8a8a", style: "bun", skin: "#eec4a0", eye: "#333", bg: ["#c77d3f", "#ffd9a1"] },
     ines:    { name: "Contessa Ines Corvo", tag: "", hair: "#e4e1ec", style: "long", skin: "#f0d2bc", eye: "#6b1d3a", bg: ["#2a0f24", "#7a2a55"] },
-    bruno:   { name: "Bruno Sabatini", tag: "", hair: "#23232b", style: "slick", skin: "#e8bf98", eye: "#4a4a5a", bg: ["#1a0f24", "#5a2a7a"] },
+    bruno:   { name: "Bruno Sabatini", tag: "", hair: "#23232b", style: "slick", skin: "#e8bf98", eye: "#4a4a5a", bg: ["#1a0f24", "#5a2a7a"], beard: "pizzetto" },
     lina:    { name: "Maresciallo Esposito", tag: "blue", hair: "#161616", style: "bun", skin: "#e3b48c", eye: "#2a1a0a", bg: ["#16223f", "#b3202c"], cap: "#16223f" },
     gigi:    { name: "Gigi", tag: "blue", hair: "#d4502a", style: "buzz", skin: "#f7d6b8", eye: "#2a4a1a", bg: ["#ff7a45", "#9be2ff"] },
     fede:    { name: "Fede Lanza", tag: "", hair: "#c89b4a", style: "slick", skin: "#f2cfae", eye: "#3a6b4a", bg: ["#1d3fa3", "#9be2ff"] },
     marta:   { name: "CT Marta Galli", tag: "gray", hair: "#7a3a1e", style: "bun", skin: "#e9c09a", eye: "#2a1a0a", bg: ["#1d3fa3", "#e8f0ff"], glasses: true },
-    aldo:    { name: "Aldo Lanza", tag: "", hair: "#b8b8c0", style: "slick", skin: "#efcfb2", eye: "#2a2a2a", bg: ["#10182e", "#3a4a6b"], beard: true },
-    sho:     { name: "Sho Arata", tag: "blue", hair: "#dfe8ff", style: "spiky", skin: "#f1d4bd", eye: "#4a6bd1", bg: ["#ffffff", "#ff4d5a"] },
-    jojo:    { name: "Jojo Batista", tag: "gold", hair: "#1a1a1a", style: "buzz", skin: "#8a5a3a", eye: "#1a1a1a", bg: ["#1e9e4a", "#ffd23f"] },
-    bellandi:{ name: "Mister Bellandi", tag: "gray", hair: "#d9d4c7", style: "messy", skin: "#eec39c", eye: "#2a2a2a", bg: ["#b3202c", "#ffffff"], glasses: true },
-    vitale:  { name: "Capitano Vitale", tag: "blue", hair: "#4a3a2a", style: "slick", skin: "#d9a57a", eye: "#2a1a0a", bg: ["#b3202c", "#ffd23f"], beard: true },
-    mazza:   { name: "Carlo Mazza", tag: "", hair: "#e8e8ee", style: "slick", skin: "#efd0b6", eye: "#1a1a1a", bg: ["#0a0a14", "#3a3a52"], glasses: true },
+    aldo:    { name: "Aldo Lanza", tag: "", hair: "#b8b8c0", style: "slick", skin: "#efcfb2", eye: "#2a2a2a", bg: ["#10182e", "#3a4a6b"], beard: "pizzetto" },
+    sho:     { name: "Sho Arata", tag: "blue", hair: "#dfe8ff", style: "spiky", skin: "#f1d4bd", eye: "#4a6bd1", bg: ["#ffffff", "#ff4d5a"], streak: "#ff4d5a" },
+    jojo:    { name: "Jojo Batista", tag: "gold", hair: "#1a1a1a", style: "buzz", skin: "#8a5a3a", eye: "#1a1a1a", bg: ["#1e9e4a", "#ffd23f"], band: "#1e9e4a" },
+    bellandi:{ name: "Mister Bellandi", tag: "gray", hair: "#d9d4c7", style: "messy", skin: "#eec39c", eye: "#2a2a2a", bg: ["#b3202c", "#ffffff"], glasses: true, beard: "baffi" },
+    vitale:  { name: "Capitano Vitale", tag: "blue", hair: "#4a3a2a", style: "slick", skin: "#d9a57a", eye: "#2a1a0a", bg: ["#b3202c", "#ffd23f"], beard: "baffi" },
+    mazza:   { name: "Carlo Mazza", tag: "", hair: "#e8e8ee", style: "slick", skin: "#efd0b6", eye: "#1a1a1a", bg: ["#0a0a14", "#3a3a52"], glasses: true, beard: "baffi" },
     nonna:   { name: "Nonna Ferri", tag: "gold", hair: "#f1f1f1", style: "bun", skin: "#f0c9a8", eye: "#2a4a1a", bg: ["#3fa7ff", "#ffe3a8"], glasses: true },
     // Borgo Marino
-    baciccia:{ name: "Baciccia", tag: "gray", hair: "#d8d8d8", style: "buzz", skin: "#d49a68", eye: "#1f3a63", bg: ["#1f5f8a", "#9be2ff"], beard: true, cap: "#1f3a63", shirt: "#2f5f8a" },
+    baciccia:{ name: "Baciccia", tag: "gray", hair: "#d8d8d8", style: "buzz", skin: "#d49a68", eye: "#1f3a63", bg: ["#1f5f8a", "#9be2ff"], beard: "folta", cap: "#1f3a63", shirt: "#2f5f8a" },
     pina:    { name: "Signora Pina", tag: "gold", hair: "#a0457a", style: "bun", skin: "#f0c9a8", eye: "#3a2a1a", bg: ["#ff9ec0", "#ffe3a8"], glasses: true, shirt: "#57b0a0" },
     aurelio: { name: "Don Aurelio", tag: "gray", hair: "#e8e8e8", style: "slick", skin: "#ecc6a2", eye: "#2a2a2a", bg: ["#3a3a52", "#e8f0ff"], glasses: true, shirt: "#1a1a22" },
     tonino:  { name: "Tonino", tag: "blue", hair: "#3a2a1a", style: "messy", skin: "#eec39c", eye: "#2a1a0a", bg: ["#ff9ec0", "#9be2ff"], cap: "#ffffff", shirt: "#ffffff" },
     pietrino:{ name: "Pietrino", tag: "blue", hair: "#8a5a2a", style: "messy", skin: "#f5d0ae", eye: "#2a4a1a", bg: ["#ffd23f", "#57d68d"], shirt: "#ffd23f" },
-    rocco:   { name: "Rocco Scafati", tag: "", hair: "#141414", style: "spiky", skin: "#d9a57a", eye: "#1a1a1a", bg: ["#0a3a4a", "#19a0b8"], shirt: "#0a3a4a" },
+    rocco:   { name: "Rocco Scafati", tag: "", hair: "#141414", style: "spiky", skin: "#d9a57a", eye: "#1a1a1a", bg: ["#0a3a4a", "#19a0b8"], shirt: "#0a3a4a", scar: true },
     ernesta: { name: "Ernesta «la Gatta»", tag: "gold", hair: "#2b1d14", style: "bun", skin: "#f0c9a8", eye: "#2a4a1a", bg: ["#1e9e4a", "#fff4c2"], shirt: "#1e9e4a" },
     ornella: { name: "Zia Ornella", tag: "gray", hair: "#cfc6b8", style: "bun", skin: "#e8b98e", eye: "#3a2a1a", bg: ["#57d68d", "#fff4c2"], shirt: "#7a5a3a" },
     ester:   { name: "Ester", tag: "blue", hair: "#3a2a1a", style: "long", skin: "#eec39c", eye: "#1f3a63", bg: ["#16325c", "#ffe7a0"], shirt: "#16325c" },
     settimio:{ name: "Settimio", tag: "gray", hair: "#f1f1f1", style: "buzz", skin: "#e0b48a", eye: "#2a2a2a", bg: ["#556b2f", "#e8f0ff"], glasses: true, shirt: "#556b2f" },
-    anselmo: { name: "Anselmo", tag: "", hair: "#9a9a9a", style: "messy", skin: "#c98a5a", eye: "#1a1a1a", bg: ["#0b1026", "#ffd98a"], beard: true, cap: "#26324a", shirt: "#8a2a2a" },
+    anselmo: { name: "Anselmo", tag: "", hair: "#9a9a9a", style: "messy", skin: "#c98a5a", eye: "#1a1a1a", bg: ["#0b1026", "#ffd98a"], beard: "pizzetto", cap: "#26324a", shirt: "#8a2a2a" },
     mattia:  { name: "Mattia la Saracinesca", tag: "blue", hair: "#3a2a1a", style: "buzz", skin: "#f2c9a0", eye: "#224", bg: ["#ffd23f", "#3fa7ff"], shirt: "#ffd23f" },
-    kevin:   { name: "Kevin del Pedalò", tag: "blue", hair: "#d9953a", style: "spiky", skin: "#d9a57a", eye: "#1f3a63", bg: ["#19a0b8", "#ffd23f"], shirt: "#19a0b8" },
-    saverio: { name: "Saverio Cozza", tag: "blue", hair: "#1a1a1a", style: "slick", skin: "#d49a68", eye: "#1a1a1a", bg: ["#354f82", "#2f5f8a"], shirt: "#354f82" },
+    kevin:   { name: "Kevin del Pedalò", tag: "blue", hair: "#d9953a", style: "spiky", skin: "#d9a57a", eye: "#1f3a63", bg: ["#19a0b8", "#ffd23f"], shirt: "#19a0b8", band: "#ffd23f" },
+    saverio: { name: "Saverio Cozza", tag: "blue", hair: "#1a1a1a", style: "slick", skin: "#d49a68", eye: "#1a1a1a", bg: ["#354f82", "#2f5f8a"], shirt: "#354f82", beard: "baffi" },
     // Stagione 5
     crane:   { name: "Sir Edmund Crane", tag: "", hair: "#cfcfd6", style: "slick", skin: "#f0d6c0", eye: "#3a5a3a", bg: ["#0f2a1f", "#3a6b4f"], shirt: "#1f3a2f" },
-    marco:   { name: "Marco Ferri", tag: "blue", hair: "#d9953a", style: "messy", skin: "#f2cdaa", eye: "#224", bg: ["#2a3a5a", "#3fa7ff"], beard: true, shirt: "#2e5a2e" },
+    marco:   { name: "Marco Ferri", tag: "blue", hair: "#d9953a", style: "messy", skin: "#f2cdaa", eye: "#224", bg: ["#2a3a5a", "#3fa7ff"], beard: "incolta", shirt: "#2e5a2e" },
     keller:  { name: "Jonas Keller", tag: "blue", hair: "#f0dc9a", style: "buzz", skin: "#f3d6c0", eye: "#3a6bd1", bg: ["#1a1a1a", "#d62a2a"], shirt: "#d62a2a" },
     voce:    { name: "", tag: "", bg: ["#0e1a2e", "#1f3a63"] },
   };
@@ -2367,7 +2367,7 @@
     if (sp) {
       sfx("special"); voci("special"); $("choices").innerHTML = ""; say(kind === "doppia" && S.season === 8 ? "Tommy e Leo calciano insieme lo stesso pallone! Vent'anni di passaggi in un tiro solo." : M.hero ? sp.intro.replace(/\bLeo\b/g, esc(M.hero.name)) : sp.intro);
       if (window.triggerAnimeCutin && window.isAnimeFxEnabled && window.isAnimeFxEnabled()) {
-        const charName = (CAST[sid] ? CAST[sid].name : sid) || "LEO";
+        const charName = (sid === "hero" && CAST.hero && CAST.hero.nick) || (CAST[sid] ? CAST[sid].name : sid) || "LEO";
         window.triggerAnimeCutin({ who: charName.toUpperCase(), shotName: sp.name, isEgo: false, sfxWord: "GOOOAL!" }, clash);
       } else {
         anCine({ who: sid, who2, text: sp.name, c1: sp.c1, c2: sp.c2, t: 70, d: 70, done: clash, cine: kind });
@@ -5301,7 +5301,7 @@
   window.heroLoad = heroLoad;
   window.heroEditor = heroEditor;
   function heroCast(h) {
-    CAST.hero = { name: h.name, tag: "", hair: h.hair, style: h.style, skin: h.skin, eye: h.eye || "#2a1a0a", bg: [h.shirt, "#ffd23f"], shirt: h.shirt, num: String(h.num), face: h.face || "", acc: h.acc, accId: h.accId && COSM[h.accId] && COSM[h.accId].val === h.acc ? h.accId : undefined, cap: h.acc === "cappellino" ? "#ffd23f" : h.acc === "berretto" ? "#26324a" : undefined, beard: h.beard || undefined, scar: h.scar || undefined, streak: h.streak || undefined, band: h.band || undefined };
+    CAST.hero = { name: h.name, tag: "", hair: h.hair, style: h.style, skin: h.skin, eye: h.eye || "#2a1a0a", bg: [h.shirt, "#ffd23f"], shirt: h.shirt, num: String(h.num), face: h.face || "", acc: h.acc, accId: h.accId && COSM[h.accId] && COSM[h.accId].val === h.acc ? h.accId : undefined, cap: h.acc === "cappellino" ? "#ffd23f" : h.acc === "berretto" ? "#26324a" : undefined, beard: h.beard || undefined, scar: h.scar || undefined, streak: h.streak || undefined, band: h.band || undefined, nick: h.nick || undefined };
   }
   // Il campione in campo: M.hero (partite), T.hero (rigori)
   const heroOn = () => !!(M && M.hero);
@@ -5338,10 +5338,12 @@
     box.innerHTML = `<span class="t">${heroWhere} Scegli nome, numero e il nome del tiro speciale. I look di base sono tutti liberi; al Borgo Marino e nella storia sblocchi quelli extra.</span>
       <input class="field" id="hName" maxlength="14" aria-label="Nome" placeholder="Nome">
       <div style="display:flex;gap:8px"><input class="field" id="hNum" type="number" min="1" max="99" inputmode="numeric" aria-label="Numero di maglia" style="width:90px;flex:none"><input class="field" id="hShot" maxlength="24" aria-label="Nome del tiro speciale" placeholder="Nome del tiro"></div>
+      <input class="field" id="hNick" maxlength="16" aria-label="Soprannome" placeholder="Soprannome (facoltativo, es. Razzo)">
       <span class="t" id="hSum" style="color:var(--dim);font-size:14px"></span>`;
     $("hName").value = HE.h.name; $("hNum").value = HE.h.num; $("hShot").value = HE.h.shotName;
     $("hName").oninput = () => { const old = HE.h.name; HE.h.name = $("hName").value.trim() || "Campione"; if ($("hShot").value.toUpperCase().endsWith(" DI " + old.toUpperCase())) { $("hShot").value = $("hShot").value.slice(0, -old.length) + HE.h.name.toUpperCase(); HE.h.shotName = $("hShot").value; } heroCast(HE.h); heroSum(); };
     $("hNum").oninput = () => { HE.h.num = clamp(parseInt($("hNum").value, 10) || 1, 1, 99); heroCast(HE.h); };
+    $("hNick").value = HE.h.nick || ""; $("hNick").oninput = () => { HE.h.nick = $("hNick").value.trim().slice(0, 16); heroCast(HE.h); };
     $("hShot").oninput = () => { HE.h.shotName = $("hShot").value.trim().toUpperCase() || H_SHOTS[HE.h.shot].label.toUpperCase(); };
     heroSum(); heroButtons();
   }
@@ -5356,6 +5358,7 @@
       skin: H_SKIN.map((c, i) => [c, `Tono ${i + 1}`]),
       face: [["", "Volto 1"], ...[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => ["v" + n, "Volto " + n])], // forma del viso, occhi, naso, bocca (negli stili dei volti)
       shirt: uq([...Object.entries(H_SHIRT), ...of("shirt")]),
+      cel: [["", "A caso"], ["corsa", "Corsa alla bandierina"], ["salto", "Salto"], ["ginocchia", "Scivolata in ginocchio"], ["mucchio", "Mucchio"], ["bandiere", "Sotto la curva"], ["aeroplano", "Aeroplano"], ["capriola", "Capriola"], ["abbraccio", "Abbraccio"], ["orecchio", "Mano all'orecchio"], ["trenino", "Trenino"], ["bacio", "Bacio allo stemma"]],
       beard: [["", "Nessuna"], ["incolta", "Barba incolta"], ["folta", "Barba folta"], ["pizzetto", "Pizzetto"], ["baffi", "Baffi"]],
       scar: [["", "Nessuno"], ["1", "Cicatrice sul sopracciglio"]],
       streak: [["", "Nessuna"], ["#f2f2f2", "Bianca"], ["#ff4d5a", "Rossa"], ["#3fa7ff", "Azzurra"], ["#ffd23f", "Dorata"], ["#a855f7", "Viola"]],
@@ -5368,7 +5371,7 @@
   function heroButtons() {
     const o = heroOptions(), h = HE.h;
     const cyc = (k, label) => { const list = o[k], i = Math.max(0, list.findIndex(([v]) => v === h[k])), cur = list[i] || list[0]; return { label: `${label}: ${cur[1]} ▸`, sub: `${i + 1} di ${list.length}`, fn: () => { const nx = list[(i + 1) % list.length]; const oldShot = H_SHOTS[h.shot].label.toUpperCase(); h[k] = nx[0]; if (k === "shot" && (!h.shotName || h.shotName.startsWith(oldShot))) { h.shotName = `${H_SHOTS[h.shot].label.toUpperCase()} DI ${h.name.toUpperCase()}`; $("hShot").value = h.shotName; } heroCast(h); heroSum(); heroButtons(); } }; };
-    buttons([cyc("style", "Capelli"), cyc("hair", "Colore"), cyc("eye", "Occhi"), cyc("skin", "Pelle"), Object.assign(cyc("face", "Volto"), { sub: `${Math.max(0, o.face.findIndex(([v]) => v === (h.face || ""))) + 1} di ${o.face.length} · si vede con gli stili dei volti (pulsante «Volti» in alto)` }), cyc("shirt", "Maglia"), cyc("beard", "Barba"), cyc("scar", "Segni"), cyc("streak", "Ciocca"), cyc("band", "Fascia"), cyc("acc", "Accessorio"), cyc("shot", "Tiro"),
+    buttons([cyc("style", "Capelli"), cyc("hair", "Colore"), cyc("eye", "Occhi"), cyc("skin", "Pelle"), Object.assign(cyc("face", "Volto"), { sub: `${Math.max(0, o.face.findIndex(([v]) => v === (h.face || ""))) + 1} di ${o.face.length} · si vede con gli stili dei volti (pulsante «Volti» in alto)` }), cyc("shirt", "Maglia"), cyc("beard", "Barba"), cyc("scar", "Segni"), cyc("streak", "Ciocca"), cyc("band", "Fascia"), cyc("cel", "Esultanza"), cyc("acc", "Accessorio"), cyc("shot", "Tiro"),
       { label: "Avanti ▸ Salva il Campione", sub: "Conferma ed entra in campo", cls: "hot", fn: () => { HE.h.v = 1; writeJSON(HERO, HE.h); heroCast(HE.h); view = { kind: "scene", bg: "end", speaker: "hero", chibi: true }; text("hero", `<b>${esc(HE.h.name)}</b>, numero ${HE.h.num}, pronto a scendere in campo con occhi <b>${(H_EYE[HE.h.eye] || "personalizzati").toLowerCase()}</b>. Il tiro speciale si chiama <em>${esc(HE.h.shotName)}</em>.<br><span style="color:var(--dim)">${heroWhere}</span>`); buttons([
         ...(window.__abissoStory ? [{ label: "⚓ Gioca «Abisso di Dunwich · Il Patto delle Onde Nere» ▸", sub: `Nuova saga dark oceanica Lovecraftiana con ${HE.h.name}`, cls: "hot", fn: () => window.__abissoStory.open({ onExit: HE.back }) }] : []),
         ...(window.__ragnarokStory ? [{ label: "🔥 Gioca «Ragnarok Ball · Il Fuoco di Fimbulwinter» ▸", sub: `Nuova saga norrena tra ghiaccio e fiamme con ${HE.h.name}`, cls: "hot", fn: () => window.__ragnarokStory.open({ onExit: HE.back }) }] : []),
@@ -5791,7 +5794,6 @@
       { label: `Coriandoli & Celebrazioni: ${SET.confetti !== false ? "Attivi (Oro e Amaranto)" : "Disattivati"} ▸`, sub: SET.confetti !== false ? "Esplosione di coriandoli e festa al gol, vittorie e trofei (tocca per disattivare)" : "Celebrazioni senza coriandoli a schermo (tocca per attivare)", fn: () => { SET.confetti = SET.confetti === false; save(); again(`Coriandoli ${SET.confetti !== false ? "attivati" : "disattivati"}`); if (SET.confetti && typeof window.triggerGoalCelebration === "function") window.triggerGoalCelebration(true); } },
       { label: `Effetti Calcio d'Azione: ${SET.proActionFx !== false ? "Avanzati Pro (Scia, Rete, Zolle)" : "Base Classico"} ▸`, sub: SET.proActionFx !== false ? "Scia cometa del pallone, rete reattiva e zolle nelle scivolate (tocca per disattivare)" : "Calcio d'azione senza effetti particellari avanzati (tocca per attivare)", fn: () => { SET.proActionFx = SET.proActionFx === false; save(); again(`Effetti Azione ${SET.proActionFx !== false ? "avanzati attivi" : "base"}`); } },
       { label: `Stile Fumetto Manga: ${SET.mangaView === "manga" ? "Attivo" : "Disattivato"} ▸`, sub: SET.mangaView === "manga" ? "Tavole illustrate a fumetto nei momenti chiave" : "Visualizzazione classica su canvas retrò", fn: () => { SET.mangaView = SET.mangaView === "manga" ? "canvas" : "manga"; save(); again(); } },
-      { label: `Effetti Anime Manga (Cut-in): ${(window.isAnimeFxEnabled && window.isAnimeFxEnabled()) ? "Attivi" : "Disattivati"} ▸`, sub: (window.isAnimeFxEnabled && window.isAnimeFxEnabled()) ? "Speed-lines, lampo agli occhi e lettering shonen (tocca per disattivare)" : "Stile classico senza cut-in a schermo intero (tocca per attivare)", fn: () => { if (window.toggleAnimeFx) { const now = window.toggleAnimeFx(); again(`Effetti Anime ${now ? "attivati" : "disattivati"}.`); } else { again(); } } },
       { label: `Scene speciali: ${SET.speed} ▸`, sub: "normale · veloce · salta (tocca la scena per saltarla)", fn: () => { SET.speed = { normale: "veloce", veloce: "salta", salta: "normale" }[SET.speed] || "normale"; save(); again(); } },
       { label: `Animazioni: ${SET.anim ? "sì" : "no"}`, sub: "Tiri, esultanze, fischio d'inizio e finale, coppa, cartellini · tocca per saltarle", fn: () => { SET.anim = !SET.anim; save(); again(); } },
       { label: `Tema visivo: ${(window.THEMES && window.THEMES.find(t => (localStorage.getItem("ali-di-rondine.theme") || "classic") === t.id) || { name: "Classico Rondine" }).name} ▸`, sub: "Classico · Gazzetta Vintage · Neon Costa · Arcade Retrò", fn: () => { if (window.cycleTheme) window.cycleTheme(); again(); } },
@@ -11737,13 +11739,14 @@
     else if (kind === "title") opts = [["titolo", 1]];
     else opts = [[o.col === "r" ? "rosso" : "giallo", 1]];
     const last = GX.lastCel[kind];
+    if (kind === "goal" && o.who === "hero") { const hh = heroLoad(); if (hh && hh.cel && opts.some(([k]) => k === hh.cel) && Math.random() < 0.7) { GX.lastCel[kind] = hh.cel; return hh.cel; } } // esultanza preferita del Campione
     let pool = opts.filter(([k, w]) => w > 0 && k !== last); if (!pool.length) pool = opts.filter(([, w]) => w > 0);
     let tot = pool.reduce((s, [, w]) => s + w, 0), x = Math.random() * tot;
     let pickK = pool[0][0]; for (const [k, w] of pool) { x -= w; if (x <= 0) { pickK = k; break; } }
     GX.lastCel[kind] = pickK;
     return pickK;
   }
-  const celName = (id) => { const c = CAST[id]; return c && c.name ? c.name.split(/[ ,«]/)[0] : "Leo"; };
+  const celName = (id) => { const c = CAST[id]; if (id === "hero" && c && c.nick && Math.random() < 0.5) return c.nick; return c && c.name ? c.name.split(/[ ,«]/)[0] : "Leo"; };
   function gxCap(C) {
     const N = celName(C.who || heroId()), team = typeof usName === "function" ? usName().toUpperCase() : "RONDINE";
     const sc = M ? M.score : [0, 0], opp = M && TEAMS[M.team] ? TEAMS[M.team].name : "";

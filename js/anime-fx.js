@@ -6,9 +6,9 @@
 
   function isAnimeFxEnabled() {
     try {
-      return localStorage.getItem(K_ANIME) !== "off";
+      return false; // rimosso su richiesta: niente cut-in a schermo intero
     } catch {
-      return true;
+      return false;
     }
   }
 
