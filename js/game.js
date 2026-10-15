@@ -5235,9 +5235,9 @@
   const HERO = "ali-di-rondine.campione";
   const H_STYLES = { spiky: "Spettinati", messy: "Ribelli", buzz: "Rasati", slick: "Tirati indietro", long: "Lunghi", bun: "Chignon", bob: "Caschetto", ponytail: "Coda", twintails: "Codini", braids: "Trecce", curly: "Ricci", side: "Riga di lato", ordinato: "Ordinati", bandana: "Bandana" };
   // le acconciature delle saghe: finire una saga (almeno un finale) sblocca la sua acconciatura nel guardaroba
-  const HAIR_SAGA = { hs_borsalino: "milano", hs_afro: "torneo", hs_dread: "dopo", hs_undercut: "spazio", hs_pompadour: "mantello", hs_mullet: "stagione", hs_wavy: "cronache", hs_messybun: "vento", hs_topknot: "mondi", hs_sidebraid: "trono", hs_spacebuns: "lampioni", hs_corona: "ducati", hs_ciuffo: "grigio", hs_cometa: "titano", hs_scodella: "quartiere", hs_antenne: "razzo", hs_criniera: "cavallo", hs_brace: "dungeon", hs_colbacco: "montagna", hs_cowboy: "pugno", hs_coppola: "campana", hs_alloro: "roma", hs_palma: "naufraghi" };
+  const HAIR_SAGA = { hs_borsalino: "milano", hs_afro: "torneo", hs_dread: "dopo", hs_undercut: "spazio", hs_pompadour: "mantello", hs_mullet: "stagione", hs_wavy: "cronache", hs_messybun: "vento", hs_topknot: "mondi", hs_sidebraid: "trono", hs_spacebuns: "lampioni", hs_corona: "ducati", hs_ciuffo: "grigio", hs_cometa: "titano", hs_scodella: "quartiere", hs_antenne: "razzo", hs_criniera: "cavallo", hs_brace: "dungeon", hs_colbacco: "montagna", hs_cowboy: "pugno", hs_coppola: "campana", hs_alloro: "roma", hs_palma: "naufraghi", sh_cocco: "naufraghi", sh_controluce: "milano", sh_gravita: "titano" };
   function hairUnlocks() {
-    Object.keys(HAIR_SAGA).forEach((id) => { try { const m = JSON.parse(localStorage.getItem("ali-di-rondine." + HAIR_SAGA[id]) || "null"); if (m && Array.isArray(m.ends) && m.ends.length && COSM[id] && bCos(id) && window.toast) window.toast("Nuova acconciatura: " + COSM[id].label.replace(/^Taglio (a )?/, ""), "info", "✂️"); } catch {} });
+    Object.keys(HAIR_SAGA).forEach((id) => { try { const m = JSON.parse(localStorage.getItem("ali-di-rondine." + HAIR_SAGA[id]) || "null"); if (m && Array.isArray(m.ends) && m.ends.length && COSM[id] && bCos(id) && window.toast) window.toast(COSM[id].kind === "shot" ? "Nuovo tiro: " + COSM[id].label.replace(/^Tiro: /, "") : "Nuova acconciatura: " + COSM[id].label.replace(/^Taglio (a )?/, ""), "info", COSM[id].kind === "shot" ? "⚽" : "✂️"); } catch {} });
   }
   const H_HAIR = { "#2b1d14": "Castano", "#111111": "Nero", "#e8d08a": "Biondo", "#b8452a": "Rosso", "#9a9a9a": "Grigio" };
   const H_EYE = { "#2a1a0a": "Castano scuro", "#5a3818": "Nocciola", "#2563eb": "Azzurro", "#0284c7": "Celeste", "#16a34a": "Verde smeraldo", "#15803d": "Verde scuro", "#475569": "Grigio", "#111827": "Nero", "#d97706": "Ambra", "#9333ea": "Viola" };
@@ -5286,6 +5286,9 @@
     if (k === "martello") return st.tiro * rnd(0.9, 1.25) + st.contr * 0.9 + 6 - dist * 0.7;
     if (k === "traversa") return st.tiro * rnd(0.8, 1.35) + st.pass * 0.6 + 8 - dist * 0.5;
     if (k === "saudade") return st.tiro * rnd(0.9, 1.3) + (st.pass + st.drib) * 0.42 + 6 - dist * 0.3;
+    if (k === "cocco") return st.tiro * rnd(0.9, 1.25) + st.drib * 0.5 + 7 - dist * 0.45;
+    if (k === "controluce") return st.tiro * rnd(0.85, 1.35) + st.pass * 0.3 + 6 - dist * 0.55;
+    if (k === "gravita") return st.tiro * rnd(1.0, 1.2) + st.pass * 0.7 + 5 - dist * 0.15;
     if (k === "muro") return st.tiro * rnd(0.95, 1.2) + (st.drib + st.pass) * 0.38 + 6 - dist * 0.4;
     return st.tiro * rnd(0.9, 1.25) + st.tiro * 0.75 + 8 - dist;
   }
@@ -6566,6 +6569,15 @@
     azzurromondo: { kind: "shirt", label: "Maglia Mondiale", val: "#2a5bd7", from: "Vinci i Mondiali", story: () => mondRec().titles >= 1 },
   });
   H_SHOTS.saudade = { label: "Saudade", sub: "Malinconia che entra · Passaggio +2, Dribbling +2, Tiro −2", bias: { pass: 2, drib: 2, tiro: -2 }, c1: "#1a6bd1", c2: "#ffd23f", cos: "saudade" };
+  // tiri delle saghe: finire la saga (almeno un finale) li sblocca, come le acconciature
+  Object.assign(COSM, {
+    sh_cocco:      { kind: "shot", label: "Tiro: Cocco", val: "cocco", from: "Finisci la saga «Naufraghi del Pallone» (un finale qualsiasi)" },
+    sh_controluce: { kind: "shot", label: "Tiro: Controluce", val: "controluce", from: "Finisci la saga «Operazione Fuorigioco Noir · Milano 1954» (un finale qualsiasi)" },
+    sh_gravita:    { kind: "shot", label: "Tiro: Gravità Zero", val: "gravita", from: "Finisci la saga «Il Figlio del Titano» (un finale qualsiasi)" },
+  });
+  H_SHOTS.cocco = { label: "Cocco", sub: "Rimbalza sulla sabbia · Tiro +2, Dribbling +2, Contrasto −2", bias: { tiro: 2, drib: 2, contr: -2 }, c1: "#2f9e5b", c2: "#f2e4b8", cos: "sh_cocco" };
+  H_SHOTS.controluce = { label: "Controluce", sub: "Il portiere non lo vede · Tiro +3, Passaggio +1, Contrasto −3", bias: { tiro: 3, pass: 1, contr: -3 }, c1: "#2b2b3a", c2: "#ffb347", cos: "sh_controluce" };
+  H_SHOTS.gravita = { label: "Gravità Zero", sub: "Parabola sospesa · Passaggio +3, Tiro −1, Dribbling −2", bias: { pass: 3, tiro: -1, drib: -2 }, c1: "#5b3fd1", c2: "#9be2ff", cos: "sh_gravita" };
   // accessori nuovi: ritratto e omino
   // accessori «a colore» (Quartier Generale, stagioni 10-12, Coppa, fumetto, Custodi): il valore è un colore, la forma si ricava dal nome
   const accHexKind = (a) => { const e = Object.values(COSM).find((c) => c.kind === "acc" && c.val === a); const l = e ? e.label.toLowerCase() : ""; return /sciarpa/.test(l) ? "scarf" : /fascia/.test(l) ? "band" : "badge"; };

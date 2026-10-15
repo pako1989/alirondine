@@ -51,6 +51,7 @@ Un solo file: contiene regole, stato del progetto, come costruire una saga, API 
   - un **cabinato in Sala Giochi** (`MACHINES` in `js/salone.js`), per giocare il suo motore nuovo fuori dalla storia;
   - le **carte della Squadra dei Sogni** (`js/sogni.js`);
   - un'**acconciatura da sbloccare** (`HAIR_SAGA` in `js/game.js`);
+  - se contestualizzato (non per forza in ogni saga), un **tiro speciale del campione**: voce `sh_<nome>` in `COSM` (`kind: "shot"`), `H_SHOTS.<nome>` con `bias` piccolo e colori `c1/c2`, formula in `heroPower`, sblocco aggiungendo `sh_<nome>: "<saga>"` in `HAIR_SAGA` (esempi: `sh_cocco`, `sh_controluce`, `sh_gravita`);
   - un **ospite al Borgo** (`cfg.guest`).
   - I finali entrano da soli nella **Cineteca**.
 - **Menu:** solo in Modalità → gruppo «Saghe e GDR». Aggiungi il titolo alla regex del gruppo in `js/game.js` (cerca `"Saghe e GDR"`) e una scheda nel Salone delle Saghe (`js/salone.js`: `SAGAS`, `NEWEST` e il prefisso in `PFX`). Non va in home, nella barra in alto o in Storia.
@@ -77,6 +78,7 @@ Un solo file: contiene regole, stato del progetto, come costruire una saga, API 
 - **Acconciature (`style`):**
   - classiche: `slick`, `buzz`, `messy`, `long`, `bun`, `spiky`, `codino`, `cresta`, `bob`, `ponytail`, `twintails`, `braids`, `bald`, `curly`, `side`, `ordinato`, `bandana`, `hood`, `elmo`;
   - nuove (per i PNG si usano liberamente; per il Campione si sbloccano con le saghe): `afro`, `dread`, `undercut`, `pompadour`, `mullet`, `wavy`, `messybun`, `topknot`, `sidebraid`, `spacebuns`.
+  - Le acconciature e i cappelli di saga NON vanno nella lista base `H_STYLES`: compaiono solo da sbloccate. Ogni nuova acconciatura va aggiunta anche in `HBASE` (`portrait-styles.js`) e `NB` (`portrait-styles2.js`), altrimenti in Flat/2D HD non si vede.
   - Se aggiungi un'acconciatura nuova, va disegnata in tutti gli stili dei volti (`portrait0`, figurina chibi, figura gx, e `hairOver` per gli stili di `portrait-styles*.js`) e sbloccata dalla saga con una voce `hs_<nome>` in `COSM` e in `HAIR_SAGA`.
 - **Espressioni nei dialoghi:** una battuta può iniziare con `[felice]`, `[ride]`, `[triste]`, `[arrabbiato]`, `[sorpreso]`, `[furbo]` o `[pensa]` (il tag non si vede). Anche una didascalia iniziale tra parentesi, come «(ride)» o «(sospira)», cambia la faccia. Usale nelle battute importanti: la bocca si muove da sola mentre il personaggio parla.
 
