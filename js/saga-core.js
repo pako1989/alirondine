@@ -142,6 +142,17 @@
       Object.keys(fl).forEach((k) => { if (c >= 400 || !FLAG_RE.test(k)) return; const v = fl[k]; if (typeof v === "boolean" || (typeof v === "number" && Number.isFinite(v)) || (typeof v === "string" && v.length <= 40)) { m.flags[k] = v; c++; } });
       Object.keys(obj(o.rew)).forEach((k) => { if (REW_RE.test(k) && Object.keys(m.rew).length < 250) m.rew[k] = 1; });
       const dn = obj(o.done); Object.keys(dn).forEach((k) => { const n = clampI(k, 1, 9, 0); if (n && typeof dn[k] === "string" && dn[k].length <= 24) m.done[n] = dn[k]; });
+      // le scelte importanti fatte (domande con almeno una risposta «big»): servono allo schema delle scelte
+      m.choices = arr(o.choices).filter((x) => x && typeof x.q === "string" && Array.isArray(x.o)).slice(-60).map((x) => ({ c: clampI(x.c, 1, 9, 1), k: String(x.k || "").slice(0, 12), q: x.q.slice(0, 140), o: x.o.filter((l) => typeof l === "string").slice(0, 6).map((l) => l.slice(0, 90)), p: clampI(x.p, 0, 5, 0) }));
+      // istantanee all'ingresso di ogni capitolo (statistiche e scelte): servono a rigiocare un capitolo con gli stessi parametri della prima volta
+      m.snap = {};
+      Object.keys(obj(o.snap)).slice(0, 9).forEach((k) => {
+        const n = clampI(k, 1, 9, 0), sn = obj(o.snap[k]); if (!n) return;
+        const e = { st: {}, flags: {} };
+        Object.keys(STATS).forEach((q) => { const [a, b, d] = STATS[q]; e.st[q] = clampI(obj(sn.st)[q], a, b, d); });
+        let c2 = 0; Object.keys(obj(sn.flags)).forEach((q) => { if (c2 >= 400 || !FLAG_RE.test(q)) return; const v = sn.flags[q]; if (typeof v === "boolean" || (typeof v === "number" && Number.isFinite(v)) || (typeof v === "string" && v.length <= 40)) { e.flags[q] = v; c2++; } });
+        m.snap[n] = e;
+      });
       m.zone = typeof o.zone === "string" && ZONE_RE.test(o.zone) ? o.zone : "";
       m.log = arr(o.log).filter((x) => typeof x === "string").map((x) => x.slice(0, 220)).slice(-80);
       Object.keys(obj(o.intro)).forEach((k) => { if (FLAG_RE.test(k)) m.intro[k] = 1; });
@@ -160,6 +171,19 @@
       is: (k) => !!mem().flags[k],
       add: (k, n) => { const v = (+mem().flags[k] || 0) + (n || 1); F.set(k, v); return v; },
     };
+    const takeSnap = (n) => { const m = mem(); m.snap = m.snap || {}; m.snap[n] = { st: Object.assign({}, m.st), flags: Object.assign({}, m.flags) }; };
+    // rigiocare il capitolo n: stato com'era quando ci sei entrato la prima volta (i finali trovati, le monete e i cosmetici restano tuoi)
+    function rewindTo(n) {
+      const m = mem(); let sn = m.snap && m.snap[n];
+      if (!sn && n === 1) { sn = { st: {}, flags: {} }; Object.keys(STATS).forEach((q) => { sn.st[q] = STATS[q][2]; }); }
+      if (!sn) return false; // salvataggio vecchio, senza istantanea: si rigioca com'è
+      m.st = Object.assign({}, sn.st); m.flags = Object.assign({}, sn.flags); m.zone = "";
+      Object.keys(m.step).forEach((k) => { if (+k >= n) delete m.step[k]; });
+      Object.keys(m.done).forEach((k) => { if (+k >= n) delete m.done[k]; });
+      Object.keys(m.snap).forEach((k) => { if (+k > n) delete m.snap[k]; });
+      m.choices = (m.choices || []).filter((x) => x.c < n);
+      m.ch = n; save(); return true;
+    }
     const stepOf = (ch) => mem().step[ch] | 0;
     const setStep = (ch, n) => { mem().step[ch] = clampI(n, 0, 99, 0); save(); };
     const note = (txt) => { const m = mem(); if (!m.log.includes(txt)) { m.log.push(txt); if (m.log.length > 80) m.log.shift(); save(); } };
@@ -371,6 +395,10 @@
     // vale l'opzione numero «def» (di solito il silenzio, o l'esitazione). K.timedFire() la fa scattare subito (per i test).
     let TIMED = null;
     function ask(who, prompt, opts, bg, tm) {
+      if (opts.some((q) => q.big) && opts.filter((q) => !q.disabled).length >= 2) { // scelta importante: la ricordiamo per lo schema delle scelte
+        const ch = (activeChapter() || {}).n || 1, lab = opts.map((q) => String(T(q.label)).replace(/<[^>]*>/g, "")), key = String(hash(ch + "|" + String(prompt).slice(0, 80)));
+        opts = opts.map((q, i) => (q.fn && !q.disabled ? Object.assign({}, q, { fn: () => { const m = mem(); m.choices = (m.choices || []).filter((x) => x.k !== key); m.choices.push({ c: ch, k: String(key).slice(0, 12), q: String(T(prompt)).replace(/<[^>]*>/g, "").slice(0, 140), o: lab.slice(0, 6), p: Math.min(i, 5) }); if (m.choices.length > 60) m.choices.shift(); save(); q.fn(); } }) : q));
+      }
       meet(who); if (TIMED) { clearInterval(TIMED.iv); TIMED = null; }
       const tok = {}; const wrap = (o) => (o.fn ? () => { if (TIMED && TIMED.tok === tok) { clearInterval(TIMED.iv); TIMED = null; } if (o.big) SFX.choice(); o.fn(); } : o.fn);
       api.trAsk(who, esc(T(prompt)).replace(/\n/g, "<br>"), opts.map((o) => ({ label: T(o.label), sub: o.sub ? T(o.sub) : undefined, cls: o.cls || "", disabled: !!o.disabled, fn: wrap(o) })), bg || bgNow());
@@ -425,12 +453,23 @@
       return `<b>${esc(h0.name)}</b> · n. ${esc(h0.num)}${stats ? "<br>" + stats : ""}<br><br><b>Pagine</b> (${m.lore.length}/${Object.keys(LORE).length})<br>${lore || "<span style='color:var(--dim)'>Niente, per ora.</span>"}<br><br><b>Finali</b><br>${endingsHtml()}`;
     }
     function endingsHtml() { const m = mem(); return Object.keys(ENDINGS).map((k) => (m.ends.includes(k) ? `✓ <b>${esc(ENDINGS[k][0])}</b> <span style="color:var(--dim)">${esc(ENDINGS[k][1])}</span>` : `<span style='color:var(--dim)'>• ??? ${ENDINGS[k][2] ? "· " + esc(ENDINGS[k][2]) : ""}</span>`)).join("<br>"); }
+    // schema delle scelte (alla Detroit): per capitolo, cosa hai deciso e le strade che non hai preso
+    function choicesHtml() {
+      const m = mem(), l = m.choices || []; if (!l.length) return "";
+      let out = "<br><br><b>Schema delle scelte</b>";
+      for (let n = 1; n <= NCH; n++) {
+        const cs = l.filter((x) => x.c === n); if (!cs.length) continue;
+        out += `<br><span style="color:var(--dim)">Capitolo ${n}${CHAPTERS[n] ? " · " + esc(CHAPTERS[n].title) : ""}</span>`;
+        cs.forEach((x) => { out += `<br>• ${esc(x.q.length > 90 ? x.q.slice(0, 88) + "…" : x.q)}` + x.o.map((t, i) => `<br>&nbsp;&nbsp;${i === x.p ? "<b>▶ " + esc(t) + "</b>" : `<span style="color:var(--dim)">▷ ${esc(t)}</span>`}`).join(""); });
+      }
+      return out + `<br><span style="color:var(--dim)">▷ = strade non prese. Per provarle: Capitoli → rigioca.</span>`;
+    }
     function journal(back, inZone) {
-      const html = journalHtml() + cluesHtml() + questsHtml();
+      const html = journalHtml() + choicesHtml() + cluesHtml() + questsHtml();
       if (inZone) return api.trAsk("voce", html, [{ label: "◂ Indietro", fn: back }], bgNow());
       api.scene(BG0, "voce", html, [{ label: "◂ Indietro", fn: back }], JN());
     }
-    function finishChapter(n, ending) { const m = mem(); m.done[n] = String(ending || "ok").slice(0, 24); if (m.ch <= n && n < NCH) m.ch = n + 1; save(); SFX.end(); }
+    function finishChapter(n, ending) { const m = mem(); m.done[n] = String(ending || "ok").slice(0, 24); if (m.ch <= n && n < NCH) m.ch = n + 1; if (n < NCH) takeSnap(n + 1); save(); SFX.end(); }
 
     // -------------------------------------------------------------- zone sul motore TRZ
     // PERSONAGGI CHE CAMMINANO: un PNG con route: [[x,y], [x,y], …] gira per la zona (speed, pause). Si ferma e si gira
@@ -851,7 +890,9 @@
       const m = mem(), opts = [];
       for (let n = 1; n <= NCH; n++) {
         const c = CHAPTERS[n], open = c && (n === 1 || m.done[n - 1] || m.ch >= n);
-        if (open) opts.push({ label: `${m.done[n] ? "✓" : "▸"} Capitolo ${n} · ${c.title}`, sub: m.done[n] ? "Concluso · rigioca" : c.sub || "", cls: m.ch === n ? "hot" : "", fn: () => { m.ch = n; save(); continueStory(); } });
+        if (open) opts.push({ label: `${m.done[n] ? "✓" : "▸"} Capitolo ${n} · ${c.title}`, sub: m.done[n] ? "Concluso · rigioca" : c.sub || "", cls: m.ch === n ? "hot" : "", fn: () => { if (!(m.done[n] || n < m.ch)) { m.ch = n; save(); return continueStory(); }
+          api.scene(BG0, "voce", `<b>Rigiochi il capitolo ${n}?</b><br><span style="color:var(--dim)">Riparti dai parametri e dalle scelte con cui l'avevi iniziato. I finali trovati, le monete e i cosmetici restano tuoi.${n < NCH ? " I capitoli dopo si riaprono quando lo finisci di nuovo." : ""}${n > 1 && !(m.snap && m.snap[n]) ? " (Salvataggio precedente a questa funzione: questo capitolo si rigioca com'è, senza tornare indietro.)" : ""}</span>`,
+            [{ label: "Sì, rigioca dall'inizio", cls: "hot", fn: () => { rewindTo(n); m.ch = n; save(); continueStory(); } }, { label: "◂ Indietro", fn: chapters }], TITLE); } });
         else opts.push({ label: `• Capitolo ${n} · ${c ? c.title : "???"}`, sub: c ? "Finisci il capitolo prima" : "In arrivo", disabled: true, fn: chapters });
       }
       opts.push({ label: "Ricomincia da capo", sub: "Cancella solo questo salvataggio", fn: resetAsk });
@@ -874,7 +915,7 @@
       const c = activeChapter(), m = mem(); if (!c) return;
       if (!m.diffSet && !m.intro["ch" + c.n] && c.n === 1) return diffMenu(continueStory, true);
       if (!m.intro["ch" + c.n]) {
-        m.intro["ch" + c.n] = 1; m.last = Date.now(); save();
+        if (!m.snap || !m.snap[c.n]) takeSnap(c.n); m.intro["ch" + c.n] = 1; m.last = Date.now(); save();
         return api.play(lines(safe(() => c.intro(), null) || [["voce", c.title]], c.introBg || BG0), () => { const z = ZONES[c.start]; go(c.start, z.spec.start[0], z.spec.start[1]); });
       }
       const zid = m.zone && ZONES[m.zone] && ZONES[m.zone].ch <= m.ch ? m.zone : c.start;
