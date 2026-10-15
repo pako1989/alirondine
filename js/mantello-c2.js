@@ -13,7 +13,7 @@
 
     K.cast("mg_colla", { acc: ["guanti", "occhiali"], name: "Madame Colla", tag: "", hair: "#e8e0a0", style: "bun", skin: "#f0d8c0", eye: "#5a8a3a", bg: ["#2a3a1a", "#c8e05a"], shirt: "#c8e05a" },
       "Padrona della Fabbrica di Colla di Metropolenta. Ha inventato una colla che tiene tutto: carta, legno, palloni, promesse. Da quando le sue amiche si sono trasferite in un'altra città, ha deciso che niente, qui, se ne deve più andare.");
-    K.cast("mg_mastice", { acc: ["casco"], name: "Mastice, operaio", tag: "", hair: "#5a4a3a", style: "buzz", skin: "#d9a679", eye: "#3a3a3a", bg: ["#2a3a1a", "#c8e05a"], shirt: "#8a9a4a" },
+    K.cast("mg_mastice", { beard: "incolta", acc: ["casco"], name: "Mastice, operaio", tag: "", hair: "#5a4a3a", style: "buzz", skin: "#d9a679", eye: "#3a3a3a", bg: ["#2a3a1a", "#c8e05a"], shirt: "#8a9a4a" },
       "Operaio della fabbrica. Lavora alla colla da trent'anni, e ha le dita sempre un po' appiccicose. Saluta con il gomito, per sicurezza.");
     K.cos("mg_c2", { kind: "acc", label: "Guanti appiccicosi di Madame Colla", val: "guanti", from: "Capitolo 2 del Mantello Granata" });
     K.cos("mg_ritagli2", { kind: "hairc", label: "Capelli Verde Colla", val: "#c8e05a", from: "Trova tutti i ritagli di stoffa della fabbrica" });

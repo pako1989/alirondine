@@ -9,7 +9,7 @@
     const { F, say, ask, done, go, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 3, S = () => K.stepOf(N), st = (k) => K.stat(k);
 
-    K.cast("dc_vanni", { name: "Segretario Teodoro Vanni", tag: "gray", hair: "#8a8a8a", style: "slick", skin: "#e8d0b8", eye: "#3a3a3a", shades: true, bg: ["#1a1a1a", "#c0392b"], shirt: "#1a1a1a" },
+    K.cast("dc_vanni", { beard: "pizzetto", name: "Segretario Teodoro Vanni", tag: "gray", hair: "#8a8a8a", style: "slick", skin: "#e8d0b8", eye: "#3a3a3a", shades: true, bg: ["#1a1a1a", "#c0392b"], shirt: "#1a1a1a" },
       "Segretario della Lega delle Città da vent'anni. Voce bassa, mani pulite, un ombrello rosso sempre chiuso sotto il braccio. Non ha mai perso un'elezione, né la calma.");
     K.evidence("tribuna", { t: "L'ombrello in tribuna d'onore", d: "In diretta: nel primo tempo della finale, in tribuna d'onore, si apre un ombrello rosso. Senza pioggia. Accanto c'è Vanni.", icon: "☂️", short: "Dalla moviola della finale" });
     K.evidence("pallone3", { t: "Il pallone chiaro della finale", d: "In diretta: al 30' entra in campo un pallone chiaro, leggero. Come nel 1987. Come contro il Portagrigia.", icon: "⚪", short: "Dalla moviola della finale" });

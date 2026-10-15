@@ -11,7 +11,7 @@
       "La figlia della Marchesa Cristallina, erede del ducato di Vetrara. Gioca da regista nella squadra della madre, e ha scoperto che la Coppa, quest'anno, sua madre la vuole comprare. Lei vuole vincerla.");
     K.cast("td_marchesa", { acc: ["corona", "sciarpa"], name: "La Marchesa Cristallina", tag: "", hair: "#c8c8d8", style: "bun", skin: "#f4e4d8", eye: "#5a7a8a", bg: ["#2a1e14", "#2a8a6a"], shirt: "#c8d8d0" },
       "La signora di Vetrara. Parla piano, sorride sempre, e non ha mai pagato il prezzo pieno di niente. Dice che ogni cosa al mondo ha un prezzo. Anche una coppa.");
-    K.cast("td_vetraio", { acc: ["grembiule", "guanti"], name: "Mastro Soffio, il vetraio", tag: "", hair: "#5a3a2a", style: "curly", skin: "#c68642", eye: "#3a2a1a", beard: true, bg: ["#2a1e14", "#3a6a9a"], shirt: "#3a6a9a" },
+    K.cast("td_vetraio", { beard: "folta", acc: ["grembiule", "guanti"], name: "Mastro Soffio, il vetraio", tag: "", hair: "#5a3a2a", style: "curly", skin: "#c68642", eye: "#3a2a1a", bg: ["#2a1e14", "#3a6a9a"], shirt: "#3a6a9a" },
       "Il più grande soffiatore di vetro della città. Soffia bicchieri, lampadari e, una volta, una coppa intera, che si è rotta alla prima vittoria. Odia le guerre: rompono i vetri.");
     K.cast("td_barcaiolo", { acc: ["paglia"], name: "Remo, il barcaiolo", tag: "", hair: "#2a2a2a", style: "messy", skin: "#d9a679", eye: "#2a2a2a", bg: ["#2a1e14", "#3a8aa0"], shirt: "#e8e8e8" },
       "Porta la gente da un ponte all'altro, cantando. Ha visto passare duchi, ladri e innamorati. Non giudica nessuno: li porta tutti dall'altra parte.");

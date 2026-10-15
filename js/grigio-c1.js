@@ -10,11 +10,11 @@
     const N = 1, S = () => K.stepOf(N);
     K.cast("gr_marisa", { acc: ["fascia"], name: "Marisa Onda, la capitana", tag: "", hair: "#2a1a14", style: "ponytail", skin: "#d9a679", eye: "#3a2a1a", bg: ["#0c101a", "#5a6a8a"], shirt: "#5a6a8a" },
       "La capitana del Porto Scuro Calcio. Lavora di giorno al mercato del pesce e gioca la sera. Da tre mesi la sua squadra perde sempre, e qualcuno le ha lasciato un biglietto sotto la porta: «Continuate così».");
-    K.cast("gr_alfio", { acc: ["occhiali", "grembiule"], name: "Alfio Rames, il magazziniere", tag: "gray", hair: "#c8c8c8", style: "bald", skin: "#e8c4a0", eye: "#3a4a6a", beard: true, bg: ["#0c101a", "#8a6a3a"], shirt: "#6a5a4a" },
+    K.cast("gr_alfio", { beard: "incolta", acc: ["occhiali", "grembiule"], name: "Alfio Rames, il magazziniere", tag: "gray", hair: "#c8c8c8", style: "bald", skin: "#e8c4a0", eye: "#3a4a6a", bg: ["#0c101a", "#8a6a3a"], shirt: "#6a5a4a" },
       "Il magazziniere dello Stadio della Gru da quarant'anni. Ripara i palloni, cuce le reti, accende i riflettori. Sotto la tribuna ha un'officina dove nessuno entra: trapani, bobine, e un armadio chiuso a chiave.");
     K.cast("gr_dora", { acc: ["cappellino"], name: "Commissaria Dora Valli", tag: "", hair: "#5a3a2a", style: "bob", skin: "#f0d0b0", eye: "#2a4a3a", bg: ["#0c101a", "#3a4a3a"], shirt: "#4a4a3a" },
       "La commissaria della polizia portuale. Onesta in una città dove l'onestà costa cara. Ha un impermeabile che non si toglie mai e un fascicolo sulla Lega del Porto spesso come un mattone, pieno di sospetti e senza una prova.");
-    K.cast("gr_gancio", { acc: ["berretto"], name: "Gancio, capo dei portuali", tag: "", hair: "#3a2a1a", style: "buzz", skin: "#c68642", eye: "#2a2a2a", beard: true, bg: ["#0c101a", "#a83a2a"], shirt: "#a83a2a" },
+    K.cast("gr_gancio", { beard: "incolta", scar: true, acc: ["berretto"], name: "Gancio, capo dei portuali", tag: "", hair: "#3a2a1a", style: "buzz", skin: "#c68642", eye: "#2a2a2a", bg: ["#0c101a", "#a83a2a"], shirt: "#a83a2a" },
       "Il capo dei portuali del Molo Nove. Grosso come una gru, con le mani piene di cicatrici. Lavora per il Sindacato della Nebbia: dice che è l'unico modo per far mangiare i suoi uomini.");
     ["gr_sg1", "gr_sg2", "gr_sg3"].forEach((id, i) => K.cast(id, { acc: ["cappellino"], name: ["Lo sgherro col fischio", "Lo sgherro con la torcia", "La sentinella del Molo Nove"][i], tag: "", hair: "#1a1a1a", style: "hood", skin: ["#e0b890", "#c68642", "#f0d0b0"][i], eye: "#2a2a2a", bg: ["#0c101a", "#4a4a5a"], shirt: "#4a4a5a" },
       "Uno degli uomini del Sindacato della Nebbia. Fa la ronda con una torcia e poca voglia. Guarda sempre davanti a sé: è lì che di solito arrivano i guai."));

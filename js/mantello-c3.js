@@ -11,7 +11,7 @@
     const { F, say, ask, done, go, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 3, S = () => K.stepOf(N), st = (k) => K.stat(k);
 
-    K.cast("mg_dottore", { acc: ["fischietto", "occhiali"], name: "Il Dottor Fuorigioco", tag: "", hair: "#e8e8e8", style: "slick", skin: "#e8d0b8", eye: "#3a3a5a", bg: ["#1a1a2a", "#ffd23f"], shirt: "#1a1a1a", beard: true },
+    K.cast("mg_dottore", { beard: "baffi", acc: ["fischietto", "occhiali"], name: "Il Dottor Fuorigioco", tag: "", hair: "#e8e8e8", style: "slick", skin: "#e8d0b8", eye: "#3a3a5a", bg: ["#1a1a2a", "#ffd23f"], shirt: "#1a1a1a", },
       "Un tempo era il guardalinee più preciso di Metropolenta: alzava la bandierina per un centimetro, per un capello, per un pensiero. Nessuno lo ringraziava, tutti lo fischiavano. Ha deciso che se tutto è fuorigioco, almeno avrà sempre ragione.");
     K.cast("mg_vigile", { name: "Vigile Puntuale", tag: "", hair: "#5a4a3a", style: "buzz", skin: "#e0b890", eye: "#3a3a3a", bg: ["#2a2a3a", "#e8e8e8"], shirt: "#e8e8f0", cap: "#1a2a4a" },
       "Il vigile del Viale dei Tigli. Fa le multe alle auto in doppia fila da trent'anni. Le auto sono sempre le stesse. Le multe sono sempre le stesse. Ormai si salutano.");

@@ -7,7 +7,7 @@
   function chapter1(K) {
     const { F, say, ask, done, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 1, S = () => K.stepOf(N);
-    K.cast("cm_bastiano", { acc: ["fischietto"], name: "Bastiano Loi", tag: "gray", hair: "#c8c8c8", style: "messy", skin: "#c68642", eye: "#2a2a2a", beard: true, bg: ["#0e1628", "#1f5fbf"], shirt: "#1f5fbf" },
+    K.cast("cm_bastiano", { beard: "incolta", acc: ["fischietto"], name: "Bastiano Loi", tag: "gray", hair: "#c8c8c8", style: "messy", skin: "#c68642", eye: "#2a2a2a", bg: ["#0e1628", "#1f5fbf"], shirt: "#1f5fbf" },
       "Vent'anni fa era il numero dieci della Nazionale: in una sola partita segnò tre gol con un tiro che nessuno sapeva rifare. Poi tornò a Riva Azzurra, comprò una barca e smise di parlare di calcio. Ripara reti da pesca. Guarda tutte le partite del campetto.");
     K.cast("cm_saverio", { acc: ["guanti"], name: "Saverio Muro", tag: "", hair: "#1a1a1a", style: "slick", skin: "#e8c4a0", eye: "#3a3a3a", cap: "#c83a3a", bg: ["#0e1628", "#c83a3a"], shirt: "#c83a3a" },
       "Il portiere del Collegio San Marco. Non ha mai preso un gol in partita: dice che è perché para tutto, i suoi compagni dicono che è perché nessuno ha il coraggio di tirargli. Porta sempre il cappellino rosso, anche di notte.");

@@ -10,7 +10,7 @@
     const { F, say, ask, done, go, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 3, S = () => K.stepOf(N), st = (k) => K.stat(k);
 
-    K.cast("cc_re", { acc: ["corona", "guanti"], name: "Il Re del Silenzio", tag: "gray", hair: "#c8c8d8", style: "slick", skin: "#d8c8b8", eye: "#5a5a8a", bg: ["#0a0a2a", "#c8a8ff"], shirt: "#2a2a5a", beard: true },
+    K.cast("cc_re", { beard: "folta", acc: ["corona", "guanti"], name: "Il Re del Silenzio", tag: "gray", hair: "#c8c8d8", style: "slick", skin: "#d8c8b8", eye: "#5a5a8a", bg: ["#0a0a2a", "#c8a8ff"], shirt: "#2a2a5a", },
       "Un tempo era il portiere più forte del mondo. Parò tutto, per quarant'anni, e nessuno esultò mai per una sua parata: si esulta per i gol, non per chi li evita. Un giorno smise di aspettare un applauso, e decise che nessuno ne avrebbe più avuti.");
     K.cast("cc_fabbra", { acc: ["grembiule", "chiave"], name: "Brunilde, fabbra del vulcano", tag: "", hair: "#c84a1a", style: "bun", skin: "#c68642", eye: "#3a2a1a", bg: ["#3a1a10", "#ff8a5a"], shirt: "#5a3a2a" },
       "Forgia palloni di metallo per le porte del vulcano. Custodisce il Cristallo del Fuoco da quando era bambina. Ride forte come il suo martello, e piange forte uguale.");

@@ -18,7 +18,7 @@
     K.cast("mn_mara", { acc: ["fiore"], name: "«La Bionda» Mara", tag: "gold", hair: "#e8d08a", style: "wavy", skin: "#fdf2f8", eye: "#2563eb", bg: ["#581c87", "#fef08a"], shirt: "#581c87" },
       "La regina della notte milanese. Voce vellutata al microfono della Lucciola e mente lucidissima nelle trattative sottobanco: «Il calcio è come il jazz, tesoro: se non conosci il ritmo dei soldi, steccano tutti».");
 
-    K.cast("mn_carmine", { acc: ["occhiali", "berretto"], name: "Don Carmine", tag: "gray", hair: "#94a3b8", style: "slick", skin: "#e2e8f0", eye: "#0f172a", beard: true, bg: ["#0f172a", "#334155"], shirt: "#0f172a" },
+    K.cast("mn_carmine", { beard: "baffi", acc: ["occhiali", "berretto"], name: "Don Carmine", tag: "gray", hair: "#94a3b8", style: "slick", skin: "#e2e8f0", eye: "#0f172a", bg: ["#0f172a", "#334155"], shirt: "#0f172a" },
       "Il 'Presidente Ombra' dei Bastioni. Elegante, impassibile, muove capitali e influenza arbitri dall'angolo più riservato del club senza mai sporcarsi le scarpe lucide.");
 
     K.cos("mn_c2", { kind: "shirt", label: "Cravatta di seta e giacca gessata da sera", val: "#581c87", from: "Capitolo 2 di Operazione Fuorigioco Noir" });

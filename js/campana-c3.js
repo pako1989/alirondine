@@ -14,7 +14,7 @@
     const { say, ask, done, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 3, S = () => K.stepOf(N);
 
-    K.cast("cp_mastro", { acc: ["medaglia", "fascia"], name: "Gran Mastro Campanaro", tag: "gold", hair: "#64748b", style: "wavy", skin: "#fed7aa", eye: "#1e293b", beard: true, bg: ["#ca8a04", "#713f12"], shirt: "#ca8a04" },
+    K.cast("cp_mastro", { beard: "folta", acc: ["medaglia", "fascia"], name: "Gran Mastro Campanaro", tag: "gold", hair: "#64748b", style: "wavy", skin: "#fed7aa", eye: "#1e293b", bg: ["#ca8a04", "#713f12"], shirt: "#ca8a04" },
       "Decano dei mastri campanari dell'Appennino e capitano dei Campanari di San Pancrazio. Sente il tempo nel sangue e quando calcia di collo pieno sembra che risuoni un concerto a cinque campane: «A mezzanotte si saprà chi ha la fede e chi ha solo fiato nei polmoni!».");
 
     K.cos("cp_c3", { kind: "shirt", label: "Tonaca scanzonata da rigorista notturno", val: "#18181b", from: "Capitolo 3 de La Notte dei Cento Rintocchi" });

@@ -7,7 +7,7 @@
   function chapter1(K) {
     const { F, say, ask, done, setStep, bond, finishChapter, quest, questDone, go } = K;
     const N = 1, S = () => K.stepOf(N);
-    K.cast("ft_atlante", { acc: [], name: "Atlante Varo, il Titano", tag: "", hair: "#2a1a14", style: "slick", skin: "#d9a679", eye: "#3a6ac8", beard: true, bg: ["#14183a", "#c83a2a"], shirt: "#c83a2a" },
+    K.cast("ft_atlante", { beard: "incolta", acc: [], name: "Atlante Varo, il Titano", tag: "", hair: "#2a1a14", style: "slick", skin: "#d9a679", eye: "#3a6ac8", bg: ["#14183a", "#c83a2a"], shirt: "#c83a2a" },
       "Tuo padre. Vent'anni fa era il calciatore più forte del mondo: lo chiamavano il Titano, perché saltava più in alto della traversa. Poi si è ritirato, ha aperto un negozio di articoli sportivi e ha smesso di saltare. Dice.");
     K.cast("ft_nora", { acc: ["fischietto"], name: "Nora Varo", tag: "", hair: "#8a3a2a", style: "bob", skin: "#f0d0b0", eye: "#3a5a3a", bg: ["#14183a", "#3a8a5a"], shirt: "#3a8a5a" },
       "Tua madre. Allena la squadra femminile di Altamira, fa i conti del negozio e risolve le cose prima che diventino problemi. Ha sposato un Titano: niente la sorprende. Quasi niente.");
@@ -15,7 +15,7 @@
       "Il tuo migliore amico e il terzino dell'Altamira. Non vola, non ha poteri, e non gli importa: dice che qualcuno, in squadra, deve restare con i piedi per terra. Letteralmente.");
     K.cast("ft_cecile", { acc: ["occhiali"], name: "Cecile Arden, direttrice dell'Agenzia Celeste", tag: "gray", hair: "#c8c8d0", style: "ordinato", skin: "#f4dcc8", eye: "#4a4a6a", bg: ["#14183a", "#3a6ac8"], shirt: "#2a2e4a" },
       "Dirige l'Agenzia Celeste, quella che si occupa delle cose che cadono dal cielo. Parla poco, prende appunti su un tablet, e sa di tuo padre più di quanto dica.");
-    K.cast("ft_fulmine", { acc: ["visiera"], name: "Capitan Fulmine dell'Agenzia", tag: "", hair: "#e8d08a", style: "spiky", skin: "#e8c4a0", eye: "#3a6ac8", bg: ["#14183a", "#3a6ac8"], shirt: "#3a6ac8" },
+    K.cast("ft_fulmine", { streak: "#f2c14e", acc: ["visiera"], name: "Capitan Fulmine dell'Agenzia", tag: "", hair: "#e8d08a", style: "spiky", skin: "#e8c4a0", eye: "#3a6ac8", bg: ["#14183a", "#3a6ac8"], shirt: "#3a6ac8" },
       "Il capitano della squadra dell'Agenzia, i Fulmini. Corre veloce come il suo nome e non lo dimentica mai, nemmeno quando dorme.");
     K.cos("ft_c1", { kind: "shirt", label: "Tuta rossa del Titano", val: "#c83a2a", from: "Capitolo 1 di Il Figlio del Titano" });
     K.cos("ft_anelli1", { kind: "acc", label: "Anello di nuvola", val: "medaglia", from: "Trova gli anelli di nuvola del cielo di Altamira" });

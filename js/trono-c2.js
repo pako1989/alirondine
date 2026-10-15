@@ -15,9 +15,9 @@
       "Signora di Casa Corvonero, padrona di cento corvi e di mille segreti. Non mente mai: dice soltanto metà della verità, e ti lascia indovinare quale metà. Gioca a calcio benissimo, ma nessuno l'ha mai vista farlo.");
     K.cast("tc_marino", { acc: ["bandana"], name: "Lord Marino Salmastra", tag: "", hair: "#2a4a5a", style: "curly", skin: "#c68642", eye: "#2a6a6a", bg: ["#1a2a3a", "#7ad8d8"], shirt: "#1a4a6a" },
       "Signore dei porti di Salmastra. Simpatico, generoso, sempre con un brindisi pronto. Firma tutti i patti che gli porgi, con un gran sorriso. Poi la marea cambia, dice lui, e la marea non l'ha firmato.");
-    K.cast("tc_fiamma", { acc: ["fascia"], name: "Lady Fiamma Rovoardente", tag: "", hair: "#c83a1a", style: "ponytail", skin: "#e0b890", eye: "#5a2a1a", bg: ["#2a0e06", "#ffb84a"], shirt: "#a83a1a" },
+    K.cast("tc_fiamma", { streak: "#ff6a2a", acc: ["fascia"], name: "Lady Fiamma Rovoardente", tag: "", hair: "#c83a1a", style: "ponytail", skin: "#e0b890", eye: "#5a2a1a", bg: ["#2a0e06", "#ffb84a"], shirt: "#a83a1a" },
       "Capitana di Casa Rovoardente, delle terre bruciate del sud. Non sopporta i patti, i tavoli, le parole: vuole solo giocare. Vota per chi la batte, e lo dice prima, così nessuno si offende.");
-    K.cast("tc_inverno", { acc: ["sciarpa"], name: "Ser Inverno Gelaneve", tag: "", hair: "#e8f0f8", style: "side", skin: "#f0e0d8", eye: "#5a8ab8", bg: ["#1a2a3a", "#e8f0f8"], shirt: "#5a7a9a" },
+    K.cast("tc_inverno", { streak: "#e8f0ff", acc: ["sciarpa"], name: "Ser Inverno Gelaneve", tag: "", hair: "#e8f0f8", style: "side", skin: "#f0e0d8", eye: "#5a8ab8", bg: ["#1a2a3a", "#e8f0f8"], shirt: "#5a7a9a" },
       "Il cavaliere di Casa Gelaneve, venuto dal nord, dalla Barriera di Ghiaccio. Parla piano e di una cosa sola: oltre la Barriera c'è una squadra che gioca da secoli contro l'inverno, e nessuno a sud ci crede.");
     K.cos("tc_c2", { kind: "acc", label: "Spilla del Consiglio", val: "stella", from: "Capitolo 2 del Trono di Cuoio" });
     K.cos("tc_sigilli2", { kind: "hairc", label: "Capelli Ceralacca", val: "#a82a2a", from: "Trova tutti i sigilli di cera di Altavalle" });

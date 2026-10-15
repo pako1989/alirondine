@@ -11,7 +11,7 @@
     const { F, say, ask, done, go, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 3, S = () => K.stepOf(N), st = (k) => K.stat(k);
 
-    K.cast("so_zorgo", { acc: ["medaglia"], name: "Zorgo Tre-Occhi", tag: "", hair: "#e8e84a", style: "cresta", skin: "#e89ab8", eye: "#3a1a5a", bg: ["#10162e", "#e89ab8"], shirt: "#7a3ae8" },
+    K.cast("so_zorgo", { streak: "#a855f7", acc: ["medaglia"], name: "Zorgo Tre-Occhi", tag: "", hair: "#e8e84a", style: "cresta", skin: "#e89ab8", eye: "#3a1a5a", bg: ["#10162e", "#e89ab8"], shirt: "#7a3ae8" },
       "Capitano della Selezione Galattica, la squadra della nave da crociera «Nebulosa Splendida». Ha tre occhi: uno per il pallone, uno per l'avversario, uno per il buffet. Non perde una finale da quattrocento anni. Ne ha giocate due.");
     K.cos("so_c3", { kind: "shirt", label: "Maglia della Finale tra le stelle", val: "#1a2a5a", from: "Completa Calcio Spaziale" });
     K.cos("so_casa", { kind: "acc", label: "Pallone che non cade", val: "#e8e8f0", from: "Finale «Ritorno sulla Terra»" });

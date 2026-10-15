@@ -12,7 +12,7 @@
       "La commissaria tecnica della Nazionale giovanile. Ha visto giocare Bastiano Loi dal vivo, da bambina, e ha deciso quel giorno di fare l'allenatrice. Non urla mai: scrive tutto su un taccuino, e quando lo chiude la decisione è presa.");
     K.cast("cm_dario", { name: "Dario Vento", tag: "", hair: "#c87a3a", style: "side", skin: "#f0d0b0", eye: "#3a6a5a", bg: ["#0e1628", "#7ad8a8"], shirt: "#1f5fbf", num: "8" },
       "Il centrocampista della Nazionale. Ha giocato in otto città diverse, perché il padre è un pittore che non sta mai fermo. Dice che in ogni città ha imparato un passaggio. Ne conosce otto. Il nono lo vuole inventare con te.");
-    K.cast("cm_barone", { acc: ["fascia"], name: "Il Barone, capitano di Nordavia", tag: "", hair: "#f0e0a0", style: "slick", skin: "#f0e0d8", eye: "#3a6aa8", bg: ["#0e1628", "#e8e8f0"], shirt: "#e8e8f0", num: "10" },
+    K.cast("cm_barone", { beard: "baffi", acc: ["fascia"], name: "Il Barone, capitano di Nordavia", tag: "", hair: "#f0e0a0", style: "slick", skin: "#f0e0d8", eye: "#3a6aa8", bg: ["#0e1628", "#e8e8f0"], shirt: "#e8e8f0", num: "10" },
       "Il capitano di Nordavia. Lo chiamano il Barone perché cammina in campo come in un salone da ballo. Non ha mai perso una finale. Quando tira il Fuoco del Nord, dicono, il pallone diventa blu.");
     K.cos("cm_c3", { kind: "acc", label: "Coppa del Mondiale giovanile", val: "corona", from: "Completa Dal Campetto al Mondiale" });
     K.cos("cm_mondiale", { kind: "shirt", label: "Maglia della Nazionale col numero dieci", val: "#1f5fbf", from: "Finale «Campioni del mondo»" });

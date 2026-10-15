@@ -10,9 +10,9 @@
     const N = 1, S = () => K.stepOf(N);
     const BGS = { rt_piazzale: { 2038: "rt_piazza", 1978: "rt_piazza78", 1938: "rt_piazza38" }, rt_campo: { 2038: "rt_campo", 1978: "rt_campo78", 1938: "rt_campo38" } };
 
-    K.cast("rt_quarzo", { acc: ["occhiali"], name: "Prof. Ottavio Quarzo", tag: "", hair: "#f2f2f2", style: "messy", skin: "#e8c4a0", eye: "#4a6a8a", bg: ["#2a1e32", "#ffb347"], shirt: "#e8e0d0" },
+    K.cast("rt_quarzo", { beard: "incolta", acc: ["occhiali"], name: "Prof. Ottavio Quarzo", tag: "", hair: "#f2f2f2", style: "messy", skin: "#e8c4a0", eye: "#4a6a8a", bg: ["#2a1e32", "#ffb347"], shirt: "#e8e0d0" },
       "Orologiaio del Club da sessant'anni, o da cent'anni: nell'Officina il tempo non lo tocca. Capelli bianchi dritti come una scarica, occhiali di ottone, entusiasmo da ragazzino. Ha costruito il Pullman Rondine e la Palla del Tempo, e ammette di non aver letto bene le istruzioni.");
-    K.cast("rt_tilly", { acc: ["cuffie"], name: "Tilly Verdi", tag: "", hair: "#ff46c8", style: "twintails", skin: "#c68642", eye: "#2a2a4a", bg: ["#101434", "#46f0ff"], shirt: "#1a2a7a" },
+    K.cast("rt_tilly", { streak: "#ec4899", acc: ["cuffie"], name: "Tilly Verdi", tag: "", hair: "#ff46c8", style: "twintails", skin: "#c68642", eye: "#2a2a4a", bg: ["#101434", "#46f0ff"], shirt: "#1a2a7a" },
       "Diciannove anni, tecnica del tabellone dello stadio. Parla a velocità di fibra ottica e prega le macchine come si prega un nonno. Ha capito prima di tutti che il VAR Totale non guarda le partite: le riscrive.");
     K.cast("rt_nonna", { acc: ["occhiali"], name: "Nonna Ines", tag: "gray", hair: "#eeeef4", style: "bun", skin: "#e8cdb0", eye: "#5a6a7a", bg: ["#101434", "#ffb347"], shirt: "#7a4a6a" },
       "Cent'anni compiuti in autunno, e una memoria che non perde un colpo, soprattutto quelli che non può aver visto. Siede sempre sulla stessa panchina della piazza. Dice di aver fatto la prima foto della sua vita a sei mesi.");
@@ -22,14 +22,14 @@
       "Diciannove anni e una squadra fondata con undici lire e una bugia. Capitano, presidente, magazziniere e raccogli-palloni del Rondinara. Parla con le mani, perde la voce all'intervallo e non ha mai, in vita sua, rinunciato a una partita.");
     K.cast("rt_madre38", { acc: ["grembiule"], name: "Rosa Fornaro", tag: "", hair: "#3a2418", style: "bun", skin: "#e8c4a0", eye: "#4a3a2a", bg: ["#3a342c", "#a8a090"], shirt: "#6a5a4a" },
       "Fruttivendola in piazza, mamma di una neonata, proprietaria di una macchinetta fotografica «di un cognato inventore». Si fida delle persone a prima vista, anche di quelle con le scarpe strane.");
-    K.cast("rt_baldo", { name: "Baldo Molinari", tag: "", hair: "#7a5a2a", style: "buzz", skin: "#d9a679", eye: "#3a3a2a", beard: true, bg: ["#3a342c", "#c8782a"], shirt: "#c8782a" },
+    K.cast("rt_baldo", { beard: "incolta", name: "Baldo Molinari", tag: "", hair: "#7a5a2a", style: "buzz", skin: "#d9a679", eye: "#3a3a2a", bg: ["#3a342c", "#c8782a"], shirt: "#c8782a" },
       "Capitano del Mulino, la squadra dei mugnai: spalle da sacco di farina, voce da porta di ferro. Dice che il campo è un prato con le righe. In fondo ci vorrebbe giocare anche lui.");
 
     K.cast("rt_ines78", { acc: ["occhiali"], name: "Ines del Bar", tag: "", hair: "#2a1a10", style: "bun", skin: "#e8cdb0", eye: "#5a6a7a", bg: ["#3a2a18", "#e8a030"], shirt: "#c8602a" },
       "Quarant'anni nel 1978, il bar suo da quando ne aveva venti. Grembiule arancione, mano ferma sul flipper. Una bambina del 1938, passata dai tavolini a dare ordini a tutti.");
     K.cast("rt_rino", { name: "Rino Sabbioni", tag: "", hair: "#5a3a1a", style: "curly", skin: "#d9a679", eye: "#3a3a2a", bg: ["#3a2a18", "#e8a030"], shirt: "#e8a030" },
       "Ala sinistra del Rondinara '78, basette lunghe e pantaloncini corti. Quando non gioca fa il ragazzo di bottega e dice che il pallone e la bottega sono lo stesso mestiere.");
-    K.cast("rt_mister", { acc: ["fascia"], name: "Il Mister", tag: "", hair: "#aaaaaa", style: "slick", skin: "#d8b090", eye: "#3a3a2a", bg: ["#3a2a18", "#e8a030"], shirt: "#7a4a2a" },
+    K.cast("rt_mister", { beard: "baffi", acc: ["fascia"], name: "Il Mister", tag: "", hair: "#aaaaaa", style: "slick", skin: "#d8b090", eye: "#3a3a2a", bg: ["#3a2a18", "#e8a030"], shirt: "#7a4a2a" },
       "Allena il Rondinara dal Settanta. Impermeabile beige, sigaretta spenta in bocca, tre frasi in tutto: la prima è sempre «ragazzi».");
     K.cast("rt_vera", { acc: ["occhiali"], name: "Vera Revisori", tag: "", hair: "#e8e8f0", style: "bob", skin: "#e8d0c0", eye: "#46f0ff", bg: ["#101434", "#46f0ff"], shirt: "#20204a" },
       "Direttrice del VAR Totale. Parla piano, corregge i verbali con la penna e le persone con lo sguardo. Crede che il passato sia un documento e che il futuro sia un'abitudine.");

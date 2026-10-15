@@ -10,13 +10,13 @@
     const N = 2, S = () => K.stepOf(N);
     const TS = 16;
 
-    K.cast("cc_rubi", { acc: ["bandana"], name: "Rubi, ladro gentile", tag: "", hair: "#1a1a1a", style: "spiky", skin: "#c68642", eye: "#3a2a1a", bg: ["#1a2a4a", "#e8c84a"], shirt: "#3a7a5a" },
+    K.cast("cc_rubi", { band: "#a855f7", acc: ["bandana"], name: "Rubi, ladro gentile", tag: "", hair: "#1a1a1a", style: "spiky", skin: "#c68642", eye: "#3a2a1a", bg: ["#1a2a4a", "#e8c84a"], shirt: "#3a7a5a" },
       "Il ladro più gentile del regno: ruba solo le cose che qualcun altro sta per rubare, e poi le restituisce, lucidate. È il più veloce di tutti. Dice che correre è come rubare il tempo agli altri, ma in modo onesto.");
-    K.cast("cc_capitana", { acc: ["pescatore"], name: "Capitana Marea", tag: "", hair: "#d8d8d8", style: "codino", skin: "#c68642", eye: "#2a4a6a", bg: ["#1a2a4a", "#3a8ac8"], shirt: "#1a3a6a" },
+    K.cast("cc_capitana", { scar: true, acc: ["pescatore"], name: "Capitana Marea", tag: "", hair: "#d8d8d8", style: "codino", skin: "#c68642", eye: "#2a4a6a", bg: ["#1a2a4a", "#3a8ac8"], shirt: "#1a3a6a" },
       "Capitana del «Garbino», l'ultima nave del porto di Sale Antico. Ha navigato in tutti i mari del mondo e in nessuno ha trovato il vento che ha perso.");
     K.cast("cc_marinaio", { name: "Mozzo Tito Ancora", tag: "", hair: "#8a5a2a", style: "messy", skin: "#e8b88a", eye: "#3a3a2a", bg: ["#1a2a4a", "#f4ecdc"], shirt: "#f4ecdc" },
       "Il mozzo del Garbino. Pulisce il ponte dieci volte al giorno, anche se la nave non parte da un anno. «Quando tornerà il vento», dice, «voglio che trovi tutto in ordine.»");
-    K.cast("cc_muto", { acc: ["maschera"], name: "Il Muto, capitano dei Silenti", tag: "", hair: "#3a3a4a", style: "slick", skin: "#c8c8d0", eye: "#5a5a6a", bg: ["#10102a", "#5a5a6a"], shirt: "#3a3a4a" },
+    K.cast("cc_muto", { scar: true, acc: ["maschera"], name: "Il Muto, capitano dei Silenti", tag: "", hair: "#3a3a4a", style: "slick", skin: "#c8c8d0", eye: "#5a5a6a", bg: ["#10102a", "#5a5a6a"], shirt: "#3a3a4a" },
       "Capitano dei Silenti, gli agenti del Re del Silenzio. Non parla mai: comunica con un fischietto senza fischio. I Silenti spengono i cristalli giocando partite senza esultare, senza parlare, senza gioia. Funziona benissimo. Purtroppo.");
     K.cos("cc_c2", { kind: "acc", label: "Bussola del Garbino", val: "#c9a227", from: "Capitolo 2 delle Cronache del Pallone di Cristallo" });
     K.cos("cc_mare", { kind: "hairc", label: "Capelli Cristallo del Mare", val: "#5ab8ff", from: "Trova tutte le schegge del porto e dell'isola" });

@@ -16,7 +16,7 @@
       "Capitana dei Ragazzi del Mercato: i figli dei venditori, che si allenano tra una cassetta di pesche e l'altra. Grida come al banco della frutta, e in campo si sente da tutta la città.");
     K.cast("ts_lume", { name: "Lume, capitano delle Lanterne", tag: "", hair: "#e8c84a", style: "slick", skin: "#f0d0b0", eye: "#3a3a2a", bg: ["#1a1a2a", "#e8c84a"], shirt: "#e8883a" },
       "Capitano delle Lanterne, la scuola calcio della zona del porto vecchio. Gioca bene e sorride poco. Dicono che le Lanterne vincano le partite prima di giocarle, a forza di chiacchiere in tribuna.");
-    K.cast("ts_venditore", { acc: ["paglia"], name: "Sor Fulvio, venditore di angurie", tag: "gray", hair: "#d8d8d8", style: "buzz", skin: "#c68642", eye: "#3a3a3a", bg: ["#3a2a18", "#e85a3a"], shirt: "#f4ecdc" },
+    K.cast("ts_venditore", { beard: "baffi", acc: ["paglia"], name: "Sor Fulvio, venditore di angurie", tag: "gray", hair: "#d8d8d8", style: "buzz", skin: "#c68642", eye: "#3a3a3a", bg: ["#3a2a18", "#e85a3a"], shirt: "#f4ecdc" },
       "Vende angurie da cinquant'anni, sempre camminando con la carriola tra le bancarelle. Dice che un'anguria ferma non la compra nessuno.");
     K.cast("ts_fioraia", { name: "Mirella, la fioraia", tag: "", hair: "#c8642a", style: "long", skin: "#f2c9a0", eye: "#2a5a3a", bg: ["#3a2a18", "#e8a8c8"], shirt: "#e8a8c8" },
       "La fioraia del mercato. Gira con un secchio di fiori e ne regala uno a chi ha l'aria triste. A fine giornata il secchio è sempre vuoto.");

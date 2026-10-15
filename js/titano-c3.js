@@ -7,7 +7,7 @@
   function chapter3(K) {
     const { F, say, ask, done, setStep, bond, finishChapter, quest, questDone, go } = K;
     const N = 3, S = () => K.stepOf(N);
-    K.cast("ft_orione", { acc: ["corona"], name: "Orione, Gran Maestro di Elyon", tag: "gray", hair: "#e8e8f8", style: "long", skin: "#e8d8f0", eye: "#ffd23f", beard: true, bg: ["#14183a", "#7a5ad8"], shirt: "#4a3a8a" },
+    K.cast("ft_orione", { beard: "folta", acc: ["corona"], name: "Orione, Gran Maestro di Elyon", tag: "gray", hair: "#e8e8f8", style: "long", skin: "#e8d8f0", eye: "#ffd23f", bg: ["#14183a", "#7a5ad8"], shirt: "#4a3a8a" },
       "Il Gran Maestro di Elyon. Ha giocato il Torneo Eterno per trecento anni e lo considera il regalo più bello dell'universo. Non è cattivo: è sicuro di avere ragione. Che a volte è peggio.");
     K.cos("ft_c3", { kind: "shirt", label: "Maglia della Partita del Cielo", val: "#7a5ad8", from: "Capitolo 3 di Il Figlio del Titano" });
     K.cos("ft_padre", { kind: "acc", label: "Il mantello piegato di Atlante", val: "sciarpa", from: "Finale «Il Titano resta»" });

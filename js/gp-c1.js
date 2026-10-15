@@ -8,9 +8,9 @@
     const { F, say, ask, done, go, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 1, S = () => K.stepOf(N), CH = () => K.mem().ch;
 
-    K.cast("gp_bullone", { acc: ["chiave"], name: "Tonino Bullone", tag: "", hair: "#c8c8d0", style: "buzz", skin: "#d9a679", eye: "#3a3a2a", beard: true, bg: ["#1c2040", "#2a6adf"], shirt: "#2a6adf" },
+    K.cast("gp_bullone", { beard: "baffi", acc: ["chiave"], name: "Tonino Bullone", tag: "", hair: "#c8c8d0", style: "buzz", skin: "#d9a679", eye: "#3a3a2a", bg: ["#1c2040", "#2a6adf"], shirt: "#2a6adf" },
       "Sessant'anni di bulloni. Capo, meccanico, cuoco e unico dipendente dell'Officina Bullone. Parla alle macchine come ai nipoti e ai nipoti come alle macchine. Il suo motto: «Si stringe a mano.»");
-    K.cast("gp_rosalba", { acc: ["visiera"], name: "Rosalba Turbo", tag: "", hair: "#d8302a", style: "ponytail", skin: "#e8c4a0", eye: "#3a2a2a", bg: ["#2a1010", "#d8302a"], shirt: "#d8302a" },
+    K.cast("gp_rosalba", { streak: "#ff4d5a", acc: ["visiera"], name: "Rosalba Turbo", tag: "", hair: "#d8302a", style: "ponytail", skin: "#e8c4a0", eye: "#3a2a2a", bg: ["#2a1010", "#d8302a"], shirt: "#d8302a" },
       "La campionessa in carica del Gran Premio, tre coppe di fila. Tuta rossa, coda alta, sorriso che dà il tempo. Gareggia per la Scuderia Fiamma e dice sempre la verità, anche quando le costa un sorpasso.");
     K.cast("gp_gridoni", { acc: ["cuffie"], name: "Cesare Gridoni", tag: "", hair: "#2a1a10", style: "slick", skin: "#e0b890", eye: "#3a3a2a", bg: ["#2a1a3a", "#ffd23f"], shirt: "#ffd23f" },
       "Il telecronista del Gran Premio. Ha la voce di uno che sta cadendo da un palazzo con molta soddisfazione. Ogni gara per lui è la più bella della storia: la sera prima, quella di ieri.");

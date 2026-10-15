@@ -14,7 +14,7 @@
     const { F, say, ask, done, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 2, S = () => K.stepOf(N);
 
-    K.cast("bm_tarcisio", { acc: ["berretto"], name: "Tarcisio il Boscaiolo", tag: "brown", hair: "#451a03", style: "messy", skin: "#d97706", eye: "#1e293b", beard: true, bg: ["#fed7aa", "#b45309"], shirt: "#b45309" },
+    K.cast("bm_tarcisio", { beard: "folta", acc: ["berretto"], name: "Tarcisio il Boscaiolo", tag: "brown", hair: "#451a03", style: "messy", skin: "#d97706", eye: "#1e293b", bg: ["#fed7aa", "#b45309"], shirt: "#b45309" },
       "Capo della cooperativa boscaioli del Passo della Ghiotta. Spacca tronchi di pino a mani nude e sostiene che il cartone del borgo sia un insulto al vero legno massello. Vuole sfrattare il Piccolo Borgo dal lago ghiacciato.");
 
     K.cos("bm_c2", { kind: "acc", label: "Colbacco alpino di pelliccia", val: "colbacco", from: "Capitolo 2 di Piccolo Borgo di Montagna" });

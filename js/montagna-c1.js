@@ -14,13 +14,13 @@
     const { F, say, ask, done, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 1, S = () => K.stepOf(N);
 
-    K.cast("bm_boris", { acc: ["colbacco"], name: "Boris il Barista", tag: "", hair: "#3a2a1a", style: "messy", skin: "#f0c8a0", eye: "#2a1a1a", beard: true, bg: ["#e0f2fe", "#0284c7"], shirt: "#0284c7" },
+    K.cast("bm_boris", { beard: "incolta", acc: ["colbacco"], name: "Boris il Barista", tag: "", hair: "#3a2a1a", style: "messy", skin: "#f0c8a0", eye: "#2a1a1a", bg: ["#e0f2fe", "#0284c7"], shirt: "#0284c7" },
       "Barista e capitano di riserva del borgo. Prepara cioccolate calde così dense che ci resta in piedi il cucchiaino. Ha tre cappotti uno sopra l'altro e un ottimismo incrollabile: «Se una cosa è di cartone, non può arrugginire».");
 
-    K.cast("bm_sbruffo", { acc: ["fischietto", "berretto"], name: "Vigile Sbruffo", tag: "blue", hair: "#1a1a1a", style: "short", skin: "#f6c896", eye: "#1a1a1a", bg: ["#e0f2fe", "#334155"], shirt: "#334155" },
+    K.cast("bm_sbruffo", { beard: "baffi", acc: ["fischietto", "berretto"], name: "Vigile Sbruffo", tag: "blue", hair: "#1a1a1a", style: "short", skin: "#f6c896", eye: "#1a1a1a", bg: ["#e0f2fe", "#334155"], shirt: "#334155" },
       "L'unico vigile del borgo. Ha compilato 1.400 verbali solo quest'anno, tra cui una multa a una renna per divieto di sosta e una al sole per abbagliamento illecito. Vuole ordine a tutti i costi.");
 
-    K.cast("bm_valanga", { acc: ["sciarpa"], name: "Sindaco Valanga", tag: "gold", hair: "#c8c8c8", style: "pompadour", skin: "#ffd2a8", eye: "#334155", bg: ["#fef3c7", "#b91c1c"], shirt: "#b91c1c" },
+    K.cast("bm_valanga", { beard: "baffi", acc: ["sciarpa"], name: "Sindaco Valanga", tag: "gold", hair: "#c8c8c8", style: "pompadour", skin: "#ffd2a8", eye: "#334155", bg: ["#fef3c7", "#b91c1c"], shirt: "#b91c1c" },
       "Sindaco in carica da ventiquattro inverni. Indossa una pelliccia ecologica bianca e una fascia tricolore cucita a mano. Sostiene che il Pallone Sacro di cartone custodisca il destino economico della vallata.");
 
     K.cast("bm_wendy", { acc: ["cappellino"], name: "Wendy della Scuola", tag: "", hair: "#b45309", style: "bob", skin: "#fce7f3", eye: "#15803d", bg: ["#e0f2fe", "#10b981"], shirt: "#10b981" },

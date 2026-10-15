@@ -11,7 +11,7 @@
       "Il custode del Campo Base. Allena la squadra del Torneo di Fine Stagione dal giorno in cui lo Stadio Vecchio ha chiuso. Parla piano, fa le battute con la faccia seria, e non ha mai detto quanti anni ha. Ha un fischietto che non suona più.");
     K.cast("dg_fiamma", { shape: "fiamma", name: "Fiamma", tag: "", skin: "#ff9a3a", eye: "#fff6c0", bg: ["#241810", "#ffd23f"], shirt: "#ff7a1a", num: "7" },
       "Una scintilla del falò del Campo Base che ha deciso di fare il tifo. Brilla quando è felice, fuma quando è offesa e sa tutte le scorciatoie dell'Ipogeo. Dice di non avere paura del buio: è più vero di quanto sembri.");
-    K.cast("dg_ruggine", { acc: ["cappellino"], name: "Ruggine, il Capitano", tag: "", hair: "#8a8478", style: "messy", skin: "#a8744a", eye: "#2a2a2a", bg: ["#241810", "#8a8478"], shirt: "#5a5048", num: "5" },
+    K.cast("dg_ruggine", { scar: true, acc: ["cappellino"], name: "Ruggine, il Capitano", tag: "", hair: "#8a8478", style: "messy", skin: "#a8744a", eye: "#2a2a2a", bg: ["#241810", "#8a8478"], shirt: "#5a5048", num: "5" },
       "Il capitano della squadra di trent'anni fa. Scende nell'Ipogeo ogni fine stagione da allora e non ha mai superato l'ultimo piano. Brontola, ma controlla sempre che tu abbia le scarpe allacciate.");
     K.cast("dg_asterio", { name: "Asterio, il Terzino", tag: "", hair: "#2a1a14", style: "messy", skin: "#a8503a", eye: "#fff0c0", bg: ["#241810", "#a8503a"], shirt: "#6a2a1a", num: "3" },
       "Il Minotauro del Primo Piano, terzino dai tempi del Labirinto. Si è sempre ritenuto un ottimo marcatore: gli attaccanti dicono che marca anche la loro ombra. Gentile con chi ha l'educazione di salutare.");

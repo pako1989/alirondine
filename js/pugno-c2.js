@@ -14,7 +14,7 @@
     const { F, say, ask, done, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 2, S = () => K.stepOf(N);
 
-    K.cast("pr_ramon", { acc: ["cappellino"], name: "Ramon «Sette Tiri»", tag: "", hair: "#111111", style: "slick", skin: "#b9804f", eye: "#1a1a1a", beard: true, bg: ["#7c2d12", "#dc2626"], shirt: "#dc2626" },
+    K.cast("pr_ramon", { beard: "pizzetto", acc: ["cappellino"], name: "Ramon «Sette Tiri»", tag: "", hair: "#111111", style: "slick", skin: "#b9804f", eye: "#1a1a1a", bg: ["#7c2d12", "#dc2626"], shirt: "#dc2626" },
       "Il temuto capo dei Desperados di Rio Bravo. Si chiama 'Sette Tiri' perché sostiene di poter segnare sette rigori consecutivi con gli occhi bendati. Indossa un poncho rosso scuro e ha un rispetto quasi religioso per il calcio leale.");
 
     K.cast("pr_chico", { acc: ["bandana"], name: "Chico Mano Lesta", tag: "blue", hair: "#3a2a1a", style: "messy", skin: "#e0ac7e", eye: "#2a1a1a", bg: ["#451a03", "#d97706"], shirt: "#d97706" },

@@ -8,7 +8,7 @@
     const { F, say, ask, done, go, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 2, S = () => K.stepOf(N);
 
-    K.cast("gp_smeraldo", { acc: ["cappellino"], name: "Smeraldo Lime", tag: "", hair: "#2a2a1a", style: "spiky", skin: "#d9a679", eye: "#2a4a2a", bg: ["#0a2a14", "#1a8a4a"], shirt: "#1a8a4a" },
+    K.cast("gp_smeraldo", { band: "#22c55e", acc: ["cappellino"], name: "Smeraldo Lime", tag: "", hair: "#2a2a1a", style: "spiky", skin: "#d9a679", eye: "#2a4a2a", bg: ["#0a2a14", "#1a8a4a"], shirt: "#1a8a4a" },
       "Capitano dei Bolidi Verdi. Parla di verde come di una religione: macchina verde, tuta verde, colazione verde (frullato). Ha un solo difetto: non perde mai un'occasione di ricordartelo.");
     K.cos("gp_c2", { kind: "shirt", label: "Tuta Giro Lungo", val: "#ffb02a", from: "Completa il Capitolo 2 di Gran Premio del Pallone" });
     K.lore("l_sponsor", { t: "Gommalux", d: "«La gomma che ti ricorda». Il Signor Gommino compra pneumatici, cartelloni, tribune e, se ci riesce, anche le curve. Ha un unico principio: i bulloni si pagano a peso d'oro, ma non per tenerli." });

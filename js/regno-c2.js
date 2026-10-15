@@ -13,9 +13,9 @@
       "Quartiermastro del Forte dei Lupi. Conta le lance la mattina e i soldati la sera, e non ha mai sbagliato un conto, il che la rende insopportabile e indispensabile.");
     K.cast("re_scilla", { acc: ["bandana"], name: "Scilla Marenghi, Campionessa dei Gabbiani", tag: "", hair: "#2a6a9a", style: "ponytail", skin: "#f0d0b0", eye: "#2a7aa8", beard: false, bg: ["#2a6a9a", "#e8e0c8"], shirt: "#38a8d8" },
       "La nipote di Dama Perla e la più veloce del Porto. Corre come se la marea la inseguisse, e la marea, a volte, lo fa.");
-    K.cast("re_nereo", { acc: ["cappellino"], name: "Nereo il Pescatore", tag: "", hair: "#c8c8c0", style: "bald", skin: "#c89870", eye: "#3a5a7a", beard: true, bg: ["#2a5a7a", "#c8d0c0"], shirt: "#6a8a9a" },
+    K.cast("re_nereo", { beard: "folta", acc: ["cappellino"], name: "Nereo il Pescatore", tag: "", hair: "#c8c8c0", style: "bald", skin: "#c89870", eye: "#3a5a7a", bg: ["#2a5a7a", "#c8d0c0"], shirt: "#6a8a9a" },
       "Il più vecchio pescatore del Porto. Ricorda la nave che non è tornata, e la ricorda con il giorno e con l'ora, perché da allora non ha più smesso di guardare l'orizzonte.");
-    K.cast("re_selvano", { acc: ["fiore"], name: "Selvano, Campione dei Cervi", tag: "", hair: "#5a3a2a", style: "long", skin: "#e0b890", eye: "#3a6a3a", beard: false, bg: ["#2a5a3a", "#c8c8a0"], shirt: "#5aa862" },
+    K.cast("re_selvano", { beard: "incolta", acc: ["fiore"], name: "Selvano, Campione dei Cervi", tag: "", hair: "#5a3a2a", style: "long", skin: "#e0b890", eye: "#3a6a3a", bg: ["#2a5a3a", "#c8c8a0"], shirt: "#5aa862" },
       "Il campione dei Cervi. Gioca in silenzio, come un bosco. Quando parla, tutti si fermano: succede due volte l'anno.");
     K.cast("re_bruna", { acc: ["borsa"], name: "Bruna la Guardaboschi", tag: "", hair: "#7a5a2a", style: "bun", skin: "#e0b890", eye: "#3a5a3a", beard: false, bg: ["#2a4a2a", "#a8c890"], shirt: "#4a6a3a" },
       "Guardaboschi dei Cervi. Conosce ogni sentiero e ogni cestino della carta di Lord Cedro, perché ha il vizio di vuotarli di nascosto, «per l'ordine del bosco».");

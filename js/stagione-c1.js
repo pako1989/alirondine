@@ -11,7 +11,7 @@
 
     K.cast("sf_ada", { acc: ["chiave", "sciarpa"], name: "Ada, custode del Lido", tag: "gray", hair: "#d8d8e0", style: "bob", skin: "#e8c4a0", eye: "#3a5a6a", bg: ["#1a1a24", "#e8c84a"], shirt: "#3a4a6a" },
       "Custode dello stadio «Il Lido» da quarantadue anni. Apre i cancelli alle otto, li chiude dopo l'ultima partita, conta i seggiolini rotti e li chiama per nome. Domani, per la prima volta, non avrà niente da aprire.");
-    K.cast("sf_bruno", { acc: ["fischietto"], name: "Mister Bruno", tag: "gray", hair: "#8a8a8a", style: "buzz", skin: "#d9a679", eye: "#3a3a3a", bg: ["#2a2a1a", "#e8c84a"], shirt: "#e8c84a", beard: true },
+    K.cast("sf_bruno", { beard: "baffi", acc: ["fischietto"], name: "Mister Bruno", tag: "gray", hair: "#8a8a8a", style: "buzz", skin: "#d9a679", eye: "#3a3a3a", bg: ["#2a2a1a", "#e8c84a"], shirt: "#e8c84a", },
       "L'allenatore della tua squadra, l'Atletico Lago Lungo. Burbero, preciso, ripete i discorsi pre-partita parola per parola da vent'anni: «Così porta bene». Stasera porta bene di sicuro. Stasera, e stasera, e stasera.");
     K.cast("sf_mira", { acc: ["cuffie"], name: "Mira, Radio Lago", tag: "", hair: "#2a1a2a", style: "ponytail", skin: "#c68642", eye: "#2a2a1a", bg: ["#2a1020", "#ff5a7a"], shirt: "#ff5a7a" },
       "La voce di Radio Lago. Trasmette tutte le partite dal tetto del bar, con una cuffia rattoppata e un microfono del 1979. Dice che le parole giuste, in radio, arrivano sempre un secondo prima del gol.");

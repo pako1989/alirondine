@@ -11,11 +11,11 @@
 
     K.cast("ts_iole", { acc: ["fischietto", "occhiali"], name: "Maestra Iole Bandini", tag: "gray", hair: "#e8e8e8", style: "bun", skin: "#e8c4a0", eye: "#3a3a5a", bg: ["#2a1a18", "#e8c84a"], shirt: "#3a5a8a" },
       "Per quarant'anni ha allenato i bambini di Portolungo sotto i portici, con un pallone di stracci e un fischietto di latta. Poi la scuola calcio ha chiuso. Dice che non allena più. Ha il fischietto al collo da trent'anni.");
-    K.cast("ts_tito", { acc: ["grembiule"], name: "Tito Fornaretti", tag: "", hair: "#3a2a1a", style: "buzz", skin: "#e8b88a", eye: "#3a2a1a", bg: ["#3a2a18", "#f4ecdc"], shirt: "#f4ecdc", beard: true },
+    K.cast("ts_tito", { beard: "incolta", acc: ["grembiule"], name: "Tito Fornaretti", tag: "", hair: "#3a2a1a", style: "buzz", skin: "#e8b88a", eye: "#3a2a1a", bg: ["#3a2a18", "#f4ecdc"], shirt: "#f4ecdc", },
       "Il panettiere di via Lunga. Grande come una porta, gentile come la mollica. Si alza alle tre per il pane e dice che per questo non ha paura di nessun attaccante: «Alle tre del mattino ho visto cose peggiori».");
     K.cast("ts_alba", { acc: ["borsa"], name: "Alba Corsi, postina", tag: "", hair: "#c8642a", style: "ponytail", skin: "#f0d0b0", eye: "#2a5a3a", bg: ["#1a2a3a", "#e8c84a"], shirt: "#3a5a8a" },
       "La postina di Portolungo, in bicicletta da quindici anni. Conosce ogni scorciatoia, ogni cane e ogni segreto della città, ma non ne racconta nessuno. Veloce come una lettera urgente.");
-    K.cast("ts_rocco", { acc: ["fischietto"], name: "Rocco Sabbia", tag: "", hair: "#e8c870", style: "spiky", skin: "#c68642", eye: "#2a4a6a", bg: ["#1a3a5a", "#e83a3a"], shirt: "#e83a3a" },
+    K.cast("ts_rocco", { band: "#ffd23f", acc: ["fischietto"], name: "Rocco Sabbia", tag: "", hair: "#e8c870", style: "spiky", skin: "#c68642", eye: "#2a4a6a", bg: ["#1a3a5a", "#e83a3a"], shirt: "#e83a3a" },
       "Bagnino, gemello di Remo. Finisce le frasi di suo fratello. Il che sarebbe carino, se le finisse in modo giusto.");
     K.cast("ts_remo", { acc: ["fischietto"], name: "Remo Sabbia", tag: "", hair: "#e8c870", style: "spiky", skin: "#c68642", eye: "#2a4a6a", bg: ["#1a3a5a", "#e83a3a"], shirt: "#e83a3a" },
       "Bagnino, gemello di Rocco. Si scambiano i nomi per scherzo da trentadue anni. La loro madre li distingue dal modo di starnutire.");
@@ -27,7 +27,7 @@
       "Il vigile di piazza. Gira tutto il giorno intorno al Tabellone e fischia alle biciclette. A tutte. Anche a quelle parcheggiate.");
     K.cast("ts_turista", { acc: ["paglia"], name: "Signora Greta, turista", tag: "", hair: "#e8d08a", style: "bob", skin: "#f2c9a0", eye: "#2a5a8a", bg: ["#3a2a1a", "#e8c84a"], shirt: "#e8a8c8" },
       "In vacanza a Portolungo da trentun estati. Si perde tutti i giorni, sempre nello stesso punto, e ogni volta è felicissima di aver trovato la piazza.");
-    K.cast("ts_pescatore", { name: "Nonno Pino, pescatore", tag: "gray", hair: "#d8d8d8", style: "buzz", skin: "#c68642", eye: "#3a3a3a", bg: ["#1a3a5a", "#d8d8d8"], shirt: "#3a5a7a", beard: true },
+    K.cast("ts_pescatore", { beard: "folta", name: "Nonno Pino, pescatore", tag: "gray", hair: "#d8d8d8", style: "buzz", skin: "#c68642", eye: "#3a3a3a", bg: ["#1a3a5a", "#d8d8d8"], shirt: "#3a5a7a", },
       "Pescatore in pensione. Passeggia sul lungomare avanti e indietro, come se stesse ancora tirando le reti. Racconta la stessa storia del tonno da sessant'anni, e ogni volta il tonno è più grande.");
     K.cos("ts_c1", { kind: "shirt", label: "Maglia rossa della Via Lunga", val: "#e83a3a", from: "Capitolo 1 del Torneo delle Cento Scuole" });
     K.cos("ts_fischi", { kind: "hairc", label: "Capelli Pane Dorato", val: "#e8b860", from: "Trova tutti i fischietti di latta della piazza" });

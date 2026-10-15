@@ -8,9 +8,9 @@
   function chapter2(K) {
     const { F, say, ask, done, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 2, S = () => K.stepOf(N);
-    K.cast("cm_ponte_a", { acc: ["fascia"], name: "Elio Ponte", tag: "", hair: "#e8c84a", style: "spiky", skin: "#f0d0b0", eye: "#3a6a3a", bg: ["#0e1628", "#3a8ad8"], shirt: "#3a8ad8" },
+    K.cast("cm_ponte_a", { band: "#e74c3c", acc: ["fascia"], name: "Elio Ponte", tag: "", hair: "#e8c84a", style: "spiky", skin: "#f0d0b0", eye: "#3a6a3a", bg: ["#0e1628", "#3a8ad8"], shirt: "#3a8ad8" },
       "Uno dei gemelli Ponte, di Ponteruga. Fa il trampolino: si china, il fratello ci salta sopra e vola. Dice che non fa male. Ha sempre le ginocchia sbucciate.");
-    K.cast("cm_ponte_b", { acc: ["fascia"], name: "Ezio Ponte", tag: "", hair: "#e8c84a", style: "spiky", skin: "#f0d0b0", eye: "#3a6a3a", bg: ["#0e1628", "#3a8ad8"], shirt: "#3a8ad8" },
+    K.cast("cm_ponte_b", { band: "#3fa7ff", acc: ["fascia"], name: "Ezio Ponte", tag: "", hair: "#e8c84a", style: "spiky", skin: "#f0d0b0", eye: "#3a6a3a", bg: ["#0e1628", "#3a8ad8"], shirt: "#3a8ad8" },
       "L'altro gemello Ponte. Quello che vola. Finiscono le frasi l'uno dell'altro, e nessuno, nemmeno la loro mamma, sa chi dei due sia Elio.");
     K.cast("cm_leone", { name: "Leone Ruggeri", tag: "", hair: "#1a1a1a", style: "messy", skin: "#a86a3a", eye: "#3a2a1a", bg: ["#2a0e06", "#e85a1a"], shirt: "#e85a1a", num: "9" },
       "Il centravanti delle Fiamme del Porto. Si allena tirando contro la saracinesca del magazzino del padre, finché la saracinesca non si è piegata. Non sorride mai in campo. Fuori, un po'. Pochissimo.");

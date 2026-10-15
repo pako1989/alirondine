@@ -7,7 +7,7 @@
   function chapter2(K) {
     const { F, say, ask, done, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 2, S = () => K.stepOf(N);
-    K.cast("ml_ottone", { acc: ["garofano"], name: "Il Cavalier Ottone", tag: "", hair: "#2a2a2a", style: "slick", skin: "#e8c4a0", eye: "#3a3a3a", bg: ["#1e3a2a", "#a83a2a"], shirt: "#1a1a2a" },
+    K.cast("ml_ottone", { beard: "baffi", acc: ["garofano"], name: "Il Cavalier Ottone", tag: "", hair: "#2a2a2a", style: "slick", skin: "#e8c4a0", eye: "#3a3a3a", bg: ["#1e3a2a", "#a83a2a"], shirt: "#1a1a2a" },
       "Presidente dell'Atletico Valfonda, la squadra ricca delle colline. Ha fatto i soldi con i trattori, e compra calciatori come compra trattori: i più grossi, i più nuovi, e due per volta. Sorride sempre. Soprattutto quando vince.");
     K.cast("ml_fiera", { acc: ["coppola"], name: "Il capitano del Borgofiera", tag: "", hair: "#8a5a2a", style: "curly", skin: "#d9a679", eye: "#3a2a1a", bg: ["#1e3a2a", "#c88a2a"], shirt: "#c88a2a" },
       "Il capitano degli Amatori Borgofiera, e il macellaio della fiera. Gioca a palla lunga perché, dice, il centrocampo è una perdita di tempo, come i salami tagliati sottili.");

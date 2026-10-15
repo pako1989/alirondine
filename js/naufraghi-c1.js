@@ -9,9 +9,9 @@
     const N = 1, S = () => K.stepOf(N);
     K.cast("nf_bora", { acc: ["berretto"], name: "Capitana Vittoria Bora", tag: "", hair: "#2a2a3a", style: "ordinato", skin: "#c68a5e", eye: "#3a2a1a", bg: ["#0c4a6e", "#38bdf8"], shirt: "#1e3a5f" },
       "Comandante del volo dei Rondine, quarantun anni e un solo difetto: non ammette di avere paura. Parla piano, decide in fretta, e ha una pagina di appunti per ogni imprevisto. Sull'imprevisto «isola» ne ha scritte tre.");
-    K.cast("nf_salvi", { acc: ["occhiali", "borsa"], name: "Dottor Ettore Salvi", tag: "", hair: "#9a9a9a", style: "curly", skin: "#e8c4a0", eye: "#3a3a3a", bg: ["#134e4a", "#5eead4"], shirt: "#f8fafc" },
+    K.cast("nf_salvi", { beard: "pizzetto", acc: ["occhiali", "borsa"], name: "Dottor Ettore Salvi", tag: "", hair: "#9a9a9a", style: "curly", skin: "#e8c4a0", eye: "#3a3a3a", bg: ["#134e4a", "#5eead4"], shirt: "#f8fafc" },
       "Il medico di bordo. Cura scottature, vesciche e strappi d'orgoglio, che è tutto quello che serve a una squadra in trasferta. Ha una borsa piena di cerotti, una passione segreta per le piante e l'abitudine di dare un nome latino a qualsiasi cosa gli punti contro.");
-    K.cast("nf_gaspare", { acc: ["grembiule", "taccuino"], name: "Gaspare Pellegrini", tag: "", hair: "#3a2a1a", style: "buzz", skin: "#d9a679", eye: "#2a2a2a", bg: ["#78350f", "#fbbf24"], shirt: "#92400e" },
+    K.cast("nf_gaspare", { beard: "baffi", acc: ["grembiule", "taccuino"], name: "Gaspare Pellegrini", tag: "", hair: "#3a2a1a", style: "buzz", skin: "#d9a679", eye: "#2a2a2a", bg: ["#78350f", "#fbbf24"], shirt: "#92400e" },
       "Il magazziniere di bordo e della squadra. Conta le maglie, i palloni, le noccioline. Se una cosa non è sull'inventario, per lui non esiste ancora. È felice quando qualcosa finisce nella lista, e molto più felice quando una cosa torna dov'era.");
     K.cast("nf_voce", { shape: "robot", acc: ["cuffie"], name: "La Voce", tag: "", hair: "#94a3a8", skin: "#2d5a68", eye: "#5eead4", bg: ["#0b3b45", "#2dd4bf"], shirt: "#1f3a44" },
       "Una voce che arriva dalla radio, di notte, con un fruscio dentro come il mare dentro una conchiglia. Parla piano, a volte in ritardo. Dice sempre la stessa cosa: «Giocate?».");

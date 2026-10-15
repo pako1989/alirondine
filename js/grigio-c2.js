@@ -7,7 +7,7 @@
   function chapter2(K) {
     const { F, say, ask, done, setStep, bond, finishChapter, quest, questDone, go } = K;
     const N = 2, S = () => K.stepOf(N);
-    K.cast("gr_vela", { acc: ["bandana", "guanti"], name: "Vela Nera, ladra dei tetti", tag: "", hair: "#111111", style: "sidebraid", skin: "#e8c4a0", eye: "#3a8a5a", bg: ["#0c101a", "#1a1a24"], shirt: "#1a1a24" },
+    K.cast("gr_vela", { streak: "#a855f7", acc: ["bandana", "guanti"], name: "Vela Nera, ladra dei tetti", tag: "", hair: "#111111", style: "sidebraid", skin: "#e8c4a0", eye: "#3a8a5a", bg: ["#0c101a", "#1a1a24"], shirt: "#1a1a24" },
       "Una ladra che si muove sui tetti come se fossero un campo da calcio. Ruba solo al Sindacato della Nebbia: dice che è un modo di restituire. La polizia la cerca da due anni; la commissaria Valli, a voce bassa, ammette che la ammira un po'.");
     ["gr_sg4", "gr_sg5", "gr_sg6"].forEach((id, i) => K.cast(id, { acc: ["cappellino"], name: ["Il guardiano delle casse", "La guardia con la lanterna", "Il custode del deposito"][i], tag: "", hair: "#1a1a1a", style: "hood", skin: ["#d9a679", "#f0d0b0", "#c68642"][i], eye: "#2a2a2a", bg: ["#0c101a", "#4a4a5a"], shirt: "#3a3a4a" },
       "Una guardia del Deposito della Nebbia. Pagata per guardare, non per pensare. Guarda dove punta la lanterna."));

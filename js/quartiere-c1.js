@@ -9,11 +9,11 @@
     const N = 1, S = () => K.stepOf(N);
     K.cast("sq_ines", { acc: ["occhiali"], name: "Nonna Ines, la calamita", tag: "gray", hair: "#c8c8c8", style: "bun", skin: "#e0b890", eye: "#3a3a3a", bg: ["#1e1432", "#c83a3a"], shirt: "#c83a3a" },
       "Ottantadue anni, un garage pieno di ferri da stiro e un potere: tutto ciò che è di ferro le corre incontro. Per questo non va mai in ferramenta. Dice che i supereroi, a Ponterotto, ci sono sempre stati: solo che nessuno li aveva mai messi insieme.");
-    K.cast("sq_brina", { acc: ["grembiule"], name: "Brina, la gelataia", tag: "", hair: "#e8f4ff", style: "twintails", skin: "#f4dcc8", eye: "#3a8ac8", bg: ["#1e1432", "#7ad8ff"], shirt: "#7ad8ff" },
+    K.cast("sq_brina", { streak: "#9be2ff", acc: ["grembiule"], name: "Brina, la gelataia", tag: "", hair: "#e8f4ff", style: "twintails", skin: "#f4dcc8", eye: "#3a8ac8", bg: ["#1e1432", "#7ad8ff"], shirt: "#7ad8ff" },
       "Ha la gelateria sul canale e le mani sempre fredde: quello che tocca, gela. D'estate è la persona più amata del quartiere. D'inverno, la più evitata.");
     K.cast("sq_soffio", { acc: ["cuffie"], name: "Soffio, il trombettista", tag: "", hair: "#1a1a1a", style: "afro", skin: "#c68642", eye: "#2a1a0a", bg: ["#1e1432", "#c8f0e0"], shirt: "#3a8a6a" },
       "Suonava la tromba nella banda di Ponterotto finché, un giorno, ha soffiato così forte da far volare il direttore fino al campanile. Adesso suona da solo, sull'isoletta, con la tromba tappata.");
-    K.cast("sq_gommo", { acc: ["cappellino"], name: "Gommo, l'idraulico elastico", tag: "", hair: "#3a2a1a", style: "messy", skin: "#e8c4a0", eye: "#3a3a3a", beard: true, bg: ["#1e1432", "#ff8ac8"], shirt: "#3a5aa8" },
+    K.cast("sq_gommo", { beard: "incolta", acc: ["cappellino"], name: "Gommo, l'idraulico elastico", tag: "", hair: "#3a2a1a", style: "messy", skin: "#e8c4a0", eye: "#3a3a3a", bg: ["#1e1432", "#ff8ac8"], shirt: "#3a5aa8" },
       "L'idraulico del quartiere: arriva nei tubi più stretti e sotto i lavandini più storti, perché si allunga come una gomma. Non ha mai perso una chiave inglese. Le recupera tutte, anche dal terzo piano.");
     K.cast("sq_geometra", { acc: ["casco"], name: "Il Capo dei Geometri", tag: "", hair: "#2a2a2a", style: "ordinato", skin: "#f0d0b0", eye: "#3a3a3a", bg: ["#1e1432", "#7a7a8a"], shirt: "#ffd23f" },
       "Gilet giallo, metro giallo, casco giallo. Misura tutto quello che vede e lo scrive su un blocco. Lavora per il Dottor Cemento. Ha misurato anche te: sei «un metro e settanta, inutile».");

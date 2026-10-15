@@ -15,13 +15,13 @@
       "Il Capitano a diciott'anni: le scarpe del padre, la maglia granata cucita dalla madre, un sorriso che arriva prima di lui. Ancora non sa che diventerà una leggenda. Sa solo che vuole giocare.");
     K.cast("ep_tecla", { acc: ["taccuino"], name: "Tecla Arcieri", tag: "", hair: "#6a3a2a", style: "bun", skin: "#e8c8a8", eye: "#4a3a2a", glasses: true, bg: ["#3a2a20", "#e8b86a"], shirt: "#5a4a6a" },
       "La nipote del Capitano. Fa la bibliotecaria a Bologna, è tornata per il funerale. Ha trovato in soffitta una scatola di latta con scritto «per Ada». Non l'ha aperta.");
-    K.cast("ep_carlo", { acc: ["grembiule"], name: "Carlo del Bar Sport", tag: "gray", hair: "#e0e0e0", style: "buzz", skin: "#d9a679", eye: "#3a3a2a", bg: ["#3a2a20", "#c8a87a"], shirt: "#6a5a4a", beard: true },
+    K.cast("ep_carlo", { beard: "baffi", acc: ["grembiule"], name: "Carlo del Bar Sport", tag: "gray", hair: "#e0e0e0", style: "buzz", skin: "#d9a679", eye: "#3a3a2a", bg: ["#3a2a20", "#c8a87a"], shirt: "#6a5a4a", },
       "Gestisce il Bar Sport di Valdorsa da sessant'anni. Ha visto giocare il Capitano dal 1952 in poi. Il suo caffè è terribile, le sue storie no.");
-    K.cast("ep_nino", { name: "Nino Fava", tag: "", hair: "#e8a040", style: "spiky", skin: "#f0d0b0", eye: "#3a6a8a", bg: ["#7a2a2a", "#f4ecdc"], shirt: "#7a2a2a" },
+    K.cast("ep_nino", { band: "#ffd23f", name: "Nino Fava", tag: "", hair: "#e8a040", style: "spiky", skin: "#f0d0b0", eye: "#3a6a8a", bg: ["#7a2a2a", "#f4ecdc"], shirt: "#7a2a2a" },
       "Attaccante della nuova squadra di Valdorsa. Parla più veloce di quanto corra, e corre veloce. Crede che Ada sia un fantasma. Lo spera, un po'.");
     K.cast("ep_lia", { acc: ["guanti"], name: "Lia Sereni", tag: "", hair: "#1a1a2a", style: "long", skin: "#d9a679", eye: "#2a4a3a", bg: ["#7a2a2a", "#f4ecdc"], shirt: "#7a2a2a" },
       "Portiera della nuova squadra di Valdorsa. Seria, precisa, si allena da sola all'alba. Vuole parare come Ada. Non vuole che Ada lo sappia.");
-    K.cast("ep_gelindo", { acc: ["coppola"], name: "Gelindo delle Fornaci, 1928", tag: "", hair: "#1a1a1a", style: "buzz", skin: "#c68642", eye: "#2a2a2a", bg: ["#3a2a20", "#5a5a62"], shirt: "#5a5a62", beard: true },
+    K.cast("ep_gelindo", { beard: "incolta", acc: ["coppola"], name: "Gelindo delle Fornaci, 1928", tag: "", hair: "#1a1a1a", style: "buzz", skin: "#c68642", eye: "#2a2a2a", bg: ["#3a2a20", "#5a5a62"], shirt: "#5a5a62", },
       "Capitano delle Fornaci, la squadra dei mattonai. Spalle larghe come un forno, mani piene di calce. Il primo avversario della storia del Valdorsa.");
 
     K.cos("ep_c1", { kind: "shirt", label: "Maglia granata del 1928", val: "#7a2a2a", from: "Completa il Capitolo 1 di Dopo il Campione" });

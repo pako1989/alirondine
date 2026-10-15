@@ -16,7 +16,7 @@
     K.cast("rm_furbio", { acc: ["corona"], name: "Senatore Furbio", tag: "gold", hair: "#e2e8f0", style: "bald", skin: "#ffd2a8", eye: "#78350f", bg: ["#fef3c7", "#b91c1c"], shirt: "#b91c1c" },
       "Patrizio decaduto, impresario di gladiatori del pallone e maestro di intrighi. Porta una toga purpurea sempre troppo lunga e una corona d'alloro finto: «Un rigore comprato al momento giusto vale più di tre legioni in Gallia».");
 
-    K.cast("rm_spartaco", { acc: ["fascia"], name: "Spartaco il Ruvido", tag: "", hair: "#1c1917", style: "buzz", skin: "#b9804f", eye: "#1a1a1a", beard: true, bg: ["#78350f", "#dc2626"], shirt: "#dc2626" },
+    K.cast("rm_spartaco", { scar: true, acc: ["fascia"], name: "Spartaco il Ruvido", tag: "", hair: "#1c1917", style: "buzz", skin: "#b9804f", eye: "#1a1a1a", beard: true, bg: ["#78350f", "#dc2626"], shirt: "#dc2626" },
       "Difensore centrale trace. Ha sconfitto quaranta centurioni ma nel tempo libero studia la filosofia stoica. Nei contrasti non usa mezze misure: «Colpisci il pallone come se dovessi liberare la tua anima dal ciclo delle passioni».");
 
     K.cast("rm_augusta", { acc: ["fiore"], name: "Augusta la Sibilla", tag: "blue", hair: "#ca8a04", style: "bun", skin: "#fce7f3", eye: "#15803d", bg: ["#fef3c7", "#eab308"], shirt: "#eab308" },

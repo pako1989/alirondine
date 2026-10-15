@@ -14,13 +14,13 @@
     const { say, ask, done, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 1, S = () => K.stepOf(N);
 
-    K.cast("mn_desantis", { acc: ["taccuino", "berretto"], name: "Commissario De Santis", tag: "gray", hair: "#475569", style: "slick", skin: "#cbd5e1", eye: "#0f172a", bg: ["#1e293b", "#64748b"], shirt: "#334155" },
+    K.cast("mn_desantis", { beard: "baffi", acc: ["taccuino", "berretto"], name: "Commissario De Santis", tag: "gray", hair: "#475569", style: "slick", skin: "#cbd5e1", eye: "#0f172a", bg: ["#1e293b", "#64748b"], shirt: "#334155" },
       "Funzionario della Questura di Milano. Impermeabile chiaro con il colletto alzato, sigaretta spenta tra le labbra e un fiuto infallibile per le combine: «A Milano la nebbia nasconde molte cose, figliolo, ma non il rumore di un rigore comprato».");
 
-    K.cast("mn_oste", { acc: ["grembiule"], name: "Battista l'Oste", tag: "", hair: "#334155", style: "buzz", skin: "#f1d5b5", eye: "#1e293b", bg: ["#334155", "#cbd5e1"], shirt: "#f8fafc" },
+    K.cast("mn_oste", { beard: "baffi", acc: ["grembiule"], name: "Battista l'Oste", tag: "", hair: "#334155", style: "buzz", skin: "#f1d5b5", eye: "#1e293b", bg: ["#334155", "#cbd5e1"], shirt: "#f8fafc" },
       "Gestore dell'Osteria del Tram ai Bastioni. Serve bicchieri di rosso novello e polenta fumante, mentre la radio a valvole trasmette i resoconti delle partite del dopoguerra.");
 
-    K.cast("mn_peppino", { acc: ["occhiali", "coppola"], name: "Peppino il Guercio", tag: "blue", hair: "#1e293b", style: "messy", skin: "#cbd5e1", eye: "#0f172a", bg: ["#0f172a", "#475569"], shirt: "#475569" },
+    K.cast("mn_peppino", { scar: true, acc: ["occhiali", "coppola"], name: "Peppino il Guercio", tag: "blue", hair: "#1e293b", style: "messy", skin: "#cbd5e1", eye: "#0f172a", bg: ["#0f172a", "#475569"], shirt: "#475569" },
       "Allibratore clandestino del capolinea del tram. Si vanta di conoscere in anticipo i risultati di tutte le categorie della Lombardia grazie ai suoi informatori tra i casellanti.");
 
     K.cos("mn_c1", { kind: "shirt", label: "Trench investigativo grigio antracite", val: "#334155", from: "Capitolo 1 di Operazione Fuorigioco Noir" });

@@ -16,9 +16,9 @@
       "Fotoreporter del Corriere di Metropolenta. Ha fotografato tutto: incendi di caldarroste, gatti sindaci, un tram volante (era un tram su un ponte). Le manca solo una foto: quella di un vero supereroe.");
     K.cast("mg_bullone", { shape: "tostapane", acc: ["cuffie"], name: "Bullone, robot-tostapane", tag: "", hair: "#8a9aa8", style: "buzz", skin: "#b8c4d0", eye: "#3a8ac8", bg: ["#2a3a4a", "#9ad8ff"], shirt: "#6a7a8a" },
       "Il robot di Nonna Tilde: un tostapane con le gambe, costruito per stirare le maglie. Stira benissimo. Tosta anche le maglie, ogni tanto. Dice solo «bip» e «bop», ma con un'espressività che commuove.");
-    K.cast("mg_tonno", { acc: ["bandana"], name: "Tonno, capo dei Panchinari", tag: "", hair: "#3a2a1a", style: "buzz", skin: "#e0b890", eye: "#3a2a1a", bg: ["#1a2a4a", "#3a6ab8"], shirt: "#3a6ab8", beard: true },
+    K.cast("mg_tonno", { beard: "incolta", acc: ["bandana"], name: "Tonno, capo dei Panchinari", tag: "", hair: "#3a2a1a", style: "buzz", skin: "#e0b890", eye: "#3a2a1a", bg: ["#1a2a4a", "#3a6ab8"], shirt: "#3a6ab8", },
       "Capo dei Panchinari: tre giocatori che non sono mai entrati in campo, in nessuna partita, mai. Si sono offesi. Adesso rubano le coppe, per sapere che effetto fa tenerne una in mano.");
-    K.cast("mg_ciuffo", { name: "Ciuffo, panchinaro", tag: "", hair: "#e8c84a", style: "cresta", skin: "#f0c8a0", eye: "#3a3a3a", bg: ["#1a2a4a", "#3a6ab8"], shirt: "#3a6ab8" },
+    K.cast("mg_ciuffo", { streak: "#ff4d5a", name: "Ciuffo, panchinaro", tag: "", hair: "#e8c84a", style: "cresta", skin: "#f0c8a0", eye: "#3a3a3a", bg: ["#1a2a4a", "#3a6ab8"], shirt: "#3a6ab8" },
       "Il secondo dei Panchinari. Si pettina il ciuffo durante i colpi. Anche durante le fughe. Per questo li prendono sempre.");
     K.cast("mg_brace", { acc: ["casco"], name: "Capitana Brace, pompiera", tag: "", hair: "#c8642a", style: "ponytail", skin: "#c68642", eye: "#2a2a2a", bg: ["#3a1010", "#ff8a3a"], shirt: "#c8302a" },
       "Capitana dei pompieri di Metropolenta. Spegne incendi, recupera gatti, sfida chiunque a calcio nel cortile della caserma. Perde di rado. Quando perde, offre il caffè della moka da quaranta tazze.");

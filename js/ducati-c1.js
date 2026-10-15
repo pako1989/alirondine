@@ -7,13 +7,13 @@
   function chapter1(K) {
     const { F, say, ask, done, setStep, bond, finishChapter, quest, questDone, go } = K;
     const N = 1, S = () => K.stepOf(N);
-    K.cast("td_corrado", { acc: ["fascia"], name: "Corrado Salvi, il vecchio capitano", tag: "gray", hair: "#a8a8a8", style: "slick", skin: "#e0b890", eye: "#3a3a2a", beard: true, bg: ["#2a1e14", "#2a6ab8"], shirt: "#2a6ab8" },
+    K.cast("td_corrado", { beard: "baffi", acc: ["fascia"], name: "Corrado Salvi, il vecchio capitano", tag: "gray", hair: "#a8a8a8", style: "slick", skin: "#e0b890", eye: "#3a3a2a", bg: ["#2a1e14", "#2a6ab8"], shirt: "#2a6ab8" },
       "Il capitano di Salinella prima di te. Ha passato la fascia, non la voce: in spogliatoio parla lui. Crede in ciò che è giusto, anche quando costa. Soprattutto quando costa.");
-    K.cast("td_lia", { acc: ["bandana"], name: "Lia della Cava", tag: "", hair: "#c87a3a", style: "ponytail", skin: "#e8c4a0", eye: "#3a6a3a", bg: ["#2a1e14", "#4a7ac8"], shirt: "#4a7ac8" },
+    K.cast("td_lia", { band: "#d97706", acc: ["bandana"], name: "Lia della Cava", tag: "", hair: "#c87a3a", style: "ponytail", skin: "#e8c4a0", eye: "#3a6a3a", bg: ["#2a1e14", "#4a7ac8"], shirt: "#4a7ac8" },
       "Figlia di minatori, ala velocissima, lingua ancora più veloce. Dice che il sale è di chi lo scava, e lo dice anche al duca, se capita.");
     K.cast("td_ottone", { acc: ["occhiali", "taccuino"], name: "Ottone Berilli, il tesoriere", tag: "", hair: "#3a2a1a", style: "ordinato", skin: "#f0d0b0", eye: "#3a3a3a", bg: ["#2a1e14", "#4a9a6a"], shirt: "#4a9a6a" },
       "Il tesoriere del ducato e mediano di riserva. Conta tutto: le monete, i passaggi, i minuti. Non è avido: è che ha visto Salinella fare la fame, e non vuole rivederla.");
-    K.cast("td_anselmo", { acc: ["taccuino"], name: "Frate Anselmo, il cronista", tag: "gray", hair: "#c8c8c8", style: "bald", skin: "#e8c4a0", eye: "#4a3a2a", beard: true, bg: ["#2a1e14", "#8a6a3a"], shirt: "#6a5a3a" },
+    K.cast("td_anselmo", { beard: "folta", acc: ["taccuino"], name: "Frate Anselmo, il cronista", tag: "gray", hair: "#c8c8c8", style: "bald", skin: "#e8c4a0", eye: "#4a3a2a", bg: ["#2a1e14", "#8a6a3a"], shirt: "#6a5a3a" },
       "Il cronista di Salinella: scrive tutto quello che succede in un libro grande come una porta. Gioca in porta nelle partitelle, male. Conosce ogni giuramento mai fatto sull'altopiano.");
     K.cast("td_bruna", { acc: ["casco"], name: "Bruna, caposquadra della miniera", tag: "", hair: "#2a1a14", style: "bun", skin: "#c68642", eye: "#2a2a1a", bg: ["#2a1e14", "#6a5a4a"], shirt: "#6a5a4a" },
       "La caposquadra dei minatori. Mani bianche di sale, voce che rimbomba nelle gallerie. Non ha mai visto una partita della Coppa: il giorno della finale, di solito, si lavora.");

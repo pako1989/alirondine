@@ -9,7 +9,7 @@
     const N = 2, S = () => K.stepOf(N);
     const houseCol = () => { const e = K.ZX.eraName; return e === "1938" ? { roof: "#5a4a3a", wall: "#9a9486" } : e === "1978" ? { roof: "#a8522a", wall: "#e8c89a" } : { roof: "#2a1a6a", wall: "#3a3a8a" }; };
 
-    K.cast("rt_quarzo78", { acc: ["occhiali"], name: "Ottavio Quarzo (1978)", tag: "", hair: "#1a1410", style: "messy", skin: "#e8c4a0", eye: "#4a6a8a", bg: ["#3a2a18", "#e8a030"], shirt: "#8a6a3a" },
+    K.cast("rt_quarzo78", { beard: "baffi", acc: ["occhiali"], name: "Ottavio Quarzo (1978)", tag: "", hair: "#1a1410", style: "messy", skin: "#e8c4a0", eye: "#4a6a8a", bg: ["#3a2a18", "#e8a030"], shirt: "#8a6a3a" },
       "Quarant'anni nel 1978, l'orologiaio più giovane del Club. Un treppiede, una cinepresa e una macchina con un occhio solo. Cammina come chi porta qualcosa che non vorrebbe aver costruito.");
     K.cos("rt_c2", { kind: "shirt", label: "Maglia della Coppa '78", val: "#e8a030", from: "Completa il Capitolo 2 di Rondine 1938-2038" });
     K.cos("rt_gettone", { kind: "acc", label: "Gettone del flipper", val: "occhiali", from: "Il flipper del Bar da Ines" });

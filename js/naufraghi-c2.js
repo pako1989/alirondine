@@ -8,11 +8,11 @@
   function chapter2(K) {
     const { F, say, ask, done, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 2, S = () => K.stepOf(N);
-    K.cast("nf_tobia", { acc: ["cuffie"], name: "Tobia Bellandi", tag: "", hair: "#5a3a22", style: "messy", skin: "#e8c4a0", eye: "#2a2a2a", bg: ["#1e40af", "#fbbf24"], shirt: "#f59e0b" },
+    K.cast("nf_tobia", { band: "#ef4444", acc: ["cuffie"], name: "Tobia Bellandi", tag: "", hair: "#5a3a22", style: "messy", skin: "#e8c4a0", eye: "#2a2a2a", bg: ["#1e40af", "#fbbf24"], shirt: "#f59e0b" },
       "Stagista video dei Rondine, ventidue anni, una telecamera sempre accesa e una fiducia incrollabile nel «materiale buono». Racconta tutto in diretta anche quando non ha nessuno collegato. Soprattutto in quel caso.");
-    K.cast("nf_scoglio", { acc: ["berretto"], name: "Capitan Marino Scoglio", tag: "", hair: "#c8c8d0", style: "ordinato", skin: "#d9a679", eye: "#2a3a4a", bg: ["#e2e8f0", "#64748b"], shirt: "#f8fafc" },
+    K.cast("nf_scoglio", { beard: "baffi", acc: ["berretto"], name: "Capitan Marino Scoglio", tag: "", hair: "#c8c8d0", style: "ordinato", skin: "#d9a679", eye: "#2a3a4a", bg: ["#e2e8f0", "#64748b"], shirt: "#f8fafc" },
       "Il capitano dei Gabbiani, la squadra che abita il lato del faro. Stretta di mano ferma, sguardo di chi ha già visto come va a finire la partita e te lo lascia scoprire da solo.");
-    K.cast("nf_fiorenzo", { acc: ["grembiule"], name: "Fiorenzo il Guardiano", tag: "", hair: "#e5e5e5", style: "buzz", skin: "#c68a5e", eye: "#3a2a1a", bg: ["#78716c", "#fcd34d"], shirt: "#44403c" },
+    K.cast("nf_fiorenzo", { beard: "folta", acc: ["grembiule"], name: "Fiorenzo il Guardiano", tag: "", hair: "#e5e5e5", style: "buzz", skin: "#c68a5e", eye: "#3a2a1a", bg: ["#78716c", "#fcd34d"], shirt: "#44403c" },
       "Tiene acceso il faro, lucida i vetri, conta le ondate e cucina un brodo di pesce che nessuno ha mai avuto il coraggio di rifiutare. Parla poco, e quando parla sembra che stia leggendo una targa.");
     K.cos("nf_c2", { kind: "acc", label: "Cuffie del faro", val: "cuffie", from: "Capitolo 2 di Naufraghi del Pallone" });
     K.lore("l_faro", { t: "Il faro", d: "Una torre a strisce rosse e bianche, con la luce che gira da sola. Dentro c'è la sala radio, con la mappa dell'isola disegnata a matita: la costa, ogni volta che la guardi, è un po' diversa." });

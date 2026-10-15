@@ -8,7 +8,7 @@
   function chapter4(K) {
     const { F, say, ask, done, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 4, S = () => K.stepOf(N);
-    K.cast("mg_senza", { name: "Capitan Nessuno, dei Senzamaglia", tag: "", hair: "#5a5a5a", style: "messy", skin: "#d9a679", eye: "#3a3a3a", bg: ["#2a2a2a", "#c8c8c8"], shirt: "#c8c8c8" },
+    K.cast("mg_senza", { band: "#9ca3af", name: "Capitan Nessuno, dei Senzamaglia", tag: "", hair: "#5a5a5a", style: "messy", skin: "#d9a679", eye: "#3a3a3a", bg: ["#2a2a2a", "#c8c8c8"], shirt: "#c8c8c8" },
       "Il capitano dei Senzamaglia: giocatori che ai provini non sono mai stati scelti. Si allenano in un garage, con un pallone sgonfio e tanta rabbia. Sotto la rabbia, però, c'è solo una gran voglia di avere una maglia.");
     K.cos("mg_c4", { kind: "shirt", label: "Maglia della Lega dei Mantelli", val: "#6a1a4a", from: "Capitolo bonus «La Lega» del Mantello Granata" });
     K.lore("l_lega", { t: "La Lega", d: "Quando un eroe da solo non basta, ne servono tanti, diversi. Nella partita della Lega i poteri girano: ognuno porta il suo, e la barra riparte da metà dopo ogni potere." });

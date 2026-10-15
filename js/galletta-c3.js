@@ -14,7 +14,7 @@
     const { F, say, ask, done, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 3, S = () => K.stepOf(N);
 
-    K.cast("gl_lievito", { acc: ["cappellino"], name: "Mastro Lievito", tag: "gold", hair: "#ffffff", style: "wavy", skin: "#fed7aa", eye: "#15803d", beard: true, bg: ["#ea580c", "#fef3c7"], shirt: "#ea580c" },
+    K.cast("gl_lievito", { beard: "folta", acc: ["cappellino"], name: "Mastro Lievito", tag: "gold", hair: "#ffffff", style: "wavy", skin: "#fed7aa", eye: "#15803d", bg: ["#ea580c", "#fef3c7"], shirt: "#ea580c" },
       "L'antico eremita e custode del Santuario del Gran Forno. Custodisce la brace primordiale da quattro generazioni: «Qui il tempo non si misura in ore, ma in tempi di doratura della crosta!»");
 
     K.cos("gl_c3", { kind: "shirt", label: "Mantello da Gran Cerimoniere del Forno", val: "#ea580c", from: "Capitolo 3 di S.O.S. Galletta" });

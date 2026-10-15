@@ -9,25 +9,25 @@
     const N = 1, S = () => K.stepOf(N);
 
     // ------------------------------------------------------------ il cast di tutta la saga (nomi inventati)
-    K.cast("re_evaristo", { acc: ["occhiali", "taccuino"], name: "Evaristo Cappamagna, ciambellano", tag: "", hair: "#8a8a92", style: "ordinato", skin: "#e8c8a8", eye: "#2a2a3a", beard: false, bg: ["#3a1426", "#e8b84a"], shirt: "#5a2a4a" },
+    K.cast("re_evaristo", { beard: "baffi", acc: ["occhiali", "taccuino"], name: "Evaristo Cappamagna, ciambellano", tag: "", hair: "#8a8a92", style: "ordinato", skin: "#e8c8a8", eye: "#2a2a3a", bg: ["#3a1426", "#e8b84a"], shirt: "#5a2a4a" },
       "Il ciambellano di Castelalto: trentasei anni di cerimonie, due manuali di protocollo e un taccuino su cui annota tutto, anche le cose che non succedono. Dice «con tutto il rispetto» quando sta per essere scortese.");
-    K.cast("re_fiorino", { acc: ["cappellino", "fiore"], name: "Fiorino da Tre Ponti, il Bardo", tag: "", hair: "#7a4a2a", style: "curly", skin: "#f0d0b0", eye: "#3a5a2a", beard: false, bg: ["#2a1a3a", "#e8b84a"], shirt: "#3a6a8a" },
+    K.cast("re_fiorino", { beard: "pizzetto", acc: ["cappellino", "fiore"], name: "Fiorino da Tre Ponti, il Bardo", tag: "", hair: "#7a4a2a", style: "curly", skin: "#f0d0b0", eye: "#3a5a2a", bg: ["#2a1a3a", "#e8b84a"], shirt: "#3a6a8a" },
       "Il bardo di corte. Canta le ballate del Regno con tre strofe in più del necessario, perché «i cantastorie si pagano a verso». Sa tutto di tutti, e fa finta di non saperlo solo quando gli conviene.");
     K.cast("re_mirta", { acc: ["grembiule"], name: "Mirta, detta la Gazza", tag: "", hair: "#2a2a34", style: "braids", skin: "#e8c0a0", eye: "#2a2a3a", beard: false, bg: ["#2a2a34", "#c8a040"], shirt: "#6a6a7a" },
       "La cameriera dai vassoi sempre pieni. Non ascolta mai niente, dice: è il primo requisito del mestiere. Ha lo sguardo di chi ha contato le porte di una stanza prima di entrarci.");
-    K.cast("re_anselmo", { acc: ["corona"], name: "Re Anselmo il Vecchio", tag: "gold", hair: "#e8e8e8", style: "bald", skin: "#e0b890", eye: "#3a3a5a", beard: true, bg: ["#7a1f2a", "#e8c860"], shirt: "#a82a3a" },
+    K.cast("re_anselmo", { beard: "folta", acc: ["corona"], name: "Re Anselmo il Vecchio", tag: "gold", hair: "#e8e8e8", style: "bald", skin: "#e0b890", eye: "#3a3a5a", bg: ["#7a1f2a", "#e8c860"], shirt: "#a82a3a" },
       "Il re del Regno Ultimo. Ha ottantadue anni, un trono più alto di lui e una pazienza infinita per le cose importanti. Per le altre, un gatto.");
     K.cast("re_oriele", { acc: ["medaglia"], name: "Principessa Oriele di Castelalto", tag: "", hair: "#5a2a1a", style: "long", skin: "#f0d0b8", eye: "#3a5a8a", beard: false, bg: ["#3a1426", "#e8b84a"], shirt: "#7a1f2a" },
       "La nipote del re e sua unica erede. Parla poco e ascolta molto, che a corte è considerato un difetto. Vuole una cosa sola: che il Regno non finisca come l'Impero.");
-    K.cast("re_brando", { acc: ["medaglia"], name: "Generale Brando Ferrano", tag: "gray", hair: "#6a6a72", style: "buzz", skin: "#d8b08a", eye: "#2a2a34", beard: true, bg: ["#4a5266", "#8b95ab"], shirt: "#4a5266" },
+    K.cast("re_brando", { beard: "incolta", scar: true, acc: ["medaglia"], name: "Generale Brando Ferrano", tag: "gray", hair: "#6a6a72", style: "buzz", skin: "#d8b08a", eye: "#2a2a34", bg: ["#4a5266", "#8b95ab"], shirt: "#4a5266" },
       "Capo della Casata dei Lupi. Sedici mila lance, un solo sorriso all'anno (se piove). Dice che la pace è una guerra che si è messa in ordine.");
     K.cast("re_perla", { acc: ["borsa"], name: "Dama Perla Marenghi", tag: "", hair: "#e8d8b8", style: "bun", skin: "#f0d0b0", eye: "#2a7aa8", beard: false, bg: ["#2a6a9a", "#e8e0c8"], shirt: "#2a7aa8" },
       "Capo della Casata dei Gabbiani. Settanta navi e i conti sempre in ordine. Sa il prezzo di tutto, e a volte anche il valore, che è una cosa diversa.");
-    K.cast("re_cedro", { acc: ["lente"], name: "Lord Cedro Valverde", tag: "", hair: "#9a9a8a", style: "side", skin: "#e0c8a8", eye: "#3a5a3a", beard: true, bg: ["#2a5a3a", "#c8c8a0"], shirt: "#2a5a3a" },
+    K.cast("re_cedro", { beard: "pizzetto", acc: ["lente"], name: "Lord Cedro Valverde", tag: "", hair: "#9a9a8a", style: "side", skin: "#e0c8a8", eye: "#3a5a3a", bg: ["#2a5a3a", "#c8c8a0"], shirt: "#2a5a3a" },
       "Capo della Casata dei Cervi. Giurista, bibliotecario, signore di una foresta. Non dice mai «penso»: dice «secondo l'articolo».");
     K.cast("re_gatto", { shape: "gatto", name: "Sua Maestà Pallina", tag: "", hair: "#e8a860", skin: "#e8a860", eye: "#3a8a3a", bg: ["#7a1f2a", "#e8c860"], shirt: "#e8a860" },
       "Il gatto reale. Dorme sul cuscino del trono dal giorno in cui il re ha smesso di sedercisi. Nessuno sa chi comandi davvero.");
-    K.cast("re_ulderico", { acc: ["bandana"], name: "Ulderico Fendivento, Campione dei Lupi", tag: "gray", hair: "#c8c8d0", style: "spiky", skin: "#e0b890", eye: "#3a4a6a", beard: false, bg: ["#4a5266", "#c8d0e0"], shirt: "#8b95ab" },
+    K.cast("re_ulderico", { beard: "incolta", acc: ["bandana"], name: "Ulderico Fendivento, Campione dei Lupi", tag: "gray", hair: "#c8c8d0", style: "spiky", skin: "#e0b890", eye: "#3a4a6a", bg: ["#4a5266", "#c8d0e0"], shirt: "#8b95ab" },
       "Il campione scelto dal Generale. Veloce, leale e poco fantasioso: con lui la strategia è «avanti».");
     ["lupi:#8b95ab:casco:buzz", "gabbiani:#38a8d8:bandana:messy", "cervi:#5aa862:cappellino:long"].forEach((s) => { const [h, c, a, st] = s.split(":"); if (K.api.CAST && !K.api.CAST["re_s_" + h]) K.api.CAST["re_s_" + h] = { tag: "", name: "Scorta di Casata", hair: "#4a3a2a", style: st, skin: "#e0b890", eye: "#2a2a2a", bg: ["#2a1426", c], shirt: c, acc: [a] }; });
 

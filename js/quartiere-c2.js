@@ -7,7 +7,7 @@
   function chapter2(K) {
     const { F, say, ask, done, setStep, bond, finishChapter, quest, questDone, go } = K;
     const N = 2, S = () => K.stepOf(N);
-    K.cast("sq_scintilla", { acc: ["grembiule"], name: "Scintilla, il pizzaiolo", tag: "", hair: "#8a2a1a", style: "curly", skin: "#d9a679", eye: "#3a2a1a", beard: true, bg: ["#1e1432", "#ff8a3a"], shirt: "#ffffff" },
+    K.cast("sq_scintilla", { beard: "pizzetto", acc: ["grembiule"], name: "Scintilla, il pizzaiolo", tag: "", hair: "#8a2a1a", style: "curly", skin: "#d9a679", eye: "#3a2a1a", bg: ["#1e1432", "#ff8a3a"], shirt: "#ffffff" },
       "Il pizzaiolo di Ponterotto. Non ha bisogno del forno: le sue mani sono il forno. Cuoce una margherita in quattro secondi. Una volta ha starnutito e ha acceso le candeline di un compleanno dall'altra parte della strada.");
     K.cast("sq_cemento", { acc: ["casco", "occhiali"], name: "Il Dottor Cemento", tag: "", hair: "#8a8a8a", style: "slick", skin: "#e8d0c0", eye: "#5a5a6a", bg: ["#1e1432", "#7a7a8a"], shirt: "#7a7a8a" },
       "Ingegnere, costruttore, inventore della Macchina Congelastrade. Vuole fare un parcheggio sul campetto di Ponterotto. Parla sempre di metri cubi. Non sorride mai, tranne quando parla di sua madre.");

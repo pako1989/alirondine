@@ -14,10 +14,10 @@
     const { say, ask, done, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 1, S = () => K.stepOf(N);
 
-    K.cast("cp_crispino", { acc: ["fischietto"], name: "Don Crispino", tag: "gold", hair: "#475569", style: "buzz", skin: "#f8d7b0", eye: "#2a1a0a", beard: false, bg: ["#fef08a", "#ca8a04"], shirt: "#18181b" },
+    K.cast("cp_crispino", { beard: "folta", acc: ["fischietto"], name: "Don Crispino", tag: "gold", hair: "#475569", style: "buzz", skin: "#f8d7b0", eye: "#2a1a0a", bg: ["#fef08a", "#ca8a04"], shirt: "#18181b" },
       "Il parroco vulcanico di Rocca Campanaria. Veste la tonaca nera, ha una voce tonante da predicatore e tira punizioni a parabola verso il cielo ringraziando la Provvidenza: «Un sacrilegio! Chi ha osato toccare il bronzo di San Fortunato?!».");
 
-    K.cast("cp_cacace", { acc: ["berretto", "taccuino"], name: "Maresciallo Cacace", tag: "blue", hair: "#334155", style: "slick", skin: "#cbd5e1", eye: "#0f172a", beard: true, bg: ["#1e3a8a", "#ca8a04"], shirt: "#1e3a8a" },
+    K.cast("cp_cacace", { beard: "baffi", acc: ["berretto", "taccuino"], name: "Maresciallo Cacace", tag: "blue", hair: "#334155", style: "slick", skin: "#cbd5e1", eye: "#0f172a", bg: ["#1e3a8a", "#ca8a04"], shirt: "#1e3a8a" },
       "Comandante della stazione dei Carabinieri di Rocca Campanaria. Non si separa mai dal taccuino d'ordinanza e ha una teoria del complotto per ogni tombino del borgo: «Qui gatta ci cova, e se non cova, la diffido formalmente!».");
 
     K.cast("cp_rosetta", { acc: ["grembiule", "fiore"], name: "Rosetta l'Ostessa", tag: "", hair: "#b45309", style: "curly", skin: "#fed7aa", eye: "#15803d", bg: ["#fef9c3", "#991b1b"], shirt: "#991b1b" },

@@ -14,10 +14,10 @@
     const { say, ask, done, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 2, S = () => K.stepOf(N);
 
-    K.cast("cp_peppe", { acc: ["chiave", "grembiule"], name: "Peppe il Meccanico", tag: "gold", hair: "#1c1917", style: "buzz", skin: "#d9a57a", eye: "#2a1a0a", beard: true, bg: ["#ca8a04", "#1e3a8a"], shirt: "#1e3a8a" },
+    K.cast("cp_peppe", { beard: "incolta", acc: ["chiave", "grembiule"], name: "Peppe il Meccanico", tag: "gold", hair: "#1c1917", style: "buzz", skin: "#d9a57a", eye: "#2a1a0a", bg: ["#ca8a04", "#1e3a8a"], shirt: "#1e3a8a" },
       "Il forzuto meccanico di Rocca Campanaria. Sposta i motori a braccia e calcia punizioni che piegano le traverse: «Il piano era perfetto! Solo che la botte era troppo stretta e la campana continuava a fare ding-dong a ogni buca!».");
 
-    K.cast("cp_sindaco", { acc: ["medaglia"], name: "Sindaco Bellavista", tag: "blue", hair: "#94a3b8", style: "ordinato", skin: "#fed7aa", eye: "#334155", beard: false, bg: ["#1e3a8a", "#ca8a04"], shirt: "#0284c7" },
+    K.cast("cp_sindaco", { beard: "baffi", acc: ["medaglia"], name: "Sindaco Bellavista", tag: "blue", hair: "#94a3b8", style: "ordinato", skin: "#fed7aa", eye: "#334155", bg: ["#1e3a8a", "#ca8a04"], shirt: "#0284c7" },
       "Primo cittadino di Rocca Campanaria. Sempre impettito nella fascia tricolore, non vede l'ora di demolire il vecchio campetto parrocchiale per fare un moderno garage a pagamento per le carrozze dei turisti.");
 
     K.cast("cp_gufo", { acc: ["maschera", "cappellino"], name: "Capitano del Gufo", tag: "", hair: "#334155", style: "slick", skin: "#f8d7b0", eye: "#0f172a", bg: ["#1e1b4b", "#ca8a04"], shirt: "#1e1b4b" },

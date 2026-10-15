@@ -8,7 +8,7 @@
   function chapter2(K) {
     const { F, say, ask, done, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 2, S = () => K.stepOf(N);
-    K.cast("cs_regista", { acc: ["occhiali", "berretto"], name: "Orazio Manovella, il regista", tag: "gray", hair: "#c8c8c8", style: "messy", skin: "#e0b890", eye: "#3a3a3a", beard: true, bg: ["#fff4f8", "#3a2a3a"], shirt: "#3a2a3a" },
+    K.cast("cs_regista", { beard: "pizzetto", acc: ["occhiali", "berretto"], name: "Orazio Manovella, il regista", tag: "gray", hair: "#c8c8c8", style: "messy", skin: "#e0b890", eye: "#3a3a3a", bg: ["#fff4f8", "#3a2a3a"], shirt: "#3a2a3a" },
       "Il regista di «Zoccoli d'Oro», allora e adesso. Gira ogni scena dodici volte e poi sceglie la prima. Parla col megafono anche quando sei a un metro. Dice che il calcio e la televisione sono la stessa cosa: «Conta il finale».");
     K.cast("cs_viola", { acc: ["occhiali", "taccuino"], name: "Viola Penna, scrittrice", tag: "", hair: "#2a1a3a", style: "long", skin: "#c68642", eye: "#2a1a1a", bg: ["#fff4f8", "#a8d8a8"], shirt: "#a8d8a8" },
       "Scrittrice. La casa editrice le ha chiesto la biografia di Baldo: trecento pagine di trofei e sorrisi. Lei vuole scrivere quella vera. Fa domande lente e ascolta le risposte fino in fondo, cosa che a Lustrino non fa nessuno.");

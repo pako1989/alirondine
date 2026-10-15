@@ -7,7 +7,7 @@
   function chapter3(K) {
     const { F, say, ask, done, setStep, bond, finishChapter, quest, questDone, go } = K;
     const N = 3, S = () => K.stepOf(N);
-    K.cast("gr_brume", { acc: ["sciarpa"], name: "Ottavio Brume, presidente della Lega", tag: "gray", hair: "#9a9a9a", style: "slick", skin: "#f0d8c8", eye: "#5a5a6a", bg: ["#0c101a", "#8a8a9a"], shirt: "#3a3a4a" },
+    K.cast("gr_brume", { beard: "baffi", acc: ["sciarpa"], name: "Ottavio Brume, presidente della Lega", tag: "gray", hair: "#9a9a9a", style: "slick", skin: "#f0d8c8", eye: "#5a5a6a", bg: ["#0c101a", "#8a8a9a"], shirt: "#3a3a4a" },
       "Il presidente della Lega del Porto e del Nebbia Athletic. Elegante, gentile, sempre asciutto anche quando piove. Lo chiamano il Mercante di Nebbia: compra partite come altri comprano il pesce, al mattino presto, quando nessuno guarda.");
     K.cast("gr_capitano", { acc: [], name: "Il capitano del Nebbia Athletic", tag: "", hair: "#e8e8f0", style: "undercut", skin: "#e8c4a0", eye: "#4a4a5a", bg: ["#0c101a", "#8a8a9a"], shirt: "#8a8a9a" },
       "Il capitano del Nebbia Athletic. Gioca bene, gioca pulito, e non sa niente del contratto. O forse lo sa, e ha deciso di non saperlo.");

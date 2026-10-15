@@ -9,7 +9,7 @@
     const { F, say, ask, done, go, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 1, S = () => K.stepOf(N);
 
-    K.cast("cc_ermete", { acc: ["occhiali"], name: "Saggio Ermete", tag: "gray", hair: "#e8e8e8", style: "bald", skin: "#e8c4a0", eye: "#3a3a5a", bg: ["#0e1446", "#9ad8ff"], shirt: "#5a4a8a", beard: true },
+    K.cast("cc_ermete", { beard: "folta", acc: ["occhiali"], name: "Saggio Ermete", tag: "gray", hair: "#e8e8e8", style: "bald", skin: "#e8c4a0", eye: "#3a3a5a", bg: ["#0e1446", "#9ad8ff"], shirt: "#5a4a8a", },
       "Il più vecchio di Prato Lungo. Ha visto giocare la finale delle Quattro Stagioni, quando i cristalli brillavano tutti. Racconta che allora l'erba del campo cantava a ogni gol. Nessuno gli crede. Lui continua a raccontarlo.");
     K.cast("cc_lyra", { acc: ["fascia"], name: "Lyra del Prato, cavaliera", tag: "", hair: "#c8a040", style: "ponytail", skin: "#f0d0b0", eye: "#2a5a3a", bg: ["#0e1446", "#c8a040"], shirt: "#8a9aaa" },
       "Cavaliera del Castello di Verdemare, mandata a scoprire perché i cristalli si spengono. Para con lo scudo, difende con la spada piatta (non la usa mai di taglio). Ha giurato di non giocare mai più a calcio. Non dice perché.");

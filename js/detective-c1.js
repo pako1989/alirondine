@@ -11,7 +11,7 @@
 
     K.cast("dc_agata", { acc: ["lente", "sciarpa"], name: "Ispettrice Agata Brina", tag: "", hair: "#5a2a2a", style: "long", skin: "#f0d0b0", eye: "#3a5a4a", bg: ["#2a2622", "#d8b46a"], shirt: "#6a5a4a" },
       "Ispettrice della Questura di Portagrigia, sezione «cose strane». Impermeabile sempre bagnato, una fisarmonica sotto il braccio, caramelle alla liquirizia in tasca. Risolve i casi pensando ad altro. Con la Lega delle Città ha un conto aperto, ma non ne parla.");
-    K.cast("dc_tonio", { name: "Tonio Borraccia", tag: "gray", hair: "#d8d8d8", style: "buzz", skin: "#c68642", eye: "#3a3a2a", bg: ["#3a2a1e", "#c8a888"], shirt: "#3a4a6a", beard: true },
+    K.cast("dc_tonio", { beard: "incolta", name: "Tonio Borraccia", tag: "gray", hair: "#d8d8d8", style: "buzz", skin: "#c68642", eye: "#3a3a2a", bg: ["#3a2a1e", "#c8a888"], shirt: "#3a4a6a", },
       "Magazziniere del Portagrigia da trentadue anni, adesso in pensione al bancone del Caffè Fuorigioco. Riconosce un pallone dal rumore che fa quando rimbalza.");
     K.cast("dc_ugo", { name: "Ugo Nastro", tag: "", hair: "#3a3a3a", style: "slick", skin: "#e8c8a8", eye: "#4a4a5a", glasses: true, bg: ["#1e1a18", "#b89a5a"], shirt: "#4a4a52" },
       "Custode della Sala Moviola dello stadio. Conserva ogni partita dal 1971 su nastri etichettati a mano. Parla ai proiettori come ad animali domestici.");

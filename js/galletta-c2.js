@@ -17,7 +17,7 @@
     K.cast("gl_commodoro", { acc: ["parrucca"], name: "Commodoro Cracker", tag: "gold", hair: "#ffffff", style: "curly", skin: "#fed7aa", eye: "#1e3a8a", bg: ["#1e3a8a", "#fef3c7"], shirt: "#1e3a8a" },
       "Ammiraglio della Flotta Reale dei Buongustai. Porta una parrucca candida incipriata di zucchero a velo e una divisa con spalline dorate: «In nome di Sua Maestà Pasticciera, ogni briciola non autorizzata verrà requisita!»");
 
-    K.cast("gl_calipso", { acc: ["bandana"], name: "Dama Calipso", tag: "blue", hair: "#451a03", style: "braid", skin: "#d97706", eye: "#15803d", bg: ["#0284c7", "#fef3c7"], shirt: "#0284c7" },
+    K.cast("gl_calipso", { streak: "#22d3ee", acc: ["bandana"], name: "Dama Calipso", tag: "blue", hair: "#451a03", style: "braid", skin: "#d97706", eye: "#15803d", bg: ["#0284c7", "#fef3c7"], shirt: "#0284c7" },
       "La timoniera e navigatrice delle spezie. Conosce le correnti sotterranee dell'oceano e legge il moto delle onde osservando come ribolle il caramello in una fiala di cristallo.");
 
     K.cos("gl_c2", { kind: "style", label: "Tricorno piumato con biscotto dorato", val: "tricorno", from: "Capitolo 2 di S.O.S. Galletta" });

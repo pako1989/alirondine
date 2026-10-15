@@ -9,7 +9,7 @@
     const N = 3, S = () => K.stepOf(N), HS = ["lupi", "gabbiani", "cervi"];
     const visti = () => HS.filter((h) => F.is("re_v_" + h)).length;
 
-    K.cast("re_tullio", { acc: ["bandana"], name: "Tullio Valverde, Capo dei Corvi", tag: "gray", hair: "#3a3a3a", style: "side", skin: "#e0c8a8", eye: "#3a5a3a", beard: true, bg: ["#2a2030", "#8a7a9a"], shirt: "#3a2a40" },
+    K.cast("re_tullio", { beard: "pizzetto", acc: ["bandana"], name: "Tullio Valverde, Capo dei Corvi", tag: "gray", hair: "#3a3a3a", style: "side", skin: "#e0c8a8", eye: "#3a5a3a", bg: ["#2a2030", "#8a7a9a"], shirt: "#3a2a40" },
       "Il capo dei Corvi di Rocca Nera, che da tre mesi assediano un angolo del Regno con molta pazienza e poche idee. Ha la calligrafia di suo padre e il carattere di sua madre.");
     K.cos("re_c3", { kind: "shirt", label: "Casacca della Piazza d'Armi", val: "#c8a040", from: "Capitolo 3 di Cronache del Regno Ultimo" });
     K.cos("re_regina", { kind: "shirt", label: "Cotta dei Tre Stendardi", val: "#a82a3a", from: "Finale «La Regina dei Tre Stendardi»" });

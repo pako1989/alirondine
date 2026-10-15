@@ -10,7 +10,7 @@
     const N = 1, S = () => K.stepOf(N);
     K.cast("ml_bice", { acc: ["occhiali", "fiore"], name: "La Contessa Bice", tag: "gray", hair: "#e8e8e8", style: "bun", skin: "#f0d8c0", eye: "#3a3a5a", bg: ["#1e3a2a", "#c8a050"], shirt: "#5a2a4a" },
       "Presidentessa dell'U.S. Colle Alto da quarant'anni. Possiede metà delle vigne delle colline e tutta la pazienza del mondo, tranne la domenica pomeriggio. Non ha mai licenziato un allenatore: li ha sempre convinti ad andarsene da soli.");
-    K.cast("ml_pino", { acc: ["grembiule"], name: "Il Mago Pino", tag: "gray", hair: "#8a8a8a", style: "slick", skin: "#d9a679", eye: "#2a2a2a", beard: true, bg: ["#1e3a2a", "#2a5a8a"], shirt: "#f4f0e4" },
+    K.cast("ml_pino", { beard: "baffi", acc: ["grembiule"], name: "Il Mago Pino", tag: "gray", hair: "#8a8a8a", style: "slick", skin: "#d9a679", eye: "#2a2a2a", bg: ["#1e3a2a", "#2a5a8a"], shirt: "#f4f0e4" },
       "Il barista del Bar dello Sport. Nel 1978 allenava la Colle Alto e la portò in Serie Collina con una tattica disegnata su un tovagliolo. Poi una sera si arrabbiò con un arbitro, appese il fischietto e aprì il bar. Disegna ancora tattiche, sui tovaglioli.");
     K.cast("ml_marta", { acc: ["fascia"], name: "Marta Fiore, la capitana", tag: "", hair: "#c8642a", style: "ponytail", skin: "#f0d0b0", eye: "#3a5a3a", bg: ["#1e3a2a", "#2a6a3a"], shirt: "#2a6a3a", num: "8" },
       "La fiorista di Colle Alto e la capitana della squadra. Organizza il centrocampo come un mazzo di fiori: ogni cosa al suo posto, e qualcosa di colorato davanti.");

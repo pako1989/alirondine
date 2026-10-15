@@ -7,7 +7,7 @@
   function chapter3(K) {
     const { F, say, ask, done, setStep, bond, finishChapter, quest, questDone, go } = K;
     const N = 3, S = () => K.stepOf(N);
-    K.cast("td_duca", { acc: ["corona"], name: "Il Duca Ferro di Ruggine", tag: "", hair: "#2a2a2a", style: "buzz", skin: "#c68642", eye: "#5a2a1a", beard: true, bg: ["#2a1e14", "#a83a2a"], shirt: "#5a3a34" },
+    K.cast("td_duca", { beard: "pizzetto", acc: ["corona"], name: "Il Duca Ferro di Ruggine", tag: "", hair: "#2a2a2a", style: "buzz", skin: "#c68642", eye: "#5a2a1a", bg: ["#2a1e14", "#a83a2a"], shirt: "#5a3a34" },
       "Il signore di Ruggine. Parla poco, mangia poco, dorme poco. Il suo ducato ha ferro per cento anni e sale per tre mesi: per questo guarda le saline come un affamato guarda il pane.");
     K.cast("td_fabbro", { acc: ["grembiule", "guanti"], name: "Mastra Incudine, la fabbra", tag: "", hair: "#5a2a1a", style: "bandana", skin: "#d9a679", eye: "#3a2a1a", bg: ["#2a1e14", "#a83a2a"], shirt: "#5a4a44" },
       "La fabbra più brava di Ruggine. Forgia ferri di cavallo, chiodi e, una volta all'anno, una spada che nessuno usa. Dice che il ferro serve a costruire, non a minacciare. Il duca non la ascolta.");

@@ -14,7 +14,7 @@
     const { F, say, ask, done, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 1, S = () => K.stepOf(N);
 
-    K.cast("gl_barbabiscotto", { acc: ["bandana"], name: "Capitan Barbabiscotto", tag: "gold", hair: "#78350f", style: "wavy", skin: "#d9a57a", eye: "#2a1a0a", beard: true, bg: ["#fef3c7", "#d97706"], shirt: "#d97706" },
+    K.cast("gl_barbabiscotto", { beard: "folta", acc: ["bandana"], name: "Capitan Barbabiscotto", tag: "gold", hair: "#78350f", style: "wavy", skin: "#d9a57a", eye: "#2a1a0a", bg: ["#fef3c7", "#d97706"], shirt: "#d97706" },
       "Capitano del veliero «Masticatore». Ha la barba intrecciata con spago e zollette di zucchero di canna: «Il mare appartiene a chi sa calciare a volo mentre il ponte ondeggia a quaranta nodi!».");
 
     K.cast("gl_cannella", { acc: ["berretto"], name: "Cannella l'Oste", tag: "", hair: "#451a03", style: "buzz", skin: "#f8d7b0", eye: "#15803d", bg: ["#fef3c7", "#b45309"], shirt: "#b45309" },
@@ -23,7 +23,7 @@
     K.cast("gl_crusty", { acc: ["occhiali"], name: "Crusty il Pappagallo", tag: "blue", hair: "#15803d", style: "slick", skin: "#fef08a", eye: "#1e293b", bg: ["#0284c7", "#15803d"], shirt: "#15803d" },
       "Pappagallo parlante della cambusa. Ha viaggiato sui sette mari e conosce a memoria le traiettorie del vento, ripetendo a raffica: «Occhio al rollio! Briciole a dritta!»");
 
-    K.cast("gl_sottaceto", { acc: ["cappellino"], name: "Capitan Sottaceto", tag: "", hair: "#334155", style: "buzz", skin: "#cbd5e1", eye: "#0f172a", beard: true, bg: ["#1e3a8a", "#0284c7"], shirt: "#1e3a8a" },
+    K.cast("gl_sottaceto", { beard: "incolta", acc: ["cappellino"], name: "Capitan Sottaceto", tag: "", hair: "#334155", style: "buzz", skin: "#cbd5e1", eye: "#0f172a", bg: ["#1e3a8a", "#0284c7"], shirt: "#1e3a8a" },
       "Corsaro delle scogliere basse. Gioca con scarpini inzuppati d'aceto e non sopporta i biscotti dolci: «Il vero marinaio mangia solo aringhe salate e spazza la palla in tribuna!».");
 
     K.cos("gl_c1", { kind: "shirt", label: "Casacca corsara a righe vaniglia", val: "#d97706", from: "Capitolo 1 di S.O.S. Galletta" });

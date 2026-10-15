@@ -9,13 +9,13 @@
     const { F, say, ask, done, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 1, S = () => K.stepOf(N), C = K.CASATE;
 
-    K.cast("tc_ubaldo", { acc: ["corona", "barba"], name: "Lord Ubaldo Tasso", tag: "gray", hair: "#c8c8c8", style: "messy", skin: "#e0b48a", eye: "#3a3a2a", bg: ["#2a1a0c", "#6a5a3a"], shirt: "#6a5a3a" },
+    K.cast("tc_ubaldo", { beard: "incolta", acc: ["corona", "barba"], name: "Lord Ubaldo Tasso", tag: "gray", hair: "#c8c8c8", style: "messy", skin: "#e0b48a", eye: "#3a3a2a", bg: ["#2a1a0c", "#6a5a3a"], shirt: "#6a5a3a" },
       "Signore di Rocca Tasso e delle colline di Tanagrigia. Ha vinto due Tornei del Trono da giovane, e da allora non ha più cambiato idea su niente. Non ti ha mai riconosciuto come figlio. Non ti ha mai nemmeno mandato via.");
     K.cast("tc_brunilde", { acc: ["fascia"], name: "Brunilde Tasso", tag: "", hair: "#5a3a1a", style: "braids", skin: "#f0d0b0", eye: "#3a5a3a", bg: ["#2a1a0c", "#c8a050"], shirt: "#6a5a3a" },
       "Figlia legittima di Lord Ubaldo, erede di Casa Tasso, capitana della squadra della rocca. Gioca da centrale e parla allo stesso modo: chiude tutte le strade. Tu sei il fratello che non ha scelto, e non ha ancora deciso cosa farne.");
-    K.cast("tc_gualtiero", { acc: ["barba"], name: "Ser Gualtiero, maestro d'armi", tag: "", hair: "#8a8a8a", style: "short", skin: "#c68642", eye: "#2a2a2a", bg: ["#2a1a0c", "#8a8a8a"], shirt: "#5a5a5a" },
+    K.cast("tc_gualtiero", { beard: "incolta", acc: ["barba"], name: "Ser Gualtiero, maestro d'armi", tag: "", hair: "#8a8a8a", style: "short", skin: "#c68642", eye: "#2a2a2a", bg: ["#2a1a0c", "#8a8a8a"], shirt: "#5a5a5a" },
       "Il maestro d'armi di Rocca Tasso: insegna la spada, il cavallo e il calcio, nell'ordine. Ti ha cresciuto lui, nel cortile, tra un allenamento e l'altro. Sostiene che il pallone è la spada di chi ha buon cuore.");
-    K.cast("tc_ardo", { acc: ["mantello"], name: "Lord Ardo Pietrabruna", tag: "", hair: "#3a3a3a", style: "ordinato", skin: "#d9a679", eye: "#3a3a3a", bg: ["#2a1a0c", "#c8b898"], shirt: "#5a4a3a" },
+    K.cast("tc_ardo", { beard: "pizzetto", acc: ["mantello"], name: "Lord Ardo Pietrabruna", tag: "", hair: "#3a3a3a", style: "ordinato", skin: "#d9a679", eye: "#3a3a3a", bg: ["#2a1a0c", "#c8b898"], shirt: "#5a4a3a" },
       "Signore delle montagne di Pietrabruna. Parla poco, e quando dà la sua parola la incide su una pietra, letteralmente: ne ha un cortile pieno. Non ha mai rotto un patto. Pretende lo stesso dagli altri.");
     K.cos("tc_c1", { kind: "shirt", label: "Maglia di Casa Tasso", val: "#6a5a3a", from: "Capitolo 1 del Trono di Cuoio" });
     K.cos("tc_sigilli1", { kind: "acc", label: "Sigillo di cera al collo", val: "medaglia", from: "Trova tutti i sigilli di cera di Rocca Tasso" });

@@ -11,7 +11,7 @@
     const { F, say, ask, done, go, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 2, S = () => K.stepOf(N);
 
-    K.cast("so_mira", { acc: ["chiave"], name: "Mira Zetta, ingegnera", tag: "", hair: "#e85a3a", style: "ponytail", skin: "#c68642", eye: "#2a4a2a", bg: ["#2a1e1e", "#e8a83a"], shirt: "#e8a83a" },
+    K.cast("so_mira", { streak: "#38bdf8", acc: ["chiave"], name: "Mira Zetta, ingegnera", tag: "", hair: "#e85a3a", style: "ponytail", skin: "#c68642", eye: "#2a4a2a", bg: ["#2a1e1e", "#e8a83a"], shirt: "#e8a83a" },
       "L'ingegnera della stazione. Ha una chiave inglese per ogni giorno della settimana e le chiama per nome. Parla con le macchine più volentieri che con le persone, perché «le macchine almeno ammettono quando sono rotte».");
     K.cast("so_primula", { acc: ["fiore"], name: "Primula Verdi, botanica", tag: "", hair: "#5a8a3a", style: "long", skin: "#f0d0b0", eye: "#3a6a3a", bg: ["#1a3a30", "#7ae86a"], shirt: "#d8c8a8" },
       "Cura la Serra idroponica e parla alle piante, una per una, ogni mattina. Sostiene che i pomodori spaziali capiscano l'italiano ma rispondano in tedesco.");

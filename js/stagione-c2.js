@@ -11,7 +11,7 @@
     const { F, say, ask, done, go, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 2, S = () => K.stepOf(N), O = () => K.ora(), G = () => K.giro();
 
-    K.cast("sf_pescatore", { acc: ["paglia"], name: "Nonno Remigio, pescatore", tag: "gray", hair: "#e8e8e8", style: "buzz", skin: "#c68642", eye: "#3a3a3a", bg: ["#1a2a3a", "#e8c84a"], shirt: "#3a5a7a", beard: true },
+    K.cast("sf_pescatore", { beard: "folta", acc: ["paglia"], name: "Nonno Remigio, pescatore", tag: "gray", hair: "#e8e8e8", style: "buzz", skin: "#c68642", eye: "#3a3a3a", bg: ["#1a2a3a", "#e8c84a"], shirt: "#3a5a7a", },
       "Pesca sul lungolago da sessant'anni e non ha mai preso un pesce, per scelta: «Li conosco tutti per nome». La domenica organizza la partitella dei pescatori, con le canne al posto delle porte.");
     K.cos("sf_c2", { kind: "acc", label: "Cuffie di Radio Lago", val: "cuffie", from: "Capitolo 2 di Stagione Infinita" });
     K.cos("sf_cassetta", { kind: "shirt", label: "Maglia «Finale 1986»", val: "#c8742a", from: "Ritrova il gol di Lucio" });

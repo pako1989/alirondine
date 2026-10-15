@@ -14,16 +14,16 @@
     const { F, say, ask, done, setStep, bond, finishChapter, quest, questDone } = K;
     const N = 1, S = () => K.stepOf(N);
 
-    K.cast("pr_sceriffo", { acc: ["cappellino"], name: "Sceriffo Cooper", tag: "gold", hair: "#451a03", style: "slick", skin: "#e0ac7e", eye: "#2a1a0a", beard: true, bg: ["#fef3c7", "#ea580c"], shirt: "#ea580c" },
+    K.cast("pr_sceriffo", { beard: "baffi", acc: ["cappellino"], name: "Sceriffo Cooper", tag: "gold", hair: "#451a03", style: "slick", skin: "#e0ac7e", eye: "#2a1a0a", bg: ["#fef3c7", "#ea580c"], shirt: "#ea580c" },
       "Lo sceriffo di El Paso. Mastica uno stecchino di legno, porta una stella di latta a sei punte e difende la porta con due guantoni da lavoro in cuoio rinforzato: «Qui la legge si fa dai dodici passi».");
 
     K.cast("pr_carmela", { acc: ["bandana"], name: "Carmela la Locandiera", tag: "", hair: "#1c1917", style: "bun", skin: "#d9a57a", eye: "#15803d", bg: ["#fef3c7", "#b45309"], shirt: "#b45309" },
       "Proprietaria del Saloon El Palo. Serve sarsaparilla gelata, fagioli alla messicana e consigli su come spiazzare i portieri del deserto. Ha visto passare tutti i campioni della frontiera.");
 
-    K.cast("pr_barnaba", { acc: ["berretto"], name: "Barnaba il Becchino", tag: "blue", hair: "#64748b", style: "buzz", skin: "#cbd5e1", eye: "#1e293b", bg: ["#451a03", "#1c1917"], shirt: "#1c1917" },
+    K.cast("pr_barnaba", { beard: "baffi", acc: ["berretto"], name: "Barnaba il Becchino", tag: "blue", hair: "#64748b", style: "buzz", skin: "#cbd5e1", eye: "#1e293b", bg: ["#451a03", "#1c1917"], shirt: "#1c1917" },
       "Il becchino ufficiale del villaggio. Gira con un metro di legno pieghevole e prende le misure dei pali: «Un tiro alto sopra la traversa merita una lapide con epigrafe in rima baciata».");
 
-    K.cast("pr_doc", { acc: ["occhiali"], name: "Doc Holliday", tag: "", hair: "#e2e8f0", style: "slick", skin: "#f8fafc", eye: "#334155", beard: true, bg: ["#fef3c7", "#78350f"], shirt: "#78350f" },
+    K.cast("pr_doc", { beard: "pizzetto", acc: ["occhiali"], name: "Doc Holliday", tag: "", hair: "#e2e8f0", style: "slick", skin: "#f8fafc", eye: "#334155", bg: ["#fef3c7", "#78350f"], shirt: "#78350f" },
       "Medico, farmacista e scommettitore incallito. Analizza la traiettoria del pallone calcolando la velocità del vento e l'angolo di rotazione con una precisione quasi scientifica.");
 
     K.cos("pr_c1", { kind: "shirt", label: "Gilet di pelle con frange", val: "#b45309", from: "Capitolo 1 di Per un pugno di rigori" });

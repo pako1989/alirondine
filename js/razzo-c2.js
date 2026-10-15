@@ -10,7 +10,7 @@
     const N = 2, S = () => K.stepOf(N);
     K.cast("rz_minestra", { acc: ["grembiule"], name: "Gran Cuoca Minestra", tag: "", hair: "#ffe8a8", style: "bun", skin: "#b8d88a", eye: "#3a3a1a", bg: ["#1a1030", "#ffc86a"], shirt: "#f4f0e4" },
       "La cuoca più importante del Pianeta Brodo, dove gli oceani sono di minestra e le isole di cracker. Mescola l'oceano con un mestolo lungo trecento metri. Ha ordinato un mestolo nuovo: il vecchio si è sciolto.");
-    K.cast("rz_crostino", { acc: ["bandana"], name: "Capitan Crostino", tag: "", hair: "#c8782a", style: "spiky", skin: "#e8c88a", eye: "#3a2a1a", bg: ["#1a1030", "#c8782a"], shirt: "#c8782a" },
+    K.cast("rz_crostino", { streak: "#f2c14e", acc: ["bandana"], name: "Capitan Crostino", tag: "", hair: "#c8782a", style: "spiky", skin: "#e8c88a", eye: "#3a2a1a", bg: ["#1a1030", "#c8782a"], shirt: "#c8782a" },
       "Capitano della squadra di Consegna a Rete del Pianeta Brodo, I Crostini. Croccante fuori, morbido dentro, come dice lui. Nessuno ha mai capito se è un complimento.");
     K.cast("rz_archivista", { acc: ["occhiali", "taccuino"], name: "L'Archivista Capo", tag: "gray", hair: "#c8c8d0", style: "ordinato", skin: "#d8d8e0", eye: "#3a3a5a", bg: ["#1a1030", "#d8d8e0"], shirt: "#5a5a6a" },
       "Custode di tutti i documenti della galassia, sulla Luna Modulo 7. Ha letto ogni modulo mai compilato. Dice che nessuna storia è vera finché non è archiviata.");
