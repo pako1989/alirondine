@@ -2803,7 +2803,7 @@
   }
 
   // --- 20. FUGA DA ALCATRAZ FC · IL PENITENZIARIO SULL'ISOLA ---
-  window.__alcDraw = { get Isola() { return drawDetailedAlcatrazIsola; }, get Cortile() { return drawDetailedAlcatrazCortile; }, get Celle() { return drawDetailedAlcatrazCelle; } };
+  window.__alcDraw = { get Isola() { return drawDetailedAlcatrazIsola; }, get Cortile() { return drawDetailedAlcatrazCortile; }, get Celle() { return drawDetailedAlcatrazCelle; }, get Caldaie() { return drawDetailedAlcatrazCaldaie; }, get Molo() { return drawDetailedAlcatrazMolo; } };
 
   function drawDetailedAlcatrazIsola(g, W, H, f) {
     // Cielo notturno cupo sulla baia
@@ -3028,6 +3028,145 @@
     px(g, 0, 8, W, 4, "#475569");
     const steamX = 90 + (f * 0.5) % 80;
     px(g, steamX, 6, 15, 3, "rgba(241, 245, 249, 0.35)");
+  }
+
+  function drawDetailedAlcatrazCaldaie(g, W, H, f) {
+    // Sfondo buio sotterraneo con riflessi di ruggine e braci
+    const bg = g.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, "#090d16");
+    bg.addColorStop(0.5, "#18181b");
+    bg.addColorStop(1, "#271c19");
+    g.fillStyle = bg;
+    g.fillRect(0, 0, W, H);
+
+    // Muro di mattoni refrattari scuri
+    g.strokeStyle = "rgba(71, 85, 105, 0.35)";
+    g.lineWidth = 1;
+    for (let y = 10; y < H - 20; y += 12) {
+      g.beginPath();
+      g.moveTo(0, y);
+      g.lineTo(W, y);
+      g.stroke();
+    }
+
+    // Grande caldaia centrale in ghisa rivettata
+    const cx = W / 2 - 45, cy = 45;
+    px(g, cx, cy, 90, 85, "#27272a");
+    px(g, cx + 4, cy + 4, 82, 77, "#18181b");
+    // Rivetti metallici
+    for (let rx = cx + 8; rx < cx + 85; rx += 12) {
+      px(g, rx, cy + 8, 3, 3, "#71717a");
+      px(g, rx, cy + 74, 3, 3, "#71717a");
+    }
+
+    // Bocca della fornace ardente con bagliore pulsante
+    const firePulse = 0.7 + 0.3 * Math.sin(f * 0.12);
+    px(g, cx + 25, cy + 35, 40, 30, "#451a03");
+    const fireGrad = g.createLinearGradient(0, cy + 35, 0, cy + 65);
+    fireGrad.addColorStop(0, `rgba(249, 115, 22, ${firePulse})`);
+    fireGrad.addColorStop(0.7, `rgba(239, 68, 68, ${firePulse})`);
+    fireGrad.addColorStop(1, "#7c2d12");
+    g.fillStyle = fireGrad;
+    g.fillRect(cx + 28, cy + 38, 34, 24);
+    // Grata di ferro davanti al fuoco
+    for (let gx = cx + 32; gx < cx + 60; gx += 6) {
+      px(g, gx, cy + 38, 2, 24, "#0f172a");
+    }
+
+    // Manometri e indicatori di pressione in ottone
+    [cx - 20, cx + 100].forEach((mx) => {
+      px(g, mx + 4, cy + 18, 4, 18, "#78350f"); // tubo di rame
+      g.fillStyle = "#facc15";
+      g.beginPath();
+      g.arc(mx + 6, cy + 14, 8, 0, Math.PI * 2);
+      g.fill();
+      px(g, mx + 5, cy + 10, 2, 8, "#0f172a"); // lancetta
+    });
+
+    // Bocchetta del cunicolo segreto a sinistra
+    px(g, 15, H - 45, 40, 35, "#020617");
+    px(g, 12, H - 48, 46, 4, "#64748b");
+    // Anello di ferro per il sollevamento
+    g.strokeStyle = "#94a3b8";
+    g.beginPath();
+    g.arc(35, H - 28, 6, 0, Math.PI * 2);
+    g.stroke();
+
+    // Tubi superiori con sbuffi di vapore
+    px(g, 0, 14, W, 8, "#475569");
+    const stX = 140 + (f * 0.7) % 90;
+    px(g, stX, 10, 16, 4, "rgba(241, 245, 249, 0.4)");
+  }
+
+  function drawDetailedAlcatrazMolo(g, W, H, f) {
+    // Cielo notturno in tempesta
+    const sky = g.createLinearGradient(0, 0, 0, 95);
+    sky.addColorStop(0, "#020617");
+    sky.addColorStop(0.5, "#082f49");
+    sky.addColorStop(1, "#0c4a6e");
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, 95);
+
+    // Pioggia a raffiche diagonali
+    g.strokeStyle = "rgba(226, 232, 240, 0.25)";
+    g.lineWidth = 1;
+    for (let i = 0; i < 40; i++) {
+      const rx = (i * 29 + f * 4) % (W + 40) - 20;
+      const ry = (i * 17 + f * 6) % 110;
+      g.beginPath();
+      g.moveTo(rx, ry);
+      g.lineTo(rx - 8, ry + 12);
+      g.stroke();
+    }
+
+    // Onde impetuose che si infrangono sulla scogliera
+    const sea = g.createLinearGradient(0, 95, 0, H);
+    sea.addColorStop(0, "#075985");
+    sea.addColorStop(0.4, "#0369a1");
+    sea.addColorStop(1, "#020617");
+    g.fillStyle = sea;
+    g.fillRect(0, 95, W, H - 95);
+
+    // Creste schiumose animate
+    for (let i = 0; i < 7; i++) {
+      const wy = 105 + i * 14;
+      const woff = (f * 1.5 + i * 45) % W;
+      px(g, woff, wy, 45, 3, "rgba(248, 250, 252, 0.35)");
+      px(g, (woff + 110) % W, wy + 5, 55, 2, "rgba(56, 189, 248, 0.25)");
+    }
+
+    // Scogliera nera frastagliata sulla destra
+    g.fillStyle = "#0f172a";
+    g.beginPath();
+    g.moveTo(W - 75, H);
+    g.lineTo(W - 65, 120);
+    g.lineTo(W - 40, 95);
+    g.lineTo(W - 15, 80);
+    g.lineTo(W, 75);
+    g.lineTo(W, H);
+    g.closePath();
+    g.fill();
+
+    // Banchina in cemento armato con bitte d'ormeggio
+    px(g, 0, 130, W - 90, 45, "#334155");
+    px(g, 0, 128, W - 90, 3, "#64748b");
+    // Bitte d'acciaio con gomene
+    [35, 105, 175].forEach((bx) => {
+      px(g, bx, 122, 6, 8, "#0f172a");
+      px(g, bx - 2, 120, 10, 3, "#475569");
+      // Anello di corda attorno alla bitta
+      g.strokeStyle = "#ca8a04";
+      g.beginPath();
+      g.arc(bx + 3, 125, 5, 0, Math.PI * 2);
+      g.stroke();
+    });
+
+    // Motovedetta delle guardie ormeggiata
+    px(g, 120, 145, 95, 22, "#1e293b"); // scafo
+    px(g, 150, 134, 40, 12, "#334155"); // cabina
+    px(g, 155, 137, 8, 6, "rgba(56, 189, 248, 0.5)"); // vetro cabina
+    px(g, 182, 132, 2, 8, "#94a3b8"); // antenna
+    px(g, 182, 130, 3, 3, "#ef4444"); // luce rossa d'albero
   }
 
   function ctxStrokeRect(g, x, y, w, h, col) {
@@ -4718,6 +4857,12 @@
         return true;
       case "alc_celle":
         drawDetailedAlcatrazCelle(g, W, H, f);
+        return true;
+      case "alc_caldaie":
+        drawDetailedAlcatrazCaldaie(g, W, H, f);
+        return true;
+      case "alc_molo":
+        drawDetailedAlcatrazMolo(g, W, H, f);
         return true;
       case "cp_piazza":
       case "cp_titolo":
@@ -8802,6 +8947,18 @@
       [125, 20, 90, 70, "🪜 Passerella del Braccio Ovest: guardie in ronda sui ballatoi con fischietti d'ottone."],
       [220, 100, 75, 55, "🚪 Cella d'Isolamento: sbarre temprate e una grata di ventilazione fissata con quattro bulloni."],
       [100, 120, 95, 45, "🛒 Carrello della Mensa: scodelle di latta e sacchi di farina sotto cui nascondere i grimaldelli."]
+    ]],
+    ["alc_caldaie", "Caldaie", [
+      [20, 95, 70, 55, "🕳️ Bocchetta del Cunicolo: una pesante botola di ferro con maniglione a scomparsa che porta sotto la scogliera."],
+      [135, 45, 90, 85, "🔥 Caldaia Monumentale: mastodontico cilindro in ghisa con portello a grata e braci incandescenti."],
+      [240, 45, 75, 55, "⚙️ Manometri di Pressione: lancette d'ottone che oscillano pericolosamente nella zona rossa."],
+      [110, 15, 100, 30, "💨 Condotto a Vapore: tubature coibentate che sibilano calore verso il cortile superiore."]
+    ]],
+    ["alc_molo", "Molo", [
+      [25, 95, 75, 55, "⚓ Bitte d'Ormeggio: bitte in ghisa con pesanti gomene d'acciaio tese contro il moto ondoso."],
+      [125, 125, 105, 45, "🚤 Motovedetta delle Guardie: scafo rinforzato con faro di prua e motore entrobordo da 300 cavalli."],
+      [240, 75, 75, 80, "🪨 Scogliera dei Naufraghi: rocce scivolose di basalto nero sferzate dalla schiuma marina."],
+      [95, 15, 110, 65, "🌧️ Tempesta sulla Baia: raffiche di vento gelido e pioggia battente che oscurano la costa."]
     ]]
   ].forEach(([k, n, hot]) => {
     LB[k] = { draw: (g, W, H, f) => { const D = window.__alcDraw; if (D && D[n]) D[n](g, W, H, f); else px(g, 0, 0, W, H, "#0f172a"); }, hot };

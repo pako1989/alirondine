@@ -12,7 +12,8 @@
   }
 
   function chapter1(K) {
-    const { say, ask, done, setStep, bond, finishChapter, quest, questDone } = K;
+    const { say, done, setStep, bond, finishChapter, quest } = K;
+    const ask = (prompt, opts) => K.ask("voce", prompt, opts), questDone = (id) => K.questDone(id);
     const N = 1, S = () => K.stepOf(N);
 
     // Cast dei personaggi
@@ -273,7 +274,7 @@
                 label: "⚽ Accetto il ruolo di regista: guiderò la squadra!",
                 big: true,
                 fn: () => {
-                  bond("alc_bruno", 2);
+                  questDone("alc_q1");
                   say([
                     ["alc_bruno", "Ottimo spirito! Ti presento Smilzo Sam: è lui che fa volare i cross sulle lamiere."],
                     ["alc_bruno", "Prima di giocare, parla con Malick la Roccia là in difesa. Ha trovato qualcosa vicino alla grata di scolo."]
@@ -288,6 +289,7 @@
                 label: "🤝 Vogliamo solo un accordo leale senza trucchi",
                 big: true,
                 fn: () => {
+                  questDone("alc_q1");
                   say([
                     ["alc_bruno", "Lealtà anche dietro le sbarre? Mi piace il tuo stile. Ti metteremo alla prova sul campo."],
                     ["alc_bruno", "Prima però va' a parlare con Malick la Roccia vicino alla porta nord."]
@@ -330,12 +332,12 @@
             ["alc_malick", "Mentre ripulivo l'asfalto ho trovato questo vecchio grimaldello d'ottone incastrato tra le sbarre della grata. Prendilo tu: chi ha buone gambe ne farà miglior uso."],
             ["voce", "Hai ottenuto un <b>Grimaldello d'ottone</b>! (🗝️ +1)"]
           ], () => {
-            K.stat("chiavi", K.stat("chiavi") + 1);
+            bond("chiavi", 1);
             say([
               ["alc_malick", "Il Direttore Cardenas è sceso sul ballatoio con il fischietto. Il Braccio Est ci sta sfidando! Raggiungi Bruno e diamo inizio alla partita!"]
             ], () => {
               setStep(N, 3);
-              questDone();
+              questDone("alc_q2");
               quest("alc_q3", "Vinci a Calcio a Parete", "Parla con il Direttore Cardenas o entra nel campo per disputare la sfida 3v3 a Calcio a Parete.");
               done();
             });
@@ -362,15 +364,16 @@
                   opp: "Braccio Est",
                   colA: "#38bdf8",
                   colB: "#f59e0b",
-                  onDone: (res) => {
+                  done: (res) => {
                     say([
                       ["alc_cardenas", res.win ? "Fischio finale! Vittoria limpida del Braccio Ovest. Niente da eccepire sulla traiettoria." : "Tempo scaduto! Partita dura e serrata."],
                       ["alc_bruno", "Grande prova di squadra! I rimbalzi sulle lamiere hanno fatto scuola."],
                       ["voce", "Hai conquistato il rispetto dei detenuti del Braccio Ovest e sbloccato la divisa carceraria!"]
                     ], () => {
-                      K.reward("alc_c1");
-                      finishChapter(1, "evaso", "Capitolo 1 completato! Il Campione ha guidato il Braccio Ovest alla vittoria nel cortile.");
-                      done();
+                      questDone("alc_q3");
+                      const msg = K.reward("alc_c1", { coins: 60, cos: "alc_c1" });
+                      finishChapter(1, "evaso");
+                      K.scene([["voce", `<b>FINE DEL CAPITOLO 1.</b> ${msg.join(" · ")}<br>Continua nel Capitolo 2: «Il Tunnel sotto la Caldaia».`]], () => K.openMain(), "alc_cortile");
                     });
                   }
                 });
@@ -394,7 +397,7 @@
       introBg: "alc_titolo",
       zones,
       talk,
-      intro: [
+      intro: () => [
         ["voce", "Roccia d'Alcatraz, ore 20:30. Il faro gira nella nebbia marina e illumina le garitte di cemento armato."],
         ["voce", "Uno scambio d'identità ti ha catapultato nel carcere più famoso del mondo con una casacca a strisce."],
         ["voce", "Per trovare una via d'uscita devi guadagnarti il rispetto dei detenuti sul campo d'asfalto!"]

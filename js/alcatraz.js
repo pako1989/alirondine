@@ -134,12 +134,12 @@
       g.arc(sx + 4, sy + 8, 3, 0, Math.PI * 2);
       g.stroke();
     },
-    endings: [
-      ["evasione", "La Notte dell'Evasione", "Vittoria in campo e fuga perfetta attraverso il condotto con Bruno e Sam."],
-      ["patto", "Il Patto del Direttore", "Trionfo leale: Cardenas riconosce l'errore d'identità e firma la grazia ufficiale."],
-      ["barbiere", "La Barberia della Roccia", "Decidi di restare sull'isola come allenatore e barbiere del penitenziario."],
-      ["segreto", "Il Tunnel Segreto della Roccia", "Tutti i grimaldelli raccolti, allarme mai al massimo e scoperta del tunnel sottomarino."]
-    ],
+    endings: {
+      evasione: ["La Notte dell'Evasione", "Vittoria in campo e fuga perfetta attraverso il condotto con Bruno e Sam.", "Sali sulla motovedetta."],
+      patto: ["Il Patto del Direttore", "Trionfo leale: Cardenas riconosce l'errore d'identità e firma la grazia ufficiale.", "Fidati della parola del Direttore."],
+      barbiere: ["La Barberia della Roccia", "Decidi di restare sull'isola come allenatore e barbiere del penitenziario.", "Resta dove sei amato."],
+      segreto: ["Il Tunnel Segreto della Roccia", "Grimaldelli raccolti, allarme basso e scoperta del tunnel sottomarino.", "Serve cautela e almeno due grimaldelli."]
+    },
     guest: {
       id: "alc_bruno",
       lines: [
@@ -170,9 +170,7 @@
 
   // Funzione d'allarme per la saga
   K.allarme = (delta, motivo) => {
-    const cur = K.stat("sospetto");
-    const n = Math.max(0, Math.min(99, cur + delta));
-    K.stat("sospetto", n);
+    const n = K.bond("sospetto", delta);
     if (delta > 0) {
       try { if (K.SFX) K.SFX("whistle"); } catch (_) {}
       K.say([["voce", `🚨 <b>ALLERTA GUARDIE SALITA A ${n}!</b><br><span style="color:var(--dim)">${motivo || "Passi di scarponi risuonano sui camminamenti."}</span>`]]);
@@ -182,12 +180,12 @@
   // Funzione di scasso serrature
   K.scasso = (diff, okFn, failFn) => {
     const chiavi = K.stat("chiavi");
-    K.ask(`C'è una serratura blindata (Difficoltà ${diff}). Come procedi?`, [
+    K.ask("voce", `C'è una serratura blindata (Difficoltà ${diff}). Come procedi?`, [
       {
         label: `🗝️ Usa un grimaldello (${chiavi} disponibili)`,
         fn: () => {
           if (chiavi > 0) {
-            K.stat("chiavi", chiavi - 1);
+            K.bond("chiavi", -1);
             K.say([["voce", "<i>*CLAC!*</i> Il pistoncino metallico scatta docilmente. Serratura aperta!"]], okFn);
           } else {
             K.say([["voce", "Non hai grimaldelli! Il meccanismo bloccato stride e attira l'attenzione."]], () => {

@@ -1,275 +1,84 @@
-// tests/alcatraz.cjs - Test completo BFS, grafica e validazione per «Fuga da Alcatraz FC»
-const fs = require('fs');
-const path = require('path');
-
-// Mock browser environment
-const window = {
-  addEventListener: () => {},
-  document: {
-    addEventListener: () => {},
-    createElement: () => ({
-      setHeader: () => {},
-      setAttribute: () => {},
-      textContent: "",
-      appendChild: () => {},
-      style: {},
-      classList: { add: () => {}, remove: () => {}, toggle: () => {} },
-      querySelector: () => null,
-      querySelectorAll: () => []
-    }),
-    head: { appendChild: () => {} },
-    body: { appendChild: () => {} },
-    getElementById: () => null,
-    querySelector: () => null,
-    querySelectorAll: () => []
-  },
-  location: { search: "?debug=1" },
-  localStorage: {
-    getItem: () => null,
-    setItem: () => {},
-    removeItem: () => {}
-  },
-  AudioContext: class {
-    constructor() { this.currentTime = 0; this.sampleRate = 44100; this.state = "running"; }
-    createGain() { return { gain: { setValueAtTime: () => {}, linearRampToValueAtTime: () => {}, exponentialRampToValueAtTime: () => {} }, connect: () => {} }; }
-    createOscillator() { return { frequency: { setValueAtTime: () => {}, linearRampToValueAtTime: () => {}, exponentialRampToValueAtTime: () => {} }, connect: () => {}, start: () => {}, stop: () => {} }; }
-    createBuffer() { return { getChannelData: () => new Float32Array(1024) }; }
-    createBufferSource() { return { connect: () => {}, start: () => {} }; }
-    createBiquadFilter() { return { frequency: { setValueAtTime: () => {}, exponentialRampToValueAtTime: () => {} }, connect: () => {} }; }
-    resume() {}
-  },
-  __borgoApi: {
-    TRZ: () => {}, trGo: () => {}, play: () => {}, scene: () => {}, match: () => {}, matchPick: () => {}, trZone: () => "", COSM: {}
-  }
-};
-global.window = window;
-global.document = window.document;
-global.localStorage = window.localStorage;
-global.location = window.location;
-
-// 1. Load saga-core
-const sagaCoreCode = fs.readFileSync(path.join(__dirname, '../js/saga-core.js'), 'utf8');
-eval(sagaCoreCode);
-
-// 2. Load alcatraz match engine
-const matchCode = fs.readFileSync(path.join(__dirname, '../js/alcatraz-partita.js'), 'utf8');
-eval(matchCode);
-
-// 3. Load alcatraz core
-const alcatrazCode = fs.readFileSync(path.join(__dirname, '../js/alcatraz.js'), 'utf8');
-eval(alcatrazCode);
-
-// 4. Load chapter 1
-const c1Code = fs.readFileSync(path.join(__dirname, '../js/alcatraz-c1.js'), 'utf8');
-eval(c1Code);
-
-console.log("✓ Files loaded and evaluated successfully!");
-
-const G = window.__alcatraz;
-if (!G) {
-  console.error("FAIL: window.__alcatraz not found!");
-  process.exit(1);
+// tests/alcatraz.cjs - «Fuga da Alcatraz FC»: raggiungibilità delle zone, tre capitoli giocati fino in fondo, quattro finali, sfondi
+const L = require("./lib.cjs");
+const MOD = { mod: "__alcatraz", key: "ali-di-rondine.alcatraz" };
+const K_ = "window.__alcatraz._dbg.K";
+const info = (p) => L.info(p);
+const mockMatch = (p, win = true) => p.evaluate((w) => { window.__alcatrazMatch.start = (o) => { setTimeout(() => o.onDone({ a: w ? 2 : 0, b: w ? 1 : 2, win: w, quit: false, data: {} }), 30); return true; }; }, win);
+async function reach(page, zid) {
+  await page.evaluate(([k, z]) => { eval(k).enterZone(z); }, [K_, zid]); await page.waitForTimeout(450);
+  return page.evaluate((zid) => {
+    const D = window.__alcatraz._dbg, z = window.__borgoApi.TRZ[zid], spec = D.ZONES[zid].spec, m = window.__tr.trMap(z), T = window.T_, st = spec.start, bad = [];
+    const npcs = (z.npcs || []).filter((n) => !n.ghost).map((n) => n.at), seen = T.bfs(m, z, st[0], st[1], npcs);
+    const adj = (x, y) => [[0, 0], [0, 1], [0, -1], [1, 0], [-1, 0]].some(([dx, dy]) => seen[y + dy] && seen[y + dy][x + dx]);
+    if (T.solidAt(m, z, st[0], st[1])) bad.push("partenza su solido");
+    (spec.items || []).forEach(([x, y]) => { if (!adj(x, y)) bad.push("oggetto " + x + "," + y); });
+    for (let s = 0; s <= 3; s++) (spec.npcs ? spec.npcs(s) : []).forEach((n) => { if (!adj(n.at[0], n.at[1])) bad.push("png " + n.id + " " + n.at); });
+    for (let y = 0; y < m.length; y++) for (let x = 0; x < m[0].length; x++) if (m[y][x] === "q" && !adj(x, y)) bad.push("porta " + x + "," + y);
+    return bad;
+  }, zid);
 }
-
-// Verifica engine partita
-if (!window.__alcatrazMatch || typeof window.__alcatrazMatch.start !== "function") {
-  console.error("FAIL: window.__alcatrazMatch.start is missing!");
-  process.exit(1);
-}
-console.log("✓ window.__alcatrazMatch engine verified!");
-
-const dbg = G._dbg;
-if (!dbg) {
-  console.error("FAIL: G._dbg is undefined!");
-  process.exit(1);
-}
-const allZones = dbg.ZONES || {};
-const zoneKeys = Object.keys(allZones);
-console.log(`Found ${zoneKeys.length} zones in dbg.ZONES:`, zoneKeys);
-
-let allPassed = true;
-
-// BFS Reachability test
-zoneKeys.forEach((zid) => {
-  const entry = allZones[zid];
-  const spec = (entry && entry.spec) || entry;
-  if (!spec) return;
-
-  const w = spec.w, h = spec.h;
-  const grid = Array.from({ length: h }, () => Array(w).fill("."));
-
-  const builder = {
-    lay(x1, y1, x2, y2, ch) {
-      for (let y = y1; y <= y2; y++) {
-        for (let x = x1; x <= x2; x++) {
-          if (x >= 0 && x < w && y >= 0 && y < h) grid[y][x] = ch;
-        }
-      }
-    },
-    put(x, y, ch) {
-      if (x >= 0 && x < w && y >= 0 && y < h) grid[y][x] = ch;
-    },
-    house(x, y, hw, hh, cfg) {
-      builder.lay(x, y, x + hw - 1, y + hh - 1, "#");
-      if (cfg && cfg.door) {
-        builder.put(cfg.door[0], cfg.door[1], cfg.enter ? "q" : "+");
-      }
-    }
+async function storia(w) {
+  const { browser, page, errors } = await L.setup({ w, ...MOD });
+  await page.evaluate(() => window.__alcatraz.open()); await page.evaluate(() => window.T_.click("Inizia la storia")); await L.advance(page);
+  const st = async (n) => ((await info(page)).step[n] || 0);
+  const chk = async (n, v, why) => { const s = await st(n); if (s !== v) errors.push(why + ": step " + s + " invece di " + v); };
+  await mockMatch(page, true);
+  // ---------- capitolo 1
+  for (const z of ["alc_cortile", "alc_celle"]) { const bad = await reach(page, z); if (bad.length) errors.push(z + " irraggiungibile: " + bad.join(", ")); }
+  await page.evaluate(([k]) => eval(k).enterZone("alc_cortile"), [K_]); await page.waitForTimeout(400);
+  if (w === 390) await L.shot(page, "alc_cortile");
+  await L.talk(page, "alc_tonelli"); await L.advance(page); await chk(1, 1, "Tonelli");
+  await L.talk(page, "alc_bruno"); await L.advance(page, [/Accetto il ruolo/]); await chk(1, 2, "Bruno");
+  await L.talk(page, "alc_malick"); await L.advance(page); await chk(1, 3, "Malick");
+  { const k = await page.evaluate((k) => eval(k).stat("chiavi"), K_); if (k !== 2) errors.push("chiavi dopo cap.1: " + k + " (attese 2)"); }
+  await L.talk(page, "alc_cardenas"); await L.advance(page, [/Inizia la partita/]);
+  { const i = await info(page); if (!i.done[1] || i.ch !== 2) errors.push("capitolo 1 non concluso: " + JSON.stringify([i.done, i.ch])); }
+  // ---------- capitolo 2
+  await page.evaluate(() => window.T_.click("Inizia il Capitolo 2")); await L.advance(page);
+  if ((await L.zone(page)) !== "alc_caldaie") errors.push("cap.2: non parte dalle caldaie: " + (await L.zone(page)));
+  for (const z of ["alc_caldaie", "alc_cortile2"]) { const bad = await reach(page, z); if (bad.length) errors.push(z + " irraggiungibile: " + bad.join(", ")); }
+  await page.evaluate(([k]) => eval(k).enterZone("alc_caldaie"), [K_]); await page.waitForTimeout(400);
+  if (w === 390) await L.shot(page, "alc_caldaie");
+  await L.talk(page, "alc_bruno"); await L.advance(page); await chk(2, 1, "Bruno cap.2");
+  await L.talk(page, "alc_malick"); await L.advance(page, [/Usa un grimaldello/, /Libertà nell'ombra/]); await chk(2, 2, "scasso e bivio");
+  if (!(await page.evaluate((k) => eval(k).F.get("alc_scelta_fuga"), K_))) errors.push("scelta fuga non registrata");
+  await L.goAct(page, 4, 12); await L.advance(page); if ((await L.zone(page)) !== "alc_cortile2") errors.push("non si sale al cortile: " + (await L.zone(page)));
+  await L.talk(page, "alc_tonelli"); await L.advance(page, [/Inizia la semifinale/]);
+  { const i = await info(page); if (!i.done[2] || i.ch !== 3) errors.push("capitolo 2 non concluso: " + JSON.stringify([i.done, i.ch])); }
+  { const k = await page.evaluate((k) => [eval(k).stat("chiavi"), eval(k).stat("sospetto")], K_); if (k[0] !== 2 || k[1] !== 10) errors.push("chiavi/allerta dopo cap.2: " + k + " (attesi 2,10)"); }
+  // ---------- capitolo 3
+  await page.evaluate(() => window.T_.click("Inizia il Capitolo 3")); await L.advance(page);
+  if ((await L.zone(page)) !== "alc_molo") errors.push("cap.3: non parte dal molo: " + (await L.zone(page)));
+  for (const z of ["alc_molo", "alc_cortile3"]) { const bad = await reach(page, z); if (bad.length) errors.push(z + " irraggiungibile: " + bad.join(", ")); }
+  await page.evaluate(([k]) => eval(k).enterZone("alc_molo"), [K_]); await page.waitForTimeout(400);
+  if (w === 390) await L.shot(page, "alc_molo");
+  await L.talk(page, "alc_cardenas"); await L.advance(page); await chk(3, 1, "Cardenas cap.3");
+  await L.goAct(page, 4, 4); await L.advance(page); if ((await L.zone(page)) !== "alc_cortile3") errors.push("molo→cortile: " + (await L.zone(page)));
+  await L.talk(page, "alc_cardenas"); await L.advance(page, [/Gioca la Finale/]); await chk(3, 2, "finale giocata");
+  await L.goAct(page, 26, 16); await L.advance(page); if ((await L.zone(page)) !== "alc_molo") errors.push("cortile→molo: " + (await L.zone(page)));
+  // finali: dallo stesso punto, quattro scelte diverse
+  const finale = async (kind, setup, pref) => {
+    await page.evaluate(([k, setup]) => { const K = eval(k); K.setStep(3, 2); eval(setup); K.enterZone("alc_molo"); }, [K_, setup]);
+    await page.waitForTimeout(450); await L.talk(page, "alc_cardenas"); await L.advance(page, [pref]);
+    const i = await info(page); if (!i.ends.includes(kind) || i.done[3] !== kind) errors.push("finale " + kind + " non registrato: " + JSON.stringify([i.done, i.ends]));
   };
-
-  if (typeof spec.build === "function") {
-    spec.build(builder);
-  }
-
-  const start = spec.start || [2, 2];
-  const [sx, sy] = start;
-
-  // Solid tiles definition
-  const solidSet = new Set((spec.solid || "WRFPB#~T").split(""));
-
-  if (solidSet.has(grid[sy][sx])) {
-    console.error(`FAIL: Start position [${sx}, ${sy}] in zone ${zid} is on solid tile '${grid[sy][sx]}'!`);
-    allPassed = false;
-  }
-
-  // BFS
-  const visited = Array.from({ length: h }, () => Array(w).fill(false));
-  const queue = [[sx, sy]];
-  visited[sy][sx] = true;
-
-  while (queue.length > 0) {
-    const [cx, cy] = queue.shift();
-    const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
-    for (const [dx, dy] of dirs) {
-      const nx = cx + dx, ny = cy + dy;
-      if (nx >= 0 && nx < w && ny >= 0 && ny < h && !visited[ny][nx]) {
-        const cell = grid[ny][nx];
-        if (!solidSet.has(cell)) {
-          visited[ny][nx] = true;
-          queue.push([nx, ny]);
-        }
-      }
-    }
-  }
-
-  // Verifica che gli NPC siano raggiungibili
-  for (let step = 0; step <= 3; step++) {
-    const npcs = typeof spec.npcs === "function" ? spec.npcs(step) : (Array.isArray(spec.npcs) ? spec.npcs : []);
-    npcs.forEach((npc) => {
-      const [nx, ny] = npc.at;
-      const reachable = visited[ny][nx] ||
-        (nx > 0 && visited[ny][nx - 1]) ||
-        (nx < w - 1 && visited[ny][nx + 1]) ||
-        (ny > 0 && visited[ny - 1][nx]) ||
-        (ny < h - 1 && visited[ny + 1][nx]);
-      if (!reachable) {
-        console.error(`FAIL: NPC ${npc.id} in zone ${zid} at [${nx}, ${ny}] is unreachable!`);
-        allPassed = false;
-      }
-    });
-  }
-
-  // Verifica che gli items siano raggiungibili
-  (spec.items || []).forEach(([ix, iy]) => {
-    const reachable = visited[iy][ix] ||
-      (ix > 0 && visited[iy][ix - 1]) ||
-      (ix < w - 1 && visited[iy][ix + 1]) ||
-      (iy > 0 && visited[iy - 1][ix]) ||
-      (iy < h - 1 && visited[iy + 1][ix]);
-    if (!reachable) {
-      console.error(`FAIL: Item in zone ${zid} at [${ix}, ${iy}] is unreachable!`);
-      allPassed = false;
-    }
-  });
-
-  console.log(`✓ Zone ${zid} BFS passed (${w}x${h}) from [${sx}, ${sy}]`);
-});
-
-// Test bg scenarios
-const bgCode = fs.readFileSync(path.join(__dirname, '../js/bg-scenarios.js'), 'utf8');
-eval(bgCode);
-
-const LB = window.__lbBg && window.__lbBg.LB;
-if (!LB) {
-  console.error("FAIL: window.__lbBg.LB not found!");
-  process.exit(1);
+  await finale("evasione", "K.bond('sospetto', 40)", /Sali sulla motovedetta/);
+  await finale("patto", "0", /Firma l'accordo/);
+  await finale("barbiere", "0", /Resta sull'isola/);
+  // il segreto c'è solo con chiavi >= 2 e allerta <= 25; senza non compare
+  await page.evaluate(([k]) => { const K = eval(k); K.setStep(3, 2); K.bond("chiavi", 5); K.bond("sospetto", -99); K.enterZone("alc_molo"); }, [K_]); await page.waitForTimeout(450);
+  await L.talk(page, "alc_cardenas"); await page.waitForTimeout(200);
+  { const lab = await page.evaluate(() => { for (let i = 0; i < 8; i++) { const b = window.T_.btns().find((o) => /^Continua/.test(o.t)); if (!b) break; b.b.click(); } return window.T_.btns().map((o) => o.t); }); await page.waitForTimeout(400);
+    const t = await page.evaluate(() => window.T_.btns().map((o) => o.t)); if (!t.concat(lab).some((x) => /Segreto/.test(x))) errors.push("opzione segreta assente con chiavi e allerta bassa: " + JSON.stringify(t)); }
+  await L.advance(page, [/Segreto/]);
+  { const i = await info(page); if (!i.ends.includes("segreto") || i.ends.length !== 4) errors.push("finali: " + JSON.stringify(i.ends)); }
+  L.check(`Fuga da Alcatraz FC · tre capitoli e quattro finali (${w} px)`, errors); await browser.close();
 }
-
-["alc_titolo", "alc_cortile", "alc_celle"].forEach((k) => {
-  const def = LB[k];
-  if (!def) {
-    console.error(`FAIL: Scenario key '${k}' missing in LB!`);
-    allPassed = false;
-  } else {
-    if (!def.hot || def.hot.length < 3) {
-      console.error(`FAIL: Scenario '${k}' has fewer than 3 clickable hotspots!`);
-      allPassed = false;
-    } else {
-      console.log(`✓ Scenario ${k} has ${def.hot.length} clickable hotspots.`);
-    }
-
-    // Prova di disegno
-    if (typeof def.draw === "function") {
-      const mockG = {
-        fillStyle: "",
-        strokeStyle: "",
-        lineWidth: 1,
-        fillRect: () => {},
-        strokeRect: () => {},
-        beginPath: () => {},
-        moveTo: () => {},
-        lineTo: () => {},
-        closePath: () => {},
-        arc: () => {},
-        ellipse: () => {},
-        fill: () => {},
-        stroke: () => {},
-        quadraticCurveTo: () => {},
-        bezierCurveTo: () => {},
-        createLinearGradient: () => ({ addColorStop: () => {} }),
-        createRadialGradient: () => ({ addColorStop: () => {} }),
-        save: () => {},
-        restore: () => {},
-        translate: () => {},
-        rotate: () => {},
-        globalAlpha: 1,
-        globalCompositeOperation: "source-over"
-      };
-      try {
-        def.draw(mockG, 360, 210, 0);
-        console.log(`✓ Scenario ${k} drawn without errors.`);
-      } catch (err) {
-        console.error(`FAIL: Error drawing scenario ${k}:`, err);
-        allPassed = false;
-      }
-    }
-  }
-});
-
-// Test match engine state
-try {
-  const match = window.__alcatrazMatch.start({
-    teamA: "Braccio Ovest",
-    opp: "Braccio Est",
-    onDone: (res) => {}
-  });
-  if (!window.__alcatrazMatch.state || typeof window.__alcatrazMatch.state.finish !== "function") {
-    console.error("FAIL: window.__alcatrazMatch.state or finish() missing!");
-    allPassed = false;
-  } else {
-    console.log("✓ window.__alcatrazMatch.state.finish() successfully verified.");
-  }
-} catch (err) {
-  console.error("FAIL: Error testing match engine:", err);
-  allPassed = false;
+// sfondi: le cinque scene ci sono, hanno punti da toccare e si disegnano senza errori
+async function sfondi() {
+  const { browser, page, errors } = await L.setup({ ...MOD });
+  const r = await page.evaluate(() => { const LB = window.__lbBg && window.__lbBg.LB, out = []; if (!LB) return ["LB assente"]; ["alc_titolo", "alc_cortile", "alc_celle", "alc_caldaie", "alc_molo"].forEach((k) => { const d = LB[k]; if (!d) return out.push("manca " + k); if (!d.hot || d.hot.length < 3) out.push(k + ": meno di 3 punti da toccare"); }); return out; });
+  r.forEach((x) => errors.push(x));
+  L.check("Alcatraz · sfondi", errors); await browser.close();
 }
-
-if (allPassed) {
-  console.log("=========================================");
-  console.log("✓ ALL CHECKS PASSED FOR FUGA DA ALCATRAZ FC!");
-  console.log("=========================================");
-  process.exit(0);
-} else {
-  console.error("VALIDATION FAILED!");
-  process.exit(1);
-}
+(async () => { await storia(390); await sfondi(); })().catch((e) => { console.error("✗ alcatraz:", e.message); process.exit(1); });
