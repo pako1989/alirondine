@@ -609,7 +609,7 @@
         name: spec.name, short: spec.short, sub: spec.sub || "", need: 0, w: spec.w, h: spec.h, start: spec.start, theme: spec.music || cfg.musicMain || "torino", isCustomSaga: true,
         bus: "uscita", busLabel: "Esci dalla saga",
         item: spec.item || cfg.item || ["Piuma", "Piume"], itemCos: spec.itemCos, items: spec.items || [], bld: [], npcs: [], areas: spec.areas || [], hints: {}, pitch: spec.pitch || [-20, -20, 1, 1],
-        solid: SOLID, act: Object.assign({ [REST.ch]: REST.label, x: "Apri il baule" }, obj(cfg.act), spec.act || {}), intro: [],
+        solid: SOLID, act: Object.assign({ [REST.ch]: REST.label, x: "Apri il baule", q: "Entra" }, obj(cfg.act), spec.act || {}), intro: [],
         me: () => { const c = api.CAST.hero || api.CAST.leo; return Object.assign({}, c); },
         pass: () => (cfg.pass ? safe(() => cfg.pass(K, zid), "") || "" : ""), // tessere che l'eroe può attraversare adesso (forme, poteri)
         heroFx: cfg.heroFx ? () => safe(() => cfg.heroFx(K, zid), null) : null, // l'aspetto dell'eroe in esplorazione: { s: scala, dy: volo, cape: colore, aura }
@@ -739,7 +739,7 @@
     }
     // commissioni: piccole missioni date dai personaggi (si leggono nel diario)
     const QUESTS = {};
-    function quest(id, title, desc) { QUESTS[id] = { title, desc }; if (!F.get("q_" + id)) { F.set("q_" + id, 1); SFX.ding(); note(`Commissione: ${title}`); if (api && api.trToast) safe(() => api.trToast("Nuova commissione: " + title)); } }
+    function quest(id, title, desc) { if (title === undefined && desc === undefined) { desc = String(id); title = desc.length > 46 ? desc.slice(0, 44).replace(/[\s,;.]+$/, "") + "…" : desc; id = "auto_" + hash(desc); } /* chiamata con la sola descrizione (errore già visto: toast «undefined») */ QUESTS[id] = { title, desc }; if (!F.get("q_" + id)) { F.set("q_" + id, 1); SFX.ding(); note(`Commissione: ${title}`); if (api && api.trToast) safe(() => api.trToast("Nuova commissione: " + title)); } }
     function questDone(id) { if (F.get("q_" + id) === 2) return false; F.set("q_" + id, 2); SFX.choice(); if (api && api.trToast && QUESTS[id]) safe(() => api.trToast("Commissione completata: " + QUESTS[id].title)); return true; }
     const questState = (id) => F.get("q_" + id, 0);
     function questsHtml() {

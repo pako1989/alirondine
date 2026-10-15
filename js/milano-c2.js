@@ -123,7 +123,7 @@
             bond("biglietti", 20);
             bond("fiuto", 15);
             setStep(1);
-            quest("Entra nel Camerino di Mara ed esamina la valigia delle scommesse.");
+            quest("mn2_camerino", "Il camerino di Mara", "Entra nel Camerino di Mara ed esamina la valigia delle scommesse.");
             done();
           });
         } else if (s === 1) {
@@ -136,7 +136,7 @@
                 ["mn_mara", "Don Carmine è nel vicolo sul retro della bisca. Sta distribuendo gli ultimi anticipi. Se vai da lui, vacci a testa alta."]
               ], () => {
                 setStep(2);
-                quest("Raggiungi il Vicolo delle Bische e parla con Don Carmine.");
+                quest("mn2_vicolo", "Il Vicolo delle Bische", "Raggiungi il Vicolo delle Bische e parla con Don Carmine.");
                 done();
               });
             });
@@ -160,7 +160,7 @@
           ], () => {
             K.interroga("fischietto", { biglietti: 50, fiuto: 25, sospetto: 20 }, () => {
               setStep(3);
-              quest("Sconfiggi i Tirapiedi di Don Carmine a Pedinamento Tattico!");
+              quest("mn2_tirapiedi", "I Tirapiedi di Don Carmine", "Sconfiggi i Tirapiedi di Don Carmine a Pedinamento Tattico!");
               done();
             });
           });

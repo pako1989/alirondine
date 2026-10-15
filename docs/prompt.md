@@ -29,6 +29,8 @@ Un solo file: contiene regole, stato del progetto, come costruire una saga, API 
 | Popup/toast che durano 3 s | testo non leggibile | ora automatico (4,5-12 s); non usare timer propri brevi |
 | `<b>` mostrato a schermo | simboli nel testo | ora supportato in `play()`; evita altri tag |
 | Pulsanti di uscita vicini ai tasti di gioco | tocchi per sbaglio | staccali e rendili meno evidenti |
+| `K.quest("solo testo")` con un solo argomento (Milano, Campana, Galletta) | toast «Nuova commissione: undefined» | firma: `K.quest(id, titolo, descrizione)` (ora il motore tollera il solo testo, ma scrivi tutti e tre) |
+| Porte delle case (`L.house(..., { door, enter })`) senza etichetta azione `q` | vicino alla porta non compare «Entra» | ora `q: "Entra"` è di default; se usi un'etichetta diversa mettila in `act` |
 | Manifest in solo verticale | app non ruota | `orientation: any` (già fatto) |
 
 ---

@@ -120,7 +120,7 @@
             bond("biglietti", 25);
             bond("fiuto", 15);
             setStep(1);
-            quest("Raggiungi gli Spogliatoi Sotterranei e parla con l'Arbitro Brambilla.");
+            quest("mn3_spogliatoi", "Gli Spogliatoi Sotterranei", "Raggiungi gli Spogliatoi Sotterranei e parla con l'Arbitro Brambilla.");
             done();
           });
         } else if (s === 1) {
@@ -150,7 +150,7 @@
             bond("biglietti", 30);
             bond("fiuto", 20);
             setStep(2);
-            quest("Sali in Tribuna d'Onore e confrontati con Mara e Don Carmine.");
+            quest("mn3_tribuna", "La Tribuna d'Onore", "Sali in Tribuna d'Onore e confrontati con Mara e Don Carmine.");
             done();
           });
         } else {
@@ -171,7 +171,7 @@
           ], () => {
             K.interroga("spartito", { biglietti: 50, fiuto: 30, sospetto: 20 }, () => {
               setStep(3);
-              quest("Scendi sul campo dell'Arena Civica e trionfa nel Derby dell'Ombra!");
+              quest("mn3_derby", "Il Derby dell'Ombra", "Scendi sul campo dell'Arena Civica e trionfa nel Derby dell'Ombra!");
               done();
             });
           });

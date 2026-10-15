@@ -132,7 +132,7 @@
             bond("biglietti", 15);
             bond("fiuto", 10);
             setStep(1);
-            quest("Entra nell'Osteria del Tram e parla con Battista l'Oste.");
+            quest("mn1_osteria", "All'Osteria del Tram", "Entra nell'Osteria del Tram e parla con Battista l'Oste.");
             done();
           });
         } else if (s === 1) {
@@ -164,7 +164,7 @@
             bond("biglietti", 30);
             bond("fiuto", 15);
             setStep(2);
-            quest("Raggiungi il Deposito del Tram n° 19 e affronta Peppino il Guercio.");
+            quest("mn1_deposito", "Il Deposito n° 19", "Raggiungi il Deposito del Tram n° 19 e affronta Peppino il Guercio.");
             done();
           });
         } else if (s >= 2) {
@@ -194,7 +194,7 @@
                 ["hero", "Perfetto. È proprio sul campo da calcio che volevo incontrarli!"]
               ], () => {
                 setStep(3);
-                quest("Ritorna sul piazzale e sfida la Banda dei Bastioni a Pedinamento Tattico!");
+                quest("mn1_banda", "La Banda dei Bastioni", "Ritorna sul piazzale e sfida la Banda dei Bastioni a Pedinamento Tattico!");
                 done();
               });
             });
