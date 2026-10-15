@@ -3413,6 +3413,291 @@
     }
   }
 
+  // --- 21. LA PIRAMIDE DEL SOLE · IL SEGRETO DEI MAYA ---
+  window.__myDraw = {
+    get Piramide() { return drawDetailedMayaPiramide; },
+    get Campobase() { return drawDetailedMayaCampobase; },
+    get Cortile() { return drawDetailedMayaCortile; },
+    get Labirinto() { return drawDetailedMayaLabirinto; },
+    get Cenote() { return drawDetailedMayaCenote; }
+  };
+
+  function drawDetailedMayaPiramide(g, W, H, f) {
+    // Cielo dorato/porpora al tramonto tropicale dello Yucatán
+    vgrad(g, 0, 0, W, 110, "#451a03", "#b45309");
+    // Grande sole solare dorato
+    g.fillStyle = "#fef08a";
+    g.beginPath();
+    g.arc(W / 2, 45, 20, 0, Math.PI * 2);
+    g.fill();
+    glowB(g, W / 2, 45, 40, "rgba(251, 191, 36, 0.4)");
+
+    // Sagoma maestosa della Piramide a gradoni
+    const pirGrad = g.createLinearGradient(0, 40, 0, 140);
+    pirGrad.addColorStop(0, "#78350f");
+    pirGrad.addColorStop(1, "#292524");
+    g.fillStyle = pirGrad;
+    for (let st = 0; st < 6; st++) {
+      const sw = 90 + st * 35;
+      const sh = 14;
+      const sy = 40 + st * 15;
+      g.fillRect(W / 2 - sw / 2, sy, sw, sh);
+      g.strokeStyle = "rgba(254, 243, 199, 0.2)";
+      g.lineWidth = 1;
+      g.strokeRect(W / 2 - sw / 2, sy, sw, sh);
+    }
+
+    // Scalinata centrale monumentale
+    g.fillStyle = "#b45309";
+    g.beginPath();
+    g.moveTo(W / 2 - 14, 40);
+    g.lineTo(W / 2 + 14, 40);
+    g.lineTo(W / 2 + 28, 130);
+    g.lineTo(W / 2 - 28, 130);
+    g.closePath();
+    g.fill();
+    g.strokeStyle = "#f59e0b";
+    g.lineWidth = 1.2;
+    g.stroke();
+
+    // Tempio sommitale col basamento
+    g.fillStyle = "#451a03";
+    g.fillRect(W / 2 - 20, 26, 40, 14);
+    g.fillStyle = "#fbbf24";
+    g.fillRect(W / 2 - 5, 29, 10, 11);
+
+    // Foresta pluviale e ceiba ai piedi della piramide
+    vgrad(g, 0, 130, W, H - 130, "#064e3b", "#022c22");
+    for (let cx = 0; cx < W; cx += 22) {
+      g.fillStyle = cx % 44 === 0 ? "#047857" : "#059669";
+      g.beginPath();
+      g.arc(cx, 134 + Math.sin(cx) * 4, 18, 0, Math.PI * 2);
+      g.fill();
+    }
+
+    // Bracieri rituali accesi ai lati della scalinata
+    [W / 2 - 38, W / 2 + 38].forEach((bx, idx) => {
+      g.fillStyle = "#78350f";
+      g.fillRect(bx - 6, 122, 12, 16);
+      g.fillStyle = "#f59e0b";
+      g.beginPath();
+      g.arc(bx + Math.sin(f * 0.2 + idx) * 2, 118, 6, 0, Math.PI * 2);
+      g.fill();
+      glowB(g, bx, 118, 14, "rgba(245, 158, 11, 0.35)");
+    });
+  }
+
+  function drawDetailedMayaCampobase(g, W, H, f) {
+    // Radura tra gli alberi giganti di ceiba
+    vgrad(g, 0, 0, W, 90, "#14532d", "#052e16");
+    g.fillStyle = "#3f2212";
+    g.fillRect(20, 0, 18, 110);
+    g.fillRect(W - 35, 0, 22, 110);
+
+    // Terreno battuto e radici
+    vgrad(g, 0, 90, W, H - 90, "#78350f", "#451a03");
+
+    // Grande tenda coloniale in canapa dell'accampamento
+    g.fillStyle = "#a16207";
+    g.beginPath();
+    g.moveTo(70, 60);
+    g.lineTo(135, 125);
+    g.lineTo(25, 125);
+    g.closePath();
+    g.fill();
+    g.strokeStyle = "#ca8a04";
+    g.lineWidth = 1.5;
+    g.stroke();
+    // Ingresso tenda aperto
+    g.fillStyle = "#451a03";
+    g.beginPath();
+    g.moveTo(70, 65);
+    g.lineTo(95, 125);
+    g.lineTo(45, 125);
+    g.closePath();
+    g.fill();
+
+    // Seconda tenda sullo sfondo
+    g.fillStyle = "#854d0e";
+    g.beginPath();
+    g.moveTo(W - 90, 75);
+    g.lineTo(W - 45, 125);
+    g.lineTo(W - 135, 125);
+    g.closePath();
+    g.fill();
+
+    // Casse di legno reperti e generatore radio
+    g.fillStyle = "#5c2b09";
+    g.fillRect(150, 105, 36, 25);
+    g.fillRect(190, 112, 28, 18);
+    g.strokeStyle = "#ca8a04";
+    g.lineWidth = 1;
+    g.strokeRect(150, 105, 36, 25);
+    g.fillStyle = "#334155";
+    g.fillRect(230, 108, 22, 22);
+    g.strokeStyle = "#cbd5e1";
+    g.lineWidth = 1.5;
+    g.beginPath();
+    g.moveTo(241, 108);
+    g.lineTo(241, 55);
+    g.stroke();
+
+    // Lanterna a cherosene accesa su un palo
+    g.fillStyle = "#0f172a";
+    g.fillRect(138, 80, 4, 45);
+    g.fillStyle = "#fef08a";
+    g.beginPath();
+    g.arc(140, 80, 5, 0, Math.PI * 2);
+    g.fill();
+    glowB(g, 140, 80, 18, "rgba(254, 240, 138, 0.4)");
+  }
+
+  function drawDetailedMayaCortile(g, W, H, f) {
+    // Pareti cerimoniali in pietra calcarea intagliata
+    vgrad(g, 0, 0, W, 100, "#292524", "#44403c");
+    g.strokeStyle = "rgba(245, 158, 11, 0.25)";
+    g.lineWidth = 1.5;
+    for (let x = 30; x < W; x += 55) {
+      g.strokeRect(x, 20, 40, 65);
+      g.beginPath();
+      g.arc(x + 20, 45, 12, 0, Math.PI * 2);
+      g.stroke();
+    }
+
+    // Pavimento rituale in pietra e lastre rosse
+    vgrad(g, 0, 100, W, H - 100, "#78350f", "#33160a");
+    g.strokeStyle = "rgba(254, 243, 199, 0.4)";
+    g.lineWidth = 1.5;
+    g.strokeRect(35, 108, W - 70, H - 120);
+    g.beginPath();
+    g.moveTo(W / 2, 108);
+    g.lineTo(W / 2, H - 12);
+    g.stroke();
+    g.beginPath();
+    g.arc(W / 2, 150, 22, 0, Math.PI * 2);
+    g.stroke();
+
+    // Rampe laterali inclinate a quarantacinque gradi
+    g.fillStyle = "#451a03";
+    g.beginPath();
+    g.moveTo(0, 100); g.lineTo(35, 118); g.lineTo(35, H); g.lineTo(0, H);
+    g.fill();
+    g.beginPath();
+    g.moveTo(W, 100); g.lineTo(W - 35, 118); g.lineTo(W - 35, H); g.lineTo(W, H);
+    g.fill();
+
+    // I due antichi anelli verticali di pietra forati in quota
+    [40, W - 40].forEach((rx, idx) => {
+      g.fillStyle = "#78350f";
+      g.fillRect(idx === 0 ? rx - 14 : rx + 2, 55, 12, 8);
+      g.strokeStyle = "#ca8a04";
+      g.lineWidth = 4;
+      g.beginPath();
+      g.arc(rx, 59, 14, 0, Math.PI * 2);
+      g.stroke();
+      g.fillStyle = "#0f172a";
+      g.beginPath();
+      g.arc(rx, 59, 9, 0, Math.PI * 2);
+      g.fill();
+      glowB(g, rx, 59, 16, "rgba(251, 191, 36, 0.3)");
+    });
+
+    // Torce accese alle pareti
+    [95, W - 95].forEach((tx, idx) => {
+      g.fillStyle = "#292524";
+      g.fillRect(tx - 3, 40, 6, 24);
+      g.fillStyle = "#f59e0b";
+      g.beginPath();
+      g.arc(tx + Math.sin(f * 0.15 + idx) * 2, 38, 7, 0, Math.PI * 2);
+      g.fill();
+    });
+  }
+
+  function drawDetailedMayaLabirinto(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, "#1c1917", "#0c0a09");
+    g.strokeStyle = "rgba(120, 53, 15, 0.35)";
+    g.lineWidth = 1.2;
+    for (let y = 0; y < H; y += 22) {
+      g.beginPath();
+      g.moveTo(0, y);
+      g.lineTo(W, y);
+      g.stroke();
+      for (let x = (y % 44 === 0 ? 0 : 25); x < W; x += 50) {
+        g.beginPath();
+        g.moveTo(x, y);
+        g.lineTo(x, y + 22);
+        g.stroke();
+      }
+    }
+
+    // Fessure per dardi a pressione
+    g.fillStyle = "#000000";
+    for (let fy = 35; fy < H - 40; fy += 30) {
+      g.fillRect(25, fy, 15, 3);
+      g.fillRect(W - 40, fy, 15, 3);
+      g.fillRect(W / 2 - 8, fy, 16, 3);
+    }
+
+    // Lastra centrale a bilanciere con glifo intagliato
+    g.fillStyle = "#451a03";
+    g.fillRect(W / 2 - 35, H - 45, 70, 30);
+    g.strokeStyle = "#f59e0b";
+    g.lineWidth = 1.5;
+    g.strokeRect(W / 2 - 35, H - 45, 70, 30);
+    g.fillStyle = "#fbbf24";
+    g.beginPath();
+    g.arc(W / 2, H - 30, 8, 0, Math.PI * 2);
+    g.fill();
+    glowB(g, W / 2, H - 30, 18, "rgba(245, 158, 11, 0.25)");
+  }
+
+  function drawDetailedMayaCenote(g, W, H, f) {
+    vgrad(g, 0, 0, W, 70, "#022c22", "#0f172a");
+    // Apertura da cui filtra la luce solare
+    g.fillStyle = "rgba(254, 240, 138, 0.15)";
+    g.beginPath();
+    g.moveTo(W / 2 - 25, 0);
+    g.lineTo(W / 2 + 25, 0);
+    g.lineTo(W / 2 + 80, H);
+    g.lineTo(W / 2 - 80, H);
+    g.closePath();
+    g.fill();
+
+    // Stalattiti pendenti dalla volta
+    g.fillStyle = "#1e293b";
+    for (let st = 15; st < W; st += 32) {
+      g.beginPath();
+      g.moveTo(st - 7, 0);
+      g.lineTo(st + 7, 0);
+      g.lineTo(st, 28 + Math.sin(st) * 12);
+      g.closePath();
+      g.fill();
+    }
+
+    // Lago sotterraneo turchese limpidissimo
+    vgrad(g, 0, 70, W, H - 70, "#0284c7", "#064e3b");
+    g.strokeStyle = "rgba(254, 255, 255, 0.25)";
+    g.lineWidth = 1;
+    for (let wy = 85; wy < H; wy += 16) {
+      g.beginPath();
+      g.moveTo(0, wy + Math.sin(f * 0.08 + wy) * 3);
+      g.lineTo(W, wy + Math.cos(f * 0.08 + wy) * 3);
+      g.stroke();
+    }
+
+    // Zattera di bambù ormeggiata alla sponda
+    g.fillStyle = "#78350f";
+    g.fillRect(W / 2 - 35, H - 35, 70, 20);
+    for (let b = W / 2 - 30; b < W / 2 + 35; b += 12) {
+      g.strokeStyle = "#451a03";
+      g.lineWidth = 1.5;
+      g.beginPath();
+      g.moveTo(b, H - 35);
+      g.lineTo(b, H - 15);
+      g.stroke();
+    }
+  }
+
   // --- 19. LA NOTTE DEI CENTO RINTOCCHI · ROCCA CAMPANARIA ---
   window.__cpDraw = { get Piazza() { return drawDetailedCampanaPiazza; }, get Campanile() { return drawDetailedCampanaCampanile; }, get Cantina() { return drawDetailedCampanaCantina; } };
 
@@ -5119,6 +5404,26 @@
       case "te_stazione":
       case "te_caldaie":
         drawDetailedTrenoStazione(g, W, H, f);
+        return true;
+      case "my_titolo":
+      case "my_atrio":
+      case "my_sommita":
+        drawDetailedMayaPiramide(g, W, H, f);
+        return true;
+      case "my_campobase":
+      case "my_giungla":
+        drawDetailedMayaCampobase(g, W, H, f);
+        return true;
+      case "my_cortile":
+      case "my_cripta":
+      case "my_museo":
+        drawDetailedMayaCortile(g, W, H, f);
+        return true;
+      case "my_labirinto":
+        drawDetailedMayaLabirinto(g, W, H, f);
+        return true;
+      case "my_cenote":
+        drawDetailedMayaCenote(g, W, H, f);
         return true;
       case "cp_piazza":
       case "cp_titolo":
@@ -9289,6 +9594,52 @@
   LB.te_cuccette = LB.te_corridoio;
   LB.te_panoramico = LB.te_corridoio;
   LB.te_caldaie = LB.te_stazione;
+
+  // La Piramide del Sole · Il Segreto dei Maya del Pallone
+  [
+    ["my_titolo", "Piramide", [
+      [140, 25, 80, 50, "☀️ Il Sole di Kukulkan: il disco solare dorato che domina il cielo dello Yucatán e scandisce i riti del Pok-ta-pok."],
+      [130, 75, 100, 55, "🏛️ La Scalinata del Tempio: gradoni megalitici scolpiti a serpente piumato che salgono fino alle nuvole."],
+      [30, 120, 75, 45, "🌿 La Foresta Pluviale: alberi secolari di ceiba e liane che hanno protetto la piramide per mille anni."],
+      [255, 115, 75, 45, "🔥 Braciere Sacro: fiamme di copale aromatico che illuminano l'ascesa dei guerrieri del pallone."]
+    ]],
+    ["my_campobase", "Campobase", [
+      [35, 75, 85, 50, "⛺ Tenda del Professor Alvarez: carte geografiche del 1936, lenti d'ingrandimento e diari di scavo."],
+      [145, 95, 75, 45, "📦 Casse Archeologiche: attrezzi in ferro battuto, pennelli da restauro e calchi in gesso dei bassorilievi."],
+      [225, 70, 65, 55, "📻 Radiotelegrafo da Campo: l'antenna a onde corte che capta i messaggi cifrati dei mercenari di Vargas."],
+      [130, 70, 35, 35, "🏮 Lanterna a Cherosene: bagliore caldo che tiene lontane le creature della notte tropicale."]
+    ]],
+    ["my_giungla", "Campobase", [
+      [25, 45, 65, 75, "🌴 Ceiba Millenaria: le radici giganti avvolgono colonne spezzate e gradini di pietra calcarea."],
+      [110, 85, 80, 50, "🦜 Quetzal del Tempio: uccello dalle piume smeraldo che guida la spedizione verso la piramide."],
+      [210, 80, 75, 45, "🗿 Stele dei Giocatori: bassorilievo maya che ritrae il colpo d'anca con la sfera di caucciù."],
+      [275, 60, 45, 65, "💧 Cascata Nascosta: velo d'acqua cristallina che occulta una fessura verso le gallerie segrete."]
+    ]],
+    ["my_cortile", "Cortile", [
+      [25, 45, 60, 45, "⭕ Anello di Pietra Ovest: intagliato a bocca di giaguaro a quattro metri d'altezza sulle lastre inclinate."],
+      [275, 45, 60, 45, "⭕ Anello di Pietra Est: il bersaglio sacro dove il tiro solare a parabola consacra la vittoria."],
+      [125, 125, 110, 45, "⚽ Palla di Caucciù Pesante: sfera gommosa naturale che rimbalza a velocità micidiale sulla roccia."],
+      [130, 40, 100, 50, "🐍 Bassorilievo di Kukulkan: il serpente piumato che serpeggia lungo l'intera cornice dello stadio."]
+    ]],
+    ["my_labirinto", "Labirinto", [
+      [20, 40, 55, 45, "🏹 Fessure per Dardi: minuscoli fori nella pietra da cui scattano frecce azionate a bilanciere."],
+      [135, 115, 90, 50, "⚖️ Lastra a Pressione: basamento basculante che richiede il passo felino del giaguaro per non cedere."],
+      [140, 30, 80, 50, "📜 Glifi della Volta: iscrizioni geroglifiche che indicano la via sicura verso la Cripta."],
+      [280, 60, 55, 65, "🕯️ Nicchia Votiva: incavi nella parete dove i sacerdoti riponevano offerte di resina e giada."]
+    ]],
+    ["my_cenote", "Cenote", [
+      [125, 15, 110, 55, "🕳️ Occhio del Cielo: l'apertura circolare nella volta calcarea che inonda il lago di luce dorata."],
+      [35, 110, 90, 50, "💧 Acque Turchesi: pozzo sotterraneo profondo e immobile consacrato al dio della pioggia Chaac."],
+      [230, 110, 85, 45, "🛶 Zattera di Balsa: tronchi legati con liane intrecciate, pronta per la navigazione d'emergenza."],
+      [270, 25, 45, 65, "💎 Stalattiti Smeraldo: formazioni minerali millenarie che gocciolano ritmicamente nel silenzio."]
+    ]]
+  ].forEach(([k, n, hot]) => {
+    LB[k] = { draw: (g, W, H, f) => { const D = window.__myDraw; if (D && D[n]) D[n](g, W, H, f); else px(g, 0, 0, W, H, "#1c1917"); }, hot };
+  });
+  LB.my_atrio = LB.my_titolo;
+  LB.my_sommita = LB.my_titolo;
+  LB.my_cripta = LB.my_cortile;
+  LB.my_museo = LB.my_cortile;
 
   // Operazione Fuorigioco Noir · Milano 1954: scene con punti cliccabili visibili (scintille) e didascalia
   [
