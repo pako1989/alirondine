@@ -160,6 +160,9 @@
       m.ends = [...new Set(arr(o.ends).filter((x) => typeof x === "string" && FLAG_RE.test(x)))].slice(0, 16);
       m.lore = [...new Set(arr(o.lore).filter((x) => typeof x === "string" && FLAG_RE.test(x)))].slice(0, 60);
       m.met = [...new Set(arr(o.met).filter((x) => typeof x === "string" && FLAG_RE.test(x)))].slice(0, 80); // i personaggi incontrati (per la pagina «Personaggi»)
+
+      // capitolo più avanzato raggiunto: i capitoli già raggiunti restano giocabili anche dopo un «rivivi»
+      m.max = Math.max(m.ch, clampI(o.max, 1, 9, 1), ...Object.keys(m.done).map((k) => Math.min(+k + 1, NCH)), m.ends.length ? NCH : 1);
       return m;
     }
     let MEM = null;
@@ -177,11 +180,10 @@
     function rewindTo(n) {
       const m = mem(); let sn = m.snap && m.snap[n];
       if (!sn && n === 1) { sn = { st: {}, flags: {} }; Object.keys(STATS).forEach((q) => { sn.st[q] = STATS[q][2]; }); }
-      if (!sn) return false; // salvataggio vecchio, senza istantanea: si rigioca com'è
+      m.max = Math.max(m.max || 1, m.ch, n);
+      if (!sn) { m.ch = n; save(); return false; } // salvataggio vecchio, senza istantanea: si rigioca com'è
       m.st = Object.assign({}, sn.st); m.flags = Object.assign({}, sn.flags); m.zone = "";
-      Object.keys(m.step).forEach((k) => { if (+k >= n) delete m.step[k]; });
-      Object.keys(m.done).forEach((k) => { if (+k >= n) delete m.done[k]; });
-      Object.keys(m.snap).forEach((k) => { if (+k > n) delete m.snap[k]; });
+      delete m.step[n]; delete m.done[n];
       m.choices = (m.choices || []).filter((x) => x.c < n);
       m.ch = n; save(); return true;
     }
@@ -459,9 +461,7 @@
     function rewindToChoice(x) {
       const m = mem(); if (!x || !x.s) return false; const n = x.c;
       m.st = Object.assign({}, x.s.st); m.flags = Object.assign({}, x.s.flags);
-      Object.keys(m.step).forEach((k) => { if (+k > n) delete m.step[k]; }); m.step[n] = x.s.step | 0;
-      Object.keys(m.done).forEach((k) => { if (+k >= n) delete m.done[k]; });
-      Object.keys(m.snap || {}).forEach((k) => { if (+k > n) delete m.snap[k]; });
+      m.step[n] = x.s.step | 0; delete m.done[n]; m.max = Math.max(m.max || 1, m.ch, n);
       const at = m.choices.indexOf(x); m.choices = m.choices.slice(0, at >= 0 ? at : m.choices.length);
       m.ch = n; m.zone = x.s.zone || ""; save(); return true;
     }
@@ -489,7 +489,7 @@
       if (inZone) return api.trAsk("voce", html, jb, bgNow());
       api.scene(BG0, "voce", html, jb, JN());
     }
-    function finishChapter(n, ending) { const m = mem(); m.done[n] = String(ending || "ok").slice(0, 24); if (m.ch <= n && n < NCH) m.ch = n + 1; if (n < NCH) takeSnap(n + 1); save(); SFX.end(); }
+    function finishChapter(n, ending) { const m = mem(); m.done[n] = String(ending || "ok").slice(0, 24); if (m.ch <= n && n < NCH) m.ch = n + 1; if (n < NCH) takeSnap(n + 1); m.max = Math.max(m.max || 1, m.ch, Math.min(n + 1, NCH)); save(); SFX.end(); }
 
     // -------------------------------------------------------------- zone sul motore TRZ
     // PERSONAGGI CHE CAMMINANO: un PNG con route: [[x,y], [x,y], …] gira per la zona (speed, pause). Si ferma e si gira
@@ -909,9 +909,9 @@
     function chapters() {
       const m = mem(), opts = [];
       for (let n = 1; n <= NCH; n++) {
-        const c = CHAPTERS[n], open = c && (n === 1 || m.done[n - 1] || m.ch >= n);
-        if (open) opts.push({ label: `${m.done[n] ? "✓" : "▸"} Capitolo ${n} · ${c.title}`, sub: m.done[n] ? "Concluso · rigioca" : c.sub || "", cls: m.ch === n ? "hot" : "", fn: () => { if (!(m.done[n] || n < m.ch)) { m.ch = n; save(); return continueStory(); }
-          api.scene(BG0, "voce", `<b>Rigiochi il capitolo ${n}?</b><br><span style="color:var(--dim)">Riparti dai parametri e dalle scelte con cui l'avevi iniziato. I finali trovati, le monete e i cosmetici restano tuoi.${n < NCH ? " I capitoli dopo si riaprono quando lo finisci di nuovo." : ""}${n > 1 && !(m.snap && m.snap[n]) ? " (Salvataggio precedente a questa funzione: questo capitolo si rigioca com'è, senza tornare indietro.)" : ""}</span>`,
+        const c = CHAPTERS[n], open = c && (n === 1 || m.done[n - 1] || m.ch >= n || (m.max || 1) >= n);
+        if (open) opts.push({ label: `${m.done[n] ? "✓" : "▸"} Capitolo ${n} · ${c.title}`, sub: m.done[n] ? "Concluso · rigioca" : c.sub || "", cls: m.ch === n ? "hot" : "", fn: () => { if (n === m.ch && !m.done[n]) return continueStory();
+          api.scene(BG0, "voce", `<b>Rigiochi il capitolo ${n}?</b><br><span style="color:var(--dim)">Riparti dai parametri e dalle scelte con cui l'avevi iniziato. I finali trovati, le monete e i cosmetici restano tuoi.${n < NCH ? " I capitoli già raggiunti restano giocabili." : ""}${n > 1 && !(m.snap && m.snap[n]) ? " (Salvataggio precedente a questa funzione: questo capitolo si rigioca com'è, senza tornare indietro.)" : ""}</span>`,
             [{ label: "Sì, rigioca dall'inizio", cls: "hot", fn: () => { rewindTo(n); m.ch = n; save(); continueStory(); } }, { label: "◂ Indietro", fn: chapters }], TITLE); } });
         else opts.push({ label: `• Capitolo ${n} · ${c ? c.title : "???"}`, sub: c ? "Finisci il capitolo prima" : "In arrivo", disabled: true, fn: chapters });
       }
