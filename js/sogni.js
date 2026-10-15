@@ -19,6 +19,7 @@
   const safe = (fn, d) => { try { return fn(); } catch (e) { return d; } };
   // le saghe da cui vengono le carte: chiave di salvataggio, nome, colore
   const SAGHE = {
+    milano: ["ali-di-rondine.milano", "Operazione Fuorigioco Noir", "#64748b", "__milano"],
     gp: ["ali-di-rondine.gp", "Gran Premio del Pallone", "#ffb02a", "__gp"],
     tempo: ["ali-di-rondine.tempo", "Rondine 1938-2038", "#ffb347", "__tempo"],
     dungeon: ["ali-di-rondine.dungeon", "Dungeon di Fine Stagione", "#ff7a1a", "__dungeon"],
@@ -43,6 +44,8 @@
   // le carte delle saghe a capitoli (Vallombra e le altre): il 8° valore è il capitolo che le sblocca, una volta concluso.
   // Mai nelle bustine, nei premi a sorpresa e nel Draft finché non sono guadagnate: niente anticipazioni.
   const NEWC = [
+    // Operazione Fuorigioco Noir · Milano 1954
+    ["mn_desantis", "milano", "e", 55, 82, 70, "D", 1], ["mn_oste", "milano", "c", 48, 65, 58, "C", 1], ["mn_mara", "milano", "r", 78, 52, 76, "C", 2], ["mn_carmine", "milano", "l", 72, 85, 80, "D", 3],
     // Gran Premio del Pallone
     ["gp_gridoni", "gp", "c", 44, 52, 80, "C", 1], ["gp_bullone", "gp", "r", 60, 78, 66, "D", 1], ["gp_rosalba", "gp", "e", 86, 60, 74, "A", 2], ["gp_nembo", "gp", "r", 50, 70, 84, "C", 3],
     // Rondine 1938-2038
@@ -208,6 +211,7 @@
   const RAR = { c: ["Comune", "#9aa5b1", 1], r: ["Rara", "#3a8ad8", 2], e: ["Epica", "#a85ad8", 3], l: ["Leggendaria", "#ffd23f", 4] };
   // i legami tra saghe diverse: +3 di intesa se entrambi in squadra
   const LINKS = [
+    ["mn_desantis", "dc_agata", "Fiuto Investigativo"],
     ["rt_baldo", "td_corrado", "Capitani di campo e di mulino"], ["gp_rosalba", "dg_fiamma", "Teste rosse e cuori caldi"], ["gp_bullone", "sq_ines", "Mani d'olio e di ferro"],
     ["dg_fiamma", "sq_scintilla", "Scintille gemelle"], ["dg_ruggine", "cm_bastiano", "Capitani che non smettono"],
     ["sq_ines", "mg_tilde", "Nonne d'acciaio"], ["rz_ferruccio", "mg_bullone", "Bulloni postali"], ["rz_orsola", "sq_ines", "Le capitane di quartiere"], ["cs_baldo", "ft_atlante", "Leggende che tornano in campo"], ["cs_max", "sq_brina", "Sorrisi d'estate"], ["sq_scintilla", "mg_brace", "Chi gioca col fuoco"], ["sq_brina", "ve_selva", "Fresco e gentile"],

@@ -4460,6 +4460,21 @@
       case "bv_aurora":
         drawDetailedBelovodiaAurora(g, W, H, f);
         return true;
+      case "mn_titolo":
+      case "mn_bastioni":
+        if (window.__mnDraw && window.__mnDraw.Bastioni) { window.__mnDraw.Bastioni(g, W, H, f); return true; }
+        px(g, 0, 0, W, H, "#090d16");
+        return true;
+      case "mn_club":
+      case "mn_lucciola":
+        if (window.__mnDraw && window.__mnDraw.Lucciola) { window.__mnDraw.Lucciola(g, W, H, f); return true; }
+        px(g, 0, 0, W, H, "#1b0f1c");
+        return true;
+      case "mn_stadio":
+      case "mn_arena":
+        if (window.__mnDraw && window.__mnDraw.ArenaCivica) { window.__mnDraw.ArenaCivica(g, W, H, f); return true; }
+        px(g, 0, 0, W, H, "#0f172a");
+        return true;
       case "cp_piazza":
       case "cp_titolo":
         drawDetailedCampanaPiazza(g, W, H, f);
@@ -8551,6 +8566,33 @@
   LB.cp_tetti = LB.cp_campanile;
   LB.cp_osteria = LB.cp_cantina;
   LB.cp_officina = LB.cp_cantina;
+
+  // Operazione Fuorigioco Noir · Milano 1954: scene con punti cliccabili visibili (scintille) e didascalia
+  [
+    ["mn_titolo", "Bastioni", [
+      [35, 95, 60, 45, "☕ Osteria del Tram: profumo di grappa, caffè corretto e risotti caldi con la radio accesa sui Bastioni."],
+      [135, 30, 80, 80, "🏛️ Porta Ticinese: gli archi monumentali e i dazi avvolti dalla nebbia autunnale milanese del 1954."],
+      [225, 110, 70, 55, "🚋 Deposito del Tram n° 19: rotaie ingrassate, cavi aerei e carrozze biverdi ferme al capolinea."],
+      [95, 100, 80, 35, "⚽ Campetto dei Bastioni: terra battuta e pozzanghere dove i giovani si sfidano col pallone di cuoio."]
+    ]],
+    ["mn_club", "Lucciola", [
+      [110, 25, 95, 65, "✨ Insegna al Neon «La Lucciola»: luce viola soffusa che filtra tra le volute di fumo e velluto damascato."],
+      [20, 95, 75, 70, "🎹 Pianoforte a Coda: note di cabaret e jazz d'altri tempi che mascherano le trattative sottobanco."],
+      [235, 40, 75, 80, "🚪 Camerino di Mara: specchiere con lampadine calde, cipria francese e la valigia con le mazzette."],
+      [105, 120, 105, 45, "🍸 Tavolini Riservati: bicchieri di vermouth e fiches d'avorio per le puntate clandestine."]
+    ]],
+    ["mn_stadio", "ArenaCivica", [
+      [100, 20, 110, 75, "🏟️ Tribuna Napoleonica: cinquantamila ombrelli scuri stipati sotto la pioggia battente di Milano."],
+      [15, 95, 80, 70, "🚿 Spogliatoi Sotterranei: volte in pietra secolare, puzza di canfora e scarponi di cuoio chiodati."],
+      [230, 45, 80, 80, "💡 Piloni dei Riflettori: fasci di luce giallastra che tagliano la nebbia e creano coni d'ombra sul prato."],
+      [95, 115, 120, 45, "⚽ Risaia di Fango: il rettangolo verde inzuppato d'acqua dove si decide il Derby dell'Ombra."]
+    ]]
+  ].forEach(([k, n, hot]) => {
+    LB[k] = { draw: (g, W, H, f) => { const D = window.__mnDraw; if (D && D[n]) D[n](g, W, H, f); else px(g, 0, 0, W, H, "#090d16"); }, hot };
+  });
+  LB.mn_bastioni = LB.mn_titolo;
+  LB.mn_lucciola = LB.mn_club;
+  LB.mn_arena = LB.mn_stadio;
 
   function drawMarkers(g, k, f) {
     const def = LB[k]; if (!def || !def.hot) return;
