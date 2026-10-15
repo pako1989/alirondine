@@ -8385,7 +8385,7 @@
     if (!dive) dive = o.res === "goal" ? pick(Object.keys(SA_X).filter((k) => k !== aim)) : aim;
     const ty = aim === "centro" ? (o.res === "goal" ? 52 : 70) : 58 + Math.random() * 18;
     const tx = SA_X[aim] + (aim === "centro" ? (Math.random() - 0.5) * 16 : (aim === "sx" ? -8 : 8));
-    SA = { ...o, aim, dive, tx, ty, t: 0, d, done, look: SA_LOOK[o.kind] || SA_LOOK.normal, seed: Math.random() * 1000 };
+    SA = { ...o, aim, dive, tx, ty, t: 0, d, done, look: SA_LOOK[o.kind] || SA_LOOK.normal, seed: Math.random() * 1000, born: performance.now() };
     $("choices").innerHTML = "";
   }
   // traiettoria: u in [0,1] -> {x,y,r}
@@ -8552,7 +8552,7 @@
     g.save(); g.translate(160, 132); g.rotate(-0.08); g.font = "26px 'Dela Gothic One', Impact, sans-serif"; g.textAlign = "center";
     g.fillStyle = "#000"; g.fillText(s, 2, 2); g.fillStyle = c; g.fillText(s, 0, 0); g.restore(); g.textAlign = "left";
   }
-  $("cv").addEventListener("click", () => { if (SA && SA.t < SA.d - 1) SA.t = SA.d - 1; });
+  $("cv").addEventListener("click", () => { if (SA && SA.t < SA.d - 1 && performance.now() - (SA.born || 0) > 900) SA.t = SA.d - 1; }); // i tocchi per chiudere la scena prima (primo piano, esultanza) non saltano anche il tiro
   // ================= BORGO PIÙ VIVO: feste, monete, bancarella =================
   const todayKey = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
   const seedOf = (s) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
