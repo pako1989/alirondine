@@ -4,7 +4,7 @@ Un solo file: contiene regole, stato del progetto, come costruire una saga, API 
 
 **Come usarlo:** leggi per prima la sezione «LEGGI PRIMA». Se Pasquale chiede di riprendere i lavori, leggi §A e §B e controlla `git log` e `ls js/`. Se chiede una saga nuova, leggi tutto e parti dal §1.
 
-## ⛔ LEGGI PRIMA · 11 regole bloccanti (il resto del file è riferimento)
+## ⛔ LEGGI PRIMA · 10 regole bloccanti (il resto del file è riferimento)
 1. Rispondi in italiano, telegrafico, **senza spoiler** della trama; dopo ogni pubblicazione una nota breve (cosa hai finito, cosa aggiunge).
 2. `git pull --rebase origin main` prima di ogni push; patch mirate sui file condivisi; mai `git add -A`; dopo il pull bump di `?v=` e cache `sw.js` (`node tools/bump.cjs <file>`).
 3. Usa solo funzioni che esistono nel kit `K` (§7). **`K.teleport` non esiste**: l'`intro` del capitolo restituisce righe `[["voce","testo"]]` e il capitolo ha `start: "id_zona"`.
@@ -14,8 +14,7 @@ Un solo file: contiene regole, stato del progetto, come costruire una saga, API 
 7. Ogni sfondo e ogni punto cliccabile disegnato e verificato; zero errori in console al caricamento.
 8. Ogni PNG, oggetto e uscita raggiungibili a piedi; ogni dialogo finisce con `done()`, un altro dialogo o una partita.
 9. **Prima di consegnare lancia `npm run verifica`** e incolla l'esito (✓/✗). Poi i test della tua saga (§5).
-10. **Non propormi più idee a scelta**: una sola scheda, poi costruisci (salvo mia richiesta esplicita di idee).
-11. Nel report finale scrivi sempre: cosa hai fatto, quali test hai eseguito, **cosa non hai verificato**.
+10. Nel report finale scrivi sempre: cosa hai fatto, quali test hai eseguito, **cosa non hai verificato**.
 
 ## ✔ Verifica con un solo comando
 `npm run verifica` = controllo sintassi + avvio del gioco a 390 e 320 px + percorso nuova partita di OGNI saga (Inizia → Continua → mappa). Dura pochi minuti. Per una sola saga: `node tests/percorso.cjs <parte-del-nome>`. I test lunghi di capitolo restano `npm test` / `node tests/run.cjs <nome>`.
@@ -87,7 +86,7 @@ Un solo file: contiene regole, stato del progetto, come costruire una saga, API 
 - **Idee da cui partire (almeno una delle 3 proposte può venire da qui):** mockumentary sul calcio di provincia; heist in uno stadio; viaggio nel tempo tra epoche del calcio; scuola di calcio magica; sopravvivenza su un'isola; torneo tra mondi paralleli; calcio nell'antichità o nel medioevo comico; spionaggio anni '60 con tattiche segrete; fantasy con draghi e arbitri; musical; torneo tra bar di paese; parodia di una serie TV o di un videogioco.
 - **Da evitare:** carriera da allenatore, Jukebox, imprevisti casuali, temi medici o su minori in pericolo, ripetere saghe già nel gioco.
 
-## 1 · Prima di scrivere codice: studia e scrivi la scheda
+## 1 · Prima di scrivere codice: studia e proponi
 1. Leggi il **motore comune** `js/saga-core.js` (intestazione e funzione `create`) e le saghe costruite sopra:
    - «La Valle del Vento Gentile»: `js/vento.js`, `vento-c1..c3.js`, partita `vento-partita.js`. Ha il vento, gli interni e la casa che cammina.
    - «Detective di Campo»: `js/detective.js`, `detective-c1..c3.js`, `moviola.js`. Ha prove, presentazioni e pedinamento.
@@ -102,7 +101,7 @@ Un solo file: contiene regole, stato del progetto, come costruire una saga, API 
 
    Come spunti di storia e grafica guarda anche le saghe più vecchie: `ragnarok-story.js`, `chrono-story.js`, `bilancia-feudi.js`, `kronenburg-story.js`, `storia-campione.js` (Vallombra). Sono scritte senza motore comune: prendi le idee, non il codice.
 2. Leggi `js/bg-scenarios.js`, cioè gli sfondi di scena animati con punti da toccare (blocco `LB`).
-3. Poi scrivi **una sola scheda** (mai più idee a scelta, salvo che io scriva esplicitamente «proponimi idee»). Se ti ho dato un titolo o un'idea, sviluppa quella; se non ti ho dato niente, scegli tu **una** idea diversa dalle saghe già nel gioco. Poi costruisci subito, senza aspettare la mia scelta. La scheda indica:
+3. Poi **proponimi 3 idee** diverse tra loro per genere, grafica e gioco, senza scrivere codice (non riproporre quelle già elencate in S4). Se ti ho già dato un titolo o un'idea precisa, salta la proposta e sviluppa quella. Per ogni idea indica:
    - titolo, ambientazione, ispirazione e tono (serio o comico);
    - protagonista: il mio Campione creato;
    - 4-5 personaggi;
@@ -113,7 +112,7 @@ Un solo file: contiene regole, stato del progetto, come costruire una saga, API 
    - quali partite forzi e perché;
    - come cambiano **grafica e gioco** delle partite secondarie nello stadio della saga (`cfg.stadium`).
 
-   Mi mandi la scheda in poche righe come nota e prosegui.
+   Io scelgo.
 
 ## 2 · Come si costruisce una saga sul motore comune
 Struttura dei file: `js/<nome>.js` (configurazione) + `js/<nome>-c1.js` … `-c4.js` (un file per capitolo) + `js/<nome>-partita.js` (la partita originale, se serve).
@@ -274,7 +273,7 @@ Funzioni di saghe singole (non sono del kit comune: non usarle in un'altra saga 
 Le funzioni dei **talk** ricevono `K` come parametro; l'`intro` di un capitolo restituisce righe `[["voce","testo"]]` e il capitolo ha `start: "id_zona"`.
 
 ## 8 · Ordine di lavoro (per ogni saga)
-1. Scrivi **una sola scheda** (vedi §1) e prosegui senza aspettare.
+1. Proponi 3 idee (vedi §1), aspetta che Pasquale scelga; se ha già indicato la saga, salta questo passo.
 2. **Scheletro prima di tutto:** configurazione, una zona, capitolo 1 giocabile da «Inizia la storia» a un PNG, un test che passa a zero errori. Poi gli altri capitoli e il motore di partita.
 3. Un capitolo alla volta; a ogni capitolo: test, push, nota a Pasquale.
 4. **Rilettura finale della propria saga:** cerca refusi, nomi sbagliati, spoiler nelle schede, battute fuori tono, personaggi che compaiono prima di essere presentati.
@@ -337,7 +336,7 @@ Le funzioni dei **talk** ricevono `K` come parametro; l'`intro` di un capitolo r
 
 ## S2 · Cosa resta da fare (in ordine)
 Fatte e pubblicate: le saghe A, D, C, B, E, F (Cavallo Star), G (Piccolo Borgo di Montagna), Pugno, Galletta, Campana e, di ottobre 2026, Ave Calcio (Roma, motore Circo), Naufraghi del Pallone (motore Marea), Cronache del Regno Ultimo (Duello di Corona), Dungeon di Fine Stagione, Rondine 1938-2038 (Palla del Tempo), Gran Premio del Pallone (Giro e Gol). Prima di cominciare controlla con `git log` e `ls js/` cosa è già presente.
-1. **Nuova saga** solo su richiesta di Pasquale: una sola scheda (vedi §1), poi costruisci. In coda approvata: J «Pallone: La Serie».
+1. **Nuova saga** solo su richiesta di Pasquale: proponi 3 idee (vedi §1) e aspetta che scelga. In coda approvata: J «Pallone: La Serie».
 2. **Controllo qualità delle saghe recenti** (offerto): ripassa Galletta, Pugno e Campana con la checklist §9 (oggetti raggiungibili, punti cliccabili visibili, dialoghi senza errori, zero errori in console).
 3. **Carte della Storia principale** nella Squadra dei Sogni (Leo, Dario, Nico, Lina…), che si sbloccano con le stagioni.
 4. **Storia principale**, da valutare con Pasquale (lui ha detto «per la saga di Leo valutiamo dopo»):
@@ -380,7 +379,7 @@ Proposte in attesa di scelta, in una riga ciascuna (tono: S serio, M mix, D deme
 
 ## S5 · Preferenze di Pasquale (da rispettare)
 - Vuole un mix di toni: storie serie, mix e demenziali. Ama JRPG (Suikoden), supereroi, colpi di scena maturi con ironia, eFootball/FC. Citazioni e omaggi a opere esistenti gli fanno piacere.
-- **Non vuole:** seguiti o remake di Ali di Rondine; carriera da allenatore; Jukebox; imprevisti in partita; cambiare il gameplay base della partita; più idee a scelta nelle risposte; spoiler.
+- **Non vuole:** seguiti o remake di Ali di Rondine; carriera da allenatore; Jukebox; imprevisti in partita; cambiare il gameplay base della partita; spoiler. Gli piace che l'IA gli **proponga idee** di saga (3, diverse per genere) prima di costruire.
 - Risposte brevi e telegrafiche, in italiano; ogni novità spiegata in due righe senza spoiler. Modalità visive e passeggiabili, non menu di soli comandi.
 - Dialoghi e popup corti e leggibili. Salvataggi vecchi sempre intatti.
 - Test già falliti prima delle tue modifiche (non tuoi): `tests/sogni.cjs`. Segnalali, non correggerli a meno che il tuo lavoro li tocchi.
