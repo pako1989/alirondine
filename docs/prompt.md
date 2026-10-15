@@ -274,7 +274,7 @@ Funzioni di saghe singole (non sono del kit comune: non usarle in un'altra saga 
 Le funzioni dei **talk** ricevono `K` come parametro; l'`intro` di un capitolo restituisce righe `[["voce","testo"]]` e il capitolo ha `start: "id_zona"`.
 
 ## 8 · Ordine di lavoro (per ogni saga)
-1. Proponi 3 idee, aspetta che Pasquale scelga.
+1. Scrivi **una sola scheda** (vedi §1) e prosegui senza aspettare.
 2. **Scheletro prima di tutto:** configurazione, una zona, capitolo 1 giocabile da «Inizia la storia» a un PNG, un test che passa a zero errori. Poi gli altri capitoli e il motore di partita.
 3. Un capitolo alla volta; a ogni capitolo: test, push, nota a Pasquale.
 4. **Rilettura finale della propria saga:** cerca refusi, nomi sbagliati, spoiler nelle schede, battute fuori tono, personaggi che compaiono prima di essere presentati.
@@ -336,8 +336,8 @@ Le funzioni dei **talk** ricevono `K` come parametro; l'`intro` di un capitolo r
 - **Prompt aggiornato per le saghe nuove:** `questo file` .
 
 ## S2 · Cosa resta da fare (in ordine)
-Fatte e pubblicate: le saghe A, D, C, B, E, F (Cavallo Star), G (Piccolo Borgo di Montagna), Pugno, Galletta e Campana. Prima di cominciare controlla con `git log` e `ls js/` cosa è già presente.
-1. **Nuova saga** solo su richiesta di Pasquale: proponi 3 idee (vedi §1) e aspetta che scelga.
+Fatte e pubblicate: le saghe A, D, C, B, E, F (Cavallo Star), G (Piccolo Borgo di Montagna), Pugno, Galletta, Campana e, di ottobre 2026, Ave Calcio (Roma, motore Circo), Naufraghi del Pallone (motore Marea), Cronache del Regno Ultimo (Duello di Corona), Dungeon di Fine Stagione, Rondine 1938-2038 (Palla del Tempo), Gran Premio del Pallone (Giro e Gol). Prima di cominciare controlla con `git log` e `ls js/` cosa è già presente.
+1. **Nuova saga** solo su richiesta di Pasquale: una sola scheda (vedi §1), poi costruisci. In coda approvata: J «Pallone: La Serie».
 2. **Controllo qualità delle saghe recenti** (offerto): ripassa Galletta, Pugno e Campana con la checklist §9 (oggetti raggiungibili, punti cliccabili visibili, dialoghi senza errori, zero errori in console).
 3. **Carte della Storia principale** nella Squadra dei Sogni (Leo, Dario, Nico, Lina…), che si sbloccano con le stagioni.
 4. **Storia principale**, da valutare con Pasquale (lui ha detto «per la saga di Leo valutiamo dopo»):
@@ -367,3 +367,21 @@ Fatte e pubblicate: le saghe A, D, C, B, E, F (Cavallo Star), G (Piccolo Borgo d
   - sfondi senza punti cliccabili visibili (usa `LB` con `hot`);
   - dialoghi dei PNG che si bloccano: gli errori sono inghiottiti da `safe()`, il test deve parlare con ogni PNG e ascoltare `pageerror`;
   - regressioni sui file condivisi: `git pull --rebase`, patch mirate, `git diff` prima di `git add`.
+
+## S4 · Idee già proposte a Pasquale (non costruirle senza che le citi)
+Approvata e in coda: **J «Pallone: La Serie»** (comico meta: ogni capitolo parodia un genere con gli stessi personaggi; partita «Cambio Genere»).
+Proposte in attesa di scelta, in una riga ciascuna (tono: S serio, M mix, D demenziale):
+- K Kaiju Cup (M): mecha e mostri giganti. L La Locanda dei Mille Fantasmi (D): horror comico.
+- N Il Mago del Pallone (M): accademia di magia. O Il Calcio Perduto (M): archeologia e rovine con trappole. P Il Pallone nello Spazio (D): stazione a gravità variabile. Q Il Pallone Pirata (D): arcipelago e abbordaggi.
+- R L'Ultima Partita di Nonna Ines (S): paese di montagna, ex portiera. S Il Delitto della Curva Sud (M): giallo in uno stadio. T Il Torneo dei Pupazzi (D): giocattoli di notte.
+- Il Faro dei Gol Perduti (S, mistero). Calcio e Cavalieri (D, medievale). Palla di Neve (M, invernale). Agenzia Fuorigioco (M, spie). Il Giardino delle Mille Palle (S, fiaba).
+- Cowboy del Cosmo (M). Scuola di Calcio Magica per Casi Disperati (D). Ultima Fermata Cimitero (M, horror leggero). Mercato del Pallone (M). Ombre sul Ring (S). La Banda delle Biciclette (M).
+- Più vecchie: Accademia Pallonia, Colpo della Coppa, Gol Cantato, Spie '63, Circo Massimo, Villaggio dei Mille Mestieri, Treno dei Campioni, Provincia FC, Draghi e Fischietti, Torneo dei Bar.
+
+## S5 · Preferenze di Pasquale (da rispettare)
+- Vuole un mix di toni: storie serie, mix e demenziali. Ama JRPG (Suikoden), supereroi, colpi di scena maturi con ironia, eFootball/FC. Citazioni e omaggi a opere esistenti gli fanno piacere.
+- **Non vuole:** seguiti o remake di Ali di Rondine; carriera da allenatore; Jukebox; imprevisti in partita; cambiare il gameplay base della partita; più idee a scelta nelle risposte; spoiler.
+- Risposte brevi e telegrafiche, in italiano; ogni novità spiegata in due righe senza spoiler. Modalità visive e passeggiabili, non menu di soli comandi.
+- Dialoghi e popup corti e leggibili. Salvataggi vecchi sempre intatti.
+- Test già falliti prima delle tue modifiche (non tuoi): `tests/sogni.cjs`. Segnalali, non correggerli a meno che il tuo lavoro li tocchi.
+- Una saga per chat, una IA alla volta sulla stessa saga.
