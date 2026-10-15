@@ -143,7 +143,7 @@
       Object.keys(obj(o.rew)).forEach((k) => { if (REW_RE.test(k) && Object.keys(m.rew).length < 250) m.rew[k] = 1; });
       const dn = obj(o.done); Object.keys(dn).forEach((k) => { const n = clampI(k, 1, 9, 0); if (n && typeof dn[k] === "string" && dn[k].length <= 24) m.done[n] = dn[k]; });
       // le scelte importanti fatte (domande con almeno una risposta «big»): servono allo schema delle scelte
-      m.choices = arr(o.choices).filter((x) => x && typeof x.q === "string" && Array.isArray(x.o)).slice(-60).map((x) => ({ c: clampI(x.c, 1, 9, 1), k: String(x.k || "").slice(0, 12), q: x.q.slice(0, 140), o: x.o.filter((l) => typeof l === "string").slice(0, 6).map((l) => l.slice(0, 90)), p: clampI(x.p, 0, 5, 0) }));
+      m.choices = arr(o.choices).filter((x) => x && typeof x.q === "string" && Array.isArray(x.o)).slice(-60).map((x) => ({ c: clampI(x.c, 1, 9, 1), k: String(x.k || "").slice(0, 12), q: x.q.slice(0, 140), o: x.o.filter((l) => typeof l === "string").slice(0, 6).map((l) => l.slice(0, 90)), p: clampI(x.p, 0, 5, 0), d: typeof x.d === "string" ? x.d.slice(0, 80) : "" }));
       // istantanee all'ingresso di ogni capitolo (statistiche e scelte): servono a rigiocare un capitolo con gli stessi parametri della prima volta
       const cleanSnap = (sn) => {
         sn = obj(sn); const e = { st: {}, flags: {} };
@@ -399,7 +399,7 @@
       if (opts.some((q) => q.big) && opts.filter((q) => !q.disabled).length >= 2) { // scelta importante: la ricordiamo per lo schema delle scelte
         const ch = (activeChapter() || {}).n || 1, lab = opts.map((q) => String(T(q.label)).replace(/<[^>]*>/g, "")), key = String(hash(ch + "|" + String(prompt).slice(0, 80)));
         const pre = { st: Object.assign({}, mem().st), flags: Object.assign({}, mem().flags), step: mem().step[ch] | 0, zone: mem().zone || "" }; 
-        opts = opts.map((q, i) => (q.fn && !q.disabled ? Object.assign({}, q, { fn: () => { const m = mem(); m.choices = (m.choices || []).filter((x) => x.k !== key); m.choices.push({ c: ch, k: String(key).slice(0, 12), q: String(T(prompt)).replace(/<[^>]*>/g, "").slice(0, 140), o: lab.slice(0, 6), p: Math.min(i, 5), s: pre }); if (m.choices.length > 60) m.choices.shift(); m.choices.forEach((x, j) => { if (x.s && j < m.choices.length - 25) delete x.s; }); save(); q.fn(); } }) : q));
+        opts = opts.map((q, i) => (q.fn && !q.disabled ? Object.assign({}, q, { fn: () => { const m = mem(); m.choices = (m.choices || []).filter((x) => x.k !== key); m.choices.push({ c: ch, k: String(key).slice(0, 12), q: String(T(prompt)).replace(/<[^>]*>/g, "").slice(0, 140), o: lab.slice(0, 6), p: Math.min(i, 5), s: pre }); if (m.choices.length > 60) m.choices.shift(); m.choices.forEach((x, j) => { if (x.s && j < m.choices.length - 25) delete x.s; }); save(); q.fn(); const rec = m.choices.find((x) => x.k === String(key).slice(0, 12)); const eff = () => { if (!rec) return; const cur = mem().st, d = Object.keys(STATS).filter((z) => STATS[z][3] && (cur[z] | 0) !== (pre.st[z] | 0)).map((z) => `${STATS[z][3]} ${(cur[z] | 0) - (pre.st[z] | 0) > 0 ? "+" : ""}${(cur[z] | 0) - (pre.st[z] | 0)}`).join(", "); if (d !== rec.d) { rec.d = d; save(); } }; eff(); setTimeout(eff, 6000); } }) : q));
       }
       meet(who); if (TIMED) { clearInterval(TIMED.iv); TIMED = null; }
       const tok = {}; const wrap = (o) => (o.fn ? () => { if (TIMED && TIMED.tok === tok) { clearInterval(TIMED.iv); TIMED = null; } if (o.big) SFX.choice(); o.fn(); } : o.fn);
@@ -479,7 +479,7 @@
       for (let n = 1; n <= NCH; n++) {
         const cs = l.filter((x) => x.c === n); if (!cs.length) continue;
         out += `<br><span style="color:var(--dim)">Capitolo ${n}${CHAPTERS[n] ? " · " + esc(CHAPTERS[n].title) : ""}</span>`;
-        cs.forEach((x) => { out += `<br>• ${esc(x.q.length > 90 ? x.q.slice(0, 88) + "…" : x.q)}` + x.o.map((t, i) => `<br>&nbsp;&nbsp;${i === x.p ? "<b>▶ " + esc(t) + "</b>" : `<span style="color:var(--dim)">▷ ${esc(t)}</span>`}`).join(""); });
+        cs.forEach((x) => { out += `<br>• ${esc(x.q.length > 90 ? x.q.slice(0, 88) + "…" : x.q)}` + x.o.map((t, i) => `<br>&nbsp;&nbsp;${i === x.p ? "<b>▶ " + esc(t) + "</b>" + (x.d ? ` <span style="color:var(--dim)">(${esc(x.d)})</span>` : "") : `<span style="color:var(--dim)">▷ ${esc(t)}</span>`}`).join(""); });
       }
       return out + `<br><span style="color:var(--dim)">▷ = strade non prese. Per provarle: Capitoli → rigioca.</span>`;
     }
