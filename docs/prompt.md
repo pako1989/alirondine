@@ -355,6 +355,7 @@ Fatte e pubblicate: le saghe A, D, C, B, E, F (Cavallo Star), G (Piccolo Borgo d
 ## S3 · Come lavorare
 - Per la struttura dei file guarda il §2 e usa solo funzioni che esistono nel kit `K` (§7). Non copiare il contenuto di un'altra saga: la struttura sì, storia, motore e grafica devono essere nuovi.
 - **Cosa toccare per ogni saga nuova:** `index.html` (gli script prima di `salone.js`), `sw.js` (la lista dei file), la regex «Saghe e GDR», `HAIR_SAGA` e `COSM` in `game.js`, `SAGAS` / `NEWEST` / `PFX` / `MACHINES` in `salone.js`, `SAGHE` / `CARDS` / `FRASI` / `ENG` / `LINKS` / `extraFor` / `bonusTxt` in `sogni.js`, gli sfondi in `bg-scenarios.js` (3 punti da toccare ciascuno), e nei test `run.cjs`, `sala.cjs` (elenco dei cabinati) e `volti.cjs`.
+- **Un motore di partita entra nella Squadra dei Sogni** aggiungendolo a `ENG`, `bonusTxt` e `extraFor` in `sogni.js`; il motore legge `opts.bonus` ({at, df, te}, livelli 0-3) e `opts.mates` ([{name}]) (esempio: `alcatraz-partita.js`).
 - **Bilanciamento:** prima di collegarlo alla saga, fai giocare al motore qualche partita intera con un pilota automatico e controlla che i risultati siano realistici (tipo 1-0, 2-1).
 - **Prove veloci:** `python3 -m http.server 8821` nella cartella della repo, poi `TEST_URL=http://localhost:8821 node tests/<saga>.cjs`.
 - **Errori già fatti, da evitare:**

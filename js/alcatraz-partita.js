@@ -137,6 +137,13 @@
       }
     };
 
+    // Squadra dei Sogni: ATT = tiri più veloci, DIF = portiere più reattivo, TEC = compagni e Campione più rapidi; i compagni prendono i nomi delle carte
+    const bn = opts.bonus || {};
+    st.shotPow = 7.5 + (bn.at | 0) * 0.45;
+    st.players[2].speed += (bn.df | 0) * 0.12;
+    st.players[0].speed += (bn.te | 0) * 0.06; st.players[1].speed += (bn.te | 0) * 0.06;
+    if (opts.mates && opts.mates[0]) { st.players[1].name = opts.mates[0].name || st.players[1].name; if (opts.mates[1]) st.players[2].name = opts.mates[1].name || st.players[2].name; }
+
     curMatch = st;
     window.__alcatrazMatch.state = st;
 
@@ -308,8 +315,8 @@
     const dx = 340 - hero.x;
     const dy = targetY - hero.y;
     const dist = Math.hypot(dx, dy) || 1;
-    st.ball.vx = (dx / dist) * 7.5;
-    st.ball.vy = (dy / dist) * 7.5;
+    st.ball.vx = (dx / dist) * (st.shotPow || 7.5);
+    st.ball.vy = (dy / dist) * (st.shotPow || 7.5);
     st.ball.holder = null;
   }
 

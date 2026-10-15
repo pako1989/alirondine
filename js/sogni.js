@@ -212,7 +212,7 @@
     { name: "Union Cometa", color: "#7a5ad8", style: "contropiede", f: 73, pl: ["Coda", "Chioma", "Nucleo", "Scia"] },
     { name: "I Leggendari del Faro", color: "#1a2a4a", style: "equilibrata", f: 76, pl: ["Lampo", "Vedetta", "Scoglio", "Fanale"] },
   ];
-  const ENG = ["marea", "vignette", "bottoni", "luci", "nastro", "concilio", "lavagna", "duello", "atb", "gadget", "iso", "volo", "combo", "consegna", "ciak", "ipogeo", "pallatempo", "giroegol"];
+  const ENG = ["marea", "vignette", "bottoni", "luci", "nastro", "concilio", "lavagna", "duello", "atb", "gadget", "iso", "volo", "combo", "consegna", "ciak", "ipogeo", "pallatempo", "giroegol", "rebound"];
   const RAR = { c: ["Comune", "#9aa5b1", 1], r: ["Rara", "#3a8ad8", 2], e: ["Epica", "#a85ad8", 3], l: ["Leggendaria", "#ffd23f", 4] };
   // i legami tra saghe diverse: +3 di intesa se entrambi in squadra
   const LINKS = [
@@ -367,6 +367,7 @@
       giroegol: `turbo ${2 + (T.te >= 2 ? 1 : 0)} (TEC), mirino fermo ${T.df >= 2 ? 1 : 0} (DIF), tiri più forti (ATT)`,
       pallatempo: `compagno dalle tue carte, comandi TEMPO ${2 + (T.te >= 2 ? 1 : 0)} (TEC), FISCHIO ${T.df >= 2 ? 1 : 0} (DIF), tiri più forti (ATT)`,
       consegna: "il compagno di volo dalle tue carte, tiri (ATT), recuperi (DIF), tempo +" + T.te * 4 + "s (TEC)",
+      rebound: `tiri +${T.at * 6}% (ATT), portiere +${T.df * 7}% (DIF), corsa +${T.te * 3}% (TEC)`,
       marea: `pedane ${3 + (T.te >= 2 ? 1 : 0)} (TEC), portiere +${T.df * 2}% (DIF), tiri più precisi (ATT)`,
       ipogeo: `cuori ${4 + (T.df >= 2 ? 1 : 0)} (DIF), tiro +${T.at * 3}% (ATT), tempo +${T.te * 3}s (TEC)`,
       ciak: `ciak di riserva ${2 + (I >= 8 ? 1 : 0) + (T.te >= 3 ? 1 : 0)} (TEC), idee riuscite con ATT/DIF/TEC`,
@@ -391,6 +392,7 @@
       pallatempo: { mate: names[0], us: "La Squadra dei Sogni", tempo: (base.tempo || 2) + (T.te >= 2 ? 1 : 0), fischio: (base.fischio || 0) + (T.df >= 2 ? 1 : 0) },
       consegna: { mate: names[0], us: "La Squadra dei Sogni" },
       marea: { mates: names.slice(0, 2), us: "La Squadra dei Sogni" },
+      rebound: { mates: names.slice(0, 2), us: "La Squadra dei Sogni" },
       ipogeo: { us: "La Squadra dei Sogni" },
       ciak: { mates: names.slice(0, 2), us: "La Squadra dei Sogni", takes: 2 + (I >= 8 ? 1 : 0) + (T.te >= 3 ? 1 : 0) },
       volo: { energy: 100 + I * 3 + T.te * 5, mates: names.slice(0, 1), us: "La Squadra dei Sogni" },
