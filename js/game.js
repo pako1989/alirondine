@@ -1635,7 +1635,7 @@
       seeCard(l.who);
 
       const wasSeen = window.isDialogueSeen ? window.isDialogueSeen(l.who, l.text) : true;
-      text(l.who, esc(l.text).replace(/&lt;(\/?)(b|em|i|strong)&gt;/g, "<$1$2>").replace(/&lt;br\s*\/?&gt;/g, "<br>")); // solo grassetto/corsivo/a capo consentiti nei dialoghi
+      text(l.who, esc(l.text).replace(/&lt;(\/?)(b|em|i|strong)&gt;/g, "<$1$2>").replace(/&lt;br\s*\/?&gt;/g, "<br>").replace(/&lt;span style=(["'])color:(var\(--[a-z-]+\)|#[0-9a-fA-F]{3,6})\1&gt;/g, '<span style="color:$2">').replace(/&lt;\/span&gt;/g, "</span>")); // solo grassetto/corsivo/a capo consentiti nei dialoghi
 
       if (window.isStorySkipActive && window.isStorySkipActive()) {
         if (!wasSeen) {
