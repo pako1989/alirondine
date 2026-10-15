@@ -101,7 +101,7 @@ Un solo file: contiene regole, stato del progetto, come costruire una saga, API 
 
    Come spunti di storia e grafica guarda anche le saghe più vecchie: `ragnarok-story.js`, `chrono-story.js`, `bilancia-feudi.js`, `kronenburg-story.js`, `storia-campione.js` (Vallombra). Sono scritte senza motore comune: prendi le idee, non il codice.
 2. Leggi `js/bg-scenarios.js`, cioè gli sfondi di scena animati con punti da toccare (blocco `LB`).
-3. Poi **proponimi 3 idee** diverse tra loro per genere, grafica e gioco, senza scrivere codice (non riproporre quelle già elencate in S4). Se ti ho già dato un titolo o un'idea precisa, salta la proposta e sviluppa quella. Per ogni idea indica:
+3. Poi **proponimi 4 idee** diverse tra loro per genere, grafica e gioco, senza scrivere codice (non riproporre quelle già elencate in S4). Se ti ho già dato un titolo o un'idea precisa, salta la proposta e sviluppa quella. Per ogni idea indica:
    - titolo, ambientazione, ispirazione e tono (serio o comico);
    - protagonista: il mio Campione creato;
    - 4-5 personaggi;
@@ -273,7 +273,7 @@ Funzioni di saghe singole (non sono del kit comune: non usarle in un'altra saga 
 Le funzioni dei **talk** ricevono `K` come parametro; l'`intro` di un capitolo restituisce righe `[["voce","testo"]]` e il capitolo ha `start: "id_zona"`.
 
 ## 8 · Ordine di lavoro (per ogni saga)
-1. Proponi 3 idee (vedi §1), aspetta che Pasquale scelga; se ha già indicato la saga, salta questo passo.
+1. Proponi 4 idee (vedi §1), aspetta che Pasquale scelga; se ha già indicato la saga, salta questo passo.
 2. **Scheletro prima di tutto:** configurazione, una zona, capitolo 1 giocabile da «Inizia la storia» a un PNG, un test che passa a zero errori. Poi gli altri capitoli e il motore di partita.
 3. Un capitolo alla volta; a ogni capitolo: test, push, nota a Pasquale.
 4. **Rilettura finale della propria saga:** cerca refusi, nomi sbagliati, spoiler nelle schede, battute fuori tono, personaggi che compaiono prima di essere presentati.
@@ -336,7 +336,7 @@ Le funzioni dei **talk** ricevono `K` come parametro; l'`intro` di un capitolo r
 
 ## S2 · Cosa resta da fare (in ordine)
 Fatte e pubblicate: le saghe A, D, C, B, E, F (Cavallo Star), G (Piccolo Borgo di Montagna), Pugno, Galletta, Campana e, di ottobre 2026, Ave Calcio (Roma, motore Circo), Naufraghi del Pallone (motore Marea), Cronache del Regno Ultimo (Duello di Corona), Dungeon di Fine Stagione, Rondine 1938-2038 (Palla del Tempo), Gran Premio del Pallone (Giro e Gol). Prima di cominciare controlla con `git log` e `ls js/` cosa è già presente.
-1. **Nuova saga** solo su richiesta di Pasquale: proponi 3 idee (vedi §1) e aspetta che scelga. In coda approvata: J «Pallone: La Serie».
+1. **Nuova saga** solo su richiesta di Pasquale: proponi 4 idee (vedi §1) e aspetta che scelga. In coda approvata: J «Pallone: La Serie».
 2. **Controllo qualità delle saghe recenti** (offerto): ripassa Galletta, Pugno e Campana con la checklist §9 (oggetti raggiungibili, punti cliccabili visibili, dialoghi senza errori, zero errori in console).
 3. **Carte della Storia principale** nella Squadra dei Sogni (Leo, Dario, Nico, Lina…), che si sbloccano con le stagioni.
 4. **Storia principale**, da valutare con Pasquale (lui ha detto «per la saga di Leo valutiamo dopo»):
@@ -379,7 +379,7 @@ Proposte in attesa di scelta, in una riga ciascuna (tono: S serio, M mix, D deme
 
 ## S5 · Preferenze di Pasquale (da rispettare)
 - Vuole un mix di toni: storie serie, mix e demenziali. Ama JRPG (Suikoden), supereroi, colpi di scena maturi con ironia, eFootball/FC. Citazioni e omaggi a opere esistenti gli fanno piacere.
-- **Non vuole:** seguiti o remake di Ali di Rondine; carriera da allenatore; Jukebox; imprevisti in partita; cambiare il gameplay base della partita; spoiler. Gli piace che l'IA gli **proponga idee** di saga (3, diverse per genere) prima di costruire.
+- **Non vuole:** seguiti o remake di Ali di Rondine; carriera da allenatore; Jukebox; imprevisti in partita; cambiare il gameplay base della partita; spoiler. Gli piace che l'IA gli **proponga idee** di saga (4, diverse per genere) prima di costruire.
 - Risposte brevi e telegrafiche, in italiano; ogni novità spiegata in due righe senza spoiler. Modalità visive e passeggiabili, non menu di soli comandi.
 - Dialoghi e popup corti e leggibili. Salvataggi vecchi sempre intatti.
 - Test già falliti prima delle tue modifiche (non tuoi): `tests/sogni.cjs`. Segnalali, non correggerli a meno che il tuo lavoro li tocchi.
