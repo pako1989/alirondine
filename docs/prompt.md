@@ -4,7 +4,7 @@ Un solo file: contiene regole, stato del progetto, come costruire una saga, API 
 
 **Come usarlo:** leggi per prima la sezione «LEGGI PRIMA». Se Pasquale chiede di riprendere i lavori, leggi §A e §B e controlla `git log` e `ls js/`. Se chiede una saga nuova, leggi tutto e parti dal §1.
 
-## ⛔ LEGGI PRIMA · 10 regole bloccanti (il resto del file è riferimento)
+## ⛔ LEGGI PRIMA · 11 regole bloccanti (il resto del file è riferimento)
 1. Rispondi in italiano, telegrafico, **senza spoiler** della trama; dopo ogni pubblicazione una nota breve (cosa hai finito, cosa aggiunge).
 2. `git pull --rebase origin main` prima di ogni push; patch mirate sui file condivisi; mai `git add -A`; dopo il pull bump di `?v=` e cache `sw.js` (`node tools/bump.cjs <file>`).
 3. Usa solo funzioni che esistono nel kit `K` (§7). **`K.teleport` non esiste**: l'`intro` del capitolo restituisce righe `[["voce","testo"]]` e il capitolo ha `start: "id_zona"`.
@@ -14,7 +14,8 @@ Un solo file: contiene regole, stato del progetto, come costruire una saga, API 
 7. Ogni sfondo e ogni punto cliccabile disegnato e verificato; zero errori in console al caricamento.
 8. Ogni PNG, oggetto e uscita raggiungibili a piedi; ogni dialogo finisce con `done()`, un altro dialogo o una partita.
 9. **Prima di consegnare lancia `npm run verifica`** e incolla l'esito (✓/✗). Poi i test della tua saga (§5).
-10. Nel report finale scrivi sempre: cosa hai fatto, quali test hai eseguito, **cosa non hai verificato**.
+10. **Non propormi più idee a scelta**: una sola scheda, poi costruisci (salvo mia richiesta esplicita di idee).
+11. Nel report finale scrivi sempre: cosa hai fatto, quali test hai eseguito, **cosa non hai verificato**.
 
 ## ✔ Verifica con un solo comando
 `npm run verifica` = controllo sintassi + avvio del gioco a 390 e 320 px + percorso nuova partita di OGNI saga (Inizia → Continua → mappa). Dura pochi minuti. Per una sola saga: `node tests/percorso.cjs <parte-del-nome>`. I test lunghi di capitolo restano `npm test` / `node tests/run.cjs <nome>`.
@@ -86,7 +87,7 @@ Un solo file: contiene regole, stato del progetto, come costruire una saga, API 
 - **Idee da cui partire (almeno una delle 3 proposte può venire da qui):** mockumentary sul calcio di provincia; heist in uno stadio; viaggio nel tempo tra epoche del calcio; scuola di calcio magica; sopravvivenza su un'isola; torneo tra mondi paralleli; calcio nell'antichità o nel medioevo comico; spionaggio anni '60 con tattiche segrete; fantasy con draghi e arbitri; musical; torneo tra bar di paese; parodia di una serie TV o di un videogioco.
 - **Da evitare:** carriera da allenatore, Jukebox, imprevisti casuali, temi medici o su minori in pericolo, ripetere saghe già nel gioco.
 
-## 1 · Prima di scrivere codice: studia e proponi
+## 1 · Prima di scrivere codice: studia e scrivi la scheda
 1. Leggi il **motore comune** `js/saga-core.js` (intestazione e funzione `create`) e le saghe costruite sopra:
    - «La Valle del Vento Gentile»: `js/vento.js`, `vento-c1..c3.js`, partita `vento-partita.js`. Ha il vento, gli interni e la casa che cammina.
    - «Detective di Campo»: `js/detective.js`, `detective-c1..c3.js`, `moviola.js`. Ha prove, presentazioni e pedinamento.
@@ -101,7 +102,7 @@ Un solo file: contiene regole, stato del progetto, come costruire una saga, API 
 
    Come spunti di storia e grafica guarda anche le saghe più vecchie: `ragnarok-story.js`, `chrono-story.js`, `bilancia-feudi.js`, `kronenburg-story.js`, `storia-campione.js` (Vallombra). Sono scritte senza motore comune: prendi le idee, non il codice.
 2. Leggi `js/bg-scenarios.js`, cioè gli sfondi di scena animati con punti da toccare (blocco `LB`).
-3. Poi **proponimi 3 idee** diverse tra loro per genere, grafica e gioco, senza scrivere codice. Per ognuna indica:
+3. Poi scrivi **una sola scheda** (mai più idee a scelta, salvo che io scriva esplicitamente «proponimi idee»). Se ti ho dato un titolo o un'idea, sviluppa quella; se non ti ho dato niente, scegli tu **una** idea diversa dalle saghe già nel gioco. Poi costruisci subito, senza aspettare la mia scelta. La scheda indica:
    - titolo, ambientazione, ispirazione e tono (serio o comico);
    - protagonista: il mio Campione creato;
    - 4-5 personaggi;
@@ -112,7 +113,7 @@ Un solo file: contiene regole, stato del progetto, come costruire una saga, API 
    - quali partite forzi e perché;
    - come cambiano **grafica e gioco** delle partite secondarie nello stadio della saga (`cfg.stadium`).
 
-   Io scelgo.
+   Mi mandi la scheda in poche righe come nota e prosegui.
 
 ## 2 · Come si costruisce una saga sul motore comune
 Struttura dei file: `js/<nome>.js` (configurazione) + `js/<nome>-c1.js` … `-c4.js` (un file per capitolo) + `js/<nome>-partita.js` (la partita originale, se serve).
