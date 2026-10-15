@@ -145,14 +145,15 @@
       // le scelte importanti fatte (domande con almeno una risposta «big»): servono allo schema delle scelte
       m.choices = arr(o.choices).filter((x) => x && typeof x.q === "string" && Array.isArray(x.o)).slice(-60).map((x) => ({ c: clampI(x.c, 1, 9, 1), k: String(x.k || "").slice(0, 12), q: x.q.slice(0, 140), o: x.o.filter((l) => typeof l === "string").slice(0, 6).map((l) => l.slice(0, 90)), p: clampI(x.p, 0, 5, 0) }));
       // istantanee all'ingresso di ogni capitolo (statistiche e scelte): servono a rigiocare un capitolo con gli stessi parametri della prima volta
-      m.snap = {};
-      Object.keys(obj(o.snap)).slice(0, 9).forEach((k) => {
-        const n = clampI(k, 1, 9, 0), sn = obj(o.snap[k]); if (!n) return;
-        const e = { st: {}, flags: {} };
+      const cleanSnap = (sn) => {
+        sn = obj(sn); const e = { st: {}, flags: {} };
         Object.keys(STATS).forEach((q) => { const [a, b, d] = STATS[q]; e.st[q] = clampI(obj(sn.st)[q], a, b, d); });
         let c2 = 0; Object.keys(obj(sn.flags)).forEach((q) => { if (c2 >= 400 || !FLAG_RE.test(q)) return; const v = sn.flags[q]; if (typeof v === "boolean" || (typeof v === "number" && Number.isFinite(v)) || (typeof v === "string" && v.length <= 40)) { e.flags[q] = v; c2++; } });
-        m.snap[n] = e;
-      });
+        return e;
+      };
+      m.snap = {};
+      Object.keys(obj(o.snap)).slice(0, 9).forEach((k) => { const n = clampI(k, 1, 9, 0); if (n) m.snap[n] = cleanSnap(o.snap[k]); });
+      m.choices.forEach((x, i) => { const src = arr(o.choices).filter((y) => y && typeof y.q === "string" && Array.isArray(y.o)).slice(-60)[i]; if (src && src.s) { x.s = cleanSnap(src.s); x.s.step = clampI(obj(src.s).step, 0, 99, 0); x.s.zone = typeof obj(src.s).zone === "string" && ZONE_RE.test(src.s.zone) ? src.s.zone : ""; } });
       m.zone = typeof o.zone === "string" && ZONE_RE.test(o.zone) ? o.zone : "";
       m.log = arr(o.log).filter((x) => typeof x === "string").map((x) => x.slice(0, 220)).slice(-80);
       Object.keys(obj(o.intro)).forEach((k) => { if (FLAG_RE.test(k)) m.intro[k] = 1; });
@@ -397,7 +398,8 @@
     function ask(who, prompt, opts, bg, tm) {
       if (opts.some((q) => q.big) && opts.filter((q) => !q.disabled).length >= 2) { // scelta importante: la ricordiamo per lo schema delle scelte
         const ch = (activeChapter() || {}).n || 1, lab = opts.map((q) => String(T(q.label)).replace(/<[^>]*>/g, "")), key = String(hash(ch + "|" + String(prompt).slice(0, 80)));
-        opts = opts.map((q, i) => (q.fn && !q.disabled ? Object.assign({}, q, { fn: () => { const m = mem(); m.choices = (m.choices || []).filter((x) => x.k !== key); m.choices.push({ c: ch, k: String(key).slice(0, 12), q: String(T(prompt)).replace(/<[^>]*>/g, "").slice(0, 140), o: lab.slice(0, 6), p: Math.min(i, 5) }); if (m.choices.length > 60) m.choices.shift(); save(); q.fn(); } }) : q));
+        const pre = { st: Object.assign({}, mem().st), flags: Object.assign({}, mem().flags), step: mem().step[ch] | 0, zone: mem().zone || "" }; 
+        opts = opts.map((q, i) => (q.fn && !q.disabled ? Object.assign({}, q, { fn: () => { const m = mem(); m.choices = (m.choices || []).filter((x) => x.k !== key); m.choices.push({ c: ch, k: String(key).slice(0, 12), q: String(T(prompt)).replace(/<[^>]*>/g, "").slice(0, 140), o: lab.slice(0, 6), p: Math.min(i, 5), s: pre }); if (m.choices.length > 60) m.choices.shift(); m.choices.forEach((x, j) => { if (x.s && j < m.choices.length - 25) delete x.s; }); save(); q.fn(); } }) : q));
       }
       meet(who); if (TIMED) { clearInterval(TIMED.iv); TIMED = null; }
       const tok = {}; const wrap = (o) => (o.fn ? () => { if (TIMED && TIMED.tok === tok) { clearInterval(TIMED.iv); TIMED = null; } if (o.big) SFX.choice(); o.fn(); } : o.fn);
@@ -453,6 +455,23 @@
       return `<b>${esc(h0.name)}</b> · n. ${esc(h0.num)}${stats ? "<br>" + stats : ""}<br><br><b>Pagine</b> (${m.lore.length}/${Object.keys(LORE).length})<br>${lore || "<span style='color:var(--dim)'>Niente, per ora.</span>"}<br><br><b>Finali</b><br>${endingsHtml()}`;
     }
     function endingsHtml() { const m = mem(); return Object.keys(ENDINGS).map((k) => (m.ends.includes(k) ? `✓ <b>${esc(ENDINGS[k][0])}</b> <span style="color:var(--dim)">${esc(ENDINGS[k][1])}</span>` : `<span style='color:var(--dim)'>• ??? ${ENDINGS[k][2] ? "· " + esc(ENDINGS[k][2]) : ""}</span>`)).join("<br>"); }
+    // ripartire da una scelta precisa: stato com'era un attimo prima di sceglierla
+    function rewindToChoice(x) {
+      const m = mem(); if (!x || !x.s) return false; const n = x.c;
+      m.st = Object.assign({}, x.s.st); m.flags = Object.assign({}, x.s.flags);
+      Object.keys(m.step).forEach((k) => { if (+k > n) delete m.step[k]; }); m.step[n] = x.s.step | 0;
+      Object.keys(m.done).forEach((k) => { if (+k >= n) delete m.done[k]; });
+      Object.keys(m.snap || {}).forEach((k) => { if (+k > n) delete m.snap[k]; });
+      const at = m.choices.indexOf(x); m.choices = m.choices.slice(0, at >= 0 ? at : m.choices.length);
+      m.ch = n; m.zone = x.s.zone || ""; save(); return true;
+    }
+    function choiceMenu(back, inZone) {
+      const m = mem(), l = (m.choices || []).filter((x) => x.s).slice(-10).reverse();
+      const show = (html, opts) => (inZone ? api.trAsk("voce", html, opts, bgNow()) : api.scene(BG0, "voce", html, opts, JN()));
+      const opts = l.map((x) => ({ label: (x.q.length > 56 ? x.q.slice(0, 54) + "…" : x.q), sub: `Capitolo ${x.c} · hai scelto: ${x.o[x.p] || ""}`.slice(0, 90), fn: () => show(`<b>Rivivere questa scelta?</b><br>${esc(x.q)}<br><span style="color:var(--dim)">Torni a un attimo prima, con le statistiche di allora. Da qui in poi le scelte successive si rifanno. Finali trovati, monete e cosmetici restano tuoi.</span>`, [{ label: "Sì, riparti da qui", cls: "hot", fn: () => { rewindToChoice(x); continueStory(); } }, { label: "◂ Indietro", fn: () => choiceMenu(back, inZone) }]) }));
+      opts.push({ label: "◂ Indietro", fn: () => journal(back, inZone) });
+      show(`<b>Rivivi una scelta</b><br><span style="color:var(--dim)">Le ultime scelte importanti, dalla più recente.</span>`, opts);
+    }
     // schema delle scelte (alla Detroit): per capitolo, cosa hai deciso e le strade che non hai preso
     function choicesHtml() {
       const m = mem(), l = m.choices || []; if (!l.length) return "";
@@ -466,8 +485,9 @@
     }
     function journal(back, inZone) {
       const html = journalHtml() + choicesHtml() + cluesHtml() + questsHtml();
-      if (inZone) return api.trAsk("voce", html, [{ label: "◂ Indietro", fn: back }], bgNow());
-      api.scene(BG0, "voce", html, [{ label: "◂ Indietro", fn: back }], JN());
+      const jb = ((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
+      if (inZone) return api.trAsk("voce", html, jb, bgNow());
+      api.scene(BG0, "voce", html, jb, JN());
     }
     function finishChapter(n, ending) { const m = mem(); m.done[n] = String(ending || "ok").slice(0, 24); if (m.ch <= n && n < NCH) m.ch = n + 1; if (n < NCH) takeSnap(n + 1); save(); SFX.end(); }
 
