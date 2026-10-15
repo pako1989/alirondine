@@ -19,7 +19,7 @@ const sagas = [...src.matchAll(/id: "([\w-]+)"[^\n]*?mod: "(__\w+)", key: "([\w.
         const st = await page.evaluate(() => ({ walk: document.body.classList.contains("borgo") && !!(window.__ali.view && window.__ali.view.kind === "trasf"), b: [...document.querySelectorAll("#choices button")].filter((b) => b.offsetParent).map((b) => b.innerText.split("\n")[0].trim()) }));
         if (st.walk) { map = true; break; }
         if (st.b.some((t) => /^Continua ▸/.test(t))) seenCont = true;
-        const pick = st.b.find((t) => /^Continua ▸|^Inizia|^Continua la storia|^Normale/.test(t)) || st.b.find((t) => /^Storia/.test(t));
+        const pick = st.b.find((t) => /^Continua ▸|^Inizia|^Continua la storia|^Normale/.test(t)) || st.b.find((t) => /^Storia/.test(t)) || (i === 0 ? st.b.find((t) => !/^◂/.test(t)) : null); // alcune saghe chiamano il primo pulsante in altro modo (es. «Firma il contratto»)
         if (!pick) { await page.waitForTimeout(300); continue; }
         await page.evaluate((p) => { const b = [...document.querySelectorAll("#choices button")].find((x) => x.innerText.trim().startsWith(p)); b && b.click(); }, pick);
       }
