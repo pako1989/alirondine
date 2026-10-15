@@ -8,7 +8,7 @@ async function run(w) {
   const { browser, page, errors } = await L.setup({ w, extra });
   await page.evaluate(() => window.__salone.salaGiochi(() => {})); await page.waitForTimeout(300);
   const ms = await page.evaluate(() => [...document.querySelectorAll(".salOv [data-m]")].map((b) => b.dataset.m + ":" + (b.querySelector(".pe").textContent === "🔒" ? "chiuso" : "aperto")));
-  if (ms.join() !== "vignette:chiuso,atb:chiuso,bottoni:aperto,nastro:aperto,luci:chiuso,lavagna:chiuso,duello:chiuso,concilio:chiuso,gadget:chiuso,iso:chiuso,volo:chiuso,ciak:chiuso,ipogeo:chiuso,consegna:chiuso,pallatempo:chiuso,combo:chiuso,ritagli:chiuso,stangata:chiuso,arrembaggio:chiuso,corona:chiuso,rintocchi:chiuso,circo:chiuso,marea:chiuso") errors.push("cabinati sbagliati: " + ms.join());
+  if (ms.join() !== "vignette:chiuso,atb:chiuso,bottoni:aperto,nastro:aperto,luci:chiuso,lavagna:chiuso,duello:chiuso,concilio:chiuso,gadget:chiuso,iso:chiuso,volo:chiuso,ciak:chiuso,ipogeo:chiuso,consegna:chiuso,giroegol:chiuso,pallatempo:chiuso,combo:chiuso,ritagli:chiuso,stangata:chiuso,arrembaggio:chiuso,corona:chiuso,rintocchi:chiuso,circo:chiuso,marea:chiuso") errors.push("cabinati sbagliati: " + ms.join());
   if (w === 390) await L.shot(page, "sala");
   // Super-Bottoni: il boss c'è (saga finita), si sceglie il potere
   await page.evaluate(() => document.querySelector('.salOv [data-m="bottoni"]').click()); await page.waitForTimeout(200);
