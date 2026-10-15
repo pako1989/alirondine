@@ -24,6 +24,8 @@
   const GEN = { fantasy: ["Fantasy", "#7a4ab0"], mistero: ["Mistero", "#2c6a9a"], scifi: ["Fantascienza", "#1f8a8a"], storico: ["Storico", "#a8622a"], commedia: ["Commedia", "#c9921a"], sport: ["Sport anime", "#c0392b"], avventura: ["Avventura", "#3f8a3f"], dramma: ["Drammatico", "#6a5a7a"], tattica: ["Tattica", "#5a6a3a"], satira: ["Satira", "#0284c7"] };
   // mod: oggetto window con menuEntry/info · fn: funzione window da chiamare con (indietro) · ch: capitoli totali (se noti)
   const SAGAS = [
+    { id: "alcatraz", t: "Fuga da Alcatraz FC · La Grande Evasione", e: "⛓️", g: ["avventura", "commedia"], mod: "__alcatraz", key: "ali-di-rondine.alcatraz", ch: 3, cover: "alc_titolo", d: "Sull'isola spazzata dai fari, il Campione scambiato per un galeotto guida la squadra dei detenuti. Calcio a Parete: sponde elastiche metalliche, tiri d'anticipo e riflettori delle guardie da evitare.",
+      hints: { evasione: "Serve aver completato la galleria nel Capitolo 2 e vinto la finale.", patto: "Serve aver stretto l'accordo col Direttore e giocato leale.", barbiere: "Sempre possibile: vittoria e gestione della barberia clandestina.", segreto: "Segreto: tutti i grimaldelli raccolti, allarme mai scattato al massimo e tunnel scoperto." } },
     { id: "milano", t: "Operazione Fuorigioco Noir · Milano 1954", e: "🕵️", g: ["mistero", "storico"], mod: "__milano", key: "ali-di-rondine.milano", ch: 3, cover: "mn_titolo", d: "Nebbia fitta sui Bastioni di Porta Ticinese, bische clandestine e il mistero delle partite truccate nell'autunno del 1954. Il nuovo motore Pedinamento Tattico (coni d'ombra dei riflettori, marcature serrate e ripartenze nel fango), il Taccuino dei Verbali della Questura e quattro finali nel fango dell'Arena Civica.",
       hints: { legge: "Serve aver consegnato tutte le prove al Commissario De Santis e vinto la finale.", riscatto: "Serve aver stretto il patto con Don Carmine e Mara per salvare la società dei ferrovieri.", solitario: "Sempre possibile, alla fine: allontanati sui binari nella nebbia fedele solo al pallone.", verita: "Segreto: tutti i 12 biglietti punzonati raccolti e verbali completi al 100% per il Cappello Borsalino Noir d'Oro." } },
     { id: "roma", t: "Ave Calcio! · I Gladiatori del Pallone", e: "🏛️", g: ["storico", "commedia"], mod: "__roma", key: "ali-di-rondine.roma", ch: 3, cover: "rm_titolo", d: "Sabbia dorata, senatori furbi e ludi circensi nell'Urbe del 75 d.C. Tu sei il Legionario dal Piede Alato, scambiato per errore con uno schiavo e gettato nell'arena. Il nuovo motore Circo Massimo (campo ovale con spina centrale, scatti a biga, muri di scudi e catapulte per superare l'obelisco), gli Editti Imperiali e quattro finali per la corona d'alloro.",
@@ -120,7 +122,7 @@
     { id: "cala", t: "Cala Tramontana", e: "🌊", g: ["avventura"], fn: "openCalaTramontana", key: "ali-di-rondine.cala-tramontana", cover: "beach", d: "Esplora a piedi il borgo marino alternativo con il tuo Campione." },
     { id: "borgostorto", t: "Il Borgo Storto", e: "🌀", g: ["commedia", "tattica"], api: "openBorgoStorto", cover: "beach", d: "Lo spin-off GDR a turni del Borgo Marino." },
   ];
-  const NEWEST = ["milano", "gp", "tempo", "dungeon", "roma", "regno", "naufraghi", "campana", "galletta", "pugno", "montagna", "cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
+  const NEWEST = ["alcatraz", "milano", "gp", "tempo", "dungeon", "roma", "regno", "naufraghi", "campana", "galletta", "pugno", "montagna", "cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
   const modOf = (s) => (s.mod ? window[s.mod] : null);
   const available = (s) => (s.mod ? !!window[s.mod] : s.fn ? typeof window[s.fn] === "function" : !!(api() && api()[s.api]));
   function state(s) {
@@ -337,6 +339,10 @@
       opp: [{ name: "Banda dei Bastioni '54", color: "#475569", style: "pressing" }, { name: "Tirapiedi della Lucciola", color: "#581c87", style: "contropiede" }],
       boss: { name: "I Diavoli dell'Ombra '54", color: "#0f172a", style: "difensiva" },
       opts: (o, h, boss) => ({ title: `Pedinamento Tattico · contro ${o.name}`, us: "Il Campione del '54", usColor: "#334155", hero: { name: h.name || "Tu" }, opp: o }) },
+    { id: "rebound", t: "Calcio a Parete · Rebound Heist", e: "⛓️", saga: "alcatraz", eng: "__alcatrazMatch", d: "3 contro 3 tra le sbarre e le sponde metalliche del penitenziario, con fari di ronda e tiri a rimbalzo.",
+      opp: [{ name: "Detenuti del Braccio Est", color: "#f59e0b", style: "pressing" }, { name: "Squadra dei Magazzini", color: "#64748b", style: "contropiede" }],
+      boss: { name: "I Custodi del Direttore", color: "#0f172a", style: "difensiva" },
+      opts: (o, h, boss) => ({ title: `Calcio a Parete · contro ${o.name}`, teamA: "Braccio Ovest", opp: o.name, colA: "#38bdf8", colB: o.color }) },
   ];
   function sgState(m) { const s = SAGAS.find((x) => x.id === m.saga), x = s ? state(s) : null; return { s, open: !!(x && (x.doneN >= 1)), boss: !!(x && x.endsFound > 0) }; }
   function openSalaGiochi(back) {
@@ -639,7 +645,7 @@
   // ---------------------------------------------------------------- ALBUM DEI PERSONAGGI
   // ogni personaggio registrato nel gioco (window.__borgoApi.BIO) diventa una carta. Si «incontra» parlandoci (seeCard del gioco).
   // Le sezioni: la Storia e Borgo Marino, i tornei e le modalità del Borgo, e una sezione per saga (riconosciuta dal prefisso degli id).
-  const PFX = { milano: "mn", gp: "gp", tempo: "rt", roma: "rm", regno: "re", naufraghi: "nf", campana: "cp", galletta: "gl", pugno: "pr", montagna: "bm", cavallo: "cs", dungeon: "dg", razzo: "rz", quartiere: "sq", titano: "ft", ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
+  const PFX = { alcatraz: "alc", milano: "mn", gp: "gp", tempo: "rt", roma: "rm", regno: "re", naufraghi: "nf", campana: "cp", galletta: "gl", pugno: "pr", montagna: "bm", cavallo: "cs", dungeon: "dg", razzo: "rz", quartiere: "sq", titano: "ft", ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
   const BORGO_PFX = ["sv", "rb", "sb", "cg", "hd", "md", "ac"];
   function perSections() {
     const A = api(); if (!A || !A.BIO) return [];

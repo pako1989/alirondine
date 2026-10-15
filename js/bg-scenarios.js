@@ -2802,6 +2802,240 @@
     });
   }
 
+  // --- 20. FUGA DA ALCATRAZ FC · IL PENITENZIARIO SULL'ISOLA ---
+  window.__alcDraw = { get Isola() { return drawDetailedAlcatrazIsola; }, get Cortile() { return drawDetailedAlcatrazCortile; }, get Celle() { return drawDetailedAlcatrazCelle; } };
+
+  function drawDetailedAlcatrazIsola(g, W, H, f) {
+    // Cielo notturno cupo sulla baia
+    const sky = g.createLinearGradient(0, 0, 0, 110);
+    sky.addColorStop(0, "#020617");
+    sky.addColorStop(0.6, "#0f172a");
+    sky.addColorStop(1, "#1e293b");
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, 110);
+
+    // Stelle e luna fredda
+    for (let i = 0; i < 30; i++) {
+      const sx = (i * 53 + 17) % W;
+      const sy = (i * 31 + 11) % 75;
+      const sa = 0.3 + 0.3 * Math.sin(f * 0.08 + i);
+      px(g, sx, sy, 1.5, 1.5, `rgba(226, 232, 240, ${sa})`);
+    }
+    // Luna
+    g.fillStyle = "#e2e8f0";
+    g.beginPath();
+    g.arc(W - 45, 28, 12, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = "#020617";
+    g.beginPath();
+    g.arc(W - 49, 26, 11, 0, Math.PI * 2);
+    g.fill();
+
+    // Onde della baia scura
+    const sea = g.createLinearGradient(0, 110, 0, H);
+    sea.addColorStop(0, "#0c4a6e");
+    sea.addColorStop(0.5, "#082f49");
+    sea.addColorStop(1, "#020617");
+    g.fillStyle = sea;
+    g.fillRect(0, 110, W, H - 110);
+    for (let i = 0; i < 8; i++) {
+      const wy = 120 + i * 11;
+      const off = (f * 0.8 + i * 40) % W;
+      px(g, (off) % W, wy, 35, 2, "rgba(56, 189, 248, 0.25)");
+      px(g, (off + 140) % W, wy + 4, 45, 1.5, "rgba(241, 245, 249, 0.2)");
+    }
+
+    // Sagoma rocciosa dell'isola di Alcatraz
+    g.fillStyle = "#0f172a";
+    g.beginPath();
+    g.moveTo(20, 140);
+    g.lineTo(50, 95);
+    g.lineTo(90, 85);
+    g.lineTo(140, 75);
+    g.lineTo(190, 70);
+    g.lineTo(250, 82);
+    g.lineTo(290, 100);
+    g.lineTo(315, 140);
+    g.lineTo(20, 140);
+    g.fill();
+
+    // Mura della fortezza e blocchi celle
+    px(g, 90, 60, 140, 35, "#1e293b");
+    px(g, 92, 58, 136, 4, "#334155");
+    // Finestrelle con sbarre e luci soffuse
+    for (let bx = 100; bx < 220; bx += 18) {
+      px(g, bx, 68, 8, 10, "rgba(250, 204, 21, 0.35)");
+      px(g, bx + 3, 68, 2, 10, "#0f172a");
+    }
+
+    // Torretta del faro principale
+    px(g, 150, 32, 18, 30, "#334155");
+    px(g, 146, 28, 26, 6, "#475569");
+    px(g, 152, 22, 14, 8, "#facc15");
+
+    // Fascio del riflettore rotante
+    const beamAngle = Math.sin(f * 0.04) * 0.85;
+    g.save();
+    g.translate(159, 26);
+    g.rotate(beamAngle);
+    const beam = g.createRadialGradient(0, 0, 5, 0, 120, 140);
+    beam.addColorStop(0, "rgba(250, 204, 21, 0.7)");
+    beam.addColorStop(0.4, "rgba(56, 189, 248, 0.3)");
+    beam.addColorStop(1, "rgba(56, 189, 248, 0)");
+    g.fillStyle = beam;
+    g.beginPath();
+    g.moveTo(-4, 0);
+    g.lineTo(4, 0);
+    g.lineTo(45, 140);
+    g.lineTo(-45, 140);
+    g.closePath();
+    g.fill();
+    g.restore();
+
+    // Molo d'attracco e motovedetta
+    px(g, 220, 132, 70, 12, "#334155");
+    px(g, 235, 124, 30, 8, "#1e293b");
+    px(g, 240, 122, 4, 4, "#38bdf8");
+  }
+
+  function drawDetailedAlcatrazCortile(g, W, H, f) {
+    // Cielo notturno cupo
+    const sky = g.createLinearGradient(0, 0, 0, 85);
+    sky.addColorStop(0, "#020617");
+    sky.addColorStop(1, "#0f172a");
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, 85);
+
+    // Muro perimetrale di cemento armato
+    px(g, 0, 50, W, 45, "#1e293b");
+    px(g, 0, 48, W, 4, "#334155");
+    // Filo spinato a spirale in cima
+    g.strokeStyle = "#64748b";
+    g.lineWidth = 1;
+    for (let x = 6; x < W; x += 12) {
+      g.beginPath();
+      g.arc(x, 48, 4, 0, Math.PI * 2);
+      g.stroke();
+    }
+
+    // Torretta di guardia sinistra
+    px(g, 15, 20, 24, 32, "#334155");
+    px(g, 12, 16, 30, 5, "#475569");
+    px(g, 22, 10, 10, 7, "rgba(250, 204, 21, 0.5)");
+
+    // Asfalto del cortile
+    const court = g.createLinearGradient(0, 95, 0, H);
+    court.addColorStop(0, "#1e293b");
+    court.addColorStop(0.5, "#334155");
+    court.addColorStop(1, "#0f172a");
+    g.fillStyle = court;
+    g.fillRect(0, 95, W, H - 95);
+
+    // Riflessi d'umidità sull'asfalto
+    for (let i = 0; i < 6; i++) {
+      const rx = (i * 60 + 25) % (W - 50);
+      const ry = 115 + i * 14;
+      px(g, rx, ry, 40, 3, "rgba(56, 189, 248, 0.15)");
+    }
+
+    // Linee di gesso del campo di calcio a parete
+    ctxStrokeRect(g, 40, 110, W - 80, 85, "rgba(226, 232, 240, 0.45)");
+    g.strokeStyle = "rgba(226, 232, 240, 0.4)";
+    g.beginPath();
+    g.arc(W / 2, 152, 22, 0, Math.PI * 2);
+    g.stroke();
+    g.beginPath();
+    g.moveTo(W / 2, 110);
+    g.lineTo(W / 2, 195);
+    g.stroke();
+
+    // Sponde laterali di lamiera metallica
+    px(g, 40, 106, W - 80, 4, "#64748b");
+    px(g, 40, 195, W - 80, 4, "#64748b");
+
+    // Porte in ferro con reti metalliche
+    px(g, 36, 135, 6, 35, "#94a3b8");
+    px(g, W - 42, 135, 6, 35, "#94a3b8");
+
+    // Cono del riflettore mobile che spazza il cortile
+    const spotX = W / 2 + Math.sin(f * 0.05) * 80;
+    g.save();
+    const spotGrad = g.createRadialGradient(spotX, 152, 5, spotX, 152, 55);
+    spotGrad.addColorStop(0, "rgba(250, 204, 21, 0.4)");
+    spotGrad.addColorStop(0.6, "rgba(56, 189, 248, 0.18)");
+    spotGrad.addColorStop(1, "rgba(56, 189, 248, 0)");
+    g.fillStyle = spotGrad;
+    g.beginPath();
+    g.arc(spotX, 152, 55, 0, Math.PI * 2);
+    g.fill();
+    g.restore();
+  }
+
+  function drawDetailedAlcatrazCelle(g, W, H, f) {
+    // Sfondo interno corridoio detentivo
+    const bg = g.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, "#090d16");
+    bg.addColorStop(0.5, "#0f172a");
+    bg.addColorStop(1, "#1e293b");
+    g.fillStyle = bg;
+    g.fillRect(0, 0, W, H);
+
+    // Secondo piano / ballatoio metallico
+    px(g, 0, 75, W, 8, "#334155");
+    px(g, 0, 73, W, 2, "#64748b");
+    for (let rx = 10; rx < W; rx += 14) {
+      px(g, rx, 60, 2, 14, "#475569");
+    }
+
+    // Fila celle superiori (sbarre)
+    for (let cx = 15; cx < W - 20; cx += 45) {
+      px(g, cx, 15, 36, 45, "#020617");
+      for (let bar = cx + 4; bar < cx + 34; bar += 6) {
+        px(g, bar, 15, 2, 45, "#64748b");
+      }
+    }
+
+    // Fila celle inferiori
+    for (let cx = 15; cx < W - 20; cx += 45) {
+      px(g, cx, 90, 36, 65, "#020617");
+      for (let bar = cx + 4; bar < cx + 34; bar += 6) {
+        px(g, bar, 90, 2, 65, "#64748b");
+      }
+    }
+
+    // La Barberia di Bruno (porta speciale con specchio e insegna)
+    const bx = W - 75;
+    px(g, bx, 88, 55, 70, "#1e293b");
+    px(g, bx + 4, 94, 20, 25, "rgba(56, 189, 248, 0.4)");
+    // Palo da barbiere a spirale
+    px(g, bx - 8, 92, 6, 24, "#ffffff");
+    px(g, bx - 8, 96, 6, 4, "#ef4444");
+    px(g, bx - 8, 104, 6, 4, "#3b82f6");
+    px(g, bx - 8, 112, 6, 4, "#ef4444");
+
+    // Lanterna d'emergenza ambrata
+    const bulbPulse = 0.6 + 0.3 * Math.sin(f * 0.1);
+    g.save();
+    const bGrad = g.createRadialGradient(W / 2, 25, 1, W / 2, 25, 14);
+    bGrad.addColorStop(0, `rgba(250,204,21,${bulbPulse})`);
+    bGrad.addColorStop(1, "rgba(250,204,21,0)");
+    g.fillStyle = bGrad;
+    g.fillRect(W / 2 - 14, 11, 28, 28);
+    px(g, W / 2 - 3, 20, 6, 8, "#facc15");
+    g.restore();
+
+    // Tubature e vapore
+    px(g, 0, 8, W, 4, "#475569");
+    const steamX = 90 + (f * 0.5) % 80;
+    px(g, steamX, 6, 15, 3, "rgba(241, 245, 249, 0.35)");
+  }
+
+  function ctxStrokeRect(g, x, y, w, h, col) {
+    g.strokeStyle = col;
+    g.lineWidth = 1;
+    g.strokeRect(x, y, w, h);
+  }
+
   // --- 19. LA NOTTE DEI CENTO RINTOCCHI · ROCCA CAMPANARIA ---
   window.__cpDraw = { get Piazza() { return drawDetailedCampanaPiazza; }, get Campanile() { return drawDetailedCampanaCampanile; }, get Cantina() { return drawDetailedCampanaCantina; } };
 
@@ -4474,6 +4708,16 @@
       case "mn_arena":
         if (window.__mnDraw && window.__mnDraw.ArenaCivica) { window.__mnDraw.ArenaCivica(g, W, H, f); return true; }
         px(g, 0, 0, W, H, "#0f172a");
+        return true;
+      case "alc_titolo":
+      case "alc_isola":
+        drawDetailedAlcatrazIsola(g, W, H, f);
+        return true;
+      case "alc_cortile":
+        drawDetailedAlcatrazCortile(g, W, H, f);
+        return true;
+      case "alc_celle":
+        drawDetailedAlcatrazCelle(g, W, H, f);
         return true;
       case "cp_piazza":
       case "cp_titolo":
@@ -8538,6 +8782,31 @@
     LB[k] = { draw: (g, W, H, f) => { const D = window.__glDraw; if (D && D[n]) D[n](g, W, H, f); else px(g, 0, 0, W, H, "#7c4a1d"); }, hot };
   });
   LB.gl_porto = LB.gl_titolo;
+
+  // Fuga da Alcatraz FC · La Grande Evasione: scene con punti cliccabili visibili (scintille) e didascalia
+  [
+    ["alc_titolo", "Isola", [
+      [30, 95, 65, 45, "🌊 Baia delle Correnti Gelide: acque profonde e insidiose circondano la fortezza d'Alcatraz."],
+      [140, 20, 80, 75, "🗼 Faro del Penitenziario: fascio rotante ad alta intensità che scandaglia ogni metro della costa."],
+      [230, 110, 70, 50, "⛴️ Molo d'Attracco: la motovedetta delle guardie ormeggiata alle bitte rugginose."],
+      [95, 100, 90, 40, "🏰 Fortezza di Roccia: mura ciclopiche di granito nero impenetrabili da oltre un secolo."]
+    ]],
+    ["alc_cortile", "Cortile", [
+      [30, 95, 65, 50, "⚽ Porte di Ferro Battuto: pali quadrati e reti metalliche per il torneo dei detenuti."],
+      [130, 20, 85, 70, "💡 Riflettori di Ronda: fasci mobili che scandagliano il campo a intervalli regolari."],
+      [230, 90, 65, 60, "🧱 Muro di Cinta Est: dodici metri di cemento armato con filo spinato a rasoio."],
+      [105, 115, 90, 45, "🪨 Asfalto Scanalato: terreno duro dove il rimbalzo della palla a parete è fulmineo."]
+    ]],
+    ["alc_celle", "Celle", [
+      [25, 95, 70, 55, "💈 La Barberia di Bruno: forbici nascoste, poltrona girevole e lavagnetta tattica d'evasione."],
+      [125, 20, 90, 70, "🪜 Passerella del Braccio Ovest: guardie in ronda sui ballatoi con fischietti d'ottone."],
+      [220, 100, 75, 55, "🚪 Cella d'Isolamento: sbarre temprate e una grata di ventilazione fissata con quattro bulloni."],
+      [100, 120, 95, 45, "🛒 Carrello della Mensa: scodelle di latta e sacchi di farina sotto cui nascondere i grimaldelli."]
+    ]]
+  ].forEach(([k, n, hot]) => {
+    LB[k] = { draw: (g, W, H, f) => { const D = window.__alcDraw; if (D && D[n]) D[n](g, W, H, f); else px(g, 0, 0, W, H, "#0f172a"); }, hot };
+  });
+  LB.alc_isola = LB.alc_titolo;
 
   // La Notte dei Cento Rintocchi: scene con punti cliccabili visibili (scintille) e didascalia
   [

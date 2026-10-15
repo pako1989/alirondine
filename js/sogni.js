@@ -33,6 +33,7 @@
     roma: ["ali-di-rondine.roma", "Ave Calcio! · I Gladiatori del Pallone", "#b91c1c", "__roma"],
     galletta: ["ali-di-rondine.galletta", "S.O.S. Galletta: I Bucanieri del Biscotto", "#d97706", "__galletta"],
     naufraghi: ["ali-di-rondine.naufraghi", "Naufraghi del Pallone", "#0e9aa7", "__naufraghi"],
+    alcatraz: ["ali-di-rondine.alcatraz", "Fuga da Alcatraz FC", "#38bdf8", "__alcatraz"],
     campana: ["ali-di-rondine.campana", "La Notte dei Cento Rintocchi", "#ca8a04", "__campana"],
     regno: ["ali-di-rondine.regno", "Cronache del Regno Ultimo", "#a82a3a", "__regno"],
     vallombra: ["ali-di-rondine.storia-campione", "Vallombra", "#6a8aa8", "__storiaCampione"], kronenburg: ["ali-di-rondine.kronenburg-story", "Kronenburg", "#8a1a2a", "__kronenburgStory"], pirati: ["ali-di-rondine.pirati-story", "I Pirati della Tempesta Celeste", "#2a8ac8", "__piratiStory"],
@@ -108,6 +109,9 @@
     ["gl_barbabiscotto", "galletta", "c", 54, 76, 58, "D", 1], ["gl_cannella", "galletta", "c", 60, 56, 76, "C", 1], ["gl_crusty", "galletta", "r", 74, 52, 70, "A", 1],
     ["gl_commodoro", "galletta", "r", 62, 78, 64, "D", 2], ["gl_calipso", "galletta", "e", 70, 68, 86, "C", 2],
     ["gl_lievito", "galletta", "e", 64, 74, 84, "C", 3], ["gl_kraken", "galletta", "l", 88, 76, 82, "A", 3],
+    // Fuga da Alcatraz FC · La Grande Evasione
+    ["alc_bruno", "alcatraz", "r", 68, 62, 82, "C", 1], ["alc_cardenas", "alcatraz", "c", 50, 78, 60, "D", 1], ["alc_sam", "alcatraz", "c", 76, 52, 70, "A", 1],
+    ["alc_malick", "alcatraz", "e", 60, 88, 54, "D", 2], ["alc_tonelli", "alcatraz", "r", 62, 64, 76, "C", 2],
     // La Notte dei Cento Rintocchi: Il Furto della Campana d'Oro
     ["cp_crispino", "campana", "c", 60, 72, 70, "C", 1], ["cp_cacace", "campana", "c", 48, 82, 54, "D", 1], ["cp_rosetta", "campana", "r", 68, 54, 76, "C", 1],
     ["cp_tito", "campana", "r", 74, 52, 78, "A", 2], ["cp_peppe", "campana", "e", 78, 80, 56, "D", 2],
@@ -196,6 +200,7 @@
     dt_ofelia: "Conto i passi, i secondi e le porte.", dt_nina: "Dietro il bancone vedo tutto. Anche i fuorigioco.", dt_bruno: "Regole, sorrisi, e una difesa solida.", dt_pio: "Lavoro sul confine. Anche in campo.", dt_scheggia: "Gioco a piedi nudi, anche d'inverno.", dt_valtorre: "Sorriso perfetto, schema perfetto.", dt_cartografo: "Disegno mappe di posti che non ricordi.",
     lb_virgola: "Un nastro rosso e una pausa al momento giusto.", lb_lupo: "Un tè alla bergamotto e un tiro di classe.", lb_mattone: "Capitano, regista, geometra.", lb_nonna: "Ho un gomitolo per ogni partita.", lb_jolly: "Posso essere qualsiasi carta. Oggi, la migliore.", lb_gommapane: "Mangio refusi e passaggi sbagliati.", lb_regina: "Imbattuta. E dal vivo, di più.", lb_fante: "Leale fino all'ostinazione.", lb_didascalia: "«E in quel momento, il gol.» (L'ho scritto io.)", lb_balloon: "Nuvolette ben legate e un tiro a effetto.", lb_rilegatore: "Ho cucito ogni pagina con spago cerato.", lb_narratore: "E così, la partita finì come doveva.", lb_autrice: "Firmato: A.",
     gl_barbabiscotto: "Per mille forchette! Si salpa per il gol!", gl_cannella: "Impasto all'alba e tiro al novantesimo.", gl_crusty: "KRAAA! Briciole all'incrocio dei pali! KRAAA!", gl_commodoro: "Un gol conforme al rigido protocollo imperiale.", gl_calipso: "Il vento profuma di vittoria e vaniglia.", gl_lievito: "Cotto a puntino: nell'angolino basso!", gl_kraken: "I flutti si aprono al Re dei Bucanieri!",
+    alc_bruno: "Forbici salde, testa alta e cross al millimetro: così si evade dalla marcatura.", alc_cardenas: "Nessuno esce da qui senza il mio triplice fischio.", alc_sam: "Ho una chiave per ogni porta e un tunnel per ogni contropiede.", alc_malick: "Palla o uomo passano... ma mai insieme.", alc_tonelli: "Fischietto tra i denti e marcatura a uomo: la disciplina prima di tutto.",
   };
   // le squadre inventate della Stagione dei Sogni e del Draft
   const TEAMS = [
@@ -211,6 +216,7 @@
   const RAR = { c: ["Comune", "#9aa5b1", 1], r: ["Rara", "#3a8ad8", 2], e: ["Epica", "#a85ad8", 3], l: ["Leggendaria", "#ffd23f", 4] };
   // i legami tra saghe diverse: +3 di intesa se entrambi in squadra
   const LINKS = [
+    ["alc_bruno", "mg_bullone", "Pezzi di Ricambio & Forbici"], ["alc_malick", "tc_ardo", "I Baluardi di Pietra"],
     ["mn_desantis", "dc_agata", "Fiuto Investigativo"],
     ["rt_baldo", "td_corrado", "Capitani di campo e di mulino"], ["gp_rosalba", "dg_fiamma", "Teste rosse e cuori caldi"], ["gp_bullone", "sq_ines", "Mani d'olio e di ferro"],
     ["dg_fiamma", "sq_scintilla", "Scintille gemelle"], ["dg_ruggine", "cm_bastiano", "Capitani che non smettono"],
