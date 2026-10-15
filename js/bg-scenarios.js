@@ -3175,6 +3175,244 @@
     g.strokeRect(x, y, w, h);
   }
 
+  // --- 20. L'ESPRESSO DELLE OMBRE · IL NORD-SUD STAR ---
+  window.__teDraw = {
+    get Ristorante() { return drawDetailedTrenoRistorante; },
+    get Corridoio() { return drawDetailedTrenoCorridoio; },
+    get Bagagliaio() { return drawDetailedTrenoBagagliaio; },
+    get Tetto() { return drawDetailedTrenoTetto; },
+    get Stazione() { return drawDetailedTrenoStazione; }
+  };
+
+  function vgrad(g, x, y, w, h, c1, c2) {
+    const gr = g.createLinearGradient(x, y, x, y + h);
+    gr.addColorStop(0, c1);
+    gr.addColorStop(1, c2);
+    g.fillStyle = gr;
+    g.fillRect(x, y, w, h);
+  }
+
+  function glowB(g, x, y, r, col) {
+    const gr = g.createRadialGradient(x, y, 0, x, y, r);
+    gr.addColorStop(0, col);
+    gr.addColorStop(1, "rgba(0,0,0,0)");
+    g.fillStyle = gr;
+    g.beginPath();
+    g.arc(x, y, r, 0, Math.PI * 2);
+    g.fill();
+  }
+
+  function drawDetailedTrenoRistorante(g, W, H, f) {
+    vgrad(g, 0, 0, W, 100, "#020617", "#0f172a");
+    g.fillStyle = "#1e293b";
+    g.beginPath();
+    g.moveTo(0, 95);
+    for (let x = 0; x <= W; x += 30) {
+      const py = 45 + Math.sin((x + f * 0.4) * 0.04) * 22;
+      g.lineTo(x, py);
+    }
+    g.lineTo(W, 95);
+    g.closePath();
+    g.fill();
+    for (let i = 0; i < 40; i++) {
+      const sx = (i * 31 + f * 4) % W;
+      const sy = (i * 19 + f * 1.5) % 90;
+      px(g, sx, sy, 2, 2, "rgba(255, 255, 255, 0.75)");
+    }
+    vgrad(g, 0, 95, W, H - 95, "#78350f", "#451a03");
+    for (let wx = 12; wx < W - 20; wx += 72) {
+      g.fillStyle = "#292524";
+      g.fillRect(wx, 30, 60, 65);
+      g.strokeStyle = "#fbbf24";
+      g.lineWidth = 1.5;
+      g.strokeRect(wx + 2, 32, 56, 61);
+      g.fillStyle = "rgba(56, 189, 248, 0.12)";
+      g.fillRect(wx + 4, 34, 52, 57);
+    }
+    vgrad(g, 0, H - 65, W, 65, "#92400e", "#451a03");
+    g.fillStyle = "#881337";
+    g.fillRect(0, H - 42, W, 32);
+    g.strokeStyle = "#facc15";
+    g.lineWidth = 1;
+    g.strokeRect(0, H - 42, W, 32);
+    for (let tx = 40; tx < W; tx += 95) {
+      g.fillStyle = "#ffffff";
+      g.beginPath();
+      g.ellipse(tx, H - 55, 24, 9, 0, 0, Math.PI * 2);
+      g.fill();
+      g.strokeStyle = "#cbd5e1";
+      g.stroke();
+      g.fillStyle = "#d97706";
+      g.fillRect(tx - 1.5, H - 68, 3, 10);
+      g.fillStyle = "#fef08a";
+      g.beginPath();
+      g.arc(tx, H - 71, 6, Math.PI, Math.PI * 2);
+      g.fill();
+      glowB(g, tx, H - 71, 14, "rgba(250, 204, 21, 0.25)");
+      g.fillStyle = "#38bdf8";
+      g.fillRect(tx + 10, H - 62, 2, 5);
+      g.fillRect(tx + 8, H - 65, 6, 3);
+    }
+    for (let cx = 15; cx < W; cx += 95) {
+      g.fillStyle = "#991b1b";
+      g.fillRect(cx - 8, H - 48, 16, 18);
+      g.fillStyle = "#b91c1c";
+      g.fillRect(cx - 7, H - 46, 14, 10);
+    }
+  }
+
+  function drawDetailedTrenoCorridoio(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, "#292524", "#0c0a09");
+    vgrad(g, 0, 15, W, 85, "#78350f", "#451a03");
+    for (let dx = 20; dx < W; dx += 85) {
+      g.fillStyle = "#451a03";
+      g.fillRect(dx, 25, 65, 110);
+      g.strokeStyle = "#78350f";
+      g.lineWidth = 2;
+      g.strokeRect(dx + 3, 28, 59, 104);
+      g.fillStyle = "#fbbf24";
+      g.fillRect(dx + 22, 38, 22, 10);
+      g.fillStyle = "#0f172a";
+      g.fillRect(dx + 24, 40, 18, 6);
+      g.fillStyle = "#f59e0b";
+      g.fillRect(dx + 52, 75, 4, 12);
+      g.fillStyle = "rgba(254, 240, 138, 0.15)";
+      g.fillRect(dx + 12, 54, 42, 38);
+    }
+    vgrad(g, 0, H - 60, W, 60, "#92400e", "#292524");
+    g.fillStyle = "#881337";
+    g.fillRect(0, H - 40, W, 28);
+    g.strokeStyle = "#facc15";
+    g.lineWidth = 1;
+    g.strokeRect(0, H - 40, W, 28);
+    g.fillStyle = "#dc2626";
+    g.fillRect(W - 35, 65, 12, 22);
+    g.fillStyle = "#ffffff";
+    g.fillRect(W - 32, 68, 6, 8);
+    glowB(g, W - 29, 76, 12, "rgba(239, 68, 68, 0.35)");
+    for (let lx = 60; lx < W; lx += 85) {
+      g.fillStyle = "#facc15";
+      g.beginPath();
+      g.arc(lx, 22, 4, 0, Math.PI * 2);
+      g.fill();
+      glowB(g, lx, 22, 16, "rgba(250, 204, 21, 0.2)");
+    }
+  }
+
+  function drawDetailedTrenoBagagliaio(g, W, H, f) {
+    vgrad(g, 0, 0, W, H, "#1e293b", "#0f172a");
+    g.fillStyle = "#334155";
+    for (let bx = 0; bx < W; bx += 55) {
+      g.fillRect(bx, 0, 6, H);
+      for (let ry = 15; ry < H; ry += 25) {
+        g.fillStyle = "#64748b";
+        g.fillRect(bx + 1.5, ry, 3, 3);
+      }
+    }
+    vgrad(g, 0, H - 55, W, 55, "#334155", "#0f172a");
+    g.fillStyle = "#18181b";
+    g.fillRect(40, H - 85, 32, 45);
+    g.fillStyle = "#f97316";
+    g.fillRect(46, H - 65, 20, 18);
+    g.fillStyle = "#fef08a";
+    g.fillRect(51, H - 58, 10, 8);
+    glowB(g, 56, H - 56, 25, "rgba(249, 115, 22, 0.4)");
+    g.fillStyle = "#27272a";
+    g.fillRect(52, 0, 8, H - 85);
+    for (let tx = 110; tx < W - 40; tx += 75) {
+      g.fillStyle = "#475569";
+      g.fillRect(tx, H - 50, 48, 28);
+      g.strokeStyle = "#94a3b8";
+      g.lineWidth = 1.5;
+      g.strokeRect(tx, H - 50, 48, 28);
+      g.fillStyle = "#f59e0b";
+      g.fillRect(tx + 8, H - 52, 4, 32);
+      g.fillRect(tx + 36, H - 52, 4, 32);
+      g.fillStyle = "#dc2626";
+      g.beginPath();
+      g.arc(tx + 24, H - 36, 4, 0, Math.PI * 2);
+      g.fill();
+    }
+  }
+
+  function drawDetailedTrenoTetto(g, W, H, f) {
+    vgrad(g, 0, 0, W, 120, "#020617", "#0f172a");
+    g.fillStyle = "#f8fafc";
+    g.beginPath();
+    g.arc(W - 60, 40, 16, 0, Math.PI * 2);
+    g.fill();
+    glowB(g, W - 60, 40, 35, "rgba(248, 250, 252, 0.3)");
+    g.fillStyle = "#1e293b";
+    g.beginPath();
+    g.moveTo(0, 115);
+    for (let x = 0; x <= W; x += 25) {
+      const hy = 65 + Math.cos((x + f * 0.3) * 0.05) * 20;
+      g.lineTo(x, hy);
+    }
+    g.lineTo(W, 115);
+    g.closePath();
+    g.fill();
+    for (let i = 0; i < 50; i++) {
+      const sx = (i * 29 + f * 6) % W;
+      const sy = (i * 17 + f * 2) % 115;
+      px(g, sx, sy, 3, 1.5, "rgba(255, 255, 255, 0.85)");
+    }
+    vgrad(g, 0, 120, W, H - 120, "#475569", "#1e293b");
+    for (let rx = 10; rx < W; rx += 40) {
+      g.fillStyle = "#64748b";
+      g.fillRect(rx, 120, 4, H - 120);
+    }
+    for (let vx = 50; vx < W - 50; vx += 90) {
+      g.fillStyle = "#0f172a";
+      g.fillRect(vx, 105, 14, 18);
+      const va = 0.4 + 0.3 * Math.sin(f * 0.1 + vx);
+      g.fillStyle = `rgba(241, 245, 249, ${va})`;
+      g.beginPath();
+      g.arc(vx + 7 + Math.sin(f * 0.1) * 6, 92, 12, 0, Math.PI * 2);
+      g.fill();
+    }
+  }
+
+  function drawDetailedTrenoStazione(g, W, H, f) {
+    vgrad(g, 0, 0, W, 100, "#020617", "#1e293b");
+    g.fillStyle = "#0f172a";
+    g.fillRect(0, 30, W, 16);
+    g.strokeStyle = "#38bdf8";
+    g.lineWidth = 1.5;
+    for (let ax = 20; ax < W; ax += 50) {
+      g.beginPath();
+      g.arc(ax, 38, 18, Math.PI, 0);
+      g.stroke();
+    }
+    vgrad(g, 0, 100, W, H - 100, "#e2e8f0", "#94a3b8");
+    g.fillStyle = "#475569";
+    g.fillRect(0, H - 38, W, 4);
+    g.fillRect(0, H - 24, W, 4);
+    for (let tx = 10; tx < W; tx += 20) {
+      g.fillStyle = "#451a03";
+      g.fillRect(tx, H - 42, 6, 24);
+    }
+    g.fillStyle = "#ffffff";
+    g.beginPath();
+    g.arc(W / 2, 45, 14, 0, Math.PI * 2);
+    g.fill();
+    g.strokeStyle = "#0f172a";
+    g.lineWidth = 2;
+    g.stroke();
+    g.fillStyle = "#0f172a";
+    g.fillRect(W / 2 - 1, 35, 2, 10);
+    g.fillRect(W / 2 - 1, 45, 8, 2);
+    for (let lx = 40; lx < W; lx += 110) {
+      g.fillStyle = "#1e293b";
+      g.fillRect(lx - 2, 50, 4, 60);
+      g.fillStyle = "#facc15";
+      g.beginPath();
+      g.arc(lx, 50, 5, 0, Math.PI * 2);
+      g.fill();
+      glowB(g, lx, 50, 20, "rgba(250, 204, 21, 0.35)");
+    }
+  }
+
   // --- 19. LA NOTTE DEI CENTO RINTOCCHI · ROCCA CAMPANARIA ---
   window.__cpDraw = { get Piazza() { return drawDetailedCampanaPiazza; }, get Campanile() { return drawDetailedCampanaCampanile; }, get Cantina() { return drawDetailedCampanaCantina; } };
 
@@ -4862,7 +5100,25 @@
         drawDetailedAlcatrazCaldaie(g, W, H, f);
         return true;
       case "alc_molo":
-        drawDetailedAlcatrazMolo(g, W, H, f);
+      case "te_titolo":
+      case "te_ristorante":
+        drawDetailedTrenoRistorante(g, W, H, f);
+        return true;
+      case "te_corridoio":
+      case "te_scompartimento":
+      case "te_cuccette":
+      case "te_panoramico":
+        drawDetailedTrenoCorridoio(g, W, H, f);
+        return true;
+      case "te_bagagliaio":
+        drawDetailedTrenoBagagliaio(g, W, H, f);
+        return true;
+      case "te_tetto":
+        drawDetailedTrenoTetto(g, W, H, f);
+        return true;
+      case "te_stazione":
+      case "te_caldaie":
+        drawDetailedTrenoStazione(g, W, H, f);
         return true;
       case "cp_piazza":
       case "cp_titolo":
@@ -8992,6 +9248,47 @@
   LB.cp_tetti = LB.cp_campanile;
   LB.cp_osteria = LB.cp_cantina;
   LB.cp_officina = LB.cp_cantina;
+
+  // L'Espresso delle Ombre · Intrigo sul Treno delle Nevi
+  [
+    ["te_titolo", "Ristorante", [
+      [25, 45, 70, 45, "🪟 Finestrini del Valico: la tormenta di neve impazza a quota duemila metri mentre il convoglio fende la notte."],
+      [110, 85, 60, 45, "🍷 Tavolino della Contessa: un calice di champagne spumeggiante, un foulard di seta e una scacchiera viennese."],
+      [200, 75, 60, 45, "🕯️ Abat-jour d'Ottone: luce soffusa e calda che riflette le venature del mogano intagliato della carrozza."],
+      [285, 90, 65, 45, "🚪 Porta a Soffietto: conduce al corridoio stretto della carrozza letti tra scossoni sui binari."]
+    ]],
+    ["te_corridoio", "Corridoio", [
+      [30, 65, 60, 45, "🚪 Scompartimento Diplomatico: la serratura in ottone reca ancora la cera lacca spezzata dell'ambasciata."],
+      [120, 80, 55, 45, "🪟 Finestrino del Corridoio: vetri doppi smerigliati dal gelo con riflessi della lanterna di coda."],
+      [200, 75, 60, 45, "🚨 Freno d'Emergenza: leva scarlatta piombata per arrestare il treno in caso di pericolo sui viadotti."],
+      [280, 85, 65, 45, "💼 Baule di Viaggio: valigie in cuoio rinforzato con etichette di Parigi, Vienna e Ginevra."]
+    ]],
+    ["te_bagagliaio", "Bagagliaio", [
+      [35, 80, 65, 45, "📦 Bauli Diplomatici: casse blindate con sigilli consolari e cinghie d'ancoraggio in cuoio pesante."],
+      [125, 75, 55, 45, "🔥 Stufa in Ghisa: calore asciutto e brace scoppiettante che contrasta col gelo delle pareti metalliche."],
+      [205, 80, 60, 45, "✉️ Sacchi Postali di Frontiera: corrispondenza e dispacci ufficiali in transito verso il confine alpino."],
+      [280, 85, 65, 45, "🚪 Portellone Scorrevole: sbarra di sicurezza in ferro battuto che affaccia sulla bufera esterna."]
+    ]],
+    ["te_tetto", "Tetto", [
+      [35, 60, 65, 45, "💨 Sfiatatoi del Vapore: nubi bianche e calde che si disperdono all'istante nel vento polare delle Alpi."],
+      [120, 75, 60, 45, "🌉 Travature del Viadotto: possente struttura reticolare in ghisa sospesa a duecento metri sulla gola."],
+      [205, 65, 60, 45, "❄️ Vette del Ghiacciaio: creste innevate e seracchi azzurri illuminati dal chiarore lunare."],
+      [280, 80, 65, 45, "🪜 Scaletta di Ferro: mancorrente ghiacciato per ridiscendere nella sicurezza della carrozza."]
+    ]],
+    ["te_stazione", "Stazione", [
+      [30, 75, 65, 45, "🕰️ Orologio della Stazione: lancette d'oro che segnano la mezzanotte del match diplomatico."],
+      [115, 80, 60, 45, "🏮 Fari a Gas: lampioni liberty in ferro battuto che creano aloni dorati tra i fiocchi di neve."],
+      [200, 75, 60, 45, "🚩 Banchina di Frontiera: delegazioni internazionali e tricolori pronti per la grande amichevole."],
+      [280, 85, 65, 45, "🚂 La Locomotiva a Vapore: il Nord-Sud Star che riposa sui binari dopo la traversata alpina."]
+    ]]
+  ].forEach(([k, n, hot]) => {
+    LB[k] = { draw: (g, W, H, f) => { const D = window.__teDraw; if (D && D[n]) D[n](g, W, H, f); else px(g, 0, 0, W, H, "#0f172a"); }, hot };
+  });
+  LB.te_ristorante = LB.te_titolo;
+  LB.te_scompartimento = LB.te_corridoio;
+  LB.te_cuccette = LB.te_corridoio;
+  LB.te_panoramico = LB.te_corridoio;
+  LB.te_caldaie = LB.te_stazione;
 
   // Operazione Fuorigioco Noir · Milano 1954: scene con punti cliccabili visibili (scintille) e didascalia
   [
