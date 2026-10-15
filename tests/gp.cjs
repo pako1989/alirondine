@@ -161,5 +161,6 @@ async function mac(w) {
 const only = process.argv[2] || "";
 (async () => {
   if (!only || only === "c1") { await c1(390); await c1(320); }
+  if (!only || only === "c2") { await c2(390); await c2(320); }
   if (!only || only === "mac") { await mac(390); await mac(320); }
 })().catch((e) => { console.error("✗ gp:", e.message); process.exit(1); });
