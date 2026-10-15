@@ -1108,8 +1108,9 @@
     px(-13, -6, 10, 2, c.hair); px(3, -6, 10, 2, c.hair);
     if (c.shades) { px(-15, -3, 30, 9, "#0a0a0a"); px(-13, -1, 6, 2, "#4a4a6a"); }
     if (c.glasses) { g.strokeStyle = "#222"; g.lineWidth = 1.5; g.strokeRect(-14, -4, 12, 11); g.strokeRect(2, -4, 12, 11); px(-2, 1, 4, 1.5, "#222"); }
-    if (c.beard) { g.fillStyle = c.hair + "cc"; g.beginPath(); g.ellipse(0, 20, 14, 8, 0, 0, Math.PI); g.fill(); }
+    if (c.beard === true) { g.fillStyle = c.hair + "cc"; g.beginPath(); g.ellipse(0, 20, 14, 8, 0, 0, Math.PI); g.fill(); }
     if (c.scar) { g.strokeStyle = "#b35a5a"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(10, -6); g.lineTo(15, 10); g.stroke(); }
+    if (window.__faceStyles && window.__faceStyles.mods && (typeof c.beard === "string" || c.streak || c.band)) window.__faceStyles.mods(g, c, { noScar: true });
     AL.forEach((a) => portraitAcc(a, "head"));
     px(-4, 16, 8, 2, "#8a3b3b");
     g.restore();
@@ -5300,7 +5301,7 @@
   window.heroLoad = heroLoad;
   window.heroEditor = heroEditor;
   function heroCast(h) {
-    CAST.hero = { name: h.name, tag: "", hair: h.hair, style: h.style, skin: h.skin, eye: h.eye || "#2a1a0a", bg: [h.shirt, "#ffd23f"], shirt: h.shirt, num: String(h.num), face: h.face || "", acc: h.acc, accId: h.accId && COSM[h.accId] && COSM[h.accId].val === h.acc ? h.accId : undefined, cap: h.acc === "cappellino" ? "#ffd23f" : h.acc === "berretto" ? "#26324a" : undefined };
+    CAST.hero = { name: h.name, tag: "", hair: h.hair, style: h.style, skin: h.skin, eye: h.eye || "#2a1a0a", bg: [h.shirt, "#ffd23f"], shirt: h.shirt, num: String(h.num), face: h.face || "", acc: h.acc, accId: h.accId && COSM[h.accId] && COSM[h.accId].val === h.acc ? h.accId : undefined, cap: h.acc === "cappellino" ? "#ffd23f" : h.acc === "berretto" ? "#26324a" : undefined, beard: h.beard || undefined, scar: h.scar || undefined, streak: h.streak || undefined, band: h.band || undefined };
   }
   // Il campione in campo: M.hero (partite), T.hero (rigori)
   const heroOn = () => !!(M && M.hero);
@@ -5355,6 +5356,10 @@
       skin: H_SKIN.map((c, i) => [c, `Tono ${i + 1}`]),
       face: [["", "Volto 1"], ...[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => ["v" + n, "Volto " + n])], // forma del viso, occhi, naso, bocca (negli stili dei volti)
       shirt: uq([...Object.entries(H_SHIRT), ...of("shirt")]),
+      beard: [["", "Nessuna"], ["incolta", "Barba incolta"], ["folta", "Barba folta"], ["pizzetto", "Pizzetto"], ["baffi", "Baffi"]],
+      scar: [["", "Nessuno"], ["1", "Cicatrice sul sopracciglio"]],
+      streak: [["", "Nessuna"], ["#f2f2f2", "Bianca"], ["#ff4d5a", "Rossa"], ["#3fa7ff", "Azzurra"], ["#ffd23f", "Dorata"], ["#a855f7", "Viola"]],
+      band: [["", "Nessuna"], ["#ff4d5a", "Rossa"], ["#1d3fa3", "Blu"], ["#111111", "Nera"], ["#f2f2f2", "Bianca"], ["#ffd23f", "Gialla"]],
       acc: uq([...Object.entries(H_ACC), ...of("acc")]),
       shot: Object.entries(H_SHOTS).filter(([, s]) => !s.cos || own.includes(s.cos)).map(([k, s]) => [k, s.label]),
     };
@@ -5363,7 +5368,7 @@
   function heroButtons() {
     const o = heroOptions(), h = HE.h;
     const cyc = (k, label) => { const list = o[k], i = Math.max(0, list.findIndex(([v]) => v === h[k])), cur = list[i] || list[0]; return { label: `${label}: ${cur[1]} ▸`, sub: `${i + 1} di ${list.length}`, fn: () => { const nx = list[(i + 1) % list.length]; const oldShot = H_SHOTS[h.shot].label.toUpperCase(); h[k] = nx[0]; if (k === "shot" && (!h.shotName || h.shotName.startsWith(oldShot))) { h.shotName = `${H_SHOTS[h.shot].label.toUpperCase()} DI ${h.name.toUpperCase()}`; $("hShot").value = h.shotName; } heroCast(h); heroSum(); heroButtons(); } }; };
-    buttons([cyc("style", "Capelli"), cyc("hair", "Colore"), cyc("eye", "Occhi"), cyc("skin", "Pelle"), Object.assign(cyc("face", "Volto"), { sub: `${Math.max(0, o.face.findIndex(([v]) => v === (h.face || ""))) + 1} di ${o.face.length} · si vede con gli stili dei volti (pulsante «Volti» in alto)` }), cyc("shirt", "Maglia"), cyc("acc", "Accessorio"), cyc("shot", "Tiro"),
+    buttons([cyc("style", "Capelli"), cyc("hair", "Colore"), cyc("eye", "Occhi"), cyc("skin", "Pelle"), Object.assign(cyc("face", "Volto"), { sub: `${Math.max(0, o.face.findIndex(([v]) => v === (h.face || ""))) + 1} di ${o.face.length} · si vede con gli stili dei volti (pulsante «Volti» in alto)` }), cyc("shirt", "Maglia"), cyc("beard", "Barba"), cyc("scar", "Segni"), cyc("streak", "Ciocca"), cyc("band", "Fascia"), cyc("acc", "Accessorio"), cyc("shot", "Tiro"),
       { label: "Avanti ▸ Salva il Campione", sub: "Conferma ed entra in campo", cls: "hot", fn: () => { HE.h.v = 1; writeJSON(HERO, HE.h); heroCast(HE.h); view = { kind: "scene", bg: "end", speaker: "hero", chibi: true }; text("hero", `<b>${esc(HE.h.name)}</b>, numero ${HE.h.num}, pronto a scendere in campo con occhi <b>${(H_EYE[HE.h.eye] || "personalizzati").toLowerCase()}</b>. Il tiro speciale si chiama <em>${esc(HE.h.shotName)}</em>.<br><span style="color:var(--dim)">${heroWhere}</span>`); buttons([
         ...(window.__abissoStory ? [{ label: "⚓ Gioca «Abisso di Dunwich · Il Patto delle Onde Nere» ▸", sub: `Nuova saga dark oceanica Lovecraftiana con ${HE.h.name}`, cls: "hot", fn: () => window.__abissoStory.open({ onExit: HE.back }) }] : []),
         ...(window.__ragnarokStory ? [{ label: "🔥 Gioca «Ragnarok Ball · Il Fuoco di Fimbulwinter» ▸", sub: `Nuova saga norrena tra ghiaccio e fiamme con ${HE.h.name}`, cls: "hot", fn: () => window.__ragnarokStory.open({ onExit: HE.back }) }] : []),

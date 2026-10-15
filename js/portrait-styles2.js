@@ -254,5 +254,33 @@
     const st0 = ALIAS[c.style] || c.style, NB = { afro: "buzz", dread: "buzz", undercut: "slick", pompadour: "slick", mullet: "messy", wavy: "long", messybun: "bun", topknot: "buzz", sidebraid: "slick", spacebuns: "buzz", corona: "slick", ciuffo: "slick", cometa: "buzz", scodella: "buzz", antenne: "buzz", criniera: "slick", brace: "buzz", palma: "buzz", alloro: "buzz", borsalino: "slick", colbacco: "buzz", cowboy: "buzz", coppola: "buzz" }[st0];
     g.save(); try { if (NB && FS.hairOver && !c.cap) FS.hairOver(g, st0, c, "back"); NEW[style](g, id, NB ? Object.assign({}, c, { style: NB }) : c, expr); if (NB && FS.hairOver && (!c.cap || st0 === "sidebraid")) FS.hairOver(g, st0, c, "front"); } catch (e) { g.restore(); return false; } g.restore(); return true;
   };
+
+  // ---------------------------------------------------------------- dettagli del volto (valgono per tutti gli stili e per i PNG delle saghe)
+  // c.beard: true = barba piena di sempre; oppure "incolta" | "folta" | "pizzetto" | "baffi"
+  // c.scar: true = cicatrice sul sopracciglio; c.streak: "#colore" = ciocca colorata; c.band: "#colore" = fascia sulla fronte
+  FS.mods = function (g, c, o) {
+    o = o || {}; const hair = c.hair || "#2b1d14", b = typeof c.beard === "string" ? c.beard : "";
+    g.save(); g.lineCap = "round"; g.lineJoin = "round";
+    const bowl = (top, chin, a, w) => { g.globalAlpha = a; g.fillStyle = hair; g.beginPath(); g.moveTo(-w, top); g.bezierCurveTo(-w - 1, 18, -w + 3, chin - 2, 0, chin); g.bezierCurveTo(w - 3, chin - 2, w + 1, 18, w, top); g.quadraticCurveTo(w - 4, top + 5, 6, 15.6); g.quadraticCurveTo(0, 17.5, -6, 15.6); g.quadraticCurveTo(-w + 4, top + 5, -w, top); g.fill(); g.globalAlpha = 1; };
+    const must = (th) => { g.strokeStyle = hair; g.lineWidth = th; g.beginPath(); g.moveTo(-7, 17); g.quadraticCurveTo(-3.5, 14.2, 0, 16); g.quadraticCurveTo(3.5, 14.2, 7, 17); g.stroke(); };
+    if (b === "incolta") bowl(9, 27, 0.32, 15);
+    else if (b === "folta") { bowl(5, 33, 0.96, 16.5); g.fillStyle = "#7a2c3c"; g.fillRect(-3.4, 18.6, 6.8, 1.8); }
+    else if (b === "pizzetto") { g.fillStyle = hair; g.beginPath(); g.ellipse(0, 24.5, 3.6, 5, 0, 0, 7); g.fill(); must(1.6); }
+    else if (b === "baffi") must(3.2);
+    if (c.scar && !o.noScar) { g.strokeStyle = "#e08a90"; g.lineWidth = 1.9; g.beginPath(); g.moveTo(6.5, -4); g.lineTo(10.5, 6); g.stroke(); g.lineWidth = 1; g.beginPath(); g.moveTo(5.3, -0.3); g.lineTo(9.3, 0.8); g.moveTo(7.2, 3.2); g.lineTo(11.4, 4); g.stroke(); }
+    if (!c.cap) {
+      if (c.streak) { g.strokeStyle = c.streak; g.globalAlpha = 0.92; g.lineWidth = 3.6; g.beginPath(); g.moveTo(-3, -29); g.quadraticCurveTo(5, -23, 7, -12); g.stroke(); g.lineWidth = 2; g.beginPath(); g.moveTo(-8, -27); g.quadraticCurveTo(-3, -21, -3, -14); g.stroke(); g.globalAlpha = 1; }
+      if (c.band) { g.fillStyle = c.band; g.beginPath(); g.moveTo(-18, -12); g.quadraticCurveTo(0, -17, 18, -12); g.lineTo(18, -8.5); g.quadraticCurveTo(0, -13, -18, -8.5); g.closePath(); g.fill(); g.beginPath(); g.moveTo(16, -10); g.lineTo(24, -5); g.lineTo(20, -2); g.closePath(); g.fill(); }
+    }
+    g.restore();
+  };
+  const withMods = FS.draw;
+  FS.draw = function (style, g, id, c, expr) {
+    if (!c || !(typeof c.beard === "string" || c.scar || c.streak || c.band)) return withMods.call(FS, style, g, id, c, expr);
+    const c2 = typeof c.beard === "string" ? Object.assign({}, c, { beard: false }) : c; // la barba a stile la disegniamo noi
+    const r = withMods.call(FS, style, g, id, c2, expr);
+    if (r !== false) { try { FS.mods(g, c, {}); } catch (e) {} }
+    return r;
+  };
   FS.__v2 = true; FS.NEW = Object.keys(NEW);
 })();
