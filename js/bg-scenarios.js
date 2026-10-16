@@ -9841,6 +9841,44 @@
   LB.my_cripta = LB.my_cortile;
   LB.my_museo = LB.my_cortile;
 
+  // Cenere e Gloria · villaggi di rottami dopo il Crollo
+  [
+    ["ce_titolo", "Strada", [
+      [20, 40, 70, 40, "☀️ Il sole sporco: filtra attraverso la polvere e fa sembrare ogni cosa più vecchia."],
+      [120, 80, 100, 50, "🛣️ La Strada di Polvere: una lingua di terra battuta che collega i villaggi. Nessuno l'ha costruita."],
+      [250, 85, 60, 40, "🪧 Cartello storto: «ACQUA 40 PASSI». Qualcuno l'ha dipinto con il sangue della speranza."],
+      [30, 120, 90, 45, "🚗 La carcassa d'auto: fa ombra, ospita lucertole e, certe notti, un po' di compagnia."]
+    ]],
+    ["ce_villaggio", "Villaggio", [
+      [40, 60, 80, 60, "🏚️ Baracche di lamiera: ogni pezzo ha una storia, e probabilmente un precedente proprietario."],
+      [120, 130, 70, 40, "🔥 Il barile di fuoco: intorno a lui, la sera, si decidono le cose importanti."],
+      [210, 70, 90, 55, "🏭 Il magazzino delle razioni: qui l'acqua si conta, e ogni sorso è un contratto."],
+      [260, 20, 50, 40, "☁️ Fumo e polvere: il cielo di Rottame ha il colore di una vecchia moneta."]
+    ]],
+    ["ce_bunker", "Bunker", [
+      [120, 50, 90, 70, "🚪 Il portellone: acciaio, bulloni e una polvere antica come il silenzio."],
+      [20, 25, 45, 45, "🔴 La luce rossa: pulsa da vent'anni, come se non avesse capito che il mondo è finito."],
+      [270, 90, 50, 50, "⚽ Il pallone sullo scaffale: l'unica cosa pulita in tutto il bunker."],
+      [20, 120, 80, 45, "📦 Casse militari vuote: tranne una, con qualcosa di scritto col gesso."]
+    ]],
+    ["ce_oasi", "Strada", [
+      [20, 40, 70, 40, "☀️ Il sole sporco: filtra attraverso la polvere e fa sembrare ogni cosa più vecchia."],
+      [120, 80, 100, 50, "💧 La pozza dell'Oasi: poca, limpida, e per questo preziosa."],
+      [250, 85, 60, 40, "🪧 Cartello: «UN SORSO A TESTA». La regola più antica."],
+      [30, 120, 90, 45, "⛺ Tenda dei Fedeli: dentro, una brace che non si spegne."]
+    ]],
+    ["ce_cratere", "Cratere", [
+      [110, 100, 140, 60, "🔥 Le braci sul fondo: ci sono da prima che qualcuno si ricordi."],
+      [20, 30, 70, 50, "🌫️ Cenere in sospensione: il cielo sembra respirare."],
+      [250, 30, 60, 90, "🗼 La Torre del Predicatore: sul bordo, sempre accesa."],
+      [30, 130, 70, 45, "🪨 Rocce nere: spezzate, ancora tiepide."]
+    ]]
+  ].forEach(([k, n, hot]) => {
+    LB[k] = { draw: (g, W, H, f) => { const D = window.__ceDraw; if (D && D[n]) D[n](g, W, H, f); else px(g, 0, 0, W, H, "#3a2c1e"); }, hot };
+  });
+  LB.ce_torre = LB.ce_cratere;
+  LB.ce_strada = LB.ce_titolo;
+
   // La Carovana del Fiume d'Argento: scene con punti cliccabili visibili (scintille) e didascalia
   [
     ["fa_titolo", "Molo", [
