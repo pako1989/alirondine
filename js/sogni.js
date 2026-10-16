@@ -49,6 +49,10 @@
   // le carte delle saghe a capitoli (Vallombra e le altre): il 8° valore è il capitolo che le sblocca, una volta concluso.
   // Mai nelle bustine, nei premi a sorpresa e nel Draft finché non sono guadagnate: niente anticipazioni.
   const NEWC = [
+    // Tactics Note · Il Quaderno del Giudizio
+    ["qd_raito", "note", "e", 86, 68, 88, "A", 1], ["qd_ryu", "note", "l", 82, 70, 92, "C", 1],
+    ["qd_misa", "note", "r", 78, 54, 76, "A", 2], ["qd_elle", "note", "l", 64, 88, 94, "C", 2],
+    ["qd_soichiro", "note", "c", 52, 80, 60, "D", 3],
     // Operazione Doppio Zero · Licenza di Cross
     ["dz_sterling", "spia", "e", 74, 70, 84, "C", 1], ["dz_croupier", "spia", "c", 55, 62, 72, "D", 1],
     ["dz_eva", "spia", "r", 62, 76, 80, "C", 2], ["dz_kalt", "spia", "l", 85, 78, 82, "A", 3],
@@ -167,6 +171,10 @@
   const BY = Object.fromEntries(CARDS.map((c) => [c.id, c]));
   // la frase speciale che la carta dice quando arriva a tre stelle
   const FRASI = {
+    qd_raito: "Questo è il mio nuovo mondo: ogni contrasto è stato previsto esattamente al millimetro.",
+    qd_elle: "La probabilità che questa parabola entri all'incrocio era del 99,4%. L'ho verificata.",
+    qd_ryu: "Eh eh eh... Un gol magnifico in cambio di una bella mela rossa croccante!",
+    qd_misa: "Per Raito farei qualsiasi cosa: persino volare sulla fascia all'ultimo minuto!",
     dz_sterling: "Un Martini agitato, non mescolato: e un tiro all'incrocio, non telefonato.",
     dz_croupier: "Rien ne va plus: il pallone è già entrato nel sette.",
     dz_eva: "Codice decifrato: traiettoria balistica perfetta con il 99,8% di probabilità di gol.",
@@ -238,6 +246,7 @@
   const RAR = { c: ["Comune", "#9aa5b1", 1], r: ["Rara", "#3a8ad8", 2], e: ["Epica", "#a85ad8", 3], l: ["Leggendaria", "#ffd23f", 4] };
   // i legami tra saghe diverse: +3 di intesa se entrambi in squadra
   const LINKS = [
+    ["qd_raito", "qd_elle", "Duello Mentale"], ["qd_ryu", "qd_misa", "Occhi dello Shinigami"], ["qd_elle", "dc_agata", "Deduzioni & Lavagna"],
     ["dz_sterling", "mn_desantis", "Servizi Segreti & Questura"], ["dz_eva", "dc_agata", "Crittografia & Indagini"],
     ["fa_roderico", "gl_barbabiscotto", "Lupi di Fiume e di Mare"], ["fa_mirella", "my_alvarez", "Mappe e Glifi dell'Acqua"],
     ["te_valenti", "mn_desantis", "Intelligenza di Frontiera"], ["te_elena", "dc_agata", "Mistero & Eleganza"],
