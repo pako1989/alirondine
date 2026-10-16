@@ -3693,10 +3693,179 @@
       g.lineWidth = 1.5;
       g.beginPath();
       g.moveTo(b, H - 35);
-      g.lineTo(b, H - 15);
       g.stroke();
     }
   }
+
+  // --- FIUME D'ARGENTO · LA CAROVANA FLUVIALE ---
+  function drawDetailedFiumeMolo(g, W, H, f) {
+    // Cielo mattutino con riflessi azzurri e nubi morbide
+    vgrad(g, 0, 0, W, 95, "#0284c7", "#e0f2fe");
+    // Nubi basse
+    g.fillStyle = "rgba(255, 255, 255, 0.4)";
+    circ(g, 60, 30, 25); circ(85, 25, 30); circ(110, 32, 22);
+    circ(240, 40, 28); circ(270, 35, 32);
+
+    // Il Grande Fiume Argenteo che scorre
+    vgrad(g, 0, 90, W, 70, "#0369a1", "#0284c7");
+    g.strokeStyle = "rgba(255, 255, 255, 0.4)";
+    g.lineWidth = 1.2;
+    for (let wy = 98; wy < 155; wy += 12) {
+      g.beginPath();
+      const wave = Math.sin(f * 0.08 + wy) * 4;
+      g.moveTo(0, wy + wave);
+      g.bezierCurveTo(W * 0.3, wy - 3 + wave, W * 0.7, wy + 3 + wave, W, wy + wave);
+      g.stroke();
+    }
+
+    // Battello a vapore «Nautilus di Latta» ormeggiato
+    g.fillStyle = "#78350f";
+    g.beginPath();
+    g.moveTo(W / 2 - 60, 115);
+    g.lineTo(W / 2 + 50, 115);
+    g.lineTo(W / 2 + 65, 95);
+    g.lineTo(W / 2 - 50, 95);
+    g.closePath();
+    g.fill();
+    g.strokeStyle = "#451a03";
+    g.lineWidth = 1.5;
+    g.stroke();
+
+    // Cabina di pilotaggio e ciminiera a vapore
+    g.fillStyle = "#e2e8f0";
+    g.fillRect(W / 2 - 25, 75, 45, 20);
+    g.fillStyle = "#38bdf8";
+    g.fillRect(W / 2 - 18, 78, 12, 10);
+    g.fillRect(W / 2 + 2, 78, 12, 10);
+    // Ciminiera con sbuffo
+    g.fillStyle = "#dc2626";
+    g.fillRect(W / 2 + 8, 55, 10, 20);
+    g.fillStyle = "rgba(255, 255, 255, 0.5)";
+    circ(g, W / 2 + 13 + Math.sin(f * 0.1) * 3, 45, 8);
+    circ(g, W / 2 + 18 + Math.sin(f * 0.1) * 6, 35, 12);
+
+    // Molo dei Mulini in primo piano (assi di quercia bagnata)
+    vgrad(g, 0, 155, W, H - 155, "#451a03", "#291508");
+    g.strokeStyle = "#1a0c04";
+    g.lineWidth = 1.2;
+    for (let x = 15; x < W; x += 18) {
+      g.beginPath();
+      g.moveTo(x, 155);
+      g.lineTo(x, H);
+      g.stroke();
+    }
+    // Bitte d'ottone e gomene
+    [35, 110, 200, 280].forEach((bx) => {
+      g.fillStyle = "#fef08a";
+      g.beginPath();
+      g.arc(bx, 162, 4, 0, Math.PI * 2);
+      g.fill();
+      g.strokeStyle = "#b45309";
+      g.stroke();
+    });
+  }
+
+  function drawDetailedFiumeChiuse(g, W, H, f) {
+    // Cielo plumbeo tempestoso
+    vgrad(g, 0, 0, W, 80, "#1e293b", "#475569");
+    // Pioggia fine animata
+    g.strokeStyle = "rgba(255, 255, 255, 0.15)";
+    g.lineWidth = 0.8;
+    for (let i = 0; i < 25; i++) {
+      const rx = (i * 17 + f * 4) % W;
+      const ry = (i * 23 + f * 7) % 80;
+      g.beginPath();
+      g.moveTo(rx, ry);
+      g.lineTo(rx - 2, ry + 8);
+      g.stroke();
+    }
+
+    // Monumentali arcate in pietra di basalto delle Chiuse
+    g.fillStyle = "#334155";
+    g.fillRect(0, 50, W, 45);
+    for (let ax = 20; ax < W; ax += 70) {
+      g.fillStyle = "#0f172a";
+      g.beginPath();
+      g.arc(ax + 25, 95, 20, Math.PI, 0);
+      g.fill();
+      g.strokeStyle = "#64748b";
+      g.lineWidth = 2;
+      g.stroke();
+    }
+
+    // Paratie metalliche a scorrimento
+    g.fillStyle = "#1e293b";
+    g.fillRect(W / 2 - 35, 70, 70, 50);
+    g.strokeStyle = "#94a3b8";
+    g.lineWidth = 1.5;
+    g.strokeRect(W / 2 - 35, 70, 70, 50);
+    for (let y = 78; y < 118; y += 8) {
+      g.beginPath();
+      g.moveTo(W / 2 - 30, y);
+      g.lineTo(W / 2 + 30, y);
+      g.stroke();
+    }
+
+    // Cascate d'acqua e schiuma bianca
+    vgrad(g, 0, 115, W, H - 115, "#0284c7", "#0c4a6e");
+    g.fillStyle = "rgba(255, 255, 255, 0.6)";
+    for (let cx = 15; cx < W; cx += 25) {
+      const cy = 120 + Math.sin(f * 0.15 + cx) * 3;
+      circ(g, cx, cy, 6);
+      circ(g, cx + 8, cy + 2, 8);
+    }
+    glowB(g, W / 2, 130, 40, "rgba(255, 255, 255, 0.35)");
+  }
+
+  function drawDetailedFiumeDelta(g, W, H, f) {
+    // Tramonto dorato all'orizzonte dove il fiume incontra il mare
+    vgrad(g, 0, 0, W, 100, "#7c2d12", "#f59e0b");
+    // Grande sole al calar della sera
+    g.fillStyle = "#fef08a";
+    g.beginPath();
+    g.arc(W / 2, 60, 22, 0, Math.PI * 2);
+    g.fill();
+    glowB(g, W / 2, 60, 45, "rgba(245, 158, 11, 0.45)");
+
+    // Specchio d'acqua dorato del delta
+    vgrad(g, 0, 95, W, H - 95, "#b45309", "#0369a1");
+    g.strokeStyle = "rgba(254, 240, 138, 0.4)";
+    g.lineWidth = 1.2;
+    for (let wy = 105; wy < 155; wy += 10) {
+      g.beginPath();
+      const wave = Math.sin(f * 0.05 + wy) * 3;
+      g.moveTo(0, wy + wave);
+      g.lineTo(W, wy + wave);
+      g.stroke();
+    }
+
+    // Arena a palafitte sospesa sull'acqua
+    g.fillStyle = "#78350f";
+    g.fillRect(W / 2 - 75, 130, 150, 18);
+    g.strokeStyle = "#fef08a";
+    g.lineWidth = 1.5;
+    g.strokeRect(W / 2 - 75, 130, 150, 18);
+    // Pali di sostegno immersi nell'acqua
+    g.fillStyle = "#451a03";
+    for (let pxPos = W / 2 - 70; pxPos <= W / 2 + 70; pxPos += 20) {
+      g.fillRect(pxPos, 148, 5, 25);
+    }
+
+    // Fiaccole accese sui bordi dell'arena
+    [W / 2 - 70, W / 2 + 70].forEach((fxPos) => {
+      g.fillStyle = "#f59e0b";
+      g.beginPath();
+      g.arc(fxPos + 2, 125, 4, 0, Math.PI * 2);
+      g.fill();
+      glowB(g, fxPos + 2, 125, 10, "rgba(245, 158, 11, 0.6)");
+    });
+  }
+
+  window.__faDraw = {
+    get Molo() { return drawDetailedFiumeMolo; },
+    get Chiuse() { return drawDetailedFiumeChiuse; },
+    get Delta() { return drawDetailedFiumeDelta; }
+  };
 
   // --- 19. LA NOTTE DEI CENTO RINTOCCHI · ROCCA CAMPANARIA ---
   window.__cpDraw = { get Piazza() { return drawDetailedCampanaPiazza; }, get Campanile() { return drawDetailedCampanaCampanile; }, get Cantina() { return drawDetailedCampanaCantina; } };
@@ -5404,6 +5573,19 @@
       case "te_stazione":
       case "te_caldaie":
         drawDetailedTrenoStazione(g, W, H, f);
+        return true;
+      case "fa_titolo":
+      case "fa_molo":
+      case "fa_chiatta":
+        drawDetailedFiumeMolo(g, W, H, f);
+        return true;
+      case "fa_chiuse":
+      case "fa_sala_macchine":
+        drawDetailedFiumeChiuse(g, W, H, f);
+        return true;
+      case "fa_delta":
+      case "fa_arena_delta":
+        drawDetailedFiumeDelta(g, W, H, f);
         return true;
       case "my_titolo":
       case "my_atrio":
@@ -9640,6 +9822,34 @@
   LB.my_sommita = LB.my_titolo;
   LB.my_cripta = LB.my_cortile;
   LB.my_museo = LB.my_cortile;
+
+  // La Carovana del Fiume d'Argento: scene con punti cliccabili visibili (scintille) e didascalia
+  [
+    ["fa_titolo", "Molo", [
+      [35, 95, 65, 45, "⛵ Battello «Nautilus di Latta»: scafo in legno di quercia e ciminiera a vapore pronto a salpare verso monte."],
+      [140, 25, 80, 65, "🌊 Il Grande Fiume Argenteo: acque scintillanti che scorrono rapide verso le Grandi Chiuse."],
+      [230, 105, 70, 50, "🌾 Casse di Spezie e Farina: le provviste per la lunga risalita fluviale verso il delta."],
+      [95, 110, 85, 35, "🪵 Molo dei Mulini: solide assi di quercia impregnate di pece e bagnate dalla risacca."]
+    ]],
+    ["fa_chiuse", "Chiuse", [
+      [25, 95, 70, 55, "⚙️ Paratie Idrauliche Reali: titaniche porte d'acciaio che sbarrano il canale del dazio."],
+      [135, 35, 90, 75, "🏛️ Arcate Gotiche della Fortezza: bastioni in pietra di basalto da cui vegliano le guardie."],
+      [235, 100, 75, 55, "💨 Condotto a Vapore: sfiatatoi in ottone che rilasciano vapore caldo sull'acqua schiumosa."],
+      [100, 120, 95, 45, "🌊 Cascata della Chiusa: scroscio fragoroso d'acqua che alimenta le turbine sotterranee."]
+    ]],
+    ["fa_delta", "Delta", [
+      [25, 95, 75, 55, "🏮 Lanterne del Porto Franco: lampade a olio dorate che guidano i battellieri nella laguna."],
+      [130, 25, 100, 65, "🌅 Tramonto sull'Oceano: l'orizzonte dove il Fiume Argenteo sposa le grandi acque aperte."],
+      [240, 85, 75, 65, "🏟️ Arena a Palafitte: il campo galleggiante sospeso dove si disputa la finale del Trofeo."],
+      [95, 115, 110, 45, "🌿 Canneti della Laguna: fitti banchi di giunchi selvatici cullati dalla brezza serale."]
+    ]]
+  ].forEach(([k, n, hot]) => {
+    LB[k] = { draw: (g, W, H, f) => { const D = window.__faDraw; if (D && D[n]) D[n](g, W, H, f); else px(g, 0, 0, W, H, "#0369a1"); }, hot };
+  });
+  LB.fa_molo = LB.fa_titolo;
+  LB.fa_chiatta = LB.fa_titolo;
+  LB.fa_sala_macchine = LB.fa_chiuse;
+  LB.fa_arena_delta = LB.fa_delta;
 
   // Operazione Fuorigioco Noir · Milano 1954: scene con punti cliccabili visibili (scintille) e didascalia
   [

@@ -19,6 +19,7 @@
   const safe = (fn, d) => { try { return fn(); } catch (e) { return d; } };
   // le saghe da cui vengono le carte: chiave di salvataggio, nome, colore
   const SAGHE = {
+    fiume: ["ali-di-rondine.fiume", "La Carovana del Fiume d'Argento", "#0284c7", "__fiume"],
     milano: ["ali-di-rondine.milano", "Operazione Fuorigioco Noir", "#64748b", "__milano"],
     gp: ["ali-di-rondine.gp", "Gran Premio del Pallone", "#ffb02a", "__gp"],
     tempo: ["ali-di-rondine.tempo", "Rondine 1938-2038", "#ffb347", "__tempo"],
@@ -47,6 +48,9 @@
   // le carte delle saghe a capitoli (Vallombra e le altre): il 8° valore è il capitolo che le sblocca, una volta concluso.
   // Mai nelle bustine, nei premi a sorpresa e nel Draft finché non sono guadagnate: niente anticipazioni.
   const NEWC = [
+    // La Carovana del Fiume d'Argento
+    ["fa_roderico", "fiume", "r", 68, 74, 76, "C", 1], ["fa_mirella", "fiume", "e", 62, 70, 86, "C", 1], ["fa_vanni", "fiume", "c", 78, 65, 60, "A", 1],
+    ["fa_silvia", "fiume", "r", 58, 80, 72, "D", 2], ["fa_malacarne", "fiume", "l", 70, 85, 78, "D", 2],
     // Operazione Fuorigioco Noir · Milano 1954
     ["mn_desantis", "milano", "e", 55, 82, 70, "D", 1], ["mn_oste", "milano", "c", 48, 65, 58, "C", 1], ["mn_mara", "milano", "r", 78, 52, 76, "C", 2], ["mn_carmine", "milano", "l", 72, 85, 80, "D", 3],
     // Gran Premio del Pallone
@@ -222,10 +226,11 @@
     { name: "Union Cometa", color: "#7a5ad8", style: "contropiede", f: 73, pl: ["Coda", "Chioma", "Nucleo", "Scia"] },
     { name: "I Leggendari del Faro", color: "#1a2a4a", style: "equilibrata", f: 76, pl: ["Lampo", "Vedetta", "Scoglio", "Fanale"] },
   ];
-  const ENG = ["marea", "vignette", "bottoni", "luci", "nastro", "concilio", "lavagna", "duello", "atb", "gadget", "iso", "volo", "combo", "consegna", "ciak", "ipogeo", "pallatempo", "giroegol", "rebound", "corridoio", "anello"];
+  const ENG = ["corrente", "marea", "vignette", "bottoni", "luci", "nastro", "concilio", "lavagna", "duello", "atb", "gadget", "iso", "volo", "combo", "consegna", "ciak", "ipogeo", "pallatempo", "giroegol", "rebound", "corridoio", "anello"];
   const RAR = { c: ["Comune", "#9aa5b1", 1], r: ["Rara", "#3a8ad8", 2], e: ["Epica", "#a85ad8", 3], l: ["Leggendaria", "#ffd23f", 4] };
   // i legami tra saghe diverse: +3 di intesa se entrambi in squadra
   const LINKS = [
+    ["fa_roderico", "gl_barbabiscotto", "Lupi di Fiume e di Mare"], ["fa_mirella", "my_alvarez", "Mappe e Glifi dell'Acqua"],
     ["te_valenti", "mn_desantis", "Intelligenza di Frontiera"], ["te_elena", "dc_agata", "Mistero & Eleganza"],
     ["my_ixchel", "alc_sam", "Sentieri e Chiavi"], ["my_alvarez", "dt_ofelia", "Appunti e Indizi"],
     ["alc_bruno", "mg_bullone", "Pezzi di Ricambio & Forbici"], ["alc_malick", "tc_ardo", "I Baluardi di Pietra"],
@@ -380,6 +385,7 @@
       pallatempo: `compagno dalle tue carte, comandi TEMPO ${2 + (T.te >= 2 ? 1 : 0)} (TEC), FISCHIO ${T.df >= 2 ? 1 : 0} (DIF), tiri più forti (ATT)`,
       consegna: "il compagno di volo dalle tue carte, tiri (ATT), recuperi (DIF), tempo +" + T.te * 4 + "s (TEC)",
       anello: `mira +${T.at * 5}% (ATT), rivali meno precisi -${T.df * 5}% (DIF), corsa +${T.te * 3}% (TEC)`,
+      corrente: `velocità pontili +${T.at * 5}% (ATT), stabilità risacca +${T.df * 5}% (DIF), precisione rinvio +${T.te * 10}% (TEC)`,
       rebound: `tiri +${T.at * 6}% (ATT), portiere +${T.df * 7}% (DIF), corsa +${T.te * 3}% (TEC)`,
       marea: `pedane ${3 + (T.te >= 2 ? 1 : 0)} (TEC), portiere +${T.df * 2}% (DIF), tiri più precisi (ATT)`,
       ipogeo: `cuori ${4 + (T.df >= 2 ? 1 : 0)} (DIF), tiro +${T.at * 3}% (ATT), tempo +${T.te * 3}s (TEC)`,
@@ -407,6 +413,7 @@
       marea: { mates: names.slice(0, 2), us: "La Squadra dei Sogni" },
       rebound: { mates: names.slice(0, 2), us: "La Squadra dei Sogni" },
       anello: { mate: names[0], us: "La Squadra dei Sogni" },
+      corrente: { mates: names.slice(0, 2), us: "La Squadra dei Sogni" },
       ipogeo: { us: "La Squadra dei Sogni" },
       ciak: { mates: names.slice(0, 2), us: "La Squadra dei Sogni", takes: 2 + (I >= 8 ? 1 : 0) + (T.te >= 3 ? 1 : 0) },
       volo: { energy: 100 + I * 3 + T.te * 5, mates: names.slice(0, 1), us: "La Squadra dei Sogni" },
