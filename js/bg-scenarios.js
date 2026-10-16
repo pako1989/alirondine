@@ -5581,6 +5581,22 @@
       case "fa_chiatta":
         drawDetailedFiumeMolo(g, W, H, f);
         return true;
+      case "dz_titolo":
+      case "dz_casino":
+      case "dz_salavip":
+        if (window.__dzDraw && window.__dzDraw.Casino) window.__dzDraw.Casino(g, W, H, f);
+        else px(g, 0, 0, W, H, "#064e3b");
+        return true;
+      case "dz_chalet":
+      case "dz_neve":
+        if (window.__dzDraw && window.__dzDraw.Chalet) window.__dzDraw.Chalet(g, W, H, f);
+        else px(g, 0, 0, W, H, "#1e293b");
+        return true;
+      case "dz_bunker":
+      case "dz_base":
+        if (window.__dzDraw && window.__dzDraw.Bunker) window.__dzDraw.Bunker(g, W, H, f);
+        else px(g, 0, 0, W, H, "#020617");
+        return true;
       case "fa_chiuse":
       case "fa_sala_macchine":
         drawDetailedFiumeChiuse(g, W, H, f);
@@ -9852,6 +9868,35 @@
   LB.fa_chiatta = LB.fa_titolo;
   LB.fa_sala_macchine = LB.fa_chiuse;
   LB.fa_arena_delta = LB.fa_delta;
+
+  // Operazione Doppio Zero · Licenza di Cross: scene con punti cliccabili visibili (scintille) e didascalia
+  [
+    ["dz_titolo", "Casino", [
+      [30, 95, 70, 50, "🎲 Tavolo Verde da Roulette: panno di velluto smeraldo con fiches placcate d'oro e roulette d'ebano."],
+      [135, 25, 90, 65, "✨ Lampadario di Cristallo: gocce di luce e riflettori dorati sulla sala VIP di Montegol."],
+      [235, 95, 75, 55, "🍸 Bancone del Barman: bicchieri da cocktail shakerati (non mescolati) e sottobicchieri cifrati."],
+      [90, 110, 100, 45, "🚪 Ingresso Sala Segreta: porta blindata mascherata da libreria in radica con scanner retinico."]
+    ]],
+    ["dz_chalet", "Chalet", [
+      [25, 95, 70, 55, "🚠 Funivia delle Vette: cabina d'acciaio sospesa nel vuoto tra i crepacci innevati."],
+      [130, 25, 100, 65, "❄️ Vetta della Vedetta: cime alpine candide dove il radar del Barone scansiona l'etere."],
+      [235, 90, 75, 60, "🔥 Camino in Pietra: ceppi di pino scoppiettanti in cui ardono messaggi segreti intercettati."],
+      [95, 115, 90, 45, "📡 Antenna Parabolica Clandestina: camuffata da banderuola segnavento sul tetto di scandole."]
+    ]],
+    ["dz_bunker", "Bunker", [
+      [25, 90, 75, 55, "🔴 Raggio Laser di Sicurezza: griglia a fotocellule cremisi che pattuglia il corridoio d'acciaio."],
+      [135, 25, 90, 65, "🌋 Cratere Sotterraneo: magma ribollente e turbine geotermiche che alimentano la base sottomarina."],
+      [240, 90, 75, 55, "💻 Terminale Master 00: schermi a fosfori verdi con il conto alla rovescia del Cannone Ghiacciato."],
+      [95, 115, 95, 45, "🚀 Siluro Subacqueo: lanciatore a propulsione idraulica pronto a congelare gli stadi del mondo."]
+    ]]
+  ].forEach(([k, n, hot]) => {
+    LB[k] = { draw: (g, W, H, f) => { const D = window.__dzDraw; if (D && D[n]) D[n](g, W, H, f); else px(g, 0, 0, W, H, "#064e3b"); }, hot };
+  });
+  LB.dz_casino = LB.dz_titolo;
+  LB.dz_salavip = LB.dz_titolo;
+  LB.dz_neve = LB.dz_chalet;
+  LB.dz_base = LB.dz_bunker;
+
 
   // Operazione Fuorigioco Noir · Milano 1954: scene con punti cliccabili visibili (scintille) e didascalia
   [

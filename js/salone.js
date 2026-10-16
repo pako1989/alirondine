@@ -24,6 +24,8 @@
   const GEN = { fantasy: ["Fantasy", "#7a4ab0"], mistero: ["Mistero", "#2c6a9a"], scifi: ["Fantascienza", "#1f8a8a"], storico: ["Storico", "#a8622a"], commedia: ["Commedia", "#c9921a"], sport: ["Sport anime", "#c0392b"], avventura: ["Avventura", "#3f8a3f"], dramma: ["Drammatico", "#6a5a7a"], tattica: ["Tattica", "#5a6a3a"], satira: ["Satira", "#0284c7"] };
   // mod: oggetto window con menuEntry/info · fn: funzione window da chiamare con (indietro) · ch: capitoli totali (se noti)
   const SAGAS = [
+    { id: "spia", t: "Operazione Doppio Zero · Licenza di Cross", e: "🍸", g: ["mistero", "avventura"], mod: "__spia", key: "ali-di-rondine.spia", ch: 3, cover: "dz_titolo", d: "Nei panni dell'Agente 00 tra smoking di Montegol, inseguimenti in funivia sulle Alpi e il covo vulcanico del Barone von Kalt. Tavolo da Gioco & Tiri a Effetto: panno verde d'azzardo, difensori-fiches, raggi laser mobili e carambole sulle sponde dorate.",
+      hints: { diplomatico: "Serve aver superato la Sala VIP e scelto la via della giustizia sportiva con il Ministero.", ombra: "Serve decidere di svanire nella notte di Montegol senza reclamare la gloria.", spettacolo: "Sempre possibile vincendo la finale: festeggia con una parata trionfale al Casinò Royale.", segreto: "Segreto: tutte le 12 microspie d'oro piazzate e sangue freddo al massimo per il Protocollo 00." } },
     { id: "fiume", t: "La Carovana del Fiume d'Argento", e: "⛵", g: ["avventura", "dramma"], mod: "__fiume", key: "ali-di-rondine.fiume", ch: 3, cover: "fa_titolo", d: "Naviga il Grande Fiume a bordo del Nautilus di Latta, recluta i maestri del timone e sfida la dogana a Corrente & Rinvio: pontili oscillanti, spinta vettoriale dell'acqua e rinvii a vortice.",
       hints: { mercantile: "Serve aver stretto accordi con i mercanti delle Chiuse nel Capitolo 2 e vinto la finale.", franca: "Serve aver proclamato il fiume libero per tutti i battellieri e alta intesa (>50).", sentinella: "Sempre possibile vincendo la finale: sigilla il patto di difesa congiunta con Malacarne.", segreto: "Segreto: tutte le bussole d'argento raccolte e idrologia fluviale altissima." } },
     { id: "treno", t: "L'Espresso delle Ombre · Intrigo sul Treno delle Nevi", e: "🚂", g: ["mistero", "storico"], mod: "__treno", key: "ali-di-rondine.treno", ch: 3, cover: "te_titolo", d: "Spie, carrozze in mogano e una valigetta scomparsa tra le Alpi innevate. Il Corridoio d'Acciaio: match a scorrimento, pendenza delle curve che devia il pallone e sponde sulle porte degli scompartimenti.",
@@ -127,7 +129,7 @@
     { id: "cala", t: "Cala Tramontana", e: "🌊", g: ["avventura"], fn: "openCalaTramontana", key: "ali-di-rondine.cala-tramontana", cover: "beach", d: "Esplora a piedi il borgo marino alternativo con il tuo Campione." },
     { id: "borgostorto", t: "Il Borgo Storto", e: "🌀", g: ["commedia", "tattica"], api: "openBorgoStorto", cover: "beach", d: "Lo spin-off GDR a turni del Borgo Marino." },
   ];
-  const NEWEST = ["fiume", "piramide", "treno", "alcatraz", "milano", "gp", "tempo", "dungeon", "roma", "regno", "naufraghi", "campana", "galletta", "pugno", "montagna", "cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
+  const NEWEST = ["spia", "fiume", "piramide", "treno", "alcatraz", "milano", "gp", "tempo", "dungeon", "roma", "regno", "naufraghi", "campana", "galletta", "pugno", "montagna", "cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
   const modOf = (s) => (s.mod ? window[s.mod] : null);
   const available = (s) => (s.mod ? !!window[s.mod] : s.fn ? typeof window[s.fn] === "function" : !!(api() && api()[s.api]));
   function state(s) {
@@ -360,6 +362,10 @@
       opp: [{ name: "Portuali di Roccabruna", color: "#0284c7", style: "equilibrata" }, { name: "Guardia del Dazio", color: "#dc2626", style: "pressing" }],
       boss: { name: "Campioni del Delta", color: "#f59e0b", style: "contropiede" },
       opts: (o, h, boss) => ({ opp: o.name }) },
+    { id: "roulette", t: "Tavolo da Gioco & Tiri a Effetto", e: "🎲", saga: "spia", eng: "__spiaMatch", d: "La sfida sul panno verde del Casinò Royale: difensori-fiches, gettoni rimbalzanti, raggi laser mobili di sorveglianza e tiri a effetto carambola.",
+      opp: [{ name: "I Croupier di Montegol", color: "#10b981", style: "equilibrata" }, { name: "I Cecchini delle Nevi", color: "#0284c7", style: "contropiede" }],
+      boss: { name: "I Sicari del Barone von Kalt", color: "#e11d48", style: "pressing" },
+      opts: (o, h, boss) => ({ opp: o.name, us: h.name, turns: boss ? 7 : 6, targetGoals: boss ? 3 : 2 }) },
   ];
   function sgState(m) { const s = SAGAS.find((x) => x.id === m.saga), x = s ? state(s) : null; return { s, open: !!(x && (x.doneN >= 1)), boss: !!(x && x.endsFound > 0) }; }
   function openSalaGiochi(back) {
@@ -662,7 +668,7 @@
   // ---------------------------------------------------------------- ALBUM DEI PERSONAGGI
   // ogni personaggio registrato nel gioco (window.__borgoApi.BIO) diventa una carta. Si «incontra» parlandoci (seeCard del gioco).
   // Le sezioni: la Storia e Borgo Marino, i tornei e le modalità del Borgo, e una sezione per saga (riconosciuta dal prefisso degli id).
-  const PFX = { fiume: "fa", piramide: "my", treno: "te", alcatraz: "alc", milano: "mn", gp: "gp", tempo: "rt", roma: "rm", regno: "re", naufraghi: "nf", campana: "cp", galletta: "gl", pugno: "pr", montagna: "bm", cavallo: "cs", dungeon: "dg", razzo: "rz", quartiere: "sq", titano: "ft", ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
+  const PFX = { spia: "dz", fiume: "fa", piramide: "my", treno: "te", alcatraz: "alc", milano: "mn", gp: "gp", tempo: "rt", roma: "rm", regno: "re", naufraghi: "nf", campana: "cp", galletta: "gl", pugno: "pr", montagna: "bm", cavallo: "cs", dungeon: "dg", razzo: "rz", quartiere: "sq", titano: "ft", ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
   const BORGO_PFX = ["sv", "rb", "sb", "cg", "hd", "md", "ac"];
   function perSections() {
     const A = api(); if (!A || !A.BIO) return [];
