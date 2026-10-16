@@ -1111,7 +1111,8 @@
   function continueStory() {
     const c = activeChapter(); if (!c) return;
     const m = mem();
-    const curZ = (m.zone && ZONES[m.zone]) ? m.zone : Object.keys(c.zones || {})[0] || "feudi_mastio_ch1";
+    // la zona salvata deve appartenere al capitolo attivo: altrimenti si resta nella sala del capitolo precedente senza uscita
+    const curZ = (m.zone && c.zones && c.zones[m.zone] && ZONES[m.zone]) ? m.zone : Object.keys(c.zones || {})[0] || "feudi_mastio_ch1";
     const zr = ZONES[curZ];
     const sp = (zr && zr.spec.start) || [14, 14];
 
