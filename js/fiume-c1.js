@@ -51,7 +51,7 @@
     const zones = {
       fa_molo: {
         region: "porto", name: "Molo dei Mulini di Roccabruna", short: "Molo Mulini", sub: "Gomene d'ormeggio, casse di spezie e la sagoma del Nautilus", bg: "fa_molo", time: "giorno",
-        w: 32, h: 22, start: [6, 11], items: [[8, 6], [22, 6], [16, 17]],
+        w: 32, h: 22, start: [6, 11], items: [[9, 6], [21, 6], [16, 17]],
         areas: [[0, 0, 31, 21, "La banchina in pietra e quercia dove attraccano i battelli a vapore"]],
         flavor: {
           B: "Bitte di bronzo e canapa impregnate di salmastro e pece.",
@@ -84,7 +84,7 @@
 
       fa_chiatta: {
         region: "porto", name: "La Chiatta Galleggiante", short: "Chiatta", sub: "Assi oscillanti a pelo d'acqua, bitte di sponda e il campo di prova", bg: "fa_chiatta", time: "giorno",
-        w: 32, h: 22, start: [3, 11], items: [[10, 5], [20, 16], [24, 7]],
+        w: 32, h: 22, start: [3, 11], items: [[10, 5], [20, 16], [23, 7]],
         areas: [[0, 0, 31, 21, "La grande piattaforma galleggiante dove i battellieri disputano le sfide d'argine"]],
         flavor: {
           B: "Bitte d'acciaio che tengono la chiatta ancorata ai piloni del ponte.",

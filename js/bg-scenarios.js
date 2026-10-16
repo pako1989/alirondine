@@ -3184,6 +3184,8 @@
     get Stazione() { return drawDetailedTrenoStazione; }
   };
 
+  function circ(g, x, y, r, col) { if (col) g.fillStyle = col; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill(); }
+
   function vgrad(g, x, y, w, h, c1, c2) {
     const gr = g.createLinearGradient(x, y, x, y + h);
     gr.addColorStop(0, c1);
@@ -3703,8 +3705,8 @@
     vgrad(g, 0, 0, W, 95, "#0284c7", "#e0f2fe");
     // Nubi basse
     g.fillStyle = "rgba(255, 255, 255, 0.4)";
-    circ(g, 60, 30, 25); circ(85, 25, 30); circ(110, 32, 22);
-    circ(240, 40, 28); circ(270, 35, 32);
+    circ(g, 60, 30, 25); circ(g, 85, 25, 30); circ(g, 110, 32, 22);
+    circ(g, 240, 40, 28); circ(g, 270, 35, 32);
 
     // Il Grande Fiume Argenteo che scorre
     vgrad(g, 0, 90, W, 70, "#0369a1", "#0284c7");

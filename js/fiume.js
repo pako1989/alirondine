@@ -116,7 +116,7 @@
       beard: "folta",
       acc: ["berretto"],
       bg: ["#0369a1", "#082f49"]
-    });
+    }, "Vecchio lupo di fiume, timoniere del Nautilus di Latta. Brontola, fuma pipa spenta e giura di conoscere ogni gorgo dal molo al delta. Ha una regola d'oro: controcorrente si gioca di sponda.");
 
     K.cast("fa_mirella", {
       name: "Mirella la Cartografa",
@@ -129,7 +129,7 @@
       streak: "#0284c7",
       acc: ["occhiali", "taccuino"],
       bg: ["#0284c7", "#0c4a6e"]
-    });
+    }, "Cartografa e idrologa della Carovana. Misura correnti, vettori e rimbalzi con il taccuino sempre in mano. Se sbagli un calcolo te lo fa notare, con il sorriso.");
 
     K.cast("fa_vanni", {
       name: "Burlone Vanni",
@@ -142,7 +142,7 @@
       beard: "pizzetto",
       acc: ["fascia"],
       bg: ["#b45309", "#451a03"]
-    });
+    }, "Pescatore di sponda, gigante buono e buontempone. Ride di tutto, anche quando cade in acqua. Quando calcia fa tremare l'intero pontile.");
 
     K.cast("fa_malacarne", {
       name: "Doganiere Malacarne",
@@ -155,7 +155,7 @@
       beard: "baffi",
       acc: ["medaglia"],
       bg: ["#991b1b", "#450a0a"]
-    });
+    }, "Capitano del Dazio, inflessibile con registro e sciabola. Per lui le regole vengono prima di tutto. Dietro la divisa, però, nasconde più onore di quanto ammetta.");
 
     K.cast("fa_silvia", {
       name: "Silvia dei Mulini",
@@ -167,7 +167,7 @@
       shirt: "#047857",
       acc: ["visiera", "grembiule"],
       bg: ["#065f46", "#022c22"]
-    });
+    }, "Ingegnera idraulica dei mulini. Sa riparare una turbina a occhi chiusi e tiene il campo d'argine in piedi con olio di lino e tenacia.");
   }
   casts();
 

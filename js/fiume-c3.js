@@ -50,7 +50,7 @@
     const zones = {
       fa_delta: {
         region: "delta", name: "L'Approdo del Delta d'Argento", short: "Delta d'Argento", sub: "Isolotti di canne, lanterne d'ottone e il riflesso dell'oceano", bg: "fa_delta", time: "tramonto",
-        w: 32, h: 22, start: [6, 11], items: [[8, 6], [22, 6], [16, 17]],
+        w: 32, h: 22, start: [6, 11], items: [[9, 6], [22, 6], [16, 17]],
         areas: [[0, 0, 31, 21, "Il lungo molo in legno di cedro che si protende sulle lagune dorate"]],
         flavor: {
           B: "Bitte dorate tempestate di madreperla fluviale.",

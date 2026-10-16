@@ -155,7 +155,7 @@
     beard: "incolta",
     acc: ["occhiali"],
     bg: ["#78350f", "#1c1917"]
-  });
+  }, "Professore capo della spedizione del 1936. Entusiasta e un po' sbadato, vede il Pok-ta-pok in ogni traiettoria di pallone. Ha sempre un appunto in tasca.");
 
   K.cast("my_ixchel", {
     name: "Ixchel",
@@ -168,7 +168,7 @@
     acc: ["bandana"],
     streak: "#f59e0b",
     bg: ["#059669", "#064e3b"]
-  });
+  }, "Guida dello Yucatán, sicura e silenziosa. Conosce ogni sentiero della giungla e ogni rimbalzo del rito. Gioca al tuo fianco come ala e scudo.");
 
   K.cast("my_vargas", {
     name: "Capitano Vargas",
@@ -182,7 +182,7 @@
     scar: true,
     acc: ["cappellino"],
     bg: ["#451a03", "#1c1917"]
-  });
+  }, "Cacciatore di tesori dal sorriso storto e dalla cicatrice sulla guancia. Non fa nulla per nulla. Il tuo rivale nella corsa alla piramide.");
 
   K.cast("my_kukulkan", {
     name: "Guardiano Kukulkan",
@@ -194,7 +194,7 @@
     shirt: "#b45309",
     acc: ["corona"],
     bg: ["#b45309", "#78350f"]
-  });
+  }, "Sacerdote-guardiano dell'Anello di Pietra. Parla poco e giudica tutto. Da mille anni aspetta chi sappia onorare il rito del sole.");
 
   K.cast("my_diego", {
     name: "Diego",
@@ -206,7 +206,7 @@
     shirt: "#0284c7",
     acc: ["cuffie"],
     bg: ["#0369a1", "#082f49"]
-  });
+  }, "Radiotelegrafista della spedizione. Chiacchierone, tiene i contatti con il mondo e la zattera pronta quando serve.");
 
   }
   casts();

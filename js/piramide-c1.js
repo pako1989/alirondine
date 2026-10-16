@@ -41,7 +41,7 @@
     const zones = {
       my_campobase: {
         region: "giungla", name: "Accampamento della Spedizione", short: "Campo Base", sub: "Tende coloniali, casse di reperti e generatori a nafta", bg: "my_campobase", time: "giorno",
-        w: 32, h: 22, start: [6, 11], items: [[8, 6], [24, 7], [16, 17]],
+        w: 32, h: 22, start: [6, 11], items: [[9, 6], [24, 8], [16, 17]],
         areas: [[0, 0, 31, 21, "La radura dell'accampamento archeologico tra alberi di ceiba secolari"]],
         flavor: {
           T: "Le grandi tende di canapa verde oliva piantate dagli archeologi della spedizione.",

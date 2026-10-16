@@ -50,7 +50,7 @@
     const zones = {
       fa_chiuse: {
         region: "chiuse", name: "La Fortezza delle Grandi Chiuse", short: "Grandi Chiuse", sub: "Arcate di basalto, paratie d'acciaio e scrosci d'acqua fragorosi", bg: "fa_chiuse", time: "giorno",
-        w: 32, h: 22, start: [6, 11], items: [[8, 6], [22, 6], [16, 17]],
+        w: 32, h: 22, start: [6, 11], items: [[9, 6], [22, 6], [16, 17]],
         areas: [[0, 0, 31, 21, "Il vasto sagrato lastricato a strapiombo sulle cascate artificiali delle chiuse"]],
         flavor: {
           B: "Le bitte monumentali con lo stemma imperiale del dazio fluviale.",
