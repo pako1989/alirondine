@@ -32,6 +32,11 @@ Un solo file: contiene regole, stato del progetto, come costruire una saga, API 
 | `K.quest("solo testo")` con un solo argomento (Milano, Campana, Galletta) | toast «Nuova commissione: undefined» | firma: `K.quest(id, titolo, descrizione)` (ora il motore tollera il solo testo, ma scrivi tutti e tre) |
 | Porte delle case (`L.house(..., { door, enter })`) senza etichetta azione `q` | vicino alla porta non compare «Entra» | ora `q: "Entra"` è di default; se usi un'etichetta diversa mettila in `act` |
 | Manifest in solo verticale | app non ruota | `orientation: any` (già fatto) |
+| `K.cast(...)` chiamato subito (api non pronta, `CAST` null) | saga che non si carica | rimanda con polling su `K.api && K.api.CAST`; bio come 3° argomento |
+| `K.finishChapter(n)` senza finale, `K.evidence` con firma inventata, `K.bond` letto come getter | fine capitolo/indizi rotti | `K.finishChapter(n, "finale")`, `K.evidence(id,{t,d,icon})`, `K.bond(stat, delta)` solo scrive; leggi con `K.stat(k)` |
+| Oggetti/PNG su tessere solide, PNG senza bio | oggetti non raggiungibili, scheda vuota | `items` su tessere libere (test `reachAll`), bio sempre |
+| Motore di partita: palla ferma, pareggio non gestito, HUD `[object Object]` | partita che non finisce | stallo -> riparte; pareggio = sconfitta o ripetizione; test a pilota automatico: 8-10 partite devono finire |
+| **File condivisi consegnati interi** (bg-scenarios, salone, sogni, game, sw, index) | cancellati i `case` di altre saghe (es. `te_caldaie`) | solo patch mirate; dopo il pull controlla `git diff` che non tolga righe altrui |
 
 ---
 
@@ -226,6 +231,9 @@ Struttura dei file: `js/<nome>.js` (configurazione) + `js/<nome>-c1.js` … `-c4
 25. **`saga-core.js` è usato da ~30 saghe:** modificalo se la novità serve alle saghe esistenti OPPURE è nuova e utile anche per saghe future, con una patch piccola e retrocompatibile (le saghe esistenti devono comportarsi come prima), poi rilancia `node tests/run.cjs saghe-vecchie` e 2-3 saghe a campione. Se la novità serve solo alla tua saga, resta nel file della tua saga.
 26. **Percorso reale del giocatore:** dopo il push rifai, sul sito aggiornato, il percorso da nuova partita (Inizia la storia → difficoltà → Continua → primo PNG), non solo il salvataggio di prova.
 27. **Risparmio token:** test via script con output breve (✓/✗ o poche righe); pochi screenshot (intro, menu, 1-2 zone per saga), non uno per zona; non giocare a mano i capitoli se uno script li attraversa.
+
+## Saga su richiesta specifica (personaggio, serie, film)
+Pasquale può dire: «Fai una saga su <tema>». Dagli: tono (serio/mix/demenziale), cosa NON vuole, quanti capitoli (default 3) e finali (default 4). L'IA propone in 5 righe titolo, protagonista, 3 capitoli, 4 finali, minigioco, aspetta l'ok, poi costruisce. Omaggi e parodie bonarie di opere e personaggi pubblici ammessi, nomi trasformati (§0 «Persone reali»); mai persone private. Esempio: «Saga mix su <tema>, 3 capitoli, finali multipli, ironica con momenti seri, niente spoiler nelle risposte».
 
 ## 4b · Evitare regressioni (obbligatorio a ogni push)
 - `git pull --rebase origin main` prima di iniziare e prima di ogni commit. Lavora sempre sull'ultima versione dei file: mai rimettere una copia vecchia, mai riscrivere un file intero.
