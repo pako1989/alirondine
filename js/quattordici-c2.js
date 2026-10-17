@@ -39,6 +39,7 @@
         intro: [
           ["voce", "Il giardino è bellissimo e mezzo vuoto. Al tavolo di Teo, la colazione è apparecchiata per una persona che non verrà."]
         ],
+        loot: { "23,2": { id: "qt_guanti", text: "Un armadietto con la targa grattata via. Dentro, un paio di guanti da portiere rattoppati.", empty: "L'armadietto è vuoto, a parte una molletta." } },
         npcs: () => [{ id: "qt_ilse", at: [8, 9] }, { id: "qt_banditore", at: [19, 7] }],
         build(L) {
           const { lay, house } = L;
@@ -62,6 +63,7 @@
         intro: [
           ["voce", "L'archivio ha il silenzio di una biblioteca e l'ordine di un'officina. Una lampada verde illumina un'unica scrivania."]
         ],
+        loot: { "13,11": { id: "qt_lente", text: "Tra gli appunti, una lente d'ingrandimento con il manico d'osso.", empty: "Sulla scrivania restano solo appunti a grafia minuscola." } },
         npcs: () => [{ id: "qt_luce", at: [14, 8] }],
         build(L) {
           const { lay, house } = L;
@@ -80,7 +82,7 @@
       say("Banditore", "(Dall'altoparlante.) Gentili ospiti, un incidente all'archivio. L'archivista Ferrante ci ha lasciati e il Meridiana la ricorderà con affetto. Per ragioni organizzative, cinque squadre escono dal Torneo. Restate nelle camere.");
       say("Ilse", "Non è stato un incidente. Ha parlato con te, e adesso non parla più. Ricordatelo quando ti offrono un biscotto.");
       if (luce() >= 1) {
-        F.set("qt_chiave", true);
+        F.set("qt_chiave", true); if (K.inv) K.inv.give("qt_chiave");
         say("voce", "Nella tasca della giacca trovi una chiave di ottone che prima non c'era. Un biglietto, con grafia minuscola: «Dietro il quadro dell'Ala Nord. Non fidarti dei corvi che sorridono. L.»");
         stat("verita", 6);
       } else {
@@ -115,6 +117,7 @@
               say("voce", "L'armadietto di Teo ha il lucchetto aperto e la targa grattata via. Dentro, una lettera piegata in quattro e il suo braccialetto da capitano.");
               say("Ilse", "(Legge.) «Ilse, se leggi questo non mi hanno portato in vacanza. Il furgone aveva i sedili con le cinghie. Non fidarti di chi ti offre da bere. Salutami il Campione, digli che il gol di Rimini era suo.»");
               stat("verita", 8); stat("alleanze", 4);
+              if (K.inv) K.inv.give("qt_braccialetto");
             }
           }
         ],

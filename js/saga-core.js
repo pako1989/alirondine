@@ -18,6 +18,7 @@
 //     mainExtra(K) { return [{ label, sub, fn }] }, zoneMenuExtra(K) { return [...] },
 //     clock: { slots: ["Mattina", "Sera"], hud: true, tint: [...], onSlot(K, giorno, fascia, nome) { return [["voce", "..."]]; } },  // calendario: K.clock.advance(n), K.clock.is("Sera"); npcs(step, K)
 //     bonds: { talk: 4, max: 5, per: 10, names: ["Estranei", ...], scenes: { id_png: [{ lv: 2, id: "x", lines: [[chi, testo]], reward(K) {} }] } },  // RAPPORTI: K.rel.add(id, punti), K.rel.lv(id), K.rel.scene(id, then); cuori nella pagina Personaggi; scena a soglia al prossimo dialogo
+//     inv: { items: { id: { n: "Nome", icon: "🗝️", d: "descrizione", match: { at: 1, df: 0, te: 0 }, gift: { id_png: punti }, giftAny: 2, react: { id_png: "battuta" }, refuse: { id_png: "battuta" } } } },  // INVENTARIO: spec.loot = { "x,y": { id, text, empty } } (tessera con azione), K.inv.give/has/take/count/bonus("at"), 🎒 Zaino nel menu: i regali alzano i Rapporti, gli oggetti passivi danno bonus in partita finché li tieni
 //     plugins: [{ zone(zid, spec, Z, K), tick(zid, spec, px, py, dt, K), top(g, zid, spec, cx, cy, d, K), enter(zid, spec, K) }],
 //     rest: { ch: "s", label: "Riposa", text: "..." },
 //   });
@@ -730,6 +731,8 @@
         chainFor(ZONES[zid]).some((c) => { f = c.obj && (c.obj[zid + ":" + ch + ":" + tx + "," + ty] || c.obj[zid + ":" + ch]); return !!f; });
         if (f) { f({ ch, tx, ty, zid }); return true; }
         const own = spec.objects && (spec.objects[tx + "," + ty] || spec.objects[ch]); if (own) { own({ ch, tx, ty, zid }, K); return true; }
+        const lt = INV && spec.loot && spec.loot[tx + "," + ty];
+        if (lt) { const lk = "loot_" + zid + "_" + tx + "_" + ty; if (F.get(lk)) say([["voce", lt.empty || "Qui non c'è più niente da prendere."]], done); else { F.set(lk, true); invGive(lt.id); say([["voce", (lt.text || "Trovi qualcosa.") + ` <b>${esc((itemDef(lt.id) || {}).n || lt.id)}</b> nello zaino.`]], done); } return true; }
         const plug = PLUG.find((p) => p.obj && p.obj(ch, tx, ty, zid, spec, K)); if (plug) return true;
         if (TUBE.pts) return true;
         const ti = arr(spec.tubes).findIndex((t) => t.at && t.at[0] === tx && t.at[1] === ty); if (ti >= 0) { tubeRide(zid, ti); return true; }
@@ -877,6 +880,7 @@
       api.trAsk("voce", `<b>${esc(TITLE)}</b> · ${esc(c ? "Capitolo " + c.n + " · " + c.title : "")}<br><span style="color:var(--dim)">${esc(goalNow())}<br>Monete ${bal()} · ${esc(JN())}: ${m.lore.length} pagine</span>`, [
         { label: JN(), sub: (cfg.journal && cfg.journal.sub) || "Persone, scoperte, finali", cls: "hot", fn: () => journal(zoneMenu, true) },
         { label: "👥 Personaggi", sub: "Chi hai incontrato in questa saga", fn: () => persone(zoneMenu) },
+        ...(INV ? [{ label: "🎒 Zaino", sub: invList().length ? invList().length + " oggetti: regali e bonus" : "Ancora vuoto", fn: () => zaino(zoneMenu) }] : []),
         ...(cfg.travel && !(zoneRec() && zoneRec().spec.interior) ? [{ label: "Viaggio rapido", sub: "Nei luoghi che conosci già", fn: () => travelMenu(zoneMenu) }] : []),
         ...extra,
         { label: `Esci da ${TITLE}`, sub: "Progressi e posizione restano salvati", cls: "hot", fn: leave },
@@ -999,6 +1003,43 @@
     }
     const REL = BND && { lv: relLv, pts: relPts, add: relAdd, scene: relScene, pending: relPending, names: BND.names, max: BND.max, per: BND.per };
 
+    // -------------------------------------------------------------- INVENTARIO (cfg.inv)
+    // Oggetti in flag inv_<id> (numero). Si trovano su tessere «loot» (spec.loot), si regalano dal menu 🎒 Zaino (alzano i Rapporti)
+    // e, finché li tieni, danno bonus alla partita (item.match = { at, df, te }): tenerli o regalarli è una scelta.
+    const INVC = cfg.inv ? Object.assign({ items: {} }, cfg.inv) : null;
+    const itemDef = (id) => (INVC && INVC.items[id]) || null;
+    const invCount = (id) => (INVC ? clampI(F.get("inv_" + id, 0) | 0, 0, 99, 0) : 0);
+    const invList = () => (INVC ? Object.keys(INVC.items).filter((id) => invCount(id) > 0) : []);
+    function invGive(id, n, quiet) {
+      const d = itemDef(id); if (!d) return 0; F.set("inv_" + id, Math.min(99, invCount(id) + (n | 0 || 1)));
+      if (!quiet && window.toast) window.toast(`Zaino: ${d.n}`, "good", d.icon || "🎒");
+      return invCount(id);
+    }
+    function invTake(id, n) { const c = invCount(id); if (!c) return false; F.set("inv_" + id, Math.max(0, c - (n | 0 || 1))); return true; }
+    const invBonus = (kind) => invList().reduce((t, id) => t + ((itemDef(id).match && itemDef(id).match[kind]) | 0) * Math.min(1, invCount(id)), 0);
+    function invGift(itemId, npcId, back) {
+      const d = itemDef(itemId), C = (api && api.CAST || {})[npcId] || {}, nm = C.name || npcId;
+      if (!d || !invCount(itemId)) return back();
+      const pts = d.gift && d.gift[npcId] != null ? d.gift[npcId] : d.giftAny != null ? d.giftAny : 0;
+      if (pts <= 0) { say([[npcId, (d.refuse && d.refuse[npcId]) || "Grazie, ma non fa per me. Tienilo."]], back); return; }
+      invTake(itemId, 1); relAdd(npcId, pts);
+      say([[npcId, (d.react && d.react[npcId]) || "Per me? Grazie. Lo terrò con cura."], ["voce", `${esc(nm)} riceve «${esc(d.n)}». Rapporto <b>+${pts}</b>.`]], () => { if (INVC.onGift) safe(() => INVC.onGift(K, itemId, npcId)); back(); });
+    }
+    function itemMenu(id, back) {
+      const d = itemDef(id), zr = zoneRec(), here = zr ? zr.Z.npcs.filter((n) => !n.ghost && n.id !== "hero" && SCAST.includes(n.id) && mem().met.includes(n.id)) : [];
+      const bonus = d.match ? Object.keys(d.match).filter((k2) => d.match[k2]).map((k2) => ({ at: "ATT", df: "DIF", te: "TEC" }[k2] + " +" + d.match[k2])).join(" ") : "";
+      const opts = here.map((n) => ({ label: `Regala a ${((api.CAST || {})[n.id] || {}).name || n.id}`, sub: d.gift && d.gift[n.id] === 0 ? "Non lo vuole" : undefined, fn: () => invGift(id, n.id, () => zaino(back)) }));
+      opts.push({ label: "◂ Torna allo zaino", fn: () => zaino(back) });
+      api.trAsk("voce", `${esc(d.icon || "🎒")} <b>${esc(d.n)}</b> × ${invCount(id)}<br><span style="color:var(--dim)">${esc(d.d || "")}${bonus ? `<br>In partita finché lo tieni: ${bonus}` : ""}${here.length ? "" : "<br>Nessuno qui con cui parlarne."}</span>`, opts, bgNow());
+    }
+    function zaino(back) {
+      const ids = invList();
+      if (!ids.length) return api.trAsk("voce", "🎒 <b>Zaino</b><br><span style=\"color:var(--dim)\">Vuoto. Gli oggetti si trovano frugando mobili, scaffali e armadietti.</span>", [{ label: "◂ Indietro", fn: back }], bgNow());
+      api.trAsk("voce", `🎒 <b>Zaino</b> · ${ids.length} oggetti<br><span style="color:var(--dim)">Regalali per alzare i Rapporti, oppure tienili: alcuni danno bonus in partita.</span>`,
+        ids.map((id) => ({ label: `${itemDef(id).icon || "•"} ${itemDef(id).n}${invCount(id) > 1 ? " ×" + invCount(id) : ""}`, sub: itemDef(id).d, fn: () => itemMenu(id, back) })).concat([{ label: "◂ Indietro", fn: back }]), bgNow());
+    }
+    const INV = INVC && { give: invGive, take: invTake, has: (id) => invCount(id) > 0, count: invCount, list: invList, bonus: invBonus, gift: invGift, zaino };
+
     // -------------------------------------------------------------- kit per i capitoli
     const K = {
       get api() { return api; }, ID, TITLE, TS, T, esc, hash, rnd, pick, safe, F, mem, save, stepOf, setStep, note, once, reward, coinsGive, bal, hero, castHero, stat, bond,
@@ -1009,7 +1050,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, rel: REL,
+      clock: CLOCK, rel: REL, inv: INV,
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
       ending: (id, d) => { ENDINGS[id] = d; },
       continueStory: () => continueStory(), hasChapter: (n) => !!CHAPTERS[n], setInMatch: (v) => { inMatch = !!v; }, openMain: () => openMain(),

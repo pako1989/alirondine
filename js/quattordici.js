@@ -49,6 +49,16 @@
         ]
       }
     },
+    inv: {
+      items: {
+        qt_biscotti: { n: "Biscotti del Meridiana", icon: "🍪", d: "Troppo buoni per essere sicuri. Teo ne andrebbe matto.", gift: { qt_teo: 8, qt_ilse: 0 }, refuse: { qt_ilse: "Biscotti offerti da questo albergo? No, grazie. Mangiali tu, io ti guardo." }, react: { qt_teo: "Biscotti! Mi stai viziando. Adesso devo proprio farti perdere... piano." } },
+        qt_fascia: { n: "Fascia di riserva", icon: "🎽", d: "Una fascia da capitano lasciata a bordo campo.", match: { te: 1 }, gift: { qt_corvo: 6 }, giftAny: 3 },
+        qt_guanti: { n: "Guanti da portiere", icon: "🧤", d: "Vecchi, rattoppati, della taglia di Ilse.", match: { df: 1 }, gift: { qt_ilse: 9 }, react: { qt_ilse: "(Li gira tra le mani.) Sono i miei vecchi. Come hai fatto a trovarli? ...Non importa. Grazie." } },
+        qt_braccialetto: { n: "Braccialetto di Teo", icon: "🔗", d: "Il braccialetto da capitano di Teo, dall'armadietto.", gift: { qt_corvo: 8, qt_ilse: 5 }, react: { qt_corvo: "Anche lui aveva un fratello da cercare. Lo terrò io finché non lo ritrovo." } },
+        qt_lente: { n: "Lente d'ingrandimento", icon: "🔍", d: "La lente di Luce, dimenticata sulla scrivania.", match: { at: 1 }, gift: { qt_luce: 8 }, react: { qt_luce: "La mia lente! Pensavo di averla persa insieme a tante altre cose. Grazie, signor Campione." } },
+        qt_chiave: { n: "Chiave di Luce", icon: "🗝️", d: "Apre il registro dietro il quadro dell'Ala Nord.", giftAny: 0 }
+      }
+    },
     clock: {
       slots: ["Mattina", "Pomeriggio", "Sera", "Notte"],
       hud: true,
@@ -141,7 +151,7 @@
         g.fillStyle = "#0f172a"; g.fillRect(sx + 6, sy + 7, 1, 2); g.fillRect(sx + 12, sy + 7, 1, 2);
       }
     },
-    act: { q: "Entra", K: "Guarda il bancone", B: "Guarda lo scaffale", N: "Guarda il tabellone", E: "Esamina il cancello", X: "Guarda l'armadietto" },
+    act: { q: "Entra", U: "Guarda il tavolino", K: "Guarda il bancone", B: "Guarda lo scaffale", N: "Guarda il tabellone", E: "Esamina il cancello", X: "Guarda l'armadietto" },
     travel: true,
     item: ["Biglietto del Torneo", "Biglietti del Torneo"],
     drawItem(g, x, y, i, f) {
@@ -252,9 +262,9 @@
     },
     // la partita a Zona Rossa (la forma di Ilse diventa bonus ATT/DIF/TEC)
     match(K, k, o) {
-      const f = K.stat("forma");
+      const f = K.stat("forma"), iv = (x) => (K.inv ? K.inv.bonus(x) : 0);
       K.ownMatch(window.__zonarossa.start, {
-        title: o.title, oppNames: [o.opp, "Rivali"], mate: "Ilse", bonus: { at: f, df: f, te: f },
+        title: o.title, oppNames: [o.opp, "Rivali"], mate: "Ilse", bonus: { at: Math.min(4, f + iv("at")), df: Math.min(4, f + iv("df")), te: Math.min(4, f + iv("te")) },
         done: (res) => { if (res.win) o.win(); else o.lose(); }
       });
     },

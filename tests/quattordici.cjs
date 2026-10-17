@@ -33,6 +33,14 @@ async function storia(w) {
   for (const z of zones[1]) { const bad = await reach(page, z); if (bad.length) errors.push(z + " irraggiungibile: " + bad.join(", ")); }
   await goEnter("qt_atrio"); if (w === 390) await L.shot(page, "qt_atrio");
   await ck(1, "Mattina", "avvio giorno 1");
+  // inventario: loot su una tessera, regalo che alza il rapporto, bonus passivo degli oggetti
+  await L.goAct(page, 23, 3); await L.advance(page);
+  if (!(await page.evaluate((k) => eval(k).inv.has("qt_biscotti"), K_))) errors.push("loot: biscotti non raccolti");
+  await page.evaluate((k) => eval(k).inv.gift("qt_biscotti", "qt_teo", () => eval(k).done()), K_); await L.advance(page);
+  { const r = await page.evaluate((k) => [eval(k).inv.has("qt_biscotti"), eval(k).rel.lv("qt_teo")], K_); if (r[0] || r[1] !== 1) errors.push("regalo a Teo: " + JSON.stringify(r)); }
+  await page.evaluate((k) => eval(k).inv.give("qt_guanti", 1, true), K_);
+  { const b = await page.evaluate((k) => eval(k).inv.bonus("df"), K_); if (b !== 1) errors.push("bonus DIF dei guanti: " + b); }
+  await page.evaluate((k) => eval(k).inv.take("qt_guanti"), K_);
   await L.talk(page, "qt_teo"); await L.advance(page); await chk(1, 0, "Teo prima del briefing");
   await L.talk(page, "qt_ilse"); await L.advance(page); await chk(1, 1, "Ilse c1");
   await L.talk(page, "qt_ilse"); await L.advance(page, [/Allenarsi con Ilse/]); await ck(1, "Pomeriggio", "dopo l'attività del mattino");

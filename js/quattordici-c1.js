@@ -41,6 +41,7 @@
           ["voce", "L'atrio del Meridiana profuma di lucido da pavimenti e di nervosismo contenuto."],
           ["voce", "Quattordici squadre, tre giorni. Domani, a quest'ora, ne saranno rimaste meno."]
         ],
+        loot: { "23,3": { id: "qt_biscotti", text: "Un vassoio di biscotti che nessuno osa toccare. Tu ne prendi un sacchetto.", empty: "Il vassoio è vuoto. Qualcuno ti ha visto." } },
         npcs: (s) => [
           { id: "qt_ilse", at: [8, 9] },
           ...(s < 2 ? [{ id: "qt_teo", at: [18, 7] }] : [])
@@ -68,6 +69,7 @@
         intro: [
           ["voce", "Il campo è un rettangolo di prato perfetto. Sul bordo alto e basso, strisce rosse spente aspettano."]
         ],
+        loot: { "4,13": { id: "qt_fascia", text: "Sotto la panchina di velluto c'è una fascia da capitano ripiegata.", empty: "Sotto la panchina non c'è altro." } },
         npcs: () => [{ id: "qt_banditore", at: [14, 6] }],
         build(L) {
           const { lay, house } = L;
