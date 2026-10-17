@@ -94,6 +94,8 @@
       }
     };
 
+    const chDone = () => { try { const i = window.__note && window.__note.info && window.__note.info(); return !!(i && i.done && i.done[1]); } catch (e) { return true; } };
+
     const talk = {
       qd_ryu(K) {
         const s = S();
@@ -140,7 +142,7 @@
             K.deduci("quaderno", { intuito: 10, giustizia: 5 });
             done();
           });
-        } else if (s === 2) {
+        } else if (s === 2 || (s >= 3 && !chDone())) {
           ask("qd_raito", "I Rivali di Shibuya sono schierati per il test. Sei pronto a dedurre le loro mosse con il Tactics Note?", [
             {
               label: "Inizia la sfida a Tactics Note ▸",
