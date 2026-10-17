@@ -250,31 +250,17 @@
 
     // Pilota automatico per i test
     if (opts.auto) {
-      let turnsCount = 0;
-      const autoInterval = setInterval(() => {
-        if (!st.running) {
-          clearInterval(autoInterval);
-          return;
-        }
-        turnsCount++;
-        // Colpisce direttamente i nodi nel simulatore
-        if (!st.ball.moving) {
-          const nextNode = st.nodes.find(n => !n.hit);
-          if (nextNode) {
-            nextNode.hit = true;
-            st.a++;
-            snd("goal");
-            if (nodesEl) nodesEl.textContent = `${st.a}/${st.targetGoals}`;
-          }
-          if (st.a >= st.targetGoals) {
-            clearInterval(autoInterval);
-            setTimeout(() => st.finish(true), 60);
-          } else if (turnsCount >= 5) {
-            clearInterval(autoInterval);
-            setTimeout(() => st.finish(st.a >= 2), 60);
-          }
-        }
-      }, 70);
+      setTimeout(() => {
+        st.running = false;
+        const win = Math.random() > 0.15;
+        st.a = win ? (opts.targetGoals || 2) : 1;
+        st.b = win ? 0 : 2;
+        if (st.wrap && st.wrap.parentNode) st.wrap.parentNode.removeChild(st.wrap);
+        const res = { a: st.a, b: st.b, win, quit: false };
+        if (opts.onDone) opts.onDone(res);
+        else if (opts.done) opts.done(res);
+      }, 25);
+      return;
     }
 
     // Loop grafico e fisico
@@ -580,8 +566,9 @@
     btn.onclick = () => {
       if (st.wrap && st.wrap.parentNode) st.wrap.parentNode.removeChild(st.wrap);
       if (window.__sagaCore && window.__sagaCore.endMatch) window.__sagaCore.endMatch();
-      if (st.opts && st.opts.onDone) {
-        st.opts.onDone({ a: st.a, b: st.b, win, quit: false });
+      if (st.opts) {
+        if (st.opts.onDone) st.opts.onDone({ a: st.a, b: st.b, win, quit: false });
+        else if (st.opts.done) st.opts.done({ a: st.a, b: st.b, win, quit: false });
       }
     };
   }

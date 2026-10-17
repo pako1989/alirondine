@@ -104,7 +104,7 @@
     const talk = {
       fo_lupin(K) {
         const s = S();
-        if (K.curZone === "fo_quadri" && s === 2) {
+        if (K.inZone("fo_quadri") && s === 2) {
           say("fo_lupin", "[furbo] Ecco il quadro comandi della turbina! Ci sono tre nodi di blocco protetti da laser.");
           say("fo_turing", "Usa la sfera-sonda con i prismi riflettenti: tre centri precisi e il varco per i sotterranei si aprirà!");
           ask("Attivi il simulatore di breccia?", [
@@ -200,7 +200,7 @@
     // Nella Sala Quadri, terminale T attiva la sfida del motore Laser
     const obj = {
       T(K) {
-        if (K.curZone === "fo_quadri" && S() === 2) {
+        if (K.inZone("fo_quadri") && S() === 2) {
           say("fo_lupin", "[furbo] Ecco il quadro comandi della turbina! Ci sono tre nodi di blocco protetti da laser.");
           say("fo_turing", "Usa la sfera-sonda con i prismi riflettenti: tre centri precisi e il varco per i sotterranei si aprirà!");
           ask("Attivi il simulatore di breccia?", [
