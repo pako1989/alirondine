@@ -66,7 +66,7 @@
         ],
         build(L) {
           const { lay, house } = L;
-          frame(L, 32, 22);
+          frame(L, 32, 22); window.__ceProps(L, "ce_villaggio");
           lay(2, 11, 30, 11, ":"); lay(10, 6, 10, 16, ":"); lay(22, 8, 22, 15, ":");
           lay(4, 4, 7, 6, "U"); lay(14, 4, 17, 5, "M"); lay(20, 4, 23, 5, "U");
           lay(4, 16, 7, 18, "M"); lay(18, 16, 20, 18, "K"); lay(25, 16, 28, 18, "U");
@@ -92,7 +92,7 @@
         ],
         build(L) {
           const { lay, house } = L;
-          frame(L, 32, 22);
+          frame(L, 32, 22); window.__ceProps(L, "ce_bunker");
           lay(2, 11, 30, 11, ":"); lay(15, 4, 15, 18, ":");
           lay(5, 4, 8, 5, "M"); lay(21, 4, 25, 5, "E"); lay(5, 17, 9, 18, "M"); lay(21, 17, 25, 18, "M");
           lay(28, 8, 28, 8, "N"); lay(3, 9, 3, 9, "B");
@@ -100,6 +100,7 @@
         }
       }
     };
+    Object.keys(zones).forEach((z) => { zones[z].decor = window.__ceDec(z); });
 
     const talk = {
       ce_brace(K) {

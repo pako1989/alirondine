@@ -46,7 +46,7 @@
           H.frame(L, 28, 16);
           lay(2, 8, 26, 8, ":");
           lay(8, 3, 10, 3, "P"); lay(18, 12, 20, 12, "P"); lay(12, 5, 13, 6, "U"); lay(22, 2, 25, 2, "X"); lay(3, 13, 4, 13, "P");
-          house(27, 7, 1, 3, { door: [27, 8], enter: { to: "qt_archivio", at: [2, 8] } });
+          H.props(L, "qt_giardino"); house(27, 7, 1, 3, { door: [27, 8], enter: { to: "qt_archivio", at: [2, 8] } });
         }
       },
 
@@ -70,10 +70,12 @@
           H.frame(L, 28, 16);
           lay(2, 8, 26, 8, ":");
           lay(3, 2, 24, 2, "B"); lay(3, 6, 10, 6, "B"); lay(17, 6, 24, 6, "B"); lay(12, 11, 15, 11, "K"); lay(4, 11, 5, 12, "U"); lay(22, 12, 22, 12, "P");
-          house(0, 7, 1, 3, { door: [0, 8], enter: { to: "qt_giardino", at: [25, 8] } });
+          H.props(L, "qt_archivio"); house(0, 7, 1, 3, { door: [0, 8], enter: { to: "qt_giardino", at: [25, 8] } });
         }
       }
     };
+
+    Object.keys(zones).forEach((z) => { zones[z].decor = window.__qtDec(z); });
 
     // ------------------------------------------------------------------ notte del giorno 2
     k.night = () => {

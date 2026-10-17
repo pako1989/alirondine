@@ -65,7 +65,7 @@
         ],
         build(L) {
           const { lay, house } = L;
-          frame(L, 32, 22);
+          frame(L, 32, 22); window.__ceProps(L, "ce_cratere");
           lay(2, 11, 30, 11, ":"); lay(16, 6, 16, 16, ":");
           lay(12, 4, 15, 5, "M"); lay(22, 4, 25, 5, "K"); lay(4, 16, 7, 18, "U"); lay(24, 16, 27, 18, "M");
           lay(18, 9, 18, 9, "B");
@@ -89,7 +89,7 @@
         ],
         build(L) {
           const { lay, house } = L;
-          frame(L, 32, 22);
+          frame(L, 32, 22); window.__ceProps(L, "ce_torre");
           lay(2, 11, 30, 11, ":"); lay(15, 5, 15, 17, ":");
           lay(6, 4, 9, 5, "M"); lay(22, 4, 26, 5, "U"); lay(6, 16, 9, 18, "M"); lay(22, 16, 26, 18, "M");
           lay(28, 8, 28, 8, "N"); lay(12, 9, 12, 9, "B");
@@ -97,6 +97,7 @@
         }
       }
     };
+    Object.keys(zones).forEach((z) => { zones[z].decor = window.__ceDec(z); });
 
     const endChoices = () => {
       const opts = [

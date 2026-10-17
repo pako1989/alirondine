@@ -8,6 +8,49 @@
 
   const OUTDOOR = { ce_strada: 1, ce_cratere: 1 };
 
+  const HD = window.__hd, FX = HD.F, hs = HD.hs;
+  const neigh = (K, tx, ty, ch) => { const m = K.ZX.map || []; return ((m[ty] || [])[tx]) === ch; };
+  // pavimenti per ambiente (js/hd.js)
+  const FLOORS = {
+    villaggio: { ".": (g, sx, sy, tx, ty, fr, K) => FX.sand(g, sx, sy, tx, ty, fr, K, ["#b98c55", "#ad8049"]), ":": (g, sx, sy, tx, ty, fr, K) => ruts(g, sx, sy, tx, ty, ["#8a6a3e", "#7d5f36"]), "+": (g, sx, sy, tx, ty, fr, K) => FX.concrete(g, sx, sy, tx, ty, fr, K, ["#6b6258", "#5c544b"]) },
+    bunker: { ".": (g, sx, sy, tx, ty, fr, K) => FX.concrete(g, sx, sy, tx, ty, fr, K, ["#4a4d52", "#42454a"]), ":": (g, sx, sy, tx, ty, fr, K) => FX.grate(g, sx, sy, tx, ty, fr, K, ["#25282c", "#6b6f75"]), "+": (g, sx, sy, tx, ty, fr, K) => FX.concrete(g, sx, sy, tx, ty, fr, K, ["#33363b", "#2a2d31"]) },
+    strada: { ".": (g, sx, sy, tx, ty, fr, K) => FX.sand(g, sx, sy, tx, ty, fr, K, ["#c9a265", "#bd9659"]), ":": (g, sx, sy, tx, ty, fr, K) => road(g, sx, sy, tx, ty, K), "+": (g, sx, sy, tx, ty, fr, K) => FX.stone(g, sx, sy, tx, ty, fr, K, ["#7a6a55", "#6c5d4a"]) },
+    cratere: { ".": (g, sx, sy, tx, ty, fr, K) => FX.ash(g, sx, sy, tx, ty, fr, K, ["#5a4034", "#4e362c"]), ":": (g, sx, sy, tx, ty, fr, K) => FX.cobble(g, sx, sy, tx, ty, fr, K, ["#6a4a38", "#4e3122"]), "+": (g, sx, sy, tx, ty, fr, K) => FX.stone(g, sx, sy, tx, ty, fr, K, ["#5f5148", "#51443c"]) }
+  };
+  function ruts(g, sx, sy, tx, ty, p) { // terra battuta con solchi di ruote
+    HD.R(g, sx, sy, 16, 16, p[(tx + ty) % 2]); HD.R(g, sx, sy + 3, 16, 2, "rgba(0,0,0,.2)"); HD.R(g, sx, sy + 11, 16, 2, "rgba(0,0,0,.2)"); HD.R(g, sx, sy + 5, 16, 1, "rgba(255,230,180,.1)");
+    for (let i = 0; i < 4; i++) HD.R(g, sx + hs(tx, ty, i) * 14, sy + hs(tx, ty, i + 4) * 14, 2, 1, "rgba(255,255,255,.12)");
+  }
+  function road(g, sx, sy, tx, ty, K) { // asfalto crepato con riga mezza cancellata
+    HD.R(g, sx, sy, 16, 16, (tx + ty) % 2 ? "#4a4540" : "#524c46"); for (let i = 0; i < 4; i++) HD.R(g, sx + hs(tx, ty, i) * 14, sy + hs(tx, ty, i + 4) * 14, 3, 1, "rgba(0,0,0,.22)");
+    if (hs(tx, ty, 9) < 0.18) { g.strokeStyle = "rgba(0,0,0,.45)"; g.lineWidth = 0.8; g.beginPath(); g.moveTo(sx + 2, sy + 3); g.lineTo(sx + 8, sy + 9); g.lineTo(sx + 11, sy + 15); g.stroke(); }
+    if (tx % 3 !== 0) HD.R(g, sx + 2, sy + 7, 8, 2, "rgba(230,200,120,.55)"); HD.R(g, sx, sy + 15, 16, 1, "rgba(255,230,180,.1)");
+    if (K.ZX.under && (K.ZX.under[ty - 1] || [])[tx] !== ":") { HD.R(g, sx, sy, 16, 2, "rgba(214,170,100,.5)"); }
+  }
+  const PLK = (g, t, x, y, c) => HD.D.plaque(g, t, x, y, c);
+  const glowL = (g, x, y, r, rgb, a) => { const gr = g.createRadialGradient(x, y, 1, x, y, r); gr.addColorStop(0, `rgba(${rgb},${a})`); gr.addColorStop(1, `rgba(${rgb},0)`); g.save(); g.globalCompositeOperation = "lighter"; g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2); g.restore(); };
+  // decorazioni sopra la mappa: plachette, bagliori, aloni di calore, luci dei barili
+  window.__ceDec = (z) => {
+    const D = {
+      ce_villaggio(g, cx, cy, d) { PLK(g, "VILLAGGIO DI ROTTAME", d.X(16), d.Y(2) + 4, "#d97706"); PLK(g, "POZZO", d.X(26) + 8, d.Y(10) - 4, "#38bdf8"); PLK(g, "BUNKER →", d.X(30), d.Y(10) - 4, "#9ca3af"); glowL(g, d.X(9) + 8, d.Y(9) + 4, 52, "255,150,50", 0.35); glowL(g, d.X(11) + 8, d.Y(9) + 4, 52, "255,150,50", 0.35); },
+      ce_bunker(g, cx, cy, d) { PLK(g, "BUNKER DELLE DUNE", d.X(16), d.Y(2) + 4, "#facc15"); PLK(g, "← VILLAGGIO", d.X(2), d.Y(10) - 4); const on = Math.floor(d.fr / 30) % 2; glowL(g, d.X(28) + 8, d.Y(8) + 2, 36, "239,68,68", on ? 0.4 : 0.15); },
+      ce_strada(g, cx, cy, d) { PLK(g, "LA STRADA DI POLVERE", d.X(16), d.Y(2) + 4, "#fbbf24"); PLK(g, "OASI →", d.X(30), d.Y(10) - 4, "#38bdf8"); glowL(g, d.X(18) + 8, d.Y(9) + 4, 50, "255,150,50", 0.35); },
+      ce_oasi(g, cx, cy, d) { PLK(g, "L'OASI DEL POZZO", d.X(16), d.Y(2) + 4, "#38bdf8"); PLK(g, "← STRADA", d.X(2), d.Y(10) - 4); glowL(g, d.X(20) + 8, d.Y(6), 70, "160,220,255", 0.16); },
+      ce_cratere(g, cx, cy, d) { PLK(g, "CRATERE DEI FUOCHI", d.X(16), d.Y(2) + 4, "#f97316"); PLK(g, "TORRE →", d.X(30), d.Y(10) - 4, "#fca5a5"); glowL(g, d.X(18) + 8, d.Y(9) + 4, 56, "255,110,30", 0.4); for (let i = 0; i < 26; i++) { const x = (i * 71 + d.fr * (0.3 + (i % 3) * 0.2)) % 340, y = 200 - ((d.fr * (0.5 + (i % 4) * 0.3) + i * 40) % 220); g.fillStyle = `rgba(255,${120 + (i % 4) * 30},40,${0.5 + 0.4 * Math.sin(d.fr / 10 + i)})`; g.fillRect(x, y, 1.6, 1.6); } },
+      ce_torre(g, cx, cy, d) { PLK(g, "TORRE DEL PREDICATORE", d.X(16), d.Y(2) + 4, "#fca5a5"); PLK(g, "← CRATERE", d.X(2), d.Y(10) - 4); glowL(g, d.X(12) + 8, d.Y(9) + 4, 50, "255,150,50", 0.35); }
+    };
+    return D[z];
+  };
+  window.__ceProps = (L, z) => {
+    const { lay, put } = L, row = (xs, y, ch) => xs.forEach((x) => put(x, y, ch));
+    const base = { ce_villaggio: [[1, 1, 30, 1, 11, 20], [13, 18, 2, 2]], ce_bunker: [], ce_strada: [[1, 1, 30, 1, 10, 20]], ce_oasi: [[1, 1, 30, 1, 11, 20]], ce_cratere: [[1, 1, 30, 1, 10, 20]], ce_torre: [[1, 1, 30, 1, 11, 20]] }[z];
+    if (z === "ce_bunker") { row([12, 18], 2, "G"); row([12, 18], 19, "G"); row([2, 3, 29, 30], 2, "J"); row([2, 30], 19, "J"); [[10, 8], [21, 8], [10, 14], [21, 14]].forEach(([x, y]) => put(x, y, "J")); return; }
+    const t = base[0]; row([t[0], t[2]], t[1] + 0, "D"); row([t[0], t[2]], 20, "D"); put(t[4], t[5] - 1, "D");
+    row([2, 3], 19, "J"); row([29, 30], 19, "J"); row([13, 18], 2, "G");
+    row([3, 29], 8, "Y"); row([3, 29], 14, "Y");
+    [[5, 9], [28, 9], [4, 13], [28, 14], [19, 19], [8, 19]].forEach(([x, y]) => put(x, y, "D")); [[12, 9], [19, 13], [26, 8], [7, 14]].forEach(([x, y]) => put(x, y, "J"));
+  };
+
   const E = window.__sagaCore.create({
     id: "cenere",
     key: "ali-di-rondine.cenere",
@@ -72,30 +115,71 @@
         ]
       }
     },
-    solid: "aMKUPBNWE",
+    solid: "aMKUPBNWEDJGY",
+    floors: ".",
+    floorPaint(K, f, sx, sy, tx, ty) {
+      const T = FLOORS[K.ZX.rk] || FLOORS.villaggio, fn = T[f] || T["."]; fn(K.g, sx, sy, tx, ty, Math.floor(performance.now() / 16), K); return true;
+    },
     paint: {
-      a(K, sx, sy) {
-        const g = K.g;
-        g.fillStyle = "#4a3a2a"; g.fillRect(sx, sy, 16, 16);
-        g.fillStyle = "#6b5640"; g.fillRect(sx + 1, sy + 1, 14, 6); g.fillRect(sx + 1, sy + 9, 14, 6);
-        g.fillStyle = "#2a1f15"; g.fillRect(sx + 2, sy + 3, 2, 2); g.fillRect(sx + 11, sy + 11, 2, 2);
+      a(K, sx, sy, tx, ty, fr) { // recinto: lamiera ondulata, cemento del bunker o pietra della torre
+        const g = K.g, id = K.ZX.id, below = (K.ZX.map[ty + 1] || [])[tx], face = below !== "a" && below !== undefined;
+        if (id === "ce_bunker") {
+          HD.R(g, sx, sy, 16, 16, "#2b2e33"); HD.R(g, sx, sy, 16, 1, "#4a4d52");
+          if (face) { HD.R(g, sx + 1, sy + 2, 14, 12, "#3a3d42"); HD.R(g, sx + 1, sy + 12, 14, 2, "#facc15"); for (let i = 0; i < 4; i++) HD.R(g, sx + 1 + i * 4, sy + 12, 2, 2, "#111"); HD.R(g, sx + 2, sy + 4, 12, 2, "#6b6f75"); HD.R(g, sx + 2, sy + 7, 12, 1, "#1c1e22"); }
+          return;
+        }
+        if (id === "ce_torre") {
+          HD.R(g, sx, sy, 16, 16, "#4a3a34"); for (let r = 0; r < 4; r++) { HD.R(g, sx, sy + r * 4, 16, 1, "rgba(0,0,0,.35)"); const o = (r % 2) * 4 + ((tx * 3) % 4); HD.R(g, sx + o, sy + r * 4, 1, 4, "rgba(0,0,0,.3)"); HD.R(g, sx + (o + 8) % 16, sy + r * 4, 1, 4, "rgba(0,0,0,.3)"); }
+          HD.R(g, sx, sy, 16, 1, "rgba(255,255,255,.12)"); if (face) HD.R(g, sx, sy + 13, 16, 3, "rgba(0,0,0,.3)"); return;
+        }
+        const cols = ["#8a4a2a", "#5a6670", "#6f5a3a", "#7a3a2a"]; HD.R(g, sx, sy, 16, 16, cols[(tx * 5 + ty) % 4]);
+        for (let i = 0; i < 16; i += 4) { HD.R(g, sx + i, sy, 2, 16, "rgba(255,255,255,.1)"); HD.R(g, sx + i + 2, sy, 2, 16, "rgba(0,0,0,.16)"); }
+        HD.R(g, sx + hs(tx, ty, 1) * 12, sy + 4 + hs(tx, ty, 2) * 6, 4, 3, "rgba(120,50,20,.55)"); HD.R(g, sx, sy + 13, 16, 3, "rgba(0,0,0,.28)");
+        HD.R(g, sx + 2, sy + 2, 2, 2, "#2a2a2a"); HD.R(g, sx + 12, sy + 2, 2, 2, "#2a2a2a");
+        if (face) { g.strokeStyle = "#1c1c1c"; g.lineWidth = 0.7; g.beginPath(); g.moveTo(sx, sy + 1); for (let i = 0; i < 4; i++) { g.lineTo(sx + i * 4 + 2, sy - 1); g.lineTo(sx + i * 4 + 4, sy + 1); } g.stroke(); }
       },
-      M(K, sx, sy) { // mucchio di rottami
-        const g = K.g;
-        g.fillStyle = "#5c4a38"; g.fillRect(sx + 1, sy + 5, 14, 10);
-        g.fillStyle = "#8a6a4a"; g.fillRect(sx + 2, sy + 3, 6, 5); g.fillStyle = "#9aa0a6"; g.fillRect(sx + 8, sy + 2, 6, 4);
-        g.fillStyle = "#b45309"; g.fillRect(sx + 3, sy + 8, 4, 3);
+      M(K, sx, sy, tx, ty) { // mucchio di rottami
+        K.ground(sx, sy, tx, ty); const g = K.g, up = !neigh(K, tx, ty - 1, "M");
+        HD.R(g, sx, sy + 13, 16, 3, "rgba(0,0,0,.3)"); HD.R(g, sx, sy + (up ? 5 : 0), 16, up ? 10 : 15, "#5c4a38");
+        for (let i = 0; i < 6; i++) { const x = sx + hs(tx, ty, i) * 12, y = sy + (up ? 3 : 0) + hs(tx, ty, i + 6) * 9; HD.R(g, x, y, 5, 3, ["#9aa0a6", "#b45309", "#6b7280", "#8a6a4a", "#3a3a3a"][(i + tx) % 5]); HD.R(g, x, y, 5, 1, "rgba(255,255,255,.25)"); }
+        if (up && hs(tx, ty, 14) < 0.5) { HD.C(g, sx + 8, sy + 4, 3, "#1c1917"); HD.C(g, sx + 8, sy + 4, 1.2, "#6b7280"); }
       },
-      K(K, sx, sy) { // carcassa d'auto
-        const g = K.g;
-        g.fillStyle = "#7c3a1f"; g.fillRect(sx + 1, sy + 6, 14, 7);
-        g.fillStyle = "#5a2a15"; g.fillRect(sx + 4, sy + 3, 8, 4);
-        g.fillStyle = "#1c1917"; g.beginPath(); g.arc(sx + 4, sy + 13, 2.2, 0, 7); g.arc(sx + 12, sy + 13, 2.2, 0, 7); g.fill();
+      K(K, sx, sy, tx, ty) { // carcassa d'auto
+        K.ground(sx, sy, tx, ty); const g = K.g; HD.R(g, sx, sy + 13, 16, 3, "rgba(0,0,0,.3)");
+        const L = !neigh(K, tx - 1, ty, "K"), Rr = !neigh(K, tx + 1, ty, "K"), up = !neigh(K, tx, ty - 1, "K");
+        HD.R(g, sx, sy + (up ? 5 : 0), 16, up ? 8 : 13, "#7c3a1f"); HD.R(g, sx, sy + (up ? 5 : 0), 16, 1, "#b4532a");
+        if (up) { HD.R(g, sx + 3, sy + 1, 11, 5, "#5a2a15"); HD.R(g, sx + 4, sy + 2, 9, 3, "#2a3a44"); HD.R(g, sx + 8, sy + 2, 1, 3, "#5a2a15"); }
+        HD.R(g, sx + 2, sy + 8, 4, 2, "rgba(0,0,0,.25)"); HD.R(g, sx + 9, sy + 9, 5, 2, "rgba(120,60,20,.7)");
+        if (!up) { HD.C(g, sx + 4, sy + 13, 2.6, "#1c1917"); HD.C(g, sx + 12, sy + 13, 2.6, "#1c1917"); HD.C(g, sx + 4, sy + 13, 1, "#6b7280"); HD.C(g, sx + 12, sy + 13, 1, "#6b7280"); }
+        if (L) HD.R(g, sx, sy, 1, 16, "rgba(0,0,0,.25)"); if (Rr) HD.R(g, sx + 15, sy, 1, 16, "rgba(0,0,0,.25)");
       },
-      U(K, sx, sy) { // tenda di lamiera
-        const g = K.g;
-        g.fillStyle = "#8b7355"; g.beginPath(); g.moveTo(sx + 8, sy + 1); g.lineTo(sx + 15, sy + 15); g.lineTo(sx + 1, sy + 15); g.closePath(); g.fill();
-        g.fillStyle = "#3a2c1e"; g.fillRect(sx + 6, sy + 9, 4, 6);
+      U(K, sx, sy, tx, ty) { // tenda di tela e lamiera
+        K.ground(sx, sy, tx, ty); const g = K.g, up = !neigh(K, tx, ty - 1, "U"), dn = !neigh(K, tx, ty + 1, "U"), l = !neigh(K, tx - 1, ty, "U"), r = !neigh(K, tx + 1, ty, "U");
+        const col = [["#b45309", "#f1e2b8"], ["#7a3a2a", "#d9c9a0"], ["#3a5a6a", "#cbd5d0"]][Math.floor(tx / 4) % 3];
+        if (up) { for (let i = 0; i < 16; i += 4) { HD.R(g, sx + i, sy + 2, 2, 10, col[0]); HD.R(g, sx + i + 2, sy + 2, 2, 10, col[1]); } HD.R(g, sx, sy + 12, 16, 2, "rgba(0,0,0,.3)"); HD.R(g, sx, sy + 2, 16, 1, "rgba(255,255,255,.3)"); HD.R(g, sx, sy + 14, 16, 2, "#3a2c1e"); }
+        else { HD.R(g, sx, sy, 16, 16, "#8b7355"); for (let i = 0; i < 16; i += 5) HD.R(g, sx + i, sy, 1, 16, "rgba(0,0,0,.14)"); HD.R(g, sx + 3, sy + 4, 5, 4, "#a8895a"); HD.R(g, sx + 9, sy + 9, 5, 4, "#7a6240"); }
+        if (dn) { HD.R(g, sx, sy + 13, 16, 3, "rgba(0,0,0,.3)"); if (tx % 4 === 1 || tx % 4 === 2) { HD.R(g, sx + 4, sy + 6, 8, 10, "#2a1f15"); HD.R(g, sx + 4, sy + 6, 8, 1, "#e0b060"); } }
+        if (l) HD.R(g, sx, sy, 1, 16, "rgba(0,0,0,.3)"); if (r) HD.R(g, sx + 15, sy, 1, 16, "rgba(0,0,0,.3)");
+      },
+      D(K, sx, sy, tx, ty) { // albero secco
+        K.ground(sx, sy, tx, ty); const g = K.g; HD.R(g, sx + 3, sy + 13, 10, 3, "rgba(0,0,0,.25)");
+        g.strokeStyle = "#3a2a1c"; g.lineWidth = 3; g.beginPath(); g.moveTo(sx + 8, sy + 15); g.quadraticCurveTo(sx + 6, sy + 8, sx + 8, sy + 2); g.stroke();
+        K.later((gg, cx, cy) => { const x = tx * 16 - cx + 8, y = ty * 16 - cy; gg.strokeStyle = "#3a2a1c"; gg.lineWidth = 1.6; [[-9, -10], [8, -12], [-5, -17], [4, -19]].forEach(([dx, dy]) => { gg.beginPath(); gg.moveTo(x, y + 4); gg.quadraticCurveTo(x + dx * 0.4, y + dy * 0.5, x + dx, y + dy); gg.stroke(); gg.beginPath(); gg.moveTo(x + dx * 0.6, y + dy * 0.6); gg.lineTo(x + dx * 0.6 + (dx > 0 ? 4 : -4), y + dy * 0.6 - 4); gg.stroke(); }); });
+      },
+      J(K, sx, sy, tx, ty) { // casse e taniche
+        K.ground(sx, sy, tx, ty); const g = K.g; HD.R(g, sx + 1, sy + 13, 14, 2, "rgba(0,0,0,.3)");
+        HD.R(g, sx + 1, sy + 6, 9, 8, "#7a5a32"); HD.R(g, sx + 1, sy + 6, 9, 1, "#a8844a"); HD.R(g, sx + 1, sy + 9, 9, 1, "#4a3420"); HD.R(g, sx + 5, sy + 6, 1, 8, "#4a3420");
+        HD.R(g, sx + 10, sy + 5, 5, 9, "#b91c1c"); HD.R(g, sx + 11, sy + 3, 2, 2, "#7f1d1d"); HD.R(g, sx + 10, sy + 8, 5, 1, "#7f1d1d"); HD.R(g, sx + 11, sy + 5, 1, 8, "rgba(255,255,255,.22)");
+      },
+      G(K, sx, sy, tx, ty, fr) { // generatore
+        K.ground(sx, sy, tx, ty); const g = K.g; HD.R(g, sx + 1, sy + 13, 14, 2, "rgba(0,0,0,.3)");
+        HD.R(g, sx + 1, sy + 4, 14, 10, "#4b5563"); HD.R(g, sx + 1, sy + 4, 14, 2, "#6b7280"); HD.R(g, sx + 3, sy + 8, 6, 4, "#1f2937"); for (let i = 0; i < 3; i++) HD.R(g, sx + 3, sy + 8 + i * 1.5, 6, 0.6, "#4b5563");
+        HD.R(g, sx + 11, sy + 1, 2, 4, "#374151"); const on = Math.floor(fr / 30 + tx) % 2; HD.C(g, sx + 12, sy + 9, 1.4, on ? "#22c55e" : "#14532d"); if (on) K.light(sx + 12, sy + 9, 16, "34,197,94", 0.35);
+        HD.R(g, sx + 11.5, sy - 2 - (fr / 5 % 3), 1.5, 1.5, "rgba(200,200,200,.35)");
+      },
+      Y(K, sx, sy, tx, ty, fr) { // palo con stendardo strappato
+        K.ground(sx, sy, tx, ty); const g = K.g; HD.R(g, sx + 4, sy + 14, 8, 2, "rgba(0,0,0,.25)"); HD.R(g, sx + 7, sy + 1, 2, 14, "#5a4630");
+        const w = Math.sin(fr / 12 + tx) * 1.5; g.fillStyle = "#b91c1c"; g.beginPath(); g.moveTo(sx + 9, sy + 2); g.lineTo(sx + 16 + w, sy + 4); g.lineTo(sx + 14 + w, sy + 6); g.lineTo(sx + 16 + w, sy + 9); g.lineTo(sx + 9, sy + 8); g.fill(); HD.R(g, sx + 10, sy + 5, 3, 1, "#fde68a");
       },
       P(K, sx, sy, tx, ty, fr) { // pozzo
         const g = K.g;
@@ -129,7 +213,7 @@
         g.fillStyle = "#111827"; g.fillRect(sx + 6, sy + 5, 4, 4);
       }
     },
-    act: { q: "Entra", P: "Guarda il pozzo", B: "Scalda le mani", N: "Ascolta la radio", E: "Esamina il portello", W: "Guarda la pozza" },
+    act: { D: "Guarda l'albero secco", J: "Guarda le casse", G: "Guarda il generatore", Y: "Guarda lo stendardo", q: "Entra", P: "Guarda il pozzo", B: "Scalda le mani", N: "Ascolta la radio", E: "Esamina il portello", W: "Guarda la pozza" },
     travel: true,
     item: ["Rottame Prezioso", "Rottami Preziosi"],
     drawItem(g, x, y, i, f) {

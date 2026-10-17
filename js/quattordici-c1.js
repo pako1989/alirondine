@@ -53,7 +53,7 @@
           lay(6, 4, 6, 4, "M"); lay(6, 12, 6, 12, "M"); lay(21, 4, 21, 4, "M"); lay(21, 12, 21, 12, "M");
           lay(11, 4, 15, 4, "K"); lay(3, 3, 4, 4, "U"); lay(23, 3, 24, 4, "U"); lay(22, 1, 24, 1, "B");
           lay(3, 13, 3, 13, "P"); lay(24, 13, 24, 13, "P");
-          house(27, 7, 1, 3, { door: [27, 8], enter: { to: "qt_stadio", at: [2, 8] } });
+          H.props(L, "qt_atrio"); house(27, 7, 1, 3, { door: [27, 8], enter: { to: "qt_stadio", at: [2, 8] } });
         }
       },
 
@@ -76,10 +76,12 @@
           H.frame(L, 28, 16);
           lay(2, 8, 26, 8, ":");
           lay(7, 1, 20, 1, "N"); lay(4, 13, 6, 13, "U"); lay(21, 13, 23, 13, "U"); lay(12, 14, 15, 14, "E");
-          house(0, 7, 1, 3, { door: [0, 8], enter: { to: "qt_atrio", at: [25, 8] } });
+          H.props(L, "qt_stadio"); house(0, 7, 1, 3, { door: [0, 8], enter: { to: "qt_atrio", at: [25, 8] } });
         }
       }
     };
+
+    Object.keys(zones).forEach((z) => { zones[z].decor = window.__qtDec(z); });
 
     // ------------------------------------------------------------------ notte del giorno 1
     k.night = () => {

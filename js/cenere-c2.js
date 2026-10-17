@@ -64,7 +64,7 @@
         ],
         build(L) {
           const { lay, house } = L;
-          frame(L, 32, 22);
+          frame(L, 32, 22); window.__ceProps(L, "ce_strada");
           lay(2, 11, 30, 11, ":"); lay(16, 8, 16, 14, ":");
           lay(12, 4, 14, 5, "M"); lay(22, 4, 25, 5, "K"); lay(4, 16, 7, 18, "U"); lay(24, 16, 27, 18, "M");
           lay(18, 9, 18, 9, "B");
@@ -88,13 +88,14 @@
         ],
         build(L) {
           const { lay, house } = L;
-          frame(L, 32, 22);
+          frame(L, 32, 22); window.__ceProps(L, "ce_oasi");
           lay(2, 11, 30, 11, ":"); lay(14, 5, 14, 17, ":");
           lay(18, 4, 22, 7, "W"); lay(18, 15, 21, 17, "W"); lay(27, 8, 27, 8, "P"); lay(5, 4, 8, 5, "M"); lay(5, 16, 9, 18, "U"); lay(25, 16, 28, 18, "M");
           house(0, 10, 1, 3, { door: [0, 11], enter: { to: "ce_strada", at: [29, 11] } });
         }
       }
     };
+    Object.keys(zones).forEach((z) => { zones[z].decor = window.__ceDec(z); });
 
     const talk = {
       ce_tamburo(K) {

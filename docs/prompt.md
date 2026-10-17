@@ -4,7 +4,7 @@ Un solo file: contiene regole, stato del progetto, come costruire una saga, API 
 
 **Come usarlo:** leggi per prima la sezione «LEGGI PRIMA». Se Pasquale chiede di riprendere i lavori, leggi §A e §B e controlla `git log` e `ls js/`. Se chiede una saga nuova, leggi tutto e parti dal §1.
 
-## ⛔ LEGGI PRIMA · 10 regole bloccanti (il resto del file è riferimento)
+## ⛔ LEGGI PRIMA · 11 regole bloccanti (il resto del file è riferimento)
 1. Rispondi in italiano, telegrafico, **senza spoiler** della trama; dopo ogni pubblicazione una nota breve (cosa hai finito, cosa aggiunge).
 2. `git pull --rebase origin main` prima di ogni push; patch mirate sui file condivisi; mai `git add -A`; dopo il pull bump di `?v=` e cache `sw.js` (`node tools/bump.cjs <file>`).
 3. Usa solo funzioni che esistono nel kit `K` (§7). **`K.teleport` non esiste**: l'`intro` del capitolo restituisce righe `[["voce","testo"]]` e il capitolo ha `start: "id_zona"`.
@@ -15,6 +15,7 @@ Un solo file: contiene regole, stato del progetto, come costruire una saga, API 
 8. Ogni PNG, oggetto e uscita raggiungibili a piedi; ogni dialogo finisce con `done()`, un altro dialogo o una partita.
 9. **Prima di consegnare lancia `npm run verifica`** e incolla l'esito (✓/✗). Poi i test della tua saga (§5).
 10. Nel report finale scrivi sempre: cosa hai fatto, quali test hai eseguito, **cosa non hai verificato**.
+11. **Grafica pari alle saghe curate** (Rondine 1938, Gran Premio): mappe grandi, `floorPaint` con texture, facciate `house()` con tetto e finestre accese, `decor` con plachette, luci `K.light`, sfondi 320x200 animati con 3+ punti. Prima di consegnare fai uno screenshot affiancato con una saga curata: se la tua è più povera, non consegnare. Le meccaniche non compensano una resa spoglia.
 
 ## ✔ Verifica con un solo comando
 `npm run verifica` = controllo sintassi + avvio del gioco a 390 e 320 px + percorso nuova partita di OGNI saga (Inizia → Continua → mappa). Dura pochi minuti. Per una sola saga: `node tests/percorso.cjs <parte-del-nome>`. I test lunghi di capitolo restano `npm test` / `node tests/run.cjs <nome>`.

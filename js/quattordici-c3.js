@@ -55,7 +55,7 @@
           H.frame(L, 28, 16);
           lay(2, 8, 26, 8, ":");
           lay(7, 1, 20, 1, "N"); lay(3, 3, 6, 3, "X"); lay(21, 3, 24, 3, "X"); lay(10, 12, 12, 12, "K"); lay(17, 12, 19, 12, "K");
-          house(27, 7, 1, 3, { door: [27, 8], enter: { to: "qt_sipario", at: [2, 8] } });
+          H.props(L, "qt_alanord"); house(27, 7, 1, 3, { door: [27, 8], enter: { to: "qt_sipario", at: [2, 8] } });
         }
       },
 
@@ -78,10 +78,12 @@
           H.frame(L, 28, 16);
           lay(2, 8, 26, 8, ":");
           lay(7, 1, 20, 1, "N"); lay(6, 4, 6, 4, "M"); lay(6, 12, 6, 12, "M"); lay(21, 12, 21, 12, "M"); lay(13, 3, 14, 3, "K"); lay(3, 13, 3, 13, "P"); lay(24, 13, 24, 13, "P");
-          house(0, 7, 1, 3, { door: [0, 8], enter: { to: "qt_alanord", at: [25, 8] } });
+          H.props(L, "qt_sipario"); house(0, 7, 1, 3, { door: [0, 8], enter: { to: "qt_alanord", at: [25, 8] } });
         }
       }
     };
+
+    Object.keys(zones).forEach((z) => { zones[z].decor = window.__qtDec(z); });
 
     // la notte del giorno 3: niente evento, solo la convocazione davanti alla Sfinge
     k.night = () => {
@@ -209,3 +211,4 @@
 
   boot();
 })();
+
