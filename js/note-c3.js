@@ -103,7 +103,7 @@
           ], () => {
             bond("intuito", 10);
             bond("giustizia", 10);
-            setStep(1);
+            setStep(N, 1);
             quest("qd3_tribuna", "La Resa dei Conti", "Sali nella Tribuna d'Onore per il confronto decisivo con Raito ed Elle.");
             done();
           });
@@ -124,7 +124,7 @@
             ["qd_elle", "Il calcio è imprevedibilità, errore umano e bellezza del limite. Chiunque tenti di controllarlo come un dittatore è solo un megalomane."],
             ["hero", "La risposta la darà la partita sul campo."]
           ], () => {
-            setStep(2);
+            setStep(N, 2);
             questDone("qd3_tribuna");
             quest("qd3_finale", "La Sfida del Giudizio", "Vinci la finalissima al Tactics Note contro l'Undici del Nuovo Mondo!");
             done();
@@ -141,7 +141,7 @@
                     opp: "Undici del Nuovo Mondo",
                     onDone: (res) => {
                       if (res.win) {
-                        setStep(3);
+                        setStep(N, 3);
                         questDone("qd3_finale");
                         bond("intuito", 30);
                         K.reward("qd_c3", 50);
@@ -157,7 +157,7 @@
                     }
                   });
                 } else {
-                  setStep(3);
+                  setStep(N, 3);
                   done();
                 }
               }

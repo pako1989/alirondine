@@ -98,7 +98,7 @@
           ], () => {
             bond("intuito", 10);
             bond("giustizia", -5);
-            setStep(1);
+            setStep(N, 1);
             quest("qd2_elle", "L'Ermita della Lavagna", "Entra nella Suite di Sorveglianza e confrontati con Elle Lawliet.");
             done();
           });
@@ -120,7 +120,7 @@
             ["hero", "È solo questione di allenamento e colpo d'occhio."],
             ["qd_elle", "[fissa dritto negli occhi] Mente brillante, ma risposta banale. Per verificare la mia ipotesi, ti farò affrontare la Squadra Speciale Investigativa. Se vinci senza trucchi, forse potremo collaborare."]
           ], () => {
-            setStep(2);
+            setStep(N, 2);
             questDone("qd2_elle");
             quest("qd2_match", "Il Test di Elle", "Affronta la Squadra Speciale Investigativa a Tactics Note!");
             K.deduci("zolletta", { intuito: 15, giustizia: 10 });
@@ -138,7 +138,7 @@
                     opp: "Squadra Speciale Investigativa",
                     onDone: (res) => {
                       if (res.win) {
-                        setStep(3);
+                        setStep(N, 3);
                         questDone("qd2_match");
                         bond("intuito", 25);
                         bond("giustizia", 15);
@@ -159,7 +159,7 @@
                     }
                   });
                 } else {
-                  setStep(3);
+                  setStep(N, 3);
                   done();
                 }
               }

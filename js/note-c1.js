@@ -110,7 +110,7 @@
           ], () => {
             bond("intuito", 15);
             bond("mele", 2);
-            setStep(1);
+            setStep(N, 1);
             quest("qd1_aula", "Il Club di Tattica", "Entra nel Liceo Daikoku e confrontati con Raito Yagami nell'Aula del Club.");
             done();
           });
@@ -136,7 +136,7 @@
             ["hero", "E credi che una lavagna basti per cambiare le cose?"],
             ["qd_raito", "[sorride con freddezza] Una lavagna ordinaria no. Ma la mia teoria della contromossa istantanea sì. Dimostrami che sai leggere la traiettoria prima del fischio: affronta i Rivali di Shibuya al Tactics Note!"]
           ], () => {
-            setStep(2);
+            setStep(N, 2);
             questDone("qd1_aula");
             quest("qd1_match", "Simulazione al Tactics Note", "Vinci la sfida tattica a Tactics Note contro i Rivali di Shibuya!");
             K.deduci("quaderno", { intuito: 10, giustizia: 5 });
@@ -154,7 +154,7 @@
                     opp: "I Rivali di Shibuya",
                     onDone: (res) => {
                       if (res.win) {
-                        setStep(3);
+                        setStep(N, 3);
                         questDone("qd1_match");
                         bond("intuito", 20);
                         bond("giustizia", 10);
@@ -174,7 +174,7 @@
                     }
                   });
                 } else {
-                  setStep(3);
+                  setStep(N, 3);
                   finishChapter(1, "Il Tactics Note ha superato il primo test. Ma a Tokyo una mente altrettanto geniale sta già indagando...");
                 }
               }
