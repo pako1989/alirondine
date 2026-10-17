@@ -44,7 +44,7 @@
       sg_biblioteca: {
         region: "biblioteca", name: "Biblioteca Sospesa · Archivi Proibiti", short: "Biblioteca",
         sub: "Scansie vertiginose in mogano, tomi rilegati in pelle e polvere d'astri", bg: "sg_biblioteca", time: "notte",
-        w: 24, h: 18, start: [4, 9], items: [[6, 5], [16, 13]],
+        w: 24, h: 18, start: [4, 9], items: [[6, 5], [16, 12]],
         areas: [[0, 0, 23, 17, "Migliaia di trattati di tattica ed esoterismo sportivo fluttuano tra le volte"]],
         flavor: {
           L: "Un antico trattato: 'Sulla rotazione impressa dal piede del taumaturgo'.",
@@ -71,7 +71,7 @@
           L.put(11, 4, "A");
 
           // Passaggio verso la Cripta a est
-          L.house(20, 8, 3, 3, { door: [20, 9], enter: { to: "sg_cripta", at: [4, 8] } });
+          L.house(20, 8, 3, 3, { door: [20, 9], enter: { to: "sg_cripta", at: [5, 8] } });
         },
         npcs(s) {
           return [
@@ -85,10 +85,10 @@
       sg_cripta: {
         region: "accademia", name: "La Cripta dei Quattro Sigilli", short: "Cripta", interior: true, outside: ["sg_biblioteca", 19, 9],
         sub: "Santuario millenario in granito con i piedistalli degli elementi", bg: "sg_biblioteca", time: "notte",
-        w: 22, h: 16, start: [4, 8], items: [[12, 4]],
+        w: 22, h: 16, start: [5, 8], items: [[12, 4]],
         areas: [[0, 0, 21, 15, "Le antiche lastre dove riposano le matrici dei quattro sigilli balistici"]],
         flavor: {
-          R: "Il pavimento vibra: la Runa del Tuono emana archi voltaici bluastri.",
+          u: "Il pavimento vibra: la Runa del Tuono emana archi voltaici bluastri.",
           S: "Il piedistallo di granito del Golem protettore."
         },
         build(L) {
@@ -99,17 +99,17 @@
           L.lay(20, 0, 21, 15, "#");
 
           // Rune elementali sul pavimento
-          L.put(7, 5, "R");
-          L.put(14, 5, "R");
-          L.put(7, 11, "R");
-          L.put(14, 11, "R");
+          L.put(7, 5, "u");
+          L.put(14, 5, "u");
+          L.put(7, 11, "u");
+          L.put(14, 11, "u");
 
           // Statue guardiane
           L.put(18, 5, "S");
           L.put(18, 11, "S");
 
           // Uscita verso la biblioteca a ovest
-          L.house(2, 7, 3, 3, { door: [3, 8], enter: { to: "sg_biblioteca", at: [19, 9] } });
+          L.house(2, 7, 3, 3, { door: [4, 8], enter: { to: "sg_biblioteca", at: [19, 9] } });
         },
         npcs(s) {
           return [
@@ -199,7 +199,7 @@
                     us: K.hero().name,
                     turns: 5,
                     winTitle: "IL GOLEM È PLACATO!",
-                    onDone(res) {
+                    done(res) {
                       setStep(N, 3);
                       say("sg_valerian", "Impossibile... hai sciolto il legame magico del Golem con un solo tocco a parabola...");
                       say("sg_miriel", "La Cripta è al sicuro! Ma Valerian dice che stanotte sulla Torre dell'Osservatorio si compirà la Prova dei Quattro Sigilli.");

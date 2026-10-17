@@ -48,7 +48,7 @@
         w: 26, h: 20, start: [5, 10], items: [[8, 6], [18, 14]],
         areas: [[0, 0, 25, 19, "Il grande chiostro dove gli studenti si allenano a tracciare le parabole di vento"]],
         flavor: {
-          R: "Un cerchio runico inciso nella pietra: emana un calore pulsante.",
+          u: "Un cerchio runico inciso nella pietra: emana un calore pulsante.",
           S: "Statua in marmo del Fondatore che tiene un pallone sospeso tra le dita.",
           B: "Un tavolo in pietra dove sono appoggiate coppe di polvere scintillante."
         },
@@ -72,10 +72,10 @@
           L.put(21, 16, "S");
 
           // Cerchio runico centrale
-          L.lay(10, 8, 15, 12, "R");
+          L.lay(10, 8, 15, 12, "u");
 
           // Porta per l'aula a est
-          L.house(22, 9, 3, 3, { door: [22, 10], enter: { to: "sg_aula", at: [4, 8] } });
+          L.house(22, 9, 3, 3, { door: [22, 10], enter: { to: "sg_aula", at: [5, 8] } });
         },
         npcs(s) {
           return [
@@ -89,7 +89,7 @@
       sg_aula: {
         region: "accademia", name: "Aula di Balistica Arcana", short: "Aula", interior: true, outside: ["sg_cortile", 21, 10],
         sub: "Cattedre in mogano, lavagne incise e alambicchi scintillanti", bg: "sg_cortile", time: "giorno",
-        w: 22, h: 16, start: [4, 8], items: [[14, 4]],
+        w: 22, h: 16, start: [5, 8], items: [[14, 4]],
         areas: [[0, 0, 21, 15, "L'aula dove si apprendono gli incantesimi applicati al calcio"]],
         flavor: {
           L: "Scaffali carichi di pergamene e trattati di geometria balistica.",
@@ -115,7 +115,7 @@
           L.put(18, 8, "B");
 
           // Uscita verso il cortile
-          L.house(2, 7, 3, 3, { door: [3, 8], enter: { to: "sg_cortile", at: [21, 10] } });
+          L.house(2, 7, 3, 3, { door: [4, 8], enter: { to: "sg_cortile", at: [21, 10] } });
         },
         npcs(s) {
           return [
@@ -208,7 +208,7 @@
                     us: K.hero().name,
                     turns: 5,
                     winTitle: "ESAME SUPERATO A PIENI VOTI!",
-                    onDone(res) {
+                    done(res) {
                       setStep(N, 3);
                       say("sg_balthazar", "Impressionante. La tua parabola ha spazzato via i difensori d'argilla come fossero foglie.");
                       say("sg_preside", "Benvenuto all'Accademia dei Sigilli, Campione. Hai guadagnato la Toga da Apprendista.");

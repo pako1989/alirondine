@@ -65,15 +65,15 @@
           L.put(17, 4, "A");
 
           // Rune astronomiche
-          L.put(11, 8, "R");
-          L.put(11, 10, "R");
+          L.put(11, 8, "u");
+          L.put(11, 10, "u");
 
           // Statue del fondatore
           L.put(5, 13, "S");
           L.put(17, 13, "S");
 
           // Passaggio alla Torre dei Sigilli a est
-          L.house(20, 8, 3, 3, { door: [20, 9], enter: { to: "sg_torre", at: [4, 8] } });
+          L.house(20, 8, 3, 3, { door: [20, 9], enter: { to: "sg_torre", at: [5, 8] } });
         },
         npcs(s) {
           return [
@@ -87,10 +87,10 @@
       sg_torre: {
         region: "osservatorio", name: "La Torre dei Quattro Sigilli · Arena Finale", short: "Torre Sigilli", interior: true, outside: ["sg_osservatorio", 19, 9],
         sub: "Il pinnacolo supremo dove convergono i flussi magici dei quattro elementi", bg: "sg_torre", time: "notte",
-        w: 22, h: 16, start: [4, 8], items: [[12, 4]],
+        w: 22, h: 16, start: [5, 8], items: [[12, 4]],
         areas: [[0, 0, 21, 15, "L'anello di pietra sospeso nel vuoto dove si decidono i destini dell'Accademia"]],
         flavor: {
-          R: "Il Sigillo Supremo risplende di riflessi d'oro e ametista.",
+          u: "Il Sigillo Supremo risplende di riflessi d'oro e ametista.",
           A: "Il meccanismo di chiusura della grande barriera del cielo."
         },
         build(L) {
@@ -101,7 +101,7 @@
           L.lay(20, 0, 21, 15, "#");
 
           // Grande cerchio dei quattro elementi
-          L.lay(9, 6, 13, 10, "R");
+          L.lay(9, 6, 13, 10, "u");
 
           // Pilastri dell'arena
           L.put(6, 4, "S");
@@ -110,7 +110,7 @@
           L.put(16, 12, "S");
 
           // Uscita verso l'osservatorio
-          L.house(2, 7, 3, 3, { door: [3, 8], enter: { to: "sg_osservatorio", at: [19, 9] } });
+          L.house(2, 7, 3, 3, { door: [4, 8], enter: { to: "sg_osservatorio", at: [19, 9] } });
         },
         npcs(s) {
           return [
@@ -185,7 +185,7 @@
                     us: K.hero().name,
                     turns: 6,
                     winTitle: "IL SIGILLO DELL'AURA È CONSACRATO!",
-                    onDone(res) {
+                    done(res) {
                       fin("luce");
                     }
                   });
@@ -204,7 +204,7 @@
                     us: K.hero().name,
                     turns: 6,
                     winTitle: "IL TUONO ARCANO È SCATENATO!",
-                    onDone(res) {
+                    done(res) {
                       fin("tempesta");
                     }
                   });
@@ -224,7 +224,7 @@
                     us: K.hero().name,
                     turns: 6,
                     winTitle: "L'ARMONIA DELLE CASE È RAGGIUNTA!",
-                    onDone(res) {
+                    done(res) {
                       fin("specchio");
                     }
                   });
@@ -245,7 +245,7 @@
                     us: K.hero().name,
                     turns: 6,
                     winTitle: "IL QUINTO SIGILLO È RISVEGLIATO!",
-                    onDone(res) {
+                    done(res) {
                       fin("arcano");
                     }
                   });

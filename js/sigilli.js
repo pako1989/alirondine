@@ -62,9 +62,10 @@
         fx: "fireflies"
       }
     },
+    floors: "u",
     solid: "LBSA",
     paint: {
-      R(K, sx, sy) {
+      u(K, sx, sy) {
         // Runa sul pavimento (calpestabile)
         const g = K.g;
         g.strokeStyle = "rgba(168,85,247,.6)";
@@ -136,7 +137,7 @@
     },
     act: {
       q: "Entra",
-      R: "Esamina la runa incisa",
+      u: "Esamina la runa incisa",
       L: "Sfoglia il tomo arcano",
       B: "Osserva l'alambicco balistico",
       S: "Leggi l'epigrafe del Fondatore",
