@@ -41,6 +41,8 @@ Un solo file: contiene regole, stato del progetto, come costruire una saga, API 
 | Partenza/arrivo e porta di un interno dentro o sul bordo della casa 3x3 | il giocatore nasce dentro un solido | arrivo fuori dalla casa, porta sul lato; test `reach` su ogni zona |
 | `api.play(...)` per righe a metà zona (calendario) | schermo bloccato senza pulsanti | usa `K.say(righe, then)` dentro le zone; `play` solo per intro/scene |
 | Riconoscimento di gesto assente (qualsiasi tratto = successo) | sfida impossibile da perdere | classifica il tratto (cerchio, zig-zag, freccia, onda); errore e tempo scaduto = niente gol; test del classificatore |
+| Oggetto `loot` su una tessera senza etichetta in `act` | l'azione non compare, l'oggetto non si prende | aggiungi la lettera in `act` (es. `U: "Guarda il tavolino"`) |
+| Scena di rapporto che sostituisce il dialogo | il giocatore deve parlare due volte | ora la scena precede il dialogo normale (nessun secondo giro) |
 | **File condivisi consegnati interi** (bg-scenarios, salone, sogni, game, sw, index) | cancellati i `case` di altre saghe (es. `te_caldaie`) | solo patch mirate; dopo il pull controlla `git diff` che non tolga righe altrui |
 
 ---
@@ -326,6 +328,8 @@ Le funzioni dei **talk** ricevono `K` come parametro; l'`intro` di un capitolo r
   - **pagina «👥 Personaggi»** dentro ogni saga (si riempie da sola con i personaggi incontrati);
   - **scelte a tempo** (`ask(..., { secs, def })`, nei test `K.timedFire()`);
   - **calendario a fasce orarie** (`cfg.clock = { slots, hud, tint, onSlot }`, `K.clock.advance(n, then)` / `.is("Sera")` / `.set(giorno, fascia)`; `npcs(step, K)` riceve il kit; esempio: `js/quattordici*.js`, motore `js/zonarossa.js`);
+  - **Rapporti** (`cfg.bonds = { talk: 4, per: 10, max: 5, names: [...], scenes: { id_png: [{ lv, id, lines: [[chi, testo]], reward(K) }] } }`): affinità per personaggio nei flag `rel_<id>`. `K.rel.add(id, punti)`, `K.rel.lv(id)`, `K.rel.scene(id, then)`. Cuori nella pagina 👥 Personaggi; la scena a soglia parte da sola al dialogo successivo e poi segue il dialogo normale; `talk: N` dà N punti ad ogni nuovo passo di storia (retrofit senza toccare i capitoli: vedi `js/cenere.js`). Usa `K.rel.lv(id)` per far cambiare una battuta o un finale.
+  - **Inventario** (`cfg.inv = { items: { id: { n, icon, d, match: {at,df,te}, gift: {id_png: punti}, giftAny, react, refuse } } }`): `spec.loot = { "x,y": { id, text, empty } }` su una tessera con etichetta azione (es. `act: { U: "Guarda il tavolino" }`), `K.inv.give/has/take/count/bonus("df")`. Menu 🎒 Zaino automatico: regali che alzano i Rapporti; `match` = bonus passivo in partita finché l'oggetto è nello zaino (somma `K.inv.bonus` nelle opzioni `bonus` del motore, tetto 4). Tenere o regalare deve essere una scelta vera. Esempio: `js/quattordici*.js`.
   - **tubi pneumatici** (`spec.tubes`: stazione `at`, `path`, uscita `out`, `when`, `shut`; `K.tubeRide`, `K.tubeBusy`);
   - stadio della saga (`stadium`);
   - ospiti, cameo, musiche.
