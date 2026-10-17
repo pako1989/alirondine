@@ -34,14 +34,14 @@
         <div style="display:flex;align-items:center;gap:12px;">
           <div style="text-align:right;">
             <span id="qdScore" style="font-size:18px;font-weight:bold;color:#ef4444;">0 - 0</span>
-            <div id="qdTime" style="font-size:11px;color:#cbd5e1;">Min 10'</div>
+            <div id="qdTime" style="font-size:11px;color:#cbd5e1;">Mossa 1/6</div>
           </div>
           <button type="button" id="qdQuitBtn" style="background:#334155;color:#f8fafc;border:1px solid #64748b;padding:4px 8px;border-radius:4px;font-size:11px;cursor:pointer;">✕ Esci</button>
         </div>
       </div>
       <div style="position:relative;width:100%;max-width:480px;aspect-ratio:4/3;max-height:60vh;background:#090d16;border:2px solid #334155;overflow:hidden;box-sizing:border-box;">
         <canvas id="qdCanvas" width="400" height="300" style="display:block;width:100%;height:100%;image-rendering:pixelated;"></canvas>
-        <div id="qdCountdown" style="position:absolute;top:10px;right:14px;background:rgba(239,68,68,0.25);border:1px solid #ef4444;padding:4px 8px;border-radius:4px;font-weight:bold;font-size:14px;color:#f87171;">10s</div>
+        <div id="qdCountdown" style="position:absolute;top:10px;right:14px;background:rgba(239,68,68,0.25);border:1px solid #ef4444;padding:4px 8px;border-radius:4px;font-weight:bold;font-size:14px;color:#f87171;">12s</div>
         <div id="qdToast" style="position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(15,23,42,0.95);padding:5px 12px;border-radius:4px;border:1px solid #94a3b8;font-size:12px;color:#f8fafc;pointer-events:none;opacity:0;transition:opacity 0.2s;text-align:center;max-width:90%;"></div>
       </div>
       <div style="width:100%;max-width:480px;padding:8px 12px;background:#020617;display:flex;flex-direction:column;gap:6px;box-sizing:border-box;">
@@ -49,6 +49,7 @@
           <span>Mossa Avversaria: <b id="qdMossa" style="color:#f87171;">Pressing Asfissiante</b></span>
           <span>Intuito: <b id="qdIntuito" style="color:#38bdf8;">100%</b></span>
         </div>
+        <div id="qdHint" style="font-size:12px;color:#fbbf24;min-height:15px;">Ti saltano addosso: gioca d'anticipo.</div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
           <button type="button" id="qdBtn1" style="background:#1e293b;color:#f8fafc;border:1px solid #475569;padding:9px 4px;border-radius:6px;font-weight:bold;font-size:12px;cursor:pointer;">1. ANTICIPO ⚡</button>
           <button type="button" id="qdBtn2" style="background:#1e293b;color:#f8fafc;border:1px solid #475569;padding:9px 4px;border-radius:6px;font-weight:bold;font-size:12px;cursor:pointer;">2. TRAPPOLA 📐</button>
@@ -59,19 +60,40 @@
 
     document.body.appendChild(wrap);
 
+    // Spiegazione prima di iniziare: il tempo resta fermo finché non premi il pulsante
+    const tut = document.createElement("div");
+    tut.style.cssText = "position:absolute;inset:0;z-index:5;background:rgba(2,6,23,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:18px;text-align:left;font-size:13px;line-height:1.45;overflow:auto;";
+    tut.innerHTML = `<div style="max-width:420px;">
+      <div style="font-size:17px;font-weight:bold;color:#f87171;margin-bottom:6px;">📓 Come si gioca</div>
+      <div>Sfida a <b>${teamTitle}</b> in <b>6 mosse</b>. Ogni mossa l'avversario prepara una giocata: leggi il nome e l'indizio in giallo, poi scegli la <b>contromossa giusta</b> prima che scada il tempo (12 secondi, con calma).</div>
+      <div style="margin:8px 0;border-left:3px solid #ef4444;padding-left:8px;">
+        <b>1. ANTICIPO ⚡</b> contro Pressing e Gabbia (ti saltano addosso)<br>
+        <b>2. TRAPPOLA 📐</b> contro Incursione e Finta (qualcuno scatta alle spalle)<br>
+        <b>3. LANCIO 🚀</b> contro Catenaccio e Muro (sono tutti dietro)
+      </div>
+      <div>Giusta = <b>gol tuo</b> e Intuito su. Sbagliata o tempo scaduto = <b>gol loro</b>. Vinci se segni più di loro. Tasti 1, 2, 3 o tocca i pulsanti.</div>
+      <button type="button" id="qdGo" style="margin-top:12px;width:100%;background:#ef4444;color:#fff;border:0;padding:12px;border-radius:6px;font-weight:bold;font-size:14px;cursor:pointer;">Ho capito, inizia ▸</button>
+    </div>`;
+    wrap.appendChild(tut);
+    wrap.style.position = "fixed";
+    tut.querySelector("#qdGo").onclick = () => { tut.remove(); locked = false; lastT = performance.now(); };
+
     const canvas = document.getElementById("qdCanvas");
     const ctx = canvas.getContext("2d");
 
     const MOVES = [
-      { name: "Pressing Asfissiante", correct: 1, resp: "ANTICIPO TATTICO!" },
-      { name: "Incursione a Sorpresa", correct: 2, resp: "TRAPPOLA DEL FUORIGIOCO!" },
-      { name: "Catenaccio Difensivo", correct: 3, resp: "LANCIO A PALBELLA!" },
-      { name: "Trappola della Gabbia", correct: 1, resp: "ANTICIPO RAPIDO!" },
-      { name: "Finta dell'Ala", correct: 2, resp: "RADDOPPIO DIFENSIVO!" }
+      { name: "Pressing Asfissiante", correct: 1, resp: "ANTICIPO TATTICO!", hint: "Ti saltano addosso: gioca d'anticipo." },
+      { name: "Incursione a Sorpresa", correct: 2, resp: "TRAPPOLA DEL FUORIGIOCO!", hint: "Uno scatta alle spalle: tendi la trappola." },
+      { name: "Catenaccio Difensivo", correct: 3, resp: "LANCIO LUNGO!", hint: "Sono tutti dietro: scavalca con un lancio." },
+      { name: "Trappola della Gabbia", correct: 1, resp: "ANTICIPO RAPIDO!", hint: "Ti chiudono in gabbia: anticipa prima." },
+      { name: "Finta dell'Ala", correct: 2, resp: "TRAPPOLA DEL FUORIGIOCO!", hint: "L'ala finge e scatta: tendi la trappola." },
+      { name: "Muro Alto", correct: 3, resp: "LANCIO LUNGO!", hint: "Linea alta e compatta: scavalca con un lancio." }
     ];
+    const ROUNDS = 6, TIME = 12, LOCK = 1.5;
+    let round = 1, locked = true, lastT = 0, lockLeft = 0;
 
     let currentMoveIdx = 0;
-    let moveCountdown = 40;
+    let moveCountdown = TIME;
     let scorePlayer = 0, scoreOpp = 0;
     let matchTime = 10;
     let intuito = 100;
@@ -88,11 +110,11 @@
       if (!el) return;
       el.textContent = msg;
       el.style.opacity = "1";
-      setTimeout(() => { if (el) el.style.opacity = "0"; }, 1400);
+      setTimeout(() => { if (el) el.style.opacity = "0"; }, 1900);
     }
 
     function chooseCounter(choice) {
-      if (isGameOver) return;
+      if (isGameOver || locked) return;
       const cur = MOVES[currentMoveIdx];
       if (choice === cur.correct) {
         scorePlayer++;
@@ -105,15 +127,24 @@
         ballTargetX = 50; ballTargetY = 240;
         intuito = Math.max(0, intuito - 20);
       }
-      nextMove();
+      endRound();
       updateHud();
     }
 
+    // Dopo ogni mossa: pausa per leggere l'esito, poi la prossima o il fischio finale
+    function endRound() {
+      locked = true; lockLeft = LOCK;
+    }
+
     function nextMove() {
-      currentMoveIdx = (currentMoveIdx + 1) % MOVES.length;
-      moveCountdown = 40;
-      const mEl = document.getElementById("qdMossa");
+      if (round >= ROUNDS) { finish(scorePlayer > scoreOpp || (scorePlayer === scoreOpp && intuito >= 50)); return; }
+      round++;
+      let n; do { n = Math.floor(Math.random() * MOVES.length); } while (n === currentMoveIdx);
+      currentMoveIdx = n;
+      moveCountdown = TIME; locked = false;
+      const mEl = document.getElementById("qdMossa"), hEl = document.getElementById("qdHint");
       if (mEl) mEl.textContent = MOVES[currentMoveIdx].name;
+      if (hEl) hEl.textContent = MOVES[currentMoveIdx].hint;
     }
 
     function updateHud() {
@@ -122,8 +153,8 @@
       const cEl = document.getElementById("qdCountdown");
       const iEl = document.getElementById("qdIntuito");
       if (sEl) sEl.textContent = `${scorePlayer} - ${scoreOpp}`;
-      if (tEl) tEl.textContent = `Min ${Math.min(90, Math.floor(matchTime))}'`;
-      if (cEl) cEl.textContent = `${Math.ceil(moveCountdown / 4)}s`;
+      if (tEl) tEl.textContent = `Mossa ${round}/${ROUNDS}`;
+      if (cEl) cEl.textContent = `${Math.max(0, Math.ceil(moveCountdown))}s`;
       if (iEl) iEl.textContent = `${intuito}%`;
     }
 
@@ -164,13 +195,18 @@
 
     function loop() {
       frame++;
-      matchTime += 0.25;
-      moveCountdown--;
-
-      if (moveCountdown <= 0) {
-        scoreOpp++;
-        toast("Tempo scaduto! Mossa avversaria subita!");
-        nextMove();
+      const now = performance.now(), dt = Math.min(0.1, (now - (lastT || now)) / 1000); lastT = now;
+      if (locked && lockLeft > 0) {
+        lockLeft -= dt;
+        if (lockLeft <= 0) { lockLeft = 0; nextMove(); updateHud(); }
+      } else if (!locked) {
+        moveCountdown -= dt;
+        if (moveCountdown <= 0) {
+          scoreOpp++;
+          toast("Tempo scaduto! L'avversario va in rete!");
+          ballTargetX = 50; ballTargetY = 240;
+          endRound();
+        }
         updateHud();
       }
 
@@ -232,11 +268,6 @@
       ctx.fill();
       ctx.fillStyle = "#22c55e";
       ctx.fillRect(359, 34, 2, 4);
-
-      if (matchTime >= 90) {
-        finish(scorePlayer >= scoreOpp);
-        return;
-      }
 
       animId = requestAnimationFrame(loop);
     }
