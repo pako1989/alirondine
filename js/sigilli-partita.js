@@ -81,11 +81,37 @@
   }
 
   const SPELLS = [
-    { id: "vento", name: "Runa del Vento", icon: "🌀", desc: "Tiro a spirale che aggira la barriera", sym: "O" },
-    { id: "tuono", name: "Runa del Tuono", icon: "⚡", desc: "Saetta folgorante a massima velocità", sym: "Z" },
-    { id: "scudo", name: "Sigillo di Protezione", icon: "🛡️", desc: "Barriera esagonale respingi-tiri", sym: "^" },
-    { id: "illusione", name: "Runa del Doppio", icon: "✨", desc: "Finta speculare che sdoppia il pallone", sym: "~" }
+    { id: "vento", shape: "◯ CERCHIO: gira in tondo", name: "Runa del Vento", icon: "🌀", desc: "Tiro a spirale che aggira la barriera", sym: "O" },
+    { id: "tuono", shape: "⚡ ZIG-ZAG: destra, diagonale, destra", name: "Runa del Tuono", icon: "⚡", desc: "Saetta folgorante a massima velocità", sym: "Z" },
+    { id: "scudo", shape: "^ FRECCIA IN SU: sali e scendi", name: "Sigillo di Protezione", icon: "🛡️", desc: "Barriera esagonale respingi-tiri", sym: "^" },
+    { id: "illusione", shape: "〰 ONDA: su e giù mentre avanzi", name: "Runa del Doppio", icon: "✨", desc: "Finta speculare che sdoppia il pallone", sym: "~" }
   ];
+
+  // riconoscimento del gesto: cerchio (Vento), zig-zag (Tuono), freccia in su (Scudo), onda (Doppio)
+  function reversals(a, th) {
+    let n = 0, dir = 0, hi = a[0], lo = a[0];
+    for (let i = 1; i < a.length; i++) {
+      const v = a[i];
+      if (v > hi) hi = v; if (v < lo) lo = v;
+      if (dir <= 0 && v - lo > th) { if (dir === -1) n++; dir = 1; hi = v; }
+      else if (dir >= 0 && hi - v > th) { if (dir === 1) n++; dir = -1; lo = v; }
+    }
+    return n;
+  }
+  function classify(p) {
+    if (!p || p.length < 8) return null;
+    const xs = p.map((q) => q.x), ys = p.map((q) => q.y);
+    const x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys), w = x1 - x0, h = y1 - y0;
+    if (Math.max(w, h) < 26) return null;
+    let len = 0; for (let i = 1; i < p.length; i++) len += Math.hypot(xs[i] - xs[i - 1], ys[i] - ys[i - 1]);
+    const gap = Math.hypot(xs[0] - xs[xs.length - 1], ys[0] - ys[ys.length - 1]);
+    if (gap < 0.5 * Math.max(w, h) && w > 0.45 * h && h > 0.45 * w && len > 2.0 * Math.max(w, h)) return "vento";
+    const rx = reversals(xs, w * 0.22), ry = reversals(ys, h * 0.22);
+    if (ry >= 2 && w >= h * 0.9) return "illusione";
+    if (rx >= 2) return "tuono";
+    if (ry >= 1 && rx <= 1) return "scudo";
+    return null;
+  }
 
   let G_STATE = null;
 
@@ -97,7 +123,7 @@
 
     const cur = (window.__sagaCore && window.__sagaCore.cur) || {};
     const diff = cur.diff || opts.diff || "normale";
-    const oppName = opts.opp || (typeof opts.opp === "string" ? opts.opp : (opts.opp && opts.opp.name) || "Custodi dell'Accademia");
+    const oppName = (typeof opts.opp === "string" && opts.opp) || (opts.opp && opts.opp.name) || (opts.oppNames && opts.oppNames[0]) || "Custodi dell'Accademia";
     const heroName = (opts.hero && opts.hero.name) || opts.us || "Il Campione";
     const totalRounds = opts.turns || 5;
 
@@ -161,65 +187,41 @@
     const timerLbl = wrap.querySelector("#sg-timer-lbl");
     const spellTargetEl = wrap.querySelector("#sg-spell-target");
 
+    function pickTargetLabel() { if (spellTargetEl) spellTargetEl.textContent = `${targetSpell.shape}`; }
     function pickTargetSpell() {
       targetSpell = SPELLS[(round - 1) % SPELLS.length];
-      if (spellTargetEl) spellTargetEl.textContent = `${targetSpell.name} (${targetSpell.icon} ${targetSpell.desc})`;
+      pickTargetLabel();
       roundTimer = diff === "sfida" ? 3.8 : diff === "storia" ? 6.5 : 5.0;
     }
     pickTargetSpell();
 
-    function castSpell(spellId) {
+    const pHit = diff === "sfida" ? 0.7 : diff === "storia" ? 0.95 : 0.82;
+    const oppPower = diff === "sfida" ? 0.62 : diff === "storia" ? 0.22 : 0.45;
+    function castSpell(spellId, timeout) {
       if (phase !== "draw") return;
       phase = "anim";
       animTimer = 0;
       const sp = SPELLS.find((x) => x.id === spellId) || targetSpell;
-      const isCorrect = (sp.id === targetSpell.id);
+      const isCorrect = !timeout && sp.id === targetSpell.id;
+
+      let playerScores = false, oppScores = false;
+      if (timeout) animText = "⏳ Tempo scaduto! Il sigillo si dissolve.";
+      else if (!isCorrect) animText = `🌫️ Il sigillo sbagliato svanisce nel nulla.`;
+      else if (Math.random() < pHit) { playerScores = true; animText = `✨ ${sp.name}! GOL ARCANO!`; snd("goal"); }
+      else animText = `🛡️ Parata dell'avversario! Il tiro è respinto.`;
+
+      // l'avversario attacca sempre; lo Scudo ben tracciato dimezza il pericolo
+      const pr = oppPower * (isCorrect && sp.id === "scudo" ? 0.5 : 1);
+      if (Math.random() < pr) { oppScores = true; animText += " Ma l'avversario segna!"; }
 
       snd(sp.id === "tuono" ? "thunder" : sp.id === "scudo" ? "shield" : "spell");
-
-      // Success calculation based on player choice & difficulty
-      let playerScores = false;
-      let oppScores = false;
-
-      if (isCorrect) {
-        playerScores = true;
-        animText = `✨ ${sp.name}! GOL ARCANO!`;
-        snd("goal");
-      } else {
-        // partial chance
-        if (Math.random() < 0.35) {
-          playerScores = true;
-          animText = `⚡ Incanalamento forzato! GOL!`;
-          snd("goal");
-        } else {
-          animText = `🛡️ Respinta dalla barriera avversaria!`;
-        }
-      }
-
-      // Opponent attack check in second half of round
-      const oppPower = diff === "sfida" ? 0.65 : diff === "storia" ? 0.2 : 0.45;
-      if (Math.random() < oppPower && !playerScores) {
-        oppScores = true;
-      }
-
       if (playerScores) scoreA++;
       if (oppScores) scoreB++;
-
       scoreAEl.textContent = scoreA;
       scoreBEl.textContent = scoreB;
-
-      // Create burst particles
       for (let i = 0; i < 24; i++) {
-        const ang = Math.random() * Math.PI * 2;
-        const spd = 2 + Math.random() * 4;
-        auraSparkles.push({
-          x: 180,
-          y: 70,
-          vx: Math.cos(ang) * spd,
-          vy: Math.sin(ang) * spd,
-          color: isCorrect ? "#fbbf24" : "#a855f7",
-          life: 30
-        });
+        const ang = Math.random() * Math.PI * 2, spd = 2 + Math.random() * 4;
+        auraSparkles.push({ x: 180, y: 70, vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd, color: playerScores ? "#fbbf24" : "#a855f7", life: 30 });
       }
     }
 
@@ -241,16 +243,16 @@
 
     canvas.addEventListener("pointermove", (e) => {
       if (!isDrawing || phase !== "draw") return;
-      strokePoints.push(getCanvasCoords(e));
-      if (strokePoints.length > 80) strokePoints.shift();
+      if (strokePoints.length < 300) strokePoints.push(getCanvasCoords(e));
     });
 
     window.addEventListener("pointerup", () => {
       if (!isDrawing) return;
       isDrawing = false;
       if (phase === "draw" && strokePoints.length > 5) {
-        // Recognized stroke: cast current target spell!
-        castSpell(targetSpell.id);
+        const got = classify(strokePoints);
+        if (got) castSpell(got);
+        else if (spellTargetEl) { spellTargetEl.textContent = "Gesto non riconosciuto: riprova!"; setTimeout(() => { if (phase === "draw") pickTargetLabel(); }, 900); }
       }
       strokePoints = [];
     });
@@ -268,7 +270,7 @@
       else if (e.key === "2") castSpell(SPELLS[1].id);
       else if (e.key === "3") castSpell(SPELLS[2].id);
       else if (e.key === "4") castSpell(SPELLS[3].id);
-      else if (e.key === " " || e.key === "Enter") castSpell(targetSpell.id);
+      
     }
     window.addEventListener("keydown", onKeyDown);
 
@@ -279,7 +281,7 @@
       window.removeEventListener("keydown", onKeyDown);
       cancelAnimationFrame(animId);
 
-      const win = forceWin !== undefined ? forceWin : (scoreA >= scoreB);
+      const win = forceWin !== undefined ? forceWin : (scoreA > scoreB);
       const res = {
         a: scoreA,
         b: scoreB,
@@ -323,20 +325,17 @@
       if (phase === "draw") {
         roundTimer -= dt;
         if (timerLbl) timerLbl.textContent = Math.max(0, roundTimer).toFixed(1) + "s";
-        if (roundTimer <= 0) {
-          // Timeout: auto-cast
-          castSpell(targetSpell.id);
-        }
+        if (roundTimer <= 0) castSpell(targetSpell.id, true);
       } else if (phase === "anim") {
         animTimer += dt;
         if (animTimer > 1.8) {
-          if (round >= totalRounds) {
+          if (round >= totalRounds && (scoreA !== scoreB || round >= totalRounds + 3)) {
             phase = "result";
-            finishMatch(scoreA >= scoreB);
+            finishMatch(scoreA > scoreB);
             return;
           } else {
             round++;
-            roundLbl.textContent = `TURNO ${round}/${totalRounds}`;
+            roundLbl.textContent = round > totalRounds ? `SPAREGGIO ${round - totalRounds}` : `TURNO ${round}/${totalRounds}`;
             phase = "draw";
             pickTargetSpell();
           }
@@ -473,7 +472,7 @@
   }
 
   window.__runaMatch = {
-    start,
+    start, classify,
     state: () => G_STATE
   };
   window.__runa = window.__runaMatch;

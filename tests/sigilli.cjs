@@ -155,6 +155,14 @@ async function motore(w) {
   const res = await page.evaluate(() => window.__testRes);
   if (!res || !res.win) errors.push("risultato motore errato: " + JSON.stringify(res));
 
+  // il riconoscimento del gesto: i simboli veri passano, lo scarabocchio al centro no
+  const cl = await page.evaluate(() => {
+    const C = window.__runaMatch.classify, seg = (pts) => { const o = []; pts.forEach((a, i) => { if (i) for (let t = 0; t <= 6; t++) o.push({ x: pts[i - 1][0] + (a[0] - pts[i - 1][0]) * t / 6, y: pts[i - 1][1] + (a[1] - pts[i - 1][1]) * t / 6 }); }); return o; };
+    return [C([...Array(30)].map((_, i) => ({ x: 180 + 30 * Math.cos(i / 29 * 6.5), y: 110 + 30 * Math.sin(i / 29 * 6.5) })))
+      , C(seg([[150, 90], [210, 90], [150, 130], [210, 130]])), C(seg([[150, 130], [180, 85], [210, 130]])), C([...Array(30)].map((_, i) => ({ x: 140 + i * 3, y: 110 + 18 * Math.sin(i / 29 * 12) })))
+      , C([...Array(12)].map((_, i) => ({ x: 180 + i * 0.5, y: 110 + (i % 2) }))), C([...Array(20)].map((_, i) => ({ x: 150 + i * 4, y: 110 })))];
+  });
+  if (JSON.stringify(cl) !== JSON.stringify(["vento", "tuono", "scudo", "illusione", null, null])) errors.push("gesti riconosciuti male: " + JSON.stringify(cl));
   L.check(`Accademia dei Sigilli · motore Traccia-Runa (${w} px)`, errors);
   await browser.close();
 }
