@@ -27,7 +27,7 @@
     K.lore("l_daikoku", { t: "Liceo Daikoku", d: "Prestigioso istituto studentesco noto per i suoi successi accademici e l'implacabile squadra di calcio diretta da Raito." });
 
     const goal = (s) => ({
-      0: "Trova chi ti osserva sotto i ciliegi del cortile.",
+      0: "Qualcuno ti osserva dai rami dei ciliegi: è Ryu, vicino all'ingresso in basso a sinistra, accanto al cartello. Avvicinati e premi Parla.",
       1: "Entra nel Liceo Daikoku e raggiungi l'Aula del Club di Tattica per parlare con Raito Yagami.",
       2: "Dimostra le tue capacità nella simulazione tattica contro i Rivali di Shibuya!",
       3: "Il primo capitolo è concluso. Continua con il Capitolo 2."
@@ -67,6 +67,8 @@
           put(16, 9, "T"); put(26, 17, "K"); put(6, 17, "B");
           [[9, 7], [21, 7], [12, 14]].forEach(([x, y]) => put(x, y, "P"));
           put(5, 17, "s");
+          // ciliegi in fiore lungo il viale e ai lati del campo
+          [[2, 9], [2, 14], [29, 9], [29, 14], [7, 10], [24, 10], [7, 14], [24, 14], [12, 17], [19, 17], [3, 3], [8, 3]].forEach(([x, y]) => put(x, y, "t"));
         }
       },
       qd_aula: {

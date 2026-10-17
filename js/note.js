@@ -65,7 +65,7 @@
         path: ["#334155", "#475569"],
         wall: ["#1e293b", "#0f172a"],
         stone: ["#64748b", "#94a3b8"],
-        tree: ["#0f3824", "#1b5938", "#2b7d52"],
+        tree: ["#7a2f4a", "#c2587f", "#f9a8d4"],
         fx: "petals",
         dark: 0.08
       },
@@ -81,10 +81,9 @@
     },
     solid: "atryqwsxflbgjnpzuBHDTLWKT",
     paint: {
-      A(sx, sy, tx, ty) {
+      A(K, sx, sy, tx, ty) {
         // Mela rossa a terra
-        window.__sagaCore.ctx();
-        const g = document.getElementById("cv").getContext("2d");
+        const g = K.g;
         g.fillStyle = "#ef4444";
         g.beginPath();
         g.arc(sx + 8, sy + 10, 4.5, 0, Math.PI * 2);
@@ -92,17 +91,17 @@
         g.fillStyle = "#22c55e";
         g.fillRect(sx + 8, sy + 4, 1.5, 3);
       },
-      K(sx, sy, tx, ty) {
+      K(K, sx, sy, tx, ty) {
         // Cassetta di mele
-        const g = document.getElementById("cv").getContext("2d");
+        const g = K.g;
         g.fillStyle = "#78350f";
         g.fillRect(sx + 2, sy + 4, 12, 10);
         g.fillStyle = "#ef4444";
         g.fillRect(sx + 4, sy + 2, 8, 4);
       },
-      T(sx, sy, tx, ty) {
+      T(K, sx, sy, tx, ty) {
         // Tavolo tattico con monitor CRT
-        const g = document.getElementById("cv").getContext("2d");
+        const g = K.g;
         g.fillStyle = "#334155";
         g.fillRect(sx + 1, sy + 6, 14, 8);
         g.fillStyle = "#0f172a";
@@ -110,18 +109,18 @@
         g.fillStyle = "#38bdf8";
         g.fillRect(sx + 5, sy + 2, 6, 4);
       },
-      B(sx, sy, tx, ty) {
+      B(K, sx, sy, tx, ty) {
         // Banco del liceo
-        const g = document.getElementById("cv").getContext("2d");
+        const g = K.g;
         g.fillStyle = "#b45309";
         g.fillRect(sx + 2, sy + 5, 12, 8);
         g.fillStyle = "#78350f";
         g.fillRect(sx + 3, sy + 13, 2, 3);
         g.fillRect(sx + 11, sy + 13, 2, 3);
       },
-      P(sx, sy, tx, ty) {
+      P(K, sx, sy, tx, ty) {
         // Lampione o riflettore
-        const g = document.getElementById("cv").getContext("2d");
+        const g = K.g;
         g.fillStyle = "#475569";
         g.fillRect(sx + 7, sy + 2, 2, 14);
         g.fillStyle = "#fef08a";
@@ -129,9 +128,9 @@
         g.arc(sx + 8, sy + 3, 3, 0, Math.PI * 2);
         g.fill();
       },
-      L(sx, sy, tx, ty) {
+      L(K, sx, sy, tx, ty) {
         // Grande lavagna tattica
-        const g = document.getElementById("cv").getContext("2d");
+        const g = K.g;
         g.fillStyle = "#064e3b";
         g.fillRect(sx + 1, sy + 2, 14, 12);
         g.strokeStyle = "#78350f";
@@ -181,10 +180,10 @@
       ask: "Vuoi riposare nel dormitorio del Liceo?"
     },
     endings: {
-      giustizia_pura: { t: "La Giustizia della Lavagna", d: "Hai collaborato con Elle, dimostrando che il calcio si vince con la tattica pura senza trucchi occulti." },
-      nuovo_mondo: { t: "Il Dio del Nuovo Campionato", d: "Ti sei alleato con Raito, riscrivendo le regole del torneo e vincendo ogni contrasto con la precisione glaciale del Quaderno." },
-      patto_demone: { t: "Il Patto con Ryu", d: "Hai barattato il destino del torneo con il demone Ryu in cambio di un cesto infinito di mele e un tiro infallibile." },
-      calcio_puro: { t: "Senza Nomi né Quaderni (Segreto)", d: "Segreto: Hai bruciato il Tactics Note al centro del campo, costringendo Raito ed Elle a una sfida autentica 1 contro 1 a piedi nudi." }
+      giustizia_pura: ["La Giustizia della Lavagna", "Hai collaborato con Elle, dimostrando che il calcio si vince con la tattica pura senza trucchi occulti.", "Fai la scelta che porta a questo finale."],
+      nuovo_mondo: ["Il Dio del Nuovo Campionato", "Ti sei alleato con Raito, riscrivendo le regole del torneo e vincendo ogni contrasto con la precisione glaciale del Quaderno.", "Fai la scelta che porta a questo finale."],
+      patto_demone: ["Il Patto con Ryu", "Hai barattato il destino del torneo con il demone Ryu in cambio di un cesto infinito di mele e un tiro infallibile.", "Fai la scelta che porta a questo finale."],
+      calcio_puro: ["Senza Nomi né Quaderni (Segreto)", "Segreto: Hai bruciato il Tactics Note al centro del campo, costringendo Raito ed Elle a una sfida autentica 1 contro 1 a piedi nudi.", "Fai la scelta che porta a questo finale."]
     },
     guest: {
       id: "qd_ryu",
