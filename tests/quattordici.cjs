@@ -43,6 +43,7 @@ async function storia(w) {
   await goEnter("qt_atrio");
   { const gone = await page.evaluate(() => !window.T_.npcAt("qt_teo")); if (!gone) errors.push("Teo è ancora nell'atrio dopo l'eliminazione"); }
   await L.talk(page, "qt_ilse"); await L.advance(page, [/Chiederle del suo passato/]);
+  { const lv = await page.evaluate((k) => eval(k).rel.lv("qt_ilse"), K_); if (lv !== 1) errors.push("rapporto con Ilse dopo il giorno 1: livello " + lv + " invece di 1"); }
   { const i = await info(page); if (!i.done[1] || i.ch !== 2) errors.push("capitolo 1 non concluso: " + JSON.stringify([i.done, i.ch])); if ((await stat(page, "squadre")) !== 7) errors.push("squadre dopo la notte 1: " + (await stat(page, "squadre"))); }
 
   // ---- giorno 2
@@ -51,7 +52,8 @@ async function storia(w) {
   await ck(2, "Mattina", "avvio giorno 2");
   for (const z of zones[2]) { const bad = await reach(page, z); if (bad.length) errors.push(z + " irraggiungibile: " + bad.join(", ")); }
   await goEnter("qt_giardino"); if (w === 390) await L.shot(page, "qt_giardino");
-  await L.talk(page, "qt_ilse"); await L.advance(page); await chk(2, 1, "Ilse c2");
+  await L.talk(page, "qt_ilse"); await L.advance(page); await chk(2, 1, "Ilse c2 (scena del rapporto, poi il briefing)");
+  { const seen = await page.evaluate((k) => eval(k).F.get("relsc_ilse1"), K_); if (!seen) errors.push("scena di rapporto Ilse livello 1 non vista"); }
   await goEnter("qt_archivio"); if (w === 390) await L.shot(page, "qt_archivio");
   await L.talk(page, "qt_luce"); await L.advance(page, [/Leggere il registro/]); await ck(2, "Pomeriggio", "Luce di mattina");
   await goEnter("qt_giardino"); await L.talk(page, "qt_banditore"); await L.advance(page, [/Gioca contro i Gufi/]); await chk(2, 2, "partita c2"); await ck(2, "Sera", "dopo la partita 2");

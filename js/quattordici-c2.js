@@ -128,7 +128,7 @@
         early: "Prima parli con la signorina Varga, poi vieni da me. Il Torneo ha un ordine, e io lo rispetto.",
         acts: [
           {
-            t: "Leggere il registro con Luce (+Verità)", cond: () => luce() < 2,
+            t: "Leggere il registro con Luce (+Verità)", rel: 8, cond: () => luce() < 2,
             run() {
               const n = luce() + 1; F.set("qt2_luce", n);
               if (n === 1) {

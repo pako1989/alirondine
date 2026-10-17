@@ -17,6 +17,7 @@
 //     endings: { id: ["TITOLO", "descrizione", "indizio"] },
 //     mainExtra(K) { return [{ label, sub, fn }] }, zoneMenuExtra(K) { return [...] },
 //     clock: { slots: ["Mattina", "Sera"], hud: true, tint: [...], onSlot(K, giorno, fascia, nome) { return [["voce", "..."]]; } },  // calendario: K.clock.advance(n), K.clock.is("Sera"); npcs(step, K)
+//     bonds: { max: 5, per: 10, names: ["Estranei", ...], scenes: { id_png: [{ lv: 2, id: "x", lines: [[chi, testo]], reward(K) {} }] } },  // RAPPORTI: K.rel.add(id, punti), K.rel.lv(id), K.rel.scene(id, then); cuori nella pagina Personaggi; scena a soglia al prossimo dialogo
 //     plugins: [{ zone(zid, spec, Z, K), tick(zid, spec, px, py, dt, K), top(g, zid, spec, cx, cy, d, K), enter(zid, spec, K) }],
 //     rest: { ch: "s", label: "Riposa", text: "..." },
 //   });
@@ -389,7 +390,7 @@
       const m = mem(), B = window.__borgoApi || {}, C = api.CAST || {}, BIO = api.BIO || {}, met = SCAST.filter((id) => m.met.includes(id) && C[id]);
       if (!document.getElementById("scPersCss")) { const st = document.createElement("style"); st.id = "scPersCss"; st.textContent = `.scPers{position:fixed;inset:0;z-index:330;background:rgba(10,12,18,.97);color:#f4f0e4;font-family:system-ui,sans-serif;overflow:auto}.scPers .w{max-width:520px;margin:0 auto;padding:10px 12px 30px}.scPers .bar{display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:rgba(10,12,18,.97);padding:6px 0}.scPers h2{margin:0;font:800 18px system-ui;color:var(--sc,#ffd23f)}.scPers .x{width:42px;height:42px;border-radius:8px;border:1px solid #556;background:#1c2232;color:#f4f0e4;font-size:16px}.scPers .sum{font-size:13px;opacity:.8;margin:4px 0 10px}.scPers .c{display:grid;grid-template-columns:64px 1fr;gap:10px;align-items:start;background:#161b28;border:1px solid #2c3446;border-left:3px solid var(--sc,#ffd23f);border-radius:10px;padding:8px;margin:8px 0}.scPers img,.scPers .ph{width:64px;height:64px;border-radius:8px;object-fit:cover;background:#0006;display:block}.scPers b{font-size:14px}.scPers p{margin:4px 0 0;font-size:12.5px;line-height:1.45;opacity:.9}.scPers .lock{opacity:.45}`; document.head.appendChild(st); }
       const ov = document.createElement("div"); ov.className = "scPers"; ov.style.setProperty("--sc", TH.accent || "#ffd23f");
-      const card = (id) => { const img = safe(() => B.portraitImg && B.portraitImg(id), null), c = C[id]; return `<div class="c">${img ? `<img alt="" src="${img}">` : `<span class="ph"></span>`}<div><b>${esc(c.name || id)}</b><p>${esc(BIO[id] || "")}</p></div></div>`; };
+      const card = (id) => { const img = safe(() => B.portraitImg && B.portraitImg(id), null), c = C[id], rel = BND ? `<div style="color:#fb7185;font-size:13px;letter-spacing:2px;margin-top:4px">${"♥".repeat(relLv(id))}${"♡".repeat(BND.max - relLv(id))} <span style="letter-spacing:0;font-size:11px;color:#fda4af">${esc(BND.names[relLv(id)] || "")}</span></div>` : ""; return `<div class="c">${img ? `<img alt="" src="${img}">` : `<span class="ph"></span>`}<div><b>${esc(c.name || id)}</b>${rel}<p>${esc(BIO[id] || "")}</p></div></div>`; };
       const left = SCAST.length - met.length;
       ov.innerHTML = `<div class="w"><div class="bar"><h2>👥 Personaggi · ${esc(TITLE)}</h2><button type="button" class="x" aria-label="Chiudi">✕</button></div><p class="sum">Incontrati: ${met.length} su ${SCAST.length}. Gli altri compaiono quando ci parli.</p>${met.map(card).join("")}${left ? `<div class="c lock"><span class="ph"></span><div><b>??? × ${left}</b><p>Personaggi che non hai ancora incontrato.</p></div></div>` : ""}</div>`;
       ov.querySelector(".x").onclick = () => { ov.remove(); back(); };
@@ -977,6 +978,27 @@
       advance: clkAdvance, set: (d, sl) => { F.set("clk_day", Math.max(1, d | 0)); F.set("clk_slot", clampI(sl | 0, 0, CLK.slots.length - 1)); refreshZone(); }
     };
 
+    // -------------------------------------------------------------- RAPPORTI (cfg.bonds)
+    // Ogni personaggio ha punti di affinità (flag rel_<id>); ogni «per» punti è un livello (0..max). Le scene a soglia partono da sole
+    // al primo dialogo con quel personaggio dopo aver raggiunto il livello; si vedono una volta sola (flag relsc_<id scena>).
+    const BND = cfg.bonds ? Object.assign({ per: 10, max: 5, names: ["Sconosciuti", "Cordiali", "Amici", "Fidati", "Complici", "Inseparabili"], scenes: {} }, cfg.bonds) : null;
+    const relPts = (id) => (BND ? clampI(F.get("rel_" + id, 0) | 0, 0, BND.per * BND.max, 0) : 0);
+    const relLv = (id) => (BND ? Math.min(BND.max, Math.floor(relPts(id) / BND.per)) : 0);
+    function relAdd(id, n, quiet) {
+      if (!BND || !id) return 0;
+      const a = relLv(id); F.set("rel_" + id, clampI(relPts(id) + (n | 0), 0, BND.per * BND.max, 0)); const b = relLv(id);
+      if (!quiet && b !== a && window.toast) { const C = (api && api.CAST || {})[id]; window.toast(`${(C && C.name) || id}: ${BND.names[b] || "Livello " + b}`, b > a ? "good" : "warn", b > a ? "❤️" : "💔"); }
+      return b;
+    }
+    const relPending = (id) => (BND ? arr(BND.scenes && BND.scenes[id]).find((sc) => relLv(id) >= sc.lv && !F.get("relsc_" + sc.id)) || null : null);
+    function relScene(id, then) {
+      const sc = relPending(id); if (!sc) return false;
+      F.set("relsc_" + sc.id, true);
+      say(sc.lines, () => { if (sc.reward) safe(() => sc.reward(K)); if (typeof then === "function") then(); else done(); });
+      return true;
+    }
+    const REL = BND && { lv: relLv, pts: relPts, add: relAdd, scene: relScene, pending: relPending, names: BND.names, max: BND.max, per: BND.per };
+
     // -------------------------------------------------------------- kit per i capitoli
     const K = {
       get api() { return api; }, ID, TITLE, TS, T, esc, hash, rnd, pick, safe, F, mem, save, stepOf, setStep, note, once, reward, coinsGive, bal, hero, castHero, stat, bond,
@@ -987,7 +1009,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK,
+      clock: CLOCK, rel: REL,
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
       ending: (id, d) => { ENDINGS[id] = d; },
       continueStory: () => continueStory(), hasChapter: (n) => !!CHAPTERS[n], setInMatch: (v) => { inMatch = !!v; }, openMain: () => openMain(),
@@ -1011,9 +1033,10 @@
         const cm = cameoOf(id); if (cm) { castHero(); F.set("cameo_" + id, true); safe(() => (cm.talk ? cm.talk(K) : say(cm.lines)), null); return true; }
         const c = mineC(id);
         if (c) { // un capitolo può restituire K.PASS: allora risponde il capitolo precedente che conosce quel personaggio
-          castHero(); meet(id); const zr = zoneRec(), list = chainFor(zr).filter((cc) => cc.talk && cc.talk[id]);
-          for (const cc of list) { const r = safe(() => cc.talk[id](K), null); if (r !== PASS) return true; }
-          done(); return true;
+          castHero(); meet(id);
+          const run = () => { const zr = zoneRec(), list = zr ? chainFor(zr).filter((cc) => cc.talk && cc.talk[id]) : []; for (const cc of list) { const r = safe(() => cc.talk[id](K), null); if (r !== PASS) return; } done(); };
+          if (BND && relScene(id, run)) return true; // scena a soglia del rapporto, poi il dialogo normale
+          run(); return true;
         }
         return chained && typeof prev === "function" ? prev(id) : false;
       };

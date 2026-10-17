@@ -32,7 +32,7 @@
         { t: "Prendi il posto del Banditore (La Maschera)", big: true, fn: () => { say("Banditore", "(Si toglie la maschera con un sospiro.) Finalmente. Tenga, la mia. Le starà meglio che a me."); say("Sfinge", "Prima o poi ci arrivano tutti. Benvenuto, Banditore."); k.fin("patto"); } }
       ];
       if (F.get("qt_chiave")) opts.splice(1, 0, { t: "Smaschera il Banditore (Il Sipario Strappato)", big: true, fn: () => { say("Ilse", "(Ti passa la chiave.) Dietro il quadro dell'Ala Nord. Facciamo vedere a tutti cosa c'è scritto."); say("Banditore", "(Si lascia togliere la maschera. Sotto, un volto stanco di quarant'anni.) Ero il Dodicesimo, signor Campione. Mi hanno tenuto qui perché sapevo le battute."); k.fin("rivolta"); } });
-      if (F.get("qt_chiave") && K.stat("alleanze") >= 35 && K.stat("verita") >= 35) opts.push({ t: "Chiedi la libertà di tutti (I Quattordici)", big: true, fn: () => { say("Sfinge", "(Per la prima volta, senza sorridere.) Nessuno l'ha mai chiesto. Nessuno ci ha mai creduto."); say("Corvo", "Io ci credo. E ho il registro con i nomi."); say("Ilse", "Tutti e quattordici. Fuori, adesso."); k.fin("quattordici"); } });
+      if (F.get("qt_chiave") && K.stat("alleanze") >= 35 && K.stat("verita") >= 35) opts.push({ t: "Chiedi la libertà di tutti (I Quattordici)", big: true, fn: () => { say("Sfinge", "(Per la prima volta, senza sorridere.) Nessuno l'ha mai chiesto. Nessuno ci ha mai creduto."); say("Corvo", "Io ci credo. E ho il registro con i nomi."); say("Ilse", K.rel && K.rel.lv("qt_ilse") >= 3 ? "Tutti e quattordici. Fuori, adesso. E poi, finalmente, mi spieghi come si tira come si deve." : "Tutti e quattordici. Fuori, adesso."); k.fin("quattordici"); } });
       return opts;
     };
 
@@ -129,7 +129,7 @@
         early: "Parla con la tua compagna, prima. Ha visto cose.",
         acts: [
           {
-            t: "Parlare con Corvo (+Alleanze, +Verità)", cond: () => !F.get("qt3_corvo"),
+            t: "Parlare con Corvo (+Alleanze, +Verità)", rel: 8, cond: () => !F.get("qt3_corvo"),
             run() {
               F.set("qt3_corvo", true);
               say("Corvo", "Sono qui da tre giorni, e in tre anni di Torneo non ho mai visto nessuno uscire dall'Ala Nord. Ho perso mio fratello al primo. Non l'ho mai ritrovato.");

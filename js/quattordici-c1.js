@@ -132,7 +132,7 @@
         early: "Ehi, Campione! Parla con la tua compagna: è quella con le braccia incrociate e lo sguardo da portiere.",
         acts: [
           {
-            t: "Colazione con Teo (+Alleanze)", cond: () => !F.get("qt1_teo"),
+            t: "Colazione con Teo (+Alleanze)", rel: 8, cond: () => !F.get("qt1_teo"),
             run() {
               F.set("qt1_teo", true);
               say("Teo", "Teo Marangon! Giovanili, Rimini, tre gol miei e due tuoi, e a me quelli tuoi li ricordo tutti. Non sono rancoroso, solo preciso.");

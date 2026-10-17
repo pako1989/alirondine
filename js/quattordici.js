@@ -30,6 +30,25 @@
       verita: [0, 99, 0, "Verità scoperte"],
       forma: [0, 3, 0, "Forma"]
     },
+    bonds: {
+      per: 8, max: 5,
+      names: ["Estranei", "Conoscenti", "Alleati", "Fidati", "Complici", "Inseparabili"],
+      scenes: {
+        qt_ilse: [
+          { lv: 1, id: "ilse1", lines: [["qt_ilse", "Una cosa che non ti ho detto: mio padre era portiere. Aveva il guanto sinistro con il pollice rotto. Lo porto sempre in tasca."], ["qt_ilse", "Non sono scaramantica. Solo... abituata a non parare da sola."]], reward: (K) => K.bond("alleanze", 3) },
+          { lv: 3, id: "ilse3", lines: [["qt_ilse", "Se usciamo di qui, apro una scuola portieri. Quindici ragazzi per classe, niente fasce rosse, merenda obbligatoria."], ["qt_ilse", "Tu vieni a insegnare a tirare. Male, ma con convinzione."]], reward: (K) => K.bond("alleanze", 5) }
+        ],
+        qt_teo: [
+          { lv: 1, id: "teo1", lines: [["qt_teo", "Una cosa seria, per una volta. Da piccolo ho cambiato squadra tre volte perché mi sentivo di troppo. A Rimini con te per la prima volta no."], ["qt_teo", "Quindi grazie. Non ti sto chiedendo di perdere, eh. Solo di ricordarmi."]], reward: (K) => K.bond("alleanze", 3) }
+        ],
+        qt_luce: [
+          { lv: 1, id: "luce1", lines: [["qt_luce", "Una cosa personale, signor Campione. Ho tre nipoti che non sanno cosa faccio. Ho detto loro che catalogo musei."], ["qt_luce", "Se mai li vede, gli dica che i musei erano veri. Almeno quello."]], reward: (K) => K.bond("verita", 4) }
+        ],
+        qt_corvo: [
+          { lv: 1, id: "corvo1", lines: [["qt_corvo", "Tengo una foto di mio fratello nella fascia. La guardo prima di ogni partita. Non per portafortuna: per ricordarmi cosa sto cercando."], ["qt_corvo", "Ora la conosci anche tu. Fai come se non l'avessi vista."]], reward: (K) => K.bond("alleanze", 4) }
+        ]
+      }
+    },
     clock: {
       slots: ["Mattina", "Pomeriggio", "Sera", "Notte"],
       hud: true,
@@ -252,7 +271,7 @@
           const list = c.acts.filter((a) => !a.cond || a.cond());
           if (list.length) {
             return k.ask(c.prompt || (cl.is("Mattina") ? "È mattina. Come la spendi?" : "È sera. Come la spendi?"),
-              list.map((a) => ({ t: a.t, big: true, fn: () => { a.run(); k.spend(); } })).concat([{ t: "Lascia stare per ora", fn: () => { k.say(c.who, c.skip || "Come vuoi. Il tempo però non aspetta."); k.done(); } }]));
+              list.map((a) => ({ t: a.t, big: true, fn: () => { a.run(); if (K.rel) K.rel.add(WHO[c.who], a.rel == null ? 6 : a.rel); k.spend(); } })).concat([{ t: "Lascia stare per ora", fn: () => { k.say(c.who, c.skip || "Come vuoi. Il tempo però non aspetta."); k.done(); } }]));
           }
         }
         const idle = c.idle || ["..."];
