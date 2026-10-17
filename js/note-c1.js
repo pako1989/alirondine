@@ -173,7 +173,7 @@
                   });
                 } else {
                   setStep(3);
-                  done();
+                  finishChapter(1, "Il Tactics Note ha superato il primo test. Ma a Tokyo una mente altrettanto geniale sta già indagando...");
                 }
               }
             },
