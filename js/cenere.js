@@ -51,6 +51,27 @@
         tint: "220,38,38", tintA: 0.1, fx: "sparks"
       }
     },
+    bonds: {
+      talk: 4, per: 10, max: 5,
+      names: ["Sconosciuti", "Conoscenti", "Compagni di strada", "Fidati", "Famiglia", "Inseparabili"],
+      scenes: {
+        ce_brace: [
+          { lv: 1, id: "brace1", lines: [["ce_brace", "Sai perché conto le borracce ad alta voce? Perché mio marito le contava in silenzio, e un giorno ha smesso. Preferisco il rumore."]], reward: (K) => K.bond("legami", 4) },
+          { lv: 3, id: "brace3", lines: [["ce_brace", "Se il pallone arriva intero, le do un nome. Come alle borracce. Così non si perde."]], reward: (K) => K.bond("speranza", 5) }
+        ],
+        ce_tamburo: [
+          { lv: 1, id: "tamburo1", lines: [["ce_tamburo", "Aggiusto generatori perché i generatori non fanno domande. Con le persone è più difficile: non c'è il libretto di istruzioni."]], reward: (K) => K.bond("legami", 4) },
+          { lv: 3, id: "tamburo3", lines: [["ce_tamburo", "Un giorno ti dirò quanto pesa una promessa. Ma intanto passami il cacciavite."]], reward: (K) => K.bond("speranza", 5) }
+        ],
+        ce_selce: [
+          { lv: 1, id: "selce1", lines: [["ce_selce", "Disegno mappe perché le strade cambiano e le persone no. Mi sbaglio spesso, ma non su questo."]], reward: (K) => K.bond("legami", 4) },
+          { lv: 3, id: "selce3", lines: [["ce_selce", "Ho lasciato una pagina bianca in fondo all'atlante. Se vuoi, la riempi tu."]], reward: (K) => K.bond("speranza", 5) }
+        ],
+        ce_predicatore: [
+          { lv: 1, id: "pred1", lines: [["ce_predicatore", "Non odio il gioco. Odio quello che abbiamo fatto l'ultima volta che ci siamo divertiti. Non ero qui. Ma ci sarei stato."]], reward: (K) => K.bond("speranza", 4) }
+        ]
+      }
+    },
     solid: "aMKUPBNWE",
     paint: {
       a(K, sx, sy) {

@@ -63,6 +63,7 @@ async function storia(w) {
   await page.evaluate(([k]) => { const K = eval(k); K.bond("legami", 99); K.bond("speranza", 99); K.bond("borraccia", 9); }, [K_]);
   await fin("segreto", /Fidati di tutti/);
   { const i = await info(page); if (!i.ends.includes("pace") && !i.ends.includes("solitaria")) errors.push("finali: " + JSON.stringify(i.ends)); if (i.ends.length < 3) errors.push("finali pochi: " + JSON.stringify(i.ends)); }
+  { const lv = await page.evaluate((k) => eval(k).rel.lv("ce_tamburo"), K_); if (lv < 1) errors.push("rapporti: Tamburo livello " + lv + " dopo tre capitoli"); }
   L.check(`Cenere e Gloria · tre capitoli e finali (${w} px)`, errors); await browser.close();
 }
 // il motore: partite intere a pilota automatico, con punteggi plausibili

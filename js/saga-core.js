@@ -17,7 +17,7 @@
 //     endings: { id: ["TITOLO", "descrizione", "indizio"] },
 //     mainExtra(K) { return [{ label, sub, fn }] }, zoneMenuExtra(K) { return [...] },
 //     clock: { slots: ["Mattina", "Sera"], hud: true, tint: [...], onSlot(K, giorno, fascia, nome) { return [["voce", "..."]]; } },  // calendario: K.clock.advance(n), K.clock.is("Sera"); npcs(step, K)
-//     bonds: { max: 5, per: 10, names: ["Estranei", ...], scenes: { id_png: [{ lv: 2, id: "x", lines: [[chi, testo]], reward(K) {} }] } },  // RAPPORTI: K.rel.add(id, punti), K.rel.lv(id), K.rel.scene(id, then); cuori nella pagina Personaggi; scena a soglia al prossimo dialogo
+//     bonds: { talk: 4, max: 5, per: 10, names: ["Estranei", ...], scenes: { id_png: [{ lv: 2, id: "x", lines: [[chi, testo]], reward(K) {} }] } },  // RAPPORTI: K.rel.add(id, punti), K.rel.lv(id), K.rel.scene(id, then); cuori nella pagina Personaggi; scena a soglia al prossimo dialogo
 //     plugins: [{ zone(zid, spec, Z, K), tick(zid, spec, px, py, dt, K), top(g, zid, spec, cx, cy, d, K), enter(zid, spec, K) }],
 //     rest: { ch: "s", label: "Riposa", text: "..." },
 //   });
@@ -1034,6 +1034,7 @@
         const c = mineC(id);
         if (c) { // un capitolo può restituire K.PASS: allora risponde il capitolo precedente che conosce quel personaggio
           castHero(); meet(id);
+          if (BND && BND.talk) { const tk = `relt_${id}_${(activeChapter() || {}).n || 0}_${(activeChapter() ? stepOf(activeChapter().n) : 0)}`; if (!F.get(tk)) { F.set(tk, true); relAdd(id, BND.talk); } } // guadagno automatico: bonds.talk punti ad ogni nuovo passo di storia
           const run = () => { const zr = zoneRec(), list = zr ? chainFor(zr).filter((cc) => cc.talk && cc.talk[id]) : []; for (const cc of list) { const r = safe(() => cc.talk[id](K), null); if (r !== PASS) return; } done(); };
           if (BND && relScene(id, run)) return true; // scena a soglia del rapporto, poi il dialogo normale
           run(); return true;
