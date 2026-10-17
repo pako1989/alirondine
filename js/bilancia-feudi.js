@@ -589,7 +589,7 @@
         shirt: h.shirt || "#b91c1c",
         num: String(h.num || 9),
         bg: [h.shirt || "#b91c1c", "#fbbf24"],
-        acc: "sciarpa"
+        acc: h.acc || "none"
       };
     }
   }
