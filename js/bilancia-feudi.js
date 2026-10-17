@@ -2531,6 +2531,7 @@
     function triggerEpilogue(key) {
       X.sfxScalesBalance();
       F.set("finale_feudi", key);
+      { const e = F.get("ends_feudi", []); if (Array.isArray(e) && !e.includes(key)) F.set("ends_feudi", e.concat(key)); }
       finishChapter(N, "epilogo_" + key);
 
       const h = hero();
@@ -2590,6 +2591,16 @@
           ? `${h.name} · ${c ? "Capitolo " + c.n + (m.done[c.n] ? " concluso" : " in corso") : "Saga Tattica dei Feudi (Triangle Strategy)"}`
           : "Crea prima il tuo campione · Saga tattica medievale con Bilancia del Consiglio e Gettoni d'Oro"
       };
+    },
+    endings() {
+      const d = mem().decisions, e = Array.isArray(d.ends_feudi) ? d.ends_feudi.slice() : [];
+      if (d.finale_feudi && !e.includes(d.finale_feudi)) e.push(d.finale_feudi);
+      return [
+        ["moralita", "La Pace dei Giusti", "Leggi antiche e moralità trionfano.", "Conviction Moralità alta."],
+        ["utilita", "Il Dominio d'Acciaio", "Wolffort padrona di sale e ferro.", "Conviction Utilità alta."],
+        ["liberta", "Il Vento dei Roseliani", "Libertà per tutti i popoli.", "Conviction Libertà alta."],
+        ["golden", "La Corona Unita di Norzelia", "Federazione democratica.", "3 prove + almeno 4 gettoni."]
+      ].map((x) => ({ id: x[0], title: x[1], desc: x[2], hint: x[3], found: e.includes(x[0]) }));
     },
     info() {
       const m = mem();
