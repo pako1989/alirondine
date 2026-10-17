@@ -9898,6 +9898,54 @@
   LB.ce_torre = LB.ce_cratere;
   LB.ce_strada = LB.ce_titolo;
 
+  // Il Torneo dei Quattordici · albergo Meridiana, Zona Rossa, Ala Nord
+  [
+    ["qt_titolo", "Titolo", [
+      [20, 10, 300, 24, "💡 Quattordici lampade, una per squadra. Qualcuna sta già spegnendosi."],
+      [100, 60, 160, 70, "🏨 Il Meridiana: un albergo di lusso su una collina che non ha un nome."],
+      [20, 120, 100, 50, "🌑 La collina: quella strada la fanno i furgoni, non le persone."],
+      [250, 100, 70, 60, "🎭 Un invito con scritto: «Il Premio è qualunque cosa desideri»."]
+    ]],
+    ["qt_atrio", "Atrio", [
+      [20, 20, 70, 80, "🏛️ Colonne di marmo: ci sono scritte a matita, in piccolo, che nessuno lava."],
+      [130, 120, 100, 40, "🔔 Il bancone della reception: il registro è aperto, l'addetto non alza mai gli occhi."],
+      [250, 20, 60, 50, "💡 Il lampadario più grande dell'albergo, più caro della tua squadra."],
+      [30, 130, 70, 40, "🌿 Una pianta: sembra vera perché è curata male, e quindi vera."]
+    ]],
+    ["qt_stadio", "Stadio", [
+      [20, 10, 300, 30, "📟 Il tabellone: quattordici lampade, una per squadra. Finché dura."],
+      [30, 100, 100, 70, "🟥 Le fasce rosse: dormono sul bordo, per ora."],
+      [200, 90, 110, 70, "⚽ Il pallone al centro: l'unica cosa del Torneo che sembra sincera."],
+      [140, 120, 50, 40, "🎙️ Il microfono del Banditore."]
+    ]],
+    ["qt_giardino", "Giardino", [
+      [20, 60, 90, 70, "🌳 Siepi a forma di pallone: un lavoro che nessuno ha chiesto."],
+      [140, 130, 80, 40, "⛲ La fontana: l'acqua cade sempre nello stesso punto, come un orologio."],
+      [240, 30, 70, 60, "🗄️ Gli armadietti delle squadre. Alcune targhe sono grattate via."],
+      [20, 130, 70, 40, "☕ Una tazzina ancora tiepida su un tavolino di ferro battuto."]
+    ]],
+    ["qt_archivio", "Archivio", [
+      [20, 20, 90, 100, "📚 Scaffali di registri: ogni volume è un Torneo, ogni riga una squadra."],
+      [150, 20, 60, 60, "🕯️ La lampada verde: Luce ci lavora da trent'anni."],
+      [230, 60, 80, 80, "🗝️ Un cassetto chiuso: quello in cui, forse, c'è altro."],
+      [60, 130, 90, 40, "🖋️ Un blocco di appunti scritti a mano con grafia minuscola."]
+    ]],
+    ["qt_alanord", "Nord", [
+      [20, 20, 300, 20, "🔴 La luce rossa in fondo: pulsa, come un cuore che non sa se continuare."],
+      [30, 70, 90, 80, "🚪 Porte con numero e nome. Dietro, respiri regolari."],
+      [200, 70, 110, 80, "🧳 Valigie etichettate, vestiti ripiegati con cura."],
+      [130, 140, 80, 30, "📟 Il tabellone: due lampade accese su quattordici."]
+    ]],
+    ["qt_sipario", "Sipario", [
+      [20, 10, 120, 110, "🎭 Il sipario di velluto rosso: sembra pesare quanto una scelta."],
+      [200, 10, 120, 110, "🪑 Due poltrone: una per chi vince, l'altra per chi gli parla."],
+      [150, 70, 40, 50, "😶 Una maschera bianca appesa a un chiodo, sorridente a metà."],
+      [60, 140, 220, 30, "🌟 La pedana dorata: ci sale chi ha vinto. Poi, di solito, ci resta."]
+    ]]
+  ].forEach(([k, n, hot]) => {
+    LB[k] = { draw: (g, W, H, f) => { const D = window.__qtDraw; if (D && D[n]) D[n](g, W, H, f); else px(g, 0, 0, W, H, "#1a0710"); }, hot };
+  });
+
   // La Carovana del Fiume d'Argento: scene con punti cliccabili visibili (scintille) e didascalia
   [
     ["fa_titolo", "Molo", [

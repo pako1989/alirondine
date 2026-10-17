@@ -36,6 +36,11 @@ Un solo file: contiene regole, stato del progetto, come costruire una saga, API 
 | `K.finishChapter(n)` senza finale, `K.evidence` con firma inventata, `K.bond` letto come getter | fine capitolo/indizi rotti | `K.finishChapter(n, "finale")`, `K.evidence(id,{t,d,icon})`, `K.bond(stat, delta)` solo scrive; leggi con `K.stat(k)` |
 | Oggetti/PNG su tessere solide, PNG senza bio | oggetti non raggiungibili, scheda vuota | `items` su tessere libere (test `reachAll`), bio sempre |
 | Motore di partita: palla ferma, pareggio non gestito, HUD `[object Object]` | partita che non finisce | stallo -> riparte; pareggio = sconfitta o ripetizione; test a pilota automatico: 8-10 partite devono finire |
+| `K.ownMatch(...)` con `onDone` invece di `done` nelle opzioni | la storia non avanza dopo la partita | `ownMatch` chiama `o.done(res)`; il motore riceve `onDone` già avvolto |
+| Tessera personalizzata come pavimento (es. `R`, `u`) presente in `TR_SOLID` (`~#TSGMORWLNHBDW`) o in `SOLID0` | PNG/oggetti irraggiungibili | usa lettere libere e dichiarale in `cfg.floors`; scegli lettere non presenti in quelle stringhe |
+| Partenza/arrivo e porta di un interno dentro o sul bordo della casa 3x3 | il giocatore nasce dentro un solido | arrivo fuori dalla casa, porta sul lato; test `reach` su ogni zona |
+| `api.play(...)` per righe a metà zona (calendario) | schermo bloccato senza pulsanti | usa `K.say(righe, then)` dentro le zone; `play` solo per intro/scene |
+| Riconoscimento di gesto assente (qualsiasi tratto = successo) | sfida impossibile da perdere | classifica il tratto (cerchio, zig-zag, freccia, onda); errore e tempo scaduto = niente gol; test del classificatore |
 | **File condivisi consegnati interi** (bg-scenarios, salone, sogni, game, sw, index) | cancellati i `case` di altre saghe (es. `te_caldaie`) | solo patch mirate; dopo il pull controlla `git diff` che non tolga righe altrui |
 
 ---
@@ -320,6 +325,7 @@ Le funzioni dei **talk** ricevono `K` come parametro; l'`intro` di un capitolo r
   - **effetto diorama** tilt-shift (`cfg.diorama` o `spec.diorama`);
   - **pagina «👥 Personaggi»** dentro ogni saga (si riempie da sola con i personaggi incontrati);
   - **scelte a tempo** (`ask(..., { secs, def })`, nei test `K.timedFire()`);
+  - **calendario a fasce orarie** (`cfg.clock = { slots, hud, tint, onSlot }`, `K.clock.advance(n, then)` / `.is("Sera")` / `.set(giorno, fascia)`; `npcs(step, K)` riceve il kit; esempio: `js/quattordici*.js`, motore `js/zonarossa.js`);
   - **tubi pneumatici** (`spec.tubes`: stazione `at`, `path`, uscita `out`, `when`, `shut`; `K.tubeRide`, `K.tubeBusy`);
   - stadio della saga (`stadium`);
   - ospiti, cameo, musiche.

@@ -16,6 +16,7 @@
 //     journal: { name: "Il Quaderno", sub: "...", html(K) { return "..." } },
 //     endings: { id: ["TITOLO", "descrizione", "indizio"] },
 //     mainExtra(K) { return [{ label, sub, fn }] }, zoneMenuExtra(K) { return [...] },
+//     clock: { slots: ["Mattina", "Sera"], hud: true, tint: [...], onSlot(K, giorno, fascia, nome) { return [["voce", "..."]]; } },  // calendario: K.clock.advance(n), K.clock.is("Sera"); npcs(step, K)
 //     plugins: [{ zone(zid, spec, Z, K), tick(zid, spec, px, py, dt, K), top(g, zid, spec, cx, cy, d, K), enter(zid, spec, K) }],
 //     rest: { ch: "s", label: "Riposa", text: "..." },
 //   });
@@ -366,7 +367,7 @@
     function refreshZone() {
       const zr = zoneRec(); if (!zr) return;
       const c = CHAPTERS[zr.ch]; castHero();
-      const s = stepOf(c.n), es = eraSpec(api.trZone()); let list = es ? (es.npcs ? es.npcs(s) : []) : zr.spec.npcs ? zr.spec.npcs(s) : [];
+      const s = stepOf(c.n), es = eraSpec(api.trZone()); let list = es ? (es.npcs ? es.npcs(s, K) : []) : zr.spec.npcs ? zr.spec.npcs(s, K) : [];
       chainFor(zr).slice().reverse().forEach((cc) => { const p = cc.n !== zr.ch && cc.patch && cc.patch[api.trZone()]; if (p && p.npcs) list = p.npcs(stepOf(cc.n), list); });
       arr(cfg.cameos).forEach((c) => { if (c.zone === api.trZone() && !list.some((n) => n.id === c.id) && safe(() => c.when(K), false)) list.push({ id: c.id, at: c.at, cameo: true }); });
       // IL GRUPPO: i compagni di cfg.party(K) camminano in fila dietro al Campione (non bloccano, ci si parla guardandoli)
@@ -721,6 +722,7 @@
         safe(() => diorama(GP, spec));
         if (spec.hud) safe(() => spec.hud(GP, K, stepOf(chN)));
         PLUG.forEach((p) => p.hud && safe(() => p.hud(GP, zid, spec, K)));
+        if (CLK) safe(() => clkHud(GP));
       };
       Z.onObj = function (ch, tx, ty) {
         let f = null;
@@ -942,6 +944,39 @@
       recap(() => enterZone(zid));
     }
 
+    // -------------------------------------------------------------- CALENDARIO A FASCE ORARIE (cfg.clock)
+    // cfg.clock = { slots: ["Mattina", "Pomeriggio", "Sera", "Notte"], hud: true, tint: [null, null, "rgba(251,146,60,.10)", "rgba(15,23,60,.30)"],
+    //               onSlot(K, giorno, fascia, nome) { return [["voce", "testo"]] | null } }
+    // Ogni attività può consumare tempo: K.clock.advance(n). I PNG leggono l'ora: npcs(step, K) → K.clock.slot() / K.clock.is("Sera").
+    // Giorno e fascia stanno nei flag della saga (clk_day, clk_slot). Se onSlot restituisce righe, vengono recitate al cambio di fascia.
+    const CLK = cfg.clock ? Object.assign({ slots: ["Mattina", "Pomeriggio", "Sera", "Notte"], hud: true }, cfg.clock) : null;
+    const clkDay = () => Math.max(1, F.get("clk_day", 1) | 0), clkSlot = () => clampI(F.get("clk_slot", 0) | 0, 0, CLK.slots.length - 1);
+    function clkAdvance(n, then) {
+      let lines = [];
+      for (let i = 0; i < Math.max(1, n | 0 || 1); i++) {
+        let sl = clkSlot() + 1, d = clkDay();
+        if (sl >= CLK.slots.length) { sl = 0; d++; }
+        F.set("clk_day", d); F.set("clk_slot", sl);
+        const r = CLK.onSlot ? safe(() => CLK.onSlot(K, d, sl, CLK.slots[sl]), null) : null;
+        if (Array.isArray(r) && r.length) lines = lines.concat(r);
+      }
+      refreshZone();
+      if (window.toast) window.toast(`Giorno ${clkDay()} · ${CLK.slots[clkSlot()]}`, "info", "🕒");
+      if (lines.length) say(lines.map((l) => (Array.isArray(l) ? l : ["voce", String(l)])), then || null);
+      else if (then) then();
+    }
+    function clkHud(g) {
+      const c = g.canvas, sl = clkSlot(), tn = arr(CLK.tint)[sl];
+      if (tn) { g.fillStyle = tn; g.fillRect(0, 0, c.width, c.height); }
+      if (CLK.hud === false) return;
+      const t = `Giorno ${clkDay()} · ${CLK.slots[sl]}`; g.save(); g.font = "bold 9px sans-serif";
+      const w = g.measureText(t).width + 12; g.fillStyle = "rgba(0,0,0,.6)"; g.fillRect(4, c.height - 17, w, 13); g.fillStyle = "#fde68a"; g.fillText(t, 10, c.height - 7); g.restore();
+    }
+    const CLOCK = CLK && {
+      SLOTS: CLK.slots, day: clkDay, slot: clkSlot, name: () => CLK.slots[clkSlot()], is: (n) => CLK.slots[clkSlot()] === n,
+      advance: clkAdvance, set: (d, sl) => { F.set("clk_day", Math.max(1, d | 0)); F.set("clk_slot", clampI(sl | 0, 0, CLK.slots.length - 1)); refreshZone(); }
+    };
+
     // -------------------------------------------------------------- kit per i capitoli
     const K = {
       get api() { return api; }, ID, TITLE, TS, T, esc, hash, rnd, pick, safe, F, mem, save, stepOf, setStep, note, once, reward, coinsGive, bal, hero, castHero, stat, bond,
@@ -952,6 +987,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
+      clock: CLOCK,
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
       ending: (id, d) => { ENDINGS[id] = d; },
       continueStory: () => continueStory(), hasChapter: (n) => !!CHAPTERS[n], setInMatch: (v) => { inMatch = !!v; }, openMain: () => openMain(),
