@@ -5597,6 +5597,25 @@
         if (window.__dzDraw && window.__dzDraw.Bunker) window.__dzDraw.Bunker(g, W, H, f);
         else px(g, 0, 0, W, H, "#020617");
         return true;
+      case "fo_titolo":
+        if (window.__foDraw && window.__foDraw.Titolo) window.__foDraw.Titolo(g, W, H, f);
+        else px(g, 0, 0, W, H, "#030712");
+        return true;
+      case "fo_condotti":
+      case "fo_quadri":
+        if (window.__foDraw && window.__foDraw.Condotti) window.__foDraw.Condotti(g, W, H, f);
+        else px(g, 0, 0, W, H, "#020617");
+        return true;
+      case "fo_corridoio":
+      case "fo_caveau":
+        if (window.__foDraw && window.__foDraw.Caveau) window.__foDraw.Caveau(g, W, H, f);
+        else px(g, 0, 0, W, H, "#020617");
+        return true;
+      case "fo_tribuna":
+      case "fo_tetti":
+        if (window.__foDraw && window.__foDraw.Tetti) window.__foDraw.Tetti(g, W, H, f);
+        else px(g, 0, 0, W, H, "#020617");
+        return true;
       case "fa_chiuse":
       case "fa_sala_macchine":
         drawDetailedFiumeChiuse(g, W, H, f);
@@ -9841,44 +9860,6 @@
   LB.my_cripta = LB.my_cortile;
   LB.my_museo = LB.my_cortile;
 
-  // Cenere e Gloria · villaggi di rottami dopo il Crollo
-  [
-    ["ce_titolo", "Strada", [
-      [20, 40, 70, 40, "☀️ Il sole sporco: filtra attraverso la polvere e fa sembrare ogni cosa più vecchia."],
-      [120, 80, 100, 50, "🛣️ La Strada di Polvere: una lingua di terra battuta che collega i villaggi. Nessuno l'ha costruita."],
-      [250, 85, 60, 40, "🪧 Cartello storto: «ACQUA 40 PASSI». Qualcuno l'ha dipinto con il sangue della speranza."],
-      [30, 120, 90, 45, "🚗 La carcassa d'auto: fa ombra, ospita lucertole e, certe notti, un po' di compagnia."]
-    ]],
-    ["ce_villaggio", "Villaggio", [
-      [40, 60, 80, 60, "🏚️ Baracche di lamiera: ogni pezzo ha una storia, e probabilmente un precedente proprietario."],
-      [120, 130, 70, 40, "🔥 Il barile di fuoco: intorno a lui, la sera, si decidono le cose importanti."],
-      [210, 70, 90, 55, "🏭 Il magazzino delle razioni: qui l'acqua si conta, e ogni sorso è un contratto."],
-      [260, 20, 50, 40, "☁️ Fumo e polvere: il cielo di Rottame ha il colore di una vecchia moneta."]
-    ]],
-    ["ce_bunker", "Bunker", [
-      [120, 50, 90, 70, "🚪 Il portellone: acciaio, bulloni e una polvere antica come il silenzio."],
-      [20, 25, 45, 45, "🔴 La luce rossa: pulsa da vent'anni, come se non avesse capito che il mondo è finito."],
-      [270, 90, 50, 50, "⚽ Il pallone sullo scaffale: l'unica cosa pulita in tutto il bunker."],
-      [20, 120, 80, 45, "📦 Casse militari vuote: tranne una, con qualcosa di scritto col gesso."]
-    ]],
-    ["ce_oasi", "Strada", [
-      [20, 40, 70, 40, "☀️ Il sole sporco: filtra attraverso la polvere e fa sembrare ogni cosa più vecchia."],
-      [120, 80, 100, 50, "💧 La pozza dell'Oasi: poca, limpida, e per questo preziosa."],
-      [250, 85, 60, 40, "🪧 Cartello: «UN SORSO A TESTA». La regola più antica."],
-      [30, 120, 90, 45, "⛺ Tenda dei Fedeli: dentro, una brace che non si spegne."]
-    ]],
-    ["ce_cratere", "Cratere", [
-      [110, 100, 140, 60, "🔥 Le braci sul fondo: ci sono da prima che qualcuno si ricordi."],
-      [20, 30, 70, 50, "🌫️ Cenere in sospensione: il cielo sembra respirare."],
-      [250, 30, 60, 90, "🗼 La Torre del Predicatore: sul bordo, sempre accesa."],
-      [30, 130, 70, 45, "🪨 Rocce nere: spezzate, ancora tiepide."]
-    ]]
-  ].forEach(([k, n, hot]) => {
-    LB[k] = { draw: (g, W, H, f) => { const D = window.__ceDraw; if (D && D[n]) D[n](g, W, H, f); else px(g, 0, 0, W, H, "#3a2c1e"); }, hot };
-  });
-  LB.ce_torre = LB.ce_cratere;
-  LB.ce_strada = LB.ce_titolo;
-
   // La Carovana del Fiume d'Argento: scene con punti cliccabili visibili (scintille) e didascalia
   [
     ["fa_titolo", "Molo", [
@@ -9935,6 +9916,40 @@
   LB.dz_neve = LB.dz_chalet;
   LB.dz_base = LB.dz_bunker;
 
+  // Colpo al Fortino · La Notte del Trofeo Scomparso: scene con punti cliccabili visibili (scintille) e didascalia
+  [
+    ["fo_titolo", "Titolo", [
+      [30, 95, 75, 50, "🏆 La Coppa delle Rondini 1912: d'argento e quarzo sbalzato, il trofeo più antico del calcio nazionale."],
+      [135, 25, 90, 65, "🏟️ Stadio Metropolitano di Notte: 60.000 spettatori gremiscono le gradinate sotto i fari alogeni."],
+      [235, 95, 75, 55, "🚨 Barriere Laser del Fortino: fasci cremisi che pattugliano gli accessi sotterranei."],
+      [90, 110, 100, 45, "🚁 Eliporto Presidenziale: pale d'acciaio in rotazione sulla sommità della Curva Sud."]
+    ]],
+    ["fo_condotti", "Condotti", [
+      [25, 95, 75, 55, "🌀 Ventola della Turbina B: enormi pale in alluminio che aspirano l'aria calda del terreno di gioco."],
+      [130, 25, 100, 65, "⚡ Cavi di Media Tensione: conduttori inguainati che alimentano i riflettori di curva."],
+      [235, 90, 75, 60, "📻 Terminale Portatile di Daria: frequenze radio e radar di scansione dei prismi."],
+      [95, 115, 90, 45, "🚪 Grata di Sicurezza: condotto d'aerazione aperto con il grimaldello elettronico."]
+    ]],
+    ["fo_caveau", "Caveau", [
+      [25, 90, 75, 55, "🔒 Cilindro di Titanio: la camera blindata a tenuta stagna che protegge il piedistallo."],
+      [135, 25, 90, 65, "💎 Prismi a Specchio in Ottone: riflettori angolari regolati a 45 gradi per deviare i fasci ottici."],
+      [240, 90, 75, 55, "🚨 Emettitore Laser a Scansione: rete invisibile che fa scattare l'allarme generale del fortino."],
+      [95, 115, 95, 45, "💼 Valigia Diplomatica: custodia corazzata con i sigilli della federazione calcistica."]
+    ]],
+    ["fo_tetti", "Tetti", [
+      [30, 85, 75, 55, "🚁 Elicottero Presidenziale: turbina accesa pronta al decollo verso la frontiera alpina."],
+      [130, 20, 100, 70, "🌃 Skyline della Metropoli: grattacieli illuminati e fari che solcano le nubi notturne."],
+      [235, 85, 75, 60, "🏟️ Balcone sopra la Curva Sud: bandiere sventolanti e fumo colorato dei fumogeni dei tifosi."],
+      [95, 120, 90, 45, "🪂 Rampino con Deltaplano Furtivo: la via di fuga nell'ombra preparata da Loris la Volpe."]
+    ]]
+  ].forEach(([k, n, hot]) => {
+    LB[k] = { draw: (g, W, H, f) => { const D = window.__foDraw; if (D && D[n]) D[n](g, W, H, f); else px(g, 0, 0, W, H, "#0f172a"); }, hot };
+  });
+  LB.fo_quadri = LB.fo_condotti;
+  LB.fo_corridoio = LB.fo_caveau;
+  LB.fo_tribuna = LB.fo_tetti;
+
+
 
   // Operazione Fuorigioco Noir · Milano 1954: scene con punti cliccabili visibili (scintille) e didascalia
   [
@@ -9962,39 +9977,6 @@
   LB.mn_bastioni = LB.mn_titolo;
   LB.mn_lucciola = LB.mn_club;
   LB.mn_arena = LB.mn_stadio;
-
-  // Tactics Note · Il Quaderno del Giudizio: scene con punti cliccabili visibili (scintille) e didascalia
-  [
-    ["qd_titolo", "Titolo", [
-      [140, 115, 40, 30, "🍎 Mela Rossa di Ryu: uno spirito del cuoio che ama solo mele dolci e il brivido della sfida."],
-      [225, 30, 35, 35, "🔴 Luna Piena Scarlatta: illumina il cielo di Tokyo nella notte del giudizio sportivo."],
-      [20, 20, 60, 50, "💡 Torri Faro dello Stadio: potenti fasci di luce che squarciano l'oscurità del campo Daikoku."],
-      [120, 140, 80, 40, "📓 Tactics Note: il quaderno del giudizio che assegna contromosse fulminee in 40 secondi."]
-    ]],
-    ["qd_cortile", "Cortile", [
-      [145, 35, 30, 25, "🕰️ Orologio a Torre: scandisce i minuti delle lezioni e il conto alla rovescia del riscaldamento."],
-      [40, 60, 60, 40, "🏫 Edificio del Liceo Daikoku: aule silenziose dove si formano le menti più brillanti della capitale."],
-      [210, 110, 70, 50, "🌸 Viale dei Ciliegi: petali rosa che fluttuano nel vento notturno sul manto sintetico."],
-      [90, 120, 80, 40, "🚲 Rastrelliera delle Biciclette: gli studenti del club atletico hanno già raggiunto gli spalti."]
-    ]],
-    ["qd_aula", "Aula", [
-      [35, 25, 90, 60, "📐 Grande Lavagna Tattica: formule geometriche, traiettorie a gesso e schemi per anticipare Kira."],
-      [235, 95, 40, 40, "🍬 Piramide di Zollette di Zucchero: il nutrimento per il cervello di Elle durante le lunghe indagini."],
-      [140, 35, 60, 45, "💻 Monitor Tattico CRT: elabora percentuali di possesso palla e tempi di recupero in tempo reale."],
-      [80, 120, 70, 40, "📝 Banchi del Club: quaderni di tattica e appunti sulle debolezze dei mediani avversari."]
-    ]],
-    ["qd_stadio", "Stadio", [
-      [115, 25, 90, 30, "🔢 Tabellone Luminoso: segnapunti elettronico della finalissima del Torneo Interscolastico."],
-      [20, 20, 50, 40, "💡 Proiettori della Notte: illuminano a giorno il cerchio di centrocampo cancellando ogni ombra."],
-      [110, 115, 100, 45, "⚽ Cerchio di Centrocampo: il prato impeccabile dove si scontrano le filosofie di Raito ed Elle."],
-      [220, 90, 70, 50, "🏟️ Spalti di Tokyo: trentamila tifosi con sciarpe e striscioni in attesa del fischio del destino."]
-    ]]
-  ].forEach(([k, n, hot]) => {
-    LB[k] = { draw: (g, W, H, f) => { const D = window.__qdDraw; if (D && D[n]) D[n](g, W, H, f); else px(g, 0, 0, W, H, "#090d16"); }, hot };
-  });
-  LB.qd_quartier = LB.qd_cortile;
-  LB.qd_suite = LB.qd_aula;
-  LB.qd_tribuna = LB.qd_aula;
 
   function drawMarkers(g, k, f) {
     const def = LB[k]; if (!def || !def.hot) return;

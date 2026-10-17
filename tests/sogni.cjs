@@ -25,13 +25,13 @@ async function run(w) {
   await page.evaluate(() => document.querySelector('.sgOv [data-go="tour"]').click()); await page.waitForTimeout(200);
   if (w === 390) await L.shot(page, "sogni_torneo");
   await page.evaluate(() => document.querySelector('.sgOv [data-i="4"]').click()); await page.waitForTimeout(400);
-  const co = await page.evaluate(() => { const S = window.__concilio.state; return S ? [S.cred, S.ravens] : null; }); if (!co || co.join() !== "7,2") errors.push("Concilio dei Sogni: " + co);
+  const co = await page.evaluate(() => { const S = window.__concilio.state; return S ? [S.cred, S.ravens] : null; }); if (!co || co.join() !== "7,3") errors.push("Concilio dei Sogni: " + co);
   await page.evaluate(() => document.querySelector(".coOv .ov button").click()); await page.waitForTimeout(100);
   await page.evaluate(() => { const S = window.__concilio.state; S.a = 2; S.b = 0; S.finish(); }); await page.waitForTimeout(200); await page.evaluate(() => document.querySelector(".coOv .ov button").click()); await page.waitForTimeout(300);
   if (!(await page.evaluate(() => window.__sogni._load().won.includes(4)))) errors.push("sfida del Concilio non registrata");
   await page.evaluate(() => { const b = document.querySelector(".sgOv [data-ok]"); if (b) b.click(); }); await page.waitForTimeout(200);
   await page.evaluate(() => document.querySelector('.sgOv [data-i="6"]').click()); await page.waitForTimeout(400);
-  const du = await page.evaluate(() => { const S = window.__duello.state; return S ? S.gutsMax : null; }); if (du !== 124) errors.push("Duello dei Sogni, grinta: " + du);
+  const du = await page.evaluate(() => { const S = window.__duello.state; return S ? S.gutsMax : null; }); if (du !== 132) errors.push("Duello dei Sogni, grinta: " + du);
   await page.evaluate(() => document.querySelector(".duOv .ov button").click()); await page.waitForTimeout(100); await page.evaluate(() => window.__duello.state.finish(true)); await page.waitForTimeout(200); await page.evaluate(() => document.querySelector(".duOv .ov button").click()); await page.waitForTimeout(300);
   // le stelle: esperienza alle carte che giocano, a tre stelle la frase
   const xp = await page.evaluate(() => window.__sogni._load().xp); if (!(xp.cm_bastiano >= 1)) errors.push("nessuna esperienza alle carte dopo le sfide: " + JSON.stringify(xp));

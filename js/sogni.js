@@ -19,7 +19,7 @@
   const safe = (fn, d) => { try { return fn(); } catch (e) { return d; } };
   // le saghe da cui vengono le carte: chiave di salvataggio, nome, colore
   const SAGHE = {
-    cenere: ["ali-di-rondine.cenere", "Cenere e Gloria", "#d97706", "__cenere"],
+    fortino: ["ali-di-rondine.fortino", "Colpo al Fortino", "#38bdf8", "__fortino"],
     spia: ["ali-di-rondine.spia", "Operazione Doppio Zero", "#10b981", "__spia"],
     fiume: ["ali-di-rondine.fiume", "La Carovana del Fiume d'Argento", "#0284c7", "__fiume"],
     milano: ["ali-di-rondine.milano", "Operazione Fuorigioco Noir", "#64748b", "__milano"],
@@ -50,14 +50,9 @@
   // le carte delle saghe a capitoli (Vallombra e le altre): il 8° valore è il capitolo che le sblocca, una volta concluso.
   // Mai nelle bustine, nei premi a sorpresa e nel Draft finché non sono guadagnate: niente anticipazioni.
   const NEWC = [
-    // Tactics Note · Il Quaderno del Giudizio
-    ["qd_raito", "note", "e", 86, 68, 88, "A", 1], ["qd_ryu", "note", "l", 82, 70, 92, "C", 1],
-    ["qd_misa", "note", "r", 78, 54, 76, "A", 2], ["qd_elle", "note", "l", 64, 88, 94, "C", 2],
-    ["qd_soichiro", "note", "c", 52, 80, 60, "D", 3],
-    // Cenere e Gloria
-    ["ce_brace", "cenere", "r", 60, 76, 72, "D", 1], ["ce_tamburo", "cenere", "c", 66, 58, 82, "C", 1],
-    ["ce_selce", "cenere", "r", 58, 70, 80, "C", 2], ["ce_dente", "cenere", "e", 80, 62, 66, "A", 2],
-    ["ce_predicatore", "cenere", "l", 78, 84, 76, "D", 3],
+    // Colpo al Fortino · La Notte del Trofeo Scomparso
+    ["fo_lupin", "fortino", "e", 78, 62, 86, "A", 1], ["fo_turing", "fortino", "r", 60, 72, 82, "C", 1],
+    ["fo_gargoyle", "fortino", "r", 52, 84, 68, "D", 2], ["fo_boss", "fortino", "l", 82, 70, 75, "C", 3],
     // Operazione Doppio Zero · Licenza di Cross
     ["dz_sterling", "spia", "e", 74, 70, 84, "C", 1], ["dz_croupier", "spia", "c", 55, 62, 72, "D", 1],
     ["dz_eva", "spia", "r", 62, 76, 80, "C", 2], ["dz_kalt", "spia", "l", 85, 78, 82, "A", 3],
@@ -176,11 +171,10 @@
   const BY = Object.fromEntries(CARDS.map((c) => [c.id, c]));
   // la frase speciale che la carta dice quando arriva a tre stelle
   const FRASI = {
-    qd_raito: "Questo è il mio nuovo mondo: ogni contrasto è stato previsto esattamente al millimetro.",
-    qd_elle: "La probabilità che questa parabola entri all'incrocio era del 99,4%. L'ho verificata.",
-    qd_ryu: "Eh eh eh... Un gol magnifico in cambio di una bella mela rossa croccante!",
-    qd_misa: "Per Raito farei qualsiasi cosa: persino volare sulla fascia all'ultimo minuto!",
-    ce_brace: "Un sorso a testa. E il pallone, un tocco a testa.", ce_tamburo: "Se si rompe lo riparo. Se si perde lo ritrovo. Dammi un cacciavite e un minuto.", ce_selce: "Traiettoria tracciata. Lamiera 2 si abbassa tra tre secondi: tira ora.", ce_dente: "Le cose abbandonate sono di chi arriva primo. Questo gol, per esempio.", ce_predicatore: "Il pallone non si gioca per vincere. Si gioca per ricordare.",
+    fo_lupin: "Nessun lucchetto resiste a un tocco di suola calibrato al millimetro.",
+    fo_turing: "Firewall superato, frequenze allineate: palla nel sette a colpo sicuro!",
+    fo_gargoyle: "Disciplina di ferro sul campo e nella camera blindata: qui non si passa.",
+    fo_boss: "Un trofeo di cent'anni non si tocca: ma il talento vale più di quaranta milioni.",
     dz_sterling: "Un Martini agitato, non mescolato: e un tiro all'incrocio, non telefonato.",
     dz_croupier: "Rien ne va plus: il pallone è già entrato nel sette.",
     dz_eva: "Codice decifrato: traiettoria balistica perfetta con il 99,8% di probabilità di gol.",
@@ -248,12 +242,11 @@
     { name: "Union Cometa", color: "#7a5ad8", style: "contropiede", f: 73, pl: ["Coda", "Chioma", "Nucleo", "Scia"] },
     { name: "I Leggendari del Faro", color: "#1a2a4a", style: "equilibrata", f: 76, pl: ["Lampo", "Vedetta", "Scoglio", "Fanale"] },
   ];
-  const ENG = ["rottami", "roulette", "corrente", "marea", "vignette", "bottoni", "luci", "nastro", "concilio", "lavagna", "duello", "atb", "gadget", "iso", "volo", "combo", "consegna", "ciak", "ipogeo", "pallatempo", "giroegol", "rebound", "corridoio", "anello"];
+  const ENG = ["caveau", "roulette", "corrente", "marea", "vignette", "bottoni", "luci", "nastro", "concilio", "lavagna", "duello", "atb", "gadget", "iso", "volo", "combo", "consegna", "ciak", "ipogeo", "pallatempo", "giroegol", "rebound", "corridoio", "anello"];
   const RAR = { c: ["Comune", "#9aa5b1", 1], r: ["Rara", "#3a8ad8", 2], e: ["Epica", "#a85ad8", 3], l: ["Leggendaria", "#ffd23f", 4] };
   // i legami tra saghe diverse: +3 di intesa se entrambi in squadra
   const LINKS = [
-    ["qd_raito", "qd_elle", "Duello Mentale"], ["qd_ryu", "qd_misa", "Occhi dello Shinigami"], ["qd_elle", "dc_agata", "Deduzioni & Lavagna"],
-    ["ce_selce", "dc_agata", "Mappe & Indagini"], ["ce_tamburo", "fa_mirella", "Meccanica & Rinvii"],
+    ["fo_lupin", "dz_sterling", "Ombre & Servizi Segreti"], ["fo_turing", "te_valenti", "Crittografi del Binario"],
     ["dz_sterling", "mn_desantis", "Servizi Segreti & Questura"], ["dz_eva", "dc_agata", "Crittografia & Indagini"],
     ["fa_roderico", "gl_barbabiscotto", "Lupi di Fiume e di Mare"], ["fa_mirella", "my_alvarez", "Mappe e Glifi dell'Acqua"],
     ["te_valenti", "mn_desantis", "Intelligenza di Frontiera"], ["te_elena", "dc_agata", "Mistero & Eleganza"],
@@ -416,7 +409,6 @@
       ipogeo: `cuori ${4 + (T.df >= 2 ? 1 : 0)} (DIF), tiro +${T.at * 3}% (ATT), tempo +${T.te * 3}s (TEC)`,
       ciak: `ciak di riserva ${2 + (I >= 8 ? 1 : 0) + (T.te >= 3 ? 1 : 0)} (TEC), idee riuscite con ATT/DIF/TEC`,
       iso: `terreno ${["saline", "vetro", "ruggine"][I % 3]}, tiro +${T.at} (ATT), contrasto +${T.df} (DIF), passaggio +${T.te} (TEC)`,
-      rottami: `anteprima del tiro più lunga +${T.at * 5} (ATT), scudo più alto +${T.df * 3} (DIF), vento di sabbia -${T.te * 10}% (TEC)`,
       roulette: `fiches scudo +${T.df} (DIF), precisione carambola +${T.at * 5}% (ATT), gettoni turbo +${(I >= 8 ? 1 : 0) + (T.te >= 2 ? 1 : 0)} (TEC)`,
       atb: `statistiche +${Math.floor(I / 3)}, tiro +${T.at} (ATT), difesa +${T.df} (DIF), passaggio +${T.te} (TEC)`,
     }[m] || "";
@@ -445,7 +437,6 @@
       ciak: { mates: names.slice(0, 2), us: "La Squadra dei Sogni", takes: 2 + (I >= 8 ? 1 : 0) + (T.te >= 3 ? 1 : 0) },
       volo: { energy: 100 + I * 3 + T.te * 5, mates: names.slice(0, 1), us: "La Squadra dei Sogni" },
       gadget: { slots: Math.min(6, 4 + (I >= 10 ? 1 : 0) + (T.te >= 2 ? 1 : 0)), mates: names.slice(0, 2), us: "La Squadra dei Sogni" },
-      rottami: { mate: names[0], us: "La Squadra dei Sogni" },
       roulette: { mates: names.slice(0, 2), us: "La Squadra dei Sogni" },
       atb: { heroSt: { tiro: 16 + Math.floor(I / 3) + T.at, pass: 14 + Math.floor(I / 3) + T.te, dif: 12 + Math.floor(I / 3) + T.df, vel: 15 + Math.floor(I / 3) + Math.floor(T.te / 2) } },
     }[m] || {};
