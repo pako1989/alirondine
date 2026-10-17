@@ -10422,3 +10422,147 @@
   const DRAW = { rm_titolo: titolo, rm_suburra: suburra, rm_terme: terme, rm_colosseo: colosseo };
   Object.keys(DRAW).forEach((k) => R.register(k, { draw: (g, W, H, f) => DRAW[k](g, W, H, f), hot: HOT[k] }));
 })();
+
+// ============================================================ «L'Accademia dei Sigilli»: quattro sfondi arcani
+(function () {
+  "use strict";
+  const R = window.__lbBg; if (!R || !R.register) return;
+  const px = (g, x, y, w, h, c) => { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); };
+  const circ = (g, x, y, r, c) => { g.fillStyle = c; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); };
+  const ell = (g, x, y, rx, ry, c) => { g.fillStyle = c; g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, 7); g.fill(); };
+  const vg = (g, x, y, w, h, st) => { const gr = g.createLinearGradient(0, y, 0, y + h); st.forEach((s, i) => gr.addColorStop(i / (st.length - 1), s)); g.fillStyle = gr; g.fillRect(x, y, w, h); };
+  const glow = (g, x, y, r, rgb, a) => { const gr = g.createRadialGradient(x, y, 1, x, y, r); gr.addColorStop(0, `rgba(${rgb},${a})`); gr.addColorStop(1, `rgba(${rgb},0)`); g.save(); g.globalCompositeOperation = "lighter"; g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2); g.restore(); };
+
+  function sgTitolo(g, W, H, f) {
+    vg(g, 0, 0, W, 120, ["#030712", "#1e1b4b", "#312e81"]);
+    vg(g, 0, 120, W, H - 120, ["#1e1b4b", "#0f172a"]);
+    circ(g, 160, 45, 24, "#fef08a");
+    glow(g, 160, 45, 55, "254,240,138", 0.4);
+    for (let i = 0; i < 20; i++) {
+      const sx = (i * 47 + 13) % W;
+      const sy = (i * 29 + 7) % 100;
+      px(g, sx, sy, 1.5, 1.5, "#e0e7ff");
+    }
+    for (let k = 0; k < 5; k++) {
+      const gx = 40 + k * 60;
+      g.fillStyle = "#0f172a";
+      g.beginPath();
+      g.moveTo(gx - 16, 120);
+      g.lineTo(gx, 50 + (k % 2) * 20);
+      g.lineTo(gx + 16, 120);
+      g.closePath();
+      g.fill();
+      px(g, gx - 1, 38 + (k % 2) * 20, 2, 14, "#fbbf24");
+    }
+    circ(g, 160, 95, 22, "#4338ca");
+    g.strokeStyle = "#fbbf24"; g.lineWidth = 2;
+    g.beginPath(); g.arc(160, 95, 22, 0, 7); g.stroke();
+    for (let p = 0; p < 8; p++) {
+      const pa = p * Math.PI / 4;
+      g.beginPath(); g.moveTo(160, 95); g.lineTo(160 + Math.cos(pa) * 22, 95 + Math.sin(pa) * 22); g.stroke();
+    }
+    px(g, 40, 148, 240, 38, "rgba(15,23,42,.92)");
+    g.strokeStyle = "#6366f1"; g.lineWidth = 2;
+    g.strokeRect(40, 148, 240, 38);
+    g.fillStyle = "#fbbf24";
+    g.font = "900 13px 'Trebuchet MS', serif";
+    g.textAlign = "center";
+    g.fillText("📜 L'ACCADEMIA DEI SIGILLI 📜", 160, 165);
+    g.font = "700 9px 'Trebuchet MS', serif";
+    g.fillStyle = "#c7d2fe";
+    g.fillText("ESAMI DI MAGIA DEL PALLONE · ANNO 1492", 160, 178);
+  }
+
+  function sgCortile(g, W, H, f) {
+    vg(g, 0, 0, W, 90, ["#0f172a", "#1e1b4b", "#312e81"]);
+    vg(g, 0, 90, W, H - 90, ["#1e1b4b", "#0f172a"]);
+    for (let c = 0; c < 6; c++) {
+      const cx = 20 + c * 55;
+      px(g, cx, 30, 10, 80, "#475569");
+      g.strokeStyle = "#64748b"; g.lineWidth = 2;
+      g.beginPath(); g.arc(cx + 27, 30, 28, Math.PI, 0); g.stroke();
+    }
+    g.strokeStyle = "rgba(168,85,247,.7)"; g.lineWidth = 2;
+    g.beginPath(); g.ellipse(160, 145, 80, 28, 0, 0, 7); g.stroke();
+    g.strokeStyle = "rgba(251,191,36,.8)"; g.lineWidth = 1.5;
+    g.beginPath(); g.ellipse(160, 145, 55, 18, 0, 0, 7); g.stroke();
+    circ(g, 160, 145, 6, "#fbbf24");
+    glow(g, 160, 145, 30, "251,191,36", 0.35);
+  }
+
+  function sgBiblioteca(g, W, H, f) {
+    vg(g, 0, 0, W, H, ["#090d16", "#0f172a", "#1e1b4b"]);
+    px(g, 10, 20, 60, 160, "#3b1e10");
+    px(g, 250, 20, 60, 160, "#3b1e10");
+    for (let r = 0; r < 5; r++) {
+      px(g, 12, 30 + r * 28, 56, 3, "#ca8a04");
+      px(g, 252, 30 + r * 28, 56, 3, "#ca8a04");
+      const c1 = ["#dc2626", "#2563eb", "#ca8a04", "#16a34a", "#9333ea"];
+      for (let b = 0; b < 6; b++) {
+        px(g, 14 + b * 8, 33 + r * 28, 6, 22, c1[(r + b) % 5]);
+        px(g, 254 + b * 8, 33 + r * 28, 6, 22, c1[(r + b + 1) % 5]);
+      }
+    }
+    px(g, 156, 120, 8, 45, "#ca8a04");
+    g.strokeStyle = "#fbbf24"; g.lineWidth = 2;
+    g.beginPath(); g.arc(160, 85, 35, 0, 7); g.stroke();
+    g.beginPath(); g.ellipse(160, 85, 35, 12, f * 0.03, 0, 7); g.stroke();
+    circ(g, 160, 85, 8, "#38bdf8");
+    glow(g, 160, 85, 24, "56,189,248", 0.4);
+  }
+
+  function sgTorre(g, W, H, f) {
+    vg(g, 0, 0, W, 130, ["#030712", "#111827", "#1e1b4b"]);
+    vg(g, 0, 130, W, H - 130, ["#1e1b4b", "#0f172a"]);
+    glow(g, 160, 50, 90, "168,85,247", 0.25);
+    for (let s = 0; s < 25; s++) {
+      const sx = (s * 39 + 17) % W;
+      const sy = (s * 23 + 11) % 110;
+      px(g, sx, sy, 1.5, 1.5, s % 2 ? "#fbbf24" : "#c7d2fe");
+    }
+    px(g, 0, 125, W, 8, "#334155");
+    for (let m = 0; m < 12; m++) {
+      px(g, m * 28 + 4, 115, 16, 12, "#1e293b");
+    }
+    g.strokeStyle = "#fbbf24"; g.lineWidth = 2.5;
+    g.beginPath(); g.ellipse(160, 165, 95, 30, 0, 0, 7); g.stroke();
+    const sigCol = ["#38bdf8", "#facc15", "#4ade80", "#c084fc"];
+    for (let k = 0; k < 4; k++) {
+      const ka = k * Math.PI / 2 + f * 0.02;
+      const kx = 160 + Math.cos(ka) * 75;
+      const ky = 165 + Math.sin(ka) * 22;
+      circ(g, kx, ky, 5, sigCol[k]);
+      glow(g, kx, ky, 18, "251,191,36", 0.3);
+    }
+  }
+
+  const HOT = {
+    sg_titolo: [
+      [120, 70, 80, 50, "📜 Il Rosone Arcano dell'Accademia: le vetrate istoriate narrano la prima sfida calcistica del 1492."],
+      [30, 50, 70, 70, "🏰 Le guglie gotiche della Torre dei Sigilli che sfiorano le comete nel cielo notturno."],
+      [220, 60, 70, 60, "🔮 Gli orbi di etere fluttuanti che illuminano le corti senza bisogno di torce."],
+      [110, 140, 100, 50, "⚽ Il Cerchio delle Parabole dove gli apprendisti tracciano i primi incantesimi a mezzanotte."]
+    ],
+    sg_cortile: [
+      [100, 115, 120, 60, "✨ Il grande cerchio runico del chiostro: sotto i piedi si sente pulsare l'energia delle linee di faglia."],
+      [20, 30, 70, 80, "🏛️ Le arcate del chiostro gotico dove gli studenti si riparano tra una lezione e l'altra."],
+      [230, 30, 70, 70, "🚩 Gli stendardi delle Quattro Case magiche dell'Accademia: Vento, Tuono, Scudo e Illusione."],
+      [130, 20, 60, 50, "🗿 La statua del Gran Maestro Fondatore che benedice ogni nuovo novizio."]
+    ],
+    sg_biblioteca: [
+      [110, 45, 100, 80, "🪐 L'Astrolabio Monumentale di Tolomeo il Portiere: calcola le parabole ideali per i calci d'angolo."],
+      [10, 20, 70, 150, "📚 Le scansie dei tomi proibiti rilegate in pelle di drago e sigillate con ceralacca."],
+      [240, 20, 70, 150, "🕯️ I tomi di geometria balistica contenenti formule di rotazione d'effetto."],
+      [100, 130, 120, 45, "📜 La pergamena aperta del 'Trattato di Balistica Eterea' del 1492."]
+    ],
+    sg_torre: [
+      [110, 20, 100, 60, "🌌 La Grande Congiunzione delle Quattro Costellazioni: le stelle vibrano all'unisono con il pallone."],
+      [20, 90, 80, 60, "🛡️ Il Sigillo della Difesa Assoluta intagliato nella roccia del pinnacolo ovest."],
+      [220, 90, 80, 60, "⚡ La Runa della Tempesta che scarica bagliori violetti verso le valli sottostanti."],
+      [90, 135, 140, 50, "🥅 La Porta di Luce Stellare: segnare qui consacra un giocatore nella leggenda immortale."]
+    ]
+  };
+
+  const DRAW = { sg_titolo: sgTitolo, sg_cortile: sgCortile, sg_biblioteca: sgBiblioteca, sg_torre: sgTorre };
+  Object.keys(DRAW).forEach((k) => R.register(k, { draw: (g, W, H, f) => DRAW[k](g, W, H, f), hot: HOT[k] }));
+})();

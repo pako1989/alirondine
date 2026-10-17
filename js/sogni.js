@@ -19,6 +19,7 @@
   const safe = (fn, d) => { try { return fn(); } catch (e) { return d; } };
   // le saghe da cui vengono le carte: chiave di salvataggio, nome, colore
   const SAGHE = {
+    sigilli: ["ali-di-rondine.sigilli", "L'Accademia dei Sigilli", "#6366f1", "__sigilli"],
     fortino: ["ali-di-rondine.fortino", "Colpo al Fortino", "#38bdf8", "__fortino"],
     cenere: ["ali-di-rondine.cenere", "Cenere e Gloria", "#d97706", "__cenere"],
     spia: ["ali-di-rondine.spia", "Operazione Doppio Zero", "#10b981", "__spia"],
@@ -51,6 +52,9 @@
   // le carte delle saghe a capitoli (Vallombra e le altre): il 8° valore è il capitolo che le sblocca, una volta concluso.
   // Mai nelle bustine, nei premi a sorpresa e nel Draft finché non sono guadagnate: niente anticipazioni.
   const NEWC = [
+    // L'Accademia dei Sigilli · Esami di Magia del Pallone
+    ["sg_preside", "sigilli", "l", 85, 72, 90, "C", 3], ["sg_miriel", "sigilli", "e", 88, 64, 84, "A", 1],
+    ["sg_golem", "sigilli", "r", 55, 88, 60, "D", 2], ["sg_tobia", "sigilli", "c", 62, 58, 70, "C", 1],
     // Colpo al Fortino · La Notte del Trofeo Scomparso
     ["fo_lupin", "fortino", "e", 78, 62, 86, "A", 1], ["fo_turing", "fortino", "r", 60, 72, 82, "C", 1],
     ["fo_gargoyle", "fortino", "r", 52, 84, 68, "D", 2], ["fo_boss", "fortino", "l", 82, 70, 75, "C", 3],
@@ -180,6 +184,10 @@
   const BY = Object.fromEntries(CARDS.map((c) => [c.id, c]));
   // la frase speciale che la carta dice quando arriva a tre stelle
   const FRASI = {
+    sg_preside: "Il vero potere di un calciatore non è nei piedi, ma nei simboli che sa imprimere sul destino.",
+    sg_miriel: "Una parabola di vento non è solo fisica... è pura armonia che supera la barriera.",
+    sg_golem: "GROOOM... NESSUN... PALLONE... VARCA... IL... GRANITO.",
+    sg_tobia: "Ho allineato gli inchiostri! Ora il nostro tiro saetta non sbaglia un colpo!",
     fo_lupin: "Nessun lucchetto resiste a un tocco di suola calibrato al millimetro.",
     fo_turing: "Firewall superato, frequenze allineate: palla nel sette a colpo sicuro!",
     fo_gargoyle: "Disciplina di ferro sul campo e nella camera blindata: qui non si passa.",
@@ -260,6 +268,7 @@
   const RAR = { c: ["Comune", "#9aa5b1", 1], r: ["Rara", "#3a8ad8", 2], e: ["Epica", "#a85ad8", 3], l: ["Leggendaria", "#ffd23f", 4] };
   // i legami tra saghe diverse: +3 di intesa se entrambi in squadra
   const LINKS = [
+    ["sg_miriel", "cc_lyra", "Armonie di Cristallo & Sigilli"], ["sg_preside", "fo_lupin", "I Segreti dei Maestri"],
     ["fo_lupin", "dz_sterling", "Ombre & Servizi Segreti"], ["fo_turing", "te_valenti", "Crittografi del Binario"],
     ["qd_raito", "qd_elle", "Duello Mentale"], ["qd_ryu", "qd_misa", "Occhi dello Shinigami"], ["qd_elle", "dc_agata", "Deduzioni & Lavagna"],
     ["ce_selce", "dc_agata", "Mappe & Indagini"], ["ce_tamburo", "fa_mirella", "Meccanica & Rinvii"],
@@ -450,6 +459,7 @@
       rebound: { mates: names.slice(0, 2), us: "La Squadra dei Sogni" },
       anello: { mate: names[0], us: "La Squadra dei Sogni" },
       corrente: { mates: names.slice(0, 2), us: "La Squadra dei Sogni" },
+      runa: { us: "La Squadra dei Sogni" },
       ipogeo: { us: "La Squadra dei Sogni" },
       ciak: { mates: names.slice(0, 2), us: "La Squadra dei Sogni", takes: 2 + (I >= 8 ? 1 : 0) + (T.te >= 3 ? 1 : 0) },
       volo: { energy: 100 + I * 3 + T.te * 5, mates: names.slice(0, 1), us: "La Squadra dei Sogni" },
