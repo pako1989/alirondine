@@ -29,7 +29,7 @@
     const goal = (s) => ({
       0: "Qualcuno ti osserva dai rami dei ciliegi: è Ryu, vicino all'ingresso in basso a sinistra, accanto al cartello. Avvicinati e premi Parla.",
       1: "Entra nel Liceo Daikoku e raggiungi l'Aula del Club di Tattica per parlare con Raito Yagami.",
-      2: "Dimostra le tue capacità nella simulazione tattica contro i Rivali di Shibuya!",
+      2: "Parla di nuovo con Raito (Aula del Club, dentro il Liceo) e scegli «Inizia la sfida a Tactics Note». Vinci contro i Rivali di Shibuya.",
       3: "Il primo capitolo è concluso. Continua con il Capitolo 2."
     }[s] || "Il primo capitolo è concluso. Continua con il Capitolo 2.");
 
