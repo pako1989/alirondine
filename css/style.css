@@ -1934,3 +1934,34 @@ body:has(#matchHud:not([hidden])) #matchHud .hud div { padding: 2px 6px; }
 .azb button:not(.big) { padding-inline: 2px !important; font-size: 12.5px !important; }
 
 html, body { overscroll-behavior-y: contain; }
+
+  /* ---- home a schede ---- */
+  #choices.home { grid-template-columns: repeat(6, 1fr); gap: 8px; }
+  #choices.home .head { grid-column: 1 / -1; margin-top: 8px; }
+  #choices.home > button[data-h] { position: relative; overflow: hidden; text-align: left; color: #fff; transition: transform .12s, filter .12s; }
+  #choices.home > button[data-h]:active { transform: scale(.97); filter: brightness(1.1); }
+  #choices.home > button[data-h]::before { content: attr(data-ic); position: absolute; pointer-events: none; filter: drop-shadow(0 3px 4px #0007); }
+  #choices.home > button[data-h] small { display: block; margin-top: 3px; font: 600 11px/1.2 var(--body); opacity: .92; white-space: normal; }
+  #choices.home > button[data-h="big"] { grid-column: span 3; min-height: 112px; display: flex; flex-direction: column; justify-content: flex-end; padding: 46px 10px 10px; font-size: 16px; border: 2px solid #ffffff55; background: linear-gradient(150deg, var(--c1), var(--c2)); text-shadow: 0 1px 2px #0009; }
+  #choices.home > button[data-h="big"]::before { top: 6px; right: 10px; font-size: 36px; animation: hBob 3.4s ease-in-out infinite; }
+  #choices.home > button[data-h="big"]::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, transparent 38%, #ffffff30 50%, transparent 62%); transform: translateX(-130%); animation: hSheen 6s ease-in-out infinite; }
+  #choices.home > button[data-c="a"] { --c1: #9f1239; --c2: #f97316; }
+  #choices.home > button[data-c="b"] { --c1: #5b21b6; --c2: #ec4899; animation-delay: .08s; }
+  #choices.home > button[data-c="c"] { --c1: #1e40af; --c2: #38bdf8; }
+  #choices.home > button[data-c="d"] { --c1: #166534; --c2: #a3e635; }
+  #choices.home > button[data-h="mid"] { grid-column: span 2; min-height: 84px; padding-top: 34px; display: flex; flex-direction: column; justify-content: flex-end; padding: 8px 9px; font-size: 12.5px; background: linear-gradient(160deg, #26457a, #172a4d); border-color: #fbbf2488; }
+  #choices.home > button[data-h="mid"]::before { top: 6px; left: 9px; font-size: 22px; }
+  #choices.home > button[data-h="mid"] small { display: none; }
+  #choices.home > button[data-h="small"], #choices.home > button[data-h="slot"] { grid-column: span 3; min-height: 44px; padding: 8px 10px 8px 38px; font-size: 13px; background: #16294a; }
+  #choices.home > button[data-h="slot"] { grid-column: 1 / -1; }
+  #choices.home > button[data-h="small"]::before, #choices.home > button[data-h="slot"]::before { left: 10px; top: 50%; transform: translateY(-50%); font-size: 17px; }
+  #choices.home > button[data-h="hero"], #choices.home > button[data-h="hero2"] { grid-column: 1 / -1; min-height: 78px; display: flex; flex-direction: column; justify-content: center; padding: 10px 14px 10px 66px; font-size: 18px; border: 2px solid #ffffffaa; text-shadow: 0 1px 3px #000a; }
+  #choices.home > button[data-h="hero"] { background: linear-gradient(100deg, #f59e0b, #ef4444); animation: hGlow 2.4s ease-in-out infinite; }
+  #choices.home > button[data-h="hero2"] { min-height: 64px; font-size: 16px; background: linear-gradient(100deg, #4c1d95, #be185d) center/cover; }
+  #choices.home > button[data-h="hero"]::before, #choices.home > button[data-h="hero2"]::before { left: 14px; top: 50%; transform: translateY(-50%); font-size: 30px; }
+  #choices.home > button[data-h="tip"] { grid-column: 1 / -1; }
+  @keyframes hBob { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-5px) rotate(3deg); } }
+  @keyframes hSheen { 0%, 70% { transform: translateX(-130%); } 100% { transform: translateX(130%); } }
+  @keyframes hGlow { 0%, 100% { box-shadow: 0 0 0 0 #fbbf2400, 0 4px 14px #0006; } 50% { box-shadow: 0 0 18px 3px #fbbf24aa, 0 4px 14px #0006; } }
+  @media (max-width: 440px) { #choices.home > button[data-h="mid"] { font-size: 11.5px; } #choices.home > button[data-h="big"] { font-size: 15px; } }
+  @media (prefers-reduced-motion: reduce) { #choices.home > button[data-h]::before, #choices.home > button[data-h]::after, #choices.home > button[data-h="hero"] { animation: none; } }

@@ -815,6 +815,9 @@
     open: (back) => openSalone(back), album: (back) => openAlbum(back), salaGiochi: (back) => openSalaGiochi(back), machine: (id) => MACHINES.find((m) => m.id === id) || null, heroLook: () => heroLook(), cineteca: (back) => openCineteca(back), guardaroba: (back) => openGuardaroba(back), close, personaggi: (back) => openPersonaggi(back), personaggiStato: () => safe(() => perTotals(), null),
     summary: () => safe(() => { const t = totals(), A = api(), C = (A && A.COSM) || {}; return Object.assign(t, { cosOwned: safe(() => A.cosOwned().length, 0), cosTot: Object.keys(C).length }); }, { n: 0, run: 0, fin: 0, fe: 0, te: 0, cosOwned: 0, cosTot: 0 }),
     SAGAS,
+    // ultima saga giocata, per «Riprendi» nella home
+    lastSaga: () => safe(() => { const s = SAGAS.find((x) => x.id === rec().last); return s && available(s) ? { id: s.id, t: s.t, e: s.e, cover: cover(s) } : null; }, null),
+    resume: (back) => safe(() => { const s = SAGAS.find((x) => x.id === rec().last); if (s) play(s, back); }),
     // saga conclusa (tutti i capitoli o almeno un finale trovato): serve ai mazzi di Carte del Destino
     concluded: (key) => safe(() => { const s = SAGAS.find((x) => x.key === key); if (!s) return false; const x = state(s); return !!(x.finished || x.endsFound > 0); }, false),
   };

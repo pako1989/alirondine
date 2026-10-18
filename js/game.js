@@ -15691,6 +15691,7 @@
     buttons([
       ...(has && STORY[has.step] ? [{ label: "Continua", sub: STORY[has.step].chap, cls: "hot", fn: () => { S = has; run(); } }] : []),
       ...(fresh0 ? [{ label: "Nuova partita", sub: "Stagione 1 · circa 30–40 minuti", cls: "hot", fn: () => { S = fresh(); run(); } }] : []),
+      ...((ls) => (ls ? [{ label: "Riprendi saga", sub: ls.t, cls: "hot", fn: () => window.__salone.resume(title) }] : []))(salLast()),
       { head: "Gioca" },
       { label: "Storia", sub: `Le stagioni di Leo · ${mnPct(mnStoria())}%`, fn: menuStoria },
       ((t) => ({ label: "🏛️ Salone delle Saghe", sub: t ? `${t.n} saghe · ${t.run} in corso · finali ${t.fe}/${t.te}` : "Tutte le saghe a schede, con copertine e finali", cls: "hot", fn: () => salGo("open") }))(salSum()),
@@ -15699,11 +15700,28 @@
       { head: "Il tuo Campione" },
       ((t) => ({ label: "👕 Guardaroba", sub: t ? `${t.cosOwned}/${t.cosTot} capi, colori e accessori` : "Prova e indossa capi, colori e accessori", fn: () => salGo("guardaroba") }))(salSum()),
       ((t) => ({ label: "🏆 Album dei finali", sub: t ? `${t.fe}/${t.te} timbri` : "Un timbro per ogni finale trovato", fn: () => salGo("album") }))(salSum()),
+      ...(window.__carteDecks ? [{ label: "Carte del Destino", sub: "Mini-storie a mazzi: pesca, vivi, rigioca", fn: () => window.__carteDecks.openHub(title) }] : []),
       { head: "Altro" },
       { label: "Altro…", sub: "Minigiochi, collezioni, enciclopedia, guide", fn: menuAltro },
       { label: "Impostazioni", sub: `${(DIFF[SET.diff] || DIFF.normale)[0]} · salvataggi · grafica`, fn: menuImp },
     ]);
+    homeSkin();
     TITLE_BOX = $("choices").firstElementChild;
+  }
+  // la home a schede: stessi pulsanti di prima (e gli stessi test), vestiti da tessere grandi con icona e colore
+  function salLast() { try { return window.__salone && window.__salone.lastSaga ? window.__salone.lastSaga() : null; } catch { return null; } }
+  function homeSkin() {
+    const box = $("choices"); if (!box) return; box.classList.add("home");
+    const M = [[/^(Continua|Nuova partita)/, "hero", "▶"], [/^Riprendi saga/, "hero2", "⏪"], [/^Storia/, "big", "📖", "a"], [/Salone delle Saghe/, "big", "🏛️", "b"], [/^Partite e modalità/, "big", "⚽", "c"], [/^Borgo e trasferte/, "big", "🏘️", "d"], [/Guardaroba/, "mid", "👕"], [/Album dei finali/, "mid", "🏆"], [/^Carte del Destino/, "mid", "🎴"], [/^Altro/, "small", "➕"], [/^Impostazioni/, "small", "⚙️"], [/^Partite ·/, "slot", "💾"]];
+    const ls = salLast();
+    box.querySelectorAll(":scope > button").forEach((b) => {
+      const t = b.innerText.replace(/\s+/g, " ").trim(), m = M.find((x) => x[0].test(t));
+      b.dataset.h = m ? m[1] : "tip"; if (!m) return;
+      b.dataset.ic = m[2]; if (m[3]) b.dataset.c = m[3];
+      const l = b.querySelector(".choice-lbl-text"); if (l) l.textContent = l.textContent.replace(/^[^\p{L}\p{N}]+/u, "");
+      if (m[1] === "slot") box.appendChild(b);
+      if (m[1] === "hero2" && ls && ls.cover) b.style.backgroundImage = `linear-gradient(90deg,#0b1026f5 28%,#0b102655),url(${ls.cover})`;
+    });
   }
   // il Salone si carica dopo game.js: la home mostra subito le sue porte e, appena è pronto, aggiorna i numeri
   let TITLE_BOX = null;
