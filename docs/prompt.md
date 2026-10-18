@@ -4,7 +4,7 @@ Un solo file: contiene regole, stato del progetto, come costruire una saga, API 
 
 **Come usarlo:** leggi per prima la sezione «LEGGI PRIMA». Se Pasquale chiede di riprendere i lavori, leggi §A e §B e controlla `git log` e `ls js/`. Se chiede una saga nuova, leggi tutto e parti dal §1.
 
-## ⛔ LEGGI PRIMA · 11 regole bloccanti (il resto del file è riferimento)
+## ⛔ LEGGI PRIMA · 12 regole bloccanti (il resto del file è riferimento)
 1. Rispondi in italiano, telegrafico, **senza spoiler** della trama; dopo ogni pubblicazione una nota breve (cosa hai finito, cosa aggiunge).
 2. `git pull --rebase origin main` prima di ogni push; patch mirate sui file condivisi; mai `git add -A`; dopo il pull bump di `?v=` e cache `sw.js` (`node tools/bump.cjs <file>`).
 3. Usa solo funzioni che esistono nel kit `K` (§7). **`K.teleport` non esiste**: l'`intro` del capitolo restituisce righe `[["voce","testo"]]` e il capitolo ha `start: "id_zona"`.
@@ -16,6 +16,7 @@ Un solo file: contiene regole, stato del progetto, come costruire una saga, API 
 9. **Prima di consegnare lancia `npm run verifica`** e incolla l'esito (✓/✗). Poi i test della tua saga (§5).
 10. Nel report finale scrivi sempre: cosa hai fatto, quali test hai eseguito, **cosa non hai verificato**.
 11. **Grafica pari alle saghe curate** (Rondine 1938, Gran Premio): mappe grandi, `floorPaint` con texture, facciate `house()` con tetto e finestre accese, `decor` con plachette, luci `K.light`, sfondi 320x200 animati con 3+ punti. Prima di consegnare fai uno screenshot affiancato con una saga curata: se la tua è più povera, non consegnare. Le meccaniche non compensano una resa spoglia.
+12. **Usa tutto il motore se serve (non per forza).** Prima di scrivere codice scorri §2, §3 e §7 e per ogni funzione scrivi nel piano: **usata / scartata perché** (es. interni `house(enter)`, Rapporti `cfg.bonds`, Inventario `cfg.inv`, calendario `cfg.clock`, tubi, furtivo, scelte a tempo, `party`, `pass`, `heroFx`, `eras`, `cameos`, `mood`, `stadium`). Scartare va bene se la storia non la vuole; dimenticarla no. **Interni:** ogni saga ha almeno 2 edifici in cui si entra (stanza automatica o interno a mano con PNG/oggetto) alternati a edifici solo descritti. Nel report finale elenca le funzioni scartate e il motivo.
 
 ## ✔ Verifica con un solo comando
 `npm run verifica` = controllo sintassi + avvio del gioco a 390 e 320 px + percorso nuova partita di OGNI saga (Inizia → Continua → mappa). Dura pochi minuti. Per una sola saga: `node tests/percorso.cjs <parte-del-nome>`. I test lunghi di capitolo restano `npm test` / `node tests/run.cjs <nome>`.
@@ -304,6 +305,8 @@ Le funzioni dei **talk** ricevono `K` come parametro; l'`intro` di un capitolo r
 5. Un solo giro di screenshot alla fine (intro, menu difficoltà, 1-2 zone); durante il lavoro test via script con output breve.
 
 ## 9 · Checklist di fine saga (spunta ogni riga prima di dire «fatto»)
+- [ ] Interni: almeno 2 edifici enterabili; elenco funzioni del motore «usata/scartata perché» nel report.
+- [ ] Screenshot affiancato con una saga curata (regola 11).
 - [ ] Zero errori in console dal caricamento a fine capitolo 1 (e poi per tutti i capitoli).
 - [ ] Percorso da nuova partita: Inizia la storia → difficoltà → Continua → primo PNG → ultima battuta → compare il pulsante/scheda successiva.
 - [ ] Ogni PNG con `ask`/ricompense/funzioni proprie provato fino in fondo.
