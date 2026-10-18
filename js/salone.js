@@ -648,6 +648,7 @@
     let html = `<p class="sum">${tt.n} saghe · ${tt.run} in corso · ${tt.fin} concluse · finali trovati ${tt.fe}/${tt.te}</p>`;
     if (lastS) html += `<div class="cont" data-id="${lastS.s.id}"><img alt="" src="${cover(lastS.s)}"><div><b>▸ Continua: ${esc(lastS.s.t)}</b>${lastS.x.finished ? "Conclusa · rigioca o cerca gli altri finali" : `Capitolo ${lastS.x.ch}${lastS.s.ch ? ` di ${lastS.s.ch}` : ""}`}</div></div>`;
     if (window.__carteDecks) html += `<div class="big"><button type="button" data-go="carte">🎴 Carte del Destino<small>Mini-storie a mazzi · pesca, vivi, rigioca</small></button></div>`;
+    if (window.__bar) html += `<div class="big"><button type="button" data-go="bar">🍺 Il Bar del Borgo<small>Gestione leggera · servi, ascolta gli ospiti, migliora il locale</small></button></div>`;
     html += `<div class="big"><button type="button" data-go="album">🏆 Album dei finali<small>${tt.fe}/${tt.te} timbri</small></button><button type="button" data-go="guarda">👕 Guardaroba<small>Prova e indossa ciò che hai sbloccato</small></button></div>`;
     html += `<div class="big"><button type="button" data-go="sala">🕹️ Sala Giochi<small>I motori di partita delle saghe, liberi</small></button><button type="button" data-go="cine">🎬 Cineteca<small>Rivedi i finali trovati</small></button></div>`;
     { const pt = safe(() => perTotals(), null); if (pt) html += `<div class="big"><button type="button" data-go="per">👥 Album dei personaggi<small>${pt.seen}/${pt.tot} incontrati · carte d'oro per le saghe concluse</small></button>${window.__sogni ? `<button type="button" data-go="sogni">🃏 La Squadra dei Sogni<small>Carte da collezionare, intesa e il Torneo dei Sogni</small></button>` : ""}</div>`; }
@@ -664,6 +665,7 @@
     body.querySelectorAll("[data-st]").forEach((b) => (b.onclick = () => { FILT.st = b.dataset.st; openSalone(); }));
     body.querySelectorAll("[data-g]").forEach((b) => (b.onclick = () => { FILT.g = b.dataset.g; openSalone(); }));
     body.querySelectorAll(".card,.cont").forEach((b) => (b.onclick = () => detail(SAGAS.find((s) => s.id === b.dataset.id))));
+    const brb = body.querySelector('[data-go="bar"]'); if (brb) brb.onclick = () => { close(); window.__bar.open(() => openSalone()); };
     const cdb = body.querySelector('[data-go="carte"]'); if (cdb) cdb.onclick = () => { close(); window.__carteDecks.openHub(() => openSalone()); };
     body.querySelector('[data-go="album"]').onclick = () => openAlbum(() => openSalone());
     body.querySelector('[data-go="guarda"]').onclick = () => openGuardaroba(() => openSalone());

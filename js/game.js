@@ -15700,6 +15700,7 @@
       { head: "Il tuo Campione" },
       ((t) => ({ label: "👕 Guardaroba", sub: t ? `${t.cosOwned}/${t.cosTot} capi, colori e accessori` : "Prova e indossa capi, colori e accessori", fn: () => salGo("guardaroba") }))(salSum()),
       ((t) => ({ label: "🏆 Album dei finali", sub: t ? `${t.fe}/${t.te} timbri` : "Un timbro per ogni finale trovato", fn: () => salGo("album") }))(salSum()),
+      ...(window.__bar ? [{ label: "🍺 Il Bar del Borgo", sub: "Servi di giorno, ascolta di sera, migliora il locale", fn: () => window.__bar.open(title) }] : []),
       ...(window.__carteDecks ? [{ label: "Carte del Destino", sub: "Mini-storie a mazzi: pesca, vivi, rigioca", fn: () => window.__carteDecks.openHub(title) }] : []),
       { head: "Altro" },
       { label: "Altro…", sub: "Minigiochi, collezioni, enciclopedia, guide", fn: menuAltro },
