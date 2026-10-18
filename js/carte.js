@@ -31,6 +31,16 @@
     tamburo: { id: "ce_tamburo", key: "ali-di-rondine.cenere", n: "Tamburo", i: "🔧", tr: "furbizia", d: "Da Cenere e Gloria. Aggiusta tutto con due fili e un po' di ostinazione.", greet: (a) => `Ehi, Campione. In ${a} non c'è un libretto di istruzioni, ma ho un cacciavite.`, win: "Perfetto. Funziona. Non toccare niente.", lose: "Sì, è rotto. Ma si ripara. Quasi sempre." },
     tilly: { id: "rt_tilly", key: "ali-di-rondine.tempo", n: "Tilly Verdi", i: "📟", tr: "furbizia", d: "Da Rondine 1938-2038. Parla a velocità di fibra ottica.", greet: (a) => `Ho dieci minuti prima del prossimo guasto del tabellone. ${a}? Perfetto, andiamo.`, win: "Segnato, registrato, backup fatto. Bravo.", lose: "Errore 404: vittoria non trovata. Riprova." }
   };
+  // ------------------------------------------------------------------ mazzi estendibili
+  // Un mazzo è un pacchetto di carte (personaggi, eventi, twist) con una condizione di sblocco. Qualsiasi file caricato dopo
+  // carte.js può aggiungerne uno: window.__carteDecks.register({ id, t, e, d, lock, unlock: (ctx) => bool, pg: {...}, ev: {...}, tw: {...} })
+  // pg: come PG, in più `cast` (spec di K.cast); ev: come EV; tw: come TW, `fx(monete, vinta, rnd)` opzionale. Gli id sono dei mazzi: niente collisioni.
+  const DECKS = [], PREFK = "ali-di-rondine.carte-mazzi";
+  const prefs = () => safe(() => JSON.parse(localStorage.getItem(PREFK) || "{}"), {});
+  const ctx = () => { const f = safe(() => window.__carte.info().flags, {}) || {}; return { wins: +f.cd_wins || 0, runs: +f.cd_runs || 0, played: (key) => safe(() => !!localStorage.getItem(key), false) }; };
+  const deckUnlocked = (d) => safe(() => !!d.unlock(ctx()), false);
+  const deckLive = (d) => deckUnlocked(d) && prefs()[d.id] !== false;
+  const liveCard = (c) => { const d = c && c.deck && DECKS.find((x) => x.id === c.deck); return !d || deckLive(d); };
   const EV = {
     pallone: { n: "Il Pallone Smarrito", i: "⚽", d: "Un pallone prezioso è sparito, e tutti si accusano a vicenda.",
       setup: (p, a) => [[p, "Un pallone è sparito da {a}. Non uno qualunque: quello firmato da tutti i capitani del molo. Si sospetta l'uno dell'altro."], [p, "Io non accuso nessuno. Ma qualcuno prima o poi dovrà mettere la faccia. Tu, per esempio."]],
@@ -149,6 +159,7 @@
   .cdC u em{font-style:normal;font-size:9px;font-weight:900;letter-spacing:.06em;color:#fff;background:var(--c);border-radius:6px;padding:2px 7px}
   .cdC u s{text-decoration:none;font-size:38px;margin:6px 0 2px;filter:drop-shadow(0 3px 2px #0004)}.cdC u strong{font-size:11.5px;line-height:1.15}.cdC u span{font-size:9.5px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:7;-webkit-box-orient:vertical;opacity:.8;margin-top:3px;line-height:1.15}
   .cdBt{font-size:16px;font-weight:900;padding:12px 28px;border-radius:12px;border:0;background:linear-gradient(#fbbf24,#f59e0b);color:#2a1a00;cursor:pointer}.cdBt.s{background:#244d3d;color:#f7f2e3;font-size:13px;padding:9px 18px}
+  .cdDks{display:flex;flex-direction:column;gap:8px;max-width:360px;width:100%}.cdDk{display:flex;gap:10px;align-items:center;background:#0b2c22cc;border:1px solid #fde68a55;border-radius:12px;padding:8px 10px}.cdDk .e{font-size:26px}.cdDk div{flex:1;min-width:0}.cdDk b{display:block;font-size:14px;color:#fde68a}.cdDk small{display:block;font-size:11.5px;opacity:.85;line-height:1.25}.cdDk small.s{opacity:.6;margin-top:2px}
   @keyframes cdDeal{from{transform:translateY(-120px) rotate(-14deg);opacity:0}to{transform:none;opacity:1}}`;
   function injectCss() { if (document.getElementById("cdCss")) return; const s = document.createElement("style"); s.id = "cdCss"; s.textContent = CSS; document.head.appendChild(s); }
   function cardHtml(type, c, i) { const t = TYPES[type]; return `<div class="cdC" data-i="${i}" style="--c:${t[1]};animation-delay:${i * 0.12}s"><i><b>🎴</b><u><em>${t[0].toUpperCase()}</em><s>${c.i}</s><strong>${esc(c.n)}</strong><span>${esc(c.d || "")}</span></u></i></div>`; }
@@ -241,6 +252,23 @@
     },
     cameos: []
   });
+  const deckApi = {
+    register(d) { if (!d || !d.id || DECKS.some((x) => x.id === d.id)) return false; DECKS.push(d); [["pg", PG], ["ev", EV], ["tw", TW]].forEach(([t, o]) => Object.keys(d[t] || {}).forEach((k) => { const c = d[t][k]; c.deck = d.id; o[d.id + "_" + k] = c; })); return true; },
+    list: () => DECKS.map((d) => ({ id: d.id, t: d.t, unlocked: deckUnlocked(d), on: deckLive(d) })),
+    openHub(back) {
+      injectCss(); document.querySelectorAll(".cdOv").forEach((e) => e.remove());
+      const ov = document.createElement("div"); ov.className = "cdOv";
+      const n = (d) => ["pg", "ev", "tw"].reduce((a, t) => a + Object.keys(d[t] || {}).length, 0), c = ctx();
+      const guests = Object.keys(GUEST).filter((k) => c.played(GUEST[k].key)).length;
+      const row = (e, t, d, st, id, on) => `<div class="cdDk"><span class="e">${e}</span><div><b>${esc(t)}</b><small>${esc(d)}</small><small class="s">${esc(st)}</small></div>${id ? `<button type="button" class="cdBt s" data-dk="${id}">${on ? "Attivo" : "Spento"}</button>` : ""}</div>`;
+      const paint = () => { ov.innerHTML = `<h2>🎴 Carte del Destino</h2><p>Mini-storie rigiocabili: pesca 5 carte, vivi la storia, gioca la prova. Più mazzi, più storie.</p><div class="cdDks">${row("🎣", "Mazzo del Molo", "Il mazzo base: 4 luoghi, 5 personaggi, 5 eventi, 4 prove, 5 twist.", "Sempre attivo", "", 0)}${row("🤝", "Mazzo degli Ospiti", "Personaggi delle altre saghe che hai giocato.", guests + "/" + Object.keys(GUEST).length + " ospiti presenti", "", 0)}${DECKS.map((d) => deckUnlocked(d) ? row(d.e, d.t, d.d, n(d) + " carte", d.id, deckLive(d)) : row("🔒", d.t, d.d, d.lock || "Bloccato", "", 0)).join("")}</div><button class="cdBt" id="cdPlay" type="button">Gioca ▸</button><button class="cdBt s" id="cdBack" type="button">Indietro</button>`;
+        ov.querySelectorAll("[data-dk]").forEach((b) => (b.onclick = () => { const p = prefs(); p[b.dataset.dk] = p[b.dataset.dk] === false; safe(() => localStorage.setItem(PREFK, JSON.stringify(p))); paint(); }));
+        ov.querySelector("#cdPlay").onclick = () => { ov.remove(); E.api.open({ onExit: back }); };
+        ov.querySelector("#cdBack").onclick = () => { ov.remove(); if (back) back(); }; };
+      paint(); document.body.appendChild(ov);
+    }
+  };
+  window.__carteDecks = deckApi;
   window.__carte = E.api; window.__carteProvaStart = prova; window.__carteEV = EV;
   window.__carteCore = E;
 
@@ -255,6 +283,7 @@
     K.cast("cd_gigi", { name: "Gigi Due-Reti", sub: "Ex portiere", style: "buzz", hair: "#6b7280", acc: ["fascia"], skin: "#d9a679", eye: "#3a3a2a", shirt: "#16a34a", bg: ["#14532d", "#bbf7d0"] }, PG.gigi.d);
     K.cast("cd_lanterna", { name: "Signora Lanterna", sub: "Custode del faro", style: "bun", hair: "#e5e7eb", acc: ["occhiali"], skin: "#e8cdb0", eye: "#4a6a8a", shirt: "#7c2d12", bg: ["#1e1b4b", "#fcd34d"] }, PG.lanterna.d);
     K.cast("cd_tonno", { name: "Il Barone Tonno", sub: "Re del pesce in scatola", style: "slick", hair: "#1a1a1a", acc: ["occhiali"], skin: "#e0b890", eye: "#3a3a2a", shirt: "#6d28d9", bg: ["#4c1d95", "#fbbf24"] }, PG.tonno.d);
+    DECKS.forEach((d) => Object.keys(d.pg || {}).forEach((k) => { const p = d.pg[k]; if (p.cast) K.cast(p.id, p.cast, p.d); }));
     K.cos("cd_c1", { kind: "shirt", label: "Giacca da mazziere", val: "#92400e", from: "Vinci la prima storia delle Carte del Destino" });
     K.cos("cd_c2", { kind: "hairc", label: "Capelli color gettone", val: "#d4a02a", from: "Vinci 3 storie delle Carte del Destino" });
     K.cos("cd_c3", { kind: "acc", label: "Cappellino del Molo", val: "cappellino", from: "Vinci 6 storie delle Carte del Destino" });
@@ -265,7 +294,7 @@
     const pgOf = (id) => PG[id] || GUEST[id];
     const guestsAvailable = () => Object.keys(GUEST).filter((k) => safe(() => !!K.otherSaga(GUEST[k].key), false));
     const pickFrom = (type, pool) => { const un = pool.filter((k) => !F.is("cd_s_" + type + "_" + k)), from = un.length && Math.random() < 0.75 ? un : pool; return from[rnd(from.length)]; };
-    const deal = () => ({ amb: pickFrom("amb", Object.keys(AMB)), pg: pickFrom("pg", Object.keys(PG).concat(guestsAvailable())), ev: pickFrom("ev", Object.keys(EV)), sf: pickFrom("sf", Object.keys(SF)), tw: pickFrom("tw", Object.keys(TW)) });
+    const deal = () => ({ amb: pickFrom("amb", Object.keys(AMB)), pg: pickFrom("pg", Object.keys(PG).filter((k) => liveCard(PG[k])).concat(guestsAvailable())), ev: pickFrom("ev", Object.keys(EV).filter((k) => liveCard(EV[k]))), sf: pickFrom("sf", Object.keys(SF)), tw: pickFrom("tw", Object.keys(TW).filter((k) => liveCard(TW[k]))) });
     const startRun = () => {
       const d = deal(), cards = { amb: AMB[d.amb], pg: pgOf(d.pg), ev: EV[d.ev], sf: SF[d.sf], tw: TW[d.tw] };
       Object.keys(d).forEach((t) => F.set("cd_" + t, d[t])); ["amb", "pg", "ev", "sf", "tw"].forEach((t) => F.set("cd_s_" + t + "_" + d[t], true));
@@ -302,6 +331,7 @@
       if (c.tw === "doppio") coins = win ? coins * 2 : Math.round(coins * 0.5);
       if (c.tw === "prezzo") coins = Math.round(coins * 0.7);
       if (c.tw === "pallone") coins += rnd(25);
+      if (tw.fx) coins = safe(() => tw.fx(coins, win, rnd), coins);
       if (!win) coins = Math.round(coins * 0.5);
       const g = K.coinsGive(coins); if (g) msg.push(`+${g} monete`);
       const runs = F.get("cd_runs", 0) + 1, wins = F.get("cd_wins", 0) + (win ? 1 : 0);

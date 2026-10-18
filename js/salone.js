@@ -647,12 +647,13 @@
     const lastS = list.find((o) => o.s.id === r.last);
     let html = `<p class="sum">${tt.n} saghe · ${tt.run} in corso · ${tt.fin} concluse · finali trovati ${tt.fe}/${tt.te}</p>`;
     if (lastS) html += `<div class="cont" data-id="${lastS.s.id}"><img alt="" src="${cover(lastS.s)}"><div><b>▸ Continua: ${esc(lastS.s.t)}</b>${lastS.x.finished ? "Conclusa · rigioca o cerca gli altri finali" : `Capitolo ${lastS.x.ch}${lastS.s.ch ? ` di ${lastS.s.ch}` : ""}`}</div></div>`;
+    if (window.__carteDecks) html += `<div class="big"><button type="button" data-go="carte">🎴 Carte del Destino<small>Mini-storie a mazzi · pesca, vivi, rigioca</small></button></div>`;
     html += `<div class="big"><button type="button" data-go="album">🏆 Album dei finali<small>${tt.fe}/${tt.te} timbri</small></button><button type="button" data-go="guarda">👕 Guardaroba<small>Prova e indossa ciò che hai sbloccato</small></button></div>`;
     html += `<div class="big"><button type="button" data-go="sala">🕹️ Sala Giochi<small>I motori di partita delle saghe, liberi</small></button><button type="button" data-go="cine">🎬 Cineteca<small>Rivedi i finali trovati</small></button></div>`;
     { const pt = safe(() => perTotals(), null); if (pt) html += `<div class="big"><button type="button" data-go="per">👥 Album dei personaggi<small>${pt.seen}/${pt.tot} incontrati · carte d'oro per le saghe concluse</small></button>${window.__sogni ? `<button type="button" data-go="sogni">🃏 La Squadra dei Sogni<small>Carte da collezionare, intesa e il Torneo dei Sogni</small></button>` : ""}</div>`; }
     html += `<div class="row">${[["tutte", "Tutte"], ["corso", "In corso"], ["nuove", "Da iniziare"], ["concluse", "Concluse"]].map(([k, l]) => `<button type="button" class="chip${FILT.st === k ? " on" : ""}" data-st="${k}">${l}</button>`).join("")}</div>`;
     html += `<div class="row">${[["", "Tutti i generi"], ...Object.entries(GEN).map(([k, v]) => [k, v[0]])].map(([k, l]) => `<button type="button" class="chip${FILT.g === k ? " on" : ""}" data-g="${k}">${l}</button>`).join("")}</div>`;
-    const shown = list.filter(({ s, x }) => (FILT.st === "tutte" || (FILT.st === "corso" && x.started && !x.finished) || (FILT.st === "nuove" && !x.started) || (FILT.st === "concluse" && x.finished)) && (!FILT.g || s.g.includes(FILT.g))).map((e, i) => [e, i]).sort((a, b) => { const ia = NEWEST.indexOf(a[0].s.id), ib = NEWEST.indexOf(b[0].s.id); return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib) || a[1] - b[1]; }).map((p) => p[0]); // le saghe più recenti per prime
+    const shown = list.filter(({ s, x }) => s.id !== "carte" && (FILT.st === "tutte" || (FILT.st === "corso" && x.started && !x.finished) || (FILT.st === "nuove" && !x.started) || (FILT.st === "concluse" && x.finished)) && (!FILT.g || s.g.includes(FILT.g))).map((e, i) => [e, i]).sort((a, b) => { const ia = NEWEST.indexOf(a[0].s.id), ib = NEWEST.indexOf(b[0].s.id); return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib) || a[1] - b[1]; }).map((p) => p[0]); // le saghe più recenti per prime
     html += `<div class="grid">${shown.map(({ s, x }) => {
       const isNew = !r.seen[s.id] && !x.started && NEWEST.includes(s.id);
       const badge = x.finished ? `<span class="badge done">✓ CONCLUSA</span>` : x.started ? `<span class="badge run">IN CORSO</span>` : isNew ? `<span class="badge new">NUOVA</span>` : "";
@@ -663,6 +664,7 @@
     body.querySelectorAll("[data-st]").forEach((b) => (b.onclick = () => { FILT.st = b.dataset.st; openSalone(); }));
     body.querySelectorAll("[data-g]").forEach((b) => (b.onclick = () => { FILT.g = b.dataset.g; openSalone(); }));
     body.querySelectorAll(".card,.cont").forEach((b) => (b.onclick = () => detail(SAGAS.find((s) => s.id === b.dataset.id))));
+    const cdb = body.querySelector('[data-go="carte"]'); if (cdb) cdb.onclick = () => { close(); window.__carteDecks.openHub(() => openSalone()); };
     body.querySelector('[data-go="album"]').onclick = () => openAlbum(() => openSalone());
     body.querySelector('[data-go="guarda"]').onclick = () => openGuardaroba(() => openSalone());
     const pg = body.querySelector('[data-go="per"]'); if (pg) pg.onclick = () => openPersonaggi(() => openSalone());

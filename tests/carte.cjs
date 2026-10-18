@@ -65,6 +65,20 @@ async function run(w) {
     await page.evaluate(() => window.__carteProva.finish(0.8)); await page.waitForTimeout(1200);
     got = await page.evaluate(() => window.__got); if (got == null) errors.push("prova " + kind + " non ha restituito il punteggio");
   }
+  // mazzi: il Salone ha il bottone in cima, il mazzo Marea è bloccato fino a 3 vittorie, poi entra nel gioco
+  const dl = await page.evaluate(() => window.__carteDecks.list()); if (!dl.some((d) => d.id === "marea")) errors.push("mazzo marea non registrato");
+  await page.evaluate(() => { window.__salone.open(); }); await page.waitForTimeout(500);
+  const btn = await page.evaluate(() => { const b = document.querySelector('[data-go="carte"]'); return b ? b.textContent : null; }); if (!btn || !/Carte del Destino/.test(btn)) errors.push("bottone Salone assente");
+  if (btn) { await page.evaluate(() => document.querySelector('[data-go="carte"]').click()); await page.waitForTimeout(400);
+    const t1 = await page.evaluate(() => document.querySelector(".cdOv").innerText); if (!/Mazzo della Marea/.test(t1) || !/Vinci 3 storie/.test(t1)) errors.push("hub: mazzo marea non bloccato: " + t1.slice(0, 80));
+    if (w === 390) await L.shot(page, "cd_hub"); await page.evaluate(() => document.getElementById("cdBack").click()); }
+  await page.evaluate(([k]) => { const K = eval(k); K.F.set("cd_wins", 3); K.F.set("cd_amb", "bar"); K.F.set("cd_pg", "marea_risacca"); K.F.set("cd_ev", "marea_lanterne"); K.F.set("cd_sf", "tempismo"); K.F.set("cd_tw", "marea_alta"); K.setStep(1, 1); K.enterZone("cd_bar"); }, [K_]); await page.waitForTimeout(450);
+  await L.talk(page, "cd_risacca"); await L.advance(page, [/^Esprimi un desiderio/]);
+  await page.waitForSelector("#cdProva", { timeout: 6000 }).catch(() => errors.push("prova mazzo marea non comparsa"));
+  await page.evaluate(() => document.getElementById("cdPg").click()); await page.waitForTimeout(500); await page.evaluate(() => window.__carteProva.finish(0.9)); await page.waitForTimeout(1300); await L.advance(page);
+  if ((await zone()) !== "cd_molo") errors.push("mazzo marea: non tornato al molo");
+  await page.evaluate(() => { window.__salone.open(); }); await page.waitForTimeout(400); await page.evaluate(() => document.querySelector('[data-go="carte"]').click()); await page.waitForTimeout(300);
+  const t2 = await page.evaluate(() => document.querySelector(".cdOv").innerText); if (!/Attivo/.test(t2)) errors.push("hub: mazzo marea non sbloccato");
   // Archivio: il diario elenca le carte trovate
   const arch = await page.evaluate(([k]) => { const K = eval(k); return document.body.innerText.length; }, [K_]);
   await browser.close(); L.check("Carte del Destino · storie, prove, Archivio (" + w + " px)", errors);
