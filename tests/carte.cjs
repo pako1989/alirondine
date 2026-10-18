@@ -53,6 +53,11 @@ async function run(w) {
   };
   const a = await play(true, "cd_run"); if (a.runs !== 1 || a.wins !== 1) errors.push("run 1 (vinta): " + JSON.stringify(a));
   const b = await play(false); if (b.runs !== 2 || b.wins !== 1) errors.push("run 2 (persa): " + JSON.stringify(b));
+  // tetto giornaliero di monete: dopo 250 le storie non pagano più
+  const cap = await page.evaluate(([k]) => { const K = eval(k); K.F.set("cd_day", new Date().toISOString().slice(0, 10)); K.F.set("cd_dcoins", 250); return K.F.get("cd_dcoins"); }, [K_]);
+  const before = await page.evaluate(() => window.__borgoApi && window.__borgoApi.coins ? window.__borgoApi.coins() : null);
+  await play(true);
+  const after = await page.evaluate(([k]) => eval(k).F.get("cd_dcoins"), [K_]); if (after !== 250) errors.push("tetto monete superato: " + after);
   const html = await page.evaluate(([k]) => window.__carte._dbg.K.F.get("cd_runs") + ":" + (window.__carte._dbg.K ? 1 : 0), [K_]);
   // le quattro prove: partono, disegnano, si chiudono
   for (const kind of ["tempismo", "memoria", "mira", "tazze"]) {

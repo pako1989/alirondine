@@ -334,7 +334,12 @@
       if (c.tw === "pallone") coins += rnd(25);
       if (tw.fx) coins = safe(() => tw.fx(coins, win, rnd), coins);
       if (!win) coins = Math.round(coins * 0.5);
-      const g = K.coinsGive(coins); if (g) msg.push(`+${g} monete`);
+      // tetto giornaliero: le monete delle Carte non si coltivano all'infinito (le storie restano rigiocabili per il gusto)
+      const day = new Date().toISOString().slice(0, 10), DCAP = 250; if (F.get("cd_day", "") !== day) { F.set("cd_day", day); F.set("cd_dcoins", 0); }
+      const left = Math.max(0, DCAP - F.get("cd_dcoins", 0)); coins = Math.min(coins, left);
+      const g = coins > 0 ? K.coinsGive(coins) : 0; F.set("cd_dcoins", F.get("cd_dcoins", 0) + (g || 0));
+      if (g) msg.push(`+${g} monete`); else if (left <= 0) msg.push(`Tetto di oggi raggiunto (${DCAP} monete): le storie restano, il portafoglio riposa`);
+      else if (g < coins) msg.push(`ultime monete di oggi (tetto ${DCAP})`);
       const runs = F.get("cd_runs", 0) + 1, wins = F.get("cd_wins", 0) + (win ? 1 : 0);
       F.set("cd_runs", runs); F.set("cd_wins", wins);
       const cos = [];
