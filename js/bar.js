@@ -116,6 +116,7 @@
 .brCard{width:100%;max-width:520px;background:#2a160c;border:1px solid #7a4a22;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;font-size:14px;line-height:1.4;flex:none}
 .brCard .row{display:flex;gap:10px;align-items:center;background:#1c0f08;border-radius:10px;padding:8px}.brCard .row .e{font-size:26px;width:36px;text-align:center}.brCard .row b{display:block}.brCard .row small{display:block;opacity:.75;font-size:11.5px}
 .brSay{display:flex;gap:10px;align-items:flex-start}.brSay .pt{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;flex:none;border:2px solid #fcd34d}.brSay b{color:#fcd34d}.brSay .tx{flex:1}
+@media (orientation:landscape) and (max-height:560px){.brOv{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);grid-auto-rows:min-content;column-gap:12px;row-gap:8px;align-content:start;justify-items:center}.brOv>canvas{grid-column:1;grid-row:1/span 8;max-height:calc(100dvh - 20px);width:100%;align-self:start}.brOv>:not(canvas){grid-column:2}.brOv>.brIt{max-width:none}}
 .brCh{display:flex;flex-direction:column;gap:8px}.brHt{letter-spacing:2px}`;
     document.head.appendChild(s);
   };
