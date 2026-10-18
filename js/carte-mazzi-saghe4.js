@@ -2,7 +2,7 @@
 (function () {
   "use strict";
   if (!window.__carteDecks) return;
-  const D = (id, t, e, key, d, pg, ev, tw) => window.__carteDecks.register({ id, t: "Mazzo · " + t, e, d, lock: "Gioca «" + t + "»", unlock: (c) => c.played(key), pg: { p: pg }, ev: { e: ev }, tw: { t: tw } });
+  const D = (id, t, e, key, d, pg, ev, tw) => window.__carteDecks.register({ id, t: "Mazzo · " + t, e, d, lock: "Concludi «" + t + "»", unlock: (c) => c.finished(key), pg: { p: pg }, ev: { e: ev }, tw: { t: tw } });
   const E3 = (n, i, d, s, ch) => ({ n, i, d, setup: (p, a) => s.map((x, j) => [j ? p : "voce", x]), ch: ch.map(([t, k, ask, win, lose]) => ({ t, k, ask, win, lose })) });
   const TW = (n, i, d, win, lose, fx) => ({ n, i, d, win, lose, fx });
 

@@ -37,7 +37,7 @@
   // pg: come PG, in più `cast` (spec di K.cast); ev: come EV; tw: come TW, `fx(monete, vinta, rnd)` opzionale. Gli id sono dei mazzi: niente collisioni.
   const DECKS = [], PREFK = "ali-di-rondine.carte-mazzi";
   const prefs = () => safe(() => JSON.parse(localStorage.getItem(PREFK) || "{}"), {});
-  const ctx = () => { const f = safe(() => window.__carte.info().flags, {}) || {}; return { wins: +f.cd_wins || 0, runs: +f.cd_runs || 0, played: (key) => safe(() => !!localStorage.getItem(key), false) }; };
+  const ctx = () => { const f = safe(() => window.__carte.info().flags, {}) || {}; return { wins: +f.cd_wins || 0, runs: +f.cd_runs || 0, played: (key) => safe(() => !!localStorage.getItem(key), false), finished: (key) => safe(() => !!(window.__salone && window.__salone.concluded(key)), false) }; };
   const deckUnlocked = (d) => safe(() => !!d.unlock(ctx()), false);
   const deckLive = (d) => deckUnlocked(d) && prefs()[d.id] !== false;
   const liveCard = (c) => { const d = c && c.deck && DECKS.find((x) => x.id === c.deck); return !d || deckLive(d); };
@@ -262,7 +262,7 @@
       const n = (d) => ["pg", "ev", "tw"].reduce((a, t) => a + Object.keys(d[t] || {}).length, 0), c = ctx();
       const guests = Object.keys(GUEST).filter((k) => c.played(GUEST[k].key)).length;
       const row = (e, t, d, st, id, on) => `<div class="cdDk"><span class="e">${e}</span><div><b>${esc(t)}</b><small>${esc(d)}</small><small class="s">${esc(st)}</small></div>${id ? `<button type="button" class="cdBt s" data-dk="${id}">${on ? "Attivo" : "Spento"}</button>` : ""}</div>`;
-      const paint = () => { ov.innerHTML = `<h2>🎴 Carte del Destino</h2><p>Mini-storie rigiocabili: pesca 5 carte, vivi la storia, gioca la prova. Più mazzi, più storie.</p><div class="cdDks">${row("🎣", "Mazzo del Molo", "Il mazzo base: 4 luoghi, 5 personaggi, 5 eventi, 4 prove, 5 twist.", "Sempre attivo", "", 0)}${row("🤝", "Mazzo degli Ospiti", "Personaggi delle altre saghe che hai giocato.", guests + "/" + Object.keys(GUEST).length + " ospiti presenti", "", 0)}${DECKS.map((d) => deckUnlocked(d) ? row(d.e, d.t, d.d, n(d) + " carte", d.id, deckLive(d)) : row("🔒", d.t, d.d, d.lock || "Bloccato", "", 0)).join("")}</div><button class="cdBt" id="cdPlay" type="button">Gioca ▸</button><button class="cdBt s" id="cdBack" type="button">Indietro</button>`;
+      const paint = () => { ov.innerHTML = `<h2>🎴 Carte del Destino</h2><p>Mini-storie rigiocabili: pesca 5 carte, vivi la storia, gioca la prova. Più mazzi, più storie.</p><div class="cdDks">${row("🎣", "Mazzo del Molo", "Il mazzo base: 4 luoghi, 5 personaggi, 5 eventi, 4 prove, 5 twist.", "Sempre attivo", "", 0)}${row("🤝", "Mazzo degli Ospiti", "Personaggi delle altre saghe che hai giocato.", guests + "/" + Object.keys(GUEST).length + " ospiti presenti", "", 0)}${DECKS.map((d) => { const dd = d.id === "marea" ? d.d : ""; return deckUnlocked(d) ? row(d.e, d.t, dd, n(d) + " carte", d.id, deckLive(d)) : row("🔒", d.t, dd, d.lock || "Bloccato", "", 0); }).join("")}</div><button class="cdBt" id="cdPlay" type="button">Gioca ▸</button><button class="cdBt s" id="cdBack" type="button">Indietro</button>`;
         ov.querySelectorAll("[data-dk]").forEach((b) => (b.onclick = () => { const p = prefs(); p[b.dataset.dk] = p[b.dataset.dk] === false; safe(() => localStorage.setItem(PREFK, JSON.stringify(p))); paint(); }));
         ov.querySelector("#cdPlay").onclick = () => { ov.remove(); E.api.open({ onExit: back }); };
         ov.querySelector("#cdBack").onclick = () => { ov.remove(); if (back) back(); }; };
