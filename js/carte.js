@@ -260,9 +260,9 @@
       injectCss(); document.querySelectorAll(".cdOv").forEach((e) => e.remove());
       const ov = document.createElement("div"); ov.className = "cdOv";
       const n = (d) => ["pg", "ev", "tw"].reduce((a, t) => a + Object.keys(d[t] || {}).length, 0), c = ctx();
-      const guests = Object.keys(GUEST).filter((k) => c.played(GUEST[k].key)).length;
+      const guests = Object.keys(GUEST).filter((k) => c.finished(GUEST[k].key)).length;
       const row = (e, t, d, st, id, on) => `<div class="cdDk"><span class="e">${e}</span><div><b>${esc(t)}</b><small>${esc(d)}</small><small class="s">${esc(st)}</small></div>${id ? `<button type="button" class="cdBt s" data-dk="${id}">${on ? "Attivo" : "Spento"}</button>` : ""}</div>`;
-      const paint = () => { ov.innerHTML = `<h2>🎴 Carte del Destino</h2><p>Mini-storie rigiocabili: pesca 5 carte, vivi la storia, gioca la prova. Più mazzi, più storie.</p><div class="cdDks">${row("🎣", "Mazzo del Molo", "Il mazzo base: 4 luoghi, 5 personaggi, 5 eventi, 4 prove, 5 twist.", "Sempre attivo", "", 0)}${row("🤝", "Mazzo degli Ospiti", "Personaggi delle altre saghe che hai giocato.", guests + "/" + Object.keys(GUEST).length + " ospiti presenti", "", 0)}${DECKS.map((d) => { const dd = d.id === "marea" ? d.d : ""; return deckUnlocked(d) ? row(d.e, d.t, dd, n(d) + " carte", d.id, deckLive(d)) : row("🔒", d.t, dd, d.lock || "Bloccato", "", 0); }).join("")}</div><button class="cdBt" id="cdPlay" type="button">Gioca ▸</button><button class="cdBt s" id="cdBack" type="button">Indietro</button>`;
+      const paint = () => { ov.innerHTML = `<h2>🎴 Carte del Destino</h2><p>Mini-storie rigiocabili: pesca 5 carte, vivi la storia, gioca la prova. Più mazzi, più storie.</p><div class="cdDks">${row("🎣", "Mazzo del Molo", "Il mazzo base: 4 luoghi, 5 personaggi, 5 eventi, 4 prove, 5 twist.", "Sempre attivo", "", 0)}${row("🤝", "Mazzo degli Ospiti", "Personaggi delle saghe che hai concluso.", guests + "/" + Object.keys(GUEST).length + " ospiti presenti", "", 0)}${DECKS.map((d) => { const dd = d.id === "marea" ? d.d : ""; return deckUnlocked(d) ? row(d.e, d.t, dd, n(d) + " carte", d.id, deckLive(d)) : row("🔒", d.t, dd, d.lock || "Bloccato", "", 0); }).join("")}</div><button class="cdBt" id="cdPlay" type="button">Gioca ▸</button><button class="cdBt s" id="cdBack" type="button">Indietro</button>`;
         ov.querySelectorAll("[data-dk]").forEach((b) => (b.onclick = () => { const p = prefs(); p[b.dataset.dk] = p[b.dataset.dk] === false; safe(() => localStorage.setItem(PREFK, JSON.stringify(p))); paint(); }));
         ov.querySelector("#cdPlay").onclick = () => { ov.remove(); E.api.open({ onExit: back }); };
         ov.querySelector("#cdBack").onclick = () => { ov.remove(); if (back) back(); }; };
@@ -293,7 +293,7 @@
     // ------- stato della storia (solo flag semplici)
     const cur = () => ({ amb: F.get("cd_amb", ""), pg: F.get("cd_pg", ""), ev: F.get("cd_ev", ""), sf: F.get("cd_sf", ""), tw: F.get("cd_tw", "") });
     const pgOf = (id) => PG[id] || GUEST[id];
-    const guestsAvailable = () => Object.keys(GUEST).filter((k) => safe(() => !!K.otherSaga(GUEST[k].key), false));
+    const guestsAvailable = () => Object.keys(GUEST).filter((k) => safe(() => !!(window.__salone && window.__salone.concluded(GUEST[k].key)), false));
     const pickFrom = (type, pool) => { const un = pool.filter((k) => !F.is("cd_s_" + type + "_" + k)), from = un.length && Math.random() < 0.75 ? un : pool; return from[rnd(from.length)]; };
     const deal = () => ({ amb: pickFrom("amb", Object.keys(AMB)), pg: pickFrom("pg", Object.keys(PG).filter((k) => liveCard(PG[k])).concat(guestsAvailable())), ev: pickFrom("ev", Object.keys(EV).filter((k) => liveCard(EV[k]))), sf: pickFrom("sf", Object.keys(SF)), tw: pickFrom("tw", Object.keys(TW).filter((k) => liveCard(TW[k]))) });
     const startRun = () => {
