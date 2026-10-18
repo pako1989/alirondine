@@ -79,6 +79,19 @@ async function run(w) {
   if ((await zone()) !== "cd_molo") errors.push("mazzo marea: non tornato al molo");
   await page.evaluate(() => { window.__salone.open(); }); await page.waitForTimeout(400); await page.evaluate(() => document.querySelector('[data-go="carte"]').click()); await page.waitForTimeout(300);
   const t2 = await page.evaluate(() => document.querySelector(".cdOv").innerText); if (!/Attivo/.test(t2)) errors.push("hub: mazzo marea non sbloccato");
+  // un mazzo per saga: bloccato finché la saga non è giocata, poi le sue carte entrano (qui: Quattordici, Fortino)
+  const dk = await page.evaluate(() => window.__carteDecks.list().map((d) => d.id)); for (const id of ["qt", "sg", "fo", "ce", "qd", "dz", "fa", "my", "te", "alc"]) if (!dk.includes(id)) errors.push("mazzo saga mancante: " + id);
+  await page.evaluate(() => { localStorage.setItem("ali-di-rondine.quattordici", '{"x":1}'); localStorage.setItem("ali-di-rondine.fortino", '{"x":1}'); });
+  const lv = await page.evaluate(() => window.__carteDecks.list().filter((d) => d.on).map((d) => d.id)); if (!lv.includes("qt") || !lv.includes("fo") || lv.includes("sg")) errors.push("sblocco mazzi saga: " + lv);
+  for (const [pg, ev, id, first] of [["qt_p", "qt_e", "qt_teo", /^Sorridi davvero/], ["fo_p", "fo_e", "fo_lupin", /^Entra dalla finestra/]]) {
+    await page.evaluate(([k, pg, ev]) => { const K = eval(k); K.F.set("cd_amb", "mercato"); K.F.set("cd_pg", pg); K.F.set("cd_ev", ev); K.F.set("cd_sf", "memoria"); K.F.set("cd_tw", pg.slice(0, 2) + "_t"); K.setStep(1, 1); K.enterZone("cd_mercato"); }, [K_, pg, ev]); await page.waitForTimeout(450);
+    await L.talk(page, id); await L.advance(page, [first]);
+    await page.waitForSelector("#cdProva", { timeout: 6000 }).catch(() => errors.push("prova mazzo " + pg + " non comparsa"));
+    await page.evaluate(() => document.getElementById("cdPg").click()); await page.waitForTimeout(500); await page.evaluate(() => window.__carteProva.finish(0.9)); await page.waitForTimeout(1300); await L.advance(page);
+    if ((await zone()) !== "cd_molo") errors.push("mazzo " + pg + ": non tornato al molo");
+  }
+  await page.evaluate(() => { window.__salone.open(); }); await page.waitForTimeout(400); await page.evaluate(() => document.querySelector('[data-go="carte"]').click()); await page.waitForTimeout(300);
+  if (w === 390) await L.shot(page, "cd_hub2");
   // Archivio: il diario elenca le carte trovate
   const arch = await page.evaluate(([k]) => { const K = eval(k); return document.body.innerText.length; }, [K_]);
   await browser.close(); L.check("Carte del Destino · storie, prove, Archivio (" + w + " px)", errors);

@@ -148,7 +148,8 @@
 
   // ------------------------------------------------------------------ pesca delle carte (sovrapposizione animata)
   const CSS = `
-  .cdOv{position:fixed;inset:0;z-index:99980;background:radial-gradient(ellipse at 50% 40%,#1c6b4a,#0b2c22 70%,#04140f);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;font-family:'Trebuchet MS',system-ui,sans-serif;color:#f7f2e3;padding:12px;overflow:auto}
+  .cdOv{position:fixed;inset:0;z-index:99980;background:radial-gradient(ellipse at 50% 40%,#1c6b4a,#0b2c22 70%,#04140f);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:14px;font-family:'Trebuchet MS',system-ui,sans-serif;color:#f7f2e3;padding:12px;overflow:auto}
+  .cdOv>:first-child{margin-top:auto}.cdOv>:last-child{margin-bottom:auto}
   .cdOv h2{margin:0;font-size:19px;color:#fde68a;text-shadow:0 2px 0 #0008}.cdOv p{margin:0;font-size:12.5px;opacity:.85;text-align:center;max-width:320px}
   .cdRow{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:380px}
   .cdC{width:106px;height:200px;perspective:700px;cursor:pointer;animation:cdDeal .5s both}
