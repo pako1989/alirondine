@@ -1976,3 +1976,18 @@ html, body { overscroll-behavior-y: contain; }
   body:not(:has(#matchHud:not([hidden]))) #choices { grid-column: 2; grid-row: 3; max-height: 100%; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; align-self: stretch; }
   body:not(:has(#matchHud:not([hidden]))) #stats, body:not(:has(#matchHud:not([hidden]))) .foot { display: none; }
 }
+@media (orientation: landscape) and (max-height: 560px) {
+  body:not(:has(#matchHud:not([hidden]))) .top-header { display: none; }
+  body:not(:has(#matchHud:not([hidden]))) .topr { gap: 4px; }
+  body:not(:has(#matchHud:not([hidden]))) .topr .mute { height: 30px; font-size: 14px; max-width: none; }
+  body:not(:has(#matchHud:not([hidden]))) #text { max-height: 24dvh; min-height: 40px; padding: 6px 8px; }
+  body:not(:has(#matchHud:not([hidden]))) #text .t { font-size: 12.5px; line-height: 1.35; }
+  body:not(:has(#matchHud:not([hidden]))) .dpad { grid-template-columns: repeat(3, clamp(30px, 12.5dvh, 50px)); grid-template-rows: repeat(3, clamp(30px, 12.5dvh, 50px)); gap: 3px; }
+  body:not(:has(#matchHud:not([hidden]))) .padwrap { gap: 6px; }
+  body:not(:has(#matchHud:not([hidden]))) .choices button.pad.act { font-size: 14px; }
+  body:not(:has(#matchHud:not([hidden]))) .padacts .pad-row { min-height: 30px; }
+  body:not(:has(#matchHud:not([hidden]))) #choices button { font-size: 13px; }
+}
+@media (orientation: landscape) and (max-height: 560px) { body:not(:has(#matchHud:not([hidden]))) .topr .mute { padding: 0; } body:not(:has(#matchHud:not([hidden]))) .topr { overflow: hidden; } }
+@media (orientation: landscape) and (max-height: 560px) { body:not(:has(#matchHud:not([hidden]))) .topr { gap: 2px; } body:not(:has(#matchHud:not([hidden]))) .topr .mute { font-size: 12px; border-width: 1px; } }
+@media (orientation: landscape) and (max-height: 560px) { body:not(:has(#matchHud:not([hidden]))) #pfitBtn { display: none !important; } }
