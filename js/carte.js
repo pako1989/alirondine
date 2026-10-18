@@ -82,7 +82,13 @@
     tempismo: { n: "Colpo preciso", i: "🎯", q: "audacia", d: "Ferma il segnatore nella zona verde. Tre colpi." },
     memoria: { n: "L'ordine dei segnali", i: "🏮", q: "furbizia", d: "Guarda la sequenza di lanterne e ripetila." },
     mira: { n: "Bersagli in volo", i: "🐦", q: "cuore", d: "Tocca i bersagli prima che volino via." },
-    tazze: { n: "Occhio alla palla", i: "🥤", q: "furbizia", d: "Segui il pallone sotto le tazze." }
+    tazze: { n: "Occhio alla palla", i: "🥤", q: "furbizia", d: "Segui il pallone sotto le tazze." },
+    ritmo: { n: "A tempo di tamburo", i: "🥁", q: "cuore", d: "Tocca quando il cerchio si chiude sull'anello. Cinque battiti." },
+    coppie: { n: "Coppie di conchiglie", i: "🐚", q: "furbizia", d: "Memorizza le carte e trova le tre coppie." },
+    canna: { n: "La pesca al molo", i: "🎣", q: "cuore", d: "Tocca dove vuoi calare l'amo: prendi i pesci che passano. Cinque lanci." },
+    equilibrio: { n: "Sulla trave del molo", i: "⚖️", q: "audacia", d: "Tocca a sinistra o a destra per tenere la palla in equilibrio. Dieci secondi." },
+    ostacoli: { n: "Corsa tra le casse", i: "🏃", q: "audacia", d: "Tocca per saltare le casse. Otto ostacoli." },
+    intruso: { n: "Trova l'intruso", i: "🔍", q: "furbizia", d: "Tocca l'unico simbolo diverso, prima che scada il tempo. Quattro quadri." }
   };
   const TW = {
     doppio: { n: "Il vero premio", i: "💰", d: "Se vinci, la ricompensa raddoppia. Se perdi, un premio di consolazione.", win: "Dalla tasca di {p} spunta una busta: il premio era più grosso di quanto dicesse.", lose: "Dalla tasca di {p} spunta un gettone di consolazione: «Per l'impegno. Non dirlo a nessuno»." },
@@ -131,6 +137,57 @@
           T.forEach((t) => { if (t.dead) { t.dead++; return; } t.x += t.vx * 2; t.y += t.vy; if ((t.x < -30 || t.x > 350) && !t.gone) { t.gone = 1; t.dead = 999; gone++; } });
           if (spawned >= total && T.every((t) => t.dead)) { end(hits / need); return; } draw(); raf = requestAnimationFrame(loop); }; raf = requestAnimationFrame(loop);
         tap((x, y) => { T.forEach((t) => { if (!t.dead && Math.abs(t.x - x) < 24 && Math.abs(t.y - y) < 24) { t.dead = 1; hits++; } }); });
+      },
+      ritmo() { // cerchi che si chiudono su un anello: tocca a tempo
+        let n = 0, hits = 0, t0 = performance.now(), msg = "", sc = [], fl = 0; const dur = 1300 + qv * 40, gap = 600, r0 = 78, rr = 24, tol = 0.16 + qv * 0.012;
+        const loop = (ts) => { if (fin) return; const t = ts - t0, p = Math.min(1.4, t / dur), r = r0 - (r0 - rr) * p; bg(); g.strokeStyle = "#fde68a"; g.lineWidth = 4; g.beginPath(); g.arc(160, 100, rr, 0, 7); g.stroke(); g.strokeStyle = "rgba(251,191,36,.9)"; g.lineWidth = 3; g.beginPath(); g.arc(160, 100, Math.max(4, r), 0, 7); g.stroke(); g.font = "30px serif"; g.fillStyle = "#fff"; g.fillText("🥁", 146, 112); g.fillStyle = "#fde68a"; g.font = "900 13px sans-serif"; g.textAlign = "center"; g.fillText(`Battito ${Math.min(5, n + 1)}/5 · ${msg}`, 160, 188); if (fl > 0) { fl--; g.strokeStyle = "rgba(52,211,153,.8)"; g.lineWidth = 6; g.beginPath(); g.arc(160, 100, rr + 6, 0, 7); g.stroke(); }
+          if (p >= 1.35) { sc.push(0); msg = "troppo tardi"; next(); } raf = requestAnimationFrame(loop); };
+        const next = () => { n++; if (n >= 5) { end(sc.reduce((a, b) => a + b, 0) / 5 + 0.01); return; } t0 = performance.now() + gap; };
+        raf = requestAnimationFrame(loop);
+        tap(() => { if (fin) return; const p = (performance.now() - t0) / dur; if (p < 0.2) return; const d = Math.abs(p - 1); const v = d < tol ? 1 : d < tol * 2 ? 0.55 : d < tol * 3.4 ? 0.2 : 0; sc.push(v); msg = v === 1 ? "PERFETTO" : v > 0.5 ? "bene" : v > 0 ? "quasi" : "storto"; fl = v ? 14 : 0; next(); });
+      },
+      coppie() { // sei carte, tre coppie
+        const ic = ["🐚", "⭐", "🦀"], deck = ic.concat(ic).sort(() => Math.random() - 0.5); let open = [], found = [], taps = 0, lock = true, showAll = true; const maxTaps = 14 - Math.floor(qv / 3);
+        const pos = (k) => [60 + (k % 3) * 100, 60 + Math.floor(k / 3) * 70];
+        const draw = () => { bg(); deck.forEach((c, k) => { const [x, y] = pos(k), up = showAll || open.includes(k) || found.includes(k); g.fillStyle = found.includes(k) ? "#14532d" : up ? "#f1e6c8" : "#7f1d1d"; g.fillRect(x - 32, y - 28, 64, 56); g.strokeStyle = "#fde68a"; g.lineWidth = 2; g.strokeRect(x - 32, y - 28, 64, 56); g.font = "30px serif"; g.textAlign = "center"; g.fillStyle = "#000"; g.fillText(up ? c : "🎴", x, y + 11); }); g.fillStyle = "#fde68a"; g.font = "900 13px sans-serif"; g.fillText(`Tocchi: ${taps}/${maxTaps} · Coppie: ${found.length / 2}/3`, 160, 192); };
+        const loop = () => { if (fin) return; draw(); raf = requestAnimationFrame(loop); }; loop();
+        setTimeout(() => { showAll = false; lock = false; }, 1500 + (9 - qv) * 120);
+        tap((x, y) => { if (lock || fin) return; const k = deck.findIndex((c, i) => { const [cx, cy] = pos(i); return Math.abs(x - cx) < 34 && Math.abs(y - cy) < 30; }); if (k < 0 || found.includes(k) || open.includes(k)) return; open.push(k); taps++;
+          if (open.length === 2) { lock = true; const [a, b] = open; setTimeout(() => { if (deck[a] === deck[b]) found.push(a, b); open = []; lock = false; if (found.length === 6) end(Math.max(0.55, 1 - Math.max(0, taps - 6) / 12)); else if (taps >= maxTaps) end(found.length / 6 * 0.9); }, 520); } });
+      },
+      canna() { // pesci che nuotano: cala l'amo dove tocchi
+        const F = Array.from({ length: 4 }, (_, i) => ({ x: Math.random() * 320, y: 110 + i * 22, v: (0.6 + Math.random() * 0.6 + Math.max(0, 4 - qv) * 0.12) * (i % 2 ? 1 : -1) })); let casts = 0, hits = 0, hook = null, msg = "";
+        const loop = () => { if (fin) return; bg(); g.fillStyle = "#1e4a78"; g.fillRect(0, 90, 320, 110); g.fillStyle = "#8b5a2b"; g.fillRect(0, 70, 320, 20); F.forEach((f) => { f.x += f.v; if (f.x < -20) f.x = 340; if (f.x > 340) f.x = -20; g.font = "24px serif"; g.fillStyle = "#fff"; g.fillText(f.v > 0 ? "🐟" : "🐠", f.x - 12, f.y + 8); });
+          if (hook) { hook.t++; const dy = Math.min(1, hook.t / 14); g.strokeStyle = "#fde68a"; g.lineWidth = 2; g.beginPath(); g.moveTo(hook.x, 80); g.lineTo(hook.x, 80 + dy * 100); g.stroke(); if (hook.t === 14) { const got = F.filter((f) => Math.abs(f.x - hook.x) < 22 + qv * 1.6); if (got.length) { hits++; msg = "PRESO!"; got.forEach((f) => { f.x = f.v > 0 ? -20 : 340; }); } else msg = "niente"; } if (hook.t > 26) { hook = null; if (casts >= 5) { end(hits / 5 + 0.01); return; } } }
+          g.fillStyle = "#fde68a"; g.font = "900 13px sans-serif"; g.textAlign = "center"; g.fillText(`Lanci ${casts}/5 · Pesci ${hits} · ${msg}`, 160, 192); raf = requestAnimationFrame(loop); }; raf = requestAnimationFrame(loop);
+        tap((x) => { if (hook || casts >= 5 || fin) return; casts++; hook = { x, t: 0 }; msg = ""; });
+      },
+      equilibrio() { // trave in bilico: spingi a sinistra o a destra
+        let a = 0, va = 0, t0 = performance.now(), ok = 0, tot = 0, push = 0; const dur = 10000, drift = 0.0016 + Math.max(0, 5 - qv) * 0.0003;
+        const loop = (ts) => { if (fin) return; const dt = ts - t0; a += va; va += (Math.sin(dt / 700) * drift + a * 0.0022) + push; push = 0; va *= 0.985; tot++; if (Math.abs(a) < 0.55) ok++;
+          bg(); g.save(); g.translate(160, 120); g.rotate(a); g.fillStyle = "#8b5a2b"; g.fillRect(-120, -5, 240, 10); g.font = "26px serif"; g.fillStyle = "#fff"; g.fillText("⚽", -13, -10); g.restore(); g.fillStyle = "#33485e"; g.beginPath(); g.moveTo(150, 200); g.lineTo(170, 200); g.lineTo(160, 125); g.fill();
+          g.fillStyle = "#fde68a"; g.font = "900 13px sans-serif"; g.textAlign = "center"; g.fillText(`Tempo ${Math.max(0, Math.ceil((dur - dt) / 1000))}s`, 160, 24); g.fillStyle = Math.abs(a) < 0.55 ? "#34d399" : "#ef4444"; g.fillRect(60, 36, 200 * Math.max(0, 1 - Math.abs(a) / 0.9), 6);
+          if (dt >= dur) { end(ok / tot); return; } raf = requestAnimationFrame(loop); }; raf = requestAnimationFrame(loop);
+        tap((x) => { push = (x < 160 ? -1 : 1) * 0.012; });
+      },
+      ostacoli() { // salta le casse
+        let y = 0, vy = 0, x0 = 0, cleared = 0, hit = 0, spawned = 0, last = 0; const O = [], total = 8, spd = 2.1 + Math.max(0, 4 - qv) * 0.1, gap = 1150;
+        const loop = (ts) => { if (fin) return; if (spawned < total && ts - last > gap + Math.random() * 400) { last = ts; spawned++; O.push({ x: 340, w: 22 + Math.random() * 10, h: 22 + Math.random() * 14, st: 0 }); }
+          vy += 0.55; y += vy; if (y > 0) { y = 0; vy = 0; }
+          bg(); g.fillStyle = "#4b5563"; g.fillRect(0, 150, 320, 50); g.font = "28px serif"; g.fillStyle = "#fff"; g.fillText("🏃", 50, 150 + y + 2);
+          O.forEach((o) => { o.x -= spd * 2; g.fillStyle = "#a16207"; g.fillRect(o.x, 150 - o.h, o.w, o.h); g.strokeStyle = "#fde68a"; g.strokeRect(o.x, 150 - o.h, o.w, o.h); if (!o.st && o.x < 78 && o.x + o.w > 52) { if (-y < o.h - 4) { o.st = 2; hit++; } } if (!o.st && o.x + o.w < 52) { o.st = 1; cleared++; } });
+          g.fillStyle = "#fde68a"; g.font = "900 13px sans-serif"; g.textAlign = "center"; g.fillText(`Saltate ${cleared}/${total} · Urti ${hit}`, 160, 24);
+          if (spawned >= total && O.every((o) => o.x < -40)) { end(Math.max(0, (total - hit * 1.1) / total) * 0.98 + 0.01); return; } raf = requestAnimationFrame(loop); }; raf = requestAnimationFrame(loop);
+        tap(() => { if (y === 0) vy = -9.2; });
+      },
+      intruso() { // quattro quadri, un simbolo diverso
+        const sets = [["🍎", "🍏"], ["🐟", "🐠"], ["⭐", "🌟"], ["🔔", "🛎️"], ["🧢", "🎩"], ["⚽", "🏀"]]; let round = 0, good = 0, cells = [], odd = 0, t0 = 0, msg = "", lock = false; const tmax = 4200 + qv * 260;
+        const mk = () => { const s = sets[Math.floor(Math.random() * sets.length)], sw = Math.random() < 0.5; odd = Math.floor(Math.random() * 9); cells = Array.from({ length: 9 }, (_, i) => (i === odd ? s[sw ? 1 : 0] : s[sw ? 0 : 1])); t0 = performance.now(); lock = false; };
+        mk(); const pos = (k) => [70 + (k % 3) * 90, 50 + Math.floor(k / 3) * 48];
+        const loop = (ts) => { if (fin) return; bg(); cells.forEach((c, k) => { const [x, y] = pos(k); g.font = "30px serif"; g.textAlign = "center"; g.fillStyle = "#fff"; g.fillText(c, x, y + 10); }); const left = Math.max(0, 1 - (ts - t0) / tmax); g.fillStyle = left > 0.3 ? "#34d399" : "#ef4444"; g.fillRect(40, 8, 240 * left, 6); g.fillStyle = "#fde68a"; g.font = "900 13px sans-serif"; g.fillText(`Quadro ${Math.min(4, round + 1)}/4 · ${msg}`, 160, 192);
+          if (!lock && left <= 0) { lock = true; msg = "tempo!"; setTimeout(nx, 500); } raf = requestAnimationFrame(loop); };
+        const nx = () => { round++; msg = ""; if (round >= 4) { end(good / 4 + 0.01); return; } mk(); }; raf = requestAnimationFrame(loop);
+        tap((x, y) => { if (lock || fin) return; const k = cells.findIndex((c, i) => { const [cx, cy] = pos(i); return Math.abs(x - cx) < 40 && Math.abs(y - cy) < 24; }); if (k < 0) return; lock = true; if (k === odd) { good++; msg = "ESATTO"; } else msg = "no"; setTimeout(nx, 450); });
       },
       tazze() { // tre tazze, un pallone: mescola e indovina (3 round)
         let round = 0, correct = 0, ball = 0, pos = [0, 1, 2], phase = "show", swaps = 0, anim = null, pick = -1;
@@ -311,9 +368,10 @@
       const c = cur(), p = pgOf(c.pg), ev = EV[c.ev], a = AMB[c.amb], pn = p.n.split(" ")[0] === "Il" || p.n.split(" ")[0] === "La" ? p.n : p.n.split(" ")[0];
       const lines = [[p.id, p.greet(a.n)], ...ev.setup(p.id, a.n).map(([w, t]) => [w, fillText(t, p.n, a.n)])];
       say(lines, () => {
-        ask(p.id, `${ev.n}: come la affronti?`, ev.ch.map((ch, i) => ({
-          label: ch.t, sub: `${ch.ask} · +Qualità: ${ch.k === "cuore" ? "Cuore" : ch.k === "audacia" ? "Audacia" : "Furbizia"}`, cls: ch.k === p.tr ? "hot" : "",
-          fn: () => { K.bond(ch.k, 2); F.set("cd_ch", i); say([["hero", ch.t + "."]], () => beginProva(p, ev, i)); }
+        const sfc = SF[c.sf], QN = { cuore: "Cuore", audacia: "Audacia", furbizia: "Furbizia" };
+        ask(p.id, `${ev.n}: come la affronti? La prova sarà «${sfc.n}» ${sfc.i} e conta ${QN[sfc.q]}: scegliere ${QN[sfc.q]} la rende più facile.`, ev.ch.map((ch, i) => ({
+          label: ch.t, sub: `${ch.ask} · ${ch.k === sfc.q ? "+2 " + QN[ch.k] + " · 🎯 prova più facile" : "+3 " + QN[ch.k] + " · prova più dura, monete +30%"}${ch.k === p.tr ? " · tratto di " + p.n.split(" ")[0] : ""}`, cls: ch.k === sfc.q ? "hot" : "",
+          fn: () => { K.bond(ch.k, ch.k === sfc.q ? 2 : 3); F.set("cd_ch", i); say([["hero", ch.t + "."]], () => beginProva(p, ev, i)); }
         })));
       });
     }
@@ -333,6 +391,7 @@
       if (c.tw === "prezzo") coins = Math.round(coins * 0.7);
       if (c.tw === "pallone") coins += rnd(25);
       if (tw.fx) coins = safe(() => tw.fx(coins, win, rnd), coins);
+      if (ch.k !== SF[c.sf].q) coins = Math.round(coins * 1.3);
       if (!win) coins = Math.round(coins * 0.5);
       // tetto giornaliero: le monete delle Carte non si coltivano all'infinito (le storie restano rigiocabili per il gusto)
       const day = new Date().toISOString().slice(0, 10), DCAP = 250; if (F.get("cd_day", "") !== day) { F.set("cd_day", day); F.set("cd_dcoins", 0); }

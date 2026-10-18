@@ -60,7 +60,7 @@ async function run(w) {
   const after = await page.evaluate(([k]) => eval(k).F.get("cd_dcoins"), [K_]); if (after !== 250) errors.push("tetto monete superato: " + after);
   const html = await page.evaluate(([k]) => window.__carte._dbg.K.F.get("cd_runs") + ":" + (window.__carte._dbg.K ? 1 : 0), [K_]);
   // le quattro prove: partono, disegnano, si chiudono
-  for (const kind of ["tempismo", "memoria", "mira", "tazze"]) {
+  for (const kind of ["tempismo", "memoria", "mira", "tazze", "ritmo", "coppie", "canna", "equilibrio", "ostacoli", "intruso"]) {
     let got = null;
     await page.evaluate(([kind]) => { window.__got = null; window.__carteProvaStart(kind, 5, (s) => (window.__got = s)); document.getElementById("cdPg").click(); }, [kind]);
     await page.waitForTimeout(600);
