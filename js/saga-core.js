@@ -487,8 +487,8 @@
       return out + `<br><span style="color:var(--dim)">▷ = strade non prese. Per provarle: Capitoli → rigioca.</span>`;
     }
     function journal(back, inZone) {
-      const html = journalHtml() + (CRW ? CRW.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
-      const jb = (CRW && CRW.count() ? [{ label: "⚔️ Schiera la compagnia", sub: `${CRW.field().length}/${CRW.max} in campo`, fn: () => CRW.pick(() => journal(back, inZone), inZone) }] : []).concat((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
+      const html = journalHtml() + (CRW ? CRW.html() : "") + (DOS ? DOS.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
+      const jb = (DOS ? Object.keys(DOS.cases).filter((c) => DOS.list(c).length).map((c) => ({ label: "🗂️ Dossier · " + DOS.cases[c].t, sub: "Confronta prove e testimonianze", fn: () => DOS.open(c, () => journal(back, inZone), inZone) })) : []).concat(CRW && CRW.count() ? [{ label: "⚔️ Schiera la compagnia", sub: `${CRW.field().length}/${CRW.max} in campo`, fn: () => CRW.pick(() => journal(back, inZone), inZone) }] : []).concat((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
       if (inZone) return api.trAsk("voce", html, jb, bgNow());
       api.scene(BG0, "voce", html, jb, JN());
     }
@@ -778,7 +778,7 @@
         build(L) {
           const { lay, put } = L, floor = kind === "bottega" || kind === "ufficio" || kind === "spogliatoio" ? "+" : kind === "mulino" ? ":" : "=";
           lay(0, 0, W - 1, Hh - 1, floor); lay(0, 0, W - 1, 1, "a"); lay(0, 0, 0, Hh - 1, "a"); lay(W - 1, 0, W - 1, Hh - 1, "a"); lay(0, Hh - 1, W - 1, Hh - 1, "a"); put(door[0], door[1], "v");
-          [3 + (hs % 3), 15 - (hs % 2)].forEach((x) => put(kind === "bottega" && x % 2 === 0 ? x + 1 : x, 1, "W")); // (bottega: gli scaffali stanno sulle x pari, la finestra va accanto per restare raggiungibile)
+          [3 + (hs % 3), 15 - (hs % 2)].forEach((x) => put(kind === "spogliatoio" && x !== 10 && x % 3 ? x - (x % 3) : (kind === "bottega" && x % 2 === 0) || (kind === "ufficio" && [2, 3, 16, 17].includes(x)) ? x + 1 : x, 1, "W")); // (bottega: gli scaffali stanno sulle x pari, la finestra va accanto per restare raggiungibile)
           if (kind !== "bottega" && kind !== "spogliatoio") lay(7, 6, 12, 8, '"');
           const corner = (hs >> 3) % 2; // l'arredamento cambia lato da casa a casa
           const L0 = corner ? 2 : 16, L1 = corner ? 16 : 2;
@@ -1063,6 +1063,40 @@
       return { has, count: () => list().length, total: IDS.length, list, field, recruit, leave, toggle, power, html, pick, members: M, max: MAXF };
     })();
 
+    // -------------------------------------------------------------- IL DOSSIER (cfg.cases): prove e testimonianze, confronti, verdetto
+    // cfg.cases = { id_caso: { t, q, items: { id: { t, d, icon, kind: "prova"|"testimonianza" } }, links: [[a, b, "cosa non torna"]], verdicts: [{ id, label, sub }] } }
+    // K.dossier: add(caso, item) · has · list(caso) · found(caso) (contraddizioni scoperte) · solid(caso) (0..1) · open(back, inZone, caso) (schermata: tocca due voci
+    // per CONFRONTARLE; se una coppia dichiarata in `links` si contraddice, la scopri) · verdict(caso, back, inZone, cb(id, solidità, trovate))
+    const DOS = cfg.cases && (() => {
+      const C = cfg.cases, has = (c, i) => F.is(`ds_${c}_${i}`), lk = (c) => (C[c] && C[c].links) || [], lf = (c, k) => F.is(`dl_${c}_${k}`);
+      const add = (c, i) => { if (!C[c] || !C[c].items[i] || has(c, i)) return false; F.set(`ds_${c}_${i}`, true); SFX.ding(); note("Dossier: " + C[c].items[i].t); return true; };
+      const list = (c) => (C[c] ? Object.keys(C[c].items).filter((i) => has(c, i)) : []);
+      const found = (c) => lk(c).filter((_, k) => lf(c, k)).length, solid = (c) => (lk(c).length ? found(c) / lk(c).length : 0);
+      const html = () => Object.keys(C).filter((c) => list(c).length).map((c) => `<br><br><b>Dossier · ${esc(C[c].t)}</b> (${list(c).length}/${Object.keys(C[c].items).length} voci · ${found(c)}/${lk(c).length} contraddizioni)<br>` + list(c).map((i) => `${esc(C[c].items[i].icon || "🔎")} <b>${esc(C[c].items[i].t)}</b> <span style="color:var(--dim)">${esc(C[c].items[i].d || "")}</span>`).join("<br>")).join("");
+      function open(c, back, inZone, sel, msg) {
+        const ls = list(c); sel = sel || [];
+        const head = `<b>Dossier · ${esc(C[c].t)}</b><br><span style="color:var(--dim)">${esc(C[c].q || "")} Tocca due voci per confrontarle. Contraddizioni: ${found(c)}/${lk(c).length}.</span>${msg ? "<br><br>" + msg : ""}`;
+        const opts = ls.map((i) => ({ label: `${sel.includes(i) ? "◉" : "○"} ${C[c].items[i].icon || "🔎"} ${C[c].items[i].t}`, sub: String(C[c].items[i].d || "").slice(0, 80), fn: () => {
+          const n = sel.includes(i) ? sel.filter((x) => x !== i) : sel.concat(i).slice(-2);
+          if (n.length < 2) return open(c, back, inZone, n, "");
+          const k = lk(c).findIndex((l) => (l[0] === n[0] && l[1] === n[1]) || (l[0] === n[1] && l[1] === n[0]));
+          if (k >= 0 && !lf(c, k)) { F.set(`dl_${c}_${k}`, true); SFX.choice(); return open(c, back, inZone, [], `<b>Non torna!</b> ${esc(lk(c)[k][2])}`); }
+          open(c, back, inZone, [], k >= 0 ? "Già notato." : "Le due voci non si contraddicono.");
+        } }));
+        opts.push({ label: "◂ Indietro", fn: back });
+        if (inZone) return api.trAsk("voce", head, opts, bgNow());
+        api.scene(BG0, "voce", head, opts, JN());
+      }
+      function verdict(c, back, inZone, cb) {
+        const head = `<b>Verdetto · ${esc(C[c].t)}</b><br><span style="color:var(--dim)">${esc(C[c].q || "")} Hai ${list(c).length} voci e ${found(c)}/${lk(c).length} contraddizioni.</span>`;
+        const opts = (C[c].verdicts || []).map((v) => ({ label: v.label, sub: v.sub, big: v.big, fn: () => cb(v.id, solid(c), found(c)) }));
+        opts.push({ label: "◂ Non ancora", fn: back });
+        if (inZone) return api.trAsk("voce", head, opts, bgNow());
+        api.scene(BG0, "voce", head, opts, JN());
+      }
+      return { add, has, list, found, solid, open, verdict, html, cases: C };
+    })();
+
     // -------------------------------------------------------------- kit per i capitoli
     const K = {
       get api() { return api; }, ID, TITLE, TS, T, esc, hash, rnd, pick, safe, F, mem, save, stepOf, setStep, note, once, reward, coinsGive, bal, hero, castHero, stat, bond,
@@ -1073,7 +1107,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, rel: REL, inv: INV, crew: CRW,
+      clock: CLOCK, rel: REL, inv: INV, crew: CRW, dossier: DOS,
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
       ending: (id, d) => { ENDINGS[id] = d; },
       continueStory: () => continueStory(), hasChapter: (n) => !!CHAPTERS[n], setInMatch: (v) => { inMatch = !!v; }, openMain: () => openMain(),

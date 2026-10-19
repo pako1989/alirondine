@@ -224,12 +224,12 @@
 
     // -------------------------------------------------------------------- oggetti
     const obj = {
-      Y() { // bacheca di Pietrabianca
+      "cv_borgo:Y"() { // bacheca di Pietrabianca
         say("voce", "Avvisi: «Cercasi carpentiere per ponte. Astenersi indecisi.» «Il bue di Zanna non si muove. Si offre mancia.» «Gemma vuole sfide. Astenersi vigliacchi.» «Madre Letizia ha bisogno di mani in cucina. Astenersi pigri.» «Piccarda: restituite la borsa. Grazie.»");
         done();
       },
-      U() { say("voce", "Una fontana con un cavallo di pietra. Il cavallo è più grande di tutti quelli del Conte."); done(); },
-      A() { say("voce", "Frecce, balestre, un bersaglio con la faccia di un barone. Qualcuno ci ha disegnato i baffi."); done(); }
+      "cv_borgo:U"() { say("voce", "Una fontana con un cavallo di pietra. Il cavallo è più grande di tutti quelli del Conte."); done(); },
+      "cv_borgo:A"() { say("voce", "Frecce, balestre, un bersaglio con la faccia di un barone. Qualcuno ci ha disegnato i baffi."); done(); }
     };
 
     // -------------------------------------------------------------------- battaglia

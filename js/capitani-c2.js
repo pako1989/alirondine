@@ -132,8 +132,8 @@
     };
 
     const obj = {
-      Y() { say("voce", "Avviso del Conte: «Chi taglia la legna nel parco, la riporta. Chi la riporta, la ripianta.»"); done(); },
-      U() { say("voce", "La fontana del cortile. Sul bordo, qualcuno ha scritto «Isotta paga» e qualcuno ha corretto «Isotta chiede»."); done(); }
+      "cv_castello:Y"() { say("voce", "Avviso del Conte: «Chi taglia la legna nel parco, la riporta. Chi la riporta, la ripianta.»"); done(); },
+      "cv_castello:U"() { say("voce", "La fontana del cortile. Sul bordo, qualcuno ha scritto «Isotta paga» e qualcuno ha corretto «Isotta chiede»."); done(); }
     };
 
     const zones = {

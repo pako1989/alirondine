@@ -131,8 +131,8 @@
       }
     };
     const obj = {
-      Y() { say("voce", "Avvisi della Fiera: «Si cerca gallo che canti a mezzogiorno.» «Si ringrazia chi ha restituito la ruota.» «Il grano è in arrivo. Fonte: il Conte.» (Sotto, con altra grafia: «Da dove?»)"); done(); },
-      U() { say("voce", "La fontana è in secca. Qualcuno ci ha lasciato un biglietto: «Cercasi pioggia. Astenersi indecisi.»"); done(); }
+      "cv_fiera:Y"() { say("voce", "Avvisi della Fiera: «Si cerca gallo che canti a mezzogiorno.» «Si ringrazia chi ha restituito la ruota.» «Il grano è in arrivo. Fonte: il Conte.» (Sotto, con altra grafia: «Da dove?»)"); done(); },
+      "cv_fiera:U"() { say("voce", "La fontana è in secca. Qualcuno ci ha lasciato un biglietto: «Cercasi pioggia. Astenersi indecisi.»"); done(); }
     };
 
     const zones = {

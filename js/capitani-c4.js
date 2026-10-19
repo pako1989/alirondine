@@ -113,8 +113,8 @@
       }
     };
     const obj = {
-      A() { say("voce", "Lance spezzate nella neve. Qualcuno ci ha appeso una sciarpa. Non è chiaro se per scherzo."); done(); },
-      F() { say("voce", "Il falò del Valico. L'unico punto del mondo dove si sta vicini senza motivo."); done(); }
+      "cv_valico:A"() { say("voce", "Lance spezzate nella neve. Qualcuno ci ha appeso una sciarpa. Non è chiaro se per scherzo."); done(); },
+      "cv_valico:F"() { say("voce", "Il falò del Valico. L'unico punto del mondo dove si sta vicini senza motivo."); done(); }
     };
 
     const zones = {
