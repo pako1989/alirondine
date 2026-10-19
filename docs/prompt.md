@@ -125,7 +125,7 @@ Un solo file: contiene regole, stato del progetto, come costruire una saga, API 
 
    Come spunti di storia e grafica guarda anche le saghe più vecchie: `ragnarok-story.js`, `chrono-story.js`, `bilancia-feudi.js`, `kronenburg-story.js`, `storia-campione.js` (Vallombra). Sono scritte senza motore comune: prendi le idee, non il codice.
 2. Leggi `js/bg-scenarios.js`, cioè gli sfondi di scena animati con punti da toccare (blocco `LB`).
-3. Poi **proponimi 4 idee** diverse tra loro per genere, grafica e gioco, senza scrivere codice (non riproporre quelle già elencate in S4). Se ti ho già dato un titolo o un'idea precisa, salta la proposta e sviluppa quella. Per ogni idea indica:
+3. Poi **proponimi 4 idee** diverse tra loro per grafica e gioco (il genere è libero: anche già usato o nuovo), senza scrivere codice (non riproporre quelle già elencate in S4). Se ti ho già dato un titolo o un'idea precisa, salta la proposta e sviluppa quella. Per ogni idea indica:
    - titolo, ambientazione, ispirazione e tono (serio o comico);
    - protagonista: il mio Campione creato;
    - 4-5 personaggi;
