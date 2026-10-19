@@ -1169,13 +1169,13 @@
       function approach(id, o) {
         o = o || {}; const g = FG[id]; if (!g) return; const right = TEMP[g.temper];
         const fin = (ok) => { if (o.done) o.done(ok); else done(); };
-        const catchIt = (txt) => { add(id); say([["voce", txt || g.win || `${g.n} ti segue e si siede nell'Album.`]], () => fin(true)); };
+        const catchIt = (txt) => { add(id); say([[id, txt || g.win || `${g.n} ti segue e si siede nell'Album.`]], () => fin(true)); };
         const head = `<b>${esc(g.n)}</b> ${esc(g.icon)} · ${esc(g.type)}<br><span style="color:var(--dim)">${esc(g.hint || "Ti guarda, in attesa.")}</span>`;
         const opts = Object.keys(HOW).map((k) => ({ label: HOW[k][0], sub: HOW[k][1], fn: () => {
-          if (k === "sfida") return battle([id], { title: `Sfida a ${g.n}`, done: (r) => { if (r.win) catchIt(`${g.n} accetta la sconfitta e si fa catturare${right === "sfida" ? " con un sorriso" : ", un po' offesa"}.`); else say([["voce", `${g.n} ti guarda con compassione e se ne va nel prato. Tornerà.`]], () => fin(false)); } });
+          if (k === "sfida") return battle([id], { title: `Sfida a ${g.n}`, done: (r) => { if (r.win) catchIt(`${g.n} accetta la sconfitta e si fa catturare${right === "sfida" ? " con un sorriso" : ", un po' offesa"}.`); else say([[id, `${g.n} ti guarda con compassione e se ne va nel prato. Tornerà.`]], () => fin(false)); } });
           if (k === "esca") { if (!INV || !INV.has(C0.bait)) return say([["voce", "Non hai esche da offrire."]], () => approach(id, o)); INV.take(C0.bait); }
           if (k === right) return catchIt();
-          say([["voce", `${g.n} non è convinta. ${k === "esca" ? "L'esca è sparita, il carattere no." : "Magari un altro modo."}`]], () => approach(id, o));
+          say([[id, `${g.n} non è convinta. ${k === "esca" ? "L'esca è sparita, il carattere no." : "Magari un altro modo."}`]], () => approach(id, o));
         } }));
         opts.push({ label: "◂ Lasci stare", fn: () => fin(false) });
         api.trAsk("voce", head, opts, bgNow());
