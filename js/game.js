@@ -19563,10 +19563,11 @@
   }
   // ESPRESSIONI DICHIARATE: una battuta può iniziare con [felice] [ride] [triste] [arrabbiato] [sorpreso] [furbo] [pensa]
   // (il tag non si vede). Senza tag, l'espressione si ricava dalla didascalia iniziale «(ride…)» o dalle parole.
-  const EXPR_TAG = { felice: "smile", sorride: "smile", ride: "grin", triste: "sad", piange: "sad", arrabbiato: "angry", arrabbiata: "angry", sorpreso: "wow", sorpresa: "wow", furbo: "sly", furba: "sly", pensa: "think", pensieroso: "think", pensierosa: "think" };
+  const EXPR_TAG = { felice: "smile", sorride: "smile", ride: "grin", triste: "sad", piange: "sad", arrabbiato: "angry", arrabbiata: "angry", sorpreso: "wow", sorpresa: "wow", furbo: "sly", furba: "sly", pensa: "think", pensieroso: "think", pensierosa: "think", sospira: "sad", commosso: "sad", commossa: "sad", sbalordito: "wow", sbalordita: "wow", allarmata: "wow", sarcastico: "sly", serio: "", freddo: "", solenne: "", severo: "", fiero: "", determinata: "", incoraggiante: "" };
   function exprOf(html) {
     const m = String(html || "").match(/^\s*\[([a-zà-ù]+)\]\s*/i), tag = m && EXPR_TAG[m[1].toLowerCase()];
     if (tag) return { x: tag, html: String(html).slice(m[0].length) };
+    if (tag === "") return { x: pvExpr(String(html).slice(m[0].length)), html: String(html).slice(m[0].length) }; // tag neutro («[serio]»): niente espressione dichiarata
     const t = String(html || "").replace(/<[^>]+>/g, " "), sd = t.match(/^\s*\(([^)]{1,80})\)/), d = sd ? sd[1].toLowerCase() : "";
     let x = null;
     if (d) x = /piang|singhiozz|sospir|trema la voce|lacrim|abbassa gli occhi/.test(d) ? "sad" : /ride|ridacch|risata/.test(d) ? "grin" : /sorrid/.test(d) ? "smile" : /urla|grida(?! di gioia)|sbatte|furios|ringhi/.test(d) ? "angry" : /sgran|sbalord|bocca aperta|sobbalz|salta sulla/.test(d) ? "wow" : /ammicc|strizza l'occhio|sottovoce|sorrisetto/.test(d) ? "sly" : /pensa|si gratta|riflett|guarda lontano|in silenzio/.test(d) ? "think" : null;
