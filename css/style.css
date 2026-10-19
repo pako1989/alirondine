@@ -1991,3 +1991,13 @@ html, body { overscroll-behavior-y: contain; }
 @media (orientation: landscape) and (max-height: 560px) { body:not(:has(#matchHud:not([hidden]))) .topr .mute { padding: 0; } body:not(:has(#matchHud:not([hidden]))) .topr { overflow: hidden; } }
 @media (orientation: landscape) and (max-height: 560px) { body:not(:has(#matchHud:not([hidden]))) .topr { gap: 2px; } body:not(:has(#matchHud:not([hidden]))) .topr .mute { font-size: 12px; border-width: 1px; } }
 @media (orientation: landscape) and (max-height: 560px) { body:not(:has(#matchHud:not([hidden]))) #pfitBtn { display: none !important; } }
+/* ---- orizzontale: più spazio al testo, «Continua» non più gigante, direzionale sopra la scena in basso a sinistra ---- */
+@media (orientation: landscape) and (max-height: 560px) {
+  body:not(:has(#matchHud:not([hidden]))) #text { max-height: 46dvh; }
+  body:not(:has(#matchHud:not([hidden]))) #choices { align-content: start; }
+  body:not(:has(#matchHud:not([hidden]))) #choices.one > button { min-height: 44px; }
+  body:not(:has(#matchHud:not([hidden]))) .padwrap { height: 100%; }
+  body:not(:has(#matchHud:not([hidden]))) .padwrap > .dpad { position: fixed; left: calc(env(safe-area-inset-left, 0px) + 14px); bottom: 54px; z-index: 30; opacity: .72; grid-template-columns: repeat(3, clamp(30px, 10.5dvh, 46px)); grid-template-rows: repeat(3, clamp(30px, 10.5dvh, 46px)); }
+  body:not(:has(#matchHud:not([hidden]))) .padwrap > .dpad:active, body:not(:has(#matchHud:not([hidden]))) .padwrap > .dpad:focus-within { opacity: .9; }
+  body:not(:has(#matchHud:not([hidden]))) .padwrap .padacts { flex: 1; }
+}
