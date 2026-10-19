@@ -7,7 +7,6 @@
     const E = window.__capitaniCore;
     if (!E || !E.api || !E.api.addChapter) return setTimeout(boot, 100);
     E.api.addChapter(chapter1);
-    E.api.addChapter(chapter2);
   }
   const SHORT = { cv_isotta: "Isotta", cv_ambrogio: "Ambrogio", cv_brenno: "Brenno", cv_piccarda: "Piccarda", cv_tancredi: "Tancredi", cv_gemma: "Gemma", cv_dario: "Dario", cv_cunegonda: "Cunegonda", cv_letizia: "Letizia", cv_piero: "Piero", cv_zanna: "Zanna", cv_pellegrino: "Pellegrino" };
 
@@ -328,14 +327,6 @@
       n: N, title: "Il Ponte e il Contratto", sub: "Reclutare una compagnia, firmare un contratto e difendere un ponte",
       goal, start: "cv_campo", introBg: "cv_titolo", zones, talk, obj,
       intro: [["voce", "1427. Accampamento della Rondine Scalza."], ["voce", "Una compagnia di ventura. Un pallone di cuoio. Un contratto che non hai ancora."]]
-    };
-  }
-
-  function chapter2(K) {
-    return {
-      n: 2, title: "L'Estate dei Contratti", sub: "In arrivo",
-      goal: () => "Il Capitolo 2 è in arrivo.", start: "cv_campo", introBg: "cv_titolo", zones: {}, talk: {}, obj: {},
-      intro: [["voce", "Il Capitolo 2, «L'Estate dei Contratti», è in arrivo."]]
     };
   }
 

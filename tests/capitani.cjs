@@ -42,4 +42,34 @@ async function run(w) {
   i = await info(page); if (!i.done[1] || i.done[1] !== "villaggio") errors.push("capitolo 1 non concluso: " + JSON.stringify([i.done, i.step]));
   L.check(`Capitani di Ventura · capitolo 1 (${w} px)`, errors); await browser.close();
 }
-(async () => { await run(390); await run(320); })();
+async function c2(w) {
+  const save = { v: 1, ch: 2, step: { 1: 4 }, done: { 1: "villaggio" }, diffSet: true, intro: { ch1: 1, cv_campo: 1, cv_borgo: 1, cv_ponte: 1 }, st: { onore: 4, fama: 2, scudi: 60 }, flags: { cr_cv_isotta: 1, cf_cv_isotta: 1, cr_cv_ambrogio: 2, cf_cv_ambrogio: 1, cr_cv_brenno: 3, cf_cv_brenno: 1, cr_cv_gemma: 4, cf_cv_gemma: 1, cr_n: 4 } };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await page.evaluate(() => window.__capitani.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 2")); await L.advance(page);
+  await L.talk(page, "cv_isotta"); await L.advance(page);
+  let i = await info(page); if (i.step[2] !== 1) errors.push("dopo Isotta c2: " + JSON.stringify(i.step));
+  await go(page, "cv_borgo", 15, 3); { const bad = await L.reachAll(page, "cv_borgo"); if (bad.length) errors.push("cv_borgo (patch) " + bad.join(", ")); }
+  await go(page, "cv_castello", 15, 19); if (w === 390) await L.shot(page, "cv_castello");
+  { const bad = await L.reachAll(page, "cv_castello"); if (bad.length) errors.push("cv_castello irraggiungibile: " + bad.join(", ")); }
+  await L.talk(page, "cv_fulvio"); await L.advance(page, ["Gli offri una quota"]);
+  await L.talk(page, "cv_tiburzio"); await L.advance(page, ["Gli dai il ritmo"]);
+  await go(page, "cv_castello_i1", 10, 10); { const bad = await L.reachAll(page, "cv_castello_i1"); if (bad.length) errors.push("infermeria: " + bad.join(", ")); }
+  await L.talk(page, "cv_ilaria"); await L.advance(page, ["Reggi la bacinella"]);
+  await go(page, "cv_castello_i0", 10, 10); { const bad = await L.reachAll(page, "cv_castello_i0"); if (bad.length) errors.push("sala: " + bad.join(", ")); }
+  await L.talk(page, "cv_conte"); await L.advance(page, ["La Torre dei Corvi"]);
+  i = await info(page); if (i.step[2] !== 2 || i.flags.cv2_path !== "assedio") errors.push("dopo il Conte: " + JSON.stringify([i.step, i.flags.cv2_path]));
+  await go(page, "cv_castello", 15, 19);
+  await L.talk(page, "cv_oddone"); await L.advance(page, ["Sì, andiamo"]).catch(() => {}); await page.waitForTimeout(500);
+  if (!(await page.evaluate(() => !!document.getElementById("scOv")))) errors.push("Schiere non si apre");
+  if (w === 390) await L.shot(page, "cv_schiere");
+  // un turno vero, poi chiusura programmata
+  await page.evaluate(() => document.getElementById("scGo").click()); await page.waitForTimeout(200);
+  if (w === 390) await L.shot(page, "cv_schiere2");
+  await page.evaluate(() => window.__schiere.state.finish(3, 1)); await page.waitForTimeout(200);
+  await page.evaluate(() => document.getElementById("scGo").click()); await page.waitForTimeout(400);
+  await L.advance(page, ["Lo curi e lo lasci andare"]);
+  i = await info(page); if (!i.done[2] || i.done[2] !== "clemenza") errors.push("capitolo 2 non concluso: " + JSON.stringify([i.done, i.step]));
+  const n = (await crew(page)).length; if (n < 7) errors.push("compagni " + n);
+  L.check(`Capitani di Ventura · capitolo 2 (${w} px)`, errors); await browser.close();
+}
+(async () => { await run(390); await run(320); await c2(390); await c2(320); })();

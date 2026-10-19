@@ -20,6 +20,9 @@
     cv_letizia: { n: "Madre Letizia", icon: "🥖", role: "Portiere", d: "Cuoca del convento. Para con il mestolo e benedice con il coltello.", s: { forza: 2, cuore: 2 } },
     cv_piero: { n: "Mastro Piero", icon: "⚙️", role: "Ingegnere", d: "Costruisce macchine che funzionano quasi sempre. «Quasi» è il suo marchio di fabbrica.", s: { ingegno: 4 } },
     cv_zanna: { n: "Zanna il Carrettiere", icon: "🐂", role: "Corsa", d: "Ha la faccia di un orso e il carattere di un agnello. Il bue, invece, ha il carattere di un orso.", s: { forza: 2, tiro: 2 } },
+    cv_ilaria: { n: "Ilaria la Medica", icon: "🌿", role: "Cura", d: "Medica del castello. Cuce i feriti con lo stesso filo con cui ricuce i bilanci.", s: { cuore: 3, forza: 1 } },
+    cv_fulvio: { n: "Messer Fulvio", icon: "💼", role: "Mercante", d: "Vende di tutto, soprattutto promesse. Con lui ogni prezzo è una trattativa e ogni trattativa un'amicizia.", s: { ingegno: 3, tiro: 1 } },
+    cv_tiburzio: { n: "Tiburzio il Tamburino", icon: "🥁", role: "Ritmo", d: "Ha sempre due bacchette in mano e mai un'idea del silenzio. Il suo tamburo muove la truppa meglio di un ordine.", s: { cuore: 2, forza: 2 } },
     cv_pellegrino: { n: "Il Pellegrino", icon: "🧳", role: "Segreto", d: "Cammina da sempre verso un posto che non ricorda. Non parla di sé; ascolta, e basta.", s: { cuore: 4, ingegno: 1 } }
   };
   const E = window.__sagaCore.create({
