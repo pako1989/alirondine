@@ -313,6 +313,7 @@ Le funzioni dei **talk** ricevono `K` come parametro; l'`intro` di un capitolo r
 - [ ] Ogni PNG con `ask`/ricompense/funzioni proprie provato fino in fondo.
 - [ ] `L.reachAll(page, zid)` vuoto su ogni zona; `start` non solido.
 - [ ] Ogni sfondo-scena con 3-4 punti cliccabili visibili in `LB`.
+- [ ] **Carte del Destino** (mazzo `D(...)` in `js/carte-mazzi-saghe.js` + ospite in `GUEST` di `js/carte.js`) e **Squadra dei Sogni** (`SAGHE`, `NEWC` con capitolo, `FRASI` in `js/sogni.js`) fatti PRIMA del push, non rinviati.
 - [ ] Menu «Saghe e GDR», `SAGAS`, `NEWEST`, `PFX`, `MACHINES`, `HAIR_SAGA`, `COSM`, `SAGHE`, `CARDS`, `LINKS`, `FRASI` aggiornati; test `sala`, `sogni`, `volti` passano.
 - [ ] Stadio della saga e partite a tema provati almeno una per modalità.
 - [ ] `git pull --rebase`, `git diff` senza righe rimosse non tue, `git add <file>`, bump `?v=`/`sw.js` dopo il pull.
