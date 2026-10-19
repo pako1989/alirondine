@@ -487,7 +487,7 @@
       return out + `<br><span style="color:var(--dim)">▷ = strade non prese. Per provarle: Capitoli → rigioca.</span>`;
     }
     function journal(back, inZone) {
-      const html = journalHtml() + (CRW ? CRW.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
+      const html = journalHtml() + (CRW ? CRW.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
       const jb = (DOS ? Object.keys(DOS.cases).filter((c) => DOS.list(c).length).map((c) => ({ label: "🗂️ Dossier · " + DOS.cases[c].t, sub: "Confronta prove e testimonianze", fn: () => DOS.open(c, () => journal(back, inZone), inZone) })) : []).concat(CAT && CAT.list().length ? [{ label: "🃏 Album", sub: `${CAT.team().length}/${CAT.max} in squadra`, fn: () => CAT.open(() => journal(back, inZone), inZone) }] : []).concat(CRW && CRW.count() ? [{ label: "⚔️ Schiera la compagnia", sub: `${CRW.field().length}/${CRW.max} in campo`, fn: () => CRW.pick(() => journal(back, inZone), inZone) }] : []).concat((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
       if (inZone) return api.trAsk("voce", html, jb, bgNow());
       api.scene(BG0, "voce", html, jb, JN());
@@ -1191,6 +1191,23 @@
       return { add, own, list, team, toggle, lv, spec, approach, battle, open, html, figs: FG, max: MAXT, total: SP.length, species: SP, dex, complete: () => SP.every(dex) };
     })();
 
+    // -------------------------------------------------------------- PRESSIONE E SFIATO (cfg.steam): una caldaia da dosare
+    // cfg.steam = { stat: "pressione", reset: 2, perSlot: 1, warn: 8, hit: { scafo: 1 }, text: [[chi, testo]…] }   (la pressione è una statistica della saga: stats: { pressione: [0, 10, 3] })
+    // K.steam: level() · add(n, cb) (se supera il massimo la caldaia va in STALLO: torna a `reset`, perdi `hit`, recita `text`; ritorna false) · vent(n) (sfiato volontario, mai uno stallo)
+    // · need(n) (true e spende n se ne hai abbastanza: valvole, passaggi ostruiti, scatti) · bar() (testo ▮▮▮▯) · html(). Con cfg.clock aumenta da sola di `perSlot` a ogni fascia, e va in stallo se tocca il massimo.
+    const STM = cfg.steam && (() => {
+      const S0 = cfg.steam, k = S0.stat || "pressione", mx = () => STATS[k][1], level = () => stat(k);
+      const bar = () => `${"▮".repeat(level())}${"▯".repeat(Math.max(0, mx() - level()))} ${level()}/${mx()}`;
+      function stall(cb) {
+        bond(k, -(level() - (S0.reset == null ? 2 : S0.reset))); Object.keys(S0.hit || {}).forEach((h) => bond(h, -(S0.hit[h] | 0))); safe(() => SFX.choice());
+        say(S0.text || [["voce", "La caldaia fischia, trema e sfiata tutto di colpo. Stallo termico: perdi tempo, vapore e un po' di scafo."]], cb || done);
+      }
+      const add = (n, cb) => { if (level() + n > mx()) { stall(cb); return false; } bond(k, n); if (cb) cb(); return true; };
+      const vent = (n) => { bond(k, -(n == null ? 4 : n)); return level(); };
+      const need = (n) => { if (level() < n) return false; bond(k, -n); return true; };
+      return { level, add, vent, need, bar, stall, html: () => `<br><br><b>${esc(S0.name || "Pressione")}</b> ${bar()}`, max: mx, warn: S0.warn || mx() - 2, perSlot: S0.perSlot | 0 };
+    })();
+
     // -------------------------------------------------------------- kit per i capitoli
     const K = {
       get api() { return api; }, ID, TITLE, TS, T, esc, hash, rnd, pick, safe, F, mem, save, stepOf, setStep, note, once, reward, coinsGive, bal, hero, castHero, stat, bond,
@@ -1201,7 +1218,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, rel: REL, inv: INV, crew: CRW, dossier: DOS, route: RTE, catch: CAT,
+      clock: CLOCK, rel: REL, inv: INV, crew: CRW, dossier: DOS, route: RTE, catch: CAT, steam: STM,
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
       ending: (id, d) => { ENDINGS[id] = d; },
       continueStory: () => continueStory(), hasChapter: (n) => !!CHAPTERS[n], setInMatch: (v) => { inMatch = !!v; }, openMain: () => openMain(),

@@ -8,7 +8,7 @@ async function run(w) {
   const { browser, page, errors } = await L.setup({ w, extra });
   await page.evaluate(() => window.__salone.salaGiochi(() => {})); await page.waitForTimeout(300);
   const ms = await page.evaluate(() => [...document.querySelectorAll(".salOv [data-m]")].map((b) => b.dataset.m + ":" + (b.querySelector(".pe").textContent === "🔒" ? "chiuso" : "aperto")));
-  if (ms.join() !== "vignette:chiuso,atb:chiuso,bottoni:aperto,nastro:aperto,luci:chiuso,lavagna:chiuso,duello:chiuso,concilio:chiuso,gadget:chiuso,iso:chiuso,volo:chiuso,ciak:chiuso,ipogeo:chiuso,consegna:chiuso,giroegol:chiuso,pallatempo:chiuso,combo:chiuso,ritagli:chiuso,stangata:chiuso,arrembaggio:chiuso,corona:chiuso,rintocchi:chiuso,circo:chiuso,marea:chiuso,pedinamento:chiuso,rebound:chiuso,anello:chiuso,corridoio:chiuso,corrente:chiuso,rottami:chiuso,schiere:chiuso,lotta:chiuso,zonarossa:chiuso,roulette:chiuso,caveau:chiuso,quaderno:chiuso,runa:chiuso") errors.push("cabinati sbagliati: " + ms.join());
+  if (ms.join() !== "vignette:chiuso,atb:chiuso,bottoni:aperto,nastro:aperto,luci:chiuso,lavagna:chiuso,duello:chiuso,concilio:chiuso,gadget:chiuso,iso:chiuso,volo:chiuso,ciak:chiuso,ipogeo:chiuso,consegna:chiuso,giroegol:chiuso,pallatempo:chiuso,combo:chiuso,ritagli:chiuso,stangata:chiuso,arrembaggio:chiuso,corona:chiuso,rintocchi:chiuso,circo:chiuso,marea:chiuso,pedinamento:chiuso,rebound:chiuso,anello:chiuso,corridoio:chiuso,corrente:chiuso,rottami:chiuso,schiere:chiuso,lotta:chiuso,steam:chiuso,zonarossa:chiuso,roulette:chiuso,caveau:chiuso,quaderno:chiuso,runa:chiuso") errors.push("cabinati sbagliati: " + ms.join());
   if (w === 390) await L.shot(page, "sala");
   // Super-Bottoni: il boss c'è (saga finita), si sceglie il potere
   await page.evaluate(() => document.querySelector('.salOv [data-m="bottoni"]').click()); await page.waitForTimeout(200);
@@ -106,4 +106,16 @@ async function lotta(w) {
   const rec = await page.evaluate(() => JSON.parse(localStorage.getItem("ali-di-rondine.salagiochi") || "{}")); if (!rec.p || rec.p.lotta !== 1) errors.push("partita Lotta non registrata: " + JSON.stringify(rec.p));
   L.check(`Sala Giochi · cabinato Lotta (${w} px)`, errors); await browser.close();
 }
-(async () => { await run(390); await run(320); await ospiti(390); await torneo(390); await torneo(320); await marea(390); await marea(320); await schiere(390); await schiere(320); await lotta(390); await lotta(320); })().catch((e) => { console.error("✗ sala:", e.message); process.exit(1); });
+async function steam(w) {
+  const extra = { "ali-di-rondine.officina": { v: 1, ch: 4, step: { 1: 4, 2: 4, 3: 4, 4: 5 }, done: { 1: "ok", 2: "ok", 3: "ok", 4: "vapore" }, ends: ["vapore"], diffSet: true, flags: {} } };
+  const { browser, page, errors } = await L.setup({ w, extra });
+  await page.evaluate(() => window.__salone.salaGiochi(() => {})); await page.waitForTimeout(300);
+  const st = await page.evaluate(() => { const b = document.querySelector('.salOv [data-m="steam"]'); return b ? b.querySelector(".pe").textContent : null; }); if (st === null || st === "🔒") errors.push("cabinato Steam non aperto: " + st);
+  await page.evaluate(() => document.querySelector('.salOv [data-m="steam"]').click()); await page.waitForTimeout(200);
+  await page.evaluate(() => document.querySelector('.salOv [data-o="0"]').click()); await page.waitForTimeout(400);
+  if (!(await page.evaluate(() => !!document.querySelector("#stOv")))) errors.push("Steam Strikers non parte dal cabinato");
+  await page.evaluate(() => window.__steam.state.finish(5, 1)); await page.click("#stGo"); await page.waitForTimeout(400);
+  const rec = await page.evaluate(() => JSON.parse(localStorage.getItem("ali-di-rondine.salagiochi") || "{}")); if (!rec.p || rec.p.steam !== 1) errors.push("partita Steam non registrata: " + JSON.stringify(rec.p));
+  L.check(`Sala Giochi · cabinato Steam (${w} px)`, errors); await browser.close();
+}
+(async () => { await run(390); await run(320); await ospiti(390); await torneo(390); await torneo(320); await marea(390); await marea(320); await schiere(390); await schiere(320); await steam(390); await steam(320); await lotta(390); await lotta(320); })().catch((e) => { console.error("✗ sala:", e.message); process.exit(1); });

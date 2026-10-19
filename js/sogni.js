@@ -23,6 +23,7 @@
     fortino: ["ali-di-rondine.fortino", "Colpo al Fortino", "#38bdf8", "__fortino"],
     note: ["ali-di-rondine.note", "Tactics Note · Il Quaderno del Giudizio", "#64748b", "__note"],
     cenere: ["ali-di-rondine.cenere", "Cenere e Gloria", "#d97706", "__cenere"],
+    officina: ["ali-di-rondine.officina", "L'Officina dei Giganti di Ruggine", "#d97706", "__officina"],
     figurine: ["ali-di-rondine.figurine", "Cacciatori di Figurine", "#a855f7", "__figurine"],
     capitani: ["ali-di-rondine.capitani", "Capitani di Ventura", "#b45309", "__capitani"],
     fischietto: ["ali-di-rondine.fischietto", "Il Fischietto · Arbitro di Provincia", "#ca8a04", "__fischietto"],
@@ -69,6 +70,11 @@
     ["fg_ginestra", "figurine", "c", 54, 62, 78, "C", 1], ["fg_ottone", "figurine", "c", 58, 60, 66, "D", 1],
     ["fg_nives", "figurine", "e", 82, 66, 80, "A", 1], ["fg_rosa", "figurine", "r", 60, 70, 82, "C", 3],
     ["fg_cora", "figurine", "l", 86, 74, 88, "A", 4],
+    // L'Officina dei Giganti di Ruggine
+    ["of_gasparre", "officina", "c", 52, 60, 80, "D", 1], ["of_rina", "officina", "r", 66, 76, 72, "C", 1],
+    ["of_volta", "officina", "c", 70, 58, 62, "A", 2], ["of_ferro", "officina", "r", 78, 70, 66, "B", 2],
+    ["of_vanda", "officina", "e", 84, 72, 78, "C", 3], ["of_brontolo", "officina", "e", 74, 86, 70, "D", 1],
+    ["of_titano", "officina", "l", 90, 84, 92, "B", 3], ["of_apprendista", "officina", "c", 56, 54, 60, "B", 1],
     // Rotta 66
     ["ro_tino", "rotta", "c", 78, 50, 60, "A", 1], ["ro_fiamma", "rotta", "e", 56, 90, 70, "D", 1],
     ["ro_osvaldo", "rotta", "r", 54, 72, 66, "C", 2], ["ro_ersilia", "rotta", "l", 66, 70, 90, "C", 3],
@@ -229,6 +235,7 @@
     nf_gaspare: "Parate registrate: tutte. Gol subiti: li ho messi alla voce «varie».", nf_bora: "Pensa, decidi, vai. In quest'ordine, e senza panico.", nf_tobia: "Ripeto il gol al rallentatore: sembra ancora più bello.", nf_scoglio: "La partita è lunga quanto serve. Io ho tempo.",
     dg_asterio: "Il pilastro sono io. E io non mi sposto, nemmeno per il pallone d'oro.", dg_fiamma: "Non brucio, io. Illumino. Ma se mi offendi, fumo.", dg_meda: "Non guardarmi negli occhi: passa e basta. Il pallone, intendo.", dg_ruggine: "Trent'anni di allenamento per un solo rigore. Questa volta entra.",
     gp_gridoni: "E IL PALLONE ENTRA! (Era già entrato. Ma l'emozione è in differita.)", gp_bullone: "Si stringe a mano. Anche il portiere, se serve.", gp_rosalba: "Il rosso non è un colore: è un modo di arrivare primi.", gp_nembo: "Fischio, sventolo, verbalizzo. Il gol è regolare, salvo nuvole.",
+    of_gasparre: "Piano. La caldaia ha pazienza, a differenza di chi la guarda.", of_rina: "La chiave inglese non la uso. La tengo. Oggi, forse, la uso.", of_volta: "Un fulmine, un fischio e un gol. Nello stesso ordine.", of_ferro: "Gioco per la Corporazione. Ma il fischietto lo tengo nel taschino del cuore.", of_vanda: "Una penna nuova per un patto nuovo. L'inchiostro, quello, è sempre vecchio.", of_brontolo: "Fsss. Brrr. (Traduzione: palla a me.)", of_titano: "Clank. Clank. Clank.", of_apprendista: "Mi hanno insegnato a vincere. Non a farlo con gusto.",
     fg_ginestra: "Non si comprano le figure: si incontrano.", fg_ottone: "Un caffè, un consiglio, un tackle.", fg_nives: "Vincere è la mia lingua. Perdere la sto imparando.", fg_rosa: "Fischio una volta. Capito? Una.", fg_cora: "Tre Leghe vinte. La quarta è la tua.",
     cv_gemma: "Un dardo, un respiro, un punto. Come ai tempi del ponte.", cv_brenno: "Qui non si passa. Nemmeno col pallone.", cv_isotta: "Conti pagati, schemi in regola e un assist al momento giusto.", cv_conte: "Un feudo si difende. Un campo, ancora meglio.",
     fi_pino: "Contatto lieve. Gioco avanti. Il mio fischietto è la mia bandierina.", fi_livia: "Annotato. Anche questo tiro finisce in cronaca.", fi_dante: "Una scivolata pulita, per una volta. Segnatevelo.", fi_edvige: "Il regolamento ammette il talento. Articolo uno, comma gol.",
