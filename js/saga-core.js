@@ -487,7 +487,7 @@
       return out + `<br><span style="color:var(--dim)">▷ = strade non prese. Per provarle: Capitoli → rigioca.</span>`;
     }
     function journal(back, inZone) {
-      const html = journalHtml() + (CRW ? CRW.html() : "") + (DOS ? DOS.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
+      const html = journalHtml() + (CRW ? CRW.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
       const jb = (DOS ? Object.keys(DOS.cases).filter((c) => DOS.list(c).length).map((c) => ({ label: "🗂️ Dossier · " + DOS.cases[c].t, sub: "Confronta prove e testimonianze", fn: () => DOS.open(c, () => journal(back, inZone), inZone) })) : []).concat(CRW && CRW.count() ? [{ label: "⚔️ Schiera la compagnia", sub: `${CRW.field().length}/${CRW.max} in campo`, fn: () => CRW.pick(() => journal(back, inZone), inZone) }] : []).concat((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
       if (inZone) return api.trAsk("voce", html, jb, bgNow());
       api.scene(BG0, "voce", html, jb, JN());
@@ -1097,6 +1097,39 @@
       return { add, has, list, found, solid, open, verdict, html, cases: C };
     })();
 
+    // -------------------------------------------------------------- LA ROTTA (cfg.route): viaggio a tappe con risorse
+    // cfg.route = { start: "nodo", nodes: { id: { t, icon, zone } }, edges: [[da, a, { benza: 1, umore: 0 }, { when(K), ev(K) → [[chi, testo]…] }]],
+    //   rescue: { stat: "benza", n: 2, cost: { umore: 2 }, text } }   (le risorse sono statistiche della saga: stats: { benza: [0, 9, 6, "Benzina"] })
+    // K.route: here() · edges() (tappe raggiungibili da qui) · open(back, inZone) (schermata della mappa con costi) · go(nodo, cb) (paga, avanza l'orologio, recita
+    // l'evento della tratta, entra nella zona del nodo) · visited(nodo) · set(nodo). Senza tappe pagabili offre il soccorso (rescue), così non ci si blocca mai.
+    const RTE = cfg.route && (() => {
+      const R = cfg.route, NS = R.nodes || {}, here = () => F.get("rt_at", R.start || Object.keys(NS)[0]), vis = (id) => F.is("rt_v_" + id);
+      const edges = () => arr(R.edges).filter((e) => e[0] === here() && NS[e[1]] && (!(e[3] && e[3].when) || safe(() => e[3].when(K), true)));
+      const cost = (e) => e[2] || {}, can = (e) => Object.keys(cost(e)).every((k) => stat(k) >= (cost(e)[k] | 0));
+      const cTxt = (e) => Object.keys(cost(e)).filter((k) => cost(e)[k]).map((k) => `${(STATS[k] && STATS[k][3]) || k} -${cost(e)[k]}`).join(" · ") || "gratis";
+      function go(to, cb) {
+        const e = edges().find((x) => x[1] === to); if (!e || !can(e)) return false;
+        Object.keys(cost(e)).forEach((k) => bond(k, -(cost(e)[k] | 0)));
+        const from = here(); F.set("rt_at", to); F.set("rt_v_" + to, true);
+        const enter = () => { if (cb) cb(); enterZone(NS[to].zone); };
+        const ev = e[3] && e[3].ev ? safe(() => e[3].ev(K, from, to), null) : null;
+        const after = () => { if (ev && ev.length) say(ev, enter); else enter(); };
+        if (CLOCK) clkAdvance(1, after); else after();
+        return true;
+      }
+      function open(back, inZone) {
+        const es = edges(), okE = es.filter(can);
+        const head = `<b>Rotta</b> · ${esc((NS[here()] || {}).t || "")}<br><span style="color:var(--dim)">${Object.keys(STATS).filter((k) => STATS[k][3]).map((k) => `${esc(STATS[k][3])} ${stat(k)}`).join(" · ")}</span>`;
+        const opts = es.map((e) => ({ label: `${NS[e[1]].icon || "🛣️"} ${NS[e[1]].t}`, sub: can(e) ? cTxt(e) : "Non puoi: " + cTxt(e), fn: () => { if (!can(e)) return open(back, inZone); go(e[1]); } }));
+        if (!okE.length && R.rescue) opts.push({ label: "🆘 " + (R.rescue.label || "Chiedi aiuto"), sub: Object.keys(R.rescue.cost || {}).map((k) => `${(STATS[k] && STATS[k][3]) || k} -${R.rescue.cost[k]}`).join(" · "), fn: () => { Object.keys(R.rescue.cost || {}).forEach((k) => bond(k, -R.rescue.cost[k])); bond(R.rescue.stat, R.rescue.n || 2); say([["voce", R.rescue.text || "Qualcuno ti dà una mano. Costa qualcosa."]], () => open(back, inZone)); } });
+        opts.push({ label: "◂ Indietro", fn: back });
+        if (inZone) return api.trAsk("voce", head, opts, bgNow());
+        api.scene(BG0, "voce", head, opts, JN());
+      }
+      const html = () => `<br><br><b>Rotta</b> ${Object.keys(NS).map((id) => `${here() === id ? "📍" : vis(id) ? "✓" : "·"} ${esc(NS[id].t)}`).join(" → ")}`;
+      return { here, edges, open, go, visited: vis, set: (id) => { if (NS[id]) F.set("rt_at", id); }, nodes: NS, html };
+    })();
+
     // -------------------------------------------------------------- kit per i capitoli
     const K = {
       get api() { return api; }, ID, TITLE, TS, T, esc, hash, rnd, pick, safe, F, mem, save, stepOf, setStep, note, once, reward, coinsGive, bal, hero, castHero, stat, bond,
@@ -1107,7 +1140,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, rel: REL, inv: INV, crew: CRW, dossier: DOS,
+      clock: CLOCK, rel: REL, inv: INV, crew: CRW, dossier: DOS, route: RTE,
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
       ending: (id, d) => { ENDINGS[id] = d; },
       continueStory: () => continueStory(), hasChapter: (n) => !!CHAPTERS[n], setInMatch: (v) => { inMatch = !!v; }, openMain: () => openMain(),
