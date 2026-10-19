@@ -34,6 +34,7 @@
       campo: { grass: ["#5a7a3a", "#527232", "#628442"], path: ["#a8946a", "#9a865e"], stone: ["#8a8a8a", "#7a7a7a"], wall: ["#5a4630", "#4e3c28"], water: ["#2f6aa0", "#2a6096"], tree: "#2e5a2a", tint: "255,170,90", tintA: 0.12, fx: "dust" },
       borgo: { grass: ["#6a8a4a", "#628244", "#729a52"], path: ["#b8a47a", "#aa966e"], stone: ["#9a9288", "#8a8278"], wall: ["#cdb48a", "#bda47a"], water: ["#2f7ab0", "#2a70a4"], tree: "#3a6a30", tint: "255,220,160", tintA: 0.06 },
       ponte: { grass: ["#6a9a50", "#629048", "#72a458"], path: ["#bda882", "#ad9872"], stone: ["#8a8a92", "#7a7a82"], wall: ["#6a6a72", "#5e5e66"], water: ["#2f6aa0", "#2a6096"], tree: "#2e6a30", tint: "200,220,255", tintA: 0.07 },
+      neve: { grass: ["#dde7ee", "#d2dee8", "#e6eef4"], path: ["#b8c4cc", "#aab6be"], stone: ["#9aa6b0", "#8e9aa4"], wall: ["#6a7684", "#5e6a78"], water: ["#7aa0c0", "#6e94b4"], tree: "#2e4a3a", tint: "200,220,255", tintA: 0.1, fx: "snow" },
       casa: { grass: ["#6a4a2e", "#5e4126", "#745234"], path: ["#8a6a3e", "#7d5f36"], stone: ["#7a5a38", "#6b4e30"], wall: ["#2a1810", "#20120c"], water: ["#2a4a52", "#223c43"], tree: "#3a2c1e", tint: "255,190,110", tintA: 0.1 }
     },
     floors: ".",
@@ -54,7 +55,11 @@
     travel: true,
     item: ["Scudo di Pietrabianca", "Scudi di Pietrabianca"],
     journal: { name: "Il Registro della Compagnia", sub: "Compagni, mappa dei contratti e finali" },
-    endings: {},
+    endings: {
+      capitano: ["Capitano del Conte", "Hai firmato per un padrone solo. La paga arriva. La libertà, un po' meno.", "Accetta l'incarico del Conte nel capitolo 4."],
+      libera: ["La Rondine Scalza", "Libera e senza padroni, con i debiti di sempre e una compagnia vera.", "Rifiuta l'incarico del Conte."],
+      leggenda: ["La Rondine Leggendaria", "Dodici compagni, un onore intatto e una ballata che tutti conoscono.", "Segreto: rifiuta l'incarico con Onore 5 e almeno 12 compagni."]
+    },
     heroLook: (h, K) => ({ bg: ["#3a2438", "#fbbf24"], shirt: h.shirt }),
     heroTitle: () => "capitano della Rondine Scalza",
     crew: { name: "La Rondine Scalza", field: 4, members: MEMBERS },

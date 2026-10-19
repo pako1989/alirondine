@@ -8,7 +8,6 @@
     const E = window.__capitaniCore;
     if (!E || !E.api || !E.api.addChapter || !window.__schiere) return setTimeout(boot, 100);
     E.api.addChapter(chapter3);
-    E.api.addChapter(chapter4);
   }
   const SHORT = { cv_isotta: "Isotta", cv_ambrogio: "Ambrogio", cv_brenno: "Brenno", cv_piccarda: "Piccarda", cv_tancredi: "Tancredi", cv_gemma: "Gemma", cv_dario: "Dario", cv_cunegonda: "Cunegonda", cv_letizia: "Letizia", cv_piero: "Piero", cv_zanna: "Zanna", cv_pellegrino: "Pellegrino", cv_ilaria: "Ilaria", cv_fulvio: "Fulvio", cv_tiburzio: "Tiburzio" };
 
@@ -72,7 +71,7 @@
     }
     function fin(end, extra) {
       K.finishChapter(N, end);
-      K.scene([extra, ["voce", `<b>FINE DEL CAPITOLO 3.</b> L'autunno è passato. La Rondine Scalza è ${CR.count()} compagni e una reputazione che non sa più di che colore sia.`], ["voce", "Il Capitolo 4, «L'Inverno del Capitano», è in arrivo."]], () => K.openMain(), "cv_titolo");
+      K.scene([extra, ["voce", `<b>FINE DEL CAPITOLO 3.</b> L'autunno è passato. La Rondine Scalza è ${CR.count()} compagni e una reputazione che non sa più di che colore sia.`], ["voce", "Il Capitolo 4, «L'Inverno del Capitano», chiude la storia."]], () => K.openMain(), "cv_titolo");
     }
 
     const talk = {
@@ -178,12 +177,5 @@
     };
   }
 
-  function chapter4() {
-    return {
-      n: 4, title: "L'Inverno del Capitano", sub: "In arrivo",
-      goal: () => "Il Capitolo 4 è in arrivo.", start: "cv_campo", introBg: "cv_titolo", zones: {}, talk: {}, obj: {},
-      intro: [["voce", "Il Capitolo 4, «L'Inverno del Capitano», è in arrivo."]]
-    };
-  }
   boot();
 })();

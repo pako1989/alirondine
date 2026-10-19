@@ -99,4 +99,25 @@ async function c3(w, via) {
   i = await info(page); if (!i.done[3] || i.done[3] !== (via || "conte")) errors.push("capitolo 3 non concluso: " + JSON.stringify([i.done, i.step, i.flags.cv3_path]));
   L.check(`Capitani di Ventura · capitolo 3 ${via || "conte"} (${w} px)`, errors); await browser.close();
 }
-(async () => { await run(390); await run(320); await c2(390); await c2(320); await c3(390, "conte"); await c3(320, "accordo"); })();
+async function c4(w, opt, end) {
+  const fl = { cr_cv_isotta: 1, cf_cv_isotta: 1, cr_cv_dario: 2, cf_cv_dario: 1, cr_cv_pellegrino: 3, cf_cv_pellegrino: 1, cr_cv_gemma: 4, cf_cv_gemma: 1, cr_n: 4, cv3_path: "accordo" };
+  const save = { v: 1, ch: 4, step: { 1: 4, 2: 3, 3: 4 }, done: { 1: "villaggio", 2: "clemenza", 3: "accordo" }, diffSet: true, intro: { ch1: 1, cv_campo: 1, cv_borgo: 1, cv_ponte: 1, cv_castello: 1 }, st: { onore: 4, fama: 3, scudi: 40 }, flags: fl };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await page.evaluate(() => window.__capitani.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 4")); await L.advance(page);
+  await L.talk(page, "cv_isotta"); await L.advance(page);
+  let i = await info(page); if (i.step[4] !== 1) errors.push("dopo Isotta c4: " + JSON.stringify(i.step));
+  await go(page, "cv_castello", 27, 15); { const bad = await L.reachAll(page, "cv_castello"); if (bad.length) errors.push("castello (patch c4) " + bad.join(", ")); }
+  await go(page, "cv_castello_i0", 10, 10);
+  await L.talk(page, "cv_conte"); await L.advance(page, [opt]);
+  i = await info(page); if (i.step[4] !== 2) errors.push("dopo il Conte: " + JSON.stringify(i.step));
+  await go(page, "cv_valico", 2, 10); if (w === 390) await L.shot(page, "cv_valico");
+  { const bad = await L.reachAll(page, "cv_valico"); if (bad.length) errors.push("cv_valico irraggiungibile: " + bad.join(", ")); }
+  await L.talk(page, "cv_pellegrino"); await L.advance(page, ["Gli offri un posto"]);
+  await L.talk(page, "cv_araldo"); await L.advance(page, ["Sì, si combatte"]).catch(() => {}); await page.waitForTimeout(500);
+  if (!(await page.evaluate(() => !!document.getElementById("scOv")))) errors.push("Schiere non si apre");
+  await page.evaluate(() => window.__schiere.state.finish(3, 1)); await page.waitForTimeout(200);
+  await page.evaluate(() => document.getElementById("scGo").click()); await page.waitForTimeout(400); await L.advance(page).catch(() => {});
+  i = await info(page); if (i.done[4] !== end || !i.ends.includes(end)) errors.push("finale atteso " + end + ": " + JSON.stringify([i.done, i.ends]));
+  L.check(`Capitani di Ventura · capitolo 4 ${end} (${w} px)`, errors); await browser.close();
+}
+(async () => { await run(390); await run(320); await c2(390); await c2(320); await c3(390, "conte"); await c3(320, "accordo"); await c4(390, "Accetto l'incarico", "capitano"); await c4(320, "Rifiuto", "libera"); })();
