@@ -487,8 +487,8 @@
       return out + `<br><span style="color:var(--dim)">▷ = strade non prese. Per provarle: Capitoli → rigioca.</span>`;
     }
     function journal(back, inZone) {
-      const html = journalHtml() + (CRW ? CRW.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
-      const jb = (DOS ? Object.keys(DOS.cases).filter((c) => DOS.list(c).length).map((c) => ({ label: "🗂️ Dossier · " + DOS.cases[c].t, sub: "Confronta prove e testimonianze", fn: () => DOS.open(c, () => journal(back, inZone), inZone) })) : []).concat(CRW && CRW.count() ? [{ label: "⚔️ Schiera la compagnia", sub: `${CRW.field().length}/${CRW.max} in campo`, fn: () => CRW.pick(() => journal(back, inZone), inZone) }] : []).concat((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
+      const html = journalHtml() + (CRW ? CRW.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
+      const jb = (DOS ? Object.keys(DOS.cases).filter((c) => DOS.list(c).length).map((c) => ({ label: "🗂️ Dossier · " + DOS.cases[c].t, sub: "Confronta prove e testimonianze", fn: () => DOS.open(c, () => journal(back, inZone), inZone) })) : []).concat(CAT && CAT.list().length ? [{ label: "🃏 Album", sub: `${CAT.team().length}/${CAT.max} in squadra`, fn: () => CAT.open(() => journal(back, inZone), inZone) }] : []).concat(CRW && CRW.count() ? [{ label: "⚔️ Schiera la compagnia", sub: `${CRW.field().length}/${CRW.max} in campo`, fn: () => CRW.pick(() => journal(back, inZone), inZone) }] : []).concat((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
       if (inZone) return api.trAsk("voce", html, jb, bgNow());
       api.scene(BG0, "voce", html, jb, JN());
     }
@@ -1130,6 +1130,67 @@
       return { here, edges, open, go, visited: vis, set: (id) => { if (NS[id]) F.set("rt_at", id); }, nodes: NS, html };
     })();
 
+    // -------------------------------------------------------------- L'ALBUM (cfg.catch): cattura, squadra di figure, lotta a turni
+    // cfg.catch = { name, max: 3, beats: { aria: "campo", campo: "ombra", ombra: "aria" }, bait: "id_oggetto_esca",
+    //   temps: { timida: "parla", fiera: "sfida", vanitosa: "esca", curiosa: "gioca" },
+    //   figs: { id: { n, icon, type: "campo|aria|ombra|cuore", temper, hp, atk, def, moves: [[nome, potenza, tipizzata]…, [nome, 0, 0, "heal"]], evo: [id, livello], hint, win, d } } }
+    // K.catch: add(id) (true se nuova) · own · list() · team() · toggle(id) · lv(id) · approach(id, { done(preso) }) (scelta: parlare, sfidare, esca, giocare: la giusta dipende dal carattere)
+    // · battle([id | [id, liv]], { title, done(r) }) (lotta 3 contro 3 col motore js/figurine-lotta.js; chi vince guadagna esperienza ed evolve) · open(back, inZone) (l'Album) · html()
+    const CAT = cfg.catch && (() => {
+      const C0 = cfg.catch, FG = C0.figs || {}, MAXT = C0.max || 3, TEMP = C0.temps || { timida: "parla", fiera: "sfida", vanitosa: "esca", curiosa: "gioca" };
+      const HOW = { parla: ["🗣️ Parli piano", "Per le timide"], sfida: ["⚔️ La sfidi", "Lotta: se vinci, è tua"], esca: ["🍬 Offri un'esca", "Per le vanitose"], gioca: ["🎲 Giochi con lei", "Per le curiose"] };
+      const EVO = Object.keys(FG).filter((k) => FG[k].evo).map((k) => FG[k].evo[0]), SP = Object.keys(FG).filter((k) => !EVO.includes(k));
+      const own = (id) => !!FG[id] && F.get("ca_" + id, 0) > 0, dex = (id) => own(id) || (!!FG[id].evo && own(FG[id].evo[0])), xp = (id) => F.get("cx_" + id, 0), lv = (id) => 1 + Math.min(4, Math.floor(xp(id) / 2)), on = (id) => F.get("ct_" + id, 0) > 0;
+      const list = () => Object.keys(FG).filter(own).sort((a, b) => F.get("ca_" + a, 0) - F.get("ca_" + b, 0)), team = () => list().filter(on).slice(0, MAXT);
+      const add = (id) => { if (!FG[id] || own(id)) return false; const n = F.get("ca_n", 0) + 1; F.set("ca_n", n); F.set("ca_" + id, n); if (team().length < MAXT) F.set("ct_" + id, 1); SFX.ding(); note("Album: " + FG[id].n); safe(() => meet(id)); return true; };
+      const toggle = (id) => { if (!own(id)) return false; if (on(id)) { if (team().length <= 1) return false; F.set("ct_" + id, 0); return true; } if (team().length >= MAXT) return false; F.set("ct_" + id, 1); return true; };
+      const spec = (id, L) => { const g = FG[id], l = L || lv(id); return { id, n: g.n, icon: g.icon, type: g.type, hp: (g.hp || 22) + (l - 1) * 3, atk: g.atk || 7, def: (g.def || 4) + (l > 2 ? 1 : 0), lv: l, moves: g.moves }; };
+      function grow(ids) {
+        const lines = [];
+        ids.forEach((id) => {
+          F.set("cx_" + id, xp(id) + 1); const g = FG[id];
+          if (g.evo && FG[g.evo[0]] && !own(g.evo[0]) && lv(id) >= g.evo[1]) {
+            const e = g.evo[0], o = F.get("ca_" + id, 0), t = on(id); F.set("ca_" + id, 0); F.set("ct_" + id, 0); F.set("ca_" + e, o); F.set("ct_" + e, t ? 1 : 0); F.set("cx_" + e, xp(id));
+            safe(() => meet(e)); SFX.ding(); lines.push(["voce", `<b>${esc(g.n)} si evolve in ${esc(FG[e].n)}!</b>`]);
+          }
+        });
+        return lines;
+      }
+      function battle(foes, o) {
+        o = o || {}; const tm = team(); if (!tm.length) { say([["voce", "Non hai figure in squadra: apri l'Album dal Libro di Bordo."]]); return false; }
+        const fs = arr(foes).map((f) => (Array.isArray(f) ? spec(f[0], f[1]) : spec(f, 1)));
+        ownMatch(window.__lotta.start, { team: tm.map((i) => spec(i)), foe: fs, beats: C0.beats, title: o.title || "Lotta di figure", done: (r) => {
+          const ev = r.win ? grow(tm) : [];
+          const fin = () => { if (o.done) o.done(r); else done(); };
+          if (ev.length) say(ev, fin); else fin();
+        } });
+        return true;
+      }
+      function approach(id, o) {
+        o = o || {}; const g = FG[id]; if (!g) return; const right = TEMP[g.temper];
+        const fin = (ok) => { if (o.done) o.done(ok); else done(); };
+        const catchIt = (txt) => { add(id); say([["voce", txt || g.win || `${g.n} ti segue e si siede nell'Album.`]], () => fin(true)); };
+        const head = `<b>${esc(g.n)}</b> ${esc(g.icon)} · ${esc(g.type)}<br><span style="color:var(--dim)">${esc(g.hint || "Ti guarda, in attesa.")}</span>`;
+        const opts = Object.keys(HOW).map((k) => ({ label: HOW[k][0], sub: HOW[k][1], fn: () => {
+          if (k === "sfida") return battle([id], { title: `Sfida a ${g.n}`, done: (r) => { if (r.win) catchIt(`${g.n} accetta la sconfitta e si fa catturare${right === "sfida" ? " con un sorriso" : ", un po' offesa"}.`); else say([["voce", `${g.n} ti guarda con compassione e se ne va nel prato. Tornerà.`]], () => fin(false)); } });
+          if (k === "esca") { if (!INV || !INV.has(C0.bait)) return say([["voce", "Non hai esche da offrire."]], () => approach(id, o)); INV.take(C0.bait); }
+          if (k === right) return catchIt();
+          say([["voce", `${g.n} non è convinta. ${k === "esca" ? "L'esca è sparita, il carattere no." : "Magari un altro modo."}`]], () => approach(id, o));
+        } }));
+        opts.push({ label: "◂ Lasci stare", fn: () => fin(false) });
+        api.trAsk("voce", head, opts, bgNow());
+      }
+      function open(back, inZone) {
+        const ls = list(), head = `<b>${esc(C0.name || "Album")}</b> (${SP.filter(dex).length}/${SP.length})<br><span style="color:var(--dim)">Tocca per mandare in squadra (${team().length}/${MAXT}) o tenere nell'album. Triangolo: aria batte campo, campo batte ombra, ombra batte aria.</span>`;
+        const opts = ls.map((id) => ({ label: `${on(id) ? "⭐" : "○"} ${FG[id].icon} ${FG[id].n}`, sub: `${FG[id].type} · Liv. ${lv(id)}${FG[id].evo && !own(FG[id].evo[0]) ? " · evolve al " + FG[id].evo[1] : ""}`, fn: () => { toggle(id); open(back, inZone); } }));
+        opts.push({ label: "◂ Indietro", fn: back });
+        if (inZone) return api.trAsk("voce", head, opts, bgNow());
+        api.scene(BG0, "voce", head, opts, JN());
+      }
+      const html = () => `<br><br><b>${esc(C0.name || "Album")}</b> (${SP.filter(dex).length}/${SP.length})<br>` + Object.keys(FG).map((id) => own(id) ? `${on(id) ? "⭐" : "•"} ${esc(FG[id].icon)} <b>${esc(FG[id].n)}</b> · ${esc(FG[id].type)} · Liv. ${lv(id)}` : `· ???`).join("<br>");
+      return { add, own, list, team, toggle, lv, spec, approach, battle, open, html, figs: FG, max: MAXT, total: SP.length, species: SP, dex, complete: () => SP.every(dex) };
+    })();
+
     // -------------------------------------------------------------- kit per i capitoli
     const K = {
       get api() { return api; }, ID, TITLE, TS, T, esc, hash, rnd, pick, safe, F, mem, save, stepOf, setStep, note, once, reward, coinsGive, bal, hero, castHero, stat, bond,
@@ -1140,7 +1201,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, rel: REL, inv: INV, crew: CRW, dossier: DOS, route: RTE,
+      clock: CLOCK, rel: REL, inv: INV, crew: CRW, dossier: DOS, route: RTE, catch: CAT,
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
       ending: (id, d) => { ENDINGS[id] = d; },
       continueStory: () => continueStory(), hasChapter: (n) => !!CHAPTERS[n], setInMatch: (v) => { inMatch = !!v; }, openMain: () => openMain(),
