@@ -382,7 +382,7 @@
     let soon = 0;
     const refreshSoon = () => { clearTimeout(soon); soon = setTimeout(() => safe(refreshZone), 0); };
     const done = () => { refreshZone(); api.trResume(); };
-    function lines(ls, bg) { return ls.map((l) => api.L(l[0], T(l[1]), l[2] || bg || bgNow())); }
+    function lines(ls, bg) { return ls.map((l) => api.L(l[0], T(String(l[1]).replace(/^\[[a-zà-ù ]{2,12}\]\s*/i, "")), l[2] || bg || bgNow())); } // toglie i segnaposto d'umore «[serio]» a inizio battuta
     function say(ls, then) { safe(() => arr(ls).forEach((l) => Array.isArray(l) && meet(l[0]))); api.trSay(lines(ls), typeof then === "function" ? then : done); }
     // PERSONAGGI DELLA SAGA: chi parla in un dialogo o in una scena viene «incontrato» e compare nella pagina Personaggi del menu
     const SCAST = [];
