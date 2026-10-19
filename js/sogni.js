@@ -21,6 +21,7 @@
   const SAGHE = {
     sigilli: ["ali-di-rondine.sigilli", "L'Accademia dei Sigilli", "#6366f1", "__sigilli"],
     fortino: ["ali-di-rondine.fortino", "Colpo al Fortino", "#38bdf8", "__fortino"],
+    note: ["ali-di-rondine.note", "Tactics Note · Il Quaderno del Giudizio", "#64748b", "__note"],
     cenere: ["ali-di-rondine.cenere", "Cenere e Gloria", "#d97706", "__cenere"],
     quattordici: ["ali-di-rondine.quattordici", "Il Torneo dei Quattordici", "#dc2626", "__quattordici"],
     spia: ["ali-di-rondine.spia", "Operazione Doppio Zero", "#10b981", "__spia"],
@@ -50,6 +51,7 @@
     shogun: ["ali-di-rondine.shogun-story", "Shogun Eclipse", "#a02a3a", "__shogunStory"], phantom: ["ali-di-rondine.phantom-genesis", "Phantom Genesis", "#5a2a8a", "__phantomGenesis"], abisso: ["ali-di-rondine.abisso-story", "Abisso di Dunwich", "#1a4a5a", "__abissoStory"],
     muro: ["ali-di-rondine.muro", "Il Muro", "#6a6a5a", "__muro"], cristalli: ["ali-di-rondine.cristalli", "Cristalli del Campo", "#3a9ac8", "__cristalli"], doppio: ["ali-di-rondine.doppio-turno", "Doppio Turno", "#7a7a9a", "__doppioTurno"], libro: ["ali-di-rondine.libro-finali", "Il Libro che Mangiava i Finali", "#a8782a", "__libroFinali"],
   };
+  const SG = (k) => SAGHE[k] || ["ali-di-rondine." + k, k, "#94a3b8", ""]; // una saga mancante nella tabella non deve rompere la Squadra dei Sogni
   // le carte delle saghe a capitoli (Vallombra e le altre): il 8° valore è il capitolo che le sblocca, una volta concluso.
   // Mai nelle bustine, nei premi a sorpresa e nel Draft finché non sono guadagnate: niente anticipazioni.
   const NEWC = [
@@ -316,9 +318,9 @@
   const load = () => { const o = load0(); XPC = o.xp; return o; };
   const load0 = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { own: Array.isArray(r.own) ? r.own.filter((x) => BY[x]) : [], team: Array.isArray(r.team) ? r.team.filter((x) => BY[x]).slice(0, 5) : [], won: Array.isArray(r.won) ? r.won.filter((x) => typeof x === "number") : [], packs: r.packs | 0, hero: !!r.hero, xp: r.xp && typeof r.xp === "object" ? r.xp : {}, season: r.season && Array.isArray(r.season.sched) ? r.season : null, titles: r.titles | 0, draft: r.draft && Array.isArray(r.draft.picks) ? r.draft : null, cups: r.cups | 0 }; };
   const save = (r) => { XPC = r.xp || {}; safe(() => localStorage.setItem(KEY, JSON.stringify(r)), 0); };
-  const sagaMem = (k) => safe(() => JSON.parse(localStorage.getItem(SAGHE[k][0]) || "null"), null);
+  const sagaMem = (k) => safe(() => JSON.parse(localStorage.getItem(SG(k)[0]) || "null"), null);
   function progress(k) {
-    let m = null; const mod = SAGHE[k][3];
+    let m = null; const mod = SG(k)[3];
     if (mod) m = safe(() => { const i = window[mod].info(); return i && i.done ? i : null; }, null);
     if (!m) m = sagaMem(k);
     if (!m) return { ch: 0, ends: 0, done: {} };
@@ -366,7 +368,7 @@
   const port = (id) => safe(() => window.__borgoApi.portraitImg(id), null);
   // ---------------------------------------------------------------- la carta (HTML)
   function cardHtml(id, opts) {
-    const c = BY[id], R = RAR[c.rar], own = !opts || opts.own !== false, img = own ? port(id) : null, S = SAGHE[c.saga], st = own ? starsOf(id) : 0, e = own ? eff(c) : c;
+    const c = BY[id], R = RAR[c.rar], own = !opts || opts.own !== false, img = own ? port(id) : null, S = SG(c.saga), st = own ? starsOf(id) : 0, e = own ? eff(c) : c;
     return `<div class="sgCard r${c.rar}${own ? "" : " lock"}${opts && opts.sel ? " sel" : ""}${st >= 3 ? " s3" : ""}" data-c="${id}" style="--rc:${R[1]};--sc:${S[2]}"${st >= 3 ? ` title="«${esc(FRASI[id] || "")}»"` : ""}><div class="hd"><span>${R[0]}</span><b>${c.role}</b></div>${st ? `<div class="stars">${"★".repeat(st)}</div>` : ""}<div class="img">${img ? `<img alt="" src="${img}">` : `<span>?</span>`}</div><div class="nm">${own ? esc(name(id)) : "???"}</div><div class="st"><span>ATT <b>${own ? e.at : "–"}</b></span><span>DIF <b>${own ? e.df : "–"}</b></span><span>TEC <b>${own ? e.te : "–"}</b></span></div><div class="sg">${esc(S[1])}</div></div>`;
   }
   // ---------------------------------------------------------------- le schermate
@@ -400,7 +402,7 @@
   }
   function reveal(id, title, then) {
     const body = shell("🎴 " + esc(title));
-    body.innerHTML = `<div class="reveal">${cardHtml(id)}</div><p class="sum" style="text-align:center"><b>${esc(name(id))}</b> · ${RAR[BY[id].rar][0]} · ${esc(SAGHE[BY[id].saga][1])}</p><div class="big"><button type="button" data-ok="1">Nella collezione ▸<small>La trovi tra le carte</small></button></div>`;
+    body.innerHTML = `<div class="reveal">${cardHtml(id)}</div><p class="sum" style="text-align:center"><b>${esc(name(id))}</b> · ${RAR[BY[id].rar][0]} · ${esc(SG(BY[id].saga)[1])}</p><div class="big"><button type="button" data-ok="1">Nella collezione ▸<small>La trovi tra le carte</small></button></div>`;
     try { const A = new (window.AudioContext || window.webkitAudioContext)(); [523, 659, 784, 1046].forEach((f, i) => { const o = A.createOscillator(), g = A.createGain(); o.frequency.value = f; g.gain.value = 0.04; g.gain.exponentialRampToValueAtTime(0.0001, A.currentTime + 0.2 + i * 0.1); o.connect(g); g.connect(A.destination); o.start(A.currentTime + i * 0.1); o.stop(A.currentTime + 0.3 + i * 0.1); }); } catch (e) {}
     body.querySelector("[data-ok]").onclick = then;
   }
