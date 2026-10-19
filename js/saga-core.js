@@ -487,8 +487,8 @@
       return out + `<br><span style="color:var(--dim)">▷ = strade non prese. Per provarle: Capitoli → rigioca.</span>`;
     }
     function journal(back, inZone) {
-      const html = journalHtml() + choicesHtml() + cluesHtml() + questsHtml();
-      const jb = ((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
+      const html = journalHtml() + (CRW ? CRW.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
+      const jb = (CRW && CRW.count() ? [{ label: "⚔️ Schiera la compagnia", sub: `${CRW.field().length}/${CRW.max} in campo`, fn: () => CRW.pick(() => journal(back, inZone), inZone) }] : []).concat((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
       if (inZone) return api.trAsk("voce", html, jb, bgNow());
       api.scene(BG0, "voce", html, jb, JN());
     }
@@ -778,7 +778,7 @@
         build(L) {
           const { lay, put } = L, floor = kind === "bottega" || kind === "ufficio" || kind === "spogliatoio" ? "+" : kind === "mulino" ? ":" : "=";
           lay(0, 0, W - 1, Hh - 1, floor); lay(0, 0, W - 1, 1, "a"); lay(0, 0, 0, Hh - 1, "a"); lay(W - 1, 0, W - 1, Hh - 1, "a"); lay(0, Hh - 1, W - 1, Hh - 1, "a"); put(door[0], door[1], "v");
-          [3 + (hs % 3), 15 - (hs % 2)].forEach((x) => put(x, 1, "W"));
+          [3 + (hs % 3), 15 - (hs % 2)].forEach((x) => put(kind === "bottega" && x % 2 === 0 ? x + 1 : x, 1, "W")); // (bottega: gli scaffali stanno sulle x pari, la finestra va accanto per restare raggiungibile)
           if (kind !== "bottega" && kind !== "spogliatoio") lay(7, 6, 12, 8, '"');
           const corner = (hs >> 3) % 2; // l'arredamento cambia lato da casa a casa
           const L0 = corner ? 2 : 16, L1 = corner ? 16 : 2;
@@ -1039,6 +1039,29 @@
         ids.map((id) => ({ label: `${itemDef(id).icon || "•"} ${itemDef(id).n}${invCount(id) > 1 ? " ×" + invCount(id) : ""}`, sub: itemDef(id).d, fn: () => itemMenu(id, back) })).concat([{ label: "◂ Indietro", fn: back }]), bgNow());
     }
     const INV = INVC && { give: invGive, take: invTake, has: (id) => invCount(id) > 0, count: invCount, list: invList, bonus: invBonus, gift: invGift, zaino };
+    // -------------------------------------------------------------- LA COMPAGNIA (cfg.crew): reclutamento e schieramento
+    // cfg.crew = { name, field: 4, members: { id: { n, icon, role, d, s: { forza: 3, ... } } } }. Chi non è reclutato resta «???».
+    // K.crew.recruit(id) (true se nuovo) · has · count · total · list() · field() (schierati, max `field`) · toggle(id) · leave(id)
+    // · power("forza") somma di quel valore sugli schierati · K.crew.pick(back, inZone) apre lo schieramento. Il registro si legge nel diario.
+    const CRW = cfg.crew && (() => {
+      const C0 = cfg.crew, M = C0.members || {}, IDS = Object.keys(M), MAXF = C0.field || 4;
+      const flag = (id) => F.get("cr_" + id, 0), on = (id) => !!F.get("cf_" + id, 0), has = (id) => !!M[id] && flag(id) > 0;
+      const list = () => IDS.filter(has).sort((x, y) => flag(x) - flag(y)), field = () => list().filter(on);
+      const recruit = (id) => { if (!M[id] || has(id)) return false; const n = F.get("cr_n", 0) + 1; F.set("cr_n", n); F.set("cr_" + id, n); if (field().length < MAXF) F.set("cf_" + id, 1); safe(() => meet(id)); return true; };
+      const leave = (id) => { if (has(id)) { F.set("cr_" + id, 0); F.set("cf_" + id, 0); } };
+      const toggle = (id) => { if (!has(id)) return false; if (on(id)) { if (field().length <= 1) return false; F.set("cf_" + id, 0); return true; } if (field().length >= MAXF) return false; F.set("cf_" + id, 1); return true; };
+      const power = (k) => field().reduce((a, id) => a + (((M[id] || {}).s || {})[k] || 0), 0);
+      const sTxt = (m) => Object.keys(m.s || {}).map((k) => `${esc(k)} ${m.s[k]}`).join(" · ");
+      const html = () => `<br><br><b>${esc(C0.name || "La Compagnia")}</b> (${list().length}/${IDS.length}) · schierati ${field().length}/${MAXF}<br>` + IDS.map((id) => { const m = M[id]; return has(id) ? `${on(id) ? "⚔️" : "•"} ${esc(m.icon || "")} <b>${esc(m.n)}</b> <span style="color:var(--dim)">${esc(m.role || "")}${sTxt(m) ? " · " + sTxt(m) : ""}<br>&nbsp;&nbsp;${esc(m.d || "")}</span>` : "<span style='color:var(--dim)'>• ???</span>"; }).join("<br>");
+      function pick(back, inZone) {
+        const ls = list(), head = `<b>Schiera la compagnia</b><br><span style="color:var(--dim)">Tocca per mandare in campo (${field().length}/${MAXF}) o tenere in riserva. Gli schierati seguono il Campione e giocano le battaglie.</span>`;
+        const opts = ls.map((id) => ({ label: `${on(id) ? "⚔️" : "○"} ${M[id].icon || ""} ${M[id].n}`, sub: `${M[id].role || ""}${sTxt(M[id]) ? " · " + sTxt(M[id]) : ""}`.slice(0, 80), fn: () => { toggle(id); pick(back, inZone); } }));
+        opts.push({ label: "◂ Indietro", fn: back });
+        if (inZone) return api.trAsk("voce", head, opts, bgNow());
+        api.scene(BG0, "voce", head, opts, JN());
+      }
+      return { has, count: () => list().length, total: IDS.length, list, field, recruit, leave, toggle, power, html, pick, members: M, max: MAXF };
+    })();
 
     // -------------------------------------------------------------- kit per i capitoli
     const K = {
@@ -1050,7 +1073,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, rel: REL, inv: INV,
+      clock: CLOCK, rel: REL, inv: INV, crew: CRW,
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
       ending: (id, d) => { ENDINGS[id] = d; },
       continueStory: () => continueStory(), hasChapter: (n) => !!CHAPTERS[n], setInMatch: (v) => { inMatch = !!v; }, openMain: () => openMain(),
