@@ -72,4 +72,31 @@ async function c2(w) {
   const n = (await crew(page)).length; if (n < 7) errors.push("compagni " + n);
   L.check(`Capitani di Ventura · capitolo 2 (${w} px)`, errors); await browser.close();
 }
-(async () => { await run(390); await run(320); await c2(390); await c2(320); })();
+async function c3(w, via) {
+  const fl = { cr_cv_isotta: 1, cf_cv_isotta: 1, cr_cv_dario: 2, cf_cv_dario: 1, cr_cv_piero: 3, cf_cv_piero: 1, cr_cv_letizia: 4, cf_cv_letizia: 1, cr_n: 4 };
+  const save = { v: 1, ch: 3, step: { 1: 4, 2: 3 }, done: { 1: "villaggio", 2: "clemenza" }, diffSet: true, intro: { ch1: 1, cv_campo: 1, cv_borgo: 1, cv_ponte: 1, cv_castello: 1 }, st: { onore: 4, fama: 3, scudi: 40 }, flags: fl };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await page.evaluate(() => window.__capitani.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 3")); await L.advance(page);
+  await L.talk(page, "cv_isotta"); await L.advance(page);
+  let i = await info(page); if (i.step[3] !== 1) errors.push("dopo Isotta c3: " + JSON.stringify(i.step));
+  await go(page, "cv_borgo", 29, 11); { const bad = await L.reachAll(page, "cv_borgo"); if (bad.length) errors.push("cv_borgo (patch c3) " + bad.join(", ")); }
+  await go(page, "cv_fiera", 2, 10); if (w === 390) await L.shot(page, "cv_fiera");
+  { const bad = await L.reachAll(page, "cv_fiera"); if (bad.length) errors.push("cv_fiera irraggiungibile: " + bad.join(", ")); }
+  await L.talk(page, "cv_marta"); await L.advance(page);
+  await L.talk(page, "cv_bertoldo"); await L.advance(page, ["Lo ascolti seduto"]);
+  await L.talk(page, "cv_oddone"); await L.advance(page, ["Lo incalzi"]);
+  await go(page, "cv_fiera_i0", 10, 10); { const bad = await L.reachAll(page, "cv_fiera_i0"); if (bad.length) errors.push("botte piena: " + bad.join(", ")); }
+  await L.talk(page, "cv_lupo"); await L.advance(page).catch(() => {});
+  await page.evaluate((k) => eval(k).setStep(3, 2), K_);
+  await go(page, "cv_bosco", 2, 9); if (w === 390) await L.shot(page, "cv_bosco");
+  { const bad = await L.reachAll(page, "cv_bosco"); if (bad.length) errors.push("cv_bosco irraggiungibile: " + bad.join(", ")); }
+  await L.talk(page, "cv_lupo"); await L.advance(page, via === "accordo" ? ["Doppio gioco"] : ["Resto col Conte"]).catch(() => {}); await page.waitForTimeout(500);
+  if (via !== "accordo") {
+    if (!(await page.evaluate(() => !!document.getElementById("scOv")))) errors.push("Schiere non si apre");
+    await page.evaluate(() => window.__schiere.state.finish(3, 1)); await page.waitForTimeout(200);
+    await page.evaluate(() => document.getElementById("scGo").click()); await page.waitForTimeout(400); await L.advance(page);
+  }
+  i = await info(page); if (!i.done[3] || i.done[3] !== (via || "conte")) errors.push("capitolo 3 non concluso: " + JSON.stringify([i.done, i.step, i.flags.cv3_path]));
+  L.check(`Capitani di Ventura · capitolo 3 ${via || "conte"} (${w} px)`, errors); await browser.close();
+}
+(async () => { await run(390); await run(320); await c2(390); await c2(320); await c3(390, "conte"); await c3(320, "accordo"); })();

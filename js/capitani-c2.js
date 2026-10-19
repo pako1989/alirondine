@@ -7,7 +7,6 @@
     const E = window.__capitaniCore;
     if (!E || !E.api || !E.api.addChapter || !window.__schiere) return setTimeout(boot, 100);
     E.api.addChapter(chapter2);
-    E.api.addChapter(chapter3);
   }
   const SHORT = { cv_isotta: "Isotta", cv_ambrogio: "Ambrogio", cv_brenno: "Brenno", cv_piccarda: "Piccarda", cv_tancredi: "Tancredi", cv_gemma: "Gemma", cv_dario: "Dario", cv_cunegonda: "Cunegonda", cv_letizia: "Letizia", cv_piero: "Piero", cv_zanna: "Zanna", cv_pellegrino: "Pellegrino", cv_ilaria: "Ilaria", cv_fulvio: "Fulvio", cv_tiburzio: "Tiburzio" };
 
@@ -85,8 +84,8 @@
       cv_conte() {
         const s = S();
         if (s === 0) { say("cv_conte", "Non vi ho ancora convocati. Torni dal campo con una lettera, capitano."); return done(); }
-        if (s >= 2) { say("cv_conte", path() === "assedio" ? "La Torre dei Corvi non aspetta. Ser Oddone vi guida, nel cortile." : "Il grano non aspetta. Ser Oddone vi guida, nel cortile."); return done(); }
         if (s >= 3) { say("cv_conte", "Siete stati utili. Non è un complimento: è un'osservazione."); return done(); }
+        if (s >= 2) { say("cv_conte", path() === "assedio" ? "La Torre dei Corvi non aspetta. Ser Oddone vi guida, nel cortile." : "Il grano non aspetta. Ser Oddone vi guida, nel cortile."); return done(); }
         say("cv_conte", "[serio] Capitano della Rondine Scalza. Il ponte ha tenuto. Mi hanno detto che qualcuno ha pianto, ma non so chi.");
         say("cv_conte", "Due contratti. Il primo: la Torre dei Corvi, a nord. Il Lupo Grigio l'ha occupata. Paga: grande, rischio: idem. Il secondo: scortare il grano del villaggio fino al mulino. Paga: piccola, rischio: piccolo, soddisfazione: media.");
         ask("Quale contratto firmi?", [
@@ -167,14 +166,6 @@
         cv_ponte: { npcs: (s, list) => list.filter((n) => n.id !== "cv_lupo" && n.id !== "cv_oddone") }
       },
       intro: [["voce", "Estate 1427. Il ponte ha tenuto, e al borgo qualcuno ha cominciato a chiamarvi «i Rondinelli»."], ["voce", "Per il Conte, forse, è un complimento."]]
-    };
-  }
-
-  function chapter3() {
-    return {
-      n: 3, title: "L'Autunno dei Contratti Doppi", sub: "In arrivo",
-      goal: () => "Il Capitolo 3 è in arrivo.", start: "cv_campo", introBg: "cv_titolo", zones: {}, talk: {}, obj: {},
-      intro: [["voce", "Il Capitolo 3, «L'Autunno dei Contratti Doppi», è in arrivo."]]
     };
   }
 
