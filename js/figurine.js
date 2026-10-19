@@ -62,8 +62,8 @@
     bonds: {
       per: 6, max: 4, names: ["Conoscenti", "Colleghi", "Amici", "Fidati", "Famiglia"],
       scenes: {
-        fg_ginestra: [{ lv: 2, id: "gin2", lines: [["fg_ginestra", "Ho venduto figurine per quarant'anni. Una sola volta ho fatto una cosa diversa: ne ho tenuta una. Per tutta una vita."], ["fg_ginestra", "Era Sorriso. Non era mia: mi aveva scelto lei. Tu capisci la differenza, vero?"]], reward: (K) => K.bond("fama", 1) }],
-        fg_nives: [{ lv: 2, id: "niv2", lines: [["fg_nives", "Vincere è la mia lingua. Perdere la imparo adesso, a vent'anni, senza dizionario."], ["fg_nives", "Grazie di avermi battuta senza guardarmi dall'alto. Ci provo anch'io, a non farlo."]], reward: (K) => K.bond("scorte", 1) }]
+        fg_ginestra: [{ lv: 2, id: "gin2", lines: [["fg_ginestra", "Ho venduto figurine per quarant'anni. Una sola volta ho fatto una cosa diversa: ne ho tenuta una. Per tutta una vita."], ["fg_ginestra", "Era Sorriso. Non era mia: mi aveva scelto lei. Tu capisci la differenza, vero?"]], reward: (K) => K.bond("fama", 1) }, { lv: 3, id: "gin3", prize: "+3 Scorte e 60 monete", lines: [["fg_ginestra", "Ti ho tenuto da parte una cosa dal retro. Non è una figura: è la chiave della vetrina. Tienila, ormai ti conoscono più di me."], ["fg_ginestra", "Se un giorno apri un'edicola, mettila sotto il bancone. Le figure sanno dove abiti."]], reward: (K) => { K.bond("scorte", 3); K.reward("fg_gin3", { coins: 60 }); } }],
+        fg_nives: [{ lv: 2, id: "niv2", lines: [["fg_nives", "Vincere è la mia lingua. Perdere la imparo adesso, a vent'anni, senza dizionario."], ["fg_nives", "Grazie di avermi battuta senza guardarmi dall'alto. Ci provo anch'io, a non farlo."]], reward: (K) => K.bond("scorte", 1) }, { lv: 3, id: "niv3", prize: "+2 Fama e +2 Scorte", lines: [["fg_nives", "Ho una regola nuova: dopo ogni lotta offro io. Anche se perdo, soprattutto se perdo."], ["fg_nives", "Prendi, sono le mie scorte di riserva. Le figure hanno fame, e io ho imparato che si vince anche mangiando."]], reward: (K) => { K.bond("fama", 2); K.bond("scorte", 2); } }]
       }
     },
     inv: {

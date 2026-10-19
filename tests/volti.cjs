@@ -7,13 +7,14 @@ async function run(w) {
   await page.evaluate(() => window.__faceStyles.preload()); await page.waitForFunction(() => !!window.__dicebear, null, { timeout: 15000 });
   const bad = await page.evaluate(() => {
     const C = window.__borgoApi.CAST, g = document.createElement("canvas").getContext("2d"), out = [], ids = Object.keys(C).filter((id) => C[id] && C[id].skin).slice(0, 70);
-    ["flat", "hd", "db_toonhead"].forEach((st) => ids.forEach((id) => [null, "smile", "grin", "sad", "angry", "wow", "sly", "think", "blink"].forEach((e) => { try { if (!window.__faceStyles.draw(st, g, id, C[id], e)) out.push(st + ":" + id + ":" + e); } catch (er) { out.push(st + ":" + id + " " + er.message); } })));
+    ["flat", "hd"].forEach((st) => ids.forEach((id) => [null, "smile", "grin", "sad", "angry", "wow", "sly", "think", "blink"].forEach((e) => { try { if (!window.__faceStyles.draw(st, g, id, C[id], e)) out.push(st + ":" + id + ":" + e); } catch (er) { out.push(st + ":" + id + " " + er.message); } })));
     return [ids.length, out.slice(0, 8)];
   });
   if (bad[0] < 50) errors.push("pochi personaggi: " + bad[0]); if (bad[1].length) errors.push("volti non disegnati: " + bad[1].join(", "));
   // il ciclo delle Impostazioni passa per tutti gli stili nuovi
   const seen = await page.evaluate(() => { const s = []; for (let i = 0; i < 15 && window.cycleFaces; i++) { window.cycleFaces(); s.push(JSON.parse(localStorage.getItem("ali-di-rondine.impostazioni") || "{}").faces); } return s.join(); });
-  ["flat", "hd", "db_toonhead"].forEach((k) => { if (seen && !seen.includes(k)) errors.push("lo stile " + k + " manca nel ciclo: " + seen); });
+  ["flat", "hd", "pixel"].forEach((k) => { if (seen && !seen.includes(k)) errors.push("lo stile " + k + " manca nel ciclo: " + seen); });
+  if (/db_toonhead|manga|acquerello|anime/.test(seen)) errors.push("stili rimossi ancora nel ciclo: " + seen);
   L.check(`Stili dei volti nuovi (${w} px)`, errors); await browser.close();
 }
 // le acconciature: 18 nel gioco (8 libere in più, 10 delle saghe) disegnate in tutti gli stili; finire una saga sblocca la sua
