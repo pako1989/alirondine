@@ -49,7 +49,7 @@
     journal: { name: "L'Archivio di Rete", sub: "Dossier, Hacking, legami e finali" },
     cases: CASES,
     bonds: {
-      per: 8, max: 4, names: ["Estranei", "Conoscenti", "Alleati", "Fidati", "Famiglia di strada"],
+      per: 4, talk: 2, max: 4, names: ["Estranei", "Conoscenti", "Alleati", "Fidati", "Famiglia di strada"],
       scenes: {
         nr_kira: [{ lv: 2, id: "kir2", lines: [["nr_kira", "Mio fratello dice che la città è un codice che qualcuno ha scritto di fretta. Io dico che basta una riga per cambiarlo."], ["nr_kira", "Se mi trovano, nasconditi. Se ti trovano, nascondi me. Funziona meglio così."]], reward: (K) => K.bond("hackeraggio", 5) },
           { lv: 3, id: "kir3", prize: "+10 Hacking e il cyberdeck di Kira", lines: [["nr_kira", "Il mio cyberdeck. Tre porte rotte, una calamita e un adesivo di mio fratello. Ti serve più di me."], ["nr_kira", "Non perderlo. E se lo perdi, fallo con stile."]], reward: (K) => { K.bond("hackeraggio", 10); } }],
