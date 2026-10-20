@@ -494,7 +494,7 @@
       return out + `<br><span style="color:var(--dim)">▷ = strade non prese. Per provarle: Capitoli → rigioca.</span>`;
     }
     function journal(back, inZone) {
-      const html = journalHtml() + (CRW ? CRW.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
+      const html = journalHtml() + (CRW ? CRW.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + (WGT ? WGT.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
       const jb = (DOS ? Object.keys(DOS.cases).filter((c) => DOS.list(c).length).map((c) => ({ label: "🗂️ Dossier · " + DOS.cases[c].t, sub: "Confronta prove e testimonianze", fn: () => DOS.open(c, () => journal(back, inZone), inZone) })) : []).concat(CAT && CAT.list().length ? [{ label: "🃏 Album", sub: `${CAT.team().length}/${CAT.max} in squadra`, fn: () => CAT.open(() => journal(back, inZone), inZone) }] : []).concat(CRW && CRW.count() ? [{ label: "⚔️ Schiera la compagnia", sub: `${CRW.field().length}/${CRW.max} in campo`, fn: () => CRW.pick(() => journal(back, inZone), inZone) }] : []).concat((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
       if (inZone) return api.trAsk("voce", html, jb, bgNow());
       api.scene(BG0, "voce", html, jb, JN());
@@ -894,6 +894,7 @@
         ...(DOS ? [["🗂️ Dossier", "Raccogli prove e indizi parlando e guardando i dettagli dei luoghi: il Dossier li collega, e a volte serve per le scelte decisive."]] : []),
         ...(CAT ? [["📒 Album", "Incontri creature o figure: puoi parlare, sfidare o offrire esche. Ognuna ha un carattere e un modo giusto di essere avvicinata. L'Album mostra quante ne hai e che squadra porti."]] : []),
         ...(STM ? [["♨️ " + nm, nm + " sale col tempo e quando alimenti la caldaia, e si consuma con valvole, viaggi e partite. Se supera il massimo c'è stallo: perdi pressione e un pezzo di scafo. Sfiata prima che sia tardi."]] : []),
+        ...(WGT ? [["⚖️ " + (cfg.weight.name || "Peso"), "Le scelte morali non hanno una risposta giusta: accumulano " + WGT.axes.map(WGT.name).join(", ") + ". Il Peso sblocca o chiude opzioni nei dialoghi, cambia le scene e decide il finale. Il valore si vede nel Registro."]] : []),
         ...arr(safe(() => cfg.guide && cfg.guide(K), []))
       ];
       api.trAsk("voce", `<b>📖 Guida · ${esc(TITLE)}</b><br><span style="color:var(--dim)">Tocca un argomento. Qui ci sono solo le regole che usa questa saga.</span>`, T0.map((t) => ({ label: t[0], fn: () => say([["voce", t[1]]], () => guida(back)) })).concat([{ label: "◂ Indietro", fn: back }]), bgNow());
@@ -1233,6 +1234,25 @@
       return { level, add, vent, need, bar, stall, html: () => `<br><br><b>${esc(S0.name || "Pressione")}</b> ${bar()}`, max: mx, warn: S0.warn || mx() - 2, perSlot: S0.perSlot | 0 };
     })();
 
+    // -------------------------------------------------------------- PESO (cfg.weight): le scelte morali accumulano conseguenze
+    // cfg.weight = { axes: { fiducia: ["Fiducia", "🤝"], colpa: ["Colpa", "🕯️"], rabbia: ["Rabbia", "🔥"] } }   (ogni asse è anche una statistica: stats: { fiducia: [0, 9, 0] }…)
+    // K.weight: add(asse, n) · get(asse) · top() (asse più alto; a parità il primo) · has(asse, n) · bar() · html()
+    // · ask(chi, domanda, [{ label, sub, w: { colpa: 1 }, need: { rabbia: 3 }, fn }], sfondo): come K.ask, ma applica i pesi della scelta e blocca le opzioni che richiedono un asse non abbastanza alto
+    const WGT = cfg.weight && (() => {
+      const W0 = cfg.weight, AX = Object.keys(W0.axes), nmOf = (a) => W0.axes[a][0], icOf = (a) => W0.axes[a][1] || "";
+      const get = (a) => stat(a), has = (a, n) => get(a) >= n;
+      const add = (a, n) => { if (!W0.axes[a]) return; bond(a, n | 0); if (window.toast && (n | 0)) safe(() => window.toast(`${nmOf(a)} ${n > 0 ? "+" : ""}${n}`, n > 0 ? "info" : "good", icOf(a))); };
+      const top = () => AX.reduce((b, a) => (get(a) > get(b) ? a : b), AX[0]);
+      const bar = () => AX.map((a) => `${icOf(a)} ${nmOf(a)} ${"▮".repeat(get(a))}${"▯".repeat(Math.max(0, 5 - get(a)))}`).join(" · ");
+      const html = () => `<br><br><b>${esc((W0.name) || "Peso")}</b><br>` + AX.map((a) => `${icOf(a)} ${esc(nmOf(a))} ${get(a)}`).join(" · ");
+      const wask = (who, prompt, opts, bg, tm) => ask(who, prompt, opts.map((o) => {
+        const lack = Object.keys(o.need || {}).find((a) => !has(a, o.need[a])), wt = Object.keys(o.w || {}).filter((a) => o.w[a]).map((a) => `${o.w[a] > 0 ? "+" : ""}${o.w[a]} ${nmOf(a)}`).join(", ");
+        const sub = lack ? `Richiede ${nmOf(lack)} ${o.need[lack]}` : [o.sub, wt && "Peso: " + wt].filter(Boolean).join(" · ");
+        return Object.assign({}, o, { sub, disabled: !!lack || !!o.disabled, fn: o.fn && (() => { Object.keys(o.w || {}).forEach((a) => add(a, o.w[a])); o.fn(); }) });
+      }), bg, tm);
+      return { add, get, top, has, bar, html, ask: wask, axes: AX, name: nmOf };
+    })();
+
     // -------------------------------------------------------------- kit per i capitoli
     const K = {
       get api() { return api; }, ID, TITLE, TS, T, esc, hash, rnd, pick, safe, F, mem, save, stepOf, setStep, note, once, reward, coinsGive, bal, hero, castHero, stat, bond,
@@ -1243,7 +1263,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, rel: REL, inv: INV, crew: CRW, dossier: DOS, route: RTE, catch: CAT, steam: STM,
+      clock: CLOCK, rel: REL, inv: INV, crew: CRW, dossier: DOS, route: RTE, catch: CAT, steam: STM, weight: WGT,
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
       ending: (id, d) => { ENDINGS[id] = d; },
       continueStory: () => continueStory(), hasChapter: (n) => !!CHAPTERS[n], setInMatch: (v) => { inMatch = !!v; }, openMain: () => openMain(),
