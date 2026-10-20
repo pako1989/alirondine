@@ -881,6 +881,23 @@
 
     // -------------------------------------------------------------- menu
     function leave() { const back = EXIT || window.title; EXIT = null; api.trExitTo(typeof back === "function" ? back : null); }
+    // GUIDA: spiega, solo per le regole che questa saga usa, come funzionano (menu → 📖 Guida)
+    function guida(back) {
+      const nm = (STM && STM.max && cfg.steam && cfg.steam.name) || "Pressione";
+      const T0 = [
+        ["🧭 Come si gioca", "Muoviti con le frecce. «Parla» funziona vicino a una persona, a un oggetto o a una porta. Il Menu mostra obiettivo, personaggi e progressi. Le scelte importanti vengono ricordate: nel Registro trovi i finali che hai già visto."],
+        ...(BND ? [["♥ Rapporti", "Ogni personaggio ha un livello di fiducia a cuori. Salgono con regali dallo Zaino, aiuti e risposte gentili. A ogni livello c'è una scena e un premio: in Personaggi vedi sempre il prossimo. Poi parlagli di nuovo per vederla."]] : []),
+        ...(INV ? [["🎒 Zaino", "Gli oggetti si trovano in giro, nelle case e nei capitoli. Alcuni danno bonus in partita finché li tieni, altri sono regali: aprili dallo Zaino e scegli a chi darli (devi essere vicino a quella persona)."]] : []),
+        ...(CLK ? [["🕓 Orologio", "La giornata è divisa in fasce (" + CLK.slots.join(", ") + "). Alcune azioni e i viaggi passano il tempo: certe persone e luoghi cambiano da una fascia all'altra."]] : []),
+        ...(RTE ? [["🗺️ Rotta", "Per spostarti tra le tappe apri la Rotta dal personaggio che ti accompagna. Ogni tratto costa risorse: guarda i numeri in alto prima di partire e scegli la strada giusta."]] : []),
+        ...(CRW ? [["👥 Compagnia", "Reclutando persone formi una compagnia che entra in campo con te. Controlla chi è in squadra dal menu della saga."]] : []),
+        ...(DOS ? [["🗂️ Dossier", "Raccogli prove e indizi parlando e guardando i dettagli dei luoghi: il Dossier li collega, e a volte serve per le scelte decisive."]] : []),
+        ...(CAT ? [["📒 Album", "Incontri creature o figure: puoi parlare, sfidare o offrire esche. Ognuna ha un carattere e un modo giusto di essere avvicinata. L'Album mostra quante ne hai e che squadra porti."]] : []),
+        ...(STM ? [["♨️ " + nm, nm + " sale col tempo e quando alimenti la caldaia, e si consuma con valvole, viaggi e partite. Se supera il massimo c'è stallo: perdi pressione e un pezzo di scafo. Sfiata prima che sia tardi."]] : []),
+        ...arr(safe(() => cfg.guide && cfg.guide(K), []))
+      ];
+      api.trAsk("voce", `<b>📖 Guida · ${esc(TITLE)}</b><br><span style="color:var(--dim)">Tocca un argomento. Qui ci sono solo le regole che usa questa saga.</span>`, T0.map((t) => ({ label: t[0], fn: () => say([["voce", t[1]]], () => guida(back)) })).concat([{ label: "◂ Indietro", fn: back }]), bgNow());
+    }
     function zoneMenu() {
       const c = activeChapter(), m = mem();
       const extra = cfg.zoneMenuExtra ? arr(safe(() => cfg.zoneMenuExtra(K), [])) : [];
@@ -888,6 +905,7 @@
         { label: JN(), sub: (cfg.journal && cfg.journal.sub) || "Persone, scoperte, finali", cls: "hot", fn: () => journal(zoneMenu, true) },
         { label: "👥 Personaggi", sub: "Chi hai incontrato in questa saga", fn: () => persone(zoneMenu) },
         ...(INV ? [{ label: "🎒 Zaino", sub: invList().length ? invList().length + " oggetti: regali e bonus" : "Ancora vuoto", fn: () => zaino(zoneMenu) }] : []),
+        { label: "📖 Guida", sub: "Come funzionano le regole di questa saga", fn: () => guida(zoneMenu) },
         ...(cfg.travel && !(zoneRec() && zoneRec().spec.interior) ? [{ label: "Viaggio rapido", sub: "Nei luoghi che conosci già", fn: () => travelMenu(zoneMenu) }] : []),
         ...extra,
         { label: `Esci da ${TITLE}`, sub: "Progressi e posizione restano salvati", cls: "hot", fn: leave },

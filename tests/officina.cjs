@@ -108,4 +108,12 @@ async function rotta(w) {
   const p1 = await lvl(page); if (!(p1 < p0)) errors.push(`il Tubo non costa pressione: ${p0} → ${p1}`);
   L.check(`Officina · Rotta (${w} px)`, errors); await browser.close();
 }
-(async () => { for (const w of (process.argv[2] ? [390] : [390, 320])) { if (process.argv[2]) { await rotta(w); continue; } await c1(w); await stallo(w); await c2(w); await c3(w); await c4(w, false); await c4(w, true); await rotta(w); } })();
+async function guida(w) {
+  const { browser, page, errors } = await L.setup({ w, ...MOD });
+  await page.evaluate(() => window.__officina.open()); await page.evaluate(() => window.T_.click("Inizia la storia")); await adv(page);
+  await page.evaluate(() => window.T_.click("Menu")); await page.waitForTimeout(300); await page.evaluate(() => window.T_.click("Guida")); await page.waitForTimeout(300);
+  const l = await page.evaluate(() => [...document.querySelectorAll("#choices button")].map((b) => b.innerText).join("|"));
+  ["Rapporti", "Zaino", "Orologio", "Rotta", "Pressione"].forEach((k) => { if (!l.includes(k)) errors.push("guida senza " + k + ": " + l); });
+  L.check(`Officina · Guida (${w} px)`, errors); await browser.close();
+}
+(async () => { for (const w of (process.argv[2] ? [390] : [390, 320])) { if (process.argv[2]) { await rotta(w); continue; } await c1(w); await stallo(w); await c2(w); await c3(w); await c4(w, false); await c4(w, true); await rotta(w); await guida(w); } })();
