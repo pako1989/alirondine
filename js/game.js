@@ -9422,7 +9422,7 @@
     const it = `${z.item[1]} ${got.length}/${z.items.length}`, iw = g.measureText(it).width + 22;
     px(4, 4, iw, 14, "#000a"); px(8, 8, 7, 7, "#ffe3ec"); g.fillStyle = "#fff"; g.fillText(it, 18, 14);
     px(4, 20, 70, 13, "#000a"); g.fillStyle = "#ffd23f"; g.beginPath(); g.arc(12, 26.5, 4, 0, 7); g.fill(); g.fillStyle = "#fff"; g.fillText(`Monete ${bCoins()}`, 20, 30);
-    const area = trArea(); g.textAlign = "right"; const aw = g.measureText(area).width; px(W - 4 - aw - 10, 4, aw + 10, 14, "#000a"); g.fillStyle = "#ffd23f"; g.fillText(area, W - 9, 14); g.textAlign = "left";
+    /* etichetta area in alto tolta: si sovrapponeva al contatore degli oggetti */
     if (TW.toast && TW.toast.t > 0) {
       TW.toast.t--; g.font = "bold 10px sans-serif"; const tw = Math.min(W - 16, g.measureText(TW.toast.text).width + 16);
       px((W - tw) / 2, H - 26, tw, 18, "#000c"); g.fillStyle = "#ffd23f"; g.textAlign = "center"; g.fillText(TW.toast.text, W / 2, H - 13, W - 24); g.textAlign = "left";
