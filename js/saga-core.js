@@ -895,6 +895,7 @@
         ...(CAT ? [["📒 Album", "Incontri creature o figure: puoi parlare, sfidare o offrire esche. Ognuna ha un carattere e un modo giusto di essere avvicinata. L'Album mostra quante ne hai e che squadra porti."]] : []),
         ...(STM ? [["♨️ " + nm, nm + " sale col tempo e quando alimenti la caldaia, e si consuma con valvole, viaggi e partite. Se supera il massimo c'è stallo: perdi pressione e un pezzo di scafo. Sfiata prima che sia tardi."]] : []),
         ...(WGT ? [["⚖️ " + (cfg.weight.name || "Peso"), "Le scelte morali non hanno una risposta giusta: accumulano " + WGT.axes.map(WGT.name).join(", ") + ". Il Peso sblocca o chiude opzioni nei dialoghi, cambia le scene e decide il finale. Il valore si vede nel Registro."]] : []),
+        ...(ALB ? [["🕵️ " + ALB.name, "Il Registro è una griglia di chi era dove e quando. Entrando nelle stanze vedi chi c'è; i testimoni ti dicono altro; i sospettati dichiarano un alibi. Quando dichiarazione e avvistamento non coincidono, aprilo e segnala la contraddizione."]] : []),
         ...(HCK ? [["💻 " + HCK.name, "Le consolle sulla mappa si usano con la statistica " + HCK.name + ": ogni comando costa punti e può deviare i droni, invertire i pavimenti elettrificati o aprire serrande. Chi forza la rete alza l'Allarme, e le sentinelle dei settori vicini aumentano."]] : []),
         ...arr(safe(() => cfg.guide && cfg.guide(K), []))
       ];
@@ -972,7 +973,7 @@
         if (!m.snap || !m.snap[c.n]) takeSnap(c.n); m.intro["ch" + c.n] = 1; m.last = Date.now(); save();
         return api.play(lines(safe(() => c.intro(), null) || [["voce", c.title]], c.introBg || BG0), () => { const z = ZONES[c.start]; go(c.start, z.spec.start[0], z.spec.start[1]); });
       }
-      const zid = m.zone && ZONES[m.zone] && ZONES[m.zone].ch <= m.ch ? m.zone : c.start;
+      const fresh = !((m.step && m.step[c.n]) > 0), zid = m.zone && ZONES[m.zone] && ZONES[m.zone].ch <= m.ch && !(fresh && ZONES[m.zone].ch < c.n) ? m.zone : c.start; // capitolo appena iniziato (anche rigiocato): parte dal suo luogo di partenza, non dall'ultima mappa del capitolo prima
       recap(() => enterZone(zid));
     }
 
@@ -1269,6 +1270,32 @@
       return { run, on, heat, reset: (id) => { F.set("hk_" + id, false); refreshZone(); }, set: (id) => { F.set("hk_" + id, true); refreshZone(); }, name: nm, stat: ST };
     })();
 
+    // -------------------------------------------------------------- REGISTRO DELLE PRESENZE (cfg.alibi = { name, people: { id: "Nome" }, places: { zona: "Etichetta" }, onFound(p, fascia, K) })
+    // Griglia persone x fasce dell'orologio (cfg.clock). Ogni cella ha un AVVISTAMENTO (la persona è stata vista in un luogo: da te entrando in una zona, o riferito da un
+    // testimone) e una DICHIARAZIONE (dove dice di essere stata). Se le due non coincidono è una contraddizione, da confrontare dal Registro. K.alibi: see(p, luogo, fascia?)
+    // · claim(p, fascia, luogo) · scan(zona, [id…]) (registra chi c'è) · cell(p, fascia) · conflicts() · found() · open(back, inZone). Altra cosa dal Dossier: lì si
+    // confrontano voci a coppie, qui conta CHI era DOVE e QUANDO.
+    const ALB = cfg.alibi && CLK && (() => {
+      const A0 = cfg.alibi, PP = A0.people || {}, PL = A0.places || {}, nS = CLK.slots.length, sl = (x) => (x == null ? clkSlot() : clampI(x | 0, 0, nS - 1, 0));
+      const lab = (z) => PL[z] || z, S_ = (p, s) => F.get(`al_s_${p}_${s}`, ""), C_ = (p, s) => F.get(`al_c_${p}_${s}`, ""), Fd = (p, s) => F.is(`al_f_${p}_${s}`);
+      const see = (p, z, s) => { if (!PP[p] || !z) return false; s = sl(s); if (S_(p, s) === z) return false; F.set(`al_s_${p}_${s}`, z); return true; };
+      const claim = (p, s, z) => { if (!PP[p] || !z) return false; s = sl(s); F.set(`al_c_${p}_${s}`, z); return true; };
+      const scan = (z, ids) => { let n = 0; arr(ids).forEach((i) => { if (see(i, z)) n++; }); return n; };
+      const conflicts = () => { const out = []; Object.keys(PP).forEach((p) => { for (let s = 0; s < nS; s++) { const c = C_(p, s), v = S_(p, s); if (c && v && c !== v) out.push({ p, s, claim: c, seen: v, found: Fd(p, s) }); } }); return out; };
+      const found = () => conflicts().filter((x) => x.found).length;
+      function open(back, inZone, msg) {
+        const cf = conflicts(), pend = cf.filter((x) => !x.found), names = Object.keys(PP);
+        const cell = (p, s) => { const c = C_(p, s), v = S_(p, s), bad = c && v && c !== v; return `<td style="padding:2px 4px;border:1px solid rgba(255,255,255,.12);${bad ? "background:rgba(220,38,38,.25)" : ""}">${v ? "👁 " + esc(lab(v)) : "·"}${c ? `<br><span style="color:var(--dim)">💬 ${esc(lab(c))}</span>` : ""}</td>`; };
+        const tbl = `<table style="border-collapse:collapse;font-size:10px;margin-top:6px"><tr><td></td>${CLK.slots.map((x) => `<td style="padding:2px 4px"><b>${esc(x)}</b></td>`).join("")}</tr>${names.filter((p) => { for (let s = 0; s < nS; s++) if (S_(p, s) || C_(p, s)) return true; return false; }).map((p) => `<tr><td style="padding:2px 4px"><b>${esc(PP[p])}</b></td>${CLK.slots.map((_, s) => cell(p, s)).join("")}</tr>`).join("")}</table>`;
+        const head = `<b>${esc(A0.name || "Registro delle Presenze")}</b><br><span style="color:var(--dim)">👁 visto in · 💬 dichiara di essere stato in. Dove non coincidono, c'è qualcosa che non torna. Scoperte: ${found()}/${cf.length}.</span>${tbl}${msg ? "<br><br>" + msg : ""}`;
+        const opts = pend.map((x) => ({ label: `⚠ ${PP[x.p]} · ${CLK.slots[x.s]}`, sub: `Dice: ${lab(x.claim)} · Visto: ${lab(x.seen)}`, big: true, cls: "hot", fn: () => { F.set(`al_f_${x.p}_${x.s}`, true); SFX.choice(); note("Registro: " + PP[x.p] + " mente"); if (A0.onFound) A0.onFound(x.p, x.s, K); open(back, inZone, `<b>Non torna!</b> ${esc(PP[x.p])} dichiarava ${esc(lab(x.claim))}, ma era in ${esc(lab(x.seen))}.`); } }));
+        opts.push({ label: "◂ Indietro", fn: back });
+        if (inZone) return api.trAsk("voce", head, opts, bgNow());
+        api.scene(BG0, "voce", head, opts, JN());
+      }
+      return { see, claim, scan, cell: (p, s) => ({ seen: S_(p, sl(s)), claim: C_(p, sl(s)) }), conflicts, found, open, name: A0.name || "Registro delle Presenze" };
+    })();
+
     // -------------------------------------------------------------- kit per i capitoli
     const K = {
       get api() { return api; }, ID, TITLE, TS, T, esc, hash, rnd, pick, safe, F, mem, save, stepOf, setStep, note, once, reward, coinsGive, bal, hero, castHero, stat, bond,
@@ -1279,7 +1306,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, rel: REL, inv: INV, crew: CRW, dossier: DOS, route: RTE, catch: CAT, steam: STM, weight: WGT, hack: HCK,
+      clock: CLOCK, rel: REL, inv: INV, crew: CRW, dossier: DOS, route: RTE, catch: CAT, steam: STM, weight: WGT, hack: HCK, alibi: ALB,
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
       ending: (id, d) => { ENDINGS[id] = d; },
       continueStory: () => continueStory(), hasChapter: (n) => !!CHAPTERS[n], setInMatch: (v) => { inMatch = !!v; }, openMain: () => openMain(),

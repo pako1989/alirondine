@@ -34,7 +34,7 @@
     journal: { name: "Il Quaderno del Peso", sub: "Dossier, Peso e legami" },
     cases: CASES,
     bonds: {
-      per: 6, max: 4, names: ["Conoscenti", "Colleghi", "Amici", "Fidati", "Famiglia"],
+      per: 4, talk: 2, max: 4, names: ["Conoscenti", "Colleghi", "Amici", "Fidati", "Famiglia"],
       scenes: {
         rp_marta: [{ lv: 2, id: "mar2", lines: [["rp_marta", "Tuo padre ha sempre detto che i poteri sono un dono. Io ho sempre risposto che anche le bollette lo sono: arrivano e non chiedono permesso."], ["rp_marta", "Qualunque cosa succeda, a cena ci sei. Non è un'opinione, è un orario."]], reward: (K) => K.bond("fiducia", 1) },
           { lv: 3, id: "mar3", prize: "+2 Potere e un gilet di nonna", lines: [["rp_marta", "Ti ho cucito io il mantello. Non è pesante, è solo scomodo come tutte le cose fatte con amore."], ["rp_marta", "Con questo addosso, se atterri male, almeno è colpa mia."]], reward: (K) => { K.bond("potere", 2); } }],
