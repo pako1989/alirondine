@@ -895,6 +895,7 @@
         ...(CAT ? [["📒 Album", "Incontri creature o figure: puoi parlare, sfidare o offrire esche. Ognuna ha un carattere e un modo giusto di essere avvicinata. L'Album mostra quante ne hai e che squadra porti."]] : []),
         ...(STM ? [["♨️ " + nm, nm + " sale col tempo e quando alimenti la caldaia, e si consuma con valvole, viaggi e partite. Se supera il massimo c'è stallo: perdi pressione e un pezzo di scafo. Sfiata prima che sia tardi."]] : []),
         ...(WGT ? [["⚖️ " + (cfg.weight.name || "Peso"), "Le scelte morali non hanno una risposta giusta: accumulano " + WGT.axes.map(WGT.name).join(", ") + ". Il Peso sblocca o chiude opzioni nei dialoghi, cambia le scene e decide il finale. Il valore si vede nel Registro."]] : []),
+        ...(HCK ? [["💻 " + HCK.name, "Le consolle sulla mappa si usano con la statistica " + HCK.name + ": ogni comando costa punti e può deviare i droni, invertire i pavimenti elettrificati o aprire serrande. Chi forza la rete alza l'Allarme, e le sentinelle dei settori vicini aumentano."]] : []),
         ...arr(safe(() => cfg.guide && cfg.guide(K), []))
       ];
       api.trAsk("voce", `<b>📖 Guida · ${esc(TITLE)}</b><br><span style="color:var(--dim)">Tocca un argomento. Qui ci sono solo le regole che usa questa saga.</span>`, T0.map((t) => ({ label: t[0], fn: () => say([["voce", t[1]]], () => guida(back)) })).concat([{ label: "◂ Indietro", fn: back }]), bgNow());
@@ -1253,6 +1254,21 @@
       return { add, get, top, has, bar, html, ask: wask, axes: AX, name: nmOf };
     })();
 
+    // -------------------------------------------------------------- TERMINALI DI HACKING (cfg.hack = { stat, name, text })
+    // Consolle sulla mappa: K.hack.run(titolo, azioni) apre il menu del terminale. Ogni azione { id, label, sub, cost, need, once, alert, run(K) } costa punti della
+    // statistica `stat`; se `alert` la rete si allarma (K.hack.heat() sale, le sentinelle dei settori vicini si fanno più numerose). Gli effetti sono flag hk_<id>:
+    // K.hack.on(id) li legge (guardie deviate, pavimenti invertiti, serrande aperte). K.hack.reset(id) li rimette com'erano.
+    const HCK = cfg.hack && (() => {
+      const H0 = cfg.hack, ST = H0.stat, nm = H0.name || "Hacking", on = (id) => F.is("hk_" + id), heat = () => F.get("hk_heat", 0) | 0;
+      const spend = (n) => { if (n) bond(ST, -n); };
+      const run = (title, acts, back) => ask("voce", `${title}<br><span style="color:var(--dim)">${esc(nm)}: ${stat(ST)} · Allarme: ${heat()}</span>`, acts.map((a) => {
+        const isDone = a.once !== false && a.id && on(a.id), lack = (a.cost || 0) > stat(ST), gate = a.when && !a.when(K);
+        return { label: (isDone ? "✓ " : "") + a.label, sub: isDone ? "Già eseguito" : lack ? `Servono ${a.cost} ${nm}` : [a.sub, a.cost ? `Costo ${a.cost}` : "", a.alert ? "Allarma la rete" : ""].filter(Boolean).join(" · "), big: a.big, cls: a.cls, disabled: isDone || lack || gate,
+          fn: () => { spend(a.cost || 0); if (a.id) F.set("hk_" + a.id, true); if (a.alert) F.set("hk_heat", heat() + 1); SFX.ding(); refreshZone(); if (a.run) a.run(K); else done(); } };
+      }).concat([{ label: "Scollegati", fn: back || done }]));
+      return { run, on, heat, reset: (id) => { F.set("hk_" + id, false); refreshZone(); }, set: (id) => { F.set("hk_" + id, true); refreshZone(); }, name: nm, stat: ST };
+    })();
+
     // -------------------------------------------------------------- kit per i capitoli
     const K = {
       get api() { return api; }, ID, TITLE, TS, T, esc, hash, rnd, pick, safe, F, mem, save, stepOf, setStep, note, once, reward, coinsGive, bal, hero, castHero, stat, bond,
@@ -1263,7 +1279,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, rel: REL, inv: INV, crew: CRW, dossier: DOS, route: RTE, catch: CAT, steam: STM, weight: WGT,
+      clock: CLOCK, rel: REL, inv: INV, crew: CRW, dossier: DOS, route: RTE, catch: CAT, steam: STM, weight: WGT, hack: HCK,
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
       ending: (id, d) => { ENDINGS[id] = d; },
       continueStory: () => continueStory(), hasChapter: (n) => !!CHAPTERS[n], setInMatch: (v) => { inMatch = !!v; }, openMain: () => openMain(),

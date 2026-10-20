@@ -24,6 +24,7 @@
     note: ["ali-di-rondine.note", "Tactics Note · Il Quaderno del Giudizio", "#64748b", "__note"],
     cenere: ["ali-di-rondine.cenere", "Cenere e Gloria", "#d97706", "__cenere"],
     officina: ["ali-di-rondine.officina", "L'Officina dei Giganti di Ruggine", "#d97706", "__officina"],
+    circuiti: ["ali-di-rondine.circuiti", "Neo-Rondine 2099", "#22d3ee", "__circuiti"],
     replica: ["ali-di-rondine.replica", "Eroi in Replica", "#38bdf8", "__replica"],
     figurine: ["ali-di-rondine.figurine", "Cacciatori di Figurine", "#a855f7", "__figurine"],
     capitani: ["ali-di-rondine.capitani", "Capitani di Ventura", "#b45309", "__capitani"],
@@ -76,6 +77,11 @@
     ["of_volta", "officina", "c", 70, 58, 62, "A", 2], ["of_ferro", "officina", "r", 78, 70, 66, "B", 2],
     ["of_vanda", "officina", "e", 84, 72, 78, "C", 3], ["of_brontolo", "officina", "e", 74, 86, 70, "D", 1],
     ["of_titano", "officina", "l", 90, 84, 92, "B", 3], ["of_apprendista", "officina", "c", 56, 54, 60, "B", 1],
+    // Neo-Rondine 2099
+    ["nr_kira", "circuiti", "r", 70, 60, 84, "C", 1], ["nr_jax", "circuiti", "c", 66, 70, 60, "B", 1],
+    ["nr_bolt", "circuiti", "c", 50, 62, 66, "D", 1], ["nr_volt", "circuiti", "c", 54, 58, 70, "D", 1],
+    ["nr_nyx", "circuiti", "r", 60, 74, 82, "C", 2], ["nr_vance", "circuiti", "c", 52, 60, 76, "D", 2],
+    ["nr_vektor", "circuiti", "e", 78, 82, 86, "B", 3], ["nr_zero", "circuiti", "l", 94, 92, 88, "B", 3],
     // Eroi in Replica
     ["rp_brezza", "replica", "r", 68, 64, 80, "C", 1], ["rp_marta", "replica", "c", 52, 66, 74, "D", 1],
     ["rp_basalto", "replica", "r", 76, 80, 58, "B", 1], ["rp_nube", "replica", "r", 80, 62, 70, "A", 2],
@@ -242,6 +248,7 @@
     dg_asterio: "Il pilastro sono io. E io non mi sposto, nemmeno per il pallone d'oro.", dg_fiamma: "Non brucio, io. Illumino. Ma se mi offendi, fumo.", dg_meda: "Non guardarmi negli occhi: passa e basta. Il pallone, intendo.", dg_ruggine: "Trent'anni di allenamento per un solo rigore. Questa volta entra.",
     gp_gridoni: "E IL PALLONE ENTRA! (Era già entrato. Ma l'emozione è in differita.)", gp_bullone: "Si stringe a mano. Anche il portiere, se serve.", gp_rosalba: "Il rosso non è un colore: è un modo di arrivare primi.", gp_nembo: "Fischio, sventolo, verbalizzo. Il gol è regolare, salvo nuvole.",
     of_gasparre: "Piano. La caldaia ha pazienza, a differenza di chi la guarda.", of_rina: "La chiave inglese non la uso. La tengo. Oggi, forse, la uso.", of_volta: "Un fulmine, un fischio e un gol. Nello stesso ordine.", of_ferro: "Gioco per la Corporazione. Ma il fischietto lo tengo nel taschino del cuore.", of_vanda: "Una penna nuova per un patto nuovo. L'inchiostro, quello, è sempre vecchio.", of_brontolo: "Fsss. Brrr. (Traduzione: palla a me.)", of_titano: "Clank. Clank. Clank.", of_apprendista: "Mi hanno insegnato a vincere. Non a farlo con gusto.",
+    nr_kira: "Una riga di codice cambia una città. Due, un rapporto.", nr_jax: "La gamba cigola. Il tiro, quando riesce, no.", nr_bolt: "Bzzz. Il banco è aperto. Il cuore, meno.", nr_volt: "Il banco non esiste, ma i prezzi sì.", nr_nyx: "L'imparzialità è una scelta. Ho scelto.", nr_vance: "Il sigaro è spento, il fascicolo no.", nr_vektor: "Il talento muore. Il codice, no.", nr_zero: "Probabilità di parata: 99,96%. Il resto è tifo.",
     rp_brezza: "Volo piano, ma arrivo. Anche alla verità.", rp_marta: "A cena ci sei. Non è un'opinione, è un orario.", rp_basalto: "Cadere è metà del mestiere. L'altra metà è la pazienza.", rp_nube: "Sorrido anche quando dormo. Dicono sia un talento.", rp_sabbioni: "Questo comunicato è già in stampa. Anche questo.", rp_ilario: "Suggerisco battute. Alcune sono più lunghe delle altre.", rp_teodora: "Gli archivi non mentono: è il personale che ha la memoria corta.", rp_zenit: "Ti ho insegnato a volare. Ora imparo a cadere.",
     fg_ginestra: "Non si comprano le figure: si incontrano.", fg_ottone: "Un caffè, un consiglio, un tackle.", fg_nives: "Vincere è la mia lingua. Perdere la sto imparando.", fg_rosa: "Fischio una volta. Capito? Una.", fg_cora: "Tre Leghe vinte. La quarta è la tua.",
     cv_gemma: "Un dardo, un respiro, un punto. Come ai tempi del ponte.", cv_brenno: "Qui non si passa. Nemmeno col pallone.", cv_isotta: "Conti pagati, schemi in regola e un assist al momento giusto.", cv_conte: "Un feudo si difende. Un campo, ancora meglio.",
