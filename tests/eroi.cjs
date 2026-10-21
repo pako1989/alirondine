@@ -17,7 +17,8 @@ async function run(w) {
     o.n = [M.p.length, M.q.length]; for (let i = 0; i < 200; i++) E.tick();
     // il giocatore tira: porta la palla al centro-destra e tira
     const me = M.ctl; M.ball.owner = me; me.x = 300; me.y = 115; M.ball.x = me.x; M.ball.y = me.y; M.q[3].stun = 999; // portiere avversario KO per il tiro di prova
-    const g0 = M.score[0]; E.press("b", true); for (let i = 0; i < 120 && M.score[0] === g0; i++) E.tick(); o.shot = M.score[0] - g0;
+    const g0 = M.score[0]; E.press("b", true); for (let i = 0; i < 30; i++) E.tick(); E.press("b", false); for (let i = 0; i < 120 && M.score[0] === g0; i++) E.tick(); o.shot = M.score[0] - g0;
+    { const q = M.p[1]; M.ctl = M.p[0]; const c = M.ctl; M.ball.owner = null; const x0 = c.x; M.stick && M.stick.set(1, 0); for (let i = 0; i < 30; i++) E.tick(); o.mv = Math.round(c.x - x0); M.stick && M.stick.set(0, 0); }
     return o;
   });
   if (r.n.join() !== "4,4") errors.push("giocatori: " + JSON.stringify(r));
