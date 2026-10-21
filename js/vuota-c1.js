@@ -127,7 +127,7 @@
         build(L) {
           const { lay, put, house } = L;
           lay(0, 17, 31, 21, "~"); lay(5, 16, 9, 21, "r"); lay(0, 15, 31, 16, "e"); lay(0, 0, 31, 1, "A"); lay(0, 0, 0, 21, "A"); lay(1, 2, 3, 8, "A");
-          lay(12, 15, 18, 16, "e"); lay(1, 11, 30, 13, "k"); lay(28, 10, 31, 14, "u"); put(31, 12, "q");
+          lay(12, 15, 18, 16, "e"); lay(4, 2, 30, 6, "g"); lay(1, 8, 3, 10, "g"); lay(1, 11, 30, 13, "k"); lay(28, 10, 31, 14, "u"); put(31, 12, "q");
           house(5, 3, 7, 5, { door: [8, 7], roof: "#9b2a2a", enter: { room: "locanda", name: "Il Bar di Nena", who: ["vs_nena"] } });
           house(14, 4, 6, 4, { door: [16, 7], roof: "#3a5a8a", enter: { to: "vs_capanna", at: [8, 10] } });
           house(23, 3, 6, 5, { door: [25, 7], roof: "#6a4a2a", enter: "La casa di un pescatore: finestre chiuse, rete stesa, un gatto che finge di non vederti." });

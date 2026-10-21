@@ -27,6 +27,7 @@
     mondiale: ["ali-di-rondine.mondiale", "Ali di Rondine · Mondiale Giovanile", "#2563eb", "__mondiale"],
     cavaliere: ["ali-di-rondine.cavaliere", "Il Cavaliere del Fischio", "#facc15", "__cavaliere"],
     gala: ["ali-di-rondine.gala", "Il Rapimento del Pallone d'Oro", "#d4a73a", "__gala"],
+    vuota: ["ali-di-rondine.vuota", "Operazione Scatola Vuota", "#facc15", "__vuota"],
     circuiti: ["ali-di-rondine.circuiti", "Neo-Rondine 2099", "#22d3ee", "__circuiti"],
     replica: ["ali-di-rondine.replica", "Eroi in Replica", "#38bdf8", "__replica"],
     figurine: ["ali-di-rondine.figurine", "Cacciatori di Figurine", "#a855f7", "__figurine"],
@@ -97,6 +98,11 @@
     ["mg_lukas", "mondiale", "r", 66, 86, 68, "D", 2], ["mg_tico", "mondiale", "e", 92, 58, 84, "B", 3],
     ["mg_wolff", "mondiale", "e", 68, 88, 80, "C", 3], ["mg_ren", "mondiale", "l", 88, 80, 94, "B", 3],
     ["cf_lucre", "cavaliere", "e", 70, 80, 86, "B", 3], ["cf_pierrot", "cavaliere", "l", 82, 90, 88, "B", 3],
+    // Operazione Scatola Vuota
+    ["vs_mira", "vuota", "c", 56, 64, 80, "C", 1], ["vs_ghiro", "vuota", "c", 44, 72, 58, "D", 1], ["vs_corvo", "vuota", "r", 66, 84, 62, "D", 1],
+    ["vs_ottone", "vuota", "e", 74, 62, 86, "C", 2], ["vs_brace", "vuota", "r", 80, 56, 72, "A", 2], ["vs_pio", "vuota", "c", 40, 68, 52, "P", 2],
+    ["vs_vulpe", "vuota", "r", 52, 60, 88, "C", 3], ["vs_lastra", "vuota", "r", 54, 90, 60, "P", 3],
+    ["vs_eco", "vuota", "e", 78, 70, 90, "C", 4], ["vs_sipario", "vuota", "l", 72, 82, 94, "B", 4],
     // Neo-Rondine 2099
     ["nr_kira", "circuiti", "r", 70, 60, 84, "C", 1], ["nr_jax", "circuiti", "c", 66, 70, 60, "B", 1],
     ["nr_bolt", "circuiti", "c", 50, 62, 66, "D", 1], ["nr_volt", "circuiti", "c", 54, 58, 70, "D", 1],
@@ -271,6 +277,9 @@
     pd_teresa: "Il dolce non si fa da solo. Il silenzio, neanche.", pd_arturo: "Un maggiordomo non lascia la casa quando le luci si spengono.", pd_livia: "Il sorriso è una pratica quotidiana.", pd_zeno: "L'ho vinto io, il Pallone. Poi l'ho perso io.", pd_clio: "Chiedere «perché?» tutta la vita e farmi pagare.", pd_gualtiero: "Ho solo comprato il Pallone, dieci anni fa.", pd_ospite: "Un biglietto che nessuno ricorda di aver spedito.", pd_delmonte: "Ogni parola, qui dentro, ha un prezzo.",
     cf_fulgenzio: "Ho comprato corde più resistenti. Non ho mai chiesto il perché.", cf_brandi: "Non mi fido di chi veste di nero. Mi fido di lei.", cf_zeppa: "Dico sempre una cosa in più di quella che so.", cf_micia: "Miagola, se ti serve una mano sui tetti.", cf_spillo: "Se è per un rigore, lo calciamo all'alba.", cf_diva: "Canto piano, quando il pubblico è l'ultimo a crederci.", cf_lucre: "Ho un registro per ogni cosa.", cf_pierrot: "Ogni palloncino porta un indovinello. Ogni indovinello porta qui.",
     mg_gallo: "Venticinque anni di panchina. Passatevi la palla.", mg_mara: "Misuro i polpacci e leggo le partite come radiografie.", mg_teo: "Se non passi, non passi.", mg_sandro: "Parlo con i pali. Qualche volta rispondono.", mg_elio: "Passo a occhi chiusi: so dove sei.", mg_nina: "Corro per non pensare. Poi penso per correre.", mg_bruno: "Segno con qualunque parte del corpo.", mg_duarte: "Nessuna partita è una cosa seria. La si vince lo stesso.", mg_lukas: "Ripara biciclette di notte, anticipa attaccanti di giorno.", mg_tico: "Il pallone non si prende: si balla.", mg_wolff: "Gut. Quarantacinque minuti e un fischio.", mg_ren: "Si gioca con rispetto, e con un sorriso che non concede niente.",
+    vs_mira: "Una vite storta racconta più di un manuale.", vs_ghiro: "Ascolta le tazze, non il mare. Il mare è bugiardo.", vs_corvo: "Sento anche i passi che non hai ancora fatto.",
+    vs_ottone: "Cartone. Una sola parola, tre ore di discorso risparmiate.", vs_brace: "Io decido dove guarda il faro. È poco. È tutto.", vs_pio: "Non ho visto niente. Non sono neanche qui. Zzz.",
+    vs_vulpe: "Ti vedo sul radar: un puntino che cammina bene.", vs_lastra: "Il freddo conserva. Non giudica.", vs_eco: "Dodici anni di attesa diventano un mestiere.", vs_sipario: "Per il bene del gioco. Ovviamente.",
     nr_kira: "Una riga di codice cambia una città. Due, un rapporto.", nr_jax: "La gamba cigola. Il tiro, quando riesce, no.", nr_bolt: "Bzzz. Il banco è aperto. Il cuore, meno.", nr_volt: "Il banco non esiste, ma i prezzi sì.", nr_nyx: "L'imparzialità è una scelta. Ho scelto.", nr_vance: "Il sigaro è spento, il fascicolo no.", nr_vektor: "Il talento muore. Il codice, no.", nr_zero: "Probabilità di parata: 99,96%. Il resto è tifo.",
     rp_brezza: "Volo piano, ma arrivo. Anche alla verità.", rp_marta: "A cena ci sei. Non è un'opinione, è un orario.", rp_basalto: "Cadere è metà del mestiere. L'altra metà è la pazienza.", rp_nube: "Sorrido anche quando dormo. Dicono sia un talento.", rp_sabbioni: "Questo comunicato è già in stampa. Anche questo.", rp_ilario: "Suggerisco battute. Alcune sono più lunghe delle altre.", rp_teodora: "Gli archivi non mentono: è il personale che ha la memoria corta.", rp_zenit: "Ti ho insegnato a volare. Ora imparo a cadere.",
     fg_ginestra: "Non si comprano le figure: si incontrano.", fg_ottone: "Un caffè, un consiglio, un tackle.", fg_nives: "Vincere è la mia lingua. Perdere la sto imparando.", fg_rosa: "Fischio una volta. Capito? Una.", fg_cora: "Tre Leghe vinte. La quarta è la tua.",
@@ -341,6 +350,7 @@
   const RAR = { c: ["Comune", "#9aa5b1", 1], r: ["Rara", "#3a8ad8", 2], e: ["Epica", "#a85ad8", 3], l: ["Leggendaria", "#ffd23f", 4] };
   // i legami tra saghe diverse: +3 di intesa se entrambi in squadra
   const LINKS = [
+    ["vs_ottone", "fg_ottone", "Gli Ottoni (due scatole, un caffè)"], ["vs_vulpe", "nr_kira", "Radio & Codici"], ["vs_corvo", "dz_sterling", "Sorveglianza & Servizi"], ["vs_eco", "qd_elle", "Dossier & Deduzioni"],
     ["sg_miriel", "cc_lyra", "Armonie di Cristallo & Sigilli"], ["sg_preside", "fo_lupin", "I Segreti dei Maestri"],
     ["fo_lupin", "dz_sterling", "Ombre & Servizi Segreti"], ["fo_turing", "te_valenti", "Crittografi del Binario"],
     ["qd_raito", "qd_elle", "Duello Mentale"], ["qd_ryu", "qd_misa", "Occhi dello Shinigami"], ["qd_elle", "dc_agata", "Deduzioni & Lavagna"],

@@ -50,7 +50,7 @@
       officina: { grass: ["#4b5563", "#454e5b", "#525c69"], path: ["#6b7280", "#626976"], stone: ["#4a4e56", "#40444c"], wall: ["#374151", "#2e3846"], water: ["#1a3a5a", "#163450"], tree: "#243a2a", tint: "250,204,21", tintA: 0.06, fx: "" },
       campo: { grass: ["#2f7d3e", "#2a7438", "#378748"], path: ["#bda97a", "#b19d6e"], stone: ["#4b5563", "#434c59"], wall: ["#1f2937", "#18202d"], water: ["#1a3a5a", "#163450"], tree: "#14202e", tint: "255,240,200", tintA: 0.06, fx: "", dark: 0.1 }
     },
-    floors: "ekcdhmoiruxs", solid: "KFAQVJEZYP",
+    floors: "ekcdhmoiruxsg", solid: "KFAQVJEZYP",
     act: { q: "Entra", v: "Esci", K: "Guarda le casse", F: "Guarda la recinzione", Q: "Guarda il faro", V: "Guarda il distributore", J: "Usa la radio", E: "Guarda il container", Z: "Guarda i server", Y: "Guarda gli scaffali", P: "Leggi il cartello", x: "Guarda la scatola" },
     flavor: {
       K: "Casse di legno impilate. Sul fianco: «MATERIALE SPORTIVO». Dentro, a giudicare dal peso, non ci sono palloni.",
@@ -111,6 +111,7 @@
     floorPaint(K, f, sx, sy, tx, ty) {
       const P = K.P, g = K.g, fr = Math.floor(performance.now() / 16), r = (s) => rn(tx, ty, s);
       if (f === "e") { P(sx, sy, 16, 16, (tx + ty) % 2 ? "#d8c48a" : "#d1bd82"); for (let i = 0; i < 4; i++) if (r(i) < 0.5) P(sx + Math.floor(r(i + 9) * 14), sy + Math.floor(r(i + 5) * 14), 1, 1, "#b8a468"); if (r(20) < 0.07) { P(sx + 5, sy + 8, 4, 2, "#f1e6c8"); P(sx + 6, sy + 7, 2, 1, "#e0c9a0"); } if (r(21) < 0.05) P(sx + 3, sy + 4, 3, 2, "#8a7a5a"); return true; }
+      if (f === "g") { P(sx, sy, 16, 16, (tx + ty) % 2 ? "#3f6b34" : "#3a6430"); for (let i = 0; i < 6; i++) { const a = Math.floor(r(i + 30) * 14), b = Math.floor(r(i + 40) * 12); P(sx + a, sy + b + 2, 1, 3, "#5e9a4a"); P(sx + a + 1, sy + b + 3, 1, 2, "#2f5428"); } if (r(50) < 0.16) { const a = 3 + Math.floor(r(51) * 9), b = 3 + Math.floor(r(52) * 9); P(sx + a, sy + b, 2, 2, r(53) < 0.5 ? "#fde68a" : "#fca5a5"); P(sx + a, sy + b + 2, 1, 2, "#2f5428"); } return true; }
       if (f === "k") { P(sx, sy, 16, 16, "#a39c8c"); [[0, 0], [8, 0], [4, 5], [12, 5], [0, 10], [8, 10]].forEach(([a, b], i) => { P(sx + a + (i % 2), sy + b, 7, 4, (tx + ty + i) % 3 ? "#b6af9e" : "#aaa392"); P(sx + a + (i % 2), sy + b + 4, 7, 1, "rgba(0,0,0,.22)"); }); return true; }
       if (f === "c") { P(sx, sy, 16, 16, (tx + ty) % 2 ? "#585d66" : "#53585f"); P(sx, sy + 15, 16, 1, "rgba(0,0,0,.3)"); P(sx + 15, sy, 1, 16, "rgba(0,0,0,.18)"); if (r(1) < 0.12) P(sx + 3, sy + 6, 9, 2, "rgba(255,255,255,.05)"); if (r(2) < 0.08) { g.fillStyle = "rgba(0,0,0,.2)"; g.beginPath(); g.ellipse(sx + 8, sy + 9, 5, 3, 0, 0, 7); g.fill(); } if (ty % 6 === 0 && tx % 2 === 0) P(sx + 2, sy + 7, 12, 2, "#facc15"); return true; }
       if (f === "h") { P(sx, sy, 16, 16, "#1c1c1f"); g.fillStyle = "#facc15"; for (let i = -2; i < 5; i++) { g.beginPath(); g.moveTo(sx + i * 6, sy + 16); g.lineTo(sx + i * 6 + 3, sy + 16); g.lineTo(sx + i * 6 + 11, sy); g.lineTo(sx + i * 6 + 8, sy); g.closePath(); g.fill(); } P(sx, sy, 16, 16, "rgba(0,0,0,.28)"); return true; }
