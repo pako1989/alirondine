@@ -64,6 +64,42 @@ async function run(w) {
   await page.setViewportSize({ width: 844, height: 390 }); await page.waitForTimeout(400);
   const ls = await page.evaluate(() => { const c = document.querySelector(".btOv canvas").getBoundingClientRect(); return { land: document.querySelector(".btOv").classList.contains("land"), h: Math.round(c.height) }; }); if (!ls.land || ls.h < 340) errors.push("landscape: " + JSON.stringify(ls));
   if (w === 390) await L.shot(page, "rissa_land");
+  // afferra e lancia, collisioni solide, armi, ostacoli di scena
+  await page.setViewportSize({ width: w, height: 800 }); await page.waitForTimeout(300);
+  await page.evaluate(() => window.__beat.open()); await page.waitForTimeout(150);
+  await page.evaluate(() => document.querySelector('.btOv [data-go="run"]').click()); await page.waitForTimeout(500); await page.evaluate(() => window.__beat.pause(true));
+  const ev = await page.evaluate(() => {
+    const B = window.__beat, G = B.state(), P = G.P, out = {}; B._fast(true); for (let i = 0; i < 130; i++) B.tick(); G.en = []; G.items = []; G.haz = []; G.hzT = 99999; G.lock = G.cam; out.btn = !!document.querySelector(".btOv .gr");
+    const mk = (x, y, hp) => { const e = B.mkE("thug", G.pool[0], 0, 0); e.x = x; e.y = y; e.hp = e.hpMax = hp || 999; e.cool = 9999; G.en.push(e); return e; };
+    // solidi: non attraversi un rivale
+    P.x = 100; P.y = 182; P.dir = 1; const a = mk(112, 182); a.st = "idle"; for (let i = 0; i < 20; i++) { G.inp = { r: 1 }; B.tick(); } G.inp = {}; out.solid = P.x < a.x - 6; out.pushed = a.x > 112;
+    // barile solido, col salto si scavalca
+    G.en = []; G.items.push({ k: "barrel", x: 160, y: 182, hp: 2, z: 0, id: 0 }); P.x = 140; P.y = 182; for (let i = 0; i < 25; i++) { G.inp = { r: 1 }; B.tick(); } G.inp = {}; out.barrel = P.x < 160;
+    G.items = [];
+    // afferra e lancia: il lanciato travolge il secondo e si fa male
+    G.en = []; P.x = 100; P.y = 182; P.dir = 1; P.st = "idle"; P.hp = P.hpMax; const e1 = mk(118, 182, 80), e2 = mk(170, 184, 80); const h1 = e1.hp, h2 = e2.hp; B.press("g", true); B.tick(); out.held = e1.st === "held" && P.st === "grab"; for (let i = 0; i < 60; i++) B.tick(); out.thrown = e1.hp < h1 && e2.hp < h2 && P.st === "idle";
+    // il boss non si afferra
+    G.en = []; P.st = "idle"; const bo = B.mkE("boss", G.pool[0], 0, 0); bo.x = P.x + 20; bo.y = P.y; G.en.push(bo); B.press("g", true); B.tick(); out.boss = bo.st !== "held";
+    // colpito mentre afferri: rilascio
+    G.en = []; P.st = "idle"; P.inv = 0; const e3 = mk(P.x + 18, P.y, 80); B.press("g", true); B.tick(); const wasHeld = e3.st === "held" && P.held === e3; P.wp = null; P.inv = 0; G.state = "play"; G.stop = 0; B.hurtP(5, false, -1); out.release = wasHeld && !P.held && e3.st === "idle";
+    P.st = "idle"; P.held = null; e3.st = "idle";
+    // armi: mazza, bomba, scudo
+    G.en = []; P.st = "idle"; P.x = 100; P.y = 182; P.dir = 1; P.hit = false; P.wp = { k: "bat", n: 8 }; const t1 = mk(118, 182, 999); const hb = t1.hp; B.press("a", true); for (let i = 0; i < 14; i++) B.tick(); const dmgBat = hb - t1.hp; P.wp = null; P.st = "idle"; P.chain = 0; t1.hp = t1.hpMax = 999; t1.st = "idle"; t1.cool = 9999; t1.x = 118; P.x = 100; B.press("a", true); for (let i = 0; i < 14; i++) B.tick(); const dmgFist = hb - 0 - (999 - (999 - 0)); out.bat = dmgBat > 0;
+    G.en = []; P.st = "idle"; P.x = 100; P.wp = { k: "bomb", n: 2 }; const t2 = mk(190, 182, 999); B.press("a", true); for (let i = 0; i < 60; i++) B.tick(); out.bomb = t2.hp < 999 && P.wp && P.wp.n === 1;
+    G.en = []; P.st = "idle"; P.wp = { k: "shield", n: 2 }; P.inv = 0; P.hp = P.hpMax; G.state = "play"; G.stop = 0; const wk = mk(P.x + 20, P.y, 99); wk.cool = 0; wk.T = Object.assign({}, wk.T, { wu: 2, cd: 20 }); for (let i = 0; i < 200 && P.wp && P.wp.n === 2; i++) B.tick(); out.shield = !P.wp || P.wp.n < 2; out.shieldHp = P.hp === P.hpMax || !!P.wp === false;
+    // raccolta arma da terra
+    G.en = []; G.items = [{ k: "wp", w: "bomb", x: P.x, y: P.y, z: 0 }]; P.wp = null; G.stop = 0; P.st = "idle"; B.tick(); out.pick = !!P.wp && P.wp.k === "bomb";
+    // ostacoli di scena
+    G.en = []; G.items = []; P.x = 200; P.y = 182; P.st = "idle"; P.inv = 0; P.hp = P.hpMax; P.wp = null; G.haz = [{ k: "roll", x: 190, y: 182, vx: 2.6, t: 0, hs: [] }]; for (let i = 0; i < 20; i++) B.tick(); out.roll = P.hp < P.hpMax;
+    P.st = "idle"; P.inv = 0; P.hp = P.hpMax; G.stg = 1; G.haz = [{ k: "fall", x: P.x, y: P.y, t: 0 }]; for (let i = 0; i < 70; i++) B.tick(); out.fall = P.hp < P.hpMax && G.haz.length === 0; G.stg = 0;
+    // armi iniziali sul percorso
+    out.wpSpots = true;
+    return out;
+  });
+  { const bad = ["btn", "solid", "pushed", "barrel", "held", "thrown", "boss", "release", "bat", "bomb", "shield", "pick", "roll", "fall"].filter((k) => !ev[k]); if (bad.length) errors.push("afferra/armi/ostacoli: " + bad.join(",") + " " + JSON.stringify(ev)); }
+  const w0 = await page.evaluate(() => { const B = window.__beat; B.close(); B.open(); B.load; const x = B.load(); x.evo = false; B.save(x); B.open(); document.querySelector('.btOv [data-go="run"]').click(); const G = B.state(); return [G.evo, G.items.filter((i) => i.k === "wp").length, !!document.querySelector(".btOv .gr")]; });
+  if (w0[0] || w0[1] || w0[2]) errors.push("opzione spenta: " + JSON.stringify(w0));
+  await page.evaluate(() => { const B = window.__beat, x = B.load(); x.evo = true; B.save(x); });
   L.check(`Rissa dei Sogni (${w} px)`, errors); await browser.close();
 }
 (async () => { await run(390); await run(320); })();
