@@ -59,6 +59,34 @@ async function run(w) {
   const tv = await page.evaluate(() => { const C = window.__corsa, R = C.state(); C._fast(true); let n = 0; const me = R.me; while (!R.over && n++ < 14000) { const a = C.at(R.T, me.prog + 70 + me.v * 20), want = a.k > 0.0006 ? 0.6 : a.k < -0.0006 ? -0.6 : 0, d = want - me.lat; R.inp = { l: d < -0.08 ? 1 : 0, r: d > 0.08 ? 1 : 0 }; C.tick(); } return [R.cfg.view, !!R.over]; });
   if (tv[0] !== "top" || !tv[1]) errors.push("gara dall'alto: " + JSON.stringify(tv));
   await page.evaluate(() => { const x = window.__corsa.load(); x.view = "rear"; window.__corsa.save(x); });
+  // oggetti a tema saga, ostacoli, scorciatoie e leva
+  await page.evaluate(() => window.__corsa.open()); await page.waitForTimeout(150);
+  await page.evaluate(() => document.querySelector('.crOv [data-t="0"]').click()); await page.waitForTimeout(500); await page.evaluate(() => window.__corsa.pause(true));
+  const fe = await page.evaluate(() => {
+    const C = window.__corsa, R = C.state(), me = R.me, out = {}; C._fast(true); const T = R.T; for (let i = 0; i < 200; i++) C.tick(); // via
+    out.has = R.items.some((i) => i.k === "x") && R.obs.length > 4 && R.zones.length === 2 && R.pads.length === 1; out.btn = !!document.querySelector(".crOv .it");
+    // oggetto: raccolta
+    const x = R.items.find((i) => i.k === "x"); me.prog = x.s - 2; me.lat = x.lat; me.stun = 0; C.tick(); out.held = me.held === me.fxk && !!me.held;
+    // uso di ogni oggetto, nessuna eccezione e un effetto
+    const ks = ["fire", "thunder", "curve", "zig", "spiral", "vanish", "ice", "change", "drill"], fx = []; R.racers.forEach((r, i) => { if (r !== me) { r.prog = me.prog + 60 + i * 5; r.lat = me.lat; r.stun = 0; r.shield = 0; r.inv = 0; r.v = 1; } });
+    ks.forEach((k) => { me.held = k; me.stun = 0; const o = R.racers.find((r) => r !== me); o.stun = 0; o.shield = 0; o.inv = 0; o.lat = me.lat; o.prog = me.prog + 60; const p0 = me.prog, st0 = R.racers.reduce((a, r) => a + r.stun, 0), oi = R.oils.length; C.press("o", true); C.tick(); const ch = me.boost > 0 || me.sure > 0 || me.inv > 0 || me.ghost > 0 || me.shield > 0 || R.oils.length > oi || R.racers.reduce((a, r) => a + r.stun, 0) > st0 || me.prog > p0 + 40; fx.push([k, !!ch, me.held === null]); });
+    out.fx = fx.filter((f) => !f[1] || !f[2]).map((f) => f[0]);
+    // scorciatoia aperta: bonus di strada
+    const z0 = R.zones[0]; me.stun = 0; me.v = 1.5; me.prog = z0.a + 5; me.lat = 0.8; me.zc = 0; const pa = me.prog; C.tick(); out.open = me.prog - pa > me.v * 1 + 0.4;
+    // cancello chiuso: botta; con la leva: bonus
+    const z1 = R.zones[1]; me.stun = 0; me.v = 1.5; me.prog = z1.a + 5; me.lat = -0.8; me.zc = 0; z1.open = 0; C.tick(); out.gate = me.stun > 0 && me.v < 1; 
+    me.stun = 0; me.v = 1.5; const pd = R.pads[0]; me.prog = pd.s - 1; me.lat = 0; C.tick(); out.pad = z1.open > 0; me.prog = z1.a + 5; me.lat = -0.8; me.zc = 0; me.v = 1.5; const pb = me.prog; C.tick(); out.gateOpen = me.stun === 0 && me.prog - pb > me.v + 0.4;
+    // ostacolo
+    const bm = R.obs.find((o) => o.k === "bump" && o.on); me.stun = 0; me.v = 1.5; me.inv = 0; me.shield = 0; me.bc = 0; me.prog = bm.s - 3; me.lat = bm.lat; C.tick(); out.bump = me.stun > 0;
+    // gara completa con tutto attivo (bot), senza eccezioni
+    R.t = 0; let n = 0; while (!R.over && n++ < 14000) { const a = C.at(T, me.prog + 70 + me.v * 20), want = a.k > 0.0006 ? 0.6 : a.k < -0.0006 ? -0.6 : 0, d = want - me.lat; R.inp = { r: d > 0.06 ? 1 : 0, l: d < -0.06 ? 1 : 0 }; if (me.held && n % 40 === 0) C.press("o", true); C.tick(); } out.end = R.over;
+    return out;
+  });
+  if (!fe.has || !fe.btn || !fe.held || fe.fx.length || !fe.open || !fe.gate || !fe.pad || !fe.gateOpen || !fe.bump || !fe.end) errors.push("oggetti/scorciatoie: " + JSON.stringify(fe));
+  await page.evaluate(() => { const x = window.__corsa.load(); x.fun = false; window.__corsa.save(x); window.__corsa.open(); }); await page.waitForTimeout(150);
+  await page.evaluate(() => document.querySelector('.crOv [data-t="0"]').click()); await page.waitForTimeout(400); await page.evaluate(() => window.__corsa.pause(true));
+  const nf = await page.evaluate(() => { const R = window.__corsa.state(); return [R.fun, R.obs.length, R.zones.length, !!document.querySelector(".crOv .it")]; }); if (nf[0] || nf[1] || nf[2] || nf[3]) errors.push("opzione oggetti spenta: " + JSON.stringify(nf));
+  await page.evaluate(() => { const x = window.__corsa.load(); x.fun = true; window.__corsa.save(x); });
   L.check(`Gran Premio dei Sogni (${w} px)`, errors); await browser.close();
 }
 (async () => { await run(390); await run(320); })();
