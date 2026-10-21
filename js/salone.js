@@ -27,8 +27,15 @@
     { id: "sigilli", t: "L'Accademia dei Sigilli · Esami di Magia del Pallone", e: "📜", g: ["fantasy", "avventura"], mod: "__sigilli", key: "ali-di-rondine.sigilli", ch: 3, cover: "sg_titolo", d: "Supera gli esami di ammissione dell'antica Accademia Arcana, svela le rune segrete celate nella Biblioteca Proibita e padroneggia i Quattro Sigilli nella notte della Grande Congiunzione. Il nuovo motore Traccia-Runa (parabole a spirale, saette a zig-zag e barriere magiche), i Frammenti di Pergamena del 1492 e 4 finali leggendari.",
       hints: { luce: "Serve consacrare la magia alla difesa comune del collegio e degli studenti.", tempesta: "Serve scegliere la potenza offensiva del tuono per vincere ogni torneo.", specchio: "Serve proporre a Valerian un patto paritario di rispetto e cooperazione.", arcano: "Segreto: trova tutti i frammenti di pergamena e sblocca il Quinto Sigillo del 1492." } },
     { id: "figurine", t: "Cacciatori di Figurine", e: "🃏", g: ["avventura", "fantasy", "commedia"], mod: "__figurine", key: "ali-di-rondine.figurine", ch: 4, cover: "fg_titolo", d: "Figure viventi da catturare, allenare e schierare. Avvicinale nel modo giusto (parlare, sfidare, esca o gioco), costruisci una squadra di tre con il triangolo dei tipi e arriva alla Lega. Novità: l'Album (cattura, squadra, evoluzioni, lotta a turni). Minigioco: Lotta di Figure.", hints: { custode: "Serve liberare le figure delle vetrine nel Capitolo 3 e vincere la finale.", album: "Serve completare l'Album con le dodici specie, anche evolute." } },
+    { id: "gala", t: "Il Rapimento del Pallone d'Oro", e: "🏆", g: ["mistero", "commedia", "avventura"], mod: "__gala", key: "ali-di-rondine.gala", ch: 3, cover: "pd_titolo", d: "Gala alla villa del Presidente: il Pallone d'Oro sparisce al blackout, il ponte è crollato e nessuno può uscire. Otto sospettati, tutti con un segreto. Interroga, osserva chi c'è in ogni stanza e confronta dove dicevano di essere con dove erano davvero. Quattro finali. Novità: il Registro delle Presenze. Minigioco: Ping-Pong da Salone.", hints: { giustizia: "Con quattro contraddizioni e tre prove, accusa il Presidente.", capro: "Accusa Gualtiero: il colpevole comodo.", silenzio: "Fai confessare Livia e accetta il suo patto.", segreto: "Segreto: sei contraddizioni, tutte le prove, la confessione di Livia e Zeno battuto a ping-pong." } },
+    { id: "cavaliere", t: "Il Cavaliere del Fischio", e: "🦇", g: ["mistero", "avventura", "dramma"], mod: "__cavaliere", key: "ali-di-rondine.cavaliere", ch: 4, cover: "cf_titolo", d: "Borgo Gotico sotto la pioggia: un ex portiere miliardario veste di notte un mantello e dà la caccia a chi trucca le partite. Il Pierrot Bianco ruba i palloni e lascia indovinelli. Rampino sui tetti, salti a rischio, guardie da evitare nell'ombra, interrogatori. Quattro capitoli, quattro finali. Novità: i Tetti. Minigioco: Interrogatorio.", hints: { giustizia: "Raccogli Libro Mastro, fischietto d'oro e cartella clinica, poi consegna tutto al Commissario.", pieta: "Ascolta il Pierrot fino alla fine e lascialo andare.", ombra: "Con Timore 40 o più, lascia cadere il Pierrot.", segreto: "Segreto: tutti e sei gli indovinelli e il Libro Mastro." } },
+    { id: "mondiale", t: "Ali di Rondine · Mondiale Giovanile", e: "🌍", g: ["sport", "avventura", "commedia"], mod: "__mondiale", key: "ali-di-rondine.mondiale", ch: 4, cover: "mg_titolo", d: "La nazionale under-16 al Mondiale: raduno in Italia, samba a Rio, neve al Nord, finale a Tokyo. Recluta la squadra (due vie per ognuno), allenala e passa la palla. Quattro capitoli, quattro finali. Novità: la Catena (ruoli e sinergie). Minigioco: Catena d'attacco.", hints: { oro: "Vinci la finale.", argento: "Perdi la finale, a testa alta.", squadra: "Vinci la finale con Intesa 50 o più.", segreto: "Segreto: vinci la finale con Intesa 50 e almeno 3 catene perfette." } },
+    { id: "vuota", t: "Operazione Scatola Vuota", e: "📦", g: ["avventura", "mistero", "sport"], mod: "__vuota", key: "ali-di-rondine.vuota", ch: 4, cover: "vs_titolo", d: "Un'isola-fortezza, una squadra dimenticata e un Rapporto che nessuno deve leggere. Ottone, ex capitano con una scatola di cartone, ti insegna a non farti vedere: guardie con il cono di luce, ombre da usare, una scatola dove infilarti. Novità: l'Allerta (Calma, Sospetto, Allarme, Caccia) e il nascondiglio. Minigioco: Infiltrazione.", hints: { pubblico: "Serve Fiducia 5 o più e diffondere il Rapporto.", fuoco: "Serve bruciare il Rapporto.", scatola: "Serve Fiducia 7, Silenzio 6 e la Foto degli Aironi.", silenzio: "Succede se vieni scoperto all'ultima infiltrazione (Allerta massima)." } },
+    { id: "circuiti", t: "Neo-Rondine 2099", e: "⚡", g: ["scifi", "sport", "avventura"], mod: "__circuiti", key: "ali-di-rondine.circuiti", ch: 4, cover: "nr_titolo", d: "Sotto la pioggia acida, la Vektor Corp possiede ogni luce e ogni risultato. Nei sotterranei vive una lega clandestina: la sfera conduttrice dei Circuiti d'Oro. Terminali da hackerare, droni che pattugliano i vicoli, piastre elettrificate, laser sui varchi e tre finali. Novità: i Terminali di Hacking. Minigioco: Circuito EMP.", hints: { libero: "Carica il virus di K1-RA nel server centrale.", corporativo: "Firma il contratto del Barone sulla consolle.", segreto: "Segreto: raccogli i sei Datapad nascosti e inserisci la sequenza antica." } },
+    { id: "replica", t: "Eroi in Replica", e: "🦸", g: ["scifi", "dramma"], mod: "__replica", key: "ali-di-rondine.replica", ch: 4, cover: "rp_titolo", d: "Tuo padre è il più grande eroe della Terra. A diciannove anni arrivano i tuoi poteri, e con loro una verità: le «invasioni aliene» della Lega Celeste sono uno spettacolo. Ogni scelta lascia un Peso (Fiducia, Colpa, Rabbia) che decide come finisce. Novità: il Peso. Minigioco: Sparring Volante.", hints: { figlio: "Vinci il duello finale con più Fiducia che Rabbia.", cielo: "Vinci il duello finale con più Rabbia che Fiducia.", terza: "Segreto: Fiducia e Rabbia a 3 o più, tutte le contraddizioni del Dossier e vittoria finale." } },
+    { id: "officina", t: "L'Officina dei Giganti di Ruggine", e: "⚙️", g: ["scifi", "sport", "avventura"], mod: "__officina", key: "ali-di-rondine.officina", ch: 4, cover: "of_titolo", d: "Una fonderia abbandonata, colossi a vapore e un torneo di calcio corazzato contro la Corporazione. Dosa la pressione della caldaia: poca ti ferma, troppa fa stallo. Novità: Pressione e Sfiato. Minigioco: Steam Strikers.", hints: { vapore: "Vinci la finale dopo aver rifiutato il Patto.", patto: "Vinci la finale dopo aver accettato il Patto.", nucleo: "Segreto: tre ingranaggi d'oro (nessuno stallo nei capitoli 1 e 2, Patto rifiutato) e vittoria in finale." } },
     { id: "rotta", t: "Rotta 66 · Il Gigante Stanco", e: "🚌", g: ["commedia", "avventura", "sport"], mod: "__rotta", key: "ali-di-rondine.rotta", ch: 3, cover: "ro_titolo", d: "Una squadra di Terza Categoria, un pullman del 1981 e duecento chilometri fino alla finale della Coppa dei Borghi. Benzina, umore e cassa: apri la Rotta, scegli ogni tappa e arriva a Valcampo. Novità: la Rotta (viaggio a tappe con risorse). Una sola partita, la finale.", hints: {} },
-    { id: "fischietto", t: "Il Fischietto · Arbitro di Provincia", e: "🟨", g: ["mistero", "storico", "commedia"], mod: "__fischietto", key: "ali-di-rondine.fischietto", ch: 3, cover: "fi_titolo", d: "1998. Arbitro di provincia e giudice del Giurì: raccogli prove e testimonianze, confrontale nel Dossier, scopri le contraddizioni, emetti verdetti che cambiano chi sei. Poi fischia la finale. Novità: il Dossier (prove, confronti, verdetto). Nessuna partita da giocare.",
+    { id: "fischietto", t: "Il Fischietto · Arbitro di Provincia", e: "🟨", g: ["mistero", "storico", "commedia"], mod: "__fischietto", key: "ali-di-rondine.fischietto", ch: 4, cover: "fi_titolo", d: "1998. Arbitro di provincia e giudice del Giurì: raccogli prove e testimonianze, confrontale nel Dossier, scopri le contraddizioni, emetti verdetti che cambiano chi sei. Poi fischia la finale. Novità: il Dossier (prove, confronti, verdetto). Nessuna partita da giocare.",
       hints: { argento: "Serve Integrità 7 o più senza aver tenuto la busta.", riscatto: "Serve aver preso la busta e averlo denunciato.", spento: "Serve aver preso la busta e aver taciuto." } },
     { id: "capitani", t: "Capitani di Ventura · La Rondine Scalza", e: "🏰", g: ["storico", "commedia", "avventura"], mod: "__capitani", key: "ali-di-rondine.capitani", ch: 4, cover: "cv_titolo", d: "1427. Le guerre si decidono con una partita di pallone di cuoio. Capitano di una compagnia di ventura senza paga, recluta i compagni nei borghi (ognuno con la sua storia), schiera la rosa, firma i contratti e difendi i ponti. Novità: la Compagnia (reclutamento e schieramento).",
       hints: {} },
@@ -146,7 +153,7 @@
     { id: "cala", t: "Cala Tramontana", e: "🌊", g: ["avventura"], fn: "openCalaTramontana", key: "ali-di-rondine.cala-tramontana", cover: "beach", d: "Esplora a piedi il borgo marino alternativo con il tuo Campione." },
     { id: "borgostorto", t: "Il Borgo Storto", e: "🌀", g: ["commedia", "tattica"], api: "openBorgoStorto", cover: "beach", d: "Lo spin-off GDR a turni del Borgo Marino." },
   ];
-  const NEWEST = ["figurine", "rotta", "fischietto", "capitani", "carte", "quattordici", "sigilli", "fortino", "cenere", "note", "spia", "fiume", "piramide", "treno", "alcatraz", "milano", "gp", "tempo", "dungeon", "roma", "regno", "naufraghi", "campana", "galletta", "pugno", "montagna", "cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
+  const NEWEST = ["vuota", "mondiale", "cavaliere", "gala", "circuiti", "replica", "officina", "figurine", "rotta", "fischietto", "capitani", "carte", "quattordici", "sigilli", "fortino", "cenere", "note", "spia", "fiume", "piramide", "treno", "alcatraz", "milano", "gp", "tempo", "dungeon", "roma", "regno", "naufraghi", "campana", "galletta", "pugno", "montagna", "cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
   const modOf = (s) => (s.mod ? window[s.mod] : null);
   const available = (s) => (s.mod ? !!window[s.mod] : s.fn ? typeof window[s.fn] === "function" : !!(api() && api()[s.api]));
   function state(s) {
@@ -394,6 +401,34 @@
         const lv = boss ? 4 : 3;
         return { title: `Lotta di Figure · contro ${o.name}`, team: [L("a", "Zolla", "🌱", "campo", 22, 7, 5, "Zolla Piena", 3), L("b", "Svolazzo", "🪁", "aria", 20, 8, 3, "Folata", 3), L("c", "Notturno", "🦇", "ombra", 21, 8, 4, "Velo di Notte", 3)],
           foe: boss ? [L("d", "Eclisse", "🌘", "ombra", 29, 10, 6, "Oscuramento", lv), L("e", "Cometa", "☄️", "aria", 28, 10, 4, "Coda Infuocata", lv), L("f", "Zollone", "🪨", "campo", 30, 9, 7, "Frana", lv)] : [L("d", "Raffica", "🌪️", "aria", 21, 9, 3, "Tromba d'Aria", lv - 1), L("e", "Muraglia", "🧱", "campo", 26, 6, 7, "Sbarramento", lv - 1), L("f", "Sipario", "🎭", "ombra", 22, 7, 5, "Calata di Tela", lv - 1)] }; } },
+    { id: "steam", t: "Steam Strikers", e: "♨️", saga: "officina", eng: "__steam", d: "Calcio a vapore a turni: ferma la barra nella zona verde per tirare, Getto, Salto o Sfiato per difendere. Quattro cariche in comune, sopra il rosso la caldaia va in stallo.",
+      opp: [{ name: "Apprendisti dell'Acciaio", color: "#52525b", style: "equilibrata" }, { name: "Squadra di Ferro", color: "#3f3f46", style: "pressing" }],
+      boss: { name: "Il Titano", color: "#111827", style: "pressing" },
+      opts: (o, h, boss) => ({ title: `Steam Strikers · contro ${o.name}`, level: boss ? 3 : 2, oppName: o.name, mate: "Brontolo" }) },
+    { id: "pingpong", t: "Ping-Pong da Salone", e: "🏓", saga: "gala", eng: "__pingpong", d: "Duello su un tavolo: mira la direzione, scegli l'effetto e la forza, e rispondi ai colpi dell'avversario. Si gioca a sette punti; il gettone d'oro e gli oggetti di inventario aiutano.",
+      opp: [{ name: "Zeno Bassi", color: "#1d4ed8", style: "equilibrata" }, { name: "Il Presidente", color: "#7c2d12", style: "pressing" }],
+      boss: { name: "Campione dei Delmonte", color: "#d4a73a", style: "pressing" },
+      opts: (o, h, boss) => ({ title: `Ping-Pong · contro ${o.name}`, level: boss ? 3 : 2, oppName: o.name }) },
+    { id: "interrogatorio", t: "Interrogatorio", e: "🕵️", saga: "cavaliere", eng: "__interrogatorio", d: "Un sospettato, tre umori. Leggi come si sente (spavaldo, spaventato, sarcastico) e rispondi con la corda giusta: Calmo, Duro o Ironico. Fai salire la Verità prima che i Nervi esplodano. Il Timore e gli oggetti aiutano.",
+      opp: [{ name: "Zeppa", color: "#44403c", style: "equilibrata" }, { name: "Dottor Spillo", color: "#9ca3af", style: "equilibrata" }],
+      boss: { name: "Il Pierrot Bianco", color: "#f8fafc", style: "pressing" },
+      opts: (o, h, boss) => ({ title: `Interrogatorio · ${o.name}`, level: boss ? 3 : 2, oppName: o.name }) },
+    { id: "catena", t: "Catena d'attacco", e: "⛓️", saga: "mondiale", eng: "__catena", d: "Tre passaggi e un tiro, a tempo. Linea verde = passaggio libero: tocca il compagno, poi tira nell'angolo dove il portiere non è. Le sinergie di ruolo allargano la linea; senza intercetti la catena è perfetta.",
+      opp: [{ name: "Squadra B", color: "#7c2d12", style: "equilibrata" }, { name: "Difesa a Quattro", color: "#111827", style: "pressing" }],
+      boss: { name: "Giappone U16", color: "#dc2626", style: "pressing" },
+      opts: (o, h, boss) => ({ title: `Catena · contro ${o.name}`, level: boss ? 3 : 2, oppName: o.name, roles: { jolly: "⭐ Fantasista", regista: "🎯 Regista", ala: "💨 Ala", punta: "🔥 Punta" }, syn: (a, b) => (a === "jolly" || b === "jolly" ? 1 : ({ "regista>ala": 2, "ala>punta": 2, "regista>punta": 1 })[a + ">" + b] || 0), team: [{ id: "hero", n: "Campione", icon: "⭐", rk: "jolly" }, { id: "a", n: "Elio", icon: "🎯", rk: "regista" }, { id: "b", n: "Nina", icon: "💨", rk: "ala" }, { id: "c", n: "Bruno", icon: "🔥", rk: "punta" }] }) },
+    { id: "inf", t: "Infiltrazione", e: "📦", saga: "vuota", eng: "__inf", d: "Rompicapo a turni sulla griglia: muovi, aspetta, infilati nella scatola o lancia una moneta. Le guardie girano a schema, il loro cono è lo schema: passa dove non guardano e raggiungi l'uscita. Meno turni, più stelle.",
+      opp: [{ name: "Pattuglia del Molo", color: "#64748b", style: "equilibrata" }, { name: "Turno di Notte", color: "#1e293b", style: "pressing" }],
+      boss: { name: "Il Bastione", color: "#facc15", style: "pressing" },
+      opts: (o, h, boss) => ({ title: `Infiltrazione · ${o.name}`, level: boss ? 8 : o.name === "Turno di Notte" ? 5 : 2, oppName: o.name }) },
+    { id: "emp", t: "Circuito EMP", e: "⚡", saga: "circuiti", eng: "__emp", d: "Una sfera conduttrice su una pista a nodi: mira l'angolo, scegli la potenza, fai rimbalzare la sfera sui nodi per caricarla. A 60% scatta l'EMP che stordisce cyborg e portiere. Laser, polarità e cyborg sulla rotaia: segna i gol richiesti con i tiri che hai.",
+      opp: [{ name: "Cyborg Clandestini", color: "#7c3aed", style: "equilibrata" }, { name: "Divisione Beta", color: "#0891b2", style: "pressing" }],
+      boss: { name: "Z-Zero", color: "#38bdf8", style: "pressing" },
+      opts: (o, h, boss) => ({ title: `Circuito EMP · contro ${o.name}`, level: boss ? 3 : 2, oppName: o.name }) },
+    { id: "sparring", t: "Sparring Volante", e: "🦸", saga: "replica", eng: "__sparring", d: "Duello nel cielo: la corsia rossa è dove colpisce l'avversario, spostati di corsia, accumuli carica a ogni schivata e poi scegli dove colpire. L'avversario può parare una corsia.",
+      opp: [{ name: "Basalto", color: "#44403c", style: "equilibrata" }, { name: "Nube", color: "#6d28d9", style: "pressing" }],
+      boss: { name: "Zenit", color: "#1d4ed8", style: "pressing" },
+      opts: (o, h, boss) => ({ title: `Sparring Volante · contro ${o.name}`, level: boss ? 3 : 2, oppName: o.name, hp: 0 }) },
     { id: "zonarossa", t: "Zona Rossa", e: "🔴", saga: "quattordici", eng: "__zonarossa", d: "Due contro due su un campo che si restringe: dopo dieci secondi le fasce rosse avanzano dai bordi e chi ci resta perde fiato fino al KO. Tre gol o un minuto; il pari è una sconfitta.",
       opp: [{ name: "Fenicotteri di Marina", color: "#db2777", style: "pressing" }, { name: "Gufi di Tesla", color: "#6366f1", style: "equilibrata" }],
       boss: { name: "Corvi di Rigel", color: "#18181b", style: "pressing" },
@@ -667,6 +702,7 @@
     if (window.__carteDecks) html += `<div class="big"><button type="button" data-go="carte">🎴 Carte del Destino<small>Mini-storie a mazzi · pesca, vivi, rigioca</small></button></div>`;
     if (window.__bar) html += `<div class="big"><button type="button" data-go="bar">🍺 Il Bar del Borgo<small>Gestione leggera · servi, ascolta gli ospiti, migliora il locale</small></button></div>`;
     html += `<div class="big"><button type="button" data-go="album">🏆 Album dei finali<small>${tt.fe}/${tt.te} timbri</small></button><button type="button" data-go="guarda">👕 Guardaroba<small>Prova e indossa ciò che hai sbloccato</small></button></div>`;
+    html += `<div class="big"><button type="button" data-go="diario">📖 Diario<small>Tutte le saghe in un libro · completamento e titoli</small></button></div>`;
     html += `<div class="big"><button type="button" data-go="sala">🕹️ Sala Giochi<small>I motori di partita delle saghe, liberi</small></button><button type="button" data-go="cine">🎬 Cineteca<small>Rivedi i finali trovati</small></button></div>`;
     { const pt = safe(() => perTotals(), null); if (pt) html += `<div class="big"><button type="button" data-go="per">👥 Album dei personaggi<small>${pt.seen}/${pt.tot} incontrati · carte d'oro per le saghe concluse</small></button>${window.__sogni ? `<button type="button" data-go="sogni">🃏 La Squadra dei Sogni<small>Carte da collezionare, intesa e il Torneo dei Sogni</small></button>` : ""}</div>`; }
     html += `<div class="row">${[["tutte", "Tutte"], ["corso", "In corso"], ["nuove", "Da iniziare"], ["concluse", "Concluse"]].map(([k, l]) => `<button type="button" class="chip${FILT.st === k ? " on" : ""}" data-st="${k}">${l}</button>`).join("")}</div>`;
@@ -690,6 +726,7 @@
     const sgb = body.querySelector('[data-go="sogni"]'); if (sgb) sgb.onclick = () => { close(); window.__sogni.open(() => openSalone()); };
     body.querySelector('[data-go="sala"]').onclick = () => openSalaGiochi(() => openSalone());
     body.querySelector('[data-go="cine"]').onclick = () => openCineteca(() => openSalone());
+    body.querySelector('[data-go="diario"]').onclick = () => openDiario(() => openSalone());
   }
   function detail(s) {
     if (!s || !OV) return; const x = state(s), r = rec(); r.seen[s.id] = 1; recSave(r);
@@ -703,6 +740,36 @@
   }
   const endRow = (found, title, sub) => `<div class="end${found ? " f" : ""}"><div class="seal">${found ? "FINALE<br>TROVATO" : "?"}</div><div><b>${found ? esc(title) : "???"}</b><span>${found ? esc(sub) : "Indizio: " + esc(sub)}</span></div></div>`;
 
+
+  // ---------------------------------------------------------------- DIARIO
+  // un libro unico: per ogni saga capitoli, finali e personaggi; in alto il completamento globale con i titoli a soglia
+  const TITOLI = [[25, "Viaggiatore"], [50, "Cronista del Borgo"], [75, "Custode delle Saghe"], [100, "Leggenda Completa"]];
+  function diarioData() {
+    const secs = safe(() => perSections(), []), bySaga = {};
+    secs.forEach((x) => { if (x.saga) bySaga[x.saga.id] = x; });
+    const rows = SAGAS.filter(available).map((s) => {
+      const x = state(s), p = bySaga[s.id], ch = s.ch || 0;
+      const parts = [], add = (a, b) => { if (b > 0) parts.push(a / b); };
+      if (ch) add(Math.min(x.doneN, ch), ch); else if (x.finished) parts.push(1);
+      add(x.endsFound, x.ends.length); if (p) add(p.seen, p.ids.length);
+      const pct = parts.length ? Math.round((parts.reduce((a, b) => a + b, 0) / parts.length) * 100) : 0;
+      return { s, x, p, ch, pct: x.started || pct ? pct : 0 };
+    });
+    const tot = rows.length ? Math.round(rows.reduce((a, r) => a + r.pct, 0) / rows.length) : 0;
+    return { rows, tot, titolo: TITOLI.filter((t) => tot >= t[0]).pop() || null };
+  }
+  function openDiario(back) {
+    if (back) BK.dia = back; BACK = BK.dia; const body = shell("📖 Diario"), d = diarioData();
+    const next = TITOLI.find((t) => d.tot < t[0]);
+    let html = `<p class="sum">Il libro di tutto ciò che hai fatto. Completamento globale: <b>${d.tot}%</b>${d.titolo ? ` · titolo: <b style="color:#ffd23f">${esc(d.titolo[1])}</b>` : ""}${next ? ` · prossimo (${next[0]}%): ${esc(next[1])}` : ""}.</p><div class="pbar"><i style="width:${Math.max(2, d.tot)}%"></i></div>`;
+    html += `<div class="row">${TITOLI.map((t) => `<span class="chip${d.tot >= t[0] ? " on" : ""}" style="cursor:default">${t[0]}% · ${esc(t[1])}</span>`).join("")}</div>`;
+    html += d.rows.slice().sort((a, b) => (b.x.started - a.x.started) || (b.pct - a.pct)).map((r) => {
+      const { s, x, p } = r, dim = x.started ? "" : "opacity:.55";
+      return `<div class="psec${x.finished ? " gold" : ""}" data-id="${s.id}" style="${dim}"><div class="pe">${s.e}</div><div><b>${esc(s.t)}</b><span>${x.started ? `${r.ch ? `Capitoli ${Math.min(x.doneN, r.ch)}/${r.ch} · ` : ""}${x.ends.length ? `Finali ${x.endsFound}/${x.ends.length} · ` : ""}${p ? `Personaggi ${p.seen}/${p.ids.length}` : ""}` : "Non ancora iniziata"}</span><div class="pbar"><i style="width:${Math.max(2, r.pct)}%"></i></div></div><div class="n">${r.pct}%</div></div>`;
+    }).join("");
+    body.innerHTML = html;
+    body.querySelectorAll("[data-id]").forEach((b) => (b.onclick = () => detail(SAGAS.find((s) => s.id === b.dataset.id))));
+  }
   // ---------------------------------------------------------------- ALBUM DEI FINALI
   function openAlbum(back) {
     if (back) BK.alb = back; BACK = BK.alb; const body = shell("🏆 Album dei finali"), tt = totals();
@@ -720,7 +787,7 @@
   // ---------------------------------------------------------------- ALBUM DEI PERSONAGGI
   // ogni personaggio registrato nel gioco (window.__borgoApi.BIO) diventa una carta. Si «incontra» parlandoci (seeCard del gioco).
   // Le sezioni: la Storia e Borgo Marino, i tornei e le modalità del Borgo, e una sezione per saga (riconosciuta dal prefisso degli id).
-  const PFX = { figurine: "fg", rotta: "ro", fischietto: "fi", capitani: "cv", carte: "cd", quattordici: "qt", sigilli: "sg", cenere: "ce", note: "qd", fortino: "fo", spia: "dz", fiume: "fa", piramide: "my", treno: "te", alcatraz: "alc", milano: "mn", gp: "gp", tempo: "rt", roma: "rm", regno: "re", naufraghi: "nf", campana: "cp", galletta: "gl", pugno: "pr", montagna: "bm", cavallo: "cs", dungeon: "dg", razzo: "rz", quartiere: "sq", titano: "ft", ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
+  const PFX = { mondiale: "mg", cavaliere: "cf", gala: "pd", circuiti: "nr", vuota: "vs", replica: "rp", officina: "of", figurine: "fg", rotta: "ro", fischietto: "fi", capitani: "cv", carte: "cd", quattordici: "qt", sigilli: "sg", cenere: "ce", note: "qd", fortino: "fo", spia: "dz", fiume: "fa", piramide: "my", treno: "te", alcatraz: "alc", milano: "mn", gp: "gp", tempo: "rt", roma: "rm", regno: "re", naufraghi: "nf", campana: "cp", galletta: "gl", pugno: "pr", montagna: "bm", cavallo: "cs", dungeon: "dg", razzo: "rz", quartiere: "sq", titano: "ft", ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
   const BORGO_PFX = ["sv", "rb", "sb", "cg", "hd", "md", "ac"];
   function perSections() {
     const A = api(); if (!A || !A.BIO) return [];
@@ -831,7 +898,7 @@
   }
 
   window.__salone = {
-    open: (back) => openSalone(back), album: (back) => openAlbum(back), salaGiochi: (back) => openSalaGiochi(back), machine: (id) => MACHINES.find((m) => m.id === id) || null, heroLook: () => heroLook(), cineteca: (back) => openCineteca(back), guardaroba: (back) => openGuardaroba(back), close, personaggi: (back) => openPersonaggi(back), personaggiStato: () => safe(() => perTotals(), null),
+    open: (back) => openSalone(back), album: (back) => openAlbum(back), diario: (back) => openDiario(back), diarioStato: () => safe(() => diarioData().tot, 0), salaGiochi: (back) => openSalaGiochi(back), machine: (id) => MACHINES.find((m) => m.id === id) || null, heroLook: () => heroLook(), cineteca: (back) => openCineteca(back), guardaroba: (back) => openGuardaroba(back), close, personaggi: (back) => openPersonaggi(back), personaggiStato: () => safe(() => perTotals(), null),
     summary: () => safe(() => { const t = totals(), A = api(), C = (A && A.COSM) || {}; return Object.assign(t, { cosOwned: safe(() => A.cosOwned().length, 0), cosTot: Object.keys(C).length }); }, { n: 0, run: 0, fin: 0, fe: 0, te: 0, cosOwned: 0, cosTot: 0 }),
     SAGAS,
     // ultima saga giocata, per «Riprendi» nella home
