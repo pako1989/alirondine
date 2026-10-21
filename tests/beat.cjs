@@ -69,7 +69,7 @@ async function run(w) {
   await page.evaluate(() => window.__beat.open()); await page.waitForTimeout(150);
   await page.evaluate(() => document.querySelector('.btOv [data-go="run"]').click()); await page.waitForTimeout(500); await page.evaluate(() => window.__beat.pause(true));
   const ev = await page.evaluate(() => {
-    const B = window.__beat, G = B.state(), P = G.P, out = {}; B._fast(true); for (let i = 0; i < 130; i++) B.tick(); G.en = []; G.items = []; G.haz = []; G.hzT = 99999; G.lock = G.cam; out.btn = !!document.querySelector(".btOv .gr");
+    const B = window.__beat, G = B.state(), P = G.P, out = {}; B._fast(true); G.ally = null; for (let i = 0; i < 130; i++) B.tick(); G.en = []; G.items = []; G.haz = []; G.hzT = 99999; G.lock = G.cam; out.btn = !!document.querySelector(".btOv .gr");
     const mk = (x, y, hp) => { const e = B.mkE("thug", G.pool[0], 0, 0); e.x = x; e.y = y; e.hp = e.hpMax = hp || 999; e.cool = 9999; G.en.push(e); return e; };
     // solidi: non attraversi un rivale
     P.x = 100; P.y = 182; P.dir = 1; const a = mk(112, 182); a.st = "idle"; for (let i = 0; i < 20; i++) { G.inp = { r: 1 }; B.tick(); } G.inp = {}; out.solid = P.x < a.x - 6; out.pushed = a.x > 112;
@@ -96,6 +96,17 @@ async function run(w) {
     out.wpSpots = true;
     return out;
   });
+  // campione a tema (mossa speciale) e compagno CPU
+  const mc = await page.evaluate(() => {
+    const B = window.__beat, G = B.state(), P = G.P, out = {}; G.en = []; G.items = []; G.haz = []; G.hzT = 99999; G.proj = []; G.zaps = []; G.lock = G.cam; P.hp = P.hpMax = 9999; P.x = 100; P.y = 182;
+    const m = B.mkE("mini", G.pool[1] || G.pool[0], 0, 0); m.x = 220; m.y = 182; m.cool = 0; m.spc = 2; m.sg = { fx: "fire", name: "Test", col: "#f80" }; G.en.push(m);
+    let mp = 0; for (let i = 0; i < 90; i++) { B.tick(); mp = Math.max(mp, G.proj.length); } out.proj = mp > 0; out.mini = m.mini === true && m.n.length > 0;
+    m.sg = { fx: "thunder", name: "Fulmine", col: "#ff0" }; m.st = "idle"; m.cool = 0; m.spc = 2; P.hp = 9999; P.x = 150; P.y = 182; let z = 0; for (let i = 0; i < 110; i++) { B.tick(); z = Math.max(z, G.zaps.length); } out.zap = z > 0;
+    G.en = []; const a = B.mkE("thug", G.pool[0], 0, 0); a.x = 200; a.y = 182; a.hp = a.hpMax = 999; a.cool = 9999; G.en.push(a); const al = B.mkP ? B.mkP(G.pool[0], {}) : null;
+    if (al) { al.ally = true; al.x = 170; al.y = 182; al.dir = 1; al.hp = al.hpMax = 9999; al.cool = 0; al.n3 = 0; G.ally = al; P.x = 150; for (let i = 0; i < 90; i++) B.tick(); out.ally = a.hp < 999; } else out.ally = "nomkP";
+    return out;
+  });
+  if (!mc.proj || !mc.mini || !mc.zap || mc.ally !== true) errors.push("campione/compagno: " + JSON.stringify(mc));
   { const bad = ["btn", "solid", "pushed", "barrel", "held", "thrown", "boss", "release", "bat", "bomb", "shield", "pick", "roll", "fall"].filter((k) => !ev[k]); if (bad.length) errors.push("afferra/armi/ostacoli: " + bad.join(",") + " " + JSON.stringify(ev)); }
   const w0 = await page.evaluate(() => { const B = window.__beat; B.close(); B.open(); B.load; const x = B.load(); x.evo = false; B.save(x); B.open(); document.querySelector('.btOv [data-go="run"]').click(); const G = B.state(); return [G.evo, G.items.filter((i) => i.k === "wp").length, !!document.querySelector(".btOv .gr")]; });
   if (w0[0] || w0[1] || w0[2]) errors.push("opzione spenta: " + JSON.stringify(w0));
