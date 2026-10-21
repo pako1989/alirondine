@@ -17,7 +17,7 @@
   const FXD = (window.__supers || { FXD: {} }).FXD;
   const supOf = (p) => (window.__supers ? window.__supers.of(p.id) : { fx: "fire", name: "Tiro Fuoco", col: "#ff8a30", saga: "" });
   let LAY = null, OV = null, BACK = null, M = null, RAF = 0, PAUSE = false, STATIC = null;
-  const load = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { cup: r.cup | 0, wins: r.wins | 0, goals: r.goals | 0, mode: r.mode === 5 ? 5 : 3 }; };
+  const load = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { cup: r.cup | 0, wins: r.wins | 0, goals: r.goals | 0, mode: r.mode === 5 ? 5 : 3, tele: r.tele !== false, combo: r.combo !== false }; };
   const save = (r) => safe(() => localStorage.setItem(KEY, JSON.stringify(r)), 0);
   const name = (id) => safe(() => S().name(id), id);
   function seeded(seed) { let a = seed >>> 0; return () => { a = (a + 0x6d2b79f5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
@@ -33,7 +33,7 @@
   function begin(cfg) {
     setField(cfg.n || 3);
     const P = cfg.mine.map((c, i) => mk(c, 0, i, { m: 0.02 })).concat([mkKeeper(0, cfg.myKeeper, { m: 0 })]), Q = cfg.foes.map((c, i) => mk(c, 1, i, { m: (cfg.lvl - 3) * 0.04 })).concat([mkKeeper(1, cfg.foeKeeper, { m: (cfg.lvl - 3) * 0.04 })]);
-    M = { cfg, lvl: cfg.lvl, p: P, q: Q, all: P.concat(Q), ball: { x: W / 2, y: H / 2, vx: 0, vy: 0, owner: null, cool: 0, kick: 0, magic: 0, rot: 0, tr: [] }, score: [0, 0], t: -150, extra: false, ctl: P[2], inp: {}, edge: {}, hold: {}, chg: 0, stam: 100, stick: null, energy: [30, 30], fx: [], parts: [], goalT: 0, over: null, r: cfg.seed != null ? seeded(cfg.seed) : Math.random, fast: !!cfg.fast, lastScorer: -1, stat: { shots: [0, 0], saves: [0, 0] }, poss: [0, 0], shake: 0, scorer: null, cam: -MX, vw: Math.min(CW, 412) };
+    M = { cfg, opt: cfg.fast ? { tele: false, combo: cfg.combo !== false } : load(), cm: null, cmCd: 0, lvl: cfg.lvl, p: P, q: Q, all: P.concat(Q), ball: { x: W / 2, y: H / 2, vx: 0, vy: 0, owner: null, cool: 0, kick: 0, magic: 0, rot: 0, tr: [] }, score: [0, 0], t: -150, extra: false, ctl: P[2], inp: {}, edge: {}, hold: {}, chg: 0, stam: 100, stick: null, energy: [30, 30], fx: [], parts: [], goalT: 0, over: null, r: cfg.seed != null ? seeded(cfg.seed) : Math.random, fast: !!cfg.fast, lastScorer: -1, stat: { shots: [0, 0], saves: [0, 0] }, poss: [0, 0], shake: 0, scorer: null, cam: -MX, vw: Math.min(CW, 412) };
     STATIC = null; kickoff(0); return M;
   }
   function kickoff(team) {
@@ -42,12 +42,20 @@
   }
   const mate = (p) => (p.team ? M.q : M.p), foe = (p) => (p.team ? M.p : M.q), gx = (team) => (team ? 0 : W);
   function fxAdd(x, y, t, c) { if (!M.fast) M.fx.push({ x, y, t, c, l: 36 }); }
+  // telecronaca: una riga di commento in basso (opzione nel menu) + tiro combinato (due compagni vicini, opzione nel menu)
+  const pickL = (a) => a[Math.floor(M.r() * a.length)];
+  function say(txt, pri) { if (M.fast || !M.opt.tele) return; pri = pri || 0; if (M.cm && M.cm.l > 90 && M.cm.pri > pri) return; M.cm = { t: txt, l: 190, pri }; }
+  function sayCd(txt, cd) { if (M.cmCd > 0) return; M.cmCd = cd || 150; say(txt, 0); }
+  function comboOf(p) {
+    if (!M.opt.combo || p.team !== 0 || M.ball.owner !== p || !(p.role === "A" || p.role === "D" || p.role === "P")) return null; const cost = p.role === "A" ? 40 : 50; if (M.energy[0] < cost + 25) return null;
+    let best = null, bd = 85; mate(p).forEach((m) => { if (m === p || m.keeper || m.stun > 0) return; const d = dist(m, p); if (d < bd) { bd = d; best = m; } }); return best;
+  }
   function burst(x, y, n, cols, sp, up) { if (M.fast) return; for (let i = 0; i < n; i++) { const a = M.r() * 6.283, v = (0.4 + M.r()) * sp; M.parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - (up || 0), l: 30 + M.r() * 30, c: cols[Math.floor(M.r() * cols.length)], s: 1.5 + M.r() * 2 }); } }
   // ------------------------------------------------------------ azioni
   function shoot(p, o) {
     const b = M.ball; if (b.owner !== p) return; o = o || {}; const tx = gx(p.team), aim = o.aim != null ? o.aim : CY, ty = Math.max(GY0 + 5, Math.min(GY1 - 5, aim));
-    const dx = tx - p.x, dy = ty - p.y, l = Math.hypot(dx, dy) || 1, sp = (o.power || p.shoot) * (o.mult || 1) * (o.f || 1), err = ((100 - Math.min(99, p.dribble)) / 100) * 0.12 * (o.mult ? 0.2 : 1) * (o.f > 1.25 ? 1.6 : 1) * (M.r() - 0.5) * 2;
-    const c = Math.cos(err), s = Math.sin(err); b.vx = ((dx / l) * c - (dy / l) * s) * sp; b.vy = ((dx / l) * s + (dy / l) * c) * sp; b.owner = null; b.cool = 14; b.kick = p.team; b.shotBy = p; b.big = !!o.mult; b.sup = null; if (o.sup) startSup(b, o.sup); M.stat.shots[p.team]++; p.hold = 0; fxAdd(p.x, p.y - 30, o.mult ? "🔥" : "tiro!", "#ffd23f"); burst(p.x, p.y, 6, ["#fff", "#cfe"], 1.2); if (o.mult) M.shake = 8;
+    const dx = tx - p.x, dy = ty - p.y, l = Math.hypot(dx, dy) || 1, sp = (o.power || p.shoot) * (o.mult || 1) * (o.f || 1), err = (o.exact ? 0 : ((100 - Math.min(99, p.dribble)) / 100) * 0.12 * (o.mult ? 0.2 : 1)) * (o.f > 1.25 ? 1.6 : 1) * (M.r() - 0.5) * 2;
+    const c = Math.cos(err), s = Math.sin(err); b.vx = ((dx / l) * c - (dy / l) * s) * sp; b.vy = ((dx / l) * s + (dy / l) * c) * sp; b.owner = null; b.cool = 14; b.kick = p.team; b.shotBy = p; b.big = !!o.mult; b.sup = null; b.twin = o.twin || null; if (o.sup) startSup(b, o.sup); M.stat.shots[p.team]++; p.hold = 0; fxAdd(p.x, p.y - 30, o.mult ? "🔥" : "tiro!", "#ffd23f"); burst(p.x, p.y, 6, ["#fff", "#cfe"], 1.2); if (o.mult) M.shake = 8;
   }
   function startSup(b, sp) {
     b.sup = sp.fx; b.supCol = sp.col; b.age = 0; b.big = true; b.cs = M.r() < 0.5 ? -1 : 1; const mul = { thunder: 1.3, drill: 1.1, change: 0.45 }[sp.fx] || 1; b.vx *= mul; b.vy *= mul;
@@ -70,7 +78,7 @@
     return steal(p, o, 0);
   }
   function steal(p, o, bonus) {
-    const b = M.ball, prob = Math.max(0.2, Math.min(0.88, 0.45 + (p.tack - o.dribble) / 220 + bonus)); if (M.r() < prob) { b.owner = null; b.cool = 12; b.vx = (M.r() - 0.5) * 3 + p.fx * 1.5; b.vy = (M.r() - 0.5) * 3 + p.fy * 1.5; M.energy[p.team] = Math.min(100, M.energy[p.team] + 12); fxAdd(p.x, p.y - 30, "rubata!", "#7ad87a"); burst(o.x, o.y, 8, ["#3a9a40", "#8ad87a", "#6a4a2a"], 1.4); p.hold = 0; return true; }
+    const b = M.ball, prob = Math.max(0.2, Math.min(0.88, 0.45 + (p.tack - o.dribble) / 220 + bonus)); if (M.r() < prob) { b.owner = null; b.cool = 12; b.vx = (M.r() - 0.5) * 3 + p.fx * 1.5; b.vy = (M.r() - 0.5) * 3 + p.fy * 1.5; M.energy[p.team] = Math.min(100, M.energy[p.team] + 12); fxAdd(p.x, p.y - 30, "rubata!", "#7ad87a"); sayCd(pickL([`${p.n} ruba palla a ${o.n}!`, `Che scivolata di ${p.n}!`, `${o.n} perde il pallone, lo prende ${p.n}.`]), 170); burst(o.x, o.y, 8, ["#3a9a40", "#8ad87a", "#6a4a2a"], 1.4); p.hold = 0; return true; }
     p.stun = 20; fxAdd(p.x, p.y - 30, "mancata", "#aaa"); return false;
   }
   function slide(p) { if (p.slide > 0 || p.stun > 0) return false; const l = Math.hypot(p.fx, p.fy) || 1; p.slide = 14; p.sx = (p.fx / l) * 3.6; p.sy = (p.fy / l) * 3.6; return true; }
@@ -78,15 +86,16 @@
     const A = ABIL[p.role], t = p.team, b = M.ball; if (!A || p.stun > 0) return false;
     const own = b.owner === p, shot = own && (p.role === "A" || p.role === "D" || p.role === "P"), cost = shot ? (p.role === "A" ? 40 : 50) : A[2];
     if (M.energy[t] < cost) return false; if (p.role === "C" && !own) return false; if (p.role === "A" && !own) return false;
-    M.energy[t] -= cost;
-    if (shot) { const sp = supOf(p); cutin(p, sp.name, sp.col, FXD[sp.fx]); fxAdd(p.x, p.y - 36, sp.name.toUpperCase() + "!", sp.col); shoot(p, { aim: CY, mult: p.role === "A" ? 1.75 : 1.5, power: p.shoot, sup: sp }); return true; }
+    const pa = shot ? comboOf(p) : null; M.energy[t] -= cost + (pa ? 25 : 0);
+    if (shot) { const sp = supOf(p); if (pa) { const sp2 = supOf(pa); cutin(p, "TIRO COMBINATO", sp.col, p.n + " + " + pa.n, pa); fxAdd(p.x, p.y - 36, "COMBO!", "#ffd23f"); fxAdd(pa.x, pa.y - 30, "+" + sp2.name, sp2.col); say(pickL([`${p.n} e ${pa.n} insieme: TIRO COMBINATO!`, `Due campioni, un solo tiro: ${p.n} e ${pa.n}!`, `${pa.n} lo serve, ${p.n} lo scarica: combinato!`]), 3); shoot(p, { aim: CY, mult: (p.role === "A" ? 1.75 : 1.5) * 1.3, power: p.shoot, sup: sp, twin: sp2.col, exact: pa.role === "C" }); return true; }
+      cutin(p, sp.name, sp.col, FXD[sp.fx]); fxAdd(p.x, p.y - 36, sp.name.toUpperCase() + "!", sp.col); say(pickL([`${p.n} carica il ${sp.name}!`, `Attenzione: ${p.n} ha un colpo speciale!`, `${p.n} lascia partire il ${sp.name}!`]), 2); shoot(p, { aim: CY, mult: p.role === "A" ? 1.75 : 1.5, power: p.shoot, sup: sp }); return true; }
     cutin(p, A[0]);
     if (p.role === "C") { const m = mate(p).filter((x) => x !== p && !x.keeper).sort((a, c) => (t ? a.x - c.x : c.x - a.x))[0]; pass(p, m, { fast: true, magic: 70 }); }
     else if (p.role === "D") { foe(p).forEach((o) => { if (dist(o, p) < 75) { o.stun = Math.max(o.stun, 45); if (b.owner === o) { b.owner = p; p.hold = 0; } } }); fxAdd(p.x, p.y - 30, "MURO!", "#ffd23f"); M.fx.push({ ring: 1, x: p.x, y: p.y, l: 20 }); burst(p.x, p.y, 16, ["#ffd23f", "#fff"], 2.2); M.shake = 6; }
     else { b.owner === null && dist(b, p) < 120 && (b.owner = p, b.vx = b.vy = 0); fxAdd(p.x, p.y - 30, "MAGNETE!", "#9ad8ff"); M.fx.push({ ring: 1, x: p.x, y: p.y, l: 20 }); }
     return true;
   }
-  function cutin(p, ab, col, sub) { if (M.fast || !OV) return; const w = OV.querySelector(".erStage"); if (!w) return; const c = document.createElement("div"); c.className = "erCut"; const u = safe(() => S().port(p.id), null); c.innerHTML = `${u ? `<img alt="" src="${u}">` : ""}<div><b>${esc(ab)}</b><span>${esc(p.n)}${sub ? " · " + esc(sub) : ""}</span></div>`; if (col) { c.style.borderColor = col; const im = c.querySelector("img"); if (im) im.style.borderColor = col; c.querySelector("b").style.color = col; } w.appendChild(c); M.stop = 30; setTimeout(() => c.remove(), 900); }
+  function cutin(p, ab, col, sub, p2) { if (M.fast || !OV) return; const w = OV.querySelector(".erStage"); if (!w) return; const c = document.createElement("div"); c.className = "erCut"; const u = safe(() => S().port(p.id), null); const u2 = p2 ? safe(() => S().port(p2.id), null) : null; c.innerHTML = `${u ? `<img alt="" src="${u}">` : ""}<div><b>${esc(ab)}</b><span>${p2 ? "" : esc(p.n) + (sub ? " · " : "")}${sub ? esc(sub) : ""}</span></div>${u2 ? `<img alt="" src="${u2}">` : ""}`; if (col) { c.style.borderColor = col; const im = c.querySelector("img"); if (im) im.style.borderColor = col; c.querySelector("b").style.color = col; } w.appendChild(c); M.stop = 30; setTimeout(() => c.remove(), 900); }
   // ------------------------------------------------------------ AI
   function aiMove(p) {
     const b = M.ball, atk = (b.owner && b.owner.team === p.team) || (!b.owner && b.kick === p.team), own = b.owner === p, L = M.lvl, sp = p.spd * (0.8 + L * 0.04), tgx = gx(p.team), out = { x: p.x, y: p.y, s: sp };
@@ -121,7 +130,9 @@
   function tick() {
     if (!M || M.over) return; if (M.stop > 0) { M.stop--; return; } M.fx = M.fx.filter((x) => --x.l > 0); M.parts = M.parts.filter((q) => { q.x += q.vx; q.y += q.vy; q.vy += 0.06; return --q.l > 0; }); if (M.shake > 0) M.shake--;
     if (M.goalT > 0) { if (M.goalT % 4 === 0) burst(M.scorer ? M.scorer.x : W / 2, 60, 5, ["#ffd23f", "#ff5a5a", "#5ad8ff", "#fff"], 2.4, 1.2); if (M.goalT % 6 === 0 && M.scorer) burst(M.scorer.x, M.scorer.y - 20, 4, [look(M.scorer).col, "#fff"], 1.6, 1.4); if (--M.goalT === 0) kickoff(M.lastScorer ? 0 : 1); return; }
-    M.t++; if (M.t < 0) return; const b = M.ball, e = M.edge; M.edge = {}; M.energy[0] = Math.min(100, M.energy[0] + 0.03); M.energy[1] = Math.min(100, M.energy[1] + 0.03);
+    if (M.cm) M.cm.l--; if (M.cmCd > 0) M.cmCd--;
+    M.t++; if (M.t === 2) say(pickL(["Si parte! Calcio d'inizio.", "Fischio d'inizio: si gioca!", "Ci siamo: parte la partita!"]), 1); else if (M.t === Math.floor(DUR / 2)) say("Siamo a metà: tutto ancora da decidere.", 1); else if (M.t === DUR - 600 && !M.extra) say("Ultimi dieci secondi: ora o mai più!", 4); else if (M.t > 0 && M.t % 700 === 350 && !M.cm) say(pickL(["Ritmo alto, il campo scotta.", "Si gioca a viso aperto.", "Il pubblico canta: che atmosfera!"]), 0);
+    if (M.t < 0) return; const b = M.ball, e = M.edge; M.edge = {}; M.energy[0] = Math.min(100, M.energy[0] + 0.03); M.energy[1] = Math.min(100, M.energy[1] + 0.03);
     if (b.owner) { M.poss[b.owner.team]++; if (M.t % 40 === 0) M.energy[b.owner.team] = Math.min(100, M.energy[b.owner.team] + 0.6); }
     const fld = M.p.filter((x) => !x.keeper); if (b.owner && b.owner.team === 0 && !b.owner.keeper) M.ctl = b.owner; else if (M.t % 12 === 0) { const nb = fld.slice().sort((a, c) => dist(a, b) - dist(c, b))[0]; if (nb !== M.ctl && dist(nb, b) + 14 < dist(M.ctl, b)) M.ctl = nb; }
     // carica del tiro: si tiene premuto, al rilascio parte
@@ -148,7 +159,7 @@
       if (b.y < TOP + 3) { b.y = TOP + 3; b.vy = Math.abs(b.vy) * 0.8; } if (b.y > BOT - 3) { b.y = BOT - 3; b.vy = -Math.abs(b.vy) * 0.8; }
       const inMouth = b.y > GY0 && b.y < GY1;
       if (b.x < 2 && !inMouth) { b.x = 2; b.vx = Math.abs(b.vx) * 0.8; } if (b.x > W - 2 && !inMouth) { b.x = W - 2; b.vx = -Math.abs(b.vx) * 0.8; }
-      [M.p[NP], M.q[NP]].forEach((k) => { const sp = Math.hypot(b.vx, b.vy), toward = k.team ? b.vx > 0.5 : b.vx < -0.5; if (toward && sp > 2.5 && b.kick !== k.team && dist(b, k) < 20 && k.stun <= 0) { const big = b.big ? 0.15 : 1, pr = Math.max(0.1, Math.min(0.85, (0.5 + k.kdf / 260 - sp / 22)) * big); if (M.r() < pr) { M.stat.saves[k.team]++; b.vx = (k.team ? -1 : 1) * (1.5 + M.r()); b.vy = (M.r() - 0.5) * 3; b.kick = -1; b.big = false; b.sup = null; fxAdd(k.x, k.y - 30, "PARATA!", "#9ad8ff"); burst(b.x, b.y, 8, ["#fff", "#9ad8ff"], 1.6); if (M.r() < 0.5) { b.owner = k; k.hold = 0; } } else k.stun = 6; } });
+      [M.p[NP], M.q[NP]].forEach((k) => { const sp = Math.hypot(b.vx, b.vy), toward = k.team ? b.vx > 0.5 : b.vx < -0.5; if (toward && sp > 2.5 && b.kick !== k.team && dist(b, k) < 20 && k.stun <= 0) { const big = b.big ? 0.15 : 1, pr = Math.max(0.1, Math.min(0.85, (0.5 + k.kdf / 260 - sp / 22)) * big); if (M.r() < pr) { M.stat.saves[k.team]++; b.vx = (k.team ? -1 : 1) * (1.5 + M.r()); b.vy = (M.r() - 0.5) * 3; b.kick = -1; b.big = false; b.sup = null; fxAdd(k.x, k.y - 30, "PARATA!", "#9ad8ff"); say(pickL([`${k.n} dice di no!`, `Che parata di ${k.n}!`, `${k.n} si allunga e salva tutto!`]), 2); burst(b.x, b.y, 8, ["#fff", "#9ad8ff"], 1.6); if (M.r() < 0.5) { b.owner = k; k.hold = 0; } } else k.stun = 6; } });
       if (Math.hypot(b.vx, b.vy) > 4 && b.magic <= 0) M.all.forEach((p) => { if (!p.keeper && p.team !== b.kick && p.stun <= 0 && dist(p, b) < PR + 2 && M.r() < 0.35 + (p.tack - 50) / 400 && !b.big) { b.vx *= -0.4; b.vy = (M.r() - 0.5) * 4; b.kick = p.team; fxAdd(p.x, p.y - 30, "blocco", "#ccc"); } });
       if (b.cool <= 0 && Math.hypot(b.vx, b.vy) < 4.2) { let best = null, bd = PR + 4; M.all.forEach((p) => { if (p.stun > 0) return; const d = dist(p, b); if (d < bd) { bd = d; best = p; } }); if (best) { b.owner = best; best.hold = 0; b.kick = -1; b.big = false; b.sup = null; } }
       else if (b.magic > 0 && b.to && dist(b.to, b) < PR + 3) { b.owner = b.to; b.to.hold = 0; b.magic = 0; }
@@ -157,8 +168,8 @@
     if (!M.extra) { if (M.t >= DUR) { if (M.score[0] === M.score[1]) { M.extra = true; M.t = DUR - 1800; } else finish(); } }
     else if (M.t >= DUR + 1800) finish();
   }
-  function goal(team) { M.score[team]++; M.lastScorer = team; M.goalT = M.fast ? 1 : 130; M.scorer = M.ball.shotBy || M.all.find((p) => p.team === team && !p.keeper); M.ball.owner = null; M.ball.vx = M.ball.vy = 0; M.ball.tr = []; fxAdd(W / 2, 100, "GOL!", "#ffd23f"); M.shake = 14; M.flash = 14; burst(team ? 8 : W - 8, CY, 30, ["#ffd23f", "#ff5a5a", "#5ad8ff", "#fff"], 3.2, 1); if (M.extra) finish(); }
-  function finish() { if (M.over) return; const s = M.score; M.over = s[0] > s[1] ? "win" : s[0] < s[1] ? "lose" : "draw"; const f = M.cfg.onEnd; setTimeout(() => f && f(M.over, M), M.fast ? 0 : 1100); }
+  function goal(team) { M.score[team]++; M.lastScorer = team; M.goalT = M.fast ? 1 : 130; M.scorer = M.ball.shotBy || M.all.find((p) => p.team === team && !p.keeper); { const sc = M.scorer ? M.scorer.n : ""; const n = `${M.score[0]}-${M.score[1]}`; say(team === 0 ? pickL([`GOOOL! ${sc} la mette dentro! ${n}`, `${sc} non perdona: è rete! ${n}`, `Che gol di ${sc}! ${n}`]) : pickL([`Gol avversario: ${sc} ci punisce. ${n}`, `Rete per loro, ${sc} è freddissimo. ${n}`, `Ahi, ${sc} trova la porta. ${n}`]), 5); } M.ball.owner = null; M.ball.vx = M.ball.vy = 0; M.ball.tr = []; fxAdd(W / 2, 100, "GOL!", "#ffd23f"); M.shake = 14; M.flash = 14; burst(team ? 8 : W - 8, CY, 30, ["#ffd23f", "#ff5a5a", "#5ad8ff", "#fff"], 3.2, 1); if (M.extra) finish(); }
+  function finish() { if (M.over) return; const s = M.score; M.over = s[0] > s[1] ? "win" : s[0] < s[1] ? "lose" : "draw"; say(M.over === "win" ? `Fischio finale: vittoria ${s[0]}-${s[1]}!` : M.over === "lose" ? `Fischio finale: sconfitta ${s[0]}-${s[1]}.` : `Fischio finale: pari ${s[0]}-${s[1]}.`, 9); const f = M.cfg.onEnd; setTimeout(() => f && f(M.over, M), M.fast ? 0 : 1100); }
   // ------------------------------------------------------------ disegno (doppia risoluzione)
   const IMG = {}; const imgOf = (id) => { if (IMG[id] !== undefined) return IMG[id]; const u = safe(() => S().port(id), null); if (!u) return (IMG[id] = null); const i = new Image(); i.src = u; return (IMG[id] = i); };
   function buildStatic() {
@@ -229,6 +240,7 @@
     const vw = M.vw, b0 = M.ball, fo = b0.owner ? b0.owner.x : b0.x + b0.vx * 9, tcam = vw >= CW ? -MX : clampN(fo - vw / 2, -MX, W + MX - vw); M.cam += (tcam - M.cam) * (M.fast ? 1 : 0.1);
     g.save(); g.scale(SS, SS); g.fillStyle = "#000"; g.fillRect(0, 0, vw, CH); const sh = M.shake > 0 ? (M.r() - 0.5) * M.shake * 0.5 : 0; g.drawImage(STATIC, (M.cam + MX) * SS, 0, vw * SS, CH * SS, sh, sh * 0.5, vw, CH); g.translate(-M.cam + sh, OY + sh * 0.5);
     if (M.flash > 0) { g.fillStyle = `rgba(255,255,200,${M.flash / 40})`; g.fillRect(M.cam, -OY, vw, CH); M.flash--; }
+    { const o0 = M.ctl, pa = o0 && M.ball.owner === o0 ? comboOf(o0) : null; if (pa) { g.strokeStyle = "rgba(255,210,63," + (0.55 + 0.4 * Math.sin(M.t * 0.2)) + ")"; g.lineWidth = 2; g.setLineDash([4, 3]); g.beginPath(); g.moveTo(o0.x, o0.y - 6); g.lineTo(pa.x, pa.y - 6); g.stroke(); g.setLineDash([]); g.fillStyle = "#ffd23f"; g.font = "bold 9px system-ui"; g.textAlign = "center"; g.fillText("COMBO", (o0.x + pa.x) / 2, (o0.y + pa.y) / 2 - 10); } }
     M.fx.forEach((x) => { if (x.ring) { g.strokeStyle = `rgba(255,220,120,${x.l / 20})`; g.lineWidth = 3; g.beginPath(); g.arc(x.x, x.y, 75 * (1 - x.l / 20), 0, 7); g.stroke(); } });
     // indicatori: mira e ricevente
     const c = M.ctl, b = M.ball;
@@ -236,7 +248,7 @@
     M.all.slice().sort((a, d) => a.y - d.y).forEach((p) => fig(g, p));
     // palla con scia
     const hid = b.sup === "vanish" && b.age > 6 && b.age < 26;
-    b.tr.forEach((t, i) => { if (b.sup) { g.globalAlpha = (i / 14) * (hid ? 0.4 : 1); g.fillStyle = b.supCol; } else g.fillStyle = `rgba(255,${b.big ? 160 : 255},${b.big ? 60 : 255},${i / 14})`; g.beginPath(); g.arc(t[0], t[1], 2 + i * 0.35, 0, 7); g.fill(); g.globalAlpha = 1; });
+    b.tr.forEach((t, i) => { if (b.sup) { g.globalAlpha = (i / 14) * (hid ? 0.4 : 1); g.fillStyle = b.twin && i % 2 ? b.twin : b.supCol; } else g.fillStyle = `rgba(255,${b.big ? 160 : 255},${b.big ? 60 : 255},${i / 14})`; g.beginPath(); g.arc(t[0], t[1], 2 + i * 0.35, 0, 7); g.fill(); g.globalAlpha = 1; });
     if (b.sup && !hid) { const gr = g.createRadialGradient(b.x, b.y - 2, 1, b.x, b.y - 2, 12); gr.addColorStop(0, b.supCol + "cc"); gr.addColorStop(1, b.supCol + "00"); g.fillStyle = gr; g.beginPath(); g.arc(b.x, b.y - 2, 12, 0, 7); g.fill(); }
     g.fillStyle = "rgba(0,0,0,.3)"; g.beginPath(); g.ellipse(b.x + 1, b.y + 3, 5, 2.4, 0, 0, 7); g.fill();
     if (hid) { g.globalAlpha = 0.25; }
@@ -248,6 +260,7 @@
     g.save(); g.scale(SS, SS); const cx = vw / 2;
     g.fillStyle = "#0009"; g.beginPath(); g.roundRect(cx - 72, 2, 144, 17, 6); g.fill(); g.font = "900 10px system-ui"; g.textAlign = "right"; g.fillStyle = "#6ab0ff"; g.fillText(M.cfg.myName || "TU", cx - 22, 14); g.textAlign = "left"; g.fillStyle = "#ff8a7a"; g.fillText(M.cfg.foeName || "RIVALI", cx + 22, 14);
     g.textAlign = "center"; g.fillStyle = "#fff"; g.font = "900 13px system-ui"; g.fillText(`${M.score[0]}-${M.score[1]}`, cx, 15);
+    if (M.cm && M.cm.l > 0) { const a = Math.min(1, M.cm.l / 20); g.globalAlpha = a; g.fillStyle = "#000b"; g.beginPath(); g.roundRect(6, 22, vw - 12, 17, 6); g.fill(); g.fillStyle = "#ffe08a"; g.font = "bold 10px system-ui"; g.textAlign = "center"; g.fillText("🎙️ " + M.cm.t, cx, 34, vw - 24); g.globalAlpha = 1; }
     const rem = M.extra ? Math.max(0, Math.ceil((DUR + 1800 - M.t) / 60)) : Math.max(0, Math.ceil((DUR - Math.max(0, M.t)) / 60)); g.font = "bold 9px system-ui"; g.fillStyle = "#000a"; g.fillRect(2, 2, 40, 14); g.fillStyle = M.extra ? "#ffd23f" : "#fff"; g.textAlign = "center"; g.fillText((M.extra ? "ORO " : "") + rem + "s", 22, 12);
     const A = M.ctl ? ABIL[M.ctl.role] : null, can = A && M.energy[0] >= A[2];
     const BY = M.land ? 28 : CH - 11;
@@ -309,7 +322,9 @@
     n = n || 3; const all = S().CARDS, pool = all.filter((c) => c.saga === theme), p = pool.length >= n + 1 ? pool : all, out = [], used = {}; for (let i = 0; i < n + 1; i++) { let c; for (let k = 0; k < 20; k++) { c = p[Math.floor(rand() * p.length)]; if (!used[c.id]) break; } used[c.id] = 1; out.push(c); } return out; }
   function menu(back) {
     if (back) BACK = back; const body = shell("⚽ Calcio d'Azione Eroi"), r = load(), team = myTeam(r.mode), rl = (c) => (ABIL[c.role] ? c.role : "A");
-    body.innerHTML = `<p class="sum">Partita 3 contro 3 o 5 contro 5 (campo grande con camera) con i personaggi delle saghe, joystick libero, tiro caricato, scivolata, anche in orizzontale. Ogni personaggio ha il <b>super tiro della sua saga</b> (curva, zig-zag, invisibile, ghiaccio, fulmine...); poi Regia, Muro, Magnete.</p><button type="button" class="one" data-mode="1">👥 Formato: ${r.mode === 5 ? "5 contro 5 (campo grande)" : "3 contro 3"}<small>tocca per cambiare · il 5 contro 5 dura 110 secondi, il 3 contro 3 80</small></button><div class="sec">La tua squadra</div><p class="sum">${team.map((c) => `<b>${esc(name(c.id))}</b> (${esc(ABIL[rl(c)][0])})`).join(" · ")}</p><div class="sec">Modalità</div><button type="button" class="one" data-go="cup">🏆 Coppa degli Eroi<small>3 turni a eliminazione, difficoltà crescente · ${r.cup ? "vinta " + r.cup + " volte" : "mai vinta"}</small></button>${[1, 2, 3, 4, 5].map((l) => `<button type="button" class="one" data-l="${l}">Amichevole ${l}${"★".repeat(l)}<small>${["molto facile", "facile", "media", "difficile", "implacabile"][l - 1]} · ${r.mode === 5 ? 110 : 80} secondi · ${8 * l} monete</small></button>`).join("")}`;
+    body.innerHTML = `<p class="sum">Partita 3 contro 3 o 5 contro 5 (campo grande con camera) con i personaggi delle saghe, joystick libero, tiro caricato, scivolata, anche in orizzontale. Ogni personaggio ha il <b>super tiro della sua saga</b> (curva, zig-zag, invisibile, ghiaccio, fulmine...); poi Regia, Muro, Magnete.</p><button type="button" class="one" data-mode="1">👥 Formato: ${r.mode === 5 ? "5 contro 5 (campo grande)" : "3 contro 3"}<small>tocca per cambiare · il 5 contro 5 dura 110 secondi, il 3 contro 3 80</small></button><button type="button" class="one" data-tele="1">🎙️ Telecronaca: ${r.tele ? "SÌ" : "NO"}<small>una riga di commento per gol, parate, scivolate, super. Tocca per cambiare</small></button><button type="button" class="one" data-combo="1">🤝 Tiro combinato: ${r.combo ? "SÌ" : "NO"}<small>il Super con un compagno vicino (filo dorato COMBO): +25 energia, tiro molto più forte. Tocca per cambiare</small></button><div class="sec">La tua squadra</div><p class="sum">${team.map((c) => `<b>${esc(name(c.id))}</b> (${esc(ABIL[rl(c)][0])})`).join(" · ")}</p><div class="sec">Modalità</div><button type="button" class="one" data-go="cup">🏆 Coppa degli Eroi<small>3 turni a eliminazione, difficoltà crescente · ${r.cup ? "vinta " + r.cup + " volte" : "mai vinta"}</small></button>${[1, 2, 3, 4, 5].map((l) => `<button type="button" class="one" data-l="${l}">Amichevole ${l}${"★".repeat(l)}<small>${["molto facile", "facile", "media", "difficile", "implacabile"][l - 1]} · ${r.mode === 5 ? 110 : 80} secondi · ${8 * l} monete</small></button>`).join("")}`;
+    body.querySelector('[data-tele]').onclick = () => { const x = load(); x.tele = !x.tele; save(x); menu(); };
+    body.querySelector('[data-combo]').onclick = () => { const x = load(); x.combo = !x.combo; save(x); menu(); };
     body.querySelector('[data-mode]').onclick = () => { const x = load(); x.mode = x.mode === 5 ? 3 : 5; save(x); menu(); };
     body.querySelector('[data-go="cup"]').onclick = () => cup(0);
     body.querySelectorAll("[data-l]").forEach((b) => (b.onclick = () => game(+b.dataset.l, null)));

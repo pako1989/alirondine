@@ -25,13 +25,19 @@ async function run(w) {
   if (r.shot !== 1) errors.push("il tiro a porta vuota non fa gol: " + JSON.stringify(r));
   // abilità: Tiro Fuoco / Regia / Muro / Magnete
   const ab = await page.evaluate(() => {
-    const E = window.__eroi, M = E.state(), out = {}; for (let i = 0; i < 200; i++) E.tick(); // finisce l'esultanza e riparte
+    const E = window.__eroi, M = E.state(), out = {}; M.opt.combo = false; for (let i = 0; i < 200; i++) E.tick(); // finisce l'esultanza e riparte
     for (const role of ["A", "C", "D", "P"]) {
       M.energy[0] = 100; const p = M.p[0]; p.role = role; p.stun = 0; M.ctl = p; if (role === "A" || role === "C") { M.ball.owner = p; p.x = 200; p.y = 115; } else { M.ball.owner = null; M.ball.x = p.x + 30; M.ball.y = p.y; M.ball.vx = M.ball.vy = 0; M.q[0].x = p.x + 20; M.q[0].y = p.y; }
       const e0 = M.energy[0], ok = E.ability(p); out[role] = [ok, Math.round(e0 - M.energy[0]), role === "A" ? (M.ball.sup ? 99 : Math.round(Math.hypot(M.ball.vx, M.ball.vy))) : role === "D" ? M.q[0].stun : role === "P" ? (M.ball.owner === p) : Math.round(Math.hypot(M.ball.vx, M.ball.vy))];
     }
     return out;
   });
+  // tiro combinato (compagno vicino, +25 energia) e telecronaca
+  const cb = await page.evaluate(() => {
+    const E = window.__eroi, M = E.state(); M.opt.combo = true; M.opt.tele = true; M.fast = false; const p = M.p[0], m = M.p[1]; p.role = "A"; p.stun = 0; m.stun = 0; M.ctl = p; M.ball.owner = p; p.x = 200; p.y = 115; m.x = 215; m.y = 120; M.energy[0] = 100; M.stop = 0;
+    const e0 = M.energy[0], ok = E.ability(p), out = { ok, cost: Math.round(e0 - M.energy[0]), twin: !!M.ball.twin, say: M.cm && M.cm.t }; M.fast = true; M.opt.combo = false; return out;
+  });
+  if (!cb.ok || cb.cost !== 65 || !cb.twin || !/COMBINATO|insieme|serve/.test(cb.say || "")) errors.push("tiro combinato: " + JSON.stringify(cb));
   if (!ab.A[0] || ab.A[1] !== 40 || ab.A[2] < 8) errors.push("Tiro Fuoco: " + JSON.stringify(ab.A));
   if (!ab.C[0] || ab.C[2] < 6) errors.push("Regia: " + JSON.stringify(ab.C));
   if (!ab.D[0] || ab.D[2] < 30) errors.push("Muro: " + JSON.stringify(ab.D));
