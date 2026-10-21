@@ -15,13 +15,23 @@
   const XPT = [0, 2, 5, 9, 14, 20, 27, 35, 44, 54]; // soglie livello 1..10
   const lvOf = (xp) => { let l = 1; XPT.forEach((t, i) => { if (xp >= t) l = i + 1; }); return l; };
   const MODS = [["Pioggia", "I danni sono −15%", { dmg: 0.85 }], ["Vento in poppa", "Le abilità si ricaricano un round prima", { cd: 1 }], ["Notte di coppa", "Colpi critici più frequenti", { crit: 0.12 }], ["Terreno pesante", "Tutti hanno +20% punti vita", { hp: 1.2 }]];
+  const TMODS = MODS.concat([["Nebbia", "Le intenzioni nemiche sono nascoste (❓)", { fog: 1 }], ["Muraglia", "I nemici iniziano con 30 scudo", { foeSh: 30 }], ["Fretta", "Le abilità nemiche sono subito pronte", { foeCd: 1 }]]);
+  const floorRule = (f) => (f < 3 || f % 10 === 0 ? null : TMODS[hash("r" + f) % TMODS.length]);
+  const EVENTS = [
+    { t: "⛲ Fonte nel buio", p: "Un'acqua azzurra gorgoglia tra le crepe. Bere?", o: [["Bere", "50% salute piena · 50% crampi (−25%)", (run, rn) => { if (rn() < 0.5) { run.team.forEach((id) => delete run.hp[id]); return "L'acqua è fresca e buona: salute piena."; } adjRun(run, (u, c) => Math.max(1, c - Math.round(u.maxhp * 0.25))); return "Crampi: −25% di salute a tutti."; }], ["Passare", "non succede nulla", () => "Tiri dritto. La fonte gorgoglia dietro di voi."]] },
+    { t: "🗿 Altare spezzato", p: "Un altare chiede un'offerta. Il sangue non è obbligatorio, ma aiuta.", o: [["Offrire sangue", "−20% salute a tutti · un potenziamento", (run, rn) => { adjRun(run, (u, c) => Math.max(1, c - Math.round(u.maxhp * 0.2))); return "L'altare brilla. " + giveRandomPerk(run, rn); }], ["Lasciar stare", "niente di niente", () => "Nessuno tocca niente. Meglio così."]] },
+    { t: "🎲 Il banco del Custode", p: "Un omino con un cappello a tesa larga allunga un mazzo di carte.", o: [["Puntare tutto", "50% due potenziamenti · 50% −30% salute", (run, rn) => { if (rn() < 0.5) return giveRandomPerk(run, rn) + " " + giveRandomPerk(run, rn); adjRun(run, (u, c) => Math.max(1, c - Math.round(u.maxhp * 0.3))); return "Il mazzo era truccato. −30% di salute."; }], ["Puntare poco", "+20% salute sicuro", (run) => { healRun(run, 0.2); return "Vincita modesta: +20% di salute."; }]] },
+  ];
+  function adjRun(run, fn) { const ar = load(); ownTeam({ team: run.team }, ar).forEach((o) => { const u = mk(o.c, "p", { st: o.st, m: o.m }), cur = run.hp[u.id] == null ? u.maxhp : run.hp[u.id]; run.hp[u.id] = Math.min(u.maxhp, fn(u, cur)); }); }
+  function healRun(run, frac) { adjRun(run, (u, c) => (c <= 0 ? Math.round(u.maxhp * 0.35) : c + Math.round(u.maxhp * frac))); }
+  function giveRandomPerk(run, rn) { const free = ["fuoco", "scudo", "telo", "pronte"].filter((k) => !run.perks.includes(k)); if (!free.length) { healRun(run, 0.3); return "Hai già tutto: +30% di salute."; } const k = free[Math.floor(rn() * free.length)]; run.perks.push(k); const P = PERKS.find((x) => x[0] === k); return "Ottieni " + P[1] + "."; }
   const PERKS = [
     ["fuoco", "🔥 Colpo caldo", "+12% danni per il resto della salita"], ["scudo", "🛡️ Cuore di roccia", "−10% danni subiti per il resto della salita"],
     ["cura", "💚 Cura completa", "Tutta la squadra torna a piena salute"], ["torna", "✨ Ritorno", "Un caduto rientra al 50%"], ["pronte", "⚡ Abilità pronte", "Tutte le abilità subito disponibili"], ["telo", "🧤 Scudo iniziale", "+35 scudo a tutti a ogni piano"],
   ];
   let OV = null, BACK = null, B = null, FAST = false;
   // ------------------------------------------------------------ dati
-  const load = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { xp: r.xp && typeof r.xp === "object" ? r.xp : {}, tier: Math.max(1, r.tier | 0), best: r.best | 0, run: r.run && r.run.team ? r.run : null, daily: r.daily || { d: "", won: false }, wins: r.wins | 0, bosses: r.bosses | 0 }; };
+  const load = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { xp: r.xp && typeof r.xp === "object" ? r.xp : {}, tier: Math.max(1, r.tier | 0), best: r.best | 0, run: r.run && r.run.team ? r.run : null, daily: r.daily || { d: "", won: false }, wins: r.wins | 0, bosses: r.bosses | 0, deep: r.deep !== false }; };
   const save = (r) => safe(() => localStorage.setItem(KEY, JSON.stringify(r)), 0);
   const today = () => new Date().toISOString().slice(0, 10);
   function rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6d2b79f5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
@@ -32,7 +42,7 @@
   function mk(c, side, o) {
     const m = o.m || 1, st = o.st || { at: c.at, df: c.df, te: c.te };
     const at = st.at * m, df = st.df * m, te = st.te * m, hp = Math.round((70 + df * 1.1 + te * 0.4) * (o.hpm || 1));
-    return { id: c.id, side, n: name(c.id), role: ABIL[c.role] ? c.role : { at: "A", te: "C", df: "D" }[trOf({ at, df, te })], rar: c.rar, tr: trOf({ at, df, te }), at, df, te, maxhp: hp, hp: o.hp != null ? Math.max(1, Math.min(hp, o.hp)) : hp, shield: 0, cd: 1, taunt: 0, def: false, boss: !!o.boss };
+    return { id: c.id, side, n: name(c.id), role: ABIL[c.role] ? c.role : { at: "A", te: "C", df: "D" }[trOf({ at, df, te })], rar: c.rar, tr: trOf({ at, df, te }), at, df, te, maxhp: hp, hp: o.hp != null ? Math.max(1, Math.min(hp, o.hp)) : hp, shield: 0, cd: 1, taunt: 0, def: false, boss: !!o.boss, burn: 0, stun: 0, intent: null, broken: false, ph: 1 };
   }
   function ownTeam(r, ar) {
     const I = S().intesa(r.team).n, b = 1 + I * 0.015;
@@ -53,14 +63,17 @@
     const tm = cfg.tierM || 1, foes = cfg.foes.map((c, i) => mk(c, "e", { m: tm, boss: cfg.boss && i === 0, hpm: (cfg.boss && i === 0 ? 2.2 : 1) * ((cfg.mod && cfg.mod.hp) || 1) }));
     const P = cfg.perks || [];
     team.forEach((u) => { if (P.includes("telo")) u.shield = 35; if (P.includes("pronte")) u.cd = 0; if (cfg.mod && cfg.mod.cd) u.cd = Math.max(0, u.cd - 1); });
-    B = { team, foes, round: 0, order: [], i: -1, cur: null, mode: null, buffT: 0, buffE: 0, over: null, log: [], cfg, perks: P, rand: cfg.seed != null ? rng(cfg.seed) : Math.random, wait: null };
+    const md = cfg.mod || {}; foes.forEach((f) => { if (md.foeSh) f.shield = md.foeSh; if (md.foeCd) f.cd = 0; });
+    B = { deep: cfg.deep != null ? !!cfg.deep : load().deep, gauge: 0, team, foes, round: 0, order: [], i: -1, cur: null, mode: null, buffT: 0, buffE: 0, over: null, log: [], cfg, perks: P, rand: cfg.seed != null ? rng(cfg.seed) : Math.random, wait: null };
     render(); nextRound(); return B;
   }
   const alive = (a) => a.filter((u) => u.hp > 0);
   const delay = (fn, ms) => { if (FAST) return fn(); B.wait = setTimeout(fn, ms); };
   function nextRound() {
-    B.round++; B.order = alive(B.team).concat(alive(B.foes)).map((u) => [u, u.te + B.rand() * 14]).sort((a, b) => b[1] - a[1]).map((x) => x[0]); B.i = -1;
-    B.team.concat(B.foes).forEach((u) => { if (u.hp > 0) { if (u.cd > 0) u.cd--; if (u.taunt > 0) u.taunt--; u.def = false; } });
+    B.round++;
+    B.team.concat(B.foes).forEach((u) => { if (u.hp > 0) { if (u.cd > 0) u.cd--; if (u.taunt > 0) u.taunt--; u.def = false; if (B.deep && u.burn > 0) { const d = Math.max(4, Math.round(u.maxhp * 0.06)); u.hp = Math.max(0, u.hp - d); u.burn--; pop(u, "-" + d + "🔥", "bad"); } } });
+    B.order = alive(B.team).concat(alive(B.foes)).map((u) => [u, u.te + B.rand() * 14]).sort((a, b) => b[1] - a[1]).map((x) => x[0]); B.i = -1;
+    if (B.deep) { const ex = []; B.order.forEach((u, k) => { if (u.boss && u.ph >= 3) ex.push(k); }); ex.reverse().forEach((k) => B.order.splice(k + 1, 0, B.order[k])); B.foes.forEach((u) => { u.intent = u.hp > 0 ? plan(u) : null; u.broken = false; }); }
     if (B.buffT > 0) B.buffT--; if (B.buffE > 0) B.buffE--;
     say(`Round ${B.round}`); step();
   }
@@ -71,14 +84,22 @@
     B.i++; if (B.i >= B.order.length) return nextRound();
     const u = B.order[B.i]; if (u.hp <= 0) return step();
     B.cur = u; B.mode = null;
+    if (B.deep && u.stun > 0) { u.stun--; u.intent = null; say(`${u.n} è stordito e salta il turno`); pop(u, "💫", "bad"); render(); return delay(() => step(), 600); }
     if (u.side === "p") { render(); return; } // tocca al giocatore
     render(); delay(() => enemyAct(u), 650);
   }
   function enemyAct(u) {
     if (!B || B.over || u.hp <= 0) return step();
-    const T = alive(B.team), tk = T.filter((x) => x.taunt > 0), pool = tk.length ? tk : T;
+    const T = alive(B.team), tk = T.filter((x) => x.taunt > 0), pool = tk.length ? tk : T, I = u.intent; u.intent = null;
+    if (u.broken) { u.broken = false; say(`${u.n} perde l'attacco: era stato interrotto`); return finish(u); }
+    const weak = pool.slice().sort((a, b) => a.hp - b.hp)[0], tgt = (I && pool.find((x) => x.id === I.t)) || (B.rand() < 0.55 ? weak : pool[Math.floor(B.rand() * pool.length)]);
+    if (I ? I.k === "abl" && u.cd <= 0 : u.cd <= 0 && B.rand() < 0.6) ability(u, tgt); else attack(u, tgt);
+  }
+  // intenzione nemica visibile a inizio round (Battaglia a fondo)
+  function plan(u) {
+    const T = alive(B.team), tk = T.filter((x) => x.taunt > 0), pool = tk.length ? tk : T; if (!pool.length) return null;
     const weak = pool.slice().sort((a, b) => a.hp - b.hp)[0], tgt = B.rand() < 0.55 ? weak : pool[Math.floor(B.rand() * pool.length)];
-    if (u.cd <= 0 && B.rand() < 0.6) ability(u, tgt); else attack(u, tgt);
+    return { k: u.cd <= 0 && B.rand() < 0.6 ? "abl" : "atk", t: tgt.id };
   }
   function dmgCalc(a, d, mult) {
     const raw = a.at * 0.5 * (mult || 1) - d.df * 0.12, trM = BEATS[a.tr] === d.tr ? 1.3 : BEATS[d.tr] === a.tr ? 0.8 : 1;
@@ -92,6 +113,15 @@
     const x = dmgCalc(a, d, mult); let v = x.v;
     if (d.shield > 0) { const s = Math.min(d.shield, v); d.shield -= s; v -= s; }
     d.hp = Math.max(0, d.hp - v); pop(d, "-" + x.v, x.crit ? "crit" : x.trM > 1 ? "good" : x.trM < 1 ? "bad" : "");
+    if (B.deep) {
+      if (a.side === "p") B.gauge = Math.min(100, B.gauge + Math.min(16, 4 + (x.v / d.maxhp) * 60)); else B.gauge = Math.min(100, B.gauge + 5);
+      if (d.hp > 0) {
+        if (x.crit && a.tr === "te") { if (d.boss) pop(d, "resiste", "bad"); else { d.stun = 1; d.intent = null; pop(d, "💫", "bad"); } }
+        if (d.side === "e" && d.intent && v >= d.maxhp * 0.3) { d.intent = null; d.broken = true; pop(d, "interrotto!", "crit"); }
+        if (d.boss && d.ph < 2 && d.hp <= d.maxhp * 0.5) { d.ph = 2; d.at *= 1.2; d.shield += 50; d.cd = 0; say(`👑 ${d.n} entra nella seconda fase! Più forte, scudo nuovo`); pop(d, "FASE 2", "crit"); }
+        else if (d.boss && d.ph < 3 && d.ph >= 2 && d.hp <= d.maxhp * 0.2) { d.ph = 3; d.at *= 1.15; d.cd = 0; say(`👑 ${d.n} è furioso: agisce due volte per round!`); pop(d, "FURIA", "crit"); }
+      }
+    }
     return x;
   }
   function attack(a, d) {
@@ -102,11 +132,20 @@
     const A = ABIL[a.role] || ABIL.A; a.cd = 3; cutin(a, A[0]);
     const go = () => {
       if (!B || B.over) return;
-      if (a.role === "A") { const x = hit(a, tgt, 2.2); say(`${a.n}: ${A[0]} su ${tgt.n} (${x.v})${tgt.hp <= 0 ? " · KO" : ""}`); shake(tgt); }
+      if (a.role === "A") { const x = hit(a, tgt, 2.2); say(`${a.n}: ${A[0]} su ${tgt.n} (${x.v})${tgt.hp <= 0 ? " · KO" : ""}`); shake(tgt); if (B.deep && tgt.hp > 0) { tgt.burn = 3; pop(tgt, "🔥", "bad"); } }
       else if (a.role === "C") { if (a.side === "p") B.buffT = 2; else B.buffE = 2; say(`${a.n}: ${A[0]}. Danni della squadra +25%`); }
       else if (a.role === "D") { a.taunt = 2; a.shield += 45; say(`${a.n}: ${A[0]}. Tutti i colpi su di lui`); pop(a, "+45🛡", "good"); }
       else { alive(a.side === "p" ? B.team : B.foes).forEach((u) => { u.shield += 30; pop(u, "+30🛡", "good"); }); say(`${a.n}: ${A[0]}. Scudo a tutta la squadra`); }
       finish(a);
+    };
+    FAST ? go() : (B.wait = setTimeout(go, 950));
+  }
+  function superMove(a) {
+    cutin(a, "Colpo di squadra");
+    const go = () => {
+      if (!B || B.over) return;
+      alive(B.foes).forEach((f) => { hit(a, f, 1.3); if (f.hp > 0) { f.burn = Math.max(f.burn, 2); pop(f, "🔥", "bad"); } shake(f); });
+      B.gauge = 0; say(`Colpo di squadra! ${a.n} guida l'assalto su tutti i nemici`); finish(a);
     };
     FAST ? go() : (B.wait = setTimeout(go, 950));
   }
@@ -117,6 +156,7 @@
   function act(kind, targetId) {
     if (!B || B.over || !B.cur || B.cur.side !== "p") return false; const u = B.cur;
     if (kind === "defend") { defend(u); return true; }
+    if (kind === "super") { if (!B.deep || B.gauge < 100) return false; superMove(u); return true; }
     const T = alive(B.foes), tk = T.filter((x) => x.taunt > 0), pool = tk.length ? tk : T;
     const t = pool.find((x) => x.id === targetId) || pool.slice().sort((a, b) => a.hp - b.hp)[0];
     if (kind === "attack") { attack(u, t); return true; }
@@ -143,6 +183,8 @@
 .arCut{position:absolute;left:0;right:0;top:34%;height:92px;overflow:hidden;z-index:6;pointer-events:none;background:linear-gradient(90deg,#000c,#3a1a6ccc 40%,#000c);border-top:3px solid #ffd23f;border-bottom:3px solid #ffd23f;animation:arCut 1.1s forwards;display:flex;align-items:center;gap:12px;padding:0 14px}
 .arCut img{height:80px;width:80px;object-fit:cover;object-position:50% 20%;border-radius:50%;border:2px solid #ffd23f;animation:arSl .5s ease-out}.arCut b{font:900 22px system-ui;color:#ffd23f;text-shadow:0 2px 0 #000}.arCut span{display:block;font-size:12px;color:#fff}
 @keyframes arCut{0%{opacity:0;transform:scaleY(.1)}12%{opacity:1;transform:none}85%{opacity:1}100%{opacity:0}}@keyframes arSl{from{transform:translateX(-120px)}}
+.arU .st{position:absolute;left:3px;top:13px;font-size:9px;font-weight:800;background:#000a;border-radius:4px;padding:0 2px}.arU .st+.st{top:23px}.arU .it{position:absolute;left:0;right:0;bottom:30px;background:#000c;color:#ffd23f;font-size:9px;font-weight:800;border-radius:4px;padding:1px 0}.arU .aim{position:absolute;left:0;right:0;bottom:30px;background:#a01818d0;color:#fff;font-size:9px;font-weight:800;border-radius:4px;padding:1px 0}
+.arGa{height:6px;border-radius:3px;background:#000a;margin:2px 0 4px;overflow:hidden}.arGa i{display:block;height:100%;background:linear-gradient(90deg,#3a8ad8,#ffd23f)}.arAct .sup{grid-column:1/-1;border-color:#ffd23f}
 .arBt{position:relative}.arRes{text-align:center;margin:14px 0}.arRes h3{font:900 24px system-ui;margin:4px 0}.arPerk{display:grid;gap:6px}
 @media (prefers-reduced-motion:reduce){.arU.tg,.arCut,.arPop{animation:none!important}}`;
     document.head.appendChild(st);
@@ -150,18 +192,25 @@
   function shell(title) { css(); if (OV) OV.remove(); OV = document.createElement("div"); OV.className = "arOv"; OV.innerHTML = `<div class="wrap"><div class="bar"><h2>${title}</h2><button type="button" class="x" aria-label="Chiudi">✕</button></div><div class="body"></div></div>`; OV.querySelector(".x").onclick = () => { if (B && !B.over && B.cfg.quit) return B.cfg.quit(); const b = BACK; close(); if (typeof b === "function") b(); }; document.body.appendChild(OV); return OV.querySelector(".body"); }
   function close() { if (B && B.wait) clearTimeout(B.wait); B = null; if (OV) { OV.remove(); OV = null; } }
   const img = (id) => safe(() => S().port(id), null);
+  function stat(u) {
+    if (!B || !B.deep || u.hp <= 0) return "";
+    let h = (u.burn > 0 ? `<span class="st">🔥${u.burn}</span>` : "") + (u.stun > 0 ? `<span class="st">💫</span>` : "");
+    if (u.side === "e" && u.intent) { const fog = B.cfg.mod && B.cfg.mod.fog, t = B.team.find((x) => x.id === u.intent.t); h += `<span class="it">${fog ? "❓" : (u.intent.k === "abl" ? "✨" : "⚔️") + (t ? "→" + esc(t.n.split(" ")[0].slice(0, 6)) : "")}</span>`; }
+    if (u.side === "p" && !(B.cfg.mod && B.cfg.mod.fog)) { const n = B.foes.filter((f) => f.hp > 0 && f.intent && f.intent.t === u.id).length; if (n) h += `<span class="aim">🎯×${n}</span>`; }
+    return h;
+  }
   function unit(u, cls, extra) {
     const t = TR[u.tr];
-    return `<div class="arU ${cls || ""}${u.hp <= 0 ? " ko" : ""}${u.boss ? " boss" : ""}" data-u="${u.id}" data-s="${u.side}" style="--tc:${t[2]}">${u.shield > 0 ? `<span class="sh">🛡${u.shield}</span>` : ""}<span class="tag">${u.taunt > 0 ? "🎯" : t[1]}</span><div class="im">${img(u.id) ? `<img alt="" src="${img(u.id)}">` : "?"}</div><div class="nm">${esc(u.n)}</div><div class="hp"><i style="width:${Math.round((u.hp / u.maxhp) * 100)}%"></i></div></div>`;
+    return `<div class="arU ${cls || ""}${u.hp <= 0 ? " ko" : ""}${u.boss ? " boss" : ""}" data-u="${u.id}" data-s="${u.side}" style="--tc:${t[2]}">${u.shield > 0 ? `<span class="sh">🛡${u.shield}</span>` : ""}<span class="tag">${u.taunt > 0 ? "🎯" : t[1]}</span>${stat(u)}<div class="im">${img(u.id) ? `<img alt="" src="${img(u.id)}">` : "?"}</div><div class="nm">${esc(u.n)}</div><div class="hp"><i style="width:${Math.round((u.hp / u.maxhp) * 100)}%"></i></div></div>`;
   }
   function render() {
     if (!B) return; if (!OV || !OV.querySelector(".arBt")) shell(B.cfg.title || "⚔️ Arena dei Sogni");
     const body = OV.querySelector(".body"), u = B.cur, mine = u && u.side === "p" && !B.over;
     const tk = alive(B.foes).filter((x) => x.taunt > 0), tg = mine && B.mode === "attack";
-    const act = mine ? `<div class="arAct"><button type="button" data-a="attack">⚔️ Attacca<small>${B.mode === "attack" ? "scegli il bersaglio" : "colpo normale"}</small></button><button type="button" data-a="ability" ${u.cd > 0 ? "disabled" : ""}>${esc(ABIL[u.role][0])}<small>${u.cd > 0 ? `pronta tra ${u.cd}` : esc(ABIL[u.role][1])}</small></button><button type="button" data-a="defend">🛡️ Difendi<small>danni −50%, +10 scudo</small></button></div>` : `<div class="arAct" style="opacity:.5"><button disabled>…</button><button disabled>…</button><button disabled>…</button></div>`;
-    body.innerHTML = `<div class="arBt"><div class="arHd"><span>${esc(B.cfg.sub || "")}</span><span>Round ${B.round}${B.buffT > 0 ? " · 📣 +25%" : ""}</span></div><div class="arRow" data-r="e">${B.foes.map((x) => unit(x, (tg && x.hp > 0 && (!tk.length || x.taunt > 0) ? "tg " : "") + (u === x ? "cur" : ""))).join("")}</div><div class="arLog">${esc(B.log[B.log.length - 1] || "")}</div><div class="arRow" data-r="p">${B.team.map((x) => unit(x, u === x ? "cur" : "")).join("")}</div>${mine ? `<div class="sum" style="text-align:center">Tocca a <b>${esc(u.n)}</b> · ${esc(ROLE[u.role])} · tratto ${TR[u.tr][0]} ${TR[u.tr][1]}</div>` : ""}${act}<p class="sum" style="font-size:11px;opacity:.65">🔥 Assalto batte 🎯 Mente, 🎯 Mente batte 🛡️ Muro, 🛡️ Muro batte 🔥 Assalto: +30% danni al tratto favorevole.</p></div>`;
+    const act = mine ? `<div class="arAct"><button type="button" data-a="attack">⚔️ Attacca<small>${B.mode === "attack" ? "scegli il bersaglio" : "colpo normale"}</small></button><button type="button" data-a="ability" ${u.cd > 0 ? "disabled" : ""}>${esc(ABIL[u.role][0])}<small>${u.cd > 0 ? `pronta tra ${u.cd}` : esc(ABIL[u.role][1])}</small></button><button type="button" data-a="defend">🛡️ Difendi<small>danni −50%, +10 scudo</small></button>${B.deep ? `<button type="button" class="sup" data-a="super" ${B.gauge >= 100 ? "" : "disabled"}>💥 Colpo di squadra<small>${B.gauge >= 100 ? "pronto: colpisce tutti" : "carica " + Math.round(B.gauge) + "/100"}</small></button>` : ""}</div>` : `<div class="arAct" style="opacity:.5"><button disabled>…</button><button disabled>…</button><button disabled>…</button></div>`;
+    body.innerHTML = `<div class="arBt"><div class="arHd"><span>${esc(B.cfg.sub || "")}</span><span>Round ${B.round}${B.buffT > 0 ? " · 📣 +25%" : ""}</span></div><div class="arRow" data-r="e">${B.foes.map((x) => unit(x, (tg && x.hp > 0 && (!tk.length || x.taunt > 0) ? "tg " : "") + (u === x ? "cur" : ""))).join("")}</div><div class="arLog">${esc(B.log[B.log.length - 1] || "")}</div>${B.deep ? `<div class="arGa"><i style="width:${Math.round(B.gauge)}%"></i></div>` : ""}<div class="arRow" data-r="p">${B.team.map((x) => unit(x, u === x ? "cur" : "")).join("")}</div>${mine ? `<div class="sum" style="text-align:center">Tocca a <b>${esc(u.n)}</b> · ${esc(ROLE[u.role])} · tratto ${TR[u.tr][0]} ${TR[u.tr][1]}</div>` : ""}${act}<p class="sum" style="font-size:11px;opacity:.65">${B.deep ? "Sopra i nemici vedi cosa faranno (⚔️ attacco, ✨ abilità, →bersaglio): un colpo da 30% dei loro PV li interrompe. 🔥 brucia, 💫 salta il turno (Mente in critico). Boss: fase 2 a metà salute, furia al 20%. " : ""}🔥 Assalto batte 🎯 Mente, 🎯 Mente batte 🛡️ Muro, 🛡️ Muro batte 🔥 Assalto: +30% danni al tratto favorevole.</p></div>`;
     body.querySelectorAll("[data-a]").forEach((b) => (b.onclick = () => {
-      const k = b.dataset.a; if (k === "defend") return act2("defend");
+      const k = b.dataset.a; if (k === "defend" || k === "super") return act2(k);
       if (k === "ability") { if (u.role !== "A") return act2("ability"); B.mode = "ability"; return render2(); }
       B.mode = "attack"; render2();
     }));
@@ -188,9 +237,11 @@
     h += `<div class="big"><button type="button" data-go="best">✨ Schiera le migliori<small>le 5 carte più forti</small></button><button type="button" data-go="sogni">🃏 Cambia squadra<small>vai alla Squadra dei Sogni</small></button></div>`;
     h += `${window.__picchia ? `<div class="sec">Altri giochi con le tue carte</div><button type="button" class="one" data-go="pic">🥊 Duello dei Sogni<small>Picchiaduro 1 contro 1: mosse, speciale di ruolo e Super</small></button>` : ""}${window.__eroi ? `<button type="button" class="one" data-go="ero">⚽ Calcio d'Azione Eroi<small>Partita 3 contro 3 con abilità di ruolo · Coppa degli Eroi</small></button>` : ""}${window.__corsa ? `<button type="button" class="one" data-go="cor">🏁 Gran Premio dei Sogni<small>Corsa a squadre: guidi un pilota, due compagni corrono da soli</small></button>` : ""}${window.__beat ? `<button type="button" class="one" data-go="bea">🥋 Rissa dei Sogni<small>Beat 'em up a scorrimento in 3 stadi: ondate, barili, boss e Super della tua saga</small></button>` : ""}<div class="sec">Scontri · livello sbloccato ${ar.tier}/5</div>${[1, 2, 3, 4, 5].map((t) => `<button type="button" class="one" data-tier="${t}" ${!has || t > ar.tier ? "disabled" : ""}>Scontro ${t}${"★".repeat(t)}<small>${t > ar.tier ? "Vinci il livello precedente" : "Avversari +" + Math.round((t - 1) * 12 + 0) + "% · premio " + 10 * t + " monete"}</small></button>`).join("")}`;
     h += `<div class="sec">Arena del giorno</div><button type="button" class="one" data-go="daily" ${!has ? "disabled" : ""}>📅 ${esc(mod[0])}${d.won ? " ✓" : ""}<small>${esc(mod[1])} · ${d.won ? "già vinta oggi" : "primo successo del giorno: +30 monete"}</small></button>`;
-    h += `<div class="sec">Torre dei Duelli · record piano ${ar.best}</div><button type="button" class="one" data-go="torre" ${!has ? "disabled" : ""}>🗼 ${ar.run ? "Continua la salita (piano " + ar.run.floor + ")" : "Sali la Torre"}<small>30 piani · boss ogni 10 · tra un piano e l'altro scegli un potenziamento</small></button>${ar.run ? `<button type="button" class="one" data-go="torreNew">↺ Ricomincia dal piano 1<small>abbandona la salita in corso</small></button>` : ""}`;
+    h += `<div class="sec">Torre dei Duelli · record piano ${ar.best}</div><button type="button" class="one" data-go="torre" ${!has ? "disabled" : ""}>🗼 ${ar.run ? "Continua la salita (piano " + ar.run.floor + ")" : "Sali la Torre"}<small>30 piani · boss ogni 10 · tra un piano e l'altro scegli un potenziamento e una porta (riposo, elite, eventi)</small></button>${ar.run ? `<button type="button" class="one" data-go="torreNew">↺ Ricomincia dal piano 1<small>abbandona la salita in corso</small></button>` : ""}`;
+    h += `<div class="sec">Opzioni</div><button type="button" class="one" data-go="deep">🧠 Battaglia a fondo: ${ar.deep ? "ATTIVA" : "SPENTA"}<small>intenzioni nemiche visibili, bruciature e stordimenti, Colpo di squadra, boss a fasi, bivi nella Torre</small></button>`;
     body.innerHTML = h;
     const q = (s) => body.querySelector(s);
+    q('[data-go="deep"]').onclick = () => { const a = load(); a.deep = !a.deep; save(a); open(); };
     q('[data-go="best"]').onclick = () => { bestTeam(); open(); };
     q('[data-go="sogni"]').onclick = () => { close(); S().open(() => open()); };
     body.querySelectorAll("[data-tier]").forEach((b) => (b.onclick = () => scontro(+b.dataset.tier)));
@@ -240,28 +291,54 @@
     const ar = load(), r = S()._load(); let run = ar.run;
     if (fresh || !run) { run = { floor: 1, perks: [], hp: {}, team: r.team.slice() }; ar.run = run; save(ar); }
     const team = run.team.map((id) => S().BY[id]).filter(Boolean), I = S().intesa(run.team).n, tm = ownTeam({ team: run.team }, ar);
-    const F = floorFoes(run.floor), tierM = 0.9 + run.floor * 0.045 + (F.boss ? 0.12 : 0);
-    start({ title: `🗼 Torre · piano ${run.floor}`, sub: F.boss ? "👑 BOSS" : "Piano " + run.floor + "/30", team: tm, hp: run.hp, perks: run.perks, foes: F.foes, boss: F.boss, tierM, onEnd: (res, b) => {
+    const F = floorFoes(run.floor), deep = ar.deep, rule = deep ? floorRule(run.floor) : null, elite = deep && run.elite, tierM = 0.9 + run.floor * 0.045 + (F.boss ? 0.12 : 0) + (elite ? 0.15 : 0);
+    start({ title: `🗼 Torre · piano ${run.floor}`, sub: F.boss ? "👑 BOSS a fasi" : "Piano " + run.floor + "/30" + (elite ? " · 🔥 Elite" : "") + (rule ? " · " + rule[0] + ": " + rule[1] : ""), team: tm, hp: run.hp, perks: run.perks, foes: F.foes, boss: F.boss, tierM, mod: rule ? rule[2] : null, onEnd: (res, b) => {
       const a = load(); const rn = a.run || run;
       if (res === "lose") { a.best = Math.max(a.best, rn.floor - 1); a.run = null; save(a); const ups = giveXp(b.team); return result(res, false, [`Salita finita al piano ${rn.floor}. Record: ${a.best}.`, ups.length ? "📈 " + ups.map(esc).join(" · ") : "Ogni salita conta: i livelli restano."], ["🗼 Riprova", "dal piano 1", () => torre(true)]); }
       const ups = giveXp(b.team); b.team.forEach((u) => (rn.hp[u.id] = u.hp));
       rn.hp = Object.assign({}, rn.hp); const heal = Math.round(0.25); b.team.forEach((u) => { if (u.hp > 0) rn.hp[u.id] = Math.min(u.maxhp, u.hp + Math.round(u.maxhp * 0.25)); });
       a.best = Math.max(a.best, rn.floor); if (F.boss) { a.bosses++; safe(() => window.addCoins(5 * rn.floor), 0); }
       if (rn.floor >= 30) { a.run = null; save(a); safe(() => window.addCoins(300), 0); return result(res, true, ["Hai conquistato la cima della Torre! +300 monete.", "Record piano 30."], null); }
-      rn.floor++; a.run = rn; save(a); perkPick(rn, ups, F.boss);
+      let extra = ""; if (elite) { rn.elite = 0; extra = giveRandomPerk(rn, Math.random) + " (ricompensa Elite) "; safe(() => window.addCoins(10 * rn.floor), 0); }
+      rn.floor++; a.run = rn; save(a); perkPick(rn, ups, F.boss, extra);
     }, quit: () => { close(); open(); } });
   }
-  function perkPick(rn, ups, boss) {
+  function perkPick(rn, ups, boss, extra) {
     const rand = rng(hash("p" + rn.floor)), pool = PERKS.slice(), pick = []; while (pick.length < 3) pick.push(pool.splice(Math.floor(rand() * pool.length), 1)[0]);
     const body = shell("🗼 Un potenziamento");
-    body.innerHTML = `<div class="arRes"><h3>Piano ${rn.floor - 1} superato</h3><p class="sum">${boss ? "Boss battuto! " : ""}Salute +25% a chi è in piedi.${ups.length ? " 📈 " + ups.map(esc).join(" · ") : ""}</p></div><div class="arPerk">${pick.map((p) => `<button type="button" class="one" data-p="${p[0]}">${esc(p[1])}<small>${esc(p[2])}</small></button>`).join("")}</div>`;
+    body.innerHTML = `<div class="arRes"><h3>Piano ${rn.floor - 1} superato</h3><p class="sum">${boss ? "Boss battuto! " : ""}${esc(extra || "")}Salute +25% a chi è in piedi.${ups.length ? " 📈 " + ups.map(esc).join(" · ") : ""}</p></div><div class="arPerk">${pick.map((p) => `<button type="button" class="one" data-p="${p[0]}">${esc(p[1])}<small>${esc(p[2])}</small></button>`).join("")}</div>`;
     body.querySelectorAll("[data-p]").forEach((b) => (b.onclick = () => {
       const a = load(), run = a.run, k = b.dataset.p;
       if (k === "cura") run.team.forEach((id) => delete run.hp[id]);
       else if (k === "torna") { const d = run.team.find((id) => run.hp[id] === 0 || run.hp[id] <= 0); if (d) delete run.hp[d], (run.hp[d] = 40); }
       else run.perks.push(k);
-      a.run = run; save(a); torre(false);
+      a.run = run; save(a); if (a.deep) bivio(run); else torre(false);
     }));
   }
-  window.__arena = { open, close, start, act, state: () => B, load, save, _fast: (v) => { FAST = !!v; }, lvOf, mk, floorFoes, TR, ABIL, PERKS, MODS };
+  // bivio tra un piano e l'altro: salita normale, riposo, elite o evento
+  function bivio(run) {
+    const rand = rng(hash("b" + run.floor)), next = run.floor;
+    const all = [["salita", "🚪 Salita normale", "nessun cambio: avanti col piano " + next], ["riposo", "🛏️ Riposo al fuoco", "+50% salute, i caduti rientrano al 35%"], ["evento", "🎲 Una porta strana", "un evento a sorpresa: rischio e ricompensa"]];
+    if (next % 10 !== 0 && next > 2) all.push(["elite", "🔥 Corridoio Elite", "nemici +15% più forti · potenziamento in premio + monete"]);
+    const pool = all.slice(), pick = []; while (pick.length < 3 && pool.length) pick.push(pool.splice(Math.floor(rand() * pool.length), 1)[0]);
+    const body = shell("🗼 Bivio · piano " + next);
+    body.innerHTML = `<div class="arRes"><h3>Tre porte</h3><p class="sum">${next % 10 === 0 ? "Il prossimo piano è un boss. Preparati bene." : "Scegli come affrontare il piano " + next + "."}</p></div><div class="arPerk">${pick.map((d) => `<button type="button" class="one" data-d="${d[0]}">${esc(d[1])}<small>${esc(d[2])}</small></button>`).join("")}</div>`;
+    body.querySelectorAll("[data-d]").forEach((b) => (b.onclick = () => {
+      const a = load(), rn = a.run, k = b.dataset.d;
+      if (k === "riposo") { healRun(rn, 0.5); a.run = rn; save(a); return torre(false); }
+      if (k === "elite") { rn.elite = 1; a.run = rn; save(a); return torre(false); }
+      if (k === "evento") return evento(rn);
+      torre(false);
+    }));
+  }
+  function evento(run) {
+    const rand = rng(hash("e" + run.floor)), ev = EVENTS[Math.floor(rand() * EVENTS.length)], body = shell("🗼 " + ev.t);
+    body.innerHTML = `<div class="arRes"><h3>${esc(ev.t)}</h3><p class="sum">${esc(ev.p)}</p></div><div class="arPerk">${ev.o.map((o, i) => `<button type="button" class="one" data-e="${i}">${esc(o[0])}<small>${esc(o[1])}</small></button>`).join("")}</div>`;
+    body.querySelectorAll("[data-e]").forEach((b) => (b.onclick = () => {
+      const a = load(), rn = a.run, txt = ev.o[+b.dataset.e][2](rn, Math.random); a.run = rn; save(a);
+      body.innerHTML = `<div class="arRes"><h3>${esc(ev.t)}</h3><p class="sum">${esc(txt)}</p></div><div class="big"><button type="button" data-go="on">▶ Avanti<small>piano ${rn.floor}</small></button></div>`;
+      body.querySelector('[data-go="on"]').onclick = () => torre(false);
+    }));
+  }
+  window.__arena = { open, close, start, act, state: () => B, load, save, _fast: (v) => { FAST = !!v; }, lvOf, mk, floorFoes, TR, ABIL, PERKS, MODS, TMODS, floorRule, bivio, evento, healRun, EVENTS };
 })();
