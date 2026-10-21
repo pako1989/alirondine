@@ -82,4 +82,22 @@ async function c3(w, busta) {
   i = await info(page); if (i.done[3] !== want || !i.ends.includes(want)) errors.push("finale atteso " + want + ": " + JSON.stringify([i.done, i.ends, i.st]));
   L.check(`Il Fischietto · capitolo 3 ${want} (${w} px)`, errors); await browser.close();
 }
-(async () => { await c1(390); await c1(320); await c2(390); await c2(320); await c3(390, false); await c3(320, true); })();
+async function c4(w, verdetto) {
+  const save = Object.assign({}, BASE, { ch: 4, step: { 1: 2, 2: 2, 3: 3 }, done: { 1: "assolvi", 2: "procura", 3: "argento" }, flags: { rel_fi_livia: 6 } });
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await page.evaluate(() => window.__fischietto.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 4")); await L.advance(page);
+  await go(page, "fi_citta_i0", 10, 10); await L.talk(page, "fi_edvige"); await L.advance(page);
+  let i = await info(page); if (i.step[4] !== 1) errors.push("dopo Edvige c4: " + JSON.stringify(i.step));
+  await go(page, "fi_citta", 15, 17); if (w === 390) await L.shot(page, "fi_ponte");
+  { const bad = await L.reachAll(page, "fi_citta"); if (bad.length) errors.push("fi_citta: " + bad.join(", ")); }
+  await go(page, "fi_citta_i5", 10, 10); { const bad = await L.reachAll(page, "fi_citta_i5"); if (bad.length) errors.push("albergo: " + bad.join(", ")); }
+  await L.talk(page, "dz_sterling"); await L.advance(page);
+  await L.talk(page, "dz_eva"); await L.advance(page); await L.talk(page, "dz_eva"); await L.advance(page);
+  const n = await page.evaluate((k) => eval(k).dossier.list("ponte").length, K_); if (n !== 6) errors.push("dossier ponte " + n + "/6");
+  await page.evaluate((k) => { const F = eval(k).F; [0, 1, 2].forEach((j) => F.set("dl_ponte_" + j, true)); }, K_);
+  await L.talk(page, "dz_eva"); await L.advance(page, ["Decidi cosa fare", verdetto.label]); await L.advance(page).catch(() => {});
+  i = await info(page); if (i.done[4] !== verdetto.id) errors.push("capitolo ponte " + verdetto.id + ": " + JSON.stringify([i.done, i.ends]));
+  if (verdetto.id !== "archivia" && !i.ends.includes("doppio")) errors.push("finale doppio non registrato");
+  L.check(`Il Fischietto · capitolo ponte ${verdetto.id} (${w} px)`, errors); await browser.close();
+}
+(async () => { await c1(390); await c1(320); await c2(390); await c2(320); await c3(390, false); await c3(320, true); await c4(390, { id: "agente", label: "Consegno tutto a Sterling" }); await c4(320, { id: "procura", label: "Porto tutto alla Procura" }); await c4(390, { id: "archivia", label: "Archivio la cartolina" }); })();

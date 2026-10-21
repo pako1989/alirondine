@@ -44,10 +44,23 @@
       },
       links: [["f_lettera", "f_firma", "La «t» a gancio è la stessa: la lettera è del presidente."], ["f_cron", "f_edv", "La cronista l'ha ricevuta martedì a mano; la Federazione la aveva già lunedì: l'ha inviata prima a chi poteva agire."], ["f_pres", "f_firma", "Gualtiero dice di non scrivere assegni: ma la sua firma è sul blocco."]],
       verdicts: [{ id: "denuncia", label: "Denuncio il presidente", sub: "Con le prove in mano" }, { id: "silenzio", label: "Resto in silenzio", sub: "Fischi la finale e basta" }, { id: "ritira", label: "Mi ritiro dalla finale", sub: "Lasci il campo a un altro" }]
+    },
+    ponte: {
+      t: "La Cartolina di Montegol", q: "Chi sta organizzando una partita truccata a Montegol, e chi lo sa già?",
+      items: {
+        p_cart: { t: "La cartolina", icon: "✉️", kind: "prova", d: "«Primo tempo 3-0. Secondo, a piacere.» Timbro postale: 22 marzo. Nessun mittente." },
+        p_edv: { t: "Edvige, la segretaria", icon: "🗂️", kind: "testimonianza", d: "«La cartolina è arrivata in Federazione il 21 marzo, a mano, in una busta senza francobollo.»" },
+        p_ster: { t: "L'osservatore Sterling", icon: "🕶️", kind: "testimonianza", d: "«Sono arrivato ieri sera, solo per osservare. Non cerco nessuno.»" },
+        p_reg: { t: "Registro dell'albergo", icon: "📒", kind: "prova", d: "Camera 12, «S. Ling»: arrivo il 15 marzo, due valigie, mai una colazione." },
+        p_eva: { t: "Eva, la crittografa", icon: "🎧", kind: "testimonianza", d: "«Il 3-0 è un cifrario di scommesse: tre quarti del tabellone, zero rischi.»" },
+        p_tab: { t: "Tabulato del cercapersone", icon: "📟", kind: "prova", d: "Messaggi alle 11:38 dal numero della ricevitoria, con lo stesso schema del caso Ivano." }
+      },
+      links: [["p_cart", "p_edv", "La cartolina è arrivata il 21 ma è timbrata il 22: l'ha portata a mano qualcuno che era già a Ponterosso."], ["p_ster", "p_reg", "Sterling dice di essere arrivato ieri, ma la camera 12 è sua da una settimana: era già in città prima della cartolina."], ["p_eva", "p_tab", "Lo schema del cifrario è lo stesso del cercapersone di Ivano: la rete che ha stretto lui sta stringendo Montegol."]],
+      verdicts: [{ id: "agente", label: "Consegno tutto a Sterling", sub: "Il Servizio la chiude in silenzio" }, { id: "procura", label: "Porto tutto alla Procura federale", sub: "Più rischi, più verità" }, { id: "archivia", label: "Archivio la cartolina", sub: "Un arbitro fischia, non indaga" }]
     }
   };
   const E = window.__sagaCore.create({
-    id: "fischietto", key: "ali-di-rondine.fischietto", title: "Il Fischietto", icon: "🟨", bg: "fi_titolo", chapters: 3,
+    id: "fischietto", key: "ali-di-rondine.fischietto", title: "Il Fischietto", icon: "🟨", bg: "fi_titolo", chapters: 4,
     menuSub: "1998. Arbitro di provincia e giudice del Giurì: raccogli prove, confronta le testimonianze, emetti verdetti. E poi fischia la finale.",
     theme: { accent: "#facc15", ink: "#1c1917", paper: "rgba(250,246,230,.96)", font: "Georgia, 'Times New Roman', serif", chipBg: "#fef08a", chipBorder: "#854d0e" },
     stats: { integrita: [0, 9, 3, "Integrità"], fama: [0, 9, 0, "Reputazione"] },
@@ -85,6 +98,7 @@
       argento: ["Il Fischietto d'Argento", "Integro fino in fondo: la finale è tua, e il silenzio dello stadio vale più di un applauso.", "Integrità 7 o più, senza aver tenuto la busta."],
       silenzio: ["Il Silenzio", "Hai fischiato la finale senza gloria e senza macchia. Nessuno sa cosa pensi. Meglio così.", "Resta in silenzio."],
       riscatto: ["Il Riscatto", "Hai preso la busta, hai sbagliato, hai confessato. Poi hai fischiato. Il tuo nome è nei registri, ma da solo.", "Tieni la busta e confessa."],
+      doppio: ["Il Fischietto Doppio Zero", "Una cartolina, un agente con la valigia e un tabulato già visto: hai fatto da ponte tra due mondi che non si parlano. Il fischietto, per una volta, ha fatto da radio.", "Nel capitolo ponte, porta le prove a Sterling o alla Procura."],
       spento: ["Il Fischietto Spento", "Il fischietto suona ancora. Ma non fa più rumore: sai tu perché.", "Tieni la busta e tacciono tutti."]
     },
     heroLook: (h) => ({ bg: ["#1c1917", "#facc15"], shirt: "#111827" }),
