@@ -71,8 +71,32 @@ async function storia(w) {
   { const lab = await page.evaluate(() => { for (let i = 0; i < 8; i++) { const b = window.T_.btns().find((o) => /^Continua/.test(o.t)); if (!b) break; b.b.click(); } return window.T_.btns().map((o) => o.t); }); await page.waitForTimeout(400);
     const t = await page.evaluate(() => window.T_.btns().map((o) => o.t)); if (!t.concat(lab).some((x) => /Segreto/.test(x))) errors.push("opzione segreta assente con chiavi e allerta bassa: " + JSON.stringify(t)); }
   await L.advance(page, [/Segreto/]);
-  { const i = await info(page); if (!i.ends.includes("segreto") || i.ends.length !== 4) errors.push("finali: " + JSON.stringify(i.ends)); }
+  { const i = await info(page); if (!i.ends.includes("segreto") || i.ends.length < 4) errors.push("finali: " + JSON.stringify(i.ends)); }
   L.check(`Fuga da Alcatraz FC · tre capitoli e quattro finali (${w} px)`, errors); await browser.close();
+}
+async function c4(w, verdetto) {
+  const save = { v: 1, diffSet: true, ch: 4, step: { 1: 3, 2: 2, 3: 2 }, done: { 1: true, 2: true, 3: "evasione" }, ends: ["evasione"], flags: {}, st: { chiavi: 2, sospetto: 10 } };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await mockMatch(page, true);
+  await page.evaluate(() => window.__alcatraz.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 4")); await L.advance(page);
+  for (const z of ["alc_molo", "alc_cortile4", "alc_celle4"]) { const bad = await reach(page, z); if (bad.length) errors.push(z + " irraggiungibile: " + bad.join(", ")); }
+  await page.evaluate(([k]) => eval(k).enterZone("alc_molo"), [K_]); await page.waitForTimeout(400);
+  if (w === 390) await L.shot(page, "alc_molo_c4");
+  await L.talk(page, "vs_ottone"); await L.advance(page);
+  let i = await info(page); if (i.step[4] !== 1) errors.push("dopo Ottone c4: " + JSON.stringify(i.step));
+  await L.goAct(page, 4, 4); await L.advance(page); if ((await L.zone(page)) !== "alc_cortile4") errors.push("molo→cortile4: " + (await L.zone(page)));
+  await L.talk(page, "alc_bruno"); await L.advance(page);
+  await L.goAct(page, 8, 4); await L.advance(page); if ((await L.zone(page)) !== "alc_celle4") errors.push("cortile4→celle4: " + (await L.zone(page)));
+  await L.talk(page, "alc_dario"); await L.advance(page);
+  i = await info(page); if (i.step[4] !== 2) errors.push("dopo Dario c4: " + JSON.stringify(i.step));
+  await L.goAct(page, 4, 11); await L.advance(page); if ((await L.zone(page)) !== "alc_cortile4") errors.push("celle4→cortile4: " + (await L.zone(page)));
+  await L.talk(page, "alc_cardenas"); await L.advance(page, [/Gioca la Partita/]);
+  i = await info(page); if (i.step[4] !== 3) errors.push("dopo partita c4: " + JSON.stringify(i.step));
+  await L.goAct(page, 26, 16); await L.advance(page); if ((await L.zone(page)) !== "alc_molo") errors.push("cortile4→molo: " + (await L.zone(page)));
+  await L.talk(page, "vs_ottone"); await L.advance(page, [verdetto.label]);
+  i = await info(page); if (i.done[4] !== verdetto.id) errors.push("capitolo ponte " + verdetto.id + ": " + JSON.stringify([i.done, i.ends]));
+  if (verdetto.id === "scatola" && !i.ends.includes("scatola")) errors.push("finale scatola non registrato");
+  L.check(`Alcatraz · capitolo ponte ${verdetto.id} (${w} px)`, errors); await browser.close();
 }
 // sfondi: le cinque scene ci sono, hanno punti da toccare e si disegnano senza errori
 async function sfondi() {
@@ -81,4 +105,4 @@ async function sfondi() {
   r.forEach((x) => errors.push(x));
   L.check("Alcatraz · sfondi", errors); await browser.close();
 }
-(async () => { await storia(390); await sfondi(); })().catch((e) => { console.error("✗ alcatraz:", e.message); process.exit(1); });
+(async () => { await storia(390); await c4(390, { id: "scatola", label: "Salta sulla barca" }); await sfondi(); })().catch((e) => { console.error("✗ alcatraz:", e.message); process.exit(1); });

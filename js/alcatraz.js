@@ -43,7 +43,7 @@
     title: "Fuga da Alcatraz FC · La Grande Evasione",
     icon: "⛓️",
     bg: "alc_titolo",
-    chapters: 3,
+    chapters: 4,
     menuSub: "L'isola rocciosa, i riflettori nella notte e la grande evasione durante la partita contro le Guardie",
     theme: {
       accent: "#38bdf8",
@@ -138,6 +138,7 @@
       evasione: ["La Notte dell'Evasione", "Vittoria in campo e fuga perfetta attraverso il condotto con Bruno e Sam.", "Sali sulla motovedetta."],
       patto: ["Il Patto del Direttore", "Trionfo leale: Cardenas riconosce l'errore d'identità e firma la grazia ufficiale.", "Fidati della parola del Direttore."],
       barbiere: ["La Barberia della Roccia", "Decidi di restare sull'isola come allenatore e barbiere del penitenziario.", "Resta dove sei amato."],
+      scatola: ["L'Airone d'Oltremare", "Ottone e la sua scatola ad Alcatraz: hai liberato Dario degli Aironi e saltato i muraglioni sul barchino nella nebbia marina.", "Nel capitolo ponte con Operazione Scatola Vuota, completa la fuga con Ottone e Dario."],
       segreto: ["Il Tunnel Segreto della Roccia", "Grimaldelli raccolti, allarme basso e scoperta del tunnel sottomarino.", "Serve cautela e almeno due grimaldelli."]
     },
     guest: {
@@ -210,4 +211,5 @@
   };
 
   window.__alcatraz = E.api;
+  window.__alcatrazCore = E;
 })();
