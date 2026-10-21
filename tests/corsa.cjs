@@ -19,7 +19,7 @@ async function run(w) {
     const C = window.__corsa; let R = C.state(); C._fast(true); const out = {}; out.n = R.racers.length; out.teams = R.racers.map((x) => x.team).join("");
     for (let i = 0; i < 200; i++) C.tick(); // via
     // abilità: carica l'energia e usala
-    const me = R.me; me.energy = 100; const e0 = me.energy; C.press("t", true); C.tick(); out.turbo = e0 - me.energy; me.cd = 0; const e1 = me.energy; C.press("a", true); C.tick(); out.abil = e1 - me.energy;
+    const me = R.me; me.stun = 0; me.energy = 100; const e0 = me.energy; C.press("t", true); C.tick(); out.turbo = e0 - me.energy; me.cd = 0; const e1 = me.energy; C.press("a", true); C.tick(); out.abil = e1 - me.energy;
     // guida semplice: segui il bersaglio dell'IA di chi guida (stessa logica ma sul giocatore)
     let n = 0; const steer = () => { const a = C.at(R.T, me.prog + 70 + me.v * 20); const want = a.k > 0.0006 ? 0.6 : a.k < -0.0006 ? -0.6 : 0, d = want - me.lat; R.inp = { l: d < -0.08 ? 1 : 0, r: d > 0.08 ? 1 : 0 }; };
     while (!R.over && n++ < 12000) { steer(); C.tick(); }
