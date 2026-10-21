@@ -88,7 +88,7 @@ async function bloccati(w) {
 async function partita(w, win) {
   const { browser, page, errors } = await open(w, SAVE(4, { 1: 4, 2: 4, 3: 4, 4: 2 }, { 1: "ok", 2: "ok", 3: "ok" }, { vs_c1_done: true, vs_c2_done: true, vs_c3_done: true, vs_tessera: true, vs_hatch: true }, { fiducia: 5 }), "vs_campo");
   await L.stubMatch(page, win);
-  await L.talk(page, "vs_eco"); await adv(page, ["Accetti la partita", "Diffondilo"]);
+  await L.talk(page, "vs_eco"); await adv(page, ["Accetti la partita", "Accetta il risultato", "Diffondilo"]);
   const i = await info(page); if (JSON.stringify(i).indexOf("pubblico") < 0 && !(await page.evaluate(() => window.__vuota.endings().find((x) => x.id === "pubblico").found))) errors.push("finale pubblico dopo partita " + win + " non registrato");
   L.check(`Scatola Vuota · partita finale ${win ? "vinta" : "persa"} (${w} px)`, errors); await browser.close();
 }

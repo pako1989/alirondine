@@ -29,10 +29,11 @@
       K.finishChapter(N, win ? "ok" : "ko");
       K.scene(H.flush().concat([["voce", `<b>FINE DEL CAPITOLO 3.</b><br>🔥 Grinta ${K.stat("grinta")} · 🤝 Intesa ${K.stat("intesa")} · Squadra ${K.crew.count()}/${K.crew.total} · Catene perfette ${K.chain.perfect()}`], ["voce", "Il Capitolo 4, «La Finale di Tokyo», vi aspetta."]]), () => K.openMain(), "mg_neve");
     }
+    const lost = () => K.ask("voce", "Partita persa (o abbandonata). La storia non va avanti con una sconfitta: vuoi riprovare?", [{ label: "Riprova la partita", cls: "hot", fn: () => match() }, { label: "Più tardi", fn: K.done }]);
     function match() {
       K.say(H.flush(), () => K.playMatch({
         id: "mg_nord", alt: "az,cage,hd", force: false, squad: names().slice(0, 3), mate: names()[0] || "Elio", us: "Italia U16", oppTeam: "Germania U16", oppColor: "#111827", homeKit: ["#1d4ed8", "#f8fafc"],
-        oppNames: ["Jonas", "Felix", "Max", "Moritz"], intro: "Stadio del Nord · Semifinale: Italia contro Germania. Neve sul campo, vapore dalle bocche.", done: (r) => fin(!!r.win)
+        oppNames: ["Jonas", "Felix", "Max", "Moritz"], intro: "Stadio del Nord · Semifinale: Italia contro Germania. Neve sul campo, vapore dalle bocche.", done: (r) => (r.win ? fin(true) : lost())
       }));
     }
     function recover(how) {

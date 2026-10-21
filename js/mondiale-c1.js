@@ -26,10 +26,11 @@
       K.finishChapter(N, win ? "ok" : "ko");
       K.scene(H.flush().concat([["voce", `<b>FINE DEL CAPITOLO 1.</b><br>🔥 Grinta ${K.stat("grinta")} · 🤝 Intesa ${K.stat("intesa")} · Squadra ${K.crew.count()}/${K.crew.total}`], ["voce", "Il Capitolo 2, «Samba sulla Sabbia», ti aspetta a Rio."]]), () => K.openMain(), "mg_colle");
     }
+    const lost = () => K.ask("voce", "Partita persa (o abbandonata). La storia non va avanti con una sconfitta: vuoi riprovare?", [{ label: "Riprova la partita", cls: "hot", fn: () => match() }, { label: "Più tardi", fn: K.done }]);
     function match() {
       K.say(H.flush(), () => K.playMatch({
         id: "mg_amichevole", alt: "az,cage,hd", force: false, squad: names().slice(0, 3), mate: names()[0] || "Elio", us: "Italia U16", oppTeam: "Selezione Nord", oppColor: "#7c2d12", homeKit: ["#1d4ed8", "#f8fafc"],
-        oppNames: ["Cesare", "Dino", "Ettore", "Fabio"], intro: "Centro Tecnico di Rondine · Amichevole del raduno. Il CT guarda in silenzio.", done: (r) => fin(!!r.win)
+        oppNames: ["Cesare", "Dino", "Ettore", "Fabio"], intro: "Centro Tecnico di Rondine · Amichevole del raduno. Il CT guarda in silenzio.", done: (r) => (r.win ? fin(true) : lost())
       }));
     }
     const zones = {

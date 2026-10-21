@@ -26118,7 +26118,7 @@
     const card = (name, role, bonus) => ({ id: "", name, role, rar: "", lv: 1, stats: Object.fromEntries(SK.map((k, j) => [k, cl(Math.round(q + (bonus || 0) + PROF[role][j]), 20, 92)])) });
     const hn = (h && h.name) || "Campione", mn = cfg.mate || "Tommy", sq = cfg.squad || ["Portiere", "Difensore", "Terzino"];
     const team = [card(sq[0] || "Portiere", "p", 0), card(sq[1] || "Difensore", "d", 0), card(sq[2] || "Terzino", "d", 0), card(mn, "c", 4), card(hn, "a", 8)];
-    const oppNames = (T.names && T.names.length >= 5) ? T.names : ((cfg.oppNames && cfg.oppNames.length >= 5) ? cfg.oppNames : [(T.gk && T.gk[0]) || "Portiere", ...((T.defs || []).map((d) => d[0])), ...((T.atk || []).map((a) => a[0]))].filter((x) => typeof x === "string").slice(0, 5));
+    const oppNames = (T.names && T.names.length >= 5) ? T.names : ((cfg.oppNames && cfg.oppNames.length >= 5) ? cfg.oppNames : [(Array.isArray(T.gk) && T.gk[0]) || "Portiere", ...(Array.isArray(T.defs) ? T.defs : []).map((d) => d[0]), ...(Array.isArray(T.atk) ? T.atk : []).map((a) => a[0])].filter((x) => typeof x === "string").slice(0, 5));
     trSavePos(); document.body.classList.remove("borgo");
     window.__actionHd.start({ mode: "ut", team, title: cfg.chap, theme: cfg.venue || null, opp: { name: T.name || "Avversari", pw, kit: T.color || T.col, names: oppNames.length >= 5 ? oppNames : undefined },
       onExit: (res) => { const a = res ? res.a : 0, b = res ? res.c : 1; cfg.onDone({ a, b, win: a > b, recap: "", hd: true }); } });

@@ -27,10 +27,11 @@
       K.finishChapter(N, win ? "ok" : "ko");
       K.scene(H.flush().concat([["voce", `<b>FINE DEL CAPITOLO 2.</b><br>🔥 Grinta ${K.stat("grinta")} · 🤝 Intesa ${K.stat("intesa")} · Squadra ${K.crew.count()}/${K.crew.total} · Catene perfette ${K.chain.perfect()}`], ["voce", "Il Capitolo 3, «Ghiaccio e Acciaio», vi porta al Nord."]]), () => K.openMain(), "mg_spiaggia");
     }
+    const lost = () => K.ask("voce", "Partita persa (o abbandonata). La storia non va avanti con una sconfitta: vuoi riprovare?", [{ label: "Riprova la partita", cls: "hot", fn: () => match() }, { label: "Più tardi", fn: K.done }]);
     function match() {
       K.say(H.flush(), () => K.playMatch({
         id: "mg_rio", alt: "az,cage,hd", force: false, squad: names().slice(0, 3), mate: names()[0] || "Elio", us: "Italia U16", oppTeam: "Brasile U16", oppColor: "#16a34a", homeKit: ["#1d4ed8", "#f8fafc"],
-        oppNames: ["Gabriel", "Rafa", "Thiago", "Leo"], intro: "Stadio di Rio · Girone del Mondiale: Italia contro Brasile. Il pubblico balla prima di sedersi.", done: (r) => fin(!!r.win)
+        oppNames: ["Gabriel", "Rafa", "Thiago", "Leo"], intro: "Stadio di Rio · Girone del Mondiale: Italia contro Brasile. Il pubblico balla prima di sedersi.", done: (r) => (r.win ? fin(true) : lost())
       }));
     }
     const mare = "Z";

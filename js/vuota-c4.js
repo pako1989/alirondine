@@ -50,7 +50,7 @@
       K.say(flush(), () => K.playMatch({
         id: "vs_finale", alt: "az,cage", force: false, squad: ["Mira", "Vulpe", "Ghiro"], mate: "Ottone", us: "Squadra Nove", oppTeam: "Sipario XI", oppColor: "#581c87", homeKit: ["#15803d", "#f4f0e4"],
         oppNames: ["Corvo", "Brace", "Lastra", "Eco"], intro: "Campo Zero · Bastione Nove. Undici ragazzi, una coppa e una finale rimasta a metà.",
-        done: (r) => { F.set("vs_match_win", !!r.win); setStep(N, 3); say("vs_eco", r.win ? "[felice] Hai vinto. E la coppa, stavolta, è tua." : "[triste] Hai perso. Ma io avevo perso prima di cominciare: non cambia."); if (r.win) K.bond("fiducia", 1); QL = QL.concat([["vs_sipario", "[serio] Per il bene del gioco... Fate quello che dovete."]]); choose(); }
+        done: (r) => { if (!r.win) return K.ask("voce", "Partita persa (o abbandonata). Puoi riprovare, oppure accettare il risultato: Sipario tiene il Rapporto sul tavolo.", [{ label: "Riprova la partita", cls: "hot", fn: () => { QL = []; match(); } }, { label: "Accetta il risultato", fn: () => { F.set("vs_match_win", false); setStep(N, 3); say("vs_eco", "[triste] Hai perso. Ma io avevo perso prima di cominciare: non cambia."); QL = QL.concat([["vs_sipario", "[serio] Per il bene del gioco... Fate quello che dovete."]]); choose(); } }, { label: "Più tardi", fn: K.done }]); F.set("vs_match_win", true); setStep(N, 3); say("vs_eco", r.win ? "[felice] Hai vinto. E la coppa, stavolta, è tua." : "[triste] Hai perso. Ma io avevo perso prima di cominciare: non cambia."); if (r.win) K.bond("fiducia", 1); QL = QL.concat([["vs_sipario", "[serio] Per il bene del gioco... Fate quello che dovete."]]); choose(); }
       }));
     }
     const talk = {

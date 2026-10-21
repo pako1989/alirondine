@@ -40,10 +40,11 @@
       if (ok) return ending("squadra", true);
       return ending("oro", true);
     }
+    const lost = () => K.ask("voce", "Finale persa (o abbandonata). Puoi riprovare, oppure accettare il risultato: la storia continua col finale d'argento.", [{ label: "Riprova la finale", cls: "hot", fn: () => match() }, { label: "Accetta il risultato", sub: "Finale d'argento", fn: () => result(false) }, { label: "Più tardi", fn: K.done }]);
     function match() {
       K.say(H.flush(), () => K.playMatch({
         id: "mg_finale", alt: "az,cage,hd", force: false, squad: names().slice(0, 3), mate: names()[0] || "Elio", us: "Italia U16", oppTeam: "Giappone U16", oppColor: "#dc2626", homeKit: ["#1d4ed8", "#f8fafc"],
-        oppNames: ["Haru", "Sho", "Daichi", "Kenta"], intro: "Stadio Nazionale di Tokyo · La finale del Mondiale Giovanile: Italia contro Giappone.", min: 60, done: (r) => result(!!r.win)
+        oppNames: ["Haru", "Sho", "Daichi", "Kenta"], intro: "Stadio Nazionale di Tokyo · La finale del Mondiale Giovanile: Italia contro Giappone.", min: 60, done: (r) => (r.win ? result(true) : lost())
       }));
     }
     const zones = {

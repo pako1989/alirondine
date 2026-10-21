@@ -108,7 +108,7 @@ async function c4(w) {
 async function ending(w, id, win, st, perf) {
   const { browser, page, errors } = await L.setup({ w, ...MOD, save: SAVE("mg_stadio_tokyo", 4, { 1: 3, 2: 5, 3: 5, 4: 3 }, { 1: "ok", 2: "ok", 3: "ok" }, Object.assign({ mg_c1_done: true, mg_c2_done: true, mg_c3_done: true, ch_perf: perf || 0 }, CREW(CREW5)), st) });
   await page.evaluate(() => window.__mondiale.open()); await page.evaluate(() => window.T_.click("Continua")).catch(() => {}); await adv(page);
-  await go(page, "mg_stadio_tokyo", 2, 11); await L.stubMatch(page, win); await L.talk(page, "mg_ren"); await adv(page); await page.waitForTimeout(500); await adv(page).catch(() => {});
+  await go(page, "mg_stadio_tokyo", 2, 11); await L.stubMatch(page, win); await L.talk(page, "mg_ren"); await adv(page, ["Accetta il risultato"]); await page.waitForTimeout(500); await adv(page).catch(() => {});
   const i = await info(page); if (!(i.ends || []).includes(id)) errors.push("finale " + id + " non registrato: " + JSON.stringify(i.ends));
   L.check(`Mondiale · finale ${id} (${w} px)`, errors); await browser.close();
 }
