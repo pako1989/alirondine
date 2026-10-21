@@ -896,6 +896,7 @@
         ...(STM ? [["♨️ " + nm, nm + " sale col tempo e quando alimenti la caldaia, e si consuma con valvole, viaggi e partite. Se supera il massimo c'è stallo: perdi pressione e un pezzo di scafo. Sfiata prima che sia tardi."]] : []),
         ...(WGT ? [["⚖️ " + (cfg.weight.name || "Peso"), "Le scelte morali non hanno una risposta giusta: accumulano " + WGT.axes.map(WGT.name).join(", ") + ". Il Peso sblocca o chiude opzioni nei dialoghi, cambia le scene e decide il finale. Il valore si vede nel Registro."]] : []),
         ...(ALB ? [["🕵️ " + ALB.name, "Il Registro è una griglia di chi era dove e quando. Entrando nelle stanze vedi chi c'è; i testimoni ti dicono altro; i sospettati dichiarano un alibi. Quando dichiarazione e avvistamento non coincidono, aprilo e segnala la contraddizione."]] : []),
+        ...(RFT ? [["🦇 " + RFT.name, "Sui tetti puoi saltare (a rischio) o usare il rampino (sicuro, ma serve Agilità). Una caduta costa Vigore: a zero ti raccolgono e ti riportano al rifugio, dove riposi. Dall'alto puoi stordire una guardia, e una lampada rotta ti nasconde meglio."]] : []),
         ...(HCK ? [["💻 " + HCK.name, "Le consolle sulla mappa si usano con la statistica " + HCK.name + ": ogni comando costa punti e può deviare i droni, invertire i pavimenti elettrificati o aprire serrande. Chi forza la rete alza l'Allarme, e le sentinelle dei settori vicini aumentano."]] : []),
         ...arr(safe(() => cfg.guide && cfg.guide(K), []))
       ];
@@ -1296,6 +1297,32 @@
       return { see, claim, scan, cell: (p, s) => ({ seen: S_(p, sl(s)), claim: C_(p, sl(s)) }), conflicts, found, open, name: A0.name || "Registro delle Presenze" };
     })();
 
+    // -------------------------------------------------------------- TETTI (cfg.roof = { name, stat: "vigore", agi: "agilita", hurt: 15, home: [zona, x, y], text })
+    // Furtività verticale: sui tetti si passa da un tetto all'altro con il RAMPINO (K.roof.hook, sicuro ma serve Agilità) o con un SALTO (K.roof.leap, a rischio).
+    // Una caduta (K.roof.fall) toglie Vigore e riporta all'inizio della zona; a Vigore 0 si è raccolti e riportati a `home`. K.roof.drop(id) stordisce una guardia
+    // dall'alto (flag rf_down_<id>: lo spec.npcs della zona la salta con K.roof.down(id)). K.roof.lamp(id) spegne una lampada (flag rf_lamp_<id>, per spec.luci/buio).
+    const RFT = cfg.roof && (() => {
+      const R0 = cfg.roof, ST = R0.stat || "vigore", AG = R0.agi || "agilita", hurt = R0.hurt || 15, vig = () => stat(ST);
+      const roll = () => (typeof window.__roofRoll === "number" ? window.__roofRoll : Math.random());
+      const rest = () => { const d = 100 - vig(); if (d > 0) bond(ST, d); };
+      function fall(msg) {
+        bond(ST, -hurt); const zid = api && api.trZone && api.trZone(), z = ZONES[zid];
+        if (vig() <= 0) { rest(); bond(ST, -40); const h = R0.home || [zid, 1, 1]; return say([["voce", (R0.text && R0.text.faint) || "Cadi male. Qualcuno ti raccoglie, ti porta via e ti rimette in piedi."]], () => go(h[0], h[1], h[2])); }
+        const b = (z && (z.spec.sneakStart || z.spec.start)) || [1, 1];
+        say([["voce", msg || (R0.text && R0.text.fall) || "Cadi. Rotoli, ti rialzi, ricominci dall'inizio del tetto."]], () => go(zid, b[0], b[1]));
+      }
+      function hook(to, o) {
+        o = o || {}; if (stat(AG) < (o.need || 0)) return say([["voce", `Il rampino non regge: servono ${o.need} ${(cfg.stats[AG] || [])[3] || AG} (hai ${stat(AG)}).`]], done);
+        say([["voce", o.text || "Lanci il rampino. Si aggancia, tiri, e il mantello ti porta di là."]], () => go(to[0], to[1], to[2]));
+      }
+      function leap(to, o) {
+        o = o || {}; const p = Math.max(0.15, Math.min(0.95, (o.base == null ? 0.55 : o.base) + stat(AG) / 250));
+        if (roll() < p) say([["voce", o.ok || "Salti. Per un attimo sei più alto della pioggia, poi il tetto di fronte ti riceve."]], () => go(to[0], to[1], to[2])); else fall(o.fail);
+      }
+      const down = (id) => F.is("rf_down_" + id), drop = (id) => { F.set("rf_down_" + id, true); refreshZone(); }, lamp = (id) => F.is("rf_lamp_" + id), lampOff = (id) => { F.set("rf_lamp_" + id, true); refreshZone(); };
+      return { hook, leap, fall, rest, drop, down, lamp, lampOff, vigor: vig, name: R0.name || "Tetti", stat: ST };
+    })();
+
     // -------------------------------------------------------------- kit per i capitoli
     const K = {
       get api() { return api; }, ID, TITLE, TS, T, esc, hash, rnd, pick, safe, F, mem, save, stepOf, setStep, note, once, reward, coinsGive, bal, hero, castHero, stat, bond,
@@ -1306,7 +1333,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, rel: REL, inv: INV, crew: CRW, dossier: DOS, route: RTE, catch: CAT, steam: STM, weight: WGT, hack: HCK, alibi: ALB,
+      clock: CLOCK, rel: REL, inv: INV, crew: CRW, dossier: DOS, route: RTE, catch: CAT, steam: STM, weight: WGT, hack: HCK, alibi: ALB, roof: RFT,
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
       ending: (id, d) => { ENDINGS[id] = d; },
       continueStory: () => continueStory(), hasChapter: (n) => !!CHAPTERS[n], setInMatch: (v) => { inMatch = !!v; }, openMain: () => openMain(),

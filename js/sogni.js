@@ -24,6 +24,7 @@
     note: ["ali-di-rondine.note", "Tactics Note · Il Quaderno del Giudizio", "#64748b", "__note"],
     cenere: ["ali-di-rondine.cenere", "Cenere e Gloria", "#d97706", "__cenere"],
     officina: ["ali-di-rondine.officina", "L'Officina dei Giganti di Ruggine", "#d97706", "__officina"],
+    cavaliere: ["ali-di-rondine.cavaliere", "Il Cavaliere del Fischio", "#facc15", "__cavaliere"],
     gala: ["ali-di-rondine.gala", "Il Rapimento del Pallone d'Oro", "#d4a73a", "__gala"],
     circuiti: ["ali-di-rondine.circuiti", "Neo-Rondine 2099", "#22d3ee", "__circuiti"],
     replica: ["ali-di-rondine.replica", "Eroi in Replica", "#38bdf8", "__replica"],
@@ -83,6 +84,11 @@
     ["pd_livia", "gala", "r", 62, 62, 82, "C", 1], ["pd_zeno", "gala", "r", 86, 54, 78, "B", 2],
     ["pd_clio", "gala", "c", 60, 56, 80, "C", 2], ["pd_gualtiero", "gala", "c", 56, 70, 62, "D", 2],
     ["pd_ospite", "gala", "e", 70, 76, 90, "B", 3], ["pd_delmonte", "gala", "l", 80, 88, 86, "B", 3],
+    // Il Cavaliere del Fischio
+    ["cf_fulgenzio", "cavaliere", "c", 50, 78, 60, "D", 1], ["cf_brandi", "cavaliere", "c", 58, 66, 70, "C", 1],
+    ["cf_zeppa", "cavaliere", "c", 66, 60, 64, "C", 1], ["cf_micia", "cavaliere", "r", 90, 62, 74, "B", 2],
+    ["cf_spillo", "cavaliere", "r", 60, 84, 70, "C", 2], ["cf_diva", "cavaliere", "r", 64, 76, 82, "C", 2],
+    ["cf_lucre", "cavaliere", "e", 70, 80, 86, "B", 3], ["cf_pierrot", "cavaliere", "l", 82, 90, 88, "B", 3],
     // Neo-Rondine 2099
     ["nr_kira", "circuiti", "r", 70, 60, 84, "C", 1], ["nr_jax", "circuiti", "c", 66, 70, 60, "B", 1],
     ["nr_bolt", "circuiti", "c", 50, 62, 66, "D", 1], ["nr_volt", "circuiti", "c", 54, 58, 70, "D", 1],
@@ -255,6 +261,7 @@
     gp_gridoni: "E IL PALLONE ENTRA! (Era già entrato. Ma l'emozione è in differita.)", gp_bullone: "Si stringe a mano. Anche il portiere, se serve.", gp_rosalba: "Il rosso non è un colore: è un modo di arrivare primi.", gp_nembo: "Fischio, sventolo, verbalizzo. Il gol è regolare, salvo nuvole.",
     of_gasparre: "Piano. La caldaia ha pazienza, a differenza di chi la guarda.", of_rina: "La chiave inglese non la uso. La tengo. Oggi, forse, la uso.", of_volta: "Un fulmine, un fischio e un gol. Nello stesso ordine.", of_ferro: "Gioco per la Corporazione. Ma il fischietto lo tengo nel taschino del cuore.", of_vanda: "Una penna nuova per un patto nuovo. L'inchiostro, quello, è sempre vecchio.", of_brontolo: "Fsss. Brrr. (Traduzione: palla a me.)", of_titano: "Clank. Clank. Clank.", of_apprendista: "Mi hanno insegnato a vincere. Non a farlo con gusto.",
     pd_teresa: "Il dolce non si fa da solo. Il silenzio, neanche.", pd_arturo: "Un maggiordomo non lascia la casa quando le luci si spengono.", pd_livia: "Il sorriso è una pratica quotidiana.", pd_zeno: "L'ho vinto io, il Pallone. Poi l'ho perso io.", pd_clio: "Chiedere «perché?» tutta la vita e farmi pagare.", pd_gualtiero: "Ho solo comprato il Pallone, dieci anni fa.", pd_ospite: "Un biglietto che nessuno ricorda di aver spedito.", pd_delmonte: "Ogni parola, qui dentro, ha un prezzo.",
+    cf_fulgenzio: "Ho comprato corde più resistenti. Non ho mai chiesto il perché.", cf_brandi: "Non mi fido di chi veste di nero. Mi fido di lei.", cf_zeppa: "Dico sempre una cosa in più di quella che so.", cf_micia: "Miagola, se ti serve una mano sui tetti.", cf_spillo: "Se è per un rigore, lo calciamo all'alba.", cf_diva: "Canto piano, quando il pubblico è l'ultimo a crederci.", cf_lucre: "Ho un registro per ogni cosa.", cf_pierrot: "Ogni palloncino porta un indovinello. Ogni indovinello porta qui.",
     nr_kira: "Una riga di codice cambia una città. Due, un rapporto.", nr_jax: "La gamba cigola. Il tiro, quando riesce, no.", nr_bolt: "Bzzz. Il banco è aperto. Il cuore, meno.", nr_volt: "Il banco non esiste, ma i prezzi sì.", nr_nyx: "L'imparzialità è una scelta. Ho scelto.", nr_vance: "Il sigaro è spento, il fascicolo no.", nr_vektor: "Il talento muore. Il codice, no.", nr_zero: "Probabilità di parata: 99,96%. Il resto è tifo.",
     rp_brezza: "Volo piano, ma arrivo. Anche alla verità.", rp_marta: "A cena ci sei. Non è un'opinione, è un orario.", rp_basalto: "Cadere è metà del mestiere. L'altra metà è la pazienza.", rp_nube: "Sorrido anche quando dormo. Dicono sia un talento.", rp_sabbioni: "Questo comunicato è già in stampa. Anche questo.", rp_ilario: "Suggerisco battute. Alcune sono più lunghe delle altre.", rp_teodora: "Gli archivi non mentono: è il personale che ha la memoria corta.", rp_zenit: "Ti ho insegnato a volare. Ora imparo a cadere.",
     fg_ginestra: "Non si comprano le figure: si incontrano.", fg_ottone: "Un caffè, un consiglio, un tackle.", fg_nives: "Vincere è la mia lingua. Perdere la sto imparando.", fg_rosa: "Fischio una volta. Capito? Una.", fg_cora: "Tre Leghe vinte. La quarta è la tua.",

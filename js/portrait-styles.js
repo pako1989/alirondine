@@ -246,6 +246,7 @@
       if (st === "cacciatore") { g.fillStyle = "#7c3aed"; g.fillRect(-1.00 * fw, -23.8, 2.00 * fw, 6.4); g.fillStyle = "#f5f3ff"; g.fillRect(0.57 * fw, -36.6, 0.57 * fw, 16.0); g.fillStyle = "#a78bfa"; g.fillRect(0.71 * fw, -33.4, 0.29 * fw, 9.6); }
       if (st === "meccanico") { g.fillStyle = "#7c2d12"; g.fillRect(-fw + 2, -16, 2 * fw - 4, 5); g.fillStyle = "#fde68a"; g.beginPath(); g.arc(-8, -24, 5, 0, 7); g.arc(8, -24, 5, 0, 7); g.fill(); g.fillStyle = "#0f172a"; g.beginPath(); g.arc(-8, -24, 3, 0, 7); g.arc(8, -24, 3, 0, 7); g.fill(); }
       if (st === "gala") { g.fillStyle = "#facc15"; g.fillRect(-4, -31, 6, 12); g.fillRect(-1, -34, 3, 5); g.fillRect(9, -26, 3, 7); }
+      if (st === "cavaliere") { g.fillStyle = "#0b0b12"; g.fillRect(-9, -33, 4, 11); g.fillRect(8, -33, 4, 11); g.fillRect(-9, -23, 21, 4); }
       if (st === "cyber") { g.fillStyle = "#22d3ee"; g.fillRect(-4, -31, 6, 12); g.fillRect(-1, -34, 3, 5); g.fillRect(9, -26, 3, 7); }
       if (st === "maschera") { g.fillStyle = "#1d4ed8"; g.fillRect(-fw + 1, -28, 2 * fw - 2, 8); g.fillStyle = "#f8fafc"; g.fillRect(-12, -26, 7, 3); g.fillRect(5, -26, 7, 3); }
       if (st === "apprendista") { g.fillStyle = "#4338ca"; g.beginPath(); g.ellipse(0, -11, fw + 14, 5, 0, 0, 7); g.fill(); g.beginPath(); g.moveTo(-fw + 2, -12); g.quadraticCurveTo(-fw + 4, -40, 10, -48); g.quadraticCurveTo(fw - 8, -32, fw - 2, -12); g.closePath(); g.fill(); g.fillStyle = "#fbbf24"; g.fillRect(-3, -24, 6, 4); }
