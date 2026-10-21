@@ -120,7 +120,7 @@
   }
   function tick() {
     if (!M || M.over) return; if (M.stop > 0) { M.stop--; return; } M.fx = M.fx.filter((x) => --x.l > 0); M.parts = M.parts.filter((q) => { q.x += q.vx; q.y += q.vy; q.vy += 0.06; return --q.l > 0; }); if (M.shake > 0) M.shake--;
-    if (M.goalT > 0) { if (M.goalT % 4 === 0) burst(M.scorer ? M.scorer.x : W / 2, 60, 5, ["#ffd23f", "#ff5a5a", "#5ad8ff", "#fff"], 2.4, 1.2); if (--M.goalT === 0) kickoff(M.lastScorer ? 0 : 1); return; }
+    if (M.goalT > 0) { if (M.goalT % 4 === 0) burst(M.scorer ? M.scorer.x : W / 2, 60, 5, ["#ffd23f", "#ff5a5a", "#5ad8ff", "#fff"], 2.4, 1.2); if (M.goalT % 6 === 0 && M.scorer) burst(M.scorer.x, M.scorer.y - 20, 4, [look(M.scorer).col, "#fff"], 1.6, 1.4); if (--M.goalT === 0) kickoff(M.lastScorer ? 0 : 1); return; }
     M.t++; if (M.t < 0) return; const b = M.ball, e = M.edge; M.edge = {}; M.energy[0] = Math.min(100, M.energy[0] + 0.03); M.energy[1] = Math.min(100, M.energy[1] + 0.03);
     if (b.owner) { M.poss[b.owner.team]++; if (M.t % 40 === 0) M.energy[b.owner.team] = Math.min(100, M.energy[b.owner.team] + 0.6); }
     const fld = M.p.filter((x) => !x.keeper); if (b.owner && b.owner.team === 0 && !b.owner.keeper) M.ctl = b.owner; else if (M.t % 12 === 0) { const nb = fld.slice().sort((a, c) => dist(a, b) - dist(c, b))[0]; if (nb !== M.ctl && dist(nb, b) + 14 < dist(M.ctl, b)) M.ctl = nb; }
@@ -135,7 +135,7 @@
         p.vx += ((v.m ? v.x * s : 0) - p.vx) * (v.m ? 0.3 : 0.4); p.vy += ((v.m ? v.y * s : 0) - p.vy) * (v.m ? 0.3 : 0.4); if (v.m) { p.fx = v.x; p.fy = v.y; if (sprint) M.stam = Math.max(0, M.stam - 0.85); }
         if (e.a) { if (b.owner === p) pass(p, bestMate(p, v.x, v.y)); else tackle(p); } if (e.c) ability(p);
       } else { const t = aiMove(p); moveTo(p, t, t.s); const sv = Math.hypot(p.vx, p.vy); if (sv > 0.3) { p.fx = p.vx / sv; p.fy = p.vy / sv; } }
-      p.x += p.vx; p.y += p.vy; p.x = Math.max(PR + 2, Math.min(W - PR - 2, p.x)); p.y = Math.max(TOP + PR, Math.min(BOT - PR, p.y)); p.run += Math.hypot(p.vx, p.vy) * 0.22;
+      p.x += p.vx; p.y += p.vy; p.x = Math.max(PR + 2, Math.min(W - PR - 2, p.x)); p.y = Math.max(TOP + PR, Math.min(BOT - PR, p.y)); { const sv2 = Math.hypot(p.vx, p.vy), L = look(p); p.run += sv2 * 0.22 * L.gait; if (!M.fast && sv2 > 1.15 && L.fx && M.t % 3 === 0) M.parts.push({ x: p.x - p.vx * 2, y: p.y - 3, vx: -p.vx * 0.15, vy: -0.2, l: 16, c: L.col, s: 2 }); }
       if (p.keeper) p.x = Math.max(p.team ? W - 60 : 8, Math.min(p.team ? W - 8 : 60, p.x));
     });
     if (!sprint || !M.hold.s) M.stam = Math.min(100, M.stam + 0.4);
@@ -180,10 +180,31 @@
     [[-MX + 2, 0], [W, 1]].forEach(([x0, rt]) => { g.fillStyle = "rgba(20,20,30,.55)"; g.fillRect(x0, GY0, MX - 2, GY1 - GY0); g.strokeStyle = "rgba(255,255,255,.4)"; g.lineWidth = 0.7; for (let y = GY0; y <= GY1; y += 4) { g.beginPath(); g.moveTo(x0, y); g.lineTo(x0 + MX - 2, y); g.stroke(); } for (let x = x0; x <= x0 + MX - 2; x += 4) { g.beginPath(); g.moveTo(x, GY0); g.lineTo(x, GY1); g.stroke(); } g.strokeStyle = "#fff"; g.lineWidth = 3; g.strokeRect(rt ? W - 1 : -MX + 2, GY0, MX - 1, GY1 - GY0); });
     g.restore(); return c;
   }
+  // dettagli per personaggio: aspetto, andatura e scia in base alla saga (supers.js) e al ruolo
+  function look(p) { if (p._lk) return p._lk; const s = p.keeper ? { fx: "", col: p.col } : supOf(p); return (p._lk = { fx: s.fx, col: s.col || p.col, gait: p.keeper ? 0.9 : p.role === "A" ? 1.18 : p.role === "D" ? 0.88 : 1 }); }
+  function accBack(g, p, L, bob, sgn, sv) {
+    const t = M.t, c = L.col; g.save();
+    if (L.fx === "vanish" || L.fx === "change") { const b = -sgn * (5 + sv * 4) + Math.sin(t * 0.2 + p.x) * 1.5; g.fillStyle = c + "bb"; g.beginPath(); g.moveTo(-4, -19 - bob); g.lineTo(4, -19 - bob); g.lineTo(b + 4, -4); g.lineTo(b - 4, -3); g.closePath(); g.fill(); }
+    if (L.fx === "spiral") { g.strokeStyle = c + "88"; g.lineWidth = 1; g.beginPath(); g.ellipse(0, -14 - bob, 10, 3.2, 0, Math.PI, 0); g.stroke(); }
+    g.restore();
+  }
+  function accFront(g, p, L, bob, hy) {
+    const t = M.t, c = L.col; g.save(); g.lineCap = "round";
+    if (L.fx === "fire") { for (let i = -1; i <= 1; i++) { const h = 6 + Math.sin(t * 0.5 + i * 2 + p.x) * 2 - Math.abs(i) * 1.6; g.fillStyle = i ? c : "#ffe066"; g.beginPath(); g.moveTo(i * 3 - 2, hy - 7); g.quadraticCurveTo(i * 3, hy - 7 - h, i * 3 + 2, hy - 7); g.fill(); } }
+    else if (L.fx === "thunder") { g.strokeStyle = "#fff6a8"; g.fillStyle = c; g.lineWidth = 1; g.beginPath(); g.moveTo(1.5, -19 - bob); g.lineTo(-2, -15 - bob); g.lineTo(1, -15 - bob); g.lineTo(-1.5, -11 - bob); g.lineTo(3, -16 - bob); g.lineTo(0, -16 - bob); g.closePath(); g.fill(); if (t % 40 < 5) { g.strokeStyle = c; g.beginPath(); g.moveTo(-9, hy - 4); g.lineTo(-5, hy - 9); g.lineTo(-7, hy - 10); g.lineTo(-3, hy - 14); g.stroke(); } }
+    else if (L.fx === "curve") { g.strokeStyle = c; g.lineWidth = 2; const sgn = p.vx >= 0 ? -1 : 1; g.beginPath(); g.moveTo(sgn * 7, hy - 3); g.bezierCurveTo(sgn * 12, hy - 6 + Math.sin(t * 0.3) * 3, sgn * 15, hy + 1, sgn * 20, hy - 2 + Math.sin(t * 0.3 + 1) * 4); g.stroke(); }
+    else if (L.fx === "zig") { g.strokeStyle = c; g.lineWidth = 1.6; g.beginPath(); g.moveTo(-5, -18 - bob); g.lineTo(-2, -15 - bob); g.lineTo(-5, -13 - bob); g.lineTo(5, -11 - bob); g.stroke(); }
+    else if (L.fx === "spiral") { const a = t * 0.18 + p.x; g.fillStyle = c; g.beginPath(); g.arc(Math.cos(a) * 10, -14 - bob + Math.sin(a) * 3.2, 1.8, 0, 7); g.fill(); }
+    else if (L.fx === "vanish") { g.fillStyle = c + "cc"; g.fillRect(-8, hy - 1, 16, 3.5); g.fillStyle = "#fff"; g.fillRect(-4, hy - 0.5, 2.5, 1.6); g.fillRect(2, hy - 0.5, 2.5, 1.6); }
+    else if (L.fx === "ice") { g.fillStyle = "#cfefff"; g.strokeStyle = c; g.lineWidth = 0.8; for (let i = -1; i <= 1; i++) { const h = 5 - Math.abs(i) * 1.2; g.beginPath(); g.moveTo(i * 3.2, hy - 7); g.lineTo(i * 3.2 - 1.6, hy - 7 - h * 0.6); g.lineTo(i * 3.2, hy - 7 - h); g.lineTo(i * 3.2 + 1.6, hy - 7 - h * 0.6); g.closePath(); g.fill(); g.stroke(); } }
+    else if (L.fx === "change") { g.strokeStyle = c; g.lineWidth = 1.6; g.globalAlpha = 0.6 + Math.sin(t * 0.2) * 0.35; g.beginPath(); g.ellipse(0, hy - 11, 6, 2, 0, 0, 7); g.stroke(); }
+    else if (L.fx === "drill") { g.fillStyle = "#b8bcc8"; g.strokeStyle = "#444"; g.lineWidth = 0.8; g.beginPath(); g.moveTo(-6, hy - 4); g.lineTo(0, hy - 14); g.lineTo(6, hy - 4); g.closePath(); g.fill(); g.stroke(); g.strokeStyle = c; g.beginPath(); g.moveTo(-3, hy - 8); g.lineTo(3, hy - 8); g.stroke(); }
+    g.restore();
+  }
   function fig(g, p) {
-    const sv = Math.hypot(p.vx, p.vy), sw = Math.sin(p.run) * Math.min(1, sv) * 4.2, bob = Math.abs(Math.sin(p.run)) * Math.min(1, sv) * 1.2, ko = p.stun > 0 && !p.slide;
+    const sv = Math.hypot(p.vx, p.vy), sw = Math.sin(p.run) * Math.min(1, sv) * 4.2, bob = Math.abs(Math.sin(p.run)) * Math.min(1, sv) * 1.2, ko = p.stun > 0 && !p.slide, L = look(p), cel = M.goalT > 0 && p.team === M.lastScorer ? (p === M.scorer ? 1 : 0.5) : 0, jy = cel ? -Math.abs(Math.sin(M.goalT * 0.22 + p.x)) * 9 * cel : 0, up = cel === 1, sgn = p.vx >= 0 ? 1 : -1;
     g.fillStyle = "rgba(0,0,0,.3)"; g.beginPath(); g.ellipse(p.x, p.y + 1, 8, 3, 0, 0, 7); g.fill();
-    g.save(); g.translate(p.x, p.y); if (p.slide > 0) { g.rotate(Math.atan2(p.sy, p.sx) * 0 + (p.sx >= 0 ? 1.2 : -1.2)); g.translate(0, -4); } if (ko) g.globalAlpha = 0.7 + Math.sin(M.t * 0.8) * 0.2;
+    g.save(); g.translate(p.x, p.y + jy); if (!p.keeper) accBack(g, p, L, bob, sgn, sv); if (p.slide > 0) { g.rotate(Math.atan2(p.sy, p.sx) * 0 + (p.sx >= 0 ? 1.2 : -1.2)); g.translate(0, -4); } if (ko) g.globalAlpha = 0.7 + Math.sin(M.t * 0.8) * 0.2;
     const sk = "#e8bc90";
     // gambe e calzettoni
     g.lineCap = "round"; g.strokeStyle = sk; g.lineWidth = 3; g.beginPath(); g.moveTo(-2.5, -8); g.lineTo(-3 + sw, -1 - bob * 0.2); g.moveTo(2.5, -8); g.lineTo(3 - sw, -1 - bob * 0.2); g.stroke();
@@ -194,10 +215,11 @@
     g.fillStyle = p.col; g.strokeStyle = "rgba(0,0,0,.6)"; g.lineWidth = 1; g.beginPath(); g.roundRect(-5.5, -20 - bob, 11, 10, 3); g.fill(); g.stroke();
     g.fillStyle = "rgba(255,255,255,.85)"; g.font = "bold 6px system-ui"; g.textAlign = "center"; g.fillText(p.num, 0, -12.6 - bob);
     // braccia
-    g.strokeStyle = p.keeper ? "#ffe066" : sk; g.lineWidth = p.keeper ? 3.4 : 2.4; g.beginPath(); g.moveTo(-5.5, -18 - bob); g.lineTo(-8 - sw * 0.5, -12 - bob); g.moveTo(5.5, -18 - bob); g.lineTo(8 + sw * 0.5, -12 - bob); g.stroke();
+    g.strokeStyle = p.keeper ? "#ffe066" : sk; g.lineWidth = p.keeper ? 3.4 : 2.4; g.beginPath(); g.moveTo(-5.5, -18 - bob); g.lineTo(up ? -9 : -8 - sw * 0.5, up ? -27 : -12 - bob); g.moveTo(5.5, -18 - bob); g.lineTo(up ? 9 : 8 + sw * 0.5, up ? -27 : -12 - bob); g.stroke();
     // testa = ritratto
     const im = imgOf(p.id), hy = -27 - bob; g.save(); g.beginPath(); g.arc(0, hy, 8, 0, 7); g.clip(); if (im && im.complete && im.naturalWidth && !p.keeper) g.drawImage(im, -8, hy - 8.5, 16, 16); else { g.fillStyle = p.keeper ? "#caa070" : sk; g.fillRect(-8, hy - 8, 16, 16); if (p.keeper) { g.fillStyle = "#222"; g.fillRect(-8, hy - 8, 16, 5); } } g.restore();
     g.strokeStyle = p.col; g.lineWidth = 2; g.beginPath(); g.arc(0, hy, 8, 0, 7); g.stroke();
+    if (!p.keeper) accFront(g, p, L, bob, hy);
     g.restore();
     if (ko) { g.strokeStyle = "#ffd23f"; g.lineWidth = 1.2; for (let i = 0; i < 3; i++) { const a = M.t * 0.15 + i * 2.1; g.beginPath(); g.arc(p.x + Math.cos(a) * 7, p.y - 36 + Math.sin(a) * 2.5, 1.3, 0, 7); g.stroke(); } }
     if (p === M.ctl) { g.fillStyle = "#ffd23f"; g.strokeStyle = "#000"; g.lineWidth = 1; g.beginPath(); g.moveTo(p.x, p.y - 41 + Math.sin(M.t * 0.15) * 2); g.lineTo(p.x - 5, p.y - 48 + Math.sin(M.t * 0.15) * 2); g.lineTo(p.x + 5, p.y - 48 + Math.sin(M.t * 0.15) * 2); g.closePath(); g.fill(); g.stroke(); }
