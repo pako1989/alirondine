@@ -21,6 +21,7 @@
 //     inv: { items: { id: { n: "Nome", icon: "🗝️", d: "descrizione", match: { at: 1, df: 0, te: 0 }, gift: { id_png: punti }, giftAny: 2, react: { id_png: "battuta" }, refuse: { id_png: "battuta" } } } },  // INVENTARIO: spec.loot = { "x,y": { id, text, empty } } (tessera con azione), K.inv.give/has/take/count/bonus("at"), 🎒 Zaino nel menu: i regali alzano i Rapporti, gli oggetti passivi danno bonus in partita finché li tieni
 //     plugins: [{ zone(zid, spec, Z, K), tick(zid, spec, px, py, dt, K), top(g, zid, spec, cx, cy, d, K), enter(zid, spec, K) }],
 //     rest: { ch: "s", label: "Riposa", text: "..." },
+//     alert: { max: 3, names: [...], rangeMul: 0.25, decay: true, hud: true, onChange(K, lv, old) },  // ALLERTA globale: ogni avvistamento +1 (K.alert.get/set/add), il raggio delle guardie cresce; hiding(K) → true = nascosto alle guardie
 //   });
 //   E.addChapter((K) => ({ n: 1, title, sub, goal(step), intro(), start: "zona", zones: {...}, patch: {...}, talk: {...}, obj: {...}, news(id, step) }));
 //   window.__vento = E.api;   // { open, menuEntry, endings, info, addChapter, ... }
@@ -537,20 +538,21 @@
       const L = spec.luci ? arr(safe(() => spec.luci(K), [])) : []; return !L.some(([tx, ty, r]) => Math.hypot(px - (tx * TS + 8), py - (ty * TS + 8)) < (r || 3) * TS * 0.7);
     }
     function guardTick(zid, spec, px, py) {
+      if (ALR && ALR_Z.zid !== zid) { ALR_Z.zid = zid; if (alLv() > 0 && ALR.decay !== false) ALERT.add(-1); }
       const gs = guardsOf(zid); if (!gs.length || window.__noGuards) return null; const G = GUARD; if (G.zid !== zid) { G.zid = zid; G.seen = 0; G.cool = 40; }
       gs.forEach((n) => { if (n.guard.turn && !(Array.isArray(n.route) && n.route.length > 1)) n.face = DIRS[Math.floor(frNow() / n.guard.turn) % 4]; n.__alert = 0; });
       if (G.cool > 0) { G.cool--; return null; }
-      const hid = spec.hide && spec.hide.includes(at(Math.floor(px / TS), Math.floor((py - 4) / TS))), dark = inDark(spec, px, py);
+      const hid = (spec.hide && spec.hide.includes(at(Math.floor(px / TS), Math.floor((py - 4) / TS)))) || (cfg.hiding && safe(() => cfg.hiding(K), false)), dark = inDark(spec, px, py);
       let by = null;
       if (!hid) gs.forEach((n) => {
-        const [gx, gy] = guardPos(n), dx = px - gx, dy = py - gy, d = Math.hypot(dx, dy), range = (n.guard.range || 4) * TS * (dark ? 0.5 : 1);
+        const [gx, gy] = guardPos(n), dx = px - gx, dy = py - gy, d = Math.hypot(dx, dy), range = (n.guard.range || 4) * TS * (dark ? 0.5 : 1) * alMul();
         if (d > range) return; let da = Math.atan2(dy, dx) - (FACE_A[n.face || "down"] || 0); while (da > Math.PI) da -= Math.PI * 2; while (da < -Math.PI) da += Math.PI * 2;
         if (Math.abs(da) > (n.guard.cone || 0.55) && d > 12) return; if (!sight(gx, gy, px, py)) return; by = n;
       });
       if (by) { G.seen++; by.__alert = G.seen; G.who = by; if (G.seen === 1) safe(() => tone(520, 0.08, "square", 0.03)); }
       else G.seen = Math.max(0, G.seen - 2);
       if (G.seen > 22) {
-        G.seen = 0; G.cool = 70; const back = spec.sneakStart || spec.start || [1, 1], who = G.who;
+        G.seen = 0; G.cool = 70; const back = spec.sneakStart || spec.start || [1, 1], who = G.who; if (ALR) ALERT.add(1);
         safe(() => tone(220, 0.35, "sawtooth", 0.05)); GUARD.caught = (GUARD.caught | 0) + 1;
         setTimeout(() => safe(() => (spec.onSeen ? spec.onSeen(K, who) : say([["voce", (cfg.texts && cfg.texts.seen) || "Ti hanno visto! Torni indietro, nell'ombra, e riprovi."]], done))), 0);
         return [back[0] * TS + 8, back[1] * TS + 12];
@@ -561,7 +563,7 @@
     function guardDraw(g, zid, cx, cy) {
       const gs = guardsOf(zid); if (!gs.length) return;
       gs.forEach((n) => {
-        const [gx, gy] = guardPos(n), fa = FACE_A[n.face || "down"] || 0, cone = n.guard.cone || 0.55, range = (n.guard.range || 4) * TS, alert = n.__alert || 0, N = 14;
+        const [gx, gy] = guardPos(n), fa = FACE_A[n.face || "down"] || 0, cone = n.guard.cone || 0.55, range = (n.guard.range || 4) * TS * alMul(), alert = n.__alert || 0, N = 14;
         g.save(); g.beginPath(); g.moveTo(gx - cx, gy - cy - 6);
         for (let i = 0; i <= N; i++) { const a = fa - cone + (cone * 2 * i) / N; let r = 6; while (r < range && !blocks(at(Math.floor((gx + Math.cos(a) * r) / TS), Math.floor((gy - 6 + Math.sin(a) * r) / TS)))) r += 4; g.lineTo(gx - cx + Math.cos(a) * r, gy - cy - 6 + Math.sin(a) * r); }
         g.closePath(); const gr = g.createRadialGradient(gx - cx, gy - cy - 6, 4, gx - cx, gy - cy - 6, range);
@@ -732,6 +734,7 @@
         if (spec.hud) safe(() => spec.hud(GP, K, stepOf(chN)));
         PLUG.forEach((p) => p.hud && safe(() => p.hud(GP, zid, spec, K)));
         if (CLK) safe(() => clkHud(GP));
+        if (ALR) safe(() => alHud(GP));
       };
       Z.onObj = function (ch, tx, ty) {
         let f = null;
@@ -1006,6 +1009,22 @@
       if (CLK.hud === false) return;
       const t = `Giorno ${clkDay()} · ${CLK.slots[sl]}`; g.save(); g.font = "bold 9px sans-serif";
       const w = g.measureText(t).width + 12; g.fillStyle = "rgba(0,0,0,.6)"; g.fillRect(4, c.height - 17, w, 13); g.fillStyle = "#fde68a"; g.fillText(t, 10, c.height - 7); g.restore();
+    }
+    // -------------------------------------------------------------- ALLERTA (cfg.alert, opt-in)
+    // cfg.alert = { max: 3, names: ["Calma", "Sospetto", "Allarme", "Caccia"], rangeMul: 0.25, decay: true, hud: true, onChange(K, lv, old) }
+    // Livello di allerta globale (flag al_lv). Ogni volta che una guardia ti vede sale di 1; entrando in un'altra zona scende di 1 (decay:false = no).
+    // A ogni livello il raggio delle guardie cresce di rangeMul (+25%); le zone possono leggere K.alert.get() in spec.npcs per aggiungere rinforzi.
+    // K.alert = { get, set(n), add(d), name(), max, mul() }. Senza cfg.alert non cambia nulla.
+    const ALR = cfg.alert ? Object.assign({ max: 3, names: ["Calma", "Sospetto", "Allarme", "Caccia"], rangeMul: 0.25, hud: true }, cfg.alert) : null, ALR_Z = { zid: "" };
+    const alLv = () => (ALR ? clampI(F.get("al_lv", 0) | 0, 0, ALR.max) : 0), alMul = () => (ALR ? 1 + ALR.rangeMul * alLv() : 1);
+    const ALERT = ALR && {
+      get: alLv, max: ALR.max, mul: alMul, name: () => ALR.names[alLv()] || "",
+      set(n) { const o = alLv(), v = clampI(n | 0, 0, ALR.max); if (v === o) return; F.set("al_lv", v); if (v > o) safe(() => tone(300 + v * 60, 0.25, "sawtooth", 0.04)); if (window.toast) window.toast(v > o ? `Allerta: ${ALR.names[v]}` : `Allerta calata: ${ALR.names[v]}`, v > o ? "warn" : "info", "⚠️"); if (ALR.onChange) safe(() => ALR.onChange(K, v, o)); refreshZone(); },
+      add(d) { ALERT.set(alLv() + d); }
+    };
+    function alHud(g) {
+      if (ALR.hud === false) return; const c = g.canvas, lv = alLv(), t = `⚠ ${ALR.names[lv] || ""}`, cols = ["#86efac", "#fde047", "#fb923c", "#f87171", "#f87171"];
+      g.save(); g.font = "bold 9px sans-serif"; const w = g.measureText(t).width + 12; g.fillStyle = "rgba(0,0,0,.6)"; g.fillRect(c.width - w - 4, 4, w, 13); g.fillStyle = cols[Math.min(lv, 4)]; g.fillText(t, c.width - w + 2, 14); g.restore();
     }
     const CLOCK = CLK && {
       SLOTS: CLK.slots, day: clkDay, slot: clkSlot, name: () => CLK.slots[clkSlot()], is: (n) => CLK.slots[clkSlot()] === n,
@@ -1351,7 +1370,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, rel: REL, inv: INV, crew: CRW, dossier: DOS, route: RTE, catch: CAT, steam: STM, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN,
+      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, dossier: DOS, route: RTE, catch: CAT, steam: STM, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN,
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
       ending: (id, d) => { ENDINGS[id] = d; },
       continueStory: () => continueStory(), hasChapter: (n) => !!CHAPTERS[n], setInMatch: (v) => { inMatch = !!v; }, openMain: () => openMain(),

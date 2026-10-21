@@ -333,6 +333,7 @@ Le funzioni dei **talk** ricevono `K` come parametro; l'`intro` di un capitolo r
   - forme dell'eroe (`pass`, `heroFx`);
   - luce dinamica (`buio`, `luci`);
   - **guardie con il cono di vista** (`guard`, `hide`, `sneakStart`, `onSeen`; nei test `window.__noGuards = true`);
+  - **Allerta e nascondiglio** (`cfg.alert = { max, names, rangeMul, decay, hud, onChange }`, opzionale): `K.alert.get/add/reset`; ogni avvistamento alza l'Allerta, il raggio delle guardie cresce di `rangeMul` per livello e l'Allerta cala cambiando zona. `cfg.hiding = (K) => bool` rende il Campione invisibile alle guardie (scatola, ombra, armadio). Esempio: `vuota.js`.
   - **effetto diorama** tilt-shift (`cfg.diorama` o `spec.diorama`);
   - **pagina «👥 Personaggi»** dentro ogni saga (si riempie da sola con i personaggi incontrati);
   - **scelte a tempo** (`ask(..., { secs, def })`, nei test `K.timedFire()`);
