@@ -1,22 +1,23 @@
 // js/corsa.js - «Gran Premio dei Sogni»: corsa a squadre con i personaggi della Squadra dei Sogni (js/sogni.js).
-// Vista dall'alto, tre piste. Tu guidi un pilota (gas automatico: sterzi, usi Turbo e Abilità), gli altri due della tua squadra corrono da soli;
+// Due visuali: da dietro (pseudo-3D, joystick analogico) o dall'alto (la vecchia). Tre piste. Tu guidi un pilota (gas automatico: sterzi, usi Turbo e Abilità), gli altri due della tua squadra corrono da soli;
 // i punti dei tre si sommano contro la squadra rivale (3 piloti) e due indipendenti. Il campionato dura tre gare.
 // Corsia interna = percorso più corto, ma la curva spinge fuori: serve sterzare. Scia (stare dietro un rivale) = piccolo bonus.
 (function () {
   "use strict";
   if (window.__corsa) return;
-  const KEY = "ali-di-rondine.corsa", W = 380, H = 230, HW = 36, LAPS = 2, PTS = [10, 7, 5, 4, 3, 2, 1, 0], SC = 1.5;
+  const KEY = "ali-di-rondine.corsa", W = 380, H = 230, HW = 36, LAPS = 2, PTS = [10, 7, 5, 4, 3, 2, 1, 0], SC = 1.5, SS = 2, HY = 88, DZ = 5, NSEG = 110;
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const safe = (fn, d) => { try { return fn(); } catch (e) { return d; } };
   const S = () => window.__sogni;
+  const clampN = (v, a, b) => Math.max(a, Math.min(b, v));
   const ABIL = { A: ["Scia di Fuoco", "scatto lungo", 30], C: ["Scorciatoia", "balzo in avanti", 40], D: ["Muro", "scudo e spinta ai vicini", 30], P: ["Chiazza d'olio", "trappola dietro di te", 25] };
   const TRACKS = [
-    { id: "mare", n: "Lungomare del Borgo", ground: "#c9b27a", road: "#4a4f5c", edge: "#fff", deco: ["🌴", "🏖️", "⛱️", "🌊"], pts: [[0, 0], [260, -30], [520, 40], [640, 220], [520, 400], [250, 430], [60, 330], [-160, 400], [-340, 250], [-250, 40]] },
-    { id: "neve", n: "Valico Innevato", ground: "#e8f0fa", road: "#6a7488", edge: "#e8603a", deco: ["🌲", "⛄", "🏔️", "❄️"], pts: [[0, 0], [300, 20], [450, -120], [650, -60], [700, 180], [500, 300], [280, 240], [200, 420], [-80, 430], [-240, 250], [-200, 60]] },
-    { id: "neon", n: "Circuito Neon", ground: "#14102a", road: "#272342", edge: "#ff4fd8", deco: ["💡", "🌆", "🛸", "✨"], pts: [[0, 0], [220, 60], [440, -20], [600, 120], [560, 330], [320, 420], [120, 300], [-60, 420], [-300, 360], [-380, 160], [-200, -20]] },
+    { id: "mare", n: "Lungomare del Borgo", ground: "#c9b27a", road: "#4a4f5c", edge: "#fff", deco: ["🌴", "🏖️", "⛱️", "🌊"], sky: ["#4aa8f0", "#e8f6ff"], hill: ["#7ab8c8", "#4a9a6a"], grass: ["#c9b27a", "#bda56c"], pts: [[0, 0], [260, -30], [520, 40], [640, 220], [520, 400], [250, 430], [60, 330], [-160, 400], [-340, 250], [-250, 40]] },
+    { id: "neve", n: "Valico Innevato", ground: "#e8f0fa", road: "#6a7488", edge: "#e8603a", deco: ["🌲", "⛄", "🏔️", "❄️"], sky: ["#8aa0c8", "#eef4fc"], hill: ["#b8c8e0", "#8aa0c0"], grass: ["#e8f0fa", "#d8e4f2"], pts: [[0, 0], [300, 20], [450, -120], [650, -60], [700, 180], [500, 300], [280, 240], [200, 420], [-80, 430], [-240, 250], [-200, 60]] },
+    { id: "neon", n: "Circuito Neon", ground: "#14102a", road: "#272342", edge: "#ff4fd8", deco: ["💡", "🌆", "🛸", "✨"], sky: ["#06021a", "#4a0a6a"], hill: ["#1a1040", "#2a1460"], grass: ["#14102a", "#1a1436"], neon: 1, pts: [[0, 0], [220, 60], [440, -20], [600, 120], [560, 330], [320, 420], [120, 300], [-60, 420], [-300, 360], [-380, 160], [-200, -20]] },
   ];
   let OV = null, BACK = null, R = null, RAF = 0, PAUSE = false;
-  const load = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { champ: r.champ | 0, wins: r.wins | 0, best: r.best || {} }; };
+  const load = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { champ: r.champ | 0, wins: r.wins | 0, best: r.best || {}, view: r.view === "top" ? "top" : "rear" }; };
   const save = (r) => safe(() => localStorage.setItem(KEY, JSON.stringify(r)), 0);
   const name = (id) => safe(() => S().name(id), id);
   const rlOf = (c) => { if (ABIL[c.role]) return c.role; const e = safe(() => S().eff(c), c); return { at: "A", te: "C", df: "D" }[e.at >= e.df && e.at >= e.te ? "at" : e.df >= e.te ? "df" : "te"]; };
@@ -34,7 +35,8 @@
     for (let i = 0; i < N; i++) { const a = cs[(i + N - 2) % N], b = cs[(i + 2) % N], dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy); T.tan.push([dx / l, dy / l]); }
     for (let i = 0; i < N; i++) { const a = T.tan[(i + N - 3) % N], b = T.tan[(i + 3) % N]; let da = Math.atan2(b[1], b[0]) - Math.atan2(a[1], a[0]); while (da > Math.PI) da -= 2 * Math.PI; while (da < -Math.PI) da += 2 * Math.PI; T.k.push(da / (6 * STEP)); }
     // decorazioni fisse
-    const rr = seeded(T.id.length * 977 + 3); T.decor = []; for (let i = 0; i < N; i += 7) { const sd = rr() < 0.5 ? -1 : 1, off = HW + 26 + rr() * 70, c = cs[i], t = T.tan[i]; T.decor.push([c[0] - t[1] * off * sd, c[1] + t[0] * off * sd, T.deco[Math.floor(rr() * T.deco.length)], 11 + rr() * 9]); }
+    const rr = seeded(T.id.length * 977 + 3); T.decor = []; for (let i = 0; i < N; i += 7) { const sd = rr() < 0.5 ? -1 : 1, off = HW + 26 + rr() * 70, c = cs[i], t = T.tan[i]; T.decor.push([c[0] - t[1] * off * sd, c[1] + t[0] * off * sd, T.deco[Math.floor(rr() * T.deco.length)], 11 + rr() * 9, i * STEP, (sd * off) / HW]); }
+    { let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; cs.forEach((c) => { x0 = Math.min(x0, c[0]); x1 = Math.max(x1, c[0]); y0 = Math.min(y0, c[1]); y1 = Math.max(y1, c[1]); }); T.bb = [x0, y0, x1, y1]; }
     // bonus e chiazze d'olio fisse sul percorso (un po' variabili con il seme della gara)
     return T;
   }
@@ -72,7 +74,7 @@
     const T = R.T; if (r.fin) { r.v *= 0.97; r.prog += r.v; return; }
     if (r.stun > 0) r.stun--; if (r.cd > 0) r.cd--; if (r.shield > 0) r.shield--; if (r.boost > 0) r.boost--;
     if (inp.t) turbo(r); if (inp.a) useAbil(r);
-    const a = at(T, r.prog), steer = ((inp.r ? 1 : 0) - (inp.l ? 1 : 0)) * 0.034 * r.grip * (r.stun > 0 ? 0.3 : 1);
+    const a = at(T, r.prog), steer = (inp.sx != null ? inp.sx : (inp.r ? 1 : 0) - (inp.l ? 1 : 0)) * 0.034 * r.grip * (r.stun > 0 ? 0.3 : 1);
     // la curva spinge verso l'esterno (k>0 = si gira verso destra: la forza va a sinistra)
     r.w = r.w * 0.82 + (-a.k * r.v * r.v * 1.9) * (r.hold) ;
     r.lat += steer + r.w * 0.1; if (r.lat > 1 || r.lat < -1) { r.lat = Math.max(-1, Math.min(1, r.lat)); r.v *= 0.93; r.wall = 8; } else if (r.wall > 0) r.wall--;
@@ -94,7 +96,7 @@
   function tick() {
     if (!R || R.over) return; R.t++; R.fxs = R.fxs.filter((x) => --x.l > 0);
     if (R.t < 0) return; const e = R.edge; R.edge = {};
-    R.racers.forEach((r) => stepR(r, r.human ? Object.assign({}, R.inp, e) : aiIn(r)));
+    R.racers.forEach((r) => { let inp = null; if (r.human) { inp = Object.assign({}, R.inp, e); const sv = R.stk && R.stk.v; if (sv && sv.m > 0) inp.sx = sv.x; R.leanIn = inp.sx != null ? inp.sx : (inp.r ? 1 : 0) - (inp.l ? 1 : 0); } stepR(r, inp || aiIn(r)); });
     R.items.forEach((it) => { if (!it.on && --it.t <= 0) it.on = 1; }); R.oils.forEach((o) => o.l--);
     collide();
     if (R.me.fin && !R.over) { R.after = (R.after || 0) + 1; if (R.after > (R.fast ? 1 : 420) || R.racers.every((r) => r.fin)) finish(); }
@@ -104,7 +106,8 @@
     R.pts = pts; R.over = true; R.myPos = order.indexOf(R.me) + 1; const f = R.cfg.onEnd; setTimeout(() => f && f(R), R.fast ? 0 : 600);
   }
   // ------------------------------------------------------------ disegno
-  function draw(g) {
+  function draw(g) { g.setTransform(SS, 0, 0, SS, 0, 0); if (R.cfg.view === "rear") draw3(g); else drawTop(g); }
+  function drawTop(g) {
     const T = R.T, me = R.me, p = pos(T, me.prog, me.lat), cx = p[0], cy = p[1];
     g.fillStyle = T.ground; g.fillRect(0, 0, W, H); g.save(); g.translate(W / 2, H / 2); g.scale(SC, SC); g.translate(-cx, -cy);
     const vx = W / 2 / SC + 60, vy = H / 2 / SC + 60;
@@ -120,7 +123,10 @@
     R.items.forEach((it) => { if (!it.on) return; const q = pos(T, it.s, it.lat); if (Math.abs(q[0] - cx) > vx || Math.abs(q[1] - cy) > vy) return; g.font = "14px serif"; g.fillText(it.k === "e" ? "⚡" : "🔶", q[0], q[1] + 5); });
     R.oils.forEach((o) => { const q = pos(T, o.s, o.lat); g.fillStyle = "#000b"; g.beginPath(); g.ellipse(q[0], q[1], 10, 7, q[2], 0, 7); g.fill(); });
     R.racers.slice().sort((a, b) => a.prog - b.prog).forEach((r) => kart(g, r, T));
-    g.restore();
+    g.restore(); hud(g);
+  }
+  function hud(g) {
+    const T = R.T, me = R.me;
     g.fillStyle = "#000a"; g.fillRect(0, 0, W, 26); g.fillStyle = "#fff"; g.font = "bold 12px system-ui"; g.textAlign = "left"; const ord = place(), pl = ord.indexOf(me) + 1;
     g.fillText(`${pl}° / ${R.racers.length}`, 8, 17); g.textAlign = "center"; g.fillText(`Giro ${Math.min(LAPS, me.laps + 1)}/${LAPS}`, W / 2, 17); g.textAlign = "right"; g.fillText(T.n, W - 8, 17);
     // barre energia e abilità
@@ -129,6 +135,75 @@
     R.fxs.forEach((x) => { if (x.r !== me) return; g.globalAlpha = x.l / 40; g.fillStyle = "#ffd23f"; g.font = "bold 16px system-ui"; g.textAlign = "center"; g.fillText(x.t, W / 2, H / 2 - 40 - (40 - x.l)); g.globalAlpha = 1; });
     if (R.t < 0) { g.fillStyle = "#0008"; g.fillRect(0, 80, W, 60); g.fillStyle = "#ffd23f"; g.font = "900 38px system-ui"; g.textAlign = "center"; g.fillText(Math.ceil(-R.t / 60), W / 2, 124); } else if (R.t < 50) { g.fillStyle = "#ffd23f"; g.font = "900 30px system-ui"; g.textAlign = "center"; g.fillText("VIA!", W / 2, 124); }
     if (me.fin && !R.over) { g.fillStyle = "#0008"; g.fillRect(0, 90, W, 44); g.fillStyle = "#fff"; g.font = "900 22px system-ui"; g.textAlign = "center"; g.fillText(`Traguardo! ${pl}° posto`, W / 2, 120); }
+  }
+  // ------------------------------------------------------------ vista da dietro (pseudo-3D)
+  const F3 = 91.6, D0 = 14, HC = 21.7, KG = 1.25;
+  const quad = (g, xa, xb, ya, xc, xd, yb) => { g.beginPath(); g.moveTo(xa, ya); g.lineTo(xb, ya); g.lineTo(xd, yb); g.lineTo(xc, yb); g.closePath(); g.fill(); };
+  function scenery(g, T, head) {
+    const off = head * 230;
+    if (T.neon) { const sx = ((W * 0.62 - off * 0.12) % (W + 160) + (W + 160)) % (W + 160) - 80; const gr = g.createLinearGradient(0, HY - 70, 0, HY); gr.addColorStop(0, "#ff4fd8"); gr.addColorStop(1, "#ffd23f"); g.fillStyle = gr; g.beginPath(); g.arc(sx, HY - 30, 36, Math.PI, 0); g.fill(); g.fillStyle = T.sky[0]; for (let i = 0; i < 5; i++) g.fillRect(sx - 40, HY - 28 + i * 6, 80, 1.5 + i * 0.6); }
+    else if (T.id === "mare") { const sx = ((W * 0.3 - off * 0.1) % (W + 160) + (W + 160)) % (W + 160) - 80; g.fillStyle = "rgba(255,248,200,.95)"; g.beginPath(); g.arc(sx, HY - 44, 20, 0, 7); g.fill(); g.fillStyle = "rgba(255,248,200,.25)"; g.beginPath(); g.arc(sx, HY - 44, 34, 0, 7); g.fill(); }
+    [[0.25, 38, 0.014, T.hill[0]], [0.55, 24, 0.03, T.hill[1]]].forEach(([k, amp, fr, col], L) => {
+      g.fillStyle = col; g.beginPath(); g.moveTo(-4, HY + 1);
+      for (let x = -4; x <= W + 8; x += 6) { const u = x + off * k; let h; if (T.neon) { const cell = Math.floor(u / 15); h = 8 + ((cell * 2654435761 >>> 0) % (L ? 26 : 46)); h = (u % 15 + 15) % 15 < 13 ? h : 0; g.lineTo(x, HY - h); continue; } h = amp * (0.55 + 0.45 * Math.sin(u * fr + L * 2.1)) + amp * 0.45 * Math.sin(u * fr * 2.7 + 1 + L); g.lineTo(x, HY - h); }
+      g.lineTo(W + 8, HY + 1); g.closePath(); g.fill();
+      if (T.neon && L === 0) { g.fillStyle = "rgba(255,79,216,.18)"; g.fillRect(0, HY - 2, W, 3); }
+    });
+  }
+  function kartRear(g, x, y, u, r, tilt) {
+    g.save(); g.translate(x, y); g.rotate(tilt || 0); if (r.stun > 0) g.rotate(Math.sin(R.t * 0.5) * 0.35);
+    g.fillStyle = "rgba(0,0,0,.35)"; g.beginPath(); g.ellipse(0, 3 * u, 17 * u, 4.6 * u, 0, 0, 7); g.fill();
+    g.fillStyle = "#15151c"; g.fillRect(-16 * u, -9 * u, 6 * u, 11 * u); g.fillRect(10 * u, -9 * u, 6 * u, 11 * u); g.fillStyle = "#34343f"; g.fillRect(-15 * u, -9 * u, 2 * u, 11 * u); g.fillRect(11 * u, -9 * u, 2 * u, 11 * u);
+    if (r.boost > 0 && !R.fast) { for (let k = 0; k < 2; k++) { g.fillStyle = k ? "#fff3a0" : "#ff9a2a"; g.beginPath(); g.moveTo((k ? 4 : 8) * u, -3 * u); g.lineTo(6 * u * (k ? 0.5 : 1) , (6 + Math.random() * 6) * u); g.lineTo(0, -3 * u); g.lineTo(-6 * u * (k ? 0.5 : 1), (6 + Math.random() * 6) * u); g.lineTo(-8 * u, -3 * u); g.fill(); } }
+    g.fillStyle = r.col; g.strokeStyle = "#111"; g.lineWidth = Math.max(1, u * 0.6); g.beginPath(); g.roundRect(-11 * u, -14 * u, 22 * u, 14 * u, 4 * u); g.fill(); g.stroke();
+    g.fillStyle = "rgba(255,255,255,.3)"; g.fillRect(-9 * u, -12 * u, 18 * u, 2.4 * u); g.fillStyle = "#111"; g.fillRect(-14 * u, -19 * u, 28 * u, 3.4 * u); g.fillRect(-9 * u, -19 * u, 2 * u, 6 * u); g.fillRect(7 * u, -19 * u, 2 * u, 6 * u);
+    g.fillStyle = "#ff3a3a"; g.fillRect(-9 * u, -6 * u, 4 * u, 2.2 * u); g.fillRect(5 * u, -6 * u, 4 * u, 2.2 * u);
+    const im = imgOf(r.id), hr = 7.4 * u; g.save(); g.beginPath(); g.arc(0, -22 * u, hr, 0, 7); g.clip(); if (im && im.complete && im.naturalWidth) g.drawImage(im, -hr, -22 * u - hr, hr * 2, hr * 2); else { g.fillStyle = "#e8c8a0"; g.fillRect(-hr, -22 * u - hr, hr * 2, hr * 2); } g.restore();
+    g.strokeStyle = r.human ? "#ffd23f" : r.col; g.lineWidth = Math.max(1, u * (r.human ? 1 : 0.7)); g.beginPath(); g.arc(0, -22 * u, hr, 0, 7); g.stroke();
+    if (r.shield > 0) { g.strokeStyle = "#9ad8ff"; g.lineWidth = Math.max(1, u * 0.7); g.beginPath(); g.arc(0, -12 * u, 24 * u, 0, 7); g.stroke(); }
+    g.restore();
+  }
+  function draw3(g) {
+    const T = R.T, me = R.me, a0 = at(T, me.prog), head = Math.atan2(a0.t[1], a0.t[0]), len = T.len, camX = me.lat * HW;
+    g.save(); if ((me.wall > 0 || me.stun > 0) && !R.fast) g.translate((Math.random() - 0.5) * 3, (Math.random() - 0.5) * 2);
+    const sk = g.createLinearGradient(0, 0, 0, HY); sk.addColorStop(0, T.sky[0]); sk.addColorStop(1, T.sky[1]); g.fillStyle = sk; g.fillRect(-4, -4, W + 8, HY + 5);
+    scenery(g, T, head); g.fillStyle = T.grass[0]; g.fillRect(-4, HY, W + 8, H - HY + 4);
+    const seg = []; let th = 0, xo = 0;
+    for (let i = 0; i <= NSEG; i++) { const d = i * DZ, sc = F3 / (d + D0), a = at(T, me.prog + d); seg.push({ d, sc, y: HY + HC * sc, cx: W / 2 + (xo - camX) * sc, hw: HW * sc, s: me.prog + d }); th += a.k * DZ * KG; xo += th * DZ * 0.85; }
+    // sprite: raggruppati per segmento
+    const bk = []; for (let i = 0; i < NSEG; i++) bk.push([]);
+    const rel = (s) => (((s - me.prog) % len) + len * 1.5) % len - len / 2;
+    const put = (s, lat, o) => { const d = rel(s); if (d < 0.5 || d >= NSEG * DZ - 1) return; const i = Math.floor(d / DZ), u = d / DZ - i, A = seg[i], B = seg[i + 1]; o.sc = A.sc + (B.sc - A.sc) * u; o.y = A.y + (B.y - A.y) * u; o.x = A.cx + (B.cx - A.cx) * u + lat * (A.hw + (B.hw - A.hw) * u); o.d = d; bk[i].push(o); };
+    T.decor.forEach((dc) => { if (dc[4] != null) put(dc[4], dc[5], { k: "d", e: dc[2], z: dc[3] }); });
+    R.items.forEach((it) => { if (it.on) put(it.s, it.lat, { k: "i", e: it.k === "e" ? "⚡" : "🔶" }); });
+    R.oils.forEach((o) => put(o.s, o.lat, { k: "o" }));
+    R.racers.forEach((r) => { if (r !== me) put(r.prog, r.lat, { k: "r", r }); });
+    for (let i = NSEG - 1; i >= 0; i--) {
+      const a = seg[i], b = seg[i + 1], st = Math.floor(a.s / (DZ * 3)) & 1;
+      if (b.y < a.y) {
+        g.fillStyle = T.grass[st]; g.fillRect(-4, b.y, W + 8, a.y - b.y + 1);
+        g.fillStyle = st ? T.edge : (T.neon ? "#22d8ff" : "#f4f0e4"); quad(g, b.cx - b.hw * 1.14, b.cx + b.hw * 1.14, b.y, a.cx - a.hw * 1.14, a.cx + a.hw * 1.14, a.y);
+        g.fillStyle = st ? T.road : (T.neon ? "#2f2a52" : "#555b69"); quad(g, b.cx - b.hw, b.cx + b.hw, b.y, a.cx - a.hw, a.cx + a.hw, a.y);
+        if (st) { g.fillStyle = "rgba(255,255,255,.55)"; quad(g, b.cx - b.hw * 0.025, b.cx + b.hw * 0.025, b.y, a.cx - a.hw * 0.025, a.cx + a.hw * 0.025, a.y); }
+        if (Math.floor(a.s / len) !== Math.floor(b.s / len)) { for (let k = 0; k < 10; k++) { g.fillStyle = k & 1 ? "#fff" : "#111"; const x0 = -1 + k * 0.2; quad(g, b.cx + b.hw * x0, b.cx + b.hw * (x0 + 0.2), b.y, a.cx + a.hw * x0, a.cx + a.hw * (x0 + 0.2), a.y); } }
+      }
+      bk[i].sort((p, q) => q.d - p.d).forEach((o) => {
+        if (o.k === "d") { g.font = Math.max(6, o.z * o.sc * 1.5) + "px serif"; g.textAlign = "center"; g.fillStyle = "#fff"; g.fillText(o.e, o.x, o.y); }
+        else if (o.k === "i") { g.font = Math.max(6, 15 * o.sc * 1.6) + "px serif"; g.textAlign = "center"; g.fillText(o.e, o.x, o.y - 4 * o.sc); }
+        else if (o.k === "o") { g.fillStyle = "rgba(0,0,0,.78)"; g.beginPath(); g.ellipse(o.x, o.y, HW * 0.3 * o.sc, HW * 0.09 * o.sc, 0, 0, 7); g.fill(); g.fillStyle = "rgba(120,120,255,.25)"; g.beginPath(); g.ellipse(o.x - 2 * o.sc, o.y - 0.5 * o.sc, HW * 0.12 * o.sc, HW * 0.03 * o.sc, 0, 0, 7); g.fill(); }
+        else { kartRear(g, o.x, o.y, o.sc * 0.37, o.r, 0); if (o.d < 260) { g.font = "bold " + Math.max(7, Math.min(11, 11 * o.sc * 0.5)) + "px system-ui"; g.textAlign = "center"; g.fillStyle = o.r.col; g.strokeStyle = "#000"; g.lineWidth = 2.5; const ty = o.y - 36 * o.sc * 0.37 - 6; g.strokeText(o.r.n.split(" ")[0], o.x, ty); g.fillText(o.r.n.split(" ")[0], o.x, ty); } }
+      });
+    }
+    // pilota (sempre davanti, in basso)
+    R.lean = (R.lean || 0) * 0.8 + 0.2 * (R.leanIn || 0); const lean = R.lean, slide = clampN(me.w * 6, -1, 1);
+    if ((me.boost > 0 || me.v > me.vmax * 1.2) && !R.fast) { g.strokeStyle = "rgba(255,255,255,.3)"; g.lineWidth = 1.2; for (let i = 0; i < 14; i++) { const a = R.t * 0.37 + i * 2.1, rx = W / 2 + Math.cos(a) * (60 + (i * 37) % 120), ry = HY + 20 + Math.abs(Math.sin(a * 1.3)) * 100; g.beginPath(); g.moveTo(rx, ry); g.lineTo(rx + (rx - W / 2) * 0.25, ry + (ry - HY) * 0.25); g.stroke(); } }
+    kartRear(g, W / 2 + lean * 10 + slide * 4, H - 30, 2.35, me, lean * 0.1 + slide * 0.08);
+    g.restore(); hud(g);
+    // contachilometri e minimappa
+    g.textAlign = "center"; g.fillStyle = "#fff"; g.strokeStyle = "#000"; g.lineWidth = 3; g.font = "900 20px system-ui"; g.strokeText(Math.round(me.v * 95), W - 34, 94); g.fillText(Math.round(me.v * 95), W - 34, 94); g.font = "bold 8px system-ui"; g.fillText("km/h", W - 34, 104);
+    const bb = T.bb, mw = 62, mh = 44, k = Math.min((mw - 8) / (bb[2] - bb[0]), (mh - 8) / (bb[3] - bb[1])), mx = (x) => W - mw - 4 + 4 + (x - bb[0]) * k + ((mw - 8) - (bb[2] - bb[0]) * k) / 2, my = (y) => 30 + 4 + (y - bb[1]) * k + ((mh - 8) - (bb[3] - bb[1]) * k) / 2;
+    g.fillStyle = "rgba(0,0,0,.5)"; g.beginPath(); g.roundRect(W - mw - 4, 30, mw, mh, 6); g.fill(); g.strokeStyle = "rgba(255,255,255,.6)"; g.lineWidth = 2; g.beginPath(); T.cs.forEach((c, i) => { if (i % 3) return; i ? g.lineTo(mx(c[0]), my(c[1])) : g.moveTo(mx(c[0]), my(c[1])); }); g.closePath(); g.stroke();
+    R.racers.forEach((r) => { const q = pos(T, r.prog, 0); g.fillStyle = r.human ? "#ffd23f" : r.col; g.beginPath(); g.arc(mx(q[0]), my(q[1]), r.human ? 3.2 : 2, 0, 7); g.fill(); });
   }
   const IMG = {}; const imgOf = (id) => { if (IMG[id] !== undefined) return IMG[id]; const u = safe(() => S().port(id), null); if (!u) return (IMG[id] = null); const i = new Image(); i.src = u; return (IMG[id] = i); };
   function kart(g, r, T) {
@@ -150,7 +225,7 @@
 .crOv .sum{font-size:13px;line-height:1.45;opacity:.9}.crOv .sec{margin:12px 0 6px;font-weight:800;font-size:13px;color:#c8b8ff}
 .crOv .one{width:100%;min-height:54px;border-radius:10px;border:1px solid #4a3a6a;background:#221a36;color:#f4f0e4;font:800 14px system-ui;text-align:left;padding:8px 10px;margin:5px 0}.crOv .one small{display:block;font-weight:400;font-size:11px;opacity:.75}.crOv button:disabled{opacity:.4}
 .crOv canvas{display:block;width:100%;max-width:520px;margin:0 auto;height:auto;border-radius:10px;background:#000}
-.crCtl{display:flex;justify-content:space-between;gap:10px;margin-top:8px;touch-action:none;user-select:none;-webkit-user-select:none}.crCtl button{border-radius:14px;border:1px solid #4a3a6a;background:#221a36;color:#f4f0e4;font:800 15px system-ui;padding:4px;touch-action:none;min-height:64px}.crCtl .st{display:grid;grid-template-columns:64px 64px;gap:6px}.crCtl .ac{display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1}.crCtl button.on,.crCtl button:active{background:#5a3aa8}.crCtl .tb{background:#7a5a10;color:#ffe9a8}.crCtl .ab{background:#2a4a7a}.crCtl small{display:block;font-weight:400;font-size:9px;opacity:.8}
+.crCtl{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;touch-action:none;user-select:none;-webkit-user-select:none}.crCtl button{border-radius:14px;border:1px solid #4a3a6a;background:#221a36;color:#f4f0e4;font:800 15px system-ui;padding:4px;touch-action:none;min-height:64px}.crCtl .st{display:grid;grid-template-columns:64px 64px;gap:6px}.crCtl .ac{display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1}.crCtl button.on,.crCtl button:active{background:#5a3aa8}.crCtl .tb{background:#7a5a10;color:#ffe9a8}.crCtl .ab{background:#2a4a7a}.crCtl small{display:block;font-weight:400;font-size:9px;opacity:.8}
 .crTab{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0}.crTab td{padding:5px 4px;border-top:1px solid #2a2040}.crTab tr.me td{color:#ffd23f;font-weight:800}.crRes{text-align:center;margin:10px 0}.crRes h3{font:900 24px system-ui;margin:4px 0}`;
     document.head.appendChild(st);
   }
@@ -162,8 +237,9 @@
   const ku = (e) => { const k = KM[e.key]; if (k && R && k !== "t" && k !== "a") R.inp[k] = 0; };
   function press(k, on) { if (!R) return; if (k === "t" || k === "a") { if (on) R.edge[k] = 1; } else R.inp[k] = on ? 1 : 0; }
   function raceUI(cfg) {
-    const body = shell(cfg.title || "🏁 Gran Premio dei Sogni"); begin(cfg); const me = R.me;
-    body.innerHTML = `<canvas width="${W}" height="${H}"></canvas><div class="crCtl"><div class="st"><button data-k="l">◀</button><button data-k="r">▶</button></div><div class="ac"><button data-k="t" class="tb">⚡ Turbo<small>25 energia</small></button><button data-k="a" class="ab">✦ ${esc(ABIL[me.role][0])}<small>${esc(ABIL[me.role][1])}</small></button></div></div><p class="sum" style="font-size:11px;opacity:.65;margin-top:6px">Il gas è automatico. Sterza ◀ ▶: dentro la curva si risparmia strada, ma la curva ti spinge fuori. ⚡ e 🔶 sulla pista ricaricano l'energia o danno turbo. Stare dietro un rivale dà scia. Tasti: frecce, spazio turbo, K abilità.</p>`;
+    const body = shell(cfg.title || "🏁 Gran Premio dei Sogni"); begin(cfg); const me = R.me, rear = cfg.view === "rear";
+    body.innerHTML = `<canvas width="${W * SS}" height="${H * SS}"></canvas><div class="crCtl">${rear ? `<div class="stkSlot"></div>` : `<div class="st"><button data-k="l">◀</button><button data-k="r">▶</button></div>`}<div class="ac"><button data-k="t" class="tb">⚡ Turbo<small>25 energia</small></button><button data-k="a" class="ab">✦ ${esc(ABIL[me.role][0])}<small>${esc(ABIL[me.role][1])}</small></button></div></div><p class="sum" style="font-size:11px;opacity:.65;margin-top:6px">Il gas è automatico. ${rear ? "Joystick ◀▶: sterza (più lo spingi, più giri)." : "Sterza ◀ ▶."} Dentro la curva si risparmia strada, ma la curva ti spinge fuori. ⚡ e 🔶 sulla pista ricaricano l'energia o danno turbo. Stare dietro un rivale dà scia. Tasti: frecce, spazio turbo, K abilità.</p>`;
+    if (rear && window.__stick) { R.stk = window.__stick.make({ size: 118 }); body.querySelector(".stkSlot").appendChild(R.stk.el); }
     const cv = body.querySelector("canvas"), g = cv.getContext("2d");
     body.querySelectorAll("[data-k]").forEach((b) => { const k = b.dataset.k, up = () => { press(k, false); b.classList.remove("on"); }; b.addEventListener("pointerdown", (e) => { e.preventDefault(); press(k, true); b.classList.add("on"); }); b.addEventListener("pointerup", up); b.addEventListener("pointercancel", up); b.addEventListener("pointerleave", up); });
     window.addEventListener("keydown", kd); window.addEventListener("keyup", ku);
@@ -186,7 +262,8 @@
   }
   function menu(back) {
     if (back) BACK = back; const body = shell("🏁 Gran Premio dei Sogni"), r = load(), team = myTeam();
-    body.innerHTML = `<p class="sum">Corsa a squadre con i personaggi delle saghe: <b>guidi uno dei tuoi tre piloti</b>, gli altri due corrono da soli e i punti di tutti e tre si sommano contro la squadra rivale. Scia, turbo, abilità di ruolo e chiazze d'olio.</p><div class="sec">La tua squadra (dalla Squadra dei Sogni)</div><p class="sum">${team.map((c) => `<b>${esc(name(c.id))}</b> (${esc(ABIL[rlOf(c)][0])})`).join(" · ")}</p><div class="sec">Modalità</div><button type="button" class="one" data-go="champ">🏆 Campionato dei Sogni<small>3 gare su 3 piste · ${r.champ ? "vinto " + r.champ + " volte" : "mai vinto"} · premi in monete</small></button>${TRACKS.map((t, i) => `<button type="button" class="one" data-t="${i}">🏁 ${esc(t.n)}<small>gara singola · 2 giri${r.best[t.id] ? " · record posto " + r.best[t.id] : ""}</small></button>`).join("")}`;
+    body.innerHTML = `<p class="sum">Corsa a squadre con i personaggi delle saghe: <b>guidi uno dei tuoi tre piloti</b>, gli altri due corrono da soli e i punti di tutti e tre si sommano contro la squadra rivale. Scia, turbo, abilità di ruolo e chiazze d'olio.</p><div class="sec">La tua squadra (dalla Squadra dei Sogni)</div><p class="sum">${team.map((c) => `<b>${esc(name(c.id))}</b> (${esc(ABIL[rlOf(c)][0])})`).join(" · ")}</p><div class="sec">Modalità</div><button type="button" class="one" data-view="1">👁️ Visuale: ${r.view === "rear" ? "da dietro (joystick)" : "dall'alto"}<small>tocca per cambiare: da dietro oppure dall'alto (la classica)</small></button><button type="button" class="one" data-go="champ">🏆 Campionato dei Sogni<small>3 gare su 3 piste · ${r.champ ? "vinto " + r.champ + " volte" : "mai vinto"} · premi in monete</small></button>${TRACKS.map((t, i) => `<button type="button" class="one" data-t="${i}">🏁 ${esc(t.n)}<small>gara singola · 2 giri${r.best[t.id] ? " · record posto " + r.best[t.id] : ""}</small></button>`).join("")}`;
+    body.querySelector('[data-view]').onclick = () => { const x = load(); x.view = x.view === "rear" ? "top" : "rear"; save(x); menu(); };
     body.querySelector('[data-go="champ"]').onclick = () => champ(0, 0, { t: 0 });
     body.querySelectorAll("[data-t]").forEach((b) => (b.onclick = () => race(+b.dataset.t, 2, null)));
   }
@@ -198,7 +275,7 @@
     return { track: T, racers: rac, seed: Math.floor(rand() * 1e6) };
   }
   function race(ti, lvl, st) {
-    const cfg = setup(ti, lvl); cfg.title = st ? `🏆 Campionato · gara ${st.n + 1}/3` : "🏁 " + TRACKS[ti].n; cfg.onEnd = (G) => results(G, ti, lvl, st); raceUI(cfg);
+    const cfg = setup(ti, lvl); cfg.view = load().view; cfg.title = st ? `🏆 Campionato · gara ${st.n + 1}/3` : "🏁 " + TRACKS[ti].n; cfg.onEnd = (G) => results(G, ti, lvl, st); raceUI(cfg);
   }
   function champ(n, tot, st) { race(n, 1 + n, { n, tot: st.tot || tot || 0, pts: st.pts || 0 }); }
   function results(G, ti, lvl, st) {

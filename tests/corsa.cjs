@@ -15,6 +15,10 @@ async function run(w) {
   await page.evaluate(() => document.querySelector('.crOv [data-t="0"]').click()); await page.waitForTimeout(500);
   await page.evaluate(() => window.__corsa.pause(true));
   if (w === 390) await L.shot(page, "corsa_via");
+  await page.evaluate(() => { const C = window.__corsa, R = C.state(), me = R.me; for (let i = 0; i < 900; i++) { const a = C.at(R.T, me.prog + 70 + me.v * 20), want = a.k > 0.0006 ? 0.6 : a.k < -0.0006 ? -0.6 : 0, d = want - me.lat; R.inp = { l: d < -0.08 ? 1 : 0, r: d > 0.08 ? 1 : 0 }; C.tick(); } R.inp = {}; });
+  await page.waitForTimeout(200); if (w === 390) await L.shot(page, "corsa_gara");
+  const rv = await page.evaluate(() => { const R = window.__corsa.state(); return [R.cfg.view, !!R.stk]; }); if (rv[0] !== "rear" || !rv[1]) errors.push("visuale da dietro/joystick: " + JSON.stringify(rv));
+  { const sx = await page.evaluate(() => { const C = window.__corsa, R = C.state(), me = R.me, l0 = me.lat; R.stk.set(1, 0); for (let i = 0; i < 25; i++) C.tick(); R.stk.set(0, 0); const dr = me.lat - l0; R.stk.set(-0.4, 0); const l1 = me.lat; for (let i = 0; i < 25; i++) C.tick(); R.stk.set(0, 0); return [dr, l1 - me.lat]; }); if (!(sx[0] > 0.1) || !(sx[1] > 0)) errors.push("sterzo analogico: " + JSON.stringify(sx)); }
   const r = await page.evaluate(() => {
     const C = window.__corsa; let R = C.state(); C._fast(true); const out = {}; out.n = R.racers.length; out.teams = R.racers.map((x) => x.team).join("");
     for (let i = 0; i < 200; i++) C.tick(); // via
@@ -47,6 +51,14 @@ async function run(w) {
   await page.evaluate(() => { const C = window.__corsa, R = C.state(); C._fast(true); let n = 0; const me = R.me; while (!R.over && n++ < 14000) { const a = C.at(R.T, me.prog + 70 + me.v * 20), want = a.k > 0.0006 ? 0.6 : a.k < -0.0006 ? -0.6 : 0, d = want - me.lat; R.inp = { l: d < -0.08 ? 1 : 0, r: d > 0.08 ? 1 : 0 }; C.tick(); } });
   await page.waitForTimeout(500);
   const nx = await page.evaluate(() => !!document.querySelector('.crOv [data-go="next"]')); if (!nx) errors.push("campionato: manca la gara successiva");
+  // visuale dall'alto (la classica)
+  await page.evaluate(() => window.__corsa.open()); await page.waitForTimeout(150);
+  await page.evaluate(() => document.querySelector('.crOv [data-view]').click()); await page.waitForTimeout(150);
+  const vt = await page.evaluate(() => ({ s: window.__corsa.load().view, n: document.querySelectorAll(".crOv [data-t]").length })); if (vt.s !== "top" || vt.n !== 3) errors.push("cambio visuale: " + JSON.stringify(vt));
+  await page.evaluate(() => document.querySelector('.crOv [data-t="1"]').click()); await page.waitForTimeout(400); await page.evaluate(() => window.__corsa.pause(true));
+  const tv = await page.evaluate(() => { const C = window.__corsa, R = C.state(); C._fast(true); let n = 0; const me = R.me; while (!R.over && n++ < 14000) { const a = C.at(R.T, me.prog + 70 + me.v * 20), want = a.k > 0.0006 ? 0.6 : a.k < -0.0006 ? -0.6 : 0, d = want - me.lat; R.inp = { l: d < -0.08 ? 1 : 0, r: d > 0.08 ? 1 : 0 }; C.tick(); } return [R.cfg.view, !!R.over]; });
+  if (tv[0] !== "top" || !tv[1]) errors.push("gara dall'alto: " + JSON.stringify(tv));
+  await page.evaluate(() => { const x = window.__corsa.load(); x.view = "rear"; window.__corsa.save(x); });
   L.check(`Gran Premio dei Sogni (${w} px)`, errors); await browser.close();
 }
 (async () => { await run(390); await run(320); })();
