@@ -28,7 +28,7 @@ async function run(w) {
     const E = window.__eroi, M = E.state(), out = {}; for (let i = 0; i < 200; i++) E.tick(); // finisce l'esultanza e riparte
     for (const role of ["A", "C", "D", "P"]) {
       M.energy[0] = 100; const p = M.p[0]; p.role = role; p.stun = 0; M.ctl = p; if (role === "A" || role === "C") { M.ball.owner = p; p.x = 200; p.y = 115; } else { M.ball.owner = null; M.ball.x = p.x + 30; M.ball.y = p.y; M.ball.vx = M.ball.vy = 0; M.q[0].x = p.x + 20; M.q[0].y = p.y; }
-      const e0 = M.energy[0], ok = E.ability(p); out[role] = [ok, Math.round(e0 - M.energy[0]), role === "A" ? Math.round(Math.hypot(M.ball.vx, M.ball.vy)) : role === "D" ? M.q[0].stun : role === "P" ? (M.ball.owner === p) : Math.round(Math.hypot(M.ball.vx, M.ball.vy))];
+      const e0 = M.energy[0], ok = E.ability(p); out[role] = [ok, Math.round(e0 - M.energy[0]), role === "A" ? (M.ball.sup ? 99 : Math.round(Math.hypot(M.ball.vx, M.ball.vy))) : role === "D" ? M.q[0].stun : role === "P" ? (M.ball.owner === p) : Math.round(Math.hypot(M.ball.vx, M.ball.vy))];
     }
     return out;
   });
@@ -36,6 +36,33 @@ async function run(w) {
   if (!ab.C[0] || ab.C[2] < 6) errors.push("Regia: " + JSON.stringify(ab.C));
   if (!ab.D[0] || ab.D[2] < 30) errors.push("Muro: " + JSON.stringify(ab.D));
   if (!ab.P[0] || !ab.P[2]) errors.push("Magnete: " + JSON.stringify(ab.P));
+  // super tiri per saga: ogni saga ha un effetto, la palla lo porta e poi si pulisce
+  const sp = await page.evaluate(() => {
+    const E = window.__eroi, M = E.state(), out = {}; M.cfg.auto = false; E._fast(true);
+    for (const fx of ["fire", "thunder", "curve", "zig", "spiral", "vanish", "ice", "change", "drill"]) {
+      for (let i = 0; i < 200; i++) E.tick(); const p = M.p[0]; p.stun = 0; M.ctl = p; M.ball.owner = p; p.x = 250; p.y = M.ball.y = 115; M.energy[0] = 100; M.q[3].stun = 999;
+      E.shoot(p, { aim: 115, mult: 1.75, power: p.shoot, sup: { fx, col: "#ffaa00", name: "t" } }); const s0 = M.ball.sup; let g0 = M.score[0], n = 0, nan = false; while (M.score[0] === g0 && n++ < 150) { E.tick(); if (!isFinite(M.ball.x) || !isFinite(M.ball.y)) nan = true; } out[fx] = [s0, M.score[0] - g0, nan];
+      M.score[0] = 0; M.goalT = 0; M.over = null; M.t = 100;
+    }
+    return out;
+  });
+  Object.keys(sp).forEach((k) => { if (sp[k][0] !== k || sp[k][2]) errors.push("super " + k + ": " + JSON.stringify(sp[k])); });
+  if (Object.values(sp).filter((v) => v[1] === 1).length < 7) errors.push("super: pochi gol su porta vuota: " + JSON.stringify(sp));
+  // 5 contro 5, campo grande, landscape
+  await page.evaluate(() => window.__eroi.open()); await page.waitForTimeout(150);
+  await page.evaluate(() => document.querySelector('.erOv [data-mode]').click()); await page.waitForTimeout(120);
+  await page.evaluate(() => document.querySelector('.erOv [data-l="3"]').click()); await page.waitForTimeout(500); await page.evaluate(() => window.__eroi.pause(true));
+  const f5 = await page.evaluate(() => { const E = window.__eroi, M = E.state(); return { p: M.p.length, q: M.q.length, vw: M.vw, mode: E.load().mode, ctl: !!M.ctl }; });
+  if (f5.p !== 6 || f5.q !== 6 || f5.mode !== 5 || f5.vw > 412) errors.push("5 contro 5: " + JSON.stringify(f5));
+  if (w === 390) await L.shot(page, "eroi_5v5");
+  await page.setViewportSize({ width: 844, height: 390 }); await page.waitForTimeout(400);
+  const ls = await page.evaluate(() => { const M = window.__eroi.state(), c = document.querySelector(".erOv canvas"); const r = c.getBoundingClientRect(); return { land: document.querySelector(".erOv").classList.contains("land"), vw: M.vw, cw: c.width, h: Math.round(r.height), w: Math.round(r.width) }; });
+  if (!ls.land || ls.vw < 500 || ls.h < 340) errors.push("landscape: " + JSON.stringify(ls));
+  if (w === 390) await L.shot(page, "eroi_land");
+  await page.evaluate(() => { const E = window.__eroi, M = E.state(); E._fast(true); M.cfg.auto = true; let n = 0; while (!M.over && n++ < 40000) E.tick(); window.__r5 = { over: M.over, nan: M.all.some((p) => !isFinite(p.x) || !isFinite(p.y)), shots: M.stat.shots.join("-") }; });
+  const r5 = await page.evaluate(() => window.__r5); if (!r5.over || r5.nan || r5.shots === "0-0") errors.push("partita 5v5 IA: " + JSON.stringify(r5));
+  await page.setViewportSize({ width: w, height: 844 });
+  await page.evaluate(() => { const x = window.__eroi.load(); x.mode = 3; window.__eroi.save(x); });
   // partita IA contro IA completa: finisce, niente NaN, ci sono tiri
   await page.evaluate(() => window.__eroi.open()); await page.waitForTimeout(150);
   await page.evaluate(() => document.querySelector('.erOv [data-l="3"]').click()); await page.waitForTimeout(400); await page.evaluate(() => window.__eroi.pause(true));

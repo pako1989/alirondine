@@ -41,6 +41,16 @@ async function run(w) {
   if (!(nm.thr > 0) || !(nm.thrBlk > 0)) errors.push("presa: " + JSON.stringify(nm));
   if (!(nm.up > 0) || !nm.upAir) errors.push("anti-aereo: " + JSON.stringify(nm));
   if (nm.walk < 15 || nm.dash < 25 || !nm.jump) errors.push("joystick/scatto/salto: " + JSON.stringify(nm));
+  // super per saga: tutti e nove gli effetti fanno danno
+  const sx = await page.evaluate(() => {
+    const P = window.__picchia, G = P.state(), out = {};
+    for (const fx of ["fire", "thunder", "curve", "zig", "spiral", "vanish", "ice", "change", "drill"]) {
+      for (let i = 0; i < 60; i++) P.tick(); G.p.st = "idle"; G.e.st = "idle"; G.p.atk = G.e.atk = null; G.p.y = G.e.y = 0; G.p.vy = G.e.vy = 0; G.p.inv = G.e.inv = 0; G.e.ice = 0; G.p.x = 150; G.e.x = 215; G.e.hp = G.e.hpMax = 9999; G.p.meter = 100; G.p.sg = { fx, name: "t", col: "#ffaa00", saga: "" };
+      const h = G.e.hp; P.press("x", true); let n = 0, nan = false; for (; n < 120; n++) { P.tick(); if (!isFinite(G.p.x) || !isFinite(G.e.x)) nan = true; } out[fx] = [h - G.e.hp, nan, G.p.st];
+    }
+    return out;
+  });
+  Object.keys(sx).forEach((k) => { if (!(sx[k][0] > 0) || sx[k][1]) errors.push("super " + k + ": " + JSON.stringify(sx[k])); });
   // parata
   const bl = await page.evaluate(() => { const P = window.__picchia, G = P.state(); G.e.hp = G.e.hpMax = 9999; G.p.hp = G.p.hpMax; G.p.x = 150; G.e.x = 175; G.e.st = "idle"; G.e.atk = null; G.p.st = "idle"; G.p.atk = null; for (let i = 0; i < 40; i++) P.tick(); const h = G.p.hp; P.press("d", true); G.e.ai = 0; const E = G.e; E.st = "atk"; E.atk = { k: "b", su: 2, ac: 3, rc: 4, dmg: 12, reach: 44, stun: 19, kb: 5 }; E.t = 0; E.hit = false; for (let i = 0; i < 12; i++) P.tick(); P.press("d", false); return [h - G.p.hp, G.p.st]; });
   if (!(bl[0] >= 0 && bl[0] <= 4)) errors.push("la parata non riduce i danni: " + JSON.stringify(bl));
