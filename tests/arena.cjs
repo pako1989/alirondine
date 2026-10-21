@@ -4,7 +4,7 @@ const fin = { v: 1, ch: 3, step: { 1: 5, 2: 5, 3: 5 }, done: { 1: "a", 2: "b", 3
 const uno = { v: 1, ch: 2, step: { 1: 5 }, done: { 1: "a" }, ends: [], diffSet: true, flags: {} };
 async function run(w) {
   const { browser, page, errors } = await L.setup({ w, extra: { "ali-di-rondine.campetto": fin, "ali-di-rondine.trono": uno } });
-  await page.evaluate(() => { const S = window.__sogni; S.sync(); const r = S._load(); r.team = ["cm_bastiano", "cm_leone", "cm_saverio", "cm_pio", "tc_brunilde"].filter((id) => r.own.includes(id)); S._save(r); });
+  await page.evaluate(() => { const S = window.__sogni; S.sync(); const r = S._load(); ["of_ferro", "pd_zeno"].forEach((id) => { if (!r.own.includes(id)) r.own.push(id); }); r.team = ["of_ferro", "cm_bastiano", "cm_leone", "pd_zeno", "tc_brunilde"].filter((id) => r.own.includes(id)); S._save(r); });
   // dalla Squadra dei Sogni c'è il bottone
   await page.evaluate(() => window.__sogni.open(() => {})); await page.waitForTimeout(300);
   if (!(await page.evaluate(() => !!document.querySelector('.sgOv [data-go="arena"]')))) errors.push("manca il bottone Arena nella Squadra dei Sogni");

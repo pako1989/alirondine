@@ -3,7 +3,7 @@ const L = require("./lib.cjs");
 const fin = { v: 1, ch: 3, step: { 1: 5, 2: 5, 3: 5 }, done: { 1: "a", 2: "b", 3: "c" }, ends: ["mondiale", "leone", "campetto", "amico"], diffSet: true, flags: {} };
 async function run(w) {
   const { browser, page, errors } = await L.setup({ w, extra: { "ali-di-rondine.campetto": fin } });
-  await page.evaluate(() => window.__sogni.sync());
+  await page.evaluate(() => window.__sogni.sync()); await page.evaluate(() => { const S = window.__sogni, r = S._load(); ["of_ferro", "pd_zeno"].forEach((id) => { if (!r.own.includes(id)) r.own.push(id); }); r.team = ["of_ferro", "pd_zeno", "cm_bastiano"]; S._save(r); });
   await page.evaluate(() => window.__arena.open(() => {})); await page.waitForTimeout(250);
   if (!(await page.evaluate(() => !!document.querySelector('.arOv [data-go="cor"]')))) errors.push("manca il bottone Corsa nell'Arena");
   await page.evaluate(() => document.querySelector('.arOv [data-go="cor"]').click()); await page.waitForTimeout(300);
