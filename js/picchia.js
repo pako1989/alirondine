@@ -23,7 +23,7 @@
   function mkF(card, side, o) {
     o = o || {}; const e = safe(() => S().eff(card), card), lv = o.lv || 0, m = 1 + lv * 0.04 + (o.m || 0), tr = trOf(e);
     const hpMax = Math.round((92 + e.df * 1.05) * m * (o.hpm || 1));
-    return { id: card.id, n: name(card.id), role: card.role, tr, col: SAGCOL(card), side, x: side ? 280 : 100, y: 0, vy: 0, dir: side ? -1 : 1, hp: hpMax, hpMax, meter: 0, st: "idle", t: 0, atk: null, hit: false, stun: 0, kbv: 0, dmgM: (0.7 + e.at / 100) * m, spd: 1.5 + e.te / 130, ai: o.ai || 0, combo: 0, counter: 0, rounds: 0, flash: 0, boss: !!o.boss };
+    return { id: card.id, n: name(card.id), role: SPEC[card.role] ? card.role : { at: "A", te: "C", df: "D" }[tr], tr, col: SAGCOL(card), side, x: side ? 280 : 100, y: 0, vy: 0, dir: side ? -1 : 1, hp: hpMax, hpMax, meter: 0, st: "idle", t: 0, atk: null, hit: false, stun: 0, kbv: 0, dmgM: (0.7 + e.at / 100) * m, spd: 1.5 + e.te / 130, ai: o.ai || 0, combo: 0, counter: 0, rounds: 0, flash: 0, boss: !!o.boss };
   }
   const grounded = (f) => f.y <= 0;
   const busy = (f) => f.st === "atk" || f.st === "hit" || f.st === "ko" || f.st === "spec";

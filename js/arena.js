@@ -32,7 +32,7 @@
   function mk(c, side, o) {
     const m = o.m || 1, st = o.st || { at: c.at, df: c.df, te: c.te };
     const at = st.at * m, df = st.df * m, te = st.te * m, hp = Math.round((70 + df * 1.1 + te * 0.4) * (o.hpm || 1));
-    return { id: c.id, side, n: name(c.id), role: c.role, rar: c.rar, tr: trOf({ at, df, te }), at, df, te, maxhp: hp, hp: o.hp != null ? Math.max(1, Math.min(hp, o.hp)) : hp, shield: 0, cd: 1, taunt: 0, def: false, boss: !!o.boss };
+    return { id: c.id, side, n: name(c.id), role: ABIL[c.role] ? c.role : { at: "A", te: "C", df: "D" }[trOf({ at, df, te })], rar: c.rar, tr: trOf({ at, df, te }), at, df, te, maxhp: hp, hp: o.hp != null ? Math.max(1, Math.min(hp, o.hp)) : hp, shield: 0, cd: 1, taunt: 0, def: false, boss: !!o.boss };
   }
   function ownTeam(r, ar) {
     const I = S().intesa(r.team).n, b = 1 + I * 0.015;
@@ -186,7 +186,7 @@
     h += `<div class="sec">La tua squadra</div>${teamBar(rr, ar)}`;
     if (!has) h += `<p class="sum">Nessuna carta in squadra. Sblocca carte giocando le saghe, poi schierale.</p>`;
     h += `<div class="big"><button type="button" data-go="best">✨ Schiera le migliori<small>le 5 carte più forti</small></button><button type="button" data-go="sogni">🃏 Cambia squadra<small>vai alla Squadra dei Sogni</small></button></div>`;
-    h += `<div class="sec">Scontri · livello sbloccato ${ar.tier}/5</div>${[1, 2, 3, 4, 5].map((t) => `<button type="button" class="one" data-tier="${t}" ${!has || t > ar.tier ? "disabled" : ""}>Scontro ${t}${"★".repeat(t)}<small>${t > ar.tier ? "Vinci il livello precedente" : "Avversari +" + Math.round((t - 1) * 12 + 0) + "% · premio " + 10 * t + " monete"}</small></button>`).join("")}`;
+    h += `${window.__picchia ? `<div class="sec">Altri giochi con le tue carte</div><button type="button" class="one" data-go="pic">🥊 Duello dei Sogni<small>Picchiaduro 1 contro 1: mosse, speciale di ruolo e Super</small></button>` : ""}${window.__corsa ? `<button type="button" class="one" data-go="cor">🏁 Gran Premio dei Sogni<small>Corsa a squadre: guidi un pilota, due compagni corrono da soli</small></button>` : ""}<div class="sec">Scontri · livello sbloccato ${ar.tier}/5</div>${[1, 2, 3, 4, 5].map((t) => `<button type="button" class="one" data-tier="${t}" ${!has || t > ar.tier ? "disabled" : ""}>Scontro ${t}${"★".repeat(t)}<small>${t > ar.tier ? "Vinci il livello precedente" : "Avversari +" + Math.round((t - 1) * 12 + 0) + "% · premio " + 10 * t + " monete"}</small></button>`).join("")}`;
     h += `<div class="sec">Arena del giorno</div><button type="button" class="one" data-go="daily" ${!has ? "disabled" : ""}>📅 ${esc(mod[0])}${d.won ? " ✓" : ""}<small>${esc(mod[1])} · ${d.won ? "già vinta oggi" : "primo successo del giorno: +30 monete"}</small></button>`;
     h += `<div class="sec">Torre dei Duelli · record piano ${ar.best}</div><button type="button" class="one" data-go="torre" ${!has ? "disabled" : ""}>🗼 ${ar.run ? "Continua la salita (piano " + ar.run.floor + ")" : "Sali la Torre"}<small>30 piani · boss ogni 10 · tra un piano e l'altro scegli un potenziamento</small></button>${ar.run ? `<button type="button" class="one" data-go="torreNew">↺ Ricomincia dal piano 1<small>abbandona la salita in corso</small></button>` : ""}`;
     body.innerHTML = h;
@@ -194,6 +194,8 @@
     q('[data-go="best"]').onclick = () => { bestTeam(); open(); };
     q('[data-go="sogni"]').onclick = () => { close(); S().open(() => open()); };
     body.querySelectorAll("[data-tier]").forEach((b) => (b.onclick = () => scontro(+b.dataset.tier)));
+    const pi = q('[data-go="pic"]'); if (pi) pi.onclick = () => { close(); window.__picchia.open(() => open()); };
+    const co = q('[data-go="cor"]'); if (co) co.onclick = () => { close(); window.__corsa.open(() => open()); };
     const dl = q('[data-go="daily"]'); if (dl) dl.onclick = daily;
     const tr = q('[data-go="torre"]'); if (tr) tr.onclick = () => torre(false);
     const tn = q('[data-go="torreNew"]'); if (tn) tn.onclick = () => torre(true);
