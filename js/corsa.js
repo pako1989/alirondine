@@ -20,8 +20,10 @@
   const ZON = [{ f: 0.17, len: 150, side: 1, gated: 0 }, { f: 0.55, len: 170, side: -1, gated: 1 }];
   const ITEMN = { fire: "Missile di Fuoco", thunder: "Fulmine", curve: "Presa perfetta", zig: "Zig-zag", spiral: "Tornado", vanish: "Fantasma", ice: "Gelata", change: "Scambio", drill: "Trivella" };
   const ITEMD = { fire: "colpisce chi hai davanti", thunder: "frena tutti i rivali davanti", curve: "curve senza sbandare + turbo", zig: "turbo e niente ostacoli", spiral: "lascia un tornado dietro", vanish: "attraversi tutto per un po'", ice: "congela chi hai davanti", change: "scambi posto con chi hai davanti", drill: "scudo + turbo" };
+  const ITEMI = { fire: "🔥", thunder: "⚡", curve: "🎯", zig: "〰️", spiral: "🌪️", vanish: "👻", ice: "🧊", change: "🔄", drill: "🔩" };
+  const MODES = { classic: ["🏁 Classica", "8 piloti, squadre, punti: la gara di sempre"], time: ["⏱️ Giro lanciato", "da solo contro il cronometro: batti il tuo record"], duel: ["⚔️ Testa a testa", "tu contro un solo rivale forte: chi arriva prima vince"], caos: ["🎲 Caos", "scatole 🎁 ovunque e si ricaricano subito: vince chi usa meglio gli oggetti"] };
   let OV = null, BACK = null, R = null, RAF = 0, PAUSE = false;
-  const load = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { champ: r.champ | 0, wins: r.wins | 0, best: r.best || {}, view: r.view === "top" ? "top" : "rear", fun: r.fun !== false }; };
+  const load = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { champ: r.champ | 0, wins: r.wins | 0, best: r.best || {}, view: r.view === "top" ? "top" : "rear", fun: r.fun !== false, mode: MODES[r.mode] ? r.mode : "classic", rec: r.rec || {} }; };
   const save = (r) => safe(() => localStorage.setItem(KEY, JSON.stringify(r)), 0);
   const name = (id) => safe(() => S().name(id), id);
   const rlOf = (c) => { if (ABIL[c.role]) return c.role; const e = safe(() => S().eff(c), c); return { at: "A", te: "C", df: "D" }[e.at >= e.df && e.at >= e.te ? "at" : e.df >= e.te ? "df" : "te"]; };
@@ -55,12 +57,12 @@
     const T = build(cfg.track), rnd = seeded(cfg.seed != null ? cfg.seed : (Date.now() & 0xfffff));
     R = { cfg, T, rnd, racers: cfg.racers, items: [], oils: [], t: -180, over: null, fin: [], inp: {}, edge: {}, fast: !!cfg.fast, fxs: [] };
     for (let s = 120; s < T.len - 40; s += 150 + Math.floor(rnd() * 110)) R.items.push({ s, lat: (rnd() * 2 - 1) * 0.8, k: rnd() < 0.72 ? "e" : "b", on: 1 }); // e = ⚡ energia, b = piastra turbo
-    R.fun = cfg.fun !== false; R.obs = []; R.pads = []; R.zones = [];
+    R.caos = cfg.mode === "caos"; R.fun = cfg.fun !== false || R.caos; R.obs = []; R.pads = []; R.zones = [];
     if (R.fun) {
       R.zones = ZON.map((z) => { const a = Math.floor(T.len * z.f); return { a, b: a + z.len, side: z.side, gated: z.gated, open: 0 }; });
       for (let s = 200; s < T.len - 60; s += 120 + Math.floor(rnd() * 100)) { if (R.zones.some((z) => s > z.a - 30 && s < z.b + 30)) continue; R.obs.push({ s, lat: rnd() * 1.6 - 0.8, k: rnd() < 0.5 ? "bump" : "patch", on: 1 }); }
       R.zones.forEach((z) => { if (!z.gated) for (let s = z.a + 25; s < z.b - 15; s += 45) R.obs.push({ s, lat: z.side * (0.8 + rnd() * 0.15), k: "bump", on: 1 }); else R.pads.push({ s: z.a - 140, lat: 0, z }); });
-      for (let s = 260; s < T.len - 80; s += 230 + Math.floor(rnd() * 120)) if (!R.items.some((it) => Math.abs(it.s - s) < 40)) R.items.push({ s, lat: (rnd() * 2 - 1) * 0.7, k: "x", on: 1 });
+      for (let s = 260; s < T.len - 80; s += R.caos ? 85 + Math.floor(rnd() * 40) : 230 + Math.floor(rnd() * 120)) if (!R.items.some((it) => Math.abs(it.s - s) < 40)) R.items.push({ s, lat: (rnd() * 2 - 1) * 0.7, k: "x", on: 1 });
     }
     R.me = R.racers.find((r) => r.human);
     return R;
@@ -113,7 +115,7 @@
     r.prog += r.v / Math.max(0.55, 1 - a.k * r.lat * HW);
     // oggetti e chiazze
     const sd = (x) => ((x - r.prog) % T.len + T.len * 1.5) % T.len - T.len / 2; // distanza con segno lungo il giro
-    for (const it of R.items) { if (!it.on) continue; if (Math.abs(sd(it.s)) < 9 && Math.abs(it.lat - r.lat) < 0.35) { it.on = 0; it.t = 420; if (it.k === "x") { if (!r.held) { r.held = r.fxk; fx(r, "🎁 " + ITEMN[r.fxk]); } else r.energy = Math.min(100, r.energy + 20); } else { if (it.k === "e") r.energy = Math.min(100, r.energy + 30); else r.boost = Math.max(r.boost, 40); fx(r, it.k === "e" ? "+⚡" : "TURBO!"); } } }
+    for (const it of R.items) { if (!it.on) continue; if (Math.abs(sd(it.s)) < 9 && Math.abs(it.lat - r.lat) < 0.35) { it.on = 0; it.t = R.caos ? 150 : 420; if (it.k === "x") { if (!r.held) { r.held = r.fxk; fx(r, "🎁 " + ITEMN[r.fxk]); } else r.energy = Math.min(100, r.energy + 20); } else { if (it.k === "e") r.energy = Math.min(100, r.energy + 30); else r.boost = Math.max(r.boost, 40); fx(r, it.k === "e" ? "+⚡" : "TURBO!"); } } }
     R.oils = R.oils.filter((o) => { if (o.own !== r && Math.abs(sd(o.s)) < 8 && Math.abs(o.lat - r.lat) < 0.32 && r.stun <= 0 && r.inv <= 0) { if (r.shield > 0) { r.shield = 0; fx(r, "SCUDO!"); } else { r.stun = o.tor ? 70 : 55; r.v *= 0.5; fx(r, o.tor ? "TORNADO!" : "OLIO!"); } o.l = 0; } return o.l > 0; });
     // ostacoli di pista, chiazze lente, scorciatoie e leve
     r.pat = 0; for (const o of R.obs) { if (!o.on) continue; const dd = Math.abs(sd(o.s)); if (o.k === "patch") { if (dd < 11 && Math.abs(o.lat - r.lat) < 0.4) r.pat = (THEME[T.id] || THEME.mare).ice ? 2 : 1; } else if (dd < 7 && Math.abs(o.lat - r.lat) < 0.2 && r.bc <= 0 && r.inv <= 0) { r.bc = 30; if (r.shield > 0) { r.shield = 0; o.on = 0; o.t = 600; fx(r, "SFONDATO!"); } else { r.stun = Math.max(r.stun, 35); r.v *= 0.45; fx(r, "OSTACOLO!"); } } }
@@ -161,10 +163,10 @@
   function hud(g) {
     const T = R.T, me = R.me;
     g.fillStyle = "#000a"; g.fillRect(0, 0, W, 26); g.fillStyle = "#fff"; g.font = "bold 12px system-ui"; g.textAlign = "left"; const ord = place(), pl = ord.indexOf(me) + 1;
-    g.fillText(`${pl}° / ${R.racers.length}`, 8, 17); g.textAlign = "center"; g.fillText(`Giro ${Math.min(LAPS, me.laps + 1)}/${LAPS}`, W / 2, 17); g.textAlign = "right"; g.fillText(T.n, W - 8, 17);
+    g.fillText(`${pl}° / ${R.racers.length} · ${(Math.max(0, me.fin ? me.finT : R.t) / 60).toFixed(1)}s`, 8, 17); g.textAlign = "center"; g.fillText(`Giro ${Math.min(LAPS, me.laps + 1)}/${LAPS}`, W / 2, 17); g.textAlign = "right"; g.fillText(T.n, W - 8, 17);
     // barre energia e abilità
     g.fillStyle = "#000a"; g.fillRect(8, H - 20, 110, 11); g.fillStyle = me.energy >= 25 ? "#ffd23f" : "#8a7a30"; g.fillRect(9, H - 19, 108 * me.energy / 100, 9); g.fillStyle = "#fff"; g.font = "bold 9px system-ui"; g.textAlign = "left"; g.fillText("⚡ ENERGIA", 12, H - 11);
-    if (me.held) { g.textAlign = "left"; g.fillStyle = "#000a"; g.fillRect(8, H - 42, 150, 14); g.fillStyle = "#ffd23f"; g.font = "bold 10px system-ui"; g.fillText("🎁 " + ITEMN[me.held] + " (O)", 12, H - 32); }
+    if (me.held) { g.textAlign = "left"; g.fillStyle = "#000b"; g.fillRect(8, H - 56, 190, 28); g.strokeStyle = "#ffd23f"; g.lineWidth = 1; g.strokeRect(8, H - 56, 190, 28); g.fillStyle = "#ffd23f"; g.font = "bold 10px system-ui"; g.fillText((ITEMI[me.held] || "🎁") + " " + ITEMN[me.held] + " · tasto Oggetto", 12, H - 44); g.fillStyle = "#fff"; g.font = "9px system-ui"; g.fillText(ITEMD[me.held], 12, H - 33); }
     g.textAlign = "right"; g.fillStyle = me.cd <= 0 && me.energy >= ABIL[me.role][2] ? "#7ad87a" : "#aaa"; g.fillText(`${ABIL[me.role][0]} (${ABIL[me.role][2]})`, W - 8, H - 11);
     R.fxs.forEach((x) => { if (x.r !== me) return; g.globalAlpha = x.l / 40; g.fillStyle = "#ffd23f"; g.font = "bold 16px system-ui"; g.textAlign = "center"; g.fillText(x.t, W / 2, H / 2 - 40 - (40 - x.l)); g.globalAlpha = 1; });
     if (R.t < 0) { g.fillStyle = "#0008"; g.fillRect(0, 80, W, 60); g.fillStyle = "#ffd23f"; g.font = "900 38px system-ui"; g.textAlign = "center"; g.fillText(Math.ceil(-R.t / 60), W / 2, 124); } else if (R.t < 50) { g.fillStyle = "#ffd23f"; g.font = "900 30px system-ui"; g.textAlign = "center"; g.fillText("VIA!", W / 2, 124); }
@@ -264,23 +266,42 @@
 .crOv .one{width:100%;min-height:54px;border-radius:10px;border:1px solid #4a3a6a;background:#221a36;color:#f4f0e4;font:800 14px system-ui;text-align:left;padding:8px 10px;margin:5px 0}.crOv .one small{display:block;font-weight:400;font-size:11px;opacity:.75}.crOv button:disabled{opacity:.4}
 .crOv canvas{display:block;width:100%;max-width:520px;margin:0 auto;height:auto;border-radius:10px;background:#000}
 .crCtl{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;touch-action:none;user-select:none;-webkit-user-select:none}.crCtl button{border-radius:14px;border:1px solid #4a3a6a;background:#221a36;color:#f4f0e4;font:800 15px system-ui;padding:4px;touch-action:none;min-height:64px}.crCtl .st{display:grid;grid-template-columns:64px 64px;gap:6px}.crCtl .ac{display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1}.crCtl button.on,.crCtl button:active{background:#5a3aa8}.crCtl .tb{background:#7a5a10;color:#ffe9a8}.crCtl .ab{background:#2a4a7a}.crCtl small{display:block;font-weight:400;font-size:9px;opacity:.8}
-.crTab{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0}.crTab td{padding:5px 4px;border-top:1px solid #2a2040}.crTab tr.me td{color:#ffd23f;font-weight:800}.crRes{text-align:center;margin:10px 0}.crRes h3{font:900 24px system-ui;margin:4px 0}`;
+.crTab{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0}.crTab td{padding:5px 4px;border-top:1px solid #2a2040}.crTab tr.me td{color:#ffd23f;font-weight:800}.crRes{text-align:center;margin:10px 0}.crRes h3{font:900 24px system-ui;margin:4px 0}
+.crOv .crX{display:none}.crOv.land{overflow:hidden}.crOv.land .wrap{max-width:none;padding:0;height:100%}.crOv.land .bar{display:none}.crOv.land .body{height:100%;position:relative;display:flex;justify-content:center;background:#000}.crOv.land canvas{height:100%;width:auto;max-width:100%;border-radius:0;max-width:calc(100% - 0px)}
+.crOv.land .crX{display:block;position:absolute;top:6px;right:8px;z-index:7;width:36px;height:36px;border-radius:10px;border:1px solid #4a3a6a;background:#221a36cc;color:#fff;font-size:15px}.crOv.land .crCtl{position:absolute;left:0;right:0;bottom:6px;padding:0 12px;margin:0;pointer-events:none;align-items:flex-end}.crOv.land .crCtl>*{pointer-events:auto}.crOv.land .sum{display:none}
+.crOv.land .stk{background:rgba(20,15,40,.16)!important;border-color:rgba(255,255,255,.22)!important;box-shadow:none!important}.crOv.land .stk i{opacity:.62}.crOv.land .crCtl button{background:rgba(34,26,54,.45);border-color:rgba(255,255,255,.2)}.crOv.land .crCtl .tb,.crOv.land .crCtl .sp{background:rgba(42,74,122,.5)}.crOv.land .crCtl .su{background:rgba(122,90,16,.5)}.crOv.land .crCtl .ac{flex:none;width:230px}.crOv .body{position:relative}.crOv .crQ{position:absolute;top:-45px;right:48px;width:40px;height:40px;border-radius:10px;border:1px solid #4a3a6a;background:#221a36;color:#ffd23f;font:900 18px system-ui;z-index:4}.crOv.land .crQ{top:6px;right:50px;width:36px;height:36px}.crOv .crQ{display:none}.crOv .race .crQ,.crOv .crX~.crQ{display:block}.crTut{position:absolute;inset:0;z-index:6;background:#0c0818;min-height:380px;overflow:auto;padding:12px;border-radius:10px}.crTut h4{margin:0 0 6px;font:900 16px system-ui;color:#ffd23f}.crTut p{margin:6px 0;font-size:13px;line-height:1.4}.crTut .il{display:grid;gap:3px;font-size:12px}.crTut .il div{padding:3px 6px;border-radius:6px;background:#221a36}.crTut .il .mine{background:#5a3aa8}.crTut .nv{display:flex;gap:6px;margin-top:10px}.crTut .nv button{flex:1;min-height:44px;border-radius:10px;border:2px solid #ffd23f;background:#221a36;color:#fff;font:800 14px system-ui}`;
     document.head.appendChild(st);
   }
   function shell(title) { css(); halt(); if (OV) OV.remove(); OV = document.createElement("div"); OV.className = "crOv"; OV.innerHTML = `<div class="wrap"><div class="bar"><h2>${title}</h2><button type="button" class="x" aria-label="Chiudi">✕</button></div><div class="body"></div></div>`; OV.querySelector(".x").onclick = () => { const live = R && !R.over; halt(); if (live) return menu(); const b = BACK; close(); if (typeof b === "function") b(); }; document.body.appendChild(OV); return OV.querySelector(".body"); }
-  function halt() { cancelAnimationFrame(RAF); RAF = 0; window.removeEventListener("keydown", kd); window.removeEventListener("keyup", ku); }
+  let LAY = null;
+  function halt() { cancelAnimationFrame(RAF); RAF = 0; if (LAY) { window.removeEventListener("resize", LAY); window.removeEventListener("orientationchange", LAY); LAY = null; } window.removeEventListener("keydown", kd); window.removeEventListener("keyup", ku); }
   function close() { halt(); R = null; if (OV) { OV.remove(); OV = null; } }
   const KM = { ArrowLeft: "l", ArrowRight: "r", a: "l", d: "r", " ": "t", j: "t", k: "a", l: "a", o: "o", e: "o" };
   const kd = (e) => { const k = KM[e.key]; if (!k || !R) return; e.preventDefault(); if (k === "t" || k === "a" || k === "o") R.edge[k] = 1; else R.inp[k] = 1; };
   const ku = (e) => { const k = KM[e.key]; if (k && R && k !== "t" && k !== "a" && k !== "o") R.inp[k] = 0; };
   function press(k, on) { if (!R) return; if (k === "t" || k === "a" || k === "o") { if (on) R.edge[k] = 1; } else R.inp[k] = on ? 1 : 0; }
+  function tutor(body, me) {
+    if (body.querySelector(".crTut")) return; const mine = me.fxk, wasP = PAUSE; PAUSE = true; let i = 0;
+    const pages = [
+      ["Guida", `<p>Il <b>gas è automatico</b>: tu sterzi (joystick o ◀ ▶). <b>⚡ Turbo</b> (25 energia) dà una spinta. L'<b>✦ abilità</b> dipende dal ruolo. Stare dietro a un rivale dà <b>scia</b>. Sulla pista raccogli ⚡ (energia) e 🔶 (turbo).</p><p>Dentro la curva si risparmia strada, ma la curva ti spinge fuori.</p>`],
+      ["Gli oggetti 🎁", `<p>Passa su una <b>scatola 🎁</b> sulla pista: ricevi l'oggetto della tua saga (ne tieni uno solo). Poi premi il pulsante <b>🎁 Oggetto</b> (tasto O) per usarlo. Se ne hai già uno, la scatola ti dà +20 energia. In alto a sinistra vedi quello che hai e cosa fa.</p><div class="il">${Object.keys(ITEMN).map((k) => `<div class="${k === mine ? "mine" : ""}">${ITEMI[k]} <b>${ITEMN[k]}</b>: ${ITEMD[k]}${k === mine ? " ← il tuo" : ""}</div>`).join("")}</div>`],
+      ["Ostacoli e scorciatoie", `<p><b>Ostacoli</b> e <b>chiazze</b> sulla pista ti rallentano. Ai bordi ci sono <b>scorciatoie</b>: quella sterrata è sempre aperta ma piena di ostacoli, quella con il <b>cancello</b> si apre passando sulla leva 🔘 prima.</p><p>Le modalità si cambiano dal menu: Classica, Giro lanciato (cronometro), Testa a testa, Caos.</p>`]
+    ];
+    const ov = document.createElement("div"); ov.className = "crTut"; body.appendChild(ov);
+    const end = () => { ov.remove(); PAUSE = false; safe(() => localStorage.setItem("ali-di-rondine.mini.corsa", "1"), 0); };
+    const show = () => { const p = pages[i], last = i === pages.length - 1; ov.innerHTML = `<h4>${i + 1}/${pages.length} · ${p[0]}</h4>${p[1]}<div class="nv">${i ? `<button type="button" data-a="b">◂ Indietro</button>` : `<button type="button" data-a="x">Salta</button>`}<button type="button" data-a="${last ? "x" : "n"}">${last ? "▶ Via!" : "Avanti ▸"}</button></div>`; ov.querySelectorAll("[data-a]").forEach((b) => (b.onclick = () => { const a = b.dataset.a; if (a === "n") { i++; show(); } else if (a === "b") { i--; show(); } else end(); })); };
+    show();
+  }
   function raceUI(cfg) {
     const body = shell(cfg.title || "🏁 Gran Premio dei Sogni"); begin(cfg); const me = R.me, rear = cfg.view === "rear";
-    body.innerHTML = `<canvas width="${W * SS}" height="${H * SS}"></canvas><div class="crCtl">${rear ? `<div class="stkSlot"></div>` : `<div class="st"><button data-k="l">◀</button><button data-k="r">▶</button></div>`}<div class="ac"><button data-k="t" class="tb">⚡ Turbo<small>25 energia</small></button><button data-k="a" class="ab">✦ ${esc(ABIL[me.role][0])}<small>${esc(ABIL[me.role][1])}</small></button>${R.fun ? `<button data-k="o" class="it" style="grid-column:1/3;background:#3a2a5a">🎁 Oggetto<small>raccogli 🎁 sulla pista</small></button>` : ""}</div></div><p class="sum" style="font-size:11px;opacity:.65;margin-top:6px">Il gas è automatico. ${rear ? "Joystick ◀▶: sterza (più lo spingi, più giri)." : "Sterza ◀ ▶."} Dentro la curva si risparmia strada, ma la curva ti spinge fuori. ⚡ e 🔶 sulla pista ricaricano l'energia o danno turbo. Stare dietro un rivale dà scia. ${R.fun ? "🎁 dà l'oggetto della tua saga (tasto Oggetto). Ostacoli e chiazze rallentano. Scorciatoie ai bordi: quella sterrata è sempre aperta ma con ostacoli; quella col cancello si apre passando sulla leva 🔘. " : ""}Tasti: frecce, spazio turbo, K abilità, O oggetto.</p>`;
+    body.innerHTML = `<canvas width="${W * SS}" height="${H * SS}"></canvas><button type="button" class="crX" aria-label="Esci">✕</button><button type="button" class="crQ" aria-label="Come si gioca">?</button><div class="crCtl">${rear ? `<div class="stkSlot"></div>` : `<div class="st"><button data-k="l">◀</button><button data-k="r">▶</button></div>`}<div class="ac"><button data-k="t" class="tb">⚡ Turbo<small>25 energia</small></button><button data-k="a" class="ab">✦ ${esc(ABIL[me.role][0])}<small>${esc(ABIL[me.role][1])}</small></button>${R.fun ? `<button data-k="o" class="it" style="grid-column:1/3;background:#3a2a5a">🎁 Oggetto<small>raccogli 🎁 sulla pista</small></button>` : ""}</div></div><p class="sum" style="font-size:11px;opacity:.65;margin-top:6px">Il gas è automatico. ${rear ? "Joystick ◀▶: sterza (più lo spingi, più giri)." : "Sterza ◀ ▶."} Dentro la curva si risparmia strada, ma la curva ti spinge fuori. ⚡ e 🔶 sulla pista ricaricano l'energia o danno turbo. Stare dietro un rivale dà scia. ${R.fun ? "🎁 dà l'oggetto della tua saga (tasto Oggetto). Ostacoli e chiazze rallentano. Scorciatoie ai bordi: quella sterrata è sempre aperta ma con ostacoli; quella col cancello si apre passando sulla leva 🔘. " : ""}Tasti: frecce, spazio turbo, K abilità, O oggetto.</p>`;
     if (rear && window.__stick) { R.stk = window.__stick.make({ size: 118 }); body.querySelector(".stkSlot").appendChild(R.stk.el); }
     const cv = body.querySelector("canvas"), g = cv.getContext("2d");
     body.querySelectorAll("[data-k]").forEach((b) => { const k = b.dataset.k, up = () => { press(k, false); b.classList.remove("on"); }; b.addEventListener("pointerdown", (e) => { e.preventDefault(); press(k, true); b.classList.add("on"); }); b.addEventListener("pointerup", up); b.addEventListener("pointercancel", up); b.addEventListener("pointerleave", up); });
     window.addEventListener("keydown", kd); window.addEventListener("keyup", ku);
+    const layout = () => { if (OV) OV.classList.toggle("land", innerWidth > innerHeight * 1.1); }; LAY = layout; window.addEventListener("resize", LAY); window.addEventListener("orientationchange", LAY); layout(); body.querySelector(".crX").onclick = () => OV.querySelector(".bar .x").click();
+    body.querySelector(".crQ").onclick = () => tutor(body, R.me);
+    if (cfg.tutorial !== false && !safe(() => localStorage.getItem("ali-di-rondine.mini.corsa") === "1", false)) tutor(body, R.me);
     let last = performance.now(), acc = 0; const loop = (t) => { if (!OV || !R) return; acc += Math.min(100, t - last); last = t; try { while (acc >= 16.67) { if (!PAUSE) tick(); acc -= 16.67; } draw(g); } catch (er) { acc = 0; if (window.console) console.warn("corsa", er); } const ib = body.querySelector(".it"); if (ib && R) { const hl = R.me.held || ""; if (ib.dataset.h !== hl) { ib.dataset.h = hl; ib.innerHTML = hl ? `🎁 ${esc(ITEMN[hl])}<small>${esc(ITEMD[hl])}</small>` : `🎁 Oggetto<small>raccogli 🎁 sulla pista</small>`; } } if (R && !R.over) RAF = requestAnimationFrame(loop); }; RAF = requestAnimationFrame(loop);
     R.draw = () => draw(g);
   }
@@ -300,28 +321,32 @@
   }
   function menu(back) {
     if (back) BACK = back; const body = shell("🏁 Gran Premio dei Sogni"), r = load(), team = myTeam();
-    body.innerHTML = `<p class="sum">Corsa a squadre con i personaggi delle saghe: <b>guidi uno dei tuoi tre piloti</b>, gli altri due corrono da soli e i punti di tutti e tre si sommano contro la squadra rivale. Scia, turbo, abilità di ruolo e chiazze d'olio.</p><div class="sec">La tua squadra (dalla Squadra dei Sogni)</div><p class="sum">${team.map((c) => `<b>${esc(name(c.id))}</b> (${esc(ABIL[rlOf(c)][0])})`).join(" · ")}</p><div class="sec">Modalità</div><button type="button" class="one" data-view="1">👁️ Visuale: ${r.view === "rear" ? "da dietro (joystick)" : "dall'alto"}<small>tocca per cambiare: da dietro oppure dall'alto (la classica)</small></button><button type="button" class="one" data-fun="1">🎁 Oggetti, ostacoli e scorciatoie: ${r.fun ? "SÌ" : "NO"}<small>oggetti della tua saga, ostacoli per pista, scorciatoie (una sempre aperta, una con leva). Tocca per cambiare</small></button><button type="button" class="one" data-go="champ">🏆 Campionato dei Sogni<small>3 gare su 3 piste · ${r.champ ? "vinto " + r.champ + " volte" : "mai vinto"} · premi in monete</small></button>${TRACKS.map((t, i) => `<button type="button" class="one" data-t="${i}">🏁 ${esc(t.n)}<small>gara singola · 2 giri${r.best[t.id] ? " · record posto " + r.best[t.id] : ""}</small></button>`).join("")}`;
+    body.innerHTML = `<p class="sum">Corsa a squadre con i personaggi delle saghe: <b>guidi uno dei tuoi tre piloti</b>, gli altri due corrono da soli e i punti di tutti e tre si sommano contro la squadra rivale. Scia, turbo, abilità di ruolo e chiazze d'olio.</p><div class="sec">La tua squadra (dalla Squadra dei Sogni)</div><p class="sum">${team.map((c) => `<b>${esc(name(c.id))}</b> (${esc(ABIL[rlOf(c)][0])})`).join(" · ")}</p><div class="sec">Modalità</div><button type="button" class="one" data-mode="1">${MODES[r.mode][0]}<small>${MODES[r.mode][1]}. Tocca per cambiare (vale per le gare singole, il campionato è sempre classico)</small></button><button type="button" class="one" data-view="1">👁️ Visuale: ${r.view === "rear" ? "da dietro (joystick)" : "dall'alto"}<small>tocca per cambiare: da dietro oppure dall'alto (la classica)</small></button><button type="button" class="one" data-fun="1">🎁 Oggetti, ostacoli e scorciatoie: ${r.fun ? "SÌ" : "NO"}<small>oggetti della tua saga, ostacoli per pista, scorciatoie (una sempre aperta, una con leva). Tocca per cambiare</small></button><button type="button" class="one" data-go="champ">🏆 Campionato dei Sogni<small>3 gare su 3 piste · ${r.champ ? "vinto " + r.champ + " volte" : "mai vinto"} · premi in monete</small></button>${TRACKS.map((t, i) => `<button type="button" class="one" data-t="${i}">🏁 ${esc(t.n)}<small>gara singola · 2 giri${r.best[t.id] ? " · record posto " + r.best[t.id] : ""}</small></button>`).join("")}`;
+    body.querySelector('[data-mode]').onclick = () => { const x = load(), k = Object.keys(MODES); x.mode = k[(k.indexOf(x.mode) + 1) % k.length]; save(x); menu(); };
     body.querySelector('[data-view]').onclick = () => { const x = load(); x.view = x.view === "rear" ? "top" : "rear"; save(x); menu(); };
     body.querySelector('[data-fun]').onclick = () => { const x = load(); x.fun = !x.fun; save(x); menu(); };
     body.querySelector('[data-go="champ"]').onclick = () => champ(0, 0, { t: 0 });
     body.querySelectorAll("[data-t]").forEach((b) => (b.onclick = () => race(+b.dataset.t, 2, null)));
   }
-  function setup(ti, lvl, seed) {
+  function setup(ti, lvl, seed, mode) {
     const T = TRACKS[ti], rand = seeded(seed != null ? seed : (Date.now() & 0xffff)), me = myTeam(), ss = [...new Set(S().CARDS.map((c) => c.saga))], th = ss[Math.floor(rand() * ss.length)], rv = rivals(rand, lvl, th);
     const rac = [];
-    me.forEach((c, i) => rac.push(mk(c, 0, i, { human: i === 0, m: 0.02, ai: 3 })));
-    rv.forEach((c, i) => rac.push(mk(c, i < 3 ? 1 : 2, i, { ai: lvl, m: (lvl - 3) * 0.035 })));
-    return { track: T, racers: rac, seed: Math.floor(rand() * 1e6) };
+    if (mode === "time") rac.push(mk(me[0], 0, 0, { human: true, m: 0.02, ai: 3 }));
+    else if (mode === "duel") { rac.push(mk(me[0], 0, 0, { human: true, m: 0.02, ai: 3 })); rac.push(mk(rv[0], 1, 0, { ai: 4, m: 0.02 })); }
+    else { me.forEach((c, i) => rac.push(mk(c, 0, i, { human: i === 0, m: 0.02, ai: 3 })));
+    rv.forEach((c, i) => rac.push(mk(c, i < 3 ? 1 : 2, i, { ai: lvl, m: (lvl - 3) * 0.035 }))); }
+    return { track: T, racers: rac, seed: Math.floor(rand() * 1e6), mode: mode || "classic" };
   }
   function race(ti, lvl, st) {
-    const cfg = setup(ti, lvl); cfg.view = load().view; cfg.fun = load().fun; cfg.title = st ? `🏆 Campionato · gara ${st.n + 1}/3` : "🏁 " + TRACKS[ti].n; cfg.onEnd = (G) => results(G, ti, lvl, st); raceUI(cfg);
+    const mode = st ? "classic" : load().mode, cfg = setup(ti, lvl, null, mode); cfg.view = load().view; cfg.fun = load().fun; cfg.title = st ? `🏆 Campionato · gara ${st.n + 1}/3` : MODES[mode][0].split(" ")[0] + " " + TRACKS[ti].n; cfg.onEnd = (G) => results(G, ti, lvl, st); raceUI(cfg);
   }
   function champ(n, tot, st) { race(n, 1 + n, { n, tot: st.tot || tot || 0, pts: st.pts || 0 }); }
   function results(G, ti, lvl, st) {
-    const body = shell("🏁 Risultati"), order = G.order, tp = G.pts[0] || 0, rp = G.pts[1] || 0, win = tp > rp, a = load(), L = [];
+    const body = shell("🏁 Risultati"), order = G.order, tp = G.pts[0] || 0, rp = G.pts[1] || 0, md = G.cfg.mode || "classic", win = md === "duel" ? G.myPos === 1 : tp > rp, a = load(), L = [];
     const nm = ["Tua squadra", "Squadra rivale", "Indipendenti"];
-    body.innerHTML = `<div class="crRes"><h3>${G.myPos}° posto</h3><p class="sum">Squadra: <b>${tp}</b> punti contro <b>${rp}</b> dei rivali ${win ? "· 🏅 gara di squadra vinta" : ""}</p></div><table class="crTab">${order.map((r, i) => `<tr class="${r.human ? "me" : ""}"><td>${i + 1}°</td><td>${esc(r.n)}</td><td style="color:${r.col}">${nm[r.team]}</td><td>${PTS[i] || 0} pt</td></tr>`).join("")}</table>`;
-    const coins = Math.max(0, 14 - G.myPos * 2) + (win ? 12 : 0); safe(() => window.addCoins(coins), 0); L.push(`+${coins} monete.`);
+    body.innerHTML = `<div class="crRes"><h3>${md === "time" ? "⏱️ " + (G.me.finT / 60).toFixed(1) + " s" : G.myPos + "° posto"}</h3>${md === "time" ? "" : md === "duel" ? `<p class="sum">${win ? "🏅 Testa a testa vinto" : "Il rivale ti ha battuto"}</p>` : `<p class="sum">Squadra: <b>${tp}</b> punti contro <b>${rp}</b> dei rivali ${win ? "· 🏅 gara di squadra vinta" : ""}</p>`}</div><table class="crTab">${order.map((r, i) => `<tr class="${r.human ? "me" : ""}"><td>${i + 1}°</td><td>${esc(r.n)}</td><td style="color:${r.col}">${nm[r.team]}</td><td>${PTS[i] || 0} pt</td></tr>`).join("")}</table>`;
+    let coins = Math.max(0, 14 - G.myPos * 2) + (win ? 12 : 0);
+    if (md === "time") { const sec = +(G.me.finT / 60).toFixed(1), old = a.rec[TRACKS[ti].id], nr = !old || sec < old; if (nr) a.rec[TRACKS[ti].id] = sec; coins = nr ? 10 : 2; L.push(`Record della pista: ${Math.min(old || sec, sec)} s${nr ? " · 🏅 nuovo record!" : ""}`); } safe(() => window.addCoins(coins), 0); L.push(`+${coins} monete.`);
     const T = TRACKS[ti]; if (!a.best[T.id] || G.myPos < a.best[T.id]) a.best[T.id] = G.myPos;
     let html = L.map((l) => `<p class="sum" style="text-align:center">${l}</p>`).join("");
     if (st) {
