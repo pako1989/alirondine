@@ -120,4 +120,23 @@ async function c4(w, opt, end) {
   i = await info(page); if (i.done[4] !== end || !i.ends.includes(end)) errors.push("finale atteso " + end + ": " + JSON.stringify([i.done, i.ends]));
   L.check(`Capitani di Ventura · capitolo 4 ${end} (${w} px)`, errors); await browser.close();
 }
-(async () => { await run(390); await run(320); await c2(390); await c2(320); await c3(390, "conte"); await c3(320, "accordo"); await c4(390, "Accetto l'incarico", "capitano"); await c4(320, "Rifiuto", "libera"); })();
+async function schiereUi(w) {
+  const { browser, page, errors } = await L.setup({ w });
+  const tu = await page.evaluate(async () => {
+    const wait = (ms) => new Promise((ok) => setTimeout(ok, ms)), out = {}; localStorage.removeItem("ali-di-rondine.mini.schiere");
+    const mem = [{ id: "a", n: "Elio", icon: "🛡️", s: { forza: 5, cuore: 2, tiro: 1, ingegno: 1 } }, { id: "b", n: "Nina", icon: "🏹", s: { forza: 1, cuore: 1, tiro: 6, ingegno: 2 } }, { id: "c", n: "Bruno", icon: "⚔️", s: { forza: 4, cuore: 2, tiro: 3, ingegno: 1 } }];
+    window.__r = null; window.__schiere.start({ members: mem, enemy: { name: "Lupi", icon: "🐺", atk: [3, 0.3], def: [3, 0.3] }, rounds: 3, onDone: (r) => { window.__r = r; } }); await wait(150); const st = window.__schiere.state; out.tut = st.tut();
+    document.querySelector('.tut [data-a="n"]').click(); await wait(60); document.querySelector('.tut [data-a="n"]').click(); await wait(60); out.p3 = !!document.querySelector('.tut [data-a="pr"]');
+    document.querySelector('.tut [data-a="pr"]').click(); await wait(100); out.practice = st.practice && !st.tut();
+    const b0 = document.querySelector('button[data-m="a"]'); b0.click(); await wait(30); out.cycle = /Assalto 1/.test(document.querySelector('button[data-m="a"]').textContent);
+    document.querySelector("#scGo").click(); await wait(100); out.res = !!document.querySelector("#scRe") && !!document.querySelector("#scGo2") && st.a === 0 && st.b === 0;
+    document.querySelector("#scGo2").click(); await wait(100); out.real = st.practice === false;
+    document.querySelector(".hp").click(); await wait(50); out.help = st.tut(); document.querySelector('.tut [data-a="x"]').click(); await wait(50);
+    for (let k = 0; k < 8 && window.__schiere.state && window.__schiere.state.a + window.__schiere.state.b >= 0; k++) { const go = document.querySelector("#scGo"); if (!go || /Fine/.test(go.textContent)) break; go.click(); await wait(20); }
+    window.__schiere.state && window.__schiere.state.finish(3, 1); await wait(50); document.querySelector("#scGo").click(); await wait(60); out.done = !!window.__r && window.__r.win === true && !document.getElementById("scOv");
+    return out;
+  });
+  { const bad = Object.keys(tu).filter((k) => !tu[k]); if (bad.length) errors.push("Schiere spiegazione/prova: " + bad.join(",") + " " + JSON.stringify(tu)); }
+  L.check(`Schiere · spiegazione, prova e turni (${w} px)`, errors); await browser.close();
+}
+(async () => { await schiereUi(390); await schiereUi(320); await run(390); await run(320); await c2(390); await c2(320); await c3(390, "conte"); await c3(320, "accordo"); await c4(390, "Accetto l'incarico", "capitano"); await c4(320, "Rifiuto", "libera"); })();
