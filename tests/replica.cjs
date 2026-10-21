@@ -98,7 +98,7 @@ async function porta(w) {
 }
 async function sparring(w) {
   const { browser, page, errors } = await L.setup({ w });
-  await page.evaluate(() => { window.__dn = null; window.__sparring.start({ title: "Prova", level: 1, oppName: "Test", hp: 0, onDone: (r) => { window.__dn = r; } }); });
+  await page.evaluate(() => { window.__dn = null; window.__sparring.start({ title: "Prova", level: 1, oppName: "Test", hp: 0, tutorial: false, onDone: (r) => { window.__dn = r; } }); });
   await page.waitForSelector("#spOv");
   const hp0 = await page.evaluate(() => window.__sparring.state.hp), cur = await page.evaluate(() => window.__sparring.state.cur);
   await page.click(`[data-d="${(cur + 1) % 3}"]`); await page.waitForTimeout(100);
@@ -109,6 +109,19 @@ async function sparring(w) {
   const hp2 = await page.evaluate(() => window.__sparring.state.hp); if (hp2 !== hp1 - 1) errors.push(`corsia sbagliata: vita ${hp1}→${hp2}`);
   await page.evaluate(() => window.__sparring.state.finish(true)); await page.click("#spGo"); await page.waitForTimeout(150);
   const r = await page.evaluate(() => window.__dn); if (!r || !r.win) errors.push("finish(true) senza vittoria: " + JSON.stringify(r));
+  const tu = await page.evaluate(async () => {
+    const wait = (ms) => new Promise((ok) => setTimeout(ok, ms)), out = {}; localStorage.removeItem("ali-di-rondine.sparring");
+    window.__sparring.start({ level: 1, onDone: () => {} }); await wait(100); const st = window.__sparring.state; out.tut = st.tut();
+    document.querySelector('.tut [data-a="n"]').click(); await wait(50); document.querySelector('.tut [data-a="n"]').click(); await wait(50); out.p3 = !!document.querySelector('.tut [data-a="pr"]');
+    document.querySelector('.tut [data-a="pr"]').click(); await wait(100); out.practice = st.practice && !st.tut() && st.cur != null;
+    for (let k = 0; k < 3; k++) { const c = st.cur; if (c == null) break; document.querySelector(`[data-d="${(c + 1) % 3}"]`).click(); await wait(60); } out.strikePh = st.phase === "strike"; out.strikeBtns = document.querySelectorAll("[data-s]").length === 3;
+    document.querySelector('[data-s="1"]').click(); await wait(100); out.practiceEnd = st.phase === "end" && !!document.querySelector("#spRe") && !!document.querySelector("#spGo2");
+    document.querySelector("#spGo2").click(); await wait(100); out.real = st.practice === false && st.phase === "dodge";
+    document.querySelector(".hp").click(); await wait(50); out.help = st.tut(); document.querySelector('.tut [data-a="x"]').click(); await wait(100); out.resumed = !st.tut() && st.phase === "dodge";
+    st.finish(true); await wait(50); document.querySelector("#spGo").click(); await wait(50); out.gone = !document.querySelector("#spOv");
+    return out;
+  });
+  { const bad = Object.keys(tu).filter((k) => !tu[k]); if (bad.length) errors.push("Duello nel cielo spiegazione/prova: " + bad.join(",") + " " + JSON.stringify(tu)); }
   L.check(`Replica · Sparring Volante (${w} px)`, errors); await browser.close();
 }
 (async () => {

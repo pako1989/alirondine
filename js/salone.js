@@ -420,7 +420,7 @@
       opp: [{ name: "Cyborg Clandestini", color: "#7c3aed", style: "equilibrata" }, { name: "Divisione Beta", color: "#0891b2", style: "pressing" }],
       boss: { name: "Z-Zero", color: "#38bdf8", style: "pressing" },
       opts: (o, h, boss) => ({ title: `Circuito EMP · contro ${o.name}`, level: boss ? 3 : 2, oppName: o.name }) },
-    { id: "sparring", t: "Sparring Volante", e: "🦸", saga: "replica", eng: "__sparring", d: "Duello aereo a turni: leggi dove colpisce l'avversario e schiva spostandoti di corsia, accumuli carica a ogni schivata e poi scegli dove colpire. L'avversario può parare una corsia.",
+    { id: "sparring", t: "Sparring Volante", e: "🦸", saga: "replica", eng: "__sparring", d: "Duello nel cielo: la corsia rossa è dove colpisce l'avversario, spostati di corsia, accumuli carica a ogni schivata e poi scegli dove colpire. L'avversario può parare una corsia.",
       opp: [{ name: "Basalto", color: "#44403c", style: "equilibrata" }, { name: "Nube", color: "#6d28d9", style: "pressing" }],
       boss: { name: "Zenit", color: "#1d4ed8", style: "pressing" },
       opts: (o, h, boss) => ({ title: `Sparring Volante · contro ${o.name}`, level: boss ? 3 : 2, oppName: o.name, hp: 0 }) },
