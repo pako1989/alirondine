@@ -560,7 +560,7 @@ if ("serviceWorker" in navigator && location.protocol === "https:") {
 (function () {
   var el = document.getElementById("appVersion"); if (!el) return;
   var cur = null;
-  function show(online) { try { el.textContent = (cur ? "v" + cur : "v?") + (online && cur && online !== cur ? " · nuova v" + online + ": Impostazioni → Aggiorna app" : ""); } catch (e) {} }
+  function show(online) { try { el.textContent = (cur ? "v" + cur : "v?") + (online && cur && +online !== +cur ? " · nuova v" + online + ": Impostazioni → Aggiorna app" : ""); } catch (e) {} }
   try { if (window.caches) caches.keys().then(function (ks) { var n = ks.map(function (k) { var m = /^alirondine-v(\d+)$/.exec(k); return m ? +m[1] : 0; }); cur = Math.max.apply(null, n.concat([0])) || null; show(); }).catch(function () {}); } catch (e) {}
   try { fetch("sw.js", { cache: "no-store" }).then(function (r) { return r.text(); }).then(function (t) { var m = /alirondine-v(\d+)/.exec(t); if (m) { if (!cur) cur = null; show(m[1]); if (!cur) el.textContent = "v" + m[1]; } }).catch(function () {}); } catch (e) {}
 })();
