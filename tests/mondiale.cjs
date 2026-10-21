@@ -119,7 +119,7 @@ async function catenaReale(w) {
     const out = { wins: 0, tries: 0, perfect: 0 }; const team = [{ id: "hero", n: "Campione", icon: "⭐", rk: "jolly" }, { id: "a", n: "Elio", icon: "🎯", rk: "regista" }, { id: "b", n: "Nina", icon: "💨", rk: "ala" }, { id: "c", n: "Bruno", icon: "🔥", rk: "punta" }];
     const syn = (a, b) => (a === "jolly" || b === "jolly" ? 1 : ({ "regista>ala": 2, "ala>punta": 2 })[a + ">" + b] || 0);
     for (let k = 0; k < 3; k++) {
-      let r = null; window.__catena.start({ level: 1 + k, team, syn, roles: { jolly: "J", regista: "R", ala: "A", punta: "P" }, onDone: (x) => { r = x; } });
+      let r = null; window.__catena.start({ level: 1 + k, tutorial: false, team, syn, roles: { jolly: "J", regista: "R", ala: "A", punta: "P" }, onDone: (x) => { r = x; } });
       const st = window.__catena.state; const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
       for (let p = 0; p < 3; p++) { for (let t = 0; t < 400; t++) { const b = st.blockedNow; const i = b.indexOf(false); if (i >= 0) { st.pass(i); break; } await wait(30); } }
       for (let t = 0; t < 600; t++) { if (st.phase !== "shot") break; const kx = st.keeperX; const side = kx > 190 ? -1 : 1; if (Math.abs(kx - 190) > 30) { st.shoot(side); break; } await wait(30); }
@@ -128,6 +128,18 @@ async function catenaReale(w) {
     return out;
   });
   if (res.wins < 2) errors.push("Catena giocata davvero: vinte " + res.wins + "/" + res.tries);
+  const tu = await page.evaluate(async () => {
+    const wait = (ms) => new Promise((ok) => setTimeout(ok, ms)), out = {}; localStorage.removeItem("ali-di-rondine.catena");
+    window.__catena.start({ level: 1, onDone: () => {} }); await wait(100); const st = window.__catena.state; out.tut = st.tut(); out.pages = 1;
+    document.querySelector('.tut [data-a="n"]').click(); await wait(50); document.querySelector('.tut [data-a="n"]').click(); await wait(50); out.p3 = !!document.querySelector('.tut [data-a="pr"]');
+    document.querySelector('.tut [data-a="pr"]').click(); await wait(100); out.practice = st.practice && !st.tut();
+    for (let t = 0; t < 400; t++) { const i = st.blockedNow.indexOf(false); if (i >= 0) { st.pass(i); break; } await wait(30); } out.pass = st.passes === 1;
+    document.querySelector(".hp").click(); await wait(50); out.help = st.tut(); document.querySelector('.tut [data-a="x"]').click(); await wait(50); out.closed = !st.tut();
+    st.finish(false); await wait(50); out.again = !!document.querySelector("#catRe") && !!document.querySelector("#catGo2"); document.querySelector("#catGo2").click(); await wait(50); out.real = st.practice === false;
+    st.finish(true); await wait(50); document.querySelector("#catGo").click(); await wait(50); out.gone = !document.querySelector("#catOv");
+    return out;
+  });
+  { const bad = Object.keys(tu).filter((k) => !tu[k]); if (bad.length) errors.push("Catena spiegazione/prova: " + bad.join(",") + " " + JSON.stringify(tu)); }
   L.check(`Mondiale · Catena d'attacco giocabile (${w} px)`, errors); await browser.close();
 }
 (async () => {

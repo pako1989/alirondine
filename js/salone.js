@@ -412,7 +412,7 @@
       opp: [{ name: "Zeppa", color: "#44403c", style: "equilibrata" }, { name: "Dottor Spillo", color: "#9ca3af", style: "equilibrata" }],
       boss: { name: "Il Pierrot Bianco", color: "#f8fafc", style: "pressing" },
       opts: (o, h, boss) => ({ title: `Interrogatorio · ${o.name}`, level: boss ? 3 : 2, oppName: o.name }) },
-    { id: "catena", t: "Catena d'attacco", e: "⛓️", saga: "mondiale", eng: "__catena", d: "Tre passaggi e un tiro, a tempo. Tocca il compagno quando la linea è libera dai difensori, poi tira nell'angolo dove il portiere non è. Le sinergie di ruolo allargano la linea; senza intercetti la catena è perfetta.",
+    { id: "catena", t: "Catena d'attacco", e: "⛓️", saga: "mondiale", eng: "__catena", d: "Tre passaggi e un tiro, a tempo. Linea verde = passaggio libero: tocca il compagno, poi tira nell'angolo dove il portiere non è. Le sinergie di ruolo allargano la linea; senza intercetti la catena è perfetta.",
       opp: [{ name: "Squadra B", color: "#7c2d12", style: "equilibrata" }, { name: "Difesa a Quattro", color: "#111827", style: "pressing" }],
       boss: { name: "Giappone U16", color: "#dc2626", style: "pressing" },
       opts: (o, h, boss) => ({ title: `Catena · contro ${o.name}`, level: boss ? 3 : 2, oppName: o.name, roles: { jolly: "⭐ Fantasista", regista: "🎯 Regista", ala: "💨 Ala", punta: "🔥 Punta" }, syn: (a, b) => (a === "jolly" || b === "jolly" ? 1 : ({ "regista>ala": 2, "ala>punta": 2, "regista>punta": 1 })[a + ">" + b] || 0), team: [{ id: "hero", n: "Campione", icon: "⭐", rk: "jolly" }, { id: "a", n: "Elio", icon: "🎯", rk: "regista" }, { id: "b", n: "Nina", icon: "💨", rk: "ala" }, { id: "c", n: "Bruno", icon: "🔥", rk: "punta" }] }) },
