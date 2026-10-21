@@ -25,6 +25,22 @@ async function run(w) {
   });
   if (!(r.punch > 0) || !(r.kick > r.punch) || !(r.spec > 0) || !(r.sup > 0) || r.meter >= 100) errors.push("mosse: " + JSON.stringify(r));
   if (w === 390) await L.shot(page, "duello_lotta");
+  // nuove mosse: catena, anti-aereo, presa, scatto, joystick
+  const nm = await page.evaluate(() => {
+    const P = window.__picchia, G = P.state(); const o = {}; const reset = () => { G.p.st = "idle"; G.e.st = "idle"; G.p.atk = G.e.atk = null; G.p.y = G.e.y = 0; G.p.vy = G.e.vy = 0; G.p.inv = G.e.inv = 0; G.p.x = 150; G.e.x = 176; G.e.hp = G.e.hpMax = 9999; G.p.hits = G.e.hits = 0; for (let i = 0; i < 50; i++) P.tick(); G.p.x = 150; G.e.x = 176; };
+    reset(); let h = G.e.hp; P.press("a", true); for (let i = 0; i < 6; i++) P.tick(); P.press("a", true); for (let i = 0; i < 6; i++) P.tick(); P.press("a", true); for (let i = 0; i < 40; i++) P.tick(); o.chain = h - G.e.hp; o.hits = G.p.combo;
+    reset(); h = G.e.hp; P.press("t", true); for (let i = 0; i < 12; i++) P.tick(); o.thr = h - G.e.hp; o.thrSt = G.e.st;
+    reset(); h = G.e.hp; G.e.st = "block"; G.inp.d = 0; P.press("t", true); for (let i = 0; i < 12; i++) P.tick(); o.thrBlk = h - G.e.hp;
+    reset(); h = G.e.hp; G.inp.d = 1; P.press("a", true); for (let i = 0; i < 14; i++) P.tick(); G.inp.d = 0; o.up = h - G.e.hp; o.upAir = G.e.y > 0 || G.e.st === "hit";
+    reset(); G.p.x = 100; G.e.x = 300; const x0 = G.p.x; G.stk.set(1, 0); for (let i = 0; i < 20; i++) P.tick(); G.stk.set(0, 0); o.walk = Math.round(G.p.x - x0);
+    reset(); G.p.x = 100; G.e.x = 300; const x1 = G.p.x; P.press("h", true); for (let i = 0; i < 12; i++) P.tick(); o.dash = Math.round(G.p.x - x1);
+    reset(); G.p.x = 100; G.e.x = 300; G.stk.set(0, -1); for (let i = 0; i < 4; i++) P.tick(); o.jump = G.p.y > 0; G.stk.set(0, 0);
+    return o;
+  });
+  if (!(nm.chain > 0) || nm.hits < 2) errors.push("catena di pugni: " + JSON.stringify(nm));
+  if (!(nm.thr > 0) || !(nm.thrBlk > 0)) errors.push("presa: " + JSON.stringify(nm));
+  if (!(nm.up > 0) || !nm.upAir) errors.push("anti-aereo: " + JSON.stringify(nm));
+  if (nm.walk < 15 || nm.dash < 25 || !nm.jump) errors.push("joystick/scatto/salto: " + JSON.stringify(nm));
   // parata
   const bl = await page.evaluate(() => { const P = window.__picchia, G = P.state(); G.e.hp = G.e.hpMax = 9999; G.p.hp = G.p.hpMax; G.p.x = 150; G.e.x = 175; G.e.st = "idle"; G.e.atk = null; G.p.st = "idle"; G.p.atk = null; for (let i = 0; i < 40; i++) P.tick(); const h = G.p.hp; P.press("d", true); G.e.ai = 0; const E = G.e; E.st = "atk"; E.atk = { k: "b", su: 2, ac: 3, rc: 4, dmg: 12, reach: 44, stun: 19, kb: 5 }; E.t = 0; E.hit = false; for (let i = 0; i < 12; i++) P.tick(); P.press("d", false); return [h - G.p.hp, G.p.st]; });
   if (!(bl[0] >= 0 && bl[0] <= 4)) errors.push("la parata non riduce i danni: " + JSON.stringify(bl));
