@@ -55,7 +55,7 @@
   }
   const banner = (t) => { if (!G.fast) G.fxs.push({ x: W / 2, y: 90, t, c: "#ffd23f", l: 100, big: true, sx: true }); };
   const fx = (x, y, t, c) => { if (!G.fast) G.fxs.push({ x, y, t, c, l: 30 }); };
-  function spark(x, y, col, n) { if (G.fast) return; for (let i = 0; i < n; i++) { const a = Math.random() * 6.28, s = 0.8 + Math.random() * 2; G.parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 1, l: 16 + (Math.random() * 10 | 0), c, s: 2 }); } }
+  function spark(x, y, col, n) { if (G.fast) return; for (let i = 0; i < n; i++) { const a = Math.random() * 6.28, s = 0.8 + Math.random() * 2; G.parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 1, l: 16 + (Math.random() * 10 | 0), c: col, s: 2 }); } }
   // ------------------------------------------------------------ danni
   function hurtE(e, d, o) {
     o = o || {}; if (e.hp <= 0 || e.st === "down") return false; if (e.ice > 0) d *= 1.5; if (e.boss && e.st === "wind") d *= 0.6;
@@ -312,7 +312,7 @@
     body.querySelectorAll("[data-k]").forEach((b) => { const k = b.dataset.k, up = () => { press(k, false); b.classList.remove("on"); }; b.addEventListener("pointerdown", (e) => { e.preventDefault(); safe(() => b.setPointerCapture(e.pointerId), 0); press(k, true); b.classList.add("on"); }); b.addEventListener("pointerup", up); b.addEventListener("pointercancel", up); b.addEventListener("pointerleave", up); });
     const layout = () => { if (OV) OV.classList.toggle("land", innerWidth > innerHeight * 1.1); }; LAY = layout; window.addEventListener("resize", LAY); window.addEventListener("orientationchange", LAY); layout(); body.querySelector(".btX").onclick = () => OV.querySelector(".bar .x").click();
     window.addEventListener("keydown", kd); window.addEventListener("keyup", ku);
-    let last = performance.now(), acc = 0; const loop = (t) => { if (!OV || !G) return; acc += Math.min(100, t - last); last = t; while (acc >= 16.67) { if (!PAUSE) tick(); acc -= 16.67; } draw(g); if (G && !G.over) RAF = requestAnimationFrame(loop); }; RAF = requestAnimationFrame(loop); G.draw = () => draw(g);
+    let last = performance.now(), acc = 0; const loop = (t) => { if (!OV || !G) return; acc += Math.min(100, t - last); last = t; try { while (acc >= 16.67) { if (!PAUSE) tick(); acc -= 16.67; } draw(g); } catch (er) { acc = 0; if (window.console) console.warn("beat", er); } if (G && !G.over) RAF = requestAnimationFrame(loop); }; RAF = requestAnimationFrame(loop); G.draw = () => draw(g);
   }
   // ------------------------------------------------------------ menu e avventura
   const mine = () => safe(() => S()._load().own.map((id) => S().BY[id]).filter(Boolean), []);
