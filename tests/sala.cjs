@@ -30,6 +30,13 @@ async function run(w) {
   await page.evaluate(() => document.querySelector(".salOv [data-e]").click()); await page.waitForTimeout(1500);
   const t = await page.evaluate(() => (document.querySelector(".salOv .txt") || {}).textContent || ""); if (!/EROE/.test(t)) errors.push("il film non racconta il finale: " + t.slice(0, 40));
   if (w === 390) await L.shot(page, "cineteca");
+  // Diario: una riga per saga, la saga finita (Mantello) al 100% nei capitoli e con almeno 1 finale
+  await page.evaluate(() => window.__salone.diario(() => {})); await page.waitForTimeout(300);
+  const dia = await page.evaluate(() => ({ n: document.querySelectorAll(".salOv [data-id]").length, mant: (document.querySelector('.salOv [data-id="mantello"]') || {}).textContent || "", tot: window.__salone.diarioStato() }));
+  if (dia.n < 5) errors.push("righe nel Diario: " + dia.n);
+  if (!/Capitoli 3\/3/.test(dia.mant) || !/Finali 1\//.test(dia.mant)) errors.push("riga Mantello nel Diario: " + dia.mant);
+  if (!(dia.tot > 0)) errors.push("completamento globale a 0");
+  if (w === 390) await L.shot(page, "diario");
   L.check(`Sala Giochi e Cineteca (${w} px)`, errors); await browser.close();
 }
 async function ospiti(w) {

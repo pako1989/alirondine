@@ -697,6 +697,7 @@
     if (window.__carteDecks) html += `<div class="big"><button type="button" data-go="carte">🎴 Carte del Destino<small>Mini-storie a mazzi · pesca, vivi, rigioca</small></button></div>`;
     if (window.__bar) html += `<div class="big"><button type="button" data-go="bar">🍺 Il Bar del Borgo<small>Gestione leggera · servi, ascolta gli ospiti, migliora il locale</small></button></div>`;
     html += `<div class="big"><button type="button" data-go="album">🏆 Album dei finali<small>${tt.fe}/${tt.te} timbri</small></button><button type="button" data-go="guarda">👕 Guardaroba<small>Prova e indossa ciò che hai sbloccato</small></button></div>`;
+    html += `<div class="big"><button type="button" data-go="diario">📖 Diario<small>Tutte le saghe in un libro · completamento e titoli</small></button></div>`;
     html += `<div class="big"><button type="button" data-go="sala">🕹️ Sala Giochi<small>I motori di partita delle saghe, liberi</small></button><button type="button" data-go="cine">🎬 Cineteca<small>Rivedi i finali trovati</small></button></div>`;
     { const pt = safe(() => perTotals(), null); if (pt) html += `<div class="big"><button type="button" data-go="per">👥 Album dei personaggi<small>${pt.seen}/${pt.tot} incontrati · carte d'oro per le saghe concluse</small></button>${window.__sogni ? `<button type="button" data-go="sogni">🃏 La Squadra dei Sogni<small>Carte da collezionare, intesa e il Torneo dei Sogni</small></button>` : ""}</div>`; }
     html += `<div class="row">${[["tutte", "Tutte"], ["corso", "In corso"], ["nuove", "Da iniziare"], ["concluse", "Concluse"]].map(([k, l]) => `<button type="button" class="chip${FILT.st === k ? " on" : ""}" data-st="${k}">${l}</button>`).join("")}</div>`;
@@ -720,6 +721,7 @@
     const sgb = body.querySelector('[data-go="sogni"]'); if (sgb) sgb.onclick = () => { close(); window.__sogni.open(() => openSalone()); };
     body.querySelector('[data-go="sala"]').onclick = () => openSalaGiochi(() => openSalone());
     body.querySelector('[data-go="cine"]').onclick = () => openCineteca(() => openSalone());
+    body.querySelector('[data-go="diario"]').onclick = () => openDiario(() => openSalone());
   }
   function detail(s) {
     if (!s || !OV) return; const x = state(s), r = rec(); r.seen[s.id] = 1; recSave(r);
@@ -733,6 +735,36 @@
   }
   const endRow = (found, title, sub) => `<div class="end${found ? " f" : ""}"><div class="seal">${found ? "FINALE<br>TROVATO" : "?"}</div><div><b>${found ? esc(title) : "???"}</b><span>${found ? esc(sub) : "Indizio: " + esc(sub)}</span></div></div>`;
 
+
+  // ---------------------------------------------------------------- DIARIO
+  // un libro unico: per ogni saga capitoli, finali e personaggi; in alto il completamento globale con i titoli a soglia
+  const TITOLI = [[25, "Viaggiatore"], [50, "Cronista del Borgo"], [75, "Custode delle Saghe"], [100, "Leggenda Completa"]];
+  function diarioData() {
+    const secs = safe(() => perSections(), []), bySaga = {};
+    secs.forEach((x) => { if (x.saga) bySaga[x.saga.id] = x; });
+    const rows = SAGAS.filter(available).map((s) => {
+      const x = state(s), p = bySaga[s.id], ch = s.ch || 0;
+      const parts = [], add = (a, b) => { if (b > 0) parts.push(a / b); };
+      if (ch) add(Math.min(x.doneN, ch), ch); else if (x.finished) parts.push(1);
+      add(x.endsFound, x.ends.length); if (p) add(p.seen, p.ids.length);
+      const pct = parts.length ? Math.round((parts.reduce((a, b) => a + b, 0) / parts.length) * 100) : 0;
+      return { s, x, p, ch, pct: x.started || pct ? pct : 0 };
+    });
+    const tot = rows.length ? Math.round(rows.reduce((a, r) => a + r.pct, 0) / rows.length) : 0;
+    return { rows, tot, titolo: TITOLI.filter((t) => tot >= t[0]).pop() || null };
+  }
+  function openDiario(back) {
+    if (back) BK.dia = back; BACK = BK.dia; const body = shell("📖 Diario"), d = diarioData();
+    const next = TITOLI.find((t) => d.tot < t[0]);
+    let html = `<p class="sum">Il libro di tutto ciò che hai fatto. Completamento globale: <b>${d.tot}%</b>${d.titolo ? ` · titolo: <b style="color:#ffd23f">${esc(d.titolo[1])}</b>` : ""}${next ? ` · prossimo (${next[0]}%): ${esc(next[1])}` : ""}.</p><div class="pbar"><i style="width:${Math.max(2, d.tot)}%"></i></div>`;
+    html += `<div class="row">${TITOLI.map((t) => `<span class="chip${d.tot >= t[0] ? " on" : ""}" style="cursor:default">${t[0]}% · ${esc(t[1])}</span>`).join("")}</div>`;
+    html += d.rows.slice().sort((a, b) => (b.x.started - a.x.started) || (b.pct - a.pct)).map((r) => {
+      const { s, x, p } = r, dim = x.started ? "" : "opacity:.55";
+      return `<div class="psec${x.finished ? " gold" : ""}" data-id="${s.id}" style="${dim}"><div class="pe">${s.e}</div><div><b>${esc(s.t)}</b><span>${x.started ? `${r.ch ? `Capitoli ${Math.min(x.doneN, r.ch)}/${r.ch} · ` : ""}${x.ends.length ? `Finali ${x.endsFound}/${x.ends.length} · ` : ""}${p ? `Personaggi ${p.seen}/${p.ids.length}` : ""}` : "Non ancora iniziata"}</span><div class="pbar"><i style="width:${Math.max(2, r.pct)}%"></i></div></div><div class="n">${r.pct}%</div></div>`;
+    }).join("");
+    body.innerHTML = html;
+    body.querySelectorAll("[data-id]").forEach((b) => (b.onclick = () => detail(SAGAS.find((s) => s.id === b.dataset.id))));
+  }
   // ---------------------------------------------------------------- ALBUM DEI FINALI
   function openAlbum(back) {
     if (back) BK.alb = back; BACK = BK.alb; const body = shell("🏆 Album dei finali"), tt = totals();
@@ -861,7 +893,7 @@
   }
 
   window.__salone = {
-    open: (back) => openSalone(back), album: (back) => openAlbum(back), salaGiochi: (back) => openSalaGiochi(back), machine: (id) => MACHINES.find((m) => m.id === id) || null, heroLook: () => heroLook(), cineteca: (back) => openCineteca(back), guardaroba: (back) => openGuardaroba(back), close, personaggi: (back) => openPersonaggi(back), personaggiStato: () => safe(() => perTotals(), null),
+    open: (back) => openSalone(back), album: (back) => openAlbum(back), diario: (back) => openDiario(back), diarioStato: () => safe(() => diarioData().tot, 0), salaGiochi: (back) => openSalaGiochi(back), machine: (id) => MACHINES.find((m) => m.id === id) || null, heroLook: () => heroLook(), cineteca: (back) => openCineteca(back), guardaroba: (back) => openGuardaroba(back), close, personaggi: (back) => openPersonaggi(back), personaggiStato: () => safe(() => perTotals(), null),
     summary: () => safe(() => { const t = totals(), A = api(), C = (A && A.COSM) || {}; return Object.assign(t, { cosOwned: safe(() => A.cosOwned().length, 0), cosTot: Object.keys(C).length }); }, { n: 0, run: 0, fin: 0, fe: 0, te: 0, cosOwned: 0, cosTot: 0 }),
     SAGAS,
     // ultima saga giocata, per «Riprendi» nella home
