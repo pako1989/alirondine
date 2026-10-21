@@ -252,6 +252,7 @@
 .erOv.land .erStage{max-width:none;width:100%;height:100%;display:flex;justify-content:center;background:#000}.erOv.land .erStage canvas{height:100%;width:auto;max-width:100%;border-radius:0}
 .erOv.land .erX{display:block;position:absolute;top:6px;right:8px;z-index:7;width:36px;height:36px;border-radius:10px;border:1px solid #4a3a6a;background:#221a36cc;color:#fff;font-size:15px}
 .erOv.land .erCtl{position:absolute;left:0;right:0;bottom:6px;padding:0 12px;margin:0;pointer-events:none;align-items:flex-end}.erOv.land .erCtl>*{pointer-events:auto}.erOv.land .erCtl .ab{max-width:250px;opacity:.9}.erOv.land .erCtl .ab button{min-height:50px}.erOv.land .sum{display:none}
+.erOv.land .stk{background:rgba(20,15,40,.16)!important;border-color:rgba(255,255,255,.22)!important;box-shadow:none!important}.erOv.land .stk::before{border-color:#ffffff18}.erOv.land .stk i{opacity:.62}.erOv.land .erCtl button{background:rgba(34,26,54,.45);border-color:rgba(255,255,255,.2)}.erOv.land .erCtl .tb,.erOv.land .erCtl .sp{background:rgba(42,74,122,.5)}.erOv.land .erCtl .sb{background:rgba(26,90,90,.5)}.erOv.land .erCtl .ac,.erOv.land .erCtl .su{background:rgba(122,90,16,.5)}
 @keyframes erCut{0%{opacity:0;transform:scaleY(.1)}12%{opacity:1;transform:none}85%{opacity:1}100%{opacity:0}}.erRes{text-align:center;margin:12px 0}.erRes h3{font:900 24px system-ui;margin:4px 0}`;
     document.head.appendChild(st);
   }
