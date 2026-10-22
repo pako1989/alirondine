@@ -15747,6 +15747,7 @@
       { head: "Gioca" },
       { label: "Storia", sub: `Le stagioni di Leo · ${mnPct(mnStoria())}%`, fn: menuStoria },
       ((t) => ({ label: "🏛️ Salone delle Saghe", sub: t ? `${t.n} saghe · ${t.run} in corso · finali ${t.fe}/${t.te}` : "Tutte le saghe a schede, con copertine e finali", cls: "hot", fn: () => salGo("open") }))(salSum()),
+      ((t) => ({ label: "🗺️ Mappamondo delle Saghe", sub: "Esplora 6 macro-regioni, fari interattivi e ricerca", cls: "hot", fn: () => salGo("mappamondo") }))(salSum()),
       { label: "Partite e modalità", sub: `Carriera, tornei, arcade · ${mnPct(mnModi())}%`, fn: modes },
       { label: "Borgo e trasferte", sub: `A piedi per il paese · ${mnPct(mnBorgo())}%`, fn: menuBorgo },
       { head: "Il tuo Campione" },
@@ -15765,7 +15766,7 @@
   function salLast() { try { return window.__salone && window.__salone.lastSaga ? window.__salone.lastSaga() : null; } catch { return null; } }
   function homeSkin() {
     const box = $("choices"); if (!box) return; box.classList.add("home");
-    const M = [[/^(Continua|Nuova partita)/, "hero", "▶"], [/^Riprendi saga/, "hero2", "⏪"], [/^Storia/, "big", "📖", "a"], [/Salone delle Saghe/, "big", "🏛️", "b"], [/^Partite e modalità/, "big", "⚽", "c"], [/^Borgo e trasferte/, "big", "🏘️", "d"], [/Guardaroba/, "mid", "👕"], [/Album dei finali/, "mid", "🏆"], [/^Carte del Destino/, "mid", "🎴"], [/^Altro/, "small", "➕"], [/^Impostazioni/, "small", "⚙️"], [/^Partite ·/, "slot", "💾"]];
+    const M = [[/^(Continua|Nuova partita)/, "hero", "▶"], [/^Riprendi saga/, "hero2", "⏪"], [/^Storia/, "big", "📖", "a"], [/Mappamondo delle Saghe/, "big", "🗺️", "a"], [/Salone delle Saghe/, "big", "🏛️", "b"], [/^Partite e modalità/, "big", "⚽", "c"], [/^Borgo e trasferte/, "big", "🏘️", "d"], [/Guardaroba/, "mid", "👕"], [/Album dei finali/, "mid", "🏆"], [/^Carte del Destino/, "mid", "🎴"], [/^Altro/, "small", "➕"], [/^Impostazioni/, "small", "⚙️"], [/^Partite ·/, "slot", "💾"]];
     const ls = salLast();
     box.querySelectorAll(":scope > button").forEach((b) => {
       const t = b.innerText.replace(/\s+/g, " ").trim(), m = M.find((x) => x[0].test(t));
@@ -15800,7 +15801,10 @@
     view = { kind: "scene", bg: "title" }; chap("Minigiochi e arcade");
     text("voce", "<b>Minigiochi e arcade</b><br>Giochi a parte e saghe classiche. Tutte le saghe, con copertine e avanzamento, sono nel Salone delle Saghe.");
     buttons([
-      ...(window.__salone ? [{ label: "🏛️ Salone delle Saghe", sub: "Tutte le saghe a schede", cls: "hot", fn: () => window.__salone.open(menuSaghe) }] : []),
+      ...(window.__salone ? [
+        { label: "🗺️ Mappamondo delle Saghe", sub: "Le 6 macro-regioni su mappa interattiva", cls: "hot", fn: () => window.__salone.mappamondo(menuSaghe) },
+        { label: "🏛️ Salone delle Saghe", sub: "Tutte le saghe a schede", cls: "hot", fn: () => window.__salone.open(menuSaghe) }
+      ] : []),
       { head: "✨ Nuova Suite Gameplay 2D HD" },
       { label: "✨ Arena 2D HD · Hub Completo", sub: "Le 4 modalità 2D HD in un posto solo", cls: "hot", fn: () => { if (window.openArena2DHDModal) window.openArena2DHDModal(menuSaghe); } },
       { label: "🛡️ Rondine Emblem · RPG Tattico 2D HD", sub: "RPG tattico a griglia: 10 capitoli con storia, ritratti e sfondi, anteprima dei danni, stelle", cls: "hot", fn: () => { if (window.openTacticalEmblemMode) window.openTacticalEmblemMode(menuSaghe); } },
