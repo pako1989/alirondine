@@ -283,6 +283,22 @@
 .salOv .hubAtmoTag{padding:2px 7px;border-radius:6px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);font-size:11px;color:#cbd5e1;font-weight:600}
 .salOv .hubQuote{font-size:12px;font-style:italic;color:#93c5fd;margin:4px 0 8px;line-height:1.35}
 .salOv .hubDesc{margin:0 0 6px;font-size:12.5px;color:#e2e8f0;line-height:1.4}
+.salOv .treeCard{background:#101a35;border:1.5px solid #233560;border-radius:14px;padding:12px;margin:10px 0 16px;box-shadow:0 4px 14px #0008}
+.salOv .treeHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;border-bottom:1px solid #ffffff18;padding-bottom:6px}
+.salOv .treeHead b{color:#ffd23f;font-size:14px}
+.salOv .treeStem{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:10px;background:#18284e;border:1.5px solid #38bdf888;font-size:12.5px;font-weight:700}
+.salOv .treeStem.done{border-color:#4fd1a5;color:#e8fbf3}
+.salOv .treeBranch{margin:8px 0 8px 18px;padding-left:14px;border-left:2px dashed #38bdf866;display:flex;flex-direction:column;gap:8px}
+.salOv .treeLeaf{position:relative;padding:8px 10px;border-radius:10px;background:#0c162e;border:1.5px dashed #ffffff2a;font-size:12px}
+.salOv .treeLeaf::before{content:"";position:absolute;left:-16px;top:14px;width:12px;height:2px;background:#38bdf866}
+.salOv .treeLeaf.f{border-style:solid;border-color:#ffd23f88;background:linear-gradient(135deg,#1b2b52,#13203f)}
+.salOv .treeLeaf.f::before{background:#ffd23f}
+.salOv .treeLeaf b{display:flex;align-items:center;gap:6px;font-size:13px;color:#fff}
+.salOv .treeLeaf.f b{color:#ffd23f}
+.salOv .treeLeaf span{display:block;font-size:11.5px;color:#c9d2ea;margin-top:3px}
+.salOv .treeTag{display:inline-block;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:800;text-transform:uppercase;margin-left:auto}
+.salOv .treeTag.f{background:#ffd23f22;color:#ffd23f;border:1px solid #ffd23f88}
+.salOv .treeTag.lock{background:#ffffff11;color:#ffffff66;border:1px dashed #ffffff33}
 @media (max-width:360px){.salOv .grid{grid-template-columns:1fr 1fr;gap:8px}.salOv .prev{grid-template-columns:110px 1fr}.salOv .prev canvas{width:110px;height:110px}}`;
     document.head.appendChild(st);
   }
@@ -1344,9 +1360,10 @@
     if (!s || !OV) return; const x = state(s), r = rec(); r.seen[s.id] = 1; recSave(r);
     const sh = document.createElement("div"); sh.className = "sheet";
     const ends = x.ends.length ? `<div class="sec"><span>Finali</span><span>${x.endsFound}/${x.ends.length}</span></div><div class="ends">${x.ends.map((e) => endRow(e.found, e.title, e.found ? e.desc : (s.hints && s.hints[e.id]) || "Un finale ancora nascosto.")).join("")}</div>` : "";
-    sh.innerHTML = `<div class="box"><img alt="" src="${cover(s)}"><div class="in"><h3>${s.e} ${esc(s.t)}</h3><div>${s.g.map((k) => `<span class="tag" style="background:${GEN[k][1]}">${GEN[k][0]}</span>`).join("")}</div><p>${esc(s.d)}</p><p style="color:#c9d2ea;font-size:13px">${x.finished ? "✓ Saga conclusa." : x.started ? `In corso · capitolo ${x.ch}${s.ch ? ` di ${s.ch}` : ""}${x.doneN ? ` · ${x.doneN} capitoli conclusi` : ""}.` : "Non l'hai ancora iniziata."}${s.ch ? ` ${s.ch} capitoli.` : ""}</p>${ends}<div class="act"><button type="button" class="ghost">◂ Indietro</button><button type="button" class="play">${x.started ? "Continua ▸" : "Gioca ▸"}</button></div></div></div>`;
+    sh.innerHTML = `<div class="box"><img alt="" src="${cover(s)}"><div class="in"><h3>${s.e} ${esc(s.t)}</h3><div>${s.g.map((k) => `<span class="tag" style="background:${GEN[k][1]}">${GEN[k][0]}</span>`).join("")}</div><p>${esc(s.d)}</p><p style="color:#c9d2ea;font-size:13px">${x.finished ? "✓ Saga conclusa." : x.started ? `In corso · capitolo ${x.ch}${s.ch ? ` di ${s.ch}` : ""}${x.doneN ? ` · ${x.doneN} capitoli conclusi` : ""}.` : "Non l'hai ancora iniziata."}${s.ch ? ` ${s.ch} capitoli.` : ""}</p>${ends}<div class="act"><button type="button" class="ghost">◂ Indietro</button>${x.ends.length ? `<button type="button" class="ghost" data-tree="1">🌳 Albero Bivi</button>` : ""}<button type="button" class="play">${x.started ? "Continua ▸" : "Gioca ▸"}</button></div></div></div>`;
     sh.onclick = (e) => { if (e.target === sh) sh.remove(); };
     sh.querySelector(".ghost").onclick = () => sh.remove();
+    const tb = sh.querySelector("[data-tree]"); if (tb) tb.onclick = () => { sh.remove(); openAlbum(() => detail(s), "albero", s.id); };
     sh.querySelector(".play").onclick = () => play(s, () => openSalone());
     OV.appendChild(sh);
   }
@@ -1382,18 +1399,64 @@
     body.innerHTML = html;
     body.querySelectorAll("[data-id]").forEach((b) => (b.onclick = () => detail(SAGAS.find((s) => s.id === b.dataset.id))));
   }
-  // ---------------------------------------------------------------- ALBUM DEI FINALI
-  function openAlbum(back) {
-    if (back) BK.alb = back; BACK = BK.alb; const body = shell("🏆 Album dei finali"), tt = totals();
-    let html = `<p class="sum">Un timbro per ogni finale trovato. Quelli mancanti hanno un indizio, senza svelare troppo. Totale: <b>${tt.fe}/${tt.te}</b>.</p>`;
-    const story = safe(() => api().storyEndings(), []);
-    if (story.length) {
-      const groups = [...new Set(story.map((e) => e.group))];
-      html += `<div class="sec"><span>⚽ Storia di Leo</span><span>${story.filter((e) => e.found).length}/${story.length}</span></div>`;
-      groups.forEach((gname) => { const es = story.filter((e) => e.group === gname); html += `<div style="font-size:12.5px;color:#c9d2ea;margin:8px 0 2px">${esc(gname)}</div><div class="ends">${es.map((e) => endRow(e.found, e.title.replace(/^(Finale · |Stagione \d+ · )/, ""), e.found ? e.group : e.hint)).join("")}</div>`; });
+  // ---------------------------------------------------------------- ALBUM DEI FINALI & ALBERO DEI BIVI
+  let ALB_TAB = "timbri";
+  function openAlbum(back, tab, focusId) {
+    if (tab) ALB_TAB = tab;
+    if (back) BK.alb = back; BACK = BK.alb; const body = shell(ALB_TAB === "albero" ? "🌳 Albero dei Bivi Narrativi" : "🏆 Album dei Finali"), tt = totals();
+    let html = `<p class="sum">${ALB_TAB === "albero" ? "Mappa visuale degli snodi narrativi e dei bivi che conducono ai differenti destini di ogni saga." : "Un timbro per ogni finale trovato. Quelli mancanti hanno un indizio, senza svelare troppo."} Totale: <b>${tt.fe}/${tt.te}</b>.</p>`;
+    html += `<div class="row" style="margin-top:6px;margin-bottom:12px"><button type="button" class="chip${ALB_TAB === "timbri" ? " on" : ""}" data-atab="timbri">🏆 Timbri Finali</button><button type="button" class="chip${ALB_TAB === "albero" ? " on" : ""}" data-atab="albero">🌳 Albero dei Bivi</button></div>`;
+
+    if (ALB_TAB === "timbri") {
+      const story = safe(() => api().storyEndings(), []);
+      if (story.length) {
+        const groups = [...new Set(story.map((e) => e.group))];
+        html += `<div class="sec"><span>⚽ Storia di Leo</span><span>${story.filter((e) => e.found).length}/${story.length}</span></div>`;
+        groups.forEach((gname) => { const es = story.filter((e) => e.group === gname); html += `<div style="font-size:12.5px;color:#c9d2ea;margin:8px 0 2px">${esc(gname)}</div><div class="ends">${es.map((e) => endRow(e.found, e.title.replace(/^(Finale · |Stagione \d+ · )/, ""), e.found ? e.group : e.hint)).join("")}</div>`; });
+      }
+      SAGAS.filter(available).forEach((s) => { const x = state(s); if (!x.ends.length) return; html += `<div class="sec"><span>${s.e} ${esc(s.t)}</span><span>${x.endsFound}/${x.ends.length}</span></div><div class="ends">${x.ends.map((e) => endRow(e.found, e.title, e.found ? e.desc : (s.hints && s.hints[e.id]) || "Un finale ancora nascosto.")).join("")}</div>`; });
+    } else {
+      // Albero visuale dei bivi narrativi
+      const story = safe(() => api().storyEndings(), []);
+      if (story.length) {
+        const groups = [...new Set(story.map((e) => e.group))];
+        const storyFound = story.filter((e) => e.found).length;
+        html += `<div class="treeCard"><div class="treeHead"><b>⚽ Storia di Leo · Il Cammino del Campione</b><span>${storyFound}/${story.length} finali</span></div>`
+          + `<div class="treeStem ${storyFound > 0 ? "done" : ""}"><span>🌱</span><div>Atto I: Dalle spiagge di Borgo Marino alle prime sfide</div></div>`
+          + `<div class="treeBranch">`
+          + groups.map((gname) => {
+              const es = story.filter((e) => e.group === gname);
+              const gFound = es.filter((e) => e.found).length;
+              return `<div style="font-size:11.5px;font-weight:700;color:#38bdf8;margin:4px 0 2px">🔀 Bivio: ${esc(gname)} (${gFound}/${es.length})</div>`
+                + es.map((e) => `<div class="treeLeaf ${e.found ? "f" : ""}"><b><span>${e.found ? "🏆" : "🔒"}</span>${e.found ? esc(e.title.replace(/^(Finale · |Stagione \d+ · )/, "")) : "Destino da sbloccare"} <span class="treeTag ${e.found ? "f" : "lock"}">${e.found ? "Concluso" : "Inesplorato"}</span></b><span>${e.found ? esc(e.group) : "Indizio: " + esc(e.hint)}</span></div>`).join("");
+            }).join("")
+          + `</div></div>`;
+      }
+      SAGAS.filter(available).forEach((s) => {
+        const x = state(s); if (!x.ends.length) return;
+        const isFocused = focusId && focusId === s.id;
+        html += `<div class="treeCard" id="tree_${s.id}" style="${isFocused ? "border-color:#ffd23f;box-shadow:0 0 16px rgba(255,210,63,0.3)" : ""}"><div class="treeHead"><b>${s.e} ${esc(s.t)}</b><span>${x.endsFound}/${x.ends.length} ${x.endsFound === x.ends.length ? "✨ Completo" : "finali"}</span></div>`
+          + `<div class="treeStem ${x.started ? "done" : ""}"><span>🌱</span><div>Atto I & Prologo: ${x.started ? "Iniziata" : "Non ancora iniziata"} ${x.doneN ? `(${x.doneN} capitoli percorsi)` : ""}</div></div>`
+          + `<div class="treeBranch">`
+          + `<div style="font-size:11.5px;font-weight:700;color:#38bdf8;margin:4px 0 2px">🔀 Snodo Narrativo dei Bivi & Decisioni Cruciali</div>`
+          + x.ends.map((e) => {
+              const isSecret = e.id && (e.id.includes("segreto") || e.id.includes("arcano") || e.id.includes("calcio_puro") || e.id.includes("quarto") || (s.hints && s.hints[e.id] && s.hints[e.id].includes("Segreto")));
+              return `<div class="treeLeaf ${e.found ? "f" : ""}"><b><span>${e.found ? (isSecret ? "🔮" : "🏆") : "🔒"}</span>${e.found ? esc(e.title) : (isSecret ? "Finale Segreto (??)" : "Ramo Inesplorato")} <span class="treeTag ${e.found ? "f" : "lock"}">${e.found ? (isSecret ? "Segreto Trovato" : "Ramo Trovato") : "Da Scoprire"}</span></b><span>${e.found ? esc(e.desc) : "Indizio: " + esc((s.hints && s.hints[e.id]) || "Esplora e compi scelte diverse per aprire questo ramo.")}</span></div>`;
+            }).join("")
+          + `</div></div>`;
+      });
     }
-    SAGAS.filter(available).forEach((s) => { const x = state(s); if (!x.ends.length) return; html += `<div class="sec"><span>${s.e} ${esc(s.t)}</span><span>${x.endsFound}/${x.ends.length}</span></div><div class="ends">${x.ends.map((e) => endRow(e.found, e.title, e.found ? e.desc : (s.hints && s.hints[e.id]) || "Un finale ancora nascosto.")).join("")}</div>`; });
+
     body.innerHTML = html;
+    body.querySelectorAll("[data-atab]").forEach((b) => {
+      b.onclick = () => { ALB_TAB = b.dataset.atab; openAlbum(back, ALB_TAB, focusId); };
+    });
+    if (focusId && ALB_TAB === "albero") {
+      setTimeout(() => {
+        const el = document.getElementById("tree_" + focusId);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 50);
+    }
   }
 
   // ---------------------------------------------------------------- ALBUM DEI PERSONAGGI
