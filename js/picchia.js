@@ -521,13 +521,115 @@
         { who: "me", text: "Capitano! Non trattenerti: oggi voglio dimostrarti che ho imparato a non abbassare mai la testa!" },
         { who: "foe", text: "Bravo Pio! Corri pure quanto vuoi, ma se vuoi battermi dovrai passare sopra la mia esperienza!" }
       ]
+    },
+    mg_nina: {
+      title: "La Freccia del Mondiale",
+      prologue: "Nina corre per non pensare, ma quando entra nel ring il suo sguardo è un laser. Vuole dimostrare che la velocità pura del Mondiale piega ogni colosso.",
+      nemesis: "mg_ren",
+      epilogue: "Nina si slaccia le scarpette bagnate di sudore e alza il trofeo verso il cielo. La vittoria nel Duello porta la maglia azzurra sul tetto di tutte le dimensioni.",
+      nemesisDials: [
+        { who: "foe", text: "Nina... il tuo scatto è leggenda, ma hai la pazienza per superare il mio muro d'Oriente?" },
+        { who: "me", text: "Ren, la pazienza serve a chi non ha le ali. Oggi ti supero prima ancora che tu veda il colpo!" },
+        { who: "foe", text: "Un sorriso non concede nulla: difenditi!" }
+      ]
+    },
+    mg_ren: {
+      title: "Il Maestro della Foglia Morta",
+      prologue: "Ren scende sul ring con un inchino solenne e una calma olimpica. Nel Duello dei Sogni non cerca trofei effimeri, ma l'armonia assoluta del movimento perfetto.",
+      nemesis: "mg_tico",
+      epilogue: "Ren ripone le mani dietro la schiena inchinandosi al pubblico estasiato. Il suo stile aggraziato ed etereo ha dimostrato che la serenità interiore è l'arma più letale.",
+      nemesisDials: [
+        { who: "foe", text: "Ren! Niente formule filosofiche oggi: la mia samba contro la tua disciplina orientale!" },
+        { who: "me", text: "Tico, la danza è bellissima finché non incontra il vento che ferma ogni passo. Mostrami il tuo ritmo." }
+      ]
+    },
+    tc_ardo: {
+      title: "Il Baluardo di Pietra",
+      prologue: "Ardo ha resistito ad assedi di regni e frecce incendiarie. Nell'Arena non fa un passo indietro: i suoi pugni sono rocce staccate dalla montagna.",
+      nemesis: "cm_saverio",
+      epilogue: "Ardo incrocia le braccia mastodontiche mentre le tribune tremano di cori. La fortezza del Trono si erge intatta: nessun eroe è riuscito a far crollare il colosso.",
+      nemesisDials: [
+        { who: "foe", text: "Ardo! I tuoi bastioni sono imponenti, ma davanti a questa porta c'è un uomo solo che non si piega." },
+        { who: "me", text: "Saverio... il rispetto tra guardiani è sacro, ma oggi crollerai sotto la mia valanga di pietra!" }
+      ]
+    },
+    tc_ysolde: {
+      title: "La Veggente della Casata",
+      prologue: "Ysolde ha già visto l'esito di ogni scontro prima ancora che le campane suonino. Scende sul ring per confermare ciò che le carte del destino hanno già scritto.",
+      nemesis: "pd_zeno",
+      epilogue: "Ysolde sorride con aria enigmatica mentre il pubblico applaude. Il futuro è compiuto come previsto: l'intelletto ha dominato ogni muscolo avversario.",
+      nemesisDials: [
+        { who: "foe", text: "Dama Ysolde... la vostra chiaroveggenza non potrà anticipare la velocità del mio scatto." },
+        { who: "me", text: "Zeno, sapevo cosa avresti detto prima che aprissi bocca. Il tuo colpo è già parato." }
+      ]
+    },
+    nr_zero: {
+      title: "Il Fulmine Cibernetico",
+      prologue: "Zero scivola tra le luci al neon di Tokyo 2099 con una sola missione: liberare la simulazione dal controllo rigido dei protocolli e restituirle anima.",
+      nemesis: "nr_vektor",
+      epilogue: "Zero saluta con due dita la telecamera mentre i monitor della megalopoli proiettano la sua vittoria. Il cuore ribelle ha battuto il freddo algoritmo.",
+      nemesisDials: [
+        { who: "foe", text: "Zero. Sei un'anomalia di codice da formattare all'istante." },
+        { who: "me", text: "Vektor, i tuoi calcoli sono perfetti sulla carta, ma sul ring l'istinto vince sempre sulla macchina!" }
+      ]
+    },
+    of_titano: {
+      title: "Il Colosso d'Acciaio",
+      prologue: "Un gigante forgiato tra scorie incandescenti e vapore ad alta pressione. Titano non parla: avanza a passi sordi facendo vibrare il cemento dell'arena.",
+      nemesis: "of_ferro",
+      epilogue: "Titano batte i pugni d'acciaio sul petto con un rombo metallico che zittisce l'intero stadio. Il vero dominatore dell'Officina ha conquistato la gloria immortale.",
+      nemesisDials: [
+        { who: "foe", text: "Titano! Ho passato la vita ad aggiustare le tue piastre arrugginite, oggi ti smonto pezzo per pezzo!" },
+        { who: "me", text: "CLANK... CLANK... NESSUNO... FERMA... TITANO!" }
+      ]
+    },
+    fo_lupin: {
+      title: "Il Ladro Gentiluomo del Gol",
+      prologue: "Lupin non cerca la violenza, ma la beffa perfetta. Ha forzato le casseforti più impenetrabili della città: rubare la cintura del campione sarà il suo colpo più celebre.",
+      nemesis: "fo_boss",
+      epilogue: "Con una giravolta e un inchino teatrale, Lupin mostra al pubblico il trofeo scintillante appena sfilato dalle mani del boss. L'audacia e la destrezza hanno vinto ancora.",
+      nemesisDials: [
+        { who: "foe", text: "Lupin! Pensavi di scappare con il bottino? Da questo ring non esci vivo!" },
+        { who: "me", text: "Mio caro Boss, un gentiluomo non fugge mai... scompare semplicemente al momento giusto con la coppa!" }
+      ]
+    },
+    qd_raito: {
+      title: "La Mente del Quaderno",
+      prologue: "Raito calcola ogni mossa con freddezza millimetrica. L'Arena dei Sogni non è altro che un nuovo mondo da plasmare secondo il suo disegno di giustizia assoluta.",
+      nemesis: "qd_elle",
+      epilogue: "Raito chiude il suo quaderno con un sorriso trionfante. Tutti gli avversari sono caduti nell'ordine esatto da lui stabilito: il giudizio è compiuto.",
+      nemesisDials: [
+        { who: "foe", text: "Raito... la probabilità che tu perda questo duello è del 99,8%." },
+        { who: "me", text: "Elle, sei sempre stato troppo legato alle statistiche. Il finale di questo incontro l'ho già scritto io!" }
+      ]
+    },
+    dz_sterling: {
+      title: "L'Agente Doppio Zero",
+      prologue: "Smoking su misura, papillon impeccabile e licenza di colpire. Sterling affronta il torneo con la calma di una spia navigata che non sbaglia mai bersaglio.",
+      nemesis: "dz_kalt",
+      epilogue: "Sorseggiando un Martini mentre le luci dell'arena si abbassano, Sterling trasmette il rapporto al quartier generale: 'Missione compiuta. Bersaglio neutralizzato con eleganza.'",
+      nemesisDials: [
+        { who: "foe", text: "Sterling... il gelo dell'inverno polare fermerà il tuo fuoco britannico." },
+        { who: "me", text: "Kalt, il mio fuoco non si spegne con un soffio freddo. Fatti sotto, servito con ghiaccio!" }
+      ]
     }
   };
 
   function getStoryPlan(fId) {
     const meCard = S().BY[fId] || S().CARDS[0];
     const custom = STORY_LORE[fId] || {};
+    const meFrase = (S().FRASI && S().FRASI[fId]) || "";
+    const sagaInfo = S().SAGHE && S().SAGHE[meCard.saga] ? S().SAGHE[meCard.saga] : [null, meCard.saga || "Borgo", "#ffd23f"];
+
+    // Cerca nemesi: custom -> LINKS canonici della Squadra dei Sogni -> affinità
     let nemId = custom.nemesis;
+    if (!nemId || !S().BY[nemId]) {
+      const link = (S().LINKS || []).find(([a, b]) => a === fId || b === fId);
+      if (link) {
+        const other = link[0] === fId ? link[1] : link[0];
+        if (S().BY[other]) nemId = other;
+      }
+    }
     if (!nemId || !S().BY[nemId]) {
       const candidates = S().CARDS.filter((c) => c.id !== fId);
       const sameSaga = candidates.filter((c) => c.saga === meCard.saga);
@@ -535,20 +637,27 @@
       nemId = pool[hash(fId + "nem") % pool.length].id;
     }
     const nemCard = S().BY[nemId] || S().CARDS[1];
+    const nemFrase = (S().FRASI && S().FRASI[nemCard.id]) || "";
+
     const a1Pool = S().CARDS.filter((c) => c.id !== fId && c.id !== nemId && (!meCard.saga || c.saga === meCard.saga));
     const a1Card = a1Pool.length ? a1Pool[hash(fId + "a1") % a1Pool.length] : S().CARDS.filter((c) => c.id !== fId)[0];
     const a2Pool = S().CARDS.filter((c) => c.id !== fId && c.id !== nemId && c.saga !== meCard.saga);
     const a2Card = a2Pool.length ? a2Pool[hash(fId + "a2") % a2Pool.length] : S().CARDS.filter((c) => c.id !== fId && c.id !== a1Card.id)[0];
     const bossPool = ["of_titano", "cf_pierrot", "mg_ren", "nr_zero", "tc_ardo", "pd_delmonte"].filter((id) => id !== fId && id !== nemId);
     const bossCard = S().BY[bossPool[hash(fId + "boss") % bossPool.length]] || S().CARDS.filter((c) => c.id !== fId && c.id !== nemId)[0];
-    const title = custom.title || `${name(fId)}, ${trOf(meCard) === "at" ? "Furia" : trOf(meCard) === "df" ? "Baluardo" : "Stratega"} dei Sogni`;
-    const prologue = custom.prologue || `${name(fId)} varca la soglia del Duello dei Sogni. Non cerca solo la vittoria, ma la consacrazione definitiva del proprio stile di lotta contro le leggende di ogni epoca.`;
-    const epilogue = custom.epilogue || `Con la vittoria sul Campione Supremo, ${name(fId)} solleva il trofeo scintillante tra gli applausi dell'intera Arena. Il suo nome rimarrà per sempre leggenda tra i guerrieri dei sogni.`;
+
+    const roleName = { A: "L'Assalitore", C: "Il Regista", D: "Il Baluardo", P: "La Roccia", B: "Il Fuoriclasse" }[meCard.role] || "Il Guerriero";
+    const title = custom.title || `${name(fId)} · ${roleName} di ${sagaInfo[1]}`;
+    const prologue = custom.prologue || `${name(fId)} scende nell'Arena del Duello per difendere i colori di «${sagaInfo[1]}». Il suo motto riecheggia forte sul ring: «${meFrase || "Questa squadra è un sogno."}»`;
+    const epilogue = custom.epilogue || `Sollevando la corona d'oro al cielo, ${name(fId)} consacra il trionfo della saga «${sagaInfo[1]}» nell'Arena dei Sogni. Il suo nome rimarrà per sempre scolpito nella gloria dei guerrieri.`;
+
     return {
       hero: meCard,
       title,
       prologue,
       epilogue,
+      meFrase,
+      nemFrase,
       acts: [
         { num: 1, name: "La Scintilla del Ring", foe: a1Card, lvl: 1, boss: false },
         { num: 2, name: "Il Crocevia delle Saghe", foe: a2Card, lvl: 2, boss: false },
@@ -565,7 +674,7 @@
     if (act.num === 1) {
       return [
         { who: "foe", text: `Ti stavo aspettando, ${name(me.id)}! Vediamo se i tuoi colpi sono all'altezza della tua fama.` },
-        { who: "me", text: `Non farti illusioni: ho affilato le mie tecniche per arrivare fino in fondo al torneo!` },
+        { who: "me", text: plan.meFrase ? `«${plan.meFrase}» Ho affilato ogni mossa per arrivare fino in fondo!` : `Non farti illusioni: ho affilato le mie tecniche per arrivare fino in fondo al torneo!` },
         { who: "foe", text: `Meno parole e guardia alta: che il duello cominci!` }
       ];
     }
@@ -578,8 +687,8 @@
     }
     if (act.num === 3) {
       return [
-        { who: "foe", text: `${name(me.id)}... sapevo che il destino ci avrebbe portati qui, faccia a faccia.` },
-        { who: "me", text: `${name(foe.id)}... è giunto il momento di chiudere i conti. Nessun pareggio, nessun rinvio!` },
+        { who: "foe", text: plan.nemFrase ? `«${plan.nemFrase}» Sapevo che prima o poi ci saremmo scontrati!` : `${name(me.id)}... sapevo che il destino ci avrebbe portati qui, faccia a faccia.` },
+        { who: "me", text: plan.meFrase ? `«${plan.meFrase}» È il momento di chiudere i conti una volta per tutte!` : `${name(foe.id)}... è giunto il momento di chiudere i conti. Nessun pareggio, nessun rinvio!` },
         { who: "foe", text: `Un solo lottatore uscirà da questa sabbia da vincitore. Mostrami tutto quello che hai!` },
         { who: "me", text: `Preparati: non avrò pietà!` }
       ];
