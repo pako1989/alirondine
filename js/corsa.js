@@ -15,8 +15,22 @@
     { id: "mare", n: "Lungomare del Borgo", ground: "#c9b27a", road: "#4a4f5c", edge: "#fff", deco: ["🌴", "🏖️", "⛱️", "🌊"], sky: ["#4aa8f0", "#e8f6ff"], hill: ["#7ab8c8", "#4a9a6a"], grass: ["#c9b27a", "#bda56c"], pts: [[0, 0], [260, -30], [520, 40], [640, 220], [520, 400], [250, 430], [60, 330], [-160, 400], [-340, 250], [-250, 40]] },
     { id: "neve", n: "Valico Innevato", ground: "#e8f0fa", road: "#6a7488", edge: "#e8603a", deco: ["🌲", "⛄", "🏔️", "❄️"], sky: ["#8aa0c8", "#eef4fc"], hill: ["#b8c8e0", "#8aa0c0"], grass: ["#e8f0fa", "#d8e4f2"], pts: [[0, 0], [300, 20], [450, -120], [650, -60], [700, 180], [500, 300], [280, 240], [200, 420], [-80, 430], [-240, 250], [-200, 60]] },
     { id: "neon", n: "Circuito Neon", ground: "#14102a", road: "#272342", edge: "#ff4fd8", deco: ["💡", "🌆", "🛸", "✨"], sky: ["#06021a", "#4a0a6a"], hill: ["#1a1040", "#2a1460"], grass: ["#14102a", "#1a1436"], neon: 1, pts: [[0, 0], [220, 60], [440, -20], [600, 120], [560, 330], [320, 420], [120, 300], [-60, 420], [-300, 360], [-380, 160], [-200, -20]] },
+    { id: "tokyo", n: "Tokyo 2099 Cyberway", ground: "#09041a", road: "#1b0a38", edge: "#00f5d4", deco: ["🗼", "⚡", "🤖", "🛸", "✨", "🌆"], sky: ["#050014", "#7303c0"], hill: ["#240046", "#3c096c"], grass: ["#0d0221", "#150530"], neon: 1, pts: [[0, 0], [280, 60], [540, -40], [700, 160], [600, 360], [360, 440], [140, 320], [-80, 420], [-300, 340], [-400, 160], [-220, -10]] },
+    { id: "alcatraz", n: "Cortili di Alcatraz", ground: "#211f1d", road: "#36322e", edge: "#f59e0b", deco: ["🧱", "⛓️", "🚨", "🔦", "🌧️"], sky: ["#141210", "#3a342f"], hill: ["#26221f", "#181512"], grass: ["#211f1d", "#1a1816"], pts: [[0, 0], [260, -30], [500, 40], [620, 220], [500, 400], [260, 420], [80, 320], [-140, 400], [-320, 260], [-260, 50]] },
+    { id: "corsari", n: "Baia dei Corsari", ground: "#d4a373", road: "#584232", edge: "#e76f51", deco: ["🏴‍☠️", "⚓", "🦜", "⛵", "🌴"], sky: ["#2a9d8f", "#e9c46a"], hill: ["#264653", "#2a9d8f"], grass: ["#d4a373", "#bc8a5f"], pts: [[0, 0], [270, 40], [510, -20], [660, 150], [570, 360], [330, 420], [110, 330], [-90, 420], [-310, 320], [-370, 140], [-200, -20]] },
   ];
-  const THEME = { mare: { bump: "🦀", patch: "rgba(216,190,120,.9)" }, neve: { bump: "⛄", patch: "rgba(190,230,255,.9)", ice: 1 }, neon: { bump: "🚧", patch: "rgba(255,79,216,.55)" } };
+  const THEME = {
+    mare: { bump: "🦀", patch: "rgba(216,190,120,.9)" },
+    neve: { bump: "⛄", patch: "rgba(190,230,255,.9)", ice: 1 },
+    neon: { bump: "🚧", patch: "rgba(255,79,216,.55)" },
+    tokyo: { bump: "⚡", patch: "rgba(0,245,212,.55)", cyber: 1 },
+    alcatraz: { bump: "⛓️", patch: "rgba(75,60,45,.95)", mud: 1 },
+    corsari: { bump: "⚓", patch: "rgba(230,185,110,.9)" },
+  };
+  const CUPS = {
+    borgo: { id: "borgo", name: "🏖️ Trofeo del Borgo", desc: "Lungomare, Valico Innevato e Circuito Neon", idxs: [0, 1, 2] },
+    saghe: { id: "saghe", name: "🌆 Trofeo delle Saghe", desc: "Tokyo 2099 Cyberway, Cortili di Alcatraz e Baia dei Corsari", idxs: [3, 4, 5] },
+  };
   const ZON = [{ f: 0.17, len: 150, side: 1, gated: 0 }, { f: 0.55, len: 170, side: -1, gated: 1 }];
   const ITEMN = { fire: "Missile di Fuoco", thunder: "Fulmine", curve: "Presa perfetta", zig: "Zig-zag", spiral: "Tornado", vanish: "Fantasma", ice: "Gelata", change: "Scambio", drill: "Trivella" };
   const ITEMD = { fire: "colpisce chi hai davanti", thunder: "frena tutti i rivali davanti", curve: "curve senza sbandare + turbo", zig: "turbo e niente ostacoli", spiral: "lascia un tornado dietro", vanish: "attraversi tutto per un po'", ice: "congela chi hai davanti", change: "scambi posto con chi hai davanti", drill: "scudo + turbo" };
@@ -71,7 +85,7 @@
     }
   };
   let OV = null, BACK = null, R = null, RAF = 0, PAUSE = false;
-  const load = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { champ: r.champ | 0, wins: r.wins | 0, best: r.best || {}, view: r.view === "top" ? "top" : "rear", fun: r.fun !== false, mode: MODES[r.mode] ? r.mode : "classic", kart: KARTS[r.kart] ? r.kart : "classic", rec: r.rec || {} }; };
+  const load = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { champ: r.champ | 0, wins: r.wins | 0, best: r.best || {}, view: r.view === "top" ? "top" : "rear", fun: r.fun !== false, mode: MODES[r.mode] ? r.mode : "classic", kart: KARTS[r.kart] ? r.kart : "classic", cup: CUPS[r.cup] ? r.cup : "borgo", rec: r.rec || {} }; };
   const save = (r) => safe(() => localStorage.setItem(KEY, JSON.stringify(r)), 0);
   const name = (id) => safe(() => S().name(id), id);
   const rlOf = (c) => { if (ABIL[c.role]) return c.role; const e = safe(() => S().eff(c), c); return { at: "A", te: "C", df: "D" }[e.at >= e.df && e.at >= e.te ? "at" : e.df >= e.te ? "df" : "te"]; };
@@ -276,13 +290,58 @@
   const quad = (g, xa, xb, ya, xc, xd, yb) => { g.beginPath(); g.moveTo(xa, ya); g.lineTo(xb, ya); g.lineTo(xd, yb); g.lineTo(xc, yb); g.closePath(); g.fill(); };
   function scenery(g, T, head) {
     const off = head * 230;
-    if (T.neon) { const sx = ((W * 0.62 - off * 0.12) % (W + 160) + (W + 160)) % (W + 160) - 80; const gr = g.createLinearGradient(0, HY - 70, 0, HY); gr.addColorStop(0, "#ff4fd8"); gr.addColorStop(1, "#ffd23f"); g.fillStyle = gr; g.beginPath(); g.arc(sx, HY - 30, 36, Math.PI, 0); g.fill(); g.fillStyle = T.sky[0]; for (let i = 0; i < 5; i++) g.fillRect(sx - 40, HY - 28 + i * 6, 80, 1.5 + i * 0.6); }
-    else if (T.id === "mare") { const sx = ((W * 0.3 - off * 0.1) % (W + 160) + (W + 160)) % (W + 160) - 80; g.fillStyle = "rgba(255,248,200,.95)"; g.beginPath(); g.arc(sx, HY - 44, 20, 0, 7); g.fill(); g.fillStyle = "rgba(255,248,200,.25)"; g.beginPath(); g.arc(sx, HY - 44, 34, 0, 7); g.fill(); }
+    if (T.id === "tokyo" || (T.neon && T.id !== "neon")) {
+      const sx = ((W * 0.7 - off * 0.12) % (W + 160) + (W + 160)) % (W + 160) - 80;
+      const gr = g.createLinearGradient(0, HY - 75, 0, HY);
+      gr.addColorStop(0, "#00f5d4"); gr.addColorStop(0.5, "#7303c0"); gr.addColorStop(1, "#f72585");
+      g.fillStyle = gr; g.beginPath(); g.arc(sx, HY - 34, 40, Math.PI, 0); g.fill();
+      g.fillStyle = T.sky[0];
+      for (let i = 0; i < 6; i++) g.fillRect(sx - 45, HY - 32 + i * 5.5, 90, 1.8 + i * 0.5);
+    } else if (T.neon) {
+      const sx = ((W * 0.62 - off * 0.12) % (W + 160) + (W + 160)) % (W + 160) - 80;
+      const gr = g.createLinearGradient(0, HY - 70, 0, HY);
+      gr.addColorStop(0, "#ff4fd8"); gr.addColorStop(1, "#ffd23f");
+      g.fillStyle = gr; g.beginPath(); g.arc(sx, HY - 30, 36, Math.PI, 0); g.fill();
+      g.fillStyle = T.sky[0];
+      for (let i = 0; i < 5; i++) g.fillRect(sx - 40, HY - 28 + i * 6, 80, 1.5 + i * 0.6);
+    } else if (T.id === "alcatraz") {
+      const beamX = W * 0.5 + Math.sin((R ? R.t : 0) * 0.04) * (W * 0.4);
+      const bgGr = g.createRadialGradient(beamX, HY - 22, 5, beamX, HY - 22, 110);
+      bgGr.addColorStop(0, "rgba(255,240,180,.35)"); bgGr.addColorStop(1, "rgba(0,0,0,0)");
+      g.fillStyle = bgGr; g.beginPath(); g.arc(beamX, HY - 22, 110, 0, 7); g.fill();
+    } else if (T.id === "corsari") {
+      const sx = ((W * 0.4 - off * 0.1) % (W + 160) + (W + 160)) % (W + 160) - 80;
+      g.fillStyle = "rgba(247,127,0,.9)"; g.beginPath(); g.arc(sx, HY - 35, 24, 0, 7); g.fill();
+      g.fillStyle = "rgba(234,88,12,.3)"; g.beginPath(); g.arc(sx, HY - 35, 42, 0, 7); g.fill();
+    } else if (T.id === "mare") {
+      const sx = ((W * 0.3 - off * 0.1) % (W + 160) + (W + 160)) % (W + 160) - 80;
+      g.fillStyle = "rgba(255,248,200,.95)"; g.beginPath(); g.arc(sx, HY - 44, 20, 0, 7); g.fill();
+      g.fillStyle = "rgba(255,248,200,.25)"; g.beginPath(); g.arc(sx, HY - 44, 34, 0, 7); g.fill();
+    }
     [[0.25, 38, 0.014, T.hill[0]], [0.55, 24, 0.03, T.hill[1]]].forEach(([k, amp, fr, col], L) => {
       g.fillStyle = col; g.beginPath(); g.moveTo(-4, HY + 1);
-      for (let x = -4; x <= W + 8; x += 6) { const u = x + off * k; let h; if (T.neon) { const cell = Math.floor(u / 15); h = 8 + ((cell * 2654435761 >>> 0) % (L ? 26 : 46)); h = (u % 15 + 15) % 15 < 13 ? h : 0; g.lineTo(x, HY - h); continue; } h = amp * (0.55 + 0.45 * Math.sin(u * fr + L * 2.1)) + amp * 0.45 * Math.sin(u * fr * 2.7 + 1 + L); g.lineTo(x, HY - h); }
+      for (let x = -4; x <= W + 8; x += 6) {
+        const u = x + off * k; let h;
+        if (T.neon || T.id === "tokyo") {
+          const cell = Math.floor(u / 15);
+          h = 8 + ((cell * 2654435761 >>> 0) % (L ? 26 : 46));
+          h = (u % 15 + 15) % 15 < 13 ? h : 0;
+          g.lineTo(x, HY - h);
+          continue;
+        } else if (T.id === "alcatraz") {
+          const cell = Math.floor(u / 28);
+          h = 16 + ((cell * 179424673 >>> 0) % (L ? 18 : 34));
+          g.lineTo(x, HY - h);
+          continue;
+        }
+        h = amp * (0.55 + 0.45 * Math.sin(u * fr + L * 2.1)) + amp * 0.45 * Math.sin(u * fr * 2.7 + 1 + L);
+        g.lineTo(x, HY - h);
+      }
       g.lineTo(W + 8, HY + 1); g.closePath(); g.fill();
-      if (T.neon && L === 0) { g.fillStyle = "rgba(255,79,216,.18)"; g.fillRect(0, HY - 2, W, 3); }
+      if ((T.neon || T.id === "tokyo") && L === 0) {
+        g.fillStyle = T.id === "tokyo" ? "rgba(0,245,212,.22)" : "rgba(255,79,216,.18)";
+        g.fillRect(0, HY - 2, W, 3);
+      }
     });
   }
   function kartRear(g, x, y, u, r, tilt) {
@@ -508,7 +567,9 @@
   function menu(back) {
     if (back) BACK = back; const body = shell("🏁 Gran Premio dei Sogni"), r = load(), team = myTeam();
     const selK = KARTS[r.kart] || KARTS.classic, isSolo = r.mode === "solo";
-    body.innerHTML = `<p class="sum">${isSolo ? "<b>Corsa Individuale (Tutti contro Tutti)</b>: sei da solo in pista contro 7 piloti rivali agguerriti! Nessun compagno, ognuno per sé: vince chi taglia per primo il traguardo." : "<b>Corsa a squadre dei Sogni</b>: guidi il tuo pilota, due compagni corrono con te e i punti di squadra si sommano contro i rivali."} Scia, turbo, abilità e veicoli differenziati.</p><div class="sec">${isSolo ? "Il tuo Pilota" : "La tua squadra (dalla Squadra dei Sogni)"}</div><p class="sum">${isSolo ? `<b>${esc(name(team[0].id))}</b> (${esc(ABIL[rlOf(team[0])][0])}) · Pilota Titolare` : team.map((c) => `<b>${esc(name(c.id))}</b> (${esc(ABIL[rlOf(c)][0])})`).join(" · ")}</p><div class="sec">Scegli il tuo Veicolo · Attivo: ${esc(selK.name)}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0">${Object.values(KARTS).map((k) => `<button type="button" class="one" data-pick-kart="${k.id}" style="margin:0;min-height:80px;border:2px solid ${k.id === r.kart ? '#ffd23f' : '#4a3a6a'};background:${k.id === r.kart ? '#3a2254' : '#221a36'}"><div style="display:flex;justify-content:space-between;align-items:center"><b>${k.name}</b><span style="font-size:9px;font-weight:900;padding:2px 5px;border-radius:4px;background:#000;color:${k.id === r.kart ? '#ffd23f' : '#bbb'}">${k.tag}</span></div><small style="margin-top:3px;color:#c8b8ff">⚡ ${esc(k.perk)}</small><small style="color:#aaa;font-size:9px;margin-top:2px">Vel: ${k.stats.vel} · Scat: ${k.stats.acc} · Manov: ${k.stats.man} · Resist: ${k.stats.res}</small></button>`).join("")}</div><button type="button" class="one" data-kart="1" style="display:none">Cambia kart</button><div class="sec">Modalità di Gara e Piste</div><button type="button" class="one" data-mode="1">${MODES[r.mode][0]}<small>${MODES[r.mode][1]}. Tocca per cambiare modalità</small></button><button type="button" class="one" data-view="1">👁️ Visuale: ${r.view === "rear" ? "da dietro (joystick)" : "dall'alto"}<small>tocca per cambiare: da dietro oppure dall'alto (la classica)</small></button><button type="button" class="one" data-fun="1">🎁 Oggetti, ostacoli e scorciatoie: ${r.fun ? "SÌ" : "NO"}<small>oggetti della tua saga, ostacoli per pista, scorciatoie (una sempre aperta, una con leva). Tocca per cambiare</small></button><button type="button" class="one" data-go="champ">🏆 Campionato dei Sogni<small>3 gare su 3 piste · ${r.champ ? "vinto " + r.champ + " volte" : "mai vinto"} · premi in monete</small></button>${TRACKS.map((t, i) => `<button type="button" class="one" data-t="${i}">🏁 ${esc(t.n)}<small>${isSolo ? "gara individuale (tutti contro tutti)" : "gara singola"} · 2 giri${r.best[t.id] ? " · record posto " + r.best[t.id] : ""}</small></button>`).join("")}`;
+    const curCup = CUPS[r.cup || "borgo"] || CUPS.borgo;
+    const cTracks = curCup.idxs.map((i) => TRACKS[i]);
+    body.innerHTML = `<p class="sum">${isSolo ? "<b>Corsa Individuale (Tutti contro Tutti)</b>: sei da solo in pista contro 7 piloti rivali agguerriti! Nessun compagno, ognuno per sé: vince chi taglia per primo il traguardo." : "<b>Corsa a squadre dei Sogni</b>: guidi il tuo pilota, due compagni corrono con te e i punti di squadra si sommano contro i rivali."} Scia, turbo, abilità e veicoli differenziati.</p><div class="sec">${isSolo ? "Il tuo Pilota" : "La tua squadra (dalla Squadra dei Sogni)"}</div><p class="sum">${isSolo ? `<b>${esc(name(team[0].id))}</b> (${esc(ABIL[rlOf(team[0])][0])}) · Pilota Titolare` : team.map((c) => `<b>${esc(name(c.id))}</b> (${esc(ABIL[rlOf(c)][0])})`).join(" · ")}</p><div class="sec">Scegli il tuo Veicolo · Attivo: ${esc(selK.name)}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0">${Object.values(KARTS).map((k) => `<button type="button" class="one" data-pick-kart="${k.id}" style="margin:0;min-height:80px;border:2px solid ${k.id === r.kart ? '#ffd23f' : '#4a3a6a'};background:${k.id === r.kart ? '#3a2254' : '#221a36'}"><div style="display:flex;justify-content:space-between;align-items:center"><b>${k.name}</b><span style="font-size:9px;font-weight:900;padding:2px 5px;border-radius:4px;background:#000;color:${k.id === r.kart ? '#ffd23f' : '#bbb'}">${k.tag}</span></div><small style="margin-top:3px;color:#c8b8ff">⚡ ${esc(k.perk)}</small><small style="color:#aaa;font-size:9px;margin-top:2px">Vel: ${k.stats.vel} · Scat: ${k.stats.acc} · Manov: ${k.stats.man} · Resist: ${k.stats.res}</small></button>`).join("")}</div><button type="button" class="one" data-kart="1" style="display:none">Cambia kart</button><div class="sec">Modalità di Gara e Piste</div><button type="button" class="one" data-mode="1">${MODES[r.mode][0]}<small>${MODES[r.mode][1]}. Tocca per cambiare modalità</small></button><button type="button" class="one" data-view="1">👁️ Visuale: ${r.view === "rear" ? "da dietro (joystick)" : "dall'alto"}<small>tocca per cambiare: da dietro oppure dall'alto (la classica)</small></button><button type="button" class="one" data-cup="1">🗺️ Coppa Piste: ${esc(curCup.name)}<small>${esc(curCup.desc)}. Tocca per cambiare coppa!</small></button><button type="button" class="one" data-fun="1">🎁 Oggetti, ostacoli e scorciatoie: ${r.fun ? "SÌ" : "NO"}<small>oggetti della tua saga, ostacoli per pista, scorciatoie (una sempre aperta, una con leva). Tocca per cambiare</small></button><button type="button" class="one" data-go="champ">🏆 Campionato dei Sogni<small>3 gare (${esc(curCup.name)}) · ${r.champ ? "vinto " + r.champ + " volte" : "mai vinto"} · premi in monete</small></button>${cTracks.map((t, i) => `<button type="button" class="one" data-t="${i}">🏁 ${esc(t.n)}<small>${isSolo ? "gara individuale (tutti contro tutti)" : "gara singola"} · 2 giri${r.best[t.id] ? " · record posto " + r.best[t.id] : ""}</small></button>`).join("")}`;
     body.querySelectorAll('[data-pick-kart]').forEach((b) => {
       b.onclick = () => { const x = load(); x.kart = b.dataset.pickKart; save(x); menu(); };
     });
@@ -516,9 +577,10 @@
     if (dk) dk.onclick = () => { const x = load(), ks = Object.keys(KARTS); x.kart = ks[(ks.indexOf(x.kart) + 1) % ks.length]; save(x); menu(); };
     body.querySelector('[data-mode]').onclick = () => { const x = load(), k = Object.keys(MODES); x.mode = k[(k.indexOf(x.mode) + 1) % k.length]; save(x); menu(); };
     body.querySelector('[data-view]').onclick = () => { const x = load(); x.view = x.view === "rear" ? "top" : "rear"; save(x); menu(); };
+    body.querySelector('[data-cup]').onclick = () => { const x = load(); x.cup = x.cup === "saghe" ? "borgo" : "saghe"; save(x); menu(); };
     body.querySelector('[data-fun]').onclick = () => { const x = load(); x.fun = !x.fun; save(x); menu(); };
-    body.querySelector('[data-go="champ"]').onclick = () => champ(0, 0, { t: 0 });
-    body.querySelectorAll("[data-t]").forEach((b) => (b.onclick = () => race(+b.dataset.t, 2, null)));
+    body.querySelector('[data-go="champ"]').onclick = () => champ(0, 0, { t: 0, cup: curCup.id });
+    body.querySelectorAll("[data-t]").forEach((b) => (b.onclick = () => race(curCup.idxs[+b.dataset.t], 2, null)));
   }
   function setup(ti, lvl, seed, mode) {
     const T = TRACKS[ti], rand = seeded(seed != null ? seed : (Date.now() & 0xffff)), me = myTeam(), ss = [...new Set(S().CARDS.map((c) => c.saga))], th = ss[Math.floor(rand() * ss.length)], rv = rivals(rand, lvl, th);
@@ -547,7 +609,12 @@
   function race(ti, lvl, st) {
     const mode = st ? "classic" : load().mode, cfg = setup(ti, lvl, null, mode); cfg.view = load().view; cfg.fun = load().fun; cfg.title = st ? `🏆 Campionato · gara ${st.n + 1}/3` : MODES[mode][0].split(" ")[0] + " " + TRACKS[ti].n; cfg.onEnd = (G) => results(G, ti, lvl, st); raceUI(cfg);
   }
-  function champ(n, tot, st) { race(n, 1 + n, { n, tot: st.tot || tot || 0, pts: st.pts || 0 }); }
+  function champ(n, tot, st) {
+    const cId = (st && st.cup) || load().cup || "borgo";
+    const curCup = CUPS[cId] || CUPS.borgo;
+    const ti = curCup.idxs[n] != null ? curCup.idxs[n] : n;
+    race(ti, 1 + n, { n, tot: st && st.tot ? st.tot : (tot || 0), pts: st && st.pts ? st.pts : 0, cup: cId });
+  }
   function results(G, ti, lvl, st) {
     const body = shell("🏁 Risultati"), order = G.order, tp = G.pts[0] || 0, rp = G.pts[1] || 0, md = G.cfg.mode || "classic", win = (md === "duel" || md === "solo") ? G.myPos === 1 : tp > rp, a = load(), L = [];
     const nm = ["Tua squadra", "Squadra rivale", "Indipendenti"];
@@ -560,12 +627,13 @@
     let html = L.map((l) => `<p class="sum" style="text-align:center">${l}</p>`).join("");
     if (st) {
       const tot = (st.tot || 0) + tp, rtot = (st.rt || 0) + rp, n = st.n + 1;
+      const cId = st.cup || "borgo", curCup = CUPS[cId] || CUPS.borgo;
       if (n >= 3) { const cw = tot > rtot; if (cw) { a.champ++; safe(() => window.addCoins(100), 0); } save(a); html += `<p class="sum" style="text-align:center"><b>Campionato: ${tot} punti contro ${rtot}.</b><br>${cw ? "🏆 Campionato dei Sogni vinto! +100 monete." : "Rivali campioni. Riprova!"}</p><button type="button" class="one" data-go="again">↺ Nuovo campionato</button>`; }
-      else { save(a); html += `<p class="sum" style="text-align:center">Classifica squadre: <b>${tot}</b> contro <b>${rtot}</b>.</p><button type="button" class="one" data-go="next">▶ Prossima gara<small>${TRACKS[n].n}</small></button>`; }
+      else { const nextTi = curCup.idxs[n] != null ? curCup.idxs[n] : n; save(a); html += `<p class="sum" style="text-align:center">Classifica squadre: <b>${tot}</b> contro <b>${rtot}</b>.</p><button type="button" class="one" data-go="next">▶ Prossima gara<small>${TRACKS[nextTi] ? TRACKS[nextTi].n : TRACKS[n].n}</small></button>`; }
       body.insertAdjacentHTML("beforeend", html + `<button type="button" class="one" data-go="menu">◂ Menu</button>`);
-      const q = (s) => body.querySelector(s); const nx = q('[data-go="next"]'); if (nx) nx.onclick = () => race(n, 1 + n, { n, tot, rt: rtot }); const ag = q('[data-go="again"]'); if (ag) ag.onclick = () => race(0, 1, { n: 0, tot: 0, rt: 0 }); q('[data-go="menu"]').onclick = () => menu();
+      const q = (s) => body.querySelector(s); const nx = q('[data-go="next"]'); if (nx) nx.onclick = () => champ(n, tot, { n, tot, rt: rtot, cup: cId }); const ag = q('[data-go="again"]'); if (ag) ag.onclick = () => champ(0, 0, { n: 0, tot: 0, rt: 0, cup: cId }); q('[data-go="menu"]').onclick = () => menu();
     } else { save(a); body.insertAdjacentHTML("beforeend", html + `<button type="button" class="one" data-go="again">↺ Rivincita</button><button type="button" class="one" data-go="menu">◂ Menu</button>`); body.querySelector('[data-go="again"]').onclick = () => race(ti, lvl, null); body.querySelector('[data-go="menu"]').onclick = () => menu(); }
     if (safe(() => window.__arena, null)) safe(() => { const ar = window.__arena.load(), id = G.me.id; ar.xp[id] = Math.min(60, (ar.xp[id] | 0) + 1); window.__arena.save(ar); }, 0);
   }
-  window.__corsa = { open: menu, close, state: () => R, tick, press, begin, setup, build, TRACKS, ABIL, KARTS, pos, at, _fast: (v) => { if (R) R.fast = !!v; }, pause: (v) => { PAUSE = !!v; }, race, load, save, mk };
+  window.__corsa = { open: menu, close, state: () => R, tick, press, begin, setup, build, TRACKS, ABIL, KARTS, CUPS, pos, at, _fast: (v) => { if (R) R.fast = !!v; }, pause: (v) => { PAUSE = !!v; }, race, load, save, mk };
 })();

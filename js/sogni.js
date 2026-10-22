@@ -582,8 +582,193 @@
   // ---------------------------------------------------------------- la carta (HTML)
   function cardHtml(id, opts) {
     const c = BY[id], R = RAR[c.rar], own = !opts || opts.own !== false, img = own ? port(id) : null, S = SG(c.saga), st = own ? starsOf(id) : 0, e = own ? eff(c) : c;
-    return `<div class="sgCard r${c.rar}${own ? "" : " lock"}${opts && opts.sel ? " sel" : ""}${st >= 3 ? " s3" : ""}" data-c="${id}" style="--rc:${R[1]};--sc:${S[2]}"${st >= 3 ? ` title="«${esc(FRASI[id] || "")}»"` : ""}><div class="hd"><span>${R[0]}</span><b>${c.role}</b></div>${st ? `<div class="stars">${"★".repeat(st)}</div>` : ""}<div class="img">${img ? `<img alt="" src="${img}">` : `<span>?</span>`}</div><div class="nm">${own ? esc(name(id)) : "???"}</div><div class="st"><span>ATT <b>${own ? e.at : "–"}</b></span><span>DIF <b>${own ? e.df : "–"}</b></span><span>TEC <b>${own ? e.te : "–"}</b></span></div><div class="sg">${esc(S[1])}</div></div>`;
+    return `<div class="sgCard r${c.rar}${own ? "" : " lock"}${opts && opts.sel ? " sel" : ""}${st >= 3 ? " s3" : ""}" data-c="${id}" style="--rc:${R[1]};--sc:${S[2]}"${st >= 3 ? ` title="«${esc(FRASI[id] || "")}»"` : ""}>${own ? `<button type="button" class="sgLoreBtn" data-lore="${id}" title="📖 Lore e Dettagli" aria-label="Lore e dettagli">📖</button>` : ""}<div class="hd"><span>${R[0]}</span><b>${c.role}</b></div>${st ? `<div class="stars">${"★".repeat(st)}</div>` : ""}<div class="img">${img ? `<img alt="" src="${img}">` : `<span>?</span>`}</div><div class="nm">${own ? esc(name(id)) : "???"}</div><div class="st"><span>ATT <b>${own ? e.at : "–"}</b></span><span>DIF <b>${own ? e.df : "–"}</b></span><span>TEC <b>${own ? e.te : "–"}</b></span></div><div class="sg">${esc(S[1])}</div></div>`;
   }
+
+  function getCardLore(c) {
+    const C = window.__borgoApi && window.__borgoApi.CAST && window.__borgoApi.CAST[c.id];
+    if (C && C.bio) return C.bio;
+    const sagaNames = {
+      campetto: "Cresciuto nei campetti di periferia tra pali arrugginiti e asfalto, sa che il vero talento nasce dalla passione e dal sudore.",
+      note: "Custodisce segreti tattici e schemi indecifrabili. Ogni partita per lui è una partita a scacchi giocata con la mente.",
+      fortino: "Esperto in infiltrazioni e colpi audaci. In campo si muove come un'ombra, capace di scassinare le difese più ermetiche.",
+      sigilli: "Formatosi all'Accademia dei Sigilli, padroneggia le arti magiche del pallone tra parabole incantate e barriere arcane.",
+      circuiti: "Pilota e atleta potenziato nella metropoli al neon del 2099. Riflessi cibernetici e scatti fulminei a frequenza quantistica.",
+      vallombra: "Custode dei misteri di Vallombra e delle sue tradizioni secolari. Freddo nei momenti decisivi, gioca con cuore d'acciaio.",
+      alcatraz: "Veterano della prigione più dura, sa cosa significa lottare per ogni centimetro di campo senza mai abbassare la guardia.",
+      treno: "Viaggiatore dell'Espresso delle Ombre, abituato a muoversi nel fumo e a leggere i punti deboli di chiunque in un batter d'occhio.",
+      gala: "Figura di spicco nei salotti e negli stadi più prestigiosi del mondo. Classe cristallina e visione di gioco da gran galà.",
+      spia: "Agente sotto copertura con licenza di cross. Calcola ogni traiettoria al millimetro prima ancora che il pallone tocchi terra.",
+    };
+    return sagaNames[c.saga] || `Leggenda della saga «${SG(c.saga)[1]}». Scende in campo per portare la Squadra dei Sogni alla gloria.`;
+  }
+
+  function getSkillInfo(id, role) {
+    const u = (window.__arena && window.__arena.UNIQUE_SKILLS && window.__arena.UNIQUE_SKILLS[id]);
+    if (u) return { name: u.name, desc: u.desc, cd: u.cd || 3, special: true };
+    const rNames = {
+      A: { name: "Tiro di Fuoco", desc: "Conclusione potente da 2.2× sui pali avversari", cd: 3 },
+      C: { name: "Regia Fulminea", desc: "Aumenta del +25% i danni di tutta la squadra per 2 round", cd: 2 },
+      D: { name: "Muro Vivente", desc: "Attira i colpi avversari e guadagna uno scudo protettivo", cd: 3 },
+      P: { name: "Parata Ermetica", desc: "Dona scudo a tutti i compagni e neutralizza i tiri a rete", cd: 3 },
+      B: { name: "Battuta Jolly", desc: "Colpo jolly ad alta precisione con bonus critico", cd: 2 },
+    };
+    return rNames[role] || { name: "Azione di Classe", desc: "Manovra tattica decisiva per la squadra", cd: 3 };
+  }
+
+  function openCardLore(id, back) {
+    const c = BY[id];
+    if (!c) return;
+    const r = load();
+    const isOwn = r.own.includes(id);
+    const R_RAR = RAR[c.rar];
+    const S_SAG = SG(c.saga);
+    const st = isOwn ? starsOf(id) : 0;
+    const curXp = isOwn ? (r.xp[id] | 0) : 0;
+    const nextXp = st === 0 ? 3 : st === 1 ? 8 : 15;
+    const e = isOwn ? eff(c) : c;
+    const img = isOwn ? port(id) : null;
+    const inTeam = r.team.includes(id);
+    const roleFull = { A: "Attaccante", C: "Centrocampista", D: "Difensore", P: "Portiere", B: "Battitore Jolly" }[c.role] || c.role;
+    const roleIcon = { A: "⚔️", C: "🎯", D: "🛡️", P: "🧤", B: "⭐" }[c.role] || "⚽";
+
+    const body = shell("📖 Scheda & Lore del Personaggio");
+    const quote = FRASI[id] || "Questa squadra è un sogno.";
+    const loreText = getCardLore(c);
+    const skill = getSkillInfo(id, c.role);
+    const charLinks = LINKS.filter(([a, b]) => a === id || b === id).map(([a, b, t]) => {
+      const otherId = a === id ? b : a;
+      return { title: t, other: otherId, otherName: name(otherId), active: r.own.includes(otherId) };
+    });
+
+    let flipped = false;
+
+    function renderView() {
+      body.innerHTML = `
+        <div class="sgLoreWrap">
+          <div class="sgFlipCardArea">
+            <div class="sgFlipCardInner ${flipped ? "flipped" : ""}" style="--rc:${R_RAR[1]};--sc:${S_SAG[2]}">
+              <!-- FRONTE CARTA -->
+              <div class="sgFlipFace sgFlipFront r${c.rar}">
+                <div class="sgCardHolo"></div>
+                <div class="sgFlipHd">
+                  <span class="rarBadge" style="background:${R_RAR[1]}">${R_RAR[0]}</span>
+                  <span class="roleBadge">${roleIcon} ${roleFull}</span>
+                </div>
+                <div class="sgFlipImgWrap">
+                  ${img ? `<img src="${img}" alt="${esc(name(id))}">` : `<span class="ph">?</span>`}
+                  ${st > 0 ? `<div class="sgFlipStars">${"★".repeat(st)}${"☆".repeat(3 - st)}</div>` : ""}
+                </div>
+                <div class="sgFlipName">${esc(name(id))}</div>
+                <div class="sgFlipSaga" style="color:${S_SAG[2]}">🏛️ ${esc(S_SAG[1])}</div>
+                
+                <div class="sgFlipStatsBox">
+                  <div class="stRow">
+                    <span>⚔️ ATT <b>${e.at}</b></span>
+                    <div class="stBar"><div class="stFill att" style="width:${Math.min(100, (e.at / 99) * 100)}%"></div></div>
+                    <small>base ${c.at}${st ? ` +${st * 2}` : ""}</small>
+                  </div>
+                  <div class="stRow">
+                    <span>🛡️ DIF <b>${e.df}</b></span>
+                    <div class="stBar"><div class="stFill dif" style="width:${Math.min(100, (e.df / 99) * 100)}%"></div></div>
+                    <small>base ${c.df}${st ? ` +${st * 2}` : ""}</small>
+                  </div>
+                  <div class="stRow">
+                    <span>🎯 TEC <b>${e.te}</b></span>
+                    <div class="stBar"><div class="stFill tec" style="width:${Math.min(100, (e.te / 99) * 100)}%"></div></div>
+                    <small>base ${c.te}${st ? ` +${st * 2}` : ""}</small>
+                  </div>
+                </div>
+
+                <div class="sgFlipXpRow">
+                  <span>⭐ Esperienza: <b>${curXp}/${nextXp} XP</b></span>
+                  <div class="xpBar"><div class="xpFill" style="width:${Math.min(100, (curXp / nextXp) * 100)}%"></div></div>
+                </div>
+
+                <div class="sgTouchFlipHint">↻ Tocca la carta per girarla e leggere la Lore</div>
+              </div>
+
+              <!-- RETRO CARTA (LORE & CURIOSITÀ) -->
+              <div class="sgFlipFace sgFlipBack r${c.rar}">
+                <div class="sgCardHolo"></div>
+                <div class="sgBackHd">
+                  <div class="sagaTag" style="border-color:${S_SAG[2]};color:${S_SAG[2]}">📜 ${esc(S_SAG[1])}</div>
+                  <span class="roleBadge">${roleIcon} ${c.role}</span>
+                </div>
+
+                <div class="sgQuoteBox">«${esc(quote)}»</div>
+
+                <div class="sgLoreSec">
+                  <div class="sgLoreSecTitle">📖 Biografia & Curiosità</div>
+                  <div class="sgLoreSecText">${esc(loreText)}</div>
+                </div>
+
+                <div class="sgLoreSec">
+                  <div class="sgLoreSecTitle">⚔️ Tecnica in Battaglia</div>
+                  <div class="sgLoreSkill">
+                    <b>✦ ${esc(skill.name)}</b> <span class="cdTag">(${skill.cd} turni)</span>
+                    <p>${esc(skill.desc)}</p>
+                  </div>
+                </div>
+
+                ${charLinks.length ? `
+                  <div class="sgLoreSec">
+                    <div class="sgLoreSecTitle">🤝 Legami (+3 Intesa)</div>
+                    <div class="sgLoreLinksList">
+                      ${charLinks.map((lk) => `<div class="lkItem ${lk.active ? "on" : "off"}"><b>${esc(lk.title)}</b> con ${esc(lk.otherName)} ${lk.active ? "✓" : "(da sbloccare)"}</div>`).join("")}
+                    </div>
+                  </div>
+                ` : ""}
+
+                <div class="sgTouchFlipHint">↻ Tocca la carta per tornare alle statistiche</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- AZIONI RAPIDE SMARTPHONE -->
+          <div class="sgLoreActions">
+            <button type="button" class="sgActionBtn flipBtn">🔄 Gira Carta</button>
+            <button type="button" class="sgActionBtn teamBtn ${inTeam ? "inTeam" : ""}">${inTeam ? "✕ Togli dalla Squadra" : "⚽ Schiera in Squadra"}</button>
+          </div>
+          <div class="big" style="margin-top:6px">
+            <button type="button" data-close-lore="1">◂ Torna indietro<small>${back ? "alla schermata precedente" : "alla Squadra dei Sogni"}</small></button>
+          </div>
+        </div>
+      `;
+
+      const cardInner = body.querySelector(".sgFlipCardInner");
+      if (cardInner) {
+        cardInner.onclick = () => {
+          flipped = !flipped;
+          cardInner.classList.toggle("flipped", flipped);
+        };
+      }
+      const flipBtn = body.querySelector(".flipBtn");
+      if (flipBtn) {
+        flipBtn.onclick = () => {
+          flipped = !flipped;
+          if (cardInner) cardInner.classList.toggle("flipped", flipped);
+        };
+      }
+      const teamBtn = body.querySelector(".teamBtn");
+      if (teamBtn) {
+        teamBtn.onclick = () => {
+          toggle(id);
+          openCardLore(id, back);
+        };
+      }
+      const closeBtn = body.querySelector("[data-close-lore]");
+      if (closeBtn) {
+        closeBtn.onclick = () => {
+          if (typeof back === "function") back();
+          else open();
+        };
+      }
+    }
+
+    renderView();
+  }
+
   // ---------------------------------------------------------------- le schermate
   let OV = null, BACK = null;
   let COLL_FILT = { q: "", own: "all", rar: "all", role: "all" };
@@ -637,7 +822,18 @@
     }
 
     collEl.innerHTML = filtered.map((c) => cardHtml(c.id, { own: r.own.includes(c.id), sel: r.team.includes(c.id) })).join("");
-    collEl.querySelectorAll(".sgCard:not(.lock)").forEach((el) => (el.onclick = () => toggle(el.dataset.c)));
+    collEl.querySelectorAll(".sgCard:not(.lock)").forEach((el) => {
+      el.onclick = (e) => {
+        if (e.target.closest(".sgLoreBtn")) return;
+        toggle(el.dataset.c);
+      };
+    });
+    collEl.querySelectorAll(".sgLoreBtn").forEach((btn) => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        openCardLore(btn.dataset.lore, () => open());
+      };
+    });
   }
 
   function resetAllFilters(body, r) {
@@ -773,7 +969,18 @@
     const teamEl = body.querySelector(".team");
     if (teamEl) {
       teamEl.innerHTML = [0, 1, 2, 3, 4].map((k) => (r.team[k] ? cardHtml(r.team[k]) : `<div class="sgCard empty" data-slot="${k}"><span>+</span></div>`)).join("");
-      teamEl.querySelectorAll(".sgCard[data-c]").forEach((el) => (el.onclick = () => toggle(el.dataset.c)));
+      teamEl.querySelectorAll(".sgCard[data-c]").forEach((el) => {
+        el.onclick = (e) => {
+          if (e.target.closest(".sgLoreBtn")) return;
+          toggle(el.dataset.c);
+        };
+      });
+      teamEl.querySelectorAll(".sgLoreBtn").forEach((btn) => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          openCardLore(btn.dataset.lore, () => open());
+        };
+      });
     }
     const modWrap = body.querySelector(".sgModWrap");
     if (modWrap) {
@@ -870,8 +1077,18 @@
 
     bindModChips(body);
     renderColl(body, r);
-    body.querySelectorAll(".team .sgCard[data-c]").forEach((el) => (el.onclick = () => toggle(el.dataset.c)));
-    body.querySelector('[data-go="tour"]').onclick = torneo;
+    body.querySelectorAll(".team .sgCard[data-c]").forEach((el) => {
+      el.onclick = (e) => {
+        if (e.target.closest(".sgLoreBtn")) return;
+        toggle(el.dataset.c);
+      };
+    });
+    body.querySelectorAll(".team .sgLoreBtn").forEach((btn) => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        openCardLore(btn.dataset.lore, () => open());
+      };
+    });
     body.querySelector('[data-go="pack"]').onclick = pack;
     body.querySelector('[data-go="season"]').onclick = stagione;
     body.querySelector('[data-go="draft"]').onclick = draft;
@@ -1224,12 +1441,61 @@
 .sgCard .stars{position:absolute;top:22px;right:9px;color:#ffd23f;font-size:11px;text-shadow:0 1px 0 #000;z-index:1}.sgCard.s3{border-color:#ffd23f;box-shadow:0 0 0 2px #7a5a10,0 0 14px rgba(255,210,63,.6)}
 .sgOv .frase{text-align:center;font:italic 700 15px Georgia,serif;color:#ffe9a8;margin:4px 16px 10px}.sgOv .last{background:#1a1428;border-radius:8px;padding:8px;border-left:3px solid #c8b8ff}
 .sgOv .tab{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0}.sgOv .tab th{font-size:10.5px;opacity:.7;text-align:left;padding:3px}.sgOv .tab td{padding:5px 3px;border-top:1px solid #2a2040}.sgOv .tab td:nth-child(n+3),.sgOv .tab th:nth-child(n+3){text-align:center}.sgOv .tab tr.me td{background:#2a2048;color:#ffd23f}
-.sgOv .pick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.sgOv .sf.next{cursor:default;border-color:#c8b8ff}.sgOv .big span:empty{display:none}
+.sgCard .sgLoreBtn{position:absolute;top:2px;right:2px;width:19px;height:19px;line-height:17px;border-radius:5px;background:rgba(18,14,30,.88);border:1px solid rgba(255,255,255,.3);color:#ffd23f;font-size:10px;padding:0;z-index:4;cursor:pointer;text-align:center;transition:transform .12s,background .15s}
+.sgCard .sgLoreBtn:hover,.sgCard .sgLoreBtn:active{transform:scale(1.15);background:#7a5ad8;color:#fff;border-color:#ffd23f}
+.sgLoreWrap{max-width:380px;margin:0 auto;padding:4px}
+.sgFlipCardArea{perspective:1000px;display:flex;justify-content:center;margin:6px 0 10px}
+.sgFlipCardInner{position:relative;width:270px;min-height:430px;transition:transform .65s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d;border-radius:14px;box-shadow:0 10px 28px rgba(0,0,0,.7);cursor:pointer}
+.sgFlipCardInner.flipped{transform:rotateY(180deg)}
+.sgFlipFace{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:14px;padding:12px;border:2.5px solid var(--rc);background:linear-gradient(165deg,var(--sc),#120e1e 72%);display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;box-sizing:border-box}
+.sgFlipBack{transform:rotateY(180deg);background:linear-gradient(165deg,#23183c,#0d0818 75%);border-color:var(--rc)}
+.sgCardHolo{position:absolute;inset:0;pointer-events:none;background:linear-gradient(125deg,transparent 25%,rgba(255,255,255,.2) 42%,rgba(255,210,63,.15) 50%,transparent 65%);opacity:.7;mix-blend-mode:screen}
+.sgFlipHd,.sgBackHd{display:flex;justify-content:space-between;align-items:center;z-index:2}
+.rarBadge{font-size:9.5px;font-weight:900;text-transform:uppercase;color:#120e1e;padding:2px 7px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.roleBadge{font-size:10.5px;font-weight:800;color:#c8b8ff;background:rgba(0,0,0,.4);padding:2px 7px;border-radius:6px;border:1px solid rgba(255,255,255,.15)}
+.sgFlipImgWrap{position:relative;width:120px;height:120px;margin:6px auto 4px;border-radius:12px;background:#090612;border:2px solid var(--rc);overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.5);z-index:2}
+.sgFlipImgWrap img{width:100%;height:100%;object-fit:cover}
+.sgFlipImgWrap .ph{font:900 48px system-ui;color:#4a3a6a}
+.sgFlipStars{position:absolute;bottom:3px;left:0;right:0;text-align:center;font-size:12px;color:#ffd23f;text-shadow:0 1px 2px #000}
+.sgFlipName{font:900 16px system-ui;color:#f4f0e4;text-align:center;margin:2px 0 0;z-index:2;line-height:1.2}
+.sgFlipSaga{font:700 11px system-ui;text-align:center;margin-bottom:6px;z-index:2;opacity:.95}
+.sgFlipStatsBox{background:rgba(12,8,22,.65);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:7px 9px;margin:4px 0;display:flex;flex-direction:column;gap:5px;z-index:2}
+.stRow{display:flex;align-items:center;gap:6px;font-size:11px}
+.stRow span{width:82px;font-weight:700}
+.stRow span b{color:#ffd23f}
+.stBar{flex:1;height:7px;background:#231a38;border-radius:4px;overflow:hidden}
+.stFill{height:100%;border-radius:4px}
+.stFill.att{background:#e8603a}
+.stFill.dif{background:#3a8ad8}
+.stFill.tec{background:#a85ad8}
+.stRow small{font-size:9.5px;color:#9b8cb8;width:55px;text-align:right}
+.sgFlipXpRow{display:flex;align-items:center;justify-content:space-between;font-size:10.5px;color:#c8b8ff;background:rgba(0,0,0,.35);padding:4px 8px;border-radius:6px;margin-top:4px;z-index:2}
+.xpBar{width:70px;height:6px;background:#231a38;border-radius:3px;overflow:hidden}
+.xpFill{height:100%;background:#ffd23f}
+.sgTouchFlipHint{text-align:center;font-size:10px;color:#c8b8ff;opacity:.75;margin-top:4px;font-style:italic}
+.sagaTag{font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;background:rgba(0,0,0,.45);border:1px solid}
+.sgQuoteBox{font:italic 600 13px Georgia,serif;color:#ffe9a8;background:rgba(20,14,34,.6);border-left:3px solid #ffd23f;padding:7px 10px;border-radius:0 6px 6px 0;margin:6px 0;line-height:1.35;z-index:2}
+.sgLoreSec{background:rgba(12,8,22,.6);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:6px 8px;margin:4px 0;z-index:2}
+.sgLoreSecTitle{font:800 10.5px system-ui;color:#c8b8ff;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
+.sgLoreSecText{font-size:11.5px;line-height:1.4;color:#e8e0f5}
+.sgLoreSkill b{color:#ffd23f;font-size:12px}
+.cdTag{font-size:10px;color:#9ad8ff;margin-left:4px}
+.sgLoreSkill p{margin:2px 0 0;font-size:11px;color:#d8cde8;line-height:1.35}
+.sgLoreLinksList{display:flex;flex-direction:column;gap:3px}
+.lkItem{font-size:10.5px;padding:3px 6px;border-radius:4px;background:#1a1428}
+.lkItem.on{border-left:2px solid #7ad87a;color:#e2fbe2}
+.lkItem.off{opacity:.6}
+.sgLoreActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.sgActionBtn{min-height:46px;border-radius:10px;border:1px solid #4a3a6a;font:800 13px system-ui;cursor:pointer;transition:transform .12s,background .15s;touch-action:manipulation}
+.sgActionBtn:active{transform:scale(.97)}
+.flipBtn{background:#2a1e48;color:#ffd23f;border-color:#7a5ad8}
+.teamBtn{background:#1f482a;color:#7ad87a;border-color:#48a05a}
+.teamBtn.inTeam{background:#5a1f28;color:#ff9aa8;border-color:#a0485a}
 .sgOv .reveal{display:flex;justify-content:center;margin:20px 0}.sgOv .reveal .sgCard{width:180px;font-size:13px;animation:sgFlip .7s ease-out}.sgOv .reveal .sgCard .nm{font-size:15px}.sgOv .reveal .sgCard .st{font-size:11px}.sgOv .reveal .sgCard .hd{font-size:11px}
 @keyframes sgFlip{from{transform:perspective(600px) rotateY(180deg) scale(.6)}to{transform:none}}`;
     document.head.appendChild(st);
   }
   // la Maglia dei Sogni nel guardaroba (si registra all'avvio, così resta anche dopo aver ricaricato la pagina)
   (function reg() { const A = window.__borgoApi; if (!A || !A.COSM) return setTimeout(reg, 200); if (!A.COSM.sg_maglia) A.COSM.sg_maglia = { kind: "shirt", label: "Maglia dei Sogni", val: "#7a5ad8", from: "Vinci il Torneo dei Sogni (Salone delle Saghe)" }; })();
-  window.__sogni = { SAGHE, BY, eff, name, port, _save: save, open, close: closeAll, _launch: launch, _tiers: tiers, CARDS, LINKS, SFIDE, TEAMS, FRASI, intesa, forza, sync, stagione, draft, stars: (id) => { XPC = load().xp; return starsOf(id); }, _load: load, MODULI, modSintonia, openModDetail };
+  window.__sogni = { SAGHE, BY, eff, name, port, _save: save, open, close: closeAll, _launch: launch, _tiers: tiers, CARDS, LINKS, SFIDE, TEAMS, FRASI, intesa, forza, sync, stagione, draft, stars: (id) => { XPC = load().xp; return starsOf(id); }, _load: load, MODULI, modSintonia, openModDetail, openCardLore };
 })();
