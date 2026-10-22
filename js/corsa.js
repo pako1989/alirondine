@@ -84,8 +84,110 @@
       stats: { vel: "4/5", acc: "2/5", man: "3/5", res: "5/5" }
     }
   };
+  const LIVERIES = {
+    classic: { id: "classic", name: "Scuderia Rondine", icon: "🏎️", col: null, stripe: "#ffffff", accent: "#ffd23f", desc: "Verniciatura di scuderia classica: pulita, leggibile ed equilibrata", perk: "Assetto bilanciato originale da gara" },
+    fire: { id: "fire", name: "Fiamme Racing", icon: "🔥", col: "#d62828", stripe: "#ff8c00", accent: "#ffd166", desc: "Rosso fuoco acceso con grafiche a saetta fiammeggiante", perk: "Scatto bruciante (+6% accelerazione di spunto)" },
+    cyber: { id: "cyber", name: "Neon Synthwave", icon: "⚡", col: "#3a0ca3", stripe: "#00f5d4", accent: "#f72585", desc: "Viola profondo e ciano neon ad alta luminescenza stile 2099", perk: "Aerodinamica scia (+12% effetto risucchio scia)" },
+    gold: { id: "gold", name: "Oro dei Campioni", icon: "👑", col: "#d4af37", stripe: "#fff275", accent: "#111111", desc: "Laminatura oro lucido con finiture satinate da Gran Premio", perk: "Trofeo da podio: +3 monete bonus a podio" },
+    carbon: { id: "carbon", name: "Carbonio & Smeraldo", icon: "🏁", col: "#1e242b", stripe: "#00f59b", accent: "#0d1117", desc: "Trame in fibra di carbonio scuro con profili verde smeraldo", perk: "Gomme rain-proof (-20% rallentamento su erba/cordoli)" },
+    sakura: { id: "sakura", name: "Rosa Tramonto", icon: "🌸", col: "#e05780", stripe: "#ffc2d1", accent: "#ffffff", desc: "Rosa pastello e perla con ali sagomate a petalo", perk: "Assetto morbido (+5% tenuta laterale in curva)" }
+  };
+  const SPOILERS = {
+    std: { id: "std", name: "Alettone Standard", icon: "➖", desc: "Alettone posteriore di fabbrica a basso attrito", perk: "Assetto neutro originale" },
+    high: { id: "high", name: "Doppio Flap GT", icon: "✈️", desc: "Spoiler alto a doppio profilo rialzato da circuito veloce", perk: "+7% deportanza e tenuta nelle curve strette" },
+    twin: { id: "twin", name: "Doppia Turbina Jet", icon: "🚀", desc: "Ugelli gemelli a reazione con bagliore al plasma", perk: "+15 frame di durata prolungata della fiammata Turbo" },
+    stealth: { id: "stealth", name: "Pinna Stealth Dorsale", icon: "🦈", desc: "Pinna centrale longitudinale a lama da prototipo Le Mans", perk: "Fattore penetrazione: stabilità accresciuta nei contatti" }
+  };
+  const HORNS = {
+    vintage: { id: "vintage", name: "Vintage Beep-Beep", icon: "🎺", desc: "Doppio tono allegro squillante anni '60" },
+    siren: { id: "siren", name: "Sirena Express", icon: "🚨", desc: "Ululato d'emergenza che sorprende e distrae i rivali" },
+    arcade: { id: "arcade", name: "Chiptune 8-bit", icon: "👾", desc: "Arpeggio rapido sintetizzato da sala giochi 1985" },
+    whistle: { id: "whistle", name: "Fischietto Sportivo", icon: "🎵", desc: "Fischio bitonale da direttore di gara" },
+    bell: { id: "bell", name: "Campana del Borgo", icon: "🔔", desc: "Rintocco metallico d'epoca chiaro e risonante" }
+  };
+  function playHorn(hornId) {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      const actx = (window.__crAC = window.__crAC || new AC());
+      if (actx.state === "suspended") actx.resume();
+      const t0 = actx.currentTime;
+      if (hornId === "siren") {
+        const osc = actx.createOscillator(), gn = actx.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(520, t0);
+        osc.frequency.linearRampToValueAtTime(1040, t0 + 0.16);
+        osc.frequency.linearRampToValueAtTime(520, t0 + 0.32);
+        gn.gain.setValueAtTime(0.045, t0);
+        gn.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.36);
+        osc.connect(gn); gn.connect(actx.destination);
+        osc.start(t0); osc.stop(t0 + 0.36);
+      } else if (hornId === "arcade") {
+        [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+          const osc = actx.createOscillator(), gn = actx.createGain();
+          osc.type = "square";
+          osc.frequency.value = freq;
+          const st = t0 + i * 0.055;
+          gn.gain.setValueAtTime(0.035, st);
+          gn.gain.exponentialRampToValueAtTime(0.0001, st + 0.075);
+          osc.connect(gn); gn.connect(actx.destination);
+          osc.start(st); osc.stop(st + 0.075);
+        });
+      } else if (hornId === "whistle") {
+        const osc = actx.createOscillator(), gn = actx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(1400, t0);
+        osc.frequency.linearRampToValueAtTime(1800, t0 + 0.07);
+        osc.frequency.linearRampToValueAtTime(1400, t0 + 0.22);
+        gn.gain.setValueAtTime(0.045, t0);
+        gn.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.25);
+        osc.connect(gn); gn.connect(actx.destination);
+        osc.start(t0); osc.stop(t0 + 0.25);
+      } else if (hornId === "bell") {
+        [880, 1760, 2640].forEach((freq, idx) => {
+          const osc = actx.createOscillator(), gn = actx.createGain();
+          osc.type = "triangle";
+          osc.frequency.value = freq;
+          gn.gain.setValueAtTime(0.04 / (idx + 1), t0);
+          gn.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.45);
+          osc.connect(gn); gn.connect(actx.destination);
+          osc.start(t0); osc.stop(t0 + 0.45);
+        });
+      } else {
+        [660, 880].forEach((freq, i) => {
+          const osc = actx.createOscillator(), gn = actx.createGain();
+          osc.type = "square";
+          osc.frequency.value = freq;
+          const st = t0 + i * 0.085;
+          gn.gain.setValueAtTime(0.04, st);
+          gn.gain.exponentialRampToValueAtTime(0.0001, st + 0.095);
+          osc.connect(gn); gn.connect(actx.destination);
+          osc.start(st); osc.stop(st + 0.095);
+        });
+      }
+    } catch (e) {}
+  }
   let OV = null, BACK = null, R = null, RAF = 0, PAUSE = false;
-  const load = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { champ: r.champ | 0, wins: r.wins | 0, best: r.best || {}, view: r.view === "top" ? "top" : "rear", fun: r.fun !== false, mode: MODES[r.mode] ? r.mode : "classic", kart: KARTS[r.kart] ? r.kart : "classic", cup: CUPS[r.cup] ? r.cup : "borgo", rec: r.rec || {} }; };
+  const load = () => {
+    const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {};
+    const c = r.custom || {};
+    return {
+      champ: r.champ | 0,
+      wins: r.wins | 0,
+      best: r.best || {},
+      view: r.view === "top" ? "top" : "rear",
+      fun: r.fun !== false,
+      mode: MODES[r.mode] ? r.mode : "classic",
+      kart: KARTS[r.kart] ? r.kart : "classic",
+      cup: CUPS[r.cup] ? r.cup : "borgo",
+      rec: r.rec || {},
+      custom: {
+        livery: LIVERIES[c.livery] ? c.livery : "classic",
+        spoiler: SPOILERS[c.spoiler] ? c.spoiler : "std",
+        horn: HORNS[c.horn] ? c.horn : "vintage"
+      }
+    };
+  };
   const save = (r) => safe(() => localStorage.setItem(KEY, JSON.stringify(r)), 0);
   const name = (id) => safe(() => S().name(id), id);
   const rlOf = (c) => { if (ABIL[c.role]) return c.role; const e = safe(() => S().eff(c), c); return { at: "A", te: "C", df: "D" }[e.at >= e.df && e.at >= e.te ? "at" : e.df >= e.te ? "df" : "te"]; };
@@ -116,11 +218,27 @@
     const roleKart = (card.role === "A" ? "speed" : card.role === "C" ? "light" : card.role === "D" ? "heavy" : (idx % 3 === 1 ? "speed" : idx % 3 === 2 ? "light" : "classic"));
     const kartId = o.human ? (o.kart || load().kart) : (o.kart || roleKart);
     const kData = KARTS[kartId] || KARTS.classic;
-    const vmax = (1.55 + e.at / 260) * m * (o.human ? kData.vm : (0.97 + (kData.vm - 1) * 0.45));
-    const grip = (0.9 + e.te / 220) * (o.human ? kData.grip : 1);
+    const cData = o.human ? (o.custom || load().custom) : null;
+    const curLiv = cData && LIVERIES[cData.livery] ? LIVERIES[cData.livery] : null;
+    const curSpo = cData && SPOILERS[cData.spoiler] ? SPOILERS[cData.spoiler] : null;
+    let kAcc = o.human ? kData.acc : 1;
+    if (curLiv && curLiv.id === "fire") kAcc *= 1.06;
+    let grip = (0.9 + e.te / 220) * (o.human ? kData.grip : 1);
+    if (curSpo && curSpo.id === "high") grip *= 1.07;
+    if (curLiv && curLiv.id === "sakura") grip *= 1.05;
     const hold = (1 - e.df / 520) * (o.human ? kData.hold : 1);
     const shield = o.human ? kData.initShield : (kData.id === "heavy" ? 140 : 0);
-    return { id: card.id, n: name(card.id), role: ABIL[card.role] ? card.role : { at: "A", te: "C", df: "D" }[(e.at >= e.df && e.at >= e.te) ? "at" : e.df >= e.te ? "df" : "te"], team, idx, col: team === 0 ? "#3aa0ff" : team === 1 ? "#ff5a5a" : "#b0b0b0", s: -idx * 22 - (team === 1 ? 14 : 0), lat: ((idx % 3) - 1) * 0.55, v: 0, vmax, grip, hold, energy: o.energy != null ? o.energy : 40, boost: 0, cd: 0, shield, stun: 0, laps: 0, fin: 0, finT: 0, ai: o.ai || 0, human: !!o.human, dash: 0, tlat: 0, w: 0, wall: 0, prog: 0, fxk: safe(() => window.__supers.of(card.id).fx, "fire"), held: null, inv: 0, ghost: 0, sure: 0, bc: 0, zc: 0, pat: 0, kart: kData.id, kAcc: o.human ? kData.acc : 1, kRate: o.human ? kData.eRate : 1 };
+    const vmax = (1.55 + e.at / 260) * m * (o.human ? kData.vm : (0.97 + (kData.vm - 1) * 0.45));
+    const baseCol = team === 0 ? "#3aa0ff" : team === 1 ? "#ff5a5a" : "#b0b0b0";
+    const col = (o.human && curLiv && curLiv.col) ? curLiv.col : baseCol;
+    return {
+      id: card.id, n: name(card.id), role: ABIL[card.role] ? card.role : { at: "A", te: "C", df: "D" }[(e.at >= e.df && e.at >= e.te) ? "at" : e.df >= e.te ? "df" : "te"],
+      team, idx, col, s: -idx * 22 - (team === 1 ? 14 : 0), lat: ((idx % 3) - 1) * 0.55, v: 0, vmax, grip, hold,
+      energy: o.energy != null ? o.energy : 40, boost: 0, cd: 0, shield, stun: 0, laps: 0, fin: 0, finT: 0, ai: o.ai || 0, human: !!o.human,
+      dash: 0, tlat: 0, w: 0, wall: 0, prog: 0, fxk: safe(() => window.__supers.of(card.id).fx, "fire"), held: null, inv: 0, ghost: 0,
+      sure: 0, bc: 0, zc: 0, pat: 0, kart: kData.id, kAcc, kRate: o.human ? kData.eRate : 1,
+      custom: cData, hornT: 0, hornCd: 0
+    };
   }
   function begin(cfg) {
     const T = build(cfg.track), rnd = seeded(cfg.seed != null ? cfg.seed : (Date.now() & 0xfffff));
@@ -144,11 +262,34 @@
   function turbo(r) {
     if (r.energy < 25 || r.stun > 0) return;
     r.energy -= 25;
-    const dur = r.kart === "speed" ? 72 : 55;
+    let dur = r.kart === "speed" ? 72 : 55;
+    if (r.custom && r.custom.spoiler === "twin") dur += 15;
     r.boost = Math.max(r.boost, dur);
     fx(r, r.kart === "speed" ? "⚡ OVERDRIVE!" : "TURBO");
   }
-  function fx(r, t) { if (!R.fast) R.fxs.push({ r, t, l: 40 }); }
+  function soundHorn(r) {
+    if (r.hornCd > 0 || r.stun > 0) return;
+    const hId = (r.custom && r.custom.horn) || "vintage";
+    r.hornT = 45;
+    r.hornCd = 90;
+    playHorn(hId);
+    fx(r, "🎺 " + (HORNS[hId] ? HORNS[hId].name.split(" ")[0] : "BEEP!"));
+    if (R && R.racers) {
+      R.racers.forEach((o) => {
+        if (o !== r && !o.fin) {
+          const d = o.prog - r.prog;
+          if (d > -15 && d < 75 && Math.abs(o.lat - r.lat) < 0.6) {
+            if (o.inv <= 0 && o.shield <= 0) {
+              o.lat = clampN(o.lat + (o.lat >= r.lat ? 0.12 : -0.12), -0.9, 0.9);
+              o.stun = Math.max(o.stun, 12);
+              fx(o, "SORPRESO! 😲");
+            }
+          }
+        }
+      });
+    }
+  }
+  function fx(r, t) { if (!R || !R.fast) R && R.fxs.push({ r, t, l: 40 }); }
   function hit(o, st, vm, txt) { if (o.inv > 0) return false; if (o.shield > 0) { o.shield = 0; fx(o, "SCUDO!"); return false; } o.stun = Math.max(o.stun, st); o.v *= vm; fx(o, txt || "COLPITO!"); return true; }
   const ahead = (r, d, lw) => R.racers.filter((o) => o !== r && !o.fin && o.prog > r.prog && o.prog - r.prog < d && Math.abs(o.lat - r.lat) < lw).sort((a, b) => a.prog - b.prog)[0];
   function useItem(r) {
@@ -178,17 +319,25 @@
   function stepR(r, inp) {
     const T = R.T; if (r.fin) { r.v *= 0.97; r.prog += r.v; return; }
     if (r.stun > 0) r.stun--; if (r.cd > 0) r.cd--; if (r.shield > 0) r.shield--; if (r.boost > 0) r.boost--; if (r.inv > 0) r.inv--; if (r.ghost > 0) r.ghost--; if (r.sure > 0) r.sure--; if (r.bc > 0) r.bc--;
-    if (inp.o) useItem(r); if (inp.t) turbo(r); if (inp.a) useAbil(r);
+    if (r.hornT > 0) r.hornT--; if (r.hornCd > 0) r.hornCd--;
+    if (inp.o) useItem(r); if (inp.t) turbo(r); if (inp.a) useAbil(r); if (inp.h) soundHorn(r);
     const a = at(T, r.prog), steer = (inp.sx != null ? inp.sx : (inp.r ? 1 : 0) - (inp.l ? 1 : 0)) * 0.034 * r.grip * (r.stun > 0 ? 0.3 : 1) * (r.pat === 2 ? (r.kart === "light" ? 0.7 : 0.45) : 1);
     // la curva spinge verso l'esterno
     const curveCentrif = r.kart === "light" ? 0.65 : 0.82;
     r.w = r.sure > 0 ? 0 : r.w * curveCentrif + (-a.k * r.v * r.v * 1.9) * (r.hold);
-    r.lat += steer + r.w * 0.1; if (r.lat > 1 || r.lat < -1) { r.lat = Math.max(-1, Math.min(1, r.lat)); r.v *= 0.93; r.wall = 8; } else if (r.wall > 0) r.wall--;
+    r.lat += steer + r.w * 0.1;
+    if (r.lat > 1 || r.lat < -1) {
+      r.lat = Math.max(-1, Math.min(1, r.lat));
+      const slow = (r.custom && r.custom.livery === "carbon") ? 0.96 : 0.93;
+      r.v *= slow;
+      r.wall = 8;
+    } else if (r.wall > 0) r.wall--;
     // velocità
     let vt = r.vmax * (r.boost > 0 ? 1.55 : 1) * (r.stun > 0 ? 0.45 : 1) * (r.pat && r.inv <= 0 ? (r.kart === "light" ? 0.88 : 0.72) : 1); if (r.dash > 0) { vt = r.vmax * 3; r.dash--; }
     for (const o of R.racers) {
       if (o !== r && o.prog > r.prog && o.prog - r.prog < 48 && Math.abs(o.lat - r.lat) < 0.35 && !o.fin) {
-        const slip = r.kart === "classic" ? 1.15 : 1.07;
+        let slip = r.kart === "classic" ? 1.15 : 1.07;
+        if (r.custom && r.custom.livery === "cyber") slip += 0.12;
         vt *= slip;
         if (r.kart === "classic" && r.human) r.energy = Math.min(100, r.energy + 0.06);
         break;
@@ -345,79 +494,156 @@
     });
   }
   function kartRear(g, x, y, u, r, tilt) {
-    g.save(); g.translate(x, y); g.rotate(tilt || 0); if (r.ghost > 0) g.globalAlpha = 0.45; if (r.stun > 0) g.rotate(Math.sin(R.t * 0.5) * 0.35);
+    const rt = (R && R.t) || 0;
+    g.save(); g.translate(x, y); g.rotate(tilt || 0); if (r.ghost > 0) g.globalAlpha = 0.45; if (r.stun > 0) g.rotate(Math.sin(rt * 0.5) * 0.35);
     const k = r.kart || "classic";
+    const c = r.custom || {};
+    const liv = (r.human && LIVERIES[c.livery]) ? LIVERIES[c.livery] : null;
+    const spk = (r.human && SPOILERS[c.spoiler]) ? SPOILERS[c.spoiler] : null;
     if (k === "speed") {
       g.fillStyle = "rgba(0,0,0,.4)"; g.beginPath(); g.ellipse(0, 3 * u, 20 * u, 4.2 * u, 0, 0, 7); g.fill();
       g.fillStyle = "#111"; g.fillRect(-19 * u, -8 * u, 7 * u, 10 * u); g.fillRect(12 * u, -8 * u, 7 * u, 10 * u);
-      g.fillStyle = "#e62810"; g.fillRect(-17 * u, -4 * u, 3 * u, 3 * u); g.fillRect(14 * u, -4 * u, 3 * u, 3 * u);
-      if ((r.boost > 0 || r.v > r.vmax * 1.06) && !R.fast) {
+      g.fillStyle = (liv && liv.accent) || "#e62810"; g.fillRect(-17 * u, -4 * u, 3 * u, 3 * u); g.fillRect(14 * u, -4 * u, 3 * u, 3 * u);
+      if ((r.boost > 0 || r.v > r.vmax * 1.06) && (!R || !R.fast)) {
         for (let j = 0; j < 3; j++) {
           g.fillStyle = j === 0 ? "#ffd23f" : j === 1 ? "#ff5010" : "#ffffff";
           g.beginPath(); g.moveTo(4 * u, -2 * u); g.lineTo(0, (7 + Math.random() * 9 + (r.boost > 0 ? 5 : 0)) * u); g.lineTo(-4 * u, -2 * u); g.fill();
         }
       }
-      g.fillStyle = "#c81410"; g.strokeStyle = "#111"; g.lineWidth = Math.max(1, u * 0.6);
+      g.fillStyle = (liv && liv.col) || "#c81410"; g.strokeStyle = "#111"; g.lineWidth = Math.max(1, u * 0.6);
       g.beginPath(); g.moveTo(-13 * u, 0); g.lineTo(-11 * u, -12 * u); g.lineTo(11 * u, -12 * u); g.lineTo(13 * u, 0); g.closePath(); g.fill(); g.stroke();
-      g.fillStyle = "#ffd700"; g.beginPath(); g.moveTo(-6 * u, -12 * u); g.lineTo(0, -3 * u); g.lineTo(6 * u, -12 * u); g.lineTo(3 * u, -12 * u); g.lineTo(0, -6 * u); g.lineTo(-3 * u, -12 * u); g.fill();
-      g.fillStyle = "#1a1a24"; g.fillRect(-16 * u, -17 * u, 32 * u, 3 * u); g.fillRect(-14 * u, -21 * u, 28 * u, 2.5 * u);
-      g.fillStyle = "#e62810"; g.fillRect(-17 * u, -22 * u, 2.5 * u, 8 * u); g.fillRect(14.5 * u, -22 * u, 2.5 * u, 8 * u);
-      g.fillStyle = "#333"; g.fillRect(-7 * u, -17 * u, 2 * u, 6 * u); g.fillRect(5 * u, -17 * u, 2 * u, 6 * u);
-      g.fillStyle = (R.t % 14 < 7) ? "#ff2222" : "#550000"; g.fillRect(-2 * u, -4 * u, 4 * u, 3 * u);
+      g.fillStyle = (liv && liv.stripe) || "#ffd700"; g.beginPath(); g.moveTo(-6 * u, -12 * u); g.lineTo(0, -3 * u); g.lineTo(6 * u, -12 * u); g.lineTo(3 * u, -12 * u); g.lineTo(0, -6 * u); g.lineTo(-3 * u, -12 * u); g.fill();
+      if (spk && spk.id === "high") {
+        g.fillStyle = "#111"; g.fillRect(-11 * u, -25 * u, 2.5 * u, 13 * u); g.fillRect(8.5 * u, -25 * u, 2.5 * u, 13 * u);
+        g.fillStyle = (liv && liv.col) || "#c81410"; g.fillRect(-16 * u, -26 * u, 32 * u, 3.5 * u);
+        g.fillStyle = (liv && liv.stripe) || "#ffd700"; g.fillRect(-14 * u, -22 * u, 28 * u, 2 * u);
+        g.fillStyle = (liv && liv.accent) || "#ffd700"; g.fillRect(-17 * u, -28 * u, 2 * u, 8 * u); g.fillRect(15 * u, -28 * u, 2 * u, 8 * u);
+      } else if (spk && spk.id === "twin") {
+        [-7, 7].forEach((tx) => {
+          g.fillStyle = "#1c1e22"; g.beginPath(); g.arc(tx * u, -8 * u, 5.5 * u, 0, 7); g.fill();
+          g.strokeStyle = (liv && liv.stripe) || "#00f5d4"; g.lineWidth = 1.5 * u; g.stroke();
+          g.fillStyle = (liv && liv.stripe) || "#00f5d4"; g.beginPath(); g.arc(tx * u, -8 * u, 2.8 * u, 0, 7); g.fill();
+          if (r.boost > 0 || Math.random() < 0.35) { g.fillStyle = "#ffffff"; g.beginPath(); g.arc(tx * u, -8 * u, 1.4 * u, 0, 7); g.fill(); }
+        });
+      } else if (spk && spk.id === "stealth") {
+        g.fillStyle = "#15181e"; g.strokeStyle = (liv && liv.stripe) || "#00f5d4"; g.lineWidth = 1.2 * u;
+        g.beginPath(); g.moveTo(0, -28 * u); g.lineTo(1.8 * u, -12 * u); g.lineTo(-1.8 * u, -12 * u); g.closePath(); g.fill(); g.stroke();
+        g.fillStyle = (liv && liv.accent) || "#f72585"; g.fillRect(-1 * u, -26 * u, 2 * u, 10 * u);
+      } else {
+        g.fillStyle = "#1a1a24"; g.fillRect(-16 * u, -17 * u, 32 * u, 3 * u); g.fillRect(-14 * u, -21 * u, 28 * u, 2.5 * u);
+        g.fillStyle = (liv && liv.accent) || "#e62810"; g.fillRect(-17 * u, -22 * u, 2.5 * u, 8 * u); g.fillRect(14.5 * u, -22 * u, 2.5 * u, 8 * u);
+        g.fillStyle = "#333"; g.fillRect(-7 * u, -17 * u, 2 * u, 6 * u); g.fillRect(5 * u, -17 * u, 2 * u, 6 * u);
+      }
+      g.fillStyle = (rt % 14 < 7) ? "#ff2222" : "#550000"; g.fillRect(-2 * u, -4 * u, 4 * u, 3 * u);
     } else if (k === "light") {
       g.fillStyle = "rgba(0,0,0,.3)"; g.beginPath(); g.ellipse(0, 3 * u, 14 * u, 4 * u, 0, 0, 7); g.fill();
       g.fillStyle = "#15151c"; g.fillRect(-14 * u, -9 * u, 4.5 * u, 11 * u); g.fillRect(9.5 * u, -9 * u, 4.5 * u, 11 * u);
-      g.strokeStyle = "#00e5ff"; g.lineWidth = Math.max(1, u * 0.5);
+      g.strokeStyle = (liv && liv.stripe) || "#00e5ff"; g.lineWidth = Math.max(1, u * 0.5);
       g.strokeRect(-13.5 * u, -8 * u, 3.5 * u, 9 * u); g.strokeRect(10 * u, -8 * u, 3.5 * u, 9 * u);
-      if (r.boost > 0 && !R.fast) {
-        g.fillStyle = "#00e5ff"; g.beginPath(); g.arc(-4 * u, 0, (3 + Math.random() * 4) * u, 0, 7); g.arc(4 * u, 0, (3 + Math.random() * 4) * u, 0, 7); g.fill();
+      if (r.boost > 0 && (!R || !R.fast)) {
+        g.fillStyle = (liv && liv.stripe) || "#00e5ff"; g.beginPath(); g.arc(-4 * u, 0, (3 + Math.random() * 4) * u, 0, 7); g.arc(4 * u, 0, (3 + Math.random() * 4) * u, 0, 7); g.fill();
       }
-      g.fillStyle = "#0a2a3a"; g.strokeStyle = "#00e5ff"; g.lineWidth = Math.max(1, u * 0.7);
+      g.fillStyle = (liv && liv.col) || "#0a2a3a"; g.strokeStyle = (liv && liv.stripe) || "#00e5ff"; g.lineWidth = Math.max(1, u * 0.7);
       g.beginPath(); g.roundRect(-9 * u, -13 * u, 18 * u, 13 * u, 6 * u); g.fill(); g.stroke();
-      g.fillStyle = "#76ff03"; g.fillRect(-7 * u, -7 * u, 14 * u, 2 * u);
-      g.strokeStyle = "rgba(0,229,255,.8)"; g.lineWidth = 1.8 * u; g.beginPath(); g.arc(0, -14 * u, 9 * u, Math.PI, 0); g.stroke();
-      const sway = Math.sin(R.t * 0.3) * 1.5 * u;
-      g.strokeStyle = "#99ffff"; g.lineWidth = 1;
-      g.beginPath(); g.moveTo(-7 * u, -13 * u); g.lineTo(-9 * u + sway, -25 * u); g.stroke();
-      g.beginPath(); g.moveTo(7 * u, -13 * u); g.lineTo(9 * u + sway, -25 * u); g.stroke();
-      g.fillStyle = "#00e5ff"; g.beginPath(); g.arc(-9 * u + sway, -25 * u, 2 * u, 0, 7); g.fill(); g.beginPath(); g.arc(9 * u + sway, -25 * u, 2 * u, 0, 7); g.fill();
+      g.fillStyle = (liv && liv.accent) || "#76ff03"; g.fillRect(-7 * u, -7 * u, 14 * u, 2 * u);
+      g.strokeStyle = (liv && liv.stripe) || "rgba(0,229,255,.8)"; g.lineWidth = 1.8 * u; g.beginPath(); g.arc(0, -14 * u, 9 * u, Math.PI, 0); g.stroke();
+      if (spk && spk.id === "high") {
+        g.fillStyle = "#111"; g.fillRect(-10 * u, -24 * u, 2 * u, 12 * u); g.fillRect(8 * u, -24 * u, 2 * u, 12 * u);
+        g.fillStyle = (liv && liv.stripe) || "#00e5ff"; g.fillRect(-14 * u, -25 * u, 28 * u, 3 * u);
+      } else if (spk && spk.id === "twin") {
+        [-6, 6].forEach((tx) => {
+          g.fillStyle = "#0e1824"; g.beginPath(); g.arc(tx * u, -7 * u, 4.8 * u, 0, 7); g.fill();
+          g.strokeStyle = (liv && liv.stripe) || "#00e5ff"; g.lineWidth = 1.5 * u; g.stroke();
+        });
+      } else if (spk && spk.id === "stealth") {
+        g.fillStyle = "#101622"; g.strokeStyle = (liv && liv.stripe) || "#00e5ff"; g.lineWidth = 1.2 * u;
+        g.beginPath(); g.moveTo(0, -26 * u); g.lineTo(1.6 * u, -12 * u); g.lineTo(-1.6 * u, -12 * u); g.closePath(); g.fill(); g.stroke();
+      } else {
+        const sway = Math.sin(rt * 0.3) * 1.5 * u;
+        g.strokeStyle = "#99ffff"; g.lineWidth = 1;
+        g.beginPath(); g.moveTo(-7 * u, -13 * u); g.lineTo(-9 * u + sway, -25 * u); g.stroke();
+        g.beginPath(); g.moveTo(7 * u, -13 * u); g.lineTo(9 * u + sway, -25 * u); g.stroke();
+        g.fillStyle = "#00e5ff"; g.beginPath(); g.arc(-9 * u + sway, -25 * u, 2 * u, 0, 7); g.fill(); g.beginPath(); g.arc(9 * u + sway, -25 * u, 2 * u, 0, 7); g.fill();
+      }
     } else if (k === "heavy") {
       g.fillStyle = "rgba(0,0,0,.5)"; g.beginPath(); g.ellipse(0, 3.5 * u, 22 * u, 5.5 * u, 0, 0, 7); g.fill();
       g.fillStyle = "#111"; g.fillRect(-20 * u, -11 * u, 8 * u, 14 * u); g.fillRect(12 * u, -11 * u, 8 * u, 14 * u);
       g.fillStyle = "#444"; for (let t = -9; t <= 1; t += 3) { g.fillRect(-19 * u, t * u, 6 * u, 1.2 * u); g.fillRect(13 * u, t * u, 6 * u, 1.2 * u); }
-      if (!R.fast && (r.boost > 0 || R.t % 4 === 0)) {
+      if ((!R || !R.fast) && (r.boost > 0 || rt % 4 === 0)) {
         g.fillStyle = r.boost > 0 ? "#ff9a2a" : "rgba(80,80,80,.6)";
         g.beginPath(); g.arc(-11 * u, -24 * u, (r.boost > 0 ? 4 : 2) * u, 0, 7); g.arc(11 * u, -24 * u, (r.boost > 0 ? 4 : 2) * u, 0, 7); g.fill();
       }
       g.fillStyle = "#222"; g.fillRect(-12 * u, -22 * u, 3 * u, 14 * u); g.fillRect(9 * u, -22 * u, 3 * u, 14 * u);
-      g.fillStyle = "#3a404a"; g.strokeStyle = "#1a1e24"; g.lineWidth = Math.max(1, u * 0.8);
+      g.fillStyle = (liv && liv.col) || "#3a404a"; g.strokeStyle = "#1a1e24"; g.lineWidth = Math.max(1, u * 0.8);
       g.beginPath(); g.roundRect(-13 * u, -15 * u, 26 * u, 15 * u, 3 * u); g.fill(); g.stroke();
       g.save(); g.beginPath(); g.rect(-12 * u, -6 * u, 24 * u, 5 * u); g.clip();
-      g.fillStyle = "#ffd23f"; g.fillRect(-12 * u, -6 * u, 24 * u, 5 * u); g.fillStyle = "#111";
+      g.fillStyle = (liv && liv.stripe) || "#ffd23f"; g.fillRect(-12 * u, -6 * u, 24 * u, 5 * u); g.fillStyle = (liv && liv.accent) || "#111";
       for (let xh = -16; xh <= 16; xh += 5) { g.beginPath(); g.moveTo(xh * u, -6 * u); g.lineTo((xh + 3) * u, -6 * u); g.lineTo((xh - 1) * u, -1 * u); g.lineTo((xh - 4) * u, -1 * u); g.fill(); }
       g.restore();
-      g.strokeStyle = "#ffd23f"; g.lineWidth = 1.6 * u;
-      g.beginPath(); g.moveTo(-9 * u, -15 * u); g.lineTo(-6 * u, -24 * u); g.lineTo(6 * u, -24 * u); g.lineTo(9 * u, -15 * u); g.stroke();
-      g.fillStyle = "#fff"; g.fillRect(-4 * u, -25.5 * u, 3 * u, 2 * u); g.fillRect(1 * u, -25.5 * u, 3 * u, 2 * u);
+      if (spk && spk.id === "high") {
+        g.fillStyle = "#111"; g.fillRect(-12 * u, -27 * u, 3 * u, 14 * u); g.fillRect(9 * u, -27 * u, 3 * u, 14 * u);
+        g.fillStyle = (liv && liv.col) || "#3a404a"; g.fillRect(-17 * u, -28 * u, 34 * u, 4 * u);
+        g.fillStyle = (liv && liv.stripe) || "#ffd23f"; g.fillRect(-15 * u, -24 * u, 30 * u, 2 * u);
+      } else if (spk && spk.id === "twin") {
+        [-8, 8].forEach((tx) => {
+          g.fillStyle = "#1a1e24"; g.beginPath(); g.arc(tx * u, -8 * u, 6 * u, 0, 7); g.fill();
+          g.strokeStyle = (liv && liv.stripe) || "#ffd23f"; g.lineWidth = 1.6 * u; g.stroke();
+        });
+      } else if (spk && spk.id === "stealth") {
+        g.fillStyle = "#1a1e24"; g.strokeStyle = (liv && liv.stripe) || "#ffd23f"; g.lineWidth = 1.4 * u;
+        g.beginPath(); g.moveTo(0, -28 * u); g.lineTo(2.2 * u, -14 * u); g.lineTo(-2.2 * u, -14 * u); g.closePath(); g.fill(); g.stroke();
+      } else {
+        g.strokeStyle = (liv && liv.stripe) || "#ffd23f"; g.lineWidth = 1.6 * u;
+        g.beginPath(); g.moveTo(-9 * u, -15 * u); g.lineTo(-6 * u, -24 * u); g.lineTo(6 * u, -24 * u); g.lineTo(9 * u, -15 * u); g.stroke();
+        g.fillStyle = "#fff"; g.fillRect(-4 * u, -25.5 * u, 3 * u, 2 * u); g.fillRect(1 * u, -25.5 * u, 3 * u, 2 * u);
+      }
       g.fillStyle = "#1a1e24"; g.fillRect(-14 * u, -1 * u, 28 * u, 2.5 * u);
     } else {
       g.fillStyle = "rgba(0,0,0,.35)"; g.beginPath(); g.ellipse(0, 3 * u, 17 * u, 4.6 * u, 0, 0, 7); g.fill();
       g.fillStyle = "#15151c"; g.fillRect(-16 * u, -9 * u, 6 * u, 11 * u); g.fillRect(10 * u, -9 * u, 6 * u, 11 * u);
       g.fillStyle = "#34343f"; g.fillRect(-15 * u, -9 * u, 2 * u, 11 * u); g.fillRect(11 * u, -9 * u, 2 * u, 11 * u);
-      if (r.boost > 0 && !R.fast) {
+      if (r.boost > 0 && (!R || !R.fast)) {
         for (let k = 0; k < 2; k++) {
           g.fillStyle = k ? "#fff3a0" : "#ff9a2a"; g.beginPath(); g.moveTo((k ? 4 : 8) * u, -3 * u); g.lineTo(6 * u * (k ? 0.5 : 1) , (6 + Math.random() * 6) * u); g.lineTo(0, -3 * u); g.lineTo(-6 * u * (k ? 0.5 : 1), (6 + Math.random() * 6) * u); g.lineTo(-8 * u, -3 * u); g.fill();
         }
       }
-      g.fillStyle = r.col; g.strokeStyle = "#111"; g.lineWidth = Math.max(1, u * 0.6); g.beginPath(); g.roundRect(-11 * u, -14 * u, 22 * u, 14 * u, 4 * u); g.fill(); g.stroke();
-      g.fillStyle = "#ffffff"; g.fillRect(-2.5 * u, -14 * u, 1.8 * u, 14 * u); g.fillRect(0.7 * u, -14 * u, 1.8 * u, 14 * u);
+      g.fillStyle = (liv && liv.col) || r.col; g.strokeStyle = "#111"; g.lineWidth = Math.max(1, u * 0.6); g.beginPath(); g.roundRect(-11 * u, -14 * u, 22 * u, 14 * u, 4 * u); g.fill(); g.stroke();
+      g.fillStyle = (liv && liv.stripe) || "#ffffff"; g.fillRect(-2.5 * u, -14 * u, 1.8 * u, 14 * u); g.fillRect(0.7 * u, -14 * u, 1.8 * u, 14 * u);
       g.fillStyle = "rgba(255,255,255,.3)"; g.fillRect(-9 * u, -12 * u, 18 * u, 2.4 * u);
-      g.fillStyle = "#111"; g.fillRect(-14 * u, -19 * u, 28 * u, 3.4 * u); g.fillRect(-9 * u, -19 * u, 2 * u, 6 * u); g.fillRect(7 * u, -19 * u, 2 * u, 6 * u);
+      if (spk && spk.id === "high") {
+        g.fillStyle = "#111"; g.fillRect(-10 * u, -24 * u, 2.2 * u, 11 * u); g.fillRect(7.8 * u, -24 * u, 2.2 * u, 11 * u);
+        g.fillStyle = (liv && liv.col) || r.col; g.fillRect(-15 * u, -25 * u, 30 * u, 3 * u);
+        g.fillStyle = (liv && liv.stripe) || "#ffffff"; g.fillRect(-13 * u, -21 * u, 26 * u, 2 * u);
+      } else if (spk && spk.id === "twin") {
+        [-6.5, 6.5].forEach((tx) => {
+          g.fillStyle = "#1c1e22"; g.beginPath(); g.arc(tx * u, -7 * u, 5 * u, 0, 7); g.fill();
+          g.strokeStyle = (liv && liv.stripe) || "#ffd23f"; g.lineWidth = 1.4 * u; g.stroke();
+        });
+      } else if (spk && spk.id === "stealth") {
+        g.fillStyle = "#15181e"; g.strokeStyle = (liv && liv.stripe) || "#ffd23f"; g.lineWidth = 1.2 * u;
+        g.beginPath(); g.moveTo(0, -26 * u); g.lineTo(1.8 * u, -12 * u); g.lineTo(-1.8 * u, -12 * u); g.closePath(); g.fill(); g.stroke();
+      } else {
+        g.fillStyle = "#111"; g.fillRect(-14 * u, -19 * u, 28 * u, 3.4 * u); g.fillRect(-9 * u, -19 * u, 2 * u, 6 * u); g.fillRect(7 * u, -19 * u, 2 * u, 6 * u);
+      }
       g.fillStyle = "#ff3a3a"; g.fillRect(-9 * u, -6 * u, 4 * u, 2.2 * u); g.fillRect(5 * u, -6 * u, 4 * u, 2.2 * u);
     }
     const im = imgOf(r.id), hr = 7.4 * u; g.save(); g.beginPath(); g.arc(0, -22 * u, hr, 0, 7); g.clip(); if (im && im.complete && im.naturalWidth) g.drawImage(im, -hr, -22 * u - hr, hr * 2, hr * 2); else { g.fillStyle = "#e8c8a0"; g.fillRect(-hr, -22 * u - hr, hr * 2, hr * 2); } g.restore();
     g.strokeStyle = r.human ? "#ffd23f" : r.col; g.lineWidth = Math.max(1, u * (r.human ? 1 : 0.7)); g.beginPath(); g.arc(0, -22 * u, hr, 0, 7); g.stroke();
     if (r.shield > 0) { g.strokeStyle = k === "heavy" ? "#ffd23f" : "#9ad8ff"; g.lineWidth = Math.max(1, u * (k === "heavy" ? 1.4 : 0.7)); g.beginPath(); g.arc(0, -12 * u, 24 * u, 0, 7); g.stroke(); }
+    if (r.hornT > 0) {
+      const ht = 45 - r.hornT;
+      g.save();
+      g.textAlign = "center";
+      g.font = `bold ${Math.max(11, 10 * u)}px system-ui`;
+      g.fillStyle = (liv && liv.stripe) || "#ffd23f";
+      g.fillText(ht % 14 < 7 ? "🎺 ♪" : "♫ 📢", 0, -31 * u - (ht * 0.4) * u);
+      g.strokeStyle = (liv && liv.stripe) || "rgba(255,210,63,.8)";
+      g.lineWidth = Math.max(1, 1.4 * u);
+      g.beginPath();
+      g.arc(0, -22 * u, (16 + (ht % 12) * 1.6) * u, -Math.PI * 0.8, -Math.PI * 0.2);
+      g.stroke();
+      g.restore();
+    }
     g.restore();
   }
   function draw3(g) {
@@ -468,28 +694,41 @@
   }
   const IMG = {}; const imgOf = (id) => { if (IMG[id] !== undefined) return IMG[id]; const u = safe(() => S().port(id), null); if (!u) return (IMG[id] = null); const i = new Image(); i.src = u; return (IMG[id] = i); };
   function kart(g, r, T) {
-    const q = pos(T, r.prog, r.lat); g.save(); g.translate(q[0], q[1]); g.rotate(q[2] + (r.stun > 0 ? Math.sin(R.t * 0.6) * 0.6 : 0));
+    const q = pos(T, r.prog, r.lat), rt = (R && R.t) || 0;
+    g.save(); g.translate(q[0], q[1]); g.rotate(q[2] + (r.stun > 0 ? Math.sin(rt * 0.6) * 0.6 : 0));
     g.fillStyle = "rgba(0,0,0,.3)"; g.beginPath(); g.ellipse(2, 3, 13, 8, 0, 0, 7); g.fill();
     const k = r.kart || "classic";
+    const c = r.custom || {};
+    const liv = (r.human && LIVERIES[c.livery]) ? LIVERIES[c.livery] : null;
+    const spk = (r.human && SPOILERS[c.spoiler]) ? SPOILERS[c.spoiler] : null;
+    const bodyCol = (liv && liv.col) || (k === "speed" ? "#c81410" : k === "light" ? "#0a2a3a" : k === "heavy" ? "#3a404a" : r.col);
+    const stripeCol = (liv && liv.stripe) || (k === "speed" ? "#ffd700" : k === "light" ? "#00e5ff" : k === "heavy" ? "#ffd23f" : "#fff");
     if (k === "speed") {
-      g.fillStyle = "#c81410"; g.strokeStyle = "#ffd700"; g.lineWidth = 1.5;
+      g.fillStyle = bodyCol; g.strokeStyle = stripeCol; g.lineWidth = 1.5;
       g.beginPath(); g.moveTo(14, 0); g.lineTo(-12, -8); g.lineTo(-8, 0); g.lineTo(-12, 8); g.closePath();
       g.fill(); g.stroke();
       g.fillStyle = "#111"; g.fillRect(-13, -11, 3, 22);
     } else if (k === "light") {
-      g.fillStyle = "#0a2a3a"; g.strokeStyle = "#00e5ff"; g.lineWidth = 1.5;
+      g.fillStyle = bodyCol; g.strokeStyle = stripeCol; g.lineWidth = 1.5;
       g.beginPath(); g.ellipse(1, 0, 11, 7, 0, 0, 7); g.fill(); g.stroke();
-      g.fillStyle = "#76ff03"; g.beginPath(); g.arc(10, 0, 2.5, 0, 7); g.fill();
+      g.fillStyle = (liv && liv.accent) || "#76ff03"; g.beginPath(); g.arc(10, 0, 2.5, 0, 7); g.fill();
     } else if (k === "heavy") {
       g.fillStyle = "#111";
       g.fillRect(-14, -10, 8, 4); g.fillRect(-14, 6, 8, 4);
       g.fillRect(4, -10, 8, 4); g.fillRect(4, 6, 8, 4);
-      g.fillStyle = "#3a404a"; g.strokeStyle = "#ffd23f"; g.lineWidth = 1.6;
+      g.fillStyle = bodyCol; g.strokeStyle = stripeCol; g.lineWidth = 1.6;
       g.beginPath(); g.roundRect(-11, -7, 22, 14, 2); g.fill(); g.stroke();
     } else {
-      g.fillStyle = r.col; g.strokeStyle = "#111"; g.lineWidth = 1.5;
+      g.fillStyle = bodyCol; g.strokeStyle = "#111"; g.lineWidth = 1.5;
       g.beginPath(); g.roundRect(-12, -7, 24, 14, 4); g.fill(); g.stroke();
-      g.fillStyle = "#fff"; g.fillRect(-11, -1, 22, 2);
+      g.fillStyle = stripeCol; g.fillRect(-11, -1, 22, 2);
+    }
+    if (spk && spk.id === "high") {
+      g.fillStyle = stripeCol; g.fillRect(-15, -10, 3, 20);
+    } else if (spk && spk.id === "twin") {
+      g.fillStyle = stripeCol; g.beginPath(); g.arc(-13, -5, 2.5, 0, 7); g.arc(-13, 5, 2.5, 0, 7); g.fill();
+    } else if (spk && spk.id === "stealth") {
+      g.fillStyle = stripeCol; g.fillRect(-14, -1, 10, 2);
     }
     if (r.boost > 0) {
       g.fillStyle = k === "light" ? "#00e5ff" : k === "speed" ? "#ff4010" : "#ffb347";
@@ -500,6 +739,7 @@
     g.strokeStyle = r.human ? "#ffd23f" : r.col; g.lineWidth = r.human ? 2.5 : 1.5; g.beginPath(); g.arc(1, -1, 8, 0, 7); g.stroke();
     if (r.shield > 0) { g.strokeStyle = k === "heavy" ? "#ffd23f" : "#9ad8ff"; g.lineWidth = 1.5; g.beginPath(); g.arc(1, -1, 14, 0, 7); g.stroke(); }
     if (r.human) { g.fillStyle = "#ffd23f"; g.font = "bold 8px system-ui"; g.textAlign = "center"; g.fillText("TU", 1, -14); }
+    if (r.hornT > 0) { g.fillStyle = stripeCol; g.font = "bold 10px system-ui"; g.textAlign = "center"; g.fillText("♪♫", 1, -22); }
     g.restore();
   }
   // ------------------------------------------------------------ interfaccia
@@ -514,23 +754,24 @@
 .crTab{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0}.crTab td{padding:5px 4px;border-top:1px solid #2a2040}.crTab tr.me td{color:#ffd23f;font-weight:800}.crRes{text-align:center;margin:10px 0}.crRes h3{font:900 24px system-ui;margin:4px 0}
 .crOv .crX{display:none}.crOv.land{overflow:hidden}.crOv.land .wrap{max-width:none;padding:0;height:100%}.crOv.land .bar{display:none}.crOv.land .body{height:100%;position:relative;display:flex;justify-content:center;background:#000}.crOv.land canvas{height:100%;width:auto;max-width:100%;border-radius:0;max-width:calc(100% - 0px)}
 .crOv.land .crX{display:block;position:absolute;top:6px;right:8px;z-index:7;width:36px;height:36px;border-radius:10px;border:1px solid #4a3a6a;background:#221a36cc;color:#fff;font-size:15px}.crOv.land .crCtl{position:absolute;left:0;right:0;bottom:6px;padding:0 12px;margin:0;pointer-events:none;align-items:flex-end}.crOv.land .crCtl>*{pointer-events:auto}.crOv.land .sum{display:none}
-.crOv.land .stk{background:rgba(20,15,40,.16)!important;border-color:rgba(255,255,255,.22)!important;box-shadow:none!important}.crOv.land .stk i{opacity:.62}.crOv.land .crCtl button{background:rgba(34,26,54,.45);border-color:rgba(255,255,255,.2)}.crOv.land .crCtl .tb,.crOv.land .crCtl .sp{background:rgba(42,74,122,.5)}.crOv.land .crCtl .su{background:rgba(122,90,16,.5)}.crOv.land .crCtl .ac{flex:none;width:230px}.crOv .body{position:relative}.crOv .crQ{position:absolute;top:-45px;right:48px;width:40px;height:40px;border-radius:10px;border:1px solid #4a3a6a;background:#221a36;color:#ffd23f;font:900 18px system-ui;z-index:4}.crOv.land .crQ{top:6px;right:50px;width:36px;height:36px}.crOv .crQ{display:none}.crOv .race .crQ,.crOv .crX~.crQ{display:block}.crTut{position:absolute;inset:0;z-index:6;background:#0c0818;min-height:380px;overflow:auto;padding:12px;border-radius:10px}.crTut h4{margin:0 0 6px;font:900 16px system-ui;color:#ffd23f}.crTut p{margin:6px 0;font-size:13px;line-height:1.4}.crTut .il{display:grid;gap:3px;font-size:12px}.crTut .il div{padding:3px 6px;border-radius:6px;background:#221a36}.crTut .il .mine{background:#5a3aa8}.crTut .nv{display:flex;gap:6px;margin-top:10px}.crTut .nv button{flex:1;min-height:44px;border-radius:10px;border:2px solid #ffd23f;background:#221a36;color:#fff;font:800 14px system-ui}`;
+.crOv.land .stk{background:rgba(20,15,40,.16)!important;border-color:rgba(255,255,255,.22)!important;box-shadow:none!important}.crOv.land .stk i{opacity:.62}.crOv.land .crCtl button{background:rgba(34,26,54,.45);border-color:rgba(255,255,255,.2)}.crOv.land .crCtl .tb,.crOv.land .crCtl .sp{background:rgba(42,74,122,.5)}.crOv.land .crCtl .su{background:rgba(122,90,16,.5)}.crOv.land .crCtl .ac{flex:none;width:230px}.crOv .body{position:relative}.crOv .crQ{position:absolute;top:-45px;right:48px;width:40px;height:40px;border-radius:10px;border:1px solid #4a3a6a;background:#221a36;color:#ffd23f;font:900 18px system-ui;z-index:4}.crOv.land .crQ{top:6px;right:50px;width:36px;height:36px}.crOv .crQ{display:none}.crOv .race .crQ,.crOv .crX~.crQ{display:block}.crTut{position:absolute;inset:0;z-index:6;background:#0c0818;min-height:380px;overflow:auto;padding:12px;border-radius:10px}.crTut h4{margin:0 0 6px;font:900 16px system-ui;color:#ffd23f}.crTut p{margin:6px 0;font-size:13px;line-height:1.4}.crTut .il{display:grid;gap:3px;font-size:12px}.crTut .il div{padding:3px 6px;border-radius:6px;background:#221a36}.crTut .il .mine{background:#5a3aa8}.crTut .nv{display:flex;gap:6px;margin-top:10px}.crTut .nv button{flex:1;min-height:44px;border-radius:10px;border:2px solid #ffd23f;background:#221a36;color:#fff;font:800 14px system-ui}
+.crGar{padding:4px 0}.crGarTabs{display:flex;gap:6px;margin:8px 0}.crGarTabs button{flex:1;min-height:38px;border-radius:8px;border:1px solid #4a3a6a;background:#1a142e;color:#c8b8ff;font:800 12px system-ui;cursor:pointer}.crGarTabs button.on{background:#5a3aa8;color:#ffd23f;border-color:#ffd23f}.crGrid{display:grid;grid-template-columns:1fr;gap:6px;margin:6px 0}@media(min-width:440px){.crGrid{grid-template-columns:1fr 1fr}}.crCard{border-radius:10px;border:2px solid #4a3a6a;background:#221a36;color:#f4f0e4;padding:8px 10px;text-align:left;cursor:pointer;position:relative}.crCard.sel{border-color:#ffd23f;background:#352150}.crCard h5{margin:0 0 2px;font:800 13px system-ui;display:flex;align-items:center;justify-content:space-between}.crCard p{margin:2px 0 0;font-size:11px;opacity:.8;line-height:1.3}.crCard .perk{color:#ffd23f;font-weight:700;font-size:10px;margin-top:3px}.crDot{width:14px;height:14px;border-radius:50%;display:inline-block;vertical-align:middle;margin-right:6px;border:1px solid rgba(255,255,255,.4)}`;
     document.head.appendChild(st);
   }
   function shell(title) { css(); halt(); if (OV) OV.remove(); OV = document.createElement("div"); OV.className = "crOv"; OV.innerHTML = `<div class="wrap"><div class="bar"><h2>${title}</h2><button type="button" class="x" aria-label="Chiudi">✕</button></div><div class="body"></div></div>`; OV.querySelector(".x").onclick = () => { const live = R && !R.over; halt(); if (live) return menu(); const b = BACK; close(); if (typeof b === "function") b(); }; document.body.appendChild(OV); return OV.querySelector(".body"); }
   let LAY = null;
   function halt() { cancelAnimationFrame(RAF); RAF = 0; if (LAY) { window.removeEventListener("resize", LAY); window.removeEventListener("orientationchange", LAY); LAY = null; } window.removeEventListener("keydown", kd); window.removeEventListener("keyup", ku); }
   function close() { halt(); R = null; if (OV) { OV.remove(); OV = null; } }
-  const KM = { ArrowLeft: "l", ArrowRight: "r", a: "l", d: "r", " ": "t", j: "t", k: "a", l: "a", o: "o", e: "o" };
-  const kd = (e) => { const k = KM[e.key]; if (!k || !R) return; e.preventDefault(); if (k === "t" || k === "a" || k === "o") R.edge[k] = 1; else R.inp[k] = 1; };
-  const ku = (e) => { const k = KM[e.key]; if (k && R && k !== "t" && k !== "a" && k !== "o") R.inp[k] = 0; };
-  function press(k, on) { if (!R) return; if (k === "t" || k === "a" || k === "o") { if (on) R.edge[k] = 1; } else R.inp[k] = on ? 1 : 0; }
+  const KM = { ArrowLeft: "l", ArrowRight: "r", a: "l", d: "r", " ": "t", j: "t", k: "a", l: "a", o: "o", e: "o", h: "h", c: "h" };
+  const kd = (e) => { const k = KM[e.key]; if (!k || !R) return; e.preventDefault(); if (k === "t" || k === "a" || k === "o" || k === "h") R.edge[k] = 1; else R.inp[k] = 1; };
+  const ku = (e) => { const k = KM[e.key]; if (k && R && k !== "t" && k !== "a" && k !== "o" && k !== "h") R.inp[k] = 0; };
+  function press(k, on) { if (!R) return; if (k === "t" || k === "a" || k === "o" || k === "h") { if (on) R.edge[k] = 1; } else R.inp[k] = on ? 1 : 0; }
   function tutor(body, me) {
     if (body.querySelector(".crTut")) return; const mine = me.fxk, wasP = PAUSE; PAUSE = true; let i = 0;
     const pages = [
-      ["Guida", `<p>Il <b>gas è automatico</b>: tu sterzi (joystick o ◀ ▶). <b>⚡ Turbo</b> (25 energia) dà una spinta. L'<b>✦ abilità</b> dipende dal ruolo. Stare dietro a un rivale dà <b>scia</b>. Sulla pista raccogli ⚡ (energia) e 🔶 (turbo).</p><p>Dentro la curva si risparmia strada, ma la curva ti spinge fuori.</p>`],
+      ["Guida", `<p>Il <b>gas è automatico</b>: tu sterzi (joystick o ◀ ▶). <b>⚡ Turbo</b> (25 energia) dà una spinta. L'<b>✦ abilità</b> dipende dal ruolo. <b>🎺 Clacson</b> (tasto H o C) distrae gli avversari vicini! Stare dietro a un rivale dà <b>scia</b>. Sulla pista raccogli ⚡ (energia) e 🔶 (turbo).</p><p>Dentro la curva si risparmia strada, ma la curva ti spinge fuori.</p>`],
       ["Gli oggetti 🎁", `<p>Passa su una <b>scatola 🎁</b> sulla pista: ricevi l'oggetto della tua saga (ne tieni uno solo). Poi premi il pulsante <b>🎁 Oggetto</b> (tasto O) per usarlo. Se ne hai già uno, la scatola ti dà +20 energia. In alto a sinistra vedi quello che hai e cosa fa.</p><div class="il">${Object.keys(ITEMN).map((k) => `<div class="${k === mine ? "mine" : ""}">${ITEMI[k]} <b>${ITEMN[k]}</b>: ${ITEMD[k]}${k === mine ? " ← il tuo" : ""}</div>`).join("")}</div>`],
-      ["Ostacoli e scorciatoie", `<p><b>Ostacoli</b> e <b>chiazze</b> sulla pista ti rallentano. Ai bordi ci sono <b>scorciatoie</b>: quella sterrata è sempre aperta ma piena di ostacoli, quella con il <b>cancello</b> si apre passando sulla leva 🔘 prima.</p><p>Le modalità si cambiano dal menu: Classica, Giro lanciato (cronometro), Testa a testa, Caos.</p>`]
+      ["Ostacoli e scorciatoie", `<p><b>Ostacoli</b> e <b>chiazze</b> sulla pista ti rallentano. Ai bordi ci sono <b>scorciatoie</b>: quella sterrata è sempre aperta ma piena di ostacoli, quella con il <b>cancello</b> si apre passando sulla leva 🔘 prima.</p><p>Le modalità si cambiano dal menu: Classica, Giro lanciato (cronometro), Testa a testa, Caos. Nel <b>Garage</b> puoi personalizzare livree, alettoni e clacson!</p>`]
     ];
     const ov = document.createElement("div"); ov.className = "crTut"; body.appendChild(ov);
     const end = () => { ov.remove(); PAUSE = false; safe(() => localStorage.setItem("ali-di-rondine.mini.corsa", "1"), 0); };
@@ -539,7 +780,7 @@
   }
   function raceUI(cfg) {
     const body = shell(cfg.title || "🏁 Gran Premio dei Sogni"); begin(cfg); const me = R.me, rear = cfg.view === "rear";
-    body.innerHTML = `<canvas width="${W * SS}" height="${H * SS}"></canvas><button type="button" class="crX" aria-label="Esci">✕</button><button type="button" class="crQ" aria-label="Come si gioca">?</button><div class="crCtl">${rear ? `<div class="stkSlot"></div>` : `<div class="st"><button data-k="l">◀</button><button data-k="r">▶</button></div>`}<div class="ac"><button data-k="t" class="tb">⚡ Turbo<small>25 energia</small></button><button data-k="a" class="ab">✦ ${esc(ABIL[me.role][0])}<small>${esc(ABIL[me.role][1])}</small></button>${R.fun ? `<button data-k="o" class="it" style="grid-column:1/3;background:#3a2a5a">🎁 Oggetto<small>raccogli 🎁 sulla pista</small></button>` : ""}</div></div><p class="sum" style="font-size:11px;opacity:.65;margin-top:6px">Il gas è automatico. ${rear ? "Joystick ◀▶: sterza (più lo spingi, più giri)." : "Sterza ◀ ▶."} Dentro la curva si risparmia strada, ma la curva ti spinge fuori. ⚡ e 🔶 sulla pista ricaricano l'energia o danno turbo. Stare dietro un rivale dà scia. ${R.fun ? "🎁 dà l'oggetto della tua saga (tasto Oggetto). Ostacoli e chiazze rallentano. Scorciatoie ai bordi: quella sterrata è sempre aperta ma con ostacoli; quella col cancello si apre passando sulla leva 🔘. " : ""}Tasti: frecce, spazio turbo, K abilità, O oggetto.</p>`;
+    body.innerHTML = `<canvas width="${W * SS}" height="${H * SS}"></canvas><button type="button" class="crX" aria-label="Esci">✕</button><button type="button" class="crQ" aria-label="Come si gioca">?</button><div class="crCtl">${rear ? `<div class="stkSlot"></div>` : `<div class="st"><button data-k="l">◀</button><button data-k="r">▶</button></div>`}<div class="ac"><button data-k="t" class="tb">⚡ Turbo<small>25 energia</small></button><button data-k="a" class="ab">✦ ${esc(ABIL[me.role][0])}<small>${esc(ABIL[me.role][1])}</small></button>${R.fun ? `<button data-k="o" class="it" style="background:#3a2a5a">🎁 Oggetto<small>raccogli 🎁 sulla pista</small></button>` : ""}<button data-k="h" class="hn" style="${R.fun ? '' : 'grid-column:1/3;'}background:#502810;color:#ffd23f">🎺 Clacson<small>suona (tasto H)</small></button></div></div><p class="sum" style="font-size:11px;opacity:.65;margin-top:6px">Il gas è automatico. ${rear ? "Joystick ◀▶: sterza (più lo spingi, più giri)." : "Sterza ◀ ▶."} Dentro la curva si risparmia strada, ma la curva ti spinge fuori. ⚡ e 🔶 sulla pista ricaricano l'energia o danno turbo. Stare dietro un rivale dà scia. 🎺 Clacson distrae i rivali vicini. ${R.fun ? "🎁 dà l'oggetto della tua saga (tasto Oggetto). Ostacoli e chiazze rallentano. Scorciatoie ai bordi: quella sterrata è sempre aperta ma con ostacoli; quella col cancello si apre passando sulla leva 🔘. " : ""}Tasti: frecce, spazio turbo, K abilità, O oggetto, H clacson.</p>`;
     if (rear && window.__stick) { R.stk = window.__stick.make({ size: 118 }); body.querySelector(".stkSlot").appendChild(R.stk.el); }
     const cv = body.querySelector("canvas"), g = cv.getContext("2d");
     body.querySelectorAll("[data-k]").forEach((b) => { const k = b.dataset.k, up = () => { press(k, false); b.classList.remove("on"); }; b.addEventListener("pointerdown", (e) => { e.preventDefault(); press(k, true); b.classList.add("on"); }); b.addEventListener("pointerup", up); b.addEventListener("pointercancel", up); b.addEventListener("pointerleave", up); });
@@ -564,12 +805,166 @@
     for (let i = 0; i < 5; i++) { const src = i < 3 ? p : all; let c; for (let k = 0; k < 20; k++) { c = src[Math.floor(rand() * src.length)]; if (!used[c.id]) break; } used[c.id] = 1; out.push(c); }
     return out;
   }
+  function garageUI(onDone) {
+    const body = shell("🛠️ Garage dei Sogni · Personalizza Kart");
+    let tab = "liv";
+    let st = load();
+    let animId = 0, t = 0, testHornT = 0;
+    const dummyRacer = () => {
+      const curL = LIVERIES[st.custom.livery] || LIVERIES.classic;
+      const kId = st.kart || "classic";
+      return {
+        id: (myTeam()[0] || {}).id || "alce",
+        n: "TU",
+        kart: kId,
+        col: curL.col || "#3aa0ff",
+        human: true,
+        custom: st.custom,
+        hornT: testHornT,
+        boost: 0,
+        stun: 0,
+        ghost: 0,
+        shield: 0,
+        v: 0.8,
+        vmax: 1.5
+      };
+    };
+    function renderGarage() {
+      const curL = LIVERIES[st.custom.livery] || LIVERIES.classic;
+      const curS = SPOILERS[st.custom.spoiler] || SPOILERS.std;
+      const curH = HORNS[st.custom.horn] || HORNS.vintage;
+      const curK = KARTS[st.kart] || KARTS.classic;
+      body.innerHTML = `
+        <div class="crGar">
+          <canvas class="garPrev" width="${320 * SS}" height="${170 * SS}" style="width:100%;max-width:440px;height:170px;background:radial-gradient(ellipse at center, #261c42 0%, #0d081a 100%);border-radius:12px;border:2px solid #5a4282;box-shadow:0 8px 24px rgba(0,0,0,.6);margin:0 auto;display:block"></canvas>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin:6px 0 2px">
+            <span style="font-size:11px;color:#c8b8ff">Kart: <b>${esc(curK.name)}</b></span>
+            <button type="button" class="testHrnBtn" style="border-radius:6px;border:1px solid #ffd23f;background:#3a2a14;color:#ffd23f;font:800 11px system-ui;padding:4px 8px;cursor:pointer">🔊 Suona Clacson (${esc(curH.name.split(" ")[0])})</button>
+          </div>
+          <div class="crGarTabs">
+            <button type="button" data-tab="liv" class="${tab === "liv" ? "on" : ""}">🎨 Livree (${esc(curL.name.split(" ")[0])})</button>
+            <button type="button" data-tab="spo" class="${tab === "spo" ? "on" : ""}">✈️ Alettoni (${esc(curS.name.split(" ")[0])})</button>
+            <button type="button" data-tab="hrn" class="${tab === "hrn" ? "on" : ""}">🎺 Clacson (${esc(curH.name.split(" ")[0])})</button>
+          </div>
+          <div class="tabContent"></div>
+          <div style="background:#191228;border-radius:10px;padding:8px;border:1px solid #3d2c5e;margin-top:10px">
+            <div style="font-size:11px;font-weight:800;color:#ffd23f;margin-bottom:3px">⚡ Assetto Attuale:</div>
+            <div style="font-size:11px;color:#e8e0ff;line-height:1.4">
+              🎨 <b>${esc(curL.name)}</b>: <span style="opacity:.85">${esc(curL.perk)}</span><br>
+              ✈️ <b>${esc(curS.name)}</b>: <span style="opacity:.85">${esc(curS.perk)}</span><br>
+              🎺 <b>${esc(curH.name)}</b>: <span style="opacity:.85">${esc(curH.desc)}</span>
+            </div>
+          </div>
+          <button type="button" class="one" data-save-gar="1" style="background:#2d1b54;border-color:#ffd23f;color:#ffd23f;margin-top:10px;text-align:center;font-size:15px">
+            ✅ Applica ed Esci dal Garage
+          </button>
+        </div>
+      `;
+      const tc = body.querySelector(".tabContent");
+      if (tab === "liv") {
+        tc.innerHTML = `<div class="crGrid">${Object.values(LIVERIES).map((lv) => `
+          <div class="crCard ${lv.id === st.custom.livery ? "sel" : ""}" data-pick-liv="${lv.id}">
+            <h5><span><span class="crDot" style="background:${lv.col || '#3aa0ff'};border-color:${lv.stripe}"></span>${esc(lv.name)}</span> ${lv.id === st.custom.livery ? '<span style="color:#ffd23f;font-size:11px">ATTIVO</span>' : ''}</h5>
+            <p>${esc(lv.desc)}</p>
+            <div class="perk">⚡ ${esc(lv.perk)}</div>
+          </div>`).join("")}</div>`;
+      } else if (tab === "spo") {
+        tc.innerHTML = `<div class="crGrid">${Object.values(SPOILERS).map((sp) => `
+          <div class="crCard ${sp.id === st.custom.spoiler ? "sel" : ""}" data-pick-spo="${sp.id}">
+            <h5><span>${sp.icon} ${esc(sp.name)}</span> ${sp.id === st.custom.spoiler ? '<span style="color:#ffd23f;font-size:11px">ATTIVO</span>' : ''}</h5>
+            <p>${esc(sp.desc)}</p>
+            <div class="perk">⚡ ${esc(sp.perk)}</div>
+          </div>`).join("")}</div>`;
+      } else {
+        tc.innerHTML = `<div class="crGrid">${Object.values(HORNS).map((hr) => `
+          <div class="crCard ${hr.id === st.custom.horn ? "sel" : ""}" data-pick-hrn="${hr.id}">
+            <h5><span>${hr.icon} ${esc(hr.name)}</span> ${hr.id === st.custom.horn ? '<span style="color:#ffd23f;font-size:11px">ATTIVO</span>' : ''}</h5>
+            <p>${esc(hr.desc)}</p>
+            <div style="margin-top:6px;display:flex;justify-content:flex-end">
+              <button type="button" class="one" data-test-hrn="${hr.id}" style="width:auto;min-height:28px;padding:3px 10px;margin:0;font-size:11px;background:#352515;border-color:#ffd23f;color:#ffd23f">Ascolta 🔊</button>
+            </div>
+          </div>`).join("")}</div>`;
+      }
+      body.querySelectorAll("[data-tab]").forEach((btn) => {
+        btn.onclick = () => { tab = btn.dataset.tab; renderGarage(); };
+      });
+      body.querySelectorAll("[data-pick-liv]").forEach((cd) => {
+        cd.onclick = () => { st.custom.livery = cd.dataset.pickLiv; save(st); renderGarage(); };
+      });
+      body.querySelectorAll("[data-pick-spo]").forEach((cd) => {
+        cd.onclick = () => { st.custom.spoiler = cd.dataset.pickSpo; save(st); renderGarage(); };
+      });
+      body.querySelectorAll("[data-pick-hrn]").forEach((cd) => {
+        cd.onclick = (e) => {
+          if (e.target.closest("[data-test-hrn]")) return;
+          st.custom.horn = cd.dataset.pickHrn; save(st); testHornT = 45; playHorn(st.custom.horn); renderGarage();
+        };
+      });
+      body.querySelectorAll("[data-test-hrn]").forEach((b) => {
+        b.onclick = (e) => {
+          e.stopPropagation();
+          const hid = b.dataset.testHrn; st.custom.horn = hid; save(st); testHornT = 45; playHorn(hid); renderGarage();
+        };
+      });
+      const thb = body.querySelector(".testHrnBtn");
+      if (thb) thb.onclick = () => { testHornT = 45; playHorn(st.custom.horn); };
+      const sgb = body.querySelector("[data-save-gar]");
+      if (sgb) sgb.onclick = () => {
+        cancelAnimationFrame(animId);
+        save(st);
+        if (typeof onDone === "function") onDone();
+        else menu();
+      };
+      const cv = body.querySelector(".garPrev");
+      if (cv) {
+        const g = cv.getContext("2d");
+        cancelAnimationFrame(animId);
+        const garLoop = () => {
+          if (!OV || !body.querySelector(".garPrev")) return;
+          t++;
+          if (testHornT > 0) testHornT--;
+          g.save();
+          g.scale(SS, SS);
+          g.clearRect(0, 0, 320, 170);
+          const gr = g.createRadialGradient(160, 130, 20, 160, 130, 150);
+          gr.addColorStop(0, "rgba(90,58,168,.3)");
+          gr.addColorStop(1, "rgba(0,0,0,0)");
+          g.fillStyle = gr;
+          g.beginPath(); g.ellipse(160, 135, 140, 26, 0, 0, 7); g.fill();
+          g.strokeStyle = "rgba(100, 70, 180, .25)";
+          g.lineWidth = 1;
+          for (let gx = 30; gx <= 290; gx += 26) {
+            g.beginPath(); g.moveTo(gx, 120); g.lineTo(160 + (gx - 160) * 1.5, 168); g.stroke();
+          }
+          for (let gy = 125; gy <= 165; gy += 10) {
+            g.beginPath(); const span = (gy - 110) * 2.8; g.moveTo(160 - span, gy); g.lineTo(160 + span, gy); g.stroke();
+          }
+          const tilt = Math.sin(t * 0.04) * 0.05;
+          const bounce = Math.sin(t * 0.1) * 1.5;
+          const rObj = dummyRacer();
+          kartRear(g, 160, 140 + bounce, 3.2, rObj, tilt);
+          g.font = "900 11px system-ui";
+          g.textAlign = "center";
+          g.fillStyle = "rgba(255,210,63,.8)";
+          g.fillText("GARAGE PREVIEW · " + esc(curK.name).toUpperCase(), 160, 20);
+          g.restore();
+          animId = requestAnimationFrame(garLoop);
+        };
+        animId = requestAnimationFrame(garLoop);
+      }
+    }
+    renderGarage();
+  }
   function menu(back) {
     if (back) BACK = back; const body = shell("🏁 Gran Premio dei Sogni"), r = load(), team = myTeam();
     const selK = KARTS[r.kart] || KARTS.classic, isSolo = r.mode === "solo";
     const curCup = CUPS[r.cup || "borgo"] || CUPS.borgo;
     const cTracks = curCup.idxs.map((i) => TRACKS[i]);
-    body.innerHTML = `<p class="sum">${isSolo ? "<b>Corsa Individuale (Tutti contro Tutti)</b>: sei da solo in pista contro 7 piloti rivali agguerriti! Nessun compagno, ognuno per sé: vince chi taglia per primo il traguardo." : "<b>Corsa a squadre dei Sogni</b>: guidi il tuo pilota, due compagni corrono con te e i punti di squadra si sommano contro i rivali."} Scia, turbo, abilità e veicoli differenziati.</p><div class="sec">${isSolo ? "Il tuo Pilota" : "La tua squadra (dalla Squadra dei Sogni)"}</div><p class="sum">${isSolo ? `<b>${esc(name(team[0].id))}</b> (${esc(ABIL[rlOf(team[0])][0])}) · Pilota Titolare` : team.map((c) => `<b>${esc(name(c.id))}</b> (${esc(ABIL[rlOf(c)][0])})`).join(" · ")}</p><div class="sec">Scegli il tuo Veicolo · Attivo: ${esc(selK.name)}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0">${Object.values(KARTS).map((k) => `<button type="button" class="one" data-pick-kart="${k.id}" style="margin:0;min-height:80px;border:2px solid ${k.id === r.kart ? '#ffd23f' : '#4a3a6a'};background:${k.id === r.kart ? '#3a2254' : '#221a36'}"><div style="display:flex;justify-content:space-between;align-items:center"><b>${k.name}</b><span style="font-size:9px;font-weight:900;padding:2px 5px;border-radius:4px;background:#000;color:${k.id === r.kart ? '#ffd23f' : '#bbb'}">${k.tag}</span></div><small style="margin-top:3px;color:#c8b8ff">⚡ ${esc(k.perk)}</small><small style="color:#aaa;font-size:9px;margin-top:2px">Vel: ${k.stats.vel} · Scat: ${k.stats.acc} · Manov: ${k.stats.man} · Resist: ${k.stats.res}</small></button>`).join("")}</div><button type="button" class="one" data-kart="1" style="display:none">Cambia kart</button><div class="sec">Modalità di Gara e Piste</div><button type="button" class="one" data-mode="1">${MODES[r.mode][0]}<small>${MODES[r.mode][1]}. Tocca per cambiare modalità</small></button><button type="button" class="one" data-view="1">👁️ Visuale: ${r.view === "rear" ? "da dietro (joystick)" : "dall'alto"}<small>tocca per cambiare: da dietro oppure dall'alto (la classica)</small></button><button type="button" class="one" data-cup="1">🗺️ Coppa Piste: ${esc(curCup.name)}<small>${esc(curCup.desc)}. Tocca per cambiare coppa!</small></button><button type="button" class="one" data-fun="1">🎁 Oggetti, ostacoli e scorciatoie: ${r.fun ? "SÌ" : "NO"}<small>oggetti della tua saga, ostacoli per pista, scorciatoie (una sempre aperta, una con leva). Tocca per cambiare</small></button><button type="button" class="one" data-go="champ">🏆 Campionato dei Sogni<small>3 gare (${esc(curCup.name)}) · ${r.champ ? "vinto " + r.champ + " volte" : "mai vinto"} · premi in monete</small></button>${cTracks.map((t, i) => `<button type="button" class="one" data-t="${i}">🏁 ${esc(t.n)}<small>${isSolo ? "gara individuale (tutti contro tutti)" : "gara singola"} · 2 giri${r.best[t.id] ? " · record posto " + r.best[t.id] : ""}</small></button>`).join("")}`;
+    const curLiv = LIVERIES[r.custom.livery] || LIVERIES.classic;
+    const curSpo = SPOILERS[r.custom.spoiler] || SPOILERS.std;
+    const curHrn = HORNS[r.custom.horn] || HORNS.vintage;
+    body.innerHTML = `<p class="sum">${isSolo ? "<b>Corsa Individuale (Tutti contro Tutti)</b>: sei da solo in pista contro 7 piloti rivali agguerriti! Nessun compagno, ognuno per sé: vince chi taglia per primo il traguardo." : "<b>Corsa a squadre dei Sogni</b>: guidi il tuo pilota, due compagni corrono con te e i punti di squadra si sommano contro i rivali."} Scia, turbo, abilità e veicoli differenziati.</p><div class="sec">${isSolo ? "Il tuo Pilota" : "La tua squadra (dalla Squadra dei Sogni)"}</div><p class="sum">${isSolo ? `<b>${esc(name(team[0].id))}</b> (${esc(ABIL[rlOf(team[0])][0])}) · Pilota Titolare` : team.map((c) => `<b>${esc(name(c.id))}</b> (${esc(ABIL[rlOf(c)][0])})`).join(" · ")}</p><button type="button" class="one" data-garage="1" style="border:2px solid #00f5d4;background:linear-gradient(135deg, #152236 0%, #1f143a 100%);margin:8px 0;box-shadow:0 4px 14px rgba(0,245,212,.15)"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:15px;color:#00f5d4">🛠️ <b>Garage dei Sogni</b></span><span style="font-size:9px;font-weight:900;padding:2px 6px;border-radius:4px;background:#00f5d4;color:#091624">PERSONALIZZA</span></div><small style="margin-top:4px;color:#c0f8f0;font-size:12px">🎨 <b>${esc(curLiv.name)}</b> · ✈️ <b>${esc(curSpo.name)}</b> · 🎺 <b>${esc(curHrn.name.split(" ")[0])}</b></small><small style="color:#80dcd4;font-size:10px;margin-top:2px">Personalizza livree da corsa, alettoni aerodinamici e clacson sonori con anteprima live!</small></button><div class="sec">Scegli il tuo Veicolo · Attivo: ${esc(selK.name)}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0">${Object.values(KARTS).map((k) => `<button type="button" class="one" data-pick-kart="${k.id}" style="margin:0;min-height:80px;border:2px solid ${k.id === r.kart ? '#ffd23f' : '#4a3a6a'};background:${k.id === r.kart ? '#3a2254' : '#221a36'}"><div style="display:flex;justify-content:space-between;align-items:center"><b>${k.name}</b><span style="font-size:9px;font-weight:900;padding:2px 5px;border-radius:4px;background:#000;color:${k.id === r.kart ? '#ffd23f' : '#bbb'}">${k.tag}</span></div><small style="margin-top:3px;color:#c8b8ff">⚡ ${esc(k.perk)}</small><small style="color:#aaa;font-size:9px;margin-top:2px">Vel: ${k.stats.vel} · Scat: ${k.stats.acc} · Manov: ${k.stats.man} · Resist: ${k.stats.res}</small></button>`).join("")}</div><button type="button" class="one" data-kart="1" style="display:none">Cambia kart</button><div class="sec">Modalità di Gara e Piste</div><button type="button" class="one" data-mode="1">${MODES[r.mode][0]}<small>${MODES[r.mode][1]}. Tocca per cambiare modalità</small></button><button type="button" class="one" data-view="1">👁️ Visuale: ${r.view === "rear" ? "da dietro (joystick)" : "dall'alto"}<small>tocca per cambiare: da dietro oppure dall'alto (la classica)</small></button><button type="button" class="one" data-cup="1">🗺️ Coppa Piste: ${esc(curCup.name)}<small>${esc(curCup.desc)}. Tocca per cambiare coppa!</small></button><button type="button" class="one" data-fun="1">🎁 Oggetti, ostacoli e scorciatoie: ${r.fun ? "SÌ" : "NO"}<small>oggetti della tua saga, ostacoli per pista, scorciatoie (una sempre aperta, una con leva). Tocca per cambiare</small></button><button type="button" class="one" data-go="champ">🏆 Campionato dei Sogni<small>3 gare (${esc(curCup.name)}) · ${r.champ ? "vinto " + r.champ + " volte" : "mai vinto"} · premi in monete</small></button>${cTracks.map((t, i) => `<button type="button" class="one" data-t="${i}">🏁 ${esc(t.n)}<small>${isSolo ? "gara individuale (tutti contro tutti)" : "gara singola"} · 2 giri${r.best[t.id] ? " · record posto " + r.best[t.id] : ""}</small></button>`).join("")}`;
+    body.querySelector('[data-garage]').onclick = () => garageUI(() => menu());
     body.querySelectorAll('[data-pick-kart]').forEach((b) => {
       b.onclick = () => { const x = load(); x.kart = b.dataset.pickKart; save(x); menu(); };
     });
@@ -585,11 +980,11 @@
   function setup(ti, lvl, seed, mode) {
     const T = TRACKS[ti], rand = seeded(seed != null ? seed : (Date.now() & 0xffff)), me = myTeam(), ss = [...new Set(S().CARDS.map((c) => c.saga))], th = ss[Math.floor(rand() * ss.length)], rv = rivals(rand, lvl, th);
     const rac = [];
-    const userKart = load().kart;
-    if (mode === "time") rac.push(mk(me[0], 0, 0, { human: true, m: 0.02, ai: 3, kart: userKart }));
-    else if (mode === "duel") { rac.push(mk(me[0], 0, 0, { human: true, m: 0.02, ai: 3, kart: userKart })); rac.push(mk(rv[0], 1, 0, { ai: 4, m: 0.02 })); }
+    const userKart = load().kart, userCustom = load().custom;
+    if (mode === "time") rac.push(mk(me[0], 0, 0, { human: true, m: 0.02, ai: 3, kart: userKart, custom: userCustom }));
+    else if (mode === "duel") { rac.push(mk(me[0], 0, 0, { human: true, m: 0.02, ai: 3, kart: userKart, custom: userCustom })); rac.push(mk(rv[0], 1, 0, { ai: 4, m: 0.02 })); }
     else if (mode === "solo") {
-      rac.push(mk(me[0], 0, 0, { human: true, m: 0.02, ai: 3, kart: userKart }));
+      rac.push(mk(me[0], 0, 0, { human: true, m: 0.02, ai: 3, kart: userKart, custom: userCustom }));
       const allCards = S().CARDS, used = { [me[0].id]: 1 };
       const rivalCols = ["#e63946", "#f4a261", "#2a9d8f", "#e76f51", "#9d4edd", "#48cae4", "#52b788"];
       for (let i = 0; i < 7; i++) {
@@ -601,7 +996,7 @@
       }
     }
     else {
-      me.forEach((c, i) => rac.push(mk(c, 0, i, { human: i === 0, m: 0.02, ai: 3, kart: userKart })));
+      me.forEach((c, i) => rac.push(mk(c, 0, i, { human: i === 0, m: 0.02, ai: 3, kart: userKart, custom: i === 0 ? userCustom : null })));
       rv.forEach((c, i) => rac.push(mk(c, i < 3 ? 1 : 2, i, { ai: lvl, m: (lvl - 3) * 0.035 })));
     }
     return { track: T, racers: rac, seed: Math.floor(rand() * 1e6), mode: mode || "classic" };
@@ -622,7 +1017,9 @@
     const sub = md === "time" ? "" : md === "solo" ? `<p class="sum">${G.myPos === 1 ? "🏆 Trionfo in Corsa Individuale! Hai sbaragliato tutti i 7 avversari!" : G.myPos <= 3 ? "Gara individuale (Tutti contro tutti): podio conquistato!" : "Gara individuale (Tutti contro tutti): ritenta per salire sul podio!"}</p>` : md === "duel" ? `<p class="sum">${win ? "🏅 Testa a testa vinto" : "Il rivale ti ha battuto"}</p>` : `<p class="sum">Squadra: <b>${tp}</b> punti contro <b>${rp}</b> dei rivali ${win ? "· 🏅 gara di squadra vinta" : ""}</p>`;
     body.innerHTML = `<div class="crRes"><h3>${md === "time" ? "⏱️ " + (G.me.finT / 60).toFixed(1) + " s" : podio}</h3>${sub}</div><table class="crTab">${order.map((r, i) => `<tr class="${r.human ? "me" : ""}"><td>${i + 1}°</td><td>${esc(r.n)}</td><td style="color:${r.col}">${md === "solo" ? (r.human ? "TU" : (S().SAGHE[r.saga] ? S().SAGHE[r.saga][1] : "Rivale")) : (nm[r.team] || "Rivale")}</td><td>${PTS[i] || 0} pt</td></tr>`).join("")}</table>`;
     let coins = md === "solo" ? (G.myPos === 1 ? 30 : G.myPos === 2 ? 22 : G.myPos === 3 ? 16 : Math.max(2, 14 - G.myPos * 2)) : Math.max(0, 14 - G.myPos * 2) + (win ? 12 : 0);
-    if (md === "time") { const sec = +(G.me.finT / 60).toFixed(1), old = a.rec[TRACKS[ti].id], nr = !old || sec < old; if (nr) a.rec[TRACKS[ti].id] = sec; coins = nr ? 10 : 2; L.push(`Record della pista: ${Math.min(old || sec, sec)} s${nr ? " · 🏅 nuovo record!" : ""}`); } safe(() => window.addCoins(coins), 0); L.push(`+${coins} monete.`);
+    if (md === "time") { const sec = +(G.me.finT / 60).toFixed(1), old = a.rec[TRACKS[ti].id], nr = !old || sec < old; if (nr) a.rec[TRACKS[ti].id] = sec; coins = nr ? 10 : 2; L.push(`Record della pista: ${Math.min(old || sec, sec)} s${nr ? " · 🏅 nuovo record!" : ""}`); }
+    if (G.me && G.me.custom && G.me.custom.livery === "gold" && G.myPos <= 3) { coins += 3; L.push("👑 +3 monete bonus per Livrea Oro dei Campioni!"); }
+    safe(() => window.addCoins(coins), 0); L.push(`+${coins} monete.`);
     const T = TRACKS[ti]; if (!a.best[T.id] || G.myPos < a.best[T.id]) a.best[T.id] = G.myPos;
     let html = L.map((l) => `<p class="sum" style="text-align:center">${l}</p>`).join("");
     if (st) {
@@ -635,5 +1032,5 @@
     } else { save(a); body.insertAdjacentHTML("beforeend", html + `<button type="button" class="one" data-go="again">↺ Rivincita</button><button type="button" class="one" data-go="menu">◂ Menu</button>`); body.querySelector('[data-go="again"]').onclick = () => race(ti, lvl, null); body.querySelector('[data-go="menu"]').onclick = () => menu(); }
     if (safe(() => window.__arena, null)) safe(() => { const ar = window.__arena.load(), id = G.me.id; ar.xp[id] = Math.min(60, (ar.xp[id] | 0) + 1); window.__arena.save(ar); }, 0);
   }
-  window.__corsa = { open: menu, close, state: () => R, tick, press, begin, setup, build, TRACKS, ABIL, KARTS, CUPS, pos, at, _fast: (v) => { if (R) R.fast = !!v; }, pause: (v) => { PAUSE = !!v; }, race, load, save, mk };
+  window.__corsa = { open: menu, close, state: () => R, tick, press, begin, setup, build, TRACKS, ABIL, KARTS, LIVERIES, SPOILERS, HORNS, playHorn, garage: garageUI, CUPS, pos, at, _fast: (v) => { if (R) R.fast = !!v; }, pause: (v) => { PAUSE = !!v; }, race, load, save, mk };
 })();
