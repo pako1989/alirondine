@@ -396,55 +396,85 @@
       name: "Rombo 1-2-1",
       icon: "🔶",
       short: "1D · 2C · 1A",
-      desc: "Fraseggio corto e tecnica sopraffina: +1 lanterna/riavvolgimento/tempo e passaggi millimetrici.",
+      desc: "Fraseggio corto e tecnica sopraffina: bonus a Tecnica, ricarica abilità, lanterne e tempo.",
       matchBonusDesc: "+TEC e fraseggio: +1 lanterna, +1 riavvolgimento o tempo, passaggi e idee impeccabili",
       check: (roles) => roles.filter((r) => r === "D" || r === "P").length >= 1 && roles.filter((r) => r === "C").length >= 2 && roles.filter((r) => r === "A").length >= 1,
       hint: "1 Difensore (o P), 2 Centrocampisti, 1 Attaccante",
-      bonus: { at: 0, df: 0, te: 1 }
+      bonus: { at: 0, df: 0, te: 1 },
+      effects: {
+        arena: "⚡ +20% Tecnica e velocità turni · Abilità pronte 1 turno prima all'avvio (con sintonia) · +12% Colpo Critico con tratto Mente",
+        torneo: "💡 +1 Lanterna (Luci), +1 Riavvolgimento (Nastro), +1 Tempo (Pallatempo), +1 Ciak (Ciak d'Autore), +1 Slot Gadget",
+        stagione: "🎯 +2 Forza globale e controllo del gioco nella simulazione · Idee e passaggi impeccabili nelle partite giocate",
+        arcade: "🏃 Manovra fluida, assist millimetrici e ricarica rapida mosse speciali"
+      }
     },
     catenaccio: {
       id: "catenaccio",
       name: "Catenaccio 2-1-1",
       icon: "🛡️",
       short: "2D · 1C · 1A",
-      desc: "Muro difensivo d'acciaio e ripartenza: parate e contrasti ermetici, scudo e cuori extra.",
+      desc: "Muro difensivo d'acciaio e ripartenza: parate ermetiche, scudo protettivo e contrasti duri.",
       matchBonusDesc: "+DIF impenetrabile: turni extra in difesa, contrasti ferrei e scudo protettivo",
       check: (roles) => roles.filter((r) => r === "D" || r === "P").length >= 2 && roles.filter((r) => r === "C").length >= 1 && roles.filter((r) => r === "A").length >= 1,
       hint: "2 Difensori (o D+P), 1 Centrocampista, 1 Attaccante",
-      bonus: { at: 0, df: 1, te: 0 }
+      bonus: { at: 0, df: 1, te: 0 },
+      effects: {
+        arena: "🛡️ +25% Difesa squadra · +40 Scudo iniziale a tutti al Round 1 · Danni subiti ridotti del 12%",
+        torneo: "🧤 Turni extra difesa (Luci/Concilio), +1 Cuore (Ipogeo), +Fiches scudo (Roulette), +Parate Portiere",
+        stagione: "🔒 −1 gol subito medio per partita nella simulazione · Muro difensivo invalicabile nelle partite giocate",
+        arcade: "🧱 Scudo più resistente, recuperi palla fulminei e contrasti vincenti"
+      }
     },
     tridente: {
       id: "tridente",
       name: "Tridente 1-1-2",
       icon: "⚡",
       short: "1D · 1C · 2A",
-      desc: "Attacco travolgente a due punte: +1 azione/tiro offensivo in tutti i motori e grinta alta.",
+      desc: "Attacco travolgente a due punte: +1 azione/tiro offensivo, colpi critici devastanti e grinta.",
       matchBonusDesc: "+ATT arrembante: +1 azione o tiro in attacco, conclusioni esplosive e grinta alta",
       check: (roles) => roles.filter((r) => r === "D" || r === "P").length >= 1 && roles.filter((r) => r === "C").length >= 1 && roles.filter((r) => r === "A").length >= 2,
       hint: "1 Difensore (o P), 1 Centrocampista, 2 Attaccanti",
-      bonus: { at: 1, df: 0, te: 0 }
+      bonus: { at: 1, df: 0, te: 0 },
+      effects: {
+        arena: "⚔️ +25% Attacco · Critici a 1.75× danno · Barra Colpo di Squadra si carica il 30% più in fretta",
+        torneo: "🔥 +1 Azione offensiva (Vignette), +1 Tiro (Bottoni), +15 Grinta (Duello), +1 Turno d'attacco (Concilio)",
+        stagione: "⚽ +3 Forza offensiva e media gol più alta nelle simulazioni · Conclusione letale nelle partite giocate",
+        arcade: "💥 Tiri potenti, scatti brucianti e conclusioni a rete imparabili"
+      }
     },
     quadrato: {
       id: "quadrato",
       name: "Quadrato 2-2",
       icon: "🟩",
       short: "2D · 2A / 2C",
-      desc: "Assetto simmetrico e transizioni rapide: bonus equilibrato ad attacco, difesa ed energia.",
+      desc: "Assetto simmetrico e transizioni rapide: salute massima aumentata, barra speciale carica e costanza.",
       matchBonusDesc: "Equilibrio totale: +energia nei duelli e nel volo, tenuta costante su entrambi i fronti",
       check: (roles) => roles.filter((r) => r === "D" || r === "P").length >= 2 && (roles.filter((r) => r === "A").length >= 2 || roles.filter((r) => r === "C").length >= 2),
       hint: "2 Difensori (o P) e 2 Attaccanti (oppure 2 Centrocampisti)",
-      bonus: { at: 0, df: 0, te: 0 }
+      bonus: { at: 0, df: 0, te: 0 },
+      effects: {
+        arena: "💚 +15% Salute massima · +8% ATT, DIF e TEC · Barra Colpo di Squadra già al 25% all'avvio · +18 Scudo in Difesa",
+        torneo: "🔋 +15 Energia nel volo, +10 Grinta nei duelli, transizioni offensive e difensive continue",
+        stagione: "⚖️ Equilibrio e costanza: tenuta atletica superiore nei finali di gara, rendimento stabile",
+        arcade: "🔄 Recupero rapido stamina, ottima reattività e supporto costante su ambo le fasi"
+      }
     },
     fortezza: {
       id: "fortezza",
       name: "Fortezza 3-1",
       icon: "🏰",
       short: "3D/C · 1A",
-      desc: "Linee serrate e contropiede letale: massima tenuta fisica, +credibilità e contrasti d'acciaio.",
+      desc: "Linee serrate e contropiede letale: salute e scudo alti, contrattacco spinato e massima credibilità.",
       matchBonusDesc: "Resistenza estrema: +credibilità nel concilio, salvataggi miracolosi e contrasti duri",
       check: (roles) => roles.filter((r) => r === "D" || r === "P" || r === "C").length >= 3 && roles.filter((r) => r === "A").length >= 1,
       hint: "3 tra Difensori e Centrocampisti, 1 Attaccante",
-      bonus: { at: 0, df: 1, te: 0 }
+      bonus: { at: 0, df: 1, te: 0 },
+      effects: {
+        arena: "🏰 +20% Salute massima, +25% Difesa · +35 Scudo iniziale a tutti · Contrattacco (rimanda il 18% dei danni sotto scudo)",
+        torneo: "👑 +Credibilità massima nel Concilio, turni prolungati di tenuta (Luci), contrasti rocciosi",
+        stagione: "🛡️ Rigore tattico: subisce pochissimi gol sia nelle simulate che nelle giocate per blindare il risultato",
+        arcade: "🪨 Resistenza agli urti, intercettazioni aeree e impenetrabilità difensiva"
+      }
     }
   };
   function modSintonia(modKey, team) {
@@ -626,18 +656,94 @@
     const sin = modSintonia(cur, team);
     return `<div class="sgModBox">
       <div class="sgModHd">
-        <span class="sgModTitle">📋 Modulo:</span>
+        <span class="sgModTitle">📋 Modulo Tattico:</span>
         <div class="sgModChips">
           ${Object.values(MODULI).map((m) => `<button type="button" class="sgModChip${m.id === cur ? " active" : ""}" data-mod="${m.id}">${m.icon} ${esc(m.name)}</button>`).join("")}
         </div>
       </div>
       <div class="sgModDesc">
         <div class="sgModTxt"><b>${esc(M_MOD.short)}</b>: ${esc(M_MOD.desc)}</div>
-        <div class="sgModSin ${sin ? "ok" : "warn"}">
-          ${sin ? `✨ <b>Sintonia Modulo Attiva!</b> (+2 Intesa · ${esc(M_MOD.matchBonusDesc)})` : `ℹ️ <b>Sintonia parziale:</b> schiera ${esc(M_MOD.hint)} per sbloccare il pieno bonus in partita.`}
+        <div class="sgModStatusRow">
+          <span class="sgModSin ${sin ? "ok" : "warn"}">
+            ${sin ? `✨ <b>Sintonia Attiva!</b> (+2 Intesa · bonus operativi)` : `ℹ️ <b>Sintonia parziale:</b> serve ${esc(M_MOD.hint)}`}
+          </span>
+          <button type="button" class="sgModDetailBtn" data-mod-detail="${cur}">🔍 Dettagli effetti per modalità</button>
         </div>
       </div>
     </div>`;
+  }
+
+  function openModDetail(activeKey, back) {
+    const r = load();
+    let curKey = activeKey || r.modulo || "rombo";
+    const body = shell("📋 Dettaglio Effetti per Modalità");
+    function renderDetail() {
+      const M = MODULI[curKey] || MODULI.rombo;
+      const sin = modSintonia(curKey, r.team);
+      const isCur = r.modulo === curKey;
+      let h = `<p class="sum">Ogni modulo tattico incide concretamente sulle prestazioni della tua squadra attraverso tutte le modalità di gioco. Schierando i ruoli previsti attivi la <b>Sintonia Modulo</b> (+2 Intesa e massima efficacia dei bonus).</p>`;
+      h += `<div class="sgModDetailTabs">
+        ${Object.values(MODULI).map((m) => `<button type="button" class="sgModTabBtn${m.id === curKey ? " active" : ""}" data-tab="${m.id}">${m.icon} ${esc(m.name)}</button>`).join("")}
+      </div>`;
+      h += `<div class="sgModDetailCard">
+        <div class="sgModDetailHead">
+          <div class="sgModDetailTitle">
+            <span class="ic">${M.icon}</span>
+            <div>
+              <h3>${esc(M.name)} <small>${esc(M.short)}</small></h3>
+              <p>${esc(M.desc)}</p>
+            </div>
+          </div>
+          <div class="sgModDetailAction">
+            ${isCur ? `<span class="sgModActiveBadge">✓ Attualmente in uso</span>` : `<button type="button" class="sgModSetBtn" data-set-mod="${M.id}">Adotta questo modulo</button>`}
+          </div>
+        </div>
+        <div class="sgModSinBox ${sin ? "ok" : "warn"}">
+          <div class="sgModSinHd">${sin ? "✨ Sintonia Modulo Attiva sulla tua squadra" : "⚠️ Sintonia parziale sulla tua squadra"}</div>
+          <div class="sgModSinBody">${sin ? `Requisiti soddisfatti! La tua formazione ottiene +2 Intesa e il pieno potenziamento in ogni partita.` : `Requisiti per la sintonia: schiera <b>${esc(M.hint)}</b> per sbloccare tutti i bonus al 100%.`}</div>
+        </div>
+        <div class="sgModModesGrid">
+          <div class="sgModModeCol arena">
+            <div class="sgModModeTitle">⚔️ Arena dei Sogni & Torre dei Duelli</div>
+            <div class="sgModModeText">${esc(M.effects.arena)}</div>
+          </div>
+          <div class="sgModModeCol torneo">
+            <div class="sgModModeTitle">🏆 Torneo dei Sogni (8 Sfide / Motori)</div>
+            <div class="sgModModeText">${esc(M.effects.torneo)}</div>
+          </div>
+          <div class="sgModModeCol stagione">
+            <div class="sgModModeTitle">📅 Stagione dei Sogni (Campionato)</div>
+            <div class="sgModModeText">${esc(M.effects.stagione)}</div>
+          </div>
+          <div class="sgModModeCol arcade">
+            <div class="sgModModeTitle">🎮 Minigiochi Cabinato & Giochi Eroi</div>
+            <div class="sgModModeText">${esc(M.effects.arcade)}</div>
+          </div>
+        </div>
+      </div>`;
+      h += `<div class="big"><button type="button" data-close="1">◂ Torna indietro<small>${back ? "alla schermata precedente" : "alla Squadra dei Sogni"}</small></button></div>`;
+      body.innerHTML = h;
+      body.querySelectorAll(".sgModTabBtn").forEach((btn) => {
+        btn.onclick = () => {
+          curKey = btn.dataset.tab;
+          renderDetail();
+        };
+      });
+      const setBtn = body.querySelector("[data-set-mod]");
+      if (setBtn) {
+        setBtn.onclick = () => {
+          const r2 = load();
+          r2.modulo = curKey;
+          save(r2);
+          renderDetail();
+        };
+      }
+      body.querySelector("[data-close]").onclick = () => {
+        if (typeof back === "function") back();
+        else open();
+      };
+    }
+    renderDetail();
   }
 
   function bindModChips(body) {
@@ -650,6 +756,12 @@
           save(r);
           refreshTeam(body, r);
         }
+      };
+    });
+    body.querySelectorAll(".sgModDetailBtn").forEach((btn) => {
+      btn.onclick = () => {
+        const cur = btn.dataset.modDetail || (load().modulo) || "rombo";
+        openModDetail(cur, () => open());
       };
     });
   }
@@ -940,7 +1052,9 @@
       const r2 = load(), s2 = r2.season; if (!s2 || s2.day !== se.day) return stagione();
       record(s2, -1, opp, ga, gb);
       const others = s2.sched[s2.day].filter((p) => !p.includes(-1)).map(([a, b]) => { const g = simGoals(TEAMS[a].f, TEAMS[b].f); record(s2, a, b, g[0], g[1]); return `${TEAMS[a].name} ${g[0]}-${g[1]} ${TEAMS[b].name}`; });
-      s2.last = `<b>Giornata ${s2.day + 1}: Sogni ${ga}-${gb} ${esc(T.name)}</b>${isSim ? " (simulata)" : ""}. ${others.map(esc).join(" · ")}.`;
+      const mName = MODULI[r.modulo] ? MODULI[r.modulo].name : r.modulo;
+      const sin = modSintonia(r.modulo, team);
+      s2.last = `<b>Giornata ${s2.day + 1}: Sogni ${ga}-${gb} ${esc(T.name)}</b>${isSim ? ` (simulata · Modulo ${esc(mName)}${sin ? " ✨" : ""})` : ""}. ${others.map(esc).join(" · ")}.`;
       s2.day++; let prize = null;
       if (s2.day >= 7 && ranking(s2)[0] === -1) { r2.titles++; safe(() => window.addCoins(80), 0); const pool = CARDS.filter((c) => drop(c) && !r2.own.includes(c.id)), rare = pool.filter((c) => c.rar !== "c"); const pick = (rare.length ? rare : pool); if (pick.length) { prize = pick[Math.floor(Math.random() * pick.length)].id; r2.own.push(prize); } else safe(() => window.addCoins(100), 0); s2.last += " <b>Scudetto dei Sogni! +80 monete.</b>"; }
       r2.season = s2; save(r2);
@@ -949,8 +1063,19 @@
     };
     if (sim) {
       const sin = modSintonia(r.modulo, team);
-      const modAdv = sin ? 3 : 1;
-      const g = simGoals(forza(team) + intesa(team, r.modulo).n / 2.5 + modAdv, T.f);
+      let advOff = 0, advDef = 0;
+      if (sin) {
+        if (r.modulo === "tridente") advOff = 3.5;
+        else if (r.modulo === "catenaccio") advDef = 3.5;
+        else if (r.modulo === "fortezza") advDef = 4.2;
+        else if (r.modulo === "rombo") { advOff = 2.0; advDef = 2.0; }
+        else if (r.modulo === "quadrato") { advOff = 2.0; advDef = 2.0; }
+      } else {
+        advOff = 0.8; advDef = 0.8;
+      }
+      const myPower = forza(team) + intesa(team, r.modulo).n / 2.5 + advOff;
+      const oppPower = Math.max(20, T.f - advDef);
+      const g = simGoals(myPower, oppPower);
       return close(g[0], g[1], true);
     }
     launch(m, dress(m, T), `Stagione dei Sogni · giornata ${se.day + 1}/7 · ${engName(m)}`, team, T.f >= 72, (res) => { if (res.quit) return stagione(); close(res.a | 0, res.b | 0, false); }, stagione);
@@ -1045,9 +1170,40 @@
 .sgModChip.active{background:#7a5ad8;border-color:#ffd23f;color:#ffd23f;box-shadow:0 0 8px rgba(122,90,216,.5)}
 .sgModDesc{margin-top:6px;font-size:11.5px;line-height:1.4}
 .sgModTxt{margin:0 0 4px;color:#d8cde8}
+.sgModStatusRow{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:4px}
 .sgModSin{border-radius:6px;padding:3px 8px;font-size:10.5px;display:inline-block}
 .sgModSin.ok{background:rgba(122,216,122,.15);border:1px solid #7ad87a;color:#7ad87a}
 .sgModSin.warn{background:rgba(255,210,63,.1);border:1px solid rgba(255,210,63,.4);color:#ffd23f}
+.sgModDetailBtn{background:#2a1e48;border:1px solid #7c3aed;color:#d8b4fe;font:700 11px system-ui;padding:4px 10px;border-radius:6px;cursor:pointer;transition:all .15s}
+.sgModDetailBtn:hover{background:#7c3aed;color:#fff}
+.sgModDetailTabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin:8px 0;scrollbar-width:none}
+.sgModDetailTabs::-webkit-scrollbar{display:none}
+.sgModTabBtn{background:#1f1834;border:1px solid #4a3a6a;color:#c8b8ff;padding:6px 12px;border-radius:10px;font:700 12px system-ui;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.sgModTabBtn:hover{border-color:#ffd23f;color:#fff}
+.sgModTabBtn.active{background:#ffd23f;border-color:#ffd23f;color:#120e1e;font-weight:900;box-shadow:0 0 8px rgba(255,210,63,.4)}
+.sgModDetailCard{background:#181326;border:1px solid #4a3a6a;border-radius:14px;padding:12px;margin:8px 0}
+.sgModDetailHead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;border-bottom:1px solid #2d2248;padding-bottom:10px}
+.sgModDetailTitle{display:flex;align-items:center;gap:10px}
+.sgModDetailTitle .ic{font-size:32px;line-height:1}
+.sgModDetailTitle h3{margin:0;font:900 18px system-ui;color:#ffd23f}
+.sgModDetailTitle h3 small{font-size:12px;font-weight:600;color:#c8b8ff;margin-left:6px}
+.sgModDetailTitle p{margin:3px 0 0;font-size:12px;color:#d8cde8;line-height:1.35}
+.sgModActiveBadge{display:inline-block;padding:4px 10px;border-radius:8px;background:rgba(122,216,122,.2);border:1px solid #7ad87a;color:#7ad87a;font:800 11.5px system-ui;white-space:nowrap}
+.sgModSetBtn{background:#7c3aed;border:0;color:#fff;font:800 12px system-ui;padding:6px 12px;border-radius:8px;cursor:pointer;transition:transform .15s}
+.sgModSetBtn:active{transform:scale(.96)}
+.sgModSinBox{border-radius:10px;padding:8px 10px;margin:10px 0;font-size:12px;line-height:1.4}
+.sgModSinBox.ok{background:rgba(122,216,122,.12);border:1px solid rgba(122,216,122,.4);color:#e2fbe2}
+.sgModSinBox.warn{background:rgba(255,210,63,.1);border:1px solid rgba(255,210,63,.35);color:#fff2cc}
+.sgModSinHd{font-weight:900;font-size:12.5px;margin-bottom:2px}
+.sgModModesGrid{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px}
+@media (min-width:480px){.sgModModesGrid{grid-template-columns:1fr 1fr}}
+.sgModModeCol{background:#120c22;border:1px solid #3d2d60;border-radius:10px;padding:9px 11px}
+.sgModModeTitle{font:800 12px system-ui;color:#c8b8ff;margin-bottom:4px;display:flex;align-items:center;gap:4px}
+.sgModModeCol.arena .sgModModeTitle{color:#ffd23f}
+.sgModModeCol.torneo .sgModModeTitle{color:#38bdf8}
+.sgModModeCol.stagione .sgModModeTitle{color:#f472b6}
+.sgModModeCol.arcade .sgModModeTitle{color:#4ade80}
+.sgModModeText{font-size:11.5px;line-height:1.45;color:#e2daf0}
 .sgIntTag{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:800;margin-left:4px;vertical-align:middle}
 .sgIntTag.leg{background:#ffd23f;color:#120e1e;box-shadow:0 0 6px rgba(255,210,63,.5)}
 .sgIntTag.top{background:#7a5ad8;color:#fff}
@@ -1075,5 +1231,5 @@
   }
   // la Maglia dei Sogni nel guardaroba (si registra all'avvio, così resta anche dopo aver ricaricato la pagina)
   (function reg() { const A = window.__borgoApi; if (!A || !A.COSM) return setTimeout(reg, 200); if (!A.COSM.sg_maglia) A.COSM.sg_maglia = { kind: "shirt", label: "Maglia dei Sogni", val: "#7a5ad8", from: "Vinci il Torneo dei Sogni (Salone delle Saghe)" }; })();
-  window.__sogni = { SAGHE, BY, eff, name, port, _save: save, open, close: closeAll, _launch: launch, _tiers: tiers, CARDS, LINKS, SFIDE, TEAMS, FRASI, intesa, forza, sync, stagione, draft, stars: (id) => { XPC = load().xp; return starsOf(id); }, _load: load };
+  window.__sogni = { SAGHE, BY, eff, name, port, _save: save, open, close: closeAll, _launch: launch, _tiers: tiers, CARDS, LINKS, SFIDE, TEAMS, FRASI, intesa, forza, sync, stagione, draft, stars: (id) => { XPC = load().xp; return starsOf(id); }, _load: load, MODULI, modSintonia, openModDetail };
 })();
