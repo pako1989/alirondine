@@ -251,11 +251,27 @@
 @keyframes salFoil{0%{background-position:120% 0}100%{background-position:-120% 0}}
 .salOv .pbig{position:relative;width:min(260px,70vw);margin:12px auto 4px;border-radius:16px;overflow:hidden;border:3px solid #ffffff44;background:#0b1026}
 .salOv .pbig.gold{border-color:#ffd23f}.salOv .pbig canvas{width:100%;display:block;aspect-ratio:1}
-.salOv .pbig .no{position:absolute;left:8px;top:6px;font:900 12px sans-serif;color:#fff;text-shadow:0 1px 3px #000}
+.salOv .mapWrap{position:relative;margin:6px 0 14px;border-radius:16px;overflow:hidden;border:2px solid #38bdf866;background:#060d1a;box-shadow:0 6px 22px rgba(0,0,0,0.5)}
+.salOv .mapCanvas{width:100%;height:auto;display:block;cursor:pointer}
+.salOv .mapSearchBox{margin:8px 0 12px;position:relative}
+.salOv .mapSearch{width:100%;box-sizing:border-box;padding:10px 14px 10px 38px;border-radius:12px;background:#13213f;border:1.5px solid #38bdf888;color:#fff;font:700 13.5px "M PLUS Rounded 1c",sans-serif;outline:none}
+.salOv .mapSearch:focus{border-color:#ffd23f;box-shadow:0 0 10px rgba(255,210,63,0.3)}
+.salOv .mapSearchIcon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none}
+.salOv .terrGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:8px 0 12px}
+.salOv .terrBtn{padding:10px 11px;border-radius:12px;border:1.5px solid #ffffff2a;background:#16294a;color:#fff;text-align:left;cursor:pointer;transition:transform .12s,border-color .15s}
+.salOv .terrBtn:active{transform:scale(.97)}
+.salOv .terrBtn.on{border-color:var(--tcol,#38bdf8);background:linear-gradient(135deg,rgba(56,189,248,0.22),#16294a);box-shadow:0 0 14px rgba(56,189,248,0.25)}
+.salOv .terrBtn .te{font-size:22px;margin-bottom:3px}
+.salOv .terrBtn b{display:block;font-size:12.5px;line-height:1.2;color:#f1f5f9}
+.salOv .terrBtn span{font-size:11px;color:#94a3b8}
+.salOv .terrHeader{padding:12px 14px;border-radius:14px;background:#13213f;border-left:4px solid var(--tcol,#38bdf8);margin-bottom:12px;box-shadow:0 3px 10px rgba(0,0,0,0.3)}
+.salOv .terrHeader h3{margin:0 0 4px;font-size:17px;color:#ffd23f;display:flex;align-items:center;gap:8px}
+.salOv .terrHeader p{margin:0 0 6px;font-size:13px;color:#e2e8f0;line-height:1.4}
+.salOv .terrHeader em{display:block;font-size:11.5px;color:#93c5fd;font-style:italic}
 @media (max-width:360px){.salOv .grid{grid-template-columns:1fr 1fr;gap:8px}.salOv .prev{grid-template-columns:110px 1fr}.salOv .prev canvas{width:110px;height:110px}}`;
     document.head.appendChild(st);
   }
-  let OV = null, BACK = null; const BK = { sal: null, alb: null, gua: null, per: null, sg: null, cin: null }; // ogni schermata ricorda da dove si era entrati
+  let OV = null, BACK = null; const BK = { sal: null, alb: null, gua: null, per: null, sg: null, cin: null, map: null }; // ogni schermata ricorda da dove si era entrati
   function shell(title) { css(); close(); OV = document.createElement("div"); OV.className = "salOv"; OV.innerHTML = `<div class="wrap"><div class="bar"><h2>${title}</h2><button type="button" class="x" aria-label="Chiudi">✕</button></div><div class="body"></div></div>`; OV.querySelector(".x").onclick = () => { const b = BACK; close(); if (typeof b === "function") b(); }; document.body.appendChild(OV); return OV.querySelector(".body"); }
   function close() { if (OV) { OV.remove(); OV = null; } }
 
@@ -693,12 +709,321 @@
     const story = safe(() => api().storyEndings(), []); fe += story.filter((e) => e.found).length; te += story.length;
     return { n: list.length, run: st.filter(([, x]) => x.started && !x.finished).length, fin: st.filter(([, x]) => x.finished).length, fe, te };
   }
+
+  // ---------------------------------------------------------------- MAPPAMONDO DELLE SAGHE
+  const MAP_REGIONS = [
+    {
+      id: "riviera",
+      t: "Borgo Marino & Riviera",
+      e: "⚓",
+      color: "#38bdf8",
+      accent: "#0284c7",
+      x: 100, y: 75, r: 40,
+      desc: "Il porto vecchio, la spiaggia dei ciottoli, la Trattoria Moretti, i caruggi e i paesi arrampicati sulle scogliere liguri.",
+      quote: "«Il mare restituisce sempre quello che gli lanci con effetto.»",
+      sagas: ["cala", "borgostorto", "torneo", "campetto", "stagione", "lampioni", "colline", "montagna", "vallombra", "faro", "rotta", "campana", "carte"]
+    },
+    {
+      id: "epoche",
+      t: "Novecento & Epoche del Passato",
+      e: "🏛️",
+      color: "#f59e0b",
+      accent: "#b45309",
+      x: 290, y: 55, r: 38,
+      desc: "Dai ludi circensi dell'Antica Roma al 1427 dei capitani di ventura, fino al noir di Milano 1954 e al fischietto del 1998.",
+      quote: "«Cambiano le scarpe e i palloni di cuoio, ma il coraggio resta uguale.»",
+      sagas: ["roma", "capitani", "milano", "fischietto", "piramide", "tempo", "treno", "pugno", "kronenburg", "shogun"]
+    },
+    {
+      id: "mari",
+      t: "Mari Lontani, Isole & Frontiere",
+      e: "⛵",
+      color: "#06b6d4",
+      accent: "#0891b2",
+      x: 110, y: 170, r: 42,
+      desc: "Fortezze carcerarie, atolli spazzati dalle maree, baie corsare dell'Oceano di Melassa e fiumi selvaggi.",
+      quote: "«Nessun vento è contrario per chi sa tirare a giro controcorrente.»",
+      sagas: ["alcatraz", "vuota", "naufraghi", "galletta", "fiume", "abisso", "traversata", "cenere"]
+    },
+    {
+      id: "arcano",
+      t: "Regni Fantastici & Mitologia Arcana",
+      e: "👑",
+      color: "#a855f7",
+      accent: "#7e22ce",
+      x: 320, y: 165, r: 44,
+      desc: "Accademie di magia runica, casate feudali in guerra, cristalli elementali in frantumi e cancelli dimensionali.",
+      quote: "«Il destino del regno non si decide sulle pergamene, ma su un tiro all'incrocio al novantesimo.»",
+      sagas: ["sigilli", "regno", "trono", "ducati", "bilancia", "cronache", "cristalli", "muro", "vento", "dungeon", "ragnarok", "belovodia", "alchimia", "libro", "mondi", "westeros"]
+    },
+    {
+      id: "cosmo",
+      t: "Cyberpunk, Cosmo & Futuro",
+      e: "⚡",
+      color: "#10b981",
+      accent: "#059669",
+      x: 490, y: 65, r: 40,
+      desc: "Grattacieli al neon sotto la pioggia acida della Vektor, stazioni orbitanti e corrieri interplanetari dell'anno 3000.",
+      quote: "«Nell'iper-spazio l'effetto Magnus curva sia la luce che i gol.»",
+      sagas: ["circuiti", "spazio", "razzo", "officina", "replica", "titano", "futurama", "cittadella", "chrono", "phantom", "multiverso"]
+    },
+    {
+      id: "arene",
+      t: "Arene Mondiali & Duelli Anime",
+      e: "🌍",
+      color: "#ef4444",
+      accent: "#dc2626",
+      x: 485, y: 175, r: 44,
+      desc: "I grandi palcoscenici mondiali: Tokio, Rio, le gabbie di strada, i campi da liceo e i duelli cinematografici.",
+      quote: "«Quando lo stadio intero trattiene il fiato, senti solo il rimbalzo.»",
+      sagas: ["mondiale", "gala", "fortino", "quattordici", "spia", "gp", "figurine", "note", "bluelock", "tsubasa", "jojo", "emblem", "cavallo", "quartiere", "cavaliere", "grigio", "ombre", "detective", "mantello", "dopo", "doppio", "leggenda", "noir", "pirati"]
+    }
+  ];
+
+  let ACTIVE_MAP_REG = "riviera";
+  let MAP_SEARCH_QUERY = "";
+
+  function renderSagaCards(sagasList) {
+    const r = rec();
+    return sagasList.map(({ s, x }) => {
+      const isNew = !r.seen[s.id] && !x.started && NEWEST.includes(s.id);
+      const badge = x.finished ? `<span class="badge done">✓ CONCLUSA</span>` : x.started ? `<span class="badge run">IN CORSO</span>` : isNew ? `<span class="badge new">NUOVA</span>` : "";
+      const prog = x.pct != null && (x.started || x.finished) ? `<div class="pbar"><i style="width:${Math.max(4, x.pct)}%"></i></div>` : "";
+      return `<div class="card" data-id="${s.id}"><img alt="" loading="lazy" src="${cover(s)}"><div class="t"><span class="e">${s.e}</span>${esc(s.t)}</div><div class="info">${s.g.map((k) => `<span class="tag" style="background:${GEN[k][1]}">${GEN[k][0]}</span>`).join("")}<div style="display:flex;justify-content:space-between;align-items:center;gap:6px"><span>${x.finished ? "Conclusa" : x.started ? `Capitolo ${x.ch}${s.ch ? `/${s.ch}` : ""}` : "Da iniziare"}</span>${x.ends.length ? `<span>🏆 ${x.endsFound}/${x.ends.length}</span>` : ""}</div>${prog}</div>${badge ? `<div class="stamp">${badge}</div>` : ""}</div>`;
+    }).join("");
+  }
+
+  function initWorldMapCanvas(cv, activeReg, regions, sagaList) {
+    const g = cv.getContext("2d"); if (!g) return;
+    let animId = 0, f = 0;
+
+    const drawMap = () => {
+      if (!cv.isConnected) { cancelAnimationFrame(animId); return; }
+      f++;
+      const W = cv.width, H = cv.height;
+
+      const oceanGrad = g.createRadialGradient(W / 2, H / 2, 30, W / 2, H / 2, W / 1.7);
+      oceanGrad.addColorStop(0, "#0e1a38");
+      oceanGrad.addColorStop(1, "#070c1a");
+      g.fillStyle = oceanGrad;
+      g.fillRect(0, 0, W, H);
+
+      g.strokeStyle = "rgba(56, 189, 248, 0.08)";
+      g.lineWidth = 1;
+      for (let x = 30; x < W; x += 40) {
+        g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H); g.stroke();
+      }
+      for (let y = 20; y < H; y += 40) {
+        g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke();
+      }
+
+      g.strokeStyle = "rgba(148, 163, 184, 0.07)";
+      for (let i = 0; i < 8; i++) {
+        const wx = (i * 90 + f * 0.4) % (W + 60) - 30;
+        const wy = 30 + (i * 35) % (H - 50);
+        g.beginPath();
+        g.arc(wx, wy, 16, Math.PI * 0.2, Math.PI * 0.8);
+        g.stroke();
+      }
+
+      const bx = W - 38, by = 38;
+      g.save();
+      g.translate(bx, by);
+      g.rotate(f * 0.003);
+      g.strokeStyle = "rgba(255, 210, 63, 0.25)";
+      g.beginPath(); g.arc(0, 0, 24, 0, Math.PI * 2); g.stroke();
+      for (let a = 0; a < 4; a++) {
+        g.rotate(Math.PI / 2);
+        g.fillStyle = a === 0 ? "rgba(255, 77, 90, 0.7)" : "rgba(255, 210, 63, 0.4)";
+        g.beginPath(); g.moveTo(0, 0); g.lineTo(-4, -8); g.lineTo(0, -22); g.lineTo(4, -8); g.closePath(); g.fill();
+      }
+      g.restore();
+
+      g.strokeStyle = "rgba(255, 210, 63, 0.15)";
+      g.setLineDash([4, 6]);
+      g.beginPath();
+      g.moveTo(regions[0].x, regions[0].y);
+      g.lineTo(regions[1].x, regions[1].y);
+      g.lineTo(regions[4].x, regions[4].y);
+      g.lineTo(regions[5].x, regions[5].y);
+      g.lineTo(regions[3].x, regions[3].y);
+      g.lineTo(regions[2].x, regions[2].y);
+      g.closePath();
+      g.stroke();
+      g.setLineDash([]);
+
+      regions.forEach((reg) => {
+        const isAct = reg.id === activeReg.id;
+        const regSagas = sagaList.filter(({ s }) => reg.sagas.includes(s.id));
+        const finCount = regSagas.filter(({ x }) => x.finished).length;
+        const totCount = regSagas.length;
+
+        const rad = reg.r;
+        const glow = g.createRadialGradient(reg.x, reg.y, 4, reg.x, reg.y, rad + 12);
+        glow.addColorStop(0, reg.color + (isAct ? "66" : "25"));
+        glow.addColorStop(1, "transparent");
+        g.fillStyle = glow;
+        g.beginPath(); g.arc(reg.x, reg.y, rad + 12, 0, Math.PI * 2); g.fill();
+
+        g.fillStyle = isAct ? "#182a4d" : "#111c33";
+        g.strokeStyle = isAct ? reg.color : "rgba(255,255,255,0.2)";
+        g.lineWidth = isAct ? 2.5 : 1.5;
+        g.beginPath();
+        for (let a = 0; a < 8; a++) {
+          const ang = (a / 8) * Math.PI * 2;
+          const dist = rad * (0.85 + Math.sin(ang * 3 + reg.x) * 0.15);
+          const px = reg.x + Math.cos(ang) * dist;
+          const py = reg.y + Math.sin(ang) * dist;
+          if (a === 0) g.moveTo(px, py); else g.lineTo(px, py);
+        }
+        g.closePath();
+        g.fill();
+        g.stroke();
+
+        if (isAct) {
+          const pulse = (Math.sin(f / 12) + 1) * 3;
+          g.strokeStyle = reg.color;
+          g.lineWidth = 1.5;
+          g.beginPath(); g.arc(reg.x, reg.y, rad + 6 + pulse, 0, Math.PI * 2); g.stroke();
+        }
+
+        g.font = "20px serif";
+        g.textAlign = "center";
+        g.textBaseline = "middle";
+        g.fillText(reg.e, reg.x, reg.y - 7);
+
+        g.font = "bold 10px sans-serif";
+        const badgeTxt = `${finCount}/${totCount}`;
+        const tw = g.measureText(badgeTxt).width + 8;
+        g.fillStyle = finCount === totCount && totCount > 0 ? "#14532d" : "#0f172a";
+        g.strokeStyle = isAct ? "#ffd23f" : "rgba(255,255,255,0.3)";
+        g.lineWidth = 1;
+        g.beginPath();
+        if (g.roundRect) g.roundRect(reg.x - tw / 2, reg.y + 8, tw, 14, 4); else g.rect(reg.x - tw / 2, reg.y + 8, tw, 14);
+        g.fill(); g.stroke();
+
+        g.fillStyle = finCount === totCount && totCount > 0 ? "#4ade80" : "#fff";
+        g.fillText(badgeTxt, reg.x, reg.y + 15);
+
+        g.fillStyle = isAct ? "#ffd23f" : "#cbd5e1";
+        g.font = (isAct ? "bold 11px" : "10px") + " 'M PLUS Rounded 1c', sans-serif";
+        g.fillText(reg.t.split(" & ")[0].split(" · ")[0], reg.x, reg.y + rad + 14);
+      });
+
+      animId = requestAnimationFrame(drawMap);
+    };
+
+    drawMap();
+
+    cv.onclick = (e) => {
+      const rect = cv.getBoundingClientRect();
+      const scaleX = cv.width / rect.width;
+      const scaleY = cv.height / rect.height;
+      const mx = (e.clientX - rect.left) * scaleX;
+      const my = (e.clientY - rect.top) * scaleY;
+
+      for (const reg of regions) {
+        const dx = mx - reg.x, dy = my - reg.y;
+        if (Math.hypot(dx, dy) <= reg.r + 14) {
+          ACTIVE_MAP_REG = reg.id;
+          MAP_SEARCH_QUERY = "";
+          safe(() => window.sfx && window.sfx("kick"));
+          openMappamondo();
+          return;
+        }
+      }
+    };
+  }
+
+  function openMappamondo(back) {
+    if (back) BK.map = back; BACK = BK.map;
+    const body = shell("🗺️ Mappamondo delle Saghe");
+    const list = SAGAS.filter(available).map((s) => ({ s, x: state(s) }));
+    const tt = totals();
+
+    const getRegStats = (reg) => {
+      const regSagas = list.filter(({ s }) => reg.sagas.includes(s.id));
+      const fin = regSagas.filter(({ x }) => x.finished).length;
+      const run = regSagas.filter(({ x }) => x.started && !x.finished).length;
+      const tot = regSagas.length;
+      return { regSagas, fin, run, tot, pct: tot > 0 ? Math.round((fin / tot) * 100) : 0 };
+    };
+
+    const renderMappamondoContent = () => {
+      const activeReg = MAP_REGIONS.find((r) => r.id === ACTIVE_MAP_REG) || MAP_REGIONS[0];
+      const curStats = getRegStats(activeReg);
+
+      let html = `<p class="sum">${tt.n} saghe divise in 6 grandi territori ed epoche. Tocca una regione o cerca una storia.</p>`;
+
+      html += `<div class="mapWrap"><canvas class="mapCanvas" id="worldMapCv" width="600" height="240" title="Tocca un territorio sulla mappa"></canvas></div>`;
+
+      html += `<div class="mapSearchBox"><span class="mapSearchIcon">🔍</span><input type="text" class="mapSearch" id="mapSearchInput" placeholder="Cerca saga per nome, ambientazione o parola..." value="${esc(MAP_SEARCH_QUERY)}"></div>`;
+
+      html += `<div class="terrGrid">${MAP_REGIONS.map((reg) => {
+        const st = getRegStats(reg);
+        const isSel = reg.id === activeReg.id && !MAP_SEARCH_QUERY;
+        return `<button type="button" class="terrBtn${isSel ? " on" : ""}" data-reg="${reg.id}" style="--tcol:${reg.color}"><div class="te">${reg.e}</div><b>${esc(reg.t)}</b><span>${st.fin}/${st.tot} concluse · ${st.pct}%</span></button>`;
+      }).join("")}</div>`;
+
+      if (MAP_SEARCH_QUERY.trim()) {
+        const q = MAP_SEARCH_QUERY.trim().toLowerCase();
+        const searchMatches = list.filter(({ s }) => s.t.toLowerCase().includes(q) || (s.d && s.d.toLowerCase().includes(q)) || s.e.includes(q) || s.g.some((g) => g.toLowerCase().includes(q)));
+        html += `<div class="sec">Risultati ricerca (${searchMatches.length})</div>`;
+        if (searchMatches.length === 0) {
+          html += `<p class="sum" style="text-align:center;padding:16px 0;">Nessuna saga trovata per «${esc(MAP_SEARCH_QUERY)}».</p>`;
+        } else {
+          html += `<div class="grid">${renderSagaCards(searchMatches)}</div>`;
+        }
+      } else {
+        html += `<div class="terrHeader" style="--tcol:${activeReg.color}">
+          <h3><span>${activeReg.e}</span> ${esc(activeReg.t)} <span style="font-size:12px;font-weight:normal;color:#94a3b8;margin-left:auto;">${curStats.fin}/${curStats.tot} concluse</span></h3>
+          <p>${esc(activeReg.desc)}</p>
+          <em>${esc(activeReg.quote)}</em>
+          <div class="pbar" style="margin-top:8px"><i style="width:${Math.max(4, curStats.pct)}%;background:${activeReg.color}"></i></div>
+        </div>`;
+
+        html += `<div class="grid">${renderSagaCards(curStats.regSagas)}</div>`;
+      }
+
+      body.innerHTML = html;
+
+      const cv = body.querySelector("#worldMapCv");
+      if (cv) initWorldMapCanvas(cv, activeReg, MAP_REGIONS, list);
+
+      const searchInp = body.querySelector("#mapSearchInput");
+      if (searchInp) {
+        searchInp.oninput = (e) => {
+          MAP_SEARCH_QUERY = e.target.value;
+          renderMappamondoContent();
+          const inp = body.querySelector("#mapSearchInput");
+          if (inp) { inp.focus(); inp.selectionStart = inp.selectionEnd = inp.value.length; }
+        };
+      }
+
+      body.querySelectorAll("[data-reg]").forEach((btn) => {
+        btn.onclick = () => {
+          ACTIVE_MAP_REG = btn.dataset.reg;
+          MAP_SEARCH_QUERY = "";
+          safe(() => window.sfx && window.sfx("kick"));
+          renderMappamondoContent();
+        };
+      });
+
+      body.querySelectorAll(".card").forEach((c) => {
+        c.onclick = () => detail(SAGAS.find((s) => s.id === c.dataset.id));
+      });
+    };
+
+    renderMappamondoContent();
+  }
+
   function openSalone(back) {
     if (back) BK.sal = back; BACK = BK.sal; const body = shell("🏛️ Salone delle Saghe"), r = rec(), tt = totals();
     const list = SAGAS.filter(available).map((s) => ({ s, x: state(s) }));
     const lastS = list.find((o) => o.s.id === r.last);
     let html = `<p class="sum">${tt.n} saghe · ${tt.run} in corso · ${tt.fin} concluse · finali trovati ${tt.fe}/${tt.te}</p>`;
     if (lastS) html += `<div class="cont" data-id="${lastS.s.id}"><img alt="" src="${cover(lastS.s)}"><div><b>▸ Continua: ${esc(lastS.s.t)}</b>${lastS.x.finished ? "Conclusa · rigioca o cerca gli altri finali" : `Capitolo ${lastS.x.ch}${lastS.s.ch ? ` di ${lastS.s.ch}` : ""}`}</div></div>`;
+    html += `<div class="big"><button type="button" data-go="mappa" style="border:2px solid #38bdf8;background:linear-gradient(135deg,#1b3252,#0f1f38)">🗺️ Mappamondo delle Saghe<small>Esplora territori, mari ed epoche di ogni avventura</small></button></div>`;
     if (window.__carteDecks) html += `<div class="big"><button type="button" data-go="carte">🎴 Carte del Destino<small>Mini-storie a mazzi · pesca, vivi, rigioca</small></button></div>`;
     if (window.__bar) html += `<div class="big"><button type="button" data-go="bar">🍺 Il Bar del Borgo<small>Gestione leggera · servi, ascolta gli ospiti, migliora il locale</small></button></div>`;
     html += `<div class="big"><button type="button" data-go="album">🏆 Album dei finali<small>${tt.fe}/${tt.te} timbri</small></button><button type="button" data-go="guarda">👕 Guardaroba<small>Prova e indossa ciò che hai sbloccato</small></button></div>`;
@@ -718,6 +1043,7 @@
     body.querySelectorAll("[data-st]").forEach((b) => (b.onclick = () => { FILT.st = b.dataset.st; openSalone(); }));
     body.querySelectorAll("[data-g]").forEach((b) => (b.onclick = () => { FILT.g = b.dataset.g; openSalone(); }));
     body.querySelectorAll(".card,.cont").forEach((b) => (b.onclick = () => detail(SAGAS.find((s) => s.id === b.dataset.id))));
+    const mapb = body.querySelector('[data-go="mappa"]'); if (mapb) mapb.onclick = () => openMappamondo(() => openSalone());
     const brb = body.querySelector('[data-go="bar"]'); if (brb) brb.onclick = () => { close(); window.__bar.open(() => openSalone()); };
     const cdb = body.querySelector('[data-go="carte"]'); if (cdb) cdb.onclick = () => { close(); window.__carteDecks.openHub(() => openSalone()); };
     body.querySelector('[data-go="album"]').onclick = () => openAlbum(() => openSalone());
@@ -899,6 +1225,7 @@
 
   window.__salone = {
     open: (back) => openSalone(back), album: (back) => openAlbum(back), diario: (back) => openDiario(back), diarioStato: () => safe(() => diarioData().tot, 0), salaGiochi: (back) => openSalaGiochi(back), machine: (id) => MACHINES.find((m) => m.id === id) || null, heroLook: () => heroLook(), cineteca: (back) => openCineteca(back), guardaroba: (back) => openGuardaroba(back), close, personaggi: (back) => openPersonaggi(back), personaggiStato: () => safe(() => perTotals(), null),
+    mappamondo: (back) => openMappamondo(back),
     summary: () => safe(() => { const t = totals(), A = api(), C = (A && A.COSM) || {}; return Object.assign(t, { cosOwned: safe(() => A.cosOwned().length, 0), cosTot: Object.keys(C).length }); }, { n: 0, run: 0, fin: 0, fe: 0, te: 0, cosOwned: 0, cosTot: 0 }),
     SAGAS,
     // ultima saga giocata, per «Riprendi» nella home
