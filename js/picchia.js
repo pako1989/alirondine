@@ -30,7 +30,7 @@
   function mkF(card, side, o) {
     o = o || {}; const e = safe(() => S().eff(card), card), lv = o.lv || 0, m = 1 + lv * 0.04 + (o.m || 0), tr = trOf(e);
     const hpMax = Math.round((92 + e.df * 1.05) * m * (o.hpm || 1));
-    return { id: card.id, n: name(card.id), saga: card.saga || "", role: SPEC[card.role] ? card.role : { at: "A", te: "C", df: "D" }[tr], tr, col: SAGCOL(card), side, x: side ? 280 : 100, y: 0, vy: 0, dir: side ? -1 : 1, hp: hpMax, hpMax, meter: 0, st: "idle", t: 0, atk: null, hit: false, stun: 0, kbv: 0, dmgM: (0.7 + e.at / 100) * m, spd: 1.5 + e.te / 130, ai: o.ai || 0, combo: 0, hits: 0, chain: 0, counter: 0, rounds: 0, flash: 0, inv: 0, ghost: 0, ice: 0, sg: safe(() => window.__supers.of(card.id), { fx: "fire", name: "Super", col: "#ffb347", saga: "" }), boss: !!o.boss, dt: 0, dd: 0, pd: 0, pu: 0 };
+    return { id: card.id, n: name(card.id), saga: card.saga || "", role: SPEC[card.role] ? card.role : { at: "A", te: "C", df: "D" }[tr], tr, col: SAGCOL(card), side, x: side ? 280 : 100, y: 0, vy: 0, dir: side ? -1 : 1, hp: hpMax, hpMax, meter: 0, st: "idle", t: 0, atk: null, hit: false, stun: 0, kbv: 0, dmgM: (0.7 + e.at / 100) * m, spd: 1.5 + e.te / 130, ai: o.ai || 0, combo: 0, hits: 0, chain: 0, counter: 0, rounds: 0, flash: 0, inv: 0, ghost: 0, ice: 0, sg: safe(() => window.__supers.of(card.id), { fx: "fire", name: "Super", col: "#ffb347", saga: "" }), boss: !!o.boss, dt: 0, dd: 0, pd: 0, pu: 0, parry: 0, pblk: 0 };
   }
   const grounded = (f) => f.y <= 0;
   const busy = (f) => f.st === "atk" || f.st === "hit" || f.st === "ko" || f.st === "spec" || f.st === "down";
@@ -51,7 +51,19 @@
     let v = base * att.dmgM * (BEATS[att.tr] === def.tr ? 1.15 : BEATS[def.tr] === att.tr ? 0.9 : 1);
     if (def.counter > 0 && !opts.unblock) { def.counter = 0; def.meter = Math.min(100, def.meter + 25); fx(def.x, def.y + 40, "PARATA!", "#7ad87a"); counterHit(def, att); return 0; }
     const blk = def.st === "block" && def.dir === -att.dir && !opts.unblock;
-    if (blk) { v *= 0.2; def.x += att.dir * 3; def.meter = Math.min(100, def.meter + v * 0.5); fx(def.x, def.y + 44, "BLOCCO", "#9ad8ff"); G.stop = 2; spark(def.x + att.dir * -8, def.y + 44, "#9ad8ff", 5); G.shake = Math.max(G.shake, 1.5); }
+    if (blk) {
+      if (def.parry > 0) {
+        def.parry = 0;
+        def.meter = Math.min(100, def.meter + 25);
+        fx(def.x, def.y + 44, "✨ PARRY PERFETTO!", "#ffd23f");
+        spark(def.x + att.dir * -8, def.y + 44, "#ffd23f", 12, true);
+        G.stop = 10; G.shake = Math.max(G.shake, 6);
+        att.st = "hit"; att.t = 0; att.stun = 36; att.atk = null; att.kbv = -att.dir * 3;
+        G.log = `✨ PARRY PERFETTO di ${def.n}!`;
+        return 0;
+      }
+      v *= 0.2; def.x += att.dir * 3; def.meter = Math.min(100, def.meter + v * 0.5); fx(def.x, def.y + 44, "BLOCCO", "#9ad8ff"); G.stop = 2; spark(def.x + att.dir * -8, def.y + 44, "#9ad8ff", 5); G.shake = Math.max(G.shake, 1.5);
+    }
     else {
       def.hits++; v *= Math.max(0.45, 1 - 0.12 * (def.hits - 1)); def.st = "hit"; def.t = 0; def.stun = stun; def.kbv = att.dir * kb; def.atk = null; att.combo = def.hits; if (opts.freeze) { def.stun = opts.freeze; def.kbv = 0; def.ice = opts.freeze; fx(def.x, def.y + 60, "GELATO!", "#9ad8ff"); }
       if (opts.kd || opts.launch) { def.kd = true; def.vy = opts.launch || 6; def.y = Math.max(def.y, 0.1); }
@@ -66,7 +78,7 @@
   function fx(x, y, t, c) { if (G && !G.fast) G.fxs.push({ x, y, t, c, l: 30 }); }
   // un frame di un combattente (inp = ingressi: l r u d a b s x t h, m = intensità del joystick)
   function tickF(f, o, inp) {
-    if (f.flash > 0) f.flash--; if (f.counter > 0) f.counter--; if (f.inv > 0) f.inv--;
+    if (f.flash > 0) f.flash--; if (f.counter > 0) f.counter--; if (f.inv > 0) f.inv--; if (f.parry > 0) f.parry--;
     // fisica
     if (f.y > 0 || f.vy) { f.y += f.vy; f.vy -= 0.55; if (f.y <= 0) { f.y = 0; f.vy = 0; if (f.st === "jump") f.st = "idle"; } }
     if (f.st === "ko") { f.t++; f.x += f.kbv; f.kbv *= 0.9; clamp(f); return; }
@@ -97,13 +109,16 @@
       if (f.t >= 13) f.st = "idle"; clamp(f); return;
     }
     // scelte
+    const isDown = !!inp.d;
+    if (isDown && !f.pblk) { f.parry = 7; }
+    f.pblk = isDown;
     if (f.st === "block" && !inp.d) f.st = "idle";
     const dr = inp.r ? 1 : inp.l ? -1 : 0; if (dr && dr !== f.pd) { if (f.dt > 0 && f.dd === dr) { f.dtrig = 1; f.dt = 0; } else { f.dt = 14; f.dd = dr; } } f.pd = dr; if (f.dt > 0) f.dt--;
     if (grounded(f) && (f.st === "idle" || f.st === "walk" || f.st === "block")) {
       f.dir = o.x >= f.x ? 1 : -1;
       if (inp.x) return startSpec(f, true); if (inp.s) return startSpec(f, false);
       if (inp.t) return startAtk(f, "t"); if (inp.d && inp.a) return startAtk(f, "u"); if (inp.a) return startAtk(f, "a"); if (inp.b) return startAtk(f, "b");
-      if (f.dtrig || inp.h) { const ddr = f.dtrig ? dr || f.dd : inp.r ? 1 : inp.l ? -1 : f.dir; f.dtrig = 0; f.st = "dash"; f.t = 0; f.dv = ddr * 6.8; if (ddr !== f.dir) f.inv = 8; return; }
+      if (f.dtrig || inp.h) { const ddr = f.dtrig ? dr || f.dd : inp.r ? 1 : inp.l ? -1 : f.dir; f.dtrig = 0; f.st = "dash"; f.t = 0; f.dv = ddr * 6.8; f.inv = 14; fx(f.x, f.y + 46, "⚡ SCHIVATA!", "#c084fc"); return; }
       if (inp.d) { f.st = "block"; } else { f.st = inp.l || inp.r ? "walk" : "idle"; f.x += dr * f.spd * (inp.m ? clampN(inp.m, 0.55, 1) : 1); }
       if (inp.u && !f.pu) { f.vy = 9; f.st = "jump"; f.y = 0.1; f.jx = dr; }
     } else if (f.st === "jump") { f.x += dr * f.spd * 0.85; if ((inp.a || inp.b) && !f.airHit) { f.airHit = 1; f.st = "atk"; f.atk = Object.assign({ k: inp.b ? "j" : "a" }, inp.b ? ATK.j : ATK.a, inp.b ? {} : { su: 2, rc: 10 }); f.t = 0; f.hit = false; f.chain = 0; } }
@@ -361,7 +376,7 @@
   function press(k, on) { if (!G) return; if (EDGE.includes(k) || k === "h") { if (on) G.edge[k] = 1; } else G.inp[k] = on ? 1 : 0; }
   function fightUI(cfg) {
     const body = shell(cfg.title || "🥊 Duello dei Sogni"); begin(cfg);
-    body.innerHTML = `<div class="pcStage"><canvas width="${W * SS}" height="${H * SS}"></canvas><button type="button" class="pcX" aria-label="Esci">✕</button></div><div class="pcCtl"><div class="stkSlot"></div><div class="g ab"><button data-k="a">👊<br>Pugno</button><button data-k="b">🦵<br>Calcio</button><button data-k="t" class="pr">🤼<br>Presa</button><button data-k="d">🛡️<br>Para</button><button data-k="s" class="sp">✦ Speciale<small>${esc(SPEC[G.p.role][0])}</small></button><button data-k="x" class="su">★ SUPER<small>${esc(G.p.sg.name)}</small></button></div></div><p class="sum" style="font-size:11px;opacity:.65;margin-top:6px">Joystick: ◀▶ muovi (doppio tocco = scatto), ▲ salta, ▼ para. ▼ + Pugno = anti-aereo che lancia in aria. Pugno ×3 = catena; dopo un colpo a segno puoi annullare in Calcio o Speciale. Presa buca la parata. Super: ogni personaggio ha quello della sua saga (fulmine, ghiaccio, teletrasporto, trapano, tornado...). Combo: più colpi = meno danni. Tasti: frecce/WASD, J pugno, K calcio, U presa, L speciale, ; super, I scatto.</p>`;
+    body.innerHTML = `<div class="pcStage"><canvas width="${W * SS}" height="${H * SS}"></canvas><button type="button" class="pcX" aria-label="Esci">✕</button></div><div class="pcCtl"><div class="stkSlot"></div><div class="g ab"><button data-k="a">👊<br>Pugno</button><button data-k="b">🦵<br>Calcio</button><button data-k="t" class="pr">🤼<br>Presa</button><button data-k="d">🛡️<br>Para/Parry</button><button data-k="s" class="sp">✦ Speciale<small>${esc(SPEC[G.p.role][0])}</small></button><button data-k="x" class="su">★ SUPER<small>${esc(G.p.sg.name)}</small></button></div></div><p class="sum" style="font-size:11px;opacity:.65;margin-top:6px">Joystick: ◀▶ muovi (doppio tocco = scatto/schivata ⚡), ▲ salta, ▼ para. ✨ PARRY PERFETTO: premi ▼ un istante prima dell'impatto per azzerare il danno, stordire il rivale e caricare la Super! ▼ + Pugno = anti-aereo. Pugno ×3 = catena; dopo un colpo a segno puoi annullare in Calcio o Speciale. Presa buca la parata. Super di saga. Tasti: frecce/WASD, J pugno, K calcio, U presa, L speciale, ; super, I schivata.</p>`;
     const cv = body.querySelector("canvas"), g = cv.getContext("2d"), slot = body.querySelector(".stkSlot");
     if (window.__stick) { G.stk = window.__stick.make({ size: 122 }); slot.appendChild(G.stk.el); }
     body.querySelectorAll("[data-k]").forEach((b) => { const k = b.dataset.k, up = () => { press(k, false); b.classList.remove("on"); }; b.addEventListener("pointerdown", (e) => { e.preventDefault(); b.setPointerCapture && safe(() => b.setPointerCapture(e.pointerId), 0); press(k, true); b.classList.add("on"); }); b.addEventListener("pointerup", up); b.addEventListener("pointercancel", up); b.addEventListener("pointerleave", up); });
