@@ -21,7 +21,13 @@
   const ITEMN = { fire: "Missile di Fuoco", thunder: "Fulmine", curve: "Presa perfetta", zig: "Zig-zag", spiral: "Tornado", vanish: "Fantasma", ice: "Gelata", change: "Scambio", drill: "Trivella" };
   const ITEMD = { fire: "colpisce chi hai davanti", thunder: "frena tutti i rivali davanti", curve: "curve senza sbandare + turbo", zig: "turbo e niente ostacoli", spiral: "lascia un tornado dietro", vanish: "attraversi tutto per un po'", ice: "congela chi hai davanti", change: "scambi posto con chi hai davanti", drill: "scudo + turbo" };
   const ITEMI = { fire: "🔥", thunder: "⚡", curve: "🎯", zig: "〰️", spiral: "🌪️", vanish: "👻", ice: "🧊", change: "🔄", drill: "🔩" };
-  const MODES = { classic: ["🏁 Classica", "8 piloti, squadre, punti: la gara di sempre"], time: ["⏱️ Giro lanciato", "da solo contro il cronometro: batti il tuo record"], duel: ["⚔️ Testa a testa", "tu contro un solo rivale forte: chi arriva prima vince"], caos: ["🎲 Caos", "scatole 🎁 ovunque e si ricaricano subito: vince chi usa meglio gli oggetti"] };
+  const MODES = {
+    classic: ["👥 Gara a Squadre", "8 piloti in squadre (3 tuoi + 3 rivali + 2 indipendenti), i punti si sommano"],
+    solo: ["🏆 Tutti contro Tutti", "8 piloti singoli: sei da solo contro 7 rivali, ognuno corre per sé e vince chi arriva 1°"],
+    time: ["⏱️ Giro lanciato", "da solo contro il cronometro: batti il tuo record"],
+    duel: ["⚔️ Testa a testa", "tu contro un solo rivale forte: chi arriva prima vince"],
+    caos: ["🎲 Caos", "scatole 🎁 ovunque e si ricaricano subito: vince chi usa meglio gli oggetti"]
+  };
   const KARTS = {
     classic: {
       id: "classic",
@@ -501,8 +507,8 @@
   }
   function menu(back) {
     if (back) BACK = back; const body = shell("🏁 Gran Premio dei Sogni"), r = load(), team = myTeam();
-    const selK = KARTS[r.kart] || KARTS.classic;
-    body.innerHTML = `<p class="sum">Corsa a squadre con i personaggi delle saghe: <b>guidi uno dei tuoi tre piloti</b>, gli altri due corrono da soli e i punti di tutti e tre si sommano contro la squadra rivale. Scia, turbo, abilità di ruolo e veicoli differenziati.</p><div class="sec">La tua squadra (dalla Squadra dei Sogni)</div><p class="sum">${team.map((c) => `<b>${esc(name(c.id))}</b> (${esc(ABIL[rlOf(c)][0])})`).join(" · ")}</p><div class="sec">Scegli il tuo Veicolo · Attivo: ${esc(selK.name)}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0">${Object.values(KARTS).map((k) => `<button type="button" class="one" data-pick-kart="${k.id}" style="margin:0;min-height:80px;border:2px solid ${k.id === r.kart ? '#ffd23f' : '#4a3a6a'};background:${k.id === r.kart ? '#3a2254' : '#221a36'}"><div style="display:flex;justify-content:space-between;align-items:center"><b>${k.name}</b><span style="font-size:9px;font-weight:900;padding:2px 5px;border-radius:4px;background:#000;color:${k.id === r.kart ? '#ffd23f' : '#bbb'}">${k.tag}</span></div><small style="margin-top:3px;color:#c8b8ff">⚡ ${esc(k.perk)}</small><small style="color:#aaa;font-size:9px;margin-top:2px">Vel: ${k.stats.vel} · Scat: ${k.stats.acc} · Manov: ${k.stats.man} · Resist: ${k.stats.res}</small></button>`).join("")}</div><button type="button" class="one" data-kart="1" style="display:none">Cambia kart</button><div class="sec">Opzioni e Piste</div><button type="button" class="one" data-mode="1">${MODES[r.mode][0]}<small>${MODES[r.mode][1]}. Tocca per cambiare (vale per le gare singole, il campionato è sempre classico)</small></button><button type="button" class="one" data-view="1">👁️ Visuale: ${r.view === "rear" ? "da dietro (joystick)" : "dall'alto"}<small>tocca per cambiare: da dietro oppure dall'alto (la classica)</small></button><button type="button" class="one" data-fun="1">🎁 Oggetti, ostacoli e scorciatoie: ${r.fun ? "SÌ" : "NO"}<small>oggetti della tua saga, ostacoli per pista, scorciatoie (una sempre aperta, una con leva). Tocca per cambiare</small></button><button type="button" class="one" data-go="champ">🏆 Campionato dei Sogni<small>3 gare su 3 piste · ${r.champ ? "vinto " + r.champ + " volte" : "mai vinto"} · premi in monete</small></button>${TRACKS.map((t, i) => `<button type="button" class="one" data-t="${i}">🏁 ${esc(t.n)}<small>gara singola · 2 giri${r.best[t.id] ? " · record posto " + r.best[t.id] : ""}</small></button>`).join("")}`;
+    const selK = KARTS[r.kart] || KARTS.classic, isSolo = r.mode === "solo";
+    body.innerHTML = `<p class="sum">${isSolo ? "<b>Corsa Individuale (Tutti contro Tutti)</b>: sei da solo in pista contro 7 piloti rivali agguerriti! Nessun compagno, ognuno per sé: vince chi taglia per primo il traguardo." : "<b>Corsa a squadre dei Sogni</b>: guidi il tuo pilota, due compagni corrono con te e i punti di squadra si sommano contro i rivali."} Scia, turbo, abilità e veicoli differenziati.</p><div class="sec">${isSolo ? "Il tuo Pilota" : "La tua squadra (dalla Squadra dei Sogni)"}</div><p class="sum">${isSolo ? `<b>${esc(name(team[0].id))}</b> (${esc(ABIL[rlOf(team[0])][0])}) · Pilota Titolare` : team.map((c) => `<b>${esc(name(c.id))}</b> (${esc(ABIL[rlOf(c)][0])})`).join(" · ")}</p><div class="sec">Scegli il tuo Veicolo · Attivo: ${esc(selK.name)}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0">${Object.values(KARTS).map((k) => `<button type="button" class="one" data-pick-kart="${k.id}" style="margin:0;min-height:80px;border:2px solid ${k.id === r.kart ? '#ffd23f' : '#4a3a6a'};background:${k.id === r.kart ? '#3a2254' : '#221a36'}"><div style="display:flex;justify-content:space-between;align-items:center"><b>${k.name}</b><span style="font-size:9px;font-weight:900;padding:2px 5px;border-radius:4px;background:#000;color:${k.id === r.kart ? '#ffd23f' : '#bbb'}">${k.tag}</span></div><small style="margin-top:3px;color:#c8b8ff">⚡ ${esc(k.perk)}</small><small style="color:#aaa;font-size:9px;margin-top:2px">Vel: ${k.stats.vel} · Scat: ${k.stats.acc} · Manov: ${k.stats.man} · Resist: ${k.stats.res}</small></button>`).join("")}</div><button type="button" class="one" data-kart="1" style="display:none">Cambia kart</button><div class="sec">Modalità di Gara e Piste</div><button type="button" class="one" data-mode="1">${MODES[r.mode][0]}<small>${MODES[r.mode][1]}. Tocca per cambiare modalità</small></button><button type="button" class="one" data-view="1">👁️ Visuale: ${r.view === "rear" ? "da dietro (joystick)" : "dall'alto"}<small>tocca per cambiare: da dietro oppure dall'alto (la classica)</small></button><button type="button" class="one" data-fun="1">🎁 Oggetti, ostacoli e scorciatoie: ${r.fun ? "SÌ" : "NO"}<small>oggetti della tua saga, ostacoli per pista, scorciatoie (una sempre aperta, una con leva). Tocca per cambiare</small></button><button type="button" class="one" data-go="champ">🏆 Campionato dei Sogni<small>3 gare su 3 piste · ${r.champ ? "vinto " + r.champ + " volte" : "mai vinto"} · premi in monete</small></button>${TRACKS.map((t, i) => `<button type="button" class="one" data-t="${i}">🏁 ${esc(t.n)}<small>${isSolo ? "gara individuale (tutti contro tutti)" : "gara singola"} · 2 giri${r.best[t.id] ? " · record posto " + r.best[t.id] : ""}</small></button>`).join("")}`;
     body.querySelectorAll('[data-pick-kart]').forEach((b) => {
       b.onclick = () => { const x = load(); x.kart = b.dataset.pickKart; save(x); menu(); };
     });
@@ -520,8 +526,22 @@
     const userKart = load().kart;
     if (mode === "time") rac.push(mk(me[0], 0, 0, { human: true, m: 0.02, ai: 3, kart: userKart }));
     else if (mode === "duel") { rac.push(mk(me[0], 0, 0, { human: true, m: 0.02, ai: 3, kart: userKart })); rac.push(mk(rv[0], 1, 0, { ai: 4, m: 0.02 })); }
-    else { me.forEach((c, i) => rac.push(mk(c, 0, i, { human: i === 0, m: 0.02, ai: 3, kart: userKart })));
-    rv.forEach((c, i) => rac.push(mk(c, i < 3 ? 1 : 2, i, { ai: lvl, m: (lvl - 3) * 0.035 }))); }
+    else if (mode === "solo") {
+      rac.push(mk(me[0], 0, 0, { human: true, m: 0.02, ai: 3, kart: userKart }));
+      const allCards = S().CARDS, used = { [me[0].id]: 1 };
+      const rivalCols = ["#e63946", "#f4a261", "#2a9d8f", "#e76f51", "#9d4edd", "#48cae4", "#52b788"];
+      for (let i = 0; i < 7; i++) {
+        let c; for (let k = 0; k < 30; k++) { c = allCards[Math.floor(rand() * allCards.length)]; if (!used[c.id]) break; }
+        used[c.id] = 1;
+        const rk = mk(c, i + 1, i + 1, { ai: lvl + (i < 2 ? 1 : 0), m: (lvl - 2.5) * 0.03 });
+        rk.col = rivalCols[i % rivalCols.length];
+        rac.push(rk);
+      }
+    }
+    else {
+      me.forEach((c, i) => rac.push(mk(c, 0, i, { human: i === 0, m: 0.02, ai: 3, kart: userKart })));
+      rv.forEach((c, i) => rac.push(mk(c, i < 3 ? 1 : 2, i, { ai: lvl, m: (lvl - 3) * 0.035 })));
+    }
     return { track: T, racers: rac, seed: Math.floor(rand() * 1e6), mode: mode || "classic" };
   }
   function race(ti, lvl, st) {
@@ -529,10 +549,12 @@
   }
   function champ(n, tot, st) { race(n, 1 + n, { n, tot: st.tot || tot || 0, pts: st.pts || 0 }); }
   function results(G, ti, lvl, st) {
-    const body = shell("🏁 Risultati"), order = G.order, tp = G.pts[0] || 0, rp = G.pts[1] || 0, md = G.cfg.mode || "classic", win = md === "duel" ? G.myPos === 1 : tp > rp, a = load(), L = [];
+    const body = shell("🏁 Risultati"), order = G.order, tp = G.pts[0] || 0, rp = G.pts[1] || 0, md = G.cfg.mode || "classic", win = (md === "duel" || md === "solo") ? G.myPos === 1 : tp > rp, a = load(), L = [];
     const nm = ["Tua squadra", "Squadra rivale", "Indipendenti"];
-    body.innerHTML = `<div class="crRes"><h3>${md === "time" ? "⏱️ " + (G.me.finT / 60).toFixed(1) + " s" : G.myPos + "° posto"}</h3>${md === "time" ? "" : md === "duel" ? `<p class="sum">${win ? "🏅 Testa a testa vinto" : "Il rivale ti ha battuto"}</p>` : `<p class="sum">Squadra: <b>${tp}</b> punti contro <b>${rp}</b> dei rivali ${win ? "· 🏅 gara di squadra vinta" : ""}</p>`}</div><table class="crTab">${order.map((r, i) => `<tr class="${r.human ? "me" : ""}"><td>${i + 1}°</td><td>${esc(r.n)}</td><td style="color:${r.col}">${nm[r.team]}</td><td>${PTS[i] || 0} pt</td></tr>`).join("")}</table>`;
-    let coins = Math.max(0, 14 - G.myPos * 2) + (win ? 12 : 0);
+    const podio = G.myPos === 1 ? "🥇 1° Posto! VITTORIA ASSOLUTA!" : G.myPos === 2 ? "🥈 2° Posto! Grande podio!" : G.myPos === 3 ? "🥉 3° Posto! Sei a podio!" : G.myPos + "° posto";
+    const sub = md === "time" ? "" : md === "solo" ? `<p class="sum">${G.myPos === 1 ? "🏆 Trionfo in Corsa Individuale! Hai sbaragliato tutti i 7 avversari!" : G.myPos <= 3 ? "Gara individuale (Tutti contro tutti): podio conquistato!" : "Gara individuale (Tutti contro tutti): ritenta per salire sul podio!"}</p>` : md === "duel" ? `<p class="sum">${win ? "🏅 Testa a testa vinto" : "Il rivale ti ha battuto"}</p>` : `<p class="sum">Squadra: <b>${tp}</b> punti contro <b>${rp}</b> dei rivali ${win ? "· 🏅 gara di squadra vinta" : ""}</p>`;
+    body.innerHTML = `<div class="crRes"><h3>${md === "time" ? "⏱️ " + (G.me.finT / 60).toFixed(1) + " s" : podio}</h3>${sub}</div><table class="crTab">${order.map((r, i) => `<tr class="${r.human ? "me" : ""}"><td>${i + 1}°</td><td>${esc(r.n)}</td><td style="color:${r.col}">${md === "solo" ? (r.human ? "TU" : (S().SAGHE[r.saga] ? S().SAGHE[r.saga][1] : "Rivale")) : (nm[r.team] || "Rivale")}</td><td>${PTS[i] || 0} pt</td></tr>`).join("")}</table>`;
+    let coins = md === "solo" ? (G.myPos === 1 ? 30 : G.myPos === 2 ? 22 : G.myPos === 3 ? 16 : Math.max(2, 14 - G.myPos * 2)) : Math.max(0, 14 - G.myPos * 2) + (win ? 12 : 0);
     if (md === "time") { const sec = +(G.me.finT / 60).toFixed(1), old = a.rec[TRACKS[ti].id], nr = !old || sec < old; if (nr) a.rec[TRACKS[ti].id] = sec; coins = nr ? 10 : 2; L.push(`Record della pista: ${Math.min(old || sec, sec)} s${nr ? " · 🏅 nuovo record!" : ""}`); } safe(() => window.addCoins(coins), 0); L.push(`+${coins} monete.`);
     const T = TRACKS[ti]; if (!a.best[T.id] || G.myPos < a.best[T.id]) a.best[T.id] = G.myPos;
     let html = L.map((l) => `<p class="sum" style="text-align:center">${l}</p>`).join("");
