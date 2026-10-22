@@ -389,9 +389,73 @@
     { m: "duello", saga: "campetto", opp: { name: "La Nazionale dei Sogni", color: "#e8e8f0", style: "pressing", players: [{ name: "Il Barone", pow: 14 }, { name: "Gelo", pow: 12 }], keeper: { name: "Il Muro dei Sogni", pow: 16 }, ace: { name: "Il Barone", special: "Fuoco del Nord" } } },
     { m: "atb", saga: "cronache", opp: null },
   ];
+  // ---------------------------------------------------------------- moduli tattici
+  const MODULI = {
+    rombo: {
+      id: "rombo",
+      name: "Rombo 1-2-1",
+      icon: "🔶",
+      short: "1D · 2C · 1A",
+      desc: "Fraseggio corto e tecnica sopraffina: +1 lanterna/riavvolgimento/tempo e passaggi millimetrici.",
+      matchBonusDesc: "+TEC e fraseggio: +1 lanterna, +1 riavvolgimento o tempo, passaggi e idee impeccabili",
+      check: (roles) => roles.filter((r) => r === "D" || r === "P").length >= 1 && roles.filter((r) => r === "C").length >= 2 && roles.filter((r) => r === "A").length >= 1,
+      hint: "1 Difensore (o P), 2 Centrocampisti, 1 Attaccante",
+      bonus: { at: 0, df: 0, te: 1 }
+    },
+    catenaccio: {
+      id: "catenaccio",
+      name: "Catenaccio 2-1-1",
+      icon: "🛡️",
+      short: "2D · 1C · 1A",
+      desc: "Muro difensivo d'acciaio e ripartenza: parate e contrasti ermetici, scudo e cuori extra.",
+      matchBonusDesc: "+DIF impenetrabile: turni extra in difesa, contrasti ferrei e scudo protettivo",
+      check: (roles) => roles.filter((r) => r === "D" || r === "P").length >= 2 && roles.filter((r) => r === "C").length >= 1 && roles.filter((r) => r === "A").length >= 1,
+      hint: "2 Difensori (o D+P), 1 Centrocampista, 1 Attaccante",
+      bonus: { at: 0, df: 1, te: 0 }
+    },
+    tridente: {
+      id: "tridente",
+      name: "Tridente 1-1-2",
+      icon: "⚡",
+      short: "1D · 1C · 2A",
+      desc: "Attacco travolgente a due punte: +1 azione/tiro offensivo in tutti i motori e grinta alta.",
+      matchBonusDesc: "+ATT arrembante: +1 azione o tiro in attacco, conclusioni esplosive e grinta alta",
+      check: (roles) => roles.filter((r) => r === "D" || r === "P").length >= 1 && roles.filter((r) => r === "C").length >= 1 && roles.filter((r) => r === "A").length >= 2,
+      hint: "1 Difensore (o P), 1 Centrocampista, 2 Attaccanti",
+      bonus: { at: 1, df: 0, te: 0 }
+    },
+    quadrato: {
+      id: "quadrato",
+      name: "Quadrato 2-2",
+      icon: "🟩",
+      short: "2D · 2A / 2C",
+      desc: "Assetto simmetrico e transizioni rapide: bonus equilibrato ad attacco, difesa ed energia.",
+      matchBonusDesc: "Equilibrio totale: +energia nei duelli e nel volo, tenuta costante su entrambi i fronti",
+      check: (roles) => roles.filter((r) => r === "D" || r === "P").length >= 2 && (roles.filter((r) => r === "A").length >= 2 || roles.filter((r) => r === "C").length >= 2),
+      hint: "2 Difensori (o P) e 2 Attaccanti (oppure 2 Centrocampisti)",
+      bonus: { at: 0, df: 0, te: 0 }
+    },
+    fortezza: {
+      id: "fortezza",
+      name: "Fortezza 3-1",
+      icon: "🏰",
+      short: "3D/C · 1A",
+      desc: "Linee serrate e contropiede letale: massima tenuta fisica, +credibilità e contrasti d'acciaio.",
+      matchBonusDesc: "Resistenza estrema: +credibilità nel concilio, salvataggi miracolosi e contrasti duri",
+      check: (roles) => roles.filter((r) => r === "D" || r === "P" || r === "C").length >= 3 && roles.filter((r) => r === "A").length >= 1,
+      hint: "3 tra Difensori e Centrocampisti, 1 Attaccante",
+      bonus: { at: 0, df: 1, te: 0 }
+    }
+  };
+  function modSintonia(modKey, team) {
+    const m = MODULI[modKey] || MODULI.rombo;
+    const roles = team.map((id) => BY[id] && BY[id].role).filter(Boolean);
+    return roles.length >= 5 && m.check(roles);
+  }
+
   // ---------------------------------------------------------------- salvataggio
   const load = () => { const o = load0(); XPC = o.xp; return o; };
-  const load0 = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { own: Array.isArray(r.own) ? r.own.filter((x) => BY[x]) : [], team: Array.isArray(r.team) ? r.team.filter((x) => BY[x]).slice(0, 5) : [], won: Array.isArray(r.won) ? r.won.filter((x) => typeof x === "number") : [], packs: r.packs | 0, hero: !!r.hero, xp: r.xp && typeof r.xp === "object" ? r.xp : {}, season: r.season && Array.isArray(r.season.sched) ? r.season : null, titles: r.titles | 0, draft: r.draft && Array.isArray(r.draft.picks) ? r.draft : null, cups: r.cups | 0 }; };
+  const load0 = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { own: Array.isArray(r.own) ? r.own.filter((x) => BY[x]) : [], team: Array.isArray(r.team) ? r.team.filter((x) => BY[x]).slice(0, 5) : [], won: Array.isArray(r.won) ? r.won.filter((x) => typeof x === "number") : [], packs: r.packs | 0, hero: !!r.hero, xp: r.xp && typeof r.xp === "object" ? r.xp : {}, season: r.season && Array.isArray(r.season.sched) ? r.season : null, titles: r.titles | 0, draft: r.draft && Array.isArray(r.draft.picks) ? r.draft : null, cups: r.cups | 0, modulo: typeof r.modulo === "string" && MODULI[r.modulo] ? r.modulo : "rombo" }; };
   const save = (r) => { XPC = r.xp || {}; safe(() => localStorage.setItem(KEY, JSON.stringify(r)), 0); };
   const sagaMem = (k) => safe(() => JSON.parse(localStorage.getItem(SG(k)[0]) || "null"), null);
   function progress(k) {
@@ -406,10 +470,41 @@
   const drop = (c) => !c.n || earned(c); // le carte a capitoli non escono a sorpresa prima di averle guadagnate
   function sync() { const r = load(); XPC = r.xp; let nw = []; CARDS.forEach((c) => { if (!r.own.includes(c.id) && earned(c)) { r.own.push(c.id); nw.push(c.id); } }); if (nw.length) save(r); return { r, nw }; }
   // ---------------------------------------------------------------- intesa e forza
-  function intesa(team) {
+  function intesa(team, modKey) {
     let n = 0; const why = [];
-    for (let i = 0; i < team.length; i++) for (let j = i + 1; j < team.length; j++) { const a = BY[team[i]], b = BY[team[j]]; if (!a || !b) continue; if (a.saga === b.saga) n += 1; const L = LINKS.find(([x, y]) => (x === a.id && y === b.id) || (x === b.id && y === a.id)); if (L) { n += 3; why.push(L[2]); } }
-    return { n: Math.min(15, n), why };
+    const sagaCount = {};
+    for (let i = 0; i < team.length; i++) {
+      const a = BY[team[i]];
+      if (a) sagaCount[a.saga] = (sagaCount[a.saga] || 0) + 1;
+      for (let j = i + 1; j < team.length; j++) {
+        const b = BY[team[j]]; if (!a || !b) continue;
+        if (a.saga === b.saga) n += 1;
+        const L = LINKS.find(([x, y]) => (x === a.id && y === b.id) || (x === b.id && y === a.id));
+        if (L) { n += 3; why.push(L[2]); }
+      }
+    }
+    // Blocco di Saga (se 3 o più giocatori sono della stessa saga: affinità naturale!)
+    Object.entries(sagaCount).forEach(([sg, cnt]) => {
+      if (cnt >= 3) {
+        n += 2;
+        why.push(`Blocco ${SG(sg)[1]} (x${cnt})`);
+      }
+    });
+    // Sintonia Modulo
+    const mKey = modKey || (safe(() => load().modulo, "rombo")) || "rombo";
+    const m = MODULI[mKey] || MODULI.rombo;
+    const sin = modSintonia(mKey, team);
+    if (sin) {
+      n += 2;
+      why.push(`Sintonia ${m.name}`);
+    }
+    return { n: Math.min(20, n), why, sintonia: sin, modulo: m };
+  }
+  function intesaBadge(n) {
+    if (n >= 15) return `<span class="sgIntTag leg">🌟 Leggendaria (${n}/20)</span>`;
+    if (n >= 10) return `<span class="sgIntTag top">✨ Affiatata (${n}/20)</span>`;
+    if (n >= 5) return `<span class="sgIntTag med">⚡ In sintonia (${n}/20)</span>`;
+    return `<span class="sgIntTag base">In crescita (${n}/20)</span>`;
   }
   // le stelle: la carta cresce giocando (3, 8 e 15 punti esperienza); ogni stella dà +2 a tutte le statistiche, solo qui nella Squadra dei Sogni
   let XPC = {};
@@ -418,15 +513,28 @@
   const ovr = (c) => { const e = eff(c); return Math.round((e.at + e.df + e.te) / 3); };
   const roleOvr = (c) => { const e = eff(c); return Math.round(c.role === "A" ? (2 * e.at + e.te) / 3 : c.role === "C" ? (e.at + e.df + 2 * e.te) / 4 : (2 * e.df + e.te) / 3); }; // in lavagna ognuno pesa col suo ruolo: ATT per gli attaccanti, DIF per difesa e portiere, TEC per il centrocampo
   const forza = (team) => { const cs = team.map((id) => BY[id]).filter(Boolean); if (!cs.length) return 40; return Math.round(cs.reduce((s, c) => s + ovr(c), 0) / cs.length); };
-  // le STATISTICHE pesano in ogni motore: la media di ATT/DIF/TEC delle carte in squadra (con le stelle) diventa un livello 0-3
-  // (0 sotto ~57, 1 ~60, 2 ~66, 3 da ~72) che i motori trasformano in piccoli bonus: tiri/azioni, parate/difesa, passaggi/tecnica
+  // le STATISTICHE pesano in ogni motore: la media di ATT/DIF/TEC delle carte in squadra (con le stelle e con il modulo) diventa un livello 0-3
+  // (0 sotto ~57, 1 ~60, 2 ~66, 3 da ~72) che i motori trasformano in concreti bonus: tiri/azioni, parate/difesa, passaggi/tecnica
   const lvOf = (x) => Math.max(0, Math.min(3, Math.round((x - 54) / 6)));
-  function tiers(team) {
+  function tiers(team, modKey) {
     const cs = team.map((id) => BY[id]).filter(Boolean), n = cs.length || 1, sum = { at: 0, df: 0, te: 0 };
     cs.forEach((c) => { const e = eff(c); sum.at += e.at; sum.df += e.df; sum.te += e.te; });
-    return cs.length ? { at: lvOf(sum.at / n), df: lvOf(sum.df / n), te: lvOf(sum.te / n) } : { at: 0, df: 0, te: 0 };
+    const mKey = modKey || (safe(() => load().modulo, "rombo")) || "rombo";
+    const sin = modSintonia(mKey, team);
+    const m = MODULI[mKey] || MODULI.rombo;
+    const mb = sin ? m.bonus : { at: 0, df: 0, te: 0 };
+    return cs.length ? {
+      at: Math.min(3, lvOf(sum.at / n) + mb.at),
+      df: Math.min(3, lvOf(sum.df / n) + mb.df),
+      te: Math.min(3, lvOf(sum.te / n) + mb.te)
+    } : { at: 0, df: 0, te: 0 };
   }
-  const statLine = (team) => { const T = tiers(team); return `<p class="sum" style="font-size:12px;opacity:.8">⚔️ <b>ATT ${T.at}</b>: tiri e azioni · 🛡️ <b>DIF ${T.df}</b>: parate e difesa · 🎯 <b>TEC ${T.te}</b>: passaggi, dribbling e tecnica. Le medie delle carte in squadra (livello 0-3, con le stelle) contano in ogni sfida.</p>`; };
+  const statLine = (team, modKey) => {
+    const r = load(), mKey = modKey || r.modulo || "rombo", M_MOD = MODULI[mKey] || MODULI.rombo;
+    const sin = modSintonia(mKey, team);
+    const T = tiers(team, mKey);
+    return `<p class="sum" style="font-size:12px;opacity:.9">⚔️ <b>ATT ${T.at}</b>: tiri e azioni · 🛡️ <b>DIF ${T.df}</b>: parate e difesa · 🎯 <b>TEC ${T.te}</b>: passaggi, dribbling e tecnica.<br><span style="color:#ffd23f">📋 Modulo <b>${M_MOD.name}</b>${sin ? " (✨ Sintonia Attiva: bonus applicati)" : ` (${M_MOD.hint})`}</span>. Le statistiche contano concretamente in ogni motore di gioco.</p>`;
+  };
   function gainXp(team, win, sim) {
     const r = load(), ups = [];
     team.forEach((id) => { if (!r.own.includes(id)) return; const s0 = starsOf(id); r.xp[id] = Math.min(15, (r.xp[id] | 0) + (sim ? (win ? 1 : 0) : win ? 2 : 1)); XPC = r.xp; if (starsOf(id) > s0) ups.push([id, starsOf(id)]); });
@@ -512,17 +620,56 @@
     renderColl(body, r);
   }
 
+  function modSelectorHtml(modKey, team) {
+    const cur = modKey || "rombo";
+    const M_MOD = MODULI[cur] || MODULI.rombo;
+    const sin = modSintonia(cur, team);
+    return `<div class="sgModBox">
+      <div class="sgModHd">
+        <span class="sgModTitle">📋 Modulo:</span>
+        <div class="sgModChips">
+          ${Object.values(MODULI).map((m) => `<button type="button" class="sgModChip${m.id === cur ? " active" : ""}" data-mod="${m.id}">${m.icon} ${esc(m.name)}</button>`).join("")}
+        </div>
+      </div>
+      <div class="sgModDesc">
+        <div class="sgModTxt"><b>${esc(M_MOD.short)}</b>: ${esc(M_MOD.desc)}</div>
+        <div class="sgModSin ${sin ? "ok" : "warn"}">
+          ${sin ? `✨ <b>Sintonia Modulo Attiva!</b> (+2 Intesa · ${esc(M_MOD.matchBonusDesc)})` : `ℹ️ <b>Sintonia parziale:</b> schiera ${esc(M_MOD.hint)} per sbloccare il pieno bonus in partita.`}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function bindModChips(body) {
+    body.querySelectorAll(".sgModChip").forEach((chip) => {
+      chip.onclick = () => {
+        const mId = chip.dataset.mod;
+        if (mId && MODULI[mId]) {
+          const r = load();
+          r.modulo = mId;
+          save(r);
+          refreshTeam(body, r);
+        }
+      };
+    });
+  }
+
   function refreshTeam(body, r) {
-    const I = intesa(r.team);
+    const I = intesa(r.team, r.modulo);
     const secT = body.querySelector(".sec-team");
-    if (secT) secT.innerHTML = `La tua squadra · forza <b>${forza(r.team)}</b> · intesa <b>${I.n}</b>/15${I.why.length ? ` <span class="why">(${I.why.map(esc).join(", ")})</span>` : ""}`;
+    if (secT) secT.innerHTML = `La tua squadra · forza <b>${forza(r.team)}</b> · intesa ${intesaBadge(I.n)}${I.why.length ? ` <span class="why">(${I.why.map(esc).join(", ")})</span>` : ""}`;
     const teamEl = body.querySelector(".team");
     if (teamEl) {
       teamEl.innerHTML = [0, 1, 2, 3, 4].map((k) => (r.team[k] ? cardHtml(r.team[k]) : `<div class="sgCard empty" data-slot="${k}"><span>+</span></div>`)).join("");
       teamEl.querySelectorAll(".sgCard[data-c]").forEach((el) => (el.onclick = () => toggle(el.dataset.c)));
     }
+    const modWrap = body.querySelector(".sgModWrap");
+    if (modWrap) {
+      modWrap.innerHTML = modSelectorHtml(r.modulo, r.team);
+      bindModChips(body);
+    }
     const statEl = body.querySelector(".team-stats");
-    if (statEl) statEl.innerHTML = r.team.length ? statLine(r.team) : "";
+    if (statEl) statEl.innerHTML = r.team.length ? statLine(r.team, r.modulo) : "";
     const linksEl = body.querySelector(".links");
     if (linksEl) {
       linksEl.innerHTML = LINKS.map(([a, b, t]) => `<span class="${r.own.includes(a) && r.own.includes(b) ? "ok" : ""}"><b>${esc(t)}</b> ${r.own.includes(a) ? esc(name(a)) : "???"} + ${r.own.includes(b) ? esc(name(b)) : "???"}</span>`).join("");
@@ -534,9 +681,9 @@
 
   function open(back) {
     if (back) BACK = back; const { r, nw } = sync(); const body = shell("🃏 La Squadra dei Sogni");
-    const I = intesa(r.team), coins = safe(() => window.__borgoApi.coins(), 0);
+    const I = intesa(r.team, r.modulo), coins = safe(() => window.__borgoApi.coins(), 0);
     let h = `<p class="sum">Le carte dei personaggi di tutte le saghe. Si sbloccano giocando, o con le bustine. Carte: <b>${r.own.length}/${CARDS.length}</b> · monete: <b>${coins}</b>${nw.length ? ` · <b class="new">nuove: ${nw.length}</b>` : ""}</p>`;
-    h += `<div class="sec sec-team">La tua squadra · forza <b>${forza(r.team)}</b> · intesa <b>${I.n}</b>/15${I.why.length ? ` <span class="why">(${I.why.map(esc).join(", ")})</span>` : ""}</div><div class="team">${[0, 1, 2, 3, 4].map((k) => (r.team[k] ? cardHtml(r.team[k]) : `<div class="sgCard empty" data-slot="${k}"><span>+</span></div>`)).join("")}</div><div class="team-stats">${r.team.length ? statLine(r.team) : ""}</div>`;
+    h += `<div class="sec sec-team">La tua squadra · forza <b>${forza(r.team)}</b> · intesa ${intesaBadge(I.n)}${I.why.length ? ` <span class="why">(${I.why.map(esc).join(", ")})</span>` : ""}</div><div class="team">${[0, 1, 2, 3, 4].map((k) => (r.team[k] ? cardHtml(r.team[k]) : `<div class="sgCard empty" data-slot="${k}"><span>+</span></div>`)).join("")}</div><div class="sgModWrap">${modSelectorHtml(r.modulo, r.team)}</div><div class="team-stats">${r.team.length ? statLine(r.team, r.modulo) : ""}</div>`;
     h += `<div class="big"><button type="button" data-go="tour">🏆 Torneo dei Sogni<small>${r.won.length}/8 sfide vinte · ogni sfida in un motore diverso</small></button><button type="button" data-go="pack" ${coins < PACK ? "disabled" : ""}>🎴 Bustina<small>${PACK} monete · una carta a sorpresa</small></button><button type="button" data-go="season">📅 Stagione dei Sogni<small>${r.season ? `giornata ${Math.min(7, r.season.day + 1)}/7` : "campionato a 8 squadre"}${r.titles ? ` · scudetti ${r.titles}` : ""}</small></button>${window.__arena ? `<button type="button" data-go="arena">⚔️ Arena dei Sogni<small>Battaglie a turni · Torre dei Duelli</small></button>` : ""}<button type="button" data-go="draft">🎲 Draft<small>${r.draft ? (r.draft.picks.length < 5 ? `scelta ${r.draft.picks.length + 1}/5` : "coppa in corso") : "scegli 1 carta su 3 e gioca la coppa"}${r.cups ? ` · coppe ${r.cups}` : ""}</small></button></div><p class="sum">Le carte crescono giocando: ⭐ a 3 punti esperienza, ⭐⭐ a 8, ⭐⭐⭐ a 15 (+2 a ogni statistica per stella; a tre stelle la carta dice la sua frase).</p>`;
     h += `<div class="sec">Collezione · tocca una carta per metterla in squadra o toglierla</div>`;
     h += `<div class="sgCollControls">
@@ -609,6 +756,7 @@
       rst.onclick = () => resetAllFilters(body, load());
     }
 
+    bindModChips(body);
     renderColl(body, r);
     body.querySelectorAll(".team .sgCard[data-c]").forEach((el) => (el.onclick = () => toggle(el.dataset.c)));
     body.querySelector('[data-go="tour"]').onclick = torneo;
@@ -641,8 +789,8 @@
   }
   // ---------------------------------------------------------------- il Torneo dei Sogni
   function torneo() {
-    const r = load(), body = shell("🏆 Torneo dei Sogni"), I = intesa(r.team), f = forza(r.team);
-    let h = `<p class="sum">Otto sfide, otto motori. La tua squadra (forza ${f}, intesa ${I.n}) dà vantaggi diversi in ogni motore. ${r.team.length < 5 ? "<b>Servono cinque carte in squadra.</b>" : ""}</p>${r.team.length ? statLine(r.team) : ""}`;
+    const r = load(), body = shell("🏆 Torneo dei Sogni"), I = intesa(r.team, r.modulo), f = forza(r.team);
+    let h = `<p class="sum">Otto sfide, otto motori. La tua squadra (forza ${f}, intesa ${intesaBadge(I.n)}) dà vantaggi diversi in ogni motore. ${r.team.length < 5 ? "<b>Servono cinque carte in squadra.</b>" : ""}</p>${r.team.length ? statLine(r.team, r.modulo) : ""}`;
     h += SFIDE.map((s, i) => { const M = safe(() => window.__salone.machine(s.m), null), won = r.won.includes(i); return `<div class="sf${won ? " won" : ""}" data-i="${i}"><div class="e">${M ? M.e : "⚽"}</div><div><b>${i + 1}. ${esc(M ? M.t : s.m)}</b><span>${esc(s.opp ? s.opp.name : "I Sogni del Cristallo")} · ${esc(bonusTxt(s.m, r.team))}</span></div><div class="n">${won ? "✓" : "▶"}</div></div>`; }).join("");
     if (r.won.length >= 8) h += `<div class="big"><button type="button" data-hero="1">${r.hero ? "✓ Il Campione dei Sogni è tuo" : "🌟 Ritira la carta del Campione dei Sogni"}<small>La carta leggendaria del tuo Campione · e la Maglia dei Sogni</small></button></div>`;
     h += `<div class="big"><button type="button" data-back="1">◂ La squadra<small>Carte e collezione</small></button></div>`;
@@ -653,49 +801,53 @@
   }
   const count = (team, saga) => team.filter((id) => BY[id] && BY[id].saga === saga).length;
   function bonusTxt(m, team) {
-    const I = intesa(team).n, T = tiers(team), A = T.at >= 2 ? 1 : 0;
-    return {
-      vignette: `azioni +${Math.floor(I / 5) + A} (ATT), parate +${T.df * 5}% (DIF), Spirito +${T.te * 10}% (TEC)`,
-      bottoni: `tiri +${(I >= 6 ? 1 : 0) + A} (ATT), avversari meno precisi (DIF), potere +${Math.round(T.te * 15)}% (TEC)${count(team, "mantello") ? ", superpoteri a turno" : ""}`,
-      luci: `azioni +${A} (ATT), turni +${T.df} (DIF), lanterne +${(I >= 8 ? 1 : 0) + (T.te >= 2 ? 1 : 0)} (TEC)`,
-      nastro: `azioni +${A} (ATT), riavvolgimenti +${(I >= 8 ? 1 : 0) + Math.floor((T.te + T.df) / 3)} (TEC+DIF)`,
-      concilio: `turni +${A} (ATT), credibilità ${Math.min(9, 5 + Math.floor(I / 4) + Math.ceil(T.df / 2))} (DIF), corvi ${1 + count(team, "trono") + (T.te >= 2 ? 1 : 0)} (TEC)`,
-      lavagna: "ogni carta pesa col suo ruolo: ATT, DIF, TEC",
-      duello: `grinta ${100 + I * 4 + T.at * 4} (ATT), parate e contrasti +${T.df * 1.5} (DIF), dribbling e passaggi +${T.te * 1.5} (TEC)`,
-      gadget: `tiri +${T.at * 4}% (ATT), difesa +${T.df * 6}% (DIF), cintura ${Math.min(6, 4 + (I >= 10 ? 1 : 0) + (T.te >= 2 ? 1 : 0))} gadget (TEC)`,
-      volo: `tiro +${T.at * 5}% (ATT), difesa +${T.df * 6}% (DIF), energia ${100 + I * 3 + T.te * 5} (TEC)`,
+    const r = load(), modKey = r.modulo || "rombo", M_MOD = MODULI[modKey] || MODULI.rombo, sin = modSintonia(modKey, team);
+    const I = intesa(team, modKey).n, T = tiers(team, modKey), A = T.at >= 2 ? 1 : 0;
+    const pre = `[${M_MOD.name}${sin ? " ✨" : ""}] `;
+    const txt = {
+      vignette: `azioni +${Math.floor(I / 4) + A + (sin && (modKey === "tridente" || modKey === "rombo") ? 1 : 0)} (ATT), parate +${T.df * 5}% (DIF), Spirito +${T.te * 10}% (TEC)`,
+      bottoni: `tiri +${(I >= 5 ? 1 : 0) + A + (sin && modKey === "tridente" ? 1 : 0)} (ATT), avversari meno precisi (DIF), potere +${Math.round(T.te * 15)}% (TEC)${count(team, "mantello") ? ", superpoteri a turno" : ""}`,
+      luci: `azioni +${A} (ATT), turni +${T.df + (sin && (modKey === "catenaccio" || modKey === "fortezza") ? 1 : 0)} (DIF), lanterne +${(I >= 7 ? 1 : 0) + (T.te >= 2 ? 1 : 0) + (sin && modKey === "rombo" ? 1 : 0)} (TEC)`,
+      nastro: `azioni +${A + (sin && modKey === "tridente" ? 1 : 0)} (ATT), riavvolgimenti +${(I >= 7 ? 1 : 0) + Math.floor((T.te + T.df) / 3) + (sin && modKey === "rombo" ? 1 : 0)} (TEC+DIF)`,
+      concilio: `turni +${A + (sin && modKey === "tridente" ? 1 : 0)} (ATT), credibilità ${Math.min(10, 5 + Math.floor(I / 3.5) + Math.ceil(T.df / 2) + (sin && (modKey === "catenaccio" || modKey === "fortezza") ? 1 : 0))} (DIF), corvi ${1 + count(team, "trono") + (T.te >= 2 ? 1 : 0)} (TEC)`,
+      lavagna: `modulo ${M_MOD.name}${sin ? " in piena sintonia (+3 OVR)" : ""}, ogni carta pesa col suo ruolo: ATT, DIF, TEC`,
+      duello: `grinta ${100 + I * 5 + T.at * 4 + (sin && modKey === "tridente" ? 15 : sin && modKey === "quadrato" ? 10 : 0)} (ATT), contrasti +${T.df * 1.5 + (sin && modKey === "catenaccio" ? 1 : 0)} (DIF), passaggi +${T.te * 1.5} (TEC)`,
+      gadget: `tiri +${T.at * 4}% (ATT), difesa +${T.df * 6}% (DIF), cintura ${Math.min(6, 4 + (I >= 8 ? 1 : 0) + (T.te >= 2 ? 1 : 0) + (sin && modKey === "rombo" ? 1 : 0))} gadget (TEC)`,
+      volo: `tiro +${T.at * 5}% (ATT), difesa +${T.df * 6}% (DIF), energia ${100 + I * 4 + T.te * 5 + (sin && modKey === "quadrato" ? 15 : 0)} (TEC)`,
       combo: "quattro poteri dalle tue carte, tiri (ATT), contrasti e difesa (DIF), pressing (TEC)",
       giroegol: `turbo ${2 + (T.te >= 2 ? 1 : 0)} (TEC), mirino fermo ${T.df >= 2 ? 1 : 0} (DIF), tiri più forti (ATT)`,
-      pallatempo: `compagno dalle tue carte, comandi TEMPO ${2 + (T.te >= 2 ? 1 : 0)} (TEC), FISCHIO ${T.df >= 2 ? 1 : 0} (DIF), tiri più forti (ATT)`,
-      consegna: "il compagno di volo dalle tue carte, tiri (ATT), recuperi (DIF), tempo +" + T.te * 4 + "s (TEC)",
+      pallatempo: `compagno dalle tue carte, comandi TEMPO ${2 + (T.te >= 2 ? 1 : 0) + (sin && modKey === "rombo" ? 1 : 0)} (TEC), FISCHIO ${T.df >= 2 ? 1 : 0} (DIF), tiri più forti (ATT)`,
+      consegna: "il compagno di volo dalle tue carte, tiri (ATT), recuperi (DIF), tempo +" + (T.te * 4 + (sin && modKey === "rombo" ? 4 : 0)) + "s (TEC)",
       anello: `mira +${T.at * 5}% (ATT), rivali meno precisi -${T.df * 5}% (DIF), corsa +${T.te * 3}% (TEC)`,
       corrente: `velocità pontili +${T.at * 5}% (ATT), stabilità risacca +${T.df * 5}% (DIF), precisione rinvio +${T.te * 10}% (TEC)`,
       rebound: `tiri +${T.at * 6}% (ATT), portiere +${T.df * 7}% (DIF), corsa +${T.te * 3}% (TEC)`,
       marea: `pedane ${3 + (T.te >= 2 ? 1 : 0)} (TEC), portiere +${T.df * 2}% (DIF), tiri più precisi (ATT)`,
-      ipogeo: `cuori ${4 + (T.df >= 2 ? 1 : 0)} (DIF), tiro +${T.at * 3}% (ATT), tempo +${T.te * 3}s (TEC)`,
-      ciak: `ciak di riserva ${2 + (I >= 8 ? 1 : 0) + (T.te >= 3 ? 1 : 0)} (TEC), idee riuscite con ATT/DIF/TEC`,
+      ipogeo: `cuori ${4 + (T.df >= 2 ? 1 : 0) + (sin && modKey === "catenaccio" ? 1 : 0)} (DIF), tiro +${T.at * 3}% (ATT), tempo +${T.te * 3}s (TEC)`,
+      ciak: `ciak di riserva ${2 + (I >= 7 ? 1 : 0) + (T.te >= 2 ? 1 : 0) + (sin && modKey === "rombo" ? 1 : 0)} (TEC), idee riuscite con ATT/DIF/TEC`,
       iso: `terreno ${["saline", "vetro", "ruggine"][I % 3]}, tiro +${T.at} (ATT), contrasto +${T.df} (DIF), passaggio +${T.te} (TEC)`,
       zonarossa: `tiro +${T.at * 5}% (ATT), fiato nelle fasce rosse +${T.df * 8}% (DIF), mira assistita +${T.te * 8}% (TEC)`,
-      rottami: `anteprima del tiro più lunga +${T.at * 5} (ATT), scudo più alto +${T.df * 3} (DIF), vento di sabbia -${T.te * 10}% (TEC)`,
-      roulette: `fiches scudo +${T.df} (DIF), precisione carambola +${T.at * 5}% (ATT), gettoni turbo +${(I >= 8 ? 1 : 0) + (T.te >= 2 ? 1 : 0)} (TEC)`,
-      atb: `statistiche +${Math.floor(I / 3)}, tiro +${T.at} (ATT), difesa +${T.df} (DIF), passaggio +${T.te} (TEC)`,
+      rottami: `anteprima del tiro più lunga +${T.at * 5} (ATT), scudo più alto +${T.df * 3 + (sin && modKey === "catenaccio" ? 2 : 0)} (DIF), vento di sabbia -${T.te * 10}% (TEC)`,
+      roulette: `fiches scudo +${T.df + (sin && modKey === "catenaccio" ? 1 : 0)} (DIF), precisione carambola +${T.at * 5}% (ATT), gettoni turbo +${(I >= 7 ? 1 : 0) + (T.te >= 2 ? 1 : 0)} (TEC)`,
+      atb: `statistiche +${Math.floor(I / 2.5) + (sin ? 2 : 0)}, tiro +${T.at} (ATT), difesa +${T.df} (DIF), passaggio +${T.te} (TEC)`,
     }[m] || "";
+    return pre + txt;
   }
   function extraFor(m, base, team, I, f, h) {
-    const T = tiers(team);
+    const r = load(), modKey = r.modulo || "rombo", M_MOD = MODULI[modKey] || MODULI.rombo, sin = modSintonia(modKey, team);
+    const T = tiers(team, modKey);
     const names = team.map((id) => ({ name: String(name(id)).split(/[ ,]/)[0], skin: (window.__borgoApi.CAST[id] || {}).skin, hair: (window.__borgoApi.CAST[id] || {}).hair }));
     return {
-      vignette: { actions: (base.actions || 8) + Math.floor(I / 5) + (T.at >= 2 ? 1 : 0) },
-      bottoni: { shots: (base.shots || 6) + (I >= 6 ? 1 : 0) + (T.at >= 2 ? 1 : 0), powers: count(team, "mantello") ? ["fulmine", "gigante", "calamita", "gelo", "doppio"] : undefined, mates: names.slice(0, 3) },
-      luci: { lanterns: (base.lanterns || 3) + (I >= 8 ? 1 : 0) + (T.te >= 2 ? 1 : 0), actions: (base.actions || 6) + (T.at >= 2 ? 1 : 0), turns: 8 + T.df, mates: names.slice(0, 2) },
-      nastro: { rewinds: (base.rewinds || 2) + (I >= 8 ? 1 : 0) + Math.floor((T.te + T.df) / 3), actions: (base.actions || 6) + (T.at >= 2 ? 1 : 0), mates: names.slice(0, 2) },
-      concilio: { cred: Math.min(9, 5 + Math.floor(I / 4) + Math.ceil(T.df / 2)), ravens: 1 + count(team, "trono") + (T.te >= 2 ? 1 : 0), turns: (base.turns || 8) + (T.at >= 2 ? 1 : 0), foresee: T.te >= 3, us: "La Squadra dei Sogni" },
-      lavagna: { us: "La Squadra dei Sogni", squad: team.map((id) => ({ name: name(id), role: BY[id].role, ovr: Math.round(roleOvr(BY[id]) + I / 3) })).concat([{ name: h.name || "Il Campione", role: "A", ovr: f + 2 }, { name: "Il Portiere dei Sogni", role: "P", ovr: f }]) },
-      duello: { guts: 100 + I * 4 + T.at * 4, mates: names.slice(0, 3), us: "La Squadra dei Sogni" },
+      vignette: { actions: (base.actions || 8) + Math.floor(I / 4) + (T.at >= 2 ? 1 : 0) + (sin && (modKey === "tridente" || modKey === "rombo") ? 1 : 0) },
+      bottoni: { shots: (base.shots || 6) + (I >= 5 ? 1 : 0) + (T.at >= 2 ? 1 : 0) + (sin && modKey === "tridente" ? 1 : 0), powers: count(team, "mantello") ? ["fulmine", "gigante", "calamita", "gelo", "doppio"] : undefined, mates: names.slice(0, 3) },
+      luci: { lanterns: (base.lanterns || 3) + (I >= 7 ? 1 : 0) + (T.te >= 2 ? 1 : 0) + (sin && modKey === "rombo" ? 1 : 0), actions: (base.actions || 6) + (T.at >= 2 ? 1 : 0), turns: 8 + T.df + (sin && (modKey === "catenaccio" || modKey === "fortezza") ? 1 : 0), mates: names.slice(0, 2) },
+      nastro: { rewinds: (base.rewinds || 2) + (I >= 7 ? 1 : 0) + Math.floor((T.te + T.df) / 3) + (sin && modKey === "rombo" ? 1 : 0), actions: (base.actions || 6) + (T.at >= 2 ? 1 : 0) + (sin && modKey === "tridente" ? 1 : 0), mates: names.slice(0, 2) },
+      concilio: { cred: Math.min(10, 5 + Math.floor(I / 3.5) + Math.ceil(T.df / 2) + (sin && (modKey === "catenaccio" || modKey === "fortezza") ? 1 : 0)), ravens: 1 + count(team, "trono") + (T.te >= 2 ? 1 : 0), turns: (base.turns || 8) + (T.at >= 2 ? 1 : 0) + (sin && modKey === "tridente" ? 1 : 0), foresee: T.te >= 3, us: "La Squadra dei Sogni" },
+      lavagna: { us: "La Squadra dei Sogni", squad: team.map((id) => ({ name: name(id), role: BY[id].role, ovr: Math.round(roleOvr(BY[id]) + I / 2.5 + (sin ? 3 : 0)) })).concat([{ name: h.name || "Il Campione", role: "A", ovr: f + 2 + (sin ? 2 : 0) }, { name: "Il Portiere dei Sogni", role: "P", ovr: f + (sin && modKey === "catenaccio" ? 3 : 0) }]) },
+      duello: { guts: 100 + I * 5 + T.at * 4 + (sin && modKey === "tridente" ? 15 : sin && modKey === "quadrato" ? 10 : 0), mates: names.slice(0, 3), us: "La Squadra dei Sogni" },
       iso: { mates: names.slice(0, 2), us: "La Squadra dei Sogni", terrain: ["saline", "vetro", "ruggine"][I % 3] },
       combo: { heroes: team.slice(0, 4).map((id, k) => ({ name: String(name(id)).split(/[ ,]/)[0], power: ["scatto", "ghiaccio", "vento", "fuoco"][k] })), us: "La Squadra dei Sogni" },
       giroegol: { mate: names[0], us: "La Squadra dei Sogni", turbi: (base.turbi || 0) + (T.te >= 2 ? 1 : 0), mira: (base.mira || 0) + (T.df >= 2 ? 1 : 0) },
-      pallatempo: { mate: names[0], us: "La Squadra dei Sogni", tempo: (base.tempo || 2) + (T.te >= 2 ? 1 : 0), fischio: (base.fischio || 0) + (T.df >= 2 ? 1 : 0) },
+      pallatempo: { mate: names[0], us: "La Squadra dei Sogni", tempo: (base.tempo || 2) + (T.te >= 2 ? 1 : 0) + (sin && modKey === "rombo" ? 1 : 0), fischio: (base.fischio || 0) + (T.df >= 2 ? 1 : 0) },
       consegna: { mate: names[0], us: "La Squadra dei Sogni" },
       marea: { mates: names.slice(0, 2), us: "La Squadra dei Sogni" },
       rebound: { mates: names.slice(0, 2), us: "La Squadra dei Sogni" },
@@ -703,22 +855,22 @@
       corrente: { mates: names.slice(0, 2), us: "La Squadra dei Sogni" },
       runa: { us: "La Squadra dei Sogni" },
       ipogeo: { us: "La Squadra dei Sogni" },
-      ciak: { mates: names.slice(0, 2), us: "La Squadra dei Sogni", takes: 2 + (I >= 8 ? 1 : 0) + (T.te >= 3 ? 1 : 0) },
-      volo: { energy: 100 + I * 3 + T.te * 5, mates: names.slice(0, 1), us: "La Squadra dei Sogni" },
-      gadget: { slots: Math.min(6, 4 + (I >= 10 ? 1 : 0) + (T.te >= 2 ? 1 : 0)), mates: names.slice(0, 2), us: "La Squadra dei Sogni" },
+      ciak: { mates: names.slice(0, 2), us: "La Squadra dei Sogni", takes: 2 + (I >= 7 ? 1 : 0) + (T.te >= 2 ? 1 : 0) + (sin && modKey === "rombo" ? 1 : 0) },
+      volo: { energy: 100 + I * 4 + T.te * 5 + (sin && modKey === "quadrato" ? 15 : 0), mates: names.slice(0, 1), us: "La Squadra dei Sogni" },
+      gadget: { slots: Math.min(6, 4 + (I >= 8 ? 1 : 0) + (T.te >= 2 ? 1 : 0) + (sin && modKey === "rombo" ? 1 : 0)), mates: names.slice(0, 2), us: "La Squadra dei Sogni" },
       rottami: { mate: names[0], us: "La Squadra dei Sogni" },
       zonarossa: { mate: names[0], us: "La Squadra dei Sogni" },
       roulette: { mates: names.slice(0, 2), us: "La Squadra dei Sogni" },
-      atb: { heroSt: { tiro: 16 + Math.floor(I / 3) + T.at, pass: 14 + Math.floor(I / 3) + T.te, dif: 12 + Math.floor(I / 3) + T.df, vel: 15 + Math.floor(I / 3) + Math.floor(T.te / 2) } },
+      atb: { heroSt: { tiro: 16 + Math.floor(I / 2.5) + T.at + (sin ? 2 : 0), pass: 14 + Math.floor(I / 2.5) + T.te + (sin ? 2 : 0), dif: 12 + Math.floor(I / 2.5) + T.df + (sin ? 2 : 0), vel: 15 + Math.floor(I / 2.5) + Math.floor(T.te / 2) + (sin ? 2 : 0) } },
     }[m] || {};
   }
   // gioca una partita dei Sogni nel motore m; opp = avversario (se manca, quello della sfida del Torneo); onRes(res) alla fine
   function launch(m, opp, title, team, hard, onRes, back) {
     const M = safe(() => window.__salone.machine(m), null), eng = M && window[M.eng]; if (!M || !eng || !eng.start) return false;
-    const I = intesa(team).n, f = forza(team), h = safe(() => window.__salone.heroLook(), { name: "Campione" });
+    const r = load(), modKey = r.modulo || "rombo", I = intesa(team, modKey).n, f = forza(team), h = safe(() => window.__salone.heroLook(), { name: "Campione" });
     const o0 = opp || M.boss || M.opp[0], base = M.opts(o0, h, hard);
     closeAll(); const C = window.__sagaCore; if (C && C.setCur) C.setCur(hard ? "sfida" : "normale", o0 && o0.style);
-    const o = Object.assign({}, base, extraFor(m, base, team, I, f, h), { bonus: tiers(team), title, heroLook: h, winTitle: "VITTORIA DEI SOGNI!", onDone: onRes });
+    const o = Object.assign({}, base, extraFor(m, base, team, I, f, h), { bonus: tiers(team, modKey), title, heroLook: h, winTitle: "VITTORIA DEI SOGNI!", onDone: onRes });
     if (safe(() => eng.start(o), false) === false) { if (C && C.endMatch) C.endMatch(); back(); }
     return true;
   }
@@ -761,8 +913,8 @@
   const ranking = (se) => Object.keys(se.tab).map(Number).sort((x, y) => pts(se.tab[y]) - pts(se.tab[x]) || (se.tab[y][4] - se.tab[y][5]) - (se.tab[x][4] - se.tab[x][5]) || se.tab[y][4] - se.tab[x][4] || x - y);
   function stagione() {
     const r = load(); if (!r.season) { r.season = newSeason(); save(r); }
-    const se = r.season, body = shell("📅 Stagione dei Sogni"), rk = ranking(se), f = forza(r.team);
-    let h = `<p class="sum">Otto squadre, sette giornate, ogni giornata in un motore diverso. Vittoria 3 punti, pareggio 1. Chi vince lo scudetto prende una <b>carta rara garantita</b> e 80 monete. ${r.team.length < 5 ? "<b>Servono cinque carte in squadra.</b>" : `La tua forza: <b>${f}</b>.`}</p>`;
+    const se = r.season, body = shell("📅 Stagione dei Sogni"), rk = ranking(se), f = forza(r.team), I = intesa(r.team, r.modulo);
+    let h = `<p class="sum">Otto squadre, sette giornate, ogni giornata in un motore diverso. Vittoria 3 punti, pareggio 1. Chi vince lo scudetto prende una <b>carta rara garantita</b> e 80 monete. ${r.team.length < 5 ? "<b>Servono cinque carte in squadra.</b>" : `La tua forza: <b>${f}</b> · intesa: <b>${I.n}</b>/20 ${intesaBadge(I.n)}.`}</p>`;
     if (se.last) h += `<p class="sum last">${se.last}</p>`;
     h += `<table class="tab"><tr><th></th><th>Squadra</th><th>G</th><th>V</th><th>N</th><th>P</th><th>Gol</th><th>Pt</th></tr>${rk.map((t, k) => { const R = se.tab[t]; return `<tr class="${t < 0 ? "me" : ""}"><td>${k + 1}</td><td>${esc(tName(t))}</td><td>${R[0]}</td><td>${R[1]}</td><td>${R[2]}</td><td>${R[3]}</td><td>${R[4]}:${R[5]}</td><td><b>${pts(R)}</b></td></tr>`; }).join("")}</table>`;
     if (se.day < 7) {
@@ -795,7 +947,12 @@
       const ups = gainXp(team, ga > gb, isSim);
       levelUps(ups, () => (prize ? reveal(prize, "Premio dello scudetto", stagione) : stagione()));
     };
-    if (sim) { const g = simGoals(forza(team) + intesa(team).n / 3, T.f); return close(g[0], g[1], true); }
+    if (sim) {
+      const sin = modSintonia(r.modulo, team);
+      const modAdv = sin ? 3 : 1;
+      const g = simGoals(forza(team) + intesa(team, r.modulo).n / 2.5 + modAdv, T.f);
+      return close(g[0], g[1], true);
+    }
     launch(m, dress(m, T), `Stagione dei Sogni · giornata ${se.day + 1}/7 · ${engName(m)}`, team, T.f >= 72, (res) => { if (res.quit) return stagione(); close(res.a | 0, res.b | 0, false); }, stagione);
   }
   // ---------------------------------------------------------------- il Draft: 1 carta su 3, cinque volte, poi la coppa a eliminazione
@@ -878,6 +1035,24 @@
 .sgCollInfo b{color:#ffd23f}
 .sgCollReset{background:none;border:none;color:#ff5a7a;font-size:11px;cursor:pointer;padding:0;text-decoration:underline}
 .sgEmptyColl{text-align:center;padding:26px 12px;background:#1a1428;border-radius:10px;border:1px dashed #4a3a6a;color:#c8b8ff;font-size:13px;grid-column:1/-1}
+.sgModBox{background:#181326;border:1px solid #3d2d60;border-radius:10px;padding:8px 10px;margin:8px 0}
+.sgModHd{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.sgModTitle{font-size:11px;font-weight:800;color:#c8b8ff;text-transform:uppercase;letter-spacing:.5px}
+.sgModChips{display:flex;gap:4px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.sgModChips::-webkit-scrollbar{display:none}
+.sgModChip{background:#221a36;border:1px solid #42345e;color:#c8b8ff;padding:3px 8px;border-radius:12px;font:700 11px system-ui;cursor:pointer;white-space:nowrap;transition:all .15s}
+.sgModChip:hover{border-color:#ffd23f;color:#fff}
+.sgModChip.active{background:#7a5ad8;border-color:#ffd23f;color:#ffd23f;box-shadow:0 0 8px rgba(122,90,216,.5)}
+.sgModDesc{margin-top:6px;font-size:11.5px;line-height:1.4}
+.sgModTxt{margin:0 0 4px;color:#d8cde8}
+.sgModSin{border-radius:6px;padding:3px 8px;font-size:10.5px;display:inline-block}
+.sgModSin.ok{background:rgba(122,216,122,.15);border:1px solid #7ad87a;color:#7ad87a}
+.sgModSin.warn{background:rgba(255,210,63,.1);border:1px solid rgba(255,210,63,.4);color:#ffd23f}
+.sgIntTag{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:800;margin-left:4px;vertical-align:middle}
+.sgIntTag.leg{background:#ffd23f;color:#120e1e;box-shadow:0 0 6px rgba(255,210,63,.5)}
+.sgIntTag.top{background:#7a5ad8;color:#fff}
+.sgIntTag.med{background:#3a8ad8;color:#fff}
+.sgIntTag.base{background:#4a3a6a;color:#c8b8ff}
 .sgOv .team{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.sgOv .coll{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:8px}
 .sgCard{position:relative;border-radius:10px;padding:5px;background:linear-gradient(160deg,var(--sc),#120e1e 75%);border:2px solid var(--rc);box-shadow:0 2px 0 rgba(0,0,0,.5);cursor:pointer;overflow:hidden;font-size:10px;min-height:92px}
 .sgCard.empty{display:flex;align-items:center;justify-content:center;border-style:dashed;border-color:#4a3a6a;background:#1a1428;font-size:22px;color:#4a3a6a}
