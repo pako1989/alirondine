@@ -1,4 +1,4 @@
-// js/eroi.js - «Calcio d'Azione Eroi»: partita 3 contro 3 o 5 contro 5 (più i portieri), anche in orizzontale (landscape), con i personaggi della Squadra dei Sogni (js/sogni.js).
+// js/eroi.js - «Calcio d'Azione Eroi»: partita a squadre (3v3 o 5v5 più i portieri), anche in orizzontale (landscape), con i personaggi della Squadra dei Sogni (js/sogni.js).
 // Vista 2,5D con sponde (stile calcetto), joystick analogico (js/stick.js), Passa/Contrasta (scivolata senza palla), Tira (tieni premuto per caricare,
 // su/giù per mirare), Scatto con fiato e Abilità di ruolo pagata con la Grinta di squadra (si carica con passaggi, rubate e possesso):
 // Tiro Fuoco, Regia, Muro, Magnete. Super tiri firmati per saga (curva, zig-zag, invisibile, ghiaccio, fulmine...). Campo grande con camera che segue la palla. Grafica a doppia risoluzione: tribune, tabelloni, reti, figure animate con il ritratto come testa.
@@ -165,11 +165,51 @@
       else if (b.magic > 0 && b.to && dist(b.to, b) < PR + 3) { b.owner = b.to; b.to.hold = 0; b.magic = 0; }
       if (b.x < -2 && inMouth) goal(1); else if (b.x > W + 2 && inMouth) goal(0);
     }
-    if (!M.extra) { if (M.t >= DUR) { if (M.score[0] === M.score[1]) { M.extra = true; M.t = DUR - 1800; } else finish(); } }
-    else if (M.t >= DUR + 1800) finish();
+    if (!M.extra) {
+      if (M.t >= DUR) {
+        if (M.score[0] === M.score[1]) {
+          M.extra = true;
+          M.t = DUR;
+          say("⚽ TEMPI SUPPLEMENTARI: GOLDEN GOL! Chi segna il prossimo gol vince!", 10);
+          fxAdd(W / 2, 80, "GOLDEN GOL!", "#ffd23f");
+          M.shake = 16;
+          kickoff(0);
+        } else finish();
+      }
+    } else if (M.t >= DUR + 1800) {
+      if (M.score[0] === M.score[1]) {
+        const s0 = M.stat.shots[0], s1 = M.stat.shots[1];
+        if (s0 > s1) M.score[0]++;
+        else if (s1 > s0) M.score[1]++;
+        else M.score[M.r() < 0.5 ? 0 : 1]++;
+        say("Fischio finale: spareggio deciso ai calci di rigore!", 10);
+      }
+      finish();
+    }
   }
-  function goal(team) { M.score[team]++; M.lastScorer = team; M.goalT = M.fast ? 1 : 130; M.scorer = M.ball.shotBy || M.all.find((p) => p.team === team && !p.keeper); { const sc = M.scorer ? M.scorer.n : ""; const n = `${M.score[0]}-${M.score[1]}`; say(team === 0 ? pickL([`GOOOL! ${sc} la mette dentro! ${n}`, `${sc} non perdona: è rete! ${n}`, `Che gol di ${sc}! ${n}`]) : pickL([`Gol avversario: ${sc} ci punisce. ${n}`, `Rete per loro, ${sc} è freddissimo. ${n}`, `Ahi, ${sc} trova la porta. ${n}`]), 5); } M.ball.owner = null; M.ball.vx = M.ball.vy = 0; M.ball.tr = []; fxAdd(W / 2, 100, "GOL!", "#ffd23f"); M.shake = 14; M.flash = 14; burst(team ? 8 : W - 8, CY, 30, ["#ffd23f", "#ff5a5a", "#5ad8ff", "#fff"], 3.2, 1); if (M.extra) finish(); }
-  function finish() { if (M.over) return; const s = M.score; M.over = s[0] > s[1] ? "win" : s[0] < s[1] ? "lose" : "draw"; say(M.over === "win" ? `Fischio finale: vittoria ${s[0]}-${s[1]}!` : M.over === "lose" ? `Fischio finale: sconfitta ${s[0]}-${s[1]}.` : `Fischio finale: pari ${s[0]}-${s[1]}.`, 9); const f = M.cfg.onEnd; setTimeout(() => f && f(M.over, M), M.fast ? 0 : 1100); }
+  function goal(team) {
+    M.score[team]++; M.lastScorer = team; M.goalT = M.fast ? 1 : 130; M.scorer = M.ball.shotBy || M.all.find((p) => p.team === team && !p.keeper);
+    const sc = M.scorer ? M.scorer.n : ""; const n = `${M.score[0]}-${M.score[1]}`;
+    if (M.extra) {
+      say(team === 0 ? `✨ GOLDEN GOL DI ${sc}! VITTORIA! ${n}` : `Ahi! Golden gol di ${sc}... sconfitta. ${n}`, 10);
+      fxAdd(W / 2, 80, "GOLDEN GOL!", "#ffd23f");
+      M.shake = 18; M.flash = 20;
+    } else {
+      say(team === 0 ? pickL([`GOOOL! ${sc} la mette dentro! ${n}`, `${sc} non perdona: è rete! ${n}`, `Che gol di ${sc}! ${n}`]) : pickL([`Gol avversario: ${sc} ci punisce. ${n}`, `Rete per loro, ${sc} è freddissimo. ${n}`, `Ahi, ${sc} trova la porta. ${n}`]), 5);
+    }
+    M.ball.owner = null; M.ball.vx = M.ball.vy = 0; M.ball.tr = [];
+    fxAdd(W / 2, 100, "GOL!", "#ffd23f"); M.shake = 14; M.flash = 14;
+    burst(team ? 8 : W - 8, CY, 30, ["#ffd23f", "#ff5a5a", "#5ad8ff", "#fff"], 3.2, 1);
+    if (M.extra) finish();
+  }
+  function finish() {
+    if (M.over) return;
+    const s = M.score;
+    M.over = s[0] > s[1] ? "win" : s[0] < s[1] ? "lose" : "draw";
+    say(M.over === "win" ? (M.extra ? `✨ Fischio finale: vittoria al Golden Gol ${s[0]}-${s[1]}!` : `Fischio finale: vittoria ${s[0]}-${s[1]}!`) : M.over === "lose" ? (M.extra ? `Fischio finale: sconfitta al Golden Gol ${s[0]}-${s[1]}.` : `Fischio finale: sconfitta ${s[0]}-${s[1]}.`) : `Fischio finale: pari ${s[0]}-${s[1]}.`, 9);
+    const f = M.cfg.onEnd;
+    setTimeout(() => f && f(M.over, M), M.fast ? 0 : 1100);
+  }
   // ------------------------------------------------------------ disegno (doppia risoluzione)
   const IMG = {}; const imgOf = (id) => { if (IMG[id] !== undefined) return IMG[id]; const u = safe(() => S().port(id), null); if (!u) return (IMG[id] = null); const i = new Image(); i.src = u; return (IMG[id] = i); };
   function buildStatic() {
@@ -261,13 +301,14 @@
     g.fillStyle = "#0009"; g.beginPath(); g.roundRect(cx - 72, 2, 144, 17, 6); g.fill(); g.font = "900 10px system-ui"; g.textAlign = "right"; g.fillStyle = "#6ab0ff"; g.fillText(M.cfg.myName || "TU", cx - 22, 14); g.textAlign = "left"; g.fillStyle = "#ff8a7a"; g.fillText(M.cfg.foeName || "RIVALI", cx + 22, 14);
     g.textAlign = "center"; g.fillStyle = "#fff"; g.font = "900 13px system-ui"; g.fillText(`${M.score[0]}-${M.score[1]}`, cx, 15);
     if (M.cm && M.cm.l > 0) { const a = Math.min(1, M.cm.l / 20); g.globalAlpha = a; g.fillStyle = "#000b"; g.beginPath(); g.roundRect(6, 22, vw - 12, 17, 6); g.fill(); g.fillStyle = "#ffe08a"; g.font = "bold 10px system-ui"; g.textAlign = "center"; g.fillText("🎙️ " + M.cm.t, cx, 34, vw - 24); g.globalAlpha = 1; }
-    const rem = M.extra ? Math.max(0, Math.ceil((DUR + 1800 - M.t) / 60)) : Math.max(0, Math.ceil((DUR - Math.max(0, M.t)) / 60)); g.font = "bold 9px system-ui"; g.fillStyle = "#000a"; g.fillRect(2, 2, 40, 14); g.fillStyle = M.extra ? "#ffd23f" : "#fff"; g.textAlign = "center"; g.fillText((M.extra ? "ORO " : "") + rem + "s", 22, 12);
+    const rem = M.extra ? Math.max(0, Math.ceil((DUR + 1800 - M.t) / 60)) : Math.max(0, Math.ceil((DUR - Math.max(0, M.t)) / 60)); g.font = "bold 9px system-ui"; g.fillStyle = "#000a"; g.fillRect(2, 2, 48, 14); g.fillStyle = M.extra ? "#ffd23f" : "#fff"; g.textAlign = "center"; g.fillText((M.extra ? "ORO " : "") + rem + "s", 26, 12);
     const A = M.ctl ? ABIL[M.ctl.role] : null, can = A && M.energy[0] >= A[2];
     const BY = M.land ? 28 : CH - 11;
     g.fillStyle = "#000a"; g.fillRect(4, BY - 1, 100, 9); g.fillStyle = can ? "#ffd23f" : "#8a7a30"; g.fillRect(5, BY, 98 * M.energy[0] / 100, 7); g.fillStyle = "#fff"; g.font = "bold 7px system-ui"; g.textAlign = "left"; g.fillText(`GRINTA${A ? " · " + A[0] : ""}${can ? " ✓" : ""}`, 7, BY + 6);
     g.fillStyle = "#000a"; const FXo = M.land ? 44 : 0; g.fillRect(vw - 62 - FXo, BY - 1, 58, 9); g.fillStyle = M.stam > 25 ? "#5ad8ff" : "#d85a5a"; g.fillRect(vw - 61 - FXo, BY, 56 * M.stam / 100, 7); g.fillStyle = "#fff"; g.textAlign = "right"; g.fillText("FIATO", vw - 7 - FXo, BY + 6);
     if (vw < CW) { const rw = 76, rh = rw * H / W, rx = vw / 2 - rw / 2, ry = CH - rh - 3; g.fillStyle = "rgba(10,40,20,.65)"; g.fillRect(rx, ry, rw, rh); g.strokeStyle = "rgba(255,255,255,.5)"; g.lineWidth = 0.7; g.strokeRect(rx, ry, rw, rh); g.beginPath(); g.moveTo(rx + rw / 2, ry); g.lineTo(rx + rw / 2, ry + rh); g.stroke(); const mx = (x) => rx + (x / W) * rw, my = (y) => ry + (y / H) * rh; M.all.forEach((q) => { g.fillStyle = q === M.ctl ? "#ffd23f" : q.team ? "#ff6a5a" : "#5aa8ff"; g.beginPath(); g.arc(mx(q.x), my(q.y), q === M.ctl ? 2 : 1.4, 0, 7); g.fill(); }); g.fillStyle = "#fff"; g.beginPath(); g.arc(mx(M.ball.x), my(M.ball.y), 1.6, 0, 7); g.fill(); g.strokeStyle = "#ffd23f"; g.strokeRect(rx + ((M.cam + MX) / CW) * rw, ry, (vw / CW) * rw, rh); }
     if (M.t < 0) { g.fillStyle = "#0008"; g.fillRect(0, CH / 2 - 30, vw, 54); g.fillStyle = "#ffd23f"; g.font = "900 26px system-ui"; g.textAlign = "center"; g.fillText(M.t > -70 ? "FISCHIO D'INIZIO!" : "PRONTI?", cx, CH / 2 + 8); }
+    if (M.extra && M.t >= DUR && M.t < DUR + 90) { g.fillStyle = "#0009"; g.fillRect(0, CH / 2 - 28, vw, 50); g.fillStyle = "#ffd23f"; g.font = "900 20px system-ui"; g.textAlign = "center"; g.fillText("⚽ GOLDEN GOL!", cx, CH / 2); g.font = "bold 10px system-ui"; g.fillStyle = "#fff"; g.fillText("Tempi supplementari: chi segna vince!", cx, CH / 2 + 16); }
     if (M.goalT > 0) { g.fillStyle = "#0008"; const oy = CH / 2 - 120; g.fillRect(0, 84 + oy, vw, 72); const s = M.scorer, u = s && imgOf(s.id); if (u && u.complete && u.naturalWidth) { g.save(); g.beginPath(); g.arc(cx - 70, 120 + oy, 30, 0, 7); g.clip(); g.drawImage(u, cx - 100, 90 + oy, 60, 60); g.restore(); g.strokeStyle = s.col; g.lineWidth = 3; g.beginPath(); g.arc(cx - 70, 120 + oy, 30, 0, 7); g.stroke(); } g.fillStyle = M.lastScorer ? "#ff8a8a" : "#ffd23f"; g.font = "900 36px system-ui"; g.textAlign = "center"; g.fillText("GOOOL!", cx + 16, 128 + oy); if (s) { g.font = "bold 11px system-ui"; g.fillStyle = "#fff"; g.fillText(s.n, cx + 16, 146 + oy); } }
     g.restore();
   }
@@ -322,7 +363,7 @@
     n = n || 3; const all = S().CARDS, pool = all.filter((c) => c.saga === theme), p = pool.length >= n + 1 ? pool : all, out = [], used = {}; for (let i = 0; i < n + 1; i++) { let c; for (let k = 0; k < 20; k++) { c = p[Math.floor(rand() * p.length)]; if (!used[c.id]) break; } used[c.id] = 1; out.push(c); } return out; }
   function menu(back) {
     if (back) BACK = back; const body = shell("⚽ Calcio d'Azione Eroi"), r = load(), team = myTeam(r.mode), rl = (c) => (ABIL[c.role] ? c.role : "A");
-    body.innerHTML = `<p class="sum">Partita 3 contro 3 o 5 contro 5 (campo grande con camera) con i personaggi delle saghe, joystick libero, tiro caricato, scivolata, anche in orizzontale. Ogni personaggio ha il <b>super tiro della sua saga</b> (curva, zig-zag, invisibile, ghiaccio, fulmine...); poi Regia, Muro, Magnete.</p><button type="button" class="one" data-mode="1">👥 Formato: ${r.mode === 5 ? "5 contro 5 (campo grande)" : "3 contro 3"}<small>tocca per cambiare · il 5 contro 5 dura 110 secondi, il 3 contro 3 80</small></button><button type="button" class="one" data-tele="1">🎙️ Telecronaca: ${r.tele ? "SÌ" : "NO"}<small>una riga di commento per gol, parate, scivolate, super. Tocca per cambiare</small></button><button type="button" class="one" data-combo="1">🤝 Tiro combinato: ${r.combo ? "SÌ" : "NO"}<small>il Super con un compagno vicino (filo dorato COMBO): +25 energia, tiro molto più forte. Tocca per cambiare</small></button><div class="sec">La tua squadra</div><p class="sum">${team.map((c) => `<b>${esc(name(c.id))}</b> (${esc(ABIL[rl(c)][0])})`).join(" · ")}</p><div class="sec">Modalità</div><button type="button" class="one" data-go="cup">🏆 Coppa degli Eroi<small>3 turni a eliminazione, difficoltà crescente · ${r.cup ? "vinta " + r.cup + " volte" : "mai vinta"}</small></button>${[1, 2, 3, 4, 5].map((l) => `<button type="button" class="one" data-l="${l}">Amichevole ${l}${"★".repeat(l)}<small>${["molto facile", "facile", "media", "difficile", "implacabile"][l - 1]} · ${r.mode === 5 ? 110 : 80} secondi · ${8 * l} monete</small></button>`).join("")}`;
+    body.innerHTML = `<p class="sum">Partita a squadre (formato 3v3 o 5v5 con campo grande e telecamera) con i personaggi delle saghe, joystick libero, tiro caricato, scivolata, anche in orizzontale. Ogni personaggio ha il <b>super tiro della sua saga</b> (curva, zig-zag, invisibile, ghiaccio, fulmine...); poi Regia, Muro, Magnete.</p><button type="button" class="one" data-mode="1">👥 Formato: ${r.mode === 5 ? "5 contro 5 (campo grande)" : "3 contro 3"}<small>tocca per cambiare · durata: ${r.mode === 5 ? "110 secondi" : "80 secondi"}</small></button><button type="button" class="one" data-tele="1">🎙️ Telecronaca: ${r.tele ? "SÌ" : "NO"}<small>una riga di commento per gol, parate, scivolate, super. Tocca per cambiare</small></button><button type="button" class="one" data-combo="1">🤝 Tiro combinato: ${r.combo ? "SÌ" : "NO"}<small>il Super con un compagno vicino (filo dorato COMBO): +25 energia, tiro molto più forte. Tocca per cambiare</small></button><div class="sec">La tua squadra</div><p class="sum">${team.map((c) => `<b>${esc(name(c.id))}</b> (${esc(ABIL[rl(c)][0])})`).join(" · ")}</p><div class="sec">Modalità</div><button type="button" class="one" data-go="cup">🏆 Coppa degli Eroi<small>3 turni a eliminazione (Quarti, Semifinale, Finale) · Tempi supplementari & Golden Gol · ${r.cup ? "vinta " + r.cup + " volte" : "mai vinta"}</small></button>${[1, 2, 3, 4, 5].map((l) => `<button type="button" class="one" data-l="${l}">Amichevole ${l}${"★".repeat(l)}<small>${["molto facile", "facile", "media", "difficile", "implacabile"][l - 1]} · ${r.mode === 5 ? 110 : 80} secondi · ${8 * l} monete</small></button>`).join("")}`;
     body.querySelector('[data-tele]').onclick = () => { const x = load(); x.tele = !x.tele; save(x); menu(); };
     body.querySelector('[data-combo]').onclick = () => { const x = load(); x.combo = !x.combo; save(x); menu(); };
     body.querySelector('[data-mode]').onclick = () => { const x = load(); x.mode = x.mode === 5 ? 3 : 5; save(x); menu(); };
@@ -332,17 +373,20 @@
   function game(lvl, st) {
     const rand = seeded(Date.now() & 0xffff), ss = [...new Set(S().CARDS.map((c) => c.saga))], th = ss[Math.floor(rand() * ss.length)], n = load().mode, fo = foesFor(rand, th, n), gk = (cs) => cs.find((c) => c.role === "P") || null;
     const SN = safe(() => S().SAGHE[th][1], "RIVALI");
-    const cfg = { n, mine: myTeam(n), foes: fo.slice(0, n), foeKeeper: gk(fo.slice(n)), myKeeper: null, lvl, myName: "TU", foeName: String(SN).replace(/^(Il |La |L'|Lo |I |Le )/, "").slice(0, 10).toUpperCase(), title: st ? `🏆 Coppa · ${["Quarti", "Semifinale", "Finale"][st.n]}` : `⚽ Amichevole ${lvl}★`, onEnd: (res, G) => results(res, G, lvl, st) };
+    const cupTitles = ["🏆 Coppa · Quarti", "🏆 Coppa · Semifinale", "🏆 Coppa · FINALE"];
+    const cfg = { n, mine: myTeam(n), foes: fo.slice(0, n), foeKeeper: gk(fo.slice(n)), myKeeper: null, lvl, myName: "TU", foeName: String(SN).replace(/^(Il |La |L'|Lo |I |Le )/, "").slice(0, 10).toUpperCase(), title: st ? cupTitles[st.n] || "🏆 Coppa degli Eroi" : `⚽ Amichevole ${lvl}★`, onEnd: (res, G) => results(res, G, lvl, st) };
     matchUI(cfg);
   }
   function cup(n) { game(2 + n, { n }); }
   function results(res, G, lvl, st) {
-    const body = shell(res === "win" ? "🏆 Vittoria" : res === "lose" ? "💫 Sconfitta" : "🤝 Pareggio"), a = load(), L = []; let coins = 0;
+    const body = shell(res === "win" ? (G.extra ? "🏆 Vittoria al Golden Gol!" : "🏆 Vittoria") : res === "lose" ? (G.extra ? "💫 Sconfitta al Golden Gol" : "💫 Sconfitta") : "🤝 Pareggio"), a = load(), L = []; let coins = 0;
     if (res === "win") { a.wins++; coins = st ? 20 * (st.n + 1) + (st.n === 2 ? 100 : 0) : 8 * lvl; safe(() => window.addCoins(coins), 0); L.push(`+${coins} monete.`); if (st && st.n === 2) a.cup++; }
     a.goals += G.score[0]; save(a);
-    if (safe(() => window.__arena, null)) safe(() => { const ar = window.__arena.load(); G.p.filter((p) => !p.keeper).forEach((p) => { ar.xp[p.id] = Math.min(60, (ar.xp[p.id] | 0) + 1); }); window.__arena.save(ar); L.push("📈 +1 esperienza di Arena a tutta la squadra."); }, 0);
+    if (safe(() => window.__arena, null)) safe(() => { const ar = window.__arena.load(); G.p.filter((p) => !p.keeper).forEach((p) => { ar.xp[p.id] = Math.min(60, (ar.xp[p.id] | 0) + (st && st.n === 2 ? 3 : 1)); }); window.__arena.save(ar); L.push(`📈 +${st && st.n === 2 ? "3" : "1"} esperienza di Arena a tutta la squadra.`); }, 0);
     const next = res === "win" && st && st.n < 2, pt = G.poss[0] + G.poss[1] || 1;
-    body.innerHTML = `<div class="erRes"><h3>${G.score[0]} - ${G.score[1]}</h3><p class="sum">Tiri ${G.stat.shots[0]}-${G.stat.shots[1]} · parate ${G.stat.saves[0]}-${G.stat.saves[1]} · possesso ${Math.round((G.poss[0] / pt) * 100)}%</p>${L.map((l) => `<p class="sum">${l}</p>`).join("")}${res === "win" && st && st.n === 2 ? `<p class="sum"><b>Coppa degli Eroi vinta!</b></p>` : ""}${res === "draw" ? `<p class="sum">Pareggio: ripetiamo.</p>` : ""}</div>${next ? `<button type="button" class="one" data-go="next">▶ Turno successivo<small>${["Semifinale", "Finale"][st.n]}</small></button>` : ""}<button type="button" class="one" data-go="again">↺ ${st && res !== "win" ? "Riprova il turno" : "Rivincita"}</button><button type="button" class="one" data-go="menu">◂ Menu</button>`;
+    const stages = ["Quarti", "Semifinale", "Finale"];
+    const bracketHTML = st ? `<div style="display:flex;justify-content:center;align-items:center;gap:6px;margin:8px 0;font-size:11px;font-weight:800"><span style="padding:4px 8px;border-radius:6px;background:${st.n > 0 || (st.n === 0 && res === 'win') ? '#1e7a3a' : st.n === 0 && res !== 'win' ? '#7a2020' : '#221a36'}">1. Quarti ${st.n > 0 || (st.n === 0 && res === 'win') ? '✓' : ''}</span><span>›</span><span style="padding:4px 8px;border-radius:6px;background:${st.n > 1 || (st.n === 1 && res === 'win') ? '#1e7a3a' : st.n === 1 && res !== 'win' ? '#7a2020' : '#221a36'}">2. Semifinale ${st.n > 1 || (st.n === 1 && res === 'win') ? '✓' : ''}</span><span>›</span><span style="padding:4px 8px;border-radius:6px;background:${st.n === 2 && res === 'win' ? '#ffd23f;color:#111' : st.n === 2 && res !== 'win' ? '#7a2020' : '#221a36'}">3. Finale ${st.n === 2 && res === 'win' ? '🏆' : ''}</span></div>` : "";
+    body.innerHTML = `<div class="erRes"><h3>${G.score[0]} - ${G.score[1]}</h3>${G.extra ? `<p style="font-weight:800;color:#ffd23f;font-size:12px;margin:2px 0">⚽ Decisa ai supplementari con il Golden Gol!</p>` : ""}<p class="sum">Tiri ${G.stat.shots[0]}-${G.stat.shots[1]} · parate ${G.stat.saves[0]}-${G.stat.saves[1]} · possesso ${Math.round((G.poss[0] / pt) * 100)}%</p>${bracketHTML}${L.map((l) => `<p class="sum">${l}</p>`).join("")}${res === "win" && st && st.n === 2 ? `<p class="sum" style="color:#ffd23f;font-size:14px"><b>🏆 COPPA DEGLI EROI VINTA! Campioni!</b></p>` : ""}${res === "draw" ? `<p class="sum">Pareggio: ripetiamo.</p>` : ""}</div>${next ? `<button type="button" class="one" data-go="next">▶ Turno successivo<small>${stages[st.n + 1]}</small></button>` : ""}<button type="button" class="one" data-go="again">↺ ${st && res !== "win" ? "Riprova il turno" : "Rivincita"}</button><button type="button" class="one" data-go="menu">◂ Menu</button>`;
     const q = (s) => body.querySelector(s); if (next) q('[data-go="next"]').onclick = () => cup(st.n + 1); q('[data-go="again"]').onclick = () => (st ? cup(st.n) : game(lvl, null)); q('[data-go="menu"]').onclick = () => menu();
   }
   window.__eroi = { open: menu, close, state: () => M, tick, press, begin, matchUI, game, cup, shoot, pass, ability, tackle, _fast: (v) => { if (M) M.fast = !!v; }, pause: (v) => { PAUSE = !!v; }, load, save, ABIL, myTeam, foesFor };
