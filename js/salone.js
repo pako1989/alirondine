@@ -832,7 +832,7 @@
     }
   ];
 
-  let SALONE_VIEW = "hub"; // "hub" (Mappa del Mondo) oppure "grid" (Catalogo Schede)
+  let SALONE_VIEW = "grid"; // default: "grid" (Catalogo Completo) oppure "hub" (Mappa del Mondo)
   let ACTIVE_MAP_REG = "riviera";
   let MAP_SEARCH_QUERY = "";
   let SWALLOW_TOKEN = { x: 120, y: 88, tx: 120, ty: 88, trail: [] };
@@ -1138,13 +1138,12 @@
   }
 
   function openMappamondo(back) {
-    SALONE_VIEW = "hub";
-    openSalone(back);
+    openSalone(back, "hub");
   }
 
   function openSalone(back, forceMode) {
     if (back) BK.sal = back; BACK = BK.sal;
-    if (forceMode) SALONE_VIEW = forceMode;
+    SALONE_VIEW = forceMode || "grid";
     const body = shell("🏛️ Salone delle Saghe & Hub del Mondo"), r = rec(), tt = totals();
     const list = SAGAS.filter(available).map((s) => ({ s, x: state(s) }));
     const lastS = list.find((o) => o.s.id === r.last);
