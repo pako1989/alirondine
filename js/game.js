@@ -5847,7 +5847,8 @@
       ...(SET.omini === "pixel" ? [{ label: `Il tuo omino: ${OMINI.names[SET.ominoHero] || "Ragazzo"} ▸`, sub: "Il personaggio pixel del tuo Campione · tocca per cambiarlo", fn: () => { SET.ominoHero = (SET.ominoHero + 1) % OMINI.names.length; save(); again(); } }] : []),
       { label: `Grafica: ${SET.gfx === "classica" ? "Classica" : "Migliorata"} ▸`, sub: SET.gfx === "classica" ? "Aspetto originale retrò, senza effetti aggiuntivi" : "Luci, cielo e mare animati, particelle, riflettori e pubblico", fn: () => { SET.gfx = SET.gfx === "classica" ? "migliorata" : "classica"; GX.low = false; GX.auto = false; GX.slow = 0; save(); again(); } },
       { label: `Dissolvenze e card di capitolo: ${SET.dis ? "sì" : "no"}`, sub: "Schermata col titolo e sfumature a ogni cambio scena", fn: () => { SET.dis = !SET.dis; save(); again(); } },
-      { label: `Filtro retrò: ${SET.crt ? "sì" : "no"}`, sub: "Righe e bordi curvi, come la tv della trattoria", fn: () => { SET.crt = !SET.crt; save(); again(); } },
+      { label: `Filtro Retrò / CRT: ${!SET.crt ? "Spento" : SET.crt === "vhs" ? "VHS Tape Vintage" : SET.crt === "scanline" ? "Scanline Monitor" : "Arcade '90 Tubo CRT"} ▸`, sub: !SET.crt ? "Nessun filtro retrò attivo (tocca per attivare Arcade, VHS o Scanlines)" : SET.crt === "vhs" ? "Effetto nastro magnetico VHS con grana, tracking orizzontale e fosfori caldi" : SET.crt === "scanline" ? "Sottili scanlines pulite da monitor arcade" : "Tubo catodico curvo anni '90, fosfori RGB e riflesso vetrato", fn: () => { const modes = [false, "arcade", "vhs", "scanline"]; const curIdx = modes.indexOf(SET.crt === true ? "arcade" : SET.crt); SET.crt = modes[(curIdx + 1) % modes.length]; save(); again(`Filtro Retrò: ${!SET.crt ? "Spento" : String(SET.crt).toUpperCase()}`); } },
+      { label: `Particellari Meteo & Ambiente: ${SET.ambientFx !== false ? "Attivi (Brezza, Foglie, Lucciole)" : "Disattivati"} ▸`, sub: SET.ambientFx !== false ? "Foglie al vento, pulviscolo dorato e lucciole notturne nel Borgo e nelle scene (tocca per disattivare)" : "Meteo statico senza particelle d'ambiente (tocca per attivare)", fn: () => { SET.ambientFx = SET.ambientFx === false; save(); again(`Particellari Meteo & Ambiente ${SET.ambientFx !== false ? "attivati" : "disattivati"}.`); } },
       { label: `Risparmio batteria: ${SET.eco ? "sì" : "no"}`, sub: SET.eco ? "Effetti pesanti spenti" : GX.auto ? "Il telefono faticava: effetti pesanti già alleggeriti" : "Se il telefono fatica, il gioco si alleggerisce da solo", fn: () => { SET.eco = !SET.eco; save(); again(); } },
       { label: `Testo più grande: ${SET.big ? "sì" : "no"}`, fn: () => { SET.big = !SET.big; save(); again(); } },
     );
@@ -11730,11 +11731,40 @@
     }
     if (ch === "L" && night && gxHeavy()) { g.save(); g.globalCompositeOperation = "lighter"; gxGlow(sx + 8, sy + 2, 26, "255,220,140", 0.35); g.restore(); }
   }
+  function gxAmbientDay(h) {
+    const leafCols = h >= 18 && h < 21 ? ["#d97706", "#f59e0b", "#b45309"] : ["#16a34a", "#65a30d", "#84cc16"];
+    for (let i = 0; i < 6; i++) {
+      const spd = 0.6 + (i % 3) * 0.35;
+      const x = ((i * 57 + frame * spd * 1.2 + Math.sin(frame / 25 + i * 2) * 16) % (W + 40)) - 20;
+      const y = ((i * 37 + frame * spd * 0.8 + Math.cos(frame / 20 + i) * 10) % (H + 30)) - 15;
+      g.fillStyle = leafCols[i % leafCols.length];
+      g.save();
+      g.translate(x, y);
+      g.rotate(frame / 18 + i * 1.5);
+      g.beginPath();
+      g.ellipse(0, 0, 3, 1.4, 0, 0, 7);
+      g.fill();
+      g.restore();
+    }
+  }
+  function gxAmbientNight() {
+    for (let i = 0; i < 7; i++) {
+      const x = ((i * 47 + Math.sin(frame / 35 + i * 1.7) * 22 + frame * 0.15) % W + W) % W;
+      const y = ((i * 31 + Math.cos(frame / 28 + i * 2.1) * 18 - frame * 0.1) % H + H) % H;
+      const glow = Math.max(0, Math.sin(frame / 15 + i * 1.8));
+      if (glow > 0.05) {
+        g.fillStyle = `rgba(187,247,208,${glow * 0.85})`;
+        g.fillRect(x, y, 2, 2);
+        gxGlow(x, y, 6, "187,247,208", glow * 0.4);
+      }
+    }
+  }
   function gxWorld() {
     const night = view.kind === "borgo" && B && B.night, h = gxHour();
     if (night) {
       g.fillStyle = "rgba(20,30,80,.12)"; g.fillRect(0, 0, W, H);
       for (let i = 0; i < 12; i++) { const x = ((i * 71 + Math.sin(frame / 40 + i) * 14) % W + W) % W, y = ((i * 47 + Math.cos(frame / 50 + i) * 10) % H + H) % H, on = (frame / 8 + i * 3) % 12 < 5; if (on) { px(x, y, 1.5, 1.5, "#fff2a0"); gxGlow(x, y, 5, "255,240,150", 0.35); } }
+      if (SET.ambientFx !== false) gxAmbientNight();
       return;
     }
     // luce del sole e ombre delle nuvole che passano
@@ -11742,6 +11772,7 @@
     g.fillStyle = "rgba(10,30,60,.07)";
     for (let i = 0; i < 3; i++) { const x = ((i * 157 + frame * 0.3) % (W + 200)) - 100, y = ((i * 83 + frame * 0.12) % (H + 120)) - 60; g.beginPath(); g.ellipse(x, y, 60, 26, 0.3, 0, 7); g.fill(); }
     gxMotes(10, "255,255,230");
+    if (SET.ambientFx !== false) gxAmbientDay(h);
     if (h >= 18 && h < 21) { g.fillStyle = "rgba(255,120,60,.06)"; g.fillRect(0, 0, W, H); }
   }
   // ---------- dopo ogni disegno: vignetta, filtro retrò, controllo delle prestazioni ----------
@@ -11751,13 +11782,23 @@
     const gr = x.createRadialGradient(W / 2, H / 2, 70, W / 2, H / 2, 200); gr.addColorStop(0, "rgba(0,0,0,0)"); gr.addColorStop(1, "rgba(0,0,0,.42)"); x.fillStyle = gr; x.fillRect(0, 0, W, H);
     return (GX.vig = c);
   }
-  function gxScan() {
-    if (GX.scan) return GX.scan;
+  function gxScan(mode) {
+    const k = mode || SET.crt || "arcade";
+    if (GX["scan_" + k]) return GX["scan_" + k];
     const c = document.createElement("canvas"); c.width = W; c.height = H; const x = c.getContext("2d");
-    for (let y = 0; y < H; y += 2) { x.fillStyle = "rgba(0,0,0,.22)"; x.fillRect(0, y, W, 1); }
-    for (let i = 0; i < W; i += 3) { x.fillStyle = "rgba(255,0,0,.035)"; x.fillRect(i, 0, 1, H); x.fillStyle = "rgba(0,255,0,.035)"; x.fillRect(i + 1, 0, 1, H); x.fillStyle = "rgba(0,0,255,.035)"; x.fillRect(i + 2, 0, 1, H); }
-    const gr = x.createRadialGradient(W / 2, H / 2, 90, W / 2, H / 2, 210); gr.addColorStop(0, "rgba(0,0,0,0)"); gr.addColorStop(1, "rgba(0,0,0,.6)"); x.fillStyle = gr; x.fillRect(0, 0, W, H);
-    return (GX.scan = c);
+    if (k === "scanline") {
+      for (let y = 0; y < H; y += 2) { x.fillStyle = "rgba(0,0,0,.26)"; x.fillRect(0, y, W, 1); }
+      const gr = x.createRadialGradient(W / 2, H / 2, 110, W / 2, H / 2, 220); gr.addColorStop(0, "rgba(0,0,0,0)"); gr.addColorStop(1, "rgba(0,0,0,.35)"); x.fillStyle = gr; x.fillRect(0, 0, W, H);
+    } else if (k === "vhs") {
+      for (let y = 0; y < H; y += 2) { x.fillStyle = "rgba(25,12,0,.26)"; x.fillRect(0, y, W, 1); }
+      for (let y = 1; y < H; y += 4) { x.fillStyle = "rgba(255,230,170,.03)"; x.fillRect(0, y, W, 1); }
+      const gr = x.createRadialGradient(W / 2, H / 2, 85, W / 2, H / 2, 205); gr.addColorStop(0, "rgba(255,200,100,.02)"); gr.addColorStop(1, "rgba(25,10,0,.55)"); x.fillStyle = gr; x.fillRect(0, 0, W, H);
+    } else {
+      for (let y = 0; y < H; y += 2) { x.fillStyle = "rgba(0,0,0,.22)"; x.fillRect(0, y, W, 1); }
+      for (let i = 0; i < W; i += 3) { x.fillStyle = "rgba(255,0,0,.035)"; x.fillRect(i, 0, 1, H); x.fillStyle = "rgba(0,255,0,.035)"; x.fillRect(i + 1, 0, 1, H); x.fillStyle = "rgba(0,0,255,.035)"; x.fillRect(i + 2, 0, 1, H); }
+      const gr = x.createRadialGradient(W / 2, H / 2, 90, W / 2, H / 2, 210); gr.addColorStop(0, "rgba(0,0,0,0)"); gr.addColorStop(1, "rgba(0,0,0,.6)"); x.fillStyle = gr; x.fillRect(0, 0, W, H);
+    }
+    return (GX["scan_" + k] = c);
   }
   let gxCrtCls = null;
   function gxPost(t0) {
@@ -11765,9 +11806,25 @@
       if ((view.kind === "borgo" && BW) || (view.kind === "trasf" && TW)) gxWorld();
       if (view.kind !== "fig" && view.kind !== "bacheca" && view.kind !== "foto") g.drawImage(gxVig(), 0, 0);
     }
-    if (SET.crt) { g.drawImage(gxScan(), 0, 0); if (frame % 3 === 0) { g.fillStyle = "rgba(255,255,255,.015)"; g.fillRect(0, 0, W, H); } }
+    if (SET.crt) {
+      const mode = typeof SET.crt === "string" ? SET.crt : "arcade";
+      g.drawImage(gxScan(mode), 0, 0);
+      if (mode === "vhs") {
+        const trackY = ((frame * 1.6) % (H + 40)) - 20;
+        g.fillStyle = "rgba(255,255,255,.04)";
+        g.fillRect(0, trackY, W, 2);
+        if (frame % 4 === 0) { g.fillStyle = "rgba(255,235,190,.018)"; g.fillRect(0, 0, W, H); }
+      } else if (frame % 3 === 0) {
+        g.fillStyle = "rgba(255,255,255,.015)"; g.fillRect(0, 0, W, H);
+      }
+    }
     try { gxPost2(); } catch {}
-    if (gxCrtCls !== !!SET.crt) { gxCrtCls = !!SET.crt; $("cv").classList.toggle("crt", gxCrtCls); }
+    const curCrtClass = !SET.crt ? "" : typeof SET.crt === "string" ? "crt-" + SET.crt : "crt";
+    if (gxCrtCls !== curCrtClass) {
+      if (gxCrtCls) $("cv").classList.remove("crt", "crt-arcade", "crt-vhs", "crt-scanline");
+      gxCrtCls = curCrtClass;
+      if (curCrtClass) $("cv").classList.add("crt", curCrtClass);
+    }
     const w = performance.now() - t0;
     if (w < 200) GX.ema = GX.ema * 0.95 + w * 0.05;
     if (gxOn() && !GX.low && !SET.eco) {
@@ -11775,7 +11832,11 @@
       else GX.slow = Math.max(0, GX.slow - 3);
     }
   }
-  (() => { const st = document.createElement("style"); st.textContent = "#cv.crt{border-radius:14px;filter:saturate(1.15) contrast(1.06);box-shadow:inset 0 0 30px #000}"; document.head.appendChild(st); })();
+  (() => {
+    const st = document.createElement("style");
+    st.textContent = "#cv.crt,#cv.crt-arcade{border-radius:14px;filter:saturate(1.18) contrast(1.08) brightness(1.02);box-shadow:inset 0 0 35px rgba(0,0,0,0.85),0 0 16px rgba(56,189,248,0.2)}#cv.crt-vhs{border-radius:12px;filter:saturate(1.22) contrast(1.1) sepia(0.12);box-shadow:inset 0 0 40px rgba(45,18,0,0.85),0 0 16px rgba(251,191,36,0.25)}#cv.crt-scanline{border-radius:10px;filter:contrast(1.06);box-shadow:inset 0 0 25px rgba(0,0,0,0.7)}";
+    document.head.appendChild(st);
+  })();
 
   // ================= SCENE ANIMATE: esultanze, fischi, coppa, cartellini =================
   let CEL = null;
