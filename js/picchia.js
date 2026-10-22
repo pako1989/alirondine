@@ -17,7 +17,7 @@
     t: { su: 5, ac: 2, rc: 16, dmg: 15, reach: 26, stun: 30, kb: 4, kd: true, launch: 5, grab: true, nm: "presa" },
   };
   let OV = null, BACK = null, G = null, RAF = 0, PAUSE = false;
-  const load = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { tour: r.tour | 0, wins: r.wins | 0, fighter: r.fighter || "" }; };
+  const load = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { tour: r.tour | 0, wins: r.wins | 0, fighter: r.fighter || "", storyProg: r.storyProg || {}, storyWon: Array.isArray(r.storyWon) ? r.storyWon : [] }; };
   const save = (r) => safe(() => localStorage.setItem(KEY, JSON.stringify(r)), 0);
   const name = (id) => safe(() => S().name(id), id);
   const rlOf = (c) => { if (SPEC[c.role]) return c.role; const e = safe(() => S().eff(c), c); return { at: "A", te: "C", df: "D" }[e.at >= e.df && e.at >= e.te ? "at" : e.df >= e.te ? "df" : "te"]; };
@@ -362,7 +362,34 @@
 @keyframes pcCut{0%{opacity:0;transform:scaleY(.1)}12%{opacity:1;transform:none}85%{opacity:1}100%{opacity:0}}.pcRes{text-align:center;margin:12px 0}.pcRes h3{font:900 24px system-ui;margin:4px 0}
 .pcOv .pcX{display:none}.pcOv.land{overflow:hidden}.pcOv.land .wrap{max-width:none;padding:0;height:100%}.pcOv.land .bar{display:none}.pcOv.land .body{height:100%;position:relative}.pcOv.land .pcStage{max-width:none;width:100%;height:100%;display:flex;justify-content:center;background:#000}.pcOv.land .pcStage canvas{height:100%;width:auto;max-width:100%;border-radius:0}
 .pcOv.land .pcX{display:block;position:absolute;top:6px;right:8px;z-index:7;width:36px;height:36px;border-radius:10px;border:1px solid #4a3a6a;background:#221a36cc;color:#fff;font-size:15px}.pcOv.land .pcCtl{position:absolute;left:0;right:0;bottom:6px;padding:0 12px;margin:0;pointer-events:none;align-items:flex-end}.pcOv.land .pcCtl>*{pointer-events:auto}.pcOv.land .sum{display:none}
-.pcOv.land .stk{background:rgba(20,15,40,.16)!important;border-color:rgba(255,255,255,.22)!important;box-shadow:none!important}.pcOv.land .stk i{opacity:.62}.pcOv.land .pcCtl button{background:rgba(34,26,54,.45);border-color:rgba(255,255,255,.2)}.pcOv.land .pcCtl .tb,.pcOv.land .pcCtl .sp{background:rgba(42,74,122,.5)}.pcOv.land .pcCtl .su{background:rgba(122,90,16,.5)}`;
+.pcOv.land .stk{background:rgba(20,15,40,.16)!important;border-color:rgba(255,255,255,.22)!important;box-shadow:none!important}.pcOv.land .stk i{opacity:.62}.pcOv.land .pcCtl button{background:rgba(34,26,54,.45);border-color:rgba(255,255,255,.2)}.pcOv.land .pcCtl .tb,.pcOv.land .pcCtl .sp{background:rgba(42,74,122,.5)}.pcOv.land .pcCtl .su{background:rgba(122,90,16,.5)}
+.pcStoryHub{background:#16102a;border:1px solid #5a4282;border-radius:12px;padding:12px;margin:8px 0}
+.pcStoryHero{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.pcStoryHero img{width:62px;height:62px;border-radius:50%;object-fit:cover;border:2.5px solid #ffd23f;flex-shrink:0;box-shadow:0 0 10px #ffd23f55}
+.pcStoryTitle{font:900 15px system-ui;color:#ffd23f;line-height:1.2}
+.pcStorySub{font-size:11px;color:#c8b8ff;margin-top:2px}
+.pcStoryProlog{font-size:12px;line-height:1.45;color:#e2daf2;background:#1e1438;border:1px solid #4a3472;border-radius:8px;padding:8px 10px;margin:8px 0;font-style:italic}
+.pcStoryActs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:10px 0}
+.pcStoryAct{padding:6px 2px;border-radius:6px;background:#221a36;border:1px solid #3d2d5c;text-align:center;font-size:9.5px;color:#a896cc;line-height:1.2}
+.pcStoryAct.done{border-color:#7ad87a;color:#7ad87a;background:#142d1e}
+.pcStoryAct.cur{border-color:#ffd23f;color:#ffd23f;background:#3a2c10;font-weight:800}
+.pcDialBox{position:relative;background:#161028;border:2px solid #ffd23f;border-radius:12px;padding:12px;margin:10px 0;box-shadow:0 0 16px #000a}
+.pcDialFaces{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px;padding:0 8px}
+.pcDialFace{display:flex;flex-direction:column;align-items:center;gap:4px;opacity:.45;transition:all .2s;max-width:44%}
+.pcDialFace.active{opacity:1;transform:scale(1.08)}
+.pcDialFace img{width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid #a896cc}
+.pcDialFace.active img{border-color:#ffd23f;box-shadow:0 0 12px #ffd23f88}
+.pcDialFace span{font-size:11px;font-weight:800;color:#f4f0e4;text-align:center}
+.pcDialBubble{background:#231a3d;border:1.5px solid #5a4282;border-radius:10px;padding:11px 13px;min-height:58px;font-size:13.5px;line-height:1.45;color:#f4f0e4;position:relative}
+.pcDialBubble b{color:#ffd23f;display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+.pcDialTap{font-size:10.5px;color:#a896cc;text-align:right;margin-top:6px;opacity:.8}
+.pcDialSkip{float:right;background:#2a1c44;border:1px solid #6b4c9e;color:#f4f0e4;border-radius:6px;font-size:10.5px;padding:3px 8px;cursor:pointer}
+.pcEpilBox{background:linear-gradient(180deg,#2b194c,#130c24);border:2px solid #ffd23f;border-radius:14px;padding:16px 12px;text-align:center;box-shadow:0 0 24px #ffd23f44;margin:10px 0}
+.pcEpilBox img{width:86px;height:86px;border-radius:50%;border:3px solid #ffd23f;box-shadow:0 0 18px #ffd23faa;margin:0 auto 10px;display:block;object-fit:cover}
+.pcEpilBadge{display:inline-block;background:#ffd23f;color:#1a0f2e;font:900 11px system-ui;padding:2px 10px;border-radius:12px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.pcEpilTitle{font:900 17px system-ui;color:#ffd23f;margin-bottom:10px}
+.pcEpilText{font-size:13px;line-height:1.6;color:#eae4f7;text-align:left;background:#1c1332;padding:12px;border-radius:8px;border:1px solid #4a3472;margin:12px 0}
+.pcRewardPill{display:inline-flex;align-items:center;gap:6px;background:#2a1d48;border:1px solid #ffd23f;padding:4px 10px;border-radius:16px;font-size:12px;color:#ffd23f;font-weight:700;margin:3px}`;
     document.head.appendChild(st);
   }
   function shell(title) { css(); stop(); if (OV) OV.remove(); OV = document.createElement("div"); OV.className = "pcOv"; OV.innerHTML = `<div class="wrap"><div class="bar"><h2>${title}</h2><button type="button" class="x" aria-label="Chiudi">✕</button></div><div class="body"></div></div>`; OV.querySelector(".x").onclick = () => { const live = G && !G.over; stop(); if (live) return menu(); const b = BACK; close(); if (typeof b === "function") b(); }; document.body.appendChild(OV); return OV.querySelector(".body"); }
@@ -386,6 +413,302 @@
     const loop = (t) => { if (!OV || !G) return; acc += Math.min(100, t - last); last = t; while (acc >= 16.67) { if (!PAUSE) tick(); acc -= 16.67; } draw(g); if (G && !G.over) RAF = requestAnimationFrame(loop); };
     RAF = requestAnimationFrame(loop); G.draw = () => draw(g);
   }
+  // ------------------------------------------------------------ Modalità Storia: Cronache & Nemesi
+  const STORY_LORE = {
+    cm_bastiano: {
+      title: "L'Eterno Capitano del Borgo",
+      prologue: "Il vecchio Campetto custodisce quarant'anni di sogni e polvere. Bastiano stringe i pugni con un sorriso stanco ma feroce: 'Dicono che il tempo cancelli la grinta... oggi dimostrerò a tutti questi campioni moderni cosa significa avere cuore.'",
+      nemesis: "cm_leone",
+      epilogue: "Bastiano si siede sulla panchina di legno scrostata del Borgo, con il trofeo d'oro posato a terra vicino al pallone di cuoio. I ragazzi del quartiere accorrono ad abbracciarlo: la leggenda non invecchia mai, e la maglia del Campetto brilla più fiera che mai.",
+      nemesisDials: [
+        { who: "foe", text: "Bastiano! Pensavi davvero che avrei lasciato a te tutta la gloria del Duello?" },
+        { who: "me", text: "Valerio... sono quarant'anni che corri. È ora di vedere se hai ancora fiato contro la vecchia guardia!" },
+        { who: "foe", text: "Il mio collo pieno piega anche le colonne di pietra! Fatti sotto, capitano!" },
+        { who: "me", text: "Meno parole, Leone. Fammi vedere di che pasta sei fatto!" }
+      ]
+    },
+    cm_leone: {
+      title: "La Saetta d'Oro del Campetto",
+      prologue: "Valerio Leone non ha mai sopportato le chiacchiere da bar. Il suo tiro mancino ha fatto epoca, ma nell'Arena dei Sogni cerca una prova definitiva: piegare i campioni di ogni dimensione.",
+      nemesis: "cm_bastiano",
+      epilogue: "Con un urlo che risuona fino agli spalti più alti, Leone alza le braccia al cielo. Il suo tiro implacabile ha abbattuto ogni difesa: il Campetto ha il suo eroe immortale.",
+      nemesisDials: [
+        { who: "me", text: "Bastiano! Fin dai tempi del '78 aspettavo questo momento a viso aperto!" },
+        { who: "foe", text: "Valerio, il tuo tiro fa tremare le reti, ma io non sono una rete: sono un muro." },
+        { who: "me", text: "Allora preparati a volare via insieme alle macerie!" }
+      ]
+    },
+    tc_brunilde: {
+      title: "La Valchiria Infrangibile",
+      prologue: "La Casata del Trono esige nobiltà, disciplina e lama ferma. Brunilde scende nell'Arena per difendere l'onore della sua gente e saggiare la tempra dei guerrieri di mondi lontani.",
+      nemesis: "tc_gualtiero",
+      epilogue: "Brunilde ripone lo scudo ammaccato e contempla il silenzio reverenziale dell'arena. La corona dei guerrieri le spetta di diritto: la rocca del Trono rimarrà inespugnata.",
+      nemesisDials: [
+        { who: "foe", text: "Dama Brunilde! Il dovere cavalleresco mi impone di non trattenere alcun colpo." },
+        { who: "me", text: "Risparmia i convenevoli, Gualtiero! La mia guardia non conosce crepe. Mostrami il tuo valore!" },
+        { who: "foe", text: "Che sia l'acciaio a decidere il destino della casata!" }
+      ]
+    },
+    tc_gualtiero: {
+      title: "Lo Scudo del Regno",
+      prologue: "Fedele al giuramento e alla bandiera, Gualtiero non combatte per vanità ma per la sacra gloria del Regno. Ogni suo colpo è bilanciato da secoli di disciplina.",
+      nemesis: "tc_brunilde",
+      epilogue: "Gualtiero rende l'onore delle armi agli avversari sconfitti. La sua spada rifulge di luce dorata: l'integrità e la fede del vero cavaliere hanno trionfato nel Duello.",
+      nemesisDials: [
+        { who: "me", text: "Brunilde, per troppo tempo le nostre casate si sono sfidate nell'ombra. Oggi chiariremo tutto." },
+        { who: "foe", text: "Impugna la spada, cavaliere! Vediamo se la tua disciplina regge contro la tempesta!" }
+      ]
+    },
+    pd_zeno: {
+      title: "L'Ombra del Gran Gala",
+      prologue: "Tra i valzer di mezzanotte e i riflessi dei cristalli, Zeno è un calcolatore implacabile. Scende nell'Arena dei Sogni come si partecipa a un ballo d'alta società: con eleganza chirurgica.",
+      nemesis: "of_ferro",
+      epilogue: "Zeno si spolvera il bavero del frac senza aver versato una goccia di sudore. I riflettori si spengono sui rivali esausti: la classe e l'ingegno superano sempre la forza bruta.",
+      nemesisDials: [
+        { who: "foe", text: "Guarda un po', il damerino impomatato del Gala! Ti rovinerò la giacchetta di seta!" },
+        { who: "me", text: "La tua officina è rumorosa e rozza, Ferro. I miei colpi arrivano a destinazione prima che tu batta ciglio." },
+        { who: "foe", text: "Vediamo come schivi un maglio da cento chili!" }
+      ]
+    },
+    of_ferro: {
+      title: "Il Maglio dell'Officina",
+      prologue: "Grasso d'ingranaggi, fuliggine e braccia da fabbro. Ferro non crede nelle buone maniere: quando c'è da aggiustare i conti sul ring, un pugno pesante risolve qualsiasi disputa.",
+      nemesis: "pd_zeno",
+      epilogue: "Ferro batte l'avambraccio muscoloso contro la ringhiera del ring ridendo di cuore. Tra scintille di bronzo e cori dei meccanici, il campionato dei sogni è conquistato a suon di mazzate.",
+      nemesisDials: [
+        { who: "me", text: "Zeno! Niente sale dorate o pianoforti: oggi assaggi il ferro battuto a caldo!" },
+        { who: "foe", text: "La violenza non compensa la lentezza dei tuoi riflessi, caro Ferro." },
+        { who: "me", text: "Ti farò rimangiare quella linguaccia raffinata!" }
+      ]
+    },
+    cf_pierrot: {
+      title: "Il Burattinaio Senza Volto",
+      prologue: "Un trucco bianco come la luna e uno sguardo imperscrutabile. Pierrot conosce i segreti di tutti, ma nessuno conosce i suoi. L'Arena è il palcoscenico per la sua farsa mortale.",
+      nemesis: "cf_lucre",
+      epilogue: "Le luci della ribalta si spengono, lasciando sul ring solo una rosa bianca e la maschera di Pierrot. Il pubblico applaude frastornato: la commedia più tragica ha incoronato il suo re.",
+      nemesisDials: [
+        { who: "foe", text: "È finita la recita, Pierrot. So chi si nasconde dietro quella maschera da saltimbanco!" },
+        { who: "me", text: "Lucrezia... il sipario cala sempre quando la verità sta per essere rivelata." },
+        { who: "foe", text: "Non ci saranno applausi per te alla fine di questa lotta!" }
+      ]
+    },
+    nr_vektor: {
+      title: "L'Algoritmo Supremo 2099",
+      prologue: "Calcoli cibernetici, sinapsi overclockate e traiettorie previste al microsecondo. Vektor considera gli avversari semplici equazioni biologiche da azzerare.",
+      nemesis: "nr_zero",
+      epilogue: "L'interfaccia neurale lampeggia: 'Minacce neutralizzate. Efficienza 100%'. Vektor archivia i dati della simulazione: il futuro appartiene alla pura precisione digitale.",
+      nemesisDials: [
+        { who: "foe", text: "Vektor, i tuoi circuiti non possono calcolare la scintilla e l'istinto umano." },
+        { who: "me", text: "L'istinto è solo una variazione entropica trascurabile, Zero. Inizializzo la cancellazione." }
+      ]
+    },
+    cm_saverio: {
+      title: "La Roccia Inviolabile",
+      prologue: "Saverio ha parato di tutto: tiri a fil di palo, punizioni sotto l'incrocio e tempeste di vento. Sul ring non cambierà mestiere: nessuno oltrepasserà la sua guardia.",
+      nemesis: "tc_ardo",
+      epilogue: "Saverio sistema i vecchi guantoni e saluta il quartiere con un cenno solenne. La porta del Borgo rimane sprangata: nessun guerriero è riuscito a far crollare il guardiano.",
+      nemesisDials: [
+        { who: "foe", text: "Portiere del Borgo! Io ho difeso le roccaforti del Nord contro gli assedi! Credi di resistere al mio urto?" },
+        { who: "me", text: "Le tue fortezze sono crollate nei libri di storia, Ardo. Io invece sono ancora qui, in piedi tra i pali!" }
+      ]
+    },
+    cm_pio: {
+      title: "Il Motorino Inesauribile",
+      prologue: "Pio non ha il pedigree dei grandi campioni, ma corre fino all'ultimo secondo di recupero. Vuole dimostrare che la tenacia batte qualsiasi talento presuntuoso.",
+      nemesis: "cm_bastiano",
+      epilogue: "Pio salta sulle corde del ring esultando con tutta la voce che ha in corpo. Da riserva bistrattata a campione indiscusso dei sogni: il sogno è diventato realtà.",
+      nemesisDials: [
+        { who: "me", text: "Capitano! Non trattenerti: oggi voglio dimostrarti che ho imparato a non abbassare mai la testa!" },
+        { who: "foe", text: "Bravo Pio! Corri pure quanto vuoi, ma se vuoi battermi dovrai passare sopra la mia esperienza!" }
+      ]
+    }
+  };
+
+  function getStoryPlan(fId) {
+    const meCard = S().BY[fId] || S().CARDS[0];
+    const custom = STORY_LORE[fId] || {};
+    let nemId = custom.nemesis;
+    if (!nemId || !S().BY[nemId]) {
+      const candidates = S().CARDS.filter((c) => c.id !== fId);
+      const sameSaga = candidates.filter((c) => c.saga === meCard.saga);
+      const pool = sameSaga.length >= 2 ? sameSaga : candidates;
+      nemId = pool[hash(fId + "nem") % pool.length].id;
+    }
+    const nemCard = S().BY[nemId] || S().CARDS[1];
+    const a1Pool = S().CARDS.filter((c) => c.id !== fId && c.id !== nemId && (!meCard.saga || c.saga === meCard.saga));
+    const a1Card = a1Pool.length ? a1Pool[hash(fId + "a1") % a1Pool.length] : S().CARDS.filter((c) => c.id !== fId)[0];
+    const a2Pool = S().CARDS.filter((c) => c.id !== fId && c.id !== nemId && c.saga !== meCard.saga);
+    const a2Card = a2Pool.length ? a2Pool[hash(fId + "a2") % a2Pool.length] : S().CARDS.filter((c) => c.id !== fId && c.id !== a1Card.id)[0];
+    const bossPool = ["of_titano", "cf_pierrot", "mg_ren", "nr_zero", "tc_ardo", "pd_delmonte"].filter((id) => id !== fId && id !== nemId);
+    const bossCard = S().BY[bossPool[hash(fId + "boss") % bossPool.length]] || S().CARDS.filter((c) => c.id !== fId && c.id !== nemId)[0];
+    const title = custom.title || `${name(fId)}, ${trOf(meCard) === "at" ? "Furia" : trOf(meCard) === "df" ? "Baluardo" : "Stratega"} dei Sogni`;
+    const prologue = custom.prologue || `${name(fId)} varca la soglia del Duello dei Sogni. Non cerca solo la vittoria, ma la consacrazione definitiva del proprio stile di lotta contro le leggende di ogni epoca.`;
+    const epilogue = custom.epilogue || `Con la vittoria sul Campione Supremo, ${name(fId)} solleva il trofeo scintillante tra gli applausi dell'intera Arena. Il suo nome rimarrà per sempre leggenda tra i guerrieri dei sogni.`;
+    return {
+      hero: meCard,
+      title,
+      prologue,
+      epilogue,
+      acts: [
+        { num: 1, name: "La Scintilla del Ring", foe: a1Card, lvl: 1, boss: false },
+        { num: 2, name: "Il Crocevia delle Saghe", foe: a2Card, lvl: 2, boss: false },
+        { num: 3, name: "La Nemesi Storica", foe: nemCard, lvl: 3, boss: false, isNemesis: true },
+        { num: 4, name: "Il Campione Supremo", foe: bossCard, lvl: 4, boss: true, isBoss: true }
+      ],
+      customDials: custom.nemesisDials || null
+    };
+  }
+
+  function getActDialogs(plan, actIdx) {
+    const act = plan.acts[actIdx], me = plan.hero, foe = act.foe;
+    if (act.isNemesis && plan.customDials) return plan.customDials;
+    if (act.num === 1) {
+      return [
+        { who: "foe", text: `Ti stavo aspettando, ${name(me.id)}! Vediamo se i tuoi colpi sono all'altezza della tua fama.` },
+        { who: "me", text: `Non farti illusioni: ho affilato le mie tecniche per arrivare fino in fondo al torneo!` },
+        { who: "foe", text: `Meno parole e guardia alta: che il duello cominci!` }
+      ];
+    }
+    if (act.num === 2) {
+      return [
+        { who: "foe", text: `Un guerriero della saga ${foe.saga || "del Borgo"} contro la mia scuola! Sarà una lezione veloce.` },
+        { who: "me", text: `Le leggende della mia terra non temono la tua superbia. Te lo dimostrerò sul ring!` },
+        { who: "foe", text: `Fatti sotto, allora! Vediamo cosa sai fare!` }
+      ];
+    }
+    if (act.num === 3) {
+      return [
+        { who: "foe", text: `${name(me.id)}... sapevo che il destino ci avrebbe portati qui, faccia a faccia.` },
+        { who: "me", text: `${name(foe.id)}... è giunto il momento di chiudere i conti. Nessun pareggio, nessun rinvio!` },
+        { who: "foe", text: `Un solo lottatore uscirà da questa sabbia da vincitore. Mostrami tutto quello che hai!` },
+        { who: "me", text: `Preparati: non avrò pietà!` }
+      ];
+    }
+    return [
+      { who: "foe", text: `Sei arrivato fino al cuore dei Sogni, ${name(me.id)}... ma la corona dei campioni non si concede ai deboli.` },
+      { who: "me", text: `Ho superato ogni ostacolo per salire su questo ring. Non mi fermerò a un passo dalla vetta!` },
+      { who: "foe", text: `Allora affronta la mia furia suprema: cadi e svanisci nel nulla!` }
+    ];
+  }
+
+  function storyDialog(plan, actIdx, onDone) {
+    const act = plan.acts[actIdx], me = plan.hero, foe = act.foe;
+    const lines = getActDialogs(plan, actIdx);
+    let step = 0;
+    const body = shell(`📜 Atto ${act.num} · ${act.name}`);
+    const render = () => {
+      const cur = lines[step];
+      const isMe = cur.who === "me";
+      body.innerHTML = `<div class="pcDialBox"><button type="button" class="pcDialSkip" aria-label="Salta">⏩ Salta</button><div class="pcDialFaces"><div class="pcDialFace${isMe ? " active" : ""}"><img alt="" src="${safe(() => S().port(me.id), "")}"><span>${esc(name(me.id))}</span></div><div style="font:900 16px system-ui;color:#ffd23f">VS</div><div class="pcDialFace${!isMe ? " active" : ""}"><img alt="" src="${safe(() => S().port(foe.id), "")}"><span>${esc(name(foe.id))}</span></div></div><div class="pcDialBubble"><b>${esc(isMe ? name(me.id) : name(foe.id))}</b>«${esc(cur.text)}»<div class="pcDialTap">${step + 1}/${lines.length} · Tocca per continuare ▸</div></div></div><button type="button" class="one" data-next="1">${step < lines.length - 1 ? "▶ Continua" : "⚔️ COMBATTI!"}</button>`;
+      const box = body.querySelector(".pcDialBox");
+      const adv = () => {
+        if (step < lines.length - 1) { step++; render(); }
+        else onDone();
+      };
+      body.querySelector(".pcDialSkip").onclick = (e) => { e.stopPropagation(); onDone(); };
+      box.onclick = adv;
+      body.querySelector('[data-next]').onclick = adv;
+    };
+    render();
+  }
+
+  function storyFight(actIdx, plan) {
+    const act = plan.acts[actIdx], meCard = plan.hero, foeCard = act.foe;
+    const me = mkF(meCard, 0, { lv: lvOf(meCard.id) });
+    const foe = mkF(foeCard, 1, { ai: act.lvl, boss: act.boss, hpm: act.boss ? 1.35 : 1, m: (act.lvl - 2) * 0.05 });
+    fightUI({
+      me,
+      foe,
+      title: `📜 Atto ${act.num} · ${act.name}`,
+      bgKey: act.theme || "stadium",
+      onEnd: (res, g) => {
+        const win = res === "win";
+        const body = shell(win ? `🏆 Atto ${act.num} Superato!` : "💫 Sconfitta");
+        const r = load();
+        let coins = 0;
+        if (win) {
+          r.wins++;
+          coins = 12 * act.lvl + (act.boss ? 80 : 0);
+          safe(() => window.addCoins(coins), 0);
+          const nextAct = actIdx + 1;
+          r.storyProg[meCard.id] = Math.max(r.storyProg[meCard.id] || 0, nextAct);
+          if (act.boss && !r.storyWon.includes(meCard.id)) {
+            r.storyWon.push(meCard.id);
+            safe(() => window.addCoins(100), 0);
+            coins += 100;
+          }
+          save(r);
+          if (safe(() => window.__arena, null)) {
+            const ar = window.__arena.load();
+            ar.xp[meCard.id] = Math.min(60, (ar.xp[meCard.id] | 0) + (act.boss ? 3 : 1));
+            window.__arena.save(ar);
+          }
+        }
+        if (win && actIdx === 3) {
+          storyEpilogue(plan, coins);
+          return;
+        }
+        body.innerHTML = `<div class="pcRes"><h3>${win ? "Vittoria!" : "Sconfitta"}</h3><p class="sum">${esc(me.n)} ${win ? "supera" : "è battuto da"} ${esc(foe.n)} (${g.p.rounds}-${g.e.rounds}).</p>${win ? `<p class="sum" style="color:#ffd23f">+${coins} monete guadagnate!</p><p class="sum" style="color:#7ad87a">📈 +1 maestria d'Arena per ${esc(me.n)}.</p>` : `<p class="sum">Studia le aperture del rivale, schiva con il doppio tocco e para al momento giusto per sconfiggerlo.</p>`}</div>${win && actIdx < 3 ? `<button type="button" class="one" data-next="1">▶ Prossimo Atto (${actIdx + 2}/4: ${esc(plan.acts[actIdx + 1].name)})<small>rivale: ${esc(name(plan.acts[actIdx + 1].foe.id))}</small></button>` : ""}<button type="button" class="one" data-retry="1">↺ Riprova Atto ${act.num}</button><button type="button" class="one" data-hub="1">📜 Cronache del Guerriero<small>torna alla panoramica della storia</small></button><button type="button" class="one" data-menu="1">◂ Menu Duello</button>`;
+        const q = (s) => body.querySelector(s);
+        if (win && actIdx < 3) q('[data-next]').onclick = () => storyDialog(plan, actIdx + 1, () => storyFight(actIdx + 1, plan));
+        q('[data-retry]').onclick = () => storyDialog(plan, actIdx, () => storyFight(actIdx, plan));
+        q('[data-hub]').onclick = () => storyHub();
+        q('[data-menu]').onclick = () => menu();
+      }
+    });
+  }
+
+  function storyEpilogue(plan, coins) {
+    const me = plan.hero;
+    const body = shell("👑 Epilogo Trionfale");
+    body.innerHTML = `<div class="pcEpilBox"><img alt="" src="${safe(() => S().port(me.id), "")}"><div class="pcEpilBadge">👑 CAMPIONE SUPREMO DEI SOGNI</div><div class="pcEpilTitle">${esc(plan.title)}</div><div class="pcEpilText">${esc(plan.epilogue)}</div><div style="margin:8px 0"><span class="pcRewardPill">🪙 +${coins || 150} Monete</span><span class="pcRewardPill">⭐ Corona della Storia</span><span class="pcRewardPill">📈 +3 Maestria Arena</span></div></div><button type="button" class="one" data-again="1">↺ Rigioca la Storia dall'Atto 1<small>rivivi tutti i dialoghi e le sfide</small></button><button type="button" class="one" data-hub="1">📜 Cronache del Guerriero<small>scegli un altro combattente</small></button><button type="button" class="one" data-menu="1">◂ Torna al Duello dei Sogni</button>`;
+    body.querySelector('[data-again]').onclick = () => {
+      const r = load();
+      r.storyProg[me.id] = 0;
+      save(r);
+      storyDialog(plan, 0, () => storyFight(0, plan));
+    };
+    body.querySelector('[data-hub]').onclick = () => storyHub();
+    body.querySelector('[data-menu]').onclick = () => menu();
+  }
+
+  function storyHub() {
+    const body = shell("📜 Modalità Storia: Cronache & Nemesi");
+    const r = load(), own = mine();
+    if (!own.length) { body.innerHTML = `<p class="sum">Sblocca personaggi giocando le saghe per iniziare la loro storia.</p>`; return; }
+    if (!r.fighter || !own.some((c) => c.id === r.fighter)) { r.fighter = own[0].id; save(r); }
+    const cur = S().BY[r.fighter];
+    const plan = getStoryPlan(cur.id);
+    const prog = r.storyProg[cur.id] || 0;
+    const won = r.storyWon.includes(cur.id);
+
+    body.innerHTML = `<div class="pcStoryHub"><div class="pcStoryHero"><img alt="" src="${safe(() => S().port(cur.id), "")}"><div><div class="pcStoryTitle">${won ? "👑 " : ""}${esc(plan.title)}</div><div class="pcStorySub">${esc(name(cur.id))} · ${esc(({ A: "Attaccante", C: "Centrocampista", D: "Difensore", P: "Portiere" })[rlOf(cur)])} · ${TR[trOf(cur)][1]} ${TR[trOf(cur)][0]}</div></div></div><div class="pcStoryProlog">«${esc(plan.prologue)}»</div><div class="sec">I 4 Atti della Storia</div><div class="pcStoryActs">${plan.acts.map((a, i) => {
+      const isDone = prog > i;
+      const isCur = prog === i;
+      return `<div class="pcStoryAct${isDone ? " done" : isCur ? " cur" : ""}">${isDone ? "✅" : isCur ? "⚔️" : "🔒"}<br><b>Atto ${a.num}</b><br>${esc(a.name)}</div>`;
+    }).join("")}</div></div><div class="sec">Cambia Combattente</div><div class="pcPick">${own.map((c) => {
+      const w = r.storyWon.includes(c.id);
+      return `<div class="c${c.id === r.fighter ? " sel" : ""}" data-c="${c.id}">${safe(() => S().port(c.id), null) ? `<img alt="" src="${S().port(c.id)}">` : "?"}${w ? "👑" : ""}${esc(name(c.id))}</div>`;
+    }).join("")}</div><div style="margin-top:12px">${won ? `<button type="button" class="one" data-act="epilogue">📖 Rileggi Epilogo &amp; Titolo d'Onore<small>Campione Supremo consacrato</small></button><button type="button" class="one" data-act="start">↺ Rigioca la Storia dall'Atto 1<small>affronta nuovamente le 4 sfide narrative</small></button>` : `<button type="button" class="one" data-act="start" style="border-color:#ffd23f;background:#352055">▶ ${prog === 0 ? "Inizia la Storia" : `Continua: Atto ${prog + 1}/4`}<small>${esc(plan.acts[Math.min(3, prog)].name)} · rivale: ${esc(name(plan.acts[Math.min(3, prog)].foe.id))}</small></button>`}<button type="button" class="one" data-act="menu">◂ Torna al Menu Duello</button></div>`;
+
+    body.querySelectorAll("[data-c]").forEach((e) => {
+      e.onclick = () => {
+        const x = load();
+        x.fighter = e.dataset.c;
+        save(x);
+        storyHub();
+      };
+    });
+    const epBtn = body.querySelector('[data-act="epilogue"]');
+    if (epBtn) epBtn.onclick = () => storyEpilogue(plan);
+    const stBtn = body.querySelector('[data-act="start"]');
+    if (stBtn) stBtn.onclick = () => {
+      const actIdx = won ? 0 : Math.min(3, prog);
+      storyDialog(plan, actIdx, () => storyFight(actIdx, plan));
+    };
+    body.querySelector('[data-act="menu"]').onclick = () => menu();
+  }
+
   // ------------------------------------------------------------ menu, torneo
   const mine = () => safe(() => S()._load().own.map((id) => S().BY[id]).filter(Boolean), []);
   const lvOf = (id) => safe(() => window.__arena.lvOf((window.__arena.load().xp[id]) | 0) - 1, 0);
@@ -394,8 +717,10 @@
     if (!own.length) { body.innerHTML = `<p class="sum">Servono carte: sblocca personaggi giocando le saghe, poi torna qui.</p>`; return; }
     if (!r.fighter || !own.some((c) => c.id === r.fighter)) { r.fighter = own.slice().sort((a, b) => b.at + b.df + b.te - (a.at + a.df + a.te))[0].id; save(r); }
     const cur = S().BY[r.fighter];
-    body.innerHTML = `<p class="sum">Picchiaduro 1 contro 1 con i personaggi delle saghe. Pugno, calcio, para, salto; lo <b>Speciale</b> dipende dal ruolo e il <b>Super</b> ha il cut-in. Al meglio di tre round.</p><div class="sec">Il tuo combattente: ${esc(name(cur.id))} · ${esc(({ A: "Attaccante", C: "Centrocampista", D: "Difensore", P: "Portiere" })[rlOf(cur)])} · ${TR[trOf(cur)][1]} ${TR[trOf(cur)][0]} · speciale «${esc(SPEC[rlOf(cur)][0])}»</div><div class="pcPick">${own.slice().sort((a, b) => b.at + b.df + b.te - (a.at + a.df + a.te)).map((c) => `<div class="c${c.id === r.fighter ? " sel" : ""}" data-c="${c.id}">${safe(() => S().port(c.id), null) ? `<img alt="" src="${S().port(c.id)}">` : "?"}${esc(name(c.id))}</div>`).join("")}</div><div class="sec">Modalità</div><button type="button" class="one" data-go="tour">🏆 Torneo dei Sogni<small>5 incontri, un boss in finale · ${r.tour}/5 superati · premi in monete</small></button><button type="button" class="one" data-go="quick">⚡ Incontro rapido<small>un rivale a caso, livello a scelta</small></button><button type="button" class="one" data-go="train">🥋 Allenamento<small>un sacco da boxe che non risponde: prova mosse e Super</small></button>`;
+    const doneStories = (r.storyWon || []).length;
+    body.innerHTML = `<p class="sum">Picchiaduro 1 contro 1 con i personaggi delle saghe. Pugno, calcio, para, salto; lo <b>Speciale</b> dipende dal ruolo e il <b>Super</b> ha il cut-in. Al meglio di tre round.</p><div class="sec">Il tuo combattente: ${esc(name(cur.id))} · ${esc(({ A: "Attaccante", C: "Centrocampista", D: "Difensore", P: "Portiere" })[rlOf(cur)])} · ${TR[trOf(cur)][1]} ${TR[trOf(cur)][0]} · speciale «${esc(SPEC[rlOf(cur)][0])}»</div><div class="pcPick">${own.slice().sort((a, b) => b.at + b.df + b.te - (a.at + a.df + a.te)).map((c) => `<div class="c${c.id === r.fighter ? " sel" : ""}" data-c="${c.id}">${safe(() => S().port(c.id), null) ? `<img alt="" src="${S().port(c.id)}">` : "?"}${r.storyWon && r.storyWon.includes(c.id) ? "👑" : ""}${esc(name(c.id))}</div>`).join("")}</div><div class="sec">Modalità</div><button type="button" class="one pcStoryBtn" data-story="1">📜 Modalità Storia: Cronache &amp; Nemesi<small>4 atti narrativi, dialoghi ed epilogo per ogni eroe · ${doneStories} storie concluse</small></button><button type="button" class="one" data-go="tour">🏆 Torneo dei Sogni<small>5 incontri, un boss in finale · ${r.tour}/5 superati · premi in monete</small></button><button type="button" class="one" data-go="quick">⚡ Incontro rapido<small>un rivale a caso, livello a scelta</small></button><button type="button" class="one" data-go="train">🥋 Allenamento<small>un sacco da boxe che non risponde: prova mosse e Super</small></button>`;
     body.querySelectorAll("[data-c]").forEach((e) => (e.onclick = () => { const x = load(); x.fighter = e.dataset.c; save(x); menu(); }));
+    const sBtn = body.querySelector('[data-story]'); if (sBtn) sBtn.onclick = () => storyHub();
     body.querySelector('[data-go="tour"]').onclick = () => tour(0);
     body.querySelector('[data-go="quick"]').onclick = quickPick; body.querySelector('[data-go="train"]').onclick = train;
   }
@@ -425,5 +750,5 @@
       q('[data-go="again"]').onclick = () => (mode === "tour" ? tour(idx) : match(lvl, theme, boss, mode, idx)); q('[data-go="menu"]').onclick = () => menu();
     } });
   }
-  window.__picchia = { open: menu, close, state: () => G, begin, tick, press, mkF, _fast: (v) => { if (G) G.fast = !!v; }, pause: (v) => { PAUSE = !!v; }, match, load, save, fightUI, SPEC };
+  window.__picchia = { open: menu, close, state: () => G, begin, tick, press, mkF, _fast: (v) => { if (G) G.fast = !!v; }, pause: (v) => { PAUSE = !!v; }, match, load, save, fightUI, SPEC, storyHub, storyFight, getStoryPlan };
 })();
