@@ -443,20 +443,31 @@
   }
   function superMove(a) {
     if (B.activeCombo) {
-      cutin(a, `⚡ ${B.activeCombo.title}`);
+      cutinDuo(B.activeCombo.u1, B.activeCombo.u2, B.activeCombo.title);
       const go = () => {
         if (!B || B.over) return;
         alive(B.foes).forEach((f) => {
-          hit(a, f, 1.5);
-          if (f.hp > 0) { f.burn = Math.max(f.burn, 2); pop(f, "🔥", "bad"); }
+          hit(a, f, 1.85);
+          if (f.hp > 0) {
+            f.burn = Math.max(f.burn, 3);
+            f.intent = null;
+            f.broken = true;
+            pop(f, "INTERROTTO!", "crit");
+            pop(f, "🔥", "bad");
+          }
           shake(f);
         });
-        alive(B.team).forEach((tm) => { tm.shield += 35; pop(tm, "+35🛡️", "good"); });
+        alive(B.team).forEach((tm) => {
+          tm.shield += 50;
+          tm.burn = 0;
+          tm.stun = 0;
+          pop(tm, "+50🛡️ PURIFICA", "good");
+        });
         B.gauge = 0;
-        say(`🌟 DOPPIO COLPO! ${B.activeCombo.u1.n} & ${B.activeCombo.u2.n} scatenano «${B.activeCombo.title}»!`);
+        say(`🌟 ATTACCO COMBINATO! ${B.activeCombo.u1.n} & ${B.activeCombo.u2.n} travolgono il campo con «${B.activeCombo.title}»!`);
         finish(a);
       };
-      FAST ? go() : (B.wait = setTimeout(go, 950));
+      FAST ? go() : (B.wait = setTimeout(go, 1250));
     } else {
       cutin(a, "Colpo di squadra");
       const go = () => {
@@ -515,6 +526,9 @@
 .arModBtn:hover{background:#7c3aed;color:#fff}
 .arAct{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}.arAct button{min-height:50px;border-radius:10px;border:1px solid #4a3a6a;background:#221a36;color:#f4f0e4;font:800 13px system-ui;padding:6px}.arAct button small{display:block;font-weight:400;font-size:10px;opacity:.75}.arAct button:disabled{opacity:.4}
 .arCut{position:absolute;left:0;right:0;top:34%;height:92px;overflow:hidden;z-index:6;pointer-events:none;background:linear-gradient(90deg,#000c,#3a1a6ccc 40%,#000c);border-top:3px solid #ffd23f;border-bottom:3px solid #ffd23f;animation:arCut 1.1s forwards;display:flex;align-items:center;gap:12px;padding:0 14px}
+.arCut.duo{background:linear-gradient(90deg,#000c,#581c87ee 40%,#831843ee 60%,#000c);border-color:#ffd23f;box-shadow:0 0 25px rgba(255,210,63,0.5)}
+.duoImgs{display:flex;gap:6px;flex:none}
+.duoImgs img{height:72px;width:72px;object-fit:cover;border-radius:50%;border:2px solid #ffd23f}
 .arCut img{height:80px;width:80px;object-fit:cover;object-position:50% 20%;border-radius:50%;border:2px solid #ffd23f;animation:arSl .5s ease-out}.arCut b{font:900 22px system-ui;color:#ffd23f;text-shadow:0 2px 0 #000}.arCut span{display:block;font-size:12px;color:#fff}
 @keyframes arCut{0%{opacity:0;transform:scaleY(.1)}12%{opacity:1;transform:none}85%{opacity:1}100%{opacity:0}}@keyframes arSl{from{transform:translateX(-120px)}}
 .arU .st{position:absolute;left:3px;top:13px;font-size:9px;font-weight:800;background:#000a;border-radius:4px;padding:0 2px}.arU .st+.st{top:23px}.arU .it{position:absolute;left:0;right:0;bottom:30px;background:#000c;color:#ffd23f;font-size:9px;font-weight:800;border-radius:4px;padding:1px 0}.arU .aim{position:absolute;left:0;right:0;bottom:30px;background:#a01818d0;color:#fff;font-size:9px;font-weight:800;border-radius:4px;padding:1px 0}
@@ -561,6 +575,14 @@
   function pop(u, text, cls) { if (FAST || !OV) return; const el = OV.querySelector(`.arU[data-u="${u.id}"][data-s="${u.side}"]`); if (!el) return; const s = document.createElement("span"); s.className = "arPop " + (cls || ""); s.textContent = text; el.appendChild(s); setTimeout(() => s.remove(), 950); }
   function shake(u) { if (FAST || !OV) return; const el = OV.querySelector(`.arU[data-u="${u.id}"][data-s="${u.side}"]`); if (el) { el.classList.add("shk"); setTimeout(() => el.classList.remove("shk"), 320); } }
   function cutin(u, ab) { if (FAST || !OV) return; const bt = OV.querySelector(".arBt"); if (!bt) return; const c = document.createElement("div"); c.className = "arCut"; c.innerHTML = `${img(u.id) ? `<img alt="" src="${img(u.id)}">` : ""}<div><b>${esc(ab)}</b><span>${esc(u.n)} · ${esc(ROLE[u.role] || u.role)}</span></div>`; bt.appendChild(c); setTimeout(() => c.remove(), 1150); }
+  function cutinDuo(u1, u2, ab) {
+    if (FAST || !OV) return;
+    const bt = OV.querySelector(".arBt"); if (!bt) return;
+    const c = document.createElement("div"); c.className = "arCut duo";
+    c.innerHTML = `<div class="duoImgs">${img(u1.id) ? `<img alt="" src="${img(u1.id)}">` : ""}${img(u2.id) ? `<img alt="" src="${img(u2.id)}">` : ""}</div><div><b style="color:#ffd23f">⚡ ATTACCO COMBINATO!</b><span style="font-size:13px;font-weight:800;color:#fff">${esc(ab)}</span><span style="font-size:11px;color:#93c5fd">${esc(u1.n)} &amp; ${esc(u2.n)}</span></div>`;
+    bt.appendChild(c);
+    setTimeout(() => c.remove(), 1300);
+  }
   // ------------------------------------------------------------ menu, modalità, Torre
   const bestTeam = () => { const s = S(), r = s._load(); const own = r.own.map((id) => s.BY[id]).filter(Boolean).sort((a, b) => (s.eff(b).at + s.eff(b).df + s.eff(b).te) - (s.eff(a).at + s.eff(a).df + s.eff(a).te)); r.team = own.slice(0, 5).map((c) => c.id); s._save(r); return r.team; };
   function teamBar(r, ar) {

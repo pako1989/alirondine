@@ -989,6 +989,13 @@
     }
     const statEl = body.querySelector(".team-stats");
     if (statEl) statEl.innerHTML = r.team.length ? statLine(r.team, r.modulo) : "";
+    const comboEl = body.querySelector(".sgComboContainer");
+    if (comboEl) {
+      const activeCombo = getTeamCombo(r.team);
+      comboEl.innerHTML = activeCombo
+        ? `<div class="sgComboBanner"><div class="sgComboIcon">⚡</div><div class="sgComboInfo"><b>Attacco Combinato: «${esc(activeCombo.title)}»</b><span>Doppio colpo pronto nell'Arena dei Sogni e nel Torneo con <em>${esc(name(activeCombo.id1))}</em> &amp; <em>${esc(name(activeCombo.id2))}</em>.</span></div></div>`
+        : `<div class="sgComboBanner none"><div class="sgComboIcon">💡</div><div class="sgComboInfo"><b>Attacco Combinato di Coppia</b><span>Schiera 2 giocatori con un legame speciale per attivare il Doppio Colpo d'Assalto.</span></div></div>`;
+    }
     const linksEl = body.querySelector(".links");
     if (linksEl) {
       linksEl.innerHTML = LINKS.map(([a, b, t]) => `<span class="${r.own.includes(a) && r.own.includes(b) ? "ok" : ""}"><b>${esc(t)}</b> ${r.own.includes(a) ? esc(name(a)) : "???"} + ${r.own.includes(b) ? esc(name(b)) : "???"}</span>`).join("");
@@ -998,11 +1005,29 @@
     });
   }
 
+  function getTeamCombo(team) {
+    const ids = (team || []).filter(Boolean);
+    for (let i = 0; i < ids.length; i++) {
+      for (let j = i + 1; j < ids.length; j++) {
+        const id1 = ids[i], id2 = ids[j];
+        const match = LINKS.find(([x, y]) => (x === id1 && y === id2) || (x === id2 && y === id1));
+        if (match) {
+          return { id1, id2, title: match[2] };
+        }
+      }
+    }
+    return null;
+  }
+
   function open(back) {
     if (back) BACK = back; const { r, nw } = sync(); const body = shell("🃏 La Squadra dei Sogni");
     const I = intesa(r.team, r.modulo), coins = safe(() => window.__borgoApi.coins(), 0);
+    const activeCombo = getTeamCombo(r.team);
+    const comboHtml = activeCombo
+      ? `<div class="sgComboBanner"><div class="sgComboIcon">⚡</div><div class="sgComboInfo"><b>Attacco Combinato: «${esc(activeCombo.title)}»</b><span>Doppio colpo pronto nell'Arena dei Sogni e nel Torneo con <em>${esc(name(activeCombo.id1))}</em> &amp; <em>${esc(name(activeCombo.id2))}</em>.</span></div></div>`
+      : `<div class="sgComboBanner none"><div class="sgComboIcon">💡</div><div class="sgComboInfo"><b>Attacco Combinato di Coppia</b><span>Schiera 2 giocatori con un legame speciale per attivare il Doppio Colpo d'Assalto.</span></div></div>`;
     let h = `<p class="sum">Le carte dei personaggi di tutte le saghe. Si sbloccano giocando, o con le bustine. Carte: <b>${r.own.length}/${CARDS.length}</b> · monete: <b>${coins}</b>${nw.length ? ` · <b class="new">nuove: ${nw.length}</b>` : ""}</p>`;
-    h += `<div class="sec sec-team">La tua squadra · forza <b>${forza(r.team)}</b> · intesa ${intesaBadge(I.n)}${I.why.length ? ` <span class="why">(${I.why.map(esc).join(", ")})</span>` : ""}</div><div class="team">${[0, 1, 2, 3, 4].map((k) => (r.team[k] ? cardHtml(r.team[k]) : `<div class="sgCard empty" data-slot="${k}"><span>+</span></div>`)).join("")}</div><div class="sgModWrap">${modSelectorHtml(r.modulo, r.team)}</div><div class="team-stats">${r.team.length ? statLine(r.team, r.modulo) : ""}</div>`;
+    h += `<div class="sec sec-team">La tua squadra · forza <b>${forza(r.team)}</b> · intesa ${intesaBadge(I.n)}${I.why.length ? ` <span class="why">(${I.why.map(esc).join(", ")})</span>` : ""}</div><div class="team">${[0, 1, 2, 3, 4].map((k) => (r.team[k] ? cardHtml(r.team[k]) : `<div class="sgCard empty" data-slot="${k}"><span>+</span></div>`)).join("")}</div><div class="sgModWrap">${modSelectorHtml(r.modulo, r.team)}</div><div class="team-stats">${r.team.length ? statLine(r.team, r.modulo) : ""}</div><div class="sgComboContainer">${comboHtml}</div>`;
     h += `<div class="big"><button type="button" data-go="tour">🏆 Torneo dei Sogni<small>${r.won.length}/8 sfide vinte · ogni sfida in un motore diverso</small></button><button type="button" data-go="pack" ${coins < PACK ? "disabled" : ""}>🎴 Bustina<small>${PACK} monete · una carta a sorpresa</small></button><button type="button" data-go="season">📅 Stagione dei Sogni<small>${r.season ? `giornata ${Math.min(7, r.season.day + 1)}/7` : "campionato a 8 squadre"}${r.titles ? ` · scudetti ${r.titles}` : ""}</small></button>${window.__arena ? `<button type="button" data-go="arena">⚔️ Arena dei Sogni<small>Battaglie a turni · Torre dei Duelli</small></button>` : ""}<button type="button" data-go="draft">🎲 Draft<small>${r.draft ? (r.draft.picks.length < 5 ? `scelta ${r.draft.picks.length + 1}/5` : "coppa in corso") : "scegli 1 carta su 3 e gioca la coppa"}${r.cups ? ` · coppe ${r.cups}` : ""}</small></button></div><p class="sum">Le carte crescono giocando: ⭐ a 3 punti esperienza, ⭐⭐ a 8, ⭐⭐⭐ a 15 (+2 a ogni statistica per stella; a tre stelle la carta dice la sua frase).</p>`;
     h += `<div class="sec">Collezione · tocca una carta per metterla in squadra o toglierla</div>`;
     h += `<div class="sgCollControls">
@@ -1487,6 +1512,13 @@
 .lkItem.off{opacity:.6}
 .sgLoreActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
 .sgActionBtn{min-height:46px;border-radius:10px;border:1px solid #4a3a6a;font:800 13px system-ui;cursor:pointer;transition:transform .12s,background .15s;touch-action:manipulation}
+.sgComboBanner{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#2c1a4d,#18102b);border:1.5px solid #a855f7;border-radius:10px;padding:8px 12px;margin:8px 0;box-shadow:0 3px 12px rgba(168,85,247,0.25)}
+.sgComboBanner.none{background:#181226;border:1px dashed #4a3a6a;box-shadow:none;opacity:.8}
+.sgComboIcon{font-size:22px;flex:none}
+.sgComboInfo{flex:1;font-size:12px;line-height:1.35}
+.sgComboInfo b{display:block;color:#ffd23f;font-size:13px}
+.sgComboInfo span{color:#d8cde8;font-size:11.5px}
+.sgComboInfo em{color:#38bdf8;font-style:normal;font-weight:700}
 .sgActionBtn:active{transform:scale(.97)}
 .flipBtn{background:#2a1e48;color:#ffd23f;border-color:#7a5ad8}
 .teamBtn{background:#1f482a;color:#7ad87a;border-color:#48a05a}
@@ -1497,5 +1529,5 @@
   }
   // la Maglia dei Sogni nel guardaroba (si registra all'avvio, così resta anche dopo aver ricaricato la pagina)
   (function reg() { const A = window.__borgoApi; if (!A || !A.COSM) return setTimeout(reg, 200); if (!A.COSM.sg_maglia) A.COSM.sg_maglia = { kind: "shirt", label: "Maglia dei Sogni", val: "#7a5ad8", from: "Vinci il Torneo dei Sogni (Salone delle Saghe)" }; })();
-  window.__sogni = { SAGHE, BY, eff, name, port, _save: save, open, close: closeAll, _launch: launch, _tiers: tiers, CARDS, LINKS, SFIDE, TEAMS, FRASI, intesa, forza, sync, stagione, draft, stars: (id) => { XPC = load().xp; return starsOf(id); }, _load: load, MODULI, modSintonia, openModDetail, openCardLore };
+  window.__sogni = { SAGHE, BY, eff, name, port, _save: save, open, close: closeAll, _launch: launch, _tiers: tiers, CARDS, LINKS, SFIDE, TEAMS, FRASI, intesa, forza, sync, stagione, draft, stars: (id) => { XPC = load().xp; return starsOf(id); }, _load: load, MODULI, modSintonia, openModDetail, openCardLore, combo: getTeamCombo };
 })();
