@@ -251,23 +251,38 @@
 @keyframes salFoil{0%{background-position:120% 0}100%{background-position:-120% 0}}
 .salOv .pbig{position:relative;width:min(260px,70vw);margin:12px auto 4px;border-radius:16px;overflow:hidden;border:3px solid #ffffff44;background:#0b1026}
 .salOv .pbig.gold{border-color:#ffd23f}.salOv .pbig canvas{width:100%;display:block;aspect-ratio:1}
-.salOv .mapWrap{position:relative;margin:6px 0 14px;border-radius:16px;overflow:hidden;border:2px solid #38bdf866;background:#060d1a;box-shadow:0 6px 22px rgba(0,0,0,0.5)}
-.salOv .mapCanvas{width:100%;height:auto;display:block;cursor:pointer}
-.salOv .mapSearchBox{margin:8px 0 12px;position:relative}
-.salOv .mapSearch{width:100%;box-sizing:border-box;padding:10px 14px 10px 38px;border-radius:12px;background:#13213f;border:1.5px solid #38bdf888;color:#fff;font:700 13.5px "M PLUS Rounded 1c",sans-serif;outline:none}
+.salOv .modeSwitch{display:flex;background:#0d1a33;padding:4px;border-radius:14px;border:1.5px solid #ffffff2a;margin:0 0 10px;gap:6px}
+.salOv .modeBtn{flex:1;min-height:42px;border:none;background:transparent;color:#94a3b8;font:800 13px "M PLUS Rounded 1c",sans-serif;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s}
+.salOv .modeBtn.on{background:linear-gradient(135deg,#38bdf8,#0284c7);color:#041324;box-shadow:0 2px 10px rgba(56,189,248,.35)}
+.salOv .modeBtn.on.gridTab{background:linear-gradient(135deg,#ffd23f,#e8a33d);color:#1a1400;box-shadow:0 2px 10px rgba(255,210,63,.35)}
+.salOv .hubTools{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:6px;margin-bottom:10px}
+.salOv .hubToolBtn{flex:none;min-height:34px;padding:5px 11px;border-radius:10px;border:1.5px solid #ffffff22;background:#13213f;color:#e2e8f0;font:700 12px "M PLUS Rounded 1c",sans-serif;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px;transition:border-color .15s}
+.salOv .hubToolBtn:hover{border-color:#ffd23f88}
+.salOv .mapWrap{position:relative;margin:4px 0 12px;border-radius:18px;overflow:hidden;border:2px solid #38bdf888;background:#060d1a;box-shadow:0 8px 30px rgba(0,0,0,0.6);aspect-ratio:16/9;max-height:380px}
+.salOv .mapCanvas{width:100%;height:100%;display:block;cursor:pointer}
+.salOv .mapOverlayHud{position:absolute;bottom:8px;left:8px;right:8px;display:flex;justify-content:space-between;align-items:center;pointer-events:none}
+.salOv .mapPill{background:rgba(11,16,38,0.85);backdrop-filter:blur(6px);padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.25);font-size:11px;color:#f8fafc;font-weight:700;pointer-events:auto}
+.salOv .mapSearchRow{display:flex;gap:8px;margin:8px 0 12px;align-items:stretch}
+.salOv .mapSearchBox{position:relative;flex:1}
+.salOv .mapSearch{width:100%;box-sizing:border-box;height:100%;min-height:42px;padding:9px 12px 9px 36px;border-radius:12px;background:#13213f;border:1.5px solid #38bdf888;color:#fff;font:700 13px "M PLUS Rounded 1c",sans-serif;outline:none}
 .salOv .mapSearch:focus{border-color:#ffd23f;box-shadow:0 0 10px rgba(255,210,63,0.3)}
-.salOv .mapSearchIcon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none}
-.salOv .terrGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:8px 0 12px}
-.salOv .terrBtn{padding:10px 11px;border-radius:12px;border:1.5px solid #ffffff2a;background:#16294a;color:#fff;text-align:left;cursor:pointer;transition:transform .12s,border-color .15s}
+.salOv .mapSearchIcon{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none}
+.salOv .compassBtn{flex:none;padding:0 14px;min-height:42px;border-radius:12px;border:1.5px solid #ffd23f;background:linear-gradient(135deg,#24386b,#1a2d54);color:#ffd23f;font:800 12.5px "M PLUS Rounded 1c",sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;transition:transform .12s}
+.salOv .compassBtn:active{transform:scale(.96)}
+.salOv .terrGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px;margin:8px 0 12px}
+.salOv .terrBtn{padding:9px 10px;border-radius:12px;border:1.5px solid #ffffff2a;background:#16294a;color:#fff;text-align:left;cursor:pointer;transition:transform .12s,border-color .15s}
 .salOv .terrBtn:active{transform:scale(.97)}
 .salOv .terrBtn.on{border-color:var(--tcol,#38bdf8);background:linear-gradient(135deg,rgba(56,189,248,0.22),#16294a);box-shadow:0 0 14px rgba(56,189,248,0.25)}
-.salOv .terrBtn .te{font-size:22px;margin-bottom:3px}
-.salOv .terrBtn b{display:block;font-size:12.5px;line-height:1.2;color:#f1f5f9}
-.salOv .terrBtn span{font-size:11px;color:#94a3b8}
-.salOv .terrHeader{padding:12px 14px;border-radius:14px;background:#13213f;border-left:4px solid var(--tcol,#38bdf8);margin-bottom:12px;box-shadow:0 3px 10px rgba(0,0,0,0.3)}
-.salOv .terrHeader h3{margin:0 0 4px;font-size:17px;color:#ffd23f;display:flex;align-items:center;gap:8px}
-.salOv .terrHeader p{margin:0 0 6px;font-size:13px;color:#e2e8f0;line-height:1.4}
-.salOv .terrHeader em{display:block;font-size:11.5px;color:#93c5fd;font-style:italic}
+.salOv .terrBtn .te{font-size:20px;margin-bottom:2px}
+.salOv .terrBtn b{display:block;font-size:12px;line-height:1.2;color:#f1f5f9}
+.salOv .terrBtn span{font-size:10.5px;color:#94a3b8}
+.salOv .hubPanel{padding:12px 14px;border-radius:16px;background:linear-gradient(145deg,#13213f,#0e1933);border:1.5px solid var(--tcol,#38bdf8);margin-bottom:12px;box-shadow:0 4px 16px rgba(0,0,0,0.35)}
+.salOv .hubTop{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:6px}
+.salOv .hubTitle{margin:0;font-family:"Dela Gothic One",Impact,sans-serif;font-size:17px;color:#ffd23f;display:flex;align-items:center;gap:7px}
+.salOv .hubAtmo{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 8px}
+.salOv .hubAtmoTag{padding:2px 7px;border-radius:6px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);font-size:11px;color:#cbd5e1;font-weight:600}
+.salOv .hubQuote{font-size:12px;font-style:italic;color:#93c5fd;margin:4px 0 8px;line-height:1.35}
+.salOv .hubDesc{margin:0 0 6px;font-size:12.5px;color:#e2e8f0;line-height:1.4}
 @media (max-width:360px){.salOv .grid{grid-template-columns:1fr 1fr;gap:8px}.salOv .prev{grid-template-columns:110px 1fr}.salOv .prev canvas{width:110px;height:110px}}`;
     document.head.appendChild(st);
   }
@@ -711,6 +726,7 @@
   }
 
   // ---------------------------------------------------------------- MAPPAMONDO DELLE SAGHE
+  // ---------------------------------------------------------------- MAPPAMONDO & HUB DEL MONDO
   const MAP_REGIONS = [
     {
       id: "riviera",
@@ -718,10 +734,16 @@
       e: "⚓",
       color: "#38bdf8",
       accent: "#0284c7",
-      x: 100, y: 75, r: 40,
+      x: 120, y: 88, r: 46,
+      weather: "🍃 Tramontana · 🌊 Mare Calmo · ☀️ Costa Ligure",
       desc: "Il porto vecchio, la spiaggia dei ciottoli, la Trattoria Moretti, i caruggi e i paesi arrampicati sulle scogliere liguri.",
       quote: "«Il mare restituisce sempre quello che gli lanci con effetto.»",
-      sagas: ["cala", "borgostorto", "torneo", "campetto", "stagione", "lampioni", "colline", "montagna", "vallombra", "faro", "rotta", "campana", "carte"]
+      sagas: ["cala", "borgostorto", "torneo", "campetto", "stagione", "lampioni", "colline", "montagna", "vallombra", "faro", "rotta", "campana", "carte"],
+      pins: [
+        { id: "torneo", t: "Cento Scuole", e: "🏆", dx: 36, dy: -24 },
+        { id: "campetto", t: "Campetto", e: "⚽", dx: -36, dy: 22 },
+        { id: "lampioni", t: "Lampioni", e: "🏮", dx: 38, dy: 24 }
+      ]
     },
     {
       id: "epoche",
@@ -729,10 +751,16 @@
       e: "🏛️",
       color: "#f59e0b",
       accent: "#b45309",
-      x: 290, y: 55, r: 38,
+      x: 320, y: 78, r: 44,
+      weather: "📜 Zefiro Antico · 🏛️ 75 d.C. - 1998 · 🏺 Storia Viva",
       desc: "Dai ludi circensi dell'Antica Roma al 1427 dei capitani di ventura, fino al noir di Milano 1954 e al fischietto del 1998.",
       quote: "«Cambiano le scarpe e i palloni di cuoio, ma il coraggio resta uguale.»",
-      sagas: ["roma", "capitani", "milano", "fischietto", "piramide", "tempo", "treno", "pugno", "kronenburg", "shogun"]
+      sagas: ["roma", "capitani", "milano", "fischietto", "piramide", "tempo", "treno", "pugno", "kronenburg", "shogun"],
+      pins: [
+        { id: "roma", t: "Ave Calcio", e: "🏛️", dx: -36, dy: -22 },
+        { id: "milano", t: "Milano Noir", e: "🕵️", dx: 36, dy: -18 },
+        { id: "capitani", t: "Capitani 1427", e: "🏰", dx: 34, dy: 22 }
+      ]
     },
     {
       id: "mari",
@@ -740,10 +768,16 @@
       e: "⛵",
       color: "#06b6d4",
       accent: "#0891b2",
-      x: 110, y: 170, r: 42,
+      x: 125, y: 240, r: 48,
+      weather: "🌪️ Libeccio Furente · 🌊 Marea Alta · 🏴‍☠️ Frontiera",
       desc: "Fortezze carcerarie, atolli spazzati dalle maree, baie corsare dell'Oceano di Melassa e fiumi selvaggi.",
       quote: "«Nessun vento è contrario per chi sa tirare a giro controcorrente.»",
-      sagas: ["alcatraz", "vuota", "naufraghi", "galletta", "fiume", "abisso", "traversata", "cenere"]
+      sagas: ["alcatraz", "vuota", "naufraghi", "galletta", "fiume", "abisso", "traversata", "cenere"],
+      pins: [
+        { id: "alcatraz", t: "Alcatraz", e: "⛓️", dx: -36, dy: -22 },
+        { id: "naufraghi", t: "Naufraghi", e: "🏝️", dx: 36, dy: -20 },
+        { id: "galletta", t: "Bucanieri", e: "🏴‍☠️", dx: 32, dy: 24 }
+      ]
     },
     {
       id: "arcano",
@@ -751,10 +785,16 @@
       e: "👑",
       color: "#a855f7",
       accent: "#7e22ce",
-      x: 320, y: 165, r: 44,
+      x: 330, y: 245, r: 48,
+      weather: "✨ Brezza Runica · 🔮 Nebbie di Mana · 👑 Regni Feudali",
       desc: "Accademie di magia runica, casate feudali in guerra, cristalli elementali in frantumi e cancelli dimensionali.",
       quote: "«Il destino del regno non si decide sulle pergamene, ma su un tiro all'incrocio al novantesimo.»",
-      sagas: ["sigilli", "regno", "trono", "ducati", "bilancia", "cronache", "cristalli", "muro", "vento", "dungeon", "ragnarok", "belovodia", "alchimia", "libro", "mondi", "westeros"]
+      sagas: ["sigilli", "regno", "trono", "ducati", "bilancia", "cronache", "cristalli", "muro", "vento", "dungeon", "ragnarok", "belovodia", "alchimia", "libro", "mondi", "westeros"],
+      pins: [
+        { id: "sigilli", t: "Accademia", e: "📜", dx: -38, dy: -24 },
+        { id: "trono", t: "Trono Cuoio", e: "👑", dx: 38, dy: -20 },
+        { id: "cristalli", t: "Cristalli", e: "💎", dx: 34, dy: 24 }
+      ]
     },
     {
       id: "cosmo",
@@ -762,10 +802,16 @@
       e: "⚡",
       color: "#10b981",
       accent: "#059669",
-      x: 490, y: 65, r: 40,
+      x: 520, y: 82, r: 46,
+      weather: "⚡ Pioggia Acida · 🚀 Gravità 0.8g · 🤖 Neon City",
       desc: "Grattacieli al neon sotto la pioggia acida della Vektor, stazioni orbitanti e corrieri interplanetari dell'anno 3000.",
       quote: "«Nell'iper-spazio l'effetto Magnus curva sia la luce che i gol.»",
-      sagas: ["circuiti", "spazio", "razzo", "officina", "replica", "titano", "futurama", "cittadella", "chrono", "phantom", "multiverso"]
+      sagas: ["circuiti", "spazio", "razzo", "officina", "replica", "titano", "futurama", "cittadella", "chrono", "phantom", "multiverso"],
+      pins: [
+        { id: "circuiti", t: "Neo-Rondine", e: "⚡", dx: -36, dy: -22 },
+        { id: "spazio", t: "Stazione 7", e: "🚀", dx: 36, dy: -20 },
+        { id: "razzo", t: "Razzopacco", e: "📦", dx: 32, dy: 22 }
+      ]
     },
     {
       id: "arene",
@@ -773,15 +819,23 @@
       e: "🌍",
       color: "#ef4444",
       accent: "#dc2626",
-      x: 485, y: 175, r: 44,
+      x: 515, y: 245, r: 48,
+      weather: "🔥 Foga dei Cori · 🏟️ Riflettori Accesi · 🏆 Mondiali",
       desc: "I grandi palcoscenici mondiali: Tokio, Rio, le gabbie di strada, i campi da liceo e i duelli cinematografici.",
       quote: "«Quando lo stadio intero trattiene il fiato, senti solo il rimbalzo.»",
-      sagas: ["mondiale", "gala", "fortino", "quattordici", "spia", "gp", "figurine", "note", "bluelock", "tsubasa", "jojo", "emblem", "cavallo", "quartiere", "cavaliere", "grigio", "ombre", "detective", "mantello", "dopo", "doppio", "leggenda", "noir", "pirati"]
+      sagas: ["mondiale", "gala", "fortino", "quattordici", "spia", "gp", "figurine", "note", "bluelock", "tsubasa", "jojo", "emblem", "cavallo", "quartiere", "cavaliere", "grigio", "ombre", "detective", "mantello", "dopo", "doppio", "leggenda", "noir", "pirati"],
+      pins: [
+        { id: "mondiale", t: "Mondiale", e: "🌍", dx: -38, dy: -22 },
+        { id: "gala", t: "Pallone d'Oro", e: "🏆", dx: 36, dy: -20 },
+        { id: "cavaliere", t: "Cavaliere", e: "🦇", dx: 34, dy: 22 }
+      ]
     }
   ];
 
+  let SALONE_VIEW = "hub"; // "hub" (Mappa del Mondo) oppure "grid" (Catalogo Schede)
   let ACTIVE_MAP_REG = "riviera";
   let MAP_SEARCH_QUERY = "";
+  let SWALLOW_TOKEN = { x: 120, y: 88, tx: 120, ty: 88, trail: [] };
 
   function renderSagaCards(sagasList) {
     const r = rec();
@@ -793,55 +847,63 @@
     }).join("");
   }
 
-  function initWorldMapCanvas(cv, activeReg, regions, sagaList) {
+  function initWorldMapCanvas(cv, activeReg, regions, sagaList, onSelectRegion, onOpenSaga) {
     const g = cv.getContext("2d"); if (!g) return;
     let animId = 0, f = 0;
+
+    SWALLOW_TOKEN.tx = activeReg.x;
+    SWALLOW_TOKEN.ty = activeReg.y;
 
     const drawMap = () => {
       if (!cv.isConnected) { cancelAnimationFrame(animId); return; }
       f++;
       const W = cv.width, H = cv.height;
 
-      const oceanGrad = g.createRadialGradient(W / 2, H / 2, 30, W / 2, H / 2, W / 1.7);
-      oceanGrad.addColorStop(0, "#0e1a38");
-      oceanGrad.addColorStop(1, "#070c1a");
+      // 1. Oceano profondo & gradiente nautico
+      const oceanGrad = g.createRadialGradient(W / 2, H / 2, 40, W / 2, H / 2, W / 1.4);
+      oceanGrad.addColorStop(0, "#0e2040");
+      oceanGrad.addColorStop(0.5, "#09152e");
+      oceanGrad.addColorStop(1, "#040914");
       g.fillStyle = oceanGrad;
       g.fillRect(0, 0, W, H);
 
-      g.strokeStyle = "rgba(56, 189, 248, 0.08)";
+      // Griglia cartografica di latitudine e longitudine
+      g.strokeStyle = "rgba(56, 189, 248, 0.07)";
       g.lineWidth = 1;
-      for (let x = 30; x < W; x += 40) {
+      for (let x = 40; x < W; x += 50) {
         g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H); g.stroke();
       }
-      for (let y = 20; y < H; y += 40) {
+      for (let y = 30; y < H; y += 45) {
         g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke();
       }
 
-      g.strokeStyle = "rgba(148, 163, 184, 0.07)";
-      for (let i = 0; i < 8; i++) {
-        const wx = (i * 90 + f * 0.4) % (W + 60) - 30;
-        const wy = 30 + (i * 35) % (H - 50);
+      // Onde marine animate
+      g.strokeStyle = "rgba(148, 163, 184, 0.08)";
+      for (let i = 0; i < 9; i++) {
+        const wx = (i * 85 + f * 0.45) % (W + 60) - 30;
+        const wy = 25 + (i * 38) % (H - 45);
         g.beginPath();
-        g.arc(wx, wy, 16, Math.PI * 0.2, Math.PI * 0.8);
+        g.arc(wx, wy, 14, Math.PI * 0.25, Math.PI * 0.75);
         g.stroke();
       }
 
-      const bx = W - 38, by = 38;
-      g.save();
-      g.translate(bx, by);
-      g.rotate(f * 0.003);
-      g.strokeStyle = "rgba(255, 210, 63, 0.25)";
-      g.beginPath(); g.arc(0, 0, 24, 0, Math.PI * 2); g.stroke();
-      for (let a = 0; a < 4; a++) {
-        g.rotate(Math.PI / 2);
-        g.fillStyle = a === 0 ? "rgba(255, 77, 90, 0.7)" : "rgba(255, 210, 63, 0.4)";
-        g.beginPath(); g.moveTo(0, 0); g.lineTo(-4, -8); g.lineTo(0, -22); g.lineTo(4, -8); g.closePath(); g.fill();
+      // Folate di vento (Tramontana)
+      g.strokeStyle = "rgba(255, 255, 255, 0.09)";
+      g.lineWidth = 1.2;
+      for (let w = 0; w < 4; w++) {
+        const sx = ((w * 170 + f * 1.2) % (W + 100)) - 50;
+        const sy = 40 + w * 65 + Math.sin(f * 0.02 + w) * 12;
+        g.beginPath();
+        g.moveTo(sx, sy);
+        g.quadraticCurveTo(sx + 35, sy - 10, sx + 70, sy + 4);
+        g.stroke();
       }
-      g.restore();
 
-      g.strokeStyle = "rgba(255, 210, 63, 0.15)";
+      // Rotte di navigazione tra territori
+      g.strokeStyle = "rgba(255, 210, 63, 0.18)";
       g.setLineDash([4, 6]);
       g.beginPath();
+      // Anello principale
       g.moveTo(regions[0].x, regions[0].y);
       g.lineTo(regions[1].x, regions[1].y);
       g.lineTo(regions[4].x, regions[4].y);
@@ -849,29 +911,91 @@
       g.lineTo(regions[3].x, regions[3].y);
       g.lineTo(regions[2].x, regions[2].y);
       g.closePath();
+      // Diagonali interne
+      g.moveTo(regions[1].x, regions[1].y); g.lineTo(regions[3].x, regions[3].y);
+      g.moveTo(regions[0].x, regions[0].y); g.lineTo(regions[3].x, regions[3].y);
       g.stroke();
       g.setLineDash([]);
 
+      // Vascello in navigazione sulla rotta Riviera-Mari
+      const shipT = (f * 0.003) % 1;
+      const shipX = regions[0].x + (regions[2].x - regions[0].x) * shipT;
+      const shipY = regions[0].y + (regions[2].y - regions[0].y) * shipT;
+      g.font = "14px serif";
+      g.textAlign = "center";
+      g.textBaseline = "middle";
+      g.fillText("⛵", shipX + 12, shipY);
+
+      // Rondini in volo nel cielo
+      for (let r = 0; r < 3; r++) {
+        const rx = ((r * 180 + f * 1.5) % (W + 80)) - 40;
+        const ry = 30 + r * 35 + Math.sin(f * 0.05 + r) * 8;
+        const wing = Math.sin(f * 0.2 + r * 2) * 3;
+        g.fillStyle = "rgba(248, 250, 252, 0.4)";
+        g.beginPath();
+        g.moveTo(rx, ry);
+        g.lineTo(rx - 5, ry - 3 + wing);
+        g.lineTo(rx - 3, ry);
+        g.lineTo(rx - 5, ry + 3 - wing);
+        g.closePath();
+        g.fill();
+      }
+
+      // Rosa dei Venti animata in alto a destra
+      const bx = W - 44, by = 44;
+      g.save();
+      g.translate(bx, by);
+      g.rotate(f * 0.002);
+      g.strokeStyle = "rgba(255, 210, 63, 0.35)";
+      g.beginPath(); g.arc(0, 0, 24, 0, Math.PI * 2); g.stroke();
+      for (let a = 0; a < 4; a++) {
+        g.rotate(Math.PI / 2);
+        g.fillStyle = a === 0 ? "rgba(255, 77, 90, 0.75)" : "rgba(255, 210, 63, 0.5)";
+        g.beginPath(); g.moveTo(0, 0); g.lineTo(-4, -8); g.lineTo(0, -22); g.lineTo(4, -8); g.closePath(); g.fill();
+      }
+      g.restore();
+      g.fillStyle = "rgba(255,210,63,0.7)";
+      g.font = "bold 9px sans-serif";
+      g.textAlign = "center";
+      g.fillText("N", bx, by - 26);
+
+      // Faro della Riviera con fascio di luce rotante
+      const riv = regions[0];
+      const beamAngle = f * 0.03;
+      const beamLen = 95;
+      const lg = g.createRadialGradient(riv.x - 18, riv.y - 12, 0, riv.x - 18, riv.y - 12, beamLen);
+      lg.addColorStop(0, "rgba(255, 230, 120, 0.55)");
+      lg.addColorStop(1, "transparent");
+      g.fillStyle = lg;
+      g.beginPath();
+      g.moveTo(riv.x - 18, riv.y - 12);
+      g.arc(riv.x - 18, riv.y - 12, beamLen, beamAngle - 0.28, beamAngle + 0.28);
+      g.closePath();
+      g.fill();
+
+      // 2. Disegno dei Territori (Isole, Coste e Fari)
       regions.forEach((reg) => {
         const isAct = reg.id === activeReg.id;
         const regSagas = sagaList.filter(({ s }) => reg.sagas.includes(s.id));
         const finCount = regSagas.filter(({ x }) => x.finished).length;
         const totCount = regSagas.length;
-
         const rad = reg.r;
-        const glow = g.createRadialGradient(reg.x, reg.y, 4, reg.x, reg.y, rad + 12);
-        glow.addColorStop(0, reg.color + (isAct ? "66" : "25"));
-        glow.addColorStop(1, "transparent");
-        g.fillStyle = glow;
-        g.beginPath(); g.arc(reg.x, reg.y, rad + 12, 0, Math.PI * 2); g.fill();
 
-        g.fillStyle = isAct ? "#182a4d" : "#111c33";
-        g.strokeStyle = isAct ? reg.color : "rgba(255,255,255,0.2)";
-        g.lineWidth = isAct ? 2.5 : 1.5;
+        // Bordo costa e fondale sabbioso
+        const shelfGrad = g.createRadialGradient(reg.x, reg.y, rad * 0.6, reg.x, reg.y, rad + 14);
+        shelfGrad.addColorStop(0, reg.color + (isAct ? "55" : "20"));
+        shelfGrad.addColorStop(1, "transparent");
+        g.fillStyle = shelfGrad;
+        g.beginPath(); g.arc(reg.x, reg.y, rad + 14, 0, Math.PI * 2); g.fill();
+
+        // Terraferma poligonale organica
+        g.fillStyle = isAct ? "#182c4d" : "#111f38";
+        g.strokeStyle = isAct ? reg.color : "rgba(255,255,255,0.22)";
+        g.lineWidth = isAct ? 3 : 1.5;
         g.beginPath();
         for (let a = 0; a < 8; a++) {
           const ang = (a / 8) * Math.PI * 2;
-          const dist = rad * (0.85 + Math.sin(ang * 3 + reg.x) * 0.15);
+          const dist = rad * (0.86 + Math.sin(ang * 3 + reg.x * 0.1) * 0.14);
           const px = reg.x + Math.cos(ang) * dist;
           const py = reg.y + Math.sin(ang) * dist;
           if (a === 0) g.moveTo(px, py); else g.lineTo(px, py);
@@ -880,35 +1004,100 @@
         g.fill();
         g.stroke();
 
+        // Anello pulsante per il territorio attivo
         if (isAct) {
-          const pulse = (Math.sin(f / 12) + 1) * 3;
+          const pulse = (Math.sin(f / 10) + 1) * 4;
           g.strokeStyle = reg.color;
-          g.lineWidth = 1.5;
-          g.beginPath(); g.arc(reg.x, reg.y, rad + 6 + pulse, 0, Math.PI * 2); g.stroke();
+          g.lineWidth = 1.8;
+          g.beginPath(); g.arc(reg.x, reg.y, rad + 5 + pulse, 0, Math.PI * 2); g.stroke();
         }
 
-        g.font = "20px serif";
+        // Icona del territorio
+        g.font = "24px serif";
         g.textAlign = "center";
         g.textBaseline = "middle";
-        g.fillText(reg.e, reg.x, reg.y - 7);
+        g.fillText(reg.e, reg.x, reg.y - 8);
 
+        // Badge di avanzamento (concluse / totali)
         g.font = "bold 10px sans-serif";
         const badgeTxt = `${finCount}/${totCount}`;
-        const tw = g.measureText(badgeTxt).width + 8;
+        const tw = g.measureText(badgeTxt).width + 10;
         g.fillStyle = finCount === totCount && totCount > 0 ? "#14532d" : "#0f172a";
         g.strokeStyle = isAct ? "#ffd23f" : "rgba(255,255,255,0.3)";
         g.lineWidth = 1;
         g.beginPath();
-        if (g.roundRect) g.roundRect(reg.x - tw / 2, reg.y + 8, tw, 14, 4); else g.rect(reg.x - tw / 2, reg.y + 8, tw, 14);
+        if (g.roundRect) g.roundRect(reg.x - tw / 2, reg.y + 7, tw, 15, 5); else g.rect(reg.x - tw / 2, reg.y + 7, tw, 15);
         g.fill(); g.stroke();
 
         g.fillStyle = finCount === totCount && totCount > 0 ? "#4ade80" : "#fff";
         g.fillText(badgeTxt, reg.x, reg.y + 15);
 
+        // Nome della regione
         g.fillStyle = isAct ? "#ffd23f" : "#cbd5e1";
         g.font = (isAct ? "bold 11px" : "10px") + " 'M PLUS Rounded 1c', sans-serif";
         g.fillText(reg.t.split(" & ")[0].split(" · ")[0], reg.x, reg.y + rad + 14);
+
+        // Se la regione è attiva: disegna i mini pin delle saghe landmark
+        if (isAct && reg.pins) {
+          reg.pins.forEach((pin) => {
+            const px = reg.x + pin.dx, py = reg.y + pin.dy;
+            const targetSaga = sagaList.find(({ s }) => s.id === pin.id);
+            const isFin = targetSaga && targetSaga.x.finished;
+
+            // alone pin
+            g.fillStyle = isFin ? "rgba(74, 222, 128, 0.3)" : "rgba(255, 210, 63, 0.3)";
+            g.beginPath(); g.arc(px, py, 11, 0, Math.PI * 2); g.fill();
+
+            // corpo pin
+            g.fillStyle = "#1e293b";
+            g.strokeStyle = isFin ? "#4ade80" : "#ffd23f";
+            g.lineWidth = 1.5;
+            g.beginPath(); g.arc(px, py, 9, 0, Math.PI * 2); g.fill(); g.stroke();
+
+            g.font = "10px serif";
+            g.textAlign = "center";
+            g.textBaseline = "middle";
+            g.fillText(pin.e, px, py);
+
+            // etichetta pin
+            g.font = "bold 9px 'M PLUS Rounded 1c', sans-serif";
+            const ptw = g.measureText(pin.t).width + 6;
+            g.fillStyle = "rgba(11, 16, 38, 0.85)";
+            g.fillRect(px - ptw / 2, py + 10, ptw, 12);
+            g.fillStyle = "#f8fafc";
+            g.fillText(pin.t, px, py + 16);
+          });
+        }
       });
+
+      // 3. Volo del Campione / Segnaposto Rondine
+      SWALLOW_TOKEN.x += (SWALLOW_TOKEN.tx - SWALLOW_TOKEN.x) * 0.12;
+      SWALLOW_TOKEN.y += (SWALLOW_TOKEN.ty - SWALLOW_TOKEN.y) * 0.12;
+
+      // Scia di particelle del volo
+      if (Math.hypot(SWALLOW_TOKEN.tx - SWALLOW_TOKEN.x, SWALLOW_TOKEN.ty - SWALLOW_TOKEN.y) > 2) {
+        SWALLOW_TOKEN.trail.push({ x: SWALLOW_TOKEN.x, y: SWALLOW_TOKEN.y, a: 1 });
+      }
+      SWALLOW_TOKEN.trail.forEach((p, idx) => {
+        p.a -= 0.06;
+        if (p.a <= 0) { SWALLOW_TOKEN.trail.splice(idx, 1); return; }
+        g.fillStyle = `rgba(255, 210, 63, ${p.a * 0.6})`;
+        g.beginPath(); g.arc(p.x, p.y, 2.5 * p.a, 0, Math.PI * 2); g.fill();
+      });
+
+      // Token Campione volante
+      const tokY = SWALLOW_TOKEN.y - 28 + Math.sin(f * 0.1) * 3;
+      g.fillStyle = "rgba(0, 0, 0, 0.45)";
+      g.beginPath(); g.ellipse(SWALLOW_TOKEN.x, SWALLOW_TOKEN.y + 4, 12, 4, 0, 0, Math.PI * 2); g.fill();
+
+      // Emblema Rondine dorata
+      g.fillStyle = "rgba(255, 210, 63, 0.25)";
+      g.beginPath(); g.arc(SWALLOW_TOKEN.x, tokY, 15, 0, Math.PI * 2); g.fill();
+      g.fillStyle = "#ffd23f";
+      g.font = "bold 15px serif";
+      g.textAlign = "center";
+      g.textBaseline = "middle";
+      g.fillText("🕊️", SWALLOW_TOKEN.x, tokY);
 
       animId = requestAnimationFrame(drawMap);
     };
@@ -922,13 +1111,26 @@
       const mx = (e.clientX - rect.left) * scaleX;
       const my = (e.clientY - rect.top) * scaleY;
 
+      // Controlla prima se si tocca un pin landmark del territorio attivo
+      if (activeReg.pins) {
+        for (const pin of activeReg.pins) {
+          const px = activeReg.x + pin.dx, py = activeReg.y + pin.dy;
+          if (Math.hypot(mx - px, my - py) <= 16) {
+            safe(() => window.sfx && window.sfx("kick"));
+            if (typeof onOpenSaga === "function") onOpenSaga(pin.id);
+            return;
+          }
+        }
+      }
+
+      // Controlla se si tocca una macro-regione
       for (const reg of regions) {
         const dx = mx - reg.x, dy = my - reg.y;
         if (Math.hypot(dx, dy) <= reg.r + 14) {
-          ACTIVE_MAP_REG = reg.id;
-          MAP_SEARCH_QUERY = "";
+          SWALLOW_TOKEN.tx = reg.x;
+          SWALLOW_TOKEN.ty = reg.y;
           safe(() => window.sfx && window.sfx("kick"));
-          openMappamondo();
+          if (typeof onSelectRegion === "function") onSelectRegion(reg.id);
           return;
         }
       }
@@ -936,10 +1138,17 @@
   }
 
   function openMappamondo(back) {
-    if (back) BK.map = back; BACK = BK.map;
-    const body = shell("🗺️ Mappamondo delle Saghe");
+    SALONE_VIEW = "hub";
+    openSalone(back);
+  }
+
+  function openSalone(back, forceMode) {
+    if (back) BK.sal = back; BACK = BK.sal;
+    if (forceMode) SALONE_VIEW = forceMode;
+    const body = shell("🏛️ Salone delle Saghe & Hub del Mondo"), r = rec(), tt = totals();
     const list = SAGAS.filter(available).map((s) => ({ s, x: state(s) }));
-    const tt = totals();
+    const lastS = list.find((o) => o.s.id === r.last);
+    const pt = safe(() => perTotals(), null);
 
     const getRegStats = (reg) => {
       const regSagas = list.filter(({ s }) => reg.sagas.includes(s.id));
@@ -949,110 +1158,188 @@
       return { regSagas, fin, run, tot, pct: tot > 0 ? Math.round((fin / tot) * 100) : 0 };
     };
 
-    const renderMappamondoContent = () => {
-      const activeReg = MAP_REGIONS.find((r) => r.id === ACTIVE_MAP_REG) || MAP_REGIONS[0];
+    const renderContent = () => {
+      const activeReg = MAP_REGIONS.find((rg) => rg.id === ACTIVE_MAP_REG) || MAP_REGIONS[0];
       const curStats = getRegStats(activeReg);
 
-      let html = `<p class="sum">${tt.n} saghe divise in 6 grandi territori ed epoche. Tocca una regione o cerca una storia.</p>`;
+      let html = `<p class="sum">${tt.n} saghe divise in 6 territori ed epoche · ${tt.run} in corso · ${tt.fin} concluse · finali ${tt.fe}/${tt.te}</p>`;
 
-      html += `<div class="mapWrap"><canvas class="mapCanvas" id="worldMapCv" width="600" height="240" title="Tocca un territorio sulla mappa"></canvas></div>`;
+      // Selettore unificato delle modalità (Mappa Hub vs Catalogo Completo)
+      html += `<div class="modeSwitch">
+        <button type="button" class="modeBtn ${SALONE_VIEW === "hub" ? "on" : ""}" data-switch="hub">🗺️ Mappa & Hub del Mondo</button>
+        <button type="button" class="modeBtn gridTab ${SALONE_VIEW === "grid" ? "on" : ""}" data-switch="grid">📜 Catalogo Completo (${tt.n})</button>
+      </div>`;
 
-      html += `<div class="mapSearchBox"><span class="mapSearchIcon">🔍</span><input type="text" class="mapSearch" id="mapSearchInput" placeholder="Cerca saga per nome, ambientazione o parola..." value="${esc(MAP_SEARCH_QUERY)}"></div>`;
+      // Barra orizzontale degli strumenti del Salone
+      html += `<div class="hubTools">
+        <button type="button" class="hubToolBtn" data-go="album">🏆 Album Finali (${tt.fe}/${tt.te})</button>
+        <button type="button" class="hubToolBtn" data-go="guarda">👕 Guardaroba</button>
+        <button type="button" class="hubToolBtn" data-go="diario">📖 Diario</button>
+        <button type="button" class="hubToolBtn" data-go="sala">🕹️ Sala Giochi</button>
+        <button type="button" class="hubToolBtn" data-go="cine">🎬 Cineteca</button>
+        ${pt ? `<button type="button" class="hubToolBtn" data-go="per">👥 Personaggi (${pt.seen}/${pt.tot})</button>` : ""}
+        ${window.__bar ? `<button type="button" class="hubToolBtn" data-go="bar">🍺 Bar del Borgo</button>` : ""}
+        ${window.__carteDecks ? `<button type="button" class="hubToolBtn" data-go="carte">🎴 Carte del Destino</button>` : ""}
+        ${window.__sogni ? `<button type="button" class="hubToolBtn" data-go="sogni">🃏 Squadra dei Sogni</button>` : ""}
+      </div>`;
 
-      html += `<div class="terrGrid">${MAP_REGIONS.map((reg) => {
-        const st = getRegStats(reg);
-        const isSel = reg.id === activeReg.id && !MAP_SEARCH_QUERY;
-        return `<button type="button" class="terrBtn${isSel ? " on" : ""}" data-reg="${reg.id}" style="--tcol:${reg.color}"><div class="te">${reg.e}</div><b>${esc(reg.t)}</b><span>${st.fin}/${st.tot} concluse · ${st.pct}%</span></button>`;
-      }).join("")}</div>`;
-
-      if (MAP_SEARCH_QUERY.trim()) {
-        const q = MAP_SEARCH_QUERY.trim().toLowerCase();
-        const searchMatches = list.filter(({ s }) => s.t.toLowerCase().includes(q) || (s.d && s.d.toLowerCase().includes(q)) || s.e.includes(q) || s.g.some((g) => g.toLowerCase().includes(q)));
-        html += `<div class="sec">Risultati ricerca (${searchMatches.length})</div>`;
-        if (searchMatches.length === 0) {
-          html += `<p class="sum" style="text-align:center;padding:16px 0;">Nessuna saga trovata per «${esc(MAP_SEARCH_QUERY)}».</p>`;
-        } else {
-          html += `<div class="grid">${renderSagaCards(searchMatches)}</div>`;
-        }
-      } else {
-        html += `<div class="terrHeader" style="--tcol:${activeReg.color}">
-          <h3><span>${activeReg.e}</span> ${esc(activeReg.t)} <span style="font-size:12px;font-weight:normal;color:#94a3b8;margin-left:auto;">${curStats.fin}/${curStats.tot} concluse</span></h3>
-          <p>${esc(activeReg.desc)}</p>
-          <em>${esc(activeReg.quote)}</em>
-          <div class="pbar" style="margin-top:8px"><i style="width:${Math.max(4, curStats.pct)}%;background:${activeReg.color}"></i></div>
+      if (SALONE_VIEW === "hub") {
+        // --- VISTA MAPPA & HUB ---
+        html += `<div class="mapWrap">
+          <canvas class="mapCanvas" id="worldMapCv" width="640" height="340" title="Tocca un territorio o un pin per esplorare"></canvas>
+          <div class="mapOverlayHud">
+            <span class="mapPill">🧭 ${activeReg.e} ${esc(activeReg.t.split(" & ")[0])}</span>
+            <span class="mapPill">🕊️ Volo della Rondine</span>
+          </div>
         </div>`;
 
-        html += `<div class="grid">${renderSagaCards(curStats.regSagas)}</div>`;
+        // Barra ricerca + Bussola della Fortuna
+        html += `<div class="mapSearchRow">
+          <div class="mapSearchBox">
+            <span class="mapSearchIcon">🔍</span>
+            <input type="text" class="mapSearch" id="mapSearchInput" placeholder="Cerca saga per nome, personaggio o atmosfera..." value="${esc(MAP_SEARCH_QUERY)}">
+          </div>
+          <button type="button" class="compassBtn" id="btnCompass" title="Suggerisci una saga consigliata o a sorpresa">🎲 Consigliami</button>
+        </div>`;
+
+        // Griglia macro-regioni
+        html += `<div class="terrGrid">${MAP_REGIONS.map((reg) => {
+          const st = getRegStats(reg);
+          const isSel = reg.id === activeReg.id && !MAP_SEARCH_QUERY;
+          return `<button type="button" class="terrBtn${isSel ? " on" : ""}" data-reg="${reg.id}" style="--tcol:${reg.color}">
+            <div class="te">${reg.e}</div>
+            <b>${esc(reg.t.split(" & ")[0])}</b>
+            <span>${st.fin}/${st.tot} concluse · ${st.pct}%</span>
+          </button>`;
+        }).join("")}</div>`;
+
+        if (MAP_SEARCH_QUERY.trim()) {
+          const q = MAP_SEARCH_QUERY.trim().toLowerCase();
+          const searchMatches = list.filter(({ s }) => s.t.toLowerCase().includes(q) || (s.d && s.d.toLowerCase().includes(q)) || s.e.includes(q) || s.g.some((g) => g.toLowerCase().includes(q)));
+          html += `<div class="sec">Risultati ricerca (${searchMatches.length})</div>`;
+          if (searchMatches.length === 0) {
+            html += `<p class="sum" style="text-align:center;padding:16px 0;">Nessuna saga trovata per «${esc(MAP_SEARCH_QUERY)}».</p>`;
+          } else {
+            html += `<div class="grid">${renderSagaCards(searchMatches)}</div>`;
+          }
+        } else {
+          // Scheda Hub del Territorio attivo
+          html += `<div class="hubPanel" style="--tcol:${activeReg.color}">
+            <div class="hubTop">
+              <h3 class="hubTitle"><span>${activeReg.e}</span> ${esc(activeReg.t)}</h3>
+              <span style="font-size:12px;font-weight:bold;color:#f8fafc;background:rgba(255,255,255,0.12);padding:3px 8px;border-radius:999px;">${curStats.fin}/${curStats.tot} concluse</span>
+            </div>
+            <div class="hubAtmo">
+              ${activeReg.weather.split(" · ").map((tag) => `<span class="hubAtmoTag">${esc(tag)}</span>`).join("")}
+            </div>
+            <p class="hubDesc">${esc(activeReg.desc)}</p>
+            <div class="hubQuote">${esc(activeReg.quote)}</div>
+            <div class="pbar" style="margin-top:6px"><i style="width:${Math.max(4, curStats.pct)}%;background:${activeReg.color}"></i></div>
+          </div>`;
+
+          html += `<div class="sec"><span>Cronache del Territorio (${curStats.regSagas.length})</span><span>${curStats.fin} concluse</span></div>`;
+          html += `<div class="grid">${renderSagaCards(curStats.regSagas)}</div>`;
+        }
+      } else {
+        // --- VISTA CATALOGO SCHEDE CLASSICO ---
+        if (lastS) html += `<div class="cont" data-id="${lastS.s.id}"><img alt="" src="${cover(lastS.s)}"><div><b>▸ Continua: ${esc(lastS.s.t)}</b>${lastS.x.finished ? "Conclusa · rigioca o cerca gli altri finali" : `Capitolo ${lastS.x.ch}${lastS.s.ch ? ` di ${lastS.s.ch}` : ""}`}</div></div>`;
+
+        html += `<div class="row">${[["tutte", "Tutte"], ["corso", "In corso"], ["nuove", "Da iniziare"], ["concluse", "Concluse"]].map(([k, l]) => `<button type="button" class="chip${FILT.st === k ? " on" : ""}" data-st="${k}">${l}</button>`).join("")}</div>`;
+        html += `<div class="row">${[["", "Tutti i generi"], ...Object.entries(GEN).map(([k, v]) => [k, v[0]])].map(([k, l]) => `<button type="button" class="chip${FILT.g === k ? " on" : ""}" data-g="${k}">${l}</button>`).join("")}</div>`;
+
+        const shown = list.filter(({ s, x }) => s.id !== "carte" && (FILT.st === "tutte" || (FILT.st === "corso" && x.started && !x.finished) || (FILT.st === "nuove" && !x.started) || (FILT.st === "concluse" && x.finished)) && (!FILT.g || s.g.includes(FILT.g))).map((e, i) => [e, i]).sort((a, b) => { const ia = NEWEST.indexOf(a[0].s.id), ib = NEWEST.indexOf(b[0].s.id); return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib) || a[1] - b[1]; }).map((p) => p[0]);
+
+        html += `<div class="grid">${renderSagaCards(shown)}</div>`;
       }
 
       body.innerHTML = html;
 
-      const cv = body.querySelector("#worldMapCv");
-      if (cv) initWorldMapCanvas(cv, activeReg, MAP_REGIONS, list);
-
-      const searchInp = body.querySelector("#mapSearchInput");
-      if (searchInp) {
-        searchInp.oninput = (e) => {
-          MAP_SEARCH_QUERY = e.target.value;
-          renderMappamondoContent();
-          const inp = body.querySelector("#mapSearchInput");
-          if (inp) { inp.focus(); inp.selectionStart = inp.selectionEnd = inp.value.length; }
-        };
-      }
-
-      body.querySelectorAll("[data-reg]").forEach((btn) => {
-        btn.onclick = () => {
-          ACTIVE_MAP_REG = btn.dataset.reg;
-          MAP_SEARCH_QUERY = "";
+      // Eventi pulsanti modalità
+      body.querySelectorAll("[data-switch]").forEach((b) => {
+        b.onclick = () => {
+          SALONE_VIEW = b.dataset.switch;
           safe(() => window.sfx && window.sfx("kick"));
-          renderMappamondoContent();
+          renderContent();
         };
       });
 
-      body.querySelectorAll(".card").forEach((c) => {
-        c.onclick = () => detail(SAGAS.find((s) => s.id === c.dataset.id));
+      // Eventi pulsanti strumenti
+      const bindTool = (sel, fn) => { const el = body.querySelector(sel); if (el) el.onclick = fn; };
+      bindTool('[data-go="album"]', () => openAlbum(() => openSalone()));
+      bindTool('[data-go="guarda"]', () => openGuardaroba(() => openSalone()));
+      bindTool('[data-go="diario"]', () => openDiario(() => openSalone()));
+      bindTool('[data-go="sala"]', () => openSalaGiochi(() => openSalone()));
+      bindTool('[data-go="cine"]', () => openCineteca(() => openSalone()));
+      bindTool('[data-go="per"]', () => openPersonaggi(() => openSalone()));
+      bindTool('[data-go="bar"]', () => { close(); window.__bar.open(() => openSalone()); });
+      bindTool('[data-go="carte"]', () => { close(); window.__carteDecks.openHub(() => openSalone()); });
+      bindTool('[data-go="sogni"]', () => { close(); window.__sogni.open(() => openSalone()); });
+
+      if (SALONE_VIEW === "hub") {
+        const cv = body.querySelector("#worldMapCv");
+        if (cv) {
+          initWorldMapCanvas(cv, activeReg, MAP_REGIONS, list,
+            (newRegId) => {
+              ACTIVE_MAP_REG = newRegId;
+              MAP_SEARCH_QUERY = "";
+              renderContent();
+            },
+            (sagaId) => {
+              const target = SAGAS.find((s) => s.id === sagaId);
+              if (target) detail(target);
+            }
+          );
+        }
+
+        const searchInp = body.querySelector("#mapSearchInput");
+        if (searchInp) {
+          searchInp.oninput = (e) => {
+            MAP_SEARCH_QUERY = e.target.value;
+            renderContent();
+            const inp = body.querySelector("#mapSearchInput");
+            if (inp) { inp.focus(); inp.selectionStart = inp.selectionEnd = inp.value.length; }
+          };
+        }
+
+        const compBtn = body.querySelector("#btnCompass");
+        if (compBtn) {
+          compBtn.onclick = () => {
+            safe(() => window.sfx && window.sfx("jingle"));
+            // Scegli una saga: preferisci una non ancora conclusa
+            const unstarted = list.filter(({ x }) => !x.finished);
+            const pool = unstarted.length ? unstarted : list;
+            const picked = pool[Math.floor(Math.random() * pool.length)];
+            if (picked) {
+              const reg = MAP_REGIONS.find((rg) => rg.sagas.includes(picked.s.id));
+              if (reg) {
+                ACTIVE_MAP_REG = reg.id;
+                SWALLOW_TOKEN.tx = reg.x;
+                SWALLOW_TOKEN.ty = reg.y;
+              }
+              detail(picked.s);
+            }
+          };
+        }
+
+        body.querySelectorAll("[data-reg]").forEach((btn) => {
+          btn.onclick = () => {
+            ACTIVE_MAP_REG = btn.dataset.reg;
+            MAP_SEARCH_QUERY = "";
+            safe(() => window.sfx && window.sfx("kick"));
+            renderContent();
+          };
+        });
+      } else {
+        body.querySelectorAll("[data-st]").forEach((b) => (b.onclick = () => { FILT.st = b.dataset.st; renderContent(); }));
+        body.querySelectorAll("[data-g]").forEach((b) => (b.onclick = () => { FILT.g = b.dataset.g; renderContent(); }));
+      }
+
+      body.querySelectorAll(".card,.cont").forEach((b) => {
+        b.onclick = () => detail(SAGAS.find((s) => s.id === b.dataset.id));
       });
     };
 
-    renderMappamondoContent();
-  }
-
-  function openSalone(back) {
-    if (back) BK.sal = back; BACK = BK.sal; const body = shell("🏛️ Salone delle Saghe"), r = rec(), tt = totals();
-    const list = SAGAS.filter(available).map((s) => ({ s, x: state(s) }));
-    const lastS = list.find((o) => o.s.id === r.last);
-    let html = `<p class="sum">${tt.n} saghe · ${tt.run} in corso · ${tt.fin} concluse · finali trovati ${tt.fe}/${tt.te}</p>`;
-    if (lastS) html += `<div class="cont" data-id="${lastS.s.id}"><img alt="" src="${cover(lastS.s)}"><div><b>▸ Continua: ${esc(lastS.s.t)}</b>${lastS.x.finished ? "Conclusa · rigioca o cerca gli altri finali" : `Capitolo ${lastS.x.ch}${lastS.s.ch ? ` di ${lastS.s.ch}` : ""}`}</div></div>`;
-    html += `<div class="big"><button type="button" data-go="mappa" style="border:2px solid #38bdf8;background:linear-gradient(135deg,#1b3252,#0f1f38)">🗺️ Mappamondo delle Saghe<small>Esplora territori, mari ed epoche di ogni avventura</small></button></div>`;
-    if (window.__carteDecks) html += `<div class="big"><button type="button" data-go="carte">🎴 Carte del Destino<small>Mini-storie a mazzi · pesca, vivi, rigioca</small></button></div>`;
-    if (window.__bar) html += `<div class="big"><button type="button" data-go="bar">🍺 Il Bar del Borgo<small>Gestione leggera · servi, ascolta gli ospiti, migliora il locale</small></button></div>`;
-    html += `<div class="big"><button type="button" data-go="album">🏆 Album dei finali<small>${tt.fe}/${tt.te} timbri</small></button><button type="button" data-go="guarda">👕 Guardaroba<small>Prova e indossa ciò che hai sbloccato</small></button></div>`;
-    html += `<div class="big"><button type="button" data-go="diario">📖 Diario<small>Tutte le saghe in un libro · completamento e titoli</small></button></div>`;
-    html += `<div class="big"><button type="button" data-go="sala">🕹️ Sala Giochi<small>I motori di partita delle saghe, liberi</small></button><button type="button" data-go="cine">🎬 Cineteca<small>Rivedi i finali trovati</small></button></div>`;
-    { const pt = safe(() => perTotals(), null); if (pt) html += `<div class="big"><button type="button" data-go="per">👥 Album dei personaggi<small>${pt.seen}/${pt.tot} incontrati · carte d'oro per le saghe concluse</small></button>${window.__sogni ? `<button type="button" data-go="sogni">🃏 La Squadra dei Sogni<small>Carte da collezionare, intesa e il Torneo dei Sogni</small></button>` : ""}</div>`; }
-    html += `<div class="row">${[["tutte", "Tutte"], ["corso", "In corso"], ["nuove", "Da iniziare"], ["concluse", "Concluse"]].map(([k, l]) => `<button type="button" class="chip${FILT.st === k ? " on" : ""}" data-st="${k}">${l}</button>`).join("")}</div>`;
-    html += `<div class="row">${[["", "Tutti i generi"], ...Object.entries(GEN).map(([k, v]) => [k, v[0]])].map(([k, l]) => `<button type="button" class="chip${FILT.g === k ? " on" : ""}" data-g="${k}">${l}</button>`).join("")}</div>`;
-    const shown = list.filter(({ s, x }) => s.id !== "carte" && (FILT.st === "tutte" || (FILT.st === "corso" && x.started && !x.finished) || (FILT.st === "nuove" && !x.started) || (FILT.st === "concluse" && x.finished)) && (!FILT.g || s.g.includes(FILT.g))).map((e, i) => [e, i]).sort((a, b) => { const ia = NEWEST.indexOf(a[0].s.id), ib = NEWEST.indexOf(b[0].s.id); return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib) || a[1] - b[1]; }).map((p) => p[0]); // le saghe più recenti per prime
-    html += `<div class="grid">${shown.map(({ s, x }) => {
-      const isNew = !r.seen[s.id] && !x.started && NEWEST.includes(s.id);
-      const badge = x.finished ? `<span class="badge done">✓ CONCLUSA</span>` : x.started ? `<span class="badge run">IN CORSO</span>` : isNew ? `<span class="badge new">NUOVA</span>` : "";
-      const prog = x.pct != null && (x.started || x.finished) ? `<div class="pbar"><i style="width:${Math.max(4, x.pct)}%"></i></div>` : "";
-      return `<div class="card" data-id="${s.id}"><img alt="" loading="lazy" src="${cover(s)}"><div class="t"><span class="e">${s.e}</span>${esc(s.t)}</div><div class="info">${s.g.map((k) => `<span class="tag" style="background:${GEN[k][1]}">${GEN[k][0]}</span>`).join("")}<div style="display:flex;justify-content:space-between;align-items:center;gap:6px"><span>${x.finished ? "Conclusa" : x.started ? `Capitolo ${x.ch}${s.ch ? `/${s.ch}` : ""}` : "Da iniziare"}</span>${x.ends.length ? `<span>🏆 ${x.endsFound}/${x.ends.length}</span>` : ""}</div>${prog}</div>${badge ? `<div class="stamp">${badge}</div>` : ""}</div>`;
-    }).join("") || `<p class="sum">Nessuna saga con questo filtro.</p>`}</div>`;
-    body.innerHTML = html;
-    body.querySelectorAll("[data-st]").forEach((b) => (b.onclick = () => { FILT.st = b.dataset.st; openSalone(); }));
-    body.querySelectorAll("[data-g]").forEach((b) => (b.onclick = () => { FILT.g = b.dataset.g; openSalone(); }));
-    body.querySelectorAll(".card,.cont").forEach((b) => (b.onclick = () => detail(SAGAS.find((s) => s.id === b.dataset.id))));
-    const mapb = body.querySelector('[data-go="mappa"]'); if (mapb) mapb.onclick = () => openMappamondo(() => openSalone());
-    const brb = body.querySelector('[data-go="bar"]'); if (brb) brb.onclick = () => { close(); window.__bar.open(() => openSalone()); };
-    const cdb = body.querySelector('[data-go="carte"]'); if (cdb) cdb.onclick = () => { close(); window.__carteDecks.openHub(() => openSalone()); };
-    body.querySelector('[data-go="album"]').onclick = () => openAlbum(() => openSalone());
-    body.querySelector('[data-go="guarda"]').onclick = () => openGuardaroba(() => openSalone());
-    const pg = body.querySelector('[data-go="per"]'); if (pg) pg.onclick = () => openPersonaggi(() => openSalone());
-    const sgb = body.querySelector('[data-go="sogni"]'); if (sgb) sgb.onclick = () => { close(); window.__sogni.open(() => openSalone()); };
-    body.querySelector('[data-go="sala"]').onclick = () => openSalaGiochi(() => openSalone());
-    body.querySelector('[data-go="cine"]').onclick = () => openCineteca(() => openSalone());
-    body.querySelector('[data-go="diario"]').onclick = () => openDiario(() => openSalone());
+    renderContent();
   }
   function detail(s) {
     if (!s || !OV) return; const x = state(s), r = rec(); r.seen[s.id] = 1; recSave(r);
