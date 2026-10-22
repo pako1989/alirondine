@@ -22,8 +22,14 @@
   const ITEMD = { fire: "colpisce chi hai davanti", thunder: "frena tutti i rivali davanti", curve: "curve senza sbandare + turbo", zig: "turbo e niente ostacoli", spiral: "lascia un tornado dietro", vanish: "attraversi tutto per un po'", ice: "congela chi hai davanti", change: "scambi posto con chi hai davanti", drill: "scudo + turbo" };
   const ITEMI = { fire: "🔥", thunder: "⚡", curve: "🎯", zig: "〰️", spiral: "🌪️", vanish: "👻", ice: "🧊", change: "🔄", drill: "🔩" };
   const MODES = { classic: ["🏁 Classica", "8 piloti, squadre, punti: la gara di sempre"], time: ["⏱️ Giro lanciato", "da solo contro il cronometro: batti il tuo record"], duel: ["⚔️ Testa a testa", "tu contro un solo rivale forte: chi arriva prima vince"], caos: ["🎲 Caos", "scatole 🎁 ovunque e si ricaricano subito: vince chi usa meglio gli oggetti"] };
+  const KARTS = {
+    classic: { id: "classic", name: "🏎️ Rondine Standard", desc: "Bilanciato: perfetto equilibrio tra velocità, sterzo e accelerazione", vm: 1.0, grip: 1.0, hold: 1.0, acc: 1.0, eRate: 1.0, initShield: 0 },
+    speed: { id: "speed", name: "⚡ Saetta Rossa", desc: "Bolide aerodinamico: velocità max +15% e turbo +10%, ma tenuta ridotta", vm: 1.15, grip: 0.88, hold: 0.90, acc: 0.95, eRate: 1.0, initShield: 0 },
+    light: { id: "light", name: "🪶 Piuma Scattante", desc: "Kart leggero: scatto +25%, tenuta in curva +20%, ricarica energia rapida", vm: 0.94, grip: 1.20, hold: 1.15, acc: 1.25, eRate: 1.35, initShield: 0 },
+    heavy: { id: "heavy", name: "🛡️ Titano Corazzato", desc: "Mezzo pesante: scudo iniziale da 180 frame, massima stabilità contro le spinte", vm: 1.04, grip: 1.05, hold: 1.25, acc: 0.88, eRate: 1.0, initShield: 180 }
+  };
   let OV = null, BACK = null, R = null, RAF = 0, PAUSE = false;
-  const load = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { champ: r.champ | 0, wins: r.wins | 0, best: r.best || {}, view: r.view === "top" ? "top" : "rear", fun: r.fun !== false, mode: MODES[r.mode] ? r.mode : "classic", rec: r.rec || {} }; };
+  const load = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { champ: r.champ | 0, wins: r.wins | 0, best: r.best || {}, view: r.view === "top" ? "top" : "rear", fun: r.fun !== false, mode: MODES[r.mode] ? r.mode : "classic", kart: KARTS[r.kart] ? r.kart : "classic", rec: r.rec || {} }; };
   const save = (r) => safe(() => localStorage.setItem(KEY, JSON.stringify(r)), 0);
   const name = (id) => safe(() => S().name(id), id);
   const rlOf = (c) => { if (ABIL[c.role]) return c.role; const e = safe(() => S().eff(c), c); return { at: "A", te: "C", df: "D" }[e.at >= e.df && e.at >= e.te ? "at" : e.df >= e.te ? "df" : "te"]; };
@@ -51,7 +57,12 @@
   // ------------------------------------------------------------ piloti
   function mk(card, team, idx, o) {
     o = o || {}; const e = safe(() => S().eff(card), card), m = 1 + (o.m || 0);
-    return { id: card.id, n: name(card.id), role: ABIL[card.role] ? card.role : { at: "A", te: "C", df: "D" }[(e.at >= e.df && e.at >= e.te) ? "at" : e.df >= e.te ? "df" : "te"], team, idx, col: team === 0 ? "#3aa0ff" : team === 1 ? "#ff5a5a" : "#b0b0b0", s: -idx * 22 - (team === 1 ? 14 : 0), lat: ((idx % 3) - 1) * 0.55, v: 0, vmax: (1.55 + e.at / 260) * m, grip: 0.9 + e.te / 220, hold: 1 - e.df / 520, energy: o.energy != null ? o.energy : 40, boost: 0, cd: 0, shield: 0, stun: 0, laps: 0, fin: 0, finT: 0, ai: o.ai || 0, human: !!o.human, dash: 0, tlat: 0, w: 0, wall: 0, prog: 0, fxk: safe(() => window.__supers.of(card.id).fx, "fire"), held: null, inv: 0, ghost: 0, sure: 0, bc: 0, zc: 0, pat: 0 };
+    const kData = (o.human ? KARTS[o.kart || load().kart] : null) || KARTS.classic;
+    const vmax = (1.55 + e.at / 260) * m * (o.human ? kData.vm : 1);
+    const grip = (0.9 + e.te / 220) * (o.human ? kData.grip : 1);
+    const hold = (1 - e.df / 520) * (o.human ? kData.hold : 1);
+    const shield = o.human ? kData.initShield : 0;
+    return { id: card.id, n: name(card.id), role: ABIL[card.role] ? card.role : { at: "A", te: "C", df: "D" }[(e.at >= e.df && e.at >= e.te) ? "at" : e.df >= e.te ? "df" : "te"], team, idx, col: team === 0 ? "#3aa0ff" : team === 1 ? "#ff5a5a" : "#b0b0b0", s: -idx * 22 - (team === 1 ? 14 : 0), lat: ((idx % 3) - 1) * 0.55, v: 0, vmax, grip, hold, energy: o.energy != null ? o.energy : 40, boost: 0, cd: 0, shield, stun: 0, laps: 0, fin: 0, finT: 0, ai: o.ai || 0, human: !!o.human, dash: 0, tlat: 0, w: 0, wall: 0, prog: 0, fxk: safe(() => window.__supers.of(card.id).fx, "fire"), held: null, inv: 0, ghost: 0, sure: 0, bc: 0, zc: 0, pat: 0, kart: kData.id, kAcc: o.human ? kData.acc : 1, kRate: o.human ? kData.eRate : 1 };
   }
   function begin(cfg) {
     const T = build(cfg.track), rnd = seeded(cfg.seed != null ? cfg.seed : (Date.now() & 0xfffff));
@@ -111,7 +122,7 @@
     // velocità
     let vt = r.vmax * (r.boost > 0 ? 1.55 : 1) * (r.stun > 0 ? 0.45 : 1) * (r.pat && r.inv <= 0 ? 0.72 : 1); if (r.dash > 0) { vt = r.vmax * 3; r.dash--; }
     for (const o of R.racers) if (o !== r && o.prog > r.prog && o.prog - r.prog < 46 && Math.abs(o.lat - r.lat) < 0.35 && !o.fin) { vt *= 1.07; break; } // scia
-    r.v += (vt - r.v) * 0.045; if (r.energy < 100) r.energy = Math.min(100, r.energy + 0.025);
+    r.v += (vt - r.v) * 0.045 * (r.kAcc || 1); if (r.energy < 100) r.energy = Math.min(100, r.energy + 0.025 * (r.kRate || 1));
     r.prog += r.v / Math.max(0.55, 1 - a.k * r.lat * HW);
     // oggetti e chiazze
     const sd = (x) => ((x - r.prog) % T.len + T.len * 1.5) % T.len - T.len / 2; // distanza con segno lungo il giro
@@ -321,7 +332,8 @@
   }
   function menu(back) {
     if (back) BACK = back; const body = shell("🏁 Gran Premio dei Sogni"), r = load(), team = myTeam();
-    body.innerHTML = `<p class="sum">Corsa a squadre con i personaggi delle saghe: <b>guidi uno dei tuoi tre piloti</b>, gli altri due corrono da soli e i punti di tutti e tre si sommano contro la squadra rivale. Scia, turbo, abilità di ruolo e chiazze d'olio.</p><div class="sec">La tua squadra (dalla Squadra dei Sogni)</div><p class="sum">${team.map((c) => `<b>${esc(name(c.id))}</b> (${esc(ABIL[rlOf(c)][0])})`).join(" · ")}</p><div class="sec">Modalità</div><button type="button" class="one" data-mode="1">${MODES[r.mode][0]}<small>${MODES[r.mode][1]}. Tocca per cambiare (vale per le gare singole, il campionato è sempre classico)</small></button><button type="button" class="one" data-view="1">👁️ Visuale: ${r.view === "rear" ? "da dietro (joystick)" : "dall'alto"}<small>tocca per cambiare: da dietro oppure dall'alto (la classica)</small></button><button type="button" class="one" data-fun="1">🎁 Oggetti, ostacoli e scorciatoie: ${r.fun ? "SÌ" : "NO"}<small>oggetti della tua saga, ostacoli per pista, scorciatoie (una sempre aperta, una con leva). Tocca per cambiare</small></button><button type="button" class="one" data-go="champ">🏆 Campionato dei Sogni<small>3 gare su 3 piste · ${r.champ ? "vinto " + r.champ + " volte" : "mai vinto"} · premi in monete</small></button>${TRACKS.map((t, i) => `<button type="button" class="one" data-t="${i}">🏁 ${esc(t.n)}<small>gara singola · 2 giri${r.best[t.id] ? " · record posto " + r.best[t.id] : ""}</small></button>`).join("")}`;
+    body.innerHTML = `<p class="sum">Corsa a squadre con i personaggi delle saghe: <b>guidi uno dei tuoi tre piloti</b>, gli altri due corrono da soli e i punti di tutti e tre si sommano contro la squadra rivale. Scia, turbo, abilità di ruolo e chiazze d'olio.</p><div class="sec">La tua squadra (dalla Squadra dei Sogni)</div><p class="sum">${team.map((c) => `<b>${esc(name(c.id))}</b> (${esc(ABIL[rlOf(c)][0])})`).join(" · ")}</p><div class="sec">Modalità e Veicolo</div><button type="button" class="one" data-kart="1">🏎️ Veicolo: ${esc(KARTS[r.kart].name)}<small>${esc(KARTS[r.kart].desc)}. Tocca per cambiare kart</small></button><button type="button" class="one" data-mode="1">${MODES[r.mode][0]}<small>${MODES[r.mode][1]}. Tocca per cambiare (vale per le gare singole, il campionato è sempre classico)</small></button><button type="button" class="one" data-view="1">👁️ Visuale: ${r.view === "rear" ? "da dietro (joystick)" : "dall'alto"}<small>tocca per cambiare: da dietro oppure dall'alto (la classica)</small></button><button type="button" class="one" data-fun="1">🎁 Oggetti, ostacoli e scorciatoie: ${r.fun ? "SÌ" : "NO"}<small>oggetti della tua saga, ostacoli per pista, scorciatoie (una sempre aperta, una con leva). Tocca per cambiare</small></button><button type="button" class="one" data-go="champ">🏆 Campionato dei Sogni<small>3 gare su 3 piste · ${r.champ ? "vinto " + r.champ + " volte" : "mai vinto"} · premi in monete</small></button>${TRACKS.map((t, i) => `<button type="button" class="one" data-t="${i}">🏁 ${esc(t.n)}<small>gara singola · 2 giri${r.best[t.id] ? " · record posto " + r.best[t.id] : ""}</small></button>`).join("")}`;
+    body.querySelector('[data-kart]').onclick = () => { const x = load(), ks = Object.keys(KARTS); x.kart = ks[(ks.indexOf(x.kart) + 1) % ks.length]; save(x); menu(); };
     body.querySelector('[data-mode]').onclick = () => { const x = load(), k = Object.keys(MODES); x.mode = k[(k.indexOf(x.mode) + 1) % k.length]; save(x); menu(); };
     body.querySelector('[data-view]').onclick = () => { const x = load(); x.view = x.view === "rear" ? "top" : "rear"; save(x); menu(); };
     body.querySelector('[data-fun]').onclick = () => { const x = load(); x.fun = !x.fun; save(x); menu(); };
@@ -331,9 +343,10 @@
   function setup(ti, lvl, seed, mode) {
     const T = TRACKS[ti], rand = seeded(seed != null ? seed : (Date.now() & 0xffff)), me = myTeam(), ss = [...new Set(S().CARDS.map((c) => c.saga))], th = ss[Math.floor(rand() * ss.length)], rv = rivals(rand, lvl, th);
     const rac = [];
-    if (mode === "time") rac.push(mk(me[0], 0, 0, { human: true, m: 0.02, ai: 3 }));
-    else if (mode === "duel") { rac.push(mk(me[0], 0, 0, { human: true, m: 0.02, ai: 3 })); rac.push(mk(rv[0], 1, 0, { ai: 4, m: 0.02 })); }
-    else { me.forEach((c, i) => rac.push(mk(c, 0, i, { human: i === 0, m: 0.02, ai: 3 })));
+    const userKart = load().kart;
+    if (mode === "time") rac.push(mk(me[0], 0, 0, { human: true, m: 0.02, ai: 3, kart: userKart }));
+    else if (mode === "duel") { rac.push(mk(me[0], 0, 0, { human: true, m: 0.02, ai: 3, kart: userKart })); rac.push(mk(rv[0], 1, 0, { ai: 4, m: 0.02 })); }
+    else { me.forEach((c, i) => rac.push(mk(c, 0, i, { human: i === 0, m: 0.02, ai: 3, kart: userKart })));
     rv.forEach((c, i) => rac.push(mk(c, i < 3 ? 1 : 2, i, { ai: lvl, m: (lvl - 3) * 0.035 }))); }
     return { track: T, racers: rac, seed: Math.floor(rand() * 1e6), mode: mode || "classic" };
   }
@@ -358,5 +371,5 @@
     } else { save(a); body.insertAdjacentHTML("beforeend", html + `<button type="button" class="one" data-go="again">↺ Rivincita</button><button type="button" class="one" data-go="menu">◂ Menu</button>`); body.querySelector('[data-go="again"]').onclick = () => race(ti, lvl, null); body.querySelector('[data-go="menu"]').onclick = () => menu(); }
     if (safe(() => window.__arena, null)) safe(() => { const ar = window.__arena.load(), id = G.me.id; ar.xp[id] = Math.min(60, (ar.xp[id] | 0) + 1); window.__arena.save(ar); }, 0);
   }
-  window.__corsa = { open: menu, close, state: () => R, tick, press, begin, setup, build, TRACKS, ABIL, pos, at, _fast: (v) => { if (R) R.fast = !!v; }, pause: (v) => { PAUSE = !!v; }, race, load, save, mk };
+  window.__corsa = { open: menu, close, state: () => R, tick, press, begin, setup, build, TRACKS, ABIL, KARTS, pos, at, _fast: (v) => { if (R) R.fast = !!v; }, pause: (v) => { PAUSE = !!v; }, race, load, save, mk };
 })();
