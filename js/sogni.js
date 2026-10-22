@@ -448,18 +448,168 @@
   }
   // ---------------------------------------------------------------- le schermate
   let OV = null, BACK = null;
+  let COLL_FILT = { q: "", own: "all", rar: "all", role: "all" };
+  const isFiltered = () => !!COLL_FILT.q || COLL_FILT.own !== "all" || COLL_FILT.rar !== "all" || COLL_FILT.role !== "all";
   function shell(title) { css(); if (OV) OV.remove(); OV = document.createElement("div"); OV.className = "sgOv"; OV.innerHTML = `<div class="wrap"><div class="bar"><h2>${title}</h2><button type="button" class="x" aria-label="Chiudi">✕</button></div><div class="body"></div></div>`; OV.querySelector(".x").onclick = () => { const b = BACK; closeAll(); if (typeof b === "function") b(); }; document.body.appendChild(OV); return OV.querySelector(".body"); }
   function closeAll() { if (OV) { OV.remove(); OV = null; } }
+
+  function matchCard(c, q, r) {
+    if (COLL_FILT.own === "own" && !r.own.includes(c.id)) return false;
+    if (COLL_FILT.own === "lock" && r.own.includes(c.id)) return false;
+    if (COLL_FILT.rar !== "all" && c.rar !== COLL_FILT.rar) return false;
+    if (COLL_FILT.role !== "all" && c.role !== COLL_FILT.role) return false;
+    if (!q) return true;
+    const n = (name(c.id) || "").toLowerCase();
+    const sg = (SG(c.saga)[1] || "").toLowerCase();
+    const rarName = (RAR[c.rar] ? RAR[c.rar][0] : "").toLowerCase();
+    const roleName = c.role === "A" ? "attaccante attacco" : c.role === "C" ? "centrocampista centrocampo" : c.role === "D" ? "difensore difesa" : c.role === "P" ? "portiere" : c.role === "B" ? "battitore jolly" : "";
+    const words = q.split(/\s+/).filter(Boolean);
+    return words.every((w) => n.includes(w) || sg.includes(w) || rarName.includes(w) || roleName.includes(w) || c.id.toLowerCase().includes(w));
+  }
+
+  function renderColl(body, r) {
+    const collEl = body.querySelector(".coll");
+    const countEl = body.querySelector(".sgCount");
+    const resetBtn = body.querySelector(".sgCollReset");
+    const clearBtn = body.querySelector(".sgClearBtn");
+    if (!collEl) return;
+    if (clearBtn) clearBtn.style.display = COLL_FILT.q ? "" : "none";
+    if (resetBtn) resetBtn.style.display = isFiltered() ? "" : "none";
+
+    body.querySelectorAll(".sgFilterRow .sgChip").forEach((chip) => {
+      const group = chip.parentElement.dataset.filtGroup;
+      if (group && COLL_FILT[group] !== undefined) {
+        chip.classList.toggle("active", COLL_FILT[group] === chip.dataset.val);
+      }
+    });
+
+    const q = (COLL_FILT.q || "").trim().toLowerCase();
+    const filtered = CARDS.filter((c) => matchCard(c, q, r));
+    filtered.sort((a, b) => (r.own.includes(b.id) ? 1 : 0) - (r.own.includes(a.id) ? 1 : 0));
+
+    if (countEl) {
+      countEl.innerHTML = `Mostrate <b>${filtered.length}</b> di <b>${CARDS.length}</b> carte${r.own.length ? ` · <b>${filtered.filter((c) => r.own.includes(c.id)).length}</b> possedute` : ""}`;
+    }
+
+    if (!filtered.length) {
+      collEl.innerHTML = `<div class="sgEmptyColl">Nessuna carta corrisponde ai filtri selezionati.<br><button type="button" class="sgChip" style="margin-top:10px;display:inline-block" data-reset="1">Azzera filtri</button></div>`;
+      const rb = collEl.querySelector("[data-reset]");
+      if (rb) rb.onclick = () => resetAllFilters(body, r);
+      return;
+    }
+
+    collEl.innerHTML = filtered.map((c) => cardHtml(c.id, { own: r.own.includes(c.id), sel: r.team.includes(c.id) })).join("");
+    collEl.querySelectorAll(".sgCard:not(.lock)").forEach((el) => (el.onclick = () => toggle(el.dataset.c)));
+  }
+
+  function resetAllFilters(body, r) {
+    COLL_FILT.q = "";
+    COLL_FILT.own = "all";
+    COLL_FILT.rar = "all";
+    COLL_FILT.role = "all";
+    const inp = body.querySelector(".sgSearchInp");
+    if (inp) inp.value = "";
+    renderColl(body, r);
+  }
+
+  function refreshTeam(body, r) {
+    const I = intesa(r.team);
+    const secT = body.querySelector(".sec-team");
+    if (secT) secT.innerHTML = `La tua squadra · forza <b>${forza(r.team)}</b> · intesa <b>${I.n}</b>/15${I.why.length ? ` <span class="why">(${I.why.map(esc).join(", ")})</span>` : ""}`;
+    const teamEl = body.querySelector(".team");
+    if (teamEl) {
+      teamEl.innerHTML = [0, 1, 2, 3, 4].map((k) => (r.team[k] ? cardHtml(r.team[k]) : `<div class="sgCard empty" data-slot="${k}"><span>+</span></div>`)).join("");
+      teamEl.querySelectorAll(".sgCard[data-c]").forEach((el) => (el.onclick = () => toggle(el.dataset.c)));
+    }
+    const statEl = body.querySelector(".team-stats");
+    if (statEl) statEl.innerHTML = r.team.length ? statLine(r.team) : "";
+    const linksEl = body.querySelector(".links");
+    if (linksEl) {
+      linksEl.innerHTML = LINKS.map(([a, b, t]) => `<span class="${r.own.includes(a) && r.own.includes(b) ? "ok" : ""}"><b>${esc(t)}</b> ${r.own.includes(a) ? esc(name(a)) : "???"} + ${r.own.includes(b) ? esc(name(b)) : "???"}</span>`).join("");
+    }
+    body.querySelectorAll(".coll .sgCard[data-c]").forEach((el) => {
+      el.classList.toggle("sel", r.team.includes(el.dataset.c));
+    });
+  }
+
   function open(back) {
     if (back) BACK = back; const { r, nw } = sync(); const body = shell("🃏 La Squadra dei Sogni");
     const I = intesa(r.team), coins = safe(() => window.__borgoApi.coins(), 0);
     let h = `<p class="sum">Le carte dei personaggi di tutte le saghe. Si sbloccano giocando, o con le bustine. Carte: <b>${r.own.length}/${CARDS.length}</b> · monete: <b>${coins}</b>${nw.length ? ` · <b class="new">nuove: ${nw.length}</b>` : ""}</p>`;
-    h += `<div class="sec">La tua squadra · forza <b>${forza(r.team)}</b> · intesa <b>${I.n}</b>/15${I.why.length ? ` <span class="why">(${I.why.map(esc).join(", ")})</span>` : ""}</div><div class="team">${[0, 1, 2, 3, 4].map((k) => (r.team[k] ? cardHtml(r.team[k]) : `<div class="sgCard empty" data-slot="${k}"><span>+</span></div>`)).join("")}</div>${r.team.length ? statLine(r.team) : ""}`;
+    h += `<div class="sec sec-team">La tua squadra · forza <b>${forza(r.team)}</b> · intesa <b>${I.n}</b>/15${I.why.length ? ` <span class="why">(${I.why.map(esc).join(", ")})</span>` : ""}</div><div class="team">${[0, 1, 2, 3, 4].map((k) => (r.team[k] ? cardHtml(r.team[k]) : `<div class="sgCard empty" data-slot="${k}"><span>+</span></div>`)).join("")}</div><div class="team-stats">${r.team.length ? statLine(r.team) : ""}</div>`;
     h += `<div class="big"><button type="button" data-go="tour">🏆 Torneo dei Sogni<small>${r.won.length}/8 sfide vinte · ogni sfida in un motore diverso</small></button><button type="button" data-go="pack" ${coins < PACK ? "disabled" : ""}>🎴 Bustina<small>${PACK} monete · una carta a sorpresa</small></button><button type="button" data-go="season">📅 Stagione dei Sogni<small>${r.season ? `giornata ${Math.min(7, r.season.day + 1)}/7` : "campionato a 8 squadre"}${r.titles ? ` · scudetti ${r.titles}` : ""}</small></button>${window.__arena ? `<button type="button" data-go="arena">⚔️ Arena dei Sogni<small>Battaglie a turni · Torre dei Duelli</small></button>` : ""}<button type="button" data-go="draft">🎲 Draft<small>${r.draft ? (r.draft.picks.length < 5 ? `scelta ${r.draft.picks.length + 1}/5` : "coppa in corso") : "scegli 1 carta su 3 e gioca la coppa"}${r.cups ? ` · coppe ${r.cups}` : ""}</small></button></div><p class="sum">Le carte crescono giocando: ⭐ a 3 punti esperienza, ⭐⭐ a 8, ⭐⭐⭐ a 15 (+2 a ogni statistica per stella; a tre stelle la carta dice la sua frase).</p>`;
-    h += `<div class="sec">Collezione · tocca una carta per metterla in squadra o toglierla</div><div class="coll">${CARDS.slice().sort((a, b) => r.own.includes(b.id) - r.own.includes(a.id)).map((c) => cardHtml(c.id, { own: r.own.includes(c.id), sel: r.team.includes(c.id) })).join("")}</div>`;
+    h += `<div class="sec">Collezione · tocca una carta per metterla in squadra o toglierla</div>`;
+    h += `<div class="sgCollControls">
+      <div class="sgSearchBox">
+        <span class="sgSearchIcon">🔍</span>
+        <input type="search" class="sgSearchInp" placeholder="Cerca per nome, saga o ruolo..." value="${esc(COLL_FILT.q)}" aria-label="Cerca carte">
+        <button type="button" class="sgClearBtn"${COLL_FILT.q ? "" : ' style="display:none"'} title="Cancella ricerca">✕</button>
+      </div>
+      <div class="sgFilterGroups">
+        <div class="sgFilterRow" data-filt-group="own">
+          <span class="sgFilterLabel">Stato:</span>
+          <button type="button" class="sgChip${COLL_FILT.own === "all" ? " active" : ""}" data-val="all">Tutte (${CARDS.length})</button>
+          <button type="button" class="sgChip${COLL_FILT.own === "own" ? " active" : ""}" data-val="own">Possedute (${r.own.length})</button>
+          <button type="button" class="sgChip${COLL_FILT.own === "lock" ? " active" : ""}" data-val="lock">Da sbloccare (${CARDS.length - r.own.length})</button>
+        </div>
+        <div class="sgFilterRow" data-filt-group="role">
+          <span class="sgFilterLabel">Ruolo:</span>
+          <button type="button" class="sgChip${COLL_FILT.role === "all" ? " active" : ""}" data-val="all">Tutti</button>
+          <button type="button" class="sgChip${COLL_FILT.role === "A" ? " active" : ""}" data-val="A">⚔️ Attacco (A)</button>
+          <button type="button" class="sgChip${COLL_FILT.role === "C" ? " active" : ""}" data-val="C">🎯 Centrocampo (C)</button>
+          <button type="button" class="sgChip${COLL_FILT.role === "D" ? " active" : ""}" data-val="D">🛡️ Difesa (D)</button>
+          <button type="button" class="sgChip${COLL_FILT.role === "P" ? " active" : ""}" data-val="P">🧤 Portieri (P)</button>
+          <button type="button" class="sgChip${COLL_FILT.role === "B" ? " active" : ""}" data-val="B">⭐ Battitori (B)</button>
+        </div>
+        <div class="sgFilterRow" data-filt-group="rar">
+          <span class="sgFilterLabel">Rarità:</span>
+          <button type="button" class="sgChip${COLL_FILT.rar === "all" ? " active" : ""}" data-val="all">Tutte</button>
+          <button type="button" class="sgChip chip-c${COLL_FILT.rar === "c" ? " active" : ""}" data-val="c">Comuni</button>
+          <button type="button" class="sgChip chip-r${COLL_FILT.rar === "r" ? " active" : ""}" data-val="r">Rare</button>
+          <button type="button" class="sgChip chip-e${COLL_FILT.rar === "e" ? " active" : ""}" data-val="e">Epiche</button>
+          <button type="button" class="sgChip chip-l${COLL_FILT.rar === "l" ? " active" : ""}" data-val="l">Leggendarie</button>
+        </div>
+      </div>
+      <div class="sgCollInfo">
+        <span class="sgCount"></span>
+        <button type="button" class="sgCollReset"${isFiltered() ? "" : ' style="display:none"'}>Azzera filtri</button>
+      </div>
+    </div>`;
+    h += `<div class="coll"></div>`;
     h += `<div class="sec">Legami tra saghe (+3 di intesa)</div><div class="links">${LINKS.map(([a, b, t]) => `<span class="${r.own.includes(a) && r.own.includes(b) ? "ok" : ""}"><b>${esc(t)}</b> ${r.own.includes(a) ? esc(name(a)) : "???"} + ${r.own.includes(b) ? esc(name(b)) : "???"}</span>`).join("")}</div>`;
     body.innerHTML = h;
-    body.querySelectorAll(".coll .sgCard:not(.lock)").forEach((el) => (el.onclick = () => toggle(el.dataset.c)));
+
+    const inp = body.querySelector(".sgSearchInp");
+    const clr = body.querySelector(".sgClearBtn");
+    if (inp) {
+      inp.oninput = () => {
+        COLL_FILT.q = inp.value;
+        renderColl(body, load());
+      };
+    }
+    if (clr) {
+      clr.onclick = () => {
+        COLL_FILT.q = "";
+        if (inp) inp.value = "";
+        renderColl(body, load());
+        if (inp) inp.focus();
+      };
+    }
+    body.querySelectorAll(".sgFilterRow .sgChip").forEach((chip) => {
+      chip.onclick = () => {
+        const group = chip.parentElement.dataset.filtGroup;
+        const val = chip.dataset.val;
+        if (!group) return;
+        COLL_FILT[group] = val;
+        renderColl(body, load());
+      };
+    });
+    const rst = body.querySelector(".sgCollReset");
+    if (rst) {
+      rst.onclick = () => resetAllFilters(body, load());
+    }
+
+    renderColl(body, r);
     body.querySelectorAll(".team .sgCard[data-c]").forEach((el) => (el.onclick = () => toggle(el.dataset.c)));
     body.querySelector('[data-go="tour"]').onclick = torneo;
     body.querySelector('[data-go="pack"]').onclick = pack;
@@ -467,7 +617,14 @@
     body.querySelector('[data-go="draft"]').onclick = draft;
     const arb = body.querySelector('[data-go="arena"]'); if (arb) arb.onclick = () => { closeAll(); window.__arena.open(() => open()); };
   }
-  function toggle(id) { const r = load(); if (r.team.includes(id)) r.team = r.team.filter((x) => x !== id); else if (r.team.length < 5 && r.own.includes(id)) r.team.push(id); save(r); open(); }
+  function toggle(id) {
+    const r = load();
+    if (r.team.includes(id)) r.team = r.team.filter((x) => x !== id);
+    else if (r.team.length < 5 && r.own.includes(id)) r.team.push(id);
+    save(r);
+    if (OV && OV.querySelector(".team")) refreshTeam(OV, r);
+    else open();
+  }
   function pack() {
     const coins = safe(() => window.__borgoApi.coins(), 0); if (coins < PACK) return;
     const r = load(), started = Object.keys(SAGHE).filter((k) => progress(k).ch >= 1), pool = CARDS.filter((c) => drop(c) && !r.own.includes(c.id) && (started.includes(c.saga) || c.rar === "c"));
@@ -698,6 +855,29 @@
     st.textContent = `.sgOv{position:fixed;inset:0;z-index:310;background:#120e1e;color:#f4f0e4;font-family:system-ui,sans-serif;overflow:auto}
 .sgOv .wrap{max-width:560px;margin:0 auto;padding:10px 10px 30px}.sgOv .bar{display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#120e1e;padding:6px 0;z-index:2}.sgOv h2{margin:0;font:900 20px system-ui;color:#ffd23f}.sgOv .x{width:40px;height:40px;border-radius:8px;border:1px solid #4a3a6a;background:#221a36;color:#f4f0e4;font-size:16px}
 .sgOv .sum{font-size:13px;line-height:1.45;opacity:.9}.sgOv .sum .new{color:#7ad87a}.sgOv .sec{margin:12px 0 6px;font-weight:800;font-size:13px;color:#c8b8ff}.sgOv .why{font-weight:400;opacity:.8}
+.sgCollControls{background:#181326;border:1px solid #3d2d60;border-radius:12px;padding:10px 12px;margin:8px 0 10px}
+.sgSearchBox{display:flex;align-items:center;background:#100c1a;border:1px solid #4a3a6a;border-radius:8px;padding:5px 10px;gap:8px;transition:border-color .2s,box-shadow .2s}
+.sgSearchBox:focus-within{border-color:#ffd23f;box-shadow:0 0 8px rgba(255,210,63,.25)}
+.sgSearchIcon{font-size:13px;opacity:.7}
+.sgSearchInp{flex:1;background:transparent;border:0;color:#f4f0e4;font:500 13px system-ui;outline:none;min-width:0}
+.sgSearchInp::placeholder{color:#7d7098}
+.sgClearBtn{background:transparent;border:0;color:#a89bc4;cursor:pointer;font-size:13px;padding:2px 6px;border-radius:4px;line-height:1}
+.sgClearBtn:hover{color:#ffd23f;background:rgba(255,255,255,.08)}
+.sgFilterGroups{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.sgFilterRow{display:flex;align-items:center;gap:4px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.sgFilterRow::-webkit-scrollbar{display:none}
+.sgFilterLabel{font-size:10px;font-weight:800;color:#9b8cb8;text-transform:uppercase;letter-spacing:.5px;margin-right:2px;flex-shrink:0}
+.sgChip{background:#221a36;border:1px solid #42345e;color:#c8b8ff;padding:4px 9px;border-radius:14px;font:600 11px system-ui;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.sgChip:hover{border-color:#ffd23f;color:#fff}
+.sgChip.active{background:#ffd23f;border-color:#ffd23f;color:#120e1e;font-weight:800;box-shadow:0 1px 4px rgba(255,210,63,.3)}
+.sgChip.chip-c.active{background:#9aa5b1;border-color:#9aa5b1;color:#120e1e}
+.sgChip.chip-r.active{background:#3a8ad8;border-color:#3a8ad8;color:#fff}
+.sgChip.chip-e.active{background:#a85ad8;border-color:#a85ad8;color:#fff}
+.sgChip.chip-l.active{background:#ffd23f;border-color:#ffd23f;color:#120e1e}
+.sgCollInfo{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#a89bc4;margin-top:8px;padding-top:6px;border-top:1px solid #281e42}
+.sgCollInfo b{color:#ffd23f}
+.sgCollReset{background:none;border:none;color:#ff5a7a;font-size:11px;cursor:pointer;padding:0;text-decoration:underline}
+.sgEmptyColl{text-align:center;padding:26px 12px;background:#1a1428;border-radius:10px;border:1px dashed #4a3a6a;color:#c8b8ff;font-size:13px;grid-column:1/-1}
 .sgOv .team{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.sgOv .coll{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:8px}
 .sgCard{position:relative;border-radius:10px;padding:5px;background:linear-gradient(160deg,var(--sc),#120e1e 75%);border:2px solid var(--rc);box-shadow:0 2px 0 rgba(0,0,0,.5);cursor:pointer;overflow:hidden;font-size:10px;min-height:92px}
 .sgCard.empty{display:flex;align-items:center;justify-content:center;border-style:dashed;border-color:#4a3a6a;background:#1a1428;font-size:22px;color:#4a3a6a}
