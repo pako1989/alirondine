@@ -389,7 +389,7 @@
     { name: "Union Cometa", color: "#7a5ad8", style: "contropiede", f: 73, pl: ["Coda", "Chioma", "Nucleo", "Scia"] },
     { name: "I Leggendari del Faro", color: "#1a2a4a", style: "equilibrata", f: 76, pl: ["Lampo", "Vedetta", "Scoglio", "Fanale"] },
   ];
-  const ENG = ["caveau", "rottami", "zonarossa", "roulette", "corrente", "marea", "vignette", "bottoni", "luci", "nastro", "concilio", "lavagna", "duello", "atb", "gadget", "iso", "volo", "combo", "consegna", "ciak", "ipogeo", "pallatempo", "giroegol", "rebound", "corridoio", "anello", "viva"];
+  const ENG = ["caveau", "rottami", "zonarossa", "roulette", "corrente", "marea", "vignette", "bottoni", "luci", "nastro", "concilio", "lavagna", "duello", "atb", "gadget", "iso", "volo", "combo", "consegna", "ciak", "ipogeo", "pallatempo", "giroegol", "rebound", "corridoio", "anello"];
   const RAR = { c: ["Comune", "#9aa5b1", 1], r: ["Rara", "#3a8ad8", 2], e: ["Epica", "#a85ad8", 3], l: ["Leggendaria", "#ffd23f", 4] };
   // i legami tra saghe diverse: +3 di intesa se entrambi in squadra
   const LINKS = [
@@ -534,7 +534,7 @@
 
   // ---------------------------------------------------------------- salvataggio
   const load = () => { const o = load0(); XPC = o.xp; return o; };
-  const load0 = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { own: Array.isArray(r.own) ? r.own.filter((x) => BY[x]) : [], team: Array.isArray(r.team) ? r.team.filter((x) => BY[x]).slice(0, 5) : [], won: Array.isArray(r.won) ? r.won.filter((x) => typeof x === "number") : [], packs: r.packs | 0, vivaW: r.vivaW | 0, hero: !!r.hero, xp: r.xp && typeof r.xp === "object" ? r.xp : {}, season: r.season && Array.isArray(r.season.sched) ? r.season : null, titles: r.titles | 0, draft: r.draft && Array.isArray(r.draft.picks) ? r.draft : null, cups: r.cups | 0, modulo: typeof r.modulo === "string" && MODULI[r.modulo] ? r.modulo : "rombo", voci: r.voci && typeof r.voci === "object" ? r.voci : {}, vociSeen: Array.isArray(r.vociSeen) ? r.vociSeen.filter((x) => typeof x === "string") : [] }; };
+  const load0 = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { own: Array.isArray(r.own) ? r.own.filter((x) => BY[x]) : [], team: Array.isArray(r.team) ? r.team.filter((x) => BY[x]).slice(0, 5) : [], won: Array.isArray(r.won) ? r.won.filter((x) => typeof x === "number") : [], packs: r.packs | 0, hero: !!r.hero, xp: r.xp && typeof r.xp === "object" ? r.xp : {}, season: r.season && Array.isArray(r.season.sched) ? r.season : null, titles: r.titles | 0, draft: r.draft && Array.isArray(r.draft.picks) ? r.draft : null, cups: r.cups | 0, modulo: typeof r.modulo === "string" && MODULI[r.modulo] ? r.modulo : "rombo", voci: r.voci && typeof r.voci === "object" ? r.voci : {}, vociSeen: Array.isArray(r.vociSeen) ? r.vociSeen.filter((x) => typeof x === "string") : [] }; };
   const save = (r) => { XPC = r.xp || {}; safe(() => localStorage.setItem(KEY, JSON.stringify(r)), 0); };
   const sagaMem = (k) => safe(() => JSON.parse(localStorage.getItem(SG(k)[0]) || "null"), null);
   function progress(k) {
@@ -1719,7 +1719,7 @@
     const comboHtml = renderComboBanner(r);
     let h = `<p class="sum">Le carte dei personaggi di tutte le saghe. Si sbloccano giocando, o con le bustine. Carte: <b>${r.own.length}/${CARDS.length}</b> · monete: <b>${coins}</b>${nw.length ? ` · <b class="new">nuove: ${nw.length}</b>` : ""}</p>`;
     h += `<div class="sec sec-team">La tua squadra · forza <b>${forza(r.team)}</b> · intesa ${intesaBadge(I.n)}${I.why.length ? ` <span class="why">(${I.why.map(esc).join(", ")})</span>` : ""}</div><div class="team">${[0, 1, 2, 3, 4].map((k) => (r.team[k] ? cardHtml(r.team[k]) : `<div class="sgCard empty" data-slot="${k}"><span>+</span></div>`)).join("")}</div><div class="sgFormaz">${formazHtml(r.team)}</div><div class="sgModWrap">${modSelectorHtml(r.modulo, r.team)}</div><div class="team-stats">${r.team.length ? statLine(r.team, r.modulo) : ""}</div><div class="sgComboContainer">${comboHtml}</div>`;
-    h += `<div class="big"><button type="button" data-go="tour">🏆 Torneo dei Sogni<small>${r.won.length}/8 sfide vinte · ogni sfida in un motore diverso</small></button><button type="button" data-go="pack" ${coins < PACK ? "disabled" : ""}>🎴 Bustina<small>${PACK} monete · una carta a sorpresa</small></button><button type="button" data-go="season">📅 Stagione dei Sogni<small>${r.season ? `giornata ${Math.min(7, r.season.day + 1)}/7` : "campionato a 8 squadre"}${r.titles ? ` · scudetti ${r.titles}` : ""}</small></button>${window.__arena ? `<button type="button" data-go="arena">⚔️ Arena dei Sogni<small>Battaglie a turni · Torre dei Duelli</small></button>` : ""}${window.__viva ? `<button type="button" data-go="viva" ${r.team.length < 5 ? "disabled" : ""}>⚽ Partita Viva<small>${r.team.length < 5 ? "serve una squadra di 5 carte" : "calcio con fisica vera · giochi con le tue 5 carte, portiere compreso"}${r.vivaW ? ` · vinte ${r.vivaW}` : ""}</small></button>` : ""}<button type="button" data-go="draft">🎲 Draft<small>${r.draft ? (r.draft.picks.length < 5 ? `scelta ${r.draft.picks.length + 1}/5` : "coppa in corso") : "scegli 1 carta su 3 e gioca la coppa"}${r.cups ? ` · coppe ${r.cups}` : ""}</small></button><button type="button" data-go="voci" class="${vSt.unread ? "sgBtnPulse" : ""}">🎙️ Voci dallo Spogliatoio${vSt.unread ? ` <span class="sgNewDot">${vSt.unread}</span>` : ""}<small>${vSt.unlocked}/${vSt.total} dialoghi · 3 gare col Legame</small></button></div><p class="sum">Le carte crescono giocando: ⭐ a 3 punti esperienza, ⭐⭐ a 8, ⭐⭐⭐ a 15 (+2 a ogni statistica per stella; a tre stelle la carta dice la sua frase).</p>`;
+    h += `<div class="big"><button type="button" data-go="tour">🏆 Torneo dei Sogni<small>${r.won.length}/8 sfide vinte · ogni sfida in un motore diverso</small></button><button type="button" data-go="pack" ${coins < PACK ? "disabled" : ""}>🎴 Bustina<small>${PACK} monete · una carta a sorpresa</small></button><button type="button" data-go="season">📅 Stagione dei Sogni<small>${r.season ? `giornata ${Math.min(7, r.season.day + 1)}/7` : "campionato a 8 squadre"}${r.titles ? ` · scudetti ${r.titles}` : ""}</small></button>${window.__arena ? `<button type="button" data-go="arena">⚔️ Arena dei Sogni<small>Battaglie a turni · Torre dei Duelli</small></button>` : ""}<button type="button" data-go="draft">🎲 Draft<small>${r.draft ? (r.draft.picks.length < 5 ? `scelta ${r.draft.picks.length + 1}/5` : "coppa in corso") : "scegli 1 carta su 3 e gioca la coppa"}${r.cups ? ` · coppe ${r.cups}` : ""}</small></button><button type="button" data-go="voci" class="${vSt.unread ? "sgBtnPulse" : ""}">🎙️ Voci dallo Spogliatoio${vSt.unread ? ` <span class="sgNewDot">${vSt.unread}</span>` : ""}<small>${vSt.unlocked}/${vSt.total} dialoghi · 3 gare col Legame</small></button></div><p class="sum">Le carte crescono giocando: ⭐ a 3 punti esperienza, ⭐⭐ a 8, ⭐⭐⭐ a 15 (+2 a ogni statistica per stella; a tre stelle la carta dice la sua frase).</p>`;
     h += `<div class="sec">Collezione · tocca una carta per metterla in squadra o toglierla</div>`;
     h += `<div class="sgCollControls">
       <div class="sgSearchBox">
@@ -1812,7 +1812,6 @@
     body.querySelector('[data-go="season"]').onclick = stagione;
     body.querySelector('[data-go="draft"]').onclick = draft;
     const vcb = body.querySelector('[data-go="voci"]'); if (vcb) vcb.onclick = () => openVoci(() => open());
-    const vvb = body.querySelector('[data-go="viva"]'); if (vvb) vvb.onclick = viva;
     const arb = body.querySelector('[data-go="arena"]'); if (arb) arb.onclick = () => { closeAll(); window.__arena.open(() => open()); };
   }
   function toggle(id) {
@@ -2013,7 +2012,6 @@
       zonarossa: `tiro +${T.at * 5}% (ATT), fiato nelle fasce rosse +${T.df * 8}% (DIF), mira assistita +${T.te * 8}% (TEC)`,
       rottami: `anteprima del tiro più lunga +${T.at * 5} (ATT), scudo più alto +${T.df * 3 + (sin && modKey === "catenaccio" ? 2 : 0)} (DIF), vento di sabbia -${T.te * 10}% (TEC)`,
       roulette: `fiches scudo +${T.df + (sin && modKey === "catenaccio" ? 1 : 0)} (DIF), precisione carambola +${T.at * 5}% (ATT), gettoni turbo +${(I >= 7 ? 1 : 0) + (T.te >= 2 ? 1 : 0)} (TEC)`,
-      viva: `tiri +${T.at * 6}% (ATT), contrasti e parate +${T.df * 6}% (DIF), controllo e velocità +${T.te * 4}% (TEC), la carta Portiere va in porta`,
       atb: `statistiche +${Math.floor(I / 2.5) + (sin ? 2 : 0)}, tiro +${T.at} (ATT), difesa +${T.df} (DIF), passaggio +${T.te} (TEC)`,
     }[m] || "";
     return pre + txt;
@@ -2040,7 +2038,6 @@
       anello: { mate: names[0], us: "La Squadra dei Sogni" },
       corrente: { mates: names.slice(0, 2), us: "La Squadra dei Sogni" },
       runa: { us: "La Squadra dei Sogni" },
-      viva: { team: team.slice(), n: team.length >= 5 ? 5 : 3, us: "La Squadra dei Sogni" },
       ipogeo: { us: "La Squadra dei Sogni" },
       ciak: { mates: names.slice(0, 2), us: "La Squadra dei Sogni", takes: 2 + (I >= 7 ? 1 : 0) + (T.te >= 2 ? 1 : 0) + (sin && modKey === "rombo" ? 1 : 0) },
       volo: { energy: 100 + I * 4 + T.te * 5 + (sin && modKey === "quadrato" ? 15 : 0), mates: names.slice(0, 1), us: "La Squadra dei Sogni" },
@@ -2098,7 +2095,7 @@
   }
   const pts = (R) => R[1] * 3 + R[2];
   const ranking = (se) => Object.keys(se.tab).map(Number).sort((x, y) => pts(se.tab[y]) - pts(se.tab[x]) || (se.tab[y][4] - se.tab[y][5]) - (se.tab[x][4] - se.tab[x][5]) || se.tab[y][4] - se.tab[x][4] || x - y);
-  // FORMAZIONE IN CAMPO (regola unica per Calcio Eroi, Partita Viva e per il campo in miniatura): n giocatori IN TOTALE, portiere compreso.
+  // FORMAZIONE IN CAMPO (regola unica per Calcio Eroi e per il campo in miniatura): n giocatori IN TOTALE, portiere compreso.
   // In porta va la carta Portiere (P); senza, quella con più DIF. Gli altri si schierano per ruolo: Attaccanti (A) davanti, Centrocampisti (C) in mezzo, Difensori (D) dietro.
   const RANKR = (c) => { const v = { A: 0, B: 0, C: 1, D: 2, P: 2 }[c.role]; return v == null ? 1 : v; };
   function squad(n, ids) {
@@ -2124,18 +2121,7 @@
     const sq = squad(5, ids), pl = lineup(sq.field), tok = (c, x, y, tag, col) => `<div class="sgTk" style="left:${x}%;top:${y}%;--c:${col}"><img src="${port(c.id) || ""}" alt=""><i>${esc(String(name(c.id)).split(/[ ,]/)[0])}</i><b>${tag}</b></div>`;
     const t = pl.map((q) => tok(q.c, 12 + (q.fx / 0.5) * 80, 10 + q.fy * 80, (ROLEN[q.c.role] || ["", ""])[0].slice(0, 3).toUpperCase() || "—", (ROLEN[q.c.role] || ["", "#94a3b8"])[1])).join("") + tok(sq.keeper, 5, 50, "PORT.", "#22c55e");
     const short = ids.length < 5 ? `<br><span style="opacity:.8">Con meno di 5 carte il resto della squadra viene completato in automatico.</span>` : "";
-    return `<div class="sec">⚽ Schieramento nelle partite di calcio <small style="font-weight:400;opacity:.8">(Calcio Eroi, Partita Viva · porta a sinistra)</small></div><div class="sgPitch">${t}</div><p class="sum" style="font-size:12px;opacity:.9">🧤 In porta: <b>${esc(String(name(sq.keeper.id)))}</b> ${sq.keeper.role === "P" ? "(carta Portiere)" : "(la carta con più DIF)"} · Gli <b>Attaccanti</b> e i <b>Jolly</b> partono davanti, i <b>Centrocampisti</b> in mezzo, i <b>Difensori</b> dietro. In 3 contro 3 giocano il portiere e le prime carte di campo.<br>Negli altri modi (Arena, Torneo, Stagione…) non c'è un campo: contano ruolo, statistiche e modulo della stessa squadra.${short}</p>`;
-  }
-  // Partita Viva (Phaser): amichevole con le 5 carte della squadra (portiere compreso); vincere dà monete e punti esperienza
-  function viva() {
-    const r = load(); if (r.team.length < 5) return;
-    const M = safe(() => window.__salone.machine("viva"), null), opp = M && M.opp[1];
-    const back = () => open();
-    launch("viva", opp, "Partita Viva · amichevole", r.team, false, (res) => {
-      const ups = gainXp(r.team, res.win), r2 = load(); let msg = res.win ? "Vittoria! +25 monete." : "Sconfitta: si può rigiocare.";
-      if (res.win) { r2.vivaW = (r2.vivaW || 0) + 1; save(r2); safe(() => window.addCoins(25), 0); }
-      levelUps(ups, () => { open(); const sm = OV && OV.querySelector(".sum"); if (sm) sm.insertAdjacentHTML("afterbegin", `<b>${msg}</b> `); });
-    }, back);
+    return `<div class="sec">⚽ Schieramento nelle partite di calcio <small style="font-weight:400;opacity:.8">(Calcio Eroi · porta a sinistra)</small></div><div class="sgPitch">${t}</div><p class="sum" style="font-size:12px;opacity:.9">🧤 In porta: <b>${esc(String(name(sq.keeper.id)))}</b> ${sq.keeper.role === "P" ? "(carta Portiere)" : "(la carta con più DIF)"} · Gli <b>Attaccanti</b> e i <b>Jolly</b> partono davanti, i <b>Centrocampisti</b> in mezzo, i <b>Difensori</b> dietro. In 3 contro 3 giocano il portiere e le prime carte di campo.<br>Negli altri modi (Arena, Torneo, Stagione…) non c'è un campo: contano ruolo, statistiche e modulo della stessa squadra.${short}</p>`;
   }
   function stagione() {
     const r = load(); if (!r.season) { r.season = newSeason(); save(r); }

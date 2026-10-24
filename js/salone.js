@@ -501,10 +501,6 @@
       opp: [{ name: "Pioggia Battente", color: "#0e7490", style: "equilibrata" }, { name: "Piena Notturna", color: "#1e3a5f", style: "pressing" }],
       boss: { name: "La Notte della Cresta", color: "#38bdf8", style: "pressing" },
       opts: (o, h, boss) => ({ title: `Argine · ${o.name}`, level: boss ? 6 : o.name === "Piena Notturna" ? 4 : 2, oppName: o.name }) },
-    { id: "viva", t: "Partita Viva", e: "⚽", saga: "diga", eng: "__viva", d: "Calcio con fisica vera, costruito con Phaser: palla con inerzia che rimbalza su sponde e pali, 5 contro 5 col portiere compreso. Giochi con le carte della tua Squadra dei Sogni: la carta Portiere va in porta, ATT/DIF/TEC danno potenza, contrasti e controllo. Joystick, TIRA (tieni per caricare), PASSA, SCATTO.",
-      opp: [{ name: "Ragazzi del Molo", color: "#2563eb", style: "equilibrata" }, { name: "Lega dei Borghi", color: "#b91c1c", style: "pressing" }],
-      boss: { name: "La Nazionale dei Sogni", color: "#fbbf24", style: "pressing" },
-      opts: (o, h, boss) => ({ title: `Partita Viva · ${o.name}`, level: boss ? 5 : o.name === "Lega dei Borghi" ? 3 : 2, oppName: o.name }) },
   ];
   function sgState(m) { const s = SAGAS.find((x) => x.id === m.saga), x = s ? state(s) : null; return { s, open: !!(x && (x.doneN >= 1)), boss: !!(x && x.endsFound > 0) }; }
   function openSalaGiochi(back) {
