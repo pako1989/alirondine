@@ -1191,10 +1191,21 @@
   function pack() {
     const coins = safe(() => window.__borgoApi.coins(), 0); if (coins < PACK) return;
     const r = load(), started = Object.keys(SAGHE).filter((k) => progress(k).ch >= 1), pool = CARDS.filter((c) => drop(c) && !r.own.includes(c.id) && (started.includes(c.saga) || c.rar === "c"));
-    if (!pool.length) return;
+    if (!pool.length) return dupPack(r);
     safe(() => window.addCoins(-PACK), 0);
     const w = pool.flatMap((c) => Array(5 - RAR[c.rar][2]).fill(c)), got = w[Math.floor(Math.random() * w.length)];
     r.own.push(got.id); r.packs++; save(r); reveal(got.id, "Dalla bustina", open);
+  }
+  // nessuna carta nuova disponibile (le altre si sbloccano a capitoli): la bustina dà un doppione = +3 punti esperienza a una carta con stelle da crescere
+  function dupPack(r) {
+    const cand = r.own.filter((id) => BY[id] && (r.xp[id] | 0) < 15);
+    if (!cand.length) { const b = shell("🎴 Bustina"); b.innerHTML = `<p class="sum">Nessuna carta nuova da trovare ora: le altre si sbloccano giocando i capitoli delle saghe. E tutte le tue carte sono già al massimo. Monete non spese.</p><div class="big"><button type="button" data-ok="1">◂ La squadra</button></div>`; b.querySelector("[data-ok]").onclick = () => open(); return; }
+    safe(() => window.addCoins(-PACK), 0);
+    const id = cand[Math.floor(Math.random() * cand.length)], s0 = starsOf(id);
+    r.xp[id] = Math.min(15, (r.xp[id] | 0) + 3); r.packs++; save(r);
+    const b = shell("🎴 Doppione!");
+    b.innerHTML = `<p class="sum">Nessuna carta nuova disponibile ora (le altre si sbloccano a capitoli). Doppione di <b>${esc(name(id))}</b>: <b>+3 punti esperienza</b>${starsOf(id) > s0 ? ` · sale a ${"⭐".repeat(starsOf(id))}!` : ""}</p><div class="reveal">${cardHtml(id)}</div><div class="big"><button type="button" data-ok="1">Nella collezione ▸</button></div>`;
+    b.querySelector("[data-ok]").onclick = () => open();
   }
   function packSfx(kind, rar) {
     try {
