@@ -8,7 +8,7 @@
 (function () {
   "use strict";
   if (window.__interrogatorio) return;
-  const M = window.__mini, W = M.W, H = M.H, esc = M.esc;
+  const M = window.__mini || {}, W = M.W || 380, H = M.H || 230, esc = M.esc || ((s) => String(s == null ? "" : s));
   const MOODS = {
     spavaldo: { best: "duro", tic: "😏", name: "Spavaldo", lines: ["Che vuole da me? Io non ho niente da dire.", "Faccia pure. Ho avvocati che si mangiano le sentenze."] },
     spaventato: { best: "calmo", tic: "💧", name: "Spaventato", lines: ["Io... io non dovrei essere qui. Non so niente.", "Se parlo, mi... mi fanno del male."] },

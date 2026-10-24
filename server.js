@@ -20,8 +20,11 @@ app.use((req, res, next) => {
 // Serve static files from root directory
 app.use(express.static(__dirname, { extensions: ['html'] }));
 
-// Serve index.html for root or any unknown routes
+// Serve index.html for root or any unknown routes (SPA fallback only for non-file requests)
 app.get('*', (req, res) => {
+  if (path.extname(req.path)) {
+    return res.status(404).type('text/plain').send('Not found');
+  }
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 

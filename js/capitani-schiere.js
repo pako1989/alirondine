@@ -8,7 +8,7 @@
 (function () {
   "use strict";
   if (window.__schiere) return;
-  const M = window.__mini, W = M.W, H = M.H, esc = M.esc;
+  const M = window.__mini || {}, W = M.W || 380, H = M.H || 230, esc = M.esc || ((s) => String(s == null ? "" : s));
   const LANES = ["Sinistra", "Centro", "Destra"], LX = [70, 190, 310], WALL = 150;
   const pick = (a) => a[Math.floor(Math.random() * a.length)];
   const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
