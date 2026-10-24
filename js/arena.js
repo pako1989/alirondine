@@ -625,7 +625,9 @@
       h += `<div class="arRelicRow"><b>🏆 Reliquie Oniriche possedute (${ar.run.relics.length}):</b><br>${ar.run.relics.map((k) => { const rel = RELIQUES.find((x) => x[0] === k); return `<span class="arRelicTag" title="${esc(rel ? rel[2] : "")}">${esc(rel ? rel[1] : k)}</span>`; }).join(" ")}</div>`;
     }
     if (!has) h += `<p class="sum">Nessuna carta in squadra. Sblocca carte giocando le saghe, poi schierale.</p>`;
+    const vSt = S().vociStats ? S().vociStats(rr) : null;
     h += `<div class="big"><button type="button" data-go="best">✨ Schiera le migliori<small>le 5 carte più forti</small></button><button type="button" data-go="sogni">🃏 Cambia squadra<small>vai alla Squadra dei Sogni</small></button></div>`;
+    if (vSt && S().openVoci) h += `<button type="button" class="one" data-go="voci"${vSt.unread ? ' style="border-color:#ffd23f"' : ""}>🎙️ Voci dallo Spogliatoio${vSt.unread ? ` · ● ${vSt.unread} nuove!` : ""}<small>${vSt.unlocked}/${vSt.total} dialoghi d'intesa sbloccati giocando 3 gare insieme</small></button>`;
     h += `${window.__picchia ? `<div class="sec">Altri giochi con le tue carte</div><button type="button" class="one" data-go="pic">🥊 Duello dei Sogni<small>Picchiaduro 1 contro 1: mosse, speciale di ruolo e Super</small></button>` : ""}${window.__eroi ? `<button type="button" class="one" data-go="ero">⚽ Calcio d'Azione Eroi<small>Partita a squadre (3v3 o 5v5) con abilità di ruolo · Coppa degli Eroi</small></button>` : ""}${window.__corsa ? `<button type="button" class="one" data-go="cor">🏁 Gran Premio dei Sogni<small>Corsa a squadre: guidi un pilota, due compagni corrono da soli</small></button>` : ""}${window.__beat ? `<button type="button" class="one" data-go="bea">🥋 Rissa dei Sogni<small>Beat 'em up a scorrimento in 3 stadi: ondate, barili, boss e Super della tua saga</small></button>` : ""}<div class="sec">Scontri · livello sbloccato ${ar.tier}/5</div>${[1, 2, 3, 4, 5].map((t) => `<button type="button" class="one" data-tier="${t}" ${!has || t > ar.tier ? "disabled" : ""}>Scontro ${t}${"★".repeat(t)}<small>${t > ar.tier ? "Vinci il livello precedente" : "Avversari +" + Math.round((t - 1) * 12 + 0) + "% · premio " + 10 * t + " monete"}</small></button>`).join("")}`;
     h += `<div class="sec">Arena del giorno</div><button type="button" class="one" data-go="daily" ${!has ? "disabled" : ""}>📅 ${esc(mod[0])}${d.won ? " ✓" : ""}<small>${esc(mod[1])} · ${d.won ? "già vinta oggi" : "primo successo del giorno: +30 monete"}</small></button>`;
     h += `<div class="sec">Torre dei Duelli · record piano ${ar.best}</div><button type="button" class="one" data-go="torre" ${!has ? "disabled" : ""}>🗼 ${ar.run ? "Continua la salita (piano " + ar.run.floor + ")" : "Sali la Torre"}<small>30 piani · boss ogni 10 · reliquie oniriche e porte (riposo, elite, eventi)</small></button>${ar.run ? `<button type="button" class="one" data-go="torreNew">↺ Ricomincia dal piano 1<small>abbandona la salita in corso</small></button>` : ""}`;
@@ -635,6 +637,8 @@
     q('[data-go="deep"]').onclick = () => { const a = load(); a.deep = !a.deep; save(a); open(); };
     q('[data-go="best"]').onclick = () => { bestTeam(); open(); };
     q('[data-go="sogni"]').onclick = () => { close(); S().open(() => open()); };
+    const vcBtn = q('[data-go="voci"]');
+    if (vcBtn) vcBtn.onclick = () => { if (S() && S().openVoci) { close(); S().openVoci(() => open()); } };
     const mdBtn = q('[data-go="modDetail"]');
     if (mdBtn) mdBtn.onclick = () => { if (S() && S().openModDetail) { close(); S().openModDetail(tmInfo.k, () => open()); } };
     body.querySelectorAll("[data-tier]").forEach((b) => (b.onclick = () => scontro(+b.dataset.tier)));
@@ -657,18 +661,22 @@
   function scontro(t) {
     const r = S()._load(), ar = load(), rand = rng(Date.now() & 0xffff);
     const foes = enemyTeam(rand, t, null, 5);
-    start({ title: `⚔️ Scontro ${t}${"★".repeat(t)}`, sub: "Scontro singolo", foes, tierM: 0.85 + t * 0.12, onEnd: (res) => {
-      const win = res === "win", ups = win ? giveXp(B.team.filter((u) => u.hp > 0 || true)) : [], a = load(), L = [];
+    start({ title: `⚔️ Scontro ${t}${"★".repeat(t)}`, sub: "Scontro singolo", foes, tierM: 0.85 + t * 0.12, onEnd: (res, b) => {
+      const win = res === "win", tm = (b || B).team, ups = win ? giveXp(tm.filter((u) => u.hp > 0 || true)) : [], a = load(), L = [];
+      const vNew = S() && S().recordVoci ? S().recordVoci(tm.map((u) => u.id)) : [];
       if (win) { a.wins++; if (t === a.tier && a.tier < 5) { a.tier++; L.push(`Livello ${a.tier} sbloccato.`); } save(a); safe(() => window.addCoins(10 * t), 0); L.push(`+${10 * t} monete.`); if (ups.length) L.push("📈 " + ups.map(esc).join(" · ")); } else L.push("Riprova con un'altra squadra o un livello più basso.");
+      vNew.forEach((v) => L.push("🎙️ Nuova Voce dallo Spogliatoio: «" + esc(v.title) + "»!"));
       result(res, win, L, ["⚔️ Ancora", "stesso livello", () => scontro(t)]);
     }, quit: () => { close(); open(); } });
   }
   function daily() {
     const mod = MODS[hash(today()) % MODS.length], rand = rng(hash("d" + today())), theme = [...new Set(S().CARDS.map((c) => c.saga))][hash("t" + today()) % [...new Set(S().CARDS.map((c) => c.saga))].length];
     const foes = enemyTeam(rand, 3, theme, 5);
-    start({ title: "📅 Arena del giorno", sub: mod[0] + " · " + mod[1], foes, tierM: 1.05, mod: mod[2], seed: hash("b" + today()), onEnd: (res) => {
-      const win = res === "win", a = load(), L = [], ups = win ? giveXp(B.team) : [];
+    start({ title: "📅 Arena del giorno", sub: mod[0] + " · " + mod[1], foes, tierM: 1.05, mod: mod[2], seed: hash("b" + today()), onEnd: (res, b) => {
+      const win = res === "win", tm = (b || B).team, a = load(), L = [], ups = win ? giveXp(tm) : [];
+      const vNew = S() && S().recordVoci ? S().recordVoci(tm.map((u) => u.id)) : [];
       if (win) { a.wins++; if (a.daily.d !== today() || !a.daily.won) { a.daily = { d: today(), won: true }; safe(() => window.addCoins(30), 0); L.push("+30 monete: primo successo del giorno."); } else L.push("Già vinta oggi: nessun premio extra."); save(a); if (ups.length) L.push("📈 " + ups.map(esc).join(" · ")); } else L.push("Domani l'avversario cambia. Riprova ora se vuoi.");
+      vNew.forEach((v) => L.push("🎙️ Nuova Voce dallo Spogliatoio: «" + esc(v.title) + "»!"));
       result(res, win, L, null);
     }, quit: () => { close(); open(); } });
   }
@@ -688,12 +696,13 @@
     const F = floorFoes(run.floor), deep = ar.deep, rule = deep ? floorRule(run.floor) : null, elite = deep && run.elite, tierM = 0.9 + run.floor * 0.045 + (F.boss ? 0.12 : 0) + (elite ? 0.15 : 0);
     start({ title: `🗼 Torre · piano ${run.floor}`, sub: F.boss ? "👑 BOSS a fasi" : "Piano " + run.floor + "/30" + (elite ? " · 🔥 Elite" : "") + (rule ? " · " + rule[0] + ": " + rule[1] : ""), team: tm, hp: run.hp, perks: run.perks, relics: run.relics, foes: F.foes, boss: F.boss, floor: run.floor, elite: !!elite, tierM, mod: rule ? rule[2] : null, onEnd: (res, b) => {
       const a = load(); const rn = a.run || run;
-      if (res === "lose") { a.best = Math.max(a.best, rn.floor - 1); a.run = null; save(a); const ups = giveXp(b.team); return result(res, false, [`Salita finita al piano ${rn.floor}. Record: ${a.best}.`, ups.length ? "📈 " + ups.map(esc).join(" · ") : "Ogni salita conta: i livelli restano."], ["🗼 Riprova", "dal piano 1", () => torre(true)]); }
+      const vNew = S() && S().recordVoci ? S().recordVoci(b.team.map((u) => u.id)) : [];
+      if (res === "lose") { a.best = Math.max(a.best, rn.floor - 1); a.run = null; save(a); const ups = giveXp(b.team); const LL = [`Salita finita al piano ${rn.floor}. Record: ${a.best}.`, ups.length ? "📈 " + ups.map(esc).join(" · ") : "Ogni salita conta: i livelli restano."]; vNew.forEach((v) => LL.push("🎙️ Nuova Voce dallo Spogliatoio: «" + esc(v.title) + "»!")); return result(res, false, LL, ["🗼 Riprova", "dal piano 1", () => torre(true)]); }
       const ups = giveXp(b.team); b.team.forEach((u) => (rn.hp[u.id] = u.hp));
       rn.hp = Object.assign({}, rn.hp); b.team.forEach((u) => { if (u.hp > 0) rn.hp[u.id] = Math.min(u.maxhp, u.hp + Math.round(u.maxhp * 0.25)); });
       a.best = Math.max(a.best, rn.floor); if (F.boss) { a.bosses++; safe(() => window.addCoins(5 * rn.floor), 0); }
       if (rn.floor >= 30) { a.run = null; save(a); safe(() => window.addCoins(300), 0); return result(res, true, ["Hai conquistato la cima della Torre! +300 monete.", "Record piano 30."], null); }
-      let extra = "";
+      let extra = vNew.length ? `🎙️ Voce sbloccata: «${vNew[0].title}»! ` : "";
       if (elite) {
         rn.elite = 0;
         rn.relics = rn.relics || [];

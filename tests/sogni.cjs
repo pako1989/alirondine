@@ -90,6 +90,57 @@ async function run(w) {
     };
   });
   if (!borgoCheck.s12 || !borgoCheck.noS3 || !borgoCheck.combo || !borgoCheck.skill) errors.push("Carte Borgo Marino: " + JSON.stringify(borgoCheck));
+  // Dialoghi d'Intesa «Voci dallo Spogliatoio»: 3 partite col Legame, archivio, messa in squadra, scena a battute e premio unico
+  const vociPre = await page.evaluate(() => {
+    window.__sogni.open();
+    const btn = document.querySelector('.sgOv [data-go="voci"]');
+    if (btn) btn.click();
+    const hasTitle = !!(document.querySelector(".sgOv h2") && /Voci dallo Spogliatoio/.test(document.querySelector(".sgOv h2").textContent));
+    // schiera coppia pronta (es. leo|dario) col bottone rapido
+    const fb = document.querySelector('.sgOv [data-field-pair="leo|dario"]') || document.querySelector(".sgOv [data-field-pair]");
+    if (fb) fb.click();
+    const tm = window.__sogni._load().team;
+    const pk = window.__sogni.pairKey("leo", "dario");
+    const u1 = window.__sogni.recordVoci(["leo", "dario"]);
+    const u2 = window.__sogni.recordVoci(["leo", "dario"]);
+    const u3 = window.__sogni.recordVoci(["leo", "dario"]);
+    // carte non possedute non devono sbloccare voci né rivelare nomi
+    const uLock = window.__sogni.recordVoci(["jojo", "mg_tico"]);
+    return {
+      hasBtn: !!btn,
+      hasTitle,
+      fielded: tm.includes("leo") && tm.includes("dario"),
+      prog: [u1.length, u2.length, u3.length],
+      unlockedTitle: u3[0] && u3[0].title,
+      cnt: window.__sogni._load().voci[pk],
+      noSpoilerUnlock: uLock.length === 0,
+    };
+  });
+  if (!vociPre.hasBtn || !vociPre.hasTitle || !vociPre.fielded || vociPre.prog.join(",") !== "0,0,1" || vociPre.unlockedTitle !== "I Fratelli Moretti" || vociPre.cnt !== 3 || !vociPre.noSpoilerUnlock) {
+    errors.push("Voci dallo Spogliatoio (sblocco): " + JSON.stringify(vociPre));
+  }
+  await page.evaluate(() => window.__sogni.openVoci()); await page.waitForTimeout(150);
+  if (w === 390) await L.shot(page, "sogni_voci_archivio");
+  const cBefore = await page.evaluate(() => window.__borgoApi.coins());
+  await page.evaluate(() => { const b = document.querySelector('.sgOv [data-play-voce="dario|leo"]'); if (b) b.click(); }); await page.waitForTimeout(150);
+  if (w === 390) await L.shot(page, "sogni_voce_scena");
+  const sceneCheck = await page.evaluate(() => {
+    const step1 = document.querySelector(".sgVoceBubble .bbStep") && document.querySelector(".sgVoceBubble .bbStep").textContent;
+    const txt1 = document.querySelector(".sgVoceBubble .bbTxt") && document.querySelector(".sgVoceBubble .bbTxt").textContent;
+    const nxt = document.querySelector("[data-voce-next]");
+    if (nxt) nxt.click();
+    const step2 = document.querySelector(".sgVoceBubble .bbStep") && document.querySelector(".sgVoceBubble .bbStep").textContent;
+    const allB = document.querySelector("[data-voce-all]");
+    if (allB) allB.click();
+    const linesCnt = document.querySelectorAll(".sgVoceTranscript .sgVoceLine").length;
+    return { step1, hasTxt: !!(txt1 && txt1.length > 10), step2, linesCnt };
+  });
+  const cAfter1 = await page.evaluate(() => window.__borgoApi.coins());
+  await page.evaluate(() => window.__sogni.openVoceScene("dario|leo")); await page.waitForTimeout(80);
+  const cAfter2 = await page.evaluate(() => window.__borgoApi.coins());
+  if (sceneCheck.step1 !== "1/4" || !sceneCheck.hasTxt || sceneCheck.step2 !== "2/4" || sceneCheck.linesCnt !== 4 || cAfter1 !== cBefore + 25 || cAfter2 !== cAfter1) {
+    errors.push("Voci dallo Spogliatoio (scena/premio): " + JSON.stringify({ sceneCheck, cBefore, cAfter1, cAfter2 }));
+  }
   L.check(`La Squadra dei Sogni (${w} px)`, errors); await browser.close();
 }
 (async () => { await run(390); await run(320); })().catch((e) => { console.error("✗ sogni:", e.message); process.exit(1); });

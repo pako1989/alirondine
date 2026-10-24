@@ -534,7 +534,7 @@
 
   // ---------------------------------------------------------------- salvataggio
   const load = () => { const o = load0(); XPC = o.xp; return o; };
-  const load0 = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { own: Array.isArray(r.own) ? r.own.filter((x) => BY[x]) : [], team: Array.isArray(r.team) ? r.team.filter((x) => BY[x]).slice(0, 5) : [], won: Array.isArray(r.won) ? r.won.filter((x) => typeof x === "number") : [], packs: r.packs | 0, hero: !!r.hero, xp: r.xp && typeof r.xp === "object" ? r.xp : {}, season: r.season && Array.isArray(r.season.sched) ? r.season : null, titles: r.titles | 0, draft: r.draft && Array.isArray(r.draft.picks) ? r.draft : null, cups: r.cups | 0, modulo: typeof r.modulo === "string" && MODULI[r.modulo] ? r.modulo : "rombo" }; };
+  const load0 = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { own: Array.isArray(r.own) ? r.own.filter((x) => BY[x]) : [], team: Array.isArray(r.team) ? r.team.filter((x) => BY[x]).slice(0, 5) : [], won: Array.isArray(r.won) ? r.won.filter((x) => typeof x === "number") : [], packs: r.packs | 0, hero: !!r.hero, xp: r.xp && typeof r.xp === "object" ? r.xp : {}, season: r.season && Array.isArray(r.season.sched) ? r.season : null, titles: r.titles | 0, draft: r.draft && Array.isArray(r.draft.picks) ? r.draft : null, cups: r.cups | 0, modulo: typeof r.modulo === "string" && MODULI[r.modulo] ? r.modulo : "rombo", voci: r.voci && typeof r.voci === "object" ? r.voci : {}, vociSeen: Array.isArray(r.vociSeen) ? r.vociSeen.filter((x) => typeof x === "string") : [] }; };
   const save = (r) => { XPC = r.xp || {}; safe(() => localStorage.setItem(KEY, JSON.stringify(r)), 0); };
   const sagaMem = (k) => safe(() => JSON.parse(localStorage.getItem(SG(k)[0]) || "null"), null);
   function progress(k) {
@@ -624,16 +624,432 @@
     const T = tiers(team, mKey);
     return `<p class="sum" style="font-size:12px;opacity:.9">⚔️ <b>ATT ${T.at}</b>: tiri e azioni · 🛡️ <b>DIF ${T.df}</b>: parate e difesa · 🎯 <b>TEC ${T.te}</b>: passaggi, dribbling e tecnica.<br><span style="color:#ffd23f">📋 Modulo <b>${M_MOD.name}</b>${sin ? " (✨ Sintonia Attiva: bonus applicati)" : ` (${M_MOD.hint})`}</span>. Le statistiche contano concretamente in ogni motore di gioco.</p>`;
   };
+  // ---------------------------------------------------------------- Voci dallo Spogliatoio (Dialoghi d'Intesa)
+  const BOND_GOAL = 3, VOCE_COIN = 25;
+  const pairKey = (a, b) => (a < b ? a + "|" + b : b + "|" + a);
+  const findLinkByPk = (pk) => LINKS.find(([x, y]) => pairKey(x, y) === pk) || null;
+  const EXPR_BADGE = {
+    ride: "😄 Ride", felice: "😊 Sorride", pensa: "🤔 Pensieroso", sorpreso: "😮 Sorpreso",
+    furbo: "😏 Sguardo furbo", triste: "😔 Malinconico", serio: "😌 Calmo", arrabbiato: "😤 Sbuffa"
+  };
+  const VOCI_RAW = [
+    // Borgo Marino & Crossover principali
+    ["leo", "dario", "Spogliatoio del Molo · Panca in legno", [
+      [1, "furbo", "Hai ancora il vizio di allacciarti lo scarpino sinistro col doppio nodo storto, fratellino."],
+      [0, "ride", "Quel nodo storto ha appena messo la palla sotto l'incrocio. Passami piuttosto un asciugamano asciutto."],
+      [1, "serio", "Sai che ti dico? Per un po' ho creduto che certi passaggi non me li avresti più chiamati."],
+      [0, "felice", "Finché corri sul secondo palo senza guardare, io te la metto lì. Ora muoviti o papà finisce le acciughe."]
+    ]],
+    ["leo", "nico", "Muro del Porto · Dopo la doccia", [
+      [1, "felice", "Dì la verità: quando ho tolto quel tiro dal sette ti è venuto in mente l'intonaco scrostato del molo."],
+      [0, "furbo", "Mi è venuto in mente quando hai rotto la persiana del bar e hai dato la colpa al maestrale."],
+      [1, "sorpreso", "Era maestrale forza sette! Il pallone ha preso un giro scientificamente impossibile!"],
+      [0, "ride", "Certo, Gatto Volante. Comunque oggi dietro mi sentivo al sicuro come a casa."]
+    ]],
+    ["leo", "tommy", "Tunnel degli spogliatoi · Sacca dei palloni", [
+      [1, "pensa", "Tre tocchi nello stretto senza nemmeno alzare la testa. A volte mi chiedo se abbiamo il filo tra le scarpe."],
+      [0, "felice", "È che conosco il rumore del tuo passo sul prato prima ancora che chiami palla."],
+      [1, "furbo", "Perfetto: allora conosci anche il rumore di chi oggi gonfia tutti i palloni sgonfi al posto mio."],
+      [0, "ride", "Un assist e già presenti il conto? Va bene, dammi la pompa."]
+    ]],
+    ["nico", "sara", "Panchina in legno · Taccuino e cerotti", [
+      [0, "felice", "Ammettilo, Sara: l'ultima parata in tuffo valeva almeno nove e mezzo in pagella."],
+      [1, "furbo", "Ho segnato tutto: parata da otto, atterraggio di faccia sull'erba bagnata da quattro scarso."],
+      [0, "sorpreso", "Quattro?! Ma se sono rimbalzato su come una molla senza mollare la presa!"],
+      [1, "ride", "Con mezzo ciuffo di trifoglio sul naso. Tieni fermo il polso, ti stringo il bendaggio."]
+    ]],
+    ["baciccia", "nonna", "Sottoscala dello stadio · Thermos fumante", [
+      [0, "serio", "Ai miei tempi dopo novanta minuti così si beveva brodo di scorfano, altro che sali minerali color puffo."],
+      [1, "furbo", "Tu pensa a parare col nodo del pescatore, Baciccia, ché alle clausole e alla teglia ci penso io."],
+      [0, "ride", "Hai messo una penale anche se gli avversari tirano sul palo?"],
+      [1, "felice", "Articolo quattro: chi sporca la maglia suda il doppio, chi vince ha doppia crosticina di lasagne."]
+    ]],
+    ["kenji", "sho", "Corridoio silenzioso · Luci dei riflettori", [
+      [1, "pensa", "Ti ho tenuto d'occhio per tutto il secondo tempo, Kenji. Non hai rallentato neanche di mezzo passo."],
+      [0, "felice", "Quando corri tu sulla fascia opposta, l'aria pesa la metà. È difficile spiegarlo a chi sta in tribuna."],
+      [1, "serio", "Non esagerare lo stesso. Promettimi che se ti manca il fiato alzi la mano e lasci correre me."],
+      [0, "ride", "Affare fatto, fratellino. Ma il prossimo Volo dell'Aquila lo chiudiamo insieme."]
+    ]],
+    ["ruggeri", "cm_bastiano", "Stanzino degli allenatori · Gesso e linimento", [
+      [0, "pensa", "Lavagna rigata, tre mozziconi di gesso bianco e odore di canfora: mi pare di stare al campo vecchio."],
+      [1, "serio", "Cambiano i mondi e le maglie, Mister, ma un terzino che sale senza coprire ti fa venire i capelli bianchi ovunque."],
+      [0, "ride", "Allora non sono l'unico che urla fino a perdere la voce al settantesimo."],
+      [1, "felice", "Macché. Tieni una caramella al miele: me le dava il magazziniere nel settantadue."]
+    ]],
+    ["lina", "mn_desantis", "Ingresso spogliatoi · Nebbia e lampadina gialla", [
+      [0, "furbo", "Bel trench, Commissario. Ma se ci corre altri dieci minuti in fascia le faccio il verbale per eccesso di lana."],
+      [1, "pensa", "Signorina, a Milano nel cinquantaquattro l'umidità ti entra nelle ossa. E lei mastica gomma anche mentre marca?"],
+      [0, "ride", "Aiuta a calcolare il tempo dell'anticipo. Ne vuole una alla menta?"],
+      [1, "felice", "Accetto. Però quell'entrata pulita sul centravanti la metto agli atti: manuale di polizia difensiva."]
+    ]],
+    ["pina", "fi_livia", "Tribuna stampa improvvisata · Due taccuini", [
+      [0, "felice", "Ho già il titolo a nove colonne: «Uragano di classe, avversari spazzati fino al molo!»"],
+      [1, "pensa", "Io starei più sobria: «Buona tenuta dei reparti, due fuorigioco dubbi al minuto ventitré.»"],
+      [0, "sorpreso", "Così mi addormenti i lettori del bar prima ancora del caffè! Ci vuole epica!"],
+      [1, "ride", "Facciamo a metà: tu scrivi il titolo col punto esclamativo e io correggo i voti in difesa."]
+    ]],
+    ["jojo", "mg_tico", "Spogliatoio in festa · Scarpini a tempo", [
+      [0, "ride", "Ferma tutto, Tico: batti due colpi sulla panca con i parastinchi, ho in testa un ritmo nuovo!"],
+      [1, "felice", "Così? Ta-ta-tum! È lo stesso passo con cui hai mandato al bar il mediano sulla linea laterale!"],
+      [0, "furbo", "Chi gioca rigido si spezza, amico mio. Il pallone sente subito se hai paura di sbagliare."],
+      [1, "ride", "Allora stasera non sbagliamo niente: altro giro di tamburo finché non ci cacciano!"]
+    ]],
+    ["ernesta", "ro_fiamma", "Panca dei portieri · Guanti appesi", [
+      [0, "furbo", "Fammi vedere quei guanti, ragazza. Troppa gommapiuma: non senti neanche le cuciture del cuoio."],
+      [1, "sorpreso", "Senza questi sul tiro del capitano avversario mi ritrovavano le dita nel parcheggio del pullman!"],
+      [0, "ride", "Nel sessantotto ci sputavamo sulle mani e via. Però quel colpo di reni basso… niente male davvero."],
+      [1, "felice", "Detto da lei vale doppio scudetto. La prossima uscita alta me la chiama lei?"]
+    ]],
+    ["papa", "pd_teresa", "Angolo ristoro · Cesto di vimini", [
+      [0, "sorpreso", "Aspetta un secondo: hai davvero portato sfogliatine calde nello spogliatoio per l'intervallo?"],
+      [1, "serio", "La pasticceria è disciplina, caro collega. Se lo zucchero cala al sessantesimo, il centrocampo sbanda."],
+      [0, "furbo", "Io di solito risolvo con pane bruschettato e quattro acciughe sotto sale del porto."],
+      [1, "ride", "Facciamo primo piatto tuo e dessert mio: questa squadra non perde più neanche a tavolino."]
+    ]],
+    ["sara", "dc_nina", "Tavolino pieghevole · Fogli sparsi", [
+      [1, "furbo", "Ho contato quattordici passaggi filtranti e un bilancio in attivo di tre gol. Niente male, collega."],
+      [0, "pensa", "Merito della copertura sulle seconde palle. Aspetta… stai prendendo appunti sul mio quaderno dei conti?"],
+      [1, "ride", "Deformazione da cronista: quando vedo colonne ordinate mi scappa l'inchiesta."],
+      [0, "felice", "Allora ti passo le statistiche vere, basta che in prima pagina scrivi anche chi ha parato tutto."]
+    ]],
+    ["keller", "mg_wolff", "Corridoio freddo · Borracce d'alluminio", [
+      [1, "serio", "Novanta minuti. Due sponde pulite, zero parole inutili. Efficienza esemplare."],
+      [0, "pensa", "Un tempo giocavo solo così: contare i passi, eseguire, non guardare nessuno negli occhi."],
+      [1, "sorpreso", "E adesso cosa è cambiato?"],
+      [0, "felice", "Adesso quando segniamo mi scappa pure mezzo sorriso. Non dirlo in giro o ci rovinano la fama."]
+    ]],
+    // Saghe & Crossover tra mondi lontani
+    ["vs_ottone", "fg_ottone", "Magazzino scatoloni · Macchinetta del caffè", [
+      [0, "pensa", "Quella scatola di cartone nell'angolo… è a doppia onda rinforzata. Posso provarla un minuto?"],
+      [1, "sorpreso", "Veramente dentro ci tengo le tazzine e tre bustine rare. Perché mai dovresti entrarci sotto?"],
+      [0, "serio", "Abitudine operativa. Meno ti vedono, meglio imposti il contropiede."],
+      [1, "ride", "Da due che si chiamano Ottone mi aspettavo di tutto, ma non di dividere un espresso sotto un imballaggio."]
+    ]],
+    ["vs_vulpe", "nr_kira", "Panca sul fondo · Interferenze radio", [
+      [0, "arrabbiato", "Chi sta trasmettendo su quarantadue megahertz? Mi stai mandando in tilt le valvole del ricevitore!"],
+      [1, "furbo", "Ops, è la telemetria della mia caviglia cibernetica. Nel 2099 nessuno usa più manopole di bachelite!"],
+      [0, "pensa", "Sarà, ma le mie manopole non prendono virus quando piove. Però quel filtrante codificato era geniale."],
+      [1, "felice", "Sincronizziamo le frequenze alla prossima: tu copri il cono d'ombra, io spengo i radar."]
+    ]],
+    ["fo_lupin", "dz_sterling", "Armadietti metallici · Lucchetto aperto", [
+      [1, "furbo", "Curioso. Avevo chiuso il mio armadietto a tripla mandata, eppure il mio orologio è sul tuo polso."],
+      [0, "ride", "Volevo solo controllare se avesse un laser nascosto nella ghiera, Agente. Glielo rendo lucidato."],
+      [1, "serio", "Tenga pure il fumo di scena: in area di rigore i suoi scassi ci fanno parecchio comodo."],
+      [0, "felice", "E a me fa comodo chi copre la fuga in smoking senza sgualcirsi il bavero!"]
+    ]],
+    ["sg_preside", "fo_lupin", "Corridoio a volte · Moneta che gira", [
+      [0, "pensa", "Quella finta sul primo palo non era magia accademica… era puro prestigio da strada."],
+      [1, "furbo", "I maghi e i ladri gentiluomini fanno lo stesso mestiere, Preside: guardano dove nessun altro guarda."],
+      [0, "felice", "Se mai ti stancassi dei caveau, avrei una cattedra vacante di Contropiede Illusorio."],
+      [1, "ride", "Solo se l'esame finale consiste nel far sparire il pallone dai piedi del capitano avversario!"]
+    ]],
+    ["qd_raito", "qd_elle", "Panca d'angolo · Tè e zollette", [
+      [1, "pensa", "Hai chiamato lo schema tre secondi prima che il terzino scivolasse. Probabilità di coincidenza: due per cento."],
+      [0, "furbo", "Si chiama visione di gioco, Elle. Chi studia il campo non ha bisogno di indovinare."],
+      [1, "serio", "O forse sapevi già da quale zolla d'erba si sarebbe alzata la polvere. Vuoi una zolletta di zucchero?"],
+      [0, "ride", "Tieni pure gli zuccheri per il tuo cervello: al prossimo turno ti dimostro che il mio schema è perfetto."]
+    ]],
+    ["qd_ryu", "qd_misa", "Fondo spogliatoio · Sacca rossa", [
+      [1, "felice", "Guarda cosa ho nascosto tra i parastinchi per festeggiare la vittoria: due mele Fuji lucidissime!"],
+      [0, "ride", "Eh eh eh… Finalmente qualcuno in questa squadra che capisce le vere priorità tattiche!"],
+      [1, "furbo", "Però in cambio al prossimo calcio d'angolo fai quella faccia spaventosa al portiere, intesi?"],
+      [0, "felice", "Affare fatto. Gli umani corrono il doppio quando sentono ridere dietro la traversa!"]
+    ]],
+    ["qd_elle", "dc_agata", "Lavagna tattica · Gessetti colorati", [
+      [1, "pensa", "Tre indizi sulla fascia destra: il mediano zoppica sul piede perno, il portiere batte sempre corto…"],
+      [0, "serio", "…e il capitano guarda la panchina ogni volta che bluffa sul fuorigioco. Deduzione identica alla mia."],
+      [1, "felice", "Finalmente una mente che non tira a casaccio! Ti va di dividere il fascicolo della prossima gara?"],
+      [0, "furbo", "Volentieri, Ispettrice. Ma i dolci del rinfresco li gestisco io."]
+    ]],
+    ["dz_sterling", "mn_desantis", "Panchina coperta · Bicchierino di carta", [
+      [0, "furbo", "Niente male questo caffè di macchinetta, Commissario. Quasi letale quanto un inseguimento sulle Alpi."],
+      [1, "ride", "Non abbiamo i casinò di Montegol in questura, giovanotto, ma con un sorso così resti sveglio due tempi."],
+      [0, "serio", "Devo ammetterlo: senza i suoi gadget, quella chiusura in scivolata nel fango è stata pura classe."],
+      [1, "felice", "Suole di cuoio risuolate due volte, Agente. La tecnologia passa, il mestiere resta."]
+    ]],
+    ["fo_turing", "te_valenti", "Finestrino appannato · Appunti in codice", [
+      [0, "felice", "Ho decodificato i fischi dell'allenatore rivale in sei minuti: usavano un cifrario a scorrimento banale!"],
+      [1, "serio", "Sul treno delle nevi avevamo meno tempo e dita più gelate, ma apprezzo la pulizia del calcolo."],
+      [0, "pensa", "E lei non ha sbagliato un solo anticipo senza guardare mai il tabellone. Come fa?"],
+      [1, "furbo", "Guardo gli occhi di chi porta palla. Quelli non riescono mai a cifrarli del tutto."]
+    ]],
+    ["sg_miriel", "cc_lyra", "Spogliatoio quieto · Bagliore azzurro", [
+      [0, "sorpreso", "La tua spada… cioè, il tuo parastinco brilla esattamente sulla frequenza del Sigillo del Vento!"],
+      [1, "felice", "È la risonanza del Cristallo delle Stagioni. Ogni volta che lanci il pallone a giro, canta anche lui."],
+      [0, "pensa", "All'Accademia dicevano che due arti diverse si annullano. Avevano torto marcio."],
+      [1, "ride", "I libri antichi non hanno mai dovuto difendere un due a uno al novantesimo!"]
+    ]],
+    ["fa_roderico", "gl_barbabiscotto", "Panca umida · Discussione nautica", [
+      [1, "arrabbiato", "Per mille forchette, quella che chiami onda sul tuo fiume da me non fa nemmeno traballare il tè!"],
+      [0, "furbo", "Facile fare il lupo di mare sull'oceano di melassa: prova tu a timonare tra due secche di ghiaia al buio!"],
+      [1, "pensa", "Uhm… però quel rinvio controcorrente sul secondo palo aveva il taglio di un vero timoniere."],
+      [0, "ride", "E il tuo contrasto di spalla profumava di cannella a venti metri. Qua la mano, pirata!"]
+    ]],
+    ["alc_bruno", "mg_bullone", "Lavandini · Forbici e cacciavite", [
+      [0, "pensa", "In dieci anni di barberia ad Alcatraz ho tagliato criniere impossibili, ma tu non hai neanche un capello."],
+      [1, "felice", "BZZT. SONO UN TOSTAPANE DA DIFESA. SE VUOI PUOI SPOLVERARMI LA FESSURA DEL PANE."],
+      [0, "ride", "Ci sto! Una spazzolata alle cromature, due gocce d'olio sulla leva e torni in campo lucido come uno specchio."],
+      [1, "felice", "TOSTATURA D'AMICIZIA COMPLETATA. AL PROSSIMO CORNER TI SCALDO LA FOCACCIA."]
+    ]],
+    ["mg_bullone", "so_blop", "Angolo borracce · Rumori metallici", [
+      [1, "felice", "Blop! Blop-blop? (Tocca incuriosito la leva laterale con un tentacolo gelatinoso.)"],
+      [0, "sorpreso", "ATTENZIONE CREATURA SPAZIALE: QUELLA LEVA ATTIVA LA DORATURA EXTRA CROCCANTE."],
+      [1, "ride", "Bloo-op! (Applaude felice quando due fette di pane saltano fuori dritte nel cestino.)"],
+      [0, "felice", "SEI IL MIGLIOR COMPAGNO DI REPARTO DELLA GALASSIA. PALLA LUNGA E FETTE CALDE."]
+    ]],
+    ["cs_baldo", "ft_atlante", "Corridoio interviste · Specchio grande", [
+      [0, "furbo", "Ascolta un veterano della tivù, Atlante: quando atterri dallo spazio, piega un po' il profilo verso la telecamera."],
+      [1, "pensa", "Ho attraversato galassie curve per secoli, Baldo, e tu ti preoccupi della mia criniera… cioè, della mia barba?"],
+      [0, "ride", "Il pubblico vuole sognare! Un nitrito al momento giusto e tre quarti di stadio sono già nostri!"],
+      [1, "felice", "E sia. Alla prossima vittoria proverò a sorridere prima di rimettermi in orbita."]
+    ]],
+    ["ft_vega", "so_zorgo", "Finestra alta · Guardando il cielo notturno", [
+      [0, "pensa", "Su Elyon il campo non ha righe di gesso. Qui invece se fai mezzo passo avanti fischiano tutti insieme."],
+      [1, "furbo", "Con tre occhi ci ho messo due settimane anch'io a capire il fuorigioco terrestre, tranquilla!"],
+      [0, "felice", "Però quando lo stadio urla dopo un gol… vibra persino più forte dei motori orbitali."],
+      [1, "ride", "È per questo che nessuno di noi due ha ancora chiesto il biglietto di ritorno!"]
+    ]],
+    ["sf_gatto", "nl_lucia", "Sotto l'ultimo lampione · Silenzio caldo", [
+      [1, "felice", "Eccoti qui, piccolino. Lo sapevo che ti saresti acciambellato proprio sotto la lanterna più calda."],
+      [0, "serio", "Miao. (Socchiude gli occhi gialli come chi quella domenica sera l'ha già vista cento volte.)"],
+      [1, "pensa", "Sessant'anni a custodire fiammiferi insegnano una cosa: chi sa aspettare al buio non ha paura della notte."],
+      [0, "felice", "Prrr… (Appoggia la zampa sugli scarpini di Lucia prima di stirarsi verso il campo.)"]
+    ]],
+    ["cc_re", "tm_eclisse", "Fondo del tunnel · Ombra quieta", [
+      [0, "serio", "…"],
+      [1, "pensa", "Non serve che tu aggiunga altro. Chi ha portato una corona così pesante parla già col modo in cui difende."],
+      [0, "serio", "… (Annuisce piano e allunga mezza borraccia d'acqua fresca.)"],
+      [1, "felice", "Grazie, Maestà. A volte una squadra che non fa domande è la casa migliore che esista."]
+    ]],
+    ["vl_teodora", "chr_elias", "Sotto l'orologio a muro · Cacciavite in mano", [
+      [0, "arrabbiato", "Quest'orologio di spogliatoio spacca il minuto di quattro secondi! Come si fa a entrare in campo puntuali?!"],
+      [1, "felice", "Fermo lì, Teodora: dammi mezzo giro di molla sul bilanciere e te lo riporto al decimo di secondo."],
+      [0, "sorpreso", "Però… mano ferma e scappamento perfetto. Lavori anche sulle funivie per caso?"],
+      [1, "ride", "Diciamo che aggiusto orari molto più ingarbugliati. Ma con te in difesa non perdiamo un treno!"]
+    ]],
+    ["chr_aria", "ep_ada", "Panchina deserta · Vento della sera", [
+      [1, "pensa", "Hai lo stesso sguardo di chi conta gli anni dalle maglie piegate nell'armadio, non dai calendari."],
+      [0, "serio", "Aspettare stanca più che correre novanta minuti, Ada. Tu come fai a parare ancora con tanta leggerezza?"],
+      [1, "felice", "Perché ogni partita nuova non cancella quelle vecchie: le rimette in movimento per un'ora."],
+      [0, "felice", "Allora restiamo ancora un tempo. Oggi il pallone sembrava leggero davvero."]
+    ]],
+    ["rag_brokk", "sh_muramasa", "Banco degli attrezzi · Tacchetti di ferro", [
+      [0, "arrabbiato", "Guarda che roba moderna: tacchetti di plastica incollati! Un contrasto nei fiordi e saltano come nocciole!"],
+      [1, "serio", "Concordo, mastro Brokk. Senza tre pieghe d'acciaio temprato non c'è equilibrio né nel taglio né nel tiro."],
+      [0, "furbo", "Ho un martelletto nello zaino e quattro chiodi ribattuti: sistemiamo le suole a tutta la rosa?"],
+      [1, "ride", "Io affilo i bordi, tu batti il cuoio. Domani gli scarpini canteranno come lame!"]
+    ]],
+    ["sh_hayato", "cm_bastiano", "Soglia del campo · Due tazze di tè", [
+      [0, "serio", "Il tuo modo di calciare d'esterno non cerca più gli applausi, Bastiano. Va dritto dove serve ai ragazzi."],
+      [1, "felice", "A una certa età le ginocchia scricchiolano, maestro Hayato: tocca far correre il pallone al posto nostro."],
+      [0, "pensa", "Nel mio dojo lo chiamiamo il colpo senz'ombra. Nei vostri porti invece?"],
+      [1, "ride", "Da noi si chiama «passala prima che ti prendano la caviglia», ma il succo è lo stesso!"]
+    ]],
+    ["lb_narratore", "pi_morgana", "Centro spogliatoio · Pipa e mappa", [
+      [0, "serio", "«E fu così che la temibile capitana Morgana si sedette sulla panca, segretamente commossa dal bel gioco…»"],
+      [1, "arrabbiato", "Se finisci quella frase ti spedisco fuori dall'oblò con tutto il dizionario, chiacchierone!"],
+      [0, "furbo", "«…minacciò lei con fierezza, pur sapendo che l'assist al settantottesimo era pura poesia.»"],
+      [1, "ride", "Tsk! Scrivi almeno che il gol l'ho segnato controvento, altrimenti ti strappo l'indice!"]
+    ]],
+    ["cp_crispino", "cp_cacace", "Corridoio parrocchiale · Borsa del ghiaccio", [
+      [0, "arrabbiato", "Maresciallo, quella spallata in area gridava vendetta davanti al cielo e pure al regolamento!"],
+      [1, "furbo", "Reverendo, per il codice penale era contrasto regolare di spalla: semmai è lei che ha tirato la tonaca!"],
+      [0, "pensa", "L'ho alzata solo per fare il velo sul primo palo! E comunque abbiamo vinto, no?"],
+      [1, "ride", "Appunto: archivio l'indagine per manifesta superiorità a centrocampo. Offre lei la gazzosa?"]
+    ]],
+    ["cp_tito", "cp_peppe", "Dietro la porta · Sacco degli scarpini", [
+      [0, "furbo", "Peppe, dimmi che nella borsa hai messo i palloni nostri e non l'argenteria della tribuna d'onore."],
+      [1, "sorpreso", "Offeso! Oggi solo furti con destrezza a centrocampo: tre palloni rubati puliti senza manco il fischio!"],
+      [0, "ride", "Quasi quasi fare i calciatori onesti rende meno fatica che bucare i muri di notte!"],
+      [1, "felice", "Zitto e passa la pasta e ceci nello scaldavivande, ché al secondo tempo ci tocca correre ancora!"]
+    ]],
+    ["cp_rosetta", "gl_cannella", "Tavolo massaggi · Tagliere improvvisato", [
+      [0, "felice", "Assaggia questa fetta di cacciatorino stagionato sopra la tua galletta dolce e poi dimmi se non è arte."],
+      [1, "sorpreso", "Per tutti i forni dei sette mari… il pepe nero con la vaniglia di bordo sposa da meraviglia!"],
+      [0, "furbo", "Te l'avevo detto! Con due merende così in pancia i difensori ci vedono solo la targa."],
+      [1, "ride", "Affare d'oro, Rosetta: tu metti il salame, io l'impasto e apriamo cambusa fissa in panchina!"]
+    ]],
+    ["rm_spartaco", "pr_sceriffo", "Panca d'angolo · Speroni e parastinchi", [
+      [0, "pensa", "Strani calzari i tuoi, uomo dell'Ovest: hanno rotelle di ferro sul tallone. Servono contro le bighe?"],
+      [1, "furbo", "Servono a farsi sentire nel saloon prima di calciare un rigore a mezzogiorno, gladiatore."],
+      [0, "felice", "Nella Suburra apprezziamo chi non abbassa lo sguardo. Oggi hai difeso l'area come una testuggine."],
+      [1, "ride", "E tu hai spazzato palloni come un bisonte in carica. Stella di latta d'onore anche per te, socio."]
+    ]],
+    ["rm_furbio", "tc_ysolde", "Angolo tattico · Pergamena e cera", [
+      [0, "furbo", "Mia cara dama, se l'arbitro contesta il gol proporrò un emendamento retroattivo in Senato!"],
+      [1, "serio", "Risparmia il fiato, senatore: avevo già previsto sia il fallo sia la nostra rete al minuto ottantotto."],
+      [0, "sorpreso", "Per Giove Ottimo Massimo, nella mia curia pagherebbero oro colato per vaticini così precisi!"],
+      [1, "ride", "Nel mio Concilio bastano occhi aperti e poca fiducia nelle promesse altrui. Passami il sigillo."]
+    ]],
+    ["al_armatura", "gr_gancio", "Panca rinforzata · Cigolio metallico", [
+      [0, "triste", "Scusa se faccio tutto questo baccano quando mi siedo, amico. Essere fatti di ferro ha i suoi lati scomodi."],
+      [1, "felice", "Scherzi? A me chiamano l'Armadio da vent'anni: finalmente uno su questa panca che non la fa pendere solo dal mio lato!"],
+      [0, "felice", "Davvero non ti dà fastidio l'eco dentro l'elmo quando chiamo il fuorigioco?"],
+      [1, "ride", "Anzi, sembri un megafono da stadio! Gli attaccanti si fermano tre metri prima per educazione!"]
+    ]],
+    ["sf_ada", "ep_ada", "Specchio appannato · Due maglie uguali", [
+      [0, "sorpreso", "Ogni volta che qualcuno grida «Ada, esci!» ci buttiamo sul pallone in due nello stesso istante."],
+      [1, "ride", "Almeno la porta resta chiusa a doppia mandata! Il tuo Lido ha lo stesso odore di salsedine del mio campo."],
+      [0, "pensa", "Dici che prima o poi i lunedì arrivano davvero per tutti, anche quando una domenica sembra non finire?"],
+      [1, "felice", "Arrivano, sì. E ti assicuro che portarsi dietro qualche amico rende la strada molto più dolce."]
+    ]],
+    ["vl_agata", "dc_agata", "Panca centrale · Due paia d'occhiali", [
+      [0, "serio", "I miei tabulati davano il sessantotto virgola quattro per cento di vittoria sul lato sinistro."],
+      [1, "furbo", "E la mia lente d'ingrandimento diceva che il loro terzino aveva la stringa slacciata. Stesso risultato!"],
+      [0, "pensa", "Chiamarsi Agata dev'essere una garanzia statistica di pignoleria applicata al pallone."],
+      [1, "ride", "Chiamiamolo talento investigativo, omonima. Caso chiuso e tre punti in tasca!"]
+    ]],
+    ["vs_corvo", "dz_sterling", "Porta socchiusa · Controllo corridoio", [
+      [0, "serio", "Corridoio libero fino al parcheggio. Nessun passo sospetto nel raggio di trenta metri."],
+      [1, "furbo", "Rilassati un istante, Corvo: la partita è finita e il tabellone segna vittoria nostra."],
+      [0, "pensa", "La prudenza comincia dopo il triplice fischio. Però quel tuo tiro a giro senza guardare… chirurgico."],
+      [1, "ride", "Merito della tua copertura preventiva: non ho dovuto guardarmi le spalle neanche una volta."]
+    ]]
+  ];
+  const VOCI_MAP = {};
+  VOCI_RAW.forEach(([a, b, loc, lines]) => { VOCI_MAP[pairKey(a, b)] = { a, b, loc, lines }; });
+
+  function hashStr(s) {
+    let h = 2166136261;
+    for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return h >>> 0;
+  }
+
+  function getVoceData(id1, id2, linkTitle) {
+    const pk = pairKey(id1, id2);
+    if (VOCI_MAP[pk]) return VOCI_MAP[pk];
+    const c1 = BY[id1] || { saga: "borgo", role: "C" }, c2 = BY[id2] || { saga: "borgo", role: "C" };
+    const s1 = SG(c1.saga)[1], s2 = SG(c2.saga)[1], sameSaga = c1.saga === c2.saga;
+    const q1 = FRASI[id1] || "In campo conta farsi trovare pronti.";
+    const q2 = FRASI[id2] || "Una squadra vera si vede nei momenti stretti.";
+    const locs = [
+      "Spogliatoio Ospiti · Panchina sotto la finestra",
+      "Tunnel di rientro · Luci calde dopo il novantesimo",
+      "Bordo campo · Borracce e gesso sulle scarpe",
+      "Stanza tattica · Lavagna ancora segnata"
+    ];
+    const h = hashStr(pk), loc = locs[h % locs.length], variant = h % 3;
+    let lines;
+    if (sameSaga) {
+      lines = [
+        [0, "felice", `Tre partite di fila fianco a fianco: ormai ci capiamo con mezzo sguardo, proprio come ai tempi di ${s1}.`],
+        [1, "furbo", `Per forza! Come dico sempre: «${q2}»`],
+        [0, "pensa", `Là fuori però c'è gente venuta da mondi assurdi. Meno male che sulla fascia coprivi tu.`],
+        [1, "ride", `E tu tieni pronto il piede caldo: finché regge il legame «${linkTitle}», non ci sposta nessuno.`]
+      ];
+    } else if (variant === 0) {
+      lines = [
+        [0, "sorpreso", `Vengo da «${s1}», ma uno stile come il tuo in «${s2}» non l'avevo mai visto da vicino.`],
+        [1, "ride", `Questione d'abitudine! Da noi vale una regola semplice: «${q2}»`],
+        [0, "felice", `Allora andiamo più d'accordo del previsto. Anche da me si dice: «${q1}»`],
+        [1, "furbo", `Tre gare insieme e parliamo già la stessa lingua: la prossima volta puntiamo dritti alla coppa.`]
+      ];
+    } else if (variant === 1) {
+      lines = [
+        [1, "pensa", `Quando ci hanno messi nello stesso spogliatoio pensavo che tra «${s2}» e «${s1}» avremmo fatto scintille.`],
+        [0, "furbo", `Scintille ne abbiamo fatte eccome, ma tutte nella metà campo avversaria!`],
+        [1, "felice", `Vero. Sul terzo scatto ho capito subito dove avresti messo il pallone senza neanche chiamarlo.`],
+        [0, "ride", `È il bello di questa Squadra dei Sogni: mondi lontani, stessa fame di pallone.`]
+      ];
+    } else {
+      lines = [
+        [0, "serio", `Fermati un attimo sulla panca: dopo tre battaglie così ti sei guadagnato metà del mio thermos.`],
+        [1, "sorpreso", `Detto da una leggenda di «${s1}» è un onore raro. Da noi in «${s2}» non fanno complimenti facilmente.`],
+        [0, "felice", `Non è un complimento, è cronaca: là in mezzo hai tenuto su il reparto quando mancava il fiato.`],
+        [1, "ride", `Allora brindo col tappo di plastica: lunga vita a «${linkTitle}»!`]
+      ];
+    }
+    return { a: id1, b: id2, loc, lines };
+  }
+
+  function vociStats(r0) {
+    const r = r0 || load(), vc = r.voci || {}, sn = r.vociSeen || [];
+    let unlocked = 0, unread = 0, ready = 0;
+    LINKS.forEach(([a, b]) => {
+      const pk = pairKey(a, b), cnt = vc[pk] | 0;
+      if (cnt >= BOND_GOAL && r.own.includes(a) && r.own.includes(b)) {
+        unlocked++;
+        if (!sn.includes(pk)) unread++;
+      } else if (r.own.includes(a) && r.own.includes(b)) {
+        ready++;
+      }
+    });
+    return { unlocked, unread, ready, total: LINKS.length };
+  }
+
+  function bumpVociOnRecord(r, team) {
+    const ids = [...new Set((team || []).filter(Boolean))], out = [];
+    r.voci = r.voci || {};
+    for (let i = 0; i < ids.length; i++) {
+      for (let j = i + 1; j < ids.length; j++) {
+        const a = ids[i], b = ids[j];
+        if (!r.own.includes(a) || !r.own.includes(b)) continue;
+        const L = LINKS.find(([x, y]) => (x === a && y === b) || (x === b && y === a));
+        if (!L) continue;
+        const pk = pairKey(L[0], L[1]), prev = r.voci[pk] | 0;
+        r.voci[pk] = Math.min(99, prev + 1);
+        if (prev < BOND_GOAL && r.voci[pk] >= BOND_GOAL) {
+          out.push({ voce: true, pk, a: L[0], b: L[1], title: L[2] });
+        }
+      }
+    }
+    return out;
+  }
+
+  function recordVoci(team) {
+    const r = load();
+    const out = bumpVociOnRecord(r, team);
+    save(r);
+    return out;
+  }
+
+  function voceSfx(kind) {
+    try {
+      const A = new (window.AudioContext || window.webkitAudioContext)();
+      const notes = kind === "unlock" ? [440, 554, 659, 880] : [520 + Math.random() * 90];
+      notes.forEach((f, i) => {
+        const o = A.createOscillator(), g = A.createGain();
+        o.type = "sine"; o.frequency.value = f; g.gain.value = kind === "unlock" ? 0.035 : 0.018;
+        g.gain.exponentialRampToValueAtTime(0.0001, A.currentTime + (kind === "unlock" ? 0.22 : 0.07) + i * 0.08);
+        o.connect(g); g.connect(A.destination); o.start(A.currentTime + i * 0.08); o.stop(A.currentTime + (kind === "unlock" ? 0.28 : 0.09) + i * 0.08);
+      });
+    } catch (e) {}
+  }
+
   function gainXp(team, win, sim) {
     const r = load(), ups = [];
     team.forEach((id) => { if (!r.own.includes(id)) return; const s0 = starsOf(id); r.xp[id] = Math.min(15, (r.xp[id] | 0) + (sim ? (win ? 1 : 0) : win ? 2 : 1)); XPC = r.xp; if (starsOf(id) > s0) ups.push([id, starsOf(id)]); });
+    const vNew = bumpVociOnRecord(r, team);
+    vNew.forEach((v) => ups.push(v));
     save(r); return ups;
   }
-  // le carte salite di stella dopo una partita; a tre stelle si sblocca la frase speciale
+  // le carte salite di stella dopo una partita (e le nuove Voci dallo Spogliatoio sbloccate)
   function levelUps(ups, then) {
     if (!ups.length) return then();
-    const [id, st] = ups[0], body = shell(st >= 3 ? "⭐⭐⭐ Carta al massimo!" : "⭐ La carta cresce");
-    body.innerHTML = `<div class="reveal">${cardHtml(id)}</div><p class="sum" style="text-align:center"><b>${esc(name(id))}</b> sale a ${"★".repeat(st)}${"☆".repeat(3 - st)} · +2 a tutte le statistiche</p>${st >= 3 ? `<p class="frase">«${esc(FRASI[id] || "Questa squadra è un sogno.")}»</p>` : ""}<div class="big"><button type="button" data-ok="1">Avanti ▸<small>${ups.length > 1 ? "Un'altra carta è cresciuta" : "Si continua"}</small></button></div>`;
+    const cur = ups[0];
+    if (cur && cur.voce) {
+      const body = shell("🎙️ Nuova Voce dallo Spogliatoio!");
+      const p1 = port(cur.a), p2 = port(cur.b);
+      voceSfx("unlock");
+      body.innerHTML = `<div class="sgVoceUnlockCard">
+        <div class="sgVoceUnlockPair">
+          <div class="sgVoceAv">${p1 ? `<img alt="" src="${p1}">` : "?"}</div>
+          <div class="sgVoceSpark">🎙️</div>
+          <div class="sgVoceAv">${p2 ? `<img alt="" src="${p2}">` : "?"}</div>
+        </div>
+        <div class="sgVoceUnlockTitle">«${esc(cur.title)}»</div>
+        <p class="sum" style="text-align:center;margin:6px 0">Dopo <b>${BOND_GOAL} partite insieme</b>, <b>${esc(name(cur.a))}</b> e <b>${esc(name(cur.b))}</b> si sono fermati a parlare nello spogliatoio.</p>
+      </div>
+      <div class="big">
+        <button type="button" data-read-voce="1">🎙️ Ascolta ora ▸<small>Scena inedita · +${VOCE_COIN} monete</small></button>
+        <button type="button" data-ok="1">Più tardi ▸<small>La ritrovi in Voci dallo Spogliatoio</small></button>
+      </div>`;
+      body.querySelector("[data-read-voce]").onclick = () => openVoceScene(cur.pk, () => levelUps(ups.slice(1), then));
+      body.querySelector("[data-ok]").onclick = () => levelUps(ups.slice(1), then);
+      return;
+    }
+    const [id, st] = cur, body = shell(st >= 3 ? "⭐⭐⭐ Carta al massimo!" : "⭐ La carta cresce");
+    body.innerHTML = `<div class="reveal">${cardHtml(id)}</div><p class="sum" style="text-align:center"><b>${esc(name(id))}</b> sale a ${"★".repeat(st)}${"☆".repeat(3 - st)} · +2 a tutte le statistiche</p>${st >= 3 ? `<p class="frase">«${esc(FRASI[id] || "Questa squadra è un sogno.")}»</p>` : ""}<div class="big"><button type="button" data-ok="1">Avanti ▸<small>${ups.length > 1 ? "Un'altra novità ti aspetta" : "Si continua"}</small></button></div>`;
     body.querySelector("[data-ok]").onclick = () => levelUps(ups.slice(1), then);
   }
   const name = (id) => { const C = window.__borgoApi && window.__borgoApi.CAST; return (C && C[id] && C[id].name) || id; };
@@ -704,8 +1120,8 @@
     const loreText = getCardLore(c);
     const skill = getSkillInfo(id, c.role);
     const charLinks = LINKS.filter(([a, b]) => a === id || b === id).map(([a, b, t]) => {
-      const otherId = a === id ? b : a;
-      return { title: t, other: otherId, otherName: name(otherId), active: r.own.includes(otherId) };
+      const otherId = a === id ? b : a, pk = pairKey(a, b), both = isOwn && r.own.includes(otherId), cnt = (r.voci && r.voci[pk]) | 0;
+      return { title: t, pk, other: otherId, otherName: r.own.includes(otherId) ? name(otherId) : "???", active: both, cnt, unlocked: both && cnt >= BOND_GOAL, seen: (r.vociSeen || []).includes(pk) };
     });
 
     let flipped = false;
@@ -780,9 +1196,9 @@
 
                 ${charLinks.length ? `
                   <div class="sgLoreSec">
-                    <div class="sgLoreSecTitle">🤝 Legami (+3 Intesa)</div>
+                    <div class="sgLoreSecTitle">🤝 Legami (+3 Intesa · Voci Spogliatoio)</div>
                     <div class="sgLoreLinksList">
-                      ${charLinks.map((lk) => `<div class="lkItem ${lk.active ? "on" : "off"}"><b>${esc(lk.title)}</b> con ${esc(lk.otherName)} ${lk.active ? "✓" : "(da sbloccare)"}</div>`).join("")}
+                      ${charLinks.map((lk) => `<div class="lkItem ${lk.active ? "on" : "off"}"><div><b>${esc(lk.title)}</b> con ${esc(lk.otherName)} ${lk.active ? "✓" : "(da sbloccare)"}</div>${lk.unlocked ? `<button type="button" class="sgVoceMiniBtn" data-voce-lk="${lk.pk}">🎙️ ${lk.seen ? "Dialogo" : `Nuovo! +${VOCE_COIN}🪙`}</button>` : lk.active ? `<span class="lkProg">🎙️ ${lk.cnt}/${BOND_GOAL}</span>` : ""}</div>`).join("")}
                     </div>
                   </div>
                 ` : ""}
@@ -805,11 +1221,18 @@
 
       const cardInner = body.querySelector(".sgFlipCardInner");
       if (cardInner) {
-        cardInner.onclick = () => {
+        cardInner.onclick = (ev) => {
+          if (ev.target.closest("[data-voce-lk]")) return;
           flipped = !flipped;
           cardInner.classList.toggle("flipped", flipped);
         };
       }
+      body.querySelectorAll("[data-voce-lk]").forEach((vb) => {
+        vb.onclick = (ev) => {
+          ev.stopPropagation();
+          openVoceScene(vb.dataset.voceLk, () => openCardLore(id, back));
+        };
+      });
       const flipBtn = body.querySelector(".flipBtn");
       if (flipBtn) {
         flipBtn.onclick = () => {
@@ -1058,17 +1481,47 @@
     if (statEl) statEl.innerHTML = r.team.length ? statLine(r.team, r.modulo) : "";
     const comboEl = body.querySelector(".sgComboContainer");
     if (comboEl) {
-      const activeCombo = getTeamCombo(r.team);
-      comboEl.innerHTML = activeCombo
-        ? `<div class="sgComboBanner"><div class="sgComboIcon">⚡</div><div class="sgComboInfo"><b>Attacco Combinato: «${esc(activeCombo.title)}»</b><span>Doppio colpo pronto nell'Arena dei Sogni e nel Torneo con <em>${esc(name(activeCombo.id1))}</em> &amp; <em>${esc(name(activeCombo.id2))}</em>.</span></div></div>`
-        : `<div class="sgComboBanner none"><div class="sgComboIcon">💡</div><div class="sgComboInfo"><b>Attacco Combinato di Coppia</b><span>Schiera 2 giocatori con un legame speciale per attivare il Doppio Colpo d'Assalto.</span></div></div>`;
+      comboEl.innerHTML = renderComboBanner(r);
+      bindVoceBannerBtns(body);
     }
     const linksEl = body.querySelector(".links");
     if (linksEl) {
-      linksEl.innerHTML = LINKS.map(([a, b, t]) => `<span class="${r.own.includes(a) && r.own.includes(b) ? "ok" : ""}"><b>${esc(t)}</b> ${r.own.includes(a) ? esc(name(a)) : "???"} + ${r.own.includes(b) ? esc(name(b)) : "???"}</span>`).join("");
+      linksEl.innerHTML = renderLinksList(r);
+      bindLinksList(body);
     }
     body.querySelectorAll(".coll .sgCard[data-c]").forEach((el) => {
       el.classList.toggle("sel", r.team.includes(el.dataset.c));
+    });
+  }
+
+  function renderComboBanner(r) {
+    const activeCombo = getTeamCombo(r.team);
+    if (!activeCombo) {
+      return `<div class="sgComboBanner none"><div class="sgComboIcon">💡</div><div class="sgComboInfo"><b>Attacco Combinato &amp; Spogliatoio</b><span>Schiera 2 giocatori con un Legame per attivare il Doppio Colpo e sbloccare i dialoghi dopo ${BOND_GOAL} partite insieme.</span></div></div>`;
+    }
+    const pk = pairKey(activeCombo.id1, activeCombo.id2), cnt = (r.voci && r.voci[pk]) | 0, unl = cnt >= BOND_GOAL, seen = (r.vociSeen || []).includes(pk);
+    const voceChip = unl
+      ? `<button type="button" class="sgVoceMiniBtn" data-voce-open="${pk}">🎙️ ${seen ? "Rileggi dialogo" : `Nuovo dialogo! (+${VOCE_COIN}🪙)`}</button>`
+      : `<span class="sgVoceProgTag">🎙️ Spogliatoio: ${cnt}/${BOND_GOAL} partite</span>`;
+    return `<div class="sgComboBanner"><div class="sgComboIcon">⚡</div><div class="sgComboInfo"><b>Attacco Combinato: «${esc(activeCombo.title)}»</b><span>Doppio colpo pronto con <em>${esc(name(activeCombo.id1))}</em> &amp; <em>${esc(name(activeCombo.id2))}</em>.</span><div style="margin-top:5px">${voceChip}</div></div></div>`;
+  }
+
+  function renderLinksList(r) {
+    return LINKS.map(([a, b, t]) => {
+      const both = r.own.includes(a) && r.own.includes(b), pk = pairKey(a, b), cnt = (r.voci && r.voci[pk]) | 0, unl = both && cnt >= BOND_GOAL;
+      return `<span class="${both ? "ok" : ""}${unl ? " voceOk" : ""}" ${unl ? `data-voce-open="${pk}" title="Tocca per ascoltare il dialogo"` : ""}><b>${esc(t)}</b> ${r.own.includes(a) ? esc(name(a)) : "???"} + ${r.own.includes(b) ? esc(name(b)) : "???"}${unl ? ` <em class="lkVoceTag">🎙️ Dialogo ▸</em>` : both && cnt > 0 ? ` <em class="lkVoceCnt">(${cnt}/${BOND_GOAL})</em>` : ""}</span>`;
+    }).join("");
+  }
+
+  function bindVoceBannerBtns(body) {
+    body.querySelectorAll(".sgComboContainer [data-voce-open]").forEach((btn) => {
+      btn.onclick = () => openVoceScene(btn.dataset.voceOpen, () => open());
+    });
+  }
+
+  function bindLinksList(body) {
+    body.querySelectorAll(".links [data-voce-open]").forEach((el) => {
+      el.onclick = () => openVoceScene(el.dataset.voceOpen, () => open());
     });
   }
 
@@ -1086,16 +1539,186 @@
     return null;
   }
 
+  let VOCI_FILT = "all";
+  function openVoci(back) {
+    const { r } = sync();
+    const closeBack = typeof back === "function" ? back : () => open();
+    const body = shell("🎙️ Voci dallo Spogliatoio");
+    function renderArchive() {
+      const curR = load(), st = vociStats(curR);
+      const items = LINKS.map(([a, b, t]) => {
+        const pk = pairKey(a, b), ownA = curR.own.includes(a), ownB = curR.own.includes(b), both = ownA && ownB;
+        const cnt = (curR.voci && curR.voci[pk]) | 0, unl = both && cnt >= BOND_GOAL, seen = (curR.vociSeen || []).includes(pk);
+        const inTeam = curR.team.includes(a) && curR.team.includes(b);
+        return { a, b, t, pk, ownA, ownB, both, cnt, unl, seen, inTeam };
+      });
+      items.sort((x, y) => (y.unl - x.unl) || ((y.unl && !y.seen ? 1 : 0) - (x.unl && !x.seen ? 1 : 0)) || (y.both - x.both) || (y.cnt - x.cnt));
+      const shown = items.filter((it) => {
+        if (VOCI_FILT === "unl") return it.unl;
+        if (VOCI_FILT === "ready") return it.both && !it.unl;
+        if (VOCI_FILT === "lock") return !it.both;
+        return true;
+      });
+      let h = `<p class="sum">Quando due carte unite da un Legame giocano insieme <b>${BOND_GOAL} partite</b> (Torneo, Stagione, Draft o Arena), sbloccano una scena di dialogo post-partita. Ogni nuova scena letta vale <b>+${VOCE_COIN} monete</b>. Sbloccate: <b>${st.unlocked}/${st.total}</b>${st.unread ? ` · <b class="new">${st.unread} da leggere!</b>` : ""}.</p>`;
+      h += `<div class="sgFilterRow" style="margin:8px 0">
+        <button type="button" class="sgChip${VOCI_FILT === "all" ? " active" : ""}" data-vf="all">Tutte (${items.length})</button>
+        <button type="button" class="sgChip${VOCI_FILT === "unl" ? " active" : ""}" data-vf="unl">🎙️ Sbloccate (${st.unlocked})</button>
+        <button type="button" class="sgChip${VOCI_FILT === "ready" ? " active" : ""}" data-vf="ready">⚽ Coppie pronte (${st.ready})</button>
+        <button type="button" class="sgChip${VOCI_FILT === "lock" ? " active" : ""}" data-vf="lock">🔒 Da scoprire (${items.length - st.unlocked - st.ready})</button>
+      </div>`;
+      if (!shown.length) {
+        h += `<div class="sgEmptyColl">Nessun legame in questa categoria.<br><small>Sblocca nuove carte o schiera una coppia affiatata per 3 partite!</small></div>`;
+      } else {
+        h += `<div class="sgVociList">${shown.map((it) => {
+          const pA = it.ownA ? port(it.a) : null, pB = it.ownB ? port(it.b) : null;
+          const nA = it.ownA ? name(it.a) : "???", nB = it.ownB ? name(it.b) : "???";
+          const sA = it.ownA && BY[it.a] ? SG(BY[it.a].saga)[1] : "Saga misteriosa";
+          const sB = it.ownB && BY[it.b] ? SG(BY[it.b].saga)[1] : "Saga misteriosa";
+          const pct = Math.min(100, Math.round((Math.min(BOND_GOAL, it.cnt) / BOND_GOAL) * 100));
+          return `<div class="sgVoceRow ${it.unl ? "unl" : it.both ? "ready" : "locked"}">
+            <div class="sgVocePortPair">
+              <div class="av ${it.ownA ? "" : "unk"}">${pA ? `<img alt="" src="${pA}">` : "<span>?</span>"}</div>
+              <div class="av ${it.ownB ? "" : "unk"}">${pB ? `<img alt="" src="${pB}">` : "<span>?</span>"}</div>
+            </div>
+            <div class="sgVoceMeta">
+              <div class="sgVoceRowHd">
+                <b>«${esc(it.t)}»</b>
+                ${it.unl && !it.seen ? `<span class="sgVoceNewBadge">NUOVA +${VOCE_COIN}🪙</span>` : it.unl ? `<span class="sgVoceDoneBadge">✓ Letta</span>` : ""}
+              </div>
+              <div class="sgVoceNames">${esc(nA)} <span>+</span> ${esc(nB)}</div>
+              <div class="sgVoceSagas">${esc(sA)} · ${esc(sB)}</div>
+              ${it.unl ? `<div class="sgVoceActs"><button type="button" class="sgVocePlayBtn" data-play-voce="${it.pk}">🎙️ ${it.seen ? "Rileggi scena ▸" : "Ascolta scena ▸"}</button></div>`
+                : it.both ? `<div class="sgVoceProgRow"><div class="sgVoceBar"><i style="width:${pct}%"></i></div><span>${it.cnt}/${BOND_GOAL} partite</span>${it.inTeam ? `<em class="inTm">✓ In squadra</em>` : `<button type="button" class="sgVoceFieldBtn" data-field-pair="${it.a}|${it.b}">⚽ Schiera coppia</button>`}</div>`
+                : `<div class="sgVoceLockHint">Sblocca entrambe le carte giocando le saghe o aprendo bustine</div>`}
+            </div>
+          </div>`;
+        }).join("")}</div>`;
+      }
+      h += `<div class="big"><button type="button" data-close-voci="1">◂ Torna indietro<small>Alla schermata precedente</small></button><span></span></div>`;
+      body.innerHTML = h;
+      body.querySelectorAll("[data-vf]").forEach((b) => {
+        b.onclick = () => { VOCI_FILT = b.dataset.vf; renderArchive(); };
+      });
+      body.querySelectorAll("[data-play-voce]").forEach((b) => {
+        b.onclick = () => openVoceScene(b.dataset.playVoce, () => openVoci(closeBack));
+      });
+      body.querySelectorAll("[data-field-pair]").forEach((b) => {
+        b.onclick = () => {
+          const [idA, idB] = b.dataset.fieldPair.split("|");
+          const r2 = load();
+          if (!r2.own.includes(idA) || !r2.own.includes(idB)) return;
+          const rest = r2.team.filter((x) => x !== idA && x !== idB).slice(0, 3);
+          r2.team = [idA, idB].concat(rest);
+          save(r2);
+          renderArchive();
+        };
+      });
+      body.querySelector("[data-close-voci]").onclick = closeBack;
+    }
+    renderArchive();
+  }
+
+  function openVoceScene(pk, back) {
+    const closeBack = typeof back === "function" ? back : () => openVoci(() => open());
+    const L = findLinkByPk(pk);
+    if (!L) return closeBack();
+    const r = load();
+    const [rawA, rawB, title] = L;
+    if (!r.own.includes(rawA) || !r.own.includes(rawB)) return closeBack();
+    let firstTime = false;
+    r.vociSeen = r.vociSeen || [];
+    if (!r.vociSeen.includes(pk)) {
+      r.vociSeen.push(pk);
+      save(r);
+      safe(() => window.addCoins(VOCE_COIN), 0);
+      firstTime = true;
+    }
+    const scene = getVoceData(rawA, rawB, title);
+    const id0 = scene.a, id1 = scene.b;
+    const c0 = BY[id0] || { saga: "borgo" }, c1 = BY[id1] || { saga: "borgo" };
+    const col0 = SG(c0.saga)[2], col1 = SG(c1.saga)[2];
+    const sag0 = SG(c0.saga)[1], sag1 = SG(c1.saga)[1];
+    const p0 = port(id0), p1 = port(id1);
+    let stepIdx = 0, showAll = false;
+    const body = shell("🎙️ " + esc(title));
+
+    function drawBeat() {
+      const beat = scene.lines[stepIdx] || scene.lines[0];
+      const spk = beat[0] === 0 ? 0 : 1;
+      const spkId = spk === 0 ? id0 : id1;
+      const spkCol = spk === 0 ? col0 : col1;
+      const spkSag = spk === 0 ? sag0 : sag1;
+      const exprLabel = EXPR_BADGE[beat[1]] || "";
+      const isLast = stepIdx >= scene.lines.length - 1;
+
+      body.innerHTML = `<div class="sgVoceStage">
+        <div class="sgVoceLocBar">
+          <span>📍 ${esc(scene.loc)}</span>
+          ${firstTime ? `<span class="sgVoceCoinPill">🪙 +${VOCE_COIN} monete!</span>` : `<span class="sgVoceSubPill">🤝 Legame d'Intesa</span>`}
+        </div>
+        <div class="sgVoceActors">
+          <div class="sgVoceActor ${!showAll && spk === 0 ? "speaking" : showAll ? "" : "dim"}" style="--ac:${col0}">
+            <div class="avFrame">${p0 ? `<img alt="" src="${p0}">` : "?"}</div>
+            <div class="acName">${esc(name(id0))}</div>
+            <div class="acSaga">${esc(sag0)}</div>
+            ${!showAll && spk === 0 && exprLabel ? `<div class="acExpr">${exprLabel}</div>` : ""}
+          </div>
+          <div class="sgVoceVs">💬</div>
+          <div class="sgVoceActor ${!showAll && spk === 1 ? "speaking" : showAll ? "" : "dim"}" style="--ac:${col1}">
+            <div class="avFrame">${p1 ? `<img alt="" src="${p1}">` : "?"}</div>
+            <div class="acName">${esc(name(id1))}</div>
+            <div class="acSaga">${esc(sag1)}</div>
+            ${!showAll && spk === 1 && exprLabel ? `<div class="acExpr">${exprLabel}</div>` : ""}
+          </div>
+        </div>
+        ${showAll ? `<div class="sgVoceTranscript">
+          ${scene.lines.map(([who, ex, txt]) => {
+            const wid = who === 0 ? id0 : id1, wc = who === 0 ? col0 : col1, eb = EXPR_BADGE[ex] || "";
+            return `<div class="sgVoceLine" style="--lc:${wc}"><div class="lnHd"><b>${esc(name(wid))}</b> ${eb ? `<span>${eb}</span>` : ""}</div><p>«${esc(txt)}»</p></div>`;
+          }).join("")}
+        </div>` : `<div class="sgVoceBubble" style="--bc:${spkCol}">
+          <div class="bbHd">
+            <div><b>${esc(name(spkId))}</b> <small>${esc(spkSag)}</small></div>
+            <span class="bbStep">${stepIdx + 1}/${scene.lines.length}</span>
+          </div>
+          <p class="bbTxt">«${esc(beat[2])}»</p>
+        </div>`}
+        <div class="sgVoceCtrls">
+          ${!showAll ? `<button type="button" class="sgVoceNextBtn" data-voce-next="1">${isLast ? "✓ Concludi scena" : "Avanti ▸"}<small>${isLast ? "Torna indietro" : `Battuta ${stepIdx + 2} di ${scene.lines.length}`}</small></button>` : ""}
+          <button type="button" class="sgVoceAltBtn" data-voce-all="1">${showAll ? "🎭 Modalità scena" : "📜 Tutto il dialogo"}<small>${showAll ? "Battuta per battuta" : "Leggi tutto insieme"}</small></button>
+        </div>
+        <div class="big" style="margin-top:6px">
+          <button type="button" data-voce-back="1">◂ Indietro<small>Chiudi lo spogliatoio</small></button>
+        </div>
+      </div>`;
+
+      const nxt = body.querySelector("[data-voce-next]");
+      if (nxt) {
+        nxt.onclick = () => {
+          voceSfx("step");
+          if (isLast) return closeBack();
+          stepIdx++;
+          drawBeat();
+        };
+      }
+      const allBtn = body.querySelector("[data-voce-all]");
+      if (allBtn) {
+        allBtn.onclick = () => { showAll = !showAll; drawBeat(); };
+      }
+      body.querySelector("[data-voce-back]").onclick = closeBack;
+    }
+
+    voceSfx("step");
+    drawBeat();
+  }
+
   function open(back) {
     if (back) BACK = back; const { r, nw } = sync(); const body = shell("🃏 La Squadra dei Sogni");
-    const I = intesa(r.team, r.modulo), coins = safe(() => window.__borgoApi.coins(), 0);
-    const activeCombo = getTeamCombo(r.team);
-    const comboHtml = activeCombo
-      ? `<div class="sgComboBanner"><div class="sgComboIcon">⚡</div><div class="sgComboInfo"><b>Attacco Combinato: «${esc(activeCombo.title)}»</b><span>Doppio colpo pronto nell'Arena dei Sogni e nel Torneo con <em>${esc(name(activeCombo.id1))}</em> &amp; <em>${esc(name(activeCombo.id2))}</em>.</span></div></div>`
-      : `<div class="sgComboBanner none"><div class="sgComboIcon">💡</div><div class="sgComboInfo"><b>Attacco Combinato di Coppia</b><span>Schiera 2 giocatori con un legame speciale per attivare il Doppio Colpo d'Assalto.</span></div></div>`;
+    const I = intesa(r.team, r.modulo), coins = safe(() => window.__borgoApi.coins(), 0), vSt = vociStats(r);
+    const comboHtml = renderComboBanner(r);
     let h = `<p class="sum">Le carte dei personaggi di tutte le saghe. Si sbloccano giocando, o con le bustine. Carte: <b>${r.own.length}/${CARDS.length}</b> · monete: <b>${coins}</b>${nw.length ? ` · <b class="new">nuove: ${nw.length}</b>` : ""}</p>`;
     h += `<div class="sec sec-team">La tua squadra · forza <b>${forza(r.team)}</b> · intesa ${intesaBadge(I.n)}${I.why.length ? ` <span class="why">(${I.why.map(esc).join(", ")})</span>` : ""}</div><div class="team">${[0, 1, 2, 3, 4].map((k) => (r.team[k] ? cardHtml(r.team[k]) : `<div class="sgCard empty" data-slot="${k}"><span>+</span></div>`)).join("")}</div><div class="sgModWrap">${modSelectorHtml(r.modulo, r.team)}</div><div class="team-stats">${r.team.length ? statLine(r.team, r.modulo) : ""}</div><div class="sgComboContainer">${comboHtml}</div>`;
-    h += `<div class="big"><button type="button" data-go="tour">🏆 Torneo dei Sogni<small>${r.won.length}/8 sfide vinte · ogni sfida in un motore diverso</small></button><button type="button" data-go="pack" ${coins < PACK ? "disabled" : ""}>🎴 Bustina<small>${PACK} monete · una carta a sorpresa</small></button><button type="button" data-go="season">📅 Stagione dei Sogni<small>${r.season ? `giornata ${Math.min(7, r.season.day + 1)}/7` : "campionato a 8 squadre"}${r.titles ? ` · scudetti ${r.titles}` : ""}</small></button>${window.__arena ? `<button type="button" data-go="arena">⚔️ Arena dei Sogni<small>Battaglie a turni · Torre dei Duelli</small></button>` : ""}<button type="button" data-go="draft">🎲 Draft<small>${r.draft ? (r.draft.picks.length < 5 ? `scelta ${r.draft.picks.length + 1}/5` : "coppa in corso") : "scegli 1 carta su 3 e gioca la coppa"}${r.cups ? ` · coppe ${r.cups}` : ""}</small></button></div><p class="sum">Le carte crescono giocando: ⭐ a 3 punti esperienza, ⭐⭐ a 8, ⭐⭐⭐ a 15 (+2 a ogni statistica per stella; a tre stelle la carta dice la sua frase).</p>`;
+    h += `<div class="big"><button type="button" data-go="tour">🏆 Torneo dei Sogni<small>${r.won.length}/8 sfide vinte · ogni sfida in un motore diverso</small></button><button type="button" data-go="pack" ${coins < PACK ? "disabled" : ""}>🎴 Bustina<small>${PACK} monete · una carta a sorpresa</small></button><button type="button" data-go="season">📅 Stagione dei Sogni<small>${r.season ? `giornata ${Math.min(7, r.season.day + 1)}/7` : "campionato a 8 squadre"}${r.titles ? ` · scudetti ${r.titles}` : ""}</small></button>${window.__arena ? `<button type="button" data-go="arena">⚔️ Arena dei Sogni<small>Battaglie a turni · Torre dei Duelli</small></button>` : ""}<button type="button" data-go="draft">🎲 Draft<small>${r.draft ? (r.draft.picks.length < 5 ? `scelta ${r.draft.picks.length + 1}/5` : "coppa in corso") : "scegli 1 carta su 3 e gioca la coppa"}${r.cups ? ` · coppe ${r.cups}` : ""}</small></button><button type="button" data-go="voci" class="${vSt.unread ? "sgBtnPulse" : ""}">🎙️ Voci dallo Spogliatoio${vSt.unread ? ` <span class="sgNewDot">${vSt.unread}</span>` : ""}<small>${vSt.unlocked}/${vSt.total} dialoghi · 3 gare col Legame</small></button></div><p class="sum">Le carte crescono giocando: ⭐ a 3 punti esperienza, ⭐⭐ a 8, ⭐⭐⭐ a 15 (+2 a ogni statistica per stella; a tre stelle la carta dice la sua frase).</p>`;
     h += `<div class="sec">Collezione · tocca una carta per metterla in squadra o toglierla</div>`;
     h += `<div class="sgCollControls">
       <div class="sgSearchBox">
@@ -1134,7 +1757,7 @@
       </div>
     </div>`;
     h += `<div class="coll"></div>`;
-    h += `<div class="sec">Legami tra saghe (+3 di intesa)</div><div class="links">${LINKS.map(([a, b, t]) => `<span class="${r.own.includes(a) && r.own.includes(b) ? "ok" : ""}"><b>${esc(t)}</b> ${r.own.includes(a) ? esc(name(a)) : "???"} + ${r.own.includes(b) ? esc(name(b)) : "???"}</span>`).join("")}</div>`;
+    h += `<div class="sec">Legami tra saghe (+3 di intesa · 3 gare per il dialogo)</div><div class="links">${renderLinksList(r)}</div>`;
     body.innerHTML = h;
 
     const inp = body.querySelector(".sgSearchInp");
@@ -1168,6 +1791,8 @@
     }
 
     bindModChips(body);
+    bindVoceBannerBtns(body);
+    bindLinksList(body);
     renderColl(body, r);
     body.querySelectorAll(".team .sgCard[data-c]").forEach((el) => {
       el.onclick = (e) => {
@@ -1185,6 +1810,7 @@
     body.querySelector('[data-go="pack"]').onclick = pack;
     body.querySelector('[data-go="season"]').onclick = stagione;
     body.querySelector('[data-go="draft"]').onclick = draft;
+    const vcb = body.querySelector('[data-go="voci"]'); if (vcb) vcb.onclick = () => openVoci(() => open());
     const arb = body.querySelector('[data-go="arena"]'); if (arb) arb.onclick = () => { closeAll(); window.__arena.open(() => open()); };
   }
   function toggle(id) {
@@ -1710,9 +2336,10 @@
 .cdTag{font-size:10px;color:#9ad8ff;margin-left:4px}
 .sgLoreSkill p{margin:2px 0 0;font-size:11px;color:#d8cde8;line-height:1.35}
 .sgLoreLinksList{display:flex;flex-direction:column;gap:3px}
-.lkItem{font-size:10.5px;padding:3px 6px;border-radius:4px;background:#1a1428}
+.lkItem{font-size:10.5px;padding:4px 6px;border-radius:4px;background:#1a1428;display:flex;align-items:center;justify-content:space-between;gap:6px}
 .lkItem.on{border-left:2px solid #7ad87a;color:#e2fbe2}
 .lkItem.off{opacity:.6}
+.lkProg{font-size:9.5px;color:#ffd23f;background:rgba(255,210,63,.12);padding:1px 5px;border-radius:6px;white-space:nowrap}
 .sgLoreActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
 .sgActionBtn{min-height:46px;border-radius:10px;border:1px solid #4a3a6a;font:800 13px system-ui;cursor:pointer;transition:transform .12s,background .15s;touch-action:manipulation}
 .sgComboBanner{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#2c1a4d,#18102b);border:1.5px solid #a855f7;border-radius:10px;padding:8px 12px;margin:8px 0;box-shadow:0 3px 12px rgba(168,85,247,0.25)}
@@ -1751,10 +2378,82 @@
 .sgSparks{position:absolute;inset:0;pointer-events:none;overflow:visible}
 .sgSparks i{position:absolute;width:6px;height:6px;border-radius:50%;background:var(--rc);box-shadow:0 0 8px #fff,0 0 12px var(--rc);animation:sgSpark .5s ease-out forwards}
 @keyframes sgSpark{to{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}}
-@keyframes sgFlip{from{transform:perspective(600px) rotateY(180deg) scale(.6)}to{transform:none}}`;
+@keyframes sgFlip{from{transform:perspective(600px) rotateY(180deg) scale(.6)}to{transform:none}}
+.sgBtnPulse{border-color:#ffd23f!important;box-shadow:0 0 12px rgba(255,210,63,.28)}
+.sgNewDot{display:inline-block;background:#ffd23f;color:#120e1e;font-size:10px;font-weight:900;padding:1px 6px;border-radius:10px;margin-left:4px;vertical-align:middle}
+.sgVoceMiniBtn{background:linear-gradient(135deg,#3b1f6e,#22143e);border:1px solid #ffd23f;color:#ffd23f;font:800 10.5px system-ui;padding:3px 8px;border-radius:8px;cursor:pointer;white-space:nowrap}
+.sgVoceProgTag{display:inline-block;font-size:10.5px;color:#e9d5ff;background:rgba(168,85,247,.18);border:1px solid rgba(168,85,247,.4);padding:2px 7px;border-radius:8px}
+.sgOv .links span.voceOk{cursor:pointer;border-left:3px solid #ffd23f;background:#221938}
+.lkVoceTag{font-style:normal;font-weight:800;color:#ffd23f;float:right}
+.lkVoceCnt{font-style:normal;color:#a89bc4;font-size:10.5px;margin-left:4px}
+.sgVociList{display:flex;flex-direction:column;gap:8px;margin:8px 0 12px}
+.sgVoceRow{display:flex;gap:10px;align-items:center;background:#181326;border:1px solid #3d2d60;border-radius:12px;padding:9px 10px}
+.sgVoceRow.unl{border-color:#ffd23f;background:linear-gradient(145deg,#241a3a,#161124)}
+.sgVoceRow.locked{opacity:.68}
+.sgVocePortPair{display:flex;flex-shrink:0}
+.sgVocePortPair .av{width:46px;height:46px;border-radius:50%;background:#0c0816;border:2px solid #7a5ad8;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.sgVocePortPair .av+.av{margin-left:-12px}
+.sgVoceRow.unl .sgVocePortPair .av{border-color:#ffd23f}
+.sgVocePortPair .av.unk{border-color:#4a3a6a;color:#6d5c8c;font:900 18px system-ui}
+.sgVocePortPair .av img{width:100%;height:100%;object-fit:cover}
+.sgVoceMeta{flex:1;min-width:0}
+.sgVoceRowHd{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap}
+.sgVoceRowHd b{color:#ffd23f;font-size:13px}
+.sgVoceNewBadge{background:#ffd23f;color:#120e1e;font:900 9.5px system-ui;padding:2px 6px;border-radius:8px}
+.sgVoceDoneBadge{color:#7ad87a;font:800 10px system-ui}
+.sgVoceNames{font:700 12px system-ui;color:#f4f0e4;margin-top:2px}
+.sgVoceNames span{color:#a855f7}
+.sgVoceSagas{font-size:10px;color:#a89bc4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sgVoceActs{margin-top:6px}
+.sgVocePlayBtn{background:linear-gradient(135deg,#6d28d9,#4c1d95);border:1px solid #ffd23f;color:#fff;font:800 11.5px system-ui;padding:5px 12px;border-radius:8px;cursor:pointer}
+.sgVoceProgRow{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:5px;font-size:10.5px;color:#c8b8ff}
+.sgVoceBar{width:64px;height:6px;background:#0e0a1a;border-radius:4px;overflow:hidden;border:1px solid #3d2d60}
+.sgVoceBar i{display:block;height:100%;background:linear-gradient(90deg,#a855f7,#ffd23f)}
+.sgVoceProgRow .inTm{font-style:normal;color:#7ad87a;font-weight:800}
+.sgVoceFieldBtn{background:#221a36;border:1px solid #7ad87a;color:#7ad87a;font:700 10.5px system-ui;padding:3px 8px;border-radius:7px;cursor:pointer}
+.sgVoceLockHint{font-size:10.5px;color:#8c7da8;margin-top:4px;font-style:italic}
+.sgVoceUnlockCard{background:linear-gradient(160deg,#2a1c48,#140e24);border:2px solid #ffd23f;border-radius:16px;padding:16px 12px;margin:10px 0;text-align:center;box-shadow:0 8px 26px rgba(0,0,0,.6)}
+.sgVoceUnlockPair{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:8px}
+.sgVoceAv{width:76px;height:76px;border-radius:50%;overflow:hidden;border:2.5px solid #ffd23f;background:#0c0816;display:flex;align-items:center;justify-content:center}
+.sgVoceAv img{width:100%;height:100%;object-fit:cover}
+.sgVoceSpark{font-size:28px}
+.sgVoceUnlockTitle{font:900 17px system-ui;color:#ffd23f}
+.sgVoceStage{background:linear-gradient(180deg,#1f1635 0%,#120d20 100%);border:1.5px solid #4a3a6a;border-radius:14px;padding:12px;margin:6px 0}
+.sgVoceLocBar{display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;font-size:11px;color:#d8cde8;background:rgba(0,0,0,.35);padding:5px 9px;border-radius:8px;margin-bottom:10px}
+.sgVoceCoinPill{background:#ffd23f;color:#120e1e;font-weight:900;padding:2px 7px;border-radius:8px;font-size:10.5px}
+.sgVoceSubPill{color:#c8b8ff;font-weight:700;font-size:10.5px}
+.sgVoceActors{display:grid;grid-template-columns:1fr 28px 1fr;align-items:start;gap:6px;margin:6px 0 12px}
+.sgVoceActor{text-align:center;transition:transform .2s,opacity .2s}
+.sgVoceActor.dim{opacity:.52;transform:scale(.95)}
+.sgVoceActor.speaking{transform:translateY(-3px)}
+.sgVoceActor .avFrame{width:84px;height:84px;margin:0 auto;border-radius:14px;background:#0a0714;border:2.5px solid var(--ac,#7a5ad8);overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.5)}
+.sgVoceActor.speaking .avFrame{border-color:#ffd23f;box-shadow:0 0 16px rgba(255,210,63,.45)}
+.sgVoceActor .avFrame img{width:100%;height:100%;object-fit:cover}
+.sgVoceActor .acName{font:800 12.5px system-ui;color:#f4f0e4;margin-top:5px;line-height:1.15}
+.sgVoceActor.speaking .acName{color:#ffd23f}
+.sgVoceActor .acSaga{font-size:9.5px;color:#a89bc4;line-height:1.2;margin-top:1px}
+.sgVoceActor .acExpr{display:inline-block;margin-top:4px;font-size:10px;font-weight:700;color:#ffe9a8;background:rgba(255,210,63,.14);border:1px solid rgba(255,210,63,.4);padding:1px 6px;border-radius:8px}
+.sgVoceVs{text-align:center;font-size:18px;padding-top:28px;opacity:.75}
+.sgVoceBubble{background:#150f26;border:1.5px solid var(--bc,#ffd23f);border-left:4px solid #ffd23f;border-radius:12px;padding:12px;min-height:92px;box-shadow:0 4px 14px rgba(0,0,0,.45)}
+.sgVoceBubble .bbHd{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:6px}
+.sgVoceBubble .bbHd b{color:#ffd23f;font-size:13.5px}
+.sgVoceBubble .bbHd small{color:#a89bc4;font-size:10.5px;margin-left:4px}
+.sgVoceBubble .bbStep{font-size:10.5px;font-weight:800;color:#c8b8ff;background:#241a3c;padding:2px 7px;border-radius:8px}
+.sgVoceBubble .bbTxt{margin:0;font:500 14px/1.48 Georgia,serif;color:#f8f4ea}
+.sgVoceTranscript{display:flex;flex-direction:column;gap:7px;margin:4px 0 8px}
+.sgVoceLine{background:#150f26;border-left:3px solid var(--lc,#ffd23f);border-radius:8px;padding:8px 10px}
+.sgVoceLine .lnHd{display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:3px}
+.sgVoceLine .lnHd b{color:#ffd23f}
+.sgVoceLine .lnHd span{color:#c8b8ff;font-size:10px}
+.sgVoceLine p{margin:0;font:500 13px/1.42 Georgia,serif;color:#f4f0e4}
+.sgVoceCtrls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.sgVoceCtrls button{min-height:50px;border-radius:10px;border:1px solid #4a3a6a;background:#221a36;color:#f4f0e4;font:800 13px system-ui;text-align:left;padding:7px 10px;cursor:pointer}
+.sgVoceCtrls button small{display:block;font-weight:400;font-size:10.5px;opacity:.8;margin-top:2px}
+.sgVoceCtrls .sgVoceNextBtn{background:linear-gradient(135deg,#5b21b6,#3b0764);border-color:#ffd23f;color:#ffd23f}
+.sgVoceCtrls .sgVoceNextBtn small{color:#f4f0e4}`;
     document.head.appendChild(st);
   }
   // la Maglia dei Sogni nel guardaroba (si registra all'avvio, così resta anche dopo aver ricaricato la pagina)
   (function reg() { const A = window.__borgoApi; if (!A || !A.COSM) return setTimeout(reg, 200); if (!A.COSM.sg_maglia) A.COSM.sg_maglia = { kind: "shirt", label: "Maglia dei Sogni", val: "#7a5ad8", from: "Vinci il Torneo dei Sogni (Salone delle Saghe)" }; })();
-  window.__sogni = { SAGHE, BY, eff, name, port, _save: save, open, close: closeAll, _launch: launch, _tiers: tiers, CARDS, LINKS, SFIDE, TEAMS, FRASI, intesa, forza, sync, stagione, draft, stars: (id) => { XPC = load().xp; return starsOf(id); }, _load: load, MODULI, modSintonia, openModDetail, openCardLore, combo: getTeamCombo };
+  window.__sogni = { SAGHE, BY, eff, name, port, _save: save, open, close: closeAll, _launch: launch, _tiers: tiers, CARDS, LINKS, SFIDE, TEAMS, FRASI, intesa, forza, sync, stagione, draft, stars: (id) => { XPC = load().xp; return starsOf(id); }, _load: load, MODULI, modSintonia, openModDetail, openCardLore, combo: getTeamCombo, openVoci, openVoceScene, recordVoci, vociStats, pairKey, BOND_GOAL };
 })();
