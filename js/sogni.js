@@ -1057,7 +1057,7 @@
   // ---------------------------------------------------------------- la carta (HTML)
   function cardHtml(id, opts) {
     const c = BY[id], R = RAR[c.rar], own = !opts || opts.own !== false, img = own ? port(id) : null, S = SG(c.saga), st = own ? starsOf(id) : 0, e = own ? eff(c) : c;
-    return `<div class="sgCard r${c.rar}${own ? "" : " lock"}${opts && opts.sel ? " sel" : ""}${st >= 3 ? " s3" : ""}" data-c="${id}" style="--rc:${R[1]};--sc:${S[2]}"${st >= 3 ? ` title="«${esc(FRASI[id] || "")}»"` : ""}>${own ? `<button type="button" class="sgLoreBtn" data-lore="${id}" title="📖 Lore e Dettagli" aria-label="Lore e dettagli">📖</button>` : ""}<div class="hd"><span>${R[0]}</span><b>${c.role}</b></div>${st ? `<div class="stars">${"★".repeat(st)}</div>` : ""}<div class="img">${img ? `<img alt="" src="${img}">` : `<span>?</span>`}</div><div class="nm">${own ? esc(name(id)) : "???"}</div><div class="st"><span>ATT <b>${own ? e.at : "–"}</b></span><span>DIF <b>${own ? e.df : "–"}</b></span><span>TEC <b>${own ? e.te : "–"}</b></span></div><div class="sg">${esc(S[1])}</div></div>`;
+    return `<div class="sgCard r${c.rar}${own ? "" : " lock"}${opts && opts.sel ? " sel" : ""}${st >= 3 ? " s3" : ""}" data-c="${id}" style="--rc:${R[1]};--sc:${S[2]}"${st >= 3 ? ` title="«${esc(FRASI[id] || "")}»"` : ""}>${own ? `<button type="button" class="sgLoreBtn" data-lore="${id}" title="📖 Lore e Dettagli" aria-label="Lore e dettagli">📖</button>` : ""}<div class="hd"><span>${R[0]}</span></div>${st ? `<div class="stars">${"★".repeat(st)}</div>` : ""}<div class="img">${img ? `<img alt="" src="${img}">` : `<span>?</span>`}${own ? `<em class="rolB" style="--rb:${(ROLEN[c.role] || ["", "#94a3b8"])[1]}" title="${(ROLEN[c.role] || [""])[0]}">${{ A: "ATT", B: "JOL", C: "CEN", D: "DIF", P: "POR" }[c.role] || c.role}</em>` : ""}</div><div class="nm">${own ? esc(name(id)) : "???"}</div><div class="st"><span>ATT <b>${own ? e.at : "–"}</b></span><span>DIF <b>${own ? e.df : "–"}</b></span><span>TEC <b>${own ? e.te : "–"}</b></span></div><div class="sg">${esc(S[1])}</div></div>`;
   }
 
   function getCardLore(c) {
@@ -2100,7 +2100,7 @@
   const ranking = (se) => Object.keys(se.tab).map(Number).sort((x, y) => pts(se.tab[y]) - pts(se.tab[x]) || (se.tab[y][4] - se.tab[y][5]) - (se.tab[x][4] - se.tab[x][5]) || se.tab[y][4] - se.tab[x][4] || x - y);
   // FORMAZIONE IN CAMPO (regola unica per Calcio Eroi, Partita Viva e per il campo in miniatura): n giocatori IN TOTALE, portiere compreso.
   // In porta va la carta Portiere (P); senza, quella con più DIF. Gli altri si schierano per ruolo: Attaccanti (A) davanti, Centrocampisti (C) in mezzo, Difensori (D) dietro.
-  const RANKR = (c) => { const v = { A: 0, C: 1, D: 2, P: 2 }[c.role]; return v == null ? 1 : v; };
+  const RANKR = (c) => { const v = { A: 0, B: 0, C: 1, D: 2, P: 2 }[c.role]; return v == null ? 1 : v; };
   function squad(n, ids) {
     n = n === 3 ? 3 : n === 5 ? 5 : n || 5; const r = load(), tc = (ids || r.team).map((id) => BY[id]).filter(Boolean), pick = [];
     const gk0 = tc.find((c) => c.role === "P"); if (gk0) pick.push(gk0);
@@ -2118,13 +2118,13 @@
     const ys = { 1: [0.5], 2: [0.3, 0.7], 3: [0.2, 0.5, 0.8], 4: [0.15, 0.38, 0.62, 0.85] };
     return srt.map((c, i) => { const same = rows.map((x, k) => (x === rows[i] ? k : -1)).filter((k) => k >= 0); return { c, fx: fr[rows[i]], fy: ys[Math.min(4, same.length)][same.indexOf(i)] }; });
   }
-  const ROLEN = { A: ["Attaccante", "#ef4444"], C: ["Centrocampista", "#f59e0b"], D: ["Difensore", "#3b82f6"], P: ["Portiere", "#22c55e"] };
+  const ROLEN = { A: ["Attaccante", "#ef4444"], C: ["Centrocampista", "#f59e0b"], D: ["Difensore", "#3b82f6"], P: ["Portiere", "#22c55e"], B: ["Jolly", "#a855f7"] };
   function formazHtml(ids) {
     if (!ids.length) return "";
     const sq = squad(5, ids), pl = lineup(sq.field), tok = (c, x, y, tag, col) => `<div class="sgTk" style="left:${x}%;top:${y}%;--c:${col}"><img src="${port(c.id) || ""}" alt=""><i>${esc(String(name(c.id)).split(/[ ,]/)[0])}</i><b>${tag}</b></div>`;
     const t = pl.map((q) => tok(q.c, 12 + (q.fx / 0.5) * 80, 10 + q.fy * 80, (ROLEN[q.c.role] || ["", ""])[0].slice(0, 3).toUpperCase() || "—", (ROLEN[q.c.role] || ["", "#94a3b8"])[1])).join("") + tok(sq.keeper, 5, 50, "PORT.", "#22c55e");
     const short = ids.length < 5 ? `<br><span style="opacity:.8">Con meno di 5 carte il resto della squadra viene completato in automatico.</span>` : "";
-    return `<div class="sec">⚽ Schieramento nelle partite di calcio <small style="font-weight:400;opacity:.8">(Calcio Eroi, Partita Viva · porta a sinistra)</small></div><div class="sgPitch">${t}</div><p class="sum" style="font-size:12px;opacity:.9">🧤 In porta: <b>${esc(String(name(sq.keeper.id)))}</b> ${sq.keeper.role === "P" ? "(carta Portiere)" : "(la carta con più DIF)"} · Gli <b>Attaccanti</b> partono davanti, i <b>Centrocampisti</b> in mezzo, i <b>Difensori</b> dietro. In 3 contro 3 giocano il portiere e le prime carte di campo.<br>Negli altri modi (Arena, Torneo, Stagione…) non c'è un campo: contano ruolo, statistiche e modulo della stessa squadra.${short}</p>`;
+    return `<div class="sec">⚽ Schieramento nelle partite di calcio <small style="font-weight:400;opacity:.8">(Calcio Eroi, Partita Viva · porta a sinistra)</small></div><div class="sgPitch">${t}</div><p class="sum" style="font-size:12px;opacity:.9">🧤 In porta: <b>${esc(String(name(sq.keeper.id)))}</b> ${sq.keeper.role === "P" ? "(carta Portiere)" : "(la carta con più DIF)"} · Gli <b>Attaccanti</b> e i <b>Jolly</b> partono davanti, i <b>Centrocampisti</b> in mezzo, i <b>Difensori</b> dietro. In 3 contro 3 giocano il portiere e le prime carte di campo.<br>Negli altri modi (Arena, Torneo, Stagione…) non c'è un campo: contano ruolo, statistiche e modulo della stessa squadra.${short}</p>`;
   }
   // Partita Viva (Phaser): amichevole con le 5 carte della squadra (portiere compreso); vincere dà monete e punti esperienza
   function viva() {
@@ -2331,7 +2331,7 @@
 .sgCard{position:relative;border-radius:10px;padding:5px;background:linear-gradient(160deg,var(--sc),#120e1e 75%);border:2px solid var(--rc);box-shadow:0 2px 0 rgba(0,0,0,.5);cursor:pointer;overflow:hidden;font-size:10px;min-height:92px}
 .sgCard.empty{display:flex;align-items:center;justify-content:center;border-style:dashed;border-color:#4a3a6a;background:#1a1428;font-size:22px;color:#4a3a6a}
 .sgCard .hd{display:flex;justify-content:space-between;font-weight:800;font-size:8.5px;color:var(--rc);text-transform:uppercase}.sgCard .img{aspect-ratio:1;border-radius:6px;background:#0a0814;overflow:hidden;margin:3px 0;display:flex;align-items:center;justify-content:center}.sgCard .img img{width:100%;height:100%;object-fit:cover}.sgCard .img span{font:900 26px system-ui;color:#4a3a6a}
-.sgCard .nm{font-weight:800;font-size:10px;line-height:1.15;min-height:2.3em}.sgCard .st{display:flex;justify-content:space-between;font-size:8px;opacity:.9}.sgCard .st b{color:#ffd23f}.sgCard .sg{font-size:7.5px;opacity:.65;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sgCard .img{position:relative}.sgCard .rolB{position:absolute;right:3px;bottom:3px;font:900 9px/1 system-ui;font-style:normal;color:#fff;background:var(--rb);border:1px solid rgba(0,0,0,.6);border-radius:5px;padding:2px 4px;letter-spacing:.3px;text-shadow:0 1px 0 rgba(0,0,0,.6);z-index:2}.sgCard .nm{font-weight:800;font-size:10px;line-height:1.15;min-height:2.3em}.sgCard .st{display:flex;justify-content:space-between;font-size:8px;opacity:.9}.sgCard .st b{color:#ffd23f}.sgCard .sg{font-size:7.5px;opacity:.65;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sgCard.lock{filter:grayscale(1) brightness(.5);cursor:default}.sgCard.sel{outline:3px solid #7ad87a;outline-offset:1px}
 .sgCard.re::after,.sgCard.rl::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.35) 45%,rgba(255,180,255,.25) 50%,transparent 62%);background-size:250% 100%;animation:sgHolo 3.2s linear infinite;pointer-events:none;mix-blend-mode:screen}
 .sgCard.rl{box-shadow:0 0 12px rgba(255,210,63,.5)}@keyframes sgHolo{from{background-position:120% 0}to{background-position:-130% 0}}

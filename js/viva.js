@@ -40,7 +40,7 @@
   function mkPlayer(card, team, i, nf, m, bonus, home) {
     const e = safe(() => S().eff(card), card), b = team ? { at: 0, df: 0, te: 0 } : bonus || {}, at = e.at * m + (b.at | 0) * 6, df = e.df * m + (b.df | 0) * 6, te = e.te * m + (b.te | 0) * 6;
     const H0 = home || (nf === 4 ? HOME5 : HOME3)[i] || [0.1, 0.5], hx = team ? W - H0[0] * W : H0[0] * W;
-    const role = card.role === "P" ? "P" : card.role || "C";
+    const role = card.role === "P" ? "P" : card.role === "B" ? "A" : card.role || "C";
     return { id: card.id, name: String(safe(() => S().name(card.id), card.id)).split(/[ ,]/)[0], card, team, i, role, x: hx, y: H0[1] * H, hx, hy: H0[1] * H, vx: 0, vy: 0, fx: team ? -1 : 1, fy: 0, spd: 1.45 + te / 170, pw: 5.4 + at / 40, drib: te, tack: df, kdf: df, stun: 0, slide: 0, keeper: false, hold: 0, cd: 0, sh: 0 };
   }
   function mkKeeper(card, team, m, bonus) { const p = mkPlayer(card, team, 0, 4, m, bonus); p.keeper = true; p.role = "P"; p.x = p.hx = team ? W - 16 : 16; p.y = p.hy = H / 2; p.fx = team ? -1 : 1; return p; }
