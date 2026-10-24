@@ -24,21 +24,25 @@
   const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y), clampN = (v, a, b) => Math.max(a, Math.min(b, v));
   // ------------------------------------------------------------ giocatori
   const formation = (team, i) => { const F = NP === 5 ? [[130, CY - 70], [130, CY + 70], [225, CY], [285, CY]] : [[120, CY - 40], [180, CY + 25]], f = F[i]; return f ? (team ? [W - f[0], f[1]] : f) : [0, 0]; };
+  // la formazione rispecchia i ruoli delle carte: Attaccanti (A) davanti, Centrocampisti (C) in mezzo, Difensori (D) dietro; il portiere è la carta Portiere (o quella con più DIF)
+  const sortField = (cs) => S().lineup(cs).map((q) => q.c);
+  const layoutHomes = (cs) => S().lineup(cs).map((q) => [q.fx * W, q.fy * H]);
   function mk(card, team, i, o) {
     o = o || {}; const e = safe(() => S().eff(card), card), m = 1 + (o.m || 0), tr = e.at >= e.df && e.at >= e.te ? "at" : e.df >= e.te ? "df" : "te";
-    const role = ABIL[card.role] ? card.role : { at: "A", te: "C", df: "D" }[tr], h = formation(team, i);
+    const role = ABIL[card.role] ? card.role : { at: "A", te: "C", df: "D" }[tr], h = o.home ? (team ? [W - o.home[0], o.home[1]] : o.home) : formation(team, i);
     return { id: card.id, saga: card.saga || "", n: name(card.id), team, i, role, x: h[0], y: h[1], vx: 0, vy: 0, fx: team ? -1 : 1, fy: 0, home: h, spd: (1.5 + e.te / 150) * m, shoot: 5.2 + (e.at * m) / 36, dribble: e.te * m, tack: e.df * m, stun: 0, keeper: false, col: team ? "#e8453a" : "#2f86f0", col2: team ? "#7a1a14" : "#14407a", kdf: e.df * m, hold: 0, slide: 0, run: 0, num: i + 7, skin: 0 };
   }
   function mkKeeper(team, card, o) { const k = mk(card || { id: "gk", at: 50, df: 70, te: 50, role: "P" }, team, NF, o); k.keeper = true; k.role = "P"; k.x = team ? W - 16 : 16; k.y = CY; k.home = [k.x, CY]; k.n = card ? k.n : "Portiere"; k.col = team ? "#e8d030" : "#3ac878"; k.col2 = "#1a1a1a"; k.num = 1; return k; }
   function begin(cfg) {
     setField(cfg.n || 3);
-    const P = cfg.mine.map((c, i) => mk(c, 0, i, { m: 0.02 })).concat([mkKeeper(0, cfg.myKeeper, { m: 0 })]), Q = cfg.foes.map((c, i) => mk(c, 1, i, { m: (cfg.lvl - 3) * 0.04 })).concat([mkKeeper(1, cfg.foeKeeper, { m: (cfg.lvl - 3) * 0.04 })]);
-    M = { cfg, opt: cfg.fast ? { tele: false, combo: cfg.combo !== false } : load(), cm: null, cmCd: 0, lvl: cfg.lvl, p: P, q: Q, all: P.concat(Q), ball: { x: W / 2, y: H / 2, vx: 0, vy: 0, owner: null, cool: 0, kick: 0, magic: 0, rot: 0, tr: [] }, score: [0, 0], t: -150, extra: false, ctl: P[NF - 1], inp: {}, edge: {}, hold: {}, chg: 0, stam: 100, stick: null, energy: [30, 30], fx: [], parts: [], goalT: 0, over: null, r: cfg.seed != null ? seeded(cfg.seed) : Math.random, fast: !!cfg.fast, lastScorer: -1, stat: { shots: [0, 0], saves: [0, 0] }, poss: [0, 0], shake: 0, scorer: null, cam: -MX, vw: Math.min(CW, 412) };
+    const mineS = sortField(cfg.mine), foesS = sortField(cfg.foes), hm = layoutHomes(mineS), hf = layoutHomes(foesS);
+    const P = mineS.map((c, i) => mk(c, 0, i, { m: 0.02, home: hm[i] })).concat([mkKeeper(0, cfg.myKeeper, { m: 0 })]), Q = foesS.map((c, i) => mk(c, 1, i, { m: (cfg.lvl - 3) * 0.04, home: hf[i] })).concat([mkKeeper(1, cfg.foeKeeper, { m: (cfg.lvl - 3) * 0.04 })]);
+    M = { cfg, opt: cfg.fast ? { tele: false, combo: cfg.combo !== false } : load(), cm: null, cmCd: 0, lvl: cfg.lvl, p: P, q: Q, all: P.concat(Q), ball: { x: W / 2, y: H / 2, vx: 0, vy: 0, owner: null, cool: 0, kick: 0, magic: 0, rot: 0, tr: [] }, score: [0, 0], t: -150, extra: false, ctl: P[0], inp: {}, edge: {}, hold: {}, chg: 0, stam: 100, stick: null, energy: [30, 30], fx: [], parts: [], goalT: 0, over: null, r: cfg.seed != null ? seeded(cfg.seed) : Math.random, fast: !!cfg.fast, lastScorer: -1, stat: { shots: [0, 0], saves: [0, 0] }, poss: [0, 0], shake: 0, scorer: null, cam: -MX, vw: Math.min(CW, 412) };
     STATIC = null; kickoff(0); return M;
   }
   function kickoff(team) {
-    M.all.forEach((p) => { p.x = p.team === team && !p.keeper ? p.home[0] + (p.team ? -20 : 20) * (p.i === NF - 1 ? 1 : 0.4) : p.home[0]; p.y = p.home[1]; p.vx = p.vy = 0; p.stun = 0; p.slide = 0; p.fx = p.team ? -1 : 1; p.fy = 0; });
-    const b = M.ball; b.x = W / 2; b.y = H / 2; b.vx = b.vy = 0; b.owner = null; b.cool = 0; b.magic = 0; b.tr = []; M.ctl = M.p[NF - 1]; M.goalT = 0; M.chg = 0; const k = M.all.find((p) => p.team === team && p.i === NF - 1); k.x = W / 2 - (team ? -14 : 14); k.y = H / 2; b.owner = k; k.hold = 0;
+    M.all.forEach((p) => { p.x = p.team === team && !p.keeper ? p.home[0] + (p.team ? -20 : 20) * (p.i === 0 ? 1 : 0.4) : p.home[0]; p.y = p.home[1]; p.vx = p.vy = 0; p.stun = 0; p.slide = 0; p.fx = p.team ? -1 : 1; p.fy = 0; });
+    const b = M.ball; b.x = W / 2; b.y = H / 2; b.vx = b.vy = 0; b.owner = null; b.cool = 0; b.magic = 0; b.tr = []; M.ctl = M.p[0]; M.goalT = 0; M.chg = 0; const k = M.all.find((p) => p.team === team && p.i === 0 && !p.keeper); k.x = W / 2 - (team ? -14 : 14); k.y = H / 2; b.owner = k; k.hold = 0;
   }
   const mate = (p) => (p.team ? M.q : M.p), foe = (p) => (p.team ? M.p : M.q), gx = (team) => (team ? 0 : W);
   function fxAdd(x, y, t, c) { if (!M.fast) M.fx.push({ x, y, t, c, l: 36 }); }
@@ -268,7 +272,7 @@
     // braccia
     g.strokeStyle = p.keeper ? "#ffe066" : sk; g.lineWidth = p.keeper ? 3.4 : 2.4; g.beginPath(); g.moveTo(-5.5, -18 - bob); g.lineTo(up ? -9 : -8 - sw * 0.5, up ? -27 : -12 - bob); g.moveTo(5.5, -18 - bob); g.lineTo(up ? 9 : 8 + sw * 0.5, up ? -27 : -12 - bob); g.stroke();
     // testa = ritratto
-    const im = imgOf(p.id), hy = -27 - bob; g.save(); g.beginPath(); g.arc(0, hy, 8, 0, 7); g.clip(); if (im && im.complete && im.naturalWidth && !p.keeper) g.drawImage(im, -8, hy - 8.5, 16, 16); else { g.fillStyle = p.keeper ? "#caa070" : sk; g.fillRect(-8, hy - 8, 16, 16); if (p.keeper) { g.fillStyle = "#222"; g.fillRect(-8, hy - 8, 16, 5); } } g.restore();
+    const im = imgOf(p.id), hy = -27 - bob; g.save(); g.beginPath(); g.arc(0, hy, 8, 0, 7); g.clip(); if (im && im.complete && im.naturalWidth) g.drawImage(im, -8, hy - 8.5, 16, 16); else { g.fillStyle = p.keeper ? "#caa070" : sk; g.fillRect(-8, hy - 8, 16, 16); if (p.keeper) { g.fillStyle = "#222"; g.fillRect(-8, hy - 8, 16, 5); } } g.restore();
     g.strokeStyle = p.col; g.lineWidth = 2; g.beginPath(); g.arc(0, hy, 8, 0, 7); g.stroke();
     if (!p.keeper) accFront(g, p, L, bob, hy);
     g.restore();
@@ -355,15 +359,7 @@
   // la squadra ha n giocatori IN TOTALE, portiere compreso: la carta Portiere (o, se non c'è, quella con più DIF) va in porta
   const dfOf = (c) => safe(() => S().eff(c).df, c.df || 0);
   function withKeeper(cards) { const gk = cards.find((c) => c.role === "P") || cards.slice().sort((a, b) => dfOf(b) - dfOf(a))[0]; return cards.filter((c) => c !== gk).concat([gk]); }
-  function myTeam(n) {
-    n = n || 3;
-    const r = safe(() => S()._load(), { own: [], team: [] }), own = mine().slice().sort((a, b) => strength(b) - strength(a)), tc = r.team.map((id) => S().BY[id]).filter(Boolean), pick = [];
-    const gk = tc.find((c) => c.role === "P") || null; if (gk) pick.push(gk);
-    tc.forEach((c) => { if (pick.length < n && !pick.includes(c)) pick.push(c); });
-    own.forEach((c) => { if (pick.length < n && !pick.includes(c)) pick.push(c); });
-    const pool = S().CARDS.slice().sort((a, b) => strength(a) - strength(b)); while (pick.length < n) pick.push(pool[(pick.length * 11) % pool.length]);
-    return withKeeper(pick.slice(0, n));
-  }
+  function myTeam(n) { return S().squad(n || 3).all; }
   function foesFor(rand, theme, n) {
     n = n || 3; const all = S().CARDS, pool = all.filter((c) => c.saga === theme), p = pool.length >= n ? pool : all, out = [], used = {}; for (let i = 0; i < n; i++) { let c; for (let k = 0; k < 20; k++) { c = p[Math.floor(rand() * p.length)]; if (!used[c.id]) break; } used[c.id] = 1; out.push(c); } return out; }
   function menu(back) {
