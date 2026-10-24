@@ -16,7 +16,7 @@
   const api = () => window.__borgoApi;
   const safe = (fn, d) => { try { return fn(); } catch (e) { return d; } };
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const rec = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "{}"), {}); return { v: 1, seen: r.seen && typeof r.seen === "object" ? r.seen : {}, last: typeof r.last === "string" ? r.last : "" }; };
+  const rec = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "{}"), {}); return { v: 1, seen: r.seen && typeof r.seen === "object" ? r.seen : {}, last: typeof r.last === "string" ? r.last : "", favs: Array.isArray(r.favs) ? r.favs : [] }; };
   const recSave = (r) => safe(() => localStorage.setItem(KEY, JSON.stringify(r)));
   const hero = () => safe(() => window.heroLoad && window.heroLoad(), null);
 
@@ -208,7 +208,11 @@
 .salOv .card{position:relative;border-radius:14px;overflow:hidden;background:#13213f;border:1.5px solid #ffffff22;cursor:pointer;box-shadow:0 4px 14px #0008;transition:transform .15s}
 .salOv .card:active{transform:scale(.97)}
 .salOv .card img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block}
-.salOv .card .t{position:absolute;left:8px;right:8px;top:6px;font:800 14px/1.15 "M PLUS Rounded 1c",sans-serif;text-shadow:0 2px 3px #000,0 0 8px #000}
+.salOv .card .t{position:absolute;left:8px;right:38px;top:6px;font:800 14px/1.15 "M PLUS Rounded 1c",sans-serif;text-shadow:0 2px 3px #000,0 0 8px #000}
+.salOv .card.isFav{border-color:#ffd23f88;box-shadow:0 0 10px #ffd23f22,0 4px 14px #0008}
+.salOv .salFav{position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:50%;background:#0b1026bb;border:1.5px solid #ffffff44;color:#cbd5e1;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;z-index:2;line-height:1;padding:0;transition:transform .15s,background .15s,color .15s}
+.salOv .salFav:active{transform:scale(1.25)}
+.salOv .salFav.on{background:#ffd23f2f;border-color:#ffd23f;color:#ffd23f;box-shadow:0 0 8px #ffd23f66}
 .salOv .card .e{font-size:18px;margin-right:4px}
 .salOv .card .info{padding:7px 9px 9px;font-size:11.5px;color:#c9d2ea}
 .salOv .badge{position:absolute;right:6px;top:calc(min(100%,1000px) * 0);padding:3px 7px;border-radius:999px;font:900 10px/1 sans-serif;letter-spacing:.5px}
@@ -861,10 +865,12 @@
   function renderSagaCards(sagasList) {
     const r = rec();
     return sagasList.map(({ s, x }) => {
+      const isFav = r.favs.includes(s.id);
       const isNew = !r.seen[s.id] && !x.started && NEWEST.includes(s.id);
       const badge = x.finished ? `<span class="badge done">✓ CONCLUSA</span>` : x.started ? `<span class="badge run">IN CORSO</span>` : isNew ? `<span class="badge new">NUOVA</span>` : "";
       const prog = x.pct != null && (x.started || x.finished) ? `<div class="pbar"><i style="width:${Math.max(4, x.pct)}%"></i></div>` : "";
-      return `<div class="card" data-id="${s.id}"><img alt="" loading="lazy" src="${cover(s)}"><div class="t"><span class="e">${s.e}</span>${esc(s.t)}</div><div class="info">${s.g.map((k) => `<span class="tag" style="background:${GEN[k][1]}">${GEN[k][0]}</span>`).join("")}<div style="display:flex;justify-content:space-between;align-items:center;gap:6px"><span>${x.finished ? "Conclusa" : x.started ? `Capitolo ${x.ch}${s.ch ? `/${s.ch}` : ""}` : "Da iniziare"}</span>${x.ends.length ? `<span>🏆 ${x.endsFound}/${x.ends.length}</span>` : ""}</div>${prog}</div>${badge ? `<div class="stamp">${badge}</div>` : ""}</div>`;
+      const favBtn = `<button type="button" class="salFav${isFav ? " on" : ""}" data-fav="${s.id}" title="${isFav ? "Rimuovi dai preferiti" : "Fissa tra le saghe preferite in cima"}" aria-label="Preferita">${isFav ? "⭐" : "☆"}</button>`;
+      return `<div class="card${isFav ? " isFav" : ""}" data-id="${s.id}"><img alt="" loading="lazy" src="${cover(s)}"><div class="t"><span class="e">${s.e}</span>${esc(s.t)}</div>${favBtn}<div class="info">${s.g.map((k) => `<span class="tag" style="background:${GEN[k][1]}">${GEN[k][0]}</span>`).join("")}<div style="display:flex;justify-content:space-between;align-items:center;gap:6px"><span>${x.finished ? "Conclusa" : x.started ? `Capitolo ${x.ch}${s.ch ? `/${s.ch}` : ""}` : "Da iniziare"}</span>${x.ends.length ? `<span>🏆 ${x.endsFound}/${x.ends.length}</span>` : ""}</div>${prog}</div>${badge ? `<div class="stamp">${badge}</div>` : ""}</div>`;
     }).join("");
   }
 
@@ -1264,12 +1270,21 @@
         // --- VISTA CATALOGO SCHEDE CLASSICO ---
         if (lastS) html += `<div class="cont" data-id="${lastS.s.id}"><img alt="" src="${cover(lastS.s)}"><div><b>▸ Continua: ${esc(lastS.s.t)}</b>${lastS.x.finished ? "Conclusa · rigioca o cerca gli altri finali" : `Capitolo ${lastS.x.ch}${lastS.s.ch ? ` di ${lastS.s.ch}` : ""}`}</div></div>`;
 
-        html += `<div class="row">${[["tutte", "Tutte"], ["corso", "In corso"], ["nuove", "Da iniziare"], ["concluse", "Concluse"]].map(([k, l]) => `<button type="button" class="chip${FILT.st === k ? " on" : ""}" data-st="${k}">${l}</button>`).join("")}</div>`;
+        html += `<div class="row">${[["tutte", "Tutte"], ["fav", `⭐ Preferite (${r.favs.length})`], ["corso", "In corso"], ["nuove", "Da iniziare"], ["concluse", "Concluse"]].map(([k, l]) => `<button type="button" class="chip${FILT.st === k ? " on" : ""}" data-st="${k}">${l}</button>`).join("")}</div>`;
         html += `<div class="row">${[["", "Tutti i generi"], ...Object.entries(GEN).map(([k, v]) => [k, v[0]])].map(([k, l]) => `<button type="button" class="chip${FILT.g === k ? " on" : ""}" data-g="${k}">${l}</button>`).join("")}</div>`;
 
-        const shown = list.filter(({ s, x }) => s.id !== "carte" && (FILT.st === "tutte" || (FILT.st === "corso" && x.started && !x.finished) || (FILT.st === "nuove" && !x.started) || (FILT.st === "concluse" && x.finished)) && (!FILT.g || s.g.includes(FILT.g))).map((e, i) => [e, i]).sort((a, b) => { const ia = NEWEST.indexOf(a[0].s.id), ib = NEWEST.indexOf(b[0].s.id); return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib) || a[1] - b[1]; }).map((p) => p[0]);
+        const shown = list.filter(({ s, x }) => s.id !== "carte" && (FILT.st === "tutte" || (FILT.st === "fav" && r.favs.includes(s.id)) || (FILT.st === "corso" && x.started && !x.finished) || (FILT.st === "nuove" && !x.started) || (FILT.st === "concluse" && x.finished)) && (!FILT.g || s.g.includes(FILT.g))).map((e, i) => [e, i]).sort((a, b) => {
+          const fa = r.favs.includes(a[0].s.id) ? 1 : 0, fb = r.favs.includes(b[0].s.id) ? 1 : 0;
+          if (fa !== fb) return fb - fa;
+          const ia = NEWEST.indexOf(a[0].s.id), ib = NEWEST.indexOf(b[0].s.id);
+          return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib) || a[1] - b[1];
+        }).map((p) => p[0]);
 
-        html += `<div class="grid">${renderSagaCards(shown)}</div>`;
+        if (FILT.st === "fav" && shown.length === 0) {
+          html += `<p class="sum" style="text-align:center;padding:24px 8px">Nessuna saga fissata nei preferiti.<br>Tocca la stellina <b>☆</b> su qualsiasi saga per tenerla sempre in cima al Salone.</p>`;
+        } else {
+          html += `<div class="grid">${renderSagaCards(shown)}</div>`;
+        }
       }
 
       body.innerHTML = html;
@@ -1354,8 +1369,24 @@
         body.querySelectorAll("[data-g]").forEach((b) => (b.onclick = () => { FILT.g = b.dataset.g; renderContent(); }));
       }
 
+      body.querySelectorAll(".salFav").forEach((b) => {
+        b.onclick = (e) => {
+          e.stopPropagation();
+          const sid = b.dataset.fav;
+          const curR = rec();
+          const pos = curR.favs.indexOf(sid);
+          if (pos >= 0) curR.favs.splice(pos, 1); else curR.favs.push(sid);
+          recSave(curR);
+          safe(() => window.sfx && window.sfx("ding"));
+          renderContent();
+        };
+      });
+
       body.querySelectorAll(".card,.cont").forEach((b) => {
-        b.onclick = () => detail(SAGAS.find((s) => s.id === b.dataset.id));
+        b.onclick = (e) => {
+          if (e.target.closest(".salFav")) return;
+          detail(SAGAS.find((s) => s.id === b.dataset.id));
+        };
       });
     };
 
