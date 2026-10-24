@@ -6,8 +6,8 @@
   "use strict";
   if (window.__eroi) return;
   const KEY = "ali-di-rondine.eroi", PR = 9, MX = 16, OY = 24, SS = 2;
-  let W = 380, H = 230, TOP = 10, BOT = 220, GY0 = 88, GY1 = 142, CY = 115, DUR = 80 * 60, CW = W + MX * 2, CH = H + OY + 12, NP = 3, BXW = 44, BXH = 110;
-  function setField(n) { NP = n === 5 ? 5 : 3; if (NP === 5) { W = 620; H = 270; DUR = 110 * 60; BXW = 58; BXH = 150; } else { W = 380; H = 230; DUR = 80 * 60; BXW = 44; BXH = 110; } TOP = 10; BOT = H - 10; CY = H / 2; const gm = NP === 5 ? 30 : 27; GY0 = CY - gm; GY1 = CY + gm; CW = W + MX * 2; CH = H + OY + 12; }
+  let W = 380, H = 230, TOP = 10, BOT = 220, GY0 = 88, GY1 = 142, CY = 115, DUR = 80 * 60, CW = W + MX * 2, CH = H + OY + 12, NP = 3, NF = 2, BXW = 44, BXH = 110;
+  function setField(n) { NP = n === 5 ? 5 : 3; NF = NP - 1; if (NP === 5) { W = 620; H = 270; DUR = 110 * 60; BXW = 58; BXH = 150; } else { W = 380; H = 230; DUR = 80 * 60; BXW = 44; BXH = 110; } TOP = 10; BOT = H - 10; CY = H / 2; const gm = NP === 5 ? 30 : 27; GY0 = CY - gm; GY1 = CY + gm; CW = W + MX * 2; CH = H + OY + 12; }
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const safe = (fn, d) => { try { return fn(); } catch (e) { return d; } };
   const S = () => window.__sogni;
@@ -23,22 +23,22 @@
   function seeded(seed) { let a = seed >>> 0; return () => { a = (a + 0x6d2b79f5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
   const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y), clampN = (v, a, b) => Math.max(a, Math.min(b, v));
   // ------------------------------------------------------------ giocatori
-  const formation = (team, i) => { const F = NP === 5 ? [[130, CY - 70], [130, CY + 70], [225, CY], [285, CY - 60], [285, CY + 60]] : [[120, CY - 45], [120, CY + 45], [175, CY]], f = F[i]; return f ? (team ? [W - f[0], f[1]] : f) : [0, 0]; };
+  const formation = (team, i) => { const F = NP === 5 ? [[130, CY - 70], [130, CY + 70], [225, CY], [285, CY]] : [[120, CY - 40], [180, CY + 25]], f = F[i]; return f ? (team ? [W - f[0], f[1]] : f) : [0, 0]; };
   function mk(card, team, i, o) {
     o = o || {}; const e = safe(() => S().eff(card), card), m = 1 + (o.m || 0), tr = e.at >= e.df && e.at >= e.te ? "at" : e.df >= e.te ? "df" : "te";
     const role = ABIL[card.role] ? card.role : { at: "A", te: "C", df: "D" }[tr], h = formation(team, i);
     return { id: card.id, saga: card.saga || "", n: name(card.id), team, i, role, x: h[0], y: h[1], vx: 0, vy: 0, fx: team ? -1 : 1, fy: 0, home: h, spd: (1.5 + e.te / 150) * m, shoot: 5.2 + (e.at * m) / 36, dribble: e.te * m, tack: e.df * m, stun: 0, keeper: false, col: team ? "#e8453a" : "#2f86f0", col2: team ? "#7a1a14" : "#14407a", kdf: e.df * m, hold: 0, slide: 0, run: 0, num: i + 7, skin: 0 };
   }
-  function mkKeeper(team, card, o) { const k = mk(card || { id: "gk", at: 50, df: 70, te: 50, role: "P" }, team, NP, o); k.keeper = true; k.x = team ? W - 16 : 16; k.y = CY; k.home = [k.x, CY]; k.n = card ? k.n : "Portiere"; k.col = team ? "#e8d030" : "#3ac878"; k.col2 = "#1a1a1a"; k.num = 1; return k; }
+  function mkKeeper(team, card, o) { const k = mk(card || { id: "gk", at: 50, df: 70, te: 50, role: "P" }, team, NF, o); k.keeper = true; k.role = "P"; k.x = team ? W - 16 : 16; k.y = CY; k.home = [k.x, CY]; k.n = card ? k.n : "Portiere"; k.col = team ? "#e8d030" : "#3ac878"; k.col2 = "#1a1a1a"; k.num = 1; return k; }
   function begin(cfg) {
     setField(cfg.n || 3);
     const P = cfg.mine.map((c, i) => mk(c, 0, i, { m: 0.02 })).concat([mkKeeper(0, cfg.myKeeper, { m: 0 })]), Q = cfg.foes.map((c, i) => mk(c, 1, i, { m: (cfg.lvl - 3) * 0.04 })).concat([mkKeeper(1, cfg.foeKeeper, { m: (cfg.lvl - 3) * 0.04 })]);
-    M = { cfg, opt: cfg.fast ? { tele: false, combo: cfg.combo !== false } : load(), cm: null, cmCd: 0, lvl: cfg.lvl, p: P, q: Q, all: P.concat(Q), ball: { x: W / 2, y: H / 2, vx: 0, vy: 0, owner: null, cool: 0, kick: 0, magic: 0, rot: 0, tr: [] }, score: [0, 0], t: -150, extra: false, ctl: P[2], inp: {}, edge: {}, hold: {}, chg: 0, stam: 100, stick: null, energy: [30, 30], fx: [], parts: [], goalT: 0, over: null, r: cfg.seed != null ? seeded(cfg.seed) : Math.random, fast: !!cfg.fast, lastScorer: -1, stat: { shots: [0, 0], saves: [0, 0] }, poss: [0, 0], shake: 0, scorer: null, cam: -MX, vw: Math.min(CW, 412) };
+    M = { cfg, opt: cfg.fast ? { tele: false, combo: cfg.combo !== false } : load(), cm: null, cmCd: 0, lvl: cfg.lvl, p: P, q: Q, all: P.concat(Q), ball: { x: W / 2, y: H / 2, vx: 0, vy: 0, owner: null, cool: 0, kick: 0, magic: 0, rot: 0, tr: [] }, score: [0, 0], t: -150, extra: false, ctl: P[NF - 1], inp: {}, edge: {}, hold: {}, chg: 0, stam: 100, stick: null, energy: [30, 30], fx: [], parts: [], goalT: 0, over: null, r: cfg.seed != null ? seeded(cfg.seed) : Math.random, fast: !!cfg.fast, lastScorer: -1, stat: { shots: [0, 0], saves: [0, 0] }, poss: [0, 0], shake: 0, scorer: null, cam: -MX, vw: Math.min(CW, 412) };
     STATIC = null; kickoff(0); return M;
   }
   function kickoff(team) {
-    M.all.forEach((p) => { p.x = p.team === team && !p.keeper ? p.home[0] + (p.team ? -20 : 20) * (p.i === 2 ? 1 : 0.4) : p.home[0]; p.y = p.home[1]; p.vx = p.vy = 0; p.stun = 0; p.slide = 0; p.fx = p.team ? -1 : 1; p.fy = 0; });
-    const b = M.ball; b.x = W / 2; b.y = H / 2; b.vx = b.vy = 0; b.owner = null; b.cool = 0; b.magic = 0; b.tr = []; M.ctl = M.p[2]; M.goalT = 0; M.chg = 0; const k = M.all.find((p) => p.team === team && p.i === 2); k.x = W / 2 - (team ? -14 : 14); k.y = H / 2; b.owner = k; k.hold = 0;
+    M.all.forEach((p) => { p.x = p.team === team && !p.keeper ? p.home[0] + (p.team ? -20 : 20) * (p.i === NF - 1 ? 1 : 0.4) : p.home[0]; p.y = p.home[1]; p.vx = p.vy = 0; p.stun = 0; p.slide = 0; p.fx = p.team ? -1 : 1; p.fy = 0; });
+    const b = M.ball; b.x = W / 2; b.y = H / 2; b.vx = b.vy = 0; b.owner = null; b.cool = 0; b.magic = 0; b.tr = []; M.ctl = M.p[NF - 1]; M.goalT = 0; M.chg = 0; const k = M.all.find((p) => p.team === team && p.i === NF - 1); k.x = W / 2 - (team ? -14 : 14); k.y = H / 2; b.owner = k; k.hold = 0;
   }
   const mate = (p) => (p.team ? M.q : M.p), foe = (p) => (p.team ? M.p : M.q), gx = (team) => (team ? 0 : W);
   function fxAdd(x, y, t, c) { if (!M.fast) M.fx.push({ x, y, t, c, l: 36 }); }
@@ -159,7 +159,7 @@
       if (b.y < TOP + 3) { b.y = TOP + 3; b.vy = Math.abs(b.vy) * 0.8; } if (b.y > BOT - 3) { b.y = BOT - 3; b.vy = -Math.abs(b.vy) * 0.8; }
       const inMouth = b.y > GY0 && b.y < GY1;
       if (b.x < 2 && !inMouth) { b.x = 2; b.vx = Math.abs(b.vx) * 0.8; } if (b.x > W - 2 && !inMouth) { b.x = W - 2; b.vx = -Math.abs(b.vx) * 0.8; }
-      [M.p[NP], M.q[NP]].forEach((k) => { const sp = Math.hypot(b.vx, b.vy), toward = k.team ? b.vx > 0.5 : b.vx < -0.5; if (toward && sp > 2.5 && b.kick !== k.team && dist(b, k) < 20 && k.stun <= 0) { const big = b.big ? 0.15 : 1, pr = Math.max(0.1, Math.min(0.85, (0.5 + k.kdf / 260 - sp / 22)) * big); if (M.r() < pr) { M.stat.saves[k.team]++; b.vx = (k.team ? -1 : 1) * (1.5 + M.r()); b.vy = (M.r() - 0.5) * 3; b.kick = -1; b.big = false; b.sup = null; fxAdd(k.x, k.y - 30, "PARATA!", "#9ad8ff"); say(pickL([`${k.n} dice di no!`, `Che parata di ${k.n}!`, `${k.n} si allunga e salva tutto!`]), 2); burst(b.x, b.y, 8, ["#fff", "#9ad8ff"], 1.6); if (M.r() < 0.5) { b.owner = k; k.hold = 0; } } else k.stun = 6; } });
+      [M.p[NF], M.q[NF]].forEach((k) => { const sp = Math.hypot(b.vx, b.vy), toward = k.team ? b.vx > 0.5 : b.vx < -0.5; if (toward && sp > 2.5 && b.kick !== k.team && dist(b, k) < 20 && k.stun <= 0) { const big = b.big ? 0.15 : 1, pr = Math.max(0.1, Math.min(0.85, (0.5 + k.kdf / 260 - sp / 22)) * big); if (M.r() < pr) { M.stat.saves[k.team]++; b.vx = (k.team ? -1 : 1) * (1.5 + M.r()); b.vy = (M.r() - 0.5) * 3; b.kick = -1; b.big = false; b.sup = null; fxAdd(k.x, k.y - 30, "PARATA!", "#9ad8ff"); say(pickL([`${k.n} dice di no!`, `Che parata di ${k.n}!`, `${k.n} si allunga e salva tutto!`]), 2); burst(b.x, b.y, 8, ["#fff", "#9ad8ff"], 1.6); if (M.r() < 0.5) { b.owner = k; k.hold = 0; } } else k.stun = 6; } });
       if (Math.hypot(b.vx, b.vy) > 4 && b.magic <= 0) M.all.forEach((p) => { if (!p.keeper && p.team !== b.kick && p.stun <= 0 && dist(p, b) < PR + 2 && M.r() < 0.35 + (p.tack - 50) / 400 && !b.big) { b.vx *= -0.4; b.vy = (M.r() - 0.5) * 4; b.kick = p.team; fxAdd(p.x, p.y - 30, "blocco", "#ccc"); } });
       if (b.cool <= 0 && Math.hypot(b.vx, b.vy) < 4.2) { let best = null, bd = PR + 4; M.all.forEach((p) => { if (p.stun > 0) return; const d = dist(p, b); if (d < bd) { bd = d; best = p; } }); if (best) { b.owner = best; best.hold = 0; b.kick = -1; b.big = false; b.sup = null; } }
       else if (b.magic > 0 && b.to && dist(b.to, b) < PR + 3) { b.owner = b.to; b.to.hold = 0; b.magic = 0; }
@@ -352,18 +352,23 @@
   // ------------------------------------------------------------ menu e coppa
   const mine = () => safe(() => S()._load().own.map((id) => S().BY[id]).filter(Boolean), []);
   const strength = (c) => c.at + c.df + c.te;
+  // la squadra ha n giocatori IN TOTALE, portiere compreso: la carta Portiere (o, se non c'è, quella con più DIF) va in porta
+  const dfOf = (c) => safe(() => S().eff(c).df, c.df || 0);
+  function withKeeper(cards) { const gk = cards.find((c) => c.role === "P") || cards.slice().sort((a, b) => dfOf(b) - dfOf(a))[0]; return cards.filter((c) => c !== gk).concat([gk]); }
   function myTeam(n) {
     n = n || 3;
-    const r = safe(() => S()._load(), { own: [], team: [] }), own = mine().slice().sort((a, b) => strength(b) - strength(a)), pick = [];
-    r.team.forEach((id) => { const c = S().BY[id]; if (c && c.role !== "P" && pick.length < n) pick.push(c); }); own.forEach((c) => { if (pick.length < n && !pick.includes(c) && c.role !== "P") pick.push(c); });
+    const r = safe(() => S()._load(), { own: [], team: [] }), own = mine().slice().sort((a, b) => strength(b) - strength(a)), tc = r.team.map((id) => S().BY[id]).filter(Boolean), pick = [];
+    const gk = tc.find((c) => c.role === "P") || null; if (gk) pick.push(gk);
+    tc.forEach((c) => { if (pick.length < n && !pick.includes(c)) pick.push(c); });
+    own.forEach((c) => { if (pick.length < n && !pick.includes(c)) pick.push(c); });
     const pool = S().CARDS.slice().sort((a, b) => strength(a) - strength(b)); while (pick.length < n) pick.push(pool[(pick.length * 11) % pool.length]);
-    return pick.slice(0, n);
+    return withKeeper(pick.slice(0, n));
   }
   function foesFor(rand, theme, n) {
-    n = n || 3; const all = S().CARDS, pool = all.filter((c) => c.saga === theme), p = pool.length >= n + 1 ? pool : all, out = [], used = {}; for (let i = 0; i < n + 1; i++) { let c; for (let k = 0; k < 20; k++) { c = p[Math.floor(rand() * p.length)]; if (!used[c.id]) break; } used[c.id] = 1; out.push(c); } return out; }
+    n = n || 3; const all = S().CARDS, pool = all.filter((c) => c.saga === theme), p = pool.length >= n ? pool : all, out = [], used = {}; for (let i = 0; i < n; i++) { let c; for (let k = 0; k < 20; k++) { c = p[Math.floor(rand() * p.length)]; if (!used[c.id]) break; } used[c.id] = 1; out.push(c); } return out; }
   function menu(back) {
     if (back) BACK = back; const body = shell("⚽ Calcio d'Azione Eroi"), r = load(), team = myTeam(r.mode), rl = (c) => (ABIL[c.role] ? c.role : "A");
-    body.innerHTML = `<p class="sum">Partita a squadre (formato 3v3 o 5v5 con campo grande e telecamera) con i personaggi delle saghe, joystick libero, tiro caricato, scivolata, anche in orizzontale. Ogni personaggio ha il <b>super tiro della sua saga</b> (curva, zig-zag, invisibile, ghiaccio, fulmine...); poi Regia, Muro, Magnete.</p><button type="button" class="one" data-mode="1">👥 Formato: ${r.mode === 5 ? "5 contro 5 (campo grande)" : "3 contro 3"}<small>tocca per cambiare · durata: ${r.mode === 5 ? "110 secondi" : "80 secondi"}</small></button><button type="button" class="one" data-tele="1">🎙️ Telecronaca: ${r.tele ? "SÌ" : "NO"}<small>una riga di commento per gol, parate, scivolate, super. Tocca per cambiare</small></button><button type="button" class="one" data-combo="1">🤝 Tiro combinato: ${r.combo ? "SÌ" : "NO"}<small>il Super con un compagno vicino (filo dorato COMBO): +25 energia, tiro molto più forte. Tocca per cambiare</small></button><div class="sec">La tua squadra</div><p class="sum">${team.map((c) => `<b>${esc(name(c.id))}</b> (${esc(ABIL[rl(c)][0])})`).join(" · ")}</p><div class="sec">Modalità</div><button type="button" class="one" data-go="cup">🏆 Coppa degli Eroi<small>3 turni a eliminazione (Quarti, Semifinale, Finale) · Tempi supplementari & Golden Gol · ${r.cup ? "vinta " + r.cup + " volte" : "mai vinta"}</small></button>${[1, 2, 3, 4, 5].map((l) => `<button type="button" class="one" data-l="${l}">Amichevole ${l}${"★".repeat(l)}<small>${["molto facile", "facile", "media", "difficile", "implacabile"][l - 1]} · ${r.mode === 5 ? 110 : 80} secondi · ${8 * l} monete</small></button>`).join("")}`;
+    body.innerHTML = `<p class="sum">Partita a squadre (formato 3v3 o 5v5, portiere compreso, con campo grande e telecamera) con i personaggi delle saghe, joystick libero, tiro caricato, scivolata, anche in orizzontale. Ogni personaggio ha il <b>super tiro della sua saga</b> (curva, zig-zag, invisibile, ghiaccio, fulmine...); poi Regia, Muro, Magnete.</p><button type="button" class="one" data-mode="1">👥 Formato: ${r.mode === 5 ? "5 contro 5, portiere compreso (campo grande)" : "3 contro 3, portiere compreso"}<small>tocca per cambiare · la carta Portiere va in porta, senza Portiere quella con più DIF · durata: ${r.mode === 5 ? "110 secondi" : "80 secondi"}</small></button><button type="button" class="one" data-tele="1">🎙️ Telecronaca: ${r.tele ? "SÌ" : "NO"}<small>una riga di commento per gol, parate, scivolate, super. Tocca per cambiare</small></button><button type="button" class="one" data-combo="1">🤝 Tiro combinato: ${r.combo ? "SÌ" : "NO"}<small>il Super con un compagno vicino (filo dorato COMBO): +25 energia, tiro molto più forte. Tocca per cambiare</small></button><div class="sec">La tua squadra</div><p class="sum">${team.map((c) => `<b>${esc(name(c.id))}</b> (${esc(ABIL[rl(c)][0])})`).join(" · ")}</p><div class="sec">Modalità</div><button type="button" class="one" data-go="cup">🏆 Coppa degli Eroi<small>3 turni a eliminazione (Quarti, Semifinale, Finale) · Tempi supplementari & Golden Gol · ${r.cup ? "vinta " + r.cup + " volte" : "mai vinta"}</small></button>${[1, 2, 3, 4, 5].map((l) => `<button type="button" class="one" data-l="${l}">Amichevole ${l}${"★".repeat(l)}<small>${["molto facile", "facile", "media", "difficile", "implacabile"][l - 1]} · ${r.mode === 5 ? 110 : 80} secondi · ${8 * l} monete</small></button>`).join("")}`;
     body.querySelector('[data-tele]').onclick = () => { const x = load(); x.tele = !x.tele; save(x); menu(); };
     body.querySelector('[data-combo]').onclick = () => { const x = load(); x.combo = !x.combo; save(x); menu(); };
     body.querySelector('[data-mode]').onclick = () => { const x = load(); x.mode = x.mode === 5 ? 3 : 5; save(x); menu(); };
@@ -371,10 +376,10 @@
     body.querySelectorAll("[data-l]").forEach((b) => (b.onclick = () => game(+b.dataset.l, null)));
   }
   function game(lvl, st) {
-    const rand = seeded(Date.now() & 0xffff), ss = [...new Set(S().CARDS.map((c) => c.saga))], th = ss[Math.floor(rand() * ss.length)], n = load().mode, fo = foesFor(rand, th, n), gk = (cs) => cs.find((c) => c.role === "P") || null;
+    const rand = seeded(Date.now() & 0xffff), ss = [...new Set(S().CARDS.map((c) => c.saga))], th = ss[Math.floor(rand() * ss.length)], n = load().mode, fo = withKeeper(foesFor(rand, th, n)), mt = myTeam(n);
     const SN = safe(() => S().SAGHE[th][1], "RIVALI");
     const cupTitles = ["🏆 Coppa · Quarti", "🏆 Coppa · Semifinale", "🏆 Coppa · FINALE"];
-    const cfg = { n, mine: myTeam(n), foes: fo.slice(0, n), foeKeeper: gk(fo.slice(n)), myKeeper: null, lvl, myName: "TU", foeName: String(SN).replace(/^(Il |La |L'|Lo |I |Le )/, "").slice(0, 10).toUpperCase(), title: st ? cupTitles[st.n] || "🏆 Coppa degli Eroi" : `⚽ Amichevole ${lvl}★`, onEnd: (res, G) => results(res, G, lvl, st) };
+    const cfg = { n, mine: mt.slice(0, n - 1), foes: fo.slice(0, n - 1), foeKeeper: fo[n - 1], myKeeper: mt[n - 1], lvl, myName: "TU", foeName: String(SN).replace(/^(Il |La |L'|Lo |I |Le )/, "").slice(0, 10).toUpperCase(), title: st ? cupTitles[st.n] || "🏆 Coppa degli Eroi" : `⚽ Amichevole ${lvl}★`, onEnd: (res, G) => results(res, G, lvl, st) };
     matchUI(cfg);
   }
   function cup(n) { game(2 + n, { n }); }

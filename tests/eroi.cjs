@@ -7,6 +7,7 @@ async function run(w) {
   await page.evaluate(() => window.__arena.open(() => {})); await page.waitForTimeout(250);
   if (!(await page.evaluate(() => !!document.querySelector('.arOv [data-go="ero"]')))) errors.push("manca il bottone Calcio nell'Arena");
   await page.evaluate(() => document.querySelector('.arOv [data-go="ero"]').click()); await page.waitForTimeout(300);
+  await page.evaluate(() => { const S = window.__sogni, r = S._load(); window.__gkId = r.team.find((id) => S.BY[id] && S.BY[id].role === "P") || null; });
   const mn = await page.evaluate(() => ({ l: document.querySelectorAll(".erOv [data-l]").length, c: !!document.querySelector('.erOv [data-go="cup"]') })); if (mn.l !== 5 || !mn.c) errors.push("menu Calcio: " + JSON.stringify(mn));
   if (w === 390) await L.shot(page, "eroi_menu");
   await page.evaluate(() => document.querySelector('.erOv [data-l="1"]').click()); await page.waitForTimeout(700);
@@ -16,12 +17,13 @@ async function run(w) {
     const E = window.__eroi; let M = E.state(); E._fast(true); const o = {};
     o.n = [M.p.length, M.q.length]; for (let i = 0; i < 200; i++) E.tick();
     // il giocatore tira: porta la palla al centro-destra e tira
-    const me = M.ctl; M.ball.owner = me; me.x = 300; me.y = 115; M.ball.x = me.x; M.ball.y = me.y; M.q[3].stun = 999; // portiere avversario KO per il tiro di prova
+    const me = M.ctl; M.ball.owner = me; me.x = 300; me.y = 115; M.ball.x = me.x; M.ball.y = me.y; M.q[M.q.length - 1].stun = 999; // portiere avversario KO per il tiro di prova
     const g0 = M.score[0]; E.press("b", true); for (let i = 0; i < 30; i++) E.tick(); E.press("b", false); for (let i = 0; i < 120 && M.score[0] === g0; i++) E.tick(); o.shot = M.score[0] - g0;
     { const q = M.p[1]; M.ctl = M.p[0]; const c = M.ctl; M.ball.owner = null; const x0 = c.x; M.stick && M.stick.set(1, 0); for (let i = 0; i < 30; i++) E.tick(); o.mv = Math.round(c.x - x0); M.stick && M.stick.set(0, 0); }
     return o;
   });
-  if (r.n.join() !== "4,4") errors.push("giocatori: " + JSON.stringify(r));
+  { const kp = await page.evaluate(() => { const M = window.__eroi.state(), k = M.p[M.p.length - 1], f = M.p.slice(0, -1); return { keeper: k.keeper, gk: window.__gkId, id: k.id, fieldKeeper: f.some((p) => p.keeper), mine: M.cfg.mine.length }; }); if (!kp.keeper || kp.fieldKeeper || kp.mine !== 2 || (kp.gk && kp.id !== kp.gk)) errors.push("portiere dalla carta: " + JSON.stringify(kp)); }
+  if (r.n.join() !== "3,3") errors.push("giocatori: " + JSON.stringify(r));
   if (r.shot !== 1) errors.push("il tiro a porta vuota non fa gol: " + JSON.stringify(r));
   // abilità: Tiro Fuoco / Regia / Muro / Magnete
   const ab = await page.evaluate(() => {
@@ -37,7 +39,7 @@ async function run(w) {
     const E = window.__eroi, M = E.state(); M.opt.combo = true; M.opt.tele = true; M.fast = false; const p = M.p[0], m = M.p[1]; p.role = "A"; p.stun = 0; m.stun = 0; M.ctl = p; M.ball.owner = p; p.x = 200; p.y = 115; m.x = 215; m.y = 120; M.energy[0] = 100; M.stop = 0;
     const e0 = M.energy[0], ok = E.ability(p), out = { ok, cost: Math.round(e0 - M.energy[0]), twin: !!M.ball.twin, say: M.cm && M.cm.t }; M.fast = true; M.opt.combo = false; return out;
   });
-  if (!cb.ok || cb.cost !== 65 || !cb.twin || !/COMBINATO|insieme|serve/.test(cb.say || "")) errors.push("tiro combinato: " + JSON.stringify(cb));
+  if (!cb.ok || cb.cost !== 65 || !cb.twin || !/COMBINATO|insieme|serve|campioni|solo tiro/.test(cb.say || "")) errors.push("tiro combinato: " + JSON.stringify(cb));
   if (!ab.A[0] || ab.A[1] !== 40 || ab.A[2] < 8) errors.push("Tiro Fuoco: " + JSON.stringify(ab.A));
   if (!ab.C[0] || ab.C[2] < 6) errors.push("Regia: " + JSON.stringify(ab.C));
   if (!ab.D[0] || ab.D[2] < 30) errors.push("Muro: " + JSON.stringify(ab.D));
@@ -46,7 +48,7 @@ async function run(w) {
   const sp = await page.evaluate(() => {
     const E = window.__eroi, M = E.state(), out = {}; M.cfg.auto = false; E._fast(true);
     for (const fx of ["fire", "thunder", "curve", "zig", "spiral", "vanish", "ice", "change", "drill"]) {
-      for (let i = 0; i < 200; i++) E.tick(); const p = M.p[0]; p.stun = 0; M.ctl = p; M.ball.owner = p; p.x = 250; p.y = M.ball.y = 115; M.energy[0] = 100; M.q[3].stun = 999;
+      for (let i = 0; i < 200; i++) E.tick(); const p = M.p[0]; p.stun = 0; M.ctl = p; M.ball.owner = p; p.x = 250; p.y = M.ball.y = 115; M.energy[0] = 100; M.q[M.q.length - 1].stun = 999;
       E.shoot(p, { aim: 115, mult: 1.75, power: p.shoot, sup: { fx, col: "#ffaa00", name: "t" } }); const s0 = M.ball.sup; let g0 = M.score[0], n = 0, nan = false; while (M.score[0] === g0 && n++ < 150) { E.tick(); if (!isFinite(M.ball.x) || !isFinite(M.ball.y)) nan = true; } out[fx] = [s0, M.score[0] - g0, nan];
       M.score[0] = 0; M.goalT = 0; M.over = null; M.t = 100;
     }
@@ -59,7 +61,7 @@ async function run(w) {
   await page.evaluate(() => document.querySelector('.erOv [data-mode]').click()); await page.waitForTimeout(120);
   await page.evaluate(() => document.querySelector('.erOv [data-l="3"]').click()); await page.waitForTimeout(500); await page.evaluate(() => window.__eroi.pause(true));
   const f5 = await page.evaluate(() => { const E = window.__eroi, M = E.state(); return { p: M.p.length, q: M.q.length, vw: M.vw, mode: E.load().mode, ctl: !!M.ctl }; });
-  if (f5.p !== 6 || f5.q !== 6 || f5.mode !== 5 || f5.vw > 412) errors.push("5 contro 5: " + JSON.stringify(f5));
+  if (f5.p !== 5 || f5.q !== 5 || f5.mode !== 5 || f5.vw > 412) errors.push("5 contro 5: " + JSON.stringify(f5));
   if (w === 390) await L.shot(page, "eroi_5v5");
   await page.setViewportSize({ width: 844, height: 390 }); await page.waitForTimeout(400);
   const ls = await page.evaluate(() => { const M = window.__eroi.state(), c = document.querySelector(".erOv canvas"); const r = c.getBoundingClientRect(); return { land: document.querySelector(".erOv").classList.contains("land"), vw: M.vw, cw: c.width, h: Math.round(r.height), w: Math.round(r.width) }; });
