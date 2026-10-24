@@ -742,7 +742,7 @@
     cv.onclick = () => { n = full.length; };
   }
   // ---------------------------------------------------------------- SALONE
-  const FILT = { st: "tutte", g: "" };
+  const FILT = { st: "tutte", g: "", sort: "recenti" };
   function totals() {
     const list = SAGAS.filter(available), st = list.map((s) => [s, state(s)]);
     let fe = 0, te = 0; st.forEach(([, x]) => { fe += x.endsFound; te += x.ends.length; });
@@ -1272,10 +1272,19 @@
 
         html += `<div class="row">${[["tutte", "Tutte"], ["fav", `⭐ Preferite (${r.favs.length})`], ["corso", "In corso"], ["nuove", "Da iniziare"], ["concluse", "Concluse"]].map(([k, l]) => `<button type="button" class="chip${FILT.st === k ? " on" : ""}" data-st="${k}">${l}</button>`).join("")}</div>`;
         html += `<div class="row">${[["", "Tutti i generi"], ...Object.entries(GEN).map(([k, v]) => [k, v[0]])].map(([k, l]) => `<button type="button" class="chip${FILT.g === k ? " on" : ""}" data-g="${k}">${l}</button>`).join("")}</div>`;
+        html += `<div class="row" style="align-items:center;gap:6px"><span style="font-size:12px;color:#94a3b8;font-weight:700">Ordina:</span>${[["recenti", "✨ Recenti"], ["pct", "📈 Avanzamento %"], ["az", "🔤 Alfabetico A-Z"]].map(([k, l]) => `<button type="button" class="chip${FILT.sort === k ? " on" : ""}" data-sort="${k}" style="min-height:30px;padding:3px 10px;font-size:12px">${l}</button>`).join("")}</div>`;
 
         const shown = list.filter(({ s, x }) => s.id !== "carte" && (FILT.st === "tutte" || (FILT.st === "fav" && r.favs.includes(s.id)) || (FILT.st === "corso" && x.started && !x.finished) || (FILT.st === "nuove" && !x.started) || (FILT.st === "concluse" && x.finished)) && (!FILT.g || s.g.includes(FILT.g))).map((e, i) => [e, i]).sort((a, b) => {
           const fa = r.favs.includes(a[0].s.id) ? 1 : 0, fb = r.favs.includes(b[0].s.id) ? 1 : 0;
           if (fa !== fb) return fb - fa;
+          if (FILT.sort === "pct") {
+            const pa = a[0].x.pct != null ? a[0].x.pct : -1;
+            const pb = b[0].x.pct != null ? b[0].x.pct : -1;
+            if (pb !== pa) return pb - pa;
+          } else if (FILT.sort === "az") {
+            const c = a[0].s.t.localeCompare(b[0].s.t, "it");
+            if (c !== 0) return c;
+          }
           const ia = NEWEST.indexOf(a[0].s.id), ib = NEWEST.indexOf(b[0].s.id);
           return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib) || a[1] - b[1];
         }).map((p) => p[0]);
@@ -1367,6 +1376,7 @@
       } else {
         body.querySelectorAll("[data-st]").forEach((b) => (b.onclick = () => { FILT.st = b.dataset.st; renderContent(); }));
         body.querySelectorAll("[data-g]").forEach((b) => (b.onclick = () => { FILT.g = b.dataset.g; renderContent(); }));
+        body.querySelectorAll("[data-sort]").forEach((b) => (b.onclick = () => { FILT.sort = b.dataset.sort; renderContent(); }));
       }
 
       body.querySelectorAll(".salFav").forEach((b) => {
