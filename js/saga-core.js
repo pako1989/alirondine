@@ -17,6 +17,7 @@
 //     endings: { id: ["TITOLO", "descrizione", "indizio"] },
 //     mainExtra(K) { return [{ label, sub, fn }] }, zoneMenuExtra(K) { return [...] },
 //     clock: { slots: ["Mattina", "Sera"], hud: true, tint: [...], onSlot(K, giorno, fascia, nome) { return [["voce", "..."]]; } },  // calendario: K.clock.advance(n), K.clock.is("Sera"); npcs(step, K)
+//     flood: { stat: "acqua", names: [...], per: 4, hud: true, onRise(K, lv) { return [["voce", "..."]]; } },  // ACQUA CHE SALE: K.flood.get/add/drain/set; spec.flood = [[livello, x0, y0, x1, y1]] allaga le caselle (vedi sotto)
 //     bonds: { talk: 4, max: 5, per: 10, names: ["Estranei", ...], scenes: { id_png: [{ lv: 2, id: "x", lines: [[chi, testo]], reward(K) {} }] } },  // RAPPORTI: K.rel.add(id, punti), K.rel.lv(id), K.rel.scene(id, then); cuori nella pagina Personaggi; scena a soglia al prossimo dialogo
 //     inv: { items: { id: { n: "Nome", icon: "🗝️", d: "descrizione", match: { at: 1, df: 0, te: 0 }, gift: { id_png: punti }, giftAny: 2, react: { id_png: "battuta" }, refuse: { id_png: "battuta" } } } },  // INVENTARIO: spec.loot = { "x,y": { id, text, empty } } (tessera con azione), K.inv.give/has/take/count/bonus("at"), 🎒 Zaino nel menu: i regali alzano i Rapporti, gli oggetti passivi danno bonus in partita finché li tieni
 //     plugins: [{ zone(zid, spec, Z, K), tick(zid, spec, px, py, dt, K), top(g, zid, spec, cx, cy, d, K), enter(zid, spec, K) }],
@@ -697,6 +698,7 @@
         const Ls = makeLayers(spec.w, spec.h, spec.base || ","); Ls.lay(0, 0, spec.w - 1, spec.h - 1, spec.base || ",");
         const es = eraSpec(zid); if (es && es.build) es.build(Ls, K); else spec.build(Ls, K);
         chainFor(ZONES[zid]).slice().reverse().forEach((cc) => { const p = cc.n !== chN && cc.patch && cc.patch[zid]; if (p && p.build) p.build(Ls, stepOf(cc.n), K); });
+        if (FLD && spec.flood) spec.flood.forEach((a) => { if (FLD.get() >= a[0]) Ls.lay(a[1], a[2], a[3], a[4], a[5] || "~"); });
         spec.__doors = {};
         Ls.autos.forEach((a, i) => {
           const d = a.def, k = a.x + "," + a.y;
@@ -897,6 +899,7 @@
         ...(DOS ? [["🗂️ Dossier", "Raccogli prove e indizi parlando e guardando i dettagli dei luoghi: il Dossier li collega, e a volte serve per le scelte decisive."]] : []),
         ...(CAT ? [["📒 Album", "Incontri creature o figure: puoi parlare, sfidare o offrire esche. Ognuna ha un carattere e un modo giusto di essere avvicinata. L'Album mostra quante ne hai e che squadra porti."]] : []),
         ...(STM ? [["♨️ " + nm, nm + " sale col tempo e quando alimenti la caldaia, e si consuma con valvole, viaggi e partite. Se supera il massimo c'è stallo: perdi pressione e un pezzo di scafo. Sfiata prima che sia tardi."]] : []),
+        ...(FLD ? [["🌊 Livello dell'acqua", "L'acqua sale col passare delle fasce del giorno e per gli eventi della storia. Quando sale, alcune zone si allagano: i passaggi bassi si chiudono, i sentieri alti restano. Il livello si vede in basso a destra. Puoi farlo scendere con le scelte giuste."]] : []),
         ...(WGT ? [["⚖️ " + (cfg.weight.name || "Peso"), "Le scelte morali non hanno una risposta giusta: accumulano " + WGT.axes.map(WGT.name).join(", ") + ". Il Peso sblocca o chiude opzioni nei dialoghi, cambia le scene e decide il finale. Il valore si vede nel Registro."]] : []),
         ...(ALB ? [["🕵️ " + ALB.name, "Il Registro è una griglia di chi era dove e quando. Entrando nelle stanze vedi chi c'è; i testimoni ti dicono altro; i sospettati dichiarano un alibi. Quando dichiarazione e avvistamento non coincidono, aprilo e segnala la contraddizione."]] : []),
         ...(CHN ? [["⛓ Catena", "Nei passaggi a catena ogni compagno ha un ruolo. Un passaggio tra ruoli che si intendono (per esempio regista verso ala, ala verso punta) ha una finestra più larga: schiera la squadra giusta. Tre passaggi puliti e un tiro fanno una catena; senza intercetti è «perfetta»."]] : []),
@@ -997,6 +1000,7 @@
         F.set("clk_day", d); F.set("clk_slot", sl);
         const r = CLK.onSlot ? safe(() => CLK.onSlot(K, d, sl, CLK.slots[sl]), null) : null;
         if (Array.isArray(r) && r.length) lines = lines.concat(r);
+        if (FLD && FLD.per) { const fr = FLD.tick(); if (Array.isArray(fr) && fr.length) lines = lines.concat(fr); }
       }
       refreshZone();
       if (window.toast) window.toast(`Giorno ${clkDay()} · ${CLK.slots[clkSlot()]}`, "info", "🕒");
@@ -1009,6 +1013,7 @@
       if (CLK.hud === false) return;
       const t = `Giorno ${clkDay()} · ${CLK.slots[sl]}`; g.save(); g.font = "bold 9px sans-serif";
       const w = g.measureText(t).width + 12; g.fillStyle = "rgba(0,0,0,.6)"; g.fillRect(4, c.height - 17, w, 13); g.fillStyle = "#fde68a"; g.fillText(t, 10, c.height - 7); g.restore();
+      if (FLD && FLD.hud) FLD.draw(g);
     }
     // -------------------------------------------------------------- ALLERTA (cfg.alert, opt-in)
     // cfg.alert = { max: 3, names: ["Calma", "Sospetto", "Allarme", "Caccia"], rangeMul: 0.25, decay: true, hud: true, onChange(K, lv, old) }
@@ -1257,6 +1262,29 @@
       return { level, add, vent, need, bar, stall, html: () => `<br><br><b>${esc(S0.name || "Pressione")}</b> ${bar()}`, max: mx, warn: S0.warn || mx() - 2, perSlot: S0.perSlot | 0 };
     })();
 
+    // -------------------------------------------------------------- ACQUA CHE SALE (cfg.flood): un livello che cresce col tempo e allaga le zone
+    // cfg.flood = { stat: "acqua", names: ["Magra", "Alta", "Piena", "Colma", "Esondata"], per: 4, hud: true, onRise(K, livello) { return [["voce", "…"]] } }   (stats: { acqua: [0, 4, 0, "Acqua"] })
+    // Ogni zona può avere spec.flood = [[livello, x0, y0, x1, y1, "~"?], …]: dal livello indicato in su quelle caselle diventano acqua (solide) quando la zona viene costruita (entrandoci).
+    // Il livello sale da solo di 1 ogni `per` fasce dell'orologio (richiede cfg.clock; per: 0 = solo a mano) e con K.flood.add(n); scende con K.flood.drain(n) o K.flood.set(n).
+    // K.flood: get() · max() · name() · add(n) · drain(n) · set(n) · bar() · tick(). Mai caselle allagabili su start, porte, oggetti, PNG o percorso obbligato (il test reachAll va fatto ad ogni livello).
+    const FLD = cfg.flood && (() => {
+      const F0 = cfg.flood, k = F0.stat || "acqua", mx = () => STATS[k][1], get = () => stat(k), nm = () => (F0.names && F0.names[get()]) || String(get());
+      const set = (n) => { bond(k, Math.max(0, Math.min(mx(), n | 0)) - get()); };
+      const add = (n) => { set(get() + (n == null ? 1 : n)); return get(); };
+      const bar = () => `${"▮".repeat(get())}${"▯".repeat(Math.max(0, mx() - get()))}`;
+      function tick() {
+        const c = (F.get("fl_c", 0) | 0) + 1; if (c < (F0.per | 0)) { F.set("fl_c", c); return null; }
+        F.set("fl_c", 0); if (get() >= mx()) return null; add(1);
+        return F0.onRise ? safe(() => F0.onRise(K, get()), null) : null;
+      }
+      function draw(g) {
+        const c = g.canvas, t = `🌊 ${nm()}`; g.save(); g.font = "bold 9px sans-serif"; const w = Math.max(g.measureText(t).width + 12, 8 * mx() + 14), x = c.width - w - 4;
+        g.fillStyle = "rgba(0,0,0,.6)"; g.fillRect(x, c.height - 29, w, 25); g.fillStyle = "#bae6fd"; g.fillText(t, x + 6, c.height - 19);
+        for (let i = 0; i < mx(); i++) { g.fillStyle = i < get() ? (get() >= mx() - 1 ? "#f87171" : "#38bdf8") : "rgba(255,255,255,.2)"; g.fillRect(x + 6 + i * 8, c.height - 14, 6, 6); } g.restore();
+      }
+      return { get, set, add, drain: (n) => add(-(n == null ? 1 : n)), max: mx, name: nm, bar, tick, draw, per: F0.per | 0, hud: F0.hud !== false };
+    })();
+
     // -------------------------------------------------------------- PESO (cfg.weight): le scelte morali accumulano conseguenze
     // cfg.weight = { axes: { fiducia: ["Fiducia", "🤝"], colpa: ["Colpa", "🕯️"], rabbia: ["Rabbia", "🔥"] } }   (ogni asse è anche una statistica: stats: { fiducia: [0, 9, 0] }…)
     // K.weight: add(asse, n) · get(asse) · top() (asse più alto; a parità il primo) · has(asse, n) · bar() · html()
@@ -1370,7 +1398,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, dossier: DOS, route: RTE, catch: CAT, steam: STM, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN,
+      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN,
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
       ending: (id, d) => { ENDINGS[id] = d; },
       continueStory: () => continueStory(), hasChapter: (n) => !!CHAPTERS[n], setInMatch: (v) => { inMatch = !!v; }, openMain: () => openMain(),
