@@ -16,8 +16,8 @@
   // Super tiri firmati: ogni saga ha il suo effetto sulla palla (fx) e il suo nome. fx: fire, thunder, curve, zig, spiral, vanish, ice, change, drill
   const FXD = (window.__supers || { FXD: {} }).FXD;
   const supOf = (p) => (window.__supers ? window.__supers.of(p.id) : { fx: "fire", name: "Tiro Fuoco", col: "#ff8a30", saga: "" });
-  let LAY = null, OV = null, BACK = null, M = null, RAF = 0, PAUSE = false, STATIC = null;
-  const load = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { cup: r.cup | 0, wins: r.wins | 0, goals: r.goals | 0, mode: r.mode === 5 ? 5 : 3, tele: r.tele !== false, combo: r.combo !== false }; };
+  let PV = null, LAY = null, OV = null, BACK = null, M = null, RAF = 0, PAUSE = false, STATIC = null;
+  const load = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { cup: r.cup | 0, wins: r.wins | 0, goals: r.goals | 0, mode: r.mode === 5 ? 5 : 3, tele: r.tele !== false, combo: r.combo !== false, gfx: r.gfx === "phaser" ? "phaser" : "2d" }; };
   const save = (r) => safe(() => localStorage.setItem(KEY, JSON.stringify(r)), 0);
   const name = (id) => safe(() => S().name(id), id);
   function seeded(seed) { let a = seed >>> 0; return () => { a = (a + 0x6d2b79f5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
@@ -337,21 +337,56 @@
     document.head.appendChild(st);
   }
   function shell(title) { css(); halt(); if (OV) OV.remove(); OV = document.createElement("div"); OV.className = "erOv"; OV.innerHTML = `<div class="wrap"><div class="bar"><h2>${title}</h2><button type="button" class="x" aria-label="Chiudi">✕</button></div><div class="body"></div></div>`; OV.querySelector(".x").onclick = () => { const live = M && !M.over; halt(); if (live) return menu(); const b = BACK; close(); if (typeof b === "function") b(); }; document.body.appendChild(OV); return OV.querySelector(".body"); }
-  function halt() { cancelAnimationFrame(RAF); RAF = 0; if (LAY) { window.removeEventListener("resize", LAY); window.removeEventListener("orientationchange", LAY); LAY = null; } window.removeEventListener("keydown", kd); window.removeEventListener("keyup", ku); }
+  function halt() { cancelAnimationFrame(RAF); RAF = 0; if (PV) { PV.destroy(); PV = null; } if (LAY) { window.removeEventListener("resize", LAY); window.removeEventListener("orientationchange", LAY); LAY = null; } window.removeEventListener("keydown", kd); window.removeEventListener("keyup", ku); }
   function close() { halt(); M = null; if (OV) { OV.remove(); OV = null; } }
   const KM = { ArrowLeft: "l", ArrowRight: "r", ArrowUp: "u", ArrowDown: "d", a: "l", d: "r", w: "u", s: "d", j: "a", k: "bh", l: "c", Shift: "s" };
   const kd = (e) => { const k = KM[e.key]; if (!k || !M) return; e.preventDefault(); if (k === "a" || k === "c") M.edge[k] = 1; else if (k === "s") M.hold.s = 1; else M.inp[k] = 1; };
   const ku = (e) => { const k = KM[e.key]; if (k && M && k !== "a" && k !== "c") { if (k === "s") M.hold.s = 0; else M.inp[k] = 0; } };
   function press(k, on) { if (!M) return; if (k === "a" || k === "c") { if (on) M.edge[k] = 1; } else if (k === "b" || k === "s") M.hold[k] = on ? 1 : 0; else M.inp[k] = on ? 1 : 0; }
+  // ------------------------------------------------------------ vista Phaser (opzione "Grafica" nel menu): la partita è la stessa, il disegno di Eroi diventa una texture; Phaser aggiunge camera con zoom sull'azione, scossoni, particelle, luci
+  function loadPhaser(ok, ko) { if (window.Phaser) return ok(); const s = document.createElement("script"); s.src = "js/vendor/phaser.min.js?v=1"; s.onload = () => (window.Phaser ? ok() : ko()); s.onerror = ko; document.head.appendChild(s); }
+  function phaserView(cv, stage) {
+    const PH = window.Phaser, st = { sc: null, game: null, goals: M.score[0] + M.score[1], z: 1, n: 0, key: "", dead: false };
+    const glow = (k, w, col) => { const c = document.createElement("canvas"); c.width = c.height = w; const x = c.getContext("2d"), r = x.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2); r.addColorStop(0, col[0]); r.addColorStop(1, col[1]); x.fillStyle = r; x.fillRect(0, 0, w, w); return c; };
+    class V extends PH.Scene {
+      constructor() { super("erv"); }
+      create() {
+        const sc = this; st.sc = sc; sc.textures.addCanvas("erdot", glow("d", 16, ["rgba(255,255,255,1)", "rgba(255,255,255,0)"])); sc.textures.addCanvas("erlight", glow("l", 128, ["rgba(255,244,200,.9)", "rgba(255,244,200,0)"]));
+        sc.img = null; sc.trail = sc.add.particles(0, 0, "erdot", { lifespan: 380, scale: { start: SS * 0.9, end: 0 }, alpha: { start: 0.7, end: 0 }, tint: 0xfff2a0, blendMode: "ADD", emitting: false }).setDepth(8);
+        sc.conf = sc.add.particles(0, 0, "erdot", { lifespan: 1100, speed: { min: 90 * SS, max: 340 * SS }, angle: { min: 0, max: 360 }, gravityY: 320 * SS, scale: { start: SS * 1.1, end: 0 }, tint: [0xffd23f, 0xff5a5a, 0x5ad8ff, 0xffffff], emitting: false }).setDepth(9);
+        sc.lg = [0, 1].map((i) => sc.add.image(0, 0, "erlight").setBlendMode("ADD").setScrollFactor(0).setDepth(7).setAlpha(0.18));
+        sc.vg = sc.add.graphics().setScrollFactor(0).setDepth(6);
+      }
+    }
+    st.game = new PH.Game({ type: PH.CANVAS, width: cv.width, height: cv.height, parent: stage, banner: false, audio: { noAudio: true }, input: { mouse: false, touch: false, keyboard: false, gamepad: false }, scale: { mode: PH.Scale.NONE }, scene: V, backgroundColor: "#000" });
+    st.on = false;
+    st.frame = () => {
+      const sc = st.sc; if (st.dead || !sc || !sc.sys || !sc.sys.isActive() || !M) return;
+      const gc = st.game.canvas; if (!st.on) { st.on = true; cv.style.display = "none"; stage.querySelectorAll(".erX").forEach((e) => { e.style.zIndex = 6; }); }
+      if (gc.style.width || gc.style.height) { gc.style.width = ""; gc.style.height = ""; }
+      const w = cv.width, h = cv.height;
+      if (st.game.scale.width !== w || st.game.scale.height !== h) st.game.scale.resize(w, h);
+      const key = "erc" + w + "x" + h; if (st.key !== key) { if (sc.img) { sc.img.destroy(); } if (st.key) sc.textures.remove(st.key); sc.textures.addCanvas(key, cv); sc.img = sc.add.image(0, 0, key).setOrigin(0, 0).setDepth(0); st.key = key; sc.vg.clear(); sc.vg.fillStyle(0, 0.16); sc.vg.fillRect(0, 0, w, h * 0.06); sc.vg.fillRect(0, h * 0.94, w, h * 0.06); }
+      sc.img.setScale(1); const b = M.ball, bx = (b.x - M.cam) * SS, by = (OY + b.y) * SS, cam = sc.cameras.main;
+      const big = M.stop > 0 || M.goalT > 80 || !!b.sup || b.big, tz = big ? 1.12 : 1; st.z += (tz - st.z) * 0.07; cam.setZoom(st.z);
+      const hx = w / (2 * st.z), hy = h / (2 * st.z), tx = Math.max(hx, Math.min(w - hx, bx)), ty = Math.max(hy, Math.min(h - hy, by)); cam.centerOn(tx, ty);
+      const g = M.score[0] + M.score[1]; if (g !== st.goals) { st.goals = g; cam.shake(380, 0.012); const gx = (M.lastScorer ? 8 : W - 8) * 0 + (M.lastScorer ? 0 : 0); sc.conf.explode(46, bx, by); }
+      const sp = Math.hypot(b.vx || 0, b.vy || 0); if (sp > 3.4 && !M.over) sc.trail.emitParticleAt(bx, by, 1);
+      sc.lg[0].setPosition(w * 0.1, h * 0.04).setScale(SS * 1.4).setAlpha(0.14 + 0.04 * Math.sin(M.t * 0.05)); sc.lg[1].setPosition(w * 0.9, h * 0.04).setScale(SS * 1.4).setAlpha(0.14 + 0.04 * Math.cos(M.t * 0.05));
+    };
+    st.destroy = () => { st.dead = true; cv.style.display = ""; safe(() => st.game.destroy(true), 0); };
+    return st;
+  }
   function matchUI(cfg) {
     const body = shell(cfg.title || "⚽ Calcio d'Azione Eroi"); begin(cfg);
     body.innerHTML = `<div class="erStage"><canvas width="${M.vw * SS}" height="${CH * SS}"></canvas><button type="button" class="erX" aria-label="Esci">✕</button></div><div class="erCtl"><div class="stkSlot"></div><div class="ab"><button data-k="a">⚽ Passa<small>senza palla: scivolata</small></button><button data-k="b" class="tb">🎯 Tira<small>tieni: carica</small></button><button data-k="s" class="sb">⚡ Scatto<small>tieni premuto</small></button><button data-k="c" class="ac">✦ Abilità<small>costa Grinta</small></button></div></div><p class="sum" style="font-size:11px;opacity:.65;margin-top:6px">Joystick libero: muovi il giocatore col segno ▼ (cambia da solo verso la palla). Tira: tieni premuto per caricare, joystick su/giù per mirare, rilascia. Abilità con la Grinta: con la palla è il SUPER TIRO della tua saga (curva, zig-zag, ghiaccio, fulmine...); senza palla Muro e Magnete. Gira il telefono per giocare in orizzontale. Tasti: frecce, J passa, K tira, Maiusc scatto, L abilità.</p>`;
     const cv = body.querySelector("canvas"), g = cv.getContext("2d"); M.stick = safe(() => window.__stick.make({ size: 140 }), null); if (M.stick) body.querySelector(".stkSlot").appendChild(M.stick.el);
     body.querySelectorAll("[data-k]").forEach((b) => { const k = b.dataset.k, up = () => { press(k, false); b.classList.remove("on"); }; b.addEventListener("pointerdown", (e) => { e.preventDefault(); press(k, true); b.classList.add("on"); }); b.addEventListener("pointerup", up); b.addEventListener("pointercancel", up); b.addEventListener("pointerleave", up); });
+    if (M.opt.gfx === "phaser" && !cfg.fast) loadPhaser(() => { if (M && OV && !PV && body.isConnected) PV = phaserView(cv, body.querySelector(".erStage")); }, () => {});
     const layout = () => { if (!OV || !M) return; const land = innerWidth > innerHeight * 1.1; OV.classList.toggle("land", land); M.land = land; const vw = land ? Math.min(CW, Math.round(CH * Math.min(2.3, innerWidth / Math.max(1, innerHeight)))) : Math.min(CW, 412); if (vw !== M.vw || cv.width !== vw * SS) { M.vw = vw; cv.width = vw * SS; cv.height = CH * SS; } };
     LAY = layout; window.addEventListener("resize", LAY); window.addEventListener("orientationchange", LAY); layout(); body.querySelector(".erX").onclick = () => OV.querySelector(".bar .x").click();
     window.addEventListener("keydown", kd); window.addEventListener("keyup", ku);
-    let last = performance.now(), acc = 0; const loop = (t) => { if (!OV || !M) return; acc += Math.min(100, t - last); last = t; while (acc >= 16.67) { if (!PAUSE) tick(); acc -= 16.67; } draw(g); if (M && !M.over) RAF = requestAnimationFrame(loop); }; RAF = requestAnimationFrame(loop); M.draw = () => draw(g);
+    let last = performance.now(), acc = 0; const loop = (t) => { if (!OV || !M) return; acc += Math.min(100, t - last); last = t; while (acc >= 16.67) { if (!PAUSE) tick(); acc -= 16.67; } draw(g); if (PV) PV.frame(); if (M && !M.over) RAF = requestAnimationFrame(loop); }; RAF = requestAnimationFrame(loop); M.draw = () => draw(g);
   }
   // ------------------------------------------------------------ menu e coppa
   const mine = () => safe(() => S()._load().own.map((id) => S().BY[id]).filter(Boolean), []);
@@ -364,8 +399,9 @@
     n = n || 3; const all = S().CARDS, pool = all.filter((c) => c.saga === theme), p = pool.length >= n ? pool : all, out = [], used = {}; for (let i = 0; i < n; i++) { let c; for (let k = 0; k < 20; k++) { c = p[Math.floor(rand() * p.length)]; if (!used[c.id]) break; } used[c.id] = 1; out.push(c); } return out; }
   function menu(back) {
     if (back) BACK = back; const body = shell("⚽ Calcio d'Azione Eroi"), r = load(), team = myTeam(r.mode), rl = (c) => (ABIL[c.role] ? c.role : "A");
-    body.innerHTML = `<p class="sum">Partita a squadre (formato 3v3 o 5v5, portiere compreso, con campo grande e telecamera) con i personaggi delle saghe, joystick libero, tiro caricato, scivolata, anche in orizzontale. Ogni personaggio ha il <b>super tiro della sua saga</b> (curva, zig-zag, invisibile, ghiaccio, fulmine...); poi Regia, Muro, Magnete.</p><button type="button" class="one" data-mode="1">👥 Formato: ${r.mode === 5 ? "5 contro 5, portiere compreso (campo grande)" : "3 contro 3, portiere compreso"}<small>tocca per cambiare · la carta Portiere va in porta, senza Portiere quella con più DIF · durata: ${r.mode === 5 ? "110 secondi" : "80 secondi"}</small></button><button type="button" class="one" data-tele="1">🎙️ Telecronaca: ${r.tele ? "SÌ" : "NO"}<small>una riga di commento per gol, parate, scivolate, super. Tocca per cambiare</small></button><button type="button" class="one" data-combo="1">🤝 Tiro combinato: ${r.combo ? "SÌ" : "NO"}<small>il Super con un compagno vicino (filo dorato COMBO): +25 energia, tiro molto più forte. Tocca per cambiare</small></button><div class="sec">La tua squadra</div><p class="sum">${team.map((c) => `<b>${esc(name(c.id))}</b> (${esc(ABIL[rl(c)][0])})`).join(" · ")}</p><div class="sec">Modalità</div><button type="button" class="one" data-go="cup">🏆 Coppa degli Eroi<small>3 turni a eliminazione (Quarti, Semifinale, Finale) · Tempi supplementari & Golden Gol · ${r.cup ? "vinta " + r.cup + " volte" : "mai vinta"}</small></button>${[1, 2, 3, 4, 5].map((l) => `<button type="button" class="one" data-l="${l}">Amichevole ${l}${"★".repeat(l)}<small>${["molto facile", "facile", "media", "difficile", "implacabile"][l - 1]} · ${r.mode === 5 ? 110 : 80} secondi · ${8 * l} monete</small></button>`).join("")}`;
+    body.innerHTML = `<p class="sum">Partita a squadre (formato 3v3 o 5v5, portiere compreso, con campo grande e telecamera) con i personaggi delle saghe, joystick libero, tiro caricato, scivolata, anche in orizzontale. Ogni personaggio ha il <b>super tiro della sua saga</b> (curva, zig-zag, invisibile, ghiaccio, fulmine...); poi Regia, Muro, Magnete.</p><button type="button" class="one" data-mode="1">👥 Formato: ${r.mode === 5 ? "5 contro 5, portiere compreso (campo grande)" : "3 contro 3, portiere compreso"}<small>tocca per cambiare · la carta Portiere va in porta, senza Portiere quella con più DIF · durata: ${r.mode === 5 ? "110 secondi" : "80 secondi"}</small></button><button type="button" class="one" data-tele="1">🎙️ Telecronaca: ${r.tele ? "SÌ" : "NO"}<small>una riga di commento per gol, parate, scivolate, super. Tocca per cambiare</small></button><button type="button" class="one" data-gfx="1">🎞️ Grafica: ${r.gfx === "phaser" ? "PHASER" : "classica"}<small>stessa partita; con Phaser: zoom della telecamera sull'azione, scossoni, scia della palla, coriandoli, luci. Serve connessione la prima volta. Tocca per cambiare</small></button><button type="button" class="one" data-combo="1">🤝 Tiro combinato: ${r.combo ? "SÌ" : "NO"}<small>il Super con un compagno vicino (filo dorato COMBO): +25 energia, tiro molto più forte. Tocca per cambiare</small></button><div class="sec">La tua squadra</div><p class="sum">${team.map((c) => `<b>${esc(name(c.id))}</b> (${esc(ABIL[rl(c)][0])})`).join(" · ")}</p><div class="sec">Modalità</div><button type="button" class="one" data-go="cup">🏆 Coppa degli Eroi<small>3 turni a eliminazione (Quarti, Semifinale, Finale) · Tempi supplementari & Golden Gol · ${r.cup ? "vinta " + r.cup + " volte" : "mai vinta"}</small></button>${[1, 2, 3, 4, 5].map((l) => `<button type="button" class="one" data-l="${l}">Amichevole ${l}${"★".repeat(l)}<small>${["molto facile", "facile", "media", "difficile", "implacabile"][l - 1]} · ${r.mode === 5 ? 110 : 80} secondi · ${8 * l} monete</small></button>`).join("")}`;
     body.querySelector('[data-tele]').onclick = () => { const x = load(); x.tele = !x.tele; save(x); menu(); };
+    body.querySelector('[data-gfx]').onclick = () => { const x = load(); x.gfx = x.gfx === "phaser" ? "2d" : "phaser"; save(x); menu(); };
     body.querySelector('[data-combo]').onclick = () => { const x = load(); x.combo = !x.combo; save(x); menu(); };
     body.querySelector('[data-mode]').onclick = () => { const x = load(); x.mode = x.mode === 5 ? 3 : 5; save(x); menu(); };
     body.querySelector('[data-go="cup"]').onclick = () => cup(0);
