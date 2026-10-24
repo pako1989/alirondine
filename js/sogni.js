@@ -19,6 +19,7 @@
   const safe = (fn, d) => { try { return fn(); } catch (e) { return d; } };
   // le saghe da cui vengono le carte: chiave di salvataggio, nome, colore
   const SAGHE = {
+    borgo: ["ali-di-rondine.stagione1", "Ali di Rondine · Borgo Marino", "#ff7a45", ""],
     sigilli: ["ali-di-rondine.sigilli", "L'Accademia dei Sigilli", "#6366f1", "__sigilli"],
     fortino: ["ali-di-rondine.fortino", "Colpo al Fortino", "#38bdf8", "__fortino"],
     note: ["ali-di-rondine.note", "Tactics Note · Il Quaderno del Giudizio", "#64748b", "__note"],
@@ -66,6 +67,18 @@
   // le carte delle saghe a capitoli (Vallombra e le altre): il 8° valore è il capitolo che le sblocca, una volta concluso.
   // Mai nelle bustine, nei premi a sorpresa e nel Draft finché non sono guadagnate: niente anticipazioni.
   const NEWC = [
+    // Ali di Rondine · Borgo Marino (Storia Principale, Stagioni 1-5)
+    ["leo", "borgo", "l", 88, 66, 90, "A", 1], ["nico", "borgo", "e", 50, 90, 74, "P", 1],
+    ["tommy", "borgo", "r", 66, 64, 86, "C", 1], ["sara", "borgo", "r", 56, 70, 88, "C", 1],
+    ["ruggeri", "borgo", "e", 64, 82, 86, "D", 1], ["papa", "borgo", "e", 84, 68, 80, "A", 1],
+    ["kenji", "borgo", "e", 86, 62, 84, "A", 1], ["baciccia", "borgo", "c", 52, 80, 62, "P", 1],
+    ["pina", "borgo", "c", 54, 62, 78, "C", 1], ["rocco", "borgo", "c", 74, 70, 58, "A", 1], ["mattia", "borgo", "c", 46, 82, 60, "P", 1],
+    ["dario", "borgo", "l", 90, 68, 88, "A", 2], ["lina", "borgo", "r", 58, 86, 76, "D", 2],
+    ["bruno", "borgo", "e", 84, 72, 78, "A", 2], ["kevin", "borgo", "r", 78, 58, 72, "A", 2],
+    ["sho", "borgo", "e", 86, 64, 82, "A", 3], ["jojo", "borgo", "l", 92, 64, 90, "A", 3],
+    ["marta", "borgo", "e", 62, 80, 88, "C", 3], ["saverio", "borgo", "r", 58, 86, 62, "D", 3],
+    ["vitale", "borgo", "e", 70, 86, 78, "D", 4], ["ernesta", "borgo", "e", 52, 90, 80, "P", 4], ["nonna", "borgo", "r", 60, 76, 84, "D", 4],
+    ["keller", "borgo", "l", 90, 72, 84, "A", 5],
     // Capitani di Ventura
     ["cv_gemma", "capitani", "e", 84, 58, 78, "A", 1], ["cv_brenno", "capitani", "r", 58, 88, 56, "D", 1],
     ["cv_isotta", "capitani", "c", 56, 62, 84, "C", 2], ["cv_conte", "capitani", "l", 80, 76, 82, "C", 4],
@@ -252,6 +265,29 @@
   const BY = Object.fromEntries(CARDS.map((c) => [c.id, c]));
   // la frase speciale che la carta dice quando arriva a tre stelle
   const FRASI = {
+    leo: "Contro il muro del porto ho imparato a tirare. Con voi ho imparato perché.",
+    nico: "Gatto Volante pronto al decollo! (Sara, stai guardando vero?)",
+    tommy: "Un passaggio fatto bene è meglio di un gol. Quasi.",
+    sara: "Ho controllato statistiche, vento e bilanci: vinciamo di due.",
+    ruggeri: "Testa bassa, calzettoni su, e niente scuse fino al novantesimo.",
+    papa: "Dopo la partita tutti in trattoria: le acciughe le offro io.",
+    kenji: "Finché il cuore tiene il tempo del pallone, io resto in campo.",
+    baciccia: "Settant'anni di mare e quaranta di parate col nodo del pescatore.",
+    pina: "Edizione straordinaria del Corriere: questo gol va in prima pagina!",
+    rocco: "Punta Nera non molla mai! E stavolta il gelato alla menta lo paghi tu.",
+    mattia: "La saracinesca è abbassata: ripassate pure domani mattina.",
+    dario: "Ho sbagliato strada una volta, fratellino. Questa parabola invece è dritta.",
+    lina: "Chewing gum, verbale pronto e marcatura stretta: qui non scappa nessuno.",
+    bruno: "Non gioco per piacere a nessuno. Gioco per non perdere più.",
+    kevin: "Giù dal pedalò e dritto in area: l'estate al Borgo non finisce mai!",
+    sho: "Questo Volo dell'Aquila è per mio fratello Kenji, e per chi ci aspetta.",
+    jojo: "Sorridi, amico! Il pallone pesa meno quando balla con te!",
+    marta: "Due ginocchia rifatte e zero giri di parole: in campo si ragiona.",
+    saverio: "Chi passa da qui paga dazio: parola di Saverio Cozza.",
+    vitale: "Diciassette anni con la stessa fascia: il campo ti restituisce chi sei.",
+    ernesta: "Nel '68 paravo senza guanti. Figurati adesso, ragazzo.",
+    nonna: "Contratto chiuso, clausola firmata e teglia di lasagne già in forno.",
+    keller: "Trenta gol pesano poco, quando torni a giocare libero.",
     sg_preside: "Il vero potere di un calciatore non è nei piedi, ma nei simboli che sa imprimere sul destino.",
     sg_miriel: "Una parabola di vento non è solo fisica... è pura armonia che supera la barriera.",
     sg_golem: "GROOOM... NESSUN... PALLONE... VARCA... IL... GRANITO.",
@@ -350,6 +386,12 @@
   const RAR = { c: ["Comune", "#9aa5b1", 1], r: ["Rara", "#3a8ad8", 2], e: ["Epica", "#a85ad8", 3], l: ["Leggendaria", "#ffd23f", 4] };
   // i legami tra saghe diverse: +3 di intesa se entrambi in squadra
   const LINKS = [
+    ["leo", "dario", "I Fratelli Moretti"], ["leo", "nico", "Dal Muro del Porto"], ["leo", "tommy", "Uno-Due del Campetto"],
+    ["nico", "sara", "Cuore e Taccuino"], ["baciccia", "nonna", "Nodo del Pescatore"], ["kenji", "sho", "Il Volo degli Arata"],
+    ["ruggeri", "cm_bastiano", "Panchine di Riviera"], ["lina", "mn_desantis", "Indagini in Divisa"],
+    ["pina", "fi_livia", "Cronache di Provincia"], ["jojo", "mg_tico", "Samba d'Oro"],
+    ["ernesta", "ro_fiamma", "Le Gatte tra i Pali"], ["papa", "pd_teresa", "Cucina & Pallone"],
+    ["sara", "dc_nina", "Inchieste in Prima Pagina"], ["keller", "mg_wolff", "Bomber d'Acciaio"],
     ["vs_ottone", "fg_ottone", "Gli Ottoni (due scatole, un caffè)"], ["vs_vulpe", "nr_kira", "Radio & Codici"], ["vs_corvo", "dz_sterling", "Sorveglianza & Servizi"], ["vs_eco", "qd_elle", "Dossier & Deduzioni"],
     ["sg_miriel", "cc_lyra", "Armonie di Cristallo & Sigilli"], ["sg_preside", "fo_lupin", "I Segreti dei Maestri"],
     ["fo_lupin", "dz_sterling", "Ombre & Servizi Segreti"], ["fo_turing", "te_valenti", "Crittografi del Binario"],
@@ -489,6 +531,16 @@
   const save = (r) => { XPC = r.xp || {}; safe(() => localStorage.setItem(KEY, JSON.stringify(r)), 0); };
   const sagaMem = (k) => safe(() => JSON.parse(localStorage.getItem(SG(k)[0]) || "null"), null);
   function progress(k) {
+    if (k === "borgo") {
+      const done = {}, ends = [];
+      for (let i = 1; i <= 12; i++) {
+        const d = safe(() => JSON.parse(localStorage.getItem("ali-di-rondine.stagione" + i) || "null"), null);
+        if (d && typeof d === "object") { done[i] = true; ends.push("s" + i); }
+      }
+      const cur = safe(() => JSON.parse(localStorage.getItem("ali-di-rondine.salvataggio") || "null"), null);
+      if (cur && cur.season > 1) { for (let i = 1; i < cur.season; i++) done[i] = true; }
+      return { ch: Object.keys(done).length, ends: ends.length, done };
+    }
     let m = null; const mod = SG(k)[3];
     if (mod) m = safe(() => { const i = window[mod].info(); return i && i.done ? i : null; }, null);
     if (!m) m = sagaMem(k);
@@ -586,9 +638,17 @@
   }
 
   function getCardLore(c) {
-    const C = window.__borgoApi && window.__borgoApi.CAST && window.__borgoApi.CAST[c.id];
-    if (C && C.bio) return C.bio;
+    const api = window.__borgoApi;
+    if (api && api.CAST && api.CAST[c.id] && api.CAST[c.id].bio) return api.CAST[c.id].bio;
+    if (api && api.BIO && api.BIO[c.id]) return api.BIO[c.id];
+    const borgoExtra = {
+      mattia: "Portiere reclutato tra i moli di Borgo Marino: riflessi d'istinto e fama di saracinesca nei tornei estivi.",
+      kevin: "Bagnino e ala imprendibile dello Scoglio: scende dal pedalò e brucia la fascia a piedi nudi sulla sabbia.",
+      saverio: "Difensore ruvido del porto vecchio: poche parole, baffo d'ordinanza e anticipo secco su ogni pallone vagante.",
+    };
+    if (borgoExtra[c.id]) return borgoExtra[c.id];
     const sagaNames = {
+      borgo: "Anima di Borgo Marino e della Rondine: cresciuto tra il sale del porto, i tavoli della trattoria e le notti di coppa.",
       campetto: "Cresciuto nei campetti di periferia tra pali arrugginiti e asfalto, sa che il vero talento nasce dalla passione e dal sudore.",
       note: "Custodisce segreti tattici e schemi indecifrabili. Ogni partita per lui è una partita a scacchi giocata con la mente.",
       fortino: "Esperto in infiltrazioni e colpi audaci. In campo si muove come un'ombra, capace di scassinare le difese più ermetiche.",
@@ -1114,6 +1174,7 @@
         openCardLore(btn.dataset.lore, () => open());
       };
     });
+    body.querySelector('[data-go="tour"]').onclick = torneo;
     body.querySelector('[data-go="pack"]').onclick = pack;
     body.querySelector('[data-go="season"]').onclick = stagione;
     body.querySelector('[data-go="draft"]').onclick = draft;
@@ -1135,11 +1196,135 @@
     const w = pool.flatMap((c) => Array(5 - RAR[c.rar][2]).fill(c)), got = w[Math.floor(Math.random() * w.length)];
     r.own.push(got.id); r.packs++; save(r); reveal(got.id, "Dalla bustina", open);
   }
+  function packSfx(kind, rar) {
+    try {
+      const A = new (window.AudioContext || window.webkitAudioContext)();
+      if (kind === "crinkle") {
+        const o = A.createOscillator(), g = A.createGain();
+        o.type = "triangle"; o.frequency.value = 320 + Math.random() * 260;
+        g.gain.value = 0.018; g.gain.exponentialRampToValueAtTime(0.0001, A.currentTime + 0.06);
+        o.connect(g); g.connect(A.destination); o.start(); o.stop(A.currentTime + 0.065);
+      } else {
+        const notes = rar === "l" ? [523, 659, 784, 1046, 1318] : rar === "e" ? [440, 554, 659, 880] : rar === "r" ? [494, 622, 740, 988] : [523, 659, 784];
+        notes.forEach((f, i) => {
+          const o = A.createOscillator(), g = A.createGain();
+          o.type = rar === "l" ? "triangle" : "sine";
+          o.frequency.value = f; g.gain.value = 0.045;
+          g.gain.exponentialRampToValueAtTime(0.0001, A.currentTime + 0.24 + i * 0.09);
+          o.connect(g); g.connect(A.destination); o.start(A.currentTime + i * 0.09); o.stop(A.currentTime + 0.34 + i * 0.09);
+        });
+      }
+    } catch (e) {}
+  }
   function reveal(id, title, then) {
     const body = shell("🎴 " + esc(title));
-    body.innerHTML = `<div class="reveal">${cardHtml(id)}</div><p class="sum" style="text-align:center"><b>${esc(name(id))}</b> · ${RAR[BY[id].rar][0]} · ${esc(SG(BY[id].saga)[1])}</p><div class="big"><button type="button" data-ok="1">Nella collezione ▸<small>La trovi tra le carte</small></button></div>`;
-    try { const A = new (window.AudioContext || window.webkitAudioContext)(); [523, 659, 784, 1046].forEach((f, i) => { const o = A.createOscillator(), g = A.createGain(); o.frequency.value = f; g.gain.value = 0.04; g.gain.exponentialRampToValueAtTime(0.0001, A.currentTime + 0.2 + i * 0.1); o.connect(g); g.connect(A.destination); o.start(A.currentTime + i * 0.1); o.stop(A.currentTime + 0.3 + i * 0.1); }); } catch (e) {}
-    body.querySelector("[data-ok]").onclick = then;
+    const c = BY[id], R = RAR[c.rar], S_SAG = SG(c.saga);
+    body.innerHTML = `<div class="sgPackStage r-${c.rar}" style="--rc:${R[1]};--sc:${S_SAG[2]};--tear:0">
+      <div class="sgPackAura"></div>
+      <div class="sgPackCardSlot">
+        <div class="reveal">${cardHtml(id)}</div>
+        <p class="sum sgPackMeta"><b>${esc(name(id))}</b> · <span style="color:${R[1]};font-weight:800">${R[0]}</span> · ${esc(S_SAG[1])}</p>
+      </div>
+      <div class="sgFoilWrap" role="button" tabindex="0" aria-label="Strappa la bustina">
+        <div class="sgFoilTop">
+          <span class="sgCutIcon">✂️</span>
+          <span class="sgTearHint">Striscia col dito per strappare</span>
+          <div class="sgTearProgress"><i></i></div>
+        </div>
+        <div class="sgFoilSeam"></div>
+        <div class="sgFoilBody">
+          <div class="sgFoilShine"></div>
+          <div class="sgFoilCrest">🃏</div>
+          <div class="sgFoilTitle">SQUADRA DEI SOGNI</div>
+          <div class="sgFoilSub">${esc(title)}</div>
+          <div class="sgFoilRarHint" style="color:${R[1]}">✦ Bagliore ${R[0]} ✦</div>
+        </div>
+        <div class="sgSparks"></div>
+      </div>
+    </div>
+    <div class="big sgPackBtns">
+      <button type="button" data-tear="1">✂️ Strappa bustina<small>Rivela la carta trovata</small></button>
+      <button type="button" data-ok="1">Nella collezione ▸<small>Salta e vai alle carte</small></button>
+    </div>`;
+
+    const stage = body.querySelector(".sgPackStage");
+    const foil = body.querySelector(".sgFoilWrap");
+    const sparks = body.querySelector(".sgSparks");
+    const okBtn = body.querySelector("[data-ok]");
+    const tearBtn = body.querySelector("[data-tear]");
+    let prog = 0, torn = false, down = false, startX = 0, lastSound = 0;
+
+    const addSpark = (px, py) => {
+      if (!sparks) return;
+      const sp = document.createElement("i");
+      sp.style.left = Math.max(6, Math.min(94, px)) + "%";
+      sp.style.top = (py || 18) + "%";
+      sp.style.setProperty("--dx", ((Math.random() - 0.5) * 70).toFixed(0) + "px");
+      sp.style.setProperty("--dy", (-18 - Math.random() * 45).toFixed(0) + "px");
+      sparks.appendChild(sp);
+      setTimeout(() => sp.remove(), 520);
+    };
+
+    const setProg = (v) => {
+      if (torn) return;
+      prog = Math.max(0, Math.min(1, v));
+      stage.style.setProperty("--tear", prog.toFixed(3));
+      const now = Date.now();
+      if (now - lastSound > 70 && prog > 0.04) {
+        lastSound = now;
+        packSfx("crinkle", c.rar);
+        safe(() => window.hapticTrigger && window.hapticTrigger(8), 0);
+      }
+      if (prog >= 0.72) finishTear();
+    };
+
+    const finishTear = () => {
+      if (torn) return;
+      torn = true;
+      stage.style.setProperty("--tear", "1");
+      stage.classList.add("torn");
+      packSfx("fanfare", c.rar);
+      safe(() => window.hapticTrigger && window.hapticTrigger(c.rar === "l" ? [25, 40, 45] : 22), 0);
+      for (let k = 0; k < 10; k++) addSpark(10 + k * 8, 18);
+      if (tearBtn) {
+        tearBtn.innerHTML = `📖 Dettagli &amp; Lore<small>Gira la carta in 3D</small>`;
+        tearBtn.onclick = () => openCardLore(id, () => then());
+      }
+      if (okBtn) okBtn.innerHTML = `Nella collezione ▸<small>La trovi tra le carte</small>`;
+      const loreB = stage.querySelector(".sgLoreBtn");
+      if (loreB) loreB.onclick = (ev) => { ev.stopPropagation(); openCardLore(id, () => then()); };
+    };
+
+    if (foil) {
+      foil.addEventListener("pointerdown", (e) => {
+        if (torn) return;
+        down = true;
+        startX = e.clientX;
+        safe(() => foil.setPointerCapture && foil.setPointerCapture(e.pointerId), 0);
+        const rect = foil.getBoundingClientRect();
+        addSpark(((e.clientX - rect.left) / Math.max(1, rect.width)) * 100, 18);
+      });
+      foil.addEventListener("pointermove", (e) => {
+        if (!down || torn) return;
+        const rect = foil.getBoundingClientRect();
+        const w = Math.max(120, rect.width * 0.72);
+        const delta = Math.abs(e.clientX - startX);
+        addSpark(((e.clientX - rect.left) / Math.max(1, rect.width)) * 100, 18);
+        setProg(Math.max(prog, delta / w));
+      });
+      const up = () => {
+        if (!down || torn) return;
+        down = false;
+        if (prog >= 0.42) finishTear();
+        else if (prog < 0.08) finishTear();
+        else setProg(0);
+      };
+      foil.addEventListener("pointerup", up);
+      foil.addEventListener("pointercancel", up);
+      foil.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); finishTear(); } });
+    }
+    if (tearBtn) tearBtn.onclick = () => finishTear();
+    if (okBtn) okBtn.onclick = then;
   }
   // ---------------------------------------------------------------- il Torneo dei Sogni
   function torneo() {
@@ -1524,6 +1709,30 @@
 .teamBtn{background:#1f482a;color:#7ad87a;border-color:#48a05a}
 .teamBtn.inTeam{background:#5a1f28;color:#ff9aa8;border-color:#a0485a}
 .sgOv .reveal{display:flex;justify-content:center;margin:20px 0}.sgOv .reveal .sgCard{width:180px;font-size:13px;animation:sgFlip .7s ease-out}.sgOv .reveal .sgCard .nm{font-size:15px}.sgOv .reveal .sgCard .st{font-size:11px}.sgOv .reveal .sgCard .hd{font-size:11px}
+.sgPackStage{position:relative;min-height:330px;display:flex;align-items:center;justify-content:center;margin:10px 0 8px;overflow:hidden;border-radius:16px;padding:12px 8px}
+.sgPackAura{position:absolute;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle,var(--rc) 0%,transparent 70%);opacity:calc(.18 + var(--tear) * .55);transform:scale(calc(.75 + var(--tear) * .55));transition:opacity .2s,transform .25s;pointer-events:none;filter:blur(8px)}
+.sgPackStage.r-l .sgPackAura{box-shadow:0 0 42px rgba(255,210,63,.55)}
+.sgPackCardSlot{position:relative;z-index:2;opacity:0;transform:translateY(26px) scale(.84);transition:opacity .42s ease,transform .5s cubic-bezier(.2,.9,.25,1);pointer-events:none}
+.sgPackCardSlot .reveal{margin:8px 0 6px}
+.sgPackMeta{text-align:center;margin:4px 0 0}
+.sgPackStage.torn .sgPackCardSlot{opacity:1;transform:none;pointer-events:auto}
+.sgFoilWrap{position:absolute;z-index:4;width:214px;height:286px;border-radius:14px;user-select:none;-webkit-user-select:none;touch-action:none;cursor:grab;display:flex;flex-direction:column;box-shadow:0 14px 32px rgba(0,0,0,.65),0 0 18px rgba(255,255,255,.08);transition:opacity .38s ease,transform .42s ease}
+.sgFoilTop{height:54px;background:linear-gradient(135deg,#352852,#1d1530 60%,#433268);border:2px solid var(--rc);border-bottom:none;border-radius:14px 14px 4px 4px;padding:6px 10px;display:flex;flex-direction:column;justify-content:center;position:relative;transform-origin:100% 100%;transform:translateX(calc(var(--tear) * 36px)) translateY(calc(var(--tear) * -22px)) rotate(calc(var(--tear) * 14deg))}
+.sgCutIcon{position:absolute;left:calc(8px + var(--tear) * 165px);top:6px;font-size:14px;filter:drop-shadow(0 1px 2px #000)}
+.sgTearHint{font:800 10.5px system-ui;color:#f4f0e4;text-align:center;margin-top:8px;letter-spacing:.2px}
+.sgTearProgress{height:4px;border-radius:3px;background:rgba(0,0,0,.45);margin-top:5px;overflow:hidden}
+.sgTearProgress i{display:block;height:100%;width:calc(var(--tear) * 100%);background:linear-gradient(90deg,#fff,var(--rc))}
+.sgFoilSeam{height:4px;background:repeating-linear-gradient(90deg,var(--rc) 0 6px,transparent 6px 11px);opacity:.9}
+.sgFoilBody{flex:1;position:relative;overflow:hidden;background:linear-gradient(155deg,#2b1f47 0%,#150f26 48%,var(--sc) 135%);border:2px solid var(--rc);border-top:none;border-radius:4px 4px 14px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px;text-align:center;transform:translateY(calc(var(--tear) * 16px))}
+.sgFoilShine{position:absolute;inset:-30%;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.26) 47%,rgba(255,210,63,.2) 52%,transparent 64%);background-size:240% 100%;animation:sgHolo 2.8s linear infinite;pointer-events:none;mix-blend-mode:screen}
+.sgFoilCrest{font-size:44px;line-height:1;margin-bottom:8px;filter:drop-shadow(0 3px 8px rgba(0,0,0,.6))}
+.sgFoilTitle{font:900 14px system-ui;letter-spacing:1px;color:#ffd23f;text-shadow:0 2px 4px rgba(0,0,0,.8)}
+.sgFoilSub{font:600 11px system-ui;color:#e4dcf5;margin-top:4px;opacity:.9}
+.sgFoilRarHint{font:800 10.5px system-ui;margin-top:14px;padding:3px 9px;border-radius:10px;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.15)}
+.sgPackStage.torn .sgFoilWrap{opacity:0;transform:scale(1.12) translateY(45px);pointer-events:none}
+.sgSparks{position:absolute;inset:0;pointer-events:none;overflow:visible}
+.sgSparks i{position:absolute;width:6px;height:6px;border-radius:50%;background:var(--rc);box-shadow:0 0 8px #fff,0 0 12px var(--rc);animation:sgSpark .5s ease-out forwards}
+@keyframes sgSpark{to{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}}
 @keyframes sgFlip{from{transform:perspective(600px) rotateY(180deg) scale(.6)}to{transform:none}}`;
     document.head.appendChild(st);
   }

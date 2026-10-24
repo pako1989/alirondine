@@ -14,10 +14,13 @@ async function run(w) {
   if (w === 390) await L.shot(page, "sogni");
   // la squadra e l'intesa: quattro del Campetto (6 coppie) + Brunilde
   for (const id of ["cm_bastiano", "cm_leone", "cm_saverio", "cm_pio", "tc_brunilde"]) { await page.evaluate((id) => document.querySelector(`.sgOv .coll [data-c="${id}"]`).click(), id); await page.waitForTimeout(80); }
-  const I = await page.evaluate(() => window.__sogni.intesa(window.__sogni._load().team).n); if (I !== 6) errors.push("intesa: " + I);
+  const I = await page.evaluate(() => window.__sogni.intesa(window.__sogni._load().team).n); if (I !== 8) errors.push("intesa: " + I);
   // la bustina
   await page.evaluate(() => window.addCoins(500)); await page.evaluate(() => window.__sogni.open()); await page.waitForTimeout(200);
   const n0 = (await page.evaluate(() => window.__sogni._load().own)).length; await page.evaluate(() => document.querySelector('.sgOv [data-go="pack"]').click()); await page.waitForTimeout(300);
+  if (!(await page.evaluate(() => !!document.querySelector(".sgOv .sgPackStage:not(.torn) .sgFoilWrap")))) errors.push("manca involucro bustina a strappo");
+  await page.evaluate(() => { const b = document.querySelector(".sgOv [data-tear]"); if (b) b.click(); }); await page.waitForTimeout(200);
+  if (!(await page.evaluate(() => !!document.querySelector(".sgOv .sgPackStage.torn")))) errors.push("la bustina non si strappa");
   if (w === 390) await L.shot(page, "sogni_bustina");
   const n1 = (await page.evaluate(() => window.__sogni._load().own)).length; if (n1 !== n0 + 1) errors.push("la bustina non dà una carta");
   await page.evaluate(() => document.querySelector(".sgOv [data-ok]").click()); await page.waitForTimeout(200);
@@ -25,13 +28,13 @@ async function run(w) {
   await page.evaluate(() => document.querySelector('.sgOv [data-go="tour"]').click()); await page.waitForTimeout(200);
   if (w === 390) await L.shot(page, "sogni_torneo");
   await page.evaluate(() => document.querySelector('.sgOv [data-i="4"]').click()); await page.waitForTimeout(400);
-  const co = await page.evaluate(() => { const S = window.__concilio.state; return S ? [S.cred, S.ravens] : null; }); if (!co || co.join() !== "7,3") errors.push("Concilio dei Sogni: " + co);
+  const co = await page.evaluate(() => { const S = window.__concilio.state; return S ? [S.cred, S.ravens] : null; }); if (!co || co.join() !== "8,3") errors.push("Concilio dei Sogni: " + co);
   await page.evaluate(() => document.querySelector(".coOv .ov button").click()); await page.waitForTimeout(100);
   await page.evaluate(() => { const S = window.__concilio.state; S.a = 2; S.b = 0; S.finish(); }); await page.waitForTimeout(200); await page.evaluate(() => document.querySelector(".coOv .ov button").click()); await page.waitForTimeout(300);
   if (!(await page.evaluate(() => window.__sogni._load().won.includes(4)))) errors.push("sfida del Concilio non registrata");
   await page.evaluate(() => { const b = document.querySelector(".sgOv [data-ok]"); if (b) b.click(); }); await page.waitForTimeout(200);
   await page.evaluate(() => document.querySelector('.sgOv [data-i="6"]').click()); await page.waitForTimeout(400);
-  const du = await page.evaluate(() => { const S = window.__duello.state; return S ? S.gutsMax : null; }); if (du !== 132) errors.push("Duello dei Sogni, grinta: " + du);
+  const du = await page.evaluate(() => { const S = window.__duello.state; return S ? S.gutsMax : null; }); if (du !== 148) errors.push("Duello dei Sogni, grinta: " + du);
   await page.evaluate(() => document.querySelector(".duOv .ov button").click()); await page.waitForTimeout(100); await page.evaluate(() => window.__duello.state.finish(true)); await page.waitForTimeout(200); await page.evaluate(() => document.querySelector(".duOv .ov button").click()); await page.waitForTimeout(300);
   // le stelle: esperienza alle carte che giocano, a tre stelle la frase
   const xp = await page.evaluate(() => window.__sogni._load().xp); if (!(xp.cm_bastiano >= 1)) errors.push("nessuna esperienza alle carte dopo le sfide: " + JSON.stringify(xp));
@@ -72,6 +75,21 @@ async function run(w) {
   await page.evaluate(() => document.querySelector('.sgOv [data-go="tour"]').click()); await page.waitForTimeout(200); await page.evaluate(() => document.querySelector(".sgOv [data-hero]").click()); await page.waitForTimeout(300);
   if (w === 390) await L.shot(page, "sogni_campione");
   if (!(await page.evaluate(() => window.__borgoApi.cosOwned().includes("sg_maglia")))) errors.push("Maglia dei Sogni non sbloccata");
+  // carte della Storia Principale e Legami di Borgo Marino
+  const borgoCheck = await page.evaluate(() => {
+    localStorage.setItem("ali-di-rondine.stagione1", JSON.stringify({ st: { tiro: 10 }, f: { end: "alba" } }));
+    localStorage.setItem("ali-di-rondine.stagione2", JSON.stringify({ st: { tiro: 15 }, f: { end2: "tavola" } }));
+    const { r } = window.__sogni.sync();
+    const cb = window.__sogni.combo(["leo", "dario"]);
+    const sk = window.__arena && window.__arena.UNIQUE_SKILLS && window.__arena.UNIQUE_SKILLS.leo;
+    return {
+      s12: ["leo", "nico", "tommy", "sara", "ruggeri", "baciccia", "dario", "lina"].every((id) => r.own.includes(id)),
+      noS3: !r.own.includes("jojo"),
+      combo: cb && cb.title === "I Fratelli Moretti",
+      skill: !!(sk && sk.name === "Volo della Rondine"),
+    };
+  });
+  if (!borgoCheck.s12 || !borgoCheck.noS3 || !borgoCheck.combo || !borgoCheck.skill) errors.push("Carte Borgo Marino: " + JSON.stringify(borgoCheck));
   L.check(`La Squadra dei Sogni (${w} px)`, errors); await browser.close();
 }
 (async () => { await run(390); await run(320); })().catch((e) => { console.error("✗ sogni:", e.message); process.exit(1); });

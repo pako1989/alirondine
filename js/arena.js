@@ -20,6 +20,22 @@
 
   // ------------------------------------------------------------ Abilità Iconiche Uniche ("Firme d'Autore")
   const UNIQUE_SKILLS = {
+    // Ali di Rondine · Borgo Marino (Storia Principale)
+    leo: { name: "Volo della Rondine", desc: "Danno 2,6× che spezza lo scudo bersaglio, brucia per 3 round e carica +20% barra squadra", cd: 3, role: "A", mult: 2.6, pierce: true, burn: 3, gauge: 20 },
+    dario: { name: "Mancino del Molo", desc: "Danno 2,7× penetrante che ignora gli scudi e brucia per 3 round", cd: 3, role: "A", mult: 2.7, pierce: true, burn: 3 },
+    nico: { name: "Gatto Volante", desc: "Scudo +55 a tutta la squadra e purifica ogni bruciatura o stordimento", cd: 3, role: "P", teamShield: 55, cleanse: true },
+    tommy: { name: "Assist dal Cuore", desc: "Danni squadra +30% per 2 round, ricarica di 1 turno le abilità e carica +20% barra", cd: 2, role: "C", buffDmg: 1.30, cdAll: true, gauge: 20 },
+    sara: { name: "Dossier Tattico", desc: "Interrompe il nemico, aumenta i danni squadra del +35% e dona +25 scudo a tutti", cd: 3, role: "C", buffDmg: 1.35, interrupt: true, allShield: 25 },
+    ruggeri: { name: "Lavagna del Mister", desc: "Attira i colpi per 2 round (+55 scudo), purifica e protegge i compagni (+25 scudo)", cd: 3, role: "D", taunt: 2, shield: 55, allShield: 25, cleanse: true },
+    papa: { name: "Rovesciata Moretti", desc: "Danno 2,4× generoso che brucia il bersaglio e carica +25% barra squadra", cd: 3, role: "A", mult: 2.4, burn: 3, gauge: 25 },
+    kenji: { name: "Volo dell'Aquila", desc: "Danno 2,5× dall'alto che trafigge lo scudo nemico", cd: 3, role: "A", mult: 2.5, pierce: true },
+    sho: { name: "Artiglio Cremisi", desc: "Danno 2,4× rapido con onda d'urto sui nemici vicini", cd: 3, role: "A", mult: 2.4, aoe: true },
+    jojo: { name: "Ginga d'Oro", desc: "Danno 2,6× danzante, travolge i nemici vicini e carica +25% barra squadra", cd: 3, role: "A", mult: 2.6, aoe: true, gauge: 25 },
+    lina: { name: "Fermo in Area", desc: "Attira i colpi per 2 round (+55 scudo) e interrompe l'azione del bersaglio", cd: 3, role: "D", taunt: 2, shield: 55, interrupt: true },
+    ernesta: { name: "Sguardo della Gatta '68", desc: "Scudo +55 a tutta la squadra e purifica gli stati alterati", cd: 3, role: "P", teamShield: 55, cleanse: true },
+    marta: { name: "Cambio Modulo Azzurro", desc: "Danni squadra +35% per 2 round e riduce di 1 turno la ricarica alleata", cd: 3, role: "C", buffDmg: 1.35, cdAll: true },
+    keller: { name: "Tuono dello Sturmwald", desc: "Danno 2,7× devastante che infrange lo scudo e stordisce il bersaglio", cd: 3, role: "A", mult: 2.7, pierce: true, stun: true },
+
     // Campetto al Mondiale
     cm_bastiano: { name: "Tiro dell'Incrollabile", desc: "Danno 2,6× micidiale, annulla lo scudo bersaglio e brucia per 3 round", cd: 3, role: "A", mult: 2.6, pierce: true, burn: 3 },
     cm_leone: { name: "Fiammata del Campetto", desc: "Danno 2,4×, infligge Bruciatura e carica la barra squadra del +25%", cd: 3, role: "A", mult: 2.4, burn: 3, gauge: 25 },
@@ -365,6 +381,7 @@
       const gRate = (a.side === "p" && modK === "tridente") ? (sin ? 1.3 : 1.15) : 1;
       const relicRate = (a.side === "p" && B.relics && B.relics.includes("prisma_astrale")) ? 1.35 : 1;
       if (a.side === "p") B.gauge = Math.min(100, B.gauge + Math.min(16, 4 + (x.v / d.maxhp) * 60) * gRate * relicRate); else B.gauge = Math.min(100, B.gauge + 5);
+      if (d.boss && d.ph < 3 && d.hp <= 0) d.hp = 1;
       if (d.hp > 0) {
         if (x.crit && a.tr === "te") { if (d.boss) pop(d, "resiste", "bad"); else { d.stun = 1; d.intent = null; pop(d, "💫", "bad"); } }
         if (d.side === "e" && d.intent && v >= d.maxhp * 0.3) { d.intent = null; d.broken = true; pop(d, "interrotto!", "crit"); }
