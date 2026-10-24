@@ -2,7 +2,7 @@
 // Aprono il gioco come su un telefono, camminano nelle zone, parlano con i personaggi, scelgono nei dialoghi
 // e controllano che non ci siano errori in console. Ogni saga sul motore comune si prova con setup({ mod, key }).
 const path = require("path");
-function loadPW() { for (const p of ["playwright", "/opt/node22/lib/node_modules/playwright"]) { try { return require(p); } catch (e) {} } throw new Error("Playwright non trovato: npm i --no-save playwright"); }
+function loadPW() { for (const p of ["playwright", "/opt/node22/lib/node_modules/playwright", "/root/.bun/install/global/node_modules/playwright"]) { try { return require(p); } catch (e) {} } throw new Error("Playwright non trovato: npm i --no-save playwright"); }
 const { chromium } = loadPW();
 const fs = require("fs");
 const BASE = process.env.TEST_URL || "http://localhost:8765";
