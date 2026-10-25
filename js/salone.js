@@ -1222,6 +1222,7 @@
         ${window.__bar ? `<button type="button" class="hubToolBtn" data-go="bar">🍺 Bar del Borgo</button>` : ""}
         ${window.__carteDecks ? `<button type="button" class="hubToolBtn" data-go="carte">🎴 Carte del Destino</button>` : ""}
         ${window.__sogni ? `<button type="button" class="hubToolBtn" data-go="sogni">🃏 Squadra dei Sogni</button>` : ""}
+        ${window.__portieri ? `<button type="button" class="hubToolBtn" data-go="portieri">🧤 Sfida di Portieri</button>` : ""}
       </div>`;
 
       if (SALONE_VIEW === "hub") {
@@ -1334,6 +1335,7 @@
       bindTool('[data-go="bar"]', () => { close(); window.__bar.open(() => openSalone()); });
       bindTool('[data-go="carte"]', () => { close(); window.__carteDecks.openHub(() => openSalone()); });
       bindTool('[data-go="sogni"]', () => { close(); window.__sogni.open(() => openSalone()); });
+      bindTool('[data-go="portieri"]', () => { close(); window.__portieri.open(() => openSalone()); });
 
       if (SALONE_VIEW === "hub") {
         const cv = body.querySelector("#worldMapCv");
