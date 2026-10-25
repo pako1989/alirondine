@@ -35,6 +35,8 @@
     <div class="top-opt-panel" id="topOptPanel" hidden>
       <button type="button" class="opt-pill" id="facesBtn" aria-label="Stile dei volti" title="Cambia lo stile dei volti dei personaggi">🎭 <span id="facesLbl">Volti</span></button>
       <button type="button" class="opt-pill" id="themeBtn" aria-label="Tema Grafico" title="Cambia tema (Classico / Vintage / Neon / Arcade)">🎨 <span>Tema</span></button>
+      <button type="button" class="opt-pill" id="crtPillBtn" aria-label="Filtro Retrò CRT" title="Filtro Retrò CRT & Scanline Tubo Catodico">📺 <span id="crtPillLbl">CRT: Spento</span></button>
+      <button type="button" class="opt-pill" id="weatherPillBtn" aria-label="Particellari Meteo" title="Particellari Meteo & Ambiente Dinamico">🌧️ <span id="weatherPillLbl">Meteo: Auto</span></button>
       <button type="button" class="opt-pill" id="btn3d" aria-label="Stadio 3D" title="Stadio 3D · Sfida dei Tiri (Tiro della Rondine 3D)">⚽ <span>Stadio 3D</span></button>
       <button type="button" class="opt-pill" id="logBtn" aria-label="Cronologia Dialoghi" title="Cronologia dei dialoghi e eventi (Tasto L)">📜 <span>Log</span></button>
       <button type="button" class="opt-pill" id="hapticBtn" aria-label="Feedback Aptico" title="Feedback Aptico (Vibrazione Tattile)">📳 <span id="hapticLbl">Aptico: Full</span></button>
@@ -129,7 +131,7 @@
 <script src="js/arena-2d-hd.js?v=69"></script>
 <script src="js/quest-board.js?v=66"></script>
 <script src="js/ui.js?v=67"></script>
-<script src="js/game.js?v=264"></script>
+<script src="js/game.js?v=265"></script>
 <script src="js/borgo-expansions.js?v=70"></script>
 <script src="js/cage-borgo.js?v=74"></script>
 <script src="js/action-borgo.js?v=74"></script>
@@ -527,6 +529,71 @@ if (perkToggleBtn) {
     syncPerkBtn();
     if (window.toast) {
       window.toast(next === "on" ? "Perk Reclute in partita ATTIVATI (Max 1 a match)" : "Perk Reclute in partita DISATTIVATI", "info", "⚡");
+    }
+  };
+}
+var crtPillBtn = document.getElementById("crtPillBtn");
+var crtPillLbl = document.getElementById("crtPillLbl");
+function syncCrtBtn() {
+  var s = {};
+  try { s = JSON.parse(localStorage.getItem("ali-di-rondine.impostazioni") || "{}"); } catch(e) {}
+  var crt = s.crt;
+  var txt = !crt ? "Spento" : String(crt).toUpperCase();
+  if (crtPillLbl) crtPillLbl.textContent = "CRT: " + txt;
+  if (crtPillBtn) {
+    crtPillBtn.style.color = crt ? "#ffd23f" : "#94a3b8";
+    crtPillBtn.style.borderColor = crt ? "#ffd23f" : "#475569";
+  }
+}
+syncCrtBtn();
+if (crtPillBtn) {
+  crtPillBtn.onclick = function () {
+    var s = {};
+    try { s = JSON.parse(localStorage.getItem("ali-di-rondine.impostazioni") || "{}"); } catch(e) {}
+    var modes = [false, "arcade", "vhs", "scanline", "phosphor"];
+    var curIdx = modes.indexOf(s.crt === true ? "arcade" : s.crt);
+    s.crt = modes[(curIdx + 1) % modes.length];
+    try { localStorage.setItem("ali-di-rondine.impostazioni", JSON.stringify(s)); } catch(e) {}
+    if (window.SET) window.SET.crt = s.crt;
+    syncCrtBtn();
+    var lbl = !s.crt ? "SPENTO" : String(s.crt).toUpperCase();
+    if (typeof window.showFeatureCutIn === "function") {
+      window.showFeatureCutIn("FILTRO RETRÒ CRT", "Modalità: " + lbl, "📺");
+    } else if (window.toast) {
+      window.toast("Filtro Retrò: " + lbl, "info", "📺");
+    }
+  };
+}
+
+var weatherPillBtn = document.getElementById("weatherPillBtn");
+var weatherPillLbl = document.getElementById("weatherPillLbl");
+function syncWeatherBtn() {
+  var s = {};
+  try { s = JSON.parse(localStorage.getItem("ali-di-rondine.impostazioni") || "{}"); } catch(e) {}
+  var w = s.envWeather || "auto";
+  if (weatherPillLbl) weatherPillLbl.textContent = "Meteo: " + w.toUpperCase();
+  if (weatherPillBtn) {
+    weatherPillBtn.style.color = w !== "spento" ? "#38bdf8" : "#94a3b8";
+    weatherPillBtn.style.borderColor = w !== "spento" ? "#38bdf8" : "#475569";
+  }
+}
+syncWeatherBtn();
+if (weatherPillBtn) {
+  weatherPillBtn.onclick = function () {
+    var s = {};
+    try { s = JSON.parse(localStorage.getItem("ali-di-rondine.impostazioni") || "{}"); } catch(e) {}
+    var modes = ["auto", "pioggia", "vento", "neve", "lucciole", "braci", "spento"];
+    var curIdx = modes.indexOf(s.envWeather || "auto");
+    s.envWeather = modes[(curIdx + 1) % modes.length];
+    s.ambientFx = s.envWeather !== "spento";
+    try { localStorage.setItem("ali-di-rondine.impostazioni", JSON.stringify(s)); } catch(e) {}
+    if (window.SET) { window.SET.envWeather = s.envWeather; window.SET.ambientFx = s.ambientFx; }
+    syncWeatherBtn();
+    var lbl = s.envWeather.toUpperCase();
+    if (typeof window.showFeatureCutIn === "function") {
+      window.showFeatureCutIn("PARTICELLARI METEO", "Atmosfera: " + lbl, "🌧️");
+    } else if (window.toast) {
+      window.toast("Meteo Dinamico: " + lbl, "info", "🌧️");
     }
   };
 }
