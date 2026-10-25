@@ -534,7 +534,7 @@
 
   // ---------------------------------------------------------------- salvataggio
   const load = () => { const o = load0(); XPC = o.xp; return o; };
-  const load0 = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { own: Array.isArray(r.own) ? r.own.filter((x) => BY[x]) : [], team: Array.isArray(r.team) ? r.team.filter((x) => BY[x]).slice(0, 5) : [], won: Array.isArray(r.won) ? r.won.filter((x) => typeof x === "number") : [], packs: r.packs | 0, hero: !!r.hero, xp: r.xp && typeof r.xp === "object" ? r.xp : {}, season: r.season && Array.isArray(r.season.sched) ? r.season : null, titles: r.titles | 0, draft: r.draft && Array.isArray(r.draft.picks) ? r.draft : null, cups: r.cups | 0, modulo: typeof r.modulo === "string" && MODULI[r.modulo] ? r.modulo : "rombo", voci: r.voci && typeof r.voci === "object" ? r.voci : {}, vociSeen: Array.isArray(r.vociSeen) ? r.vociSeen.filter((x) => typeof x === "string") : [] }; };
+  const load0 = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; const own = Array.isArray(r.own) ? r.own.filter((x) => BY[x]) : []; const tm = Array.isArray(r.team) ? r.team.filter((x) => BY[x]).slice(0, 5) : []; const bn = Array.isArray(r.bench) ? r.bench.filter((x) => BY[x] && !tm.includes(x) && (!own.length || own.includes(x))).slice(0, 5) : []; return { own, team: tm, bench: bn, won: Array.isArray(r.won) ? r.won.filter((x) => typeof x === "number") : [], packs: r.packs | 0, hero: !!r.hero, xp: r.xp && typeof r.xp === "object" ? r.xp : {}, season: r.season && Array.isArray(r.season.sched) ? r.season : null, titles: r.titles | 0, draft: r.draft && Array.isArray(r.draft.picks) ? r.draft : null, cups: r.cups | 0, modulo: typeof r.modulo === "string" && MODULI[r.modulo] ? r.modulo : "rombo", voci: r.voci && typeof r.voci === "object" ? r.voci : {}, vociSeen: Array.isArray(r.vociSeen) ? r.vociSeen.filter((x) => typeof x === "string") : [] }; };
   const save = (r) => { XPC = r.xp || {}; safe(() => localStorage.setItem(KEY, JSON.stringify(r)), 0); };
   const sagaMem = (k) => safe(() => JSON.parse(localStorage.getItem(SG(k)[0]) || "null"), null);
   function progress(k) {
@@ -1056,8 +1056,8 @@
   const port = (id) => safe(() => window.__borgoApi.portraitImg(id), null);
   // ---------------------------------------------------------------- la carta (HTML)
   function cardHtml(id, opts) {
-    const c = BY[id], R = RAR[c.rar], own = !opts || opts.own !== false, img = own ? port(id) : null, S = SG(c.saga), st = own ? starsOf(id) : 0, e = own ? eff(c) : c;
-    return `<div class="sgCard r${c.rar}${own ? "" : " lock"}${opts && opts.sel ? " sel" : ""}${st >= 3 ? " s3" : ""}" data-c="${id}" style="--rc:${R[1]};--sc:${S[2]}"${st >= 3 ? ` title="«${esc(FRASI[id] || "")}»"` : ""}>${own ? `<button type="button" class="sgLoreBtn" data-lore="${id}" title="📖 Lore e Dettagli" aria-label="Lore e dettagli">📖</button>` : ""}<div class="hd"><span>${R[0]}</span></div>${st ? `<div class="stars">${"★".repeat(st)}</div>` : ""}<div class="img">${img ? `<img alt="" src="${img}">` : `<span>?</span>`}${own ? `<em class="rolB" style="--rb:${(ROLEN[c.role] || ["", "#94a3b8"])[1]}" title="${(ROLEN[c.role] || [""])[0]}">${{ A: "ATT", B: "JOL", C: "CEN", D: "DIF", P: "POR" }[c.role] || c.role}</em>` : ""}</div><div class="nm">${own ? esc(name(id)) : "???"}</div><div class="st"><span>ATT <b>${own ? e.at : "–"}</b></span><span>DIF <b>${own ? e.df : "–"}</b></span><span>TEC <b>${own ? e.te : "–"}</b></span></div><div class="sg">${esc(S[1])}</div></div>`;
+    const c = BY[id], R = RAR[c.rar], own = !opts || opts.own !== false, img = own ? port(id) : null, S = SG(c.saga), st = own ? starsOf(id) : 0, e = own ? eff(c) : c, isBn = !!(opts && opts.bench);
+    return `<div class="sgCard r${c.rar}${own ? "" : " lock"}${opts && opts.sel ? " sel" : ""}${isBn ? " benchSel" : ""}${st >= 3 ? " s3" : ""}" data-c="${id}" style="--rc:${R[1]};--sc:${S[2]}"${st >= 3 ? ` title="«${esc(FRASI[id] || "")}»"` : ""}>${own ? `<button type="button" class="sgLoreBtn" data-lore="${id}" title="📖 Lore e Dettagli" aria-label="Lore e dettagli">📖</button>` : ""}${isBn ? `<span class="sgBenchTag" title="In panchina per la Staffetta dei Dieci">🪑</span>` : ""}<div class="hd"><span>${R[0]}</span></div>${st ? `<div class="stars">${"★".repeat(st)}</div>` : ""}<div class="img">${img ? `<img alt="" src="${img}">` : `<span>?</span>`}${own ? `<em class="rolB" style="--rb:${(ROLEN[c.role] || ["", "#94a3b8"])[1]}" title="${(ROLEN[c.role] || [""])[0]}">${{ A: "ATT", B: "JOL", C: "CEN", D: "DIF", P: "POR" }[c.role] || c.role}</em>` : ""}</div><div class="nm">${own ? esc(name(id)) : "???"}</div><div class="st"><span>ATT <b>${own ? e.at : "–"}</b></span><span>DIF <b>${own ? e.df : "–"}</b></span><span>TEC <b>${own ? e.te : "–"}</b></span></div><div class="sg">${esc(S[1])}</div></div>`;
   }
 
   function getCardLore(c) {
@@ -1123,6 +1123,8 @@
       const otherId = a === id ? b : a, pk = pairKey(a, b), both = isOwn && r.own.includes(otherId), cnt = (r.voci && r.voci[pk]) | 0;
       return { title: t, pk, other: otherId, otherName: r.own.includes(otherId) ? name(otherId) : "???", active: both, cnt, unlocked: both && cnt >= BOND_GOAL, seen: (r.vociSeen || []).includes(pk) };
     });
+
+    const inBench = (r.bench || []).includes(id);
 
     let flipped = false;
 
@@ -1213,6 +1215,7 @@
             <button type="button" class="sgActionBtn flipBtn">🔄 Gira Carta</button>
             <button type="button" class="sgActionBtn teamBtn ${inTeam ? "inTeam" : ""}">${inTeam ? "✕ Togli dalla Squadra" : "⚽ Schiera in Squadra"}</button>
           </div>
+          ${isOwn && !inTeam ? `<div style="margin:4px 0"><button type="button" class="sgActionBtn benchBtn ${inBench ? "inBench" : ""}" style="width:100%">${inBench ? "✕ Togli dalla Panchina (Staffetta)" : "🪑 Metti in Panchina (Staffetta dei Dieci)"}</button></div>` : ""}
           <div class="big" style="margin-top:6px">
             <button type="button" data-close-lore="1">◂ Torna indietro<small>${back ? "alla schermata precedente" : "alla Squadra dei Sogni"}</small></button>
           </div>
@@ -1247,6 +1250,13 @@
           openCardLore(id, back);
         };
       }
+      const benchBtn = body.querySelector(".benchBtn");
+      if (benchBtn) {
+        benchBtn.onclick = () => {
+          toggleBench(id);
+          openCardLore(id, back);
+        };
+      }
       const closeBtn = body.querySelector("[data-close-lore]");
       if (closeBtn) {
         closeBtn.onclick = () => {
@@ -1260,7 +1270,7 @@
   }
 
   // ---------------------------------------------------------------- le schermate
-  let OV = null, BACK = null;
+    let OV = null, BACK = null, PICK_MODE = "team";
   let COLL_FILT = { q: "", own: "all", rar: "all", role: "all" };
   const isFiltered = () => !!COLL_FILT.q || COLL_FILT.own !== "all" || COLL_FILT.rar !== "all" || COLL_FILT.role !== "all";
   function shell(title) { css(); if (OV) OV.remove(); OV = document.createElement("div"); OV.className = "sgOv"; OV.innerHTML = `<div class="wrap"><div class="bar"><h2>${title}</h2><button type="button" class="x" aria-label="Chiudi">✕</button></div><div class="body"></div></div>`; OV.querySelector(".x").onclick = () => { const b = BACK; closeAll(); if (typeof b === "function") b(); }; document.body.appendChild(OV); return OV.querySelector(".body"); }
@@ -1311,11 +1321,12 @@
       return;
     }
 
-    collEl.innerHTML = filtered.map((c) => cardHtml(c.id, { own: r.own.includes(c.id), sel: r.team.includes(c.id) })).join("");
+    collEl.innerHTML = filtered.map((c) => cardHtml(c.id, { own: r.own.includes(c.id), sel: r.team.includes(c.id), bench: (r.bench || []).includes(c.id) })).join("");
     collEl.querySelectorAll(".sgCard:not(.lock)").forEach((el) => {
       el.onclick = (e) => {
         if (e.target.closest(".sgLoreBtn")) return;
-        toggle(el.dataset.c);
+        if (PICK_MODE === "bench") toggleBench(el.dataset.c);
+        else toggle(el.dataset.c);
       };
     });
     collEl.querySelectorAll(".sgLoreBtn").forEach((btn) => {
@@ -1452,6 +1463,51 @@
     });
   }
 
+  function benchBoxHtml(r) {
+    const bn = r.bench || [];
+    return `<div class="sgBenchBox">
+      <div class="sgBenchHd">
+        <span>🪑 <b>Panchina Staffetta</b> (${bn.length}/5)</span>
+        <div class="sgBenchBtns">
+          <button type="button" class="sgPickModeBtn${PICK_MODE === "team" ? " active" : ""}" data-pick-mode="team">⚽ Titolari</button>
+          <button type="button" class="sgPickModeBtn${PICK_MODE === "bench" ? " active" : ""}" data-pick-mode="bench">🪑 Panchina</button>
+          <button type="button" class="sgBenchAutoBtn" data-bench-auto="1" title="Completa la panchina con le migliori carte libere">✨ Auto</button>
+          ${window.__arena && window.__arena.openStaffetta ? `<button type="button" class="sgBenchGoBtn" data-go-staffetta="1">📟 Staffetta ▶</button>` : ""}
+        </div>
+      </div>
+      <div class="sgBenchRow">${[0, 1, 2, 3, 4].map((k) => {
+        const id = bn[k];
+        if (!id || !BY[id]) return `<div class="sgBenchSlot empty" data-bench-empty="${k}"><span>+${k + 6}</span></div>`;
+        const c = BY[id], im = port(id), col = (ROLEN[c.role] || ["", "#94a3b8"])[1];
+        return `<div class="sgBenchSlot" data-bench-c="${id}" title="Tocca per togliere dalla panchina"><div class="av">${im ? `<img alt="" src="${im}">` : "?"}<em style="background:${col}">${c.role}</em></div><div class="nm">${esc(String(name(id)).split(/[ ,]/)[0])}</div></div>`;
+      }).join("")}</div>
+      <div class="sgBenchHint">${PICK_MODE === "bench" ? "🪑 Modalità Panchina attiva: tocca le carte nella collezione qui sotto per scegliere le 5 riserve." : "Nella Staffetta dei Dieci (Arena) queste 5 riserve subentrano in corsa quando un titolare cade."}</div>
+    </div>`;
+  }
+
+  function bindBenchBox(body) {
+    body.querySelectorAll("[data-pick-mode]").forEach((b) => {
+      b.onclick = () => {
+        PICK_MODE = b.dataset.pickMode === "bench" ? "bench" : "team";
+        const r = load();
+        refreshTeam(body, r);
+      };
+    });
+    body.querySelectorAll("[data-bench-c]").forEach((el) => {
+      el.onclick = () => toggleBench(el.dataset.benchC);
+    });
+    body.querySelectorAll("[data-bench-empty]").forEach((el) => {
+      el.onclick = () => {
+        PICK_MODE = "bench";
+        refreshTeam(body, load());
+      };
+    });
+    const ab = body.querySelector("[data-bench-auto]");
+    if (ab) ab.onclick = () => autoBench();
+    const gs = body.querySelector("[data-go-staffetta]");
+    if (gs) gs.onclick = () => { if (window.__arena && window.__arena.openStaffetta) { closeAll(); window.__arena.openStaffetta(() => open()); } };
+  }
+
   function refreshTeam(body, r) {
     const I = intesa(r.team, r.modulo);
     const secT = body.querySelector(".sec-team");
@@ -1472,6 +1528,13 @@
         };
       });
     }
+    const bnWrap = body.querySelector(".sgBenchWrap");
+    if (bnWrap) {
+      bnWrap.innerHTML = benchBoxHtml(r);
+      bindBenchBox(body);
+    }
+    const secColl = body.querySelector(".sec-coll");
+    if (secColl) secColl.innerHTML = PICK_MODE === "bench" ? "Collezione · 🪑 tocca una carta per metterla o toglierla dalla Panchina" : "Collezione · tocca una carta per metterla in squadra o toglierla";
     const fzEl = body.querySelector(".sgFormaz"); if (fzEl) fzEl.innerHTML = formazHtml(r.team);
     const modWrap = body.querySelector(".sgModWrap");
     if (modWrap) {
@@ -1490,9 +1553,7 @@
       linksEl.innerHTML = renderLinksList(r);
       bindLinksList(body);
     }
-    body.querySelectorAll(".coll .sgCard[data-c]").forEach((el) => {
-      el.classList.toggle("sel", r.team.includes(el.dataset.c));
-    });
+    renderColl(body, r);
   }
 
   function renderComboBanner(r) {
@@ -1621,6 +1682,7 @@
           if (!r2.own.includes(idA) || !r2.own.includes(idB)) return;
           const rest = r2.team.filter((x) => x !== idA && x !== idB).slice(0, 3);
           r2.team = [idA, idB].concat(rest);
+          r2.bench = (r2.bench || []).filter((x) => !r2.team.includes(x));
           save(r2);
           renderArchive();
         };
@@ -1725,13 +1787,13 @@
   }
 
   function open(back) {
-    if (back) BACK = back; const { r, nw } = sync(); const body = shell("🃏 La Squadra dei Sogni");
+    if (back) BACK = back; PICK_MODE = "team"; const { r, nw } = sync(); const body = shell("🃏 La Squadra dei Sogni");
     const I = intesa(r.team, r.modulo), coins = safe(() => window.__borgoApi.coins(), 0), vSt = vociStats(r);
     const comboHtml = renderComboBanner(r);
     let h = `<p class="sum">Le carte dei personaggi di tutte le saghe. Si sbloccano giocando, o con le bustine. Carte: <b>${r.own.length}/${CARDS.length}</b> · monete: <b>${coins}</b>${nw.length ? ` · <b class="new">nuove: ${nw.length}</b>` : ""}</p>`;
-    h += `<div class="sec sec-team">La tua squadra · forza <b>${forza(r.team)}</b> · intesa ${intesaBadge(I.n)}${I.why.length ? ` <span class="why">(${I.why.map(esc).join(", ")})</span>` : ""}</div><div class="team">${[0, 1, 2, 3, 4].map((k) => (r.team[k] ? cardHtml(r.team[k]) : `<div class="sgCard empty" data-slot="${k}"><span>+</span></div>`)).join("")}</div><div class="sgFormaz">${formazHtml(r.team)}</div><div class="sgModWrap">${modSelectorHtml(r.modulo, r.team)}</div><div class="team-stats">${r.team.length ? statLine(r.team, r.modulo) : ""}</div><div class="sgComboContainer">${comboHtml}</div>`;
-    h += `<div class="big"><button type="button" data-go="tour">🏆 Torneo dei Sogni<small>${r.won.length}/8 sfide vinte · ogni sfida in un motore diverso</small></button><button type="button" data-go="pack" ${coins < PACK ? "disabled" : ""}>🎴 Bustina<small>${PACK} monete · una carta a sorpresa</small></button><button type="button" data-go="season">📅 Stagione dei Sogni<small>${r.season ? `giornata ${Math.min(7, r.season.day + 1)}/7` : "campionato a 8 squadre"}${r.titles ? ` · scudetti ${r.titles}` : ""}</small></button>${window.__arena ? `<button type="button" data-go="arena">⚔️ Arena dei Sogni<small>Battaglie a turni · Torre dei Duelli</small></button>` : ""}<button type="button" data-go="draft">🎲 Draft<small>${r.draft ? (r.draft.picks.length < 5 ? `scelta ${r.draft.picks.length + 1}/5` : "coppa in corso") : "scegli 1 carta su 3 e gioca la coppa"}${r.cups ? ` · coppe ${r.cups}` : ""}</small></button><button type="button" data-go="voci" class="${vSt.unread ? "sgBtnPulse" : ""}">🎙️ Voci dallo Spogliatoio${vSt.unread ? ` <span class="sgNewDot">${vSt.unread}</span>` : ""}<small>${vSt.unlocked}/${vSt.total} dialoghi · 3 gare col Legame</small></button></div><p class="sum">Le carte crescono giocando: ⭐ a 3 punti esperienza, ⭐⭐ a 8, ⭐⭐⭐ a 15 (+2 a ogni statistica per stella; a tre stelle la carta dice la sua frase).</p>`;
-    h += `<div class="sec">Collezione · tocca una carta per metterla in squadra o toglierla</div>`;
+    h += `<div class="sec sec-team">La tua squadra · forza <b>${forza(r.team)}</b> · intesa ${intesaBadge(I.n)}${I.why.length ? ` <span class="why">(${I.why.map(esc).join(", ")})</span>` : ""}</div><div class="team">${[0, 1, 2, 3, 4].map((k) => (r.team[k] ? cardHtml(r.team[k]) : `<div class="sgCard empty" data-slot="${k}"><span>+</span></div>`)).join("")}</div><div class="sgBenchWrap">${benchBoxHtml(r)}</div><div class="sgFormaz">${formazHtml(r.team)}</div><div class="sgModWrap">${modSelectorHtml(r.modulo, r.team)}</div><div class="team-stats">${r.team.length ? statLine(r.team, r.modulo) : ""}</div><div class="sgComboContainer">${comboHtml}</div>`;
+    h += `<div class="big"><button type="button" data-go="tour">🏆 Torneo dei Sogni<small>${r.won.length}/8 sfide vinte · ogni sfida in un motore diverso</small></button><button type="button" data-go="pack" ${coins < PACK ? "disabled" : ""}>🎴 Bustina<small>${PACK} monete · una carta a sorpresa</small></button><button type="button" data-go="season">📅 Stagione dei Sogni<small>${r.season ? `giornata ${Math.min(7, r.season.day + 1)}/7` : "campionato a 8 squadre"}${r.titles ? ` · scudetti ${r.titles}` : ""}</small></button>${window.__arena ? `<button type="button" data-go="arena">⚔️ Arena dei Sogni<small>Battaglie a turni · Staffetta dei Dieci · Torre</small></button>` : ""}<button type="button" data-go="draft">🎲 Draft<small>${r.draft ? (r.draft.picks.length < 5 ? `scelta ${r.draft.picks.length + 1}/5` : "coppa in corso") : "scegli 1 carta su 3 e gioca la coppa"}${r.cups ? ` · coppe ${r.cups}` : ""}</small></button><button type="button" data-go="voci" class="${vSt.unread ? "sgBtnPulse" : ""}">🎙️ Voci dallo Spogliatoio${vSt.unread ? ` <span class="sgNewDot">${vSt.unread}</span>` : ""}<small>${vSt.unlocked}/${vSt.total} dialoghi · 3 gare col Legame</small></button></div><p class="sum">Le carte crescono giocando: ⭐ a 3 punti esperienza, ⭐⭐ a 8, ⭐⭐⭐ a 15 (+2 a ogni statistica per stella; a tre stelle la carta dice la sua frase).</p>`;
+    h += `<div class="sec sec-coll">Collezione · tocca una carta per metterla in squadra o toglierla</div>`;
     h += `<div class="sgCollControls">
       <div class="sgSearchBox">
         <span class="sgSearchIcon">🔍</span>
@@ -1803,6 +1865,7 @@
     }
 
     bindModChips(body);
+    bindBenchBox(body);
     bindVoceBannerBtns(body);
     bindLinksList(body);
     renderColl(body, r);
@@ -1828,10 +1891,28 @@
   function toggle(id) {
     const r = load();
     if (r.team.includes(id)) r.team = r.team.filter((x) => x !== id);
-    else if (r.team.length < 5 && r.own.includes(id)) r.team.push(id);
+    else if (r.team.length < 5 && r.own.includes(id)) { r.bench = (r.bench || []).filter((x) => x !== id); r.team.push(id); }
     save(r);
     if (OV && OV.querySelector(".team")) refreshTeam(OV, r);
     else open();
+  }
+  function toggleBench(id) {
+    const r = load();
+    r.bench = r.bench || [];
+    if (r.bench.includes(id)) r.bench = r.bench.filter((x) => x !== id);
+    else if (r.own.includes(id) && !r.team.includes(id) && r.bench.length < 5) r.bench.push(id);
+    save(r);
+    if (OV && OV.querySelector(".team")) refreshTeam(OV, r);
+    else open();
+  }
+  function autoBench() {
+    const r = load();
+    r.bench = (r.bench || []).filter((id) => r.own.includes(id) && !r.team.includes(id));
+    const cand = r.own.filter((id) => !r.team.includes(id) && !r.bench.includes(id) && BY[id]).sort((a, b) => ovr(BY[b]) - ovr(BY[a]));
+    while (r.bench.length < 5 && cand.length) r.bench.push(cand.shift());
+    save(r);
+    if (OV && OV.querySelector(".team")) refreshTeam(OV, r);
+    return r.bench;
   }
   function pack() {
     const coins = safe(() => window.__borgoApi.coins(), 0); if (coins < PACK) return;
@@ -2493,11 +2574,32 @@
 .sgVoceCtrls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .sgVoceCtrls button{min-height:50px;border-radius:10px;border:1px solid #4a3a6a;background:#221a36;color:#f4f0e4;font:800 13px system-ui;text-align:left;padding:7px 10px;cursor:pointer}
 .sgVoceCtrls button small{display:block;font-weight:400;font-size:10.5px;opacity:.8;margin-top:2px}
+.sgOv .sgCard.benchSel{box-shadow:0 0 0 2px #38bdf8,0 0 10px rgba(56,189,248,.35)}
+.sgBenchTag{position:absolute;top:2px;left:2px;z-index:3;font-size:10px;background:#0c2d48ee;border:1px solid #38bdf8;border-radius:5px;padding:0 3px;line-height:1.3}
+.benchBtn{background:#122b3d;color:#7dd3fc;border-color:#0284c7}
+.benchBtn.inBench{background:#3f1d2b;color:#fda4af;border-color:#e11d48}
+.sgBenchBox{background:linear-gradient(145deg,#151d2e,#141024);border:1px solid #2b4c6f;border-radius:10px;padding:8px 10px;margin:8px 0}
+.sgBenchHd{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;font-size:12px;color:#bae6fd}
+.sgBenchHd b{color:#38bdf8}
+.sgBenchBtns{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.sgPickModeBtn,.sgBenchAutoBtn,.sgBenchGoBtn{border-radius:8px;padding:3px 7px;font:700 10.5px system-ui;cursor:pointer;border:1px solid #3b4f6b;background:#1c2538;color:#cbd5e1}
+.sgPickModeBtn.active{background:#ffd23f;border-color:#ffd23f;color:#120e1e;font-weight:800}
+.sgBenchAutoBtn{border-color:#38bdf8;color:#7dd3fc}
+.sgBenchGoBtn{background:linear-gradient(135deg,#065f46,#047857);border-color:#34d399;color:#ecfdf5;font-weight:800}
+.sgBenchRow{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:7px}
+.sgBenchSlot{background:#0f1626;border:1.5px solid #38bdf8;border-radius:8px;padding:4px 2px;text-align:center;cursor:pointer;transition:transform .12s}
+.sgBenchSlot:active{transform:scale(.96)}
+.sgBenchSlot.empty{border-style:dashed;border-color:#334155;color:#64748b;display:flex;align-items:center;justify-content:center;min-height:54px;font:800 11px system-ui}
+.sgBenchSlot .av{position:relative;width:36px;height:36px;margin:0 auto;border-radius:50%;overflow:hidden;background:#090d16;border:1px solid #475569;display:flex;align-items:center;justify-content:center}
+.sgBenchSlot .av img{width:100%;height:100%;object-fit:cover}
+.sgBenchSlot .av em{position:absolute;right:0;bottom:0;font:900 8px system-ui;color:#fff;padding:0 3px;border-radius:4px}
+.sgBenchSlot .nm{font:700 9.5px system-ui;color:#e2e8f0;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sgBenchHint{font-size:10.5px;color:#94a3b8;margin-top:5px;line-height:1.3}
 .sgVoceCtrls .sgVoceNextBtn{background:linear-gradient(135deg,#5b21b6,#3b0764);border-color:#ffd23f;color:#ffd23f}
 .sgVoceCtrls .sgVoceNextBtn small{color:#f4f0e4}`;
     document.head.appendChild(st);
   }
   // la Maglia dei Sogni nel guardaroba (si registra all'avvio, così resta anche dopo aver ricaricato la pagina)
   (function reg() { const A = window.__borgoApi; if (!A || !A.COSM) return setTimeout(reg, 200); if (!A.COSM.sg_maglia) A.COSM.sg_maglia = { kind: "shirt", label: "Maglia dei Sogni", val: "#7a5ad8", from: "Vinci il Torneo dei Sogni (Salone delle Saghe)" }; })();
-  window.__sogni = { squad, lineup, SAGHE, BY, eff, name, port, _save: save, open, close: closeAll, _launch: launch, _tiers: tiers, CARDS, LINKS, SFIDE, TEAMS, FRASI, intesa, forza, sync, stagione, draft, stars: (id) => { XPC = load().xp; return starsOf(id); }, _load: load, MODULI, modSintonia, openModDetail, openCardLore, combo: getTeamCombo, openVoci, openVoceScene, recordVoci, vociStats, pairKey, BOND_GOAL };
+  window.__sogni = { squad, lineup, SAGHE, BY, eff, name, port, _save: save, open, close: closeAll, _launch: launch, _tiers: tiers, CARDS, LINKS, SFIDE, TEAMS, FRASI, intesa, forza, sync, stagione, draft, stars: (id) => { XPC = load().xp; return starsOf(id); }, _load: load, MODULI, modSintonia, openModDetail, openCardLore, combo: getTeamCombo, openVoci, openVoceScene, recordVoci, vociStats, pairKey, BOND_GOAL, toggleBench, autoBench };
 })();

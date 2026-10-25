@@ -186,7 +186,7 @@
   ];
   let OV = null, BACK = null, B = null, FAST = false;
   // ------------------------------------------------------------ dati
-  const load = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { xp: r.xp && typeof r.xp === "object" ? r.xp : {}, tier: Math.max(1, r.tier | 0), best: r.best | 0, run: r.run && r.run.team ? r.run : null, daily: r.daily || { d: "", won: false }, wins: r.wins | 0, bosses: r.bosses | 0, deep: r.deep !== false }; };
+  const load = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; return { xp: r.xp && typeof r.xp === "object" ? r.xp : {}, tier: Math.max(1, r.tier | 0), best: r.best | 0, run: r.run && r.run.team ? r.run : null, daily: r.daily || { d: "", won: false }, wins: r.wins | 0, bosses: r.bosses | 0, deep: r.deep !== false, relayBest: r.relayBest | 0, relayWins: r.relayWins | 0, relayRun: r.relayRun && Array.isArray(r.relayRun.team) ? r.relayRun : null }; };
   const save = (r) => safe(() => localStorage.setItem(KEY, JSON.stringify(r)), 0);
   const today = () => new Date().toISOString().slice(0, 10);
   function rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6d2b79f5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
@@ -212,9 +212,12 @@
     u.skill = getUnitAbility(u);
     return u;
   }
+  function ownList(ids, refTeam, ar) {
+    const I = S().intesa(refTeam || ids).n, b = 1 + I * 0.015;
+    return (ids || []).map((id) => { const c = S().BY[id]; if (!c) return null; const e = S().eff(c), lv = lvOf(ar.xp[id] | 0); return { c, st: e, m: b * (1 + (lv - 1) * 0.04) }; }).filter(Boolean);
+  }
   function ownTeam(r, ar) {
-    const I = S().intesa(r.team).n, b = 1 + I * 0.015;
-    return r.team.map((id) => { const c = S().BY[id]; if (!c) return null; const e = S().eff(c), lv = lvOf(ar.xp[id] | 0); return { c, st: e, m: b * (1 + (lv - 1) * 0.04) }; }).filter(Boolean);
+    return ownList(r.team, r.team, ar);
   }
   function enemyTeam(rand, tier, theme, n) {
     const all = S().CARDS.filter((c) => !theme || c.saga === theme), pool = all.length >= 3 ? all : S().CARDS, out = [], used = {};
@@ -239,8 +242,10 @@
 
     const team = (cfg.team || ownTeam(sLoad, r)).map((o) => {
       const u = mk(o.c, "p", { st: o.st, m: o.m, hp: cfg.hp && cfg.hp[o.c.id], hpm, atm, dfm, tem });
+      u._st = o.st; u._m = o.m;
       return u;
     });
+    const benchQueue = (cfg.bench || []).map((o) => ({ c: o.c, st: o.st, m: o.m, hp: o.hp != null ? o.hp : (cfg.hp && cfg.hp[o.c.id]), usedOnce: !!o.usedOnce }));
     const tm = cfg.tierM || 1, foes = cfg.foes.map((c, i) => mk(c, "e", { m: tm, boss: cfg.boss && i === 0, hpm: (cfg.boss && i === 0 ? 2.2 : 1) * ((cfg.mod && cfg.mod.hp) || 1) }));
     const P = cfg.perks || [];
     const Rels = cfg.relics || [];
@@ -253,19 +258,87 @@
     });
     const md = cfg.mod || {}; foes.forEach((f) => { if (md.foeSh) f.shield = md.foeSh; if (md.foeCd) f.cd = 0; });
     const activeCombo = findActiveCombo(team);
-    B = { deep: cfg.deep != null ? !!cfg.deep : load().deep, gauge: (modK === "quadrato" ? 25 : 0), team, foes, round: 0, order: [], i: -1, cur: null, mode: null, buffT: 0, buffE: 0, over: null, log: [], cfg, perks: P, relics: Rels, rand: cfg.seed != null ? rng(cfg.seed) : Math.random, wait: null, modInfo: tMod, activeCombo };
+    B = { deep: cfg.deep != null ? !!cfg.deep : load().deep, gauge: (modK === "quadrato" ? 25 : 0), team, bench: benchQueue, fallen: (cfg.fallen || []).slice(), allPlayed: team.map((u) => u.id), subsLog: [], swappedRound: false, isRelay: !!cfg.isRelay, unitMods: { hpm, atm, dfm, tem, initShield, modK, sin }, foes, round: 0, order: [], i: -1, cur: null, mode: null, buffT: 0, buffE: 0, over: null, log: [], cfg, perks: P, relics: Rels, rand: cfg.seed != null ? rng(cfg.seed) : Math.random, wait: null, modInfo: tMod, activeCombo };
     render();
     const mLabel = tMod.m ? tMod.m.name : modK;
     let introSay = `📋 Modulo ${mLabel}${sin ? " ✨ Sintonia Attiva" : ""}`;
+    if (B.isRelay) introSay += ` · 📟 Panchina: ${B.bench.length} riserve`;
     if (activeCombo) introSay += ` · ⚡ Doppio Colpo: ${activeCombo.title}`;
     say(introSay);
+    if (cfg.relayCut) cutinRelayStart(cfg.relayCut.wave, cfg.relayCut.name, team.length, B.bench.length);
     nextRound();
     return B;
   }
   const alive = (a) => a.filter((u) => u.hp > 0);
   const delay = (fn, ms) => { if (FAST) return fn(); B.wait = setTimeout(fn, ms); };
+  function mkBenchSub(spec) {
+    const M = B.unitMods || { hpm: 1, atm: 1, dfm: 1, tem: 1, initShield: 0, modK: "rombo", sin: false };
+    const uIn = mk(spec.c, "p", { st: spec.st, m: spec.m, hp: spec.hp, hpm: M.hpm, atm: M.atm, dfm: M.dfm, tem: M.tem });
+    uIn._st = spec.st; uIn._m = spec.m;
+    if (!spec.usedOnce) {
+      uIn.shield += (M.initShield || 0) + 25;
+      if (M.modK === "rombo" && M.sin) uIn.cd = Math.max(0, uIn.cd - 1);
+      if (B.perks && B.perks.includes("telo")) uIn.shield += 35;
+      if (B.perks && B.perks.includes("pronte")) uIn.cd = 0;
+      if (B.cfg.mod && B.cfg.mod.cd) uIn.cd = Math.max(0, uIn.cd - 1);
+    }
+    if (!B.allPlayed.includes(uIn.id)) B.allPlayed.push(uIn.id);
+    return uIn;
+  }
+  function processBenchSubs() {
+    if (!B || B.over || !B.bench || !B.bench.length) return false;
+    let changed = false, lastSub = null;
+    for (let idx = 0; idx < B.team.length; idx++) {
+      const uOut = B.team[idx];
+      if (uOut && uOut.hp <= 0 && B.bench.length > 0) {
+        if (!B.fallen.includes(uOut.id)) B.fallen.push(uOut.id);
+        const spec = B.bench.shift();
+        const uIn = mkBenchSub(spec);
+        B.team[idx] = uIn;
+        B.foes.forEach((f) => { if (f.intent && f.intent.t === uOut.id) f.intent.t = uIn.id; });
+        const oIdx = B.order.findIndex((x, k) => k > B.i && x === uOut);
+        if (oIdx >= 0) B.order[oIdx] = uIn;
+        B.subsLog.push({ out: uOut.id, in: uIn.id, ko: true });
+        lastSub = { uOut, uIn, fresh: !spec.usedOnce };
+        changed = true;
+      }
+    }
+    if (changed) {
+      B.activeCombo = findActiveCombo(alive(B.team));
+      if (lastSub) {
+        cutinSub(lastSub.uOut, lastSub.uIn, B.bench.length, false);
+        say(`📟 CAMBIO! Esce ${lastSub.uOut.n} (KO) · entra ${lastSub.uIn.n}${lastSub.fresh ? " (+25🛡️)" : ""}! Riserve: ${B.bench.length}`);
+      }
+    }
+    return changed;
+  }
+  function swapBench(benchId) {
+    if (!B || B.over || !B.isRelay || !B.cur || B.cur.side !== "p" || B.swappedRound || !B.bench || !B.bench.length) return false;
+    const bIdx = benchId ? B.bench.findIndex((x) => x.c.id === benchId) : 0;
+    if (bIdx < 0) return false;
+    const uOut = B.cur, tIdx = B.team.indexOf(uOut);
+    if (tIdx < 0 || uOut.hp <= 0) return false;
+    const spec = B.bench.splice(bIdx, 1)[0];
+    const cOut = S() && S().BY[uOut.id];
+    if (cOut) B.bench.push({ c: cOut, st: uOut._st, m: uOut._m, hp: uOut.hp, usedOnce: true });
+    const uIn = mkBenchSub(spec);
+    B.team[tIdx] = uIn;
+    B.cur = uIn;
+    if (B.order[B.i] === uOut) B.order[B.i] = uIn;
+    B.mode = null;
+    B.swappedRound = true;
+    B.foes.forEach((f) => { if (f.intent && f.intent.t === uOut.id) f.intent.t = uIn.id; });
+    B.activeCombo = findActiveCombo(alive(B.team));
+    B.subsLog.push({ out: uOut.id, in: uIn.id, ko: false });
+    say(`📟 Cambio tattico! Esce ${uOut.n}, entra ${uIn.n}${!spec.usedOnce ? " (+25🛡️)" : ""} e prende il turno!`);
+    render();
+    cutinSub(uOut, uIn, B.bench.length, true);
+    pop(uIn, !spec.usedOnce ? "▲ +25🛡️" : "▲ ENTRA", "good");
+    return true;
+  }
   function nextRound() {
     B.round++;
+    B.swappedRound = false;
     B.team.concat(B.foes).forEach((u) => {
       if (u.hp > 0) {
         if (u.cd > 0) u.cd--;
@@ -279,6 +352,7 @@
         }
       }
     });
+    processBenchSubs();
     // Reliquia Fischietto d'Oro: chance di ricaricare 1 turno abilità alla squadra
     if (B.relics && B.relics.includes("fischietto_oro") && B.rand() < 0.25) {
       alive(B.team).forEach((u) => { if (u.cd > 0) u.cd--; });
@@ -302,6 +376,7 @@
   function say(t) { B.log.push(t); const el = OV && OV.querySelector(".arLog"); if (el) el.innerHTML = esc(t); }
   function step() {
     if (!B || B.over) return;
+    processBenchSubs();
     if (!alive(B.foes).length) return end("win"); if (!alive(B.team).length) return end("lose");
     B.i++; if (B.i >= B.order.length) return nextRound();
     const u = B.order[B.i]; if (u.hp <= 0) return step();
@@ -501,11 +576,12 @@
     a.def = true; a.shield += extraSh; pop(a, `+${extraSh}🛡`, "good");
     say(`${a.n} si copre (+${extraSh} scudo)`); finish(a);
   }
-  function finish(a) { render(); delay(() => step(), 420); }
+  function finish(a) { const subbed = processBenchSubs(); render(); delay(() => step(), subbed ? 720 : 420); }
   function end(res) { B.over = res; render(); const f = B.cfg.onEnd; setTimeout(() => f && f(res, B), FAST ? 0 : 900); }
   // ------------------------------------------------------------ azioni del giocatore (anche per i test)
   function act(kind, targetId) {
     if (!B || B.over || !B.cur || B.cur.side !== "p") return false; const u = B.cur;
+    if (kind === "sub") return swapBench(targetId);
     if (kind === "defend") { defend(u); return true; }
     if (kind === "super") { if (!B.deep || B.gauge < 100) return false; superMove(u); return true; }
     const T = alive(B.foes), tk = T.filter((x) => x.taunt > 0), pool = tk.length ? tk : T;
@@ -552,11 +628,50 @@
 .arGa{height:6px;border-radius:3px;background:#000a;margin:2px 0 4px;overflow:hidden}.arGa i{display:block;height:100%;background:linear-gradient(90deg,#3a8ad8,#ffd23f)}.arAct .sup{grid-column:1/-1;border-color:#ffd23f}
 .arAct .sup.combo{background:linear-gradient(90deg,#581c87,#831843);border-color:#ffd23f;box-shadow:0 0 10px #ec489955}
 .arBt{position:relative}.arRes{text-align:center;margin:14px 0}.arRes h3{font:900 24px system-ui;margin:4px 0}.arPerk{display:grid;gap:6px}
-@media (prefers-reduced-motion:reduce){.arU.tg,.arCut,.arPop{animation:none!important}}`;
+.arRelayMenuBtn{border-color:#34d399!important;background:linear-gradient(135deg,#0f2922,#1d1633)!important}
+.arBenchStrip{background:linear-gradient(145deg,#0d1b24,#141026);border:1px solid #2b4c6f;border-radius:9px;padding:5px 7px;margin:6px 0}
+.arBenchHd{display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;font-size:10.5px;color:#93c5fd;margin-bottom:4px}
+.arBenchHd b{color:#4ade80}
+.arBenchList{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.arBenchChip{position:relative;background:#0a131f;border:1.5px solid #38bdf8;border-radius:7px;padding:3px 2px;text-align:center;font-size:9px;color:#e2e8f0;transition:transform .12s,border-color .15s}
+.arBenchChip.canSub{cursor:pointer;border-color:#4ade80;box-shadow:0 0 8px rgba(74,222,128,.25)}
+.arBenchChip.canSub:active{transform:scale(.95)}
+.arBenchChip.ko{opacity:.38;filter:grayscale(1);border-color:#475569}
+.arBenchChip.empty{border-style:dashed;border-color:#334155;color:#64748b;display:flex;align-items:center;justify-content:center;min-height:44px}
+.arBenchChip .av{width:28px;height:28px;margin:0 auto;border-radius:50%;overflow:hidden;background:#060911;display:flex;align-items:center;justify-content:center}
+.arBenchChip .av img{width:100%;height:100%;object-fit:cover}
+.arBenchChip .nm{font-weight:700;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.arBenchChip .subLed{position:absolute;top:1px;right:2px;font:900 8px monospace;color:#4ade80}
+.arBenchChip .miniHp{height:3px;border-radius:2px;background:#000a;margin-top:2px;overflow:hidden}
+.arBenchChip .miniHp i{display:block;height:100%;background:#4ade80}
+.arSubBoard{position:fixed;left:0;right:0;top:24%;z-index:9999;pointer-events:none;display:flex;justify-content:center;padding:0 10px;animation:arSubAnim 1.35s forwards}
+.arSubFrame{width:100%;max-width:420px;background:linear-gradient(180deg,#071510 0%,#0b0f1c 100%);border:3px solid #334155;border-top-color:#4ade80;border-bottom-color:#f87171;border-radius:14px;padding:10px 12px;box-shadow:0 12px 34px rgba(0,0,0,.85),0 0 24px rgba(74,222,128,.35);text-align:center}
+.arSubTop{font:900 11px ui-monospace,monospace;letter-spacing:1.2px;color:#fde047;background:#030806;border:1px solid #1e293b;border-radius:6px;padding:3px 8px;display:inline-block;margin-bottom:8px}
+.arSubGrid{display:grid;grid-template-columns:1fr 30px 1fr;align-items:center;gap:6px}
+.arSubSide{border-radius:10px;padding:6px 4px;background:rgba(0,0,0,.45)}
+.arSubSide.out{border:1.5px solid #ef4444;color:#fca5a5}
+.arSubSide.in{border:1.5px solid #22c55e;color:#bbf7d0;box-shadow:0 0 12px rgba(34,197,94,.25)}
+.arSubLedLbl{font:900 11px ui-monospace,monospace;letter-spacing:.6px;margin-bottom:4px}
+.arSubSide.out .arSubLedLbl{color:#ff5a5a}
+.arSubSide.in .arSubLedLbl{color:#4ade80}
+.arSubSide .av{width:50px;height:50px;margin:0 auto;border-radius:50%;overflow:hidden;border:2px solid currentColor;background:#090d16}
+.arSubSide .av img{width:100%;height:100%;object-fit:cover}
+.arSubSide .nm{font:800 11.5px system-ui;color:#fff;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.arSubArrow{font:900 22px system-ui;color:#ffd23f}
+.arSubFoot{font:700 10.5px system-ui;color:#cbd5e1;margin-top:7px}
+@keyframes arSubAnim{0%{opacity:0;transform:scale(.82) translateY(16px)}14%{opacity:1;transform:none}84%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-12px)}}
+.arRelayWaveRow{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin:8px 0}
+.arRelayStep{background:#181228;border:1px solid #3b2d5a;border-radius:8px;padding:6px 4px;text-align:center;font-size:10px}
+.arRelayStep.cur{border-color:#ffd23f;background:#281d42;box-shadow:0 0 10px rgba(255,210,63,.25)}
+.arRelayStep.done{border-color:#4ade80;color:#bbf7d0}
+.arRelayStep b{display:block;font-size:11px;color:#ffd23f}
+.arRelayPool{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:6px 0}
+.arU.swapSel{box-shadow:0 0 0 3px #38bdf8,0 0 14px rgba(56,189,248,.6)}
+@media (prefers-reduced-motion:reduce){.arU.tg,.arCut,.arPop,.arSubBoard{animation:none!important}}`;
     document.head.appendChild(st);
   }
-  function shell(title) { css(); if (OV) OV.remove(); OV = document.createElement("div"); OV.className = "arOv"; OV.innerHTML = `<div class="wrap"><div class="bar"><h2>${title}</h2><button type="button" class="x" aria-label="Chiudi">✕</button></div><div class="body"></div></div>`; OV.querySelector(".x").onclick = () => { if (B && !B.over && B.cfg.quit) return B.cfg.quit(); const b = BACK; close(); if (typeof b === "function") b(); }; document.body.appendChild(OV); return OV.querySelector(".body"); }
-  function close() { if (B && B.wait) clearTimeout(B.wait); B = null; if (OV) { OV.remove(); OV = null; } }
+  function shell(title) { css(); document.querySelectorAll(".arSubBoard").forEach((el) => el.remove()); if (OV) OV.remove(); OV = document.createElement("div"); OV.className = "arOv"; OV.innerHTML = `<div class="wrap"><div class="bar"><h2>${title}</h2><button type="button" class="x" aria-label="Chiudi">✕</button></div><div class="body"></div></div>`; OV.querySelector(".x").onclick = () => { if (B && !B.over && B.cfg.quit) return B.cfg.quit(); const b = BACK; close(); if (typeof b === "function") b(); }; document.body.appendChild(OV); return OV.querySelector(".body"); }
+  function close() { document.querySelectorAll(".arSubBoard").forEach((el) => el.remove()); if (B && B.wait) clearTimeout(B.wait); B = null; if (OV) { OV.remove(); OV = null; } }
   const img = (id) => safe(() => S().port(id), null);
   function stat(u) {
     if (!B || !B.deep || u.hp <= 0) return "";
@@ -569,6 +684,23 @@
     const t = TR[u.tr];
     return `<div class="arU ${cls || ""}${u.hp <= 0 ? " ko" : ""}${u.boss ? " boss" : ""}" data-u="${u.id}" data-s="${u.side}" style="--tc:${t[2]}">${u.shield > 0 ? `<span class="sh">🛡${u.shield}</span>` : ""}<span class="tag">${u.taunt > 0 ? "🎯" : t[1]}</span>${stat(u)}<div class="im">${img(u.id) ? `<img alt="" src="${img(u.id)}">` : "?"}</div><div class="nm">${esc(u.n)}</div><div class="hp"><i style="width:${Math.round((u.hp / u.maxhp) * 100)}%"></i></div></div>`;
   }
+  function benchStripHtml(mine) {
+    if (!B || !B.isRelay) return "";
+    const canSwap = !!(mine && !B.swappedRound && B.bench && B.bench.length > 0 && B.cur && B.cur.hp > 0);
+    const readyChips = (B.bench || []).map((spec) => {
+      const id = spec.c.id, im = img(id), tr = TR[trOf(spec.st || spec.c)];
+      const maxH = Math.round((70 + (spec.st ? spec.st.df : spec.c.df) * (spec.m || 1) * 1.1 + (spec.st ? spec.st.te : spec.c.te) * (spec.m || 1) * 0.4) * ((B.unitMods && B.unitMods.hpm) || 1));
+      const pct = spec.hp != null ? Math.max(5, Math.min(100, Math.round((spec.hp / Math.max(1, maxH)) * 100))) : 100;
+      return `<div class="arBenchChip${canSwap ? " canSub" : ""}" data-sub="${id}" title="${canSwap ? `Tocca per far entrare ${esc(name(id))} al posto di ${esc(B.cur.n)}` : esc(name(id))}"><span class="subLed">${canSwap ? "▲" : tr[1]}</span><div class="av">${im ? `<img alt="" src="${im}">` : "?"}</div><div class="nm">${esc(String(name(id)).split(/[ ,]/)[0])}</div><div class="miniHp"><i style="width:${pct}%"></i></div></div>`;
+    });
+    const koChips = (B.fallen || []).slice(-Math.max(0, 5 - readyChips.length)).map((id) => {
+      const im = img(id);
+      return `<div class="arBenchChip ko" title="${esc(name(id))} (KO)"><div class="av">${im ? `<img alt="" src="${im}">` : "?"}</div><div class="nm">${esc(String(name(id)).split(/[ ,]/)[0])}</div><div class="miniHp"><i style="width:0%"></i></div></div>`;
+    });
+    const slots = readyChips.concat(koChips);
+    while (slots.length < 5) slots.push(`<div class="arBenchChip empty">—</div>`);
+    return `<div class="arBenchStrip"><div class="arBenchHd"><span>📟 Panchina: <b>${B.bench.length}</b> pronte${B.fallen.length ? ` · ${B.fallen.length} KO` : ""}</span><span>${canSwap ? "Tocca una riserva per cambio volante (1/round)" : B.swappedRound ? "✓ Cambio usato in questo round" : "Subentro automatico sui KO"}</span></div><div class="arBenchList">${slots.slice(0, 5).join("")}</div></div>`;
+  }
   function render() {
     if (!B) return; if (!OV || !OV.querySelector(".arBt")) shell(B.cfg.title || "⚔️ Arena dei Sogni");
     const body = OV.querySelector(".body"), u = B.cur, mine = u && u.side === "p" && !B.over;
@@ -578,12 +710,13 @@
     const act = mine ? `<div class="arAct"><button type="button" data-a="attack">⚔️ Attacca<small>${B.mode === "attack" ? "scegli il bersaglio" : "colpo normale"}</small></button><button type="button" data-a="ability" ${u.cd > 0 ? "disabled" : ""}>${esc(curAb.name)}<small>${u.cd > 0 ? `pronta tra ${u.cd}` : esc(curAb.desc)}</small></button><button type="button" data-a="defend">🛡️ Difendi<small>danni −50%, +10 scudo</small></button>${superBtn}</div>` : `<div class="arAct" style="opacity:.5"><button disabled>…</button><button disabled>…</button><button disabled>…</button></div>`;
     const mTag = B.modInfo && B.modInfo.m ? `<span class="arModTag" title="Modulo tattico attivo">📋 ${esc(B.modInfo.m.name)}${B.modInfo.sin ? " ✨" : ""}</span>` : "";
     const relTag = (B.relics && B.relics.length) ? `<span class="arRelicTag" title="Reliquie Oniriche attive">🏆 ${B.relics.length} reliquie</span>` : "";
-    body.innerHTML = `<div class="arBt"><div class="arHd"><span>${esc(B.cfg.sub || "")}${mTag}${relTag}</span><span>Round ${B.round}${B.buffT > 0 ? " · 📣 +25%" : ""}</span></div><div class="arRow" data-r="e">${B.foes.map((x) => unit(x, (tg && x.hp > 0 && (!tk.length || x.taunt > 0) ? "tg " : "") + (u === x ? "cur" : ""))).join("")}</div><div class="arLog">${esc(B.log[B.log.length - 1] || "")}</div>${B.deep ? `<div class="arGa"><i style="width:${Math.round(B.gauge)}%"></i></div>` : ""}<div class="arRow" data-r="p">${B.team.map((x) => unit(x, u === x ? "cur" : "")).join("")}</div>${mine ? `<div class="sum" style="text-align:center">Tocca a <b>${esc(u.n)}</b> · ${esc(ROLE[u.role] || u.role)} · tratto ${TR[u.tr][0]} ${TR[u.tr][1]}</div>` : ""}${act}<p class="sum" style="font-size:11px;opacity:.65">${B.deep ? "Sopra i nemici vedi cosa faranno (⚔️ attacco, ✨ abilità, →bersaglio): un colpo da 30% dei loro PV li interrompe. 🔥 brucia, 💫 salta il turno (Mente in critico). Boss a fasi. " : ""}🔥 Assalto batte 🎯 Mente, 🎯 Mente batte 🛡️ Muro, 🛡️ Muro batte 🔥 Assalto: +30% danni al tratto favorevole.</p></div>`;
+    body.innerHTML = `<div class="arBt"><div class="arHd"><span>${esc(B.cfg.sub || "")}${mTag}${relTag}</span><span>Round ${B.round}${B.buffT > 0 ? " · 📣 +25%" : ""}</span></div><div class="arRow" data-r="e">${B.foes.map((x) => unit(x, (tg && x.hp > 0 && (!tk.length || x.taunt > 0) ? "tg " : "") + (u === x ? "cur" : ""))).join("")}</div><div class="arLog">${esc(B.log[B.log.length - 1] || "")}</div>${B.deep ? `<div class="arGa"><i style="width:${Math.round(B.gauge)}%"></i></div>` : ""}<div class="arRow" data-r="p">${B.team.map((x) => unit(x, u === x ? "cur" : "")).join("")}</div>${benchStripHtml(mine)}${mine ? `<div class="sum" style="text-align:center">Tocca a <b>${esc(u.n)}</b> · ${esc(ROLE[u.role] || u.role)} · tratto ${TR[u.tr][0]} ${TR[u.tr][1]}</div>` : ""}${act}<p class="sum" style="font-size:11px;opacity:.65">${B.deep ? "Sopra i nemici vedi cosa faranno (⚔️ attacco, ✨ abilità, →bersaglio): un colpo da 30% dei loro PV li interrompe. 🔥 brucia, 💫 salta il turno (Mente in critico). Boss a fasi. " : ""}🔥 Assalto batte 🎯 Mente, 🎯 Mente batte 🛡️ Muro, 🛡️ Muro batte 🔥 Assalto: +30% danni al tratto favorevole.</p></div>`;
     body.querySelectorAll("[data-a]").forEach((b) => (b.onclick = () => {
       const k = b.dataset.a; if (k === "defend" || k === "super") return act2(k);
       if (k === "ability") { if (u.role !== "A") return act2("ability"); B.mode = "ability"; return render2(); }
       B.mode = "attack"; render2();
     }));
+    body.querySelectorAll(".arBenchChip.canSub[data-sub]").forEach((el) => (el.onclick = () => act2("sub", el.dataset.sub)));
     body.querySelectorAll(".arU.tg").forEach((el) => (el.onclick = () => act2(B.mode, el.dataset.u)));
     if (B.mode === "ability") body.querySelectorAll('[data-r="e"] .arU:not(.ko)').forEach((el) => { el.classList.add("tg"); el.onclick = () => act2("ability", el.dataset.u); });
   }
@@ -592,6 +725,63 @@
   function pop(u, text, cls) { if (FAST || !OV) return; const el = OV.querySelector(`.arU[data-u="${u.id}"][data-s="${u.side}"]`); if (!el) return; const s = document.createElement("span"); s.className = "arPop " + (cls || ""); s.textContent = text; el.appendChild(s); setTimeout(() => s.remove(), 950); }
   function shake(u) { if (FAST || !OV) return; const el = OV.querySelector(`.arU[data-u="${u.id}"][data-s="${u.side}"]`); if (el) { el.classList.add("shk"); setTimeout(() => el.classList.remove("shk"), 320); } }
   function cutin(u, ab) { if (FAST || !OV) return; const bt = OV.querySelector(".arBt"); if (!bt) return; const c = document.createElement("div"); c.className = "arCut"; c.innerHTML = `${img(u.id) ? `<img alt="" src="${img(u.id)}">` : ""}<div><b>${esc(ab)}</b><span>${esc(u.n)} · ${esc(ROLE[u.role] || u.role)}</span></div>`; bt.appendChild(c); setTimeout(() => c.remove(), 1150); }
+  function relaySfx(kind) {
+    try {
+      const A = new (window.AudioContext || window.webkitAudioContext)();
+      const seq = kind === "start" ? [587, 784, 1046] : [880, 660, 988];
+      seq.forEach((f, i) => {
+        const o = A.createOscillator(), g = A.createGain();
+        o.type = "square"; o.frequency.value = f; g.gain.value = 0.024;
+        g.gain.exponentialRampToValueAtTime(0.0001, A.currentTime + 0.14 + i * 0.08);
+        o.connect(g); g.connect(A.destination); o.start(A.currentTime + i * 0.08); o.stop(A.currentTime + 0.16 + i * 0.08);
+      });
+    } catch (e) {}
+  }
+  function cutinSub(uOut, uIn, leftCnt, tactical) {
+    if (FAST) return;
+    document.querySelectorAll(".arSubBoard").forEach((el) => el.remove());
+    const c = document.createElement("div");
+    c.className = "arSubBoard";
+    const imOut = uOut && img(uOut.id), imIn = uIn && img(uIn.id);
+    const comboNow = B && B.activeCombo ? ` · ⚡ Combo «${esc(B.activeCombo.title)}»` : "";
+    c.innerHTML = `<div class="arSubFrame">
+      <div class="arSubTop">📟 LAVAGNETTA LUMINOSA · ${tactical ? "CAMBIO VOLANTE" : "SUBENTRO IN CORSA"}</div>
+      <div class="arSubGrid">
+        <div class="arSubSide out">
+          <div class="arSubLedLbl">▼ ESCE${tactical ? "" : " · KO"}</div>
+          <div class="av">${imOut ? `<img alt="" src="${imOut}">` : "?"}</div>
+          <div class="nm">${esc(uOut ? uOut.n : "—")}</div>
+        </div>
+        <div class="arSubArrow">🔄</div>
+        <div class="arSubSide in">
+          <div class="arSubLedLbl">▲ ENTRA</div>
+          <div class="av">${imIn ? `<img alt="" src="${imIn}">` : "?"}</div>
+          <div class="nm">${esc(uIn ? uIn.n : "—")}</div>
+        </div>
+      </div>
+      <div class="arSubFoot">🪑 Riserve pronte: <b>${leftCnt}</b>${comboNow}</div>
+    </div>`;
+    document.body.appendChild(c);
+    relaySfx("sub");
+    setTimeout(() => c.remove(), 1380);
+  }
+  function cutinRelayStart(wave, waveName, starterCnt, benchCnt) {
+    if (FAST) return;
+    const c = document.createElement("div");
+    c.className = "salTreeCutIn";
+    c.style.zIndex = "9999";
+    c.innerHTML = `
+      <div class="salTreeCutStripe" style="background:linear-gradient(90deg,transparent,#10b98188,#ffd23fcc,transparent)"></div>
+      <div class="salTreeCutContent" style="border-top-color:#4ade80;border-bottom-color:#ffd23f">
+        <div style="font:900 12px ui-monospace,monospace;letter-spacing:1.4px;color:#4ade80;margin-bottom:4px">📟 LAVAGNETTA PRONTA · ONDATA ${wave}/4</div>
+        <div class="salTreeCutTitle" style="color:#ffd23f">🔄 STAFFETTA DEI DIECI!</div>
+        <div style="font-family:'Dela Gothic One',Impact,sans-serif;font-size:17px;color:#fff;margin:4px 0">${esc(waveName)}</div>
+        <div class="salTreeCutSub" style="color:#bae6fd">${starterCnt} Titolari in campo + ${benchCnt} Riserve pronte al subentro</div>
+      </div>`;
+    document.body.appendChild(c);
+    relaySfx("start");
+    setTimeout(() => { c.classList.add("salTreeCutOut"); setTimeout(() => c.remove(), 320); }, 1050);
+  }
   function cutinDuo(u1, u2, ab) {
     if (FAST) return;
     const c = document.createElement("div");
@@ -619,7 +809,8 @@
     }, 1100);
   }
   // ------------------------------------------------------------ menu, modalità, Torre
-  const bestTeam = () => { const s = S(), r = s._load(); const own = r.own.map((id) => s.BY[id]).filter(Boolean).sort((a, b) => (s.eff(b).at + s.eff(b).df + s.eff(b).te) - (s.eff(a).at + s.eff(a).df + s.eff(a).te)); r.team = own.slice(0, 5).map((c) => c.id); s._save(r); return r.team; };
+  const bestTeam = () => { const s = S(), r = s._load(); const own = r.own.map((id) => s.BY[id]).filter(Boolean).sort((a, b) => (s.eff(b).at + s.eff(b).df + s.eff(b).te) - (s.eff(a).at + s.eff(a).df + s.eff(a).te)); r.team = own.slice(0, 5).map((c) => c.id); r.bench = (r.bench || []).filter((id) => !r.team.includes(id)); s._save(r); return r.team; };
+  const bestTen = () => { const s = S(), r = s._load(); const own = r.own.map((id) => s.BY[id]).filter(Boolean).sort((a, b) => (s.eff(b).at + s.eff(b).df + s.eff(b).te) - (s.eff(a).at + s.eff(a).df + s.eff(a).te)); r.team = own.slice(0, 5).map((c) => c.id); r.bench = own.slice(5, 10).map((c) => c.id); s._save(r); return { team: r.team, bench: r.bench }; };
   function teamBar(r, ar) {
     return `<div class="arRow">${[0, 1, 2, 3, 4].map((k) => { const id = r.team[k]; if (!id) return `<div class="arU" style="--tc:#4a3a6a;opacity:.5"><div class="im">+</div><div class="nm">vuoto</div></div>`; const c = S().BY[id], lv = lvOf(ar.xp[id] | 0); return unit({ id, side: "m", n: name(id), tr: trOf(S().eff(c)), hp: 1, maxhp: 1, shield: 0, taunt: 0 }, "") .replace('<div class="hp"><i style="width:100%"></i></div>', `<div class="hp" style="background:none;color:#ffd23f;font-weight:800;height:auto">Liv. ${lv}</div>`); }).join("")}</div>`;
   }
@@ -648,6 +839,7 @@
     if (vSt && S().openVoci) h += `<button type="button" class="one" data-go="voci"${vSt.unread ? ' style="border-color:#ffd23f"' : ""}>🎙️ Voci dallo Spogliatoio${vSt.unread ? ` · ● ${vSt.unread} nuove!` : ""}<small>${vSt.unlocked}/${vSt.total} dialoghi d'intesa sbloccati giocando 3 gare insieme</small></button>`;
     h += `${window.__picchia ? `<div class="sec">Altri giochi con le tue carte</div><button type="button" class="one" data-go="pic">🥊 Duello dei Sogni<small>Picchiaduro 1 contro 1: mosse, speciale di ruolo e Super</small></button>` : ""}${window.__eroi ? `<button type="button" class="one" data-go="ero">⚽ Calcio d'Azione Eroi<small>Partita a squadre (3v3 o 5v5) con abilità di ruolo · Coppa degli Eroi</small></button>` : ""}${window.__corsa ? `<button type="button" class="one" data-go="cor">🏁 Gran Premio dei Sogni<small>Corsa a squadre: guidi un pilota, due compagni corrono da soli</small></button>` : ""}${window.__beat ? `<button type="button" class="one" data-go="bea">🥋 Rissa dei Sogni<small>Beat 'em up a scorrimento in 3 stadi: ondate, barili, boss e Super della tua saga</small></button>` : ""}<div class="sec">Scontri · livello sbloccato ${ar.tier}/5</div>${[1, 2, 3, 4, 5].map((t) => `<button type="button" class="one" data-tier="${t}" ${!has || t > ar.tier ? "disabled" : ""}>Scontro ${t}${"★".repeat(t)}<small>${t > ar.tier ? "Vinci il livello precedente" : "Avversari +" + Math.round((t - 1) * 12 + 0) + "% · premio " + 10 * t + " monete"}</small></button>`).join("")}`;
     h += `<div class="sec">Arena del giorno</div><button type="button" class="one" data-go="daily" ${!has ? "disabled" : ""}>📅 ${esc(mod[0])}${d.won ? " ✓" : ""}<small>${esc(mod[1])} · ${d.won ? "già vinta oggi" : "primo successo del giorno: +30 monete"}</small></button>`;
+    h += `<div class="sec">Staffetta dei Dieci · record ondata ${ar.relayBest}/4${ar.relayWins ? ` · 🏆 ${ar.relayWins}` : ""}</div><button type="button" class="one arRelayMenuBtn" data-go="staffetta" ${!has ? "disabled" : ""}>📟 ${ar.relayRun ? `Continua Staffetta (Ondata ${ar.relayRun.wave}/4)` : "Staffetta dei Dieci · Boss Rush"}<small>5 titolari + 5 riserve in panchina (${(rr.bench || []).length}/5 pronte) · subentro in corsa su 4 ondate di Campioni</small></button>`;
     h += `<div class="sec">Torre dei Duelli · record piano ${ar.best}</div><button type="button" class="one" data-go="torre" ${!has ? "disabled" : ""}>🗼 ${ar.run ? "Continua la salita (piano " + ar.run.floor + ")" : "Sali la Torre"}<small>30 piani · boss ogni 10 · reliquie oniriche e porte (riposo, elite, eventi)</small></button>${ar.run ? `<button type="button" class="one" data-go="torreNew">↺ Ricomincia dal piano 1<small>abbandona la salita in corso</small></button>` : ""}`;
     h += `<div class="sec">Opzioni</div><button type="button" class="one" data-go="deep">🧠 Battaglia a fondo: ${ar.deep ? "ATTIVA" : "SPENTA"}<small>intenzioni nemiche visibili, bruciature, stordimenti, Colpo di squadra, boss a fasi, reliquie nella Torre</small></button>`;
     body.innerHTML = h;
@@ -665,6 +857,7 @@
     const er = q('[data-go="ero"]'); if (er) er.onclick = () => { close(); window.__eroi.open(() => open()); };
     const co = q('[data-go="cor"]'); if (co) co.onclick = () => { close(); window.__corsa.open(() => open()); };
     const dl = q('[data-go="daily"]'); if (dl) dl.onclick = daily;
+    const stf = q('[data-go="staffetta"]'); if (stf) stf.onclick = () => openStaffetta();
     const tr = q('[data-go="torre"]'); if (tr) tr.onclick = () => torre(false);
     const tn = q('[data-go="torreNew"]'); if (tn) tn.onclick = () => torre(true);
   }
@@ -795,5 +988,231 @@
       body.querySelector('[data-go="on"]').onclick = () => torre(false);
     }));
   }
-  window.__arena = { open, close, start, act, state: () => B, load, save, _fast: (v) => { FAST = !!v; }, lvOf, mk, floorFoes, TR, ABIL, PERKS, RELIQUES, UNIQUE_SKILLS, MODS, TMODS, floorRule, bivio, evento, healRun, EVENTS, cutinDuo };
+  // ------------------------------------------------------------ Staffetta dei Dieci (Boss Rush con Panchina)
+  const RELAY_WAVES = [
+    { wave: 1, name: "Avanguardia dei Mondi", sub: "Ondata 1/4 · Boss a fasi", coins: 15, tierM: 0.96, mod: null, ruleTxt: "Campo neutro" },
+    { wave: 2, name: "Signori della Tattica", sub: "Ondata 2/4 · Notte di coppa (+critici)", coins: 25, tierM: 1.08, mod: { crit: 0.10 }, ruleTxt: "Notte di coppa (+10% critici)" },
+    { wave: 3, name: "Guardia Imperiale", sub: "Ondata 3/4 · Muraglia (+25🛡️ nemici)", coins: 35, tierM: 1.20, mod: { foeSh: 25 }, ruleTxt: "Muraglia (nemici +25🛡️ iniziale)" },
+    { wave: 4, name: "Il Pantheon dei Dieci", sub: "Ondata 4/4 · Finale Leggendaria", coins: 75, tierM: 1.32, mod: { cd: 1 }, ruleTxt: "Vento in poppa (abilità −1 turno)" }
+  ];
+  function relayFoes(wave, seed) {
+    const rand = rng(hash("staffetta_" + wave + "_" + (seed || 1)));
+    const ss = sagas();
+    if (wave >= 4) {
+      const elites = S().CARDS.filter((c) => c.rar === "l" || c.rar === "e").slice().sort((a, b) => (b.at + b.df + b.te) - (a.at + a.df + a.te));
+      const pool = elites.length >= 5 ? elites : S().CARDS.slice();
+      const out = [], used = {}, usedSg = {};
+      const bossCard = pool[Math.floor(rand() * Math.min(8, pool.length))];
+      out.push(bossCard); used[bossCard.id] = 1; usedSg[bossCard.saga] = 1;
+      const roles = ["A", "C", "D", "P"];
+      roles.forEach((rl) => {
+        let cand = pool.filter((c) => !used[c.id] && c.role === rl && !usedSg[c.saga]);
+        if (!cand.length) cand = pool.filter((c) => !used[c.id] && c.role === rl);
+        if (!cand.length) cand = S().CARDS.filter((c) => !used[c.id]);
+        const pk = cand[Math.floor(rand() * cand.length)];
+        used[pk.id] = 1; usedSg[pk.saga] = 1; out.push(pk);
+      });
+      return { foes: out, boss: true, theme: "pantheon" };
+    }
+    const theme = ss[(wave * 5 + (seed || 0)) % ss.length];
+    let foes = enemyTeam(rand, wave + 1, theme, 5);
+    const top = S().CARDS.filter((c) => c.saga === theme).sort((a, b) => (b.at + b.df + b.te) - (a.at + a.df + a.te))[0];
+    if (top) foes = [top].concat(foes.filter((c) => c.id !== top.id)).slice(0, 5);
+    return { foes, boss: true, theme };
+  }
+  function cardSlotMini(id, ar, cls, badgeTxt) {
+    if (!id || !S().BY[id]) return `<div class="arU ${cls || ""}" style="--tc:#4a3a6a;opacity:.5"><div class="im">+</div><div class="nm">vuoto</div></div>`;
+    const c = S().BY[id], lv = lvOf(ar.xp[id] | 0);
+    return unit({ id, side: "m", n: name(id), tr: trOf(S().eff(c)), hp: 1, maxhp: 1, shield: 0, taunt: 0 }, cls || "").replace('<div class="hp"><i style="width:100%"></i></div>', `<div class="hp" style="background:none;color:#ffd23f;font-weight:800;height:auto">${esc(badgeTxt || ("Liv. " + lv))}</div>`);
+  }
+  function openStaffetta(backFromExt) {
+    if (backFromExt) BACK = backFromExt;
+    if (!S()) return;
+    S().sync && S().sync();
+    const body = shell("📟 Staffetta dei Dieci"), rr = S()._load(), ar = load();
+    const bn = rr.bench || [], freeCards = rr.own.filter((id) => !rr.team.includes(id) && S().BY[id]).sort((a, b) => {
+      const ca = S().eff(S().BY[a]), cb = S().eff(S().BY[b]);
+      return (cb.at + cb.df + cb.te) - (ca.at + ca.df + ca.te);
+    });
+    const has = rr.team.length > 0, rn = ar.relayRun;
+    let h = `<p class="sum">Boss Rush in <b>4 ondate di Campioni</b>: schieri <b>5 titolari</b> e fino a <b>5 riserve in panchina</b>. Quando un titolare va KO, la lavagnetta luminosa fa subentrare subito la prima riserva (+25🛡️ scudo d'ingresso), oppure puoi chiamare un <b>cambio volante</b> (1 a round) toccando la panchina!</p>`;
+    h += `<div class="arRelayWaveRow">${RELAY_WAVES.map((w) => {
+      const done = rn ? w.wave < rn.wave : w.wave <= ar.relayBest && ar.relayWins > 0;
+      const cur = rn ? w.wave === rn.wave : w.wave === 1;
+      return `<div class="arRelayStep${cur ? " cur" : ""}${done ? " done" : ""}"><b>Ondata ${w.wave}</b><span>+${w.coins}🪙</span></div>`;
+    }).join("")}</div>`;
+    h += `<div class="sec">⚽ I 5 Titolari · Intesa +${(S().intesa(rr.team).n * 1.5).toFixed(1)}%</div>${teamBar(rr, ar)}`;
+    h += `<div class="sec">🪑 Le 5 Riserve in Panchina (${bn.length}/5) · tocca per rimuovere</div><div class="arRow" data-bench-bar="1">${[0, 1, 2, 3, 4].map((k) => cardSlotMini(bn[k], ar, bn[k] ? "tg" : "", bn[k] ? `🪑 #${k + 6}` : "libero")).join("")}</div>`;
+    h += `<div class="big"><button type="button" data-stf="best10">✨ Convoca migliori 10<small>5 titolari + 5 riserve in un tocco</small></button><button type="button" data-stf="sogni">🃏 Vai a Squadra dei Sogni<small>cambia titolari o modulo</small></button></div>`;
+    if (rn) {
+      h += `<div class="big"><button type="button" data-stf="cont" style="border-color:#4ade80;background:#102b22">▶ Continua Ondata ${rn.wave}/4<small>${rn.team.length} in campo · ${rn.bench.length} in panchina</small></button><button type="button" data-stf="new">↺ Nuova Staffetta<small>riparti da Ondata 1 con la rosa attuale</small></button></div>`;
+    } else {
+      h += `<div class="big"><button type="button" data-stf="start" ${!has ? "disabled" : ""} style="border-color:#4ade80;background:#102b22">📟 Inizia Staffetta · Ondata 1/4<small>${rr.team.length} titolari + ${bn.length} riserve</small></button><button type="button" data-stf="menu">◂ Menu Arena<small>torna alle altre modalità</small></button></div>`;
+    }
+    if (freeCards.length) {
+      h += `<div class="sec">Carte disponibili per la Panchina (${freeCards.length}) · tocca per convocare/togliere</div><div class="arRelayPool">${freeCards.slice(0, 20).map((id) => {
+        const inB = bn.includes(id);
+        return cardSlotMini(id, ar, inB ? "cur" : "", inB ? "✓ Panchina" : "Tocca +");
+      }).join("")}</div>`;
+    }
+    if (rn) h += `<div class="big"><button type="button" data-stf="menu">◂ Menu Arena<small>la Staffetta resta salvata</small></button><span></span></div>`;
+    body.innerHTML = h;
+
+    body.querySelectorAll('[data-bench-bar="1"] .arU[data-u]').forEach((el) => {
+      el.onclick = () => { if (S().toggleBench) S().toggleBench(el.dataset.u); openStaffetta(); };
+    });
+    body.querySelectorAll(".arRelayPool .arU[data-u]").forEach((el) => {
+      el.onclick = () => { if (S().toggleBench) S().toggleBench(el.dataset.u); openStaffetta(); };
+    });
+    const b10 = body.querySelector('[data-stf="best10"]'); if (b10) b10.onclick = () => { bestTen(); openStaffetta(); };
+    const bSg = body.querySelector('[data-stf="sogni"]'); if (bSg) bSg.onclick = () => { close(); S().open(() => openStaffetta()); };
+    const bMn = body.querySelector('[data-stf="menu"]'); if (bMn) bMn.onclick = () => open();
+    const bSt = body.querySelector('[data-stf="start"]'); if (bSt) bSt.onclick = () => startStaffettaWave(true);
+    const bNw = body.querySelector('[data-stf="new"]'); if (bNw) bNw.onclick = () => startStaffettaWave(true);
+    const bCn = body.querySelector('[data-stf="cont"]'); if (bCn) bCn.onclick = () => relayIntervallo();
+  }
+  function startStaffettaWave(fresh) {
+    const ar = load(), rr = S()._load();
+    let rn = ar.relayRun;
+    if (fresh || !rn) {
+      if (!rr.team.length) return openStaffetta();
+      const bn = (rr.bench || []).filter((id) => !rr.team.includes(id) && S().BY[id]).slice(0, 5);
+      rn = { wave: 1, seed: (Date.now() & 0xffff) || 7, team: rr.team.slice(), bench: bn, fallen: [], hp: {}, used: {} };
+      ar.relayRun = rn;
+      save(ar);
+    }
+    const W = RELAY_WAVES[Math.min(RELAY_WAVES.length - 1, rn.wave - 1)];
+    const F = relayFoes(rn.wave, rn.seed);
+    const refIds = rn.team.concat(rn.bench);
+    const tmSpecs = ownList(rn.team, refIds.slice(0, 5), ar);
+    const bnSpecs = ownList(rn.bench, refIds.slice(0, 5), ar).map((o) => Object.assign({}, o, { hp: rn.hp[o.c.id], usedOnce: !!rn.used[o.c.id] }));
+    start({
+      title: `📟 Staffetta · Ondata ${rn.wave}/4`,
+      sub: `${W.name} · ${W.ruleTxt}`,
+      team: tmSpecs,
+      bench: bnSpecs,
+      fallen: rn.fallen || [],
+      hp: rn.hp,
+      foes: F.foes,
+      boss: true,
+      floor: rn.wave * 8,
+      tierM: W.tierM,
+      mod: W.mod,
+      isRelay: true,
+      relayCut: { wave: rn.wave, name: W.name },
+      onEnd: (res, b) => {
+        const a = load(), curR = a.relayRun || rn;
+        const playedIds = (b && b.allPlayed && b.allPlayed.length) ? b.allPlayed : curR.team;
+        const playedUnits = playedIds.map((id) => ({ id }));
+        const vNew = S() && S().recordVoci ? S().recordVoci(playedIds) : [];
+        if (res === "lose") {
+          a.relayBest = Math.max(a.relayBest | 0, curR.wave - 1);
+          a.relayRun = null;
+          save(a);
+          const ups = giveXp(playedUnits);
+          const LL = [`Staffetta interrotta all'Ondata ${curR.wave}/4 (${W.name}). Record: ${a.relayBest}/4.`, ups.length ? "📈 " + ups.map(esc).join(" · ") : "Tutte le carte scese in campo hanno guadagnato esperienza Arena."];
+          vNew.forEach((v) => LL.push("🎙️ Nuova Voce dallo Spogliatoio: «" + esc(v.title) + "»!"));
+          return result(res, false, LL, ["📟 Riprova Staffetta", "riparti da Ondata 1", () => startStaffettaWave(true)]);
+        }
+        // Vittoria dell'ondata: doppia XP Arena ai protagonisti
+        giveXp(playedUnits);
+        const ups = giveXp(playedUnits);
+        safe(() => window.addCoins(W.coins), 0);
+        a.wins++;
+        a.bosses++;
+        a.relayBest = Math.max(a.relayBest | 0, curR.wave);
+        const nextHp = {}, nextUsed = Object.assign({}, curR.used || {});
+        const aliveTeam = alive(b.team);
+        aliveTeam.forEach((u) => {
+          nextHp[u.id] = Math.min(u.maxhp, u.hp + Math.round(u.maxhp * 0.20));
+          nextUsed[u.id] = true;
+        });
+        const remBench = (b.bench || []).map((sp) => {
+          const id = sp.c.id;
+          if (sp.hp != null) {
+            const uTmp = mk(sp.c, "p", { st: sp.st, m: sp.m });
+            nextHp[id] = Math.min(uTmp.maxhp, sp.hp + Math.round(uTmp.maxhp * 0.25));
+          }
+          if (sp.usedOnce) nextUsed[id] = true;
+          return id;
+        });
+        curR.team = aliveTeam.map((u) => u.id);
+        curR.bench = remBench;
+        curR.fallen = (b.fallen || []).slice();
+        while (curR.team.length < 5 && curR.bench.length > 0) curR.team.push(curR.bench.shift());
+        curR.hp = nextHp;
+        curR.used = nextUsed;
+        if (curR.wave >= 4) {
+          a.relayWins = (a.relayWins | 0) + 1;
+          a.relayRun = null;
+          save(a);
+          const LL = [
+            `🏆 HAI TRIONFATO NELLA STAFFETTA DEI DIECI! Tutte le 4 ondate battute!`,
+            `+${W.coins} monete · Trofei Staffetta: ${a.relayWins} · Superstiti: ${curR.team.length + curR.bench.length}/${curR.team.length + curR.bench.length + curR.fallen.length}.`
+          ];
+          if (ups.length) LL.push("📈 " + ups.map(esc).join(" · "));
+          vNew.forEach((v) => LL.push("🎙️ Nuova Voce dallo Spogliatoio: «" + esc(v.title) + "»!"));
+          return result(res, true, LL, ["📟 Nuova Staffetta", "rigioca da Ondata 1", () => startStaffettaWave(true)]);
+        }
+        curR.wave++;
+        curR.lastMsg = `Ondata ${curR.wave - 1} vinta (+${W.coins}🪙)! Spogliatoio: +20% PV in campo, +25% PV in panchina.${ups.length ? " 📈 " + ups.join(" · ") : ""}`;
+        a.relayRun = curR;
+        save(a);
+        relayIntervallo();
+      },
+      quit: () => { close(); openStaffetta(); }
+    });
+  }
+  function relayIntervallo() {
+    const ar = load(), rn = ar.relayRun;
+    if (!rn) return openStaffetta();
+    let selStarter = null;
+    const W = RELAY_WAVES[Math.min(RELAY_WAVES.length - 1, rn.wave - 1)];
+    function draw() {
+      const body = shell(`📟 Spogliatoio · verso Ondata ${rn.wave}/4`);
+      let h = `<div class="arRes"><h3>Prossima sfida: ${esc(W.name)}</h3><p class="sum">${esc(rn.lastMsg || "Prepara la formazione prima del fischio d'inizio.")}<br><b>Regola campo:</b> ${esc(W.ruleTxt)} · Premio: <b>+${W.coins} monete</b>.</p></div>`;
+      h += `<div class="sec">⚽ In campo (${rn.team.length}/5) · ${selStarter ? "ora tocca una riserva per scambiarla" : "tocca un titolare per cambiarlo con la panchina"}</div>`;
+      h += `<div class="arRow" data-iv-team="1">${[0, 1, 2, 3, 4].map((k) => {
+        const id = rn.team[k];
+        if (!id) return cardSlotMini(null, ar);
+        const c = S().BY[id], uTmp = mk(c, "p", { st: S().eff(c), m: 1 + (lvOf(ar.xp[id] | 0) - 1) * 0.04 });
+        const curH = rn.hp[id] != null ? Math.min(uTmp.maxhp, rn.hp[id]) : uTmp.maxhp;
+        const pct = Math.max(5, Math.round((curH / uTmp.maxhp) * 100));
+        return cardSlotMini(id, ar, selStarter === id ? "swapSel" : "", `PV ${pct}%`);
+      }).join("")}</div>`;
+      h += `<div class="sec">🪑 Panchina pronta (${rn.bench.length}) ${rn.fallen.length ? `· 💥 Caduti KO: ${rn.fallen.length}` : ""}</div>`;
+      h += `<div class="arRow" data-iv-bench="1">${[0, 1, 2, 3, 4].map((k) => {
+        const id = rn.bench[k];
+        if (!id) return cardSlotMini(null, ar, "", "vuoto");
+        const c = S().BY[id], uTmp = mk(c, "p", { st: S().eff(c), m: 1 + (lvOf(ar.xp[id] | 0) - 1) * 0.04 });
+        const curH = rn.hp[id] != null ? Math.min(uTmp.maxhp, rn.hp[id]) : uTmp.maxhp;
+        const pct = Math.max(5, Math.round((curH / uTmp.maxhp) * 100));
+        return cardSlotMini(id, ar, selStarter ? "tg" : "", `🪑 PV ${pct}%`);
+      }).join("")}</div>`;
+      h += `<div class="big"><button type="button" data-iv="go" style="border-color:#4ade80;background:#102b22">▶ Gioca Ondata ${rn.wave}/4<small>${esc(W.name)}</small></button><button type="button" data-iv="pause">⏸ Sospendi<small>torna alla sala Staffetta</small></button></div>`;
+      body.innerHTML = h;
+      body.querySelectorAll('[data-iv-team="1"] .arU[data-u]').forEach((el) => {
+        el.onclick = () => { selStarter = selStarter === el.dataset.u ? null : el.dataset.u; draw(); };
+      });
+      body.querySelectorAll('[data-iv-bench="1"] .arU[data-u]').forEach((el) => {
+        el.onclick = () => {
+          const bId = el.dataset.u;
+          if (!selStarter) { selStarter = rn.team[0] || null; }
+          const tIdx = rn.team.indexOf(selStarter), bIdx = rn.bench.indexOf(bId);
+          if (tIdx >= 0 && bIdx >= 0) {
+            rn.team[tIdx] = bId;
+            rn.bench[bIdx] = selStarter;
+            selStarter = null;
+            ar.relayRun = rn;
+            save(ar);
+            draw();
+          }
+        };
+      });
+      body.querySelector('[data-iv="go"]').onclick = () => startStaffettaWave(false);
+      body.querySelector('[data-iv="pause"]').onclick = () => openStaffetta();
+    }
+    draw();
+  }
+  window.__arena = { open, close, start, act, state: () => B, load, save, _fast: (v) => { FAST = !!v; }, lvOf, mk, floorFoes, TR, ABIL, PERKS, RELIQUES, UNIQUE_SKILLS, MODS, TMODS, floorRule, bivio, evento, healRun, EVENTS, cutinDuo, openStaffetta, startStaffettaWave, relayIntervallo, relayFoes, RELAY_WAVES, bestTen, cutinSub, cutinRelayStart };
 })();

@@ -107,6 +107,139 @@ async function run(w) {
   // boss al piano 10
   const f10 = await page.evaluate(() => window.__arena.floorFoes(10)); if (!f10.boss || f10.foes.length < 3) errors.push("boss piano 10: " + JSON.stringify(f10.boss));
   await page.evaluate(() => { const A = window.__arena, a = A.load(); a.run = null; A.save(a); });
+
+  // Staffetta dei Dieci: panchina in Squadra dei Sogni, bestTen, subentro KO automatico, cambio tattico, intervallo e 4 ondate
+  await page.evaluate(() => {
+    window.__arena._fast(false);
+    const S = window.__sogni, r = S._load();
+    ["leo", "dario", "nico", "tommy", "sara", "ruggeri", "cm_bastiano", "cm_leone", "cm_saverio", "cm_pio", "tc_brunilde", "of_ferro"].forEach((id) => {
+      if (S.BY[id] && !r.own.includes(id)) r.own.push(id);
+    });
+    S._save(r);
+  });
+  const stfPrep = await page.evaluate(() => {
+    const S = window.__sogni, A = window.__arena;
+    S.open();
+    const hasBenchBox = !!document.querySelector(".sgOv .sgBenchBox");
+    const picked = A.bestTen();
+    A.openStaffetta();
+    return {
+      hasBenchBox,
+      teamLen: picked.team.length,
+      benchLen: picked.bench.length,
+      disjoint: picked.team.every((id) => !picked.bench.includes(id)),
+      hasStartBtn: !!document.querySelector('.arOv [data-stf="start"]')
+    };
+  });
+  if (!stfPrep.hasBenchBox || stfPrep.teamLen !== 5 || stfPrep.benchLen !== 5 || !stfPrep.disjoint || !stfPrep.hasStartBtn) {
+    errors.push("Staffetta preparazione: " + JSON.stringify(stfPrep));
+  }
+  if (w === 390) await L.shot(page, "arena_staffetta_lobby");
+
+  // Avvia Ondata 1 con cut-in e verifica striscia panchina + subentro KO automatico e cambio tattico
+  await page.evaluate(() => document.querySelector('.arOv [data-stf="start"]').click());
+  await page.waitForTimeout(250);
+  if (w === 390) await L.shot(page, "arena_staffetta_cutin");
+  const stfSubCheck = await page.evaluate(() => {
+    const A = window.__arena;
+    let B = A.state();
+    clearTimeout(B.wait);
+    const hasStrip = !!document.querySelector(".arOv .arBenchStrip");
+    const b0 = B.bench.length;
+    const firstBenchId = B.bench[0].c.id;
+    const fallenId = B.team[0].id;
+    // Simula KO del primo titolare: deve entrare subito la prima riserva con +25 scudo
+    B.team[0].hp = 0;
+    // Forza turno di un alleato vivo per verificare cambio tattico e subentro
+    B.cur = B.team[1];
+    A.act("defend");
+    const entered = B.team[0].id === firstBenchId && B.team[0].hp > 0 && B.team[0].shield >= 25;
+    const cutBoard = !!document.querySelector(".arSubBoard");
+    A._fast(true);
+    clearTimeout(B.wait);
+    // Verifica cambio volante (1 per round)
+    B.swappedRound = false;
+    B.cur = B.team[2];
+    const outTact = B.cur.id, inTact = B.bench[0].c.id;
+    const okSwap1 = A.act("sub", inTact);
+    const blockedSwap2 = A.act("sub");
+    return {
+      hasStrip,
+      b0,
+      entered,
+      cutBoard,
+      fallenTracked: B.fallen.includes(fallenId),
+      okSwap1: okSwap1 && B.team[2].id === inTact && B.bench.some((x) => x.c.id === outTact),
+      blockedSwap2: blockedSwap2 === false
+    };
+  });
+  if (!stfSubCheck.hasStrip || stfSubCheck.b0 !== 5 || !stfSubCheck.entered || !stfSubCheck.cutBoard || !stfSubCheck.fallenTracked || !stfSubCheck.okSwap1 || !stfSubCheck.blockedSwap2) {
+    errors.push("Staffetta subentri: " + JSON.stringify(stfSubCheck));
+  }
+
+  // Completa Ondata 1 -> Intervallo spogliatoio (scambio tra campo e panchina) -> Completa Ondate 2, 3 e 4
+  const stfRunRes = await page.evaluate(() => {
+    const A = window.__arena;
+    A._fast(true);
+    const winCurrentBattle = () => {
+      const B = A.state();
+      if (!B) return false;
+      clearTimeout(B.wait);
+      B.foes.forEach((f) => { f.ph = 3; f.shield = 0; f.hp = 1; });
+      for (let k = 0; k < 40 && !B.over; k++) {
+        if (!B.cur || B.cur.side !== "p") B.cur = B.team.find((u) => u.hp > 0);
+        A.act("attack");
+      }
+      return B.over === "win";
+    };
+    const coins0 = window.__borgoApi.coins();
+    const w1 = winCurrentBattle();
+    return { w1, coins0 };
+  });
+  await page.waitForTimeout(120);
+  if (w === 390) await L.shot(page, "arena_staffetta_intervallo");
+  const stfFinish = await page.evaluate(async (coins0) => {
+    const A = window.__arena;
+    const rn1 = A.load().relayRun;
+    const hasIntervallo = !!(rn1 && rn1.wave === 2 && document.querySelector('[data-iv="go"]'));
+    // Scambia un titolare con una riserva nello spogliatoio
+    const t0 = rn1 && rn1.team[0], b0 = rn1 && rn1.bench[0];
+    const tEl = document.querySelector('[data-iv-team="1"] .arU[data-u]');
+    const bEl = document.querySelector('[data-iv-bench="1"] .arU[data-u]');
+    if (tEl && bEl) { tEl.click(); bEl.click(); }
+    const rnSwapped = A.load().relayRun;
+    const swappedOk = !!(rnSwapped && b0 && rnSwapped.team[0] === b0 && rnSwapped.bench[0] === t0);
+    // Gioca Ondate 2, 3, 4 fino al trionfo
+    for (let wv = 2; wv <= 4; wv++) {
+      const goBtn = document.querySelector('[data-iv="go"]');
+      if (goBtn) goBtn.click();
+      const B = A.state();
+      if (B) {
+        clearTimeout(B.wait);
+        B.foes.forEach((f) => { f.ph = 3; f.shield = 0; f.hp = 1; });
+        for (let k = 0; k < 40 && !B.over; k++) {
+          if (!B.cur || B.cur.side !== "p") B.cur = B.team.find((u) => u.hp > 0);
+          A.act("attack");
+        }
+      }
+      await new Promise((r) => setTimeout(r, 25));
+    }
+    const arEnd = A.load();
+    const coins1 = window.__borgoApi.coins();
+    return {
+      hasIntervallo,
+      swappedOk,
+      relayBest: arEnd.relayBest,
+      relayWins: arEnd.relayWins,
+      runCleared: arEnd.relayRun === null,
+      coinsGain: coins1 - coins0
+    };
+  }, stfRunRes.coins0);
+  if (!stfRunRes.w1 || !stfFinish.hasIntervallo || !stfFinish.swappedOk || stfFinish.relayBest !== 4 || stfFinish.relayWins < 1 || !stfFinish.runCleared || stfFinish.coinsGain !== 150) {
+    errors.push("Staffetta corsa 4 ondate: " + JSON.stringify({ stfRunRes, stfFinish }));
+  }
+
   L.check(`Arena dei Sogni e Torre (${w} px)`, errors); await browser.close();
 }
 (async () => { await run(390); await run(320); })();
+
