@@ -571,7 +571,16 @@
     body.querySelector('[data-tele]').onclick = () => { const x = load(); x.tele = !x.tele; save(x); menu(); };
     body.querySelector('[data-pro]').onclick = () => { const x = load(); x.pro = !x.pro; save(x); menu(); };
     body.querySelector('[data-gfx]').onclick = () => { const x = load(); x.gfx = x.gfx === "phaser" ? "2d" : "phaser"; save(x); menu(); };
-    body.querySelector('[data-combo]').onclick = () => { const x = load(); x.combo = !x.combo; save(x); menu(); };
+    body.querySelector('[data-combo]').onclick = () => {
+      const x = load();
+      x.combo = !x.combo;
+      save(x);
+      if (typeof window.showFeatureCutIn === "function") {
+        window.showFeatureCutIn("TIRO COMBINATO", x.combo ? "ATTIVATO · SUPER CON COMPAGNO VICINO" : "DISATTIVATO", "🤝", () => menu());
+      } else {
+        menu();
+      }
+    };
     body.querySelector('[data-mode]').onclick = () => { const x = load(); x.mode = x.mode === 5 ? 3 : 5; save(x); menu(); };
     body.querySelector('[data-go="cup"]').onclick = () => cup(0);
     body.querySelectorAll("[data-l]").forEach((b) => (b.onclick = () => game(+b.dataset.l, null)));

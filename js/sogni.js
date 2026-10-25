@@ -1504,7 +1504,7 @@
     const voceChip = unl
       ? `<button type="button" class="sgVoceMiniBtn" data-voce-open="${pk}">🎙️ ${seen ? "Rileggi dialogo" : `Nuovo dialogo! (+${VOCE_COIN}🪙)`}</button>`
       : `<span class="sgVoceProgTag">🎙️ Spogliatoio: ${cnt}/${BOND_GOAL} partite</span>`;
-    return `<div class="sgComboBanner"><div class="sgComboIcon">⚡</div><div class="sgComboInfo"><b>Attacco Combinato: «${esc(activeCombo.title)}»</b><span>Doppio colpo pronto con <em>${esc(name(activeCombo.id1))}</em> &amp; <em>${esc(name(activeCombo.id2))}</em>.</span><div style="margin-top:5px">${voceChip}</div></div></div>`;
+    return `<div class="sgComboBanner"><div class="sgComboIcon">⚡</div><div class="sgComboInfo"><b>Attacco Combinato: «${esc(activeCombo.title)}»</b><span>Doppio colpo attivo con <em>${esc(name(activeCombo.id1))}</em> &amp; <em>${esc(name(activeCombo.id2))}</em>.</span><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">${voceChip}<button type="button" class="sgVoceMiniBtn" data-combo-preview="${esc(activeCombo.id1)}:${esc(activeCombo.id2)}:${esc(activeCombo.title)}" style="background:linear-gradient(135deg,#7e22ce,#be185d);border-color:#ffd23f">⚡ Prova Attacco Combinato</button></div></div></div>`;
   }
 
   function renderLinksList(r) {
@@ -1517,6 +1517,17 @@
   function bindVoceBannerBtns(body) {
     body.querySelectorAll(".sgComboContainer [data-voce-open]").forEach((btn) => {
       btn.onclick = () => openVoceScene(btn.dataset.voceOpen, () => open());
+    });
+    body.querySelectorAll(".sgComboContainer [data-combo-preview]").forEach((btn) => {
+      btn.onclick = () => {
+        const parts = btn.dataset.comboPreview.split(":");
+        const id1 = parts[0], id2 = parts[1], title = parts.slice(2).join(":");
+        if (window.__arena && typeof window.__arena.cutinDuo === "function") {
+          window.__arena.cutinDuo({ id: id1, n: name(id1) }, { id: id2, n: name(id2) }, title);
+        } else if (typeof window.showFeatureCutIn === "function") {
+          window.showFeatureCutIn("⚡ ATTACCO COMBINATO!", `«${title}» · ${name(id1)} & ${name(id2)}`, "⚡");
+        }
+      };
     });
   }
 

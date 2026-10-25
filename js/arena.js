@@ -593,12 +593,30 @@
   function shake(u) { if (FAST || !OV) return; const el = OV.querySelector(`.arU[data-u="${u.id}"][data-s="${u.side}"]`); if (el) { el.classList.add("shk"); setTimeout(() => el.classList.remove("shk"), 320); } }
   function cutin(u, ab) { if (FAST || !OV) return; const bt = OV.querySelector(".arBt"); if (!bt) return; const c = document.createElement("div"); c.className = "arCut"; c.innerHTML = `${img(u.id) ? `<img alt="" src="${img(u.id)}">` : ""}<div><b>${esc(ab)}</b><span>${esc(u.n)} · ${esc(ROLE[u.role] || u.role)}</span></div>`; bt.appendChild(c); setTimeout(() => c.remove(), 1150); }
   function cutinDuo(u1, u2, ab) {
-    if (FAST || !OV) return;
-    const bt = OV.querySelector(".arBt"); if (!bt) return;
-    const c = document.createElement("div"); c.className = "arCut duo";
-    c.innerHTML = `<div class="duoImgs">${img(u1.id) ? `<img alt="" src="${img(u1.id)}">` : ""}${img(u2.id) ? `<img alt="" src="${img(u2.id)}">` : ""}</div><div><b style="color:#ffd23f">⚡ ATTACCO COMBINATO!</b><span style="font-size:13px;font-weight:800;color:#fff">${esc(ab)}</span><span style="font-size:11px;color:#93c5fd">${esc(u1.n)} &amp; ${esc(u2.n)}</span></div>`;
-    bt.appendChild(c);
-    setTimeout(() => c.remove(), 1300);
+    if (FAST) return;
+    const c = document.createElement("div");
+    c.className = "salTreeCutIn";
+    c.style.zIndex = "9999";
+    const im1 = img(u1.id), im2 = img(u2.id);
+    c.innerHTML = `
+      <div class="salTreeCutStripe" style="background:linear-gradient(90deg,transparent,#f43f5e88,#ffd23fcc,transparent)"></div>
+      <div class="salTreeCutContent" style="border-top-color:#ffd23f;border-bottom-color:#f43f5e">
+        <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:8px">
+          ${im1 ? `<img src="${im1}" style="width:60px;height:60px;border-radius:12px;border:2px solid #ffd23f;background:#0b1026;box-shadow:0 0 12px rgba(255,210,63,.5)">` : ""}
+          <span style="font-size:28px">⚡</span>
+          ${im2 ? `<img src="${im2}" style="width:60px;height:60px;border-radius:12px;border:2px solid #38bdf8;background:#0b1026;box-shadow:0 0 12px rgba(56,189,248,.5)">` : ""}
+        </div>
+        <div class="salTreeCutTitle" style="color:#ffd23f">⚡ ATTACCO COMBINATO!</div>
+        <div style="font-family:'Dela Gothic One',Impact,sans-serif;font-size:18px;color:#fff;margin:4px 0">${esc(ab)}</div>
+        <div class="salTreeCutSub" style="color:#fbcfe8">${esc(u1.n)} &amp; ${esc(u2.n)}</div>
+      </div>
+    `;
+    document.body.appendChild(c);
+    safe(() => window.sfx && window.sfx("special"));
+    setTimeout(() => {
+      c.classList.add("salTreeCutOut");
+      setTimeout(() => c.remove(), 320);
+    }, 1100);
   }
   // ------------------------------------------------------------ menu, modalità, Torre
   const bestTeam = () => { const s = S(), r = s._load(); const own = r.own.map((id) => s.BY[id]).filter(Boolean).sort((a, b) => (s.eff(b).at + s.eff(b).df + s.eff(b).te) - (s.eff(a).at + s.eff(a).df + s.eff(a).te)); r.team = own.slice(0, 5).map((c) => c.id); s._save(r); return r.team; };
@@ -777,5 +795,5 @@
       body.querySelector('[data-go="on"]').onclick = () => torre(false);
     }));
   }
-  window.__arena = { open, close, start, act, state: () => B, load, save, _fast: (v) => { FAST = !!v; }, lvOf, mk, floorFoes, TR, ABIL, PERKS, RELIQUES, UNIQUE_SKILLS, MODS, TMODS, floorRule, bivio, evento, healRun, EVENTS };
+  window.__arena = { open, close, start, act, state: () => B, load, save, _fast: (v) => { FAST = !!v; }, lvOf, mk, floorFoes, TR, ABIL, PERKS, RELIQUES, UNIQUE_SKILLS, MODS, TMODS, floorRule, bivio, evento, healRun, EVENTS, cutinDuo };
 })();
