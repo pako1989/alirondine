@@ -16,7 +16,7 @@
   const api = () => window.__borgoApi;
   const safe = (fn, d) => { try { return fn(); } catch (e) { return d; } };
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const rec = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "{}"), {}); return { v: 1, seen: r.seen && typeof r.seen === "object" ? r.seen : {}, last: typeof r.last === "string" ? r.last : "", favs: Array.isArray(r.favs) ? r.favs : [] }; };
+  const rec = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "{}"), {}); return { v: 1, seen: r.seen && typeof r.seen === "object" ? r.seen : {}, last: typeof r.last === "string" ? r.last : "" }; };
   const recSave = (r) => safe(() => localStorage.setItem(KEY, JSON.stringify(r)));
   const hero = () => safe(() => window.heroLoad && window.heroLoad(), null);
 
@@ -30,7 +30,6 @@
     { id: "gala", t: "Il Rapimento del Pallone d'Oro", e: "🏆", g: ["mistero", "commedia", "avventura"], mod: "__gala", key: "ali-di-rondine.gala", ch: 3, cover: "pd_titolo", d: "Gala alla villa del Presidente: il Pallone d'Oro sparisce al blackout, il ponte è crollato e nessuno può uscire. Otto sospettati, tutti con un segreto. Interroga, osserva chi c'è in ogni stanza e confronta dove dicevano di essere con dove erano davvero. Quattro finali. Novità: il Registro delle Presenze. Minigioco: Ping-Pong da Salone.", hints: { giustizia: "Con quattro contraddizioni e tre prove, accusa il Presidente.", capro: "Accusa Gualtiero: il colpevole comodo.", silenzio: "Fai confessare Livia e accetta il suo patto.", segreto: "Segreto: sei contraddizioni, tutte le prove, la confessione di Livia e Zeno battuto a ping-pong." } },
     { id: "cavaliere", t: "Il Cavaliere del Fischio", e: "🦇", g: ["mistero", "avventura", "dramma"], mod: "__cavaliere", key: "ali-di-rondine.cavaliere", ch: 4, cover: "cf_titolo", d: "Borgo Gotico sotto la pioggia: un ex portiere miliardario veste di notte un mantello e dà la caccia a chi trucca le partite. Il Pierrot Bianco ruba i palloni e lascia indovinelli. Rampino sui tetti, salti a rischio, guardie da evitare nell'ombra, interrogatori. Quattro capitoli, quattro finali. Novità: i Tetti. Minigioco: Interrogatorio.", hints: { giustizia: "Raccogli Libro Mastro, fischietto d'oro e cartella clinica, poi consegna tutto al Commissario.", pieta: "Ascolta il Pierrot fino alla fine e lascialo andare.", ombra: "Con Timore 40 o più, lascia cadere il Pierrot.", segreto: "Segreto: tutti e sei gli indovinelli e il Libro Mastro." } },
     { id: "mondiale", t: "Ali di Rondine · Mondiale Giovanile", e: "🌍", g: ["sport", "avventura", "commedia"], mod: "__mondiale", key: "ali-di-rondine.mondiale", ch: 4, cover: "mg_titolo", d: "La nazionale under-16 al Mondiale: raduno in Italia, samba a Rio, neve al Nord, finale a Tokyo. Recluta la squadra (due vie per ognuno), allenala e passa la palla. Quattro capitoli, quattro finali. Novità: la Catena (ruoli e sinergie). Minigioco: Catena d'attacco.", hints: { oro: "Vinci la finale.", argento: "Perdi la finale, a testa alta.", squadra: "Vinci la finale con Intesa 50 o più.", segreto: "Segreto: vinci la finale con Intesa 50 e almeno 3 catene perfette." } },
-    { id: "diga", t: "La Diga di Valpiana", e: "🌊", g: ["avventura", "dramma", "sport"], mod: "__diga", key: "ali-di-rondine.diga", ch: 4, cover: "dg_titolo", d: "Un paese di montagna, una diga di quarant'anni e un lago che sale: gioca la Coppa della Piena per pagare la riparazione, prima che arrivi l'acqua. Ermete custodisce un registro, Zita un pallone sepolto, Gino una teoria sui sacchi. Novità: il livello dell'acqua, che sale con le ore e allaga davvero le mappe. Minigioco: Argine (Phaser).", hints: { diga: "Serve Argine 6, Fiducia 6 e vincere l'ultima prova dell'Argine.", scarichi: "Sempre possibile: apri gli scarichi verso i Prati.", sommerso: "Serve Memoria 2: lascia andare il vecchio paese.", campo: "Segreto: Memoria 5, Fiducia 5 e il Pallone di Zita." } },
     { id: "vuota", t: "Operazione Scatola Vuota", e: "📦", g: ["avventura", "mistero", "sport"], mod: "__vuota", key: "ali-di-rondine.vuota", ch: 4, cover: "vs_titolo", d: "Un'isola-fortezza, una squadra dimenticata e un Rapporto che nessuno deve leggere. Ottone, ex capitano con una scatola di cartone, ti insegna a non farti vedere: guardie con il cono di luce, ombre da usare, una scatola dove infilarti. Novità: l'Allerta (Calma, Sospetto, Allarme, Caccia) e il nascondiglio. Minigioco: Infiltrazione.", hints: { pubblico: "Serve Fiducia 5 o più e diffondere il Rapporto.", fuoco: "Serve bruciare il Rapporto.", scatola: "Serve Fiducia 7, Silenzio 6 e la Foto degli Aironi.", silenzio: "Succede se vieni scoperto all'ultima infiltrazione (Allerta massima)." } },
     { id: "circuiti", t: "Neo-Rondine 2099", e: "⚡", g: ["scifi", "sport", "avventura"], mod: "__circuiti", key: "ali-di-rondine.circuiti", ch: 4, cover: "nr_titolo", d: "Sotto la pioggia acida, la Vektor Corp possiede ogni luce e ogni risultato. Nei sotterranei vive una lega clandestina: la sfera conduttrice dei Circuiti d'Oro. Terminali da hackerare, droni che pattugliano i vicoli, piastre elettrificate, laser sui varchi e tre finali. Novità: i Terminali di Hacking. Minigioco: Circuito EMP.", hints: { libero: "Carica il virus di K1-RA nel server centrale.", corporativo: "Firma il contratto del Barone sulla consolle.", segreto: "Segreto: raccogli i sei Datapad nascosti e inserisci la sequenza antica." } },
     { id: "replica", t: "Eroi in Replica", e: "🦸", g: ["scifi", "dramma"], mod: "__replica", key: "ali-di-rondine.replica", ch: 4, cover: "rp_titolo", d: "Tuo padre è il più grande eroe della Terra. A diciannove anni arrivano i tuoi poteri, e con loro una verità: le «invasioni aliene» della Lega Celeste sono uno spettacolo. Ogni scelta lascia un Peso (Fiducia, Colpa, Rabbia) che decide come finisce. Novità: il Peso. Minigioco: Sparring Volante.", hints: { figlio: "Vinci il duello finale con più Fiducia che Rabbia.", cielo: "Vinci il duello finale con più Rabbia che Fiducia.", terza: "Segreto: Fiducia e Rabbia a 3 o più, tutte le contraddizioni del Dossier e vittoria finale." } },
@@ -154,7 +153,7 @@
     { id: "cala", t: "Cala Tramontana", e: "🌊", g: ["avventura"], fn: "openCalaTramontana", key: "ali-di-rondine.cala-tramontana", cover: "beach", d: "Esplora a piedi il borgo marino alternativo con il tuo Campione." },
     { id: "borgostorto", t: "Il Borgo Storto", e: "🌀", g: ["commedia", "tattica"], api: "openBorgoStorto", cover: "beach", d: "Lo spin-off GDR a turni del Borgo Marino." },
   ];
-  const NEWEST = ["diga", "vuota", "mondiale", "cavaliere", "gala", "circuiti", "replica", "officina", "figurine", "rotta", "fischietto", "capitani", "carte", "quattordici", "sigilli", "fortino", "cenere", "note", "spia", "fiume", "piramide", "treno", "alcatraz", "milano", "gp", "tempo", "dungeon", "roma", "regno", "naufraghi", "campana", "galletta", "pugno", "montagna", "cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
+  const NEWEST = ["vuota", "mondiale", "cavaliere", "gala", "circuiti", "replica", "officina", "figurine", "rotta", "fischietto", "capitani", "carte", "quattordici", "sigilli", "fortino", "cenere", "note", "spia", "fiume", "piramide", "treno", "alcatraz", "milano", "gp", "tempo", "dungeon", "roma", "regno", "naufraghi", "campana", "galletta", "pugno", "montagna", "cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
   const modOf = (s) => (s.mod ? window[s.mod] : null);
   const available = (s) => (s.mod ? !!window[s.mod] : s.fn ? typeof window[s.fn] === "function" : !!(api() && api()[s.api]));
   function state(s) {
@@ -208,11 +207,7 @@
 .salOv .card{position:relative;border-radius:14px;overflow:hidden;background:#13213f;border:1.5px solid #ffffff22;cursor:pointer;box-shadow:0 4px 14px #0008;transition:transform .15s}
 .salOv .card:active{transform:scale(.97)}
 .salOv .card img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block}
-.salOv .card .t{position:absolute;left:8px;right:38px;top:6px;font:800 14px/1.15 "M PLUS Rounded 1c",sans-serif;text-shadow:0 2px 3px #000,0 0 8px #000}
-.salOv .card.isFav{border-color:#ffd23f88;box-shadow:0 0 10px #ffd23f22,0 4px 14px #0008}
-.salOv .salFav{position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:50%;background:#0b1026bb;border:1.5px solid #ffffff44;color:#cbd5e1;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;z-index:2;line-height:1;padding:0;transition:transform .15s,background .15s,color .15s}
-.salOv .salFav:active{transform:scale(1.25)}
-.salOv .salFav.on{background:#ffd23f2f;border-color:#ffd23f;color:#ffd23f;box-shadow:0 0 8px #ffd23f66}
+.salOv .card .t{position:absolute;left:8px;right:8px;top:6px;font:800 14px/1.15 "M PLUS Rounded 1c",sans-serif;text-shadow:0 2px 3px #000,0 0 8px #000}
 .salOv .card .e{font-size:18px;margin-right:4px}
 .salOv .card .info{padding:7px 9px 9px;font-size:11.5px;color:#c9d2ea}
 .salOv .badge{position:absolute;right:6px;top:calc(min(100%,1000px) * 0);padding:3px 7px;border-radius:999px;font:900 10px/1 sans-serif;letter-spacing:.5px}
@@ -294,9 +289,9 @@
 .salOv .treeStem{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:10px;background:#18284e;border:1.5px solid #38bdf888;font-size:12.5px;font-weight:700}
 .salOv .treeStem.done{border-color:#4fd1a5;color:#e8fbf3}
 .salOv .treeBranch{margin:8px 0 8px 18px;padding-left:14px;border-left:2px dashed #38bdf866;display:flex;flex-direction:column;gap:8px}
-.salOv .treeLeaf{position:relative;padding:8px 10px;border-radius:10px;background:#0c162e;border:1.5px dashed #ffffff2a;font-size:12px}
-.salOv .treeLeaf::before{content:"";position:absolute;left:-16px;top:14px;width:12px;height:2px;background:#38bdf866}
+.salOv .treeLeaf{position:relative;padding:9px 12px;border-radius:10px;background:#0c162e;border:1.5px dashed #ffffff2a;font-size:12px;transition:all .15s}
 .salOv .treeLeaf.f{border-style:solid;border-color:#ffd23f88;background:linear-gradient(135deg,#1b2b52,#13203f)}
+.salOv .treeLeaf::before{content:"";position:absolute;left:-16px;top:14px;width:12px;height:2px;background:#38bdf866}
 .salOv .treeLeaf.f::before{background:#ffd23f}
 .salOv .treeLeaf b{display:flex;align-items:center;gap:6px;font-size:13px;color:#fff}
 .salOv .treeLeaf.f b{color:#ffd23f}
@@ -304,6 +299,20 @@
 .salOv .treeTag{display:inline-block;padding:2px 6px;border-radius:6px;font-size:10px;font-weight:800;text-transform:uppercase;margin-left:auto}
 .salOv .treeTag.f{background:#ffd23f22;color:#ffd23f;border:1px solid #ffd23f88}
 .salOv .treeTag.lock{background:#ffffff11;color:#ffffff66;border:1px dashed #ffffff33}
+.salOv .treeLegend{display:flex;flex-wrap:wrap;gap:8px 14px;background:#0d1830;border:1px solid #1e3a66;border-radius:12px;padding:8px 12px;margin:8px 0 12px;font-size:11.5px;color:#93c5fd}
+.salOv .treeActBox{margin-top:8px;padding-top:7px;border-top:1px dashed #ffffff22;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.salOv .treeActBtn{padding:4px 10px;border-radius:8px;border:1.5px solid #ffd23f;background:linear-gradient(#ffd23f,#e8a33d);color:#1a1400;font:800 11.5px "M PLUS Rounded 1c",sans-serif;cursor:pointer}
+.salTreeCutIn{position:fixed;inset:0;z-index:9999;background:radial-gradient(ellipse at center,#0d2047 0%,#030712 85%);display:flex;align-items:center;justify-content:center;pointer-events:all;overflow:hidden;animation:salTreeCutIn .32s cubic-bezier(.16,1,.3,1)}
+.salTreeCutStripe{position:absolute;width:180%;height:130px;background:linear-gradient(90deg,transparent,#38bdf888,#ffd23fcc,transparent);transform:rotate(-12deg);animation:salTreeStripe 1s ease-in-out infinite alternate}
+.salTreeCutContent{position:relative;z-index:2;text-align:center;padding:24px 34px;border-top:2px solid #ffd23f;border-bottom:2px solid #38bdf8;background:rgba(6,13,31,.92);backdrop-filter:blur(8px);box-shadow:0 0 50px rgba(56,189,248,.35);border-radius:8px}
+.salTreeCutIcon{font-size:44px;animation:salTreeBounce .9s ease infinite alternate}
+.salTreeCutTitle{font-family:"Dela Gothic One",Impact,sans-serif;font-size:24px;letter-spacing:1px;color:#ffd23f;text-shadow:0 3px 0 #000,0 0 20px rgba(255,210,63,.6);margin:6px 0 4px}
+.salTreeCutSub{font-family:"M PLUS Rounded 1c",system-ui,sans-serif;font-size:13px;font-weight:700;color:#e0f2fe;letter-spacing:.5px}
+.salTreeCutOut{animation:salTreeCutOut .35s forwards ease-in}
+@keyframes salTreeCutIn{0%{opacity:0;transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
+@keyframes salTreeCutOut{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.94)}}
+@keyframes salTreeStripe{0%{transform:rotate(-12deg) translateY(-20px)}100%{transform:rotate(-12deg) translateY(20px)}}
+@keyframes salTreeBounce{0%{transform:scale(.92)}100%{transform:scale(1.08)}}
 @media (max-width:360px){.salOv .grid{grid-template-columns:1fr 1fr;gap:8px}.salOv .prev{grid-template-columns:110px 1fr}.salOv .prev canvas{width:110px;height:110px}}`;
     document.head.appendChild(st);
   }
@@ -501,10 +510,6 @@
       opp: [{ name: "Apprendisti del Vento", color: "#6366f1", style: "equilibrata" }, { name: "I Guardiani di Gesso", color: "#a855f7", style: "difensiva" }],
       boss: { name: "I Maestri della Congiunzione", color: "#fbbf24", style: "pressing" },
       opts: (o, h, boss) => ({ opp: o.name, us: h.name, turns: boss ? 6 : 5 }) },
-    { id: "argine", t: "Argine", e: "🌊", saga: "diga", eng: "__argine", d: "L'acqua scende dalle falle e scivola lungo le file di sacchi che trascini con il dito: guidala via dalle case, tieni il tetto asciutto, ripara con la pompa. Meno danni, più stelle.",
-      opp: [{ name: "Pioggia Battente", color: "#0e7490", style: "equilibrata" }, { name: "Piena Notturna", color: "#1e3a5f", style: "pressing" }],
-      boss: { name: "La Notte della Cresta", color: "#38bdf8", style: "pressing" },
-      opts: (o, h, boss) => ({ title: `Argine · ${o.name}`, level: boss ? 6 : o.name === "Piena Notturna" ? 4 : 2, oppName: o.name }) },
   ];
   function sgState(m) { const s = SAGAS.find((x) => x.id === m.saga), x = s ? state(s) : null; return { s, open: !!(x && (x.doneN >= 1)), boss: !!(x && x.endsFound > 0) }; }
   function openSalaGiochi(back) {
@@ -742,7 +747,7 @@
     cv.onclick = () => { n = full.length; };
   }
   // ---------------------------------------------------------------- SALONE
-  const FILT = { st: "tutte", g: "", sort: "recenti" };
+  const FILT = { st: "tutte", g: "" };
   function totals() {
     const list = SAGAS.filter(available), st = list.map((s) => [s, state(s)]);
     let fe = 0, te = 0; st.forEach(([, x]) => { fe += x.endsFound; te += x.ends.length; });
@@ -763,7 +768,7 @@
       weather: "🍃 Tramontana · 🌊 Mare Calmo · ☀️ Costa Ligure",
       desc: "Il porto vecchio, la spiaggia dei ciottoli, la Trattoria Moretti, i caruggi e i paesi arrampicati sulle scogliere liguri.",
       quote: "«Il mare restituisce sempre quello che gli lanci con effetto.»",
-      sagas: ["cala", "borgostorto", "torneo", "campetto", "stagione", "lampioni", "colline", "montagna", "vallombra", "diga", "faro", "rotta", "campana", "carte"],
+      sagas: ["cala", "borgostorto", "torneo", "campetto", "stagione", "lampioni", "colline", "montagna", "vallombra", "faro", "rotta", "campana", "carte"],
       pins: [
         { id: "torneo", t: "Cento Scuole", e: "🏆", dx: 36, dy: -24 },
         { id: "campetto", t: "Campetto", e: "⚽", dx: -36, dy: 22 },
@@ -865,12 +870,10 @@
   function renderSagaCards(sagasList) {
     const r = rec();
     return sagasList.map(({ s, x }) => {
-      const isFav = r.favs.includes(s.id);
       const isNew = !r.seen[s.id] && !x.started && NEWEST.includes(s.id);
       const badge = x.finished ? `<span class="badge done">✓ CONCLUSA</span>` : x.started ? `<span class="badge run">IN CORSO</span>` : isNew ? `<span class="badge new">NUOVA</span>` : "";
       const prog = x.pct != null && (x.started || x.finished) ? `<div class="pbar"><i style="width:${Math.max(4, x.pct)}%"></i></div>` : "";
-      const favBtn = `<button type="button" class="salFav${isFav ? " on" : ""}" data-fav="${s.id}" title="${isFav ? "Rimuovi dai preferiti" : "Fissa tra le saghe preferite in cima"}" aria-label="Preferita">${isFav ? "⭐" : "☆"}</button>`;
-      return `<div class="card${isFav ? " isFav" : ""}" data-id="${s.id}"><img alt="" loading="lazy" src="${cover(s)}"><div class="t"><span class="e">${s.e}</span>${esc(s.t)}</div>${favBtn}<div class="info">${s.g.map((k) => `<span class="tag" style="background:${GEN[k][1]}">${GEN[k][0]}</span>`).join("")}<div style="display:flex;justify-content:space-between;align-items:center;gap:6px"><span>${x.finished ? "Conclusa" : x.started ? `Capitolo ${x.ch}${s.ch ? `/${s.ch}` : ""}` : "Da iniziare"}</span>${x.ends.length ? `<span>🏆 ${x.endsFound}/${x.ends.length}</span>` : ""}</div>${prog}</div>${badge ? `<div class="stamp">${badge}</div>` : ""}</div>`;
+      return `<div class="card" data-id="${s.id}"><img alt="" loading="lazy" src="${cover(s)}"><div class="t"><span class="e">${s.e}</span>${esc(s.t)}</div><div class="info">${s.g.map((k) => `<span class="tag" style="background:${GEN[k][1]}">${GEN[k][0]}</span>`).join("")}<div style="display:flex;justify-content:space-between;align-items:center;gap:6px"><span>${x.finished ? "Conclusa" : x.started ? `Capitolo ${x.ch}${s.ch ? `/${s.ch}` : ""}` : "Da iniziare"}</span>${x.ends.length ? `<span>🏆 ${x.endsFound}/${x.ends.length}</span>` : ""}</div>${prog}</div>${badge ? `<div class="stamp">${badge}</div>` : ""}</div>`;
     }).join("");
   }
 
@@ -1199,6 +1202,7 @@
       // Barra orizzontale degli strumenti del Salone
       html += `<div class="hubTools">
         <button type="button" class="hubToolBtn" data-go="album">🏆 Album Finali (${tt.fe}/${tt.te})</button>
+        <button type="button" class="hubToolBtn" data-go="albero">🌳 Albero Bivi (${tt.fe}/${tt.te})</button>
         <button type="button" class="hubToolBtn" data-go="guarda">👕 Guardaroba</button>
         <button type="button" class="hubToolBtn" data-go="diario">📖 Diario</button>
         <button type="button" class="hubToolBtn" data-go="sala">🕹️ Sala Giochi</button>
@@ -1270,30 +1274,12 @@
         // --- VISTA CATALOGO SCHEDE CLASSICO ---
         if (lastS) html += `<div class="cont" data-id="${lastS.s.id}"><img alt="" src="${cover(lastS.s)}"><div><b>▸ Continua: ${esc(lastS.s.t)}</b>${lastS.x.finished ? "Conclusa · rigioca o cerca gli altri finali" : `Capitolo ${lastS.x.ch}${lastS.s.ch ? ` di ${lastS.s.ch}` : ""}`}</div></div>`;
 
-        html += `<div class="row">${[["tutte", "Tutte"], ["fav", `⭐ Preferite (${r.favs.length})`], ["corso", "In corso"], ["nuove", "Da iniziare"], ["concluse", "Concluse"]].map(([k, l]) => `<button type="button" class="chip${FILT.st === k ? " on" : ""}" data-st="${k}">${l}</button>`).join("")}</div>`;
+        html += `<div class="row">${[["tutte", "Tutte"], ["corso", "In corso"], ["nuove", "Da iniziare"], ["concluse", "Concluse"]].map(([k, l]) => `<button type="button" class="chip${FILT.st === k ? " on" : ""}" data-st="${k}">${l}</button>`).join("")}</div>`;
         html += `<div class="row">${[["", "Tutti i generi"], ...Object.entries(GEN).map(([k, v]) => [k, v[0]])].map(([k, l]) => `<button type="button" class="chip${FILT.g === k ? " on" : ""}" data-g="${k}">${l}</button>`).join("")}</div>`;
-        html += `<div class="row" style="align-items:center;gap:6px"><span style="font-size:12px;color:#94a3b8;font-weight:700">Ordina:</span>${[["recenti", "✨ Recenti"], ["pct", "📈 Avanzamento %"], ["az", "🔤 Alfabetico A-Z"]].map(([k, l]) => `<button type="button" class="chip${FILT.sort === k ? " on" : ""}" data-sort="${k}" style="min-height:30px;padding:3px 10px;font-size:12px">${l}</button>`).join("")}</div>`;
 
-        const shown = list.filter(({ s, x }) => s.id !== "carte" && (FILT.st === "tutte" || (FILT.st === "fav" && r.favs.includes(s.id)) || (FILT.st === "corso" && x.started && !x.finished) || (FILT.st === "nuove" && !x.started) || (FILT.st === "concluse" && x.finished)) && (!FILT.g || s.g.includes(FILT.g))).map((e, i) => [e, i]).sort((a, b) => {
-          const fa = r.favs.includes(a[0].s.id) ? 1 : 0, fb = r.favs.includes(b[0].s.id) ? 1 : 0;
-          if (fa !== fb) return fb - fa;
-          if (FILT.sort === "pct") {
-            const pa = a[0].x.pct != null ? a[0].x.pct : -1;
-            const pb = b[0].x.pct != null ? b[0].x.pct : -1;
-            if (pb !== pa) return pb - pa;
-          } else if (FILT.sort === "az") {
-            const c = a[0].s.t.localeCompare(b[0].s.t, "it");
-            if (c !== 0) return c;
-          }
-          const ia = NEWEST.indexOf(a[0].s.id), ib = NEWEST.indexOf(b[0].s.id);
-          return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib) || a[1] - b[1];
-        }).map((p) => p[0]);
+        const shown = list.filter(({ s, x }) => s.id !== "carte" && (FILT.st === "tutte" || (FILT.st === "corso" && x.started && !x.finished) || (FILT.st === "nuove" && !x.started) || (FILT.st === "concluse" && x.finished)) && (!FILT.g || s.g.includes(FILT.g))).map((e, i) => [e, i]).sort((a, b) => { const ia = NEWEST.indexOf(a[0].s.id), ib = NEWEST.indexOf(b[0].s.id); return (ia < 0 ? 999 : ia) - (ib < 0 ? 999 : ib) || a[1] - b[1]; }).map((p) => p[0]);
 
-        if (FILT.st === "fav" && shown.length === 0) {
-          html += `<p class="sum" style="text-align:center;padding:24px 8px">Nessuna saga fissata nei preferiti.<br>Tocca la stellina <b>☆</b> su qualsiasi saga per tenerla sempre in cima al Salone.</p>`;
-        } else {
-          html += `<div class="grid">${renderSagaCards(shown)}</div>`;
-        }
+        html += `<div class="grid">${renderSagaCards(shown)}</div>`;
       }
 
       body.innerHTML = html;
@@ -1310,6 +1296,7 @@
       // Eventi pulsanti strumenti
       const bindTool = (sel, fn) => { const el = body.querySelector(sel); if (el) el.onclick = fn; };
       bindTool('[data-go="album"]', () => openAlbum(() => openSalone()));
+      bindTool('[data-go="albero"]', () => openAlbero(() => openSalone()));
       bindTool('[data-go="guarda"]', () => openGuardaroba(() => openSalone()));
       bindTool('[data-go="diario"]', () => openDiario(() => openSalone()));
       bindTool('[data-go="sala"]', () => openSalaGiochi(() => openSalone()));
@@ -1376,27 +1363,10 @@
       } else {
         body.querySelectorAll("[data-st]").forEach((b) => (b.onclick = () => { FILT.st = b.dataset.st; renderContent(); }));
         body.querySelectorAll("[data-g]").forEach((b) => (b.onclick = () => { FILT.g = b.dataset.g; renderContent(); }));
-        body.querySelectorAll("[data-sort]").forEach((b) => (b.onclick = () => { FILT.sort = b.dataset.sort; renderContent(); }));
       }
 
-      body.querySelectorAll(".salFav").forEach((b) => {
-        b.onclick = (e) => {
-          e.stopPropagation();
-          const sid = b.dataset.fav;
-          const curR = rec();
-          const pos = curR.favs.indexOf(sid);
-          if (pos >= 0) curR.favs.splice(pos, 1); else curR.favs.push(sid);
-          recSave(curR);
-          safe(() => window.sfx && window.sfx("ding"));
-          renderContent();
-        };
-      });
-
       body.querySelectorAll(".card,.cont").forEach((b) => {
-        b.onclick = (e) => {
-          if (e.target.closest(".salFav")) return;
-          detail(SAGAS.find((s) => s.id === b.dataset.id));
-        };
+        b.onclick = () => detail(SAGAS.find((s) => s.id === b.dataset.id));
       });
     };
 
@@ -1409,7 +1379,7 @@
     sh.innerHTML = `<div class="box"><img alt="" src="${cover(s)}"><div class="in"><h3>${s.e} ${esc(s.t)}</h3><div>${s.g.map((k) => `<span class="tag" style="background:${GEN[k][1]}">${GEN[k][0]}</span>`).join("")}</div><p>${esc(s.d)}</p><p style="color:#c9d2ea;font-size:13px">${x.finished ? "✓ Saga conclusa." : x.started ? `In corso · capitolo ${x.ch}${s.ch ? ` di ${s.ch}` : ""}${x.doneN ? ` · ${x.doneN} capitoli conclusi` : ""}.` : "Non l'hai ancora iniziata."}${s.ch ? ` ${s.ch} capitoli.` : ""}</p>${ends}<div class="act"><button type="button" class="ghost">◂ Indietro</button>${x.ends.length ? `<button type="button" class="ghost" data-tree="1">🌳 Albero Bivi</button>` : ""}<button type="button" class="play">${x.started ? "Continua ▸" : "Gioca ▸"}</button></div></div></div>`;
     sh.onclick = (e) => { if (e.target === sh) sh.remove(); };
     sh.querySelector(".ghost").onclick = () => sh.remove();
-    const tb = sh.querySelector("[data-tree]"); if (tb) tb.onclick = () => { sh.remove(); openAlbum(() => detail(s), "albero", s.id); };
+    const tb = sh.querySelector("[data-tree]"); if (tb) tb.onclick = () => { sh.remove(); openAlbero(() => detail(s), s.id); };
     sh.querySelector(".play").onclick = () => play(s, () => openSalone());
     OV.appendChild(sh);
   }
@@ -1445,12 +1415,46 @@
     body.innerHTML = html;
     body.querySelectorAll("[data-id]").forEach((b) => (b.onclick = () => detail(SAGAS.find((s) => s.id === b.dataset.id))));
   }
+
+  // ---------------------------------------------------------------- CUT-IN ALBERO & NAVIGATORE BIVI
+  function cutInTree(title, subtitle, onComplete) {
+    css();
+    const c = document.createElement("div");
+    c.className = "salTreeCutIn";
+    c.innerHTML = `
+      <div class="salTreeCutStripe"></div>
+      <div class="salTreeCutContent">
+        <div class="salTreeCutIcon">🌳</div>
+        <div class="salTreeCutTitle">${esc(title || "ALBERO DEI BIVI")}</div>
+        <div class="salTreeCutSub">${esc(subtitle || "Mappa Visuale del Destino & degli Snodi Narrativi")}</div>
+      </div>
+    `;
+    document.body.appendChild(c);
+    safe(() => window.sfx && window.sfx("special"));
+    setTimeout(() => {
+      c.classList.add("salTreeCutOut");
+      setTimeout(() => {
+        c.remove();
+        if (typeof onComplete === "function") onComplete();
+      }, 360);
+    }, 950);
+  }
+
+  function openAlbero(back, focusId) {
+    cutInTree("ALBERO DEI BIVI", "✦ Mappa degli Snodi Narrativi & Destini ✦", () => {
+      openAlbum(back, "albero", focusId);
+    });
+  }
+
   // ---------------------------------------------------------------- ALBUM DEI FINALI & ALBERO DEI BIVI
   let ALB_TAB = "timbri";
+  let TREE_FILTER = "tutte";
+  let TREE_QUERY = "";
+
   function openAlbum(back, tab, focusId) {
     if (tab) ALB_TAB = tab;
     if (back) BK.alb = back; BACK = BK.alb; const body = shell(ALB_TAB === "albero" ? "🌳 Albero dei Bivi Narrativi" : "🏆 Album dei Finali"), tt = totals();
-    let html = `<p class="sum">${ALB_TAB === "albero" ? "Mappa visuale degli snodi narrativi e dei bivi che conducono ai differenti destini di ogni saga." : "Un timbro per ogni finale trovato. Quelli mancanti hanno un indizio, senza svelare troppo."} Totale: <b>${tt.fe}/${tt.te}</b>.</p>`;
+    let html = `<p class="sum">${ALB_TAB === "albero" ? "Mappa visuale degli snodi narrativi, percorsi e bivi che conducono ai differenti destini di ogni saga." : "Un timbro per ogni finale trovato. Quelli mancanti hanno un indizio, senza svelare troppo."} Totale: <b>${tt.fe}/${tt.te}</b>.</p>`;
     html += `<div class="row" style="margin-top:6px;margin-bottom:12px"><button type="button" class="chip${ALB_TAB === "timbri" ? " on" : ""}" data-atab="timbri">🏆 Timbri Finali</button><button type="button" class="chip${ALB_TAB === "albero" ? " on" : ""}" data-atab="albero">🌳 Albero dei Bivi</button></div>`;
 
     if (ALB_TAB === "timbri") {
@@ -1463,11 +1467,36 @@
       SAGAS.filter(available).forEach((s) => { const x = state(s); if (!x.ends.length) return; html += `<div class="sec"><span>${s.e} ${esc(s.t)}</span><span>${x.endsFound}/${x.ends.length}</span></div><div class="ends">${x.ends.map((e) => endRow(e.found, e.title, e.found ? e.desc : (s.hints && s.hints[e.id]) || "Un finale ancora nascosto.")).join("")}</div>`; });
     } else {
       // Albero visuale dei bivi narrativi
+      html += `<div class="treeLegend">
+        <span>🌱 Radice & Prologo</span>
+        <span>🔀 Snodo Narrativo</span>
+        <span>🏆 Ramo Raggiunto</span>
+        <span>🔒 Ramo Inesplorato</span>
+        <span>🔮 Finale Segreto</span>
+      </div>`;
+
+      // Barra filtri dell'Albero
+      html += `<div class="row" style="margin-bottom:10px;">
+        ${[["tutte", "Tutte le saghe"], ["corso", "In corso"], ["mancano", "Bivi da scoprire"], ["complete", "100% Esplorate"]].map(([k, l]) => `<button type="button" class="chip${TREE_FILTER === k ? " on" : ""}" data-tfilt="${k}">${l}</button>`).join("")}
+      </div>`;
+
+      // Input di ricerca rapida nell'albero
+      html += `<div style="margin-bottom:12px;">
+        <input type="text" id="treeSearchInput" placeholder="Cerca saga, bivio o parole chiave..." value="${esc(TREE_QUERY)}" style="width:100%;box-sizing:border-box;padding:8px 12px;border-radius:10px;background:#0d1a33;border:1.5px solid #38bdf888;color:#fff;font:700 12.5px 'M PLUS Rounded 1c',sans-serif;outline:none;">
+      </div>`;
+
+      const q = TREE_QUERY.trim().toLowerCase();
       const story = safe(() => api().storyEndings(), []);
-      if (story.length) {
+      let showStory = !q || "storia di leo il cammino del campione".includes(q) || story.some((e) => e.title.toLowerCase().includes(q) || e.group.toLowerCase().includes(q));
+
+      if (TREE_FILTER === "corso") showStory = showStory && story.some((e) => e.found) && story.some((e) => !e.found);
+      else if (TREE_FILTER === "mancano") showStory = showStory && story.some((e) => !e.found);
+      else if (TREE_FILTER === "complete") showStory = showStory && story.length > 0 && story.every((e) => e.found);
+
+      if (story.length && showStory) {
         const groups = [...new Set(story.map((e) => e.group))];
         const storyFound = story.filter((e) => e.found).length;
-        html += `<div class="treeCard"><div class="treeHead"><b>⚽ Storia di Leo · Il Cammino del Campione</b><span>${storyFound}/${story.length} finali</span></div>`
+        html += `<div class="treeCard" id="tree_story"><div class="treeHead"><b>⚽ Storia di Leo · Il Cammino del Campione</b><span>${storyFound}/${story.length} finali</span></div>`
           + `<div class="treeStem ${storyFound > 0 ? "done" : ""}"><span>🌱</span><div>Atto I: Dalle spiagge di Borgo Marino alle prime sfide</div></div>`
           + `<div class="treeBranch">`
           + groups.map((gname) => {
@@ -1478,8 +1507,27 @@
             }).join("")
           + `</div></div>`;
       }
-      SAGAS.filter(available).forEach((s) => {
-        const x = state(s); if (!x.ends.length) return;
+
+      const sagasWithEnds = SAGAS.filter(available).filter((s) => {
+        const x = state(s);
+        if (!x.ends.length) return false;
+        if (TREE_FILTER === "corso" && (!x.started || x.finished)) return false;
+        if (TREE_FILTER === "mancano" && x.endsFound >= x.ends.length) return false;
+        if (TREE_FILTER === "complete" && x.endsFound < x.ends.length) return false;
+        if (q) {
+          const matchTitle = s.t.toLowerCase().includes(q) || (s.d && s.d.toLowerCase().includes(q));
+          const matchEnds = x.ends.some((e) => e.title.toLowerCase().includes(q) || (e.desc && e.desc.toLowerCase().includes(q)));
+          if (!matchTitle && !matchEnds) return false;
+        }
+        return true;
+      });
+
+      if (sagasWithEnds.length === 0 && !showStory) {
+        html += `<p class="sum" style="text-align:center;padding:16px 0;">Nessun albero corrisponde ai filtri selezionati.</p>`;
+      }
+
+      sagasWithEnds.forEach((s) => {
+        const x = state(s);
         const isFocused = focusId && focusId === s.id;
         html += `<div class="treeCard" id="tree_${s.id}" style="${isFocused ? "border-color:#ffd23f;box-shadow:0 0 16px rgba(255,210,63,0.3)" : ""}"><div class="treeHead"><b>${s.e} ${esc(s.t)}</b><span>${x.endsFound}/${x.ends.length} ${x.endsFound === x.ends.length ? "✨ Completo" : "finali"}</span></div>`
           + `<div class="treeStem ${x.started ? "done" : ""}"><span>🌱</span><div>Atto I & Prologo: ${x.started ? "Iniziata" : "Non ancora iniziata"} ${x.doneN ? `(${x.doneN} capitoli percorsi)` : ""}</div></div>`
@@ -1489,13 +1537,33 @@
               const isSecret = e.id && (e.id.includes("segreto") || e.id.includes("arcano") || e.id.includes("calcio_puro") || e.id.includes("quarto") || (s.hints && s.hints[e.id] && s.hints[e.id].includes("Segreto")));
               return `<div class="treeLeaf ${e.found ? "f" : ""}"><b><span>${e.found ? (isSecret ? "🔮" : "🏆") : "🔒"}</span>${e.found ? esc(e.title) : (isSecret ? "Finale Segreto (??)" : "Ramo Inesplorato")} <span class="treeTag ${e.found ? "f" : "lock"}">${e.found ? (isSecret ? "Segreto Trovato" : "Ramo Trovato") : "Da Scoprire"}</span></b><span>${e.found ? esc(e.desc) : "Indizio: " + esc((s.hints && s.hints[e.id]) || "Esplora e compi scelte diverse per aprire questo ramo.")}</span></div>`;
             }).join("")
-          + `</div></div>`;
+          + `</div>`
+          + `<div class="treeActBox"><span style="font-size:11.5px;color:#94a3b8">${x.started ? `Capitolo attuale: ${x.ch}` : "Non ancora iniziata"}</span><button type="button" class="treeActBtn" data-play-tree="${s.id}">${x.started ? "Continua saga ▸" : "Inizia saga ▸"}</button></div>`
+          + `</div>`;
       });
     }
 
     body.innerHTML = html;
     body.querySelectorAll("[data-atab]").forEach((b) => {
       b.onclick = () => { ALB_TAB = b.dataset.atab; openAlbum(back, ALB_TAB, focusId); };
+    });
+    body.querySelectorAll("[data-tfilt]").forEach((b) => {
+      b.onclick = () => { TREE_FILTER = b.dataset.tfilt; openAlbum(back, "albero", focusId); };
+    });
+    const searchInp = body.querySelector("#treeSearchInput");
+    if (searchInp) {
+      searchInp.oninput = (e) => {
+        TREE_QUERY = e.target.value;
+        openAlbum(back, "albero", focusId);
+        const inp = body.querySelector("#treeSearchInput");
+        if (inp) { inp.focus(); inp.selectionStart = inp.selectionEnd = inp.value.length; }
+      };
+    }
+    body.querySelectorAll("[data-play-tree]").forEach((btn) => {
+      btn.onclick = () => {
+        const s = SAGAS.find((item) => item.id === btn.dataset.playTree);
+        if (s) play(s, () => openAlbum(back, "albero", s.id));
+      };
     });
     if (focusId && ALB_TAB === "albero") {
       setTimeout(() => {
@@ -1508,7 +1576,7 @@
   // ---------------------------------------------------------------- ALBUM DEI PERSONAGGI
   // ogni personaggio registrato nel gioco (window.__borgoApi.BIO) diventa una carta. Si «incontra» parlandoci (seeCard del gioco).
   // Le sezioni: la Storia e Borgo Marino, i tornei e le modalità del Borgo, e una sezione per saga (riconosciuta dal prefisso degli id).
-  const PFX = { diga: "vp", mondiale: "mg", cavaliere: "cf", gala: "pd", circuiti: "nr", vuota: "vs", replica: "rp", officina: "of", figurine: "fg", rotta: "ro", fischietto: "fi", capitani: "cv", carte: "cd", quattordici: "qt", sigilli: "sg", cenere: "ce", note: "qd", fortino: "fo", spia: "dz", fiume: "fa", piramide: "my", treno: "te", alcatraz: "alc", milano: "mn", gp: "gp", tempo: "rt", roma: "rm", regno: "re", naufraghi: "nf", campana: "cp", galletta: "gl", pugno: "pr", montagna: "bm", cavallo: "cs", dungeon: "dg", razzo: "rz", quartiere: "sq", titano: "ft", ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
+  const PFX = { mondiale: "mg", cavaliere: "cf", gala: "pd", circuiti: "nr", vuota: "vs", replica: "rp", officina: "of", figurine: "fg", rotta: "ro", fischietto: "fi", capitani: "cv", carte: "cd", quattordici: "qt", sigilli: "sg", cenere: "ce", note: "qd", fortino: "fo", spia: "dz", fiume: "fa", piramide: "my", treno: "te", alcatraz: "alc", milano: "mn", gp: "gp", tempo: "rt", roma: "rm", regno: "re", naufraghi: "nf", campana: "cp", galletta: "gl", pugno: "pr", montagna: "bm", cavallo: "cs", dungeon: "dg", razzo: "rz", quartiere: "sq", titano: "ft", ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
   const BORGO_PFX = ["sv", "rb", "sb", "cg", "hd", "md", "ac"];
   function perSections() {
     const A = api(); if (!A || !A.BIO) return [];
@@ -1619,7 +1687,7 @@
   }
 
   window.__salone = {
-    open: (back) => openSalone(back), album: (back) => openAlbum(back), diario: (back) => openDiario(back), diarioStato: () => safe(() => diarioData().tot, 0), salaGiochi: (back) => openSalaGiochi(back), machine: (id) => MACHINES.find((m) => m.id === id) || null, heroLook: () => heroLook(), cineteca: (back) => openCineteca(back), guardaroba: (back) => openGuardaroba(back), close, personaggi: (back) => openPersonaggi(back), personaggiStato: () => safe(() => perTotals(), null),
+    open: (back) => openSalone(back), album: (back) => openAlbum(back), albero: (back, sagaId) => openAlbero(back, sagaId), diario: (back) => openDiario(back), diarioStato: () => safe(() => diarioData().tot, 0), salaGiochi: (back) => openSalaGiochi(back), machine: (id) => MACHINES.find((m) => m.id === id) || null, heroLook: () => heroLook(), cineteca: (back) => openCineteca(back), guardaroba: (back) => openGuardaroba(back), close, personaggi: (back) => openPersonaggi(back), personaggiStato: () => safe(() => perTotals(), null),
     mappamondo: (back) => openMappamondo(back),
     summary: () => safe(() => { const t = totals(), A = api(), C = (A && A.COSM) || {}; return Object.assign(t, { cosOwned: safe(() => A.cosOwned().length, 0), cosTot: Object.keys(C).length }); }, { n: 0, run: 0, fin: 0, fe: 0, te: 0, cosOwned: 0, cosTot: 0 }),
     SAGAS,
