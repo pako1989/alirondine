@@ -179,20 +179,95 @@ async function run(w) {
   await page.waitForTimeout(100);
   await page.click('.g3dOv [data-tier="1"]');
   await page.waitForTimeout(350);
-  await page.evaluate(() => window.__gabbia3d.pause(true));
+
+  // Test REALE multi-touch sui pulsanti DOM mentre il pollice sinistro tiene premuto e muove #g3dStick!
+  const multiTouchOk = await page.evaluate(() => {
+    const P = window.__gabbia3d;
+    P.pause(false);
+    const G = P.state();
+    const stick = document.querySelector("#g3dStick");
+    const bPass = document.querySelector('.g3dOv [data-btn="pass"]');
+    const bShoot = document.querySelector('.g3dOv [data-btn="shoot"]');
+    const bTackle = document.querySelector('.g3dOv [data-btn="tackle"]');
+    const bSuper = document.querySelector('.g3dOv [data-btn="super"]');
+    if (!stick || !bPass || !bShoot || !bTackle || !bSuper) return { missingBtns: true };
+
+    const sr = stick.getBoundingClientRect();
+    // Dito 1 (pointerId=11): tiene premuto e inclina #g3dStick in avanti
+    stick.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, cancelable: true, pointerId: 11, pointerType: "touch", clientX: sr.left + sr.width * 0.5, clientY: sr.top + sr.height * 0.5 }));
+    stick.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, cancelable: true, pointerId: 11, pointerType: "touch", clientX: sr.left + sr.width * 0.85, clientY: sr.top + sr.height * 0.5 }));
+    const stickActive = G.stk.x > 0.4;
+
+    // 1) Dito 2 (pointerId=22) preme PASSA mentre Dito 1 tiene lo stick
+    G.ball.owner = G.myTeam[1];
+    G.ctrlIdx = 1;
+    bPass.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, cancelable: true, pointerId: 22, pointerType: "touch" }));
+    bPass.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, cancelable: true, pointerId: 22, pointerType: "touch" }));
+    const passReleased = G.ball.owner === null && Math.hypot(G.ball.vx, G.ball.vz) > 8;
+    const stickStillHeldAfterPass = G.stk.x > 0.4;
+
+    // 2) Dito 2 preme TIRA (anche con palla libera ravvicinata ai piedi!) mentre Dito 1 tiene lo stick
+    const shooter = G.myTeam[1];
+    G.ctrlIdx = 1;
+    G.ball.owner = null;
+    G.ball.x = shooter.x + 1.1;
+    G.ball.y = 0.31;
+    G.ball.z = shooter.z;
+    bShoot.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, cancelable: true, pointerId: 23, pointerType: "touch" }));
+    bShoot.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, cancelable: true, pointerId: 23, pointerType: "touch" }));
+    const shotFired = G.ball.owner === null && G.ball.vx > 10 && shooter.kickT > 0;
+
+    // 3) Avversario prende palla vicino a noi -> Dito 2 preme RECUPERA mentre Dito 1 muove lo stick
+    const foe = G.oppTeam[1];
+    foe.x = shooter.x + 1.4;
+    foe.z = shooter.z + 0.2;
+    G.ball.owner = foe;
+    shooter.tackleCd = 0;
+    bTackle.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, cancelable: true, pointerId: 24, pointerType: "touch" }));
+    bTackle.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, cancelable: true, pointerId: 24, pointerType: "touch" }));
+    const recoveredBall = G.ball.owner === shooter && foe.slowT > 0;
+
+    // 4) Super sotto 100% dà feedback immediato sul banner (non muto!)
+    G.superPct = 50;
+    const ban = document.querySelector("#g3dBanner");
+    if (ban) ban.hidden = true;
+    bSuper.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, cancelable: true, pointerId: 25, pointerType: "touch" }));
+    bSuper.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, cancelable: true, pointerId: 25, pointerType: "touch" }));
+    const superFeedback = !!(ban && !ban.hidden);
+
+    // Rilascia Dito 1 sullo stick
+    window.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, cancelable: true, pointerId: 11, pointerType: "touch" }));
+    const stickReleased = G.stk.x === 0 && G.stk.z === 0;
+
+    P.pause(true);
+    return { stickActive, passReleased, stickStillHeldAfterPass, shotFired, recoveredBall, superFeedback, stickReleased };
+  });
+  if (
+    !multiTouchOk.stickActive ||
+    !multiTouchOk.passReleased ||
+    !multiTouchOk.stickStillHeldAfterPass ||
+    !multiTouchOk.shotFired ||
+    !multiTouchOk.recoveredBall ||
+    !multiTouchOk.superFeedback ||
+    !multiTouchOk.stickReleased
+  ) {
+    errors.push(`multi-touch pulsanti Gabbia 3D (${w}px): ` + JSON.stringify(multiTouchOk));
+  }
 
   const matchUi = await page.evaluate(() => {
     const xBtn = document.querySelector(".g3dOv .bar .x").getBoundingClientRect();
     const passBtn = document.querySelector('.g3dOv [data-btn="pass"]').getBoundingClientRect();
+    const tackleBtn = document.querySelector('.g3dOv [data-btn="tackle"]').getBoundingClientRect();
     const cv = document.querySelector("#g3dCanvas").getBoundingClientRect();
     const wrap = document.querySelector(".g3dOv .wrap");
     return {
       sepY: Math.round(passBtn.top - xBtn.bottom),
+      hasTackle: tackleBtn.width >= 60 && tackleBtn.height >= 44,
       ratio: +(cv.width / Math.max(1, cv.height)).toFixed(2),
       overX: wrap ? wrap.scrollWidth - wrap.clientWidth : 99,
     };
   });
-  if (matchUi.sepY < 160 || matchUi.ratio < 1.35 || matchUi.ratio > 1.85 || matchUi.overX > 2) {
+  if (matchUi.sepY < 160 || !matchUi.hasTackle || matchUi.ratio < 1.35 || matchUi.ratio > 1.85 || matchUi.overX > 2) {
     errors.push(`partita Gabbia 3D UI (${w}px): ` + JSON.stringify(matchUi));
   }
   if (w === 390) await L.shot(page, "gabbia3d_partita");
@@ -206,7 +281,9 @@ async function run(w) {
     const out = {};
 
     // 1. Movimento atleta tramite stick
+    G.ctrlIdx = 1;
     const me = G.myTeam[G.ctrlIdx];
+    me.tackleT = 0;
     const x0 = me.x;
     G.stk.set(1, 0);
     for (let i = 0; i < 12; i++) P.tick(1 / 30);

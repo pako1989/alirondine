@@ -216,22 +216,39 @@
 .g3dBanner .bTxt{flex:1;min-width:0}
 .g3dBanner .bTxt b{display:block;font:900 12.5px system-ui;color:#ffd23f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .g3dBanner .bTxt span{display:block;font:700 10.5px system-ui;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.g3dPad{display:grid;grid-template-columns:108px 1fr;gap:10px;align-items:center;margin-top:10px;padding:6px 4px;user-select:none;-webkit-user-select:none}
-.g3dStick{position:relative;width:104px;height:104px;border-radius:50%;background:#131d33;border:2px solid #3b4f6b;touch-action:none;margin:0 auto}
-.g3dStickKnob{position:absolute;left:50%;top:50%;width:42px;height:42px;margin:-21px 0 0 -21px;border-radius:50%;background:#38bdf8;border:2px solid #e0f2fe;box-shadow:0 2px 8px rgba(0,0,0,.5);pointer-events:none}
-.g3dBtns{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.g3dAct{min-height:48px;border-radius:10px;border:1.5px solid #475569;background:#192742;color:#f8fafc;font:800 12.5px/1.15 system-ui;padding:6px 8px;cursor:pointer;touch-action:manipulation;text-align:center}
-.g3dAct small{display:block;font:600 9.5px system-ui;color:#94a3b8;margin-top:2px}
-.g3dAct.pass{border-color:#38bdf8;background:#122a44}
-.g3dAct.shoot{border-color:#fb7185;background:#3b1629}
-.g3dAct.super{grid-column:1/-1;min-height:46px;border-color:#475569;background:#1a2236;color:#94a3b8}
-.g3dAct.super.ready{border-color:#ffd23f;background:linear-gradient(135deg,#6d28d9,#b45309);color:#fff;box-shadow:0 0 12px rgba(255,210,63,.35)}
+.g3dPad{display:grid;grid-template-columns:108px 1fr;gap:10px;align-items:center;margin-top:8px;padding:6px 4px;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+.g3dStick{position:relative;width:104px;height:104px;border-radius:50%;background:radial-gradient(circle at 50% 38%,#1b2b4b,#0f172a 74%);border:2px solid #38bdf8;touch-action:none;margin:0 auto;box-shadow:inset 0 0 14px rgba(0,0,0,.6)}
+.g3dStick.on{border-color:#ffd23f;box-shadow:0 0 12px rgba(255,210,63,.35),inset 0 0 14px rgba(0,0,0,.6)}
+.g3dStickKnob{position:absolute;left:50%;top:50%;width:42px;height:42px;margin:-21px 0 0 -21px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#bae6fd,#0284c7 75%);border:2px solid #f0f9ff;box-shadow:0 2px 8px rgba(0,0,0,.55);pointer-events:none}
+.g3dStick.on .g3dStickKnob{background:radial-gradient(circle at 35% 30%,#fef08a,#f59e0b 75%);border-color:#fff}
+.g3dBtns{display:grid;grid-template-columns:1fr 1fr;gap:7px;touch-action:none;user-select:none;-webkit-user-select:none}
+.g3dAct{min-height:50px;border-radius:11px;border:2px solid #475569;background:#192742;color:#f8fafc;font:800 12.5px/1.15 system-ui;padding:6px 7px;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;text-align:center;transition:transform .06s,filter .08s,box-shadow .12s}
+.g3dAct *{pointer-events:none}
+.g3dAct small{display:block;font:600 9.5px system-ui;color:#cbd5e1;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g3dAct.isDown,.g3dAct:active{transform:scale(.93);filter:brightness(1.25)}
+.g3dAct.pass{border-color:#38bdf8;background:linear-gradient(160deg,#123252,#0f2138)}
+.g3dAct.shoot{border-color:#fb7185;background:linear-gradient(160deg,#4c162e,#2d1222)}
+.g3dAct.tackle{border-color:#34d399;background:linear-gradient(160deg,#0f392b,#102428)}
+.g3dAct.tackle.defFocus{box-shadow:0 0 11px rgba(52,211,153,.42);border-color:#6ee7b7}
+.g3dAct.super{border-color:#64748b;background:#1a2236;color:#cbd5e1}
+.g3dAct.super.ready{border-color:#ffd23f;background:linear-gradient(135deg,#6d28d9,#b45309);color:#fff;box-shadow:0 0 14px rgba(255,210,63,.45)}
 .g3dAct.super.ready small{color:#fef08a}
+.g3dAct.super.deny{border-color:#f59e0b;filter:brightness(1.18)}
 .g3dKeyHint{font-size:10.5px;color:#64748b;text-align:center;margin-top:6px}
 @media (max-width:350px){
-  .g3dPad{grid-template-columns:92px 1fr;gap:7px}
-  .g3dStick{width:88px;height:88px}
-  .g3dAct{padding:5px 6px;font-size:11.5px}
+  .g3dPad{grid-template-columns:90px 1fr;gap:6px}
+  .g3dStick{width:86px;height:86px}
+  .g3dAct{min-height:46px;padding:5px 5px;font-size:11.5px}
+  .g3dAct small{font-size:8.5px}
+}
+@media (orientation:landscape) and (max-height:480px){
+  .g3dOv .wrap{max-width:720px;padding:4px 10px 10px}
+  .g3dOv .bar{padding:3px 0}
+  .g3dHud{padding:4px 8px;margin:3px 0}
+  .g3dSuperBarWrap{margin:2px 0 4px}
+  .g3dStage{max-height:42vh}
+  .g3dPad{margin-top:5px;padding:2px 2px}
+  .g3dKeyHint{display:none}
 }`;
     document.head.appendChild(st);
   }
@@ -711,15 +728,16 @@
       homeX,
       homeZ,
       facing: dir > 0 ? 0 : Math.PI,
-      speed: (isGk ? 5.6 : 6.5 + (eff.te - 55) * 0.032),
-      reach: (isGk ? 1.25 + (eff.df - 50) * 0.008 : 0.82 + (eff.df - 50) * 0.004) * pBonus,
-      shotPow: 15.2 + (eff.at - 50) * 0.095,
+      speed: (isGk ? 5.6 : 6.6 + (eff.te - 55) * 0.032),
+      reach: (isGk ? 1.28 + (eff.df - 50) * 0.008 : 1.08 + (eff.df - 50) * 0.005) * pBonus,
+      shotPow: 15.4 + (eff.at - 50) * 0.095,
       tackleCd: 0,
       tackleT: 0,
       kickT: 0,
       diveT: 0,
       diveZ: 0,
       slowT: 0,
+      actPulse: 0,
       phase: slotIdx * 1.7,
       mesh,
     };
@@ -767,12 +785,13 @@
           <div class="g3dStickKnob" id="g3dKnob"></div>
         </div>
         <div class="g3dBtns">
-          <button type="button" class="g3dAct pass" data-btn="pass">🎯 Passa / Cambia<small>Uno-due di sponda</small></button>
-          <button type="button" class="g3dAct shoot" data-btn="shoot">⚽ Tira / Scivolata<small>Tiro o contrasto</small></button>
-          <button type="button" class="g3dAct super" id="g3dSuperBtn" data-btn="super">⚡ Super dei Sogni<small id="g3dSuperSub">Carica con passaggi e sponde</small></button>
+          <button type="button" class="g3dAct pass" data-btn="pass">🎯 Passa<small id="g3dPassSub">Uno-due / Sponda</small></button>
+          <button type="button" class="g3dAct shoot" data-btn="shoot">⚽ Tira<small id="g3dShootSub">Botta in porta</small></button>
+          <button type="button" class="g3dAct tackle" id="g3dTackleBtn" data-btn="tackle">🛡️ Recupera<small id="g3dTackleSub">Scivolata / Ruba</small></button>
+          <button type="button" class="g3dAct super" id="g3dSuperBtn" data-btn="super">⚡ Super<small id="g3dSuperSub">Carica 25%</small></button>
         </div>
       </div>
-      <div class="g3dKeyHint">Tastiera: WASD / Frecce · J/Z Passa-Cambia · K/X Tira-Scivolata · Spazio/L Super</div>
+      <div class="g3dKeyHint">Tastiera: WASD / Frecce · J/Z Passa · K/X Tira · C Recupera · Spazio/L Super</div>
     `;
 
     const canvas = body.querySelector("#g3dCanvas");
@@ -1001,11 +1020,12 @@
         r: ballRadius,
         owner: myTeam[1],
         lastSide: "m",
+        lastActor: myTeam[1],
         wallBounced: false,
         superFx: null,
         superCol: 0xffd23f,
         superAge: 0,
-        pickupLock: 0,
+        pickupLock: 0.25,
       },
       score: [0, 0],
       timeLeft: 90,
@@ -1021,6 +1041,8 @@
       bannerTimer: 0,
     };
 
+    kickoff("m");
+
     const syncSize = () => {
       if (!G || !stageEl.isConnected) return;
       const w = Math.max(260, stageEl.clientWidth || 320);
@@ -1035,14 +1057,15 @@
 
     const camBtn = OV.querySelector("[data-cam-toggle]");
     if (camBtn) {
-      camBtn.onclick = () => {
+      camBtn.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
         if (!G) return;
         G.camMode = G.camMode === "tribuna" ? "terza" : "tribuna";
         const r2 = load();
         r2.cam = G.camMode;
         save(r2);
         showBanner("🎥 Telecamera", G.camMode === "tribuna" ? "Tribuna Dinamica" : "Terza Persona", null, 1.2);
-      };
+      });
     }
 
     bindMatchInputs(body);
@@ -1059,7 +1082,7 @@
             const st = gl.clientWaitSync(sync, 0, 0);
             if (st === gl.TIMEOUT_EXPIRED) { G.raf = requestAnimationFrame(poll); return; }
             gl.deleteSync(sync);
-            G.swTimer = setTimeout(() => { if (G && !G.dead) G.raf = requestAnimationFrame(cb); }, 80);
+            G.swTimer = setTimeout(() => { if (G && !G.dead) G.raf = requestAnimationFrame(cb); }, 45);
           };
           G.raf = requestAnimationFrame(poll);
         }
@@ -1112,65 +1135,186 @@
     const stick = body.querySelector("#g3dStick");
     const knob = body.querySelector("#g3dKnob");
     let ptrId = null;
+    let touchId = null;
 
     const moveStick = (clientX, clientY) => {
       if (!G || !stick) return;
       const rect = stick.getBoundingClientRect();
       const cx = rect.left + rect.width / 2;
       const cy = rect.top + rect.height / 2;
-      const maxR = rect.width * 0.36;
+      const maxR = Math.max(24, rect.width * 0.36);
       let dx = clientX - cx, dy = clientY - cy;
       const d = hypot(dx, dy);
       if (d > maxR) { dx = (dx / d) * maxR; dy = (dy / d) * maxR; }
       if (knob) knob.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px)`;
-      G.stk.set(d < 6 ? 0 : dx / maxR, d < 6 ? 0 : dy / maxR);
+      G.stk.set(d < 5 ? 0 : dx / maxR, d < 5 ? 0 : dy / maxR);
     };
     const resetStick = () => {
       ptrId = null;
+      touchId = null;
+      if (stick) stick.classList.remove("on");
       if (knob) knob.style.transform = "translate(0px, 0px)";
       if (G) G.stk.set(0, 0);
     };
+
+    const onWinPtrMove = (e) => {
+      if (ptrId !== null && e.pointerId === ptrId) moveStick(e.clientX, e.clientY);
+    };
+    const onWinPtrEnd = (e) => {
+      if (ptrId !== null && e.pointerId === ptrId) resetStick();
+    };
+
     if (stick) {
       stick.addEventListener("pointerdown", (e) => {
+        if (ptrId !== null && ptrId !== e.pointerId) return;
+        e.preventDefault();
+        e.stopPropagation();
         ptrId = e.pointerId;
+        stick.classList.add("on");
         safe(() => stick.setPointerCapture(e.pointerId), 0);
         moveStick(e.clientX, e.clientY);
       });
       stick.addEventListener("pointermove", (e) => {
-        if (ptrId === e.pointerId) moveStick(e.clientX, e.clientY);
+        if (ptrId === e.pointerId) {
+          e.preventDefault();
+          moveStick(e.clientX, e.clientY);
+        }
       });
-      stick.addEventListener("pointerup", resetStick);
-      stick.addEventListener("pointercancel", resetStick);
+      stick.addEventListener("pointerup", onWinPtrEnd);
+      stick.addEventListener("pointercancel", onWinPtrEnd);
+      stick.addEventListener("lostpointercapture", onWinPtrEnd);
+
+      // Blocca gesture native multi-touch/scroll iOS/Android mentre il pollice muove lo stick
+      stick.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        if (ptrId === null && touchId === null && e.changedTouches && e.changedTouches[0]) {
+          const t = e.changedTouches[0];
+          touchId = t.identifier;
+          stick.classList.add("on");
+          moveStick(t.clientX, t.clientY);
+        }
+      }, { passive: false });
+      stick.addEventListener("touchmove", (e) => {
+        e.preventDefault();
+        if (touchId !== null && e.changedTouches) {
+          for (let i = 0; i < e.changedTouches.length; i++) {
+            if (e.changedTouches[i].identifier === touchId) {
+              moveStick(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
+              break;
+            }
+          }
+        }
+      }, { passive: false });
+      const onTouchEnd = (e) => {
+        if (touchId !== null && e.changedTouches) {
+          for (let i = 0; i < e.changedTouches.length; i++) {
+            if (e.changedTouches[i].identifier === touchId) {
+              resetStick();
+              break;
+            }
+          }
+        }
+      };
+      stick.addEventListener("touchend", onTouchEnd);
+      stick.addEventListener("touchcancel", onTouchEnd);
     }
 
-    const actPass = () => { if (G && !G.over && !G.paused) doPassOrSwitch(); };
-    const actShoot = () => { if (G && !G.over && !G.paused) doShootOrTackle(); };
-    const actSuper = () => { if (G && !G.over && !G.paused) doSuperShot(); };
+    window.addEventListener("pointermove", onWinPtrMove);
+    window.addEventListener("pointerup", onWinPtrEnd);
+    window.addEventListener("pointercancel", onWinPtrEnd);
 
-    const bPass = body.querySelector('[data-btn="pass"]');
-    const bShoot = body.querySelector('[data-btn="shoot"]');
-    const bSuper = body.querySelector('[data-btn="super"]');
-    if (bPass) bPass.onclick = actPass;
-    if (bShoot) bShoot.onclick = actShoot;
-    if (bSuper) bSuper.onclick = actSuper;
+    const actions = {
+      pass: () => { if (G && !G.over && !G.paused) doPassOrSwitch(); },
+      shoot: () => { if (G && !G.over && !G.paused) doShootOrTackle(); },
+      tackle: () => { if (G && !G.over && !G.paused) doTackle(); },
+      super: () => { if (G && !G.over && !G.paused) doSuperShot(); },
+    };
+
+    // Binding immediato su pointerdown + touchstart (supporto pieno multi-touch col pollice sullo stick!)
+    // con fallback click dedupato per tastiera/accessibilità/automazione.
+    body.querySelectorAll(".g3dAct[data-btn]").forEach((btn) => {
+      const kind = btn.dataset.btn;
+      const fn = actions[kind];
+      if (!fn) return;
+      let lastPtrTs = -999;
+      let lastDirectTs = -999;
+
+      const fire = () => {
+        safe(() => window.hapticTrigger && window.hapticTrigger("tap"), 0);
+        fn();
+      };
+      const releaseVisual = () => btn.classList.remove("isDown");
+
+      btn.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        lastPtrTs = performance.now();
+        lastDirectTs = lastPtrTs;
+        btn.classList.add("isDown");
+        fire();
+      });
+      btn.addEventListener("pointerup", releaseVisual);
+      btn.addEventListener("pointercancel", releaseVisual);
+      btn.addEventListener("pointerleave", releaseVisual);
+
+      btn.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const now = performance.now();
+        btn.classList.add("isDown");
+        if (now - lastPtrTs < 90) return; // già scattato su pointerdown
+        lastDirectTs = now;
+        fire();
+      }, { passive: false });
+      btn.addEventListener("touchend", releaseVisual);
+      btn.addEventListener("touchcancel", releaseVisual);
+
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (performance.now() - lastDirectTs < 340) return; // evita doppio sparo dopo pointerdown/touchstart
+        fire();
+      });
+    });
 
     const onKeyDown = (e) => {
-      if (!G || G.over) return;
+      if (!G || G.over || !OV || !OV.isConnected) return;
+      const tag = e.target && e.target.tagName ? e.target.tagName.toLowerCase() : "";
+      if (tag === "input" || tag === "textarea") return;
       const k = e.key.toLowerCase();
-      G.keys[k] = true;
-      if (k === "j" || k === "z") { e.preventDefault(); actPass(); }
-      else if (k === "k" || k === "x") { e.preventDefault(); actShoot(); }
-      else if (k === "l" || k === " ") { e.preventDefault(); actSuper(); }
+      const isMove = k === "arrowleft" || k === "arrowright" || k === "arrowup" || k === "arrowdown" || k === "a" || k === "d" || k === "w" || k === "s";
+      const isAct = k === "j" || k === "z" || k === "k" || k === "x" || k === "c" || k === "l" || k === " " || k === "enter";
+      if (!isMove && !isAct) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+      if (isMove) {
+        G.keys[k] = true;
+        return;
+      }
+      if (e.repeat) return;
+      if (k === "j" || k === "z") actions.pass();
+      else if (k === "k" || k === "x") actions.shoot();
+      else if (k === "c") actions.tackle();
+      else if (k === "l" || k === " " || k === "enter") actions.super();
     };
     const onKeyUp = (e) => {
       if (!G) return;
       G.keys[e.key.toLowerCase()] = false;
     };
-    window.addEventListener("keydown", onKeyDown);
-    window.addEventListener("keyup", onKeyUp);
+    const onBlur = () => {
+      if (G) G.keys = {};
+      resetStick();
+    };
+    window.addEventListener("keydown", onKeyDown, true);
+    window.addEventListener("keyup", onKeyUp, true);
+    window.addEventListener("blur", onBlur);
     keyCleanup = () => {
-      window.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("keydown", onKeyDown, true);
+      window.removeEventListener("keyup", onKeyUp, true);
+      window.removeEventListener("blur", onBlur);
+      window.removeEventListener("pointermove", onWinPtrMove);
+      window.removeEventListener("pointerup", onWinPtrEnd);
+      window.removeEventListener("pointercancel", onWinPtrEnd);
     };
   }
 
@@ -1192,10 +1336,11 @@
     const b = G.ball;
     b.owner = null;
     b.lastSide = actor.side;
+    b.lastActor = actor;
     b.wallBounced = false;
     b.pickupLock = 0.22;
-    b.x = actor.x + Math.cos(actor.facing) * 0.55;
-    b.z = actor.z + Math.sin(actor.facing) * 0.55;
+    b.x = clamp(actor.x + Math.cos(actor.facing) * 0.55, -HX + b.r, HX - b.r);
+    b.z = clamp(actor.z + Math.sin(actor.facing) * 0.55, -HZ + b.r, HZ - b.r);
     b.y = Math.max(b.r, 0.36);
     b.vx = vx;
     b.vy = vy;
@@ -1203,91 +1348,212 @@
     b.superFx = superFx || null;
     b.superCol = superCol || 0xffd23f;
     b.superAge = 0;
-    actor.kickT = 0.28;
+    actor.kickT = 0.3;
+    actor.actPulse = 0.34;
+  }
+
+  // Consente passaggi e tiri di prima anche quando il pallone è libero vicino ai piedi del giocatore
+  function claimBallForMyAction(maxLooseDist) {
+    if (!G) return null;
+    const b = G.ball;
+    if (b.owner && b.owner.side === "m") {
+      if (!b.owner.isGk) G.ctrlIdx = G.myTeam.indexOf(b.owner);
+      return b.owner;
+    }
+    if (!b.owner && b.y < 1.95) {
+      const me = G.myTeam[G.ctrlIdx];
+      if (me && hypot(me.x - b.x, me.z - b.z) <= maxLooseDist) {
+        b.owner = me;
+        b.pickupLock = 0;
+        return me;
+      }
+      for (let i = 1; i < G.myTeam.length; i++) {
+        const m = G.myTeam[i];
+        if (hypot(m.x - b.x, m.z - b.z) <= maxLooseDist * 0.85) {
+          b.owner = m;
+          b.pickupLock = 0;
+          G.ctrlIdx = i;
+          return m;
+        }
+      }
+    }
+    return null;
   }
 
   function doPassOrSwitch() {
-    const me = G.myTeam[G.ctrlIdx];
+    if (!G || G.over) return;
     const b = G.ball;
-    if (b.owner && b.owner.side === "m") {
-      const carrier = b.owner;
+    const carrier = claimBallForMyAction(1.95);
+    if (carrier) {
       const inp = activeInputVec();
       const mates = G.myTeam.filter((p) => p !== carrier);
-      // Se il giocatore inclina decisamente verso la sponda laterale, esegue un passaggio di sponda!
-      if (Math.abs(inp.z) > 0.68) {
+      // Se il giocatore inclina verso la sponda laterale, esegue un passaggio di sponda!
+      if (Math.abs(inp.z) > 0.58) {
         const targetMate = mates.find((p) => !p.isGk) || mates[0];
         const wallZ = inp.z > 0 ? HZ - b.r : -HZ + b.r;
         const midX = (carrier.x + Math.max(carrier.x + 3.5, targetMate.x + 2)) * 0.5;
         const dx = midX - carrier.x, dz = wallZ - carrier.z;
         const d = hypot(dx, dz) || 1;
-        const spd = 14.5;
+        const spd = 14.8;
         carrier.facing = Math.atan2(dz, dx);
-        releaseBall(carrier, (dx / d) * spd, 0.8, (dz / d) * spd, null, 0);
+        releaseBall(carrier, (dx / d) * spd, 0.78, (dz / d) * spd, null, 0);
         G.superPct = Math.min(100, G.superPct + 8);
         sfx("pass");
+        updateHud();
         return;
       }
-      // Passaggio diretto al compagno meglio piazzato in avanti
-      const target = mates.sort((p1, p2) => (p2.isGk ? -99 : p2.x) - (p1.isGk ? -99 : p1.x))[0];
-      const leadX = clamp(target.x + (target.isGk ? 0 : 1.4), -HX + 1, HX - 1);
+      // Passaggio diretto al compagno di movimento meglio piazzato
+      const target = mates.slice().sort((p1, p2) => (p2.isGk ? -99 : p2.x) - (p1.isGk ? -99 : p1.x))[0];
+      const leadX = clamp(target.x + (target.isGk ? 0 : 1.05), -HX + 1, HX - 1);
       const dx = leadX - carrier.x, dz = target.z - carrier.z;
       const d = hypot(dx, dz) || 1;
-      const spd = 13.8;
+      const spd = 14.2;
       carrier.facing = Math.atan2(dz, dx);
-      releaseBall(carrier, (dx / d) * spd, 0.7, (dz / d) * spd, null, 0);
+      releaseBall(carrier, (dx / d) * spd, 0.65, (dz / d) * spd, null, 0);
       if (!target.isGk) G.ctrlIdx = G.myTeam.indexOf(target);
+      target.actPulse = 0.28;
       G.superPct = Math.min(100, G.superPct + 8);
       sfx("pass");
-    } else {
-      // Cambia controllo al giocatore di movimento più vicino alla palla
-      const cands = [1, 2];
-      const other = cands.find((i) => i !== G.ctrlIdx) || 1;
-      const dCur = hypot(me.x - b.x, me.z - b.z);
-      const dOth = hypot(G.myTeam[other].x - b.x, G.myTeam[other].z - b.z);
-      G.ctrlIdx = dOth <= dCur + 1.5 ? other : (G.ctrlIdx === 1 ? 2 : 1);
+      updateHud();
+      return;
+    }
+
+    // Senza palla: se siamo già addosso al portatore/pallone tenta subito il contrasto, altrimenti cambia al compagno e pressa
+    const me = G.myTeam[G.ctrlIdx];
+    const tx = b.owner ? b.owner.x : b.x;
+    const tz = b.owner ? b.owner.z : b.z;
+    if (me && hypot(me.x - tx, me.z - tz) < 1.85) {
+      doTackle();
+      return;
+    }
+    const nextIdx = G.ctrlIdx === 1 ? 2 : 1;
+    G.ctrlIdx = nextIdx;
+    const switched = G.myTeam[nextIdx];
+    if (switched) {
+      const ang = Math.atan2(tz - switched.z, tx - switched.x);
+      switched.facing = ang;
+      switched.vx = Math.cos(ang) * switched.speed * 1.15;
+      switched.vz = Math.sin(ang) * switched.speed * 1.15;
+      switched.actPulse = 0.36;
+    }
+    sfx("pass");
+    updateHud();
+  }
+
+  function doTackle() {
+    if (!G || G.over) return;
+    const b = G.ball;
+    // Se abbiamo già la palla, il tasto Recupera esegue uno Scatto protetto in avanti!
+    if (b.owner && b.owner.side === "m") {
+      const carrier = b.owner;
+      const inp = activeInputVec();
+      const ang = (inp.x || inp.z) ? Math.atan2(inp.z, inp.x) : carrier.facing;
+      carrier.facing = ang;
+      carrier.vx = Math.cos(ang) * (carrier.speed * 1.55);
+      carrier.vz = Math.sin(ang) * (carrier.speed * 1.55);
+      carrier.tackleT = 0.18;
+      carrier.actPulse = 0.34;
+      b.pickupLock = Math.max(b.pickupLock, 0.28);
+      spawnSparks(carrier.x, 0.2, carrier.z, 0x38bdf8);
       sfx("pass");
+      return;
+    }
+
+    const tx = b.owner ? b.owner.x : b.x;
+    const tz = b.owner ? b.owner.z : b.z;
+    let me = G.myTeam[G.ctrlIdx];
+    const othIdx = G.ctrlIdx === 1 ? 2 : 1;
+    const oth = G.myTeam[othIdx];
+    // Se l'altro compagno di movimento è molto più vicino alla palla, passa a lui per intervenire subito!
+    if (me && oth && hypot(me.x - tx, me.z - tz) > 3.0 && hypot(oth.x - tx, oth.z - tz) + 1.0 < hypot(me.x - tx, me.z - tz)) {
+      G.ctrlIdx = othIdx;
+      me = oth;
+    }
+    if (!me) return;
+
+    if (me.tackleCd <= 0) {
+      const inp = activeInputVec();
+      const distBall = hypot(tx - me.x, tz - me.z);
+      const angToBall = Math.atan2(tz - me.z, tx - me.x);
+      // Mira assistita verso il pallone quando si è a distanza di contrasto
+      const ang = (distBall < 4.4 || (!inp.x && !inp.z)) ? angToBall : Math.atan2(inp.z, inp.x);
+      me.facing = ang;
+      me.vx = Math.cos(ang) * (me.speed * 1.85);
+      me.vz = Math.sin(ang) * (me.speed * 1.85);
+      me.tackleT = 0.32;
+      me.tackleCd = 0.38;
+      me.actPulse = 0.4;
+      spawnSparks(me.x, 0.18, me.z, 0x34d399);
+      sfx("kick");
+    } else {
+      me.actPulse = 0.22;
+    }
+
+    // Controllo recupero immediato sul tocco del pulsante
+    if (hypot(me.x - tx, me.z - tz) <= 2.05 && b.y < 1.85) {
+      if (b.owner && b.owner.side === "o") {
+        b.owner.slowT = Math.max(b.owner.slowT, 0.55);
+      }
+      b.owner = me;
+      b.lastSide = "m";
+      b.lastActor = me;
+      b.superFx = null;
+      b.wallBounced = false;
+      b.pickupLock = 0.38;
+      G.superPct = Math.min(100, G.superPct + 12);
+      spawnSparks(tx, 0.42, tz, 0xffd23f);
+      showBanner("🛡️ PALLA RECUPERATA!", `${me.name} vince il contrasto!`, me.id, 1.05);
+      sfx("kick");
+      updateHud();
     }
   }
 
   function doShootOrTackle() {
-    const b = G.ball;
-    if (b.owner && b.owner.side === "m") {
-      const shooter = b.owner;
+    if (!G || G.over) return;
+    const shooter = claimBallForMyAction(2.05);
+    if (shooter) {
       const inp = activeInputVec();
-      const aimZ = clamp(inp.z * (GW * 0.42), -GW * 0.42, GW * 0.42);
+      const defaultCorner = shooter.z >= 0 ? -GW * 0.28 : GW * 0.28;
+      const aimZ = inp.z ? clamp(inp.z * (GW * 0.42), -GW * 0.42, GW * 0.42) : defaultCorner;
       const dx = HX - shooter.x;
       const dz = aimZ - shooter.z;
       const d = hypot(dx, dz) || 1;
       const spd = shooter.shotPow;
       shooter.facing = Math.atan2(dz, dx);
-      releaseBall(shooter, (dx / d) * spd, 2.2 + Math.random() * 1.1, (dz / d) * spd, null, 0);
+      releaseBall(shooter, (dx / d) * spd, 2.1 + Math.random() * 1.0, (dz / d) * spd, null, 0);
+      spawnSparks(shooter.x + 0.3, 0.36, shooter.z, 0xfb7185);
       G.superPct = Math.min(100, G.superPct + 12);
       sfx("kick");
+      updateHud();
     } else {
-      // Scivolata / contrasto sul portatore o verso la palla
-      const me = G.myTeam[G.ctrlIdx];
-      if (me.tackleCd > 0) return;
-      const inp = activeInputVec();
-      const ang = (inp.x || inp.z) ? Math.atan2(inp.z, inp.x) : Math.atan2(b.z - me.z, b.x - me.x);
-      me.facing = ang;
-      me.vx = Math.cos(ang) * (me.speed * 1.65);
-      me.vz = Math.sin(ang) * (me.speed * 1.65);
-      me.tackleT = 0.26;
-      me.tackleCd = 0.75;
-      sfx("kick");
+      doTackle();
     }
   }
 
   function doSuperShot() {
-    if (!G || G.superPct < 100) return;
+    if (!G || G.over) return;
+    if (G.superPct < 100) {
+      const sb = OV && OV.querySelector("#g3dSuperBtn");
+      if (sb) {
+        sb.classList.add("deny");
+        setTimeout(() => sb.classList.remove("deny"), 240);
+      }
+      showBanner(`⚡ Super al ${Math.round(G.superPct)}%`, "Carica al 100% con passaggi, contrasti e sponde (+24%)!", null, 1.05);
+      return;
+    }
     const b = G.ball;
-    let shooter = b.owner && b.owner.side === "m" ? b.owner : null;
-    if (!shooter) {
+    let shooter = claimBallForMyAction(2.35);
+    if (!shooter && b.owner && b.owner.side === "o") {
       const me = G.myTeam[G.ctrlIdx];
-      if (!b.owner && hypot(me.x - b.x, me.z - b.z) < 1.8) shooter = me;
+      if (me && hypot(me.x - b.owner.x, me.z - b.owner.z) <= 2.4) {
+        b.owner.slowT = 0.8;
+        b.owner = me;
+        shooter = me;
+      }
     }
     if (!shooter) {
-      showBanner("⚡ Super Pronta!", "Conquista palla per scatenare il Super-Tiro!", null, 1.2);
+      doTackle();
+      showBanner("⚡ Super Pronta!", "Avvicinati alla palla per scatenare il Super-Tiro!", null, 1.15);
       return;
     }
     G.superPct = 0;
@@ -1322,22 +1588,27 @@
       p.vx = 0;
       p.vz = 0;
       p.tackleT = 0;
+      p.tackleCd = 0;
       p.diveT = 0;
       p.slowT = 0;
+      p.actPulse = 0;
     });
     const starter = concededSide === "o" ? G.oppTeam[1] : G.myTeam[1];
     starter.x = concededSide === "o" ? 0.8 : -0.8;
     starter.z = 0;
-    b.x = starter.x;
+    starter.facing = concededSide === "o" ? Math.PI : 0;
+    b.x = starter.x + (concededSide === "o" ? -0.45 : 0.45);
     b.y = b.r;
     b.z = 0;
     b.vx = 0;
     b.vy = 0;
     b.vz = 0;
     b.owner = starter;
+    b.lastSide = starter.side;
+    b.lastActor = starter;
     b.superFx = null;
     b.wallBounced = false;
-    b.pickupLock = 0.25;
+    b.pickupLock = 0.32;
     G.ctrlIdx = 1;
   }
 
@@ -1442,9 +1713,9 @@
       p.vx = (dx / d) * p.speed * 0.92;
       p.vz = (dz / d) * p.speed * 0.92;
       p.facing = Math.atan2(dz, dx);
-      if (b.owner && b.owner.side === "m" && d < 1.35 && p.tackleCd <= 0 && Math.random() < dt * 3.2) {
-        p.tackleT = 0.22;
-        p.tackleCd = 1.15;
+      if (b.owner && b.owner.side === "m" && d < 1.3 && p.tackleCd <= 0 && Math.random() < dt * 2.2) {
+        p.tackleT = 0.2;
+        p.tackleCd = 1.45;
       }
     } else {
       const tx = b.x < 0 ? -1.5 : 3.8;
@@ -1519,13 +1790,14 @@
       if (p.kickT > 0) p.kickT = Math.max(0, p.kickT - dt);
       if (p.diveT > 0) p.diveT = Math.max(0, p.diveT - dt);
       if (p.slowT > 0) p.slowT = Math.max(0, p.slowT - dt);
+      if (p.actPulse > 0) p.actPulse = Math.max(0, p.actPulse - dt);
 
       const slowMul = p.slowT > 0 ? 0.52 : 1.0;
 
       if (p === me) {
         if (p.tackleT <= 0) {
           if (inp.x || inp.z) {
-            const carryMul = G.ball.owner === p ? 0.93 : 1.0;
+            const carryMul = G.ball.owner === p ? 0.94 : 1.0;
             p.vx = inp.x * p.speed * carryMul * slowMul;
             p.vz = inp.z * p.speed * carryMul * slowMul;
             p.facing = Math.atan2(inp.z, inp.x);
@@ -1562,15 +1834,22 @@
 
       // Contrasti avversari / scivolate per rubare palla
       G.all.forEach((other) => {
-        if (other.side === o.side || b.pickupLock > 0) return;
+        if (other.side === o.side || b.pickupLock > 0 || other.slowT > 0) return;
         const dist = hypot(other.x - o.x, other.z - o.z);
-        const stealR = other.tackleT > 0 ? other.reach * 1.38 : other.reach * 0.76;
+        const stealR = other.side === "m"
+          ? (other.tackleT > 0 ? Math.max(1.85, other.reach * 1.65) : other.reach * 0.9)
+          : (other.tackleT > 0 ? other.reach * 1.16 : 0.56);
         if (dist < stealR) {
+          o.slowT = Math.max(o.slowT, 0.5);
           b.owner = other;
-          b.pickupLock = 0.32;
+          b.lastSide = other.side;
+          b.lastActor = other;
+          b.pickupLock = 0.35;
           b.wallBounced = false;
           if (other.side === "m") {
             G.superPct = Math.min(100, G.superPct + 12);
+            other.actPulse = 0.38;
+            spawnSparks(o.x, 0.38, o.z, 0xffd23f);
             if (!other.isGk) G.ctrlIdx = G.myTeam.indexOf(other);
           }
           sfx("kick");
@@ -1647,40 +1926,48 @@
         sfx("wall");
       }
 
-      // Intercetto / Parata / Raccolta pallone libero
-      if (b.pickupLock <= 0) {
-        for (let i = 0; i < G.all.length; i++) {
-          const p = G.all[i];
-          const d = hypot(p.x - b.x, p.z - b.z);
-          if (d < p.reach && b.y < (p.isGk ? 2.15 : 1.55)) {
-            const fastSuper = !!b.superFx && p.side !== b.lastSide;
-            if (fastSuper && b.superFx === "drill" && !p.isGk) {
-              // Trapano buca i difensori di movimento
-              continue;
-            }
-            if (fastSuper && p.isGk && Math.random() < 0.68) {
-              // I Super tiri piegano spesso le mani al portiere!
-              p.diveT = 0.35;
-              continue;
-            }
-            if (p.side === "m" && b.wallBounced && b.lastSide === "m") {
-              G.superPct = Math.min(100, G.superPct + 24);
-              showBanner("⚡ UNO-DUE DI SPONDA!", "+24% Energia Super · Grande intesa!", p.id, 1.35);
-              sfx("wall");
-            }
-            b.owner = p;
-            b.superFx = null;
-            b.wallBounced = false;
-            b.pickupLock = 0.2;
-            if (p.isGk) p.diveT = 0.3;
-            if (p.side === "m" && !p.isGk) G.ctrlIdx = G.myTeam.indexOf(p);
-            break;
+      // Intercetto / Parata / Raccolta pallone libero (i compagni ricevono subito i passaggi ravvicinati!)
+      for (let i = 0; i < G.all.length; i++) {
+        const p = G.all[i];
+        if (b.pickupLock > 0) {
+          const earlyReceive = p.side === b.lastSide && !b.superFx && ((p !== b.lastActor && b.pickupLock < 0.19) || b.wallBounced);
+          if (!earlyReceive) continue;
+        }
+        const d = hypot(p.x - b.x, p.z - b.z);
+        if (d < p.reach && b.y < (p.isGk ? 2.15 : 1.65)) {
+          const fastSuper = !!b.superFx && p.side !== b.lastSide;
+          if (fastSuper && b.superFx === "drill" && !p.isGk) {
+            // Trapano buca i difensori di movimento
+            continue;
           }
+          if (fastSuper && p.isGk && Math.random() < 0.68) {
+            // I Super tiri piegano spesso le mani al portiere!
+            p.diveT = 0.35;
+            continue;
+          }
+          if (p.side === "m" && b.wallBounced && b.lastSide === "m") {
+            G.superPct = Math.min(100, G.superPct + 24);
+            showBanner("⚡ UNO-DUE DI SPONDA!", "+24% Energia Super · Grande intesa!", p.id, 1.35);
+            sfx("wall");
+          }
+          b.owner = p;
+          b.lastSide = p.side;
+          b.lastActor = p;
+          b.superFx = null;
+          b.wallBounced = false;
+          b.pickupLock = 0.2;
+          if (p.isGk) p.diveT = 0.3;
+          if (p.side === "m" && !p.isGk) G.ctrlIdx = G.myTeam.indexOf(p);
+          break;
         }
       }
     }
 
     updateHud();
+  }
+
+  function setTxt(el, val) {
+    if (el && el.textContent !== val) el.textContent = val;
   }
 
   function updateHud() {
@@ -1692,32 +1979,44 @@
     const sp = OV.querySelector("#g3dSuperPct");
     const sb = OV.querySelector("#g3dSuperBtn");
     const ss = OV.querySelector("#g3dSuperSub");
+    const ps = OV.querySelector("#g3dPassSub");
+    const shs = OV.querySelector("#g3dShootSub");
+    const tks = OV.querySelector("#g3dTackleSub");
+    const tkb = OV.querySelector("#g3dTackleBtn");
 
-    if (sc) sc.textContent = `${G.score[0]} – ${G.score[1]}`;
+    setTxt(sc, `${G.score[0]} – ${G.score[1]}`);
     if (cl) {
       if (G.goldenGoal) {
-        cl.textContent = "⚡ GOLDEN GOAL";
-        cl.className = "gg";
+        setTxt(cl, "⚡ GOLDEN GOAL");
+        if (cl.className !== "gg") cl.className = "gg";
       } else {
         const sec = Math.ceil(G.timeLeft);
         const m = Math.floor(sec / 60);
         const s = String(sec % 60).padStart(2, "0");
-        cl.textContent = `${m}:${s}`;
-        cl.className = "";
+        setTxt(cl, `${m}:${s}`);
+        if (cl.className !== "") cl.className = "";
       }
     }
     const cur = G.myTeam[G.ctrlIdx];
-    if (nm && cur) nm.textContent = `· ${String(cur.name).split(/[ ,]/)[0]}`;
+    if (nm && cur) setTxt(nm, `· ${String(cur.name).split(/[ ,]/)[0]}`);
+
+    const weHave = !!(G.ball.owner && G.ball.owner.side === "m");
+    setTxt(ps, weHave ? "Uno-due / Sponda" : "Cambia / Pressa");
+    setTxt(shs, weHave ? "Botta in porta!" : "Tiro di prima");
+    setTxt(tks, weHave ? "Scatto palla" : "Scivolata ruba!");
+    if (tkb) tkb.classList.toggle("defFocus", !weHave);
+
     const pct = Math.round(G.superPct);
     if (sf) {
-      sf.style.width = `${pct}%`;
+      const wStr = `${pct}%`;
+      if (sf.style.width !== wStr) sf.style.width = wStr;
       sf.classList.toggle("ready", pct >= 100);
     }
-    if (sp) sp.textContent = `${pct}%`;
+    setTxt(sp, `${pct}%`);
     if (sb) sb.classList.toggle("ready", pct >= 100);
     if (ss && cur) {
       const sup = SUP() ? SUP().of(cur.id) : { name: "Super Tiro" };
-      ss.textContent = pct >= 100 ? `PRONTA! Scatena «${sup.name}»` : "Carica con passaggi e sponde (+24%)";
+      setTxt(ss, pct >= 100 ? `PRONTA · ${sup.name}` : `Carica ${pct}% · Sponde`);
     }
   }
 
@@ -1726,7 +2025,7 @@
     const b = G.ball;
 
     // Aggiorna pose 3D di tutti gli atleti
-    G.all.forEach((p, idx) => {
+    G.all.forEach((p) => {
       const m = p.mesh;
       m.grp.position.set(p.x, 0, p.z);
       m.grp.rotation.y = -p.facing + Math.PI / 2;
@@ -1738,12 +2037,13 @@
       m.armL.rotation.x = -sw * 0.7;
       m.armR.rotation.x = sw * 0.7;
       m.bodyRoot.position.y = v > 0.25 ? Math.abs(Math.cos(p.phase)) * 0.05 : 0;
-      m.bodyRoot.rotation.x = p.tackleT > 0 ? 0.52 : 0;
+      m.bodyRoot.rotation.x = p.tackleT > 0 ? 0.56 : 0;
       m.bodyRoot.rotation.z = p.diveT > 0 ? 0.65 : 0;
 
       const isCtrl = p.side === "m" && G.myTeam[G.ctrlIdx] === p;
-      m.ringMat.color.setHex(isCtrl ? 0xffd23f : p.side === "m" ? 0x38bdf8 : 0xfb7185);
-      m.ring.scale.setScalar(isCtrl ? 1.16 : 0.92);
+      const pulse = p.actPulse > 0 ? p.actPulse * 1.45 : 0;
+      m.ringMat.color.setHex(p.actPulse > 0 ? 0xffffff : isCtrl ? 0xffd23f : p.side === "m" ? 0x38bdf8 : 0xfb7185);
+      m.ring.scale.setScalar((isCtrl ? 1.18 : 0.92) + pulse);
     });
 
     // Pallone (con effetto sparizione intermittente per Super "vanish")
@@ -1886,6 +2186,7 @@
     pause,
     doPassOrSwitch,
     doShootOrTackle,
+    doTackle,
     doSuperShot,
     state: () => G,
     load,
