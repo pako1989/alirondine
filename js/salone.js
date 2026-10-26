@@ -1224,6 +1224,7 @@
         ${window.__carteDecks ? `<button type="button" class="hubToolBtn" data-go="carte">🎴 Carte del Destino</button>` : ""}
         ${window.__sogni ? `<button type="button" class="hubToolBtn" data-go="sogni">🃏 Squadra dei Sogni</button>` : ""}
         ${window.__gabbia3d ? `<button type="button" class="hubToolBtn" data-go="gabbia3d">🏟️ Gabbia 3D</button>` : ""}
+        ${window.__calcio11_3d ? `<button type="button" class="hubToolBtn" data-go="c11">⚽ Calcio a 11 3D</button>` : ""}
         ${window.__portieri ? `<button type="button" class="hubToolBtn" data-go="portieri">🧤 Sfida di Portieri</button>` : ""}
       </div>`;
 
@@ -1339,6 +1340,7 @@
       bindTool('[data-go="carte"]', () => { close(); window.__carteDecks.openHub(() => openSalone()); });
       bindTool('[data-go="sogni"]', () => { close(); window.__sogni.open(() => openSalone()); });
       bindTool('[data-go="gabbia3d"]', () => { close(); window.__gabbia3d.open(() => openSalone()); });
+      bindTool('[data-go="c11"]', () => { close(); window.__calcio11_3d.open(() => openSalone()); });
       bindTool('[data-go="portieri"]', () => { close(); window.__portieri.open(() => openSalone()); });
 
       if (SALONE_VIEW === "hub") {
