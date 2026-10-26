@@ -270,15 +270,56 @@ async function run(w) {
   if (matchUi.sepY < 160 || !matchUi.hasTackle || matchUi.ratio < 1.35 || matchUi.ratio > 1.85 || matchUi.overX > 2) {
     errors.push(`partita Gabbia 3D UI (${w}px): ` + JSON.stringify(matchUi));
   }
-  if (w === 390) await L.shot(page, "gabbia3d_partita");
+  if (w === 390) {
+    // Nascondi il banner del test multi-touch così la visuale 3D delle porte in Tribuna è completamente visibile nello scatto
+    await page.evaluate(() => {
+      const P = window.__gabbia3d;
+      const G = P.state();
+      const ban = document.querySelector("#g3dBanner");
+      if (ban) ban.hidden = true;
+      G.camMode = "tribuna";
+      G.camSnap = true;
+      G.ball.x = 0;
+      G.ball.z = 0;
+      P.tick(0);
+    });
+    await L.shot(page, "gabbia3d_partita");
+
+    // Scatta anche in Terza Persona ravvicinata verso la nuova Porta 3D!
+    await page.evaluate(() => {
+      const P = window.__gabbia3d;
+      const G = P.state();
+      G.camMode = "terza";
+      G.camSnap = true;
+      const me = G.myTeam[1];
+      me.x = 3.5;
+      me.z = -1.0;
+      me.facing = 0.12;
+      G.ball.owner = me;
+      P.tick(0);
+    });
+    await L.shot(page, "gabbia3d_terza_porta");
+
+    await page.evaluate(() => {
+      const P = window.__gabbia3d;
+      const G = P.state();
+      G.camMode = "tribuna";
+      G.camSnap = true;
+      P.tick(0);
+    });
+  }
   if (w === 320) await L.shot(page, "gabbia3d_320");
 
-  // Test meccaniche 3D: movimento stick, uno-due di sponda (+24% Super), Super-Tiro e completamento a 3 gol
+  // Test meccaniche 3D + nuove strutture grafiche (Porte 3D a 4 teli, gonfiaggio rete, cursore 3D, scia)
   const mech = await page.evaluate(() => {
     const P = window.__gabbia3d;
     P._fast(true);
     const G = P.state();
     const out = {};
+
+    out.goalsBuilt = !!(G.goalLeft && G.goalRight && G.goalLeft.netRig.children.length === 4 && G.goalRight.netRig.children.length === 4);
+    out.hasCtrlCursor = !!(G.myTeam[G.ctrlIdx] && G.myTeam[G.ctrlIdx].mesh.ctrlCone && G.myTeam[G.ctrlIdx].mesh.ctrlCone.visible);
+    out.hasTrailAndCrowd = G.trailPool.length === 10 && G.arenaProps.crowd.length === 16;
 
     // 1. Movimento atleta tramite stick
     G.ctrlIdx = 1;
@@ -322,9 +363,22 @@ async function run(w) {
     P.doSuperShot();
     out.superFired = G.superPct === 0 && !!G.ball.superFx;
 
-    // 4. Segna 3 reti per concludere la partita e assegnare ricompense
-    G.score = [2, 0];
-    G.oppTeam[0].z = 2.1; // sposta portiere
+    // 4. Segna una rete intermedia per verificare il gonfiaggio dinamico della rete (pulse > 0), poi chiudi a 3 gol
+    G.score = [1, 0];
+    G.oppTeam[0].z = 2.1;
+    G.ball.owner = null;
+    G.ball.x = 10.6;
+    G.ball.y = 0.5;
+    G.ball.z = 0;
+    G.ball.vx = 18;
+    G.ball.vy = 0;
+    G.ball.vz = 0;
+    P.tick(1 / 30);
+    out.goalNetPulse = G.goalRight.pulse > 0.5 && G.score[0] === 2;
+    G.goalFreeze = 0;
+
+    // Segna il 3° gol per concludere la partita e assegnare ricompense
+    G.oppTeam[0].z = 2.1;
     G.ball.owner = null;
     G.ball.x = 10.6;
     G.ball.y = 0.5;
@@ -342,7 +396,19 @@ async function run(w) {
     return out;
   });
 
-  if (!mech.moved || !mech.wallHit || !mech.spondaCharge || !mech.superFired || !mech.finished || mech.wins < 1 || !mech.disposed) {
+  if (
+    !mech.goalsBuilt ||
+    !mech.hasCtrlCursor ||
+    !mech.hasTrailAndCrowd ||
+    !mech.moved ||
+    !mech.wallHit ||
+    !mech.spondaCharge ||
+    !mech.superFired ||
+    !mech.goalNetPulse ||
+    !mech.finished ||
+    mech.wins < 1 ||
+    !mech.disposed
+  ) {
     errors.push(`meccaniche Gabbia 3D (${w}px): ` + JSON.stringify(mech));
   }
 

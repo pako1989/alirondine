@@ -152,7 +152,7 @@
 
   // Dimensioni campo Gabbia 3D (metri virtuali)
   const PW = 22, PD = 14, HX = PW / 2, HZ = PD / 2;
-  const GW = 4.6, GH = 2.35, GD = 1.65;
+  const GW = 4.6, GH = 2.55, GD = 1.85;
 
   let OV = null, BACK = null, G = null, FAST = false;
   let keyCleanup = null, resizeCleanup = null;
@@ -269,6 +269,7 @@
             if (!m) return;
             if (m.map && m.map.dispose) m.map.dispose();
             if (m.alphaMap && m.alphaMap.dispose) m.alphaMap.dispose();
+            if (m.emissiveMap && m.emissiveMap.dispose) m.emissiveMap.dispose();
             if (m.dispose) m.dispose();
           });
         }
@@ -276,6 +277,9 @@
     }
     if (G.textures) {
       G.textures.forEach((t) => { if (t && t.dispose) t.dispose(); });
+    }
+    if (G.envRT && G.envRT.dispose) {
+      safe(() => G.envRT.dispose(), 0);
     }
     if (G.renderer) {
       safe(() => G.renderer.dispose(), 0);
@@ -452,77 +456,356 @@
     }
   }
 
-  // Texture procedurali in SRGBColorSpace (zero file esterni)
-  function makePitchTexture(THREE, ar) {
+  function hexToCss(hex, alpha) {
+    const n = typeof hex === "number" ? hex : parseInt(String(hex || "0").replace("#", ""), 16) || 0;
+    const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    return alpha === undefined ? `rgb(${r},${g},${b})` : `rgba(${r},${g},${b},${alpha})`;
+  }
+
+  function addTubeBetween(THREE, parent, ax, ay, az, bx, by, bz, radTop, radBot, segs, mat) {
+    const dx = bx - ax, dy = by - ay, dz = bz - az;
+    const len = Math.sqrt(dx * dx + dy * dy + dz * dz);
+    if (len < 0.001) return null;
+    const mesh = new THREE.Mesh(new THREE.CylinderGeometry(radTop, radBot, len, segs), mat);
+    mesh.position.set((ax + bx) * 0.5, (ay + by) * 0.5, (az + bz) * 0.5);
+    const up = new THREE.Vector3(0, 1, 0);
+    const dir = new THREE.Vector3(dx / len, dy / len, dz / len);
+    if (dir.y < -0.9999) mesh.rotation.x = Math.PI;
+    else mesh.quaternion.setFromUnitVectors(up, dir);
+    parent.add(mesh);
+    return mesh;
+  }
+
+  function makeQuadGeo(THREE, p0, p1, p2, p3, uMax, vMax) {
+    const geo = new THREE.BufferGeometry();
+    const pos = new Float32Array([
+      p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], p2[0], p2[1], p2[2],
+      p0[0], p0[1], p0[2], p2[0], p2[1], p2[2], p3[0], p3[1], p3[2],
+    ]);
+    const uvs = new Float32Array([
+      0, 0, uMax, 0, uMax, vMax,
+      0, 0, uMax, vMax, 0, vMax,
+    ]);
+    geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    geo.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
+    geo.computeVertexNormals();
+    return geo;
+  }
+
+  function buildStudioEnv(THREE, renderer, ar) {
+    if (typeof THREE.PMREMGenerator !== "function") return null;
+    return safe(() => {
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      if (pmrem.compileEquirectangularShader) pmrem.compileEquirectangularShader();
+      const envScene = new THREE.Scene();
+      envScene.background = new THREE.Color(ar.sky);
+
+      const mkLightPanel = (w, h, col, x, y, z) => {
+        const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: col, side: THREE.DoubleSide }));
+        m.position.set(x, y, z);
+        m.lookAt(0, 0, 0);
+        envScene.add(m);
+        return m;
+      };
+      const pTop = mkLightPanel(14, 14, 0xffffff, 0, 10, 0);
+      const pKey = mkLightPanel(10, 6, ar.sun, 8, 5, 7);
+      const pRimL = mkLightPanel(9, 5, ar.hemiSky, -9, 4, -6);
+      const pRimR = mkLightPanel(9, 5, ar.rail, 9, 3, -7);
+      const pGnd = mkLightPanel(18, 18, ar.apron, 0, -6, 0);
+
+      const rt = pmrem.fromScene(envScene, 0.04);
+      [pTop, pKey, pRimL, pRimR, pGnd].forEach((m) => {
+        m.geometry.dispose();
+        m.material.dispose();
+      });
+      pmrem.dispose();
+      return rt;
+    }, null);
+  }
+
+  // Texture procedurali ad alta nitidezza in SRGBColorSpace (zero file esterni)
+  function makePitchTexture(THREE, ar, maxAniso) {
     const cv = document.createElement("canvas");
-    cv.width = 512;
-    cv.height = 320;
+    cv.width = 1024;
+    cv.height = 640;
     const c = cv.getContext("2d");
-    const stripes = 8;
+    const W = cv.width, H = cv.height;
+
+    const stripes = 10;
     for (let i = 0; i < stripes; i++) {
       c.fillStyle = i % 2 === 0 ? ar.floorA : ar.floorB;
-      c.fillRect((i * cv.width) / stripes, 0, cv.width / stripes + 1, cv.height);
+      c.fillRect((i * W) / stripes, 0, W / stripes + 1, H);
     }
-    if (ar.id === "cupola") {
-      c.strokeStyle = "rgba(34,211,238,0.12)";
-      c.lineWidth = 1;
-      for (let x = 0; x < cv.width; x += 32) {
-        c.beginPath(); c.moveTo(x, 0); c.lineTo(x, cv.height); c.stroke();
-      }
-      for (let y = 0; y < cv.height; y += 32) {
-        c.beginPath(); c.moveTo(0, y); c.lineTo(cv.width, y); c.stroke();
-      }
-    } else if (ar.id === "periferia") {
-      for (let i = 0; i < 420; i++) {
-        c.fillStyle = i % 2 ? "rgba(255,255,255,0.035)" : "rgba(0,0,0,0.08)";
-        c.fillRect((i * 73) % cv.width, (i * 47) % cv.height, 2, 2);
-      }
-    }
-    // Righe regolamentari Gabbia
-    c.strokeStyle = ar.line;
-    c.lineWidth = 4;
-    c.strokeRect(10, 10, cv.width - 20, cv.height - 20);
-    c.beginPath();
-    c.moveTo(cv.width / 2, 10);
-    c.lineTo(cv.width / 2, cv.height - 10);
-    c.stroke();
-    c.beginPath();
-    c.arc(cv.width / 2, cv.height / 2, 46, 0, Math.PI * 2);
-    c.stroke();
-    c.beginPath();
-    c.arc(10, cv.height / 2, 68, -Math.PI / 2, Math.PI / 2);
-    c.stroke();
-    c.beginPath();
-    c.arc(cv.width - 10, cv.height / 2, 68, Math.PI / 2, Math.PI * 1.5);
-    c.stroke();
 
+    // Dettaglio materico specifico per ognuna delle 4 Arene
+    if (ar.id === "darsena") {
+      // Manto marino con micro-trama erbosa e cornice in tavole di molo
+      for (let i = 0; i < 900; i++) {
+        c.fillStyle = i % 2 ? "rgba(255,255,255,0.025)" : "rgba(0,0,0,0.045)";
+        c.fillRect((i * 137) % W, (i * 89) % H, 3, 2);
+      }
+      c.fillStyle = "rgba(120,72,32,0.42)";
+      c.fillRect(0, 0, W, 16);
+      c.fillRect(0, H - 16, W, 16);
+    } else if (ar.id === "periferia") {
+      // Asfalto urbano granuloso con zebrature di bordo gabbia
+      for (let i = 0; i < 1400; i++) {
+        c.fillStyle = i % 3 === 0 ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.09)";
+        c.fillRect((i * 97) % W, (i * 61) % H, 3, 3);
+      }
+      c.fillStyle = "rgba(250,204,21,0.16)";
+      for (let x = 24; x < W - 24; x += 48) {
+        c.fillRect(x, 4, 22, 10);
+        c.fillRect(x, H - 14, 22, 10);
+      }
+    } else if (ar.id === "cupola") {
+      // Griglia esagonale / cyber circuito luminoso Neo-2099
+      c.strokeStyle = "rgba(34,211,238,0.14)";
+      c.lineWidth = 1.5;
+      const stepX = 48, stepY = 42;
+      for (let row = 0; row < H / stepY + 1; row++) {
+        for (let col = 0; col < W / stepX + 1; col++) {
+          const cx = col * stepX + (row % 2 ? stepX * 0.5 : 0);
+          const cy = row * stepY;
+          c.beginPath();
+          for (let k = 0; k < 6; k++) {
+            const a = (k * Math.PI) / 3;
+            const px = cx + Math.cos(a) * 18, py = cy + Math.sin(a) * 18;
+            if (k === 0) c.moveTo(px, py); else c.lineTo(px, py);
+          }
+          c.closePath();
+          c.stroke();
+        }
+      }
+    } else if (ar.id === "colosseo") {
+      // Lastre di travertino e sabbia dorata con greca perimetrale
+      c.strokeStyle = "rgba(41,23,14,0.22)";
+      c.lineWidth = 2;
+      for (let x = 64; x < W; x += 64) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, H); c.stroke(); }
+      for (let y = 64; y < H; y += 64) { c.beginPath(); c.moveTo(0, y); c.lineTo(W, y); c.stroke(); }
+      for (let i = 0; i < 800; i++) {
+        c.fillStyle = i % 2 ? "rgba(254,243,199,0.035)" : "rgba(0,0,0,0.05)";
+        c.fillRect((i * 113) % W, (i * 71) % H, 3, 3);
+      }
+    }
+
+    // Vignettatura morbida sui bordi per dare profondità sotto le sponde
+    const vig = c.createRadialGradient(W / 2, H / 2, H * 0.25, W / 2, H / 2, W * 0.62);
+    vig.addColorStop(0, "rgba(255,255,255,0.04)");
+    vig.addColorStop(1, "rgba(0,0,0,0.26)");
+    c.fillStyle = vig;
+    c.fillRect(0, 0, W, H);
+
+    // Aree di porta colorate semitrasparenti (sinistra blu Sogni, destra corallo rivali)
+    c.save();
+    c.fillStyle = "rgba(56,189,248,0.11)";
+    c.beginPath(); c.arc(20, H / 2, 138, -Math.PI / 2, Math.PI / 2); c.closePath(); c.fill();
+    c.fillStyle = "rgba(251,113,133,0.11)";
+    c.beginPath(); c.arc(W - 20, H / 2, 138, Math.PI / 2, Math.PI * 1.5); c.closePath(); c.fill();
+    c.restore();
+
+    // Emblema centrale stilizzato della Gabbia / Rondine
+    c.save();
+    c.translate(W / 2, H / 2);
+    c.fillStyle = "rgba(255,255,255,0.05)";
+    c.beginPath(); c.arc(0, 0, 92, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = ar.line;
+    c.globalAlpha = 0.28;
+    c.lineWidth = 3;
+    c.beginPath(); c.arc(0, 0, 66, 0, Math.PI * 2); c.stroke();
+    // Sagoma ali stilizzate al centro
+    c.beginPath();
+    c.moveTo(-42, 10);
+    c.quadraticCurveTo(-14, -24, 0, -4);
+    c.quadraticCurveTo(14, -24, 42, 10);
+    c.quadraticCurveTo(14, 2, 0, 18);
+    c.quadraticCurveTo(-14, 2, -42, 10);
+    c.closePath();
+    c.fillStyle = ar.line;
+    c.fill();
+    c.restore();
+
+    // Righe regolamentari nitide con leggero alone
+    c.save();
+    c.strokeStyle = ar.line;
+    c.shadowColor = ar.line;
+    c.shadowBlur = ar.id === "cupola" ? 10 : 4;
+    c.lineWidth = 7;
+    c.strokeRect(20, 20, W - 40, H - 40);
+
+    // Linea mediana e cerchio di centrocampo
+    c.beginPath(); c.moveTo(W / 2, 20); c.lineTo(W / 2, H - 20); c.stroke();
+    c.beginPath(); c.arc(W / 2, H / 2, 92, 0, Math.PI * 2); c.stroke();
+    c.fillStyle = ar.line;
+    c.beginPath(); c.arc(W / 2, H / 2, 9, 0, Math.PI * 2); c.fill();
+
+    // Aree di rigore a D + dischetti
+    c.beginPath(); c.arc(20, H / 2, 138, -Math.PI / 2, Math.PI / 2); c.stroke();
+    c.beginPath(); c.arc(W - 20, H / 2, 138, Math.PI / 2, Math.PI * 1.5); c.stroke();
+    c.beginPath(); c.arc(195, H / 2, 6, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.arc(W - 195, H / 2, 6, 0, Math.PI * 2); c.fill();
+
+    // Lunette d'angolo
+    [[20, 20, 0, Math.PI / 2], [W - 20, 20, Math.PI / 2, Math.PI], [W - 20, H - 20, Math.PI, Math.PI * 1.5], [20, H - 20, -Math.PI / 2, 0]].forEach(([cx, cy, a0, a1]) => {
+      c.beginPath(); c.arc(cx, cy, 28, a0, a1); c.stroke();
+    });
+    c.restore();
+
+    const tex = new THREE.CanvasTexture(cv);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    if (maxAniso > 1) tex.anisotropy = maxAniso;
+    tex.needsUpdate = true;
+    return tex;
+  }
+
+  // Texture procedurale rete intrecciata a rombi con nodi per le Porte 3D
+  function makeNetTexture(THREE, accentHex, maxAniso) {
+    const cv = document.createElement("canvas");
+    cv.width = 256;
+    cv.height = 256;
+    const c = cv.getContext("2d");
+    c.clearRect(0, 0, 256, 256);
+
+    const cells = 4;
+    const step = 256 / cells;
+    const acc = hexToCss(accentHex, 0.85);
+
+    // Ombra cordino per stacco netto su ogni sfondo
+    c.strokeStyle = "rgba(8,13,26,0.75)";
+    c.lineWidth = 8.2;
+    for (let i = -cells; i <= cells * 2; i++) {
+      c.beginPath(); c.moveTo(i * step, 0); c.lineTo(i * step + 256, 256); c.stroke();
+      c.beginPath(); c.moveTo(i * step, 0); c.lineTo(i * step - 256, 256); c.stroke();
+    }
+
+    // Cordino intrecciato bianco ad alta visibilità
+    c.strokeStyle = "rgba(255,255,255,0.98)";
+    c.lineWidth = 4.5;
+    for (let i = -cells; i <= cells * 2; i++) {
+      c.beginPath(); c.moveTo(i * step, 0); c.lineTo(i * step + 256, 256); c.stroke();
+      c.beginPath(); c.moveTo(i * step, 0); c.lineTo(i * step - 256, 256); c.stroke();
+    }
+
+    // Filo secondario color squadra + nodi d'incrocio
+    c.strokeStyle = acc;
+    c.lineWidth = 2.2;
+    for (let i = -cells; i <= cells * 2; i += 2) {
+      c.beginPath(); c.moveTo(i * step, 0); c.lineTo(i * step + 256, 256); c.stroke();
+    }
+    c.fillStyle = "#ffffff";
+    for (let y = 0; y <= 256; y += step / 2) {
+      const odd = Math.round(y / (step / 2)) % 2;
+      for (let x = odd ? step / 2 : 0; x <= 256; x += step) {
+        c.beginPath(); c.arc(x, y, 3.4, 0, Math.PI * 2); c.fill();
+      }
+    }
+
+    const tex = new THREE.CanvasTexture(cv);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    if (maxAniso > 1) tex.anisotropy = maxAniso;
+    tex.needsUpdate = true;
+    return tex;
+  }
+
+  // Texture barriera energetica / rete metallica per le sponde della Gabbia
+  function makeCageGlassTexture(THREE, ar, maxAniso) {
+    const cv = document.createElement("canvas");
+    cv.width = 256;
+    cv.height = 128;
+    const c = cv.getContext("2d");
+    const g = c.createLinearGradient(0, 0, 0, 128);
+    g.addColorStop(0, hexToCss(ar.rail, 0.52));
+    g.addColorStop(0.18, hexToCss(ar.wall, 0.16));
+    g.addColorStop(0.82, hexToCss(ar.wall, 0.16));
+    g.addColorStop(1, hexToCss(ar.rail, 0.55));
+    c.fillStyle = g;
+    c.fillRect(0, 0, 256, 128);
+
+    c.strokeStyle = hexToCss(ar.wall, 0.48);
+    c.lineWidth = 2;
+    const st = 32;
+    for (let x = -128; x <= 384; x += st) {
+      c.beginPath(); c.moveTo(x, 0); c.lineTo(x + 128, 128); c.stroke();
+      c.beginPath(); c.moveTo(x, 0); c.lineTo(x - 128, 128); c.stroke();
+    }
+    c.fillStyle = hexToCss(ar.rail, 0.65);
+    c.fillRect(0, 62, 256, 3);
+
+    const tex = new THREE.CanvasTexture(cv);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.ClampToEdgeWrapping;
+    if (maxAniso > 1) tex.anisotropy = maxAniso;
+    tex.needsUpdate = true;
+    return tex;
+  }
+
+  function makeWindowGridTexture(THREE, skyHex, litHex) {
+    const cv = document.createElement("canvas");
+    cv.width = 128;
+    cv.height = 128;
+    const c = cv.getContext("2d");
+    c.fillStyle = hexToCss(skyHex);
+    c.fillRect(0, 0, 128, 128);
+    for (let r = 0; r < 6; r++) {
+      for (let col = 0; col < 5; col++) {
+        const on = ((r * 7 + col * 13) % 5) < 3;
+        c.fillStyle = on ? hexToCss(litHex, 0.85) : "rgba(15,23,42,0.7)";
+        c.fillRect(10 + col * 23, 10 + r * 19, 14, 11);
+      }
+    }
     const tex = new THREE.CanvasTexture(cv);
     tex.colorSpace = THREE.SRGBColorSpace;
     tex.needsUpdate = true;
     return tex;
   }
 
-  function makeBallTexture(THREE) {
+  function makeBallTexture(THREE, maxAniso) {
     const cv = document.createElement("canvas");
-    cv.width = 256;
-    cv.height = 128;
+    cv.width = 512;
+    cv.height = 256;
     const c = cv.getContext("2d");
-    c.fillStyle = "#f8fafc";
-    c.fillRect(0, 0, 256, 128);
-    c.fillStyle = "#0f172a";
-    const spots = [[32, 32], [96, 28], [160, 32], [224, 28], [64, 92], [128, 96], [192, 92]];
+    const baseG = c.createLinearGradient(0, 0, 0, 256);
+    baseG.addColorStop(0, "#ffffff");
+    baseG.addColorStop(0.5, "#f8fafc");
+    baseG.addColorStop(1, "#e2e8f0");
+    c.fillStyle = baseG;
+    c.fillRect(0, 0, 512, 256);
+
+    // Cuciture e fregi pro dorati/azzurri
+    c.strokeStyle = "#38bdf8";
+    c.lineWidth = 5;
+    c.beginPath();
+    c.moveTo(0, 128);
+    c.bezierCurveTo(140, 68, 372, 188, 512, 128);
+    c.stroke();
+    c.strokeStyle = "#f59e0b";
+    c.lineWidth = 3;
+    c.beginPath();
+    c.moveTo(0, 128);
+    c.bezierCurveTo(140, 188, 372, 68, 512, 128);
+    c.stroke();
+
+    const spots = [[64, 62], [192, 54], [320, 62], [448, 54], [128, 188], [256, 196], [384, 188]];
     spots.forEach(([x, y]) => {
+      c.fillStyle = "#0f172a";
+      c.strokeStyle = "#475569";
+      c.lineWidth = 3;
       c.beginPath();
       for (let k = 0; k < 5; k++) {
         const a = (k * Math.PI * 2) / 5 - Math.PI / 2;
-        const px = x + Math.cos(a) * 16, py = y + Math.sin(a) * 15;
+        const px = x + Math.cos(a) * 31, py = y + Math.sin(a) * 29;
         if (k === 0) c.moveTo(px, py); else c.lineTo(px, py);
       }
       c.closePath();
       c.fill();
+      c.stroke();
     });
     const tex = new THREE.CanvasTexture(cv);
     tex.colorSpace = THREE.SRGBColorSpace;
+    if (maxAniso > 1) tex.anisotropy = maxAniso;
     tex.needsUpdate = true;
     return tex;
   }
@@ -533,8 +816,8 @@
     cv.height = 64;
     const c = cv.getContext("2d");
     const g = c.createRadialGradient(32, 32, 4, 32, 32, 30);
-    g.addColorStop(0, "rgba(0,0,0,0.62)");
-    g.addColorStop(0.65, "rgba(0,0,0,0.24)");
+    g.addColorStop(0, "rgba(0,0,0,0.66)");
+    g.addColorStop(0.65, "rgba(0,0,0,0.26)");
     g.addColorStop(1, "rgba(0,0,0,0)");
     c.fillStyle = g;
     c.fillRect(0, 0, 64, 64);
@@ -543,144 +826,490 @@
     return tex;
   }
 
-  // Modello procedurale composito a 9 parti (THREE.Group, pivot y=0 a terra)
+  // Porta 3D realistica da Futsal / Gabbia (pali smaltati con bande, giunti sferici, telaio D inclinato posteriore, rete a rombi su 4 teli e barra LED di gol)
+  function buildGoal3D(THREE, scene, sign, netTex) {
+    const gg = new THREE.Group();
+    gg.position.set(sign * HX, 0, 0);
+
+    const accentHex = sign < 0 ? 0x38bdf8 : 0xfb7185;
+    const halfZ = GW / 2;
+    const topD = 0.96;
+    const botD = GD; // 1.85m
+    const rPost = 0.132;
+
+    const postMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.16, metalness: 0.5 });
+    const bandMat = new THREE.MeshStandardMaterial({ color: accentHex, emissive: accentHex, emissiveIntensity: 0.45, roughness: 0.22, metalness: 0.35 });
+    const darkMetalMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3, metalness: 0.78 });
+    const stanchionMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.24, metalness: 0.82 });
+    const ledMat = new THREE.MeshStandardMaterial({ color: accentHex, emissive: accentHex, emissiveIntensity: 0.85, roughness: 0.18 });
+    const padMat = new THREE.MeshBasicMaterial({ color: accentHex, transparent: true, opacity: 0.22, depthWrite: false, side: THREE.DoubleSide });
+    const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95, depthWrite: false });
+    const netMat = new THREE.MeshBasicMaterial({
+      map: netTex,
+      transparent: true,
+      opacity: 0.96,
+      alphaTest: 0.05,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+    });
+
+    // 1. Tappetino interno di porta + linea di porta luminosa
+    const mouthPad = new THREE.Mesh(new THREE.PlaneGeometry(botD, GW - 0.08), padMat);
+    mouthPad.rotation.x = -Math.PI / 2;
+    mouthPad.position.set(sign * (botD * 0.5), 0.012, 0);
+    gg.add(mouthPad);
+
+    const goalLine = new THREE.Mesh(new THREE.PlaneGeometry(0.16, GW - 0.1), lineMat);
+    goalLine.rotation.x = -Math.PI / 2;
+    goalLine.position.set(0, 0.019, 0);
+    gg.add(goalLine);
+
+    // 2. Pali anteriori + anelli grip color squadra + basi ancorate a terra + giunti superiori
+    [-halfZ, halfZ].forEach((pz) => {
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(0.19, 0.24, 0.16, 14), darkMetalMat);
+      base.position.set(0, 0.08, pz);
+      gg.add(base);
+
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(rPost, rPost, GH, 16), postMat);
+      post.position.set(0, GH * 0.5, pz);
+      if (!IS_SW_GL) post.castShadow = true;
+      gg.add(post);
+
+      [0.78, 1.74].forEach((by) => {
+        const band = new THREE.Mesh(new THREE.CylinderGeometry(rPost + 0.01, rPost + 0.01, 0.24, 16), bandMat);
+        band.position.set(0, by, pz);
+        gg.add(band);
+      });
+
+      const elbow = new THREE.Mesh(new THREE.SphereGeometry(rPost * 1.24, 14, 12), bandMat);
+      elbow.position.set(0, GH, pz);
+      gg.add(elbow);
+    });
+
+    // 3. Traversa + fasce decorative + barra LED + visiera luminosa superiore di porta
+    const bar = new THREE.Mesh(new THREE.CylinderGeometry(rPost, rPost, GW, 16), postMat);
+    bar.rotation.x = Math.PI / 2;
+    bar.position.set(0, GH, 0);
+    if (!IS_SW_GL) bar.castShadow = true;
+    gg.add(bar);
+
+    [-1.18, 1.18].forEach((bz) => {
+      const cBand = new THREE.Mesh(new THREE.CylinderGeometry(rPost + 0.01, rPost + 0.01, 0.26, 16), bandMat);
+      cBand.rotation.x = Math.PI / 2;
+      cBand.position.set(0, GH, bz);
+      gg.add(cBand);
+    });
+
+    const ledBar = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.075, GW - 0.34), ledMat);
+    ledBar.position.set(-sign * 0.08, GH - 0.06, 0);
+    gg.add(ledBar);
+
+    const topSign = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.24, 1.9), darkMetalMat);
+    topSign.position.set(sign * 0.04, GH + 0.22, 0);
+    const topSignFace = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 1.68), ledMat);
+    topSignFace.position.set(sign * 0.04, GH + 0.22, 0);
+    gg.add(topSign, topSignFace);
+
+    // 4. Telaio posteriore a D inclinato (montanti alti, correnti a terra, puntoni obliqui e traverse di fondo)
+    const topY = GH - 0.03, botY = 0.065;
+    [-halfZ, halfZ].forEach((pz) => {
+      addTubeBetween(THREE, gg, 0, topY, pz, sign * topD, topY, pz, 0.052, 0.052, 10, stanchionMat);
+      addTubeBetween(THREE, gg, 0, botY, pz, sign * botD, botY, pz, 0.058, 0.058, 10, darkMetalMat);
+      addTubeBetween(THREE, gg, sign * topD, topY, pz, sign * botD, botY, pz, 0.052, 0.052, 10, stanchionMat);
+
+      const jTop = new THREE.Mesh(new THREE.SphereGeometry(0.072, 10, 8), darkMetalMat);
+      jTop.position.set(sign * topD, topY, pz);
+      const jBot = new THREE.Mesh(new THREE.SphereGeometry(0.078, 10, 8), darkMetalMat);
+      jBot.position.set(sign * botD, botY, pz);
+      gg.add(jTop, jBot);
+    });
+    addTubeBetween(THREE, gg, sign * topD, topY, -halfZ, sign * topD, topY, halfZ, 0.05, 0.05, 10, stanchionMat);
+    addTubeBetween(THREE, gg, sign * botD, botY, -halfZ, sign * botD, botY, halfZ, 0.06, 0.06, 10, darkMetalMat);
+
+    // 5. Gruppo Rete 3D a 4 teli sagomati (retro inclinato + tetto + 2 fianchi trapezoidali) che si gonfia al Gol!
+    const netRig = new THREE.Group();
+    const dens = 1.45;
+    const slopeLen = Math.hypot(botD - topD, topY - botY);
+
+    // Telo posteriore inclinato
+    const backNet = new THREE.Mesh(
+      makeQuadGeo(
+        THREE,
+        [sign * botD, botY, -halfZ],
+        [sign * botD, botY, halfZ],
+        [sign * topD, topY, halfZ],
+        [sign * topD, topY, -halfZ],
+        GW * dens,
+        slopeLen * dens
+      ),
+      netMat
+    );
+    // Telo superiore (tetto porta)
+    const roofNet = new THREE.Mesh(
+      makeQuadGeo(
+        THREE,
+        [0, topY, -halfZ],
+        [0, topY, halfZ],
+        [sign * topD, topY, halfZ],
+        [sign * topD, topY, -halfZ],
+        GW * dens,
+        topD * dens
+      ),
+      netMat
+    );
+    // Teli laterali trapezoidali sinistro e destro
+    const sideNetL = new THREE.Mesh(
+      makeQuadGeo(
+        THREE,
+        [0, botY, -halfZ],
+        [sign * botD, botY, -halfZ],
+        [sign * topD, topY, -halfZ],
+        [0, topY, -halfZ],
+        botD * dens,
+        GH * dens
+      ),
+      netMat
+    );
+    const sideNetR = new THREE.Mesh(
+      makeQuadGeo(
+        THREE,
+        [0, botY, halfZ],
+        [sign * botD, botY, halfZ],
+        [sign * topD, topY, halfZ],
+        [0, topY, halfZ],
+        botD * dens,
+        GH * dens
+      ),
+      netMat
+    );
+    netRig.add(backNet, roofNet, sideNetL, sideNetR);
+    gg.add(netRig);
+
+    scene.add(gg);
+    return { grp: gg, netRig, ledMat, padMat, pulse: 0 };
+  }
+
+  // Modello procedurale composito espressivo (15 parti, pivot y=0 a terra + cursore 3D sopra l'atleta attivo)
   function buildAthleteMesh(THREE, shadowTex, cfg) {
     const grp = new THREE.Group();
 
-    const matSkin = new THREE.MeshStandardMaterial({ color: cfg.skin, roughness: 0.65, metalness: 0.04 });
-    const matHair = new THREE.MeshStandardMaterial({ color: cfg.hair, roughness: 0.78, metalness: 0.05 });
-    const matShirt = new THREE.MeshStandardMaterial({ color: cfg.shirt, roughness: 0.68, metalness: 0.08 });
-    const matShorts = new THREE.MeshStandardMaterial({ color: cfg.shorts, roughness: 0.85, metalness: 0.04 });
-    const matBoots = new THREE.MeshStandardMaterial({ color: cfg.boots, roughness: 0.35, metalness: 0.22 });
-    const matGlove = new THREE.MeshStandardMaterial({ color: cfg.isGk ? 0xffd23f : cfg.skin, roughness: cfg.isGk ? 0.4 : 0.65, metalness: 0.1 });
+    const matSkin = new THREE.MeshStandardMaterial({ color: cfg.skin, roughness: 0.62, metalness: 0.04 });
+    const matHair = new THREE.MeshStandardMaterial({ color: cfg.hair, roughness: 0.72, metalness: 0.06 });
+    const matShirt = new THREE.MeshStandardMaterial({ color: cfg.shirt, roughness: 0.58, metalness: 0.1 });
+    const matTrim = new THREE.MeshStandardMaterial({ color: cfg.trim || 0xfef08a, roughness: 0.45, metalness: 0.18 });
+    const matShorts = new THREE.MeshStandardMaterial({ color: cfg.shorts, roughness: 0.8, metalness: 0.05 });
+    const matSock = new THREE.MeshStandardMaterial({ color: cfg.shirt, roughness: 0.72, metalness: 0.05 });
+    const matBoots = new THREE.MeshStandardMaterial({ color: cfg.boots, roughness: 0.28, metalness: 0.32 });
+    const matGlove = new THREE.MeshStandardMaterial({ color: cfg.isGk ? 0xffd23f : cfg.skin, roughness: cfg.isGk ? 0.35 : 0.62, metalness: 0.12 });
+    const matEye = new THREE.MeshBasicMaterial({ color: 0x0f172a });
 
     // 1. Ombra di contatto radiale a terra
     const sh = new THREE.Mesh(
-      new THREE.PlaneGeometry(1.15, 1.15),
+      new THREE.PlaneGeometry(1.22, 1.22),
       new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false })
     );
     sh.rotation.x = -Math.PI / 2;
     sh.position.y = 0.015;
     grp.add(sh);
 
-    // 2. Anello indicatore ruolo / giocatore controllato
+    // 2. Doppio anello indicatore ruolo / giocatore controllato
     const ringMat = new THREE.MeshBasicMaterial({
       color: cfg.ringColor,
       transparent: true,
-      opacity: 0.82,
+      opacity: 0.86,
       side: THREE.DoubleSide,
       depthWrite: false,
     });
-    const ring = new THREE.Mesh(new THREE.RingGeometry(0.46, 0.62, 24), ringMat);
+    const ring = new THREE.Mesh(new THREE.RingGeometry(0.47, 0.65, 28), ringMat);
     ring.rotation.x = -Math.PI / 2;
     ring.position.y = 0.022;
     grp.add(ring);
 
+    // 3. Cursore diamante 3D oro sopra il campione controllato dall'utente
+    const ctrlConeMat = new THREE.MeshStandardMaterial({
+      color: 0xffd23f,
+      emissive: 0xf59e0b,
+      emissiveIntensity: 0.85,
+      roughness: 0.22,
+      metalness: 0.45,
+    });
+    const ctrlCone = new THREE.Mesh(new THREE.OctahedronGeometry(0.14, 0), ctrlConeMat);
+    ctrlCone.scale.set(0.95, 1.35, 0.95);
+    ctrlCone.position.y = 2.08;
+    ctrlCone.visible = false;
+    grp.add(ctrlCone);
+
     const bodyRoot = new THREE.Group();
     grp.add(bodyRoot);
 
-    // 3 & 4. Gambe articolate + scarpini
+    // 4 & 5. Gambe articolate + calzettoni alti + scarpini bicolori
     function mkLeg(xOff) {
       const piv = new THREE.Group();
       piv.position.set(xOff, 0.56, 0);
-      const shin = new THREE.Mesh(new THREE.CylinderGeometry(0.095, 0.08, 0.44, 10), matSkin);
-      shin.position.y = -0.22;
-      piv.add(shin);
-      const boot = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.13, 0.3), matBoots);
-      boot.position.set(0, -0.46, 0.05);
+      const knee = new THREE.Mesh(new THREE.CylinderGeometry(0.098, 0.088, 0.21, 10), matSkin);
+      knee.position.y = -0.11;
+      piv.add(knee);
+      const sock = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.078, 0.25, 10), matSock);
+      sock.position.y = -0.33;
+      piv.add(sock);
+      const boot = new THREE.Mesh(new THREE.BoxGeometry(0.185, 0.13, 0.31), matBoots);
+      boot.position.set(0, -0.46, 0.055);
       piv.add(boot);
       return piv;
     }
-    const legL = mkLeg(-0.14);
-    const legR = mkLeg(0.14);
+    const legL = mkLeg(-0.145);
+    const legR = mkLeg(0.145);
     bodyRoot.add(legL, legR);
 
-    // 5. Pantaloncini
-    const shorts = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.23, 0.24, 12), matShorts);
+    // 6. Pantaloncini con bordo laterale
+    const shorts = new THREE.Mesh(new THREE.CylinderGeometry(0.255, 0.235, 0.25, 14), matShorts);
     shorts.position.y = 0.64;
     bodyRoot.add(shorts);
 
-    // 6. Busto maglia + colletto
-    const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.24, 0.52, 12), matShirt);
-    torso.position.y = 0.98;
+    // 7. Busto maglia + banda pettorale + colletto
+    const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.285, 0.242, 0.53, 14), matShirt);
+    torso.position.y = 0.985;
     if (!IS_SW_GL) torso.castShadow = true;
     bodyRoot.add(torso);
 
-    const collar = new THREE.Mesh(new THREE.TorusGeometry(0.16, 0.035, 8, 16), matShorts);
+    const chestBand = new THREE.Mesh(new THREE.CylinderGeometry(0.278, 0.268, 0.12, 14), matTrim);
+    chestBand.position.y = 1.04;
+    bodyRoot.add(chestBand);
+
+    const collar = new THREE.Mesh(new THREE.TorusGeometry(0.16, 0.036, 8, 16), matTrim);
     collar.rotation.x = Math.PI / 2;
-    collar.position.y = 1.23;
+    collar.position.y = 1.24;
     bodyRoot.add(collar);
 
-    // 7 & 8. Braccia + mani / guantoni da portiere
+    // 8 & 9. Braccia + manica + mani / guantoni da portiere
     function mkArm(xOff) {
       const piv = new THREE.Group();
-      piv.position.set(xOff, 1.16, 0);
-      const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.07, 0.38, 9), matShirt);
-      upper.position.y = -0.17;
-      piv.add(upper);
-      const handGeo = cfg.isGk ? new THREE.BoxGeometry(0.19, 0.19, 0.14) : new THREE.SphereGeometry(0.085, 9, 9);
+      piv.position.set(xOff, 1.17, 0);
+      const sleeve = new THREE.Mesh(new THREE.CylinderGeometry(0.088, 0.08, 0.19, 10), matShirt);
+      sleeve.position.y = -0.09;
+      piv.add(sleeve);
+      const forearm = new THREE.Mesh(new THREE.CylinderGeometry(0.074, 0.066, 0.22, 9), matSkin);
+      forearm.position.y = -0.27;
+      piv.add(forearm);
+      const handGeo = cfg.isGk ? new THREE.BoxGeometry(0.2, 0.2, 0.15) : new THREE.SphereGeometry(0.085, 9, 9);
       const hand = new THREE.Mesh(handGeo, matGlove);
-      hand.position.y = -0.39;
+      hand.position.y = -0.4;
       piv.add(hand);
       return piv;
     }
-    const armL = mkArm(-0.34);
-    const armR = mkArm(0.34);
+    const armL = mkArm(-0.345);
+    const armR = mkArm(0.345);
     bodyRoot.add(armL, armR);
 
-    // 9. Testa + capigliatura distintiva
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.24, 14, 12), matSkin);
-    head.position.y = 1.46;
+    // 10. Testa + occhi espressivi + capigliatura variata
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.242, 16, 13), matSkin);
+    head.position.y = 1.47;
     if (!IS_SW_GL) head.castShadow = true;
     bodyRoot.add(head);
 
-    const hairCap = new THREE.Mesh(new THREE.SphereGeometry(0.252, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.58), matHair);
-    hairCap.position.y = 1.48;
+    [-0.082, 0.082].forEach((ex) => {
+      const eye = new THREE.Mesh(new THREE.SphereGeometry(0.03, 8, 8), matEye);
+      eye.position.set(ex, 1.485, 0.215);
+      bodyRoot.add(eye);
+    });
+
+    const hairCap = new THREE.Mesh(new THREE.SphereGeometry(0.254, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.58), matHair);
+    hairCap.position.y = 1.49;
     hairCap.rotation.x = -0.18;
     bodyRoot.add(hairCap);
 
-    const crest = new THREE.Mesh(new THREE.ConeGeometry(0.11, 0.22, 7), matHair);
-    crest.position.set(0, 1.72, 0.06);
-    crest.rotation.x = 0.35;
-    bodyRoot.add(crest);
+    const style = cfg.styleIdx % 3;
+    if (style === 0) {
+      const crest = new THREE.Mesh(new THREE.ConeGeometry(0.11, 0.23, 7), matHair);
+      crest.position.set(0, 1.73, 0.06);
+      crest.rotation.x = 0.35;
+      bodyRoot.add(crest);
+    } else if (style === 1) {
+      const band = new THREE.Mesh(new THREE.TorusGeometry(0.242, 0.028, 8, 18), matTrim);
+      band.rotation.x = Math.PI / 2 - 0.08;
+      band.position.y = 1.54;
+      bodyRoot.add(band);
+    } else {
+      const tuft = new THREE.Mesh(new THREE.SphereGeometry(0.13, 10, 8), matHair);
+      tuft.position.set(0, 1.7, -0.05);
+      bodyRoot.add(tuft);
+    }
 
-    return { grp, bodyRoot, legL, legR, armL, armR, ring, ringMat };
+    return { grp, bodyRoot, legL, legR, armL, armR, ring, ringMat, ctrlCone };
   }
 
-  function buildArenaProps(THREE, scene, ar) {
-    // Ampio piazzale esterno oltre la gabbia così non fluttua nel vuoto
+  function buildArenaProps(THREE, scene, ar, extraTextures) {
+    const props = { crowd: [], flames: [], beacon: null };
+
+    // Ampio piazzale esterno oltre la gabbia
     const apron = new THREE.Mesh(
-      new THREE.PlaneGeometry(76, 56),
-      new THREE.MeshStandardMaterial({ color: ar.apron, roughness: 0.92, metalness: 0.05 })
+      new THREE.PlaneGeometry(88, 64),
+      new THREE.MeshStandardMaterial({ color: ar.apron, roughness: 0.9, metalness: 0.06 })
     );
     apron.rotation.x = -Math.PI / 2;
     apron.position.y = -0.03;
     scene.add(apron);
 
-    const propMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.75, metalness: 0.25 });
-    const glowMat = new THREE.MeshStandardMaterial({ color: ar.rail, emissive: ar.rail, emissiveIntensity: 0.85, roughness: 0.3 });
+    // Cornice pavimentata attorno al perimetro della gabbia
+    const curbMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.65, metalness: 0.35 });
+    const curb = new THREE.Mesh(new THREE.RingGeometry(13.2, 15.8, 4), curbMat);
+    curb.rotation.x = -Math.PI / 2;
+    curb.rotation.z = Math.PI / 4;
+    curb.scale.set(1.12, 0.74, 1);
+    curb.position.y = -0.015;
+    scene.add(curb);
 
-    // 4 torri faro / colonne angolari esterne
-    const corners = [[-13.2, -8.8], [13.2, -8.8], [-13.2, 8.8], [13.2, 8.8]];
+    const trussMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.42, metalness: 0.72 });
+    const glowMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: ar.sun, emissiveIntensity: 1.35, roughness: 0.2 });
+    const coneMat = new THREE.MeshBasicMaterial({ color: ar.sun, transparent: true, opacity: 0.075, side: THREE.DoubleSide, depthWrite: false });
+
+    // 4 Torri faro da stadio con riflettori multipli e coni di luce atmosferici
+    const corners = [[-13.4, -8.9], [13.4, -8.9], [-13.4, 8.9], [13.4, 8.9]];
     corners.forEach(([cx, cz]) => {
-      const poleH = ar.id === "colosseo" ? 5.2 : 6.4;
-      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.32, poleH, 10), propMat);
+      const poleH = ar.id === "colosseo" ? 5.6 : 6.8;
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.52, 0.45, 10), curbMat);
+      base.position.set(cx, 0.22, cz);
+      scene.add(base);
+
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.28, poleH, 10), trussMat);
       pole.position.set(cx, poleH / 2, cz);
       scene.add(pole);
-      const lamp = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.42, 0.55), glowMat);
-      lamp.position.set(cx, poleH + 0.15, cz);
-      lamp.lookAt(0, 0, 0);
-      scene.add(lamp);
+
+      const headGrp = new THREE.Group();
+      headGrp.position.set(cx, poleH + 0.18, cz);
+      headGrp.lookAt(0, 0.6, 0);
+      const hood = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.62, 0.42), curbMat);
+      const face = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.48), glowMat);
+      face.position.z = 0.22;
+      headGrp.add(hood, face);
+      scene.add(headGrp);
+
+      const beam = new THREE.Mesh(new THREE.ConeGeometry(2.8, 7.5, 14, 1, true), coneMat);
+      beam.position.set(cx * 0.78, poleH * 0.56, cz * 0.78);
+      beam.lookAt(cx * 0.35, 0, cz * 0.35);
+      beam.rotateX(Math.PI / 2);
+      scene.add(beam);
     });
 
-    // Sagome architettoniche di sfondo coerenti col tema
-    const bgMat = new THREE.MeshStandardMaterial({ color: ar.id === "colosseo" ? 0x452719 : 0x131e33, roughness: 0.88, metalness: 0.12 });
-    for (let i = -3; i <= 3; i++) {
-      const h = 2.6 + ((Math.abs(i * 7 + 3) % 4) * 1.1);
-      const blk = new THREE.Mesh(new THREE.BoxGeometry(3.6, h, 2.2), bgMat);
-      blk.position.set(i * 5.2, h / 2, -13.5);
-      scene.add(blk);
+    // Tribunetta Nord a gradoni con spettatori festanti animati
+    const stepMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8, metalness: 0.2 });
+    const banMat = new THREE.MeshStandardMaterial({ color: ar.rail, emissive: ar.rail, emissiveIntensity: 0.35, roughness: 0.4 });
+    for (let s = 0; s < 3; s++) {
+      const tier = new THREE.Mesh(new THREE.BoxGeometry(18.5, 0.45 + s * 0.42, 0.95), stepMat);
+      tier.position.set(0, (0.45 + s * 0.42) * 0.5, -9.2 - s * 0.95);
+      scene.add(tier);
     }
+    const hoard = new THREE.Mesh(new THREE.BoxGeometry(18.6, 0.42, 0.12), banMat);
+    hoard.position.set(0, 0.24, -8.62);
+    scene.add(hoard);
+
+    const fanColors = [0x38bdf8, 0xffd23f, 0xfb7185, 0x34d399, 0xa855f7, 0xf97316];
+    const fanMats = fanColors.map((hex) => new THREE.MeshStandardMaterial({ color: hex, roughness: 0.65 }));
+    const fanHeadMat = new THREE.MeshStandardMaterial({ color: 0xf1c27d, roughness: 0.65 });
+    const torsoGeo = new THREE.CylinderGeometry(0.16, 0.14, 0.38, 8);
+    const headGeo = new THREE.SphereGeometry(0.13, 8, 8);
+    for (let i = 0; i < 16; i++) {
+      const row = i % 2;
+      const fx = -7.5 + i * 1.0;
+      const fy = 0.62 + row * 0.44;
+      const fz = -9.2 - row * 0.95;
+      const fg = new THREE.Group();
+      const ft = new THREE.Mesh(torsoGeo, fanMats[i % fanMats.length]);
+      const fh = new THREE.Mesh(headGeo, fanHeadMat);
+      fh.position.y = 0.31;
+      fg.add(ft, fh);
+      fg.position.set(fx, fy, fz);
+      scene.add(fg);
+      props.crowd.push({ grp: fg, baseY: fy, phase: i * 0.85 });
+    }
+
+    // Scenografia tematica specifica dell'Arena
+    if (ar.id === "darsena") {
+      // Specchio d'acqua del porto + Faro di Borgo Marino + bitte d'ormeggio
+      const sea = new THREE.Mesh(
+        new THREE.PlaneGeometry(90, 26),
+        new THREE.MeshStandardMaterial({ color: 0x0c4a6e, roughness: 0.18, metalness: 0.65 })
+      );
+      sea.rotation.x = -Math.PI / 2;
+      sea.position.set(0, -0.01, -24);
+      scene.add(sea);
+
+      const lhGrp = new THREE.Group();
+      lhGrp.position.set(16.5, 0, -13.8);
+      const redMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.55 });
+      const whtMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
+      for (let k = 0; k < 4; k++) {
+        const seg = new THREE.Mesh(new THREE.CylinderGeometry(0.85 - k * 0.1, 0.95 - k * 0.1, 1.55, 12), k % 2 ? whtMat : redMat);
+        seg.position.y = 0.78 + k * 1.55;
+        lhGrp.add(seg);
+      }
+      const lantern = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.52, 0.75, 12), glowMat);
+      lantern.position.y = 6.6;
+      const roof = new THREE.Mesh(new THREE.ConeGeometry(0.68, 0.65, 12), redMat);
+      roof.position.y = 7.25;
+      lhGrp.add(lantern, roof);
+      scene.add(lhGrp);
+      props.beacon = lantern;
+
+      [-15.5, -10.5, 10.5, 15.5].forEach((bx) => {
+        const bollard = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.26, 0.55, 10), curbMat);
+        bollard.position.set(bx, 0.28, -11.8);
+        scene.add(bollard);
+      });
+    } else if (ar.id === "periferia") {
+      // Palazzi notturni con finestre illuminate
+      const winTex = makeWindowGridTexture(THREE, 0x1e293b, 0xfef08a);
+      extraTextures.push(winTex);
+      const bldMat = new THREE.MeshStandardMaterial({ map: winTex, emissive: 0xfde047, emissiveMap: winTex, emissiveIntensity: 0.35, roughness: 0.85 });
+      for (let i = -3; i <= 3; i++) {
+        const h = 4.2 + ((Math.abs(i * 5 + 2) % 4) * 1.45);
+        const blk = new THREE.Mesh(new THREE.BoxGeometry(3.9, h, 2.6), bldMat);
+        blk.position.set(i * 4.8, h / 2, -14.8 - (Math.abs(i) % 2) * 1.4);
+        scene.add(blk);
+      }
+    } else if (ar.id === "cupola") {
+      // Archi olografici al plasma Neo-2099 sullo sfondo Nord + obelischi cyber (senza ostruire la visuale Tribuna sulle porte)
+      const archMat = new THREE.MeshStandardMaterial({ color: 0x22d3ee, emissive: 0x06b6d4, emissiveIntensity: 0.9, roughness: 0.2, metalness: 0.6 });
+      const archMat2 = new THREE.MeshStandardMaterial({ color: 0xc084fc, emissive: 0x9333ea, emissiveIntensity: 0.85, roughness: 0.2, metalness: 0.6 });
+      [[14.8, -12.6, archMat], [17.6, -15.4, archMat2]].forEach(([rad, az, mt]) => {
+        const torus = new THREE.Mesh(new THREE.TorusGeometry(rad, 0.15, 10, 48, Math.PI), mt);
+        torus.position.set(0, 0, az);
+        scene.add(torus);
+      });
+      for (let i = -3; i <= 3; i++) {
+        const h = 3.2 + (Math.abs(i) % 3) * 1.4;
+        const ob = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.45, h, 6), i % 2 ? archMat : archMat2);
+        ob.position.set(i * 4.8, h / 2, -14.2);
+        scene.add(ob);
+      }
+    } else if (ar.id === "colosseo") {
+      // Colonnato classico imperiale + 4 bracieri ardenti animati
+      const stoneMat = new THREE.MeshStandardMaterial({ color: 0xa8896c, roughness: 0.82, metalness: 0.08 });
+      const bronzeMat = new THREE.MeshStandardMaterial({ color: 0x92400e, roughness: 0.4, metalness: 0.72 });
+      const fireMat = new THREE.MeshBasicMaterial({ color: 0xfbbf24 });
+      for (let i = -3; i <= 3; i++) {
+        const cx = i * 4.4, cz = -13.6;
+        const col = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.44, 4.8, 12), stoneMat);
+        col.position.set(cx, 2.4, cz);
+        const cap = new THREE.Mesh(new THREE.BoxGeometry(1.05, 0.32, 1.05), stoneMat);
+        cap.position.set(cx, 4.95, cz);
+        scene.add(col, cap);
+      }
+      const architrave = new THREE.Mesh(new THREE.BoxGeometry(28, 0.55, 1.1), stoneMat);
+      architrave.position.set(0, 5.38, -13.6);
+      scene.add(architrave);
+
+      [[-12.6, -5.2], [12.6, -5.2], [-12.6, 5.2], [12.6, 5.2]].forEach(([bx, bz], idx) => {
+        const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.26, 0.95, 10), bronzeMat);
+        bowl.position.set(bx, 0.48, bz);
+        const flame = new THREE.Mesh(new THREE.ConeGeometry(0.36, 0.85, 8), fireMat);
+        flame.position.set(bx, 1.28, bz);
+        scene.add(bowl, flame);
+        props.flames.push({ m: flame, baseY: 1.28, phase: idx * 1.4 });
+      });
+    }
+
+    return props;
   }
 
   // Vettori pre-allocati per zero GC nel game loop
@@ -697,14 +1326,17 @@
     const dir = side === "m" ? 1 : -1;
     const homeX = isGk ? -dir * (HX - 0.85) : -dir * (slotIdx === 1 ? 3.2 : 5.8);
     const homeZ = isGk ? 0 : (slotIdx === 1 ? -2.6 : 2.6);
+    const idHash = String(c.id || "").split("").reduce((acc, ch) => acc + ch.charCodeAt(0), slotIdx);
 
     const mesh = buildAthleteMesh(THREE, shadowTex, {
       skin: skinHex,
       hair: hairHex,
       shirt: isGk ? (side === "m" ? 0x16a34a : 0xd97706) : shirtHex,
+      trim: side === "m" ? 0xfef08a : (c.trimHex || 0xfecdd3),
       shorts: side === "m" ? 0x0f172a : 0x1e1b4b,
       boots: side === "m" ? 0xfbbf24 : 0xf43f5e,
       isGk,
+      styleIdx: idHash,
       ringColor: side === "m" ? 0x38bdf8 : 0xfb7185,
     });
 
@@ -811,23 +1443,28 @@
 
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.12;
+    renderer.toneMappingExposure = 1.14;
     renderer.setPixelRatio(IS_SW_GL ? 1 : Math.min(window.devicePixelRatio || 1, 2));
     renderer.shadowMap.enabled = !IS_SW_GL;
     if (!IS_SW_GL) renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
+    const maxAniso = safe(() => Math.min(8, renderer.capabilities.getMaxAnisotropy() || 1), 1);
+
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(ar.sky);
-    scene.fog = new THREE.FogExp2(ar.fog, ar.fogD);
+    scene.fog = new THREE.FogExp2(ar.fog, ar.fogD * 0.92);
 
-    const camera = new THREE.PerspectiveCamera(48, 16 / 10, 0.2, 110);
+    const envRT = buildStudioEnv(THREE, renderer, ar);
+    if (envRT && envRT.texture) scene.environment = envRT.texture;
+
+    const camera = new THREE.PerspectiveCamera(52, 16 / 10, 0.2, 120);
     _vTarget = new THREE.Vector3();
     _vLook = new THREE.Vector3();
 
-    const hemi = new THREE.HemisphereLight(ar.hemiSky, ar.hemiGnd, 0.72);
+    const hemi = new THREE.HemisphereLight(ar.hemiSky, ar.hemiGnd, 0.78);
     scene.add(hemi);
 
-    const dirLight = new THREE.DirectionalLight(ar.sun, 1.35);
+    const dirLight = new THREE.DirectionalLight(ar.sun, 1.42);
     dirLight.position.set(9, 17, 11);
     if (!IS_SW_GL) {
       dirLight.castShadow = true;
@@ -842,55 +1479,82 @@
     }
     scene.add(dirLight);
 
-    const rimLight = new THREE.DirectionalLight(ar.wall, 0.42);
+    const rimLight = new THREE.DirectionalLight(ar.wall, 0.48);
     rimLight.position.set(-10, 9, -9);
     scene.add(rimLight);
 
-    const pitchTex = makePitchTexture(THREE, ar);
-    const ballTex = makeBallTexture(THREE);
+    const extraTextures = [];
+    const pitchTex = makePitchTexture(THREE, ar, maxAniso);
+    const ballTex = makeBallTexture(THREE, maxAniso);
     const shadowTex = makeShadowTexture(THREE);
+    const netTexLeft = makeNetTexture(THREE, 0x38bdf8, maxAniso);
+    const netTexRight = makeNetTexture(THREE, 0xfb7185, maxAniso);
+    const cageGlassTex = makeCageGlassTexture(THREE, ar, maxAniso);
 
-    buildArenaProps(THREE, scene, ar);
+    const arenaProps = buildArenaProps(THREE, scene, ar, extraTextures);
 
     const pitchMesh = new THREE.Mesh(
       new THREE.PlaneGeometry(PW, PD),
-      new THREE.MeshStandardMaterial({ map: pitchTex, roughness: 0.78, metalness: 0.06 })
+      new THREE.MeshStandardMaterial({ map: pitchTex, roughness: 0.74, metalness: 0.08 })
     );
     pitchMesh.rotation.x = -Math.PI / 2;
     if (!IS_SW_GL) pitchMesh.receiveShadow = true;
     scene.add(pitchMesh);
 
-    // Sponde luminose della Gabbia (lati nord/sud + angoli di fondo attorno alle porte)
+    // Sponde luminose rinforzate della Gabbia con montanti d'acciaio e piloni angolari
     const railMat = new THREE.MeshStandardMaterial({
       color: ar.rail,
       emissive: ar.rail,
-      emissiveIntensity: 0.75,
-      roughness: 0.28,
-      metalness: 0.4,
+      emissiveIntensity: 0.8,
+      roughness: 0.24,
+      metalness: 0.52,
     });
     const glassMat = new THREE.MeshStandardMaterial({
-      color: ar.wall,
+      map: cageGlassTex,
+      color: 0xffffff,
       emissive: ar.wall,
-      emissiveIntensity: 0.22,
+      emissiveIntensity: 0.28,
       transparent: true,
-      opacity: 0.24,
-      roughness: 0.2,
+      opacity: 0.56,
+      roughness: 0.18,
       side: THREE.DoubleSide,
+      depthWrite: false,
     });
+    const pillarMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.34, metalness: 0.76 });
 
     function addCageWall(w, x, z, rotY) {
       const wg = new THREE.Group();
       wg.position.set(x, 0, z);
       wg.rotation.y = rotY;
-      const pane = new THREE.Mesh(new THREE.PlaneGeometry(w, 1.35), glassMat);
-      pane.position.y = 0.68;
+
+      const paneGeo = new THREE.PlaneGeometry(w, 1.32);
+      const uv = paneGeo.attributes.uv;
+      const rep = Math.max(1, Math.round(w / 2.6));
+      for (let i = 0; i < uv.count; i++) uv.setX(i, uv.getX(i) * rep);
+      const pane = new THREE.Mesh(paneGeo, glassMat);
+      pane.position.y = 0.7;
       wg.add(pane);
-      const topR = new THREE.Mesh(new THREE.BoxGeometry(w, 0.11, 0.14), railMat);
-      topR.position.y = 1.38;
+
+      const topR = new THREE.Mesh(new THREE.BoxGeometry(w, 0.11, 0.15), railMat);
+      topR.position.y = 1.4;
       wg.add(topR);
-      const botR = new THREE.Mesh(new THREE.BoxGeometry(w, 0.1, 0.14), railMat);
+
+      const midR = new THREE.Mesh(new THREE.BoxGeometry(w, 0.04, 0.09), pillarMat);
+      midR.position.y = 0.7;
+      wg.add(midR);
+
+      const botR = new THREE.Mesh(new THREE.BoxGeometry(w, 0.11, 0.16), railMat);
       botR.position.y = 0.06;
       wg.add(botR);
+
+      const postsCount = Math.max(2, Math.round(w / 4.4) + 1);
+      for (let k = 0; k < postsCount; k++) {
+        const px = -w * 0.5 + (k / (postsCount - 1)) * w;
+        const st = new THREE.Mesh(new THREE.BoxGeometry(0.11, 1.48, 0.18), pillarMat);
+        st.position.set(px, 0.74, 0);
+        wg.add(st);
+      }
+
       scene.add(wg);
     }
     addCageWall(PW, 0, -HZ, 0);
@@ -901,54 +1565,65 @@
       addCageWall(sideSpan, gx, HZ - sideSpan / 2, Math.PI / 2);
     });
 
-    // Porte 3D a sinistra (-HX) e destra (+HX)
-    function addGoal(sign) {
-      const gg = new THREE.Group();
-      gg.position.set(sign * HX, 0, 0);
-      const postMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3, metalness: 0.65 });
-      const netMat = new THREE.MeshBasicMaterial({ color: sign < 0 ? 0x38bdf8 : 0xfb7185, wireframe: true, transparent: true, opacity: 0.35 });
-      const pL = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, GH, 10), postMat);
-      pL.position.set(0, GH / 2, -GW / 2);
-      const pR = pL.clone();
-      pR.position.set(0, GH / 2, GW / 2);
-      const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, GW + 0.16, 10), postMat);
-      bar.rotation.x = Math.PI / 2;
-      bar.position.set(0, GH, 0);
-      const netBox = new THREE.Mesh(new THREE.BoxGeometry(GD, GH, GW), netMat);
-      netBox.position.set(sign * (GD / 2), GH / 2, 0);
-      gg.add(pL, pR, bar, netBox);
-      scene.add(gg);
-    }
-    addGoal(-1);
-    addGoal(1);
+    // 4 Piloni corazzati luminosi agli angoli della Gabbia
+    [[-HX, -HZ], [HX, -HZ], [-HX, HZ], [HX, HZ]].forEach(([cx, cz]) => {
+      const pyl = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.26, 1.62, 12), pillarMat);
+      pyl.position.set(cx, 0.81, cz);
+      const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.14, 12), railMat);
+      cap.position.set(cx, 1.66, cz);
+      scene.add(pyl, cap);
+    });
 
-    // Pallone + ombra + anello aura Super
+    // Porte 3D ad alta definizione a sinistra (-HX, blu Sogni) e destra (+HX, corallo Rivali)
+    const goalLeft = buildGoal3D(THREE, scene, -1, netTexLeft);
+    const goalRight = buildGoal3D(THREE, scene, 1, netTexRight);
+
+    // Pallone + ombra + anello aura Super + scia dinamica 3D + onda d'urto
     const ballRadius = 0.31;
     const ballMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(ballRadius, 18, 14),
-      new THREE.MeshStandardMaterial({ map: ballTex, roughness: 0.42, metalness: 0.08 })
+      new THREE.SphereGeometry(ballRadius, 20, 16),
+      new THREE.MeshStandardMaterial({ map: ballTex, roughness: 0.34, metalness: 0.12 })
     );
     ballMesh.position.set(0, ballRadius, 0);
     if (!IS_SW_GL) ballMesh.castShadow = true;
     scene.add(ballMesh);
 
     const ballShadow = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.9, 0.9),
+      new THREE.PlaneGeometry(0.92, 0.92),
       new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false })
     );
     ballShadow.rotation.x = -Math.PI / 2;
     ballShadow.position.y = 0.016;
     scene.add(ballShadow);
 
-    const superAuraMat = new THREE.MeshBasicMaterial({ color: 0xffd23f, transparent: true, opacity: 0, side: THREE.DoubleSide });
-    const superAura = new THREE.Mesh(new THREE.RingGeometry(0.36, 0.68, 20), superAuraMat);
+    const superAuraMat = new THREE.MeshBasicMaterial({ color: 0xffd23f, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false });
+    const superAura = new THREE.Mesh(new THREE.RingGeometry(0.36, 0.72, 24), superAuraMat);
     scene.add(superAura);
 
-    // Particelle scintille sponda / Super (pool pre-allocato zero GC)
+    // Onda d'urto 3D circolare a terra (per tiri, sponde, contrasti e gol)
+    const shockMat = new THREE.MeshBasicMaterial({ color: 0xffd23f, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false });
+    const shockRing = new THREE.Mesh(new THREE.RingGeometry(0.42, 0.68, 28), shockMat);
+    shockRing.rotation.x = -Math.PI / 2;
+    shockRing.position.y = 0.026;
+    shockRing.visible = false;
+    scene.add(shockRing);
+
+    // Scia luminosa 3D del pallone (pool pre-allocato zero GC)
+    const trailPool = [];
+    const trailGeo = new THREE.SphereGeometry(0.22, 10, 8);
+    for (let i = 0; i < 10; i++) {
+      const tm = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0, depthWrite: false });
+      const m = new THREE.Mesh(trailGeo, tm);
+      m.visible = false;
+      scene.add(m);
+      trailPool.push({ m, mat: tm, life: 0, maxLife: 0.24 });
+    }
+
+    // Particelle scintille sponda / Super / pali (pool pre-allocato zero GC)
     const sparkPool = [];
-    const sparkGeo = new THREE.BoxGeometry(0.14, 0.14, 0.14);
+    const sparkGeo = new THREE.OctahedronGeometry(0.11, 0);
     const sparkMat = new THREE.MeshBasicMaterial({ color: ar.rail });
-    for (let i = 0; i < 18; i++) {
+    for (let i = 0; i < 22; i++) {
       const m = new THREE.Mesh(sparkGeo, sparkMat);
       m.visible = false;
       scene.add(m);
@@ -969,9 +1644,9 @@
     });
 
     const oppCards = [
-      { id: "opp_gk", name: opp.pl[2] || "Portiere", role: "P", at: opp.ovr - 12, df: opp.ovr + 4, te: opp.ovr - 4, shirtHex: opp.shirt },
-      { id: "opp_1", name: opp.pl[0] || "Capitano", role: "A", at: opp.ovr + 3, df: opp.ovr - 4, te: opp.ovr + 2, shirtHex: opp.shirt },
-      { id: "opp_2", name: opp.pl[1] || "Ala", role: "C", at: opp.ovr - 1, df: opp.ovr, te: opp.ovr + 1, shirtHex: opp.shirt },
+      { id: "opp_gk", name: opp.pl[2] || "Portiere", role: "P", at: opp.ovr - 12, df: opp.ovr + 4, te: opp.ovr - 4, shirtHex: opp.shirt, trimHex: opp.trim },
+      { id: "opp_1", name: opp.pl[0] || "Capitano", role: "A", at: opp.ovr + 3, df: opp.ovr - 4, te: opp.ovr + 2, shirtHex: opp.shirt, trimHex: opp.trim },
+      { id: "opp_2", name: opp.pl[1] || "Ala", role: "C", at: opp.ovr - 1, df: opp.ovr, te: opp.ovr + 1, shirtHex: opp.shirt, trimHex: opp.trim },
     ];
     const oppTeam = [
       makeActor(oppCards[0], "o", 0, true, shadowTex, THREE),
@@ -992,13 +1667,24 @@
       scene,
       camera,
       renderer,
+      envRT,
       clock,
-      textures: [pitchTex, ballTex, shadowTex],
+      textures: [pitchTex, ballTex, shadowTex, netTexLeft, netTexRight, cageGlassTex].concat(extraTextures),
       railMat,
+      glassMat,
+      goalLeft,
+      goalRight,
+      arenaProps,
       ballMesh,
       ballShadow,
       superAura,
       superAuraMat,
+      shockRing,
+      shockMat,
+      shockLife: 0,
+      trailPool,
+      trailCursor: 0,
+      trailTick: 0,
       sparkPool,
       myTeam,
       oppTeam,
@@ -1025,6 +1711,7 @@
         superFx: null,
         superCol: 0xffd23f,
         superAge: 0,
+        trailCol: 0x38bdf8,
         pickupLock: 0.25,
       },
       score: [0, 0],
@@ -1033,6 +1720,9 @@
       superPct: 25,
       wallFlash: 0,
       goalFreeze: 0,
+      camShake: 0,
+      camSnap: true,
+      animTime: 0,
       paused: false,
       over: false,
       dead: false,
@@ -1061,6 +1751,7 @@
         e.preventDefault();
         if (!G) return;
         G.camMode = G.camMode === "tribuna" ? "terza" : "tribuna";
+        G.camSnap = true;
         const r2 = load();
         r2.cam = G.camMode;
         save(r2);
@@ -1123,12 +1814,22 @@
       sp.m.position.set(x, y, z);
       sp.m.material.color.setHex(colHex || G.ar.rail);
       const a = (i / G.sparkPool.length) * Math.PI * 2;
-      sp.vx = Math.cos(a) * (2.2 + (i % 3));
-      sp.vy = 1.6 + (i % 4) * 0.8;
-      sp.vz = Math.sin(a) * (2.2 + (i % 3));
-      sp.life = 0.42;
+      sp.vx = Math.cos(a) * (2.4 + (i % 3));
+      sp.vy = 1.7 + (i % 4) * 0.85;
+      sp.vz = Math.sin(a) * (2.4 + (i % 3));
+      sp.life = 0.44;
       sp.m.visible = true;
     });
+  }
+
+  function spawnShock(x, z, colHex) {
+    if (!G || !G.shockRing) return;
+    G.shockRing.position.set(x, 0.028, z);
+    G.shockRing.scale.setScalar(0.55);
+    G.shockMat.color.setHex(colHex || 0xffd23f);
+    G.shockMat.opacity = 0.86;
+    G.shockRing.visible = true;
+    G.shockLife = 0.42;
   }
 
   function bindMatchInputs(body) {
@@ -1332,7 +2033,7 @@
     return { x: G.stk.x, z: G.stk.z };
   }
 
-  function releaseBall(actor, vx, vy, vz, superFx, superCol) {
+  function releaseBall(actor, vx, vy, vz, superFx, superCol, trailCol) {
     const b = G.ball;
     b.owner = null;
     b.lastSide = actor.side;
@@ -1347,6 +2048,7 @@
     b.vz = vz;
     b.superFx = superFx || null;
     b.superCol = superCol || 0xffd23f;
+    b.trailCol = superFx ? (superCol || 0xffd23f) : (trailCol || (actor.side === "m" ? 0x38bdf8 : 0xfb7185));
     b.superAge = 0;
     actor.kickT = 0.3;
     actor.actPulse = 0.34;
@@ -1502,6 +2204,7 @@
       b.pickupLock = 0.38;
       G.superPct = Math.min(100, G.superPct + 12);
       spawnSparks(tx, 0.42, tz, 0xffd23f);
+      spawnShock(tx, tz, 0x34d399);
       showBanner("🛡️ PALLA RECUPERATA!", `${me.name} vince il contrasto!`, me.id, 1.05);
       sfx("kick");
       updateHud();
@@ -1520,8 +2223,9 @@
       const d = hypot(dx, dz) || 1;
       const spd = shooter.shotPow;
       shooter.facing = Math.atan2(dz, dx);
-      releaseBall(shooter, (dx / d) * spd, 2.1 + Math.random() * 1.0, (dz / d) * spd, null, 0);
+      releaseBall(shooter, (dx / d) * spd, 2.1 + Math.random() * 1.0, (dz / d) * spd, null, 0, 0xfb7185);
       spawnSparks(shooter.x + 0.3, 0.36, shooter.z, 0xfb7185);
+      spawnShock(shooter.x, shooter.z, 0xfb7185);
       G.superPct = Math.min(100, G.superPct + 12);
       sfx("kick");
       updateHud();
@@ -1568,8 +2272,10 @@
     const spd = (shooter.shotPow + 6.5) * comboBonus;
 
     shooter.facing = Math.atan2(dz, dx);
-    releaseBall(shooter, (dx / d) * spd, 2.7, (dz / d) * spd, sup.fx, colHex);
+    releaseBall(shooter, (dx / d) * spd, 2.7, (dz / d) * spd, sup.fx, colHex, colHex);
     spawnSparks(shooter.x, 0.7, shooter.z, colHex);
+    spawnShock(shooter.x, shooter.z, colHex);
+    G.camShake = 0.26;
     if (sup.fx === "ice") {
       G.oppTeam.forEach((foe) => { if (!foe.isGk) foe.slowT = 2.0; });
     }
@@ -1618,14 +2324,20 @@
     if (scoringSide === "m") {
       G.score[0]++;
       G.superPct = Math.min(100, G.superPct + 15);
+      if (G.goalRight) G.goalRight.pulse = 1;
+      G.camShake = 0.38;
       sfx("goal");
       spawnSparks(HX - 0.3, 1.2, b.z, 0xffd23f);
+      spawnShock(HX - 0.25, b.z, 0xffd23f);
       showBanner("⚽ GOOOL DEI SOGNI!", `${G.score[0]} – ${G.score[1]} · Gabbia in delirio!`, G.myTeam[G.ctrlIdx].id, 1.8);
     } else {
       G.score[1]++;
       G.superPct = Math.min(100, G.superPct + 25);
+      if (G.goalLeft) G.goalLeft.pulse = 1;
+      G.camShake = 0.32;
       sfx("kick");
       spawnSparks(-HX + 0.3, 1.2, b.z, 0xfb7185);
+      spawnShock(-HX + 0.25, b.z, 0xfb7185);
       showBanner(`⚽ Gol di ${G.opp.name}`, `${G.score[0]} – ${G.score[1]} · Riparti subito!`, null, 1.6);
     }
     updateHud();
@@ -1735,6 +2447,9 @@
   function stepSim(dt) {
     if (!G || G.over) return;
 
+    G.animTime += dt;
+    if (G.camShake > 0) G.camShake = Math.max(0, G.camShake - dt * 1.65);
+
     if (G.bannerTimer > 0) {
       G.bannerTimer -= dt;
       if (G.bannerTimer <= 0 && OV) {
@@ -1744,8 +2459,37 @@
     }
     if (G.wallFlash > 0) {
       G.wallFlash = Math.max(0, G.wallFlash - dt * 3);
-      G.railMat.emissiveIntensity = 0.75 + G.wallFlash * 1.1;
+      G.railMat.emissiveIntensity = 0.8 + G.wallFlash * 1.15;
+      if (G.glassMat) G.glassMat.emissiveIntensity = 0.28 + G.wallFlash * 0.65;
     }
+    [G.goalLeft, G.goalRight].forEach((glObj) => {
+      if (glObj && glObj.pulse > 0) {
+        glObj.pulse = Math.max(0, glObj.pulse - dt * 1.12);
+        const bulge = 1 + Math.sin(glObj.pulse * Math.PI * 4) * 0.26 * glObj.pulse;
+        glObj.netRig.scale.set(bulge, 1 + glObj.pulse * 0.04, 1 + glObj.pulse * 0.05);
+        glObj.ledMat.emissiveIntensity = 0.72 + glObj.pulse * 2.4;
+        glObj.padMat.opacity = 0.16 + glObj.pulse * 0.42;
+      }
+    });
+    if (G.shockLife > 0) {
+      G.shockLife = Math.max(0, G.shockLife - dt);
+      const prog = 1 - G.shockLife / 0.42;
+      G.shockRing.scale.setScalar(0.55 + prog * 3.4);
+      G.shockMat.opacity = (1 - prog) * 0.85;
+      if (G.shockLife <= 0) G.shockRing.visible = false;
+    }
+    G.trailPool.forEach((tr) => {
+      if (tr.life > 0) {
+        tr.life -= dt;
+        if (tr.life <= 0) {
+          tr.m.visible = false;
+        } else {
+          const ratio = tr.life / tr.maxLife;
+          tr.m.scale.setScalar(0.35 + ratio * 0.75);
+          tr.mat.opacity = ratio * 0.56;
+        }
+      }
+    });
     G.sparkPool.forEach((sp) => {
       if (sp.life > 0) {
         sp.life -= dt;
@@ -1883,6 +2627,24 @@
         if (hypot(b.vx, b.vz) < 2.2) b.superFx = null;
       }
 
+      // Scia luminosa dinamica sui passaggi rapidi, tiri, sponde e Super
+      const flatSpd = hypot(b.vx, b.vz);
+      if (flatSpd > 8.8 || b.superFx) {
+        G.trailTick -= dt;
+        if (G.trailTick <= 0) {
+          G.trailTick = 0.025;
+          const tr = G.trailPool[G.trailCursor];
+          G.trailCursor = (G.trailCursor + 1) % G.trailPool.length;
+          tr.m.position.set(b.x, b.y, b.z);
+          tr.mat.color.setHex(b.superFx ? b.superCol : (b.wallBounced ? 0xffd23f : (b.trailCol || 0x38bdf8)));
+          tr.maxLife = b.superFx ? 0.3 : 0.2;
+          tr.life = tr.maxLife;
+          tr.m.scale.setScalar(b.superFx ? 1.15 : 0.9);
+          tr.mat.opacity = 0.6;
+          tr.m.visible = true;
+        }
+      }
+
       // Rimbalzo sulle sponde laterali (Nord/Sud)
       if (b.z < -HZ + b.r) {
         b.z = -HZ + b.r;
@@ -1890,6 +2652,7 @@
         b.wallBounced = true;
         G.wallFlash = 1;
         spawnSparks(b.x, b.y, -HZ + 0.1, G.ar.rail);
+        spawnShock(b.x, -HZ + 0.25, G.ar.rail);
         sfx("wall");
       } else if (b.z > HZ - b.r) {
         b.z = HZ - b.r;
@@ -1897,32 +2660,39 @@
         b.wallBounced = true;
         G.wallFlash = 1;
         spawnSparks(b.x, b.y, HZ - 0.1, G.ar.rail);
+        spawnShock(b.x, HZ - 0.25, G.ar.rail);
         sfx("wall");
       }
 
-      // Controllo Gol o rimbalzo sulle sponde di fondo
+      // Controllo Gol o rimbalzo su pali/traversa/sponde di fondo
       const inGoalMouth = Math.abs(b.z) < GW / 2 - b.r * 0.4 && b.y < GH;
       if (b.x > HX - b.r) {
         if (inGoalMouth) {
           onGoalScored("m");
           return;
         }
+        const hitWoodwork = Math.abs(b.z) < GW / 2 + 0.35 && b.y < GH + 0.35;
         b.x = HX - b.r;
         b.vx = -Math.abs(b.vx) * G.ar.bounce;
         b.wallBounced = true;
         G.wallFlash = 1;
-        spawnSparks(HX - 0.1, b.y, b.z, G.ar.rail);
+        if (hitWoodwork) G.camShake = 0.22;
+        spawnSparks(HX - 0.1, b.y, b.z, hitWoodwork ? 0xffffff : G.ar.rail);
+        spawnShock(HX - 0.2, b.z, hitWoodwork ? 0xffffff : G.ar.rail);
         sfx("wall");
       } else if (b.x < -HX + b.r) {
         if (inGoalMouth) {
           onGoalScored("o");
           return;
         }
+        const hitWoodwork = Math.abs(b.z) < GW / 2 + 0.35 && b.y < GH + 0.35;
         b.x = -HX + b.r;
         b.vx = Math.abs(b.vx) * G.ar.bounce;
         b.wallBounced = true;
         G.wallFlash = 1;
-        spawnSparks(-HX + 0.1, b.y, b.z, G.ar.rail);
+        if (hitWoodwork) G.camShake = 0.22;
+        spawnSparks(-HX + 0.1, b.y, b.z, hitWoodwork ? 0xffffff : G.ar.rail);
+        spawnShock(-HX + 0.2, b.z, hitWoodwork ? 0xffffff : G.ar.rail);
         sfx("wall");
       }
 
@@ -2023,8 +2793,9 @@
   function render3D() {
     if (!G || G.dead) return;
     const b = G.ball;
+    const tNow = G.animTime || 0;
 
-    // Aggiorna pose 3D di tutti gli atleti
+    // Aggiorna pose 3D di tutti gli atleti + cursore oro sul campione attivo
     G.all.forEach((p) => {
       const m = p.mesh;
       m.grp.position.set(p.x, 0, p.z);
@@ -2041,10 +2812,34 @@
       m.bodyRoot.rotation.z = p.diveT > 0 ? 0.65 : 0;
 
       const isCtrl = p.side === "m" && G.myTeam[G.ctrlIdx] === p;
+      const hasBall = b.owner === p;
       const pulse = p.actPulse > 0 ? p.actPulse * 1.45 : 0;
-      m.ringMat.color.setHex(p.actPulse > 0 ? 0xffffff : isCtrl ? 0xffd23f : p.side === "m" ? 0x38bdf8 : 0xfb7185);
+      m.ringMat.color.setHex(p.actPulse > 0 ? 0xffffff : hasBall && p.side === "m" ? 0x34d399 : isCtrl ? 0xffd23f : p.side === "m" ? 0x38bdf8 : 0xfb7185);
       m.ring.scale.setScalar((isCtrl ? 1.18 : 0.92) + pulse);
+
+      if (m.ctrlCone) {
+        m.ctrlCone.visible = isCtrl;
+        if (isCtrl) {
+          m.ctrlCone.position.y = 2.08 + Math.sin(tNow * 5.2) * 0.075;
+          m.ctrlCone.rotation.y = tNow * 2.5;
+        }
+      }
     });
+
+    // Animazione pubblico sugli spalti e dettagli scenografici (bracieri / faro)
+    if (G.arenaProps) {
+      const hype = G.goalFreeze > 0 ? 3.2 : 1.0;
+      G.arenaProps.crowd.forEach((fn) => {
+        fn.grp.position.y = fn.baseY + Math.abs(Math.sin(tNow * 3.4 * hype + fn.phase)) * (G.goalFreeze > 0 ? 0.16 : 0.045);
+      });
+      G.arenaProps.flames.forEach((fl) => {
+        const s = 0.88 + Math.sin(tNow * 11 + fl.phase) * 0.16;
+        fl.m.scale.set(s, 0.85 + Math.cos(tNow * 13 + fl.phase) * 0.2, s);
+      });
+      if (G.arenaProps.beacon) {
+        G.arenaProps.beacon.rotation.y = tNow * 1.4;
+      }
+    }
 
     // Pallone (con effetto sparizione intermittente per Super "vanish")
     const vanishHide = b.superFx === "vanish" && Math.sin(b.superAge * 28) > 0.2;
@@ -2060,21 +2855,30 @@
       G.superAura.position.set(b.x, b.y, b.z);
       G.superAura.lookAt(G.camera.position);
       G.superAuraMat.color.setHex(b.superCol);
-      G.superAuraMat.opacity = 0.85;
+      G.superAuraMat.opacity = 0.88;
     } else {
       G.superAuraMat.opacity = 0;
     }
 
-    // Telecamera dinamica: Tribuna ampia o Terza Persona
+    // Telecamera dinamica (Tribuna ampia con entrambe le porte 3D ben inquadrate fin dal calcio d'inizio, o Terza Persona immersiva)
     const me = G.myTeam[G.ctrlIdx];
     if (G.camMode === "terza" && me) {
-      _vTarget.set(clamp(me.x - 6.2, -16.5, 6), 4.6, clamp(me.z * 0.85, -8.5, 8.5));
-      _vLook.set(clamp((me.x + b.x) * 0.5 + 3.2, -6, HX), 0.9, (me.z + b.z) * 0.45);
+      _vTarget.set(clamp(me.x - 6.0, -16.2, 6.2), 4.5, clamp(me.z * 0.85, -8.5, 8.5));
+      _vLook.set(clamp((me.x + b.x) * 0.5 + 3.6, -6, HX + 1.2), 1.0, (me.z + b.z) * 0.45);
     } else {
-      _vTarget.set(clamp(b.x * 0.38, -5.5, 5.5), 11.4, 14.8 + clamp(b.z * 0.22, -2, 2));
-      _vLook.set(b.x * 0.52, 0.45, b.z * 0.35);
+      _vTarget.set(clamp(b.x * 0.34, -4.4, 4.4), 12.6, 17.8 + clamp(b.z * 0.2, -1.8, 1.8));
+      _vLook.set(b.x * 0.4, 0.55, b.z * 0.3);
     }
-    G.camera.position.lerp(_vTarget, 0.14);
+    if (G.camShake > 0) {
+      _vTarget.x += Math.sin(tNow * 47) * G.camShake * 0.45;
+      _vTarget.y += Math.cos(tNow * 53) * G.camShake * 0.32;
+    }
+    if (G.camSnap) {
+      G.camera.position.copy(_vTarget);
+      G.camSnap = false;
+    } else {
+      G.camera.position.lerp(_vTarget, 0.16);
+    }
     G.camera.lookAt(_vLook);
 
     G.renderer.render(G.scene, G.camera);
