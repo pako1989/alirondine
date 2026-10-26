@@ -532,10 +532,175 @@
     return roles.length >= 5 && m.check(roles);
   }
 
-  // ---------------------------------------------------------------- salvataggio
+  // ---------------------------------------------------------------- salvataggio e 5 Mazzi Tattici
+  const PRESET_COUNT = 5;
+  function sanitizePresetName(nm, idx) {
+    const s = String(nm == null ? "" : nm).replace(/[<>]/g, "").trim().slice(0, 18);
+    return s || ("Mazzo " + (idx + 1));
+  }
+  function normalizePresets(rawPresets, tm, bn, mod, own, activeIdx) {
+    const act = Math.max(0, Math.min(PRESET_COUNT - 1, activeIdx | 0));
+    const out = [];
+    for (let i = 0; i < PRESET_COUNT; i++) {
+      const p = Array.isArray(rawPresets) && rawPresets[i] && typeof rawPresets[i] === "object" ? rawPresets[i] : null;
+      let pTeam = p && Array.isArray(p.team) ? p.team.filter((x) => BY[x] && (!own.length || own.includes(x))).slice(0, 5) : [];
+      let pBench = p && Array.isArray(p.bench) ? p.bench.filter((x) => BY[x] && !pTeam.includes(x) && (!own.length || own.includes(x))).slice(0, 5) : [];
+      let pMod = p && typeof p.modulo === "string" && MODULI[p.modulo] ? p.modulo : "rombo";
+      if (i === act && (!p || (!pTeam.length && tm.length))) {
+        pTeam = tm.slice();
+        pBench = bn.slice();
+        pMod = mod;
+      }
+      out.push({ name: sanitizePresetName(p && p.name, i), team: pTeam, bench: pBench, modulo: pMod });
+    }
+    return out;
+  }
   const load = () => { const o = load0(); XPC = o.xp; return o; };
-  const load0 = () => { const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {}; const own = Array.isArray(r.own) ? r.own.filter((x) => BY[x]) : []; const tm = Array.isArray(r.team) ? r.team.filter((x) => BY[x]).slice(0, 5) : []; const bn = Array.isArray(r.bench) ? r.bench.filter((x) => BY[x] && !tm.includes(x) && (!own.length || own.includes(x))).slice(0, 5) : []; return { own, team: tm, bench: bn, won: Array.isArray(r.won) ? r.won.filter((x) => typeof x === "number") : [], packs: r.packs | 0, hero: !!r.hero, xp: r.xp && typeof r.xp === "object" ? r.xp : {}, season: r.season && Array.isArray(r.season.sched) ? r.season : null, titles: r.titles | 0, draft: r.draft && Array.isArray(r.draft.picks) ? r.draft : null, cups: r.cups | 0, modulo: typeof r.modulo === "string" && MODULI[r.modulo] ? r.modulo : "rombo", voci: r.voci && typeof r.voci === "object" ? r.voci : {}, vociSeen: Array.isArray(r.vociSeen) ? r.vociSeen.filter((x) => typeof x === "string") : [] }; };
-  const save = (r) => { XPC = r.xp || {}; safe(() => localStorage.setItem(KEY, JSON.stringify(r)), 0); };
+  const load0 = () => {
+    const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {};
+    const own = Array.isArray(r.own) ? r.own.filter((x) => BY[x]) : [];
+    const tm = Array.isArray(r.team) ? r.team.filter((x) => BY[x]).slice(0, 5) : [];
+    const bn = Array.isArray(r.bench) ? r.bench.filter((x) => BY[x] && !tm.includes(x) && (!own.length || own.includes(x))).slice(0, 5) : [];
+    const mod = typeof r.modulo === "string" && MODULI[r.modulo] ? r.modulo : "rombo";
+    const activePreset = Math.max(0, Math.min(PRESET_COUNT - 1, r.activePreset | 0));
+    const presets = normalizePresets(r.presets, tm, bn, mod, own, activePreset);
+    return {
+      own, team: tm, bench: bn,
+      won: Array.isArray(r.won) ? r.won.filter((x) => typeof x === "number") : [],
+      packs: r.packs | 0, hero: !!r.hero,
+      xp: r.xp && typeof r.xp === "object" ? r.xp : {},
+      season: r.season && Array.isArray(r.season.sched) ? r.season : null,
+      titles: r.titles | 0,
+      draft: r.draft && Array.isArray(r.draft.picks) ? r.draft : null,
+      cups: r.cups | 0,
+      modulo: mod,
+      voci: r.voci && typeof r.voci === "object" ? r.voci : {},
+      vociSeen: Array.isArray(r.vociSeen) ? r.vociSeen.filter((x) => typeof x === "string") : [],
+      activePreset,
+      presets
+    };
+  };
+  const save = (r) => {
+    XPC = r.xp || {};
+    const act = Math.max(0, Math.min(PRESET_COUNT - 1, r.activePreset | 0));
+    r.activePreset = act;
+    r.presets = normalizePresets(r.presets, r.team || [], r.bench || [], r.modulo || "rombo", r.own || [], act);
+    r.presets[act] = {
+      name: sanitizePresetName(r.presets[act] && r.presets[act].name, act),
+      team: (r.team || []).slice(0, 5),
+      bench: (r.bench || []).filter((x) => !(r.team || []).includes(x)).slice(0, 5),
+      modulo: MODULI[r.modulo] ? r.modulo : "rombo"
+    };
+    safe(() => localStorage.setItem(KEY, JSON.stringify(r)), 0);
+  };
+  let RENAMING_PRESET = false;
+  function switchPreset(idx) {
+    const target = Math.max(0, Math.min(PRESET_COUNT - 1, idx | 0));
+    const r = load();
+    save(r);
+    const r2 = load();
+    const p = r2.presets[target] || { name: "Mazzo " + (target + 1), team: [], bench: [], modulo: "rombo" };
+    r2.activePreset = target;
+    r2.team = (p.team || []).filter((id) => BY[id] && (!r2.own.length || r2.own.includes(id))).slice(0, 5);
+    r2.bench = (p.bench || []).filter((id) => BY[id] && !r2.team.includes(id) && (!r2.own.length || r2.own.includes(id))).slice(0, 5);
+    r2.modulo = MODULI[p.modulo] ? p.modulo : "rombo";
+    RENAMING_PRESET = false;
+    save(r2);
+    return r2;
+  }
+  function renamePreset(idx, newName) {
+    const target = Math.max(0, Math.min(PRESET_COUNT - 1, idx | 0));
+    const r = load();
+    if (r.presets && r.presets[target]) {
+      r.presets[target].name = sanitizePresetName(newName, target);
+    }
+    RENAMING_PRESET = false;
+    save(r);
+    return r;
+  }
+  function copyPresetFrom(srcIdx) {
+    const r = load();
+    const src = r.presets && r.presets[srcIdx | 0];
+    if (!src) return r;
+    r.team = (src.team || []).filter((id) => BY[id] && (!r.own.length || r.own.includes(id))).slice(0, 5);
+    r.bench = (src.bench || []).filter((id) => BY[id] && !r.team.includes(id) && (!r.own.length || r.own.includes(id))).slice(0, 5);
+    r.modulo = MODULI[src.modulo] ? src.modulo : "rombo";
+    save(r);
+    return r;
+  }
+  function presetsBarHtml(r0, opts) {
+    const r = r0 || load();
+    const compact = !!(opts && opts.compact);
+    const act = r.activePreset | 0;
+    const curP = (r.presets && r.presets[act]) || { name: "Mazzo " + (act + 1), team: r.team, modulo: r.modulo };
+    const donorIdx = !r.team.length && r.presets ? r.presets.findIndex((p, i) => i !== act && p && p.team && p.team.length > 0) : -1;
+    if (compact) {
+      return `<div class="sgPresetsBox compact" data-presets-bar="compact">
+        <div class="sgPresetsTop">
+          <span class="sgPresetsLbl">🗂️ Mazzo tattico: <b>${esc(curP.name)}</b></span>
+          <div class="sgPresetsTabs">${r.presets.map((p, i) => `<button type="button" class="sgPresetTab${i === act ? " active" : ""}" data-preset-idx="${i}" title="${esc(p.name)} (${(p.team || []).length}/5)"><span>${i + 1}. ${esc(p.name)}</span><small>${(p.team || []).length}</small></button>`).join("")}</div>
+        </div>
+      </div>`;
+    }
+    return `<div class="sgPresetsBox" data-presets-bar="full">
+      <div class="sgPresetsTop">
+        <span class="sgPresetsLbl">🗂️ <b>Mazzi Tattici</b> · 5 formazioni salvabili</span>
+        <div class="sgPresetsActions">
+          ${donorIdx >= 0 ? `<button type="button" class="sgPresetActBtn copy" data-preset-copy="${donorIdx}" title="Copia formazione da ${esc(r.presets[donorIdx].name)}">📋 Copia da ${esc(r.presets[donorIdx].name)}</button>` : ""}
+          <button type="button" class="sgPresetActBtn" data-preset-edit="1">${RENAMING_PRESET ? "✕ Annulla" : "✏️ Rinomina"}</button>
+        </div>
+      </div>
+      <div class="sgPresetsTabs">${r.presets.map((p, i) => {
+        const mIcon = (MODULI[p.modulo] || MODULI.rombo).icon;
+        return `<button type="button" class="sgPresetTab${i === act ? " active" : ""}" data-preset-idx="${i}"><span>${i + 1}. ${esc(p.name)}</span><small>${mIcon} ${(p.team || []).length}/5</small></button>`;
+      }).join("")}</div>
+      ${RENAMING_PRESET ? `<form class="sgPresetRenameRow" data-preset-form="1">
+        <input type="text" class="sgPresetInp" maxlength="18" value="${esc(curP.name)}" placeholder="Nome mazzo (es. Coppa, Legami...)" aria-label="Nome mazzo tattico">
+        <button type="submit" class="sgPresetSaveBtn">✓ Salva</button>
+      </form>` : ""}
+    </div>`;
+  }
+  function bindPresetsBar(root, onUpdate) {
+    if (!root) return;
+    css();
+    const trigger = (rNew) => {
+      if (typeof onUpdate === "function") onUpdate(rNew);
+    };
+    root.querySelectorAll("[data-preset-idx]").forEach((btn) => {
+      btn.onclick = () => {
+        const idx = +btn.dataset.presetIdx;
+        const rNew = switchPreset(idx);
+        safe(() => window.sfx && window.sfx("kick"), 0);
+        trigger(rNew);
+      };
+    });
+    const editBtn = root.querySelector("[data-preset-edit]");
+    if (editBtn) {
+      editBtn.onclick = () => {
+        RENAMING_PRESET = !RENAMING_PRESET;
+        trigger(load());
+        const inp = root.querySelector(".sgPresetInp");
+        if (inp) { inp.focus(); inp.select(); }
+      };
+    }
+    const copyBtn = root.querySelector("[data-preset-copy]");
+    if (copyBtn) {
+      copyBtn.onclick = () => {
+        const rNew = copyPresetFrom(+copyBtn.dataset.presetCopy);
+        trigger(rNew);
+      };
+    }
+    const form = root.querySelector("[data-preset-form]");
+    if (form) {
+      form.onsubmit = (ev) => {
+        ev.preventDefault();
+        const inp = form.querySelector(".sgPresetInp");
+        const cur = load();
+        const rNew = renamePreset(cur.activePreset, inp ? inp.value : "");
+        trigger(rNew);
+      };
+    }
+  }
   const sagaMem = (k) => safe(() => JSON.parse(localStorage.getItem(SG(k)[0]) || "null"), null);
   function progress(k) {
     if (k === "borgo") {
@@ -1054,10 +1219,21 @@
   }
   const name = (id) => { const C = window.__borgoApi && window.__borgoApi.CAST; return (C && C[id] && C[id].name) || id; };
   const port = (id) => safe(() => window.__borgoApi.portraitImg(id), null);
+  function cardSynPartner(id, r) {
+    if (!r || !Array.isArray(r.team)) return "";
+    for (let i = 0; i < r.team.length; i++) {
+      const tid = r.team[i];
+      if (!tid || tid === id) continue;
+      const lk = LINKS.find(([x, y]) => (x === id && y === tid) || (x === tid && y === id));
+      if (lk) return String(name(tid)).split(/[ ,]/)[0];
+    }
+    return "";
+  }
   // ---------------------------------------------------------------- la carta (HTML)
   function cardHtml(id, opts) {
     const c = BY[id], R = RAR[c.rar], own = !opts || opts.own !== false, img = own ? port(id) : null, S = SG(c.saga), st = own ? starsOf(id) : 0, e = own ? eff(c) : c, isBn = !!(opts && opts.bench);
-    return `<div class="sgCard r${c.rar}${own ? "" : " lock"}${opts && opts.sel ? " sel" : ""}${isBn ? " benchSel" : ""}${st >= 3 ? " s3" : ""}" data-c="${id}" style="--rc:${R[1]};--sc:${S[2]}"${st >= 3 ? ` title="«${esc(FRASI[id] || "")}»"` : ""}>${own ? `<button type="button" class="sgLoreBtn" data-lore="${id}" title="📖 Lore e Dettagli" aria-label="Lore e dettagli">📖</button>` : ""}${isBn ? `<span class="sgBenchTag" title="In panchina per la Staffetta dei Dieci">🪑</span>` : ""}<div class="hd"><span>${R[0]}</span></div>${st ? `<div class="stars">${"★".repeat(st)}</div>` : ""}<div class="img">${img ? `<img alt="" src="${img}">` : `<span>?</span>`}${own ? `<em class="rolB" style="--rb:${(ROLEN[c.role] || ["", "#94a3b8"])[1]}" title="${(ROLEN[c.role] || [""])[0]}">${{ A: "ATT", B: "JOL", C: "CEN", D: "DIF", P: "POR" }[c.role] || c.role}</em>` : ""}</div><div class="nm">${own ? esc(name(id)) : "???"}</div><div class="st"><span>ATT <b>${own ? e.at : "–"}</b></span><span>DIF <b>${own ? e.df : "–"}</b></span><span>TEC <b>${own ? e.te : "–"}</b></span></div><div class="sg">${esc(S[1])}</div></div>`;
+    const synWho = own && opts && opts.synPartner ? opts.synPartner : "";
+    return `<div class="sgCard r${c.rar}${own ? "" : " lock"}${opts && opts.sel ? " sel" : ""}${isBn ? " benchSel" : ""}${st >= 3 ? " s3" : ""}" data-c="${id}" style="--rc:${R[1]};--sc:${S[2]}"${st >= 3 ? ` title="«${esc(FRASI[id] || "")}»"` : ""}>${own ? `<button type="button" class="sgLoreBtn" data-lore="${id}" title="📖 Lore e Dettagli" aria-label="Lore e dettagli">📖</button>` : ""}${isBn ? `<span class="sgBenchTag" title="In panchina per la Staffetta dei Dieci">🪑</span>` : ""}<div class="hd"><span>${R[0]}</span></div>${st ? `<div class="stars">${"★".repeat(st)}</div>` : ""}<div class="img">${img ? `<img alt="" src="${img}">` : `<span>?</span>`}${own ? `<em class="rolB" style="--rb:${(ROLEN[c.role] || ["", "#94a3b8"])[1]}" title="${(ROLEN[c.role] || [""])[0]}">${{ A: "ATT", B: "JOL", C: "CEN", D: "DIF", P: "POR" }[c.role] || c.role}</em>` : ""}</div><div class="nm">${own ? esc(name(id)) : "???"}</div><div class="st"><span>ATT <b>${own ? e.at : "–"}</b></span><span>DIF <b>${own ? e.df : "–"}</b></span><span>TEC <b>${own ? e.te : "–"}</b></span></div><div class="sg">${synWho ? `<span class="sgSynInline">🤝 ${esc(synWho)}</span> · ` : ""}${esc(S[1])}</div></div>`;
   }
 
   function getCardLore(c) {
@@ -1271,16 +1447,54 @@
 
   // ---------------------------------------------------------------- le schermate
     let OV = null, BACK = null, PICK_MODE = "team";
-  let COLL_FILT = { q: "", own: "all", rar: "all", role: "all" };
-  const isFiltered = () => !!COLL_FILT.q || COLL_FILT.own !== "all" || COLL_FILT.rar !== "all" || COLL_FILT.role !== "all";
+  let COLL_FILT = { q: "", own: "all", rar: "all", role: "all", syn: "all" };
+  const isFiltered = () => !!COLL_FILT.q || COLL_FILT.own !== "all" || COLL_FILT.rar !== "all" || COLL_FILT.role !== "all" || COLL_FILT.syn !== "all";
   function shell(title) { css(); if (OV) OV.remove(); OV = document.createElement("div"); OV.className = "sgOv"; OV.innerHTML = `<div class="wrap"><div class="bar"><h2>${title}</h2><button type="button" class="x" aria-label="Chiudi">✕</button></div><div class="body"></div></div>`; OV.querySelector(".x").onclick = () => { const b = BACK; closeAll(); if (typeof b === "function") b(); }; document.body.appendChild(OV); return OV.querySelector(".body"); }
   function closeAll() { if (OV) { OV.remove(); OV = null; } }
+
+  function isIdealForMod(c, r) {
+    const mKey = (r && r.modulo) || "rombo";
+    const roles = (r && r.team ? r.team : []).map((id) => BY[id] && BY[id].role).filter(Boolean);
+    const cntD = roles.filter((x) => x === "D" || x === "P").length;
+    const cntC = roles.filter((x) => x === "C").length;
+    const cntA = roles.filter((x) => x === "A").length;
+    const cntAB = roles.filter((x) => x === "A" || x === "B").length;
+    if (mKey === "tridente") return cntAB < 2 ? (c.role === "A" || c.role === "B") : cntD < 1 ? (c.role === "D" || c.role === "P") : (c.role === "A" || c.role === "B");
+    if (mKey === "catenaccio") return cntD < 2 ? (c.role === "D" || c.role === "P") : cntC < 1 ? c.role === "C" : (c.role === "D" || c.role === "P");
+    if (mKey === "fortezza") {
+      const cntDC = roles.filter((x) => x === "D" || x === "P" || x === "C").length;
+      return cntDC < 3 ? (c.role === "D" || c.role === "P" || c.role === "C") : cntA < 1 ? c.role === "A" : (c.role === "D" || c.role === "P" || c.role === "C");
+    }
+    if (mKey === "quadrato") return cntD < 2 ? (c.role === "D" || c.role === "P") : (cntA < 2 && cntC < 2) ? (c.role === "A" || c.role === "C") : (c.role === "D" || c.role === "P" || c.role === "A" || c.role === "C");
+    if (cntD < 1 && (c.role === "D" || c.role === "P")) return true;
+    if (cntC < 2 && c.role === "C") return true;
+    if (cntA < 1 && c.role === "A") return true;
+    return cntD >= 1 && cntC >= 2 && cntA >= 1 ? (c.role === "C" || c.role === "A") : false;
+  }
 
   function matchCard(c, q, r) {
     if (COLL_FILT.own === "own" && !r.own.includes(c.id)) return false;
     if (COLL_FILT.own === "lock" && r.own.includes(c.id)) return false;
     if (COLL_FILT.rar !== "all" && c.rar !== COLL_FILT.rar) return false;
     if (COLL_FILT.role !== "all" && c.role !== COLL_FILT.role) return false;
+    if (COLL_FILT.syn === "link") {
+      if (r.team.length > 0) {
+        if (!cardSynPartner(c.id, r)) return false;
+      } else {
+        const hasOwnedPair = r.own.includes(c.id) && LINKS.some(([x, y]) => (x === c.id && r.own.includes(y)) || (y === c.id && r.own.includes(x)));
+        if (!hasOwnedPair) return false;
+      }
+    } else if (COLL_FILT.syn === "voci") {
+      if (!r.own.includes(c.id)) return false;
+      const hasVociTodo = LINKS.some(([x, y]) => {
+        if (x !== c.id && y !== c.id) return false;
+        const oth = x === c.id ? y : x;
+        return r.own.includes(oth) && ((r.voci && r.voci[pairKey(x, y)]) | 0) < BOND_GOAL;
+      });
+      if (!hasVociTodo) return false;
+    } else if (COLL_FILT.syn === "mod") {
+      if (!isIdealForMod(c, r)) return false;
+    }
     if (!q) return true;
     const n = (name(c.id) || "").toLowerCase();
     const sg = (SG(c.saga)[1] || "").toLowerCase();
@@ -1321,7 +1535,7 @@
       return;
     }
 
-    collEl.innerHTML = filtered.map((c) => cardHtml(c.id, { own: r.own.includes(c.id), sel: r.team.includes(c.id), bench: (r.bench || []).includes(c.id) })).join("");
+    collEl.innerHTML = filtered.map((c) => cardHtml(c.id, { own: r.own.includes(c.id), sel: r.team.includes(c.id), bench: (r.bench || []).includes(c.id), synPartner: cardSynPartner(c.id, r) })).join("");
     collEl.querySelectorAll(".sgCard:not(.lock)").forEach((el) => {
       el.onclick = (e) => {
         if (e.target.closest(".sgLoreBtn")) return;
@@ -1342,6 +1556,7 @@
     COLL_FILT.own = "all";
     COLL_FILT.rar = "all";
     COLL_FILT.role = "all";
+    COLL_FILT.syn = "all";
     const inp = body.querySelector(".sgSearchInp");
     if (inp) inp.value = "";
     renderColl(body, r);
@@ -1509,12 +1724,17 @@
   }
 
   function refreshTeam(body, r) {
+    const prWrap = body.querySelector(".sgPresetsWrap");
+    if (prWrap) {
+      prWrap.innerHTML = presetsBarHtml(r);
+      bindPresetsBar(prWrap, (rNew) => refreshTeam(body, rNew));
+    }
     const I = intesa(r.team, r.modulo);
     const secT = body.querySelector(".sec-team");
     if (secT) secT.innerHTML = `La tua squadra · forza <b>${forza(r.team)}</b> · intesa ${intesaBadge(I.n)}${I.why.length ? ` <span class="why">(${I.why.map(esc).join(", ")})</span>` : ""}`;
     const teamEl = body.querySelector(".team");
     if (teamEl) {
-      teamEl.innerHTML = [0, 1, 2, 3, 4].map((k) => (r.team[k] ? cardHtml(r.team[k]) : `<div class="sgCard empty" data-slot="${k}"><span>+</span></div>`)).join("");
+      teamEl.innerHTML = [0, 1, 2, 3, 4].map((k) => (r.team[k] ? cardHtml(r.team[k], { synPartner: cardSynPartner(r.team[k], r) }) : `<div class="sgCard empty" data-slot="${k}"><span>+</span></div>`)).join("");
       teamEl.querySelectorAll(".sgCard[data-c]").forEach((el) => {
         el.onclick = (e) => {
           if (e.target.closest(".sgLoreBtn")) return;
@@ -1791,8 +2011,9 @@
     const I = intesa(r.team, r.modulo), coins = safe(() => window.__borgoApi.coins(), 0), vSt = vociStats(r);
     const comboHtml = renderComboBanner(r);
     let h = `<p class="sum">Le carte dei personaggi di tutte le saghe. Si sbloccano giocando, o con le bustine. Carte: <b>${r.own.length}/${CARDS.length}</b> · monete: <b>${coins}</b>${nw.length ? ` · <b class="new">nuove: ${nw.length}</b>` : ""}</p>`;
-    h += `<div class="sec sec-team">La tua squadra · forza <b>${forza(r.team)}</b> · intesa ${intesaBadge(I.n)}${I.why.length ? ` <span class="why">(${I.why.map(esc).join(", ")})</span>` : ""}</div><div class="team">${[0, 1, 2, 3, 4].map((k) => (r.team[k] ? cardHtml(r.team[k]) : `<div class="sgCard empty" data-slot="${k}"><span>+</span></div>`)).join("")}</div><div class="sgBenchWrap">${benchBoxHtml(r)}</div><div class="sgFormaz">${formazHtml(r.team)}</div><div class="sgModWrap">${modSelectorHtml(r.modulo, r.team)}</div><div class="team-stats">${r.team.length ? statLine(r.team, r.modulo) : ""}</div><div class="sgComboContainer">${comboHtml}</div>`;
-    h += `<div class="big"><button type="button" data-go="tour">🏆 Torneo dei Sogni<small>${r.won.length}/8 sfide vinte · ogni sfida in un motore diverso</small></button><button type="button" data-go="pack" ${coins < PACK ? "disabled" : ""}>🎴 Bustina<small>${PACK} monete · una carta a sorpresa</small></button><button type="button" data-go="season">📅 Stagione dei Sogni<small>${r.season ? `giornata ${Math.min(7, r.season.day + 1)}/7` : "campionato a 8 squadre"}${r.titles ? ` · scudetti ${r.titles}` : ""}</small></button>${window.__arena ? `<button type="button" data-go="arena">⚔️ Arena dei Sogni<small>Battaglie a turni · Staffetta dei Dieci · Torre</small></button>` : ""}<button type="button" data-go="draft">🎲 Draft<small>${r.draft ? (r.draft.picks.length < 5 ? `scelta ${r.draft.picks.length + 1}/5` : "coppa in corso") : "scegli 1 carta su 3 e gioca la coppa"}${r.cups ? ` · coppe ${r.cups}` : ""}</small></button><button type="button" data-go="voci" class="${vSt.unread ? "sgBtnPulse" : ""}">🎙️ Voci dallo Spogliatoio${vSt.unread ? ` <span class="sgNewDot">${vSt.unread}</span>` : ""}<small>${vSt.unlocked}/${vSt.total} dialoghi · 3 gare col Legame</small></button>${window.__portieri ? `<button type="button" data-go="portieri" style="grid-column:1/-1;border-color:#34d399;background:linear-gradient(135deg,#0f2922,#1a1433)">🧤 Sfida di Portieri · Porta a Porta<small>Duello 1v1 tra i pali con le tue carte · Coppa dei Numeri Uno · Muro Infinito</small></button>` : ""}</div><p class="sum">Le carte crescono giocando: ⭐ a 3 punti esperienza, ⭐⭐ a 8, ⭐⭐⭐ a 15 (+2 a ogni statistica per stella; a tre stelle la carta dice la sua frase).</p>`;
+    h += `<div class="sgPresetsWrap">${presetsBarHtml(r)}</div>`;
+    h += `<div class="sec sec-team">La tua squadra · forza <b>${forza(r.team)}</b> · intesa ${intesaBadge(I.n)}${I.why.length ? ` <span class="why">(${I.why.map(esc).join(", ")})</span>` : ""}</div><div class="team">${[0, 1, 2, 3, 4].map((k) => (r.team[k] ? cardHtml(r.team[k], { synPartner: cardSynPartner(r.team[k], r) }) : `<div class="sgCard empty" data-slot="${k}"><span>+</span></div>`)).join("")}</div><div class="sgBenchWrap">${benchBoxHtml(r)}</div><div class="sgFormaz">${formazHtml(r.team)}</div><div class="sgModWrap">${modSelectorHtml(r.modulo, r.team)}</div><div class="team-stats">${r.team.length ? statLine(r.team, r.modulo) : ""}</div><div class="sgComboContainer">${comboHtml}</div>`;
+    h += `<div class="big"><button type="button" data-go="tour">🏆 Torneo dei Sogni<small>${r.won.length}/8 sfide vinte · ogni sfida in un motore diverso</small></button><button type="button" data-go="pack" ${coins < PACK ? "disabled" : ""}>🎴 Bustina<small>${PACK} monete · una carta a sorpresa</small></button><button type="button" data-go="season">📅 Stagione dei Sogni<small>${r.season ? `giornata ${Math.min(7, r.season.day + 1)}/7` : "campionato a 8 squadre"}${r.titles ? ` · scudetti ${r.titles}` : ""}</small></button>${window.__arena ? `<button type="button" data-go="arena">⚔️ Arena dei Sogni<small>Battaglie a turni · Staffetta dei Dieci · Torre</small></button>` : ""}<button type="button" data-go="draft">🎲 Draft<small>${r.draft ? (r.draft.picks.length < 5 ? `scelta ${r.draft.picks.length + 1}/5` : "coppa in corso") : "scegli 1 carta su 3 e gioca la coppa"}${r.cups ? ` · coppe ${r.cups}` : ""}</small></button><button type="button" data-go="voci" class="${vSt.unread ? "sgBtnPulse" : ""}">🎙️ Voci dallo Spogliatoio${vSt.unread ? ` <span class="sgNewDot">${vSt.unread}</span>` : ""}<small>${vSt.unlocked}/${vSt.total} dialoghi · 3 gare col Legame</small></button>${window.__gabbia3d ? `<button type="button" data-go="gabbia3d" style="grid-column:1/-1;border-color:#38bdf8;background:linear-gradient(135deg,#0c2238,#1b1438)">🏟️ Gabbia 3D · 3 contro 3<small>Calcio arcade 3D con sponde luminose, Super delle saghe e Coppa della Gabbia</small></button>` : ""}${window.__portieri ? `<button type="button" data-go="portieri" style="grid-column:1/-1;border-color:#34d399;background:linear-gradient(135deg,#0f2922,#1a1433)">🧤 Sfida di Portieri · Porta a Porta<small>Duello 1v1 tra i pali con le tue carte · Coppa dei Numeri Uno · Muro Infinito</small></button>` : ""}</div><p class="sum">Le carte crescono giocando: ⭐ a 3 punti esperienza, ⭐⭐ a 8, ⭐⭐⭐ a 15 (+2 a ogni statistica per stella; a tre stelle la carta dice la sua frase).</p>`;
     h += `<div class="sec sec-coll">Collezione · tocca una carta per metterla in squadra o toglierla</div>`;
     h += `<div class="sgCollControls">
       <div class="sgSearchBox">
@@ -1806,6 +2027,13 @@
           <button type="button" class="sgChip${COLL_FILT.own === "all" ? " active" : ""}" data-val="all">Tutte (${CARDS.length})</button>
           <button type="button" class="sgChip${COLL_FILT.own === "own" ? " active" : ""}" data-val="own">Possedute (${r.own.length})</button>
           <button type="button" class="sgChip${COLL_FILT.own === "lock" ? " active" : ""}" data-val="lock">Da sbloccare (${CARDS.length - r.own.length})</button>
+        </div>
+        <div class="sgFilterRow" data-filt-group="syn">
+          <span class="sgFilterLabel">Sinergia:</span>
+          <button type="button" class="sgChip${COLL_FILT.syn === "all" ? " active" : ""}" data-val="all">Tutte</button>
+          <button type="button" class="sgChip${COLL_FILT.syn === "link" ? " active" : ""}" data-val="link">🤝 Legame coi titolari</button>
+          <button type="button" class="sgChip${COLL_FILT.syn === "voci" ? " active" : ""}" data-val="voci">🎙️ Voci da sbloccare</button>
+          <button type="button" class="sgChip${COLL_FILT.syn === "mod" ? " active" : ""}" data-val="mod">📐 Ideali Modulo</button>
         </div>
         <div class="sgFilterRow" data-filt-group="role">
           <span class="sgFilterLabel">Ruolo:</span>
@@ -1864,6 +2092,8 @@
       rst.onclick = () => resetAllFilters(body, load());
     }
 
+    const prWrap = body.querySelector(".sgPresetsWrap");
+    if (prWrap) bindPresetsBar(prWrap, (rNew) => refreshTeam(body, rNew));
     bindModChips(body);
     bindBenchBox(body);
     bindVoceBannerBtns(body);
@@ -1887,6 +2117,7 @@
     body.querySelector('[data-go="draft"]').onclick = draft;
     const vcb = body.querySelector('[data-go="voci"]'); if (vcb) vcb.onclick = () => openVoci(() => open());
     const arb = body.querySelector('[data-go="arena"]'); if (arb) arb.onclick = () => { closeAll(); window.__arena.open(() => open()); };
+    const g3b = body.querySelector('[data-go="gabbia3d"]'); if (g3b) g3b.onclick = () => { closeAll(); window.__gabbia3d.open(() => open()); };
     const pob = body.querySelector('[data-go="portieri"]'); if (pob) pob.onclick = () => { closeAll(); window.__portieri.open(() => open()); };
   }
   function toggle(id) {
@@ -2597,10 +2828,30 @@
 .sgBenchSlot .nm{font:700 9.5px system-ui;color:#e2e8f0;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sgBenchHint{font-size:10.5px;color:#94a3b8;margin-top:5px;line-height:1.3}
 .sgVoceCtrls .sgVoceNextBtn{background:linear-gradient(135deg,#5b21b6,#3b0764);border-color:#ffd23f;color:#ffd23f}
-.sgVoceCtrls .sgVoceNextBtn small{color:#f4f0e4}`;
+.sgVoceCtrls .sgVoceNextBtn small{color:#f4f0e4}
+.sgPresetsBox{background:#181326;border:1px solid #3d2d60;border-radius:10px;padding:8px 10px;margin:8px 0}
+.sgPresetsBox.compact{padding:6px 8px;margin:6px 0;background:#161224}
+.sgPresetsTop{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap}
+.sgPresetsLbl{font-size:11.5px;color:#d8cde8}
+.sgPresetsLbl b{color:#ffd23f}
+.sgPresetsActions{display:flex;gap:5px;flex-wrap:wrap}
+.sgPresetActBtn{background:#241b3a;border:1px solid #4a3a6a;color:#e2d8f8;border-radius:7px;padding:4px 8px;font:700 11px system-ui;cursor:pointer;min-height:28px}
+.sgPresetActBtn.copy{border-color:#38bdf8;color:#7dd3fc}
+.sgPresetsTabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;margin-top:6px;width:100%}
+.sgPresetsBox.compact .sgPresetsTabs{margin-top:5px}
+.sgPresetTab{background:#211934;border:1px solid #42345e;color:#c8b8ff;border-radius:8px;padding:5px 3px;font:700 10.5px/1.15 system-ui;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:0;min-height:40px;touch-action:manipulation;transition:border-color .15s,background .15s}
+.sgPresetsBox.compact .sgPresetTab{flex-direction:row;gap:3px;min-height:34px;padding:4px 3px;font-size:10px}
+.sgPresetTab span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sgPresetTab small{font-size:9.5px;opacity:.85;color:#a89bc4;white-space:nowrap}
+.sgPresetTab.active{background:#ffd23f;border-color:#ffd23f;color:#120e1e;font-weight:900}
+.sgPresetTab.active small{color:#2a1d08;font-weight:800;opacity:1}
+.sgPresetRenameRow{display:flex;gap:6px;margin-top:7px}
+.sgPresetInp{flex:1;min-width:0;background:#100c1a;border:1px solid #7a5ad8;border-radius:8px;padding:6px 9px;color:#f4f0e4;font:600 12.5px system-ui;outline:none}
+.sgPresetSaveBtn{background:#7ad87a;border:0;border-radius:8px;padding:6px 12px;color:#0e1f12;font:800 12px system-ui;cursor:pointer;flex-shrink:0}
+.sgSynInline{color:#7ad87a;font-weight:700}`;
     document.head.appendChild(st);
   }
   // la Maglia dei Sogni nel guardaroba (si registra all'avvio, così resta anche dopo aver ricaricato la pagina)
   (function reg() { const A = window.__borgoApi; if (!A || !A.COSM) return setTimeout(reg, 200); if (!A.COSM.sg_maglia) A.COSM.sg_maglia = { kind: "shirt", label: "Maglia dei Sogni", val: "#7a5ad8", from: "Vinci il Torneo dei Sogni (Salone delle Saghe)" }; })();
-  window.__sogni = { squad, lineup, SAGHE, BY, eff, name, port, _save: save, open, close: closeAll, _launch: launch, _tiers: tiers, CARDS, LINKS, SFIDE, TEAMS, FRASI, intesa, forza, sync, stagione, draft, stars: (id) => { XPC = load().xp; return starsOf(id); }, _load: load, MODULI, modSintonia, openModDetail, openCardLore, combo: getTeamCombo, openVoci, openVoceScene, recordVoci, vociStats, pairKey, BOND_GOAL, toggleBench, autoBench };
+  window.__sogni = { squad, lineup, SAGHE, BY, eff, name, port, _save: save, open, close: closeAll, _launch: launch, _tiers: tiers, CARDS, LINKS, SFIDE, TEAMS, FRASI, intesa, forza, sync, stagione, draft, stars: (id) => { XPC = load().xp; return starsOf(id); }, _load: load, MODULI, modSintonia, openModDetail, openCardLore, combo: getTeamCombo, openVoci, openVoceScene, recordVoci, vociStats, pairKey, BOND_GOAL, toggleBench, autoBench, switchPreset, renamePreset, presetsBarHtml, bindPresetsBar, gainXp, levelUps };
 })();

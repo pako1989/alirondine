@@ -1212,6 +1212,7 @@
 
       // Barra orizzontale degli strumenti del Salone
       html += `<div class="hubTools">
+        ${window.__ricerca ? `<button type="button" class="hubToolBtn" data-go="ricerca">🔍 Cerca ovunque</button>` : ""}
         <button type="button" class="hubToolBtn" data-go="album">🏆 Album Finali (${tt.fe}/${tt.te})</button>
         <button type="button" class="hubToolBtn" data-go="albero">🌳 Albero Bivi (${tt.fe}/${tt.te})</button>
         <button type="button" class="hubToolBtn" data-go="guarda">👕 Guardaroba</button>
@@ -1222,6 +1223,7 @@
         ${window.__bar ? `<button type="button" class="hubToolBtn" data-go="bar">🍺 Bar del Borgo</button>` : ""}
         ${window.__carteDecks ? `<button type="button" class="hubToolBtn" data-go="carte">🎴 Carte del Destino</button>` : ""}
         ${window.__sogni ? `<button type="button" class="hubToolBtn" data-go="sogni">🃏 Squadra dei Sogni</button>` : ""}
+        ${window.__gabbia3d ? `<button type="button" class="hubToolBtn" data-go="gabbia3d">🏟️ Gabbia 3D</button>` : ""}
         ${window.__portieri ? `<button type="button" class="hubToolBtn" data-go="portieri">🧤 Sfida di Portieri</button>` : ""}
       </div>`;
 
@@ -1325,6 +1327,7 @@
 
       // Eventi pulsanti strumenti
       const bindTool = (sel, fn) => { const el = body.querySelector(sel); if (el) el.onclick = fn; };
+      bindTool('[data-go="ricerca"]', () => window.__ricerca.open(() => openSalone()));
       bindTool('[data-go="album"]', () => openAlbum(() => openSalone()));
       bindTool('[data-go="albero"]', () => openAlbero(() => openSalone()));
       bindTool('[data-go="guarda"]', () => openGuardaroba(() => openSalone()));
@@ -1335,6 +1338,7 @@
       bindTool('[data-go="bar"]', () => { close(); window.__bar.open(() => openSalone()); });
       bindTool('[data-go="carte"]', () => { close(); window.__carteDecks.openHub(() => openSalone()); });
       bindTool('[data-go="sogni"]', () => { close(); window.__sogni.open(() => openSalone()); });
+      bindTool('[data-go="gabbia3d"]', () => { close(); window.__gabbia3d.open(() => openSalone()); });
       bindTool('[data-go="portieri"]', () => { close(); window.__portieri.open(() => openSalone()); });
 
       if (SALONE_VIEW === "hub") {
@@ -1735,10 +1739,12 @@
   }
 
   window.__salone = {
-    open: (back) => openSalone(back), album: (back) => openAlbum(back), albero: (back, sagaId) => openAlbero(back, sagaId), diario: (back) => openDiario(back), diarioStato: () => safe(() => diarioData().tot, 0), salaGiochi: (back) => openSalaGiochi(back), machine: (id) => MACHINES.find((m) => m.id === id) || null, heroLook: () => heroLook(), cineteca: (back) => openCineteca(back), guardaroba: (back) => openGuardaroba(back), close, personaggi: (back) => openPersonaggi(back), personaggiStato: () => safe(() => perTotals(), null),
+    open: (back) => openSalone(back), album: (back) => openAlbum(back), albero: (back, sagaId) => openAlbero(back, sagaId), diario: (back) => openDiario(back), diarioStato: () => safe(() => diarioData().tot, 0), salaGiochi: (back) => openSalaGiochi(back), machine: (id) => MACHINES.find((m) => m.id === id) || null, MACHINES, machineState: (id) => { const m = MACHINES.find((x) => x.id === id); return m ? sgState(m) : null; }, openMachine: (id, back) => { openSalaGiochi(back); const m = MACHINES.find((x) => x.id === id); if (m && sgState(m).open) sgMachine(m); }, heroLook: () => heroLook(), cineteca: (back) => openCineteca(back), guardaroba: (back) => openGuardaroba(back), openGuardarobaItem: (id, back) => { const A = api(), c = A && A.COSM && A.COSM[id]; if (c) { GF.kind = kindOf(c); GF.src = ""; GF.sel = id; } openGuardaroba(back); }, close, personaggi: (back) => openPersonaggi(back), openPersonaggioCard: (id, back) => { const ss = perSections(), sec = ss.find((x) => x.ids.includes(id)); if (sec) { PF.sec = sec.id; PF.f = "tutti"; openPersonaggi(back); perCard(sec, id); } else openPersonaggi(back); }, personaggiStato: () => safe(() => perTotals(), null),
     mappamondo: (back) => openMappamondo(back),
     summary: () => safe(() => { const t = totals(), A = api(), C = (A && A.COSM) || {}; return Object.assign(t, { cosOwned: safe(() => A.cosOwned().length, 0), cosTot: Object.keys(C).length }); }, { n: 0, run: 0, fin: 0, fe: 0, te: 0, cosOwned: 0, cosTot: 0 }),
     SAGAS,
+    sagaStatus: (id) => { const s = SAGAS.find((x) => x.id === id); if (!s) return null; const avail = available(s); const st = avail ? state(s) : null; return { avail, started: !!(st && st.started), finished: !!(st && st.finished), ch: st ? st.ch : 0 }; },
+    openSaga: (id, back) => { openSalone(back); const s = SAGAS.find((x) => x.id === id); if (s && available(s)) detail(s); },
     // ultima saga giocata, per «Riprendi» nella home
     lastSaga: () => safe(() => { const s = SAGAS.find((x) => x.id === rec().last); return s && available(s) ? { id: s.id, t: s.t, e: s.e, cover: cover(s) } : null; }, null),
     resume: (back) => safe(() => { const s = SAGAS.find((x) => x.id === rec().last); if (s) play(s, back); }),
