@@ -259,11 +259,18 @@
     }
   })();
 
+  const CAM_MODES = [
+    { id: "broadcast", label: "TV", title: "TV Broadcast (Laterale FIFA)" },
+    { id: "tactical", label: "Tattica", title: "Tattica Panoramica (Grandangolo)" },
+    { id: "endtoend", label: "Dietro", title: "Dietro il Giocatore (Profondità)" },
+    { id: "action", label: "Action", title: "Action Dinamica (Ravvicinata)" }
+  ];
+
   function loadRec() {
     const r = safe(() => JSON.parse(localStorage.getItem(KEY) || "null"), null) || {};
     return {
       stadium: STADIUMS[r.stadium] ? r.stadium : "riviera",
-      cam: r.cam === "tactical" ? "tactical" : "broadcast",
+      cam: CAM_MODES.some((m) => m.id === r.cam) ? r.cam : "broadcast",
       team: r.team || "rondine",
       formation: FORMATIONS[r.formation] ? r.formation : "4-3-3",
       played: r.played | 0,
@@ -303,6 +310,9 @@
 .c11Sec{margin:14px 0 8px;font:800 13px system-ui;color:#7dd3fc;text-transform:uppercase;letter-spacing:.5px;display:flex;justify-content:space-between;align-items:center}
 .c11Stage{position:relative;width:100%;aspect-ratio:16/10;max-height:55vh;background:#020617;border:2px solid #334155;border-radius:14px;overflow:hidden;touch-action:none}
 .c11Stage canvas{display:block;width:100%!important;height:100%!important}
+.c11CamBtn{position:absolute;top:8px;right:8px;background:rgba(15,23,42,0.85);border:1.5px solid #38bdf8;border-radius:8px;color:#f8fafc;font:800 11.5px system-ui;padding:5px 9px;cursor:pointer;z-index:15;display:flex;align-items:center;gap:4px;touch-action:manipulation;box-shadow:0 2px 8px rgba(0,0,0,0.45);backdrop-filter:blur(4px);transition:all .15s}
+.c11CamBtn:active{transform:scale(0.95);background:#0369a1}
+.c11CamBtn b{color:#ffd23f}
 .c11Hud{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;background:#0f172a;border:1px solid #334155;border-radius:12px;padding:8px 12px;margin:6px 0}
 .c11ScoreSide{font:800 13px system-ui;display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .c11ScoreSide.opp{justify-content:flex-end;color:#fda4af}
@@ -683,6 +693,8 @@
     const formA = FORMATIONS[opts.formationA || rec.formation] || FORMATIONS["4-3-3"];
     const formB = FORMATIONS[opts.formationB || teamBData.formation] || FORMATIONS["4-4-2"];
     const matchDur = opts.duration || rec.duration || 90;
+    let curCamIdx = CAM_MODES.findIndex((m) => m.id === (opts.cam || rec.cam));
+    if (curCamIdx < 0) curCamIdx = 0;
 
     const title = opts.isCup ? `🏆 Coppa 3D · ${esc(teamAData.name)} vs ${esc(teamBData.name)}` : `⚽ Amichevole 3D · ${esc(teamAData.name)} vs ${esc(teamBData.name)}`;
     const body = shell(title, true);
@@ -698,6 +710,9 @@
       </div>
       <div class="c11Stage" id="c11Stage">
         <canvas id="c11Canvas"></canvas>
+        <button type="button" class="c11CamBtn" id="c11CamBtn" aria-label="Cambia visuale telecamera">
+          <span>📹</span> <b id="c11CamLabel">${CAM_MODES[curCamIdx].label}</b>
+        </button>
         <div class="c11Banner" id="c11Banner" hidden>
           <b id="c11BanTitle">GOL!</b>
           <span id="c11BanSub">Leo Moretti</span>
@@ -719,7 +734,7 @@
           <button type="button" class="c11Btn sprint" data-b="sprint">💨 Scatto<small>Sprint</small></button>
         </div>
       </div>
-      <div class="c11KeyHint">Tastiera: WASD/Frecce = Movimento · J/Z = Passa · I/X = Filtrante · K/C = Tira · L/Spazio = Scatto · Q = Cursore</div>
+      <div class="c11KeyHint">Tastiera: WASD/Frecce = Movimento · J/Z = Passa · I/X = Filtrante · K/C = Tira · L/F = Contrasto/Scivolata · V = Telecamera · Spazio = Scatto · Q = Cursore</div>
     `;
 
     const canvas = body.querySelector("#c11Canvas");
@@ -830,7 +845,10 @@
         rot: 0,
         spd: 0.16 + (plDataA.ovr || 75) * 0.0008,
         stamina: 100,
-        hasBall: false
+        hasBall: false,
+        tackleCooldown: 0,
+        tackleTime: 0,
+        pressTicks: 0
       });
 
       const plDataB = teamBData.players[i] || { name: `B${i + 1}`, num: i + 1, role: "CC", skin: 0xd9a679, hair: 0x111111 };
@@ -858,7 +876,10 @@
         rot: Math.PI,
         spd: 0.15 + (plDataB.ovr || 75) * 0.0008,
         stamina: 100,
-        hasBall: false
+        hasBall: false,
+        tackleCooldown: 0,
+        tackleTime: 0,
+        pressTicks: 0
       });
     }
 
@@ -990,16 +1011,63 @@
 
     function doTackle() {
       const user = teamA[activeAIdx];
+      // Slancio in avanti del giocatore controllato dall'utente
+      const fX = Math.cos(user.rot);
+      const fZ = Math.sin(user.rot);
+      user.vx += fX * 0.42;
+      user.vz += fZ * 0.42;
+      user.tackleTime = 0.45;
+      sfx("tackle");
+
+      // 1. Se un avversario ha la palla
       if (ball.holder && ball.holder.team === "B") {
-        const dist = hypot(user.x - ball.x, user.z - ball.z);
-        if (dist < 3.2) {
+        const opp = ball.holder;
+        const dist = hypot(user.x - opp.x, user.z - opp.z);
+        if (dist < 4.2) {
           ball.holder = user;
           ball.lastKick = "A";
-          sfx("tackle");
-          showBanner("CONTRASTO VINCENTE!", user.data.name, 1200);
+          opp.vx *= 0.2;
+          opp.vz *= 0.2;
+          opp.tackleCooldown = 1.4;
+          showBanner("GRAN CONTRASTO!", `${user.data.name} ruba palla a ${opp.data.name}!`, 1400);
+          return;
         }
       }
+
+      // 2. Se la palla è libera ma vicina
+      if (!ball.holder) {
+        const distB = hypot(user.x - ball.x, user.z - ball.z);
+        if (distB < 4.5) {
+          ball.holder = user;
+          ball.lastKick = "A";
+          showBanner("INTERCETTO IN SCIVOLATA!", user.data.name, 1200);
+          return;
+        }
+      }
+
+      // 3. Spallata di contrasto su qualsiasi avversario vicino
+      teamB.forEach((opp) => {
+        if (opp.idx === 0) return;
+        const d = hypot(user.x - opp.x, user.z - opp.z);
+        if (d < 3.2) {
+          opp.vx += fX * 0.35;
+          opp.vz += fZ * 0.35;
+        }
+      });
     }
+
+    function cycleCamera() {
+      curCamIdx = (curCamIdx + 1) % CAM_MODES.length;
+      const mode = CAM_MODES[curCamIdx];
+      rec.cam = mode.id;
+      saveRec(rec);
+      const labelEl = body.querySelector("#c11CamLabel");
+      if (labelEl) labelEl.textContent = mode.label;
+      showBanner("TELECAMERA 3D", mode.title, 1400);
+    }
+
+    const camBtn = body.querySelector("#c11CamBtn");
+    if (camBtn) camBtn.onclick = () => cycleCamera();
 
     function switchActivePlayer() {
       // Seleziona il compagno di movimento più vicino alla palla
@@ -1102,6 +1170,8 @@
       if (k === "j" || k === "z") doPass();
       if (k === "i" || k === "x") doThroughPass();
       if (k === "k" || k === "c") { isChargingShoot = true; shootCharge = 0.2; }
+      if (k === "l" || k === "f") doTackle();
+      if (k === "v") cycleCamera();
       if (k === "q" || k === "e") switchActivePlayer();
       if (e.key === " " || k === "shift") isSprinting = true;
     };
@@ -1214,20 +1284,36 @@
         p.mesh.ring.visible = isUser;
         if (isUser) p.mesh.cursor.rotation.y += dt * 3;
 
-        // Animazione ciclica gambe e braccia se in movimento
-        const speed = hypot(p.vx, p.vz);
-        if (speed > 0.02) {
-          p.mesh.step += speed * 2.8;
-          const legAngle = Math.sin(p.mesh.step) * 0.65;
-          p.mesh.legL.rotation.x = legAngle;
-          p.mesh.legR.rotation.x = -legAngle;
-          p.mesh.armL.rotation.x = -legAngle * 0.7;
-          p.mesh.armR.rotation.x = legAngle * 0.7;
+        // Cooldown tackle
+        if (p.tackleCooldown > 0) p.tackleCooldown -= dt;
+
+        // Animazione scivolata / tackle
+        if (p.tackleTime > 0) {
+          p.tackleTime -= dt;
+          p.mesh.body.position.y = -0.32;
+          p.mesh.body.rotation.x = 0.5;
+          p.mesh.legL.rotation.x = 1.35;
+          p.mesh.legR.rotation.x = -0.7;
+          p.mesh.armL.rotation.x = -0.8;
+          p.mesh.armR.rotation.x = 0.8;
         } else {
-          p.mesh.legL.rotation.x = 0;
-          p.mesh.legR.rotation.x = 0;
-          p.mesh.armL.rotation.x = 0;
-          p.mesh.armR.rotation.x = 0;
+          p.mesh.body.position.y = 0;
+          p.mesh.body.rotation.x = 0;
+          // Animazione ciclica gambe e braccia se in movimento
+          const speed = hypot(p.vx, p.vz);
+          if (speed > 0.02) {
+            p.mesh.step += speed * 2.8;
+            const legAngle = Math.sin(p.mesh.step) * 0.65;
+            p.mesh.legL.rotation.x = legAngle;
+            p.mesh.legR.rotation.x = -legAngle;
+            p.mesh.armL.rotation.x = -legAngle * 0.7;
+            p.mesh.armR.rotation.x = legAngle * 0.7;
+          } else {
+            p.mesh.legL.rotation.x = 0;
+            p.mesh.legR.rotation.x = 0;
+            p.mesh.armL.rotation.x = 0;
+            p.mesh.armR.rotation.x = 0;
+          }
         }
       };
 
@@ -1253,7 +1339,7 @@
         updatePlayer(p, isUser);
       });
 
-      // AI Squadra B (avversari)
+      // AI Squadra B (avversari con pressing e contrasti)
       let chaserB = null, minBDist = 999;
       teamB.forEach((p, idx) => {
         if (idx === 0) {
@@ -1265,43 +1351,113 @@
         } else {
           const dToBall = hypot(p.x - ball.x, p.z - ball.z);
           if (dToBall < minBDist) { minBDist = dToBall; chaserB = p; }
-
-          // Se il giocatore B è il portatore di palla
-          if (ball.holder === p) {
-            // Avanza verso la porta A (-HX, 0)
-            const dx = -HX - p.x, dz = -p.z;
-            const distG = hypot(dx, dz) || 1;
-            p.vx = (dx / distG) * p.spd * 0.95;
-            p.vz = (dz / distG) * p.spd * 0.95;
-            p.rot = Math.atan2(dz, dx);
-
-            // Tiro AI se vicino alla porta avversaria
-            if (p.x < -HX + 24 && Math.random() < 0.025) {
-              ball.holder = null;
-              ball.vx = -1.9 - Math.random() * 0.5;
-              ball.vz = (Math.random() - 0.5) * 1.2;
-              ball.vy = 0.35 + Math.random() * 0.3;
-              ball.lastKick = "B";
-              sfx("kick");
-            }
-          } else if (p === chaserB && (!ball.holder || ball.holder.team === "A")) {
-            // Inseguimento della palla
-            const dx = ball.x - p.x, dz = ball.z - p.z;
-            const d = hypot(dx, dz) || 1;
-            p.vx = (dx / d) * p.spd;
-            p.vz = (dz / d) * p.spd;
-            p.rot = Math.atan2(dz, dx);
-          } else {
-            // Posizione base tattica specchiata
-            const targetX = p.baseX + (ball.x * 0.42);
-            const targetZ = p.baseZ + (ball.z * 0.32);
-            p.vx = (targetX - p.x) * 0.04;
-            p.vz = (targetZ - p.z) * 0.04;
-            p.rot = Math.atan2(p.vz, p.vx || -0.001);
-          }
         }
+      });
+
+      teamB.forEach((p, idx) => {
+        if (idx === 0) {
+          updatePlayer(p, false);
+          return;
+        }
+
+        // Se il giocatore B è il portatore di palla
+        if (ball.holder === p) {
+          // Avanza verso la porta A (-HX, 0)
+          const dx = -HX - p.x, dz = -p.z;
+          const distG = hypot(dx, dz) || 1;
+          p.vx = (dx / distG) * p.spd * 0.95;
+          p.vz = (dz / distG) * p.spd * 0.95;
+          p.rot = Math.atan2(dz, dx);
+
+          // Tiro AI se vicino alla porta avversaria
+          if (p.x < -HX + 24 && Math.random() < 0.025) {
+            ball.holder = null;
+            ball.vx = -1.9 - Math.random() * 0.5;
+            ball.vz = (Math.random() - 0.5) * 1.2;
+            ball.vy = 0.35 + Math.random() * 0.3;
+            ball.lastKick = "B";
+            sfx("kick");
+          }
+        } else if (p === chaserB) {
+          // Inseguitore principale della palla: PRESSING AGGRESSIVO
+          const dx = ball.x - p.x, dz = ball.z - p.z;
+          const d = hypot(dx, dz) || 1;
+          const isPressingUser = ball.holder && ball.holder.team === "A";
+          const chaseSpd = isPressingUser ? p.spd * 1.35 : p.spd * 1.1;
+          p.vx = (dx / d) * chaseSpd;
+          p.vz = (dz / d) * chaseSpd;
+          p.rot = Math.atan2(dz, dx);
+
+          // TENTATIVO DI TACKLE / SCIVOLATA CPU
+          if (isPressingUser && d < 2.5 && p.tackleCooldown <= 0) {
+            p.tackleCooldown = 1.8;
+            p.tackleTime = 0.42;
+            p.vx += (dx / d) * 0.4;
+            p.vz += (dz / d) * 0.4;
+            sfx("tackle");
+
+            // Ruba palla se l'utente non ha passato o scattato via
+            if (Math.random() < 0.72) {
+              const stolenFrom = ball.holder;
+              ball.holder = p;
+              ball.lastKick = "B";
+              stolenFrom.vx *= 0.3;
+              stolenFrom.vz *= 0.3;
+              showBanner("PALLA RUBATA DALLA CPU!", `${p.data.name} ti strappa il pallone!`, 1300);
+            } else {
+              // Rimpallo conteso
+              ball.holder = null;
+              ball.vx = (dx / d) * 1.2;
+              ball.vz = (dz / d) * 1.2;
+              ball.lastKick = "B";
+              showBanner("CONTRASTO DURO!", "Palla contesa a centrocampo!", 1100);
+            }
+          }
+        } else {
+          // Posizione base tattica specchiata con baricentro mobile
+          const targetX = p.baseX + (ball.x * 0.45);
+          const targetZ = p.baseZ + (ball.z * 0.35);
+          p.vx = (targetX - p.x) * 0.045;
+          p.vz = (targetZ - p.z) * 0.045;
+          p.rot = Math.atan2(p.vz, p.vx || -0.001);
+        }
+
         updatePlayer(p, false);
       });
+
+      // --- CONTATTO FISICO E PRESSING CORPO A CORPO ---
+      if (ball.holder) {
+        const holder = ball.holder;
+        const defenders = holder.team === "A" ? teamB : teamA;
+        for (let i = 0; i < defenders.length; i++) {
+          const def = defenders[i];
+          if (def.idx === 0) continue;
+          const dist = hypot(def.x - holder.x, def.z - holder.z);
+          if (dist < 1.6) {
+            def.pressTicks = (def.pressTicks || 0) + 1;
+            // Pressione fisica corpo a corpo continuata
+            if (def.pressTicks > 12) {
+              def.pressTicks = 0;
+              sfx("tackle");
+              if (def.team === "A") {
+                // Il giocatore controllato dall'utente recupera palla per pressing!
+                ball.holder = def;
+                ball.lastKick = "A";
+                activeAIdx = def.idx;
+                showBanner("PALLA RECUPERATA!", `${def.data.name} vince il contrasto!`, 1300);
+              } else {
+                // L'avversario CPU toglie palla all'utente
+                ball.holder = def;
+                ball.lastKick = "B";
+                showBanner("PRESSING AVVERSARIO!", `${def.data.name} ruba palla!`, 1300);
+              }
+              break;
+            }
+          } else {
+            def.pressTicks = 0;
+          }
+        }
+      }
 
       // --- FISICA PALLONE 3D ---
       if (ball.holder) {
@@ -1328,12 +1484,12 @@
           ball.vz *= 0.94;
         }
 
-        // Controllo ricezione / contrasto sui giocatori vicini
+        // Controllo ricezione / recupero sui giocatori vicini
         const allPlayers = teamA.concat(teamB);
         for (let i = 0; i < allPlayers.length; i++) {
           const pl = allPlayers[i];
           const dist = hypot(pl.x - ball.x, pl.z - ball.z);
-          if (dist < 1.15 && ball.y < 1.4) {
+          if (dist < 1.45 && ball.y < 1.5) {
             ball.holder = pl;
             ball.lastKick = pl.team;
             if (pl.team === "A") activeAIdx = pl.idx;
@@ -1378,16 +1534,42 @@
       ballShadow.position.set(ball.x, 0.02, ball.z);
       ballShadow.scale.setScalar(Math.max(0.4, 1.0 - ball.y * 0.15));
 
-      // --- TELECAMERA TELEVISIVA BROADCAST DINAMICA (STILE FIFA/PES) ---
-      // Posizionata lateralmente in tribuna a Z = +40, segue la palla lungo l'asse X
-      const camTargetX = clamp(ball.x * 0.74, -30, 30);
-      const camTargetY = 19 + Math.abs(ball.x) * 0.06;
-      const camTargetZ = 40;
-
-      camera.position.x += (camTargetX - camera.position.x) * 0.08;
-      camera.position.y += (camTargetY - camera.position.y) * 0.08;
-      camera.position.z += (camTargetZ - camera.position.z) * 0.08;
-      camera.lookAt(ball.x * 0.88, 1.2, ball.z * 0.4);
+      // --- SISTEMA TELECAMERE 3D MULTIPLE ---
+      const curCam = CAM_MODES[curCamIdx].id;
+      if (curCam === "broadcast") {
+        const camTargetX = clamp(ball.x * 0.74, -30, 30);
+        const camTargetY = 19 + Math.abs(ball.x) * 0.05;
+        const camTargetZ = 40;
+        camera.position.x += (camTargetX - camera.position.x) * 0.08;
+        camera.position.y += (camTargetY - camera.position.y) * 0.08;
+        camera.position.z += (camTargetZ - camera.position.z) * 0.08;
+        camera.lookAt(ball.x * 0.88, 1.2, ball.z * 0.4);
+      } else if (curCam === "tactical") {
+        const camTargetX = clamp(ball.x * 0.6, -26, 26);
+        const camTargetY = 36;
+        const camTargetZ = 28;
+        camera.position.x += (camTargetX - camera.position.x) * 0.08;
+        camera.position.y += (camTargetY - camera.position.y) * 0.08;
+        camera.position.z += (camTargetZ - camera.position.z) * 0.08;
+        camera.lookAt(ball.x * 0.75, 0, ball.z * 0.25);
+      } else if (curCam === "endtoend") {
+        const focusP = teamA[activeAIdx];
+        const camTargetX = clamp(focusP.x - 18, -HX + 2, HX - 8);
+        const camTargetY = 12;
+        const camTargetZ = focusP.z * 0.6;
+        camera.position.x += (camTargetX - camera.position.x) * 0.1;
+        camera.position.y += (camTargetY - camera.position.y) * 0.1;
+        camera.position.z += (camTargetZ - camera.position.z) * 0.1;
+        camera.lookAt(ball.x + 10, 1.2, ball.z * 0.5);
+      } else if (curCam === "action") {
+        const camTargetX = clamp(ball.x * 0.85, -34, 34);
+        const camTargetY = 12;
+        const camTargetZ = 22;
+        camera.position.x += (camTargetX - camera.position.x) * 0.12;
+        camera.position.y += (camTargetY - camera.position.y) * 0.12;
+        camera.position.z += (camTargetZ - camera.position.z) * 0.12;
+        camera.lookAt(ball.x, 1.0, ball.z * 0.7);
+      }
 
       // Render Three.js e Minimappa Radar
       renderer.render(scene, camera);
@@ -1472,6 +1654,16 @@
         `).join("")}
       </div>
 
+      <div class="c11Sec"><span>📹 Telecamera Iniziale</span></div>
+      <div class="c11Grid">
+        ${CAM_MODES.map((cm) => `
+          <div class="c11Card ${rec.cam === cm.id ? "on" : ""}" data-cam="${cm.id}">
+            <b>${cm.label} · ${cm.title.split("(")[0].trim()}</b>
+            <span>${cm.title.includes("(") ? cm.title.split("(")[1].replace(")", "") : ""}</span>
+          </div>
+        `).join("")}
+      </div>
+
       <div class="c11Sec"><span>⏱️ Durata Partita</span></div>
       <div style="display:flex;gap:6px;margin:6px 0">
         ${[90, 180, 300].map((sec) => `
@@ -1525,6 +1717,15 @@
       };
     });
 
+    // Selettori Telecamera
+    body.querySelectorAll("[data-cam]").forEach((el) => {
+      el.onclick = () => {
+        rec.cam = el.dataset.cam;
+        saveRec(rec);
+        open();
+      };
+    });
+
     // Selettori Durata
     body.querySelectorAll("[data-dur]").forEach((el) => {
       el.onclick = () => {
@@ -1540,7 +1741,8 @@
         teamB: "gabbiani",
         formationA: rec.formation,
         stadiumId: rec.stadium,
-        duration: rec.duration
+        duration: rec.duration,
+        cam: rec.cam
       });
     };
 
@@ -1551,6 +1753,7 @@
         formationA: rec.formation,
         stadiumId: "notte",
         duration: rec.duration,
+        cam: rec.cam,
         isCup: true
       });
     };
