@@ -83,9 +83,13 @@
     // Capitani di Ventura
     ["cv_gemma", "capitani", "e", 84, 58, 78, "A", 1], ["cv_brenno", "capitani", "r", 58, 88, 56, "D", 1],
     ["cv_isotta", "capitani", "c", 56, 62, 84, "C", 2], ["cv_conte", "capitani", "l", 80, 76, 82, "C", 4],
+    ["cv_piccarda", "capitani", "r", 72, 54, 82, "A", 1], ["cv_cunegonda", "capitani", "r", 52, 78, 58, "D", 1], ["cv_dario", "capitani", "c", 50, 56, 74, "C", 1],
+    ["cv_letizia", "capitani", "c", 38, 66, 50, "P", 1], ["cv_tiburzio", "capitani", "c", 54, 58, 72, "C", 2], ["cv_lupo", "capitani", "e", 82, 66, 76, "A", 2],
     // Il Fischietto
     ["fi_pino", "fischietto", "c", 50, 74, 62, "D", 1], ["fi_livia", "fischietto", "r", 58, 66, 88, "C", 1],
     ["fi_dante", "fischietto", "e", 82, 60, 70, "A", 2], ["fi_edvige", "fischietto", "l", 70, 72, 92, "C", 3],
+    ["fi_ivano", "fischietto", "c", 40, 70, 50, "P", 2], ["fi_gualtiero", "fischietto", "r", 52, 68, 76, "C", 1], ["fi_rocco", "fischietto", "r", 48, 76, 64, "D", 2],
+    ["fi_gigio", "fischietto", "c", 62, 66, 54, "A", 2], ["fi_tullio", "fischietto", "c", 44, 52, 82, "C", 1], ["fi_quarto", "fischietto", "e", 70, 78, 82, "D", 3],
     // Cacciatori di Figurine
     ["fg_ginestra", "figurine", "c", 54, 62, 78, "C", 1], ["fg_ottone", "figurine", "c", 58, 60, 66, "D", 1],
     ["fg_nives", "figurine", "e", 82, 66, 80, "A", 1], ["fg_rosa", "figurine", "r", 60, 70, 82, "C", 3],
@@ -134,6 +138,8 @@
     // Rotta 66
     ["ro_tino", "rotta", "c", 78, 50, 60, "A", 1], ["ro_fiamma", "rotta", "e", 56, 90, 70, "D", 1],
     ["ro_osvaldo", "rotta", "r", 54, 72, 66, "C", 2], ["ro_ersilia", "rotta", "l", 66, 70, 90, "C", 3],
+    ["ro_ciro", "rotta", "r", 74, 60, 68, "A", 3], ["ro_bartolo", "rotta", "r", 50, 78, 62, "D", 1], ["ro_tobia", "rotta", "c", 36, 68, 50, "P", 1],
+    ["ro_gedeone", "rotta", "c", 46, 58, 70, "C", 1], ["ro_luisa", "rotta", "r", 52, 64, 78, "C", 2], ["ro_cosimo", "rotta", "c", 56, 66, 52, "D", 2],
     // L'Accademia dei Sigilli · Esami di Magia del Pallone
     ["sg_preside", "sigilli", "l", 85, 72, 90, "C", 3], ["sg_miriel", "sigilli", "e", 88, 64, 84, "A", 1],
     ["sg_golem", "sigilli", "r", 55, 88, 60, "D", 2], ["sg_tobia", "sigilli", "c", 62, 58, 70, "C", 1],
@@ -326,6 +332,12 @@
     nr_kira: "Una riga di codice cambia una città. Due, un rapporto.", nr_jax: "La gamba cigola. Il tiro, quando riesce, no.", nr_bolt: "Bzzz. Il banco è aperto. Il cuore, meno.", nr_volt: "Il banco non esiste, ma i prezzi sì.", nr_nyx: "L'imparzialità è una scelta. Ho scelto.", nr_vance: "Il sigaro è spento, il fascicolo no.", nr_vektor: "Il talento muore. Il codice, no.", nr_zero: "Probabilità di parata: 99,96%. Il resto è tifo.",
     rp_brezza: "Volo piano, ma arrivo. Anche alla verità.", rp_marta: "A cena ci sei. Non è un'opinione, è un orario.", rp_basalto: "Cadere è metà del mestiere. L'altra metà è la pazienza.", rp_nube: "Sorrido anche quando dormo. Dicono sia un talento.", rp_sabbioni: "Questo comunicato è già in stampa. Anche questo.", rp_ilario: "Suggerisco battute. Alcune sono più lunghe delle altre.", rp_teodora: "Gli archivi non mentono: è il personale che ha la memoria corta.", rp_zenit: "Ti ho insegnato a volare. Ora imparo a cadere.",
     fg_ginestra: "Non si comprano le figure: si incontrano.", fg_ottone: "Un caffè, un consiglio, un tackle.", fg_nives: "Vincere è la mia lingua. Perdere la sto imparando.", fg_rosa: "Fischio una volta. Capito? Una.", fg_cora: "Tre Leghe vinte. La quarta è la tua.",
+    cv_piccarda: "Ala, gazza, ladra di palloni. Solo i palloni, giuro.", cv_cunegonda: "Il contrasto è come il ferro: si batte finché si piega.", cv_dario: "Una canzone per ogni gol. E una per ogni autogol.",
+    cv_letizia: "Ho parato di peggio: la zuppa a mia madre.", cv_tiburzio: "Il ritmo non sbaglia mai. Sbaglia chi lo segue.", cv_lupo: "Il Lupo Grigio non perde. Al massimo rimanda.",
+    fi_ivano: "In porta si vede tutto, soprattutto gli errori degli altri.", fi_gualtiero: "Presidente, non tifoso. Quasi sempre.", fi_rocco: "L'arbitro ha sempre ragione, tranne quando sbaglia contro di noi.",
+    fi_gigio: "Ormeggio le barche e le fasce. Entrambe restano ferme.", fi_tullio: "La moviola dice tutto. A volte anche la verità.", fi_quarto: "Il quarto uomo vede il campo da dove nessuno guarda.",
+    ro_ciro: "Quando entro io, il pullman lo senti arrivare.", ro_bartolo: "Il pullman è lento, la panchina è lunga. Io sono paziente.", ro_tobia: "Rifugio al Passo: servo anche i tiri.",
+    ro_gedeone: "Una pomata sul ginocchio e una battuta sul resto.", ro_luisa: "La locanda si riempie quando perdete. Quindi, così così.", ro_cosimo: "Traghetto tutto, tranne le polemiche.",
     cv_gemma: "Un dardo, un respiro, un punto. Come ai tempi del ponte.", cv_brenno: "Qui non si passa. Nemmeno col pallone.", cv_isotta: "Conti pagati, schemi in regola e un assist al momento giusto.", cv_conte: "Un feudo si difende. Un campo, ancora meglio.",
     fi_pino: "Contatto lieve. Gioco avanti. Il mio fischietto è la mia bandierina.", fi_livia: "Annotato. Anche questo tiro finisce in cronaca.", fi_dante: "Una scivolata pulita, per una volta. Segnatevelo.", fi_edvige: "Il regolamento ammette il talento. Articolo uno, comma gol.",
     ro_tino: "Ho fame, ma prima segno. Forse.", ro_fiamma: "Guanti in tasca e testa sul tiro: parato.", ro_osvaldo: "Dai, Gigante: ancora un tornante e arriviamo.", ro_ersilia: "Mio marito è in tribuna. Fate bella figura.",
@@ -397,7 +409,8 @@
     ["nico", "sara", "Cuore e Taccuino"], ["baciccia", "nonna", "Nodo del Pescatore"], ["kenji", "sho", "Il Volo degli Arata"],
     ["ruggeri", "cm_bastiano", "Panchine di Riviera"], ["lina", "mn_desantis", "Indagini in Divisa"],
     ["pina", "fi_livia", "Cronache di Provincia"], ["jojo", "mg_tico", "Samba d'Oro"],
-    ["ernesta", "ro_fiamma", "Le Gatte tra i Pali"], ["papa", "pd_teresa", "Cucina & Pallone"],
+    ["ernesta", "ro_fiamma", "Le Gatte tra i Pali"], ["cv_letizia", "pd_teresa", "Padelle e Mestoli"], ["cv_cunegonda", "of_rina", "Ferro Battuto & Chiave Inglese"], ["cv_lupo", "vs_corvo", "I Due Corvi"],
+    ["fi_tullio", "qd_elle", "Moviola & Deduzioni"], ["fi_gualtiero", "pd_gualtiero", "I Due Gualtieri"], ["ro_tobia", "sg_tobia", "Un Tobia per Parte"], ["ro_luisa", "mn_oste", "Locande & Osterie"], ["ro_gedeone", "vl_gedeone", "Due Gedeoni"], ["papa", "pd_teresa", "Cucina & Pallone"],
     ["sara", "dc_nina", "Inchieste in Prima Pagina"], ["keller", "mg_wolff", "Bomber d'Acciaio"],
     ["vs_ottone", "fg_ottone", "Gli Ottoni (due scatole, un caffè)"], ["vp_ermete", "vs_ottone", "Custodi di dighe e di scatole"], ["vp_valvola", "dz_sterling", "Ingegneri e Osservatori"], ["vs_vulpe", "nr_kira", "Radio & Codici"], ["vs_corvo", "dz_sterling", "Sorveglianza & Servizi"], ["vs_eco", "qd_elle", "Dossier & Deduzioni"],
     ["sg_miriel", "cc_lyra", "Armonie di Cristallo & Sigilli"], ["sg_preside", "fo_lupin", "I Segreti dei Maestri"],

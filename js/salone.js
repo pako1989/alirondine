@@ -263,6 +263,7 @@
 .salOv .hubTools{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:6px;margin-bottom:10px}
 .salOv .hubToolBtn{flex:none;min-height:34px;padding:5px 11px;border-radius:10px;border:1.5px solid #ffffff22;background:#13213f;color:#e2e8f0;font:700 12px "M PLUS Rounded 1c",sans-serif;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px;transition:border-color .15s}
 .salOv .hubToolBtn:hover{border-color:#ffd23f88}
+.salOv .salSogniBig{display:flex;align-items:center;gap:12px;width:100%;margin:2px 0 10px;padding:12px 14px;border-radius:14px;border:2px solid #ffd23f;background:linear-gradient(135deg,#3b1d7a,#1b2a6b);color:#fff;font-family:"M PLUS Rounded 1c",sans-serif;text-align:left;cursor:pointer;box-shadow:0 0 14px #ffd23f33,0 4px 12px #0008}.salOv .salSogniBig:active{transform:scale(.985)}.salOv .salSogniBig .ic{font-size:30px}.salOv .salSogniBig .tx{flex:1;display:flex;flex-direction:column;gap:2px}.salOv .salSogniBig b{font-size:17px;font-weight:800;color:#ffd23f}.salOv .salSogniBig small{font-size:11.5px;opacity:.85;font-weight:600}.salOv .salSogniBig .go{font-size:22px;color:#ffd23f}
 .salOv .mapWrap{position:relative;margin:4px 0 12px;border-radius:18px;overflow:hidden;border:2px solid #38bdf888;background:#060d1a;box-shadow:0 8px 30px rgba(0,0,0,0.6);aspect-ratio:16/9;max-height:380px}
 .salOv .mapCanvas{width:100%;height:100%;display:block;cursor:pointer}
 .salOv .mapOverlayHud{position:absolute;bottom:8px;left:8px;right:8px;display:flex;justify-content:space-between;align-items:center;pointer-events:none}
@@ -1210,6 +1211,9 @@
         <button type="button" class="modeBtn gridTab ${SALONE_VIEW === "grid" ? "on" : ""}" data-switch="grid">📜 Catalogo Completo (${tt.n})</button>
       </div>`;
 
+      // Pulsante grande Squadra dei Sogni (prima era nascosto in fondo alla barra a scorrimento)
+      if (window.__sogni) html += `<button type="button" class="salSogniBig" data-go="sogni"><span class="ic">🃏</span><span class="tx"><b>Squadra dei Sogni</b><small>Carte dei personaggi · Arena · Torneo · Stagione · Calcio</small></span><span class="go">▸</span></button>`;
+
       // Barra orizzontale degli strumenti del Salone
       html += `<div class="hubTools">
         ${window.__ricerca ? `<button type="button" class="hubToolBtn" data-go="ricerca">🔍 Cerca ovunque</button>` : ""}
@@ -1222,7 +1226,6 @@
         ${pt ? `<button type="button" class="hubToolBtn" data-go="per">👥 Personaggi (${pt.seen}/${pt.tot})</button>` : ""}
         ${window.__bar ? `<button type="button" class="hubToolBtn" data-go="bar">🍺 Bar del Borgo</button>` : ""}
         ${window.__carteDecks ? `<button type="button" class="hubToolBtn" data-go="carte">🎴 Carte del Destino</button>` : ""}
-        ${window.__sogni ? `<button type="button" class="hubToolBtn" data-go="sogni">🃏 Squadra dei Sogni</button>` : ""}
         ${window.__gabbia3d ? `<button type="button" class="hubToolBtn" data-go="gabbia3d">🏟️ Gabbia 3D</button>` : ""}
         ${window.__calcio11_3d ? `<button type="button" class="hubToolBtn" data-go="c11">⚽ Calcio a 11 3D</button>` : ""}
         ${window.__portieri ? `<button type="button" class="hubToolBtn" data-go="portieri">🧤 Sfida di Portieri</button>` : ""}
