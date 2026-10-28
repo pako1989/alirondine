@@ -92,4 +92,34 @@
     E3("Il Debito del Mulino", "🌾", "La mugnaia chiede il conto di tre mesi di pane.", ["Teresina, la mugnaia del Guado, mette sul tavolo un foglio: tre mesi di pane, mai pagati.", "Frate Ludovico sfoglia il registro con aria grave. «Abbiamo due monete e quaranta stomaci. Decidi tu.»"],
       [["Paghi tutto", "cuore", "Il pane è sacro.", "Teresina ti abbraccia e da domani il pane arriva tiepido. La Compagnia marcia più contenta.", "Paghi e restate senza un soldo. Il pane è buonissimo, ma lo mangiate in silenzio."], ["Proponi uno scambio", "furbizia", "Braccia al posto delle monete.", "Bruno e Fiamma riparano la ruota del mulino. Teresina straccia il foglio.", "Riparate la ruota storta. Gira al contrario. Teresina, rassegnata, fa farina lo stesso."], ["Sfidi la mugnaia a rigori", "audacia", "Chi vince, paga.", "Vinci, e Teresina ride: «Siete matti, ma onesti». Debito dimezzato.", "Teresina para tre rigori su tre. Il debito raddoppia, ma il rispetto pure."]]),
     TW("Il Pallone Spezzato", "📍", "Spezzato, ma ancora rotola.", "La crepa dorata brilla: il premio rotola dritto e cresce.", "Il pallone spezzato devia. Il premio rimbalza, un po' più piccolo.", (c, w) => (w ? Math.round(c * 1.25) : Math.round(c * 0.9))));
+
+  window.__carteDecks.register({
+    id: "rf",
+    t: "Mazzo · Radio Fuorigioco",
+    e: "📻",
+    d: "Dieci carte dal rimorchiatore pirata del 1977: vinili a 45 giri, gettoni telefonici e dediche nella nebbia sui 99.9 MHz.",
+    lock: "Concludi «Radio Fuorigioco · Onde Corte sul Golfo»",
+    unlock: (c) => c.finished("ali-di-rondine.onde"),
+    amb: {
+      cabina: { n: "La Cabina 99.9 al Cantiere", i: "🎙️", zone: "cd_cantiere", at: [12, 8], d: "Odore di stagno caldo, VU-meter ambrati e un giradischi avvitato contro il rollio del mare." },
+      eldorado: { n: "L'Angolo Gettoni del Bar", i: "☎️", zone: "cd_bar", at: [8, 5], d: "Un telefono a disco grigio, tre gettoni scanalati e la radiolina nascosta dietro le tazzine." }
+    },
+    pg: {
+      lupo: { id: "rf_lupo", n: "Lupo Zappa", i: "🕶️", tr: "cuore", d: "Il Reverendo dei 45 giri: ex portiere acrobatico, mette sempre il pezzo giusto prima del fischio.", greet: (a) => `Senti che acustica qui a ${a}, fratello! Metto su un 45 giri d'importazione e vediamo come gira la serata.`, win: "Solco pulito, puntina dritta! Questa giocata merita la sigla di mezzanotte.", lose: "La puntina ha saltato un solco, capita anche ai dischi migliori." },
+      wanda: { id: "rf_wanda", n: "Wanda «Gettone» Bellini", i: "☎️", tr: "furbizia", d: "Centralinista e regista: conosce ogni voce del golfo dallo scatto della cornetta.", greet: (a) => `Tieni un gettone di scorta: a ${a} le notizie corrono più veloci del pallone.`, win: "Linea libera e passaggio al bacio. Te l'avevo detto che quel numero rispondeva!", lose: "Segnale occupato, stavolta. Richiamiamo tra cinque minuti." }
+    },
+    ev: {
+      dedica: E3("La Dedica in Onda", "💌", "Una telefonata anonima chiede di mandare in onda un messaggio in codice.", ["Squilla il telefono da campo: una voce roca chiede una dedica urgente sui 99.9 MHz prima che passi la ronda.", "Non dice il suo nome, ma promette che metà del porto capirà il segnale. Che facciamo?"], [["Mandala senza tagli", "cuore", "Ogni voce merita ascolto.", "La dedica risuona limpida sul molo: due vecchi rivali si riconoscono e fanno pace davanti a tutti.", "Era uno scherzo da bar: mezzo porto ride, ma la serata si scalda lo stesso."], ["Verifica il prefisso", "furbizia", "Controlla da quale cabina chiama.", "Riconosci il rumore della gru in sottofondo e smascheri il mittente: grato per la discrezione, ti lascia una dritta d'oro.", "La linea cade prima che tu capisca da dove chiamava. Resta solo il fruscio del mare."], ["Rilancia a microfono aperto", "audacia", "Trasformala in sfida pubblica.", "Inviti chi ascolta a presentarsi a {a}: in dieci minuti arriva una folla festante col pallone sottobraccio.", "Alzi troppo il guadagno del mixer e fischia l'amplificatore: tutti si tappano le orecchie ridendo."]]),
+      furgone: E3("L'Antenna Nascosta", "🚐", "Un furgone giallo con l'antenna sul tetto gira piano intorno al molo.", ["Un furgone goniometrico accosta vicino a {a} con le cuffie accese: cercano un trasmettitore clandestino.", "Abbiamo tre minuti prima che puntino il dipolo dalla parte giusta. Come li depistiamo?"], [["Accendi dieci radioline insieme", "audacia", "Un muro di musica da ogni finestra.", "Da ogni barca parte la stessa canzone: l'ago impazzisce e gli ispettori finiscono a battere il piede a tempo.", "Una radiolina gracchia più forte delle altre e svela il trucco, ma ormai il pezzo è finito."], ["Sposta la frequenza di mezzo scatto", "furbizia", "Finezza da radioamatore.", "Scivoli di due decimi di megahertz sul condensatore: per il furgone c'è solo vento sugli scogli.", "Giri la manopola dal lato sbagliato e becchi il bollettino dei naviganti a tutto volume."], ["Offri un caffè caldo all'equipaggio", "cuore", "Anche sotto il cappotto grigio batte un cuore.", "Il caposquadra riconosce una vecchia canzone del '58, sorride in silenzio e fa spegnere il ricevitore.", "Ringraziano per il caffè ma restano di pattuglia ancora mezz'ora: tocca aspettare con calma."]])
+    },
+    sf: {
+      vinile: { base: "ritmo", n: "A Tempo di 45 Giri", i: "💿", q: "cuore", d: "Tocca sul battito esatto del disco prima che la puntina arrivi all'etichetta. Cinque battiti." },
+      portante: { base: "memoria", n: "Sequenza d'Onda Corta", i: "📻", q: "furbizia", d: "Osserva i picchi luminosi delle valvole e ripeti la sequenza senza perdere la portante." }
+    },
+    tw: {
+      lato_b: TW("Il Lato B Nascosto", "💿", "Giri il singolo e scopri una traccia che nessuno aveva mai sentito.", "Sul Lato B c'era un pezzo inedito da pelle d'oca: l'entusiasmo raddoppia il bottino della serata!", "Il Lato B è rigato dal sale marino: la musica gracchia, ma resta comunque un bel ricordo.", (c, w) => (w ? Math.round(c * 1.3) : Math.round(c * 0.9))),
+      ponte_radio: TW("Ponte Radio sul Golfo", "📡", "I pescherecci al largo rilanciano il segnale da una barca all'altra.", "Il segnale rimbalza fino a Punta Scura: arrivano offerte e monete da tutto il golfo!", "La nebbia assorbe metà della portante: il premio arriva un po' attenuato.", (c, w) => (w ? Math.round(c * 1.25) : Math.round(c * 0.9)))
+    }
+  });
 })();
+

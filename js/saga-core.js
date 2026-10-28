@@ -498,8 +498,8 @@
       return out + `<br><span style="color:var(--dim)">▷ = strade non prese. Per provarle: Capitoli → rigioca.</span>`;
     }
     function journal(back, inZone) {
-      const html = journalHtml() + (CRW ? CRW.html() : "") + (PLN ? PLN.html() : "") + (SCR ? SCR.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + (WGT ? WGT.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
-      const jb = (DOS ? Object.keys(DOS.cases).filter((c) => DOS.list(c).length).map((c) => ({ label: "🗂️ Dossier · " + DOS.cases[c].t, sub: "Confronta prove e testimonianze", fn: () => DOS.open(c, () => journal(back, inZone), inZone) })) : []).concat(CAT && CAT.list().length ? [{ label: "🃏 Album", sub: `${CAT.team().length}/${CAT.max} in squadra`, fn: () => CAT.open(() => journal(back, inZone), inZone) }] : []).concat(CRW && CRW.count() ? [{ label: "⚔️ Schiera la compagnia", sub: `${CRW.field().length}/${CRW.max} in campo`, fn: () => CRW.pick(() => journal(back, inZone), inZone) }] : []).concat((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
+      const html = journalHtml() + (CRW ? CRW.html() : "") + (PLN ? PLN.html() : "") + (SCR ? SCR.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + (WGT ? WGT.html() : "") + (RAD ? RAD.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
+      const jb = (RAD ? [{ label: `${RAD.icon} ${RAD.name} · ${RAD.freq().toFixed(1)} MHz`, sub: "Ruota la manopola e intercetta segnali", fn: () => RAD.open(() => journal(back, inZone), inZone) }] : []).concat(DOS ? Object.keys(DOS.cases).filter((c) => DOS.list(c).length).map((c) => ({ label: "🗂️ Dossier · " + DOS.cases[c].t, sub: "Confronta prove e testimonianze", fn: () => DOS.open(c, () => journal(back, inZone), inZone) })) : []).concat(CAT && CAT.list().length ? [{ label: "🃏 Album", sub: `${CAT.team().length}/${CAT.max} in squadra`, fn: () => CAT.open(() => journal(back, inZone), inZone) }] : []).concat(CRW && CRW.count() ? [{ label: "⚔️ Schiera la compagnia", sub: `${CRW.field().length}/${CRW.max} in campo`, fn: () => CRW.pick(() => journal(back, inZone), inZone) }] : []).concat((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
       if (inZone) return api.trAsk("voce", html, jb, bgNow());
       api.scene(BG0, "voce", html, jb, JN());
     }
@@ -739,6 +739,7 @@
         PLUG.forEach((p) => p.hud && safe(() => p.hud(GP, zid, spec, K)));
         if (CLK) safe(() => clkHud(GP));
         if (ALR) safe(() => alHud(GP));
+        if (RAD && RAD.hud) safe(() => RAD.draw(GP, zid));
       };
       Z.onObj = function (ch, tx, ty) {
         let f = null;
@@ -908,6 +909,7 @@
         ...(CHN ? [["⛓ Catena", "Nei passaggi a catena ogni compagno ha un ruolo. Un passaggio tra ruoli che si intendono (per esempio regista verso ala, ala verso punta) ha una finestra più larga: schiera la squadra giusta. Tre passaggi puliti e un tiro fanno una catena; senza intercetti è «perfetta»."]] : []),
         ...(RFT ? [["🦇 " + RFT.name, "Sui tetti puoi saltare (a rischio) o usare il rampino (sicuro, ma serve Agilità). Una caduta costa Vigore: a zero ti raccolgono e ti riportano al rifugio, dove riposi. Dall'alto puoi stordire una guardia, e una lampada rotta ti nasconde meglio."]] : []),
         ...(HCK ? [["💻 " + HCK.name, "Le consolle sulla mappa si usano con la statistica " + HCK.name + ": ogni comando costa punti e può deviare i droni, invertire i pavimenti elettrificati o aprire serrande. Chi forza la rete alza l'Allarme, e le sentinelle dei settori vicini aumentano."]] : []),
+        ...(RAD ? [[RAD.icon + " " + RAD.name, "Apri il " + RAD.name + " dal Menu di zona per ruotare la scala in MHz. Più ti avvicini nel luogo giusto e alla frequenza esatta, più le tacche di ricezione salgono (da 0 a 5): con almeno 3 tacche puoi ascoltare trasmissioni nascoste, intercettare pattuglie o scoprire segnali QSL."]] : []),
         ...arr(safe(() => cfg.guide && cfg.guide(K), []))
       ];
       api.trAsk("voce", `<b>📖 Guida · ${esc(TITLE)}</b><br><span style="color:var(--dim)">Tocca un argomento. Qui ci sono solo le regole che usa questa saga.</span>`, T0.map((t) => ({ label: t[0], fn: () => say([["voce", t[1]]], () => guida(back)) })).concat([{ label: "◂ Indietro", fn: back }]), bgNow());
@@ -916,6 +918,7 @@
       const c = activeChapter(), m = mem();
       const extra = cfg.zoneMenuExtra ? arr(safe(() => cfg.zoneMenuExtra(K), [])) : [];
       api.trAsk("voce", `<b>${esc(TITLE)}</b> · ${esc(c ? "Capitolo " + c.n + " · " + c.title : "")}<br><span style="color:var(--dim)">${esc(goalNow())}<br>Monete ${bal()} · ${esc(JN())}: ${m.lore.length} pagine</span>`, [
+        ...(RAD ? [{ label: `${RAD.icon} ${RAD.name} · ${RAD.freq().toFixed(1)} MHz`, sub: RAD.statusTxt(), cls: "hot", fn: () => RAD.open(zoneMenu, true) }] : []),
         { label: JN(), sub: (cfg.journal && cfg.journal.sub) || "Persone, scoperte, finali", cls: "hot", fn: () => journal(zoneMenu, true) },
         { label: "👥 Personaggi", sub: "Chi hai incontrato in questa saga", fn: () => persone(zoneMenu) },
         ...(INV ? [{ label: "🎒 Zaino", sub: invList().length ? invList().length + " oggetti: regali e bonus" : "Ancora vuoto", fn: () => zaino(zoneMenu) }] : []),
@@ -1463,6 +1466,116 @@
       return { hook, leap, fall, rest, drop, down, lamp, lampOff, vigor: vig, name: R0.name || "Tetti", stat: ST };
     })();
 
+    // -------------------------------------------------------------- SINTONIZZATORE DI FREQUENZE (cfg.radio, opt-in)
+    // cfg.radio = { min: 88.0, max: 108.0, step: 0.1, start: 99.9, name: "Sintonizzatore", icon: "📻", hud: true, presets(K) → [[freq, "etichetta"]…] }
+    // Ogni zona può avere spec.signals = [{ id, freq, at: [tx, ty], radius: 10, tol: 0.9, title, lines: [[chi, testo]…], clue, dossier: [caso, voce], lore, flag, tag, when(K), onTune(K) }] (o funzione di K).
+    // Più sei vicino a `at` E alla frequenza `freq`, più salgono le tacche (0..5). Con >= 3 tacche puoi sintonizzare e ascoltare il segnale.
+    const RAD = cfg.radio && (() => {
+      const R0 = cfg.radio, MN = R0.min == null ? 88.0 : +R0.min, MX = R0.max == null ? 108.0 : +R0.max, ST = R0.step || 0.1, S0 = R0.start == null ? 99.9 : +R0.start;
+      const nm = R0.name || "Sintonizzatore", ic = R0.icon || "📻";
+      const roundF = (v) => Math.round(Math.max(MN, Math.min(MX, +v || S0)) * 10) / 10;
+      const freq = () => roundF(F.get("rad_f", S0));
+      const tuned = (id) => F.is("rad_t_" + id);
+      const sigsOf = (zid) => { const zr = ZONES[zid || (api && api.trZone && api.trZone())]; if (!zr) return []; const raw = zr.spec.signals; return arr(typeof raw === "function" ? safe(() => raw(K), []) : raw).filter((s) => s && s.id && (!s.when || safe(() => s.when(K), true))); };
+      const allSigs = () => { const m = {}; Object.keys(ZONES).forEach((z) => sigsOf(z).forEach((s) => { m[s.id] = s; })); return Object.values(m); };
+      function scan(zid) {
+        const z = zid || (api && api.trZone && api.trZone()), list = sigsOf(z), f = freq();
+        const p = api && api.trPos && api.trZone() === z ? api.trPos() : null;
+        const px = p ? p[0] / TS : null, py = p ? (p[1] - 4) / TS : null;
+        let best = null;
+        list.forEach((s) => {
+          const rad = s.radius || 11, tol = s.tol || 1.2, df = Math.abs(f - s.freq);
+          const dist = s.at && px != null ? Math.hypot(px - s.at[0], py - s.at[1]) : 0;
+          const sp = s.at && px != null ? Math.max(0, 1 - dist / rad) : 1;
+          const fp = Math.max(0, 1 - df / tol);
+          const raw = sp * fp, bars = df <= 0.15 && sp >= 0.45 ? 5 : df <= 0.35 && sp >= 0.32 ? Math.max(3, Math.round(5 * raw)) : Math.round(5 * raw);
+          let dir = "";
+          if (s.at && px != null && dist > 2.5) {
+            const dx = s.at[0] - px, dy = s.at[1] - py;
+            dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "verso est" : "verso ovest") : (dy > 0 ? "verso sud" : "verso nord");
+          }
+          const cand = { sig: s, bars: Math.min(5, bars), dist, df, sp, fp, dir };
+          if (!best || cand.bars > best.bars || (cand.bars === best.bars && cand.sp * 0.6 + cand.fp * 0.4 > best.sp * 0.6 + best.fp * 0.4)) best = cand;
+        });
+        return best || { sig: null, bars: 0, dist: 99, df: 99, sp: 0, fp: 0, dir: "" };
+      }
+      const barTxt = (b) => "▮".repeat(b) + "▯".repeat(Math.max(0, 5 - b));
+      function set(v, quiet) {
+        const nv = roundF(v); F.set("rad_f", nv);
+        if (!quiet) {
+          const sc = scan();
+          safe(() => { noise(0.07, 0.025 * (1 - sc.bars * 0.16), 900); if (sc.bars >= 2) tone(420 + sc.bars * 95, 0.08, "sine", 0.03 + sc.bars * 0.008); });
+        }
+        return nv;
+      }
+      const step = (dv) => set(freq() + dv);
+      const statusTxt = () => { const sc = scan(); return sc.bars >= 3 && sc.sig ? `Segnale forte (${barTxt(sc.bars)}) · ${sc.sig.title || "Portante"}` : `Campo ${barTxt(sc.bars)}`; };
+      function tune(id, back, inZone) {
+        const z = api && api.trZone && api.trZone(), s = sigsOf(z).find((x) => x.id === id) || allSigs().find((x) => x.id === id);
+        if (!s) return (back || done)();
+        const first = !tuned(s.id);
+        F.set("rad_t_" + s.id, true);
+        if (s.tag) F.set("rad_tag_" + s.tag + "_" + s.id, true);
+        if (s.flag) F.set(s.flag, true);
+        if (s.clue) giveClue(s.clue);
+        if (s.dossier && DOS) DOS.add(s.dossier[0], s.dossier[1]);
+        if (s.lore) learnLore(s.lore);
+        if (first) { SFX.choice(); note(`${nm} (${s.freq.toFixed(1)} MHz): ${s.title || s.id}`); }
+        refreshZone();
+        const after = () => { if (s.onTune) safe(() => s.onTune(K, first)); else if (back) open(back, inZone); else done(); };
+        const ls = typeof s.lines === "function" ? safe(() => s.lines(K, first), []) : arr(s.lines);
+        if (ls.length) {
+          if (inZone) say(ls, () => { if (s.onTune) safe(() => s.onTune(K, first)); else done(); });
+          else api.play(lines(ls, bgNow()), after);
+        } else after();
+      }
+      function open(back, inZone) {
+        const f = freq(), sc = scan(), zSigs = sigsOf();
+        const show = (head, opts) => (inZone ? api.trAsk("voce", head, opts, bgNow()) : api.scene(BG0, "voce", head, opts, JN()));
+        let hint = "Solo fruscio bianco dell'etere.";
+        if (sc.sig) {
+          if (sc.bars >= 3) hint = `<b>Portante agganciata!</b> «${esc(sc.sig.title || "Segnale")}» (${sc.sig.freq.toFixed(1)} MHz)${tuned(sc.sig.id) ? " · già registrata" : " · pronta all'ascolto"}.`;
+          else if (sc.sp < 0.28 && sc.sig.at) hint = `Senti un'armonica lontanissima: prova a camminare <b>${sc.dir || "nella mappa"}</b>.`;
+          else if (sc.df > 0.35) hint = `Sei vicino a una sorgente radio${sc.dir ? " (" + sc.dir + ")" : ""}: sposta la ghiera verso i <b>${sc.sig.freq > f ? "MHz più alti (+)" : "MHz più bassi (-)"}</b>.`;
+          else hint = `Il segnale trema (${barTxt(sc.bars)}): fai ancora due passi ${sc.dir || "attorno"} o affina i decimi di MHz.`;
+        } else if (!zSigs.length) hint = "Nessuna portante attiva in questa stanza.";
+        const scalePos = Math.round(((f - MN) / Math.max(0.1, MX - MN)) * 18);
+        const dial = "╟" + "─".repeat(scalePos) + "◈" + "─".repeat(Math.max(0, 18 - scalePos)) + "╢";
+        const head = `<b>${ic} ${esc(nm)} · ${f.toFixed(1)} MHz</b> · <span style="color:#4fd1a5">${barTxt(sc.bars)}</span><br><span style="font-family:monospace;color:#fde68a">${dial}</span><br><span style="color:var(--dim)">${hint}</span>`;
+        const opts = [];
+        if (sc.sig && sc.bars >= 3) {
+          opts.push({ label: `📡 ${tuned(sc.sig.id) ? "Riascolta" : "Ascolta"}: ${sc.sig.title || sc.sig.freq.toFixed(1) + " MHz"}`, sub: `${sc.sig.freq.toFixed(1)} MHz · segnale ${barTxt(sc.bars)}`, big: true, cls: "hot", fn: () => tune(sc.sig.id, back, inZone) });
+        }
+        opts.push(
+          { label: "◂ -0.1 MHz", sub: `Vai a ${roundF(f - 0.1).toFixed(1)} MHz`, fn: () => { step(-0.1); open(back, inZone); } },
+          { label: "▸ +0.1 MHz", sub: `Vai a ${roundF(f + 0.1).toFixed(1)} MHz`, fn: () => { step(0.1); open(back, inZone); } },
+          { label: "◂◂ -0.5 MHz", sub: `Salta a ${roundF(f - 0.5).toFixed(1)} MHz`, fn: () => { step(-0.5); open(back, inZone); } },
+          { label: "▸▸ +0.5 MHz", sub: `Salta a ${roundF(f + 0.5).toFixed(1)} MHz`, fn: () => { step(0.5); open(back, inZone); } }
+        );
+        const pres = R0.presets ? arr(safe(() => R0.presets(K), [])) : [];
+        pres.forEach(([pf, pl]) => {
+          if (Math.abs(pf - f) > 0.04) opts.push({ label: `🎚️ Sintonizza ${(+pf).toFixed(1)} MHz`, sub: pl || "Frequenza annotata", fn: () => { set(pf); open(back, inZone); } });
+        });
+        opts.push({ label: "◂ Indietro", fn: back || done });
+        show(head, opts);
+      }
+      function draw(g, zid) {
+        const c = g.canvas, sc = scan(zid), t = `${ic} ${freq().toFixed(1)} ${barTxt(sc.bars)}`;
+        g.save(); g.font = "bold 9px monospace"; const w = g.measureText(t).width + 12;
+        g.fillStyle = "rgba(8,14,26,.68)"; g.fillRect(4, 4, w, 13);
+        g.fillStyle = sc.bars >= 3 ? "#4fd1a5" : sc.bars >= 1 ? "#fde68a" : "#94a3b8";
+        g.fillText(t, 10, 13.5); g.restore();
+      }
+      const tagCount = (tg) => allSigs().filter((s) => s.tag === tg && tuned(s.id)).length;
+      const html = () => {
+        const all = allSigs(), got = all.filter((s) => tuned(s.id));
+        if (!all.length) return "";
+        return `<br><br><b>${ic} ${esc(nm)}</b> (${got.length}/${all.length} frequenze intercettate · ora su ${freq().toFixed(1)} MHz)<br>` +
+          (got.length ? got.map((s) => `• <b>${s.freq.toFixed(1)} MHz</b> · ${esc(s.title || s.id)}`).join("<br>") : "<span style='color:var(--dim)'>Nessuna trasmissione registrata, per ora.</span>");
+      };
+      return { name: nm, icon: ic, freq, set, step, scan, tuned, tune, open, draw, html, statusTxt, tagCount, count: () => allSigs().filter((s) => tuned(s.id)).length, total: () => allSigs().length, hud: R0.hud !== false };
+    })();
+
     // -------------------------------------------------------------- kit per i capitoli
     const K = {
       get api() { return api; }, ID, TITLE, TS, T, esc, hash, rnd, pick, safe, F, mem, save, stepOf, setStep, note, once, reward, coinsGive, bal, hero, castHero, stat, bond,
@@ -1473,7 +1586,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, plan: PLN, scroll: SCR, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN,
+      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, plan: PLN, scroll: SCR, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN, radio: RAD,
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
       ending: (id, d) => { ENDINGS[id] = d; },
       continueStory: () => continueStory(), hasChapter: (n) => !!CHAPTERS[n], setInMatch: (v) => { inMatch = !!v; }, openMain: () => openMain(),

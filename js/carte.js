@@ -44,7 +44,8 @@
     jolly: { id: "ms_jolly", key: "ali-di-rondine.missione", n: "Jolly", i: "🧢", tr: "audacia", d: "Da Missione Senza Ritorno. Pilota della Normanna: ti offre una partita e un atterraggio d'emergenza, nello stesso ordine.", greet: (a) => `Una mano a ${a}? Allacciati: io bluffo come guido.`, win: "Ben giocato. Era tutto previsto. Più o meno.", lose: "Ho vinto, ma era una manovra evasiva. Riprova." },
     brezza: { id: "rp_brezza", key: "ali-di-rondine.replica", n: "Brezza", i: "🛫", tr: "cuore", d: "Da Eroi in Replica. Eroina della Lega: ti offre una partita e una domanda scomoda, nello stesso ordine.", greet: (a) => `Una mano a ${a}? Giochiamo piano, che si vede meglio.`, win: "Ben giocato. Hai guardato dove andavi.", lose: "Ho vinto, ma stavo guardando. Riprova." },
     nives: { id: "fg_nives", key: "ali-di-rondine.figurine", n: "Nives", i: "🃏", tr: "audacia", d: "Da Cacciatori di Figurine. Cacciatrice: vince con una naturalezza che ha stancato anche lei.", greet: (a) => `Una lotta in ${a}? Tre figure, un caffè in palio. Chi perde, paga.`, win: "Buona lotta. Hai guardato le figure, non me. Brava.", lose: "Ho vinto. Vuoi un caffè? Lo pago io, stavolta." },
-    tilly: { id: "rt_tilly", key: "ali-di-rondine.tempo", n: "Tilly Verdi", i: "📟", tr: "furbizia", d: "Da Rondine 1938-2038. Parla a velocità di fibra ottica.", greet: (a) => `Ho dieci minuti prima del prossimo guasto del tabellone. ${a}? Perfetto, andiamo.`, win: "Segnato, registrato, backup fatto. Bravo.", lose: "Errore 404: vittoria non trovata. Riprova." }
+    tilly: { id: "rt_tilly", key: "ali-di-rondine.tempo", n: "Tilly Verdi", i: "📟", tr: "furbizia", d: "Da Rondine 1938-2038. Parla a velocità di fibra ottica.", greet: (a) => `Ho dieci minuti prima del prossimo guasto del tabellone. ${a}? Perfetto, andiamo.`, win: "Segnato, registrato, backup fatto. Bravo.", lose: "Errore 404: vittoria non trovata. Riprova." },
+    nilde: { id: "rf_nilde", key: "ali-di-rondine.onde", n: "Nilde Marini", i: "📻", tr: "audacia", d: "Da Radio Fuorigioco. Regista dei 99.9 MHz: parla dritto nella nebbia con le dita sporche di grafite.", greet: (a) => `Microfono aperto da ${a}! Niente tagli e niente censure: giochiamocela dal vivo.`, win: "Segnale limpidissimo! Questa storia va dritta sul Lato A.", lose: "Fruscio in cuffia, stavolta. Giriamo il disco e ripartiamo." }
   };
   // ------------------------------------------------------------------ mazzi estendibili
   // Un mazzo è un pacchetto di carte (personaggi, eventi, twist) con una condizione di sblocco. Qualsiasi file caricato dopo
@@ -215,7 +216,7 @@
         tap((x) => { if (phase !== "pick" || fin) return; const slot = Math.round((x - 80) / 80); const c = pos.indexOf(slot); if (c < 0) return; if (c === ball) correct++; phase = "end"; setTimeout(() => { round++; if (round >= 3) end(correct / 3); else newRound(); }, 800); });
       }
     };
-    btn.onclick = () => { btn.style.display = "none"; st.textContent = ""; start[kind](); };
+    btn.onclick = () => { btn.style.display = "none"; st.textContent = ""; start[(sf && sf.base) || kind](); };
   }
 
   // ------------------------------------------------------------------ pesca delle carte (sovrapposizione animata)
@@ -326,12 +327,12 @@
     cameos: []
   });
   const deckApi = {
-    register(d) { if (!d || !d.id || DECKS.some((x) => x.id === d.id)) return false; DECKS.push(d); [["pg", PG], ["ev", EV], ["tw", TW]].forEach(([t, o]) => Object.keys(d[t] || {}).forEach((k) => { const c = d[t][k]; c.deck = d.id; o[d.id + "_" + k] = c; })); return true; },
+    register(d) { if (!d || !d.id || DECKS.some((x) => x.id === d.id)) return false; DECKS.push(d); [["amb", AMB], ["pg", PG], ["ev", EV], ["sf", SF], ["tw", TW]].forEach(([t, o]) => Object.keys(d[t] || {}).forEach((k) => { const c = d[t][k]; c.deck = d.id; o[d.id + "_" + k] = c; })); return true; },
     list: () => DECKS.map((d) => ({ id: d.id, t: d.t, unlocked: deckUnlocked(d), on: deckLive(d) })),
     openHub(back) {
       injectCss(); document.querySelectorAll(".cdOv").forEach((e) => e.remove());
       const ov = document.createElement("div"); ov.className = "cdOv";
-      const n = (d) => ["pg", "ev", "tw"].reduce((a, t) => a + Object.keys(d[t] || {}).length, 0), c = ctx();
+      const n = (d) => ["amb", "pg", "ev", "sf", "tw"].reduce((a, t) => a + Object.keys(d[t] || {}).length, 0), c = ctx();
       const guests = Object.keys(GUEST).filter((k) => c.finished(GUEST[k].key)).length;
       const row = (e, t, d, st, id, on) => `<div class="cdDk"><span class="e">${e}</span><div><b>${esc(t)}</b><small>${esc(d)}</small><small class="s">${esc(st)}</small></div>${id ? `<button type="button" class="cdBt s" data-dk="${id}">${on ? "Attivo" : "Spento"}</button>` : ""}</div>`;
       const paint = () => { ov.innerHTML = `<h2>🎴 Carte del Destino</h2><p>Mini-storie rigiocabili: pesca 5 carte, vivi la storia, gioca la prova. Più mazzi, più storie.</p><div class="cdDks">${row("🎣", "Mazzo del Molo", "Il mazzo base: 4 luoghi, 5 personaggi, 5 eventi, 4 prove, 5 twist.", "Sempre attivo", "", 0)}${row("🤝", "Mazzo degli Ospiti", "Personaggi delle saghe che hai concluso.", guests + "/" + Object.keys(GUEST).length + " ospiti presenti", "", 0)}${DECKS.map((d) => { const dd = d.id === "marea" ? d.d : ""; return deckUnlocked(d) ? row(d.e, d.t, dd, n(d) + " carte", d.id, deckLive(d)) : row("🔒", d.t, dd, d.lock || "Bloccato", "", 0); }).join("")}</div><button class="cdBt" id="cdPlay" type="button">Gioca ▸</button><button class="cdBt s" id="cdBack" type="button">Indietro</button>`;
@@ -367,7 +368,7 @@
     const pgOf = (id) => PG[id] || GUEST[id];
     const guestsAvailable = () => Object.keys(GUEST).filter((k) => safe(() => !!(window.__salone && window.__salone.concluded(GUEST[k].key)), false));
     const pickFrom = (type, pool) => { const un = pool.filter((k) => !F.is("cd_s_" + type + "_" + k)), from = un.length && Math.random() < 0.75 ? un : pool; return from[rnd(from.length)]; };
-    const deal = () => ({ amb: pickFrom("amb", Object.keys(AMB)), pg: pickFrom("pg", Object.keys(PG).filter((k) => liveCard(PG[k])).concat(guestsAvailable())), ev: pickFrom("ev", Object.keys(EV).filter((k) => liveCard(EV[k]))), sf: pickFrom("sf", Object.keys(SF)), tw: pickFrom("tw", Object.keys(TW).filter((k) => liveCard(TW[k]))) });
+    const deal = () => ({ amb: pickFrom("amb", Object.keys(AMB).filter((k) => liveCard(AMB[k]))), pg: pickFrom("pg", Object.keys(PG).filter((k) => liveCard(PG[k])).concat(guestsAvailable())), ev: pickFrom("ev", Object.keys(EV).filter((k) => liveCard(EV[k]))), sf: pickFrom("sf", Object.keys(SF).filter((k) => liveCard(SF[k]))), tw: pickFrom("tw", Object.keys(TW).filter((k) => liveCard(TW[k]))) });
     const startRun = () => {
       const d = deal(), cards = { amb: AMB[d.amb], pg: pgOf(d.pg), ev: EV[d.ev], sf: SF[d.sf], tw: TW[d.tw] };
       Object.keys(d).forEach((t) => F.set("cd_" + t, d[t])); ["amb", "pg", "ev", "sf", "tw"].forEach((t) => F.set("cd_s_" + t + "_" + d[t], true));

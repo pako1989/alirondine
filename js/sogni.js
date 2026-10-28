@@ -20,6 +20,7 @@
   // le saghe da cui vengono le carte: chiave di salvataggio, nome, colore
   const SAGHE = {
     borgo: ["ali-di-rondine.stagione1", "Ali di Rondine · Borgo Marino", "#ff7a45", ""],
+    onde: ["ali-di-rondine.onde", "Radio Fuorigioco · Onde Corte sul Golfo", "#f59e0b", "__onde"],
     sigilli: ["ali-di-rondine.sigilli", "L'Accademia dei Sigilli", "#6366f1", "__sigilli"],
     fortino: ["ali-di-rondine.fortino", "Colpo al Fortino", "#38bdf8", "__fortino"],
     note: ["ali-di-rondine.note", "Tactics Note · Il Quaderno del Giudizio", "#64748b", "__note"],
@@ -266,6 +267,11 @@
     ["re_evaristo", "regno", "c", 44, 70, 76, "D", 1], ["re_oriele", "regno", "r", 62, 60, 82, "C", 1], ["re_brando", "regno", "r", 72, 82, 56, "D", 1],
     ["re_perla", "regno", "r", 52, 74, 78, "C", 2], ["re_ulderico", "regno", "e", 78, 66, 60, "A", 2], ["re_cedro", "regno", "r", 48, 72, 82, "D", 2],
     ["re_scilla", "regno", "r", 80, 54, 74, "A", 3], ["re_tullio", "regno", "e", 66, 70, 74, "C", 3], ["re_anselmo", "regno", "l", 56, 70, 92, "C", 3],
+    // Radio Fuorigioco · Onde Corte sul Golfo (1977)
+    ["rf_wanda", "onde", "c", 56, 62, 80, "C", 1], ["rf_tullio", "onde", "c", 52, 82, 58, "D", 1],
+    ["rf_lupo", "onde", "r", 48, 84, 74, "P", 2], ["rf_valvola", "onde", "r", 58, 80, 82, "D", 2],
+    ["rf_nilde", "onde", "e", 84, 62, 86, "A", 3], ["rf_valli", "onde", "e", 66, 84, 82, "C", 4],
+    ["rf_cesare", "onde", "l", 90, 68, 92, "A", 4],
   ];
   // [id, saga, rarità (c r e l), attacco, difesa, tecnica, ruolo]
   const CARDS = [
@@ -420,6 +426,7 @@
     my_alvarez: "Il Pok-ta-pok? Fisica applicata, ragazzo mio.", my_ixchel: "Conosco ogni sentiero e ogni rimbalzo.", my_diego: "Qui Diego: messaggio ricevuto, palla in arrivo!", my_vargas: "Il tesoro è un pallone d'oro. Per me, almeno.", my_kukulkan: "Il sole guarda, l'anello decide.",
     alc_bruno: "Forbici salde, testa alta e cross al millimetro: così si evade dalla marcatura.", alc_cardenas: "Nessuno esce da qui senza il mio triplice fischio.", alc_sam: "Ho una chiave per ogni porta e un tunnel per ogni contropiede.", alc_malick: "Palla o uomo passano... ma mai insieme.", alc_tonelli: "Fischietto tra i denti e marcatura a uomo: la disciplina prima di tutto.",
     te_valenti: "Nel corridoio non c'è spazio per le finte: solo per la freddezza d'agente.", te_elena: "Il pallone è come un dispaccio cifrato: chi lo sa leggere vince la partita.", te_klaus: "Fischietto e orario: il convoglio fende la neve senza fermarsi mai.", te_boris: "Gettare carbone e tenere il muro: la locomotiva non arretra!", te_morozov: "Un passaggio dosato al millimetro è la miglior medicina contro il pressing.",
+    rf_wanda: "Tre gettoni sul bancone e un lancio lungo sul secondo palo: linea libera!", rf_tullio: "Stringi i bulloni e marca a uomo: da questa difesa non filtra una goccia.", rf_lupo: "Lato B sul piatto, volume a dieci e guantoni caldi sotto la traversa!", rf_valvola: "Sento il fischio delle cuciture nel vento: l'anticipo è già partito.", rf_nilde: "Qui Radio Fuorigioco 99.9: microfono aperto e palla dritta sotto l'incrocio!", rf_valli: "Articolo quattro del buon calcio: testa alta, rispetto e geometria pulita.", rf_cesare: "Finché una radiolina resta accesa sugli scogli, il Molo Vecchio non finisce mai.",
   };
   // le squadre inventate della Stagione dei Sogni e del Draft
   const TEAMS = [
@@ -470,6 +477,7 @@
     ["bv_nadia", "sh_hanzo", "Volpi e ombre"], ["sh_hayato", "cm_bastiano", "Vecchi maestri"], ["fe_roland", "td_corrado", "Eredi di casate"], ["abi_nora", "nl_fiammetta", "Luci nella notte"], ["cr_aira", "ve_sbuffo", "Venute dal cielo"], ["mu_ugolino", "tc_ardo", "Muri di pietra"], ["lb_narratore", "pi_morgana", "Voci che comandano"],
     ["nf_bora", "nf_gaspare", "Capitana e Magazziniere"], ["cp_crispino", "cp_cacace", "Guardie e Tonache"], ["cp_tito", "cp_peppe", "I Soliti Ignoti"], ["cp_rosetta", "gl_cannella", "Salumi e Gallette"], ["re_brando", "mu_ugolino", "Muri di pietra"],
     ["rm_spartaco", "pr_sceriffo", "La Legge e la Sabbia"], ["rm_furbio", "tc_ysolde", "Senatori e Troni"],
+    ["rf_nilde", "sf_mira", "Voci Libere nell'Etere"], ["rf_valli", "mn_desantis", "Impermeabili d'Onore"], ["rf_tullio", "of_gasparre", "Caldaie & Motori"], ["rf_lupo", "pe_ettore", "Parate di Riviera"],
   ];
   // le otto sfide del Torneo dei Sogni: cabinato della Sala Giochi (motore) e avversario
   const SFIDE = [
