@@ -71,6 +71,32 @@
       // bersaglio
       C(g, 70, 24, 12, "#f5f5f4"); C(g, 70, 24, 8, "#b91c1c"); C(g, 70, 24, 4, "#f5f5f4"); R(g, 69, 23, 2, 2, "#b91c1c");
       GL(g, 160, 20, 90, "255,200,120", 0.25); VIG(g, W, H, 0.45);
+    },
+    cp_strada(g, W, H, f) {
+      VG(g, 0, 120, "#8ab4e0", "#f8e8c0"); g.fillRect(0, 0, W, 120); for (let i = 0; i < 4; i++) R(g, ((i * 100 + f * 0.12) % 380) - 40, 12 + i * 14, 64, 5, "rgba(255,255,255,.85)");
+      hills(g, W, 112, "#7a9a82", 24, 2); hills(g, W, 126, "#587a5e", 14, 5);
+      // fortino lontano
+      R(g, 210, 78, 60, 40, "#8b8f99"); R(g, 204, 70, 14, 48, "#7b7f89"); R(g, 262, 70, 14, 48, "#7b7f89"); T(g, [202, 70, 220, 70, 211, 54], "#7f1d1d"); T(g, [260, 70, 278, 70, 269, 54], "#7f1d1d"); R(g, 236, 98, 10, 20, "#2a2a30");
+      for (let i = 0; i < 6; i++) R(g, 212 + i * 9, 74, 5, 4, "#6b6f79");
+      R(g, 0, 128, W, 72, "#7a9a4e"); T(g, [118, 200, 202, 128, 224, 128, 316, 200], "#cbb98a"); R(g, 0, 150, W, 1, "rgba(0,0,0,.08)");
+      for (let i = 0; i < 20; i++) R(g, rnd(i) * W, 132 + rnd(i + 5) * 64, 3, 1, "#6a8a3e");
+      R(g, 40, 150, 40, 14, "#6b4a2a"); C(g, 52, 168, 8, "#3b2a1a"); C(g, 72, 168, 8, "#3b2a1a"); R(g, 38, 140, 8, 10, "#9ca3af");
+      T(g, [28, 126, 40, 90, 52, 126], "#2f5a34"); T(g, [20, 140, 40, 104, 60, 140], "#3a6e3e");
+      R(g, 270, 120, 2, 40, "#3b2a1a"); T(g, [272, 122, 292 + Math.sin(f / 10) * 3, 128, 272, 138], "#b91c1c"); VIG(g, W, H, 0.22);
+    },
+    cp_fortino(g, W, H, f) {
+      VG(g, 0, 120, "#6a7aa8", "#e8d8c0"); g.fillRect(0, 0, W, 120); for (let i = 0; i < 3; i++) R(g, ((i * 130 + f * 0.1) % 380) - 40, 14 + i * 16, 60, 5, "rgba(255,255,255,.7)");
+      R(g, 20, 70, 280, 90, "#8b8f99"); for (let i = 0; i < 14; i++) R(g, 22 + i * 20, 62, 12, 10, "#7b7f89");
+      [[10, 40, 40, 120], [270, 40, 40, 120]].forEach(([x, y, w, h]) => { R(g, x, y, w, h, "#7b7f89"); T(g, [x - 4, y, x + w + 4, y, x + w / 2, y - 24], "#7f1d1d"); R(g, x + 14, y + 30, 8, 12, "#1c1917"); });
+      R(g, 130, 100, 60, 60, "#4a3a2a"); T(g, [130, 100, 190, 100, 160, 76], "#3a2a1c"); for (let i = 0; i < 6; i++) R(g, 134 + i * 10, 104, 2, 56, "#2a1c10");
+      R(g, 0, 160, W, 40, "#6a8a46"); R(g, 0, 170, W, 30, "#a89c78"); for (let i = 0; i < 14; i++) R(g, rnd(i + 2) * W, 172 + rnd(i + 9) * 24, 4, 1, "#8a7e5c");
+      T(g, [158, 40, 178 + Math.sin(f / 9) * 3, 46, 158, 58], "#1d4ed8"); R(g, 157, 36, 2, 30, "#3b2a1a"); VIG(g, W, H, 0.3);
+    },
+    cp_cantina(g, W, H, f) {
+      VG(g, 0, 200, "#1a1412", "#3a2a22"); g.fillRect(0, 0, W, 200); for (let i = 0; i < 8; i++) R(g, i * 40, 0, 3, 200, "rgba(0,0,0,.2)");
+      R(g, 0, 160, W, 40, "#2a1f1a"); for (let i = 0; i < 5; i++) { R(g, 10 + i * 62, 40, 48, 100, "#3e2a1c"); for (let j = 0; j < 6; j++) R(g, 14 + i * 62, 46 + j * 16, 40, 10, `hsl(${(i * 50 + j * 20) % 360},20%,28%)`); }
+      const sw = Math.sin(f / 26) * 4; R(g, 158 + sw, 0, 1, 34, "#111"); R(g, 152 + sw, 34, 13, 8, "#92400e"); GL(g, 158 + sw, 40, 110, "255,200,130", 0.36 + 0.08 * Math.sin(f / 6));
+      C(g, 260, 168, 18, "#5a3a1c"); R(g, 242, 150, 36, 4, "#3a2410"); R(g, 242, 182, 36, 4, "#3a2410"); VIG(g, W, H, 0.5);
     }
   };
   const HOT = {
@@ -78,6 +104,9 @@
     cp_campo: [[150, 144, 40, 30, "🔥 Il falò: qui si decide tutto, di solito dopo la zuppa."], [118, 94, 60, 36, "⛺ La tenda della Capitana: l'unica con il tetto che non gocciola."], [268, 98, 34, 28, "🚩 Lo stendardo: un pallone cucito con filo di un'altra epoca."]],
     cp_tenda: [[50, 96, 90, 30, "🗺️ Il tavolo di guerra: mappe, tacche e una macchia di brodo che fa da collina."], [246, 18, 54, 60, "🚩 Il drappo: l'emblema della Compagnia, appeso storto da anni."], [236, 100, 30, 20, "⚽ Un pallone dimenticato sul tavolo: a nessuno è permesso dirlo."]],
     cp_mulini: [[104, 48, 64, 90, "🌾 Il mulino: macina grano e, dicono, anche i rimpianti."], [200, 126, 90, 28, "🚧 Il ponte chiuso: il Gabelliere ha messo un cartello. Scritto bene, purtroppo."], [0, 140, 320, 28, "🌊 Il fiume: lento, freddo, sempre dalla parte di chi ha fretta."]],
+    cp_strada: [[204, 54, 76, 66, "🏰 Il Fortino: tre torri e un cancello che si chiama «ospitale» per scherzo."], [38, 138, 44, 38, "🛒 Il carro rotto: ruota a metà, carico a metà, speranza a un quarto."], [118, 128, 100, 72, "🛤️ La strada del Marchese: polvere, sassi e un cartello che mente."]],
+    cp_fortino: [[130, 76, 60, 84, "🚪 Il cancello: ospitale, finché non entri."], [20, 56, 280, 20, "🏹 I merli: sempre qualcuno che ti guarda. Raramente per salutare."], [10, 24, 40, 20, "🚩 Un vessillo con il leone: stesso leone, stessa faccia, stessa fretta."]],
+    cp_cantina: [[10, 40, 300, 100, "📚 Gli scaffali: A a sinistra, Z a destra, «Varie» nel mezzo e in ordine."], [244, 150, 36, 36, "🍷 La botte: «Riserva dei Debitori». Il vino è buono, il conto no."], [150, 30, 30, 18, "💡 La lanterna: dondola e proietta ombre in ordine alfabetico."]],
     cp_locanda: [[200, 70, 90, 80, "🔥 Il camino: l'unico che non chiede un documento prima di scaldarti."], [20, 96, 150, 54, "🍺 Il bancone: boccali, una mira da fiera e un conto che cresce da solo."], [56, 12, 28, 26, "🎯 Il bersaglio: bucato al centro. Dieci volte. Da una sola persona."]]
   };
   function reg(n) {

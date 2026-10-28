@@ -41,4 +41,26 @@ async function realBattle(w) {
   await L.shot(page, "cp_battaglia_" + w);
   L.check(`Compagnia · battaglia vera (${w} px)`, errors); await browser.close();
 }
-(async () => { for (const w of [390, 1000]) { await zonesTest(w); await flow(w); } await realBattle(390); })().catch((e) => { console.error("✗ compagnia:", e.message); process.exit(1); });
+const S2 = { v: 1, diffSet: true, intro: { ch1: 1, ch2: 1, cp_strada: 1, cp_fortino: 1, cp_cantina: 1 }, ch: 2, step: { 1: 4 }, done: { 1: "ok" }, flags: { cp_c1_done: 1 } };
+async function zones2(w) {
+  const { browser, page, errors } = await start(w, S2, "Inizia il Capitolo 2");
+  await page.evaluate((k) => eval(k).F.set("cp_grata", true), K_);
+  for (const z of ["cp_strada", "cp_fortino", "cp_cantina"]) {
+    try { await go(page, z); await L.shot(page, "cp2_" + z + "_" + w); const bad = await L.reachAll(page, z); if (bad.length) errors.push(z + ": " + bad.join(", ")); }
+    catch (e) { errors.push(z + ": " + e.message.slice(0, 140)); }
+  }
+  L.check(`Compagnia · capitolo 2 zone (${w} px)`, errors); await browser.close();
+}
+async function flow2(w, via) {
+  const { browser, page, errors } = await start(w, S2, "Inizia il Capitolo 2");
+  await page.evaluate((k) => { eval(k).tactics.play = (o, cb) => { window.__tacLog = { foes: o.foes.length, units: o.units.length }; setTimeout(() => cb({ win: true, lost: 0 }), 10); }; }, K_);
+  await go(page, "cp_strada", 10, 10); await L.talk(page, "cp_bruno"); await L.advance(page, ["Stammi dietro"]);
+  let i = await L.info(page); if (i.step[2] !== 1) errors.push("dopo Bruno: " + JSON.stringify(i.step));
+  await go(page, "cp_strada", 17, 12); await L.talk(page, "cp_gervasio"); await L.advance(page, ["Niente"]);
+  i = await L.info(page); if (i.step[2] !== 2) errors.push("dopo Gervasio: " + JSON.stringify(i.step));
+  if (via === "assalto") { await go(page, "cp_fortino", 13, 10); await L.talk(page, "cp_aurelio"); await L.advance(page, ["Assalto"]); await L.advance(page).catch(() => {}); await L.advance(page).catch(() => {}); const lg = await page.evaluate(() => window.__tacLog); if (!lg || lg.foes < 5) errors.push("battaglia mal configurata: " + JSON.stringify(lg)); }
+  else { await go(page, "cp_cantina", 7, 6); await L.talk(page, "cp_ottavia"); await L.advance(page, ["Chiedi il registro"]); await L.advance(page).catch(() => {}); await L.advance(page).catch(() => {}); }
+  i = await L.info(page); if (i.done[2] !== "ok") errors.push("capitolo 2 non concluso (" + via + "): " + JSON.stringify([i.done, i.step]));
+  L.check(`Compagnia · capitolo 2 ${via} (${w} px)`, errors); await browser.close();
+}
+(async () => { for (const w of [390, 1000]) { await zonesTest(w); await flow(w); await zones2(w); await flow2(w, "assalto"); await flow2(w, "cantina"); } await realBattle(390); })().catch((e) => { console.error("✗ compagnia:", e.message); process.exit(1); });

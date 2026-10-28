@@ -19,6 +19,9 @@
       campo: { grass: ["#5f7d44", "#567238", "#69884c"], path: ["#a8905e", "#9c8454"], stone: ["#8a8274", "#7e766a"], wall: ["#5a4632", "#4e3c2a"], water: ["#3f7aa8", "#366e9c"], tall: "#4a6a34", tree: ["#2d4a2a", "#3a5e34", "#476f3d"], tint: "255,170,90", tintA: 0.1, fx: "dust", dark: 0.14 },
       mulini: { grass: ["#7a9a4e", "#6f8e46", "#86a656"], path: ["#cdb682", "#c2ab78"], stone: ["#9a9488", "#8e887c"], wall: ["#8a5a3a", "#7c4e32"], water: ["#4a8ac0", "#3f7eb4"], tall: "#5a7e3a", tree: ["#355a30", "#427038", "#4f8040"], tint: "255,236,180", tintA: 0.06, fx: "leaves", dark: 0 },
       locanda: { grass: ["#6a4a2a", "#5e4024", "#74522f"], path: ["#8a5a30", "#7e5028"], stone: ["#7a5a3a", "#6e4e32"], wall: ["#3a2414", "#2e1c10"], water: ["#3f7aa8", "#366e9c"], tall: "#5e4024", tint: "255,170,80", tintA: 0.16, fx: "dust", dark: 0.18 },
+      strada: { grass: ["#8aa05a", "#7e9450", "#96ac64"], path: ["#cbb98a", "#bfab7c"], stone: ["#9a9488", "#8e887c"], wall: ["#7a6a5a", "#6e5e50"], water: ["#4a8ac0", "#3f7eb4"], tall: "#6a8a44", tree: ["#3a5e30", "#477038", "#548044"], tint: "255,240,190", tintA: 0.05, fx: "leaves", dark: 0 },
+      fortino: { grass: ["#7a8a5a", "#6e7e50", "#869664"], path: ["#b8a888", "#ac9c7c"], stone: ["#8a8a92", "#7e7e86"], wall: ["#6a6a74", "#5e5e68"], water: ["#4a8ac0", "#3f7eb4"], tall: "#5e7a44", tree: ["#2d4a2a", "#3a5e34", "#476f3d"], tint: "190,200,255", tintA: 0.06, fx: "dust", dark: 0.08 },
+      cantina: { grass: ["#4a3a30", "#3e3028", "#564438"], path: ["#6a5848", "#5e4c3c"], stone: ["#5a5048", "#4e443c"], wall: ["#2a2220", "#201a18"], water: ["#3f7aa8", "#366e9c"], tall: "#3e3028", tint: "180,140,255", tintA: 0.12, fx: "dust", dark: 0.26 },
       tenda: { grass: ["#9a7a52", "#8e6e48", "#a68258"], path: ["#b8945e", "#ac8854"], stone: ["#8a6a42", "#7e5e3a"], wall: ["#7a2a1e", "#6c2218"], water: ["#3f7aa8", "#366e9c"], tall: "#8e6e48", tint: "255,190,100", tintA: 0.14, fx: "", dark: 0.16 }
     },
     floors: "", solid: "AFKECWH",
@@ -92,6 +95,7 @@
       items: {
         cp_mappa: { n: "Mappa del Guado", icon: "🗺️", d: "Un foglio unto con il fiume, due ponti e una X: «bosco a sinistra, pietraia a destra, il Gabelliere in mezzo, come sempre».", gift: { cp_ludovico: 6, cp_dorotea: 4 }, giftAny: 1, react: { cp_ludovico: "Una mappa sincera. Ne ho viste poche." } },
         cp_pagnotta: { n: "Pagnotta del Mulino", icon: "🍞", d: "Pane vero, tiepido, con la farina ancora sulle dita di chi l'ha fatto.", gift: { cp_fiamma: 8, cp_sandro: 5, cp_ludovico: 3 }, giftAny: 2, react: { cp_fiamma: "Pane che non è una promessa. Ti perdono tutto, per oggi." } },
+        cp_pagina: { n: "Impronta della prima pagina", icon: "📄", d: "Una pagina d'archivio con l'impronta d'inchiostro di una grafia da frate. La riga che conta è quella che manca.", gift: { cp_ludovico: 0 }, giftAny: 1 },
         cp_spilla: { n: "Spilla del Pallone Spezzato", icon: "📍", d: "Il simbolo della Compagnia: un pallone con una crepa dorata. «Spezzato, ma ancora rotola.»", gift: { cp_dorotea: 8 }, giftAny: 1 }
       }
     },
