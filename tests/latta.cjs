@@ -141,6 +141,62 @@ async function tettiSim() {
   } catch (e) { errors.push(e.message.slice(0, 300)); }
   L.check("Pallone di Latta · tetti e Sgrinfia", errors); await browser.close();
 }
+
+// ---------------------------------------------------------------- capitolo 3
+const SAVE3 = { v: 1, diffSet: true, intro: { ch1: 1, ch2: 1, ch3: 1 }, ch: 3, max: 3, done: { 1: "ok", 2: "tobia" }, step: { 1: 4, 2: 4, 3: 0 }, flags: { lt_armatura: 1, lt_c1_done: 1, lt_c2_done: 1 } };
+async function zones3(w) {
+  const { browser, page, errors } = await start(w, SAVE3);
+  for (const z of ["lt_chiostro", "lt_archivio", "lt_cappella"]) {
+    try { await go(page, z); await L.shot(page, "lt_" + z + "_" + w); const bad = await L.reachAll(page, z); if (bad.length) errors.push(z + ": " + bad.join(", ")); }
+    catch (e) { errors.push(z + ": " + e.message.slice(0, 140)); }
+  }
+  L.check(`Pallone di Latta · zone cap.3 (${w} px)`, errors); await browser.close();
+}
+async function flow3(w, alt) {
+  const { browser, page, errors } = await start(w, SAVE3);
+  await stubLevel(page);
+  const st = async (n, what) => { const i = await L.info(page); if (i.step[3] !== n) errors.push(what + ": " + JSON.stringify(i.step)); };
+  try {
+    await go(page, "lt_chiostro", 15, 11); await L.talk(page, "lt_benedetta"); await L.advance(page); await st(1, "dopo la Badessa");
+    await go(page, "lt_chiostro", 6, 17); await L.talk(page, "lt_gelsa"); await L.advance(page);
+    await go(page, "lt_chiostro", 21, 12); await L.talk(page, "lt_mattonaro"); await L.advance(page);
+    await go(page, "lt_cappella", 12, 4); await L.goAct(page, 13, 2); await L.advance(page); await st(1, "cripta chiusa");
+    await go(page, "lt_archivio", 8, 6); await L.goAct(page, 7, 4); await L.advance(page); await st(1, "libro prima di Ottavia");
+    await L.talk(page, "lt_ottavia"); await L.advance(page);
+    await L.goAct(page, 7, 4); await L.advance(page, [alt ? "Fotografala" : "Leggila"]); await st(2, "dopo il Libro");
+    await go(page, "lt_cappella", 12, 4); await L.goAct(page, 13, 2); await L.advance(page, ["Scendi nella cripta"]); await L.advance(page).catch(() => {}); await st(3, "dopo la cripta");
+    await L.goAct(page, 13, 2); await L.advance(page, ["Affronta il Custode", alt ? "Vendila" : "A Zeno"]); await L.advance(page).catch(() => {});
+    const i = await L.info(page); if (!i.done[3]) errors.push("capitolo 3 non concluso: " + JSON.stringify([i.done, i.step]));
+    const lg = await page.evaluate(() => window.__scLog); if (!lg || lg.length !== 2 || lg[0].id !== "cripta" || lg[1].id !== "custode") errors.push("livelli: " + JSON.stringify(lg));
+    const k = await page.evaluate((k) => { const K = eval(k); return { ch: K.inv.has("lt_chiave"), le: K.inv.has("lt_lettera"), z: K.F.is("lt_lettera_zeno"), v: K.F.is("lt_lettera_venduta"), foto: K.F.is("lt_foto") }; }, K_);
+    if (!k.ch || k.le || k.z === !!alt || k.v !== !!alt || k.foto !== !!alt) errors.push("stato finale: " + JSON.stringify(k));
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check(`Pallone di Latta · capitolo 3${alt ? " (vie alternative)" : ""} (${w} px)`, errors); await browser.close();
+}
+// motore: le campane aprono le grate, i monaci si fermano se guardati, il Custode di Pietra si batte
+async function criptaSim() {
+  const { browser, page, errors } = await L.setup({ w: 800, h: 400, ...MOD });
+  try {
+    const r = await page.evaluate(async () => {
+      window.__noSfx = 1; const LV = window.__latta._dbg.K.scroll.levels, sl = (ms) => new Promise((r) => setTimeout(r, ms)), out = {};
+      window.__scorri.start({ level: Object.assign({ id: "cripta" }, LV.cripta), tutorial: false, onDone: () => {} });
+      let s = window.__scorri.state; out.c0 = s.counts;
+      s.warp(17 * 16, 176); s.tick(5); s.press("R", true); s.tick(2); s.press("R", false); s.press("K", true); s.tick(2); s.press("K", false); s.tick(40); out.c1 = s.counts;
+      s.warp(80 * 16, 176); s.tick(10); s.ballAt(82 * 16 + 8, 6 * 16 + 10, 1, 0); s.tick(3); out.c2 = s.counts;
+      s.finish(false); await sl(50);
+      let res = null; window.__scorri.start({ level: Object.assign({ id: "custode" }, LV.custode), tutorial: false, onDone: (x) => { res = x; } });
+      s = window.__scorri.state; let sawWave = 0;
+      for (let t = 0; t < 4000 && !res; t++) { const b = s.boss, h = s.hero; if (!b) break; if (s.counts.waves) sawWave = 1; if (b.st === "tired" && b.hitT <= 0) { if (h.ground || h.y > b.y - 52 || Math.abs(h.x - b.x) > 6) s.warp(b.x, b.y - 66); } else if (b.st !== "tired" && (Math.abs(h.x - 56) > 4 || h.y > 100)) s.warp(56, 95); s.tick(1); if (s.phase === "win") { s.finish(true); break; } if (s.phase === "ko") { s.finish(false); break; } }
+      await sl(50); out.boss = res || { boss: s.boss }; out.wave = sawWave; return out;
+    });
+    if (r.c0.bells !== 3 || r.c0.ghosts < 4 || r.c0.gates < 20) errors.push("cripta: " + JSON.stringify(r.c0));
+    if (r.c1.rung !== 1 || r.c1.gates !== r.c0.gates - 3) errors.push("la prima campana non apre la grata: " + JSON.stringify(r.c1));
+    if (r.c2.rung !== 2 || r.c2.gates !== r.c0.gates - 13) errors.push("la seconda campana non apre la grata alta: " + JSON.stringify(r.c2));
+    if (!r.wave) errors.push("il Custode non fa l'onda d'urto");
+    if (!r.boss || !r.boss.win) errors.push("Custode non battibile: " + JSON.stringify(r.boss));
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check("Pallone di Latta · cripta e Custode di Pietra", errors); await browser.close();
+}
 (async () => {
   const only = process.argv[2];
   for (const w of [390, 320]) { if (!only || only === "zone") await zonesTest(w); }
@@ -150,4 +206,7 @@ async function tettiSim() {
   if (!only || only === "zone2") { await zones2(390); await zones2(320); }
   if (!only || only === "flow2") { await flow2(390, false); await flow2(320, true); }
   if (!only || only === "tetti") await tettiSim();
+  if (!only || only === "zone3") { await zones3(390); await zones3(320); }
+  if (!only || only === "flow3") { await flow3(390, false); await flow3(320, true); }
+  if (!only || only === "cripta") await criptaSim();
 })();

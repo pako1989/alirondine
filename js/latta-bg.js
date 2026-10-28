@@ -86,6 +86,49 @@
       R(g, 160, 154, 10, 6, "#f6c445"); GL(g, 165, 156, 14, "255,220,120", 0.3 + 0.2 * Math.sin(f / 7));
       VIG(g, W, H, 0.5);
     },
+    // capitolo 3: il chiostro all'alba, l'archivio, la cappella con la porta della cripta
+    lt_chiostro(g, W, H, f) {
+      bands(g, W, 0, 110, ["#2a3a6a", "#4a5a8a", "#7a7aa0", "#b08aa0", "#e0a090", "#f4c090", "#fbe0a8"]);
+      D(g, 250, 104, 20, "#ffe0a0"); D(g, 250, 104, 15, "#fff0c8"); GL(g, 250, 100, 90, "255,200,130", 0.25);
+      cloud(g, ((f * 0.05 + 40) % 380) - 30, 36, 0.9, "#f8c8b0", "#fff0d8", "#b88090");
+      // campanile del convento e tetti
+      R(g, 40, 30, 26, 90, "#a89888"); R(g, 40, 30, 3, 90, "#c8b8a8"); R(g, 46, 40, 14, 18, "#3a2a2a"); const sw = Math.sin(f / 30) * 0.15; g.save(); g.translate(53, 42); g.rotate(sw); R(g, -5, 0, 10, 10, "#b88a3a"); R(g, -6, 9, 12, 2, "#8a6a2a"); g.restore();
+      for (let i = 0; i < 26; i += 4) R(g, 40 + i, 26, 2, 4, "#a89888"); R(g, 0, 96, W, 30, "#8a5a44"); for (let x = 0; x < W; x += 6) R(g, x, 96 + (x % 12 ? 0 : 2), 5, 3, "#a86a4a");
+      // porticato con archi e colonne bianche
+      R(g, 0, 118, W, 82, "#d8ccb8"); for (let i = 0; i < 9; i++) { const x = i * 38 - 6; R(g, x + 6, 130, 26, 52, "#4a3a30"); D(g, x + 19, 132, 13, "#4a3a30"); R(g, x + 3, 126, 6, 60, "#f0e8d8"); R(g, x + 3, 126, 2, 60, "#ffffff"); R(g, x + 1, 124, 10, 4, "#c8bca8"); }
+      R(g, 0, 180, W, 20, "#b8aa90"); for (let x = 0; x < W; x += 10) R(g, x, 184 + (x % 20 ? 0 : 4), 8, 3, "#a89a80");
+      // pozzo al centro con il secchio
+      R(g, 140, 160, 40, 18, "#8a8070"); R(g, 140, 160, 40, 3, "#a89c88"); R(g, 142, 140, 3, 22, "#5a3a20"); R(g, 175, 140, 3, 22, "#5a3a20"); R(g, 142, 138, 36, 3, "#5a3a20"); const b = Math.round(Math.sin(f / 16) * 2); R(g, 159, 141, 1, 10 + b, "#c8c0b0"); R(g, 156, 151 + b, 7, 6, "#7a5a3a");
+      // rondini dell'alba e foglie
+      for (let i = 0; i < 4; i++) { const x = ((f * (0.6 + i * 0.15) + i * 90) % 360) - 20, y = 50 + i * 8 + Math.sin(f / 12 + i) * 5, w = Math.sin(f / 4 + i) > 0 ? -2 : 1; R(g, x, y, 3, 1, "#16141f"); R(g, x - 3, y + w, 3, 1, "#16141f"); R(g, x + 3, y + w, 3, 1, "#16141f"); }
+      VIG(g, W, H, 0.35);
+    },
+    lt_archivio(g, W, H, f) {
+      R(g, 0, 0, W, 200, "#2a2018"); R(g, 0, 140, W, 60, "#5a4030"); for (let y = 146; y < 200; y += 9) R(g, 0, y, W, 1, "#3a2a1e");
+      // scaffali pieni di registri dal pavimento al soffitto
+      for (let sx = 0; sx < W; sx += 80) { if (sx === 120) continue; R(g, sx + 4, 10, 72, 132, "#3a2614"); for (let r = 0; r < 5; r++) { R(g, sx + 4, 36 + r * 26, 72, 3, "#5a3a20"); for (let i = 0; i < 12; i++) { const h = 16 + ((sx + r * 7 + i * 3) % 6), c = ["#7a2a2a", "#2a4a6a", "#4a5a2a", "#6a4a2a", "#3a2a4a"][(sx + r + i) % 5]; R(g, sx + 7 + i * 5.6, 36 + r * 26 - h, 5, h, c); R(g, sx + 8 + i * 5.6, 36 + r * 26 - h + 3, 3, 1, "#e0b040"); } } }
+      // finestra con la luce dell'alba e la polvere che danza
+      R(g, 128, 14, 64, 70, "#16141f"); R(g, 130, 16, 60, 66, "#f4c090"); R(g, 130, 16, 60, 24, "#b08aa0"); R(g, 159, 16, 2, 66, "#16141f"); R(g, 130, 48, 60, 2, "#16141f");
+      g.save(); g.globalAlpha = 0.16; g.fillStyle = "#fff0c8"; g.beginPath(); g.moveTo(130, 82); g.lineTo(190, 82); g.lineTo(230, 170); g.lineTo(110, 170); g.fill(); g.restore();
+      for (let i = 0; i < 14; i++) { const t = (f * 0.3 + i * 23) % 90; R(g, 130 + ((i * 37) % 80) + Math.sin(f / 30 + i) * 6, 90 + t, 1, 1, "rgba(255,240,200,.8)"); }
+      // leggio col Libro del 1527 e la candela
+      R(g, 150, 130, 4, 44, "#3a2614"); R(g, 132, 122, 42, 10, "#5a3a20"); R(g, 134, 114, 38, 10, "#f0e4c8"); R(g, 152, 114, 2, 10, "#c8b898"); for (let l = 0; l < 3; l++) { R(g, 137, 116 + l * 2.5, 13, 1, "#6a5a4a"); R(g, 156, 116 + l * 2.5, 13, 1, "#6a5a4a"); }
+      R(g, 180, 112, 4, 12, "#f8f4e8"); const h = 3 + Math.abs(Math.sin(f / 5)) * 2; R(g, 181, 112 - h, 2, h, "#ffd25a"); GL(g, 182, 110, 34, "255,200,110", 0.4);
+      VIG(g, W, H, 0.55);
+    },
+    lt_cappella(g, W, H, f) {
+      R(g, 0, 0, W, 200, "#1e1a2a"); for (let y = 0; y < 140; y += 12) for (let x = (y / 12) % 2 ? -12 : 0; x < W; x += 24) { R(g, x + 1, y + 1, 22, 10, "#262236"); R(g, x + 1, y + 1, 22, 1, "#332e48"); }
+      R(g, 0, 140, W, 60, "#2e2a3c"); for (let y = 140; y < 200; y += 15) for (let x = (y / 15) % 2 ? 0 : 15; x < W; x += 30) R(g, x, y, 15, 15, "#3a3450");
+      // vetrata alta: cavaliere che porta un ragazzo
+      R(g, 128, 6, 64, 100, "#16141f"); D(g, 160, 30, 32, "#16141f"); const cols = ["#3b82f6", "#a855f7", "#f59e0b", "#22c55e", "#ef4444", "#0ea5e9"]; for (let y = 0; y < 8; y++) for (let x = 0; x < 6; x++) R(g, 132 + x * 9.5, 14 + y * 11.5, 8.5, 10.5, cols[(x * 2 + y) % 6]);
+      R(g, 150, 40, 14, 40, "#c8d0de"); R(g, 152, 30, 10, 10, "#c8d0de"); R(g, 156, 52, 18, 8, "#e8c0a0"); R(g, 170, 48, 6, 6, "#7a4a22"); D(g, 157, 60, 3, "#c88a2a"); GL(g, 160, 60, 80, "180,160,255", 0.2 + 0.05 * Math.sin(f / 20));
+      // altare e candele
+      R(g, 120, 140, 80, 30, "#e8e0d0"); R(g, 120, 140, 80, 4, "#ffffff"); for (let i = 0; i < 5; i++) { const x = 126 + i * 16, h = 3 + Math.abs(Math.sin(f / 5 + i)) * 2; R(g, x, 124, 3, 16, "#f8f4e8"); R(g, x + 1, 124 - h, 1, h, "#ffd25a"); GL(g, x + 1, 122, 16, "255,200,110", 0.3); }
+      // la porta della cripta con sette catenacci e il freddo che esce
+      R(g, 250, 70, 50, 100, "#3a3448"); R(g, 256, 76, 38, 94, "#16141f"); R(g, 258, 78, 34, 92, "#4a3a2a"); for (let i = 0; i < 7; i++) { R(g, 254, 84 + i * 12, 42, 3, "#5a5a6a"); R(g, 254, 84 + i * 12, 42, 1, "#8a8aa0"); R(g, 272, 82 + i * 12, 6, 7, "#8a6a2a"); }
+      for (let i = 0; i < 6; i++) { const t = (f * 0.4 + i * 15) % 60; R(g, 260 + i * 6 + Math.sin(f / 10 + i) * 3, 168 - t * 0.4, 3, 1, `rgba(180,200,255,${0.4 - t / 160})`); }
+      VIG(g, W, H, 0.55);
+    },
     // capitolo 2: i vicoli di notte, coi tetti, la luna e il campanile che suona da solo
     lt_vicoli(g, W, H, f) {
       bands(g, W, 0, 120, ["#0b1030", "#121a44", "#1a2458", "#24306a", "#33407a", "#4a4c86"]);
@@ -137,6 +180,9 @@
     }
   };
   const HOT = {
+    lt_chiostro: [[136, 136, 48, 44, "🪣 Il pozzo del chiostro. Dal fondo sale un rintocco: il pozzo comunica con la cripta delle campane."], [38, 24, 32, 100, "🔔 Il campanile del convento. La sua campana tace: quelle che suonano sono sotto terra."], [0, 118, 120, 70, "🏛️ Il porticato. Ogni capitello è diverso: uno ha un pallone scolpito, consumato dalle mani di chi passa."]],
+    lt_archivio: [[130, 104, 46, 30, "📖 Il Libro del 1527, sul leggio. Una cinghia di cuoio lo tiene chiuso."], [128, 14, 64, 70, "🪟 La finestra sul chiostro. La luce dell'alba fa danzare la polvere dei secoli."], [0, 10, 120, 130, "📚 Registri dal Quattrocento in poi. Sui dorsi, gli anni scritti a mano."]],
+    lt_cappella: [[128, 6, 64, 100, "🪟 La vetrata: un cavaliere che porta un ragazzo in braccio. Sotto, «QUI MANSIT»: rimase qui."], [250, 70, 50, 100, "🚪 La porta della cripta. Sette catenacci, e da sotto esce aria fredda."], [120, 120, 80, 50, "🕯️ L'altare. Sulla tovaglia, ricamato piccolo e antichissimo, un pallone."]],
     lt_vicoli: [[226, 10, 40, 140, "🔔 Il campanile di San Rocco. La campana suona da sola, a mezzanotte e anche prima. Senza batacchio, dicono. Eppure suona."], [40, 14, 46, 46, "🌕 La luna sopra Castelrondine. Stanotte è così grande che i gatti le fanno l'ombra."], [100, 100, 100, 30, "🐈‍⬛ Un gatto sul colmo del tetto. Ti guarda come si guarda un barattolo che cammina."]],
     lt_bottega: [[220, 70, 80, 64, "🔥 La fucina della Bottega Stagnini. Accesa da cinque secoli, dice Zeno. Spenta solo per le partite della Nazionale."], [60, 100, 100, 30, "📖 Il registro di bottega aperto e lo stampo tondo di un pallone. Le pagine più vecchie sono del Cinquecento."], [10, 0, 200, 60, "🫖 Latte appese: pentole, lanterne, imbuti. Quando passa un camion suonano tutte insieme."]],
     lt_sacrestia: [[130, 10, 60, 80, "🪟 La vetrata: un santo con un pallone sotto il braccio. Il parroco dice che è una pagnotta."], [230, 0, 20, 140, "🔔 La corda della campana si muove da sola. Lassù qualcosa tira."], [255, 20, 60, 170, "🌀 La scala a chiocciola del campanile: centotré gradini, e uno scricchiola apposta."]],

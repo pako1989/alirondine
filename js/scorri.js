@@ -137,6 +137,41 @@
       return T;
     }
   };
+  // volte a crociera e archi in fuga (cripta), colonne con catene e candele
+  function vaultStrip(w, h, body, edge, deep) {
+    const c = cnv(w, h), g = c.getContext("2d"); R(g, 0, 0, w, h, deep);
+    for (let x = 0; x < w; x += 64) {
+      R(g, x, 0, 12, h, body); R(g, x, 0, 2, h, edge);
+      for (let k = 0; k < 52; k++) { const a = Math.PI * k / 51, px = x + 38 + Math.cos(a) * 26, py = 34 - Math.sin(a) * 26; R(g, px - 2, py, 5, 4, k % 6 === 0 ? edge : body); }
+      R(g, x + 12, 34, 52, 3, body); for (let y = 44; y < h; y += 9) for (let bx = x + 14 + ((y / 9) % 2) * 6; bx < x + 62; bx += 12) R(g, bx, y, 10, 7, rnd(bx * 3 + y) > 0.5 ? "rgba(255,255,255,.035)" : "rgba(0,0,0,.12)");
+      if (rnd(x) > 0.4) { R(g, x + 34, 52, 8, 10, "#16121e"); R(g, x + 35, 53, 6, 8, "#3a2a1a"); R(g, x + 37, 55, 2, 3, "#ffcf6a"); }
+    }
+    return c;
+  }
+  function pillarStrip(w, h, body, edge, dark) {
+    const c = cnv(w, h), g = c.getContext("2d");
+    for (let x = 10; x < w; x += 92) {
+      R(g, x, 0, 22, h, body); R(g, x, 0, 3, h, edge); R(g, x + 19, 0, 3, h, dark); R(g, x - 3, h - 14, 28, 14, body); R(g, x - 3, h - 14, 28, 2, edge); R(g, x - 3, 10, 28, 6, body);
+      for (let y = 18; y < h - 14; y += 10) R(g, x + 3, y, 16, 1, dark);
+      const cx = x + 56; for (let y = 0; y < 34 + (x % 3) * 8; y += 3) { R(g, cx, y, 2, 2, dark); R(g, cx + 1, y + 1, 1, 1, edge); }
+      R(g, x + 8, h - 22, 3, 8, "#e8e0c8"); R(g, x + 9, h - 25, 1, 3, "#ffd25a");
+    }
+    return c;
+  }
+  THEMES.cripta = {
+    name: "La cripta delle campane", fall: "Giù nel pozzo! Si riparte dal gonfalone.",
+    brick: { base: "#5a5a6e", light: "#7a7a90", dark: "#3a3a4c", mortar: "#1c1c28", crack: "#2a2a38" },
+    grass: { a: "#3a5a3e", b: "#5a7a4e", c: "#24382a" }, wood: { a: "#5a4030", b: "#7a5a40", c: "#2a1c14" }, fx: "polvere", dark: 0, lit: 0.9,
+    build() {
+      const T = { flags: [], wins: [], layers: [] };
+      const sky = cnv(VW, VH), g = sky.getContext("2d");
+      skyBands(g, VW, 0, VH, ["#0c0a14", "#121020", "#18162a", "#1e1c32", "#24223a", "#2a2840"]);
+      T.sky = sky;
+      T.layers.push({ c: vaultStrip(512, 180, "#2a2838", "#3a3850", "#141220"), k: 0.12, y: 0 });
+      T.layers.push({ c: pillarStrip(552, 170, "#33314a", "#4a4866", "#1e1c2c"), k: 0.4, y: 14 });
+      return T;
+    }
+  };
   // ------------------------------------------------------------ tessere (atlante per tema)
   function atlas(th) {
     const A = {}, B = th.brick, G = th.grass, Wd = th.wood;
@@ -169,6 +204,7 @@
       return c;
     });
     A.chim = (() => { const c = cnv(16, 16), g = c.getContext("2d"); R(g, 2, 0, 12, 16, B.dark); R(g, 3, 1, 10, 15, B.base); for (let y = 3; y < 16; y += 4) R(g, 3, y, 10, 1, B.mortar); R(g, 1, 0, 14, 3, B.light); R(g, 5, 0, 6, 2, "#16141f"); return c; })();
+    A.gate = (() => { const c = cnv(16, 16), g = c.getContext("2d"); R(g, 0, 0, 16, 16, "rgba(10,8,16,.55)"); for (let x = 1; x < 16; x += 5) { R(g, x, 0, 2, 16, "#4a4a5a"); R(g, x, 0, 1, 16, "#8a8aa0"); } R(g, 0, 5, 16, 2, "#4a4a5a"); R(g, 0, 11, 16, 2, "#4a4a5a"); R(g, 0, 5, 16, 1, "#8a8aa0"); for (let x = 1; x < 16; x += 5) R(g, x, 14, 2, 2, "#6a6a80"); return c; })();
     A.plank = (() => { const c = cnv(16, 16), g = c.getContext("2d"); R(g, 0, 0, 16, 5, Wd.c); R(g, 0, 0, 16, 4, Wd.a); R(g, 0, 0, 16, 1, Wd.b); R(g, 3, 1, 1, 2, Wd.c); R(g, 11, 2, 1, 1, Wd.c); R(g, 2, 5, 2, 4, Wd.c); R(g, 12, 5, 2, 4, Wd.c); R(g, 2, 8, 12, 1, "rgba(0,0,0,.25)"); return c; })();
     A.crack = (() => { const c = cnv(16, 16), g = c.getContext("2d"); g.drawImage(A.brick[1], 0, 0); g.fillStyle = "#3a1c10"; [[7, 0], [7, 1], [8, 2], [8, 3], [7, 4], [6, 5], [6, 6], [7, 7], [9, 8], [10, 9], [10, 10], [9, 11], [8, 12], [8, 13], [5, 9], [4, 10], [3, 10], [11, 4], [12, 4], [13, 5]].forEach(([x, y]) => g.fillRect(x, y, 1, 1)); R(g, 0, 0, 16, 16, "rgba(255,240,200,.08)"); return c; })();
     A.spike = (() => { const c = cnv(16, 16), g = c.getContext("2d"); for (let i = 0; i < 4; i++) { for (let k = 0; k < 7; k++) R(g, i * 4 + (k >> 1) * 0 + Math.floor(k / 2) * 0 + (k < 4 ? 2 - Math.floor(k / 2) : 0), 9 + k, k < 2 ? 1 : k < 4 ? 2 : 4, 1, k < 3 ? "#e8e8f0" : "#9aa0b4"); R(g, i * 4 + 1, 9, 1, 2, "#ffffff"); } R(g, 0, 15, 16, 1, "#4a4a5a"); return c; })();
@@ -212,7 +248,8 @@
     c: { n: "Corvo arbitro", hp: 1, w: 14, h: 10, sp: 0.6, fly: true, stomp: true },
     t: { n: "Tamburino di pietra", hp: 2, w: 12, h: 16, sp: 0, stomp: true },
     s: { n: "Scudiero", hp: 2, w: 12, h: 18, sp: 0.4, stomp: true, shield: true },
-    g: { n: "Gatto dei tetti", hp: 1, w: 14, h: 10, sp: 0.5, stomp: true }
+    g: { n: "Gatto dei tetti", hp: 1, w: 14, h: 10, sp: 0.5, stomp: true },
+    m: { n: "Monaco fantasma", hp: 1, w: 12, h: 14, sp: 0.45, fly: true, stomp: false }
   };
   function drawFoe(g, e, f) {
     const O = "#16141f", x = Math.round(e.x), y = Math.round(e.y + e.h), d = e.dir;
@@ -245,12 +282,19 @@
       part(g, -7, -8 + (crouch ? 2 : 0), 12, 6, "#22202e", O); part(g, 3, -12 + (crouch ? 2 : 0), 6, 6, "#22202e", O); R(g, 3, -14 + (crouch ? 2 : 0), 2, 2, "#22202e"); R(g, 7, -14 + (crouch ? 2 : 0), 2, 2, "#22202e");
       R(g, 6, -10 + (crouch ? 2 : 0), 1, 1, "#ffe066"); R(g, 8, -10 + (crouch ? 2 : 0), 1, 1, "#ffe066"); R(g, -1, -8, 4, 2, "#c02a3a");
       R(g, -9, -14 + Math.round(Math.sin(f / 6) * 2), 2, 7, "#22202e"); R(g, -6 + (run ? 1 : 0), -2, 2, 2, "#22202e"); R(g, 2 - (run ? 1 : 0), -2, 2, 2, "#22202e");
+    } else if (e.t === "m") { // monaco fantasma: saio bianco trasparente, si copre la faccia se lo guardi
+      const bob = Math.round(Math.sin(f / 10 + e.ox) * 2); g.globalAlpha = (e.hitT > 0 && f % 4 < 2 ? 0.3 : 0.78);
+      part(g, -6, -14 + bob, 12, 12, "#e8ecf8", "#8a90b0"); for (let i = 0; i < 4; i++) R(g, -6 + i * 3, -2 + bob + (i % 2), 3, 2, "#e8ecf8"); R(g, -6, -14 + bob, 12, 3, "#c8cce0");
+      if (e.shy) { R(g, -4, -10 + bob, 8, 3, "#c8cce0"); R(g, -5, -9 + bob, 2, 2, "#e8ecf8"); R(g, 3, -9 + bob, 2, 2, "#e8ecf8"); R(g, 4, -6 + bob, 1, 1, "#ff9ab0"); }
+      else { R(g, -3, -10 + bob, 2, 3, "#2a2440"); R(g, 2, -10 + bob, 2, 3, "#2a2440"); R(g, -1, -6 + bob, 3, 2, "#2a2440"); }
+      g.globalAlpha = 1;
     } else if (e.t === "Z") drawBoss(g, e, f);
     g.restore();
   }
   // capo del livello 1: il Corvo Maggiore (arbitro gigante, fischietto e cartellini)
   function drawBoss(g, e, f) {
     if (e.kind === "gatto") return drawCat(g, e, f);
+    if (e.kind === "statua") return drawStatue(g, e, f);
     const O = "#16141f", fl = Math.sin(f / (e.st === "fly" ? 5 : 12)) > 0, stun = e.st === "stuck";
     if (e.hitT > 0 && f % 4 < 2) g.globalAlpha = 0.45;
     part(g, -14, -24, 26, 18, "#1c1a26", O); for (let i = 0; i < 5; i++) R(g, -11 + i * 5, -22, 2, 14, "#ececec");
@@ -295,15 +339,44 @@
       else if (!e.vul || h.vy <= 0.5) hurt(st, Math.sign(e.x - h.x) || 1);
     }
   }
+  // capo della cripta: il Custode di Pietra (statua di cavaliere col pallone di marmo; quando è stanco gli si spegne la testa)
+  function drawStatue(g, e, f) {
+    g.translate(0, -e.h - 44); const O = "#16141f", B = "#8a8aa0", L = "#b0b0c4", Dk = "#5a5a70", up = e.st === "raise" ? -6 : 0, tired = e.st === "tired";
+    if (e.hitT > 0 && f % 4 < 2) g.globalAlpha = 0.45;
+    const lg = e.st === "walk" ? Math.round(Math.sin(f / 9) * 2) : 0;
+    part(g, -12 + lg, 30, 8, 14, Dk, O); part(g, 4 - lg, 30, 8, 14, B, O); part(g, -14 + lg, 41, 11, 3, B, O); part(g, 3 - lg, 41, 11, 3, L, O);
+    part(g, -16, 8, 32, 24, B, O); R(g, -16, 8, 32, 3, L); R(g, -16, 8, 3, 22, L); for (let i = 0; i < 3; i++) R(g, -10 + i * 8, 14 + (i % 2) * 6, 5, 1, Dk); R(g, -16, 28, 32, 3, "#4a3a2a");
+    part(g, -24, 8 + up, 8, 18, Dk, O); part(g, 16, 8 + up, 8, 18, B, O);
+    part(g, -10, -8, 20, 16, B, O); R(g, -10, -8, 20, 2, L); R(g, -6, -2, 12, 3, O);
+    const eye = tired ? "#3a3a4a" : `rgba(120,200,255,${0.7 + 0.3 * Math.sin(f / 6)})`; R(g, -5, -1, 3, 1, eye); R(g, 2, -1, 3, 1, eye);
+    if (e.st === "raise") { disc(g, 0, -18, 9, O); disc(g, 0, -18, 8, "#d8d8e6"); R(g, -3, -22, 3, 2, "#ffffff"); }
+    if (tired) for (let i = 0; i < 3; i++) { const a = f / 8 + i * 2.1; R(g, Math.cos(a) * 12, -16 + Math.sin(a) * 3, 2, 2, "#fff6a0"); }
+    g.globalAlpha = 1;
+  }
+  function statueStep(st, e) {
+    const h = st.hero, minX = TS * 2.5, maxX = st.W * TS - TS * 2.5, ground = (st.H - 2) * TS, hard = e.hp <= e.max / 2;
+    if (!e.max) { e.max = e.hp; e.y = ground; e.st = "walk"; e.stT = 150; }
+    e.stT--; e.vul = e.st === "tired";
+    if (e.st === "walk") { e.dir = h.x > e.x ? 1 : -1; e.x = clamp(e.x + e.dir * (hard ? 0.75 : 0.5), minX, maxX); if (e.stT <= 0) { e.st = "raise"; e.stT = hard ? 26 : 36; snd("whistle"); say(st, "Alza il pallone di marmo: SALTA!", 50); } }
+    else if (e.st === "raise") { if (e.stT <= 0) { e.st = "slam"; e.stT = 18; st.fx && st.fx.shake(8); snd("brk"); [-1, 1].forEach((d) => st.waves.push({ x: e.x + d * 20, dir: d, l: 150, sp: hard ? 3.2 : 2.6 })); if (hard) for (let i = 0; i < 3; i++) st.stones.push({ x: clamp(h.x + (i - 1) * 46, 40, st.W * TS - 40), y: 20, vx: 0, vy: 0.5, l: 160 }); } }
+    else if (e.st === "slam") { if (e.stT <= 0) { e.waveN = (e.waveN | 0) + 1; if (e.waveN % 2 === 0) { e.st = "tired"; e.stT = 100 + (st.k < 1 ? 30 : 0); say(st, "Il Custode è stanco: colpiscilo!", 60); } else { e.st = "walk"; e.stT = 60; } } }
+    else if (e.st === "tired") { if (e.stT <= 0) { e.st = "walk"; e.stT = 130 + Math.round(rnd(st.f) * 60); } }
+    const hb = heroBox(h), fb = foeBox(e);
+    if (st.phase === "play" && overlap(hb, fb)) {
+      if (e.vul && h.vy > 0.5 && h.y - 6 < fb.y + 12) { h.vy = -5.6; if (e.hitT <= 0) { e.hp--; e.hitT = 30; snd("boing"); st.fx && st.fx.burst(e.x, fb.y, 12, ["#fff", "#9ad8ff"]); if (e.hp <= 0) foeDie(st, e); } }
+      else if (!e.vul || h.vy <= 0.5) hurt(st, Math.sign(e.x - h.x) || 1);
+    }
+  }
   const BOSSES = {
     corvo: { n: "Il Corvo Maggiore", hp: 6, w: 34, h: 34 },
-    gatto: { n: "Sgrinfia", hp: 7, w: 38, h: 30 }
+    gatto: { n: "Sgrinfia", hp: 7, w: 38, h: 30 },
+    statua: { n: "Il Custode di Pietra", hp: 8, w: 34, h: 52 }
   };
   // ------------------------------------------------------------ stato del livello
   let S = null, ui = null, raf = 0, tutC = null, keys = {}, LAY = null;
   function diffK() { const c = window.__sagaCore && window.__sagaCore.cur; return (c && c.opts && c.opts.opp) || 1; }
   function parse(level) {
-    const rows = level.map.slice(), H = rows.length, W = Math.max(...rows.map((r) => r.length)), grid = [], st = { foes: [], coins: [], items: [], signs: [], checks: [], movers: [], vents: [], falls: [], exit: null, start: [32, 32], ban: 0 };
+    const rows = level.map.slice(), H = rows.length, W = Math.max(...rows.map((r) => r.length)), grid = [], st = { foes: [], coins: [], items: [], signs: [], checks: [], movers: [], vents: [], falls: [], bells: [], torches: [], exit: null, start: [32, 32], ban: 0 };
     let si = 0;
     for (let y = 0; y < H; y++) {
       const row = []; const line = rows[y].padEnd(W, ".");
@@ -311,6 +384,9 @@
         const ch = line[x], px = x * TS, py = y * TS; let t = ".";
         if (ch === "#" || ch === "=" || ch === "B" || ch === "^") t = ch;
         else if (ch === "u") { t = "u"; st.vents.push({ x: px + 8, y: py }); }
+        else if (ch === "G") t = "G";
+        else if (ch === "k") st.bells.push({ x: px + 8, y: py + 10, rung: 0, sw: 0 });
+        else if (ch === "x") st.torches.push({ x: px + 8, y: py + 8 });
         else if (ch === "f") st.falls.push({ x: px + 8, y0: py + 2, y: py + 2, vy: 0, st: "idle", t: 0 });
         else if (ch === "o") st.coins.push({ x: px + 8, y: py + 8, got: 0 });
         else if (ch === "h") st.items.push({ k: "h", x: px + 8, y: py + 8, got: 0 });
@@ -333,7 +409,7 @@
       o, level, practice, P, grid: P.grid, W: P.W, H: P.H, th, T: th._built || (th._built = th.build()), A: th._atlas || (th._atlas = atlas(th)),
       hero: { x: P.start[0], y: P.start[1], vx: 0, vy: 0, dir: 1, ground: false, coyote: 0, buf: 0, hp: hpMax, max: hpMax, inv: 0, frozen: 0, kick: 0, squash: 0, onM: null },
       ball: { st: "held", x: 0, y: 0, vx: 0, vy: 0, sp: 0, t: 0, squash: 0 },
-      foes: P.foes.map((e) => mkFoe(e, level, k)), coins: P.coins, items: P.items, checks: P.checks, signs: P.signs, movers: P.movers, vents: P.vents, falls: P.falls, exit: P.exit,
+      foes: P.foes.map((e) => mkFoe(e, level, k)), coins: P.coins, items: P.items, checks: P.checks, signs: P.signs, movers: P.movers, vents: P.vents, falls: P.falls, bells: P.bells, torches: P.torches, waves: [], exit: P.exit,
       cam: { x: 0, y: Math.max(0, P.H * TS - VH) }, f: 0, phase: "play", coinN: 0, banMask: 0, sponde: 0, time: 0, spawn: P.start.slice(), sign: null, petals: [], stones: [], cards: [], debris: [], fx: (M.fx ? M.fx() : null), msg: "", msgT: 0, win: false, k
     };
     st.cam.x = clamp(st.hero.x - 120, 0, st.W * TS - VW);
@@ -345,7 +421,7 @@
   }
   // ------------------------------------------------------------ collisioni con la griglia
   const tile = (st, tx, ty) => (ty < 0 ? "." : ty >= st.H || tx < 0 || tx >= st.W ? (tx < 0 || tx >= st.W ? "#" : ".") : st.grid[ty][tx]);
-  const solidT = (t) => t === "#" || t === "B" || t === "u";
+  const solidT = (t) => t === "#" || t === "B" || t === "u" || t === "G";
   function hitsSolid(st, x, y, w, h) { const x0 = Math.floor(x / TS), x1 = Math.floor((x + w - 0.001) / TS), y0 = Math.floor(y / TS), y1 = Math.floor((y + h - 0.001) / TS); for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) if (solidT(tile(st, tx, ty))) return true; return false; }
   // muove un corpo (box) con assi separati; restituisce { hx, hy, ground }
   function move(st, b, w, h, oneWay) {
@@ -406,11 +482,19 @@
       const box = { x: b.x, y: b.y + 4, vx: 0, vy: 1 }; const r = move(st, box, 8, 8, true); if (!r.ground) { b.st = "fly"; b.vy = 0.5; } else b.y = box.y - 4;
       st.movers.forEach((m) => { if (b.x > m.x && b.x < m.x + m.w && Math.abs(b.y + 4 - m.y) < 2) b.x += m.dx; });
     }
+    // pallone contro le campane: suonano e aprono le grate vicine
+    if (b.st === "fly") st.bells.forEach((k) => { if (!k.rung && Math.abs(b.x - k.x) < 10 && Math.abs(b.y - k.y) < 15) ring(st, k); });
     // pallone contro i nemici
     if (b.st === "fly" || b.st === "back") {
       const fast = b.st === "back" || Math.hypot(b.vx, b.vy) > 1.4;
       if (fast) st.foes.forEach((e) => { if (e.dead || e.hitT > 0) return; if (overlap({ x: b.x - 4, y: b.y - 4, w: 8, h: 8 }, foeBox(e))) ballHit(st, e, b); });
     }
+  }
+  function ring(st, k) {
+    k.rung = 1; k.sw = 60; snd("ban"); st.fx && st.fx.text("DON!", k.x - st.cam.x, k.y - st.cam.y - 14, "#ffe8a0"); st.fx && st.fx.shake(3);
+    const kx = Math.floor(k.x / TS); let n = 0;
+    for (let y = 0; y < st.H; y++) for (let x = Math.max(0, kx - 4); x < Math.min(st.W, kx + 15); x++) if (st.grid[y][x] === "G") { st.grid[y][x] = "."; n++; for (let i = 0; i < 3; i++) st.debris.push({ x: x * TS + 8, y: y * TS + 8, vx: (rnd(i + x + y) - 0.5) * 2, vy: -1 - rnd(i * 3 + y), l: 40, c: "#8a8aa0", s: 2 }); }
+    say(st, n ? "DON! La campana apre la grata." : "DON! Una campana d'oro, in fondo al buio.", 70);
   }
   function breakAround(st, b, up) {
     const tx = Math.floor((b.x + (up ? 0 : Math.sign(b.vx || 1) * -6)) / TS), ty = Math.floor((b.y + (up ? -6 : 0)) / TS);
@@ -457,6 +541,10 @@
       e.x += e.vx; if (Math.abs(e.x - e.ox) > 56) e.vx = -e.vx; e.dir = e.vx > 0 ? 1 : -1; e.y = e.oy - 18 + Math.sin(st.f / 20 + e.ox) * 10;
       if (e.wh > 0) e.wh--;
       if (--e.cd <= 0 && Math.abs(h.x - e.x) < 80 && Math.abs(h.y - e.y) < 70) { e.cd = 200; e.wh = 30; snd("whistle"); if (Math.abs(h.x - e.x) < 64 && h.ground && h.inv <= 0) { h.frozen = 42; say(st, "FIIII! Ammonito: fermo un attimo!", 60); } }
+    } else if (e.t === "m") {
+      const dx = h.x - e.x, dy = (h.y - 12) - (e.y + 7), d = Math.hypot(dx, dy) || 1; e.dir = dx > 0 ? 1 : -1;
+      e.shy = h.dir === Math.sign(e.x - h.x) && d < 170;
+      if (!e.shy && d < 200) { const sp = FOES.m.sp * (0.85 + 0.25 * st.k); e.x += dx / d * sp; e.y += dy / d * sp; }
     } else if (e.t === "t") {
       e.dir = h.x < e.x ? -1 : 1;
       if (--e.cd <= 0) { e.cd = Math.round(130 / (0.8 + 0.2 * st.k)); if (Math.abs(h.x - e.x) < 220) { const dx = h.x - e.x, tt = 50; st.stones.push({ x: e.x, y: e.y + 2, vx: dx / tt, vy: -4.2, l: 140 }); } }
@@ -470,6 +558,7 @@
   }
   function bossStep(st, e) {
     if (e.kind === "gatto") return catStep(st, e);
+    if (e.kind === "statua") return statueStep(st, e);
     const h = st.hero, minX = TS * 1.5 + e.w / 2, maxX = st.W * TS - TS * 1.5 - e.w / 2, ground = (st.H - 2) * TS;
     e.vul = e.st === "stuck";
     if (!e.max) { e.max = e.hp; e.home = (st.H - 2) * TS - 84; e.y = e.home; }
@@ -544,6 +633,8 @@
       else if (t.st === "fall") { t.vy = Math.min(6, t.vy + 0.35); t.y += t.vy; if (st.phase === "play" && Math.abs(h.x - t.x) < 9 && t.y + 6 > h.y - 20 && t.y < h.y) { hurt(st, 1); t.st = "gone"; t.t = 200; } else if (solidT(tile(st, Math.floor(t.x / TS), Math.floor((t.y + 6) / TS))) || t.y > st.H * TS) { t.st = "gone"; t.t = 200; for (let i = 0; i < 5; i++) st.debris.push({ x: t.x, y: t.y, vx: (rnd(i + t.x) - 0.5) * 3, vy: -1.5 - rnd(i) * 1.5, l: 40, c: i % 2 ? "#a0483a" : "#d07a52", s: 2 }); } }
       else if (t.st === "gone") { if (--t.t <= 0) { t.st = "idle"; t.y = t.y0; } }
     });
+    st.waves = st.waves.filter((w) => { w.x += w.dir * w.sp; const h = st.hero; if (st.phase === "play" && h.ground && Math.abs(h.x - w.x) < 8 && h.y > (st.H - 3) * TS) hurt(st, w.dir); if (st.f % 3 === 0) st.debris.push({ x: w.x, y: (st.H - 2) * TS - 2, vx: -w.dir * 0.4, vy: -1.4 - rnd(st.f) * 1.2, l: 24, c: "#9a9ab0", s: 3 }); return --w.l > 0 && w.x > 0 && w.x < st.W * TS; });
+    st.bells.forEach((k) => { if (k.sw > 0) k.sw--; });
     st.cards = st.cards.filter((c) => { c.y += c.vy; c.x += Math.sin(st.f / 12 + c.ph) * 0.8; if (st.phase === "play" && Math.abs(c.x - st.hero.x) < 7 && c.y > st.hero.y - 20 && c.y < st.hero.y) { hurt(st, 1); return false; } return --c.l > 0 && c.y < st.H * TS; });
     st.debris = st.debris.filter((d) => { d.x += d.vx; d.vy += 0.2; d.y += d.vy; return --d.l > 0; });
     if (st.msgT > 0) st.msgT--;
@@ -551,6 +642,7 @@
     const h = st.hero, tx = clamp(h.x - VW / 2 + h.dir * 30, 0, st.W * TS - VW), ty = clamp(h.y - VH * 0.62, 0, Math.max(0, st.H * TS - VH));
     st.cam.x += (tx - st.cam.x) * 0.1; st.cam.y += (ty - st.cam.y) * 0.12;
     // petali che volano (tema)
+    if (st.th.fx === "polvere" && st.f % 12 === 0) st.petals.push({ x: rnd(st.f) * VW, y: rnd(st.f + 3) * VH, vx: -0.12 - rnd(st.f + 1) * 0.15, vy: -0.05, ph: rnd(st.f + 2) * 6, l: 300, c: "#8a88a8" });
     if (st.th.fx === "petali" && st.f % 9 === 0) st.petals.push({ x: VW + 4, y: rnd(st.f) * VH * 0.8, vx: -0.6 - rnd(st.f + 1) * 0.8, vy: 0.2, ph: rnd(st.f + 2) * 6, l: 600 });
     st.petals = st.petals.filter((p) => { p.x += p.vx; p.y += p.vy + Math.sin(st.f / 15 + p.ph) * 0.3; return --p.l > 0 && p.x > -6; });
     st.fx && st.fx.tick();
@@ -579,6 +671,7 @@
       if (t === "#") { const up = tile(st, tx, ty - 1); if (up !== "#" && up !== "B") g.drawImage(A.top[v], X, Y - 4); else g.drawImage(A.brick[v], X, Y); if (tile(st, tx - 1, ty) === "." && rnd(tx * 3 + ty) > 0.7) { R(g, X, Y + 2, 1, 9, st.th.grass ? st.th.grass.c : "#2a2a2a"); R(g, X - 1, Y + 5, 1, 3, st.th.grass ? st.th.grass.a : "#2a2a2a"); } }
       else if (t === "=") g.drawImage(A.plank, X, Y);
       else if (t === "u") g.drawImage(A.chim, X, Y);
+      else if (t === "G") g.drawImage(A.gate, X, Y);
       else if (t === "B") g.drawImage(A.crack, X, Y);
       else if (t === "^") g.drawImage(A.spike, X, Y);
     }
@@ -612,6 +705,9 @@
     // fumo dei comignoli (corrente che spinge in alto) e tegole che si staccano
     st.vents.forEach((v, j) => { if (!vis(v.x)) return; for (let i = 0; i < 9; i++) { const p = ((f * 1.2 + i * 12.4 + j * 7) % 112), X = v.x + ox + Math.round(Math.sin(f / 14 + i * 1.7) * (2 + p / 22)), Y = v.y + oy - p, r = 2 + Math.round(p / 26); disc(g, X, Y, r, `rgba(${st.th.night ? "190,190,220" : "230,230,230"},${0.42 - p / 300})`); } });
     st.falls.forEach((t) => { if (t.st === "gone" || !vis(t.x)) return; const X = Math.round(t.x + ox + (t.st === "shake" ? (f % 4 < 2 ? -1 : 1) : 0)), Y = Math.round(t.y + oy); part(g, X - 6, Y, 12, 6, "#a0483a", "#16141f"); R(g, X - 6, Y, 12, 2, "#d07a52"); R(g, X - 2, Y + 2, 1, 3, "#5a2420"); });
+    // torce a muro e campane appese (col pallone le fai suonare)
+    st.torches.forEach((t, i) => { if (!vis(t.x)) return; const X = t.x + ox, Y = t.y + oy; R(g, X - 1, Y, 3, 8, "#3a2a1a"); R(g, X - 3, Y - 1, 7, 2, "#5a4a3a"); const fl = Math.abs(Math.sin(f / 4 + i)); R(g, X - 1, Y - 5 - Math.round(fl * 2), 3, 5 + Math.round(fl * 2), "#f59e0b"); R(g, X, Y - 3, 1, 3, "#fff3c0"); });
+    st.bells.forEach((k) => { if (!vis(k.x)) return; const X = k.x + ox, Y = k.y + oy, a = k.sw > 0 ? Math.sin(k.sw / 4) * (k.sw / 60) * 0.6 : Math.sin(f / 40) * 0.05; for (let y = Y - 26; y < Y - 8; y += 3) R(g, X, y, 1, 2, "#5a5a70"); g.save(); g.translate(X, Y - 8); g.rotate(a); part(g, -5, 0, 10, 9, k.rung ? "#e0b040" : "#b88a3a", "#16141f"); R(g, -7, 8, 14, 3, k.rung ? "#f0c860" : "#8a6a2a"); R(g, -4, 1, 2, 6, "#ffe8a0"); disc(g, 0, 12, 2, "#5a3a1a"); g.restore(); if (!k.rung && f % 50 < 25) R(g, X - 1, Y - 34, 2, 4, "#ffe8a0"); });
     // piattaforme mobili (asse appesa a catene)
     st.movers.forEach((m) => { const X = Math.round(m.x + ox), Y = Math.round(m.y + oy); for (let i = 0; i < m.w; i += 16) g.drawImage(st.A.plank, X + i, Y, Math.min(16, m.w - i), 16); R(g, X + 4, Y - 40, 1, 40, "#3a3440"); R(g, X + m.w - 5, Y - 40, 1, 40, "#3a3440"); });
   }
@@ -620,6 +716,21 @@
     ell(g, X, Y + 1 + Math.round(sq / 2), 5 + sq, 5 - sq, "#16141f"); ell(g, X, Y + Math.round(sq / 2), 4 + sq, 4 - sq, "#c88a2a"); R(g, X - 2, Y - 3 + sq, 2, 1, "#ffe8a0"); R(g, X - 3, Y - 2 + sq, 1, 2, "#ffd060"); R(g, X + 1, Y + 1, 2, 1, "#8a5a1a");
     if (b.st === "back") for (let i = 1; i < 4; i++) R(g, X - b.vx * i * 2, Y - b.vy * i * 2, 2, 2, `rgba(255,220,140,${0.5 - i * 0.12})`);
     if (b.st === "rest" && st.f % 40 < 20) R(g, X - 1, Y - 9, 2, 2, "#ffe8a0");
+  }
+  // buio della cripta: si vede intorno all'eroe, alle torce, alle campane suonate e al pallone di latta (che brilla)
+  let DK = null;
+  function light(g, st, ox, oy) {
+    DK = DK || cnv(VW, VH); const d = DK.getContext("2d"), f = st.f; d.globalCompositeOperation = "source-over"; d.clearRect(0, 0, VW, VH); d.fillStyle = `rgba(4,3,12,${st.th.lit})`; d.fillRect(0, 0, VW, VH);
+    d.globalCompositeOperation = "destination-out";
+    const hole = (x, y, r) => { if (x < -r || x > VW + r || y < -r || y > VH + r) return; const gr = d.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, "rgba(0,0,0,1)"); gr.addColorStop(0.55, "rgba(0,0,0,.85)"); gr.addColorStop(1, "rgba(0,0,0,0)"); d.fillStyle = gr; d.fillRect(x - r, y - r, r * 2, r * 2); };
+    const h = st.hero; hole(h.x + ox, h.y + oy - 12, 54);
+    st.torches.forEach((t, i) => hole(t.x + ox, t.y + oy - 2, 44 + Math.sin(f / 5 + i) * 3));
+    st.bells.forEach((k) => hole(k.x + ox, k.y + oy, k.rung ? 52 : 16));
+    st.foes.forEach((e) => { if (!e.dead && e.t === "m") hole(e.x + ox, e.y + oy + 6, 16); if (!e.dead && e.t === "Z") hole(e.x + ox, e.y + oy - e.h / 2, 70); });
+    st.coins.forEach((c) => { if (!c.got) hole(c.x + ox, c.y + oy, 9); }); st.items.forEach((it) => { if (!it.got) hole(it.x + ox, it.y + oy, it.k === "S" ? 20 : 12); });
+    if (st.exit) hole(st.exit.x + 16 + ox, st.exit.y - 20 + oy, 36);
+    if (st.ball.st !== "held") hole(st.ball.x + ox, st.ball.y + oy, 40);
+    d.globalCompositeOperation = "source-over"; g.drawImage(DK, 0, 0);
   }
   function scene(g, st) {
     g.save(); g.imageSmoothingEnabled = false;
@@ -633,7 +744,8 @@
     if (h.frozen > 0) { R(g, h.x + ox - 3, h.y + oy - 36, 7, 9, "#16141f"); R(g, h.x + ox - 2, h.y + oy - 35, 5, 7, "#ffd820"); }
     drawBall(g, st);
     st.debris.forEach((d) => R(g, d.x + ox, d.y + oy, d.s, d.s, d.c));
-    st.petals.forEach((p) => { R(g, p.x, p.y, 2, 1, "#ffb0c8"); R(g, p.x + 1, p.y + 1, 1, 1, "#ff8ab0"); });
+    st.petals.forEach((p) => { if (p.c) return R(g, p.x, p.y, 1, 1, p.c); R(g, p.x, p.y, 2, 1, "#ffb0c8"); R(g, p.x + 1, p.y + 1, 1, 1, "#ff8ab0"); });
+    if (st.th.lit) light(g, st, ox, oy);
     // capo: barra della vita
     const boss = st.foes.find((e) => e.t === "Z" && !e.dead); if (boss) { R(g, 80, 6, 160, 6, "#16141f"); R(g, 81, 7, Math.round(158 * boss.hp / (boss.max || boss.hp)), 4, "#e04a4a"); }
     if (st.th.dark) R(g, 0, 0, VW, VH, `rgba(0,0,20,${st.th.dark})`);
@@ -735,7 +847,7 @@
     window.__scorri.state = {
       get phase() { return S && S.phase; }, get hero() { return S && { x: S.hero.x, y: S.hero.y, vx: S.hero.vx, vy: S.hero.vy, hp: S.hero.hp, ground: S.hero.ground, frozen: S.hero.frozen }; },
       get ball() { return S && { st: S.ball.st, x: S.ball.x, y: S.ball.y, vx: S.ball.vx, vy: S.ball.vy }; }, get foes() { return S ? S.foes.filter((e) => !e.dead).length : 0; }, get coins() { return S ? S.coinN : 0; }, get ban() { return S ? countBits(S.banMask) : 0; },
-      get boss() { const b = S && S.foes.find((e) => e.t === "Z"); return b ? { hp: b.hp, st: b.st, dead: b.dead, x: b.x, y: b.y, hitT: b.hitT } : null; }, get counts() { return S ? { vents: S.vents.length, falls: S.falls.length, cats: S.foes.filter((e) => e.t === "g").length } : null; }, get practice() { return S && S.practice; }, get W() { return S && S.W; },
+      get boss() { const b = S && S.foes.find((e) => e.t === "Z"); return b ? { hp: b.hp, st: b.st, dead: b.dead, x: b.x, y: b.y, hitT: b.hitT } : null; }, get counts() { return S ? { vents: S.vents.length, falls: S.falls.length, cats: S.foes.filter((e) => e.t === "g").length, bells: S.bells.length, rung: S.bells.filter((k) => k.rung).length, gates: S.grid.reduce((a, r) => a + r.filter((t) => t === "G").length, 0), ghosts: S.foes.filter((e) => e.t === "m" && !e.dead).length, waves: S.waves.length } : null; }, ballAt: (x, y, vx, vy) => { if (S) { S.ball.st = "fly"; S.ball.x = x; S.ball.y = y; S.ball.vx = vx || 0; S.ball.vy = vy || 0; S.ball.t = 0; S.ball.sp = 0; } }, get practice() { return S && S.practice; }, get W() { return S && S.W; },
       tut: () => !!(tutC && tutC.open), press, tick: (n) => { for (let i = 0; i < (n || 1) && S; i++) step(S); }, warp: (x, y) => { if (S) { S.hero.x = x; S.hero.y = y; S.hero.vx = S.hero.vy = 0; } },
       finish: (win) => { if (!S) return; if (tutC) { tutC.close(); tutC = null; } S.win = win !== false; if (S.win) { S.items.forEach((it) => { if (it.k === "S" && win === "all") S.banMask |= 1 << it.i; }); } close(); }
     };

@@ -78,7 +78,7 @@
     }
     // Ferro si parla dal menu della zona (è l'armatura che indossi)
     window.__lattaFerro = (KK) => {
-      if (K.mem().ch >= 2 && window.__lattaFerroC2) return window.__lattaFerroC2(KK);
+      for (let c = K.mem().ch; c >= 2; c--) if (window["__lattaFerroC" + c]) return window["__lattaFerroC" + c](KK);
       const s = S();
       say("lt_ferro", s === 2 ? "Cric. <em>(«Il castello si è svegliato perché mi sono svegliato io. Mi dispiace. Un po'. Non tanto: era noioso, nella vetrina.»)</em>" : s === 3 ? "Criiic. <em>(«Il Corvo Maggiore. Ha una memoria lunga e un fischietto più lungo. Non farti trovare coi piedi per terra.»)</em>" : "Cric-cric. <em>(«Sono qui. Sono sempre qui. Sono letteralmente intorno a te.»)</em>");
       if (!F.is("lt_ferro_nome")) { F.set("lt_ferro_nome", true); say("hero", "Come ti chiami, armatura?"); say("lt_ferro", "[pensa] Criii... <em>(«Non me lo ricordo. Chiamami Ferro. È quello che sono, almeno per metà.»)</em>"); }
