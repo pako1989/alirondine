@@ -23,6 +23,7 @@
 //     plugins: [{ zone(zid, spec, Z, K), tick(zid, spec, px, py, dt, K), top(g, zid, spec, cx, cy, d, K), enter(zid, spec, K) }],
 //     rest: { ch: "s", label: "Riposa", text: "..." },
 //     plan: { name: "Il Piano", roles: { rk: { n, icon, d, fit: { id_membro: 2 } } } },  // IL PIANO (richiede crew): K.plan.open({ title, q, roles, pool }, back, inZone, cb(mappa)) assegna compagni a ruoli; K.plan.fit(rk, id)
+//     scroll: { eng: "__scorri", name: "I livelli", levels: { id: { name, icon, d, theme, map: [righe], signs, boss } }, bonus(K) },  // A SCORRIMENTO: K.scroll.play(id, o, cb(r)) livello platform 2D (js/scorri.js); record per livello, Mappa dei livelli (K.scroll.open)
 //     alert: { max: 3, names: [...], rangeMul: 0.25, decay: true, hud: true, onChange(K, lv, old) },  // ALLERTA globale: ogni avvistamento +1 (K.alert.get/set/add), il raggio delle guardie cresce; hiding(K) → true = nascosto alle guardie
 //   });
 //   E.addChapter((K) => ({ n: 1, title, sub, goal(step), intro(), start: "zona", zones: {...}, patch: {...}, talk: {...}, obj: {...}, news(id, step) }));
@@ -497,7 +498,7 @@
       return out + `<br><span style="color:var(--dim)">▷ = strade non prese. Per provarle: Capitoli → rigioca.</span>`;
     }
     function journal(back, inZone) {
-      const html = journalHtml() + (CRW ? CRW.html() : "") + (PLN ? PLN.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + (WGT ? WGT.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
+      const html = journalHtml() + (CRW ? CRW.html() : "") + (PLN ? PLN.html() : "") + (SCR ? SCR.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + (WGT ? WGT.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
       const jb = (DOS ? Object.keys(DOS.cases).filter((c) => DOS.list(c).length).map((c) => ({ label: "🗂️ Dossier · " + DOS.cases[c].t, sub: "Confronta prove e testimonianze", fn: () => DOS.open(c, () => journal(back, inZone), inZone) })) : []).concat(CAT && CAT.list().length ? [{ label: "🃏 Album", sub: `${CAT.team().length}/${CAT.max} in squadra`, fn: () => CAT.open(() => journal(back, inZone), inZone) }] : []).concat(CRW && CRW.count() ? [{ label: "⚔️ Schiera la compagnia", sub: `${CRW.field().length}/${CRW.max} in campo`, fn: () => CRW.pick(() => journal(back, inZone), inZone) }] : []).concat((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
       if (inZone) return api.trAsk("voce", html, jb, bgNow());
       api.scene(BG0, "voce", html, jb, JN());
@@ -1148,6 +1149,35 @@
       return { open, fit, get, last, html, roles: R };
     })();
 
+    // -------------------------------------------------------------- A SCORRIMENTO (cfg.scroll): livelli platform 2D in pixel art (motore js/scorri.js o uno con la stessa interfaccia)
+    // cfg.scroll = { eng: "__scorri", name: "I livelli", levels: { id: { name, icon, d, theme, map: [righe], signs: [testi], boss } }, bonus(K) → 0..2 pezzi d'armatura in più }
+    // K.scroll.play(id, o, cb(r)) gioca il livello con ownMatch; r = { win, quit, coins, ban, banTot, time, sponde }. Record nei flag: sc_<id>_w vinto, sc_<id>_b stendardi (maschera),
+    // sc_<id>_c gettoni migliori, sc_<id>_t tempo migliore (s). won(id) · ban(id) · banTot(id) · total() [trovati, totali] · open(back) Mappa dei livelli (in una zona: rigioca i vinti) · html() nel diario
+    const SCR = cfg.scroll && (() => {
+      const C0 = cfg.scroll, LV = C0.levels || {}, bits = (n) => { let c = 0; n |= 0; while (n) { c += n & 1; n >>>= 1; } return c; };
+      const banTot = (id) => ((LV[id] && LV[id].map) || []).join("").split("S").length - 1;
+      const won = (id) => F.is("sc_" + id + "_w"), ban = (id) => bits(F.get("sc_" + id + "_b", 0));
+      const total = () => Object.keys(LV).reduce((a, id) => [a[0] + ban(id), a[1] + banTot(id)], [0, 0]);
+      function play(id, o, cb) {
+        const L = LV[id]; if (!L) return safe(() => cb({ win: false }), null);
+        const eng = window[C0.eng || "__scorri"], bonus = safe(() => (C0.bonus ? C0.bonus(K) : 0), 0) | 0;
+        ownMatch(eng.start, Object.assign({ title: L.name, level: Object.assign({ id }, L), bonus }, o || {}, { done: (r) => {
+          r = r || {};
+          if (r.win) { F.set("sc_" + id + "_w", true); F.set("sc_" + id + "_b", (F.get("sc_" + id + "_b", 0) | (r.banMask | 0))); if ((r.coins | 0) > F.get("sc_" + id + "_c", 0)) F.set("sc_" + id + "_c", r.coins | 0); const t = r.time | 0, bt = F.get("sc_" + id + "_t", 0); if (t && (!bt || t < bt)) F.set("sc_" + id + "_t", t); }
+          safe(() => cb(r), null);
+        } }));
+      }
+      const line = (id) => { const L = LV[id], n = banTot(id), t = F.get("sc_" + id + "_t", 0); return `${L.icon || "🏰"} ${L.name}: ${won(id) ? "✓" : "—"}${n ? ` · 🚩 ${ban(id)}/${n}` : ""} · 🪙 ${F.get("sc_" + id + "_c", 0)}${t ? ` · ⏱ ${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}` : ""}`; };
+      const html = () => { const ids = Object.keys(LV).filter(won); if (!ids.length) return ""; const tt = total(); return `<br><br><b>${esc(C0.name || "I livelli")}</b> (stendardi ${tt[0]}/${tt[1]})<br>` + ids.map((id) => esc(line(id))).join("<br>"); };
+      function open(back) {
+        const ids = Object.keys(LV).filter(won), tt = total();
+        const opts = ids.map((id) => ({ label: line(id), sub: LV[id].d || "Rigioca per gli stendardi mancanti e per migliorare il tempo", fn: () => play(id, {}, (r) => say([["voce", r.win ? `Livello superato. Gettoni ${r.coins | 0}, stendardi trovati ${r.ban | 0}/${r.banTot | 0}.` : "Livello lasciato a metà. I record restano quelli di prima."]], () => open(back))) }));
+        opts.push({ label: "◂ Indietro", fn: back || done });
+        ask("voce", `<b>${esc(C0.name || "I livelli")}</b><br><span style="color:var(--dim)">${ids.length ? `Stendardi trovati: ${tt[0]}/${tt[1]}. I livelli superati si rigiocano quando vuoi.` : "Nessun livello superato, per ora."}</span>`, opts);
+      }
+      return { play, won, ban, banTot, total, open, html, levels: LV };
+    })();
+
     // -------------------------------------------------------------- IL DOSSIER (cfg.cases): prove e testimonianze, confronti, verdetto
     // cfg.cases = { id_caso: { t, q, items: { id: { t, d, icon, kind: "prova"|"testimonianza" } }, links: [[a, b, "cosa non torna"]], verdicts: [{ id, label, sub }] } }
     // K.dossier: add(caso, item) · has · list(caso) · found(caso) (contraddizioni scoperte) · solid(caso) (0..1) · open(back, inZone, caso) (schermata: tocca due voci
@@ -1440,7 +1470,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, plan: PLN, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN,
+      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, plan: PLN, scroll: SCR, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN,
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
       ending: (id, d) => { ENDINGS[id] = d; },
       continueStory: () => continueStory(), hasChapter: (n) => !!CHAPTERS[n], setInMatch: (v) => { inMatch = !!v; }, openMain: () => openMain(),
