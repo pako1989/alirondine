@@ -103,7 +103,7 @@
       step: (n) => mem().step[n || mem().ch] || 0, setStep: (n, v) => { mem().step[n] = v; save(); refreshGoal(); },
       ch: () => mem().ch,
       inv: { has: (i) => mem().inv.includes(i), give: (i) => { if (!mem().inv.includes(i)) { mem().inv.push(i); save(); } }, take: (i) => { mem().inv = mem().inv.filter((x) => x !== i); save(); } },
-      coins: (n) => { mem().coins += n | 0; save(); toast(`🪙 ${n > 0 ? "+" : ""}${n}`); },
+      coins: (n) => { n |= 0; const gl = window.addCoins && window.bCoins; if (gl) { try { window.addCoins(n); mem().coins = window.bCoins(); } catch (e) { mem().coins = Math.max(0, mem().coins + n); } } else mem().coins = Math.max(0, mem().coins + n); save(); toast(`🪙 ${n > 0 ? "+" : ""}${n}`); },
       tp(did, x, z) { if (!G) return; const w = toWorld(did, [x, z]); G.p.x = w.x; G.p.z = w.z; },
       skipTo(h, cb) {
         if (!G) return; const f = OV.querySelector(".c3dFade"); f.classList.add("on");
@@ -374,6 +374,8 @@
     }
     function open(back) {
       css(); close(); BACK = back || BACK; M = load(); if (!window.THREE) return;
+      // monete unite a quelle del Borgo (una volta sola porta i vecchi risparmi della città)
+      if (window.addCoins && window.bCoins) { try { window.addCoins(M.coinsMig ? 0 : M.coins | 0); M.coinsMig = 1; M.coins = window.bCoins(); save(); } catch (e) {} }
       OV = document.createElement("div"); OV.className = "c3dOv";
       OV.innerHTML = `<canvas></canvas><div class="c3dTop"><span class="clk">🕘 09:00</span><span class="dst" style="pointer-events:auto;cursor:pointer"></span><span class="sp"></span><button class="c3dBtn" data-map="1" type="button">🗺️</button><button class="c3dBtn" data-menu="1" type="button">☰</button></div>
 <div class="c3dGoal"><span class="ar">🧭</span><span class="tx"></span></div><div class="c3dStick"><div class="c3dKnob"></div></div><button class="c3dAct off" type="button">…</button><div class="c3dFade"></div>`;
