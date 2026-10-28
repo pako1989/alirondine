@@ -252,7 +252,7 @@
         W.cars.push({ g, alongX, lane: Math.min(lane, (alongX ? 2 * DS : 3 * DS) - 1), dir, pos: hs(i, 6) * span, span, speed: 5 + hs(i, 7) * 4.5 });
       }
       for (let i = 0; i < (G.low ? 6 : 12); i++) {
-        const look = { shirt: [0x2563eb, 0xdc2626, 0x16a34a, 0xa855f7, 0xf59e0b][i % 5], hair: [0x3a2a1a, 0x111827, 0xb45309][i % 3], skin: [0xe0b890, 0xc68642, 0x8d5524][i % 3], pants: 0x334155 }, f = figure(THREE, look); f.scale.setScalar(0.92); scene.add(f);
+        const look = { shirt: [0x2563eb, 0xdc2626, 0x16a34a, 0xa855f7, 0xf59e0b][i % 5], hair: [0x3a2a1a, 0x111827, 0xb45309][i % 3], skin: [0xe0b890, 0xc68642, 0x8d5524][i % 3], pants: 0x334155, hs: ["short", "long", "bun", "cap", "spiky", "hat", "bald"][(i * 3 + (i >> 2)) % 7], mood: ["happy", "happy", "grumpy", "surprised", "sly", "sad"][(i * 5) % 6], stache: i % 7 === 3, glasses: i % 5 === 2, cap: [0x1e3a8a, 0x7f1d1d, 0x14532d][i % 3] }, f = figure(THREE, look); f.scale.setScalar(0.92); scene.add(f);
         const alongX = hs(i, 11) > 0.5, line = Math.floor(hs(i, 12) * 4), side = hs(i, 13) > 0.5 ? 1 : -1, base = alongX ? Math.floor(hs(i, 14) * 2) * DS : Math.floor(hs(i, 14) * 3) * DS;
         W.peds.push({ f, alongX, fix: base + line * CELL + side * 5.4, pos: hs(i, 15) * 80 + (alongX ? Math.floor(hs(i, 16) * 3) * DS : Math.floor(hs(i, 16) * 2) * DS), dir: 1, min: 0, max: 0, speed: 1.8 + hs(i, 17) * 1.2 });
         const pd = W.peds[W.peds.length - 1], b0 = alongX ? Math.floor(pd.pos / DS) * DS : Math.floor(pd.pos / DS) * DS; pd.min = b0 + 6; pd.max = b0 + DS - 6; pd.pos = clamp(pd.pos, pd.min, pd.max);
@@ -306,11 +306,36 @@
       const grp = new THREE.Group(), mk = (c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.75 });
       const skin = mk(look.skin || 0xe0b890), shirt = mk(look.shirt || 0x2563eb), hair = mk(look.hair || 0x3a2a1a), legs = mk(look.pants || 0x334155);
       const torso = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.05, 0.5), shirt); torso.position.y = 1.55; grp.add(torso);
-      const head = new THREE.Mesh(new THREE.SphereGeometry(0.34, 10, 8), skin); head.position.y = 2.38; grp.add(head);
-      const hr = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.28, 0.66), hair); hr.position.y = 2.6; grp.add(hr);
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.34, 12, 10), skin); head.position.y = 2.38; grp.add(head);
+      const hs = look.hs || "short", add = (g, m, x, y, z, par) => { const o = new THREE.Mesh(g, m); o.position.set(x, y, z); (par || head).add(o); return o; };
+      // capelli: coordinate locali alla testa (y 0 = centro)
+      if (hs !== "bald") add(new THREE.BoxGeometry(0.72, 0.28, 0.66), hair, 0, 0.22, -0.02);
+      if (hs === "long") { add(new THREE.BoxGeometry(0.74, 0.8, 0.2), hair, 0, -0.15, -0.3); add(new THREE.BoxGeometry(0.1, 0.5, 0.4), hair, -0.35, -0.05, -0.08); add(new THREE.BoxGeometry(0.1, 0.5, 0.4), hair, 0.35, -0.05, -0.08); }
+      else if (hs === "bun") add(new THREE.SphereGeometry(0.18, 8, 6), hair, 0, 0.45, -0.12);
+      else if (hs === "spiky") for (let i = -1; i <= 1; i++) add(new THREE.ConeGeometry(0.09, 0.22, 5), hair, i * 0.2, 0.46, 0);
+      else if (hs === "cap") { add(new THREE.BoxGeometry(0.76, 0.14, 0.7), mk(look.cap || 0x1e3a8a), 0, 0.3, 0); add(new THREE.BoxGeometry(0.6, 0.05, 0.3), mk(look.cap || 0x1e3a8a), 0, 0.26, 0.45); }
+      else if (hs === "hat") { add(new THREE.CylinderGeometry(0.5, 0.5, 0.05, 12), mk(look.cap || 0x111827), 0, 0.3, 0); add(new THREE.CylinderGeometry(0.26, 0.3, 0.3, 10), mk(look.cap || 0x111827), 0, 0.46, 0); }
+      else if (hs === "bald") add(new THREE.BoxGeometry(0.7, 0.14, 0.12), hair, 0, 0.0, -0.3);
+      // volto: occhi, sopracciglia, bocca (espressione = look.mood)
+      const mood = look.mood || "happy", white = new THREE.MeshBasicMaterial({ color: 0xffffff }), dark = new THREE.MeshBasicMaterial({ color: 0x1b1b1f }), lip = new THREE.MeshBasicMaterial({ color: 0x7f1d1d });
+      const eyes = [], brows = [];
+      [-1, 1].forEach((sx) => {
+        const eg = new THREE.Group(); eg.position.set(sx * 0.13, 0.06, 0.29); head.add(eg);
+        eg.scale.set(1, mood === "surprised" ? 1.3 : mood === "sly" ? 0.7 : 1, 1);
+        add(new THREE.SphereGeometry(0.075, 8, 6), white, 0, 0, 0, eg); add(new THREE.SphereGeometry(0.04, 6, 5), dark, 0, 0, 0.05, eg); eyes.push(eg);
+        const br = add(new THREE.BoxGeometry(0.14, 0.03, 0.03), dark, sx * 0.13, mood === "surprised" ? 0.23 : 0.18, 0.31);
+        br.rotation.z = -sx * (mood === "grumpy" ? -0.45 : mood === "sad" ? 0.4 : mood === "sly" ? -0.2 : 0.05); brows.push(br);
+      });
+      add(new THREE.SphereGeometry(0.035, 6, 5), skin, 0, -0.03, 0.34);
+      const mouth = add(mood === "surprised" ? new THREE.SphereGeometry(0.05, 6, 5) : new THREE.BoxGeometry(mood === "happy" ? 0.2 : 0.15, 0.03, 0.03), mood === "surprised" ? lip : dark, 0, mood === "sad" || mood === "grumpy" ? -0.18 : -0.15, 0.31);
+      if (mood === "happy") [-1, 1].forEach((sx) => { const c = add(new THREE.BoxGeometry(0.05, 0.03, 0.03), dark, sx * 0.11, -0.13, 0.3); c.rotation.z = sx * -0.6; });
+      if (mood === "sly") { mouth.rotation.z = 0.3; mouth.position.x = 0.04; }
+      if (look.stache) add(new THREE.BoxGeometry(0.26, 0.05, 0.05), hair, 0, -0.09, 0.32);
+      if (look.beard) add(new THREE.BoxGeometry(0.46, 0.2, 0.2), hair, 0, -0.24, 0.17);
+      if (look.glasses) { const gm = new THREE.MeshBasicMaterial({ color: 0x111111 }); [-1, 1].forEach((sx) => add(new THREE.TorusGeometry(0.1, 0.012, 5, 12), gm, sx * 0.13, 0.06, 0.33)); add(new THREE.BoxGeometry(0.06, 0.012, 0.012), gm, 0, 0.07, 0.33); }
       const mkLeg = (x) => { const l = new THREE.Group(); l.position.set(x, 1.05, 0); const m = new THREE.Mesh(new THREE.BoxGeometry(0.34, 1.05, 0.38), legs); m.position.y = -0.5; l.add(m); grp.add(l); return l; };
       const mkArm = (x) => { const a = new THREE.Group(); a.position.set(x, 2, 0); const m = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.95, 0.3), shirt); m.position.y = -0.42; a.add(m); grp.add(a); return a; };
-      grp.userData = { legL: mkLeg(-0.24), legR: mkLeg(0.24), armL: mkArm(-0.6), armR: mkArm(0.6), torso };
+      grp.userData = { mouth, eyes, brows, legL: mkLeg(-0.24), legR: mkLeg(0.24), armL: mkArm(-0.6), armR: mkArm(0.6), torso };
       const sh = new THREE.Mesh(new THREE.CircleGeometry(0.7, 12), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.3, depthWrite: false })); sh.rotation.x = -Math.PI / 2; sh.position.y = 0.05; grp.add(sh);
       return grp;
     }

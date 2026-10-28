@@ -9,7 +9,7 @@
     menuSub: "Una città aperta in 3D, di giorno e di notte: consegne, orari e un pacco senza indirizzo",
     hourPerSec: 1 / 18,
     start: { d: "stazione", at: [45, 60], hour: 9 },
-    hero: { shirt: 0xf59e0b, hair: 0x3a2a1a, pants: 0x334155 },
+    hero: { shirt: 0xf59e0b, hair: 0x3a2a1a, pants: 0x334155, hs: "spiky", mood: "happy" },
     districts: [
       { id: "porto", name: "Porto Vecchio", icon: "⚓", gx: 0, gz: 0, landmark: "porto", pal: P("#5a6a78", "#3a424c", "#8a929c", [0xc9b8a0, 0xa8b8c8, 0xd0a890, 0x9aa8a0], 0x2f5a44, 0xf59e0b) },
       { id: "mercato", name: "Mercato dei Mille Odori", icon: "🧺", gx: 1, gz: 0, landmark: "mercato", pal: P("#8a7a5a", "#4a4036", "#b8a888", [0xe0b890, 0xd89a7a, 0xe8d0a0, 0xc88a6a], 0x4a7a38, 0xdc2626) },
@@ -19,14 +19,14 @@
       { id: "sotterranei", name: "I Sotterranei", icon: "🕳️", gx: 2, gz: 1, landmark: "sotterranei", dark: true, pal: P("#2a323c", "#161b22", "#3f4b5b", [0x4b5563, 0x3f4b5b, 0x5b6676], 0x2a4a3a, 0x22d3ee) }
     ],
     npcs: [
-      { id: "marta", name: "Zia Marta", emoji: "📮", look: { shirt: 0xb91c1c, hair: 0xd4d4d8, skin: 0xe0b890, pants: 0x1e293b }, sched: [{ h: [0, 24], d: "stazione", at: [40, 52] }] },
-      { id: "pina", name: "Nonna Pina", emoji: "🧺", look: { shirt: 0xbe185d, hair: 0xe5e7eb, skin: 0xe0b890, pants: 0x4a3a2a }, sched: [{ h: [8, 15], d: "mercato", at: [38, 45] }, { h: [15, 8], away: true }] },
-      { id: "ruggero", name: "Custode Ruggero", emoji: "🔦", look: { shirt: 0x166534, hair: 0x6b7280, skin: 0xd9a679, pants: 0x1f2937 }, sched: [{ h: [17, 24], d: "stadio", at: [64, 45] }, { h: [0, 6], d: "stadio", at: [64, 45] }, { h: [6, 17], away: true }] },
-      { id: "lia", name: "Lia la Barcaiola", emoji: "⛵", look: { shirt: 0x0e7490, hair: 0x7c2d12, skin: 0xd9a679, pants: 0x1e293b }, sched: [{ h: [8, 13], d: "porto", at: [30, 40] }, { h: [13, 8], away: true }] },
-      { id: "tito", name: "Tito del Banco", emoji: "🍋", look: { shirt: 0xca8a04, hair: 0x1f2937, skin: 0xe0b890, pants: 0x3b2a1a }, sched: [{ h: [15, 20], d: "mercato", at: [58, 60] }, { h: [20, 15], away: true }] },
-      { id: "volpe", name: "La Volpe", emoji: "🦊", look: { shirt: 0x9a3412, hair: 0x7c2d12, skin: 0xe0b890, pants: 0x1c1917 }, sched: [{ h: [0, 24], away: true }] },
-      { id: "nina", name: "Nina", emoji: "🦊", look: { shirt: 0x9a3412, hair: 0x7c2d12, skin: 0xe8c4a0, pants: 0x1c1917 }, sched: [{ h: [13, 20], d: "mercato", at: [45, 64] }, { h: [20, 13], away: true }] },
-      { id: "ettore", name: "Don Ettore", emoji: "🎩", look: { shirt: 0x1e3a8a, hair: 0x4a4a4a, skin: 0xe8c4a0, pants: 0x111827 }, sched: [{ h: [0, 24], d: "collina", at: [45, 64] }] }
+      { id: "marta", name: "Zia Marta", emoji: "📮", look: { hs:"bun",mood:"happy",glasses:1, shirt: 0xb91c1c, hair: 0xd4d4d8, skin: 0xe0b890, pants: 0x1e293b }, sched: [{ h: [0, 24], d: "stazione", at: [40, 52] }] },
+      { id: "pina", name: "Nonna Pina", emoji: "🧺", look: { hs:"bun",mood:"happy",glasses:1, shirt: 0xbe185d, hair: 0xe5e7eb, skin: 0xe0b890, pants: 0x4a3a2a }, sched: [{ h: [8, 15], d: "mercato", at: [38, 45] }, { h: [15, 8], away: true }] },
+      { id: "ruggero", name: "Custode Ruggero", emoji: "🔦", look: { hs:"cap",cap:0x166534,mood:"grumpy",stache:1, shirt: 0x166534, hair: 0x6b7280, skin: 0xd9a679, pants: 0x1f2937 }, sched: [{ h: [17, 24], d: "stadio", at: [64, 45] }, { h: [0, 6], d: "stadio", at: [64, 45] }, { h: [6, 17], away: true }] },
+      { id: "lia", name: "Lia la Barcaiola", emoji: "⛵", look: { hs:"long",mood:"happy", shirt: 0x0e7490, hair: 0x7c2d12, skin: 0xd9a679, pants: 0x1e293b }, sched: [{ h: [8, 13], d: "porto", at: [30, 40] }, { h: [13, 8], away: true }] },
+      { id: "tito", name: "Tito del Banco", emoji: "🍋", look: { mood:"happy",stache:1, shirt: 0xca8a04, hair: 0x1f2937, skin: 0xe0b890, pants: 0x3b2a1a }, sched: [{ h: [15, 20], d: "mercato", at: [58, 60] }, { h: [20, 15], away: true }] },
+      { id: "volpe", name: "La Volpe", emoji: "🦊", look: { hs:"spiky",mood:"sly", shirt: 0x9a3412, hair: 0x7c2d12, skin: 0xe0b890, pants: 0x1c1917 }, sched: [{ h: [0, 24], away: true }] },
+      { id: "nina", name: "Nina", emoji: "🦊", look: { hs:"long",mood:"sly", shirt: 0x9a3412, hair: 0x7c2d12, skin: 0xe8c4a0, pants: 0x1c1917 }, sched: [{ h: [13, 20], d: "mercato", at: [45, 64] }, { h: [20, 13], away: true }] },
+      { id: "ettore", name: "Don Ettore", emoji: "🎩", look: { hs:"bald",mood:"sad",beard:1,glasses:1, shirt: 0x1e3a8a, hair: 0x4a4a4a, skin: 0xe8c4a0, pants: 0x111827 }, sched: [{ h: [0, 24], d: "collina", at: [45, 64] }] }
     ],
     pois: [
       { id: "pacco", d: "sotterranei", at: [45, 55], r: 3.2, label: "Prendi\nil pacco", mark: true, when: (K) => K.ch() === 1 && K.step(1) === 3 },
