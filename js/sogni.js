@@ -183,6 +183,8 @@
     ["gp_gridoni", "gp", "c", 44, 52, 80, "C", 1], ["gp_bullone", "gp", "r", 60, 78, 66, "D", 1], ["gp_rosalba", "gp", "e", 86, 60, 74, "A", 2], ["gp_nembo", "gp", "r", 50, 70, 84, "C", 3],
     // Rondine 1938-2038
     ["rt_tilly", "tempo", "c", 46, 62, 76, "C", 1], ["rt_baldo", "tempo", "c", 64, 70, 48, "D", 1],
+    ["rt_dorino", "tempo", "r", 74, 56, 70, "A", 1], ["rt_quarzo", "tempo", "c", 40, 58, 82, "C", 1], ["rt_rino", "tempo", "r", 78, 50, 72, "A", 2],
+    ["rt_mister", "tempo", "e", 56, 74, 84, "C", 2], ["rt_vera", "tempo", "e", 52, 80, 78, "D", 3], ["rt_nonna", "tempo", "l", 70, 76, 90, "C", 3],
     // Dungeon di Fine Stagione
     ["dg_asterio", "dungeon", "c", 52, 80, 48, "D", 1], ["dg_fiamma", "dungeon", "r", 78, 46, 66, "A", 1], ["dg_meda", "dungeon", "r", 56, 60, 82, "C", 2], ["dg_ruggine", "dungeon", "e", 48, 84, 72, "D", 3],
     // Vallombra
@@ -289,6 +291,8 @@
   const BY = Object.fromEntries(CARDS.map((c) => [c.id, c]));
   // la frase speciale che la carta dice quando arriva a tre stelle
   const FRASI = {
+    rt_dorino: "Undici lire e una bugia. Bastano per fondare una squadra.", rt_quarzo: "Il tempo è un pallone: se lo calci forte, torna indietro.", rt_rino: "Pallone e bottega: stesso mestiere, si sta in piedi.",
+    rt_mister: "Ragazzi.", rt_vera: "Il passato è un verbale. Il futuro lo correggo io.", rt_nonna: "Cent'anni di partite. Me le ricordo tutte, anche quelle che non ho visto.",
     leo: "Contro il muro del porto ho imparato a tirare. Con voi ho imparato perché.",
     nico: "Gatto Volante pronto al decollo! (Sara, stai guardando vero?)",
     tommy: "Un passaggio fatto bene è meglio di un gol. Quasi.",
