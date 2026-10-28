@@ -4,7 +4,7 @@
 // Tono: ironico di base, capitoli seri; nella notte finale chi vive e chi muore dipende dalle tue scelte (morti fuori scena, niente sangue).
 // Dal core: Compagnia (cfg.crew, reclutamento e squadra di due), Rapporti (cfg.bonds), Inventario (cfg.inv), Orologio (cfg.clock), interni a mano, Peso morale (cfg.weight: Esempio e Spregiudicato).
 // Minigioco proprio: «Squadra in Pausa» (js/pausa.js, tempo reale con pausa tattica e ruota dei poteri).
-// Tessere proprie: M console · P tavolo-mappa · O parapetto · E container · N insegna al neon · K bitta · pavimenti Q (lamiera della nave) e Y (pista da ballo)
+// Tessere proprie: M console · P tavolo-mappa · O parapetto · E container · N insegna al neon · K bitta · V bozzolo dei Raccoglitori · pavimenti Q (lamiera della nave) e Y (pista da ballo)
 (function () {
   "use strict";
   if (window.__missione || !window.__sagaCore) return;
@@ -28,9 +28,12 @@
       torre: { grass: ["#44403c", "#3f3b37", "#4a4541"], path: ["#78716c", "#716a65"], stone: ["#57534e", "#524e49"], wall: ["#1c1917", "#171412"], water: ["#38bdf8", "#33b0eb"], tall: "#44403c", tint: "250,204,21", tintA: 0.1, fx: "", dark: 0.12 },
       isola: { grass: ["#e7e5e4", "#dedbd9", "#efedec"], path: ["#d6d3d1", "#cfcbc8"], stone: ["#a8a29e", "#a09a95"], wall: ["#78716c", "#716a65"], water: ["#5eead4", "#56e0ca"], tall: "#d6d3d1", tree: ["#a3a3a3", "#b5b5b5", "#9a9a9a"], tint: "255,240,200", tintA: 0.16, fx: "dust", dark: 0 },
       orizzonte: { grass: ["#6b8e4e", "#638647", "#739656"], path: ["#c8b48a", "#bfab80"], stone: ["#a8a29e", "#a09a95"], wall: ["#7c5a3a", "#715234"], water: ["#3b82c4", "#3579ba"], tall: "#5a7a3a", tree: ["#2f5a2a", "#3a6a34", "#46783e"], tint: "255,180,120", tintA: 0.12, fx: "", dark: 0.08 },
+      flotta: { grass: ["#7a6a4a", "#726345", "#827150"], path: ["#a0815a", "#977a55"], stone: ["#6b6f78", "#646871"], wall: ["#3b2f22", "#33291d"], water: ["#1d6fa3", "#1a6699"], tall: "#6a5a3a", tree: ["#2f5a3a", "#3a6a44", "#46784e"], tint: "255,190,140", tintA: 0.08, fx: "", dark: 0.08 },
+      pragia: { grass: ["#4d5b45", "#47543f", "#53624b"], path: ["#6b6a63", "#64635c"], stone: ["#5b5d61", "#55575b"], wall: ["#2a2c30", "#25272b"], water: ["#34506a", "#304a62"], tall: "#45523c", tree: ["#2a3a2a", "#324532", "#3a4f3a"], tint: "180,200,230", tintA: 0.12, fx: "rain", dark: 0.22 },
+      relitto: { grass: ["#1f1d24", "#1b1920", "#24212a"], path: ["#3a2f1f", "#35291b"], stone: ["#2d2a33", "#28252e"], wall: ["#0b0a0e", "#08070a"], water: ["#0a0f1a", "#080c16"], tall: "#1f1d24", tint: "250,180,40", tintA: 0.12, fx: "", dark: 0.34 },
       ponte: { grass: ["#3a3646", "#353141", "#403b4d"], path: ["#5a5468", "#544e61"], stone: ["#4a4458", "#443e51"], wall: ["#1a1722", "#15121c"], water: ["#0e2338", "#0c1f33"], tall: "#3a3646", tint: "255,150,80", tintA: 0.1, fx: "rain", dark: 0.26 }
     },
-    floors: "QY", solid: "MPOENK",
+    floors: "QY", solid: "MPOENKV",
     floorPaint(K, f, sx, sy, tx, ty) {
       const g = K.g;
       if (f === "Q") { // lamiera della nave: piastre con rivetti e una linea guida
@@ -82,6 +85,12 @@
         g.fillStyle = on ? `rgb(${col})` : "#3f3f46"; g.fillRect(sx + 3, sy, 10, 1); g.fillRect(sx + 3, sy + 3, 7, 1); g.fillRect(sx + 2, sy, 1, 4);
         if (on) K.light(sx + 8, sy + 2, 34, col, 0.45);
       },
+      // bozzolo d'oro dei Raccoglitori: guscio a scaglie che pulsa piano
+      V(K, sx, sy, tx, ty, fr) {
+        K.ground(sx, sy, tx, ty); const g = K.g, p = 0.5 + 0.5 * Math.sin(fr / 14 + tx * 1.7 + ty); g.fillStyle = "rgba(0,0,0,.35)"; g.beginPath(); g.ellipse(sx + 8, sy + 14, 6, 2, 0, 0, 7); g.fill();
+        g.fillStyle = "#3b2f12"; g.beginPath(); g.ellipse(sx + 8, sy + 7, 5.5, 8, 0, 0, 7); g.fill(); g.strokeStyle = "#a16207"; g.lineWidth = 1; g.stroke();
+        g.fillStyle = `rgba(250,204,21,${0.25 + 0.35 * p})`; for (let i = 0; i < 4; i++) g.fillRect(sx + 5 + (i % 2) * 4, sy + 2 + i * 3, 3, 1); K.light(sx + 8, sy + 7, 18, "250,204,21", 0.15 + 0.2 * p);
+      },
       // bitta d'ormeggio con la cima
       K(K, sx, sy, tx, ty, fr) {
         K.ground(sx, sy, tx, ty); const g = K.g; g.fillStyle = "rgba(0,0,0,.3)"; g.beginPath(); g.ellipse(sx + 8, sy + 13, 6, 2, 0, 0, 7); g.fill();
@@ -89,7 +98,7 @@
         g.strokeStyle = "#d6b97a"; g.lineWidth = 1.4; g.beginPath(); g.moveTo(sx + 4, sy + 9); g.bezierCurveTo(sx - 2, sy + 12, sx - 4, sy + 6, sx - 8, sy + 9); g.stroke();
       }
     },
-    act: { M: "Guarda la console", P: "Guarda la mappa", O: "Guarda il mare", E: "Guarda i container", N: "Guarda l'insegna", K: "Guarda la bitta", n: "Leggi il cartello", x: "Apri la cassa", s: "Riposa un momento", q: "Entra" },
+    act: { V: "Guarda il bozzolo", M: "Guarda la console", P: "Guarda la mappa", O: "Guarda il mare", E: "Guarda i container", N: "Guarda l'insegna", K: "Guarda la bitta", n: "Leggi il cartello", x: "Apri la cassa", s: "Riposa un momento", q: "Entra" },
     rest: { ch: "s", label: "Riposa un momento", text: "Ti siedi. La nave ronza, il gioco salva da solo. Dal menu puoi rileggere il Dossier della Missione." },
     texts: { nothing: "Niente di utile. Solo ruggine, cavi e promesse di Cerbero.", noHero: "Il Signor Fumo vuole un nome sul contratto. Crea prima il tuo Campione.", chestOpen: "Apri la cassa.", chestEmpty: "La cassa è vuota. Qualcuno di Cerbero è passato prima di te." },
     journal: { name: "Il Dossier della Missione", sub: "Squadra, lealtà, nave e finali" },

@@ -102,10 +102,61 @@ async function flow2(w, alt) {
   } catch (e) { errors.push(e.message.slice(0, 300)); }
   L.check(`Missione · capitolo 2${alt ? " (vie alternative)" : ""} (${w} px)`, errors); await browser.close();
 }
+const CREW2 = Object.assign({}, CREW1, { cr_n: 7, cr_ms_zero: 5, cr_ms_tano: 6, cr_ms_tali: 7, ms_c2_done: 1 });
+const S3 = { v: 1, diffSet: true, intro: { ch1: 1, ch2: 1, ch3: 1, ms_purgatorio: 1, ms_illio: 1, ms_isola: 1, ms_orizzonte: 1, ms_omega: 1, ms_flotta: 1, ms_pragia: 1, ms_relitto: 1 }, ch: 3, step: { 1: 4, 2: 6 }, done: { 1: "ok", 2: "ok" }, st: { risorse: 12, esempio: 7, spregio: 7 }, flags: CREW2 };
+async function zones3(w) {
+  const { browser, page, errors } = await start(w, S3, "Inizia il Capitolo 3");
+  for (const z of ["ms_flotta", "ms_pragia", "ms_relitto", "ms_illio", "ms_omega", "ms_purgatorio"]) {
+    try { await page.evaluate((k) => { const K = eval(k); ["ms_lm_ms_miranda", "ms_lm_ms_tano", "ms_lm_ms_garro", "ms_lm_ms_jacopo", "ms_talidi_detto"].forEach((f) => K.F.set(f, true)); K.clock.set(1, 2); }, K_); await go(page, z); await L.shot(page, "ms3_" + z + "_" + w); const bad = await L.reachAll(page, z); if (bad.length) errors.push(z + ": " + bad.join(", ")); }
+    catch (e) { errors.push(z + ": " + e.message.slice(0, 140)); }
+  }
+  L.check(`Missione · capitolo 3 zone (${w} px)`, errors); await browser.close();
+}
+async function flow3(w, alt) {
+  const { browser, page, errors } = await start(w, S3, "Inizia il Capitolo 3");
+  await stubFight(page);
+  const st = async (n, what) => { const i = await L.info(page); if (i.step[3] !== n) errors.push(what + ": " + JSON.stringify(i.step)); };
+  const jolly = async (dest) => { await go(page, "ms_normanna", 6, 10); await L.talk(page, "ms_jolly"); await L.advance(page, [dest]); await page.waitForTimeout(400); await L.advance(page).catch(() => {}); };
+  const F = (f) => page.evaluate(([k, f]) => eval(k).F.get(f), [K_, f]);
+  try {
+    await go(page, "ms_sala", 7, 7); await L.talk(page, "ms_fumo"); await L.advance(page, [alt ? "Leali a me" : "Non li compro"]); await st(1, "dopo Fumo");
+    await go(page, "ms_normanna", 25, 5); await L.goAct(page, 25, 4); await L.advance(page, ["Corazza"]);
+    if (!(await F("ms_upg"))) errors.push("miglioria non installata");
+    await jolly("Miranda"); if ((await L.zone(page)) !== "ms_illio") errors.push("viaggio Miranda fallito");
+    await L.talk(page, "ms_niko"); await L.advance(page, ["Proteggi Oriana", alt ? "Consegnalo" : "Lascialo andare"]);
+    await L.talk(page, "ms_oriana"); await L.advance(page, [alt ? "Lasciala partire" : "Miranda, vai tu"]);
+    await jolly("Garro"); await L.talk(page, "ms_sidonio"); await L.advance(page, ["Libera il vicolo"]); await L.advance(page).catch(() => {});
+    await L.talk(page, "ms_sidonio"); await L.advance(page, [alt ? "Spostati" : "Resta in mezzo"]);
+    await jolly("Zero"); if ((await L.zone(page)) !== "ms_pragia") errors.push("viaggio Pragia fallito");
+    for (const [x, y] of [[9, 8], [25, 9], [17, 16]]) { await L.goAct(page, x, y); await L.advance(page); }
+    await L.goAct(page, 22, 8); await L.advance(page, ["Abbatti gli automi", alt ? "Prima scarichiamo" : "Fallo saltare"]); await L.advance(page).catch(() => {});
+    await st(2, "dopo tre conti");
+    await jolly("Tali"); await L.talk(page, "ms_rana"); await L.advance(page);
+    await L.talk(page, "ms_koris"); await L.advance(page, ["Sali sulla nave"]); await L.advance(page).catch(() => {});
+    await L.talk(page, "ms_koris"); await L.advance(page, [alt ? "Mostra il diario" : "Il nemico sono"]);
+    await jolly("Tano"); await L.talk(page, "ms_liara"); await L.advance(page, ["Aspetta la notte"]); await page.waitForTimeout(400); await L.advance(page).catch(() => {});
+    await L.talk(page, "ms_talidi"); await L.advance(page, ["Ferma le guardie"]); await L.advance(page).catch(() => {});
+    await L.talk(page, "ms_talidi"); await L.advance(page, [alt ? "Lascia che Tano" : "Ti proteggiamo"]);
+    await L.talk(page, "ms_nicola"); await L.advance(page, [alt ? "Disarmalo" : "parlagli"]);
+    await jolly("Jacopo"); await L.talk(page, "ms_ferro"); await L.advance(page, [alt ? "Fagli dire" : "Registra tutto"]);
+    await jolly("Mordini"); await go(page, "ms_lab", 7, 7); await L.talk(page, "ms_cinzia"); await L.advance(page, ["Scendi nel seminterrato", alt ? "Tienili" : "Distruggili"]); await L.advance(page).catch(() => {});
+    const loy = await page.evaluate((k) => ["ms_miranda", "ms_garro", "ms_zero", "ms_tali", "ms_tano", "ms_jacopo", "ms_mordini"].filter((id) => eval(k).F.get("ms_loy_" + id)), K_);
+    if (loy.length !== (alt ? 5 : 7)) errors.push("leali: " + loy.join(","));
+    await jolly("relitto"); await st(3, "arrivo al relitto"); await L.goAct(page, 26, 10); await L.advance(page, ["Stacca il trasponditore"]); await L.advance(page).catch(() => {});
+    await L.talk(page, "ms_legione"); await L.advance(page, [alt ? "Spediscilo" : "Attivalo"]); await st(4, "dopo Legione");
+    await go(page, "ms_sala", 7, 7); await L.talk(page, "ms_fumo"); await L.advance(page, [alt ? "Riporterò la vittoria" : "Riporterò indietro"]); await L.advance(page).catch(() => {});
+    const i = await L.info(page); if (i.done[3] !== "ok") errors.push("capitolo 3 non concluso: " + JSON.stringify([i.done, i.step]));
+    const c = await page.evaluate((k) => eval(k).crew.count(), K_); if (c !== (alt ? 7 : 8)) errors.push("squadra: " + c);
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check(`Missione · capitolo 3${alt ? " (vie alternative)" : ""} (${w} px)`, errors); await browser.close();
+}
 (async () => {
+  if (process.env.ONLY === "3") { await zones3(390); await flow3(390, false); await flow3(390, true); return; }
   for (const w of [390, 320]) { await zonesTest(w); await flow(w, false); }
   await flow(390, true);
   for (const w of [390, 320]) { await zones2(w); await flow2(w, false); }
   await flow2(390, true);
+  for (const w of [390, 320]) { await zones3(w); await flow3(w, false); }
+  await flow3(390, true);
   await realFight(390);
 })();

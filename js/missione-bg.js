@@ -147,9 +147,47 @@
       for (let i = 0; i < 70; i++) { const a = f / 30 + i * 0.6, r = 30 + (i % 9) * 6; R(g, 160 + Math.cos(a) * r * 1.6, 70 + Math.sin(a * 1.3) * r * 0.5, 1.5, 1.5, `rgba(250,204,21,${0.4 + 0.4 * Math.sin(f / 5 + i)})`); }
       R(g, 154, 132, 12, 30, "#111827"); C(g, 160, 128, 7, "#1f2937"); C(g, 157, 127, 1.5, "#facc15"); C(g, 163, 127, 1.5, "#facc15");
       VIG(g, W, H, 0.4);
+    },
+    ms_flotta(g, W, H, f) {
+      VG(g, 0, 110, "#f97316", "#fde68a"); g.fillRect(0, 0, W, 110); C(g, 240, 92, 22, "#fef3c7"); GL(g, 240, 92, 110, "251,146,60", 0.5);
+      for (let i = 0; i < 4; i++) R(g, ((i * 110 + f * 0.1) % 400) - 50, 20 + i * 14, 70, 5, "rgba(255,237,213,.7)");
+      sea(g, W, 104, f, "#2b7fb0", "#0c3a5a");
+      // mille barche legate: scafi colorati, alberi, vele rattoppate e passerelle
+      for (let r = 0; r < 3; r++) for (let i = 0; i < 9; i++) {
+        const x = i * 38 - 10 + r * 14 + Math.sin(f / 40 + i + r) * 1.5, y = 112 + r * 26 + Math.sin(f / 30 + i * 2) * 1, c = ["#b91c1c", "#1d4ed8", "#a16207", "#7e22ce", "#047857", "#0e7490"][(i + r * 2) % 6];
+        T(g, [x, y, x + 34, y, x + 30, y + 9, x + 4, y + 9], c); R(g, x + 2, y - 2, 30, 2, "#78350f"); R(g, x + 10, y - 8, 12, 6, "#e7d8b0");
+        if ((i + r) % 2 === 0) { R(g, x + 16, y - 34, 1.5, 26, "#3b2f22"); T(g, [x + 18, y - 32, x + 30 + Math.sin(f / 20 + i) * 2, y - 14, x + 18, y - 12], ["#fde68a", "#fca5a5", "#c4b5fd", "#a7f3d0"][(i + r) % 4]); }
+        R(g, x + 34, y + 2, 6, 1, "#a0815a"); GL(g, x + 16, y - 4, 10, "254,215,170", 0.2 + 0.1 * Math.sin(f / 12 + i));
+      }
+      for (let i = 0; i < 18; i++) { const x = (i * 23 + f * 0.25) % W; R(g, x, 30 + (i % 5) * 9, 2, 1, "rgba(30,20,10,.5)"); }
+      VIG(g, W, H, 0.3);
+    },
+    ms_pragia(g, W, H, f) {
+      VG(g, 0, 120, "#475569", "#94a3b8"); g.fillRect(0, 0, W, 120); for (let i = 0; i < 5; i++) R(g, ((i * 90 + f * 0.08) % 420) - 60, 10 + i * 12, 110, 10, "rgba(71,85,105,.6)");
+      hills(g, W, 104, "#334155", 26, 4); R(g, 0, 116, W, 84, "#3f4a3a");
+      // il centro federale abbandonato: tribuna arrugginita, riflettori, il Blocco Bianco
+      R(g, 20, 70, 130, 46, "#52525b"); for (let i = 0; i < 6; i++) R(g, 24, 74 + i * 7, 122, 3, "#71717a"); R(g, 20, 66, 130, 4, "#7c2d12");
+      [[16, 40], [154, 40], [300, 44]].forEach(([x, y], i) => { R(g, x, y, 3, 76, "#3f3f46"); R(g, x - 8, y - 6, 19, 8, "#27272a"); const on = Math.sin(f / 7 + i * 2) > 0.6; if (on) GL(g, x + 1, y - 2, 30, "254,249,195", 0.5); for (let k = 0; k < 3; k++) R(g, x - 6 + k * 6, y - 4, 4, 3, on ? "#fef9c3" : "#52525b"); });
+      R(g, 196, 64, 92, 52, "#e5e7eb"); R(g, 196, 60, 92, 5, "#f8fafc"); for (let k = 0; k < 4; k++) R(g, 204 + k * 21, 76, 12, 18, `rgba(239,68,68,${0.15 + 0.12 * Math.sin(f / 16 + k)})`); R(g, 234, 98, 16, 18, "#9ca3af");
+      R(g, 60, 140, 200, 40, "#4b5b3a"); g.strokeStyle = "rgba(255,255,255,.25)"; g.strokeRect(60, 140, 200, 40); R(g, 56, 152, 4, 16, "#d4d4d8"); R(g, 260, 152, 4, 16, "#d4d4d8");
+      g.textAlign = "center"; g.font = "900 8px 'Trebuchet MS', sans-serif"; g.fillStyle = "#991b1b"; g.fillText("CERBERO · PROGETTO ASCENSIONE", 242, 72);
+      rain(g, W, f); VIG(g, W, H, 0.45);
+    },
+    ms_relitto(g, W, H, f) {
+      VG(g, 0, 200, "#05040a", "#1a1408"); g.fillRect(0, 0, W, 200); stars(g, W, 40, f, 60);
+      // lo scafo morto dei Raccoglitori: costole nere e bozzoli d'oro
+      for (let i = 0; i < 9; i++) { const x = 20 + i * 34; g.strokeStyle = "#141218"; g.lineWidth = 6; g.beginPath(); g.moveTo(x, 200); g.quadraticCurveTo(x + 14, 60, 160, 30); g.stroke(); }
+      R(g, 0, 150, W, 50, "#141218"); for (let i = 0; i < 12; i++) { const x = 14 + i * 26, y = 132 + (i % 3) * 8; g.fillStyle = "#3b2f12"; g.beginPath(); g.ellipse(x, y, 7, 13, 0, 0, 7); g.fill(); GL(g, x, y, 16, "250,204,21", 0.2 + 0.15 * Math.sin(f / 14 + i)); }
+      C(g, 160, 80, 16, "#1c1917"); C(g, 160, 80, 9, `rgba(250,204,21,${0.55 + 0.3 * Math.sin(f / 9)})`); GL(g, 160, 80, 60, "250,204,21", 0.3 + 0.15 * Math.sin(f / 9));
+      // la sagoma di Legione: luce singola, testa a faro
+      R(g, 250, 118, 12, 26, "#4b5563"); C(g, 256, 112, 7, "#6b7280"); C(g, 256, 112, 2.5, Math.sin(f / 5) > -0.3 ? "#38bdf8" : "#0c4a6e"); GL(g, 256, 112, 14, "56,189,248", 0.4);
+      VIG(g, W, H, 0.55);
     }
   };
   const HOT = {
+    ms_flotta: [[0, 100, 320, 80, "⛵ Mille barche legate insieme. Si nasce su una, si muore su un'altra, si litiga su tutte."], [210, 70, 60, 40, "🌅 Il sole cala sulla Flotta. Qui il tramonto è l'unica cosa che nessuno ripara."], [0, 10, 320, 50, "🐦 Gabbiani. Sulla Flotta hanno un nome ciascuno. E un debito."]],
+    ms_pragia: [[196, 60, 92, 56, "🏥 Il Blocco Bianco: dove Cerbero «allenava» i ragazzi speciali. Le finestre sono rosse anche di giorno."], [20, 66, 130, 50, "🏟️ La tribuna arrugginita: nessuno ci si siede da anni. Qualcuno ci ha scritto «ZERO» con lo spray."], [60, 140, 200, 40, "⚽ Il campo di Pragia: l'erba è cresciuta sopra le linee. Le porte, invece, sono ancora lì."]],
+    ms_relitto: [[144, 64, 32, 32, "🟡 Il cuore della nave: batte ancora, lento. Ogni battito fa tremare le costole."], [0, 120, 320, 40, "🫘 Bozzoli d'oro in fila. Dentro qualcuno respira? EDI dice di no. Lo dice due volte."], [240, 100, 30, 46, "📡 Una macchina accesa in mezzo al buio. Ti guarda. Poi guarda di nuovo, come se fossero in tanti a guardare."]],
     ms_purgatorio: [[30, 96, 260, 54, "⛓️ Cento celle, cento oblò. Uno solo lampeggia rosso, al centro. Indovina chi c'è dentro."], [140, 40, 40, 60, "🔦 Il faro di sorveglianza: gira, illumina, conta. Non sbaglia mai il conto."], [250, 20, 40, 30, "🌕 La luna. L'unica cosa che dal Purgatorio si vede gratis."]],
     ms_cella: [[130, 96, 60, 60, "🪑 La sedia: cinghie spezzate da dentro. Nessuno ha mai capito come."], [60, 176, 200, 16, "🖥️ «STASI · LIVELLO 3 · SPENTO». Qualcuno ha premuto spegni. Più volte. Con rabbia."], [100, 30, 120, 40, "🔴 La luce rossa: batte come un cuore che non ha più voglia di aspettare."]],
     ms_illio: [[216, 0, 50, 116, "🏙️ La Torre Dantis: oro, vetro e ottanta piani di contratti firmati."], [20, 136, 280, 30, "🛥️ Yacht bianchi: si chiamano tutti come una vittoria. Nessuno ha mai vinto niente."], [40, 18, 40, 34, "☀️ Il sole di Illio: anche lui sembra in affitto."]],
