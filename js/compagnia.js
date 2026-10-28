@@ -109,6 +109,7 @@
       ventura: ["La Compagnia di Ventura", "Prendi la strada dei mercenari che vincono: paga ricca, nessuna bandiera. Ognuno si porta via il suo pezzo.", "Vinci la battaglia finale con l'Astuzia più alta dell'Onore."],
       spezzato: ["Il Pallone Spezzato", "Segreto: la verità sul primo debito della Compagnia cambia chi sei davvero.", "Segreto: tutti i compagni reclutati, Onore e Astuzia a 3 o più."]
     },
+    guest: { id: "cp_dorotea", lines: [["cp_dorotea", "[furbo] {n}! La Compagnia ha due giorni di licenza e quaranta stomaci. Ho portato solo il mio, gli altri restano al Guado."], ["cp_dorotea", "Bel molo. Si difende bene: acqua da un lato, focaccia dall'altro. Se un giorno vi serve un piano, ne ho sempre uno. I soldi, mai."]] },
     heroLook: () => ({ bg: ["#78350f", "#fbbf24"], shirt: "#9a3412" }),
     heroTitle: () => "recluta della Compagnia",
     musicMain: "campo",

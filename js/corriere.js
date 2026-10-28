@@ -84,6 +84,18 @@
       K.say([["voce", "Tra i tubi, sotto una griglia, un pacco di carta marrone senza scritte. Pesa come un pallone e, sotto la carta, qualcuno ha disegnato una crepa dorata."]], () => { K.inv.give("pacco_senza_indirizzo"); K.setStep(1, 4); K.toast("🎒 Pacco senza indirizzo"); });
     };
   });
+  // Squadra dei Sogni, Carte del Destino e ospiti al Borgo: ritratti nel cast comune con prefisso pe_ (Pallone Express)
+  const PE = {
+    pe_marta: [{ name: "Zia Marta", sub: "Pallone Express", style: "bob", hair: "#d4d4d8", shirt: "#b91c1c", skin: "#e0b890", eye: "#1f2937", acc: ["occhiali"], bg: ["#7f1d1d", "#fde68a"] }, "Dirige l'agenzia «Pallone Express» dalla Stazione Centrale. Considera il tempo una merce come le altre: si consegna, e se arriva tardi si paga."],
+    pe_ruggero: [{ name: "Custode Ruggero", sub: "Stadio Vecchio", style: "short", hair: "#6b7280", beard: "pizzetto", shirt: "#166534", skin: "#d9a679", eye: "#1f2937", acc: ["cappellino"], bg: ["#14532d", "#bbf7d0"] }, "Custode dello Stadio Vecchio, dalle cinque a mezzanotte. Tiene acceso il faro anche quando non gioca nessuno, per abitudine e per principio."],
+    pe_ettore: [{ name: "Don Ettore", sub: "Colle delle Ville", style: "bald", hair: "#4a4a4a", beard: "folta", shirt: "#1e3a8a", skin: "#e8c4a0", eye: "#1f2937", acc: ["occhiali"], bg: ["#172554", "#bfdbfe"] }, "Vive sul Colle delle Ville con un orologio che segna l'ora sbagliata con convinzione. Un tempo era un portiere."],
+    pe_lia: [{ name: "Lia la Barcaiola", sub: "Porto Vecchio", style: "long", hair: "#7c2d12", shirt: "#0e7490", skin: "#d9a679", eye: "#1f2937", bg: ["#164e63", "#a5f3fc"] }, "Traghetta chiunque al Porto Vecchio, la mattina. Il pomeriggio va a pescare, e se perde una partita dice che ha vinto comunque."],
+    pe_tito: [{ name: "Tito del Banco", sub: "Mercato dei Mille Odori", style: "short", hair: "#1f2937", beard: "incolta", shirt: "#ca8a04", skin: "#e0b890", eye: "#1f2937", bg: ["#713f12", "#fef08a"] }, "Tiene il banco del Mercato dalle tre alle otto. Vende limoni con un racconto incluso e li usa come munizioni morali."],
+    pe_nina: [{ name: "Nina", sub: "Nipote di Zia Marta", style: "long", hair: "#7c2d12", shirt: "#9a3412", skin: "#e8c4a0", eye: "#065f46", bg: ["#431407", "#fdba74"] }, "Nipote di Zia Marta. A sei anni rubava le caramelle e le restituiva con un biglietto di scuse. Corre più di una bici."]
+  };
+  (function castPE(n) { const a = window.__borgoApi; if (!a || !a.CAST) { if (n < 80) setTimeout(() => castPE(n + 1), 250); return; } Object.keys(PE).forEach((id) => { if (!a.CAST[id]) a.CAST[id] = Object.assign({ tag: "" }, PE[id][0]); if (a.BIO && !a.BIO[id]) a.BIO[id] = PE[id][1]; }); })(0);
+  (function guestPE(n) { if (!window.__borgoGuests) { if (n < 80) setTimeout(() => guestPE(n + 1), 250); return; }
+    window.__borgoGuests.add({ id: "pe_ruggero", when: () => { try { return window.__corriere.info().ends.length > 0; } catch (e) { return false; } }, lines: [["pe_ruggero", "[serio] {n}. Il faro dello stadio l'ho lasciato acceso, tanto non lo spegne nessuno. Sono venuto a vedere il vostro mare: di notte, dicono, fa luce da solo."], ["pe_ruggero", "Zia Marta ti saluta. Dice che il tuo posto all'agenzia è libero, e che la bici l'hanno aggiustata. Una ruota sola, ma è un inizio."]] }); })(0);
   const E = window.__citta3d.create(cfg);
   window.__corriere = E;
 })();
