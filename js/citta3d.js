@@ -176,7 +176,7 @@
         m.rotation.x = -Math.PI / 2; m.position.set(o.x + DS / 2, 0, o.z + DS / 2); m.receiveShadow = !G.low; scene.add(m); W.mats.push(m.material);
       });
       // palazzi a istanza (classi di forma, tinta per quartiere)
-      const per = BCLASS.map(() => []);
+      const per = BCLASS.map(() => []), signs = [], tops = [];
       const trees = [], lamps = [];
       cfg.districts.forEach((d, di) => {
         const o = origin(d), P = d.pal;
@@ -191,6 +191,9 @@
             const ci = Math.floor(hs(bx, bz, d.gx + d.gz * 5) * (d.landmark === "collina" ? 3 : BCLASS.length)), [w, h, dd] = BCLASS[ci], rot = hs(bx, bz, 3) > 0.5;
             per[ci].push({ x: cx + (hs(bx, bz, 11) - 0.5) * 3, z: cz + (hs(bx, bz, 12) - 0.5) * 3, rot, col: P.bld[Math.floor(hs(bx, bz, 13) * P.bld.length)] });
             const ww = rot ? dd : w, dz = rot ? w : dd; const last = per[ci][per[ci].length - 1]; addSolid(last.x - ww / 2, last.z - dz / 2, last.x + ww / 2, last.z + dz / 2);
+            const SG = [0xef4444, 0x22d3ee, 0xfacc15, 0xa3e635, 0xf472b6, 0xfb923c][Math.floor(hs(bx, bz, 40 + d.gx) * 6)];
+            if (hs(bx, bz, 41) > 0.25) signs.push({ x: rot ? last.x + ww / 2 + 0.16 : last.x, y: 3.4 + hs(bx, bz, 42) * 1.2, z: rot ? last.z : last.z + dz / 2 + 0.16, rot, col: SG, w: 2.6 + hs(bx, bz, 43) * 2.4 });
+            if (hs(bx, bz, 44) > 0.35) tops.push({ x: last.x + (hs(bx, bz, 45) - 0.5) * 3, y: h, z: last.z + (hs(bx, bz, 46) - 0.5) * 3, col: [0x4b5563, 0x7c2d12, 0x374151][Math.floor(hs(bx, bz, 47) * 3)], s: 1.4 + hs(bx, bz, 48) * 1.4 });
           } else if (r < 0.82) { // piccolo parco
             for (let i = 0; i < 6; i++) trees.push({ x: cx + (hs(bx + i, bz, 21) - 0.5) * 16, z: cz + (hs(bx, bz + i, 22) - 0.5) * 16, s: 0.8 + hs(i, bx, bz) * 0.7, col: P.tree });
             box(cx, 0, cz, 5, 0.4, 5, 0x6b7a8f, { solid: false });
@@ -211,6 +214,16 @@
         arr.forEach((b, i) => { q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), b.rot ? Math.PI / 2 : 0); m4.compose(new THREE.Vector3(b.x, h / 2, b.z), q, s); im.setMatrixAt(i, m4); c.set(b.col); im.setColorAt(i, c); });
         im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true; im.castShadow = !G.low; im.receiveShadow = !G.low; scene.add(im);
       });
+      if (signs.length) {
+        const sm = new THREE.MeshBasicMaterial({ color: 0xffffff, fog: true }), si = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1.1, 0.25), sm, signs.length), m4 = new THREE.Matrix4(), c = new THREE.Color(), q = new THREE.Quaternion();
+        signs.forEach((g, i) => { q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), g.rot ? Math.PI / 2 : 0); m4.compose(new THREE.Vector3(g.x, g.y, g.z), q, new THREE.Vector3(g.w, 1, 1)); si.setMatrixAt(i, m4); c.set(g.col); si.setColorAt(i, c); });
+        scene.add(si); W.signMat = sm;
+      }
+      if (tops.length) {
+        const tm = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 }), ti2 = new THREE.InstancedMesh(new THREE.BoxGeometry(1.6, 1.6, 1.6), tm, tops.length), m4 = new THREE.Matrix4(), c = new THREE.Color(); W.mats.push(tm);
+        tops.forEach((g, i) => { m4.compose(new THREE.Vector3(g.x, g.y + 0.8 * g.s, g.z), new THREE.Quaternion(), new THREE.Vector3(g.s, g.s, g.s)); ti2.setMatrixAt(i, m4); c.set(g.col); ti2.setColorAt(i, c); });
+        scene.add(ti2);
+      }
       // alberi
       if (trees.length) {
         const tg = new THREE.ConeGeometry(2.2, 5.5, 6), tm = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 }), trg = new THREE.CylinderGeometry(0.35, 0.45, 2, 5), trm = new THREE.MeshStandardMaterial({ color: 0x5a3a20 });
@@ -225,6 +238,31 @@
         lamps.forEach((l, i) => { m4.setPosition(l.x, 2.6, l.z); pole.setMatrixAt(i, m4); m4.setPosition(l.x, 5.3, l.z); bulb.setMatrixAt(i, m4); });
         scene.add(pole); scene.add(bulb); W.bulbMat = bulbMat; W.lampPts = lamps;
       }
+      // vita in strada: auto sulle corsie e pedoni sui marciapiedi (solo scenografia)
+      W.cars = []; W.peds = [];
+      const nCars = G.low ? 8 : 16, carCols = [0xdc2626, 0x2563eb, 0xf59e0b, 0xe5e7eb, 0x111827, 0x16a34a, 0x9333ea];
+      for (let i = 0; i < nCars; i++) {
+        const alongX = hs(i, 1) > 0.5, line = Math.floor(hs(i, 2) * 4) , row = Math.floor(hs(i, 3) * 2), dir = hs(i, 4) > 0.5 ? 1 : -1, g = new THREE.Group(), col = carCols[i % carCols.length];
+        const body = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.9, 1.7), new THREE.MeshStandardMaterial({ color: col, roughness: 0.5, metalness: 0.2 })); body.position.y = 0.75; g.add(body);
+        const cab = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.7, 1.5), new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3, metalness: 0.4 })); cab.position.set(-0.2, 1.45, 0); g.add(cab);
+        const hm = new THREE.MeshStandardMaterial({ color: 0xfff3c0, emissive: 0xfff3c0, emissiveIntensity: 0 }); W.emis.push({ mat: hm, base: 2, night: true });
+        [-0.6, 0.6].forEach((zz) => { const hl = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.3, 0.4), hm); hl.position.set(1.8, 0.8, zz); g.add(hl); });
+        g.castShadow = false; scene.add(g);
+        const span = alongX ? 3 * DS : 2 * DS, lane = (alongX ? Math.floor(hs(i, 5) * 2) * DS : Math.floor(hs(i, 5) * 3) * DS) + line * CELL + (row ? 2 : -2) * dir;
+        W.cars.push({ g, alongX, lane: Math.min(lane, (alongX ? 2 * DS : 3 * DS) - 1), dir, pos: hs(i, 6) * span, span, speed: 5 + hs(i, 7) * 4.5 });
+      }
+      for (let i = 0; i < (G.low ? 6 : 12); i++) {
+        const look = { shirt: [0x2563eb, 0xdc2626, 0x16a34a, 0xa855f7, 0xf59e0b][i % 5], hair: [0x3a2a1a, 0x111827, 0xb45309][i % 3], skin: [0xe0b890, 0xc68642, 0x8d5524][i % 3], pants: 0x334155 }, f = figure(THREE, look); f.scale.setScalar(0.92); scene.add(f);
+        const alongX = hs(i, 11) > 0.5, line = Math.floor(hs(i, 12) * 4), side = hs(i, 13) > 0.5 ? 1 : -1, base = alongX ? Math.floor(hs(i, 14) * 2) * DS : Math.floor(hs(i, 14) * 3) * DS;
+        W.peds.push({ f, alongX, fix: base + line * CELL + side * 5.4, pos: hs(i, 15) * 80 + (alongX ? Math.floor(hs(i, 16) * 3) * DS : Math.floor(hs(i, 16) * 2) * DS), dir: 1, min: 0, max: 0, speed: 1.8 + hs(i, 17) * 1.2 });
+        const pd = W.peds[W.peds.length - 1], b0 = alongX ? Math.floor(pd.pos / DS) * DS : Math.floor(pd.pos / DS) * DS; pd.min = b0 + 6; pd.max = b0 + DS - 6; pd.pos = clamp(pd.pos, pd.min, pd.max);
+      }
+      // cielo: sole, luna, stelle, nuvole
+      const sky = new THREE.Group(); scene.add(sky); W.sky = sky;
+      W.sunMesh = new THREE.Mesh(new THREE.SphereGeometry(7, 12, 8), new THREE.MeshBasicMaterial({ color: 0xfff1b0, fog: false })); W.moonMesh = new THREE.Mesh(new THREE.SphereGeometry(5, 12, 8), new THREE.MeshBasicMaterial({ color: 0xe5e9f5, fog: false })); sky.add(W.sunMesh); sky.add(W.moonMesh);
+      const sp = new Float32Array(420 * 3); for (let i = 0; i < 420; i++) { const a = hs(i, 1) * Math.PI * 2, e = 0.15 + hs(i, 2) * 1.2, r = 330; sp[i * 3] = Math.cos(a) * Math.cos(e) * r; sp[i * 3 + 1] = Math.sin(e) * r; sp[i * 3 + 2] = Math.sin(a) * Math.cos(e) * r; }
+      const sg = new THREE.BufferGeometry(); sg.setAttribute("position", new THREE.BufferAttribute(sp, 3)); W.stars = new THREE.Points(sg, new THREE.PointsMaterial({ color: 0xffffff, size: 1.6, sizeAttenuation: false, transparent: true, opacity: 0, fog: false, depthWrite: false })); sky.add(W.stars);
+      W.clouds = []; for (let i = 0; i < 9; i++) { const c = new THREE.Mesh(new THREE.BoxGeometry(26 + hs(i, 1) * 20, 3, 12 + hs(i, 2) * 8), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85, fog: false })); c.position.set(hs(i, 3) * 300, 70 + hs(i, 4) * 20, hs(i, 5) * 200); scene.add(c); W.clouds.push(c); }
       // confini del mondo: muro invisibile
       const maxX = 3 * DS, maxZ = 2 * DS; addSolid(-10, -10, maxX + 10, 0); addSolid(-10, maxZ, maxX + 10, maxZ + 10); addSolid(-10, 0, 0, maxZ); addSolid(maxX, 0, maxX + 10, maxZ);
       return W;
@@ -421,8 +459,15 @@
     function updateVisuals(dt) {
       G.me.position.set(G.p.x, 0, G.p.z); const sp = Math.hypot(G.p.vx, G.p.vz) * (G.talking || G.menu ? 0 : 1); if (G.face != null) G.me.rotation.y = lerpAng(G.me.rotation.y, G.face, 0.25); animFig(G.me, sp, G.t);
       G.npcs.forEach((o) => { o.mesh.position.set(o.x, 0, o.z); o.mesh.rotation.y = lerpAng(o.mesh.rotation.y, o.face || 0, 0.15); animFig(o.mesh, o.sp, G.t + o.x); o.mk.position.y = 4.3 + Math.sin(G.t * 3) * 0.15; o.mesh.visible = npcPresent(o); });
-      const D = 11 - (G.menu ? 0 : 0), H = 8; const tx = G.p.x + Math.sin(G.yaw) * D, tz = G.p.z + Math.cos(G.yaw) * D;
+      const D = 13, H = 10.5; const tx = G.p.x + Math.sin(G.yaw) * D, tz = G.p.z + Math.cos(G.yaw) * D;
       G.cam.position.x = lerp(G.cam.position.x, tx, 0.14); G.cam.position.y = lerp(G.cam.position.y, H, 0.1); G.cam.position.z = lerp(G.cam.position.z, tz, 0.14); G.cam.lookAt(G.p.x, 1.8, G.p.z);
+      const Wd = G.W;
+      Wd.cars.forEach((c) => { if (Math.hypot((c.alongX ? c.pos : c.lane) - G.p.x, (c.alongX ? c.lane : c.pos) - G.p.z) > 130) return; c.pos += c.speed * dt * c.dir * (G.talking || G.menu ? 0 : 1); if (c.pos > c.span) c.pos -= c.span; if (c.pos < 0) c.pos += c.span; c.g.position.set(c.alongX ? c.pos : c.lane, 0, c.alongX ? c.lane : c.pos); c.g.rotation.y = c.alongX ? (c.dir > 0 ? 0 : Math.PI) : (c.dir > 0 ? -Math.PI / 2 : Math.PI / 2); });
+      Wd.peds.forEach((p) => { const x = p.alongX ? p.pos : p.fix, z = p.alongX ? p.fix : p.pos; if (Math.hypot(x - G.p.x, z - G.p.z) > 110) return; if (!(G.talking || G.menu)) { p.pos += p.dir * p.speed * dt; if (p.pos > p.max) { p.pos = p.max; p.dir = -1; } if (p.pos < p.min) { p.pos = p.min; p.dir = 1; } } p.f.position.set(x, 0, z); p.f.rotation.y = p.alongX ? (p.dir > 0 ? Math.PI / 2 : -Math.PI / 2) : (p.dir > 0 ? 0 : Math.PI); animFig(p.f, p.speed * 2.6, G.t + p.pos); });
+      const ang = ((G.hour - 6) / 12) * Math.PI, sd = new G.THREE.Vector3(Math.cos(ang), Math.sin(ang), 0.35).normalize();
+      Wd.sky.position.set(G.p.x, 0, G.p.z); Wd.sunMesh.position.copy(sd).multiplyScalar(260); Wd.moonMesh.position.copy(sd).multiplyScalar(-260); Wd.sunMesh.visible = Wd.sunMesh.position.y > -10; Wd.moonMesh.visible = Wd.moonMesh.position.y > -10;
+      Wd.stars.material.opacity = clamp(G.night * 1.2 - 0.2, 0, 1); Wd.clouds.forEach((c, i) => { c.position.x += dt * (0.8 + (i % 3) * 0.4); if (c.position.x > G.p.x + 200) c.position.x = G.p.x - 200; c.material.opacity = 0.25 + 0.6 * (1 - G.night); c.material.color.setScalar(0.35 + 0.65 * (1 - G.night)); });
+      if (Wd.signMat) Wd.signMat.color.setScalar(0.45 + 0.55 * G.night);
       G.W.water.forEach((w, i) => { w.material.emissiveIntensity = 0.2 + Math.sin(G.t * 1.5 + i) * 0.06; });
       const hh = Math.floor(G.hour), mm = Math.floor((G.hour % 1) * 60), clk = OV.querySelector(".clk"); clk.textContent = `${G.night > 0.5 ? "🌙" : "☀️"} ${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
       const d = districtAt(G.p.x, G.p.z); const ds = OV.querySelector(".dst"); if (d && ds.dataset.d !== d.id) { ds.dataset.d = d.id; ds.textContent = `${d.icon || ""} ${d.name}`; }
