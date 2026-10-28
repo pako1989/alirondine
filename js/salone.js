@@ -523,6 +523,12 @@
       opp: [{ name: "Pioggia Battente", color: "#0e7490", style: "equilibrata" }, { name: "Piena Notturna", color: "#1e3a5f", style: "pressing" }],
       boss: { name: "La Notte della Cresta", color: "#38bdf8", style: "pressing" },
       opts: (o, h, boss) => ({ title: `Argine · ${o.name}`, level: boss ? 6 : o.name === "Piena Notturna" ? 4 : 2, oppName: o.name }) },
+    { id: "pausa", t: "Squadra in Pausa", e: "⏸", saga: "missione", eng: "__pausa", d: "Tempo reale con pausa tattica: tocchi un nemico per calciargli un pallone, tocchi il terreno per spostarti, e con «⏸ Ruota» fermi tutto e scegli il potere di un compagno. Difendi la barricata a ondate.",
+      opp: [{ name: "Le bande di Omega", color: "#7c2d12", style: "pressing" }, { name: "Gli automi dell'Isola Bianca", color: "#6b7280", style: "difensiva" }],
+      boss: { name: "Il Gigante del Passo", color: "#facc15", style: "pressing" },
+      opts: (o, h, boss) => ({ title: `Squadra in Pausa · ${o.name}`, arena: boss ? "tana" : o.name === "Le bande di Omega" ? "ponte" : "sale", bonus: 1,
+        mates: [{ id: "ms_miranda", n: "Miranda", icon: "🕸️", pow: "rete" }, { id: "ms_zero", n: "Zero", icon: "💥", pow: "onda" }],
+        waves: boss ? [[["base", 6]], [["lesto", 4], ["scudo", 2]], [["grosso", 2], ["base", 4]], [["boss", 1], ["lesto", 3]]] : o.name === "Le bande di Omega" ? [[["lesto", 4]], [["base", 4], ["scudo", 1]], [["grosso", 1], ["lesto", 3]]] : [[["base", 5]], [["scudo", 3], ["base", 2]], [["grosso", 2], ["base", 3]]] }) },
   ];
   function sgState(m) { const s = SAGAS.find((x) => x.id === m.saga), x = s ? state(s) : null; return { s, open: !!(x && (x.doneN >= 1)), boss: !!(x && x.endsFound > 0) }; }
   function openSalaGiochi(back) {

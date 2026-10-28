@@ -165,7 +165,8 @@
       bass: "R . . . R . . 5 R . . . R . 5 .", bv: 0.1, arp: "1 5 8 5 1 5 8 5", aw: "triangle", av: 0.014, drum: "k . . h s . . h k . k h s . . h", dv: 0.09 } },
     guide: () => [["⏸ Squadra in Pausa", "Negli scontri tocchi un nemico per calciargli un pallone e tocchi il terreno per spostarti. «⏸ Ruota» ferma il tempo: scegli il potere di un compagno e tocca il bersaglio. Porti due compagni: scegli chi dal menu (⚔️ Schiera la compagnia)."], ["🔵🔴 Esempio e Spregiudicato", "Le risposte importanti alzano Esempio (fare la cosa giusta) o Spregiudicato (fare la cosa che funziona). Alcune scelte si aprono solo con abbastanza punti."]],
     party: (K) => (K.crew ? K.crew.field().slice(0, 2) : []),
-    cameos: []
+    cameos: [],
+    guest: { id: "ms_jolly", lines: ["Jolly, pilota della Normanna. Ho parcheggiato al porto. Storta, ma l'ho parcheggiata.", "Se ti serve un passaggio oltre il Passo d'Omega, ti dico di no. Una volta basta. Ma per il molo, sempre."] }
   });
   window.__missioneH = (K) => {
     let QL = [];
