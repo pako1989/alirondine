@@ -35,7 +35,7 @@ async function flow(w) {
   await talk("marta"); let i = await info(); if (!/^1:/.test(i)) errors.push("dopo Marta: " + i);
   await run(page, "D.state().hour = 10.0");
   await talk("pina"); await talk("ettore");
-  await run(page, "D.state().hour = 18.0"); await run(page, "D.step(0.1)");
+  await run(page, "D.state().hour = 18.0"); await run(page, "(D.snap(), D.step(0.1))");
   await talk("ruggero"); i = await info(); if (!/^2:/.test(i)) errors.push("dopo 3 consegne: " + i);
   await talk("marta"); i = await info(); if (!/^3:/.test(i)) errors.push("dopo secondo giro Marta: " + i);
   await run(page, "(() => { D.K.tp('sotterranei', 45, 55.5); D.step(0.5); D.near2(); D.act(); })()"); i = await info(); if (!/^4:/.test(i)) errors.push("dopo il pacco: " + i);
@@ -43,4 +43,19 @@ async function flow(w) {
   await page.waitForTimeout(200); await run(page, "D.render()"); await L.shot(page, "corriere_" + w);
   L.check(`Corriere 3D · capitolo 1 (${w} px)`, errors); await browser.close();
 }
-(async () => { for (const w of [390, 1000]) { await main(w); await flow(w); } })().catch((e) => { console.error("✗ corriere:", e.message); process.exit(1); });
+async function flow2(w) {
+  const { browser, page, errors } = await start(w, { v: 1, flags: { intro_done: 1 }, hour: 9, ch: 2, step: { 1: 5 }, done: { 1: "ok" } });
+  await page.evaluate((d) => { const K = eval(d).K; K.ask = (p, opts) => { opts[0].fn && opts[0].fn(); }; K.match = (o, cb) => { window.__matchOpts = o; cb({ win: true, my: 3, opp: 1 }); }; }, D);
+  const hr = (h) => run(page, "(() => { D.state().hour = arg; D.snap(); D.step(0.05); })()", h);
+  const talk = async (id) => { await run(page, "(() => { const S = D.state(); const o = S.npcs.find((n) => n.cfg.id === arg); S.p.x = o.x + 1.5; S.p.z = o.z + 0.5; D.step(0.5); D.near2(); D.act(); })()", id); await page.waitForTimeout(120); };
+  const step = () => run(page, "D.mem().step[2]");
+  await talk("marta"); if ((await step()) !== 1) errors.push("dopo Marta: " + (await step()));
+  await hr(18); await talk("ruggero"); if ((await step()) !== 2) errors.push("dopo Ruggero: " + (await step()));
+  await hr(10); await talk("lia"); await hr(16); await talk("tito");
+  const fl = await run(page, "JSON.stringify(D.mem().flags)"); if (!/c2_lia/.test(fl) || !/c2_tito/.test(fl)) errors.push("squadra incompleta: " + fl);
+  await hr(21); await talk("ruggero"); await talk("ruggero"); if ((await step()) !== 4) errors.push("dopo la partita: " + (await step()));
+  const mo = await run(page, "window.__matchOpts && window.__matchOpts.n"); if (mo !== 3) errors.push("opzioni partita: " + mo);
+  await hr(12); await talk("marta"); const done = await run(page, "JSON.stringify(D.mem().done)"); if (!/"2":"ok"/.test(done)) errors.push("capitolo 2 non concluso: " + done);
+  L.check(`Corriere 3D · capitolo 2 (${w} px)`, errors); await browser.close();
+}
+(async () => { for (const w of [390, 1000]) { await main(w); await flow(w); await flow2(w); } })().catch((e) => { console.error("✗ corriere:", e.message); process.exit(1); });

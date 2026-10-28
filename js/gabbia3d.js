@@ -320,6 +320,7 @@
     </div>`;
     OV.querySelector(".x").onclick = () => {
       if (inMatch) {
+        if (G && G.onDone) { const cb = G.onDone; G.onDone = null; close(); safe(() => cb({ win: false, my: 0, opp: 0, quit: true }), 0); return; }
         open();
       } else {
         const b = BACK;
@@ -1774,7 +1775,8 @@
         pickupLock: 0.25,
       },
       score: [0, 0],
-      timeLeft: NP === 7 ? 150 : 90,
+      timeLeft: opts.secs || (NP === 7 ? 150 : 90),
+      onDone: typeof opts.onDone === "function" ? opts.onDone : null,
       goldenGoal: false,
       superPct: 25,
       wallFlash: 0,
@@ -3125,6 +3127,12 @@
     const playedIds = sq.all.map((c) => c.id);
     const ups = s && s.gainXp ? s.gainXp(playedIds, win, false) : [];
 
+    if (G.onDone) { // partita a missione di una saga: niente riepilogo Gabbia, si torna alla saga con l'esito
+      const cb = G.onDone, res = { win, my: myGoals, opp: oppGoals };
+      safe(() => showBanner(win ? "🏆 Vittoria!" : "Fine partita", `${myGoals} – ${oppGoals}`, null, 1400), 0);
+      setTimeout(() => { close(); safe(() => cb(res), 0); }, FAST ? 0 : 1600);
+      return;
+    }
     const renderSummary = () => {
       const body = shell(win ? "🏆 Vittoria in Gabbia 3D!" : "⚽ Fine Partita · Gabbia 3D", false);
       body.innerHTML = `

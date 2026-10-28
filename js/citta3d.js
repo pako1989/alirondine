@@ -111,6 +111,13 @@
       },
       finishChapter(n, ending) { const m = mem(); m.done[n] = String(ending || "ok"); if (m.ch <= n && n < (cfg.chapters || 1)) m.ch = n + 1; save(); },
       end(id) { const m = mem(); if (!m.ends.includes(id)) m.ends.push(id); save(); },
+      // partita 3D a missione (motore Gabbia/7v7): la città si mette in pausa e torna con l'esito { win, my, opp, quit }
+      match(opts, cb) {
+        if (!G) return; const gb = window.__gabbia3d; persist();
+        if (!gb || !gb.startMatch) { if (cb) cb({ win: true, my: 1, opp: 0, fake: true }); return; }
+        G.hidden = true; G.menu = true; OV.style.display = "none";
+        gb.startMatch(Object.assign({}, opts, { onDone: (r) => { if (OV) OV.style.display = ""; if (G) { G.hidden = false; G.menu = false; G.last = performance.now(); loop(); } if (cb) cb(r); } }));
+      },
       exit() { close(); const b = BACK; if (typeof b === "function") b(); },
       refresh: () => refreshGoal(),
       mem
@@ -413,7 +420,7 @@
     const lerpAng = (a, b, t) => { let d = b - a; while (d > Math.PI) d -= Math.PI * 2; while (d < -Math.PI) d += Math.PI * 2; return a + d * t; };
     function loop() {
       if (!G || G.dead) return; const now = performance.now(), dt = Math.min(0.05, (now - G.last) / 1000); G.last = now;
-      step(dt); updateVisuals(dt); G.renderer.render(G.scene, G.cam); G.raf = requestAnimationFrame(loop);
+      if (G.hidden) { G.raf = 0; return; } step(dt); updateVisuals(dt); G.renderer.render(G.scene, G.cam); G.raf = requestAnimationFrame(loop);
     }
 
     const api = {
@@ -421,7 +428,7 @@
       menuEntry: (back) => ({ label: `${ICON} ${TITLE}`, cls: "hot", fn: () => open(back), sub: `Capitolo ${mem().ch}${mem().done[mem().ch] ? " concluso" : " in corso"}${cfg.menuSub ? " · " + cfg.menuSub : ""}` }),
       endings: () => Object.keys(cfg.endings || {}).map((k) => ({ id: k, title: cfg.endings[k][0], desc: cfg.endings[k][1], hint: cfg.endings[k][2] || "", found: mem().ends.includes(k) })),
       info: () => { const m = load(); return { ch: m.ch, step: m.step, done: m.done, ends: m.ends, flags: m.flags }; },
-      _dbg: DBG ? { K, state: () => G, mem, step: (dt) => { step(dt); if (G) updateVisuals(dt); }, render: () => G && G.renderer.render(G.scene, G.cam), toWorld, districtAt, DIST, NPCS, say, near: () => (G && G.near) || null, near2: () => { if (G) G.near = nearest(); return G && G.near; }, act: () => doAct(), solids: () => G && G.W.solids } : undefined
+      _dbg: DBG ? { K, snap: () => updateNpcsInstant(), state: () => G, mem, step: (dt) => { step(dt); if (G) updateVisuals(dt); }, render: () => G && G.renderer.render(G.scene, G.cam), toWorld, districtAt, DIST, NPCS, say, near: () => (G && G.near) || null, near2: () => { if (G) G.near = nearest(); return G && G.near; }, act: () => doAct(), solids: () => G && G.W.solids } : undefined
     };
     return api;
   }
