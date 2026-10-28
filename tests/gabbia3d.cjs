@@ -223,8 +223,10 @@ async function run(w) {
     foe.z = shooter.z + 0.2;
     G.ball.owner = foe;
     shooter.tackleCd = 0;
+    const rndSave = Math.random; Math.random = () => 0; // contrasto riuscito (50%)
     bTackle.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, cancelable: true, pointerId: 24, pointerType: "touch" }));
     bTackle.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, cancelable: true, pointerId: 24, pointerType: "touch" }));
+    Math.random = rndSave;
     const recoveredBall = G.ball.owner === shooter && foe.slowT > 0;
 
     // 4) Super sotto 100% dà feedback immediato sul banner (non muto!)
