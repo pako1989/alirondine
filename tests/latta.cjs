@@ -90,10 +90,64 @@ async function bossSim() {
   } catch (e) { errors.push(e.message.slice(0, 300)); }
   L.check("Pallone di Latta · Corvo Maggiore battibile", errors); await browser.close();
 }
+
+// ---------------------------------------------------------------- capitolo 2
+const SAVE2 = { v: 1, diffSet: true, intro: { ch1: 1, ch2: 1 }, ch: 2, max: 2, done: { 1: "ok" }, step: { 1: 4, 2: 0 }, flags: { lt_armatura: 1, lt_c1_done: 1 } };
+async function zones2(w) {
+  const { browser, page, errors } = await start(w, SAVE2);
+  for (const z of ["lt_vicoli", "lt_bottega", "lt_sacrestia"]) {
+    try { await go(page, z); await L.shot(page, "lt_" + z + "_" + w); const bad = await L.reachAll(page, z); if (bad.length) errors.push(z + ": " + bad.join(", ")); }
+    catch (e) { errors.push(z + ": " + e.message.slice(0, 140)); }
+  }
+  L.check(`Pallone di Latta · zone cap.2 (${w} px)`, errors); await browser.close();
+}
+async function flow2(w, alt) {
+  const { browser, page, errors } = await start(w, SAVE2);
+  await stubLevel(page);
+  const st = async (n, what) => { const i = await L.info(page); if (i.step[2] !== n) errors.push(what + ": " + JSON.stringify(i.step)); };
+  try {
+    await go(page, "lt_vicoli", 20, 11); await L.talk(page, "lt_tobia"); await L.advance(page); await st(1, "dopo Tobia");
+    await go(page, "lt_vicoli", 11, 7); await L.goAct(page, 10, 7); await L.advance(page); await st(1, "scala corta");
+    await go(page, "lt_vicoli", 8, 15); await L.talk(page, "lt_rina"); await L.advance(page, ["Promesso"]);
+    await go(page, "lt_vicoli", 24, 13); await L.talk(page, "lt_mattonaro"); await L.advance(page);
+    await go(page, "lt_bottega", 7, 7); await L.talk(page, "lt_zeno"); await L.advance(page, [alt ? "Quanto vale" : "Lasciami"]); await st(2, "dopo Zeno");
+    await go(page, "lt_vicoli", 11, 7); await L.goAct(page, 10, 7); await L.advance(page, ["Sali sui tetti"]); await L.advance(page).catch(() => {}); await st(3, "dopo i tetti");
+    await go(page, "lt_sacrestia", 12, 4); await L.goAct(page, 13, 2); await L.advance(page, ["Sali nel Campanile", alt ? "Vendilo" : "Torna alla campana"]); await L.advance(page).catch(() => {});
+    const i = await L.info(page); if (!i.done[2]) errors.push("capitolo 2 non concluso: " + JSON.stringify([i.done, i.step]));
+    const lg = await page.evaluate(() => window.__scLog); if (!lg || lg.length !== 2 || lg[0].id !== "tetti" || lg[1].id !== "campanile") errors.push("livelli: " + JSON.stringify(lg));
+    const k = await page.evaluate((k) => { const K = eval(k); return { pg: K.inv.has("lt_pagina"), bat: K.inv.has("lt_batacchio"), ok: K.F.is("lt_campana_ok"), v: K.F.is("lt_campana_venduta") }; }, K_);
+    if (!k.pg || k.bat || k.ok === !!alt || k.v !== !!alt) errors.push("stato finale: " + JSON.stringify(k));
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check(`Pallone di Latta · capitolo 2${alt ? " (vie alternative)" : ""} (${w} px)`, errors); await browser.close();
+}
+// motore: i comignoli spingono su fino alla trave, il primo salto arriva alle travi dei gettoni, Sgrinfia si batte
+async function tettiSim() {
+  const { browser, page, errors } = await L.setup({ w: 800, h: 400, ...MOD });
+  try {
+    const r = await page.evaluate(async () => {
+      window.__noSfx = 1; const LV = window.__latta._dbg.K.scroll.levels, sl = (ms) => new Promise((r) => setTimeout(r, ms)), out = {};
+      window.__scorri.start({ level: Object.assign({ id: "tetti" }, LV.tetti), tutorial: false, onDone: () => {} });
+      let s = window.__scorri.state; Object.assign(out, s.counts);
+      s.warp(25 * 16 + 8, 150); s.tick(4); s.press("L", true); s.tick(2); s.press("L", false); let minY = 999; for (let i = 0; i < 160; i++) { s.tick(1); minY = Math.min(minY, s.hero.y); } s.press("R", true); s.tick(12); s.press("R", false); s.tick(80); out.vent = [Math.round(minY), Math.round(s.hero.y)];
+      s.finish(false); await sl(50);
+      let res = null; window.__scorri.start({ level: Object.assign({ id: "campanile" }, LV.campanile), tutorial: false, onDone: (x) => { res = x; } });
+      s = window.__scorri.state;
+      for (let t = 0; t < 3000 && !res; t++) { const b = s.boss, h = s.hero; if (!b) break; if (b.st === "dizzy" && b.hitT <= 0) { if (h.y > b.y - 30 || Math.abs(h.x - b.x) > 6) s.warp(b.x, b.y - 46); } else if (b.st !== "dizzy" && Math.abs(h.x - b.x) < 60) s.warp(b.x > 200 ? 72 : 344, 120); s.tick(1); if (s.phase === "win") { s.finish(true); break; } if (s.phase === "ko") { s.finish(false); break; } }
+      await sl(50); out.boss = res || { boss: s.boss }; return out;
+    });
+    if (r.vents !== 4 || r.falls < 5 || r.cats < 3) errors.push("tetti: " + JSON.stringify(r));
+    if (!(r.vent[0] < 60 && r.vent[1] === 64)) errors.push("comignolo non porta sulla trave: " + JSON.stringify(r.vent));
+    if (!r.boss || !r.boss.win) errors.push("Sgrinfia non battibile: " + JSON.stringify(r.boss));
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check("Pallone di Latta · tetti e Sgrinfia", errors); await browser.close();
+}
 (async () => {
   const only = process.argv[2];
   for (const w of [390, 320]) { if (!only || only === "zone") await zonesTest(w); }
   if (!only || only === "flow") { await flow(390, false); await flow(320, true); }
   if (!only || only === "motore") { await realEngine(390); await realEngine(800); }
   if (!only || only === "capo") await bossSim();
+  if (!only || only === "zone2") { await zones2(390); await zones2(320); }
+  if (!only || only === "flow2") { await flow2(390, false); await flow2(320, true); }
+  if (!only || only === "tetti") await tettiSim();
 })();

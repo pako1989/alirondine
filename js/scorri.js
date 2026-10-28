@@ -267,6 +267,7 @@
   }
   // capo del livello dei tetti: Sgrinfia, gattone ladro col batacchio della campana
   function drawCat(g, e, f) {
+    g.translate(0, -e.h); // per i capi e.y è la linea dei piedi: drawFoe trasla a e.y + e.h
     const O = "#16141f", dz = e.st === "dizzy", cr = e.st === "crouch", air = e.st === "leap", by = cr ? 4 : 0;
     if (e.hitT > 0 && f % 4 < 2) g.globalAlpha = 0.45;
     const tl = Math.round(Math.sin(f / 8) * 3); part(g, -22, -30 + tl, 4, 16, "#3a3848", O); part(g, -24, -32 + tl, 4, 4, "#3a3848", O);
@@ -734,7 +735,7 @@
     window.__scorri.state = {
       get phase() { return S && S.phase; }, get hero() { return S && { x: S.hero.x, y: S.hero.y, vx: S.hero.vx, vy: S.hero.vy, hp: S.hero.hp, ground: S.hero.ground, frozen: S.hero.frozen }; },
       get ball() { return S && { st: S.ball.st, x: S.ball.x, y: S.ball.y, vx: S.ball.vx, vy: S.ball.vy }; }, get foes() { return S ? S.foes.filter((e) => !e.dead).length : 0; }, get coins() { return S ? S.coinN : 0; }, get ban() { return S ? countBits(S.banMask) : 0; },
-      get boss() { const b = S && S.foes.find((e) => e.t === "Z"); return b ? { hp: b.hp, st: b.st, dead: b.dead, x: b.x, y: b.y } : null; }, get practice() { return S && S.practice; }, get W() { return S && S.W; },
+      get boss() { const b = S && S.foes.find((e) => e.t === "Z"); return b ? { hp: b.hp, st: b.st, dead: b.dead, x: b.x, y: b.y, hitT: b.hitT } : null; }, get counts() { return S ? { vents: S.vents.length, falls: S.falls.length, cats: S.foes.filter((e) => e.t === "g").length } : null; }, get practice() { return S && S.practice; }, get W() { return S && S.W; },
       tut: () => !!(tutC && tutC.open), press, tick: (n) => { for (let i = 0; i < (n || 1) && S; i++) step(S); }, warp: (x, y) => { if (S) { S.hero.x = x; S.hero.y = y; S.hero.vx = S.hero.vy = 0; } },
       finish: (win) => { if (!S) return; if (tutC) { tutC.close(); tutC = null; } S.win = win !== false; if (S.win) { S.items.forEach((it) => { if (it.k === "S" && win === "all") S.banMask |= 1 << it.i; }); } close(); }
     };
