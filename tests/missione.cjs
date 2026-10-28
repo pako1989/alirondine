@@ -65,8 +65,47 @@ async function realFight(w) {
   } catch (e) { errors.push(e.message.slice(0, 300)); }
   L.check(`Missione · Squadra in Pausa vera (${w} px)`, errors); await browser.close();
 }
+const CREW1 = { cr_n: 4, cr_ms_miranda: 1, cf_ms_miranda: 1, cr_ms_jacopo: 2, cf_ms_jacopo: 1, cr_ms_mordini: 3, cr_ms_garro: 4, ms_c1_done: 1 };
+const S2 = { v: 1, diffSet: true, intro: { ch1: 1, ch2: 1, ms_purgatorio: 1, ms_illio: 1, ms_isola: 1, ms_orizzonte: 1, ms_omega: 1 }, ch: 2, step: { 1: 4 }, done: { 1: "ok" }, flags: CREW1 };
+async function zones2(w) {
+  const { browser, page, errors } = await start(w, S2, "Inizia il Capitolo 2");
+  for (const z of ["ms_purgatorio", "ms_cella", "ms_illio", "ms_torre", "ms_isola", "ms_orizzonte"]) {
+    try { await page.evaluate((k) => { const K = eval(k); K.F.set("ms_purg_vinto", true); K.F.set("ms_torre_vinta", true); }, K_); await go(page, z); await L.shot(page, "ms2_" + z + "_" + w); const bad = await L.reachAll(page, z); if (bad.length) errors.push(z + ": " + bad.join(", ")); }
+    catch (e) { errors.push(z + ": " + e.message.slice(0, 140)); }
+  }
+  L.check(`Missione · capitolo 2 zone (${w} px)`, errors); await browser.close();
+}
+async function flow2(w, alt) {
+  const { browser, page, errors } = await start(w, S2, "Inizia il Capitolo 2");
+  await stubFight(page);
+  const st = async (n, what) => { const i = await L.info(page); if (i.step[2] !== n) errors.push(what + ": " + JSON.stringify(i.step)); };
+  const jolly = async (dest) => { await go(page, "ms_normanna", 6, 10); await L.talk(page, "ms_jolly"); await L.advance(page, [dest]); await page.waitForTimeout(400); await L.advance(page).catch(() => {}); };
+  try {
+    await go(page, "ms_sala", 7, 7); await L.talk(page, "ms_fumo"); await L.advance(page, [alt ? "Cosa c'è nei dati" : "Una detenuta"]); await st(1, "dopo Fumo");
+    await jolly("Il Purgatorio"); if ((await L.zone(page)) !== "ms_purgatorio") errors.push("viaggio al Purgatorio fallito");
+    await L.talk(page, "ms_curiale"); await L.advance(page, ["Combatti"]); await L.advance(page).catch(() => {});
+    await L.talk(page, "ms_guardia"); await L.advance(page);
+    await go(page, "ms_cella", 7, 7); await L.talk(page, "ms_zero"); await L.advance(page, [alt ? "Ti do i file" : "Vieni per le squadre"]);
+    await jolly("Porto Illio"); await L.talk(page, "ms_liara"); await L.advance(page, [alt ? "Quanto ti devo" : "Mi sei mancata"]);
+    await go(page, "ms_torre", 8, 9); await L.talk(page, "ms_capo"); await L.advance(page, ["Passa con la forza"]); await L.advance(page).catch(() => {});
+    await L.talk(page, "ms_nassana"); await L.advance(page, [alt ? "Lascia che Tano" : "Consegnala"]);
+    await jolly("Isola Bianca"); await L.talk(page, "ms_tali"); await L.advance(page, ["Proteggi Tali", alt ? "Li prende Cerbero" : "Tienili tu"]); await L.advance(page).catch(() => {});
+    await st(2, "dopo i tre reclutamenti");
+    await jolly("Borgo Orizzonte"); await st(3, "arrivo a Orizzonte");
+    await L.talk(page, "ms_sindaca"); await L.advance(page);
+    for (const [x, y] of [[14, 2], [27, 11], [14, 19]]) { await L.goAct(page, x, y); await L.advance(page); }
+    await st(4, "dopo le torri");
+    await L.talk(page, "ms_prelato"); await L.advance(page, ["Difendi Orizzonte"]); await L.advance(page).catch(() => {}); await st(5, "dopo il Prelato");
+    await L.talk(page, "ms_ascanio"); await L.advance(page, [alt ? "Faccio quello che serve" : "Ho bisogno delle loro navi"]); await L.advance(page).catch(() => {});
+    const i = await L.info(page); if (i.done[2] !== "ok") errors.push("capitolo 2 non concluso: " + JSON.stringify([i.done, i.step]));
+    const c = await page.evaluate((k) => eval(k).crew.count(), K_); if (c !== 7) errors.push("squadra: " + c + " invece di 7");
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check(`Missione · capitolo 2${alt ? " (vie alternative)" : ""} (${w} px)`, errors); await browser.close();
+}
 (async () => {
   for (const w of [390, 320]) { await zonesTest(w); await flow(w, false); }
   await flow(390, true);
+  for (const w of [390, 320]) { await zones2(w); await flow2(w, false); }
+  await flow2(390, true);
   await realFight(390);
 })();

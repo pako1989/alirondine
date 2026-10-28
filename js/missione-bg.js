@@ -19,6 +19,7 @@
     g.font = "900 7px 'Trebuchet MS', sans-serif"; g.textAlign = "left"; g.fillStyle = "#1e3a5f"; g.fillText("NORMANNA", -52, 15);
     GL(g, -66, 4, 22, "125,211,252", 0.35 + 0.1 * Math.sin(f / 7)); g.restore();
   };
+  const hills = (g, W, y, c, a, p) => { g.fillStyle = c; g.beginPath(); g.moveTo(0, 200); for (let x = 0; x <= W; x += 6) g.lineTo(x, y - Math.abs(Math.sin(x / (26 + p) + p)) * a); g.lineTo(W, 200); g.fill(); };
   const neon = (g, x, y, txt, rgb, f, sz) => { const on = Math.sin(f / 9 + x) > -0.9; g.font = `900 ${sz || 12}px 'Trebuchet MS', sans-serif`; g.textAlign = "center"; g.fillStyle = on ? `rgb(${rgb})` : "#3f3f46"; g.fillText(txt, x, y); if (on) GL(g, x, y - 4, 40, rgb, 0.35); };
   const rain = (g, W, f) => { g.strokeStyle = "rgba(170,190,230,.3)"; g.lineWidth = 1; g.beginPath(); for (let i = 0; i < 60; i++) { const x = (i * 47 + f * 1.4) % 340 - 10, y = (i * 71 + f * 5) % 210 - 5; g.moveTo(x, y); g.lineTo(x - 2, y + 7); } g.stroke(); };
   const raccoglitore = (g, x, y, s, f) => { g.save(); g.translate(x, y); g.scale(s, s); T(g, [-6, 0, 6, 0, 4, -18, -4, -18], "#111827"); C(g, 0, -22, 6, "#1f2937"); g.fillStyle = "#facc15"; g.beginPath(); g.ellipse(-2.4, -23, 1.8, 1.1, -0.4, 0, 7); g.ellipse(2.4, -23, 1.8, 1.1, 0.4, 0, 7); g.fill(); GL(g, 0, -23, 8, "250,204,21", 0.2 + 0.1 * Math.sin(f / 5 + x)); g.restore(); };
@@ -87,9 +88,74 @@
       R(g, 150, 24, 150, 70, "#1f2937"); R(g, 150, 24, 150, 3, "#64748b"); g.fillStyle = "#e5e7eb"; g.textAlign = "left"; g.font = "8px monospace"; g.fillText("Ch = f(colla) · v²", 160, 44); g.fillText("♪ atto II: tenore?", 160, 60); g.fillText("NON CANCELLARE", 160, 80);
       for (let i = 0; i < 6; i++) { const t = (f + i * 20) % 120; C(g, 230 + i * 5, 110 - t * 0.4, 2, `rgba(134,239,172,${1 - t / 120})`); }
       VIG(g, W, H, 0.45);
+    },
+    ms_purgatorio(g, W, H, f) {
+      VG(g, 0, 120, "#0b0f19", "#1e293b"); g.fillRect(0, 0, W, 120); stars(g, W, 40, f, 70); C(g, 270, 30, 10, "#e5e7eb");
+      sea(g, W, 112, f, "#0f2a44", "#020617");
+      // lo scafo grigio della nave-prigione, con file di oblò e il faro che gira
+      T(g, [20, 150, 300, 150, 284, 176, 36, 176], "#3f3f46"); R(g, 30, 96, 260, 54, "#52525b"); R(g, 30, 96, 260, 4, "#71717a");
+      for (let r = 0; r < 3; r++) for (let i = 0; i < 18; i++) R(g, 40 + i * 14, 104 + r * 14, 6, 6, (i + r * 3 + Math.floor(f / 50)) % 11 === 0 ? "#ef4444" : "#1f2937");
+      R(g, 150, 60, 20, 36, "#3f3f46"); const a = f / 40; g.fillStyle = "rgba(254,240,138,.18)"; g.beginPath(); g.moveTo(160, 62); g.lineTo(160 + Math.cos(a) * 200, 62 + Math.sin(a) * 30 - 20); g.lineTo(160 + Math.cos(a + 0.2) * 200, 62 + Math.sin(a + 0.2) * 30 - 10); g.fill(); C(g, 160, 62, 4, "#fef08a");
+      g.textAlign = "left"; g.font = "900 9px 'Trebuchet MS', sans-serif"; g.fillStyle = "#e5e7eb"; g.fillText("PURGATORIO", 46, 168);
+      VIG(g, W, H, 0.5);
+    },
+    ms_cella(g, W, H, f) {
+      VG(g, 0, 200, "#18181b", "#0a0a0b"); g.fillRect(0, 0, W, 200); GL(g, 160, 30, 160, "239,68,68", 0.18 + 0.08 * Math.sin(f / 20));
+      R(g, 60, 20, 200, 150, "#e5e7eb"); R(g, 64, 24, 192, 142, "#f4f4f5"); for (let i = 0; i < 12; i++) R(g, 66 + i * 16, 24, 2, 142, "rgba(0,0,0,.05)");
+      // la sedia con le cinghie spezzate
+      R(g, 144, 110, 32, 40, "#52525b"); R(g, 140, 100, 40, 12, "#3f3f46"); R(g, 136, 120, 8, 3, "#27272a"); R(g, 176, 120, 8, 3, "#27272a"); R(g, 128, 122, 6, 2, "#7f1d1d"); R(g, 186, 118, 6, 2, "#7f1d1d");
+      for (let i = 0; i < 6; i++) { const t = (f * 0.6 + i * 30) % 160; R(g, 150 + Math.sin(i * 3 + f / 20) * 40, 160 - t, 2, 2, `rgba(168,85,247,${0.6 - t / 300})`); }
+      g.textAlign = "center"; g.font = "900 9px monospace"; g.fillStyle = "#991b1b"; g.fillText("STASI · LIVELLO 3 · SPENTO", 160, 186); VIG(g, W, H, 0.55);
+    },
+    ms_illio(g, W, H, f) {
+      VG(g, 0, 120, "#7dd3fc", "#fef3c7"); g.fillRect(0, 0, W, 120); C(g, 60, 34, 16, "#fef9c3"); GL(g, 60, 34, 60, "254,240,138", 0.45);
+      // grattacieli di vetro e la torre d'oro
+      for (let i = 0; i < 8; i++) { const x = 20 + i * 36, h = 40 + rnd(i + 2) * 40; R(g, x, 116 - h, 26, h, i % 2 ? "#cbd5e1" : "#e2e8f0"); for (let k = 0; k < 6; k++) R(g, x + 3, 120 - h + k * 7, 20, 2, "rgba(56,189,248,.35)"); }
+      R(g, 220, 10, 40, 106, "#ca8a04"); T(g, [220, 10, 260, 10, 240, -6], "#eab308"); for (let k = 0; k < 14; k++) R(g, 224, 16 + k * 7, 32, 2, `rgba(254,240,138,${0.4 + 0.3 * Math.sin(f / 15 + k)})`);
+      sea(g, W, 116, f, "#38bdf8", "#0369a1");
+      // yacht
+      for (let i = 0; i < 3; i++) { const x = 30 + i * 90 + Math.sin(f / 50 + i) * 2; T(g, [x, 150, x + 60, 150, x + 52, 162, x + 6, 162], "#f8fafc"); R(g, x + 16, 140, 26, 10, "#e2e8f0"); R(g, x + 20, 143, 18, 3, "#0ea5e9"); }
+      VIG(g, W, H, 0.25);
+    },
+    ms_torre(g, W, H, f) {
+      VG(g, 0, 200, "#1c1917", "#292524"); g.fillRect(0, 0, W, 200);
+      // vetrata sulla città al tramonto
+      VG(g, 10, 120, "#f59e0b", "#7c2d12"); g.fillRect(20, 10, 280, 110); for (let i = 0; i < 12; i++) { const x = 24 + i * 23, h = 20 + rnd(i + 5) * 50; R(g, x, 120 - h, 18, h, "#451a03"); for (let k = 0; k < 4; k++) if (rnd(i * 7 + k) > 0.4) R(g, x + 4, 124 - h + k * 9, 3, 3, "#fde68a"); }
+      for (let i = 0; i < 6; i++) R(g, 20 + i * 56, 10, 3, 110, "#a16207"); R(g, 20, 64, 280, 2, "#a16207");
+      R(g, 0, 120, W, 80, "#292524"); R(g, 90, 140, 140, 10, "rgba(186,230,253,.4)"); R(g, 90, 150, 4, 30, "#78716c"); R(g, 226, 150, 4, 30, "#78716c");
+      C(g, 270, 150, 8, "#fde047"); GL(g, 270, 150, 26, "250,204,21", 0.35); g.fillStyle = "#15803d"; g.beginPath(); g.ellipse(46, 160, 10, 24, 0, 0, 7); g.fill();
+      VIG(g, W, H, 0.4);
+    },
+    ms_isola(g, W, H, f) {
+      VG(g, 0, 100, "#bae6fd", "#fefce8"); g.fillRect(0, 0, W, 100); C(g, 260, 26, 18, "#fffbeb"); GL(g, 260, 26, 120, "255,251,235", 0.6 + 0.08 * Math.sin(f / 20));
+      R(g, 0, 96, W, 104, "#f5f5f4"); for (let i = 0; i < 9; i++) { g.strokeStyle = "rgba(168,162,158,.5)"; g.lineWidth = 1; g.beginPath(); g.moveTo(0, 110 + i * 10); g.lineTo(W, 104 + i * 11); g.stroke(); }
+      for (let i = 0; i < 4; i++) R(g, 30 + i * 70, 120 + (i % 2) * 20, 50, 14, `rgba(94,234,212,${0.4 + 0.1 * Math.sin(f / 18 + i)})`);
+      // relitto viola e automi lontani
+      T(g, [190, 150, 230, 112, 280, 128, 300, 160], "#7e22ce"); T(g, [214, 140, 240, 124, 262, 136, 250, 150], "#a855f7"); R(g, 236, 108, 3, 20, "#4c1d95");
+      for (let i = 0; i < 4; i++) { const x = 40 + i * 30, y = 104 + Math.sin(f / 30 + i) * 1.5; R(g, x, y - 12, 6, 12, "#6b7280"); C(g, x + 3, y - 15, 3, "#9ca3af"); C(g, x + 3, y - 15, 1, Math.sin(f / 7 + i) > 0 ? "#ef4444" : "#7f1d1d"); }
+      for (let i = 0; i < 12; i++) { const x = (i * 37 + f * 0.3) % W; R(g, x, 100 + (i % 4) * 2, 6, 1, "rgba(255,255,255,.5)"); }
+      VIG(g, W, H, 0.2);
+    },
+    ms_orizzonte(g, W, H, f) {
+      VG(g, 0, 120, "#7c2d12", "#fdba74"); g.fillRect(0, 0, W, 120); C(g, 160, 100, 26, "#fde68a"); GL(g, 160, 100, 120, "251,146,60", 0.45);
+      hills(g, W, 110, "#4d5a2a", 22, 2); R(g, 0, 120, W, 80, "#55702f");
+      // campetto con le porte e il paese fermo
+      R(g, 70, 136, 180, 44, "#4d7c2f"); g.strokeStyle = "rgba(255,255,255,.6)"; g.lineWidth = 1; g.strokeRect(70, 136, 180, 44); g.beginPath(); g.moveTo(160, 136); g.lineTo(160, 180); g.stroke(); R(g, 66, 150, 4, 16, "#f8fafc"); R(g, 250, 150, 4, 16, "#f8fafc");
+      [[20, 100, 34], [244, 96, 40], [290, 104, 30]].forEach(([x, y, w]) => { R(g, x, y, w, 24, "#fde7c4"); T(g, [x - 3, y, x + w + 3, y, x + w / 2, y - 14], "#9a3412"); R(g, x + 6, y + 8, 5, 6, "#fde68a"); });
+      for (let i = 0; i < 5; i++) { const x = 90 + i * 34; R(g, x, 150, 6, 14, "#1e3a8a"); C(g, x + 3, 146, 4, "#e8c4a0"); }
+      // lo sciame d'oro e la sagoma del Prelato
+      for (let i = 0; i < 70; i++) { const a = f / 30 + i * 0.6, r = 30 + (i % 9) * 6; R(g, 160 + Math.cos(a) * r * 1.6, 70 + Math.sin(a * 1.3) * r * 0.5, 1.5, 1.5, `rgba(250,204,21,${0.4 + 0.4 * Math.sin(f / 5 + i)})`); }
+      R(g, 154, 132, 12, 30, "#111827"); C(g, 160, 128, 7, "#1f2937"); C(g, 157, 127, 1.5, "#facc15"); C(g, 163, 127, 1.5, "#facc15");
+      VIG(g, W, H, 0.4);
     }
   };
   const HOT = {
+    ms_purgatorio: [[30, 96, 260, 54, "⛓️ Cento celle, cento oblò. Uno solo lampeggia rosso, al centro. Indovina chi c'è dentro."], [140, 40, 40, 60, "🔦 Il faro di sorveglianza: gira, illumina, conta. Non sbaglia mai il conto."], [250, 20, 40, 30, "🌕 La luna. L'unica cosa che dal Purgatorio si vede gratis."]],
+    ms_cella: [[130, 96, 60, 60, "🪑 La sedia: cinghie spezzate da dentro. Nessuno ha mai capito come."], [60, 176, 200, 16, "🖥️ «STASI · LIVELLO 3 · SPENTO». Qualcuno ha premuto spegni. Più volte. Con rabbia."], [100, 30, 120, 40, "🔴 La luce rossa: batte come un cuore che non ha più voglia di aspettare."]],
+    ms_illio: [[216, 0, 50, 116, "🏙️ La Torre Dantis: oro, vetro e ottanta piani di contratti firmati."], [20, 136, 280, 30, "🛥️ Yacht bianchi: si chiamano tutti come una vittoria. Nessuno ha mai vinto niente."], [40, 18, 40, 34, "☀️ Il sole di Illio: anche lui sembra in affitto."]],
+    ms_torre: [[20, 10, 280, 110, "🌇 La città ai tuoi piedi. Da quassù sembra tutto in vendita. Lo è."], [90, 136, 140, 44, "🧾 La scrivania di vetro: rotte, nomi, firme. Diciannove paesi in una lista."], [256, 136, 30, 30, "🟡 Una lampada a forma di pallone, d'oro. Brutta. Costosissima. Inutile. Perfetta."]],
+    ms_isola: [[190, 106, 110, 56, "🛸 Il relitto viola della navetta di Tali. «Non è colpa mia (quasi)», c'è scritto sopra."], [30, 86, 120, 30, "🤖 Gli automi delle saline: proteggono il sale. Nessuno ricorda più perché."], [240, 8, 40, 40, "☀️ Un sole che non perdona: qui l'ombra è una moneta."]],
+    ms_orizzonte: [[100, 30, 120, 80, "✨ Lo sciame d'oro: ronza sopra il paese e lo tiene fermo, come una mano sulla bocca."], [70, 136, 180, 44, "⚽ Il campo della finale di domani. Le porte hanno la rete rattoppata, ma sono pronte."], [150, 120, 20, 44, "👤 Il Prelato: una sagoma più alta delle altre. Quando si ferma lui, si ferma tutto."]],
     ms_titolo: [[60, 100, 110, 40, "🚢 La Normanna: scafo nuovo, nome vecchio. Il primo viaggio è quello che ricordi; questo, forse, è quello che ti ricorderà."], [228, 40, 70, 90, "🔥 Il Passo d'Omega: un varco tra le rupi e una luce che non dovrebbe esserci. Nessuno è tornato a raccontarla."], [226, 112, 60, 22, "👁️ Sagome in fila, maschere scure, occhi gialli. Non si muovono. Aspettano."]],
     ms_normanna: [[110, 70, 100, 56, "🧭 La Sala Tattica: dentro c'è il Mediterraneo in luce e un uomo che fuma da lontano."], [230, 138, 60, 28, "📦 Container di Cerbero. «Non aprire», c'è scritto. L'ultima volta che qualcuno ha obbedito era il Medioevo."], [256, 18, 30, 26, "☀️ Il sole del Mediterraneo. Due anni fa, l'ultima cosa che ricordi è il buio. Oggi è bello vederlo."]],
     ms_sala: [[140, 2, 40, 60, "🚬 Il Signor Fumo, in ologramma. Il fumo è vero, giura Jolly. EDI dice che è una simulazione. Lui non commenta."], [90, 80, 140, 50, "🗺️ Diciannove puntini rossi sul Mediterraneo. Diciannove spogliatoi vuoti."], [226, 72, 22, 22, "🔥 Il Passo d'Omega: un punto arancio che pulsa. Come un cuore che non dovrebbe battere."]],

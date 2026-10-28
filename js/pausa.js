@@ -2,7 +2,7 @@
 // Vista dall'alto. I Raccoglitori avanzano da destra verso la tua barricata. Tocchi un nemico = calci un pallone contro di lui; tocchi il terreno = il Campione si sposta.
 // «⏸ Ruota»: il tempo si ferma e scegli il potere di un compagno (ognuno ne ha uno, con ricarica), poi tocchi il bersaglio. I compagni sparano da soli, piano.
 // Ondate: vinci se resisti a tutte; perdi se la barricata cade o il Campione resta senza energia.
-// Opzioni: title, waves: [[tipo, quanti], ...] per ondata (tipi: base, scudo, lesto, grosso, boss), mates: [{ id, n, icon, pow }], bonus (0-3), arena: "ponte"|"nave"|"tana",
+// Opzioni: title, foeCol / foeEye (colori dei nemici), waves: [[tipo, quanti], ...] per ondata (tipi: base, scudo, lesto, grosso, boss), mates: [{ id, n, icon, pow }], bonus (0-3), arena: "ponte"|"nave"|"tana",
 //   tutorial (false = niente spiegazione), onDone({ a, b, win, lost }). Poteri: tiro, onda, schiuma, rete, scudo, drone, ombra, hack.
 // Test: window.__pausa.state.finish(win) · .tap(x, y) · .wheel() · .power(i) · .kills · pulsante #paGo. Richiede js/mini.js.
 (function () {
@@ -41,7 +41,7 @@
     S.queue = q.sort(() => Math.random() - 0.5); const bi = S.queue.indexOf("boss"); if (bi > 0) S.queue.push(S.queue.splice(bi, 1)[0]);
     S.fxo.banner(S.practice ? "PROVA" : `ONDATA ${S.wave + 1}/${S.waves.length}`, "#7dd3fc"); S.spawnT = 50;
   }
-  function spawn(t) { const T = TYPES[t], k = diffK(); S.foes.push({ t, x: W + 10, y: 40 + Math.random() * (H - 80), hp: T.hp, max: T.hp, sp: T.sp * k * (0.9 + Math.random() * 0.2), r: T.r, col: T.col, sh: T.sh ? 1 : 0, boss: !!T.boss, dmg: T.dmg, stun: 0, slow: 0, ally: 0, atk: 0, wob: Math.random() * 6 }); }
+  function spawn(t) { const T = TYPES[t], k = diffK(); S.foes.push({ t, x: W + 10, y: 40 + Math.random() * (H - 80), hp: T.hp, max: T.hp, sp: T.sp * k * (0.9 + Math.random() * 0.2), r: T.r, col: (S.o.foeCol && !T.boss) ? S.o.foeCol : T.col, eye: S.o.foeEye || "#facc15", sh: T.sh ? 1 : 0, boss: !!T.boss, dmg: T.dmg, stun: 0, slow: 0, ally: 0, atk: 0, wob: Math.random() * 6 }); }
   // ------------------------------------------------------------ colpi
   function hurt(e, n, breakSh) {
     if (!e || e.hp <= 0) return; if (e.sh && !breakSh) { S.fxo.text("SCUDO", e.x, e.y - 12, "#93c5fd"); n = Math.max(0, n - 1); }
@@ -101,6 +101,8 @@
     const A = S ? S.arena : "ponte";
     if (A === "nave") { g.fillStyle = "#1e293b"; g.fillRect(0, 0, W, H); for (let x = 0; x < W; x += 24) for (let y = 0; y < H; y += 24) { g.fillStyle = (x + y) % 48 ? "#243247" : "#22304a"; g.fillRect(x, y, 23, 23); g.fillStyle = "rgba(255,255,255,.06)"; g.fillRect(x + 2, y + 2, 2, 2); } g.fillStyle = "#0f172a"; g.fillRect(0, 0, W, 16); g.fillRect(0, H - 16, W, 16); for (let x = 10; x < W; x += 60) { g.fillStyle = `rgba(56,189,248,${0.4 + 0.3 * Math.sin(f / 15 + x)})`; g.fillRect(x, 6, 30, 3); } }
     else if (A === "tana") { const gr = g.createLinearGradient(0, 0, W, 0); gr.addColorStop(0, "#1c1917"); gr.addColorStop(1, "#3b1d0e"); g.fillStyle = gr; g.fillRect(0, 0, W, H); for (let i = 0; i < 30; i++) { g.fillStyle = `rgba(234,179,8,${0.1 + 0.08 * Math.sin(f / 20 + i)})`; g.beginPath(); g.ellipse((i * 67) % W, (i * 41) % H, 9, 5, i, 0, 7); g.fill(); } g.strokeStyle = "rgba(120,53,15,.6)"; g.lineWidth = 3; for (let i = 0; i < 6; i++) { g.beginPath(); g.moveTo(0, 30 + i * 36); g.bezierCurveTo(120, 10 + i * 36, 260, 60 + i * 36, W, 30 + i * 36); g.stroke(); } }
+    else if (A === "sale") { g.fillStyle = "#e7e5e4"; g.fillRect(0, 0, W, H); for (let i = 0; i < 70; i++) { g.fillStyle = i % 3 ? "rgba(168,162,158,.25)" : "rgba(255,255,255,.6)"; g.fillRect((i * 83) % W, (i * 47) % H, 10 + (i % 4) * 6, 1); } g.strokeStyle = "rgba(120,113,108,.35)"; g.lineWidth = 1; for (let i = 0; i < 12; i++) { g.beginPath(); g.moveTo((i * 61) % W, 0); g.lineTo((i * 61 + 40) % W, H); g.stroke(); } const gr = g.createRadialGradient(W - 40, 20, 0, W - 40, 20, 200); gr.addColorStop(0, `rgba(255,237,160,${0.45 + 0.08 * Math.sin(f / 20)})`); gr.addColorStop(1, "rgba(255,237,160,0)"); g.fillStyle = gr; g.fillRect(0, 0, W, H); }
+    else if (A === "torre") { g.fillStyle = "#1c1917"; g.fillRect(0, 0, W, H); for (let x = 0; x < W; x += 32) for (let y = 0; y < H; y += 32) { g.fillStyle = (x / 32 + y / 32) % 2 ? "#292524" : "#44403c"; g.fillRect(x, y, 32, 32); } g.fillStyle = "rgba(125,211,252,.18)"; g.fillRect(0, 0, W, 14); for (let x = 0; x < W; x += 46) { g.fillStyle = "#a16207"; g.fillRect(x + 20, 0, 2, 14); } for (let i = 0; i < 5; i++) { g.fillStyle = "#57534e"; g.fillRect(110 + i * 50, 40 + (i % 2) * 110, 26, 14); g.fillStyle = "rgba(250,204,21,.25)"; g.fillRect(112 + i * 50, 42 + (i % 2) * 110, 22, 3); } }
     else { g.fillStyle = "#0b1220"; g.fillRect(0, 0, W, H); g.fillStyle = "#4b5563"; g.fillRect(0, 22, W, H - 44); for (let x = 0; x < W; x += 16) { g.fillStyle = x % 32 ? "#525c6b" : "#4b5563"; g.fillRect(x, 22, 15, H - 44); } g.fillStyle = "#94a3b8"; g.fillRect(0, 20, W, 3); g.fillRect(0, H - 23, W, 3); for (let x = 6; x < W; x += 40) { g.fillStyle = "#64748b"; g.fillRect(x, 12, 3, 10); g.fillRect(x, H - 22, 3, 10); } for (let i = 0; i < 18; i++) { g.fillStyle = `rgba(56,189,248,${0.25 + 0.2 * Math.sin(f / 30 + i)})`; g.fillRect((i * 53 + f * 0.4) % W, 4 + (i % 3) * 4, 6, 1); g.fillRect((i * 71 + f * 0.3) % W, H - 8 + (i % 2) * 3, 6, 1); } }
     // barricata
     const hp = S ? S.bar / 100 : 1; for (let y = 26; y < H - 26; y += 14) { g.fillStyle = hp > 0.5 ? "#a16207" : hp > 0.2 ? "#92400e" : "#7f1d1d"; g.fillRect(BARX - 5, y, 10, 12); g.fillStyle = "rgba(255,255,255,.18)"; g.fillRect(BARX - 5, y, 10, 2); }
@@ -109,7 +111,7 @@
     g.save(); g.translate(e.x, e.y + Math.sin(e.wob) * 1.2); g.fillStyle = "rgba(0,0,0,.35)"; g.beginPath(); g.ellipse(0, e.r, e.r, e.r * 0.35, 0, 0, 7); g.fill();
     g.fillStyle = e.ally ? "#0e7490" : e.col; g.beginPath(); g.ellipse(0, 0, e.r * 0.8, e.r, 0, 0, 7); g.fill(); g.strokeStyle = e.ally ? "#67e8f9" : "#a16207"; g.lineWidth = 1.4; g.stroke();
     // maschera da insetto: due occhi gialli
-    g.fillStyle = e.ally ? "#a5f3fc" : "#facc15"; g.beginPath(); g.ellipse(-e.r * 0.3, -e.r * 0.35, e.r * 0.22, e.r * 0.15, -0.4, 0, 7); g.ellipse(e.r * 0.3, -e.r * 0.35, e.r * 0.22, e.r * 0.15, 0.4, 0, 7); g.fill();
+    g.fillStyle = e.ally ? "#a5f3fc" : (e.eye || "#facc15"); g.beginPath(); g.ellipse(-e.r * 0.3, -e.r * 0.35, e.r * 0.22, e.r * 0.15, -0.4, 0, 7); g.ellipse(e.r * 0.3, -e.r * 0.35, e.r * 0.22, e.r * 0.15, 0.4, 0, 7); g.fill();
     if (e.sh) { g.strokeStyle = "rgba(147,197,253,.85)"; g.lineWidth = 2; g.beginPath(); g.arc(0, 0, e.r + 4, -1.2, 1.2); g.stroke(); }
     if (e.stun) { g.fillStyle = "#e2e8f0"; g.font = "8px serif"; g.textAlign = "center"; g.fillText("✦", Math.sin(e.wob * 2) * 5, -e.r - 4); }
     if (e.boss || e.max > 2) { g.fillStyle = "rgba(0,0,0,.6)"; g.fillRect(-12, -e.r - 9, 24, 3); g.fillStyle = "#ef4444"; g.fillRect(-12, -e.r - 9, 24 * Math.max(0, e.hp / e.max), 3); }
