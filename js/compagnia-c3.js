@@ -42,7 +42,7 @@
       F.set("cp_c3_done", true);
       K.reward("cp_c3", { coins: 130, cos: "cp_c3" });
       K.finishChapter(N, "ok");
-      K.scene(H.flush().concat([["cp_dorotea", "[serio] Un frate che ha preso un debito per salvare un convento. Ho visto mercenari peggiori. Ho visto anche capitani peggiori."], ["cp_ludovico", "[pensa] Registro: «un debito, due colpe, una Compagnia ancora in piedi». Se ancora mi volete."], ["voce", `<b>FINE DEL CAPITOLO 3.</b><br>💪 Grinta ${K.stat("grinta")} · 🎖️ Onore ${K.stat("onore")} · 🧠 Astuzia ${K.stat("astuzia")} · Compagnia ${K.crew.count()}/${K.crew.total}`], ["voce", "Il Capitolo 4, la battaglia finale, ti aspetta."]]), () => K.openMain(), "cp_titolo");
+      K.scene(H.flush().concat([["cp_dorotea", "[serio] Un frate che ha preso un debito per salvare un convento. Ho visto mercenari peggiori. Ho visto anche capitani peggiori."], ["cp_ludovico", "[pensa] Registro: «un debito, due colpe, una Compagnia ancora in piedi». Se ancora mi volete."], ["voce", `<b>FINE DEL CAPITOLO 3.</b><br>💪 Grinta ${K.stat("grinta")} · 🎖️ Onore ${K.stat("onore")} · 🧠 Astuzia ${K.stat("astuzia")} · Compagnia ${K.crew.count()}/${K.crew.total}`], ["voce", "Il Capitolo 4, la battaglia finale, ti aspetta a Roccafredda."]]), () => K.openMain(), "cp_titolo");
     }
     function fight() {
       H.battle({ map: CHIOSTRO, foes: FOES, turns: 14, title: "Il Chiostro di San Pallone", units: K.tactics.team().concat([dorotea]) }, (r) => {
@@ -124,7 +124,7 @@
         areas: [[8, 6, 20, 13, "Il chiostro"], [2, 14, 12, 19, "L'orto"], [11, 1, 18, 4, "La biblioteca"], [0, 0, 29, 21, "Il convento di San Pallone"]],
         act: { n: "Leggi il cartello", E: "Guarda lo stendardo", z: "Guarda le casse", b: "Siediti", s: "Riposa un momento", l: "Guarda la lanterna", u: "Guarda la bancarella" },
         flavor: { n: "Un cartello: «CONVENTO DI SAN PALLONE · FONDATO PER BENEDIRE · CHIUSO PER FALLIMENTO».", E: "Uno stendardo del convento: un pallone con un'aureola, scolorito dal sole e dai debiti.", z: "Casse di candele: tutte spente, tutte pagate, nessuna benedetta.", u: "Una bancarella di zucche finte. «Nutrono l'anima.»" },
-        doors: { "0,10": { to: "cp_fortino", at: [28, 10] }, "0,11": { to: "cp_fortino", at: [28, 11] } },
+        doors: { "0,10": { to: "cp_fortino", at: [28, 10] }, "0,11": { to: "cp_fortino", at: [28, 11] }, "29,10": { to: "cp_roccafredda", at: [1, 10], locked: () => (F.is("cp_c3_done") ? false : "La strada continua a est, verso Roccafredda. Prima, il convento: c'è ancora un Gabelliere nel chiostro.") }, "29,11": { to: "cp_roccafredda", at: [1, 11], locked: () => (F.is("cp_c3_done") ? false : "La strada continua a est, verso Roccafredda. Prima, il convento: c'è ancora un Gabelliere nel chiostro.") } },
         npcs: () => [{ id: "cp_anselmo", at: [6, 16] }].concat(S() >= 2 && S() < 3 ? [{ id: "cp_brando", at: [20, 10] }] : []).concat(S() >= 3 ? [{ id: "cp_ludovico", at: [14, 11] }] : []),
         intro: [["voce", "Il convento di San Pallone, a est del Fortino: un chiostro che aspetta, un orto finto e una campana senza batacchio."]],
         build(L) {

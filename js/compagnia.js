@@ -24,6 +24,8 @@
       cantina: { grass: ["#4a3a30", "#3e3028", "#564438"], path: ["#6a5848", "#5e4c3c"], stone: ["#5a5048", "#4e443c"], wall: ["#2a2220", "#201a18"], water: ["#3f7aa8", "#366e9c"], tall: "#3e3028", tint: "180,140,255", tintA: 0.12, fx: "dust", dark: 0.26 },
       convento: { grass: ["#7a8a52", "#6e7e48", "#869660"], path: ["#bcae92", "#b0a286"], stone: ["#8a8a8c", "#7e7e80"], wall: ["#6a6560", "#5e5954"], water: ["#4a8ac0", "#3f7eb4"], tall: "#5e7a44", tree: ["#2d4a2a", "#3a5e34", "#476f3d"], tint: "255,240,200", tintA: 0.07, fx: "leaves", dark: 0.06 },
       biblioteca: { grass: ["#5a4632", "#4e3c2a", "#664e38"], path: ["#7a6248", "#6e563e"], stone: ["#6a5848", "#5e4c3c"], wall: ["#2e2420", "#241c18"], water: ["#3f7aa8", "#366e9c"], tall: "#4e3c2a", tint: "255,210,140", tintA: 0.14, fx: "dust", dark: 0.2 },
+      citta: { grass: ["#7a8a5a", "#6e7e50", "#869664"], path: ["#b8a888", "#ac9c7c"], stone: ["#8a8a92", "#7e7e86"], wall: ["#6a5a5a", "#5e4e4e"], water: ["#4a8ac0", "#3f7eb4"], tall: "#5e7a44", tree: ["#2d4a2a", "#3a5e34", "#476f3d"], tint: "255,200,180", tintA: 0.07, fx: "dust", dark: 0.08 },
+      sala: { grass: ["#5a3a30", "#4e3028", "#664438"], path: ["#8a5a48", "#7e503e"], stone: ["#6a4a42", "#5e403a"], wall: ["#2e1c18", "#241410"], water: ["#3f7aa8", "#366e9c"], tall: "#4e3028", tint: "255,180,150", tintA: 0.14, fx: "dust", dark: 0.18 },
       tenda: { grass: ["#9a7a52", "#8e6e48", "#a68258"], path: ["#b8945e", "#ac8854"], stone: ["#8a6a42", "#7e5e3a"], wall: ["#7a2a1e", "#6c2218"], water: ["#3f7aa8", "#366e9c"], tall: "#8e6e48", tint: "255,190,100", tintA: 0.14, fx: "", dark: 0.16 }
     },
     floors: "", solid: "AFKECWH",

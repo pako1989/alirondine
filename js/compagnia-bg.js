@@ -112,6 +112,22 @@
       for (let i = 0; i < 4; i++) { R(g, 10 + i * 78, 34, 60, 110, "#3e2a1c"); for (let j = 0; j < 7; j++) { R(g, 14 + i * 78, 40 + j * 14, 52, 10, `hsl(${(i * 60 + j * 25) % 360},30%,30%)`); } }
       R(g, 0, 160, W, 40, "#2e2018"); R(g, 130, 150, 60, 20, "#6b4a2a"); R(g, 150, 140, 16, 12, "#e7d6a8"); R(g, 154, 143, 8, 1, "#7c2d12");
       const bl = 0.35 + 0.1 * Math.sin(f / 6); GL(g, 160, 120, 110, "255,200,120", bl); VIG(g, W, H, 0.5);
+    },
+    cp_roccafredda(g, W, H, f) {
+      VG(g, 0, 120, "#8a6a8a", "#f8d8b8"); g.fillRect(0, 0, W, 120); hills(g, W, 112, "#6a5a6a", 24, 2);
+      R(g, 70, 54, 180, 80, "#e0d0b0"); T(g, [64, 56, 256, 56, 160, 24], "#7f1d1d"); R(g, 144, 98, 32, 36, "#3a2410"); T(g, [144, 98, 176, 98, 160, 80], "#1c1008");
+      [[84, 70], [114, 70], [194, 70], [224, 70]].forEach(([x, y], i) => R(g, x, y, 10, 14, f % 140 > 20 + i * 20 ? "#fde68a" : "#334155"));
+      C(g, 160, 44, 14, "#f5f5f4"); C(g, 160, 44, 11, "#44403c"); R(g, 159, 34, 2, 10, "#f5f5f4"); R(g, 159, 44, 8, 2, "#f5f5f4");
+      R(g, 0, 134, W, 66, "#b8a888"); for (let i = 0; i < 40; i++) R(g, rnd(i) * W, 138 + rnd(i + 5) * 58, 6, 1, "#9a8a6a");
+      for (let i = 0; i < 6; i++) { const x = 20 + i * 52; R(g, x, 150, 10, 16, "#78350f"); C(g, x + 5, 144, 8, "#d4d4d8"); R(g, x + 4, 140, 1, 4, "#44403c"); }
+      VIG(g, W, H, 0.3);
+    },
+    cp_sala(g, W, H, f) {
+      VG(g, 0, 200, "#241410", "#4a2a20"); g.fillRect(0, 0, W, 200); R(g, 0, 150, W, 50, "#3a2018");
+      for (let i = 0; i < 6; i++) { const x = 20 + i * 50; R(g, x, 30, 30, 44, "#2a1810"); C(g, x + 15, 52, 12, "#e7e5e4"); C(g, x + 15, 52, 10, "#2a2220"); R(g, x + 14, 44, 2, 8, "#e7e5e4"); R(g, x + 15, 52, 6, 2, "#e7e5e4"); }
+      R(g, 130, 90, 60, 60, "#7f1d1d"); R(g, 140, 80, 40, 14, "#a16207"); R(g, 150, 96, 20, 54, "#450a0a");
+      R(g, 60, 164, 200, 2, "rgba(255,255,255,.2)"); R(g, 158, 160, 4, 40, "rgba(255,255,255,.15)"); C(g, 160, 182, 12, "rgba(255,255,255,0)");
+      const sw = Math.sin(f / 30) * 4; R(g, 158 + sw, 0, 1, 30, "#111"); GL(g, 158 + sw, 36, 100, "255,190,120", 0.36 + 0.08 * Math.sin(f / 8)); VIG(g, W, H, 0.5);
     }
   };
   const HOT = {
@@ -124,6 +140,8 @@
     cp_cantina: [[10, 40, 300, 100, "📚 Gli scaffali: A a sinistra, Z a destra, «Varie» nel mezzo e in ordine."], [244, 150, 36, 36, "🍷 La botte: «Riserva dei Debitori». Il vino è buono, il conto no."], [150, 30, 30, 18, "💡 La lanterna: dondola e proietta ombre in ordine alfabetico."]],
     cp_convento: [[150, 8, 20, 40, "🔔 Il campanile: la campana ha perso il batacchio nel Seicento e non ha mai smesso di sentirsene mancare."], [70, 40, 180, 90, "⛪ Il convento: pietra chiara, tetto scuro, una porta che sembra dire «prego, ma non troppo»."], [0, 160, 320, 40, "🎃 L'orto: zucche finte, perché i frutti veri richiederebbero anche un raccolto."]],
     cp_biblioteca: [[10, 34, 300, 110, "📚 Gli scaffali: salmi, ricette, un trattato sul fuorigioco."], [128, 140, 64, 30, "🕯️ Il tavolo: un quaderno aperto e una pagina che aspetta da undici anni."], [100, 100, 120, 40, "💡 La lanterna: ogni ombra è un frate che non ha restituito un libro."]],
+    cp_roccafredda: [[64, 24, 192, 110, "🏰 Il palazzo del Marchese: tetto rosso, porta chiusa e un leone sicuro di sé."], [150, 30, 20, 30, "🕰️ L'orologio fermo: segna sempre le sei e sette. Nessuno dice perché."], [14, 138, 292, 34, "🪨 La piazza: tanti orologi, nessuno puntuale."]],
+    cp_sala: [[20, 30, 280, 46, "🕰️ La parete d'orologi: tutti fermi allo stesso minuto."], [128, 80, 64, 70, "👑 Il trono: troppo grande per chi lo usa."], [60, 160, 200, 36, "⚽ Il campo disegnato sul pavimento: l'unico luogo dove il Marchese perde tempo."]],
     cp_locanda: [[200, 70, 90, 80, "🔥 Il camino: l'unico che non chiede un documento prima di scaldarti."], [20, 96, 150, 54, "🍺 Il bancone: boccali, una mira da fiera e un conto che cresce da solo."], [56, 12, 28, 26, "🎯 Il bersaglio: bucato al centro. Dieci volte. Da una sola persona."]]
   };
   function reg(n) {
