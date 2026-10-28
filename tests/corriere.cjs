@@ -79,4 +79,16 @@ async function flow3(w) {
   await talk("marta"); const done = await run(page, "JSON.stringify(D.mem().done)"); if (!/"3":"ok"/.test(done)) errors.push("capitolo 3 non concluso: " + done);
   L.check(`Corriere 3D · capitolo 3 (${w} px)`, errors); await browser.close();
 }
-(async () => { for (const w of [390, 1000]) { await main(w); await flow(w); await flow2(w); await flow3(w); } })().catch((e) => { console.error("✗ corriere:", e.message); process.exit(1); });
+async function flow4(w, id, seg) {
+  const { browser, page, errors } = await start(w, { v: 1, flags: { intro_done: 1, c3_ettore: seg ? "memoria" : "giustizia" }, inv: ["pacco_senza_indirizzo"], hour: 9, ch: 4, step: { 1: 5, 2: 5, 3: 5 }, done: { 1: "ok", 2: "ok", 3: "ok" } });
+  await page.evaluate(([d, id]) => { const K = eval(d).K; const idx = { corriere: 0, libero: 1, segreto: 2 }[id]; K.ask = (p, opts) => { const o = opts[opts.length > 2 ? idx : 0]; if (o && !o.disabled && o.fn) o.fn(); }; }, [D, id]);
+  const hr = (h) => run(page, "(() => { D.state().hour = arg; D.snap(); D.step(0.05); })()", h);
+  const talk = async (n) => { await run(page, "(() => { const S = D.state(); const o = S.npcs.find((n) => n.cfg.id === arg); S.p.x = o.x + 1.5; S.p.z = o.z + 0.5; D.step(0.5); D.near2(); D.act(); })()", n); await page.waitForTimeout(120); };
+  const step = () => run(page, "D.mem().step[4]");
+  await talk("marta"); await hr(10); await talk("ettore"); await hr(15); await talk("nina");
+  if ((await step()) !== 3) errors.push("prima del finale: " + (await step()));
+  await hr(23.5); await talk("ruggero");
+  const done = await run(page, "JSON.stringify(D.mem().done) + JSON.stringify(D.mem().ends)"); if (!new RegExp('"4":"' + id + '"').test(done)) errors.push("finale " + id + ": " + done);
+  L.check(`Corriere 3D · finale ${id} (${w} px)`, errors); await browser.close();
+}
+(async () => { for (const w of [390, 1000]) { await main(w); await flow(w); await flow2(w); await flow3(w); await flow4(w, "corriere"); await flow4(w, "libero"); await flow4(w, "segreto", 1); } })().catch((e) => { console.error("✗ corriere:", e.message); process.exit(1); });

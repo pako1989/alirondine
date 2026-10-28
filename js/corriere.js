@@ -25,6 +25,7 @@
       { id: "lia", name: "Lia la Barcaiola", emoji: "⛵", look: { shirt: 0x0e7490, hair: 0x7c2d12, skin: 0xd9a679, pants: 0x1e293b }, sched: [{ h: [8, 13], d: "porto", at: [30, 40] }, { h: [13, 8], away: true }] },
       { id: "tito", name: "Tito del Banco", emoji: "🍋", look: { shirt: 0xca8a04, hair: 0x1f2937, skin: 0xe0b890, pants: 0x3b2a1a }, sched: [{ h: [15, 20], d: "mercato", at: [58, 60] }, { h: [20, 15], away: true }] },
       { id: "volpe", name: "La Volpe", emoji: "🦊", look: { shirt: 0x9a3412, hair: 0x7c2d12, skin: 0xe0b890, pants: 0x1c1917 }, sched: [{ h: [0, 24], away: true }] },
+      { id: "nina", name: "Nina", emoji: "🦊", look: { shirt: 0x9a3412, hair: 0x7c2d12, skin: 0xe8c4a0, pants: 0x1c1917 }, sched: [{ h: [13, 20], d: "mercato", at: [45, 64] }, { h: [20, 13], away: true }] },
       { id: "ettore", name: "Don Ettore", emoji: "🎩", look: { shirt: 0x1e3a8a, hair: 0x4a4a4a, skin: 0xe8c4a0, pants: 0x111827 }, sched: [{ h: [0, 24], d: "collina", at: [45, 64] }] }
     ],
     pois: [
