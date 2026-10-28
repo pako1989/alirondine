@@ -86,6 +86,56 @@
       R(g, 160, 154, 10, 6, "#f6c445"); GL(g, 165, 156, 14, "255,220,120", 0.3 + 0.2 * Math.sin(f / 7));
       VIG(g, W, H, 0.5);
     },
+    // capitolo 4: la rocca nel temporale, il salone d'armi, lo studiolo con la porta della torre
+    lt_rocca(g, W, H, f) {
+      bands(g, W, 0, 130, ["#0b0e1c", "#121628", "#1a2034", "#222a40", "#2a334a", "#343e56"]);
+      const fl = (f % 260) < 6 || ((f % 260) > 10 && (f % 260) < 13);
+      if (fl) { R(g, 0, 0, W, 130, "rgba(220,230,255,.35)"); g.strokeStyle = "#f8fbff"; g.lineWidth = 2; g.beginPath(); g.moveTo(206, 0); g.lineTo(198, 22); g.lineTo(212, 30); g.lineTo(200, 58); g.lineTo(214, 66); g.lineTo(204, 92); g.stroke(); }
+      for (let i = 0; i < 3; i++) cloud(g, ((f * (0.12 + i * 0.05) + i * 130) % 420) - 60, 10 + i * 14, 1.2, "#1e2436", "#2e364c", "#12162a");
+      // la torre del Conestabile al centro, con la finestra accesa in cima
+      R(g, 186, 10, 50, 140, "#2a2a36"); R(g, 186, 10, 3, 140, "#3a3a4a"); for (let i = 0; i < 50; i += 10) R(g, 186 + i, 2, 6, 8, "#2a2a36"); for (let y = 16; y < 150; y += 10) for (let x = (y / 10) % 2 ? 186 : 191; x < 236; x += 10) R(g, x, y, 9, 1, "#22222e");
+      R(g, 204, 26, 14, 18, "#16141f"); R(g, 206, 28, 10, 16, fl ? "#fff" : "#f59e0b"); GL(g, 211, 36, 30, "255,170,80", 0.35 + 0.1 * Math.sin(f / 7));
+      R(g, 226, -4, 2, 16, "#16141f"); const fw = Math.sin(f / 5) * 4; g.fillStyle = "#7a1a1a"; g.beginPath(); g.moveTo(228, -2); g.lineTo(244 + fw, 2); g.lineTo(228, 8); g.fill();
+      // mura laterali con merli
+      R(g, 0, 100, W, 50, "#3a3a46"); for (let x = 0; x < W; x += 16) R(g, x, 94, 10, 8, "#3a3a46"); for (let y = 104; y < 150; y += 8) for (let x = (y / 8) % 2 ? 0 : 8; x < W; x += 16) R(g, x, y, 15, 1, "#2e2e3a");
+      R(g, 36, 106, 40, 44, "#16141f"); D(g, 56, 108, 20, "#16141f"); R(g, 280, 110, 24, 40, "#16141f"); D(g, 292, 112, 12, "#16141f"); R(g, 284, 120, 16, 12, "#ffd98a"); GL(g, 292, 126, 24, "255,200,110", 0.35);
+      // cortile lastricato bagnato con le pozzanghere
+      R(g, 0, 150, W, 50, "#2e3240"); for (let y = 154; y < 200; y += 9) for (let x = (y / 9) % 2 ? 0 : 12; x < W; x += 24) R(g, x, y, 22, 1, "#3a4050");
+      [[80, 176, 30], [240, 186, 40], [150, 168, 20]].forEach(([x, y, w], i) => { R(g, x, y, w, 4, fl ? "#a8b8e0" : "#4a5878"); const r = (f * 0.5 + i * 10) % 14; R(g, x + w / 2 - r, y + 1, r * 2, 1, "rgba(200,220,255,.4)"); });
+      // pioggia
+      for (let i = 0; i < 70; i++) { const x = (rnd(i) * 360 + f * 1.4) % 340 - 10, y = (rnd(i + 9) * 220 + f * 6) % 210 - 10; R(g, x, y, 1, 5, "rgba(170,190,230,.45)"); }
+      VIG(g, W, H, 0.5);
+    },
+    lt_salone(g, W, H, f) {
+      R(g, 0, 0, W, 200, "#2a1e1e"); for (let y = 0; y < 136; y += 12) for (let x = (y / 12) % 2 ? -14 : 0; x < W; x += 28) { R(g, x + 1, y + 1, 26, 10, "#34262a"); R(g, x + 1, y + 1, 26, 1, "#423036"); }
+      R(g, 0, 136, W, 64, "#4a2e22"); for (let y = 140; y < 200; y += 12) for (let x = (y / 12) % 2 ? 0 : 20; x < W; x += 40) R(g, x, y, 38, 1, "#3a2218");
+      // stendardi rossi appesi e spade incrociate
+      [30, 270].forEach((x, i) => { const sw = Math.sin(f / 30 + i) * 1.5; R(g, x - 2, 6, 34, 3, "#6a4a2a"); g.fillStyle = "#8a1a1a"; g.beginPath(); g.moveTo(x, 9); g.lineTo(x + 30, 9); g.lineTo(x + 30 + sw, 70); g.lineTo(x + 15 + sw, 60); g.lineTo(x + sw, 70); g.fill(); D(g, x + 15 + sw * 0.5, 34, 7, "#e0b040"); D(g, x + 15 + sw * 0.5, 34, 5, "#8a1a1a"); });
+      g.strokeStyle = "#c8d0de"; g.lineWidth = 2; g.beginPath(); g.moveTo(130, 20); g.lineTo(190, 60); g.moveTo(190, 20); g.lineTo(130, 60); g.stroke(); D(g, 160, 40, 9, "#6a4a2a"); D(g, 160, 40, 7, "#b88a3a");
+      // fila di armature, quella nera del Conestabile al centro
+      for (let i = 0; i < 5; i++) { const x = 40 + i * 58, k = i === 2, c = k ? "#1a1a22" : "#a6afc2", hi = k ? "#3a3a4a" : "#e2e8f2"; R(g, x - 6, 150, 32, 8, "#3a2a1e"); R(g, x, 104, 20, 46, c); R(g, x + 2, 92, 16, 14, c); R(g, x + 4, 98, 12, 2, "#16141f"); R(g, x, 104, 3, 46, hi); R(g, x - 6, 106, 6, 30, c); R(g, x + 20, 106, 6, 30, c); if (k) { R(g, x + 6, 96, 2, 2, "#ef4444"); R(g, x + 12, 96, 2, 2, "#ef4444"); D(g, x + 10, 120, 4, "#e0b040"); GL(g, x + 10, 120, 14, "255,200,80", 0.3 + 0.2 * Math.sin(f / 9)); R(g, x + 28, 70, 2, 84, "#5a4a3a"); g.fillStyle = "#c8d0de"; g.beginPath(); g.moveTo(x + 29, 60); g.lineTo(x + 25, 72); g.lineTo(x + 33, 72); g.fill(); } }
+      // finestrone col temporale e il lampo
+      const fl = (f % 240) < 5; R(g, 140, 70, 40, 56, "#16141f"); R(g, 142, 72, 36, 52, fl ? "#e8f0ff" : "#1e2436"); R(g, 159, 72, 2, 52, "#16141f"); for (let i = 0; i < 8; i++) R(g, 144 + (i * 5 + f) % 34, 74 + (i * 13 + f * 3) % 48, 1, 4, "rgba(170,190,230,.5)");
+      if (fl) R(g, 0, 0, W, 200, "rgba(220,230,255,.12)");
+      VIG(g, W, H, 0.55);
+    },
+    lt_studiolo(g, W, H, f) {
+      R(g, 0, 0, W, 200, "#1e1a22"); for (let x = 0; x < W; x += 32) R(g, x, 0, 4, 132, "#16121a");
+      R(g, 0, 132, W, 68, "#3a2a22"); for (let y = 136; y < 200; y += 10) R(g, 0, y, W, 1, "#2a1e18");
+      // scrittoio con la mappa del Borgo, il calamaio e la clessidra
+      R(g, 30, 120, 120, 12, "#4a2e18"); R(g, 30, 118, 120, 3, "#7a4a28"); R(g, 38, 132, 6, 50, "#2a1810"); R(g, 136, 132, 6, 50, "#2a1810");
+      R(g, 44, 108, 60, 12, "#d8c8a0"); for (let i = 0; i < 6; i++) R(g, 50 + i * 9, 110 + (i % 2) * 4, 6, 3, "#8a6a4a"); R(g, 70, 112, 3, 3, "#c02a3a");
+      R(g, 112, 108, 8, 10, "#16141f"); R(g, 118, 96, 1, 14, "#f8f4e8"); const sand = (f % 300) / 300; R(g, 128, 100, 12, 2, "#6a4a2a"); R(g, 128, 116, 12, 2, "#6a4a2a"); R(g, 130, 102, 8, 6 * (1 - sand), "#e0c080"); R(g, 130, 116 - 6 * sand, 8, 6 * sand, "#e0c080"); R(g, 133, 108, 2, 8, "rgba(224,192,128,.6)");
+      // candelabro
+      for (let i = 0; i < 3; i++) { const x = 76 + i * 8, h = 3 + Math.abs(Math.sin(f / 5 + i)) * 2; R(g, x, 90, 3, 10, "#f8f4e8"); R(g, x + 1, 90 - h, 1, h, "#ffd25a"); } R(g, 74, 100, 22, 3, "#b88a3a"); GL(g, 85, 88, 40, "255,200,110", 0.4);
+      // ritratto del Conestabile con gli occhi che seguono
+      R(g, 180, 20, 50, 64, "#6a4a1a"); R(g, 184, 24, 42, 56, "#2a2228"); R(g, 196, 36, 18, 22, "#c8a080"); R(g, 194, 30, 22, 8, "#1a1a22"); R(g, 190, 58, 30, 22, "#1a1a22"); const ex = Math.round(Math.sin(f / 40)); R(g, 200 + ex, 44, 2, 2, "#16141f"); R(g, 207 + ex, 44, 2, 2, "#16141f"); R(g, 200, 52, 10, 1, "#6a3a2a");
+      // la porta della scala della torre con l'impronta del sigillo, il vento che fischia da sotto
+      R(g, 256, 54, 50, 116, "#3a3036"); R(g, 262, 60, 38, 110, "#16141f"); R(g, 264, 62, 34, 108, "#4a3020"); for (let y = 70; y < 168; y += 20) R(g, 264, y, 34, 3, "#2a1a10"); D(g, 281, 108, 8, "#2a1a10"); D(g, 281, 108, 6, "#8a6a2a"); R(g, 279, 105, 4, 5, "#2a1a10");
+      for (let i = 0; i < 5; i++) { const t = (f * 1.2 + i * 18) % 70; R(g, 266 + t * 0.5, 166 - (i % 3) * 3, 6, 1, `rgba(190,200,230,${0.45 - t / 160})`); }
+      const fl = (f % 220) < 4; if (fl) R(g, 0, 0, W, 200, "rgba(220,230,255,.1)");
+      VIG(g, W, H, 0.55);
+    },
     // capitolo 3: il chiostro all'alba, l'archivio, la cappella con la porta della cripta
     lt_chiostro(g, W, H, f) {
       bands(g, W, 0, 110, ["#2a3a6a", "#4a5a8a", "#7a7aa0", "#b08aa0", "#e0a090", "#f4c090", "#fbe0a8"]);
@@ -180,6 +230,9 @@
     }
   };
   const HOT = {
+    lt_rocca: [[186, 10, 50, 140, "🏰 La torre del Conestabile. In cima una finestra accesa: nessuno ci abita da cinquecento anni."], [0, 150, 320, 50, "🌧️ Il cortile allagato. Ogni lampo ci disegna dentro un'altra torre, capovolta."], [270, 104, 40, 46, "🕯️ Una finestra accesa: Ottavia ha piazzato lì il suo quartier generale, con un thermos."]],
+    lt_salone: [[150, 90, 30, 64, "⚫ L'armatura nera del Conestabile. Sul petto, il sigillo col leone. Gli occhi rossi sono vetro. Forse."], [126, 16, 70, 50, "⚔️ Due spade incrociate. Una è vera, l'altra è di legno dipinto: le hanno vendute nel 1890."], [140, 70, 40, 56, "⛈️ Il finestrone. Il temporale è proprio sopra la torre, come se ci abitasse."]],
+    lt_studiolo: [[180, 20, 50, 64, "🖼️ Il ritratto del Conestabile. Gli occhi ti seguono. Ottavia dice che è la prospettiva. Ottavia non lo guarda."], [256, 54, 50, 116, "🚪 La porta della scala della torre. Un'impronta a forma di leone, e un vento che fischia da sotto."], [30, 100, 120, 30, "📜 Lo scrittoio: una mappa del Borgo del 1527, con una croce rossa sulla piazza del Palio."]],
     lt_chiostro: [[136, 136, 48, 44, "🪣 Il pozzo del chiostro. Dal fondo sale un rintocco: il pozzo comunica con la cripta delle campane."], [38, 24, 32, 100, "🔔 Il campanile del convento. La sua campana tace: quelle che suonano sono sotto terra."], [0, 118, 120, 70, "🏛️ Il porticato. Ogni capitello è diverso: uno ha un pallone scolpito, consumato dalle mani di chi passa."]],
     lt_archivio: [[130, 104, 46, 30, "📖 Il Libro del 1527, sul leggio. Una cinghia di cuoio lo tiene chiuso."], [128, 14, 64, 70, "🪟 La finestra sul chiostro. La luce dell'alba fa danzare la polvere dei secoli."], [0, 10, 120, 130, "📚 Registri dal Quattrocento in poi. Sui dorsi, gli anni scritti a mano."]],
     lt_cappella: [[128, 6, 64, 100, "🪟 La vetrata: un cavaliere che porta un ragazzo in braccio. Sotto, «QUI MANSIT»: rimase qui."], [250, 70, 50, 100, "🚪 La porta della cripta. Sette catenacci, e da sotto esce aria fredda."], [120, 120, 80, 50, "🕯️ L'altare. Sulla tovaglia, ricamato piccolo e antichissimo, un pallone."]],

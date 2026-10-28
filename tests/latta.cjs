@@ -197,6 +197,59 @@ async function criptaSim() {
   } catch (e) { errors.push(e.message.slice(0, 300)); }
   L.check("Pallone di Latta · cripta e Custode di Pietra", errors); await browser.close();
 }
+// ---------------------------------------------------------------- capitolo 4 e finali
+const SAVE4 = { v: 1, diffSet: true, intro: { ch1: 1, ch2: 1, ch3: 1, ch4: 1 }, ch: 4, max: 4, done: { 1: "ok", 2: "tobia", 3: "zeno" }, step: { 1: 4, 2: 4, 3: 4, 4: 0 }, flags: { lt_armatura: 1, lt_c1_done: 1, lt_c2_done: 1, lt_c3_done: 1, lt_lettera_zeno: 1 } };
+async function zones4(w) {
+  const { browser, page, errors } = await start(w, SAVE4);
+  for (const z of ["lt_rocca", "lt_salone", "lt_studiolo"]) {
+    try { await go(page, z); await L.shot(page, "lt_" + z + "_" + w); const bad = await L.reachAll(page, z); if (bad.length) errors.push(z + ": " + bad.join(", ")); }
+    catch (e) { errors.push(z + ": " + e.message.slice(0, 140)); }
+  }
+  L.check(`Pallone di Latta · zone cap.4 (${w} px)`, errors); await browser.close();
+}
+async function flow4(w, alt) {
+  const { browser, page, errors } = await start(w, SAVE4);
+  await stubLevel(page);
+  const st = async (n, what) => { const i = await L.info(page); if (i.step[4] !== n) errors.push(what + ": " + JSON.stringify(i.step)); };
+  try {
+    await go(page, "lt_rocca", 12, 11); await L.talk(page, "lt_ottavia"); await L.advance(page); await st(1, "dopo Ottavia");
+    await go(page, "lt_rocca", 6, 16); await L.talk(page, "lt_gelsa"); await L.advance(page);
+    await go(page, "lt_studiolo", 13, 4); await L.goAct(page, 13, 2); await L.advance(page); await st(1, "porta senza sigillo");
+    await go(page, "lt_salone", 8, 5); await L.goAct(page, 8, 3); await L.advance(page); await st(1, "sigillo prima di Mattonaro");
+    await L.talk(page, "lt_mattonaro"); await L.advance(page, [alt ? "Ne riparliamo in cima" : "Ferro non è arredo"]);
+    await L.goAct(page, 8, 3); await L.advance(page); await st(2, "dopo il sigillo");
+    await go(page, "lt_studiolo", 13, 4); await L.talk(page, "lt_benedetta"); await L.advance(page);
+    await L.goAct(page, 13, 2); await L.advance(page, ["Sali sulla torre"]); await L.advance(page).catch(() => {}); await st(3, "dopo la torre");
+    await L.goAct(page, 13, 2); await L.advance(page, ["Affronta il Conestabile", alt ? "Firma con Mattonaro" : "Lascia che Ferro riposi"]); await L.advance(page).catch(() => {});
+    const i = await L.info(page); if (!i.done[4]) errors.push("capitolo 4 non concluso: " + JSON.stringify([i.done, i.step]));
+    const lg = await page.evaluate(() => window.__scLog); if (!lg || lg.length !== 2 || lg[0].id !== "torre" || lg[1].id !== "spalti") errors.push("livelli: " + JSON.stringify(lg));
+    const k = await page.evaluate((k) => { const K = eval(k); return { r: K.F.is("lt_fine_riposo"), m: K.F.is("lt_fine_resort"), p: K.F.is("lt_patto4"), d: K.F.is("lt_c4_done") }; }, K_);
+    if (!k.d || k.r === !!alt || k.m !== !!alt || k.p !== !!alt) errors.push("finale: " + JSON.stringify(k));
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check(`Pallone di Latta · capitolo 4 e finale${alt ? " resort" : " riposo"} (${w} px)`, errors); await browser.close();
+}
+// motore: la torre ha vento e fulmini, il Conestabile si batte saltandogli addosso quando è stordito
+async function torreSim() {
+  const { browser, page, errors } = await L.setup({ w: 800, h: 400, ...MOD });
+  try {
+    const r = await page.evaluate(async () => {
+      window.__noSfx = 1; const LV = window.__latta._dbg.K.scroll.levels, sl = (ms) => new Promise((r) => setTimeout(r, ms)), out = { wind: 0, bolts: 0 };
+      window.__scorri.start({ level: Object.assign({ id: "torre" }, LV.torre), tutorial: false, onDone: () => {} });
+      let s = window.__scorri.state;
+      for (let t = 0; t < 900; t++) { s.tick(1); const c = s.counts; if (Math.abs(c.wind) > 0.05) out.wind = 1; if (c.bolts) out.bolts = 1; }
+      s.finish(false); await sl(50);
+      let res = null; window.__scorri.start({ level: Object.assign({ id: "spalti" }, LV.spalti), tutorial: false, onDone: (x) => { res = x; } });
+      s = window.__scorri.state; const sts = {}; let side = 0;
+      for (let t = 0; t < 6000 && !res; t++) { const b = s.boss, h = s.hero; if (!b) break; sts[b.st] = 1; if (b.st === "stun" && b.hitT <= 0) { const sx = b.x < 200 ? b.x - 12 : b.x + 12; if (h.ground || h.y > b.y - 36 || Math.abs(h.x - sx) > 6) s.warp(sx, b.y - 70); } else if (b.st !== "stun") { if (s.counts.cards && Math.abs(b.x - h.x) < 40) side = 1 - side; const px = side ? 344 : 64; if (Math.abs(h.x - px) > 4 || h.y > 112) s.warp(px, 111); } s.tick(1); if (s.phase === "win") { s.finish(true); break; } if (s.phase === "ko") { s.finish(false); break; } }
+      await sl(50); out.boss = res || { boss: s.boss, phase: s.phase }; out.sts = Object.keys(sts); return out;
+    });
+    if (!r.wind) errors.push("niente raffiche nella torre");
+    if (!r.bolts) errors.push("niente fulmini nella torre");
+    if (!["float", "aim", "charge", "stun"].every((x) => r.sts.includes(x))) errors.push("stati del Conestabile: " + r.sts.join(","));
+    if (!r.boss || !r.boss.win) errors.push("Conestabile non battibile: " + JSON.stringify(r.boss));
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check("Pallone di Latta · torre e Conestabile", errors); await browser.close();
+}
 (async () => {
   const only = process.argv[2];
   for (const w of [390, 320]) { if (!only || only === "zone") await zonesTest(w); }
@@ -209,4 +262,7 @@ async function criptaSim() {
   if (!only || only === "zone3") { await zones3(390); await zones3(320); }
   if (!only || only === "flow3") { await flow3(390, false); await flow3(320, true); }
   if (!only || only === "cripta") await criptaSim();
+  if (!only || only === "zone4") { await zones4(390); await zones4(320); }
+  if (!only || only === "flow4") { await flow4(390, false); await flow4(320, true); }
+  if (!only || only === "torre") await torreSim();
 })();

@@ -172,6 +172,28 @@
       return T;
     }
   };
+  // la torre nella tempesta: muro di pietroni con feritoie (si illuminano coi lampi), cielo verde-nero, castello lontano
+  function towerWall(w, h) {
+    const c = cnv(w, h), g = c.getContext("2d"); R(g, 0, 0, w, h, "#1a1e26");
+    for (let y = 0; y < h; y += 12) for (let x = (y / 12) % 2 ? -12 : 0; x < w; x += 24) { const v = rnd(x * 3 + y); R(g, x + 1, y + 1, 22, 10, v > 0.6 ? "#2a303a" : v > 0.3 ? "#252a34" : "#20242e"); R(g, x + 1, y + 1, 22, 1, "#343a46"); R(g, x + 1, y + 10, 22, 1, "#14161c"); }
+    for (let i = 0; i < 3; i++) { const x = 14 + i * 32, y = 18 + (i % 2) * 40; R(g, x, y, 6, 18, "#08090c"); R(g, x + 2, y + 2, 2, 14, "#101420"); }
+    return c;
+  }
+  THEMES.torre = {
+    name: "La torre nella tempesta", fall: "Giù dalla torre! Si riparte dal gonfalone.",
+    brick: { base: "#4a505e", light: "#6a7284", dark: "#2e323c", mortar: "#16181e", crack: "#22262e" },
+    grass: null, wood: { a: "#4a3a2a", b: "#6a5440", c: "#221810" }, fx: "pioggia", dark: 0, wind: true, storm: true,
+    build() {
+      const T = { flags: [], wins: [], layers: [] };
+      const sky = cnv(VW, VH), g = sky.getContext("2d");
+      skyBands(g, VW, 0, VH, ["#0a0f12", "#10181c", "#162226", "#1c2a2c", "#223230", "#283a34"]);
+      T.sky = sky;
+      T.layers.push({ c: cloudStrip(31, 512, 110, "#1e2a2e", "#34464a", "#121a1e", 6, 10, 70), k: 0.05, y: 0, drift: 0.6, alpha: 0.9 });
+      T.layers.push({ c: castleStrip(512, 150, "#0e1416", "#1a2428", "#0a0f10", "#d8c060", T.flags), k: 0.08, y: 40, flags: true });
+      T.back = { c: towerWall(96, 96), k: 0.55 };
+      return T;
+    }
+  };
   // ------------------------------------------------------------ tessere (atlante per tema)
   function atlas(th) {
     const A = {}, B = th.brick, G = th.grass, Wd = th.wood;
@@ -295,6 +317,7 @@
   function drawBoss(g, e, f) {
     if (e.kind === "gatto") return drawCat(g, e, f);
     if (e.kind === "statua") return drawStatue(g, e, f);
+    if (e.kind === "conestabile") return drawConest(g, e, f);
     const O = "#16141f", fl = Math.sin(f / (e.st === "fly" ? 5 : 12)) > 0, stun = e.st === "stuck";
     if (e.hitT > 0 && f % 4 < 2) g.globalAlpha = 0.45;
     part(g, -14, -24, 26, 18, "#1c1a26", O); for (let i = 0; i < 5; i++) R(g, -11 + i * 5, -22, 2, 14, "#ececec");
@@ -367,10 +390,48 @@
       else if (!e.vul || h.vy <= 0.5) hurt(st, Math.sign(e.x - h.x) || 1);
     }
   }
+  // capo finale: il Conestabile (armatura nera vuota, mantello, pennacchio rosso, lancia). Galleggia e lascia cadere decreti, poi carica a terra da un lato all'altro:
+  // quando sbatte contro il muro resta stordito. Nella seconda metà chiama i fulmini.
+  function drawConest(g, e, f) {
+    g.translate(0, -e.h - 42); const O = "#16141f", B = "#2a2836", L = "#4a4860", ch = e.st === "charge", stun = e.st === "stun";
+    if (e.hitT > 0 && f % 4 < 2) g.globalAlpha = 0.45;
+    const cw = Math.round(Math.sin(f / 6) * 2); for (let i = 0; i < 6; i++) R(g, -14 - i * (ch ? 2 : 1) + cw * (i % 2), 4 + i * 6, 12, 7, i % 2 ? "#5a0e18" : "#7a1420");
+    part(g, -10, 2, 20, 22, B, O); R(g, -10, 2, 20, 2, L); R(g, -10, 2, 2, 20, L); R(g, -3, 8, 6, 8, "#3a3848"); R(g, -10, 20, 20, 3, "#8a6a2a");
+    part(g, -8, 24, 7, 16, B, O); part(g, 1, 24, 7, 16, L, O); part(g, -9, 38, 9, 4, L, O); part(g, 1, 38, 9, 4, B, O);
+    part(g, -8, -10, 16, 13, B, O); R(g, -8, -10, 16, 2, L); R(g, -5, -5, 12, 2, O); const ey = stun ? "#4a4a5a" : "#ff3a3a"; R(g, -2, -5, 2, 2, ey); R(g, 3, -5, 2, 2, ey);
+    const pw = Math.round(Math.sin(f / 5) * 2); R(g, -3 + pw, -18, 5, 8, O); R(g, -2 + pw, -17, 3, 7, "#d23a3a"); R(g, -6 + pw, -15, 4, 4, "#d23a3a");
+    if (ch) { R(g, 8, 10, 30, 3, "#8a6a4a"); R(g, 36, 9, 6, 5, "#c8d0de"); } else { R(g, 12, -20, 3, 50, "#8a6a4a"); R(g, 11, -26, 5, 7, "#c8d0de"); }
+    if (stun) for (let i = 0; i < 3; i++) { const a = f / 8 + i * 2.1; R(g, Math.cos(a) * 12, -24 + Math.sin(a) * 3, 2, 2, "#fff6a0"); }
+    g.globalAlpha = 1;
+  }
+  function conestStep(st, e) {
+    const h = st.hero, minX = TS * 1.5 + e.w / 2, maxX = st.W * TS - TS * 1.5 - e.w / 2, ground = (st.H - 2) * TS, hard = e.hp <= e.max / 2;
+    if (!e.max) { e.max = e.hp; e.y = ground - 96; e.st = "float"; e.stT = 160; }
+    e.stT--; e.vul = e.st === "stun";
+    if (e.st === "float") {
+      e.x = clamp(e.x + clamp(h.x - e.x, -1, 1) * 0.9, minX, maxX); e.y = ground - 96 + Math.sin(st.f / 16) * 6; e.dir = h.x > e.x ? 1 : -1;
+      if (st.f % (hard ? 50 : 70) === 0) st.cards.push({ x: e.x, y: e.y - 20, vx: 0, vy: 0.7, l: 260, ph: rnd(st.f) * 6 });
+      if (hard && st.f % 150 === 40) st.bolts.push({ x: h.x, t: 50 });
+      if (e.stT <= 0) { e.st = "aim"; e.stT = 40; e.side = h.x > (minX + maxX) / 2 ? -1 : 1; }
+    } else if (e.st === "aim") {
+      const tx = e.side < 0 ? minX : maxX; e.x += clamp(tx - e.x, -4, 4); e.y = Math.min(ground, e.y + 3); e.dir = -e.side;
+      if (e.stT <= 0 && e.y >= ground && Math.abs(e.x - tx) < 2) { e.st = "charge"; snd("whistle"); say(st, "CARICA! Saltalo!", 50); }
+    } else if (e.st === "charge") {
+      e.x += e.dir * (hard ? 4.2 : 3.4); if (st.f % 3 === 0) st.debris.push({ x: e.x - e.dir * 14, y: ground - 2, vx: -e.dir, vy: -1, l: 20, c: "#6a6a7a", s: 3 });
+      if (e.x <= minX || e.x >= maxX) { e.x = clamp(e.x, minX, maxX); e.st = "stun"; e.stT = 100 + (st.k < 1 ? 30 : 0); st.fx && st.fx.shake(8); snd("brk"); st.flash = 14; say(st, "Ha sbattuto contro il muro: colpiscilo!", 60); }
+    } else if (e.st === "stun") { if (e.stT <= 0) { e.st = "rise"; } }
+    else if (e.st === "rise") { e.y -= 2; if (e.y <= ground - 96) { e.st = "float"; e.stT = 150 + Math.round(rnd(st.f) * 60); } }
+    const hb = heroBox(h), fb = foeBox(e);
+    if (st.phase === "play" && overlap(hb, fb)) {
+      if (e.vul && h.vy > 0.5 && h.y - 6 < fb.y + 12) { h.vy = -5.6; if (e.hitT <= 0) { e.hp--; e.hitT = 30; snd("boing"); st.fx && st.fx.burst(e.x, fb.y, 12, ["#fff", "#ff6a6a"]); if (e.hp <= 0) foeDie(st, e); } }
+      else if (!e.vul || h.vy <= 0.5) hurt(st, Math.sign(e.x - h.x) || 1);
+    }
+  }
   const BOSSES = {
     corvo: { n: "Il Corvo Maggiore", hp: 6, w: 34, h: 34 },
     gatto: { n: "Sgrinfia", hp: 7, w: 38, h: 30 },
-    statua: { n: "Il Custode di Pietra", hp: 8, w: 34, h: 52 }
+    statua: { n: "Il Custode di Pietra", hp: 8, w: 34, h: 52 },
+    conestabile: { n: "Il Conestabile", hp: 9, w: 28, h: 52 }
   };
   // ------------------------------------------------------------ stato del livello
   let S = null, ui = null, raf = 0, tutC = null, keys = {}, LAY = null;
@@ -409,7 +470,7 @@
       o, level, practice, P, grid: P.grid, W: P.W, H: P.H, th, T: th._built || (th._built = th.build()), A: th._atlas || (th._atlas = atlas(th)),
       hero: { x: P.start[0], y: P.start[1], vx: 0, vy: 0, dir: 1, ground: false, coyote: 0, buf: 0, hp: hpMax, max: hpMax, inv: 0, frozen: 0, kick: 0, squash: 0, onM: null },
       ball: { st: "held", x: 0, y: 0, vx: 0, vy: 0, sp: 0, t: 0, squash: 0 },
-      foes: P.foes.map((e) => mkFoe(e, level, k)), coins: P.coins, items: P.items, checks: P.checks, signs: P.signs, movers: P.movers, vents: P.vents, falls: P.falls, bells: P.bells, torches: P.torches, waves: [], exit: P.exit,
+      foes: P.foes.map((e) => mkFoe(e, level, k)), coins: P.coins, items: P.items, checks: P.checks, signs: P.signs, movers: P.movers, vents: P.vents, falls: P.falls, bells: P.bells, torches: P.torches, waves: [], bolts: [], flash: 0, windV: 0, exit: P.exit,
       cam: { x: 0, y: Math.max(0, P.H * TS - VH) }, f: 0, phase: "play", coinN: 0, banMask: 0, sponde: 0, time: 0, spawn: P.start.slice(), sign: null, petals: [], stones: [], cards: [], debris: [], fx: (M.fx ? M.fx() : null), msg: "", msgT: 0, win: false, k
     };
     st.cam.x = clamp(st.hero.x - 120, 0, st.W * TS - VW);
@@ -472,7 +533,7 @@
       const dx = h.x - b.x, dy = h.y - 12 - b.y, d = Math.hypot(dx, dy) || 1, sp = Math.min(6, 2 + b.t * 0.25); b.vx = dx / d * sp; b.vy = dy / d * sp; b.x += b.vx; b.y += b.vy;
       if (d < 10) { b.st = "held"; return; }
     } else if (b.st === "fly") {
-      b.vy = Math.min(5, b.vy + 0.22); if (inVent(st, b.x, b.y)) b.vy = Math.max(-3, b.vy - 0.5); const box = { x: b.x, y: b.y + 4, vx: b.vx, vy: b.vy }, r = move(st, box, 8, 8, true); b.x = box.x; b.y = box.y - 4;
+      b.vy = Math.min(5, b.vy + 0.22); if (st.windV) b.vx += st.windV * 0.4; if (inVent(st, b.x, b.y)) b.vy = Math.max(-3, b.vy - 0.5); const box = { x: b.x, y: b.y + 4, vx: b.vx, vy: b.vy }, r = move(st, box, 8, 8, true); b.x = box.x; b.y = box.y - 4;
       if (r.hx) { b.vx = -b.vx * 0.86; b.sp++; b.bn++; st.fx && st.fx.burst(b.x, b.y, 4, ["#ffe8a0", "#c88a2a"]); snd("kick"); breakAround(st, b); }
       if (r.hy) { if (r.ground) { if (Math.abs(b.vy) > 1.2) { b.vy = -Math.abs(b.vy) * 0.62; b.bn++; } else { b.vy = 0; } b.vx *= 0.93; } else { b.vy = Math.abs(b.vy) * 0.5; breakAround(st, b, true); } }
       if (Math.abs(b.vx) < 0.15 && Math.abs(b.vy) < 0.3 && r.ground) { b.st = "rest"; b.vx = b.vy = 0; }
@@ -508,7 +569,7 @@
   function ballHit(st, e, b) {
     const dirB = Math.sign(b.vx || 1);
     if (e.t === "s" && e.dir === -dirB && !b.sp) { b.vx = -b.vx * 0.7; b.vy = -2; e.hitT = 10; say(st, "Lo scudo para! Prova di sponda o da dietro.", 80); snd("kick"); return; }
-    if (e.t === "Z" && !e.vul && b.st !== "back") { b.vx = -b.vx * 0.6; b.vy = -2.5; say(st, e.kind === "gatto" ? "Troppo svelto! Colpiscilo quando è stordito." : "Troppo in alto: aspetta che si pianti a terra!", 70); return; }
+    if (e.t === "Z" && !e.vul && b.st !== "back") { b.vx = -b.vx * 0.6; b.vy = -2.5; say(st, e.kind === "gatto" ? "Troppo svelto! Colpiscilo quando è stordito." : e.kind === "statua" ? "È pietra! Aspetta che si stanchi." : e.kind === "conestabile" ? "Lo scudo nero para: aspetta che sbatta contro il muro!" : "Troppo in alto: aspetta che si pianti a terra!", 70); return; }
     const dmg = b.sp ? 2 : 1; e.hp -= dmg; e.hitT = 24; st.fx && st.fx.burst(e.x, e.y + 4, 10, ["#ffe8a0", "#ffffff", "#ff9a3a"]);
     if (b.sp) { st.sponde++; st.coinN += 2; say(st, "SPONDA! Doppio colpo, +2 gettoni", 60); snd("coin"); }
     if (b.st === "fly") { b.vx = -b.vx * 0.5; b.vy = -2.2; }
@@ -517,7 +578,7 @@
   function foeDie(st, e) {
     e.dead = 1; snd("hit"); st.coinN += e.t === "Z" ? 10 : 1;
     for (let i = 0; i < 10; i++) st.debris.push({ x: e.x, y: e.y + 4, vx: (rnd(i + e.x) - 0.5) * 4, vy: -2 - rnd(i) * 2, l: 50, c: ["#8a93a8", "#1c1a26", "#e8e8e8", "#ffd25a"][i % 4], s: 2 });
-    if (e.t === "Z") { st.fx && st.fx.banner(e.kind === "gatto" ? "SGRINFIA KO!" : "FISCHIO FINALE!", "#fde047"); st.winAt = st.f + 80; }
+    if (e.t === "Z") { st.fx && st.fx.banner(e.kind === "gatto" ? "SGRINFIA KO!" : e.kind === "statua" ? "IL CUSTODE CADE!" : e.kind === "conestabile" ? "IL CONESTABILE CADE!" : "FISCHIO FINALE!", "#fde047"); st.winAt = st.f + 80; }
   }
   function foeStep(st, e) {
     if (e.dead) return; if (e.hitT > 0) e.hitT--;
@@ -559,6 +620,7 @@
   function bossStep(st, e) {
     if (e.kind === "gatto") return catStep(st, e);
     if (e.kind === "statua") return statueStep(st, e);
+    if (e.kind === "conestabile") return conestStep(st, e);
     const h = st.hero, minX = TS * 1.5 + e.w / 2, maxX = st.W * TS - TS * 1.5 - e.w / 2, ground = (st.H - 2) * TS;
     e.vul = e.st === "stuck";
     if (!e.max) { e.max = e.hp; e.home = (st.H - 2) * TS - 84; e.y = e.home; }
@@ -590,6 +652,7 @@
     const ax = frozen ? 0 : (K.R ? 1 : 0) - (K.L ? 1 : 0);
     if (ax) { h.vx = clamp(h.vx + ax * 0.32, -1.9, 1.9); h.dir = ax; } else h.vx *= h.ground ? 0.72 : 0.92;
     if (Math.abs(h.vx) < 0.05) h.vx = 0;
+    if (st.windV) h.vx = clamp(h.vx + st.windV, -2.5, 2.5);
     if (K.J && !K._J) h.buf = 7; K._J = K.J; if (h.buf > 0) h.buf--;
     if (h.buf > 0 && (h.ground || h.coyote > 0) && !frozen) { h.vy = -6.4; h.ground = false; h.coyote = 0; h.buf = 0; snd("jump"); }
     if (h.spr > 0) h.spr--; else if (!K.J && h.vy < -2) h.vy *= 0.82;
@@ -635,6 +698,11 @@
     });
     st.waves = st.waves.filter((w) => { w.x += w.dir * w.sp; const h = st.hero; if (st.phase === "play" && h.ground && Math.abs(h.x - w.x) < 8 && h.y > (st.H - 3) * TS) hurt(st, w.dir); if (st.f % 3 === 0) st.debris.push({ x: w.x, y: (st.H - 2) * TS - 2, vx: -w.dir * 0.4, vy: -1.4 - rnd(st.f) * 1.2, l: 24, c: "#9a9ab0", s: 3 }); return --w.l > 0 && w.x > 0 && w.x < st.W * TS; });
     st.bells.forEach((k) => { if (k.sw > 0) k.sw--; });
+    if (st.th.wind && st.phase === "play") { const p = st.f % 420, dir = Math.floor(st.f / 420) % 2 ? 1 : -1, on = p > 240, ramp = on ? Math.min(1, (p - 240) / 30, (420 - p) / 30) : 0; st.windV = dir * 0.13 * ramp; if (p === 230) say(st, dir > 0 ? "Arriva una raffica ▶▶" : "◀◀ Arriva una raffica", 50); }
+    if (st.th.storm && st.level.bolts && st.phase === "play" && st.f % 210 === 100) st.bolts.push({ x: clamp(st.hero.x + (rnd(st.f) - 0.5) * 60, 24, st.W * TS - 24), t: 55 });
+    st.bolts = st.bolts.filter((b) => { b.t--; if (b.t === 0) { st.flash = 22; snd("brk"); st.fx && st.fx.shake(5); const h = st.hero; if (st.phase === "play" && Math.abs(h.x - b.x) < 12) hurt(st, h.x > b.x ? -1 : 1); } return b.t > -12; });
+    if (st.th.storm && st.f % 330 === 200) st.flash = Math.max(st.flash, 16);
+    if (st.flash > 0) st.flash--;
     st.cards = st.cards.filter((c) => { c.y += c.vy; c.x += Math.sin(st.f / 12 + c.ph) * 0.8; if (st.phase === "play" && Math.abs(c.x - st.hero.x) < 7 && c.y > st.hero.y - 20 && c.y < st.hero.y) { hurt(st, 1); return false; } return --c.l > 0 && c.y < st.H * TS; });
     st.debris = st.debris.filter((d) => { d.x += d.vx; d.vy += 0.2; d.y += d.vy; return --d.l > 0; });
     if (st.msgT > 0) st.msgT--;
@@ -642,6 +710,7 @@
     const h = st.hero, tx = clamp(h.x - VW / 2 + h.dir * 30, 0, st.W * TS - VW), ty = clamp(h.y - VH * 0.62, 0, Math.max(0, st.H * TS - VH));
     st.cam.x += (tx - st.cam.x) * 0.1; st.cam.y += (ty - st.cam.y) * 0.12;
     // petali che volano (tema)
+    if (st.th.fx === "pioggia") for (let i = 0; i < 3; i++) st.petals.push({ x: rnd(st.f * 3 + i) * (VW + 60) - 30, y: -4, vx: -0.6 + st.windV * 30, vy: 5 + rnd(st.f + i) * 2, ph: 0, l: 50, c: "rain" });
     if (st.th.fx === "polvere" && st.f % 12 === 0) st.petals.push({ x: rnd(st.f) * VW, y: rnd(st.f + 3) * VH, vx: -0.12 - rnd(st.f + 1) * 0.15, vy: -0.05, ph: rnd(st.f + 2) * 6, l: 300, c: "#8a88a8" });
     if (st.th.fx === "petali" && st.f % 9 === 0) st.petals.push({ x: VW + 4, y: rnd(st.f) * VH * 0.8, vx: -0.6 - rnd(st.f + 1) * 0.8, vy: 0.2, ph: rnd(st.f + 2) * 6, l: 600 });
     st.petals = st.petals.filter((p) => { p.x += p.vx; p.y += p.vy + Math.sin(st.f / 15 + p.ph) * 0.3; return --p.l > 0 && p.x > -6; });
@@ -659,6 +728,7 @@
       if (L.flags) T.flags.forEach(([fx0, fy]) => { for (let x = ox; x < VW + w; x += w) { const X = Math.round(x + fx0), Y = y + fy; if (X < -10 || X > VW + 10) continue; R(g, X, Y - 8, 1, 8, "#3a2440"); for (let i = 0; i < 5; i++) R(g, X + 1 + i, Y - 8 + Math.round(Math.sin(f / 6 + i * 0.9 + fx0) * 1), 1, 3, i % 2 ? "#e85a4a" : "#f07a5a"); } });
       if (L.wins) T.wins.forEach(([wx, wy], i) => { if (Math.sin(f / 40 + i * 1.7) > 0.93) for (let x = ox; x < VW + w; x += w) R(g, Math.round(x + wx), y + wy, 5, 6, "#3a2440"); });
     });
+    if (T.back && !st.level.open) { const B = T.back, bw = B.c.width, bh = B.c.height, bx = -(((cx * B.k) % bw) + bw) % bw, by = -(((cy * B.k) % bh) + bh) % bh, x0 = Math.round(TS * 1 - cx), x1 = Math.round((st.W - 1) * TS - cx); g.save(); g.beginPath(); g.rect(Math.max(0, x0), 0, Math.min(VW, x1) - Math.max(0, x0), VH); g.clip(); for (let x = bx; x < VW; x += bw) for (let y = by; y < VH; y += bh) g.drawImage(B.c, Math.round(x), Math.round(y)); if (st.flash > 0) R(g, 0, 0, VW, VH, `rgba(200,220,255,${st.flash / 30})`); g.restore(); }
     if (T.stars) T.stars.forEach(([x, y, i]) => { const a = Math.sin(f / 20 + i * 1.3); if (a > -0.3) R(g, x, y - Math.round(vy * 0.05), 1, 1, a > 0.8 ? "#ffffff" : "#b8b8e0"); });
     if (T.stars && f % 420 < 26) { const sx = 260 - (f % 420) * 6, sy = 18 + (f % 420) * 2; for (let i = 0; i < 6; i++) R(g, sx + i * 2, sy - i, 2, 1, `rgba(255,255,230,${0.9 - i * 0.14})`); }
     // uccelli lontani
@@ -744,7 +814,9 @@
     if (h.frozen > 0) { R(g, h.x + ox - 3, h.y + oy - 36, 7, 9, "#16141f"); R(g, h.x + ox - 2, h.y + oy - 35, 5, 7, "#ffd820"); }
     drawBall(g, st);
     st.debris.forEach((d) => R(g, d.x + ox, d.y + oy, d.s, d.s, d.c));
-    st.petals.forEach((p) => { if (p.c) return R(g, p.x, p.y, 1, 1, p.c); R(g, p.x, p.y, 2, 1, "#ffb0c8"); R(g, p.x + 1, p.y + 1, 1, 1, "#ff8ab0"); });
+    st.petals.forEach((p) => { if (p.c === "rain") return R(g, p.x, p.y, 1, 5, "rgba(170,200,220,.55)"); if (p.c) return R(g, p.x, p.y, 1, 1, p.c); R(g, p.x, p.y, 2, 1, "#ffb0c8"); R(g, p.x + 1, p.y + 1, 1, 1, "#ff8ab0"); });
+    st.bolts.forEach((b) => { const X = Math.round(b.x + ox); if (b.t > 0) { if (b.t % 8 < 5) for (let y = 0; y < VH; y += 8) R(g, X - 1, y, 2, 4, "rgba(255,240,120,.45)"); R(g, X - 6, VH - 8, 12, 3, "rgba(255,240,120,.6)"); } else { let x = X, y = 0; g.fillStyle = "#fffbe0"; while (y < VH) { const nx = x + Math.round((rnd(y + b.x) - 0.5) * 10); for (let k = 0; k < 10; k++) g.fillRect(Math.round(x + (nx - x) * k / 10) - 1, y + k, 3, 1); x = nx; y += 10; } } });
+    if (st.flash > 0 && (!st.T.back || st.level.open)) R(g, 0, 0, VW, VH, `rgba(220,235,255,${st.flash / 40})`);
     if (st.th.lit) light(g, st, ox, oy);
     // capo: barra della vita
     const boss = st.foes.find((e) => e.t === "Z" && !e.dead); if (boss) { R(g, 80, 6, 160, 6, "#16141f"); R(g, 81, 7, Math.round(158 * boss.hp / (boss.max || boss.hp)), 4, "#e04a4a"); }
@@ -847,7 +919,7 @@
     window.__scorri.state = {
       get phase() { return S && S.phase; }, get hero() { return S && { x: S.hero.x, y: S.hero.y, vx: S.hero.vx, vy: S.hero.vy, hp: S.hero.hp, ground: S.hero.ground, frozen: S.hero.frozen }; },
       get ball() { return S && { st: S.ball.st, x: S.ball.x, y: S.ball.y, vx: S.ball.vx, vy: S.ball.vy }; }, get foes() { return S ? S.foes.filter((e) => !e.dead).length : 0; }, get coins() { return S ? S.coinN : 0; }, get ban() { return S ? countBits(S.banMask) : 0; },
-      get boss() { const b = S && S.foes.find((e) => e.t === "Z"); return b ? { hp: b.hp, st: b.st, dead: b.dead, x: b.x, y: b.y, hitT: b.hitT } : null; }, get counts() { return S ? { vents: S.vents.length, falls: S.falls.length, cats: S.foes.filter((e) => e.t === "g").length, bells: S.bells.length, rung: S.bells.filter((k) => k.rung).length, gates: S.grid.reduce((a, r) => a + r.filter((t) => t === "G").length, 0), ghosts: S.foes.filter((e) => e.t === "m" && !e.dead).length, waves: S.waves.length } : null; }, ballAt: (x, y, vx, vy) => { if (S) { S.ball.st = "fly"; S.ball.x = x; S.ball.y = y; S.ball.vx = vx || 0; S.ball.vy = vy || 0; S.ball.t = 0; S.ball.sp = 0; } }, get practice() { return S && S.practice; }, get W() { return S && S.W; },
+      get boss() { const b = S && S.foes.find((e) => e.t === "Z"); return b ? { hp: b.hp, st: b.st, dead: b.dead, x: b.x, y: b.y, hitT: b.hitT } : null; }, get counts() { return S ? { vents: S.vents.length, falls: S.falls.length, cats: S.foes.filter((e) => e.t === "g").length, bells: S.bells.length, rung: S.bells.filter((k) => k.rung).length, gates: S.grid.reduce((a, r) => a + r.filter((t) => t === "G").length, 0), ghosts: S.foes.filter((e) => e.t === "m" && !e.dead).length, waves: S.waves.length, bolts: S.bolts.length, wind: S.windV, cards: S.cards.length } : null; }, ballAt: (x, y, vx, vy) => { if (S) { S.ball.st = "fly"; S.ball.x = x; S.ball.y = y; S.ball.vx = vx || 0; S.ball.vy = vy || 0; S.ball.t = 0; S.ball.sp = 0; } }, get practice() { return S && S.practice; }, get W() { return S && S.W; },
       tut: () => !!(tutC && tutC.open), press, tick: (n) => { for (let i = 0; i < (n || 1) && S; i++) step(S); }, warp: (x, y) => { if (S) { S.hero.x = x; S.hero.y = y; S.hero.vx = S.hero.vy = 0; } },
       finish: (win) => { if (!S) return; if (tutC) { tutC.close(); tutC = null; } S.win = win !== false; if (S.win) { S.items.forEach((it) => { if (it.k === "S" && win === "all") S.banMask |= 1 << it.i; }); } close(); }
     };

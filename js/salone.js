@@ -530,6 +530,10 @@
       opts: (o, h, boss) => ({ title: `Squadra in Pausa · ${o.name}`, arena: boss ? "tana" : o.name === "Le bande di Omega" ? "ponte" : "sale", bonus: 1,
         mates: [{ id: "ms_miranda", n: "Miranda", icon: "🕸️", pow: "rete" }, { id: "ms_zero", n: "Zero", icon: "💥", pow: "onda" }],
         waves: boss ? [[["base", 6]], [["lesto", 4], ["scudo", 2]], [["grosso", 2], ["base", 4]], [["boss", 1], ["lesto", 3]]] : o.name === "Le bande di Omega" ? [[["lesto", 4]], [["base", 4], ["scudo", 1]], [["grosso", 1], ["lesto", 3]]] : [[["base", 5]], [["scudo", 3], ["base", 2]], [["grosso", 2], ["base", 3]]] }) },
+    { id: "scorri", t: "A scorrimento", e: "🏰", saga: "latta", eng: "__scorri", d: "Platform a scorrimento in pixel art: sei Ferro, l'armatura del 1527. Salti, calci il pallone di latta contro i nemici (di sponda fa doppio danno) e lo usi come molla. Mura, tetti, cripta buia e torre nella tempesta.",
+      opp: [{ name: "Le Mura del Palio", lv: "mura", color: "#b45309", style: "pressing" }, { name: "I tetti del Borgo", lv: "tetti", color: "#6a3030", style: "contropiede" }, { name: "La cripta delle campane", lv: "cripta", color: "#4c1d95", style: "difensiva" }, { name: "La torre nella tempesta", lv: "torre", color: "#334155", style: "pressing" }],
+      boss: { name: "Il Conestabile", lv: "spalti", color: "#111827", style: "pressing" },
+      opts: (o, h, boss) => { const LV = window.__lattaLV || {}, id = o.lv || "mura"; return { title: `A scorrimento · ${o.name}`, level: Object.assign({ id }, LV[id] || {}), bonus: 1, tutorial: false }; } },
   ];
   function sgState(m) { const s = SAGAS.find((x) => x.id === m.saga), x = s ? state(s) : null; return { s, open: !!(x && (x.doneN >= 1)), boss: !!(x && x.endsFound > 0) }; }
   function openSalaGiochi(back) {
