@@ -101,6 +101,7 @@
       doppio: ["Il Fischietto Doppio Zero", "Una cartolina, un agente con la valigia e un tabulato già visto: hai fatto da ponte tra due mondi che non si parlano. Il fischietto, per una volta, ha fatto da radio.", "Nel capitolo ponte, porta le prove a Sterling o alla Procura."],
       spento: ["Il Fischietto Spento", "Il fischietto suona ancora. Ma non fa più rumore: sai tu perché.", "Tieni la busta e tacciono tutti."]
     },
+    guest: { id: "fi_pino", lines: [["fi_pino", "[serio] {n}. Pino, guardalinee. Ho portato la bandierina, nel caso. Non si sa mai chi è in fuorigioco, al mare."], ["fi_pino", "Ho visto la vostra partitella sulla spiaggia: tre fuorigioco e un fallo di mano. Non ho segnalato niente. In vacanza non conto."]] },
     heroLook: (h) => ({ bg: ["#1c1917", "#facc15"], shirt: "#111827" }),
     heroTitle: () => "arbitro di provincia",
     musicMain: "fischietto",

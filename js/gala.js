@@ -89,6 +89,7 @@
       silenzio: ["Il Silenzio di Livia", "Accetti il patto di Livia: il Pallone torna in sordina, il Presidente si dimette per «motivi di salute», lo scandalo non esce. Il Borgo dorme tranquillo.", "Parla in privato con Livia e accetta il suo patto."],
       segreto: ["Il Mistero Completo", "Sei contraddizioni, una partita a ping-pong vinta e l'identità dell'Ospite: il Pallone vero ricompare nella cantina dove tutto è cominciato, con il collezionista in manette.", "Scopri tutte e sei le contraddizioni e batti Zeno a ping-pong."]
     },
+    guest: { id: "pd_arturo", lines: [["pd_arturo", "[serio] {n}. Il Presidente mi ha concesso un giorno libero. Il primo in venticinque anni. Non so cosa si fa, quindi ho lucidato le panchine del molo."], ["pd_arturo", "Se le serve qualcosa, sono qui fino al tramonto. Poi torno in villa: le posate d'argento non si contano da sole, e a volte non tornano i conti."]] },
     heroLook: () => ({ bg: ["#3b2314", "#d4a73a"], shirt: "#1e293b" }),
     heroTitle: () => "Ospite d'Onore",
     musicMain: "gala",

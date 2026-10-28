@@ -67,6 +67,7 @@
       onore: ["Sconfitti, Insieme", "Battuti in finale, ma il pullman torna cantando. Per ora, basta.", "Perdi la finale con Umore 6 o più."],
       strada: ["Il Ritorno in Silenzio", "Sconfitta e silenzio. Il Gigante, almeno, non si lamenta.", "Perdi la finale con Umore basso."]
     },
+    guest: { id: "ro_osvaldo", lines: [["ro_osvaldo", "[felice] {n}! Ho parcheggiato il Gigante davanti al porto. Non chiedetemi di spostarlo: oggi è di cattivo umore e non si accende per nessuno."], ["ro_osvaldo", "Il pullman dice che il vostro mare è bello. Io dico che c'è troppa salita. Ci stiamo ancora mettendo d'accordo."]] },
     heroLook: () => ({ bg: ["#78350f", "#fbbf24"], shirt: "#b91c1c" }),
     heroTitle: () => "tuttofare dell'FC Sant'Anselmo",
     musicMain: "rotta",

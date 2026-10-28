@@ -64,6 +64,7 @@
       patto: ["Il Patto dell'Acciaio", "Vinci e firmi un accordo pragmatico con la Corporazione: pane, orari e una catena più lunga.", "Vinci la finale dopo aver accettato il Patto."],
       nucleo: ["Il Nucleo Dormiente", "Tre ingranaggi d'oro, un mecha antico che si sveglia e il portiere più vecchio del mondo.", "Segreto: raccogli i 3 ingranaggi d'oro e vinci la finale."]
     },
+    guest: { id: "of_brontolo", lines: [["of_brontolo", "Fffshhh. <em>(Traduzione di Gasparre, per lettera: «Bel posto. Troppo sale per la mia ruggine, ma la focaccia è buona.»)</em>"], ["of_brontolo", "Pfff-pfff. <em>(«Se qualcuno vuole un passaggio fino al faro, salga sulla spalla sinistra. Quella destra cigola.»)</em>"]] },
     heroLook: () => ({ bg: ["#78350f", "#fdba74"], shirt: "#b45309" }),
     heroTitle: () => "meccanico del torneo",
     musicMain: "officina",

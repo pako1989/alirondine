@@ -76,6 +76,7 @@
       ombra: ["L'Ombra che Cade", "Il Pierrot non risale. Il Borgo ti teme più di quanto ti ami e, da quella notte, qualcuno smette di giocare pulito per paura, non per scelta.", "Con Timore 40 o più, lascia cadere il Pierrot."],
       segreto: ["Il Fischio Finale", "Con i sei indovinelli, Lucre confessa davanti a tutta la Banca. L'arbitro viene riabilitato e il fischietto d'oro torna in campo, a un fischio dalla verità.", "Raccogli tutti e sei gli indovinelli e il Libro Mastro."]
     },
+    guest: { id: "cf_fulgenzio", lines: [["cf_fulgenzio", "[furbo] {n}, buongiorno. Il padrone dorme, il mantello è in lavanderia e io ho preso il treno. Una vacanza, la chiamano."], ["cf_fulgenzio", "Il vostro molo ha un'ottima vista e nessun tetto da cui cadere. La consiglierei a chiunque abbia un rampino e troppe ossa rotte."]] },
     heroLook: () => ({ bg: ["#0b0b12", "#facc15"], shirt: "#111827" }),
     heroTitle: () => "il Cavaliere",
     musicMain: "gotico",

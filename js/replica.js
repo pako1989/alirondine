@@ -61,6 +61,7 @@
       cielo: ["Il Cielo Diviso", "Vinci e dici tutto al mondo. Il padre resta in cielo, tu a terra: una distanza giusta, ma pesante.", "Vinci il duello finale con Rabbia più alta di Fiducia."],
       terza: ["La Terza Via", "Fondi una nuova lega con Brezza e gli «invasori» assunti dalla vecchia: nessun cielo finto, solo gente vera.", "Segreto: Fiducia e Rabbia a 3 o più, tutto il Dossier e vittoria finale."]
     },
+    guest: { id: "rp_basalto", lines: [["rp_basalto", "[felice] {n}! Sono in pensione, quindi niente salvataggi oggi. Al massimo innaffio le aiuole della piazza, se il sindaco mi lascia."], ["rp_basalto", "I vostri gerani hanno sete e il vostro portiere ha paura dei tiri alti. Al primo problema ci penso io. Al secondo, il vostro portiere."]] },
     heroLook: () => ({ bg: ["#0c4a6e", "#7dd3fc"], shirt: "#0369a1" }),
     heroTitle: () => "figlio di Zenit",
     musicMain: "figlio",

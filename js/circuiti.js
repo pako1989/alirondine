@@ -76,6 +76,7 @@
       corporativo: ["Il Patto d'Oro", "Accetti il contratto milionario di Vektor dopo la vittoria in finale: stella della lega commerciale, con status da élite e il rimorso di aver tradito i bassifondi.", "Firma il contratto di Vektor sulla consolle."],
       segreto: ["Protocollo Zero del Fondatore", "Raccogli i sei Datapad e inserisci la sequenza del 1900: il server storico delle Rondini originali si riattiva, i microchip truccati si spengono e la città si libera senza caos.", "Segreto: tutti e sei i Datapad e la sequenza antica."]
     },
+    guest: { id: "nr_bolt", lines: [["nr_bolt", "Bzzt. {n}. Bullone-7. In. Ferie. Questo borgo non ha. Wi-fi. Mi piace. Bzzt."], ["nr_bolt", "Ho trovato un. Chip. Sulla spiaggia. Era un tappo di bottiglia. Lo tengo lo stesso: ha. Una bella. Storia."]] },
     heroLook: () => ({ bg: ["#0b2a45", "#22d3ee"], shirt: "#06b6d4" }),
     heroTitle: () => "Campione dei Circuiti",
     musicMain: "circuiti",

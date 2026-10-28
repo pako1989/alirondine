@@ -60,6 +60,7 @@
       libera: ["La Rondine Scalza", "Libera e senza padroni, con i debiti di sempre e una compagnia vera.", "Rifiuta l'incarico del Conte."],
       leggenda: ["La Rondine Leggendaria", "Dodici compagni, un onore intatto e una ballata che tutti conoscono.", "Segreto: rifiuta l'incarico con Onore 5 e almeno 12 compagni."]
     },
+    guest: { id: "cv_tiburzio", lines: [["cv_tiburzio", "[felice] {n}! Ho portato il tamburo. Ho provato la versione silenziosa per tutto il viaggio. I gabbiani dicono che non funziona."], ["cv_tiburzio", "Al Borgo suonate le campane, noi suoniamo il tamburo. Facciamo una partita: chi perde, ascolta l'altro per un'ora intera."]] },
     heroLook: (h, K) => ({ bg: ["#3a2438", "#fbbf24"], shirt: h.shirt }),
     heroTitle: () => "capitano della Rondine Scalza",
     crew: { name: "La Rondine Scalza", field: 4, members: MEMBERS },

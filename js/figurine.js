@@ -82,6 +82,7 @@
       custode: ["Custode delle Figure", "Vinci la Lega dopo aver liberato le figure delle vetrine: chi segue te lo fa per scelta.", "Vinci la finale dopo aver liberato le figure delle vetrine."],
       album: ["L'Album Completo", "Tutte e dodici le specie hanno la loro pagina. Il figurinaio chiude gli occhi e sorride.", "Segreto: completa l'Album con tutte le 12 specie (anche evolute)."]
     },
+    guest: { id: "fg_gilda", lines: [["fg_gilda", "[felice] {n}! Il vostro Borgo ha un'edicola? Ho portato esche, nastri e un consiglio. Il consiglio è gratis, quindi non lo seguirà nessuno."], ["fg_gilda", "Le figurine doppie non si buttano: si scambiano, si regalano o si usano per pareggiare il tavolo. Quella sotto il tavolo del bar l'ho messa io."]] },
     heroLook: () => ({ bg: ["#6b21a8", "#e9d5ff"], shirt: "#7c3aed" }),
     heroTitle: () => "cacciatore di figurine",
     musicMain: "figurine",

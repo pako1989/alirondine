@@ -74,6 +74,7 @@
       squadra: ["Il Gol di Tutti", "Undici maglie, una sola esultanza. La coppa passa di mano in mano, nessuno la tiene per sé.", "Vinci la finale con Intesa 50 o più."],
       segreto: ["La Catena Perfetta", "Tre catene perfette in un torneo: il Mondiale ricorda ancora quel gol in cui nessuno ha toccato la palla da solo.", "Segreto: vinci la finale con Intesa 50 e almeno 3 catene perfette."]
     },
+    guest: { id: "mg_bia", lines: [["mg_bia", "[felice] {n}! Ho chiuso il chiosco per una settimana e sono venuta a vedere il mare degli altri. È più freddo, ma la gente gioca a pallone uguale."], ["mg_bia", "Ho portato il cocco. Nessuno qui sa aprirlo. Ve lo insegno gratis, ma il consiglio su come tirare le punizioni costa un sorriso."]] },
     heroLook: (h) => ({ bg: ["#1e3a8a", "#fde047"], shirt: "#2563eb" }),
     heroTitle: () => "il Campione",
     musicMain: "mondiale",
