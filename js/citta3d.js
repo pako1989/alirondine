@@ -50,7 +50,7 @@
 .c3dMenu{position:absolute;inset:0;background:#0b1226ee;z-index:6;padding:56px 14px 14px;overflow:auto}.c3dMenu h3{margin:0 0 8px;color:#fde68a;font:900 18px system-ui}.c3dMenu p{font:600 13.5px/1.5 system-ui;color:#cbd5e1;margin:6px 0}
 .c3dMenu button{display:block;width:100%;margin:8px 0;min-height:46px;border-radius:10px;border:1.5px solid #64748b;background:#1e293b;color:#fff;font:800 14px system-ui;cursor:pointer}
 .c3dFade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .5s;z-index:7}.c3dFade.on{opacity:1}
-.c3dToast{position:absolute;left:50%;top:96px;transform:translateX(-50%);background:#0f172af2;border:1.5px solid #fbbf24;border-radius:12px;padding:8px 14px;font:800 13px system-ui;z-index:4;pointer-events:none;text-align:center;max-width:90%}`;
+.c3dCut{position:absolute;left:0;right:0;top:34%;z-index:6;pointer-events:none;background:linear-gradient(90deg,#0000,#7c2d12ee 18%,#7c2d12ee 82%,#0000);color:#fde68a;font:900 20px system-ui;text-align:center;padding:12px 8px;letter-spacing:1px;animation:c3dcut 2.6s ease both}.c3dCut small{display:block;font:700 12px system-ui;color:#fff;letter-spacing:0;margin-top:3px}@keyframes c3dcut{0%{transform:translateX(-100%);opacity:0}12%{transform:none;opacity:1}85%{transform:none;opacity:1}100%{transform:translateX(100%);opacity:0}}.c3dToast{position:absolute;left:50%;top:96px;transform:translateX(-50%);background:#0f172af2;border:1.5px solid #fbbf24;border-radius:12px;padding:8px 14px;font:800 13px system-ui;z-index:4;pointer-events:none;text-align:center;max-width:90%}`;
     document.head.appendChild(st);
   }
 
@@ -335,7 +335,7 @@
       if (look.glasses) { const gm = new THREE.MeshBasicMaterial({ color: 0x111111 }); [-1, 1].forEach((sx) => add(new THREE.TorusGeometry(0.1, 0.012, 5, 12), gm, sx * 0.13, 0.06, 0.33)); add(new THREE.BoxGeometry(0.06, 0.012, 0.012), gm, 0, 0.07, 0.33); }
       const mkLeg = (x) => { const l = new THREE.Group(); l.position.set(x, 1.05, 0); const m = new THREE.Mesh(new THREE.BoxGeometry(0.34, 1.05, 0.38), legs); m.position.y = -0.5; l.add(m); grp.add(l); return l; };
       const mkArm = (x) => { const a = new THREE.Group(); a.position.set(x, 2, 0); const m = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.95, 0.3), shirt); m.position.y = -0.42; a.add(m); grp.add(a); return a; };
-      grp.userData = { mouth, eyes, brows, legL: mkLeg(-0.24), legR: mkLeg(0.24), armL: mkArm(-0.6), armR: mkArm(0.6), torso };
+      grp.userData = { mood, mouth, eyes, brows, legL: mkLeg(-0.24), legR: mkLeg(0.24), armL: mkArm(-0.6), armR: mkArm(0.6), torso };
       const sh = new THREE.Mesh(new THREE.CircleGeometry(0.7, 12), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.3, depthWrite: false })); sh.rotation.x = -Math.PI / 2; sh.position.y = 0.05; grp.add(sh);
       return grp;
     }
@@ -425,19 +425,42 @@
       if (!G || G.talking) return; G.menu = true; const m = document.createElement("div"); m.className = "c3dMenu";
       const goal = STORY.goal ? STORY.goal(K) : null;
       m.innerHTML = `<h3>${ICON} ${esc(TITLE)}</h3><p><b>Obiettivo:</b> ${esc((goal && goal.text) || "Gira la città.")}</p><p>Capitolo ${mem().ch}/${cfg.chapters || 1} · 🪙 ${mem().coins} · ${mem().inv.length ? "🎒 " + esc(mem().inv.join(", ")) : "🎒 vuoto"}</p>
-<button type="button" data-q="1">Grafica: ${mem().q === "low" ? "Leggera" : "Alta"} (tocca per cambiare, riapre)</button><button type="button" data-z="1">🕘 Riposa fino a domattina</button><button type="button" data-r="1">▶ Riprendi</button><button type="button" data-x="1">✕ Esci dalla città</button>`;
+<button type="button" data-q="1">Grafica: ${mem().q === "low" ? "Leggera" : "Alta"} (tocca per cambiare, riapre)</button><button type="button" data-s="1">Passanti parlanti: ${streetOn() ? "SÌ" : "NO"} (tocca per cambiare)</button><button type="button" data-z="1">🕘 Riposa fino a domattina</button><button type="button" data-r="1">▶ Riprendi</button><button type="button" data-x="1">✕ Esci dalla città</button>`;
       OV.appendChild(m);
       m.querySelector("[data-r]").onclick = () => { m.remove(); G.menu = false; };
       m.querySelector("[data-x]").onclick = () => { save(); K.exit(); };
       m.querySelector("[data-q]").onclick = () => { mem().q = mem().q === "low" ? "hi" : "low"; persist(); const b = BACK; open(b); };
+      m.querySelector("[data-s]").onclick = () => { mem().street = !streetOn(); persist(); m.remove(); G.menu = false; if (streetOn()) streetCut(); toast(streetOn() ? "👥 Passanti parlanti: SÌ" : "👥 Passanti parlanti: NO"); };
       m.querySelector("[data-z]").onclick = () => { m.remove(); G.menu = false; K.skipTo(7, () => toast("🌅 Un nuovo giorno.")); };
     }
     function persist() { if (!G || !M) return; const d = districtAt(G.p.x, G.p.z); if (d) { M.d = d.id; M.at = [G.p.x - origin(d).x, G.p.z - origin(d).z]; } M.hour = G.hour; M.yaw = G.yaw; save(); }
 
     // ------------------------------------------------------------ interazione
+    // ------------------------------------------------------------ passanti parlanti (opzione: mem().street, attiva se non === false)
+    const streetOn = () => mem().street !== false;
+    const pedXZ = (p) => ({ x: p.alongX ? p.pos : p.fix, z: p.alongX ? p.fix : p.pos });
+    const PED_NAMES = ["Gino", "Ornella", "Bepi", "Carmela", "Tonino", "Wanda", "Osvaldo", "Lucia", "Nando", "Pierina", "Sandro", "Giada", "Mimmo", "Rosalba", "Ettorino", "Franca", "Duilio", "Marisa", "Arturo", "Cinzia", "Lello", "Ivana", "Fabrizio", "Gisella"];
+    const PED_MOOD = { happy: ["Bella giornata per camminare, no? Oggi non ho pagato la sosta, è un segno.", "Ho visto un gatto che guardava il semaforo. Anche lui aspettava il verde, che persona seria.", "Qui in zona si dice che il pane migliore lo fa chi non ti guarda negli occhi."], grumpy: ["Hai visto che traffico? Una volta la città era più piccola. O io più giovane. Una delle due.", "Non è che ce l'ho con te. Ce l'ho con tutti, ma con te in modo equo.", "I lampioni sono accesi di giorno e spenti di notte. Qualcuno mi spieghi chi li ha montati al contrario."], sly: ["Psst. Se senti dire che ho un cugino bene informato, non è vero. Ne ho tre.", "Io non ho visto niente. Sto sempre qui, ma mai nel momento giusto.", "Si dice che il Corriere sappia più cose della Questura. Io dico che la Questura non le chiede."], sad: ["Ieri ho perso il tram. Oggi ho perso la voglia di prenderlo.", "Una volta qui c'era una panchina. Ora c'è un monopattino. Il progresso mi guarda male.", "Sai, a me il pallone rotola sempre dove non ci sono io."], surprised: ["Oh! Non ti avevo visto! Mi hai fatto prendere un colpo, ora mi devi un caffè.", "Hai sentito il botto? Nemmeno io. Ma mi è sembrato giusto chiederlo.", "Ma tu sei quello del Corriere? Dal vero sei più alto. O è la strada che è in discesa."] };
+    const PED_RIDDLE = [["Quanti giocatori in campo per squadra, in una partita normale?", ["11", "9", "13"], 0], ["Come si chiama il tiro dalla bandierina?", ["Rimessa", "Calcio d'angolo", "Rigore"], 1], ["Quanto dura una partita regolare, tempi regolamentari?", ["90 minuti", "60 minuti", "120 minuti"], 0], ["Chi può usare le mani, in area?", ["Il capitano", "Il portiere", "Il guardalinee"], 1], ["Il cartellino che manda fuori subito?", ["Giallo", "Verde", "Rosso"], 2]];
+    function pedInfo(p) { const i = G.W.peds.indexOf(p), mood = (p.f.userData && p.f.userData.mood) || "happy"; return { i, name: PED_NAMES[i % PED_NAMES.length], mood }; }
+    function pedTalk(p) {
+      const { i, name, mood } = pedInfo(p), me = name, m = mem(); m.met = m.met || {}; const first = !m.met[i]; m.met[i] = 1;
+      const pool = PED_MOOD[mood] || PED_MOOD.happy, line = pool[(i + G.day) % pool.length];
+      if (p.day === G.day) { say([[me, ["Ancora tu? Ti ho già detto tutto, giuro.", "Eh, oggi ho finito le battute. Torna domani.", "Mi stai seguendo? Lusingato, ma ho da fare."][i % 3]]]); return; }
+      p.day = G.day; const ev = (i + G.day * 3 + Math.floor(Math.random() * 6)) % 6;
+      if (first) toast(`👥 Nuovo incontro: ${esc(name)}`);
+      if (ev === 0 || ev === 1) say([[me, line], [me, ["Ah, se vedi Zia Marta, dille che il pacco di ieri non era mio.", "Vabbè, io vado. Buona consegna, corriere!", "Se ti serve un consiglio: mai fidarsi di chi regala monete. Tranne me."][ev === 0 ? (i % 3) : 1]]], () => { if (ev === 1) K.coins(1); });
+      else if (ev === 2) { const q = PED_RIDDLE[(i + G.day) % PED_RIDDLE.length]; say([[me, "Scommettiamo? Una domanda di pallone: se indovini ti do 3 monete."], [me, q[0]]], () => ask(esc(q[0]), q[1].map((t, k) => ({ label: t, fn: () => { if (k === q[2]) say([[me, "Giusto! Tieni, te le sei meritate."]], () => K.coins(3)); else say([[me, "Sbagliato! Ma lo spirito è giusto. Niente monete."]]); } })))); }
+      else if (ev === 3) ask(`<b>${esc(name)}</b> ha le mani occupate: <i>“Ehi, mi tieni un attimo la borsa mentre allaccio la scarpa?”</i>`, [{ label: "Certo, la tengo", fn: () => say([[me, "Grazie! Non ti dico cosa c'è dentro. Tieni, per il disturbo."]], () => K.coins(2)) }, { label: "Scusa, vado di fretta", fn: () => say([[me, "Eh, capisco. Si vede che sei del Corriere: sempre di corsa."]]) }]);
+      else if (ev === 4) { if (m.coins < 2) say([[me, line]]); else ask(`Un tipo sospetto vicino a <b>${esc(name)}</b> sfiora la tasca del tuo cappotto. Reagisci?`, [{ label: "Blocchi la mano", fn: () => say([[me, "Il borseggiatore scappa! Ti ha lasciato una moneta per la fretta."]], () => K.coins(1)) }, { label: "Ignori", fn: () => say([["voce", "Quando controlli, mancano 2 monete. La città ha i suoi pedaggi."]], () => K.coins(-2)) }]); }
+      else ask(`<b>${esc(name)}</b> tira fuori una moneta: <i>“Testa o croce? Puntiamo 2 monete.”</i>`, [{ label: "Testa", fn: () => bet(me, 0) }, { label: "Croce", fn: () => bet(me, 1) }, { label: "No grazie", fn: () => say([[me, "Prudente. La città non premia i prudenti, ma non li punisce."]]) }]);
+    }
+    function bet(me, pick) { if (mem().coins < 2) { say([[me, "Hai meno di 2 monete? Allora la scommessa è un'altra: tu mi dici che vinci, io ti credo. Fine."]]); return; } const win = Math.random() < 0.5; say([[me, win ? "Hai vinto! Mannaggia, avevo giurato che usciva l'altra." : "Ho vinto io! Mai scommettere con chi ha la moneta in tasca."]], () => K.coins(win ? 2 : -2)); void pick; }
+    function streetCut() { if (!OV) return; const e = document.createElement("div"); e.className = "c3dCut"; e.innerHTML = `👥 PASSANTI PARLANTI<small>Ora la gente per strada ha un nome e qualcosa da dire.</small>`; OV.appendChild(e); setTimeout(() => e.remove(), 2700); }
     function nearest() {
       if (!G) return null; let best = null, bd = 3.6;
       G.npcs.forEach((o) => { const d = Math.hypot(o.x - G.p.x, o.z - G.p.z); if (d < bd && npcPresent(o)) { bd = d; best = { kind: "npc", o, label: "Parla" + "\n" + o.cfg.name }; } });
+      if (streetOn()) G.W.peds.forEach((p) => { const q = pedXZ(p), d = Math.hypot(q.x - G.p.x, q.z - G.p.z); if (d < Math.min(bd, 3.1)) { bd = d; best = { kind: "ped", p, label: "Parla\n" + pedInfo(p).name }; } });
       (cfg.pois || []).forEach((p) => { const w = toWorld(p.d, p.at), d = Math.hypot(w.x - G.p.x, w.z - G.p.z); if (d < Math.max(p.r || 2.6, 0) && d < bd + 0.5 && (!p.when || p.when(K))) { bd = d; best = { kind: "poi", p, label: p.label || "Usa" }; } });
       return best;
     }
@@ -445,6 +468,7 @@
     function doAct() {
       if (!G || G.talking || G.menu) return; const n = G.near; if (!n) return;
       if (n.kind === "npc") { const f = STORY.talk && STORY.talk[n.o.cfg.id]; if (f) f(K); else say([[n.o.cfg.id, "Ciao."]]); }
+      else if (n.kind === "ped") { const q = pedXZ(n.p); n.p.f.rotation.y = Math.atan2(G.p.x - q.x, G.p.z - q.z); G.pedTalk = n.p; pedTalk(n.p); if (!mem().streetIntro) { mem().streetIntro = 1; streetCut(); } }
       else if (n.kind === "poi") { const f = STORY.poi && STORY.poi[n.p.id]; if (f) f(K); }
       persist(); refreshGoal();
     }
@@ -488,7 +512,7 @@
       G.cam.position.x = lerp(G.cam.position.x, tx, 0.14); G.cam.position.y = lerp(G.cam.position.y, H, 0.1); G.cam.position.z = lerp(G.cam.position.z, tz, 0.14); G.cam.lookAt(G.p.x, 1.8, G.p.z);
       const Wd = G.W;
       Wd.cars.forEach((c) => { if (Math.hypot((c.alongX ? c.pos : c.lane) - G.p.x, (c.alongX ? c.lane : c.pos) - G.p.z) > 130) return; c.pos += c.speed * dt * c.dir * (G.talking || G.menu ? 0 : 1); if (c.pos > c.span) c.pos -= c.span; if (c.pos < 0) c.pos += c.span; c.g.position.set(c.alongX ? c.pos : c.lane, 0, c.alongX ? c.lane : c.pos); c.g.rotation.y = c.alongX ? (c.dir > 0 ? 0 : Math.PI) : (c.dir > 0 ? -Math.PI / 2 : Math.PI / 2); });
-      Wd.peds.forEach((p) => { const x = p.alongX ? p.pos : p.fix, z = p.alongX ? p.fix : p.pos; if (Math.hypot(x - G.p.x, z - G.p.z) > 110) return; if (!(G.talking || G.menu)) { p.pos += p.dir * p.speed * dt; if (p.pos > p.max) { p.pos = p.max; p.dir = -1; } if (p.pos < p.min) { p.pos = p.min; p.dir = 1; } } p.f.position.set(x, 0, z); p.f.rotation.y = p.alongX ? (p.dir > 0 ? Math.PI / 2 : -Math.PI / 2) : (p.dir > 0 ? 0 : Math.PI); animFig(p.f, p.speed * 2.6, G.t + p.pos); });
+      Wd.peds.forEach((p) => { const x = p.alongX ? p.pos : p.fix, z = p.alongX ? p.fix : p.pos; if (Math.hypot(x - G.p.x, z - G.p.z) > 110) return; if (!(G.talking || G.menu)) { p.pos += p.dir * p.speed * dt; if (p.pos > p.max) { p.pos = p.max; p.dir = -1; } if (p.pos < p.min) { p.pos = p.min; p.dir = 1; } } p.f.position.set(x, 0, z); if (!(G.talking && G.pedTalk === p)) p.f.rotation.y = p.alongX ? (p.dir > 0 ? Math.PI / 2 : -Math.PI / 2) : (p.dir > 0 ? 0 : Math.PI); animFig(p.f, (G.talking || G.menu) ? 0 : p.speed * 2.6, G.t + p.pos); });
       const ang = ((G.hour - 6) / 12) * Math.PI, sd = new G.THREE.Vector3(Math.cos(ang), Math.sin(ang), 0.35).normalize();
       Wd.sky.position.set(G.p.x, 0, G.p.z); Wd.sunMesh.position.copy(sd).multiplyScalar(260); Wd.moonMesh.position.copy(sd).multiplyScalar(-260); Wd.sunMesh.visible = Wd.sunMesh.position.y > -10; Wd.moonMesh.visible = Wd.moonMesh.position.y > -10;
       Wd.stars.material.opacity = clamp(G.night * 1.2 - 0.2, 0, 1); Wd.clouds.forEach((c, i) => { c.position.x += dt * (0.8 + (i % 3) * 0.4); if (c.position.x > G.p.x + 200) c.position.x = G.p.x - 200; c.material.opacity = 0.25 + 0.6 * (1 - G.night); c.material.color.setScalar(0.35 + 0.65 * (1 - G.night)); });
