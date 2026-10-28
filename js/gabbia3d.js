@@ -1031,7 +1031,8 @@
     const matSock = new THREE.MeshStandardMaterial({ color: cfg.shirt, roughness: 0.72, metalness: 0.05 });
     const matBoots = new THREE.MeshStandardMaterial({ color: cfg.boots, roughness: 0.28, metalness: 0.32 });
     const matGlove = new THREE.MeshStandardMaterial({ color: cfg.isGk ? 0xffd23f : cfg.skin, roughness: cfg.isGk ? 0.35 : 0.62, metalness: 0.12 });
-    const matEye = new THREE.MeshBasicMaterial({ color: 0x0f172a });
+    const matEye = new THREE.MeshBasicMaterial({ color: 0xf8fafc });
+    const matPupil = new THREE.MeshBasicMaterial({ color: 0x0f172a }), matBrow = new THREE.MeshBasicMaterial({ color: 0x1f1209 }), matMouth = new THREE.MeshBasicMaterial({ color: 0x3b0d0d }), brows = [];
 
     // 1. Ombra di contatto radiale a terra
     const sh = new THREE.Mesh(
@@ -1141,7 +1142,31 @@
       const eye = new THREE.Mesh(new THREE.SphereGeometry(0.03, 8, 8), matEye);
       eye.position.set(ex, 1.485, 0.215);
       bodyRoot.add(eye);
+      const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.016, 6, 6), matPupil);
+      pupil.position.set(ex, 1.485, 0.243);
+      bodyRoot.add(pupil);
+      const brow = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.016, 0.016), matBrow);
+      brow.position.set(ex, 1.545, 0.222);
+      bodyRoot.add(brow);
+      brows.push(brow);
     });
+    // bocca: sorriso, broncio, neutra, "O" (visibili a seconda dell'umore)
+    const mkMouth = (geo, y, rz) => { const mm = new THREE.Mesh(geo, matMouth); mm.position.set(0, y, 0.228); mm.rotation.z = rz || 0; mm.visible = false; bodyRoot.add(mm); return mm; };
+    const mouths = {
+      happy: mkMouth(new THREE.TorusGeometry(0.05, 0.011, 5, 10, Math.PI), 1.425, Math.PI),
+      sad: mkMouth(new THREE.TorusGeometry(0.04, 0.011, 5, 10, Math.PI), 1.395, 0),
+      flat: mkMouth(new THREE.BoxGeometry(0.07, 0.014, 0.014), 1.405, 0),
+      shout: mkMouth(new THREE.SphereGeometry(0.036, 8, 6), 1.405, 0)
+    };
+    mouths.flat.visible = true;
+    let curMood = "flat";
+    const setMood = (mood) => {
+      if (mood === curMood) return; curMood = mood;
+      Object.keys(mouths).forEach((k) => { mouths[k].visible = k === mood; });
+      const tilt = mood === "sad" ? 0.42 : mood === "shout" ? -0.4 : mood === "happy" ? 0.05 : 0;
+      brows[0].rotation.z = -tilt; brows[1].rotation.z = tilt;
+      brows.forEach((b) => { b.position.y = mood === "happy" ? 1.56 : 1.545; });
+    };
 
     const hairCap = new THREE.Mesh(new THREE.SphereGeometry(0.254, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.58), matHair);
     hairCap.position.y = 1.49;
@@ -1165,7 +1190,7 @@
       bodyRoot.add(tuft);
     }
 
-    return { grp, bodyRoot, legL, legR, armL, armR, ring, ringMat, ctrlCone };
+    return { grp, bodyRoot, legL, legR, armL, armR, ring, ringMat, ctrlCone, setMood };
   }
 
   function buildArenaProps(THREE, scene, ar, extraTextures) {
@@ -2449,6 +2474,7 @@
 
   function onGoalScored(scoringSide) {
     if (!G || G.over) return;
+    G.moodUntil = (G.animTime || 0) + 2.6; G.moodSide = scoringSide;
     const b = G.ball;
     if (scoringSide === "m") {
       G.score[0]++;
@@ -3016,6 +3042,9 @@
       m.bodyRoot.position.y = v > 0.25 ? Math.abs(Math.cos(p.phase)) * 0.05 : 0;
       m.bodyRoot.rotation.x = p.tackleT > 0 ? 0.56 : 0;
       m.bodyRoot.rotation.z = p.diveT > 0 ? 0.65 : 0;
+      const celeb = (G.moodUntil || 0) > tNow, win = celeb && G.moodSide === p.side;
+      if (m.setMood) m.setMood(celeb ? (win ? "happy" : "sad") : p.tackleT > 0 || p.kickT > 0 ? "shout" : "flat");
+      if (win) { m.armL.rotation.x = -2.7 + Math.sin(tNow * 12 + p.phase) * 0.25; m.armR.rotation.x = -2.7 - Math.sin(tNow * 12 + p.phase) * 0.25; m.bodyRoot.position.y = Math.abs(Math.sin(tNow * 8 + p.phase)) * 0.18; }
 
       const isCtrl = p.side === "m" && G.myTeam[G.ctrlIdx] === p;
       const hasBall = b.owner === p;
