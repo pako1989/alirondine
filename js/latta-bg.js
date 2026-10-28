@@ -1,4 +1,4 @@
-// js/latta-bg.js - sfondi di «IL PALLONE DI LATTA» (320x200, pixel art): titolo (il castello al tramonto e l'armatura), Piazza del Palio, Museo dell'Armeria, Taverna del Gonfalone. Animati, con punti da toccare
+// js/latta-bg.js - sfondi di «IL PALLONE DI LATTA» (320x200, pixel art): titolo (il castello al tramonto e l'armatura), Piazza del Palio, Museo dell'Armeria, Taverna del Gonfalone; cap.2 vicoli di notte, Bottega Stagnini, sacrestia. Animati, con punti da toccare
 (function () {
   "use strict";
   const R = (g, x, y, w, h, c) => { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); };
@@ -85,9 +85,61 @@
       R(g, 150, 160, 70, 8, "#5a3a20"); R(g, 160, 168, 4, 26, "#4a2e18"); R(g, 206, 168, 4, 26, "#4a2e18"); R(g, 190, 128, 14, 32, "#0f172a"); D(g, 197, 122, 7, "#e8c4a0"); R(g, 190, 116, 14, 4, "#1c1917"); R(g, 193, 124, 8, 1, "#1c1917");
       R(g, 160, 154, 10, 6, "#f6c445"); GL(g, 165, 156, 14, "255,220,120", 0.3 + 0.2 * Math.sin(f / 7));
       VIG(g, W, H, 0.5);
+    },
+    // capitolo 2: i vicoli di notte, coi tetti, la luna e il campanile che suona da solo
+    lt_vicoli(g, W, H, f) {
+      bands(g, W, 0, 120, ["#0b1030", "#121a44", "#1a2458", "#24306a", "#33407a", "#4a4c86"]);
+      for (let i = 0; i < 46; i++) { const x = rnd(i) * W, y = rnd(i + 50) * 90, tw = Math.sin(f / 12 + i * 3) > 0.6; R(g, x, y, 1, 1, tw ? "#fff8d0" : "#a8b4e8"); if (tw && i % 5 === 0) { R(g, x - 1, y, 3, 1, "rgba(255,248,208,.5)"); R(g, x, y - 1, 1, 3, "rgba(255,248,208,.5)"); } }
+      const sh = (f * 1.6) % 900; if (sh < 60) { for (let k = 0; k < 10; k++) R(g, 260 - sh * 2 + k * 2, 14 + sh * 0.6 - k * 0.6, 2, 1, `rgba(255,255,230,${1 - k / 10})`); }
+      D(g, 62, 36, 18, "#e8e4c0"); D(g, 62, 36, 15, "#fffbe0"); D(g, 56, 31, 3, "#e8e4c0"); D(g, 68, 42, 2, "#e8e4c0"); GL(g, 62, 36, 60, "200,210,255", 0.18);
+      // campanile con la campana che oscilla
+      R(g, 228, 18, 34, 132, "#2a2444"); R(g, 228, 18, 2, 132, "#3a3460"); for (let i = 0; i < 34; i += 6) R(g, 228 + i, 12, 4, 6, "#2a2444");
+      R(g, 236, 30, 18, 24, "#0b0b1a"); const sw = Math.sin(f / 9) * 0.5; g.save(); g.translate(245, 32); g.rotate(sw); D(g, 0, 10, 7, "#8a6a2a"); R(g, -7, 10, 14, 4, "#8a6a2a"); R(g, -6, 4, 12, 7, "#b88a3a"); R(g, -2, 2, 4, 3, "#6a4a1a"); g.restore(); GL(g, 245, 44, 28, "255,200,120", 0.15 + 0.1 * Math.abs(sw));
+      if (Math.abs(sw) > 0.42) { g.fillStyle = "rgba(255,240,200,.7)"; g.font = "700 8px sans-serif"; g.textAlign = "center"; g.fillText("DON!", sw > 0 ? 276 : 214, 40); }
+      // tetti a coppi su più file
+      const roofRow = (y0, c, hi, n, seed) => { for (let i = 0; i < n; i++) { const w = 46 + rnd(i + seed) * 30, x = i * 56 - 10 + rnd(i * 3 + seed) * 10, h = 20 + rnd(i + seed * 2) * 14; R(g, x, y0 - h + 8, w, h + 30, c); for (let r = 0; r < 4; r++) for (let cx = 0; cx < w; cx += 5) R(g, x + cx + (r % 2) * 2, y0 - h + 8 + r * 4, 4, 2, hi); for (let k = 0; k < 2; k++) { const lit = rnd(i * 7 + k + seed) < 0.5; R(g, x + 8 + k * 18, y0 - h + 26, 6, 7, lit ? "#ffd98a" : "#1a1a30"); if (lit) GL(g, x + 11 + k * 18, y0 - h + 29, 12, "255,210,130", 0.3); } if (rnd(i + seed * 5) < 0.6) { const cx = x + w - 14; R(g, cx, y0 - h - 6, 7, 14, "#4a2e2e"); for (let p = 0; p < 4; p++) { const t = (f / 2 + p * 12 + i * 7) % 48; D(g, cx + 3 + Math.sin(t / 8 + i) * 4, y0 - h - 8 - t, 2 + t / 16, `rgba(200,200,220,${0.35 - t / 160})`); } } } };
+      roofRow(128, "#3a2a4a", "#4a3a5e", 7, 1); roofRow(158, "#6a3030", "#8a4038", 7, 4);
+      // gatto sul colmo, coda che si muove, e una lanterna nel vicolo
+      const cx = 150 + Math.sin(f / 60) * 40; R(g, cx - 6, 112, 12, 6, "#0b0b12"); R(g, cx + 4, 108, 5, 5, "#0b0b12"); R(g, cx + 4, 106, 1, 2, "#0b0b12"); R(g, cx + 8, 106, 1, 2, "#0b0b12"); R(g, cx + 6, 110, 1, 1, "#fde047"); R(g, cx - 8, 104 + Math.round(Math.sin(f / 8) * 2), 2, 9, "#0b0b12");
+      R(g, 0, 176, W, 24, "#2a2438"); for (let x = 0; x < W; x += 9) R(g, x + 1, 180 + (x % 2) * 6, 7, 4, "#3a3448");
+      R(g, 112, 150, 2, 30, "#16141f"); R(g, 108, 144, 10, 8, "#16141f"); R(g, 109, 145, 8, 6, "#ffd98a"); GL(g, 113, 148, 40, "255,200,110", 0.4 + 0.05 * Math.sin(f / 6));
+      VIG(g, W, H, 0.5);
+    },
+    lt_bottega(g, W, H, f) {
+      R(g, 0, 0, W, 200, "#2a2026"); for (let x = 0; x < W; x += 28) R(g, x, 0, 3, 130, "#1e161c");
+      R(g, 0, 130, W, 70, "#4a3a32"); for (let y = 136; y < 200; y += 8) R(g, 0, y, W, 1, "#3a2c26");
+      // fucina accesa
+      R(g, 220, 70, 80, 64, "#3a3436"); R(g, 232, 88, 56, 40, "#16141f"); for (let i = 0; i < 7; i++) { const h = 8 + Math.abs(Math.sin(f / 4 + i * 1.7)) * 16; R(g, 236 + i * 7, 128 - h, 6, h, i % 2 ? "#f59e0b" : "#ef4444"); } GL(g, 260, 116, 80, "255,140,60", 0.45 + 0.1 * Math.sin(f / 3));
+      for (let i = 0; i < 5; i++) { const t = (f * 0.7 + i * 30) % 120; R(g, 250 + Math.sin(t / 10 + i) * 10, 86 - t * 0.6, 1, 1, "#ffd25a"); }
+      // latte appese: pentole, lanterne, imbuti, che brillano e oscillano
+      for (let i = 0; i < 9; i++) { const x = 16 + i * 22, y = 26 + (i % 3) * 8, sw = Math.round(Math.sin(f / 14 + i) * 2); R(g, x + 5, 0, 1, y, "#5a5050"); const c = ["#c8d0de", "#a6afc2", "#e2e8f2"][i % 3]; if (i % 3 === 0) { D(g, x + 5 + sw, y + 8, 7, c); R(g, x - 2 + sw, y + 2, 14, 2, "#7a8090"); } else if (i % 3 === 1) { R(g, x + sw, y, 11, 14, c); R(g, x + 2 + sw, y + 3, 7, 8, "#ffd98a"); } else { R(g, x + sw, y, 11, 4, c); R(g, x + 3 + sw, y + 4, 5, 5, c); R(g, x + 5 + sw, y + 9, 1, 5, c); } R(g, x + 1 + sw, y + 1, 2, 2, "rgba(255,255,255,.6)"); }
+      // banco con lo stampo del pallone e il registro aperto
+      R(g, 30, 120, 150, 12, "#5a3a20"); R(g, 30, 118, 150, 3, "#8a5a32"); R(g, 40, 132, 6, 50, "#3a2416"); R(g, 164, 132, 6, 50, "#3a2416");
+      D(g, 70, 112, 8, "#7a8090"); D(g, 70, 112, 6, "#c8a040"); R(g, 66, 108, 2, 2, "#fff3c0"); R(g, 64, 114, 12, 1, "#8a6a2a");
+      R(g, 110, 106, 44, 12, "#f0e4c8"); R(g, 131, 106, 2, 12, "#c8b898"); for (let l = 0; l < 4; l++) { R(g, 113, 108 + l * 2.5, 15, 1, "#6a5a4a"); R(g, 136, 108 + l * 2.5, 15, 1, "#6a5a4a"); } R(g, 140, 108, 10, 2, "#16141f");
+      GL(g, 132, 100, 30, "255,220,150", 0.2);
+      // martello che batte (scintille sull'incudine)
+      R(g, 196, 150, 20, 8, "#3a3a44"); R(g, 200, 158, 12, 16, "#2a2a32"); const hm = Math.abs(Math.sin(f / 6)); R(g, 210, 128 + hm * 14, 3, 16, "#6a4426"); R(g, 205, 126 + hm * 14, 12, 6, "#5a5a66"); if (hm > 0.9) for (let i = 0; i < 5; i++) R(g, 206 + i * 3, 146 - i % 3 * 3, 1, 1, "#ffd25a");
+      VIG(g, W, H, 0.5);
+    },
+    lt_sacrestia(g, W, H, f) {
+      R(g, 0, 0, W, 200, "#242030"); for (let y = 0; y < 130; y += 10) for (let x = (y / 10) % 2 ? -10 : 0; x < W; x += 20) { R(g, x + 1, y + 1, 18, 8, "#2e2a3c"); R(g, x + 1, y + 1, 18, 1, "#3a3650"); }
+      R(g, 0, 130, W, 70, "#3a3448"); for (let y = 130; y < 200; y += 14) for (let x = (y / 14) % 2 ? 0 : 14; x < W; x += 28) R(g, x, y, 14, 14, "#46405a");
+      // vetrata con la luna
+      R(g, 130, 10, 60, 80, "#16141f"); D(g, 160, 30, 30, "#16141f"); const cols = ["#3b82f6", "#a855f7", "#f59e0b", "#22c55e", "#ef4444"]; for (let y = 0; y < 6; y++) for (let x = 0; x < 5; x++) R(g, 134 + x * 10.4, 22 + y * 11, 9, 10, cols[(x + y) % 5]); D(g, 160, 26, 10, "#fff3c0"); GL(g, 160, 50, 70, "180,160,255", 0.18);
+      // la corda della campana che si muove da sola, e la scala a chiocciola
+      const ry = Math.sin(f / 9) * 10; R(g, 238, 0, 3, 130 + ry, "#c8a070"); R(g, 236, 126 + ry, 7, 12, "#b8302a"); R(g, 237, 128 + ry, 5, 2, "#e85a4a");
+      for (let i = 0; i < 9; i++) R(g, 262 + (i % 2) * 12, 180 - i * 18, 40, 6, i % 2 ? "#4a3a2a" : "#5a4a34"); R(g, 286, 0, 4, 190, "#2a2018");
+      // candele e armadio dei paramenti
+      [[40, 140], [56, 136], [72, 140]].forEach(([x, y], i) => { R(g, x, y, 4, 16, "#f8f4e8"); const h = 3 + Math.abs(Math.sin(f / 5 + i)) * 2; R(g, x + 1, y - h, 2, h, "#ffd25a"); GL(g, x + 2, y - 2, 20, "255,200,110", 0.35); });
+      R(g, 20, 60, 70, 70, "#3a2416"); R(g, 24, 64, 30, 62, "#5a3a20"); R(g, 56, 64, 30, 62, "#5a3a20"); R(g, 52, 92, 2, 6, "#e0b040"); R(g, 56, 92, 2, 6, "#e0b040");
+      VIG(g, W, H, 0.5);
     }
   };
   const HOT = {
+    lt_vicoli: [[226, 10, 40, 140, "🔔 Il campanile di San Rocco. La campana suona da sola, a mezzanotte e anche prima. Senza batacchio, dicono. Eppure suona."], [40, 14, 46, 46, "🌕 La luna sopra Castelrondine. Stanotte è così grande che i gatti le fanno l'ombra."], [100, 100, 100, 30, "🐈‍⬛ Un gatto sul colmo del tetto. Ti guarda come si guarda un barattolo che cammina."]],
+    lt_bottega: [[220, 70, 80, 64, "🔥 La fucina della Bottega Stagnini. Accesa da cinque secoli, dice Zeno. Spenta solo per le partite della Nazionale."], [60, 100, 100, 30, "📖 Il registro di bottega aperto e lo stampo tondo di un pallone. Le pagine più vecchie sono del Cinquecento."], [10, 0, 200, 60, "🫖 Latte appese: pentole, lanterne, imbuti. Quando passa un camion suonano tutte insieme."]],
+    lt_sacrestia: [[130, 10, 60, 80, "🪟 La vetrata: un santo con un pallone sotto il braccio. Il parroco dice che è una pagnotta."], [230, 0, 20, 140, "🔔 La corda della campana si muove da sola. Lassù qualcosa tira."], [255, 20, 60, 170, "🌀 La scala a chiocciola del campanile: centotré gradini, e uno scricchiola apposta."]],
     lt_titolo: [[40, 100, 70, 90, "🛡️ L'armatura del 1527. Nel petto, un pallone di latta che batte piano, come un cuore di stagno."], [150, 40, 110, 110, "🏰 Il castello di Castelrondine. Stasera le finestre si accendono da sole."], [0, 40, 320, 50, "🐦‍⬛ Corvi con la maglia a righe. Fischiano. Fischiano tutto."]],
     lt_piazza: [[140, 60, 40, 44, "🚪 Il portone delle Mura: si apre solo per il corteo. Stasera, si apre anche per altro."], [10, 104, 90, 30, "🎪 La tribuna del Palio: il pubblico tifa per le contrade e mangia frittelle per tutte."], [136, 124, 48, 50, "⛲ La fontana: chi butta una moneta la sera del Palio vince l'anno dopo. Il fondo è pieno di sconfitte."]],
     lt_armeria: [[130, 80, 60, 90, "🛡️ Il Cavaliere di Latta, 1527, ignoto. L'unica armatura senza un documento. L'unica che respira."], [128, 14, 64, 54, "🪟 Dalla finestra, il Torrione. Sopra, un punto nero che non sembra un uccello normale."], [10, 70, 100, 70, "⚔️ Armature da torneo. Ognuna ha un nome sul cartellino, tranne una."]],

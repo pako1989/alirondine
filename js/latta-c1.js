@@ -19,9 +19,9 @@
     K.lore("l_resort", { t: "Castello Resort & Spa", d: "Il progetto del Cav. Mattonaro: suite nelle torri, idromassaggio nella cripta, parcheggio al posto della pista del Palio. Il Comune non ha ancora detto sì. Non ha ancora detto no." });
 
     const goal = (s) => ({
-      0: "In piazza: parla con l'Araldo, vicino al portone delle Mura.",
+      0: "In piazza: parla con l'Araldo, vicino al portone delle Mura. (Livelli a scorrimento: partono dal portone dopo l'armatura. Prova subito i comandi: menu ☰ › 🏰 Livelli a scorrimento › Cortile.)",
       1: "Entra nel Museo dell'Armeria (la casa grande a ovest) e parla con la curatrice.",
-      2: "Il castello si è svegliato. Quando sei pronto, sali sulle Mura dal portone (a nord). Nonna Gelsa e la Taverna aspettano, se vuoi.",
+      2: "▶ LIVELLO A SCORRIMENTO: vai al portone delle Mura (a nord, scritta MURA ▲) e sali. Nonna Gelsa e la Taverna aspettano, se vuoi.",
       3: "Sul Torrione ti aspetta il Corvo Maggiore: torna al portone delle Mura.",
       4: "Il capitolo si chiude."
     }[s] || "Il capitolo 1 è concluso.");
@@ -47,7 +47,7 @@
           if (S() === 2) setStep(N, 3);
           say("lt_ferro", "[felice] Criiic! <em>(«Hai calciato di sponda come si deve. Nel 1527 lo chiamavano «colpo del matto». Io lo chiamavo «colpo».»)</em>");
           if (r.ban) say("lt_gelsa", `[felice] Hai riportato ${r.ban} dei miei stendardi! Li riattacco stasera stessa, coi punti doppi.`);
-          if ((r.ban | 0) < (r.banTot | 0)) say("voce", "Mancano degli stendardi: dal menu, 🏰 Mappa dei livelli, puoi rigiocare il livello quando vuoi.");
+          if ((r.ban | 0) < (r.banTot | 0)) say("voce", "Mancano degli stendardi: dal menu, 🏰 Livelli a scorrimento, puoi rigiocare il livello quando vuoi.");
           say("voce", "In cima al Torrione si sente un fischio lunghissimo. Poi un altro. Il Corvo Maggiore ti ha visto.");
           quest("lt_c1c", "Il Torrione", "Torna al portone delle Mura e sali al Torrione.");
           return done();
@@ -74,7 +74,7 @@
         { label: "🏰 Rigioca le Mura", sub: "Per gli stendardi mancanti", fn: mura },
         { label: "↩ Non ancora", fn: done }
       ]);
-      say("voce", "Il portone è aperto. Dal menu, 🏰 Mappa dei livelli, rigiochi i livelli superati."); done();
+      say("voce", "Il portone è aperto. Dal menu, 🏰 Livelli a scorrimento, rigiochi i livelli superati."); done();
     }
     // Ferro si parla dal menu della zona (è l'armatura che indossi)
     window.__lattaFerro = (KK) => {
@@ -202,7 +202,7 @@
           [[12, 4], [17, 4], [12, 13], [17, 13], [8, 19], [21, 19]].forEach(([x, y]) => put(x, y, "l"));
           put(3, 12, "b"); put(12, 10, "s"); put(16, 9, "n"); put(27, 19, "x"); [[24, 11], [26, 12], [7, 20]].forEach(([x, y]) => put(x, y, "t"));
         },
-        decor(g, cx, cy, d) { H.plaque(g, "MURA ▲", d.X(14) + 16, d.Y(3) + 2, "#fde68a"); H.plaque(g, "MUSEO DELL'ARMERIA", d.X(5) + 8, d.Y(5) - 6, "#ddd6fe"); H.plaque(g, "TAVERNA DEL GONFALONE", d.X(24) + 8, d.Y(14) - 6, "#fed7aa"); H.plaque(g, "PISTA DEL PALIO", d.X(23) + 8, d.Y(10) + 10, "#fca5a5"); H.plaque(g, "GELSA", d.X(4) + 8, d.Y(14) - 6, "#bfdbfe"); }
+        decor(g, cx, cy, d) { const s = S(), on = s >= 2 && s <= 3, bl = on && Math.floor(Date.now() / 450) % 2; H.plaque(g, on ? "▶ LIVELLO: MURA ▲" : "MURA ▲", d.X(14) + 16, d.Y(3) + 2, bl ? "#fef08a" : "#fde68a"); if (on) { g.save(); g.globalAlpha = 0.35 + 0.35 * Math.abs(Math.sin(Date.now() / 300)); g.strokeStyle = "#fde047"; g.lineWidth = 2; g.strokeRect(d.X(14) - 2, d.Y(2) - 2, 36, 20); g.restore(); } H.plaque(g, "MUSEO DELL'ARMERIA", d.X(5) + 8, d.Y(5) - 6, "#ddd6fe"); H.plaque(g, "TAVERNA DEL GONFALONE", d.X(24) + 8, d.Y(14) - 6, "#fed7aa"); H.plaque(g, "PISTA DEL PALIO", d.X(23) + 8, d.Y(10) + 10, "#fca5a5"); H.plaque(g, "GELSA", d.X(4) + 8, d.Y(14) - 6, "#bfdbfe"); }
       },
       lt_armeria: {
         interior: true, region: "museo", name: "Il Museo dell'Armeria", short: "Armeria", sub: "Vetrine, lance e un'armatura che respira", bg: "lt_armeria", w: 16, h: 11, start: [8, 9], outside: ["lt_piazza", 5, 10], base: "U",

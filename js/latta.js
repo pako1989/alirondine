@@ -42,9 +42,12 @@
     regions: {
       palio: { grass: ["#6b8f3a", "#638636", "#739840"], path: ["#c9a36a", "#bf9960"], stone: ["#a08070", "#988070"], wall: ["#8a5a44", "#7e5240"], water: ["#4a8ab8", "#4682b0"], tall: "#5a7a30", tree: ["#3a5a2a", "#4a6e30", "#6a8e3a"], tint: "255,150,110", tintA: 0.14, fx: "leaves", dark: 0.06 },
       museo: { grass: ["#3a2e3e", "#352a39", "#3f3244"], path: ["#5a4a5a", "#544454"], stone: ["#6a5a6a", "#625262"], wall: ["#2a1e2a", "#241a24"], water: ["#2a4a6a", "#264662"], tall: "#3a2e3e", tint: "255,210,150", tintA: 0.1, fx: "", dark: 0.16 },
+      notte: { grass: ["#2a3a3a", "#263636", "#2e4040"], path: ["#4a4a5e", "#444458"], stone: ["#5a5a70", "#545468"], wall: ["#2a2440", "#24203a"], water: ["#1a2a4a", "#182644"], tall: "#22322e", tree: ["#1a2a24", "#22342c", "#2e4436"], tint: "120,140,255", tintA: 0.16, fx: "fireflies", dark: 0.3 },
+      bottega: { grass: ["#3a2e2e", "#352a2a", "#3f3232"], path: ["#5a4a44", "#544440"], stone: ["#6a5a54", "#625250"], wall: ["#2a1e1e", "#241a1a"], water: ["#2a4a6a", "#264662"], tall: "#3a2e2e", tint: "255,150,70", tintA: 0.16, fx: "", dark: 0.2 },
+      sacrestia: { grass: ["#2e2a3c", "#2a2638", "#322e42"], path: ["#46405a", "#403a54"], stone: ["#5a5470", "#544e68"], wall: ["#1e1a2a", "#1a1624"], water: ["#2a4a6a", "#264662"], tall: "#2e2a3c", tint: "180,160,255", tintA: 0.14, fx: "", dark: 0.24 },
       taverna: { grass: ["#4a2e1e", "#452a1b", "#503222"], path: ["#6a4a30", "#64452c"], stone: ["#5a4434", "#544030"], wall: ["#2a180e", "#24140c"], water: ["#2a4a6a", "#264662"], tall: "#4a2e1e", tint: "255,170,80", tintA: 0.16, fx: "", dark: 0.18 }
     },
-    floors: "QYUZ", solid: "IXKEFVAPJ",
+    floors: "QYUZ", solid: "IXKEFVAPJROGN",
     floorPaint(K, f, sx, sy, tx, ty) {
       const g = K.g;
       if (f === "Q") { // acciottolato: sassi tondi con bordo scuro e un filo d'erba nelle fughe
@@ -125,19 +128,44 @@
         K.ground(sx, sy, tx, ty); const g = K.g; g.fillStyle = "rgba(0,0,0,.3)"; g.beginPath(); g.ellipse(sx + 8, sy + 14, 7, 2, 0, 0, 7); g.fill();
         g.fillStyle = "#7a4a22"; g.beginPath(); g.ellipse(sx + 8, sy + 8, 7, 7, 0, 0, 7); g.fill(); g.fillStyle = "#9a6232"; g.beginPath(); g.ellipse(sx + 8, sy + 8, 5, 5, 0, 0, 7); g.fill();
         g.strokeStyle = "#3a3440"; g.lineWidth = 1; g.beginPath(); g.ellipse(sx + 8, sy + 8, 6.5, 6.5, 0, 0, 7); g.stroke(); g.fillStyle = "#4a2a10"; g.fillRect(sx + 7, sy + 7, 2, 2);
+      },
+      // capitolo 2 · scala a pioli appoggiata al muro: porta sui tetti
+      R(K, sx, sy, tx, ty, fr) {
+        const g = K.g; g.fillStyle = "#3a3448"; g.fillRect(sx, sy, 16, 16); for (let r = 0; r < 4; r++) { g.fillStyle = r % 2 ? "#46405a" : "#4e4864"; g.fillRect(sx + (r % 2) * 4, sy + r * 4, 16, 3); }
+        g.fillStyle = "#16141f"; g.fillRect(sx + 3, sy - 10, 3, 26); g.fillRect(sx + 10, sy - 10, 3, 26); g.fillStyle = "#a0784a"; g.fillRect(sx + 4, sy - 10, 1, 26); g.fillRect(sx + 11, sy - 10, 1, 26);
+        g.fillStyle = "#c8945a"; for (let y = -8; y < 16; y += 5) g.fillRect(sx + 4, sy + y, 8, 2); g.fillStyle = "#fde047"; if (Math.floor(fr / 20) % 2) g.fillRect(sx + 7, sy - 14, 2, 2);
+      },
+      // porta del campanile: arco, ferri battuti e una corda che esce sotto
+      G(K, sx, sy, tx, ty, fr) {
+        const g = K.g; g.fillStyle = "#4a4460"; g.fillRect(sx, sy, 16, 16); g.fillStyle = "#16141f"; g.fillRect(sx + 2, sy + 2, 12, 14); g.fillStyle = "#3a2a4a"; g.fillRect(sx + 3, sy + 3, 10, 13);
+        g.fillStyle = "#6a6080"; g.fillRect(sx + 2, sy + 1, 12, 2); g.fillStyle = "#1a1626"; g.fillRect(sx + 7, sy + 3, 1, 13); g.fillStyle = "#c8a070"; g.fillRect(sx + 9, sy + 13 + Math.round(Math.sin(fr / 9)), 1, 3);
+        g.fillStyle = "#e0b040"; g.fillRect(sx + 5, sy + 9, 1, 2); g.fillRect(sx + 10, sy + 9, 1, 2); K.light(sx + 8, sy + 6, 22, "180,160,255", 0.25);
+      },
+      // banco del lattoniere: incudine, cesoie, un pallone a metà
+      O(K, sx, sy, tx, ty, fr) {
+        K.ground(sx, sy, tx, ty); const g = K.g; g.fillStyle = "rgba(0,0,0,.3)"; g.fillRect(sx, sy + 13, 16, 3); g.fillStyle = "#5a3a20"; g.fillRect(sx, sy + 4, 16, 9); g.fillStyle = "#8a5a32"; g.fillRect(sx, sy + 3, 16, 2);
+        g.fillStyle = "#3a3a44"; g.fillRect(sx + 2, sy, 6, 3); g.fillRect(sx + 4, sy + 3, 2, 1); g.fillStyle = "#c8a040"; g.beginPath(); g.arc(sx + 12, sy + 1, 3, Math.PI, 0); g.fill(); g.fillStyle = "#fff3c0"; g.fillRect(sx + 11, sy - 1, 1, 1);
+        if (Math.floor(fr / 8 + tx) % 6 === 0) { g.fillStyle = "#ffd25a"; g.fillRect(sx + 5, sy - 3, 1, 1); g.fillRect(sx + 7, sy - 2, 1, 1); }
+      },
+      // scaffale di latte: barattoli, imbuti, lanterne
+      N(K, sx, sy, tx, ty, fr) {
+        K.ground(sx, sy, tx, ty); const g = K.g; g.fillStyle = "#3a2416"; g.fillRect(sx + 1, sy - 8, 14, 23); g.fillStyle = "#5a3a20"; [-6, 1, 8].forEach((y) => g.fillRect(sx + 1, sy + y + 5, 14, 1));
+        [[3, -6, "#c8d0de"], [8, -6, "#e2e8f2"], [3, 1, "#a6afc2"], [9, 1, "#c8a040"], [4, 8, "#e2e8f2"], [10, 8, "#a6afc2"]].forEach(([x, y, c]) => { g.fillStyle = c; g.fillRect(sx + x, sy + y, 4, 5); g.fillStyle = "rgba(255,255,255,.6)"; g.fillRect(sx + x, sy + y, 1, 2); });
       }
     },
-    act: { X: "Sali sulle Mura", K: "Guarda la tribuna", E: "Guarda la bancarella", F: "Guarda la fontana", V: "Guarda il vessillo", A: "Guarda l'armatura", P: "Guarda la rastrelliera", J: "Guarda le botti", n: "Leggi il cartello", x: "Apri il baule", s: "Riposa un momento", q: "Entra", l: "Guarda la lanterna", b: "Siediti", u: "Guarda il tavolo", z: "Guarda le casse" },
-    rest: { ch: "s", label: "Riposa un momento", text: "Ti siedi, e l'armatura cigola come una sedia vecchia. Il gioco salva da solo. Dal menu: 🏰 Mappa dei livelli per rigiocare quelli superati." },
+    act: { R: "Sali sui tetti", G: "Entra nel campanile", O: "Guarda il banco", N: "Guarda lo scaffale", X: "Sali sulle Mura", K: "Guarda la tribuna", E: "Guarda la bancarella", F: "Guarda la fontana", V: "Guarda il vessillo", A: "Guarda l'armatura", P: "Guarda la rastrelliera", J: "Guarda le botti", n: "Leggi il cartello", x: "Apri il baule", s: "Riposa un momento", q: "Entra", l: "Guarda la lanterna", b: "Siediti", u: "Guarda il tavolo", z: "Guarda le casse" },
+    rest: { ch: "s", label: "Riposa un momento", text: "Ti siedi, e l'armatura cigola come una sedia vecchia. Il gioco salva da solo. Dal menu: 🏰 Livelli a scorrimento per rigiocare quelli superati." },
     texts: { nothing: "Niente di utile. Solo pietra, corvi e odore di frittelle.", noHero: "L'Araldo cerca un cavaliere con un nome. Crea prima il tuo Campione.", chestOpen: "Apri il baule.", chestEmpty: "Il baule è vuoto. Qualcuno ha già fatto il Palio con quello che c'era dentro." },
     journal: { name: "Il Registro del Palio", sub: "Livelli, stendardi, persone e finali" },
-    scroll: { eng: "__scorri", name: "🏰 I livelli di Castelrondine", levels: LV, bonus: (K) => (K.inv.has("lt_toppa") ? 1 : 0) + (K.inv.has("lt_spallaccio") ? 1 : 0) },
+    scroll: { eng: "__scorri", name: "🏰 I livelli di Castelrondine", hint: "Nessun livello superato, per ora. I livelli veri partono dal portone delle Mura (a nord della piazza), dopo aver indossato l'armatura del Museo. Intanto: cortile d'allenamento.", levels: LV, bonus: (K) => (K.inv.has("lt_toppa") ? 1 : 0) + (K.inv.has("lt_spallaccio") ? 1 : 0) },
     bonds: {
       per: 4, talk: 2, max: 4, names: ["Sconosciuti", "Conoscenti", "Amici", "Fidati", "Famiglia del Palio"],
       scenes: {
         lt_ottavia: [{ lv: 2, id: "ott2", lines: [["lt_ottavia", "Sa perché faccio la curatrice? Da bambina toccavo tutto e mi sgridavano. Ora sgrido io. È un cerchio."], ["lt_ottavia", "[pensa] Però quell'armatura non l'ho mai toccata. Mai. Mi sembrava che respirasse. Adesso so che avevo ragione, ed è peggio."]], reward: (K) => K.bond("onore", 1) }],
         lt_gelsa: [{ lv: 2, id: "gel2", prize: "Una toppa ricamata per l'armatura (+1 pezzo nei livelli)", lines: [["lt_gelsa", "Questa armatura ha un buco sul fianco. Ferro dice che è «di guerra». Io dico che è di trascuratezza."], ["lt_gelsa", "[felice] Ecco: una toppa coi colori del Borgo. Ho ricucito gonfaloni per sessant'anni, una corazza non mi spaventa."]], reward: (K) => K.inv.give("lt_toppa") }],
         lt_bacco: [{ lv: 2, id: "bac2", lines: [["lt_bacco", "Mio nonno diceva che la sera del Palio nel castello si sentiva battere un pallone. Contro i muri. Toc, toc."], ["lt_bacco", "[ride] Io pensavo fosse il vino. Poi stasera l'ho sentito anch'io, e non avevo ancora aperto la botte."]], reward: (K) => K.bond("onore", 1) }],
+        lt_zeno: [{ lv: 2, id: "zen2", lines: [["lt_zeno", "Mio padre batteva latta, suo padre pure, e così indietro fino a quando la latta era una cosa nuova. Siamo gente che aggiusta."], ["lt_zeno", "[serio] Mio figlio fa il programmatore a Milano. Aggiusta anche lui, dice. Cose che non si toccano. Io non ho capito, ma sono contento lo stesso."]], reward: (K) => K.bond("onore", 1) }],
+        lt_tobia: [{ lv: 2, id: "tob2", lines: [["lt_tobia", "Sai quante volte ho suonato quella campana? Ottantamila, più o meno. Matrimoni, funerali, gol della Nazionale."], ["lt_tobia", "[pensa] Il funerale di mia moglie l'ho suonato io. Piano, piano. Lei diceva che suonavo troppo forte. Quella volta no."]], reward: (K) => K.bond("onore", 1) }],
         lt_araldo: [{ lv: 2, id: "ara2", lines: [["lt_araldo", "Sai qual è il segreto di un buon araldo? Gridare cose vere come se fossero false, e cose false come se fossero vere."], ["lt_araldo", "[furbo] Stasera ho gridato «il castello è sicuro». La gente ci ha creduto. Ora tocca a te farlo diventare vero."]], reward: (K) => K.bond("affari", 1) }]
       }
     },
@@ -147,6 +175,8 @@
         lt_spallaccio: { n: "Spallaccio dorato", icon: "🛡️", d: "Uno spallaccio con lo stemma di Castelrondine. Nei livelli vale un pezzo d'armatura in più.", gift: {}, giftAny: 0 },
         lt_torta: { n: "Torta del Palio", icon: "🥧", d: "La torta di Bacco: mandorle, miele e una quantità di burro che il medico non deve sapere.", gift: { lt_gelsa: 8, lt_araldo: 6, lt_ottavia: 4 }, giftAny: 2, react: { lt_gelsa: "La torta di Bacco! La ricetta era di mia madre. Lui dice di no. Mente col burro.", lt_araldo: "Per un araldo il miele è come l'olio per una tromba. Grazie, cavaliere!" } },
         lt_pergamena: { n: "Pergamena del Palio 1527", icon: "📜", d: "L'elenco dei cavalieri del Palio del 1527. Un nome è stato grattato via con cura. Al suo posto, un disegno: un pallone.", gift: { lt_ottavia: 10 }, giftAny: 1, react: { lt_ottavia: "Il 1527! Questa l'avevamo data per persa. Guardi qui: un nome raschiato. Chi raschia un nome, di solito, ha qualcosa da nascondere." } },
+        lt_batacchio: { n: "Batacchio di San Rocco", icon: "🔔", d: "Il batacchio della campana grande, rubato da Sgrinfia. Bronzo del 1527. Sopra, inciso piccolo, un ragazzo che corre con un pallone.", gift: {}, giftAny: 0 },
+        lt_pagina: { n: "Pagina del registro Stagnini", icon: "📖", d: "«Anno 1527. Fatto un pallone di latta per il cavaliere del Palio. Pagato un fiorino e una promessa. La promessa non l'ha mantenuta: non è tornato a ritirarlo». Firmato: Mastro Stagnini.", gift: { lt_ottavia: 10, lt_gelsa: 6 }, giftAny: 1, react: { lt_ottavia: "Una fonte! Una fonte vera! «Non è tornato a ritirarlo». Allora il pallone nel petto... qualcuno ce l'ha messo dopo.", lt_gelsa: "Mastro Stagnini. I miei nonni compravano le pentole da loro. Allora la storia è vera, cavaliere." } },
         lt_biglietto: { n: "Biglietto da visita d'oro", icon: "💳", d: "«Cav. Gino Mattonaro · Castello Resort & Spa · Il passato ha un prezzo, il futuro uno sconto». Pesa più di quanto dovrebbe.", gift: { lt_bacco: 2 }, giftAny: 0 }
       }
     },
@@ -162,8 +192,8 @@
     music: { palio: { bpm: 112, chords: ["C", "G", "Am", "F", "C", "G", "F", "G"], lres: 2, lw: "square", lv: 0.026,
       lead: "E5 - G5 - C6 - B5 - | A5 - G5 - E5 - - - | F5 - A5 - C6 - A5 - | G5 - - - - - - - | E5 - G5 - C6 - D6 - | E6 - D6 - C6 - A5 - | F5 - E5 - D5 - B4 - | C5 - - - - - - -",
       bass: "R . 5 . R . 5 . R . 5 . R . 8 .", bv: 0.09, arp: "1 3 5 8 5 3 1 3", aw: "square", av: 0.012, drum: "k . h . s . h . k k h . s . h h", dv: 0.08 } },
-    guide: () => [["🏰 Livelli a scorrimento", "Al portone delle Mura parte un livello in pixel art. ◀ ▶ cammini, ⤒ salti, ⚽ calci il pallone di latta: rimbalza sui muri (di sponda fa doppio danno), se è fermo a terra ci salti sopra e fa da molla, ⚽ di nuovo lo richiama. I gonfaloni sono punti di ripartenza."], ["🚩 Stendardi", "Ogni livello nasconde degli stendardi: in alto, sopra i buchi, dietro i mattoni crepati. Dal menu, 🏰 Mappa dei livelli, rigiochi quelli superati per trovarli tutti. Contano per un finale."], ["🛡️🪙 Onore e Affari", "Le scelte importanti pesano sull'armatura: Onore (fare la cosa giusta) o Affari (fare la cosa che conviene). Alcune risposte si aprono solo con abbastanza punti."]],
-    zoneMenuExtra: (K) => (K.F.is("lt_armatura") && window.__lattaFerro ? [{ label: "🗣️ Parla con Ferro", sub: "L'armatura che indossi ha sempre qualcosa da dire", fn: () => window.__lattaFerro(K) }] : []).concat(K.scroll && Object.keys(LV).some((id) => K.scroll.won(id)) ? [{ label: "🏰 Mappa dei livelli", sub: "Rigioca i livelli superati: stendardi e record", fn: () => K.scroll.open(() => K.done()) }] : []),
+    guide: () => [["🏰 Livelli a scorrimento", "Al portone delle Mura parte un livello in pixel art. ◀ ▶ cammini, ⤒ salti, ⚽ calci il pallone di latta: rimbalza sui muri (di sponda fa doppio danno), se è fermo a terra ci salti sopra e fa da molla, ⚽ di nuovo lo richiama. I gonfaloni sono punti di ripartenza."], ["🚩 Stendardi", "Ogni livello nasconde degli stendardi: in alto, sopra i buchi, dietro i mattoni crepati. Dal menu, 🏰 Livelli a scorrimento, rigiochi quelli superati per trovarli tutti. Contano per un finale."], ["🛡️🪙 Onore e Affari", "Le scelte importanti pesano sull'armatura: Onore (fare la cosa giusta) o Affari (fare la cosa che conviene). Alcune risposte si aprono solo con abbastanza punti."]],
+    zoneMenuExtra: (K) => (K.F.is("lt_armatura") && window.__lattaFerro ? [{ label: "🗣️ Parla con Ferro", sub: "L'armatura che indossi ha sempre qualcosa da dire", fn: () => window.__lattaFerro(K) }] : []).concat(K.scroll ? [{ label: "🏰 Livelli a scorrimento", sub: Object.keys(LV).some((id) => K.scroll.won(id)) ? "Rigioca i livelli superati (stendardi e record) o allenati nel cortile" : "Allenati subito nel cortile. I livelli veri partono dal portone delle Mura", fn: () => K.scroll.open(() => K.done()) }] : []),
     cameos: [],
     guest: { id: "lt_ferro", lines: ["Criiic. <em>(Traduzione: «Bel posto, il vostro molo. Troppo sale per un'armatura, però.»)</em>", "Cric-crac. <em>(«Se trovate un pallone di latta, è mio. Se è ammaccato, è sicuramente mio.»)</em>"] }
   });
@@ -186,6 +216,9 @@
         H.cast("lt_gelsa", "Nonna Gelsa", "Ricamatrice dei gonfaloni", { style: "bun", hair: "#e5e7eb", shirt: "#1d4ed8", skin: "#d9a679", acc: ["fiore"], bg: ["#1e3a8a", "#bfdbfe"] }, "Ricama i gonfaloni del Palio da sessant'anni, con gli occhiali sul naso e le storie in bocca. Sa tutte le leggende del castello e ne racconta il doppio.");
         H.cast("lt_bacco", "Bacco", "Oste della Taverna del Gonfalone", { style: "bald", hair: "#57534e", shirt: "#f8fafc", skin: "#c8956a", beard: "folta", acc: ["grembiule"], bg: ["#7c2d12", "#fed7aa"] }, "L'oste più largo e più gentile del Borgo. La sua torta del Palio ha vinto quattro concorsi e causato due liti in famiglia. Ascolta tutto, dimentica a pagamento.");
         H.cast("lt_mattonaro", "Cav. Gino Mattonaro", "Costruttore", { style: "slick", hair: "#1c1917", shirt: "#0f172a", skin: "#e8c4a0", eye: "#78350f", beard: "baffi", acc: ["occhiali", "medaglia"], bg: ["#0f172a", "#fcd34d"] }, "Costruttore di villette, rotonde e promesse. Vuole trasformare il castello nel «Castello Resort & Spa». Sorride sempre, soprattutto quando fa i conti.");
+        H.cast("lt_tobia", "Tobia Rintocchi", "Campanaro di San Rocco", { style: "short", hair: "#d6d3d1", shirt: "#334155", skin: "#d9a679", beard: "corta", acc: ["berretto"], bg: ["#1e1b4b", "#c4b5fd"] }, "Campanaro da cinquant'anni, sordo da un orecchio per mestiere. Conosce ogni gatto dei tetti per nome, e nessuno di loro risponde.");
+        H.cast("lt_zeno", "Zeno Stagnini", "Lattoniere", { style: "bald", hair: "#a8a29e", shirt: "#57534e", skin: "#c8956a", beard: "baffi", acc: ["grembiule", "occhiali"], bg: ["#44403c", "#fdba74"] }, "Ultimo lattoniere di Castelrondine, bottega di famiglia dal Cinquecento. Aggiusta pentole, grondaie e cuori, in quest'ordine di difficoltà.");
+        H.cast("lt_sgrinfia", "Sgrinfia", "Il gattone dei tetti", { shape: "ombra", skin: "#3a3848", shirt: "#c02a3a", eye: "#fde047", hair: "#3a3848", bg: ["#0b1030", "#fde047"] }, "Il gatto più grosso del Borgo. Ruba tutto ciò che luccica e ci dorme sopra. Stavolta ha rubato il batacchio della campana.");
         H.cast("lt_corvo", "Il Corvo Maggiore", "Arbitro del Torrione", { shape: "ombra", skin: "#1c1a26", shirt: "#e8e8e8", eye: "#ffdd55", hair: "#1c1a26", bg: ["#1c1a26", "#fde047"] }, "Un corvo enorme con la maglia a righe e il fischietto al collo. Fischia tutto: i passi, i salti, i pensieri. Per lui nessuno è mai in regola.");
       }
     };

@@ -1172,10 +1172,13 @@
       function open(back) {
         const ids = Object.keys(LV).filter(won), tt = total();
         const opts = ids.map((id) => ({ label: line(id), sub: LV[id].d || "Rigioca per gli stendardi mancanti e per migliorare il tempo", fn: () => play(id, {}, (r) => say([["voce", r.win ? `Livello superato. Gettoni ${r.coins | 0}, stendardi trovati ${r.ban | 0}/${r.banTot | 0}.` : "Livello lasciato a metà. I record restano quelli di prima."]], () => open(back))) }));
+        opts.unshift({ label: "🎮 Cortile d'allenamento", sub: "Prova subito i comandi a scorrimento: salto, calcio, sponda, molla", fn: () => practice(() => open(back)) });
         opts.push({ label: "◂ Indietro", fn: back || done });
-        ask("voce", `<b>${esc(C0.name || "I livelli")}</b><br><span style="color:var(--dim)">${ids.length ? `Stendardi trovati: ${tt[0]}/${tt[1]}. I livelli superati si rigiocano quando vuoi.` : "Nessun livello superato, per ora."}</span>`, opts);
+        ask("voce", `<b>${esc(C0.name || "I livelli")}</b><br><span style="color:var(--dim)">${ids.length ? `Stendardi trovati: ${tt[0]}/${tt[1]}. I livelli superati si rigiocano quando vuoi.` : esc(C0.hint || "Nessun livello superato, per ora. Intanto puoi allenarti nel cortile.")}</span>`, opts);
       }
-      return { play, won, ban, banTot, total, open, html, levels: LV };
+      // prova libera: il livello d'allenamento del motore, senza record
+      function practice(cb) { const eng = window[C0.eng || "__scorri"]; ownMatch(eng.start, { title: "Cortile d'allenamento", bonus: safe(() => (C0.bonus ? C0.bonus(K) : 0), 0) | 0, done: () => safe(() => cb(), null) }); }
+      return { play, practice, won, ban, banTot, total, open, html, levels: LV };
     })();
 
     // -------------------------------------------------------------- IL DOSSIER (cfg.cases): prove e testimonianze, confronti, verdetto
