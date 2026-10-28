@@ -2096,11 +2096,14 @@
     if (G.keys.arrowright || G.keys.d) kx += 1;
     if (G.keys.arrowup || G.keys.w) kz -= 1;
     if (G.keys.arrowdown || G.keys.s) kz += 1;
+    let ix = G.stk.x, iz = G.stk.z;
     if (kx || kz) {
       const m = hypot(kx, kz) || 1;
-      return { x: kx / m, z: kz / m };
+      ix = kx / m; iz = kz / m;
     }
-    return { x: G.stk.x, z: G.stk.z };
+    // Terza persona: camera dietro al giocatore che guarda verso +x -> "su" = +x, "destra" = +z
+    if (G.camMode === "terza") return { x: -iz, z: ix };
+    return { x: ix, z: iz };
   }
 
   function releaseBall(actor, vx, vy, vz, superFx, superCol, trailCol) {
