@@ -10,7 +10,7 @@ const sagas = [...src.matchAll(/id: "([\w-]+)"[^\n]*?mod: "(__\w+)", key: "([\w.
     let ctx; try { ctx = await L.setup({ mod: s.mod, key: s.key }); } catch (e) { skip.push(s.id); continue; }
     const { browser, page, errors } = ctx;
     try {
-      const has = await page.evaluate((m) => !!(window[m] && window[m].open && window[m]._dbg), s.mod);
+      const has = await page.evaluate((m) => !!(window[m] && window[m].open && window[m]._dbg && window[m]._dbg.CHAPTERS), s.mod);
       if (!has) { skip.push(s.id); await browser.close(); continue; }
       await page.evaluate((m) => window[m].open(), s.mod);
       let map = false, seenCont = false;
