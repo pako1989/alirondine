@@ -28,7 +28,8 @@
     f: { c: ["#4f8a46", "#467d3f"], cost: 2, def: 0.75, tree: 1 },
     h: { c: ["#9a8a54", "#8c7d4a"], cost: 1, up: 1 },
     w: { c: ["#3a78b8", "#3470ae"], block: 1, water: 1 },
-    "#": { c: ["#7a6a5a", "#6e5e50"], block: 1, wall: 1 }
+    "#": { c: ["#7a6a5a", "#6e5e50"], block: 1, wall: 1 },
+    "=": { c: ["#a07c4a", "#94703f"], cost: 1, bridge: 1 }
   };
   let S = null, ui = null, raf = 0, fxo = null, OPT = null, tutC = null;
 
@@ -42,7 +43,7 @@
   function eff(c) { const s = S0(); return s && s.eff ? s.eff(c) : { at: c.at || 60, df: c.df || 60, te: c.te || 60 }; }
   function mkUnit(c, side, idx, mp, ovrAdj, boss) {
     const e = c.eff || eff(c), role = ROLE[c.role] ? c.role : "A", R = ROLE[role];
-    return { id: c.id, name: c.name || (S0() && S0().name ? S0().name(c.id) : c.id), role, side, c: mp[0], r: mp[1], hp: 0, max: Math.round(18 + e.df * 0.24 + e.te * 0.08 + (boss ? 18 : 0)), atk: e.at, def: e.df, mov: R.mov, rng: R.rng, saga: c.saga || "", moved: false, acted: false, stun: 0, guard: false, movLeft: 0, boss: !!boss, px: 0, py: 0, img: side === "m" ? M.img(c.id) : null, col: c.col, idx };
+    return { id: c.id, name: c.name || (S0() && S0().name ? S0().name(c.id) : c.id), role, side, c: mp[0], r: mp[1], hp: 0, max: Math.round(18 + e.df * 0.24 + e.te * 0.08 + (boss ? 18 : 0)), atk: e.at, def: e.df, mov: R.mov, rng: R.rng, saga: c.saga || "", moved: false, acted: false, stun: 0, guard: false, movLeft: 0, boss: !!boss, px: 0, py: 0, img: M.img(c.id), col: c.col, idx };
   }
   function buildEnemies(level, mp, name, boss) {
     const ovr = 52 + level * 9, roles = ["D", "A", "C", "A", "P"], names = ["Brando", "Cesco", "Dante", "Ilario", "Osvaldo", "Piero", "Rocco", "Sandro"];
@@ -55,14 +56,17 @@
     return out;
   }
   function mk(o) {
-    const lv = Math.max(1, Math.min(3, o.level || 1)), mapN = o.map != null ? o.map % MAPS.length : (lv - 1) % MAPS.length, map = MAPS[mapN];
-    let cards = o.squad;
+    const lv = Math.max(1, Math.min(3, o.level || 1)), custom = o.map && typeof o.map === "object", mapN = custom ? 0 : o.map != null ? o.map % MAPS.length : (lv - 1) % MAPS.length, map = custom ? o.map : MAPS[mapN];
+    const k = o.heroLook && window.__sagaCore && window.__sagaCore.cur ? window.__sagaCore.cur.opts.opp || 1 : 1;
+    let cards = o.units ? o.units.map((c) => Object.assign({}, c, { eff: c.eff || { at: c.at || 60, df: c.df || 60, te: c.te || 60 } })) : o.squad;
     if (!cards) { const s = S0(); cards = s && s.squad ? s.squad(5).all : []; }
     if (!cards.length) cards = [{ id: "a", name: "Leo", role: "A", at: 70, df: 60, te: 65 }, { id: "b", name: "Tommy", role: "C", at: 60, df: 62, te: 66 }, { id: "c", name: "Dario", role: "D", at: 58, df: 74, te: 60 }, { id: "d", name: "Nico", role: "P", at: 40, df: 78, te: 60 }];
     cards = cards.slice(0, 5);
     const mine = cards.map((c, i) => { const u = mkUnit(c, "m", i, map.ps[i % map.ps.length]); u.hp = u.max; u.col = "#2563eb"; return u; });
-    const foes = buildEnemies(lv, map.es, o.enemy, o.boss);
-    S = { map, mapN, lv, units: mine.concat(foes), mode: "idle", sel: null, turn: 1, phase: "m", moveSet: null, tgtSet: null, tgtKind: null, busy: false, over: false, win: false, log: "", t: 0, flash: 0, links: (S0() && S0().LINKS) || [] };
+    let foes;
+    if (o.foes) foes = o.foes.map((f, i) => { const u = mkUnit({ id: f.id || "en_" + i, name: f.name, role: f.role || "D", eff: { at: Math.round((f.at || 60) * k), df: Math.round((f.df || 60) * k), te: f.te || 55 }, col: f.col || "#e11d48" }, "o", i, map.es[i % map.es.length], 0, f.boss); u.hp = u.max; return u; });
+    else { foes = buildEnemies(lv, map.es, o.enemy, o.boss); if (k !== 1) foes.forEach((u) => { u.atk = Math.round(u.atk * k); u.def = Math.round(u.def * k); }); }
+    S = { map, mapN, lv, limit: o.turns | 0, units: mine.concat(foes), mode: "idle", sel: null, turn: 1, phase: "m", moveSet: null, tgtSet: null, tgtKind: null, busy: false, over: false, win: false, log: "", t: 0, flash: 0, links: (S0() && S0().LINKS) || [] };
     S.units.forEach((u) => { const p = pos(u.c, u.r); u.px = p.x; u.py = p.y; });
     log("Il campo di guerra è tuo. Tocca un tuo giocatore per muoverlo.");
   }
@@ -164,7 +168,7 @@
     controls(); hud(); const q = alive("o").slice(); let i = 0;
     const next = () => {
       if (!S || S.over) return;
-      if (i >= q.length) { S.turn++; S.phase = "m"; S.busy = false; S.units.forEach((u) => { if (u.side === "m") { u.moved = false; u.acted = false; u.movLeft = 0; u.shadowDone = false; } else u.guard = false; }); log(`Turno ${S.turn}. Tocca a voi.`); controls(); hud(); return; }
+      if (i >= q.length) { S.turn++; if (S.limit && S.turn > S.limit) { S.busy = false; log("Tempo scaduto: la battaglia è persa."); return finish(false); } S.phase = "m"; S.busy = false; S.units.forEach((u) => { if (u.side === "m") { u.moved = false; u.acted = false; u.movLeft = 0; u.shadowDone = false; } else u.guard = false; }); log(`Turno ${S.turn}. Tocca a voi.`); controls(); hud(); return; }
       const u = q[i++]; if (u.hp <= 0) return next();
       if (u.stun > 0) { u.stun = 0; log(`${u.name} è fermo, salta il turno.`); return setTimeout(next, 350); }
       enemyAct(u); if (checkEnd()) return; setTimeout(next, 650);
@@ -190,7 +194,7 @@
   function log(t) { if (!S) return; S.log = t; if (ui) ui.lg.textContent = t; }
   function hud() {
     if (!ui || !S) return; const me = alive("m"), op = alive("o"), u = S.sel;
-    ui.hud.innerHTML = `<b>Turno ${S.turn}</b><span>${S.phase === "m" ? "Tocca a voi" : "Tocca ai rivali…"}</span><span>🟦 ${me.length}</span><span>🟥 ${op.length}</span>${u ? `<span><b>${esc(u.name)}</b> ${ROLE[u.role].n} · ${u.hp}/${u.max}</span>` : ""}`;
+    ui.hud.innerHTML = `<b>Turno ${S.turn}${S.limit ? "/" + S.limit : ""}</b><span>${S.phase === "m" ? "Tocca a voi" : "Tocca ai rivali…"}</span><span>🟦 ${me.length}</span><span>🟥 ${op.length}</span>${u ? `<span><b>${esc(u.name)}</b> ${ROLE[u.role].n} · ${u.hp}/${u.max}</span>` : ""}`;
   }
   function controls() {
     if (!ui || !S) return; const bt = ui.bt, u = S.sel, R = u ? ROLE[u.role] : null;
@@ -221,6 +225,7 @@
     if (h) { g.fillStyle = T.wall ? "#4a3f36" : "#6a5c36"; g.beginPath(); g.moveTo(cx - TW / 2, cy + TH / 2); g.lineTo(cx, cy + TH); g.lineTo(cx, cy + TH + h); g.lineTo(cx - TW / 2, cy + TH / 2 + h); g.fill(); g.fillStyle = T.wall ? "#3a3129" : "#54482a"; g.beginPath(); g.moveTo(cx + TW / 2, cy + TH / 2); g.lineTo(cx, cy + TH); g.lineTo(cx, cy + TH + h); g.lineTo(cx + TW / 2, cy + TH / 2 + h); g.fill(); }
     g.fillStyle = col; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + TW / 2, cy + TH / 2); g.lineTo(cx, cy + TH); g.lineTo(cx - TW / 2, cy + TH / 2); g.closePath(); g.fill();
     if (T.water) { g.strokeStyle = "rgba(255,255,255,.35)"; g.lineWidth = 1; const o = Math.sin(S.t * 0.06 + c + r) * 3; g.beginPath(); g.moveTo(cx - 8 + o, cy + TH / 2); g.lineTo(cx + 2 + o, cy + TH / 2); g.moveTo(cx - 2 - o, cy + TH / 2 + 5); g.lineTo(cx + 8 - o, cy + TH / 2 + 5); g.stroke(); }
+    if (T.bridge) { g.strokeStyle = "rgba(60,36,16,.55)"; g.lineWidth = 1; for (let i = -2; i <= 2; i++) { g.beginPath(); g.moveTo(cx + i * 7 - 4, cy + TH / 2 + 5); g.lineTo(cx + i * 7 + 4, cy + TH / 2 - 5); g.stroke(); } }
     if (T.tree) { [[-8, 4], [8, 6]].forEach(([dx, dy]) => { g.fillStyle = "#5b3a24"; g.fillRect(cx + dx - 1, cy + TH / 2 + dy - 3, 2, 5); g.fillStyle = "#2f6a35"; g.beginPath(); g.moveTo(cx + dx, cy + TH / 2 + dy - 15); g.lineTo(cx + dx + 7, cy + TH / 2 + dy - 2); g.lineTo(cx + dx - 7, cy + TH / 2 + dy - 2); g.fill(); g.fillStyle = "#3d8744"; g.beginPath(); g.moveTo(cx + dx, cy + TH / 2 + dy - 20); g.lineTo(cx + dx + 5, cy + TH / 2 + dy - 9); g.lineTo(cx + dx - 5, cy + TH / 2 + dy - 9); g.fill(); }); }
     if (T.wall) { g.strokeStyle = "rgba(0,0,0,.35)"; g.lineWidth = 1; g.beginPath(); g.moveTo(cx - 10, cy + TH / 2); g.lineTo(cx + 10, cy + TH / 2); g.moveTo(cx, cy + 4); g.lineTo(cx, cy + TH / 2); g.stroke(); }
   }
@@ -263,7 +268,9 @@
   function restart() { mk(OPT); fxo = M.fx(); controls(); hud(); }
   function close(quit) {
     cancelAnimationFrame(raf); const o = OPT, r = { win: quit ? false : !!(S && S.win), turns: S ? S.turn : 0, lost: S ? S.units.filter((u) => u.side === "m" && u.hp <= 0).length : 0 };
-    if (ui) ui.root.remove(); ui = null; S = null; tutC = null; window.__tattica._s = null; o && o.onDone && o.onDone(r);
+    if (ui) ui.root.remove(); ui = null; S = null; tutC = null; window.__tattica._s = null;
+    if (o && o.heroLook && window.__sagaCore && window.__sagaCore.endMatch) safe(() => window.__sagaCore.endMatch(), 0);
+    o && o.onDone && o.onDone(Object.assign(r, { quit: !!quit }));
   }
   function start(o) {
     cancelAnimationFrame(raf); if (ui) ui.root.remove(); OPT = o || {};
@@ -297,4 +304,5 @@
     state: () => (S ? { get units() { return S.units; }, get mode() { return S.mode; }, get turn() { return S.turn; }, get phase() { return S.phase; }, get over() { return S.over; }, get win() { return S.win; }, get sel() { return S.sel; }, get busy() { return S.busy; }, get moveSet() { return S.moveSet; } } : null),
     api: { select, moveTo, stay, act, target, endTurn, cancel, finish, reach, targetsOf, dmgCalc, pick, unitAt }
   };
+  window.__tattica.state.finish = (win) => { if (S) finish(win !== false); };
 })();

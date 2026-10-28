@@ -902,6 +902,7 @@
         ...(FLD ? [["🌊 Livello dell'acqua", "L'acqua sale col passare delle fasce del giorno e per gli eventi della storia. Quando sale, alcune zone si allagano: i passaggi bassi si chiudono, i sentieri alti restano. Il livello si vede in basso a destra. Puoi farlo scendere con le scelte giuste."]] : []),
         ...(WGT ? [["⚖️ " + (cfg.weight.name || "Peso"), "Le scelte morali non hanno una risposta giusta: accumulano " + WGT.axes.map(WGT.name).join(", ") + ". Il Peso sblocca o chiude opzioni nei dialoghi, cambia le scene e decide il finale. Il valore si vede nel Registro."]] : []),
         ...(ALB ? [["🕵️ " + ALB.name, "Il Registro è una griglia di chi era dove e quando. Entrando nelle stanze vedi chi c'è; i testimoni ti dicono altro; i sospettati dichiarano un alibi. Quando dichiarazione e avvistamento non coincidono, aprilo e segnala la contraddizione."]] : []),
+        ...(TAC ? [["⚔️ Battaglie tattiche", "Le battaglie si giocano su una griglia a turni: tocca un tuo compagno, muovilo, poi attacca, usa l'abilità del suo ruolo o attendi. Chi è schierato nella Compagnia combatte con te: scegli bene i ruoli (attaccanti da lontano, difensori davanti, un regista che cura)."]] : []),
         ...(CHN ? [["⛓ Catena", "Nei passaggi a catena ogni compagno ha un ruolo. Un passaggio tra ruoli che si intendono (per esempio regista verso ala, ala verso punta) ha una finestra più larga: schiera la squadra giusta. Tre passaggi puliti e un tiro fanno una catena; senza intercetti è «perfetta»."]] : []),
         ...(RFT ? [["🦇 " + RFT.name, "Sui tetti puoi saltare (a rischio) o usare il rampino (sicuro, ma serve Agilità). Una caduta costa Vigore: a zero ti raccolgono e ti riportano al rifugio, dove riposi. Dall'alto puoi stordire una guardia, e una lampada rotta ti nasconde meglio."]] : []),
         ...(HCK ? [["💻 " + HCK.name, "Le consolle sulla mappa si usano con la statistica " + HCK.name + ": ogni comando costa punti e può deviare i droni, invertire i pavimenti elettrificati o aprire serrande. Chi forza la rete alza l'Allarme, e le sentinelle dei settori vicini aumentano."]] : []),
@@ -1362,6 +1363,17 @@
       return { team, syn, bonus, perfect, play, roles: C0.roles || {} };
     })();
 
+    // -------------------------------------------------------------- TATTICA (cfg.tactics = { eng: "__tattica", hero: { role: "B", at, df, te }, bonus(K) }), richiede cfg.crew
+    // Battaglie a griglia isometrica (js/tattica.js) con la Compagnia: ogni membro ha `tac: { role: "A|C|D|P|B", at, df, te }` accanto a `s`. Il Campione è il Jolly.
+    // K.tactics: team() (Campione + schierati, come unità) · play(opts, cb) apre la battaglia (opts: map {name, rows, ps, es} | level, foes [{id,name,role,at,df,te,boss}], turns, title); cb({win, turns, lost, quit}).
+    const TAC = cfg.tactics && CRW && (() => {
+      const C0 = cfg.tactics, HS = C0.hero || {};
+      const unit = (id) => { const m = CRW.members[id], t = m.tac || {}; return { id, name: m.n, role: t.role || "D", at: t.at || 60, df: t.df || 60, te: t.te || 60, saga: cfg.id, col: t.col }; };
+      const team = () => { const h = hero() || {}, b = safe(() => (C0.bonus ? C0.bonus(K) : 0), 0) | 0; return [{ id: "hero", name: h.name || "Campione", role: HS.role || "B", at: (HS.at || 62) + b, df: (HS.df || 60) + b, te: (HS.te || 62) + b, saga: cfg.id, col: h.shirt }].concat(CRW.field().map(unit)); };
+      function play(o, cb) { ownMatch(window[C0.eng || "__tattica"].start, Object.assign({ units: team(), turns: 0 }, o, { done: (r) => { F.add("tc_battles", 1); if (r && r.win) F.add("tc_wins", 1); safe(() => cb(r), null); } })); }
+      return { team, play, wins: () => F.get("tc_wins", 0), battles: () => F.get("tc_battles", 0) };
+    })();
+
     // -------------------------------------------------------------- TETTI (cfg.roof = { name, stat: "vigore", agi: "agilita", hurt: 15, home: [zona, x, y], text })
     // Furtività verticale: sui tetti si passa da un tetto all'altro con il RAMPINO (K.roof.hook, sicuro ma serve Agilità) o con un SALTO (K.roof.leap, a rischio).
     // Una caduta (K.roof.fall) toglie Vigore e riporta all'inizio della zona; a Vigore 0 si è raccolti e riportati a `home`. K.roof.drop(id) stordisce una guardia
@@ -1398,7 +1410,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN,
+      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN,
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
       ending: (id, d) => { ENDINGS[id] = d; },
       continueStory: () => continueStory(), hasChapter: (n) => !!CHAPTERS[n], setInMatch: (v) => { inMatch = !!v; }, openMain: () => openMain(),
