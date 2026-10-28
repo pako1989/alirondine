@@ -391,7 +391,8 @@
       G = { THREE, renderer, scene, cam, hemi, sun, low, dead: false, p: { x: 0, z: 0, vx: 0, vz: 0 }, yaw: mem().yaw, hour: mem().hour, day: 1, stk: { x: 0, y: 0 }, keys: {}, npcs: [], talking: false, menu: false, t: 0, near: null, last: performance.now(), acc: 0 };
       G.W = build(THREE, scene);
       const w0 = toWorld(mem().d, mem().at); G.p.x = w0.x; G.p.z = w0.z;
-      G.me = figure(THREE, cfg.hero || { shirt: 0xf59e0b, hair: 0x3a2a1a, pants: 0x334155 }); scene.add(G.me);
+      G.me = figure(THREE, heroLook()); scene.add(G.me);
+      if (cfg.shop) { const sw = toWorld(cfg.shop.d, cfg.shop.at), st = new THREE.Group(); st.position.set(sw.x, 0, sw.z); const bx = (w, h, d, c, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshStandardMaterial({ color: c, roughness: 0.8 })); m.position.set(x, y, z); st.add(m); return m; }; bx(3.6, 1.1, 1.4, 0x8b5a2b, 0, 0.55, 0); bx(3.9, 0.18, 1.9, cfg.shop.color || 0xdc2626, 0, 3.0, 0.1); [-1.7, 1.7].forEach((x) => bx(0.14, 3, 0.14, 0x5b3a1a, x, 1.5, 0.75)); bx(3.2, 0.5, 0.2, 0xfef3c7, 0, 0.9, 0.62); const lb = labelSprite(THREE, `${cfg.shop.icon || "🛍️"} ${cfg.shop.name}`); lb.position.set(0, 4.0, 0); st.add(lb); scene.add(st); G.shopMesh = st; }
       (cfg.npcs || []).forEach((n) => {
         const mesh = figure(THREE, n.look || {}), lab = labelSprite(THREE, n.name); lab.position.y = 3.6; mesh.add(lab); const mk = markSprite(THREE); mk.position.y = 4.3; mesh.add(mk);
         scene.add(mesh); const t = npcTarget(n, G.hour) || { x: 0, z: 0 }; mesh.position.set(t.x, 0, t.z); G.npcs.push({ cfg: n, mesh, mk, x: t.x, z: t.z, sp: 0, face: 0 });
@@ -433,6 +434,7 @@
       cfg.districts.forEach((d) => { g.fillStyle = (d.pal && d.pal.ground) || "#475569"; g.fillRect(X(d.gx * DS) + 1, Z(d.gz * DS) + 1, DS * kx - 2, DS * kz - 2); g.fillStyle = "#0008"; g.fillRect(X(d.gx * DS) + 1, Z(d.gz * DS) + DS * kz - 26, DS * kx - 2, 25); g.fillStyle = "#f8fafc"; g.font = "800 12px system-ui"; g.textAlign = "center"; g.fillText(`${d.icon || ""} ${d.name}`, X((d.gx + 0.5) * DS), Z((d.gz + 1) * DS) - 8); });
       g.strokeStyle = "#ffffff30"; g.lineWidth = 3; for (let i = 1; i < 3; i++) { g.beginPath(); g.moveTo(X(i * DS), 0); g.lineTo(X(i * DS), cv.height); g.stroke(); } g.beginPath(); g.moveTo(0, Z(DS)); g.lineTo(cv.width, Z(DS)); g.stroke();
       const here = []; G.npcs.forEach((o) => { if (!npcPresent(o)) return; here.push(o); g.font = "20px system-ui"; g.textAlign = "center"; g.fillText(o.cfg.emoji || "•", X(o.x), Z(o.z) + 7); });
+      if (cfg.shop && G.shopMesh) { g.font = "20px system-ui"; g.textAlign = "center"; g.fillText(cfg.shop.icon || "🛍️", X(G.shopMesh.position.x), Z(G.shopMesh.position.z) + 7); }
       const gp = goalPos(); if (gp) { g.font = "26px system-ui"; g.textAlign = "center"; g.fillText("⭐", X(gp.x), Z(gp.z) + 9); }
       g.save(); g.translate(X(G.p.x), Z(G.p.z)); g.rotate(-(G.face || 0) + Math.PI); g.fillStyle = "#fbbf24"; g.strokeStyle = "#000"; g.lineWidth = 2; g.beginPath(); g.moveTo(0, -11); g.lineTo(8, 9); g.lineTo(0, 4); g.lineTo(-8, 9); g.closePath(); g.fill(); g.stroke(); g.restore();
       const cd = districtAt(G.p.x, G.p.z); m.querySelector(".lg").innerHTML = `<b>▲ Tu</b>${cd ? " · " + esc(cd.name) : ""}${gp ? " · <b>⭐ obiettivo</b>" : ""}<br>${here.length ? here.map((o) => `${o.cfg.emoji || ""} ${esc(o.cfg.name)}`).join(" · ") : "Nessun conoscente in giro a quest'ora."}`;
@@ -454,6 +456,18 @@
     function persist() { if (!G || !M) return; const d = districtAt(G.p.x, G.p.z); if (d) { M.d = d.id; M.at = [G.p.x - origin(d).x, G.p.z - origin(d).z]; } M.hour = G.hour; M.yaw = G.yaw; save(); }
 
     // ------------------------------------------------------------ interazione
+    // ------------------------------------------------------------ emporio (cfg.shop: { d, at, name, icon, open:[da,a], items:[{ id, name, icon, price, slot, look|speed }] })
+    const shopMem = () => { const m = mem(); m.shop = m.shop || { own: {}, look: {} }; return m.shop; };
+    const heroLook = () => Object.assign({ shirt: 0xf59e0b, hair: 0x3a2a1a, pants: 0x334155 }, cfg.hero || {}, shopMem().look);
+    const shopOpen = () => !cfg.shop || !cfg.shop.open || (cfg.shop.open[0] <= cfg.shop.open[1] ? G.hour >= cfg.shop.open[0] && G.hour < cfg.shop.open[1] : G.hour >= cfg.shop.open[0] || G.hour < cfg.shop.open[1]);
+    const speedMul = () => (cfg.shop && cfg.shop.items.some((it) => it.speed && shopMem().own[it.id])) ? 1.18 : 1;
+    function rebuildHero() { const THREE = G.THREE, old = G.me; G.scene.remove(old); G.me = figure(THREE, heroLook()); G.scene.add(G.me); }
+    function openShop(note) {
+      const S = cfg.shop, sm = shopMem(), coins = () => (window.bCoins ? window.bCoins() : mem().coins);
+      const opts = S.items.map((it) => { const own = !!sm.own[it.id], worn = it.slot && sm.look[it.slot + "_id"] === it.id; return { label: `${it.icon || ""} ${it.name}${worn ? " ✓ indossato" : own && !it.slot ? " ✓" : ""}`, sub: own ? (it.slot && !worn ? "Già tuo · tocca per indossarlo" : "Già tuo") : `${it.price} monete · ${it.desc || ""}`, disabled: (own && (!it.slot || worn)) || (!own && coins() < it.price), fn: () => { if (!own) { K.coins(-it.price); sm.own[it.id] = 1; } if (it.slot) { const prev = S.items.find((x) => x.id === sm.look[it.slot + "_id"]); if (prev && prev.look) Object.keys(prev.look).forEach((k) => { delete sm.look[k]; }); if (it.look) Object.assign(sm.look, it.look); sm.look[it.slot + "_id"] = it.id; rebuildHero(); } save(); K.toast(`${it.icon || "🛍️"} ${esc(it.name)}`); openShop(it.slot ? "Ti sta benissimo." : "Affare fatto."); } }; });
+      opts.push({ label: "👋 Esci dall'emporio", fn: () => {} });
+      ask(`<b>${esc((S.icon || "🛍️") + " " + S.name)}</b><br>${note ? "<i>" + esc(note) + "</i><br>" : ""}${esc(S.greet || "Cosa ti serve?")} · 🪙 ${coins()}`, opts);
+    }
     // ------------------------------------------------------------ passanti parlanti (opzione: mem().street, attiva se non === false)
     const streetOn = () => mem().street !== false;
     const pedXZ = (p) => ({ x: p.alongX ? p.pos : p.fix, z: p.alongX ? p.fix : p.pos });
@@ -480,6 +494,7 @@
       if (!G) return null; let best = null, bd = 3.6;
       G.npcs.forEach((o) => { const d = Math.hypot(o.x - G.p.x, o.z - G.p.z); if (d < bd && npcPresent(o)) { bd = d; best = { kind: "npc", o, label: "Parla" + "\n" + o.cfg.name }; } });
       if (streetOn()) G.W.peds.forEach((p) => { const q = pedXZ(p), d = Math.hypot(q.x - G.p.x, q.z - G.p.z); if (d < Math.min(bd, 3.1)) { bd = d; best = { kind: "ped", p, label: "Parla\n" + pedInfo(p).name }; } });
+      if (cfg.shop && G.shopMesh) { const d = Math.hypot(G.shopMesh.position.x - G.p.x, G.shopMesh.position.z - G.p.z); if (d < Math.min(bd, 4)) { bd = d; best = shopOpen() ? { kind: "shop", label: (cfg.shop.icon || "🛍️") + " Entra\n" + cfg.shop.name } : { kind: "shopclosed", label: "Chiuso\n" + cfg.shop.name }; } }
       (cfg.pois || []).forEach((p) => { const w = toWorld(p.d, p.at), d = Math.hypot(w.x - G.p.x, w.z - G.p.z); if (d < Math.max(p.r || 2.6, 0) && d < bd + 0.5 && (!p.when || p.when(K))) { bd = d; best = { kind: "poi", p, label: p.label || "Usa" }; } });
       return best;
     }
@@ -487,6 +502,8 @@
     function doAct() {
       if (!G || G.talking || G.menu) return; const n = G.near; if (!n) return;
       if (n.kind === "npc") { const f = STORY.talk && STORY.talk[n.o.cfg.id]; if (f) f(K); else say([[n.o.cfg.id, "Ciao."]]); }
+      else if (n.kind === "shop") openShop();
+      else if (n.kind === "shopclosed") toast(`🔒 ${esc(cfg.shop.name)}: aperto dalle ${cfg.shop.open[0]} alle ${cfg.shop.open[1]}`, 3000);
       else if (n.kind === "ped") { const q = pedXZ(n.p); n.p.f.rotation.y = Math.atan2(G.p.x - q.x, G.p.z - q.z); G.pedTalk = n.p; pedTalk(n.p); if (!mem().streetIntro) { mem().streetIntro = 1; streetCut(); } }
       else if (n.kind === "poi") { const f = STORY.poi && STORY.poi[n.p.id]; if (f) f(K); }
       persist(); refreshGoal();
@@ -509,7 +526,7 @@
         G.hour += dt * (cfg.hourPerSec || 1 / 20); if (G.hour >= 24) { G.hour -= 24; G.day++; }
         let sx = G.stk.x, sy = G.stk.y; const k = G.keys; if (k.a || k.arrowleft) sx -= 1; if (k.d || k.arrowright) sx += 1; if (k.w || k.arrowup) sy -= 1; if (k.s || k.arrowdown) sy += 1; if (k.q) G.yaw += dt * 1.8; if (k.z) G.yaw -= dt * 1.8;
         const m = Math.hypot(sx, sy); if (m > 1) { sx /= m; sy /= m; }
-        const fx = -Math.sin(G.yaw), fz = -Math.cos(G.yaw), rx = Math.cos(G.yaw), rz = -Math.sin(G.yaw), sp = 8.2;
+        const fx = -Math.sin(G.yaw), fz = -Math.cos(G.yaw), rx = Math.cos(G.yaw), rz = -Math.sin(G.yaw), sp = 8.2 * speedMul();
         const vx = (fx * -sy + rx * sx) * sp, vz = (fz * -sy + rz * sx) * sp; G.p.vx = vx; G.p.vz = vz;
         let nx = G.p.x + vx * dt, nz = G.p.z + vz * dt; [nx, nz] = collide(nx, nz, 0.7); G.p.x = nx; G.p.z = nz;
         if (Math.hypot(vx, vz) > 0.5) G.face = Math.atan2(vx, vz);

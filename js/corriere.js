@@ -28,6 +28,16 @@
       { id: "nina", name: "Nina", emoji: "🦊", look: { hs:"long",mood:"sly", shirt: 0x9a3412, hair: 0x7c2d12, skin: 0xe8c4a0, pants: 0x1c1917 }, sched: [{ h: [13, 20], d: "mercato", at: [45, 64] }, { h: [20, 13], away: true }] },
       { id: "ettore", name: "Don Ettore", emoji: "🎩", look: { hs:"bald",mood:"sad",beard:1,glasses:1, shirt: 0x1e3a8a, hair: 0x4a4a4a, skin: 0xe8c4a0, pants: 0x111827 }, sched: [{ h: [0, 24], d: "collina", at: [45, 64] }] }
     ],
+    shop: { d: "mercato", at: [46, 32], name: "Emporio del Corriere", icon: "🛍️", color: 0xdc2626, open: [8, 21], greet: "Per chi consegna in fretta e con stile.", items: [
+      { id: "scarpe", name: "Scarpe da corriere", icon: "👟", price: 30, desc: "corri più veloce", speed: true },
+      { id: "berretto", name: "Berretto rosso", icon: "🧢", price: 15, slot: "head", look: { hs: "cap", cap: 0xdc2626 }, desc: "cosmetico" },
+      { id: "cilindro", name: "Cilindro", icon: "🎩", price: 25, slot: "head", look: { hs: "hat", cap: 0x111827 }, desc: "cosmetico" },
+      { id: "occhiali", name: "Occhiali da sole", icon: "🕶️", price: 15, slot: "glasses", look: { glasses: 1 }, desc: "cosmetico" },
+      { id: "baffoni", name: "Baffoni finti", icon: "🥸", price: 10, slot: "stache", look: { stache: 1 }, desc: "cosmetico" },
+      { id: "giacca_v", name: "Giacca verde", icon: "🧥", price: 20, slot: "shirt", look: { shirt: 0x16a34a }, desc: "cosmetico" },
+      { id: "giacca_r", name: "Giacca rossa", icon: "🧥", price: 20, slot: "shirt", look: { shirt: 0xdc2626 }, desc: "cosmetico" },
+      { id: "giacca_p", name: "Giacca viola", icon: "🧥", price: 20, slot: "shirt", look: { shirt: 0xa855f7 }, desc: "cosmetico" }
+    ] },
     pois: [
       { id: "pacco", d: "sotterranei", at: [45, 55], r: 3.2, label: "Prendi\nil pacco", mark: true, when: (K) => K.ch() === 1 && K.step(1) === 3 },
       { id: "tana", d: "sotterranei", at: [45, 52], r: 3.4, label: "Aspetta\nla Volpe", mark: true, when: (K) => K.ch() === 3 && K.step(3) === 2 && (K.hour() >= 22 || K.hour() < 4) }
