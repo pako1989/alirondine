@@ -24,10 +24,12 @@
       { id: "ruggero", name: "Custode Ruggero", emoji: "🔦", look: { shirt: 0x166534, hair: 0x6b7280, skin: 0xd9a679, pants: 0x1f2937 }, sched: [{ h: [17, 24], d: "stadio", at: [64, 45] }, { h: [0, 6], d: "stadio", at: [64, 45] }, { h: [6, 17], away: true }] },
       { id: "lia", name: "Lia la Barcaiola", emoji: "⛵", look: { shirt: 0x0e7490, hair: 0x7c2d12, skin: 0xd9a679, pants: 0x1e293b }, sched: [{ h: [8, 13], d: "porto", at: [30, 40] }, { h: [13, 8], away: true }] },
       { id: "tito", name: "Tito del Banco", emoji: "🍋", look: { shirt: 0xca8a04, hair: 0x1f2937, skin: 0xe0b890, pants: 0x3b2a1a }, sched: [{ h: [15, 20], d: "mercato", at: [58, 60] }, { h: [20, 15], away: true }] },
+      { id: "volpe", name: "La Volpe", emoji: "🦊", look: { shirt: 0x9a3412, hair: 0x7c2d12, skin: 0xe0b890, pants: 0x1c1917 }, sched: [{ h: [0, 24], away: true }] },
       { id: "ettore", name: "Don Ettore", emoji: "🎩", look: { shirt: 0x1e3a8a, hair: 0x4a4a4a, skin: 0xe8c4a0, pants: 0x111827 }, sched: [{ h: [0, 24], d: "collina", at: [45, 64] }] }
     ],
     pois: [
-      { id: "pacco", d: "sotterranei", at: [45, 55], r: 3.2, label: "Prendi\nil pacco", mark: true, when: (K) => K.ch() === 1 && K.step(1) === 3 }
+      { id: "pacco", d: "sotterranei", at: [45, 55], r: 3.2, label: "Prendi\nil pacco", mark: true, when: (K) => K.ch() === 1 && K.step(1) === 3 },
+      { id: "tana", d: "sotterranei", at: [45, 52], r: 3.4, label: "Aspetta\nla Volpe", mark: true, when: (K) => K.ch() === 3 && K.step(3) === 2 && (K.hour() >= 22 || K.hour() < 4) }
     ],
     endings: { corriere: ["Il Corriere", "Consegni tutto, sempre in orario.", "Chiudi la saga restando fedele alla Zia."], libero: ["Il Corriere Libero", "Consegni a modo tuo, senza consegnare nulla.", "Chiudi la saga seguendo il pacco."], segreto: ["Il Pacco Aperto", "Segreto: il pacco senza indirizzo si apre.", "Segreto: tutte le consegne e il pacco."] }
   };

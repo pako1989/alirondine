@@ -58,4 +58,25 @@ async function flow2(w) {
   await hr(12); await talk("marta"); const done = await run(page, "JSON.stringify(D.mem().done)"); if (!/"2":"ok"/.test(done)) errors.push("capitolo 2 non concluso: " + done);
   L.check(`Corriere 3D · capitolo 2 (${w} px)`, errors); await browser.close();
 }
-(async () => { for (const w of [390, 1000]) { await main(w); await flow(w); await flow2(w); } })().catch((e) => { console.error("✗ corriere:", e.message); process.exit(1); });
+async function flow3(w) {
+  const { browser, page, errors } = await start(w, { v: 1, flags: { intro_done: 1 }, hour: 8, ch: 3, step: { 1: 5, 2: 5 }, done: { 1: "ok", 2: "ok" } });
+  await page.evaluate((d) => { const K = eval(d).K; K.ask = (p, opts) => { opts[0].fn && opts[0].fn(); }; }, D);
+  const hr = (h) => run(page, "(() => { D.state().hour = arg; D.snap(); D.step(0.05); })()", h);
+  const talk = async (id) => { await run(page, "(() => { const S = D.state(); const o = S.npcs.find((n) => n.cfg.id === arg); S.p.x = o.x + 1.5; S.p.z = o.z + 0.5; D.step(0.5); D.near2(); D.act(); })()", id); await page.waitForTimeout(120); };
+  const step = () => run(page, "D.mem().step[3]");
+  await talk("marta"); if ((await step()) !== 1) errors.push("dopo Marta: " + (await step()));
+  await hr(10); await talk("pina"); await talk("lia"); if ((await step()) !== 2) errors.push("dopo due indizi: " + (await step()));
+  // inseguimento fallito: la Volpe arriva in fondo
+  await hr(23); await run(page, "(() => { D.K.tp('sotterranei', 45, 52); D.step(0.5); D.near2(); D.act(); })()");
+  const ch1 = await run(page, "!!D.state().chase"); if (!ch1) errors.push("inseguimento non partito");
+  await run(page, "(() => { const S = D.state(); S.p.x = 5; S.p.z = 5; for (let i = 0; i < 4000 && S.chase; i++) D.step(0.05); })()");
+  if ((await step()) !== 2) errors.push("fuga: step " + (await step()));
+  // riprova: cattura
+  await run(page, "(() => { D.K.tp('sotterranei', 45, 52); D.step(0.5); D.near2(); D.act(); })()");
+  await run(page, "(() => { const S = D.state(); S.p.x = S.chase.o.x + 1; S.p.z = S.chase.o.z; D.step(0.05); })()");
+  if ((await step()) !== 3) errors.push("dopo la cattura: " + (await step()));
+  await hr(14); await talk("ettore"); if ((await step()) !== 4) errors.push("dopo Ettore: " + (await step()));
+  await talk("marta"); const done = await run(page, "JSON.stringify(D.mem().done)"); if (!/"3":"ok"/.test(done)) errors.push("capitolo 3 non concluso: " + done);
+  L.check(`Corriere 3D · capitolo 3 (${w} px)`, errors); await browser.close();
+}
+(async () => { for (const w of [390, 1000]) { await main(w); await flow(w); await flow2(w); await flow3(w); } })().catch((e) => { console.error("✗ corriere:", e.message); process.exit(1); });

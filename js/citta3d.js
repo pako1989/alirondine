@@ -111,6 +111,12 @@
       },
       finishChapter(n, ending) { const m = mem(); m.done[n] = String(ending || "ok"); if (m.ch <= n && n < (cfg.chapters || 1)) m.ch = n + 1; save(); },
       end(id) { const m = mem(); if (!m.ends.includes(id)) m.ends.push(id); save(); },
+      // inseguimento: il PNG corre lungo `route` ([[d, x, z], ...]) a `speed`; lo prendi stando a meno di 2.6 metri. cb({ caught }) allo scadere o alla cattura
+      chase(id, route, speed, cb) {
+        if (!G) return; const o = G.npcs.find((n) => n.cfg.id === id); if (!o) return;
+        const pts = route.map((r) => toWorld(r[0], [r[1], r[2]])); o.x = pts[0].x; o.z = pts[0].z; o.mesh.position.set(o.x, 0, o.z);
+        G.chase = { o, pts, i: 1, speed: speed || 6.4, cb }; toast("🦊 Corri! Prendila prima che sparisca.", 3200); refreshGoal();
+      },
       // partita 3D a missione (motore Gabbia/7v7): la città si mette in pausa e torna con l'esito { win, my, opp, quit }
       match(opts, cb) {
         if (!G) return; const gb = window.__gabbia3d; persist();
@@ -372,7 +378,7 @@
       (cfg.pois || []).forEach((p) => { const w = toWorld(p.d, p.at), d = Math.hypot(w.x - G.p.x, w.z - G.p.z); if (d < Math.max(p.r || 2.6, 0) && d < bd + 0.5 && (!p.when || p.when(K))) { bd = d; best = { kind: "poi", p, label: p.label || "Usa" }; } });
       return best;
     }
-    const npcPresent = (o) => { const t = npcTarget(o.cfg, G.hour); return !!t; };
+    const npcPresent = (o) => (G.chase && G.chase.o === o) || !!npcTarget(o.cfg, G.hour);
     function doAct() {
       if (!G || G.talking || G.menu) return; const n = G.near; if (!n) return;
       if (n.kind === "npc") { const f = STORY.talk && STORY.talk[n.o.cfg.id]; if (f) f(K); else say([[n.o.cfg.id, "Ciao."]]); }
@@ -385,7 +391,7 @@
       if (G && G.beacon) { const tg = goalCur && goalCur.target, p = tg && tg.npc ? null : tg && tg.d ? toWorld(tg.d, tg.at) : null; G.beacon.visible = !!p; if (p) G.beacon.position.set(p.x, 20, p.z); }
       if (G) G.npcs.forEach((o) => { const s = STORY.hasTalk ? STORY.hasTalk(o.cfg.id, K) : false; o.mk.visible = !!s; });
     }
-    function goalPos() { if (!goalCur || !goalCur.target) return null; const tg = goalCur.target; if (tg.npc) { const o = G.npcs.find((n) => n.cfg.id === tg.npc); return o ? { x: o.x, z: o.z } : null; } return tg.d ? toWorld(tg.d, tg.at) : null; }
+    function goalPos() { if (G.chase) return { x: G.chase.o.x, z: G.chase.o.z }; if (!goalCur || !goalCur.target) return null; const tg = goalCur.target; if (tg.npc) { const o = G.npcs.find((n) => n.cfg.id === tg.npc); return o ? { x: o.x, z: o.z } : null; } return tg.d ? toWorld(tg.d, tg.at) : null; }
 
     // ------------------------------------------------------------ simulazione
     function collide(x, z, r) {
@@ -402,7 +408,13 @@
         let nx = G.p.x + vx * dt, nz = G.p.z + vz * dt; [nx, nz] = collide(nx, nz, 0.7); G.p.x = nx; G.p.z = nz;
         if (Math.hypot(vx, vz) > 0.5) G.face = Math.atan2(vx, vz);
         // PNG: camminano verso la posizione dell'orario
-        G.npcs.forEach((o) => { const t = npcTarget(o.cfg, G.hour); if (!t) { o.sp = 0; return; } const dx = t.x - o.x, dz = t.z - o.z, d = Math.hypot(dx, dz); if (d > 0.4) { const s = Math.min(d, 5 * dt); o.x += dx / d * s; o.z += dz / d * s; o.face = Math.atan2(dx, dz); o.sp = 5; } else o.sp = 0; });
+        G.npcs.forEach((o) => { if (G.chase && G.chase.o === o) { o.sp = G.chase.speed; return; } const t = npcTarget(o.cfg, G.hour); if (!t) { o.sp = 0; return; } const dx = t.x - o.x, dz = t.z - o.z, d = Math.hypot(dx, dz); if (d > 0.4) { const s = Math.min(d, 5 * dt); o.x += dx / d * s; o.z += dz / d * s; o.face = Math.atan2(dx, dz); o.sp = 5; } else o.sp = 0; });
+      }
+      if (G.chase && !G.talking && !G.menu) {
+        const c = G.chase, o = c.o, tg = c.pts[c.i]; let dx = tg.x - o.x, dz = tg.z - o.z, d = Math.hypot(dx, dz);
+        if (d < 0.8) { c.i++; if (c.i >= c.pts.length) { G.chase = null; o.sp = 0; const cb = c.cb; if (cb) cb({ caught: false }); refreshGoal(); } }
+        else { let nx = o.x + dx / d * c.speed * dt, nz = o.z + dz / d * c.speed * dt; [nx, nz] = collide(nx, nz, 0.7); o.x = nx; o.z = nz; o.face = Math.atan2(dx, dz); }
+        if (G.chase && Math.hypot(o.x - G.p.x, o.z - G.p.z) < 2.6) { G.chase = null; o.sp = 0; const cb = c.cb; if (cb) cb({ caught: true }); refreshGoal(); }
       }
       G.t += dt; G.acc += dt; if (G.acc > 0.3) { G.acc = 0; applyLight(); G.near = nearest(); }
     }
