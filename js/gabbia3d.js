@@ -2192,10 +2192,21 @@
     }
 
     // Controllo recupero immediato sul tocco del pulsante
-    if (hypot(me.x - tx, me.z - tz) <= 2.05 && b.y < 1.85) {
+    if (hypot(me.x - tx, me.z - tz) <= 1.7 && b.y < 1.85) {
       if (b.owner && b.owner.side === "o") {
+        // contrasto non garantito: 50%, più facile se l'avversario è rallentato o ti dà le spalle
+        const back = Math.cos(b.owner.facing - Math.atan2(b.owner.z - me.z, b.owner.x - me.x)) > 0.3;
+        const chance = 0.42 + (b.owner.slowT > 0 ? 0.25 : 0) + (back ? 0.15 : 0);
+        if (Math.random() > chance) {
+          me.slowT = Math.max(me.slowT || 0, 0.35);
+          b.owner.actPulse = 0.3;
+          showBanner("🧱 Contrasto fallito!", "Scegli meglio il momento", me.id, 0.8);
+          sfx("kick");
+          return;
+        }
         b.owner.slowT = Math.max(b.owner.slowT, 0.55);
       }
+      G.noShootUntil = performance.now() + 700;
       b.owner = me;
       b.lastSide = "m";
       b.lastActor = me;
@@ -2213,7 +2224,8 @@
 
   function doShootOrTackle() {
     if (!G || G.over) return;
-    const shooter = claimBallForMyAction(2.05);
+    if (G.noShootUntil && performance.now() < G.noShootUntil && G.ball.owner && G.ball.owner.side === "m") return; // niente tiro a catena dopo recupero
+    const shooter = claimBallForMyAction(1.5);
     if (shooter) {
       const inp = activeInputVec();
       const defaultCorner = shooter.z >= 0 ? -GW * 0.28 : GW * 0.28;
