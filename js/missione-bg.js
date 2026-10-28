@@ -182,9 +182,42 @@
       // la sagoma di Legione: luce singola, testa a faro
       R(g, 250, 118, 12, 26, "#4b5563"); C(g, 256, 112, 7, "#6b7280"); C(g, 256, 112, 2.5, Math.sin(f / 5) > -0.3 ? "#38bdf8" : "#0c4a6e"); GL(g, 256, 112, 14, "56,189,248", 0.4);
       VIG(g, W, H, 0.55);
+    },
+    ms_passo(g, W, H, f) {
+      VG(g, 0, 140, "#1c0a05", "#9a3412"); g.fillRect(0, 0, W, 140); GL(g, 160, 60, 140, "251,146,60", 0.35 + 0.1 * Math.sin(f / 16));
+      // le due rupi del Passo e il varco di fuoco, rottami che girano
+      T(g, [0, 140, 0, 20, 70, 50, 120, 140], "#0f0604"); T(g, [320, 140, 320, 10, 240, 60, 200, 140], "#0f0604"); R(g, 140, 20, 40, 120, `rgba(253,186,116,${0.2 + 0.1 * Math.sin(f / 8)})`);
+      for (let i = 0; i < 14; i++) { const a = f / 80 + i * 0.45, x = 160 + Math.cos(a) * (50 + i * 6), y = 70 + Math.sin(a) * (14 + i * 2); g.save(); g.translate(x, y); g.rotate(a * 3 + i); R(g, -4, -2, 8 + (i % 3) * 3, 4, "#292524"); R(g, -4, -2, 8, 1, "#78716c"); g.restore(); }
+      R(g, 0, 140, W, 60, "#1c1210"); for (let i = 0; i < 10; i++) T(g, [i * 34, 200, i * 34 + 10, 150 + (i % 3) * 8, i * 34 + 26, 200], "#2a1b16");
+      // la Normanna atterrata storta, fumo
+      g.save(); g.translate(96, 160); g.rotate(-0.12); T(g, [-50, 0, 52, 0, 42, 14, -40, 14], "#cbd5e1"); T(g, [-20, 0, 24, 0, 18, -12, -14, -12], "#94a3b8"); g.restore();
+      for (let i = 0; i < 8; i++) { const t = (f * 0.5 + i * 20) % 120; C(g, 120 + Math.sin(i + f / 30) * 6, 150 - t, 4 + t / 12, `rgba(68,64,60,${0.5 - t / 260})`); }
+      VIG(g, W, H, 0.5);
+    },
+    ms_tana(g, W, H, f) {
+      VG(g, 0, 200, "#0d0904", "#3b2a10"); g.fillRect(0, 0, W, 200);
+      // pareti organiche a costole, cunicoli, fiumi d'oro
+      for (let i = 0; i < 12; i++) { g.strokeStyle = "#1c1408"; g.lineWidth = 8; g.beginPath(); g.moveTo(i * 30, 0); g.quadraticCurveTo(i * 30 + 40, 100, i * 30 - 10, 200); g.stroke(); }
+      for (let k = 0; k < 3; k++) { g.strokeStyle = `rgba(250,204,21,${0.3 + 0.15 * Math.sin(f / 12 + k)})`; g.lineWidth = 2; g.beginPath(); g.moveTo(0, 150 + k * 14); for (let x = 0; x <= W; x += 20) g.lineTo(x, 150 + k * 14 + Math.sin(x / 30 + f / 20 + k) * 5); g.stroke(); }
+      for (let i = 0; i < 10; i++) { const x = 20 + i * 30, y = 92 + (i % 2) * 10; g.fillStyle = "#3b2f12"; g.beginPath(); g.ellipse(x, y, 8, 15, 0, 0, 7); g.fill(); GL(g, x, y, 18, "250,204,21", 0.2 + 0.15 * Math.sin(f / 10 + i)); }
+      for (let i = 0; i < 40; i++) R(g, 160 + Math.cos(f / 25 + i) * (40 + i * 3), 50 + Math.sin(f / 20 + i * 1.3) * 20, 1.5, 1.5, `rgba(250,204,21,${0.3 + 0.4 * Math.sin(f / 6 + i)})`);
+      VIG(g, W, H, 0.55);
+    },
+    ms_cuore(g, W, H, f) {
+      VG(g, 0, 200, "#000", "#2a1a05"); g.fillRect(0, 0, W, 200);
+      // il Gigante: un pallone d'oro enorme fatto di bozzoli, appeso a cavi
+      for (let i = 0; i < 8; i++) { g.strokeStyle = "#1c1408"; g.lineWidth = 3; g.beginPath(); g.moveTo(160, 80); g.lineTo(i * 46, 0); g.stroke(); }
+      const r = 54 + Math.sin(f / 18) * 2; C(g, 160, 92, r, "#3b2a10"); for (let i = 0; i < 18; i++) { const a = i * 0.35 + f / 200; C(g, 160 + Math.cos(a) * r * 0.7, 92 + Math.sin(a) * r * 0.7, 6, "#5a4416"); }
+      C(g, 160, 92, 16, `rgba(250,204,21,${0.6 + 0.3 * Math.sin(f / 7)})`); GL(g, 160, 92, 110, "250,204,21", 0.35 + 0.15 * Math.sin(f / 7));
+      R(g, 0, 160, W, 40, "#120c05"); R(g, 60, 158, 200, 3, "#a16207");
+      for (let i = 0; i < 5; i++) { const x = 90 + i * 34; R(g, x, 140, 6, 18, "#1e3a8a"); C(g, x + 3, 136, 4, "#e8c4a0"); }
+      VIG(g, W, H, 0.55);
     }
   };
   const HOT = {
+    ms_passo: [[130, 20, 60, 120, "🔥 Il varco del Passo: due rupi e una luce arancio in mezzo. Nessuno l'ha attraversato. Fino a stasera."], [40, 130, 120, 40, "🚢 La Normanna, atterrata storta. Jolly giura che era voluto."], [200, 40, 120, 60, "🪨 Rottami che girano piano: le navi di chi ci ha provato prima."]],
+    ms_tana: [[0, 80, 320, 30, "🫘 Bozzoli in fila, a perdita d'occhio. In alcuni, una maglia. In altri, qualcuno che respira ancora."], [0, 140, 320, 40, "✨ Fiumi d'oro sul pavimento: lo sciame dorme qui. Non svegliatelo. Troppo tardi."], [120, 30, 80, 50, "🌀 Lo sciame gira sopra le teste, come un pensiero che non trova pace."]],
+    ms_cuore: [[100, 30, 120, 120, "🟡 Il Gigante: un pallone fatto di bozzoli, grande come uno stadio. Batte. Ha un cuore. Ha diciannove squadre dentro."], [80, 130, 170, 30, "⚽ I rapiti di Orizzonte, in piedi, immobili. Aspettano un fischio che non arriva."], [0, 0, 320, 30, "🕸️ Cavi che scendono dal buio. Tengono su il Gigante. O lo trattengono."]],
     ms_flotta: [[0, 100, 320, 80, "⛵ Mille barche legate insieme. Si nasce su una, si muore su un'altra, si litiga su tutte."], [210, 70, 60, 40, "🌅 Il sole cala sulla Flotta. Qui il tramonto è l'unica cosa che nessuno ripara."], [0, 10, 320, 50, "🐦 Gabbiani. Sulla Flotta hanno un nome ciascuno. E un debito."]],
     ms_pragia: [[196, 60, 92, 56, "🏥 Il Blocco Bianco: dove Cerbero «allenava» i ragazzi speciali. Le finestre sono rosse anche di giorno."], [20, 66, 130, 50, "🏟️ La tribuna arrugginita: nessuno ci si siede da anni. Qualcuno ci ha scritto «ZERO» con lo spray."], [60, 140, 200, 40, "⚽ Il campo di Pragia: l'erba è cresciuta sopra le linee. Le porte, invece, sono ancora lì."]],
     ms_relitto: [[144, 64, 32, 32, "🟡 Il cuore della nave: batte ancora, lento. Ogni battito fa tremare le costole."], [0, 120, 320, 40, "🫘 Bozzoli d'oro in fila. Dentro qualcuno respira? EDI dice di no. Lo dice due volte."], [240, 100, 30, 46, "📡 Una macchina accesa in mezzo al buio. Ti guarda. Poi guarda di nuovo, come se fossero in tanti a guardare."]],

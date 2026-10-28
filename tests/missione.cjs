@@ -150,7 +150,44 @@ async function flow3(w, alt) {
   } catch (e) { errors.push(e.message.slice(0, 300)); }
   L.check(`Missione · capitolo 3${alt ? " (vie alternative)" : ""} (${w} px)`, errors); await browser.close();
 }
+const CREW3 = Object.assign({}, CREW2, { cr_n: 8, cr_ms_legione: 8, ms_c3_done: 1, ms_iff: 1 });
+const LOYAL = {}; ["ms_miranda", "ms_garro", "ms_zero", "ms_tali", "ms_tano", "ms_jacopo", "ms_mordini", "ms_legione"].forEach((id) => { LOYAL["ms_loy_" + id] = 1; });
+const S4 = (good) => ({ v: 1, diffSet: true, intro: { ch1: 1, ch2: 1, ch3: 1, ch4: 1, ms_passo: 1, ms_tana: 1, ms_cuore: 1 }, ch: 4, step: { 1: 4, 2: 6, 3: 5 }, done: { 1: "ok", 2: "ok", 3: "ok" }, st: { risorse: 3, esempio: 7, spregio: 7 }, flags: Object.assign({}, CREW3, good ? LOYAL : { ms_loy_ms_miranda: 1, ms_loy_ms_tali: 1 }, good ? { ms_upg: 3, ms_upg_scafo: 1, ms_upg_armi: 1, ms_upg_scudi: 1 } : {}) });
+async function seq(page, labels) { for (const l of labels) { await page.waitForTimeout(250); const r = await page.evaluate((l) => window.T_.click(l), l); if (!r) throw new Error("bottone mancante: " + l); } }
+async function zones4(w) {
+  const { browser, page, errors } = await start(w, S4(true), "Inizia il Capitolo 4");
+  for (const z of ["ms_passo", "ms_tana", "ms_cuore"]) {
+    try { await page.evaluate((k) => eval(k).F.set("ms_x", 1), K_); await go(page, z); await L.shot(page, "ms4_" + z + "_" + w); const bad = await L.reachAll(page, z); if (bad.length) errors.push(z + ": " + bad.join(", ")); }
+    catch (e) { errors.push(z + ": " + e.message.slice(0, 140)); }
+  }
+  L.check(`Missione · capitolo 4 zone (${w} px)`, errors); await browser.close();
+}
+async function flow4(w, good) {
+  const { browser, page, errors } = await start(w, S4(good), "Inizia il Capitolo 4");
+  await stubFight(page);
+  const st = async (n, what) => { const i = await L.info(page); if (i.step[4] !== n) errors.push(what + ": " + JSON.stringify(i.step)); };
+  try {
+    await go(page, "ms_sala", 7, 7); await L.goAct(page, 7, 5);
+    if (((await L.info(page)).step[4] | 0) !== 0) errors.push("passo partito troppo presto");
+    await L.advance(page, ["Traccia la rotta"]); await page.waitForTimeout(400); await L.advance(page).catch(() => {});
+    await st(1, "dopo la partenza"); if ((await L.zone(page)) !== "ms_passo") errors.push("non al Passo: " + (await L.zone(page)));
+    const dead0 = await page.evaluate((k) => Object.keys(eval(k).crew.members).filter((id) => eval(k).F.get("ms_dead_" + id)), K_);
+    if (good ? dead0.length : dead0.length !== 3) errors.push("morti all'attraversamento: " + dead0.join(","));
+    await L.goAct(page, 7, 8); await L.advance(page, ["Nei condotti"]).catch(() => {}); await seq(page, good ? ["Tali", "Guida la seconda", "Jacopo", "Conferma il piano"] : ["Lascia scoperto", "Guida la seconda", "Lascia scoperto", "Conferma il piano"]); await L.advance(page, ["Tieni le valvole"]); await page.waitForTimeout(400); await L.advance(page).catch(() => {});
+    await st(2, "dopo le valvole"); if ((await L.zone(page)) !== "ms_tana") errors.push("non nella Tana");
+    const r2 = good ? ["Zero", "Scorta dei rapiti", "Tano", "Guida la seconda", "Jacopo", "Conferma il piano"] : ["Lascia scoperto", "Scorta dei rapiti", "Lascia scoperto", "Guida la seconda", "Lascia scoperto", "Conferma il piano"];
+    await L.goAct(page, 4, 13); await L.advance(page, ["La barriera"]).catch(() => {}); await seq(page, r2); await L.advance(page, ["Attraversa la Tana"]); await page.waitForTimeout(400); await L.advance(page).catch(() => {});
+    await st(3, "dopo la Tana"); if ((await L.zone(page)) !== "ms_cuore") errors.push("non nel cuore");
+    await L.talk(page, "ms_prelato"); await L.advance(page, ["Abbatti il Gigante", good ? "Saltate tutti" : "Cerbero se la prenda"]); await L.advance(page).catch(() => {});
+    const i = await L.info(page); if (i.done[4] !== (good ? "tutti" : "cerbero")) errors.push("finale: " + JSON.stringify([i.done, i.step]));
+    const dead = await page.evaluate((k) => Object.keys(eval(k).crew.members).filter((id) => eval(k).F.get("ms_dead_" + id)), K_);
+    if (good ? dead.length : dead.length < 4) errors.push("morti: " + dead.join(","));
+    const pl = await page.evaluate((k) => eval(k).plan.last(), K_); if (good && pl.tecnico !== "ms_tali") errors.push("piano non salvato: " + JSON.stringify(pl));
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check(`Missione · capitolo 4 ${good ? "(tutti salvi)" : "(prezzo e Cerbero)"} (${w} px)`, errors); await browser.close();
+}
 (async () => {
+  if (process.env.ONLY === "4") { await zones4(390); await flow4(390, true); await flow4(390, false); return; }
   if (process.env.ONLY === "3") { await zones3(390); await flow3(390, false); await flow3(390, true); return; }
   for (const w of [390, 320]) { await zonesTest(w); await flow(w, false); }
   await flow(390, true);
@@ -158,5 +195,7 @@ async function flow3(w, alt) {
   await flow2(390, true);
   for (const w of [390, 320]) { await zones3(w); await flow3(w, false); }
   await flow3(390, true);
+  for (const w of [390, 320]) { await zones4(w); await flow4(w, true); }
+  await flow4(390, false);
   await realFight(390);
 })();

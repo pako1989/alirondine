@@ -22,6 +22,7 @@
 //     inv: { items: { id: { n: "Nome", icon: "🗝️", d: "descrizione", match: { at: 1, df: 0, te: 0 }, gift: { id_png: punti }, giftAny: 2, react: { id_png: "battuta" }, refuse: { id_png: "battuta" } } } },  // INVENTARIO: spec.loot = { "x,y": { id, text, empty } } (tessera con azione), K.inv.give/has/take/count/bonus("at"), 🎒 Zaino nel menu: i regali alzano i Rapporti, gli oggetti passivi danno bonus in partita finché li tieni
 //     plugins: [{ zone(zid, spec, Z, K), tick(zid, spec, px, py, dt, K), top(g, zid, spec, cx, cy, d, K), enter(zid, spec, K) }],
 //     rest: { ch: "s", label: "Riposa", text: "..." },
+//     plan: { name: "Il Piano", roles: { rk: { n, icon, d, fit: { id_membro: 2 } } } },  // IL PIANO (richiede crew): K.plan.open({ title, q, roles, pool }, back, inZone, cb(mappa)) assegna compagni a ruoli; K.plan.fit(rk, id)
 //     alert: { max: 3, names: [...], rangeMul: 0.25, decay: true, hud: true, onChange(K, lv, old) },  // ALLERTA globale: ogni avvistamento +1 (K.alert.get/set/add), il raggio delle guardie cresce; hiding(K) → true = nascosto alle guardie
 //   });
 //   E.addChapter((K) => ({ n: 1, title, sub, goal(step), intro(), start: "zona", zones: {...}, patch: {...}, talk: {...}, obj: {...}, news(id, step) }));
@@ -496,7 +497,7 @@
       return out + `<br><span style="color:var(--dim)">▷ = strade non prese. Per provarle: Capitoli → rigioca.</span>`;
     }
     function journal(back, inZone) {
-      const html = journalHtml() + (CRW ? CRW.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + (WGT ? WGT.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
+      const html = journalHtml() + (CRW ? CRW.html() : "") + (PLN ? PLN.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + (WGT ? WGT.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
       const jb = (DOS ? Object.keys(DOS.cases).filter((c) => DOS.list(c).length).map((c) => ({ label: "🗂️ Dossier · " + DOS.cases[c].t, sub: "Confronta prove e testimonianze", fn: () => DOS.open(c, () => journal(back, inZone), inZone) })) : []).concat(CAT && CAT.list().length ? [{ label: "🃏 Album", sub: `${CAT.team().length}/${CAT.max} in squadra`, fn: () => CAT.open(() => journal(back, inZone), inZone) }] : []).concat(CRW && CRW.count() ? [{ label: "⚔️ Schiera la compagnia", sub: `${CRW.field().length}/${CRW.max} in campo`, fn: () => CRW.pick(() => journal(back, inZone), inZone) }] : []).concat((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
       if (inZone) return api.trAsk("voce", html, jb, bgNow());
       api.scene(BG0, "voce", html, jb, JN());
@@ -1118,6 +1119,35 @@
       return { has, count: () => list().length, total: IDS.length, list, field, recruit, leave, toggle, power, html, pick, members: M, max: MAXF };
     })();
 
+    // -------------------------------------------------------------- IL PIANO (cfg.plan): assegnare i compagni ai ruoli di una missione, richiede cfg.crew
+    // cfg.plan = { name: "Il Piano", roles: { rk: { n: "Specialista", icon: "🔧", d: "cosa fa", fit: { id_membro: 2 | 1 } } }, hints: true }
+    // K.plan.open({ title, q, roles: [rk…], pool: [id…] }, back, inZone, cb(mappa { rk: id })) apre la schermata: tocca un ruolo, poi chi lo copre
+    // (una persona per ruolo, nessuno su due ruoli); «Conferma» quando sono tutti coperti, o «Lascia scoperto» un ruolo (id "").
+    // K.plan.fit(rk, id) 0..2 (con hints: ★★ / ★ accanto al nome) · get(rk) · last() ultima mappa confermata · html() nel diario. L'esito lo decide la saga.
+    const PLN = cfg.plan && CRW && (() => {
+      const P0 = cfg.plan, R = P0.roles || {}, fit = (rk, id) => ((R[rk] && R[rk].fit) || {})[id] | 0, stars = (n) => (P0.hints === false ? "" : n >= 2 ? " ★★" : n === 1 ? " ★" : "");
+      const get = (rk) => F.get("pl_" + rk, ""), last = () => { const m = {}; Object.keys(R).forEach((rk) => { if (F.get("pl_" + rk, null) !== null) m[rk] = get(rk); }); return m; };
+      const html = () => { const m = last(), ks = Object.keys(m); return ks.length ? `<br><br><b>${esc(P0.name || "Il Piano")}</b><br>` + ks.map((rk) => `${esc(R[rk].icon || "•")} ${esc(R[rk].n)}: <b>${m[rk] ? esc(CRW.members[m[rk]].n) : "scoperto"}</b>`).join("<br>") : ""; };
+      function open(o, back, inZone, cb, sel) {
+        const rs = (o.roles || []).filter((rk) => R[rk]), pool = (o.pool || CRW.list()).filter((id) => CRW.members[id]); sel = sel || {};
+        const show = (head, opts) => (inZone ? api.trAsk("voce", head, opts, bgNow()) : api.scene(BG0, "voce", head, opts, JN()));
+        const nm = (id) => (id ? `${CRW.members[id].icon || ""} ${CRW.members[id].n}` : "— scoperto —");
+        const head = `<b>${esc(o.title || P0.name || "Il Piano")}</b><br><span style="color:var(--dim)">${esc(o.q || "Tocca un ruolo e scegli chi lo copre. Una persona per ruolo.")}</span>`;
+        const opts = rs.map((rk) => ({ label: `${R[rk].icon || "•"} ${R[rk].n}: ${rk in sel ? nm(sel[rk]) : "?"}`, sub: String(R[rk].d || "").slice(0, 90), fn: () => {
+          const busy = Object.keys(sel).filter((k) => k !== rk).map((k) => sel[k]);
+          const ch = pool.filter((id) => !busy.includes(id)).map((id) => ({ label: `${nm(id)}${stars(fit(rk, id))}`, sub: String(CRW.members[id].role || "").slice(0, 80), fn: () => { sel[rk] = id; SFX.ding(); open(o, back, inZone, cb, sel); } }));
+          ch.push({ label: "— Lascia scoperto", sub: "Nessuno copre questo ruolo", fn: () => { sel[rk] = ""; open(o, back, inZone, cb, sel); } });
+          ch.push({ label: "◂ Torna al piano", fn: () => open(o, back, inZone, cb, sel) });
+          show(`<b>${esc(R[rk].icon || "")} ${esc(R[rk].n)}</b><br><span style="color:var(--dim)">${esc(R[rk].d || "")}</span>`, ch);
+        } }));
+        const full = rs.every((rk) => rk in sel);
+        opts.push({ label: "✅ Conferma il piano", sub: full ? "Non si torna indietro" : "Prima copri (o lascia scoperto) ogni ruolo", big: true, cls: "hot", disabled: !full, fn: () => { rs.forEach((rk) => F.set("pl_" + rk, sel[rk])); safe(() => cb(Object.assign({}, sel)), null); } });
+        if (back) opts.push({ label: "◂ Più tardi", fn: back });
+        show(head, opts);
+      }
+      return { open, fit, get, last, html, roles: R };
+    })();
+
     // -------------------------------------------------------------- IL DOSSIER (cfg.cases): prove e testimonianze, confronti, verdetto
     // cfg.cases = { id_caso: { t, q, items: { id: { t, d, icon, kind: "prova"|"testimonianza" } }, links: [[a, b, "cosa non torna"]], verdicts: [{ id, label, sub }] } }
     // K.dossier: add(caso, item) · has · list(caso) · found(caso) (contraddizioni scoperte) · solid(caso) (0..1) · open(back, inZone, caso) (schermata: tocca due voci
@@ -1410,7 +1440,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN,
+      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, plan: PLN, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN,
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
       ending: (id, d) => { ENDINGS[id] = d; },
       continueStory: () => continueStory(), hasChapter: (n) => !!CHAPTERS[n], setInMatch: (v) => { inMatch = !!v; }, openMain: () => openMain(),

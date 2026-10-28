@@ -2,7 +2,7 @@
 // Nel Mediterraneo spariscono intere squadre di paese, la notte prima delle finali. Un uomo che fuma davanti a cento schermi, il Signor Fumo di Cerbero, ti dà una nave
 // nuova, la Normanna, e un elenco di nomi: recluta i migliori, conquista la loro lealtà, poi attraversa il Passo d'Omega. Da lì non è mai tornato nessuno.
 // Tono: ironico di base, capitoli seri; nella notte finale chi vive e chi muore dipende dalle tue scelte (morti fuori scena, niente sangue).
-// Dal core: Compagnia (cfg.crew, reclutamento e squadra di due), Rapporti (cfg.bonds), Inventario (cfg.inv), Orologio (cfg.clock), interni a mano, Peso morale (cfg.weight: Esempio e Spregiudicato).
+// Dal core: Compagnia (cfg.crew, reclutamento e squadra di due), Il Piano (cfg.plan, novità portata da questa saga: ruoli della missione finale), Rapporti (cfg.bonds), Inventario (cfg.inv), Orologio (cfg.clock), interni a mano, Peso morale (cfg.weight: Esempio e Spregiudicato).
 // Minigioco proprio: «Squadra in Pausa» (js/pausa.js, tempo reale con pausa tattica e ruota dei poteri).
 // Tessere proprie: M console · P tavolo-mappa · O parapetto · E container · N insegna al neon · K bitta · V bozzolo dei Raccoglitori · pavimenti Q (lamiera della nave) e Y (pista da ballo)
 (function () {
@@ -31,6 +31,9 @@
       flotta: { grass: ["#7a6a4a", "#726345", "#827150"], path: ["#a0815a", "#977a55"], stone: ["#6b6f78", "#646871"], wall: ["#3b2f22", "#33291d"], water: ["#1d6fa3", "#1a6699"], tall: "#6a5a3a", tree: ["#2f5a3a", "#3a6a44", "#46784e"], tint: "255,190,140", tintA: 0.08, fx: "", dark: 0.08 },
       pragia: { grass: ["#4d5b45", "#47543f", "#53624b"], path: ["#6b6a63", "#64635c"], stone: ["#5b5d61", "#55575b"], wall: ["#2a2c30", "#25272b"], water: ["#34506a", "#304a62"], tall: "#45523c", tree: ["#2a3a2a", "#324532", "#3a4f3a"], tint: "180,200,230", tintA: 0.12, fx: "rain", dark: 0.22 },
       relitto: { grass: ["#1f1d24", "#1b1920", "#24212a"], path: ["#3a2f1f", "#35291b"], stone: ["#2d2a33", "#28252e"], wall: ["#0b0a0e", "#08070a"], water: ["#0a0f1a", "#080c16"], tall: "#1f1d24", tint: "250,180,40", tintA: 0.12, fx: "", dark: 0.34 },
+      passo: { grass: ["#3b2a22", "#35261f", "#422f26"], path: ["#5c3d2a", "#553826"], stone: ["#4a3a33", "#43342e"], wall: ["#1a0f0b", "#140b08"], water: ["#7c2d12", "#73290f"], tall: "#3b2a22", tree: ["#2a1a12", "#3a2418", "#4a2e1e"], tint: "255,140,60", tintA: 0.16, fx: "", dark: 0.28 },
+      tana: { grass: ["#2d2214", "#281e12", "#33271a"], path: ["#4a3820", "#43321d"], stone: ["#3a2c1a", "#342817"], wall: ["#120c05", "#0d0904"], water: ["#4a3a0a", "#433409"], tall: "#2d2214", tree: ["#3b2f12", "#4a3b16", "#5a481a"], tint: "250,204,21", tintA: 0.14, fx: "", dark: 0.32 },
+      cuore: { grass: ["#1c1408", "#181107", "#21180a"], path: ["#3b2a10", "#35260e"], stone: ["#3b2a10", "#35260e"], wall: ["#0a0603", "#070402"], water: ["#4a3a0a", "#433409"], tall: "#1c1408", tint: "250,170,21", tintA: 0.2, fx: "", dark: 0.36 },
       ponte: { grass: ["#3a3646", "#353141", "#403b4d"], path: ["#5a5468", "#544e61"], stone: ["#4a4458", "#443e51"], wall: ["#1a1722", "#15121c"], water: ["#0e2338", "#0c1f33"], tall: "#3a3646", tint: "255,150,80", tintA: 0.1, fx: "rain", dark: 0.26 }
     },
     floors: "QY", solid: "MPOENKV",
@@ -113,6 +116,16 @@
         ms_tali: { n: "Tali", icon: "🛸", role: "Ingegnera della Flotta", d: "Non toglie mai il casco. Ripara un motore cantando e lo fa volare piangendo.", s: { tecnica: 3 }, pow: "drone" },
         ms_tano: { n: "Tano", icon: "🗡️", role: "Ex sicario, portiere di riserva", d: "Prega prima di ogni lavoro. Para, quando nessuno guarda, come un santo.", s: { tecnica: 1, barriera: 1 }, pow: "ombra" },
         ms_legione: { n: "Legione", icon: "📡", role: "Macchina che dice «noi»", d: "Un robot da allenamento abbandonato che parla al plurale. Non si sa quanti siano.", s: { tecnica: 3, guida: 1 }, pow: "hack" }
+      }
+    },
+    // IL PIANO (novità del core, opt-in): al Passo d'Omega si assegnano i compagni ai ruoli. ★★ = adatto. Chi è adatto E leale torna a casa.
+    plan: {
+      name: "Il Piano del Passo",
+      roles: {
+        tecnico: { n: "Nei condotti", icon: "🔧", d: "Entra da solo nei condotti di ventilazione e apre le valvole dall'interno. Serve un tecnico vero, e che non si fermi a metà.", fit: { ms_tali: 2, ms_legione: 2, ms_mordini: 1 } },
+        capo: { n: "Guida la seconda squadra", icon: "🧭", d: "Porta l'altra metà dell'equipaggio lungo il corridoio esterno. Se esita, chi è nei condotti resta senza copertura.", fit: { ms_jacopo: 2, ms_garro: 2, ms_miranda: 2, ms_zero: 1 } },
+        barriera: { n: "La barriera", icon: "🛡️", d: "Tiene aperta una bolla contro lo sciame mentre tutti attraversano la Tana. Serve chi sposta le cose col pensiero.", fit: { ms_zero: 2, ms_jacopo: 1 } },
+        scorta: { n: "Scorta dei rapiti", icon: "🚑", d: "Riporta alla Normanna i calciatori rapiti di Orizzonte. Chiunque va bene, se ci crede fino in fondo.", fit: { ms_miranda: 1, ms_jacopo: 1, ms_garro: 1, ms_zero: 1, ms_tali: 1, ms_tano: 1, ms_mordini: 1, ms_legione: 1 } }
       }
     },
     bonds: {
