@@ -1237,6 +1237,7 @@
         ${window.__carteDecks ? `<button type="button" class="hubToolBtn" data-go="carte">🎴 Carte del Destino</button>` : ""}
         ${window.__gabbia3d ? `<button type="button" class="hubToolBtn" data-go="gabbia3d">🏟️ Gabbia 3D · 7v7</button>` : ""}
         ${window.__portieri ? `<button type="button" class="hubToolBtn" data-go="portieri">🧤 Sfida di Portieri</button>` : ""}
+        ${window.__tavolo ? `<button type="button" class="hubToolBtn" data-go="tavolo">🎭 Il Tavolo di Sotto</button>` : ""}
       </div>`;
 
       if (SALONE_VIEW === "hub") {
@@ -1352,6 +1353,7 @@
       bindTool('[data-go="sogni"]', () => { close(); window.__sogni.open(() => openSalone()); });
       bindTool('[data-go="gabbia3d"]', () => { close(); window.__gabbia3d.open(() => openSalone()); });
       bindTool('[data-go="portieri"]', () => { close(); window.__portieri.open(() => openSalone()); });
+      bindTool('[data-go="tavolo"]', () => { close(); window.__tavolo.open(() => openSalone()); });
 
       if (SALONE_VIEW === "hub") {
         const cv = body.querySelector("#worldMapCv");
