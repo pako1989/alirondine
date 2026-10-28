@@ -124,6 +124,8 @@
     return {
       arena: ARENAS[r.arena] ? r.arena : "darsena",
       cam: r.cam === "terza" ? "terza" : "tribuna",
+      fmt: r.fmt === 7 ? 7 : 3,
+      q: r.q === "low" ? "low" : "hi",
       played: r.played | 0,
       wins: r.wins | 0,
       goals: r.goals | 0,
@@ -151,8 +153,15 @@
   }
 
   // Dimensioni campo Gabbia 3D (metri virtuali)
-  const PW = 22, PD = 14, HX = PW / 2, HZ = PD / 2;
-  const GW = 4.6, GH = 2.55, GD = 1.85;
+  let PW = 22, PD = 14, HX = PW / 2, HZ = PD / 2;
+  let GW = 4.6;
+  const GH = 2.55, GD = 1.85;
+  let FK = 1; // fattore di scala campo (1 = 3v3, 1.5 = 7v7)
+  function setField(n) {
+    FK = n === 7 ? 1.5 : 1;
+    PW = 22 * FK; PD = 14 * FK; HX = PW / 2; HZ = PD / 2;
+    GW = n === 7 ? 5.8 : 4.6;
+  }
 
   let OV = null, BACK = null, G = null, FAST = false;
   let keyCleanup = null, resizeCleanup = null;
@@ -218,6 +227,7 @@
 .g3dBanner .bTxt span{display:block;font:700 10.5px system-ui;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .g3dPad{display:grid;grid-template-columns:108px 1fr;gap:10px;align-items:center;margin-top:8px;padding:6px 4px;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
 .g3dStick{position:relative;width:104px;height:104px;border-radius:50%;background:radial-gradient(circle at 50% 38%,#1b2b4b,#0f172a 74%);border:2px solid #38bdf8;touch-action:none;margin:0 auto;box-shadow:inset 0 0 14px rgba(0,0,0,.6)}
+.g3dAct.shoot{position:relative;overflow:hidden}.g3dAct.shoot::after{content:"";position:absolute;left:0;bottom:0;height:6px;width:var(--chg,0%);background:linear-gradient(90deg,#fb7185,#ffd23f);pointer-events:none}
 .g3dStick.on{border-color:#ffd23f;box-shadow:0 0 12px rgba(255,210,63,.35),inset 0 0 14px rgba(0,0,0,.6)}
 .g3dStickKnob{position:absolute;left:50%;top:50%;width:42px;height:42px;margin:-21px 0 0 -21px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#bae6fd,#0284c7 75%);border:2px solid #f0f9ff;box-shadow:0 2px 8px rgba(0,0,0,.55);pointer-events:none}
 .g3dStick.on .g3dStickKnob{background:radial-gradient(circle at 35% 30%,#fef08a,#f59e0b 75%);border-color:#fff}
@@ -321,7 +331,8 @@
     return OV.querySelector(".body");
   }
 
-  function getMySquad3() {
+  function getMySquad3(n) {
+    n = n === 7 ? 7 : 3;
     const s = S();
     if (!s) {
       const fb = [
@@ -329,23 +340,26 @@
         { id: "leo", role: "A", at: 84, df: 56, te: 80, saga: "borgo" },
         { id: "tommy", role: "C", at: 68, df: 66, te: 82, saga: "borgo" },
       ];
-      return { keeper: fb[0], field: [fb[1], fb[2]], all: [fb[1], fb[2], fb[0]], loan: true, intesa: 4, combo: null };
+      const extra = [];
+      for (let i = 0; i < n - 3; i++) extra.push({ id: "fb" + i, role: i % 2 ? "D" : "C", at: 60, df: 62, te: 60, saga: "borgo" });
+      return { keeper: fb[0], field: [fb[1], fb[2]].concat(extra), all: [fb[1], fb[2]].concat(extra, [fb[0]]), loan: true, intesa: 4, combo: null, n };
     }
     s.sync && s.sync();
     const r = s._load();
-    const sq = s.squad(3, r.team);
+    const sq = s.squad(n, r.team);
     const allIds = sq.all.map((c) => c.id);
     const loan = r.own.length < 3 || sq.all.some((c) => !r.own.includes(c.id));
     const I = s.intesa ? s.intesa(r.team.length ? r.team : allIds, r.modulo).n : 0;
     const combo = s.combo ? s.combo(allIds) : null;
-    return { keeper: sq.keeper, field: sq.field.slice(0, 2), all: sq.all, loan, intesa: I, combo, r };
+    return { keeper: sq.keeper, field: sq.field.slice(0, n - 1), all: sq.all, n, loan, intesa: I, combo, r };
   }
 
   function open(back) {
     if (typeof back === "function") BACK = back;
-    const body = shell("🏟️ Gabbia 3D · 3 contro 3", false);
     const rec = load();
-    const sq = getMySquad3();
+    const NP = rec.fmt === 7 ? 7 : 3;
+    const body = shell(NP === 7 ? "🏟️ Calcio 3D · 7 contro 7" : "🏟️ Gabbia 3D · 3 contro 3", false);
+    const sq = getMySquad3(NP);
     const s = S();
 
     const unitCard = (c, isGk) => {
@@ -363,13 +377,22 @@
       </div>`;
     };
 
-    let h = `<p class="sum">Calcio veloce <b>3 contro 3</b> in Three.js dentro la gabbia luminosa: nessun fallo laterale, le <b>sponde</b> tengono viva l'azione e un <b>uno-due di sponda</b> carica del +24% il Super-Tiro della tua saga.${sq.loan ? ` <span>(Carte in prestito attive finché non ne sblocchi 3)</span>` : ""}</p>`;
+    let h = `<p class="sum">${NP === 7 ? "Calcio <b>7 contro 7</b> su campo grande con sponde: ruoli in campo secondo la tua formazione, portiere e 6 di movimento. Tieni premuto <b>Tira</b> per caricare il colpo." : ""}Calcio veloce <b>${NP === 7 ? "(stesso motore)" : "3 contro 3"}</b> in Three.js dentro la gabbia luminosa: nessun fallo laterale, le <b>sponde</b> tengono viva l'azione e un <b>uno-due di sponda</b> carica del +24% il Super-Tiro della tua saga.${sq.loan ? ` <span>(Carte in prestito attive finché non ne sblocchi 3)</span>` : ""}</p>`;
 
     if (s && s.presetsBarHtml) {
       h += `<div class="g3dPresetsHost">${s.presetsBarHtml(sq.r, { compact: true })}</div>`;
     }
 
-    h += `<div class="sec"><span>Il tuo Trio in Gabbia · Intesa +${sq.intesa}</span>${s ? `<button type="button" class="sgPresetActBtn" data-edit-team="1">🃏 Squadra</button>` : ""}</div>`;
+    h += `<div class="sec"><span>Formato</span><span>Qualità grafica</span></div>
+    <div class="g3dCamRow">
+      <button type="button" class="g3dCamOpt${NP === 3 ? " active" : ""}" data-fmt="3">⚡ 3 vs 3 Gabbia</button>
+      <button type="button" class="g3dCamOpt${NP === 7 ? " active" : ""}" data-fmt="7">⚽ 7 vs 7 Campo grande</button>
+    </div>
+    <div class="g3dCamRow">
+      <button type="button" class="g3dCamOpt${rec.q !== "low" ? " active" : ""}" data-q="hi">✨ Alta</button>
+      <button type="button" class="g3dCamOpt${rec.q === "low" ? " active" : ""}" data-q="low">🔋 Leggera</button>
+    </div>`;
+    h += `<div class="sec"><span>${NP === 7 ? "La tua Squadra a 7" : "Il tuo Trio in Gabbia"} · Intesa +${sq.intesa}</span>${s ? `<button type="button" class="sgPresetActBtn" data-edit-team="1">🃏 Squadra</button>` : ""}</div>`;
     h += `<div class="g3dTrio">${unitCard(sq.keeper, true)}${sq.field.map((c) => unitCard(c, false)).join("")}</div>`;
     if (sq.combo) {
       h += `<p class="sum" style="margin:4px 0 8px;color:#fde047;font-size:12px">🤝 Legame attivo in gabbia: <b>«${esc(sq.combo.title)}»</b> (+potenza Super combinata)</p>`;
@@ -388,7 +411,7 @@
     </div>`;
 
     const cupRound = rec.cupRun ? CUP_ROUNDS[rec.cupRun.round] : CUP_ROUNDS[0];
-    h += `<div class="sec"><span>Modalità · 90s o 3 Gol (Golden Goal)</span></div>`;
+    h += `<div class="sec"><span>Modalità · ${NP === 7 ? "2:30 o 5 Gol" : "90s o 3 Gol"} (Golden Goal)</span></div>`;
     h += `<div class="g3dModes">
       <button type="button" class="g3dModeBtn cup" data-mode="cup">
         <div>
@@ -430,6 +453,12 @@
         save(r2);
         open();
       };
+    });
+    body.querySelectorAll("[data-fmt]").forEach((b) => {
+      b.onclick = () => { const r2 = load(); r2.fmt = b.dataset.fmt === "7" ? 7 : 3; save(r2); open(); };
+    });
+    body.querySelectorAll("[data-q]").forEach((b) => {
+      b.onclick = () => { const r2 = load(); r2.q = b.dataset.q === "low" ? "low" : "hi"; save(r2); open(); };
     });
     body.querySelectorAll("[data-cam]").forEach((b) => {
       b.onclick = () => {
@@ -1315,7 +1344,7 @@
   // Vettori pre-allocati per zero GC nel game loop
   let _vTarget = null, _vLook = null;
 
-  function makeActor(c, side, slotIdx, isGk, shadowTex, THREE) {
+  function makeActor(c, side, slotIdx, isGk, shadowTex, THREE, home) {
     const s = S();
     const cast = CAST()[c.id] || {};
     const eff = s && s.eff && side === "m" ? s.eff(c) : { at: c.at || 65, df: c.df || 65, te: c.te || 65 };
@@ -1324,8 +1353,8 @@
     const skinHex = cast.skin ? parseInt(String(cast.skin).replace("#", ""), 16) || 0xf1c27d : (slotIdx % 2 ? 0xe0ac69 : 0xf1c27d);
     const hairHex = cast.hair ? parseInt(String(cast.hair).replace("#", ""), 16) || 0x2b1d0e : (slotIdx === 1 ? 0x1e293b : 0x451a03);
     const dir = side === "m" ? 1 : -1;
-    const homeX = isGk ? -dir * (HX - 0.85) : -dir * (slotIdx === 1 ? 3.2 : 5.8);
-    const homeZ = isGk ? 0 : (slotIdx === 1 ? -2.6 : 2.6);
+    const homeX = isGk ? -dir * (HX - 0.85) : home ? home.x : -dir * (slotIdx === 1 ? 3.2 : 5.8);
+    const homeZ = isGk ? 0 : home ? home.z : (slotIdx === 1 ? -2.6 : 2.6);
     const idHash = String(c.id || "").split("").reduce((acc, ch) => acc + ch.charCodeAt(0), slotIdx);
 
     const mesh = buildAthleteMesh(THREE, shadowTex, {
@@ -1360,10 +1389,11 @@
       homeX,
       homeZ,
       facing: dir > 0 ? 0 : Math.PI,
-      speed: (isGk ? 5.6 : 6.6 + (eff.te - 55) * 0.032),
+      speed: (isGk ? 5.6 : 6.6 + (eff.te - 55) * 0.032) * (side === "o" && !isGk ? 0.9 : 1),
       reach: (isGk ? 1.28 + (eff.df - 50) * 0.008 : 1.08 + (eff.df - 50) * 0.005) * pBonus,
       shotPow: 15.4 + (eff.at - 50) * 0.095,
       tackleCd: 0,
+      stealCd: 0,
       tackleT: 0,
       kickT: 0,
       diveT: 0,
@@ -1387,8 +1417,11 @@
     const rec = load();
     const ar = ARENAS[opts.arenaId] || ARENAS[rec.arena] || ARENAS.darsena;
     const opp = opts.opp || OPP_TIERS[0];
-    const sq = getMySquad3();
-    const title = opts.mode === "cup" ? `🏆 ${opp.label} · vs ${opp.name}` : `🏟️ Gabbia 3D · vs ${opp.name}`;
+    const NP = (opts.n || rec.fmt) === 7 ? 7 : 3;
+    setField(NP);
+    const LOWQ = rec.q === "low";
+    const sq = getMySquad3(NP);
+    const title = opts.mode === "cup" ? `🏆 ${opp.label} · vs ${opp.name}` : `🏟️ ${NP === 7 ? "Calcio 3D 7v7" : "Gabbia 3D"} · vs ${opp.name}`;
     const body = shell(title, true);
 
     body.innerHTML = `
@@ -1444,9 +1477,9 @@
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.14;
-    renderer.setPixelRatio(IS_SW_GL ? 1 : Math.min(window.devicePixelRatio || 1, 2));
-    renderer.shadowMap.enabled = !IS_SW_GL;
-    if (!IS_SW_GL) renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.setPixelRatio(IS_SW_GL || LOWQ ? 1 : Math.min(window.devicePixelRatio || 1, NP === 7 ? 1.5 : 2));
+    renderer.shadowMap.enabled = !IS_SW_GL && !LOWQ;
+    if (!IS_SW_GL && !LOWQ) renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     const maxAniso = safe(() => Math.min(8, renderer.capabilities.getMaxAnisotropy() || 1), 1);
 
@@ -1466,15 +1499,16 @@
 
     const dirLight = new THREE.DirectionalLight(ar.sun, 1.42);
     dirLight.position.set(9, 17, 11);
-    if (!IS_SW_GL) {
+    dirLight.position.set(9 * FK, 17 * FK, 11 * FK);
+    if (!IS_SW_GL && !LOWQ) {
       dirLight.castShadow = true;
-      dirLight.shadow.mapSize.set(1024, 1024);
+      dirLight.shadow.mapSize.set(NP === 7 ? 2048 : 1024, NP === 7 ? 2048 : 1024);
       dirLight.shadow.camera.near = 2;
-      dirLight.shadow.camera.far = 42;
-      dirLight.shadow.camera.left = -15;
-      dirLight.shadow.camera.right = 15;
-      dirLight.shadow.camera.top = 12;
-      dirLight.shadow.camera.bottom = -12;
+      dirLight.shadow.camera.far = 42 * FK;
+      dirLight.shadow.camera.left = -15 * FK;
+      dirLight.shadow.camera.right = 15 * FK;
+      dirLight.shadow.camera.top = 12 * FK;
+      dirLight.shadow.camera.bottom = -12 * FK;
       dirLight.shadow.bias = -0.0005;
     }
     scene.add(dirLight);
@@ -1491,14 +1525,17 @@
     const netTexRight = makeNetTexture(THREE, 0xfb7185, maxAniso);
     const cageGlassTex = makeCageGlassTexture(THREE, ar, maxAniso);
 
-    const arenaProps = buildArenaProps(THREE, scene, ar, extraTextures);
+    const propsGrp = new THREE.Group();
+    propsGrp.scale.setScalar(FK);
+    scene.add(propsGrp);
+    const arenaProps = buildArenaProps(THREE, propsGrp, ar, extraTextures);
 
     const pitchMesh = new THREE.Mesh(
       new THREE.PlaneGeometry(PW, PD),
       new THREE.MeshStandardMaterial({ map: pitchTex, roughness: 0.74, metalness: 0.08 })
     );
     pitchMesh.rotation.x = -Math.PI / 2;
-    if (!IS_SW_GL) pitchMesh.receiveShadow = true;
+    if (!IS_SW_GL && !LOWQ) pitchMesh.receiveShadow = true;
     scene.add(pitchMesh);
 
     // Sponde luminose rinforzate della Gabbia con montanti d'acciaio e piloni angolari
@@ -1585,7 +1622,7 @@
       new THREE.MeshStandardMaterial({ map: ballTex, roughness: 0.34, metalness: 0.12 })
     );
     ballMesh.position.set(0, ballRadius, 0);
-    if (!IS_SW_GL) ballMesh.castShadow = true;
+    if (!IS_SW_GL && !LOWQ) ballMesh.castShadow = true;
     scene.add(ballMesh);
 
     const ballShadow = new THREE.Mesh(
@@ -1632,11 +1669,19 @@
 
     // Creazione 3vs3 giocatori
     const intesaMult = 1 + sq.intesa * 0.006;
-    const myTeam = [
-      makeActor(sq.keeper, "m", 0, true, shadowTex, THREE),
-      makeActor(sq.field[0] || sq.keeper, "m", 1, false, shadowTex, THREE),
-      makeActor(sq.field[1] || sq.field[0] || sq.keeper, "m", 2, false, shadowTex, THREE),
-    ];
+    let myTeam;
+    if (NP === 7) {
+      const ss = S();
+      const lu = ss && ss.lineup ? ss.lineup(sq.field) : sq.field.map((c, i) => ({ c, fx: [0.47, 0.33, 0.33, 0.33, 0.2, 0.2][i] || 0.3, fy: [0.5, 0.2, 0.5, 0.8, 0.3, 0.7][i] || 0.5 }));
+      myTeam = [makeActor(sq.keeper, "m", 0, true, shadowTex, THREE)].concat(lu.map((q, i) =>
+        makeActor(q.c, "m", i + 1, false, shadowTex, THREE, { x: -HX + 1.2 + q.fx * (PW - 2.4) * 1.02, z: (q.fy - 0.5) * (PD - 4.5) })));
+    } else {
+      myTeam = [
+        makeActor(sq.keeper, "m", 0, true, shadowTex, THREE),
+        makeActor(sq.field[0] || sq.keeper, "m", 1, false, shadowTex, THREE),
+        makeActor(sq.field[1] || sq.field[0] || sq.keeper, "m", 2, false, shadowTex, THREE),
+      ];
+    }
     myTeam.forEach((p) => {
       p.speed *= intesaMult;
       p.shotPow *= intesaMult;
@@ -1648,11 +1693,22 @@
       { id: "opp_1", name: opp.pl[0] || "Capitano", role: "A", at: opp.ovr + 3, df: opp.ovr - 4, te: opp.ovr + 2, shirtHex: opp.shirt, trimHex: opp.trim },
       { id: "opp_2", name: opp.pl[1] || "Ala", role: "C", at: opp.ovr - 1, df: opp.ovr, te: opp.ovr + 1, shirtHex: opp.shirt, trimHex: opp.trim },
     ];
-    const oppTeam = [
-      makeActor(oppCards[0], "o", 0, true, shadowTex, THREE),
-      makeActor(oppCards[1], "o", 1, false, shadowTex, THREE),
-      makeActor(oppCards[2], "o", 2, false, shadowTex, THREE),
-    ];
+    let oppTeam;
+    if (NP === 7) {
+      const names = (opp.pl || []).concat(["Rocco", "Bruno", "Ivo", "Sandro", "Mimmo", "Furio"]);
+      const fxs = [0.47, 0.33, 0.33, 0.33, 0.2, 0.2], fys = [0.5, 0.2, 0.5, 0.8, 0.3, 0.7], rl = ["A", "C", "C", "C", "D", "D"], dv = [3, 0, 1, 0, -2, -2];
+      oppTeam = [makeActor(oppCards[0], "o", 0, true, shadowTex, THREE)];
+      for (let i = 0; i < 6; i++) {
+        const card = { id: "opp_" + (i + 1), name: names[i] || "Rivale", role: rl[i], at: opp.ovr + dv[i], df: opp.ovr - dv[i] * 0.6, te: opp.ovr + (i % 2), shirtHex: opp.shirt, trimHex: opp.trim };
+        oppTeam.push(makeActor(card, "o", i + 1, false, shadowTex, THREE, { x: HX - 1.2 - fxs[i] * (PW - 2.4) * 1.02, z: (fys[i] - 0.5) * (PD - 4.5) }));
+      }
+    } else {
+      oppTeam = [
+        makeActor(oppCards[0], "o", 0, true, shadowTex, THREE),
+        makeActor(oppCards[1], "o", 1, false, shadowTex, THREE),
+        makeActor(oppCards[2], "o", 2, false, shadowTex, THREE),
+      ];
+    }
     oppTeam.forEach((p) => scene.add(p.mesh.grp));
 
     const clock = new THREE.Clock();
@@ -1689,6 +1745,9 @@
       myTeam,
       oppTeam,
       all: myTeam.concat(oppTeam),
+      n: NP,
+      chg: -1,
+      winGoals: NP === 7 ? 5 : 3,
       ctrlIdx: 1, // parte sul primo giocatore di movimento
       stk: {
         x: 0,
@@ -1715,7 +1774,7 @@
         pickupLock: 0.25,
       },
       score: [0, 0],
-      timeLeft: 90,
+      timeLeft: NP === 7 ? 150 : 90,
       goldenGoal: false,
       superPct: 25,
       wallFlash: 0,
@@ -1946,17 +2005,24 @@
       };
       const releaseVisual = () => btn.classList.remove("isDown");
 
+      const isShoot = kind === "shoot";
+      const press = () => {
+        if (isShoot && G && !G.over && !G.paused && startCharge()) { safe(() => window.hapticTrigger && window.hapticTrigger("tap"), 0); return; }
+        fire();
+      };
+      const letGo = () => { releaseVisual(); if (isShoot) releaseCharge(); };
+
       btn.addEventListener("pointerdown", (e) => {
         e.preventDefault();
         e.stopPropagation();
         lastPtrTs = performance.now();
         lastDirectTs = lastPtrTs;
         btn.classList.add("isDown");
-        fire();
+        press();
       });
-      btn.addEventListener("pointerup", releaseVisual);
-      btn.addEventListener("pointercancel", releaseVisual);
-      btn.addEventListener("pointerleave", releaseVisual);
+      btn.addEventListener("pointerup", letGo);
+      btn.addEventListener("pointercancel", letGo);
+      btn.addEventListener("pointerleave", letGo);
 
       btn.addEventListener("touchstart", (e) => {
         e.preventDefault();
@@ -1965,10 +2031,10 @@
         btn.classList.add("isDown");
         if (now - lastPtrTs < 90) return; // già scattato su pointerdown
         lastDirectTs = now;
-        fire();
+        press();
       }, { passive: false });
-      btn.addEventListener("touchend", releaseVisual);
-      btn.addEventListener("touchcancel", releaseVisual);
+      btn.addEventListener("touchend", letGo);
+      btn.addEventListener("touchcancel", letGo);
 
       btn.addEventListener("click", (e) => {
         e.preventDefault();
@@ -1994,13 +2060,15 @@
       }
       if (e.repeat) return;
       if (k === "j" || k === "z") actions.pass();
-      else if (k === "k" || k === "x") actions.shoot();
+      else if (k === "k" || k === "x") { if (!startCharge()) actions.shoot(); }
       else if (k === "c") actions.tackle();
       else if (k === "l" || k === " " || k === "enter") actions.super();
     };
     const onKeyUp = (e) => {
       if (!G) return;
-      G.keys[e.key.toLowerCase()] = false;
+      const kk = e.key.toLowerCase();
+      if (kk === "k" || kk === "x") releaseCharge();
+      G.keys[kk] = false;
     };
     const onBlur = () => {
       if (G) G.keys = {};
@@ -2105,7 +2173,13 @@
         return;
       }
       // Passaggio diretto al compagno di movimento meglio piazzato
-      const target = mates.slice().sort((p1, p2) => (p2.isGk ? -99 : p2.x) - (p1.isGk ? -99 : p1.x))[0];
+      const target = G.n === 7
+        ? mates.filter((q) => !q.isGk).map((q) => {
+            const dd = hypot(q.x - carrier.x, q.z - carrier.z) || 1;
+            const al = inp.x || inp.z ? ((q.x - carrier.x) * inp.x + (q.z - carrier.z) * inp.z) / dd : 0;
+            return { q, sc: q.x * 0.5 - dd * 0.45 + al * 5 - (dd < 2.5 ? 6 : 0) };
+          }).sort((a, c) => c.sc - a.sc)[0].q
+        : mates.slice().sort((p1, p2) => (p2.isGk ? -99 : p2.x) - (p1.isGk ? -99 : p1.x))[0];
       const leadX = clamp(target.x + (target.isGk ? 0 : 1.05), -HX + 1, HX - 1);
       const dx = leadX - carrier.x, dz = target.z - carrier.z;
       const d = hypot(dx, dz) || 1;
@@ -2128,7 +2202,11 @@
       doTackle();
       return;
     }
-    const nextIdx = G.ctrlIdx === 1 ? 2 : 1;
+    let nextIdx = G.ctrlIdx === 1 ? 2 : 1;
+    if (G.n === 7) {
+      let bd = 1e9;
+      G.myTeam.forEach((q, i) => { if (i && i !== G.ctrlIdx) { const dd = hypot(q.x - tx, q.z - tz); if (dd < bd) { bd = dd; nextIdx = i; } } });
+    }
     G.ctrlIdx = nextIdx;
     const switched = G.myTeam[nextIdx];
     if (switched) {
@@ -2164,7 +2242,11 @@
     const tx = b.owner ? b.owner.x : b.x;
     const tz = b.owner ? b.owner.z : b.z;
     let me = G.myTeam[G.ctrlIdx];
-    const othIdx = G.ctrlIdx === 1 ? 2 : 1;
+    let othIdx = G.ctrlIdx === 1 ? 2 : 1;
+    if (G.n === 7) {
+      let bd = 1e9;
+      G.myTeam.forEach((q, i) => { if (i && q !== G.myTeam[G.ctrlIdx]) { const dd = hypot(q.x - tx, q.z - tz); if (dd < bd) { bd = dd; othIdx = i; } } });
+    }
     const oth = G.myTeam[othIdx];
     // Se l'altro compagno di movimento è molto più vicino alla palla, passa a lui per intervenire subito!
     if (me && oth && hypot(me.x - tx, me.z - tz) > 3.0 && hypot(oth.x - tx, oth.z - tz) + 1.0 < hypot(me.x - tx, me.z - tz)) {
@@ -2222,20 +2304,49 @@
     }
   }
 
-  function doShootOrTackle() {
+  // Tiro caricabile: tieni premuto Tira, rilascia per sparare (0..1 = potenza e precisione)
+  function chargeUi(pct) {
+    const btn = OV && OV.querySelector(".g3dAct.shoot");
+    if (btn) btn.style.setProperty("--chg", pct + "%");
+    const sub = OV && OV.querySelector("#g3dShootSub");
+    if (sub) sub.textContent = pct > 0 ? (pct >= 95 ? "PERFETTO! rilascia" : "Carico " + pct + "%") : "Botta in porta";
+  }
+  function startCharge() {
+    if (!G || G.over || G.paused) return false;
+    if (G.chg >= 0) return true;
+    const o = G.ball.owner;
+    if (!o || o.side !== "m" || o.isGk) return false;
+    if (G.noShootUntil && performance.now() < G.noShootUntil) return false;
+    G.chg = 0;
+    return true;
+  }
+  function releaseCharge() {
+    if (!G || !(G.chg >= 0)) return;
+    const pw = Math.min(1, G.chg / 0.9);
+    G.chg = -1;
+    chargeUi(0);
+    if (G.over || G.paused) return;
+    doShootOrTackle(pw);
+  }
+
+  function doShootOrTackle(power) {
     if (!G || G.over) return;
     if (G.noShootUntil && performance.now() < G.noShootUntil && G.ball.owner && G.ball.owner.side === "m") return; // niente tiro a catena dopo recupero
     const shooter = claimBallForMyAction(1.5);
     if (shooter) {
       const inp = activeInputVec();
       const defaultCorner = shooter.z >= 0 ? -GW * 0.28 : GW * 0.28;
-      const aimZ = inp.z ? clamp(inp.z * (GW * 0.42), -GW * 0.42, GW * 0.42) : defaultCorner;
+      let aimZ = inp.z ? clamp(inp.z * (GW * 0.42), -GW * 0.42, GW * 0.42) : defaultCorner;
+      const charged = typeof power === "number";
+      const perfect = charged && power >= 0.95;
+      if (charged) aimZ += (Math.random() - 0.5) * 2 * (1 - power) * GW * 0.45;
       const dx = HX - shooter.x;
       const dz = aimZ - shooter.z;
       const d = hypot(dx, dz) || 1;
-      const spd = shooter.shotPow;
+      const spd = shooter.shotPow * (charged ? 0.82 + 0.42 * power + (perfect ? 0.06 : 0) : 1);
       shooter.facing = Math.atan2(dz, dx);
-      releaseBall(shooter, (dx / d) * spd, 2.1 + Math.random() * 1.0, (dz / d) * spd, null, 0, 0xfb7185);
+      if (perfect) { showBanner("🎯 TIRO PERFETTO!", `${shooter.name} carica al punto giusto`, shooter.id, 0.9); G.camShake = Math.max(G.camShake, 0.22); }
+      releaseBall(shooter, (dx / d) * spd, (charged ? 1.6 + power * 1.2 : 2.1) + Math.random() * 0.8, (dz / d) * spd, null, 0, perfect ? 0xffd23f : 0xfb7185);
       spawnSparks(shooter.x + 0.3, 0.36, shooter.z, 0xfb7185);
       spawnShock(shooter.x, shooter.z, 0xfb7185);
       G.superPct = Math.min(100, G.superPct + 12);
@@ -2311,7 +2422,8 @@
       p.slowT = 0;
       p.actPulse = 0;
     });
-    const starter = concededSide === "o" ? G.oppTeam[1] : G.myTeam[1];
+    const fwd = (team, sgn) => team.filter((q) => !q.isGk).sort((a, c) => sgn * (c.homeX - a.homeX))[0];
+    const starter = concededSide === "o" ? fwd(G.oppTeam, -1) : fwd(G.myTeam, 1);
     starter.x = concededSide === "o" ? 0.8 : -0.8;
     starter.z = 0;
     starter.facing = concededSide === "o" ? Math.PI : 0;
@@ -2327,7 +2439,7 @@
     b.superFx = null;
     b.wallBounced = false;
     b.pickupLock = 0.32;
-    G.ctrlIdx = 1;
+    G.ctrlIdx = Math.max(1, G.myTeam.indexOf(fwd(G.myTeam, 1)));
   }
 
   function onGoalScored(scoringSide) {
@@ -2354,7 +2466,7 @@
     }
     updateHud();
 
-    if (G.goldenGoal || G.score[0] >= 3 || G.score[1] >= 3) {
+    if (G.goldenGoal || G.score[0] >= G.winGoals || G.score[1] >= G.winGoals) {
       finishMatch();
       return;
     }
@@ -2389,6 +2501,57 @@
         if (p.side === "m" && mate) G.ctrlIdx = G.myTeam.indexOf(mate);
         sfx("pass");
       }
+      return;
+    }
+
+    if (G.n === 7) {
+      // 7v7: tutti tengono la posizione di ruolo; il più vicino alla palla pressa se non l'abbiamo
+      const mine = p.side === "m";
+      const team = (mine ? G.myTeam : G.oppTeam).filter((q) => !q.isGk && (!mine || q !== G.myTeam[G.ctrlIdx]));
+      const weHave = b.owner && b.owner.side === (mine ? "m" : "o");
+      let chaser = null, bd = 1e9;
+      team.forEach((q) => { const dd = hypot(q.x - b.x, q.z - b.z); if (dd < bd) { bd = dd; chaser = q; } });
+      if (b.owner === p) {
+        const gx = mine ? HX : -HX, sd = mine ? 1 : -1;
+        const distGoal = hypot(gx - p.x, p.z);
+        if (!mine && distGoal < PW * 0.4 && (sd * (p.x - gx) > -PW * 0.4) && Math.random() < dt * 1.6 + (distGoal < 8 ? 0.05 : 0)) {
+          const aimZ = clamp((Math.random() - 0.5) * GW * 0.78, -GW * 0.4, GW * 0.4);
+          const dx = gx - p.x, dz = aimZ - p.z, d = hypot(dx, dz) || 1;
+          p.facing = Math.atan2(dz, dx);
+          releaseBall(p, (dx / d) * p.shotPow * 0.94, 1.9, (dz / d) * p.shotPow * 0.94, null, 0);
+          sfx("kick");
+          return;
+        }
+        // portatore IA avversario: conduce, a volte appoggia a un compagno più avanzato
+        if (!mine && p.tackleCd <= 0 && Math.random() < dt * 0.55) {
+          const opts2 = G.oppTeam.filter((q) => q !== p && !q.isGk && q.x < p.x - 2 && hypot(q.x - p.x, q.z - p.z) < 13);
+          const t = opts2[Math.floor(Math.random() * opts2.length)];
+          if (t) {
+            const dx = t.x - 1 - p.x, dz = t.z - p.z, d = hypot(dx, dz) || 1;
+            p.facing = Math.atan2(dz, dx);
+            releaseBall(p, (dx / d) * 13.5, 0.6, (dz / d) * 13.5, null, 0);
+            sfx("pass");
+            return;
+          }
+        }
+        const tz = p.z > 0 ? 2.2 : -2.2;
+        const dx = (gx - sd * 2.5) - p.x, dz = tz - p.z, d = hypot(dx, dz) || 1;
+        p.vx = (dx / d) * p.speed * 0.9; p.vz = (dz / d) * p.speed * 0.9; p.facing = Math.atan2(dz, dx);
+        return;
+      }
+      let tx, tz;
+      if (p === chaser && !weHave) {
+        tx = b.owner ? b.owner.x : b.x; tz = b.owner ? b.owner.z : b.z;
+        if (!mine && b.owner && b.owner.side === "m" && bd < 1.3 && p.tackleCd <= 0 && Math.random() < dt * 2.2) { p.tackleT = 0.2; p.tackleCd = 1.45; }
+      } else {
+        const push = weHave ? 3.2 : 0;
+        tx = clamp(p.homeX + (b.x * 0.42) + (mine ? push : -push), -HX + 2, HX - 2);
+        tz = p.homeZ * 0.8 + b.z * 0.3;
+        if (weHave && p === chaser) { tx = clamp(b.x + (mine ? 3 : -3), -HX + 2, HX - 2); tz = b.z >= 0 ? -3 : 3; }
+      }
+      const dx = tx - p.x, dz = tz - p.z, d = hypot(dx, dz);
+      if (d > 0.5) { p.vx = (dx / d) * p.speed * (p === chaser ? 0.92 : 0.78); p.vz = (dz / d) * p.speed * (p === chaser ? 0.92 : 0.78); p.facing = Math.atan2(dz, dx); }
+      else { p.vx *= 0.7; p.vz *= 0.7; }
       return;
     }
 
@@ -2537,11 +2700,31 @@
       if (idx > 0) G.ctrlIdx = idx;
     }
 
+    if (G.chg >= 0) {
+      const ow = G.ball.owner;
+      if (!ow || ow.side !== "m") { G.chg = -1; chargeUi(0); }
+      else {
+        G.chg += dt;
+        chargeUi(Math.round(Math.min(1, G.chg / 0.9) * 100));
+        if (G.chg > 1.7) releaseCharge();
+      }
+    }
+    if (G.n === 7) {
+      G.swCd = Math.max(0, (G.swCd || 0) - dt);
+      const cur0 = G.myTeam[G.ctrlIdx];
+      if (G.swCd <= 0 && !(G.ball.owner && G.ball.owner.side === "m") && cur0) {
+        const dCur = hypot(cur0.x - G.ball.x, cur0.z - G.ball.z);
+        let bi = -1, bd = dCur - 3;
+        G.myTeam.forEach((q, i) => { if (i && q !== cur0) { const dd = hypot(q.x - G.ball.x, q.z - G.ball.z); if (dd < bd) { bd = dd; bi = i; } } });
+        if (bi > 0) { G.ctrlIdx = bi; G.swCd = 0.7; }
+      }
+    }
     const me = G.myTeam[G.ctrlIdx];
     const inp = activeInputVec();
 
     G.all.forEach((p) => {
       if (p.tackleCd > 0) p.tackleCd = Math.max(0, p.tackleCd - dt);
+      if (p.stealCd > 0) p.stealCd = Math.max(0, p.stealCd - dt);
       if (p.tackleT > 0) p.tackleT = Math.max(0, p.tackleT - dt);
       if (p.kickT > 0) p.kickT = Math.max(0, p.kickT - dt);
       if (p.diveT > 0) p.diveT = Math.max(0, p.diveT - dt);
@@ -2594,7 +2777,13 @@
         const dist = hypot(other.x - o.x, other.z - o.z);
         const stealR = other.side === "m"
           ? (other.tackleT > 0 ? Math.max(1.85, other.reach * 1.65) : other.reach * 0.9)
-          : (other.tackleT > 0 ? other.reach * 1.16 : 0.56);
+          : (other.tackleT > 0 ? other.reach * 1.05 : 0.5);
+        if (dist < stealR && other.side === "o") {
+          // i rivali non rubano a ogni contatto: pausa tra i tentativi e riuscita parziale
+          if (other.stealCd > 0) return;
+          other.stealCd = 1.1;
+          if (Math.random() > 0.42) { other.actPulse = 0.22; return; }
+        }
         if (dist < stealR) {
           o.slowT = Math.max(o.slowT, 0.5);
           b.owner = other;
@@ -2875,11 +3064,11 @@
     // Telecamera dinamica (Tribuna ampia con entrambe le porte 3D ben inquadrate fin dal calcio d'inizio, o Terza Persona immersiva)
     const me = G.myTeam[G.ctrlIdx];
     if (G.camMode === "terza" && me) {
-      _vTarget.set(clamp(me.x - 6.0, -16.2, 6.2), 4.5, clamp(me.z * 0.85, -8.5, 8.5));
-      _vLook.set(clamp((me.x + b.x) * 0.5 + 3.6, -6, HX + 1.2), 1.0, (me.z + b.z) * 0.45);
+      _vTarget.set(clamp(me.x - 6.0, -HX - 5.2, HX - 4.8), 4.5 * (FK > 1 ? 1.15 : 1), clamp(me.z * 0.85, -HZ - 1.5, HZ + 1.5));
+      _vLook.set(clamp((me.x + b.x) * 0.5 + 3.6, -6 * FK, HX + 1.2), 1.0, (me.z + b.z) * 0.45);
     } else {
-      _vTarget.set(clamp(b.x * 0.34, -4.4, 4.4), 12.6, 17.8 + clamp(b.z * 0.2, -1.8, 1.8));
-      _vLook.set(b.x * 0.4, 0.55, b.z * 0.3);
+      _vTarget.set(clamp(b.x * 0.5, -4.4 * FK, 4.4 * FK), 12.6 * (FK > 1 ? 1.6 : 1), (17.8 + clamp(b.z * 0.2, -1.8, 1.8)) * (FK > 1 ? 1.48 : 1));
+      _vLook.set(b.x * (FK > 1 ? 0.55 : 0.4), 0.55, b.z * 0.3);
     }
     if (G.camShake > 0) {
       _vTarget.x += Math.sin(tNow * 47) * G.camShake * 0.45;
@@ -2999,6 +3188,7 @@
     close,
     startMatch,
     tick,
+    step: (dt) => stepSim(dt),
     pause,
     doPassOrSwitch,
     doShootOrTackle,
