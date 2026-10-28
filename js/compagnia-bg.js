@@ -97,6 +97,21 @@
       R(g, 0, 160, W, 40, "#2a1f1a"); for (let i = 0; i < 5; i++) { R(g, 10 + i * 62, 40, 48, 100, "#3e2a1c"); for (let j = 0; j < 6; j++) R(g, 14 + i * 62, 46 + j * 16, 40, 10, `hsl(${(i * 50 + j * 20) % 360},20%,28%)`); }
       const sw = Math.sin(f / 26) * 4; R(g, 158 + sw, 0, 1, 34, "#111"); R(g, 152 + sw, 34, 13, 8, "#92400e"); GL(g, 158 + sw, 40, 110, "255,200,130", 0.36 + 0.08 * Math.sin(f / 6));
       C(g, 260, 168, 18, "#5a3a1c"); R(g, 242, 150, 36, 4, "#3a2410"); R(g, 242, 182, 36, 4, "#3a2410"); VIG(g, W, H, 0.5);
+    },
+    cp_convento(g, W, H, f) {
+      VG(g, 0, 120, "#a8c0e0", "#f8ecd0"); g.fillRect(0, 0, W, 120); for (let i = 0; i < 3; i++) R(g, ((i * 130 + f * 0.1) % 380) - 40, 14 + i * 16, 60, 5, "rgba(255,255,255,.8)");
+      hills(g, W, 112, "#7a9a82", 24, 2); R(g, 0, 130, W, 70, "#7a9a4e");
+      R(g, 70, 70, 180, 62, "#d6d3d1"); T(g, [64, 72, 256, 72, 160, 40], "#57534e"); R(g, 144, 98, 32, 34, "#44403c"); T(g, [144, 98, 176, 98, 160, 80], "#292524");
+      R(g, 150, 18, 20, 30, "#e7e5e4"); T(g, [146, 20, 174, 20, 160, 6], "#57534e"); C(g, 160, 30, 3, "#fbbf24"); R(g, 158 + Math.sin(f / 14) * 2, 34, 4, 8, "#78716c");
+      for (let i = 0; i < 6; i++) R(g, 76 + i * 28, 84, 10, 12, i % 2 ? "#44403c" : "#fde68a");
+      R(g, 0, 160, W, 40, "#8a9a5a"); for (let i = 0; i < 14; i++) { C(g, 20 + i * 22, 176 + (i % 3) * 4, 5, "#d97706"); R(g, 19 + i * 22, 170 + (i % 3) * 4, 2, 4, "#365314"); }
+      VIG(g, W, H, 0.22);
+    },
+    cp_biblioteca(g, W, H, f) {
+      VG(g, 0, 200, "#241a14", "#4a362a"); g.fillRect(0, 0, W, 200); for (let i = 0; i < 8; i++) R(g, i * 40, 0, 3, 200, "rgba(0,0,0,.18)");
+      for (let i = 0; i < 4; i++) { R(g, 10 + i * 78, 34, 60, 110, "#3e2a1c"); for (let j = 0; j < 7; j++) { R(g, 14 + i * 78, 40 + j * 14, 52, 10, `hsl(${(i * 60 + j * 25) % 360},30%,30%)`); } }
+      R(g, 0, 160, W, 40, "#2e2018"); R(g, 130, 150, 60, 20, "#6b4a2a"); R(g, 150, 140, 16, 12, "#e7d6a8"); R(g, 154, 143, 8, 1, "#7c2d12");
+      const bl = 0.35 + 0.1 * Math.sin(f / 6); GL(g, 160, 120, 110, "255,200,120", bl); VIG(g, W, H, 0.5);
     }
   };
   const HOT = {
@@ -107,6 +122,8 @@
     cp_strada: [[204, 54, 76, 66, "🏰 Il Fortino: tre torri e un cancello che si chiama «ospitale» per scherzo."], [38, 138, 44, 38, "🛒 Il carro rotto: ruota a metà, carico a metà, speranza a un quarto."], [118, 128, 100, 72, "🛤️ La strada del Marchese: polvere, sassi e un cartello che mente."]],
     cp_fortino: [[130, 76, 60, 84, "🚪 Il cancello: ospitale, finché non entri."], [20, 56, 280, 20, "🏹 I merli: sempre qualcuno che ti guarda. Raramente per salutare."], [10, 24, 40, 20, "🚩 Un vessillo con il leone: stesso leone, stessa faccia, stessa fretta."]],
     cp_cantina: [[10, 40, 300, 100, "📚 Gli scaffali: A a sinistra, Z a destra, «Varie» nel mezzo e in ordine."], [244, 150, 36, 36, "🍷 La botte: «Riserva dei Debitori». Il vino è buono, il conto no."], [150, 30, 30, 18, "💡 La lanterna: dondola e proietta ombre in ordine alfabetico."]],
+    cp_convento: [[150, 8, 20, 40, "🔔 Il campanile: la campana ha perso il batacchio nel Seicento e non ha mai smesso di sentirsene mancare."], [70, 40, 180, 90, "⛪ Il convento: pietra chiara, tetto scuro, una porta che sembra dire «prego, ma non troppo»."], [0, 160, 320, 40, "🎃 L'orto: zucche finte, perché i frutti veri richiederebbero anche un raccolto."]],
+    cp_biblioteca: [[10, 34, 300, 110, "📚 Gli scaffali: salmi, ricette, un trattato sul fuorigioco."], [128, 140, 64, 30, "🕯️ Il tavolo: un quaderno aperto e una pagina che aspetta da undici anni."], [100, 100, 120, 40, "💡 La lanterna: ogni ombra è un frate che non ha restituito un libro."]],
     cp_locanda: [[200, 70, 90, 80, "🔥 Il camino: l'unico che non chiede un documento prima di scaldarti."], [20, 96, 150, 54, "🍺 Il bancone: boccali, una mira da fiera e un conto che cresce da solo."], [56, 12, 28, 26, "🎯 Il bersaglio: bucato al centro. Dieci volte. Da una sola persona."]]
   };
   function reg(n) {
