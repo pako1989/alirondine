@@ -50,7 +50,7 @@
 .c3dMenu{position:absolute;inset:0;background:#0b1226ee;z-index:6;padding:56px 14px 14px;overflow:auto}.c3dMenu h3{margin:0 0 8px;color:#fde68a;font:900 18px system-ui}.c3dMenu p{font:600 13.5px/1.5 system-ui;color:#cbd5e1;margin:6px 0}
 .c3dMenu button{display:block;width:100%;margin:8px 0;min-height:46px;border-radius:10px;border:1.5px solid #64748b;background:#1e293b;color:#fff;font:800 14px system-ui;cursor:pointer}
 .c3dFade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .5s;z-index:7}.c3dFade.on{opacity:1}
-.c3dCut{position:absolute;left:0;right:0;top:34%;z-index:6;pointer-events:none;background:linear-gradient(90deg,#0000,#7c2d12ee 18%,#7c2d12ee 82%,#0000);color:#fde68a;font:900 20px system-ui;text-align:center;padding:12px 8px;letter-spacing:1px;animation:c3dcut 2.6s ease both}.c3dCut small{display:block;font:700 12px system-ui;color:#fff;letter-spacing:0;margin-top:3px}@keyframes c3dcut{0%{transform:translateX(-100%);opacity:0}12%{transform:none;opacity:1}85%{transform:none;opacity:1}100%{transform:translateX(100%);opacity:0}}.c3dToast{position:absolute;left:50%;top:96px;transform:translateX(-50%);background:#0f172af2;border:1.5px solid #fbbf24;border-radius:12px;padding:8px 14px;font:800 13px system-ui;z-index:4;pointer-events:none;text-align:center;max-width:90%}`;
+.c3dCut{position:absolute;left:0;right:0;top:34%;z-index:6;pointer-events:none;background:linear-gradient(90deg,#0000,#7c2d12ee 18%,#7c2d12ee 82%,#0000);color:#fde68a;font:900 20px system-ui;text-align:center;padding:12px 8px;letter-spacing:1px;animation:c3dcut 2.6s ease both}.c3dCut small{display:block;font:700 12px system-ui;color:#fff;letter-spacing:0;margin-top:3px}@keyframes c3dcut{0%{transform:translateX(-100%);opacity:0}12%{transform:none;opacity:1}85%{transform:none;opacity:1}100%{transform:translateX(100%);opacity:0}}.c3dHrs{margin:6px 0;font:800 12px system-ui}.c3dHrs button{display:inline-block!important;width:auto!important;margin:2px 3px!important;padding:6px 9px!important}.clk{pointer-events:auto;cursor:pointer}.c3dToast{position:absolute;left:50%;top:96px;transform:translateX(-50%);background:#0f172af2;border:1.5px solid #fbbf24;border-radius:12px;padding:8px 14px;font:800 13px system-ui;z-index:4;pointer-events:none;text-align:center;max-width:90%}`;
     document.head.appendChild(st);
   }
 
@@ -419,18 +419,20 @@
       ["pointerup", "pointercancel"].forEach((n) => cv.addEventListener(n, () => { dragId = null; }));
       const kd = (e) => { if (!G) return; const k = e.key.toLowerCase(); if (k === "e" || k === " " || k === "enter") { e.preventDefault(); doAct(); return; } G.keys[k] = true; };
       const ku = (e) => { if (G) G.keys[e.key.toLowerCase()] = false; };
+      const clkEl = OV.querySelector(".clk"); if (clkEl) clkEl.onclick = () => { if (G && !G.talking && !G.menu) K.skipTo(Math.floor(G.hour + 1) % 24, () => toast("⏩ +1h")); };
       window.addEventListener("keydown", kd); window.addEventListener("keyup", ku); keyCleanup = () => { window.removeEventListener("keydown", kd); window.removeEventListener("keyup", ku); };
     }
     function openMenu() {
       if (!G || G.talking) return; G.menu = true; const m = document.createElement("div"); m.className = "c3dMenu";
       const goal = STORY.goal ? STORY.goal(K) : null;
       m.innerHTML = `<h3>${ICON} ${esc(TITLE)}</h3><p><b>Obiettivo:</b> ${esc((goal && goal.text) || "Gira la città.")}</p><p>Capitolo ${mem().ch}/${cfg.chapters || 1} · 🪙 ${mem().coins} · ${mem().inv.length ? "🎒 " + esc(mem().inv.join(", ")) : "🎒 vuoto"}</p>
-<button type="button" data-q="1">Grafica: ${mem().q === "low" ? "Leggera" : "Alta"} (tocca per cambiare, riapre)</button><button type="button" data-s="1">Passanti parlanti: ${streetOn() ? "SÌ" : "NO"} (tocca per cambiare)</button><button type="button" data-z="1">🕘 Riposa fino a domattina</button><button type="button" data-r="1">▶ Riprendi</button><button type="button" data-x="1">✕ Esci dalla città</button>`;
+<button type="button" data-q="1">Grafica: ${mem().q === "low" ? "Leggera" : "Alta"} (tocca per cambiare, riapre)</button><button type="button" data-s="1">Passanti parlanti: ${streetOn() ? "SÌ" : "NO"} (tocca per cambiare)</button><div class="c3dHrs">⏩ Salta a: <button type="button" data-h="+1">+1h</button><button type="button" data-h="8">Mattina</button><button type="button" data-h="14">Pomeriggio</button><button type="button" data-h="19">Sera</button><button type="button" data-h="23">Notte</button></div><button type="button" data-z="1">🕘 Riposa fino a domattina</button><button type="button" data-r="1">▶ Riprendi</button><button type="button" data-x="1">✕ Esci dalla città</button>`;
       OV.appendChild(m);
       m.querySelector("[data-r]").onclick = () => { m.remove(); G.menu = false; };
       m.querySelector("[data-x]").onclick = () => { save(); K.exit(); };
       m.querySelector("[data-q]").onclick = () => { mem().q = mem().q === "low" ? "hi" : "low"; persist(); const b = BACK; open(b); };
       m.querySelector("[data-s]").onclick = () => { mem().street = !streetOn(); persist(); m.remove(); G.menu = false; if (streetOn()) streetCut(); toast(streetOn() ? "👥 Passanti parlanti: SÌ" : "👥 Passanti parlanti: NO"); };
+      m.querySelectorAll("[data-h]").forEach((b) => { b.onclick = () => { const v = b.dataset.h; m.remove(); G.menu = false; const h = v === "+1" ? Math.floor(G.hour + 1) % 24 : +v; K.skipTo(h, () => toast(`⏩ ${String(h).padStart(2, "0")}:00`)); }; });
       m.querySelector("[data-z]").onclick = () => { m.remove(); G.menu = false; K.skipTo(7, () => toast("🌅 Un nuovo giorno.")); };
     }
     function persist() { if (!G || !M) return; const d = districtAt(G.p.x, G.p.z); if (d) { M.d = d.id; M.at = [G.p.x - origin(d).x, G.p.z - origin(d).z]; } M.hour = G.hour; M.yaw = G.yaw; save(); }
