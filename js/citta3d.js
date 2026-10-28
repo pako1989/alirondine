@@ -50,7 +50,7 @@
 .c3dMenu{position:absolute;inset:0;background:#0b1226ee;z-index:6;padding:56px 14px 14px;overflow:auto}.c3dMenu h3{margin:0 0 8px;color:#fde68a;font:900 18px system-ui}.c3dMenu p{font:600 13.5px/1.5 system-ui;color:#cbd5e1;margin:6px 0}
 .c3dMenu button{display:block;width:100%;margin:8px 0;min-height:46px;border-radius:10px;border:1.5px solid #64748b;background:#1e293b;color:#fff;font:800 14px system-ui;cursor:pointer}
 .c3dFade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .5s;z-index:7}.c3dFade.on{opacity:1}
-.c3dCut{position:absolute;left:0;right:0;top:34%;z-index:6;pointer-events:none;background:linear-gradient(90deg,#0000,#7c2d12ee 18%,#7c2d12ee 82%,#0000);color:#fde68a;font:900 20px system-ui;text-align:center;padding:12px 8px;letter-spacing:1px;animation:c3dcut 2.6s ease both}.c3dCut small{display:block;font:700 12px system-ui;color:#fff;letter-spacing:0;margin-top:3px}@keyframes c3dcut{0%{transform:translateX(-100%);opacity:0}12%{transform:none;opacity:1}85%{transform:none;opacity:1}100%{transform:translateX(100%);opacity:0}}.c3dHrs{margin:6px 0;font:800 12px system-ui}.c3dHrs button{display:inline-block!important;width:auto!important;margin:2px 3px!important;padding:6px 9px!important}.clk{pointer-events:auto;cursor:pointer}.c3dToast{position:absolute;left:50%;top:96px;transform:translateX(-50%);background:#0f172af2;border:1.5px solid #fbbf24;border-radius:12px;padding:8px 14px;font:800 13px system-ui;z-index:4;pointer-events:none;text-align:center;max-width:90%}`;
+.c3dCut{position:absolute;left:0;right:0;top:34%;z-index:6;pointer-events:none;background:linear-gradient(90deg,#0000,#7c2d12ee 18%,#7c2d12ee 82%,#0000);color:#fde68a;font:900 20px system-ui;text-align:center;padding:12px 8px;letter-spacing:1px;animation:c3dcut 2.6s ease both}.c3dCut small{display:block;font:700 12px system-ui;color:#fff;letter-spacing:0;margin-top:3px}@keyframes c3dcut{0%{transform:translateX(-100%);opacity:0}12%{transform:none;opacity:1}85%{transform:none;opacity:1}100%{transform:translateX(100%);opacity:0}}.c3dHrs{margin:6px 0;font:800 12px system-ui}.c3dHrs button{display:inline-block!important;width:auto!important;margin:2px 3px!important;padding:6px 9px!important}.clk{pointer-events:auto;cursor:pointer}.c3dMap{position:absolute;inset:0;background:#0b1226f2;z-index:7;display:flex;flex-direction:column;align-items:center;padding:56px 10px 12px;gap:8px}.c3dMap canvas{position:static!important;inset:auto!important;width:100%;height:auto;flex:none;max-width:560px;border:2px solid #475569;border-radius:12px;background:#0f172a;touch-action:manipulation}.c3dMap .lg{font:700 12px/1.5 system-ui;color:#cbd5e1;max-width:560px;text-align:center}.c3dMap .lg b{color:#fde68a}.c3dMap button{pointer-events:auto;padding:10px 22px;border-radius:10px;border:1px solid #64748b;background:#1e293b;color:#f8fafc;font:800 14px system-ui}.c3dToast{position:absolute;left:50%;top:96px;transform:translateX(-50%);background:#0f172af2;border:1.5px solid #fbbf24;border-radius:12px;padding:8px 14px;font:800 13px system-ui;z-index:4;pointer-events:none;text-align:center;max-width:90%}`;
     document.head.appendChild(st);
   }
 
@@ -375,7 +375,7 @@
     function open(back) {
       css(); close(); BACK = back || BACK; M = load(); if (!window.THREE) return;
       OV = document.createElement("div"); OV.className = "c3dOv";
-      OV.innerHTML = `<canvas></canvas><div class="c3dTop"><span class="clk">🕘 09:00</span><span class="dst"></span><span class="sp"></span><button class="c3dBtn" data-menu="1" type="button">☰</button></div>
+      OV.innerHTML = `<canvas></canvas><div class="c3dTop"><span class="clk">🕘 09:00</span><span class="dst" style="pointer-events:auto;cursor:pointer"></span><span class="sp"></span><button class="c3dBtn" data-map="1" type="button">🗺️</button><button class="c3dBtn" data-menu="1" type="button">☰</button></div>
 <div class="c3dGoal"><span class="ar">🧭</span><span class="tx"></span></div><div class="c3dStick"><div class="c3dKnob"></div></div><button class="c3dAct off" type="button">…</button><div class="c3dFade"></div>`;
       document.body.appendChild(OV);
       const THREE = window.THREE, canvas = OV.querySelector("canvas"), low = mem().q === "low";
@@ -419,8 +419,22 @@
       ["pointerup", "pointercancel"].forEach((n) => cv.addEventListener(n, () => { dragId = null; }));
       const kd = (e) => { if (!G) return; const k = e.key.toLowerCase(); if (k === "e" || k === " " || k === "enter") { e.preventDefault(); doAct(); return; } G.keys[k] = true; };
       const ku = (e) => { if (G) G.keys[e.key.toLowerCase()] = false; };
+      const mapB = OV.querySelector("[data-map]"); if (mapB) mapB.onclick = openMap; const dstEl = OV.querySelector(".dst"); if (dstEl) dstEl.onclick = openMap;
       const clkEl = OV.querySelector(".clk"); if (clkEl) clkEl.onclick = () => { if (G && !G.talking && !G.menu) K.skipTo(Math.floor(G.hour + 1) % 24, () => toast("⏩ +1h")); };
       window.addEventListener("keydown", kd); window.addEventListener("keyup", ku); keyCleanup = () => { window.removeEventListener("keydown", kd); window.removeEventListener("keyup", ku); };
+    }
+    // ------------------------------------------------------------ minimappa
+    function openMap() {
+      if (!G || G.talking || G.menu) return; G.menu = true; const m = document.createElement("div"); m.className = "c3dMap";
+      m.innerHTML = `<canvas width="540" height="360"></canvas><div class="lg"></div><button type="button">▶ Chiudi</button>`; OV.appendChild(m);
+      const cv = m.querySelector("canvas"), g = cv.getContext("2d"), W = 3 * DS, H = 2 * DS, kx = cv.width / W, kz = cv.height / H, X = (x) => x * kx, Z = (z) => z * kz;
+      cfg.districts.forEach((d) => { g.fillStyle = (d.pal && d.pal.ground) || "#475569"; g.fillRect(X(d.gx * DS) + 1, Z(d.gz * DS) + 1, DS * kx - 2, DS * kz - 2); g.fillStyle = "#0008"; g.fillRect(X(d.gx * DS) + 1, Z(d.gz * DS) + DS * kz - 26, DS * kx - 2, 25); g.fillStyle = "#f8fafc"; g.font = "800 12px system-ui"; g.textAlign = "center"; g.fillText(`${d.icon || ""} ${d.name}`, X((d.gx + 0.5) * DS), Z((d.gz + 1) * DS) - 8); });
+      g.strokeStyle = "#ffffff30"; g.lineWidth = 3; for (let i = 1; i < 3; i++) { g.beginPath(); g.moveTo(X(i * DS), 0); g.lineTo(X(i * DS), cv.height); g.stroke(); } g.beginPath(); g.moveTo(0, Z(DS)); g.lineTo(cv.width, Z(DS)); g.stroke();
+      const here = []; G.npcs.forEach((o) => { if (!npcPresent(o)) return; here.push(o); g.font = "20px system-ui"; g.textAlign = "center"; g.fillText(o.cfg.emoji || "•", X(o.x), Z(o.z) + 7); });
+      const gp = goalPos(); if (gp) { g.font = "26px system-ui"; g.textAlign = "center"; g.fillText("⭐", X(gp.x), Z(gp.z) + 9); }
+      g.save(); g.translate(X(G.p.x), Z(G.p.z)); g.rotate(-(G.face || 0) + Math.PI); g.fillStyle = "#fbbf24"; g.strokeStyle = "#000"; g.lineWidth = 2; g.beginPath(); g.moveTo(0, -11); g.lineTo(8, 9); g.lineTo(0, 4); g.lineTo(-8, 9); g.closePath(); g.fill(); g.stroke(); g.restore();
+      const cd = districtAt(G.p.x, G.p.z); m.querySelector(".lg").innerHTML = `<b>▲ Tu</b>${cd ? " · " + esc(cd.name) : ""}${gp ? " · <b>⭐ obiettivo</b>" : ""}<br>${here.length ? here.map((o) => `${o.cfg.emoji || ""} ${esc(o.cfg.name)}`).join(" · ") : "Nessun conoscente in giro a quest'ora."}`;
+      m.querySelector("button").onclick = () => { m.remove(); G.menu = false; };
     }
     function openMenu() {
       if (!G || G.talking) return; G.menu = true; const m = document.createElement("div"); m.className = "c3dMenu";
