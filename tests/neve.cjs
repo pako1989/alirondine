@@ -228,6 +228,56 @@ async function levels3() {
   } catch (e) { errors.push(e.message.slice(0, 300)); }
   L.check("Guardiano di Neve · seracchi e Stambecco", errors); await browser.close();
 }
+// ---------------------------------------------------------------- capitolo 4 e finali
+const SAVE4 = (fl) => ({ v: 1, diffSet: true, intro: { ch1: 1, ch2: 1, ch3: 1, ch4: 1 }, ch: 4, max: 4, done: { 1: "ok", 2: "ok", 3: "ok" }, step: { 1: 4, 2: 4, 3: 4, 4: 0 }, flags: Object.assign({ gn_guanti: 1, gn_c1_done: 1, gn_c2_done: 1, gn_c3_done: 1 }, fl || {}) });
+async function zones4(w) {
+  const { browser, page, errors } = await start(w, SAVE4({ gn_olmo_vetta: 1 }));
+  for (const z of ["gn_morena", "gn_grotta", "gn_cima", "gn_capanna"]) {
+    try { await go(page, z); await L.shot(page, "gn_" + z + "_" + w); const bad = await L.reachAll(page, z); if (bad.length) errors.push(z + ": " + bad.join(", ")); }
+    catch (e) { errors.push(z + ": " + e.message.slice(0, 140)); }
+  }
+  L.check(`Guardiano di Neve · zone cap.4 (${w} px)`, errors); await browser.close();
+}
+async function flow4(w, alt) {
+  const { browser, page, errors } = await start(w, SAVE4(alt ? { gn_olmo_invito: 1 } : { gn_olmo_dire: 1 }));
+  await stubLevel(page);
+  const st = async (n, what) => { const i = await L.info(page); if ((i.step[4] || 0) !== n) errors.push(what + ": " + JSON.stringify(i.step)); };
+  try {
+    await go(page, "gn_morena", 14, 3); await L.goAct(page, 14, 1); await L.advance(page); await st(0, "cancello chiuso");
+    await go(page, "gn_grotta", 11, 3); await L.goAct(page, 12, 2); await L.advance(page); await st(0, "cassa prima di Fiocco");
+    await go(page, "gn_morena", 22, 16); await L.talk(page, "gn_fiocco"); await L.advance(page);
+    await go(page, "gn_grotta", 11, 3); await L.goAct(page, 12, 2); await L.advance(page, [alt ? "Lo porto a Olmo" : "Lo porto a Ilde"]); await st(1, "dopo la cassa");
+    await go(page, "gn_morena", 14, 3); await L.goAct(page, 14, 1); await L.advance(page, ["Sali sulla slitta"]); await L.advance(page).catch(() => {}); await st(2, "dopo la slitta");
+    await go(page, "gn_cima", 15, 9); await L.talk(page, "gn_ilde"); await L.advance(page, [alt ? "Valdigelo ha bisogno" : "Olmo lo sa"]); await st(3, "dopo Ilde");
+    await go(page, "gn_cima", 14, 4); await L.goAct(page, 15, 4); await L.advance(page, ["Para i rigori", alt ? "In vetrina" : "Giù in paese"]); await L.advance(page).catch(() => {});
+    const i = await L.info(page); if (i.done[4] !== (alt ? "leggenda" : "verita")) errors.push("finale: " + JSON.stringify([i.done, i.step]));
+    const lg = await page.evaluate(() => window.__scLog); if (!lg || lg.length !== 2 || lg[0].id !== "slitta" || lg[1].id !== "vetta") errors.push("livelli: " + JSON.stringify(lg));
+    const k = await page.evaluate((k) => { const K = eval(k); return { c: K.inv.has("gn_coppa"), p: K.inv.has("gn_pallone79"), pi: K.F.is("gn_pallone_ilde"), ov: K.F.is("gn_olmo_vetta"), fv: K.F.is("gn_fine_verita"), fl: K.F.is("gn_fine_leggenda"), d: K.F.is("gn_c4_done") }; }, K_);
+    if (!k.c || !k.p || !k.d || k.pi === !!alt || k.ov !== !!alt || k.fv === !!alt || k.fl !== !!alt) errors.push("stato finale: " + JSON.stringify(k));
+    await L.shot(page, "gn_fine_" + w);
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check(`Guardiano di Neve · capitolo 4 e finale ${alt ? "leggenda" : "verità"} (${w} px)`, errors); await browser.close();
+}
+// slitta completabile e Regina battibile: para i rigori vicini, salta le onde della tempesta
+async function levels4() {
+  const { browser, page, errors } = await L.setup({ w: 800, h: 400, ...MOD });
+  try {
+    const r = await autoplay(page, "slitta", 2); if (!r.res || !r.res.win) errors.push("slitta non completata: " + JSON.stringify(r));
+    const b = await page.evaluate(async () => {
+      window.__noSfx = 1; let res = null; window.__scorri.start({ level: Object.assign({ id: "vetta", kit: "guanti" }, window.__neveLV.vetta), tutorial: false, onDone: (x) => { res = x; } });
+      const s = window.__scorri.state, sts = {}; let pj = false; s.warp(60, 176); s.press("R", true); s.tick(1); s.press("R", false);
+      for (let t = 0; t < 8000 && !res; t++) {
+        const b = s.boss, h = s.hero; if (!b) break; sts[b.st] = 1;
+        s.press("K", s.snow.some((x) => !x.mine && x.x > h.x - 4 && x.x - h.x < 16 && x.y > h.y - 30 && x.y < h.y + 4));
+        const want = h.ground ? (b.st === "storm" && !pj && t % 2 === 0) : pj; s.press("J", want); pj = want;
+        s.tick(1); if (s.phase === "win") { s.finish(true); break; } if (s.phase === "ko") { s.finish(false); break; }
+      }
+      await new Promise((r) => setTimeout(r, 30)); return { res, sts: Object.keys(sts) };
+    });
+    if (!b.res || !b.res.win) errors.push("Regina non battibile: " + JSON.stringify(b)); if (!["aim", "storm"].every((x) => b.sts.includes(x))) errors.push("stati della Regina: " + b.sts.join(","));
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check("Guardiano di Neve · slitta e Regina del Gelo", errors); await browser.close();
+}
 (async () => {
   const only = process.argv[2];
   for (const w of [390, 320]) { if (!only || only === "zone") await zonesTest(w); }
@@ -241,4 +291,7 @@ async function levels3() {
   if (!only || only === "zone3") { await zones3(390); await zones3(320); }
   if (!only || only === "flow3") { await flow3(390, false); await flow3(320, true); }
   if (!only || only === "livelli3") await levels3();
+  if (!only || only === "zone4") { await zones4(390); await zones4(320); }
+  if (!only || only === "flow4") { await flow4(390, false); await flow4(320, true); }
+  if (!only || only === "livelli4") await levels4();
 })();
