@@ -10962,9 +10962,12 @@
   // ================= v10 · COLLEZIONE FIGURINE: l'album «Campioni della Costa» all'edicola di Pina =================
   // Per il centenario della Coppa della Costa la tipografia Parodi di Chiavari (il cugino di Pina) ha stampato un album
   // con tutte le squadre e le persone della saga. Le bustine si comprano all'edicola, i doppioni si scambiano in paese.
-  const FIGK = "ali-di-rondine.figurine";
+  // l'album di Pina ha una chiave sua: «ali-di-rondine.figurine» è il salvataggio della saga Cacciatori di Figurine, che riscrivendolo cancellava l'album
+  const FIGK = "ali-di-rondine.figurine-album", FIGK_OLD = "ali-di-rondine.figurine";
+  const FIG_FIELDS = ["v", "have", "packs", "free", "swaps", "trades", "paid", "started", "courier", "courierHeadlines"];
+  const figMigrate = () => { const r = readJSON(FIGK_OLD, null); if (!r || typeof r !== "object" || !(r.have || r.started)) return null; const o = {}; FIG_FIELDS.forEach((k) => { if (k in r) o[k] = r[k]; }); writeJSON(FIGK, o); return o; };
   const FIG_PRICE = 12;
-  const figRec = () => { const r = readJSON(FIGK, null); const o = { v: 1, have: {}, packs: 0, free: "", swaps: 0, trades: { day: "", list: [], done: [] }, paid: [], started: false, courier: [], courierHeadlines: [], ...(r && typeof r === "object" ? r : {}) }; if (!o.have || typeof o.have !== "object") o.have = {}; if (!Array.isArray(o.paid)) o.paid = []; if (!o.trades || typeof o.trades !== "object") o.trades = { day: "", list: [], done: [] }; if (!Array.isArray(o.courier)) o.courier = []; if (!Array.isArray(o.courierHeadlines)) o.courierHeadlines = []; return o; };
+  const figRec = () => { const r = readJSON(FIGK, null) || figMigrate(); const o = { v: 1, have: {}, packs: 0, free: "", swaps: 0, trades: { day: "", list: [], done: [] }, paid: [], started: false, courier: [], courierHeadlines: [], ...(r && typeof r === "object" ? r : {}) }; if (!o.have || typeof o.have !== "object") o.have = {}; if (!Array.isArray(o.paid)) o.paid = []; if (!o.trades || typeof o.trades !== "object") o.trades = { day: "", list: [], done: [] }; if (!Array.isArray(o.courier)) o.courier = []; if (!Array.isArray(o.courierHeadlines)) o.courierHeadlines = []; return o; };
   const figSave = (r) => writeJSON(FIGK, r);
   const metC = (id) => () => getList(CARDS).includes(id);
   const FIG_PAGES = [
