@@ -84,6 +84,44 @@ async function flow2(w, alt) {
   } catch (e) { errors.push(e.message.slice(0, 300)); }
   L.check(`Banda · capitolo 2${alt ? " (vie alternative)" : ""} (${w} px)`, errors); await browser.close();
 }
+const S3 = { v: 1, diffSet: true, intro: { ch1: 1, ch2: 1, ch3: 1, bp_stadio: 1, bp_sottotribuna: 1, bp_regia: 1 }, ch: 3, step: { 1: 4, 2: 4 }, done: { 1: "ok", 2: "ok" }, flags: { bp_c1_done: 1, bp_c2_done: 1, bp_m_bp_rocco: 1, bp_m_bp_lilli: 1, bp_m_bp_abele: 1 } };
+async function flow3(w, alt) {
+  const { browser, page, errors } = await start(w, S3, "Inizia il Capitolo 3");
+  await stub(page, true, 91);
+  try {
+    await go(page, "bp_sottotribuna", 7, 5); await L.talk(page, "bp_ferrante"); await L.advance(page, [alt ? "Ricominciamo" : "Vado da lei"]);
+    if (!alt) {
+      await st(page, errors, 3, 1, "dopo la prova");
+      await go(page, "bp_stadio", 29, 10); await L.talk(page, "bp_lilli"); await L.advance(page); await st(page, errors, 3, 1, "Lilli senza ancia");
+      await go(page, "bp_stadio", 8, 16); await L.talk(page, "bp_rocco"); await L.advance(page);
+      const a = await page.evaluate((k) => eval(k).inv.has("bp_ancia"), K_); if (!a) errors.push("ancia di Rocco non ricevuta");
+      await go(page, "bp_stadio", 29, 10); await L.talk(page, "bp_lilli"); await L.advance(page, ["Al derby suona"]);
+    }
+    await st(page, errors, 3, 2, "verso la regia");
+    await go(page, "bp_regia", 3, 4); await L.talk(page, "bp_gigi"); await L.advance(page, [alt ? "Stacca il cavo" : "Abbassala"]); await st(page, errors, 3, 3, "dopo Gigi");
+    for (const id of ["bp_rocco", "bp_bracco", "bp_nana"]) { await go(page, "bp_stadio", 5, 17); await L.talk(page, id); await L.advance(page); }
+    await go(page, "bp_stadio", 5, 17); await L.talk(page, "bp_ferrante"); await L.advance(page, ["Derby: duello"]); await L.advance(page).catch(() => {});
+    await st(page, errors, 3, 4, "dopo il derby");
+    const lg = await page.evaluate(() => window.__rtLog); if (!lg || !lg.length || lg[0].song !== "derby" || lg[0].mode !== "duello") errors.push("derby mal configurato: " + JSON.stringify(lg));
+    await L.talk(page, "bp_ferrante"); await L.advance(page, [alt ? "Prove alle sei" : "Prove in piazza"]); await L.advance(page).catch(() => {});
+    const i = await L.info(page); if (i.done[3] !== "ok") errors.push("capitolo 3 non concluso: " + JSON.stringify([i.done, i.step]));
+    const fl = await page.evaluate((k) => [eval(k).F.is("bp_lilli_via"), eval(k).F.is("bp_sabotaggio"), eval(k).F.is("bp_derby_win")], K_);
+    if (fl[0] !== !!alt || fl[1] !== !!alt || !fl[2]) errors.push("flag sbagliati: " + JSON.stringify(fl));
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check(`Banda · capitolo 3${alt ? " (vie alternative)" : ""} (${w} px)`, errors); await browser.close();
+}
+// il derby perso: si può lasciare la curva alla cassa e la storia va avanti
+async function lose3(w) {
+  const { browser, page, errors } = await start(w, Object.assign({}, S3, { step: { 1: 4, 2: 4, 3: 3 }, flags: Object.assign({ bp_leale: 1 }, S3.flags) }), "Continua");
+  await stub(page, false, 40);
+  try {
+    await go(page, "bp_stadio", 5, 17); await L.talk(page, "bp_ferrante"); await L.advance(page, ["Derby: duello", "Lascia la curva"]); await L.advance(page).catch(() => {});
+    await st(page, errors, 3, 4, "dopo il derby perso");
+    const lg = await page.evaluate(() => window.__rtLog); if (!lg.length) errors.push("brano non chiamato");
+    if (!(await page.evaluate((k) => eval(k).F.is("bp_derby_perso"), K_))) errors.push("flag derby perso mancante");
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check(`Banda · derby perso (${w} px)`, errors); await browser.close();
+}
 (async () => {
   const only = process.argv[2] || "";
   for (const w of [390, 320]) {
@@ -92,5 +130,7 @@ async function flow2(w, alt) {
     if (!only || only === "real") await real(w);
     if (!only || only === "zone2") await zones(w, S2, "Inizia il Capitolo 2", ["bp_piazza", "bp_casaciro", "bp_corso"], "cap. 2");
     if (!only || only === "c2") { await flow2(w, false); if (w === 390) await flow2(w, true); }
+    if (!only || only === "zone3") await zones(w, S3, "Inizia il Capitolo 3", ["bp_stadio", "bp_sottotribuna", "bp_regia"], "cap. 3");
+    if (!only || only === "c3") { await flow3(w, false); if (w === 390) { await flow3(w, true); await lose3(w); } }
   }
 })();

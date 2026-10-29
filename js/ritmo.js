@@ -3,7 +3,7 @@
 // la MELODIA degli ottoni suonano solo se le prendi tu. Mancare = buco nel brano, e la piazza se ne accorge.
 // Modi: "concerto" (normale) · "sfilata" (si cammina: ogni battuta c'è il PASSO, tasto 👣 o spazio) · "duello" (contro l'altoparlante:
 // la barra del pubblico va da te sulle note prese e da lui sugli errori; vince chi ce l'ha a fine brano).
-// Opzioni: start({ title, song: id | {…}, mode, venue, need (0..1, quota di precisione), bonus (0-3: finestre di tempo più larghe), mates: [{id, n}], tutorial, onDone({ a, b, win, data }) })
+// Opzioni: start({ title, song: id | {…}, mode, venue, need (0..1, quota di precisione), bonus (0-3: finestre di tempo più larghe), mates: [{id, n}], crowd (20-80: pubblico di partenza nel duello, 50 di base), tutorial, onDone({ a, b, win, data }) })
 //   a = precisione in %, b = quota in %; data = { acc, stars, perfect, good, miss, combo }. Brani in window.__ritmo.SONGS (anche personalizzati).
 // Comandi: pulsanti grandi sotto il campo, tocco sulla corsia, tastiera D F J K (o frecce) e spazio per il passo.
 // Test: window.__ritmo.state.finish(win, acc) · .hit(lane) · .tick(sec) · .t · .notes · .judged · .phase · pulsante #rtGo. Richiede js/mini.js.
@@ -100,7 +100,7 @@
     const song = practice ? SONGS.prova : songOf(o), k = diffK(), B = build(song, k, practice), mode = practice ? "concerto" : (o.mode || song.mode || "concerto");
     const need = practice ? 0 : clamp(o.need != null ? o.need : 0.6, 0.2, 0.95) - (k < 0.95 ? 0.08 : k > 1.05 ? -0.04 : 0);
     return { o, song, mode, venue: o.venue || song.venue || "piazza", notes: B.notes, spb: B.spb, mt: B.mt, len: B.len, need, ws: (k < 0.95 ? 1.3 : k > 1.05 ? 0.85 : 1) * (1 + 0.06 * clamp(o.bonus | 0, 0, 3)), practice: !!practice,
-      t: -4 * B.spb - 0.6, phase: "count", perfect: 0, good: 0, miss: 0, stecche: 0, combo: 0, best: 0, crowd: 50, morale: 60, judged: 0, fl: [0, 0, 0, 0, 0], txt: [], f: 0, lastBeat: -99, sched: -4, win: false, ended: false,
+      t: -4 * B.spb - 0.6, phase: "count", perfect: 0, good: 0, miss: 0, stecche: 0, combo: 0, best: 0, crowd: clamp(o.crowd != null ? +o.crowd : 50, 20, 80), morale: 60, judged: 0, fl: [0, 0, 0, 0, 0], txt: [], f: 0, lastBeat: -99, sched: -4, win: false, ended: false,
       mates: (o.mates || []).slice(0, 4).map((m) => ({ id: m.id, n: m.n, img: M.img && M.img(m.id) })) };
   }
   function acc() { const tot = S.notes.length || 1; return clamp((S.perfect + S.good * 0.6 - S.stecche * 0.15) / tot, 0, 1); }
