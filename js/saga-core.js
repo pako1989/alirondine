@@ -24,6 +24,7 @@
 //     rest: { ch: "s", label: "Riposa", text: "..." },
 //     plan: { name: "Il Piano", roles: { rk: { n, icon, d, fit: { id_membro: 2 } } } },  // IL PIANO (richiede crew): K.plan.open({ title, q, roles, pool }, back, inZone, cb(mappa)) assegna compagni a ruoli; K.plan.fit(rk, id)
 //     scroll: { eng: "__scorri", name: "I livelli", levels: { id: { name, icon, d, theme, map: [righe], signs, boss } }, bonus(K), kit: "guanti", practice: { theme, map, signs }, practiceName, practiceSub, banName },  // A SCORRIMENTO: K.scroll.play(id, o, cb(r)) livello platform 2D (js/scorri.js); record per livello, Mappa dei livelli (K.scroll.open)
+//     rhythm: { eng: "__ritmo", name: "Il Repertorio", songs: { id: { n, icon, d, song, mode, venue, need } }, mates(K) },  // IL REPERTORIO: K.rhythm.play(id, o, cb(r)) brano a tempo (js/ritmo.js); stelle e precisione per brano, K.rhythm.open(back), morale() per la partita dopo
 //     cold: { name: "Calore", icon: "🌡️", max: 8, sec: 14, home: ["zona", tx, ty], onZero(K) },  // IL TERMOMETRO: spec.cold (true o moltiplicatore) fa scendere il Calore; spec.warm = [[tx, ty, r]] e gli interni lo fanno risalire; K.cold.get/add/warm
 //     alert: { max: 3, names: [...], rangeMul: 0.25, decay: true, hud: true, onChange(K, lv, old) },  // ALLERTA globale: ogni avvistamento +1 (K.alert.get/set/add), il raggio delle guardie cresce; hiding(K) → true = nascosto alle guardie
 //   });
@@ -499,7 +500,7 @@
       return out + `<br><span style="color:var(--dim)">▷ = strade non prese. Per provarle: Capitoli → rigioca.</span>`;
     }
     function journal(back, inZone) {
-      const html = journalHtml() + (CRW ? CRW.html() : "") + (PLN ? PLN.html() : "") + (SCR ? SCR.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + (WGT ? WGT.html() : "") + (RAD ? RAD.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
+      const html = journalHtml() + (CRW ? CRW.html() : "") + (PLN ? PLN.html() : "") + (SCR ? SCR.html() : "") + (RIT ? RIT.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + (WGT ? WGT.html() : "") + (RAD ? RAD.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
       const jb = (RAD ? [{ label: `${RAD.icon} ${RAD.name} · ${RAD.freq().toFixed(1)} MHz`, sub: "Ruota la manopola e intercetta segnali", fn: () => RAD.open(() => journal(back, inZone), inZone) }] : []).concat(DOS ? Object.keys(DOS.cases).filter((c) => DOS.list(c).length).map((c) => ({ label: "🗂️ Dossier · " + DOS.cases[c].t, sub: "Confronta prove e testimonianze", fn: () => DOS.open(c, () => journal(back, inZone), inZone) })) : []).concat(CAT && CAT.list().length ? [{ label: "🃏 Album", sub: `${CAT.team().length}/${CAT.max} in squadra`, fn: () => CAT.open(() => journal(back, inZone), inZone) }] : []).concat(CRW && CRW.count() ? [{ label: "⚔️ Schiera la compagnia", sub: `${CRW.field().length}/${CRW.max} in campo`, fn: () => CRW.pick(() => journal(back, inZone), inZone) }] : []).concat((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
       if (inZone) return api.trAsk("voce", html, jb, bgNow());
       api.scene(BG0, "voce", html, jb, JN());
@@ -912,6 +913,7 @@
         ...(RFT ? [["🦇 " + RFT.name, "Sui tetti puoi saltare (a rischio) o usare il rampino (sicuro, ma serve Agilità). Una caduta costa Vigore: a zero ti raccolgono e ti riportano al rifugio, dove riposi. Dall'alto puoi stordire una guardia, e una lampada rotta ti nasconde meglio."]] : []),
         ...(HCK ? [["💻 " + HCK.name, "Le consolle sulla mappa si usano con la statistica " + HCK.name + ": ogni comando costa punti e può deviare i droni, invertire i pavimenti elettrificati o aprire serrande. Chi forza la rete alza l'Allarme, e le sentinelle dei settori vicini aumentano."]] : []),
         ...(RAD ? [[RAD.icon + " " + RAD.name, "Apri il " + RAD.name + " dal Menu di zona per ruotare la scala in MHz. Più ti avvicini nel luogo giusto e alla frequenza esatta, più le tacche di ricezione salgono (da 0 a 5): con almeno 3 tacche puoi ascoltare trasmissioni nascoste, intercettare pattuglie o scoprire segnali QSL."]] : []),
+        ...(RIT ? [["🎼 " + (cfg.rhythm.name || "Il Repertorio"), "I brani si suonano a tempo: tocca lo strumento quando la nota arriva sul cerchio. La base va da sola; grancassa, rullante, piatti e la melodia degli ottoni suonano solo se le prendi. Ogni brano ha una quota di precisione; le stelle (fino a tre) restano nel Repertorio, dove i brani già suonati si rigiocano."]] : []),
         ...(COLD ? [[COLD.icon + " " + COLD.name, "Nelle zone all'aperto fa freddo: il " + COLD.name + " (in alto a sinistra) scende col tempo. Risale vicino a un fuoco, a una stufa o al chiuso, nelle case. Se arriva a zero ti ritrovi al riparo, senza perdere niente, ma lontano da dove eri."]] : []),
         ...arr(safe(() => cfg.guide && cfg.guide(K), []))
       ];
@@ -1185,6 +1187,37 @@
       // prova libera: il livello d'allenamento del motore, senza record
       function practice(cb) { const eng = window[C0.eng || "__scorri"]; ownMatch(eng.start, { title: C0.practiceName || "Cortile d'allenamento", level: C0.practice ? Object.assign({ id: "prova", kit: C0.kit }, C0.practice) : undefined, kit: C0.kit, bonus: safe(() => (C0.bonus ? C0.bonus(K) : 0), 0) | 0, done: () => safe(() => cb(), null) }); }
       return { play, practice, won, ban, banTot, total, open, html, levels: LV };
+    })();
+
+    // -------------------------------------------------------------- IL REPERTORIO (cfg.rhythm, opt-in): brani a tempo col motore js/ritmo.js (o uno con la stessa interfaccia)
+    // cfg.rhythm = { eng: "__ritmo", name: "Il Repertorio", songs: { id: { n, icon, d, song: id | {…}, mode, venue, need } }, mates(K) → [{ id, n }] }
+    // K.rhythm.play(id, o, cb(r)) suona il brano con ownMatch (r: win, a = precisione %, data.stars). Record nei flag: rp_<id>_w vinto, rp_<id>_s stelle migliori (0-3),
+    // rp_<id>_p precisione migliore (%), rp_last precisione dell'ultima esecuzione. won(id) · stars(id) · best(id) · last() · morale() 0..2 (per la partita dopo: 2 se l'ultima
+    // esecuzione è da 3 stelle, 1 se da 2) · total() [stelle, massimo] · open(back) il Repertorio (rigioca i brani già suonati, più una prova libera) · html() nel diario
+    const RIT = cfg.rhythm && (() => {
+      const C0 = cfg.rhythm, SG = C0.songs || {}, eng = () => window[C0.eng || "__ritmo"];
+      const won = (id) => F.is("rp_" + id + "_w"), stars = (id) => F.get("rp_" + id + "_s", 0) | 0, best = (id) => F.get("rp_" + id + "_p", 0) | 0, last = () => F.get("rp_last", 0) | 0;
+      const morale = () => { const p = last(); return p >= 90 ? 2 : p >= 75 ? 1 : 0; };
+      const total = () => Object.keys(SG).reduce((a, id) => [a[0] + stars(id), a[1] + 3], [0, 0]);
+      const mates = () => arr(safe(() => (C0.mates ? C0.mates(K) : []), []));
+      function play(id, o, cb) {
+        const S0 = SG[id], E0 = eng(); if (!S0 || !E0) return safe(() => cb({ win: false }), null);
+        ownMatch(E0.start, Object.assign({ title: S0.n, song: S0.song || id, mode: S0.mode, venue: S0.venue, need: S0.need, mates: mates() }, o || {}, { done: (r) => {
+          r = r || {}; const p = r.a | 0, st = (r.data && r.data.stars) | 0; F.set("rp_last", p);
+          if (r.win) { F.set("rp_" + id + "_w", true); if (st > stars(id)) F.set("rp_" + id + "_s", st); if (p > best(id)) F.set("rp_" + id + "_p", p); }
+          safe(() => cb(r), null);
+        } }));
+      }
+      const line = (id) => { const S0 = SG[id], s = stars(id); return `${S0.icon || "🎼"} ${S0.n}: ${"★".repeat(s)}${"☆".repeat(3 - s)} · ${best(id)}%`; };
+      const html = () => { const ids = Object.keys(SG).filter(won); if (!ids.length) return ""; const tt = total(); return `<br><br><b>${esc(C0.name || "Il Repertorio")}</b> (stelle ${tt[0]}/${tt[1]})<br>` + ids.map((id) => esc(line(id))).join("<br>"); };
+      function open(back) {
+        const ids = Object.keys(SG).filter(won), tt = total();
+        const opts = ids.map((id) => ({ label: line(id), sub: SG[id].d || "Rigioca per le stelle mancanti", fn: () => play(id, {}, (r) => say([["voce", r.win ? `Brano suonato: precisione ${r.a | 0}%.` : "Brano interrotto. I record restano quelli di prima."]], () => open(back))) }));
+        opts.unshift({ label: "🎼 " + (C0.practiceName || "Prova libera"), sub: C0.practiceSub || "Una scala per scaldare le mani: non conta nulla", fn: () => ownMatch(eng().start, { title: C0.practiceName || "Prova libera", song: "prova", need: 0.2, mates: mates(), done: () => open(back) }) });
+        opts.push({ label: "◂ Indietro", fn: back || done });
+        ask("voce", `<b>${esc(C0.name || "Il Repertorio")}</b><br><span style="color:var(--dim)">${ids.length ? `Stelle: ${tt[0]}/${tt[1]}. I brani già suonati si rigiocano quando vuoi.` : esc(C0.hint || "Nessun brano suonato, per ora.")}</span>`, opts);
+      }
+      return { play, open, html, won, stars, best, last, morale, total, songs: SG };
     })();
 
     // -------------------------------------------------------------- IL DOSSIER (cfg.cases): prove e testimonianze, confronti, verdetto
@@ -1622,7 +1655,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, plan: PLN, scroll: SCR, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN, radio: RAD, cold: COLD,
+      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, plan: PLN, scroll: SCR, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN, radio: RAD, cold: COLD, rhythm: RIT,
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
       ending: (id, d) => { ENDINGS[id] = d; },
       continueStory: () => continueStory(), hasChapter: (n) => !!CHAPTERS[n], setInMatch: (v) => { inMatch = !!v; }, openMain: () => openMain(),
