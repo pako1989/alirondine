@@ -1580,7 +1580,7 @@
     })();
 
     // -------------------------------------------------------------- IL TERMOMETRO (cfg.cold, opt-in): il freddo delle zone all'aperto
-    // cfg.cold = { name: "Calore", icon: "🌡️", max: 8, sec: 14, home: ["zona", tx, ty], onZero(K) → [[chi, testo]] }
+    // cfg.cold = { name: "Calore", icon: "🌡️", max: 8, sec: 14, home: ["zona", tx, ty] o (K, zid) => [...], onZero(K) → [[chi, testo]] }
     // Nelle zone con spec.cold (true o un moltiplicatore: 2 = il doppio del freddo) il Calore scende di una tacca ogni `sec` secondi.
     // Vicino a una fonte di calore (spec.warm = [[tx, ty, raggio]]: falò, stufe, sorgenti) e negli interni (interior: true) risale.
     // A zero: scena onZero e si riparte da cfg.home col Calore pieno. K.cold = { get, set(n), add(d), warm(n) (= add), max, name, bar() }.
@@ -1596,7 +1596,7 @@
         acc += dt * (typeof spec.cold === "number" ? spec.cold : 1); if (acc < C0.sec) return null; acc = 0;
         add(-1); if (get() === 2) note(C0.icon + " Hai freddo: cerca un fuoco o un riparo");
         if (get() > 0) return null;
-        busy = true; const h = C0.home || [zid, Math.floor(tx), Math.floor(ty)];
+        busy = true; const h = (typeof C0.home === "function" ? safe(() => C0.home(K, zid), null) : C0.home) || [zid, Math.floor(tx), Math.floor(ty)];
         const ls = arr(safe(() => C0.onZero && C0.onZero(K), null)); set(mx);
         setTimeout(() => safe(() => say(ls.length ? ls : [["voce", "Il freddo ti prende alle mani, poi alle ginocchia. Ti risvegli al caldo, avvolto in una coperta."]], () => { busy = false; go(h[0], h[1], h[2]); })), 0);
         return null;

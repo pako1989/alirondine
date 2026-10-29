@@ -25,7 +25,101 @@
     radura: { name: "La radura del Raccattapalle", icon: "🦍", theme: "neve", boss: "yetone", d: "Una radura bianca piena di palloni bucati: è la tana del Grande Raccattapalle.",
       map: [
         "#........................#", "#........................#", "#........................#", "#........................#", "#........................#", "#........................#",
-        "#..h.....................#", "#.====..............====.#", "#........................#", "#........................#", "#...P....o...Z...o.......#", "##########################", "##########################"] }
+        "#..h.....................#", "#.====..............====.#", "#........................#", "#........................#", "#...P....o...Z...o.......#", "##########################", "##########################"] },
+    canalone: { name: "Il canalone delle valanghe", icon: "🏔️", theme: "canalone", d: "Il canalone sopra Valdigelo: pareti di roccia, stalattiti, palle di valanga che rotolano e crescono.",
+      signs: ["Le palle di valanga rotolano verso di te e crescono: saltale, o PARALE con 🧤 finché sono piccole.", "Le stalattiti sotto le rocce tremano prima di cadere: passa svelto, non fermarti sotto."],
+      map: [
+        "#......................................................................................................................#",
+        "#......................................................................................................................#",
+        "#...........................######........................#######......................................................#",
+        "#...........................######........................#######...................####...............................#",
+        "#............................f.f.f.........................f.f.f.....................f.f...............................#",
+        "#............S.........................................a.................................................a....S........#",
+        "#...........o.oo...............................S.......................................................................#",
+        "#...........====................................................h.................................ooo.......=====......#",
+        "#...............................ooo..........oo.oo.............###................................===..................#",
+        "#.......ooo...........oo........###.........................o.o###..........................oo............oo...........#",
+        "#.P..i...................y..r...###...i.C......................###.....r........y.......C.r...................r.....E..#",
+        "##################...#######################.......#~~~~~~################...#~~~~~~~###########........################",
+        "##################...#######################.......#######################...###################........################"] },
+    valanga: { name: "La valanga", icon: "🌨️", theme: "canalone", chase: { from: 6, sp: 1.55 }, d: "La valanga ti insegue giù per il canalone: corri, salta, plana. Non fermarti.",
+      signs: ["Sopra di te la neve si stacca. Quando parte la valanga, CORRI ▶▶: se ti prende, torni all'ultimo ometto."],
+      map: [
+        "#......................................................................................................#",
+        "#......................................................................................................#",
+        "#......................................................................................................#",
+        "#......................................................................................................#",
+        "#......................................................................................................#",
+        "#.............................................................S........................S...............#",
+        "#......................................................................................................#",
+        "#...........................................................====......................===..............#",
+        "#....................................................oooo..............................................#",
+        "#.......ooo.......oo......oo..........oo..##..o.................oo..............o...........oo.........#",
+        "#.P.i.................##...........C......##...r....................C.........r...##...............E...#",
+        "##############..##############...###################......##############...############...~~~~~#########",
+        "##############..##############...###################......##############...############...##############"] },
+    seracchi: { name: "I seracchi del ghiacciaio", icon: "🧊", theme: "ghiacciaio", d: "Il ghiacciaio di notte, sotto l'aurora: ponti di neve che crollano, seracchi, pupazzi di guardia.",
+      signs: ["Ponti di neve sui crepacci: reggono un attimo, poi crollano. Non fermarti sopra.", "I pupazzi di neve fanno la guardia e tirano palle: parale o saltagli in testa."],
+      map: [
+        "#..........................................................................................................................#",
+        "#..........................................................................................................................#",
+        "#.............................................#######...........................................................S.####.....#",
+        "#.............................................#######.............................................................####.....#",
+        "#.............................S................f.f.f...........................................................%%%f.f......#",
+        "#.......................................................a..............................................a...................#",
+        "#...........................====..............................S............................................................#",
+        "#..................................................................................h......................=====............#",
+        "#................................%%%%%%%%.........................................###......................................#",
+        "#......ooo...o.o.o..oo....##................oo.............%%%.%%%..oo.....oo.....###............oo.........oo.............#",
+        "#.P..i................n...##.............C.i..........................r.y.....C...###..............n....................E..#",
+        "############%%%%%%###############........#####~~~~~~~#####.........###################%%%%%%%%%%############################",
+        "############......###############........#################.........###################..........############################"] },
+    conca: { name: "La conca dello Stambecco", icon: "🐐", theme: "ghiacciaio", boss: "stambecco", d: "Lo Stambecco Nero carica a testa bassa: si ferma solo con una parata.",
+      map: [
+        "#........................#",
+        "#........................#",
+        "#........................#",
+        "#........................#",
+        "#........................#",
+        "#........................#",
+        "#..h.....................#",
+        "#.===................===.#",
+        "#........................#",
+        "#........................#",
+        "#..P.........Z...........#",
+        "##########################",
+        "##########################"] },
+    slitta: { name: "La slitta di Fiocco", icon: "🛷", theme: "vetta", sled: { sp: 2.2 }, d: "Fiocco ti tira in slitta fino alla vetta: la slitta va da sola, tu salti, pari e plani.",
+      signs: ["La slitta la tira Fiocco e va da sola: ⤒ salti, ▶ spingi, ◀ freni. Tieni premuto ⤒ per planare sui crepacci."],
+      map: [
+        "#..............................................................................................................................................................#",
+        "#..............................................................................................................................................................#",
+        "#..............................................................................................................................................................#",
+        "#..............................................................................................................................................................#",
+        "#..............................................................................................................................................................#",
+        "#...............................................................................a.................S............................................................#",
+        "#....................................................S.....................................................................................S...................#",
+        "#..................................................oooo.........................................====...........................................................#",
+        "#..............................................................................................................................................................#",
+        "#.........ooo.......oo........oo..............oo..........oo..#...o...oo..........oo..........o...............o....oo...........o...o.....##...................#",
+        "#.P...i.........#.................##....n...C.................#.....n.................##..C.....................n.................C.......##..............E....#",
+        "########################...#######################......##################...#######################........################...#################......##########",
+        "########################...#######################......##################...#######################........################...#################......##########"] },
+    vetta: { name: "La vetta della Regina", icon: "👑", theme: "vetta", boss: "regina", d: "La Regina del Gelo tira rigori a tre altezze: parali tutti.",
+      map: [
+        "#......................#",
+        "#......................#",
+        "#......................#",
+        "#......................#",
+        "#......................#",
+        "#......................#",
+        "#......................#",
+        "#......................#",
+        "#......................#",
+        "#......................#",
+        "#..P................Z..#",
+        "########################",
+        "########################"] }
   };
   window.__neveLV = LV;
   const E = window.__sagaCore.create({
@@ -40,9 +134,11 @@
       valdigelo: { grass: ["#e8eef6", "#e2e9f2", "#edf2f8"], path: ["#c8d0dc", "#c0c8d6"], stone: ["#9aa4b4", "#929cac"], wall: ["#5a4a3e", "#524236"], water: ["#9ccbe8", "#94c4e2"], tall: "#d8e2ee", tree: ["#1e3a32", "#2e5246", "#e8f0f8"], tint: "200,220,255", tintA: 0.12, fx: "snow", dark: 0.06 },
       bosco: { grass: ["#dfe8f2", "#d8e2ee", "#e6eef6"], path: ["#b8c4d2", "#b0bccc"], stone: ["#8a96a8", "#828ea0"], wall: ["#3e4a5a", "#384454"], water: ["#8cbcdc", "#84b4d4"], tall: "#c8d6e4", tree: ["#142a24", "#1e3a32", "#dce8f4"], tint: "170,200,255", tintA: 0.16, fx: "snow", dark: 0.14 },
       bar: { grass: ["#4a3426", "#453022", "#503828"], path: ["#6a4a34", "#64452f"], stone: ["#5a4434", "#544030"], wall: ["#2a1a10", "#24160c"], water: ["#2a4a6a", "#264662"], tall: "#4a3426", tint: "255,180,110", tintA: 0.16, fx: "", dark: 0.14 },
+      quota: { grass: ["#c8d8ec", "#c0d2e8", "#d0deef"], path: ["#a8b8d0", "#a0b0c8"], stone: ["#7a88a0", "#728098"], wall: ["#3a4660", "#34405a"], water: ["#9ad0f0", "#92c8ea"], tall: "#b8c8de", tree: ["#10241e", "#1a3028", "#c8d8ec"], tint: "110,140,220", tintA: 0.22, fx: "snow", dark: 0.32 },
+      vetta: { grass: ["#f6e8ec", "#f0e0e6", "#faeef0"], path: ["#d8c0c8", "#d0b8c0"], stone: ["#9a8890", "#928088"], wall: ["#5a4250", "#523a48"], water: ["#c8b0d0", "#c0a8c8"], tall: "#e8d4dc", tree: ["#2a1e2a", "#3a2a3a", "#f6e8ec"], tint: "255,170,140", tintA: 0.16, fx: "snow", dark: 0.05 },
       casa: { grass: ["#3e3430", "#3a302c", "#443a34"], path: ["#5e4e44", "#58483e"], stone: ["#6a5a50", "#62524a"], wall: ["#2a201c", "#241c18"], water: ["#2a4a6a", "#264662"], tall: "#3e3430", tint: "255,190,130", tintA: 0.14, fx: "", dark: 0.18 }
     },
-    floors: "QYU", solid: "IKFAOJPCXMNRG",
+    floors: "QYUE", solid: "IKFAOJPCXMNRGSVZ",
     floorPaint(K, f, sx, sy, tx, ty) {
       const g = K.g;
       if (f === "Q") { // neve battuta: bianca e azzurrina, con orme, scintille e qualche sasso che spunta
@@ -59,9 +155,32 @@
       if (f === "U") { // tappeto a rombi rossi e verdi della stube
         const d = (tx + ty) % 2; g.fillStyle = d ? "#8a2a2a" : "#2f5a3a"; g.fillRect(sx, sy, 16, 16); g.fillStyle = d ? "#c8a050" : "#e8d8b0"; g.fillRect(sx + 7, sy + 3, 2, 10); g.fillRect(sx + 3, sy + 7, 10, 2); g.fillStyle = "rgba(0,0,0,.15)"; g.fillRect(sx, sy + 15, 16, 1); return true;
       }
+      if (f === "E") { // il campo della Partita della Neve: neve spalata e battuta, righe tracciate con la cenere
+        g.fillStyle = (tx + ty) % 2 ? "#f4f8fc" : "#eef4fa"; g.fillRect(sx, sy, 16, 16); g.fillStyle = "rgba(150,175,210,.18)"; g.fillRect(sx, sy + 13, 16, 1);
+        const Z = K.zone && K.zone("gn_campo"), sp = Z && (Z.spec || Z), lx = sp && sp.lines; if (lx && (tx === lx[0] || tx === lx[2] || ty === lx[1] || ty === lx[3] || tx === Math.round((lx[0] + lx[2]) / 2))) { g.fillStyle = "#5a6474"; if (tx === lx[0] || tx === lx[2] || tx === Math.round((lx[0] + lx[2]) / 2)) g.fillRect(sx + 7, sy, 2, 16); if (ty === lx[1] || ty === lx[3]) g.fillRect(sx, sy + 7, 16, 2); }
+        if ((tx * 5 + ty * 3) % 11 === 0) { g.fillStyle = "rgba(120,140,175,.3)"; g.fillRect(sx + 4, sy + 5, 2, 3); g.fillRect(sx + 9, sy + 9, 2, 3); } return true;
+      }
       return false;
     },
     paint: {
+      // lapide o croce di pietra sotto la neve (cimitero, cippi in quota)
+      S(K, sx, sy, tx, ty, fr) {
+        K.ground(sx, sy, tx, ty); const g = K.g; g.fillStyle = "rgba(60,80,110,.3)"; g.fillRect(sx + 3, sy + 13, 10, 3);
+        if ((tx + ty) % 2) { g.fillStyle = "#6a7484"; g.fillRect(sx + 7, sy - 6, 3, 20); g.fillRect(sx + 3, sy - 1, 11, 3); g.fillStyle = "#ffffff"; g.fillRect(sx + 7, sy - 7, 3, 1); g.fillRect(sx + 3, sy - 2, 11, 1); }
+        else { g.fillStyle = "#7a8496"; g.fillRect(sx + 3, sy, 10, 14); g.fillStyle = "#8a94a4"; g.fillRect(sx + 4, sy - 2, 8, 3); g.fillStyle = "#ffffff"; g.fillRect(sx + 3, sy - 3, 10, 2); g.fillStyle = "#4a5464"; g.fillRect(sx + 5, sy + 4, 6, 1); g.fillRect(sx + 6, sy + 7, 4, 1); }
+        if ((tx * 3 + ty) % 4 === 0) { const a = 0.5 + 0.3 * Math.sin(fr / 6 + tx); g.fillStyle = "#3a3a44"; g.fillRect(sx + 12, sy + 9, 3, 5); g.fillStyle = `rgba(255,190,90,${a})`; g.fillRect(sx + 13, sy + 10, 1, 2); K.light(sx + 13, sy + 11, 14, "255,190,90", 0.25); }
+      },
+      // televisore col videoregistratore (Pro Loco) o la radio del rifugio
+      V(K, sx, sy, tx, ty, fr) {
+        K.ground(sx, sy, tx, ty); const g = K.g; g.fillStyle = "#5a3a20"; g.fillRect(sx + 1, sy + 8, 14, 7); g.fillStyle = "#3a3a44"; g.fillRect(sx + 2, sy - 6, 12, 13); g.fillStyle = "#16141f"; g.fillRect(sx + 3, sy - 5, 10, 9);
+        for (let k = 0; k < 10; k++) { g.fillStyle = (k * 7 + Math.floor(fr / 4)) % 3 ? "#8a94a4" : "#e8eef6"; g.fillRect(sx + 3 + (k * 3) % 10, sy - 5 + (k * 5) % 9, 1, 1); } g.fillStyle = "#2a2a32"; g.fillRect(sx + 3, sy + 9, 10, 3); g.fillStyle = Math.floor(fr / 20) % 2 ? "#ef4444" : "#4a1010"; g.fillRect(sx + 11, sy + 10, 1, 1);
+        K.light(sx + 8, sy - 1, 18, "180,200,255", 0.18);
+      },
+      // porta da calcio di legno, con la rete di corda e la neve sulla traversa
+      Z(K, sx, sy, tx, ty, fr) {
+        K.ground(sx, sy, tx, ty); const g = K.g; g.fillStyle = "#5a3a20"; g.fillRect(sx + 1, sy - 10, 2, 26); g.fillRect(sx + 13, sy - 10, 2, 26); g.fillRect(sx + 1, sy - 11, 14, 2); g.fillStyle = "#ffffff"; g.fillRect(sx, sy - 13, 16, 2);
+        g.fillStyle = "rgba(220,220,230,.6)"; for (let x = 4; x < 13; x += 3) g.fillRect(sx + x, sy - 8, 1, 22); for (let y = -7; y < 14; y += 3) g.fillRect(sx + 3, sy + y, 10, 1);
+      },
       // muretto di sassi coperto di neve (bordo del paese)
       I(K, sx, sy, tx, ty, fr) {
         const g = K.g; g.fillStyle = "#5a6474"; g.fillRect(sx, sy, 16, 16);
@@ -143,11 +262,11 @@
         const g = K.g; g.fillStyle = "#4a3020"; g.fillRect(sx, sy, 16, 16); g.fillStyle = "#16141f"; g.fillRect(sx + 2, sy + 2, 12, 14); g.fillStyle = "#6a4426"; g.fillRect(sx + 3, sy + 3, 10, 13); g.fillStyle = "#3a2010"; g.fillRect(sx + 7, sy + 3, 1, 13); g.fillStyle = "#c8a050"; g.fillRect(sx + 10, sy + 9, 2, 2);
       }
     },
-    act: { F: "Guarda la fontana", A: "Guarda la vetrina", O: "Scaldati alla stufa", J: "Guarda la legna", P: "Guarda gli sci", C: "Leggi il cippo", X: "Prendi il sentiero", M: "Scaldati al braciere", N: "Guarda il bancone", R: "Guarda le foto", G: "Apri la porta", n: "Leggi il cartello", x: "Apri il baule", s: "Riposa un momento", q: "Entra", l: "Guarda la lanterna", b: "Siediti", u: "Guarda il tavolo", z: "Guarda le casse" },
+    act: { S: "Guarda la croce", V: "Guarda il televisore", Z: "Guarda la porta", F: "Guarda la fontana", A: "Guarda la vetrina", O: "Scaldati alla stufa", J: "Guarda la legna", P: "Guarda gli sci", C: "Leggi il cippo", X: "Prendi il sentiero", M: "Scaldati al braciere", N: "Guarda il bancone", R: "Guarda le foto", G: "Apri la porta", n: "Leggi il cartello", x: "Apri il baule", s: "Riposa un momento", q: "Entra", l: "Guarda la lanterna", b: "Siediti", u: "Guarda il tavolo", z: "Guarda le casse" },
     rest: { ch: "s", label: "Riposa un momento", text: "Ti siedi e soffi sulle mani. Il gioco salva da solo. Dal menu: 🏔️ Livelli a scorrimento per rigiocare quelli superati." },
     texts: { nothing: "Neve, neve e ancora neve. Bellissima, ma non aiuta.", noHero: "Tecla cerca un calciatore per la Partita della Neve. Crea prima il tuo Campione.", chestOpen: "Apri il baule.", chestEmpty: "Il baule è vuoto. Solo naftalina e un guanto spaiato." },
     journal: { name: "Il Diario di Vetta", sub: "Salite, stelle alpine, persone e finali" },
-    cold: { name: "Calore", icon: "🌡️", max: 8, sec: 13, home: ["gn_paese", 15, 14], onZero: () => [["voce", "Le dita non le senti più, poi neanche i piedi. Qualcuno ti prende sotto le braccia e ti trascina vicino al braciere della piazza."], ["gn_tecla", "[arrabbiata] In montagna il freddo non perdona, campione. Stai vicino al fuoco e bevi questo. È solo tè. Quasi solo tè."]] },
+    cold: { name: "Calore", icon: "🌡️", max: 8, sec: 13, home: (K, zid) => ({ gn_paese: ["gn_paese", 15, 14], gn_campo: ["gn_campo", 9, 12], gn_rifugio: ["gn_rifugio_in", 8, 8], gn_morena: ["gn_grotta", 8, 8], gn_cima: ["gn_capanna", 8, 8] })[zid] || ["gn_paese", 15, 14], onZero: () => [["voce", "Le dita non le senti più, poi neanche i piedi. Qualcuno ti prende sotto le braccia e ti trascina vicino al braciere della piazza."], ["gn_tecla", "[arrabbiata] In montagna il freddo non perdona, campione. Stai vicino al fuoco e bevi questo. È solo tè. Quasi solo tè."]] },
     scroll: { eng: "__scorri", kit: "guanti", name: "🏔️ Le salite di Valdigelo", banName: "Stelle alpine", banIcon: "❄️", practiceName: "Il pendio d'allenamento", practiceSub: "Prova i comandi coi guanti: salto, parata, tuffo-planata, ghiaccio", hint: "Nessuna salita superata, per ora. Le salite vere partono dal cancello del sentiero (a nord del paese), dopo aver avuto i guanti di Olmo. Intanto: il pendio d'allenamento.", levels: LV, bonus: (K) => (K.inv.has("gn_lana") ? 1 : 0) + (K.inv.has("gn_berretto") ? 1 : 0) },
     bonds: {
       per: 4, talk: 2, max: 4, names: ["Forestiero", "Conoscente", "Amico", "Di casa", "Gente di Valdigelo"],
@@ -165,6 +284,11 @@
         gn_berretto: { n: "Berretto degli Stambecchi", icon: "🧢", d: "Berretto di lana verde e bianco con il pompon. Il Raccattapalle ne aveva una collezione. Nelle salite vale un colpo in più.", gift: {}, giftAny: 0 },
         gn_brule: { n: "Vin brulè di Tecla", icon: "🍷", d: "Vino caldo, cannella, chiodi di garofano e un segreto di famiglia che, dice Tecla, «è più cannella».", gift: { gn_olmo: 6, gn_fulvio: 8 }, giftAny: 2, react: { gn_olmo: "Quello di Tecla. Il migliore della valle. Non dirglielo, che alza i prezzi.", gn_fulvio: "Benedetto. Il vin brulè, dico. Anche Tecla, ma lei lo sa già." } },
         gn_sciarpa: { n: "Sciarpa con la A", icon: "🧣", d: "Una sciarpa degli Stambecchi del 1979, piccola, da ragazzo. Su un angolo, ricamata a mano, una A. Era nella tana del Raccattapalle, piegata con cura.", gift: { gn_fulvio: 6 }, giftAny: 0, react: { gn_fulvio: "[serio] La A. Lo sapevo che prima o poi tornava fuori. Tienila tu. Io non sono pronto." } },
+        gn_chiave: { n: "Chiave del cancello", icon: "🗝️", d: "La chiave del cancello del canalone, chiuso dal Comune nel 1979. Don Fulvio la teneva nel tabernacolo, «perché lì nessuno guarda».", gift: {}, giftAny: 0 },
+        gn_pagina: { n: "Pagina del libro del rifugio", icon: "📖", d: "13 dicembre 1979. Due firme: una grande, una piccola. «Abbiamo vinto. Domani lo dico a tutti. A.»", gift: { gn_olmo: 2 }, giftAny: 0, react: { gn_olmo: "[serio] ...Questa calligrafia la conosco. Mettila via. No: tienila in mano. Così la vedo." } },
+        gn_maglia12: { n: "Maglia numero 12", icon: "👕", d: "Una maglia verde degli Stambecchi, numero 12, da portiere di riserva. Ai gomiti, due toppe di cuoio. Sopra, infilata al contrario, una maglia numero 1.", gift: { gn_ilde: 10, gn_olmo: 4 }, giftAny: 0, react: { gn_ilde: "[commosso] La sua. La portava sotto quella di Olmo. Lo sapevo che era lì.", gn_olmo: "[serio] La 12. Gliel'avevo prestata io, la mia. No. Gliel'avevo presa io, la sua." } },
+        gn_lettere: { n: "Lettere mai spedite", icon: "✉️", d: "Quarantacinque lettere, una per inverno, tutte indirizzate a «Olmo Brina, Valdigelo». Timbrate. Mai spedite.", gift: { gn_olmo: 8 }, giftAny: 0, react: { gn_olmo: "[commosso] Ilde. Sono di Ilde. ...Le leggo stanotte. Tutte. Una alla volta." } },
+        gn_coppa: { n: "Coppa delle Vette", icon: "🏆", d: "La Coppa delle Vette del 1979, lucidata come non lo era da anni. Sulla targhetta c'è un nome solo. Ne manca uno.", gift: {}, giftAny: 0 },
         gn_cassetta: { n: "Videocassetta del 1979", icon: "📼", d: "«FINALE COPPA DELLE VETTE · 1979 · NON CANCELLARE». Il nastro è mangiato a metà.", gift: { gn_olmo: 2, gn_lilli: 8 }, giftAny: 0, react: { gn_olmo: "[serio] Dove l'hai trovata? ...Lasciala qui. No. Tienila. Non lo so.", gn_lilli: "La cassetta! Allora non me lo sono inventato!" } }
       }
     },
@@ -172,7 +296,7 @@
       verita: ["La Parata Vera", "Olmo racconta a tutto il paese cosa successe davvero nel 1979. La Coppa torna in vetrina con un nome in più sulla targa.", "Fai venire fuori la verità, fino in fondo."],
       leggenda: ["La Leggenda di Valdigelo", "La Coppa torna al bar e la storia resta quella di sempre: Olmo il Guardiano, la parata impossibile. Qualcuno, in cima alla montagna, resta solo.", "Proteggi la leggenda del paese."],
       vetta: ["La Coppa sulla Vetta", "La Coppa resta lassù, accanto a chi l'aspettava da quarantacinque anni. Il paese ne fa una nuova, di latta, e la chiama «la Coppa di Aurelio».", "Lascia la Coppa dove è giusto che stia."],
-      neve: ["Il Guardiano di Neve", "Segreto: con tutte le stelle alpine, Olmo sale con te fino in vetta, ginocchia o no. L'ultima parata è sua.", "Segreto: trova tutte le stelle alpine e porta Olmo in vetta."]
+      neve: ["Il Guardiano di Neve", "Segreto: con tutte le stelle alpine, Olmo sale fino in vetta sulla slitta di Fiocco. Ilde tira l'ultimo rigore, e Olmo, per la prima volta, si butta dalla parte sbagliata apposta.", "Segreto: trova tutte le stelle alpine e porta Olmo in vetta."]
     },
     heroLook: (h, K) => (K && K.F && K.F.is("gn_guanti") ? { bg: ["#0c4a6e", "#7dd3fc"], shirt: "#2f6b3a" } : { bg: ["#0c4a6e", "#bae6fd"] }),
     heroTitle: () => "portiere di montagna",
@@ -202,6 +326,7 @@
         H.cast("gn_tecla", "Tecla Morandin", "Barista del Bar Stambecco", { style: "ponytail", hair: "#7c2d12", shirt: "#b91c1c", skin: "#f1d1b0", eye: "#365314", acc: ["grembiule"], bg: ["#7c2d12", "#fed7aa"] }, "Terza generazione dietro il bancone del Bar Stambecco. Fa il miglior vin brulè della valle e lo sa. Conosce tutti, perdona quasi tutti, fa credito solo a Olmo.");
         H.cast("gn_fulvio", "Don Fulvio", "Parroco di Valdigelo", { style: "short", hair: "#a8a29e", shirt: "#1c1917", skin: "#e8c4a0", eye: "#44403c", acc: ["occhiali"], bg: ["#1c1917", "#e7e5e4"] }, "Parroco da trent'anni, terzino degli Stambecchi nel 1979. Benedice gli sci, le slitte e una volta, per sbaglio, un gatto. Ha un segreto che pesa più della campana.");
         H.cast("gn_lilli", "Lilli Brina", "Nipote di Olmo", { style: "twintails", hair: "#b45309", shirt: "#db2777", skin: "#f1d1b0", eye: "#1e3a8a", acc: ["fiore"], bg: ["#831843", "#fbcfe8"] }, "La nipote di Olmo: undici anni, una slitta rossa e la certezza di aver visto lo yeti dalla finestra. Ha ragione, ma nessuno le crede, che è il suo argomento preferito.");
+        H.cast("gn_ilde", "Ilde Rovere", "La Regina del Gelo", { style: "long", hair: "#e5e7eb", shirt: "#e0f2fe", skin: "#e8c4a0", eye: "#1e3a8a", acc: ["sciarpa"], bg: ["#0c4a6e", "#e0f2fe"] }, "Settantadue anni, vive da sola in cima alla montagna da quando suo fratello non è tornato. In paese la chiamano la Regina del Gelo e la usano per spaventare i bambini. I bambini, invece, le lasciano i disegni sul cippo.");
         H.cast("gn_fiocco", "Il Grande Raccattapalle", "Yeti del bosco", { shape: "ombra", skin: "#eef4fa", shirt: "#d23a3a", eye: "#16141f", hair: "#eef4fa", bg: ["#bae6fd", "#ffffff"] }, "Uno yeti grande come un fienile, con la sciarpa degli Stambecchi. Da quarant'anni raccoglie i palloni che finiscono nel bosco. Non li restituisce. Dice che è il suo lavoro, ma non sa chi l'ha assunto.");
       }
     };

@@ -231,6 +231,87 @@
       return T;
     }
   };
+
+  // Il Guardiano di Neve, capitoli 2-4: canalone (pareti di roccia), ghiacciaio di notte (seracchi e aurora), vetta al tramonto (mare di nuvole)
+  function rockStrip(w, h, dark, mid, lit, snow, seed) {
+    const c = cnv(w, h), g = c.getContext("2d"); let x = 0, i = 0;
+    while (x < w) {
+      const cw = 18 + Math.round(rnd(seed + i) * 30), top = Math.round(h * (0.15 + rnd(seed + i * 7) * 0.55));
+      for (let k = 0; k < cw; k++) { const t = top + Math.round(Math.abs(Math.sin((k + i * 5) / 3.3)) * 4 + rnd(seed + k + i * 11) * 3); R(g, x + k, t, 1, h - t, k < cw * 0.35 ? lit : k < cw * 0.8 ? mid : dark); if (k % 7 === 3) R(g, x + k, t + 6, 1, Math.round((h - t) * 0.5 * rnd(seed + k * 3 + i)), dark); if (rnd(seed + k + i * 13) > 0.55) R(g, x + k, t, 1, 2 + Math.round(rnd(seed + k * 5 + i) * 3), snow); }
+      for (let y = top + 14; y < h - 6; y += 13 + Math.round(rnd(seed + y + i) * 8)) R(g, x + 2, y, cw - 4, 2, snow);
+      x += cw; i++;
+    }
+    return c;
+  }
+  function seracStrip(w, h, deep, ice, lit, seed, n) {
+    const c = cnv(w, h), g = c.getContext("2d"); R(g, 0, h - 8, w, 8, lit);
+    for (let i = 0; i < n; i++) {
+      const sx = Math.round(rnd(seed + i) * w), sw = 10 + Math.round(rnd(seed + i + 40) * 16), sh = 20 + Math.round(rnd(seed + i + 80) * (h - 30)), sk = Math.round((rnd(seed + i + 120) - 0.5) * 8);
+      for (const dx of [-w, 0, w]) for (let k = 0; k < sh; k++) { const hw = Math.max(1, Math.round(sw / 2 * Math.min(1, (k + 4) / (sh * 0.35)))), X = sx + dx + Math.round(sk * (1 - k / sh)), Y = h - 8 - sh + k; R(g, X - hw, Y, hw, 1, lit); R(g, X, Y, hw, 1, k % 9 < 2 ? deep : ice); if (k === 0) R(g, X - 1, Y - 1, 2, 2, "#ffffff"); }
+    }
+    return c;
+  }
+  function auroraStrip(w, h, seed) {
+    const c = cnv(w, h), g = c.getContext("2d");
+    for (let x = 0; x < w; x++) { const y0 = Math.round(h * 0.35 + Math.sin(x / 37 + seed) * 12 + Math.sin(x / 13) * 4), len = 18 + Math.round(Math.abs(Math.sin(x / 21 + seed * 2)) * 30); for (let k = 0; k < len; k++) { const a = (1 - k / len) * (0.22 + 0.18 * Math.abs(Math.sin(x / 9))); R(g, x, y0 + k, 1, 1, k < 3 ? `rgba(180,255,220,${a + 0.15})` : x % 3 ? `rgba(80,230,170,${a})` : `rgba(120,160,255,${a * 0.8})`); } }
+    return c;
+  }
+  function cloudSea(w, h, body, lit, shade, seed) {
+    const c = cnv(w, h), g = c.getContext("2d"); R(g, 0, 14, w, h - 14, body);
+    for (let i = 0; i < 26; i++) { const x = Math.round(rnd(seed + i) * w), r = 6 + Math.round(rnd(seed + i + 9) * 12); for (const dx of [-w, 0, w]) { disc(g, x + dx, 16, r, body); disc(g, x + dx - 2, 14, r - 3, lit); } }
+    for (let y = 22; y < h; y += 6) R(g, 0, y, w, 1, shade);
+    return c;
+  }
+  THEMES.canalone = {
+    name: "Il canalone delle valanghe", fall: "Giù nel canalone! Si riparte dall'ometto di pietre.", snow: true,
+    brick: { base: "#6e6a72", light: "#8e8a92", dark: "#4a464e", mortar: "#2e2a34", crack: "#3a3640" },
+    grass: { a: "#e8f0fa", b: "#ffffff", c: "#b8c8de" }, wood: { a: "#6a4a32", b: "#8a6a48", c: "#3a2a18" }, fx: "neve", dark: 0.04,
+    build() {
+      const T = { flags: [], wins: [], layers: [] };
+      const sky = cnv(VW, VH), g = sky.getContext("2d");
+      skyBands(g, VW, 0, VH, ["#3a4256", "#465066", "#525e76", "#606c84", "#707c92", "#8490a4", "#9aa4b6", "#b0b8c8"]);
+      disc(g, 250, 40, 13, "#e8e0d0"); disc(g, 250, 40, 10, "#f4ecdc"); T.sky = sky;
+      T.layers.push({ c: cloudStrip(57, 512, 100, "#8a94a8", "#b4bccb", "#6a7488", 7, 4, 50), k: 0.04, y: 0, drift: 0.1, alpha: 0.9 });
+      T.layers.push({ c: peakStrip(512, 120, "#5a6276", "#727a90", "#e6eaf2", 29), k: 0.08, y: 34 });
+      T.layers.push({ c: rockStrip(512, 140, "#3a3640", "#524c58", "#6a6470", "#f0f4fa", 7), k: 0.2, y: 50 });
+      T.layers.push({ c: rockStrip(512, 110, "#2a262e", "#3e3844", "#544c58", "#e8eef6", 31), k: 0.45, y: 96 });
+      return T;
+    }
+  };
+  THEMES.ghiacciaio = {
+    name: "Il ghiacciaio di notte", fall: "Giù nel crepaccio! Si riparte dall'ometto di pietre.", snow: true,
+    brick: { base: "#5a86b0", light: "#8ab8de", dark: "#3a6088", mortar: "#22405e", crack: "#2a4a6c" },
+    grass: { a: "#d8ecff", b: "#ffffff", c: "#9cc4e6" }, wood: { a: "#5a4a3a", b: "#7a6a52", c: "#2e2418" }, fx: "neve", dark: 0.04, night: true,
+    build() {
+      const T = { flags: [], wins: [], layers: [], stars: [] };
+      const sky = cnv(VW, VH), g = sky.getContext("2d");
+      skyBands(g, VW, 0, VH, ["#060a1e", "#0a1028", "#0e1834", "#122040", "#16304e", "#1a3e5a", "#1e4a64"]);
+      disc(g, 262, 30, 9, "#d8e4f0"); disc(g, 259, 28, 9, "#0a1028");
+      for (let i = 0; i < 80; i++) T.stars.push([Math.round(rnd(i + 15) * VW), Math.round(rnd(i + 190) * 100), i]);
+      T.sky = sky;
+      T.layers.push({ c: auroraStrip(512, 110, 3), k: 0.02, y: 0, drift: 0.12, alpha: 0.95 });
+      T.layers.push({ c: peakStrip(512, 110, "#1a2a44", "#243a58", "#9ab8d8", 41), k: 0.07, y: 56 });
+      T.layers.push({ c: seracStrip(512, 120, "#2a5a86", "#6aa4d4", "#bfe0fa", 9, 18), k: 0.22, y: 70 });
+      T.layers.push({ c: seracStrip(512, 90, "#1e4a72", "#4a88bc", "#a8d4f6", 23, 9), k: 0.5, y: 112 });
+      return T;
+    }
+  };
+  THEMES.vetta = {
+    name: "La vetta al tramonto", fall: "Giù dalla cresta! Si riparte dall'ometto di pietre.", snow: true,
+    brick: { base: "#7a6e6a", light: "#a09490", dark: "#54484a", mortar: "#342a2e", crack: "#463a3c" },
+    grass: { a: "#fff0e4", b: "#ffffff", c: "#e8c8c0" }, wood: { a: "#6a4a32", b: "#8a6a48", c: "#3a2a18" }, fx: "neve", dark: 0,
+    build() {
+      const T = { flags: [], wins: [], layers: [] };
+      const sky = cnv(VW, VH), g = sky.getContext("2d");
+      skyBands(g, VW, 0, VH, ["#2a1e4a", "#46285a", "#6a3266", "#9a4068", "#c85a62", "#e8805a", "#f4a868", "#fcd08a"]);
+      disc(g, 90, 128, 22, "#ffd88a"); disc(g, 90, 128, 17, "#ffecb0"); for (let i = 0; i < 5; i++) R(g, 40, 112 + i * 6, 100, 1, "rgba(255,230,170,.45)"); T.sky = sky;
+      T.layers.push({ c: cloudStrip(83, 512, 80, "#e8a0a0", "#ffd8c0", "#b06a7a", 5, 4, 40), k: 0.03, y: 0, drift: 0.04, alpha: 0.8 });
+      T.layers.push({ c: peakStrip(512, 70, "#6a4a66", "#8a5e78", "#ffe0d8", 61), k: 0.06, y: 100 });
+      T.layers.push({ c: cloudSea(512, 60, "#f6d4cc", "#fff0e8", "rgba(200,140,150,.35)", 7), k: 0.12, y: 136 });
+      T.layers.push({ c: rockStrip(512, 90, "#3e2e3a", "#5a4250", "#7a5a66", "#fff4ee", 13), k: 0.4, y: 112 });
+      return T;
+    }
+  };
   // ------------------------------------------------------------ tessere (atlante per tema)
   function atlas(th) {
     const A = {}, B = th.brick, G = th.grass, Wd = th.wood;
@@ -311,7 +392,9 @@
     g: { n: "Gatto dei tetti", hp: 1, w: 14, h: 10, sp: 0.5, stomp: true },
     m: { n: "Monaco fantasma", hp: 1, w: 12, h: 14, sp: 0.45, fly: true, stomp: false },
     y: { n: "Yeti raccattapalle", hp: 2, w: 14, h: 18, sp: 0.35, stomp: true },
-    a: { n: "Aquila talent-scout", hp: 1, w: 16, h: 10, sp: 0.5, fly: true, stomp: true }
+    a: { n: "Aquila talent-scout", hp: 1, w: 16, h: 10, sp: 0.5, fly: true, stomp: true },
+    r: { n: "Palla di valanga", hp: 1, w: 10, h: 10, sp: 1.3, stomp: false },
+    n: { n: "Pupazzo sentinella", hp: 1, w: 14, h: 22, sp: 0, stomp: true }
   };
   function drawFoe(g, e, f) {
     const O = "#16141f", x = Math.round(e.x), y = Math.round(e.y + e.h), d = e.dir;
@@ -362,6 +445,18 @@
       part(g, -7, -8, 13, 6, "#6a4a2a", O); R(g, -7, -8, 13, 1, "#8a6a42"); part(g, 4, -12, 6, 6, "#f0f0f0", O); R(g, 7, -10, 1, 1, "#16141f"); R(g, 10, -9, 3, 2, "#f0b020"); R(g, 11, -7, 2, 1, "#c08010");
       if (dv) { part(g, -6, -14, 10, 4, "#4a321c", O); } else if (fl) { part(g, -6, -18, 11, 8, "#5a3e22", O); R(g, -4, -17, 7, 1, "#7a5a32"); } else part(g, -8, -4, 12, 4, "#5a3e22", O);
       R(g, -11, -7, 4, 3, "#6a4a2a"); R(g, -2, -2, 4, 3, "#f0e0a0"); R(g, -2, -2, 4, 1, "#c0a060");
+    } else if (e.t === "r") { // palla di valanga: rotola, cresce, si porta dietro sassi e rametti
+      const rr = Math.round(e.h / 2), a = e.x / Math.max(4, rr);
+      disc(g, 0, -rr, rr + 1, "#5a7090"); disc(g, 0, -rr, rr, "#f4f8fc"); disc(g, -2, -rr - 2, Math.max(1, rr - 4), "#ffffff");
+      for (let k = 0; k < 3; k++) { const b = a + k * 2.1; R(g, Math.round(Math.cos(b) * (rr - 2)) - 1, -rr + Math.round(Math.sin(b) * (rr - 2)) - 1, 2, 2, k === 0 ? "#6a7484" : k === 1 ? "#5a3a20" : "#c8d8ea"); }
+      if (e.on) for (let k = 1; k < 4; k++) R(g, -rr - k * 3, -2 - (k % 2) * 2, 2, 2, "rgba(255,255,255,.7)");
+    } else if (e.t === "n") { // pupazzo di neve di guardia: carota, bottoni di carbone, sciarpa e braccia di rametto
+      const thr = e.thr > 0;
+      disc(g, 0, -6, 7, "#5a7090"); disc(g, 0, -6, 6, "#f4f8fc"); disc(g, 0, -16, 5, "#5a7090"); disc(g, 0, -16, 4, "#ffffff");
+      R(g, -1, -9, 1, 1, "#16141f"); R(g, -1, -5, 1, 1, "#16141f"); R(g, -2, -18, 1, 1, "#16141f"); R(g, 1, -18, 1, 1, "#16141f"); R(g, 3, -16, 4, 1, "#f97316"); R(g, 3, -15, 2, 1, "#ea580c");
+      R(g, -4, -12, 9, 2, "#2f6b3a"); R(g, -5, -11, 2, 4, "#2f6b3a"); R(g, -3, -22, 7, 2, "#3a2a20"); R(g, -2, -25, 5, 3, "#3a2a20");
+      if (thr) { R(g, 4, -14, 1, 6, "#5a3a20"); R(g, 5, -20, 1, 6, "#5a3a20"); disc(g, 6, -21, 2, "#ffffff"); } else { R(g, 4, -11, 6, 1, "#5a3a20"); R(g, 8, -13, 1, 2, "#5a3a20"); }
+      R(g, -10, -11, 6, 1, "#5a3a20"); R(g, -10, -13, 1, 2, "#5a3a20");
     } else if (e.t === "Z") drawBoss(g, e, f);
     g.restore();
   }
@@ -371,6 +466,8 @@
     if (e.kind === "statua") return drawStatue(g, e, f);
     if (e.kind === "conestabile") return drawConest(g, e, f);
     if (e.kind === "yetone") return drawYetone(g, e, f);
+    if (e.kind === "stambecco") return drawStambecco(g, e, f);
+    if (e.kind === "regina") return drawRegina(g, e, f);
     const O = "#16141f", fl = Math.sin(f / (e.st === "fly" ? 5 : 12)) > 0, stun = e.st === "stuck";
     if (e.hitT > 0 && f % 4 < 2) g.globalAlpha = 0.45;
     part(g, -14, -24, 26, 18, "#1c1a26", O); for (let i = 0; i < 5; i++) R(g, -11 + i * 5, -22, 2, 14, "#ececec");
@@ -521,12 +618,81 @@
       else if (!e.vul || h.vy <= 0.5) hurt(st, Math.sign(e.x - h.x) || 1);
     }
   }
+  // capo del capitolo 3 (Guardiano di Neve): lo Stambecco Nero. Raspa, poi carica a testa bassa: solo una PARATA lo ferma (resta stordito, saltagli in testa).
+  // Se invece sbatte contro la parete, dall'alto cadono blocchi di ghiaccio.
+  function drawStambecco(g, e, f) {
+    const O = "#16141f", st = e.st, run = st === "charge", stun = st === "stun", paw = st === "paw";
+    if (e.hitT > 0 && f % 4 < 2) g.globalAlpha = 0.5;
+    g.translate(0, -2 * e.h);
+    const lg = run ? Math.round(Math.sin(f / 2) * 3) : paw ? Math.round(Math.sin(f / 3) * 2) : 0;
+    part(g, -14 + lg, 20, 4, 10, "#2a2228", O); part(g, -6 - lg, 20, 4, 10, "#2a2228", O); part(g, 6 + lg, 20, 4, 10, "#2a2228", O); part(g, 12 - (paw ? Math.abs(lg) * 2 : lg), 20, 4, 10, "#2a2228", O);
+    part(g, -17, 6, 34, 16, "#2e2630", O); R(g, -17, 6, 34, 3, "#4a3e4a"); R(g, -12, 18, 26, 3, "#1c161c"); R(g, -18, 8, 3, 6, "#d8d0c8");
+    part(g, 12, -2 + (run ? 6 : 0), 12, 11, "#2e2630", O); R(g, 20, 4 + (run ? 6 : 0), 4, 3, "#1c161c"); R(g, 17, 1 + (run ? 6 : 0), 2, 2, stun ? "#ffffff" : "#f59e0b");
+    for (let k = 0; k < 9; k++) R(g, 10 - k * 1.6, -2 - k * 1.5 + (run ? 7 : 0) + (k > 5 ? (k - 5) * 1.2 : 0), 3, 2, k % 2 ? "#c8b48a" : "#a8946a");
+    R(g, 22, 10 + (run ? 6 : 0), 2, 4, "#d8d0c8");
+    if (stun) for (let k = 0; k < 3; k++) { const a = f / 8 + k * 2.1; R(g, 16 + Math.round(Math.cos(a) * 9), -8 + Math.round(Math.sin(a) * 3), 2, 2, "#fde047"); }
+    if (paw) for (let k = 0; k < 3; k++) R(g, 16 + k * 4 - (f % 12), 28 - (f % 9), 2, 2, "#ffffff");
+    if (run) for (let k = 1; k < 4; k++) R(g, -18 - k * 5, 24 - k, 3, 2, "rgba(255,255,255,.6)");
+  }
+  function stambeccoStep(st, e) {
+    const h = st.hero, minX = TS * 1.5 + e.w / 2, maxX = st.W * TS - TS * 1.5 - e.w / 2, ground = (st.H - 2) * TS, hard = e.hp <= e.max / 2;
+    if (!e.max) { e.max = e.hp; e.y = ground; e.st = "paw"; e.stT = 70; }
+    e.vul = e.st === "stun"; e.stT--;
+    if (e.st === "paw") { e.dir = h.x > e.x ? 1 : -1; if (e.stT === 40) say(st, "Lo Stambecco raspa: sta per caricare. 🧤 PARA quando arriva!", 60); if (e.stT <= 0) { e.st = "charge"; e.vx = e.dir * (hard ? 4.4 : 3.6); snd("whistle"); } }
+    else if (e.st === "charge") {
+      e.x += e.vx; e.dir = Math.sign(e.vx);
+      if (st.f % 3 === 0) st.debris.push({ x: e.x - e.dir * 16, y: ground - 2, vx: -e.dir * 0.8, vy: -1 - rnd(st.f) * 1.4, l: 22, c: "#ffffff", s: 2 });
+      const front = e.x + e.dir * (e.w / 2), facing = Math.sign(e.x - h.x) === h.dir;
+      if (st.phase === "play" && h.parry > 0 && facing && Math.abs(front - h.x) < 14 && h.y > ground - 30) { e.st = "stun"; e.stT = 120 + (st.k < 1 ? 30 : 0); e.x -= e.dir * 6; st.parries++; h.vx = -h.dir * 2.4; snd("boing"); st.fx && st.fx.shake(6); st.fx && st.fx.text("PARATA!", h.x - st.cam.x, h.y - st.cam.y - 30, "#fde68a"); say(st, "L'hai fermato a mani nude! Saltagli in testa!", 70); }
+      else if (e.x <= minX || e.x >= maxX) { e.x = clamp(e.x, minX, maxX); e.st = "paw"; e.stT = hard ? 55 : 75; st.fx && st.fx.shake(8); snd("brk"); say(st, "BAM! Contro la parete: occhio al ghiaccio che cade!", 60); for (let k = 0; k < (hard ? 4 : 3); k++) st.stones.push({ x: clamp(h.x + (k - 1) * 46 + (rnd(st.f + k) - 0.5) * 30, 24, st.W * TS - 24), y: -10 - k * 30, vx: 0, vy: 0.5, l: 220, snow: 1, ice: 1 }); }
+    } else if (e.st === "stun") { if (e.stT <= 0) { e.st = "paw"; e.stT = 60; } }
+    const hb = heroBox(h), fb = foeBox(e);
+    if (st.phase === "play" && overlap(hb, fb)) {
+      if (e.vul && h.vy > 0.5 && h.y - 6 < fb.y + 12) { h.vy = -5.6; if (e.hitT <= 0) { e.hp--; e.hitT = 30; snd("boing"); st.fx && st.fx.burst(e.x, fb.y, 12, ["#fff", "#c8b48a"]); if (e.hp <= 0) foeDie(st, e); else { e.st = "paw"; e.stT = 50; } } }
+      else if (!e.vul && e.st === "charge") hurt(st, e.dir);
+      else if (!e.vul && h.inv <= 0) { h.vx = Math.sign(h.x - e.x) * 2; }
+    }
+  }
+  // capo finale (Guardiano di Neve): la Regina del Gelo. Dal trono di ghiaccio calcia rigori a tre altezze, annunciati da una freccia:
+  // si parano e tornano indietro contro il suo muro di ghiaccio. Ogni tre rigori, la tormenta: lame di ghiaccio corrono a terra (salta).
+  function drawRegina(g, e, f) {
+    const O = "#16141f", kick = e.st === "aim" && e.stT < 10, hp = e.hp / (e.max || e.hp);
+    g.translate(0, -2 * e.h);
+    part(g, -16, 40, 32, 24, "#9ad0f0", O); R(g, -16, 40, 32, 3, "#e0f4ff"); for (let k = 0; k < 4; k++) R(g, -14 + k * 8, 44, 2, 18, "#bfe6ff"); R(g, -18, 26, 4, 38, "#bfe6ff"); R(g, 14, 26, 4, 38, "#bfe6ff");
+    for (let k = 0; k < 5; k++) R(g, -16 + k * 8, 20 + (k % 2) * 3, 3, 8, "#e0f4ff");
+    part(g, -7, 14, 14, 26, "#f4f8fc", O); R(g, -7, 14, 14, 3, "#ffffff"); R(g, -2, 18, 4, 20, "#dce8f4"); R(g, -7, 30, 14, 2, "#2f6b3a");
+    part(g, -5, 2, 10, 11, "#e8c4a0", O); R(g, -5, 2, 10, 4, "#d8dee8"); R(g, -6, 3, 2, 10, "#d8dee8"); R(g, 4, 3, 2, 10, "#d8dee8"); R(g, -3, 7, 1, 1, "#1e3a8a"); R(g, 2, 7, 1, 1, "#1e3a8a"); R(g, -1, 10, 3, 1, "#8a4a3a");
+    for (let k = 0; k < 5; k++) R(g, -5 + k * 2.4, -4 + (k % 2 ? 2 : 0), 2, 6 - (k % 2 ? 2 : 0), "#bfe6ff");
+    if (kick) { part(g, 6, 34, 10, 4, "#f4f8fc", O); R(g, 15, 34, 3, 4, "#5a3a20"); } else part(g, 2, 36, 4, 6, "#f4f8fc", O);
+    part(g, -12, 16, 5, 12, "#f4f8fc", O); part(g, 7, 16, 5, 12, "#f4f8fc", O);
+    if (e.hitT > 0) for (let k = 0; k < 6; k++) R(g, -20 + rnd(f + k) * 40, 10 + rnd(f * 3 + k) * 50, 2, 2, "#ffffff");
+    if (hp < 0.5) { R(g, -16, 52, 10, 1, "#5a86b0"); R(g, 4, 46, 1, 12, "#5a86b0"); }
+  }
+  const SHOT_H = { basso: 4, mezzo: 13, alto: 26 };
+  function reginaStep(st, e) {
+    const h = st.hero, ground = (st.H - 2) * TS, hard = e.hp <= e.max / 2;
+    if (!e.max) { e.max = e.hp; e.y = ground; e.x = st.W * TS - TS * 3; e.st = "wait"; e.stT = 80; e.n = 0; e.dir = -1; }
+    e.vul = 0; e.stT--; e.dir = -1;
+    if (e.st === "wait") { if (e.stT <= 0) { e.st = "aim"; const ks = ["basso", "mezzo", "alto"]; e.aim = ks[Math.floor(rnd(st.f + e.n * 7) * 3)]; e.stT = hard ? 34 : 46; say(st, `Rigore ${e.aim === "basso" ? "RASOTERRA ▼" : e.aim === "alto" ? "ALL'INCROCIO ▲" : "CENTRALE ●"}: 🧤 para al momento giusto!`, 50); } }
+    else if (e.st === "aim") {
+      if (e.stT <= 0) {
+        const y = ground - SHOT_H[e.aim], sp = (hard ? 3.9 : 3.2) + e.n * 0.04, curve = hard && e.n % 2 === 1;
+        st.stones.push({ x: e.x - 18, y: curve ? y - 12 : y, vx: -sp, vy: curve ? 0.32 : 0, l: 260, snow: 1, boss: 1, flat: 1, rig: 1 }); snd("kick"); e.n++;
+        if (e.n % 3 === 0) { e.st = "storm"; e.stT = 140; say(st, "La Regina alza le braccia: TORMENTA! Salta le lame di ghiaccio!", 70); } else { e.st = "wait"; e.stT = hard ? 50 : 70; }
+      }
+    } else if (e.st === "storm") {
+      if (e.stT === 100 || e.stT === 60 || (hard && e.stT === 30)) { st.waves.push({ x: e.x - 24, dir: -1, sp: hard ? 3 : 2.5, l: 220 }); snd("brk"); }
+      if (e.stT <= 0) { e.st = "wait"; e.stT = 50; }
+    }
+  }
   const BOSSES = {
     corvo: { n: "Il Corvo Maggiore", hp: 6, w: 34, h: 34 },
     gatto: { n: "Sgrinfia", hp: 7, w: 38, h: 30 },
     statua: { n: "Il Custode di Pietra", hp: 8, w: 34, h: 52 },
     conestabile: { n: "Il Conestabile", hp: 9, w: 28, h: 52 },
-    yetone: { n: "Il Grande Raccattapalle", hp: 8, w: 36, h: 44 }
+    yetone: { n: "Il Grande Raccattapalle", hp: 8, w: 36, h: 44 },
+    stambecco: { n: "Lo Stambecco Nero", hp: 6, w: 34, h: 30 },
+    regina: { n: "La Regina del Gelo", hp: 8, w: 30, h: 64 }
   };
   // ------------------------------------------------------------ kit dell'eroe: «pallone» (Ferro, Il Pallone di Latta) · «guanti» (Il Guardiano di Neve: niente pallone, PARATA che respinge e TUFFO-PLANATA)
   const KITS = {
@@ -564,7 +730,7 @@
       const row = []; const line = rows[y].padEnd(W, ".");
       for (let x = 0; x < W; x++) {
         const ch = line[x], px = x * TS, py = y * TS; let t = ".";
-        if (ch === "#" || ch === "=" || ch === "B" || ch === "^" || ch === "~") t = ch;
+        if (ch === "#" || ch === "=" || ch === "B" || ch === "^" || ch === "~" || ch === "%") t = ch;
         else if (ch === "u") { t = "u"; st.vents.push({ x: px + 8, y: py }); }
         else if (ch === "G") t = "G";
         else if (ch === "k") st.bells.push({ x: px + 8, y: py + 10, rung: 0, sw: 0 });
@@ -592,7 +758,7 @@
       hero: { x: P.start[0], y: P.start[1], vx: 0, vy: 0, dir: 1, ground: false, coyote: 0, buf: 0, hp: hpMax, max: hpMax, inv: 0, frozen: 0, kick: 0, squash: 0, onM: null },
       ball: { st: "held", x: 0, y: 0, vx: 0, vy: 0, sp: 0, t: 0, squash: 0 },
       foes: P.foes.map((e) => mkFoe(e, level, k)), coins: P.coins, items: P.items, checks: P.checks, signs: P.signs, movers: P.movers, vents: P.vents, falls: P.falls, bells: P.bells, torches: P.torches, waves: [], bolts: [], flash: 0, windV: 0, exit: P.exit,
-      kit: level.kit || o.kit || "pallone", parries: 0,
+      kit: level.kit || o.kit || "pallone", parries: 0, crumbs: [], aval: level.chase ? { x: null, sp: level.chase.sp || 1.5, hits: 0 } : null,
       cam: { x: 0, y: Math.max(0, P.H * TS - VH) }, f: 0, phase: "play", coinN: 0, banMask: 0, sponde: 0, time: 0, spawn: P.start.slice(), sign: null, petals: [], stones: [], cards: [], debris: [], fx: (M.fx ? M.fx() : null), msg: "", msgT: 0, win: false, k
     };
     st.cam.x = clamp(st.hero.x - 120, 0, st.W * TS - VW);
@@ -605,7 +771,7 @@
   }
   // ------------------------------------------------------------ collisioni con la griglia
   const tile = (st, tx, ty) => (ty < 0 ? "." : ty >= st.H || tx < 0 || tx >= st.W ? (tx < 0 || tx >= st.W ? "#" : ".") : st.grid[ty][tx]);
-  const solidT = (t) => t === "#" || t === "B" || t === "u" || t === "G" || t === "~";
+  const solidT = (t) => t === "#" || t === "B" || t === "u" || t === "G" || t === "~" || t === "%";
   function hitsSolid(st, x, y, w, h) { const x0 = Math.floor(x / TS), x1 = Math.floor((x + w - 0.001) / TS), y0 = Math.floor(y / TS), y1 = Math.floor((y + h - 0.001) / TS); for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) if (solidT(tile(st, tx, ty))) return true; return false; }
   // muove un corpo (box) con assi separati; restituisce { hx, hy, ground }
   function move(st, b, w, h, oneWay) {
@@ -701,7 +867,7 @@
   function foeDie(st, e) {
     e.dead = 1; snd("hit"); st.coinN += e.t === "Z" ? 10 : 1;
     for (let i = 0; i < 10; i++) st.debris.push({ x: e.x, y: e.y + 4, vx: (rnd(i + e.x) - 0.5) * 4, vy: -2 - rnd(i) * 2, l: 50, c: ["#8a93a8", "#1c1a26", "#e8e8e8", "#ffd25a"][i % 4], s: 2 });
-    if (e.t === "Z") { st.fx && st.fx.banner(e.kind === "gatto" ? "SGRINFIA KO!" : e.kind === "statua" ? "IL CUSTODE CADE!" : e.kind === "conestabile" ? "IL CONESTABILE CADE!" : e.kind === "yetone" ? "IL RACCATTAPALLE SI ARRENDE!" : "FISCHIO FINALE!", "#fde047"); st.winAt = st.f + 80; }
+    if (e.t === "Z") { st.fx && st.fx.banner(e.kind === "gatto" ? "SGRINFIA KO!" : e.kind === "statua" ? "IL CUSTODE CADE!" : e.kind === "conestabile" ? "IL CONESTABILE CADE!" : e.kind === "yetone" ? "IL RACCATTAPALLE SI ARRENDE!" : e.kind === "stambecco" ? "LO STAMBECCO SI INCHINA!" : e.kind === "regina" ? "RIGORE PARATO! LA REGINA SI FERMA" : "FISCHIO FINALE!", "#fde047"); st.winAt = st.f + 80; }
   }
   function foeStep(st, e) {
     if (e.dead) return; if (e.hitT > 0) e.hitT--;
@@ -726,6 +892,17 @@
       if (!e.sw) { e.x += e.vx; if (Math.abs(e.x - e.ox) > 48) e.vx = -e.vx; e.dir = e.vx > 0 ? 1 : -1; e.y += ((e.oy - 22 + Math.sin(st.f / 18 + e.ox) * 6) - e.y) * 0.1; if (--e.cd <= 0 && Math.abs(h.x - e.x) < 130 && h.y > e.y + 10 && h.y - e.y < 120) { e.sw = 1; e.tx = h.x; e.ty = h.y - 10; snd("whistle"); } }
       else if (e.sw === 1) { const dx = e.tx - e.x, dy = e.ty - e.y, d = Math.hypot(dx, dy) || 1, sp = 2.4 + 0.3 * st.k; e.x += dx / d * sp; e.y += dy / d * sp; e.dir = dx > 0 ? 1 : -1; if (d < 4 || hitsSolid(st, e.x - 6, e.y, 12, 10)) e.sw = 2; }
       else { const dx = e.ox - e.x, dy = (e.oy - 22) - e.y, d = Math.hypot(dx, dy) || 1; e.x += dx / d * 1.4; e.y += dy / d * 1.4; e.dir = dx > 0 ? 1 : -1; if (d < 3) { e.sw = 0; e.cd = 160; } }
+    } else if (e.t === "r") {
+      if (!e.on) { if (Math.abs(h.x - e.x) < 230 && Math.abs(h.y - e.y) < 120) { e.on = 1; e.vx = Math.sign(h.x - e.x || -1) * FOES.r.sp * (0.85 + 0.25 * st.k); } }
+      else {
+        const bot = e.y + e.h; e.g = Math.min(1, (e.g || 0) + 0.004); e.w = e.h = Math.round(10 + 8 * e.g); e.y = bot - e.h;
+        e.vy = Math.min(5, e.vy + 0.3); const box = { x: e.x, y: e.y + e.h, vx: e.vx, vy: e.vy }, r = move(st, box, e.w, e.h, true); e.x = box.x; e.y = box.y - e.h; if (r.ground) e.vy = 0;
+        if (r.hx) { foeDie(st, e); for (let i = 0; i < 8; i++) st.debris.push({ x: e.x, y: e.y + 4, vx: (rnd(i + e.x) - 0.5) * 4, vy: -2 - rnd(i) * 2, l: 40, c: "#ffffff", s: 3 }); return; }
+        if (e.y > st.H * TS + 20) e.dead = 1; e.dir = e.vx > 0 ? 1 : -1;
+      }
+    } else if (e.t === "n") {
+      if (e.thr > 0) e.thr--; const dx = h.x - e.x; e.dir = Math.sign(dx) || -1;
+      if (--e.cd <= 0) { e.cd = Math.round(140 / (0.8 + 0.2 * st.k)); if (Math.abs(dx) < 200 && Math.abs(h.y - e.y) < 90) { e.thr = 20; st.stones.push({ x: e.x + e.dir * 6, y: e.y, vx: clamp((dx - e.dir * 6) / lobT(-3.6, h.y - 12 - e.y), -3, 3), vy: -3.6, l: 160, snow: 1 }); snd("kick"); } }
     } else if (e.t === "e" || e.t === "s") {
       e.vy = Math.min(5, e.vy + 0.3); const box = { x: e.x, y: e.y + e.h, vx: e.vx, vy: e.vy }, r = move(st, box, e.w, e.h, true); e.x = box.x; e.y = box.y - e.h;
       if (r.ground) e.vy = 0;
@@ -758,6 +935,8 @@
     if (e.kind === "statua") return statueStep(st, e);
     if (e.kind === "conestabile") return conestStep(st, e);
     if (e.kind === "yetone") return yetoneStep(st, e);
+    if (e.kind === "stambecco") return stambeccoStep(st, e);
+    if (e.kind === "regina") return reginaStep(st, e);
     const h = st.hero, minX = TS * 1.5 + e.w / 2, maxX = st.W * TS - TS * 1.5 - e.w / 2, ground = (st.H - 2) * TS;
     e.vul = e.st === "stuck";
     if (!e.max) { e.max = e.hp; e.home = (st.H - 2) * TS - 84; e.y = e.home; }
@@ -791,6 +970,7 @@
     const vmax = h.glide ? 2.4 : 1.9;
     if (ax) { h.vx = clamp(h.vx + ax * (ice ? 0.1 : 0.32), -vmax, vmax); h.dir = ax; } else h.vx *= ice ? 0.985 : h.ground ? 0.72 : 0.92;
     if (Math.abs(h.vx) < 0.05) h.vx = 0;
+    if (st.level.sled && !frozen) { const sp = st.level.sled.sp || 2.2; h.vx = sp * (K.R ? 1.25 : K.L ? 0.6 : 1); h.dir = 1; }
     if (st.windV) h.vx = clamp(h.vx + st.windV, -2.5, 2.5);
     if (K.J && !K._J) h.buf = 7; K._J = K.J; if (h.buf > 0) h.buf--;
     if (h.buf > 0 && (h.ground || h.coyote > 0) && !frozen) { h.vy = -6.4; h.ground = false; h.coyote = 0; h.buf = 0; snd("jump"); }
@@ -810,6 +990,7 @@
     if (gnd) { if (!h.ground && h.vy >= 0) h.squash = 0.6; h.vy = 0; h.coyote = 6; } else if (h.coyote > 0) h.coyote--;
     if (r.hy && !gnd && h.vy < 0) h.vy = 0;
     h.ground = gnd;
+    if (gnd) [h.x - 4, h.x + 4].forEach((x) => { const tx = Math.floor(x / TS), ty = Math.floor((h.y + 2) / TS); if (tile(st, tx, ty) === "%" && !st.crumbs.some((c) => c.x === tx && c.y === ty)) st.crumbs.push({ x: tx, y: ty, t: 26, gone: 0, r: 0 }); });
     // punte e buchi
     const tb = tile(st, Math.floor(h.x / TS), Math.floor((h.y - 2) / TS)); if (tb === "^") hurt(st, -h.dir);
     if (h.y > st.H * TS + 24 && st.phase === "play") { h.hp--; snd("hit"); if (h.hp <= 0) { h.hp = 0; ko(st); } else { say(st, st.th.fall || "Giù dalle mura! Si riparte dal gonfalone.", 80); respawn(st, false); } }
@@ -828,10 +1009,22 @@
     st.movers.forEach((m) => { const nx = m.x + m.vx; if (nx < m.x0 || nx > m.x1) m.vx = -m.vx; m.dx = m.vx; m.x += m.vx; });
     if (st.phase === "play") { heroStep(st); ballStep(st); st.foes.forEach((e) => foeStep(st, e)); }
     else if (st.phase === "ko") { st.hero.vy += 0.3; st.hero.y += st.hero.vy; }
+    if (st.aval && st.phase === "play") {
+      const A = st.aval, h = st.hero, from = (st.level.chase.from || 0) * TS;
+      if (A.x === null) { if (h.x > from) { A.x = h.x - 210; say(st, "VALANGA! Corri ▶▶ e non fermarti!", 90); st.fx && st.fx.shake(6); snd("brk"); } }
+      else {
+        A.x += A.sp; if (h.x - A.x > 250) A.x = h.x - 250; if (st.f % 40 === 0) st.fx && st.fx.shake(2);
+        if (h.x < A.x + 6) { A.hits++; h.hp--; snd("hit"); st.fx && st.fx.shake(8); if (h.hp <= 0) { h.hp = 0; ko(st); } else { say(st, "Travolto! La valanga ti risputa all'ometto di pietre.", 80); respawn(st, false); A.x = st.spawn[0] - 200; } }
+      }
+    }
+    st.crumbs = st.crumbs.filter((c) => {
+      if (!c.gone) { if (--c.t <= 0) { c.gone = 1; c.r = 320; st.grid[c.y][c.x] = "."; snd("brk"); for (let i = 0; i < 6; i++) st.debris.push({ x: c.x * TS + 8, y: c.y * TS + 6, vx: (rnd(i + c.x) - 0.5) * 2, vy: -0.5 - rnd(i * 3 + c.y), l: 40, c: i % 2 ? "#ffffff" : "#9ab8d8", s: 3 }); } return true; }
+      if (--c.r > 0) return true; const h = st.hero; if (Math.abs(h.x - (c.x * TS + 8)) < 14 && Math.abs(h.y - c.y * TS) < 24) { c.r = 30; return true; } st.grid[c.y][c.x] = "%"; return false;
+    });
     st.stones = st.stones.filter((s) => {
-      s.x += s.vx; s.vy += s.mine ? 0.08 : 0.16; s.y += s.vy; const h = st.hero, r = s.big ? 10 : 7;
+      s.x += s.vx; s.vy += s.flat ? (s.mine ? 0 : s.vy > 0 ? 0.02 : 0) : s.ice ? 0.22 : s.mine ? 0.08 : 0.16; s.y += s.vy; const h = st.hero, r = s.big ? 10 : 7;
       if (s.mine) { const e = st.foes.find((e) => !e.dead && e.hitT <= 0 && overlap({ x: s.x - r / 2, y: s.y - r / 2, w: r, h: r }, foeBox(e))); if (e) { e.hp -= s.big ? 2 : 1; e.hitT = 24; snd("hit"); st.fx && st.fx.burst(s.x, s.y, 10, ["#ffffff", "#bfe0ff"]); if (e.t === "Z") say(st, s.big ? "RESPINTA! Doppio colpo!" : "Respinta! Colpito!", 50); if (e.hp <= 0) foeDie(st, e); return false; } }
-      else if (st.phase === "play" && h.parry > 0 && Math.sign(s.x - h.x) !== -h.dir && Math.abs(s.x - h.x) < 22 && s.y > h.y - 30 && s.y < h.y + 4) { const perfect = h.parry >= 10; s.mine = 1; s.vx = h.dir * (s.big ? 3.4 : 4.2); s.vy = s.boss ? -1.6 : -2.2; s.l = 140; st.parries++; snd("boing"); st.fx && st.fx.text(perfect ? "PARATA!" : "Respinta", s.x - st.cam.x, s.y - st.cam.y - 8, perfect ? "#fde68a" : "#ffffff"); if (perfect) { st.coinN++; snd("coin"); } return true; }
+      else if (st.phase === "play" && h.parry > 0 && Math.sign(s.x - h.x) !== -h.dir && Math.abs(s.x - h.x) < 22 && s.y > h.y - 30 && s.y < h.y + 4) { const perfect = h.parry >= 10; s.mine = 1; s.vx = h.dir * (s.big ? 3.4 : 4.2); s.vy = s.flat ? 0 : s.boss ? -1.6 : -2.2; s.l = 140; st.parries++; snd("boing"); st.fx && st.fx.text(perfect ? "PARATA!" : "Respinta", s.x - st.cam.x, s.y - st.cam.y - 8, perfect ? "#fde68a" : "#ffffff"); if (perfect) { st.coinN++; snd("coin"); } return true; }
       else if (st.phase === "play" && Math.abs(s.x - h.x) < r && s.y > h.y - 20 && s.y < h.y) { hurt(st, Math.sign(s.vx) || 1); if (s.snow) for (let i = 0; i < 6; i++) st.debris.push({ x: s.x, y: s.y, vx: (rnd(i + st.f) - 0.5) * 3, vy: -1 - rnd(i) * 2, l: 30, c: "#ffffff", s: 2 }); return false; }
       const alive = --s.l > 0 && !solidT(tile(st, Math.floor(s.x / TS), Math.floor(s.y / TS))); if (!alive && s.snow) for (let i = 0; i < 4; i++) st.debris.push({ x: s.x, y: s.y - 2, vx: (rnd(i + s.x) - 0.5) * 2.5, vy: -1 - rnd(i) * 1.5, l: 24, c: "#ffffff", s: 2 }); return alive;
     });
@@ -887,6 +1080,7 @@
       const t = tile(st, tx, ty); if (t === ".") continue; const X = tx * TS + ox, Y = ty * TS + oy, v = (tx * 7 + ty * 13) % 4;
       if (t === "#") { const up = tile(st, tx, ty - 1); if (up !== "#" && up !== "B") g.drawImage(A.top[v], X, Y - 4); else g.drawImage(A.brick[v], X, Y); if (tile(st, tx - 1, ty) === "." && rnd(tx * 3 + ty) > 0.7) { R(g, X, Y + 2, 1, 9, st.th.grass ? st.th.grass.c : "#2a2a2a"); R(g, X - 1, Y + 5, 1, 3, st.th.grass ? st.th.grass.a : "#2a2a2a"); } }
       else if (t === "~") g.drawImage(A.ice, X, Y);
+      else if (t === "%") { const c = st.crumbs.find((k) => k.x === tx && k.y === ty && !k.gone), sh = c ? (st.f % 4 < 2 ? -1 : 1) : 0; R(g, X + sh, Y + 2, 16, 10, "#9ab8d8"); R(g, X + sh, Y, 16, 4, "#ffffff"); R(g, X + sh, Y + 4, 16, 2, "#dcecfa"); for (let k = 0; k < 4; k++) R(g, X + sh + 2 + k * 4, Y + 12, 2, 2 + ((tx + k) % 3), "#bfe0f8"); R(g, X + sh + 5, Y + 6, 1, 4, "#6a8cb0"); R(g, X + sh + 11, Y + 5, 1, 3, "#6a8cb0"); if (c) { R(g, X + sh + 3, Y + 4, 10, 1, "#4a6c90"); R(g, X + sh + 8, Y + 4, 1, 7, "#4a6c90"); } }
       else if (t === "=") g.drawImage(A.plank, X, Y);
       else if (t === "u") g.drawImage(A.chim, X, Y);
       else if (t === "G") g.drawImage(A.gate, X, Y);
@@ -967,11 +1161,15 @@
     drawLayers(g, st); drawTiles(g, st); drawObjects(g, st);
     const ox = -Math.round(st.cam.x), oy = -Math.round(st.cam.y);
     st.foes.forEach((e) => { if (!e.dead) { g.save(); g.translate(ox, oy); drawFoe(g, e, st.f); g.restore(); } });
-    st.stones.forEach((s) => { if (s.snow) { const r = s.big ? 6 : 3; disc(g, s.x + ox, s.y + oy, r + 1, s.mine ? "#f59e0b" : "#5a7090"); disc(g, s.x + ox, s.y + oy, r, "#ffffff"); R(g, s.x + ox - r / 2, s.y + oy - r / 2, 1, 1, "#d8ecff"); return; } disc(g, s.x + ox, s.y + oy, 3, "#16141f"); disc(g, s.x + ox, s.y + oy, 2, "#9a9488"); });
+    st.foes.forEach((e) => { if (e.dead || e.kind !== "regina" || e.st !== "aim") return; const y = (st.H - 2) * TS - SHOT_H[e.aim] + oy, x = e.x - 30 + ox, bl = st.f % 8 < 5; if (bl) { R(g, x - 3, y - 1, 8, 3, "#fde047"); R(g, x - 6, y - 3, 3, 7, "#fde047"); R(g, x - 9, y - 2, 3, 5, "#fde047"); } });
+    st.stones.forEach((s) => { if (s.rig) { const X = s.x + ox, Y = s.y + oy; for (let k = 1; k < 5; k++) R(g, X - s.vx * k * 2, Y - 1, 2, 2, `rgba(${s.mine ? "245,158,11" : "220,236,255"},${0.6 - k * 0.12})`); disc(g, X, Y, 5, "#16141f"); disc(g, X, Y, 4, "#ffffff"); R(g, X - 2, Y - 1, 2, 2, s.mine ? "#f59e0b" : "#2f6b3a"); R(g, X + 1, Y + 1, 2, 2, s.mine ? "#f59e0b" : "#2f6b3a"); return; } if (s.ice) { const X = s.x + ox, Y = s.y + oy; for (let k = 0; k < 10; k++) R(g, X - Math.max(0, 4 - k / 2.5), Y - 10 + k, Math.max(1, 8 - k * 0.8), 1, k < 3 ? "#ffffff" : "#9ad0f0"); return; } if (s.snow) { const r = s.big ? 6 : 3; disc(g, s.x + ox, s.y + oy, r + 1, s.mine ? "#f59e0b" : "#5a7090"); disc(g, s.x + ox, s.y + oy, r, "#ffffff"); R(g, s.x + ox - r / 2, s.y + oy - r / 2, 1, 1, "#d8ecff"); return; } disc(g, s.x + ox, s.y + oy, 3, "#16141f"); disc(g, s.x + ox, s.y + oy, 2, "#9a9488"); });
     st.cards.forEach((c) => { R(g, c.x + ox - 3, c.y + oy - 4, 7, 9, "#16141f"); R(g, c.x + ox - 2, c.y + oy - 3, 5, 7, "#ffd820"); });
-    const h = st.hero; if (!(h.inv > 0 && st.f % 6 < 3) || st.phase !== "play") (st.kit === "guanti" ? drawKeeper : drawFerro)(g, h.x + ox, h.y + oy, h.dir, { parry: h.parry, glide: h.glide, walk: h.ground && Math.abs(h.vx) > 0.3, air: !h.ground, hp: st.phase === "ko" ? 0 : h.hp, ball: st.ball.st === "held", hurt: h.inv > 60, frozen: h.frozen > 0, kick: h.kick, squash: Math.max(0, h.squash) }, st.f, st.o.heroLook);
+    const h = st.hero;
+    if (st.level.sled) { const X = h.x + ox, Y = h.y + oy, bob = h.ground ? Math.round(Math.sin(st.f / 3)) : 0; drawFoe(g, { t: "y", x: h.x + 30 - st.cam.x, y: h.y - 18 + bob - st.cam.y, w: 14, h: 18, dir: 1, thr: 0, hitT: 0 }, st.f); R(g, X + 8, Y - 6, 18, 1, "#7a5a32"); R(g, X - 10, Y - 4, 20, 3, "#b91c1c"); R(g, X - 10, Y - 4, 20, 1, "#ef4444"); R(g, X - 11, Y - 1, 24, 1, "#5a3a20"); R(g, X + 12, Y - 3, 2, 2, "#5a3a20"); }
+    if (!(h.inv > 0 && st.f % 6 < 3) || st.phase !== "play") (st.kit === "guanti" ? drawKeeper : drawFerro)(g, h.x + ox, h.y + oy, h.dir, { parry: h.parry, glide: h.glide, walk: h.ground && Math.abs(h.vx) > 0.3, air: !h.ground, hp: st.phase === "ko" ? 0 : h.hp, ball: st.ball.st === "held", hurt: h.inv > 60, frozen: h.frozen > 0, kick: h.kick, squash: Math.max(0, h.squash) }, st.f, st.o.heroLook);
     if (h.frozen > 0) { R(g, h.x + ox - 3, h.y + oy - 36, 7, 9, "#16141f"); R(g, h.x + ox - 2, h.y + oy - 35, 5, 7, "#ffd820"); }
     drawBall(g, st);
+    if (st.aval && st.aval.x !== null) { const X = Math.round(st.aval.x + ox), f = st.f; if (X > -60) { R(g, -10, 0, X + 10, VH, "#eef4fa"); for (let y = 0; y < VH; y += 6) { const w = 6 + Math.round(Math.abs(Math.sin(y / 11 + f / 6)) * 10 + rnd(y + Math.floor(f / 3)) * 6); R(g, X, y, w, 6, y % 12 ? "#ffffff" : "#dce8f4"); disc(g, X + w, y + 3, 3, "#ffffff"); } for (let k = 0; k < 10; k++) { const yy = (k * 23 + f * 2) % VH; disc(g, X + 14 + rnd(k + f) * 10, yy, 2 + (k % 3), "#c8d8ea"); } R(g, 0, 0, Math.max(0, X), VH, "rgba(180,200,230,.25)"); } else R(g, 0, 0, 6, VH, `rgba(255,255,255,${0.4 + 0.3 * Math.sin(f / 5)})`); }
     st.debris.forEach((d) => R(g, d.x + ox, d.y + oy, d.s, d.s, d.c));
     st.petals.forEach((p) => { if (p.c === "rain") return R(g, p.x, p.y, 1, 5, "rgba(170,200,220,.55)"); if (p.c === "snow") return R(g, p.x, p.y, p.r, p.r, "#ffffff"); if (p.c) return R(g, p.x, p.y, 1, 1, p.c); R(g, p.x, p.y, 2, 1, "#ffb0c8"); R(g, p.x + 1, p.y + 1, 1, 1, "#ff8ab0"); });
     st.bolts.forEach((b) => { const X = Math.round(b.x + ox); if (b.t > 0) { if (b.t % 8 < 5) for (let y = 0; y < VH; y += 8) R(g, X - 1, y, 2, 4, "rgba(255,240,120,.45)"); R(g, X - 6, VH - 8, 12, 3, "rgba(255,240,120,.6)"); } else { let x = X, y = 0; g.fillStyle = "#fffbe0"; while (y < VH) { const nx = x + Math.round((rnd(y + b.x) - 0.5) * 10); for (let k = 0; k < 10; k++) g.fillRect(Math.round(x + (nx - x) * k / 10) - 1, y + k, 3, 1); x = nx; y += 10; } } });
@@ -1089,7 +1287,7 @@
     window.__scorri.state = {
       get phase() { return S && S.phase; }, get hero() { return S && { x: S.hero.x, y: S.hero.y, vx: S.hero.vx, vy: S.hero.vy, hp: S.hero.hp, ground: S.hero.ground, frozen: S.hero.frozen }; },
       get ball() { return S && { st: S.ball.st, x: S.ball.x, y: S.ball.y, vx: S.ball.vx, vy: S.ball.vy }; }, get foes() { return S ? S.foes.filter((e) => !e.dead).length : 0; }, get coins() { return S ? S.coinN : 0; }, get ban() { return S ? countBits(S.banMask) : 0; },
-      get boss() { const b = S && S.foes.find((e) => e.t === "Z"); return b ? { hp: b.hp, st: b.st, dead: b.dead, x: b.x, y: b.y, hitT: b.hitT } : null; }, get counts() { return S ? { vents: S.vents.length, falls: S.falls.length, cats: S.foes.filter((e) => e.t === "g").length, bells: S.bells.length, rung: S.bells.filter((k) => k.rung).length, gates: S.grid.reduce((a, r) => a + r.filter((t) => t === "G").length, 0), ghosts: S.foes.filter((e) => e.t === "m" && !e.dead).length, waves: S.waves.length, bolts: S.bolts.length, wind: S.windV, cards: S.cards.length } : null; }, ballAt: (x, y, vx, vy) => { if (S) { S.ball.st = "fly"; S.ball.x = x; S.ball.y = y; S.ball.vx = vx || 0; S.ball.vy = vy || 0; S.ball.t = 0; S.ball.sp = 0; } }, get practice() { return S && S.practice; }, get W() { return S && S.W; }, get kit() { return S && S.kit; }, get parries() { return S ? S.parries : 0; }, get snow() { return S ? S.stones.filter((x) => x.snow).map((x) => ({ x: x.x, y: x.y, vx: x.vx, mine: !!x.mine, big: !!x.big })) : []; }, get glide() { return !!(S && S.hero.glide); }, get parry() { return S ? S.hero.parry | 0 : 0; },
+      get boss() { const b = S && S.foes.find((e) => e.t === "Z"); return b ? { hp: b.hp, st: b.st, dead: b.dead, x: b.x, y: b.y, hitT: b.hitT } : null; }, get counts() { return S ? { vents: S.vents.length, falls: S.falls.length, cats: S.foes.filter((e) => e.t === "g").length, bells: S.bells.length, rung: S.bells.filter((k) => k.rung).length, gates: S.grid.reduce((a, r) => a + r.filter((t) => t === "G").length, 0), ghosts: S.foes.filter((e) => e.t === "m" && !e.dead).length, waves: S.waves.length, bolts: S.bolts.length, wind: S.windV, cards: S.cards.length } : null; }, ballAt: (x, y, vx, vy) => { if (S) { S.ball.st = "fly"; S.ball.x = x; S.ball.y = y; S.ball.vx = vx || 0; S.ball.vy = vy || 0; S.ball.t = 0; S.ball.sp = 0; } }, get practice() { return S && S.practice; }, get W() { return S && S.W; }, get kit() { return S && S.kit; }, get parries() { return S ? S.parries : 0; }, get snow() { return S ? S.stones.filter((x) => x.snow).map((x) => ({ x: x.x, y: x.y, vx: x.vx, mine: !!x.mine, big: !!x.big })) : []; }, get glide() { return !!(S && S.hero.glide); }, get aval() { return S && S.aval ? { x: S.aval.x, hits: S.aval.hits } : null; }, get crumbs() { return S ? S.crumbs.map((c) => ({ x: c.x, y: c.y, gone: c.gone })) : []; }, tileAt: (tx, ty) => (S ? tile(S, tx, ty) : null), get sled() { return !!(S && S.level.sled); }, get foeList() { return S ? S.foes.filter((e) => !e.dead).map((e) => ({ t: e.t, x: e.x, y: e.y, h: e.h, on: !!e.on })) : []; }, get parry() { return S ? S.hero.parry | 0 : 0; },
       tut: () => !!(tutC && tutC.open), press, tick: (n) => { for (let i = 0; i < (n || 1) && S; i++) step(S); }, warp: (x, y) => { if (S) { S.hero.x = x; S.hero.y = y; S.hero.vx = S.hero.vy = 0; } },
       finish: (win) => { if (!S) return; if (tutC) { tutC.close(); tutC = null; } S.win = win !== false; if (S.win) { S.items.forEach((it) => { if (it.k === "S" && win === "all") S.banMask |= 1 << it.i; }); } close(); }
     };

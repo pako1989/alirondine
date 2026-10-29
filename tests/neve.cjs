@@ -124,6 +124,110 @@ async function sims() {
   } catch (e) { errors.push(e.message.slice(0, 300)); }
   L.check("Guardiano di Neve · parata, planata e Raccattapalle", errors); await browser.close();
 }
+
+// ---------------------------------------------------------------- capitolo 2
+const SAVE2 = { v: 1, diffSet: true, intro: { ch1: 1, ch2: 1 }, ch: 2, max: 2, done: { 1: "ok" }, step: { 1: 4, 2: 0 }, flags: { gn_guanti: 1, gn_c1_done: 1, gn_fiocco_paese: 1 } };
+async function zones2(w) {
+  const { browser, page, errors } = await start(w, SAVE2);
+  for (const z of ["gn_campo", "gn_chiesa", "gn_proloco"]) {
+    try { await go(page, z); await L.shot(page, "gn_" + z + "_" + w); const bad = await L.reachAll(page, z); if (bad.length) errors.push(z + ": " + bad.join(", ")); }
+    catch (e) { errors.push(z + ": " + e.message.slice(0, 140)); }
+  }
+  L.check(`Guardiano di Neve · zone cap.2 (${w} px)`, errors); await browser.close();
+}
+async function flow2(w, alt) {
+  const { browser, page, errors } = await start(w, SAVE2);
+  await stubLevel(page);
+  const st = async (n, what) => { const i = await L.info(page); if ((i.step[2] || 0) !== n) errors.push(what + ": " + JSON.stringify(i.step)); };
+  try {
+    await go(page, "gn_campo", 14, 3); await L.goAct(page, 14, 1); await L.advance(page); await st(0, "cancello chiuso");
+    await go(page, "gn_campo", 6, 10); await L.talk(page, "gn_olmo"); await L.advance(page, [alt ? "Riporto la Coppa" : "Perché Ilde"]); await st(1, "dopo Olmo");
+    await go(page, "gn_proloco", 5, 5); await L.talk(page, "gn_lilli"); await L.advance(page, ["Guardate la cassetta"]);
+    await go(page, "gn_chiesa", 8, 4); await L.talk(page, "gn_fulvio"); await L.advance(page, [alt ? "Sono passati" : "Non lo dica a me"]); await st(2, "dopo Fulvio");
+    await go(page, "gn_campo", 14, 3); await L.goAct(page, 14, 1); await L.advance(page, ["Sali nel canalone"]); await L.advance(page).catch(() => {}); await st(3, "dopo il canalone");
+    await L.goAct(page, 14, 1); await L.advance(page, ["Sali verso il rifugio", alt ? "Solo firme vecchie" : "Leggi tutto"]); await L.advance(page).catch(() => {});
+    const i = await L.info(page); if (!i.done[2]) errors.push("capitolo 2 non concluso: " + JSON.stringify([i.done, i.step]));
+    const lg = await page.evaluate(() => window.__scLog); if (!lg || lg.length !== 2 || lg[0].id !== "canalone" || lg[1].id !== "valanga") errors.push("livelli: " + JSON.stringify(lg));
+    const k = await page.evaluate((k) => { const K = eval(k); return { ch: K.inv.has("gn_chiave"), pg: K.inv.has("gn_pagina"), n12: K.F.is("gn_n12"), cas: K.inv.has("gn_cassetta"), lo: K.F.is("gn_letto_olmo"), ta: K.F.is("gn_taciuto"), fi: K.F.is("gn_ful_ilde"), d: K.F.is("gn_c2_done") }; }, K_);
+    if (!k.ch || !k.pg || !k.n12 || !k.cas || !k.d || k.lo === !!alt || k.ta !== !!alt || k.fi === !!alt) errors.push("stato finale: " + JSON.stringify(k));
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check(`Guardiano di Neve · capitolo 2${alt ? " (vie alternative)" : ""} (${w} px)`, errors); await browser.close();
+}
+// giocatore automatico: corre a destra, salta muri, buchi e nemici, plana sui crepacci, para le palle vicine
+async function autoplay(page, id, bonus) {
+  return page.evaluate(async ([id, bonus]) => {
+    window.__noSfx = 1; const LV = window.__neveLV; let res = null, pj = false, maxX = 0;
+    window.__scorri.start({ level: Object.assign({ id, kit: "guanti" }, LV[id]), tutorial: false, bonus: bonus || 0, onDone: (x) => { res = x; } });
+    const s = window.__scorri.state, TS = 16, solid = (t) => "#B~%u".includes(t), sl = (ms) => new Promise((r) => setTimeout(r, ms)), seen = { aval: 0, crumb: 0, r: 0 };
+    for (let t = 0; t < 9000 && !res; t++) {
+      const h = s.hero; if (!h) break; maxX = Math.max(maxX, h.x);
+      const fx = Math.floor(h.x / TS), fy = Math.floor((h.y + 2) / TS), hy = Math.floor((h.y - 4) / TS); let jump = false;
+      if (h.ground) { for (let d = 1; d <= 2; d++) { if (solid(s.tileAt(fx + d, hy)) || solid(s.tileAt(fx + d, hy - 1))) jump = true; if (!solid(s.tileAt(fx + d, fy)) && s.tileAt(fx + d, fy) !== "=") jump = true; } }
+      if (h.ground && s.foeList.some((e) => e.t !== "a" && e.t !== "Z" && e.x - h.x > 4 && e.x - h.x < (s.sled ? 44 : 30) && Math.abs(e.y + e.h - h.y) < 20)) jump = true;
+      let pit = true; for (let d = 0; d < 13; d++) if (solid(s.tileAt(fx, fy + d)) || s.tileAt(fx, fy + d) === "=") pit = false;
+      const want = h.ground ? jump && !pj : h.vy < -1 ? pj : pit; s.press("J", want); pj = want; s.press("R", true);
+      s.press("K", s.snow.some((b) => !b.mine && Math.abs(b.x - h.x) < 18 && b.y > h.y - 28 && b.y < h.y + 2));
+      s.tick(1); if (s.aval && s.aval.x !== null) seen.aval = 1; if (s.crumbs.some((c) => c.gone)) seen.crumb = 1; if (s.foeList.some((e) => e.t === "r" && e.on)) seen.r = 1;
+      if (s.phase === "win") { s.finish(true); break; } if (s.phase === "ko") { s.finish(false); break; }
+    }
+    await sl(30); return { res, maxX: Math.round(maxX / TS), seen };
+  }, [id, bonus]);
+}
+async function levels2() {
+  const { browser, page, errors } = await L.setup({ w: 800, h: 400, ...MOD });
+  try {
+    for (const id of ["canalone", "valanga"]) { const r = await autoplay(page, id, 2); if (!r.res || !r.res.win) errors.push(id + " non completato: " + JSON.stringify(r)); if (id === "valanga" && !r.seen.aval) errors.push("la valanga non parte"); if (id === "canalone" && !r.seen.r) errors.push("niente palle di valanga"); }
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check("Guardiano di Neve · canalone e valanga completabili", errors); await browser.close();
+}
+// ---------------------------------------------------------------- capitolo 3
+const SAVE3 = { v: 1, diffSet: true, intro: { ch1: 1, ch2: 1, ch3: 1 }, ch: 3, max: 3, done: { 1: "ok", 2: "ok" }, step: { 1: 4, 2: 4, 3: 0 }, flags: { gn_guanti: 1, gn_c1_done: 1, gn_c2_done: 1, gn_fiocco_paese: 1 } };
+async function zones3(w) {
+  const { browser, page, errors } = await start(w, SAVE3);
+  for (const z of ["gn_rifugio", "gn_rifugio_in", "gn_funivia"]) {
+    try { await go(page, z); await L.shot(page, "gn_" + z + "_" + w); const bad = await L.reachAll(page, z); if (bad.length) errors.push(z + ": " + bad.join(", ")); }
+    catch (e) { errors.push(z + ": " + e.message.slice(0, 140)); }
+  }
+  L.check(`Guardiano di Neve · zone cap.3 (${w} px)`, errors); await browser.close();
+}
+async function flow3(w, alt) {
+  const { browser, page, errors } = await start(w, SAVE3);
+  await stubLevel(page);
+  const st = async (n, what) => { const i = await L.info(page); if ((i.step[3] || 0) !== n) errors.push(what + ": " + JSON.stringify(i.step)); };
+  try {
+    await go(page, "gn_rifugio", 14, 3); await L.goAct(page, 14, 1); await L.advance(page); await st(0, "cancello chiuso");
+    await go(page, "gn_funivia", 11, 6); await L.goAct(page, 11, 5); await L.advance(page); await st(0, "lettere troppo presto");
+    await go(page, "gn_rifugio_in", 5, 9); await L.goAct(page, 5, 8); await L.advance(page, [alt ? "Era una bugia" : "Domenica lo deve dire"]); await st(1, "dopo l'armadietto");
+    await go(page, "gn_funivia", 11, 6); await L.goAct(page, 11, 5); await L.advance(page, [alt ? "Le lasci" : "Le porterai a Olmo"]); await st(2, "dopo le lettere");
+    await go(page, "gn_rifugio", 14, 3); await L.goAct(page, 14, 1); await L.advance(page, ["Sali sul ghiacciaio"]); await L.advance(page).catch(() => {}); await st(3, "dopo i seracchi");
+    await L.goAct(page, 14, 1); await L.advance(page, ["Entra nella conca", alt ? "Vado io" : "Olmo, domani"]); await L.advance(page).catch(() => {});
+    const i = await L.info(page); if (!i.done[3]) errors.push("capitolo 3 non concluso: " + JSON.stringify([i.done, i.step]));
+    const lg = await page.evaluate(() => window.__scLog); if (!lg || lg.length !== 2 || lg[0].id !== "seracchi" || lg[1].id !== "conca") errors.push("livelli: " + JSON.stringify(lg));
+    const k = await page.evaluate((k) => { const K = eval(k); return { m: K.inv.has("gn_maglia12"), l: K.inv.has("gn_lettere"), od: K.F.is("gn_olmo_dire"), sp: K.F.is("gn_storia_paese"), lo: K.F.is("gn_lettere_olmo"), inv: K.F.is("gn_olmo_invito"), d: K.F.is("gn_c3_done") }; }, K_);
+    if (!k.m || !k.d || k.l === !!alt || k.lo === !!alt || k.od === !!alt || k.sp !== !!alt || k.inv === !!alt) errors.push("stato finale: " + JSON.stringify(k));
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check(`Guardiano di Neve · capitolo 3${alt ? " (vie alternative)" : ""} (${w} px)`, errors); await browser.close();
+}
+// seracchi completabili (i ponti crollano davvero) e Stambecco battibile: aspetta, para la carica, saltagli in testa da stordito
+async function levels3() {
+  const { browser, page, errors } = await L.setup({ w: 800, h: 400, ...MOD });
+  try {
+    const r = await autoplay(page, "seracchi", 2); if (!r.res || !r.res.win) errors.push("seracchi non completati: " + JSON.stringify(r)); if (!r.seen.crumb) errors.push("i ponti di neve non crollano");
+    const b = await page.evaluate(async () => {
+      window.__noSfx = 1; let res = null; window.__scorri.start({ level: Object.assign({ id: "conca", kit: "guanti" }, window.__neveLV.conca), tutorial: false, onDone: (x) => { res = x; } });
+      const s = window.__scorri.state, sts = {}; let side = 60; s.warp(60, 176); s.press("R", true); s.tick(1); s.press("R", false);
+      for (let t = 0; t < 6000 && !res; t++) {
+        const b = s.boss, h = s.hero; if (!b) break; sts[b.st] = 1;
+        if (b.st === "stun" && !(b.hitT > 0)) { if (h.ground || Math.abs(h.x - b.x) > 6) s.warp(b.x, b.y - 52); s.press("K", false); }
+        else if (b.st !== "stun") { if (b.st === "paw") side = b.x > 200 ? 60 : 350; if (h.y < 170 || Math.abs(h.x - side) > 10) { s.warp(side, 176); s.press(side < 200 ? "R" : "L", true); s.tick(1); s.press("R", false); s.press("L", false); } s.press("K", b.st === "charge" && Math.abs(b.x - h.x) < 34); }
+        s.tick(1); if (s.phase === "win") { s.finish(true); break; } if (s.phase === "ko") { s.finish(false); break; }
+      }
+      await new Promise((r) => setTimeout(r, 30)); return { res, sts: Object.keys(sts) };
+    });
+    if (!b.res || !b.res.win) errors.push("Stambecco non battibile: " + JSON.stringify(b)); if (!["paw", "charge", "stun"].every((x) => b.sts.includes(x))) errors.push("stati dello Stambecco: " + b.sts.join(","));
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check("Guardiano di Neve · seracchi e Stambecco", errors); await browser.close();
+}
 (async () => {
   const only = process.argv[2];
   for (const w of [390, 320]) { if (!only || only === "zone") await zonesTest(w); }
@@ -131,4 +235,10 @@ async function sims() {
   if (!only || only === "flow") { await flow(390, false); await flow(320, true); }
   if (!only || only === "motore") { await realEngine(390); await realEngine(800); }
   if (!only || only === "sim") await sims();
+  if (!only || only === "zone2") { await zones2(390); await zones2(320); }
+  if (!only || only === "flow2") { await flow2(390, false); await flow2(320, true); }
+  if (!only || only === "livelli2") await levels2();
+  if (!only || only === "zone3") { await zones3(390); await zones3(320); }
+  if (!only || only === "flow3") { await flow3(390, false); await flow3(320, true); }
+  if (!only || only === "livelli3") await levels3();
 })();

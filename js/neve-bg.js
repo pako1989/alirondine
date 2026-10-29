@@ -18,6 +18,7 @@
     for (let k = 0; k < w / 2 + 6; k++) { R(g, x - 6 + k, y - k * 0.55, w + 12 - k * 2, 2, roof); } R(g, x - 7, y - 2, w + 14, 4, "#f4f8fc"); for (let k = 0; k < w / 2 + 6; k += 2) R(g, x - 6 + k, y - k * 0.55 - 2, w + 12 - k * 2, 1, "#ffffff");
     for (let i = 0; i < Math.floor(w / 16); i++) { R(g, x + 5 + i * 16, y + h / 2 - 4, 8, 9, "#2a1a10"); R(g, x + 6 + i * 16, y + h / 2 - 3, 6, 7, lit ? "#ffd27a" : "#3a4a6a"); R(g, x + 8 + i * 16, y + h / 2 - 3, 1, 7, "#2a1a10"); if (lit) GL(g, x + 9 + i * 16, y + h / 2, 14, "255,200,110", 0.25 + 0.05 * Math.sin(f / 9 + i)); }
   };
+  window.__neveBgK = { R, D, rnd, GL, VIG, bands, peak, pine, flakes, chalet };
   const SC = {
     gn_titolo(g, W, H, f) {
       bands(g, W, 0, 130, ["#2a2a5a", "#3a3a72", "#5a4a8a", "#8a5a96", "#c06a8a", "#e88a7a", "#f6b07a", "#fbd29a"]);
