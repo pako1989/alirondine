@@ -62,8 +62,8 @@
       .urtoScope{width:76px;height:28px;flex:none;border-radius:6px;background:#04130d;border:1px solid #10b98188;display:block}
       .urtoStage{position:relative;width:min(100%,680px);flex:1;min-height:0;display:flex;align-items:center;justify-content:center;margin:4px 0}
       .urtoStage canvas.urtoPitch{width:100%;max-height:100%;aspect-ratio:18/11;height:auto;flex:none;border-radius:12px;border:2px solid rgba(245,158,11,0.55);box-shadow:0 8px 26px rgba(0,0,0,0.65);background:#0f172a;display:block}
-      .urtoBands{width:min(100%,680px);display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:4px}
-      .urtoBand{border:1.5px solid rgba(255,255,255,0.2);background:rgba(15,23,42,0.88);color:#cbd5e1;border-radius:9px;padding:4px 4px;font:800 11px/1.15 inherit;cursor:pointer;text-align:center;transition:transform .1s,border-color .15s}
+      .urtoBands{width:min(100%,680px);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-bottom:4px}
+      .urtoBand{min-width:0;overflow:hidden;border:1.5px solid rgba(255,255,255,0.2);background:rgba(15,23,42,0.88);color:#cbd5e1;border-radius:9px;padding:4px 4px;font:800 11px/1.15 inherit;cursor:pointer;text-align:center;transition:transform .1s,border-color .15s}
       .urtoBand small{display:block;font-weight:600;font-size:9.5px;opacity:0.78;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
       .urtoBand.on{background:rgba(30,41,59,0.98);color:#fff;box-shadow:0 0 10px var(--bc)}
       .urtoPad{width:min(100%,680px);display:flex;align-items:center;justify-content:space-between;gap:8px}

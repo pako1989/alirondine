@@ -23,7 +23,8 @@
 //     plugins: [{ zone(zid, spec, Z, K), tick(zid, spec, px, py, dt, K), top(g, zid, spec, cx, cy, d, K), enter(zid, spec, K) }],
 //     rest: { ch: "s", label: "Riposa", text: "..." },
 //     plan: { name: "Il Piano", roles: { rk: { n, icon, d, fit: { id_membro: 2 } } } },  // IL PIANO (richiede crew): K.plan.open({ title, q, roles, pool }, back, inZone, cb(mappa)) assegna compagni a ruoli; K.plan.fit(rk, id)
-//     scroll: { eng: "__scorri", name: "I livelli", levels: { id: { name, icon, d, theme, map: [righe], signs, boss } }, bonus(K) },  // A SCORRIMENTO: K.scroll.play(id, o, cb(r)) livello platform 2D (js/scorri.js); record per livello, Mappa dei livelli (K.scroll.open)
+//     scroll: { eng: "__scorri", name: "I livelli", levels: { id: { name, icon, d, theme, map: [righe], signs, boss } }, bonus(K), kit: "guanti", practice: { theme, map, signs }, practiceName, practiceSub, banName },  // A SCORRIMENTO: K.scroll.play(id, o, cb(r)) livello platform 2D (js/scorri.js); record per livello, Mappa dei livelli (K.scroll.open)
+//     cold: { name: "Calore", icon: "🌡️", max: 8, sec: 14, home: ["zona", tx, ty], onZero(K) },  // IL TERMOMETRO: spec.cold (true o moltiplicatore) fa scendere il Calore; spec.warm = [[tx, ty, r]] e gli interni lo fanno risalire; K.cold.get/add/warm
 //     alert: { max: 3, names: [...], rangeMul: 0.25, decay: true, hud: true, onChange(K, lv, old) },  // ALLERTA globale: ogni avvistamento +1 (K.alert.get/set/add), il raggio delle guardie cresce; hiding(K) → true = nascosto alle guardie
 //   });
 //   E.addChapter((K) => ({ n: 1, title, sub, goal(step), intro(), start: "zona", zones: {...}, patch: {...}, talk: {...}, obj: {...}, news(id, step) }));
@@ -721,7 +722,7 @@
       //  - flip: la gravità è girata, la visuale ruota di 180° e i comandi restano quelli dello schermo.
       // meccaniche per-zona: spec.tick (movimento del Campione, può spostarlo) e i plugin della saga
       const ticks = []; if (spec.__exitTick) ticks.push((px, py) => spec.__exitTick(px, py)); if (spec.tick) ticks.push((px, py, dt) => spec.tick(px, py, dt, K, stepOf(chN))); PLUG.forEach((p) => { if (p.tick) ticks.push((px, py, dt) => p.tick(zid, spec, px, py, dt, K)); }); if (spec.gravity || (spec.eras && Object.values(spec.eras).some((e) => e.gravity))) ticks.unshift((px, py) => gravTick(zid, spec, chN, px, py));
-      ticks.push(() => walkTick(zid)); ticks.push(() => followTick(zid)); ticks.push((px, py) => guardTick(zid, spec, px, py)); if (spec.tubes) ticks.push(() => tubeTick(zid));
+      ticks.push(() => walkTick(zid)); ticks.push(() => followTick(zid)); ticks.push((px, py) => guardTick(zid, spec, px, py)); if (spec.tubes) ticks.push(() => tubeTick(zid)); if (COLD && (spec.cold || spec.warm || spec.interior)) ticks.push((px, py, dt) => COLD.tick(zid, spec, px, py, dt));
       if (ticks.length) Z.tick = function (px, py, dt, moving) { if (api.trZone() !== zid) return null; let r = null; ticks.forEach((t) => { const q = safe(() => t(r ? r[0] : px, r ? r[1] : py, Math.min(0.05, dt || 0.016), moving), null); if (q && q.length === 2) r = q; }); return r; };
       Z.decor = function (cx, cy) { const d = dd(cx, cy); ZX.decor.splice(0).forEach((fn) => safe(() => fn(GP, cx, cy, d))); if (spec.decor) safe(() => spec.decor(GP, cx, cy, d, K)); };
       Z.top = function (cx, cy) {
@@ -740,6 +741,7 @@
         if (CLK) safe(() => clkHud(GP));
         if (ALR) safe(() => alHud(GP));
         if (RAD && RAD.hud) safe(() => RAD.draw(GP, zid));
+        if (COLD && (spec.cold || spec.warm)) safe(() => COLD.draw(GP));
       };
       Z.onObj = function (ch, tx, ty) {
         let f = null;
@@ -910,6 +912,7 @@
         ...(RFT ? [["🦇 " + RFT.name, "Sui tetti puoi saltare (a rischio) o usare il rampino (sicuro, ma serve Agilità). Una caduta costa Vigore: a zero ti raccolgono e ti riportano al rifugio, dove riposi. Dall'alto puoi stordire una guardia, e una lampada rotta ti nasconde meglio."]] : []),
         ...(HCK ? [["💻 " + HCK.name, "Le consolle sulla mappa si usano con la statistica " + HCK.name + ": ogni comando costa punti e può deviare i droni, invertire i pavimenti elettrificati o aprire serrande. Chi forza la rete alza l'Allarme, e le sentinelle dei settori vicini aumentano."]] : []),
         ...(RAD ? [[RAD.icon + " " + RAD.name, "Apri il " + RAD.name + " dal Menu di zona per ruotare la scala in MHz. Più ti avvicini nel luogo giusto e alla frequenza esatta, più le tacche di ricezione salgono (da 0 a 5): con almeno 3 tacche puoi ascoltare trasmissioni nascoste, intercettare pattuglie o scoprire segnali QSL."]] : []),
+        ...(COLD ? [[COLD.icon + " " + COLD.name, "Nelle zone all'aperto fa freddo: il " + COLD.name + " (in alto a sinistra) scende col tempo. Risale vicino a un fuoco, a una stufa o al chiuso, nelle case. Se arriva a zero ti ritrovi al riparo, senza perdere niente, ma lontano da dove eri."]] : []),
         ...arr(safe(() => cfg.guide && cfg.guide(K), []))
       ];
       api.trAsk("voce", `<b>📖 Guida · ${esc(TITLE)}</b><br><span style="color:var(--dim)">Tocca un argomento. Qui ci sono solo le regole che usa questa saga.</span>`, T0.map((t) => ({ label: t[0], fn: () => say([["voce", t[1]]], () => guida(back)) })).concat([{ label: "◂ Indietro", fn: back }]), bgNow());
@@ -1164,23 +1167,23 @@
       function play(id, o, cb) {
         const L = LV[id]; if (!L) return safe(() => cb({ win: false }), null);
         const eng = window[C0.eng || "__scorri"], bonus = safe(() => (C0.bonus ? C0.bonus(K) : 0), 0) | 0;
-        ownMatch(eng.start, Object.assign({ title: L.name, level: Object.assign({ id }, L), bonus }, o || {}, { done: (r) => {
+        ownMatch(eng.start, Object.assign({ title: L.name, level: Object.assign({ id, kit: C0.kit }, L), bonus }, o || {}, { done: (r) => {
           r = r || {};
           if (r.win) { F.set("sc_" + id + "_w", true); F.set("sc_" + id + "_b", (F.get("sc_" + id + "_b", 0) | (r.banMask | 0))); if ((r.coins | 0) > F.get("sc_" + id + "_c", 0)) F.set("sc_" + id + "_c", r.coins | 0); const t = r.time | 0, bt = F.get("sc_" + id + "_t", 0); if (t && (!bt || t < bt)) F.set("sc_" + id + "_t", t); }
           safe(() => cb(r), null);
         } }));
       }
-      const line = (id) => { const L = LV[id], n = banTot(id), t = F.get("sc_" + id + "_t", 0); return `${L.icon || "🏰"} ${L.name}: ${won(id) ? "✓" : "—"}${n ? ` · 🚩 ${ban(id)}/${n}` : ""} · 🪙 ${F.get("sc_" + id + "_c", 0)}${t ? ` · ⏱ ${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}` : ""}`; };
-      const html = () => { const ids = Object.keys(LV).filter(won); if (!ids.length) return ""; const tt = total(); return `<br><br><b>${esc(C0.name || "I livelli")}</b> (stendardi ${tt[0]}/${tt[1]})<br>` + ids.map((id) => esc(line(id))).join("<br>"); };
+      const line = (id) => { const L = LV[id], n = banTot(id), t = F.get("sc_" + id + "_t", 0); return `${L.icon || "🏰"} ${L.name}: ${won(id) ? "✓" : "—"}${n ? ` · ${C0.banIcon || "🚩"} ${ban(id)}/${n}` : ""} · 🪙 ${F.get("sc_" + id + "_c", 0)}${t ? ` · ⏱ ${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}` : ""}`; };
+      const html = () => { const ids = Object.keys(LV).filter(won); if (!ids.length) return ""; const tt = total(); return `<br><br><b>${esc(C0.name || "I livelli")}</b> (${esc((C0.banName || "Stendardi").toLowerCase())} ${tt[0]}/${tt[1]})<br>` + ids.map((id) => esc(line(id))).join("<br>"); };
       function open(back) {
         const ids = Object.keys(LV).filter(won), tt = total();
-        const opts = ids.map((id) => ({ label: line(id), sub: LV[id].d || "Rigioca per gli stendardi mancanti e per migliorare il tempo", fn: () => play(id, {}, (r) => say([["voce", r.win ? `Livello superato. Gettoni ${r.coins | 0}, stendardi trovati ${r.ban | 0}/${r.banTot | 0}.` : "Livello lasciato a metà. I record restano quelli di prima."]], () => open(back))) }));
-        opts.unshift({ label: "🎮 Cortile d'allenamento", sub: "Prova subito i comandi a scorrimento: salto, calcio, sponda, molla", fn: () => practice(() => open(back)) });
+        const opts = ids.map((id) => ({ label: line(id), sub: LV[id].d || "Rigioca per gli stendardi mancanti e per migliorare il tempo", fn: () => play(id, {}, (r) => say([["voce", r.win ? `Livello superato. Gettoni ${r.coins | 0}, ${esc((C0.banName || "Stendardi").toLowerCase())} trovati ${r.ban | 0}/${r.banTot | 0}.` : "Livello lasciato a metà. I record restano quelli di prima."]], () => open(back))) }));
+        opts.unshift({ label: "🎮 " + (C0.practiceName || "Cortile d'allenamento"), sub: C0.practiceSub || "Prova subito i comandi a scorrimento: salto, calcio, sponda, molla", fn: () => practice(() => open(back)) });
         opts.push({ label: "◂ Indietro", fn: back || done });
-        ask("voce", `<b>${esc(C0.name || "I livelli")}</b><br><span style="color:var(--dim)">${ids.length ? `Stendardi trovati: ${tt[0]}/${tt[1]}. I livelli superati si rigiocano quando vuoi.` : esc(C0.hint || "Nessun livello superato, per ora. Intanto puoi allenarti nel cortile.")}</span>`, opts);
+        ask("voce", `<b>${esc(C0.name || "I livelli")}</b><br><span style="color:var(--dim)">${ids.length ? `${esc(C0.banName || "Stendardi")} trovati: ${tt[0]}/${tt[1]}. I livelli superati si rigiocano quando vuoi.` : esc(C0.hint || "Nessun livello superato, per ora. Intanto puoi allenarti nel cortile.")}</span>`, opts);
       }
       // prova libera: il livello d'allenamento del motore, senza record
-      function practice(cb) { const eng = window[C0.eng || "__scorri"]; ownMatch(eng.start, { title: "Cortile d'allenamento", bonus: safe(() => (C0.bonus ? C0.bonus(K) : 0), 0) | 0, done: () => safe(() => cb(), null) }); }
+      function practice(cb) { const eng = window[C0.eng || "__scorri"]; ownMatch(eng.start, { title: C0.practiceName || "Cortile d'allenamento", level: C0.practice ? Object.assign({ id: "prova", kit: C0.kit }, C0.practice) : undefined, kit: C0.kit, bonus: safe(() => (C0.bonus ? C0.bonus(K) : 0), 0) | 0, done: () => safe(() => cb(), null) }); }
       return { play, practice, won, ban, banTot, total, open, html, levels: LV };
     })();
 
@@ -1576,6 +1579,39 @@
       return { name: nm, icon: ic, freq, set, step, scan, tuned, tune, open, draw, html, statusTxt, tagCount, count: () => allSigs().filter((s) => tuned(s.id)).length, total: () => allSigs().length, hud: R0.hud !== false };
     })();
 
+    // -------------------------------------------------------------- IL TERMOMETRO (cfg.cold, opt-in): il freddo delle zone all'aperto
+    // cfg.cold = { name: "Calore", icon: "🌡️", max: 8, sec: 14, home: ["zona", tx, ty], onZero(K) → [[chi, testo]] }
+    // Nelle zone con spec.cold (true o un moltiplicatore: 2 = il doppio del freddo) il Calore scende di una tacca ogni `sec` secondi.
+    // Vicino a una fonte di calore (spec.warm = [[tx, ty, raggio]]: falò, stufe, sorgenti) e negli interni (interior: true) risale.
+    // A zero: scena onZero e si riparte da cfg.home col Calore pieno. K.cold = { get, set(n), add(d), warm(n) (= add), max, name, bar() }.
+    const COLD = cfg.cold && (() => {
+      const C0 = Object.assign({ name: "Calore", icon: "🌡️", max: 8, sec: 14 }, cfg.cold), mx = C0.max | 0 || 8;
+      const get = () => clampI(F.get("co_v", mx), 0, mx, mx), set = (n) => { F.set("co_v", clampI(n, 0, mx, mx)); return get(); }, add = (d) => set(get() + (d == null ? 1 : d));
+      let acc = 0, busy = false, near = false;
+      function tick(zid, spec, px, py, dt) {
+        if (busy) return null;
+        const tx = px / TS, ty = py / TS, w = arr(spec.warm); near = w.some((h) => Math.hypot(tx - h[0] - 0.5, ty - h[1] - 0.5) <= (h[2] || 2));
+        if (near || spec.interior) { acc -= dt; if (acc <= -1.5) { acc = 0; if (get() < mx) { add(1); if (get() === mx) note(C0.icon + " " + C0.name + " al massimo"); } } return null; }
+        if (!spec.cold) { acc = 0; return null; }
+        acc += dt * (typeof spec.cold === "number" ? spec.cold : 1); if (acc < C0.sec) return null; acc = 0;
+        add(-1); if (get() === 2) note(C0.icon + " Hai freddo: cerca un fuoco o un riparo");
+        if (get() > 0) return null;
+        busy = true; const h = C0.home || [zid, Math.floor(tx), Math.floor(ty)];
+        const ls = arr(safe(() => C0.onZero && C0.onZero(K), null)); set(mx);
+        setTimeout(() => safe(() => say(ls.length ? ls : [["voce", "Il freddo ti prende alle mani, poi alle ginocchia. Ti risvegli al caldo, avvolto in una coperta."]], () => { busy = false; go(h[0], h[1], h[2]); })), 0);
+        return null;
+      }
+      function draw(g) {
+        const c = g.canvas, v = get(), t = `${C0.icon} ${C0.name}`; g.save(); g.font = "bold 9px sans-serif"; const w = Math.max(g.measureText(t).width + 12, 7 * mx + 14), x = c.width - w - 4, y = 4;
+        g.fillStyle = "rgba(0,0,0,.6)"; g.fillRect(x, y, w, 25); g.fillStyle = near ? "#fdba74" : "#e0f2fe"; g.fillText(t + (near ? " ▲" : ""), x + 6, y + 10);
+        for (let i = 0; i < mx; i++) { g.fillStyle = i < v ? (v <= 2 ? "#60a5fa" : v <= mx / 2 ? "#fbbf24" : "#f97316") : "rgba(255,255,255,.2)"; g.fillRect(x + 6 + i * 7, y + 15, 5, 6); }
+        if (v <= 2 && Math.floor(frNow() / 20) % 2) { g.fillStyle = "rgba(147,197,253,.18)"; g.fillRect(0, 0, c.width, c.height); }
+        g.restore();
+      }
+      const bar = () => `${"▮".repeat(get())}${"▯".repeat(Math.max(0, mx - get()))}`;
+      return { get, set, add, warm: (n) => add(n == null ? 2 : n), max: mx, name: C0.name, icon: C0.icon, bar, tick, draw };
+    })();
+
     // -------------------------------------------------------------- kit per i capitoli
     const K = {
       get api() { return api; }, ID, TITLE, TS, T, esc, hash, rnd, pick, safe, F, mem, save, stepOf, setStep, note, once, reward, coinsGive, bal, hero, castHero, stat, bond,
@@ -1586,7 +1622,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, plan: PLN, scroll: SCR, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN, radio: RAD,
+      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, plan: PLN, scroll: SCR, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN, radio: RAD, cold: COLD,
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
       ending: (id, d) => { ENDINGS[id] = d; },
       continueStory: () => continueStory(), hasChapter: (n) => !!CHAPTERS[n], setInMatch: (v) => { inMatch = !!v; }, openMain: () => openMain(),
