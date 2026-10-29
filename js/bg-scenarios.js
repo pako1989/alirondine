@@ -10106,15 +10106,17 @@
       px(g, x - 1, y - 3, 2, 6, `rgba(255,255,255,${a + 0.2})`); px(g, x - 3, y - 1, 6, 2, `rgba(255,255,255,${a + 0.2})`);
     });
   }
-  function drawCaption(g, W) {
-    if (!S.cap) return; const age = (now() - S.capT) / 16; if (age > 230) { S.cap = null; return; }
-    const a = Math.min(1, (230 - age) / 30);
+  // la didascalia resta finché non tocchi un altro punto, la didascalia stessa, o cambi schermata
+  function drawCaption(g, W, k) {
+    if (!S.cap) return; if (S.capK !== k) { S.cap = null; return; }
+    const a = Math.min(1, (now() - S.capT) / 160);
     g.save(); g.font = "9px Georgia, serif"; g.textAlign = "left"; g.textBaseline = "alphabetic";
     const words = S.cap.split(" "), out = []; let line = "";
     words.forEach((w) => { const t = line ? line + " " + w : w; if (g.measureText(t).width > W - 28) { out.push(line); line = w; } else line = t; }); if (line) out.push(line);
     const h = out.length * 11 + 8;
     g.globalAlpha = a; px(g, 6, 4, W - 12, h, "rgba(251,247,236,.94)"); px(g, 6, 4, W - 12, 1, "#3b3a4a"); px(g, 6, 3 + h, W - 12, 1, "#3b3a4a");
     g.fillStyle = "#2a2838"; out.forEach((l, i) => g.fillText(l, 13, 15 + i * 11));
+    g.fillStyle = "#7a7688"; g.textAlign = "right"; g.fillText("✕", W - 10, 13); S.capH = h + 6;
     g.restore();
   }
   let bound = false;
@@ -10125,9 +10127,11 @@
       const r = cv.getBoundingClientRect(), x = ((e.clientX - r.left) / r.width) * L.W, y = ((e.clientY - r.top) / r.height) * L.H;
       const hot = LB[L.k].hot || []; let idx = -1;
       for (let i = hot.length - 1; i >= 0; i--) { const h = hot[i]; if (x >= h[0] && x <= h[0] + h[2] && y >= h[1] && y <= h[1] + h[3]) { idx = i; break; } }
+      if (S.cap && y <= (S.capH || 0)) { S.cap = null; return; }
       if (idx < 0) return;
       const h = hot[idx]; S.act[L.k + ":" + idx] = now(); if (h[5] === "tog") S.act["tog:" + L.k + ":" + idx] = !S.act["tog:" + L.k + ":" + idx];
-      S.cap = h[4]; S.capT = now();
+      if (S.cap === h[4] && S.capK === L.k) { S.cap = null; return; }
+      S.cap = h[4]; S.capT = now(); S.capK = L.k;
       try { if (window.__libroFinali && window.__libroFinali.SFX) window.__libroFinali.SFX.page(); } catch (er) {}
     });
   }
@@ -10138,8 +10142,9 @@
       bind();
       W = W || 320; H = H || 200; const f = frame || 0;
       try { def.draw(g, W, H, f); } catch (e) { px(g, 0, 0, W, H, "#f4ecd8"); }
+      if (S.cap && now() - S.last.t > 800) S.cap = null;
       S.last = { k: kind, t: now(), W, H };
-      try { drawMarkers(g, kind, f); drawCaption(g, W); } catch (e) {}
+      try { drawMarkers(g, kind, f); drawCaption(g, W, kind); } catch (e) {}
       return true;
     }
     return typeof prev === "function" ? prev.apply(this, arguments) : false;
