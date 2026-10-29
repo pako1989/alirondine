@@ -548,6 +548,10 @@
       opp: [{ name: "Guardiani del Cantiere", color: "#475569", style: "difensiva" }, { name: "G.S. Poste & Telegrafi", color: "#eab308", style: "equilibrata" }],
       boss: { name: "Specchio Sporting Club", color: "#38bdf8", style: "pressing" },
       opts: (o, h, boss) => ({ title: `Onde d'Urto · ${o.name}`, opp: o.name, oppColor: o.color, oppStyle: o.style, us: (h && h.name) || "Radio 99.9", venue: boss ? "stadio" : o.name.includes("Poste") ? "cortile" : "carbone", track: boss ? "finale" : "rock", staticCount: boss ? 4 : o.name.includes("Poste") ? 3 : 2, halfSec: 22 }) },
+    { id: "ritmo", t: "Ritmo", e: "🥁", saga: "banda", eng: "__ritmo", d: "Brani a tempo con la banda di Borgo Marino: tocchi grancassa, rullante, piatti e ottoni quando la nota arriva sul cerchio. Concerti, sfilate col passo e duelli contro l'altoparlante.",
+      opp: [{ name: "La Marcia d'ingresso", song: "ingresso", venue: "sala", color: "#7f1d1d", style: "equilibrata" }, { name: "Sotto la pioggia", song: "pioggia", mode: "sfilata", venue: "pioggia", color: "#1e40af", style: "contropiede" }, { name: "Il derby contro la cassa", song: "derby", mode: "duello", venue: "stadio", color: "#0ea5e9", style: "pressing" }, { name: "La tarantella del molo", song: "tarantella", venue: "piazza", color: "#b45309", style: "pressing" }],
+      boss: { name: "La Marcia della Rondine", song: "rondine", venue: "venezia", color: "#facc15", style: "pressing" },
+      opts: (o, h, boss) => ({ title: `Ritmo · ${o.name}`, song: o.song || "ingresso", mode: o.mode || "concerto", venue: o.venue, need: boss ? 0.7 : 0.6, bonus: 1, tutorial: false, mates: [{ id: "bp_rocco", n: "Rocco" }, { id: "bp_lilli", n: "Lilli" }, { id: "bp_ciro", n: "Zio Ciro" }] }) },
   ];
   function sgState(m) { const s = SAGAS.find((x) => x.id === m.saga), x = s ? state(s) : null; return { s, open: !!(x && (x.doneN >= 1)), boss: !!(x && x.endsFound > 0) }; }
   function openSalaGiochi(back) {

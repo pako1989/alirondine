@@ -26,7 +26,7 @@
         build(L) {
           const { lay, put, house } = L;
           lay(0, 0, 31, 0, "a"); lay(0, 21, 31, 23, "w"); lay(0, 19, 31, 20, ":");
-          lay(0, 7, 0, 18, "t"); lay(31, 7, 31, 18, "t"); if (o.east) { put(31, 12, "q"); put(31, 13, "q"); }
+          lay(0, 7, 0, 18, "t"); lay(31, 7, 31, 18, "t"); if (o.east) { put(31, 12, "q"); put(31, 13, "q"); } if (o.west) { put(0, 12, "q"); put(0, 13, "q"); }
           house(2, 1, 8, 6, { door: [5, 6], roof: "#7f1d1d", wall: "#e7d7b5", chimney: false, enter: { to: "bp_sala", at: [8, 9] } });
           house(12, 1, 6, 5, { door: [14, 5], roof: "#9a3412", wall: "#fde68a", chimney: true, enter: { to: "bp_trattoria", at: [7, 8] } });
           house(20, 1, 7, 5, { door: [23, 5], roof: "#334155", wall: "#cbd5e1", enter: o.municipio || "Il Municipio. All'ingresso un cartellone: «STADIO DEL FUTURO · rendering». Nel rendering la tribuna è piena di gente che sorride a una cassa audio." });
@@ -44,7 +44,7 @@
         decor(g, cx, cy, d) {
           const f = window.__sagaCore.util.frNow(); H.kiosk(g, d, 23, 12, 4, f); H.fountain(g, d, 14, 11, f);
           H.plaque(g, "SAN ROCCO · SALA PROVE", d.X(6) + 8, d.Y(1) - 6, "#fde68a"); H.plaque(g, "TRATTORIA SORA NANÀ", d.X(14) + 8, d.Y(1) - 6, "#fca5a5"); H.plaque(g, "MUNICIPIO", d.X(23) + 8, d.Y(1) - 6, "#cbd5e1"); H.plaque(g, "CASSA ARMONICA", d.X(24) + 16, d.Y(14) + 10, "#86efac");
-          if (o.east) H.plaque(g, "IL CORSO ▸", d.X(30) + 8, d.Y(11) - 6, "#93c5fd");
+          if (o.east) H.plaque(g, "IL CORSO ▸", d.X(30) + 8, d.Y(11) - 6, "#93c5fd"); if (o.west) H.plaque(g, "◂ IL COLLE", d.X(1) + 8, d.Y(11) - 6, "#fdba74");
         }
       };
     },
@@ -64,6 +64,22 @@
           put(13, 2, "E"); put(2, 7, "E"); lay(1, 1, 4, 1, "L"); put(14, 7, "n"); put(14, 4, "l"); put(11, 8, "T"); put(1, 4, "x");
         },
         decor(g, cx, cy, d) { H.plaque(g, "SALA PROVE", d.X(8) + 8, d.Y(0) + 6, "#fde68a"); }
+      };
+    },
+    // casa di Zio Ciro (12x9), dal capitolo 2
+    casaciro(H, npcs, o) {
+      o = o || {};
+      return {
+        interior: true, region: "casa", name: "La casa di Zio Ciro", short: "Casa di Ciro", sub: "Una cucina, una finestra sul mare e una custodia aperta", bg: "bp_casaciro", w: 12, h: 9, start: [6, 7], outside: ["bp_piazza", 29, 6], base: "=",
+        act: { C: "Guarda la tromba", T: "Guarda il tavolo", D: "Guarda la credenza", W: "Guarda dalla finestra", B: "Guarda il letto", H: "Guarda la stufa", L: "Guarda la mensola" },
+        flavor: Object.assign({ C: "La tromba di Ciro, nella custodia aperta. L'ottone è lucido. Accanto, un panno ancora umido di lucidante.", T: "Un tavolo con due sedie. Una ha il cuscino consumato, l'altra no.", D: "Sulla credenza, la foto di un ragazzo con la tromba in mano, al contrario. Sorride come chi ha appena fatto uno scherzo. Accanto, un lumino acceso.", W: "La finestra sul mare. Le tende sono aperte, i vetri chiusi.", B: "Un letto rifatto con gli angoli tirati, come in caserma o in barca.", H: "Una stufa di ghisa. Sopra, una caffettiera da sei che nessuno usa più da sei.", L: "Una mensola con dei sassi del mare, ognuno con una data scritta a pennarello." }, o.flavor || {}),
+        npcs: npcs, loot: o.loot || {}, intro: o.intro,
+        build(L) {
+          const { lay, put } = L;
+          lay(0, 0, 11, 8, "="); lay(0, 0, 11, 0, "a"); lay(0, 0, 0, 8, "a"); lay(11, 0, 11, 8, "a"); lay(0, 8, 11, 8, "a"); put(6, 8, "v");
+          put(8, 0, "W"); put(9, 0, "W"); put(5, 3, "T"); put(6, 3, "C"); put(1, 2, "D"); put(10, 6, "B"); put(10, 7, "B"); put(2, 6, "H"); put(4, 0, "L");
+        },
+        decor(g, cx, cy, d) { H.plaque(g, "CASA ESPOSITO", d.X(6) + 8, d.Y(0) + 6, "#fca5a5"); }
       };
     },
     trattoria(H, npcs, o) {

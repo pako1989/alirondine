@@ -436,7 +436,7 @@
     function setTiles(x0, y0, x1, y1, ch) { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (ZX.map && ZX.map[y] && x >= 0 && x < ZX.map[y].length) { ZX.map[y][x] = ch; if (isFloor(ch) && ZX.under && ZX.under[y]) ZX.under[y][x] = ch; } }
     function go(zid, tx, ty) { const tr = api.trRec(); tr.pos[zid] = [tx * TS + 8, ty * TS + 12]; enterZone(zid); }
     function enterZone(zid) {
-      const zr = ZONES[zid]; if (!zr) return;
+      pickZone(zid); const zr = ZONES[zid]; if (!zr) return;
       const m = mem(); m.zone = zid; m.last = Date.now(); save();
       castHero(); api.trRec().seen[zid] = true;
       FX.enter = frNow(); FX.title = zr.spec.short;
@@ -678,6 +678,7 @@
       g.drawImage(BUIO_CV, 0, 0);
       g.save(); g.globalCompositeOperation = "lighter"; L.forEach(([tx, ty, r, rgb]) => glow(g, tx * TS + 8 - cx, ty * TS + 8 - cy, (r || 3) * TS * 0.8, rgb || "255,200,120", 0.16)); if (p) glow(g, p[0] - cx, p[1] - cy - 8, (spec.heroLight || 3) * TS * 0.6, "255,220,160", 0.1); g.restore();
     }
+    const ZALL = {};
     function registerZone(chN, zid, spec) {
       const rk = spec.region && REG[spec.region] ? spec.region : REG_FIRST;
       const syncZX = () => { const es = eraSpec(zid), rk2 = es && es.region && REG[es.region] ? es.region : rk; ZX.id = zid; ZX.rk = rk2; ZX.rg = REG[rk2]; ZX.era = es; ZX.eraName = eraOf(zid); ZX.spec = spec; ZX.standCol = spec.stands; ZX.chestOpen = (tx, ty) => F.is(chestKey(zid, tx, ty)); };
@@ -768,6 +769,13 @@
       PLUG.forEach((p) => p.zone && safe(() => p.zone(zid, spec, Z, K)));
       api.TRZ[zid] = Z;
       ZONES[zid] = { ch: chN, spec, Z };
+      (ZALL[zid] = ZALL[zid] || {})[chN] = ZONES[zid];
+    }
+    // una zona ridefinita da più capitoli (stesso id): vale la versione dell'ultimo capitolo che la definisce, fino a quello in corso
+    function pickZone(zid) {
+      const all = ZALL[zid], ns = all ? Object.keys(all).map(Number).sort((a, b) => a - b) : []; if (ns.length < 2) return;
+      const m = mem(); let n = ns[0]; ns.forEach((k) => { if (k <= m.ch) n = k; });
+      if (ZONES[zid] !== all[n]) { ZONES[zid] = all[n]; api.TRZ[zid] = all[n].Z; }
     }
 
     // -------------------------------------------------------------- stanze automatiche: arredi diversi per ogni casa (seme = id)

@@ -155,18 +155,7 @@
         flavor: { P: "La cassa armonica sotto il cielo grigio. Il tetto verde gocciola a tempo, più o meno." },
         intro: [["voce", "Domenica mattina. Il cielo è grigio, la piazza è lucida di pioggia e le campane di San Rocco suonano in anticipo, come sempre."], ["voce", "Il Maestro Ferrante aspetta sotto la cassa armonica, l'unico posto asciutto della piazza. Ha già guardato l'orologio tre volte."]]
       }),
-      bp_casaciro: {
-        interior: true, region: "casa", name: "La casa di Zio Ciro", short: "Casa di Ciro", sub: "Una cucina, una finestra sul mare e una custodia aperta", bg: "bp_casaciro", w: 12, h: 9, start: [6, 7], outside: ["bp_piazza", 29, 6], base: "=",
-        act: { C: "Guarda la tromba", T: "Guarda il tavolo", D: "Guarda la credenza", W: "Guarda dalla finestra", B: "Guarda il letto", H: "Guarda la stufa", L: "Guarda la mensola" },
-        flavor: { C: "La tromba di Ciro, nella custodia aperta. L'ottone è lucido. Accanto, un panno ancora umido di lucidante.", T: "Un tavolo con due sedie. Una ha il cuscino consumato, l'altra no.", D: "Sulla credenza, la foto di un ragazzo con la tromba in mano, al contrario. Sorride come chi ha appena fatto uno scherzo. Accanto, un lumino acceso.", W: "La finestra sul mare. Le tende sono aperte, i vetri chiusi.", B: "Un letto rifatto con gli angoli tirati, come in caserma o in barca.", H: "Una stufa di ghisa. Sopra, una caffettiera da sei che nessuno usa più da sei.", L: "Una mensola con dei sassi del mare, ognuno con una data scritta a pennarello." },
-        npcs: () => [{ id: "bp_ciro", at: [4, 4] }],
-        build(L) {
-          const { lay, put } = L;
-          lay(0, 0, 11, 8, "="); lay(0, 0, 11, 0, "a"); lay(0, 0, 0, 8, "a"); lay(11, 0, 11, 8, "a"); lay(0, 8, 11, 8, "a"); put(6, 8, "v");
-          put(8, 0, "W"); put(9, 0, "W"); put(5, 3, "T"); put(6, 3, "C"); put(1, 2, "D"); put(10, 6, "B"); put(10, 7, "B"); put(2, 6, "H"); put(4, 0, "L");
-        },
-        decor(g, cx, cy, d) { H.plaque(g, "CASA ESPOSITO", d.X(6) + 8, d.Y(0) + 6, "#fca5a5"); }
-      },
+      bp_casaciro: Z.casaciro(H, () => [{ id: "bp_ciro", at: [4, 4] }]),
       bp_corso: {
         region: "corso", name: "Il corso sotto la pioggia", short: "Corso", sub: "Dal sagrato al porto, tra ombrelli e luminarie spente", bg: "bp_corso", time: "giorno", w: 34, h: 22, base: ",", start: [2, 10], travel: [2, 10],
         items: [[9, 6], [22, 15], [30, 8], [15, 17]], itemCos: "bp_c2",

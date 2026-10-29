@@ -122,6 +122,54 @@ async function lose3(w) {
   } catch (e) { errors.push(e.message.slice(0, 300)); }
   L.check(`Banda · derby perso (${w} px)`, errors); await browser.close();
 }
+const S4 = { v: 1, diffSet: true, intro: { ch1: 1, ch2: 1, ch3: 1, ch4: 1, bp_piazza: 1, bp_sala: 1, bp_casaciro: 1, bp_archivio: 1, bp_colle: 1 }, ch: 4, step: { 1: 4, 2: 4, 3: 5 }, done: { 1: "ok", 2: "ok", 3: "ok" }, flags: { bp_c1_done: 1, bp_c2_done: 1, bp_c3_done: 1, bp_m_bp_rocco: 1, bp_m_bp_abele: 1, bp_lilli_via: 1 } };
+async function flow4(w, alt) {
+  const { browser, page, errors } = await start(w, S4, "Inizia il Capitolo 4");
+  await stub(page, true, 93);
+  try {
+    await page.evaluate((k) => eval(k).inv.give("bp_bocchino"), K_);
+    await go(page, "bp_piazza", 21, 16); await L.talk(page, "bp_abele"); await L.advance(page); await st(page, errors, 4, 1, "dopo Don Abele");
+    await L.talk(page, "bp_lilli"); await L.advance(page, [alt ? "La banda è più debole" : "Scusa"]);
+    if (!(await page.evaluate((k) => eval(k).F.is("bp_m_bp_lilli"), K_))) errors.push("Lilli non è tornata");
+    for (const id of ["bp_rocco", "bp_nana", "bp_bracco"]) { await L.talk(page, id); await L.advance(page); }
+    await go(page, "bp_archivio", 7, 8); await L.talk(page, "bp_abele"); await L.advance(page); await L.goAct(page, 11, 6); await L.advance(page);
+    await go(page, "bp_casaciro", 6, 6); await L.talk(page, "bp_ciro"); await L.advance(page);
+    if (await page.evaluate((k) => eval(k).inv.has("bp_bocchino"), K_)) errors.push("bocchino non restituito");
+    await go(page, "bp_colle", 21, 13); await L.goAct(page, 22, 12); await L.advance(page); await L.goAct(page, 24, 4); await L.advance(page);
+    const f = await page.evaluate((k) => eval(k).stat("fogli"), K_); if (f !== 3) errors.push("fogli dopo il giro: " + f);
+    await st(page, errors, 4, 2, "dopo tre fogli");
+    await go(page, "bp_sala", 8, 4); await L.talk(page, "bp_lilli"); await L.advance(page); await L.talk(page, "bp_ferrante"); await L.advance(page, [alt ? "La tenga lei" : "La marcia è del Borgo"]);
+    await st(page, errors, 4, 3, "dopo il Maestro");
+    await go(page, "bp_colle", 23, 6); await L.talk(page, "bp_rocco"); await L.advance(page); await L.talk(page, "bp_ciro"); await L.advance(page, ["Aspetta il tramonto", alt ? "Lilli" : "Zio Ciro"]); await L.advance(page).catch(() => {});
+    const lg = await page.evaluate(() => window.__rtLog); if (!lg || !lg.length || lg[0].song !== "ciro") errors.push("brano di Ciro mal configurato: " + JSON.stringify(lg));
+    const i = await L.info(page); if (i.done[4] !== "ok") errors.push("capitolo 4 non concluso: " + JSON.stringify([i.done, i.step]));
+    const fl = await page.evaluate(([k, a]) => [eval(k).stat("fogli"), eval(k).F.is("bp_pace_ciro"), eval(k).F.is("bp_m_bp_ciro"), eval(k).F.is(a ? "bp_assolo_lilli" : "bp_assolo_ciro"), eval(k).F.is("bp_pace_ferrante")], [K_, !!alt]);
+    if (fl[0] !== (alt ? 3 : 4) || !fl[1] || !fl[2] || !fl[3] || fl[4] === !!alt) errors.push("stato finale sbagliato: " + JSON.stringify(fl));
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check(`Banda · capitolo 4${alt ? " (vie alternative)" : ""} (${w} px)`, errors); await browser.close();
+}
+const S5 = { v: 1, diffSet: true, intro: { ch1: 1, ch2: 1, ch3: 1, ch4: 1, ch5: 1, bp_venezia: 1, bp_locanda: 1, bp_teatro: 1 }, ch: 5, step: { 1: 4, 2: 4, 3: 5, 4: 5 }, done: { 1: "ok", 2: "ok", 3: "ok", 4: "ok" }, st: { fogli: 3, cuore: 5, rigore: 2 }, flags: { bp_c1_done: 1, bp_c2_done: 1, bp_c3_done: 1, bp_c4_done: 1, bp_m_bp_rocco: 1, bp_m_bp_lilli: 1, bp_m_bp_ciro: 1, bp_pace_ciro: 1, bp_fer_tiene: 1, bp_f1: 1, bp_f2: 1, bp_f3: 1, bp_assolo_ciro: 1 } };
+// mode: "rondine" (notte col cuore → quarto foglio → finale segreto) · "borgo"/"trofeo" (Gran Concerto) · "cassa" (perso due volte)
+async function flow5(w, mode) {
+  const { browser, page, errors } = await start(w, S5, "Inizia il Capitolo 5");
+  await stub(page, mode !== "cassa", 90);
+  try {
+    if (mode === "trofeo") await page.evaluate((k) => eval(k).bond("rigore", 8), K_);
+    await go(page, "bp_venezia", 16, 19); await L.talk(page, "bp_ferrante"); await L.advance(page); await st(page, errors, 5, 1, "dopo l'arrivo");
+    for (const id of ["bp_rocco", "bp_abele", "bp_nana"]) { await L.talk(page, id); await L.advance(page); }
+    await go(page, "bp_venezia", 8, 9); await L.talk(page, "bp_doge"); await L.advance(page, ["Grazie"]); await st(page, errors, 5, 2, "dopo il Doge");
+    await go(page, "bp_locanda", 6, 4); await L.talk(page, "bp_ciro"); await L.advance(page); await L.talk(page, "bp_lilli"); await L.advance(page);
+    await L.talk(page, "bp_ferrante"); await L.advance(page, [mode === "rondine" ? "Domani non conti" : "Domani conti"]); await st(page, errors, 5, 3, "dopo la notte");
+    await go(page, "bp_venezia", 21, 9); await L.talk(page, "bp_gigi"); await L.advance(page);
+    await go(page, "bp_teatro", 8, 6); for (const id of ["bp_doge", "bp_bracco", "bp_ciro"]) { await L.talk(page, id); await L.advance(page); }
+    await L.talk(page, "bp_ferrante"); await L.advance(page, [mode === "rondine" ? "La Marcia della Rondine" : "Il Gran Concerto", "Chiedi la seconda", "Accetta il verdetto"]); await L.advance(page).catch(() => {});
+    const lg = await page.evaluate(() => window.__rtLog); const want = mode === "rondine" ? "rondine" : "venezia";
+    if (!lg || !lg.length || lg[0].song !== want || (mode === "cassa" && lg.length !== 2)) errors.push("concerto mal configurato: " + JSON.stringify(lg));
+    const i = await L.info(page); if (i.done[5] !== mode) errors.push("finale sbagliato: " + JSON.stringify([i.done, i.ends, i.st]));
+    if (!i.ends.includes(mode)) errors.push("finale non registrato: " + JSON.stringify(i.ends));
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check(`Banda · capitolo 5, finale ${mode} (${w} px)`, errors); await browser.close();
+}
 (async () => {
   const only = process.argv[2] || "";
   for (const w of [390, 320]) {
@@ -131,6 +179,10 @@ async function lose3(w) {
     if (!only || only === "zone2") await zones(w, S2, "Inizia il Capitolo 2", ["bp_piazza", "bp_casaciro", "bp_corso"], "cap. 2");
     if (!only || only === "c2") { await flow2(w, false); if (w === 390) await flow2(w, true); }
     if (!only || only === "zone3") await zones(w, S3, "Inizia il Capitolo 3", ["bp_stadio", "bp_sottotribuna", "bp_regia"], "cap. 3");
+    if (!only || only === "zone5") await zones(w, S5, "Inizia il Capitolo 5", ["bp_venezia", "bp_locanda", "bp_teatro"], "cap. 5");
+    if (!only || only === "c5") { await flow5(w, "rondine"); if (w === 390) { await flow5(w, "borgo"); await flow5(w, "trofeo"); await flow5(w, "cassa"); } }
     if (!only || only === "c3") { await flow3(w, false); if (w === 390) { await flow3(w, true); await lose3(w); } }
+    if (!only || only === "zone4") await zones(w, S4, "Inizia il Capitolo 4", ["bp_piazza", "bp_sala", "bp_casaciro", "bp_archivio", "bp_colle"], "cap. 4");
+    if (!only || only === "c4") { await flow4(w, false); if (w === 390) await flow4(w, true); }
   }
 })();
