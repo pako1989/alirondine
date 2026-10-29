@@ -126,5 +126,11 @@
       ponte_radio: TW("Ponte Radio sul Golfo", "📡", "I pescherecci al largo rilanciano il segnale da una barca all'altra.", "Il segnale rimbalza fino a Punta Scura: arrivano offerte e monete da tutto il golfo!", "La nebbia assorbe metà della portante: il premio arriva un po' attenuato.", (c, w) => (w ? Math.round(c * 1.25) : Math.round(c * 0.9)))
     }
   });
+
+  D("alc2", "Fuga da Alcatraz FC 2 · L'Ultimo Rientro", "🌊", "ali-di-rondine.alcatraz2", "Valvole idrauliche, immersioni e paratie a rimbalzo: l'ultimo rientro nella fortezza sommersa.",
+    { id: "alc2_rebecca", n: "Rebecca Bullone", i: "🔧", tr: "audacia", d: "Sommozzatrice d'infiltrazione e ala tornante: conosce ogni condotto allagato.", greet: (a) => `Tieni pronta la muta: a ${a} l'acqua è fredda, ma i rimbalzi scaldano la serata.`, win: "Parabola perfetta a pelo d'acqua! Nemmeno le paratie della Vipera l'avrebbero fermata.", lose: "La corrente ha deviato il tiro... ma una saldatura tiene sempre." },
+    E3("La Valvola di Fondo", "🚰", "Una saracinesca idraulica è bloccata dalla salsedine sul molo.", ["Tra le condotte di scarico spunta una valvola di bronzo del 1918 incrostata dal sale.", "Serve sbloccarla prima che la pressione allaghi il settore. Che attrezzo usiamo?"],
+      [["La chiave a brugola 14", "furbizia", "Precisione meccanica.", "La chiave fa presa perfetta: un mezzo giro e l'acqua defluisce tra gli applausi dei marinai.", "La brugola slitta sui dadi arrugginiti. Tocca passare alle maniere forti."], ["Spinta di spalla con Rebecca", "audacia", "Forza e sincronismo.", "Uno, due, tre... spinta! Il pistone si sblocca con un sibilo di vapore e il premio schizza via!", "La spallata fa rumore ma non smuove il pistone: Rebecca scuote la testa ridendo."], ["Versa olio di vaselina", "cuore", "Pazienza e cura.", "L'olio penetra nelle scanalature: la manopola gira morbida come burro.", "L'olio finisce in mare attirando due gabbiani curiosi: niente da fare per ora."]]),
+    TW("Onda di Riflusso", "🌊", "Un'onda di riflusso rimbalza sulle paratie metalliche.", "L'onda di riflusso spinge il pallone direttamente in rete: il bottino raddoppia!", "La risacca risucchia il rimbalzo: il premio si attenua tra la schiuma.", (c, w) => (w ? Math.round(c * 1.3) : Math.round(c * 0.9))));
 })();
 

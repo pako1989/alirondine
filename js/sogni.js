@@ -61,6 +61,7 @@
     naufraghi: ["ali-di-rondine.naufraghi", "Naufraghi del Pallone", "#0e9aa7", "__naufraghi"],
     piramide: ["ali-di-rondine.piramide", "La Piramide del Sole", "#f59e0b", "__piramide"],
     alcatraz: ["ali-di-rondine.alcatraz", "Fuga da Alcatraz FC", "#38bdf8", "__alcatraz"],
+    alcatraz2: ["ali-di-rondine.alcatraz2", "Fuga da Alcatraz FC 2", "#0284c7", "__alcatraz2"],
     treno: ["ali-di-rondine.treno", "L'Espresso delle Ombre", "#38bdf8", "__treno"],
     campana: ["ali-di-rondine.campana", "La Notte dei Cento Rintocchi", "#ca8a04", "__campana"],
     regno: ["ali-di-rondine.regno", "Cronache del Regno Ultimo", "#a82a3a", "__regno"],
@@ -255,6 +256,9 @@
     // Fuga da Alcatraz FC · La Grande Evasione
     ["alc_bruno", "alcatraz", "r", 68, 62, 82, "C", 1], ["alc_cardenas", "alcatraz", "c", 50, 78, 60, "D", 1], ["alc_sam", "alcatraz", "c", 76, 52, 70, "A", 1],
     ["alc_malick", "alcatraz", "e", 60, 88, 54, "D", 2], ["alc_tonelli", "alcatraz", "r", 62, 64, 76, "C", 2],
+    // Fuga da Alcatraz FC 2 · L'Ultimo Rientro
+    ["alc2_bruno", "alcatraz2", "e", 66, 86, 78, "D", 2], ["alc2_rebecca", "alcatraz2", "r", 84, 58, 82, "A", 1], ["alc2_sam", "alcatraz2", "r", 74, 64, 84, "C", 2],
+    ["alc2_vane", "alcatraz2", "l", 52, 90, 76, "P", 4], ["alc2_gaetano", "alcatraz2", "c", 68, 78, 80, "C", 3],
     // La Piramide del Sole · Il Segreto dei Maya del Pallone
     ["my_alvarez", "piramide", "r", 56, 66, 74, "C", 1], ["my_ixchel", "piramide", "r", 72, 60, 84, "A", 1], ["my_diego", "piramide", "c", 52, 58, 70, "C", 1],
     ["my_vargas", "piramide", "e", 78, 72, 62, "D", 2], ["my_kukulkan", "piramide", "l", 86, 84, 80, "D", 3],
@@ -1314,6 +1318,7 @@
       circuiti: "Pilota e atleta potenziato nella metropoli al neon del 2099. Riflessi cibernetici e scatti fulminei a frequenza quantistica.",
       vallombra: "Custode dei misteri di Vallombra e delle sue tradizioni secolari. Freddo nei momenti decisivi, gioca con cuore d'acciaio.",
       alcatraz: "Veterano della prigione più dura, sa cosa significa lottare per ogni centimetro di campo senza mai abbassare la guardia.",
+      alcatraz2: "Infiltrato tra le condotte allagate del penitenziario sotterraneo, gioca di rimbalzo calibrando ogni traiettoria contro le paratie a pressione.",
       treno: "Viaggiatore dell'Espresso delle Ombre, abituato a muoversi nel fumo e a leggere i punti deboli di chiunque in un batter d'occhio.",
       gala: "Figura di spicco nei salotti e negli stadi più prestigiosi del mondo. Classe cristallina e visione di gioco da gran galà.",
       spia: "Agente sotto copertura con licenza di cross. Calcola ogni traiettoria al millimetro prima ancora che il pallone tocchi terra.",
