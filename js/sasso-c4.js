@@ -23,6 +23,22 @@
     sn_yumi: "Ho ballato per tre signori. Per voi... avrei ballato gratis.",
     sn_masa: "Settant'anni di fiume. La rete stavolta l'ho gettata con gli occhi aperti."
   };
+  // le porte cadute perdono le costruzioni e feriscono chi le difendeva; la seconda ferita uccide, una guaritrice viva salva uno a notte
+  function wounds(K, H, fell, m) {
+    const F = K.F, say = H.say, nm = (id) => K.crew.members[id].n, dead = (id) => F.is("sn_morto_" + id);
+    let saved = false;
+    fell.forEach((g) => {
+      (K.build ? K.build.list(g) : []).forEach((b) => F.set("bd_" + b.site, ""));
+      const id = m[g]; if (!id || dead(id) || !K.crew.has(id)) return;
+      const w = (F.get("sn_ferite_" + id, 0) | 0) + 1;
+      if (w < 2) { F.set("sn_ferite_" + id, w); say("voce", `La ${K.plan.roles[g].n} è caduta. <b>${nm(id)}</b> è ferito: una seconda ferita, e non si rialza.`); return; }
+      const healer = H.alive().find((h) => h !== id && K.crew.members[h].pow === "cura");
+      if (healer && !saved) { saved = true; F.set("sn_ferite_" + id, 1); say(healer, `[serio] (${nm(healer)} lavora tutta la notte su ${nm(id)}, con le erbe, l'ago e le preghiere.) Vive. Per stavolta. Non chiedetemi di rifarlo stanotte.`); return; }
+      F.set("sn_morto_" + id, true); K.crew.leave(id);
+      say(id, `[triste] ${LAST[id] || "..."}`); say("voce", `<b>${nm(id)} è caduto alla ${K.plan.roles[g].n}.</b> Lo portano sulla collina, sotto il ciliegio. Una spada piantata nella terra.`);
+    });
+  }
+  window.__sassoWounds = wounds;
   const NIGHTS = {
     1: { title: "La prima delle tre notti", granaio: 24, waves: [[["base", 5]], [["base", 4], ["lesto", 3]], [["scudo", 2], ["base", 4]]] },
     2: { title: "La seconda notte", granaio: 24, waves: [[["base", 6]], [["lesto", 4], ["base", 3]], [["scudo", 3], ["base", 4]], [["capo", 1], ["base", 4]]] },
@@ -54,17 +70,7 @@
       F.set("sn_notte4", n); if (r.win) F.set("sn_vinta" + n, true);
       if (!r.win) { K.bond("riso", -3); say("voce", "I predoni arrivano al granaio. Prendono tre sacchi e scappano prima dell'alba, ridendo nel buio."); }
       else say("voce", `L'ultima ondata si ritira verso il passo. ${fell.length ? "Ma non senza danni." : "Le porte hanno retto tutte e quattro."}`);
-      let saved = false;
-      fell.forEach((g) => {
-        (K.build ? K.build.list(g) : []).forEach((b) => F.set("bd_" + b.site, ""));
-        const id = m[g]; if (!id || dead(id) || !K.crew.has(id)) return;
-        const w = (F.get("sn_ferite_" + id, 0) | 0) + 1;
-        if (w < 2) { F.set("sn_ferite_" + id, w); say("voce", `La ${K.plan.roles[g].n} è caduta. <b>${nm(id)}</b> è ferito: una seconda ferita, e non si rialza.`); return; }
-        const healer = H.alive().find((h) => h !== id && K.crew.members[h].pow === "cura");
-        if (healer && !saved) { saved = true; F.set("sn_ferite_" + id, 1); say(healer, `[serio] (${nm(healer)} lavora tutta la notte su ${nm(id)}, con le erbe, l'ago e le preghiere.) Vive. Per stavolta. Non chiedetemi di rifarlo stanotte.`); return; }
-        F.set("sn_morto_" + id, true); K.crew.leave(id);
-        say(id, `[triste] ${LAST[id] || "..."}`); say("voce", `<b>${nm(id)} è caduto alla ${K.plan.roles[g].n}.</b> Lo portano sulla collina, sotto il ciliegio. Una spada piantata nella terra.`);
-      });
+      wounds(K, H, fell, m);
       const gift = 5; K.bond("legno", gift); say("voce", `All'alba i contadini smontano una stalla per le palizzate: <b>+${gift} 🪵 Legno</b> (${K.stat("legno")}). ${H.stato()}`);
     }
     function night(n, then) {

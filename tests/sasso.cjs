@@ -178,6 +178,29 @@ async function flow4(w, alt) {
   } catch (e) { errors.push(e.message.slice(0, 300)); }
   L.check(`Sasso Nero · capitolo 4${alt ? " (vie alternative)" : ""} (${w} px)`, errors); await browser.close();
 }
+// capitolo 5: l'alba con Corvo Rosso (si riprova se si perde), il mantello nel fango, la collina e i quattro finali
+const S5 = { v: 1, diffSet: true, intro: Object.assign({ ch5: 1, sn_tumuli: 1 }, S4.intro), ch: 5, step: { 1: 4, 2: 3, 3: 4, 4: 4 }, done: { 1: "ok", 2: "ok", 3: "ok", 4: "ok" }, st: { riso: 4, onore: 8, pieta: 8 }, flags: Object.assign({ sn_c1_done: 1, sn_c2_done: 1, sn_c3_done: 1, sn_c4_done: 1, sn_cantieri: 1, sn_perdono: 1, sn_jiro_salvo: 1, sn_giuramento: 1 }, C6R) };
+const stubRes = (p, seq) => p.evaluate((seq) => { window.__ntLog = []; window.__notte.start = (o) => { const win = seq[window.__ntLog.length]; window.__ntLog.push({ rain: !!o.rain, boss: !!o.boss, corvo: JSON.stringify(o.waves).includes("corvo") }); setTimeout(() => o.onDone({ win, a: 80, b: 1, data: { fell: [], kills: 30, granaio: 80, gates: {} } }), 10); return true; }; }, seq);
+async function flow5(w, mode) {
+  const save = JSON.parse(JSON.stringify(S5));
+  if (mode === "tumuli") Object.assign(save.flags, { sn_morto_sn_kiku: 1, cr_sn_kiku: 0, cf_sn_kiku: 0, sn_morto_sn_ren: 1, cr_sn_ren: 0, cf_sn_ren: 0 }), Object.assign(save.st, { onore: 9, pieta: 8 });
+  if (mode === "resta") { delete save.flags.sn_perdono; Object.assign(save.st, { onore: 5, pieta: 10 }); }
+  const { browser, page, errors } = await start(w, save);
+  try {
+    await stubRes(page, mode === "tumuli" ? [false, true] : [true]);
+    await go(page, "sn_villaggio", 18, 14); await L.talk(page, "sn_kanbei"); await L.advance(page, PLAN.concat([mode === "tumuli" ? "Finisce qui" : "Vattene"]));
+    if (mode === "tumuli") { if ((await L.info(page)).step[5]) errors.push("dopo la sconfitta non si riprova"); await L.talk(page, "sn_kanbei"); await L.advance(page, PLAN.concat(["Finisce qui"])); }
+    await st(page, errors, 5, 1, "dopo Corvo");
+    const log = await page.evaluate(() => window.__ntLog); if (!log.length || !log[0].rain || !log[0].corvo) errors.push("l'alba senza pioggia o senza Corvo: " + JSON.stringify(log));
+    await go(page, "sn_villaggio", 16, 22); await L.goAct(page, 16, 23); await L.advance(page);
+    if ((await page.evaluate(() => window.__borgoApi.trZone())) !== "sn_tumuli") errors.push("la Porta Sud non porta alla collina");
+    if (w === 390) await L.shot(page, "sn_tumuli_" + mode);
+    if (mode === "tumuli") { await L.goAct(page, 17, 9); await L.advance(page); }
+    await L.talk(page, "sn_gisaku"); await L.advance(page, [mode === "resta" ? "Resti a Sasso Nero" : "Riparti"]); await L.advance(page).catch(() => {});
+    const i = await L.info(page); if (i.done[5] !== mode) errors.push("finale: " + JSON.stringify([i.done, i.step]));
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check(`Sasso Nero · capitolo 5 · finale ${mode} (${w} px)`, errors); await browser.close();
+}
 (async () => {
   const only = process.argv[2] || "";
   for (const w of [390, 320]) {
@@ -188,6 +211,8 @@ async function flow4(w, alt) {
     if (!only || only === "c3") { await flow3(w, false); if (w === 390) await flow3(w, true); }
     if (!only || only === "zone4") await zones(w, S4, null, ["sn_villaggio", "sn_accampamento"], "cap. 4");
     if (!only || only === "c4") { await flow4(w, false); if (w === 390) await flow4(w, true); }
+    if (!only || only === "zone5") await zones(w, Object.assign({}, S5, { step: Object.assign({ 5: 1 }, S5.step), flags: Object.assign({ sn_morto_sn_kiku: 1 }, S5.flags) }), null, ["sn_villaggio", "sn_tumuli"], "cap. 5");
+    if (!only || only === "c5") { if (w === 390) { await flow5(w, "nessuno"); await flow5(w, "tumuli"); } else await flow5(w, "resta"); }
     if (!only || only === "c1") { await flow1(w, false); if (w === 390) await flow1(w, true); }
     if (!only || only === "real") await real(w);
     if (!only || only === "build") await build(w);
