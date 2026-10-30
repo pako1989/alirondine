@@ -147,6 +147,37 @@ async function flow3(w, alt) {
   } catch (e) { errors.push(e.message.slice(0, 300)); }
   L.check(`Sasso Nero · capitolo 3${alt ? " (vie alternative)" : ""} (${w} px)`, errors); await browser.close();
 }
+// capitolo 4: tre notti (porte cadute = ferite, la seconda ferita uccide, la guaritrice salva uno), il campo dei predoni, Ren
+const C6R = Object.assign({}, C4, { cr_n: 6, cr_sn_kiku: 5, cf_sn_kiku: 1, cr_sn_ren: 6, cf_sn_ren: 1 });
+const S4 = { v: 1, diffSet: true, intro: Object.assign({ ch4: 1, sn_accampamento: 1 }, S3.intro), ch: 4, step: { 1: 4, 2: 3, 3: 4 }, done: { 1: "ok", 2: "ok", 3: "ok" }, st: { riso: 4, onore: 8, pieta: 8 }, flags: Object.assign({ sn_c1_done: 1, sn_c2_done: 1, sn_c3_done: 1, sn_cantieri: 1, sn_jiro_pista: 1, bd_n1: "palizzata", bd_o1: "trappola" }, C6R) };
+const stubSeq = (p, seq) => p.evaluate((seq) => { window.__ntLog = []; window.__notte.start = (o) => { const fell = seq[window.__ntLog.length] || []; window.__ntLog.push({ gates: o.gates, title: o.title }); setTimeout(() => o.onDone({ win: true, a: 80, b: 1, data: { fell, kills: 30, granaio: 80, gates: {} } }), 10); return true; }; }, seq);
+const PLAN = ["Conferma il piano", "^\\S+ Porta \\S+: \\? ", "^\\S+ (Kanbei|Gonta|Yumi|Hayate|Kiku|Okuma|Ren)"];
+async function flow4(w, alt) {
+  const { browser, page, errors } = await start(w, S4);
+  try {
+    await stubSeq(page, alt ? [[], ["n", "e"], ["n", "e"]] : [[], ["n"], ["n"]]);
+    if (alt) await page.evaluate((k) => eval(k).rel.add("sn_ren", 9), K_);
+    await go(page, "sn_villaggio", 18, 14); await L.talk(page, "sn_kanbei"); await L.advance(page, PLAN); await st(page, errors, 4, 1, "dopo la prima notte");
+    await L.talk(page, "sn_kanbei"); await L.advance(page, ["Andate al campo"]); await st(page, errors, 4, 2, "verso il campo");
+    if ((await page.evaluate(() => window.__borgoApi.trZone())) !== "sn_accampamento") errors.push("non si arriva al campo");
+    if (w === 390) await L.shot(page, "sn_campo_c4");
+    await L.goAct(page, 14, 21); await L.advance(page); if ((await page.evaluate(() => window.__borgoApi.trZone())) !== "sn_accampamento") errors.push("si esce dal campo senza i prigionieri");
+    await L.talk(page, "sn_miyo"); await L.advance(page, [alt ? "Scegli tu" : "Rikichi tiene"]);
+    await L.talk(page, "sn_jiro"); await L.advance(page);
+    await L.goAct(page, 14, 21); await L.advance(page);
+    if ((await page.evaluate(() => window.__borgoApi.trZone())) !== "sn_villaggio") errors.push("non si torna dal campo");
+    await go(page, "sn_villaggio", 18, 14); await L.talk(page, "sn_kanbei"); await L.advance(page, PLAN); await st(page, errors, 4, 3, "dopo la seconda notte");
+    const r = await page.evaluate(([k, alt]) => [eval(k).F.is("sn_ren_tradito"), eval(k).crew.has("sn_ren"), eval(k).build.at("o1"), eval(k).F.is("sn_jiro_salvo"), eval(k).F.is(alt ? "sn_moglie_resta" : "sn_moglie_salva")], [K_, alt]);
+    if (alt ? (r[0] || !r[1] || r[2] !== "trappola") : (!r[0] || r[1] || r[2] !== "")) errors.push("Ren: " + JSON.stringify(r));
+    if (!r[3] || !r[4]) errors.push("campo: " + JSON.stringify(r));
+    await L.talk(page, "sn_kanbei"); await L.advance(page, PLAN); await L.advance(page).catch(() => {});
+    const i = await L.info(page); if (i.done[4] !== "ok") errors.push("capitolo 4 non concluso: " + JSON.stringify([i.done, i.step]));
+    const d = await page.evaluate((k) => { const K = eval(k); return { log: window.__ntLog.length, m: K.plan.last(), dead: Object.keys(K.crew.members).filter((id) => K.F.is("sn_morto_" + id)), fer: Object.keys(K.crew.members).map((id) => K.F.get("sn_ferite_" + id, 0)).filter(Boolean).length, n1: K.build.at("n1") }; }, K_);
+    if (d.log !== 3 || d.n1 !== "") errors.push("notti: " + JSON.stringify(d));
+    if (alt ? d.dead.length !== 1 : d.dead.length !== 0) errors.push("ferite e morti: " + JSON.stringify(d));
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check(`Sasso Nero · capitolo 4${alt ? " (vie alternative)" : ""} (${w} px)`, errors); await browser.close();
+}
 (async () => {
   const only = process.argv[2] || "";
   for (const w of [390, 320]) {
@@ -155,6 +186,8 @@ async function flow3(w, alt) {
     if (!only || only === "c2") { await flow2(w, false); if (w === 390) await flow2(w, true); }
     if (!only || only === "zone3") await zones(w, Object.assign({}, S3, { step: { 1: 4, 2: 3, 3: 2 }, flags: Object.assign({ sn_cantieri: 1, sn_soff_pista: 1 }, S3.flags) }), null, ["sn_villaggio", "sn_bosco", "sn_soffitta"], "cap. 3");
     if (!only || only === "c3") { await flow3(w, false); if (w === 390) await flow3(w, true); }
+    if (!only || only === "zone4") await zones(w, S4, null, ["sn_villaggio", "sn_accampamento"], "cap. 4");
+    if (!only || only === "c4") { await flow4(w, false); if (w === 390) await flow4(w, true); }
     if (!only || only === "c1") { await flow1(w, false); if (w === 390) await flow1(w, true); }
     if (!only || only === "real") await real(w);
     if (!only || only === "build") await build(w);
