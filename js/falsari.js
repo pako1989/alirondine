@@ -85,10 +85,58 @@
         tintA: 0.08,
         fx: "",
         dark: 0.08
+      },
+      molo: {
+        grass: ["#0f172a", "#090d16", "#1e293b"],
+        path: ["#334155", "#1e293b"],
+        stone: ["#475569", "#334155"],
+        wall: ["#020617", "#0f172a"],
+        water: ["#0284c7", "#0369a1"],
+        tall: "#0f172a",
+        tint: "147,197,253",
+        tintA: 0.1,
+        fx: "",
+        dark: 0.18
+      },
+      fonderia: {
+        grass: ["#271313", "#1f0d0d", "#2e1616"],
+        path: ["#451a03", "#3f1d1d"],
+        stone: ["#78350f", "#57301c"],
+        wall: ["#180b0b", "#0f0505"],
+        water: ["#991b1b", "#7f1d1d"],
+        tall: "#271313",
+        tint: "249,115,22",
+        tintA: 0.15,
+        fx: "",
+        dark: 0.1
+      },
+      villa: {
+        grass: ["#047857", "#065f46", "#064e3b"],
+        path: ["#fef3c7", "#fde68a"],
+        stone: ["#fbbf24", "#d97706"],
+        wall: ["#312e81", "#1e1b4b"],
+        water: ["#06b6d4", "#0891b2"],
+        tall: "#047857",
+        tint: "253,230,138",
+        tintA: 0.08,
+        fx: "",
+        dark: 0.05
+      },
+      stadio: {
+        grass: ["#15803d", "#166534", "#14532d"],
+        path: ["#b45309", "#78350f"],
+        stone: ["#57534e", "#44403c"],
+        wall: ["#1c1917", "#0c0a09"],
+        water: ["#0284c7", "#0369a1"],
+        tall: "#15803d",
+        tint: "217,119,6",
+        tintA: 0.1,
+        fx: "",
+        dark: 0.12
       }
     },
-    floors: "UV",
-    solid: "BYTZ",
+    floors: "UVKJ",
+    solid: "BYTZFCIE",
     floorPaint(K, f, sx, sy, tx, ty) {
       const g = K.g;
       if (f === "U") {
@@ -110,6 +158,32 @@
         g.fillStyle = isLight ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.3)";
         g.fillRect(sx + 1, sy + 1, 14, 1);
         g.fillRect(sx + 1, sy + 1, 1, 14);
+        return true;
+      }
+      if (f === "K") {
+        // Assi di legno grezzo del pontile portuale bagnate dal mare
+        const c = (tx + ty) % 2 === 0 ? "#334155" : "#1e293b";
+        g.fillStyle = c;
+        g.fillRect(sx, sy, 16, 16);
+        g.fillStyle = "rgba(0,0,0,0.35)";
+        g.fillRect(sx, sy + 15, 16, 1);
+        g.fillStyle = "rgba(147,197,253,0.12)";
+        g.fillRect(sx, sy, 16, 1);
+        return true;
+      }
+      if (f === "J") {
+        // Lastre di ghisa industriale con rivetti negli angoli
+        g.fillStyle = (tx + ty) % 2 === 0 ? "#27272a" : "#18181b";
+        g.fillRect(sx, sy, 16, 16);
+        g.fillStyle = "rgba(255,255,255,0.08)";
+        g.fillRect(sx + 1, sy + 1, 14, 1);
+        g.fillStyle = "rgba(0,0,0,0.4)";
+        g.fillRect(sx + 1, sy + 15, 14, 1);
+        g.fillStyle = "#71717a";
+        g.fillRect(sx + 2, sy + 2, 1, 1);
+        g.fillRect(sx + 13, sy + 2, 1, 1);
+        g.fillRect(sx + 2, sy + 13, 1, 1);
+        g.fillRect(sx + 13, sy + 13, 1, 1);
         return true;
       }
       return false;
@@ -193,13 +267,71 @@
           g.fillStyle = cols[(ty + i) % cols.length];
           g.fillRect(sx + 2 + i * 3, sy + 9, 2.5, 5.5);
         }
+      },
+      // F: Forno a riverbero e crogiolo della fonderia
+      F(K, sx, sy, tx, ty, fr) {
+        K.ground(sx, sy, tx, ty);
+        const g = K.g;
+        g.fillStyle = "#180b0b";
+        g.fillRect(sx + 1, sy + 1, 14, 15);
+        g.fillStyle = "#3f1d1d";
+        g.fillRect(sx + 2, sy + 2, 12, 13);
+        // Bocca ardente con fiamme
+        const p = 0.5 + 0.5 * Math.sin(fr * 0.15 + tx);
+        g.fillStyle = p > 0.5 ? "#f97316" : "#ef4444";
+        g.fillRect(sx + 4, sy + 6, 8, 7);
+        g.fillStyle = "#fef08a";
+        g.fillRect(sx + 6, sy + 8, 4, 4);
+        K.light(sx + 8, sy + 9, 25, "249,115,22", 0.5);
+      },
+      // C: Cassa o cumulo di rottami navali in bronzo
+      C(K, sx, sy, tx, ty, fr) {
+        K.ground(sx, sy, tx, ty);
+        const g = K.g;
+        g.fillStyle = "rgba(0,0,0,0.3)";
+        g.fillRect(sx + 2, sy + 12, 12, 3);
+        g.fillStyle = "#78350f";
+        g.fillRect(sx + 2, sy + 4, 12, 9);
+        g.fillStyle = "#b45309";
+        g.fillRect(sx + 3, sy + 2, 10, 3);
+        g.fillStyle = "#fbbf24";
+        g.fillRect(sx + 4, sy + 5, 3, 2);
+        g.fillRect(sx + 9, sy + 7, 3, 2);
+      },
+      // I: Incudine su ceppo di quercia
+      I(K, sx, sy, tx, ty, fr) {
+        K.ground(sx, sy, tx, ty);
+        const g = K.g;
+        g.fillStyle = "rgba(0,0,0,0.3)";
+        g.fillRect(sx + 3, sy + 13, 10, 2);
+        // Ceppo
+        g.fillStyle = "#451a03";
+        g.fillRect(sx + 4, sy + 8, 8, 6);
+        // Incudine acciaio
+        g.fillStyle = "#64748b";
+        g.fillRect(sx + 2, sy + 5, 12, 4);
+        g.fillStyle = "#94a3b8";
+        g.fillRect(sx + 1, sy + 4, 7, 2);
+      },
+      // E: Statua o piedistallo di marmo aristocratico
+      E(K, sx, sy, tx, ty, fr) {
+        K.ground(sx, sy, tx, ty);
+        const g = K.g;
+        g.fillStyle = "rgba(0,0,0,0.25)";
+        g.fillRect(sx + 3, sy + 13, 10, 2);
+        g.fillStyle = "#d1d5db";
+        g.fillRect(sx + 3, sy + 7, 10, 7);
+        g.fillStyle = "#f3f4f6";
+        g.fillRect(sx + 4, sy + 2, 8, 6);
+        g.fillStyle = "#fbbf24";
+        g.fillRect(sx + 6, sy + 4, 4, 2);
       }
     },
     bonds: {
       talk: 4,
       per: 10,
       max: 5,
-      names: ["fc_arturo", "fc_valerio", "fc_gina"],
+      names: ["fc_arturo", "fc_valerio", "fc_gina", "fc_tullio"],
       scenes: {
         fc_arturo: [
           {
@@ -218,6 +350,16 @@
             lines: [
               ["fc_valerio", "[serio] Quel campo non è solo terra battuta e gradoni scrostati. Lì dentro ho lasciato i miei vent'anni, i menischi e la voce."],
               ["fc_valerio", "Se le ruspe della Morosini toccano la curva nord, giuro che mi lego con una catena ai pali della porta."]
+            ]
+          }
+        ],
+        fc_tullio: [
+          {
+            lv: 2,
+            id: "sc_tullio_bronzo",
+            lines: [
+              ["fc_tullio", "[ride] Il bronzo navale è come i marinai: duro di testa, testardo sul fondo e non fa ruggine neanche sotto le bombe."],
+              ["fc_tullio", "Se dobbiamo colare la coppa del trentaquattro, usiamo il bronzo dei sommergibili del '30. Così pesa il giusto e canta come un do di petto."]
             ]
           }
         ]
@@ -254,6 +396,35 @@
           icon: "🚩",
           d: "Riproduzione d'epoca in seta pesante con frange dorate e il primo stemma ricamato a mano.",
           gift: { fc_valerio: 20 }
+        },
+        fa_bronzo: {
+          n: "Lingotto di Bronzo Navale 1930",
+          icon: "🧱",
+          d: "Metallo bellico recuperato dai cantieri del porto. Ha la densità esatta (8,8 g/cm³) della Coppa del 1934.",
+          gift: { fc_tullio: 25 }
+        },
+        fa_zolfo: {
+          n: "Fegato di Zolfo per Patina",
+          icon: "🧪",
+          d: "Reagente chimico per ossidare e invecchiare artificialmente i metalli dorati, donando la patina dei decenni.",
+          gift: { fc_arturo: 15 }
+        },
+        fa_bulino: {
+          n: "Bulino in Acciaio Temprato",
+          icon: "✒️",
+          d: "Attrezzo da incisore ad altissima precisione per riprodurre le micro-cesellature d'epoca.",
+          gift: { fc_arturo: 20 }
+        },
+        fa_pergamena: {
+          n: "Pergamena Demaniale del 1934",
+          icon: "📜",
+          d: "Atto notarile che istituisce il vincolo d'uso perpetuo per il campo da gioco della Rondine.",
+          gift: { fc_valerio: 30 }
+        },
+        fa_chiave_villa: {
+          n: "Chiave Dorata della Limonaia",
+          icon: "🗝️",
+          d: "Passe-partout per accedere al parco privato e alle sale interne di Villa Morosini."
         }
       }
     },
@@ -326,6 +497,45 @@
           acc: ["cappellino"],
           beard: "pizzetto"
         }, "Comandante della stazione locale; severo nei regolamenti, ma ex terzino con un debole per la maglia granata.");
+
+        K.cast("fc_tullio", {
+          name: "Mastro Tullio Moriconi",
+          style: "buzz",
+          hair: "#64748b",
+          skin: "#b45309",
+          shirt: "#451a03",
+          acc: ["grembiule"],
+          beard: "folta"
+        }, "Mastro fonditore navale dei cantieri vecchi; custode del grande crogiolo e dei segreti delle leghe belliche.");
+
+        K.cast("fc_nino", {
+          name: "Oste Nino",
+          style: "slick",
+          hair: "#334155",
+          skin: "#e8c4a0",
+          shirt: "#1e3a8a",
+          acc: ["sciarpa"],
+          beard: "baffi"
+        }, "Titolare dell'osteria di porto «La Prua d'Oro», ritrovo fidato di pescatori, scaricatori e tifosi granata.");
+
+        K.cast("fc_morosini", {
+          name: "Contessa Morosini",
+          style: "bun",
+          hair: "#475569",
+          skin: "#fde047",
+          shirt: "#4c1d95",
+          acc: ["occhiali"]
+        }, "Erede dell'impero industriale Morosini; collezionista implacabile determinata ad abbattere lo stadio storico.");
+
+        K.cast("fc_renzi", {
+          name: "Avvocato Renzi",
+          style: "ordinato",
+          hair: "#1e293b",
+          skin: "#d9a679",
+          shirt: "#0f172a",
+          acc: ["occhiali"],
+          beard: "pizzetto"
+        }, "Procuratore legale della contessa, specializzato in aste fallimentari e cavilli demaniali.");
       },
       say: (who, txt) => { QL.push([who, txt]); },
       flush: () => { const l = QL; QL = []; return l; },

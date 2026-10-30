@@ -18,7 +18,7 @@ const MOD = { mod: "__falsari", key: "ali-di-rondine.falsari" };
       const bgs = await page.evaluate(() => {
         const B = window.__lbBg && window.__lbBg.LB;
         if (!B) return [];
-        return ["fa_titolo", "fa_bottega_bg", "fa_trofei_bg"].filter((k) => !B[k] || !B[k].hot || B[k].hot.length < 3);
+        return ["fa_titolo", "fa_bottega_bg", "fa_trofei_bg", "fa_molo_bg", "fa_fonderia_bg"].filter((k) => !B[k] || !B[k].hot || B[k].hot.length < 3);
       });
       if (bgs.length) errors.push("Sfondi o hotspot mancanti: " + bgs.join(", "));
 
@@ -137,11 +137,102 @@ const MOD = { mod: "__falsari", key: "ali-di-rondine.falsari" };
       const isDone = await page.evaluate(() => window.__falsariCore.K.F.get("fa_c1_done"));
       if (!isDone) errors.push("Capitolo 1 non risulta concluso (fa_c1_done false)");
 
+      // 9. Avvio Capitolo 2
+      await page.evaluate(() => window.__falsari.open());
+      await page.waitForTimeout(400);
+
+      for (let i = 0; i < 8; i++) {
+        await page.waitForTimeout(300);
+        const onMap = await page.evaluate(() => document.body.classList.contains("borgo") && window.__falsariCore.K.api.trZone() === "fa_molo");
+        if (onMap) break;
+        await page.evaluate(() => {
+          const btns = [...document.querySelectorAll("#choices button")].filter((x) => x.offsetParent);
+          const p = btns.find((x) => /Continua ▸|^Inizia il Capitolo 2|^Inizia|^Continua/.test(x.innerText));
+          if (p) p.click();
+        });
+      }
+      await page.waitForTimeout(300);
+
+      // ReachAll su fa_molo
+      const unreachMolo = await L.reachAll(page, "fa_molo");
+      if (unreachMolo && unreachMolo.length) errors.push("Tile non raggiungibili in fa_molo: " + unreachMolo.join(", "));
+
+      // Parla con Valerio al molo (step 0 -> 1)
+      await L.talk(page, "fc_valerio");
+      await L.advance(page, ["fiducia", "onore", "compravendita"]);
+      await page.waitForTimeout(300);
+
+      // Entra nell'Osteria «La Prua d'Oro»
+      await page.evaluate(() => window.__falsariCore.K.go("fa_osteria", 7, 11));
+      await page.waitForTimeout(300);
+      const unreachOsteria = await L.reachAll(page, "fa_osteria");
+      if (unreachOsteria && unreachOsteria.length) errors.push("Tile non raggiungibili in fa_osteria: " + unreachOsteria.join(", "));
+
+      // Parla con Oste Nino (step 1 -> 2)
+      await L.talk(page, "fc_nino");
+      await L.advance(page, ["salvezza", "metallo"]);
+      await page.waitForTimeout(300);
+
+      // Entra nella Fonderia Clandestina
+      await page.evaluate(() => window.__falsariCore.K.go("fa_fonderia", 8, 12));
+      await page.waitForTimeout(300);
+      const unreachFonderia = await L.reachAll(page, "fa_fonderia");
+      if (unreachFonderia && unreachFonderia.length) errors.push("Tile non raggiungibili in fa_fonderia: " + unreachFonderia.join(", "));
+
+      // Parla con Mastro Tullio (step 2 -> 3)
+      await L.talk(page, "fc_tullio");
+      await L.advance(page);
+      await page.waitForTimeout(300);
+
+      // Fruga nella cassa dei rottami (C) per prendere il lingotto
+      await page.evaluate(() => {
+        const dbg = window.__falsari._dbg;
+        const ch = dbg && dbg.CHAPTERS && dbg.CHAPTERS[2];
+        if (ch && ch.obj && ch.obj["fa_fonderia:C"]) ch.obj["fa_fonderia:C"]();
+      });
+      await page.waitForTimeout(300);
+      await L.advance(page);
+
+      // Attiva il forno a riverbero (F)
+      await page.evaluate(() => {
+        const dbg = window.__falsari._dbg;
+        const ch = dbg && dbg.CHAPTERS && dbg.CHAPTERS[2];
+        if (ch && ch.obj && ch.obj["fa_fonderia:F"]) ch.obj["fa_fonderia:F"]();
+      });
+      await page.waitForTimeout(300);
+
+      // Banco Falsario è aperto in modalità lega: finisci con successo
+      await page.evaluate(() => window.__falsariBanco.finishTest(true));
+      await page.waitForTimeout(300);
+      await L.advance(page);
+      await page.waitForTimeout(300);
+
+      // Step 4: sfida calcistica sul molo
+      await page.evaluate(() => window.__falsariCore.K.go("fa_molo", 16, 12));
+      await page.waitForTimeout(300);
+
+      // Parla con Mastro Tullio per la sfida (step 4 -> 5)
+      await L.talk(page, "fc_tullio");
+      await L.advance(page, ["Simula", "maestria", "convincere", "Banchina"]);
+      await page.waitForTimeout(300);
+
+      // Parla di nuovo con Tullio per chiudere capitolo 2
+      await L.talk(page, "fc_tullio");
+      await L.advance(page);
+      await page.waitForTimeout(400);
+
+      // Avanza scene finali capitolo 2
+      await L.advance(page);
+      await page.waitForTimeout(400);
+
+      const isC2Done = await page.evaluate(() => window.__falsariCore.K.F.get("fa_c2_done"));
+      if (!isC2Done) errors.push("Capitolo 2 non risulta concluso (fa_c2_done false)");
+
     } catch (e) {
       errors.push("Errore esecuzione test: " + e.message);
     }
 
-    L.check(`I Falsari della Coppa · Capitolo 1 a ${w} px`, errors);
+    L.check(`I Falsari della Coppa · Capitoli 1-2 a ${w} px`, errors);
     await browser.close();
   }
 })().catch((e) => {

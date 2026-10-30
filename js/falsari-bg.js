@@ -179,6 +179,198 @@
       R(g, 278, 125, 5, 25, "#d97706");
       C(g, 40, 125, 5, "#fbbf24");
       C(g, 280, 125, 5, "#fbbf24");
+    },
+
+    // 4. Molo dei Pescatori e Cantieri Navali (Notte)
+    fa_molo_bg(g, W, H, f) {
+      sky(g, W, H, "#030712", "#0f172a", 110);
+      // Onde del mare scuro
+      const sGrad = g.createLinearGradient(0, 80, 0, 140);
+      sGrad.addColorStop(0, "#0c4a6e"); sGrad.addColorStop(1, "#032b44");
+      g.fillStyle = sGrad; g.fillRect(0, 80, W, 60);
+
+      // Faro in lontananza a sinistra
+      R(g, 25, 35, 12, 50, "#334155");
+      R(g, 23, 30, 16, 6, "#dc2626");
+      C(g, 31, 26, 4, "#fef3c7");
+      // Fascio di luce rotante del faro
+      const bAng = (f * 0.03) % (Math.PI * 2);
+      const bAlpha = Math.max(0, Math.sin(bAng));
+      if (bAlpha > 0.05) {
+        g.save();
+        g.fillStyle = `rgba(254,243,199,${bAlpha * 0.35})`;
+        g.beginPath();
+        g.moveTo(31, 26);
+        g.lineTo(W, 26 + Math.cos(bAng) * 60);
+        g.lineTo(W, 50 + Math.cos(bAng) * 60);
+        g.closePath();
+        g.fill();
+        g.restore();
+      }
+
+      // Sagoma peschereccio ormeggiato
+      g.fillStyle = "#1e293b";
+      g.beginPath();
+      g.moveTo(70, 105); g.lineTo(135, 105); g.lineTo(125, 120); g.lineTo(80, 120); g.closePath();
+      g.fill();
+      R(g, 100, 75, 3, 30, "#475569"); // Albero
+      R(g, 88, 92, 22, 13, "#334155"); // Cabina peschereccio
+      C(g, 95, 98, 2.5, "#fbbf24"); // Oblò illuminato
+
+      // Banchina in pietra e bitte d'ormeggio
+      const pGrad = g.createLinearGradient(0, 125, 0, H);
+      pGrad.addColorStop(0, "#1e293b"); pGrad.addColorStop(1, "#090d16");
+      g.fillStyle = pGrad; g.fillRect(0, 125, W, H - 125);
+      // Bitte in ghisa
+      for (let x = 40; x < W; x += 90) {
+        R(g, x, 132, 8, 12, "#475569");
+        C(g, x + 4, 132, 6, "#64748b");
+      }
+      // Gru navale e capannone cantiere a destra
+      R(g, 220, 60, 95, 75, "#18181b");
+      R(g, 230, 40, 6, 40, "#71717a");
+      g.strokeStyle = "#a1a1aa"; g.lineWidth = 1.5;
+      g.beginPath(); g.moveTo(233, 42); g.lineTo(285, 75); g.stroke();
+      // Lanterna gialla del capannone
+      C(g, 225, 80, 4, "#fbbf24");
+      glow(g, 225, 80, 20, "251,191,36", 0.5);
+    },
+
+    // 5. Fonderia Clandestina di Mastro Tullio
+    fa_fonderia_bg(g, W, H, f) {
+      sky(g, W, H, "#0f0a0a", "#261313", 110);
+      // Muro di mattoni refrattari anneriti da fuliggine
+      R(g, 0, 0, W, 115, "#1c1414");
+      for (let y = 10; y < 115; y += 14) {
+        g.strokeStyle = "rgba(0,0,0,0.5)"; g.lineWidth = 1;
+        g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke();
+      }
+
+      // Pavimento in terra battuta e lastre di ghisa
+      const fGrad = g.createLinearGradient(0, 115, 0, H);
+      fGrad.addColorStop(0, "#231515"); fGrad.addColorStop(1, "#0d0707");
+      g.fillStyle = fGrad; g.fillRect(0, 115, W, H - 115);
+
+      // Grande forno a riverbero e crogiolo al centro
+      R(g, 105, 35, 110, 90, "#3f1d1d");
+      R(g, 115, 45, 90, 75, "#1a0b0b");
+      // Bocca del forno incandescente con braci e fiamme pulsanti
+      const fPulse = Math.sin(f * 0.15) * 0.2;
+      glow(g, 160, 85, 50, "249,115,22", 0.65 + fPulse);
+      R(g, 130, 65, 60, 45, "#f97316");
+      R(g, 138, 72, 44, 32, "#fef08a");
+      // Scintille che salgono dal focolare
+      for (let i = 0; i < 6; i++) {
+        const sx = 135 + ((f * 2 + i * 17) % 50);
+        const sy = 60 - ((f * 1.5 + i * 11) % 40);
+        C(g, sx, sy, 1.5, "#ffedd5");
+      }
+
+      // Canale di colata e staffa con sabbia
+      R(g, 145, 110, 30, 20, "#7c2d12");
+      R(g, 120, 130, 80, 35, "#57301c"); // Forma a staffa
+      g.strokeStyle = "#d97706"; g.lineWidth = 1;
+      g.strokeRect(120, 130, 80, 35);
+      // Impronta rotonda della coppa nella sabbia
+      C(g, 160, 147, 16, "#3b2012");
+      C(g, 160, 147, 14, "#f59e0b");
+
+      // Incudine massiccia a sinistra
+      R(g, 35, 115, 35, 25, "#334155");
+      R(g, 30, 110, 45, 8, "#475569");
+      // Mazzo di pinze da forgia appoggiate
+      g.strokeStyle = "#94a3b8"; g.lineWidth = 2;
+      g.beginPath(); g.moveTo(25, 108); g.lineTo(50, 130); g.stroke();
+
+      // Barili di carbone e lingotti di bronzo a destra
+      R(g, 240, 115, 30, 38, "#18181b");
+      R(g, 242, 110, 26, 6, "#3f3f46");
+      // Lingotti sovrapposti
+      for (let i = 0; i < 3; i++) {
+        R(g, 275 + i * 2, 130 - i * 8, 28, 7, "#b45309");
+        R(g, 277 + i * 2, 128 - i * 8, 24, 2, "#f59e0b");
+      }
+    },
+
+    // 6. Salone d'Asta di Villa Morosini
+    fa_villa_bg(g, W, H, f) {
+      sky(g, W, H, "#1e1b4b", "#312e81", 100);
+      // Pareti decorate in damasco avorio e modanature in foglia d'oro
+      R(g, 0, 0, W, 110, "#312e81");
+      for (let x = 20; x < W; x += 55) {
+        R(g, x, 0, 6, 110, "#fbbf24");
+      }
+      // Pavimento in marmo rosso Verona lucidato
+      const vGrad = g.createLinearGradient(0, 110, 0, H);
+      vGrad.addColorStop(0, "#7f1d1d"); vGrad.addColorStop(1, "#450a0a");
+      g.fillStyle = vGrad; g.fillRect(0, 110, W, H - 110);
+
+      // Lampadario di Murano a gocce di cristallo
+      R(g, 158, 0, 4, 25, "#fbbf24");
+      C(g, 160, 30, 14, "#fef3c7");
+      glow(g, 160, 30, 40, "254,243,199", 0.55);
+      for (let i = -3; i <= 3; i++) {
+        C(g, 160 + i * 7, 36 + Math.abs(i) * 2, 2.5, "#ffffff");
+      }
+
+      // Palco d'asta con piedistallo vellutato
+      R(g, 100, 115, 120, 45, "#1e1b4b");
+      R(g, 96, 112, 128, 4, "#fbbf24");
+      // Cuscino di velluto scarlatto e teca
+      R(g, 135, 96, 50, 16, "#991b1b");
+      R(g, 133, 94, 54, 3, "#f59e0b");
+      // Teca di cristallo
+      g.strokeStyle = "#fbbf24"; g.lineWidth = 1.5;
+      g.strokeRect(138, 62, 44, 32);
+      // Sagoma dorata trofeo
+      C(g, 160, 76, 10, "#fbbf24");
+      glow(g, 160, 76, 20, "251,191,36", 0.4);
+
+      // Ritratto antenato Morosini sulla parete di destra
+      R(g, 240, 25, 45, 55, "#78350f");
+      R(g, 244, 29, 37, 47, "#0f172a");
+      g.strokeStyle = "#fbbf24"; g.lineWidth = 2;
+      g.strokeRect(240, 25, 45, 55);
+    },
+
+    // 7. Lo Stadio del 1934 e la Curva Popolare
+    fa_stadio_bg(g, W, H, f) {
+      sky(g, W, H, "#0f172a", "#1e3a5f", 90);
+      // Sagoma delle tribune storiche in legno e ferro
+      R(g, 0, 70, W, 45, "#292524");
+      for (let x = 10; x < W; x += 22) {
+        R(g, x, 62, 16, 20, "#44403c");
+      }
+      // Tabellone d'epoca a cartelli di latta
+      R(g, 120, 25, 80, 40, "#1c1917");
+      R(g, 118, 23, 84, 2, "#fbbf24");
+      g.fillStyle = "#fbbf24"; g.font = "bold 9px sans-serif"; g.textAlign = "center";
+      g.fillText("STADIO COMUNALE 1934", 160, 38);
+      g.font = "bold 13px sans-serif"; g.fillStyle = "#ffffff";
+      g.fillText("RONDINE", 160, 54);
+
+      // Campo da gioco in erba e terra battuta
+      const grGrad = g.createLinearGradient(0, 115, 0, H);
+      grGrad.addColorStop(0, "#15803d"); grGrad.addColorStop(1, "#14532d");
+      g.fillStyle = grGrad; g.fillRect(0, 115, W, H - 115);
+      // Linea di porta e gesso bianco
+      g.strokeStyle = "rgba(255,255,255,0.7)"; g.lineWidth = 2;
+      g.beginPath(); g.moveTo(20, 160); g.lineTo(300, 160); g.stroke();
+
+      // Bandiere granata sventolanti dei tifosi
+      const wOff = Math.sin(f * 0.1) * 4;
+      g.fillStyle = "#991b1b";
+      g.beginPath();
+      g.moveTo(40, 65); g.lineTo(65 + wOff, 68); g.lineTo(60 + wOff, 82); g.lineTo(40, 78);
+      g.closePath();
+      g.fill();
+      R(g, 39, 65, 2, 35, "#cbd5e1");
+
+      // Ruspe gialle bloccate ai cancelli in lontananza
+      R(g, 245, 92, 45, 24, "#eab308");
+      R(g, 265, 80, 20, 14, "#ca8a04");
+      C(g, 253, 115, 6, "#18181b");
+      C(g, 280, 115, 6, "#18181b");
     }
   };
 
@@ -195,8 +387,28 @@
     ],
     fa_trofei_bg: [
       [115, 40, 90, 80, "🏆 La Coppa del 1934: le anse a collo di cigno sono cesellate a mano con motivi di spighe e rondini. Il metallo brilla con una sfumatura bronzea inconfondibile."],
-      [106, 118, 108, 35, "🚨 Micro-interruttore sotto il piedistallo: un sensore a molla calibrated sui due chili. Togliere la coppa senza sostituirla con lo stesso peso farebbe suonare la sirena."],
+      [106, 118, 108, 35, "🚨 Micro-interruttore sotto il piedistallo: un sensore a molla calibrato sui due chili. Togliere la coppa senza sostituirla con lo stesso peso farebbe suonare la sirena."],
       [235, 80, 70, 50, "📖 Registro delle Donazioni Storiche del 1934: aperto alla pagina del bando di fondazione con i nomi degli operai che donarono le fedi nuziali per il metallo."]
+    ],
+    fa_molo_bg: [
+      [23, 20, 40, 70, "🗼 Faro della Scogliera: la sua luce taglia la nebbia salmastra del porto. Oltre la scogliera ci sono i magazzini navali dismessi."],
+      [70, 75, 70, 45, "⛵ Peschereccio 'Stella Maris': la barca del vecchio capitano De Rosa. Le reti da posta sono stese ad asciugare al riparo dalla tramontana."],
+      [220, 40, 95, 90, "🏗️ Magazzino Rottami Navali: cumuli di eliche in bronzo fosforoso e cavi d'acciaio. È qui che Tullio recupera il metallo pesante d'anteguerra."]
+    ],
+    fa_fonderia_bg: [
+      [105, 35, 110, 90, "🔥 Forno a riverbero e crogiolo: il carbone d'antracite brucia a oltre millecento gradi. Il bronzo fuso ribolle con riflessi dorati e bagliori d'ametista."],
+      [120, 130, 80, 35, "🧱 Forma a staffa in sabbia refrattaria: l'impronta lasciata dal calco in cera attende la colata del metallo incandescente."],
+      [240, 105, 70, 50, "📦 Scorte di metallo navale: lingotti d'anteguerra con il marchio della Regia Marina, perfetti per replicare la densità esatta del trofeo."]
+    ],
+    fa_villa_bg: [
+      [140, 10, 45, 45, "💎 Lampadario di cristallo di Murano: dodici bracci con gocce molate a mano. Riflette la luce su velluti e stucchi della dinastia Morosini."],
+      [130, 60, 60, 50, "🛡️ Teca d'asta blindata: montata su una pedana elettronica con allarme volumetrico, pronta per l'incanto di domani."],
+      [240, 25, 45, 55, "🖼️ Ritratto del Conte Morosini: fondatore delle acciaierie e acerrimo rivale della Rondine operaia sin dagli anni Trenta."]
+    ],
+    fa_stadio_bg: [
+      [115, 20, 90, 50, "📋 Tabellone Storico del 1934: cartelli di latta verniciati a mano che hanno scandito promozioni memorabili e salvezze all'ultimo minuto."],
+      [35, 60, 40, 40, "🚩 Bandiera Granata della Curva: cucita dalle madri dei primi calciatori, sventolata anche davanti ai fari minacciosi delle ruspe."],
+      [240, 80, 60, 45, "🚜 Ruspe dell'Immobiliare Morosini: tenute a bada dal picchetto dei tifosi e degli ex calciatori uniti con catene e sciarpe."]
     ]
   };
 
