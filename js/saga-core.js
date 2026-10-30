@@ -371,7 +371,27 @@
     const bgNow = () => (zoneRec() && zoneRec().spec.bg) || BG0;
     const activeChapter = () => { const m = mem(); let best = null; Object.keys(CHAPTERS).map(Number).sort((a, b) => a - b).forEach((n) => { if (n <= m.ch) best = CHAPTERS[n]; }); return best || CHAPTERS[1] || null; };
     const CAST_OK = (id) => !!(api && api.CAST && api.CAST[id]);
-    const goalNow = () => { const c = activeChapter(); return c && c.goal ? T(c.goal(stepOf(c.n))) : ""; };
+    const goalFull = () => { const c = activeChapter(); return c && c.goal ? T(c.goal(stepOf(c.n))) : ""; };
+    // OBIETTIVI VAGHI (Impostazioni › Obiettivi, chiave ali-di-rondine.obiettivi = "vaghi" | "chiari"): si vede solo il contesto,
+    // senza parentesi e punti cardinali; il «🧭 Dove vado?» del Menu costa GOAL_COST monete e svela l'obiettivo esatto fino al passo successivo
+    const GOAL_COST = 10;
+    const goalVagueOn = () => { try { return localStorage.getItem("ali-di-rondine.obiettivi") !== "chiari"; } catch (e) { return true; } };
+    const goalKey = () => { const c = activeChapter(); return c ? c.n + ":" + stepOf(c.n) : ""; };
+    const goalPaid = () => mem().goalPaid === goalKey();
+    const goalVague = (g) => {
+      let v = String(g).replace(/\s*\([^)]*\)/g, "").replace(/,?\s*\b(?:a|ad|verso|più a|sul lato|dal lato)\s+(?:nord|sud|est|ovest)(?:-(?:est|ovest))?\b/gi, "").replace(/\s+([.,:;!?])/g, "$1").replace(/\s{2,}/g, " ").trim();
+      const ss = v.match(/[^.!?]+[.!?]+/g) || [v];
+      if (ss.length > 1 && ss[0].trim().length >= 12) v = ss[0].trim();
+      return v;
+    };
+    const goalHidden = () => { const g = goalFull(); return !!g && goalVagueOn() && !goalPaid() && goalVague(g) !== g; };
+    const goalNow = () => (goalHidden() ? goalVague(goalFull()) : goalFull());
+    function goalBuy(back) {
+      const g = goalFull(), have = bal();
+      if (have < GOAL_COST) return say([["voce", `🧭 Ti servono ${GOAL_COST} monete per l'indizio esatto. Ne hai ${have}. Intanto: parla con la gente, guarda i cartelli, esplora.`]], back);
+      safe(() => window.addCoins(-GOAL_COST)); mem().goalPaid = goalKey(); save(); refreshZone();
+      say([["voce", `🧭 <b>Dove vado?</b> (−${GOAL_COST} monete)<br>${esc(g)}`]], back);
+    }
     const chainFor = (zr) => { const m = mem(); return Object.keys(CHAPTERS).map(Number).filter((n) => n >= zr.ch && n <= m.ch).sort((a, b) => b - a).map((n) => CHAPTERS[n]); };
     function refreshZone() {
       const zr = zoneRec(); if (!zr) return;
@@ -383,7 +403,7 @@
       if (cfg.party && !zr.spec.noParty) arr(safe(() => cfg.party(K), [])).forEach((id, i) => { if (!list.some((n) => n.id === id)) { const p = api.trPos && api.trPos(); list.push({ id, ghost: true, follower: i, at: p ? [Math.floor(p[0] / TS), Math.floor((p[1] - 4) / TS)] : zr.spec.start }); } });
       zr.Z.npcs = list.filter((n) => CAST_OK(n.id));
       const hints = Object.assign({}, typeof zr.spec.hints === "function" ? zr.spec.hints(s) : zr.spec.hints || {}), gl = goalNow(), tip = typeof zr.spec.tip === "function" ? zr.spec.tip(s) : zr.spec.tip || "";
-      [...new Set([...(zr.spec.areas || []).map((a) => a[4]), zr.spec.short])].forEach((k) => { if (k) hints[k] = (gl ? "Obiettivo: " + gl + " · " : "") + (tip ? tip + " " : "") + (hints[k] || ""); });
+      [...new Set([...(zr.spec.areas || []).map((a) => a[4]), zr.spec.short])].forEach((k) => { if (k) hints[k] = (gl ? "Obiettivo: " + gl + (goalHidden() ? " (🧭 Dove vado? nel Menu: " + GOAL_COST + " monete)" : "") + " · " : "") + (tip ? tip + " " : "") + (hints[k] || ""); });
       zr.Z.hints = hints;
     }
     let soon = 0;
@@ -936,6 +956,7 @@
       const extra = cfg.zoneMenuExtra ? arr(safe(() => cfg.zoneMenuExtra(K), [])) : [];
       api.trAsk("voce", `<b>${esc(TITLE)}</b> · ${esc(c ? "Capitolo " + c.n + " · " + c.title : "")}<br><span style="color:var(--dim)">${esc(goalNow())}<br>Monete ${bal()} · ${esc(JN())}: ${m.lore.length} pagine</span>`, [
         ...(RAD ? [{ label: `${RAD.icon} ${RAD.name} · ${RAD.freq().toFixed(1)} MHz`, sub: RAD.statusTxt(), cls: "hot", fn: () => RAD.open(zoneMenu, true) }] : []),
+        ...(goalHidden() ? [{ label: "🧭 Dove vado?", sub: `L'obiettivo esatto, con la strada · ${GOAL_COST} monete (ne hai ${bal()})`, cls: "hot", fn: () => goalBuy(done) }] : []),
         { label: JN(), sub: (cfg.journal && cfg.journal.sub) || "Persone, scoperte, finali", cls: "hot", fn: () => journal(zoneMenu, true) },
         { label: "👥 Personaggi", sub: "Chi hai incontrato in questa saga", fn: () => persone(zoneMenu) },
         ...(INV ? [{ label: "🎒 Zaino", sub: invList().length ? invList().length + " oggetti: regali e bonus" : "Ancora vuoto", fn: () => zaino(zoneMenu) }] : []),
