@@ -24,6 +24,13 @@
   const GEN = { fantasy: ["Fantasy", "#7a4ab0"], mistero: ["Mistero", "#2c6a9a"], scifi: ["Fantascienza", "#1f8a8a"], storico: ["Storico", "#a8622a"], commedia: ["Commedia", "#c9921a"], sport: ["Sport anime", "#c0392b"], avventura: ["Avventura", "#3f8a3f"], dramma: ["Drammatico", "#6a5a7a"], tattica: ["Tattica", "#5a6a3a"], satira: ["Satira", "#0284c7"] };
   // mod: oggetto window con menuEntry/info · fn: funzione window da chiamare con (indietro) · ch: capitoli totali (se noti)
   const SAGAS = [
+    { id: "moviola", t: "L'Ombra della Moviola · Tele-Rondine '84", e: "📼", g: ["mistero", "satira", "dramma"], mod: "__moviola", key: "ali-di-rondine.moviola", ch: 4, cover: "mov_titolo", d: "Novembre 1984: tra furgoni di regia nascosti nel torrente, ripetitori clandestini sul Campanile dei Corvi e banchi di montaggio U-matic, ricostruisci il fotogramma incriminato del rigore del 94° minuto. Quattro capitoli, quattro finali. Novità: il Banco Moviola U-matic (jog/shuttle e tracking). Minigioco: Moviola '84 (cabinato CRT).",
+      hints: {
+        scoop: "Manda in onda il nastro integrale al massimo degli ascolti per battere la concorrenza.",
+        patto: "Accetta il compromesso economico del Commendatore per salvare Tele-Rondine.",
+        giustizia: "Consegna il dossier completo alla magistratura proteggendo la famiglia di Banti.",
+        segreto: "Segreto: trova il Nastro Zero del 1964 e proietta la verità storica totale al teatro."
+      } },
     { id: "onde", t: "Radio Fuorigioco · Onde Corte sul Golfo", e: "📻", g: ["storico", "dramma", "commedia"], mod: "__onde", key: "ali-di-rondine.onde", ch: 4, cover: "rf_titolo", d: "Ottobre 1977: a dodici miglia dal Borgo, sul rimorchiatore arrugginito «Rondine Rossa», Nilde, Lupo e Tullio difendono i 99.9 MHz e lo Stadio del Molo Vecchio dalle ruspe del Consorzio Specchio e dai furgoni goniometrici. Quattro capitoli, quattro finali. Novità: il Sintonizzatore AM/FM (portanti e Cartoline QSL). Minigioco: Onde d'Urto (calcio 2D a tempo di vinile su 3 bande MHz).",
       hints: { cooperativa: "Smaschera l'appalto col Dossier e vinci la finale con equilibrio tra Segnale Libero e Verità.", pirati: "Vinci la finale spingendo al massimo il Segnale Libero o diffondendo la Bobina 000 dagli altoparlanti.", ciclostile: "Scegli la Prudenza, accetta lo sponsor del Consorzio o cedi nella sfida finale.", bobina1096: "Segreto: sintonizza tutte e 6 le Cartoline QSL, rifiuta lo sponsor di Specchio, porta a 4+ cuori Nilde e Valli, porgi le cuffie in privato nella Torretta e vinci la finale senza errori nell'ultimo giro di vinile." } },
     { id: "sigilli", t: "L'Accademia dei Sigilli · Esami di Magia del Pallone", e: "📜", g: ["fantasy", "avventura"], mod: "__sigilli", key: "ali-di-rondine.sigilli", ch: 3, cover: "sg_titolo", d: "Supera gli esami di ammissione dell'antica Accademia Arcana, svela le rune segrete celate nella Biblioteca Proibita e padroneggia i Quattro Sigilli nella notte della Grande Congiunzione. Il nuovo motore Traccia-Runa (parabole a spirale, saette a zig-zag e barriere magiche), i Frammenti di Pergamena del 1492 e 4 finali leggendari.",
@@ -165,7 +172,7 @@
     { id: "cala", t: "Cala Tramontana", e: "🌊", g: ["avventura"], fn: "openCalaTramontana", key: "ali-di-rondine.cala-tramontana", cover: "beach", d: "Esplora a piedi il borgo marino alternativo con il tuo Campione." },
     { id: "borgostorto", t: "Il Borgo Storto", e: "🌀", g: ["commedia", "tattica"], api: "openBorgoStorto", cover: "beach", d: "Lo spin-off GDR a turni del Borgo Marino." },
   ];
-  const NEWEST = ["sasso", "banda", "neve", "onde", "latta", "missione", "corriere", "compagnia", "diga", "vuota", "mondiale", "cavaliere", "gala", "circuiti", "replica", "officina", "figurine", "rotta", "fischietto", "capitani", "carte", "quattordici", "sigilli", "fortino", "cenere", "note", "spia", "fiume", "piramide", "treno", "alcatraz", "milano", "gp", "tempo", "dungeon", "roma", "regno", "naufraghi", "campana", "galletta", "pugno", "montagna", "cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
+  const NEWEST = ["moviola", "sasso", "banda", "neve", "onde", "latta", "missione", "corriere", "compagnia", "diga", "vuota", "mondiale", "cavaliere", "gala", "circuiti", "replica", "officina", "figurine", "rotta", "fischietto", "capitani", "carte", "quattordici", "sigilli", "fortino", "cenere", "note", "spia", "fiume", "piramide", "treno", "alcatraz", "milano", "gp", "tempo", "dungeon", "roma", "regno", "naufraghi", "campana", "galletta", "pugno", "montagna", "cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
   const modOf = (s) => (s.mod ? window[s.mod] : null);
   const available = (s) => (s.mod ? !!window[s.mod] : s.fn ? typeof window[s.fn] === "function" : !!(api() && api()[s.api]));
   function state(s) {
@@ -558,6 +565,10 @@
       boss: { name: "Corvo Rosso sotto la pioggia", color: "#991b1b", style: "pressing", rain: true, waves: [[["base", 6], ["lesto", 4]], [["scudo", 4], ["base", 5]], [["capo", 2], ["lesto", 4]], [["corvo", 1, "n"], ["base", 6], ["scudo", 3]]] },
       opts: (o, h, boss) => ({ title: `La Porta del villaggio · ${o.name}`, granaio: 24, rain: !!o.rain, boss, tutorial: false, waves: o.waves,
         gates: { n: { def: 1, tower: true, who: { id: "sn_kiku", n: "Kiku", pow: "arco" } }, e: { ditch: true, who: { id: "sn_okuma", n: "Okuma", pow: "muro" } }, s: { def: 1, who: { id: "sn_shino", n: "Shino", pow: "cura" } }, o: { trap: 1, who: { id: "sn_hayate", n: "Hayate", pow: "lama" } } } }) },
+    { id: "moviola", t: "Moviola '84", e: "📼", saga: "moviola", eng: "__moviolaArcade", d: "La moviola a tubo catodico di Tele-Rondine: scrubber, replay al rallentatore estremo e fermo immagine sul rigore fantasma del 94°.",
+      opp: [{ name: "Rondine Primavera", level: 1, color: "#f97316", style: "equilibrata" }, { name: "Derby Regionale", level: 2, color: "#3b82f6", style: "pressing" }],
+      boss: { name: "Coppa dei Campioni", level: 3, color: "#eab308", style: "pressing" },
+      opts: (o, h, boss) => ({ level: boss ? 3 : o.level || 1, diff: boss ? 3 : o.level || 1, title: `Moviola '84 · ${o.name}` }) },
   ];
   function sgState(m) { const s = SAGAS.find((x) => x.id === m.saga), x = s ? state(s) : null; return { s, open: !!(x && (x.doneN >= 1)), boss: !!(x && x.endsFound > 0) }; }
   function openSalaGiochi(back) {

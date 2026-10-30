@@ -19,6 +19,7 @@
   const safe = (fn, d) => { try { return fn(); } catch (e) { return d; } };
   // le saghe da cui vengono le carte: chiave di salvataggio, nome, colore
   const SAGHE = {
+    moviola: ["ali-di-rondine.moviola", "L'Ombra della Moviola · Tele-Rondine '84", "#ca8a04", "__moviola"],
     borgo: ["ali-di-rondine.stagione1", "Ali di Rondine · Borgo Marino", "#ff7a45", ""],
     onde: ["ali-di-rondine.onde", "Radio Fuorigioco · Onde Corte sul Golfo", "#f59e0b", "__onde"],
     sigilli: ["ali-di-rondine.sigilli", "L'Accademia dei Sigilli", "#6366f1", "__sigilli"],
@@ -290,6 +291,9 @@
     ["rf_lupo", "onde", "r", 48, 84, 74, "P", 2], ["rf_valvola", "onde", "r", 58, 80, 82, "D", 2],
     ["rf_nilde", "onde", "e", 84, 62, 86, "A", 3], ["rf_valli", "onde", "e", 66, 84, 82, "C", 4],
     ["rf_cesare", "onde", "l", 90, 68, 92, "A", 4],
+    // L'Ombra della Moviola · Tele-Rondine '84
+    ["mov_walter", "moviola", "l", 54, 92, 88, "P", 1], ["mov_daria", "moviola", "e", 74, 68, 90, "C", 2],
+    ["mov_silvano", "moviola", "r", 62, 84, 76, "D", 2], ["mov_fosco", "moviola", "r", 58, 88, 70, "D", 3],
   ];
   // [id, saga, rarità (c r e l), attacco, difesa, tecnica, ruolo]
   const CARDS = [
