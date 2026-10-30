@@ -115,12 +115,46 @@ async function flow2(w, alt) {
   } catch (e) { errors.push(e.message.slice(0, 300)); }
   L.check(`Sasso Nero · capitolo 2${alt ? " (vie alternative)" : ""} (${w} px)`, errors); await browser.close();
 }
+// capitolo 3: legno dal bosco (il tempo passa), le difese sui cantieri, la soffitta del mulino, la prima notte col Piano vero e l'esploratore
+const C6 = Object.assign({}, C4, { cr_n: 6, cr_sn_kiku: 5, cf_sn_kiku: 1, cr_sn_okuma: 6, cf_sn_okuma: 1 });
+const S3 = { v: 1, diffSet: true, intro: Object.assign({ ch3: 1, sn_bosco: 1, sn_soffitta: 1 }, S2.intro), ch: 3, step: { 1: 4, 2: 3 }, done: { 1: "ok", 2: "ok" }, st: { riso: 2, onore: 7, pieta: 7 }, flags: Object.assign({ sn_c1_done: 1, sn_c2_done: 1, sn_giuramento: 1 }, C6) };
+async function flow3(w, alt) {
+  const { browser, page, errors } = await start(w, S3);
+  try {
+    await stub(page, !alt);
+    await go(page, "sn_villaggio", 18, 14); await L.talk(page, "sn_kanbei"); await L.advance(page); await st(page, errors, 3, 1, "dopo Kanbei");
+    await go(page, "sn_bosco", 27, 10);
+    for (const [x, y] of [[3, 7], [6, 7], [9, 7], [18, 4], [22, 6]]) { await L.goAct(page, x, y); await L.advance(page); }
+    const b = await page.evaluate((k) => [eval(k).stat("legno"), eval(k).at(3, 7), eval(k).clock.day(), eval(k).clock.slot()], K_);
+    if (b[0] !== 10 || b[1] === "A" || b[2] !== 2 || b[3] !== 2) errors.push("taglio del bambù: " + JSON.stringify(b));
+    await go(page, "sn_villaggio", 12, 12); await L.talk(page, "sn_okuma"); await L.advance(page);
+    await go(page, "sn_villaggio", 14, 4); await L.goAct(page, 14, 3); await L.advance(page, ["Palizzata"]);
+    await page.evaluate((k) => { const B = eval(k).build; B.place("o1", "trappola"); B.place("o2", "fossato"); B.place("e1", "palizzata"); }, K_);
+    await go(page, "sn_villaggio", 18, 14); await L.talk(page, "sn_kanbei"); await L.advance(page); await st(page, errors, 3, 2, "con quattro difese");
+    await L.talk(page, "sn_shinobu"); await L.advance(page);
+    await go(page, "sn_villaggio", 25, 7); await L.goAct(page, 25, 6); await L.advance(page);
+    const z = await page.evaluate(() => window.__borgoApi.trZone()); if (z !== "sn_soffitta") errors.push("il mulino non porta in soffitta: " + z);
+    if (w === 390) await L.shot(page, "sn_soffitta_c3");
+    await L.goAct(page, 3, 1); await L.advance(page, [alt ? "Il villaggio deve sapere" : "Ricoprile"]); await st(page, errors, 3, 3, "dopo la soffitta");
+    if (!alt && !(await page.evaluate((k) => eval(k).F.is("sn_perdono"), K_))) errors.push("perdono non segnato");
+    await go(page, "sn_villaggio", 18, 14); await L.talk(page, "sn_kanbei");
+    await L.advance(page, ["Conferma il piano", "^\\S+ Porta \\S+: \\? ", "^\\S+ (Kanbei|Gonta|Yumi|Hayate|Kiku|Okuma)", alt ? "loro giustizia" : "Si è arreso"]); await page.waitForTimeout(300); await L.advance(page).catch(() => {});
+    const log = await page.evaluate(() => window.__ntLog);
+    if (!log.length || !log[0].gates.n.who || !(log[0].gates.n.def >= 1) || !log[0].gates.o.ditch || log[0].gates.o.trap !== 1) errors.push("la notte non riceve porte e difese: " + JSON.stringify(log));
+    const i = await L.info(page); if (i.done[3] !== "ok") errors.push("capitolo 3 non concluso: " + JSON.stringify([i.done, i.step]));
+    const f = await page.evaluate((k) => [eval(k).F.is("sn_jiro_pista"), eval(k).F.is("sn_giuramento_rotto"), eval(k).stat("riso"), eval(k).clock.slot()], K_);
+    if (alt ? !(f[1] && f[2] === 0) : !(f[0] && f[2] === 2)) errors.push("esito della notte: " + JSON.stringify(f));
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check(`Sasso Nero · capitolo 3${alt ? " (vie alternative)" : ""} (${w} px)`, errors); await browser.close();
+}
 (async () => {
   const only = process.argv[2] || "";
   for (const w of [390, 320]) {
     if (!only || only === "zone") await zones(w, S1, null, ["sn_villaggio", "sn_casa", "sn_citta", "sn_locanda", "sn_dojo"], "cap. 1");
     if (!only || only === "zone2") await zones(w, S2, null, ["sn_villaggio", "sn_passo", "sn_tempio", "sn_fucina"], "cap. 2");
     if (!only || only === "c2") { await flow2(w, false); if (w === 390) await flow2(w, true); }
+    if (!only || only === "zone3") await zones(w, Object.assign({}, S3, { step: { 1: 4, 2: 3, 3: 2 }, flags: Object.assign({ sn_cantieri: 1, sn_soff_pista: 1 }, S3.flags) }), null, ["sn_villaggio", "sn_bosco", "sn_soffitta"], "cap. 3");
+    if (!only || only === "c3") { await flow3(w, false); if (w === 390) await flow3(w, true); }
     if (!only || only === "c1") { await flow1(w, false); if (w === 390) await flow1(w, true); }
     if (!only || only === "real") await real(w);
     if (!only || only === "build") await build(w);
