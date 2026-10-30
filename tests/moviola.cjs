@@ -184,6 +184,8 @@ async function testTalk() {
       try { await p.evaluate((z) => window.__moviola._dbg.K.go(z), z); } catch (e) { errors.push(z + ": " + e.message.slice(0, 120)); continue; }
       await p.waitForTimeout(400); await L.advance(p).catch(() => {});
       const bad = await L.reachAll(p, z); if (bad.length) errors.push(z + ": " + bad.join(", "));
+      const noAct = await p.evaluate((z) => { const sp = window.__moviola._dbg.ZONES[z].spec, Z = window.__borgoApi.TRZ[z], m = window.__tr.trMap(Z); return Object.keys(sp.objects || {}).filter((k) => { const [x, y] = k.split(",").map(Number), c = m[y] && m[y][x]; return !(Z.act[c] || Z.act[k]); }); }, z);
+      if (noAct.length) errors.push(z + ": oggetti che «Parla» non attiva " + noAct.join(" "));
       for (const id of await p.evaluate(() => (window.__tr.TW.z.npcs || []).filter((n) => !n.ghost).map((n) => n.id))) {
         try { await L.talk(p, id); await p.waitForTimeout(300); if (await p.evaluate(() => window.T_.walk())) errors.push(`${z}: ${id} non parla`); }
         catch (e) { errors.push(`${z}: ${id} ${e.message.slice(0, 100)}`); }

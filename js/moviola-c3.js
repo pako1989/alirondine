@@ -198,6 +198,7 @@
         time: "notte",
         w: 22, h: 16, base: "=", start: [4, 12],
         npcs: () => [],
+        act: { Z: "🔧 Rack delle valvole" }, // senza questo «Parla» davanti al rack non faceva nulla
         objects: {
           "12,8": () => {
             if (S() === 1) {
