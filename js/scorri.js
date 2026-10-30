@@ -763,6 +763,9 @@
     };
     st.cam.x = clamp(st.hero.x - 120, 0, st.W * TS - VW);
     if (st.kit === "guanti") st.ball.st = "none";
+    // GAME OVER: 3 vite per livello. Ko = si riparte dal gonfalone e il capo torna con l'energia piena (niente vittorie «a rate»);
+    // finite le vite il livello ricomincia da capo
+    st.lives = 3; st.bossInit = st.foes.map((e) => (e.t === "Z" ? Object.assign({}, e) : null));
     return st;
   }
   function mkFoe(e, level, k) {
@@ -804,7 +807,11 @@
     for (let i = 0; i < 6; i++) st.debris.push({ x: h.x, y: h.y - 14, vx: (rnd(st.f + i) - 0.5) * 3, vy: -2 - rnd(i + st.f) * 2, l: 50, c: i % 2 ? "#a6afc2" : "#e2e8f2", s: 2 });
     if (h.hp <= 0) ko(st); else say(st, h.hp === 1 ? kitOf(st).lost[0] : kitOf(st).lost[1], 70);
   }
-  function ko(st) { st.phase = "ko"; st.hero.vy = -4; for (let i = 0; i < 16; i++) st.debris.push({ x: st.hero.x, y: st.hero.y - 12, vx: (rnd(i * 3 + st.f) - 0.5) * 5, vy: -3 - rnd(i) * 3, l: 90, c: ["#a6afc2", "#e2e8f2", "#d23a3a", "#626b80"][i % 4], s: 3 }); controls(); }
+  function ko(st) { st.phase = "ko"; st.lives = Math.max(0, (st.lives == null ? 3 : st.lives) - 1); snd("hit"); st.hero.vy = -4; for (let i = 0; i < 16; i++) st.debris.push({ x: st.hero.x, y: st.hero.y - 12, vx: (rnd(i * 3 + st.f) - 0.5) * 5, vy: -3 - rnd(i) * 3, l: 90, c: ["#a6afc2", "#e2e8f2", "#d23a3a", "#626b80"][i % 4], s: 3 }); controls(); }
+  function bossReset(st) {
+    (st.bossInit || []).forEach((b, i) => { if (b && st.foes[i] && st.foes[i].t === "Z") st.foes[i] = Object.assign({}, b); });
+    st.waves = []; st.bolts = []; if (st.stones) st.stones = [];
+  }
   function respawn(st, full) {
     const h = st.hero; h.x = st.spawn[0]; h.y = st.spawn[1]; h.vx = h.vy = 0; h.inv = 60; h.frozen = 0; if (full) h.hp = h.max;
     if (st.ball.st !== "none") st.ball.st = "held"; st.cam.x = clamp(h.x - 120, 0, st.W * TS - VW); st.phase = "play"; controls();
@@ -1207,10 +1214,10 @@
     if (!ui || !S) return;
     if (S.phase === "play") { ui.bt.innerHTML = ""; ui.ctl.style.display = ""; return; }
     ui.ctl.style.display = "none"; keys = {};
-    if (S.phase === "ko") ui.bt.innerHTML = `<div class="scEnd"><button class="go" id="scGo">↻ Riprova dal gonfalone</button><button class="go" id="scQuit" style="background:#3f3f46;border-color:#a1a1aa">◂ Esci</button></div>`;
+    if (S.phase === "ko") ui.bt.innerHTML = `<div class="scEnd"><button class="go" id="scGo">${S.lives ? `↻ Riprova dal gonfalone<small style="display:block;font-size:11px;opacity:.8">vite rimaste ${S.lives} · il capo torna con l'energia piena</small>` : "↻ Ricomincia il livello"}</button><button class="go" id="scQuit" style="background:#3f3f46;border-color:#a1a1aa">◂ Esci</button></div>`;
     else ui.bt.innerHTML = `<div class="scEnd"><button class="go" id="scGo">${S.practice ? "▶ Al livello vero" : "Continua ▸"}</button></div>`;
     const go = ui.bt.querySelector("#scGo"), q = ui.bt.querySelector("#scQuit");
-    if (go) go.onclick = () => { if (!S) return; if (S.phase === "ko") return respawn(S, true); if (S.practice) { const o = S.o; S = mk(o, o.level, false); hud(); controls(); return; } close(); };
+    if (go) go.onclick = () => { if (!S) return; if (S.phase === "ko" && !S.lives) { const o = S.o; S = mk(o, o.level, S.practice); hud(); controls(); return; } if (S.phase === "ko") { bossReset(S); return respawn(S, true); } if (S.practice) { const o = S.o; S = mk(o, o.level, false); hud(); controls(); return; } close(); };
     if (q) q.onclick = () => { if (S) { S.win = false; S.quit = true; close(); } };
   }
   function press(k, down) { keys[k] = !!down; }
@@ -1224,7 +1231,13 @@
     const ban = countBits(st.banMask);
     o.onDone && o.onDone({ a: st.coinN, b: st.win ? 0 : 1, win: !!st.win, quit: !!st.quit, coins: st.coinN, ban, banMask: st.banMask, banTot: st.P.ban, time: Math.round(st.time / 60), sponde: st.sponde });
   }
-  function loop() { if (!S) return; raf = requestAnimationFrame(loop); if (!(tutC && tutC.open)) step(S); const g = ui.g; g.setTransform(SS, 0, 0, SS, 0, 0); scene(g, S); if (S.fx) S.fx.draw(g); if (S.f % 10 === 0) { hud(); log(); } }
+  function koCard(g, st) {
+    const over = !st.lives; g.save(); g.fillStyle = over ? "rgba(10,6,16,.72)" : "rgba(10,6,16,.45)"; g.fillRect(0, 0, VW, VH);
+    g.textAlign = "center"; g.textBaseline = "middle"; g.font = `bold ${over ? 30 : 22}px "Press Start 2P", monospace`; g.fillStyle = "#000"; g.fillText(over ? "GAME OVER" : "KO!", VW / 2 + 2, VH / 2 - 8 + 2);
+    g.fillStyle = over ? "#e04a4a" : "#ffd23f"; g.fillText(over ? "GAME OVER" : "KO!", VW / 2, VH / 2 - 8);
+    g.font = "bold 10px system-ui, sans-serif"; g.fillStyle = "#f1f5f9"; g.fillText(over ? "Vite finite: il livello ricomincia da capo." : `Vite rimaste: ${"♥".repeat(st.lives)}`, VW / 2, VH / 2 + 18); g.restore();
+  }
+  function loop() { if (!S) return; raf = requestAnimationFrame(loop); if (!(tutC && tutC.open)) step(S); const g = ui.g; g.setTransform(SS, 0, 0, SS, 0, 0); scene(g, S); if (S.fx) S.fx.draw(g); if (S.phase === "ko") koCard(g, S); if (S.f % 10 === 0) { hud(); log(); } }
   // livello d'allenamento per la «Prova libera»
   const PRACTICE = { id: "prova", name: "Cortile d'allenamento", theme: "prova", signs: ["⚽ calcia il pallone. Contro il muro torna indietro: è una sponda.", "Calcia il pallone a terra e saltaci sopra: fa da molla! ⚽ di nuovo per richiamarlo.", "Il mattone crepato si rompe solo col pallone."], map: [
     "##########################################",
@@ -1289,6 +1302,7 @@
       get ball() { return S && { st: S.ball.st, x: S.ball.x, y: S.ball.y, vx: S.ball.vx, vy: S.ball.vy }; }, get foes() { return S ? S.foes.filter((e) => !e.dead).length : 0; }, get coins() { return S ? S.coinN : 0; }, get ban() { return S ? countBits(S.banMask) : 0; },
       get boss() { const b = S && S.foes.find((e) => e.t === "Z"); return b ? { hp: b.hp, st: b.st, dead: b.dead, x: b.x, y: b.y, hitT: b.hitT } : null; }, get counts() { return S ? { vents: S.vents.length, falls: S.falls.length, cats: S.foes.filter((e) => e.t === "g").length, bells: S.bells.length, rung: S.bells.filter((k) => k.rung).length, gates: S.grid.reduce((a, r) => a + r.filter((t) => t === "G").length, 0), ghosts: S.foes.filter((e) => e.t === "m" && !e.dead).length, waves: S.waves.length, bolts: S.bolts.length, wind: S.windV, cards: S.cards.length } : null; }, ballAt: (x, y, vx, vy) => { if (S) { S.ball.st = "fly"; S.ball.x = x; S.ball.y = y; S.ball.vx = vx || 0; S.ball.vy = vy || 0; S.ball.t = 0; S.ball.sp = 0; } }, get practice() { return S && S.practice; }, get W() { return S && S.W; }, get kit() { return S && S.kit; }, get parries() { return S ? S.parries : 0; }, get snow() { return S ? S.stones.filter((x) => x.snow).map((x) => ({ x: x.x, y: x.y, vx: x.vx, mine: !!x.mine, big: !!x.big })) : []; }, get glide() { return !!(S && S.hero.glide); }, get aval() { return S && S.aval ? { x: S.aval.x, hits: S.aval.hits } : null; }, get crumbs() { return S ? S.crumbs.map((c) => ({ x: c.x, y: c.y, gone: c.gone })) : []; }, tileAt: (tx, ty) => (S ? tile(S, tx, ty) : null), get sled() { return !!(S && S.level.sled); }, get foeList() { return S ? S.foes.filter((e) => !e.dead).map((e) => ({ t: e.t, x: e.x, y: e.y, h: e.h, on: !!e.on })) : []; }, get parry() { return S ? S.hero.parry | 0 : 0; },
       tut: () => !!(tutC && tutC.open), press, tick: (n) => { for (let i = 0; i < (n || 1) && S; i++) step(S); }, warp: (x, y) => { if (S) { S.hero.x = x; S.hero.y = y; S.hero.vx = S.hero.vy = 0; } },
+      ko: () => { if (S && S.phase === "play") ko(S); }, get lives() { return S ? S.lives : 0; }, bossHit: (n) => { const b = S && S.foes.find((e) => e.t === "Z" && !e.dead); if (b) { if (!b.max) b.max = b.hp; b.hp = Math.max(1, b.hp - (n | 0)); } },
       finish: (win) => { if (!S) return; if (tutC) { tutC.close(); tutC = null; } S.win = win !== false; if (S.win) { S.items.forEach((it) => { if (it.k === "S" && win === "all") S.banMask |= 1 << it.i; }); } close(); }
     };
     if (innerHeight > innerWidth) say(S, "📱 Gira il telefono in orizzontale: a schermo pieno si gioca meglio.", 240);

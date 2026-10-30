@@ -82,6 +82,17 @@ async function realEngine(w) {
     await page.waitForTimeout(1500);
     const bo = await page.evaluate(() => window.__scorri.state.boss); if (!bo || bo.hp < 6) errors.push("capo assente: " + JSON.stringify(bo));
     await L.shot(page, "gn_scorri_boss_" + w);
+    // game over vero: col Ko il capo torna con l'energia piena; finite le 3 vite il livello ricomincia da capo
+    const gov = await page.evaluate(async () => {
+      const s = window.__scorri.state, sl = (ms) => new Promise((r) => setTimeout(r, ms)), out = {}; const full = s.boss.hp;
+      s.bossHit(4); await sl(100); out.hit = s.boss.hp; s.ko(); await sl(300); out.lives1 = s.lives; out.btn = (document.getElementById("scGo") || {}).innerText;
+      document.getElementById("scGo").click(); await sl(300); out.after = window.__scorri.state.boss.hp; out.full = full;
+      window.__scorri.state.ko(); await sl(200); document.getElementById("scGo").click(); await sl(200); window.__scorri.state.ko(); await sl(300);
+      out.lives0 = window.__scorri.state.lives; out.btn0 = (document.getElementById("scGo") || {}).innerText; document.getElementById("scGo").click(); await sl(400);
+      out.restart = { lives: window.__scorri.state.lives, phase: window.__scorri.state.phase }; return out;
+    });
+    if (!(gov.hit < gov.full) || gov.after !== gov.full) errors.push("dopo il Ko il capo non torna pieno: " + JSON.stringify(gov));
+    if (gov.lives1 !== 2 || !/gonfalone/.test(gov.btn || "") || gov.lives0 !== 0 || !/Ricomincia/.test(gov.btn0 || "") || gov.restart.lives !== 3 || gov.restart.phase !== "play") errors.push("game over: " + JSON.stringify(gov));
     await page.evaluate(() => window.__scorri.state.finish(true)); await page.waitForTimeout(400); await L.advance(page).catch(() => {});
     await L.advance(page, ["Torna nel bosco"]).catch(() => {});
     const i = await L.info(page); if (i.done[1] !== "ok") errors.push("capitolo non chiuso dopo il capo");
