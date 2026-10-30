@@ -41,6 +41,17 @@ async function test(w, h, name) {
 (async () => {
   await test(900, 405, "orizzontale");
   await test(390, 800, "verticale");
+  // ruotando il telefono il joystick segue il direzionale: in orizzontale sta fisso in basso a sinistra sopra la scena, tutto visibile
+  {
+    const { browser, page: p, errors } = await open(390, 800);
+    try {
+      await p.setViewportSize({ width: 900, height: 405 }); await p.waitForTimeout(400);
+      const r = await p.evaluate(() => { const d = document.querySelector(".dpad"), j = d.querySelector(".jp").getBoundingClientRect(), c = document.getElementById("cv").getBoundingClientRect(); return { pos: getComputedStyle(d).position, j: [j.left, j.top, j.right, j.bottom], c: [c.left, c.right], h: innerHeight }; });
+      if (r.pos !== "fixed" || r.j[3] > r.h || r.j[1] < 0 || r.j[2] > r.c[1]) errors.push("joystick fuori posto dopo la rotazione: " + JSON.stringify(r));
+      await L.shot(p, "joypad_ruotato");
+    } catch (e) { errors.push(e.message.slice(0, 300)); }
+    L.check("Joystick · rotazione", errors); await browser.close();
+  }
   // obiettivi vaghi (predefiniti): niente strada nel riquadro; «🧭 Dove vado?» nel Menu costa 10 monete e svela l'obiettivo esatto
   {
     const { browser, page: p, errors } = await open(390, 800);

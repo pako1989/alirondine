@@ -9,7 +9,8 @@
   const mode = () => { try { return localStorage.getItem(KEY) === "frecce" ? "frecce" : "joy"; } catch (e) { return "joy"; } };
   function css() {
     if (document.getElementById("jpCss")) return; const s = document.createElement("style"); s.id = "jpCss";
-    s.textContent = `.jpOn>*:not(.jp){visibility:hidden!important;opacity:0!important;transition:none!important;pointer-events:none!important}
+    s.textContent = `.dpad.jpOn,.cala-dpad.jpOn{position:relative}
+.jpOn>*:not(.jp){visibility:hidden!important;opacity:0!important;transition:none!important;pointer-events:none!important}
 .jp{position:absolute;inset:0;margin:auto;aspect-ratio:1;max-width:100%;max-height:100%;border-radius:50%;background:radial-gradient(circle at 50% 40%,#2a3a5ecc,#111a30dd 70%);border:2px solid #ffffff40;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:inset 0 0 16px #000a,0 2px 8px #0008;z-index:2}
 .jp::before{content:"";position:absolute;inset:24%;border-radius:50%;border:1.5px dashed #ffffff26}
 .jp i{position:absolute;width:44%;height:44%;left:28%;top:28%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe9a8,#c8962a 70%);box-shadow:0 3px 8px #000b,inset 0 -3px 6px #0006;pointer-events:none}
@@ -25,7 +26,6 @@
     if (pad._jp) return; css();
     const btn = (d) => pad.querySelector(`[${attr}="${d}"]`);
     if (!btn("up") || !btn("down") || !btn("left") || !btn("right")) return;
-    if (getComputedStyle(pad).position === "static") pad.style.position = "relative";
     const el = document.createElement("div"); el.className = "jp"; el.setAttribute("aria-label", "Joystick"); el.innerHTML = "<b>▲</b><b>▼</b><b>◀</b><b>▶</b><i></i>";
     const knob = el.querySelector("i"), held = new Set(); let pid = null;
     const press = (want) => {
