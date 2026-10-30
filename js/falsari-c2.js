@@ -120,11 +120,6 @@
           L.put(8, 16, "C");
           L.put(16, 16, "C");
           L.put(24, 16, "C");
-
-          // Lampioni portuali
-          L.light(10, 8, 25, "251,191,36", 0.4);
-          L.light(24, 8, 25, "249,115,22", 0.45);
-          L.light(6, 14, 20, "147,197,253", 0.3);
         },
         npcs(step, K) {
           const list = [];
@@ -179,8 +174,6 @@
           // Tavoli da osteria
           L.put(4, 8, "C");
           L.put(10, 8, "C");
-
-          L.light(7, 4, 30, "251,191,36", 0.5);
         },
         npcs(step, K) {
           return [{ id: "fc_nino", at: [7, 3] }];
@@ -230,8 +223,6 @@
           // Scaffali stampi a cera e sabbia
           L.lay(2, 2, 4, 2, "Z");
           L.lay(11, 2, 13, 2, "Z");
-
-          L.light(8, 3, 35, "249,115,22", 0.7);
         },
         npcs(step, K) {
           const list = [];

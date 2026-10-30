@@ -18,7 +18,7 @@ const MOD = { mod: "__falsari", key: "ali-di-rondine.falsari" };
       const bgs = await page.evaluate(() => {
         const B = window.__lbBg && window.__lbBg.LB;
         if (!B) return [];
-        return ["fa_titolo", "fa_bottega_bg", "fa_trofei_bg", "fa_molo_bg", "fa_fonderia_bg"].filter((k) => !B[k] || !B[k].hot || B[k].hot.length < 3);
+        return ["fa_titolo", "fa_bottega_bg", "fa_trofei_bg", "fa_molo_bg", "fa_fonderia_bg", "fa_villa_bg", "fa_stadio_bg"].filter((k) => !B[k] || !B[k].hot || B[k].hot.length < 3);
       });
       if (bgs.length) errors.push("Sfondi o hotspot mancanti: " + bgs.join(", "));
 
@@ -228,11 +228,96 @@ const MOD = { mod: "__falsari", key: "ali-di-rondine.falsari" };
       const isC2Done = await page.evaluate(() => window.__falsariCore.K.F.get("fa_c2_done"));
       if (!isC2Done) errors.push("Capitolo 2 non risulta concluso (fa_c2_done false)");
 
+      // 10. Avvio Capitolo 3
+      await page.evaluate(() => window.__falsari.open());
+      await page.waitForTimeout(400);
+
+      for (let i = 0; i < 8; i++) {
+        await page.waitForTimeout(300);
+        const onMap = await page.evaluate(() => document.body.classList.contains("borgo") && window.__falsariCore.K.api.trZone() === "fa_bottega");
+        if (onMap) break;
+        await page.evaluate(() => {
+          const btns = [...document.querySelectorAll("#choices button")].filter((x) => x.offsetParent);
+          const p = btns.find((x) => /Continua ▸|^Inizia il Capitolo 3|^Inizia|^Continua/.test(x.innerText));
+          if (p) p.click();
+        });
+      }
+      await page.waitForTimeout(300);
+
+      // Parla con Arturo (step 0 -> 1)
+      await L.talk(page, "fc_arturo");
+      await L.advance(page);
+      await page.waitForTimeout(300);
+
+      // Attiva banco fa_bottega:B per patina al 65%
+      await page.evaluate(() => {
+        const dbg = window.__falsari._dbg;
+        const ch = dbg && dbg.CHAPTERS && dbg.CHAPTERS[3];
+        if (ch && ch.obj && ch.obj["fa_bottega:B"]) ch.obj["fa_bottega:B"]();
+      });
+      await page.waitForTimeout(300);
+
+      // Convalida Banco Falsario
+      await page.evaluate(() => window.__falsariBanco.finishTest(true));
+      await page.waitForTimeout(300);
+      await L.advance(page);
+      await page.waitForTimeout(400);
+
+      // Siamo al parco di Villa Morosini
+      const unreachVillaG = await L.reachAll(page, "fa_villa_giardino");
+      if (unreachVillaG && unreachVillaG.length) errors.push("Tile non raggiungibili in fa_villa_giardino: " + unreachVillaG.join(", "));
+
+      // Parla con Valerio (step 2 -> 3)
+      await L.talk(page, "fc_valerio");
+      await L.advance(page, ["atto notarile", "scambieremo", "legge"]);
+      await page.waitForTimeout(300);
+
+      // Entra nel Salone della Villa
+      await page.evaluate(() => window.__falsariCore.K.go("fa_villa_salone", 8, 12));
+      await page.waitForTimeout(300);
+      const unreachSalone = await L.reachAll(page, "fa_villa_salone");
+      if (unreachSalone && unreachSalone.length) errors.push("Tile non raggiungibili in fa_villa_salone: " + unreachSalone.join(", "));
+
+      // Parla con Renzi (step 3 -> 4)
+      await L.talk(page, "fc_renzi");
+      await L.advance(page, ["fondo svizzero", "soprintendenza"]);
+      await page.waitForTimeout(300);
+
+      // Entra nel Caveau Privato
+      await page.evaluate(() => window.__falsariCore.K.go("fa_villa_caveau", 7, 10));
+      await page.waitForTimeout(300);
+      const unreachCaveau = await L.reachAll(page, "fa_villa_caveau");
+      if (unreachCaveau && unreachCaveau.length) errors.push("Tile non raggiungibili in fa_villa_caveau: " + unreachCaveau.join(", "));
+
+      // Esamina scaffale fa_villa_caveau:Z (step 4 -> 5)
+      await page.evaluate(() => {
+        const dbg = window.__falsari._dbg;
+        const ch = dbg && dbg.CHAPTERS && dbg.CHAPTERS[3];
+        if (ch && ch.obj && ch.obj["fa_villa_caveau:Z"]) ch.obj["fa_villa_caveau:Z"]();
+      });
+      await page.waitForTimeout(300);
+      await L.advance(page);
+
+      // Torna al parco e parla con Valerio/Arturo per chiudere Capitolo 3
+      await page.evaluate(() => window.__falsariCore.K.go("fa_villa_giardino", 14, 15));
+      await page.waitForTimeout(300);
+
+      await L.talk(page, "fc_valerio");
+      await L.advance(page);
+      await page.waitForTimeout(400);
+
+      // Avanza scene finali capitolo 3
+      await L.advance(page);
+      await page.waitForTimeout(400);
+
+      const isC3Done = await page.evaluate(() => window.__falsariCore.K.F.get("fa_c3_done"));
+      if (!isC3Done) errors.push("Capitolo 3 non risulta concluso (fa_c3_done false)");
+
     } catch (e) {
       errors.push("Errore esecuzione test: " + e.message);
     }
 
-    L.check(`I Falsari della Coppa · Capitoli 1-2 a ${w} px`, errors);
+    L.check(`I Falsari della Coppa · Capitoli 1-3 a ${w} px`, errors);
     await browser.close();
   }
 })().catch((e) => {

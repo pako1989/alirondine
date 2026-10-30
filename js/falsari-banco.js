@@ -251,16 +251,26 @@
       const btnValidate = ov.querySelector("#btnValidateForge");
       if (btnValidate) {
         btnValidate.onclick = () => {
-          const diffP = Math.abs(STATE.rame - STATE.targetPurezza);
-          const diffW = Math.abs(STATE.piombo - STATE.targetPeso);
-          const ok = diffP <= 8 && diffW <= 25;
+          let ok = false;
+          let errMsg = "";
+          if (STATE.opts && STATE.opts.mode === "patina") {
+            const targetPat = STATE.opts.targetPatina || 65;
+            const diffPat = Math.abs(STATE.patina - targetPat);
+            ok = diffPat <= 12;
+            errMsg = "Patina d'ossidazione non uniforme!";
+          } else {
+            const diffP = Math.abs(STATE.rame - STATE.targetPurezza);
+            const diffW = Math.abs(STATE.piombo - STATE.targetPeso);
+            ok = diffP <= 8 && diffW <= 25;
+            errMsg = diffW > 25 ? "Peso errato!" : "Lega imprecisa!";
+          }
           if (ok) {
             btnValidate.style.background = "#22c55e";
             btnValidate.innerHTML = "✓ Replica Convalidata!";
             setTimeout(() => STATE.finish(true), 600);
           } else {
             btnValidate.style.background = "#ef4444";
-            btnValidate.innerHTML = `✗ Scostamento: ${diffW > 25 ? "Peso errato!" : "Lega imprecisa!"}`;
+            btnValidate.innerHTML = `✗ ${errMsg}`;
             setTimeout(() => {
               btnValidate.style.background = "#d97706";
               btnValidate.innerHTML = "⚖️ Convalida Replica";
