@@ -197,7 +197,25 @@ async function testTalk() {
   L.check("L'Ombra della Moviola · si parla con tutti, tutto raggiungibile", errors); await browser.close();
 }
 
+// finali: l'ultimo capitolo li registra (prima mancava K.end) e un salvataggio vecchio li recupera aprendo la saga
+async function testEnds() {
+  const { browser, page: p, errors } = await L.setup({ w: 390, ...MOD, save: { v: 1, diffSet: true, intro: { ch1: 1, ch2: 1, ch3: 1, ch4: 1 }, ch: 4, max: 4, done: { 1: "ok", 2: "ok", 3: "ok", 4: "segreto" }, ends: [] } });
+  try {
+    await p.evaluate(() => window.__moviola.open()); await p.waitForTimeout(600);
+    const e = await p.evaluate(() => window.__moviola._dbg.K.endings ? null : JSON.parse(localStorage.getItem("ali-di-rondine.moviola")).ends);
+    const list = await p.evaluate(() => (window.__moviola.info ? window.__moviola.info() : {}));
+    const ends = e || (list && list.ends) || [];
+    if (!JSON.stringify(ends).includes("segreto")) errors.push("finale non recuperato: " + JSON.stringify(ends));
+    const t = await p.evaluate(() => { const st = JSON.parse(localStorage.getItem("ali-di-rondine.moviola")); return st.ends; });
+    if (!t.includes("segreto")) errors.push("finale non salvato: " + JSON.stringify(t));
+    const src = require("fs").readFileSync(require("path").join(__dirname, "../js/moviola-c4.js"), "utf8");
+    if (!/K\.end\(endingKey\)/.test(src)) errors.push("il capitolo 4 non chiama K.end");
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check("L'Ombra della Moviola · finali trovati", errors); await browser.close();
+}
+
 (async () => {
+  await testEnds();
   await testTalk();
   await testArcade(390);
   await testSaga(390);

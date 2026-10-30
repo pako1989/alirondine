@@ -35,7 +35,7 @@
     function fin(endingKey) {
       F.set("mov_c4_done", true);
       K.reward("mov_c4", { coins: 120, cos: "mov_c4" });
-      K.finishChapter(N, endingKey);
+      K.finishChapter(N, endingKey); K.end(endingKey); // senza K.end il finale non finiva tra i «Finali trovati»
       
       const epiloghi = {
         scoop: [

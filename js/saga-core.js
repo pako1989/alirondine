@@ -971,6 +971,7 @@
     function openMain(o) {
       if (o && typeof o.onExit === "function") EXIT = o.onExit;
       reload();
+      { const m0 = mem(), fe = m0.done && m0.done[NCH]; if (fe && ENDINGS[fe] && !m0.ends.includes(fe)) { m0.ends.push(fe); save(); } } // saga che chiudeva l'ultimo capitolo senza K.end: il finale raggiunto si recupera
       const h = hero();
       if (!h) return api.scene(BG0, "voce", `<b>${esc(TITLE)}</b><br>${esc((cfg.texts && cfg.texts.noHero) || "Prima crea il tuo Campione.")}`, [
         { label: "Crea il tuo Campione", sub: "Nome, numero e tiro speciale", cls: "hot", fn: () => { if (typeof window.heroEditor === "function") window.heroEditor(openMain); } },

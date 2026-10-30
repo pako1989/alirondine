@@ -231,10 +231,10 @@
       }
     },
     endings: {
-      scoop: { name: "Lo Scoop da Cento Milioni", icon: "📺", desc: "Metti in onda il nastro integrale senza filtri, facendo record storico di ascolti." },
-      patto: { name: "Patto di Mezzanotte", icon: "🤝", desc: "Accetti il finanziamento del Commendatore per salvare Tele-Rondine." },
-      giustizia: { name: "Il Processo del Lunedì", icon: "⚖️", desc: "Consegni il dossier alla magistratura proteggendo la famiglia dell'arbitro." },
-      segreto: { name: "Nastro Zero (1964)", icon: "🎞️", desc: "Ricostruisci la bobina madre del 1964: la verità storica scuote la città." }
+      scoop: ["Lo Scoop da Cento Milioni", "Metti in onda il nastro integrale senza filtri, facendo record storico di ascolti.", "Manda in onda il nastro integrale al massimo degli ascolti."],
+      patto: ["Patto di Mezzanotte", "Accetti il finanziamento del Commendatore per salvare Tele-Rondine.", "Accetta il compromesso del Commendatore."],
+      giustizia: ["Il Processo del Lunedì", "Consegni il dossier alla magistratura proteggendo la famiglia dell'arbitro.", "Consegna il dossier completo alla magistratura."],
+      segreto: ["Nastro Zero (1964)", "Ricostruisci la bobina madre del 1964: la verità storica scuote la città.", "Segreto: trova il Nastro Zero del 1964."]
     },
     bonds: { per: 4 }, // Rapporti (cuori): i capitoli usano K.rel.scene / K.rel.add
     clock: {
