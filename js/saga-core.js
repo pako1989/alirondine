@@ -24,6 +24,7 @@
 //     rest: { ch: "s", label: "Riposa", text: "..." },
 //     plan: { name: "Il Piano", roles: { rk: { n, icon, d, fit: { id_membro: 2 } } } },  // IL PIANO (richiede crew): K.plan.open({ title, q, roles, pool }, back, inZone, cb(mappa)) assegna compagni a ruoli; K.plan.fit(rk, id)
 //     scroll: { eng: "__scorri", name: "I livelli", levels: { id: { name, icon, d, theme, map: [righe], signs, boss } }, bonus(K), kit: "guanti", practice: { theme, map, signs }, practiceName, practiceSub, banName },  // A SCORRIMENTO: K.scroll.play(id, o, cb(r)) livello platform 2D (js/scorri.js); record per livello, Mappa dei livelli (K.scroll.open)
+//     build: { name, res: "legno", empty: "O", kinds: { id: { n, icon, tile, cost, d } }, sites: { id: { zone, at: [tx, ty], tag, n } }, when(K) },  // LE COSTRUZIONI: cantieri sulla mappa, K.build.place/at/list/open; restano tra i capitoli
 //     rhythm: { eng: "__ritmo", name: "Il Repertorio", songs: { id: { n, icon, d, song, mode, venue, need } }, mates(K) },  // IL REPERTORIO: K.rhythm.play(id, o, cb(r)) brano a tempo (js/ritmo.js); stelle e precisione per brano, K.rhythm.open(back), morale() per la partita dopo
 //     cold: { name: "Calore", icon: "🌡️", max: 8, sec: 14, home: ["zona", tx, ty], onZero(K) },  // IL TERMOMETRO: spec.cold (true o moltiplicatore) fa scendere il Calore; spec.warm = [[tx, ty, r]] e gli interni lo fanno risalire; K.cold.get/add/warm
 //     alert: { max: 3, names: [...], rangeMul: 0.25, decay: true, hud: true, onChange(K, lv, old) },  // ALLERTA globale: ogni avvistamento +1 (K.alert.get/set/add), il raggio delle guardie cresce; hiding(K) → true = nascosto alle guardie
@@ -500,7 +501,7 @@
       return out + `<br><span style="color:var(--dim)">▷ = strade non prese. Per provarle: Capitoli → rigioca.</span>`;
     }
     function journal(back, inZone) {
-      const html = journalHtml() + (CRW ? CRW.html() : "") + (PLN ? PLN.html() : "") + (SCR ? SCR.html() : "") + (RIT ? RIT.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + (WGT ? WGT.html() : "") + (RAD ? RAD.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
+      const html = journalHtml() + (CRW ? CRW.html() : "") + (PLN ? PLN.html() : "") + (SCR ? SCR.html() : "") + (RIT ? RIT.html() : "") + (BLD ? BLD.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + (WGT ? WGT.html() : "") + (RAD ? RAD.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
       const jb = (RAD ? [{ label: `${RAD.icon} ${RAD.name} · ${RAD.freq().toFixed(1)} MHz`, sub: "Ruota la manopola e intercetta segnali", fn: () => RAD.open(() => journal(back, inZone), inZone) }] : []).concat(DOS ? Object.keys(DOS.cases).filter((c) => DOS.list(c).length).map((c) => ({ label: "🗂️ Dossier · " + DOS.cases[c].t, sub: "Confronta prove e testimonianze", fn: () => DOS.open(c, () => journal(back, inZone), inZone) })) : []).concat(CAT && CAT.list().length ? [{ label: "🃏 Album", sub: `${CAT.team().length}/${CAT.max} in squadra`, fn: () => CAT.open(() => journal(back, inZone), inZone) }] : []).concat(CRW && CRW.count() ? [{ label: "⚔️ Schiera la compagnia", sub: `${CRW.field().length}/${CRW.max} in campo`, fn: () => CRW.pick(() => journal(back, inZone), inZone) }] : []).concat((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
       if (inZone) return api.trAsk("voce", html, jb, bgNow());
       api.scene(BG0, "voce", html, jb, JN());
@@ -704,6 +705,7 @@
         const es = eraSpec(zid); if (es && es.build) es.build(Ls, K); else spec.build(Ls, K);
         chainFor(ZONES[zid]).slice().reverse().forEach((cc) => { const p = cc.n !== chN && cc.patch && cc.patch[zid]; if (p && p.build) p.build(Ls, stepOf(cc.n), K); });
         if (FLD && spec.flood) spec.flood.forEach((a) => { if (FLD.get() >= a[0]) Ls.lay(a[1], a[2], a[3], a[4], a[5] || "~"); });
+        if (BLD) BLD.apply(zid, Ls);
         spec.__doors = {};
         Ls.autos.forEach((a, i) => {
           const d = a.def, k = a.x + "," + a.y;
@@ -755,6 +757,7 @@
         const plug = PLUG.find((p) => p.obj && p.obj(ch, tx, ty, zid, spec, K)); if (plug) return true;
         if (TUBE.pts) return true;
         const ti = arr(spec.tubes).findIndex((t) => t.at && t.at[0] === tx && t.at[1] === ty); if (ti >= 0) { tubeRide(zid, ti); return true; }
+        if (BLD && BLD.tap(zid, tx, ty)) return true;
         const dr = (spec.doors && spec.doors[tx + "," + ty]) || (spec.__doors && spec.__doors[tx + "," + ty]);
         if (dr) { if (dr.text && !dr.to) say([["voce", dr.text]], done); else enterDoor(zid, tx, ty, dr); return true; }
         if (spec.interior && (ch === "v" || (spec.exits && spec.exits[tx + "," + ty]))) { leaveInterior(zid); return true; }
@@ -767,6 +770,7 @@
       };
       Z.menu = () => zoneMenu();
       PLUG.forEach((p) => p.zone && safe(() => p.zone(zid, spec, Z, K)));
+      if (BLD) BLD.acts(zid, Z);
       api.TRZ[zid] = Z;
       ZONES[zid] = { ch: chN, spec, Z };
       (ZALL[zid] = ZALL[zid] || {})[chN] = ZONES[zid];
@@ -1228,6 +1232,38 @@
       return { play, open, html, won, stars, best, last, morale, total, songs: SG };
     })();
 
+    // -------------------------------------------------------------- LE COSTRUZIONI (cfg.build): cantieri sulla mappa, si costruisce con una risorsa e resta tra i capitoli
+    // cfg.build = { name, res: "legno" (una delle stats, si spende), empty: "O" (tessera del cantiere vuoto), kinds: { id: { n, icon, tile, cost, d } },
+    //   sites: { id: { zone, at: [tx, ty], tag, n } }, when(K) → true quando i cantieri si vedono (di base sempre) }
+    // Sulla zona il cantiere è la tessera `empty` finché è vuoto, poi la tessera del tipo costruito; toccandolo si apre la scelta (costruisci, smonta).
+    // K.build.at(site) tipo o "" · place(site, kind) (false se manca la risorsa) · remove(site) (rende metà) · list(tag) [{ site, kind, tag }] · count(kind, tag)
+    // · open(site, back) · on() · html() nel diario. Le costruzioni sono flag della saga (bd_<site>): restano capitolo dopo capitolo.
+    const BLD = cfg.build && (() => {
+      const C0 = cfg.build, KD = C0.kinds || {}, ST0 = C0.sites || {}, RES = C0.res, EMP = C0.empty || "O";
+      const on = () => !C0.when || !!safe(() => C0.when(K), true);
+      const at = (s) => (ST0[s] && KD[F.get("bd_" + s, "")] ? F.get("bd_" + s, "") : "");
+      const have = () => (RES ? stat(RES) : 999), rn = () => (RES && STATS[RES] && STATS[RES][3]) || RES || "";
+      const tileOf = (s) => { const k = at(s); return k ? KD[k].tile : on() ? EMP : null; };
+      const paint = (s) => { const d = ST0[s], t = d && tileOf(s); if (t && api && api.trZone() === d.zone) setTiles(d.at[0], d.at[1], d.at[0], d.at[1], t); };
+      const place = (s, k) => { if (!ST0[s] || !KD[k] || at(s)) return false; const c = KD[k].cost | 0; if (RES && c > have()) return false; if (RES && c) bond(RES, -c); F.set("bd_" + s, k); SFX.ding(); paint(s); return true; };
+      const remove = (s) => { const k = at(s); if (!k) return false; F.set("bd_" + s, ""); if (RES) bond(RES, Math.floor((KD[k].cost | 0) / 2)); paint(s); return true; };
+      const list = (tag) => Object.keys(ST0).filter((s) => at(s) && (tag == null || ST0[s].tag === tag)).map((s) => ({ site: s, kind: at(s), tag: ST0[s].tag }));
+      const count = (k, tag) => list(tag).filter((x) => x.kind === k).length;
+      const apply = (zid, Ls) => Object.keys(ST0).forEach((s) => { const d = ST0[s]; if (d.zone !== zid) return; const t = tileOf(s); if (t) Ls.put(d.at[0], d.at[1], t); });
+      const acts = (zid, Z) => Object.keys(ST0).forEach((s) => { const d = ST0[s]; if (d.zone === zid) Z.act[d.at[0] + "," + d.at[1]] = "🔨 " + (C0.name || "Costruisci"); });
+      function open(s, back) {
+        const d = ST0[s], k = at(s), b = back || done; if (!d) return b();
+        const head = `<b>🔨 ${esc(d.n || s)}</b><br><span style="color:var(--dim)">${k ? `Qui c'è: ${esc(KD[k].icon || "")} ${esc(KD[k].n)}. ${esc(KD[k].d || "")}` : "Cantiere vuoto. Cosa ci costruisci?"}${RES ? ` · ${esc(rn())}: ${have()}` : ""}</span>`;
+        const opts = k ? [{ label: `🪓 Smonta ${KD[k].n}`, sub: RES ? `Ti tornano ${Math.floor((KD[k].cost | 0) / 2)} di ${rn()}` : "", fn: () => { remove(s); open(s, back); } }]
+          : Object.keys(KD).map((id) => { const c = KD[id].cost | 0, ok = !RES || c <= have(); return { label: `${KD[id].icon || "•"} ${KD[id].n} · ${c}${RES ? " " + rn() : ""}`, sub: ok ? String(KD[id].d || "").slice(0, 90) : `Serve più ${rn()} (${have()}/${c})`, disabled: !ok, fn: () => { place(s, id); say([["voce", `${KD[id].icon || ""} ${KD[id].n}: fatto. ${esc(d.n || "")}`]], b); } }; });
+        opts.push({ label: "◂ Lascia stare", fn: b });
+        api.trAsk("voce", head, opts, bgNow());
+      }
+      const tap = (zid, tx, ty) => { if (!on()) return false; const s = Object.keys(ST0).find((k) => ST0[k].zone === zid && ST0[k].at[0] === tx && ST0[k].at[1] === ty); if (!s) return false; open(s); return true; };
+      const html = () => { const L = list(); return L.length ? `<br><br><b>${esc(C0.name || "Le Costruzioni")}</b>${RES ? ` · ${esc(rn())} ${have()}` : ""}<br>` + L.map((x) => `${esc(KD[x.kind].icon || "•")} ${esc(KD[x.kind].n)} <span style="color:var(--dim)">· ${esc(ST0[x.site].n || x.site)}</span>`).join("<br>") : ""; };
+      return { at, place, remove, list, count, open, on, html, apply, acts, tap, kinds: KD, sites: ST0 };
+    })();
+
     // -------------------------------------------------------------- IL DOSSIER (cfg.cases): prove e testimonianze, confronti, verdetto
     // cfg.cases = { id_caso: { t, q, items: { id: { t, d, icon, kind: "prova"|"testimonianza" } }, links: [[a, b, "cosa non torna"]], verdicts: [{ id, label, sub }] } }
     // K.dossier: add(caso, item) · has · list(caso) · found(caso) (contraddizioni scoperte) · solid(caso) (0..1) · open(back, inZone, caso) (schermata: tocca due voci
@@ -1663,7 +1699,9 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, plan: PLN, scroll: SCR, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN, radio: RAD, cold: COLD, rhythm: RIT,
+      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, plan: PLN, scroll: SCR, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN, radio: RAD, cold: COLD, rhythm: RIT, build: BLD,
+      // un minigioco proprio della saga (start = window.__xxx.start): o passa al motore, cb(r) a fine partita
+      minigame: (start, o, cb) => ownMatch(start, Object.assign({}, o, { done: (r) => safe(() => cb(r || {}), null) })),
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
       ending: (id, d) => { ENDINGS[id] = d; },
       continueStory: () => continueStory(), hasChapter: (n) => !!CHAPTERS[n], setInMatch: (v) => { inMatch = !!v; }, openMain: () => openMain(),
