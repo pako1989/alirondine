@@ -108,7 +108,7 @@ async function flow2(w, alt) {
     }
     const c = await crew(page); if (c.length !== 6) errors.push("compagni: " + JSON.stringify(c));
     await st(page, errors, 2, 2, "con sei compagni");
-    await go(page, "sn_passo", 19, 17); const t = await page.evaluate((k) => eval(k).crew.has("sn_tetsu"), K_); if (t) errors.push("Tetsu entra oltre il completo");
+    await go(page, "sn_passo", 19, 20); const t = await page.evaluate((k) => eval(k).crew.has("sn_tetsu"), K_); if (t) errors.push("Tetsu entra oltre il completo");
     await go(page, "sn_villaggio", 16, 12); await L.talk(page, "sn_gisaku"); await L.advance(page, ["Kemari coi contadini"]); await page.waitForTimeout(300); await L.advance(page).catch(() => {});
     const km = await page.evaluate(() => window.__kmLog); if (!km.length) errors.push("il kemari non parte");
     const i = await L.info(page); if (i.done[2] !== "ok") errors.push("capitolo 2 non concluso: " + JSON.stringify([i.done, i.step]));
