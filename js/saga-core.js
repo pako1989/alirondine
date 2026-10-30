@@ -1110,8 +1110,22 @@
     const invList = () => (INVC ? Object.keys(INVC.items).filter((id) => invCount(id) > 0) : []);
     function invGive(id, n, quiet) {
       const d = itemDef(id); if (!d) return 0; F.set("inv_" + id, Math.min(99, invCount(id) + (n | 0 || 1)));
-      if (!quiet && window.toast) window.toast(`Zaino: ${d.n}`, "good", d.icon || "🎒");
+      if (!quiet && window.toast) invToastLater(d);
       return invCount(id);
+    }
+    // l'avviso «Zaino: …» esce quando il dialogo arriva alla battuta che nomina l'oggetto (o 🎒/Zaino), non prima: niente spoiler.
+    // Se nessuna battuta lo nomina, esce quando si torna a camminare (al massimo dopo 60 s).
+    const INVQ = []; let invQT = 0;
+    function invToastLater(d) {
+      INVQ.push({ d, t: Date.now() }); if (invQT) return;
+      invQT = setInterval(() => {
+        const tx = ((document.getElementById("text") || {}).innerText || "").toLowerCase(), walk = !!document.querySelector(".dpad");
+        for (let i = 0; i < INVQ.length; i++) {
+          const q = INVQ[i], nm = String(q.d.n || "").toLowerCase();
+          if (walk || Date.now() - q.t > 60000 || (nm && tx.includes(nm)) || tx.includes("🎒") || tx.includes("zaino")) { INVQ.splice(i--, 1); safe(() => window.toast(`Zaino: ${q.d.n}`, "good", q.d.icon || "🎒")); }
+        }
+        if (!INVQ.length) { clearInterval(invQT); invQT = 0; }
+      }, 150);
     }
     function invTake(id, n) { const c = invCount(id); if (!c) return false; F.set("inv_" + id, Math.max(0, c - (n | 0 || 1))); return true; }
     const invBonus = (kind) => invList().reduce((t, id) => t + ((itemDef(id).match && itemDef(id).match[kind]) | 0) * Math.min(1, invCount(id)), 0);

@@ -65,6 +65,18 @@ async function test(w, h, name) {
     } catch (e) { errors.push(e.message.slice(0, 300)); }
     L.check("Esci · didascalia scena", errors); await browser.close();
   }
+  // avviso «Zaino: …» solo alla battuta che nomina l'oggetto, non a inizio dialogo
+  {
+    const { browser, page: p, errors } = await open(390, 800);
+    try {
+      await p.evaluate(() => { window.__toasts = []; const t0 = window.toast; window.toast = function (m) { window.__toasts.push(m); return t0 && t0.apply(this, arguments); }; const K = window.__neve._dbg.K; K.inv.give("gn_brule"); K.say([["voce", "Prima battuta, senza nulla."], ["voce", "Tecla ti dà una borraccia di vin brulè (🎒 Zaino)."]]); });
+      await p.waitForTimeout(600); let n = await p.evaluate(() => window.__toasts.filter((m) => /Zaino/.test(m)).length);
+      if (n) errors.push("avviso Zaino già alla prima battuta");
+      await p.evaluate(() => window.T_.click("^Continua|^Avanti")); await p.waitForTimeout(600);
+      n = await p.evaluate(() => window.__toasts.filter((m) => /Zaino/.test(m)).length); if (n !== 1) errors.push("avviso Zaino non uscito alla battuta giusta: " + n);
+    } catch (e) { errors.push(e.message.slice(0, 300)); }
+    L.check("Zaino · avviso al momento giusto", errors); await browser.close();
+  }
   // obiettivi vaghi (predefiniti): niente strada nel riquadro; «🧭 Dove vado?» nel Menu costa 10 monete e svela l'obiettivo esatto
   {
     const { browser, page: p, errors } = await open(390, 800);
