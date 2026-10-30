@@ -151,14 +151,14 @@
         time: "notte",
         w: 32, h: 22, base: "+", start: [4, 15],
         itemCos: "mov_c4",
-        items: [[3, 6], [28, 16], [15, 18]],
+        items: [[3, 10], [28, 17], [15, 18]],
         areas: [[0, 0, 31, 21, "La facciata monumentale del Teatro Comunale gremita di folla"]],
         npcs: () => [
           { id: "mov_carmela", at: [8, 14] }
         ],
         doors: {
           "16,6": { to: "mov_proiezione", at: [4, 12] },
-          "26,14": { to: "mov_camerino", at: [4, 12] }
+          "26,15": { to: "mov_camerino", at: [4, 12] }
         },
         build(L) {
           const { lay, put } = L;
@@ -168,7 +168,7 @@
           put(16, 6, "q");
           // Ingresso camerini
           lay(24, 12, 28, 15, "y");
-          put(26, 14, "q");
+          put(26, 15, "q");
         },
         intro: [
           ["voce", "Fari cinematografici illuminano la facciata del Teatro Comunale. È la sera del Gran Galà dello Sport."]
@@ -185,7 +185,7 @@
         time: "notte",
         w: 24, h: 18, base: "=", start: [4, 12],
         npcs: () => [
-          { id: "mov_walter", at: [12, 8] }
+          { id: "mov_walter", at: [12, 11] }
         ],
         exits: { "4,14": { to: "mov_foyer", at: [16, 8] } },
         build(L) {
@@ -211,8 +211,8 @@
         bg: "mov_camerino",
         time: "notte",
         w: 20, h: 16, base: "=", start: [4, 12],
-        npcs: [],
-        exits: { "4,13": { to: "mov_foyer", at: [26, 15] } },
+        npcs: () => [],
+        exits: { "4,13": { to: "mov_foyer", at: [26, 16] } },
         build(L) {
           const { lay, put } = L;
           lay(0, 0, 19, 1, "a");

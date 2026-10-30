@@ -154,14 +154,14 @@
         time: "tramonto",
         w: 32, h: 22, base: ",", start: [4, 14],
         itemCos: "mov_c2",
-        items: [[3, 6], [28, 16], [15, 18]],
+        items: [[3, 10], [28, 17], [15, 18]],
         areas: [[0, 0, 31, 21, "L'argine limaccioso sotto i grandi piloni del viadotto"]],
         npcs: () => [
           { id: "mov_silvano", at: [8, 12] }
         ],
         doors: {
-          "22,10": { to: "mov_abitacolo", at: [4, 12] },
-          "28,14": { to: "mov_osteria", at: [4, 14] }
+          "22,11": { to: "mov_abitacolo", at: [4, 12] },
+          "28,15": { to: "mov_osteria", at: [4, 14] }
         },
         loot: {
           "12,18": {
@@ -177,10 +177,10 @@
           lay(0, 17, 31, 21, ";");
           // Furgone mimetizzato
           lay(20, 8, 25, 11, "y");
-          put(22, 10, "q");
+          put(22, 11, "q");
           // Osteria in fondo al sentiero
           lay(26, 12, 30, 15, "y");
-          put(28, 14, "q");
+          put(28, 15, "q");
         },
         intro: [
           ["voce", "L'argine del torrente Rondinella è avvolto da una nebbia densa che profuma di nafta e terra bagnata."]
@@ -199,7 +199,7 @@
         npcs: () => [
           { id: "mov_daria", at: [10, 8] }
         ],
-        exits: { "4,13": { to: "mov_torrente", at: [22, 11] } },
+        exits: { "4,13": { to: "mov_torrente", at: [22, 12] } },
         build(L) {
           const { lay, put } = L;
           lay(0, 0, 19, 1, "a");
@@ -226,7 +226,7 @@
         npcs: () => [
           { id: "mov_fosco", at: [14, 10] }
         ],
-        exits: { "4,15": { to: "mov_torrente", at: [28, 15] } },
+        exits: { "4,15": { to: "mov_torrente", at: [28, 16] } },
         build(L) {
           const { lay, put } = L;
           lay(0, 0, 23, 1, "a");

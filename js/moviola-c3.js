@@ -156,14 +156,14 @@
         time: "notte",
         w: 32, h: 22, base: "+", start: [4, 15],
         itemCos: "mov_c3",
-        items: [[3, 6], [28, 16], [15, 18]],
+        items: [[3, 10], [28, 17], [15, 18]],
         areas: [[0, 0, 31, 21, "La vetta ventosa della collina dominata dal campanile"]],
         npcs: () => [
           { id: "mov_silvano", at: [8, 14] }
         ],
         doors: {
           "16,8": { to: "mov_cella", at: [4, 12] },
-          "28,14": { to: "mov_studio_tv", at: [4, 14] }
+          "28,15": { to: "mov_studio_tv", at: [4, 14] }
         },
         loot: {
           "18,16": {
@@ -181,7 +181,7 @@
           put(16, 8, "q");
           // Ingresso verso studio Tele-Rondine
           lay(26, 12, 30, 15, "y");
-          put(28, 14, "q");
+          put(28, 15, "q");
         },
         intro: [
           ["voce", "La tramontana fischia tra le campane di pietra. Il ponte radio verso la città deve partire adesso."]
@@ -197,7 +197,7 @@
         bg: "mov_cella",
         time: "notte",
         w: 22, h: 16, base: "=", start: [4, 12],
-        npcs: [],
+        npcs: () => [],
         objects: {
           "12,8": () => {
             if (S() === 1) {
@@ -242,7 +242,7 @@
           { id: "mov_brando", at: [16, 8] },
           { id: "mov_valeri", at: [20, 8] }
         ],
-        exits: { "4,15": { to: "mov_campanile", at: [28, 15] } },
+        exits: { "4,15": { to: "mov_campanile", at: [28, 16] } },
         build(L) {
           const { lay, put } = L;
           lay(0, 0, 23, 1, "a");

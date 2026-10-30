@@ -236,6 +236,7 @@
       giustizia: { name: "Il Processo del Lunedì", icon: "⚖️", desc: "Consegni il dossier alla magistratura proteggendo la famiglia dell'arbitro." },
       segreto: { name: "Nastro Zero (1964)", icon: "🎞️", desc: "Ricostruisci la bobina madre del 1964: la verità storica scuote la città." }
     },
+    bonds: { per: 4 }, // Rapporti (cuori): i capitoli usano K.rel.scene / K.rel.add
     clock: {
       slots: ["Pomeriggio Ragazzi", "Telegiornale Locale", "Prima Serata 20:30", "Televendite Notturne"],
       hud: true

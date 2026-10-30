@@ -173,7 +173,30 @@ async function testSaga(w) {
   await browser.close();
 }
 
+// tutte le zone: porte, oggetti e personaggi raggiungibili; ogni personaggio risponde a «Parla» (prima non parlava nessuno: K.rel mancante)
+async function testTalk() {
+  const { browser, page: p, errors } = await L.setup({ w: 390, ...MOD, save: { v: 1, diffSet: true, intro: { ch1: 1 } } });
+  try {
+    await p.evaluate(() => window.__moviola.open()); await p.waitForTimeout(600); await L.advance(p).catch(() => {});
+    const Z = await p.evaluate(() => { const d = window.__moviola._dbg; return Object.keys(d.ZONES).map((z) => [z, d.ZONES[z].ch]); });
+    for (const [z, ch] of Z) {
+      await p.evaluate((ch) => { const K = window.__moviola._dbg.K, m = K.mem(); m.ch = ch; m.max = 4; for (let i = 1; i <= ch; i++) m.intro["ch" + i] = 1; K.save(); K.setStep(ch, 0); }, ch);
+      try { await p.evaluate((z) => window.__moviola._dbg.K.go(z), z); } catch (e) { errors.push(z + ": " + e.message.slice(0, 120)); continue; }
+      await p.waitForTimeout(400); await L.advance(p).catch(() => {});
+      const bad = await L.reachAll(p, z); if (bad.length) errors.push(z + ": " + bad.join(", "));
+      for (const id of await p.evaluate(() => (window.__tr.TW.z.npcs || []).filter((n) => !n.ghost).map((n) => n.id))) {
+        try { await L.talk(p, id); await p.waitForTimeout(300); if (await p.evaluate(() => window.T_.walk())) errors.push(`${z}: ${id} non parla`); }
+        catch (e) { errors.push(`${z}: ${id} ${e.message.slice(0, 100)}`); }
+        await p.evaluate(() => { const b = [...document.querySelectorAll("#choices button")].find((x) => /Torna a esplorare|Indietro/.test(x.innerText)); if (b) b.click(); });
+        await L.advance(p, ["Torna a esplorare", "Indietro", "Aspetta"]).catch(() => {});
+      }
+    }
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check("L'Ombra della Moviola · si parla con tutti, tutto raggiungibile", errors); await browser.close();
+}
+
 (async () => {
+  await testTalk();
   await testArcade(390);
   await testSaga(390);
   await testSaga(320);

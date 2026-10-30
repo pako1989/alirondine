@@ -216,10 +216,10 @@
         time: "giorno",
         w: 32, h: 22, base: "+", start: [4, 14],
         itemCos: "mov_c1",
-        items: [[3, 6], [28, 16], [15, 18]],
+        items: [[3, 10], [28, 16], [15, 18]],
         areas: [[0, 0, 31, 21, "Il piazzale esterno degli studi televisivi di Tele-Rondine"]],
         npcs: () => [
-          { id: "mov_walter", at: [18, 13] }
+          { id: "mov_walter", at: [18, 15] }
         ],
         doors: {
           "8,6": { to: "mov_regia", at: [4, 15] },
