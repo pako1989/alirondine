@@ -77,6 +77,18 @@ async function test(w, h, name) {
     } catch (e) { errors.push(e.message.slice(0, 300)); }
     L.check("Zaino · avviso al momento giusto", errors); await browser.close();
   }
+  // Capitoli: il capitolo in corso si può ricominciare, e si rivedono le scene d'apertura
+  {
+    const { browser, page: p, errors } = await open(390, 800);
+    try {
+      await p.evaluate(() => window.__neve._dbg.K.setStep(1, 2)); await p.waitForTimeout(200);
+      await p.evaluate(() => { window.__borgoApi.trExitTo ? window.__borgoApi.trExitTo(() => window.__neve.open()) : window.__neve.open(); }); await p.waitForTimeout(800);
+      for (const re of ["^Capitoli", "Capitolo 1", "Ricomincia il capitolo"]) { const ok = await p.evaluate((re) => window.T_.click(re), re); if (!ok) { errors.push("manca «" + re + "»: " + (await p.evaluate(() => window.T_.btns().map((o) => o.t).join(" | ")))); break; } await p.waitForTimeout(500); }
+      const r = await p.evaluate(() => ({ walk: window.T_.walk(), step: window.__neve._dbg.K.stepOf(1), intro: !!(JSON.parse(localStorage.getItem("ali-di-rondine.neve")).intro || {}).gn_paese }));
+      if (r.walk || r.step !== 0) errors.push("capitolo non ricominciato con le scene d'apertura: " + JSON.stringify(r));
+    } catch (e) { errors.push(e.message.slice(0, 300)); }
+    L.check("Saga · ricomincia il capitolo in corso", errors); await browser.close();
+  }
   // obiettivi vaghi (predefiniti): niente strada nel riquadro; «🧭 Dove vado?» nel Menu costa 10 monete e svela l'obiettivo esatto
   {
     const { browser, page: p, errors } = await open(390, 800);

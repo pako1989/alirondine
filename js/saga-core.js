@@ -193,6 +193,8 @@
       m.max = Math.max(m.max || 1, m.ch, n);
       if (!sn) { m.ch = n; save(); return false; } // salvataggio vecchio, senza istantanea: si rigioca com'è
       m.st = Object.assign({}, sn.st); m.flags = Object.assign({}, sn.flags); m.zone = "";
+      // si rigioca davvero: tornano le scene d'apertura dei capitoli da n in poi e quelle dei loro luoghi
+      m.intro = m.intro || {}; Object.keys(CHAPTERS).map(Number).filter((k) => k >= n).forEach((k) => { delete m.intro["ch" + k]; }); Object.keys(ZONES).forEach((z) => { if ((ZONES[z].ch | 0) >= n) delete m.intro[z]; });
       delete m.step[n]; delete m.done[n];
       m.choices = (m.choices || []).filter((x) => x.c < n);
       m.ch = n; save(); return true;
@@ -997,9 +999,9 @@
       const m = mem(), opts = [];
       for (let n = 1; n <= NCH; n++) {
         const c = CHAPTERS[n], open = c && (n === 1 || m.done[n - 1] || m.ch >= n || (m.max || 1) >= n);
-        if (open) opts.push({ label: `${m.done[n] ? "✓" : "▸"} Capitolo ${n} · ${c.title}`, sub: m.done[n] ? "Concluso · rigioca" : c.sub || "", cls: m.ch === n ? "hot" : "", fn: () => { if (n === m.ch && !m.done[n]) return continueStory();
+        if (open) opts.push({ label: `${m.done[n] ? "✓" : "▸"} Capitolo ${n} · ${c.title}`, sub: m.done[n] ? "Concluso · rigioca" : c.sub || "", cls: m.ch === n ? "hot" : "", fn: () => { const cur = n === m.ch && !m.done[n];
           api.scene(BG0, "voce", `<b>Rigiochi il capitolo ${n}?</b><br><span style="color:var(--dim)">Riparti dai parametri e dalle scelte con cui l'avevi iniziato. I finali trovati, le monete e i cosmetici restano tuoi.${n < NCH ? " I capitoli già raggiunti restano giocabili." : ""}${n > 1 && !(m.snap && m.snap[n]) ? " (Salvataggio precedente a questa funzione: questo capitolo si rigioca com'è, senza tornare indietro.)" : ""}</span>`,
-            [{ label: "Sì, rigioca dall'inizio", cls: "hot", fn: () => { rewindTo(n); m.ch = n; save(); continueStory(); } }, { label: "◂ Indietro", fn: chapters }], TITLE); } });
+            [...(cur ? [{ label: "▶ Continua da dove eri", cls: "hot", fn: continueStory }] : []), { label: cur ? "↻ Ricomincia il capitolo dall'inizio" : "Sì, rigioca dall'inizio", sub: "Con le scene d'apertura", cls: cur ? "" : "hot", fn: () => { rewindTo(n); m.ch = n; save(); continueStory(); } }, { label: "◂ Indietro", fn: chapters }], TITLE); } });
         else opts.push({ label: `• Capitolo ${n} · ${c ? c.title : "???"}`, sub: c ? "Finisci il capitolo prima" : "In arrivo", disabled: true, fn: chapters });
       }
       opts.push({ label: "Ricomincia da capo", sub: "Cancella solo questo salvataggio", fn: resetAsk });
