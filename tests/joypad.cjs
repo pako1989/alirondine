@@ -52,6 +52,19 @@ async function test(w, h, name) {
     } catch (e) { errors.push(e.message.slice(0, 300)); }
     L.check("Joystick · rotazione", errors); await browser.close();
   }
+  // orizzontale: toccando un punto della scena la didascalia in alto non resta coperta dal «✕ Esci»
+  {
+    const { browser, page: p, errors } = await open(900, 405);
+    try {
+      await p.evaluate(() => window.__borgoApi.scene("gn_bar", "voce", "Prova didascalia", [{ label: "Continua ▸", fn: () => {} }])); await p.waitForTimeout(500);
+      const c = await p.evaluate(() => { const r = document.getElementById("cv").getBoundingClientRect(); return { x: r.left + (160 / 320) * r.width, y: r.top + (74 / 200) * r.height }; });
+      await p.mouse.click(c.x, c.y); await p.waitForTimeout(400);
+      const r = await p.evaluate(() => { const b = document.querySelector(".scExit.on"); return { cap: document.body.classList.contains("bgCapOn"), op: b ? getComputedStyle(b).opacity : "nessuno" }; });
+      if (!r.cap || (r.op !== "nessuno" && r.op !== "0")) errors.push("Esci copre la didascalia: " + JSON.stringify(r));
+      await L.shot(p, "joypad_didascalia");
+    } catch (e) { errors.push(e.message.slice(0, 300)); }
+    L.check("Esci · didascalia scena", errors); await browser.close();
+  }
   // obiettivi vaghi (predefiniti): niente strada nel riquadro; «🧭 Dove vado?» nel Menu costa 10 monete e svela l'obiettivo esatto
   {
     const { browser, page: p, errors } = await open(390, 800);

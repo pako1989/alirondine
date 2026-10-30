@@ -10145,8 +10145,10 @@
       if (S.cap && now() - S.last.t > 800) S.cap = null;
       S.last = { k: kind, t: now(), W, H };
       try { drawMarkers(g, kind, f); drawCaption(g, W, kind); } catch (e) {}
+      if (!!S.cap !== !!S.capOn) { S.capOn = !!S.cap; document.body.classList.toggle("bgCapOn", S.capOn); } // in orizzontale il «✕ Esci» si toglie di mezzo (css/style.css)
       return true;
     }
+    if (S.capOn) { S.capOn = false; document.body.classList.remove("bgCapOn"); }
     return typeof prev === "function" ? prev.apply(this, arguments) : false;
   };
 })();

@@ -2004,4 +2004,5 @@ html, body { overscroll-behavior-y: contain; }
 /* ---- orizzontale: «✕ Esci» delle saghe in alto, al centro della scena (posizione da js/joypad.js) ---- */
 @media (orientation: landscape) and (max-height: 560px) {
   body:not(:has(#matchHud:not([hidden]))) :is(.scExit, #scExit, #crExit, #dtExit, #muExit, #lbExit, #alExit, #bvExit, #ombExit, #chrExit, #kbExit, #piExit, #ragExit, #shExit) { top: calc(var(--cvT, 8px) + 6px) !important; bottom: auto !important; left: calc(var(--cvL, 8px) + var(--cvW, 300px) / 2) !important; transform: translateX(-50%); min-height: 30px !important; padding: 4px 10px !important; font-size: 12px !important; opacity: .92; }
+  body.bgCapOn:not(:has(#matchHud:not([hidden]))):not(:has(.dpad)) :is(.scExit, #scExit, #crExit, #dtExit, #muExit, #lbExit, #alExit, #bvExit, #ombExit, #chrExit, #kbExit, #piExit, #ragExit, #shExit) { opacity: 0 !important; pointer-events: none !important; }
 }
