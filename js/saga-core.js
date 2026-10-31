@@ -25,6 +25,7 @@
 //     plan: { name: "Il Piano", roles: { rk: { n, icon, d, fit: { id_membro: 2 } } } },  // IL PIANO (richiede crew): K.plan.open({ title, q, roles, pool }, back, inZone, cb(mappa)) assegna compagni a ruoli; K.plan.fit(rk, id)
 //     scroll: { eng: "__scorri", name: "I livelli", levels: { id: { name, icon, d, theme, map: [righe], signs, boss } }, bonus(K), kit: "guanti", practice: { theme, map, signs }, practiceName, practiceSub, banName },  // A SCORRIMENTO: K.scroll.play(id, o, cb(r)) livello platform 2D (js/scorri.js); record per livello, Mappa dei livelli (K.scroll.open)
 //     build: { name, res: "legno", empty: "O", kinds: { id: { n, icon, tile, cost, d } }, sites: { id: { zone, at: [tx, ty], tag, n } }, when(K) },  // LE COSTRUZIONI: cantieri sulla mappa, K.build.place/at/list/open; restano tra i capitoli
+//     perks: { name: "Il Bivio dei Poteri", perks: { id: { n, icon, d, max, tag } } },  // IL BIVIO DEI POTERI: K.perks.offer({ n: 3, tag, q }, cb(id)) scelta 1 su 3 di un potere che resta tra i capitoli; lv/give/all/list/html
 //     rhythm: { eng: "__ritmo", name: "Il Repertorio", songs: { id: { n, icon, d, song, mode, venue, need } }, mates(K) },  // IL REPERTORIO: K.rhythm.play(id, o, cb(r)) brano a tempo (js/ritmo.js); stelle e precisione per brano, K.rhythm.open(back), morale() per la partita dopo
 //     cold: { name: "Calore", icon: "🌡️", max: 8, sec: 14, home: ["zona", tx, ty], onZero(K) },  // IL TERMOMETRO: spec.cold (true o moltiplicatore) fa scendere il Calore; spec.warm = [[tx, ty, r]] e gli interni lo fanno risalire; K.cold.get/add/warm
 //     alert: { max: 3, names: [...], rangeMul: 0.25, decay: true, hud: true, onChange(K, lv, old) },  // ALLERTA globale: ogni avvistamento +1 (K.alert.get/set/add), il raggio delle guardie cresce; hiding(K) → true = nascosto alle guardie
@@ -523,7 +524,7 @@
       return out + `<br><span style="color:var(--dim)">▷ = strade non prese. Per provarle: Capitoli → rigioca.</span>`;
     }
     function journal(back, inZone) {
-      const html = journalHtml() + (CRW ? CRW.html() : "") + (PLN ? PLN.html() : "") + (SCR ? SCR.html() : "") + (RIT ? RIT.html() : "") + (BLD ? BLD.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + (WGT ? WGT.html() : "") + (RAD ? RAD.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
+      const html = journalHtml() + (CRW ? CRW.html() : "") + (PLN ? PLN.html() : "") + (SCR ? SCR.html() : "") + (RIT ? RIT.html() : "") + (BLD ? BLD.html() : "") + (PRK ? PRK.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + (WGT ? WGT.html() : "") + (RAD ? RAD.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
       const jb = (RAD ? [{ label: `${RAD.icon} ${RAD.name} · ${RAD.freq().toFixed(1)} MHz`, sub: "Ruota la manopola e intercetta segnali", fn: () => RAD.open(() => journal(back, inZone), inZone) }] : []).concat(DOS ? Object.keys(DOS.cases).filter((c) => DOS.list(c).length).map((c) => ({ label: "🗂️ Dossier · " + DOS.cases[c].t, sub: "Confronta prove e testimonianze", fn: () => DOS.open(c, () => journal(back, inZone), inZone) })) : []).concat(CAT && CAT.list().length ? [{ label: "🃏 Album", sub: `${CAT.team().length}/${CAT.max} in squadra`, fn: () => CAT.open(() => journal(back, inZone), inZone) }] : []).concat(CRW && CRW.count() ? [{ label: "⚔️ Schiera la compagnia", sub: `${CRW.field().length}/${CRW.max} in campo`, fn: () => CRW.pick(() => journal(back, inZone), inZone) }] : []).concat((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
       if (inZone) return api.trAsk("voce", html, jb, bgNow());
       api.scene(BG0, "voce", html, jb, JN());
@@ -1302,6 +1303,27 @@
       return { at, place, remove, list, count, open, on, html, apply, acts, tap, kinds: KD, sites: ST0 };
     })();
 
+    // -------------------------------------------------------------- IL BIVIO DEI POTERI (cfg.perks): scelta di 1 potere su 3, che resta tra i capitoli
+    // cfg.perks = { name, perks: { id: { n, icon, d, max (di base 3), tag } } }. I livelli sono flag della saga (pk_<id>), quindi restano e si rigiocano coi capitoli.
+    // K.perks.offer({ n: 3, tag, q: "domanda" }, cb(id)) apre la scelta (cb(null) se non c'è più niente da prendere) · lv(id) · give(id) · all() { id: lv }
+    // · list() [{ id, lv }] · html() nel diario. Un motore (es. js/assedio.js) li riceve come poteri di partenza: K.minigame(start, { perks: K.perks.all() }, cb).
+    const PRK = cfg.perks && (() => {
+      const C0 = cfg.perks, PK = C0.perks || {};
+      const lv = (id) => F.get("pk_" + id, 0) | 0, mx = (id) => (PK[id] && PK[id].max) || 3;
+      const give = (id) => { if (!PK[id] || lv(id) >= mx(id)) return false; F.set("pk_" + id, lv(id) + 1); SFX.ding(); return true; };
+      const all = () => { const o = {}; Object.keys(PK).forEach((id) => { if (lv(id)) o[id] = lv(id); }); return o; };
+      const list = () => Object.keys(all()).map((id) => ({ id, lv: lv(id) }));
+      const pool = (tag) => Object.keys(PK).filter((id) => lv(id) < mx(id) && (!tag || !PK[id].tag || PK[id].tag === tag));
+      function offer(o, cb) {
+        o = o || {}; const p = pool(o.tag); for (let i = p.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [p[i], p[j]] = [p[j], p[i]]; }
+        const pick = p.slice(0, o.n || 3); if (!pick.length) return cb && cb(null);
+        const head = `<b>${esc(C0.name || "Il Bivio dei Poteri")}</b><br><span style="color:var(--dim)">${esc(o.q || "Scegli un potere: resta con te per tutta la saga.")}</span>`;
+        api.trAsk("voce", head, pick.map((id) => ({ label: `${PK[id].icon || "✦"} ${PK[id].n} · Liv. ${lv(id) + 1}`, sub: String(PK[id].d || "").slice(0, 100), cls: "pick", fn: () => { give(id); cb && cb(id); } })), bgNow());
+      }
+      const html = () => { const L = list(); return L.length ? `<br><br><b>${esc(C0.name || "Il Bivio dei Poteri")}</b><br>` + L.map((x) => `${esc(PK[x.id].icon || "✦")} ${esc(PK[x.id].n)} <span style="color:var(--dim)">· Liv. ${x.lv}/${mx(x.id)}</span>`).join("<br>") : ""; };
+      return { lv, give, all, list, offer, html, perks: PK };
+    })();
+
     // -------------------------------------------------------------- IL DOSSIER (cfg.cases): prove e testimonianze, confronti, verdetto
     // cfg.cases = { id_caso: { t, q, items: { id: { t, d, icon, kind: "prova"|"testimonianza" } }, links: [[a, b, "cosa non torna"]], verdicts: [{ id, label, sub }] } }
     // K.dossier: add(caso, item) · has · list(caso) · found(caso) (contraddizioni scoperte) · solid(caso) (0..1) · open(back, inZone, caso) (schermata: tocca due voci
@@ -1737,7 +1759,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, plan: PLN, scroll: SCR, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN, radio: RAD, cold: COLD, rhythm: RIT, build: BLD,
+      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, plan: PLN, scroll: SCR, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN, radio: RAD, cold: COLD, rhythm: RIT, build: BLD, perks: PRK,
       // un minigioco proprio della saga (start = window.__xxx.start): o passa al motore, cb(r) a fine partita
       minigame: (start, o, cb) => ownMatch(start, Object.assign({}, o, { done: (r) => safe(() => cb(r || {}), null) })),
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
