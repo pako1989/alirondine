@@ -10620,4 +10620,178 @@
 
   const DRAW = { sg_titolo: sgTitolo, sg_cortile: sgCortile, sg_biblioteca: sgBiblioteca, sg_torre: sgTorre };
   Object.keys(DRAW).forEach((k) => R.register(k, { draw: (g, W, H, f) => DRAW[k](g, W, H, f), hot: HOT[k] }));
+
+  // --- BURATTINI: LA GIOSTRA DEI BURATTINI (Vicolo, Bottega, Proscenio Ducale) ---
+  function burTitolo(g, W, H, f) {
+    vg(g, 0, 0, W, H, ["#0a0505", "#260f0f", "#450a0a"]);
+    // Sipario in velluto cremisi con drappeggi ondeggianti
+    g.fillStyle = "#881337";
+    g.beginPath();
+    g.moveTo(0, 0); g.lineTo(W, 0);
+    g.lineTo(W, 40);
+    for (let x = W; x >= 0; x -= 20) {
+      g.quadraticCurveTo(x - 10, 52 + Math.sin(f * 0.05 + x) * 3, x - 20, 40);
+    }
+    g.closePath(); g.fill();
+    // Corde d'oro e nappe
+    g.strokeStyle = "#fbbf24"; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(20, 0); g.quadraticCurveTo(40, 55, 60, 42); g.stroke();
+    g.beginPath(); g.moveTo(W - 20, 0); g.quadraticCurveTo(W - 40, 55, W - 60, 42); g.stroke();
+    circ(g, 60, 44, 4, "#fbbf24"); circ(g, W - 60, 44, 4, "#fbbf24");
+    // Palco in tavole di legno
+    vg(g, 0, 130, W, H - 130, ["#78350f", "#451a03", "#1c1917"]);
+    for (let p = 135; p < H; p += 12) {
+      px(g, 0, p, W, 1, "#291305");
+      px(g, 0, p + 1, W, 1, "#92400e");
+    }
+    // Bilancino centrale a croce con fili che vibrano
+    const bx = 160 + Math.sin(f * 0.03) * 8;
+    px(g, bx - 22, 60, 44, 4, "#fbbf24");
+    px(g, bx - 2, 50, 4, 24, "#fbbf24");
+    // Fili argentei tesi verso la marionetta
+    g.strokeStyle = "rgba(226, 232, 240, 0.75)"; g.lineWidth = 1;
+    const mx = 160 + Math.sin(f * 0.03) * 6;
+    const my = 125 + Math.sin(f * 0.06) * 3;
+    g.beginPath(); g.moveTo(bx - 20, 62); g.lineTo(mx - 8, my - 16); g.stroke();
+    g.beginPath(); g.moveTo(bx + 20, 62); g.lineTo(mx + 8, my - 16); g.stroke();
+    g.beginPath(); g.moveTo(bx, 74); g.lineTo(mx, my - 24); g.stroke();
+    // Marionetta in legno intagliato
+    circ(g, mx, my - 24, 7, "#fed7aa"); // testa
+    px(g, mx - 6, my - 16, 12, 16, "#dc2626"); // giacca a losanghe
+    px(g, mx - 5, my, 4, 12, "#b45309"); // gamba sx
+    px(g, mx + 1, my, 4, 12, "#b45309"); // gamba dx
+    // Pallone di cuoio a spicchi
+    circ(g, mx + 12, my + 8, 6, "#ffffff");
+    px(g, mx + 10, my + 6, 4, 4, "#1e293b");
+    glow(g, 160, 80, 80, "251,191,36", 0.25);
+  }
+
+  function burVicolo(g, W, H, f) {
+    // Cielo crepuscolare tra le strette case
+    vg(g, 0, 0, W, 80, ["#090d16", "#1e1b4b", "#311042"]);
+    // Facciate storte del vicolo
+    px(g, 0, 10, 65, 120, "#27150c");
+    px(g, W - 65, 15, 65, 115, "#1f1209");
+    for (let w = 0; w < 3; w++) {
+      px(g, 15, 30 + w * 28, 18, 20, "#fef08a");
+      px(g, 23, 30 + w * 28, 2, 20, "#78350f");
+      px(g, W - 45, 35 + w * 28, 18, 20, "#fde68a");
+      px(g, W - 37, 35 + w * 28, 2, 20, "#78350f");
+    }
+    // Lanterna a gas oscillante sul vicolo
+    const lx = 75, ly = 48 + Math.sin(f * 0.04) * 2;
+    g.strokeStyle = "#475569"; g.lineWidth = 1.5;
+    g.beginPath(); g.moveTo(65, 30); g.lineTo(lx, ly); g.stroke();
+    px(g, lx - 4, ly, 8, 10, "#fbbf24");
+    glow(g, lx, ly + 5, 26, "251,191,36", 0.4);
+    // Ciottoli del selciato
+    vg(g, 0, 125, W, H - 125, ["#475569", "#334155", "#1e293b"]);
+    for (let row = 130; row < H; row += 8) {
+      px(g, 0, row, W, 1, "#0f172a");
+      for (let col = (row % 16 === 0 ? 0 : 8); col < W; col += 16) {
+        px(g, col, row + 1, 14, 6, "#64748b");
+      }
+    }
+    // Pedana di legno di Gervaso per le prove di calcio a fili
+    px(g, 105, 145, 110, 26, "#78350f");
+    px(g, 108, 147, 104, 22, "#9a3412");
+    px(g, 158, 147, 2, 22, "#fef08a"); // linea mediana
+    // Sagome di burattini appese
+    px(g, 80, 85, 3, 20, "#d97706");
+    circ(g, 81, 82, 3, "#fed7aa");
+  }
+
+  function burBottega(g, W, H, f) {
+    // Interno caldo della bottega d'intaglio
+    vg(g, 0, 0, W, H, ["#180e07", "#2e180d", "#451a03"]);
+    // Travi del soffitto con matasse di refe e bilancini appesi
+    px(g, 0, 18, W, 10, "#1f1209");
+    for (let h = 25; h < W - 20; h += 32) {
+      g.strokeStyle = "rgba(254,243,199,0.7)"; g.lineWidth = 1;
+      g.beginPath(); g.moveTo(h, 28); g.lineTo(h, 50); g.stroke();
+      circ(g, h, 54, 5, "#ca8a04"); // matassa cerata
+    }
+    // Parete con scansie e teste di marionette intagliate
+    px(g, 20, 45, 110, 5, "#78350f");
+    for (let m = 0; m < 5; m++) {
+      circ(g, 35 + m * 20, 38, 5, "#fed7aa");
+      px(g, 33 + m * 20, 42, 4, 3, "#d97706");
+    }
+    // Grande banco da falegname con morse e pialle
+    px(g, 40, 115, 240, 35, "#78350f");
+    px(g, 40, 115, 240, 6, "#b45309");
+    // Pialla in legno e ferro
+    px(g, 80, 106, 26, 9, "#92400e");
+    px(g, 92, 101, 4, 5, "#cbd5e1");
+    // Trucioli dorati a terra
+    for (let t = 0; t < 18; t++) {
+      const tx = 60 + (t * 23) % 200;
+      const ty = 155 + (t * 11) % 40;
+      px(g, tx, ty, 3, 2, "#fde68a");
+    }
+    // Lampada a olio sul tavolo che proietta un bagliore ambrato
+    const ox = 230, oy = 104;
+    px(g, ox - 4, oy, 8, 11, "#d97706");
+    glow(g, ox, oy - 2, 40, "251,191,36", 0.45);
+    circ(g, ox, oy - 2, 2.5, "#fef08a");
+  }
+
+  function burPalco(g, W, H, f) {
+    // Gran proscenio del Teatro Ducale
+    vg(g, 0, 0, W, 70, ["#1e1b4b", "#3b0764", "#581c87"]);
+    // Palchetti ducali laterali con velluto cremisi e dorature
+    px(g, 0, 15, 45, 110, "#4c0519");
+    px(g, W - 45, 15, 45, 110, "#4c0519");
+    for (let b = 0; b < 3; b++) {
+      px(g, 0, 30 + b * 32, 45, 4, "#fbbf24");
+      px(g, W - 45, 30 + b * 32, 45, 4, "#fbbf24");
+      // Candelabri a tre bracci
+      px(g, 20, 20 + b * 32, 4, 10, "#ca8a04");
+      glow(g, 22, 18 + b * 32, 12, "251,191,36", 0.4);
+      px(g, W - 25, 20 + b * 32, 4, 10, "#ca8a04");
+      glow(g, W - 23, 18 + b * 32, 12, "251,191,36", 0.4);
+    }
+    // La ribalta in legno lucido a specchio
+    vg(g, 0, 120, W, H - 120, ["#854d0e", "#713f12", "#3f2c0d"]);
+    // Righe del campo di gioco a fili
+    g.strokeStyle = "rgba(254, 240, 138, 0.9)"; g.lineWidth = 2;
+    g.strokeRect(55, 132, W - 110, 58);
+    g.beginPath(); g.moveTo(W / 2, 132); g.lineTo(W / 2, 190); g.stroke();
+    g.beginPath(); g.ellipse(W / 2, 161, 24, 14, 0, 0, 7); g.stroke();
+    // Campanella d'oro dell'incrocio dei pali
+    const bellSway = Math.sin(f * 0.08) * 3;
+    px(g, W / 2 - 2 + bellSway, 72, 4, 8, "#fbbf24");
+    circ(g, W / 2 + bellSway, 82, 6, "#fef08a");
+    glow(g, W / 2 + bellSway, 82, 18, "251,191,36", 0.5);
+  }
+
+  const BUR_HOT = {
+    bur_titolo: [
+      [120, 50, 80, 50, "🎭 Il Grande Sipario di Velluto: nasconde i segreti del torneo ducale e il profumo di pioppo intagliato."],
+      [30, 80, 60, 80, "🪢 I Funi di Seta Cremisi: issano i bilancini a sette metri d'altezza sopra la platea."],
+      [230, 80, 60, 80, "👑 Lo Stemma dei Burattinai Ducali con l'aquila ad ali aperte e il filo d'argento."],
+      [120, 130, 80, 60, "⚽ La Marionetta di Punta col pallone di cuoio cucito a mano pronto al tiro."]
+    ],
+    bur_vicolo: [
+      [20, 40, 60, 70, "🏚️ La Bottega di Mastro Taddeo: da cinquant'anni forgia marionette da corsa e bilancini d'ebano."],
+      [240, 40, 60, 70, "🍷 La Taverna del Fiasco Buco dove i maestri burattinai si sfidano a dadi e scommesse."],
+      [110, 140, 100, 45, "🪵 La Pedana di Betulla: teatro delle prime sfide clandestine tra garzoni di bottega."],
+      [70, 45, 30, 40, "🏮 Il Lampione a Olio che proietta ombre animate contro i mattoni bagnati."]
+    ],
+    bur_bottega: [
+      [40, 20, 90, 40, "🪡 Le Matasse di Canapa Cerata n. 4: indistruttibili all'attrito dei colpi di punta."],
+      [150, 20, 100, 40, "🪵 Le Teste di Pioppo Selvatico pronte per essere dipinte con lacche veneziane."],
+      [60, 110, 100, 40, "🪚 Il Banco delle Sgorbie: ogni intaglio richiede polso fermo e cuore calmo."],
+      [210, 95, 50, 45, "🕯️ La Lampada d'Ambra dove Taddeo lavora fino all'alba prima di ogni Derby."]
+    ],
+    bur_palco: [
+      [130, 65, 60, 35, "🔔 La Campanella d'Oro dell'incrocio dei pali: squilla cristallina a ogni gol ducale."],
+      [10, 25, 40, 90, "👑 Il Palco Ducale foderato di damasco cremisi dove siede il Duca Ottavio."],
+      [270, 25, 40, 90, "📜 La Galleria dei Canovacci dove i giudici annotano falli e virtuosismi a fili."],
+      [110, 130, 100, 60, "🏟️ La Ribalta a Specchio del Gran Derby: levigata con cera d'api per tiri veloci."]
+    ]
+  };
+
+  const BUR_DRAW = { bur_titolo: burTitolo, bur_vicolo: burVicolo, bur_bottega: burBottega, bur_palco: burPalco };
+  Object.keys(BUR_DRAW).forEach((k) => R.register(k, { draw: (g, W, H, f) => BUR_DRAW[k](g, W, H, f), hot: BUR_HOT[k] }));
 })();

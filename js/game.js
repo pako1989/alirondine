@@ -4104,16 +4104,10 @@
     for (let r = 0; r < 8; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue; if (free(ax + dx, ay + dy)) return (g.pos = { at: [ax + dx, ay + dy], ok: true }).at; }
     return (g.pos = { at: [ax, ay], ok: true }).at;
   }
-  // la saga da cui arriva l'ospite (didascalia quando ci parli): dichiarata, dalla carta della Squadra dei Sogni o dal Salone
-  function guestSaga(gst) {
-    if (gst.saga) return gst.saga;
-    try { const S = window.__sogni, c = S && S.BY[gst.id], sg = c && S.SAGHE[c.saga]; if (sg) return sg[1]; } catch (e) {}
-    return "";
-  }
   window.__borgoGuests = {
     add(def) { if (!def || !def.id || GUESTS.some((x) => x.id === def.id)) return; const gi = GUESTS.push(Object.assign({}, def)) - 1, n = { id: def.id, guest: true, day: true, when: () => { try { return !!def.when() && !!CAST[def.id]; } catch (e) { return false; } } }; Object.defineProperty(n, "at", { get: () => guestAt(gi), enumerable: true }); NPCS.push(n); },
-    talk(id) { const gst = GUESTS.find((x) => x.id === id); if (!gst) return false; let ls = typeof gst.lines === "function" ? gst.lines() : gst.lines; ls = (ls || []).map((l) => (typeof l === "string" ? [gst.id, l] : l)).map((l) => L(l[0], String(l[1]).replace(/\{n\}/g, (readJSON(HERO, null) || {}).name || "Campione"))); const sgT = guestSaga(gst); if (sgT) ls.unshift(L("voce", `<span style="color:var(--dim)">🎟️ Ospite da «${esc(sgT)}»</span>`)); bSay(ls); return true; },
-    list: () => GUESTS.map((x) => ({ id: x.id, saga: guestSaga(x), on: (() => { try { return !!x.when(); } catch (e) { return false; } })() })),
+    talk(id) { const gst = GUESTS.find((x) => x.id === id); if (!gst) return false; let ls = typeof gst.lines === "function" ? gst.lines() : gst.lines; ls = (ls || []).map((l) => (typeof l === "string" ? [gst.id, l] : l)).map((l) => L(l[0], String(l[1]).replace(/\{n\}/g, (readJSON(HERO, null) || {}).name || "Campione"))); bSay(ls); return true; },
+    list: () => GUESTS.map((x) => ({ id: x.id, on: (() => { try { return !!x.when(); } catch (e) { return false; } })() })),
   };
   const npcList = () => NPCS.filter((n) => (!n.day || !B.night) && (!n.night || B.night) && (!n.when || n.when())).map((n) => ({ ...n, x: n.at[0] * TS + 8, y: n.at[1] * TS + 12 }));
   function npcNews(id) {
@@ -5315,7 +5309,7 @@
   const HERO = "ali-di-rondine.campione";
   const H_STYLES = { spiky: "Spettinati", messy: "Ribelli", buzz: "Rasati", slick: "Tirati indietro", long: "Lunghi", bun: "Chignon", bob: "Caschetto", ponytail: "Coda", twintails: "Codini", braids: "Trecce", curly: "Ricci", side: "Riga di lato", ordinato: "Ordinati", bandana: "Bandana" };
   // le acconciature delle saghe: finire una saga (almeno un finale) sblocca la sua acconciatura nel guardaroba
-  const HAIR_SAGA = { sm_tifosi: "tifosi", sm_sasso: "sasso", sm_banda: "banda", sm_neve: "neve", sm_latta: "latta", sm_missione: "missione", sm_diga: "diga", sm_vuota: "vuota", sm_mondiale: "mondiale", hs_mondiale: "mondiale", sm_cavaliere: "cavaliere", hs_cavaliere: "cavaliere", sm_gala: "gala", hs_galadorato: "gala", sm_circuiti: "circuiti", hs_cyberundercut: "circuiti", sm_replica: "replica", hs_maschera: "replica", hs_ventura: "capitani", hs_arbitro: "fischietto", hs_autista: "rotta", hs_cacciatore: "figurine", sm_officina: "officina", hs_meccanico: "officina", hs_apprendista: "sigilli", sm_sigilli: "sigilli", sh_runa: "sigilli", hs_raito: "note", sm_quaderno: "note", sh_giudizio: "note", sm_fortino: "fortino", sh_laser: "fortino", sm_smoking: "spia", sh_carambola: "spia", hs_fluviale: "fiume", sm_fiume: "fiume", sh_vortice: "fiume", hs_spia: "treno", sm_ferrovia: "treno", sh_tormenta: "treno", hs_righe: "alcatraz", sm_strisce: "alcatraz", sh_scasso: "alcatraz", hs_borsalino: "milano", hs_afro: "torneo", hs_dread: "dopo", hs_undercut: "spazio", hs_pompadour: "mantello", hs_mullet: "stagione", hs_wavy: "cronache", hs_messybun: "vento", hs_topknot: "mondi", hs_sidebraid: "trono", hs_spacebuns: "lampioni", hs_corona: "ducati", hs_ciuffo: "grigio", hs_cometa: "titano", hs_scodella: "quartiere", hs_antenne: "razzo", hs_criniera: "cavallo", hs_brace: "dungeon", hs_colbacco: "montagna", hs_cowboy: "pugno", hs_coppola: "campana", hs_alloro: "roma", hs_palma: "naufraghi", sh_cocco: "naufraghi", sh_controluce: "milano", sh_gravita: "titano", sm_marinaio: "naufraghi", sm_gessato: "milano", sm_scacchi: "gp", sm_gladiatore: "roma", sm_dungeon: "dungeon", sm_secolo: "tempo", sm_compagnia: "capitani", sm_giuri: "fischietto", sm_gigante: "rotta", sm_album: "figurine" };
+  const HAIR_SAGA = { hs_burattino: "burattini", sm_burattini: "burattini", sh_filo: "burattini", sm_sasso: "sasso", sm_banda: "banda", sm_neve: "neve", sm_latta: "latta", sm_missione: "missione", sm_diga: "diga", sm_vuota: "vuota", sm_mondiale: "mondiale", hs_mondiale: "mondiale", sm_cavaliere: "cavaliere", hs_cavaliere: "cavaliere", sm_gala: "gala", hs_galadorato: "gala", sm_circuiti: "circuiti", hs_cyberundercut: "circuiti", sm_replica: "replica", hs_maschera: "replica", hs_ventura: "capitani", hs_arbitro: "fischietto", hs_autista: "rotta", hs_cacciatore: "figurine", sm_officina: "officina", hs_meccanico: "officina", hs_apprendista: "sigilli", sm_sigilli: "sigilli", sh_runa: "sigilli", hs_raito: "note", sm_quaderno: "note", sh_giudizio: "note", sm_fortino: "fortino", sh_laser: "fortino", sm_smoking: "spia", sh_carambola: "spia", hs_fluviale: "fiume", sm_fiume: "fiume", sh_vortice: "fiume", hs_spia: "treno", sm_ferrovia: "treno", sh_tormenta: "treno", hs_righe: "alcatraz", sm_strisce: "alcatraz", sh_scasso: "alcatraz", hs_borsalino: "milano", hs_afro: "torneo", hs_dread: "dopo", hs_undercut: "spazio", hs_pompadour: "mantello", hs_mullet: "stagione", hs_wavy: "cronache", hs_messybun: "vento", hs_topknot: "mondi", hs_sidebraid: "trono", hs_spacebuns: "lampioni", hs_corona: "ducati", hs_ciuffo: "grigio", hs_cometa: "titano", hs_scodella: "quartiere", hs_antenne: "razzo", hs_criniera: "cavallo", hs_brace: "dungeon", hs_colbacco: "montagna", hs_cowboy: "pugno", hs_coppola: "campana", hs_alloro: "roma", hs_palma: "naufraghi", sh_cocco: "naufraghi", sh_controluce: "milano", sh_gravita: "titano", sm_marinaio: "naufraghi", sm_gessato: "milano", sm_scacchi: "gp", sm_gladiatore: "roma", sm_dungeon: "dungeon", sm_secolo: "tempo", sm_compagnia: "capitani", sm_giuri: "fischietto", sm_gigante: "rotta", sm_album: "figurine" };
   function hairUnlocks() {
     Object.keys(HAIR_SAGA).forEach((id) => { try { const m = JSON.parse(localStorage.getItem("ali-di-rondine." + HAIR_SAGA[id]) || "null"); if (m && Array.isArray(m.ends) && m.ends.length && COSM[id] && bCos(id) && window.toast) window.toast(COSM[id].kind === "shot" ? "Nuovo tiro: " + COSM[id].label.replace(/^Tiro: /, "") : COSM[id].kind === "shirt" ? "Nuova maglia: " + COSM[id].label : "Nuova acconciatura: " + COSM[id].label.replace(/^Taglio (a )?/, ""), "info", COSM[id].kind === "shot" ? "⚽" : COSM[id].kind === "shirt" ? "👕" : "✂️"); } catch {} });
   }
@@ -5831,8 +5825,6 @@
     b.push(diffButton(save, again));
     const jy = !!(window.__joypad && window.__joypad.mode() === "joy"), jpB = !window.__joypad ? [] : [{ label: `Comandi per camminare: ${jy ? "Joystick" : "Quattro frecce"} ▸`, sub: jy ? "Joystick in 8 direzioni nel Borgo, nelle trasferte e nelle città delle saghe (tocca per le quattro frecce)" : "Le quattro frecce classiche (tocca per il joystick)", fn: () => { window.__joypad.set(jy ? "frecce" : "joy"); const lbl = jy ? "Quattro frecce" : "Joystick"; if (typeof showFeatureCutIn === "function") showFeatureCutIn("COMANDI", lbl, "🕹️", () => again(`Comandi: ${lbl}`)); else again(`Comandi: ${lbl}`); } }];
     b.push({ label: `Partite tattiche: ${SET.tatt ? "sì" : "no"}`, sub: SET.tatt ? "Pressing, contropiede, fiato, cambi e piccoli infortuni in ogni partita" : "Modalità alternativa: aggiunge piano di gioco, fiato, cambi e botte", fn: () => { SET.tatt = !SET.tatt; save(); again(); } });
-    if (window.__arenaAssedio) { const aon = window.__arenaAssedio.on(); b.push({ label: `Assedio dei Sogni nell'Arena: ${aon ? "Attivo" : "Disattivato"} ▸`, sub: aon ? "Sopravvivenza a ondate con le tue carte, nel menu dell'Arena dei Sogni (tocca per nasconderla)" : "Modalità nascosta dal menu dell'Arena dei Sogni (tocca per riattivarla)", fn: () => { window.__arenaAssedio.setOn(!aon); if (!aon) window.__arenaAssedio.cutin(window.__arenaAssedio.allies(), again, "ASSEDIO DEI SOGNI · ATTIVO"); else again(); } }); }
-    { let fo = true; try { fo = localStorage.getItem("ali-di-rondine.assedio-full") !== "0"; } catch (e) {} b.push({ label: `Assedio a ondate a schermo intero: ${fo ? "Sì" : "No"} ▸`, sub: fo ? "Tifosi Morti, Notte in Curva e Assedio dei Sogni a tutto schermo, in verticale e in orizzontale (tocca per la finestra piccola)" : "Finestra piccola 380×230 (tocca per lo schermo intero)", fn: () => { try { localStorage.setItem("ali-di-rondine.assedio-full", fo ? "0" : "1"); } catch (e) {} again(); } }); }
     b.push({ label: `Meteo Vento in Partita: ${SET.windWeather !== false ? "Attivo" : "Disattivato"} ▸`, sub: SET.windWeather !== false ? "Brezza marina e folate influenzano le parabole dei tiri (tocca per disattivare)" : "Meteo calmo senza raffiche di vento (tocca per attivare)", fn: () => { SET.windWeather = SET.windWeather === false; save(); again(`Meteo Vento ${SET.windWeather !== false ? "attivato" : "disattivato"}.`); } });
     b.push({ label: `Modalità Partita: ${SET.tsubasa ? "Captain Tsubasa (NES/SNES)" : "Classico JRPG"} ▸`, sub: SET.tsubasa ? "Duelli cinematografici Tecmo, comandi a griglia, radar e animazioni rétro" : "Elenco scelte testuali classico (tocca per cambiare)", fn: () => { SET.tsubasa = !SET.tsubasa; save(); again(`Modalità Partita: ${SET.tsubasa ? "Captain Tsubasa (NES/SNES)" : "Classico JRPG"}`); } });
     b.push({ label: "⚽ Gioca Esibizione Captain Tsubasa (NES/SNES) ▸", sub: "Sfida immediata con il motore a duelli Tecmo", cls: "hot", fn: () => { if (window.openTsubasaExhibition) window.openTsubasaExhibition(again); } });
@@ -5958,8 +5950,6 @@
     const storyStats = window.__storyNav ? window.__storyNav.getStats() : { seenDialoguesCount: 0, chosenOptionsCount: 0 };
     const hintsOn = SET.storyChoiceHints !== false;
     const storyB = [
-      { label: `Menu Storia ordinato: ${SET.storiaOrd !== false ? "Sì" : "No"} ▸`, sub: SET.storiaOrd !== false ? "Stagioni, Compagni e Archivio in tre cartelle (tocca per la lista unica)" : "Tutte le voci in una lista unica (tocca per le tre cartelle)", cls: "hot", fn: () => { SET.storiaOrd = SET.storiaOrd === false; save(); const lbl = SET.storiaOrd ? "Stagioni · Compagni · Archivio" : "Lista unica"; if (typeof showFeatureCutIn === "function") showFeatureCutIn("MENU STORIA", lbl, "📖", () => again(`Menu Storia: ${lbl}`)); else again(`Menu Storia: ${lbl}`); } },
-      { label: `Nelle puntate precedenti: ${SET.storiaRecap !== false ? "Sì" : "No"} ▸`, sub: SET.storiaRecap !== false ? "Prima di Continua e di ogni stagione, un riassunto di quello che hai vissuto (tocca per toglierlo)" : "Si parte subito, senza riassunto (tocca per rimetterlo)", cls: "hot", fn: () => { SET.storiaRecap = SET.storiaRecap === false; save(); const lbl = SET.storiaRecap ? "Attivo" : "Spento"; if (typeof showFeatureCutIn === "function") showFeatureCutIn("PUNTATE PRECEDENTI", lbl, "📺", () => again(`Puntate precedenti: ${lbl}`)); else again(`Puntate precedenti: ${lbl}`); } },
       {
         label: `Segnaposto "Già scelto": ${hintsOn ? "ATTIVO" : "DISATTIVATO"} ▸`,
         sub: hintsOn
@@ -6013,7 +6003,7 @@
     buttons([
       sec("partita", "Modalità di partita", `${on ? "Anni '90" : "Classico"} · difficoltà ${(DIFF[SET.diff] || DIFF.normale)[0]}`, "hot"),
       sec("calcio_azione", "⚙️ Calcio d'Azione (Difficoltà & Comandi)", `Comandi: ${azCtlName()} · Difficoltà: ${azDiffName()}`, "hot"),
-      sec("storia_bivi", "📖 Navigazione Storia & Rigiocabilità", `Menu Storia, puntate precedenti · bivi memorizzati: ${storyStats.chosenOptionsCount}`, "hot"),
+      sec("storia_bivi", "📖 Navigazione Storia & Rigiocabilità", `Bivi memorizzati: ${storyStats.chosenOptionsCount} · Skip scene già viste`, "hot"),
       sec("regole", "Opzioni di gioco", "Tiri murati, duelli, grinta di riserva, tiro a tempo e le altre regole: accese o spente"),
       sec("audio", "Audio", "Suoni, musica, voci, volumi"),
       sec("aspetto", "Grafica e aspetto", "Carte 3D, temi, animazioni, filtro retrò, testo grande"),
@@ -6716,7 +6706,6 @@
     sm_gala: { kind: "shirt", label: "Smoking del Gala", val: "#1e293b", from: "Finisci la saga «Il Rapimento del Pallone d'Oro» (un finale qualsiasi)" },
     sm_circuiti: { kind: "shirt", label: "Guscio dei Circuiti d'Oro", val: "#06b6d4", from: "Finisci la saga «Neo-Rondine 2099» (un finale qualsiasi)" },
     sm_banda: { kind: "shirt", label: "Divisa da gran gala della Banda", val: "#9f1239", from: "Finisci la saga «Banda di Piazza» (un finale qualsiasi)" },
-    sm_tifosi: { kind: "shirt", label: "Maglia verde nebbia del Borgo Marino", val: "#4d7c0f", from: "Finisci la saga «La Notte dei Tifosi Morti» (un finale qualsiasi)" },
     sm_sasso: { kind: "shirt", label: "Kimono dei Sette di Sasso Nero", val: "#7f1d1d", from: "Finisci la saga «Sette per Sasso Nero» (un finale qualsiasi)" },
     sm_neve: { kind: "shirt", label: "Maglia degli Stambecchi di Valdigelo", val: "#2f6b3a", from: "Finisci la saga «Il Guardiano di Neve» (un finale qualsiasi)" },
     sm_latta: { kind: "shirt", label: "Cotta di Latta di Castelrondine", val: "#9aa3b5", from: "Finisci la saga «Il Pallone di Latta» (un finale qualsiasi)" },
@@ -6726,7 +6715,11 @@
     sm_replica: { kind: "shirt", label: "Maglia dell'Eroe in Replica", val: "#1d4ed8", from: "Finisci la saga «Eroi in Replica» (un finale qualsiasi)" },
     sm_album:    { kind: "shirt", label: "Maglia dell'Album", val: "#7c3aed", from: "Finisci la saga «Cacciatori di Figurine» (un finale qualsiasi)" },
     sm_secolo:   { kind: "shirt", label: "Maglia bicolore del Centenario", val: "#2f5d7c", from: "Finisci la saga «Rondine 1938-2038» (un finale qualsiasi)" },
+    hs_burattino:  { kind: "hair", label: "Cuffia d'Artigiano Burattinaio", val: "burattino", from: "Finisci il Capitolo 1 di «La Giostra dei Burattini»" },
+    sm_burattini:  { kind: "shirt", label: "Casacca da Proscenio a Losanghe", val: "#881337", from: "Finisci la saga «La Giostra dei Burattini» (un finale qualsiasi)" },
+    sh_filo:       { kind: "shot", label: "Tiro: Parabola a Fili d'Oro", val: "filo", from: "Sblocca il finale segreto di «La Giostra dei Burattini»" },
   });
+  H_SHOTS.filo = { label: "Parabola a Fili", sub: "Trazione di bilancino · Tiro +3, Tecnica +2, Contrasto −1", bias: { tiro: 3, drib: 2, contr: -1 }, c1: "#fbbf24", c2: "#881337", cos: "sh_filo" };
   H_SHOTS.laser = { label: "Raggio Laser", sub: "Traiettoria a specchio · Tiro +3, Precisione +2, Contrasto −1", bias: { tiro: 3, pass: 2, contr: -1 }, c1: "#38bdf8", c2: "#facc15", cos: "sh_laser" };
   H_SHOTS.giudizio = { label: "Il Giudizio", sub: "Deduzione in 40 secondi · Tiro +3, Dribbling +2, Contrasto −1", bias: { tiro: 3, drib: 2, contr: -1 }, c1: "#ef4444", c2: "#020617", cos: "sh_giudizio" };
   H_SHOTS.carambola = { label: "Carambola Royale", sub: "Effetto d'azzardo · Tiro +3, Passaggio +2, Contrasto −1", bias: { tiro: 3, pass: 2, contr: -1 }, c1: "#10b981", c2: "#ffd23f", cos: "sh_carambola" };
@@ -15920,7 +15913,7 @@
       ...(fresh0 ? [{ label: "Nuova partita", sub: "Stagione 1 · circa 30–40 minuti", cls: "hot", fn: () => { S = fresh(); run(); } }] : []),
       ...((ls) => (ls ? [{ label: "Riprendi saga", sub: ls.t, cls: "hot", fn: () => window.__salone.resume(title) }] : []))(salLast()),
       { head: "Gioca" },
-      { label: "Storia", sub: `Le stagioni di Leo · ${mnPct(mnStoria())}%`, fn: () => { menuStoria._sez = ""; menuStoria(); } },
+      { label: "Storia", sub: `Le stagioni di Leo · ${mnPct(mnStoria())}%`, fn: menuStoria },
       ((t) => ({ label: "🏛️ Salone delle Saghe", sub: t ? `${t.n} saghe · ${t.run} in corso · finali ${t.fe}/${t.te}` : "Tutte le saghe a schede, con copertine e finali", cls: "hot", fn: () => salGo("open") }))(salSum()),
       ((t) => ({ label: "🗺️ Mappamondo delle Saghe", sub: "Esplora 6 macro-regioni, fari interattivi e ricerca", cls: "hot", fn: () => salGo("mappamondo") }))(salSum()),
       { label: "Partite e modalità", sub: `Carriera, tornei, arcade · ${mnPct(mnModi())}%`, fn: modes },
@@ -16023,73 +16016,34 @@
       { label: "◂ Altro", cls: "pick", fn: menuAltro },
     ]);
   }
-  // Menu Storia: ordinato in Stagioni / Compagni / Archivio (SET.storiaOrd) + «Nelle puntate precedenti» (SET.storiaRecap)
-  const ST_ARCH = /^Mappa temporale/, ST_SEAS = /^(Stagione|L'ultima finale|\?\?\?)/;
-  function stRecapText(n, cont) {
-    const ss = (() => { try { return diarySeasons(); } catch { return []; } })(), out = [];
-    const prev = ss.find((s) => s.n === n - 1 && s.done), cur = cont ? ss.find((s) => s.n === n && !s.done) : null;
-    if (prev) {
-      const e = diaryEnd(prev), l = diaryLines(prev).slice(-3);
-      if (e || l.length) out.push(`<b>Stagione ${prev.n}</b>${e ? ` · ${e}` : ""}${l.length ? "<br>" + l.map((x) => "· " + esc(x)).join("<br>") : ""}`);
-    }
-    if (cur) { const l = diaryLines(cur).slice(-4); if (l.length) out.push(`<b>Finora, Stagione ${n}</b><br>${l.map((x) => "· " + esc(x)).join("<br>")}`); }
-    return out.join("<br><br>");
-  }
-  function stRecap(n, cont, go) {
-    if (SET.storiaRecap === false || !n) return go();
-    let t = ""; try { t = stRecapText(n, cont); } catch {}
-    if (!t) return go();
-    const show = () => {
-      view = { kind: "scene", bg: "title", speaker: "leo" }; chap("Nelle puntate precedenti");
-      text("leo", `<em>Nelle puntate precedenti…</em><br>${t}<br><span style="color:var(--dim)">Solo quello che hai vissuto tu. Il resto lo scopri giocando.</span>`);
-      buttons([{ label: "Avanti ▸", cls: "hot", fn: go }, { label: "◂ Storia", fn: menuStoria }], true);
-    };
-    if (typeof showFeatureCutIn === "function" && SET.speed !== "salta") showFeatureCutIn("NELLE PUNTATE PRECEDENTI", `Stagione ${n}`, "📺", show); else show();
-  }
-  const stWrap = (n, b) => (b && !b.disabled && b.fn ? { ...b, fn: ((f) => () => stRecap(n, false, f))(b.fn) } : b);
   function menuStoria() {
     view = { kind: "scene", bg: "title" }; chap("Storia");
     const has = load(), rows = SEASONS.map((k) => ((k === 8 && !seasonDone(7)) || (k === 9 && !seasonDone(8)) ? "·&nbsp;???" : `${seasonDone(k) ? "✓" : "·"}&nbsp;Stagione&nbsp;${k}`));
     rows.push(s10Rec().won.length === S10_EP.length ? "✓&nbsp;Stagione&nbsp;10" : seasonDone(9) ? "·&nbsp;Stagione&nbsp;10" : "·&nbsp;???");
     rows.push(s11Rec().won.length === S11_EP.length ? "✓&nbsp;Stagione&nbsp;11" : s10Rec().won.length === S10_EP.length ? "·&nbsp;Stagione&nbsp;11" : "·&nbsp;???");
     text("voce", `<b>Storia</b> ${mnBar(mnPct(mnStoria()))}<br>${rows.join(" &nbsp;")}<br><span style="color:var(--dim)">Finali trovati ${getList(ENDS).length}/${ENDINGS.length}. Ogni stagione si può giocare anche da sola.</span>`);
-    const cont = has && STORY[has.step] ? [{ label: "Continua", sub: STORY[has.step].chap, cls: "hot", fn: () => stRecap(has.season || 1, true, () => { S = has; run(); }) }] : [];
-    const seas = [
+    buttons([
+      ...(has && STORY[has.step] ? [{ label: "Continua", sub: STORY[has.step].chap, cls: "hot", fn: () => { S = has; run(); } }] : []),
+      { label: "⭐ La Leggenda del Tuo Campione", sub: heroLoad() ? `La saga esclusiva di ${heroLoad().name} (N.${heroLoad().num})` : "Crea il tuo campione e scendi in campo!", cls: "hot", fn: () => { if (window.openHeroStoryMenu) window.openHeroStoryMenu(menuStoria); } },
       { label: "Nuova partita", sub: has ? "Ricomincia dalla Stagione 1" : "Stagione 1 · circa 30–40 minuti", cls: has ? "" : "hot", fn: () => { S = fresh(); run(); } },
-      stWrap(2, { label: "Stagione 2", sub: load(SAVE1) ? "Con il tuo Leo della Stagione 1" : "Dove è finito Dario?", fn: pickS2 }),
-      stWrap(3, { label: "Stagione 3", sub: load(SAVE2) ? "Con il tuo Leo della Stagione 2" : "Leo in Nazionale Under 19", fn: pickS3 }),
-      stWrap(4, { label: "Stagione 4", sub: load(SAVE3) ? "Serie A, con il tuo Leo" : "Serie A · il derby con Dario", fn: pickS4 }),
-      stWrap(5, { label: "Stagione 5", sub: load(SAVE4) ? "Champions League, con il tuo Leo" : "Champions League · Nico si sposa", fn: pickS5 }),
-      stWrap(6, { label: "Stagione 6", sub: load(SAVE5) ? "La Lega d'Oro, con il tuo Leo" : "La Lega d'Oro · il calcio contro l'algoritmo", fn: pickS6 }),
-      stWrap(7, { label: "Stagione 7", sub: load(SAVE6) ? "L'ultimo muro, con il tuo Leo" : "L'ultimo muro · il finale della saga", cls: seasonDone(7) ? "" : "hot", fn: pickS7 }),
-      stWrap(8, s8Btn()),
-      stWrap(9, s9Btn()),
-    ];
-    const extra = MN_STORIA.map(mnObj).filter(Boolean);
-    const arch = [
-      ...extra.filter((o) => ST_ARCH.test(o.label)),
+      { label: "Stagione 2", sub: load(SAVE1) ? "Con il tuo Leo della Stagione 1" : "Dove è finito Dario?", fn: pickS2 },
+      { label: "Stagione 3", sub: load(SAVE2) ? "Con il tuo Leo della Stagione 2" : "Leo in Nazionale Under 19", fn: pickS3 },
+      { label: "Stagione 4", sub: load(SAVE3) ? "Serie A, con il tuo Leo" : "Serie A · il derby con Dario", fn: pickS4 },
+      { label: "Stagione 5", sub: load(SAVE4) ? "Champions League, con il tuo Leo" : "Champions League · Nico si sposa", fn: pickS5 },
+      { label: "Stagione 6", sub: load(SAVE5) ? "La Lega d'Oro, con il tuo Leo" : "La Lega d'Oro · il calcio contro l'algoritmo", fn: pickS6 },
+      { label: "Stagione 7", sub: load(SAVE6) ? "L'ultimo muro, con il tuo Leo" : "L'ultimo muro · il finale della saga", cls: seasonDone(7) ? "" : "hot", fn: pickS7 },
+      s8Btn(),
+      s9Btn(),
+      { label: "🕵️ Noir · Il Peschereccio Fantasma", sub: "Nuova saga investigativa con Lina · True Detective & Breaking Bad", cls: "hot", fn: () => { if (window.openNoirStoryMenu) window.openNoirStoryMenu(menuStoria); } },
+      { label: "🌌 Multiverso · La Panda Quantistica", sub: "Nuova saga demenziale con Nonna · Rick & Morty, Futurama e Game of Thrones", cls: "hot", fn: () => { if (window.openMultiverseMenu) window.openMultiverseMenu(menuStoria); } },
+      { label: "⛵ La Notte del Faro", sub: "Saga narrativa speciale · Il torneo sulla scogliera", cls: "hot", fn: () => { if (window.openFaroStoryMenu) window.openFaroStoryMenu(menuStoria); } },
+      { label: "👑 La Traversata d'Oro", sub: "Nuova saga · I Corsari del Tigullio e la Lanterna d'Oro", cls: "hot", fn: () => { if (window.openTraversataMenu) window.openTraversataMenu(menuStoria); } },
+      ...MN_STORIA.map(mnObj).filter(Boolean),
       { label: "Albero delle scelte", sub: "Tutti i bivi e i finali delle stagioni", cls: "hot", fn: () => choiceTree(menuStoria) },
       { label: "Galleria dei finali", sub: `${getList(ENDS).length}/${ENDINGS.length}`, fn: gallery },
       { label: "Diario di Leo", sub: "Solo quello che hai vissuto", fn: () => diario(menuStoria) },
-    ];
-    const seasX = extra.filter((o) => !ST_ARCH.test(o.label) && ST_SEAS.test(o.label)), comp = extra.filter((o) => !ST_ARCH.test(o.label) && !ST_SEAS.test(o.label));
-    if (SET.storiaOrd === false) { menuStoria._sez = ""; return buttons([...cont, ...seas, ...extra, ...arch.filter((o) => !ST_ARCH.test(o.label)), { label: "◂ Menu", fn: title }]); }
-    const toTop = { label: "◂ Storia", cls: "pick", fn: () => { menuStoria._sez = ""; menuStoria(); } };
-    const sez = menuStoria._sez || "";
-    if (sez === "stagioni") { chap("Storia · Stagioni"); return buttons([...cont, ...seas, ...seasX, toTop]); }
-    if (sez === "compagni") { chap("Storia · Compagni"); return buttons([...comp, toTop]); }
-    if (sez === "archivio") { chap("Storia · Archivio"); return buttons([...arch, toTop]); }
-    const go = (id) => () => { menuStoria._sez = id; menuStoria(); };
-    const nDone = SEASONS.filter((k) => seasonDone(k)).length + (s10Rec().won.length === S10_EP.length ? 1 : 0) + (s11Rec().won.length === S11_EP.length ? 1 : 0) + mnTry(() => (s12Rec().won.length === S12_EP.length ? 1 : 0));
-    const hotC = comp.some((o) => /nuov|pront|vuole parlare|da spendere/i.test(o.sub || ""));
-    buttons([
-      ...cont,
-      { label: "📅 Stagioni", sub: `1–12 · finite ${nDone}${seasX.some((o) => /^L'ultima finale/.test(o.label)) ? " · più un epilogo" : ""}`, cls: cont.length ? "" : "hot", fn: go("stagioni") },
-      { label: "👥 Compagni", sub: `${comp.map((o) => o.label).slice(0, 4).join(", ")}${comp.length > 4 ? "…" : ""}${hotC ? " · ✦ novità" : ""}`, cls: hotC ? "hot" : "", fn: go("compagni") },
-      { label: "🗂️ Archivio", sub: `Albero delle scelte, finali ${getList(ENDS).length}/${ENDINGS.length}, diario${arch.length > 3 ? ", mappa" : ""}`, fn: go("archivio") },
-      { label: "◂ Menu", fn: () => { menuStoria._sez = ""; title(); } },
+      { label: "◂ Menu", fn: title },
     ]);
-    try { if (!localStorage.getItem(PREFIX + "storia-novita")) { localStorage.setItem(PREFIX + "storia-novita", "1"); if (typeof showFeatureCutIn === "function") showFeatureCutIn("MENU STORIA NUOVO", "Stagioni · Compagni · Archivio · Puntate precedenti", "📖"); } } catch {}
   }
   const MN_STORIA = []; // voci aggiunte dagli item successivi
   const MN_BORGO_BTN = [];
@@ -16611,7 +16565,7 @@
   // ---------- la mappa delle modalità: tutto il gioco su un foglio ----------
   // Ogni luogo: aperto (nome, colore, descrizione) o chiuso («???» e un indizio generico).
   const MAPN = [
-    { id: "storia", t: "Storia", x: 36, y: 44, ok: () => true, d: "Le stagioni di Leo, una dopo l'altra. Ogni scelta conta, qualcuna pesa.", go: () => { menuStoria._sez = ""; menuStoria(); } },
+    { id: "storia", t: "Storia", x: 36, y: 44, ok: () => true, d: "Le stagioni di Leo, una dopo l'altra. Ogni scelta conta, qualcuna pesa.", go: () => menuStoria() },
     { id: "borgo", t: "Borgo", x: 66, y: 92, ok: () => true, d: "Il paese a piedi: gente, feste, monete, conchiglie e la bancarella di Marinella.", go: () => borgo() },
     { id: "trasf", t: "Trasferte", x: 36, y: 140, ok: () => mnTry(() => trLevel()) >= 1, d: "Gite in pullman: vicoli, oggetti da trovare, partite con la gente del posto.", go: () => borgo(), from: "borgo" },
     { id: "carriera", t: "Carriera", x: 136, y: 40, ok: () => true, d: "Una stagione intera di campionato, giornata dopo giornata.", go: () => career() },
@@ -22930,7 +22884,7 @@
     ["Partite", /Settimana del Molo/],
     ["Collezioni e curiosità", /Diario del Corriere/],
     ["Calcio d'azione e arcade", /Arena 2D|Biliardino|Cabinato|Stadio 3D|Corsa della Panda|Gozzo di Baciccia|Gabbia sul Molo|Tsubasa|Supereroi/],
-    ["Saghe e GDR", /Salone delle Saghe|Banda di Piazza|Il Guardiano di Neve|Radio Fuorigioco|Onde Corte sul Golfo|Il Pallone di Latta|Missione Senza Ritorno|La Compagnia del Pallone Spezzato|Il Corriere del Pallone|La Diga di Valpiana|Diga di Valpiana|Mondiale Giovanile|Il Cavaliere del Fischio|Il Rapimento del Pallone d'Oro|Neo-Rondine 2099|Operazione Scatola Vuota|Scatola Vuota|Eroi in Replica|Officina dei Giganti|Cacciatori di Figurine|Rotta 66|Il Gigante Stanco|Capitani di Ventura|La Rondine Scalza|Il Fischietto|Arbitro di Provincia|Accademia dei Sigilli|Esami di Magia|Tactics Note|Il Quaderno del Giudizio|Quaderno del Giudizio|Cenere e Gloria|Carte del Destino|Cronache del Molo|Il Torneo dei Quattordici|Torneo dei Quattordici|Colpo al Fortino|Trofeo Scomparso|Operazione Doppio Zero|Doppio Zero|Licenza di Cross|Carovana del Fiume d'Argento|Fiume d'Argento|La Piramide del Sole|Piramide del Sole|Espresso delle Ombre|Treno delle Nevi|Fuga da Alcatraz|Alcatraz FC|Dungeon di Fine Stagione|Il Cavallo Star|Razzopacco|Gran Premio del Pallone|Rondine 1938-2038|Straordinari di Quartiere|Figlio del Titano|Tre Ducati|Cavaliere della Notte|Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis|Libro che Mangiava i Finali|Doppio Turno|Cristalli del Campo|Il Muro|Valle del Vento Gentile|Detective di Campo|Dopo il Campione|Calcio Spaziale|Torneo delle Cento Scuole|Cronache del Pallone di Cristallo|Mantello Granata|Stagione Infinita|Notte dei Lampioni|Torneo dei Mondi|Trono di Cuoio|Campetto al Mondiale|Master League delle Colline|Notte dei Cento Rintocchi|Campana d'Oro|Naufraghi del Pallone|Cronache del Regno Ultimo|Ave Calcio|I Gladiatori del Pallone|Operazione Fuorigioco Noir|Milano 1954/],
+    ["Saghe e GDR", /La Giostra dei Burattini|Giostra dei Burattini|Salone delle Saghe|Banda di Piazza|Il Guardiano di Neve|Radio Fuorigioco|Onde Corte sul Golfo|Il Pallone di Latta|Missione Senza Ritorno|La Compagnia del Pallone Spezzato|Il Corriere del Pallone|La Diga di Valpiana|Diga di Valpiana|Mondiale Giovanile|Il Cavaliere del Fischio|Il Rapimento del Pallone d'Oro|Neo-Rondine 2099|Operazione Scatola Vuota|Scatola Vuota|Eroi in Replica|Officina dei Giganti|Cacciatori di Figurine|Rotta 66|Il Gigante Stanco|Capitani di Ventura|La Rondine Scalza|Il Fischietto|Arbitro di Provincia|Accademia dei Sigilli|Esami di Magia|Tactics Note|Il Quaderno del Giudizio|Quaderno del Giudizio|Cenere e Gloria|Carte del Destino|Cronache del Molo|Il Torneo dei Quattordici|Torneo dei Quattordici|Colpo al Fortino|Trofeo Scomparso|Operazione Doppio Zero|Doppio Zero|Licenza di Cross|Carovana del Fiume d'Argento|Fiume d'Argento|La Piramide del Sole|Piramide del Sole|Espresso delle Ombre|Treno delle Nevi|Fuga da Alcatraz|Alcatraz FC|Dungeon di Fine Stagione|Il Cavallo Star|Razzopacco|Gran Premio del Pallone|Rondine 1938-2038|Straordinari di Quartiere|Figlio del Titano|Tre Ducati|Cavaliere della Notte|Vallombra|Westeros|Futurama|Rick & Morty|Blue Lock|Noir|Multiverso|Borgo Storto|Notte del Faro|Traversata d'Oro|Circuito delle Ombre|Pirati Celesti|Alchimia|Kronenburg|Chrono-Break|Lega delle Ombre|Belovodia|Ragnarok|Bilancia delle Tre Corone|Shogun Eclipse|Phantom Genesis|Libro che Mangiava i Finali|Doppio Turno|Cristalli del Campo|Il Muro|Valle del Vento Gentile|Detective di Campo|Dopo il Campione|Calcio Spaziale|Torneo delle Cento Scuole|Cronache del Pallone di Cristallo|Mantello Granata|Stagione Infinita|Notte dei Lampioni|Torneo dei Mondi|Trono di Cuoio|Campetto al Mondiale|Master League delle Colline|Notte dei Cento Rintocchi|Campana d'Oro|Naufraghi del Pallone|Cronache del Regno Ultimo|Ave Calcio|I Gladiatori del Pallone|Operazione Fuorigioco Noir|Milano 1954/],
     ["Collezioni e curiosità", /Gashapon|Roster & Talenti|Diorama|Fumetto|Leggende del passato|Bianco e Nero|Quartier Generale/],
   ];
   const MN_EXP = { "Partite": 12, "Allenamento": 6, "Storie e ricordi": 8 }; // quante voci ha la categoria a tutto sbloccato: le mancanti appaiono come «???»
