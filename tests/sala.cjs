@@ -50,6 +50,9 @@ async function ospiti(w) {
   const pos = await page.evaluate(() => { const r = window.__reg && window.__reg.npcs ? window.__reg.npcs() : []; return r.includes("mg_bullone"); }); if (!pos) errors.push("Bullone non è tra i personaggi del Borgo");
   if (w === 390) await L.shot(page, "borgo_ospite");
   const t = await page.evaluate(() => window.__borgoGuests.talk("mg_bullone")); await page.waitForTimeout(300); if (!t) errors.push("Bullone non parla");
+  const txt0 = await page.evaluate(() => document.body.innerText); if (!/Ospite da «/.test(txt0)) errors.push("manca la didascalia della saga");
+  if (w === 390) await L.shot(page, "borgo_ospite_didascalia");
+  await page.evaluate(() => { const b = [...document.querySelectorAll("button")].find((x) => /^Continua/.test(x.innerText.trim())); if (b) b.click(); }); await page.waitForTimeout(300);
   const txt = await page.evaluate(() => document.body.innerText); if (!/BIP/.test(txt)) errors.push("la battuta dell'ospite non compare");
   void ok; L.check(`Ospiti al Borgo (${w} px)`, errors); await browser.close();
 }

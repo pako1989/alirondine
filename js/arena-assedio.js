@@ -21,7 +21,7 @@
     { id: "curva", n: "La curva ospite", d: "Gradoni, tamburi e ventimila sciarpe.", mix: ["tifoso", "panzone", "tamburino", "lanciatore"], boss: "ringhio" },
     { id: "parcheggio", n: "Il parcheggio all'alba", d: "Macchine, lampioni e un rospo di gommapiuma.", mix: ["tifoso", "corridore", "panzone", "tamburino", "lanciatore"], boss: "mascotte" }
   ];
-  let OV = null, BACK = null, PICK = { arena: "arena", mode: "notte" };
+  let OV = null, BACK = null, PICK = { arena: "arena", mode: "notte", solo: false };
 
   // le tre carte che corrono col Campione: le più forti della squadra, col potere del loro ruolo
   function allies() {
@@ -75,22 +75,24 @@
 
   function open(back) {
     if (back) BACK = back; close(); css();
-    const r = load(), al = allies(), A = ARENAS.find((x) => x.id === PICK.arena) || ARENAS[0], pk = perksOf(al);
+    const r = load(), al = PICK.solo ? [] : allies(), A = ARENAS.find((x) => x.id === PICK.arena) || ARENAS[0], pk = perksOf(al);
     OV = document.createElement("div"); OV.className = "aaRoot"; OV.id = "aaOv";
     const pkTxt = Object.keys(pk).map((k) => `${k} ${pk[k]}`).join(" · ");
     OV.innerHTML = `<div class="aaW"><div class="aaHd"><div><h1>🧟 Assedio dei Sogni</h1><p>L'Assedio a ondate della Notte dei Tifosi Morti, con le tue carte. Trascina il dito per correre: il Campione calcia da solo. A ogni livello scegli un potere fra tre.</p></div><button type="button" class="aaX" data-a="x" aria-label="Chiudi">✕</button></div>
       <div class="aaSec">Corrono con te</div>
-      ${al.length ? `<div class="aaTeam">${al.map((a) => `<div class="aaC">${a.img ? `<img alt="" src="${a.img}">` : ""}<b>${esc(a.n)}</b><span>${esc(a.powN)}${a.rar === "l" ? " · ★ leggendaria" : a.rar === "e" ? " · epica" : ""}</span></div>`).join("")}</div>` : `<p class="aaInfo">Nessuna carta in squadra: corri da solo. Schiera le carte nella Squadra dei Sogni per avere compagni.</p>`}
+      <div class="aaRow" style="margin-bottom:8px"><button type="button" class="aaChip${!PICK.solo ? " on" : ""}" data-solo="0">🧍🧍🧍 Con le carte</button><button type="button" class="aaChip${PICK.solo ? " on" : ""}" data-solo="1">🧍 Da solo · niente compagni né poteri di partenza</button></div>
+      ${PICK.solo ? `<p class="aaInfo">Da solo: solo il Campione e i poteri che scegli salendo di livello. Record separato.</p>` : al.length ? `<div class="aaTeam">${al.map((a) => `<div class="aaC">${a.img ? `<img alt="" src="${a.img}">` : ""}<b>${esc(a.n)}</b><span>${esc(a.powN)}${a.rar === "l" ? " · ★ leggendaria" : a.rar === "e" ? " · epica" : ""}</span></div>`).join("")}</div>` : `<p class="aaInfo">Nessuna carta in squadra: corri da solo. Schiera le carte nella Squadra dei Sogni per avere compagni.</p>`}
       ${pkTxt ? `<p class="aaInfo">✨ Poteri di partenza: <b>${esc(pkTxt)}</b> (leggendarie, epiche e intesa di squadra).</p>` : ""}
       <div class="aaSec">Campo</div><div class="aaRow">${ARENAS.map((x) => `<button type="button" class="aaChip${x.id === A.id ? " on" : ""}" data-ar="${x.id}">${esc(x.n)}</button>`).join("")}</div>
       <p class="aaInfo" style="margin-top:6px">${esc(A.d)}</p>
       <div class="aaSec">Notte</div><div class="aaRow"><button type="button" class="aaChip${PICK.mode === "notte" ? " on" : ""}" data-md="notte">🌙 Notte · 2 min + capo</button><button type="button" class="aaChip${PICK.mode === "infinita" ? " on" : ""}" data-md="infinita">♾️ Notte infinita · record</button></div>
       <button type="button" class="aaGo" data-a="go">▶ Si comincia</button>
-      <div class="aaInfo">🏆 Notti vinte: <b>${r.wins}</b> · Record notte infinita: <b>${r.best || 0} s</b>. Prima vittoria del giorno: +30 monete. Si spegne in Impostazioni.</div></div>`;
+      <div class="aaInfo">🏆 Notti vinte: <b>${r.wins}</b> · Record notte infinita: <b>${r.best || 0} s</b> · da solo: <b>${r.bestSolo || 0} s</b>. Prima vittoria del giorno: +30 monete. Si spegne in Impostazioni.</div></div>`;
     document.body.appendChild(OV);
     const q = (s) => OV.querySelector(s);
     q('[data-a="x"]').onclick = () => { close(); if (BACK) BACK(); };
     OV.querySelectorAll("[data-ar]").forEach((b) => (b.onclick = () => { PICK.arena = b.dataset.ar; open(); }));
+    OV.querySelectorAll("[data-solo]").forEach((b) => (b.onclick = () => { PICK.solo = b.dataset.solo === "1"; open(); }));
     OV.querySelectorAll("[data-md]").forEach((b) => (b.onclick = () => { PICK.mode = b.dataset.md; open(); }));
     q('[data-a="go"]').onclick = () => play(A, al, pk);
   }
@@ -99,12 +101,13 @@
     close();
     const inf = PICK.mode === "infinita";
     cutin(al, () => {
-      E.start({ title: `Assedio dei Sogni · ${A.n}`, arena: A.id, time: inf ? 99999 : 120, mix: A.mix, boss: inf ? null : A.boss, endless: inf, bestKey: inf ? "arena-assedio-best" : undefined,
+      E.start({ title: `Assedio dei Sogni · ${A.n}`, arena: A.id, time: inf ? 99999 : 120, mix: A.mix, boss: inf ? null : A.boss, endless: inf, bestKey: inf ? (PICK.solo ? "arena-assedio-best-solo" : "arena-assedio-best") : undefined,
         allies: al.map((a) => ({ id: a.id, n: a.n, pow: a.pow })), perks: pk, tutorial: true,
         onDone: (res) => {
           const r = load(), sec = Math.floor((res.data && res.data.t) || res.b || 0);
           let msg = "";
-          if (inf) { if (sec > (r.best || 0)) { r.best = sec; msg = `Nuovo record: ${sec} s!`; } }
+          const bk = PICK.solo ? "bestSolo" : "best";
+          if (inf) { if (sec > (r[bk] || 0)) { r[bk] = sec; msg = `Nuovo record${PICK.solo ? " da solo" : ""}: ${sec} s!`; } }
           else if (res.win) { r.wins++; if (r.daily !== today()) { r.daily = today(); safe(() => window.addCoins(30), 0); msg = "+30 monete: prima notte vinta di oggi."; } }
           save(r);
           if (msg) safe(() => window.toast(msg, "info", "🧟"));

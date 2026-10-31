@@ -21,6 +21,11 @@ async function run(w) {
     await page.evaluate(() => { const b = document.querySelector("#asGo"); if (b) b.click(); }); await page.waitForTimeout(500);
     const r = await page.evaluate(() => JSON.parse(localStorage.getItem("ali-di-rondine.arena-assedio") || "{}")); if (r.wins !== 1) errors.push("vittoria non registrata: " + JSON.stringify(r));
     if (!(await page.evaluate(() => !!document.getElementById("aaOv")))) errors.push("non torna al menu Assedio");
+    await page.evaluate(() => document.querySelector('#aaOv [data-solo="1"]').click()); await page.waitForTimeout(200);
+    if ((await page.evaluate(() => document.querySelectorAll("#aaOv .aaC").length)) !== 0) errors.push("da solo ma con le carte");
+    await page.evaluate(() => document.querySelector('#aaOv [data-a="go"]').click()); await page.waitForTimeout(2100);
+    const lg2 = await page.evaluate(() => window.__aaLog); if (!lg2 || lg2.allies.length) errors.push("da solo: " + JSON.stringify(lg2));
+    await page.evaluate(() => { window.__assedio.state.finish(true); }); await page.waitForTimeout(600); await page.evaluate(() => { const b = document.querySelector("#asGo"); if (b) b.click(); }); await page.waitForTimeout(400);
     await page.evaluate(() => window.__arenaAssedio.setOn(false)); await page.evaluate(() => { window.__arenaAssedio.close(); window.__arena.open(() => {}); }); await page.waitForTimeout(300);
     if (await page.evaluate(() => !!document.querySelector('.arOv [data-go="assedio"]'))) errors.push("spenta in Impostazioni ma il bottone resta");
   } catch (e) { errors.push(e.message.slice(0, 300)); }

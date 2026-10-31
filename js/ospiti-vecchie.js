@@ -25,7 +25,7 @@
   ];
   function go(n) {
     if (!window.__borgoGuests || !window.__salone) { if (n < 80) setTimeout(() => go(n + 1), 250); return; }
-    G.forEach(([key, id, lines]) => window.__borgoGuests.add({ id, lines: lines.map((t) => [id, t]), when: () => { try { return !!window.__salone.concluded(K(key)); } catch (e) { return false; } } }));
+    G.forEach(([key, id, lines]) => window.__borgoGuests.add({ id, saga: ((window.__salone.SAGAS || []).find((x) => x.key === K(key)) || {}).t, lines: lines.map((t) => [id, t]), when: () => { try { return !!window.__salone.concluded(K(key)); } catch (e) { return false; } } }));
   }
   go(0);
 })();

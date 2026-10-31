@@ -4104,10 +4104,16 @@
     for (let r = 0; r < 8; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue; if (free(ax + dx, ay + dy)) return (g.pos = { at: [ax + dx, ay + dy], ok: true }).at; }
     return (g.pos = { at: [ax, ay], ok: true }).at;
   }
+  // la saga da cui arriva l'ospite (didascalia quando ci parli): dichiarata, dalla carta della Squadra dei Sogni o dal Salone
+  function guestSaga(gst) {
+    if (gst.saga) return gst.saga;
+    try { const S = window.__sogni, c = S && S.BY[gst.id], sg = c && S.SAGHE[c.saga]; if (sg) return sg[1]; } catch (e) {}
+    return "";
+  }
   window.__borgoGuests = {
     add(def) { if (!def || !def.id || GUESTS.some((x) => x.id === def.id)) return; const gi = GUESTS.push(Object.assign({}, def)) - 1, n = { id: def.id, guest: true, day: true, when: () => { try { return !!def.when() && !!CAST[def.id]; } catch (e) { return false; } } }; Object.defineProperty(n, "at", { get: () => guestAt(gi), enumerable: true }); NPCS.push(n); },
-    talk(id) { const gst = GUESTS.find((x) => x.id === id); if (!gst) return false; let ls = typeof gst.lines === "function" ? gst.lines() : gst.lines; ls = (ls || []).map((l) => (typeof l === "string" ? [gst.id, l] : l)).map((l) => L(l[0], String(l[1]).replace(/\{n\}/g, (readJSON(HERO, null) || {}).name || "Campione"))); bSay(ls); return true; },
-    list: () => GUESTS.map((x) => ({ id: x.id, on: (() => { try { return !!x.when(); } catch (e) { return false; } })() })),
+    talk(id) { const gst = GUESTS.find((x) => x.id === id); if (!gst) return false; let ls = typeof gst.lines === "function" ? gst.lines() : gst.lines; ls = (ls || []).map((l) => (typeof l === "string" ? [gst.id, l] : l)).map((l) => L(l[0], String(l[1]).replace(/\{n\}/g, (readJSON(HERO, null) || {}).name || "Campione"))); const sgT = guestSaga(gst); if (sgT) ls.unshift(L("voce", `<span style="color:var(--dim)">🎟️ Ospite da «${esc(sgT)}»</span>`)); bSay(ls); return true; },
+    list: () => GUESTS.map((x) => ({ id: x.id, saga: guestSaga(x), on: (() => { try { return !!x.when(); } catch (e) { return false; } })() })),
   };
   const npcList = () => NPCS.filter((n) => (!n.day || !B.night) && (!n.night || B.night) && (!n.when || n.when())).map((n) => ({ ...n, x: n.at[0] * TS + 8, y: n.at[1] * TS + 12 }));
   function npcNews(id) {
