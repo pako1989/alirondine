@@ -19,6 +19,7 @@
   const safe = (fn, d) => { try { return fn(); } catch (e) { return d; } };
   // le saghe da cui vengono le carte: chiave di salvataggio, nome, colore
   const SAGHE = {
+    falsari: ["ali-di-rondine.falsari", "I Falsari della Coppa", "#d97706", "__falsari"],
     moviola: ["ali-di-rondine.moviola", "L'Ombra della Moviola · Tele-Rondine '84", "#ca8a04", "__moviola"],
     borgo: ["ali-di-rondine.stagione1", "Ali di Rondine · Borgo Marino", "#ff7a45", ""],
     onde: ["ali-di-rondine.onde", "Radio Fuorigioco · Onde Corte sul Golfo", "#f59e0b", "__onde"],
@@ -294,6 +295,9 @@
     // L'Ombra della Moviola · Tele-Rondine '84
     ["mov_walter", "moviola", "l", 54, 92, 88, "P", 1], ["mov_daria", "moviola", "e", 74, 68, 90, "C", 2],
     ["mov_silvano", "moviola", "r", 62, 84, 76, "D", 2], ["mov_fosco", "moviola", "r", 58, 88, 70, "D", 3],
+    // I Falsari della Coppa
+    ["fc_valerio", "falsari", "r", 56, 90, 72, "D", 1], ["fc_arturo", "falsari", "e", 68, 70, 92, "C", 2],
+    ["fc_tullio", "falsari", "r", 64, 86, 75, "D", 3], ["fc_morosini", "falsari", "l", 82, 65, 88, "A", 4],
   ];
   // [id, saga, rarità (c r e l), attacco, difesa, tecnica, ruolo]
   const CARDS = [
@@ -480,6 +484,7 @@
     ["ernesta", "ro_fiamma", "Le Gatte tra i Pali"], ["cv_letizia", "pd_teresa", "Padelle e Mestoli"], ["cv_cunegonda", "of_rina", "Ferro Battuto & Chiave Inglese"], ["cv_lupo", "vs_corvo", "I Due Corvi"],
     ["fi_tullio", "qd_elle", "Moviola & Deduzioni"], ["fi_gualtiero", "pd_gualtiero", "I Due Gualtieri"], ["ro_tobia", "sg_tobia", "Un Tobia per Parte"], ["ro_luisa", "mn_oste", "Locande & Osterie"], ["ro_gedeone", "vl_gedeone", "Due Gedeoni"], ["papa", "pd_teresa", "Cucina & Pallone"],
     ["sara", "dc_nina", "Inchieste in Prima Pagina"], ["keller", "mg_wolff", "Bomber d'Acciaio"],
+    ["fc_arturo", "fc_valerio", "La Coppa del '34"], ["fc_tullio", "fc_valerio", "Bronzo & Area di Rigore"], ["fc_arturo", "lt_zeno", "Mastri Orafi e Stagnini"],
     ["bp_lilli", "gn_lilli", "Le due Lilli"], ["bp_rocco", "fg_ottone", "Ottoni di Paese"], ["bp_ciro", "gn_olmo", "Vecchi che aspettano"], ["bp_ferrante", "bp_doge", "Compagni di banco"],
     ["sn_kanbei", "sn_corvo", "Maestro e allievo"], ["sn_kiku", "sn_hayate", "Arco e spada"], ["sn_okuma", "fg_ottone", "Ferro e ottone"],
     ["gn_olmo", "gn_ilde", "Il Rigore di Ilde"], ["gn_fiocco", "lt_ferro", "Raccattapalle e Latta"], ["gn_tecla", "pe_tito", "Banconi di Paese"],

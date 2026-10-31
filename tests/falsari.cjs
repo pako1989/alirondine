@@ -313,11 +313,123 @@ const MOD = { mod: "__falsari", key: "ali-di-rondine.falsari" };
       const isC3Done = await page.evaluate(() => window.__falsariCore.K.F.get("fa_c3_done"));
       if (!isC3Done) errors.push("Capitolo 3 non risulta concluso (fa_c3_done false)");
 
+      // 10. Avvio Capitolo 4
+      await page.evaluate(() => window.__falsari.open());
+      await page.waitForTimeout(400);
+
+      for (let i = 0; i < 8; i++) {
+        await page.waitForTimeout(300);
+        const onMap = await page.evaluate(() => document.body.classList.contains("borgo") && window.__falsariCore.K.api.trZone() === "fa_stadio_curva");
+        if (onMap) break;
+        await page.evaluate(() => {
+          const btns = [...document.querySelectorAll("#choices button")].filter((x) => x.offsetParent);
+          const p = btns.find((x) => /Continua ▸|^Inizia il Capitolo 4|^Inizia|^Continua/.test(x.innerText));
+          if (p) p.click();
+        });
+      }
+      await page.waitForTimeout(300);
+
+      // ReachAll su fa_stadio_curva
+      const unreachStadio = await L.reachAll(page, "fa_stadio_curva");
+      if (unreachStadio && unreachStadio.length) errors.push("Tile non raggiungibili in fa_stadio_curva: " + unreachStadio.join(", "));
+
+      // Parla con Valerio allo stadio (step 0 -> 1)
+      await L.talk(page, "fc_valerio");
+      await L.advance(page);
+      await page.waitForTimeout(300);
+
+      const sC4_1 = await page.evaluate(() => window.__falsariCore.K.stepOf(4));
+      if (sC4_1 !== 1) errors.push("Step dopo Valerio atteso 1, trovato " + sC4_1);
+
+      // Entra nello Spogliatoio Storico
+      await page.evaluate(() => window.__falsariCore.K.go("fa_stadio_spogliatoio", 7, 11));
+      await page.waitForTimeout(300);
+
+      const unreachSpogliatoio = await L.reachAll(page, "fa_stadio_spogliatoio");
+      if (unreachSpogliatoio && unreachSpogliatoio.length) errors.push("Tile non raggiungibili in fa_stadio_spogliatoio: " + unreachSpogliatoio.join(", "));
+
+      // Parla con Arturo (step 1 -> 2)
+      await L.talk(page, "fc_arturo");
+      await L.advance(page);
+      await page.waitForTimeout(300);
+
+      const sC4_2 = await page.evaluate(() => window.__falsariCore.K.stepOf(4));
+      if (sC4_2 !== 2) errors.push("Step dopo Arturo atteso 2, trovato " + sC4_2);
+
+      // Entra nel Palco del Banditore
+      await page.evaluate(() => window.__falsariCore.K.go("fa_stadio_palco", 8, 12));
+      await page.waitForTimeout(300);
+
+      const unreachPalco = await L.reachAll(page, "fa_stadio_palco");
+      if (unreachPalco && unreachPalco.length) errors.push("Tile non raggiungibili in fa_stadio_palco: " + unreachPalco.join(", "));
+
+      // Esegui lo scambio sulla teca T (step 2 -> 3)
+      await page.evaluate(() => {
+        const dbg = window.__falsari._dbg;
+        const ch = dbg && dbg.CHAPTERS && dbg.CHAPTERS[4];
+        if (ch && ch.obj && ch.obj["fa_stadio_palco:T"]) ch.obj["fa_stadio_palco:T"]();
+      });
+      await page.waitForTimeout(300);
+
+      await page.evaluate(() => window.__falsariBanco.finishTest(true));
+      await page.waitForTimeout(300);
+      await L.advance(page);
+      await page.waitForTimeout(300);
+
+      // Ritorna allo stadio e parla con De Santis per mostrare la pergamena (step 3 -> 4)
+      await page.evaluate(() => window.__falsariCore.K.go("fa_stadio_curva", 16, 17));
+      await page.waitForTimeout(300);
+
+      await L.talk(page, "fc_desantis");
+      await L.advance(page);
+      await page.waitForTimeout(300);
+
+      const sC4_4 = await page.evaluate(() => window.__falsariCore.K.stepOf(4));
+      if (sC4_4 !== 4) errors.push("Step dopo presentazione atto atteso 4, trovato " + sC4_4);
+
+      // Parla con De Santis per la partita decisiva (step 4 -> 5)
+      await L.talk(page, "fc_desantis");
+      await L.advance(page, ["consenso dei tifosi", "vittoria a tavolino"]);
+      await page.waitForTimeout(300);
+
+      // Parla con Arturo allo stadio per scegliere il finale "olmo" (step 5 -> fin)
+      await L.talk(page, "fc_arturo");
+      for (let i = 0; i < 5; i++) {
+        await page.waitForTimeout(200);
+        const clicked = await page.evaluate(() => {
+          const btns = [...document.querySelectorAll("#choices button")].filter((b) => b.offsetParent);
+          const opt = btns.find((b) => /L'Olmo Sacro|Vittoria di Legge|Continua ▸/.test(b.innerText));
+          if (opt) { opt.click(); return true; }
+          return false;
+        });
+        if (!clicked) break;
+      }
+      await page.waitForTimeout(300);
+
+      // Avanza le scene dell'epilogo
+      for (let i = 0; i < 10; i++) {
+        await page.waitForTimeout(250);
+        const clicked = await page.evaluate(() => {
+          const btns = [...document.querySelectorAll("#choices button")].filter((b) => b.offsetParent);
+          const c = btns.find((b) => /Continua ▸|^Avanti/.test(b.innerText));
+          if (c) { c.click(); return true; }
+          return false;
+        });
+        if (!clicked) break;
+      }
+      await page.waitForTimeout(400);
+
+      const isC4Done = await page.evaluate(() => window.__falsariCore.K.F.get("fa_c4_done"));
+      if (!isC4Done) errors.push("Capitolo 4 non risulta concluso (fa_c4_done false)");
+
+      const hasOlmo = await page.evaluate(() => window.__falsariCore.K.mem().ends.includes("olmo"));
+      if (!hasOlmo) errors.push("Finale 'olmo' non registrato in mem().ends");
+
     } catch (e) {
       errors.push("Errore esecuzione test: " + e.message);
     }
 
-    L.check(`I Falsari della Coppa · Capitoli 1-3 a ${w} px`, errors);
+    L.check(`I Falsari della Coppa · Capitoli 1-4 a ${w} px`, errors);
     await browser.close();
   }
 })().catch((e) => {

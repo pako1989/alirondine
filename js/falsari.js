@@ -445,12 +445,19 @@
         ]
       }
     },
-    endings: [
-      { id: "olmo", title: "L'Olmo Sacro", desc: "La pergamena prova il vincolo perpetuo del 1934: lo stadio è salvo e le ruspe sono respinte." },
-      { id: "montecarlo", title: "Il Colpo Perfetto a Montecarlo", desc: "La replica perfetta inganna l'asta: la banda si gode la pensione dorata in Costa Azzurra." },
-      { id: "rigore", title: "I Mastri di Rigore", desc: "Il peso fuori tolleranza fa scattare l'allarme: condanna a servizi socialmente utili per curare il campo." },
-      { id: "segreto", title: "Il Primo Falso del 1934", desc: "Scopri che la coppa era già una replica forgiata nel 1934: l'oro vero finanziava la squadra popolare!" }
-    ]
+    endings: {
+      olmo: ["L'Olmo Sacro", "La pergamena prova il vincolo perpetuo del 1934: lo stadio è salvo e le ruspe sono respinte.", "Trova la pergamena demaniale del 1934."],
+      montecarlo: ["Il Colpo Perfetto a Montecarlo", "La replica perfetta inganna l'asta: la banda si gode la pensione dorata in Costa Azzurra.", "Scambia la replica perfetta all'asta."],
+      rigore: ["I Mastri di Rigore", "Il peso fuori tolleranza fa scattare l'allarme: condanna a servizi socialmente utili per curare il campo.", "Fai scattare l'allarme della bilancia."],
+      segreto: ["Il Primo Falso del 1934", "Scopri che la coppa era già una replica forgiata nel 1934: l'oro vero finanziava la squadra popolare!", "Esamina a fondo la base della coppa originale."]
+    },
+    guest: {
+      id: "fc_arturo",
+      lines: [
+        ["fc_arturo", "[furbo] Ehi, campione! Porta sempre rispetto alla coppa del trentaquattro."],
+        ["fc_arturo", "L'oro autentico non ha paura del fuoco... ma l'orgoglio del nostro borgo non ha paura di niente!"]
+      ]
+    }
   });
 
   // Helper comune per le persone e dialoghi della saga

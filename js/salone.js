@@ -24,6 +24,13 @@
   const GEN = { fantasy: ["Fantasy", "#7a4ab0"], mistero: ["Mistero", "#2c6a9a"], scifi: ["Fantascienza", "#1f8a8a"], storico: ["Storico", "#a8622a"], commedia: ["Commedia", "#c9921a"], sport: ["Sport anime", "#c0392b"], avventura: ["Avventura", "#3f8a3f"], dramma: ["Drammatico", "#6a5a7a"], tattica: ["Tattica", "#5a6a3a"], satira: ["Satira", "#0284c7"] };
   // mod: oggetto window con menuEntry/info · fn: funzione window da chiamare con (indietro) · ch: capitoli totali (se noti)
   const SAGAS = [
+    { id: "falsari", t: "I Falsari della Coppa", e: "🏆", g: ["commedia", "mistero", "storico"], mod: "__falsari", key: "ali-di-rondine.falsari", ch: 4, cover: "fa_titolo", d: "Una coppa storica del 1934 all'asta, un vecchio orafo e lo stadio da salvare dalle ruspe della Morosini. Fabbrica la replica perfetta, bilancia la lega al millimetro e inganna la contessa prima del colpo di maglio. Quattro capitoli, quattro finali. Novità: Il Banco del Falsario & Forgia Artigianale. Minigioco: Il Banco del Falsario.",
+      hints: {
+        olmo: "Trova la pergamena demaniale del 1934 nel caveau e fai valere il vincolo pubblico.",
+        montecarlo: "Completa lo scambio perfetto della coppa senza far scattare i sensori di peso.",
+        rigore: "La bilancia oscilla fuori tolleranza ma la condanna si trasforma in cura dello stadio.",
+        segreto: "Segreto: scopri che la coppa del 1934 era già un falso forgiato dagli operai per finanziare il club."
+      } },
     { id: "moviola", t: "L'Ombra della Moviola · Tele-Rondine '84", e: "📼", g: ["mistero", "satira", "dramma"], mod: "__moviola", key: "ali-di-rondine.moviola", ch: 4, cover: "mov_titolo", d: "Novembre 1984: tra furgoni di regia nascosti nel torrente, ripetitori clandestini sul Campanile dei Corvi e banchi di montaggio U-matic, ricostruisci il fotogramma incriminato del rigore del 94° minuto. Quattro capitoli, quattro finali. Novità: il Banco Moviola U-matic (jog/shuttle e tracking). Minigioco: Moviola '84 (cabinato CRT).",
       hints: {
         scoop: "Manda in onda il nastro integrale al massimo degli ascolti per battere la concorrenza.",
@@ -172,7 +179,7 @@
     { id: "cala", t: "Cala Tramontana", e: "🌊", g: ["avventura"], fn: "openCalaTramontana", key: "ali-di-rondine.cala-tramontana", cover: "beach", d: "Esplora a piedi il borgo marino alternativo con il tuo Campione." },
     { id: "borgostorto", t: "Il Borgo Storto", e: "🌀", g: ["commedia", "tattica"], api: "openBorgoStorto", cover: "beach", d: "Lo spin-off GDR a turni del Borgo Marino." },
   ];
-  const NEWEST = ["moviola", "sasso", "banda", "neve", "onde", "latta", "missione", "corriere", "compagnia", "diga", "vuota", "mondiale", "cavaliere", "gala", "circuiti", "replica", "officina", "figurine", "rotta", "fischietto", "capitani", "carte", "quattordici", "sigilli", "fortino", "cenere", "note", "spia", "fiume", "piramide", "treno", "alcatraz", "milano", "gp", "tempo", "dungeon", "roma", "regno", "naufraghi", "campana", "galletta", "pugno", "montagna", "cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
+  const NEWEST = ["falsari", "moviola", "sasso", "banda", "neve", "onde", "latta", "missione", "corriere", "compagnia", "diga", "vuota", "mondiale", "cavaliere", "gala", "circuiti", "replica", "officina", "figurine", "rotta", "fischietto", "capitani", "carte", "quattordici", "sigilli", "fortino", "cenere", "note", "spia", "fiume", "piramide", "treno", "alcatraz", "milano", "gp", "tempo", "dungeon", "roma", "regno", "naufraghi", "campana", "galletta", "pugno", "montagna", "cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
   const modOf = (s) => (s.mod ? window[s.mod] : null);
   const available = (s) => (s.mod ? !!window[s.mod] : s.fn ? typeof window[s.fn] === "function" : !!(api() && api()[s.api]));
   function state(s) {
@@ -569,6 +576,10 @@
       opp: [{ name: "Rondine Primavera", level: 1, color: "#f97316", style: "equilibrata" }, { name: "Derby Regionale", level: 2, color: "#3b82f6", style: "pressing" }],
       boss: { name: "Coppa dei Campioni", level: 3, color: "#eab308", style: "pressing" },
       opts: (o, h, boss) => ({ level: boss ? 3 : o.level || 1, diff: boss ? 3 : o.level || 1, title: `Moviola '84 · ${o.name}` }) },
+    { id: "banco", t: "Il Banco del Falsario", e: "⚖️", saga: "falsari", eng: "__falsariBanco", d: "La bottega d'orefice di Arturo e mastro Tullio: calco in cera, dosaggio della lega al milligrammo e bilanciatura per superare la prova del peso.",
+      opp: [{ name: "Medaglia d'Argento 1950", level: 1, color: "#94a3b8", style: "equilibrata" }, { name: "Calice d'Ottone Navale", level: 2, color: "#d97706", style: "pressing" }],
+      boss: { name: "La Coppa d'Oro 1934", level: 3, color: "#fbbf24", style: "pressing" },
+      opts: (o, h, boss) => ({ mode: boss ? "bilancia" : "lega", targetPurezza: boss ? 85 : 75, targetPeso: boss ? 1840 : 1200, title: `Banco del Falsario · ${o.name}` }) },
   ];
   function sgState(m) { const s = SAGAS.find((x) => x.id === m.saga), x = s ? state(s) : null; return { s, open: !!(x && (x.doneN >= 1)), boss: !!(x && x.endsFound > 0) }; }
   function openSalaGiochi(back) {
@@ -1682,7 +1693,7 @@
   // ---------------------------------------------------------------- ALBUM DEI PERSONAGGI
   // ogni personaggio registrato nel gioco (window.__borgoApi.BIO) diventa una carta. Si «incontra» parlandoci (seeCard del gioco).
   // Le sezioni: la Storia e Borgo Marino, i tornei e le modalità del Borgo, e una sezione per saga (riconosciuta dal prefisso degli id).
-  const PFX = { sasso: "sn", banda: "bp", neve: "gn", onde: "rf", latta: "lt", missione: "ms", corriere: "cr", compagnia: "cp", diga: "vp", mondiale: "mg", cavaliere: "cf", gala: "pd", circuiti: "nr", vuota: "vs", replica: "rp", officina: "of", figurine: "fg", rotta: "ro", fischietto: "fi", capitani: "cv", carte: "cd", quattordici: "qt", sigilli: "sg", cenere: "ce", note: "qd", fortino: "fo", spia: "dz", fiume: "fa", piramide: "my", treno: "te", alcatraz: "alc", milano: "mn", gp: "gp", tempo: "rt", roma: "rm", regno: "re", naufraghi: "nf", campana: "cp", galletta: "gl", pugno: "pr", montagna: "bm", cavallo: "cs", dungeon: "dg", razzo: "rz", quartiere: "sq", titano: "ft", ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
+  const PFX = { falsari: "fc", sasso: "sn", banda: "bp", neve: "gn", onde: "rf", latta: "lt", missione: "ms", corriere: "cr", compagnia: "cp", diga: "vp", mondiale: "mg", cavaliere: "cf", gala: "pd", circuiti: "nr", vuota: "vs", replica: "rp", officina: "of", figurine: "fg", rotta: "ro", fischietto: "fi", capitani: "cv", carte: "cd", quattordici: "qt", sigilli: "sg", cenere: "ce", note: "qd", fortino: "fo", spia: "dz", fiume: "fa", piramide: "my", treno: "te", alcatraz: "alc", milano: "mn", gp: "gp", tempo: "rt", roma: "rm", regno: "re", naufraghi: "nf", campana: "cp", galletta: "gl", pugno: "pr", montagna: "bm", cavallo: "cs", dungeon: "dg", razzo: "rz", quartiere: "sq", titano: "ft", ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
   const BORGO_PFX = ["sv", "rb", "sb", "cg", "hd", "md", "ac"];
   function perSections() {
     const A = api(); if (!A || !A.BIO) return [];
