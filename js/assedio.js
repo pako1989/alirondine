@@ -9,7 +9,9 @@
 (function () {
   "use strict";
   if (window.__assedio) return;
-  const M = window.__mini || {}, W = 380, H = 230, SS = 2, WW = 760, WH = 520;
+  const M = window.__mini || {}, SS = 2, WW = 760, WH = 520;
+  let W = 380, H = 230; // la vista: 380x230, oppure a schermo intero (verticale o orizzontale) con le misure dello schermo
+  const FULLK = "ali-di-rondine.assedio-full", fullOn = () => { try { return localStorage.getItem(FULLK) !== "0"; } catch (e) { return true; } };
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v)), now = () => performance.now() / 1000, rnd = Math.random, hyp = Math.hypot;
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const FOES = {
@@ -65,7 +67,7 @@
   function moveBody(e, dx, dy, r) { const nx = clamp(e.x + dx, r, WW - r), ny = clamp(e.y + dy, r, WH - r); if (!blocked(nx, e.y, r)) e.x = nx; if (!blocked(e.x, ny, r)) e.y = ny; }
   function spawn(tp, near) {
     const F0 = FOES[tp] || FOES.tifoso, h = S.hero; let x, y, n = 0;
-    do { const a = rnd() * 6.283, d = near ? 40 + rnd() * 30 : 230 + rnd() * 60; x = clamp(h.x + Math.cos(a) * d, 10, WW - 10); y = clamp(h.y + Math.sin(a) * d, 10, WH - 10); n++; } while ((blocked(x, y, F0.r) || (!near && hyp(x - h.x, y - h.y) < 150)) && n < 12);
+    do { const a = rnd() * 6.283, d = near ? 40 + rnd() * 30 : Math.max(230, Math.hypot(S.vw || 380, S.vh || 230) / 2 + 16) + rnd() * 60; x = clamp(h.x + Math.cos(a) * d, 10, WW - 10); y = clamp(h.y + Math.sin(a) * d, 10, WH - 10); n++; } while ((blocked(x, y, F0.r) || (!near && hyp(x - h.x, y - h.y) < 150)) && n < 12);
     const hm = S.k > 1.05 ? 1.3 : S.k < 0.95 ? 0.75 : 1, grow = 1 + (S.o.endless ? Math.floor(S.t / 60) * 0.35 : 0), hp = F0.hp * hm * grow * (F0.boss ? 1 : 1 + S.t / Math.max(60, S.time) * 0.6);
     const e = { tp, F: F0, x, y, hp, max: hp, sp: F0.sp * (0.88 + rnd() * 0.24), cd: 1 + rnd(), hit: 0, stun: 0, slow: 0, bob: rnd() * 6, note: rnd() * 200, st: 0, sx: 0, sy: 0 };
     S.foes.push(e); return e;
@@ -129,7 +131,7 @@
       if (S.spawnT <= 0 && S.foes.length < 110) { const n = 1 + Math.floor(pr * 2.2 + (S.o.endless ? S.t / 70 : 0)); for (let i = 0; i < n; i++) { const pool = S.mix.filter((tp, j) => j === 0 || pr > j * 0.18); spawn(pool[Math.floor(rnd() * pool.length)]); } S.spawnT = Math.max(0.35, 1.5 - pr * 1.05) / rate; }
     } else if (S.f % 150 === 0 && S.foes.length < 40) spawn(S.mix[0]);
     if (!S.bossOn && !S.bossDead && S.boss && S.t >= S.time) boss();
-    if (S.o.endless && !S.bossOn && S.t > 0 && Math.floor(S.t) % 120 === 0 && Math.floor(S.t - dt) % 120 !== 0) { S.boss = ["tamburo", "megafono", "ringhio", "mascotte"][Math.floor(S.t / 120 - 1) % 4]; S.bossDead = false; boss(); }
+    if (S.o.endless && !S.bossOn && S.t > 0 && Math.floor(S.t) % 120 === 0 && Math.floor(S.t - dt) % 120 !== 0) { S.boss = ["tamburo", "megafono", "ringhio", "mascotte"][Math.floor(S.t / 120 - 1) % 4]; S.bossDead = false; boss(); if (S.o.rotate !== false) rotateArena(); }
     if (!S.boss && !S.o.endless && S.t >= S.time) return end(true);
     // palloni a ricerca
     S.balls.forEach((b) => {
@@ -154,7 +156,7 @@
       a.cd -= dt; if (a.cd > 0 && a.pow !== "coro") return;
       if (a.pow === "bomber") { const t = nearest(a.x, a.y, 200); if (t) { const d = hyp(t.x - a.x, t.y - a.y) || 1; S.shots.push({ x: a.x, y: a.y, vx: (t.x - a.x) / d * 260, vy: (t.y - a.y) / d * 260, d: 4, life: 1.2, pierce: 1, col: "#fb923c", big: 1, hit: [] }); a.cd = 2.6; } else a.cd = 0.3; }
       else if (a.pow === "cura") { if (h.hp < h.max) { h.hp = Math.min(h.max, h.hp + 1); S.fx.push({ x: h.x, y: h.y - 10, vx: 0, vy: -0.5, a: 30, c: "#86efac", plus: 1 }); } a.cd = 7; }
-      else if (a.pow === "flash") { const vis = S.foes.filter((e) => Math.abs(e.x - S.cam[0] - W / 2) < W / 2 && Math.abs(e.y - S.cam[1] - H / 2) < H / 2); if (vis.length > 4) { vis.forEach((e) => { e.stun = e.F.boss ? 0.5 : 1.6; }); S.flash = 10; a.cd = 9; } else a.cd = 1; }
+      else if (a.pow === "flash") { const vis = S.foes.filter((e) => Math.abs(e.x - S.cam[0] - (S.vw || 380) / 2) < (S.vw || 380) / 2 && Math.abs(e.y - S.cam[1] - (S.vh || 230) / 2) < (S.vh || 230) / 2); if (vis.length > 4) { vis.forEach((e) => { e.stun = e.F.boss ? 0.5 : 1.6; }); S.flash = 10; a.cd = 9; } else a.cd = 1; }
       else if (a.pow === "scopa") { let any = 0; S.foes.forEach((e) => { if (hyp(e.x - a.x, e.y - a.y) < 32) { hurt(e, 2, "scopa"); any = 1; } }); if (any) S.rings.push({ x: a.x, y: a.y, r: 4, R: 32, a: 1, c: "#d6d3d1" }); a.cd = any ? 2 : 0.3; }
       else if (a.pow === "benedizione") { S.rings.push({ x: a.x, y: a.y, r: 6, R: 80, a: 1, c: "#93c5fd" }); S.foes.forEach((e) => { if (hyp(e.x - a.x, e.y - a.y) < 80) e.slow = 2.5; }); a.cd = 6; }
       else if (a.pow === "coro") { S.foes.forEach((e) => { if (hyp(e.x - a.x, e.y - a.y) < 62) e.slow = Math.max(e.slow, 0.2); }); a.cd = 0; }
@@ -277,6 +279,7 @@
     g.fillStyle = "#111"; g.fillRect(x - 3, y + 4, 2, 3); g.fillRect(x + 1, y + 4, 2, 3);
   }
   function scene(g, st, f) {
+    W = st.vw || 380; H = st.vh || 230;
     g.setTransform(SS, 0, 0, SS, 0, 0); g.clearRect(0, 0, W, H);
     const h = st.hero, cx = clamp(h.x - W / 2, 0, WW - W), cy = clamp(h.y - H / 2, 0, WH - H); st.cam = [cx, cy];
     const sh = st.shake > 0 ? (rnd() - 0.5) * st.shake * 0.5 : 0;
@@ -323,7 +326,7 @@
     if (!ui || !S) return; const B = ui.bt;
     if (S.phase === "end") { B.innerHTML = S.practice ? `<button class="go" id="asRe">↺ Riprova</button><button class="go" id="asGo2">▶ Gioca davvero</button>` : `<button class="go" id="asGo" style="flex-basis:100%">Fine ▸</button>`; const q = (s) => B.querySelector(s); if (q("#asGo")) q("#asGo").onclick = close; if (q("#asRe")) q("#asRe").onclick = () => restart(true); if (q("#asGo2")) q("#asGo2").onclick = () => restart(false); return; }
     if (S.phase === "pick") { B.innerHTML = S.pick.map((id, i) => `<button data-p="${i}" class="pw" style="flex-basis:100%;min-height:52px;text-align:left;padding:6px 12px">${PERKS[id].icon} ${esc(PERKS[id].n)} <b style="color:#fde68a">Liv. ${S.pk[id] + 1}</b><small>${esc(PERKS[id].d)}</small></button>`).join(""); B.querySelectorAll("[data-p]").forEach((b) => (b.onclick = () => choose(+b.dataset.p))); return; }
-    B.innerHTML = `<button id="asPause" style="flex:0 0 auto;min-width:96px;min-height:44px">${S.phase === "pause" ? "▶ Riprendi" : "⏸ Pausa"}</button><div style="flex:1;font-size:12px;opacity:.85;align-self:center">Trascina il dito sul campo per correre. Il Campione calcia da solo.</div>`;
+    B.innerHTML = `<button id="asPause" style="flex:0 0 auto;min-width:96px;min-height:44px">${S.phase === "pause" ? "▶ Riprendi" : "⏸ Pausa"}</button><div class="hint" style="flex:1;font-size:12px;opacity:.85;align-self:center">Trascina il dito sul campo per correre. Il Campione calcia da solo.</div>`;
     B.querySelector("#asPause").onclick = () => { if (!S) return; S.phase = S.phase === "pause" ? "play" : S.phase === "play" ? "pause" : S.phase; lastT = now(); controls(); };
   }
   function lg() {
@@ -333,7 +336,7 @@
       : `Raccogli i <b>gettoni</b> gialli per salire di livello. ${S.boss ? "Allo scadere del tempo arriva il <b>capo</b>." : "Resisti fino allo scadere del tempo."}${al}`;
   }
   function loop() { if (!S) return; raf = requestAnimationFrame(loop); const n = now(), dt = clamp(n - lastT, 0, 0.05); lastT = n; if (!(tutC && tutC.open)) step(dt); if (ui && S) scene(ui.g, S, S.f + (S.phase !== "play" ? 0 : 0)); }
-  function restart(practice) { const o = S.o; S = mk(o, practice); lastT = now(); hud(); controls(); lg(); }
+  function restart(practice) { const o = S.o; S = mk(o, practice); lastT = now(); fit(); hud(); controls(); lg(); }
   function close() {
     cancelAnimationFrame(raf); raf = 0; const st = S, o = st.o; detach(); ui.root.remove(); ui = null; S = null;
     try { window.__sagaCore && window.__sagaCore.endMatch(); } catch (e) {}
@@ -343,7 +346,7 @@
   // tastiera
   const KM = { ArrowLeft: "l", ArrowRight: "r", ArrowUp: "u", ArrowDown: "d", a: "l", d: "r", w: "u", s: "d", A: "l", D: "r", W: "u", S: "d" };
   const kd = (e) => { if (!S || !KM[e.key]) return; S.keys[KM[e.key]] = true; e.preventDefault(); }, ku = (e) => { if (!S || !KM[e.key]) return; S.keys[KM[e.key]] = false; };
-  function detach() { window.removeEventListener("keydown", kd); window.removeEventListener("keyup", ku); }
+  function detach() { window.removeEventListener("resize", onRs); window.removeEventListener("keydown", kd); window.removeEventListener("keyup", ku); }
   // ------------------------------------------------------------ spiegazione
   function demo(f, k) {
     const st = mk({ arena: "campo", mix: ["tifoso"] }, false); st.hero.x = WW / 2 + Math.sin(f / 40) * 30; st.hero.y = WH / 2 + Math.cos(f / 50) * 14;
@@ -358,11 +361,32 @@
     { t: "Gettoni e livelli", p: "I tifosi respinti lasciano <b>gettoni gialli</b>. Raccoglili: la barra in basso si riempie e sali di livello.", draw: (g, f) => scene(g, demo(f, 1), f) },
     { t: "Un potere su tre", p: "A ogni livello il gioco si ferma: scegli <b>1 potere su 3</b> (tiro a effetto, sciarpa che gira, fischietto, scarpini…). Si sommano. Allo scadere del tempo arriva il <b>capo</b>.", draw: (g, f) => scene(g, demo(f, 2), f) }
   ];
+  // SCHERMO INTERO: la vista prende tutto lo spazio libero, in verticale (più alta) o in orizzontale (più larga); si rifà se giri il telefono
+  function full() {
+    if (!ui) return; ui.root.classList.add("asFull");
+    if (!document.getElementById("asFullCss")) { const st = document.createElement("style"); st.id = "asFullCss"; st.textContent = `#asOv.asFull{overflow:hidden}#asOv.asFull .wr{max-width:none;height:100%;min-height:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));gap:5px}#asOv.asFull .top h3{font-size:14px}#asOv.asFull .hud{padding:4px 8px;font-size:11px}#asOv.asFull .cv{flex:1 1 auto;min-height:120px;display:flex;align-items:center;justify-content:center;overflow:hidden}#asOv.asFull .cv canvas{width:100%!important;height:100%!important;max-width:none;touch-action:none}#asOv.asFull .lg{display:none}#asOv.asFull .bt .hint{display:none}@media (orientation:landscape){#asOv.asFull .wr{display:grid;grid-template-columns:1fr minmax(150px,26%);grid-template-rows:auto auto 1fr;gap:5px}#asOv.asFull .top{grid-column:2}#asOv.asFull .hud{grid-column:2;grid-row:2;flex-direction:column;align-items:flex-start}#asOv.asFull .cv{grid-column:1;grid-row:1/4}#asOv.asFull .bt{grid-column:2;grid-row:3;align-content:flex-start;overflow:auto}}`; document.head.appendChild(st); }
+    requestAnimationFrame(fit);
+  }
+  // notte infinita: a ogni capo si cambia campo (gli ostacoli nuovi spostano chi ci finisce sopra)
+  const ROT = ["campo", "tribuna", "curva", "parcheggio", "arena"];
+  function rotateArena() {
+    const i = ROT.indexOf(S.arena); S.arena = ROT[(i + 1) % ROT.length]; S.flash = 14;
+    const free = (x, y) => !ARENAS[S.arena].obs.some(([ox, oy, ow, oh]) => x > ox - 8 && x < ox + ow + 8 && y > oy - 8 && y < oy + oh + 8);
+    [S.hero].concat(S.allies, S.foes).forEach((u) => { for (let k = 0; k < 40 && !free(u.x, u.y); k++) { u.x = clamp(u.x + (rnd() - 0.5) * 30, 10, WW - 10); u.y = clamp(u.y + (rnd() - 0.5) * 30, 10, WH - 10); } });
+    S.banner = { t: ARENAS[S.arena].n.toUpperCase() + " · " + (S.banner ? S.banner.t : ""), a: 120 }; hud();
+  }
+  function fit() {
+    if (!ui || !S || !ui.root.classList.contains("asFull")) return; const box = ui.cv.parentElement, w = box.clientWidth, h = box.clientHeight; if (w < 50 || h < 50) return;
+    const a = w / h; let vw, vh; if (a >= 1) { vh = 230; vw = Math.min(600, Math.round(230 * a)); } else { vw = 260; vh = Math.min(500, Math.round(260 / a)); }
+    S.vw = vw; S.vh = vh; ui.cv.width = vw * SS; ui.cv.height = vh * SS;
+  }
+  let rsT = 0; const onRs = () => { clearTimeout(rsT); rsT = setTimeout(() => { if (S && S.phase !== "pick") fit(); }, 150); };
   function start(o) {
     cancelAnimationFrame(raf); if (ui) { detach(); ui.root.remove(); } ui = M.shell("asOv", "🧟 " + (o.title || "L'Assedio"), "#a3e635"); ui.root.style.background = "#050a12";
     (o.allies || []).forEach((a) => { if (a && a.id && M.img && !a.img) a.img = M.img(a.id); });
     S = mk(o, false); tutC = null; lastT = now(); ui.cv.style.height = "auto"; ui.cv.style.flex = "none";
-    const pos = (ev) => { const r = ui.cv.getBoundingClientRect(); return [(ev.clientX - r.left) / r.width * W, (ev.clientY - r.top) / r.height * H]; };
+    const pos = (ev) => { const r = ui.cv.getBoundingClientRect(); return [(ev.clientX - r.left) / r.width * (S.vw || 380), (ev.clientY - r.top) / r.height * (S.vh || 230)]; };
+    if (fullOn()) { full(); window.addEventListener("resize", onRs); }
     ui.cv.addEventListener("pointerdown", (ev) => { ev.preventDefault(); if (!S) return; const [x, y] = pos(ev); S.stick = { on: true, x0: x, y0: y, cx: x, cy: y, id: ev.pointerId }; try { ui.cv.setPointerCapture(ev.pointerId); } catch (e) {} });
     ui.cv.addEventListener("pointermove", (ev) => { if (!S || !S.stick || !S.stick.on) return; const [x, y] = pos(ev); S.stick.cx = x; S.stick.cy = y; });
     const up = () => { if (S && S.stick) S.stick.on = false; }; ui.cv.addEventListener("pointerup", up); ui.cv.addEventListener("pointercancel", up);
