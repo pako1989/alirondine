@@ -5950,6 +5950,8 @@
     const storyStats = window.__storyNav ? window.__storyNav.getStats() : { seenDialoguesCount: 0, chosenOptionsCount: 0 };
     const hintsOn = SET.storyChoiceHints !== false;
     const storyB = [
+      { label: `Menu Storia ordinato: ${SET.storiaOrd !== false ? "Sì" : "No"} ▸`, sub: SET.storiaOrd !== false ? "Stagioni, Compagni e Archivio in tre cartelle (tocca per la lista unica)" : "Tutte le voci in una lista unica (tocca per le tre cartelle)", cls: "hot", fn: () => { SET.storiaOrd = SET.storiaOrd === false; save(); const lbl = SET.storiaOrd ? "Stagioni · Compagni · Archivio" : "Lista unica"; if (typeof showFeatureCutIn === "function") showFeatureCutIn("MENU STORIA", lbl, "📖", () => again(`Menu Storia: ${lbl}`)); else again(`Menu Storia: ${lbl}`); } },
+      { label: `Nelle puntate precedenti: ${SET.storiaRecap !== false ? "Sì" : "No"} ▸`, sub: SET.storiaRecap !== false ? "Prima di Continua e di ogni stagione, un riassunto di quello che hai vissuto (tocca per toglierlo)" : "Si parte subito, senza riassunto (tocca per rimetterlo)", cls: "hot", fn: () => { SET.storiaRecap = SET.storiaRecap === false; save(); const lbl = SET.storiaRecap ? "Attivo" : "Spento"; if (typeof showFeatureCutIn === "function") showFeatureCutIn("PUNTATE PRECEDENTI", lbl, "📺", () => again(`Puntate precedenti: ${lbl}`)); else again(`Puntate precedenti: ${lbl}`); } },
       {
         label: `Segnaposto "Già scelto": ${hintsOn ? "ATTIVO" : "DISATTIVATO"} ▸`,
         sub: hintsOn
@@ -6003,7 +6005,7 @@
     buttons([
       sec("partita", "Modalità di partita", `${on ? "Anni '90" : "Classico"} · difficoltà ${(DIFF[SET.diff] || DIFF.normale)[0]}`, "hot"),
       sec("calcio_azione", "⚙️ Calcio d'Azione (Difficoltà & Comandi)", `Comandi: ${azCtlName()} · Difficoltà: ${azDiffName()}`, "hot"),
-      sec("storia_bivi", "📖 Navigazione Storia & Rigiocabilità", `Bivi memorizzati: ${storyStats.chosenOptionsCount} · Skip scene già viste`, "hot"),
+      sec("storia_bivi", "📖 Navigazione Storia & Rigiocabilità", `Menu Storia, puntate precedenti · bivi memorizzati: ${storyStats.chosenOptionsCount}`, "hot"),
       sec("regole", "Opzioni di gioco", "Tiri murati, duelli, grinta di riserva, tiro a tempo e le altre regole: accese o spente"),
       sec("audio", "Audio", "Suoni, musica, voci, volumi"),
       sec("aspetto", "Grafica e aspetto", "Carte 3D, temi, animazioni, filtro retrò, testo grande"),
@@ -15909,7 +15911,7 @@
       ...(fresh0 ? [{ label: "Nuova partita", sub: "Stagione 1 · circa 30–40 minuti", cls: "hot", fn: () => { S = fresh(); run(); } }] : []),
       ...((ls) => (ls ? [{ label: "Riprendi saga", sub: ls.t, cls: "hot", fn: () => window.__salone.resume(title) }] : []))(salLast()),
       { head: "Gioca" },
-      { label: "Storia", sub: `Le stagioni di Leo · ${mnPct(mnStoria())}%`, fn: menuStoria },
+      { label: "Storia", sub: `Le stagioni di Leo · ${mnPct(mnStoria())}%`, fn: () => { menuStoria._sez = ""; menuStoria(); } },
       ((t) => ({ label: "🏛️ Salone delle Saghe", sub: t ? `${t.n} saghe · ${t.run} in corso · finali ${t.fe}/${t.te}` : "Tutte le saghe a schede, con copertine e finali", cls: "hot", fn: () => salGo("open") }))(salSum()),
       ((t) => ({ label: "🗺️ Mappamondo delle Saghe", sub: "Esplora 6 macro-regioni, fari interattivi e ricerca", cls: "hot", fn: () => salGo("mappamondo") }))(salSum()),
       { label: "Partite e modalità", sub: `Carriera, tornei, arcade · ${mnPct(mnModi())}%`, fn: modes },
@@ -16012,30 +16014,73 @@
       { label: "◂ Altro", cls: "pick", fn: menuAltro },
     ]);
   }
+  // Menu Storia: ordinato in Stagioni / Compagni / Archivio (SET.storiaOrd) + «Nelle puntate precedenti» (SET.storiaRecap)
+  const ST_ARCH = /^Mappa temporale/, ST_SEAS = /^(Stagione|L'ultima finale|\?\?\?)/;
+  function stRecapText(n, cont) {
+    const ss = (() => { try { return diarySeasons(); } catch { return []; } })(), out = [];
+    const prev = ss.find((s) => s.n === n - 1 && s.done), cur = cont ? ss.find((s) => s.n === n && !s.done) : null;
+    if (prev) {
+      const e = diaryEnd(prev), l = diaryLines(prev).slice(-3);
+      if (e || l.length) out.push(`<b>Stagione ${prev.n}</b>${e ? ` · ${e}` : ""}${l.length ? "<br>" + l.map((x) => "· " + esc(x)).join("<br>") : ""}`);
+    }
+    if (cur) { const l = diaryLines(cur).slice(-4); if (l.length) out.push(`<b>Finora, Stagione ${n}</b><br>${l.map((x) => "· " + esc(x)).join("<br>")}`); }
+    return out.join("<br><br>");
+  }
+  function stRecap(n, cont, go) {
+    if (SET.storiaRecap === false || !n) return go();
+    let t = ""; try { t = stRecapText(n, cont); } catch {}
+    if (!t) return go();
+    const show = () => {
+      view = { kind: "scene", bg: "title", speaker: "leo" }; chap("Nelle puntate precedenti");
+      text("leo", `<em>Nelle puntate precedenti…</em><br>${t}<br><span style="color:var(--dim)">Solo quello che hai vissuto tu. Il resto lo scopri giocando.</span>`);
+      buttons([{ label: "Avanti ▸", cls: "hot", fn: go }, { label: "◂ Storia", fn: menuStoria }], true);
+    };
+    if (typeof showFeatureCutIn === "function" && SET.speed !== "salta") showFeatureCutIn("NELLE PUNTATE PRECEDENTI", `Stagione ${n}`, "📺", show); else show();
+  }
+  const stWrap = (n, b) => (b && !b.disabled && b.fn ? { ...b, fn: ((f) => () => stRecap(n, false, f))(b.fn) } : b);
   function menuStoria() {
     view = { kind: "scene", bg: "title" }; chap("Storia");
     const has = load(), rows = SEASONS.map((k) => ((k === 8 && !seasonDone(7)) || (k === 9 && !seasonDone(8)) ? "·&nbsp;???" : `${seasonDone(k) ? "✓" : "·"}&nbsp;Stagione&nbsp;${k}`));
     rows.push(s10Rec().won.length === S10_EP.length ? "✓&nbsp;Stagione&nbsp;10" : seasonDone(9) ? "·&nbsp;Stagione&nbsp;10" : "·&nbsp;???");
     rows.push(s11Rec().won.length === S11_EP.length ? "✓&nbsp;Stagione&nbsp;11" : s10Rec().won.length === S10_EP.length ? "·&nbsp;Stagione&nbsp;11" : "·&nbsp;???");
     text("voce", `<b>Storia</b> ${mnBar(mnPct(mnStoria()))}<br>${rows.join(" &nbsp;")}<br><span style="color:var(--dim)">Finali trovati ${getList(ENDS).length}/${ENDINGS.length}. Ogni stagione si può giocare anche da sola.</span>`);
-    buttons([
-      ...(has && STORY[has.step] ? [{ label: "Continua", sub: STORY[has.step].chap, cls: "hot", fn: () => { S = has; run(); } }] : []),
-      { label: "⭐ La Leggenda del Tuo Campione", sub: heroLoad() ? `La saga esclusiva di ${heroLoad().name} (N.${heroLoad().num})` : "Crea il tuo campione e scendi in campo!", cls: "hot", fn: () => { if (window.openHeroStoryMenu) window.openHeroStoryMenu(menuStoria); } },
+    const cont = has && STORY[has.step] ? [{ label: "Continua", sub: STORY[has.step].chap, cls: "hot", fn: () => stRecap(has.season || 1, true, () => { S = has; run(); }) }] : [];
+    const seas = [
       { label: "Nuova partita", sub: has ? "Ricomincia dalla Stagione 1" : "Stagione 1 · circa 30–40 minuti", cls: has ? "" : "hot", fn: () => { S = fresh(); run(); } },
-      { label: "Stagione 2", sub: load(SAVE1) ? "Con il tuo Leo della Stagione 1" : "Dove è finito Dario?", fn: pickS2 },
-      { label: "Stagione 3", sub: load(SAVE2) ? "Con il tuo Leo della Stagione 2" : "Leo in Nazionale Under 19", fn: pickS3 },
-      { label: "Stagione 4", sub: load(SAVE3) ? "Serie A, con il tuo Leo" : "Serie A · il derby con Dario", fn: pickS4 },
-      { label: "Stagione 5", sub: load(SAVE4) ? "Champions League, con il tuo Leo" : "Champions League · Nico si sposa", fn: pickS5 },
-      { label: "Stagione 6", sub: load(SAVE5) ? "La Lega d'Oro, con il tuo Leo" : "La Lega d'Oro · il calcio contro l'algoritmo", fn: pickS6 },
-      { label: "Stagione 7", sub: load(SAVE6) ? "L'ultimo muro, con il tuo Leo" : "L'ultimo muro · il finale della saga", cls: seasonDone(7) ? "" : "hot", fn: pickS7 },
-      s8Btn(),
-      s9Btn(),
-      ...MN_STORIA.map(mnObj).filter(Boolean),
+      stWrap(2, { label: "Stagione 2", sub: load(SAVE1) ? "Con il tuo Leo della Stagione 1" : "Dove è finito Dario?", fn: pickS2 }),
+      stWrap(3, { label: "Stagione 3", sub: load(SAVE2) ? "Con il tuo Leo della Stagione 2" : "Leo in Nazionale Under 19", fn: pickS3 }),
+      stWrap(4, { label: "Stagione 4", sub: load(SAVE3) ? "Serie A, con il tuo Leo" : "Serie A · il derby con Dario", fn: pickS4 }),
+      stWrap(5, { label: "Stagione 5", sub: load(SAVE4) ? "Champions League, con il tuo Leo" : "Champions League · Nico si sposa", fn: pickS5 }),
+      stWrap(6, { label: "Stagione 6", sub: load(SAVE5) ? "La Lega d'Oro, con il tuo Leo" : "La Lega d'Oro · il calcio contro l'algoritmo", fn: pickS6 }),
+      stWrap(7, { label: "Stagione 7", sub: load(SAVE6) ? "L'ultimo muro, con il tuo Leo" : "L'ultimo muro · il finale della saga", cls: seasonDone(7) ? "" : "hot", fn: pickS7 }),
+      stWrap(8, s8Btn()),
+      stWrap(9, s9Btn()),
+    ];
+    const extra = MN_STORIA.map(mnObj).filter(Boolean);
+    const arch = [
+      ...extra.filter((o) => ST_ARCH.test(o.label)),
       { label: "Albero delle scelte", sub: "Tutti i bivi e i finali delle stagioni", cls: "hot", fn: () => choiceTree(menuStoria) },
       { label: "Galleria dei finali", sub: `${getList(ENDS).length}/${ENDINGS.length}`, fn: gallery },
       { label: "Diario di Leo", sub: "Solo quello che hai vissuto", fn: () => diario(menuStoria) },
-      { label: "◂ Menu", fn: title },
+    ];
+    const seasX = extra.filter((o) => !ST_ARCH.test(o.label) && ST_SEAS.test(o.label)), comp = extra.filter((o) => !ST_ARCH.test(o.label) && !ST_SEAS.test(o.label));
+    if (SET.storiaOrd === false) { menuStoria._sez = ""; return buttons([...cont, ...seas, ...extra, ...arch.filter((o) => !ST_ARCH.test(o.label)), { label: "◂ Menu", fn: title }]); }
+    const toTop = { label: "◂ Storia", cls: "pick", fn: () => { menuStoria._sez = ""; menuStoria(); } };
+    const sez = menuStoria._sez || "";
+    if (sez === "stagioni") { chap("Storia · Stagioni"); return buttons([...cont, ...seas, ...seasX, toTop]); }
+    if (sez === "compagni") { chap("Storia · Compagni"); return buttons([...comp, toTop]); }
+    if (sez === "archivio") { chap("Storia · Archivio"); return buttons([...arch, toTop]); }
+    const go = (id) => () => { menuStoria._sez = id; menuStoria(); };
+    const nDone = SEASONS.filter((k) => seasonDone(k)).length + (s10Rec().won.length === S10_EP.length ? 1 : 0) + (s11Rec().won.length === S11_EP.length ? 1 : 0) + mnTry(() => (s12Rec().won.length === S12_EP.length ? 1 : 0));
+    const hotC = comp.some((o) => /nuov|pront|vuole parlare|da spendere/i.test(o.sub || ""));
+    buttons([
+      ...cont,
+      { label: "📅 Stagioni", sub: `1–12 · finite ${nDone}${seasX.some((o) => /^L'ultima finale/.test(o.label)) ? " · più un epilogo" : ""}`, cls: cont.length ? "" : "hot", fn: go("stagioni") },
+      { label: "👥 Compagni", sub: `${comp.map((o) => o.label).slice(0, 4).join(", ")}${comp.length > 4 ? "…" : ""}${hotC ? " · ✦ novità" : ""}`, cls: hotC ? "hot" : "", fn: go("compagni") },
+      { label: "🗂️ Archivio", sub: `Albero delle scelte, finali ${getList(ENDS).length}/${ENDINGS.length}, diario${arch.length > 3 ? ", mappa" : ""}`, fn: go("archivio") },
+      { label: "◂ Menu", fn: () => { menuStoria._sez = ""; title(); } },
     ]);
+    try { if (!localStorage.getItem(PREFIX + "storia-novita")) { localStorage.setItem(PREFIX + "storia-novita", "1"); if (typeof showFeatureCutIn === "function") showFeatureCutIn("MENU STORIA NUOVO", "Stagioni · Compagni · Archivio · Puntate precedenti", "📖"); } } catch {}
   }
   const MN_STORIA = []; // voci aggiunte dagli item successivi
   const MN_BORGO_BTN = [];
@@ -16557,7 +16602,7 @@
   // ---------- la mappa delle modalità: tutto il gioco su un foglio ----------
   // Ogni luogo: aperto (nome, colore, descrizione) o chiuso («???» e un indizio generico).
   const MAPN = [
-    { id: "storia", t: "Storia", x: 36, y: 44, ok: () => true, d: "Le stagioni di Leo, una dopo l'altra. Ogni scelta conta, qualcuna pesa.", go: () => menuStoria() },
+    { id: "storia", t: "Storia", x: 36, y: 44, ok: () => true, d: "Le stagioni di Leo, una dopo l'altra. Ogni scelta conta, qualcuna pesa.", go: () => { menuStoria._sez = ""; menuStoria(); } },
     { id: "borgo", t: "Borgo", x: 66, y: 92, ok: () => true, d: "Il paese a piedi: gente, feste, monete, conchiglie e la bancarella di Marinella.", go: () => borgo() },
     { id: "trasf", t: "Trasferte", x: 36, y: 140, ok: () => mnTry(() => trLevel()) >= 1, d: "Gite in pullman: vicoli, oggetti da trovare, partite con la gente del posto.", go: () => borgo(), from: "borgo" },
     { id: "carriera", t: "Carriera", x: 136, y: 40, ok: () => true, d: "Una stagione intera di campionato, giornata dopo giornata.", go: () => career() },
