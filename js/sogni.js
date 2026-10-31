@@ -19,6 +19,8 @@
   const safe = (fn, d) => { try { return fn(); } catch (e) { return d; } };
   // le saghe da cui vengono le carte: chiave di salvataggio, nome, colore
   const SAGHE = {
+    falsari: ["ali-di-rondine.falsari", "I Falsari della Coppa", "#d97706", "__falsari"],
+    moviola: ["ali-di-rondine.moviola", "L'Ombra della Moviola · Tele-Rondine '84", "#ca8a04", "__moviola"],
     burattini: ["ali-di-rondine.burattini", "La Giostra dei Burattini", "#b45309", "__burattini"],
     borgo: ["ali-di-rondine.stagione1", "Ali di Rondine · Borgo Marino", "#ff7a45", ""],
     onde: ["ali-di-rondine.onde", "Radio Fuorigioco · Onde Corte sul Golfo", "#f59e0b", "__onde"],
@@ -40,6 +42,7 @@
     neve: ["ali-di-rondine.neve", "Il Guardiano di Neve", "#7dd3fc", "__neve"],
     banda: ["ali-di-rondine.banda", "Banda di Piazza", "#facc15", "__banda"],
     sasso: ["ali-di-rondine.sasso", "Sette per Sasso Nero", "#ef4444", "__sasso"],
+    tifosi: ["ali-di-rondine.tifosi", "La Notte dei Tifosi Morti", "#84cc16", "__tifosi"],
     corriere: ["ali-di-rondine.corriere", "Il Corriere del Pallone", "#f59e0b", "__corriere"],
     compagnia: ["ali-di-rondine.compagnia", "La Compagnia del Pallone Spezzato", "#b45309", "__compagnia"],
     capitani: ["ali-di-rondine.capitani", "Capitani di Ventura", "#b45309", "__capitani"],
@@ -117,6 +120,10 @@
     ["bp_rocco", "banda", "c", 58, 72, 62, "D", 1], ["bp_nana", "banda", "c", 46, 68, 72, "C", 1], ["bp_abele", "banda", "c", 52, 70, 66, "D", 2],
     ["bp_lilli", "banda", "r", 82, 50, 78, "A", 2], ["bp_gigi", "banda", "c", 56, 54, 76, "C", 3], ["bp_ferrante", "banda", "e", 60, 72, 92, "C", 1],
     ["bp_ciro", "banda", "e", 86, 62, 80, "A", 4], ["bp_doge", "banda", "l", 84, 74, 90, "C", 5],
+    // La Notte dei Tifosi Morti
+    ["zt_tonino", "tifosi", "c", 82, 40, 62, "A", 1], ["zt_nadia", "tifosi", "c", 54, 62, 74, "C", 1], ["zt_pippo", "tifosi", "r", 46, 92, 58, "D", 1],
+    ["zt_gaspare", "tifosi", "r", 50, 70, 82, "C", 1], ["zt_mimmo", "tifosi", "c", 60, 56, 70, "C", 2], ["zt_rebecca", "tifosi", "r", 72, 50, 80, "A", 2],
+    ["zt_ernesto", "tifosi", "e", 48, 84, 88, "P", 2], ["zt_ringhio", "tifosi", "l", 92, 82, 60, "A", 3],
     // Sette per Sasso Nero
     ["sn_gonta", "sasso", "c", 74, 52, 58, "D", 1], ["sn_hayate", "sasso", "c", 80, 46, 60, "A", 1], ["sn_yumi", "sasso", "c", 48, 70, 78, "C", 1],
     ["sn_kiku", "sasso", "r", 84, 58, 66, "A", 2], ["sn_okuma", "sasso", "r", 52, 90, 70, "D", 2], ["sn_shino", "sasso", "r", 56, 72, 86, "P", 2],
@@ -291,6 +298,12 @@
     ["rf_lupo", "onde", "r", 48, 84, 74, "P", 2], ["rf_valvola", "onde", "r", 58, 80, 82, "D", 2],
     ["rf_nilde", "onde", "e", 84, 62, 86, "A", 3], ["rf_valli", "onde", "e", 66, 84, 82, "C", 4],
     ["rf_cesare", "onde", "l", 90, 68, 92, "A", 4],
+    // L'Ombra della Moviola · Tele-Rondine '84
+    ["mov_walter", "moviola", "l", 54, 92, 88, "P", 1], ["mov_daria", "moviola", "e", 74, 68, 90, "C", 2],
+    ["mov_silvano", "moviola", "r", 62, 84, 76, "D", 2], ["mov_fosco", "moviola", "r", 58, 88, 70, "D", 3],
+    // I Falsari della Coppa
+    ["fc_valerio", "falsari", "r", 56, 90, 72, "D", 1], ["fc_arturo", "falsari", "e", 68, 70, 92, "C", 2],
+    ["fc_tullio", "falsari", "r", 64, 86, 75, "D", 3], ["fc_morosini", "falsari", "l", 82, 65, 88, "A", 4],
     // La Giostra dei Burattini
     ["bur_taddeo", "burattini", "e", 68, 76, 88, "C", 1],
     ["bur_colombina", "burattini", "r", 62, 60, 84, "C", 1],
@@ -403,6 +416,9 @@
     bp_ciro: "La tromba al contrario, per Tonino.", bp_doge: "Lui conta, io suono. Da quarant'anni.",
     sn_gonta: "Sei raccolti dalla parte sbagliata. Adesso conto le persone.", sn_hayate: "Non ho mai perso. Poi ho perso. Meglio.", sn_yumi: "Ballo, curo, passo. In quest'ordine.",
     sn_kiku: "Quarantadue frecce. Una è storta, e non la tiro.", sn_okuma: "Le mie porte non cadono: si piegano.", sn_shino: "Chi si arrende, vive. Chi tira, no.",
+    zt_tonino: "Gol in testa a un rospo. Lo racconto per vent'anni.", zt_nadia: "Chi non beve non corre. Anche alla fine del mondo.", zt_pippo: "Diciotto stagioni a mettermi in mezzo.",
+    zt_gaspare: "Ventitré palloni. Ne mancano sempre tre.", zt_mimmo: "Se canti non pensi. Se non pensi non hai paura.", zt_rebecca: "Una notizia senza colpevole è solo paura.",
+    zt_ernesto: "Ho benedetto un megafono. Ha funzionato.", zt_ringhio: "Quarant'anni sulla stessa scala. Per primo.",
     sn_kanbei: "Ho perso trenta battaglie dalla parte giusta.", sn_corvo: "A destra c'erano i fucili, maestro.",
     gn_olmo: "Il portiere aspetta. Io ho aspettato quarantacinque anni: posso aspettare un tiro.", gn_fiocco: "Fiocco raccoglie. Fiocco restituisce. A volte.", gn_ilde: "Basso a sinistra. Ottocentododici volte. Non sbaglio.",
     lt_zeno: "Gli Stagnini aspettano. È il nostro mestiere, insieme alla latta.", lt_benedetta: "Ho letto tutto due volte. Il tuo tiro, una basta.", lt_mattonaro: "Tutto si compra. Quasi tutto. Ci sto lavorando.", lt_ferro: "Criiic. («Leandro. Ma in campo, Ferro.»)",
@@ -490,7 +506,9 @@
     ["ernesta", "ro_fiamma", "Le Gatte tra i Pali"], ["cv_letizia", "pd_teresa", "Padelle e Mestoli"], ["cv_cunegonda", "of_rina", "Ferro Battuto & Chiave Inglese"], ["cv_lupo", "vs_corvo", "I Due Corvi"],
     ["fi_tullio", "qd_elle", "Moviola & Deduzioni"], ["fi_gualtiero", "pd_gualtiero", "I Due Gualtieri"], ["ro_tobia", "sg_tobia", "Un Tobia per Parte"], ["ro_luisa", "mn_oste", "Locande & Osterie"], ["ro_gedeone", "vl_gedeone", "Due Gedeoni"], ["papa", "pd_teresa", "Cucina & Pallone"],
     ["sara", "dc_nina", "Inchieste in Prima Pagina"], ["keller", "mg_wolff", "Bomber d'Acciaio"],
+    ["fc_arturo", "fc_valerio", "La Coppa del '34"], ["fc_tullio", "fc_valerio", "Bronzo & Area di Rigore"], ["fc_arturo", "lt_zeno", "Mastri Orafi e Stagnini"],
     ["bp_lilli", "gn_lilli", "Le due Lilli"], ["bp_rocco", "fg_ottone", "Ottoni di Paese"], ["bp_ciro", "gn_olmo", "Vecchi che aspettano"], ["bp_ferrante", "bp_doge", "Compagni di banco"],
+    ["zt_pippo", "zt_gaspare", "Il Muro e la Scopa"], ["zt_mimmo", "zt_ringhio", "Trent'anni di cori contro"], ["zt_rebecca", "dc_nina", "Cronache di provincia"],
     ["sn_kanbei", "sn_corvo", "Maestro e allievo"], ["sn_kiku", "sn_hayate", "Arco e spada"], ["sn_okuma", "fg_ottone", "Ferro e ottone"],
     ["gn_olmo", "gn_ilde", "Il Rigore di Ilde"], ["gn_fiocco", "lt_ferro", "Raccattapalle e Latta"], ["gn_tecla", "pe_tito", "Banconi di Paese"],
     ["vs_ottone", "fg_ottone", "Gli Ottoni (due scatole, un caffè)"], ["vp_ermete", "vs_ottone", "Custodi di dighe e di scatole"], ["vp_valvola", "dz_sterling", "Ingegneri e Osservatori"], ["vs_vulpe", "nr_kira", "Radio & Codici"], ["vs_corvo", "dz_sterling", "Sorveglianza & Servizi"], ["vs_eco", "qd_elle", "Dossier & Deduzioni"],
@@ -1350,6 +1368,7 @@
       circuiti: "Pilota e atleta potenziato nella metropoli al neon del 2099. Riflessi cibernetici e scatti fulminei a frequenza quantistica.",
       vallombra: "Custode dei misteri di Vallombra e delle sue tradizioni secolari. Freddo nei momenti decisivi, gioca con cuore d'acciaio.",
       alcatraz: "Veterano della prigione più dura, sa cosa significa lottare per ogni centimetro di campo senza mai abbassare la guardia.",
+      tifosi: "Numero dieci del Borgo Marino nella notte dei tifosi morti: ha corso fino all'alba con un gruppo di sopravvissuti, e non molla una palla neanche agli zombi.",
       sasso: "Ronin di Sasso Nero: ha difeso quattro porte per una ciotola di riso, sa leggere la pioggia e non lascia mai una porta scoperta.",
       banda: "Grancassa della banda di Borgo Marino: tiene il tempo per tutta la squadra, sfila sotto la pioggia e non perde mai il passo, neanche contro un altoparlante.",
       alcatraz2: "Infiltrato tra le condotte allagate del penitenziario sotterraneo, gioca di rimbalzo calibrando ogni traiettoria contro le paratie a pressione.",
