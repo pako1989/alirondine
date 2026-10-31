@@ -19,6 +19,7 @@
   const safe = (fn, d) => { try { return fn(); } catch (e) { return d; } };
   // le saghe da cui vengono le carte: chiave di salvataggio, nome, colore
   const SAGHE = {
+    zampano: ["ali-di-rondine.zampano", "Il Circo Zampanò · La Pista di Segatura", "#dc2626", "__zampano"],
     falsari: ["ali-di-rondine.falsari", "I Falsari della Coppa", "#d97706", "__falsari"],
     moviola: ["ali-di-rondine.moviola", "L'Ombra della Moviola · Tele-Rondine '84", "#ca8a04", "__moviola"],
     burattini: ["ali-di-rondine.burattini", "La Giostra dei Burattini", "#b45309", "__burattini"],
@@ -312,6 +313,12 @@
     ["bur_bastone", "burattini", "c", 50, 78, 62, "D", 2],
     ["bur_pece", "burattini", "r", 82, 54, 76, "A", 3],
     ["bur_duca", "burattini", "l", 86, 72, 90, "A", 4],
+    // Il Circo Zampanò · La Pista di Segatura
+    ["ci_tonio", "zampano", "c", 56, 62, 78, "C", 1],
+    ["ci_ercole", "zampano", "r", 64, 86, 60, "D", 2],
+    ["ci_lila", "zampano", "e", 86, 60, 88, "A", 1],
+    ["ci_zampano", "zampano", "e", 68, 76, 86, "C", 3],
+    ["ci_orloff", "zampano", "l", 84, 78, 90, "A", 4],
   ];
   // [id, saga, rarità (c r e l), attacco, difesa, tecnica, ruolo]
   const CARDS = [
@@ -482,6 +489,7 @@
     alc_bruno: "Forbici salde, testa alta e cross al millimetro: così si evade dalla marcatura.", alc_cardenas: "Nessuno esce da qui senza il mio triplice fischio.", alc_sam: "Ho una chiave per ogni porta e un tunnel per ogni contropiede.", alc_malick: "Palla o uomo passano... ma mai insieme.", alc_tonelli: "Fischietto tra i denti e marcatura a uomo: la disciplina prima di tutto.",
     te_valenti: "Nel corridoio non c'è spazio per le finte: solo per la freddezza d'agente.", te_elena: "Il pallone è come un dispaccio cifrato: chi lo sa leggere vince la partita.", te_klaus: "Fischietto e orario: il convoglio fende la neve senza fermarsi mai.", te_boris: "Gettare carbone e tenere il muro: la locomotiva non arretra!", te_morozov: "Un passaggio dosato al millimetro è la miglior medicina contro il pressing.",
     rf_wanda: "Tre gettoni sul bancone e un lancio lungo sul secondo palo: linea libera!", rf_tullio: "Stringi i bulloni e marca a uomo: da questa difesa non filtra una goccia.", rf_lupo: "Lato B sul piatto, volume a dieci e guantoni caldi sotto la traversa!", rf_valvola: "Sento il fischio delle cuciture nel vento: l'anticipo è già partito.", rf_nilde: "Qui Radio Fuorigioco 99.9: microfono aperto e palla dritta sotto l'incrocio!", rf_valli: "Articolo quattro del buon calcio: testa alta, rispetto e geometria pulita.", rf_cesare: "Finché una radiolina resta accesa sugli scogli, il Molo Vecchio non finisce mai.",
+    ci_tonio: "Un colpo di tromba in la bemolle e il pallone gira in valzer sopra la barriera!", ci_ercole: "Due quintali di ghisa alle nove, minestrone alle undici e muro d'area la domenica.", ci_lila: "Lassù tra una sbarra e l'altra non appartieni a nessun padrone: guarda che volo!", ci_zampano: "Signore e signori, nella segatura del Circo Zampanò ogni tiro è un salto nel cuore!", ci_orloff: "Riflettori puntati e cilindro nero: l'incrocio dei pali è questione di puro spettacolo.",
   };
   // le squadre inventate della Stagione dei Sogni e del Draft
   const TEAMS = [
@@ -497,6 +505,7 @@
   const RAR = { c: ["Comune", "#9aa5b1", 1], r: ["Rara", "#3a8ad8", 2], e: ["Epica", "#a85ad8", 3], l: ["Leggendaria", "#ffd23f", 4] };
   // i legami tra saghe diverse: +3 di intesa se entrambi in squadra
   const LINKS = [
+    ["ci_tonio", "bp_rocco", "Trombe e Bombardini"], ["ci_lila", "bur_colombina", "Funi e Fili d'Aria"], ["ci_zampano", "bur_taddeo", "Vecchi Capocomici"], ["ci_ercole", "lt_ferro", "Ghisa e Latta"], ["ci_orloff", "bur_duca", "Palchi d'Oro"],
     ["bur_taddeo", "lt_ferro", "Bottega e Fonderia"], ["bur_colombina", "dc_agata", "Intrighi alla Ribalta"], ["bur_duca", "bur_taddeo", "L'Arte e la Corte"],
     ["leo", "dario", "I Fratelli Moretti"], ["leo", "nico", "Dal Muro del Porto"], ["leo", "tommy", "Uno-Due del Campetto"],
     ["nico", "sara", "Cuore e Taccuino"], ["baciccia", "nonna", "Nodo del Pescatore"], ["kenji", "sho", "Il Volo degli Arata"],

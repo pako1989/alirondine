@@ -524,8 +524,8 @@
       return out + `<br><span style="color:var(--dim)">▷ = strade non prese. Per provarle: Capitoli → rigioca.</span>`;
     }
     function journal(back, inZone) {
-      const html = journalHtml() + (CRW ? CRW.html() : "") + (PLN ? PLN.html() : "") + (SCR ? SCR.html() : "") + (RIT ? RIT.html() : "") + (BLD ? BLD.html() : "") + (PRK ? PRK.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + (WGT ? WGT.html() : "") + (RAD ? RAD.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
-      const jb = (RAD ? [{ label: `${RAD.icon} ${RAD.name} · ${RAD.freq().toFixed(1)} MHz`, sub: "Ruota la manopola e intercetta segnali", fn: () => RAD.open(() => journal(back, inZone), inZone) }] : []).concat(DOS ? Object.keys(DOS.cases).filter((c) => DOS.list(c).length).map((c) => ({ label: "🗂️ Dossier · " + DOS.cases[c].t, sub: "Confronta prove e testimonianze", fn: () => DOS.open(c, () => journal(back, inZone), inZone) })) : []).concat(CAT && CAT.list().length ? [{ label: "🃏 Album", sub: `${CAT.team().length}/${CAT.max} in squadra`, fn: () => CAT.open(() => journal(back, inZone), inZone) }] : []).concat(CRW && CRW.count() ? [{ label: "⚔️ Schiera la compagnia", sub: `${CRW.field().length}/${CRW.max} in campo`, fn: () => CRW.pick(() => journal(back, inZone), inZone) }] : []).concat((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
+      const html = journalHtml() + (CRW ? CRW.html() : "") + (PLN ? PLN.html() : "") + (BLB ? BLB.html() : "") + (SCR ? SCR.html() : "") + (RIT ? RIT.html() : "") + (BLD ? BLD.html() : "") + (PRK ? PRK.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + (WGT ? WGT.html() : "") + (RAD ? RAD.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
+      const jb = (RAD ? [{ label: `${RAD.icon} ${RAD.name} · ${RAD.freq().toFixed(1)} MHz`, sub: "Ruota la manopola e intercetta segnali", fn: () => RAD.open(() => journal(back, inZone), inZone) }] : []).concat(BLB ? [{ label: `${BLB.icon} ${BLB.name}`, sub: BLB.statusTxt(), fn: () => BLB.open(() => journal(back, inZone), inZone) }] : []).concat(DOS ? Object.keys(DOS.cases).filter((c) => DOS.list(c).length).map((c) => ({ label: "🗂️ Dossier · " + DOS.cases[c].t, sub: "Confronta prove e testimonianze", fn: () => DOS.open(c, () => journal(back, inZone), inZone) })) : []).concat(CAT && CAT.list().length ? [{ label: "🃏 Album", sub: `${CAT.team().length}/${CAT.max} in squadra`, fn: () => CAT.open(() => journal(back, inZone), inZone) }] : []).concat(CRW && CRW.count() ? [{ label: "⚔️ Schiera la compagnia", sub: `${CRW.field().length}/${CRW.max} in campo`, fn: () => CRW.pick(() => journal(back, inZone), inZone) }] : []).concat((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
       if (inZone) return api.trAsk("voce", html, jb, bgNow());
       api.scene(BG0, "voce", html, jb, JN());
     }
@@ -948,6 +948,7 @@
         ...(RFT ? [["🦇 " + RFT.name, "Sui tetti puoi saltare (a rischio) o usare il rampino (sicuro, ma serve Agilità). Una caduta costa Vigore: a zero ti raccolgono e ti riportano al rifugio, dove riposi. Dall'alto puoi stordire una guardia, e una lampada rotta ti nasconde meglio."]] : []),
         ...(HCK ? [["💻 " + HCK.name, "Le consolle sulla mappa si usano con la statistica " + HCK.name + ": ogni comando costa punti e può deviare i droni, invertire i pavimenti elettrificati o aprire serrande. Chi forza la rete alza l'Allarme, e le sentinelle dei settori vicini aumentano."]] : []),
         ...(RAD ? [[RAD.icon + " " + RAD.name, "Apri il " + RAD.name + " dal Menu di zona per ruotare la scala in MHz. Più ti avvicini nel luogo giusto e alla frequenza esatta, più le tacche di ricezione salgono (da 0 a 5): con almeno 3 tacche puoi ascoltare trasmissioni nascoste, intercettare pattuglie o scoprire segnali QSL."]] : []),
+        ...(BLB ? [[BLB.icon + " " + BLB.name, "Scegli quali numeri o esibizioni inserire nelle cornici della serata. Alcune coppie di artisti creano un'intesa dietro le quinte che aumenta gli applausi e regala aiuti speciali durante il numero in pista."]] : []),
         ...(RIT ? [["🎼 " + (cfg.rhythm.name || "Il Repertorio"), "I brani si suonano a tempo: tocca lo strumento quando la nota arriva sul cerchio. La base va da sola; grancassa, rullante, piatti e la melodia degli ottoni suonano solo se le prendi. Ogni brano ha una quota di precisione; le stelle (fino a tre) restano nel Repertorio, dove i brani già suonati si rigiocano."]] : []),
         ...(COLD ? [[COLD.icon + " " + COLD.name, "Nelle zone all'aperto fa freddo: il " + COLD.name + " (in alto a sinistra) scende col tempo. Risale vicino a un fuoco, a una stufa o al chiuso, nelle case. Se arriva a zero ti ritrovi al riparo, senza perdere niente, ma lontano da dove eri."]] : []),
         ...arr(safe(() => cfg.guide && cfg.guide(K), []))
@@ -959,6 +960,7 @@
       const extra = cfg.zoneMenuExtra ? arr(safe(() => cfg.zoneMenuExtra(K), [])) : [];
       api.trAsk("voce", `<b>${esc(TITLE)}</b> · ${esc(c ? "Capitolo " + c.n + " · " + c.title : "")}<br><span style="color:var(--dim)">${esc(goalNow())}<br>Monete ${bal()} · ${esc(JN())}: ${m.lore.length} pagine</span>`, [
         ...(RAD ? [{ label: `${RAD.icon} ${RAD.name} · ${RAD.freq().toFixed(1)} MHz`, sub: RAD.statusTxt(), cls: "hot", fn: () => RAD.open(zoneMenu, true) }] : []),
+        ...(BLB ? [{ label: `${BLB.icon} ${BLB.name}`, sub: BLB.statusTxt(), cls: "hot", fn: () => BLB.open(zoneMenu, true) }] : []),
         ...(goalHidden() ? [{ label: "🧭 Dove vado?", sub: `L'obiettivo esatto, con la strada · ${GOAL_COST} monete (ne hai ${bal()})`, cls: "hot", fn: () => goalBuy(done) }] : []),
         { label: JN(), sub: (cfg.journal && cfg.journal.sub) || "Persone, scoperte, finali", cls: "hot", fn: () => journal(zoneMenu, true) },
         { label: "👥 Personaggi", sub: "Chi hai incontrato in questa saga", fn: () => persone(zoneMenu) },
@@ -1219,8 +1221,8 @@
       const total = () => Object.keys(LV).reduce((a, id) => [a[0] + ban(id), a[1] + banTot(id)], [0, 0]);
       function play(id, o, cb) {
         const L = LV[id]; if (!L) return safe(() => cb({ win: false }), null);
-        const eng = window[C0.eng || "__scorri"], bonus = safe(() => (C0.bonus ? C0.bonus(K) : 0), 0) | 0;
-        ownMatch(eng.start, Object.assign({ title: L.name, level: Object.assign({ id, kit: C0.kit }, L), bonus }, o || {}, { done: (r) => {
+        const eng = window[C0.eng || "__scorri"], bonus = safe(() => (C0.bonus ? C0.bonus(K) : 0), 0) | 0, buffs = arr(safe(() => (C0.buffs ? C0.buffs(K) : []), []));
+        ownMatch(eng.start, Object.assign({ title: L.name, level: Object.assign({ id, kit: C0.kit }, L), bonus, buffs }, o || {}, { done: (r) => {
           r = r || {};
           if (r.win) { F.set("sc_" + id + "_w", true); F.set("sc_" + id + "_b", (F.get("sc_" + id + "_b", 0) | (r.banMask | 0))); if ((r.coins | 0) > F.get("sc_" + id + "_c", 0)) F.set("sc_" + id + "_c", r.coins | 0); const t = r.time | 0, bt = F.get("sc_" + id + "_t", 0); if (t && (!bt || t < bt)) F.set("sc_" + id + "_t", t); }
           safe(() => cb(r), null);
@@ -1235,8 +1237,7 @@
         opts.push({ label: "◂ Indietro", fn: back || done });
         ask("voce", `<b>${esc(C0.name || "I livelli")}</b><br><span style="color:var(--dim)">${ids.length ? `${esc(C0.banName || "Stendardi")} trovati: ${tt[0]}/${tt[1]}. I livelli superati si rigiocano quando vuoi.` : esc(C0.hint || "Nessun livello superato, per ora. Intanto puoi allenarti nel cortile.")}</span>`, opts);
       }
-      // prova libera: il livello d'allenamento del motore, senza record
-      function practice(cb) { const eng = window[C0.eng || "__scorri"]; ownMatch(eng.start, { title: C0.practiceName || "Cortile d'allenamento", level: C0.practice ? Object.assign({ id: "prova", kit: C0.kit }, C0.practice) : undefined, kit: C0.kit, bonus: safe(() => (C0.bonus ? C0.bonus(K) : 0), 0) | 0, done: () => safe(() => cb(), null) }); }
+      function practice(cb) { const eng = window[C0.eng || "__scorri"], buffs = arr(safe(() => (C0.buffs ? C0.buffs(K) : []), [])); ownMatch(eng.start, { title: C0.practiceName || "Cortile d'allenamento", level: C0.practice ? Object.assign({ id: "prova", kit: C0.kit }, C0.practice) : undefined, kit: C0.kit, bonus: safe(() => (C0.bonus ? C0.bonus(K) : 0), 0) | 0, buffs, done: () => safe(() => cb(), null) }); }
       return { play, practice, won, ban, banTot, total, open, html, levels: LV };
     })();
 
@@ -1355,7 +1356,8 @@
         if (inZone) return api.trAsk("voce", head, opts, bgNow());
         api.scene(BG0, "voce", head, opts, JN());
       }
-      return { add, has, list, found, solid, open, verdict, html, cases: C };
+      const pair = (c, a, b) => { if (!has(c, a) || !has(c, b)) return false; const k = lk(c).findIndex((l) => (l[0] === a && l[1] === b) || (l[0] === b && l[1] === a)); if (k < 0) return false; if (!lf(c, k)) { F.set(`dl_${c}_${k}`, true); SFX.choice(); } return true; };
+      return { add, has, list, pair, found, solid, open, verdict, html, cases: C };
     })();
 
     // -------------------------------------------------------------- LA ROTTA (cfg.route): viaggio a tappe con risorse
@@ -1749,6 +1751,77 @@
       return { get, set, add, warm: (n) => add(n == null ? 2 : n), max: mx, name: C0.name, icon: C0.icon, bar, tick, draw };
     })();
 
+    // -------------------------------------------------------------- IL CARTELLONE / LA SCALETTA (cfg.billboard, opt-in)
+    // cfg.billboard = { name: "Il Cartellone", icon: "🎪", slots: 3, acts: { id: { n, icon, who, d, applause, buff, buffTxt } },
+    //   synergies: [{ id, pair: [a, b], n, applause, buff, buffTxt, lines: [[chi, testo]…] }] }
+    const BLB = cfg.billboard && (() => {
+      const C0 = cfg.billboard, AC = C0.acts || {}, NS = Math.max(1, C0.slots | 0 || 3);
+      const SY = Array.isArray(C0.synergies) ? C0.synergies : Object.keys(C0.synergies || {}).map((id) => Object.assign({ id }, C0.synergies[id]));
+      const nm = C0.name || "Il Cartellone", ic = C0.icon || "🎪";
+      const unlocked = (id) => !!AC[id] && F.is("bb_u_" + id);
+      const unlock = (id, quiet) => { if (!AC[id] || unlocked(id)) return false; F.set("bb_u_" + id, true); if (!quiet) { SFX.ding(); note(`${nm}: ${AC[id].n}`); if (api && api.trToast) safe(() => api.trToast(`${ic} Nuovo numero: ${AC[id].n}`)); } return true; };
+      const list = () => Object.keys(AC).filter(unlocked);
+      const slotCount = () => NS;
+      const lineup = () => Array.from({ length: NS }, (_, i) => { const v = F.get("bb_s_" + i, ""); return unlocked(v) ? v : ""; });
+      const activeActs = () => lineup().filter(Boolean);
+      const activeSynergies = () => { const a = activeActs(); return SY.filter((s) => Array.isArray(s.pair) && s.pair.every((x) => a.includes(x))); };
+      const hasSynergy = (sid) => activeSynergies().some((s) => s.id === sid);
+      const seenSynergy = (sid) => F.is("bb_sy_" + sid);
+      const seenSynergyCount = () => SY.filter((s) => seenSynergy(s.id)).length;
+      const applause = () => activeActs().reduce((t, id) => t + (AC[id].applause | 0), 0) + activeSynergies().reduce((t, s) => t + (s.applause | 0), 0);
+      const activeBuffs = () => [...new Set(activeActs().map((id) => AC[id].buff).concat(activeSynergies().map((s) => s.buff)).filter(Boolean))];
+      const hasBuff = (b) => activeBuffs().includes(b);
+      function assign(slotIdx, id) {
+        const idx = clampI(slotIdx | 0, 0, NS - 1); if (id && !unlocked(id)) return null;
+        for (let i = 0; i < NS; i++) if (i !== idx && F.get("bb_s_" + i, "") === id) F.set("bb_s_" + i, "");
+        F.set("bb_s_" + idx, id || "");
+        const fresh = activeSynergies().find((s) => !seenSynergy(s.id));
+        if (fresh) { F.set("bb_sy_" + fresh.id, true); note(`Intesa scoperta: ${fresh.n}`); }
+        return fresh || null;
+      }
+      const clearSlot = (slotIdx) => { F.set("bb_s_" + clampI(slotIdx | 0, 0, NS - 1), ""); };
+      const clear = (slotIdx) => { if (slotIdx == null) { for (let i = 0; i < NS; i++) F.set("bb_s_" + i, ""); } else clearSlot(slotIdx); };
+      const statusTxt = () => `${activeActs().length}/${NS} numeri · Applausi +${applause()}`;
+      const html = () => {
+        const ul = list(); if (!ul.length) return "";
+        const lu = lineup(), sy = activeSynergies();
+        return `<br><br><b>${esc(ic + " " + nm)}</b> (${activeActs().length}/${NS} in scaletta · Applausi +${applause()})<br>` +
+          lu.map((id, i) => `${i + 1}. ${id ? `<b>${esc((AC[id].icon || "•") + " " + AC[id].n)}</b>` : "<span style='color:var(--dim)'>— cornice vuota —</span>"}`).join("<br>") +
+          (sy.length ? `<br><span style="color:var(--dim)">Intese attive: ${sy.map((s) => esc(s.n)).join(" · ")}</span>` : "");
+      };
+      function open(back, inZone, o) {
+        o = o || {}; const b = back || done, show = (h, op) => (inZone ? api.trAsk("voce", h, op, bgNow()) : api.scene(BG0, "voce", h, op, JN()));
+        const lu = lineup(), sy = activeSynergies(), ul = list();
+        const head = `<b>${esc(ic + " " + nm)}</b> · Applausi previsti: <b>+${applause()}</b><br><span style="color:var(--dim)">${esc(o.prompt || "Scegli l'ordine dei numeri nelle cornici della serata. Coppie affiatate sbloccano intese e aiuti in pista.")}${sy.length ? "<br>✨ Intese attive: <b>" + sy.map((s) => esc(s.n + (s.buffTxt ? " (" + s.buffTxt + ")" : ""))).join(" · ") + "</b>" : ""}</span>`;
+        const opts = lu.map((cur, idx) => ({
+          label: `Cornice ${idx + 1}: ${cur ? (AC[cur].icon || "•") + " " + AC[cur].n : "— vuota —"}`,
+          sub: cur ? `${AC[cur].d || ""}${AC[cur].buffTxt ? " · " + AC[cur].buffTxt : ""} (+${AC[cur].applause | 0} applausi)` : (ul.length ? "Tocca per inserire un numero" : "Nessun numero ancora sbloccato"),
+          disabled: !ul.length,
+          fn: () => {
+            const pickOpts = ul.map((id) => ({
+              label: `${AC[id].icon || "•"} ${AC[id].n}${lu.includes(id) ? " (già in scaletta)" : ""}`,
+              sub: `${AC[id].d || ""}${AC[id].buffTxt ? " · " + AC[id].buffTxt : ""} (+${AC[id].applause | 0})`,
+              fn: () => {
+                const fresh = assign(idx, id); SFX.ding();
+                if (fresh && Array.isArray(fresh.lines) && fresh.lines.length) return say(fresh.lines, () => open(back, inZone, o));
+                open(back, inZone, o);
+              }
+            }));
+            if (cur) pickOpts.push({ label: "— Svuota questa cornice", fn: () => { clearSlot(idx); open(back, inZone, o); } });
+            pickOpts.push({ label: "◂ Torna al cartellone", fn: () => open(back, inZone, o) });
+            show(`<b>Cornice ${idx + 1} · Scegli il numero</b>`, pickOpts);
+          }
+        }));
+        if (typeof o.onConfirm === "function") {
+          const min = o.min || 1, ok = activeActs().length >= min;
+          opts.push({ label: o.confirmLabel || "✨ Conferma la scaletta e apri il sipario", sub: ok ? `Applausi +${applause()} · ${sy.length} intese` : `Inserisci almeno ${min} numero`, cls: "hot", big: !!o.big, disabled: !ok, fn: () => o.onConfirm({ acts: activeActs(), applause: applause(), buffs: activeBuffs(), synergies: sy.map((s) => s.id) }) });
+        }
+        opts.push({ label: "◂ Indietro", fn: b });
+        show(head, opts);
+      }
+      return { name: nm, icon: ic, acts: AC, synergies: SY, unlock, unlocked, list, slotCount, lineup, activeActs, assign, clear, clearSlot, applause, activeBuffs, hasBuff, activeSynergies, hasSynergy, seenSynergy, seenSynergyCount, statusTxt, open, html };
+    })();
+
     // -------------------------------------------------------------- kit per i capitoli
     const K = {
       get api() { return api; }, ID, TITLE, TS, T, esc, hash, rnd, pick, safe, F, mem, save, stepOf, setStep, note, once, reward, coinsGive, bal, hero, castHero, stat, bond,
@@ -1759,7 +1832,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, plan: PLN, scroll: SCR, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN, radio: RAD, cold: COLD, rhythm: RIT, build: BLD, perks: PRK,
+      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, plan: PLN, billboard: BLB, scroll: SCR, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN, radio: RAD, cold: COLD, rhythm: RIT, build: BLD, perks: PRK,
       // un minigioco proprio della saga (start = window.__xxx.start): o passa al motore, cb(r) a fine partita
       minigame: (start, o, cb) => ownMatch(start, Object.assign({}, o, { done: (r) => safe(() => cb(r || {}), null) })),
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },

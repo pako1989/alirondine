@@ -24,6 +24,13 @@
   const GEN = { fantasy: ["Fantasy", "#7a4ab0"], mistero: ["Mistero", "#2c6a9a"], scifi: ["Fantascienza", "#1f8a8a"], storico: ["Storico", "#a8622a"], commedia: ["Commedia", "#c9921a"], sport: ["Sport anime", "#c0392b"], avventura: ["Avventura", "#3f8a3f"], dramma: ["Drammatico", "#6a5a7a"], tattica: ["Tattica", "#5a6a3a"], satira: ["Satira", "#0284c7"] };
   // mod: oggetto window con menuEntry/info · fn: funzione window da chiamare con (indietro) · ch: capitoli totali (se noti)
   const SAGAS = [
+    { id: "zampano", t: "Il Circo Zampanò · La Pista di Segatura", e: "🎪", g: ["avventura", "mistero", "commedia"], mod: "__zampano", key: "ali-di-rondine.zampano", ch: 4, cover: "ci_titolo", d: "Pian dei Venti, sopra il Borgo Marino: il tendone cremisi di Maestro Zampanò rischia lo sgombero contro il Gran Circo Imperiale del Barone Orloff e un cavo tranciato di notte. Componi i 3 numeri della serata, scopri le sinergie segrete e vola tra trampolini, anelli del trapezio e piroette aeree. Quattro capitoli, quattro finali. Novità: il Cartellone di Pista. Minigioco: La Pista Acrobatica.",
+      hints: {
+        carovana: "Difendi il Cuore della compagnia e riparti libero coi sette carri dipinti.",
+        stabile: "Smaschera il sabotaggio col Dossier o fai brillare il Prestigio per fondare il Teatro Tenda del Borgo.",
+        imperiale: "Firma la fusione col Gran Circo Imperiale o cedi la pista finale al Barone Orloff.",
+        stellare: "Segreto: sblocca tutti i 6 numeri del Cartellone, scopri almeno 2 sinergie, risolvi il Dossier e stringi legame con Lila e Tonio."
+      } },
     { id: "falsari", t: "I Falsari della Coppa", e: "🏆", g: ["commedia", "mistero", "storico"], mod: "__falsari", key: "ali-di-rondine.falsari", ch: 4, cover: "fa_titolo", d: "Una coppa storica del 1934 all'asta, un vecchio orafo e lo stadio da salvare dalle ruspe della Morosini. Fabbrica la replica perfetta, bilancia la lega al millimetro e inganna la contessa prima del colpo di maglio. Quattro capitoli, quattro finali. Novità: Il Banco del Falsario & Forgia Artigianale. Minigioco: Il Banco del Falsario.",
       hints: {
         olmo: "Trova la pergamena demaniale del 1934 nel caveau e fai valere il vincolo pubblico.",
@@ -182,7 +189,7 @@
     { id: "cala", t: "Cala Tramontana", e: "🌊", g: ["avventura"], fn: "openCalaTramontana", key: "ali-di-rondine.cala-tramontana", cover: "beach", d: "Esplora a piedi il borgo marino alternativo con il tuo Campione." },
     { id: "borgostorto", t: "Il Borgo Storto", e: "🌀", g: ["commedia", "tattica"], api: "openBorgoStorto", cover: "beach", d: "Lo spin-off GDR a turni del Borgo Marino." },
   ];
-  const NEWEST = ["burattini", "tifosi", "falsari", "moviola", "sasso", "banda", "neve", "onde", "latta", "missione", "corriere", "compagnia", "diga", "vuota", "mondiale", "cavaliere", "gala", "circuiti", "replica", "officina", "figurine", "rotta", "fischietto", "capitani", "carte", "quattordici", "sigilli", "fortino", "cenere", "note", "spia", "fiume", "piramide", "treno", "alcatraz", "milano", "gp", "tempo", "dungeon", "roma", "regno", "naufraghi", "campana", "galletta", "pugno", "montagna", "cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
+  const NEWEST = ["zampano", "burattini", "tifosi", "falsari", "moviola", "sasso", "banda", "neve", "onde", "latta", "missione", "corriere", "compagnia", "diga", "vuota", "mondiale", "cavaliere", "gala", "circuiti", "replica", "officina", "figurine", "rotta", "fischietto", "capitani", "carte", "quattordici", "sigilli", "fortino", "cenere", "note", "spia", "fiume", "piramide", "treno", "alcatraz", "milano", "gp", "tempo", "dungeon", "roma", "regno", "naufraghi", "campana", "galletta", "pugno", "montagna", "cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
   const modOf = (s) => (s.mod ? window[s.mod] : null);
   const available = (s) => (s.mod ? !!window[s.mod] : s.fn ? typeof window[s.fn] === "function" : !!(api() && api()[s.api]));
   function state(s) {
@@ -592,6 +599,10 @@
       opp: [{ name: "Gervaso lo Sghembo", color: "#b45309", style: "pressing" }, { name: "I Burattini dei Mercanti", color: "#15803d", style: "difensiva" }],
       boss: { name: "I Burattini Ducali d'Ebano", color: "#881337", style: "pressing" },
       opts: (o, h, boss) => ({ title: `Calcio a Fili · ${o.name}`, opp: o.name, half: boss ? 45 : 30, boss: !!boss }) },
+    { id: "pista", t: "La Pista Acrobatica", e: "🎪", saga: "zampano", eng: "__scorri", d: "I livelli a scorrimento del Circo Zampanò: sfera acrobatica, trampolini a molla, piroetta aerea che respinge i birilli e slancio sugli anelli d'oro del trapezio.",
+      opp: [{ name: "Il tendone delle prove", lv: "pista1", color: "#dc2626", style: "equilibrata" }, { name: "I carri nella bruma", lv: "pista2", color: "#b45309", style: "contropiede" }, { name: "L'intreccio della cupola", lv: "pista3", color: "#7e22ce", style: "pressing" }, { name: "La parata del Gran Gala", lv: "pista4", color: "#f59e0b", style: "pressing" }],
+      boss: { name: "Il Barone Orloff", lv: "orloff", color: "#eab308", style: "pressing" },
+      opts: (o) => { const LV = window.__zampanoLV || {}, id = o.lv || "pista1"; return { title: `La Pista Acrobatica · ${o.name}`, level: Object.assign({ id, kit: "circo" }, LV[id] || {}), bonus: 1, buffs: ["piuma"], tutorial: false }; } },
   ];
   function sgState(m) { const s = SAGAS.find((x) => x.id === m.saga), x = s ? state(s) : null; return { s, open: !!(x && (x.doneN >= 1)), boss: !!(x && x.endsFound > 0) }; }
   function openSalaGiochi(back) {
@@ -850,7 +861,7 @@
       weather: "🍃 Tramontana · 🌊 Mare Calmo · ☀️ Costa Ligure",
       desc: "Il porto vecchio, la spiaggia dei ciottoli, la Trattoria Moretti, i caruggi e i paesi arrampicati sulle scogliere liguri.",
       quote: "«Il mare restituisce sempre quello che gli lanci con effetto.»",
-      sagas: ["cala", "borgostorto", "torneo", "campetto", "stagione", "lampioni", "colline", "montagna", "vallombra", "diga", "faro", "rotta", "campana", "carte"],
+      sagas: ["zampano", "cala", "borgostorto", "torneo", "campetto", "stagione", "lampioni", "colline", "montagna", "vallombra", "diga", "faro", "rotta", "campana", "carte"],
       pins: [
         { id: "torneo", t: "Cento Scuole", e: "🏆", dx: 36, dy: -24 },
         { id: "campetto", t: "Campetto", e: "⚽", dx: -36, dy: 22 },
@@ -1705,7 +1716,7 @@
   // ---------------------------------------------------------------- ALBUM DEI PERSONAGGI
   // ogni personaggio registrato nel gioco (window.__borgoApi.BIO) diventa una carta. Si «incontra» parlandoci (seeCard del gioco).
   // Le sezioni: la Storia e Borgo Marino, i tornei e le modalità del Borgo, e una sezione per saga (riconosciuta dal prefisso degli id).
-  const PFX = { burattini: "bur", tifosi: "zt", falsari: "fc", sasso: "sn", banda: "bp", neve: "gn", onde: "rf", latta: "lt", missione: "ms", corriere: "cr", compagnia: "cp", diga: "vp", mondiale: "mg", cavaliere: "cf", gala: "pd", circuiti: "nr", vuota: "vs", replica: "rp", officina: "of", figurine: "fg", rotta: "ro", fischietto: "fi", capitani: "cv", carte: "cd", quattordici: "qt", sigilli: "sg", cenere: "ce", note: "qd", fortino: "fo", spia: "dz", fiume: "fa", piramide: "my", treno: "te", alcatraz: "alc", milano: "mn", gp: "gp", tempo: "rt", roma: "rm", regno: "re", naufraghi: "nf", campana: "cp", galletta: "gl", pugno: "pr", montagna: "bm", cavallo: "cs", dungeon: "dg", razzo: "rz", quartiere: "sq", titano: "ft", ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
+  const PFX = { zampano: "ci", burattini: "bur", tifosi: "zt", falsari: "fc", sasso: "sn", banda: "bp", neve: "gn", onde: "rf", latta: "lt", missione: "ms", corriere: "cr", compagnia: "cp", diga: "vp", mondiale: "mg", cavaliere: "cf", gala: "pd", circuiti: "nr", vuota: "vs", replica: "rp", officina: "of", figurine: "fg", rotta: "ro", fischietto: "fi", capitani: "cv", carte: "cd", quattordici: "qt", sigilli: "sg", cenere: "ce", note: "qd", fortino: "fo", spia: "dz", fiume: "fa", piramide: "my", treno: "te", alcatraz: "alc", milano: "mn", gp: "gp", tempo: "rt", roma: "rm", regno: "re", naufraghi: "nf", campana: "cp", galletta: "gl", pugno: "pr", montagna: "bm", cavallo: "cs", dungeon: "dg", razzo: "rz", quartiere: "sq", titano: "ft", ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
   const BORGO_PFX = ["sv", "rb", "sb", "cg", "hd", "md", "ac"];
   function perSections() {
     const A = api(); if (!A || !A.BIO) return [];
@@ -1773,7 +1784,7 @@
 
   // ---------------------------------------------------------------- GUARDAROBA
   const KIND = { shirt: ["Maglie", "shirt", "👕"], hairc: ["Colori capelli", "hair", "🎨"], style: ["Tagli", "style", "💇"], acc: ["Accessori", "acc", "🧢"], shot: ["Tiri speciali", "shot", "⚡"], other: ["Da collezione", null, "🏅"] };
-  const SRC = [["rf_", "📻 Radio Fuorigioco"], ["lb_", "📖 Libro"], ["dt_", "🪞 Doppio Turno"], ["cr_", "💎 Cristalli"], ["mu_", "🧱 Il Muro"], ["vl_", "⛰️ Vallombra"], ["kb_", "👑 Kronenburg"], ["al_", "⚗️ Alchimia"], ["pi_", "🏴‍☠️ Pirati"], ["omb_", "🌃 Ombre"], ["sh_", "⚔️ Shogun"], ["feudi_", "⚖️ Bilancia"], ["bv_", "🌲 Belovodia"], ["rag_", "🔥 Ragnarok"]];
+  const SRC = [["ci_", "🎪 Il Circo Zampanò"], ["rf_", "📻 Radio Fuorigioco"], ["lb_", "📖 Libro"], ["dt_", "🪞 Doppio Turno"], ["cr_", "💎 Cristalli"], ["mu_", "🧱 Il Muro"], ["vl_", "⛰️ Vallombra"], ["kb_", "👑 Kronenburg"], ["al_", "⚗️ Alchimia"], ["pi_", "🏴‍☠️ Pirati"], ["omb_", "🌃 Ombre"], ["sh_", "⚔️ Shogun"], ["feudi_", "⚖️ Bilancia"], ["bv_", "🌲 Belovodia"], ["rag_", "🔥 Ragnarok"]];
   const srcOf = (id) => { const s = SRC.find(([p]) => id.startsWith(p)); return s ? s[1] : "⚽ Borgo e Storia"; };
   const kindOf = (c) => (c && KIND[c.kind] ? c.kind : "other");
   const GF = { kind: "shirt", src: "", sel: null };

@@ -312,6 +312,75 @@
       return T;
     }
   };
+  // Il Circo Zampanò: tendone a strisce cremisi/avorio, carri al crepuscolo, cupola dei trapezisti e Gran Gala
+  function tentStrip(w, h, red, cream, gold, dark) {
+    const c = cnv(w, h), g = c.getContext("2d"); R(g, 0, 0, w, h, dark);
+    for (let x = 0; x < w; x += 16) { R(g, x, 20, 8, h - 20, red); R(g, x + 8, 20, 8, h - 20, cream); R(g, x, 20, 8, 3, gold); }
+    for (let x = 0; x < w; x += 64) { R(g, x + 28, 0, 4, h, "#5a3a20"); R(g, x + 29, 0, 1, h, gold); for (let k = 0; k < 16; k++) disc(g, x + k * 4, 22 + Math.round(Math.sin(k / 15 * Math.PI) * 5), 2, k % 2 ? "#fff3b0" : gold); }
+    return c;
+  }
+  function wagonStrip(w, h, seed) {
+    const c = cnv(w, h), g = c.getContext("2d");
+    for (let x = 8; x < w; x += 84) {
+      const col = ["#9a2a2a", "#1e4e68", "#6a3a68", "#8a5a1e"][(x / 84 | 0) % 4];
+      R(g, x, h - 38, 62, 28, col); R(g, x, h - 41, 64, 4, "#e8c468"); R(g, x + 8, h - 32, 12, 10, "#ffd878"); R(g, x + 40, h - 32, 12, 10, "#ffd878");
+      disc(g, x + 14, h - 8, 7, "#3a2414"); disc(g, x + 14, h - 8, 3, "#e8c468"); disc(g, x + 48, h - 8, 7, "#3a2414"); disc(g, x + 48, h - 8, 3, "#e8c468");
+      for (let k = 0; k < 8; k++) disc(g, x + 64 + k * 2.5, h - 36 + Math.round(Math.sin(k / 7 * Math.PI) * 4), 1, k % 2 ? "#ffe898" : "#ff6a4a");
+    }
+    return c;
+  }
+  THEMES.tendone = {
+    name: "La pista di segatura", fall: "Giù dalla pedana! Si riparte dal tamburo.",
+    brick: { base: "#a83232", light: "#d4524a", dark: "#6e1c22", mortar: "#3e1018", crack: "#52161e" },
+    grass: { a: "#e6b85c", b: "#ffe08a", c: "#b08232" }, wood: { a: "#9a6434", b: "#c88c4e", c: "#4e2e16" }, fx: "coriandoli", dark: 0,
+    build() {
+      const T = { flags: [], wins: [], layers: [] }; const sky = cnv(VW, VH), g = sky.getContext("2d");
+      skyBands(g, VW, 0, VH, ["#2a0c18", "#461424", "#681c2e", "#8a2836", "#ad3c3e", "#cc5a48"]); T.sky = sky;
+      T.layers.push({ c: tentStrip(512, 150, "#7a1c28", "#cbb894", "#eab308", "#220912"), k: 0.14, y: 12 });
+      T.layers.push({ c: wagonStrip(504, 70, 3), k: 0.36, y: 112 });
+      return T;
+    }
+  };
+  THEMES.carri = {
+    name: "La carovana al crepuscolo", fall: "Giù dai carri! Si riparte dal tamburo.",
+    brick: { base: "#3a5a78", light: "#5c82a4", dark: "#22384e", mortar: "#122030", crack: "#1a2c40" },
+    grass: { a: "#d49a44", b: "#f4c468", c: "#8a5c24" }, wood: { a: "#8a522e", b: "#b47444", c: "#3e2212" }, fx: "coriandoli", dark: 0, night: true,
+    build() {
+      const T = { flags: [], wins: [], layers: [], stars: [] }; const sky = cnv(VW, VH), g = sky.getContext("2d");
+      skyBands(g, VW, 0, VH, ["#0c1028", "#161e42", "#262c5a", "#44386c", "#744872", "#a86268", "#d4885c"]);
+      disc(g, 250, 42, 14, "#fff2c6"); for (let i = 0; i < 55; i++) T.stars.push([Math.round(rnd(i + 8) * VW), Math.round(rnd(i + 77) * 90), i]); T.sky = sky;
+      T.layers.push({ c: cloudStrip(63, 512, 80, "#684874", "#986894", "#3c2850", 5, 10, 48), k: 0.05, y: 8, drift: 0.08, alpha: 0.85 });
+      T.layers.push({ c: wagonStrip(504, 80, 9), k: 0.25, y: 98 });
+      T.layers.push({ c: hedgeStrip(512, 64, "#181428", "#2a2240", "#eab308"), k: 0.5, y: 124 });
+      return T;
+    }
+  };
+  THEMES.cupola = {
+    name: "La cupola dei trapezisti", fall: "Giù nella rete! Si riparte dal tamburo.",
+    brick: { base: "#5e3a6e", light: "#86589a", dark: "#3c2248", mortar: "#20102a", crack: "#2e183a" },
+    grass: { a: "#eab308", b: "#fef08a", c: "#a16207" }, wood: { a: "#7c4a2d", b: "#a86c44", c: "#3a2012" }, fx: "coriandoli", dark: 0, night: true,
+    build() {
+      const T = { flags: [], wins: [], layers: [], stars: [] }; const sky = cnv(VW, VH), g = sky.getContext("2d");
+      skyBands(g, VW, 0, VH, ["#090616", "#140c28", "#22143c", "#321c52", "#462666"]);
+      for (let i = 0; i < 70; i++) T.stars.push([Math.round(rnd(i + 31) * VW), Math.round(rnd(i + 120) * 130), i]); T.sky = sky;
+      T.layers.push({ c: tentStrip(512, 120, "#4c1d5c", "#d8b4fe", "#fde047", "#140822"), k: 0.1, y: 0, alpha: 0.85 });
+      T.layers.push({ c: pillarStrip(552, 160, "#3b1f4e", "#6b3a84", "#1e0e2c"), k: 0.35, y: 20 });
+      return T;
+    }
+  };
+  THEMES.gala = {
+    name: "Il Gran Gala sotto i riflettori", fall: "Fuori pista! Si riparte dal tamburo.",
+    brick: { base: "#991b1b", light: "#dc2626", dark: "#5f1010", mortar: "#2e0707", crack: "#450a0a" },
+    grass: { a: "#f59e0b", b: "#fef08a", c: "#b45309" }, wood: { a: "#92400e", b: "#d97706", c: "#451a03" }, fx: "coriandoli", dark: 0,
+    build() {
+      const T = { flags: [], wins: [], layers: [] }; const sky = cnv(VW, VH), g = sky.getContext("2d");
+      skyBands(g, VW, 0, VH, ["#1c0812", "#3b0d1e", "#641428", "#8c1d30", "#b83234", "#d95b38"]);
+      disc(g, 90, 38, 22, "rgba(254,240,138,.35)"); disc(g, 230, 38, 22, "rgba(254,240,138,.35)"); T.sky = sky;
+      T.layers.push({ c: tentStrip(512, 155, "#881322", "#f5e6c8", "#facc15", "#2a0710"), k: 0.14, y: 8 });
+      T.layers.push({ c: wagonStrip(504, 72, 21), k: 0.34, y: 112 });
+      return T;
+    }
+  };
   // ------------------------------------------------------------ tessere (atlante per tema)
   function atlas(th) {
     const A = {}, B = th.brick, G = th.grass, Wd = th.wood;
@@ -394,7 +463,11 @@
     y: { n: "Yeti raccattapalle", hp: 2, w: 14, h: 18, sp: 0.35, stomp: true },
     a: { n: "Aquila talent-scout", hp: 1, w: 16, h: 10, sp: 0.5, fly: true, stomp: true },
     r: { n: "Palla di valanga", hp: 1, w: 10, h: 10, sp: 1.3, stomp: false },
-    n: { n: "Pupazzo sentinella", hp: 1, w: 14, h: 22, sp: 0, stomp: true }
+    n: { n: "Pupazzo sentinella", hp: 1, w: 14, h: 22, sp: 0, stomp: true },
+    p: { n: "Pagliaccio a molla", hp: 1, w: 12, h: 15, sp: 0.55, stomp: true },
+    l: { n: "Lanciatore di birilli", hp: 2, w: 12, h: 17, sp: 0, stomp: true },
+    b: { n: "Barboncino equilibrista", hp: 1, w: 14, h: 13, sp: 0.65, stomp: true },
+    d: { n: "Domatore della rivale", hp: 2, w: 13, h: 18, sp: 0.45, stomp: true, shield: true }
   };
   function drawFoe(g, e, f) {
     const O = "#16141f", x = Math.round(e.x), y = Math.round(e.y + e.h), d = e.dir;
@@ -457,6 +530,28 @@
       R(g, -4, -12, 9, 2, "#2f6b3a"); R(g, -5, -11, 2, 4, "#2f6b3a"); R(g, -3, -22, 7, 2, "#3a2a20"); R(g, -2, -25, 5, 3, "#3a2a20");
       if (thr) { R(g, 4, -14, 1, 6, "#5a3a20"); R(g, 5, -20, 1, 6, "#5a3a20"); disc(g, 6, -21, 2, "#ffffff"); } else { R(g, 4, -11, 6, 1, "#5a3a20"); R(g, 8, -13, 1, 2, "#5a3a20"); }
       R(g, -10, -11, 6, 1, "#5a3a20"); R(g, -10, -13, 1, 2, "#5a3a20");
+    } else if (e.t === "p") { // pagliaccio a molla: cilindro a righe, naso rosso e molla d'ottone sotto
+      const sq = e.ground ? 2 : 0;
+      for (let k = 0; k < 3; k++) R(g, -3 + (k % 2) * 2, -2 - k * 2 + sq, 5, 1, "#eab308");
+      part(g, -5, -13 + sq, 10, 7, "#ef4444", O); R(g, -1, -13 + sq, 2, 7, "#fef08a");
+      part(g, -4, -19 + sq, 8, 6, "#fff8f0", O); disc(g, 3, -16 + sq, 2, "#dc2626"); R(g, 1, -18 + sq, 1, 1, O);
+      part(g, -3, -23 + sq, 6, 4, "#2563eb", O); disc(g, 0, -24 + sq, 2, "#fde047");
+    } else if (e.t === "l") { // giocoliere rivale: gilet viola, lancia birilli dorati
+      const lit = e.cd < 28;
+      part(g, -4, -6, 3, 6, "#1e1b4b", O); part(g, 1, -6, 3, 6, "#1e1b4b", O);
+      part(g, -5, -15, 10, 9, "#7e22ce", O); R(g, -1, -15, 3, 8, "#fde047");
+      part(g, -4, -21, 8, 6, "#f1c27d", O); R(g, 2, -19, 1, 1, O); R(g, -5, -22, 10, 2, "#1e1b4b");
+      R(g, 5, lit ? -24 : -15, 3, 7, "#eab308"); R(g, 5, lit ? -25 : -16, 3, 2, "#dc2626");
+    } else if (e.t === "b") { // barboncino su sfera a spicchi
+      const a = (e.x / 4) % 6;
+      disc(g, 0, -4, 4, "#dc2626"); R(g, -2 + Math.round(Math.sin(a) * 2), -6, 3, 3, "#fef08a");
+      part(g, -4, -12, 8, 5, "#fdf2f8", O); disc(g, 3, -14, 3, "#fbcfe8"); disc(g, -4, -12, 2, "#fbcfe8"); R(g, 4, -15, 1, 1, O); R(g, 1, -17, 3, 2, "#eab308");
+    } else if (e.t === "d") { // inserviente del Granduca con cerchio dorato davanti (come scudo)
+      const ph = Math.sin(f / 5 + e.x);
+      part(g, -4, -6, 3, 6, "#1f2937", O); part(g, 1, -6, 3, 6, "#1f2937", O);
+      part(g, -5, -15, 10, 9, "#991b1b", O); R(g, -2, -15, 4, 8, "#fef08a");
+      part(g, -4, -22, 8, 6, "#e0ac69", O); R(g, -4, -26, 8, 4, "#111827"); R(g, -5, -22, 10, 1, "#eab308");
+      part(g, 4, -17 + Math.round(ph), 4, 13, "#f59e0b", O); R(g, 5, -15 + Math.round(ph), 2, 9, "#78350f");
     } else if (e.t === "Z") drawBoss(g, e, f);
     g.restore();
   }
@@ -468,6 +563,7 @@
     if (e.kind === "yetone") return drawYetone(g, e, f);
     if (e.kind === "stambecco") return drawStambecco(g, e, f);
     if (e.kind === "regina") return drawRegina(g, e, f);
+    if (e.kind === "forzuto" || e.kind === "domatore" || e.kind === "illusionista" || e.kind === "direttore") return drawCircoBoss(g, e, f);
     const O = "#16141f", fl = Math.sin(f / (e.st === "fly" ? 5 : 12)) > 0, stun = e.st === "stuck";
     if (e.hitT > 0 && f % 4 < 2) g.globalAlpha = 0.45;
     part(g, -14, -24, 26, 18, "#1c1a26", O); for (let i = 0; i < 5; i++) R(g, -11 + i * 5, -22, 2, 14, "#ececec");
@@ -692,14 +788,50 @@
     conestabile: { n: "Il Conestabile", hp: 9, w: 28, h: 52 },
     yetone: { n: "Il Grande Raccattapalle", hp: 8, w: 36, h: 44 },
     stambecco: { n: "Lo Stambecco Nero", hp: 6, w: 34, h: 30 },
-    regina: { n: "La Regina del Gelo", hp: 8, w: 30, h: 64 }
+    regina: { n: "La Regina del Gelo", hp: 8, w: 30, h: 64 },
+    forzuto: { n: "Ercole di Ghisa", hp: 6, w: 34, h: 42 },
+    domatore: { n: "Monsieur Frusta", hp: 6, w: 30, h: 40 },
+    illusionista: { n: "Il Grande Specchio", hp: 7, w: 30, h: 44 },
+    direttore: { n: "Il Barone Orloff", hp: 8, w: 34, h: 48 }
   };
-  // ------------------------------------------------------------ kit dell'eroe: «pallone» (Ferro, Il Pallone di Latta) · «guanti» (Il Guardiano di Neve: niente pallone, PARATA che respinge e TUFFO-PLANATA)
+  function drawCircoBoss(g, e, f) {
+    g.translate(0, -e.h); const O = "#16141f", vul = e.vul, k = e.kind;
+    if (e.hitT > 0 && f % 4 < 2) g.globalAlpha = 0.45;
+    const suit = k === "forzuto" ? "#f59e0b" : k === "domatore" ? "#b91c1c" : k === "illusionista" ? "#6d28d9" : "#111827";
+    const trim = k === "direttore" ? "#eab308" : "#fef08a";
+    part(g, -11, -10, 8, 10, "#1f2937", O); part(g, 3, -10, 8, 10, "#1f2937", O);
+    part(g, -14, -30, 28, 21, suit, O); R(g, -4, -30, 8, 19, trim);
+    part(g, -9, -41, 18, 11, "#e0ac69", O); R(g, -7, -35, 14, 2, "#292524"); R(g, 3, -38, 2, 2, vul ? "#ffffff" : O);
+    if (k === "direttore" || k === "illusionista") { part(g, -10, -52, 20, 11, "#111827", O); R(g, -13, -42, 26, 2, trim); }
+    else if (k === "domatore") { part(g, -10, -47, 20, 6, "#7f1d1d", O); R(g, 14, -26, 10, 2, "#eab308"); }
+    else { R(g, -19, -34, 4, 14, "#374151"); disc(g, -18, -36, 5, "#111827"); disc(g, -18, -19, 5, "#111827"); }
+    if (vul) for (let i = 0; i < 3; i++) { const a = f / 7 + i * 2.1; R(g, Math.round(Math.cos(a) * 11), -55 + Math.round(Math.sin(a) * 3), 2, 2, "#fde047"); }
+    g.globalAlpha = 1;
+  }
+  // ------------------------------------------------------------ kit dell'eroe: «pallone» · «guanti» · «circo» (Il Circo Zampanò: sfera acrobatica + piroetta aerea + trapezio)
   const KITS = {
     pallone: { hp: "🛡️", btn: "⚽", aria: "Calcia", lost: ["L'elmo è volato via!", "Un pezzo d'armatura in meno!"], check: "Gonfalone alzato: si riparte da qui.", heal: "Un pezzo d'armatura torna al suo posto!", ban: "Stendardo", tut: "scorri" },
-    guanti: { hp: "🧤", btn: "🧤", aria: "Para", lost: ["Hai perso il berretto! Un altro colpo e torni giù.", "Ti è volata via la sciarpa!"], check: "Ometto di pietre: si riparte da qui.", heal: "Una sciarpa di lana: un colpo in più!", ban: "Stella alpina", tut: "scorri_g" }
+    guanti: { hp: "🧤", btn: "🧤", aria: "Para", lost: ["Hai perso il berretto! Un altro colpo e torni giù.", "Ti è volata via la sciarpa!"], check: "Ometto di pietre: si riparte da qui.", heal: "Una sciarpa di lana: un colpo in più!", ban: "Stella alpina", tut: "scorri_g" },
+    circo: { hp: "🎪", btn: "🎪", aria: "Sfera / Piroetta", lost: ["È volato il cilindro! Attento al prossimo colpo.", "Via la mantella di paillettes!"], check: "Tamburo di pista: si riparte da qui!", heal: "Mantella rammendata: un colpo in più!", ban: "Coccarda d'Oro", tut: "scorri_c" }
   };
   const kitOf = (st) => KITS[st.kit] || KITS.pallone;
+  function drawAcrobata(g, x, y, s, st, f, look) {
+    const O = "#16141f", J = "#dc2626", Jl = "#fb7185", Jd = "#881337", Au = "#facc15";
+    const ph = st.walk ? Math.sin(f / 3.6) : 0, lift = Math.round(Math.abs(ph) * 1.6), air = st.air, sq = st.squash || 0, tw = st.twirl > 0;
+    g.save(); g.translate(Math.round(x), Math.round(y)); if (s < 0) g.scale(-1, 1); if (sq) g.scale(1 + sq * 0.15, 1 - sq * 0.15);
+    if (tw) g.rotate((f * 0.55) % (Math.PI * 2));
+    const l1 = air ? -2 : Math.round(ph * 2), l2 = air ? 2 : -Math.round(ph * 2);
+    part(g, -4 + l1, -6 - (ph > 0 ? lift : 0), 3, 5, "#f8fafc", O); part(g, -5 + l1, -2 - (ph > 0 ? lift : 0), 5, 2, Au, O);
+    part(g, 1 + l2, -6 - (ph < 0 ? lift : 0), 3, 5, "#e2e8f0", O); part(g, 1 + l2, -2 - (ph < 0 ? lift : 0), 5, 2, Au, O);
+    if (st.hp >= 3) { const w = Math.round(Math.sin(f / 5) * 2); part(g, -9 + w, -15, 5, 9, "#7e22ce", O); R(g, -8 + w, -8, 4, 1, Au); }
+    part(g, -5, -15, 10, 9, J, O); R(g, -5, -15, 10, 2, Jl); R(g, -1, -15, 3, 9, Au); R(g, 3, -14, 2, 8, Jd);
+    if (st.ball) { disc(g, 5, -11, 3, "#dc2626"); R(g, 4, -13, 3, 2, Au); }
+    const sk = (look && look.skin) || "#e0ac7e", hr = (look && look.hair) || "#2b1d14";
+    part(g, -3, -21, 7, 6, sk, O); R(g, 2, -18, 1, 1, O); R(g, 1, -16, 2, 1, "#be123c");
+    if (st.hp >= 2) { part(g, -4, -26, 9, 5, "#1e1b4b", O); R(g, -5, -22, 11, 2, Au); R(g, 2, -28, 2, 2, "#ef4444"); } else { R(g, -3, -21, 7, 2, hr); R(g, -3, -21, 1, 4, hr); }
+    if (tw) { g.strokeStyle = "#fde047"; g.lineWidth = 1; g.beginPath(); g.arc(0, -12, 13, 0, Math.PI * 1.5); g.stroke(); }
+    g.restore();
+  }
   // eroe col kit «guanti»: il Campione coi guanti da portiere di Olmo, berretto col pompon e sciarpa (i «pezzi»)
   function drawKeeper(g, x, y, s, st, f, look) {
     const O = "#16141f", J = "#2f6b3a", Jl = "#4a8a52", Jd = "#1e4a28", Gl = "#f59e0b", Gd = "#b45309";
@@ -724,7 +856,7 @@
   let S = null, ui = null, raf = 0, tutC = null, keys = {}, LAY = null;
   function diffK() { const c = window.__sagaCore && window.__sagaCore.cur; return (c && c.opts && c.opts.opp) || 1; }
   function parse(level) {
-    const rows = level.map.slice(), H = rows.length, W = Math.max(...rows.map((r) => r.length)), grid = [], st = { foes: [], coins: [], items: [], signs: [], checks: [], movers: [], vents: [], falls: [], bells: [], torches: [], exit: null, start: [32, 32], ban: 0 };
+    const rows = level.map.slice(), H = rows.length, W = Math.max(...rows.map((r) => r.length)), grid = [], st = { foes: [], coins: [], items: [], signs: [], checks: [], movers: [], vents: [], falls: [], bells: [], torches: [], tramps: [], rings: [], exit: null, start: [32, 32], ban: 0 };
     let si = 0;
     for (let y = 0; y < H; y++) {
       const row = []; const line = rows[y].padEnd(W, ".");
@@ -735,6 +867,8 @@
         else if (ch === "G") t = "G";
         else if (ch === "k") st.bells.push({ x: px + 8, y: py + 10, rung: 0, sw: 0 });
         else if (ch === "x") st.torches.push({ x: px + 8, y: py + 8 });
+        else if (ch === "T") st.tramps.push({ x: px + 8, y: py + 14, boing: 0 });
+        else if (ch === "O") st.rings.push({ x: px + 8, y: py + 8 });
         else if (ch === "f") st.falls.push({ x: px + 8, y0: py + 2, y: py + 2, vy: 0, st: "idle", t: 0 });
         else if (ch === "o") st.coins.push({ x: px + 8, y: py + 8, got: 0 });
         else if (ch === "h") st.items.push({ k: "h", x: px + 8, y: py + 8, got: 0 });
@@ -752,19 +886,19 @@
     return Object.assign(st, { grid, W, H });
   }
   function mk(o, level, practice) {
-    const P = parse(level), th = THEMES[level.theme] || (level.kit === "guanti" ? THEMES.neve : THEMES.mura), k = diffK(), hpMax = 3 + (k < 1 ? 1 : 0) + clamp(o.bonus | 0, 0, 2);
+    const buffs = Array.isArray(o.buffs) ? o.buffs : [], kit = level.kit || o.kit || "pallone";
+    const P = parse(level), th = THEMES[level.theme] || (kit === "guanti" ? THEMES.neve : kit === "circo" ? THEMES.tendone : THEMES.mura), k = diffK();
+    const hpMax = 3 + (k < 1 ? 1 : 0) + clamp((o.bonus | 0) + (buffs.includes("vita") ? 1 : 0), 0, 2);
     const st = {
       o, level, practice, P, grid: P.grid, W: P.W, H: P.H, th, T: th._built || (th._built = th.build()), A: th._atlas || (th._atlas = atlas(th)),
-      hero: { x: P.start[0], y: P.start[1], vx: 0, vy: 0, dir: 1, ground: false, coyote: 0, buf: 0, hp: hpMax, max: hpMax, inv: 0, frozen: 0, kick: 0, squash: 0, onM: null },
+      hero: { x: P.start[0], y: P.start[1], vx: 0, vy: 0, dir: 1, ground: false, coyote: 0, buf: 0, hp: hpMax, max: hpMax, inv: 0, frozen: 0, kick: 0, squash: 0, twirl: 0, twirlUsed: 0, onM: null },
       ball: { st: "held", x: 0, y: 0, vx: 0, vy: 0, sp: 0, t: 0, squash: 0 },
-      foes: P.foes.map((e) => mkFoe(e, level, k)), coins: P.coins, items: P.items, checks: P.checks, signs: P.signs, movers: P.movers, vents: P.vents, falls: P.falls, bells: P.bells, torches: P.torches, waves: [], bolts: [], flash: 0, windV: 0, exit: P.exit,
-      kit: level.kit || o.kit || "pallone", parries: 0, crumbs: [], aval: level.chase ? { x: null, sp: level.chase.sp || 1.5, hits: 0 } : null,
-      cam: { x: 0, y: Math.max(0, P.H * TS - VH) }, f: 0, phase: "play", coinN: 0, banMask: 0, sponde: 0, time: 0, spawn: P.start.slice(), sign: null, petals: [], stones: [], cards: [], debris: [], fx: (M.fx ? M.fx() : null), msg: "", msgT: 0, win: false, k
+      foes: P.foes.map((e) => mkFoe(e, level, k)), coins: P.coins, items: P.items, checks: P.checks, signs: P.signs, movers: P.movers, vents: P.vents, falls: P.falls, bells: P.bells, torches: P.torches, tramps: P.tramps, rings: P.rings, buffs, waves: [], bolts: [], flash: 0, windV: 0, exit: P.exit,
+      kit, parries: 0, crumbs: [], aval: level.chase ? { x: null, sp: level.chase.sp || 1.5, hits: 0 } : null,
+      cam: { x: 0, y: Math.max(0, P.H * TS - VH) }, f: 0, phase: "play", coinN: buffs.includes("monete") ? 5 : 0, banMask: 0, sponde: 0, time: 0, spawn: P.start.slice(), sign: null, petals: [], stones: [], cards: [], debris: [], fx: (M.fx ? M.fx() : null), msg: "", msgT: 0, win: false, k
     };
     st.cam.x = clamp(st.hero.x - 120, 0, st.W * TS - VW);
     if (st.kit === "guanti") st.ball.st = "none";
-    // GAME OVER: 3 vite per livello. Ko = si riparte dal gonfalone e il capo torna con l'energia piena (niente vittorie «a rate»);
-    // finite le vite il livello ricomincia da capo
     st.lives = 3; st.bossInit = st.foes.map((e) => (e.t === "Z" ? Object.assign({}, e) : null));
     return st;
   }
@@ -864,8 +998,8 @@
   const foeBox = (e) => (e.t === "Z" ? { x: e.x - e.w / 2, y: e.y - e.h, w: e.w, h: e.h } : { x: e.x - e.w / 2, y: e.y, w: e.w, h: e.h });
   function ballHit(st, e, b) {
     const dirB = Math.sign(b.vx || 1);
-    if (e.t === "s" && e.dir === -dirB && !b.sp) { b.vx = -b.vx * 0.7; b.vy = -2; e.hitT = 10; say(st, "Lo scudo para! Prova di sponda o da dietro.", 80); snd("kick"); return; }
-    if (e.t === "Z" && !e.vul && b.st !== "back") { b.vx = -b.vx * 0.6; b.vy = -2.5; say(st, e.kind === "gatto" ? "Troppo svelto! Colpiscilo quando è stordito." : e.kind === "statua" ? "È pietra! Aspetta che si stanchi." : e.kind === "conestabile" ? "Lo scudo nero para: aspetta che sbatta contro il muro!" : "Troppo in alto: aspetta che si pianti a terra!", 70); return; }
+    if ((e.t === "s" || e.t === "d") && e.dir === -dirB && !b.sp) { b.vx = -b.vx * 0.7; b.vy = -2; e.hitT = 10; say(st, e.t === "d" ? "Il cerchio para! Colpiscilo di sponda o alle spalle." : "Lo scudo para! Prova di sponda o da dietro.", 80); snd("kick"); return; }
+    if (e.t === "Z" && !e.vul && b.st !== "back") { b.vx = -b.vx * 0.6; b.vy = -2.5; say(st, st.kit === "circo" ? "In guardia! Aspetta che prenda fiato dopo il suo numero!" : e.kind === "gatto" ? "Troppo svelto! Colpiscilo quando è stordito." : e.kind === "statua" ? "È pietra! Aspetta che si stanchi." : e.kind === "conestabile" ? "Lo scudo nero para: aspetta che sbatta contro il muro!" : "Troppo in alto: aspetta che si pianti a terra!", 70); return; }
     const dmg = b.sp ? 2 : 1; e.hp -= dmg; e.hitT = 24; st.fx && st.fx.burst(e.x, e.y + 4, 10, ["#ffe8a0", "#ffffff", "#ff9a3a"]);
     if (b.sp) { st.sponde++; st.coinN += 2; say(st, "SPONDA! Doppio colpo, +2 gettoni", 60); snd("coin"); }
     if (b.st === "fly") { b.vx = -b.vx * 0.5; b.vy = -2.2; }
@@ -874,7 +1008,10 @@
   function foeDie(st, e) {
     e.dead = 1; snd("hit"); st.coinN += e.t === "Z" ? 10 : 1;
     for (let i = 0; i < 10; i++) st.debris.push({ x: e.x, y: e.y + 4, vx: (rnd(i + e.x) - 0.5) * 4, vy: -2 - rnd(i) * 2, l: 50, c: ["#8a93a8", "#1c1a26", "#e8e8e8", "#ffd25a"][i % 4], s: 2 });
-    if (e.t === "Z") { st.fx && st.fx.banner(e.kind === "gatto" ? "SGRINFIA KO!" : e.kind === "statua" ? "IL CUSTODE CADE!" : e.kind === "conestabile" ? "IL CONESTABILE CADE!" : e.kind === "yetone" ? "IL RACCATTAPALLE SI ARRENDE!" : e.kind === "stambecco" ? "LO STAMBECCO SI INCHINA!" : e.kind === "regina" ? "RIGORE PARATO! LA REGINA SI FERMA" : "FISCHIO FINALE!", "#fde047"); st.winAt = st.f + 80; }
+    if (e.t === "Z") {
+      const msg = { gatto: "SGRINFIA KO!", statua: "IL CUSTODE CADE!", conestabile: "IL CONESTABILE CADE!", yetone: "IL RACCATTAPALLE SI ARRENDE!", stambecco: "LO STAMBECCO SI INCHINA!", regina: "RIGORE PARATO! LA REGINA SI FERMA", forzuto: "APPLAUSI! ERCOLE SALUTA LA PISTA!", domatore: "FRUSTA A TERRA! NUMERO PERFETTO!", illusionista: "GIÙ LA MASCHERA! OVAZIONE!", direttore: "IL TENDONE È LIBERO! GRAN FINALE!" }[e.kind] || "FISCHIO FINALE!";
+      st.fx && st.fx.banner(msg, "#fde047"); st.winAt = st.f + 80;
+    }
   }
   function foeStep(st, e) {
     if (e.dead) return; if (e.hitT > 0) e.hitT--;
@@ -907,15 +1044,21 @@
         if (r.hx) { foeDie(st, e); for (let i = 0; i < 8; i++) st.debris.push({ x: e.x, y: e.y + 4, vx: (rnd(i + e.x) - 0.5) * 4, vy: -2 - rnd(i) * 2, l: 40, c: "#ffffff", s: 3 }); return; }
         if (e.y > st.H * TS + 20) e.dead = 1; e.dir = e.vx > 0 ? 1 : -1;
       }
-    } else if (e.t === "n") {
+    } else if (e.t === "n" || e.t === "l") {
       if (e.thr > 0) e.thr--; const dx = h.x - e.x; e.dir = Math.sign(dx) || -1;
-      if (--e.cd <= 0) { e.cd = Math.round(140 / (0.8 + 0.2 * st.k)); if (Math.abs(dx) < 200 && Math.abs(h.y - e.y) < 90) { e.thr = 20; st.stones.push({ x: e.x + e.dir * 6, y: e.y, vx: clamp((dx - e.dir * 6) / lobT(-3.6, h.y - 12 - e.y), -3, 3), vy: -3.6, l: 160, snow: 1 }); snd("kick"); } }
-    } else if (e.t === "e" || e.t === "s") {
+      if (--e.cd <= 0) { e.cd = Math.round(140 / (0.8 + 0.2 * st.k)); if (Math.abs(dx) < 200 && Math.abs(h.y - e.y) < 95) { e.thr = 20; st.stones.push({ x: e.x + e.dir * 6, y: e.y, vx: clamp((dx - e.dir * 6) / lobT(-3.6, h.y - 12 - e.y), -3, 3), vy: -3.6, l: 160, snow: e.t === "n" ? 1 : 0, club: e.t === "l" ? 1 : 0 }); snd("kick"); } }
+    } else if (e.t === "p") {
+      e.vy = Math.min(5, e.vy + 0.3); const box = { x: e.x, y: e.y + e.h, vx: e.vx, vy: e.vy }, r = move(st, box, e.w, e.h, true); e.x = box.x; e.y = box.y - e.h;
+      if (r.ground) { e.vy = (--e.cd <= 0) ? (e.cd = 52, -3.5) : 0; }
+      const ahead = Math.floor((e.x + Math.sign(e.vx) * (e.w / 2 + 2)) / TS), below = Math.floor((e.y + e.h + 4) / TS), t = tile(st, ahead, below);
+      if (r.hx || (r.ground && t !== "#" && t !== "=" && t !== "B")) e.vx = -e.vx;
+      if (e.y > st.H * TS + 20) e.dead = 1; e.dir = e.vx > 0 ? 1 : -1;
+    } else if (e.t === "e" || e.t === "s" || e.t === "b" || e.t === "d") {
       e.vy = Math.min(5, e.vy + 0.3); const box = { x: e.x, y: e.y + e.h, vx: e.vx, vy: e.vy }, r = move(st, box, e.w, e.h, true); e.x = box.x; e.y = box.y - e.h;
       if (r.ground) e.vy = 0;
       const ahead = Math.floor((e.x + Math.sign(e.vx) * (e.w / 2 + 2)) / TS), below = Math.floor((e.y + e.h + 4) / TS), t = tile(st, ahead, below);
       if (r.hx || (r.ground && t !== "#" && t !== "=" && t !== "B")) { e.vx = -e.vx; }
-      if (e.t === "s" && Math.abs(h.x - e.x) < 70 && Math.abs(h.y - e.y - e.h) < 30) e.vx = Math.sign(h.x - e.x) * Math.abs(e.vx || 0.4);
+      if ((e.t === "s" || e.t === "d") && Math.abs(h.x - e.x) < 70 && Math.abs(h.y - e.y - e.h) < 30) e.vx = Math.sign(h.x - e.x) * Math.abs(e.vx || 0.4);
       e.dir = e.vx > 0 ? 1 : -1;
     } else if (e.t === "c") {
       e.x += e.vx; if (Math.abs(e.x - e.ox) > 56) e.vx = -e.vx; e.dir = e.vx > 0 ? 1 : -1; e.y = e.oy - 18 + Math.sin(st.f / 20 + e.ox) * 10;
@@ -929,15 +1072,51 @@
       e.dir = h.x < e.x ? -1 : 1;
       if (--e.cd <= 0) { e.cd = Math.round(130 / (0.8 + 0.2 * st.k)); if (Math.abs(h.x - e.x) < 220) { const dx = h.x - e.x, tt = 50; st.stones.push({ x: e.x, y: e.y + 2, vx: dx / tt, vy: -4.2, l: 140 }); } }
     }
-    // contatto con l'eroe: dall'alto lo schiacci, altrimenti fa male
     const hb = heroBox(h), fb = foeBox(e);
+    if (st.phase === "play" && h.twirl > 0 && overlap({ x: h.x - 14, y: h.y - 24, w: 28, h: 26 }, fb) && e.hitT <= 0 && e.t !== "d") { e.hp--; e.hitT = 22; h.vy = -4.2; snd("boing"); st.fx && st.fx.burst(e.x, e.y + 4, 8, ["#fde047", "#fb7185"]); if (e.hp <= 0) foeDie(st, e); return; }
     if (st.phase === "play" && h.parry > 0 && Math.sign(e.x - h.x) === h.dir && overlap({ x: h.dir > 0 ? h.x : h.x - 20, y: h.y - 26, w: 20, h: 28 }, fb) && e.hitT <= 0) { e.hp--; e.hitT = 24; e.x += h.dir * 10; if (e.vx) e.vx = h.dir * Math.abs(e.vx); if (e.t === "a") e.sw = 2; snd("boing"); st.fx && st.fx.burst(e.x, e.y + 4, 8, ["#fde68a", "#ffffff"]); if (e.hp <= 0) foeDie(st, e); return; }
     if (st.phase === "play" && overlap(hb, fb)) {
       if (h.vy > 0.5 && h.y - 6 < fb.y + 4 && D.stomp) { h.vy = -4.6; e.hp -= 1; e.hitT = 20; snd("boing"); if (e.hp <= 0) foeDie(st, e); else if (e.t === "e") e.flip = 1; }
       else if (e.hitT <= 0) hurt(st, Math.sign(e.x - h.x) || 1);
     }
   }
+  function circoBossStep(st, e) {
+    const h = st.hero, minX = TS * 2 + e.w / 2, maxX = st.W * TS - TS * 2 - e.w / 2, ground = (st.H - 2) * TS, hard = e.hp <= (e.max || e.hp) / 2;
+    if (!e.max) { e.max = e.hp; e.y = ground; e.x = clamp(e.x, minX, maxX); e.st = "act"; e.stT = 75; e.n = 0; }
+    e.vul = e.st === "tired"; e.stT--;
+    if (e.st === "act") {
+      e.dir = Math.sign(h.x - e.x) || -1;
+      if (e.kind === "forzuto") {
+        e.x = clamp(e.x + e.dir * (hard ? 1.15 : 0.85), minX, maxX);
+        if (e.stT <= 0) { e.st = "slam"; e.vy = -5.2; e.stT = 40; snd("jump"); }
+      } else if (e.kind === "domatore") {
+        if (e.stT === 45 || (hard && e.stT === 20)) { st.stones.push({ x: e.x + e.dir * 12, y: e.y - 22, vx: e.dir * 2.8, vy: -2.2, l: 160, club: 1, boss: 1 }); snd("kick"); }
+        if (e.stT <= 0) { e.st = "slam"; e.vy = -4.8; e.vx = e.dir * 2.6; e.stT = 44; snd("jump"); }
+      } else if (e.kind === "illusionista") {
+        if (e.stT === 55) { const spots = [minX + 24, (minX + maxX) / 2, maxX - 24]; e.x = spots[(++e.n) % 3]; st.fx && st.fx.burst(e.x, e.y - 20, 10, ["#c084fc", "#fde047"]); snd("boing"); }
+        if (e.stT === 30) { [-1.6, 0, 1.6].forEach((vx) => st.cards.push({ x: e.x + vx * 10, y: e.y - 36, vx, vy: 0.85, l: 190, ph: vx })); }
+        if (e.stT <= 0) { e.st = "tired"; e.stT = hard ? 85 : 105; say(st, "L'Illusionista fa l'inchino: colpiscilo ora!", 55); }
+      } else {
+        e.x = clamp(e.x + e.dir * (hard ? 1.35 : 1.0), minX, maxX);
+        if (e.stT === 40) { st.stones.push({ x: e.x + e.dir * 12, y: e.y - 24, vx: e.dir * 3.1, vy: -2.0, l: 160, club: 1, boss: 1 }); snd("kick"); }
+        if (e.stT <= 0) { e.st = "slam"; e.vy = -5.4; e.vx = e.dir * 2.0; e.stT = 45; snd("jump"); }
+      }
+    } else if (e.st === "slam") {
+      e.x = clamp(e.x + (e.vx || 0), minX, maxX); e.vy = Math.min(6, (e.vy || 0) + 0.35); e.y += e.vy;
+      if (e.y >= ground) {
+        e.y = ground; e.vx = 0; e.st = "tired"; e.stT = hard ? 85 : 105; st.fx && st.fx.shake(5); snd("brk");
+        if (e.kind === "forzuto" || e.kind === "direttore") { st.waves.push({ x: e.x - 14, dir: -1, sp: 2.3, l: 150 }); st.waves.push({ x: e.x + 14, dir: 1, sp: 2.3, l: 150 }); }
+        say(st, "Riprende fiato sotto il riflettore: saltagli in testa o lancia la sfera!", 60);
+      }
+    } else if (e.st === "tired" && e.stT <= 0) { e.st = "act"; e.stT = hard ? 68 : 85; }
+    const hb = heroBox(h), fb = foeBox(e);
+    if (st.phase === "play" && overlap(hb, fb)) {
+      if (e.vul && ((h.vy > 0.5 && h.y - 6 < fb.y + 14) || h.twirl > 0)) { h.vy = -5.2; if (e.hitT <= 0) { e.hp--; e.hitT = 28; snd("boing"); st.fx && st.fx.burst(e.x, fb.y + 6, 12, ["#fde047", "#fb7185", "#ffffff"]); if (e.hp <= 0) foeDie(st, e); else { e.st = "act"; e.stT = 55; } } }
+      else if (!e.vul && e.hitT <= 0) hurt(st, Math.sign(e.x - h.x) || 1);
+    }
+  }
   function bossStep(st, e) {
+    if (e.kind === "forzuto" || e.kind === "domatore" || e.kind === "illusionista" || e.kind === "direttore") return circoBossStep(st, e);
     if (e.kind === "gatto") return catStep(st, e);
     if (e.kind === "statua") return statueStep(st, e);
     if (e.kind === "conestabile") return conestStep(st, e);
@@ -970,40 +1149,51 @@
   }
   function heroStep(st) {
     const h = st.hero, K = keys;
-    if (h.inv > 0) h.inv--; if (h.kick > 0) h.kick--; if (h.squash > 0) h.squash -= 0.1; if (h.parry > 0) h.parry--; if (h.pcd > 0) h.pcd--;
-    const G = st.kit === "guanti", ice = G && h.ground && tile(st, Math.floor(h.x / TS), Math.floor((h.y + 2) / TS)) === "~";
+    if (h.inv > 0) h.inv--; if (h.kick > 0) h.kick--; if (h.squash > 0) h.squash -= 0.1; if (h.parry > 0) h.parry--; if (h.pcd > 0) h.pcd--; if (h.twirl > 0) h.twirl--;
+    (st.tramps || []).forEach((tr) => { if (tr.boing > 0) tr.boing--; });
+    const G = st.kit === "guanti", C = st.kit === "circo", ice = G && h.ground && tile(st, Math.floor(h.x / TS), Math.floor((h.y + 2) / TS)) === "~";
     const frozen = h.frozen > 0; if (frozen) h.frozen--;
     const ax = frozen ? 0 : (K.R ? 1 : 0) - (K.L ? 1 : 0);
-    const vmax = h.glide ? 2.4 : 1.9;
+    const vmax = h.glide ? 2.4 : C && h.twirl > 0 ? 2.2 : 1.9;
     if (ax) { h.vx = clamp(h.vx + ax * (ice ? 0.1 : 0.32), -vmax, vmax); h.dir = ax; } else h.vx *= ice ? 0.985 : h.ground ? 0.72 : 0.92;
     if (Math.abs(h.vx) < 0.05) h.vx = 0;
     if (st.level.sled && !frozen) { const sp = st.level.sled.sp || 2.2; h.vx = sp * (K.R ? 1.25 : K.L ? 0.6 : 1); h.dir = 1; }
     if (st.windV) h.vx = clamp(h.vx + st.windV, -2.5, 2.5);
     if (K.J && !K._J) h.buf = 7; K._J = K.J; if (h.buf > 0) h.buf--;
-    if (h.buf > 0 && (h.ground || h.coyote > 0) && !frozen) { h.vy = -6.4; h.ground = false; h.coyote = 0; h.buf = 0; snd("jump"); }
+    const jv = C && st.buffs.includes("piuma") ? -6.75 : -6.4;
+    if (h.buf > 0 && (h.ground || h.coyote > 0) && !frozen) { h.vy = jv; h.ground = false; h.coyote = 0; h.buf = 0; snd("jump"); }
     if (h.spr > 0) h.spr--; else if (!K.J && h.vy < -2) h.vy *= 0.82;
-    if (K.K && !K._K && !frozen) { if (G) { if (!(h.pcd > 0)) { h.parry = 16; h.pcd = 30; snd("kick"); } } else kick(st); } K._K = K.K;
+    if (K.K && !K._K && !frozen) {
+      if (G) { if (!(h.pcd > 0)) { h.parry = 16; h.pcd = 30; snd("kick"); } }
+      else if (C && !h.ground) {
+        const rg = (st.rings || []).find((r) => Math.hypot(r.x - h.x, r.y - (h.y - 10)) < 26);
+        if (rg) { h.vy = -7.0; h.vx = h.dir * 2.5; h.spr = 18; h.twirl = 16; h.twirlUsed = 0; snd("boing"); st.fx && st.fx.text("SLANCIO!", rg.x - st.cam.x, rg.y - st.cam.y - 8, "#fde047"); }
+        else if (!h.twirlUsed) { h.twirl = 18; h.twirlUsed = 1; h.vy = Math.min(h.vy, -2.8); snd("boing"); if (st.ball.st !== "held") { st.ball.st = "back"; st.ball.t = 0; } }
+        else kick(st);
+      } else kick(st);
+    } K._K = K.K;
     h.vy = Math.min(5.2, h.vy + 0.3);
     h.glide = G && !h.ground && K.J && h.vy > 0.9 && !(h.spr > 0); if (h.glide) { h.vy = 0.9; if (!ax) h.vx = clamp(h.vx + h.dir * 0.05, -2.4, 2.4); if (st.f % 8 === 0) st.debris.push({ x: h.x - h.dir * 8, y: h.y - 14, vx: -h.dir * 0.6, vy: -0.2, l: 16, c: "#e8f4ff", s: 1 }); }
-    // piattaforme mobili
     if (h.onM) { h.x += h.onM.dx; }
     if (inVent(st, h.x, h.y - 6)) { h.vy = Math.max(-3.4, h.vy - 0.62); h.spr = 3; if (st.f % 20 === 0) snd("boing"); }
     const r = move(st, h, 10, 20, !K.D);
     let gnd = r.ground; h.onM = null;
     st.movers.forEach((m) => { if (h.vy >= 0 && h.x + 5 > m.x && h.x - 5 < m.x + m.w && h.y >= m.y && h.y - h.vy <= m.y + 2) { h.y = m.y - 0.01; h.vy = 0; gnd = true; h.onM = m; } });
-    // il pallone a terra fa da molla
+    (st.tramps || []).forEach((tr) => { if (h.vy >= 0 && Math.abs(h.x - tr.x) < 11 && h.y >= tr.y - 6 && h.y - h.vy <= tr.y + 4) { h.y = tr.y - 6; h.vy = -8.2; h.spr = 32; tr.boing = 12; gnd = false; h.twirlUsed = 0; snd("boing"); st.fx && st.fx.text("OP-LÀ!", tr.x - st.cam.x, tr.y - st.cam.y - 12, "#fde047"); } });
     const b = st.ball;
-    if (b.st === "rest" && h.vy > 0 && Math.abs(h.x - b.x) < 9 && h.y >= b.y - 5 && h.y - h.vy <= b.y - 3) { h.y = b.y - 5; h.vy = -7.6; h.spr = 30; gnd = false; b.squash = 10; h.squash = 0; snd("boing"); st.fx && st.fx.text("BOING!", b.x, b.y - 10, "#ffe8a0"); }
-    if (gnd) { if (!h.ground && h.vy >= 0) h.squash = 0.6; h.vy = 0; h.coyote = 6; } else if (h.coyote > 0) h.coyote--;
+    if (b.st === "rest" && h.vy > 0 && Math.abs(h.x - b.x) < 9 && h.y >= b.y - 5 && h.y - h.vy <= b.y - 3) { h.y = b.y - 5; h.vy = -7.6; h.spr = 30; gnd = false; b.squash = 10; h.squash = 0; h.twirlUsed = 0; snd("boing"); st.fx && st.fx.text("BOING!", b.x, b.y - 10, "#ffe8a0"); }
+    if (gnd) { if (!h.ground && h.vy >= 0) h.squash = 0.6; h.vy = 0; h.coyote = 6; h.twirlUsed = 0; } else if (h.coyote > 0) h.coyote--;
     if (r.hy && !gnd && h.vy < 0) h.vy = 0;
     h.ground = gnd;
     if (gnd) [h.x - 4, h.x + 4].forEach((x) => { const tx = Math.floor(x / TS), ty = Math.floor((h.y + 2) / TS); if (tile(st, tx, ty) === "%" && !st.crumbs.some((c) => c.x === tx && c.y === ty)) st.crumbs.push({ x: tx, y: ty, t: 26, gone: 0, r: 0 }); });
-    // punte e buchi
     const tb = tile(st, Math.floor(h.x / TS), Math.floor((h.y - 2) / TS)); if (tb === "^") hurt(st, -h.dir);
     if (h.y > st.H * TS + 24 && st.phase === "play") { h.hp--; snd("hit"); if (h.hp <= 0) { h.hp = 0; ko(st); } else { say(st, st.th.fall || "Giù dalle mura! Si riparte dal gonfalone.", 80); respawn(st, false); } }
-    // gettoni, oggetti, gonfaloni, cartelli, uscita
-    const hb = heroBox(h);
-    st.coins.forEach((c) => { if (!c.got && Math.abs(c.x - h.x) < 10 && Math.abs(c.y - (h.y - 10)) < 14) { c.got = 1; st.coinN++; snd("coin"); st.fx && st.fx.burst(c.x - st.cam.x, c.y - st.cam.y, 4, ["#ffe066"]); } });
+    const hb = heroBox(h), mag = st.buffs && st.buffs.includes("calamita");
+    st.coins.forEach((c) => {
+      if (c.got) return;
+      if (mag) { const dx = h.x - c.x, dy = (h.y - 10) - c.y, d = Math.hypot(dx, dy); if (d > 2 && d < 42) { c.x += dx / d * 2.2; c.y += dy / d * 2.2; } }
+      if (Math.abs(c.x - h.x) < 10 && Math.abs(c.y - (h.y - 10)) < 14) { c.got = 1; st.coinN++; snd("coin"); st.fx && st.fx.burst(c.x - st.cam.x, c.y - st.cam.y, 4, ["#ffe066"]); }
+    });
     st.items.forEach((it) => { if (!it.got && Math.abs(it.x - h.x) < 11 && Math.abs(it.y - (h.y - 10)) < 15) { it.got = 1; if (it.k === "h") { h.hp = Math.min(h.max, h.hp + 1); snd("flag"); say(st, kitOf(st).heal, 70); } else { st.banMask |= 1 << it.i; snd("ban"); say(st, `${kitOf(st).ban} ${countBits(st.banMask)}/${st.P.ban}!`, 80); } } });
     st.checks.forEach((c) => { if (!c.on && Math.abs(c.x - h.x) < 12 && Math.abs(c.y - h.y) < 30) { c.on = 1; st.spawn = [c.x, c.y - 1]; snd("flag"); say(st, kitOf(st).check, 80); } });
     st.sign = st.signs.find((s) => Math.abs(s.x - h.x) < 18 && Math.abs(s.y - h.y) < 24) || null;
@@ -1031,6 +1221,7 @@
     st.stones = st.stones.filter((s) => {
       s.x += s.vx; s.vy += s.flat ? (s.mine ? 0 : s.vy > 0 ? 0.02 : 0) : s.ice ? 0.22 : s.mine ? 0.08 : 0.16; s.y += s.vy; const h = st.hero, r = s.big ? 10 : 7;
       if (s.mine) { const e = st.foes.find((e) => !e.dead && e.hitT <= 0 && overlap({ x: s.x - r / 2, y: s.y - r / 2, w: r, h: r }, foeBox(e))); if (e) { e.hp -= s.big ? 2 : 1; e.hitT = 24; snd("hit"); st.fx && st.fx.burst(s.x, s.y, 10, ["#ffffff", "#bfe0ff"]); if (e.t === "Z") say(st, s.big ? "RESPINTA! Doppio colpo!" : "Respinta! Colpito!", 50); if (e.hp <= 0) foeDie(st, e); return false; } }
+      else if (st.phase === "play" && h.twirl > 0 && Math.abs(s.x - h.x) < 20 && s.y > h.y - 26 && s.y < h.y + 4) { s.mine = 1; s.vx = h.dir * 4.0; s.vy = -2.0; s.l = 130; st.parries++; snd("boing"); st.fx && st.fx.text("PIROETTA!", s.x - st.cam.x, s.y - st.cam.y - 8, "#fde047"); return true; }
       else if (st.phase === "play" && h.parry > 0 && Math.sign(s.x - h.x) !== -h.dir && Math.abs(s.x - h.x) < 22 && s.y > h.y - 30 && s.y < h.y + 4) { const perfect = h.parry >= 10; s.mine = 1; s.vx = h.dir * (s.big ? 3.4 : 4.2); s.vy = s.flat ? 0 : s.boss ? -1.6 : -2.2; s.l = 140; st.parries++; snd("boing"); st.fx && st.fx.text(perfect ? "PARATA!" : "Respinta", s.x - st.cam.x, s.y - st.cam.y - 8, perfect ? "#fde68a" : "#ffffff"); if (perfect) { st.coinN++; snd("coin"); } return true; }
       else if (st.phase === "play" && Math.abs(s.x - h.x) < r && s.y > h.y - 20 && s.y < h.y) { hurt(st, Math.sign(s.vx) || 1); if (s.snow) for (let i = 0; i < 6; i++) st.debris.push({ x: s.x, y: s.y, vx: (rnd(i + st.f) - 0.5) * 3, vy: -1 - rnd(i) * 2, l: 30, c: "#ffffff", s: 2 }); return false; }
       const alive = --s.l > 0 && !solidT(tile(st, Math.floor(s.x / TS), Math.floor(s.y / TS))); if (!alive && s.snow) for (let i = 0; i < 4; i++) st.debris.push({ x: s.x, y: s.y - 2, vx: (rnd(i + s.x) - 0.5) * 2.5, vy: -1 - rnd(i) * 1.5, l: 24, c: "#ffffff", s: 2 }); return alive;
@@ -1049,16 +1240,15 @@
     st.bolts = st.bolts.filter((b) => { b.t--; if (b.t === 0) { st.flash = 22; snd("brk"); st.fx && st.fx.shake(5); const h = st.hero; if (st.phase === "play" && Math.abs(h.x - b.x) < 12) hurt(st, h.x > b.x ? -1 : 1); } return b.t > -12; });
     if (st.th.storm && st.f % 330 === 200) st.flash = Math.max(st.flash, 16);
     if (st.flash > 0) st.flash--;
-    st.cards = st.cards.filter((c) => { c.y += c.vy; c.x += Math.sin(st.f / 12 + c.ph) * 0.8; if (st.phase === "play" && Math.abs(c.x - st.hero.x) < 7 && c.y > st.hero.y - 20 && c.y < st.hero.y) { hurt(st, 1); return false; } return --c.l > 0 && c.y < st.H * TS; });
+    st.cards = st.cards.filter((c) => { c.y += c.vy; c.x += (c.vx || 0) * 0.3 + Math.sin(st.f / 12 + c.ph) * 0.8; if (st.phase === "play" && Math.abs(c.x - st.hero.x) < 7 && c.y > st.hero.y - 20 && c.y < st.hero.y) { hurt(st, 1); return false; } return --c.l > 0 && c.y < st.H * TS; });
     st.debris = st.debris.filter((d) => { d.x += d.vx; d.vy += 0.2; d.y += d.vy; return --d.l > 0; });
     if (st.msgT > 0) st.msgT--;
-    // telecamera: segue l'eroe con un po' di anticipo nella direzione dello sguardo
     const h = st.hero, tx = clamp(h.x - VW / 2 + h.dir * 30, 0, st.W * TS - VW), ty = clamp(h.y - VH * 0.62, 0, Math.max(0, st.H * TS - VH));
     st.cam.x += (tx - st.cam.x) * 0.1; st.cam.y += (ty - st.cam.y) * 0.12;
-    // petali che volano (tema)
     if (st.th.fx === "pioggia") for (let i = 0; i < 3; i++) st.petals.push({ x: rnd(st.f * 3 + i) * (VW + 60) - 30, y: -4, vx: -0.6 + st.windV * 30, vy: 5 + rnd(st.f + i) * 2, ph: 0, l: 50, c: "rain" });
     if (st.th.fx === "polvere" && st.f % 12 === 0) st.petals.push({ x: rnd(st.f) * VW, y: rnd(st.f + 3) * VH, vx: -0.12 - rnd(st.f + 1) * 0.15, vy: -0.05, ph: rnd(st.f + 2) * 6, l: 300, c: "#8a88a8" });
     if (st.th.fx === "neve" && st.f % 4 === 0) st.petals.push({ x: rnd(st.f) * (VW + 40) - 20, y: -3, vx: -0.25 - rnd(st.f + 5) * 0.3 + st.windV * 20, vy: 0.5 + rnd(st.f + 1) * 0.5, ph: rnd(st.f + 2) * 6, l: 400, c: "snow", r: rnd(st.f + 9) > 0.7 ? 2 : 1 });
+    if (st.th.fx === "coriandoli" && st.f % 6 === 0) st.petals.push({ x: rnd(st.f) * VW, y: -3, vx: -0.2 + (rnd(st.f + 4) - 0.5) * 0.5, vy: 0.6 + rnd(st.f + 2) * 0.5, ph: rnd(st.f + 7) * 6, l: 360, c: ["#fde047", "#fb7185", "#38bdf8", "#4ade80"][st.f % 4] });
     if (st.th.fx === "petali" && st.f % 9 === 0) st.petals.push({ x: VW + 4, y: rnd(st.f) * VH * 0.8, vx: -0.6 - rnd(st.f + 1) * 0.8, vy: 0.2, ph: rnd(st.f + 2) * 6, l: 600 });
     st.petals = st.petals.filter((p) => { p.x += p.vx; p.y += p.vy + Math.sin(st.f / 15 + p.ph) * 0.3; return --p.l > 0 && p.x > -6; });
     st.fx && st.fx.tick();
@@ -1105,9 +1295,16 @@
     st.signs.forEach((s) => { if (!vis(s.x)) return; const X = s.x + ox, Y = s.y + oy; R(g, X - 1, Y - 12, 2, 12, "#4a2e18"); part(g, X - 7, Y - 18, 14, 8, "#b07a44", "#2a1a10"); R(g, X - 5, Y - 16, 10, 1, "#6a4426"); R(g, X - 5, Y - 14, 7, 1, "#6a4426"); if (st.sign === s && f % 30 < 20) R(g, X - 1, Y - 24, 2, 3, "#ffe066"); });
     // gonfaloni (si alzano quando li tocchi)
     st.checks.forEach((c) => { if (!vis(c.x)) return; const X = c.x + ox, Y = c.y + oy;
+      if (st.kit === "circo") { part(g, X - 7, Y - 10, 14, 10, "#dc2626", "#16141f"); R(g, X - 7, Y - 10, 14, 2, "#fde047"); R(g, X - 4, Y - 8, 2, 6, "#fef3c7"); R(g, X + 2, Y - 8, 2, 6, "#fef3c7"); if (c.on) { R(g, X, Y - 28, 1, 18, "#fde047"); for (let i = 0; i < 6; i++) R(g, X + 1, Y - 28 + i, 8 - i, 1, i % 2 ? "#ef4444" : "#fde047"); } return; }
       if (st.kit === "guanti") { [[0, 0, 7], [1, -6, 6], [0, -11, 5], [1, -15, 3]].forEach(([dx, dy, r], i) => { ell(g, X + dx, Y + dy - 3, r, 3, "#16141f"); ell(g, X + dx, Y + dy - 3, r - 1, 2, i % 2 ? "#8a94a8" : "#a8b2c4"); }); if (c.on) { R(g, X + 3, Y - 30, 1, 14, "#5a3a20"); for (let i = 0; i < 6; i++) R(g, X + 4, Y - 30 + i, 7 - i + Math.round(Math.sin(f / 5 + i / 2)), 1, i < 3 ? "#d23a3a" : "#f0f0f0"); disc(g, X + 1, Y - 20, 3, `rgba(255,200,90,${0.5 + 0.3 * Math.sin(f / 6)})`); } return; } R(g, X - 1, Y - 30, 2, 30, "#5a3a20"); R(g, X - 2, Y - 31, 4, 2, "#e0b040"); const top = c.on ? Y - 29 : Y - 10; for (let i = 0; i < 9; i++) R(g, X + 1, top + i, 9 - Math.floor(i / 3) + Math.round(Math.sin(f / 5 + i / 2)), 1, c.on ? (i < 3 ? "#f4c040" : "#2a6ad0") : "#6a6a7a"); });
-    // portone d'uscita ad arco
-    if (st.exit && vis(st.exit.x) && st.kit === "guanti") {
+    if (st.exit && vis(st.exit.x) && st.kit === "circo") {
+      const X = st.exit.x + ox, Y = st.exit.y + oy, open = !st.foes.some((e) => e.t === "Z" && !e.dead);
+      part(g, X, Y - 40, 32, 40, "#991b1b", "#16141f"); R(g, X - 2, Y - 43, 36, 5, "#eab308");
+      R(g, X + 8, Y - 34, 16, 34, open ? "#1e1b4b" : "#450a0a");
+      if (open) R(g, X + 10, Y - 32, 12, 32, `rgba(253,224,71,${0.3 + 0.15 * Math.sin(f / 8)})`);
+      for (let i = 0; i < 5; i++) disc(g, X + 3 + i * 6.5, Y - 41, 1.5, (f + i * 5) % 16 < 8 ? "#fef08a" : "#f59e0b");
+    }
+    else if (st.exit && vis(st.exit.x) && st.kit === "guanti") {
       const X = st.exit.x + ox, Y = st.exit.y + oy, open = !st.foes.some((e) => e.t === "Z" && !e.dead);
       part(g, X - 4, Y - 34, 40, 34, "#6a4a2a", "#16141f"); for (let y = Y - 32; y < Y; y += 6) R(g, X - 4, y, 40, 1, "#4a321a");
       for (let k = 0; k < 24; k++) R(g, X - 8 + k, Y - 34 - k * 0.6, 48 - k * 2, 2, k < 3 ? "#ffffff" : "#5a3a24"); R(g, X - 8, Y - 36, 48, 3, "#ffffff");
@@ -1123,27 +1320,27 @@
       else { R(g, X + 8, Y - 30, 16, 30, `rgba(255,200,120,${0.25 + 0.15 * Math.sin(f / 10)})`); }
       R(g, X + 8, Y - 50, 16, 7, "#d23a3a"); R(g, X + 9, Y - 49, 14, 5, "#f0c040");
     }
-    // gettoni e oggetti
     st.coins.forEach((c, i) => { if (!c.got && vis(c.x)) drawCoin(g, c.x + ox, c.y + oy, f, i); });
     st.items.forEach((it, i) => {
       if (it.got || !vis(it.x)) return; const X = it.x + ox, Y = it.y + oy + Math.round(Math.sin(f / 10 + i) * 2);
-      if (st.kit === "guanti" && it.k === "h") { part(g, X - 5, Y - 2, 10, 4, "#d23a3a", "#16141f"); R(g, X - 3, Y - 2, 2, 4, "#f0f0f0"); R(g, X + 1, Y - 2, 2, 4, "#f0f0f0"); R(g, X + 3, Y + 2, 2, 4, "#d23a3a"); }
+      if (st.kit === "circo" && it.k === "h") { part(g, X - 5, Y - 4, 10, 7, "#7e22ce", "#16141f"); R(g, X - 5, Y - 4, 10, 2, "#fde047"); }
+      else if (st.kit === "circo") { disc(g, X, Y - 2, 6, "#b91c1c"); disc(g, X, Y - 2, 4, "#fde047"); R(g, X - 3, Y + 3, 2, 5, "#dc2626"); R(g, X + 1, Y + 3, 2, 5, "#dc2626"); }
+      else if (st.kit === "guanti" && it.k === "h") { part(g, X - 5, Y - 2, 10, 4, "#d23a3a", "#16141f"); R(g, X - 3, Y - 2, 2, 4, "#f0f0f0"); R(g, X + 1, Y - 2, 2, 4, "#f0f0f0"); R(g, X + 3, Y + 2, 2, 4, "#d23a3a"); }
       else if (st.kit === "guanti") { R(g, X, Y, 1, 8, "#3a6a3a"); for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2 + f / 40; R(g, X + Math.round(Math.cos(a) * 4) - 1, Y - 4 + Math.round(Math.sin(a) * 4) - 1, 3, 3, "#f8f8f0"); } R(g, X - 1, Y - 5, 3, 3, "#f0c040"); R(g, X - 10, Y - 12, 20, 20, `rgba(255,255,220,${0.08 + 0.06 * Math.sin(f / 8)})`); }
       else if (it.k === "h") { part(g, X - 4, Y - 4, 8, 8, "#a6afc2", "#16141f"); R(g, X - 4, Y - 4, 8, 2, "#e2e8f2"); R(g, X - 1, Y - 1, 2, 2, "#d23a3a"); }
       else { R(g, X - 5, Y - 8, 1, 16, "#5a3a20"); for (let k = 0; k < 9; k++) R(g, X - 4, Y - 8 + k, 9 - (k > 6 ? (k - 6) * 3 : 0) + Math.round(Math.sin(f / 5 + k / 2)), 1, k < 2 ? "#f0c040" : "#c02a3a"); R(g, X - 1, Y - 4, 3, 3, "#f0c040"); R(g, X - 10, Y - 10, 20, 20, `rgba(255,220,120,${0.08 + 0.06 * Math.sin(f / 8)})`); }
     });
-    // fumo dei comignoli (corrente che spinge in alto) e tegole che si staccano
+    (st.tramps || []).forEach((tr) => { if (!vis(tr.x)) return; const X = tr.x + ox, Y = tr.y + oy, dy = tr.boing > 0 ? Math.round(Math.sin(tr.boing) * 2) : 0; R(g, X - 5, Y - 3, 2, 5, "#475569"); R(g, X + 3, Y - 3, 2, 5, "#475569"); part(g, X - 8, Y - 6 + dy, 16, 4, "#dc2626", "#16141f"); R(g, X - 7, Y - 6 + dy, 14, 1, "#fde047"); });
+    (st.rings || []).forEach((rg, i) => { if (!vis(rg.x)) return; const X = rg.x + ox + Math.round(Math.sin(f / 18 + i) * 2), Y = rg.y + oy; R(g, X, Y - 30, 1, 25, "#d6d3d1"); g.strokeStyle = "#fde047"; g.lineWidth = 2; g.beginPath(); g.arc(X, Y, 5, 0, Math.PI * 2); g.stroke(); });
     st.vents.forEach((v, j) => { if (!vis(v.x)) return; for (let i = 0; i < 9; i++) { const p = ((f * 1.2 + i * 12.4 + j * 7) % 112), X = v.x + ox + Math.round(Math.sin(f / 14 + i * 1.7) * (2 + p / 22)), Y = v.y + oy - p, r = 2 + Math.round(p / 26); disc(g, X, Y, r, `rgba(${st.th.night ? "190,190,220" : "230,230,230"},${0.42 - p / 300})`); } });
     st.falls.forEach((t) => { if (t.st === "gone" || !vis(t.x)) return; const X = Math.round(t.x + ox + (t.st === "shake" ? (f % 4 < 2 ? -1 : 1) : 0)), Y = Math.round(t.y + oy); if (st.th.snow) { for (let k = 0; k < 12; k++) R(g, X - Math.max(0, 4 - k / 3), Y - 2 + k, Math.max(1, 8 - k * 0.66), 1, k < 3 ? "#ffffff" : "#bfe6ff"); R(g, X - 1, Y, 1, 8, "#ffffff"); return; } part(g, X - 6, Y, 12, 6, "#a0483a", "#16141f"); R(g, X - 6, Y, 12, 2, "#d07a52"); R(g, X - 2, Y + 2, 1, 3, "#5a2420"); });
-    // torce a muro e campane appese (col pallone le fai suonare)
     st.torches.forEach((t, i) => { if (!vis(t.x)) return; const X = t.x + ox, Y = t.y + oy; R(g, X - 1, Y, 3, 8, "#3a2a1a"); R(g, X - 3, Y - 1, 7, 2, "#5a4a3a"); const fl = Math.abs(Math.sin(f / 4 + i)); R(g, X - 1, Y - 5 - Math.round(fl * 2), 3, 5 + Math.round(fl * 2), "#f59e0b"); R(g, X, Y - 3, 1, 3, "#fff3c0"); });
     st.bells.forEach((k) => { if (!vis(k.x)) return; const X = k.x + ox, Y = k.y + oy, a = k.sw > 0 ? Math.sin(k.sw / 4) * (k.sw / 60) * 0.6 : Math.sin(f / 40) * 0.05; for (let y = Y - 26; y < Y - 8; y += 3) R(g, X, y, 1, 2, "#5a5a70"); g.save(); g.translate(X, Y - 8); g.rotate(a); part(g, -5, 0, 10, 9, k.rung ? "#e0b040" : "#b88a3a", "#16141f"); R(g, -7, 8, 14, 3, k.rung ? "#f0c860" : "#8a6a2a"); R(g, -4, 1, 2, 6, "#ffe8a0"); disc(g, 0, 12, 2, "#5a3a1a"); g.restore(); if (!k.rung && f % 50 < 25) R(g, X - 1, Y - 34, 2, 4, "#ffe8a0"); });
-    // piattaforme mobili (asse appesa a catene)
     st.movers.forEach((m) => { const X = Math.round(m.x + ox), Y = Math.round(m.y + oy); for (let i = 0; i < m.w; i += 16) g.drawImage(st.A.plank, X + i, Y, Math.min(16, m.w - i), 16); R(g, X + 4, Y - 40, 1, 40, "#3a3440"); R(g, X + m.w - 5, Y - 40, 1, 40, "#3a3440"); });
   }
   function drawBall(g, st) {
-    const b = st.ball; if (b.st === "held") return; const X = Math.round(b.x - st.cam.x), Y = Math.round(b.y - st.cam.y), sq = b.squash > 0 ? 2 : 0;
-    ell(g, X, Y + 1 + Math.round(sq / 2), 5 + sq, 5 - sq, "#16141f"); ell(g, X, Y + Math.round(sq / 2), 4 + sq, 4 - sq, "#c88a2a"); R(g, X - 2, Y - 3 + sq, 2, 1, "#ffe8a0"); R(g, X - 3, Y - 2 + sq, 1, 2, "#ffd060"); R(g, X + 1, Y + 1, 2, 1, "#8a5a1a");
+    const b = st.ball; if (b.st === "held" || b.st === "none") return; const X = Math.round(b.x - st.cam.x), Y = Math.round(b.y - st.cam.y), sq = b.squash > 0 ? 2 : 0;
+    ell(g, X, Y + 1 + Math.round(sq / 2), 5 + sq, 5 - sq, "#16141f"); ell(g, X, Y + Math.round(sq / 2), 4 + sq, 4 - sq, st.kit === "circo" ? "#dc2626" : "#c88a2a"); R(g, X - 2, Y - 3 + sq, 4, 2, st.kit === "circo" ? "#fde047" : "#ffe8a0"); R(g, X - 3, Y - 2 + sq, 1, 2, "#ffd060");
     if (b.st === "back") for (let i = 1; i < 4; i++) R(g, X - b.vx * i * 2, Y - b.vy * i * 2, 2, 2, `rgba(255,220,140,${0.5 - i * 0.12})`);
     if (b.st === "rest" && st.f % 40 < 20) R(g, X - 1, Y - 9, 2, 2, "#ffe8a0");
   }
@@ -1169,11 +1366,11 @@
     const ox = -Math.round(st.cam.x), oy = -Math.round(st.cam.y);
     st.foes.forEach((e) => { if (!e.dead) { g.save(); g.translate(ox, oy); drawFoe(g, e, st.f); g.restore(); } });
     st.foes.forEach((e) => { if (e.dead || e.kind !== "regina" || e.st !== "aim") return; const y = (st.H - 2) * TS - SHOT_H[e.aim] + oy, x = e.x - 30 + ox, bl = st.f % 8 < 5; if (bl) { R(g, x - 3, y - 1, 8, 3, "#fde047"); R(g, x - 6, y - 3, 3, 7, "#fde047"); R(g, x - 9, y - 2, 3, 5, "#fde047"); } });
-    st.stones.forEach((s) => { if (s.rig) { const X = s.x + ox, Y = s.y + oy; for (let k = 1; k < 5; k++) R(g, X - s.vx * k * 2, Y - 1, 2, 2, `rgba(${s.mine ? "245,158,11" : "220,236,255"},${0.6 - k * 0.12})`); disc(g, X, Y, 5, "#16141f"); disc(g, X, Y, 4, "#ffffff"); R(g, X - 2, Y - 1, 2, 2, s.mine ? "#f59e0b" : "#2f6b3a"); R(g, X + 1, Y + 1, 2, 2, s.mine ? "#f59e0b" : "#2f6b3a"); return; } if (s.ice) { const X = s.x + ox, Y = s.y + oy; for (let k = 0; k < 10; k++) R(g, X - Math.max(0, 4 - k / 2.5), Y - 10 + k, Math.max(1, 8 - k * 0.8), 1, k < 3 ? "#ffffff" : "#9ad0f0"); return; } if (s.snow) { const r = s.big ? 6 : 3; disc(g, s.x + ox, s.y + oy, r + 1, s.mine ? "#f59e0b" : "#5a7090"); disc(g, s.x + ox, s.y + oy, r, "#ffffff"); R(g, s.x + ox - r / 2, s.y + oy - r / 2, 1, 1, "#d8ecff"); return; } disc(g, s.x + ox, s.y + oy, 3, "#16141f"); disc(g, s.x + ox, s.y + oy, 2, "#9a9488"); });
+    st.stones.forEach((s) => { if (s.club) { g.save(); g.translate(s.x + ox, s.y + oy); g.rotate(st.f * 0.35); part(g, -2, -5, 4, 10, s.mine ? "#4ade80" : "#ef4444", "#16141f"); R(g, -2, -5, 4, 3, "#fde047"); g.restore(); return; } if (s.rig) { const X = s.x + ox, Y = s.y + oy; for (let k = 1; k < 5; k++) R(g, X - s.vx * k * 2, Y - 1, 2, 2, `rgba(${s.mine ? "245,158,11" : "220,236,255"},${0.6 - k * 0.12})`); disc(g, X, Y, 5, "#16141f"); disc(g, X, Y, 4, "#ffffff"); R(g, X - 2, Y - 1, 2, 2, s.mine ? "#f59e0b" : "#2f6b3a"); R(g, X + 1, Y + 1, 2, 2, s.mine ? "#f59e0b" : "#2f6b3a"); return; } if (s.ice) { const X = s.x + ox, Y = s.y + oy; for (let k = 0; k < 10; k++) R(g, X - Math.max(0, 4 - k / 2.5), Y - 10 + k, Math.max(1, 8 - k * 0.8), 1, k < 3 ? "#ffffff" : "#9ad0f0"); return; } if (s.snow) { const r = s.big ? 6 : 3; disc(g, s.x + ox, s.y + oy, r + 1, s.mine ? "#f59e0b" : "#5a7090"); disc(g, s.x + ox, s.y + oy, r, "#ffffff"); R(g, s.x + ox - r / 2, s.y + oy - r / 2, 1, 1, "#d8ecff"); return; } disc(g, s.x + ox, s.y + oy, 3, "#16141f"); disc(g, s.x + ox, s.y + oy, 2, "#9a9488"); });
     st.cards.forEach((c) => { R(g, c.x + ox - 3, c.y + oy - 4, 7, 9, "#16141f"); R(g, c.x + ox - 2, c.y + oy - 3, 5, 7, "#ffd820"); });
     const h = st.hero;
     if (st.level.sled) { const X = h.x + ox, Y = h.y + oy, bob = h.ground ? Math.round(Math.sin(st.f / 3)) : 0; drawFoe(g, { t: "y", x: h.x + 30 - st.cam.x, y: h.y - 18 + bob - st.cam.y, w: 14, h: 18, dir: 1, thr: 0, hitT: 0 }, st.f); R(g, X + 8, Y - 6, 18, 1, "#7a5a32"); R(g, X - 10, Y - 4, 20, 3, "#b91c1c"); R(g, X - 10, Y - 4, 20, 1, "#ef4444"); R(g, X - 11, Y - 1, 24, 1, "#5a3a20"); R(g, X + 12, Y - 3, 2, 2, "#5a3a20"); }
-    if (!(h.inv > 0 && st.f % 6 < 3) || st.phase !== "play") (st.kit === "guanti" ? drawKeeper : drawFerro)(g, h.x + ox, h.y + oy, h.dir, { parry: h.parry, glide: h.glide, walk: h.ground && Math.abs(h.vx) > 0.3, air: !h.ground, hp: st.phase === "ko" ? 0 : h.hp, ball: st.ball.st === "held", hurt: h.inv > 60, frozen: h.frozen > 0, kick: h.kick, squash: Math.max(0, h.squash) }, st.f, st.o.heroLook);
+    if (!(h.inv > 0 && st.f % 6 < 3) || st.phase !== "play") (st.kit === "guanti" ? drawKeeper : st.kit === "circo" ? drawAcrobata : drawFerro)(g, h.x + ox, h.y + oy, h.dir, { parry: h.parry, glide: h.glide, twirl: h.twirl, walk: h.ground && Math.abs(h.vx) > 0.3, air: !h.ground, hp: st.phase === "ko" ? 0 : h.hp, ball: st.ball.st === "held", hurt: h.inv > 60, frozen: h.frozen > 0, kick: h.kick, squash: Math.max(0, h.squash) }, st.f, st.o.heroLook);
     if (h.frozen > 0) { R(g, h.x + ox - 3, h.y + oy - 36, 7, 9, "#16141f"); R(g, h.x + ox - 2, h.y + oy - 35, 5, 7, "#ffd820"); }
     drawBall(g, st);
     if (st.aval && st.aval.x !== null) { const X = Math.round(st.aval.x + ox), f = st.f; if (X > -60) { R(g, -10, 0, X + 10, VH, "#eef4fa"); for (let y = 0; y < VH; y += 6) { const w = 6 + Math.round(Math.abs(Math.sin(y / 11 + f / 6)) * 10 + rnd(y + Math.floor(f / 3)) * 6); R(g, X, y, w, 6, y % 12 ? "#ffffff" : "#dce8f4"); disc(g, X + w, y + 3, 3, "#ffffff"); } for (let k = 0; k < 10; k++) { const yy = (k * 23 + f * 2) % VH; disc(g, X + 14 + rnd(k + f) * 10, yy, 2 + (k % 3), "#c8d8ea"); } R(g, 0, 0, Math.max(0, X), VH, "rgba(180,200,230,.25)"); } else R(g, 0, 0, 6, VH, `rgba(255,255,255,${0.4 + 0.3 * Math.sin(f / 5)})`); }
@@ -1204,7 +1401,7 @@
   }
   function hud() {
     if (!ui || !S) return; const h = S.hero, n = S.P.ban;
-    const ki = kitOf(S); ui.hud.innerHTML = `<span>${ki.hp.repeat(Math.max(0, h.hp))}<span style="opacity:.3">${ki.hp.repeat(Math.max(0, h.max - h.hp))}</span></span><span>🪙 <b>${S.coinN}</b></span>${n ? `<span>${S.kit === "guanti" ? "❄️" : "🚩"} <b>${countBits(S.banMask)}/${n}</b></span>` : ""}<span>⏱ ${Math.floor(S.time / 3600)}:${String(Math.floor(S.time / 60) % 60).padStart(2, "0")}</span>${S.practice ? "<span>· prova libera</span>" : ""}`;
+    const ki = kitOf(S); ui.hud.innerHTML = `<span>${ki.hp.repeat(Math.max(0, h.hp))}<span style="opacity:.3">${ki.hp.repeat(Math.max(0, h.max - h.hp))}</span></span><span>🪙 <b>${S.coinN}</b></span>${n ? `<span>${S.kit === "guanti" ? "❄️" : S.kit === "circo" ? "🏵️" : "🚩"} <b>${countBits(S.banMask)}/${n}</b></span>` : ""}<span>⏱ ${Math.floor(S.time / 3600)}:${String(Math.floor(S.time / 60) % 60).padStart(2, "0")}</span>${S.practice ? "<span>· prova libera</span>" : ""}`;
   }
   function log() {
     if (!ui || !S) return; const t = S.sign ? `<span class="scSign">📜 ${esc(S.sign.t)}</span>` : S.msgT > 0 ? esc(S.msg) : "";
@@ -1214,7 +1411,7 @@
     if (!ui || !S) return;
     if (S.phase === "play") { ui.bt.innerHTML = ""; ui.ctl.style.display = ""; return; }
     ui.ctl.style.display = "none"; keys = {};
-    if (S.phase === "ko") ui.bt.innerHTML = `<div class="scEnd"><button class="go" id="scGo">${S.lives ? `↻ Riprova dal gonfalone<small style="display:block;font-size:11px;opacity:.8">vite rimaste ${S.lives} · il capo torna con l'energia piena</small>` : "↻ Ricomincia il livello"}</button><button class="go" id="scQuit" style="background:#3f3f46;border-color:#a1a1aa">◂ Esci</button></div>`;
+    if (S.phase === "ko") ui.bt.innerHTML = `<div class="scEnd"><button class="go" id="scGo">${S.lives ? `↻ Riprova dal ${S.kit === "circo" ? "tamburo" : "gonfalone"}<small style="display:block;font-size:11px;opacity:.8">vite rimaste ${S.lives} · il capo torna con l'energia piena</small>` : "↻ Ricomincia il livello"}</button><button class="go" id="scQuit" style="background:#3f3f46;border-color:#a1a1aa">◂ Esci</button></div>`;
     else ui.bt.innerHTML = `<div class="scEnd"><button class="go" id="scGo">${S.practice ? "▶ Al livello vero" : "Continua ▸"}</button></div>`;
     const go = ui.bt.querySelector("#scGo"), q = ui.bt.querySelector("#scQuit");
     if (go) go.onclick = () => { if (!S) return; if (S.phase === "ko" && !S.lives) { const o = S.o; S = mk(o, o.level, S.practice); hud(); controls(); return; } if (S.phase === "ko") { bossReset(S); return respawn(S, true); } if (S.practice) { const o = S.o; S = mk(o, o.level, false); hud(); controls(); return; } close(); };
@@ -1238,27 +1435,14 @@
     g.font = "bold 10px system-ui, sans-serif"; g.fillStyle = "#f1f5f9"; g.fillText(over ? "Vite finite: il livello ricomincia da capo." : `Vite rimaste: ${"♥".repeat(st.lives)}`, VW / 2, VH / 2 + 18); g.restore();
   }
   function loop() { if (!S) return; raf = requestAnimationFrame(loop); if (!(tutC && tutC.open)) step(S); const g = ui.g; g.setTransform(SS, 0, 0, SS, 0, 0); scene(g, S); if (S.fx) S.fx.draw(g); if (S.phase === "ko") koCard(g, S); if (S.f % 10 === 0) { hud(); log(); } }
-  // livello d'allenamento per la «Prova libera»
   const PRACTICE = { id: "prova", name: "Cortile d'allenamento", theme: "prova", signs: ["⚽ calcia il pallone. Contro il muro torna indietro: è una sponda.", "Calcia il pallone a terra e saltaci sopra: fa da molla! ⚽ di nuovo per richiamarlo.", "Il mattone crepato si rompe solo col pallone."], map: [
-    "##########################################",
-    "#........................................#",
-    "#........................................#",
-    "#........................................#",
-    "#...............ooo......................#",
-    "#..............=====.......o.o.o.........#",
-    "#........................#######.........#",
-    "#........................#.....#.........#",
-    "#........................#.....#....B....#",
-    "#........................#.....#....B....#",
-    "#.P...i.....e......i.....#..i..#....B..E.#",
-    "##########################################",
-    "##########################################"] };
+    "##########################################", "#........................................#", "#........................................#", "#........................................#", "#...............ooo......................#", "#..............=====.......o.o.o.........#", "#........................#######.........#", "#........................#.....#.........#", "#........................#.....#....B....#", "#........................#.....#....B....#", "#.P...i.....e......i.....#..i..#....B..E.#", "##########################################", "##########################################"] };
   const PRACTICE_G = { id: "prova", name: "Il pendio d'allenamento", theme: "neve", kit: "guanti", signs: ["🧤 PARA: tocca 🧤 quando arriva una palla di neve. Al momento giusto (PARATA!) la rimandi indietro e colpisce chi l'ha tirata.", "Salta e TIENI PREMUTO ⤒ in aria: ti tuffi e plani. Così si superano i crepacci larghi.", "Il ghiaccio blu scivola: frena prima del bordo."], map: [
-    "#............................................#", "#............................................#", "#............................................#", "#............................................#", "#............................................#", "#............................................#",
-    "#...........ooo..............................#", "#..........=====.............................#", "#.........................o.o.o..............#", "#............................................#", "#.P..i............y...i..........i........E..#",
-    "#########################.......##~~~~~~~#####", "#########################.......##############"] };
+    "#............................................#", "#............................................#", "#............................................#", "#............................................#", "#............................................#", "#............................................#", "#...........ooo..............................#", "#..........=====.............................#", "#.........................o.o.o..............#", "#............................................#", "#.P..i............y...i..........i........E..#", "#########################.......##~~~~~~~#####", "#########################.......##############"] };
+  const PRACTICE_C = { id: "prova", name: "La pista di prova", theme: "tendone", kit: "circo", signs: ["🎪 a terra lancia la sfera acrobatica; in aria fai una PIROETTA che respinge clave e nemici!", "Salta sui tamburi elastici rossi per balzare fino alle passerelle alte.", "Premi 🎪 vicino agli anelli d'oro del trapezio per slanciarti oltre il vuoto!"], map: [
+    "#............................................#", "#............................................#", "#............................................#", "#............................................#", "#........................O...................#", "#...........ooo..............................#", "#..........=====...............=====.........#", "#............................................#", "#............................................#", "#............................................#", "#.P..i.......p....i...T.............i.....E..#", "#########################.....################", "#########################.....################"] };
   function demo(script, map, kit) {
-    const lv = { id: "demo", theme: kit ? "neve" : "mura", kit, map }, st = mk({}, lv, false); st.fx = null; return { st, script, n: 0 };
+    const lv = { id: "demo", theme: kit === "guanti" ? "neve" : kit === "circo" ? "tendone" : "mura", kit, map }, st = mk({}, lv, false); st.fx = null; return { st, script, n: 0 };
   }
   let DM = {};
   function drawDemo(key, g, mapRows, script, kit) {
@@ -1282,10 +1466,16 @@
     { t: "La parata", p: "<b>🧤</b> alza i guanti per un attimo. Una palla di neve parata <b>torna indietro</b> e colpisce chi l'ha tirata: è l'unico modo di ferire i capi che tirano. Se pari proprio all'ultimo istante è una <b>PARATA!</b> e vale un gettone. Coi guanti alzati puoi anche respingere chi ti viene addosso.", draw: (g) => drawDemo("b", g, GMAP1, (n) => ({ R: n > 4 && n < 14, K: n % 46 > 36 && n % 46 < 39 }), "guanti") },
     { t: "Il tuffo-planata", p: "Dopo il salto <b>tieni premuto ⤒</b>: Olmo diceva che un portiere vola solo per un secondo, ma quel secondo è suo. Cadi piano e vai lontano: così si passano i <b>crepacci</b>. Attento al <b>ghiaccio blu</b>: scivola.", draw: (g) => drawDemo("c", g, GMAP2, (n) => ({ R: n > 10 && n < 120, J: n > 30 && n < 100 }), "guanti") }
   ];
+  const CMAP1 = ["....................", "....................", "....................", "....................", ".........O..........", "....................", "............=====...", "....................", "....................", "....................", ".P...T..............", "######.....#########", "######.....#########"];
+  const PAGES_C = [
+    { t: "La pista di segatura", p: "<b>◀ ▶</b> per correre, <b>⤒</b> per saltare. Raccogli i <b>gettoni</b> e le <b>Coccarde d'Oro</b> 🏵️ (3 per atto). Ogni colpo fa volare via la <b>mantella</b> o il <b>cilindro</b> 🎪; i <b>tamburi di pista</b> sono punti di ripartenza.", draw: (g) => drawDemo("ca", g, DMAP1, (n) => ({ R: n > 10 && n < 200, J: (n > 60 && n < 80) || (n > 150 && n < 168) }), "circo") },
+    { t: "Sfera acrobatica e piroetta", p: "A terra <b>🎪</b> lancia la <b>sfera acrobatica</b> (ottima di sponda o come molla). In aria <b>🎪</b> esegue una <b>piroetta</b> che ti sostiene un istante, devia le clave e colpisce i rivali!", draw: (g) => drawDemo("cb", g, DMAP2, (n) => ({ R: n > 5 && n < 30, K: n === 40 || n === 41 || n === 150 || n === 151 }), "circo") },
+    { t: "Tamburi elastici e trapezio", p: "I <b>tamburi elastici</b> rossi ti lanciano fino alle passerelle alte. Quando salti vicino a un <b>anello d'oro</b> del trapezio, premi <b>🎪</b> per slanciarti in avanti sotto la cupola!", draw: (g) => drawDemo("cc", g, CMAP1, (n) => ({ R: n > 8 && n < 130, K: n === 48 || n === 49 }), "circo") }
+  ];
   function start(o) {
-    o = o || {}; const level = o.level || (o.kit === "guanti" ? PRACTICE_G : PRACTICE);
+    o = o || {}; const level = o.level || (o.kit === "guanti" ? PRACTICE_G : o.kit === "circo" ? PRACTICE_C : PRACTICE);
     cancelAnimationFrame(raf); if (ui) ui.root.remove(); css(); DM = {};
-    ui = (M.shell ? M.shell("scOv", (level.kit === "guanti" ? "🏔️ " : "🏰 ") + (o.title || level.name || "A scorrimento"), "#fbbf24") : null); if (!ui) return false;
+    ui = (M.shell ? M.shell("scOv", (level.kit === "guanti" ? "🏔️ " : level.kit === "circo" ? "🎪 " : "🏰 ") + (o.title || level.name || "A scorrimento"), "#fbbf24") : null); if (!ui) return false;
     ui.root.style.background = "#0c0818"; ui.cv.width = VW * SS; ui.cv.height = VH * SS; ui.cv.style.height = "auto"; ui.cv.style.flex = "none"; ui.g = ui.cv.getContext("2d");
     const ctl = document.createElement("div"); ctl.className = "scCtl"; const KI = KITS[level.kit || o.kit] || KITS.pallone; ctl.innerHTML = `<div class="pad"><button data-k="L" aria-label="Sinistra">◀</button><button data-k="R" aria-label="Destra">▶</button></div><div class="act"><button class="k" data-k="K" aria-label="${KI.aria}">${KI.btn}</button><button class="j" data-k="J" aria-label="Salta">⤒</button></div>`;
     ui.wr.insertBefore(ctl, ui.bt); ui.ctl = ctl;
@@ -1295,13 +1485,13 @@
     keys = {}; S = mk(o, level, false); tutC = null;
     window.addEventListener("keydown", kd); window.addEventListener("keyup", ku);
     LAY = () => { if (ui) ui.root.classList.toggle("land", innerWidth > innerHeight * 1.15); }; window.addEventListener("resize", LAY); LAY();
-    const openTut = () => { if (S && !(tutC && tutC.open) && M.tut) { const gk = S.kit === "guanti"; tutC = M.tut({ root: ui.root, key: kitOf(S).tut, pages: gk ? PAGES_G : PAGES, onClose: (pr) => { tutC = null; keys = {}; if (pr && S) { const oo = S.o; S = mk(oo, gk ? PRACTICE_G : PRACTICE, true); hud(); controls(); } } }); } };
+    const openTut = () => { if (S && !(tutC && tutC.open) && M.tut) { const gk = S.kit === "guanti", ck = S.kit === "circo"; tutC = M.tut({ root: ui.root, key: kitOf(S).tut, pages: gk ? PAGES_G : ck ? PAGES_C : PAGES, onClose: (pr) => { tutC = null; keys = {}; if (pr && S) { const oo = S.o; S = mk(oo, gk ? PRACTICE_G : ck ? PRACTICE_C : PRACTICE, true); hud(); controls(); } } }); } };
     ui.help.onclick = openTut;
     window.__scorri.state = {
-      get phase() { return S && S.phase; }, get hero() { return S && { x: S.hero.x, y: S.hero.y, vx: S.hero.vx, vy: S.hero.vy, hp: S.hero.hp, ground: S.hero.ground, frozen: S.hero.frozen }; },
+      get phase() { return S && S.phase; }, get hero() { return S && { x: S.hero.x, y: S.hero.y, vx: S.hero.vx, vy: S.hero.vy, hp: S.hero.hp, max: S.hero.max, maxHp: S.hero.max, ground: S.hero.ground, frozen: S.hero.frozen, twirl: S.hero.twirl | 0 }; },
       get ball() { return S && { st: S.ball.st, x: S.ball.x, y: S.ball.y, vx: S.ball.vx, vy: S.ball.vy }; }, get foes() { return S ? S.foes.filter((e) => !e.dead).length : 0; }, get coins() { return S ? S.coinN : 0; }, get ban() { return S ? countBits(S.banMask) : 0; },
-      get boss() { const b = S && S.foes.find((e) => e.t === "Z"); return b ? { hp: b.hp, st: b.st, dead: b.dead, x: b.x, y: b.y, hitT: b.hitT } : null; }, get counts() { return S ? { vents: S.vents.length, falls: S.falls.length, cats: S.foes.filter((e) => e.t === "g").length, bells: S.bells.length, rung: S.bells.filter((k) => k.rung).length, gates: S.grid.reduce((a, r) => a + r.filter((t) => t === "G").length, 0), ghosts: S.foes.filter((e) => e.t === "m" && !e.dead).length, waves: S.waves.length, bolts: S.bolts.length, wind: S.windV, cards: S.cards.length } : null; }, ballAt: (x, y, vx, vy) => { if (S) { S.ball.st = "fly"; S.ball.x = x; S.ball.y = y; S.ball.vx = vx || 0; S.ball.vy = vy || 0; S.ball.t = 0; S.ball.sp = 0; } }, get practice() { return S && S.practice; }, get W() { return S && S.W; }, get kit() { return S && S.kit; }, get parries() { return S ? S.parries : 0; }, get snow() { return S ? S.stones.filter((x) => x.snow).map((x) => ({ x: x.x, y: x.y, vx: x.vx, mine: !!x.mine, big: !!x.big })) : []; }, get glide() { return !!(S && S.hero.glide); }, get aval() { return S && S.aval ? { x: S.aval.x, hits: S.aval.hits } : null; }, get crumbs() { return S ? S.crumbs.map((c) => ({ x: c.x, y: c.y, gone: c.gone })) : []; }, tileAt: (tx, ty) => (S ? tile(S, tx, ty) : null), get sled() { return !!(S && S.level.sled); }, get foeList() { return S ? S.foes.filter((e) => !e.dead).map((e) => ({ t: e.t, x: e.x, y: e.y, h: e.h, on: !!e.on })) : []; }, get parry() { return S ? S.hero.parry | 0 : 0; },
-      tut: () => !!(tutC && tutC.open), press, tick: (n) => { for (let i = 0; i < (n || 1) && S; i++) step(S); }, warp: (x, y) => { if (S) { S.hero.x = x; S.hero.y = y; S.hero.vx = S.hero.vy = 0; } },
+      get boss() { const b = S && S.foes.find((e) => e.t === "Z"); return b ? { hp: b.hp, st: b.st, vul: !!b.vul, dead: b.dead, x: b.x, y: b.y, h: b.h, hitT: b.hitT } : null; }, get counts() { return S ? { vents: S.vents.length, falls: S.falls.length, cats: S.foes.filter((e) => e.t === "g").length, bells: S.bells.length, rung: S.bells.filter((k) => k.rung).length, gates: S.grid.reduce((a, r) => a + r.filter((t) => t === "G").length, 0), ghosts: S.foes.filter((e) => e.t === "m" && !e.dead).length, waves: S.waves.length, bolts: S.bolts.length, wind: S.windV, cards: S.cards.length, tramps: S.tramps.length, rings: S.rings.length } : null; }, ballAt: (x, y, vx, vy) => { if (S) { S.ball.st = "fly"; S.ball.x = x; S.ball.y = y; S.ball.vx = vx || 0; S.ball.vy = vy || 0; S.ball.t = 0; S.ball.sp = 0; } }, get practice() { return S && S.practice; }, get W() { return S && S.W; }, get kit() { return S && S.kit; }, get parries() { return S ? S.parries : 0; }, get snow() { return S ? S.stones.filter((x) => x.snow).map((x) => ({ x: x.x, y: x.y, vx: x.vx, mine: !!x.mine, big: !!x.big })) : []; }, get glide() { return !!(S && S.hero.glide); }, get aval() { return S && S.aval ? { x: S.aval.x, hits: S.aval.hits } : null; }, get crumbs() { return S ? S.crumbs.map((c) => ({ x: c.x, y: c.y, gone: c.gone })) : []; }, tileAt: (tx, ty) => (S ? tile(S, tx, ty) : null), get sled() { return !!(S && S.level.sled); }, get foeList() { return S ? S.foes.filter((e) => !e.dead).map((e) => ({ t: e.t, x: e.x, y: e.y, h: e.h, on: !!e.on })) : []; }, get parry() { return S ? S.hero.parry | 0 : 0; }, get twirl() { return S ? S.hero.twirl | 0 : 0; }, get tramps() { return S ? S.tramps.map((t) => ({ x: t.x, y: t.y })) : []; }, get rings() { return S ? S.rings.map((r) => ({ x: r.x, y: r.y })) : []; },
+      tut: () => !!(tutC && tutC.open), press, tick: (n) => { for (let i = 0; i < (n || 1) && S; i++) step(S); }, warp: (x, y) => { if (S) { S.hero.x = x; S.hero.y = y; S.hero.vx = S.hero.vy = 0; S.hero.ground = false; S.hero.twirlUsed = 0; } },
       ko: () => { if (S && S.phase === "play") ko(S); }, get lives() { return S ? S.lives : 0; }, bossHit: (n) => { const b = S && S.foes.find((e) => e.t === "Z" && !e.dead); if (b) { if (!b.max) b.max = b.hp; b.hp = Math.max(1, b.hp - (n | 0)); } },
       finish: (win) => { if (!S) return; if (tutC) { tutC.close(); tutC = null; } S.win = win !== false; if (S.win) { S.items.forEach((it) => { if (it.k === "S" && win === "all") S.banMask |= 1 << it.i; }); } close(); }
     };
@@ -1310,5 +1500,5 @@
     if (o.tutorial !== false && !(M.seen && M.seen(kitOf(S).tut))) openTut();
     return true;
   }
-  window.__scorri = { start, state: null, THEMES, FOES, BOSSES, KITS, PRACTICE, PRACTICE_G, parse, _drawFerro: drawFerro };
+  window.__scorri = { start, state: null, THEMES, FOES, BOSSES, KITS, PRACTICE, PRACTICE_G, PRACTICE_C, parse, _drawFerro: drawFerro };
 })();
