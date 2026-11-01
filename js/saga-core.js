@@ -524,8 +524,8 @@
       return out + `<br><span style="color:var(--dim)">▷ = strade non prese. Per provarle: Capitoli → rigioca.</span>`;
     }
     function journal(back, inZone) {
-      const html = journalHtml() + (CRW ? CRW.html() : "") + (PLN ? PLN.html() : "") + (BLB ? BLB.html() : "") + (SCR ? SCR.html() : "") + (RIT ? RIT.html() : "") + (BLD ? BLD.html() : "") + (PRK ? PRK.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + (WGT ? WGT.html() : "") + (RAD ? RAD.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
-      const jb = (RAD ? [{ label: `${RAD.icon} ${RAD.name} · ${RAD.freq().toFixed(1)} MHz`, sub: "Ruota la manopola e intercetta segnali", fn: () => RAD.open(() => journal(back, inZone), inZone) }] : []).concat(BLB ? [{ label: `${BLB.icon} ${BLB.name}`, sub: BLB.statusTxt(), fn: () => BLB.open(() => journal(back, inZone), inZone) }] : []).concat(DOS ? Object.keys(DOS.cases).filter((c) => DOS.list(c).length).map((c) => ({ label: "🗂️ Dossier · " + DOS.cases[c].t, sub: "Confronta prove e testimonianze", fn: () => DOS.open(c, () => journal(back, inZone), inZone) })) : []).concat(CAT && CAT.list().length ? [{ label: "🃏 Album", sub: `${CAT.team().length}/${CAT.max} in squadra`, fn: () => CAT.open(() => journal(back, inZone), inZone) }] : []).concat(CRW && CRW.count() ? [{ label: "⚔️ Schiera la compagnia", sub: `${CRW.field().length}/${CRW.max} in campo`, fn: () => CRW.pick(() => journal(back, inZone), inZone) }] : []).concat((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
+      const html = journalHtml() + (CRW ? CRW.html() : "") + (PLN ? PLN.html() : "") + (BLB ? BLB.html() : "") + (PRS ? PRS.html() : "") + (SCR ? SCR.html() : "") + (RIT ? RIT.html() : "") + (BLD ? BLD.html() : "") + (PRK ? PRK.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + (WGT ? WGT.html() : "") + (RAD ? RAD.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
+      const jb = (RAD ? [{ label: `${RAD.icon} ${RAD.name} · ${RAD.freq().toFixed(1)} MHz`, sub: "Ruota la manopola e intercetta segnali", fn: () => RAD.open(() => journal(back, inZone), inZone) }] : []).concat(BLB ? [{ label: `${BLB.icon} ${BLB.name}`, sub: BLB.statusTxt(), fn: () => BLB.open(() => journal(back, inZone), inZone) }] : []).concat(PRS ? [{ label: `${PRS.icon} ${PRS.name}`, sub: PRS.statusTxt(), fn: () => PRS.open(() => journal(back, inZone), inZone) }] : []).concat(DOS ? Object.keys(DOS.cases).filter((c) => DOS.list(c).length).map((c) => ({ label: "🗂️ Dossier · " + DOS.cases[c].t, sub: "Confronta prove e testimonianze", fn: () => DOS.open(c, () => journal(back, inZone), inZone) })) : []).concat(CAT && CAT.list().length ? [{ label: "🃏 Album", sub: `${CAT.team().length}/${CAT.max} in squadra`, fn: () => CAT.open(() => journal(back, inZone), inZone) }] : []).concat(CRW && CRW.count() ? [{ label: "⚔️ Schiera la compagnia", sub: `${CRW.field().length}/${CRW.max} in squadra`, fn: () => CRW.pick(() => journal(back, inZone), inZone) }] : []).concat((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
       if (inZone) return api.trAsk("voce", html, jb, bgNow());
       api.scene(BG0, "voce", html, jb, JN());
     }
@@ -786,7 +786,8 @@
         if (spec.interior && (ch === "v" || (spec.exits && spec.exits[tx + "," + ty]))) { leaveInterior(zid); return true; }
         if (ch === REST.ch) { rest(done); return true; }
         if (ch === "x") { const def = spec.chests && spec.chests[tx + "," + ty]; openChest(zid, tx, ty, def || { coins: 10 }); return true; }
-        const flav = spec.flavor && (spec.flavor[tx + "," + ty] || spec.flavor[ch]);
+        const rawFlav = spec.flavor && (spec.flavor[tx + "," + ty] || spec.flavor[ch]);
+        const flav = typeof rawFlav === "function" ? safe(() => rawFlav(K), "") : rawFlav;
         if (flav) { say([["voce", Array.isArray(flav) ? pick(flav) : flav]], done); return true; }
         if (Z.act[tx + "," + ty] || Z.act[ch]) { say([["voce", (cfg.texts && cfg.texts.nothing) || "Niente di speciale."]], done); return true; }
         return false;
@@ -949,6 +950,7 @@
         ...(HCK ? [["💻 " + HCK.name, "Le consolle sulla mappa si usano con la statistica " + HCK.name + ": ogni comando costa punti e può deviare i droni, invertire i pavimenti elettrificati o aprire serrande. Chi forza la rete alza l'Allarme, e le sentinelle dei settori vicini aumentano."]] : []),
         ...(RAD ? [[RAD.icon + " " + RAD.name, "Apri il " + RAD.name + " dal Menu di zona per ruotare la scala in MHz. Più ti avvicini nel luogo giusto e alla frequenza esatta, più le tacche di ricezione salgono (da 0 a 5): con almeno 3 tacche puoi ascoltare trasmissioni nascoste, intercettare pattuglie o scoprire segnali QSL."]] : []),
         ...(BLB ? [[BLB.icon + " " + BLB.name, "Scegli quali numeri o esibizioni inserire nelle cornici della serata. Alcune coppie di artisti creano un'intesa dietro le quinte che aumenta gli applausi e regala aiuti speciali durante il numero in pista."]] : []),
+        ...(PRS ? [[PRS.icon + " " + PRS.name, "Raccogli corrispondenze, scatti fotografici e rubriche parlando coi personaggi ed esplorando i luoghi, poi componi i tre tagli della Prima Pagina (Titolo, Foto centrale e Spalla). Ogni numero mandato in stampa orienta l'opinione pubblica, resta sfogliabile nel Registro e concede un aiuto tattico nella sfida successiva."]] : []),
         ...(RIT ? [["🎼 " + (cfg.rhythm.name || "Il Repertorio"), "I brani si suonano a tempo: tocca lo strumento quando la nota arriva sul cerchio. La base va da sola; grancassa, rullante, piatti e la melodia degli ottoni suonano solo se le prendi. Ogni brano ha una quota di precisione; le stelle (fino a tre) restano nel Repertorio, dove i brani già suonati si rigiocano."]] : []),
         ...(COLD ? [[COLD.icon + " " + COLD.name, "Nelle zone all'aperto fa freddo: il " + COLD.name + " (in alto a sinistra) scende col tempo. Risale vicino a un fuoco, a una stufa o al chiuso, nelle case. Se arriva a zero ti ritrovi al riparo, senza perdere niente, ma lontano da dove eri."]] : []),
         ...arr(safe(() => cfg.guide && cfg.guide(K), []))
@@ -961,6 +963,7 @@
       api.trAsk("voce", `<b>${esc(TITLE)}</b> · ${esc(c ? "Capitolo " + c.n + " · " + c.title : "")}<br><span style="color:var(--dim)">${esc(goalNow())}<br>Monete ${bal()} · ${esc(JN())}: ${m.lore.length} pagine</span>`, [
         ...(RAD ? [{ label: `${RAD.icon} ${RAD.name} · ${RAD.freq().toFixed(1)} MHz`, sub: RAD.statusTxt(), cls: "hot", fn: () => RAD.open(zoneMenu, true) }] : []),
         ...(BLB ? [{ label: `${BLB.icon} ${BLB.name}`, sub: BLB.statusTxt(), cls: "hot", fn: () => BLB.open(zoneMenu, true) }] : []),
+        ...(PRS ? [{ label: `${PRS.icon} ${PRS.name}`, sub: PRS.statusTxt(), cls: "hot", fn: () => PRS.open(zoneMenu, true) }] : []),
         ...(goalHidden() ? [{ label: "🧭 Dove vado?", sub: `L'obiettivo esatto, con la strada · ${GOAL_COST} monete (ne hai ${bal()})`, cls: "hot", fn: () => goalBuy(done) }] : []),
         { label: JN(), sub: (cfg.journal && cfg.journal.sub) || "Persone, scoperte, finali", cls: "hot", fn: () => journal(zoneMenu, true) },
         { label: "👥 Personaggi", sub: "Chi hai incontrato in questa saga", fn: () => persone(zoneMenu) },
@@ -1822,6 +1825,155 @@
       return { name: nm, icon: ic, acts: AC, synergies: SY, unlock, unlocked, list, slotCount, lineup, activeActs, assign, clear, clearSlot, applause, activeBuffs, hasBuff, activeSynergies, hasSynergy, seenSynergy, seenSynergyCount, statusTxt, open, html };
     })();
 
+    // -------------------------------------------------------------- IL BANCONE D'IMPAGINAZIONE / PRIMA PAGINA (cfg.press, opt-in)
+    // cfg.press = { name: "Il Bancone di Piombo", icon: "📰", masthead: "L'ECO DEL PALLONE",
+    //   slots: [["lead", "Titolo d'apertura", "🖋️"], ["photo", "Foto di centro", "📸"], ["col", "Spalla sportiva", "⚽"]],
+    //   editions: { 1: "Numero 1 · Edizione del Giovedì", … },
+    //   items: { id: { slot: "lead"|"photo"|"col", n, icon, headline, d, w: { verita: 1, tiratura: 0 }, buff, buffTxt, copies, who, bond } } }
+    const PRS = cfg.press && (() => {
+      const C0 = cfg.press, IT = C0.items || {}, ED = C0.editions || {};
+      const SL = Array.isArray(C0.slots) && C0.slots.length ? C0.slots : [["lead", "Titolo d'apertura", "🖋️"], ["photo", "Foto di centro", "📸"], ["col", "Spalla sportiva", "⚽"]];
+      const nm = C0.name || "Prima Pagina", ic = C0.icon || "📰", mh = C0.masthead || TITLE;
+      const unlocked = (id) => !!IT[id] && F.is("pr_u_" + id);
+      const unlock = (id, quiet) => {
+        if (!IT[id] || unlocked(id)) return false;
+        F.set("pr_u_" + id, true);
+        if (!quiet) { SFX.ding(); note(`${nm}: ${IT[id].n}`); if (api && api.trToast) safe(() => api.trToast(`${ic} Pezzo pronto: ${IT[id].n}`)); }
+        return true;
+      };
+      const list = (slot) => Object.keys(IT).filter((id) => unlocked(id) && (!slot || IT[id].slot === slot));
+      const draft = () => {
+        const o = {};
+        SL.forEach(([k]) => { const v = F.get("pr_s_" + k, ""); o[k] = unlocked(v) && IT[v].slot === k ? v : ""; });
+        return o;
+      };
+      function assign(slot, id) {
+        if (!SL.some(([k]) => k === slot)) return false;
+        if (id && (!unlocked(id) || IT[id].slot !== slot)) return false;
+        F.set("pr_s_" + slot, id || ""); return true;
+      }
+      const clear = (slot) => { if (slot) F.set("pr_s_" + slot, ""); else SL.forEach(([k]) => F.set("pr_s_" + k, "")); };
+      const filledCount = () => { const d = draft(); return SL.filter(([k]) => !!d[k]).length; };
+      const ready = () => filledCount() >= SL.length;
+      function edition(n) {
+        if (!F.is("pr_ed_" + n)) return null;
+        const raw = String(F.get("pr_ed_" + n + "_s", "")).split("|");
+        const slots = {}; SL.forEach(([k], i) => { if (raw[i] && IT[raw[i]]) slots[k] = raw[i]; });
+        const leadIt = slots[SL[0][0]] && IT[slots[SL[0][0]]];
+        const buffs = Object.values(slots).map((id) => IT[id] && IT[id].buff).filter(Boolean);
+        return { n: +n, title: ED[n] || ("Numero " + n), slots, headline: (leadIt && (leadIt.headline || leadIt.n)) || mh, buffs };
+      }
+      const edNums = () => {
+        const ks = Object.keys(ED).map(Number).filter((x) => x > 0);
+        for (let i = 1; i <= 8; i++) if (!ks.includes(i) && F.is("pr_ed_" + i)) ks.push(i);
+        return ks.sort((a, b) => a - b);
+      };
+      const published = () => edNums().map(edition).filter(Boolean);
+      const publishedCount = () => published().length;
+      const latestEdition = () => { const p = published(); return p.length ? p[p.length - 1] : null; };
+      const latestHeadline = () => {
+        const le = latestEdition(); if (le && le.headline) return le.headline;
+        const d = draft(), l0 = d[SL[0][0]] && IT[d[SL[0][0]]];
+        return (l0 && (l0.headline || l0.n)) || C0.defaultHeadline || mh;
+      };
+      const activeBuffs = () => {
+        const d = draft(), le = latestEdition(), ids = Object.values(d).concat(le ? Object.values(le.slots) : []);
+        return [...new Set(ids.map((id) => IT[id] && IT[id].buff).filter(Boolean))];
+      };
+      const hasBuff = (b) => activeBuffs().includes(b);
+      function wTxt(it) {
+        if (!it || !it.w) return "";
+        return Object.entries(it.w).filter(([, v]) => v).map(([k, v]) => `${WGT && WGT.icon ? WGT.icon(k) + " " + WGT.name(k) : k} ${v > 0 ? "+" + v : v}`).join(" · ");
+      }
+      function publish(edNum) {
+        const n = edNum || (publishedCount() + 1), d = draft();
+        SL.forEach(([k]) => { if (!d[k]) { const av = list(k); if (av.length) { d[k] = av[0]; F.set("pr_s_" + k, av[0]); } } });
+        F.set("pr_ed_" + n, true);
+        F.set("pr_ed_" + n + "_s", SL.map(([k]) => d[k] || "").join("|"));
+        if (!F.is("pr_w_" + n)) {
+          F.set("pr_w_" + n, true);
+          let cp = 0;
+          SL.forEach(([k]) => {
+            const it = d[k] && IT[d[k]]; if (!it) return;
+            cp += it.copies | 0;
+            if (it.w) Object.entries(it.w).forEach(([ax, val]) => { if (!val) return; if (WGT) WGT.add(ax, val); else if (STATS[ax]) bond(ax, val); });
+            if (it.who && it.bond && REL) REL.add(it.who, it.bond, true);
+          });
+          if (cp && C0.copiesStat && STATS[C0.copiesStat]) bond(C0.copiesStat, cp);
+        }
+        SFX.ding();
+        const ed = edition(n);
+        note(`In edicola: «${ed ? ed.headline : mh}»`);
+        return ed;
+      }
+      const statusTxt = () => (publishedCount() ? `${publishedCount()} ediz. · «${latestHeadline().slice(0, 26)}»` : `${filledCount()}/${SL.length} tagli in bozza`);
+      const html = () => {
+        if (!list().length && !publishedCount()) return "";
+        const d = draft(), pubs = published();
+        let out = `<br><br><b>${esc(ic + " " + nm)}</b> · ${esc(mh)}<br>`;
+        out += SL.map(([k, lbl, sic]) => {
+          const id = d[k], it = id && IT[id];
+          return `• ${esc(sic + " " + lbl)}: ${it ? `<b>${esc((it.icon || "") + " " + it.n)}</b>${it.buffTxt ? ` <span style="color:var(--dim)">(${esc(it.buffTxt)})</span>` : ""}` : "<span style='color:var(--dim)'>— da comporre —</span>"}`;
+        }).join("<br>");
+        if (pubs.length) {
+          out += `<br><span style="color:var(--dim)">Archivio edizioni stampate (${pubs.length}):</span>` +
+            pubs.map((e) => `<br>🗞️ <b>${esc(e.title)}</b> — «${esc(e.headline)}»`).join("");
+        }
+        return out;
+      };
+      function open(back, inZone, o) {
+        o = o || {}; const b = back || done, show = (h, op) => (inZone ? api.trAsk("voce", h, op, bgNow()) : api.scene(BG0, "voce", h, op, JN()));
+        const d = draft(), pubs = published(), edN = o.edition || null;
+        const head = `<b>${esc(ic + " " + nm)}</b> · ${esc(edN && ED[edN] ? ED[edN] : mh)}<br><span style="color:var(--dim)">${esc(o.prompt || "Componi i tre tagli sul bancone di piombo: Titolo, Foto centrale e Spalla sportiva.")}${pubs.length ? "<br>🗞️ Ultimo strillo in edicola: <b>«" + esc(latestHeadline()) + "»</b>" : ""}</span>`;
+        const opts = SL.map(([k, lbl, sic]) => {
+          const cur = d[k], it = cur && IT[cur], ul = list(k);
+          return {
+            label: `${sic} ${lbl}: ${it ? (it.icon || "•") + " " + it.n : "— vuoto —"}`,
+            sub: it ? [it.headline ? "«" + it.headline + "»" : it.d, wTxt(it), it.buffTxt].filter(Boolean).join(" · ") : (ul.length ? `Tocca per scegliere (${ul.length} disponibili)` : "Raccogli prima notizie o scatti in giro"),
+            disabled: !ul.length,
+            fn: () => {
+              const pickOpts = ul.map((id) => {
+                const x = IT[id];
+                return {
+                  label: `${x.icon || sic} ${x.n}${cur === id ? " ✓" : ""}`,
+                  sub: [x.headline ? "«" + x.headline + "»" : "", x.d || "", wTxt(x), x.buffTxt || ""].filter(Boolean).join(" · "),
+                  fn: () => { assign(k, id); SFX.ding(); open(back, inZone, o); }
+                };
+              });
+              if (cur) pickOpts.push({ label: "— Togli dal bancone", fn: () => { assign(k, ""); open(back, inZone, o); } });
+              pickOpts.push({ label: "◂ Torna al bancone", fn: () => open(back, inZone, o) });
+              show(`<b>${esc(sic + " " + lbl)}</b><br><span style="color:var(--dim)">Scegli quale pezzo serrare nel telaio di piombo.</span>`, pickOpts);
+            }
+          };
+        });
+        if (edN || typeof o.onPublish === "function") {
+          const min = o.min || SL.length, ok = filledCount() >= min;
+          opts.push({
+            label: o.confirmLabel || "🖨️ Visto, si stampi! · Avvia la rotativa",
+            sub: ok ? `Manda in stampa ${ED[edN] || "l'edizione"}` : `Completa tutti i ${min} tagli sul bancone prima di stampare`,
+            cls: "hot", big: o.big !== false, disabled: !ok,
+            fn: () => { const ed = publish(edN || (publishedCount() + 1)); if (typeof o.onPublish === "function") return o.onPublish(ed); b(); }
+          });
+        }
+        if (pubs.length) {
+          opts.push({
+            label: `🗞️ Sfoglia l'archivio (${pubs.length} ${pubs.length === 1 ? "uscita" : "uscite"})`,
+            sub: "Rileggi le prime pagine già mandate in edicola",
+            fn: () => {
+              const txt = pubs.map((e) => {
+                const parts = SL.map(([k, lbl]) => { const id = e.slots[k]; return id && IT[id] ? `${lbl}: ${IT[id].n}` : ""; }).filter(Boolean).join(" · ");
+                return `<b>${esc(e.title)}</b><br>«<b>${esc(e.headline)}</b>»<br><span style="color:var(--dim)">${esc(parts)}</span>`;
+              }).join("<br><br>");
+              show(`<b>🗞️ Archivio · ${esc(mh)}</b><br><br>${txt}`, [{ label: "◂ Torna al bancone", fn: () => open(back, inZone, o) }]);
+            }
+          });
+        }
+        opts.push({ label: "◂ Indietro", fn: b });
+        show(head, opts);
+      }
+      return { name: nm, icon: ic, masthead: mh, slots: SL, items: IT, editions: ED, unlock, unlocked, list, draft, assign, clear, filledCount, ready, publish, edition, published, publishedCount, latestEdition, latestHeadline, activeBuffs, hasBuff, statusTxt, open, html };
+    })();
+
     // -------------------------------------------------------------- kit per i capitoli
     const K = {
       get api() { return api; }, ID, TITLE, TS, T, esc, hash, rnd, pick, safe, F, mem, save, stepOf, setStep, note, once, reward, coinsGive, bal, hero, castHero, stat, bond,
@@ -1832,7 +1984,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, plan: PLN, billboard: BLB, scroll: SCR, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN, radio: RAD, cold: COLD, rhythm: RIT, build: BLD, perks: PRK,
+      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, plan: PLN, billboard: BLB, press: PRS, scroll: SCR, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN, radio: RAD, cold: COLD, rhythm: RIT, build: BLD, perks: PRK,
       // un minigioco proprio della saga (start = window.__xxx.start): o passa al motore, cb(r) a fine partita
       minigame: (start, o, cb) => ownMatch(start, Object.assign({}, o, { done: (r) => safe(() => cb(r || {}), null) })),
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },

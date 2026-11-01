@@ -24,6 +24,13 @@
   const GEN = { fantasy: ["Fantasy", "#7a4ab0"], mistero: ["Mistero", "#2c6a9a"], scifi: ["Fantascienza", "#1f8a8a"], storico: ["Storico", "#a8622a"], commedia: ["Commedia", "#c9921a"], sport: ["Sport anime", "#c0392b"], avventura: ["Avventura", "#3f8a3f"], dramma: ["Drammatico", "#6a5a7a"], tattica: ["Tattica", "#5a6a3a"], satira: ["Satira", "#0284c7"] };
   // mod: oggetto window con menuEntry/info · fn: funzione window da chiamare con (indietro) · ch: capitoli totali (se noti)
   const SAGAS = [
+    { id: "tipografia", t: "La Tipografia di Mezzanotte · L'Ultima Edizione", e: "📰", g: ["storico", "mistero", "commedia"], mod: "__tipografia", key: "ali-di-rondine.tipografia", ch: 4, cover: "tp_titolo", d: "Borgo Alta, ottobre 1968: il bisettimanale «L'Eco del Pallone» e il Campo delle Acacie rischiano la chiusura sotto l'assalto edilizio del Commendator Sartori. Componi la Prima Pagina sul Bancone di Piombo, raccogli le prove nel Dossier e scendi in campo col flash al magnesio di Clara Luce. Quattro capitoli, quattro finali. Novità: il Bancone di Piombo. Minigioco: Flash & Contropiede '68.",
+      hints: {
+        cooperativa: "Fai prevalere la Verità d'Inchiostro, vinci il verdetto del Dossier contro Sartori e fonda la cooperativa dei lettori.",
+        settantamila: "Fai brillare la Tiratura Popolare e rilancia la rotativa Marinoni in tutta la provincia.",
+        riunita: "Scegli il patto civico del lunedì per tenere unita la redazione e salvare il prato.",
+        nando: "Segreto: sviluppa il rullino di Nando, stampa tutte le 4 edizioni, vinci il Dossier, stringi legame con Clara e Goffredo e segna almeno uno Scatto Perfetto in finale."
+      } },
     { id: "zampano", t: "Il Circo Zampanò · La Pista di Segatura", e: "🎪", g: ["avventura", "mistero", "commedia"], mod: "__zampano", key: "ali-di-rondine.zampano", ch: 4, cover: "ci_titolo", d: "Pian dei Venti, sopra il Borgo Marino: il tendone cremisi di Maestro Zampanò rischia lo sgombero contro il Gran Circo Imperiale del Barone Orloff e un cavo tranciato di notte. Componi i 3 numeri della serata, scopri le sinergie segrete e vola tra trampolini, anelli del trapezio e piroette aeree. Quattro capitoli, quattro finali. Novità: il Cartellone di Pista. Minigioco: La Pista Acrobatica.",
       hints: {
         carovana: "Difendi il Cuore della compagnia e riparti libero coi sette carri dipinti.",
@@ -189,7 +196,7 @@
     { id: "cala", t: "Cala Tramontana", e: "🌊", g: ["avventura"], fn: "openCalaTramontana", key: "ali-di-rondine.cala-tramontana", cover: "beach", d: "Esplora a piedi il borgo marino alternativo con il tuo Campione." },
     { id: "borgostorto", t: "Il Borgo Storto", e: "🌀", g: ["commedia", "tattica"], api: "openBorgoStorto", cover: "beach", d: "Lo spin-off GDR a turni del Borgo Marino." },
   ];
-  const NEWEST = ["zampano", "burattini", "tifosi", "falsari", "moviola", "sasso", "banda", "neve", "onde", "latta", "missione", "corriere", "compagnia", "diga", "vuota", "mondiale", "cavaliere", "gala", "circuiti", "replica", "officina", "figurine", "rotta", "fischietto", "capitani", "carte", "quattordici", "sigilli", "fortino", "cenere", "note", "spia", "fiume", "piramide", "treno", "alcatraz", "milano", "gp", "tempo", "dungeon", "roma", "regno", "naufraghi", "campana", "galletta", "pugno", "montagna", "cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
+  const NEWEST = ["tipografia", "zampano", "burattini", "tifosi", "falsari", "moviola", "sasso", "banda", "neve", "onde", "latta", "missione", "corriere", "compagnia", "diga", "vuota", "mondiale", "cavaliere", "gala", "circuiti", "replica", "officina", "figurine", "rotta", "fischietto", "capitani", "carte", "quattordici", "sigilli", "fortino", "cenere", "note", "spia", "fiume", "piramide", "treno", "alcatraz", "milano", "gp", "tempo", "dungeon", "roma", "regno", "naufraghi", "campana", "galletta", "pugno", "montagna", "cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
   const modOf = (s) => (s.mod ? window[s.mod] : null);
   const available = (s) => (s.mod ? !!window[s.mod] : s.fn ? typeof window[s.fn] === "function" : !!(api() && api()[s.api]));
   function state(s) {
@@ -603,6 +610,10 @@
       opp: [{ name: "Il tendone delle prove", lv: "pista1", color: "#dc2626", style: "equilibrata" }, { name: "I carri nella bruma", lv: "pista2", color: "#b45309", style: "contropiede" }, { name: "L'intreccio della cupola", lv: "pista3", color: "#7e22ce", style: "pressing" }, { name: "La parata del Gran Gala", lv: "pista4", color: "#f59e0b", style: "pressing" }],
       boss: { name: "Il Barone Orloff", lv: "orloff", color: "#eab308", style: "pressing" },
       opts: (o) => { const LV = window.__zampanoLV || {}, id = o.lv || "pista1"; return { title: `La Pista Acrobatica · ${o.name}`, level: Object.assign({ id, kit: "circo" }, LV[id] || {}), bonus: 1, buffs: ["piuma"], tutorial: false }; } },
+    { id: "flash68", t: "Flash & Contropiede '68", e: "📸", saga: "tipografia", eng: "__flash68", d: "Calcio 1968 a bordo campo con la fotografa Clara Luce: porta l'azione nel Riquadro d'Obiettivo dorato e premi FLASH per abbagliare i difensori e caricare il Super-Tiro Edizione Straordinaria.",
+      opp: [{ name: "Fattorini Corriere Veloce", venue: "edicole", color: "#c83228", style: "equilibrata" }, { name: "Cantiere Sartori XI", venue: "acacie", color: "#d97706", style: "difensiva" }, { name: "Vigilanza Corriere Veloce", venue: "portico", color: "#334155", style: "pressing" }],
+      boss: { name: "Real Stampa Moderna", venue: "stadio", color: "#c83228", style: "pressing" },
+      opts: (o, h, boss) => ({ title: `Flash & Contropiede '68 · ${o.name}`, venue: boss ? "stadio" : (o.venue || "edicole"), boss: !!boss, umbrellas: !!boss, opp: o.name, oppColor: o.color, oppStyle: o.style, us: (h && h.name) ? `U.S. Acacie · ${h.name}` : "U.S. Acacie '68", tutorial: false }) },
   ];
   function sgState(m) { const s = SAGAS.find((x) => x.id === m.saga), x = s ? state(s) : null; return { s, open: !!(x && (x.doneN >= 1)), boss: !!(x && x.endsFound > 0) }; }
   function openSalaGiochi(back) {
@@ -878,7 +889,7 @@
       weather: "📜 Zefiro Antico · 🏛️ 75 d.C. - 1998 · 🏺 Storia Viva",
       desc: "Dai ludi circensi dell'Antica Roma al 1427 dei capitani di ventura, fino al noir di Milano 1954 e al fischietto del 1998.",
       quote: "«Cambiano le scarpe e i palloni di cuoio, ma il coraggio resta uguale.»",
-      sagas: ["onde", "roma", "capitani", "milano", "fischietto", "piramide", "tempo", "treno", "pugno", "kronenburg", "shogun"],
+      sagas: ["tipografia", "onde", "roma", "capitani", "milano", "fischietto", "piramide", "tempo", "treno", "pugno", "kronenburg", "shogun"],
       pins: [
         { id: "roma", t: "Ave Calcio", e: "🏛️", dx: -36, dy: -22 },
         { id: "milano", t: "Milano Noir", e: "🕵️", dx: 36, dy: -18 },
@@ -1716,7 +1727,7 @@
   // ---------------------------------------------------------------- ALBUM DEI PERSONAGGI
   // ogni personaggio registrato nel gioco (window.__borgoApi.BIO) diventa una carta. Si «incontra» parlandoci (seeCard del gioco).
   // Le sezioni: la Storia e Borgo Marino, i tornei e le modalità del Borgo, e una sezione per saga (riconosciuta dal prefisso degli id).
-  const PFX = { zampano: "ci", burattini: "bur", tifosi: "zt", falsari: "fc", sasso: "sn", banda: "bp", neve: "gn", onde: "rf", latta: "lt", missione: "ms", corriere: "cr", compagnia: "cp", diga: "vp", mondiale: "mg", cavaliere: "cf", gala: "pd", circuiti: "nr", vuota: "vs", replica: "rp", officina: "of", figurine: "fg", rotta: "ro", fischietto: "fi", capitani: "cv", carte: "cd", quattordici: "qt", sigilli: "sg", cenere: "ce", note: "qd", fortino: "fo", spia: "dz", fiume: "fa", piramide: "my", treno: "te", alcatraz: "alc", milano: "mn", gp: "gp", tempo: "rt", roma: "rm", regno: "re", naufraghi: "nf", campana: "cp", galletta: "gl", pugno: "pr", montagna: "bm", cavallo: "cs", dungeon: "dg", razzo: "rz", quartiere: "sq", titano: "ft", ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
+  const PFX = { tipografia: "tp", zampano: "ci", burattini: "bur", tifosi: "zt", falsari: "fc", sasso: "sn", banda: "bp", neve: "gn", onde: "rf", latta: "lt", missione: "ms", corriere: "cr", compagnia: "cp", diga: "vp", mondiale: "mg", cavaliere: "cf", gala: "pd", circuiti: "nr", vuota: "vs", replica: "rp", officina: "of", figurine: "fg", rotta: "ro", fischietto: "fi", capitani: "cv", carte: "cd", quattordici: "qt", sigilli: "sg", cenere: "ce", note: "qd", fortino: "fo", spia: "dz", fiume: "fa", piramide: "my", treno: "te", alcatraz: "alc", milano: "mn", gp: "gp", tempo: "rt", roma: "rm", regno: "re", naufraghi: "nf", campana: "cp", galletta: "gl", pugno: "pr", montagna: "bm", cavallo: "cs", dungeon: "dg", razzo: "rz", quartiere: "sq", titano: "ft", ducati: "td", grigio: "gr", colline: "ml", campetto: "cm", trono: "tc", mondi: "tm", lampioni: "nl", stagione: "sf", mantello: "mg", cronache: "cc", torneo: "ts", spazio: "so", dopo: "ep", detective: "dc", vento: "ve", muro: "mu", cristalli: "cr", doppio: "dt", libro: "lb", abisso: "abi", ragnarok: "rag", belovodia: "bv", bilancia: "fe", ombre: "omb", shogun: "sh", phantom: "pg", pirati: "pi", alchimia: "al", kronenburg: "kb", chrono: "chr", vallombra: "vl" };
   const BORGO_PFX = ["sv", "rb", "sb", "cg", "hd", "md", "ac"];
   function perSections() {
     const A = api(); if (!A || !A.BIO) return [];
@@ -1784,7 +1795,7 @@
 
   // ---------------------------------------------------------------- GUARDAROBA
   const KIND = { shirt: ["Maglie", "shirt", "👕"], hairc: ["Colori capelli", "hair", "🎨"], style: ["Tagli", "style", "💇"], acc: ["Accessori", "acc", "🧢"], shot: ["Tiri speciali", "shot", "⚡"], other: ["Da collezione", null, "🏅"] };
-  const SRC = [["ci_", "🎪 Il Circo Zampanò"], ["rf_", "📻 Radio Fuorigioco"], ["lb_", "📖 Libro"], ["dt_", "🪞 Doppio Turno"], ["cr_", "💎 Cristalli"], ["mu_", "🧱 Il Muro"], ["vl_", "⛰️ Vallombra"], ["kb_", "👑 Kronenburg"], ["al_", "⚗️ Alchimia"], ["pi_", "🏴‍☠️ Pirati"], ["omb_", "🌃 Ombre"], ["sh_", "⚔️ Shogun"], ["feudi_", "⚖️ Bilancia"], ["bv_", "🌲 Belovodia"], ["rag_", "🔥 Ragnarok"]];
+  const SRC = [["tp_", "📰 La Tipografia di Mezzanotte"], ["ci_", "🎪 Il Circo Zampanò"], ["rf_", "📻 Radio Fuorigioco"], ["lb_", "📖 Libro"], ["dt_", "🪞 Doppio Turno"], ["cr_", "💎 Cristalli"], ["mu_", "🧱 Il Muro"], ["vl_", "⛰️ Vallombra"], ["kb_", "👑 Kronenburg"], ["al_", "⚗️ Alchimia"], ["pi_", "🏴‍☠️ Pirati"], ["omb_", "🌃 Ombre"], ["sh_", "⚔️ Shogun"], ["feudi_", "⚖️ Bilancia"], ["bv_", "🌲 Belovodia"], ["rag_", "🔥 Ragnarok"]];
   const srcOf = (id) => { const s = SRC.find(([p]) => id.startsWith(p)); return s ? s[1] : "⚽ Borgo e Storia"; };
   const kindOf = (c) => (c && KIND[c.kind] ? c.kind : "other");
   const GF = { kind: "shirt", src: "", sel: null };

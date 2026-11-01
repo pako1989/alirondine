@@ -163,5 +163,42 @@
     E3("Il Picchetto Allentato", "🎪", "Una raffica di tramontana scuote il telo maestro prima dell'apertura.", ["Il vento di Pian dei Venti gonfia il tendone cremisi come una vela e un picchetto d'ottone comincia a cedere.", "Il pubblico sta già entrando coi biglietti in mano: come tieni su la cupola?"],
       [["Slancio acrobatico sulla fune", "audacia", "Salta al volo sul tirante.", "Ti aggrappi alla gomena e col peso del salto ribatti il picchetto a tempo di marcia: il pubblico crede sia il prologo e applaude!", "La fune ti fa rimbalzare sul mucchio di fieno: Tonio suona una strombazzata comica per coprirti."], ["Doppio nodo di galloccia", "furbizia", "Usa il rinvio del carro argano.", "Fai scorrere il cavo attorno al mozzo di ferro del carro cucina: tensione perfetta al millimetro!", "La corda scivola sulla pece umida: ci vuole una mano in più per fissarla."], ["Chiama Golia e tutta la pista", "cuore", "Uno strappo tutti insieme.", "Artisti e maschere tirano a una sola voce: il tendone non trema più e la serata si apre col sorriso.", "Siete in troppi attorno allo stesso picchetto e vi pestate i piedi, ma il telo regge."]]),
     TW("Pioggia di Coriandoli d'Oro", "🎊", "Dalla cupola si apre il cesto del Gran Gala sopra le prime file.", "I coriandoli brillano sotto l'occhio di bue: gli spettatori lanciano gettoni d'ottone in pista!", "Un colpo d'aria porta metà dei coriandoli sul carro cucina, ma la festa resta allegra.", (c, w) => (w ? Math.round(c * 1.3) : Math.round(c * 0.9))));
+
+  window.__carteDecks.register({
+    id: "tp",
+    t: "Mazzo · La Tipografia di Mezzanotte",
+    e: "📰",
+    d: "Dieci carte dalla Borgo Alta del 1968: righe di piombo fuso, edicole in ferro battuto verde, schedine del Bar Sport e lampi al magnesio.",
+    lock: "Concludi «La Tipografia di Mezzanotte · L'Ultima Edizione»",
+    unlock: (c) => c.finished("ali-di-rondine.tipografia"),
+    amb: {
+      linotype: { n: "Il Bancone di Piombo", i: "🖨️", zone: "cd_cantiere", at: [12, 8], d: "Odore d'inchiostro caldo, cassettiere di caratteri Bodoni e bozze umide appese allo spago." },
+      edicola: { n: "Il Chiosco Verde all'Alba", i: "🗞️", zone: "cd_mercato", at: [10, 7], d: "Locandine gialle inchiodate al legno, profumo di caldarroste e pacchi legati col filo di canapa." }
+    },
+    pg: {
+      goffredo: { id: "tp_goffredo", n: "Mastro Goffredo", i: "🔩", tr: "cuore", d: "Capo linotipista dal 1936: compone righe di piombo a occhi chiusi e ascolta il cuore delle rotative.", greet: (a) => `Buonasera da ${a}, ragazzo. Il piombo è in temperatura: componiamo una bella pagina!`, win: "Riga giustificata al millimetro! Questa mano non ha nemmeno un refuso.", lose: "Un carattere capovolto nella riga... poco male, si rifonde nel crogiolo e si riparte." },
+      tino: { id: "tp_tino", n: "Tino Strillo", i: "📣", tr: "audacia", d: "Capo degli strilloni col berretto di traverso: corre sul selciato con cinquanta copie fresche in spalla.", greet: (a) => `Edizione straordinariaaa qui a ${a}! Chi perde porta i pacchi fino in piazza!`, win: "Vendute tutte le copie in dieci minuti! Che scatto sulla fascia!", lose: "Mi si è sciolto lo spago del pacco in curva... ma la voce regge ancora!" }
+    },
+    ev: {
+      rotativa: E3("Il Nastro Inceppato", "⚙️", "A cinque minuti dal furgone dell'alba, un rullo della Marinoni rallenta.", ["La grande rotativa del 1928 sbuffa vapore d'inchiostro a {a}: un foglio di traverso minaccia di strappare la bobina.", "Fuori gli strilloni battono già i piedi dal freddo. Come salviamo la tiratura?"], [
+        ["Regola il tendicarta al volo", "audacia", "Mano ferma tra i cilindri.", "Sfili il lembo piegato con un gesto netto e il rullo riprende a cantare a pieni giri tra gli applausi!", "Ti macchi di nero fino ai gomiti: il foglio passa storto ma leggibile."],
+        ["Allenta di mezzo giro la vite d'ottone", "furbizia", "Orecchio meccanico da tipografo.", "La tensione si riequilibra al millimetro: escono copie nitide come incisioni d'arte!", "Stringi dal verso opposto e salta una riga di titolo, ma la tiratura è salva."],
+        ["Chiama tutta la redazione ai rulli", "cuore", "Ognuno tiene un lembo.", "Cronisti, linotipisti e portieri girano il volano a braccia finché il motore riparte: che squadra!", "Siete stretti attorno ai cilindri e vi pestate i piedi ridendo, ma i pacchi partono in orario."]
+      ]),
+      schedina: E3("La Colonna del Totocalcio", "📋", "Al Bar Sport manca un solo risultato per il Tredici della domenica.", ["Attorno alla lavagna di gesso di {a} venti avventori trattengono il fiato con la matita copiativa a mezz'aria.", "La radiolina gracchia sul più bello: come gestisci la febbre della schedina?"], [
+        ["Sali su una sedia e fai la radiocronaca", "audacia", "Improvvisa con brio.", "Racconti gli ultimi minuti con tale foga che tutto il bar esulta e ti offre il giro!", "Ti inventi un rigore di troppo e la radiolina ti smentisce subito dopo tra le risate."],
+        ["Ripara il contatto della valvola", "furbizia", "Un colpetto col cucchiaino.", "Un tocco preciso sul condensatore e la voce dello stadio torna limpidissima: è X fisso!", "Tocca la manopola sbagliata e parte un tango a tutto volume nel bel mezzo del novantesimo."],
+        ["Metti d'accordo i litiganti al bancone", "cuore", "Una tazzina di pace.", "Dividi la posta della schedina di gruppo in parti uguali: brindano persino i rivali di quartiere.", "Continuano a discutere sul fuorigioco fino a sera, ma con il sorriso sulle labbra."]
+      ])
+    },
+    sf: {
+      magnesio: { base: "riflesso", n: "Lampo al Magnesio", i: "📸", q: "audacia", d: "Scatta nell'istante esatto in cui il pallone entra nel riquadro d'oro di Clara!" },
+      bozze: { base: "memoria", n: "Correzione di Bozze", i: "🖋️", q: "furbizia", d: "Memorizza l'ordine dei caratteri di piombo sul compositoio prima che vadano in pressa." }
+    },
+    tw: {
+      straordinaria: TW("Edizione Straordinaria!", "📰", "Gli strilloni escono in piazza col supplemento ancora tiepido.", "Le copie vanno a ruba davanti alle edicole verdi: gli incassi raddoppiano il premio!", "Uno scroscio d'ottobre bagna le prime locandine, ma i lettori fedeli comprano lo stesso.", (c, w) => (w ? Math.round(c * 1.3) : Math.round(c * 0.9))),
+      negativo: TW("Il Negativo Ritrovato", "🎞️", "Dalla bacinella rossa della camera oscura affiora un dettaglio inatteso.", "Lo scatto sotto la luce inattinnica svela il colpo vincente: applausi e premio maggiorato!", "Un velo di luce filtra dalla tenda e ammorbidisce i contorni, lasciando comunque un bel ricordo.", (c, w) => (w ? Math.round(c * 1.25) : Math.round(c * 0.9)))
+    }
+  });
 })();
 

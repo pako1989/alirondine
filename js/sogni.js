@@ -19,6 +19,7 @@
   const safe = (fn, d) => { try { return fn(); } catch (e) { return d; } };
   // le saghe da cui vengono le carte: chiave di salvataggio, nome, colore
   const SAGHE = {
+    tipografia: ["ali-di-rondine.tipografia", "La Tipografia di Mezzanotte · L'Ultima Edizione", "#1f6f54", "__tipografia"],
     zampano: ["ali-di-rondine.zampano", "Il Circo Zampanò · La Pista di Segatura", "#dc2626", "__zampano"],
     falsari: ["ali-di-rondine.falsari", "I Falsari della Coppa", "#d97706", "__falsari"],
     moviola: ["ali-di-rondine.moviola", "L'Ombra della Moviola · Tele-Rondine '84", "#ca8a04", "__moviola"],
@@ -319,6 +320,14 @@
     ["ci_lila", "zampano", "e", 86, 60, 88, "A", 1],
     ["ci_zampano", "zampano", "e", 68, 76, 86, "C", 3],
     ["ci_orloff", "zampano", "l", 84, 78, 90, "A", 4],
+    // La Tipografia di Mezzanotte · L'Ultima Edizione
+    ["tp_tino", "tipografia", "c", 74, 52, 68, "A", 1],
+    ["tp_oreste", "tipografia", "c", 54, 72, 64, "P", 1],
+    ["tp_beppe", "tipografia", "r", 58, 84, 62, "D", 1],
+    ["tp_clara", "tipografia", "r", 78, 56, 82, "A", 2],
+    ["tp_livia", "tipografia", "e", 60, 74, 86, "C", 3],
+    ["tp_goffredo", "tipografia", "e", 66, 82, 84, "D", 3],
+    ["tp_ada", "tipografia", "l", 82, 74, 90, "C", 4],
   ];
   // [id, saga, rarità (c r e l), attacco, difesa, tecnica, ruolo]
   const CARDS = [
@@ -490,6 +499,7 @@
     te_valenti: "Nel corridoio non c'è spazio per le finte: solo per la freddezza d'agente.", te_elena: "Il pallone è come un dispaccio cifrato: chi lo sa leggere vince la partita.", te_klaus: "Fischietto e orario: il convoglio fende la neve senza fermarsi mai.", te_boris: "Gettare carbone e tenere il muro: la locomotiva non arretra!", te_morozov: "Un passaggio dosato al millimetro è la miglior medicina contro il pressing.",
     rf_wanda: "Tre gettoni sul bancone e un lancio lungo sul secondo palo: linea libera!", rf_tullio: "Stringi i bulloni e marca a uomo: da questa difesa non filtra una goccia.", rf_lupo: "Lato B sul piatto, volume a dieci e guantoni caldi sotto la traversa!", rf_valvola: "Sento il fischio delle cuciture nel vento: l'anticipo è già partito.", rf_nilde: "Qui Radio Fuorigioco 99.9: microfono aperto e palla dritta sotto l'incrocio!", rf_valli: "Articolo quattro del buon calcio: testa alta, rispetto e geometria pulita.", rf_cesare: "Finché una radiolina resta accesa sugli scogli, il Molo Vecchio non finisce mai.",
     ci_tonio: "Un colpo di tromba in la bemolle e il pallone gira in valzer sopra la barriera!", ci_ercole: "Due quintali di ghisa alle nove, minestrone alle undici e muro d'area la domenica.", ci_lila: "Lassù tra una sbarra e l'altra non appartieni a nessun padrone: guarda che volo!", ci_zampano: "Signore e signori, nella segatura del Circo Zampanò ogni tiro è un salto nel cuore!", ci_orloff: "Riflettori puntati e cilindro nero: l'incrocio dei pali è questione di puro spettacolo.",
+    tp_tino: "Edizione straordinariaaa! Sulla fascia destra corro più veloce del furgoncino delle cinque!", tp_oreste: "Apro il chiosco alle cinque del mattino e chiudo lo specchio della porta fino a sera.", tp_beppe: "Calma da tranviere sul numero quattro: da questa linea d'area non si passa senza biglietto.", tp_clara: "Inquadratura a fuoco, lampo al magnesio e contropiede immortalato per la prima pagina!", tp_livia: "Cucito a filo refe come il rogito del 1921: questo passaggio non si strappa mai.", tp_goffredo: "Quarant'anni di piombo caldo insegnano che una squadra vera si compone lettera per lettera.", tp_ada: "Rotativa Marinoni a pieno regime: la verità e questo gol vanno in stampa senza tagli!",
   };
   // le squadre inventate della Stagione dei Sogni e del Draft
   const TEAMS = [
@@ -501,10 +511,11 @@
     { name: "Union Cometa", color: "#7a5ad8", style: "contropiede", f: 73, pl: ["Coda", "Chioma", "Nucleo", "Scia"] },
     { name: "I Leggendari del Faro", color: "#1a2a4a", style: "equilibrata", f: 76, pl: ["Lampo", "Vedetta", "Scoglio", "Fanale"] },
   ];
-  const ENG = ["caveau", "rottami", "zonarossa", "roulette", "corrente", "marea", "vignette", "bottoni", "luci", "nastro", "concilio", "lavagna", "duello", "atb", "gadget", "iso", "volo", "combo", "consegna", "ciak", "ipogeo", "pallatempo", "giroegol", "rebound", "corridoio", "anello"];
+  const ENG = ["caveau", "rottami", "zonarossa", "roulette", "corrente", "marea", "vignette", "bottoni", "luci", "nastro", "concilio", "lavagna", "duello", "atb", "gadget", "iso", "volo", "combo", "consegna", "ciak", "ipogeo", "pallatempo", "giroegol", "rebound", "corridoio", "anello", "flash68"];
   const RAR = { c: ["Comune", "#9aa5b1", 1], r: ["Rara", "#3a8ad8", 2], e: ["Epica", "#a85ad8", 3], l: ["Leggendaria", "#ffd23f", 4] };
   // i legami tra saghe diverse: +3 di intesa se entrambi in squadra
   const LINKS = [
+    ["tp_ada", "rf_nilde", "Voci Libere del '68 e '77"], ["tp_clara", "dc_agata", "Obiettivo e Taccuino"], ["tp_goffredo", "bur_taddeo", "Mastri di Piombo e di Pioppo"],
     ["ci_tonio", "bp_rocco", "Trombe e Bombardini"], ["ci_lila", "bur_colombina", "Funi e Fili d'Aria"], ["ci_zampano", "bur_taddeo", "Vecchi Capocomici"], ["ci_ercole", "lt_ferro", "Ghisa e Latta"], ["ci_orloff", "bur_duca", "Palchi d'Oro"],
     ["bur_taddeo", "lt_ferro", "Bottega e Fonderia"], ["bur_colombina", "dc_agata", "Intrighi alla Ribalta"], ["bur_duca", "bur_taddeo", "L'Arte e la Corte"],
     ["leo", "dario", "I Fratelli Moretti"], ["leo", "nico", "Dal Muro del Porto"], ["leo", "tommy", "Uno-Due del Campetto"],
@@ -2464,6 +2475,7 @@
       rottami: `anteprima del tiro più lunga +${T.at * 5} (ATT), scudo più alto +${T.df * 3 + (sin && modKey === "catenaccio" ? 2 : 0)} (DIF), vento di sabbia -${T.te * 10}% (TEC)`,
       roulette: `fiches scudo +${T.df + (sin && modKey === "catenaccio" ? 1 : 0)} (DIF), precisione carambola +${T.at * 5}% (ATT), gettoni turbo +${(I >= 7 ? 1 : 0) + (T.te >= 2 ? 1 : 0)} (TEC)`,
       atb: `statistiche +${Math.floor(I / 2.5) + (sin ? 2 : 0)}, tiro +${T.at} (ATT), difesa +${T.df} (DIF), passaggio +${T.te} (TEC)`,
+      flash68: `tiro +${T.at * 6}% (ATT), contrasto +${T.df * 6}% (DIF), mirino di Clara +${T.te * 6}% (TEC)`,
     }[m] || "";
     return pre + txt;
   }
@@ -2497,6 +2509,7 @@
       zonarossa: { mate: names[0], us: "La Squadra dei Sogni" },
       roulette: { mates: names.slice(0, 2), us: "La Squadra dei Sogni" },
       atb: { heroSt: { tiro: 16 + Math.floor(I / 2.5) + T.at + (sin ? 2 : 0), pass: 14 + Math.floor(I / 2.5) + T.te + (sin ? 2 : 0), dif: 12 + Math.floor(I / 2.5) + T.df + (sin ? 2 : 0), vel: 15 + Math.floor(I / 2.5) + Math.floor(T.te / 2) + (sin ? 2 : 0) } },
+      flash68: { mates: names.slice(0, 2), us: "La Squadra dei Sogni", buffs: (T.te >= 2 ? ["lente_grandangolo"] : []).concat(I >= 6 ? ["flash_extra"] : []) },
     }[m] || {};
   }
   // gioca una partita dei Sogni nel motore m; opp = avversario (se manca, quello della sfida del Torneo); onRes(res) alla fine
