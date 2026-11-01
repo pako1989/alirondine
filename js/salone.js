@@ -614,8 +614,15 @@
       opp: [{ name: "Fattorini Corriere Veloce", venue: "edicole", color: "#c83228", style: "equilibrata" }, { name: "Cantiere Sartori XI", venue: "acacie", color: "#d97706", style: "difensiva" }, { name: "Vigilanza Corriere Veloce", venue: "portico", color: "#334155", style: "pressing" }],
       boss: { name: "Real Stampa Moderna", venue: "stadio", color: "#c83228", style: "pressing" },
       opts: (o, h, boss) => ({ title: `Flash & Contropiede '68 · ${o.name}`, venue: boss ? "stadio" : (o.venue || "edicole"), boss: !!boss, umbrellas: !!boss, opp: o.name, oppColor: o.color, oppStyle: o.style, us: (h && h.name) ? `U.S. Acacie · ${h.name}` : "U.S. Acacie '68", tutorial: false }) },
+    { id: "staffetta", t: "La Staffetta dei Legami", e: "⚡", saga: "arena", eng: "__staffetta", d: "La sfida a cambi rapidi dell'Arena: due titolari in campo e tre riserve in panchina. Attiva le risonanze segrete tra saghe, scatena cut-in animati e supera le cinque ondate dei rivali." },
   ];
-  function sgState(m) { const s = SAGAS.find((x) => x.id === m.saga), x = s ? state(s) : null; return { s, open: !!(x && (x.doneN >= 1)), boss: !!(x && x.endsFound > 0) }; }
+  function sgState(m) {
+    if (m.id === "staffetta") {
+      const on = window.__staffetta && window.__staffetta.on ? window.__staffetta.on() : true;
+      return { s: { t: "Squadra dei Sogni & Arena" }, open: on, boss: true };
+    }
+    const s = SAGAS.find((x) => x.id === m.saga), x = s ? state(s) : null; return { s, open: !!(x && (x.doneN >= 1)), boss: !!(x && x.endsFound > 0) };
+  }
   function openSalaGiochi(back) {
     if (back) BK.sg = back; BACK = BK.sg; const body = shell("🕹️ Sala Giochi"), r = sgRec(), D = window.__sagaCore && window.__sagaCore.DIFFS;
     let html = `<p class="sum">I motori di partita originali delle saghe, da giocare liberi. Finisci il primo capitolo di una saga per accendere il suo cabinato; finisci la saga per sfidare il suo boss.</p>`;
@@ -627,7 +634,15 @@
       return `<div class="psec" data-c="${c.id}"><div class="pe">${op ? c.e : "🔒"}</div><div><b>${op ? esc(c.t) : "Prova di Vallombra"}</b><span>${op ? esc(c.d) : "Ancora da incontrare nella saga."}</span></div><div class="n">${op && b != null ? esc(c.unit(b)) : ""}</div></div>`; }).join("");
     body.innerHTML = html;
     body.querySelectorAll("[data-diff]").forEach((b) => (b.onclick = () => { const r2 = sgRec(); r2.diff = b.dataset.diff; sgSave(r2); openSalaGiochi(); }));
-    body.querySelectorAll("[data-m]").forEach((b) => (b.onclick = () => { const m = MACHINES.find((x) => x.id === b.dataset.m); if (sgState(m).open) sgMachine(m); }));
+    body.querySelectorAll("[data-m]").forEach((b) => (b.onclick = () => {
+      const m = MACHINES.find((x) => x.id === b.dataset.m);
+      if (!m) return;
+      if (m.id === "staffetta" && window.__staffetta) {
+        window.__staffetta.open(() => openSalaGiochi());
+        return;
+      }
+      if (sgState(m).open) sgMachine(m);
+    }));
     body.querySelectorAll("[data-c]").forEach((b) => (b.onclick = () => { const c = SGC.find((x) => x.id === b.dataset.c); if (c && sgcSeen(c)) sgcPlay(c); }));
   }
   function sgMachine(m) {
