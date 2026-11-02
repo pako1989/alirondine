@@ -79,9 +79,11 @@
     const T = TEMI[temaOf(c.saga)];
     if (!started) return `Da una saga ${T[0]} ${T[1].toLowerCase()} che non hai ancora cominciato`;
     const nm = "«" + ((so.SAGHE[c.saga] || [])[1] || "una saga") + "»";
-    if (c.n) return safe(() => so.premio.on(), true) ? `Solo da bustina · entra tra le possibili più avanti in ${nm}` : `Più avanti nella storia di ${nm}`;
+    if (c.n) return safe(() => so._seen(c), false) ? `Già incontrato · ora può uscire in una bustina` : safe(() => so.premio.on(), true) ? `Più avanti in ${nm}: poi esce dalle bustine` : `Più avanti nella storia di ${nm}`;
     const pr = !!safe(() => so.premio.on(), true), bus = pr ? " o in una bustina" : " o nelle bustine";
-    if (pr) return { c: `Solo da bustina · esce perché hai cominciato ${nm}`, r: `Solo da bustina · le bustine rare arrivano andando avanti nelle saghe`, e: `Solo da bustina · le bustine epiche arrivano finendo le saghe`, l: `Solo da bustina · le bustine leggendarie arrivano scoprendo tutti i finali` }[c.rar] || `Solo da bustina`;
+    const met = safe(() => so._seen(c), false);
+    if (met) return `Già incontrato · ora può uscire in una bustina`;
+    if (pr) return { c: `Gioca ${nm}: dopo averlo incontrato esce dalle bustine`, r: `Va avanti con ${nm}: poi esce dalle bustine`, e: `Arriva in fondo a ${nm}: poi esce dalle bustine`, l: `Scopri tutti i finali di ${nm}: poi esce dalle bustine` }[c.rar] || `Solo da bustina`;
     return c.rar === "c" ? `Gira per ${nm}${bus}` : c.rar === "r" ? `Va avanti con ${nm}${bus}` : c.rar === "e" ? `Arriva in fondo a ${nm}` : `Solo per chi scopre tutti i finali di ${nm}`;
   }
 

@@ -15,14 +15,15 @@ async function run(w) {
   // la squadra e l'intesa: quattro del Campetto (6 coppie) + Brunilde
   for (const id of ["cm_bastiano", "cm_leone", "cm_saverio", "cm_pio", "tc_brunilde"]) { await page.evaluate((id) => document.querySelector(`.sgOv .coll [data-c="${id}"]`).click(), id); await page.waitForTimeout(80); }
   const I = await page.evaluate(() => window.__sogni.intesa(window.__sogni._load().team).n); if (I !== 8) errors.push("intesa: " + I);
-  // la bustina
+  // la bustina: esce solo un personaggio già incontrato (qui: una carta guadagnata ma tolta dalla collezione)
+  await page.evaluate(() => { const r = window.__sogni._load(); r.own = r.own.filter((x) => x !== "cm_pio"); r.cred = r.cred || {}; localStorage.setItem("ali-di-rondine.sogni", JSON.stringify(r)); window.__sogni.premio.setOn(true); });
   await page.evaluate(() => window.addCoins(500)); await page.evaluate(() => window.__sogni.open()); await page.waitForTimeout(200);
   const n0 = (await page.evaluate(() => window.__sogni._load().own)).length; await page.evaluate(() => document.querySelector('.sgOv [data-go="pack"]').click()); await page.waitForTimeout(300);
   if (!(await page.evaluate(() => !!document.querySelector(".sgOv .sgPackStage:not(.torn) .sgFoilWrap")))) errors.push("manca involucro bustina a strappo");
   await page.evaluate(() => { const b = document.querySelector(".sgOv [data-tear]"); if (b) b.click(); }); await page.waitForTimeout(200);
   if (!(await page.evaluate(() => !!document.querySelector(".sgOv .sgPackStage.torn")))) errors.push("la bustina non si strappa");
   if (w === 390) await L.shot(page, "sogni_bustina");
-  const n1 = (await page.evaluate(() => window.__sogni._load().own)).length; if (n1 !== n0 + 1) errors.push("la bustina non dà una carta");
+  const n1 = (await page.evaluate(() => window.__sogni._load().own)).length; if (n1 !== n0 + 1) errors.push("la bustina non dà una carta"); await page.evaluate(() => window.__sogni.premio.setOn(false));
   await page.evaluate(() => document.querySelector(".sgOv [data-ok]").click()); await page.waitForTimeout(200);
   // il Torneo dei Sogni: il Concilio (credibilità e corvi dalla squadra) e il Duello (grinta dall'intesa)
   await page.evaluate(() => document.querySelector('.sgOv [data-go="tour"]').click()); await page.waitForTimeout(200);

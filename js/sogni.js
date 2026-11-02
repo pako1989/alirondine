@@ -864,7 +864,9 @@
   }
   // le carte a capitoli (c.n) si sbloccano a capitolo concluso; le altre seguono la regola per rarità
   const earned = (c) => { const p = progress(c.saga); if (c.n) return !!p.done[c.n]; return c.rar === "c" ? p.ch >= 1 : c.rar === "r" ? p.ch >= 2 : c.rar === "e" ? p.ch >= 3 || p.ends >= 1 : p.ends >= 4; };
-  const drop = (c) => !c.n || earned(c); // le carte a capitoli non escono a sorpresa prima di averle guadagnate
+  const drop = (c) => !c.n || earned(c);
+  // VISTE: bustine e premi danno solo carte di personaggi già incontrati (il punto della saga che le sblocca è raggiunto). Niente sconosciuti.
+  const seen = (c) => earned(c); // le carte a capitoli non escono a sorpresa prima di averle guadagnate
   // BUSTINE PREMIO (opzione «Carte dai premi»): con l'opzione accesa i capitoli e i finali non regalano più la carta ma una bustina gratis
   // di quella rarità (la carta resta una sorpresa). Le carte già possedute non si toccano. Spenta = sblocchi diretti come prima.
   const PREMK = "ali-di-rondine.sogni-premio";
@@ -2315,7 +2317,7 @@
   }
   function pack() {
     const coins = safe(() => window.__borgoApi.coins(), 0); if (coins < PACK) return;
-    const r = load(), started = Object.keys(SAGHE).filter((k) => progress(k).ch >= 1), pool = CARDS.filter((c) => drop(c) && !r.own.includes(c.id) && (started.includes(c.saga) || c.rar === "c"));
+    const r = load(), pool = CARDS.filter((c) => seen(c) && !r.own.includes(c.id));
     if (!pool.length) return dupPack(r);
     safe(() => window.addCoins(-PACK), 0);
     let pl = pool, po = premOn(); r.pk10 = (r.pk10 | 0) + 1;
@@ -2326,8 +2328,8 @@
   }
   // bustina premio (gratis): una carta a sorpresa della rarità guadagnata, dalle saghe cominciate; se non c'è, la più vicina; se non c'è nulla, esperienza o monete
   function openPrem() {
-    const r = load(); if (!r.prem.length) return; const rar = r.prem[0], started = Object.keys(SAGHE).filter((k) => progress(k).ch >= 1);
-    const base = CARDS.filter((c) => !r.own.includes(c.id) && drop(c) && (started.includes(c.saga) || c.rar === "c"));
+    const r = load(); if (!r.prem.length) return; const rar = r.prem[0];
+    const base = CARDS.filter((c) => !r.own.includes(c.id) && seen(c));
     let pool = base.filter((c) => c.rar === rar);
     if (!pool.length) { const d = (c) => Math.abs(RAR[c.rar][2] - RAR[rar][2]); const m = base.length ? Math.min(...base.map(d)) : 0; pool = base.filter((c) => d(c) === m); }
     r.prem.shift();
@@ -2587,7 +2589,7 @@
     const s = SFIDE[i], r = load();
     launch(s.m, s.opp, `Torneo dei Sogni ${i + 1}/8 · ${engName(s.m)}`, r.team, i >= 6, (res) => {
       const ups = gainXp(r.team, res.win), r2 = load(); let msg = res.win ? "Sfida vinta!" : "Sfida persa: si può rigiocare.";
-      if (res.win && !r2.won.includes(i)) { r2.won.push(i); safe(() => window.addCoins(40), 0); const pool = CARDS.filter((c) => drop(c) && !r2.own.includes(c.id)); if (pool.length) { const got = pool[Math.floor(Math.random() * pool.length)]; r2.own.push(got.id); save(r2); return levelUps(ups, () => reveal(got.id, "Premio della sfida · +40 monete", torneo)); } }
+      if (res.win && !r2.won.includes(i)) { r2.won.push(i); safe(() => window.addCoins(40), 0); const pool = CARDS.filter((c) => seen(c) && !r2.own.includes(c.id)); if (pool.length) { const got = pool[Math.floor(Math.random() * pool.length)]; r2.own.push(got.id); save(r2); return levelUps(ups, () => reveal(got.id, "Premio della sfida · +40 monete", torneo)); } }
       save(r2); levelUps(ups, () => { torneo(); const sm = OV && OV.querySelector(".sum"); if (sm) sm.insertAdjacentHTML("afterbegin", `<b>${msg}</b> `); });
     }, torneo);
   }
@@ -2668,7 +2670,7 @@
       const sin = modSintonia(r.modulo, team);
       s2.last = `<b>Giornata ${s2.day + 1}: Sogni ${ga}-${gb} ${esc(T.name)}</b>${isSim ? ` (simulata · Modulo ${esc(mName)}${sin ? " ✨" : ""})` : ""}. ${others.map(esc).join(" · ")}.`;
       s2.day++; let prize = null;
-      if (s2.day >= 7 && ranking(s2)[0] === -1) { r2.titles++; safe(() => window.addCoins(80), 0); const pool = CARDS.filter((c) => drop(c) && !r2.own.includes(c.id)), rare = pool.filter((c) => c.rar !== "c"); const pick = (rare.length ? rare : pool); if (pick.length) { prize = pick[Math.floor(Math.random() * pick.length)].id; r2.own.push(prize); } else safe(() => window.addCoins(100), 0); s2.last += " <b>Scudetto dei Sogni! +80 monete.</b>"; }
+      if (s2.day >= 7 && ranking(s2)[0] === -1) { r2.titles++; safe(() => window.addCoins(80), 0); const pool = CARDS.filter((c) => seen(c) && !r2.own.includes(c.id)), rare = pool.filter((c) => c.rar !== "c"); const pick = (rare.length ? rare : pool); if (pick.length) { prize = pick[Math.floor(Math.random() * pick.length)].id; r2.own.push(prize); } else safe(() => window.addCoins(100), 0); s2.last += " <b>Scudetto dei Sogni! +80 monete.</b>"; }
       r2.season = s2; save(r2);
       const ups = gainXp(team, ga > gb, isSim);
       levelUps(ups, () => (prize ? reveal(prize, "Premio dello scudetto", stagione) : stagione()));
@@ -3041,5 +3043,5 @@
   }
   // la Maglia dei Sogni nel guardaroba (si registra all'avvio, così resta anche dopo aver ricaricato la pagina)
   (function reg() { const A = window.__borgoApi; if (!A || !A.COSM) return setTimeout(reg, 200); if (!A.COSM.sg_maglia) A.COSM.sg_maglia = { kind: "shirt", label: "Maglia dei Sogni", val: "#7a5ad8", from: "Vinci il Torneo dei Sogni (Salone delle Saghe)" }; })();
-  window.__sogni = { _progress: progress, premio: { on: premOn, setOn: premSet, open: openPrem }, squad, lineup, SAGHE, BY, eff, name, port, _save: save, open, close: closeAll, _launch: launch, _tiers: tiers, CARDS, LINKS, SFIDE, TEAMS, FRASI, intesa, forza, sync, stagione, draft, stars: (id) => { XPC = load().xp; return starsOf(id); }, _load: load, MODULI, modSintonia, openModDetail, openCardLore, combo: getTeamCombo, openVoci, openVoceScene, recordVoci, vociStats, pairKey, BOND_GOAL, toggleBench, autoBench, switchPreset, renamePreset, presetsBarHtml, bindPresetsBar, gainXp, levelUps };
+  window.__sogni = { _progress: progress, _seen: seen, premio: { on: premOn, setOn: premSet, open: openPrem }, squad, lineup, SAGHE, BY, eff, name, port, _save: save, open, close: closeAll, _launch: launch, _tiers: tiers, CARDS, LINKS, SFIDE, TEAMS, FRASI, intesa, forza, sync, stagione, draft, stars: (id) => { XPC = load().xp; return starsOf(id); }, _load: load, MODULI, modSintonia, openModDetail, openCardLore, combo: getTeamCombo, openVoci, openVoceScene, recordVoci, vociStats, pairKey, BOND_GOAL, toggleBench, autoBench, switchPreset, renamePreset, presetsBarHtml, bindPresetsBar, gainXp, levelUps };
 })();
