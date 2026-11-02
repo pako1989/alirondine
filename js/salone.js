@@ -615,6 +615,10 @@
       opp: [{ name: "Fattorini Corriere Veloce", venue: "edicole", color: "#c83228", style: "equilibrata" }, { name: "Cantiere Sartori XI", venue: "acacie", color: "#d97706", style: "difensiva" }, { name: "Vigilanza Corriere Veloce", venue: "portico", color: "#334155", style: "pressing" }],
       boss: { name: "Real Stampa Moderna", venue: "stadio", color: "#c83228", style: "pressing" },
       opts: (o, h, boss) => ({ title: `Flash & Contropiede '68 · ${o.name}`, venue: boss ? "stadio" : (o.venue || "edicole"), boss: !!boss, umbrellas: !!boss, opp: o.name, oppColor: o.color, oppStyle: o.style, us: (h && h.name) ? `U.S. Acacie · ${h.name}` : "U.S. Acacie '68", tutorial: false }) },
+    { id: "tornadritto", t: "Torna Dritto", e: "🧱", saga: "leo", eng: "__tornadritto", d: "Il tiro contro il muro del porto di L'Estate del Muro: trascina per lanciare, leggi il vento e l'onda che si porta via i palloni bassi, e fai tornare il pallone dritto nelle tue mani.",
+      opp: [{ name: "Il muro di giorno", rounds: 6, need: 3, wind: 0.6, color: "#0ea5e9", style: "equilibrata" }, { name: "Il vento di Ferragosto", rounds: 8, need: 5, wind: 1.2, color: "#f59e0b", style: "contropiede" }, { name: "L'onda lunga", rounds: 8, need: 5, wind: 1, waves: true, color: "#1d4ed8", style: "pressing" }],
+      boss: { name: "L'ultimo tiro", rounds: 10, need: 7, wind: 1.4, waves: true, color: "#6366f1", style: "pressing" },
+      opts: (o) => ({ title: `Torna Dritto · ${o.name}`, rounds: o.rounds || 8, need: o.need || 5, wind: o.wind == null ? 1 : o.wind, waves: !!o.waves, tutorial: false }) },
     { id: "staffetta", t: "La Staffetta dei Legami", e: "⚡", saga: "arena", eng: "__staffetta", d: "La sfida a cambi rapidi dell'Arena: due titolari in campo e tre riserve in panchina. Attiva le risonanze segrete tra saghe, scatena cut-in animati e supera le cinque ondate dei rivali." },
   ];
   function sgState(m) {

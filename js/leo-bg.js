@@ -77,6 +77,14 @@
       for (let i = 0; i < 14; i++) { const a = i / 14 * 6.283; R(g, fx + Math.cos(a) * ph * 26, fy + Math.sin(a) * ph * 26 + ph * ph * 10, 2, 2, `rgba(${[255, 250, 120][k]},${[200, 120, 255][k]},120,${1 - ph})`); }
       R(g, 0, 160, W, 4, "rgba(255,255,255,.25)"); VIG(g, W, H, 0.3);
     },
+    lm_notte(g, W, H, f) {
+      VG(g, 0, 130, "#0f172a", "#312e81"); g.fillRect(0, 0, W, 130); C(g, 80, 44, 22, "#fef9c3"); GL(g, 80, 44, 110, "254,240,160", 0.35);
+      for (let i = 0; i < 60; i++) R(g, rnd(i + 3) * W, rnd(i + 21) * 90, 1, 1, `rgba(255,255,255,${0.3 + 0.5 * Math.abs(Math.sin(f / 22 + i))})`);
+      waves(g, W, 124, 34, f, "#1e3a8a", "#020617"); R(g, 0, 154, W, 46, "#6b7280");
+      R(g, 232, 30, 88, 126, "#8a8f98"); for (let r = 0; r < 10; r++) R(g, 232, 38 + r * 12, 88, 1, "#4b5563"); C(g, 262, 100, 12, "rgba(190,40,40,.6)"); C(g, 292, 86, 5, "rgba(190,40,40,.4)");
+      boy(g, 190, 176, 1.6, "#1d4ed8", "#2b1d14", f, 2, true); boy(g, 150, 180, 1.5, "#e5e7eb", "#6b5b4b", f, 6, false); R(g, 40, 160, 46, 12, "#1f2937");
+      R(g, 60, 150, 8, 12, "#475569"); GL(g, 64, 146, 50, "255,230,170", 0.3 + 0.1 * Math.sin(f / 12)); VIG(g, W, H, 0.45);
+    },
     lm_casa(g, W, H, f) {
       VG(g, 0, 200, "#7c5a36", "#4a3220"); g.fillRect(0, 0, W, 200); for (let x = 0; x < W; x += 28) R(g, x, 0, 2, 130, "#5b3d22");
       R(g, 0, 130, W, 70, "#a77c4b"); for (let x = 0; x < W; x += 44) R(g, x, 130, 1, 70, "rgba(0,0,0,.25)");
@@ -94,6 +102,7 @@
     lm_pensione: [[30, 80, 110, 58, "🛎️ Il banco della reception. Il campanello suona solo se glielo chiedi con garbo."], [190, 90, 70, 50, "🧥 Un uomo in beige in pieno agosto. Prende appunti. Non suda: dev'essere un talento."], [170, 30, 110, 66, "🌊 La finestra sul porto. Dalla pensione si vede tutto, compreso chi si allena di nascosto."]],
     lm_alba: [[232, 30, 88, 126, "🧱 Il muro all'alba: due macchie rosse, una grande e una piccola. La piccola è di una mano."], [30, 150, 70, 50, "⛵ Una barca capovolta. Sotto, una sveglia a molla con un calzino sopra."], [140, 130, 60, 66, "⚽ Dario, il pallone, il muro. Un tiro dopo l'altro, senza spettatori. O quasi."]],
     lm_piazza: [[100, 90, 124, 50, "🎺 Il palco di assi. La banda suona tre note su quattro, ma con convinzione."], [20, 150, 100, 50, "🍟 Le bancarelle del fritto. Si sente l'odore dal molo."], [230, 20, 80, 70, "🎆 I fuochi sul molo: pochi, corti, amatissimi."]],
+    lm_notte: [[232, 30, 88, 126, "🧱 Il muro di notte: la macchia grande è nera, la piccola è la mano di Dario."], [30, 146, 70, 40, "🎒 Una borsa mezza piena. Tra le cose, un pallone che sembra stanco."], [60, 20, 100, 60, "🌕 La luna sul porto. Stanotte non la guarda nessuno, a parte tre persone."]],
     lm_casa: [[210, 24, 76, 60, "🌊 La finestra sul porto: si vede il muro. E il pallone, probabilmente."], [20, 60, 80, 70, "🛏️ Il letto a castello. Sopra Dario, sotto Leo. La scaletta ha un gradino rotto."], [130, 90, 66, 44, "✉️ Il tavolo con un biglietto del treno piegato in quattro. Non è tuo."]]
   };
   function reg(n) {

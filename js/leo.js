@@ -99,6 +99,8 @@
         c4_banda: { zone: "lm_piazza", at: [18, 7], t: "La banda stonata", d: "Nel racconto la banda suona un inno. Nella versione vera suona tre note su quattro, con convinzione, e il trombone è di Rocco, che si ferma per salutare." },
         c4_coppa: { zone: "lm_piazza", at: [16, 12], t: "La coppa di latta", d: "Nel racconto la coppa è d'oro. Questa è latta verniciata, con un'ammaccatura a forma di pallone. Sotto c'è scritto, a mano: «Vince chi si diverte»." },
         c4_bancarella: { zone: "lm_piazza", at: [6, 8], t: "Il fritto di papà", d: "Mille acciughe, dice papà. Ne ho contate trecento. Ma le ha fritte tutte da solo, e questo è il numero che conta." },
+        c5_borsa: { zone: "lm_notte", at: [8, 10], t: "La borsa mezza vuota", d: "Nel racconto Dario parte con una valigia di cuoio e un'armatura da portiere. La borsa vera è una sacca da palestra, con un paio di calze, il pallone sgonfio e una foto in cui nessuno guarda l'obiettivo." },
+        c5_pietra: { zone: "lm_notte", at: [17, 11], t: "La pietra del piede", d: "Ai piedi del muro c'è una pietra piatta, dove Dario appoggiava il piede prima di ogni tiro. È consumata da tre estati. Sotto, forse, c'è qualcosa: ma bisogna averle viste tutte, le pagine, per sapere che si può guardare." },
         c3_orme: { zone: "lm_alba", at: [10, 10], t: "Le orme sul muro", d: "Il muro non ha una macchia. Ne ha due: una grande, del pallone, e una piccola, di una mano appoggiata a pensare." }
       }
     },
@@ -158,6 +160,7 @@
         H.cast("lm_rita", "Rita", "In sala", { style: "bun", hair: "#8a8a8a", shirt: "#be123c", skin: "#eec4a0", bg: ["#881337", "#fecdd3"] }, "Lavora in sala alla trattoria da quando Leo era piccolo. Ha sempre un'opinione e un vassoio.");
         H.cast("lm_gege", "Gegè Spinola", "Capo dei Granchi", { style: "messy", hair: "#8a5a2a", shirt: "#dc2626", skin: "#e8b88a", acc: ["cappellino"], cap: "#dc2626", bg: ["#7f1d1d", "#fecaca"] }, "Quindici anni, cappellino girato, il porto come regno. I suoi Granchi non hanno mai perso il torneo estivo.");
         H.cast("lm_quaglia", "Prof. Quaglia", "Osservatore milanese", { style: "slick", hair: "#cfc6b4", shirt: "#d6c7a1", skin: "#efcfb0", acc: ["occhiali", "taccuino"], bg: ["#57534e", "#f5f5f4"] }, "Un signore in completo beige in pieno agosto. Prende appunti su tutti, sorride a tutti e non dice per chi lavora.");
+        H.cast("lm_leo14", "Leo", "Quattordici anni", { style: "spiky", hair: "#2b1d14", shirt: "#ff4d5a", skin: "#f2c9a0", eye: "#3a2a1a", bg: ["#ff7a45", "#ffd23f"] }, "Leo Moretti a quattordici anni. Il numero dieci in costruzione, un pallone sempre sotto il braccio e un muro come migliore amico.");
         H.cast("lm_ottavio", "Ottavio", "Pescatore e arbitro", { style: "bald", hair: "#d6d3d1", shirt: "#334155", skin: "#c8956a", beard: "baffi", acc: ["paglia", "fischietto"], bg: ["#1e293b", "#cbd5e1"] }, "Pescatore del Borgo. Arbitra le partite del porto dal '71 e le cronache dicono che non abbia mai sbagliato in malafede.");
       }
     };
