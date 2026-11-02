@@ -629,11 +629,11 @@
     html += `<div class="row">${["storia", "normale", "sfida"].map((k) => `<button type="button" class="chip${r.diff === k ? " on" : ""}" data-diff="${k}">${D && D[k] ? D[k].label : k}</button>`).join("")}</div>`;
     const PG = window.__presa;
     if (PG && PG.on()) {
-      const sel = PG.sel(), cs = PG.costumeSagas().filter((k) => { const s = SAGAS.find((x) => x.id === k), x = s && state(s); return x && (x.finished || x.endsFound > 0); });
-      html += `<div class="sec">🎟️ Gettone &amp; 👗 Costume<span>solo sfida</span></div><p class="sum">Prima di giocare un cabinato scegli un gettone che complica lo schermo (e moltiplica i punti) e un costume: i personaggi vestono i panni di una saga che hai finito. Record separati per gettone.</p>`;
+      const sel = PG.sel(), cs = PG.costumeSagas().map((k) => { const s = SAGAS.find((x) => x.id === k), x = s && state(s); return s ? { k, s, ok: !!(x && (x.started || x.finished || x.endsFound > 0)) } : null; }).filter(Boolean);
+      html += `<div class="sec">🎟️ Gettone &amp; 👗 Costume<span>solo sfida</span></div><p class="sum">Prima di giocare un cabinato scegli un gettone che complica lo schermo (e moltiplica i punti) e un costume: i colori cambiano e, dove il cabinato mostra ritratti, i personaggi vestono i panni di un'altra saga. In alto compare l'etichetta «👗 Costume». Record separati per gettone.</p>`;
       html += `<div class="row"><button type="button" class="chip${!sel.tok ? " on" : ""}" data-tok="">Nessun gettone</button>${Object.keys(PG.TOK).map((k) => `<button type="button" class="chip${sel.tok === k ? " on" : ""}" data-tok="${k}">${PG.TOK[k][1]} ${PG.TOK[k][0]}</button>`).join("")}</div>`;
-      if (cs.length) html += `<div class="row"><button type="button" class="chip${!sel.cos ? " on" : ""}" data-cos="">Costume normale</button>${cs.map((k) => { const s = SAGAS.find((x) => x.id === k); return `<button type="button" class="chip${sel.cos === k ? " on" : ""}" data-cos="${k}">${s.e} ${esc(s.t.split(" · ")[0])}</button>`; }).join("")}</div>`;
-      else html += `<p class="sum">👗 I costumi si accendono finendo una saga con personaggi nella Squadra dei Sogni.</p>`;
+      html += `<div class="row"><button type="button" class="chip${!sel.cos ? " on" : ""}" data-cos="">Costume normale</button>${cs.map((c) => `<button type="button" class="chip${sel.cos === c.k ? " on" : ""}"${c.ok ? "" : " disabled style=\"opacity:.45\""} data-cos="${c.k}">${c.ok ? c.s.e : "🔒"} ${esc(c.s.t.split(" · ")[0])}</button>`).join("")}</div>`;
+      html += `<p class="sum">${sel.tok || sel.cos ? `Attivi: ${sel.tok ? PG.TOK[sel.tok][1] + " " + PG.TOK[sel.tok][0] : "nessun gettone"} · ${sel.cos ? "👗 " + esc((SAGAS.find((x) => x.id === sel.cos) || { t: sel.cos }).t.split(" · ")[0]) : "costume normale"}. Ora scegli un cabinato.` : "Nessun gettone né costume attivo."}</p>`;
       const rc = PG.recs(), ks = Object.keys(rc).filter((k) => k.split("|")[1] !== "-");
       if (ks.length) html += `<p class="sum">Record con gettone: ${ks.map((k) => { const mm = MACHINES.find((x) => x.id === k.split("|")[0]); return `${PG.TOK[k.split("|")[1]] ? PG.TOK[k.split("|")[1]][1] : ""} ${esc(mm ? mm.t : k)} <b>${rc[k].best}</b>`; }).join(" · ")}</p>`;
     }
@@ -906,18 +906,55 @@
     const g = CIM_GEN[(s.g && s.g[0]) || ""] || CIM_GEN.avventura, h = (s.id + "").split("").reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
     return { n: g[0], e: g[1], t: g[2][h % g[2].length] };
   }
-  function openCimeli(back) {
+  const CUSTODE = {
+    zero: ["Benvenuto. Le vetrine sono vuote, ma io le spolvero lo stesso: per abitudine, e per speranza.", "Qui si entra a mani vuote e si esce con una storia. Per ora, però, la storia manca."],
+    poco: ["Ogni cimelio ha il suo posto. Il mio è accanto, in piedi, a fare la guardia.", "Piano con i gomiti: ho lucidato il vetro stamattina e ci tengo."],
+    medio: ["Cominciamo ad avere una collezione. Mia moglie dice che passo più tempo qui che a casa. Ha ragione.", "Un cimelio ogni tanto lo sento respirare. Poi mi ricordo che sono io."],
+    molto: ["Il Borgo ha più storie di quante ne stiano nelle teche. Tocca allargare la sala.", "Alcuni di questi li ho visti nascere. Altri li ho solo visti partire."],
+    oro: ["Cornice d'oro: la chiamo la «vetrina dei testardi». Loro mi capiscono.", "Chi trova tutti i finali non ha più nulla da scoprire. Né, mi dicono, da fare il sabato."],
+  };
+  function cimeliSala(back, sala) {
     if (back) BK.cim = back; BACK = BK.cim; const body = shell("🏛️ Sala dei Cimeli");
-    const all = SAGAS.filter(available).map((s) => ({ s, x: state(s) })), got = all.filter(({ x }) => x.finished || x.endsFound > 0), gold = got.filter(({ x }) => x.ends.length && x.endsFound >= x.ends.length).length;
-    let html = `<p class="sum">Il museo del Borgo. Ogni saga che finisci lascia un cimelio in vetrina, con due parole del custode. <b>${got.length}</b> cimeli su ${all.length} saghe · ${gold} con cornice d'oro (tutti i finali trovati).</p>`;
-    html += got.length ? "" : `<p class="sum">Vetrine ancora vuote: finisci una saga e il custode ci metterà qualcosa.</p>`;
-    html += `<div class="cimGrid">` + all.map(({ s, x }) => {
-      if (!(x.finished || x.endsFound > 0)) return `<div class="cimV cimEmpty"><div class="ce">❔</div><b>Vetrina vuota</b><span>${esc(((GEN[(s.g && s.g[0]) || ""] || [""])[0]) || "Saga")} · ${x.started ? "in corso" : "da giocare"}</span></div>`;
+    const all = SAGAS.filter(available).map((s) => ({ s, x: state(s) })), got = all.filter(({ x }) => x.finished || x.endsFound > 0);
+    const gold = got.filter(({ x }) => x.ends.length && x.endsFound >= x.ends.length).length, n = got.length;
+    const tier = n === 0 ? "zero" : gold >= 3 ? "oro" : n < 6 ? "poco" : n < 20 ? "medio" : "molto", pool = CUSTODE[tier], line = pool[(n + gold) % pool.length];
+    const sale = [["tutte", "🏛️ Tutte"]].concat(Object.keys(GEN).filter((k) => all.some(({ s }) => s.g && s.g[0] === k)).map((k) => [k, GEN[k][0]]));
+    const cur = sale.some((x) => x[0] === sala) ? sala : "tutte", shown = all.filter(({ s }) => cur === "tutte" || (s.g && s.g[0] === cur));
+    const hasN = shown.filter(({ x }) => x.finished || x.endsFound > 0).length;
+    let html = `<style>
+.cimHall{position:relative;border-radius:14px;padding:14px 10px 18px;background:linear-gradient(180deg,#2a0f14 0%,#4a1a1f 38%,#2b1a10 38%,#3b2612 100%);border:2px solid #7a5a2a;box-shadow:inset 0 0 40px rgba(0,0,0,.65)}
+.cimHall:before{content:"";position:absolute;left:0;right:0;top:0;height:38%;background:repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 2px,transparent 2px 26px);border-radius:12px 12px 0 0;pointer-events:none}
+.cimKeep{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px}.cimKeep .av{font-size:38px;line-height:1;animation:cimBob 3.2s ease-in-out infinite}.cimKeep .bb{position:relative;background:#fff7e0;color:#2b1a10;border-radius:12px;padding:8px 12px;font:600 13px/1.4 Georgia,serif;flex:1}.cimKeep .bb:before{content:"";position:absolute;left:-8px;top:14px;border:8px solid transparent;border-right-color:#fff7e0;border-left:0}.cimKeep .bb small{display:block;opacity:.6;font:700 10px system-ui;margin-top:3px}
+.cimTabs{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:thin}.cimTabs button{flex:none;border:1.5px solid #b08a4a;background:rgba(0,0,0,.35);color:#f5deb0;border-radius:999px;padding:5px 11px;font:700 12px system-ui}.cimTabs button.on{background:#b08a4a;color:#2a1608}
+.cimGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px 10px;position:relative}
+.cimV{position:relative;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;background:none;border:0;color:#f5e9cf;padding:0}
+.cimGlass{position:relative;width:100%;aspect-ratio:1/1.05;border-radius:10px 10px 4px 4px;border:2px solid rgba(255,255,255,.35);background:radial-gradient(ellipse at 50% 18%,rgba(255,236,170,.55) 0%,rgba(255,236,170,.12) 45%,rgba(10,6,4,.55) 100%),linear-gradient(180deg,rgba(255,255,255,.1),rgba(0,0,0,.35));box-shadow:0 6px 14px rgba(0,0,0,.55),inset 0 0 18px rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.cimGlass:before{content:"";position:absolute;top:-30%;left:-40%;width:50%;height:160%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);transform:rotate(18deg);animation:cimSheen 5s ease-in-out infinite}
+.cimGlass .ob{font-size:52px;filter:drop-shadow(0 6px 6px rgba(0,0,0,.6)) drop-shadow(0 0 10px rgba(255,220,130,.5));animation:cimBob 3.6s ease-in-out infinite}
+.cimPlinth{width:104%;height:9px;background:linear-gradient(180deg,#8a5a2a,#4a2a12);border-radius:2px;margin-top:-1px;box-shadow:0 3px 5px rgba(0,0,0,.6)}
+.cimPlate{margin-top:5px;background:linear-gradient(180deg,#e0bd6a,#a67c2c);color:#2a1608;border-radius:4px;padding:3px 6px;font:800 11px/1.2 Georgia,serif;width:96%;box-shadow:0 2px 4px rgba(0,0,0,.5)}.cimPlate small{display:block;font:600 9px system-ui;opacity:.75}
+.cimGold .cimGlass{border-color:#fbbf24;box-shadow:0 0 18px rgba(251,191,36,.7),inset 0 0 18px rgba(251,191,36,.2)}.cimGold .cimGlass:after{content:"✨";position:absolute;top:4px;right:6px;animation:cimTw 2s ease-in-out infinite}
+.cimEmpty{opacity:.55;cursor:default}.cimEmpty .cimGlass .ob{filter:brightness(0) opacity(.55);font-size:46px;animation:none}.cimEmpty .cimPlate{background:linear-gradient(180deg,#5a5046,#3a322a);color:#cdbfa8}
+.cimModal{position:fixed;inset:0;z-index:340;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;padding:16px}.cimCard{max-width:420px;width:100%;background:linear-gradient(180deg,#3a1a1f,#1e1008);border:3px solid #c9a24e;border-radius:16px;padding:18px;text-align:center;color:#f5e9cf;box-shadow:0 0 40px rgba(201,162,78,.35)}
+.cimCard .big{font-size:84px;animation:cimBob 3s ease-in-out infinite;filter:drop-shadow(0 0 16px rgba(255,220,130,.7))}.cimCard h3{margin:6px 0 2px;font:900 20px Georgia,serif;color:#f0cf7a}.cimCard .sg{font-size:12px;opacity:.75}.cimCard p{font:600 14px/1.5 Georgia,serif;margin:10px 0;background:rgba(255,247,224,.08);border-left:3px solid #c9a24e;padding:8px 10px;text-align:left}.cimCard ul{list-style:none;margin:6px 0;padding:0;text-align:left;font-size:12px}.cimCard li{padding:2px 0}.cimCard .bt{display:flex;gap:8px;margin-top:10px}.cimCard .bt button{flex:1;min-height:44px;border-radius:10px;border:2px solid #c9a24e;background:rgba(255,255,255,.08);color:#fff;font:800 13px system-ui}
+@keyframes cimBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}@keyframes cimSheen{0%,70%,100%{left:-60%}35%{left:130%}}@keyframes cimTw{0%,100%{opacity:.4;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}</style>`;
+    html += `<div class="cimHall"><div class="cimKeep"><div class="av">🧓</div><div class="bb">${esc(line)}<small>Ottone, custode · ${n} cimeli su ${all.length} saghe · ${gold} con cornice d'oro</small></div></div>`;
+    html += `<div class="cimTabs">${sale.map(([k, l]) => `<button type="button" class="${k === cur ? "on" : ""}" data-sala="${k}">${esc(l)}</button>`).join("")}</div>`;
+    html += `<div class="cimGrid">` + shown.map(({ s, x }) => {
+      if (!(x.finished || x.endsFound > 0)) return `<div class="cimV cimEmpty"><div class="cimGlass"><span class="ob">❔</span></div><div class="cimPlinth"></div><div class="cimPlate">Vetrina vuota<small>${esc(((GEN[(s.g && s.g[0]) || ""] || [""])[0]) || "Saga")} · ${x.started ? "in corso" : "da giocare"}</small></div></div>`;
       const c = cimelio(s, x), full = x.ends.length && x.endsFound >= x.ends.length;
-      return `<div class="cimV${full ? " cimGold" : ""}"><div class="ce">${c.e}</div><b>${esc(c.n)}</b><span class="cs">${s.e} ${esc(s.t.split(" · ")[0])}</span><i>«${esc(c.t)}»</i><span class="cf">${x.ends.length ? `Finali ${x.endsFound}/${x.ends.length}` : "Saga conclusa"}</span></div>`;
-    }).join("") + `</div>`;
-    body.innerHTML = `<style>.cimGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.cimV{background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.18);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:4px;font-size:12px;text-align:center}.cimV .ce{font-size:34px}.cimV b{font-size:13px}.cimV i{font-size:11px;opacity:.85;line-height:1.35}.cimV .cs,.cimV .cf{font-size:10px;opacity:.7}.cimGold{border-color:#fbbf24;box-shadow:0 0 12px rgba(251,191,36,.45);background:rgba(251,191,36,.1)}.cimEmpty{opacity:.45;border-style:dashed}</style>` + html;
+      return `<button type="button" class="cimV${full ? " cimGold" : ""}" data-cim="${s.id}"><div class="cimGlass"><span class="ob">${c.e}</span></div><div class="cimPlinth"></div><div class="cimPlate">${esc(c.n)}<small>${s.e} ${esc(s.t.split(" · ")[0])}${x.ends.length ? ` · ${x.endsFound}/${x.ends.length}` : ""}</small></div></button>`;
+    }).join("") + `</div></div><p class="sum" style="margin-top:8px">${hasN} cimeli in questa sala.</p>`;
+    body.innerHTML = html;
+    body.querySelectorAll("[data-sala]").forEach((b) => (b.onclick = () => cimeliSala(null, b.dataset.sala)));
+    body.querySelectorAll("[data-cim]").forEach((b) => (b.onclick = () => {
+      const o = all.find((q) => q.s.id === b.dataset.cim); if (!o) return; const c = cimelio(o.s, o.x), full = o.x.ends.length && o.x.endsFound >= o.x.ends.length;
+      const ov = document.createElement("div"); ov.className = "cimModal";
+      ov.innerHTML = `<div class="cimCard"><div class="big">${c.e}</div><h3>${esc(c.n)}</h3><div class="sg">${o.s.e} ${esc(o.s.t)}</div><p>«${esc(c.t)}»<br><small style="opacity:.6">— Ottone, custode</small></p>${o.x.ends.length ? `<ul>${o.x.ends.map((e) => `<li>${e.found ? "🎞️ " + esc(e.title) : "▫️ Finale ancora da trovare"}</li>`).join("")}</ul>` : ""}${full ? `<div class="sg" style="color:#fbbf24">✨ Cornice d'oro: tutti i finali trovati</div>` : ""}<div class="bt"><button type="button" data-x="1">Chiudi</button><button type="button" data-s="1">Vai alla saga ▸</button></div></div>`;
+      document.body.appendChild(ov); ov.onclick = (e) => { if (e.target === ov) ov.remove(); }; ov.querySelector("[data-x]").onclick = () => ov.remove(); ov.querySelector("[data-s]").onclick = () => { ov.remove(); detail(o.s); };
+    }));
   }
+  const openCimeli = (back) => cimeliSala(back, "tutte");
 
   // ---------------------------------------------------------------- SALONE
   const FILT = { st: "tutte", g: "", sort: "recenti" };

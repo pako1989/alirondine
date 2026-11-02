@@ -30,8 +30,7 @@
     st.textContent = `#pgFx{position:fixed;inset:0;z-index:2147483000;pointer-events:none}
 #pgFx.nebbia{background:radial-gradient(ellipse at 50% 50%,rgba(210,220,235,0) 26%,rgba(210,220,235,.78) 64%,rgba(228,234,246,.95) 100%)}
 #pgFx.notte{background:radial-gradient(circle at 50% 50%,rgba(0,0,10,0) 20%,rgba(0,0,10,.9) 58%,rgba(0,0,10,.97) 100%)}
-body.pgt-notte canvas{filter:brightness(.7) contrast(1.3)}
-body.pgt-neon canvas{filter:invert(1) hue-rotate(180deg)}
+#pgBadge{position:fixed;top:6px;left:50%;transform:translateX(-50%);z-index:2147483001;pointer-events:none;background:rgba(10,14,34,.85);border:1.5px solid #fbbf24;color:#fff7d6;border-radius:999px;padding:3px 12px;font:800 11px system-ui;max-width:90vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 body.pgt-tremolio canvas{animation:pgSh .16s infinite}
 @keyframes pgSh{0%{transform:translate(2px,1px)}25%{transform:translate(-2px,-1px)}50%{transform:translate(1px,-2px)}75%{transform:translate(-1px,2px)}100%{transform:translate(2px,1px)}}
 .pgToast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:2147483001;background:rgba(10,14,34,.94);border:2px solid #fbbf24;color:#fff7d6;border-radius:12px;padding:9px 14px;font:700 13px system-ui;max-width:92vw;text-align:center;animation:pgIn .3s}
@@ -56,26 +55,35 @@ body.pgt-tremolio canvas{animation:pgSh .16s infinite}
   const cid = (c) => (Array.isArray(c) ? c[0] : c.id), csg = (c) => (Array.isArray(c) ? c[1] : c.saga);
   function pool(saga) { const S = window.__sogni; return S && S.CARDS ? S.CARDS.filter((c) => csg(c) === saga).map(cid) : []; }
   function costumeSagas() {
-    const S = window.__sogni, B = window.__borgoApi; if (!S || !S.CARDS || !B || !B.portraitImg) return [];
-    const seen = {}; S.CARDS.forEach((c) => { seen[csg(c)] = 1; });
-    return Object.keys(seen).filter((k) => pool(k).some((id) => safe(() => B.portraitImg(id), null)));
+    const S = window.__sogni; if (!S || !S.CARDS) return [];
+    const seen = {}; S.CARDS.forEach((c) => { seen[csg(c)] = 1; }); return Object.keys(seen);
   }
   function dress(saga) {
     const B = window.__borgoApi, M = window.__mini, ids = pool(saga); if (!B || !B.portraitImg || !ids.length) return false;
     const opi = B.portraitImg, omi = M && M.img; OLD = { B, opi, M, omi };
     const map = (id) => { if (INNER || !id || id === "hero" || ids.indexOf(id) >= 0) return id; return safe(() => opi.call(B, id), null) ? ids[hash(id) % ids.length] : id; };
-    B.portraitImg = function (id) { return opi.call(B, map(id)); };
+    B.portraitImg = function (id, spec) { return opi.call(B, map(id), spec); };
     if (M && omi) M.img = function (id) { if (!id || id === "hero") return omi(id); const cid = map(id); INNER = true; try { return omi(cid); } finally { INNER = false; } };
     return true;
   }
   function undress() { if (!OLD) return; OLD.B.portraitImg = OLD.opi; if (OLD.M && OLD.omi) OLD.M.img = OLD.omi; OLD = null; }
 
   // ---------------------------------------------------------------- gettoni
+  function paint(tok, cos) {
+    let d = document.getElementById("pgDyn"); if (!d) { d = document.createElement("style"); d.id = "pgDyn"; document.head.appendChild(d); }
+    const f = [];
+    if (tok === "notte") f.push("brightness(.7) contrast(1.3)"); if (tok === "neon") f.push("invert(1) hue-rotate(180deg)");
+    if (cos) { const h = hash(cos); f.push(`hue-rotate(${40 + (h % 280)}deg) saturate(1.35)`); }
+    d.textContent = f.length ? `body.pgt-on canvas{filter:${f.join(" ")}!important}` : "";
+    const old = document.getElementById("pgBadge"); if (old) old.remove();
+    if (cos) { const S = window.__sogni, nm = (S && S.SAGHE && S.SAGHE[cos] && S.SAGHE[cos][1]) || cos, b = document.createElement("div"); b.id = "pgBadge"; b.textContent = "👗 Costume · " + String(nm).split(" · ")[0]; document.body.appendChild(b); }
+    document.body.classList.toggle("pgt-on", f.length > 0);
+  }
   function applyTok(t) {
     css(); clearTok(); if (!t || !TOK[t]) return; document.body.classList.add("pgt-" + t);
     if (t === "nebbia" || t === "notte") { const d = document.createElement("div"); d.id = "pgFx"; d.className = t; document.body.appendChild(d); }
   }
-  function clearTok() { Object.keys(TOK).forEach((k) => document.body.classList.remove("pgt-" + k)); const d = document.getElementById("pgFx"); if (d) d.remove(); }
+  function clearTok() { paint("", ""); Object.keys(TOK).forEach((k) => document.body.classList.remove("pgt-" + k)); const d = document.getElementById("pgFx"); if (d) d.remove(); }
 
   // ---------------------------------------------------------------- inizio/fine di ogni partita
   function begin(id) {
@@ -84,6 +92,7 @@ body.pgt-tremolio canvas{animation:pgSh .16s infinite}
     const tok = o && o.token != null ? o.token : r.tok, cos = o && o.costume != null ? o.costume : r.cos;
     CTX = { id, t0: Date.now(), tok: TOK[tok] ? tok : "", cos: "" }; applyTok(CTX.tok);
     if (cos && dress(cos)) CTX.cos = cos;
+    paint(CTX.tok, CTX.cos);
     return CTX;
   }
   const norm = (res) => { res = res || {}; const n = [res.score, res.punti, res.a, res.goals, res.gol].find((x) => typeof x === "number" && isFinite(x)); return { vinto: !!(res.win || res.vinto), punti: n != null ? Math.round(n) : res.win ? 1 : 0 }; };

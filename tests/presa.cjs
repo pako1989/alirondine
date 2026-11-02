@@ -12,7 +12,7 @@ const L = require("./lib.cjs");
   if ((await ev(() => window.__presa.sel().tok)) !== "nebbia") errors.push("gettone non selezionato");
   const cs = await ev(() => document.querySelectorAll(".salOv [data-cos]").length);
   if (cs > 1) await ev(() => document.querySelectorAll(".salOv [data-cos]")[1].click());
-  const cos = await ev(() => window.__presa.sel().cos);
+  await ev(() => window.__presa.setSel({ cos: window.__presa.costumeSagas()[0] })); const cos = await ev(() => window.__presa.sel().cos);
   // portrait wrapper: prima, durante, dopo
   const orig = await ev(() => { window.__t0 = window.__borgoApi.portraitImg; return 1; });
   await ev(() => document.querySelector('.salOv [data-m="bottoni"]').click()); await page.waitForTimeout(200);
@@ -20,6 +20,7 @@ const L = require("./lib.cjs");
   const during = await ev(() => ({ cls: document.body.classList.contains("pgt-nebbia"), fx: !!document.getElementById("pgFx"), swapped: window.__borgoApi.portraitImg !== window.__t0 }));
   if (!during.cls || !during.fx) errors.push("gettone non applicato durante la partita: " + JSON.stringify(during));
   if (cos && !during.swapped) errors.push("costume non applicato");
+  if (!(await ev(() => !!document.getElementById("pgBadge") && /pgt-on/.test(document.body.className)))) errors.push("etichetta/tinta costume assenti");
   await ev(() => { const b = document.querySelector(".btOv .ov button"); if (b) b.click(); }); await page.waitForTimeout(400);
   await ev(() => { const S = window.__bottoni.state; S.a = 2; S.b = 0; S.finish(); }); await page.waitForTimeout(300); await ev(() => { const b = document.querySelector(".btOv .ov button"); if (b) b.click(); }); await page.waitForTimeout(400);
   const after = await ev(() => ({ cls: document.body.classList.contains("pgt-nebbia"), fx: !!document.getElementById("pgFx"), restored: window.__borgoApi.portraitImg === window.__t0, rec: window.__presa.recs() }));
