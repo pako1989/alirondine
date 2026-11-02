@@ -9467,7 +9467,9 @@
       if (n.npc) {
         const c = CAST[n.id], face = TW.target && TW.target.id === n.id ? (TW.x < n.x - 4 ? "left" : TW.x > n.x + 4 ? "right" : "down") : n.face || gxIdleFace(n);
         chibi(sx, sy + (n.walk ? 0 : gxIdleY(n)), { ...c, shirt: c.shirt || { dario: "#16325c" }[n.id] || "#555" }, face, n.walk || 0);
-        if (trNews(n.id)) { px(sx - 4, sy - 38, 9, 11, "#ffd23f"); g.fillStyle = "#2a1a00"; g.font = "bold 9px sans-serif"; g.textAlign = "center"; g.fillText("!", sx + 0.5, sy - 29); g.textAlign = "left"; }
+        const cmo = typeof window.trCameoHook === "function" && window.trCameoHook(n.id); // ospite da un'altra saga: «!» viola, poi stellina
+        if (trNews(n.id)) { px(sx - 4, sy - 38, 9, 11, cmo ? "#c58cff" : "#ffd23f"); g.fillStyle = cmo ? "#2a0a40" : "#2a1a00"; g.font = "bold 9px sans-serif"; g.textAlign = "center"; g.fillText("!", sx + 0.5, sy - 29); g.textAlign = "left"; }
+        else if (cmo) { g.fillStyle = "#c58cff"; g.font = "bold 9px sans-serif"; g.textAlign = "center"; g.fillText("✦", sx + 0.5, sy - 29); g.textAlign = "left"; }
       } else {
         const me = z.me ? z.me() : { ...CAST.leo, shirt: "#ff4d5a", num: "10" }, fx = z.heroFx ? z.heroFx() : null, ph = (dx || dy) ? TW.walk : 0;
         if (!fx) chibi(sx, sy, me, TW.dir, ph);

@@ -2006,8 +2006,12 @@
       const prev = chained ? window.trTalkHook : null;
       const mineC = (id) => { const zr = zoneRec(); if (!zr || !zr.Z.npcs.some((n) => n.id === id)) return null; return chainFor(zr).find((c) => c.talk && c.talk[id]) || null; };
       const cameoOf = (id) => { const zr = zoneRec(); if (!zr || !zr.Z.npcs.some((n) => n.id === id && n.cameo)) return null; return arr(cfg.cameos).find((c) => c.id === id && c.zone === api.trZone()) || null; };
+      // CAMEO: titolo della saga d'origine (campo from, oppure la chiave letta da otherSaga nel when), per il riquadro «✨ Ospite da …»
+      const cameoFrom = (c) => { const k = c.from || ((String(c.when).match(/otherSaga\(\s*["']ali-di-rondine\.([\w-]+)/) || [])[1]); if (!k) return ""; const S = safe(() => window.__salone.SAGAS, []) || [], m = S.find((x) => x.key === "ali-di-rondine." + k || x.id === k); return m ? String(m.t).split(" · ")[0] : ""; };
+      const prevCameo = window.trCameoHook;
+      window.trCameoHook = (id) => !!cameoOf(id) || (typeof prevCameo === "function" && !!prevCameo(id));
       window.trTalkHook = function (id) {
-        const cm = cameoOf(id); if (cm) { castHero(); F.set("cameo_" + id, true); safe(() => (cm.talk ? cm.talk(K) : say(cm.lines)), null); return true; }
+        const cm = cameoOf(id); if (cm) { castHero(); F.set("cameo_" + id, true); safe(() => { const t = cameoFrom(cm); if (window.toast) window.toast(t ? "Ospite da " + t : "Ospite da un'altra saga", "info", "✨"); }); safe(() => (cm.talk ? cm.talk(K) : say(cm.lines)), null); return true; }
         const c = mineC(id);
         if (c) { // un capitolo può restituire K.PASS: allora risponde il capitolo precedente che conosce quel personaggio
           castHero(); meet(id);
