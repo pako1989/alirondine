@@ -5742,7 +5742,7 @@
     if (res.azCtl === undefined) res.azCtl = "joystick";
     if (res.azPowerUps === undefined) res.azPowerUps = true;
     if (res.azAimAssist === undefined) res.azAimAssist = true;
-    if (!["classic", "flat", "hd", "pixel"].includes(res.faces)) res.faces = "flat";
+    if (!["classic", "flat"].includes(res.faces)) res.faces = "flat"; // 2D HD e Pixel tolti (2026-11-02): chi li aveva passa a Flat
     if (!res.fm) { res.fm = 1; if (res.faces === "classic") res.faces = "flat"; } // una tantum: Flat design diventa lo stile di partenza
     if (res.omini !== "pixel") res.omini = "classici";
     if (!(Number.isInteger(res.ominoHero) && res.ominoHero >= 0 && res.ominoHero < 30)) res.ominoHero = 0;
@@ -5854,7 +5854,7 @@
       { label: `Scene speciali: ${SET.speed} ▸`, sub: "normale · veloce · salta (tocca la scena per saltarla)", fn: () => { SET.speed = { normale: "veloce", veloce: "salta", salta: "normale" }[SET.speed] || "normale"; save(); again(); } },
       { label: `Animazioni: ${SET.anim ? "sì" : "no"}`, sub: "Tiri, esultanze, fischio d'inizio e finale, coppa, cartellini · tocca per saltarle", fn: () => { SET.anim = !SET.anim; save(); again(); } },
       { label: `Tema visivo: ${(window.THEMES && window.THEMES.find(t => (localStorage.getItem("ali-di-rondine.theme") || "classic") === t.id) || { name: "Classico Rondine" }).name} ▸`, sub: "Classico · Gazzetta Vintage · Neon Costa · Arcade Retrò", fn: () => { if (window.cycleTheme) window.cycleTheme(); again(); } },
-      { label: `Stile dei volti: ${{ classic: "Classico", flat: "Flat design", hd: "2D HD", pixel: "Pixel 16-bit" }[SET.faces] || "Classico"} ▸`, sub: ({ flat: "Flat design: forme geometriche a colori pieni, niente contorni, pulito come un'app", hd: "2D HD: sfumature morbide, capelli con riflessi, occhi a raggiera, luce di contorno", pixel: "Ritratti in pixel art alla JRPG a 16 bit"}[SET.faces] || "I ritratti originali") + " · tocca per cambiare (4 stili)", fn: () => { SET.faces = { classic: "flat", flat: "hd", hd: "pixel", pixel: "classic" }[SET.faces] || "flat"; try { Object.keys(PORT_IMG).forEach((k) => delete PORT_IMG[k]); } catch {} save(); again(); } },
+      { label: `Stile dei volti: ${{ classic: "Classico", flat: "Flat design" }[SET.faces] || "Classico"} ▸`, sub: ({ flat: "Flat design: forme geometriche a colori pieni, niente contorni, pulito come un'app"}[SET.faces] || "I ritratti originali") + " · tocca per cambiare (2 stili)", fn: () => { SET.faces = SET.faces === "flat" ? "classic" : "flat"; try { Object.keys(PORT_IMG).forEach((k) => delete PORT_IMG[k]); } catch {} save(); again(); } },
       { label: `Personaggi nelle scene: ${SET.pfit === "intero" ? "Interi" : "Grandi"} ▸`, sub: SET.pfit === "intero" ? "Più piccoli, con busto e spalle in vista · tocca per tornare grandi" : "Grandi, con il busto tagliato in basso · tocca per vederli interi", fn: () => { SET.pfit = SET.pfit === "intero" ? "grande" : "intero"; save(); again(); } },
       { label: `Omini: ${SET.omini === "pixel" ? "Pixel (Ninja Adventure)" : "Classici"} ▸`, sub: SET.omini === "pixel" ? "Personaggi in pixel art che camminano nelle 4 direzioni (pacchetto libero CC0 di Pixel-Boy). Accessori e acconciature si vedono nei ritratti" : "Gli omini disegnati del gioco, con accessori e acconciature · tocca per i personaggi in pixel art", fn: () => { SET.omini = SET.omini === "pixel" ? "classici" : "pixel"; if (SET.omini === "pixel") OMINI.load(); save(); again(); } },
       ...(SET.omini === "pixel" ? [{ label: `Il tuo omino: ${OMINI.names[SET.ominoHero] || "Ragazzo"} ▸`, sub: "Il personaggio pixel del tuo Campione · tocca per cambiarlo", fn: () => { SET.ominoHero = (SET.ominoHero + 1) % OMINI.names.length; save(); again(); } }] : []),
@@ -26235,7 +26235,7 @@
   };
   window.title = () => title();
   // pulsante rapido nel pannello Opzioni in alto: cambia lo stile dei volti con un tocco
-  const FACE_ORDER = ["classic", "flat", "hd", "pixel"], FACE_NAME = { classic: "Classico", flat: "Flat", hd: "2D HD", pixel: "Pixel" };
+  const FACE_ORDER = ["classic", "flat"], FACE_NAME = { classic: "Classico", flat: "Flat" };
   const facesLbl = () => { const l = $("facesLbl"); if (l) l.textContent = "Volti: " + (FACE_NAME[SET.faces] || "Classico"); };
   window.cycleFaces = () => { const i = FACE_ORDER.indexOf(SET.faces); SET.faces = FACE_ORDER[(i + 1) % FACE_ORDER.length]; try { Object.keys(PORT_IMG).forEach((k) => delete PORT_IMG[k]); } catch {} writeJSON(SETK, SET); facesLbl(); if (window.toast) window.toast("Stile dei volti: " + FACE_NAME[SET.faces], "info", "🎭"); };
   if ($("facesBtn")) { $("facesBtn").onclick = window.cycleFaces; facesLbl(); }

@@ -1,8 +1,7 @@
 // js/portrait-styles2.js - DUE STILI NUOVI DEI VOLTI (Impostazioni → Grafica → Stile dei volti)
 //  - flat:  FLAT DESIGN. Niente contorni, solo forme geometriche a colori pieni, una sola ombra netta, occhi a pastiglia.
 //           Come le illustrazioni delle app: pulito, leggibile anche piccolissimo.
-//  - hd:    2D HD. Disegno vettoriale morbido ad alta definizione: pelle con sfumature calde, occlusione sotto i capelli,
-//           capelli con gradiente, riflessi a ciocche e luce di contorno, occhi con iride a raggiera e due riflessi.
+//  (lo stile 2D HD è stato tolto il 2026-11-02: Pasquale usa solo Classico e Flat)
 // Stesso riferimento dei ritratti classici: origine al centro del viso, viso ±18 circa, spalle fino a y=60.
 // Si aggancia a window.__faceStyles (js/portrait-styles.js): draw(style, …) gestisce anche questi tre.
 (function () {
@@ -129,123 +128,13 @@
     cosm(g, c, T);
   }
 
-  // ================================================================ 2D HD
-  function hd(g, id, c, expr) {
-    const T = traits(id, c), st = hairOf(c), skin = c.skin || "#e0b48a", hair = c.hair || "#2b1d14", eye = c.eye || "#3a2a1a", shirt = c.shirt || "#3f5fbf", fw = T.fw, chinY = 26 + [0, 2, -1][T.chin];
-    const line = dark(skin, 0.55), hairD = dark(hair, 0.4), hairL = lite(hair, 0.45);
-    g.lineJoin = "round"; g.lineCap = "round";
-    // capelli dietro con gradiente
-    cosm(g, c, T, true);
-    const hb = g.createLinearGradient(0, -20, 0, 56); hb.addColorStop(0, dark(hair, 0.2)); hb.addColorStop(1, dark(hair, 0.5)); hairBack(g, st, fw, hb, { tie: "#e8485a", alt: dark(hair, 0.1) });
-    // corpo: maglia con pieghe sfumate e luce di contorno
-    const sg = g.createLinearGradient(-36, 30, 36, 62); sg.addColorStop(0, lite(shirt, 0.18)); sg.addColorStop(0.55, shirt); sg.addColorStop(1, dark(shirt, 0.35)); g.fillStyle = sg; bodyPath(g, 36); g.fill(); if (window.__shirtPat) { g.save(); bodyPath(g, 36); g.clip(); window.__shirtPat(g, shirt); g.restore(); }
-    g.save(); bodyPath(g, 36); g.clip();
-    g.strokeStyle = dark(shirt, 0.25, 0.5); g.lineWidth = 1.2; [[-20, 44, -14, 60], [18, 42, 24, 60]].forEach(([a, b, c2, d]) => { g.beginPath(); g.moveTo(a, b); g.quadraticCurveTo((a + c2) / 2 + 3, (b + d) / 2, c2, d); g.stroke(); });
-    g.strokeStyle = lite(shirt, 0.6, 0.7); g.lineWidth = 1.6; g.beginPath(); g.moveTo(-34, 60); g.bezierCurveTo(-33, 44, -24, 36, -10, 32); g.stroke();
-    const ao = g.createRadialGradient(0, 30, 2, 0, 30, 18); ao.addColorStop(0, "rgba(0,0,0,.35)"); ao.addColorStop(1, "rgba(0,0,0,0)"); g.fillStyle = ao; g.fillRect(-20, 28, 40, 20);
-    g.restore();
-    g.strokeStyle = dark(shirt, 0.55); g.lineWidth = 0.9; bodyPath(g, 36); g.stroke();
-    // colletto a V con bordino
-    g.fillStyle = dark(shirt, 0.3); g.beginPath(); g.moveTo(-10, 31); g.lineTo(0, 42); g.lineTo(10, 31); g.lineTo(7, 31); g.lineTo(0, 38); g.lineTo(-7, 31); g.closePath(); g.fill();
-    if (c.num && g.getTransform().a > 0) { g.font = "900 11px system-ui, sans-serif"; g.textAlign = "center"; g.fillStyle = dark(shirt, 0.5); g.fillText(String(c.num).slice(0, 2), 19, 55); g.fillStyle = lite(shirt, 0.8); g.fillText(String(c.num).slice(0, 2), 18, 54); g.textAlign = "left"; }
-    // collo con ombra del mento
-    const ng = g.createLinearGradient(0, 18, 0, 34); ng.addColorStop(0, warm(skin, 0.4)); ng.addColorStop(1, mix(skin, 0.12, "#7a3a4a")); g.fillStyle = ng; g.beginPath(); g.moveTo(-6, 18); g.lineTo(-6.5, 33); g.quadraticCurveTo(0, 37, 6.5, 33); g.lineTo(6, 18); g.closePath(); g.fill();
-    // orecchie
-    [-1, 1].forEach((sd) => { const eg = g.createRadialGradient(sd * (fw + 1), 6, 0.5, sd * (fw + 1), 6, 5); eg.addColorStop(0, warm(skin, 0.35)); eg.addColorStop(1, skin); g.fillStyle = eg; g.beginPath(); g.ellipse(sd * (fw + 1), 6, 3.3, 5, 0, 0, 7); g.fill(); g.strokeStyle = line; g.lineWidth = 0.7; g.stroke(); });
-    // viso: luce da sinistra in alto, calore sulle guance, ombra sul lato destro
-    facePath(g, fw, chinY, false);
-    const fg = g.createRadialGradient(-6, -2, 2, 0, 6, 30); fg.addColorStop(0, lite(skin, 0.14)); fg.addColorStop(0.55, skin); fg.addColorStop(1, mix(skin, 0.22, "#8a3a4a")); g.fillStyle = fg; g.fill();
-    g.save(); g.clip();
-    const side = g.createLinearGradient(fw * 0.2, 0, fw + 2, 0); side.addColorStop(0, "rgba(120,40,60,0)"); side.addColorStop(1, "rgba(120,40,60,.22)"); g.fillStyle = side; g.fillRect(0, -30, 30, 60);
-    const occ = g.createLinearGradient(0, -14, 0, -4); occ.addColorStop(0, "rgba(60,20,30,.35)"); occ.addColorStop(1, "rgba(60,20,30,0)"); g.fillStyle = occ; g.fillRect(-30, -16, 60, 14); // occlusione sotto la frangia
-    g.restore();
-    facePath(g, fw, chinY, false); g.strokeStyle = line; g.lineWidth = 0.9; g.stroke();
-    if (c.beard) { const bg2 = g.createLinearGradient(0, 8, 0, chinY + 3); bg2.addColorStop(0, dark(hair, 0.1, 0.55)); bg2.addColorStop(1, dark(hair, 0.2)); g.fillStyle = bg2; g.beginPath(); g.moveTo(-fw + 2, 9); g.quadraticCurveTo(-fw + 4, chinY + 1, 0, chinY + 3); g.quadraticCurveTo(fw - 4, chinY + 1, fw - 2, 9); g.quadraticCurveTo(5, 23, 0, 22); g.quadraticCurveTo(-5, 23, -fw + 2, 9); g.fill(); }
-    if (T.freck) { g.fillStyle = dark(skin, 0.3, 0.6); [[-11, 12], [-9, 13.5], [-12.5, 14], [11, 12], [9, 13.5], [12.5, 14]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 0.55, 0, 7); g.fill(); }); }
-    if (T.mole) { g.fillStyle = dark(skin, 0.6); g.beginPath(); g.arc(7.5, 21, 0.8, 0, 7); g.fill(); }
-    // occhi dettagliati
-    eyesDetailed(g, T, c, expr, { skin, hair, eye, line, scale: 1, vn: false });
-    // naso sfumato
-    g.save(); const nG = g.createLinearGradient(-1, 8, 3, 15); nG.addColorStop(0, "rgba(140,60,70,0)"); nG.addColorStop(1, "rgba(140,60,70,.32)"); g.fillStyle = nG; g.beginPath(); g.moveTo(1, 7); g.quadraticCurveTo(3.4, 12, 2.6, 15); g.lineTo(-0.5, 15.4); g.quadraticCurveTo(1.6, 12, 1, 7); g.fill();
-    g.fillStyle = "rgba(255,255,255,.45)"; g.beginPath(); g.ellipse(0, 13.6, 0.9, 0.6, 0, 0, 7); g.fill(); g.fillStyle = dark(skin, 0.4, 0.7); [-1.4, 1.8].forEach((nx) => { g.beginPath(); g.ellipse(nx, 15.4, 0.8, 0.45, 0, 0, 7); g.fill(); }); g.restore();
-    // bocca con labbra sfumate
-    mouthSoft(g, T, skin, expr, 20.5);
-    // capelli: gradiente, ciocche, riflessi e luce di contorno
-    if (c.cap) { g.save(); g.beginPath(); g.rect(-60, -8, 120, 80); g.clip(); }
-    const hg = g.createLinearGradient(0, -30, 0, 10); hg.addColorStop(0, lite(hair, 0.12)); hg.addColorStop(0.45, hair); hg.addColorStop(1, dark(hair, 0.3));
-    const top = hairFront(g, st, fw, T); if (st !== "hood" && st !== "elmo") { g.fillStyle = hg; g.fill(); g.strokeStyle = hairD; g.lineWidth = 0.9; g.stroke(); }
-    sideLocks(g, st, fw, hg); extras(g, st, fw, top, hg, hairD);
-    if (!c.cap && st !== "hood" && st !== "elmo") {
-      g.save(); hairFront(g, st, fw, T); g.clip();
-      g.strokeStyle = dark(hair, 0.35, 0.55); g.lineWidth = 0.7; for (let i = 0; i < 7; i++) { const x = -fw + 4 + i * (fw * 2 - 8) / 6; g.beginPath(); g.moveTo(x * 0.5, top + 2); g.quadraticCurveTo(x * 0.9, top + 10, x, -8); g.stroke(); } // ciocche
-      g.strokeStyle = hairL; g.globalAlpha = 0.85; g.lineWidth = 1.6; for (let i = 0; i < 4; i++) { const x = -10 + i * 4.5; g.beginPath(); g.moveTo(x - 2, top + 7 + (i % 2)); g.quadraticCurveTo(x, top + 4, x + 3, top + 6 + (i % 2)); g.stroke(); } g.globalAlpha = 1; // riflesso
-      g.strokeStyle = "rgba(255,240,220,.35)"; g.lineWidth = 2.5; g.beginPath(); g.arc(0, top + 26, fw + 6, Math.PI * 1.06, Math.PI * 1.3); g.stroke(); // luce di contorno
-      g.restore();
-    }
-    if (c.cap) g.restore();
-    glassesHD(g, T, c);
-    if (c.cap) { const cg = g.createLinearGradient(0, -30, 0, -6); cg.addColorStop(0, lite(c.cap, 0.2)); cg.addColorStop(1, dark(c.cap, 0.25)); g.fillStyle = cg; capPath(g, fw); g.fill(); g.strokeStyle = dark(c.cap, 0.5); g.lineWidth = 0.9; g.stroke(); const vg = g.createLinearGradient(0, -10, 0, -3); vg.addColorStop(0, dark(c.cap, 0.1)); vg.addColorStop(1, dark(c.cap, 0.45)); g.fillStyle = vg; g.beginPath(); g.ellipse(-6, -7, fw + 6, 3.6, -0.06, 0, 7); g.fill(); g.fillStyle = "rgba(255,255,255,.3)"; g.beginPath(); g.ellipse(-5, -22, 6, 2.5, -0.3, 0, 7); g.fill(); }
-    if (expr === "think") thinkBubbles(g, "rgba(255,255,255,.92)");
-    cosm(g, c, T);
-  }
-  function eyesDetailed(g, T, c, expr, P) {
-    const blink = expr === "blink", wide = isWow(expr), happy = expr === "grin", sad = expr === "sad", angry = expr === "angry", vn = P.vn;
-    [-1, 1].forEach((sd) => {
-      if (c.shades) return;
-      const ex = sd * T.gap, ey = T.eyeY + (vn ? 1 : 0), ew = T.eyeW * (vn ? 1.22 : 1) * (wide ? 1.1 : 1), eh = (vn ? 7.4 : 5.4) * (wide ? 1.18 : angry ? 0.78 : 1);
-      g.save(); g.translate(ex, ey); g.rotate(-sd * (T.tilt + (angry ? 0.12 : sad ? -0.1 : 0))); g.translate(-ex, -ey);
-      if (blink || happy || expr === "sly" && sd > 0) { g.strokeStyle = dark(P.hair, 0.5); g.lineWidth = vn ? 1.8 : 1.6; g.beginPath(); if (happy) g.arc(ex, ey + 2, ew * 0.85, Math.PI * 1.12, Math.PI * 1.88); else g.arc(ex, ey - 1.5, ew * 0.9, Math.PI * 0.15, Math.PI * 0.85); g.stroke(); g.restore(); return; }
-      // bianco con ombra della palpebra
-      g.beginPath(); g.ellipse(ex, ey, ew, eh, 0, 0, 7); g.fillStyle = "#fdfbf8"; g.fill();
-      g.save(); g.clip();
-      const lid = g.createLinearGradient(0, ey - eh, 0, ey); lid.addColorStop(0, "rgba(90,60,90,.35)"); lid.addColorStop(1, "rgba(90,60,90,0)"); g.fillStyle = lid; g.fillRect(ex - ew, ey - eh, ew * 2, eh);
-      // iride: scura in alto, luminosa in basso, anello e raggiera
-      const ix = ex - sd * 0.3, iy = ey + (vn ? 0.9 : 0.4), ir = ew * (vn ? 0.78 : 0.68), irh = eh * (vn ? 0.92 : 0.9);
-      const igr = g.createLinearGradient(0, iy - irh, 0, iy + irh); igr.addColorStop(0, dark(P.eye, 0.6)); igr.addColorStop(0.5, P.eye); igr.addColorStop(1, lite(P.eye, vn ? 0.55 : 0.35)); g.fillStyle = igr; g.beginPath(); g.ellipse(ix, iy, ir, irh, 0, 0, 7); g.fill();
-      g.strokeStyle = dark(P.eye, 0.55, 0.5); g.lineWidth = 0.35; for (let k = 0; k < 12; k++) { const a = (k / 12) * Math.PI * 2; g.beginPath(); g.moveTo(ix + Math.cos(a) * ir * 0.35, iy + Math.sin(a) * irh * 0.35); g.lineTo(ix + Math.cos(a) * ir * 0.9, iy + Math.sin(a) * irh * 0.9); g.stroke(); }
-      g.strokeStyle = dark(P.eye, 0.65); g.lineWidth = 0.8; g.beginPath(); g.ellipse(ix, iy, ir, irh, 0, 0, 7); g.stroke();
-      g.fillStyle = dark(P.eye, 0.85); g.beginPath(); g.ellipse(ix, iy + 0.3, ir * (wide ? 0.3 : 0.4), irh * (wide ? 0.32 : 0.44), 0, 0, 7); g.fill();
-      if (vn) { g.fillStyle = lite(P.eye, 0.7, 0.75); g.beginPath(); g.ellipse(ix, iy + irh * 0.62, ir * 0.62, irh * 0.24, 0, 0, Math.PI); g.fill(); }
-      g.restore();
-      // riflessi (a stella nello stile visual novel)
-      g.fillStyle = "#fff"; if (vn) star(g, ix - ir * 0.38, iy - irh * 0.4, 2.1); else { g.beginPath(); g.ellipse(ix - ir * 0.35, iy - irh * 0.38, 1.5, 1.2, -0.4, 0, 7); g.fill(); }
-      g.globalAlpha = 0.8; g.beginPath(); g.arc(ix + ir * 0.4, iy + irh * 0.35, vn ? 1.1 : 0.8, 0, 7); g.fill(); g.globalAlpha = 1;
-      // linea delle ciglia: spessa sopra, con la codina; sottile sotto
-      g.strokeStyle = dark(P.hair, 0.6); g.lineWidth = vn ? 2.2 : 1.7; g.beginPath(); g.ellipse(ex, ey, ew + 0.3, eh + 0.2, 0, Math.PI * 1.04, Math.PI * 1.96); g.stroke();
-      if (vn || T.lash) { g.lineWidth = 1.2; g.beginPath(); g.moveTo(ex + sd * (ew - 0.3), ey - eh * 0.45); g.quadraticCurveTo(ex + sd * (ew + 1.5), ey - eh * 0.6, ex + sd * (ew + 2.6), ey - eh * 0.95); g.stroke(); }
-      g.strokeStyle = dark(P.skin, 0.4, 0.8); g.lineWidth = 0.6; g.beginPath(); g.ellipse(ex, ey, ew, eh, 0, Math.PI * 0.18, Math.PI * 0.82); g.stroke();
-      if (!vn) { g.strokeStyle = dark(P.skin, 0.25, 0.6); g.lineWidth = 0.6; g.beginPath(); g.ellipse(ex, ey - 1.6, ew + 0.8, eh + 2, 0, Math.PI * 1.15, Math.PI * 1.85); g.stroke(); } // piega della palpebra
-      if (sad) { g.fillStyle = "rgba(150,210,255,.9)"; g.beginPath(); g.ellipse(ex + sd * 1.5, ey + eh + 2.5, 1.1, 1.8, 0, 0, 7); g.fill(); }
-      g.restore();
-    });
-    // sopracciglia sottili con lieve gradiente
-    g.strokeStyle = dark(P.hair, 0.3); g.lineWidth = vn ? 1.3 : [1.4, 2, 1.7][T.brow];
-    [-1, 1].forEach((sd) => { const bx = sd * T.gap, by = T.eyeY - (vn ? 10 : 8) - (wide ? 2 : 0), t = (angry ? 0.38 : sad ? -0.32 : T.tilt) * sd; g.beginPath(); g.moveTo(bx - sd * 5, by + t * 6); g.quadraticCurveTo(bx, by - 1.2 - t, bx + sd * 5.5, by - t * 6 + 1); g.stroke(); });
-  }
-  function star(g, x, y, r) { g.beginPath(); for (let k = 0; k < 8; k++) { const a = (k / 8) * Math.PI * 2 - Math.PI / 2, rr = k % 2 ? r * 0.4 : r; g.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); } g.closePath(); g.fill(); }
-  function mouthSoft(g, T, skin, expr, my) {
-    const lip = mix(skin, 0.38, "#b84a5a");
-    if (expr === "grin") { g.fillStyle = "#6a1e2c"; g.beginPath(); g.moveTo(-5.5, my - 1); g.quadraticCurveTo(0, my + 0.4, 5.5, my - 1); g.quadraticCurveTo(0, my + 8, -5.5, my - 1); g.fill(); g.fillStyle = "#fbf6f2"; g.beginPath(); g.moveTo(-4.5, my - 0.6); g.quadraticCurveTo(0, my + 0.6, 4.5, my - 0.6); g.lineTo(4, my + 1.2); g.quadraticCurveTo(0, my + 2, -4, my + 1.2); g.closePath(); g.fill(); g.fillStyle = "#e86a7a"; g.beginPath(); g.ellipse(0, my + 4.6, 2.6, 1.3, 0, 0, 7); g.fill(); return; }
-    if (isWow(expr)) { g.fillStyle = "#6a1e2c"; g.beginPath(); g.ellipse(0, my + 1, 2.4, 3.2, 0, 0, 7); g.fill(); g.strokeStyle = lip; g.lineWidth = 0.8; g.stroke(); return; }
-    g.strokeStyle = dark(skin, 0.55); g.lineWidth = 1.1; g.beginPath();
-    if (expr === "smile" || T.mouth === 1 && expr !== "sad" && expr !== "angry") { g.moveTo(-4.2, my - 0.4); g.quadraticCurveTo(0, my + 3, 4.2, my - 0.4); }
-    else if (expr === "sad") { g.moveTo(-3.5, my + 1.8); g.quadraticCurveTo(0, my - 0.8, 3.5, my + 1.8); }
-    else if (expr === "angry") { g.moveTo(-4, my + 1); g.quadraticCurveTo(0, my - 0.2, 4, my + 1); }
-    else if (expr === "sly") { g.moveTo(-3.5, my + 0.6); g.quadraticCurveTo(1, my + 2, 4.5, my - 1.2); }
-    else { g.moveTo(-3.2, my); g.quadraticCurveTo(0, my + 1.4, 3.2, my); }
-    g.stroke(); g.fillStyle = mix(skin, 0.3, "#c05060", 0.55); g.beginPath(); g.ellipse(0, my + 1.9, 2.6, 0.9, 0, 0, 7); g.fill();
-  }
-  function glassesHD(g, T, c) {
-    if (c.glasses) { [-1, 1].forEach((sd) => { g.fillStyle = "rgba(200,230,255,.14)"; g.beginPath(); g.ellipse(sd * T.gap, T.eyeY, T.eyeW + 2.6, 6.4, 0, 0, 7); g.fill(); g.strokeStyle = "#2a2a34"; g.lineWidth = 1.2; g.stroke(); g.strokeStyle = "rgba(255,255,255,.6)"; g.lineWidth = 0.8; g.beginPath(); g.moveTo(sd * T.gap - 3.5, T.eyeY - 3.5); g.lineTo(sd * T.gap - 1, T.eyeY - 5); g.stroke(); }); g.strokeStyle = "#2a2a34"; g.lineWidth = 1.2; g.beginPath(); g.moveTo(-T.gap + T.eyeW + 2.4, T.eyeY - 1); g.quadraticCurveTo(0, T.eyeY - 3, T.gap - T.eyeW - 2.4, T.eyeY - 1); g.stroke(); }
-    if (c.shades) { [-1, 1].forEach((sd) => { const sg = g.createLinearGradient(0, T.eyeY - 5, 0, T.eyeY + 5); sg.addColorStop(0, "#3a3a4a"); sg.addColorStop(1, "#0a0a10"); g.fillStyle = sg; g.beginPath(); g.ellipse(sd * T.gap, T.eyeY, T.eyeW + 2.6, 5.2, 0, 0, 7); g.fill(); g.fillStyle = "rgba(255,255,255,.4)"; g.beginPath(); g.ellipse(sd * T.gap - 2.5, T.eyeY - 2, 2.4, 1, -0.3, 0, 7); g.fill(); }); g.fillStyle = "#111"; g.fillRect(-T.gap, T.eyeY - 1, T.gap * 2, 1.4); }
-  }
   function cosm(g, c, T, back) { // i cosmetici come negli altri stili: aura (dietro), corone, maschere, elmi, mantelli, sciarpe, fasce… (FS.acc di portrait-styles.js)
     if (!c.acc || typeof c.acc !== "string") return; const G = { fw: T.fw, top: -26, ey: T.eyeY, eg: T.gap };
     try { if (back) { if (FS.acc) FS.acc(g, c, "back", G, "#1a1a22"); return; } if (FS.acc) { FS.acc(g, c, "body", G, "#1a1a22"); FS.acc(g, c, "head", G, "#1a1a22"); } else if (c.accFn) { c.accFn(g, "body"); c.accFn(g, "head"); } } catch (e) {}
   }
   function thinkBubbles(g, col) { g.fillStyle = col; [[23, -20, 2], [28, -28, 3], [35, -38, 5]].forEach(([x, y, r]) => { g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }); }
 
-  const NEW = { flat, hd };
+  const NEW = { flat };
   const draw0 = FS.draw.bind(FS);
   FS.draw = function (style, g, id, c, expr) {
     if (!NEW[style]) return draw0(style, g, id, c, expr);

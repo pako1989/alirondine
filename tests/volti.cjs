@@ -1,4 +1,4 @@
-// tests/volti.cjs - gli stili nuovi dei volti: Flat, 2D HD (disegnati) e Toon Head (DiceBear)
+// tests/volti.cjs - gli stili nuovi dei volti: Flat (disegnato) e Toon Head (DiceBear)
 // Ogni personaggio del gioco, con ogni espressione, deve disegnarsi senza errori; gli stili DiceBear caricano la libreria solo quando servono.
 const L = require("./lib.cjs");
 async function run(w) {
@@ -7,14 +7,14 @@ async function run(w) {
   await page.evaluate(() => window.__faceStyles.preload()); await page.waitForFunction(() => !!window.__dicebear, null, { timeout: 15000 });
   const bad = await page.evaluate(() => {
     const C = window.__borgoApi.CAST, g = document.createElement("canvas").getContext("2d"), out = [], ids = Object.keys(C).filter((id) => C[id] && C[id].skin).slice(0, 70);
-    ["flat", "hd"].forEach((st) => ids.forEach((id) => [null, "smile", "grin", "sad", "angry", "wow", "sly", "think", "blink"].forEach((e) => { try { if (!window.__faceStyles.draw(st, g, id, C[id], e)) out.push(st + ":" + id + ":" + e); } catch (er) { out.push(st + ":" + id + " " + er.message); } })));
+    ["flat"].forEach((st) => ids.forEach((id) => [null, "smile", "grin", "sad", "angry", "wow", "sly", "think", "blink"].forEach((e) => { try { if (!window.__faceStyles.draw(st, g, id, C[id], e)) out.push(st + ":" + id + ":" + e); } catch (er) { out.push(st + ":" + id + " " + er.message); } })));
     return [ids.length, out.slice(0, 8)];
   });
   if (bad[0] < 50) errors.push("pochi personaggi: " + bad[0]); if (bad[1].length) errors.push("volti non disegnati: " + bad[1].join(", "));
   // il ciclo delle Impostazioni passa per tutti gli stili nuovi
   const seen = await page.evaluate(() => { const s = []; for (let i = 0; i < 15 && window.cycleFaces; i++) { window.cycleFaces(); s.push(JSON.parse(localStorage.getItem("ali-di-rondine.impostazioni") || "{}").faces); } return s.join(); });
-  ["flat", "hd", "pixel"].forEach((k) => { if (seen && !seen.includes(k)) errors.push("lo stile " + k + " manca nel ciclo: " + seen); });
-  if (/db_toonhead|manga|acquerello|anime/.test(seen)) errors.push("stili rimossi ancora nel ciclo: " + seen);
+  ["flat", "classic"].forEach((k) => { if (seen && !seen.includes(k)) errors.push("lo stile " + k + " manca nel ciclo: " + seen); });
+  if (/db_toonhead|manga|acquerello|anime|hd|pixel/.test(seen)) errors.push("stili rimossi ancora nel ciclo: " + seen);
   L.check(`Stili dei volti nuovi (${w} px)`, errors); await browser.close();
 }
 // le acconciature: 18 nel gioco (8 libere in più, 10 delle saghe) disegnate in tutti gli stili; finire una saga sblocca la sua
@@ -28,11 +28,22 @@ async function capelli(w) {
     ["bob", "ponytail", "twintails", "braids", "curly", "side", "ordinato", "bandana", "afro", "dread", "undercut", "pompadour", "mullet", "wavy", "messybun", "topknot", "sidebraid", "spacebuns", "corona", "ciuffo", "cometa", "scodella", "antenne", "criniera", "brace", "palma"].forEach((st) => {
       const id = "t_" + st, c = { name: "x", tag: "", skin: "#e0ac7e", hair: "#2b1d14", eye: "#222", style: st, shirt: "#3f5fbf", bg: ["#123", "#fff"] }; API.CAST[id] = c;
       try { API.portraitTo(g, id, 50, 50, 1); } catch (e) { out.push("classico:" + st); }
-      ["anime", "manga", "acquerello", "pixel", "flat", "hd", "db_toonhead"].forEach((sy) => { try { if (!window.__faceStyles.draw(sy, g, id, c, "smile")) out.push(sy + ":" + st); } catch (e) { out.push(sy + ":" + st + " " + e.message); } });
+      ["anime", "manga", "acquerello", "flat", "db_toonhead"].forEach((sy) => { try { if (!window.__faceStyles.draw(sy, g, id, c, "smile")) out.push(sy + ":" + st); } catch (e) { out.push(sy + ":" + st + " " + e.message); } });
     });
     return out.slice(0, 8);
   });
   if (bad.length) errors.push("acconciature non disegnate: " + bad.join(", "));
   L.check(`Acconciature nuove e sblocchi dalle saghe (${w} px)`, errors); await browser.close();
 }
-(async () => { await run(390); await run(320); await capelli(390); })().catch((e) => { console.error("✗ volti:", e.message); process.exit(1); });
+// i salvataggi con 2D HD o Pixel (stili tolti) passano a Flat senza errori
+async function migra(w) {
+  for (const old of ["hd", "pixel"]) {
+    const { browser, page, errors } = await L.setup({ w, extra: { "ali-di-rondine.impostazioni": { v: 1, fm: 1, faces: old } } });
+    const faces = await page.evaluate(() => { const l = document.getElementById("facesLbl"); return l ? l.textContent : "Volti: Flat"; });
+    if (faces !== "Volti: Flat") errors.push("salvataggio " + old + " non migrato a flat: " + faces);
+    const drawn = await page.evaluate((st) => { const g = document.createElement("canvas").getContext("2d"), C = window.__borgoApi.CAST, id = Object.keys(C).find((k) => C[k] && C[k].skin); return window.__faceStyles.draw(st, g, id, C[id], null); }, old);
+    if (drawn) errors.push("lo stile " + old + " si disegna ancora");
+    L.check(`Salvataggio volti ${old} → Flat (${w} px)`, errors); await browser.close();
+  }
+}
+(async () => { await migra(390); await run(390); await run(320); await capelli(390); })().catch((e) => { console.error("✗ volti:", e.message); process.exit(1); });

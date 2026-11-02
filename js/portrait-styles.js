@@ -3,7 +3,6 @@
 // origine al centro del viso, viso circa ±20 in larghezza, spalle fino a y=60. Il ritratto è deterministico: forma del viso,
 // occhi, sopracciglia, naso, bocca, ciuffi e piccoli dettagli derivano dall'id del personaggio, così ogni volto è diverso.
 //  - anime: cel-shading, occhi grandi con iride sfumata e riflessi, frangia a ciocche, contorni morbidi.
-//  - pixel: lo stesso volto rimpicciolito e riposterizzato, con contorno scuro (ritratti alla JRPG a 16 bit).
 // Uso (da game.js): window.__faceStyles.draw(style, g, id, c, expr) dentro un g già traslato/scalato sul ritratto.
 (function () {
   "use strict";
@@ -319,26 +318,9 @@
     });
     g.drawImage(cv, -OX / SC, -OY / SC, OW / SC, OH / SC);
   }
-  const PX_CACHE = {};
-  function pixel(g, id, c, expr) {
-    const key = id + "|" + (expr || "") + "|" + (c.skin || "") + (c.hair || "") + (c.shirt || "") + (c.style || "") + (c.cap || "") + (c.num || "") + "|" + (c.face || "") + (c.acc || "") + (c.glasses ? "g" : "") + (c.shades ? "s" : "") + "|" + (c.beard || "") + (c.scar ? "r" : "") + (c.streak || "") + (c.band || "");
-    let cv = PX_CACHE[key];
-    if (!cv) {
-      const W = 36, H = 50; cv = document.createElement("canvas"); cv.width = W; cv.height = H; const o = cv.getContext("2d");
-      o.translate(W / 2, 16); o.scale(0.5, 0.5); anime(o, id, Object.assign({}, c, { num: "" }), expr);
-      const d = o.getImageData(0, 0, W, H), p = d.data, q = 22;
-      for (let i = 0; i < p.length; i += 4) { if (p[i + 3] < 110) { p[i + 3] = 0; continue; } p[i + 3] = 255; for (let k = 0; k < 3; k++) p[i + k] = Math.round(p[i + k] / q) * q; }
-      // contorno scuro attorno alla sagoma
-      const out = new Uint8ClampedArray(p); const A = (x, y) => (x < 0 || y < 0 || x >= W || y >= H ? 0 : p[(y * W + x) * 4 + 3]);
-      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = (y * W + x) * 4; if (p[i + 3]) continue; if (A(x - 1, y) || A(x + 1, y) || A(x, y - 1) || A(x, y + 1)) { out[i] = 26; out[i + 1] = 16; out[i + 2] = 24; out[i + 3] = 255; } }
-      d.data.set(out); o.setTransform(1, 0, 0, 1, 0, 0); o.putImageData(d, 0, 0);
-      PX_CACHE[key] = cv; const ks = Object.keys(PX_CACHE); if (ks.length > 160) delete PX_CACHE[ks[0]];
-    }
-    const sm = g.imageSmoothingEnabled; g.imageSmoothingEnabled = false; g.drawImage(cv, -36, -32, 72, 100); g.imageSmoothingEnabled = sm;
-  }
   window.__faceStyles = {
-    list: [["classic", "Classico"], ["anime", "Anime"], ["pixel", "Pixel 16-bit"], ["manga", "Manga"], ["acquerello", "Acquerello"]],
-    draw(style, g, id, c, expr) { if (!c || !c.skin) return false; if (c.cap && typeof c.cap !== "string") c = Object.assign({}, c, { cap: "#1d3fa3" }); g.save(); try { if (style === "anime") anime(g, id, c, expr); else if (style === "manga") manga(g, id, c, expr); else if (style === "acquerello") acquerello(g, id, c, expr); else if (style === "pixel") pixel(g, id, c, expr); else { g.restore(); return false; } } catch (e) { g.restore(); return false; } g.restore(); return true; },
+    list: [["classic", "Classico"], ["anime", "Anime"], ["manga", "Manga"], ["acquerello", "Acquerello"]],
+    draw(style, g, id, c, expr) { if (!c || !c.skin) return false; if (c.cap && typeof c.cap !== "string") c = Object.assign({}, c, { cap: "#1d3fa3" }); g.save(); try { if (style === "anime") anime(g, id, c, expr); else if (style === "manga") manga(g, id, c, expr); else if (style === "acquerello") acquerello(g, id, c, expr); else { g.restore(); return false; } } catch (e) { g.restore(); return false; } g.restore(); return true; },
     traits, acc, HBASE, hairOver, // acc(g, c, part, G, ink): i cosmetici negli stili alternativi (anche per gli stili di portrait-styles2 e portrait-dicebear)
   };
 })();
