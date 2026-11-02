@@ -117,6 +117,23 @@
           B: "La banchina bagnata con le bitte d'ormeggio delle vedette.",
           P: "La porta stagna con il logo minaccioso a tre teste del Consorzio Cerbero."
         },
+        npcs: (s) => [
+          { id: "alc2_dario", at: s === 0 ? [6, 17] : [7, 19] },
+          { id: "alc2_rebecca", at: [15, 7] },
+          { id: "alc2_sam", at: [10, 15] },
+          ...(s >= 3 ? [{ id: "alc2_sentinella", at: [25, 11] }] : [])
+        ],
+        build(L) {
+          const { lay, put } = L;
+          lay(0, 0, 31, 1, "W"); lay(0, 22, 31, 23, "W"); lay(0, 0, 1, 23, "W"); lay(30, 0, 31, 23, "W");
+          lay(2, 2, 29, 21, ".");
+          lay(2, 20, 29, 21, "~"); // risacca
+          lay(10, 10, 13, 12, "~"); lay(22, 17, 25, 18, "~");
+          lay(20, 8, 21, 9, "W"); lay(4, 4, 5, 5, "W"); lay(14, 13, 15, 13, "W");
+          put(3, 3, "F"); put(28, 3, "F"); put(16, 3, "G");
+          put(9, 19, "B"); put(15, 19, "B"); put(21, 19, "B");
+          put(28, 10, "P");
+        },
         intro: [
           ["voce", "La notte è gelida e il mare schiaffeggia la chiglia del battello."],
           ["voce", "La sagoma della fortezza si staglia come un gigante addormentato nel buio."],
@@ -149,16 +166,16 @@
               {
                 label: "🌊 Salpa nella tempesta verso la Falesia Nord",
                 fn: () => {
-                  setStep(1);
+                  setStep(N, 1);
                   quest("alc2_q1", "Avvicinamento Furtivo", "Eludi le boe sonar e raggiungi la base della falesia rocciosa.");
                   say([
                     ["voce", "Il motoscafo scivola tra i cavalloni. Rebecca calibra l'idrometro per evitare il cono delle boe sonar."],
                     ["alc2_rebecca", "Attenzione: se tocchiamo le boe, l'allerta Cerbero salirà subito a quota 30!"]
                   ], () => {
-                    setStep(2);
+                    setStep(N, 2);
                     questDone("alc2_q1");
                     quest("alc2_q2", "La Grata dei Condotti", "Raggiungi la Grata Divelta vicino al condotto di scarico nord.");
-                    K.scene([["voce", "Sbarco riuscito sugli scogli della Falesia Nord! La breccia è a portata di mano."]], () => K.openMain(), "alc2_falesia");
+                    K.scene([["voce", "Sbarco riuscito sugli scogli della Falesia Nord! La breccia è a portata di mano."]], () => done(), "alc2_falesia");
                   });
                 }
               },
@@ -191,7 +208,7 @@
                     ["alc2_rebecca", "Le luci delle sentinelle tremano e si spengono. L'infiltrazione è facilitata, ma l'allarme ha destato sospetti."],
                     ["alc2_sam", "Ottimo! I cancelli elettrici si sono sbloccati. Andiamo al pontile!"]
                   ], () => {
-                    setStep(3);
+                    setStep(N, 3);
                     questDone("alc2_q2");
                     quest("alc2_q3", "Sfida sul Pontile", "Batti le Sentinelle Cerbero a Calcio a Parete per conquistare l'ingresso.");
                     done();
@@ -206,7 +223,7 @@
                     ["alc2_rebecca", "Una... due... spingi con la spalla! <i>*CLAC!*</i> L'acqua defluisce e la paratia sale dolcemente senza allarmi."],
                     ["alc2_rebecca", "Passaggio pulito! Ma sul pontile d'attracco ci aspettano le sentinelle della guardia privata."]
                   ], () => {
-                    setStep(3);
+                    setStep(N, 3);
                     questDone("alc2_q2");
                     quest("alc2_q3", "Sfida sul Pontile", "Batti le Sentinelle Cerbero a Calcio a Parete per conquistare l'ingresso.");
                     done();

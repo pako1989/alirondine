@@ -65,6 +65,8 @@
       d: "Livello -2 del penitenziario: caldaie a carbone dismesse, tubature in ghisa e cisterne d'acqua salmastra."
     });
 
+    K.cast("alc2_sorvegliante", { name: "Sorvegliante Interno", tag: "red", hair: "#0f172a", style: "buzz", skin: "#cbd5e1", eye: "#b91c1c", bg: ["#7f1d1d", "#1e293b"], shirt: "#334155" }, "Guardiano delle turbine del Livello -2 per conto del Consorzio Cerbero.");
+
     const goal = (s) => ({
       0: "Esplora il Dormitorio delle Cisterne e trova la bottega clandestina di Bruno il Barbiere.",
       1: "Parla con Don Gaetano per decifrare lo schema idraulico delle tre leve di compensazione.",
@@ -93,6 +95,21 @@
           R: "Gabbie d'acciaio usate come alloggi provvisori per i lavoratori forzati.",
           P: "Porta stagna verso la grande cisterna centrale."
         },
+        npcs: (s) => [
+          { id: "alc2_bruno", at: [8, 10] },
+          ...(s >= 1 ? [{ id: "alc2_gaetano", at: [17, 10] }] : []),
+          ...(s >= 2 ? [{ id: "alc2_tonelli", at: [20, 5] }] : []),
+          ...(s >= 3 ? [{ id: "alc2_sorvegliante", at: [22, 14] }] : [])
+        ],
+        build(L) {
+          const { lay, put } = L;
+          lay(0, 0, 27, 1, "W"); lay(0, 18, 27, 19, "W"); lay(0, 0, 1, 19, "W"); lay(26, 0, 27, 19, "W");
+          lay(2, 2, 25, 17, ".");
+          lay(3, 3, 10, 3, "R"); lay(17, 3, 24, 3, "R"); put(6, 3, "."); put(20, 3, ".");
+          put(13, 2, "V"); put(4, 16, "V");
+          lay(10, 7, 12, 8, "~");
+          lay(3, 15, 8, 15, "R"); put(25, 9, "P");
+        },
         intro: [
           ["voce", "L'odore di salmastro si mescola al profumo pungente di lavanda e brillantina."],
           ["voce", "In mezzo al fango e al vapore, Bruno ha ricreato un piccolo angolo di dignità."]
@@ -110,7 +127,7 @@
             ["alc2_bruno", "La Comandante Vane vuole inondare il Livello -3 per cancellare le prove degli scavi clandestini e incolpare noi di una finta falla."],
             ["alc2_bruno", "Se non apriamo la valvola maestra della grande cisterna spagnola, trenta uomini annegheranno come topi nelle loro celle."]
           ], () => {
-            setStep(1);
+            setStep(N, 1);
             quest("alc2_q4", "Lo Schema di Don Gaetano", "Parla con Don Gaetano vicino al quadro idraulico.");
             say([
               ["alc2_bruno", "Parla con Don Gaetano: lui ha lavorato alle pompe della Regia Marina e conosce ogni singola saracinesca di questo inferno."]
@@ -131,7 +148,7 @@
             ["alc2_gaetano", "Per abbassare il livello dell'acqua dobbiamo calibrare la pressione a 60 bar esatti. Se sbagliamo, la paratia si blocca per sempre."],
             ["alc2_gaetano", "Ma c'è un problema: la chiave del quadro di comando è nella cella 4... insieme alla Guardia Tonelli."]
           ], () => {
-            setStep(2);
+            setStep(N, 2);
             questDone("alc2_q4");
             quest("alc2_q5", "La Cella di Tonelli", "Raggiungi la cella d'isolamento e decidi come trattare Tonelli.");
             say([
@@ -162,7 +179,7 @@
                     ["alc2_tonelli", "Grazie, Campione. Non te ne pentirai. Sui calci piazzati metterò la testa dove gli altri tirano indietro il piede."],
                     ["alc2_bruno", "Un fischietto fa sempre comodo in campo. Benvenuto nel Braccio Ovest, guardia!"]
                   ], () => {
-                    setStep(3);
+                    setStep(N, 3);
                     questDone("alc2_q5");
                     quest("alc2_q6", "Scontro nella Fonderia", "Sconfiggi i Sorveglianti Interni a Calcio a Parete.");
                     done();
@@ -178,7 +195,7 @@
                     ["alc2_tonelli", "Capisco... ho meritato la vostra sfiducia. Ma vi prego, salvate i ragazzi al Livello -3."],
                     ["alc2_rebecca", "Abbiamo la chiave del quadro. Ora togliamoci di mezzo i sorveglianti di pattuglia."]
                   ], () => {
-                    setStep(3);
+                    setStep(N, 3);
                     questDone("alc2_q5");
                     quest("alc2_q6", "Scontro nella Fonderia", "Sconfiggi i Sorveglianti Interni a Calcio a Parete.");
                     done();

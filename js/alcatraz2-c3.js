@@ -76,6 +76,20 @@
           G: "Paratia elastica scanalata montata su molle pneumatiche.",
           C: "Specchio d'acqua salmastra limpido e riflettente alto 20 centimetri."
         },
+        npcs: (s) => [
+          { id: "alc2_bruno", at: [9, 16] },
+          { id: "alc2_gaetano", at: [21, 16] },
+          ...(s >= 3 ? [{ id: "alc2_vane", at: [15, 6] }] : [])
+        ],
+        build(L) {
+          const { lay, put } = L;
+          lay(0, 0, 29, 1, "W"); lay(0, 20, 29, 21, "W"); lay(0, 0, 1, 21, "W"); lay(28, 0, 29, 21, "W");
+          lay(2, 2, 27, 19, ".");
+          lay(10, 8, 20, 13, "C"); // specchio d'acqua basso: il campo sommerso
+          put(8, 2, "V"); put(15, 2, "V"); put(22, 2, "V");
+          lay(2, 9, 3, 11, "G"); lay(26, 9, 27, 11, "G");
+          lay(5, 17, 6, 18, "~"); lay(24, 17, 25, 18, "~");
+        },
         intro: [
           ["voce", "L'acqua è fredda e arriva alle caviglie, producendo piccoli cerchi concentrici a ogni passo."],
           ["voce", "Dall'alto della passerella blindata, la Comandante Vane vi osserva con un sorriso gelido."]
@@ -155,7 +169,7 @@
             ["alc2_bruno", "Siamo dentro la Cisterna Ottagonale. Sentite come risuonano i passi? Sulle sponde metalliche il pallone acquista una velocità doppia."],
             ["alc2_bruno", "Rebecca, Gaetano: calibrate la pressione. Dobbiamo portare i manometri a 60 bar per stabilizzare il galleggiamento."]
           ], () => {
-            setStep(1);
+            setStep(N, 1);
             quest("alc2_q7", "La Pressione di 60 Bar", "Aziona le valvole a muro per impostare la pressione esatta.");
             done();
           });
@@ -169,7 +183,7 @@
             ["alc2_rebecca", "Io partirò in fascia: appena la palla schizza sulla lamiera, tiro rasoiata tesa!"],
             ["alc2_tonelli", "Io terrò fermi i Corazzieri sui contrasti. Nessuno toccherà il Campione."]
           ], () => {
-            setStep(3);
+            setStep(N, 3);
             questDone("alc2_q8");
             quest("alc2_q9", "La Sfida contro Vane", "Parla con la Comandante Vane per disputare la grande partita.");
             done();
@@ -191,7 +205,7 @@
             say([
               ["alc2_gaetano", "Perfetto! 60 bar esatti. Il livello dell'acqua è stabilizzato a pelo d'erba sintetica."]
             ], () => {
-              setStep(2);
+              setStep(N, 2);
               questDone("alc2_q7");
               quest("alc2_q8", "Il Briefing del Barbiere", "Parla con Bruno per definire lo schieramento 3v3.");
               done();

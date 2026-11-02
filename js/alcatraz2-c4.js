@@ -67,6 +67,22 @@
           B: "La ringhiera di ghisa affacciata sulla scogliera a strapiombo.",
           P: "La botola di sicurezza della sala macchine del faro."
         },
+        npcs: (s) => [
+          ...(s <= 1 ? [{ id: "alc2_bruno", at: [8, 13] }] : [{ id: "alc2_bruno", at: [10, 12] }]),
+          { id: "alc2_rebecca", at: [18, 8] },
+          { id: "alc2_gaetano", at: [5, 10] },
+          ...(s >= 2 ? [{ id: "alc2_corvo", at: [14, 5] }] : []),
+          ...(s >= 3 ? [{ id: "alc2_campione", at: [21, 15] }] : [])
+        ],
+        build(L) {
+          const { lay, put } = L;
+          lay(0, 0, 27, 1, "W"); lay(0, 18, 27, 19, "W"); lay(0, 0, 1, 19, "W"); lay(26, 0, 27, 19, "W");
+          lay(2, 2, 25, 17, ".");
+          lay(7, 2, 20, 2, "B"); // ringhiera sulla scogliera
+          lay(12, 8, 15, 10, "W"); put(13, 7, "F"); put(14, 7, "F");
+          put(12, 15, "P");
+          lay(23, 12, 25, 17, "~");
+        },
         intro: [
           ["voce", "Il vento ulula a cinquanta nodi, strappando gocce d'acqua e schiuma salmastra."],
           ["voce", "Quaranta metri più sotto, tra i flutti della baia, si intravedono le luci di navigazione verdi e rosse del battello di Dario."]
@@ -82,7 +98,7 @@
             ["alc2_bruno", "Siamo in cima alla torre! L'acqua ha sommerso completamente il Livello -3, ma tutti i compagni sono salvi sui camminamenti alti."],
             ["alc2_bruno", "Per permettere a Dario di accostare alla bitta senza farsi distruggere dai cannoni d'acqua Cerbero, dobbiamo spegnere il proiettore principale."]
           ], () => {
-            setStep(1);
+            setStep(N, 1);
             quest("alc2_q10", "Spegni la Lanterna", "Interagisci con il quadro elettrico del faro per staccare il riflettore.");
             done();
           });
@@ -111,7 +127,7 @@
               ["voce", "<i>*ZAP!*</i> Il potente fascio di luce ultravioletta si spegne con uno scoppiettio. Il buio avvolge la baia, offrendo una copertura perfetta."],
               ["alc2_rebecca", "Guarda lassù: l'ex Direttore Corvo è uscito dall'ufficio d'archivio stringendo una valigetta di cuoio."]
             ], () => {
-              setStep(2);
+              setStep(N, 2);
               questDone("alc2_q10");
               quest("alc2_q11", "Il Destino di Corvo", "Parla con l'Ex Direttore Corvo sulla balconata.");
               done();
@@ -141,7 +157,7 @@
                     ["alc2_corvo", "Grazie. Non dimenticherò questa clemenza. Avrete la piena riabilitazione legale."],
                     ["alc2_bruno", "Bene! Ora tutti pronti per il tiro decisivo."]
                   ], () => {
-                    setStep(3);
+                    setStep(N, 3);
                     questDone("alc2_q11");
                     quest("alc2_q12", "Il Tiro della Salvezza", "Parla con il Campione per eseguire il tiro finale sulla bitta.");
                     done();
@@ -156,7 +172,7 @@
                     ["alc2_corvo", "Prendete le carte, allora... ma la burocrazia non vi perdonerà mai."],
                     ["alc2_rebecca", "Noi non abbiamo bisogno del perdono dei giudici: abbiamo il mare aperto!"]
                   ], () => {
-                    setStep(3);
+                    setStep(N, 3);
                     questDone("alc2_q11");
                     quest("alc2_q12", "Il Tiro della Salvezza", "Parla con il Campione per eseguire il tiro finale sulla bitta.");
                     done();

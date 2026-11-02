@@ -262,12 +262,8 @@
       const raw = localStorage.getItem("ali-di-rondine.alcatraz");
       if (!raw) return "nessuno";
       const data = JSON.parse(raw);
-      if (data && data.endings) {
-        if (data.endings.evasione) return "evasione";
-        if (data.endings.patto) return "patto";
-        if (data.endings.barbiere) return "barbiere";
-        if (data.endings.scatola) return "scatola";
-      }
+      const ends = data && Array.isArray(data.ends) ? data.ends : [];
+      for (const k of ["evasione", "patto", "barbiere", "scatola"]) if (ends.includes(k)) return k;
     } catch (_) {}
     return "nessuno";
   };

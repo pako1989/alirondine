@@ -197,7 +197,7 @@
     { id: "cala", t: "Cala Tramontana", e: "🌊", g: ["avventura"], fn: "openCalaTramontana", key: "ali-di-rondine.cala-tramontana", cover: "beach", d: "Esplora a piedi il borgo marino alternativo con il tuo Campione." },
     { id: "borgostorto", t: "Il Borgo Storto", e: "🌀", g: ["commedia", "tattica"], api: "openBorgoStorto", cover: "beach", d: "Lo spin-off GDR a turni del Borgo Marino." },
   ];
-  const NEWEST = ["leo", "tipografia", "zampano", "burattini", "tifosi", "falsari", "moviola", "sasso", "banda", "neve", "onde", "latta", "missione", "corriere", "compagnia", "diga", "vuota", "mondiale", "cavaliere", "gala", "circuiti", "replica", "officina", "figurine", "rotta", "fischietto", "capitani", "carte", "quattordici", "sigilli", "fortino", "cenere", "note", "spia", "fiume", "piramide", "treno", "alcatraz", "milano", "gp", "tempo", "dungeon", "roma", "regno", "naufraghi", "campana", "galletta", "pugno", "montagna", "cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
+  const NEWEST = ["leo", "alcatraz2", "tipografia", "zampano", "burattini", "tifosi", "falsari", "moviola", "sasso", "banda", "neve", "onde", "latta", "missione", "corriere", "compagnia", "diga", "vuota", "mondiale", "cavaliere", "gala", "circuiti", "replica", "officina", "figurine", "rotta", "fischietto", "capitani", "carte", "quattordici", "sigilli", "fortino", "cenere", "note", "spia", "fiume", "piramide", "treno", "alcatraz", "milano", "gp", "tempo", "dungeon", "roma", "regno", "naufraghi", "campana", "galletta", "pugno", "montagna", "cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
   const modOf = (s) => (s.mod ? window[s.mod] : null);
   const available = (s) => (s.mod ? !!window[s.mod] : s.fn ? typeof window[s.fn] === "function" : !!(api() && api()[s.api]));
   function state(s) {
@@ -1013,9 +1013,10 @@
       weather: "🌪️ Libeccio Furente · 🌊 Marea Alta · 🏴‍☠️ Frontiera",
       desc: "Fortezze carcerarie, atolli spazzati dalle maree, baie corsare dell'Oceano di Melassa e fiumi selvaggi.",
       quote: "«Nessun vento è contrario per chi sa tirare a giro controcorrente.»",
-      sagas: ["alcatraz", "vuota", "naufraghi", "galletta", "fiume", "abisso", "traversata", "cenere"],
+      sagas: ["alcatraz", "alcatraz2", "vuota", "naufraghi", "galletta", "fiume", "abisso", "traversata", "cenere"],
       pins: [
         { id: "alcatraz", t: "Alcatraz", e: "⛓️", dx: -36, dy: -22 },
+        { id: "alcatraz2", t: "Alcatraz 2", e: "🌊", dx: -34, dy: 22 },
         { id: "naufraghi", t: "Naufraghi", e: "🏝️", dx: 36, dy: -20 },
         { id: "galletta", t: "Bucanieri", e: "🏴‍☠️", dx: 32, dy: 24 }
       ]
