@@ -95,6 +95,10 @@
         c3_taccuino: { zone: "lm_pensione", at: [10, 6], t: "Il taccuino", d: "Il taccuino segreto è un quaderno a quadretti con la copertina rosa. Sulla prima pagina: «Cose da non dimenticare: gli occhi, i piedi, la paura»." },
         c3_pietra: { zone: "lm_alba", at: [14, 10], t: "La pietra legata", d: "Nel racconto Dario si allena contro un drago di nebbia. Nella versione vera, calcia con una pietra legata alla caviglia per fare più fatica. Poi la toglie, per non farsi vedere." },
         c3_sveglia: { zone: "lm_alba", at: [6, 5], t: "La sveglia alle cinque", d: "Sotto la barca capovolta c'è una sveglia a molla. Suona alle cinque. Dario la mette lì ogni sera, con l'allarme coperto da un calzino." },
+        c4_fuochi: { zone: "lm_piazza", at: [31, 17], t: "I fuochi sono pochi", d: "Nel racconto i fuochi disegnano un pallone, un muro, una porta. In realtà sono sei botti e una girandola che si inceppa. Il Borgo applaude lo stesso: è il bello." },
+        c4_banda: { zone: "lm_piazza", at: [18, 7], t: "La banda stonata", d: "Nel racconto la banda suona un inno. Nella versione vera suona tre note su quattro, con convinzione, e il trombone è di Rocco, che si ferma per salutare." },
+        c4_coppa: { zone: "lm_piazza", at: [16, 12], t: "La coppa di latta", d: "Nel racconto la coppa è d'oro. Questa è latta verniciata, con un'ammaccatura a forma di pallone. Sotto c'è scritto, a mano: «Vince chi si diverte»." },
+        c4_bancarella: { zone: "lm_piazza", at: [6, 8], t: "Il fritto di papà", d: "Mille acciughe, dice papà. Ne ho contate trecento. Ma le ha fritte tutte da solo, e questo è il numero che conta." },
         c3_orme: { zone: "lm_alba", at: [10, 10], t: "Le orme sul muro", d: "Il muro non ha una macchia. Ne ha due: una grande, del pallone, e una piccola, di una mano appoggiata a pensare." }
       }
     },
@@ -127,7 +131,10 @@
       lead: "E5 - G5 - E5 - D5 - | C5 - - - D5 - E5 - | G5 - A5 - G5 - E5 - | D5 - - - - - - - | E5 - G5 - C6 - A5 - | G5 - E5 - D5 - C5 - | D5 - E5 - D5 - B4 - | C5 - - - - - - -",
       bass: "R . . . 5 . . . R . . . 5 . . .", bv: 0.1, arp: "1 5 8 5 1 5 8 5", aw: "sine", av: 0.012, drum: "k . . . . . s . k . k . . . s .", dv: 0.07 } },
     guide: () => [["🎞️ Il Ricordo", "Ogni luogo esiste in due versioni: come lo racconta Leo (esagerata, comica) e com'è andata davvero. Dal menu, il pulsante 🎞️ le scambia. Nella versione vera cerca i luccichii: ognuno è una Pagina vera del Diario."], ["📓 Leggenda e Verità", "Alcune scelte tengono il ricordo bello, altre scrivono la verità. A fine saga vince quello che hai scritto di più."], ["🧱 Torna Dritto", "Al muro del porto tira con angolo e forza: il pallone deve tornare nei piedi. Vento e onde cambiano il rimbalzo."]],
-    cameos: [],
+    cameos: [
+      { id: "bp_rocco", zone: "lm_piazza", at: [20, 8], when: (K) => !!(K.otherSaga("ali-di-rondine.banda") || {}).done?.[1], lines: [["bp_rocco", "[ride] Banda del Borgo, ci hanno chiamato all'ultimo. Il bombardino ha suonato tre note su quattro: nel Borgo è una media da primi in classifica."], ["bp_rocco", "Il piccolo Moretti con la fascia? Gli ho detto che un giorno suonerà con noi. Lui ha detto che prima deve parare un rigore."]] },
+      { id: "lt_araldo", zone: "lm_piazza", at: [12, 8], when: (K) => !!(K.otherSaga("ali-di-rondine.latta") || {}).done?.[1], lines: [["lt_araldo", "Pippo Trombetti, araldo di professione! Ferragosto del porto: la fanfara non è la mia, ma il vocione sì."], ["lt_araldo", "Annuncio: la finale! Fuori programma, ma io annuncio anche i gabbiani, se mi pagano in fritto."]] }
+    ],
     guest: { id: "lm_ottavio", lines: ["Ottavio, pescatore. Ho arbitrato ogni partita del porto dal '71. Non ho mai fischiato un rigore giusto, ma nessuno mi ha mai denunciato.", "Fischio io, che il mare non fischia. Ricordatelo se mai ci vediamo in campo."] },
     onReady(K) { window.__leoH(K).people(); }
   });

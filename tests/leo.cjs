@@ -71,6 +71,34 @@ async function flow3(w, alt) {
   } catch (e) { errors.push(e.message.slice(0, 300)); }
   L.check(`L'Estate del Muro · capitolo 3${alt ? " (vie alternative)" : ""} (${w} px)`, errors); await browser.close();
 }
+const S4 = { v: 1, diffSet: true, intro: { ch1: 1, ch2: 1, ch3: 1, ch4: 1, lm_borgo: 1, lm_casa: 1, lm_trattoria: 1, lm_pensione: 1, lm_alba: 1 }, ch: 4, step: { 1: 4, 2: 4, 3: 4 }, done: { 1: "ok", 2: "ok", 3: "ok" }, flags: { lm_c1_done: 1, lm_c2_done: 1, lm_c3_done: 1 } };
+async function zones4(w) {
+  const { browser, page, errors } = await start(w, S4);
+  try {
+    await go(page, "lm_piazza"); if (w === 390) await L.shot(page, "lm_piazza");
+    let bad = await L.reachAll(page, "lm_piazza"); if (bad.length) errors.push("piazza: " + bad.join(", "));
+    await page.evaluate((k) => eval(k).setEra("lm_piazza", "vero"), K_); await page.waitForTimeout(600);
+    if (w === 390) await L.shot(page, "lm_piazza_vero");
+    const t = await page.evaluate((k) => { const m = eval(k).recall.marks, r = []; Object.keys(m).filter((i) => m[i].zone === "lm_piazza").forEach((i) => r.push(eval(k).at(m[i].at[0], m[i].at[1]))); return r; }, K_); if (t.length !== 4 || t.some((c) => c !== "§")) errors.push("piazza discrepanze: " + JSON.stringify(t));
+    bad = await L.reachAll(page, "lm_piazza"); if (bad.length) errors.push("piazza (vera): " + bad.join(", "));
+    await go(page, "lm_borgo", 21, 8); await L.goAct(page, 21, 6).catch((e) => errors.push("porta piazza: " + e.message)); await L.advance(page).catch(() => {});
+    const z = await L.zone(page); if (z !== "lm_piazza") errors.push("la porta del Borgo non porta in piazza: " + z);
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check(`L'Estate del Muro · zone cap. 4 (${w} px)`, errors); await browser.close();
+}
+async function flow4(w, alt) {
+  const { browser, page, errors } = await start(w, S4);
+  try {
+    await L.stubMatch(page, true);
+    await go(page, "lm_piazza", 10, 12);
+    await L.talk(page, "lm_nico"); await L.advance(page); await st(page, errors, 4, 1, "dopo Nico");
+    await L.talk(page, "lm_gege"); await L.advance(page); await st(page, errors, 4, 2, "dopo Gegè");
+    await L.talk(page, "lm_ottavio"); await L.advance(page, [alt ? "Insegui" : "Resti con"]); await L.advance(page).catch(() => {});
+    const i = await L.info(page); if (i.done[4] !== "ok") errors.push("capitolo 4 non concluso: " + JSON.stringify([i.done, i.step]));
+    const c = await page.evaluate((k) => eval(k).F.is("lm_insegui"), K_); if (c !== !!alt) errors.push("scelta del molo: " + c);
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check(`L'Estate del Muro · capitolo 4${alt ? " (vie alternative)" : ""} (${w} px)`, errors); await browser.close();
+}
 async function zones(w) {
   const { browser, page, errors } = await start(w, S1);
   for (const z of ["lm_borgo", "lm_casa"]) {
@@ -160,6 +188,8 @@ async function muro(w) {
     if (!only || only === "c2") { await flow2(w, false); if (w === 390) await flow2(w, true); }
     if (!only || only === "zone3") await zones3(w);
     if (!only || only === "c3") { await flow3(w, false); if (w === 390) await flow3(w, true); }
+    if (!only || only === "zone4") await zones4(w);
+    if (!only || only === "c4") { await flow4(w, false); if (w === 390) await flow4(w, true); }
     if (!only || only === "c1") { await flow1(w, false); if (w === 390) await flow1(w, true); }
   }
 })();

@@ -65,6 +65,18 @@
       boy(g, 170, 176, 1.6, "#1d4ed8", "#2b1d14", f, 2, true); R(g, 40, 160, 46, 12, "#b91c1c"); R(g, 40, 160, 46, 3, "#f3e9d2"); boy(g, 60, 190, 1.2, "#ff4d5a", "#2b1d14", f, 5, false);
       for (let i = 0; i < 3; i++) C(g, 140 + i * 30 + Math.sin(f / 14 + i) * 4, 118 - i * 3, 8, "rgba(255,255,255,.35)"); VIG(g, W, H, 0.22);
     },
+    lm_piazza(g, W, H, f) {
+      VG(g, 0, 130, "#7c3aed", "#fb923c"); g.fillRect(0, 0, W, 130); C(g, 60, 100, 18, "#fde68a"); GL(g, 60, 100, 90, "255,200,120", 0.4);
+      for (let i = 0; i < 30; i++) R(g, rnd(i + 5) * W, rnd(i + 19) * 70, 1, 1, `rgba(255,255,255,${0.3 + 0.3 * Math.sin(f / 15 + i)})`);
+      waves(g, W, 124, 30, f, "#1e40af", "#0f172a"); R(g, 0, 154, W, 46, "#e5cf9a");
+      // palco con bandierine, banda, fuochi sul molo
+      R(g, 100, 96, 120, 40, "#8a5a2b"); R(g, 96, 90, 128, 8, "#b45309"); for (let i = 0; i < 12; i++) T(g, [96 + i * 11, 70 + Math.sin(i) * 2, 102 + i * 11, 70, 99 + i * 11, 80], ["#ef4444", "#22c55e", "#3b82f6", "#facc15"][i % 4]);
+      for (let i = 0; i < 4; i++) boy(g, 118 + i * 24, 134, 1.0, ["#ef4444", "#facc15", "#3b82f6", "#22c55e"][i], "#2b1d14", f, i + 1, false);
+      boy(g, 40, 180, 1.4, "#ff4d5a", "#2b1d14", f, 1, true); boy(g, 250, 178, 1.5, "#1d4ed8", "#2b1d14", f, 3, false);
+      const k = Math.floor(f / 40) % 3; const fx = [260, 290, 235][k], fy = 40 + k * 8, ph = (f % 40) / 40;
+      for (let i = 0; i < 14; i++) { const a = i / 14 * 6.283; R(g, fx + Math.cos(a) * ph * 26, fy + Math.sin(a) * ph * 26 + ph * ph * 10, 2, 2, `rgba(${[255, 250, 120][k]},${[200, 120, 255][k]},120,${1 - ph})`); }
+      R(g, 0, 160, W, 4, "rgba(255,255,255,.25)"); VIG(g, W, H, 0.3);
+    },
     lm_casa(g, W, H, f) {
       VG(g, 0, 200, "#7c5a36", "#4a3220"); g.fillRect(0, 0, W, 200); for (let x = 0; x < W; x += 28) R(g, x, 0, 2, 130, "#5b3d22");
       R(g, 0, 130, W, 70, "#a77c4b"); for (let x = 0; x < W; x += 44) R(g, x, 130, 1, 70, "rgba(0,0,0,.25)");
@@ -81,6 +93,7 @@
     lm_trattoria: [[20, 70, 120, 62, "🍳 La cucina a vista: quattro fuochi, due funzionanti. Papà dice che il segreto è non farlo sapere alla pentola."], [190, 36, 100, 56, "📜 La lavagna del menù. I prezzi sono scritti col gesso e le promesse con l'inchiostro."], [200, 0, 60, 30, "🌀 Il ventilatore. Fa «tac» a ogni giro: è l'orologio della trattoria."]],
     lm_pensione: [[30, 80, 110, 58, "🛎️ Il banco della reception. Il campanello suona solo se glielo chiedi con garbo."], [190, 90, 70, 50, "🧥 Un uomo in beige in pieno agosto. Prende appunti. Non suda: dev'essere un talento."], [170, 30, 110, 66, "🌊 La finestra sul porto. Dalla pensione si vede tutto, compreso chi si allena di nascosto."]],
     lm_alba: [[232, 30, 88, 126, "🧱 Il muro all'alba: due macchie rosse, una grande e una piccola. La piccola è di una mano."], [30, 150, 70, 50, "⛵ Una barca capovolta. Sotto, una sveglia a molla con un calzino sopra."], [140, 130, 60, 66, "⚽ Dario, il pallone, il muro. Un tiro dopo l'altro, senza spettatori. O quasi."]],
+    lm_piazza: [[100, 90, 124, 50, "🎺 Il palco di assi. La banda suona tre note su quattro, ma con convinzione."], [20, 150, 100, 50, "🍟 Le bancarelle del fritto. Si sente l'odore dal molo."], [230, 20, 80, 70, "🎆 I fuochi sul molo: pochi, corti, amatissimi."]],
     lm_casa: [[210, 24, 76, 60, "🌊 La finestra sul porto: si vede il muro. E il pallone, probabilmente."], [20, 60, 80, 70, "🛏️ Il letto a castello. Sopra Dario, sotto Leo. La scaletta ha un gradino rotto."], [130, 90, 66, 44, "✉️ Il tavolo con un biglietto del treno piegato in quattro. Non è tuo."]]
   };
   function reg(n) {
