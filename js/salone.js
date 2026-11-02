@@ -627,6 +627,16 @@
     if (back) BK.sg = back; BACK = BK.sg; const body = shell("🕹️ Sala Giochi"), r = sgRec(), D = window.__sagaCore && window.__sagaCore.DIFFS;
     let html = `<p class="sum">I motori di partita originali delle saghe, da giocare liberi. Finisci il primo capitolo di una saga per accendere il suo cabinato; finisci la saga per sfidare il suo boss.</p>`;
     html += `<div class="row">${["storia", "normale", "sfida"].map((k) => `<button type="button" class="chip${r.diff === k ? " on" : ""}" data-diff="${k}">${D && D[k] ? D[k].label : k}</button>`).join("")}</div>`;
+    const PG = window.__presa;
+    if (PG && PG.on()) {
+      const sel = PG.sel(), cs = PG.costumeSagas().filter((k) => { const s = SAGAS.find((x) => x.id === k), x = s && state(s); return x && (x.finished || x.endsFound > 0); });
+      html += `<div class="sec">🎟️ Gettone &amp; 👗 Costume<span>solo sfida</span></div><p class="sum">Prima di giocare un cabinato scegli un gettone che complica lo schermo (e moltiplica i punti) e un costume: i personaggi vestono i panni di una saga che hai finito. Record separati per gettone.</p>`;
+      html += `<div class="row"><button type="button" class="chip${!sel.tok ? " on" : ""}" data-tok="">Nessun gettone</button>${Object.keys(PG.TOK).map((k) => `<button type="button" class="chip${sel.tok === k ? " on" : ""}" data-tok="${k}">${PG.TOK[k][1]} ${PG.TOK[k][0]}</button>`).join("")}</div>`;
+      if (cs.length) html += `<div class="row"><button type="button" class="chip${!sel.cos ? " on" : ""}" data-cos="">Costume normale</button>${cs.map((k) => { const s = SAGAS.find((x) => x.id === k); return `<button type="button" class="chip${sel.cos === k ? " on" : ""}" data-cos="${k}">${s.e} ${esc(s.t.split(" · ")[0])}</button>`; }).join("")}</div>`;
+      else html += `<p class="sum">👗 I costumi si accendono finendo una saga con personaggi nella Squadra dei Sogni.</p>`;
+      const rc = PG.recs(), ks = Object.keys(rc).filter((k) => k.split("|")[1] !== "-");
+      if (ks.length) html += `<p class="sum">Record con gettone: ${ks.map((k) => { const mm = MACHINES.find((x) => x.id === k.split("|")[0]); return `${PG.TOK[k.split("|")[1]] ? PG.TOK[k.split("|")[1]][1] : ""} ${esc(mm ? mm.t : k)} <b>${rc[k].best}</b>`; }).join(" · ")}</p>`;
+    }
     html += MACHINES.map((m) => { const st = sgState(m), w = r.w[m.id] || 0, p = r.p[m.id] || 0;
       return `<div class="psec${st.boss ? " gold" : ""}" data-m="${m.id}"><div class="pe">${st.open ? m.e : "🔒"}</div><div><b>${esc(m.t)}</b><span>${st.open ? esc(m.d) : `Si accende finendo il primo capitolo di «${esc(st.s ? st.s.t : m.saga)}».`}</span></div><div class="n">${st.open ? `${w}/${p}` : ""}</div></div>`; }).join("");
     html += `<div class="sec">Sfide libere · i minigiochi delle saghe<span>solo record</span></div><p class="sum">Le prove a tempismo e i rompicapo di Vallombra, in versione breve e senza premi: contano solo i record. Si accendono quando incontri la prova nella saga.</p>`;
@@ -634,6 +644,8 @@
       return `<div class="psec" data-c="${c.id}"><div class="pe">${op ? c.e : "🔒"}</div><div><b>${op ? esc(c.t) : "Prova di Vallombra"}</b><span>${op ? esc(c.d) : "Ancora da incontrare nella saga."}</span></div><div class="n">${op && b != null ? esc(c.unit(b)) : ""}</div></div>`; }).join("");
     body.innerHTML = html;
     body.querySelectorAll("[data-diff]").forEach((b) => (b.onclick = () => { const r2 = sgRec(); r2.diff = b.dataset.diff; sgSave(r2); openSalaGiochi(); }));
+    body.querySelectorAll("[data-tok]").forEach((b) => (b.onclick = () => { PG.setSel({ tok: b.dataset.tok }); openSalaGiochi(); }));
+    body.querySelectorAll("[data-cos]").forEach((b) => (b.onclick = () => { PG.setSel({ cos: b.dataset.cos }); openSalaGiochi(); }));
     body.querySelectorAll("[data-m]").forEach((b) => (b.onclick = () => {
       const m = MACHINES.find((x) => x.id === b.dataset.m);
       if (!m) return;
@@ -662,8 +674,14 @@
   function sgPlay(m, o, boss, pw, after) {
     const eng = window[m.eng], C = window.__sagaCore, r = sgRec(); if (!eng || !eng.start) return;
     close(); if (C && C.setCur) C.setCur(boss && r.diff === "storia" ? "normale" : r.diff, o.style);
-    const opts = Object.assign(m.opts(o, heroLook(), boss, pw), { oppStyle: o.style, heroLook: heroLook(), winTitle: boss ? "BOSS SCONFITTO!" : "VITTORIA!", onDone: (res) => { const r2 = sgRec(); r2.p[m.id] = (r2.p[m.id] || 0) + 1; if (res.win) r2.w[m.id] = (r2.w[m.id] || 0) + 1; if (boss && res.win) r2.boss = Object.assign(r2.boss || {}, { [m.id]: 1 }); sgSave(r2); if (after) after(res); else sgMachine(m); } });
-    const ok = safe(() => eng.start(opts), false); if (ok === false) { if (C && C.endMatch) C.endMatch(); sgMachine(m); }
+    const PG = window.__presa; if (PG) safe(() => PG.begin(m.id), null);
+    const opts = Object.assign(m.opts(o, heroLook(), boss, pw), { oppStyle: o.style, heroLook: heroLook(), winTitle: boss ? "BOSS SCONFITTO!" : "VITTORIA!", onDone: (res) => { if (PG) safe(() => PG.end(m.id, res), null); const r2 = sgRec(); r2.p[m.id] = (r2.p[m.id] || 0) + 1; if (res.win) r2.w[m.id] = (r2.w[m.id] || 0) + 1; if (boss && res.win) r2.boss = Object.assign(r2.boss || {}, { [m.id]: 1 }); sgSave(r2); if (after) after(res); else sgMachine(m); } });
+    const ok = safe(() => eng.start(opts), false); if (ok === false) { if (PG) safe(() => PG.reset(), null); if (C && C.endMatch) C.endMatch(); sgMachine(m); }
+  }
+  // Presa Unica: lancia un cabinato aperto con il primo avversario e restituisce l'esito a cb(res). false se non disponibile.
+  function playMachine(id, cb) {
+    const m = MACHINES.find((x) => x.id === id); if (!m || !m.opts || !m.opp || !m.opp.length || m.id === "staffetta") return false;
+    if (!sgState(m).open) return false; sgPlay(m, m.opp[0], false, "fulmine", (res) => cb && cb(res)); return true;
   }
   // TORNEO A ELIMINAZIONE: otto squadre, tre turni. Le altre partite del tabellone si giocano «da sole» (a sorte).
   function sgCup(m, pw) {
@@ -865,6 +883,42 @@
     ov.querySelector("button").onclick = () => { cancelAnimationFrame(raf); ov.remove(); back(); };
     cv.onclick = () => { n = full.length; };
   }
+  // ---------------------------------------------------------------- SALA DEI CIMELI
+  // Il museo del Borgo: ogni saga finita (o con almeno un finale trovato) lascia un cimelio in vetrina, con le parole del custode.
+  // Le vetrine delle saghe non ancora finite sono sagome con il solo genere. Cornice d'oro se hai trovato tutti i finali. Solo lettura.
+  const CIMK = "ali-di-rondine.cimeli";
+  const cimOn = () => safe(() => JSON.parse(localStorage.getItem(CIMK) || "{}").on !== false, true);
+  const cimSet = (v) => safe(() => localStorage.setItem(CIMK, JSON.stringify({ on: !!v })));
+  const CIM_GEN = {
+    fantasy: ["Una runa in tasca", "🔮", ["Brilla quando nessuno guarda.", "Ho smesso di chiederle cosa significhi. Mi guarda, e basta."]],
+    mistero: ["Un indizio mai archiviato", "🔍", ["L'ho messo in una busta e la busta in un cassetto. Il cassetto si è messo a ticchettare.", "C'è una risposta, qui dentro. Nessuno è mai sembrato volerla."]],
+    scifi: ["Un chip fuori catalogo", "💾", ["Non è nel mio inventario, ma è nella mia teca. Misteri della burocrazia.", "Dicono che sia del futuro. Qui dentro, comunque, è già in ritardo."]],
+    storico: ["Una fotografia ingiallita", "🖼️", ["Facce serie, scarpe lucide, un pallone che pesa come un'enciclopedia.", "Non ricordo chi me l'ha data. Ricordo che la teneva con due mani."]],
+    commedia: ["Un coriandolo del finale", "🎊", ["L'ho trovato nella tasca del cappotto a luglio. Ancora di buon umore.", "Piccolo, rosa, ostinato. Come certi tifosi."]],
+    sport: ["Una medaglia di cartone", "🥇", ["Vale più di quelle d'oro, ma non lo dico ai gioiellieri.", "L'hanno vinta in tre e portata via in uno solo."]],
+    avventura: ["Una mappa piegata male", "🗺️", ["Se la apri troppo in fretta, perdi la strada. Se la tieni chiusa, anche.", "Ha una macchia di caffè esattamente dove c'è il tesoro."]],
+    dramma: ["Una lettera mai spedita", "✉️", ["La busta è chiusa. Io non leggo le lettere degli altri: le spolvero.", "Qualcuno l'ha scritta con la mano che tremava. L'ho riposta con la mia."]],
+    tattica: ["Una lavagna cancellata a metà", "📐", ["Un 4-3-3 che somiglia a una mappa del tesoro e a un conto della spesa.", "Il gesso ha vinto. La squadra, forse."]],
+    satira: ["Un titolo di giornale", "📰", ["Prima pagina, titolo enorme, notizia piccola. Il mestiere dei giornalisti, non il mio.", "Ha fatto ridere tutti, tranne chi ci stava dentro."]],
+  };
+  function cimelio(s, x) {
+    const d = window.__cimeliDati && window.__cimeliDati[s.id]; if (d) return { n: d[0], e: d[1], t: d[2] };
+    const g = CIM_GEN[(s.g && s.g[0]) || ""] || CIM_GEN.avventura, h = (s.id + "").split("").reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+    return { n: g[0], e: g[1], t: g[2][h % g[2].length] };
+  }
+  function openCimeli(back) {
+    if (back) BK.cim = back; BACK = BK.cim; const body = shell("🏛️ Sala dei Cimeli");
+    const all = SAGAS.filter(available).map((s) => ({ s, x: state(s) })), got = all.filter(({ x }) => x.finished || x.endsFound > 0), gold = got.filter(({ x }) => x.ends.length && x.endsFound >= x.ends.length).length;
+    let html = `<p class="sum">Il museo del Borgo. Ogni saga che finisci lascia un cimelio in vetrina, con due parole del custode. <b>${got.length}</b> cimeli su ${all.length} saghe · ${gold} con cornice d'oro (tutti i finali trovati).</p>`;
+    html += got.length ? "" : `<p class="sum">Vetrine ancora vuote: finisci una saga e il custode ci metterà qualcosa.</p>`;
+    html += `<div class="cimGrid">` + all.map(({ s, x }) => {
+      if (!(x.finished || x.endsFound > 0)) return `<div class="cimV cimEmpty"><div class="ce">❔</div><b>Vetrina vuota</b><span>${esc(((GEN[(s.g && s.g[0]) || ""] || [""])[0]) || "Saga")} · ${x.started ? "in corso" : "da giocare"}</span></div>`;
+      const c = cimelio(s, x), full = x.ends.length && x.endsFound >= x.ends.length;
+      return `<div class="cimV${full ? " cimGold" : ""}"><div class="ce">${c.e}</div><b>${esc(c.n)}</b><span class="cs">${s.e} ${esc(s.t.split(" · ")[0])}</span><i>«${esc(c.t)}»</i><span class="cf">${x.ends.length ? `Finali ${x.endsFound}/${x.ends.length}` : "Saga conclusa"}</span></div>`;
+    }).join("") + `</div>`;
+    body.innerHTML = `<style>.cimGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.cimV{background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.18);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:4px;font-size:12px;text-align:center}.cimV .ce{font-size:34px}.cimV b{font-size:13px}.cimV i{font-size:11px;opacity:.85;line-height:1.35}.cimV .cs,.cimV .cf{font-size:10px;opacity:.7}.cimGold{border-color:#fbbf24;box-shadow:0 0 12px rgba(251,191,36,.45);background:rgba(251,191,36,.1)}.cimEmpty{opacity:.45;border-style:dashed}</style>` + html;
+  }
+
   // ---------------------------------------------------------------- SALONE
   const FILT = { st: "tutte", g: "", sort: "recenti" };
   function totals() {
@@ -1332,6 +1386,7 @@
         <button type="button" class="hubToolBtn" data-go="diario">📖 Diario</button>
         <button type="button" class="hubToolBtn" data-go="sala">🕹️ Sala Giochi</button>
         <button type="button" class="hubToolBtn" data-go="cine">🎬 Cineteca</button>
+        ${cimOn() ? `<button type="button" class="hubToolBtn" data-go="cim">🏛️ Cimeli</button>` : ""}
         ${pt ? `<button type="button" class="hubToolBtn" data-go="per">👥 Personaggi (${pt.seen}/${pt.tot})</button>` : ""}
         ${window.__bar ? `<button type="button" class="hubToolBtn" data-go="bar">🍺 Bar del Borgo</button>` : ""}
         ${window.__carteDecks ? `<button type="button" class="hubToolBtn" data-go="carte">🎴 Carte del Destino</button>` : ""}
@@ -1447,6 +1502,7 @@
       bindTool('[data-go="diario"]', () => openDiario(() => openSalone()));
       bindTool('[data-go="sala"]', () => openSalaGiochi(() => openSalone()));
       bindTool('[data-go="cine"]', () => openCineteca(() => openSalone()));
+      bindTool('[data-go="cim"]', () => openCimeli(() => openSalone()));
       bindTool('[data-go="per"]', () => openPersonaggi(() => openSalone()));
       bindTool('[data-go="bar"]', () => { close(); window.__bar.open(() => openSalone()); });
       bindTool('[data-go="carte"]', () => { close(); window.__carteDecks.openHub(() => openSalone()); });
@@ -1853,7 +1909,7 @@
   }
 
   window.__salone = {
-    open: (back) => openSalone(back), album: (back) => openAlbum(back), albero: (back, sagaId) => openAlbero(back, sagaId), diario: (back) => openDiario(back), diarioStato: () => safe(() => diarioData().tot, 0), salaGiochi: (back) => openSalaGiochi(back), machine: (id) => MACHINES.find((m) => m.id === id) || null, MACHINES, machineState: (id) => { const m = MACHINES.find((x) => x.id === id); return m ? sgState(m) : null; }, openMachine: (id, back) => { openSalaGiochi(back); const m = MACHINES.find((x) => x.id === id); if (m && sgState(m).open) sgMachine(m); }, heroLook: () => heroLook(), cineteca: (back) => openCineteca(back), guardaroba: (back) => openGuardaroba(back), openGuardarobaItem: (id, back) => { const A = api(), c = A && A.COSM && A.COSM[id]; if (c) { GF.kind = kindOf(c); GF.src = ""; GF.sel = id; } openGuardaroba(back); }, close, personaggi: (back) => openPersonaggi(back), openPersonaggioCard: (id, back) => { const ss = perSections(), sec = ss.find((x) => x.ids.includes(id)); if (sec) { PF.sec = sec.id; PF.f = "tutti"; openPersonaggi(back); perCard(sec, id); } else openPersonaggi(back); }, personaggiStato: () => safe(() => perTotals(), null),
+    open: (back) => openSalone(back), album: (back) => openAlbum(back), albero: (back, sagaId) => openAlbero(back, sagaId), diario: (back) => openDiario(back), diarioStato: () => safe(() => diarioData().tot, 0), salaGiochi: (back) => openSalaGiochi(back), playMachine, cimeli: { open: (back) => openCimeli(back), on: cimOn, setOn: cimSet }, machine: (id) => MACHINES.find((m) => m.id === id) || null, MACHINES, machineState: (id) => { const m = MACHINES.find((x) => x.id === id); return m ? sgState(m) : null; }, openMachine: (id, back) => { openSalaGiochi(back); const m = MACHINES.find((x) => x.id === id); if (m && sgState(m).open) sgMachine(m); }, heroLook: () => heroLook(), cineteca: (back) => openCineteca(back), guardaroba: (back) => openGuardaroba(back), openGuardarobaItem: (id, back) => { const A = api(), c = A && A.COSM && A.COSM[id]; if (c) { GF.kind = kindOf(c); GF.src = ""; GF.sel = id; } openGuardaroba(back); }, close, personaggi: (back) => openPersonaggi(back), openPersonaggioCard: (id, back) => { const ss = perSections(), sec = ss.find((x) => x.ids.includes(id)); if (sec) { PF.sec = sec.id; PF.f = "tutti"; openPersonaggi(back); perCard(sec, id); } else openPersonaggi(back); }, personaggiStato: () => safe(() => perTotals(), null),
     mappamondo: (back) => openMappamondo(back),
     summary: () => safe(() => { const t = totals(), A = api(), C = (A && A.COSM) || {}; return Object.assign(t, { cosOwned: safe(() => A.cosOwned().length, 0), cosTot: Object.keys(C).length }); }, { n: 0, run: 0, fin: 0, fe: 0, te: 0, cosOwned: 0, cosTot: 0 }),
     SAGAS,
