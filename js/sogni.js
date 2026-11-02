@@ -1610,7 +1610,7 @@
     let OV = null, BACK = null, PICK_MODE = "team";
   let COLL_FILT = { q: "", own: "all", rar: "all", role: "all", syn: "all" };
   const isFiltered = () => !!COLL_FILT.q || COLL_FILT.own !== "all" || COLL_FILT.rar !== "all" || COLL_FILT.role !== "all" || COLL_FILT.syn !== "all";
-  function shell(title) { css(); if (OV) OV.remove(); OV = document.createElement("div"); OV.className = "sgOv"; OV.innerHTML = `<div class="wrap"><div class="bar"><h2>${title}</h2><button type="button" class="x" aria-label="Chiudi">✕</button></div><div class="body"></div></div>`; OV.querySelector(".x").onclick = () => { const b = BACK; closeAll(); if (typeof b === "function") b(); }; document.body.appendChild(OV); return OV.querySelector(".body"); }
+  function shell(title) { css(); if (OV) OV.remove(); OV = document.createElement("div"); OV.className = "sgOv"; OV.innerHTML = `<div class="wrap"><div class="bar"><h2>${title}</h2><button type="button" class="x" aria-label="Chiudi">✕</button></div><div class="body"></div></div>`; OV.querySelector(".x").onclick = () => { const b = BACK; closeAll(); if (typeof b === "function") b(); }; document.body.appendChild(OV); safe(() => window.__albo && window.__albo.skin(OV), 0); return OV.querySelector(".body"); }
   function closeAll() { if (OV) { OV.remove(); OV = null; } }
 
   function isIdealForMod(c, r) {
@@ -2172,6 +2172,8 @@
     const I = intesa(r.team, r.modulo), coins = safe(() => window.__borgoApi.coins(), 0), vSt = vociStats(r);
     const comboHtml = renderComboBanner(r);
     const PM = premOn(); let h = `<p class="sum">Le carte dei personaggi di tutte le saghe. ${PM ? "Si ottengono dalle bustine: giocando i capitoli e trovando i finali ricevi <b>bustine premio</b> gratis, e con le monete ne compri altre (una carta sicura ogni 10)." : "Si sbloccano giocando, o con le bustine."} Carte: <b>${r.own.length}/${CARDS.length}</b> · monete: <b>${coins}</b>${nw.length ? ` · <b class="new">nuove: ${nw.length}</b>` : ""}${np ? ` · <b class="new">🎁 nuove bustine premio: ${np}</b>` : ""}</p>`;
+    const AL = safe(() => window.__albo && window.__albo.on(), false);
+    if (AL) { const ast = safe(() => window.__albo.stats(), null); h += `${safe(() => window.__albo.badge(), "")}<div class="big"><button type="button" data-go="albo">📒 L'Albo dei Sogni<small>${ast ? window.__albo.pct(ast.tot) + "% completato" : ""} · per saga, tema e rarità · premi estetici</small></button></div>`; }
     h += `<div class="sgPresetsWrap">${presetsBarHtml(r)}</div>`;
     h += `<div class="sec sec-team">La tua squadra · forza <b>${forza(r.team)}</b> · intesa ${intesaBadge(I.n)}${I.why.length ? ` <span class="why">(${I.why.map(esc).join(", ")})</span>` : ""}</div><div class="team">${[0, 1, 2, 3, 4].map((k) => (r.team[k] ? cardHtml(r.team[k], { synPartner: cardSynPartner(r.team[k], r) }) : `<div class="sgCard empty" data-slot="${k}"><span>+</span></div>`)).join("")}</div><div class="sgBenchWrap">${benchBoxHtml(r)}</div><div class="sgFormaz">${formazHtml(r.team)}</div><div class="sgModWrap">${modSelectorHtml(r.modulo, r.team)}</div><div class="team-stats">${r.team.length ? statLine(r.team, r.modulo) : ""}</div><div class="sgComboContainer">${comboHtml}</div>`;
     if (PM && r.prem.length) h += `<div class="big"><button type="button" data-go="prem">🎁 Apri bustina premio (${r.prem.length})<small>Rarità garantita: ${RAR[r.prem[0]][0]} · gratis</small></button></div>`;
@@ -2275,6 +2277,7 @@
     });
     body.querySelector('[data-go="tour"]').onclick = torneo;
     body.querySelector('[data-go="pack"]').onclick = pack;
+    const alB = body.querySelector('[data-go="albo"]'); if (alB) alB.onclick = () => { closeAll(); window.__albo.open(() => open()); };
     const pmB = body.querySelector('[data-go="prem"]'); if (pmB) pmB.onclick = openPrem;
     body.querySelector('[data-go="season"]').onclick = stagione;
     body.querySelector('[data-go="draft"]').onclick = draft;
@@ -3038,5 +3041,5 @@
   }
   // la Maglia dei Sogni nel guardaroba (si registra all'avvio, così resta anche dopo aver ricaricato la pagina)
   (function reg() { const A = window.__borgoApi; if (!A || !A.COSM) return setTimeout(reg, 200); if (!A.COSM.sg_maglia) A.COSM.sg_maglia = { kind: "shirt", label: "Maglia dei Sogni", val: "#7a5ad8", from: "Vinci il Torneo dei Sogni (Salone delle Saghe)" }; })();
-  window.__sogni = { premio: { on: premOn, setOn: premSet, open: openPrem }, squad, lineup, SAGHE, BY, eff, name, port, _save: save, open, close: closeAll, _launch: launch, _tiers: tiers, CARDS, LINKS, SFIDE, TEAMS, FRASI, intesa, forza, sync, stagione, draft, stars: (id) => { XPC = load().xp; return starsOf(id); }, _load: load, MODULI, modSintonia, openModDetail, openCardLore, combo: getTeamCombo, openVoci, openVoceScene, recordVoci, vociStats, pairKey, BOND_GOAL, toggleBench, autoBench, switchPreset, renamePreset, presetsBarHtml, bindPresetsBar, gainXp, levelUps };
+  window.__sogni = { _progress: progress, premio: { on: premOn, setOn: premSet, open: openPrem }, squad, lineup, SAGHE, BY, eff, name, port, _save: save, open, close: closeAll, _launch: launch, _tiers: tiers, CARDS, LINKS, SFIDE, TEAMS, FRASI, intesa, forza, sync, stagione, draft, stars: (id) => { XPC = load().xp; return starsOf(id); }, _load: load, MODULI, modSintonia, openModDetail, openCardLore, combo: getTeamCombo, openVoci, openVoceScene, recordVoci, vociStats, pairKey, BOND_GOAL, toggleBench, autoBench, switchPreset, renamePreset, presetsBarHtml, bindPresetsBar, gainXp, levelUps };
 })();
