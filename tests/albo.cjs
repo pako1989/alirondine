@@ -5,7 +5,7 @@ const L = require("./lib.cjs");
   const ev = (f, a) => page.evaluate(f, a);
   const off = await ev(() => window.__albo.on()); if (off) errors.push("l'Albo deve essere spento di base");
   await ev(() => window.__sogni.open(() => {})); await page.waitForTimeout(200);
-  if (await ev(() => !!document.querySelector('[data-go="albo"]'))) errors.push("pulsante Albo visibile con opzione spenta");
+  if (!(await ev(() => /Spento/.test((document.querySelector('[data-go="albo"]') || {}).innerText || "")))) errors.push("pulsante Albo spento mancante");
   const first = await ev(() => window.__albo.setOn(true)); if (!first) errors.push("prima accensione: atteso cut-in");
   if (await ev(() => window.__albo.setOn(true))) errors.push("cut-in ripetuto");
   // 30% delle carte possedute

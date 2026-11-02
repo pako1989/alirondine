@@ -2173,7 +2173,7 @@
     const comboHtml = renderComboBanner(r);
     const PM = premOn(); let h = `<p class="sum">Le carte dei personaggi di tutte le saghe. ${PM ? "Si ottengono dalle bustine: giocando i capitoli e trovando i finali ricevi <b>bustine premio</b> gratis, e con le monete ne compri altre (una carta sicura ogni 10)." : "Si sbloccano giocando, o con le bustine."} Carte: <b>${r.own.length}/${CARDS.length}</b> · monete: <b>${coins}</b>${nw.length ? ` · <b class="new">nuove: ${nw.length}</b>` : ""}${np ? ` · <b class="new">🎁 nuove bustine premio: ${np}</b>` : ""}</p>`;
     const AL = safe(() => window.__albo && window.__albo.on(), false);
-    if (AL) { const ast = safe(() => window.__albo.stats(), null); h += `${safe(() => window.__albo.badge(), "")}<div class="big"><button type="button" data-go="albo">📒 L'Albo dei Sogni<small>${ast ? window.__albo.pct(ast.tot) + "% completato" : ""} · per saga, tema e rarità · premi estetici</small></button></div>`; }
+    if (window.__albo) { const ast = AL ? safe(() => window.__albo.stats(), null) : null; h += `${AL ? safe(() => window.__albo.badge(), "") : ""}<div class="big"><button type="button" data-go="albo">📒 L'Albo dei Sogni<small>${AL ? (ast ? window.__albo.pct(ast.tot) + "% completato · " : "") + "per saga, tema e rarità · premi estetici" : "Spento · tocca per attivarlo (si spegne da Impostazioni)"}</small></button></div>`; }
     h += `<div class="sgPresetsWrap">${presetsBarHtml(r)}</div>`;
     h += `<div class="sec sec-team">La tua squadra · forza <b>${forza(r.team)}</b> · intesa ${intesaBadge(I.n)}${I.why.length ? ` <span class="why">(${I.why.map(esc).join(", ")})</span>` : ""}</div><div class="team">${[0, 1, 2, 3, 4].map((k) => (r.team[k] ? cardHtml(r.team[k], { synPartner: cardSynPartner(r.team[k], r) }) : `<div class="sgCard empty" data-slot="${k}"><span>+</span></div>`)).join("")}</div><div class="sgBenchWrap">${benchBoxHtml(r)}</div><div class="sgFormaz">${formazHtml(r.team)}</div><div class="sgModWrap">${modSelectorHtml(r.modulo, r.team)}</div><div class="team-stats">${r.team.length ? statLine(r.team, r.modulo) : ""}</div><div class="sgComboContainer">${comboHtml}</div>`;
     if (PM && r.prem.length) h += `<div class="big"><button type="button" data-go="prem">🎁 Apri bustina premio (${r.prem.length})<small>Rarità garantita: ${RAR[r.prem[0]][0]} · gratis</small></button></div>`;
@@ -2277,7 +2277,7 @@
     });
     body.querySelector('[data-go="tour"]').onclick = torneo;
     body.querySelector('[data-go="pack"]').onclick = pack;
-    const alB = body.querySelector('[data-go="albo"]'); if (alB) alB.onclick = () => { closeAll(); window.__albo.open(() => open()); };
+    const alB = body.querySelector('[data-go="albo"]'); if (alB) alB.onclick = () => { closeAll(); const go = () => window.__albo.open(() => open()); if (!window.__albo.on()) { const first = window.__albo.setOn(true); if (first && window.__presa) return window.__presa.cutin("L'ALBO DEI SOGNI", "Tutte le carte in un album · premi a soglie", go); } go(); };
     const pmB = body.querySelector('[data-go="prem"]'); if (pmB) pmB.onclick = openPrem;
     body.querySelector('[data-go="season"]').onclick = stagione;
     body.querySelector('[data-go="draft"]').onclick = draft;
