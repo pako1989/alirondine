@@ -25,6 +25,7 @@
 //     plan: { name: "Il Piano", roles: { rk: { n, icon, d, fit: { id_membro: 2 } } } },  // IL PIANO (richiede crew): K.plan.open({ title, q, roles, pool }, back, inZone, cb(mappa)) assegna compagni a ruoli; K.plan.fit(rk, id)
 //     scroll: { eng: "__scorri", name: "I livelli", levels: { id: { name, icon, d, theme, map: [righe], signs, boss } }, bonus(K), kit: "guanti", practice: { theme, map, signs }, practiceName, practiceSub, banName },  // A SCORRIMENTO: K.scroll.play(id, o, cb(r)) livello platform 2D (js/scorri.js); record per livello, Mappa dei livelli (K.scroll.open)
 //     build: { name, res: "legno", empty: "O", kinds: { id: { n, icon, tile, cost, d } }, sites: { id: { zone, at: [tx, ty], tag, n } }, when(K) },  // LE COSTRUZIONI: cantieri sulla mappa, K.build.place/at/list/open; restano tra i capitoli
+//     recall: { name, icon, era: "vero", tile: "§", after: ":", tellLabel, trueLabel, marks: { id: { zone, at: [tx, ty], t, d } }, when(K) },  // IL RICORDO: la zona in due versioni (spec.eras[era] è quella vera), discrepanze da trovare; K.recall.toggle/found/count/mark
 //     perks: { name: "Il Bivio dei Poteri", perks: { id: { n, icon, d, max, tag } } },  // IL BIVIO DEI POTERI: K.perks.offer({ n: 3, tag, q }, cb(id)) scelta 1 su 3 di un potere che resta tra i capitoli; lv/give/all/list/html
 //     rhythm: { eng: "__ritmo", name: "Il Repertorio", songs: { id: { n, icon, d, song, mode, venue, need } }, mates(K) },  // IL REPERTORIO: K.rhythm.play(id, o, cb(r)) brano a tempo (js/ritmo.js); stelle e precisione per brano, K.rhythm.open(back), morale() per la partita dopo
 //     cold: { name: "Calore", icon: "🌡️", max: 8, sec: 14, home: ["zona", tx, ty], onZero(K) },  // IL TERMOMETRO: spec.cold (true o moltiplicatore) fa scendere il Calore; spec.warm = [[tx, ty, r]] e gli interni lo fanno risalire; K.cold.get/add/warm
@@ -524,7 +525,7 @@
       return out + `<br><span style="color:var(--dim)">▷ = strade non prese. Per provarle: Capitoli → rigioca.</span>`;
     }
     function journal(back, inZone) {
-      const html = journalHtml() + (CRW ? CRW.html() : "") + (PLN ? PLN.html() : "") + (BLB ? BLB.html() : "") + (PRS ? PRS.html() : "") + (SCR ? SCR.html() : "") + (RIT ? RIT.html() : "") + (BLD ? BLD.html() : "") + (PRK ? PRK.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + (WGT ? WGT.html() : "") + (RAD ? RAD.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
+      const html = journalHtml() + (CRW ? CRW.html() : "") + (PLN ? PLN.html() : "") + (BLB ? BLB.html() : "") + (PRS ? PRS.html() : "") + (SCR ? SCR.html() : "") + (RIT ? RIT.html() : "") + (BLD ? BLD.html() : "") + (RCL ? RCL.html() : "") + (PRK ? PRK.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + (WGT ? WGT.html() : "") + (RAD ? RAD.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
       const jb = (RAD ? [{ label: `${RAD.icon} ${RAD.name} · ${RAD.freq().toFixed(1)} MHz`, sub: "Ruota la manopola e intercetta segnali", fn: () => RAD.open(() => journal(back, inZone), inZone) }] : []).concat(BLB ? [{ label: `${BLB.icon} ${BLB.name}`, sub: BLB.statusTxt(), fn: () => BLB.open(() => journal(back, inZone), inZone) }] : []).concat(PRS ? [{ label: `${PRS.icon} ${PRS.name}`, sub: PRS.statusTxt(), fn: () => PRS.open(() => journal(back, inZone), inZone) }] : []).concat(DOS ? Object.keys(DOS.cases).filter((c) => DOS.list(c).length).map((c) => ({ label: "🗂️ Dossier · " + DOS.cases[c].t, sub: "Confronta prove e testimonianze", fn: () => DOS.open(c, () => journal(back, inZone), inZone) })) : []).concat(CAT && CAT.list().length ? [{ label: "🃏 Album", sub: `${CAT.team().length}/${CAT.max} in squadra`, fn: () => CAT.open(() => journal(back, inZone), inZone) }] : []).concat(CRW && CRW.count() ? [{ label: "⚔️ Schiera la compagnia", sub: `${CRW.field().length}/${CRW.max} in squadra`, fn: () => CRW.pick(() => journal(back, inZone), inZone) }] : []).concat((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
       if (inZone) return api.trAsk("voce", html, jb, bgNow());
       api.scene(BG0, "voce", html, jb, JN());
@@ -729,6 +730,7 @@
         chainFor(ZONES[zid]).slice().reverse().forEach((cc) => { const p = cc.n !== chN && cc.patch && cc.patch[zid]; if (p && p.build) p.build(Ls, stepOf(cc.n), K); });
         if (FLD && spec.flood) spec.flood.forEach((a) => { if (FLD.get() >= a[0]) Ls.lay(a[1], a[2], a[3], a[4], a[5] || "~"); });
         if (BLD) BLD.apply(zid, Ls);
+        if (RCL) RCL.apply(zid, Ls);
         spec.__doors = {};
         Ls.autos.forEach((a, i) => {
           const d = a.def, k = a.x + "," + a.y;
@@ -781,6 +783,7 @@
         if (TUBE.pts) return true;
         const ti = arr(spec.tubes).findIndex((t) => t.at && t.at[0] === tx && t.at[1] === ty); if (ti >= 0) { tubeRide(zid, ti); return true; }
         if (BLD && BLD.tap(zid, tx, ty)) return true;
+        if (RCL && RCL.tap(zid, tx, ty)) return true;
         const dr = (spec.doors && spec.doors[tx + "," + ty]) || (spec.__doors && spec.__doors[tx + "," + ty]);
         if (dr) { if (dr.text && !dr.to) say([["voce", dr.text]], done); else enterDoor(zid, tx, ty, dr); return true; }
         if (spec.interior && (ch === "v" || (spec.exits && spec.exits[tx + "," + ty]))) { leaveInterior(zid); return true; }
@@ -795,6 +798,7 @@
       Z.menu = () => zoneMenu();
       PLUG.forEach((p) => p.zone && safe(() => p.zone(zid, spec, Z, K)));
       if (BLD) BLD.acts(zid, Z);
+      if (RCL) RCL.acts(zid, Z);
       api.TRZ[zid] = Z;
       ZONES[zid] = { ch: chN, spec, Z };
       (ZALL[zid] = ZALL[zid] || {})[chN] = ZONES[zid];
@@ -961,6 +965,7 @@
       const c = activeChapter(), m = mem();
       const extra = cfg.zoneMenuExtra ? arr(safe(() => cfg.zoneMenuExtra(K), [])) : [];
       api.trAsk("voce", `<b>${esc(TITLE)}</b> · ${esc(c ? "Capitolo " + c.n + " · " + c.title : "")}<br><span style="color:var(--dim)">${esc(goalNow())}<br>Monete ${bal()} · ${esc(JN())}: ${m.lore.length} pagine</span>`, [
+        ...(RCL ? RCL.btn() : []),
         ...(RAD ? [{ label: `${RAD.icon} ${RAD.name} · ${RAD.freq().toFixed(1)} MHz`, sub: RAD.statusTxt(), cls: "hot", fn: () => RAD.open(zoneMenu, true) }] : []),
         ...(BLB ? [{ label: `${BLB.icon} ${BLB.name}`, sub: BLB.statusTxt(), cls: "hot", fn: () => BLB.open(zoneMenu, true) }] : []),
         ...(PRS ? [{ label: `${PRS.icon} ${PRS.name}`, sub: PRS.statusTxt(), cls: "hot", fn: () => PRS.open(zoneMenu, true) }] : []),
@@ -1305,6 +1310,39 @@
       const tap = (zid, tx, ty) => { if (!on()) return false; const s = Object.keys(ST0).find((k) => ST0[k].zone === zid && ST0[k].at[0] === tx && ST0[k].at[1] === ty); if (!s) return false; open(s); return true; };
       const html = () => { const L = list(); return L.length ? `<br><br><b>${esc(C0.name || "Le Costruzioni")}</b>${RES ? ` · ${esc(rn())} ${have()}` : ""}<br>` + L.map((x) => `${esc(KD[x.kind].icon || "•")} ${esc(KD[x.kind].n)} <span style="color:var(--dim)">· ${esc(ST0[x.site].n || x.site)}</span>`).join("<br>") : ""; };
       return { at, place, remove, list, count, open, on, html, apply, acts, tap, kinds: KD, sites: ST0 };
+    })();
+
+    // -------------------------------------------------------------- IL RICORDO (cfg.recall, opt-in): la stessa zona in due versioni, «come la racconta» e «com'è andata»
+    // cfg.recall = { name: "Il Ricordo", icon: "🎞️", era: "vero" (nome dell'epoca in spec.eras della zona: la versione vera), tile: "§" (tessera solida della discrepanza, la saga la disegna),
+    //   after: ":" (tessera che resta dopo averla trovata), tellLabel, trueLabel, marks: { id: { zone, at: [tx, ty], t, d } }, when(K) → di base sempre }
+    // La zona base è la versione raccontata; la zona con eras[era] è quella vera. Nel menu c'è il pulsante per passare dall'una all'altra (solo nelle zone che hanno la versione vera).
+    // Nella versione vera le discrepanze non ancora trovate sono la tessera `tile`: toccandole diventano una «Pagina vera» (flag rc_<id>, resta tra i capitoli).
+    // K.recall: isTrue(zid) · toggle() · found(id) · count(zone?) [trovate, totali] · list() · mark(id) (la segna da codice) · open() · html() nel diario
+    const RCL = cfg.recall && (() => {
+      const C0 = cfg.recall, MK = C0.marks || {}, ERA = C0.era || "vero", TL = C0.tile || "§", AF = C0.after || ":";
+      const on = () => !C0.when || !!safe(() => C0.when(K), true);
+      const found = (id) => F.is("rc_" + id);
+      const isTrue = (zid) => { const z = zid || (api && api.trZone && api.trZone()); return !!z && eraOf(z) === ERA; };
+      const has = (zid) => { const z = ZONES[zid || (api && api.trZone && api.trZone())]; return !!(z && z.spec.eras && z.spec.eras[ERA]); };
+      const ids = (zone) => Object.keys(MK).filter((id) => zone == null || MK[id].zone === zone);
+      const count = (zone) => { const L = ids(zone); return [L.filter(found).length, L.length]; };
+      const list = () => ids().filter(found);
+      const apply = (zid, Ls) => { if (!on() || !isTrue(zid)) return; ids(zid).forEach((id) => { if (!found(id)) Ls.put(MK[id].at[0], MK[id].at[1], TL); }); };
+      const acts = (zid, Z) => { if (ids(zid).length) Z.act[TL] = "🔎 " + (C0.look || "Guarda meglio"); };
+      function mark(id) { const d = MK[id]; if (!d || found(id)) return false; F.set("rc_" + id, true); SFX.ding(); note((C0.pageName || "Pagina vera") + ": " + (d.t || id)); if (api && api.trZone() === d.zone) setTiles(d.at[0], d.at[1], d.at[0], d.at[1], AF); return true; }
+      const tap = (zid, tx, ty) => {
+        if (!on() || !isTrue(zid)) return false; const id = ids(zid).find((k) => MK[k].at[0] === tx && MK[k].at[1] === ty); if (!id || found(id)) return false;
+        mark(id); const n = count(), d = MK[id];
+        say([["voce", `<b>🎞️ ${esc(C0.pageName || "Pagina vera")}: ${esc(d.t || "")}</b><br>${d.d || ""}`], ["voce", `${esc(C0.name || "Il Ricordo")}: ${n[0]}/${n[1]}.`]], done); return true;
+      };
+      function toggle() {
+        const z = api && api.trZone(); if (!z || !has(z)) return false;
+        if (isTrue(z)) { K.setEra(z, null); note((C0.name || "Il Ricordo") + ": " + (C0.tellLabel || "come la racconta")); } else K.setEra(z, ERA);
+        return true;
+      }
+      const html = () => { const L = list(); return L.length ? `<br><br><b>${esc(C0.name || "Il Ricordo")}</b> (${count()[0]}/${count()[1]})<br>` + L.map((id) => `🎞️ <b>${esc(MK[id].t || id)}</b> <span style="color:var(--dim)">${esc(String(MK[id].d || "").replace(/<[^>]+>/g, "").slice(0, 120))}</span>`).join("<br>") : ""; };
+      const btn = () => { const z = api && api.trZone(); if (!on() || !z || !has(z)) return []; const t = isTrue(z), n = count(ZONES[z] ? z : null); return [{ label: `${C0.icon || "🎞️"} ${t ? (C0.tellLabel || "Come la racconta Leo") : (C0.trueLabel || "Com'è andata davvero")}`, sub: t ? "Torna alla versione raccontata" : `Cerca le differenze · ${n[0]}/${n[1]} in questa zona`, cls: "hot", fn: () => { done(); setTimeout(() => toggle(), 30); } }]; };
+      return { found, isTrue, has, count, list, mark, toggle, apply, acts, tap, html, btn, marks: MK, era: ERA, tile: TL };
     })();
 
     // -------------------------------------------------------------- IL BIVIO DEI POTERI (cfg.perks): scelta di 1 potere su 3, che resta tra i capitoli
@@ -1984,7 +2022,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, plan: PLN, billboard: BLB, press: PRS, scroll: SCR, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN, radio: RAD, cold: COLD, rhythm: RIT, build: BLD, perks: PRK,
+      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, plan: PLN, billboard: BLB, press: PRS, scroll: SCR, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN, radio: RAD, cold: COLD, rhythm: RIT, build: BLD, recall: RCL, perks: PRK,
       // un minigioco proprio della saga (start = window.__xxx.start): o passa al motore, cb(r) a fine partita
       minigame: (start, o, cb) => ownMatch(start, Object.assign({}, o, { done: (r) => safe(() => cb(r || {}), null) })),
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
