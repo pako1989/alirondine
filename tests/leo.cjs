@@ -41,6 +41,36 @@ async function flow2(w, alt) {
   } catch (e) { errors.push(e.message.slice(0, 300)); }
   L.check(`L'Estate del Muro · capitolo 2${alt ? " (vie alternative)" : ""} (${w} px)`, errors); await browser.close();
 }
+const S3 = { v: 1, diffSet: true, intro: { ch1: 1, ch2: 1, ch3: 1, lm_borgo: 1, lm_casa: 1, lm_trattoria: 1, lm_pensione: 1, lm_alba: 1 }, ch: 3, step: { 1: 4, 2: 4 }, done: { 1: "ok", 2: "ok" }, flags: { lm_c1_done: 1, lm_c2_done: 1 } };
+async function zones3(w) {
+  const { browser, page, errors } = await start(w, S3);
+  try {
+    for (const z of ["lm_pensione", "lm_alba"]) {
+      await go(page, z); if (w === 390) await L.shot(page, "lm_" + z);
+      let bad = await L.reachAll(page, z); if (bad.length) errors.push(z + ": " + bad.join(", "));
+      await page.evaluate(([k, z]) => eval(k).setEra(z, "vero"), [K_, z]); await page.waitForTimeout(600);
+      const t = await page.evaluate(([k, z]) => { const m = eval(k).recall.marks, r = []; Object.keys(m).filter((i) => m[i].zone === z).forEach((i) => r.push(eval(k).at(m[i].at[0], m[i].at[1]))); return r; }, [K_, z]); if (t.length !== 3 || t.some((c) => c !== "§")) errors.push(z + " discrepanze: " + JSON.stringify(t));
+      bad = await L.reachAll(page, z); if (bad.length) errors.push(z + " (vera): " + bad.join(", "));
+    }
+    await go(page, "lm_borgo", 32, 8); await L.goAct(page, 32, 6).catch((e) => errors.push("porta pensione: " + e.message)); await L.advance(page).catch(() => {});
+    const z = await L.zone(page); if (z !== "lm_pensione") errors.push("la porta del Borgo non porta alla pensione: " + z);
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check(`L'Estate del Muro · zone cap. 3 (${w} px)`, errors); await browser.close();
+}
+async function flow3(w, alt) {
+  const { browser, page, errors } = await start(w, S3);
+  try {
+    await page.evaluate(() => { window.__tornadritto.start = (o) => { setTimeout(() => o.onDone({ win: true, a: 3, b: 6, data: { catches: 3, perfect: 1, throws: 6, best: 3 } }), 30); return true; }; });
+    await go(page, "lm_pensione", 6, 7); await L.talk(page, "lm_quaglia"); await L.advance(page, [alt ? "mio fratello" : "Chieda a lui"]); await st(page, errors, 3, 1, "dopo Quaglia");
+    await go(page, "lm_borgo", 27, 15); await L.talk(page, "lm_ottavio"); await L.advance(page); await st(page, errors, 3, 2, "dopo Ottavio");
+    const z1 = await L.zone(page); if (z1 !== "lm_alba") errors.push("Ottavio non porta all'alba: " + z1);
+    await L.talk(page, "lm_dario"); await L.advance(page, [alt ? "Tiriamo insieme" : "Se vai"]); await L.advance(page).catch(() => {}); await st(page, errors, 3, 3, "dopo Dario all'alba");
+    await go(page, "lm_pensione", 6, 7); await L.talk(page, "lm_quaglia"); await L.advance(page, [alt ? "non ha paura" : "Sì. Ma"]); await L.advance(page).catch(() => {});
+    const i = await L.info(page); if (i.done[3] !== "ok") errors.push("capitolo 3 non concluso: " + JSON.stringify([i.done, i.step]));
+    const c = await page.evaluate((k) => [eval(k).F.is("lm_aiuto"), eval(k).F.is("lm_q_dice")], K_); if (c[0] !== !!alt || c[1] !== !alt) errors.push("scelte del cap 3: " + JSON.stringify(c));
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check(`L'Estate del Muro · capitolo 3${alt ? " (vie alternative)" : ""} (${w} px)`, errors); await browser.close();
+}
 async function zones(w) {
   const { browser, page, errors } = await start(w, S1);
   for (const z of ["lm_borgo", "lm_casa"]) {
@@ -128,6 +158,8 @@ async function muro(w) {
     if (!only || only === "muro") await muro(w);
     if (!only || only === "zone2") await zones2(w);
     if (!only || only === "c2") { await flow2(w, false); if (w === 390) await flow2(w, true); }
+    if (!only || only === "zone3") await zones3(w);
+    if (!only || only === "c3") { await flow3(w, false); if (w === 390) await flow3(w, true); }
     if (!only || only === "c1") { await flow1(w, false); if (w === 390) await flow1(w, true); }
   }
 })();

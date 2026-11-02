@@ -90,6 +90,12 @@
         c2_macchia: { zone: "lm_trattoria", at: [5, 8], t: "La tovaglia macchiata", d: "Il tavolo del racconto è apparecchiato come una reggia. Quello vero ha una macchia di sugo a forma di Sardegna, e nessuno ha mai capito di chi sia." },
         c2_ventilatore: { zone: "lm_trattoria", at: [14, 5], t: "Il ventilatore che fa tac", d: "Il lampadario d'oro del ricordo è un ventilatore a pale storte. Fa «tac» a ogni giro e papà giura che è il suo orologio di cucina." },
         c2_cassa: { zone: "lm_trattoria", at: [7, 8], t: "Il cartello «Non si fa credito»", d: "Sotto il bancone c'è ancora il cartello del '98. Qualcuno ci ha scritto a penna, piccolissimo: «tranne a Dario»." }
+        ,c3_stelle: { zone: "lm_pensione", at: [5, 1], t: "Le stelle della pensione", d: "Nel racconto la Pensione Bellavista ha cinque stelle d'oro. Quella vera ne ha una, e qualcuno ci ha disegnato attorno le altre quattro col pennarello." },
+        c3_beige: { zone: "lm_pensione", at: [12, 5], t: "Il completo beige", d: "Il completo del Professore è di filo d'oro, secondo la versione di Leo. In realtà è un completo normale, un po' spiegazzato, con una macchia di tè sul risvolto." },
+        c3_taccuino: { zone: "lm_pensione", at: [10, 6], t: "Il taccuino", d: "Il taccuino segreto è un quaderno a quadretti con la copertina rosa. Sulla prima pagina: «Cose da non dimenticare: gli occhi, i piedi, la paura»." },
+        c3_pietra: { zone: "lm_alba", at: [14, 10], t: "La pietra legata", d: "Nel racconto Dario si allena contro un drago di nebbia. Nella versione vera, calcia con una pietra legata alla caviglia per fare più fatica. Poi la toglie, per non farsi vedere." },
+        c3_sveglia: { zone: "lm_alba", at: [6, 5], t: "La sveglia alle cinque", d: "Sotto la barca capovolta c'è una sveglia a molla. Suona alle cinque. Dario la mette lì ogni sera, con l'allarme coperto da un calzino." },
+        c3_orme: { zone: "lm_alba", at: [10, 10], t: "Le orme sul muro", d: "Il muro non ha una macchia. Ne ha due: una grande, del pallone, e una piccola, di una mano appoggiata a pensare." }
       }
     },
     bonds: {
