@@ -20,6 +20,7 @@
     drawItem(g, x, y, i, f) { g.save(); g.translate(x, y + Math.sin(f / 12 + i) * 1.2); g.fillStyle = "#fde2e4"; g.beginPath(); g.ellipse(0, 0, 4, 3, 0.3, 0, 7); g.fill(); g.fillStyle = "#f5b5bd"; for (let k = -2; k <= 2; k++) g.fillRect(k * 1.2, -2.5, 0.6, 5); g.restore(); },
     regions: {
       racconto: { grass: ["#7be05a", "#6fd44f", "#86ea66"], path: ["#ffd98a", "#ffcf75"], stone: ["#ffb4a2", "#ffa58e"], wall: ["#ff9a76", "#ff8c64"], water: ["#27c4f5", "#1fb6e8"], tall: "#5fc43f", tree: ["#2fb55a", "#3ac968", "#52dc7a"], tint: "255,200,120", tintA: 0.1, fx: "petals", dark: 0.0 },
+      raccontoint: { grass: ["#7be05a", "#6fd44f", "#86ea66"], path: ["#ffd98a", "#ffcf75"], stone: ["#ffb4a2", "#ffa58e"], wall: ["#ff9a76", "#ff8c64"], water: ["#27c4f5", "#1fb6e8"], tall: "#5fc43f", tree: ["#2fb55a", "#3ac968", "#52dc7a"], tint: "255,200,120", tintA: 0.12, fx: "dust", dark: 0.0 },
       vero: { grass: ["#7d9a56", "#738f4f", "#86a35f"], path: ["#bba783", "#b09d7a"], stone: ["#9a958c", "#908b82"], wall: ["#b8825a", "#ab774f"], water: ["#4f86a3", "#487d9a"], tall: "#6a8445", tree: ["#355f33", "#3f6e3c", "#4b7d46"], tint: "255,225,180", tintA: 0.06, fx: "", dark: 0.04 },
       casa: { grass: ["#8a6a44", "#80603c", "#947250"], path: ["#b8956a", "#ac8a60"], stone: ["#85786c", "#7a6e62"], wall: ["#5a3c24", "#4e321c"], water: ["#1e3a5f", "#1b3456"], tall: "#80603c", tint: "255,190,120", tintA: 0.14, fx: "dust", dark: 0.16 }
     },
@@ -85,6 +86,10 @@
         c1_scarpa: { zone: "lm_borgo", at: [11, 13], t: "La scarpa bucata", d: "Dario, nel racconto, ha scarpini d'oro. Questa è la scarpa vera: ha un buco sotto l'alluce e un nodo di spago. Sul tallone, a pennarello: «D.M.» e sotto, più piccolo, «L.M. quando cresce»." },
         c1_pallone: { zone: "lm_borgo", at: [9, 19], t: "Il pallone sgonfio", d: "Il pallone «magico» è un pallone di plastica rattoppato, moscio come una focaccia di ieri. Si gonfia con una pompa da bicicletta e il fiato dei più testardi." },
         c1_cartello: { zone: "lm_borgo", at: [21, 13], t: "Il premio del torneo", d: "Nel ricordo il premio è «un'astronave». In realtà il cartello dice: «1° premio: una coppa di latta e un gelato a testa. Iscrizione: sei euro a squadra».", }
+        ,c2_lavagna: { zone: "lm_trattoria", at: [12, 1], t: "Il prezzo del fritto", d: "Nel racconto il fritto di acciughe è gratis «con un sorriso». Sulla lavagna vera: 9 euro, e «il resto: chiedere a Papà, che non risponde»." },
+        c2_macchia: { zone: "lm_trattoria", at: [5, 8], t: "La tovaglia macchiata", d: "Il tavolo del racconto è apparecchiato come una reggia. Quello vero ha una macchia di sugo a forma di Sardegna, e nessuno ha mai capito di chi sia." },
+        c2_ventilatore: { zone: "lm_trattoria", at: [14, 5], t: "Il ventilatore che fa tac", d: "Il lampadario d'oro del ricordo è un ventilatore a pale storte. Fa «tac» a ogni giro e papà giura che è il suo orologio di cucina." },
+        c2_cassa: { zone: "lm_trattoria", at: [7, 8], t: "Il cartello «Non si fa credito»", d: "Sotto il bancone c'è ancora il cartello del '98. Qualcuno ci ha scritto a penna, piccolissimo: «tranne a Dario»." }
       }
     },
     bonds: {

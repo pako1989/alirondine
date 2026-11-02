@@ -10,6 +10,37 @@ async function start(w, save, pick) {
 }
 const st = async (p, errors, ch, n, what) => { const i = await L.info(p); if (i.step[ch] !== n) errors.push(what + ": " + JSON.stringify(i.step)); };
 const S1 = { v: 1, diffSet: true, intro: { ch1: 1, lm_borgo: 1, lm_casa: 1 } };
+const S2 = { v: 1, diffSet: true, intro: { ch1: 1, ch2: 1, lm_borgo: 1, lm_casa: 1, lm_trattoria: 1 }, ch: 2, step: { 1: 4 }, done: { 1: "ok" }, flags: { lm_c1_done: 1 } };
+async function zones2(w) {
+  const { browser, page, errors } = await start(w, S2);
+  try {
+    await go(page, "lm_trattoria"); if (w === 390) await L.shot(page, "lm_trattoria");
+    let bad = await L.reachAll(page, "lm_trattoria"); if (bad.length) errors.push("trattoria: " + bad.join(", "));
+    await page.evaluate((k) => eval(k).setEra("lm_trattoria", "vero"), K_); await page.waitForTimeout(600);
+    if (w === 390) await L.shot(page, "lm_trattoria_vero");
+    const t = await page.evaluate((k) => [eval(k).recall.isTrue("lm_trattoria"), eval(k).at(12, 1), eval(k).at(5, 8), eval(k).at(14, 5), eval(k).at(7, 8)], K_); if (!t[0] || t.slice(1).some((c) => c !== "§")) errors.push("discrepanze trattoria: " + JSON.stringify(t));
+    bad = await L.reachAll(page, "lm_trattoria"); if (bad.length) errors.push("trattoria (vera): " + bad.join(", "));
+    await go(page, "lm_borgo", 15, 8);
+    await L.goAct(page, 15, 6).catch((e) => errors.push("porta trattoria: " + e.message)); await L.advance(page).catch(() => {});
+    const z = await L.zone(page); if (z !== "lm_trattoria") errors.push("la porta del Borgo non porta in trattoria: " + z);
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check(`L'Estate del Muro · zone cap. 2 (${w} px)`, errors); await browser.close();
+}
+async function flow2(w, alt) {
+  const { browser, page, errors } = await start(w, S2);
+  try {
+    await go(page, "lm_trattoria", 8, 9); await L.talk(page, "lm_papa"); await L.advance(page); await st(page, errors, 2, 1, "dopo Papà");
+    for (const id of ["lm_turista", "lm_capitano", "lm_famiglia"]) { await L.talk(page, id); await L.advance(page); }
+    await st(page, errors, 2, 2, "con i tre ordini");
+    await L.talk(page, "lm_papa"); await L.advance(page); await st(page, errors, 2, 3, "dopo i piatti");
+    await L.talk(page, "lm_turista"); await L.advance(page); await L.talk(page, "lm_famiglia"); await L.advance(page);
+    await L.talk(page, "lm_capitano"); await L.advance(page, [alt ? "Sono stato io" : "inciampato"]); await st(page, errors, 2, 4, "serviti i tre tavoli");
+    await L.talk(page, "lm_papa"); await L.advance(page, [alt ? "leggendaria" : "Faticosa"]); await L.advance(page).catch(() => {});
+    const i = await L.info(page); if (i.done[2] !== "ok") errors.push("capitolo 2 non concluso: " + JSON.stringify([i.done, i.step]));
+    const c = await page.evaluate((k) => eval(k).F.is("lm_copri"), K_); if (c !== !!alt) errors.push("scelta del vassoio: " + c);
+  } catch (e) { errors.push(e.message.slice(0, 300)); }
+  L.check(`L'Estate del Muro · capitolo 2${alt ? " (vie alternative)" : ""} (${w} px)`, errors); await browser.close();
+}
 async function zones(w) {
   const { browser, page, errors } = await start(w, S1);
   for (const z of ["lm_borgo", "lm_casa"]) {
@@ -31,16 +62,16 @@ async function ricordo(w) {
   const { browser, page, errors } = await start(w, S1);
   try {
     await go(page, "lm_borgo", 5, 8);
-    const b0 = await page.evaluate((k) => { const r = eval(k).recall; return [r.has("lm_borgo"), r.has("lm_casa"), r.count()[1]]; }, K_); if (!b0[0] || b0[1] || b0[2] !== 4) errors.push("recall base: " + JSON.stringify(b0));
+    const b0 = await page.evaluate((k) => { const r = eval(k).recall; return [r.has("lm_borgo"), r.has("lm_casa"), r.count("lm_borgo")[1]]; }, K_); if (!b0[0] || b0[1] || b0[2] !== 4) errors.push("recall base: " + JSON.stringify(b0));
     await page.evaluate((k) => eval(k).recall.toggle(), K_); await page.waitForTimeout(600);
     await L.goAct(page, 26, 17); await L.advance(page);
-    const c1 = await page.evaluate((k) => [eval(k).recall.found("c1_muro"), eval(k).recall.count()[0], eval(k).at(26, 17)], K_); if (!c1[0] || c1[1] !== 1 || c1[2] !== ":") errors.push("pagina vera non registrata: " + JSON.stringify(c1));
+    const c1 = await page.evaluate((k) => [eval(k).recall.found("c1_muro"), eval(k).recall.count("lm_borgo")[0], eval(k).at(26, 17)], K_); if (!c1[0] || c1[1] !== 1 || c1[2] !== ":") errors.push("pagina vera non registrata: " + JSON.stringify(c1));
     await page.evaluate((k) => eval(k).recall.toggle(), K_); await page.waitForTimeout(600);
     const t = await page.evaluate((k) => [eval(k).recall.isTrue("lm_borgo"), eval(k).at(26, 17)], K_); if (t[0] || t[1] !== "M") errors.push("ritorno alla versione raccontata: " + JSON.stringify(t));
     const h = await page.evaluate((k) => eval(k).recall.html(), K_); if (!/Il muro era basso/.test(h)) errors.push("diario senza la pagina: " + h.slice(0, 120));
     await page.evaluate((k) => eval(k).recall.toggle(), K_); await page.waitForTimeout(500);
     await page.evaluate((k) => { ["c1_scarpa", "c1_pallone", "c1_cartello"].forEach((id) => eval(k).recall.mark(id)); }, K_);
-    const n = await page.evaluate((k) => eval(k).recall.count(), K_); if (n[0] !== 4 || n[1] !== 4) errors.push("conteggio: " + JSON.stringify(n));
+    const n = await page.evaluate((k) => eval(k).recall.count("lm_borgo"), K_); if (n[0] !== 4 || n[1] !== 4) errors.push("conteggio: " + JSON.stringify(n));
   } catch (e) { errors.push(e.message.slice(0, 300)); }
   L.check(`L'Estate del Muro · Il Ricordo (${w} px)`, errors); await browser.close();
 }
@@ -95,6 +126,8 @@ async function muro(w) {
     if (!only || only === "zone") await zones(w);
     if (!only || only === "ricordo") await ricordo(w);
     if (!only || only === "muro") await muro(w);
+    if (!only || only === "zone2") await zones2(w);
+    if (!only || only === "c2") { await flow2(w, false); if (w === 390) await flow2(w, true); }
     if (!only || only === "c1") { await flow1(w, false); if (w === 390) await flow1(w, true); }
   }
 })();

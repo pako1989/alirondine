@@ -40,6 +40,15 @@
       [[220, 150, "#ef4444"], [250, 160, "#2563eb"]].forEach(([x, y, c], i) => { T(g, [x - 16, y, x, y - 14, x + 16, y], c); R(g, x - 0.7, y, 1.5, 22, "#5b3a22"); });
       for (let i = 0; i < 12; i++) R(g, (i * 29 + f * (0.5 + (i % 3) * 0.2)) % 340 - 10, 8 + (i % 4) * 7, 4, 1.2, "rgba(255,255,255,.8)"); VIG(g, W, H, 0.18);
     },
+    lm_trattoria(g, W, H, f) {
+      VG(g, 0, 200, "#7a3a1e", "#3f2012"); g.fillRect(0, 0, W, 200); R(g, 0, 130, W, 70, "#9a6a3a"); for (let x = 0; x < W; x += 36) R(g, x, 130, 1, 70, "rgba(0,0,0,.25)");
+      R(g, 20, 70, 120, 62, "#5b3a22"); R(g, 20, 70, 120, 6, "#7a4d2a"); for (let i = 0; i < 4; i++) { C(g, 42 + i * 26, 96, 9, "#1f2937"); C(g, 42 + i * 26, 96, 6 + Math.sin(f / 5 + i), `rgba(251,146,60,${0.55 + 0.25 * Math.sin(f / 4 + i)})`); }
+      for (let i = 0; i < 3; i++) C(g, 62 + Math.sin(f / 18 + i) * 4, 62 - i * 9 - (f % 36) / 3, 4, "rgba(226,232,240,.22)"); GL(g, 80, 96, 80, "251,146,60", 0.22);
+      R(g, 190, 36, 100, 56, "#1f2a1f"); R(g, 190, 36, 100, 3, "#a16207"); R(g, 200, 48, 60, 2, "#e5e7eb"); R(g, 200, 58, 74, 2, "#e5e7eb"); R(g, 200, 68, 48, 2, "#e5e7eb");
+      g.save(); g.translate(230, 14); g.rotate(f / 14); R(g, -14, -1, 28, 2, "#78716c"); R(g, -1, -14, 2, 28, "#78716c"); g.restore(); C(g, 230, 14, 3, "#44403c");
+      [[60, 168], [150, 176], [250, 168]].forEach(([x, y], i) => { R(g, x - 26, y - 10, 52, 5, i % 2 ? "#fff" : "#dc2626"); for (let k = 0; k < 6; k++) R(g, x - 26 + k * 9, y - 10, 4.5, 5, i % 2 ? "#dc2626" : "#fff"); R(g, x - 3, y - 5, 6, 18, "#5b3a22"); });
+      GL(g, 150, 150, 120, "255,220,160", 0.12 + 0.03 * Math.sin(f / 15)); VIG(g, W, H, 0.4);
+    },
     lm_casa(g, W, H, f) {
       VG(g, 0, 200, "#7c5a36", "#4a3220"); g.fillRect(0, 0, W, 200); for (let x = 0; x < W; x += 28) R(g, x, 0, 2, 130, "#5b3d22");
       R(g, 0, 130, W, 70, "#a77c4b"); for (let x = 0; x < W; x += 44) R(g, x, 130, 1, 70, "rgba(0,0,0,.25)");
@@ -53,6 +62,7 @@
   const HOT = {
     lm_titolo: [[190, 118, 100, 44, "🧱 Il muro del porto. Una macchia rossa grande come un pallone: tre estati di tiri."], [20, 140, 160, 55, "👦 Leo, Dario e Nico. Uno ha un pallone, uno ha un piano, uno ha una tecnica segreta."], [200, 24, 100, 60, "☀️ Il sole di agosto: non sai mai se è tuo amico."]],
     lm_borgo: [[238, 100, 80, 40, "🧱 Il muro del porto. Dicono che se il pallone torna dritto sei pronto."], [20, 52, 220, 56, "🏠 Le case del Borgo, dipinte da un pittore che odiava il grigio."], [200, 140, 70, 40, "⛱️ Gli ombrelloni. Sotto, una signora di Torino giudica il tuo palleggio."]],
+    lm_trattoria: [[20, 70, 120, 62, "🍳 La cucina a vista: quattro fuochi, due funzionanti. Papà dice che il segreto è non farlo sapere alla pentola."], [190, 36, 100, 56, "📜 La lavagna del menù. I prezzi sono scritti col gesso e le promesse con l'inchiostro."], [200, 0, 60, 30, "🌀 Il ventilatore. Fa «tac» a ogni giro: è l'orologio della trattoria."]],
     lm_casa: [[210, 24, 76, 60, "🌊 La finestra sul porto: si vede il muro. E il pallone, probabilmente."], [20, 60, 80, 70, "🛏️ Il letto a castello. Sopra Dario, sotto Leo. La scaletta ha un gradino rotto."], [130, 90, 66, 44, "✉️ Il tavolo con un biglietto del treno piegato in quattro. Non è tuo."]]
   };
   function reg(n) {
