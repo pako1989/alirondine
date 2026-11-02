@@ -701,6 +701,7 @@
       own, team: tm, bench: bn,
       won: Array.isArray(r.won) ? r.won.filter((x) => typeof x === "number") : [],
       packs: r.packs | 0, hero: !!r.hero,
+      prem: Array.isArray(r.prem) ? r.prem.filter((x) => RAR[x]).slice(0, 200) : [], cred: r.cred && typeof r.cred === "object" ? r.cred : {}, pk10: r.pk10 | 0,
       xp: r.xp && typeof r.xp === "object" ? r.xp : {},
       season: r.season && Array.isArray(r.season.sched) ? r.season : null,
       titles: r.titles | 0,
@@ -855,7 +856,20 @@
   // le carte a capitoli (c.n) si sbloccano a capitolo concluso; le altre seguono la regola per rarità
   const earned = (c) => { const p = progress(c.saga); if (c.n) return !!p.done[c.n]; return c.rar === "c" ? p.ch >= 1 : c.rar === "r" ? p.ch >= 2 : c.rar === "e" ? p.ch >= 3 || p.ends >= 1 : p.ends >= 4; };
   const drop = (c) => !c.n || earned(c); // le carte a capitoli non escono a sorpresa prima di averle guadagnate
-  function sync() { const r = load(); XPC = r.xp; let nw = []; CARDS.forEach((c) => { if (!r.own.includes(c.id) && earned(c)) { r.own.push(c.id); nw.push(c.id); } }); if (nw.length) save(r); return { r, nw }; }
+  // BUSTINE PREMIO (opzione «Carte dai premi»): con l'opzione accesa i capitoli e i finali non regalano più la carta ma una bustina gratis
+  // di quella rarità (la carta resta una sorpresa). Le carte già possedute non si toccano. Spenta = sblocchi diretti come prima.
+  const PREMK = "ali-di-rondine.sogni-premio";
+  const premOn = () => safe(() => JSON.parse(localStorage.getItem(PREMK) || "{}").on !== false, true);
+  const premSet = (v) => safe(() => localStorage.setItem(PREMK, JSON.stringify({ on: !!v })), 0);
+  function sync() {
+    const r = load(); XPC = r.xp; const nw = []; let np = 0, ch = false, po = premOn();
+    CARDS.forEach((c) => {
+      if (r.own.includes(c.id) || !earned(c)) return;
+      if (po) { if (!r.cred[c.id]) { r.cred[c.id] = 1; r.prem.push(c.rar); np++; ch = true; } }
+      else { r.own.push(c.id); nw.push(c.id); ch = true; }
+    });
+    if (ch) save(r); return { r, nw, np };
+  }
   // ---------------------------------------------------------------- intesa e forza
   function intesa(team, modKey) {
     let n = 0; const why = [];
@@ -2144,13 +2158,14 @@
   }
 
   function open(back) {
-    if (back) BACK = back; PICK_MODE = "team"; const { r, nw } = sync(); const body = shell("🃏 La Squadra dei Sogni");
+    if (back) BACK = back; PICK_MODE = "team"; const { r, nw, np } = sync(); const body = shell("🃏 La Squadra dei Sogni");
     const I = intesa(r.team, r.modulo), coins = safe(() => window.__borgoApi.coins(), 0), vSt = vociStats(r);
     const comboHtml = renderComboBanner(r);
-    let h = `<p class="sum">Le carte dei personaggi di tutte le saghe. Si sbloccano giocando, o con le bustine. Carte: <b>${r.own.length}/${CARDS.length}</b> · monete: <b>${coins}</b>${nw.length ? ` · <b class="new">nuove: ${nw.length}</b>` : ""}</p>`;
+    const PM = premOn(); let h = `<p class="sum">Le carte dei personaggi di tutte le saghe. ${PM ? "Si ottengono dalle bustine: giocando i capitoli e trovando i finali ricevi <b>bustine premio</b> gratis, e con le monete ne compri altre (una carta sicura ogni 10)." : "Si sbloccano giocando, o con le bustine."} Carte: <b>${r.own.length}/${CARDS.length}</b> · monete: <b>${coins}</b>${nw.length ? ` · <b class="new">nuove: ${nw.length}</b>` : ""}${np ? ` · <b class="new">🎁 nuove bustine premio: ${np}</b>` : ""}</p>`;
     h += `<div class="sgPresetsWrap">${presetsBarHtml(r)}</div>`;
     h += `<div class="sec sec-team">La tua squadra · forza <b>${forza(r.team)}</b> · intesa ${intesaBadge(I.n)}${I.why.length ? ` <span class="why">(${I.why.map(esc).join(", ")})</span>` : ""}</div><div class="team">${[0, 1, 2, 3, 4].map((k) => (r.team[k] ? cardHtml(r.team[k], { synPartner: cardSynPartner(r.team[k], r) }) : `<div class="sgCard empty" data-slot="${k}"><span>+</span></div>`)).join("")}</div><div class="sgBenchWrap">${benchBoxHtml(r)}</div><div class="sgFormaz">${formazHtml(r.team)}</div><div class="sgModWrap">${modSelectorHtml(r.modulo, r.team)}</div><div class="team-stats">${r.team.length ? statLine(r.team, r.modulo) : ""}</div><div class="sgComboContainer">${comboHtml}</div>`;
-    h += `<div class="big"><button type="button" data-go="tour">🏆 Torneo dei Sogni<small>${r.won.length}/8 sfide vinte · ogni sfida in un motore diverso</small></button><button type="button" data-go="pack" ${coins < PACK ? "disabled" : ""}>🎴 Bustina<small>${PACK} monete · una carta a sorpresa</small></button><button type="button" data-go="season">📅 Stagione dei Sogni<small>${r.season ? `giornata ${Math.min(7, r.season.day + 1)}/7` : "campionato a 8 squadre"}${r.titles ? ` · scudetti ${r.titles}` : ""}</small></button>${window.__arena ? `<button type="button" data-go="arena">⚔️ Arena dei Sogni<small>Battaglie a turni · Staffetta dei Dieci · Torre</small></button>` : ""}<button type="button" data-go="draft">🎲 Draft<small>${r.draft ? (r.draft.picks.length < 5 ? `scelta ${r.draft.picks.length + 1}/5` : "coppa in corso") : "scegli 1 carta su 3 e gioca la coppa"}${r.cups ? ` · coppe ${r.cups}` : ""}</small></button><button type="button" data-go="voci" class="${vSt.unread ? "sgBtnPulse" : ""}">🎙️ Voci dallo Spogliatoio${vSt.unread ? ` <span class="sgNewDot">${vSt.unread}</span>` : ""}<small>${vSt.unlocked}/${vSt.total} dialoghi · 3 gare col Legame</small></button>${window.__gabbia3d ? `<button type="button" data-go="gabbia3d" style="grid-column:1/-1;border-color:#38bdf8;background:linear-gradient(135deg,#0c2238,#1b1438)">🏟️ Gabbia 3D · 3 contro 3<small>Calcio arcade 3D con sponde luminose, Super delle saghe e Coppa della Gabbia</small></button>` : ""}${window.__portieri ? `<button type="button" data-go="portieri" style="grid-column:1/-1;border-color:#34d399;background:linear-gradient(135deg,#0f2922,#1a1433)">🧤 Sfida di Portieri · Porta a Porta<small>Duello 1v1 tra i pali con le tue carte · Coppa dei Numeri Uno · Muro Infinito</small></button>` : ""}${window.__tavolo ? `<button type="button" data-go="tavolo" style="grid-column:1/-1;border-color:#a16207;background:linear-gradient(135deg,#1c1408,#0d2418)">🎭 Il Tavolo di Sotto<small>Gioco di carte a run contro un arbitro mascherato · le tue carte in quattro corsie · tre boss</small></button>` : ""}</div><p class="sum">Le carte crescono giocando: ⭐ a 3 punti esperienza, ⭐⭐ a 8, ⭐⭐⭐ a 15 (+2 a ogni statistica per stella; a tre stelle la carta dice la sua frase).</p>`;
+    if (PM && r.prem.length) h += `<div class="big"><button type="button" data-go="prem">🎁 Apri bustina premio (${r.prem.length})<small>Rarità garantita: ${RAR[r.prem[0]][0]} · gratis</small></button></div>`;
+    h += `<div class="big"><button type="button" data-go="tour">🏆 Torneo dei Sogni<small>${r.won.length}/8 sfide vinte · ogni sfida in un motore diverso</small></button><button type="button" data-go="pack" ${coins < PACK ? "disabled" : ""}>🎴 Bustina<small>${PACK} monete · una carta a sorpresa${PM ? ` · sicura rara+ tra ${Math.max(0, 10 - (r.pk10 | 0))}` : ""}</small></button><button type="button" data-go="season">📅 Stagione dei Sogni<small>${r.season ? `giornata ${Math.min(7, r.season.day + 1)}/7` : "campionato a 8 squadre"}${r.titles ? ` · scudetti ${r.titles}` : ""}</small></button>${window.__arena ? `<button type="button" data-go="arena">⚔️ Arena dei Sogni<small>Battaglie a turni · Staffetta dei Dieci · Torre</small></button>` : ""}<button type="button" data-go="draft">🎲 Draft<small>${r.draft ? (r.draft.picks.length < 5 ? `scelta ${r.draft.picks.length + 1}/5` : "coppa in corso") : "scegli 1 carta su 3 e gioca la coppa"}${r.cups ? ` · coppe ${r.cups}` : ""}</small></button><button type="button" data-go="voci" class="${vSt.unread ? "sgBtnPulse" : ""}">🎙️ Voci dallo Spogliatoio${vSt.unread ? ` <span class="sgNewDot">${vSt.unread}</span>` : ""}<small>${vSt.unlocked}/${vSt.total} dialoghi · 3 gare col Legame</small></button>${window.__gabbia3d ? `<button type="button" data-go="gabbia3d" style="grid-column:1/-1;border-color:#38bdf8;background:linear-gradient(135deg,#0c2238,#1b1438)">🏟️ Gabbia 3D · 3 contro 3<small>Calcio arcade 3D con sponde luminose, Super delle saghe e Coppa della Gabbia</small></button>` : ""}${window.__portieri ? `<button type="button" data-go="portieri" style="grid-column:1/-1;border-color:#34d399;background:linear-gradient(135deg,#0f2922,#1a1433)">🧤 Sfida di Portieri · Porta a Porta<small>Duello 1v1 tra i pali con le tue carte · Coppa dei Numeri Uno · Muro Infinito</small></button>` : ""}${window.__tavolo ? `<button type="button" data-go="tavolo" style="grid-column:1/-1;border-color:#a16207;background:linear-gradient(135deg,#1c1408,#0d2418)">🎭 Il Tavolo di Sotto<small>Gioco di carte a run contro un arbitro mascherato · le tue carte in quattro corsie · tre boss</small></button>` : ""}</div><p class="sum">Le carte crescono giocando: ⭐ a 3 punti esperienza, ⭐⭐ a 8, ⭐⭐⭐ a 15 (+2 a ogni statistica per stella; a tre stelle la carta dice la sua frase).</p>`;
     h += `<div class="sec sec-coll">Collezione · tocca una carta per metterla in squadra o toglierla</div>`;
     h += `<div class="sgCollControls">
       <div class="sgSearchBox">
@@ -2250,6 +2265,7 @@
     });
     body.querySelector('[data-go="tour"]').onclick = torneo;
     body.querySelector('[data-go="pack"]').onclick = pack;
+    const pmB = body.querySelector('[data-go="prem"]'); if (pmB) pmB.onclick = openPrem;
     body.querySelector('[data-go="season"]').onclick = stagione;
     body.querySelector('[data-go="draft"]').onclick = draft;
     const vcb = body.querySelector('[data-go="voci"]'); if (vcb) vcb.onclick = () => openVoci(() => open());
@@ -2289,8 +2305,27 @@
     const r = load(), started = Object.keys(SAGHE).filter((k) => progress(k).ch >= 1), pool = CARDS.filter((c) => drop(c) && !r.own.includes(c.id) && (started.includes(c.saga) || c.rar === "c"));
     if (!pool.length) return dupPack(r);
     safe(() => window.addCoins(-PACK), 0);
-    const w = pool.flatMap((c) => Array(5 - RAR[c.rar][2]).fill(c)), got = w[Math.floor(Math.random() * w.length)];
+    let pl = pool, po = premOn(); r.pk10 = (r.pk10 | 0) + 1;
+    if (po && r.pk10 >= 10) { const g = pool.filter((c) => RAR[c.rar][2] >= 2); if (g.length) pl = g; }
+    const w = pl.flatMap((c) => Array(5 - RAR[c.rar][2]).fill(c)), got = w[Math.floor(Math.random() * w.length)];
+    if (RAR[got.rar][2] >= 2) r.pk10 = 0;
     r.own.push(got.id); r.packs++; save(r); reveal(got.id, "Dalla bustina", open);
+  }
+  // bustina premio (gratis): una carta a sorpresa della rarità guadagnata, dalle saghe cominciate; se non c'è, la più vicina; se non c'è nulla, esperienza o monete
+  function openPrem() {
+    const r = load(); if (!r.prem.length) return; const rar = r.prem[0], started = Object.keys(SAGHE).filter((k) => progress(k).ch >= 1);
+    const base = CARDS.filter((c) => !r.own.includes(c.id) && drop(c) && (started.includes(c.saga) || c.rar === "c"));
+    let pool = base.filter((c) => c.rar === rar);
+    if (!pool.length) { const d = (c) => Math.abs(RAR[c.rar][2] - RAR[rar][2]); const m = base.length ? Math.min(...base.map(d)) : 0; pool = base.filter((c) => d(c) === m); }
+    r.prem.shift();
+    if (!pool.length) {
+      const cand = r.own.filter((id) => BY[id] && (r.xp[id] | 0) < 15), b = shell("🎁 Bustina premio");
+      if (cand.length) { const id = cand[Math.floor(Math.random() * cand.length)]; r.xp[id] = Math.min(15, (r.xp[id] | 0) + 3); save(r); b.innerHTML = `<p class="sum">Nessuna carta nuova disponibile: la bustina premio dà <b>+3 punti esperienza</b> a <b>${esc(name(id))}</b>.</p><div class="big"><button type="button" data-ok="1">Ok</button></div>`; }
+      else { save(r); safe(() => window.addCoins(60), 0); b.innerHTML = `<p class="sum">Hai già tutto: la bustina premio diventa <b>60 monete</b>.</p><div class="big"><button type="button" data-ok="1">Ok</button></div>`; }
+      b.querySelector("[data-ok]").onclick = () => open(); return;
+    }
+    const w = pool.flatMap((c) => Array(5 - RAR[c.rar][2]).fill(c)), got = w[Math.floor(Math.random() * w.length)];
+    r.own.push(got.id); save(r); reveal(got.id, "Bustina premio", open);
   }
   // nessuna carta nuova disponibile (le altre si sbloccano a capitoli): la bustina dà un doppione = +3 punti esperienza a una carta con stelle da crescere
   function dupPack(r) {
@@ -2993,5 +3028,5 @@
   }
   // la Maglia dei Sogni nel guardaroba (si registra all'avvio, così resta anche dopo aver ricaricato la pagina)
   (function reg() { const A = window.__borgoApi; if (!A || !A.COSM) return setTimeout(reg, 200); if (!A.COSM.sg_maglia) A.COSM.sg_maglia = { kind: "shirt", label: "Maglia dei Sogni", val: "#7a5ad8", from: "Vinci il Torneo dei Sogni (Salone delle Saghe)" }; })();
-  window.__sogni = { squad, lineup, SAGHE, BY, eff, name, port, _save: save, open, close: closeAll, _launch: launch, _tiers: tiers, CARDS, LINKS, SFIDE, TEAMS, FRASI, intesa, forza, sync, stagione, draft, stars: (id) => { XPC = load().xp; return starsOf(id); }, _load: load, MODULI, modSintonia, openModDetail, openCardLore, combo: getTeamCombo, openVoci, openVoceScene, recordVoci, vociStats, pairKey, BOND_GOAL, toggleBench, autoBench, switchPreset, renamePreset, presetsBarHtml, bindPresetsBar, gainXp, levelUps };
+  window.__sogni = { premio: { on: premOn, setOn: premSet, open: openPrem }, squad, lineup, SAGHE, BY, eff, name, port, _save: save, open, close: closeAll, _launch: launch, _tiers: tiers, CARDS, LINKS, SFIDE, TEAMS, FRASI, intesa, forza, sync, stagione, draft, stars: (id) => { XPC = load().xp; return starsOf(id); }, _load: load, MODULI, modSintonia, openModDetail, openCardLore, combo: getTeamCombo, openVoci, openVoceScene, recordVoci, vociStats, pairKey, BOND_GOAL, toggleBench, autoBench, switchPreset, renamePreset, presetsBarHtml, bindPresetsBar, gainXp, levelUps };
 })();

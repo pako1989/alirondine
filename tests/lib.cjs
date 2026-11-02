@@ -20,6 +20,7 @@ async function setup(o = {}) {
   await page.addInitScript(([hero, save, key, extra]) => {
     if (sessionStorage.getItem("__init")) return; sessionStorage.setItem("__init", "1");
     localStorage.setItem("ali-di-rondine.campione", JSON.stringify(hero));
+    localStorage.setItem("ali-di-rondine.sogni-premio", JSON.stringify({ on: false })); // i test vecchi presumono lo sblocco diretto delle carte; tests/sogni-premio.cjs prova le bustine premio
     if (save) localStorage.setItem(key, JSON.stringify(save)); else localStorage.removeItem(key);
     Object.keys(extra || {}).forEach((k) => localStorage.setItem(k, JSON.stringify(extra[k]))); // altri salvataggi di prova (setup({ extra: { chiave: valore } }))
   }, [HERO, o.save || null, o.key, o.extra || null]);

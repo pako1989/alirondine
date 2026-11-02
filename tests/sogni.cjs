@@ -4,7 +4,7 @@ const L = require("./lib.cjs");
 const fin = { v: 1, ch: 3, step: { 1: 5, 2: 5, 3: 5 }, done: { 1: "a", 2: "b", 3: "c" }, ends: ["mondiale", "leone", "campetto", "amico"], diffSet: true, flags: {} };
 const uno = { v: 1, ch: 2, step: { 1: 5 }, done: { 1: "a" }, ends: [], diffSet: true, flags: {} };
 async function run(w) {
-  const { browser, page, errors } = await L.setup({ w, extra: { "ali-di-rondine.campetto": fin, "ali-di-rondine.trono": uno } });
+  const { browser, page, errors } = await L.setup({ w, extra: { "ali-di-rondine.sogni-premio": { on: false }, "ali-di-rondine.campetto": fin, "ali-di-rondine.trono": uno } });
   await page.evaluate(() => window.__salone.open(() => {})); await page.waitForTimeout(300);
   if (!(await page.evaluate(() => !!document.querySelector('.salOv [data-go="sogni"]')))) errors.push("manca la Squadra dei Sogni nel Salone");
   await page.evaluate(() => document.querySelector('.salOv [data-go="sogni"]').click()); await page.waitForTimeout(400);
