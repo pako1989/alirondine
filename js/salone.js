@@ -1435,6 +1435,7 @@
         <button type="button" class="hubToolBtn" data-go="guarda">👕 Guardaroba</button>
         <button type="button" class="hubToolBtn" data-go="diario">📖 Diario</button>
         <button type="button" class="hubToolBtn" data-go="sala">🕹️ Sala Giochi</button>
+        ${window.__regia ? `<button type="button" class="hubToolBtn" data-go="regia">🎥 Cabina di Regia</button>` : ""}
         <button type="button" class="hubToolBtn" data-go="cine">🎬 Cineteca</button>
         ${cimOn() ? `<button type="button" class="hubToolBtn" data-go="cim">🏛️ Cimeli</button>` : ""}
         ${pt ? `<button type="button" class="hubToolBtn" data-go="per">👥 Personaggi (${pt.seen}/${pt.tot})</button>` : ""}
@@ -1551,6 +1552,7 @@
       bindTool('[data-go="guarda"]', () => openGuardaroba(() => openSalone()));
       bindTool('[data-go="diario"]', () => openDiario(() => openSalone()));
       bindTool('[data-go="sala"]', () => openSalaGiochi(() => openSalone()));
+      bindTool('[data-go="regia"]', () => { close(); window.__regia.open(() => openSalone()); });
       bindTool('[data-go="cine"]', () => openCineteca(() => openSalone()));
       bindTool('[data-go="cim"]', () => openCimeli(() => openSalone()));
       bindTool('[data-go="per"]', () => openPersonaggi(() => openSalone()));
@@ -1647,12 +1649,15 @@
   function detail(s) {
     if (!s || !OV) return; const x = state(s), r = rec(); r.seen[s.id] = 1; recSave(r);
     const sh = document.createElement("div"); sh.className = "sheet";
+    const doneSaga = !!(x.finished || x.endsFound > 0);
+    const regiaHtml = window.__regia && window.__regia.renderSagaDetailBlock ? window.__regia.renderSagaDetailBlock(s.id, doneSaga) : "";
     const ends = x.ends.length ? `<div class="sec"><span>Finali</span><span>${x.endsFound}/${x.ends.length}</span></div><div class="ends">${x.ends.map((e) => endRow(e.found, e.title, e.found ? e.desc : (s.hints && s.hints[e.id]) || "Un finale ancora nascosto.")).join("")}</div>` : "";
-    sh.innerHTML = `<div class="box"><img alt="" src="${cover(s)}"><div class="in"><h3>${s.e} ${esc(s.t)}</h3><div>${s.g.map((k) => `<span class="tag" style="background:${GEN[k][1]}">${GEN[k][0]}</span>`).join("")}</div><p>${esc(s.d)}</p><p style="color:#c9d2ea;font-size:13px">${x.finished ? "✓ Saga conclusa." : x.started ? `In corso · capitolo ${x.ch}${s.ch ? ` di ${s.ch}` : ""}${x.doneN ? ` · ${x.doneN} capitoli conclusi` : ""}.` : "Non l'hai ancora iniziata."}${s.ch ? ` ${s.ch} capitoli.` : ""}</p>${ends}<div class="act"><button type="button" class="ghost">◂ Indietro</button>${x.ends.length ? `<button type="button" class="ghost" data-tree="1">🌳 Albero Bivi</button>` : ""}<button type="button" class="play">${x.started ? "Continua ▸" : "Gioca ▸"}</button></div></div></div>`;
+    sh.innerHTML = `<div class="box"><img alt="" src="${cover(s)}"><div class="in"><h3>${s.e} ${esc(s.t)}</h3><div>${s.g.map((k) => `<span class="tag" style="background:${GEN[k][1]}">${GEN[k][0]}</span>`).join("")}</div><p>${esc(s.d)}</p><p style="color:#c9d2ea;font-size:13px">${x.finished ? "✓ Saga conclusa." : x.started ? `In corso · capitolo ${x.ch}${s.ch ? ` di ${s.ch}` : ""}${x.doneN ? ` · ${x.doneN} capitoli conclusi` : ""}.` : "Non l'hai ancora iniziata."}${s.ch ? ` ${s.ch} capitoli.` : ""}</p>${regiaHtml}${ends}<div class="act"><button type="button" class="ghost">◂ Indietro</button>${x.ends.length ? `<button type="button" class="ghost" data-tree="1">🌳 Albero Bivi</button>` : ""}<button type="button" class="play">${x.started ? "Continua ▸" : "Gioca ▸"}</button></div></div></div>`;
     sh.onclick = (e) => { if (e.target === sh) sh.remove(); };
     sh.querySelector(".ghost").onclick = () => sh.remove();
     const tb = sh.querySelector("[data-tree]"); if (tb) tb.onclick = () => { sh.remove(); openAlbero(() => detail(s), s.id); };
     sh.querySelector(".play").onclick = () => play(s, () => openSalone());
+    if (window.__regia && window.__regia.bindSagaDetailBlock) window.__regia.bindSagaDetailBlock(sh, s);
     OV.appendChild(sh);
   }
   const endRow = (found, title, sub) => `<div class="end${found ? " f" : ""}"><div class="seal">${found ? "FINALE<br>TROVATO" : "?"}</div><div><b>${found ? esc(title) : "???"}</b><span>${found ? esc(sub) : "Indizio: " + esc(sub)}</span></div></div>`;
@@ -1916,7 +1921,7 @@
 
   // ---------------------------------------------------------------- GUARDAROBA
   const KIND = { shirt: ["Maglie", "shirt", "👕"], hairc: ["Colori capelli", "hair", "🎨"], style: ["Tagli", "style", "💇"], acc: ["Accessori", "acc", "🧢"], shot: ["Tiri speciali", "shot", "⚡"], other: ["Da collezione", null, "🏅"] };
-  const SRC = [["tp_", "📰 La Tipografia di Mezzanotte"], ["ci_", "🎪 Il Circo Zampanò"], ["rf_", "📻 Radio Fuorigioco"], ["lb_", "📖 Libro"], ["dt_", "🪞 Doppio Turno"], ["cr_", "💎 Cristalli"], ["mu_", "🧱 Il Muro"], ["vl_", "⛰️ Vallombra"], ["kb_", "👑 Kronenburg"], ["al_", "⚗️ Alchimia"], ["pi_", "🏴‍☠️ Pirati"], ["omb_", "🌃 Ombre"], ["sh_", "⚔️ Shogun"], ["feudi_", "⚖️ Bilancia"], ["bv_", "🌲 Belovodia"], ["rag_", "🔥 Ragnarok"]];
+  const SRC = [["rg_", "🎥 Cabina di Regia"], ["tp_", "📰 La Tipografia di Mezzanotte"], ["ci_", "🎪 Il Circo Zampanò"], ["rf_", "📻 Radio Fuorigioco"], ["lb_", "📖 Libro"], ["dt_", "🪞 Doppio Turno"], ["cr_", "💎 Cristalli"], ["mu_", "🧱 Il Muro"], ["vl_", "⛰️ Vallombra"], ["kb_", "👑 Kronenburg"], ["al_", "⚗️ Alchimia"], ["pi_", "🏴‍☠️ Pirati"], ["omb_", "🌃 Ombre"], ["sh_", "⚔️ Shogun"], ["feudi_", "⚖️ Bilancia"], ["bv_", "🌲 Belovodia"], ["rag_", "🔥 Ragnarok"]];
   const srcOf = (id) => { const s = SRC.find(([p]) => id.startsWith(p)); return s ? s[1] : "⚽ Borgo e Storia"; };
   const kindOf = (c) => (c && KIND[c.kind] ? c.kind : "other");
   const GF = { kind: "shirt", src: "", sel: null };
@@ -1963,7 +1968,8 @@
     mappamondo: (back) => openMappamondo(back),
     summary: () => safe(() => { const t = totals(), A = api(), C = (A && A.COSM) || {}; return Object.assign(t, { cosOwned: safe(() => A.cosOwned().length, 0), cosTot: Object.keys(C).length }); }, { n: 0, run: 0, fin: 0, fe: 0, te: 0, cosOwned: 0, cosTot: 0 }),
     SAGAS,
-    sagaStatus: (id) => { const s = SAGAS.find((x) => x.id === id); if (!s) return null; const avail = available(s); const st = avail ? state(s) : null; return { avail, started: !!(st && st.started), finished: !!(st && st.finished), ch: st ? st.ch : 0 }; },
+    sagaStatus: (id) => { const s = SAGAS.find((x) => x.id === id); if (!s) return null; const avail = available(s); const st = avail ? state(s) : null; return { avail, started: !!(st && st.started), finished: !!(st && st.finished), endsFound: st ? st.endsFound : 0, ch: st ? st.ch : 0 }; },
+    sagaCompleted: (id) => safe(() => { const s = SAGAS.find((x) => x.id === id); if (!s || !available(s)) return false; const st = state(s); return !!(st && (st.finished || st.endsFound > 0)); }, false),
     openSaga: (id, back) => { openSalone(back); const s = SAGAS.find((x) => x.id === id); if (s && available(s)) detail(s); },
     // ultima saga giocata, per «Riprendi» nella home
     lastSaga: () => safe(() => { const s = SAGAS.find((x) => x.id === rec().last); return s && available(s) ? { id: s.id, t: s.t, e: s.e, cover: cover(s) } : null; }, null),

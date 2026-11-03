@@ -60,6 +60,7 @@
     safe(() => window.__portieri && window.__portieri.close && window.__portieri.close(), 0);
     safe(() => window.__arena && window.__arena.close && window.__arena.close(), 0);
     safe(() => window.__sogni && window.__sogni.close && window.__sogni.close(), 0);
+    safe(() => window.__regia && window.__regia.close && window.__regia.close(), 0);
     safe(() => window.__salone && window.__salone.close && window.__salone.close(), 0);
   }
 
@@ -149,6 +150,12 @@
         closeAllModalsBeforeJump();
         sal.salaGiochi(() => sal.open());
       });
+      if (window.__regia) {
+        addGame("cabinaregia", "🎥", "Cabina di Regia del Salone", "Rivincita rapida da 3 minuti delle partite uniche delle saghe concluse e Condizioni di Scena", "cabina regia ciak pellicola condizioni scena rivincita", () => {
+          closeAllModalsBeforeJump();
+          window.__regia.open(() => sal.open());
+        });
+      }
       addGame("album", "🏆", "Album dei Finali & Albero Bivi", "Tutti i finali scoperti e la mappa delle scelte", "album finali bivi albero", () => {
         closeAllModalsBeforeJump();
         sal.album(() => sal.open());
@@ -189,6 +196,26 @@
             closeAllModalsBeforeJump();
             if (isOpen && sal.openMachine) sal.openMachine(m.id, () => sal.salaGiochi(() => sal.open()));
             else sal.salaGiochi(() => sal.open());
+          },
+        });
+      });
+    }
+
+    // Pellicole della Cabina di Regia (solo saghe già concluse: zero spoiler)
+    if (window.__regia && window.__regia.catalog) {
+      safe(() => window.__regia.catalog(), []).forEach((r) => {
+        if (!window.__regia.isUnlocked(r.id)) return;
+        out.push({
+          cat: "giochi",
+          id: "regia_" + r.id,
+          icon: "🎥",
+          img: null,
+          title: `Regia · ${r.t}`,
+          sub: `Cabina di Regia · ${r.saga.t}`,
+          search: norm(`cabina regia ciak pellicola ${r.t} ${r.saga.t} ${r.d}`),
+          run: () => {
+            closeAllModalsBeforeJump();
+            window.__regia.openReel(r.id, () => window.__regia.open(() => sal && sal.open()));
           },
         });
       });
