@@ -596,7 +596,7 @@
     dc_zeno: "Nel fumo della Mobile un indizio non mente mai: gol convalidato.",
     so_capitano: "Dalla cupola della stazione vedo il campo intero: lancio perfetto.",
     ve_soffio: "Il vento porta voci e tiri che cambiano giro all'ultimo istante.",
-    ep_carlo: "Memoria del '28 e cuore del '74: il pallone racconta la nostra storia.",
+    ep_carlo: "Il caffè è terribile, lo so. Ma la partita del '52 te la racconto gratis.",
     vp_cantiere: "La diga regge la piena del torrente: questa difesa non crolla mai.",
     gp_direttore: "Bandiera a scacchi sul rettilineo: la staccata vale il gol!",
     dg_cenere: "Chi scende nell'ipogeo deve avere il fuoco nei piedi e il gelo nella testa.",
@@ -1561,7 +1561,7 @@
     }
     const api = window.__borgoApi;
     if (api && api.CAST && api.CAST[c.id] && api.CAST[c.id].bio) return api.CAST[c.id].bio;
-    if (api && api.BIO && api.BIO[c.id]) return api.BIO[c.id];
+    if (api && api.BIO && api.BIO[c.id] && api.BIO[c.id].indexOf("{") < 0) return api.BIO[c.id];
     if (LEG_CAST && LEG_CAST[c.id] && LEG_CAST[c.id].bio) return LEG_CAST[c.id].bio;
     const borgoExtra = {
       mattia: "Portiere reclutato tra i moli di Borgo Marino: riflessi d'istinto e fama di saracinesca nei tornei estivi.",
