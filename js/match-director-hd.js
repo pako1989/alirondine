@@ -506,12 +506,13 @@
     return { open: true };
   }
   function oppUnlocked(p, i) { return oppState(p, i).open; }
-  function formUnlocked(p, f) { if (utCfg) return true; const u = FORMS[f].unlock; return !u || p.wins >= u.wins; }
+  function formUnlocked(p, f) { if (utCfg || careerCfg) return true; const u = FORMS[f].unlock; return !u || p.wins >= u.wins; }
 
   // ---------------------------------------------------------------- stato modulo
   let root = null, style = null, canvas = null, ctx = null, rafId = 0, onExitCb = null, openOpts = null;
   let prog = defaultProg();
   let utCfg = null; // modalita' "ut" (Ultimate Team del Borgo): rosa = carte dell'utente, nessun salvataggio proprio
+  let careerCfg = null; // modalita' "career" (Carriera del Golfo): rosa e avversario passati da fuori
   let S = null; // partita
   let tab = "ordini";
   let lastT = 0, cw = 0;
@@ -690,8 +691,8 @@
     if (R.drain) S.drain = R.drain;
     if (typeof R.morale === "number") S.morale = R.morale;
     if (R.startScore) { S.scoreA = R.startScore[0]; S.scoreB = R.startScore[1]; if (S.scoreB > S.scoreA) S.stats.trailed = true; S.shotsB = S.scoreB; S.sotB = S.scoreB; }
-    const squad = utCfg ? makeUtSquad() : makeSquad();
-    S.squad = squad; S.ut = !!utCfg;
+    const squad = careerCfg ? makeCareerSquad() : utCfg ? makeUtSquad() : makeSquad();
+    S.squad = squad; S.ut = !!utCfg; S.career = !!careerCfg;
     S.bench = squad.filter((p) => p.bench);
     S.xi = squad.filter((p) => !p.bench);
     reassign(form);
@@ -1454,6 +1455,88 @@
     updateScoreboard(); refreshLive();
   }
 
+  // ---------------------------------------------------------------- modalita' "career" (Carriera del Golfo)
+  function makeCareerSquad() {
+    const raw = (careerCfg.squad || []).slice();
+    return raw.map((c, i) => {
+      const r = Number(c.r) || 70;
+      return {
+        id: i,
+        cid: c.id != null ? c.id : i,
+        name: String(c.name || "Giocatore").slice(0, 22),
+        num: c.num || (i + 1),
+        grp: c.grp || "CEN",
+        r,
+        st: clamp(c.st != null ? Number(c.st) : 100, 10, 100),
+        slotGrp: c.grp || "CEN",
+        x: W / 2, y: H - 20, tx: 0, ty: 0,
+        goals: 0, assists: 0, saves: 0, bonus: 0, mins: 0,
+        eco: false,
+        bench: !!c.bench,
+        off: false,
+        side: 0
+      };
+    });
+  }
+
+  function openKickoffCareer() {
+    const o = S.opp; S.over = true;
+    const gk = ourGK(), avg = Math.round(S.xi.reduce((n, p) => n + p.r, 0) / S.xi.length);
+    openSheet(`<h2>${o.ico || "⚽"} Rondine FC vs ${esc(o.name)}</h2>
+      <p>${esc(o.sub || o.blurb || "Giornata di campionato della Lega del Golfo.")}</p>
+      <div><span class="mdx-chip y">Titolari XI (Media: ${avg})</span><span class="mdx-chip">In porta ${esc(gk ? gk.name : "-")}</span><span class="mdx-chip">Modulo ${S.form}</span></div>
+      <p style="font-size:12.5px;color:#93a4bd">Partita di campionato: gestisci pressing, cambi e mentalità. I minuti giocati e i cartellini avranno effetto sul prosieguo della stagione.</p>
+      <div class="mdx-g2"><button class="mdx-btn" id="mdxSet">Imposta tattica</button><button class="mdx-btn gold" id="mdxGo">Fischio d'inizio!</button></div>`);
+    sheetEl.querySelector("#mdxSet").onclick = () => { closeSheet(); S.over = false; };
+    sheetEl.querySelector("#mdxGo").onclick = () => { closeSheet(); S.over = false; toggleRun(); };
+  }
+
+  function startCareerMatch(o) {
+    prog = loadProg();
+    careerCfg = {
+      onDone: typeof o.onDone === "function" ? o.onDone : (typeof o.onExit === "function" ? o.onExit : null),
+      squad: o.squad || [],
+      opp: o.opp || {},
+      res: null
+    };
+    newMatch(o.opp, o.form || "4-3-3", o.ment || "equil", o.press || "medio");
+    tab = "ordini"; buildMatchUI(); openKickoffCareer(); startLoop();
+  }
+
+  function finishCareer() {
+    S.ended = true; S.run = false; S.over = true; snd("playWhistle", true);
+    const o = S.opp, win = S.scoreA > S.scoreB, draw = S.scoreA === S.scoreB, cleanSheet = S.scoreB === 0;
+    const ratings = S.squad.filter((p) => p.mins >= 15 || p.grp === "POR").map((p) => {
+      let v = 6 + p.goals * 1.1 + p.assists * 0.6 + p.saves * 0.2 + p.bonus + (win ? 0.4 : draw ? 0.1 : -0.3) + (rnd() - 0.5) * 0.7;
+      if (p.slotGrp === "POR" && cleanSheet) v += 0.6;
+      if (p.slotGrp === "DIF" && cleanSheet) v += 0.3;
+      return { p, v: clamp(Math.round(v * 10) / 10, 4.5, 10) };
+    }).sort((a, b) => b.v - a.v);
+    const sc = S.stats.scorers, scorers = Object.keys(sc).map((n) => (sc[n] > 1 ? n + " x" + sc[n] : n));
+    careerCfg.res = {
+      win, draw, loss: !win && !draw,
+      scoreA: S.scoreA, scoreB: S.scoreB,
+      scorers,
+      shotsA: S.shotsA, shotsB: S.shotsB,
+      xgA: +S.xgA.toFixed(2), xgB: +S.xgB.toFixed(2),
+      posA: S.posTotal ? Math.round(S.posA / S.posTotal * 100) : 50,
+      mvp: ratings[0] ? ratings[0].p.name : "",
+      ratings: ratings.map((r) => ({ id: r.p.cid != null ? r.p.cid : r.p.id, name: r.p.name, rating: r.v, goals: r.p.goals, assists: r.p.assists, saves: r.p.saves, mins: r.p.mins })),
+      cards: S.stats.cards,
+      reds: S.stats.reds,
+      finalStamina: S.squad.map((p) => ({ id: p.cid != null ? p.cid : p.id, st: Math.round(p.st) }))
+    };
+    const headline = win ? "VITTORIA! Tre punti per la Rondine." : draw ? "Pareggio combattuto sul molo." : "Sconfitta. Testa alla prossima giornata.";
+    openSheet(`<div style="font-size:12px;color:#93a4bd;text-align:center">${esc(o.name)} · Fischio finale</div>
+      <div class="mdx-big">${S.scoreA} - ${S.scoreB}</div><h2 style="text-align:center">${esc(headline)}</h2>
+      <div class="mdx-res">Tiri ${S.shotsA}-${S.shotsB} · xG ${S.xgA.toFixed(1)}-${S.xgB.toFixed(1)} · Possesso ${S.posTotal ? Math.round(S.posA / S.posTotal * 100) : 50}%${scorers.length ? "<br>Marcatori: " + esc(scorers.join(", ")) : ""}</div>
+      <div class="mdx-lbl">Pagella</div>
+      ${ratings.map((r, i) => `<div class="mdx-pg"><i class="${i === 0 ? "mvp" : r.v >= 7 ? "hi" : r.v < 5.5 ? "lo" : ""}">${r.v.toFixed(1)}</i><span>${esc(r.p.name)}${i === 0 ? " ⭐ MVP" : ""}</span><small>${r.p.goals ? "⚽" + r.p.goals + " " : ""}${r.p.assists ? "🅰️" + r.p.assists + " " : ""}${r.p.saves && r.p.slotGrp === "POR" ? "🧤" + r.p.saves : ""}</small></div>`).join("")}
+      <button class="mdx-btn gold" id="mdxCareerDone" style="width:100%;margin-top:12px">Torna al Gestionale</button>`, true);
+    sheetEl.querySelector("#mdxCareerDone").onclick = exitAll;
+    updateScoreboard(); refreshLive();
+  }
+
   // ---------------------------------------------------------------- UI: schermate
   function injectStyle() {
     if (document.getElementById(STYLE_ID)) return;
@@ -1530,6 +1613,7 @@
       <div class="mdx-g2" style="margin-top:10px">
         <button class="mdx-btn gold" id="mdxNext" ${nx ? "" : "disabled"}>${nx ? "▶ Prossimo: ep. " + nx.ep : firstUnwon(prog) >= 0 ? "⭐ Servono stelle" : "Tutto completato"}</button>
         <button class="mdx-btn" id="mdxLocker">👕 Spogliatoio e bacheca</button>
+        <button class="mdx-btn gold" id="mdxCarriera" style="grid-column:span 2;margin-top:4px">🏆 Carriera del Golfo · Campionato a 3 serie</button>
       </div>
       <div style="margin:14px 0 2px;font-weight:800;font-size:13px;color:#93a4bd;letter-spacing:.5px">GLI EPISODI DELLA RONDINE FC · prima vittoria su ognuno: monete</div>
       ${seasonsHtml}
@@ -1537,6 +1621,7 @@
     </div>`;
     root.querySelector("#mdxExit").onclick = exitAll;
     root.querySelector("#mdxLocker").onclick = () => { snd("playSelect"); showLocker(); };
+    const cb = root.querySelector("#mdxCarriera"); if (cb) cb.onclick = () => { exitAll(); if (typeof window.openDirectorCarriera === "function") window.openDirectorCarriera(); };
     const nb = root.querySelector("#mdxNext"); if (nx) nb.onclick = () => { snd("playSelect"); startPrep(nx); };
     root.querySelectorAll("[data-opp]").forEach((b) => { b.onclick = () => { snd("playSelect"); startPrep(OPPS[Number(b.dataset.opp)]); }; });
   }
@@ -1646,6 +1731,7 @@
   function closeSheet() { if (sheetEl) { sheetEl.style.display = "none"; sheetEl.innerHTML = ""; } }
 
   function openKickoff() {
+    if (careerCfg) return openKickoffCareer();
     if (utCfg) return openKickoffUt();
     const o = S.opp, se = SEASONS[o.season];
     S.over = true;
@@ -1876,6 +1962,7 @@
 
   // ---------------------------------------------------------------- fine partita
   function finishMatch() {
+    if (careerCfg) return finishCareer();
     if (utCfg) return finishUt();
     S.ended = true; S.run = false; S.over = true;
     stopLoopSoft();
@@ -2079,7 +2166,9 @@
   function exitAll() {
     const cb = onExitCb; onExitCb = null;
     const uc = utCfg; utCfg = null;
+    const cc = careerCfg; careerCfg = null;
     teardown();
+    if (cc) { if (typeof cc.onDone === "function") { try { cc.onDone(cc.res); } catch (e) { console.error(e); } } return; }
     if (uc) { if (typeof uc.onExit === "function") { try { uc.onExit(uc.res); } catch (e) { console.error(e); } } return; }
     if (typeof cb === "function") { try { cb(); } catch (e) { console.error(e); } }
   }
@@ -2087,6 +2176,7 @@
   function open(onExit, opts) {
     if (root) teardown(); // riapertura: niente doppio callback
     utCfg = null;
+    careerCfg = null;
     onExitCb = onExit;
     openOpts = opts || null;
     injectStyle();
@@ -2097,6 +2187,7 @@
     document.body.appendChild(root);
     listen(document, "keydown", onKey);
     listen(document, "visibilitychange", onVis);
+    if (opts && opts.career) { onExitCb = null; startCareerMatch(opts.career); return; }
     if (opts && opts.ut) { onExitCb = null; startUt(opts.ut); return; }
     const o = opts && opts.opp ? OPPS.find((x) => x.id === opts.opp) : null;
     if (o && oppUnlocked(prog, OPPS.indexOf(o))) { showMenu(); startPrep(o); }
@@ -2118,7 +2209,7 @@
   }
   window.__directorHd = {
     version: 2,
-    start: function (o) { o = o || {}; if (o.mode === "ut") { open(null, { ut: o }); return; } open(o.onExit, { opp: o.opp, screen: o.screen, from: o.from }); },
+    start: function (o) { o = o || {}; if (o.mode === "career") { open(null, { career: o }); return; } if (o.mode === "ut") { open(null, { ut: o }); return; } open(o.onExit, { opp: o.opp, screen: o.screen, from: o.from }); },
     state: stateInfo,
     // arruolamento "narrativo" (missioni del Borgo): non tocca episodi, stelle né soglie; true solo se la recluta entra ora
     recruit: function (id) { const p = loadProg(); if (!ARRIVALS.some((a) => a.id === id) || arrivalHas(p, id)) return false; p.recruits[id] = true; saveProg(p); return true; },
