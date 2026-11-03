@@ -333,6 +333,34 @@
     ["tp_livia", "tipografia", "e", 60, 74, 86, "C", 3],
     ["tp_goffredo", "tipografia", "e", 66, 82, 84, "D", 3],
     ["tp_ada", "tipografia", "l", 82, 74, 90, "C", 4],
+    // Le 27 Leggendarie delle Saghe (sblocco completando i finali della saga)
+    ["bm_valanga_l", "montagna", "l", 86, 74, 90, "A"],
+    ["pr_colonnello", "pugno", "l", 90, 68, 86, "A"],
+    ["rm_massimo", "roma", "l", 86, 88, 76, "D"],
+    ["sq_prof", "quartiere", "l", 72, 82, 94, "C"],
+    ["rz_vega", "razzo", "l", 88, 70, 92, "A"],
+    ["cs_oro", "cavallo", "l", 92, 72, 86, "A"],
+    ["td_duca", "ducati", "l", 82, 90, 80, "D"],
+    ["ts_ettore", "torneo", "l", 92, 70, 88, "A"],
+    ["mg_fuorigioco", "mantello", "l", 80, 82, 92, "C"],
+    ["nl_ombra", "lampioni", "l", 88, 72, 90, "A"],
+    ["tc_ferroquercia", "trono", "l", 82, 88, 84, "D"],
+    ["ml_mister", "colline", "l", 74, 82, 94, "C"],
+    ["dc_zeno", "detective", "l", 76, 88, 90, "C"],
+    ["so_capitano", "spazio", "l", 84, 82, 88, "C"],
+    ["ve_soffio", "vento", "l", 86, 70, 94, "A"],
+    ["ep_carlo", "dopo", "l", 82, 86, 86, "D"],
+    ["vp_capo", "diga", "l", 80, 92, 82, "D"],
+    ["gp_direttore", "gp", "l", 88, 76, 90, "A"],
+    ["dg_cenere", "dungeon", "l", 90, 84, 80, "A"],
+    ["chr_alter_hero", "chrono", "l", 90, 80, 90, "A"],
+    ["omb_kaelen", "ombre", "l", 84, 88, 86, "D"],
+    ["rag_custode_vuoto", "ragnarok", "l", 92, 84, 82, "A"],
+    ["pg_genesis", "phantom", "l", 90, 78, 92, "A"],
+    ["mu_baluardo", "muro", "l", 70, 94, 86, "P"],
+    ["dt_maestro", "doppio", "l", 80, 84, 90, "C"],
+    ["alc_joe", "alcatraz", "l", 86, 88, 80, "D"],
+    ["nf_fiorenzo", "naufraghi", "l", 76, 92, 86, "P"],
   ];
   // [id, saga, rarità (c r e l), attacco, difesa, tecnica, ruolo]
   const CARDS = [
@@ -359,7 +387,52 @@
     ["ep_ada", "dopo", "c", 54, 62, 70, "C"], ["ep_bruno", "dopo", "r", 72, 62, 70, "A"], ["ep_tecla", "dopo", "c", 56, 66, 64, "D"],
     ["tm_custode", "mondi", "e", 70, 70, 80, "C"], ["tm_eclisse", "mondi", "l", 80, 76, 76, "A"],
   ].concat(NEWC).map(([id, saga, rar, at, df, te, role, n]) => (n ? { id, saga, rar, at, df, te, role, n } : { id, saga, rar, at, df, te, role }));
-  const BY = Object.fromEntries(CARDS.map((c) => [c.id, c]));
+  const SCRITK = "ali-di-rondine.scrittura-carta";
+  const scritturaOn = () => safe(() => JSON.parse(localStorage.getItem(SCRITK) || "{}").on === true, false);
+  const scritturaSet = (v) => safe(() => localStorage.setItem(SCRITK, JSON.stringify({ on: !!v })), 0);
+  const COMP_CACHE = {};
+  function makeComparsaCard(id) {
+    if (COMP_CACHE[id]) return COMP_CACHE[id];
+    const api = window.__borgoApi;
+    const bio = (api && api.BIO && api.BIO[id]) || "";
+    const cast = (api && api.CAST && api.CAST[id]) || null;
+    if (!bio && !cast) return null;
+    let h = 0;
+    for (let i = 0; i < id.length; i++) h = ((h << 5) - h + id.charCodeAt(i)) | 0;
+    const uh = Math.abs(h);
+    const roles = ["D", "C", "A", "D", "C", "A", "P"];
+    const role = roles[uh % roles.length];
+    const base = 50 + (uh % 9);
+    let at = base, df = base, te = base;
+    if (role === "A") { at += 6; te += (uh % 5) - 2; df -= 4; }
+    else if (role === "D") { df += 6; te += (uh % 5) - 2; at -= 4; }
+    else if (role === "P") { df += 8; te += (uh % 5) - 2; at -= 8; }
+    else { te += 6; at += (uh % 5) - 2; df += ((uh >> 3) % 5) - 2; }
+    at = Math.max(45, Math.min(64, at));
+    df = Math.max(45, Math.min(64, df));
+    te = Math.max(45, Math.min(64, te));
+    const card = { id, role, at, df, te, rar: "c", saga: "borgo", isComparsa: true, spec: cast };
+    COMP_CACHE[id] = card;
+    return card;
+  }
+  const BY_CORE = Object.fromEntries(CARDS.map((c) => [c.id, c]));
+  const BY = new Proxy(BY_CORE, {
+    get(target, prop) {
+      if (typeof prop === "string") {
+        if (target[prop]) return target[prop];
+        if (scritturaOn()) {
+          const comp = makeComparsaCard(prop);
+          if (comp) return comp;
+        }
+      }
+      return target[prop];
+    },
+    has(target, prop) {
+      if (target[prop]) return true;
+      if (scritturaOn() && makeComparsaCard(prop)) return true;
+      return false;
+    }
+  });
   // la frase speciale che la carta dice quando arriva a tre stelle
   const FRASI = {
     bur_taddeo: "Un bilancino non si forza: si ascolta come parla il pioppo.",
@@ -508,6 +581,62 @@
     rf_wanda: "Tre gettoni sul bancone e un lancio lungo sul secondo palo: linea libera!", rf_tullio: "Stringi i bulloni e marca a uomo: da questa difesa non filtra una goccia.", rf_lupo: "Lato B sul piatto, volume a dieci e guantoni caldi sotto la traversa!", rf_valvola: "Sento il fischio delle cuciture nel vento: l'anticipo è già partito.", rf_nilde: "Qui Radio Fuorigioco 99.9: microfono aperto e palla dritta sotto l'incrocio!", rf_valli: "Articolo quattro del buon calcio: testa alta, rispetto e geometria pulita.", rf_cesare: "Finché una radiolina resta accesa sugli scogli, il Molo Vecchio non finisce mai.",
     ci_tonio: "Un colpo di tromba in la bemolle e il pallone gira in valzer sopra la barriera!", ci_ercole: "Due quintali di ghisa alle nove, minestrone alle undici e muro d'area la domenica.", ci_lila: "Lassù tra una sbarra e l'altra non appartieni a nessun padrone: guarda che volo!", ci_zampano: "Signore e signori, nella segatura del Circo Zampanò ogni tiro è un salto nel cuore!", ci_orloff: "Riflettori puntati e cilindro nero: l'incrocio dei pali è questione di puro spettacolo.",
     tp_tino: "Edizione straordinariaaa! Sulla fascia destra corro più veloce del furgoncino delle cinque!", tp_oreste: "Apro il chiosco alle cinque del mattino e chiudo lo specchio della porta fino a sera.", tp_beppe: "Calma da tranviere sul numero quattro: da questa linea d'area non si passa senza biglietto.", tp_clara: "Inquadratura a fuoco, lampo al magnesio e contropiede immortalato per la prima pagina!", tp_livia: "Cucito a filo refe come il rogito del 1921: questo passaggio non si strappa mai.", tp_goffredo: "Quarant'anni di piombo caldo insegnano che una squadra vera si compone lettera per lettera.", tp_ada: "Rotativa Marinoni a pieno regime: la verità e questo gol vanno in stampa senza tagli!",
+    bm_valanga_l: "Il cartone sotto la bufera regge: questo è il Piccolo Borgo!",
+    pr_colonnello: "Nel deserto contano solo il sole in faccia e la mira sul palo lontano.",
+    rm_massimo: "Sabbia dell'arena o fango del campo: per la gloria di Roma!",
+    sq_prof: "La fisica della traiettoria e la chimica del gruppo: schema perfetto.",
+    rz_vega: "Qui Comandante Vega: orbita stabilizzata, palla all'incrocio!",
+    cs_oro: "Un lampo d'oro sulla terra battuta: il traguardo è la porta.",
+    td_duca: "I patti si firmano col ferro, ma le partite si vincono di testa.",
+    ts_ettore: "L'Accademia del Faro non arretra di un millimetro: tirate pure!",
+    mg_fuorigioco: "La scienza e il mantello: il mio contropiede è ineluttabile.",
+    nl_ombra: "Tra i lampioni del '52 l'ombra colpisce prima che il rintocco svanisca.",
+    tc_ferroquercia: "Le querce del trono non piegano: la palla si ferma qui.",
+    ml_mister: "Ragazzi, il modulo è una scusa: si corre per chi è rimasto al bar.",
+    dc_zeno: "Nel fumo della Mobile un indizio non mente mai: gol convalidato.",
+    so_capitano: "Dalla cupola della stazione vedo il campo intero: lancio perfetto.",
+    ve_soffio: "Il vento porta voci e tiri che cambiano giro all'ultimo istante.",
+    ep_carlo: "Memoria del '28 e cuore del '74: il pallone racconta la nostra storia.",
+    vp_capo: "La diga regge la piena del torrente: questa difesa non crolla mai.",
+    gp_direttore: "Bandiera a scacchi sul rettilineo: la staccata vale il gol!",
+    dg_cenere: "Chi scende nell'ipogeo deve avere il fuoco nei piedi e il gelo nella testa.",
+    chr_alter_hero: "In qualunque linea temporale, quel tiro finisce sempre sotto la traversa.",
+    omb_kaelen: "Dalle ombre della darsena non si scappa: la chiusura è totale.",
+    rag_custode_vuoto: "Il Ragnarok attende: la parata suprema infrange il destino.",
+    pg_genesis: "Sincronia Genesis al cento per cento: decollo verso l'incrocio!",
+    mu_baluardo: "Mura di pietra e braccia d'acciaio: oltre questa linea non si passa.",
+    dt_maestro: "Doppio turno, doppia visione: il campo è un orologio sincronizzato.",
+    alc_joe: "Dalle celle di Alcatraz si esce solo col pallone al piede.",
+    nf_fiorenzo: "Finché la lampada del faro gira nella tempesta, il molo è salvo.",
+  };
+  const LEG_CAST = {
+    bm_valanga_l: { name: "Sindaco Valanga", hair: "#c8c8c8", style: "pompadour", skin: "#ffd2a8", eye: "#334155", beard: "baffi", bg: ["#fef3c7", "#b91c1c"], shirt: "#b91c1c", bio: "Il leggendario Sindaco della montagna, sceso dai nevai per governare la difesa con autorità incrollabile." },
+    pr_colonnello: { name: "Colonnello Sentenza", hair: "#e2e8f0", style: "slick", skin: "#b9804f", eye: "#1a1a1a", beard: "pizzetto", bg: ["#7c2d12", "#dc2626"], shirt: "#dc2626", bio: "Veterano del Pugno d'Acciaio: ogni tiro è una sentenza inappellabile verso l'incrocio." },
+    rm_massimo: { name: "Massimo il Gladiatore", hair: "#2b1d14", style: "buzz", skin: "#d9a57a", eye: "#2b1d14", beard: "incolta", bg: ["#7f1d1d", "#facc15"], shirt: "#7f1d1d", bio: "Colosso del Circo Massimo: dominatore indiscusso dei contrasti e delle mischie in area." },
+    sq_prof: { name: "Il Professore", hair: "#94a3b8", style: "side", skin: "#f6c896", eye: "#1e293b", beard: "pizzetto", bg: ["#1e293b", "#3b82f6"], shirt: "#3b82f6", bio: "La mente tattica del Quartiere: vede linee di passaggio dove gli altri vedono solo avversari." },
+    rz_vega: { name: "Comandante Vega", hair: "#38bdf8", style: "slick", skin: "#e0ac7e", eye: "#0284c7", bg: ["#0f172a", "#38bdf8"], shirt: "#0284c7", bio: "Comandante delle rotte spaziali e delle orbite rasoterra. Velocità di crociera ineguagliabile sulla fascia." },
+    cs_oro: { name: "Zoccoli d'Oro", hair: "#fbbf24", style: "curly", skin: "#fcd34d", eye: "#78350f", bg: ["#78350f", "#fbbf24"], shirt: "#f59e0b", bio: "Il purosangue delle pianure: falcata travolgente che spacca in due le retroguardie avversarie." },
+    td_duca: { name: "Il Duca di Ferro", hair: "#64748b", style: "slick", skin: "#cbd5e1", eye: "#334155", beard: "folta", bg: ["#334155", "#94a3b8"], shirt: "#475569", bio: "Signore dei Ducati di Ferro: chiusura ermetica e leadership carismatica nel cuore della retroguardia." },
+    ts_ettore: { name: "Ettore del Faro", hair: "#1a1a2a", style: "short", skin: "#e0b890", eye: "#1e3a8a", bg: ["#1a2a5a", "#3b82f6"], shirt: "#1e3a8a", bio: "Campione del Torneo delle Onde: opportunismo implacabile in area di rigore al novantesimo minuto." },
+    mg_fuorigioco: { name: "Dottor Fuorigioco", hair: "#e8e8e8", style: "slick", skin: "#e8d0b8", eye: "#18181b", beard: "pizzetto", bg: ["#18181b", "#831843"], shirt: "#831843", bio: "Genio oscuro del Mantello e della trappola del fuorigioco. Legge il tempo con precisione chirurgica." },
+    nl_ombra: { name: "L'Ombra del '52", hair: "#0f172a", style: "messy", skin: "#cbd5e1", eye: "#fde047", bg: ["#0f172a", "#6366f1"], shirt: "#4338ca", bio: "L'imprendibile fantasma di Lampioni '52. Dribbling fulmineo tra le ombre della pioggia serale." },
+    tc_ferroquercia: { name: "Reggente Ferroquercia", hair: "#713f12", style: "bun", skin: "#d9a57a", eye: "#854d0e", bg: ["#8a6a1a", "#ca8a04"], shirt: "#854d0e", bio: "Il guardiano del Trono d'Inverno: solido come quercia secolare, non indietreggia di un millimetro." },
+    ml_mister: { name: "Il Mister delle Colline", hair: "#9ca3af", style: "cap", skin: "#e0ac7e", eye: "#15803d", beard: "incolta", bg: ["#14532d", "#22c55e"], shirt: "#15803d", bio: "Il saggio timoniere delle Colline Verdi: organizza la manovra e detta il ritmo con maestria." },
+    dc_zeno: { name: "Ispettore Zeno", hair: "#475569", style: "slick", skin: "#f1c29b", eye: "#0f172a", beard: "baffi", bg: ["#1e293b", "#0284c7"], shirt: "#1e293b", bio: "L'investigatore capo di Borgo: anticipa le mosse avversarie prima ancora che abbiano pensato a cosa fare." },
+    so_capitano: { name: "Capitano Astrale", hair: "#e0e7ff", style: "short", skin: "#e0ac7e", eye: "#6366f1", bg: ["#1e1b4b", "#818cf8"], shirt: "#4338ca", bio: "Comandante di rotta della flotta astrale: precisione orbitale nei lanci lunghi e visione a 360 gradi." },
+    ve_soffio: { name: "Spirito del Vento", hair: "#a7f3d0", style: "wild", skin: "#ecfdf5", eye: "#059669", bg: ["#064e3b", "#34d399"], shirt: "#059669", bio: "Spirito indomito del Vento del Nord: scatto bruciante e tiri a effetto che ingannano ogni portiere." },
+    ep_carlo: { name: "Carlo del '28", hair: "#d1d5db", style: "cap", skin: "#d9a57a", eye: "#374151", beard: "baffi", bg: ["#374151", "#d97706"], shirt: "#78350f", bio: "Pioniere del dopoguerra del '28: dedizione stoica, cuore generoso e tackle puliti sulla palla." },
+    vp_capo: { name: "Il Capo Cantiere", hair: "#78716c", style: "buzz", skin: "#d97706", eye: "#292524", beard: "incolta", bg: ["#1c1917", "#0ea5e9"], shirt: "#0284c7", bio: "Costruttore della grande Diga: una diga umana che respinge ogni assalto verso l'area di rigore." },
+    gp_direttore: { name: "Direttore di Gara", hair: "#f59e0b", style: "slick", skin: "#e0ac7e", eye: "#b45309", bg: ["#78350f", "#f59e0b"], shirt: "#b45309", bio: "Giudice supremo delle corse e del Gran Premio: riflessi d'acciaio nelle staccate sotto porta." },
+    dg_cenere: { name: "Cenere la Custode", hair: "#f97316", style: "wild", skin: "#ffedd5", eye: "#ea580c", bg: ["#7c2d12", "#ea580c"], shirt: "#c2410c", bio: "Sopravvissuta ai dungeon più profondi: grinta feroce e fiuto del gol tra le ceneri della battaglia." },
+    chr_alter_hero: { name: "Guardiano del Paradosso", hair: "#c084fc", style: "messy", skin: "#f3e8ff", eye: "#9333ea", bg: ["#3b0764", "#c084fc"], shirt: "#7e22ce", bio: "Il viaggiatore del paradosso temporale: ricompone le traiettorie e riscrive il tabellone dei gol." },
+    omb_kaelen: { name: "Kaelen delle Ombre", hair: "#18181b", style: "slick", skin: "#e4e4e7", eye: "#a855f7", bg: ["#09090b", "#581c87"], shirt: "#3b0764", bio: "Maestro della gilda delle Ombre: intercettazioni silenziose e ripartenze fulminee alle spalle dei difensori." },
+    rag_custode_vuoto: { name: "Custode del Vuoto", hair: "#e0f2fe", style: "long", skin: "#f0f9ff", eye: "#0284c7", beard: "folta", bg: ["#082f49", "#38bdf8"], shirt: "#0369a1", bio: "L'antico guardiano del Ragnarok: forza titanica che domina il centrocampo contro ogni tempesta." },
+    pg_genesis: { name: "Pilota Genesis", hair: "#f43f5e", style: "anime", skin: "#fff1f2", eye: "#e11d48", bg: ["#4c0519", "#fb7185"], shirt: "#be123c", bio: "Pilota del caccia Phantom: accelerazione supersonica e diagonali fulminee da area ad area." },
+    mu_baluardo: { name: "Il Baluardo", hair: "#475569", style: "buzz", skin: "#cbd5e1", eye: "#0f172a", beard: "folta", bg: ["#1e293b", "#64748b"], shirt: "#334155", bio: "L'estremo baluardo delle Mura Antiche: parate monumentali e sicurezza totale tra i pali." },
+    dt_maestro: { name: "Maestro del Doppio", hair: "#cbd5e1", style: "slick", skin: "#f1f5f9", eye: "#475569", bg: ["#1e293b", "#94a3b8"], shirt: "#334155", bio: "L'architetto del Doppio Gioco: regia impeccabile, finte di corpo e assist millimetrici." },
+    alc_joe: { name: "Joe la Sfinge", hair: "#1c1917", style: "buzz", skin: "#a8a29e", eye: "#292524", bg: ["#1c1917", "#57534e"], shirt: "#44403c", bio: "Veterano indurito dai blocchi di Alcatraz: marcatura a uomo asfissiante da cui non si sfugge." },
+    nf_fiorenzo: { name: "Fiorenzo del Faro", hair: "#e2e8f0", style: "cap", skin: "#d97706", eye: "#0369a1", beard: "folta", bg: ["#0c4a6e", "#0284c7"], shirt: "#0369a1", bio: "Il guardiano del faro dei Naufraghi: guida la squadra nella tempesta con respinte provvidenziali." },
   };
   // le squadre inventate della Stagione dei Sogni e del Draft
   const TEAMS = [
@@ -863,10 +992,15 @@
     return { ch: Object.keys(m.done || {}).length, ends: Array.isArray(m.ends) ? m.ends.length : 0, done: m.done || {} };
   }
   // le carte a capitoli (c.n) si sbloccano a capitolo concluso; le altre seguono la regola per rarità
-  const earned = (c) => { const p = progress(c.saga); if (c.n) return !!p.done[c.n]; return c.rar === "c" ? p.ch >= 1 : c.rar === "r" ? p.ch >= 2 : c.rar === "e" ? p.ch >= 3 || p.ends >= 1 : p.ends >= 4; };
+  const earned = (c) => {
+    if (c.isComparsa) return true;
+    const p = progress(c.saga);
+    if (c.n) return !!p.done[c.n];
+    return c.rar === "c" ? p.ch >= 1 : c.rar === "r" ? p.ch >= 2 : c.rar === "e" ? p.ch >= 3 || p.ends >= 1 : (p.ends >= 2 || (p.ends >= 1 && p.ch >= 3) || p.ends >= 4);
+  };
   const drop = (c) => !c.n || earned(c);
   // VISTE: bustine e premi danno solo carte di personaggi già incontrati (il punto della saga che le sblocca è raggiunto). Niente sconosciuti.
-  const seen = (c) => earned(c); // le carte a capitoli non escono a sorpresa prima di averle guadagnate
+  const seen = (c) => c.isComparsa || earned(c); // le carte a capitoli non escono a sorpresa prima di averle guadagnate
   // BUSTINE PREMIO (opzione «Carte dai premi»): con l'opzione accesa i capitoli e i finali non regalano più la carta ma una bustina gratis
   // di quella rarità (la carta resta una sorpresa). Le carte già possedute non si toccano. Spenta = sblocchi diretti come prima.
   const PREMK = "ali-di-rondine.sogni-premio";
@@ -879,6 +1013,19 @@
       if (po) { if (!r.cred[c.id]) { r.cred[c.id] = 1; r.prem.push(c.rar); np++; ch = true; } }
       else { r.own.push(c.id); nw.push(c.id); ch = true; }
     });
+    if (scritturaOn() && window.__borgoApi && window.__borgoApi.cardsSeen) {
+      const seenIds = safe(() => window.__borgoApi.cardsSeen(), []) || [];
+      seenIds.forEach((id) => {
+        if (!BY_CORE[id] && !r.own.includes(id)) {
+          const comp = makeComparsaCard(id);
+          if (comp) {
+            r.own.push(id);
+            nw.push(id);
+            ch = true;
+          }
+        }
+      });
+    }
     if (ch) save(r); return { r, nw, np };
   }
   // ---------------------------------------------------------------- intesa e forza
@@ -1375,8 +1522,20 @@
     body.innerHTML = `<div class="reveal">${cardHtml(id)}</div><p class="sum" style="text-align:center"><b>${esc(name(id))}</b> sale a ${"★".repeat(st)}${"☆".repeat(3 - st)} · +2 a tutte le statistiche</p>${st >= 3 ? `<p class="frase">«${esc(FRASI[id] || "Questa squadra è un sogno.")}»</p>` : ""}<div class="big"><button type="button" data-ok="1">Avanti ▸<small>${ups.length > 1 ? "Un'altra novità ti aspetta" : "Si continua"}</small></button></div>`;
     body.querySelector("[data-ok]").onclick = () => levelUps(ups.slice(1), then);
   }
-  const name = (id) => { const C = window.__borgoApi && window.__borgoApi.CAST; return (C && C[id] && C[id].name) || id; };
-  const port = (id) => safe(() => window.__borgoApi.portraitImg(id), null);
+  const name = (id) => {
+    const C = window.__borgoApi && window.__borgoApi.CAST;
+    if (C && C[id] && C[id].name) return C[id].name;
+    if (LEG_CAST && LEG_CAST[id] && LEG_CAST[id].name) return LEG_CAST[id].name;
+    const c = BY[id];
+    if (c && c.spec && c.spec.name) return c.spec.name;
+    return id;
+  };
+  const port = (id) => safe(() => {
+    const api = window.__borgoApi;
+    if (!api || typeof api.portraitImg !== "function") return null;
+    const spec = (LEG_CAST && LEG_CAST[id]) || (BY[id] && BY[id].spec) || undefined;
+    return api.portraitImg(id, spec);
+  }, null);
   function cardSynPartner(id, r) {
     if (!r || !Array.isArray(r.team)) return "";
     for (let i = 0; i < r.team.length; i++) {
@@ -1391,13 +1550,19 @@
   function cardHtml(id, opts) {
     const c = BY[id], R = RAR[c.rar], own = !opts || opts.own !== false, img = own ? port(id) : null, S = SG(c.saga), st = own ? starsOf(id) : 0, e = own ? eff(c) : c, isBn = !!(opts && opts.bench);
     const synWho = own && opts && opts.synPartner ? opts.synPartner : "";
-    return `<div class="sgCard r${c.rar}${own ? "" : " lock"}${opts && opts.sel ? " sel" : ""}${isBn ? " benchSel" : ""}${st >= 3 ? " s3" : ""}" data-c="${id}" style="--rc:${R[1]};--sc:${S[2]}"${st >= 3 ? ` title="«${esc(FRASI[id] || "")}»"` : ""}>${own ? `<button type="button" class="sgLoreBtn" data-lore="${id}" title="📖 Lore e Dettagli" aria-label="Lore e dettagli">📖</button>` : ""}${isBn ? `<span class="sgBenchTag" title="In panchina per la Staffetta dei Dieci">🪑</span>` : ""}<div class="hd"><span>${R[0]}</span></div>${st ? `<div class="stars">${"★".repeat(st)}</div>` : ""}<div class="img">${img ? `<img alt="" src="${img}">` : `<span>?</span>`}${own ? `<em class="rolB" style="--rb:${(ROLEN[c.role] || ["", "#94a3b8"])[1]}" title="${(ROLEN[c.role] || [""])[0]}">${{ A: "ATT", B: "JOL", C: "CEN", D: "DIF", P: "POR" }[c.role] || c.role}</em>` : ""}</div><div class="nm">${own ? esc(name(id)) : "???"}</div><div class="st"><span>ATT <b>${own ? e.at : "–"}</b></span><span>DIF <b>${own ? e.df : "–"}</b></span><span>TEC <b>${own ? e.te : "–"}</b></span></div><div class="sg">${synWho ? `<span class="sgSynInline">🤝 ${esc(synWho)}</span> · ` : ""}${esc(S[1])}</div></div>`;
+    return `<div class="sgCard r${c.rar}${own ? "" : " lock"}${opts && opts.sel ? " sel" : ""}${isBn ? " benchSel" : ""}${st >= 3 ? " s3" : ""}" data-c="${id}" style="--rc:${R[1]};--sc:${S[2]}"${st >= 3 ? ` title="«${esc(FRASI[id] || "")}»"` : ""}>${own ? `<button type="button" class="sgLoreBtn" data-lore="${id}" title="📖 Lore e Dettagli" aria-label="Lore e dettagli">📖</button>` : ""}${c.isComparsa ? `<span class="sgComparsaTag" title="Comparsa (Scrittura di Carta)">📜</span>` : ""}${isBn ? `<span class="sgBenchTag" title="In panchina per la Staffetta dei Dieci">🪑</span>` : ""}<div class="hd"><span>${R[0]}</span></div>${st ? `<div class="stars">${"★".repeat(st)}</div>` : ""}<div class="img">${img ? `<img alt="" src="${img}">` : `<span>?</span>`}${own ? `<em class="rolB" style="--rb:${(ROLEN[c.role] || ["", "#94a3b8"])[1]}" title="${(ROLEN[c.role] || [""])[0]}">${{ A: "ATT", B: "JOL", C: "CEN", D: "DIF", P: "POR" }[c.role] || c.role}</em>` : ""}</div><div class="nm">${own ? esc(name(id)) : "???"}</div><div class="st"><span>ATT <b>${own ? e.at : "–"}</b></span><span>DIF <b>${own ? e.df : "–"}</b></span><span>TEC <b>${own ? e.te : "–"}</b></span></div><div class="sg">${synWho ? `<span class="sgSynInline">🤝 ${esc(synWho)}</span> · ` : ""}${esc(S[1])}</div></div>`;
   }
 
   function getCardLore(c) {
+    if (c.isComparsa) {
+      const api = window.__borgoApi;
+      const b = (api && api.BIO && api.BIO[c.id]) || "";
+      return b || `Comparsa incontrata nel Borgo e durante l'avventura. Schierata in campo grazie alla Scrittura di Carta.`;
+    }
     const api = window.__borgoApi;
     if (api && api.CAST && api.CAST[c.id] && api.CAST[c.id].bio) return api.CAST[c.id].bio;
     if (api && api.BIO && api.BIO[c.id]) return api.BIO[c.id];
+    if (LEG_CAST && LEG_CAST[c.id] && LEG_CAST[c.id].bio) return LEG_CAST[c.id].bio;
     const borgoExtra = {
       mattia: "Portiere reclutato tra i moli di Borgo Marino: riflessi d'istinto e fama di saracinesca nei tornei estivi.",
       kevin: "Bagnino e ala imprendibile dello Scoglio: scende dal pedalò e brucia la fascia a piedi nudi sulla sabbia.",
@@ -3038,10 +3203,11 @@
 .sgPresetRenameRow{display:flex;gap:6px;margin-top:7px}
 .sgPresetInp{flex:1;min-width:0;background:#100c1a;border:1px solid #7a5ad8;border-radius:8px;padding:6px 9px;color:#f4f0e4;font:600 12.5px system-ui;outline:none}
 .sgPresetSaveBtn{background:#7ad87a;border:0;border-radius:8px;padding:6px 12px;color:#0e1f12;font:800 12px system-ui;cursor:pointer;flex-shrink:0}
-.sgSynInline{color:#7ad87a;font-weight:700}`;
+.sgSynInline{color:#7ad87a;font-weight:700}
+.sgComparsaTag{position:absolute;bottom:22px;right:6px;font-size:12px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.8));pointer-events:none}`;
     document.head.appendChild(st);
   }
   // la Maglia dei Sogni nel guardaroba (si registra all'avvio, così resta anche dopo aver ricaricato la pagina)
   (function reg() { const A = window.__borgoApi; if (!A || !A.COSM) return setTimeout(reg, 200); if (!A.COSM.sg_maglia) A.COSM.sg_maglia = { kind: "shirt", label: "Maglia dei Sogni", val: "#7a5ad8", from: "Vinci il Torneo dei Sogni (Salone delle Saghe)" }; })();
-  window.__sogni = { _progress: progress, _seen: seen, premio: { on: premOn, setOn: premSet, open: openPrem }, squad, lineup, SAGHE, BY, eff, name, port, _save: save, open, close: closeAll, _launch: launch, _tiers: tiers, CARDS, LINKS, SFIDE, TEAMS, FRASI, intesa, forza, sync, stagione, draft, stars: (id) => { XPC = load().xp; return starsOf(id); }, _load: load, MODULI, modSintonia, openModDetail, openCardLore, combo: getTeamCombo, openVoci, openVoceScene, recordVoci, vociStats, pairKey, BOND_GOAL, toggleBench, autoBench, switchPreset, renamePreset, presetsBarHtml, bindPresetsBar, gainXp, levelUps };
+  window.__sogni = { _progress: progress, _seen: seen, premio: { on: premOn, setOn: premSet, open: openPrem }, scrittura: { on: scritturaOn, setOn: scritturaSet, makeCard: makeComparsaCard }, squad, lineup, SAGHE, BY, eff, name, port, _save: save, open, close: closeAll, _launch: launch, _tiers: tiers, CARDS, LINKS, SFIDE, TEAMS, FRASI, intesa, forza, sync, stagione, draft, stars: (id) => { XPC = load().xp; return starsOf(id); }, _load: load, MODULI, modSintonia, openModDetail, openCardLore, combo: getTeamCombo, openVoci, openVoceScene, recordVoci, vociStats, pairKey, BOND_GOAL, toggleBench, autoBench, switchPreset, renamePreset, presetsBarHtml, bindPresetsBar, gainXp, levelUps };
 })();
