@@ -26,6 +26,16 @@
     }
   }
 
+  // squadre del campionato di una divisione: la Rondine c'e' sempre (in B e A prende il posto dell'ultima della lista)
+  function teamsOf(divId) {
+    const D = window.__carrieraDati.DIVISIONS, d = D[divId];
+    if (d.teams.some((t) => t.id === "rondine")) return d.teams;
+    const r = D[0].teams.find((t) => t.id === "rondine");
+    const others = d.teams.filter((t) => t.id !== "rondine");
+    return [r].concat(others.slice(0, others.length - 1));
+  }
+  const SPONSOR = [60, 80, 100];
+
   function defaultState() {
     const core = window.__carrieraCore;
     const dati = window.__carrieraDati;
@@ -41,7 +51,7 @@
       funds: 120,
       presTrust: 80,
       fans: 65,
-      sponsorWeekly: 35,
+      sponsorWeekly: 60,
       trainingDone: false,
       pressDone: false,
       lastMatchRes: null,
@@ -61,7 +71,15 @@
       const raw = localStorage.getItem(SAVE_KEY);
       if (raw) {
         const s = JSON.parse(raw);
-        if (s && s.version === 1 && s.squad && s.table) return s;
+        if (s && s.version === 1 && s.squad && s.table) {
+          // riparazione: stagioni nuove create senza la Rondine (bug promozione) e sponsor vecchio troppo basso
+          if (!s.table.rondine) {
+            const core = window.__carrieraCore, tm = teamsOf(s.divId);
+            s.table = core.initTable(tm); s.schedule = core.generateSchedule(tm.map((t) => t.id)); s.round = 1; s.lastMatchRes = null;
+          }
+          if (!s.sponsorFix) { s.sponsorFix = 1; s.sponsorWeekly = Math.max(s.sponsorWeekly || 0, SPONSOR[s.divId] || 60); if (s.funds < 60) s.funds = 60; }
+          return s;
+        }
       }
     } catch (e) { /* ignora */ }
     return defaultState();
@@ -678,9 +696,12 @@
     const isHome = roundMatches.some((m) => m.home === "rondine");
     if (isHome) {
       const stadiumMult = 1.0 + getStadiumStage() * 0.25;
-      const gate = Math.round(18 * stadiumMult);
+      const gate = Math.round(40 * stadiumMult);
       state.funds += gate;
+    } else {
+      state.funds += 12; // quota incasso in trasferta
     }
+    state.funds += res.win ? 25 : res.draw ? 10 : 0; // premio partita della Lega
 
     state.round++;
     state.trainingDone = false;
@@ -697,7 +718,7 @@
     const ourPos = sorted.findIndex((t) => t.id === "rondine") + 1;
     const div = dati.DIVISIONS[state.divId];
 
-    if (ourPos <= div.promotion && state.divId < 2) {
+    if (ourPos > 0 && ourPos <= div.promotion && state.divId < 2) {
       state.divId++;
       state.presTrust = 95;
       state.trophies.push(`Promozione in ${dati.DIVISIONS[state.divId].name} (Stagione ${state.season})`);
@@ -709,8 +730,10 @@
     state.season++;
     state.round = 1;
     const newDiv = dati.DIVISIONS[state.divId];
-    const newTeamIds = newDiv.teams.map((t) => t.id);
-    state.table = core.initTable(newDiv.teams);
+    const newTeams = teamsOf(state.divId);
+    const newTeamIds = newTeams.map((t) => t.id);
+    state.table = core.initTable(newTeams);
+    state.sponsorWeekly = Math.max(state.sponsorWeekly || 0, SPONSOR[state.divId] || 60);
     state.schedule = core.generateSchedule(newTeamIds);
     state.lastMatchRes = null;
     state.trainingDone = false;
