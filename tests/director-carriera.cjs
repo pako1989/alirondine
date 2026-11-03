@@ -135,4 +135,23 @@ assert(directorCode.includes("finishCareer"), "La patch deve includere finishCar
 assert(directorCode.includes("Carriera del Golfo"), "La patch deve mostrare la voce Carriera del Golfo nel menu");
 console.log("  ✔ Patch retrocompatibile su js/match-director-hd.js OK");
 
-console.log("\n✅ TUTTI I TEST DEL BLOCCO 1 SONO PASSATI CON SUCCESSO!");
+// 8. Test Minigioco Trattativa e Interfaccia Carriera
+const trattativaCode = fs.readFileSync(path.join(__dirname, "../js/director-trattativa.js"), "utf8");
+vm.runInContext(trattativaCode, ctx);
+assert(domWindow.__directorTrattativa && typeof domWindow.__directorTrattativa.start === "function", "window.__directorTrattativa.start deve essere definito");
+console.log("  ✔ Modulo js/director-trattativa.js OK");
+
+const carrieraCode = fs.readFileSync(path.join(__dirname, "../js/director-carriera.js"), "utf8");
+vm.runInContext(carrieraCode, ctx);
+assert(typeof domWindow.openDirectorCarriera === "function", "window.openDirectorCarriera deve essere definita");
+assert(domWindow.__directorCarriera && typeof domWindow.__directorCarriera.state === "function", "window.__directorCarriera.state deve essere definita");
+console.log("  ✔ Interfaccia mobile js/director-carriera.js OK");
+
+// 9. Test Salone e Borgo hook
+const saloneCode = fs.readFileSync(path.join(__dirname, "../js/salone.js"), "utf8");
+assert(saloneCode.includes('id: "trattativa"'), "Salone MACHINES deve includere il cabinato trattativa");
+const borgoCode = fs.readFileSync(path.join(__dirname, "../js/director-borgo.js"), "utf8");
+assert(borgoCode.includes("openDirectorCarriera"), "Spigola in director-borgo.js deve consentire di aprire la Carriera");
+console.log("  ✔ Registrazione cabinato in Salone e dialogo Presidente Spigola ai Trabucchi OK");
+
+console.log("\n✅ TUTTI I TEST DEL GESTIONALE E MINIGIOCO SONO PASSATI CON SUCCESSO!");

@@ -69,6 +69,7 @@
       var s = st(), m = mem();
       m.met = 1; memSet(m);
       var opts = [];
+      opts.push({ label: "🏆 Carriera del Golfo", sub: "Campionato a 3 serie, mercato, rosa e bilancio", cls: "hot", fn: function () { if (typeof window.openDirectorCarriera === "function") window.openDirectorCarriera(api.trResume); else go(); } });
       opts.push({ label: s && s.won > 0 ? "Matchday Director" : "Comincia il Torneo del Molo", sub: s ? ("Episodio " + (s.next ? s.next.ep : s.total) + "/" + s.total + " · " + s.seasonTitle) : "La Rondine FC dalla panchina", cls: "hot", fn: function () { go(); } });
       if (s && s.next && s.won > 0) opts.push({ label: "Prossimo episodio", sub: s.next.name, cls: "hot", fn: function () { go({ opp: s.next.id }); } });
       opts.push({ label: "Spogliatoio e bacheca", sub: s ? ("Rosa " + (16 + s.roster) + " giocatori · maglia, portiere, trofei") : "Rosa, maglie, trofei", fn: function () { go({ screen: "locker" }); } });

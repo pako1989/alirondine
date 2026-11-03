@@ -619,9 +619,16 @@
       opp: [{ name: "Il muro di giorno", rounds: 6, need: 3, wind: 0.6, color: "#0ea5e9", style: "equilibrata" }, { name: "Il vento di Ferragosto", rounds: 8, need: 5, wind: 1.2, color: "#f59e0b", style: "contropiede" }, { name: "L'onda lunga", rounds: 8, need: 5, wind: 1, waves: true, color: "#1d4ed8", style: "pressing" }],
       boss: { name: "L'ultimo tiro", rounds: 10, need: 7, wind: 1.4, waves: true, color: "#6366f1", style: "pressing" },
       opts: (o) => ({ title: `Torna Dritto · ${o.name}`, rounds: o.rounds || 8, need: o.need || 5, wind: o.wind == null ? 1 : o.wind, waves: !!o.waves, tutorial: false }) },
+    { id: "trattativa", t: "Braccio di Ferro al Barcone", e: "🤝", saga: "carriera", eng: "__directorTrattativa", d: "La trattativa di mezzanotte sul barcone dei pescatori: piega le richieste dei procuratori tra calici di bianco, bluff e l'urlo telefonico del Presidente Spigola prima che scada la pazienza.",
+      opp: [{ name: "Oreste 'Baffo d'Oro' Puleo", color: "#f59e0b", style: "equilibrata" }, { name: "Egidio Salmastro", color: "#3b82f6", style: "pressing" }],
+      boss: { name: "Cavalier Bonaccia", color: "#ec4899", style: "pressing" },
+      opts: (o) => ({ agentName: o.name, initialPrice: 50, targetPrice: 32 }) },
     { id: "staffetta", t: "La Staffetta dei Legami", e: "⚡", saga: "arena", eng: "__staffetta", d: "La sfida a cambi rapidi dell'Arena: due titolari in campo e tre riserve in panchina. Attiva le risonanze segrete tra saghe, scatena cut-in animati e supera le cinque ondate dei rivali." },
   ];
   function sgState(m) {
+    if (m.id === "trattativa") {
+      return { s: { t: "Director · Carriera del Golfo" }, open: true, boss: true };
+    }
     if (m.id === "staffetta") {
       const on = window.__staffetta && window.__staffetta.on ? window.__staffetta.on() : true;
       return { s: { t: "Squadra dei Sogni & Arena" }, open: on, boss: true };
