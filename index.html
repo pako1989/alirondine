@@ -699,7 +699,7 @@ var weatherPillLbl = document.getElementById("weatherPillLbl");
 function syncWeatherBtn() {
   var s = {};
   try { s = JSON.parse(localStorage.getItem("ali-di-rondine.impostazioni") || "{}"); } catch(e) {}
-  var w = s.envWeather || "auto";
+  var w = (s.pfx && s.envWeather) || "spento";
   if (weatherPillLbl) weatherPillLbl.textContent = "Meteo: " + w.toUpperCase();
   if (weatherPillBtn) {
     weatherPillBtn.style.color = w !== "spento" ? "#38bdf8" : "#94a3b8";
@@ -712,7 +712,8 @@ if (weatherPillBtn) {
     var s = {};
     try { s = JSON.parse(localStorage.getItem("ali-di-rondine.impostazioni") || "{}"); } catch(e) {}
     var modes = ["auto", "pioggia", "vento", "neve", "lucciole", "braci", "spento"];
-    var curIdx = modes.indexOf(s.envWeather || "auto");
+    var curIdx = modes.indexOf((s.pfx && s.envWeather) || "spento");
+    s.pfx = 1;
     s.envWeather = modes[(curIdx + 1) % modes.length];
     s.ambientFx = s.envWeather !== "spento";
     try { localStorage.setItem("ali-di-rondine.impostazioni", JSON.stringify(s)); } catch(e) {}

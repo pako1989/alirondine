@@ -5726,7 +5726,8 @@
   };
   // 15l · Partita classica: quattro aggiunte, ognuna spegnibile (spente = regole di prima)
   const SET_PC = { coppie: ["Schemi a coppie avanzati", "Con grande intesa, ogni compagno sblocca un secondo tiro in coppia (intesa 14)"], rete: ["Rete strappata", "Un tiro potentissimo può bucare la rete: cut-in speciale, un po' di grinta e il conto delle reti strappate"], star: ["Fuoriclasse rivali", "Il capitano avversario carica lo speciale con una frase sua e un cut-in nei colori della squadra"], gkf: ["Portieri che si stancano", "Più tiri affronta, più un portiere cala (il tuo e il loro); all'intervallo recupera"], duelli: ["Duelli 1 contro 1", "Dribbling in attacco (zona 3+): leggi il difensore e scegli finta, scatto o protezione"], area: ["Comandi in area", "Parata, pugno o uscita: li scegli tu col tuo portiere, e anche il portiere avversario li usa"], tempo: ["Tiro a tempo", "Ferma la barra al momento giusto: preciso = tiro più forte, sbagliato = più debole"], fiato: ["Grinta di riserva", "A secco puoi tirare lo stesso (più debole); rifiatare ridà almeno 10"], spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
-  const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false, dis: false, cardView: "holo3d", mangaView: "comic", trophyView: "3d", bgArt: "detailed", confetti: true, proActionFx: true, tsubasa: false, windWeather: true, azDiff: "norm", azCtl: "joystick", azPowerUps: true, azAimAssist: true, faces: "flat" });
+  const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false, dis: false, cardView: "holo3d", mangaView: "comic", trophyView: "3d", bgArt: "detailed", confetti: true, proActionFx: true, tsubasa: false, windWeather: true, azDiff: "norm", azCtl: "joystick", azPowerUps: true, azAimAssist: true, faces: "flat", pfx: 1, envWeather: "spento", ambientFx: false });
+  const envFxOn = () => SET.ambientFx !== false && (SET.envWeather || "spento") !== "spento";
   function setLoad() {
     const d = setDefault(), s = readJSON(SETK, null);
     if (!s || s.v !== 1) return d;
@@ -5744,6 +5745,7 @@
     if (res.azAimAssist === undefined) res.azAimAssist = true;
     if (!["classic", "flat"].includes(res.faces)) res.faces = "flat"; // 2D HD e Pixel tolti (2026-11-02): chi li aveva passa a Flat
     if (!res.fm) { res.fm = 1; if (res.faces === "classic") res.faces = "flat"; } // una tantum: Flat design diventa lo stile di partenza
+    if (!res.pfx) { res.pfx = 1; res.envWeather = "spento"; res.ambientFx = false; } // 2026-11-03: lucciole/foglie di sfondo spente di partenza (riaccendibili in Impostazioni)
     if (res.omini !== "pixel") res.omini = "classici";
     if (!(Number.isInteger(res.ominoHero) && res.ominoHero >= 0 && res.ominoHero < 30)) res.ominoHero = 0;
     return res;
@@ -5871,9 +5873,9 @@
           again(`Filtro Retrò: ${lbl}`);
         }
       } },
-      { label: `Particellari Meteo & Ambiente: ${(SET.envWeather || (SET.ambientFx === false ? "spento" : "auto")).toUpperCase()} ▸`, sub: "Meteo ambientale dinamico e particellari vivi nelle scene e nel Borgo (Auto, Pioggia, Vento, Neve, Lucciole, Braci, Spento)", fn: () => {
+      { label: `Particelle di sfondo: ${(SET.envWeather || "spento").toUpperCase()} ▸`, sub: "Lucciole, foglie, petali, braci che volano sopra scene e Borgo (Spento di partenza; Auto, Pioggia, Vento, Neve, Lucciole, Braci). Il meteo vero delle partite resta", fn: () => {
         const modes = ["auto", "pioggia", "vento", "neve", "lucciole", "braci", "spento"];
-        const curIdx = modes.indexOf(SET.envWeather || "auto");
+        const curIdx = modes.indexOf(SET.envWeather || "spento");
         SET.envWeather = modes[(curIdx + 1) % modes.length];
         SET.ambientFx = SET.envWeather !== "spento";
         save();
@@ -11820,8 +11822,8 @@
     const night = view.kind === "borgo" && B && B.night, h = gxHour();
     if (night) {
       g.fillStyle = "rgba(20,30,80,.12)"; g.fillRect(0, 0, W, H);
-      for (let i = 0; i < 12; i++) { const x = ((i * 71 + Math.sin(frame / 40 + i) * 14) % W + W) % W, y = ((i * 47 + Math.cos(frame / 50 + i) * 10) % H + H) % H, on = (frame / 8 + i * 3) % 12 < 5; if (on) { px(x, y, 1.5, 1.5, "#fff2a0"); gxGlow(x, y, 5, "255,240,150", 0.35); } }
-      if (SET.ambientFx !== false) gxAmbientNight();
+      if (envFxOn()) for (let i = 0; i < 12; i++) { const x = ((i * 71 + Math.sin(frame / 40 + i) * 14) % W + W) % W, y = ((i * 47 + Math.cos(frame / 50 + i) * 10) % H + H) % H, on = (frame / 8 + i * 3) % 12 < 5; if (on) { px(x, y, 1.5, 1.5, "#fff2a0"); gxGlow(x, y, 5, "255,240,150", 0.35); } }
+      if (envFxOn()) gxAmbientNight();
       return;
     }
     // luce del sole e ombre delle nuvole che passano
@@ -11829,7 +11831,7 @@
     g.fillStyle = "rgba(10,30,60,.07)";
     for (let i = 0; i < 3; i++) { const x = ((i * 157 + frame * 0.3) % (W + 200)) - 100, y = ((i * 83 + frame * 0.12) % (H + 120)) - 60; g.beginPath(); g.ellipse(x, y, 60, 26, 0.3, 0, 7); g.fill(); }
     gxMotes(10, "255,255,230");
-    if (SET.ambientFx !== false) gxAmbientDay(h);
+    if (envFxOn()) gxAmbientDay(h);
     if (h >= 18 && h < 21) { g.fillStyle = "rgba(255,120,60,.06)"; g.fillRect(0, 0, W, H); }
   }
   // ---------- dopo ogni disegno: vignetta, filtro retrò, controllo delle prestazioni ----------
@@ -11886,8 +11888,8 @@
   }
 
   function gxEnvParticles() {
-    if (SET.ambientFx === false) return;
-    const w = SET.envWeather || "auto";
+    if (!envFxOn()) return;
+    const w = SET.envWeather || "spento";
     if (w === "spento") return;
     let mode = w;
     if (mode === "auto") {
@@ -17985,9 +17987,9 @@
   function mtDraw() {
     const c = mtCur(), w = c.w, s = c.s;
     // la stagione, un velo di colore e qualcosa che cade
-    if (s === "autunno") { g.fillStyle = "rgba(255,140,40,.06)"; g.fillRect(0, 0, W, H); for (let i = 0; i < 16; i++) { const sp = 0.35 + (i % 4) * 0.15, x = ((i * 67 + Math.sin(frame / 25 + i) * 14 + frame * (w === "vento" ? 1.6 : 0.25)) % (W + 20) + W + 20) % (W + 20) - 10, y = (i * 47 + frame * sp) % (H + 10) - 5; px(x, y, 3, 2, ["#e8a020", "#c0501e", "#8a4a2a", "#d8b040"][i % 4]); } }
+    if (s === "autunno") { g.fillStyle = "rgba(255,140,40,.06)"; g.fillRect(0, 0, W, H); if (envFxOn()) for (let i = 0; i < 16; i++) { const sp = 0.35 + (i % 4) * 0.15, x = ((i * 67 + Math.sin(frame / 25 + i) * 14 + frame * (w === "vento" ? 1.6 : 0.25)) % (W + 20) + W + 20) % (W + 20) - 10, y = (i * 47 + frame * sp) % (H + 10) - 5; px(x, y, 3, 2, ["#e8a020", "#c0501e", "#8a4a2a", "#d8b040"][i % 4]); } }
     else if (s === "inverno" && w !== "neve") { g.fillStyle = "rgba(120,150,210,.07)"; g.fillRect(0, 0, W, H); }
-    else if (s === "primavera") for (let i = 0; i < 10; i++) { const x = ((i * 89 + Math.sin(frame / 30 + i) * 10 + frame * 0.3) % W + W) % W, y = (i * 61 + frame * 0.35) % H; px(x, y, 2, 2, i % 2 ? "#ffc0d8" : "#fff0f6"); }
+    else if (s === "primavera" && envFxOn()) for (let i = 0; i < 10; i++) { const x = ((i * 89 + Math.sin(frame / 30 + i) * 10 + frame * 0.3) % W + W) % W, y = (i * 61 + frame * 0.35) % H; px(x, y, 2, 2, i % 2 ? "#ffc0d8" : "#fff0f6"); }
     if (w === "pioggia") {
       g.fillStyle = "rgba(20,30,60,.22)"; g.fillRect(0, 0, W, H);
       g.strokeStyle = "rgba(190,215,255,.55)"; g.lineWidth = 1; g.beginPath();
@@ -19794,7 +19796,7 @@
     if (c.w === "pioggia") { g.fillStyle = "rgba(40,50,70,.18)"; g.fillRect(0, 0, W, H); g.strokeStyle = "rgba(200,220,255,.5)"; g.lineWidth = 1; g.beginPath(); for (let i = 0; i < 50 * n; i++) { const x = (i * 37 + frame * 5) % (W + 40) - 20, y = (i * 53 + frame * 9) % H; g.moveTo(x, y); g.lineTo(x - 3, y + 8); } g.stroke(); }
     else if (c.w === "neve") for (let i = 0; i < 40 * n; i++) { const x = (i * 43 + Math.sin(frame / 30 + i) * 8 + frame * 0.3) % W, y = (i * 29 + frame * 0.7) % H; px(x, y, 2, 2, "#fff"); }
     else if (c.w === "vento") for (let i = 0; i < 6; i++) { const y = 20 + i * 27, x = ((frame * 3 + i * 90) % (W + 80)) - 40; g.strokeStyle = "rgba(255,255,255,.35)"; g.lineWidth = 1; g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + 20, y - 5, x + 40, y); g.stroke(); }
-    if (c.w !== "pioggia" && c.w !== "neve") {
+    if (c.w !== "pioggia" && c.w !== "neve" && envFxOn()) {
       if (c.se === "autunno") for (let i = 0; i < 10 * n; i++) { const x = (i * 61 + frame * 0.6 + Math.sin(frame / 25 + i) * 10) % W, y = (i * 37 + frame * 0.5) % H; g.save(); g.translate(x, y); g.rotate(frame / 30 + i); px(-2, -1, 4, 2, ["#d9822a", "#c8452a", "#e8b23a"][i % 3]); g.restore(); }
       if (c.se === "primavera") for (let i = 0; i < 10 * n; i++) { const x = (i * 59 + frame * 0.5 + Math.sin(frame / 20 + i) * 12) % W, y = (i * 41 + frame * 0.4) % H; px(x, y, 2, 2, "#ffc4dc"); }
       if (c.se === "estate" && c.tod === "giorno" && heavy) gxGlow(300, 0, 140, "255,245,200", 0.12);
