@@ -350,7 +350,7 @@
     ["so_capitano", "spazio", "l", 84, 82, 88, "C"],
     ["ve_soffio", "vento", "l", 86, 70, 94, "A"],
     ["ep_carlo", "dopo", "l", 82, 86, 86, "D"],
-    ["vp_capo", "diga", "l", 80, 92, 82, "D"],
+    ["vp_cantiere", "diga", "l", 80, 92, 82, "D"],
     ["gp_direttore", "gp", "l", 88, 76, 90, "A"],
     ["dg_cenere", "dungeon", "l", 90, 84, 80, "A"],
     ["chr_alter_hero", "chrono", "l", 90, 80, 90, "A"],
@@ -597,7 +597,7 @@
     so_capitano: "Dalla cupola della stazione vedo il campo intero: lancio perfetto.",
     ve_soffio: "Il vento porta voci e tiri che cambiano giro all'ultimo istante.",
     ep_carlo: "Memoria del '28 e cuore del '74: il pallone racconta la nostra storia.",
-    vp_capo: "La diga regge la piena del torrente: questa difesa non crolla mai.",
+    vp_cantiere: "La diga regge la piena del torrente: questa difesa non crolla mai.",
     gp_direttore: "Bandiera a scacchi sul rettilineo: la staccata vale il gol!",
     dg_cenere: "Chi scende nell'ipogeo deve avere il fuoco nei piedi e il gelo nella testa.",
     chr_alter_hero: "In qualunque linea temporale, quel tiro finisce sempre sotto la traversa.",
@@ -626,7 +626,7 @@
     so_capitano: { name: "Capitano Astrale", hair: "#e0e7ff", style: "short", skin: "#e0ac7e", eye: "#6366f1", bg: ["#1e1b4b", "#818cf8"], shirt: "#4338ca", bio: "Comandante di rotta della flotta astrale: precisione orbitale nei lanci lunghi e visione a 360 gradi." },
     ve_soffio: { name: "Spirito del Vento", hair: "#a7f3d0", style: "wild", skin: "#ecfdf5", eye: "#059669", bg: ["#064e3b", "#34d399"], shirt: "#059669", bio: "Spirito indomito del Vento del Nord: scatto bruciante e tiri a effetto che ingannano ogni portiere." },
     ep_carlo: { name: "Carlo del '28", hair: "#d1d5db", style: "cap", skin: "#d9a57a", eye: "#374151", beard: "baffi", bg: ["#374151", "#d97706"], shirt: "#78350f", bio: "Pioniere del dopoguerra del '28: dedizione stoica, cuore generoso e tackle puliti sulla palla." },
-    vp_capo: { name: "Il Capo Cantiere", hair: "#78716c", style: "buzz", skin: "#d97706", eye: "#292524", beard: "incolta", bg: ["#1c1917", "#0ea5e9"], shirt: "#0284c7", bio: "Costruttore della grande Diga: una diga umana che respinge ogni assalto verso l'area di rigore." },
+    vp_cantiere: { name: "Il Capo Cantiere", hair: "#78716c", style: "buzz", skin: "#d97706", eye: "#292524", beard: "incolta", bg: ["#1c1917", "#0ea5e9"], shirt: "#0284c7", bio: "Costruttore della grande Diga: una diga umana che respinge ogni assalto verso l'area di rigore." },
     gp_direttore: { name: "Direttore di Gara", hair: "#f59e0b", style: "slick", skin: "#e0ac7e", eye: "#b45309", bg: ["#78350f", "#f59e0b"], shirt: "#b45309", bio: "Giudice supremo delle corse e del Gran Premio: riflessi d'acciaio nelle staccate sotto porta." },
     dg_cenere: { name: "Cenere la Custode", hair: "#f97316", style: "wild", skin: "#ffedd5", eye: "#ea580c", bg: ["#7c2d12", "#ea580c"], shirt: "#c2410c", bio: "Sopravvissuta ai dungeon più profondi: grinta feroce e fiuto del gol tra le ceneri della battaglia." },
     chr_alter_hero: { name: "Guardiano del Paradosso", hair: "#c084fc", style: "messy", skin: "#f3e8ff", eye: "#9333ea", bg: ["#3b0764", "#c084fc"], shirt: "#7e22ce", bio: "Il viaggiatore del paradosso temporale: ricompone le traiettorie e riscrive il tabellone dei gol." },
@@ -1524,7 +1524,7 @@
   }
   const name = (id) => {
     const C = window.__borgoApi && window.__borgoApi.CAST;
-    if (C && C[id] && C[id].name) return C[id].name;
+    if (C && C[id] && C[id].name && C[id].name.indexOf("{") < 0) return C[id].name;
     if (LEG_CAST && LEG_CAST[id] && LEG_CAST[id].name) return LEG_CAST[id].name;
     const c = BY[id];
     if (c && c.spec && c.spec.name) return c.spec.name;
@@ -1533,7 +1533,7 @@
   const port = (id) => safe(() => {
     const api = window.__borgoApi;
     if (!api || typeof api.portraitImg !== "function") return null;
-    const spec = (LEG_CAST && LEG_CAST[id]) || (BY[id] && BY[id].spec) || undefined;
+    const inCast = api.CAST && api.CAST[id]; const spec = inCast ? undefined : (LEG_CAST && LEG_CAST[id]) || (BY[id] && BY[id].spec) || undefined;
     return api.portraitImg(id, spec);
   }, null);
   function cardSynPartner(id, r) {

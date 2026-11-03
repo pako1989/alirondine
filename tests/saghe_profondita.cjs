@@ -19,7 +19,7 @@ async function run(w) {
       "bm_valanga_l", "pr_colonnello", "rm_massimo", "sq_prof", "rz_vega",
       "cs_oro", "td_duca", "ts_ettore", "mg_fuorigioco", "nl_ombra",
       "tc_ferroquercia", "ml_mister", "dc_zeno", "so_capitano", "ve_soffio",
-      "ep_carlo", "vp_capo", "gp_direttore", "dg_cenere", "chr_alter_hero",
+      "ep_carlo", "vp_cantiere", "gp_direttore", "dg_cenere", "chr_alter_hero",
       "omb_kaelen", "rag_custode_vuoto", "pg_genesis", "mu_baluardo",
       "dt_maestro", "alc_joe", "nf_fiorenzo"
     ];
