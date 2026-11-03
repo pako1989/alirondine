@@ -611,6 +611,7 @@
           lvl: oppTeam.lvl || 1.0,
           form: "4-4-2",
           style: "Campionato del Golfo",
+          names: oppTeam.names || [],
           blurb: `La sfida di campionato contro ${oppTeam.name}.`,
           hint: "Fai attenzione alla stanchezza dei tuoi giocatori.",
           goal: "Vinci per la classifica",

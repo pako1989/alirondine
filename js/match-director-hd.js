@@ -1499,7 +1499,18 @@
       opp: o.opp || {},
       res: null
     };
-    newMatch(o.opp, o.form || "4-3-3", o.ment || "equil", o.press || "medio");
+    // avversario di campionato: completa i campi che il motore si aspetta (nomi x11, twist, modulo, mod)
+    const op = Object.assign({}, o.opp || {});
+    const nm = Array.isArray(op.names) ? op.names.filter(Boolean).map(String) : [];
+    const fill = ["Bruni", "Costa", "Ferri", "Galli", "Lodi", "Marini", "Neri", "Pace", "Rossi", "Sala", "Villa"];
+    for (let i = 0; nm.length < 11; i++) nm.push(fill[i % fill.length] + (i >= fill.length ? " " + (i + 1) : ""));
+    op.names = nm;
+    if (!FORMS[op.form]) op.form = "4-4-2";
+    if (typeof op.twist !== "function") op.twist = () => {};
+    op.mod = Object.assign({ atk: 1, mid: 1, def: 1, pressWeak: 1, foul: 0.03, ctr: 1, wall: 1, tire: 1 }, op.mod || {});
+    op.name = op.name || "Avversari"; op.short = op.short || op.name; op.blurb = op.blurb || "";
+    careerCfg.opp = op;
+    newMatch(op, FORMS[o.form] ? o.form : "4-3-3", o.ment || "equil", o.press || "medio");
     tab = "ordini"; buildMatchUI(); openKickoffCareer(); startLoop();
   }
 
