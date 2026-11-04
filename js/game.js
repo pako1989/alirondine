@@ -1222,7 +1222,7 @@
     const vg = g.createLinearGradient(0, 0, 0, 200); vg.addColorStop(0, "rgba(8,10,28,.72)"); vg.addColorStop(0.35, "rgba(8,10,28,.15)"); vg.addColorStop(0.75, "rgba(8,10,28,.25)"); vg.addColorStop(1, "rgba(8,10,28,.85)"); g.fillStyle = vg; g.fillRect(0, 0, W, H);
     for (let i = 0; i < 14; i++) { g.strokeStyle = `rgba(255,210,63,${0.04 + (i % 3) * 0.03})`; g.lineWidth = 2; g.beginPath(); g.moveTo(160, 120); const a = i / 14 * Math.PI * 2 + frame / 260; g.lineTo(160 + Math.cos(a) * 300, 120 + Math.sin(a) * 300); g.stroke(); }
     const gu = hv.kind === "saga" && hv.guest && CAST[hv.guest] ? hv.guest : null;
-    if (gu) { portrait("leo", 100, 132, 1.45); portrait(gu, 222, 132, 1.45, true); }
+    if (gu) { portrait(CAST.hero && CAST.hero.skin ? "hero" : "leo", 100, 132, 1.45); portrait(gu, 222, 132, 1.45, true); }
     else { portrait("leo", 110, 128, 1.6); portrait("nico", 215, 132, 1.4, true); }
     ball(160, 152 + Math.sin(frame / 12) * 6, 8);
     g.fillStyle = "#ffd23f"; g.font = "28px 'Dela Gothic One', Impact, sans-serif"; g.textAlign = "center"; g.fillText("ALI DI RONDINE", 162, 42); g.fillStyle = "#b3202c"; g.fillText("ALI DI RONDINE", 160, 40);
