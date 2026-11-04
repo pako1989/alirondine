@@ -1205,12 +1205,31 @@
     }
   }
   function drawTitle() {
+    const hv = window.__tessera ? (() => { try { return window.__tessera.home(); } catch { return null; } })() : null;
+    if (hv) return drawTitleLive(hv);
     for (let i = 0; i < 24; i++) { g.strokeStyle = `rgba(255,210,63,${0.08 + (i % 3) * 0.05})`; g.lineWidth = 2; g.beginPath(); g.moveTo(160, 100); const a = i / 24 * Math.PI * 2 + frame / 200; g.lineTo(160 + Math.cos(a) * 300, 100 + Math.sin(a) * 300); g.stroke(); }
     portrait("leo", 110, 128, 1.6); portrait("nico", 215, 132, 1.4, true);
     ball(160, 150 + Math.sin(frame / 12) * 6, 9);
     g.fillStyle = "#ffd23f"; g.font = "28px 'Dela Gothic One', Impact, sans-serif"; g.textAlign = "center"; g.fillText("ALI DI RONDINE", 162, 42); g.fillStyle = "#b3202c"; g.fillText("ALI DI RONDINE", 160, 40);
     g.fillStyle = "#ffd23f"; g.fillText("ALI DI RONDINE", 158, 38);
     g.font = "12px 'M PLUS Rounded 1c', sans-serif"; g.fillStyle = "#e8f0ff"; g.fillText("Un JRPG di calcio · Coppa della Costa", 160, 60); g.textAlign = "left";
+  }
+  // «Home che cambia»: sfondo e personaggio dall'ultima saga (copertina + suo ospite) o dall'ultima scena della storia
+  function drawTitleLive(hv) {
+    if (hv.kind === "saga" && hv.img) {
+      const k = 1 + Math.sin(frame / 240) * 0.03, iw = hv.img.naturalWidth, ih = hv.img.naturalHeight, sh = ih * 0.62, sw = sh * 1.6; g.drawImage(hv.img, (iw - sw) / 2, ih - sh, sw, sh, 160 - 160 * k, 100 - 100 * k, 320 * k, 200 * k); // parte bassa della copertina: niente titolo della saga sotto il nostro
+    } else if (hv.kind === "storia") { try { bgScene(hv.scene); } catch {} }
+    const vg = g.createLinearGradient(0, 0, 0, 200); vg.addColorStop(0, "rgba(8,10,28,.72)"); vg.addColorStop(0.35, "rgba(8,10,28,.15)"); vg.addColorStop(0.75, "rgba(8,10,28,.25)"); vg.addColorStop(1, "rgba(8,10,28,.85)"); g.fillStyle = vg; g.fillRect(0, 0, W, H);
+    for (let i = 0; i < 14; i++) { g.strokeStyle = `rgba(255,210,63,${0.04 + (i % 3) * 0.03})`; g.lineWidth = 2; g.beginPath(); g.moveTo(160, 120); const a = i / 14 * Math.PI * 2 + frame / 260; g.lineTo(160 + Math.cos(a) * 300, 120 + Math.sin(a) * 300); g.stroke(); }
+    const gu = hv.kind === "saga" && hv.guest && CAST[hv.guest] ? hv.guest : null;
+    if (gu) { portrait("leo", 100, 132, 1.45); portrait(gu, 222, 132, 1.45, true); }
+    else { portrait("leo", 110, 128, 1.6); portrait("nico", 215, 132, 1.4, true); }
+    ball(160, 152 + Math.sin(frame / 12) * 6, 8);
+    g.fillStyle = "#ffd23f"; g.font = "28px 'Dela Gothic One', Impact, sans-serif"; g.textAlign = "center"; g.fillText("ALI DI RONDINE", 162, 42); g.fillStyle = "#b3202c"; g.fillText("ALI DI RONDINE", 160, 40);
+    g.fillStyle = "#ffd23f"; g.fillText("ALI DI RONDINE", 158, 38);
+    const sub = hv.kind === "saga" ? `Ultima saga: ${String(hv.t || "").split(" · ")[0]}` : `Ultima storia: ${hv.chap || "Borgo Marino"}`;
+    g.font = "11px 'M PLUS Rounded 1c', sans-serif"; let t = sub; while (t.length > 8 && g.measureText(t).width > 290) t = t.slice(0, -2); if (t !== sub) t += "…";
+    g.lineWidth = 3; g.strokeStyle = "rgba(0,0,0,.7)"; g.strokeText(t, 160, 60); g.fillStyle = "#e8f0ff"; g.fillText(t, 160, 60); g.textAlign = "left";
   }
   function ball(x, y, r) { g.fillStyle = "#fff"; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); g.fillStyle = "#222"; g.beginPath(); g.arc(x, y, r * 0.35, 0, 7); g.fill(); for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2 + frame / 20; g.beginPath(); g.arc(x + Math.cos(a) * r * 0.75, y + Math.sin(a) * r * 0.75, r * 0.2, 0, 7); g.fill(); } }
 
@@ -1722,6 +1741,7 @@
     playing = true; save(); statsBox(); if (BW) BW.active = false;
     try { fotoScan(); } catch {}
     const s = STORY[S.step];
+    try { if (window.__tessera) { let sc = "beach"; for (let i = S.step; i >= 0; i--) if (STORY[i] && STORY[i].scene) { sc = STORY[i].scene; break; } window.__tessera.mark("storia", { chap: s.chap || "", scene: sc }); } } catch {}
     MOOD = s.mood || null;
     chap(s.chap);
     $("matchHud").hidden = true;
@@ -6014,6 +6034,8 @@
     if (SEC === "partita") return buttons([...gameB, bk]);
     if (SEC === "calcio_azione") return buttons([...azB, bk]);
     if (SEC === "storia_bivi") return buttons([...storyB, bk]);
+    if (SEC === "tessera" && window.__tessera) { const T = window.__tessera, tg = (k, n, a, b) => { const v = T.on(k); return { label: `${n}: ${v ? "Attiva" : "Spenta"} ▸`, sub: v ? a : b, fn: () => { T.setOn(k, !v); if (!v) T.cutin(k, () => again()); else again(); } }; };
+      return buttons([tg("tessera", "🪪 Tessera del Borgo", "Pulsante in home: profilo con titolo, ore di gioco, saga e personaggio preferiti, da salvare come immagine (tocca per spegnerla)", "Nessun pulsante Tessera in home (tocca per riattivarla)"), tg("foto", "📷 Modalità foto", "Linguetta 📷 sul bordo sinistro: fermo immagine con cornici, filtri e didascalia (tocca per toglierla)", "Niente linguetta 📷 (tocca per riattivarla)"), tg("home", "🏠 Home che cambia", "Il titolo prende sfondo e personaggio dall'ultima saga o stagione giocata (tocca per il titolo classico)", "Titolo classico con Leo e Nico (tocca per la home che cambia)"), bk]); }
     if (SEC === "regole") return buttons([...ruleB, bk]);
     if (SEC === "audio") return buttons([...audioB, bk]);
     if (SEC === "aspetto") return buttons([...lookB, bk]);
@@ -6021,6 +6043,7 @@
       sec("partita", "Modalità di partita", `${on ? "Anni '90" : "Classico"} · difficoltà ${(DIFF[SET.diff] || DIFF.normale)[0]}`, "hot"),
       sec("calcio_azione", "⚙️ Calcio d'Azione (Difficoltà & Comandi)", `Comandi: ${azCtlName()} · Difficoltà: ${azDiffName()}`, "hot"),
       sec("storia_bivi", "📖 Navigazione Storia & Rigiocabilità", `Menu Storia, puntate precedenti · bivi memorizzati: ${storyStats.chosenOptionsCount}`, "hot"),
+      ...(window.__tessera ? [sec("tessera", "🪪 Tessera, foto e home", ["tessera", "foto", "home"].map((k) => `${{ tessera: "Tessera", foto: "Foto", home: "Home" }[k]} ${window.__tessera.on(k) ? "sì" : "no"}`).join(" · "))] : []),
       sec("regole", "Opzioni di gioco", "Tiri murati, duelli, grinta di riserva, tiro a tempo e le altre regole: accese o spente"),
       sec("audio", "Audio", "Suoni, musica, voci, volumi"),
       sec("aspetto", "Grafica e aspetto", "Carte 3D, temi, animazioni, filtro retrò, testo grande"),
@@ -15944,6 +15967,7 @@
       ((t) => ({ label: "👕 Guardaroba", sub: t ? `${t.cosOwned}/${t.cosTot} capi, colori e accessori` : "Prova e indossa capi, colori e accessori", fn: () => salGo("guardaroba") }))(salSum()),
       ((t) => ({ label: "🏆 Album dei finali", sub: t ? `${t.fe}/${t.te} timbri` : "Un timbro per ogni finale trovato", fn: () => salGo("album") }))(salSum()),
       ((t) => ({ label: "🌳 Albero dei bivi", sub: t ? `${t.fe}/${t.te} destini scoperti` : "Mappa visuale degli snodi e bivi narrativi", cls: "hot", fn: () => salGo("albero") }))(salSum()),
+      ...(window.__tessera && window.__tessera.on("tessera") ? [{ label: "🪪 Tessera del Borgo", sub: "Il tuo profilo: titolo, ore di gioco, preferiti · salvala come immagine", fn: () => window.__tessera.open(title) }] : []),
       ...(window.__bar ? [{ label: "🍺 Il Bar del Borgo", sub: "Servi di giorno, ascolta di sera, migliora il locale", fn: () => window.__bar.open(title) }] : []),
       ...(window.__carteDecks ? [{ label: "Carte del Destino", sub: "Mini-storie a mazzi: pesca, vivi, rigioca", fn: () => window.__carteDecks.openHub(title) }] : []),
       { head: "Altro" },
@@ -15952,12 +15976,13 @@
     ]);
     homeSkin();
     TITLE_BOX = $("choices").firstElementChild;
+    try { if (window.__tessera) window.__tessera.firstTime(); } catch {}
   }
   // la home a schede: stessi pulsanti di prima (e gli stessi test), vestiti da tessere grandi con icona e colore
   function salLast() { try { return window.__salone && window.__salone.lastSaga ? window.__salone.lastSaga() : null; } catch { return null; } }
   function homeSkin() {
     const box = $("choices"); if (!box) return; box.classList.add("home");
-    const M = [[/^(Continua|Nuova partita)/, "hero", "▶"], [/^Riprendi saga/, "hero2", "⏪"], [/^Storia/, "big", "📖", "a"], [/Mappamondo delle Saghe/, "big", "🗺️", "a"], [/Salone delle Saghe/, "big", "🏛️", "b"], [/^Partite e modalità/, "big", "⚽", "c"], [/^Borgo e trasferte/, "big", "🏘️", "d"], [/Guardaroba/, "mid", "👕"], [/Album dei finali/, "mid", "🏆"], [/Albero dei bivi/, "mid", "🌳"], [/^Carte del Destino/, "mid", "🎴"], [/^Altro/, "small", "➕"], [/^Impostazioni/, "small", "⚙️"], [/^Partite ·/, "slot", "💾"]];
+    const M = [[/^(Continua|Nuova partita)/, "hero", "▶"], [/^Riprendi saga/, "hero2", "⏪"], [/^Storia/, "big", "📖", "a"], [/Mappamondo delle Saghe/, "big", "🗺️", "a"], [/Salone delle Saghe/, "big", "🏛️", "b"], [/^Partite e modalità/, "big", "⚽", "c"], [/^Borgo e trasferte/, "big", "🏘️", "d"], [/Guardaroba/, "mid", "👕"], [/Album dei finali/, "mid", "🏆"], [/Albero dei bivi/, "mid", "🌳"], [/Tessera del Borgo/, "mid", "🪪"], [/^Carte del Destino/, "mid", "🎴"], [/^Altro/, "small", "➕"], [/^Impostazioni/, "small", "⚙️"], [/^Partite ·/, "slot", "💾"]];
     const ls = salLast();
     box.querySelectorAll(":scope > button").forEach((b) => {
       const t = b.innerText.replace(/\s+/g, " ").trim(), m = M.find((x) => x[0].test(t));

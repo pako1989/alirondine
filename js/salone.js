@@ -211,6 +211,7 @@
   }
   function play(s, back) {
     const r = rec(); r.last = s.id; r.seen[s.id] = 1; recSave(r); close();
+    safe(() => window.__tessera && window.__tessera.mark("saga", s.id));
     const m = modOf(s);
     if (m && m.menuEntry) return m.menuEntry(back).fn();
     if (s.fn && window[s.fn]) return window[s.fn](back);
@@ -1979,6 +1980,8 @@
     sagaCompleted: (id) => safe(() => { const s = SAGAS.find((x) => x.id === id); if (!s || !available(s)) return false; const st = state(s); return !!(st && (st.finished || st.endsFound > 0)); }, false),
     openSaga: (id, back) => { openSalone(back); const s = SAGAS.find((x) => x.id === id); if (s && available(s)) detail(s); },
     // ultima saga giocata, per «Riprendi» nella home
+    byId: (id) => safe(() => { const s = SAGAS.find((x) => x.id === id); return s && available(s) ? { id: s.id, t: s.t, e: s.e } : null; }, null),
+    coverOf: (id) => safe(() => { const s = SAGAS.find((x) => x.id === id); return s ? cover(s) : null; }, null),
     lastSaga: () => safe(() => { const s = SAGAS.find((x) => x.id === rec().last); return s && available(s) ? { id: s.id, t: s.t, e: s.e, cover: cover(s) } : null; }, null),
     resume: (back) => safe(() => { const s = SAGAS.find((x) => x.id === rec().last); if (s) play(s, back); }),
     // saga conclusa (tutti i capitoli o almeno un finale trovato): serve ai mazzi di Carte del Destino
