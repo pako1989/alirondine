@@ -28,7 +28,7 @@ async function step(p) {
       if (s0.round === 7 && !s0.flags["t" + s0.season]) await page.evaluate(() => { const S = window.__directorCarriera.state(); S.table.rondine.pts += 50; S.flags["t" + S.season] = 1; }); // promozione sicura
       const a = await step(page); await page.waitForTimeout(25);
       if (a === "#carCupSim") seen.cup++; if (a === "#carEvent") seen.ev++; if (a.startsWith("dlg")) seen.dlg++;
-      if (a === "#carNewSeasonBtn") { seasons++; console.log("  fine stagione " + s0.season + " round " + s0.round + " epi " + s0.epi); }
+      if (a === "#carNewSeasonBtn") { seasons++; console.log("  fine stagione " + s0.season + " cassa " + s0.funds); }
       if (a === "chiuso" || a === "niente") { errors.push("bloccato: " + a); break; }
       if (SHOTS && a === "#carCupSim" && seen.cup === 1) await L.shot(page, "golfo_coppa");
     }

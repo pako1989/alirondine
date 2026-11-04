@@ -419,7 +419,8 @@
         if (btn) {
           btn.onclick = () => {
             const core = window.__carrieraCore;
-            core.processWeek(state, t.toLowerCase());
+            const wk = core.processWeek(state, t.toLowerCase());
+            payWeek(wk.wageTotal);
             state.trainingDone = true;
             saveState();
             render();
@@ -662,7 +663,18 @@
     playVs(oppTeam, isHome, simulateOnly, (res, ids) => applyMatchResults(res, ids));
   }
 
+  // stipendi della settimana: pagati una volta per giornata (con l'allenamento o, se salti la Settimana, al fischio finale).
+  // In B e in Eccellenza gli stipendi salgono del 20% e del 40%: categoria nuova, pretese nuove.
+  function payWeek(baseWages) {
+    if (state.paidRound === state.round + "_" + state.season) return;
+    const w = baseWages != null ? baseWages : state.squad.reduce((a, p) => a + (p.wage || 6), 0);
+    const extra = Math.round(w * 0.2 * state.divId);
+    if (baseWages != null) state.funds -= extra; // processWeek ha già pagato stipendi base e sponsor
+    else state.funds += (state.sponsorWeekly || 60) - w - extra;
+    state.paidRound = state.round + "_" + state.season; state.lastWages = w + extra;
+  }
   function applyMatchResults(res, xiIds) {
+    payWeek();
     xiIds = xiIds || xiOf().map((p) => p.id);
     const core = window.__carrieraCore;
     const dati = window.__carrieraDati;
@@ -723,6 +735,7 @@
     if (vsRival && res.win) { state.fans = clamp(state.fans + 5, 0, 100); state.presTrust = clamp(state.presTrust + 3, 0, 100); state.flags.beatLivore = (state.flags.beatLivore | 0) + 1; }
     afterMatchExtras(res, xiIds);
     if (vsRival && res.win) state.news.unshift("⚔️ Battuto Livore! In sala stampa si è aggiustato il cappotto tre volte.");
+    state.news.push(`💰 Stipendi −${state.lastWages || 0} 🐟 · sponsor +${state.sponsorWeekly || 60} 🐟`);
     if (state.funds < 0) state.news.push(`💸 Cassa in rosso: ${state.funds} 🐟.`);
 
     state.round++;
