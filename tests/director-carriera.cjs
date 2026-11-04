@@ -15,6 +15,7 @@ const domWindow = {
   Array,
   Object,
   performance: { now: () => Date.now() },
+  setTimeout: () => 0,
   localStorage: {
     _data: {},
     getItem(k) { return this._data[k] || null; },

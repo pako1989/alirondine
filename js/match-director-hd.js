@@ -1624,7 +1624,7 @@
       <div class="mdx-g2" style="margin-top:10px">
         <button class="mdx-btn gold" id="mdxNext" ${nx ? "" : "disabled"}>${nx ? "▶ Prossimo: ep. " + nx.ep : firstUnwon(prog) >= 0 ? "⭐ Servono stelle" : "Tutto completato"}</button>
         <button class="mdx-btn" id="mdxLocker">👕 Spogliatoio e bacheca</button>
-        <button class="mdx-btn gold" id="mdxCarriera" style="grid-column:span 2;margin-top:4px">🏆 Carriera del Golfo · Campionato a 3 serie</button>
+        ${window.__directorCarriera && window.__directorCarriera.on && !window.__directorCarriera.on() ? "" : `<button class="mdx-btn gold" id="mdxCarriera" style="grid-column:span 2;margin-top:4px">🏆 Carriera del Golfo · Campionato a 3 serie</button>`}
       </div>
       <div style="margin:14px 0 2px;font-weight:800;font-size:13px;color:#93a4bd;letter-spacing:.5px">GLI EPISODI DELLA RONDINE FC · prima vittoria su ognuno: monete</div>
       ${seasonsHtml}
