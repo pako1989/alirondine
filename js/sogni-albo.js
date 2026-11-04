@@ -20,7 +20,7 @@
 
   // ---------------------------------------------------------------- temi (raggruppano le saghe per genere)
   const TEMI = {
-    calcio: ["⚽", "Calcio e Borgo", "#ff7a45", "borgo mondiale campetto colline stagione torneo dopo quattordici latta banda estate corriere compagnia fischietto figurine montagna muro doppio cavallo cenere trono gp"],
+    calcio: ["⚽", "Calcio e Borgo", "#ff7a45", "borgo fango mondiale campetto colline stagione torneo dopo quattordici latta banda estate corriere compagnia fischietto figurine montagna muro doppio cavallo cenere trono gp"],
     giallo: ["🕵️", "Giallo e Noir", "#ca8a04", "milano detective moviola falsari tipografia treno fortino vuota spia gala missione note onde"],
     avventura: ["🧭", "Avventura e Viaggi", "#0e9aa7", "pirati galletta naufraghi piramide fiume rotta alcatraz alcatraz2 zampano dungeon"],
     fantasy: ["🐉", "Fantasy e Leggenda", "#7a4ab0", "vallombra kronenburg alchimia ragnarok belovodia cristalli regno sigilli cronache cavaliere titano vento mondi libro"],

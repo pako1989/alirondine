@@ -231,6 +231,30 @@
     };
   }
 
+
+  // ------------------------------------------------------------- PERCORSO (novità opt-in, da «Dal Fango alla Leggenda»): carriera di UN giocatore
+  // Valutazione, curva dell'età, pagella della partita e risultato con i gol del giocatore. Qualsiasi carriera «diventa un mito» può riusarlo.
+  const percorso = {
+    // valutazione complessiva da statistiche 0-99 { tiro, drib, fis } (+ fisico attuale 0-100)
+    ovr(st, fisico) { const b = ((st.tiro || 40) + (st.drib || 40) + (st.fis || 40)) / 3; return Math.round(clamp(b * (fisico == null ? 1 : 0.9 + clamp(fisico, 0, 100) / 1000), 30, 99)); },
+    // quanto fisico si recupera e quanto ne costa una partita a una certa età
+    ageCurve(age) { const a = age || 20; return { rec: a < 23 ? 26 : a < 29 ? 22 : a < 32 ? 17 : 12, cost: a < 23 ? 10 : a < 29 ? 12 : a < 32 ? 15 : 18, cap: a < 31 ? 100 : 100 - (a - 30) * 4 }; },
+    // allenamento: +1/+3 a una statistica, con tetto che scende con l'età
+    train(st, k, quality, age) { const cap = age >= 31 ? 99 - (age - 30) * 2 : 99, n = quality >= 2 ? 3 : quality >= 1 ? 2 : 1; st[k] = clamp((st[k] || 40) + n, 0, cap); return n; },
+    // pagella: voto 4-10 con giudizio
+    pagella(o) {
+      o = o || {}; let v = 6 + (o.goals || 0) * 1 + (o.win ? 0.5 : o.lost ? -0.5 : 0) - (o.miss || 0) * 0.35 + (o.bonus || 0);
+      v = Math.round(clamp(v, 4, 10) * 2) / 2;
+      const lbl = v >= 9.5 ? "Leggendario" : v >= 8.5 ? "Fenomeno" : v >= 7.5 ? "Decisivo" : v >= 6.5 ? "Buona prova" : v >= 6 ? "Sufficiente" : v >= 5 ? "Opaco" : "Da dimenticare";
+      return { voto: v, label: lbl };
+    },
+    // risultato della squadra con i gol del giocatore: la squadra senza di lui segna meno, i suoi gol si aggiungono
+    withPlayer(us, them, myGoals, opts) {
+      const r = simMatch(Object.assign({}, us, { atk: (us.atk || us.lvl || 1) * 0.62 }), them, opts);
+      return { scoreA: r.scoreA + (myGoals || 0), scoreB: r.scoreB, mate: r.scoreA, scorersB: r.scorersB };
+    }
+  };
+
   // ------------------------------------------------------------- Registrazione API
   window.__carrieraCore = {
     version: 1,
@@ -239,6 +263,7 @@
     sortTable,
     applyMatchToTable,
     simMatch,
-    processWeek
+    processWeek,
+    percorso
   };
 })();
