@@ -1,280 +1,104 @@
-// js/pedinamento.js - PEDINAMENTO TATTICO · Motore di partita originale noir per «Operazione Fuorigioco Noir · Milano 1954»
-// Il Campione gioca una partita tattica sotto i riflettori e la nebbia dell'Arena Civica:
-// - Campo a griglia notturna con coni d'ombra proiettati dai piloni della luce
-// - Marcatura serrata a uomo sul portatore di palla avversario e anticipo sulle linee di passaggio
-// - Intercettazione pulita della sfera senza farsi fischiare fallo dall'arbitro corrotto
-// - Ripartenza rapida in contropiede con tiro rasoterra a fil di palo
-// Comandi: Tasti Freccia / WASD o Tocco/Swipe a schermo · Barra Spazio per scatto e anticipo
+// js/pedinamento.js - «PEDINAMENTO TATTICO» · la partita originale di «Operazione Fuorigioco Noir · Milano 1954» (sul kit di partita di js/saga-core.js)
+// Si gioca di notte, nella nebbia, sotto i riflettori che spazzano il campo:
+//  - il campo è BUIO: vedi bene solo intorno a te e dentro i coni dei RIFLETTORI che girano;
+//  - l'ARBITRO È COMPRATO (o.clean = false): un contrasto fatto SOTTO IL RIFLETTORE è fischiato, punizione per loro;
+//    un contrasto fatto NELL'OMBRA lui non lo vede;
+//  - PEDINARE: resta nell'ombra vicino a chi ha la palla e si carica il FIUTO; a fiuto pieno il prossimo contrasto
+//    nell'ombra è un ANTICIPO sicuro (e dopo un anticipo il tiro parte più forte);
+//  - fango (o.mud) che frena il pallone, neve (o.snow) che lo frena di più e copre il campo, pioggia (o.rain).
+// Opzioni: o.clean (arbitro onesto: niente fischi a comando) · o.fog 0..1 (nebbia) · o.lights 1..3 · o.mud · o.snow · o.rain · o.hard
+// Uso: window.__pedinamento.start({ opp: "Nome" | { name, kit, names }, heroLook, onDone({ a, b, win, data }) })
 (function () {
   "use strict";
-  if (window.__pedinamento) return;
-
-  let state = null;
-  let animId = null;
-
-  function start(opts) {
-    opts = opts || {};
-    const onDone = opts.onDone || function () {};
-    const core = window.__sagaCore;
-    const curOpts = (core && core.cur && core.cur.opts) || {};
-    const oppName = opts.opp || (core && core.cur && core.cur.title) || "Banda dei Bastioni '54";
-
-    // Rimuovi eventuali container precedenti
-    const old = document.getElementById("pedinamentoWrap");
-    if (old) old.remove();
-
-    const wrap = document.createElement("div");
-    wrap.id = "pedinamentoWrap";
-    wrap.style.cssText = "position:fixed;inset:0;z-index:99999;background:#090d16;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Courier New',Courier,monospace;color:#e2e8f0;touch-action:none;user-select:none;overflow:hidden;";
-
-    wrap.innerHTML = `
-      <div style="width:100%;max-width:480px;padding:8px 12px;background:#111827;border-bottom:2px solid #475569;display:flex;justify-content:space-between;align-items:center;box-sizing:border-box;">
-        <div>
-          <span style="font-weight:bold;color:#f1f5f9;font-size:15px;letter-spacing:1px;">🕵️ PEDINAMENTO TATTICO '54</span>
-          <div style="font-size:11px;color:#94a3b8;" id="pedVs">VS ${oppName}</div>
-        </div>
-        <div style="text-align:right;">
-          <span id="pedScore" style="font-size:18px;font-weight:bold;color:#38bdf8;">0 - 0</span>
-          <div id="pedTime" style="font-size:11px;color:#cbd5e1;">Min 15'</div>
-        </div>
-      </div>
-      <div style="position:relative;width:100%;max-width:480px;aspect-ratio:4/3;max-height:64vh;background:#1e293b;border:2px solid #334155;overflow:hidden;box-sizing:border-box;">
-        <canvas id="pedCanvas" width="400" height="300" style="display:block;width:100%;height:100%;image-rendering:pixelated;"></canvas>
-        <div id="pedToast" style="position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(15,23,42,0.9);padding:4px 10px;border-radius:4px;border:1px solid #64748b;font-size:12px;color:#f8fafc;pointer-events:none;opacity:0;transition:opacity 0.2s;"></div>
-      </div>
-      <div style="width:100%;max-width:480px;padding:8px 12px;background:#0f172a;display:flex;flex-direction:column;gap:6px;box-sizing:border-box;">
-        <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;">
-          <span>Ombra Tattica: <b id="pedShadow">In Ombra</b></span>
-          <span>Fiuto: <b id="pedFiuto" style="color:#38bdf8;">100%</b></span>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
-          <button type="button" id="pedBtnLeft" style="background:#1e293b;color:#f8fafc;border:1px solid #475569;padding:10px;border-radius:6px;font-weight:bold;font-size:16px;">◀</button>
-          <button type="button" id="pedBtnAction" style="background:#0284c7;color:#fff;border:1px solid #38bdf8;padding:10px;border-radius:6px;font-weight:bold;font-size:13px;">ANTICIPO ⚡</button>
-          <button type="button" id="pedBtnRight" style="background:#1e293b;color:#f8fafc;border:1px solid #475569;padding:10px;border-radius:6px;font-weight:bold;font-size:16px;">▶</button>
-        </div>
-      </div>
-    `;
-
-    document.body.appendChild(wrap);
-
-    const canvas = document.getElementById("pedCanvas");
-    const ctx = canvas.getContext("2d");
-
-    let heroX = 200, heroY = 240, heroTargetX = 200;
-    let ballX = 200, ballY = 120, ballVx = 1.2, ballVy = 1.0;
-    let oppX = 200, oppY = 80, oppVx = 1.5;
-    let scorePlayer = 0, scoreOpp = 0;
-    let matchTime = 15;
-    let fiuto = 100;
-    let inShadow = true;
-    let frame = 0;
-    let isGameOver = false;
-
-    function toast(msg) {
-      const el = document.getElementById("pedToast");
-      if (!el) return;
-      el.textContent = msg;
-      el.style.opacity = "1";
-      setTimeout(() => { if (el) el.style.opacity = "0"; }, 1400);
-    }
-
-    function doAnticipo() {
-      if (isGameOver) return;
-      const dx = Math.abs(heroX - ballX);
-      const dy = Math.abs(heroY - ballY);
-      if (dx < 35 && dy < 40) {
-        // Intercetto riuscito!
-        scorePlayer++;
-        toast("⚡ GRANDE ANTICIPO SUL PALLONE! GOL DI RIMESSA!");
-        ballVy = -4.5;
-        ballVx = (Math.random() - 0.5) * 2;
-        heroY = 240;
-      } else {
-        fiuto = Math.max(0, fiuto - 15);
-        toast("Fallo mancato! L'arbitro ti tiene d'occhio!");
-      }
-      updateHud();
-    }
-
-    function updateHud() {
-      const sEl = document.getElementById("pedScore");
-      const tEl = document.getElementById("pedTime");
-      const shEl = document.getElementById("pedShadow");
-      const fEl = document.getElementById("pedFiuto");
-      if (sEl) sEl.textContent = `${scorePlayer} - ${scoreOpp}`;
-      if (tEl) tEl.textContent = `Min ${Math.min(90, Math.floor(matchTime))}'`;
-      if (shEl) shEl.innerHTML = inShadow ? "<span style='color:#38bdf8;'>In Ombra 🕶️</span>" : "<span style='color:#f87171;'>Sotto il Riflettore 💡</span>";
-      if (fEl) fEl.textContent = `${fiuto}%`;
-    }
-
-    // Comandi touch
-    const btnL = document.getElementById("pedBtnLeft");
-    const btnR = document.getElementById("pedBtnRight");
-    const btnA = document.getElementById("pedBtnAction");
-    if (btnL) btnL.onclick = () => { heroTargetX = Math.max(40, heroTargetX - 45); };
-    if (btnR) btnR.onclick = () => { heroTargetX = Math.min(360, heroTargetX + 45); };
-    if (btnA) btnA.onclick = doAnticipo;
-
-    // Comandi tastiera
-    const keyHandler = (e) => {
-      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
-        heroTargetX = Math.max(40, heroTargetX - 40);
-      } else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
-        heroTargetX = Math.min(360, heroTargetX + 40);
-      } else if (e.key === " " || e.key === "Enter") {
-        doAnticipo();
-      }
-    };
-    window.addEventListener("keydown", keyHandler);
-
-    // Gestione touch sul canvas
-    canvas.addEventListener("pointerdown", (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const clickX = ((e.clientX - rect.left) / rect.width) * canvas.width;
-      heroTargetX = Math.max(40, Math.min(360, clickX));
-      if (e.clientY - rect.top > rect.height * 0.7) {
-        doAnticipo();
-      }
-    });
-
-    function finish(win) {
-      if (isGameOver) return;
-      isGameOver = true;
-      if (animId) cancelAnimationFrame(animId);
-      window.removeEventListener("keydown", keyHandler);
-      if (win === undefined) win = scorePlayer >= scoreOpp;
-      if (wrap) wrap.remove();
-      if (core && core.endMatch) core.endMatch();
-      onDone({ a: scorePlayer, b: scoreOpp, win: !!win, quit: false });
-    }
-
-    state = {
-      finish,
-      setScore(a, b) { scorePlayer = a; scoreOpp = b; updateHud(); },
-      getState() { return { scorePlayer, scoreOpp, matchTime, fiuto }; }
-    };
-    window.__pedinamento.state = state;
-
-    function loop() {
-      frame++;
-      matchTime += 0.08;
-
-      // Movimento fluido del Campione
-      heroX += (heroTargetX - heroX) * 0.2;
-
-      // Movimento avversario
-      oppX += oppVx;
-      if (oppX < 60 || oppX > 340) oppVx = -oppVx;
-
-      // Fisica del pallone
-      ballX += ballVx;
-      ballY += ballVy;
-      if (ballX < 30 || ballX > 370) ballVx = -ballVx;
-
-      // Pallone torna giù se tirato o rimbalza
-      if (ballY < 50) {
-        ballVy = 1.6;
-        ballVx = (Math.random() - 0.5) * 3;
-      }
-      if (ballY > 260) {
-        if (Math.abs(ballX - heroX) > 55) {
-          scoreOpp++;
-          toast("Gol della Banda dei Bastioni!");
-          ballX = 200; ballY = 80; ballVy = 1.2;
-        } else {
-          ballVy = -2.0;
+  if (window.__pedinamento && window.__pedinamento.v2) return;
+  function start(o) {
+    o = o || {};
+    const C = window.__sagaCore; if (!C || !C.pitch) return false;
+    const opp = typeof o.opp === "string" ? { name: o.opp, kit: o.kit || "#3a3a44", names: o.oppNames || ["Il Ciccio", "Lo Sfregiato"] } : Object.assign({ kit: (o.opp && o.opp.color) || "#3a3a44", names: ["Il Ciccio", "Lo Sfregiato"] }, o.opp || { name: "Banda dei Bastioni '54" });
+    const FOG = o.fog == null ? 0.55 : Math.max(0, Math.min(1, o.fog)), NL = Math.max(1, Math.min(3, o.lights || 2)), BENT = !o.clean;
+    let off = null;
+    const lit = (S, p) => S.data.L.some((l) => Math.hypot(p.x - l.x, p.y - l.y) < l.r);
+    const hooks = {
+      setup(S) {
+        S.data.L = Array.from({ length: NL }, (_, i) => ({ x: S.CX, y: S.WH * (i + 1) / (NL + 1), r: 46, ph: i * 2.1, sp: 0.011 + i * 0.004 }));
+        S.data.fiuto = 0; S.data.fouls = 0; S.data.ant = 0; S.data.prevSlide = 0; S.data.lit = false; S.data.whistle = 0;
+        S.data.drops = Array.from({ length: 60 }, () => ({ x: Math.random() * 240, y: Math.random() * 360, s: Math.random() }));
+      },
+      tick(S) {
+        const d = S.data, h = S.hero, b = S.ball;
+        d.L.forEach((l, i) => { l.x = S.CX + Math.sin(S.t * l.sp + l.ph) * 82; l.y = S.WH * (i + 1) / (NL + 1) + Math.cos(S.t * l.sp * 0.7 + l.ph) * 90; });
+        d.lit = lit(S, h);
+        // PEDINARE: nell'ombra, vicino a chi porta palla per loro → il fiuto sale
+        const carrier = b.own && b.own.team === 1 && !b.own.gk ? b.own : null;
+        if (carrier && !d.lit && Math.hypot(carrier.x - h.x, carrier.y - h.y) < 54) { d.fiuto = Math.min(100, d.fiuto + 0.9); if (d.fiuto === 100 && !d.ready) { d.ready = true; S.pop("FIUTO PIENO!", h.x, h.y - 20, "#fde68a"); S.tone(880, 0.12, "triangle", 0.05); } }
+        else if (!carrier && d.fiuto > 0 && !d.ready) d.fiuto = Math.max(0, d.fiuto - 0.12);
+        // il contrasto appena partito: sotto il riflettore, con l'arbitro comprato, è fischio
+        const sl = h.slide | 0;
+        if (sl > 0 && d.prevSlide <= 0) {
+          if (BENT && d.lit && b.own && b.own.team === 1) {
+            h.slide = 0; h.stun = 28; d.fouls++; d.whistle = 50; S.snd.whistle();
+            S.flash = { txt: "FISCHIO!", sub: "sotto il riflettore l'arbitro vede tutto. Quello che vuole vedere.", t: 70 };
+            const q = S.opp[0]; b.own = q; b.cd = 20; b.x = q.x; b.y = q.y; q.boost = 40;
+          }
         }
-        updateHud();
-      }
-
-      // Coni di luce / riflettori mobili
-      const lightBeamX = 200 + Math.sin(frame * 0.03) * 110;
-      inShadow = Math.abs(heroX - lightBeamX) > 60;
-
-      if (!inShadow && frame % 45 === 0) {
-        fiuto = Math.max(0, fiuto - 2);
-        updateHud();
-      }
-
-      // Disegno canvas in stile Noir 1954
-      ctx.fillStyle = "#1e293b";
-      ctx.fillRect(0, 0, 400, 300);
-
-      // Linee del campo in gesso sbiadite
-      ctx.strokeStyle = "rgba(226, 232, 240, 0.25)";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(30, 20, 340, 260);
-      ctx.beginPath();
-      ctx.moveTo(30, 150); ctx.lineTo(370, 150);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(200, 150, 40, 0, Math.PI * 2);
-      ctx.stroke();
-
-      // Fascio di luce del riflettore
-      const grad = ctx.createRadialGradient(lightBeamX, 150, 10, lightBeamX, 150, 90);
-      grad.addColorStop(0, "rgba(254, 240, 138, 0.35)");
-      grad.addColorStop(1, "rgba(254, 240, 138, 0)");
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.arc(lightBeamX, 150, 90, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Nebbia volumetrica in movimento
-      for (let i = 0; i < 4; i++) {
-        const fogX = ((frame * 0.4 + i * 100) % 500) - 50;
-        const fogY = 50 + i * 50;
-        ctx.fillStyle = "rgba(203, 213, 225, 0.06)";
-        ctx.beginPath();
-        ctx.arc(fogX, fogY, 65, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      // Avversario (Banda dei Bastioni)
-      ctx.fillStyle = "#991b1b";
-      ctx.beginPath();
-      ctx.arc(oppX, oppY, 11, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = "#f8fafc";
-      ctx.font = "bold 9px monospace";
-      ctx.fillText("BANDA", oppX - 14, oppY - 14);
-
-      // Campione (In impermeabile e trench)
-      ctx.fillStyle = inShadow ? "#0284c7" : "#38bdf8";
-      ctx.beginPath();
-      ctx.arc(heroX, heroY, 12, 0, Math.PI * 2);
-      ctx.fill();
-      // Borsalino
-      ctx.fillStyle = "#0f172a";
-      ctx.fillRect(heroX - 9, heroY - 13, 18, 4);
-      ctx.fillRect(heroX - 6, heroY - 19, 12, 7);
-      ctx.fillStyle = "#f8fafc";
-      ctx.font = "bold 9px monospace";
-      ctx.fillText("CAMPIONE", heroX - 20, heroY + 22);
-
-      // Pallone di cuoio '54 con cuciture
-      ctx.fillStyle = "#d97706";
-      ctx.beginPath();
-      ctx.arc(ballX, ballY, 7, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = "#78350f";
-      ctx.lineWidth = 1;
-      ctx.stroke();
-
-      if (matchTime >= 90) {
-        finish(scorePlayer >= scoreOpp);
-        return;
-      }
-
-      animId = requestAnimationFrame(loop);
-    }
-
-    updateHud();
-    animId = requestAnimationFrame(loop);
+        if (sl > 0 && !d.lit && d.ready && b.own && b.own.team === 1 && !b.own.gk && Math.hypot(b.x - h.x, b.y - h.y) < 16) {
+          const was = b.own; was.stun = 34; b.own = h; b.cd = 14; b.passTo = null; h.slide = 0; d.ready = false; d.fiuto = 0; d.ant++; d.boost = 140;
+          S.pop("ANTICIPO NELL'OMBRA!", h.x, h.y - 18, "#fde68a"); S.tone(523, 0.1, "square", 0.05); S.tone(784, 0.18, "triangle", 0.05, 0.08);
+        }
+        d.prevSlide = h.slide | 0;
+        if (d.boost > 0) d.boost--; if (d.whistle > 0) d.whistle--;
+      },
+      ballForce(S, b) { if (b.own) return; const k = o.snow ? 0.975 : o.mud ? 0.984 : 1; if (b.z < 0.5) { b.vx *= k; b.vy *= k; } },
+      speed(S, p, v) { let k = 1; if (o.snow) k *= 0.9; if (p === S.hero && S.data.boost > 0) k *= 1.15; return v * k; },
+      keeper(S, gk, b) { return gk.team === 1 && S.data.boost > 0 && b.last === S.hero ? 0.3 : null; },
+      bg(g, S, cy) {
+        g.fillStyle = o.snow ? "#1a2030" : "#06080e"; g.fillRect(0, 0, 240, 360);
+        for (let i = 0; i < 40; i++) { const x = (i * 29) % 240, y = ((i * 47) % 360) - cy * 0.15; g.fillStyle = i % 3 ? "#141a26" : "#1e2636"; g.beginPath(); g.arc(x, ((y % 360) + 360) % 360, 4, Math.PI, 0); g.fill(); }
+      },
+      field(g, S) {
+        for (let y = 0; y < S.WH; y += 30) { g.fillStyle = o.snow ? ((y / 30) % 2 ? "#cfd8e4" : "#d8e0ea") : ((y / 30) % 2 ? "#2c3a24" : "#334229"); g.fillRect(S.XL, y, S.XR - S.XL, 30); }
+        g.fillStyle = o.snow ? "#9aa6b8" : "#1a1f18"; g.fillRect(0, 0, S.XL, S.WH); g.fillRect(S.XR, 0, 240 - S.XR, S.WH);
+        if (!o.snow) for (let i = 0; i < 26; i++) { const x = S.XL + ((i * 67) % (S.XR - S.XL - 20)), y = (i * 113) % S.WH; g.fillStyle = "rgba(40,30,20,.55)"; g.beginPath(); g.ellipse(x + 10, y, 9 + (i % 3) * 4, 4, 0, 0, 7); g.fill(); g.fillStyle = "rgba(200,210,230,.08)"; g.fillRect(x + 6, y - 1, 6, 1); }
+        else for (let i = 0; i < 40; i++) { g.fillStyle = "rgba(150,165,190,.35)"; g.fillRect(S.XL + ((i * 53) % (S.XR - S.XL)), (i * 89) % S.WH, 3, 2); }
+        // i piloni dei riflettori ai lati
+        S.data.L.forEach((l, i) => { const px = i % 2 ? S.XR + 10 : S.XL - 12; g.fillStyle = "#3a3f4a"; g.fillRect(px, l.y - 30, 3, 34); g.fillStyle = "#fef3c7"; g.fillRect(px - 3, l.y - 34, 9, 5); });
+      },
+      under(g, S) { S.data.L.forEach((l) => { const gr = g.createRadialGradient(l.x, l.y, 4, l.x, l.y, l.r); gr.addColorStop(0, "rgba(255,240,180,.32)"); gr.addColorStop(1, "rgba(255,240,180,0)"); g.fillStyle = gr; g.beginPath(); g.arc(l.x, l.y, l.r, 0, 7); g.fill(); }); },
+      over(g, S) {
+        // la notte e la nebbia: buio dappertutto tranne intorno al Campione, al pallone e dentro i coni di luce
+        if (!off) { off = document.createElement("canvas"); off.width = 240; off.height = 360; }
+        const c = off.getContext("2d"), cam = S.cam; c.globalCompositeOperation = "source-over"; c.clearRect(0, 0, 240, 360);
+        c.fillStyle = `rgba(4,6,12,${0.5 + FOG * 0.32})`; c.fillRect(0, 0, 240, 360);
+        c.globalCompositeOperation = "destination-out";
+        const hole = (x, y, r) => { const gr = c.createRadialGradient(x, y - cam, r * 0.3, x, y - cam, r); gr.addColorStop(0, "rgba(0,0,0,1)"); gr.addColorStop(1, "rgba(0,0,0,0)"); c.fillStyle = gr; c.beginPath(); c.arc(x, y - cam, r, 0, 7); c.fill(); };
+        hole(S.hero.x, S.hero.y, 62 - FOG * 14); hole(S.ball.x, S.ball.y, 26); S.data.L.forEach((l) => hole(l.x, l.y, l.r + 8));
+        g.drawImage(off, 0, cam);
+        // banchi di nebbia che scorrono
+        for (let i = 0; i < 6; i++) { const x = ((i * 70 + S.t * 0.25) % 330) - 45, y = cam + 40 + i * 55; g.fillStyle = `rgba(200,210,225,${0.04 + FOG * 0.05})`; g.beginPath(); g.ellipse(x, y, 60, 14, 0, 0, 7); g.fill(); }
+        if (o.rain || o.snow) S.data.drops.forEach((q) => { q.y += o.snow ? 0.6 + q.s : 4 + q.s * 3; q.x += o.snow ? Math.sin(S.t / 30 + q.s * 6) * 0.4 : -0.6; if (q.y > 360) { q.y = 0; q.x = Math.random() * 240; } g.fillStyle = o.snow ? "rgba(255,255,255,.8)" : "rgba(170,190,220,.45)"; g.fillRect(q.x, cam + q.y, 1, o.snow ? 1 + (q.s > 0.6) : 4); });
+        if (S.data.whistle > 0) { g.fillStyle = "#fef3c7"; g.font = "bold 9px monospace"; g.textAlign = "center"; g.fillText("🟨 PUNIZIONE PER LORO", S.hero.x, S.hero.y - 26); g.textAlign = "left"; }
+      },
+      hud(g, S) {
+        const d = S.data;
+        g.fillStyle = "rgba(10,14,22,.82)"; g.fillRect(4, 30, 92, 22); g.strokeStyle = d.ready ? "#fde68a" : "#64748b"; g.strokeRect(4.5, 30.5, 91, 21);
+        g.fillStyle = "#94a3b8"; g.font = "bold 7px monospace"; g.fillText("FIUTO", 8, 39); g.fillStyle = "#1e293b"; g.fillRect(36, 34, 56, 6); g.fillStyle = d.ready ? "#fde68a" : "#38bdf8"; g.fillRect(36, 34, 56 * d.fiuto / 100, 6);
+        g.fillStyle = d.lit ? "#fca5a5" : "#93c5fd"; g.fillText(d.lit ? "💡 SOTTO IL RIFLETTORE" : "🕶 NELL'OMBRA", 8, 48);
+        if (BENT) { g.fillStyle = "rgba(10,14,22,.82)"; g.fillRect(170, 30, 66, 12); g.fillStyle = "#fef3c7"; g.fillText(`FISCHI ${d.fouls}`, 176, 39); }
+      },
+      result(S) { const d = S.data; return `Anticipi nell'ombra ${d.ant}` + (BENT ? ` · Fischi contro ${d.fouls}` : " · Arbitro onesto"); },
+    };
+    const look = o.heroLook || {};
+    return C.pitch({
+      title: o.title || "Pedinamento Tattico '54", us: o.us || "Ferrovieri di Porta Ticinese", opp,
+      hero: look, mate: o.mate || { name: "Nando", skin: "#f1d5b5", hair: "#2a1d14", shirt: "#7f1d1d" },
+      half: o.half || 40, hard: o.hard, extra: o.extra, halftime: o.halftime || "Intervallo. Qualcuno, in tribuna, conta banconote al buio. Sul campo, la nebbia si è fatta più fitta.",
+      gk0: "#e2e8f0", gk1: "#111827", winTitle: o.winTitle || "VITTORIA NELLA NEBBIA!",
+      theme: { accent: "#fde68a", bg: "#090d16", panel: "#1e293b", border: "#94a3b8", ink: "#f1f5f9", font: "'Courier New', monospace", tira: "#b91c1c", passa: "#334155" },
+      intro: `<p>Si gioca di notte, nella <b>nebbia</b>: vedi bene solo intorno a te e nei <b>coni dei riflettori</b> che girano.</p>` +
+        (BENT ? `<p>L'<b>arbitro è comprato</b>: un contrasto (TIRA senza palla) <b>sotto il riflettore</b> è fischiato. Nell'<b>ombra</b> non vede.</p>` : `<p>Stavolta l'<b>arbitro è onesto</b>: nessun fischio a comando.</p>`) +
+        `<p><b>Pedina</b>: resta nell'ombra vicino a chi ha la palla. A <b>FIUTO pieno</b> il contrasto nell'ombra è un <b>ANTICIPO</b> sicuro, e il tiro dopo vola.</p>`,
+      hooks, onDone: (r) => { if (o.onDone) o.onDone(r); else if (o.done) o.done(r); },
+    });
   }
-
-  window.__pedinamento = {
-    start,
-    state: null
-  };
+  window.__pedinamento = { start, v2: true };
 })();

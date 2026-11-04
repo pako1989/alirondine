@@ -1,274 +1,101 @@
-// tests/milano.cjs - Test completo BFS, grafica e validazione per «Operazione Fuorigioco Noir · Milano 1954»
-const fs = require('fs');
-const path = require('path');
-
-// Mock browser environment
-const window = {
-  addEventListener: () => {},
-  document: {
-    addEventListener: () => {},
-    createElement: () => ({
-      setHeader: () => {},
-      setAttribute: () => {},
-      textContent: "",
-      appendChild: () => {},
-      style: {},
-      classList: { add: () => {}, remove: () => {}, toggle: () => {} },
-      querySelector: () => null,
-      querySelectorAll: () => []
-    }),
-    head: { appendChild: () => {} },
-    body: { appendChild: () => {} },
-    getElementById: () => null,
-    querySelector: () => null,
-    querySelectorAll: () => []
-  },
-  location: { search: "?debug=1" },
-  localStorage: {
-    getItem: () => null,
-    setItem: () => {},
-    removeItem: () => {}
-  },
-  AudioContext: class {
-    constructor() { this.currentTime = 0; this.sampleRate = 44100; this.state = "running"; }
-    createGain() { return { gain: { setValueAtTime: () => {}, linearRampToValueAtTime: () => {}, exponentialRampToValueAtTime: () => {} }, connect: () => {} }; }
-    createOscillator() { return { frequency: { setValueAtTime: () => {}, linearRampToValueAtTime: () => {}, exponentialRampToValueAtTime: () => {} }, connect: () => {}, start: () => {}, stop: () => {} }; }
-    createBuffer() { return { getChannelData: () => new Float32Array(1024) }; }
-    createBufferSource() { return { connect: () => {}, start: () => {} }; }
-    createBiquadFilter() { return { frequency: { setValueAtTime: () => {}, exponentialRampToValueAtTime: () => {} }, connect: () => {} }; }
-    resume() {}
-  },
-  __borgoApi: {
-    TRZ: () => {}, trGo: () => {}, play: () => {}, scene: () => {}, match: () => {}, matchPick: () => {}, trZone: () => "", COSM: {}
-  }
-};
-global.window = window;
-global.document = window.document;
-global.localStorage = window.localStorage;
-global.location = window.location;
-
-// 1. Load saga-core
-const sagaCoreCode = fs.readFileSync(path.join(__dirname, '../js/saga-core.js'), 'utf8');
-eval(sagaCoreCode);
-
-// 2. Load pedinamento match engine
-const pedinamentoCode = fs.readFileSync(path.join(__dirname, '../js/pedinamento.js'), 'utf8');
-eval(pedinamentoCode);
-
-// 3. Load milano core
-const milanoCode = fs.readFileSync(path.join(__dirname, '../js/milano.js'), 'utf8');
-eval(milanoCode);
-
-// 4. Load chapters 1, 2, 3
-const c1Code = fs.readFileSync(path.join(__dirname, '../js/milano-c1.js'), 'utf8');
-eval(c1Code);
-const c2Code = fs.readFileSync(path.join(__dirname, '../js/milano-c2.js'), 'utf8');
-eval(c2Code);
-const c3Code = fs.readFileSync(path.join(__dirname, '../js/milano-c3.js'), 'utf8');
-eval(c3Code);
-
-console.log("✓ Files loaded and evaluated successfully!");
-
-const G = window.__milano;
-if (!G) {
-  console.error("FAIL: window.__milano not found!");
-  process.exit(1);
+// tests/milano.cjs - «Operazione Fuorigioco Noir · Milano 1954» (restaurata, 5 capitoli): zone raggiungibili, parla con tutti,
+// storia giocata fino in fondo con le scelte, finali (gating del Peso e dei flag), partita Pedinamento simulata.
+const L = require("./lib.cjs");
+const MOD = { mod: "__milano", key: "ali-di-rondine.milano" };
+const K_ = "window.__milano._dbg.K";
+const mock = (p, w = true) => p.evaluate((w) => { window.__pedinamento.start = (o) => { setTimeout(() => (o.onDone || o.done)({ a: w ? 2 : 0, b: w ? 1 : 2, win: w, quit: false, data: {} }), 30); return true; }; }, w);
+async function reach(page, zid, maxStep = 6) {
+  await page.evaluate(([k, z]) => eval(k).enterZone(z), [K_, zid]); await page.waitForTimeout(400);
+  return page.evaluate(([zid, maxStep]) => {
+    const D = window.__milano._dbg, z = window.__borgoApi.TRZ[zid], spec = D.ZONES[zid].spec, m = window.__tr.trMap(z), T = window.T_, st = spec.start, bad = [];
+    const npcs = (z.npcs || []).filter((n) => !n.ghost).map((n) => n.at), seen = T.bfs(m, z, st[0], st[1], npcs);
+    const adj = (x, y) => [[0, 0], [0, 1], [0, -1], [1, 0], [-1, 0]].some(([dx, dy]) => seen[y + dy] && seen[y + dy][x + dx]);
+    if (T.solidAt(m, z, st[0], st[1])) bad.push("partenza su solido");
+    (spec.items || []).forEach(([x, y]) => { if (T.solidAt(m, z, x, y) || !(seen[y] && seen[y][x])) bad.push("oggetto " + x + "," + y); });
+    for (let s = 0; s <= maxStep; s++) (spec.npcs ? spec.npcs(s, D.K) : []).forEach((n) => { if (!adj(n.at[0], n.at[1])) bad.push("png " + n.id + " " + n.at + " passo " + s); });
+    for (let y = 0; y < m.length; y++) for (let x = 0; x < m[0].length; x++) if ((m[y][x] === "q" || m[y][x] === "v") && !adj(x, y)) bad.push("porta " + x + "," + y);
+    return bad;
+  }, [zid, maxStep]);
 }
+const step = (p, n) => p.evaluate(([n]) => window.__milano.info().step[n] || 0, [n]);
+async function go(page, z) { await page.evaluate(([k, z]) => eval(k).enterZone(z), [K_, z]); await page.waitForTimeout(350); }
+async function talkAdv(page, id, prefs = []) { await L.talk(page, id); await L.advance(page, prefs); }
 
-// Verifica engine pedinamento
-if (!window.__pedinamento || typeof window.__pedinamento.start !== "function") {
-  console.error("FAIL: window.__pedinamento.start is missing!");
-  process.exit(1);
-}
-console.log("✓ window.__pedinamento engine verified!");
-
-const dbg = G._dbg;
-if (!dbg) {
-  console.error("FAIL: G._dbg is undefined!");
-  process.exit(1);
-}
-const allZones = dbg.ZONES || {};
-const zoneKeys = Object.keys(allZones);
-console.log(`Found ${zoneKeys.length} zones in dbg.ZONES:`, zoneKeys);
-
-let allPassed = true;
-
-// BFS Reachability test
-zoneKeys.forEach((zid) => {
-  const entry = allZones[zid];
-  const spec = (entry && entry.spec) || entry;
-  if (!spec) return;
-
-  const w = spec.w, h = spec.h;
-  const grid = Array.from({ length: h }, () => Array(w).fill("."));
-
-  const builder = {
-    lay(x1, y1, x2, y2, ch) {
-      for (let y = y1; y <= y2; y++) {
-        for (let x = x1; x <= x2; x++) {
-          if (x >= 0 && x < w && y >= 0 && y < h) grid[y][x] = ch;
-        }
-      }
-    },
-    put(x, y, ch) {
-      if (x >= 0 && x < w && y >= 0 && y < h) grid[y][x] = ch;
-    },
-    house(x, y, hw, hh, cfg) {
-      builder.lay(x, y, x + hw - 1, y + hh - 1, "A");
-      if (cfg && cfg.door) {
-        builder.put(cfg.door[0], cfg.door[1], cfg.enter ? "q" : "+");
-      }
-    }
+async function run(w, choices) {
+  const { browser, page, errors } = await L.setup({ w, ...MOD });
+  const err = (m) => errors.push(`[${choices.tag}] ` + m);
+  await page.evaluate(() => window.__milano.open()); await page.evaluate(() => window.T_.click("Inizia la storia")); await L.advance(page);
+  await mock(page, true);
+  const chk = async (n, v, why) => { const s = await step(page, n); if (s !== v) err(why + ": passo " + s + " invece di " + v); };
+  const zonesOf = (n) => page.evaluate((n) => Object.keys(window.__milano._dbg.ZONES).filter((z) => window.__milano._dbg.ZONES[z].ch === n), n);
+  const talkAll = async (n) => { // parla con tutti i PNG di tutte le zone del capitolo: nessun errore, il passo non cambia
+    for (const z of await zonesOf(n)) { const bad = await reach(page, z); if (bad.length) err(z + ": " + bad.join(", ")); }
   };
-
-  if (typeof spec.build === "function") {
-    spec.build(builder);
+  const shot = async (n) => { if (w === 390) await L.shot(page, n); };
+  // CAPITOLO 1
+  await talkAll(1);
+  await go(page, "mn_bastioni"); await shot("mn_bastioni");
+  for (const id of ["mn_scotti", "mn_brogio", "mn_ines", "mn_gaspare", "mn_celestino"]) await talkAdv(page, id);
+  await talkAdv(page, "mn_desantis"); await chk(1, 1, "De Santis c1");
+  await go(page, "mn_osteria"); await shot("mn_osteria");
+  for (const id of ["mn_carlo", "mn_tino", "mn_pinin"]) await talkAdv(page, id);
+  await talkAdv(page, "mn_oste"); await chk(1, 2, "Battista c1");
+  await go(page, "mn_deposito"); await talkAdv(page, "mn_peppino", [choices.pep]); await chk(1, 3, "Peppino c1");
+  await go(page, "mn_bastioni"); await talkAdv(page, "mn_nando", [/Gioca contro la Banda/]);
+  { const i = await L.info(page); if (!i.done[1] || i.ch !== 2) err("capitolo 1 non concluso: " + JSON.stringify([i.done, i.ch])); }
+  for (let n = 2; n <= 5; n++) {
+    const hook = choices["c" + n]; if (!hook) break;
+    await talkAll(n); await hook(page, { go, talkAdv, chk, shot, err, L });
+    const i = await L.info(page); if (!i.done[n]) { err("capitolo " + n + " non concluso: " + JSON.stringify([i.done, i.step])); break; }
   }
-
-  const start = spec.start || [2, 2];
-  const [sx, sy] = start;
-
-  // Solid tiles definition
-  const solidSet = new Set((spec.solid || "SPFTBA#wWCcKk").split(""));
-
-  if (solidSet.has(grid[sy][sx])) {
-    console.error(`FAIL: Start position [${sx}, ${sy}] in zone ${zid} is on solid tile '${grid[sy][sx]}'!`);
-    allPassed = false;
-  }
-
-  // BFS
-  const visited = Array.from({ length: h }, () => Array(w).fill(false));
-  const queue = [[sx, sy]];
-  visited[sy][sx] = true;
-
-  while (queue.length > 0) {
-    const [cx, cy] = queue.shift();
-    const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
-    for (const [dx, dy] of dirs) {
-      const nx = cx + dx, ny = cy + dy;
-      if (nx >= 0 && nx < w && ny >= 0 && ny < h && !visited[ny][nx]) {
-        const tile = grid[ny][nx];
-        if (!solidSet.has(tile)) {
-          visited[ny][nx] = true;
-          queue.push([nx, ny]);
-        }
-      }
-    }
-  }
-
-  // Check items reachability
-  if (Array.isArray(spec.items)) {
-    spec.items.forEach(([ix, iy], idx) => {
-      let reachable = false;
-      const dirs = [[0, 0], [0, 1], [0, -1], [1, 0], [-1, 0]];
-      for (const [dx, dy] of dirs) {
-        const nx = ix + dx, ny = iy + dy;
-        if (nx >= 0 && nx < w && ny >= 0 && ny < h && visited[ny][nx]) {
-          reachable = true;
-          break;
-        }
-      }
-      if (!reachable) {
-        console.error(`FAIL: Item #${idx} at [${ix}, ${iy}] in zone ${zid} is unreachable!`);
-        allPassed = false;
-      }
-    });
-  }
-
-  // Check NPCs reachability
-  if (typeof spec.npcs === "function") {
-    const npcsList = spec.npcs(0) || [];
-    npcsList.forEach((npc) => {
-      const [nx, ny] = npc.at || [0, 0];
-      let reachable = false;
-      const dirs = [[0, 0], [0, 1], [0, -1], [1, 0], [-1, 0]];
-      for (const [dx, dy] of dirs) {
-        const ax = nx + dx, ay = ny + dy;
-        if (ax >= 0 && ax < w && ay >= 0 && ay < h && visited[ay][ax]) {
-          reachable = true;
-          break;
-        }
-      }
-      if (!reachable) {
-        console.error(`FAIL: NPC '${npc.id}' at [${nx}, ${ny}] in zone ${zid} is unreachable!`);
-        allPassed = false;
-      }
-    });
-  }
-
-  console.log(`✓ Zone ${zid} BFS passed (${w}x${h}) from [${sx}, ${sy}]`);
-});
-
-// Mock Canvas 2D Context for drawing testing
-function createMockCtx() {
-  return {
-    save: () => {},
-    restore: () => {},
-    translate: () => {},
-    scale: () => {},
-    rotate: () => {},
-    beginPath: () => {},
-    closePath: () => {},
-    moveTo: () => {},
-    lineTo: () => {},
-    arc: () => {},
-    fill: () => {},
-    stroke: () => {},
-    fillRect: () => {},
-    strokeRect: () => {},
-    clearRect: () => {},
-    fillText: () => {},
-    measureText: () => ({ width: 50 }),
-    createLinearGradient: () => ({ addColorStop: () => {} }),
-    createRadialGradient: () => ({ addColorStop: () => {} }),
-    fillStyle: "",
-    strokeStyle: "",
-    lineWidth: 1,
-    globalAlpha: 1,
-    font: ""
+  const i = await L.info(page);
+  await browser.close();
+  return { errors, info: i };
+}
+module.exports = { run, mock, reach, go, talkAdv };
+if (require.main === module) (async () => {
+  const C2 = async (page, h) => {
+    await h.go(page, "mn_viatorino"); await h.shot("mn_viatorino");
+    for (const id of ["mn_ciccio", "mn_scotti", "mn_celestino"]) await h.talkAdv(page, id);
+    await h.talkAdv(page, "mn_desantis"); await h.chk(2, 1, "De Santis c2");
+    await h.go(page, "mn_lucciola"); await h.shot("mn_lucciola");
+    for (const id of ["mn_tullio", "mn_ugo", "mn_contessa", "mn_wanda", "mn_balestrini", "mn_ines"]) await h.talkAdv(page, id, [/Pareggio/]);
+    await h.talkAdv(page, "mn_mara"); await h.chk(2, 2, "Mara c2");
+    await h.go(page, "mn_camerino"); await h.shot("mn_camerino"); await h.talkAdv(page, "mn_mara", [/Strappo/, /lascio la busta/]); await h.chk(2, 3, "valigia c2");
+    await h.go(page, "mn_vicolo"); await h.talkAdv(page, "mn_carmine", [/Tirapiedi/]);
   };
-}
-
-// 5. Test bg-scenarios.js detailed backgrounds & clickable points
-const bgScenariosCode = fs.readFileSync(path.join(__dirname, '../js/bg-scenarios.js'), 'utf8');
-eval(bgScenariosCode);
-console.log("✓ Motore Scenari e Sfondi 2D Dettagliati caricato con successo");
-
-const mockCtx = createMockCtx();
-const lb = window.__lbBg && window.__lbBg.LB;
-if (!lb) {
-  console.error("FAIL: window.__lbBg.LB not found!");
-  process.exit(1);
-}
-
-["mn_titolo", "mn_bastioni", "mn_club", "mn_lucciola", "mn_stadio", "mn_arena"].forEach((k) => {
-  const sc = lb[k];
-  if (!sc) {
-    console.error(`FAIL: Scenario '${k}' not registered in LB!`);
-    allPassed = false;
-    return;
-  }
-  if (!Array.isArray(sc.hot) || sc.hot.length < 3) {
-    console.error(`FAIL: Scenario '${k}' must have at least 3 clickable hotspots! Found: ${sc.hot ? sc.hot.length : 0}`);
-    allPassed = false;
-  } else {
-    console.log(`✓ Scenario ${k} has ${sc.hot.length} clickable hotspots.`);
-  }
-  try {
-    sc.draw(mockCtx, 320, 200, 10);
-    console.log(`✓ Scenario ${k} drawn without errors.`);
-  } catch (err) {
-    console.error(`FAIL: Error drawing scenario '${k}':`, err);
-    allPassed = false;
-  }
-});
-
-if (!allPassed) {
-  console.error("\n✗ TESTS FAILED FOR OPERAZIONE FUORIGIOCO NOIR!");
-  process.exit(1);
-}
-
-console.log("\n=========================================");
-console.log("✓ ALL CHECKS PASSED FOR OPERAZIONE FUORIGIOCO NOIR!");
-console.log("=========================================\n");
-process.exit(0);
+  const C3 = async (page, h) => {
+    await h.go(page, "mn_arena"); await h.shot("mn_arena");
+    for (const id of ["mn_boffi", "mn_tino", "mn_pinin", "mn_gaspare", "mn_scotti", "mn_pavesi"]) await h.talkAdv(page, id);
+    await h.talkAdv(page, "mn_desantis"); await h.chk(3, 1, "De Santis c3");
+    await h.go(page, "mn_spogliatoio"); await h.shot("mn_spogliatoio"); for (const id of ["mn_gioann", "mn_nando"]) await h.talkAdv(page, id);
+    await h.talkAdv(page, "mn_arbitro", [/fischia onesto/]); await h.chk(3, 2, "Brambilla c3");
+    await h.go(page, "mn_stampa"); for (const id of ["mn_ines", "mn_rino", "mn_marietto"]) await h.talkAdv(page, id);
+    await h.go(page, "mn_tribuna"); for (const id of ["mn_balestrini", "mn_carmine", "mn_contessa"]) await h.talkAdv(page, id);
+    await h.talkAdv(page, "mn_mara"); await h.chk(3, 3, "Mara c3");
+    await h.go(page, "mn_arena"); await h.talkAdv(page, "mn_pavesi", [/Ferrovieri contro/]);
+  };
+  const C4 = async (page, h) => {
+    await h.go(page, "mn_alzaia"); await h.shot("mn_alzaia");
+    for (const id of ["mn_sangalli", "mn_ines", "mn_tino", "mn_pinin", "mn_remo"]) await h.talkAdv(page, id);
+    await h.talkAdv(page, "mn_desantis"); await h.chk(4, 1, "De Santis c4");
+    await h.go(page, "mn_lavatoio"); await h.shot("mn_lavatoio"); await h.talkAdv(page, "mn_teresa");
+    await h.go(page, "mn_ringhiera"); await h.shot("mn_ringhiera"); await h.talkAdv(page, "mn_rosetta"); await h.chk(4, 2, "testimoni c4");
+    await h.go(page, "mn_questura"); await h.shot("mn_questura"); await h.talkAdv(page, "mn_vitali", [/referto/i]); await h.chk(4, 3, "Vitali c4");
+    await h.talkAdv(page, "mn_scotti"); await h.chk(4, 4, "Scotti c4");
+    await h.go(page, "mn_alzaia"); await h.talkAdv(page, "mn_peppino"); await h.talkAdv(page, "mn_remo", [/partita della Darsena/]);
+  };
+  const C5 = async (page, h) => {
+    await h.go(page, "mn_piazza"); await h.shot("mn_piazza");
+    for (const id of ["mn_ines", "mn_marietto", "mn_scotti", "mn_peppino", "mn_arbitro", "mn_carmine"]) await h.talkAdv(page, id);
+    await h.talkAdv(page, "mn_desantis"); await h.chk(5, 1, "De Santis c5");
+    await h.talkAdv(page, "mn_fausto", [/aria lunga/]);
+    await h.go(page, "mn_sartoria"); await h.shot("mn_sartoria"); await h.talkAdv(page, "mn_elvira"); await h.chk(5, 2, "Elvira c5");
+    await h.go(page, "mn_foyer"); await h.shot("mn_foyer"); await h.talkAdv(page, "mn_contessa"); await h.talkAdv(page, "mn_ernesto", [/bottone/i]); await h.chk(5, 3, "Ernesto c5");
+    await h.go(page, "mn_palco"); await h.shot("mn_palco"); await h.talkAdv(page, "mn_balestrini", [/bottone/i, /Riprendo il bottone/]); await h.chk(5, 4, "Balestrini c5");
+    await h.go(page, "mn_piazza"); await h.talkAdv(page, "mn_pavesi", [/XI del Tondino/, /Giustizia|Alla Procura/]);
+  };
+  const r = await run(390, { tag: "A", pep: /lavorerà per me/, c2: C2, c3: C3, c4: C4, c5: C5 });
+  console.log(r.errors.length ? "ERRORI:\n" + r.errors.join("\n") : "milano OK", JSON.stringify(r.info.st), JSON.stringify(r.info.done), JSON.stringify(r.info.ends));
+  process.exit(r.errors.length ? 1 : 0);
+})();

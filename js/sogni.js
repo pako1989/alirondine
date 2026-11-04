@@ -223,6 +223,10 @@
     ["fa_silvia", "fiume", "r", 58, 80, 72, "D", 2], ["fa_malacarne", "fiume", "l", 70, 85, 78, "D", 2],
     // Operazione Fuorigioco Noir · Milano 1954
     ["mn_desantis", "milano", "e", 55, 82, 70, "D", 1], ["mn_oste", "milano", "c", 48, 65, 58, "C", 1], ["mn_mara", "milano", "r", 78, 52, 76, "C", 2], ["mn_carmine", "milano", "l", 72, 85, 80, "D", 3],
+    ["mn_nando", "milano", "c", 62, 88, 70, "C", 1], ["mn_ines", "milano", "r", 66, 58, 80, "C", 1], ["mn_scotti", "milano", "e", 40, 78, 82, "C", 1], ["mn_peppino", "milano", "r", 60, 54, 84, "C", 2],
+    ["mn_teresa", "milano", "c", 44, 70, 62, "C", 1], ["mn_rosetta", "milano", "c", 46, 66, 78, "C", 1], ["mn_remo", "milano", "l", 74, 82, 56, "C", 2], ["mn_sangalli", "milano", "e", 52, 74, 76, "D", 2],
+    ["mn_elvira", "milano", "e", 50, 60, 88, "D", 2], ["mn_fausto", "milano", "r", 58, 56, 86, "C", 2], ["mn_ernesto", "milano", "c", 56, 80, 64, "C", 2], ["mn_arbitro", "milano", "e", 54, 76, 72, "D", 2],
+    ["mn_vitali", "milano", "l", 68, 70, 90, "D", 3], ["mn_balestrini", "milano", "l", 82, 84, 88, "A", 3],
     // Gran Premio del Pallone
     ["gp_gridoni", "gp", "c", 44, 52, 80, "C", 1], ["gp_bullone", "gp", "r", 60, 78, 66, "D", 1], ["gp_rosalba", "gp", "e", 86, 60, 74, "A", 2], ["gp_nembo", "gp", "r", 50, 70, 84, "C", 3],
     // Rondine 1938-2038
