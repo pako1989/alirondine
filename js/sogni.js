@@ -428,10 +428,32 @@
     COMP_CACHE[id] = card;
     return card;
   }
+  function getHeroCardSpec() {
+    try {
+      const h = JSON.parse(localStorage.getItem("ali-di-rondine.campione") || "null");
+      const sp = window.__spogliatoioCampione;
+      const tier = sp ? sp.getHeroTier() : { rar: "c", baseAt: 74, baseDf: 68, baseTe: 76 };
+      const stats = sp ? sp.getHeroStats(h || {}, tier) : { at: 78, df: 70, te: 76, role: (h && h.role) || "A" };
+      return {
+        id: "hero",
+        role: stats.role === "W" ? "A" : (stats.role || "A"),
+        at: stats.at,
+        df: stats.df,
+        te: stats.te,
+        rar: tier.rar,
+        saga: "borgo",
+        isHero: true,
+        spec: (window.__borgoApi && window.__borgoApi.CAST && window.__borgoApi.CAST.hero) || { name: (h && h.name) || "Campione" }
+      };
+    } catch (e) {
+      return { id: "hero", role: "A", at: 78, df: 70, te: 76, rar: "c", saga: "borgo", isHero: true };
+    }
+  }
   const BY_CORE = Object.fromEntries(CARDS.map((c) => [c.id, c]));
   const BY = new Proxy(BY_CORE, {
     get(target, prop) {
       if (typeof prop === "string") {
+        if (prop === "hero") return getHeroCardSpec();
         if (target[prop]) return target[prop];
         if (scritturaOn()) {
           const comp = makeComparsaCard(prop);
@@ -441,6 +463,7 @@
       return target[prop];
     },
     has(target, prop) {
+      if (prop === "hero") return true;
       if (target[prop]) return true;
       if (scritturaOn() && makeComparsaCard(prop)) return true;
       return false;
@@ -673,6 +696,7 @@
     ["tp_ada", "rf_nilde", "Voci Libere del '68 e '77"], ["tp_clara", "dc_agata", "Obiettivo e Taccuino"], ["tp_goffredo", "bur_taddeo", "Mastri di Piombo e di Pioppo"],
     ["ci_tonio", "bp_rocco", "Trombe e Bombardini"], ["ci_lila", "bur_colombina", "Funi e Fili d'Aria"], ["ci_zampano", "bur_taddeo", "Vecchi Capocomici"], ["ci_ercole", "lt_ferro", "Ghisa e Latta"], ["ci_orloff", "bur_duca", "Palchi d'Oro"],
     ["bur_taddeo", "lt_ferro", "Bottega e Fonderia"], ["bur_colombina", "dc_agata", "Intrighi alla Ribalta"], ["bur_duca", "bur_taddeo", "L'Arte e la Corte"],
+    ["hero", "leo", "I Ragazzi del Molo"], ["hero", "nico", "La Chiave della Porta"], ["hero", "dario", "La Parabola del Porto"],
     ["leo", "dario", "I Fratelli Moretti"], ["leo", "nico", "Dal Muro del Porto"], ["leo", "tommy", "Uno-Due del Campetto"],
     ["nico", "sara", "Cuore e Taccuino"], ["baciccia", "nonna", "Nodo del Pescatore"], ["kenji", "sho", "Il Volo degli Arata"],
     ["ruggeri", "cm_bastiano", "Panchine di Riviera"], ["lina", "mn_desantis", "Indagini in Divisa"],
@@ -1045,6 +1069,14 @@
           }
         }
       });
+    }
+    // Carta del Campione: sempre presente nella collezione del giocatore
+    if (!r.own.includes("hero")) {
+      const hData = safe(() => JSON.parse(localStorage.getItem("ali-di-rondine.campione") || "null"), null);
+      if (hData && hData.name) {
+        r.own.unshift("hero");
+        ch = true;
+      }
     }
     if (ch) save(r); return { r, nw, np };
   }

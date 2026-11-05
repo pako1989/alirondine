@@ -5365,12 +5365,12 @@
     fischietto:{ kind: "acc", label: "Fischietto sequestrato al Notaio", val: "fischietto", from: "Finale «Fischio pulito»", story: () => getList(ENDS).includes("Stagione 4 · Fischio pulito") },
   });
   const cosOwned = () => { const b = B || borgoLoad(); return Object.keys(COSM).filter((k) => (COSM[k].story ? COSM[k].story() : b.cos.includes(k))); };
-  const heroDefault = () => ({ v: 1, name: "Luca", style: "spiky", hair: "#2b1d14", eye: "#2a1a0a", skin: "#f2c9a0", shirt: "#ff4d5a", acc: "none", num: 9, shot: "saetta", shotName: "SAETTA DI LUCA" });
+  const heroDefault = () => ({ v: 1, name: "Luca", nick: "La Saetta", style: "spiky", hair: "#2b1d14", eye: "#2a1a0a", skin: "#f2c9a0", shirt: "#ff4d5a", shirt2: "#1f5fbf", pattern: "unita", armband: "#ffd23f", role: "A", foot: "dx", cel: "corsa", acc: "none", num: 9, shot: "saetta", shotName: "SAETTA DI LUCA", trail: "fuoco", quote: "Questa la dedico a chi non molla mai!" });
   const heroLoad = () => { const h = readJSON(HERO, null); return h && h.v === 1 && h.name ? { ...heroDefault(), ...h } : null; };
   window.heroLoad = heroLoad;
   window.heroEditor = heroEditor;
   function heroCast(h) {
-    CAST.hero = { name: h.name, tag: "", hair: h.hair, style: h.style, skin: h.skin, eye: h.eye || "#2a1a0a", bg: [h.shirt, "#ffd23f"], shirt: h.shirt, num: String(h.num), face: h.face || "", acc: h.acc, accId: h.accId && COSM[h.accId] && COSM[h.accId].val === h.acc ? h.accId : undefined, cap: h.acc === "cappellino" ? "#ffd23f" : h.acc === "berretto" ? "#26324a" : undefined, beard: h.beard || undefined, scar: h.scar || undefined, streak: h.streak || undefined, band: h.band || undefined, nick: h.nick || undefined };
+    CAST.hero = { name: h.name, tag: h.nick ? `«${h.nick}»` : "", hair: h.hair, style: h.style, skin: h.skin, eye: h.eye || "#2a1a0a", bg: [h.shirt, h.shirt2 || "#ffd23f"], shirt: h.shirt, shirt2: h.shirt2, pattern: h.pattern || "unita", armband: h.armband || "#ffd23f", role: h.role || "A", foot: h.foot || "dx", cel: h.cel || "corsa", num: String(h.num), face: h.face || "", acc: h.acc, accId: h.accId && COSM[h.accId] && COSM[h.accId].val === h.acc ? h.accId : undefined, cap: h.acc === "cappellino" ? "#ffd23f" : h.acc === "berretto" ? "#26324a" : undefined, beard: h.beard || undefined, scar: h.scar || undefined, streak: h.streak || undefined, band: h.band || undefined, nick: h.nick || undefined, quote: h.quote || undefined, trail: h.trail || "fuoco" };
   }
   // Il campione in campo: M.hero (partite), T.hero (rigori)
   const heroOn = () => !!(M && M.hero);
@@ -5378,7 +5378,10 @@
   function heroId() { return (M && M.hero) || (T && T.hero && view.kind !== "match") ? "hero" : "leo"; }
   function heroShot() {
     const h = M.hero, st = H_SHOTS[h.shot] || H_SHOTS.saetta;
-    return { cost: 35, name: h.shotName || st.label.toUpperCase(), c1: st.c1, c2: st.c2, intro: `${h.name} prende la rincorsa…` };
+    const scMap = { fuoco: ["#ff4d20", "#ffd23f"], fulmine: ["#38bdf8", "#ffffff"], smeraldo: ["#10b981", "#86efac"], ombra: ["#8b5cf6", "#1e1b4b"], sole: ["#f59e0b", "#fef08a"], ghiaccio: ["#06b6d4", "#e0f2fe"] };
+    const trCols = h.trail && scMap[h.trail] ? scMap[h.trail] : [st.c1, st.c2];
+    const introMsg = h.quote ? `«${h.quote}»` : `${h.name} prende la rincorsa…`;
+    return { cost: 35, name: h.shotName || st.label.toUpperCase(), c1: trCols[0], c2: trCols[1], intro: introMsg };
   }
   function heroPower(st) {
     const k = (M.hero && M.hero.shot) || "saetta", dist = (5 - M.zone) * 5;
@@ -5399,6 +5402,9 @@
   // --- editor ---
   let HE = null;
   function heroEditor(back) {
+    if (typeof window.openSpogliatoio === "function") {
+      return window.openSpogliatoio(back || extras);
+    }
     hairUnlocks();
     HE = { h: heroLoad() || heroDefault(), back: back || extras };
     heroCast(HE.h);
