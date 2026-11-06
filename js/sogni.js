@@ -192,6 +192,7 @@
     ["rp_basalto", "replica", "r", 76, 80, 58, "B", 1], ["rp_nube", "replica", "r", 80, 62, 70, "A", 2],
     ["rp_sabbioni", "replica", "e", 60, 70, 88, "C", 3], ["rp_ilario", "replica", "c", 50, 54, 72, "D", 2],
     ["rp_teodora", "replica", "c", 48, 60, 82, "D", 2], ["rp_zenit", "replica", "l", 92, 88, 90, "B", 3],
+    ["rp_corrado", "replica", "r", 46, 72, 84, "D", 5], ["rp_zero", "replica", "e", 82, 70, 78, "A", 6],
     // Rotta 66
     ["ro_tino", "rotta", "c", 78, 50, 60, "A", 1], ["ro_fiamma", "rotta", "e", 56, 90, 70, "D", 1],
     ["ro_osvaldo", "rotta", "r", 54, 72, 66, "C", 2], ["ro_ersilia", "rotta", "l", 66, 70, 90, "C", 3],
@@ -579,6 +580,8 @@
     sq_brina: "Gusto del giorno: vittoria. Molto fredda.", sq_gommo: "Mi allungo fino alla porta, se serve.", sq_scintilla: "Il forno sono io. E anche il tiro.", sq_ines: "Il ferro mi vuole bene. Anche il pallone, oggi.", rz_ferruccio: "E IL CORRIERE TIRA… CONSEGNATO!", rz_timbro: "Gol approvato. In triplice copia.", rz_borea: "Ho parato un asteroide. Un pallone è facile.", rz_orsola: "Come ai campetti: chi vince decide.", cs_ugo: "Idea: vinciamo. Questa funziona.", cs_max: "Che bella partita! Tutte le partite sono belle!", cs_lucilla: "Contratto firmato. Gol incluso.", cs_baldo: "Che zoccolata!",
     rm_furbio: "Un senatore non perde mai: al massimo rinvia il risultato al prossimo plebiscito.", rm_spartaco: "Gli scudi si spezzano, ma la difesa della Suburra non crolla mai!", rm_augusta: "Gli astri avevano previsto questo gol all'incrocio fin dal primo tempo.", rm_cesare: "Veni, vidi, vici: pollice verso l'alto per questo trionfo nell'arena!",
     re_evaristo: "Con tutto il rispetto: il pallone è in fuorigioco di protocollo.", re_oriele: "Una corona si porta con la schiena dritta. E con un buon paio di scarpe.", re_perla: "Un buon conto è come una buona partita: nessuno lo vede, finché non torna.", re_ulderico: "Avanti. E se non si può, avanti lo stesso.", re_scilla: "Corro più veloce della marea. Quasi sempre.", re_tullio: "Una guerra si vince con la penna. Quella di mio padre, in particolare.", re_anselmo: "Ho ottantadue anni e un gatto: governo per metà ciascuno.", re_cedro: "Secondo l'articolo tredici, il pallone è sempre in gioco.", re_brando: "La pace è una guerra che si è messa in ordine. Anche a pallone.",
+    rp_corrado: "Ogni eroe ha un rumore di fondo. Il mio è un fischio all'orecchio destro: lo seguo e trovo la porta.",
+    rp_zero: "Ho volato appeso a un cavo per un uomo che non sapeva volare. Il pallone, almeno, lo calcio io.",
     rz_nina: "Il pallone è arrivato in ritardo. Io l'ho aspettato lo stesso: è così che si diventa forti.",
     ft_nora: "Il Titano vola. Io faccio i conti, la torta e la formazione: nell'ordine che serve.",
     ft_sam: "Qualcuno deve restare coi piedi per terra. Ci penso io.", ft_cecile: "Vent'anni di domande. Questa è la risposta che preferisco.", ft_vega: "Su Elyon nessuno mi batte. Qui, a quanto pare, sì.", ft_atlante: "Il cielo è curvo, figliolo. Giralo tutto.",

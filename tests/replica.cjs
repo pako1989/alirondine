@@ -124,9 +124,52 @@ async function sparring(w) {
   { const bad = Object.keys(tu).filter((k) => !tu[k]); if (bad.length) errors.push("Duello nel cielo spiegazione/prova: " + bad.join(",") + " " + JSON.stringify(tu)); }
   L.check(`Replica · Sparring Volante (${w} px)`, errors); await browser.close();
 }
+async function dossier(w) {
+  const save = { v: 1, ch: 5, step: { 1: 5, 2: 5, 3: 5, 4: 5 }, done: { 1: "ok", 2: "ok", 3: "ok", 4: "figlio" }, ends: ["figlio", "cielo"], max: 5, diffSet: true, intro: { ch1: 1, ch2: 1, ch3: 1, ch4: 1 }, st: { potere: 5, fiducia: 3, colpa: 1, rabbia: 2 }, flags: { rp_c3_done: true } };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await page.evaluate(() => localStorage.setItem("ali.dossier_enabled", "1"));
+  const reach = async (z) => { const bad = await L.reachAll(page, z); if (bad.length) errors.push(z + " irraggiungibile: " + bad.join(", ")); };
+  await page.evaluate(() => window.__replica.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 5")); await adv(page);
+  if ((await L.zone(page)) !== "rp_t_archivio") errors.push("dossier c5: zona " + (await L.zone(page)));
+  await reach("rp_t_archivio"); if (w === 390) await L.shot(page, "rp_t_archivio");
+  await L.talk(page, "rp_ilario"); await adv(page);
+  await L.goAct(page, 29, 20); await adv(page);
+  let i = await info(page); if (i.step[5] !== 1) errors.push("bobina non trovata: " + JSON.stringify(i.step));
+  await L.goAct(page, 5, 16); await adv(page); if ((await L.zone(page)) !== "rp_t_montaggio") errors.push("non si entra in Sala Montaggio: " + (await L.zone(page)));
+  await reach("rp_t_montaggio"); if (w === 390) await L.shot(page, "rp_t_montaggio");
+  const ok5 = w === 390 ? ["tracking", "12 fotogrammi", "Filtro stretto", "Fermo immagine"] : ["tracking", "Alzi il volume", "Abbassi tutti", "Fermo immagine"];
+  await L.goAct(page, 7, 3); await adv(page, ok5);
+  i = await info(page); if (i.step[5] !== 2 || !!i.flags.rp_t_codice !== (w === 390)) errors.push("banco di montaggio: " + JSON.stringify([i.step, i.flags.rp_t_codice]));
+  await go(page, "rp_t_archivio", 5, 17);
+  await L.talk(page, "rp_morosini");
+  if (w === 390) await adv(page, ["Inventario notturno"]); else { for (let k = 0; k < 2; k++) { await page.waitForTimeout(250); await click(page, "^Continua"); } await page.waitForTimeout(300); await page.evaluate((k) => eval(k).timedFire(), K_); await page.waitForTimeout(300); await adv(page); }
+  i = await info(page); if (i.step[5] !== 3 || i.flags.rp_t_risposta !== (w === 390 ? "inventario" : "scambio")) errors.push("Morosini: " + JSON.stringify([i.step, i.flags.rp_t_risposta]));
+  await reach("rp_t_archivio");
+  await L.talk(page, "rp_corrado"); await adv(page);
+  i = await info(page); if (!i.done[5]) errors.push("dossier c5 non concluso: " + JSON.stringify([i.step, i.done]));
+  await page.evaluate(() => window.T_.click("Inizia il Capitolo 6")); await adv(page);
+  if ((await L.zone(page)) !== "rp_t_torre") errors.push("dossier c6: zona " + (await L.zone(page)));
+  if (w === 390) await L.shot(page, "rp_t_torre");
+  await L.talk(page, "rp_corrado"); await adv(page);
+  await L.talk(page, "rp_zero"); await adv(page, [w === 390 ? "Mostrarlo" : "Usarlo"]);
+  i = await info(page); if (i.step[6] !== 2) errors.push("Zero e i condotti: " + JSON.stringify(i.step));
+  await reach("rp_t_torre");
+  await L.goAct(page, 15, 13); await adv(page); if ((await L.zone(page)) !== "rp_t_master") errors.push("non si entra nella Sala Master: " + (await L.zone(page)));
+  await reach("rp_t_master"); if (w === 390) await L.shot(page, "rp_t_master");
+  await L.goAct(page, 7, 3); await adv(page, w === 390 ? ["Applausi assortiti", "dopo il ritardo", "1994"] : ["Stacchi il cavo", "Allunghi", "0000"]);
+  i = await info(page); if (i.step[6] !== 3 || !!i.flags.rp_t_visti !== (w === 320)) errors.push("firewall: " + JSON.stringify([i.step, i.flags.rp_t_visti]));
+  await L.talk(page, "rp_morosini"); await adv(page, [w === 390 ? "Abbassa la leva" : "Metti la bobina"]);
+  i = await info(page); const fin = w === 390 ? "teodora_diretta" : "teodora_patto";
+  const e = await page.evaluate((k) => eval(k).mem().ends, K_); if (!i.done[6] || !e.includes(fin)) errors.push("dossier c6 non concluso: " + JSON.stringify([i.done, e]));
+  const own = await page.evaluate(() => window.__sogni._load().own); if (!own.includes("rp_zero") || !own.includes("rp_corrado")) errors.push("carte rp_zero/rp_corrado non sbloccate");
+  const g = await page.evaluate(() => window.__borgoGuests.list().find((x) => x.id === "rp_teodora")); if (!g || !g.on) errors.push("ospite Teodora al Borgo: " + JSON.stringify(g));
+  const d = await page.evaluate(() => window.__carteDecks.list().find((x) => x.id === "rpt")); if (!d || !d.unlocked) errors.push("mazzo del Destino rpt: " + JSON.stringify(d));
+  L.check(`Eroi in Replica · Dossier di Teodora cap. 5-6 da dati (${w} px)`, errors); await browser.close();
+}
 (async () => {
   await sparring(390);
   await c1(390); await c1(320); await c2(390); await c2(320); await c3(390); await c3(320);
   await c4(390, "terza", { fiducia: 3, rabbia: 3 }); await c4(390, "figlio", { fiducia: 4, rabbia: 1 }); await c4(320, "cielo", { fiducia: 1, rabbia: 4 });
   await porta(390);
+  await dossier(390); await dossier(320);
 })().catch((e) => { console.error("✗ replica:", e.message); process.exit(1); });
