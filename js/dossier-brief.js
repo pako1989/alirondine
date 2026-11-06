@@ -83,5 +83,57 @@
       if (a === "dl") { const bl = new Blob([txt], { type: "text/plain;charset=utf-8" }), u = URL.createObjectURL(bl), l = document.createElement("a"); l.href = u; l.download = "brief-dossier.txt"; document.body.appendChild(l); l.click(); l.remove(); setTimeout(() => URL.revokeObjectURL(u), 2000); }
     });
   }
-  window.__dossierBrief = { open, text, collect, load };
+
+  // ---------------------------------------------------------------- BRIEF SAGA (saga nuova) — stessi moduli, altri campi
+  const KEYS = "ali.saga_brief", GEN = ["Calcio realistico", "Fantasy", "Fantascienza", "Giallo/investigativo", "Supereroi", "Storico", "Horror leggero", "Commedia", "Avventura", "Sport + altro mondo"];
+  const MEC = ["Rapporti (cuori)", "Inventario (zaino/regali)", "Calendario a fasce", "Piano (assegna ruoli)", "Termometro", "Repertorio (ritmo)", "Costruzioni", "Il Ricordo (due versioni)", "Scelte a tempo", "Furtivo", "Assedio a ondate", "Scorrimento / Città 3D / Gabbia 3D"];
+  const loadS = () => { try { return JSON.parse(localStorage.getItem(KEYS)) || {}; } catch (e) { return {}; } };
+  function collectS(root) {
+    const g = (n) => (root.querySelector(`[name="${n}"]`) || {}).value || "", ch = (sel) => [...root.querySelectorAll(sel + " input:checked")].map((x) => x.value);
+    const rows = (k) => [...root.querySelectorAll(`.dbRow[data-k="${k}"]`)].map((r) => ({ n: r.querySelector('[data-f="n"]').value, r: (r.querySelector('[data-f="r"]') || {}).value || "", d: r.querySelector('[data-f="d"]').value })).filter((x) => x.n || x.d);
+    return { titolo: g("titolo"), ispira: g("ispira"), gen: ch(".dbGen"), n: g("n") || "4", amb: g("amb"), pn: g("pn"), pd: g("pd"), toni: ch(".dbChips.dbTon"), tn: g("tn"), trama: g("trama"), caps: g("caps"),
+      pgs: rows("pg"), scs: rows("sc"), mec: ch(".dbMec"), uni: g("uni"), mini: g("mini"), mind: g("mind"), fin: g("fin"), no: g("no") };
+  }
+  function textS(d) {
+    const L = [], line = (t, v) => { if (v && String(v).trim()) L.push(`${t}: ${String(v).trim()}`); };
+    L.push("BRIEF NUOVA SAGA — Ali di Rondine", "Istruzioni: segui prompt/prompt-scaletta-saga.md (scaletta) e poi prompt-codice-saga.md + docs/prompt.md (codice, regole del core, integrazione Sogni/Destino/ospite/cabinato). Lavora sull'ultima versione del repo. Tutto in italiano.", "");
+    line("TITOLO", d.titolo); line("ISPIRATA A", d.ispira); line("GENERE", (d.gen || []).join(", ")); line("CAPITOLI", d.n); line("AMBIENTAZIONE", d.amb);
+    line("PROTAGONISTA", d.pn); line("Chi è", d.pd); line("TONO", (d.toni || []).join(", ")); line("Note sul tono", d.tn);
+    line("TRAMA GENERALE", d.trama); line("IDEE PER CAPITOLO", d.caps);
+    if ((d.pgs || []).length) { L.push("", "PERSONAGGI:"); d.pgs.forEach((p) => L.push(`- ${p.n || "?"}${p.r ? " (" + p.r + ")" : ""}: ${p.d || ""}`)); }
+    if ((d.scs || []).length) { L.push("", "SCENARI:"); d.scs.forEach((s) => L.push(`- ${s.n || "?"}: ${s.d || ""}`)); }
+    L.push(""); line("FUNZIONI DEL CORE DA RIUSARE", (d.mec || []).join(", ")); line("GAMEPLAY UNICO DELLA SAGA", d.uni); line("MINIGIOCO", d.mini); line("Dettagli minigioco", d.mind);
+    line("FINALI", d.fin); line("DA NON FARE / NOTE", d.no);
+    return L.join("\n");
+  }
+  function openSaga() {
+    css(); const d = loadS(), ov = document.createElement("div"); ov.className = "dbOv"; const chk = (arr, v) => ((arr || []).includes(v) ? " checked" : "");
+    ov.innerHTML = `<div class="dbIn"><h2>🧩 Brief Saga</h2><p class="s">Per una saga NUOVA. Tutto facoltativo: dove lasci vuoto decide chi la costruisce. La bozza si salva da sola.</p>
+<fieldset><legend>Idea</legend><label>Titolo (anche provvisorio)</label><input name="titolo" value="${esc(d.titolo)}"><label>Ispirata a (opera, film, gioco…)</label><input name="ispira" value="${esc(d.ispira)}"><label>Genere</label><div class="dbChips dbGen">${GEN.map((t) => `<label><input type="checkbox" value="${t}"${chk(d.gen, t)}>${t}</label>`).join("")}</div>
+<label>Quanti capitoli</label><select name="n">${[3, 4, 5].map((n) => `<option value="${n}"${String(d.n || "4") === String(n) ? " selected" : ""}>${n}</option>`).join("")}</select><label>Ambientazione (mondo, epoca, luoghi)</label><textarea name="amb">${esc(d.amb)}</textarea></fieldset>
+<fieldset><legend>Protagonista</legend><label>Nome / ruolo (il Campione, un altro personaggio…)</label><input name="pn" value="${esc(d.pn)}"><label>Chi è, cosa vuole</label><textarea name="pd">${esc(d.pd)}</textarea></fieldset>
+<fieldset><legend>Tono</legend><div class="dbChips dbTon">${TONI.map((t) => `<label><input type="checkbox" value="${t}"${chk(d.toni, t)}>${t}</label>`).join("")}</div><label>Altro sul tono</label><textarea name="tn">${esc(d.tn)}</textarea></fieldset>
+<fieldset><legend>Storia</legend><label>Trama in breve</label><textarea name="trama">${esc(d.trama)}</textarea><label>Idee per capitolo (uno per riga)</label><textarea name="caps">${esc(d.caps)}</textarea><label>Finali che vorresti</label><textarea name="fin">${esc(d.fin)}</textarea></fieldset>
+<fieldset><legend>Personaggi</legend><div id="dbPg">${(d.pgs || []).map((p) => rowHtml("pg", p)).join("")}</div><button class="add" type="button" data-add="pg">+ Aggiungi personaggio</button></fieldset>
+<fieldset><legend>Scenari</legend><div id="dbSc">${(d.scs || []).map((p) => rowHtml("sc", p)).join("")}</div><button class="add" type="button" data-add="sc">+ Aggiungi scenario</button></fieldset>
+<fieldset><legend>Gameplay</legend><label>Funzioni del core da riusare</label><div class="dbChips dbMec">${MEC.map((t) => `<label><input type="checkbox" value="${t}"${chk(d.mec, t)}>${t}</label>`).join("")}</div><label>Cosa la rende diversa dalle altre saghe</label><textarea name="uni">${esc(d.uni)}</textarea>
+<label>Minigioco</label><select name="mini">${MINI.map((m) => `<option${d.mini === m ? " selected" : ""}>${m}</option>`).join("")}</select><label>Dettagli minigioco</label><textarea name="mind">${esc(d.mind)}</textarea><label>Da non fare / note</label><textarea name="no">${esc(d.no)}</textarea></fieldset>
+<div class="dbOut" id="dbOut" hidden></div></div>
+<div class="dbBar"><button type="button" class="hot" data-a="copy">Copia brief</button><button type="button" data-a="dl">Scarica .txt</button><button type="button" data-a="clear">Svuota</button><button type="button" data-a="close">Chiudi</button></div>`;
+    document.body.appendChild(ov);
+    const upd = () => { const c = collectS(ov); try { localStorage.setItem(KEYS, JSON.stringify(c)); } catch (e) {} return c; };
+    ov.addEventListener("input", upd); ov.addEventListener("change", upd);
+    ov.addEventListener("click", (e) => {
+      const t = e.target.closest("button"); if (!t) return;
+      if (t.dataset.add) { ov.querySelector(t.dataset.add === "pg" ? "#dbPg" : "#dbSc").insertAdjacentHTML("beforeend", rowHtml(t.dataset.add, {})); return; }
+      if (t.classList.contains("rm")) { t.parentNode.remove(); upd(); return; }
+      const a = t.dataset.a, out = ov.querySelector("#dbOut");
+      if (a === "close") { upd(); ov.remove(); return; }
+      if (a === "clear") { if (confirm("Svuotare tutto il brief?")) { try { localStorage.removeItem(KEYS); } catch (er) {} ov.remove(); openSaga(); } return; }
+      const txt = textS(upd()); out.hidden = false; out.textContent = txt;
+      if (a === "copy") { const done = () => { t.textContent = "Copiato ✓"; setTimeout(() => { t.textContent = "Copia brief"; }, 1800); }; try { navigator.clipboard.writeText(txt).then(done, () => {}); } catch (er) {} }
+      if (a === "dl") { const bl = new Blob([txt], { type: "text/plain;charset=utf-8" }), u = URL.createObjectURL(bl), l = document.createElement("a"); l.href = u; l.download = "brief-saga.txt"; document.body.appendChild(l); l.click(); l.remove(); setTimeout(() => URL.revokeObjectURL(u), 2000); }
+    });
+  }
+  window.__dossierBrief = { open, text, collect, load, openSaga, textS, collectS };
 })();

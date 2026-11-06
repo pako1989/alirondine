@@ -6077,6 +6077,7 @@
       sec("calcio_azione", "⚙️ Calcio d'Azione (Difficoltà & Comandi)", `Comandi: ${azCtlName()} · Difficoltà: ${azDiffName()}`, "hot"),
       sec("storia_bivi", "📖 Navigazione Storia & Rigiocabilità", `Menu Storia, puntate precedenti · bivi memorizzati: ${storyStats.chosenOptionsCount}`, "hot"),
       ...(window.__dossierBrief ? [{ label: "📂 Brief Dossier", sub: "Moduli per nuove storie: saga, personaggi, tono, scenari, minigioco, finali. Esce un testo da dare a Claude o a un'altra IA", cls: "hot", fn: () => window.__dossierBrief.open() }] : []),
+      ...(window.__dossierBrief ? [{ label: "🧩 Brief Saga", sub: "Moduli per una saga NUOVA: idea, protagonista, tono, personaggi, scenari, funzioni del core, minigioco, finali. Esce un testo da dare a Claude o a un'altra IA", cls: "hot", fn: () => window.__dossierBrief.openSaga() }] : []),
       ...(window.__tessera ? [sec("tessera", "🪪 Tessera, foto e home", ["tessera", "foto", "home"].map((k) => `${{ tessera: "Tessera", foto: "Foto", home: "Home" }[k]} ${window.__tessera.on(k) ? "sì" : "no"}`).join(" · "))] : []),
       sec("regole", "Opzioni di gioco", "Tiri murati, duelli, grinta di riserva, tiro a tempo e le altre regole: accese o spente"),
       sec("audio", "Audio", "Suoni, musica, voci, volumi"),
