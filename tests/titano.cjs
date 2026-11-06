@@ -92,4 +92,30 @@ async function c3(w) {
   const m = await page.evaluate(() => { const x = window.__salone.machine("volo"); return x && x.eng; }); if (m !== "__volo") errors.push("cabinato di Volo a Tutto Campo mancante");
   L.check(`Il Figlio del Titano · capitolo 3 e i 4 finali (${w} px)`, errors); await browser.close();
 }
-(async () => { await c1(390); await c1(320); await c2(390); await c2(320); await c3(390); await c3(320); })().catch((e) => { console.error("✗ titano:", e.stack); process.exit(1); });
+async function dossier(w) {
+  const save = { v: 1, ch: 4, step: { 1: 5, 2: 5, 3: 5 }, done: { 1: "agenzia", 2: "verita", 3: "padre" }, ends: ["padre", "agenzia"], max: 4, diffSet: true, intro: { ch1: 1, ch2: 1, ch3: 1 }, st: { famiglia: 5, cielo: 4 }, flags: { ft_tuta: true } };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await page.evaluate(() => localStorage.setItem("ali.dossier_enabled", "1"));
+  await page.evaluate(() => window.__titano.open());
+  await page.evaluate(() => window.T_.click("Inizia il Capitolo 4")); await L.advance(page);
+  if ((await L.zone(page)) !== "ft_retro") errors.push("dossier c4: zona " + (await L.zone(page)));
+  { const bad = await L.reachAll(page, "ft_retro"); if (bad.length) errors.push("ft_retro irraggiungibile: " + bad.join(", ")); }
+  await L.talk(page, "ft_sam"); await L.advance(page);
+  await L.goAct(page, 14, 3); await L.advance(page); if ((await L.zone(page)) !== "ft_deposito") errors.push("non si entra nel deposito: " + (await L.zone(page)));
+  { const bad = await L.reachAll(page, "ft_deposito"); if (bad.length) errors.push("ft_deposito irraggiungibile: " + bad.join(", ")); }
+  await L.goAct(page, 7, 3); await L.advance(page, ["«Cercavo una casa»", "«Sono atterrato»", "…che il padre vola"]);
+  let i = await info(page); if (i.step[4] !== 2) errors.push("dopo la prova lo step non è 2: " + JSON.stringify(i.step));
+  await page.evaluate(() => window.__titano._dbg.K.enterZone("ft_retro")); await page.waitForTimeout(400); await L.advance(page);
+  await L.talk(page, "ft_atlante"); await page.evaluate(() => window.T_.click("«Vai. Ma torni a cena»")); await page.waitForTimeout(300); await L.advance(page);
+  i = await info(page); if (!i.done[4]) errors.push("dossier c4 non concluso: " + JSON.stringify(i.step));
+  await page.evaluate(() => window.T_.click("Inizia il Capitolo 5")); await L.advance(page);
+  if ((await L.zone(page)) !== "ft_panchina") errors.push("dossier c5: zona " + (await L.zone(page)));
+  { const bad = await L.reachAll(page, "ft_panchina"); if (bad.length) errors.push("ft_panchina irraggiungibile: " + bad.join(", ")); }
+  await L.talk(page, "ft_orione"); await page.evaluate(() => window.T_.click("Salta il riscaldamento")); await page.waitForTimeout(300); await L.advance(page);
+  await L.talk(page, "ft_atlante"); await page.evaluate(() => window.T_.click("Manda Atlante in campo")); await voStart(page); await voEnd(page, 2, 0); await L.advance(page);
+  await L.talk(page, "ft_atlante"); await page.evaluate(() => window.T_.click("«La Terra resta nostra. Torniamo a cena»")); await page.waitForTimeout(300); await L.advance(page);
+  i = await info(page); if (!i.done[5]) errors.push("dossier c5 non concluso: " + JSON.stringify(i.step));
+  const e = await page.evaluate(() => window.__titano._dbg.K.mem().ends); if (!e.includes("nora_cena")) errors.push("finale nora_cena non registrato: " + e);
+  L.check(`Il Figlio del Titano · Dossier cap. 4-5 da dati (${w} px)`, errors); await browser.close();
+}
+(async () => { await c1(390); await c1(320); await c2(390); await c2(320); await c3(390); await c3(320); await dossier(390); await dossier(320); })().catch((e) => { console.error("✗ titano:", e.stack); process.exit(1); });
