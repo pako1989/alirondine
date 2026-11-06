@@ -1010,15 +1010,7 @@
   function portraitShirt(id, c) { return { leo: "#ff4d5a", nico: "#3fa7ff", tommy: "#ff4d5a", kenji: "#1d3fa3", dario: "#1b1b1b", valli: "#222", ruggeri: "#34465f", papa: "#e8e0d0", sara: "#ffd23f", rita: "#8a4b6b", ines: "#5a1a3a", bruno: "#3a1450", lina: "#16223f", gigi: "#ff4d5a", fede: "#1d3fa3", marta: "#1d3fa3", aldo: "#10182e", sho: "#ffffff", jojo: "#ffd23f", bellandi: "#b3202c", vitale: "#b3202c", mazza: "#3a3a44", nonna: "#6b8cff" }[id] || c.shirt || "#555"; }
   // maglie a disegno: il colore base identifica il disegno (un colore unico per maglia); ogni stile dei volti chiama __shirtPat dentro la sagoma del busto
   const SHIRT_PATS = { "#1f6f54": { t: "sash", c: "#f5ebd6", e: "laurel" }, "#312e81": { t: "sash", c: "#fbbf24", e: "diamond" }, "#0f172a": { t: "sash", c: "#e2e8f0", e: "diamond" }, "#e9eef2": { t: "hoops", c: "#1d3a5f", e: "anchor" }, "#23232d": { t: "pin", c: "#8b1d2c", e: "diamond" }, "#f0efe9": { t: "checks", c: "#1b1b1b", e: "wheel" }, "#a1272f": { t: "band", c: "#e0b43a", e: "laurel" }, "#4b2e83": { t: "sash", c: "#f2c14e", e: "flame" }, "#2f5d7c": { t: "halves", c: "#c9a66b", e: "glass" } };
-  // fantasia scelta nello Spogliatoio del Campione (strisce/banda/maniche + secondo colore): vale solo mentre si disegna chi la indossa
-  const patOf = (c) => (c && c.pattern && c.pattern !== "unita" && c.shirt2 ? { t: c.pattern, c: c.shirt2 } : null);
   window.__shirtPat = function (g, color) {
-    const hp = window.__curPat;
-    if (hp) { g.save(); g.fillStyle = hp.c;
-      if (hp.t === "strisce") { for (let x = -40; x < 42; x += 12) g.fillRect(x + 3, 26, 6, 44); }
-      else if (hp.t === "banda") { g.fillRect(-42, 41, 84, 9); }
-      else if (hp.t === "maniche") { g.fillRect(-44, 26, 22, 44); g.fillRect(22, 26, 22, 44); }
-      g.restore(); return; }
     const p = SHIRT_PATS[String(color || "").toLowerCase()]; if (!p) return;
     g.save(); g.fillStyle = p.c;
     if (p.t === "hoops") { for (let y = 31; y < 66; y += 8) g.fillRect(-40, y, 80, 3.6); }
@@ -1039,12 +1031,6 @@
   };
   // stessa idea per l'omino a pixel (corpo 10x8 in x-5, y-13)
   function shirtPx(x, y, color) {
-    const hp = window.__curPat;
-    if (hp) { const X = x - 5, Y = y - 13;
-      if (hp.t === "strisce") { for (let i = 1; i < 10; i += 3) px(X + i, Y, 1, 8, hp.c); }
-      else if (hp.t === "banda") { px(X, Y + 3, 10, 2, hp.c); }
-      else if (hp.t === "maniche") { px(X, Y, 2, 8, hp.c); px(X + 8, Y, 2, 8, hp.c); }
-      return; }
     const p = SHIRT_PATS[String(color || "").toLowerCase()]; if (!p) return; const X = x - 5, Y = y - 13;
     if (p.t === "hoops") { px(X, Y + 1, 10, 1, p.c); px(X, Y + 4, 10, 1, p.c); px(X, Y + 7, 10, 1, p.c); }
     else if (p.t === "pin") { for (let i = 0; i < 10; i += 3) px(X + i, Y, 1, 8, p.c); }
@@ -4364,15 +4350,14 @@
     else g.drawImage(OMINI.img, (i % 8) * 64 + col * 16, Math.floor(i / 8) * 64 + row * 16, 16, 16, Math.round(x - 12), Math.round(y - 23), 24, 24);
     g.imageSmoothingEnabled = sm; return true;
   }
-  function chibi(x, y, c, dir, ph) { const pp = window.__curPat; window.__curPat = patOf(c); try { return chibi0(x, y, c, dir, ph); } finally { window.__curPat = pp; } }
-  function chibi0(x, y, c, dir, ph) { const SA = [].concat(c.acc || []); // uno o più accessori
+  function chibi(x, y, c, dir, ph) { const SA = [].concat(c.acc || []); // uno o più accessori
     if (c.shape && SHAPE_CHIBI[c.shape]) return SHAPE_CHIBI[c.shape](x, y, c, dir, ph || 0);
     if (SET.omini === "pixel" && ominoPixel(x, y, c, dir, ph)) return;
     const hair = c.hair || "#333", skin = c.skin || "#f0c9a0", shirt = c.shirt || "#ff4d5a";
     g.fillStyle = "#0004"; g.beginPath(); g.ellipse(x, y, 6, 2.5, 0, 0, 7); g.fill();
     const l = Math.round(Math.sin(ph || 0) * 1.5);
     px(x - 4, y - 6, 3, 6 - Math.max(0, l), "#2a2a3a"); px(x + 1, y - 6, 3, 6 - Math.max(0, -l), "#2a2a3a");
-    px(x - 5, y - 13, 10, 8, shirt); shirtPx(x, y, shirt); px(x - 7, y - 12, 2, 6, skin); px(x + 5, y - 12, 2, 6, skin); if (window.__curPat && window.__curPat.t === "maniche") { px(x - 7, y - 13, 2, 4, window.__curPat.c); px(x + 5, y - 13, 2, 4, window.__curPat.c); }
+    px(x - 5, y - 13, 10, 8, shirt); shirtPx(x, y, shirt); px(x - 7, y - 12, 2, 6, skin); px(x + 5, y - 12, 2, 6, skin);
     if (c.num) { g.fillStyle = "#fff"; g.font = "bold 6px sans-serif"; g.textAlign = "center"; if (dir === "up") g.fillText(c.num, x, y - 7); g.textAlign = "left"; }
     px(x - 5, y - 22, 10, 9, skin);
     px(x - 5, y - 23, 10, dir === "up" ? 9 : 4, hair);
@@ -5880,6 +5865,17 @@
     if (window.__regia) { const ron = window.__regia.on(); b.push({ label: `Condizioni di Scena in Cabina di Regia: ${ron ? "Attive" : "Solo rivincita libera"} ▸`, sub: ron ? "Nelle saghe concluse: 3 sfide del regista con condizioni sceniche, monete e costumi Guardaroba (tocca per lasciare solo la rivincita libera)" : "Solo rivincita libera delle partite uniche senza sfide né condizioni (tocca per riattivare le Condizioni di Scena)", fn: () => { window.__regia.setOn(!ron); if (!ron && window.__presa) window.__presa.cutin("CABINA DI REGIA", "Condizioni di Scena · Ciak, Monete e Guardaroba", again); else again(); } }); }
     if (window.__sogni && window.__sogni.premio) { const kon = window.__sogni.premio.on(); b.push({ label: `Carte dei Sogni dalle bustine premio: ${kon ? "Attive" : "Disattivate"} ▸`, sub: kon ? "Capitoli e finali danno bustine premio (carta a sorpresa) invece della carta diretta; una carta sicura ogni 10 bustine a monete (tocca per tornare agli sblocchi diretti)" : "Capitoli e finali sbloccano la carta direttamente (tocca per passare alle bustine premio)", fn: () => { window.__sogni.premio.setOn(!kon); if (!kon && window.__presa) window.__presa.cutin("BUSTINE PREMIO", "Capitoli e finali → bustine con carta a sorpresa", again); else again(); } }); } if (window.__sogni && window.__sogni.scrittura) { const scOn = window.__sogni.scrittura.on(); b.push({ label: `Scrittura di Carta (Comparse nei Sogni): ${scOn ? "Attiva" : "Disattivata"} ▸`, sub: scOn ? "I personaggi incontrati dell'Album scendono in campo come carte bronzo della Squadra dei Sogni (tocca per nasconderli)" : "Mostra solo le carte ufficiali dei Sogni; tocca per schierare le comparse dell'Album", fn: () => { window.__sogni.scrittura.setOn(!scOn); if (!scOn && window.__presa) window.__presa.cutin("SCRITTURA DI CARTA", "Le comparse dell'Album scendono in campo nei Sogni!", again); else again(); } }); } if (window.__fango) { const fon = window.__fango.on(); b.push({ label: `Carriera «Dal Fango alla Leggenda»: ${fon ? "Attiva" : "Disattivata"} ▸`, sub: fon ? "La carriera da calciatore in Partite e modalità e nel Salone, col minigioco Il Momento (tocca per nasconderla)" : "Carriera da calciatore dalla Terza Categoria al mito, 5 tappe e 3 finali (tocca per mostrarla)", fn: () => { window.__fango.setOn(!fon); if (!fon && window.__presa) window.__presa.cutin("DAL FANGO ALLA LEGGENDA", "Carriera da calciatore · dalla Terza Categoria al mito", again); else again(); } }); } if (window.__directorCarriera && window.__directorCarriera.on) { const gon = window.__directorCarriera.on(); b.push({ label: `Manageriale «Carriera del Golfo»: ${gon ? "Attiva" : "Disattivata"} ▸`, sub: gon ? "La carriera da allenatore della Rondine FC nel Matchday Director, nel Salone e in Partite e modalità (tocca per nasconderla)" : "Carriera da allenatore: obiettivi del Presidente, Coppa del Golfo, rivale, rosa che invecchia (tocca per mostrarla)", fn: () => { window.__directorCarriera.setOn(!gon); if (!gon && window.__presa) window.__presa.cutin("CARRIERA DEL GOLFO", "Obiettivi, Coppa, rivale e una rosa che invecchia", again); else again(); } }); } if (window.__albo) { const aon = window.__albo.on(); b.push({ label: `Albo dei Sogni: ${aon ? "Attivo" : "Disattivato"} ▸`, sub: aon ? "L'album di tutte le carte (per saga, tema, rarità) con percentuali e premi solo estetici (tocca per spegnerlo)" : "Album di tutte le carte dei Sogni con completamento, sagome senza spoiler e cornici/titoli/sfondi a soglie (tocca per accenderlo)", fn: () => { const first = window.__albo.setOn(!aon); if (first && window.__presa) window.__presa.cutin("L'ALBO DEI SOGNI", "Tutte le carte in un album · premi a soglie", again); else again(); } }); }
     if (window.__staffetta) { const son = window.__staffetta.on(); b.push({ label: `Staffetta dei Legami nell'Arena: ${son ? "Attiva" : "Disattivata"} ▸`, sub: son ? "Modalità a coppie e cambi rapidi nell'Arena dei Sogni (tocca per nasconderla)" : "Modalità nascosta dal menu dell'Arena (tocca per riattivarla)", fn: () => { window.__staffetta.setOn(!son); if (!son) window.__staffetta.cutin(null, again, "STAFFETTA DEI LEGAMI · ATTIVA"); else again(); } }); }
+    {
+      const dosOn = localStorage.getItem("ali.dossier_enabled") !== "0";
+      b.push({
+        label: `Dossier Incompiuti (Capitoli 4-5): ${dosOn ? "Attivi" : "Disattivati"} ▸`,
+        sub: dosOn ? "Espansione a ruoli invertiti per le saghe brevi, sbloccata dopo 2 finali (tocca per nasconderla)" : "Mostra solo i 3 capitoli base nelle saghe (tocca per attivare i Dossier Incompiuti)",
+        fn: () => {
+          localStorage.setItem("ali.dossier_enabled", dosOn ? "0" : "1");
+          again(`Dossier Incompiuti ${!dosOn ? "attivati" : "disattivati"}.`);
+        }
+      });
+    }
     { let fo = true; try { fo = localStorage.getItem("ali-di-rondine.assedio-full") !== "0"; } catch (e) {} b.push({ label: `Assedio a ondate a schermo intero: ${fo ? "Sì" : "No"} ▸`, sub: fo ? "Tifosi Morti, Notte in Curva e Assedio dei Sogni a tutto schermo, in verticale e in orizzontale (tocca per la finestra piccola)" : "Finestra piccola 380×230 (tocca per lo schermo intero)", fn: () => { try { localStorage.setItem("ali-di-rondine.assedio-full", fo ? "0" : "1"); } catch (e) {} again(); } }); }
     b.push({ label: `Meteo Vento in Partita: ${SET.windWeather !== false ? "Attivo" : "Disattivato"} ▸`, sub: SET.windWeather !== false ? "Brezza marina e folate influenzano le parabole dei tiri (tocca per disattivare)" : "Meteo calmo senza raffiche di vento (tocca per attivare)", fn: () => { SET.windWeather = SET.windWeather === false; save(); again(`Meteo Vento ${SET.windWeather !== false ? "attivato" : "disattivato"}.`); } });
     b.push({ label: `Modalità Partita: ${SET.tsubasa ? "Captain Tsubasa (NES/SNES)" : "Classico JRPG"} ▸`, sub: SET.tsubasa ? "Duelli cinematografici Tecmo, comandi a griglia, radar e animazioni rétro" : "Elenco scelte testuali classico (tocca per cambiare)", fn: () => { SET.tsubasa = !SET.tsubasa; save(); again(`Modalità Partita: ${SET.tsubasa ? "Captain Tsubasa (NES/SNES)" : "Classico JRPG"}`); } });
@@ -19922,8 +19918,7 @@
     if (cl.length) { out.acc = out.acc || cl[0]; out.accFn = (ctx, part) => { const og = g; g = ctx; cl.forEach((a) => { ctx.save(); try { portraitAcc(a, part); } catch {} ctx.restore(); }); g = og; }; }
     return out;
   }
-  function portrait(id, x, y, s, flip) { const pp = window.__curPat; window.__curPat = patOf(CAST[id]); try { return portraitP(id, x, y, s, flip); } finally { window.__curPat = pp; } }
-  function portraitP(id, x, y, s, flip) {
+  function portrait(id, x, y, s, flip) {
     const fs = faceStyle(), fc = CAST[id];
     if (fc && fc.shape && SHAPE_PORTRAIT[fc.shape]) return shapePortrait(id, fc, x, y, s, flip);
     if (fs && fc && fc.skin) { // stile dei volti alternativo (Impostazioni → Grafica)
@@ -26452,7 +26447,7 @@
     text("voce", `<b>Come vuoi giocare questa partita?</b><br><span style="color:var(--dim)">Esito e ricompense della storia sono uguali: cambia solo come giochi.</span>`);
     buttons([{ label: "🎮 Partita a turni", sub: "Scegli le mosse una alla volta", cls: "hot", fn: () => apiMatch(cfg) }, ...alts.map((k) => kinds[k])]);
   }
-  window.__borgoApi = { match: apiMatch, matchPick: apiMatchPick, timing: bTiming, play, chap, scene: (bg, who, html, opts, title) => { view = { kind: "scene", bg, speaker: who }; if (title) chap(title); text(who || "voce", html); buttons(opts, true); }, portraitImg, TRZ, MN_BORGO_BTN, CAST, BIO, seeCard, trGo, trAsk, trSay, trResume, L, trToast, TR_IDS, NPCS, trLevel, trZone: () => (TW ? TW.id : null), trPos: () => (TW ? [TW.x, TW.y] : null), trTileAt: (tx, ty) => (TW && TW.map && TW.map[ty] ? TW.map[ty][tx] || null : null), trKeys: () => (BW && BW.keys) || {}, cardsSeen: () => getList(CARDS), encHas: (id) => { try { return ENC_CATS.some((c) => c.members.includes(id)); } catch { return false; } }, encOpen: (id, back) => { try { if (!ENC_CATS.some((c) => c.members.includes(id))) return false; borgoEncyclopedia(back, undefined, id); return true; } catch { return false; } }, trFace: (d) => { if (TW) TW.dir = d; }, trExitTo, trRec, todayKey, hq: HQ_API, COSM, bCos, cosOwned: () => { try { return cosOwned(); } catch { return []; } }, heroSave: (h) => { writeJSON(HERO, h); heroCast(h); }, heroCast, storyEndings: () => { const got = getList(ENDS); return ENDINGS.map(([t, grp, hint]) => ({ title: t, group: grp, hint, found: got.includes(t) })); }, coins: () => bCoins(), openBorgoStorto: (back) => openBorgoStorto(back), cosOrder: () => { try { return ((B || borgoLoad()).cos || []).slice(); } catch { return []; } }, musicTheme, musicBg, musicNow: () => MU.cur, portraitTo: (ctx, id, x, y, sc) => { const main = g, sp = view.speaker; try { g = ctx; view.speaker = null; portrait(id, x, y, sc, false); } finally { g = main; view.speaker = sp; } }, chibiTo: (ctx, x, y, c, dir, ph) => { const main = g; try { g = ctx; chibi(x, y, c, dir, ph); } finally { g = main; } } };
+  window.__borgoApi = { match: apiMatch, matchPick: apiMatchPick, timing: bTiming, play, chap, scene: (bg, who, html, opts, title) => { view = { kind: "scene", bg, speaker: who }; if (title) chap(title); text(who || "voce", html); buttons(opts, true); }, portraitImg, TRZ, MN_BORGO_BTN, CAST, BIO, seeCard, trGo, trAsk, trSay, trResume, L, trToast, TR_IDS, NPCS, trLevel, trZone: () => (TW ? TW.id : null), trPos: () => (TW ? [TW.x, TW.y] : null), trTileAt: (tx, ty) => (TW && TW.map && TW.map[ty] ? TW.map[ty][tx] || null : null), trKeys: () => (BW && BW.keys) || {}, cardsSeen: () => getList(CARDS), encHas: (id) => { try { return ENC_CATS.some((c) => c.members.includes(id)); } catch { return false; } }, encOpen: (id, back) => { try { if (!ENC_CATS.some((c) => c.members.includes(id))) return false; borgoEncyclopedia(back, undefined, id); return true; } catch { return false; } }, trFace: (d) => { if (TW) TW.dir = d; }, trExitTo, trRec, todayKey, hq: HQ_API, COSM, bCos, cosOwned: () => { try { return cosOwned(); } catch { return []; } }, heroSave: (h) => { writeJSON(HERO, h); heroCast(h); }, heroCast, storyEndings: () => { const got = getList(ENDS); return ENDINGS.map(([t, grp, hint]) => ({ title: t, group: grp, hint, found: got.includes(t) })); }, coins: () => bCoins(), openBorgoStorto: (back) => openBorgoStorto(back), cosOrder: () => { try { return ((B || borgoLoad()).cos || []).slice(); } catch { return []; } }, musicTheme, musicBg, musicNow: () => MU.cur, portraitTo: (ctx, id, x, y, sc) => { const main = g, sp = view.speaker; try { g = ctx; view.speaker = null; portrait(id, x, y, sc, false); } finally { g = main; view.speaker = sp; } } };
   try { hairUnlocks(); } catch {} // chi ha già finito delle saghe trova subito le loro acconciature
   if (/[?&]debug/.test(location.search)) window.__borgoDbg = { get BW() { return BW; }, get B() { return B; }, BLD, borgo, borgoMap, borgoDoor, borgoOpenLevel };
   try { if (window.__storyNav && window.__storyNav.seedFromSaveState) window.__storyNav.seedFromSaveState(S); } catch {}

@@ -202,6 +202,16 @@
         "Il Codice del Fondatore",
         "Finale segreto: con tutti i 6 microchip raccolti e l'allarme mai al massimo, sblocchi il caveau nascosto del 1912 con il Pallone d'Oro originale.",
         "Inserisci la sequenza antica 1912-Rondine."
+      ],
+      colonnello_onore: [
+        "L'Onore del Colonnello",
+        "Dossier Incompiuto: Vane rifiuta la fuga con Valori e serra le paratie blindate, salvando la finale e riconsegnando i registri alla squadra.",
+        "Rifiuta l'ordine di fuga di Valori nel Capitolo 5."
+      ],
+      colonnello_redenzione: [
+        "L'Ultima Guardia",
+        "Dossier Incompiuto: Vane guida i giovani staffieri fuori dai sotterranei allagati, lasciando la divisa ma conquistando il rispetto del campo.",
+        "Scorta i ragazzi verso l'uscita d'emergenza nel Capitolo 5."
       ]
     }
   });
@@ -303,6 +313,55 @@
       acc: ["casco"],
       bg: ["#1e293b", "#ef4444"]
     }, "Sorveglia la porta a tenuta stagna del caveau con passo cadenzato e controlla i monitor della pressione del titanio.");
+
+    K.cast("fo_vane", {
+      name: "Colonnello Vane",
+      sub: "Comandante della Sicurezza",
+      style: "buzz",
+      hair: "#94a3b8",
+      eye: "#0284c7",
+      skin: "#e0ac7e",
+      shirt: "#0f172a",
+      beard: "baffi",
+      acc: ["berretto", "medaglia"],
+      bg: ["#0f172a", "#38bdf8"]
+    }, "Veterano integerrimo a capo del servizio di sicurezza dello Stadio Metropolitano. Trent'anni di servizio senza una macchia: scopre l'inganno di Valori e ribalta la barricata per difendere lo sport vero.");
+
+    K.cast("fo_tobia", {
+      name: "Tobia lo Staffiere",
+      sub: "Apprendista Centralinista",
+      style: "shaggy",
+      hair: "#b45309",
+      eye: "#38bdf8",
+      skin: "#fed7aa",
+      shirt: "#0369a1",
+      acc: ["chiave_inglese"],
+      bg: ["#0f172a", "#facc15"]
+    }, "Ragazzo di bottega cresciuto nei condotti dello stadio. Conosce ogni cavo e relè della struttura: fedele al Colonnello Vane fino all'ultimo secondo di recupero.");
+
+    K.cast("fo_scorta", {
+      name: "Guardia Rinaldi",
+      sub: "Veterano del Presidio",
+      style: "bald",
+      hair: "#64748b",
+      eye: "#334155",
+      skin: "#d4a373",
+      shirt: "#1e293b",
+      beard: "barba_corta",
+      bg: ["#0f172a", "#64748b"]
+    }, "Esperto tiratore e guardiano dei cancelli bassi. Non ama i discorsi lunghi, ma quando si tratta di sbarrare la strada a chi tradisce il club non arretra di un millimetro.");
+
+    K.cast("fo_tecnico", {
+      name: "Ingegnere Serra",
+      sub: "Custode dei Generatori",
+      style: "messy",
+      hair: "#475569",
+      eye: "#f59e0b",
+      skin: "#fcd34d",
+      shirt: "#334155",
+      acc: ["occhiali_protezione"],
+      bg: ["#1e293b", "#f59e0b"]
+    }, "Responsabile delle turbine a gas sotterranee. Sa che un sovraccarico programmato può far saltare l'intero isolato: rifiuta di obbedire al sabotaggio di Valori.");
   }
   casts();
 

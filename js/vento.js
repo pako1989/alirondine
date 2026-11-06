@@ -65,6 +65,8 @@
       turbine: ["LE TURBINE", "La valle diventa ricca e silenziosa. I Soffi se ne vanno, uno alla volta.", "Serve un patto forte con la Compagnia delle Turbine."],
       custode: ["IL NUOVO CUSTODE", "Resti. Il prato ha di nuovo un custode, e tu una casa.", "Resta, quando la valle te lo chiede."],
       soffio: ["L'ULTIMO SOFFIO", "Mormorio gioca un'ultima partita, poi diventa vento.", "Segreto: tutti i Soffi, la piena fiducia di Selva e il Quaderno quasi completo."],
+      vento_custode: ["IL CANTO DELL'ANTICO MULINO", "Dossier Incompiuto: Mara riattiva le macine cantando la melodia dei Soffi; la valle ritrova il suo respiro secolare.", "Accetta il ruolo di custode solitaria nel Capitolo 5."],
+      vento_rinascita: ["LA RETE DELL'AURORA", "Dossier Incompiuto: La campana di Mulinella suona all'unisono con tutti i mulini; il vento torna a soffiare libero su ogni collina.", "Fai rintoccare la campana insieme a tutta la valle nel Capitolo 5."],
     },
     heroLook: (h, K) => ({ bg: ["#2c4a3c", "#cfe6b0"], shirt: K.F.is("ve_grembiule") ? "#5a8a4a" : h.shirt }),
     heroTitle: (K) => (K.F.is("ve_chiave") ? "custode del prato" : "forestiero"),

@@ -137,7 +137,11 @@
 
   function create(cfg) {
     cfg = obj(cfg);
-    const ID = String(cfg.id || "saga"), KEY = cfg.key || "ali-di-rondine." + ID, TS = 16, NCH = cfg.chapters || 3, TITLE = cfg.title || "Saga", ICON = cfg.icon || "📖", BG0 = cfg.bg || "title";
+    const ID = String(cfg.id || "saga"), KEY = cfg.key || "ali-di-rondine." + ID, TS = 16;
+    let NCH = cfg.chapters || 3;
+    const isDossierEnabled = () => safe(() => localStorage.getItem("ali.dossier_enabled") !== "0", true);
+    let avatarOverride = null;
+    const TITLE = cfg.title || "Saga", ICON = cfg.icon || "📖", BG0 = cfg.bg || "title";
     const TH = Object.assign({ accent: "#e8c46a", ink: "#f4efe0", paper: "rgba(18,20,26,.84)", font: "Georgia, serif", chipBg: "#2a2c34ee", chipBorder: "#8a8070" }, obj(cfg.theme));
     let api = null, tries = 0, EXIT = null, inMatch = false;
     const SFX = Object.assign({}, SFX0, obj(cfg.sfx));
@@ -193,6 +197,9 @@
       const m = mem(); let sn = m.snap && m.snap[n];
       if (!sn && n === 1) { sn = { st: {}, flags: {} }; Object.keys(STATS).forEach((q) => { sn.st[q] = STATS[q][2]; }); }
       m.max = Math.max(m.max || 1, m.ch, n);
+      const c = CHAPTERS[n];
+      if (c && c.avatar) { avatarOverride = Object.assign({ num: 10 }, c.avatar); castHero(); }
+      else { avatarOverride = null; castHero(); }
       if (!sn) { m.ch = n; save(); return false; } // salvataggio vecchio, senza istantanea: si rigioca com'è
       m.st = Object.assign({}, sn.st); m.flags = Object.assign({}, sn.flags); m.zone = "";
       // si rigioca davvero: tornano le scene d'apertura dei capitoli da n in poi e quelle dei loro luoghi
@@ -209,13 +216,20 @@
     const bond = (k, d) => { const m = mem(), s = STATS[k]; if (!s) return 0; m.st[k] = Math.max(s[0], Math.min(s[1], (m.st[k] | 0) + d)); save(); return m.st[k]; };
 
     // -------------------------------------------------------------- il Campione
-    const hero = () => safe(() => (typeof window.heroLoad === "function" ? window.heroLoad() : null), null);
+    const hero = () => {
+      if (avatarOverride) return avatarOverride;
+      return safe(() => (typeof window.heroLoad === "function" ? window.heroLoad() : null), null);
+    };
     function T(s) {
       const h = hero() || { name: "Campione", num: 9, shotName: "il tuo tiro" };
       return String(s).replace(/\{n\}/g, () => h.name).replace(/\{num\}/g, () => h.num).replace(/\{tiro\}/g, () => h.shotName || "il tuo tiro");
     }
     function castHero() {
       const h = hero(), C = api && api.CAST; if (!h || !C) return;
+      if (avatarOverride && avatarOverride.cast) {
+        C.hero = Object.assign({}, C.hero || {}, avatarOverride.cast, { name: avatarOverride.name || h.name });
+        return;
+      }
       const extra = cfg.heroLook ? obj(safe(() => cfg.heroLook(h, K), {})) : {};
       C.hero = Object.assign({}, C.hero || {}, { name: h.name, tag: "", hair: h.hair, style: h.style, skin: h.skin, eye: h.eye, bg: ["#1a1c24", TH.accent], shirt: h.shirt, num: String(h.num), acc: h.acc, accId: h.accId, cap: h.acc === "cappellino" ? "#ffd23f" : h.acc === "berretto" ? "#26324a" : undefined }, extra);
     }
@@ -517,7 +531,8 @@
     function choicesHtml() {
       const m = mem(), l = m.choices || []; if (!l.length) return "";
       let out = "<br><br><b>Schema delle scelte</b>";
-      for (let n = 1; n <= NCH; n++) {
+      const maxCh = isDossierEnabled() ? Math.max(NCH, ...Object.keys(CHAPTERS).map(Number)) : (cfg.chapters || 3);
+      for (let n = 1; n <= maxCh; n++) {
         const cs = l.filter((x) => x.c === n); if (!cs.length) continue;
         out += `<br><span style="color:var(--dim)">Capitolo ${n}${CHAPTERS[n] ? " · " + esc(CHAPTERS[n].title) : ""}</span>`;
         cs.forEach((x) => { out += `<br>• ${esc(x.q.length > 90 ? x.q.slice(0, 88) + "…" : x.q)}` + x.o.map((t, i) => `<br>&nbsp;&nbsp;${i === x.p ? "<b>▶ " + esc(t) + "</b>" + (x.d ? ` <span style="color:var(--dim)">(${esc(x.d)})</span>` : "") : `<span style="color:var(--dim)">▷ ${esc(t)}</span>`}`).join(""); });
@@ -530,7 +545,14 @@
       if (inZone) return api.trAsk("voce", html, jb, bgNow());
       api.scene(BG0, "voce", html, jb, JN());
     }
-    function finishChapter(n, ending) { const m = mem(); m.done[n] = String(ending || "ok").slice(0, 24); if (m.ch <= n && n < NCH) m.ch = n + 1; if (n < NCH) takeSnap(n + 1); m.max = Math.max(m.max || 1, m.ch, Math.min(n + 1, NCH)); save(); SFX.end(); }
+    function finishChapter(n, ending) {
+      const m = mem(); m.done[n] = String(ending || "ok").slice(0, 24);
+      const curMax = isDossierEnabled() ? Math.max(NCH, ...Object.keys(CHAPTERS).map(Number)) : (cfg.chapters || 3);
+      if (m.ch <= n && n < curMax && CHAPTERS[n + 1]) m.ch = n + 1;
+      if (n < curMax && CHAPTERS[n + 1]) takeSnap(n + 1);
+      m.max = Math.max(m.max || 1, m.ch, Math.min(n + 1, curMax));
+      save(); SFX.end();
+    }
 
     // -------------------------------------------------------------- zone sul motore TRZ
     // PERSONAGGI CHE CAMMINANO: un PNG con route: [[x,y], [x,y], …] gira per la zona (speed, pause). Si ferma e si gira
@@ -712,7 +734,7 @@
         bus: "uscita", busLabel: "Esci dalla saga",
         item: spec.item || cfg.item || ["Piuma", "Piume"], itemCos: spec.itemCos, items: spec.items || [], bld: [], npcs: [], areas: spec.areas || [], hints: {}, pitch: spec.pitch || [-20, -20, 1, 1],
         solid: SOLID, act: Object.assign({ [REST.ch]: REST.label, x: "Apri il baule", q: "Entra" }, obj(cfg.act), spec.act || {}), intro: [],
-        me: () => { const c = api.CAST.hero || api.CAST.leo; return Object.assign({}, c); },
+        me: () => { if (avatarOverride && avatarOverride.cast) return Object.assign({}, avatarOverride.cast); const c = api.CAST.hero || api.CAST.leo; return Object.assign({}, c); },
         pass: () => (cfg.pass ? safe(() => cfg.pass(K, zid), "") || "" : ""), // tessere che l'eroe può attraversare adesso (forme, poteri)
         heroFx: cfg.heroFx ? () => safe(() => cfg.heroFx(K, zid), null) : null, // l'aspetto dell'eroe in esplorazione: { s: scala, dy: volo, cape: colore, aura }
         drawItem(x, y, i) {
@@ -982,15 +1004,19 @@
     function openMain(o) {
       if (o && typeof o.onExit === "function") EXIT = o.onExit;
       reload();
-      { const m0 = mem(), fe = m0.done && m0.done[NCH]; if (fe && ENDINGS[fe] && !m0.ends.includes(fe)) { m0.ends.push(fe); save(); } } // saga che chiudeva l'ultimo capitolo senza K.end: il finale raggiunto si recupera
+      const maxCh = isDossierEnabled() ? Math.max(NCH, ...Object.keys(CHAPTERS).map(Number)) : (cfg.chapters || 3);
+      { const m0 = mem(), fe = m0.done && m0.done[maxCh]; if (fe && ENDINGS[fe] && !m0.ends.includes(fe)) { m0.ends.push(fe); save(); } } // saga che chiudeva l'ultimo capitolo senza K.end: il finale raggiunto si recupera
+      const c = activeChapter();
+      if (c && c.avatar) { avatarOverride = Object.assign({ num: 10 }, c.avatar); }
+      else { avatarOverride = null; }
       const h = hero();
       if (!h) return api.scene(BG0, "voce", `<b>${esc(TITLE)}</b><br>${esc((cfg.texts && cfg.texts.noHero) || "Prima crea il tuo Campione.")}`, [
         { label: "Crea il tuo Campione", sub: "Nome, numero e tiro speciale", cls: "hot", fn: () => { if (typeof window.heroEditor === "function") window.heroEditor(openMain); } },
         { label: "◂ Indietro", fn: leave },
       ], TITLE);
       castHero();
-      const c = activeChapter(), m = mem(), cur = c && m.done[c.n], nextOk = !!CHAPTERS[(c ? c.n : 0) + 1];
-      const status = m.done[NCH] ? `Storia conclusa. Finali trovati: ${m.ends.length} su ${Object.keys(ENDINGS).length}.` : cur ? (nextOk ? "Il prossimo capitolo ti aspetta." : "Capitolo concluso · il prossimo è in arrivo.") : goalNow();
+      const m = mem(), cur = c && m.done[c.n], nextOk = !!CHAPTERS[(c ? c.n : 0) + 1];
+      const status = m.done[maxCh] ? `Storia conclusa. Finali trovati: ${m.ends.length} su ${Object.keys(ENDINGS).length}.` : cur ? (nextOk ? "Il prossimo capitolo ti aspetta." : "Capitolo concluso · il prossimo è in arrivo.") : goalNow();
       const extra = cfg.mainExtra ? arr(safe(() => cfg.mainExtra(K), [])) : [];
       api.scene(BG0, "voce", `<b>${ICON} ${esc(TITLE)}</b><br>${esc(h.name)}${cfg.heroTitle ? " · " + esc(safe(() => cfg.heroTitle(K), "")) : ""}<br><span style="color:var(--dim)">${c ? esc("Capitolo " + c.n + " · " + c.title) : ""}<br>${esc(status)}</span>`, [
         { label: c && !m.intro["ch" + c.n] ? (c.n > 1 ? `Inizia il Capitolo ${c.n}` : "Inizia la storia") : "Continua la storia", sub: c ? `Capitolo ${c.n} · ${c.title}` : "", cls: "hot", fn: continueStory },
@@ -1009,12 +1035,40 @@
     }
     function chapters() {
       const m = mem(), opts = [];
-      for (let n = 1; n <= NCH; n++) {
-        const c = CHAPTERS[n], open = c && (n === 1 || m.done[n - 1] || m.ch >= n || (m.max || 1) >= n);
-        if (open) opts.push({ label: `${m.done[n] ? "✓" : "▸"} Capitolo ${n} · ${c.title}`, sub: m.done[n] ? "Concluso · rigioca" : c.sub || "", cls: m.ch === n ? "hot" : "", fn: () => { const cur = n === m.ch && !m.done[n];
-          api.scene(BG0, "voce", `<b>Rigiochi il capitolo ${n}?</b><br><span style="color:var(--dim)">Riparti dai parametri e dalle scelte con cui l'avevi iniziato. I finali trovati, le monete e i cosmetici restano tuoi.${n < NCH ? " I capitoli già raggiunti restano giocabili." : ""}${n > 1 && !(m.snap && m.snap[n]) ? " (Salvataggio precedente a questa funzione: questo capitolo si rigioca com'è, senza tornare indietro.)" : ""}</span>`,
-            [...(cur ? [{ label: "▶ Continua da dove eri", cls: "hot", fn: continueStory }] : []), { label: cur ? "↻ Ricomincia il capitolo dall'inizio" : "Sì, rigioca dall'inizio", sub: "Con le scene d'apertura", cls: cur ? "" : "hot", fn: () => { rewindTo(n); m.ch = n; save(); continueStory(); } }, { label: "◂ Indietro", fn: chapters }], TITLE); } });
-        else opts.push({ label: `• Capitolo ${n} · ${c ? c.title : "???"}`, sub: c ? "Finisci il capitolo prima" : "In arrivo", disabled: true, fn: chapters });
+      const dEnabled = isDossierEnabled();
+      const maxCh = dEnabled ? Math.max(NCH, ...Object.keys(CHAPTERS).map(Number)) : (cfg.chapters || 3);
+      for (let n = 1; n <= maxCh; n++) {
+        const c = CHAPTERS[n];
+        const isDossier = n >= 4;
+        let open = false;
+        if (!isDossier) {
+          open = c && (n === 1 || m.done[n - 1] || m.ch >= n || (m.max || 1) >= n);
+        } else {
+          const canUnlock = m.ends && m.ends.length >= 2;
+          open = c && canUnlock && (n === 4 || m.done[n - 1] || m.ch >= n || (m.max || 1) >= n);
+        }
+        if (open) {
+          const badge = isDossier ? "📂 " : "";
+          const subText = isDossier
+            ? (m.done[n] ? "Dossier concluso · rigioca" : (c.sub || "Fascicolo segreto · Ruolo invertito"))
+            : (m.done[n] ? "Concluso · rigioca" : c.sub || "");
+          opts.push({
+            label: `${m.done[n] ? "✓" : "▸"} ${badge}Capitolo ${n} · ${c.title}`,
+            sub: subText,
+            cls: m.ch === n ? "hot" : "",
+            fn: () => {
+              const cur = n === m.ch && !m.done[n];
+              api.scene(BG0, "voce", `<b>Rigiochi il capitolo ${n}?</b><br><span style="color:var(--dim)">Riparti dai parametri e dalle scelte con cui l'avevi iniziato. I finali trovati, le monete e i cosmetici restano tuoi.${n < maxCh ? " I capitoli già raggiunti restano giocabili." : ""}${n > 1 && !(m.snap && m.snap[n]) ? " (Salvataggio precedente a questa funzione: questo capitolo si rigioca com'è, senza tornare indietro.)" : ""}</span>`,
+                [...(cur ? [{ label: "▶ Continua da dove eri", cls: "hot", fn: continueStory }] : []), { label: cur ? "↻ Ricomincia il capitolo dall'inizio" : "Sì, rigioca dall'inizio", sub: "Con le scene d'apertura", cls: cur ? "" : "hot", fn: () => { rewindTo(n); m.ch = n; save(); continueStory(); } }, { label: "◂ Indietro", fn: chapters }], TITLE);
+            }
+          });
+        } else {
+          if (isDossier && (!m.ends || m.ends.length < 2)) {
+            opts.push({ label: `🔒 📂 Capitolo ${n} · Dossier Incompiuto`, sub: "Trova almeno 2 finali per aprire questo fascicolo", disabled: true, fn: chapters });
+          } else {
+            opts.push({ label: `• Capitolo ${n} · ${c ? c.title : "???"}`, sub: c ? "Finisci il capitolo prima" : "In arrivo", disabled: true, fn: chapters });
+          }
+        }
       }
       opts.push({ label: "Ricomincia da capo", sub: "Cancella solo questo salvataggio", fn: resetAsk });
       opts.push({ label: "◂ Indietro", fn: openMain });
@@ -1034,6 +1088,8 @@
     }
     function continueStory() {
       const c = activeChapter(), m = mem(); if (!c) return;
+      if (c.avatar) { avatarOverride = Object.assign({ num: 10 }, c.avatar); castHero(); }
+      else { avatarOverride = null; castHero(); }
       if (!m.diffSet && !m.intro["ch" + c.n] && c.n === 1) return diffMenu(continueStory, true);
       if (!m.intro["ch" + c.n]) {
         if (!m.snap || !m.snap[c.n]) takeSnap(c.n); m.intro["ch" + c.n] = 1; m.last = Date.now(); save();
@@ -2027,6 +2083,8 @@
       minigame: (start, o, cb) => ownMatch(start, Object.assign({}, o, { done: (r) => safe(() => cb(r || {}), null) })),
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
       ending: (id, d) => { ENDINGS[id] = d; },
+      setHeroOverride: (ov) => { avatarOverride = ov ? Object.assign({ num: 10 }, ov) : null; castHero(); },
+      getHeroOverride: () => avatarOverride,
       continueStory: () => continueStory(), hasChapter: (n) => !!CHAPTERS[n], setInMatch: (v) => { inMatch = !!v; }, openMain: () => openMain(),
     };
     function addChapter(fn) {
@@ -2034,6 +2092,7 @@
       const def = typeof fn === "function" ? fn(K) : fn;
       if (!def || !def.n || CHAPTERS[def.n]) return;
       CHAPTERS[def.n] = def;
+      if (def.n > NCH) NCH = def.n;
       Object.keys(def.zones || {}).forEach((zid) => registerZone(def.n, zid, def.zones[zid]));
       Object.keys(def.patch || {}).forEach((zid) => { const p = def.patch[zid]; if (p.act && ZONES[zid]) Object.assign(ZONES[zid].Z.act, p.act); });
     }

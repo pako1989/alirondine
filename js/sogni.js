@@ -203,6 +203,7 @@
     // Colpo al Fortino · La Notte del Trofeo Scomparso
     ["fo_lupin", "fortino", "e", 78, 62, 86, "A", 1], ["fo_turing", "fortino", "r", 60, 72, 82, "C", 1],
     ["fo_gargoyle", "fortino", "r", 52, 84, 68, "D", 2], ["fo_boss", "fortino", "l", 82, 70, 75, "C", 3],
+    ["fo_vane", "fortino", "l", 72, 92, 80, "D", 5], ["fo_tobia", "fortino", "r", 64, 60, 78, "C", 4],
     // Tactics Note · Il Quaderno del Giudizio
     ["qd_raito", "note", "e", 86, 68, 88, "A", 1], ["qd_ryu", "note", "l", 82, 70, 92, "C", 1],
     ["qd_misa", "note", "r", 78, 54, 76, "A", 2], ["qd_elle", "note", "l", 64, 88, 94, "C", 2],
@@ -397,6 +398,7 @@
     ["dc_agata", "detective", "c", 56, 70, 72, "P"], ["dc_nina", "detective", "c", 62, 56, 68, "C"], ["dc_vanni", "detective", "r", 54, 66, 72, "D"],
     ["so_blop", "spazio", "c", 60, 64, 62, "D"], ["so_mira", "spazio", "c", 58, 58, 74, "C"], ["so_zorgo", "spazio", "r", 74, 56, 66, "A"],
     ["ve_selva", "vento", "c", 60, 60, 66, "C"], ["ve_sbuffo", "vento", "c", 56, 66, 60, "D"], ["ve_mormorio", "vento", "r", 66, 58, 72, "A"],
+    ["ve_mara", "vento", "e", 74, 66, 88, "C", 5], ["ve_eliseo", "vento", "r", 58, 80, 68, "D", 4],
     ["ep_ada", "dopo", "c", 54, 62, 70, "C"], ["ep_bruno", "dopo", "r", 72, 62, 70, "A"], ["ep_tecla", "dopo", "c", 56, 66, 64, "D"],
     ["tm_custode", "mondi", "e", 70, 70, 80, "C"], ["tm_eclisse", "mondi", "l", 80, 76, 76, "A"],
   ].concat(NEWC).map(([id, saga, rar, at, df, te, role, n]) => (n ? { id, saga, rar, at, df, te, role, n } : { id, saga, rar, at, df, te, role }));
@@ -508,6 +510,8 @@
     fo_turing: "Firewall superato, frequenze allineate: palla nel sette a colpo sicuro!",
     fo_gargoyle: "Disciplina di ferro sul campo e nella camera blindata: qui non si passa.",
     fo_boss: "Un trofeo di cent'anni non si tocca: ma il talento vale più di quaranta milioni.",
+    fo_vane: "La mia barriera non cede. Né davanti a un tiro potente, né davanti a un ordine ingiusto.",
+    fo_tobia: "Cavi isolati e contropiede pronto: quando il Colonnello dà il segnale, scatto!",
     qd_raito: "Questo è il mio nuovo mondo: ogni contrasto è stato previsto esattamente al millimetro.",
     qd_elle: "La probabilità che questa parabola entri all'incrocio era del 99,4%. L'ho verificata.",
     qd_ryu: "Eh eh eh... Un gol magnifico in cambio di una bella mela rossa croccante!",
@@ -588,6 +592,7 @@
     dc_agata: "Ho le prove: questa squadra è la migliore.", dc_nina: "Prima pagina: «Trionfo dei Sogni». Lo scrivo io.", dc_vanni: "Verbale firmato. Partita vinta, timbro e controfirma.",
     so_blop: "Blop! (Blop significa: passa la palla.)", so_mira: "Ho ricalcolato la traiettoria: è gol al 99,8%.", so_zorgo: "Tre occhi vedono tre passaggi in più.",
     ve_selva: "Il vento gentile soffia sempre verso la porta giusta.", ve_sbuffo: "Fffff! (Il pallone vola più leggero.)", ve_mormorio: "Ascolta: anche l'erba fa il tifo.",
+    ve_mara: "Il vento non si comanda: si asseconda con un tocco morbido d'esterno.", ve_eliseo: "Ho visto sessanta inverni quassù: conosco il giro che prenderà il pallone prima ancora che parta.",
     ep_ada: "In ogni epoca c'è un gol che aspetta di essere segnato.", ep_bruno: "Nel '28 si giocava col cuoio pesante. Il cuore era lo stesso.", ep_tecla: "La storia della famiglia la scriviamo in campo.",
     tm_custode: "Ogni porta si apre, prima o poi. Anche quella avversaria.", tm_eclisse: "Anche il buio ha bisogno di una squadra.",
     // Vallombra e le altre saghe a capitoli: frasi di tre stelle, senza anticipazioni
@@ -716,6 +721,8 @@
     ["vs_ottone", "fg_ottone", "Gli Ottoni (due scatole, un caffè)"], ["vp_ermete", "vs_ottone", "Custodi di dighe e di scatole"], ["vp_valvola", "dz_sterling", "Ingegneri e Osservatori"], ["vs_vulpe", "nr_kira", "Radio & Codici"], ["vs_corvo", "dz_sterling", "Sorveglianza & Servizi"], ["vs_eco", "qd_elle", "Dossier & Deduzioni"],
     ["sg_miriel", "cc_lyra", "Armonie di Cristallo & Sigilli"], ["sg_preside", "fo_lupin", "I Segreti dei Maestri"],
     ["fo_lupin", "dz_sterling", "Ombre & Servizi Segreti"], ["fo_turing", "te_valenti", "Crittografi del Binario"],
+    ["fo_vane", "fo_lupin", "Guardia & Ladro Gentiluomo"], ["fo_vane", "fo_boss", "L'Ultimo Ammutinamento"],
+    ["ve_mara", "ve_selva", "Le Figlie del Vento"], ["ve_mara", "ve_eliseo", "Campane & Pale di Pietra"],
     ["qd_raito", "qd_elle", "Duello Mentale"], ["qd_ryu", "qd_misa", "Occhi dello Shinigami"], ["qd_elle", "dc_agata", "Deduzioni & Lavagna"],
     ["ce_selce", "dc_agata", "Mappe & Indagini"], ["ce_tamburo", "fa_mirella", "Meccanica & Rinvii"],
     ["dz_sterling", "mn_desantis", "Servizi Segreti & Questura"], ["dz_eva", "dc_agata", "Crittografia & Indagini"],
@@ -1258,6 +1265,12 @@
       [0, "ride", "Volevo solo controllare se avesse un laser nascosto nella ghiera, Agente. Glielo rendo lucidato."],
       [1, "serio", "Tenga pure il fumo di scena: in area di rigore i suoi scassi ci fanno parecchio comodo."],
       [0, "felice", "E a me fa comodo chi copre la fuga in smoking senza sgualcirsi il bavero!"]
+    ]],
+    ["fo_vane", "fo_lupin", "Panca corazzata · Medaglie e grimaldelli", [
+      [0, "serio", "Volpe, giù le mani dal mio fischietto di servizio. Non è placcato in platino, è solo acciaio temperato."],
+      [1, "ride", "Comandante, dopo avervi visto sbarrare le paratie blindate contro Valori, quel fischietto meriterebbe il museo!"],
+      [0, "pensa", "Il dovere non si espone in bacheca. Si compie. E la tua finta sulla trequarti non era male, per un ladro."],
+      [1, "felice", "Detto da un Colonnello che non ha concesso un solo metro di campo in trent'anni... vale più di un trofeo."]
     ]],
     ["sg_preside", "fo_lupin", "Corridoio a volte · Moneta che gira", [
       [0, "pensa", "Quella finta sul primo palo non era magia accademica… era puro prestigio da strada."],
@@ -3263,5 +3276,5 @@
   }
   // la Maglia dei Sogni nel guardaroba (si registra all'avvio, così resta anche dopo aver ricaricato la pagina)
   (function reg() { const A = window.__borgoApi; if (!A || !A.COSM) return setTimeout(reg, 200); if (!A.COSM.sg_maglia) A.COSM.sg_maglia = { kind: "shirt", label: "Maglia dei Sogni", val: "#7a5ad8", from: "Vinci il Torneo dei Sogni (Salone delle Saghe)" }; })();
-  window.__sogni = { _progress: progress, _seen: seen, premio: { on: premOn, setOn: premSet, open: openPrem }, scrittura: { on: scritturaOn, setOn: scritturaSet, makeCard: makeComparsaCard }, squad, lineup, SAGHE, BY, eff, name, port, _save: save, open, close: closeAll, _launch: launch, _tiers: tiers, CARDS, LINKS, SFIDE, TEAMS, FRASI, intesa, forza, sync, stagione, draft, stars: (id) => { XPC = load().xp; return starsOf(id); }, _load: load, MODULI, modSintonia, openModDetail, openCardLore, combo: getTeamCombo, openVoci, openVoceScene, recordVoci, vociStats, pairKey, BOND_GOAL, toggleBench, autoBench, switchPreset, renamePreset, presetsBarHtml, bindPresetsBar, gainXp, levelUps };
+  window.__sogni = { _progress: progress, _seen: seen, unlockCard: (id) => { const r = load(); if (!r.own.includes(id)) { r.own.push(id); save(r); } }, premio: { on: premOn, setOn: premSet, open: openPrem }, scrittura: { on: scritturaOn, setOn: scritturaSet, makeCard: makeComparsaCard }, squad, lineup, SAGHE, BY, eff, name, port, _save: save, open, close: closeAll, _launch: launch, _tiers: tiers, CARDS, LINKS, SFIDE, TEAMS, FRASI, intesa, forza, sync, stagione, draft, stars: (id) => { XPC = load().xp; return starsOf(id); }, _load: load, MODULI, modSintonia, openModDetail, openCardLore, combo: getTeamCombo, openVoci, openVoceScene, recordVoci, vociStats, pairKey, BOND_GOAL, toggleBench, autoBench, switchPreset, renamePreset, presetsBarHtml, bindPresetsBar, gainXp, levelUps };
 })();
