@@ -223,7 +223,7 @@
       .spogTopBar .closeBtn:hover { background: #352a5a; color: #ffd23f; }
       
       .spogContent { display: flex; flex: 1; overflow: hidden; }
-      @media (max-width: 820px) { .spogContent { flex-direction: column; overflow-y: auto; } }
+      @media (max-width: 820px) { .spogContent { flex-direction: column; overflow-y: auto; min-height: 0; -webkit-overflow-scrolling: touch; } }
 
       /* COLONNA SINISTRA: ANTEPRIMA LIVE */
       .spogLeftCol { width: 330px; flex-shrink: 0; background: #100d1e; border-right: 1px solid #241d38; padding: 16px; display: flex; flex-direction: column; gap: 14px; align-items: center; overflow-y: auto; }
@@ -288,6 +288,14 @@
       .spogSaveBtn:hover { transform: translateY(-1px); }
       .spogDiscardBtn { background: transparent; border: 1px solid #44356a; border-radius: 8px; color: #b7abd2; padding: 8px 16px; font-size: 13px; font-weight: 700; cursor: pointer; }
       .spogDiscardBtn:hover { background: #221b36; color: #fff; }
+      @media (max-width: 820px) {
+        .spogLeftCol { overflow: visible; flex-shrink: 0; }
+        .spogRightCol { flex: none; overflow: visible; }
+        .spogTabs { position: sticky; top: 0; z-index: 2; }
+        .spogTabBody { flex: none; overflow: visible; padding: 14px 14px 90px; }
+        .spogFooter { position: fixed; left: 0; right: 0; bottom: 0; z-index: 3; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); gap: 10px; }
+        .spogSaveBtn { flex: 1; padding: 10px 12px; font-size: 13px; }
+      }
     `;
     document.body.appendChild(st);
   }
@@ -320,7 +328,7 @@
     pctx.clearRect(0, 0, pCanvas.width, pCanvas.height);
     const api = window.__borgoApi;
     if (api && typeof api.portraitTo === "function" && api.CAST && api.CAST.hero) {
-      api.portraitTo(pctx, 48, 48, api.CAST.hero, SPOG.animFrame);
+      api.portraitTo(pctx, "hero", 48, 50, 0.72);
     } else {
       // Fallback semplice
       pctx.fillStyle = SPOG.h.shirt || "#ff4d5a";
@@ -339,7 +347,9 @@
     const ph = SPOG.previewMode === "cel" ? 0 : (SPOG.animFrame / 5);
 
     // Usa chibi globale di game.js
-    if (typeof window.chibi === "function" && api && api.CAST && api.CAST.hero) {
+    if (api && typeof api.chibiTo === "function" && api.CAST && api.CAST.hero) {
+      api.chibiTo(sctx, 0, 0, { ...api.CAST.hero }, curDir, ph);
+    } else if (typeof window.chibi === "function" && api && api.CAST && api.CAST.hero) {
       // Configurazione sprite con pattern
       const heroSpec = { ...api.CAST.hero };
       window.chibi(0, 0, heroSpec, curDir, ph);
@@ -358,6 +368,7 @@
       document.body.appendChild(ov);
     }
 
+    const keepScroll = [".spogContent", ".spogTabBody", ".spogLeftCol"].map((q) => { const el = ov.querySelector(q); return [q, el ? el.scrollTop : 0]; });
     const h = SPOG.h;
     const tier = getHeroTier();
     const stats = getHeroStats(h, tier);
@@ -455,6 +466,7 @@
       </div>
     `;
 
+    keepScroll.forEach(([q, y]) => { const el = ov.querySelector(q); if (el && y) el.scrollTop = y; });
     bindEventListeners();
   }
 
@@ -980,7 +992,7 @@
         const cctx = cCanvas.getContext("2d");
         const api = window.__borgoApi;
         if (api && typeof api.portraitTo === "function" && api.CAST && api.CAST.hero) {
-          api.portraitTo(cctx, 60, 60, api.CAST.hero, 0);
+          api.portraitTo(cctx, "hero", 60, 66, 0.9);
         }
       }
     }
