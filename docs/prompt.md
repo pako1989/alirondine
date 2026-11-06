@@ -451,3 +451,10 @@ Proposte in attesa di scelta, in una riga ciascuna (tono: S serio, M mix, D deme
 - Dialoghi e popup corti e leggibili. Salvataggi vecchi sempre intatti.
 - Test già falliti prima delle tue modifiche (non tuoi): `tests/sogni.cjs`. Segnalali, non correggerli a meno che il tuo lavoro li tocchi.
 - Una saga per chat, una IA alla volta sulla stessa saga.
+
+## Core «Dossier Incompiuti» (estensione opzionale, tutte le saghe)
+- Capitoli EXTRA oltre quelli base (`cfg.chapters`): saga da 3 → cap. 4-5; saga da 5 → cap. 6-7. NON cambiare `cfg.chapters`: i capitoli extra si aggiungono con `addChapter` in file nuovi (es. `js/<saga>-c4.js`).
+- Sblocco: opzione Impostazioni «Dossier Incompiuti» (`ali.dossier_enabled`) + almeno 2 finali trovati. Menu capitoli con badge 📂.
+- Punto di vista diverso: nel capitolo `avatar: { name, num, cast: {…look…} }` oppure `K.setHeroOverride(ov)`.
+- Finali estesi in `endings` della saga; carte Sogni sbloccabili con `window.__sogni.unlockCard(id)`.
+- Hook globali (`window.trTalkHook`): MAI richiamare il precedente se esiste il setter a catena (ricorsione infinita). Meglio usare `talk`/`act` del capitolo.

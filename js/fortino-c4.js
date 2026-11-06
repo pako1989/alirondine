@@ -209,7 +209,9 @@
     };
 
     // Interazione con la console radio (step 2 -> step 3)
-    const prevHook = window.trTalkHook;
+    // se c'è il registro a catena (setter di cage-borgo) l'assegnazione si accoda e NON va richiamato il precedente: altrimenti ricorsione infinita
+    const hookDesc = Object.getOwnPropertyDescriptor(window, "trTalkHook"), hookChained = !(hookDesc && hookDesc.set);
+    const prevHook = hookChained ? window.trTalkHook : null;
     window.trTalkHook = function (id) {
       if (id === "T" && K.inZone("fo_centrale") && S() === 2) {
         say("voce", "La radiolina gracchiante emette la voce concitata di Valori:");
@@ -247,7 +249,7 @@
         ]);
         return true;
       }
-      return typeof prevHook === "function" ? prevHook(id) : null;
+      return typeof prevHook === "function" ? prevHook(id) : false;
     };
 
     return chapterDef;

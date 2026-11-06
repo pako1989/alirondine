@@ -139,7 +139,11 @@
     cfg = obj(cfg);
     const ID = String(cfg.id || "saga"), KEY = cfg.key || "ali-di-rondine." + ID, TS = 16;
     let NCH = cfg.chapters || 3;
+    const BASE = cfg.chapters || 3; // capitoli "veri" della saga: i Dossier Incompiuti sono solo quelli OLTRE questi
     const isDossierEnabled = () => safe(() => localStorage.getItem("ali.dossier_enabled") !== "0", true);
+    const hasDossier = () => Object.keys(CHAPTERS).some((k) => +k > BASE);
+    const dossierOpen = () => { const m = mem(); return isDossierEnabled() && !!(m.ends && m.ends.length >= 2); };
+    const chLimit = () => (dossierOpen() ? Math.max(BASE, ...Object.keys(CHAPTERS).map(Number)) : BASE);
     let avatarOverride = null;
     const TITLE = cfg.title || "Saga", ICON = cfg.icon || "📖", BG0 = cfg.bg || "title";
     const TH = Object.assign({ accent: "#e8c46a", ink: "#f4efe0", paper: "rgba(18,20,26,.84)", font: "Georgia, serif", chipBg: "#2a2c34ee", chipBorder: "#8a8070" }, obj(cfg.theme));
@@ -178,7 +182,7 @@
       m.met = [...new Set(arr(o.met).filter((x) => typeof x === "string" && FLAG_RE.test(x)))].slice(0, 80); // i personaggi incontrati (per la pagina «Personaggi»)
 
       // capitolo più avanzato raggiunto: i capitoli già raggiunti restano giocabili anche dopo un «rivivi»
-      m.max = Math.max(m.ch, clampI(o.max, 1, 9, 1), ...Object.keys(m.done).map((k) => Math.min(+k + 1, NCH)), m.ends.length ? NCH : 1);
+      m.max = Math.max(m.ch, clampI(o.max, 1, 9, 1), ...Object.keys(m.done).map((k) => Math.min(+k + 1, BASE)), m.ends.length ? BASE : 1);
       return m;
     }
     let MEM = null;
@@ -387,7 +391,7 @@
     const PASS = Object.freeze({ pass: true }); // K.PASS: «qui risponde il capitolo prima»
     const zoneRec = () => (api ? ZONES[api.trZone()] || null : null);
     const bgNow = () => (zoneRec() && zoneRec().spec.bg) || BG0;
-    const activeChapter = () => { const m = mem(); let best = null; Object.keys(CHAPTERS).map(Number).sort((a, b) => a - b).forEach((n) => { if (n <= m.ch) best = CHAPTERS[n]; }); return best || CHAPTERS[1] || null; };
+    const activeChapter = () => { const m = mem(), lim = chLimit(); let best = null; Object.keys(CHAPTERS).map(Number).sort((a, b) => a - b).forEach((n) => { if (n <= m.ch && n <= lim) best = CHAPTERS[n]; }); return best || CHAPTERS[1] || null; };
     const CAST_OK = (id) => !!(api && api.CAST && api.CAST[id]);
     const goalFull = () => { const c = activeChapter(); return c && c.goal ? T(c.goal(stepOf(c.n))) : ""; };
     // OBIETTIVI VAGHI (Impostazioni › Obiettivi, chiave ali-di-rondine.obiettivi = "vaghi" | "chiari"): si vede solo il contesto,
@@ -531,7 +535,7 @@
     function choicesHtml() {
       const m = mem(), l = m.choices || []; if (!l.length) return "";
       let out = "<br><br><b>Schema delle scelte</b>";
-      const maxCh = isDossierEnabled() ? Math.max(NCH, ...Object.keys(CHAPTERS).map(Number)) : (cfg.chapters || 3);
+      const maxCh = isDossierEnabled() ? Math.max(BASE, ...Object.keys(CHAPTERS).map(Number)) : BASE;
       for (let n = 1; n <= maxCh; n++) {
         const cs = l.filter((x) => x.c === n); if (!cs.length) continue;
         out += `<br><span style="color:var(--dim)">Capitolo ${n}${CHAPTERS[n] ? " · " + esc(CHAPTERS[n].title) : ""}</span>`;
@@ -547,7 +551,7 @@
     }
     function finishChapter(n, ending) {
       const m = mem(); m.done[n] = String(ending || "ok").slice(0, 24);
-      const curMax = isDossierEnabled() ? Math.max(NCH, ...Object.keys(CHAPTERS).map(Number)) : (cfg.chapters || 3);
+      const curMax = chLimit(); // i Dossier si aprono solo con l'opzione attiva e 2 finali trovati
       if (m.ch <= n && n < curMax && CHAPTERS[n + 1]) m.ch = n + 1;
       if (n < curMax && CHAPTERS[n + 1]) takeSnap(n + 1);
       m.max = Math.max(m.max || 1, m.ch, Math.min(n + 1, curMax));
@@ -1004,8 +1008,10 @@
     function openMain(o) {
       if (o && typeof o.onExit === "function") EXIT = o.onExit;
       reload();
-      const maxCh = isDossierEnabled() ? Math.max(NCH, ...Object.keys(CHAPTERS).map(Number)) : (cfg.chapters || 3);
-      { const m0 = mem(), fe = m0.done && m0.done[maxCh]; if (fe && ENDINGS[fe] && !m0.ends.includes(fe)) { m0.ends.push(fe); save(); } } // saga che chiudeva l'ultimo capitolo senza K.end: il finale raggiunto si recupera
+      { const m0 = mem(); [BASE, NCH].forEach((k) => { const fe = m0.done && m0.done[k]; if (fe && ENDINGS[fe] && !m0.ends.includes(fe)) { m0.ends.push(fe); save(); } }); } // saga che chiudeva l'ultimo capitolo senza K.end: il finale raggiunto si recupera
+      // Dossier appena aperto (2 finali): la storia passa al primo capitolo extra
+      { const m0 = mem(); if (dossierOpen() && m0.done[BASE] && m0.ch === BASE && CHAPTERS[BASE + 1]) { m0.ch = BASE + 1; m0.max = Math.max(m0.max || 1, BASE + 1); if (!m0.snap || !m0.snap[BASE + 1]) takeSnap(BASE + 1); save(); } }
+      const maxCh = chLimit(); // saga che chiudeva l'ultimo capitolo senza K.end: il finale raggiunto si recupera
       const c = activeChapter();
       if (c && c.avatar) { avatarOverride = Object.assign({ num: 10 }, c.avatar); }
       else { avatarOverride = null; }
@@ -1016,7 +1022,7 @@
       ], TITLE);
       castHero();
       const m = mem(), cur = c && m.done[c.n], nextOk = !!CHAPTERS[(c ? c.n : 0) + 1];
-      const status = m.done[maxCh] ? `Storia conclusa. Finali trovati: ${m.ends.length} su ${Object.keys(ENDINGS).length}.` : cur ? (nextOk ? "Il prossimo capitolo ti aspetta." : "Capitolo concluso · il prossimo è in arrivo.") : goalNow();
+      const status = m.done[maxCh] ? `Storia conclusa. Finali trovati: ${m.ends.length} su ${Object.keys(ENDINGS).length}.` + (hasDossier() && isDossierEnabled() && maxCh === BASE ? " 📂 Trova 2 finali per aprire il Dossier Incompiuto." : "") : cur ? (nextOk ? "Il prossimo capitolo ti aspetta." : "Capitolo concluso · il prossimo è in arrivo.") : goalNow();
       const extra = cfg.mainExtra ? arr(safe(() => cfg.mainExtra(K), [])) : [];
       api.scene(BG0, "voce", `<b>${ICON} ${esc(TITLE)}</b><br>${esc(h.name)}${cfg.heroTitle ? " · " + esc(safe(() => cfg.heroTitle(K), "")) : ""}<br><span style="color:var(--dim)">${c ? esc("Capitolo " + c.n + " · " + c.title) : ""}<br>${esc(status)}</span>`, [
         { label: c && !m.intro["ch" + c.n] ? (c.n > 1 ? `Inizia il Capitolo ${c.n}` : "Inizia la storia") : "Continua la storia", sub: c ? `Capitolo ${c.n} · ${c.title}` : "", cls: "hot", fn: continueStory },
@@ -1036,10 +1042,10 @@
     function chapters() {
       const m = mem(), opts = [];
       const dEnabled = isDossierEnabled();
-      const maxCh = dEnabled ? Math.max(NCH, ...Object.keys(CHAPTERS).map(Number)) : (cfg.chapters || 3);
+      const maxCh = dEnabled ? Math.max(BASE, ...Object.keys(CHAPTERS).map(Number)) : BASE;
       for (let n = 1; n <= maxCh; n++) {
         const c = CHAPTERS[n];
-        const isDossier = n >= 4;
+        const isDossier = n > BASE; // solo i capitoli extra: le saghe nate con 4-5 capitoli restano com'erano
         let open = false;
         if (!isDossier) {
           open = c && (n === 1 || m.done[n - 1] || m.ch >= n || (m.max || 1) >= n);
