@@ -1,0 +1,42 @@
+// tests/piramide-dossier.cjs - «La Piramide del Sole»: Dossier di Diego cap. 4-5 da dati (prove a tempo, scelte, finali, carte, ospite, mazzo)
+const L = require("./lib.cjs");
+const MOD = { mod: "__piramide", key: "ali-di-rondine.piramide" };
+const ENDS0 = ["giaguaro", "accademia"];
+const info = (p) => L.info(p);
+async function dossier(w) {
+  const save = { v: 1, ch: 4, step: { 1: 9, 2: 9, 3: 9 }, done: { 1: "ok", 2: "ok", 3: "ok" }, ends: ENDS0, max: 4, diffSet: true, intro: { ch1: 1, ch2: 1, ch3: 1 }, st: {}, flags: {} };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await page.evaluate(() => localStorage.setItem("ali.dossier_enabled", "1"));
+  const reach = async (z) => { const bad = await L.reachAll(page, z); if (bad.length) errors.push(z + " irraggiungibile: " + bad.join(", ")); };
+  const K = "window.__piramide._dbg.K";
+  await page.evaluate(() => window.__piramide.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 4")); await L.advance(page);
+  if ((await L.zone(page)) !== "my_d_radura") errors.push("c4: zona " + (await L.zone(page)));
+  await reach("my_d_radura"); if (w === 390) await L.shot(page, "my_d_radura");
+  await L.talk(page, "my_alvarez"); await L.advance(page);
+  await L.goAct(page, 28, 18); await L.advance(page);
+  let i = await info(page); if (i.step[4] !== 1) errors.push("forziere: " + JSON.stringify(i.step));
+  await L.goAct(page, 6, 7); await L.advance(page); if ((await L.zone(page)) !== "my_d_baracca") errors.push("magazzino: " + (await L.zone(page)));
+  await reach("my_d_baracca"); if (w === 390) await L.shot(page, "my_d_baracca");
+  await L.talk(page, "my_xavier"); await L.advance(page);
+  await L.goAct(page, 5, 4); await L.advance(page, w === 390 ? ["filtro a cristallo", "Tre punti", "Sostituire la valvola", "432 Hertz"] : ["Alzare il volume", "paella", "Soffiarci", "432 Hertz"]);
+  i = await info(page); if (i.step[4] !== 3) errors.push("ispezione: " + JSON.stringify([i.step, i.flags]));
+  await page.evaluate((k) => eval(k).enterZone("my_d_radura"), K); await page.waitForTimeout(400); await L.advance(page);
+  await L.talk(page, "my_vargas"); await L.advance(page, ["Rifiuta la mazzetta"]);
+  i = await info(page); if (!i.done[4]) errors.push("c4 non concluso: " + JSON.stringify([i.step, i.done]));
+  await page.evaluate(() => window.T_.click("Inizia il Capitolo 5")); await L.advance(page);
+  if ((await L.zone(page)) !== "my_d_cenote") errors.push("c5: zona " + (await L.zone(page)));
+  await reach("my_d_cenote"); if (w === 390) await L.shot(page, "my_d_cenote");
+  await L.talk(page, "my_balam"); await L.advance(page);
+  await L.goAct(page, 15, 6); await L.advance(page); if ((await L.zone(page)) !== "my_d_grotta") errors.push("cabina: " + (await L.zone(page)));
+  await reach("my_d_grotta"); if (w === 390) await L.shot(page, "my_d_grotta");
+  await L.goAct(page, 8, 4); await L.advance(page, ["contrappeso di basalto", "Colpo d'anca", "specchio d'ambra", "Volée di ginocchio"]);
+  i = await info(page); if (i.step[5] !== 2) errors.push("disputa: " + JSON.stringify(i.step));
+  await L.talk(page, "my_kukulkan"); await L.advance(page, [w === 390 ? "Il Ponte Radio" : "Il Patto del Silenzio"]);
+  i = await info(page); const fin = w === 390 ? "diego_ponte_radio" : "diego_archivio_segreto";
+  const e = await page.evaluate((k) => eval(k).mem().ends, K); if (!i.done[5] || !e.includes(fin)) errors.push("c5 non concluso: " + JSON.stringify([i.step, i.done, e]));
+  const own = await page.evaluate(() => window.__sogni._load().own); if (!own.includes("my_xavier") || !own.includes("my_balam")) errors.push("carte non sbloccate");
+  const g = await page.evaluate(() => window.__borgoGuests.list().find((x) => x.id === "my_diego")); if (!g || !g.on) errors.push("ospite Diego: " + JSON.stringify(g));
+  const d = await page.evaluate(() => window.__carteDecks.list().find((x) => x.id === "myd")); if (!d || !d.unlocked) errors.push("mazzo Destino myd: " + JSON.stringify(d));
+  L.check(`La Piramide del Sole · Dossier di Diego cap. 4-5 da dati (${w} px)`, errors); await browser.close();
+}
+(async () => { await dossier(390); await dossier(320); })().catch((e) => { console.error("✗ piramide-dossier:", e.stack); process.exit(1); });

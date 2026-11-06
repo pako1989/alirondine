@@ -236,7 +236,7 @@
             npcs: [
               { id: "my_alvarez", at: [22, 16], when: { step: 0 } },
               { id: "my_xavier", at: [10, 18], when: { step: [0, 1] } },
-              { id: "my_vargas", at: [18, 5], when: { step: [3, 9] } }
+              { id: "my_vargas", at: [21, 7], when: { step: [3, 9] } }
             ],
             layout: [
               ...BORDER(32, 22),
