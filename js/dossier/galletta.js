@@ -238,7 +238,7 @@
               ["lay", 1, 17, 30, 19, ":"],
               ["lay", 15, 6, 15, 17, ":"],
               ["lay", 4, 6, 27, 6, ":"],
-              ["house", 3, 2, 8, 5, { door: [6, 7], roof: "#0284c7", wall: "#1e3a8a", rr: 1, enter: { to: "gl_s_magazzino", at: [7, 9] } }],
+              ["house", 3, 2, 8, 5, { door: [6, 6], roof: "#0284c7", wall: "#1e3a8a", rr: 1, enter: { to: "gl_s_magazzino", at: [7, 9] } }],
               ["lay", 17, 3, 29, 5, "a"],
               ["put", 16, 9, "A"],
               ["put", 27, 18, "K"],
@@ -268,7 +268,7 @@
             w: 16,
             h: 12,
             start: [7, 9],
-            outside: ["gl_s_scogliere", 6, 8],
+            outside: ["gl_s_scogliere", 6, 7],
             act: {
               T: "Esamina il banco di lavoro",
               B: "Ispeziona le botti",

@@ -1,0 +1,41 @@
+// tests/galletta-dossier.cjs - «S.O.S. Galletta»: Dossier di Sottaceto cap. 4-5 da dati (prove a tempo, scelte, finali, carte, ospite, mazzo)
+const L = require("./lib.cjs");
+const MOD = { mod: "__galletta", key: "ali-di-rondine.galletta" };
+const info = (p) => L.info(p);
+async function dossier(w) {
+  const save = { v: 1, ch: 4, step: { 1: 9, 2: 9, 3: 9 }, done: { 1: "ok", 2: "ok", 3: "ok" }, ends: ["reale", "cuoco"], max: 4, diffSet: true, intro: { ch1: 1, ch2: 1, ch3: 1 }, st: {}, flags: {} };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await page.evaluate(() => localStorage.setItem("ali.dossier_enabled", "1"));
+  const reach = async (z) => { const bad = await L.reachAll(page, z); if (bad.length) errors.push(z + " irraggiungibile: " + bad.join(", ")); };
+  const K = "window.__galletta._dbg.K";
+  await page.evaluate(() => window.__galletta.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 4")); await L.advance(page);
+  if ((await L.zone(page)) !== "gl_s_scogliere") errors.push("c4: zona " + (await L.zone(page)));
+  await reach("gl_s_scogliere"); if (w === 390) await L.shot(page, "gl_s_scogliere");
+  await L.talk(page, "gl_zenzero"); await L.advance(page);
+  await L.goAct(page, 28, 18); await L.advance(page);
+  let i = await info(page); if (i.step[4] !== 1) errors.push("forziere: " + JSON.stringify(i.step));
+  await L.goAct(page, 6, 6); await L.advance(page); if ((await L.zone(page)) !== "gl_s_magazzino") errors.push("magazzino: " + (await L.zone(page)));
+  await reach("gl_s_magazzino"); if (w === 390) await L.shot(page, "gl_s_magazzino");
+  await L.talk(page, "gl_zenzero"); await L.advance(page);
+  await L.goAct(page, 5, 4); await L.advance(page, w === 390 ? ["Scolare subito", "Aringhe sotto sale", "salgemma grosso", "Camera d'aria"] : ["zucchero a velo", "Bignè", "miele", "Camera d'aria"]);
+  i = await info(page); if (i.step[4] !== 3) errors.push("ispezione: " + JSON.stringify([i.step, i.flags]));
+  await page.evaluate((k) => eval(k).enterZone("gl_s_scogliere"), K); await page.waitForTimeout(400); await L.advance(page);
+  await L.talk(page, "gl_cannella"); await L.advance(page, ["Accetta la tregua"]);
+  i = await info(page); if (!i.done[4]) errors.push("c4 non concluso: " + JSON.stringify([i.step, i.done]));
+  await page.evaluate(() => window.T_.click("Inizia il Capitolo 5")); await L.advance(page);
+  if ((await L.zone(page)) !== "gl_s_rada") errors.push("c5: zona " + (await L.zone(page)));
+  await reach("gl_s_rada"); if (w === 390) await L.shot(page, "gl_s_rada");
+  await L.talk(page, "gl_barbabiscotto"); await L.advance(page);
+  await L.goAct(page, 15, 6); await L.advance(page); if ((await L.zone(page)) !== "gl_s_cabina") errors.push("cabina: " + (await L.zone(page)));
+  await reach("gl_s_cabina"); if (w === 390) await L.shot(page, "gl_s_cabina");
+  await L.goAct(page, 8, 4); await L.advance(page, ["Carta delle Acque", "zenzero polverizzato", "Tiro teso", "Uscita a valanga"]);
+  i = await info(page); if (i.step[5] !== 2) errors.push("disputa: " + JSON.stringify(i.step));
+  await L.talk(page, "gl_commodoro"); await L.advance(page, [w === 390 ? "Firma il Trattato" : "Rifiuta la Corte"]);
+  i = await info(page); const fin = w === 390 ? "sottaceto_patto" : "sottaceto_libero";
+  const e = await page.evaluate((k) => eval(k).mem().ends, K); if (!i.done[5] || !e.includes(fin)) errors.push("c5 non concluso: " + JSON.stringify([i.step, i.done, e]));
+  const own = await page.evaluate(() => window.__sogni._load().own); if (!own.includes("gl_sottaceto") || !own.includes("gl_zenzero")) errors.push("carte non sbloccate");
+  const g = await page.evaluate(() => window.__borgoGuests.list().find((x) => x.id === "gl_sottaceto")); if (!g || !g.on) errors.push("ospite Sottaceto: " + JSON.stringify(g));
+  const d = await page.evaluate(() => window.__carteDecks.list().find((x) => x.id === "gls")); if (!d || !d.unlocked) errors.push("mazzo Destino gls: " + JSON.stringify(d));
+  L.check(`S.O.S. Galletta · Dossier di Sottaceto cap. 4-5 da dati (${w} px)`, errors); await browser.close();
+}
+(async () => { await dossier(390); await dossier(320); })().catch((e) => { console.error("✗ galletta-dossier:", e.stack); process.exit(1); });
