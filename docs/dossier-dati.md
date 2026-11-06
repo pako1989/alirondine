@@ -26,13 +26,19 @@ Le tessere sono quelle del core/della saga (a=muro, t=albero, ":"=sentiero, "+"=
 - `{say:[[chi,testo]…]}` · `{scene:[[chi,testo]…], bg, openMain:true | go:"zona" | then:[azioni]}` (`{reward}` nel testo = riga del premio)
 - `{flag:{x:true}}` · `{step:n}` · `{bond:["stat",±n]}` · `{quest:[id,titolo,testo]}` · `{cred:±n}`
 - `{ask:{who,prompt,secs,def,options:[{label,sub,big,cls,when,do:[azioni]}]}}` (`secs`+`def` = scelta a tempo)
-- `{if:{when…},then:[…],else:[…]}` · `{call:"blocco"}` · `{go:"zona"}` · `{openMain:true}`
+- `{k:["nomeFunzione", …argomenti]}` funzione propria della saga, istantanea (es. `{k:["pacco","id",{n,secs}]}` / `{k:["consegnato","id"]}` in Razzopacco)
+- `{if:{when…},then:[…],else:[…]}` (ATTENZIONE: dopo un `if` la lista NON prosegue: metti il seguito dentro i rami, o in un blocco con `call`) · `{call:"blocco"}` · `{go:"zona"}` · `{openMain:true}`
 - `{reward:{key,give:{coins,cos}}}` · `{end:"idFinale"}` · `{finish:"idFinale"}` · `{unlock:"idCartaSogni"}`
 - **MINIGIOCHI** (ogni Dossier ne porta almeno 1, nuovo o riusato dalla saga):
   - `{trial:{title,secs,need,rounds:[{prompt,options:[{label,ok:true}],good,bad}],win:[…],lose:[…]}}` prova a scelte a tempo (nuovo, generico)
   - `{play:{opts:{id,alt:"az,cage,hd",force:false,…},win:[…],lose:[…]}}` partita a scelta del giocatore
   - `{engine:{name:"volo"|"concilio"|…,opts:{…},win:[…],lose:[…]}}` motore proprio della saga (`K.<name>(opts,cb)`), con le stesse opzioni usate nei suoi capitoli
 
+## Ospite al Borgo e mazzo del Destino (nei dati, facoltativi)
+`guest: { id, saga, ends:[idFinali], lines:[[chi,testo]] }` → ospite al Borgo Marino quando trovi uno di quei finali.
+`deck: { id, t, e, d, ends, lock, pg:{id,n,i,tr,d,greet:"…{a}…",win,lose}, ev:{n,i,d,setup:[…],ch:[[titolo,tratto,domanda,vinci,perdi]]}, tw:{n,i,d,win,lose,mulWin,mulLose} }` → mazzo delle Carte del Destino. Esempio: `js/dossier/razzo.js`.
+I PNG della saga con voci nel Dossier parlano coi dati SOLO nelle zone del Dossier; altrove risponde il capitolo base.
+
 ## Da fare a mano (non nei dati)
-Le carte Sogni vanno aggiunte in `js/sogni.js` (riga della carta + frase) prima di usare `{unlock:"id"}`; mazzo Destino e ospite al Borgo nei loro file.
+Le carte Sogni vanno aggiunte in `js/sogni.js` (riga della carta + frase) prima di usare `{unlock:"id"}`; mazzo Destino e ospite si possono mettere nei dati (sopra).
 Poi: `index.html` (script `dossier-dati.js` già presente + `js/dossier/<saga>.js` dopo la saga), `sw.js` (cache +1 e file nuovo), test in `tests/<saga>.cjs`.

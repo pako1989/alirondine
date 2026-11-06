@@ -6,7 +6,23 @@
   "use strict";
   if (window.__dossierDati) return;
   const arr = (x) => (Array.isArray(x) ? x : x == null ? [] : [x]);
-  function add(D) { (function boot() { const S = window["__" + D.saga]; if (!S || !S.addChapter || !S._has(D.after || 3)) return setTimeout(boot, 120); (D.chapters || []).forEach((c) => S.addChapter((K) => build(K, D, c))); })(); }
+  function add(D) { (function boot() { const S = window["__" + D.saga]; if (!S || !S.addChapter || !S._has(D.after || 3)) return setTimeout(boot, 120); (D.chapters || []).forEach((c) => S.addChapter((K) => build(K, D, c))); extras(D, S); })(); }
+
+  // EXTRA dai dati (facoltativi): ospite al Borgo e mazzo delle Carte del Destino, visibili quando un finale del Dossier è trovato.
+  //   guest: { id, saga, lines:[[chi,testo]…], ends:["idFinale"…] }   (ends vuoto = basta un finale qualsiasi della saga)
+  //   deck:  { id, t, e, d, ends, pg:{ id, n, i, tr, d, greet:"…{a}…", win, lose }, ev:{ n, i, d, setup:["voce…","png…"], ch:[[titolo,tratto,domanda,vinci,perdi]…] }, tw:{ n, i, d, win, lose, mulWin, mulLose } }
+  function extras(D, S) {
+    const found = (ids) => { try { const e = (JSON.parse(localStorage.getItem(S.KEY) || "{}").ends) || []; return ids && ids.length ? ids.some((x) => e.includes(x)) : e.length > 0; } catch (err) { return false; } };
+    const G = D.guest; if (G) (function g(n) { if (window.__borgoGuests) window.__borgoGuests.add({ id: G.id, saga: G.saga || "", lines: G.lines, when: () => found(G.ends) }); else if (n < 80) setTimeout(() => g(n + 1), 250); })(0);
+    const X = D.deck; if (X) (function d(n) {
+      if (!window.__carteDecks) { if (n < 80) setTimeout(() => d(n + 1), 250); return; }
+      const fill = (s, a) => String(s || "").replace(/\{a\}/g, a);
+      const pg = X.pg && Object.assign({}, X.pg, { greet: (a) => fill(X.pg.greet, a) });
+      const ev = X.ev && { n: X.ev.n, i: X.ev.i, d: X.ev.d, setup: (p) => arr(X.ev.setup).map((x, j) => [j ? p : "voce", x]), ch: arr(X.ev.ch).map(([t, k, ask, win, lose]) => ({ t, k, ask, win, lose })) };
+      const tw = X.tw && { n: X.tw.n, i: X.tw.i, d: X.tw.d, win: X.tw.win, lose: X.tw.lose, fx: (c, w) => Math.round(c * (w ? X.tw.mulWin || 1.3 : X.tw.mulLose || 0.9)) };
+      window.__carteDecks.register({ id: X.id, t: "Mazzo · " + X.t, e: X.e, d: X.d, lock: X.lock || "Trova un finale del Dossier Incompiuto", unlock: () => found(X.ends), pg: pg ? { p: pg } : {}, ev: ev ? { e: ev } : {}, tw: tw ? { t: tw } : {} });
+    })(0);
+  }
 
   function build(K, D, C) {
     const { F } = K, N = C.n, S = () => K.stepOf(N);
@@ -38,6 +54,7 @@
         if (a.unlock && window.__sogni && window.__sogni.unlockCard) arr(a.unlock).forEach((id) => window.__sogni.unlockCard(id));
         if (a.end) K.end(a.end);
         if (a.cred != null && K.setCred) K.setCred(K.cred() + a.cred);
+        if (a.k) { const f = K[arr(a.k)[0]]; if (typeof f === "function") f.apply(K, arr(a.k).slice(1)); else console.warn("dossier-dati: funzione sconosciuta", a.k); } // {k:["nome",…argomenti]}: funzione propria della saga, istantanea (es. K.pacco)
         let msg = []; if (a.reward) msg = K.reward(a.reward.key, a.reward.give || {});
         if (a.finish) K.finishChapter(N, a.finish);
         if (a.say) { const lines = arr(a.say).map((l) => (typeof l[1] === "string" ? [l[0], l[1].replace(/\{reward\}/g, msg.join(" · "))] : l)); K.say(lines, nx); return; }
@@ -77,7 +94,10 @@
         build(L) { arr(z.layout).forEach((op) => { const f = L[op[0]]; if (typeof f === "function") f.apply(L, op.slice(1)); }); (z.trees || []).forEach(([x, y]) => L.put(x, y, "t")); } });
       delete zones[id].layout; delete zones[id].trees;
     });
-    const talk = {}; Object.keys(C.talk || {}).forEach((id) => { talk[id] = () => { const e = pick(C.talk[id]); if (e) run(e.do); else K.done(); }; });
+    // fuori dalle zone del Dossier (o senza voce valida) risponde il capitolo base che conosce il personaggio (K.PASS):
+    // così un PNG della saga (es. la Professoressa) non resta muto nei capitoli 1-3 quando il Dossier è aperto
+    const mine = () => !!zones[K.api && K.api.trZone ? K.api.trZone() : ""];
+    const talk = {}; Object.keys(C.talk || {}).forEach((id) => { talk[id] = () => { const e = mine() && pick(C.talk[id]); if (e) run(e.do); else return K.PASS || K.done(); }; });
     const obj = {}; Object.keys(C.obj || {}).forEach((key) => { obj[key] = () => { const e = pick(C.obj[key]); if (e) run(e.do); else K.done(); }; });
     const goal = (s) => (C.goal || {})[s] || C.goalDone || "";
     return { n: N, title: C.title, sub: C.sub, dossier: true, avatar: C.avatar, goal, start: C.start, introBg: C.introBg, zones, talk, obj,

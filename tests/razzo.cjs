@@ -155,4 +155,53 @@ async function c3(w) {
   const m = await page.evaluate(() => { const x = window.__salone.machine("consegna"); return x && x.eng; }); if (m !== "__consegna") errors.push("cabinato di Consegna a Rete mancante");
   L.check(`Razzopacco · capitolo 3 e i 4 finali (${w} px)`, errors); await browser.close();
 }
-(async () => { await c1(390); await c1(320); await c2(390); await c2(320); await c3(390); await c3(320); })().catch((e) => { console.error("✗ razzo:", e.stack); process.exit(1); });
+// DOSSIER INCOMPIUTO (dati: js/dossier/razzo.js): Orsola Monòpoli, cap. 4 nel 3002 (colloquio a tempo, consegna a tempo), cap. 5 al lato buio (Consegna a Rete), carta, ospite, mazzo
+async function dossier(w) {
+  const save = { v: 1, ch: 4, step: { 1: 5, 2: 9, 3: 9 }, done: { 1: "contratto", 2: "sigillato", 3: "libera" }, ends: ["libera", "fusione"], max: 4, diffSet: true, intro: { ch1: 1, ch2: 1, ch3: 1 }, st: { ditta: 6 }, flags: { rz_contratto: true, rz_arena_ok: true } };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await page.evaluate(() => localStorage.setItem("ali.dossier_enabled", "1"));
+  const reach = async (z) => { const bad = await L.reachAll(page, z); if (bad.length) errors.push(z + " irraggiungibile: " + bad.join(", ")); };
+  await page.evaluate(() => window.__razzo.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 4")); await L.advance(page);
+  if ((await L.zone(page)) !== "rz_o_molo") errors.push("dossier c4: zona " + (await L.zone(page)));
+  await reach("rz_o_molo"); if (w === 390) await L.shot(page, "rz_o_molo");
+  await L.talk(page, "rz_ferruccio"); await L.advance(page);
+  await L.goAct(page, 21, 5); await L.advance(page); if ((await L.zone(page)) !== "rz_o_sede") errors.push("non si entra nella Razzopacco del 3002: " + (await L.zone(page)));
+  await reach("rz_o_sede");
+  await L.talk(page, "rz_ottavia"); await L.advance(page, ["Lo stoppo di petto", "Lascio un biglietto", "Perché non conosco nessuno"]);
+  let i = await info(page); if (i.step[4] !== 2 || i.flags.rz_pk !== "or_pallone" || !i.flags.rz_o_colloquio) errors.push("colloquio e pacco: " + JSON.stringify([i.step, i.flags.rz_pk, i.flags.rz_o_colloquio]));
+  if (w === 320) await page.evaluate((k) => eval(k).F.set("rz_pk_t", 1), K_); // a 320 px la consegna arriva in ritardo
+  await page.evaluate((k) => eval(k).go("rz_o_molo", 22, 17), K_); await page.waitForTimeout(400); await L.advance(page);
+  await reach("rz_o_molo"); if (w === 390) await L.shot(page, "rz_o_consegna");
+  await L.talk(page, "rz_nina"); await L.advance(page);
+  i = await info(page); if (i.step[4] !== 3 || !!i.flags.rz_o_puntuale !== (w === 390) || i.flags.rz_pk) errors.push("consegna a Nina: " + JSON.stringify([i.step, i.flags.rz_o_puntuale, i.flags.rz_pk]));
+  await L.talk(page, "rz_zeta"); await page.waitForTimeout(300); await page.evaluate(() => window.T_.click("Compro chi compra")); await page.waitForTimeout(300); await L.advance(page);
+  await page.evaluate((k) => eval(k).go("rz_o_sede", 7, 9), K_); await page.waitForTimeout(400); await L.advance(page);
+  await L.talk(page, "rz_ottavia"); await page.waitForTimeout(300);
+  if (w === 390) await page.evaluate(() => window.T_.click("Non voglio più arrivare tardi")); else await page.evaluate((k) => eval(k).timedFire(), K_);
+  await page.waitForTimeout(300); await L.advance(page);
+  i = await info(page); if (!i.done[4] || i.flags.rz_o_piano !== "impero" || i.flags.rz_o_motivo !== (w === 390 ? "tardi" : "silenzio")) errors.push("dossier c4 non concluso: " + JSON.stringify([i.done, i.flags.rz_o_piano, i.flags.rz_o_motivo]));
+  await page.evaluate(() => window.T_.click("Inizia il Capitolo 5")); await L.advance(page);
+  if ((await L.zone(page)) !== "rz_o_spogliatoio") errors.push("dossier c5: zona " + (await L.zone(page)));
+  await reach("rz_o_spogliatoio"); if (w === 390) await L.shot(page, "rz_o_spogliatoio");
+  await L.talk(page, "rz_zeta"); await L.advance(page);
+  await L.goAct(page, 7, 11); await L.advance(page); if ((await L.zone(page)) !== "rz_o_buio") errors.push("non si esce al lato buio: " + (await L.zone(page)));
+  await reach("rz_o_buio");
+  await L.talk(page, "rz_ferruccio"); await L.advance(page); if ((await info(page)).step[5] !== 1) errors.push("Ferruccio consegna prima di Nina");
+  await L.talk(page, "rz_nina"); await L.advance(page); await L.talk(page, "rz_ferruccio"); await L.advance(page);
+  i = await info(page); if (i.step[5] !== 2) errors.push("il pacco di nove anni: " + JSON.stringify(i.step));
+  await reach("rz_o_buio"); if (w === 390) await L.shot(page, "rz_o_buio");
+  await L.talk(page, "rz_ottavia"); await page.evaluate(() => window.T_.click("Gioca la partita al lato buio")); await page.waitForTimeout(500);
+  const sh = await page.evaluate(() => window.__consegna.state && window.__consegna.state.ships.slice(0, 2).map((x) => x.p.name).join()); if (sh !== "Orsola Monòpoli,Nina Sfiato") errors.push("partita al lato buio, squadra: " + sh);
+  if (!(await rnStart(page))) errors.push("la partita al lato buio non si apre");
+  if (w === 390) await L.shot(page, "rz_o_partita");
+  await rnEnd(page, w === 390 ? 3 : 1, w === 390 ? 1 : 2); await L.advance(page);
+  i = await info(page); if (i.step[5] !== 3 || !!i.flags.rz_o_vinta !== (w === 390)) errors.push("dopo la partita: " + JSON.stringify([i.step, i.flags.rz_o_vinta]));
+  await L.talk(page, "rz_ottavia"); await page.evaluate((w) => window.T_.click(w === 390 ? "Il campetto è di tutti" : "Stracci il modulo"), w); await page.waitForTimeout(300); await L.advance(page);
+  i = await info(page); const fin = w === 390 ? "orsola_campetto" : "orsola_domenica";
+  const e = await page.evaluate((k) => eval(k).mem().ends, K_); if (!i.done[5] || !e.includes(fin)) errors.push("dossier c5 non concluso: " + JSON.stringify([i.done, e]));
+  const own = await page.evaluate(() => window.__sogni._load().own); if (!own.includes("rz_nina")) errors.push("carta rz_nina non sbloccata");
+  const g = await page.evaluate(() => window.__borgoGuests.list().find((x) => x.id === "rz_orsola")); if (!g || !g.on) errors.push("ospite Orsola al Borgo: " + JSON.stringify(g));
+  const d = await page.evaluate(() => window.__carteDecks.list().find((x) => x.id === "rzo")); if (!d || !d.unlocked) errors.push("mazzo del Destino rzo: " + JSON.stringify(d));
+  L.check(`Razzopacco · Dossier di Orsola cap. 4-5 da dati (${w} px)`, errors); await browser.close();
+}
+(async () => { await c1(390); await c1(320); await c2(390); await c2(320); await c3(390); await c3(320); await dossier(390); await dossier(320); })().catch((e) => { console.error("✗ razzo:", e.stack); process.exit(1); });
