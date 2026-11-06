@@ -8,30 +8,30 @@
   const MINI = ["Decidi tu (nuovo o riusato)", "Prova a scelte a tempo", "Partita a scelta del giocatore", "Motore proprio della saga", "Minigioco NUOVO (descrivilo)"];
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const DEFAULT_BRIEF = {
-    saga: "Cacciatori di Figurine",
+    saga: "Eroi in Replica",
     base: "4",
-    pn: "Oreste \"Bustina\" Macaluso",
-    pr: "Ex custode dell'Archivio delle Vetrine, collezionista clandestino e mediatore dei retrobottega",
-    pa: "Spolverino verde muschio con tasche interne rinforzate per non sgualcire gli angoli delle bustine. Occhiali doppi da orologiaio con lente d'ingrandimento orientabile per contare i punti-fustella. Dita leggermente ingiallite dalla gomma arabica.",
-    toni: ["Giallo/intrigo", "Misterioso", "Ironico"],
-    tn: "Atmosfera nostalgica di fumo, pacchetti aperti con cura maniacale e trattative sussurrate sui tavolini di marmo del bar stazione, con l'ironia tipica del collezionismo esasperato dove un'edizione fallata vale più di un podere.",
-    altro: "Il retroscena della Città delle Vetrine: scoprire cosa accade alle figure considerate \"fuori serie\", \"errori di stampa\" o \"troppo selvagge\" per essere catalogate nella Lega ufficiale. Vedere come i vecchi mercanti considerino le figure non solo strumenti da stadio, ma memorie viventi intrappolate nella cellulosa.",
-    c4: "Capitolo 5: «L'Asta delle Tre e Venti». Nel seminterrato del Caffè Gianduja, prima dell'arrivo del treno postale, Oreste deve recuperare una misteriosa figurina senza numero e senza tipo (\"La Rondine di Cenere\") che sembra cambiare immagine ogni volta che la si rimette nella busta. Per ottenerla deve districarsi tra periti truffaldini e vincere una stima all'ultima fustellatura.",
-    c5: "Capitolo 6: «Il Foglietto d'Alluminio». All'alba al binario morto, la Corporazione delle Vetrine vuole ritirare e incenerire tutte le figurine errate per mantenere alto il valore delle collezioni regolari. Oreste e i suoi alleati improvvisati devono decidere se aprire i sigilli e liberare le creature nei prati del Borgo o completare l'Album Proibito consegnandolo alla leggenda.",
+    pn: "Teodora dell'Archivio",
+    pr: "Archivista capo dei sotterranei della Lega Celeste e custode dei nastri non censurati",
+    pa: "Giacca da lavoro grigio piombo con tasche per cacciaviti da registratore e cartellini d'inventario. Occhiali rettangolari con montatura d'acciaio, capelli legati con una matita e dita sempre sporche di polvere magnetica.",
+    toni: ["Giallo/intrigo", "Misterioso", "Serio"],
+    tn: "Thriller investigativo e noir tecnologico anni '90: lampade a neon ronzanti, nastri Betacam, registri di sicurezza contraffatti e corridoi umidi sotto lo stadio della Lega, con dialoghi taglienti e asciutti.",
+    altro: "Vedere cosa si nasconde dietro le quinte della Lega Celeste oltre i riflettori televisivi: i contratti delle comparse, le copie scartate del Progetto Paladino e la consapevolezza che alcuni 'alieni' erano repliche umane difettose rinchiuse nei sotterranei per proteggere il mito di Zenit.",
+    c4: "Capitolo 5: «Il Nastro Tagliato». Durante il turno di notte nell'Archivio Centrale, Teodora trova una bobina etichettata 'Incidente 1994 - NON TRASMETTERE': contiene il video di una replica di Zenit che ha rifiutato di recitare il copione ed è scomparsa nel vuoto della tromba dell'ascensore. Prima che la sicurezza se ne accorga, deve decifrare i codici di tracciamento e rintracciare il vecchio tecnico che l'ha nascosta.",
+    c5: "Capitolo 6: «Frequenza d'Emergenza». Con la sicurezza della Lega alle calcagna, Teodora penetra nella Sala Master della Torre di Trasmissione durante la diretta della finale di campionato: deve bypassare i firewall audiovisivi e decidere se mandare in onda la registrazione segreta svelando la grande finzione o patteggiare per salvare le vite delle repliche clandestine.",
     pgs: [
-      { n: "Celeste \"Lente\" Bonfanti", r: "Perita calligrafa e alleata scrupolosa", d: "Riconosce i falsi dal rumore della carta strofinata tra pollice e indice. Beve solo orzo amaro e non sorride mai prima delle 10 del mattino." },
-      { n: "Commendator Pasticca", r: "Antagonista e speculatore delle serie limitate", d: "Panciuto, tabacco da fiuto e anelli d'oro. Vuole comprare l'intera tiratura fallata per distruggerla sul posto e quadruplicare il valore del suo album personale." },
-      { n: "Ghirigoro Antico (Figura errata)", r: "Figura spettrale / custode involontario", d: "Una variante d'ombra stampata fuori registro: i suoi contorni vibrano, assorbe la luce dei lampioni e rifiuta di entrare in qualunque taschino rilegato." }
+      { n: "Corrado \"L'Antennista\"", r: "Tecnico anziano della sala montaggio", d: "Ha i timpani consumati da quarant'anni di cuffie monitor. Dice che ogni eroe ha un rumore di fondo che nessun mixer può cancellare." },
+      { n: "Ispettore Morosini", r: "Responsabile della Bonifica d'Immagine", d: "Completo scuro impeccabile, sorriso da comunicato stampa e un fascicolo con la vita di tutti i dipendenti. Non alza mai la voce perché non ne ha bisogno." },
+      { n: "Replica Zero (Il Dimenticato)", r: "La prima replica difettosa del '94", d: "Vive tra i condotti di ventilazione della Torre. Non ha superpoteri perfetti ma possiede ancora la medaglia di ferro originale del primo torneo del 1994." }
     ],
     scs: [
-      { n: "Sotterraneo del Caffè Gianduja", d: "Tavoli da biliardo coperti da teli di feltro verde smeraldo, lampade a campana basse, scatole di scarpe piene di pacchetti incellophanati del 1974." },
-      { n: "Scalo Merci del Binario Morto", d: "Banchine di cemento bagnate dalla nebbia mattutina, vagoni postali fermi, lampioni a gas fioca e casse di legno marchiate con lo stemma della Lega." }
+      { n: "Archivio Sotterraneo dei Nastri", d: "Scaffali metallici alti sei metri carichi di bobine magnetiche numerate, luce verde dei monitor CRT e odore penetrante di nastro vergine e ozono." },
+      { n: "Sala Master della Torre Celeste", d: "Consolle di regia illuminate a giorno, vetrate panoramiche sullo stadio e il banco dei selettori d'emergenza coperto da una cupola di vetro rosso." }
     ],
-    mini: "Motore proprio della saga",
-    mind: "Lotta di Figure su triangolo dei tipi (aria/campo/ombra) ma con varianti clandestine: le \"Mosse di Fustella\" (tiri a effetto con carte rare fallate, cambi a sorpresa al buio senza guardare il mazzo e bluff sui punti-vita residui).",
-    f1: "Finale 1 - «Il Prato Senza Foglietti»: Oreste apre tutte le bustine e i sigilli d'archivio; le figure errate fuggono nell'erba alta di Pratofiore tornando libere e selvatiche, mentre il mercato delle vetrine crolla nel caos.",
-    f2: "Finale 2 - «La Serie Completa Zero»: Oreste completa l'Album Proibito donandolo segretamente alla biblioteca del Borgo: le figurine restano conservate, ma accessibili a qualunque bambino le voglia sfogliare.",
-    no: "Niente mostri giganti o violenza: deve rimanere l'Italia di provincia anni '80-'90 con bustine da 500 lire, colla, profumo di carta fresca, discussioni da bar dello sport e rispetto per la poesia del calcio da cortile."
+    mini: "Prova a scelte a tempo",
+    mind: "Decrittazione del banco di montaggio: una prova a tempo in cui allineare le tracce audio e video del nastro del '94, tagliando i disturbi di frequenza della sicurezza della Lega prima dello scadere dei secondi.",
+    f1: "Finale 1 - «La Diretta Nazionale»: Teodora attiva la frequenza d'emergenza; il nastro non censurato va in onda su tutti i canali durante la premiazione. Il castello di finzioni della Lega Celeste crolla, ma per la prima volta la verità è libera.",
+    f2: "Finale 2 - «Il Patto nel Buio»: Teodora usa la bobina come leva di ricatto con la dirigenza: non trasmette il video, ma ottiene la liberazione segreta e nuove identità per tutte le repliche clandestine rifugiate nei sotterranei.",
+    no: "Niente super-mostri con armi laser o esplosioni alla Marvel: deve rimanere un'indagine tesa, umana e di principio sul valore della verità contro la comodità dello spettacolo televisivo."
   };
   const load = () => { try { const s = JSON.parse(localStorage.getItem(KEY)); return (s && Object.keys(s).length) ? s : DEFAULT_BRIEF; } catch (e) { return DEFAULT_BRIEF; } };
   const save = (d) => { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {} };

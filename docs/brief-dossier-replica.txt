@@ -1,0 +1,28 @@
+BRIEF DOSSIER INCOMPIUTO — Ali di Rondine
+Capitoli da aggiungere: 5 e 6 (la saga base ha 4 capitoli).
+Istruzioni: segui prompt/prompt-dossier-capitoli-extra.txt e il formato dati di docs/dossier-dati.md (file js/dossier/<saga>.js). Almeno 1 minigioco. Tutto in italiano.
+
+SAGA: Eroi in Replica
+PROTAGONISTA DEL DOSSIER: Teodora dell'Archivio
+Chi è / ruolo: Archivista capo dei sotterranei della Lega Celeste e custode dei nastri non censurati
+Aspetto: Giacca da lavoro grigio piombo con tasche per cacciaviti da registratore e cartellini d'inventario. Occhiali rettangolari con montatura d'acciaio, capelli legati con una matita e dita sempre sporche di polvere magnetica.
+TONO: Giallo/intrigo, Misterioso, Serio
+Note sul tono: Thriller investigativo e noir tecnologico anni '90: lampade a neon ronzanti, nastri Betacam, registri di sicurezza contraffatti e corridoi umidi sotto lo stadio della Lega, con dialoghi taglienti e asciutti.
+COSA VOGLIO VEDERE DALL'ALTRA PARTE: Vedere cosa si nasconde dietro le quinte della Lega Celeste oltre i riflettori televisivi: i contratti delle comparse, le copie scartate del Progetto Paladino e la consapevolezza che alcuni 'alieni' erano repliche umane difettose rinchiuse nei sotterranei per proteggere il mito di Zenit.
+Idea capitolo 5: Capitolo 5: «Il Nastro Tagliato». Durante il turno di notte nell'Archivio Centrale, Teodora trova una bobina etichettata 'Incidente 1994 - NON TRASMETTERE': contiene il video di una replica di Zenit che ha rifiutato di recitare il copione ed è scomparsa nel vuoto della tromba dell'ascensore. Prima che la sicurezza se ne accorga, deve decifrare i codici di tracciamento e rintracciare il vecchio tecnico che l'ha nascosta.
+Idea capitolo 6: Capitolo 6: «Frequenza d'Emergenza». Con la sicurezza della Lega alle calcagna, Teodora penetra nella Sala Master della Torre di Trasmissione durante la diretta della finale di campionato: deve bypassare i firewall audiovisivi e decidere se mandare in onda la registrazione segreta svelando la grande finzione o patteggiare per salvare le vite delle repliche clandestine.
+
+PERSONAGGI:
+- Corrado "L'Antennista" (Tecnico anziano della sala montaggio): Ha i timpani consumati da quarant'anni di cuffie monitor. Dice che ogni eroe ha un rumore di fondo che nessun mixer può cancellare.
+- Ispettore Morosini (Responsabile della Bonifica d'Immagine): Completo scuro impeccabile, sorriso da comunicato stampa e un fascicolo con la vita di tutti i dipendenti. Non alza mai la voce perché non ne ha bisogno.
+- Replica Zero (Il Dimenticato) (La prima replica difettosa del '94): Vive tra i condotti di ventilazione della Torre. Non ha superpoteri perfetti ma possiede ancora la medaglia di ferro originale del primo torneo del 1994.
+
+SCENARI:
+- Archivio Sotterraneo dei Nastri: Scaffali metallici alti sei metri carichi di bobine magnetiche numerate, luce verde dei monitor CRT e odore penetrante di nastro vergine e ozono.
+- Sala Master della Torre Celeste: Consolle di regia illuminate a giorno, vetrate panoramiche sullo stadio e il banco dei selettori d'emergenza coperto da una cupola di vetro rosso.
+
+MINIGIOCO: Prova a scelte a tempo
+Dettagli minigioco: Decrittazione del banco di montaggio: una prova a tempo in cui allineare le tracce audio e video del nastro del '94, tagliando i disturbi di frequenza della sicurezza della Lega prima dello scadere dei secondi.
+FINALE 1: Finale 1 - «La Diretta Nazionale»: Teodora attiva la frequenza d'emergenza; il nastro non censurato va in onda su tutti i canali durante la premiazione. Il castello di finzioni della Lega Celeste crolla, ma per la prima volta la verità è libera.
+FINALE 2: Finale 2 - «Il Patto nel Buio»: Teodora usa la bobina come leva di ricatto con la dirigenza: non trasmette il video, ma ottiene la liberazione segreta e nuove identità per tutte le repliche clandestine rifugiate nei sotterranei.
+DA NON FARE / NOTE: Niente super-mostri con armi laser o esplosioni alla Marvel: deve rimanere un'indagine tesa, umana e di principio sul valore della verità contro la comodità dello spettacolo televisivo.
