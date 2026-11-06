@@ -1,0 +1,28 @@
+BRIEF DOSSIER INCOMPIUTO — Ali di Rondine
+Capitoli da aggiungere: 5 e 6 (la saga base ha 4 capitoli).
+Istruzioni: segui prompt/prompt-dossier-capitoli-extra.txt e il formato dati di docs/dossier-dati.md (file js/dossier/<saga>.js). Almeno 1 minigioco. Tutto in italiano.
+
+SAGA: Cacciatori di Figurine
+PROTAGONISTA DEL DOSSIER: Oreste "Bustina" Macaluso
+Chi è / ruolo: Ex custode dell'Archivio delle Vetrine, collezionista clandestino e mediatore dei retrobottega
+Aspetto: Spolverino verde muschio con tasche interne rinforzate per non sgualcire gli angoli delle bustine. Occhiali doppi da orologiaio con lente d'ingrandimento orientabile per contare i punti-fustella. Dita leggermente ingiallite dalla gomma arabica.
+TONO: Giallo/intrigo, Misterioso, Ironico
+Note sul tono: Atmosfera nostalgica di fumo, pacchetti aperti con cura maniacale e trattative sussurrate sui tavolini di marmo del bar stazione, con l'ironia tipica del collezionismo esasperato dove un'edizione fallata vale più di un podere.
+COSA VOGLIO VEDERE DALL'ALTRA PARTE: Il retroscena della Città delle Vetrine: scoprire cosa accade alle figure considerate "fuori serie", "errori di stampa" o "troppo selvagge" per essere catalogate nella Lega ufficiale. Vedere come i vecchi mercanti considerino le figure non solo strumenti da stadio, ma memorie viventi intrappolate nella cellulosa.
+Idea capitolo 5: Capitolo 5: «L'Asta delle Tre e Venti». Nel seminterrato del Caffè Gianduja, prima dell'arrivo del treno postale, Oreste deve recuperare una misteriosa figurina senza numero e senza tipo ("La Rondine di Cenere") che sembra cambiare immagine ogni volta che la si rimette nella busta. Per ottenerla deve districarsi tra periti truffaldini e vincere una stima all'ultima fustellatura.
+Idea capitolo 6: Capitolo 6: «Il Foglietto d'Alluminio». All'alba al binario morto, la Corporazione delle Vetrine vuole ritirare e incenerire tutte le figurine errate per mantenere alto il valore delle collezioni regolari. Oreste e i suoi alleati improvvisati devono decidere se aprire i sigilli e liberare le creature nei prati del Borgo o completare l'Album Proibito consegnandolo alla leggenda.
+
+PERSONAGGI:
+- Celeste "Lente" Bonfanti (Perita calligrafa e alleata scrupolosa): Riconosce i falsi dal rumore della carta strofinata tra pollice e indice. Beve solo orzo amaro e non sorride mai prima delle 10 del mattino.
+- Commendator Pasticca (Antagonista e speculatore delle serie limitate): Panciuto, tabacco da fiuto e anelli d'oro. Vuole comprare l'intera tiratura fallata per distruggerla sul posto e quadruplicare il valore del suo album personale.
+- Ghirigoro Antico (Figura errata) (Figura spettrale / custode involontario): Una variante d'ombra stampata fuori registro: i suoi contorni vibrano, assorbe la luce dei lampioni e rifiuta di entrare in qualunque taschino rilegato.
+
+SCENARI:
+- Sotterraneo del Caffè Gianduja: Tavoli da biliardo coperti da teli di feltro verde smeraldo, lampade a campana basse, scatole di scarpe piene di pacchetti incellophanati del 1974.
+- Scalo Merci del Binario Morto: Banchine di cemento bagnate dalla nebbia mattutina, vagoni postali fermi, lampioni a gas fioca e casse di legno marchiate con lo stemma della Lega.
+
+MINIGIOCO: Motore proprio della saga
+Dettagli minigioco: Lotta di Figure su triangolo dei tipi (aria/campo/ombra) ma con varianti clandestine: le "Mosse di Fustella" (tiri a effetto con carte rare fallate, cambi a sorpresa al buio senza guardare il mazzo e bluff sui punti-vita residui).
+FINALE 1: Finale 1 - «Il Prato Senza Foglietti»: Oreste apre tutte le bustine e i sigilli d'archivio; le figure errate fuggono nell'erba alta di Pratofiore tornando libere e selvatiche, mentre il mercato delle vetrine crolla nel caos.
+FINALE 2: Finale 2 - «La Serie Completa Zero»: Oreste completa l'Album Proibito donandolo segretamente alla biblioteca del Borgo: le figurine restano conservate, ma accessibili a qualunque bambino le voglia sfogliare.
+DA NON FARE / NOTE: Niente mostri giganti o violenza: deve rimanere l'Italia di provincia anni '80-'90 con bustine da 500 lire, colla, profumo di carta fresca, discussioni da bar dello sport e rispetto per la poesia del calcio da cortile.
