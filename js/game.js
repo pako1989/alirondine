@@ -1010,7 +1010,15 @@
   function portraitShirt(id, c) { return { leo: "#ff4d5a", nico: "#3fa7ff", tommy: "#ff4d5a", kenji: "#1d3fa3", dario: "#1b1b1b", valli: "#222", ruggeri: "#34465f", papa: "#e8e0d0", sara: "#ffd23f", rita: "#8a4b6b", ines: "#5a1a3a", bruno: "#3a1450", lina: "#16223f", gigi: "#ff4d5a", fede: "#1d3fa3", marta: "#1d3fa3", aldo: "#10182e", sho: "#ffffff", jojo: "#ffd23f", bellandi: "#b3202c", vitale: "#b3202c", mazza: "#3a3a44", nonna: "#6b8cff" }[id] || c.shirt || "#555"; }
   // maglie a disegno: il colore base identifica il disegno (un colore unico per maglia); ogni stile dei volti chiama __shirtPat dentro la sagoma del busto
   const SHIRT_PATS = { "#1f6f54": { t: "sash", c: "#f5ebd6", e: "laurel" }, "#312e81": { t: "sash", c: "#fbbf24", e: "diamond" }, "#0f172a": { t: "sash", c: "#e2e8f0", e: "diamond" }, "#e9eef2": { t: "hoops", c: "#1d3a5f", e: "anchor" }, "#23232d": { t: "pin", c: "#8b1d2c", e: "diamond" }, "#f0efe9": { t: "checks", c: "#1b1b1b", e: "wheel" }, "#a1272f": { t: "band", c: "#e0b43a", e: "laurel" }, "#4b2e83": { t: "sash", c: "#f2c14e", e: "flame" }, "#2f5d7c": { t: "halves", c: "#c9a66b", e: "glass" } };
+  // fantasia scelta nello Spogliatoio del Campione (strisce/banda/maniche + secondo colore): vale solo mentre si disegna chi la indossa
+  const patOf = (c) => (c && c.pattern && c.pattern !== "unita" && c.shirt2 ? { t: c.pattern, c: c.shirt2 } : null);
   window.__shirtPat = function (g, color) {
+    const hp = window.__curPat;
+    if (hp) { g.save(); g.fillStyle = hp.c;
+      if (hp.t === "strisce") { for (let x = -40; x < 42; x += 12) g.fillRect(x + 3, 26, 6, 44); }
+      else if (hp.t === "banda") { g.fillRect(-42, 41, 84, 9); }
+      else if (hp.t === "maniche") { g.fillRect(-44, 26, 22, 44); g.fillRect(22, 26, 22, 44); }
+      g.restore(); return; }
     const p = SHIRT_PATS[String(color || "").toLowerCase()]; if (!p) return;
     g.save(); g.fillStyle = p.c;
     if (p.t === "hoops") { for (let y = 31; y < 66; y += 8) g.fillRect(-40, y, 80, 3.6); }
@@ -1031,6 +1039,12 @@
   };
   // stessa idea per l'omino a pixel (corpo 10x8 in x-5, y-13)
   function shirtPx(x, y, color) {
+    const hp = window.__curPat;
+    if (hp) { const X = x - 5, Y = y - 13;
+      if (hp.t === "strisce") { for (let i = 1; i < 10; i += 3) px(X + i, Y, 1, 8, hp.c); }
+      else if (hp.t === "banda") { px(X, Y + 3, 10, 2, hp.c); }
+      else if (hp.t === "maniche") { px(X, Y, 2, 8, hp.c); px(X + 8, Y, 2, 8, hp.c); }
+      return; }
     const p = SHIRT_PATS[String(color || "").toLowerCase()]; if (!p) return; const X = x - 5, Y = y - 13;
     if (p.t === "hoops") { px(X, Y + 1, 10, 1, p.c); px(X, Y + 4, 10, 1, p.c); px(X, Y + 7, 10, 1, p.c); }
     else if (p.t === "pin") { for (let i = 0; i < 10; i += 3) px(X + i, Y, 1, 8, p.c); }
@@ -4350,14 +4364,15 @@
     else g.drawImage(OMINI.img, (i % 8) * 64 + col * 16, Math.floor(i / 8) * 64 + row * 16, 16, 16, Math.round(x - 12), Math.round(y - 23), 24, 24);
     g.imageSmoothingEnabled = sm; return true;
   }
-  function chibi(x, y, c, dir, ph) { const SA = [].concat(c.acc || []); // uno o più accessori
+  function chibi(x, y, c, dir, ph) { const pp = window.__curPat; window.__curPat = patOf(c); try { return chibi0(x, y, c, dir, ph); } finally { window.__curPat = pp; } }
+  function chibi0(x, y, c, dir, ph) { const SA = [].concat(c.acc || []); // uno o più accessori
     if (c.shape && SHAPE_CHIBI[c.shape]) return SHAPE_CHIBI[c.shape](x, y, c, dir, ph || 0);
     if (SET.omini === "pixel" && ominoPixel(x, y, c, dir, ph)) return;
     const hair = c.hair || "#333", skin = c.skin || "#f0c9a0", shirt = c.shirt || "#ff4d5a";
     g.fillStyle = "#0004"; g.beginPath(); g.ellipse(x, y, 6, 2.5, 0, 0, 7); g.fill();
     const l = Math.round(Math.sin(ph || 0) * 1.5);
     px(x - 4, y - 6, 3, 6 - Math.max(0, l), "#2a2a3a"); px(x + 1, y - 6, 3, 6 - Math.max(0, -l), "#2a2a3a");
-    px(x - 5, y - 13, 10, 8, shirt); shirtPx(x, y, shirt); px(x - 7, y - 12, 2, 6, skin); px(x + 5, y - 12, 2, 6, skin);
+    px(x - 5, y - 13, 10, 8, shirt); shirtPx(x, y, shirt); px(x - 7, y - 12, 2, 6, skin); px(x + 5, y - 12, 2, 6, skin); if (window.__curPat && window.__curPat.t === "maniche") { px(x - 7, y - 13, 2, 4, window.__curPat.c); px(x + 5, y - 13, 2, 4, window.__curPat.c); }
     if (c.num) { g.fillStyle = "#fff"; g.font = "bold 6px sans-serif"; g.textAlign = "center"; if (dir === "up") g.fillText(c.num, x, y - 7); g.textAlign = "left"; }
     px(x - 5, y - 22, 10, 9, skin);
     px(x - 5, y - 23, 10, dir === "up" ? 9 : 4, hair);
@@ -19907,7 +19922,8 @@
     if (cl.length) { out.acc = out.acc || cl[0]; out.accFn = (ctx, part) => { const og = g; g = ctx; cl.forEach((a) => { ctx.save(); try { portraitAcc(a, part); } catch {} ctx.restore(); }); g = og; }; }
     return out;
   }
-  function portrait(id, x, y, s, flip) {
+  function portrait(id, x, y, s, flip) { const pp = window.__curPat; window.__curPat = patOf(CAST[id]); try { return portraitP(id, x, y, s, flip); } finally { window.__curPat = pp; } }
+  function portraitP(id, x, y, s, flip) {
     const fs = faceStyle(), fc = CAST[id];
     if (fc && fc.shape && SHAPE_PORTRAIT[fc.shape]) return shapePortrait(id, fc, x, y, s, flip);
     if (fs && fc && fc.skin) { // stile dei volti alternativo (Impostazioni → Grafica)

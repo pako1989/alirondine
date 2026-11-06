@@ -256,6 +256,8 @@
       .spogTab.active { color: #ffd23f; border-bottom-color: #ffd23f; }
 
       .spogTabBody { flex: 1; overflow-y: auto; padding: 20px; box-sizing: border-box; }
+      .spogSticky { flex-shrink: 0; }
+      .spogMini { display: none; }
 
       /* FORM SEZIONI & CONTROLLI */
       .spogSecTitle { font-size: 14px; font-weight: 800; color: #c4b5fd; text-transform: uppercase; letter-spacing: 0.5px; margin: 16px 0 10px; border-bottom: 1px solid #261f3a; padding-bottom: 4px; }
@@ -291,7 +293,12 @@
       @media (max-width: 820px) {
         .spogLeftCol { overflow: visible; flex-shrink: 0; }
         .spogRightCol { flex: none; overflow: visible; }
-        .spogTabs { position: sticky; top: 0; z-index: 2; }
+        .spogSticky { position: sticky; top: 0; z-index: 2; background: #141024; }
+        .spogMini { display: none; align-items: center; gap: 8px; padding: 6px 12px; border-bottom: 1px solid #2b2344; }
+        .spogMini.on { display: flex; }
+        .spogMini canvas { width: 64px; height: 64px; border-radius: 10px; border: 1px solid #473a6a; background: #000; }
+        .spogMini canvas + canvas { background: #1f5028; }
+        .spogMini span { font-size: 13px; font-weight: 800; color: #ffd23f; }
         .spogTabBody { flex: none; overflow: visible; padding: 14px 14px 90px; }
         .spogFooter { position: fixed; left: 0; right: 0; bottom: 0; z-index: 3; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); gap: 10px; }
         .spogSaveBtn { flex: 1; padding: 10px 12px; font-size: 13px; }
@@ -357,6 +364,17 @@
       api.chibi(0, 0, api.CAST.hero, curDir, ph);
     }
     sctx.restore();
+    // anteprima piccola fissa in alto (telefono), visibile quando quella grande esce dallo schermo
+    const mini = document.getElementById("spogMini");
+    if (mini) {
+      const cont = document.querySelector(".spogContent"), left = document.querySelector(".spogLeftCol");
+      const show = !!(cont && left && window.innerWidth <= 820 && cont.scrollTop > left.offsetHeight - 120);
+      mini.classList.toggle("on", show);
+      if (show) {
+        [["spogMiniP", pCanvas], ["spogMiniS", sCanvas]].forEach(([id, src]) => { const m = document.getElementById(id); if (m) { const mc = m.getContext("2d"); mc.clearRect(0, 0, 96, 96); mc.drawImage(src, 0, 0); } });
+        const nm = document.getElementById("spogMiniName"); if (nm && nm.textContent !== SPOG.h.name) nm.textContent = SPOG.h.name;
+      }
+    }
   }
 
   function renderSpogliatoio() {
@@ -445,6 +463,8 @@
 
         <!-- COLONNA DESTRA: TABS & OPZIONI -->
         <div class="spogRightCol">
+          <div class="spogSticky">
+          <div class="spogMini" id="spogMini"><canvas id="spogMiniP" width="96" height="96"></canvas><canvas id="spogMiniS" width="96" height="96"></canvas><span id="spogMiniName"></span></div>
           <div class="spogTabs">
             <button type="button" class="spogTab ${SPOG.tab === "identita" ? "active" : ""}" data-tab="identita">📋 Identità & Tattica</button>
             <button type="button" class="spogTab ${SPOG.tab === "aspetto" ? "active" : ""}" data-tab="aspetto">💇 Aspetto & Volto</button>
@@ -454,6 +474,7 @@
             <button type="button" class="spogTab ${SPOG.tab === "carta" ? "active" : ""}" data-tab="carta">🃏 Carta Eroe</button>
           </div>
 
+          </div>
           <div class="spogTabBody" id="spogTabBody">
             ${renderCurrentTabContent()}
           </div>
@@ -607,14 +628,15 @@
     const ARMBANDS = { "#ffd23f": "Oro", "#ff4d5a": "Rossa", "#1f5fbf": "Blu", "#f2f2f2": "Bianca", "#111111": "Nera" };
 
     return `
-      <div class="spogSecTitle">Colore Maglia Titolare (Casa)</div>
+      <div class="spogSecTitle">Colore Maglia</div>
       <div class="spogColorRow">
         ${Object.entries(H_SHIRTS).map(([c, lbl]) => `
           <div class="spogColorDot ${h.shirt === c ? "active" : ""}" data-set-shirt="${c}" style="background:${c}" title="${lbl}"></div>
         `).join("")}
       </div>
 
-      <div class="spogSecTitle">Seconda Maglia (Trasferta)</div>
+      <div class="spogSecTitle">Secondo Colore (strisce, banda, maniche)</div>
+      <div style="font-size:11px;color:#8d81a8;margin:-4px 0 4px">Si vede solo con una fantasia diversa da Tinta Unita.</div>
       <div class="spogColorRow">
         ${Object.entries(H_SHIRTS).map(([c, lbl]) => `
           <div class="spogColorDot ${h.shirt2 === c ? "active" : ""}" data-set-shirt2="${c}" style="background:${c}" title="${lbl}"></div>
