@@ -92,4 +92,31 @@ async function c3(w) {
   const m = await page.evaluate(() => { const x = window.__salone.machine("concilio"); return x && x.eng; }); if (m !== "__concilio") errors.push("cabinato del Concilio mancante");
   L.check(`Il Trono di Cuoio · capitolo 3 e i 4 finali (${w} px)`, errors); await browser.close();
 }
-(async () => { await c1(390); await c1(320); await c2(390); await c2(320); await c3(390); await c3(320); })().catch((e) => { console.error("✗ trono:", e.message); process.exit(1); });
+async function dossier(w) {
+  const save = { v: 1, ch: 4, step: { 1: 5, 2: 5, 3: 5 }, done: { 1: "nome", 2: "corvo", 3: "trono" }, ends: ["trono", "barriera"], max: 4, diffSet: true, intro: { ch1: 1, ch2: 1, ch3: 1 }, st: {}, flags: { tc_cred: 7, tc_riconosciuto: true } };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await page.evaluate(() => localStorage.setItem("ali.dossier_enabled", "1"));
+  await page.evaluate(() => window.__trono.open());
+  await page.evaluate(() => window.T_.click("Inizia il Capitolo 4")); await L.advance(page);
+  if ((await L.zone(page)) !== "tc_giardino") errors.push("dossier c4: zona " + (await L.zone(page)));
+  { const bad = await L.reachAll(page, "tc_giardino"); if (bad.length) errors.push("tc_giardino irraggiungibile: " + bad.join(", ")); }
+  await L.talk(page, "tc_ostrico"); await page.evaluate(() => window.T_.click("Firma i tre patti")); await page.waitForTimeout(300); await L.advance(page);
+  await L.goAct(page, 15, 3); await L.advance(page); if ((await L.zone(page)) !== "tc_studio") errors.push("non si entra nello studio: " + (await L.zone(page)));
+  { const bad = await L.reachAll(page, "tc_studio"); if (bad.length) errors.push("tc_studio irraggiungibile: " + bad.join(", ")); }
+  await L.goAct(page, 3, 3); await L.advance(page);
+  await page.evaluate(() => window.__trono._dbg.K.enterZone("tc_giardino")); await page.waitForTimeout(400); await L.advance(page);
+  await L.talk(page, "tc_ysolde"); await page.evaluate(() => window.T_.click("«Domani lo dirò a tutto il Consiglio»")); await page.waitForTimeout(300); await L.advance(page);
+  let i = await info(page); if (!i.done[4]) errors.push("dossier c4 non concluso: " + JSON.stringify(i.step));
+  await page.evaluate(() => window.T_.click("Inizia il Capitolo 5")); await L.advance(page);
+  if ((await L.zone(page)) !== "tc_loggia") errors.push("dossier c5: zona " + (await L.zone(page)));
+  { const bad = await L.reachAll(page, "tc_loggia"); if (bad.length) errors.push("tc_loggia irraggiungibile: " + bad.join(", ")); }
+  await L.talk(page, "tc_araldo"); await page.evaluate(() => window.T_.click("Siedi al tavolo del Concilio")); await page.waitForTimeout(500); await coBtn(page); await page.waitForTimeout(200);
+  await page.evaluate(() => { const S = window.__concilio.state; S.propose("centro"); S.toField(); S.play(0); }); await page.waitForTimeout(100);
+  await coEnd(page, 2, 0); await L.advance(page);
+  await L.talk(page, "tc_ysolde"); await page.evaluate(() => window.T_.click("Decidi il finale")); await page.waitForTimeout(300);
+  await page.evaluate(() => window.T_.click("Firma un patto vero con il figlio senza nome")); await page.waitForTimeout(300); await L.advance(page);
+  i = await info(page); if (!i.done[5]) errors.push("dossier c5 non concluso: " + JSON.stringify(i.step));
+  const e = await page.evaluate(() => window.__trono._dbg.K.mem().ends); if (!e.includes("ottavia_parola")) errors.push("finale ottavia_parola non registrato: " + e);
+  L.check(`Il Trono di Cuoio · Dossier cap. 4-5 (${w} px)`, errors); await browser.close();
+}
+(async () => { await c1(390); await c1(320); await c2(390); await c2(320); await c3(390); await c3(320); await dossier(390); await dossier(320); })().catch((e) => { console.error("✗ trono:", e.message); process.exit(1); });

@@ -203,7 +203,7 @@
     // Colpo al Fortino · La Notte del Trofeo Scomparso
     ["fo_lupin", "fortino", "e", 78, 62, 86, "A", 1], ["fo_turing", "fortino", "r", 60, 72, 82, "C", 1],
     ["fo_gargoyle", "fortino", "r", 52, 84, 68, "D", 2], ["fo_boss", "fortino", "l", 82, 70, 75, "C", 3],
-    ["fo_vane", "fortino", "l", 72, 92, 80, "D", 5], ["fo_tobia", "fortino", "r", 64, 60, 78, "C", 4],
+    ["tc_ottavia", "trono", "e", 70, 74, 90, "C", 5], ["fo_vane", "fortino", "l", 72, 92, 80, "D", 5], ["fo_tobia", "fortino", "r", 64, 60, 78, "C", 4],
     // Tactics Note · Il Quaderno del Giudizio
     ["qd_raito", "note", "e", 86, 68, 88, "A", 1], ["qd_ryu", "note", "l", 82, 70, 92, "C", 1],
     ["qd_misa", "note", "r", 78, 54, 76, "A", 2], ["qd_elle", "note", "l", 64, 88, 94, "C", 2],
@@ -510,6 +510,7 @@
     fo_turing: "Firewall superato, frequenze allineate: palla nel sette a colpo sicuro!",
     fo_gargoyle: "Disciplina di ferro sul campo e nella camera blindata: qui non si passa.",
     fo_boss: "Un trofeo di cent'anni non si tocca: ma il talento vale più di quaranta milioni.",
+    tc_ottavia: "Ho tradito settanta patti. Ero io? Guarda l'inchiostro: ti dirà la verità, ma solo a mezzanotte.",
     fo_vane: "La mia barriera non cede. Né davanti a un tiro potente, né davanti a un ordine ingiusto.",
     fo_tobia: "Cavi isolati e contropiede pronto: quando il Colonnello dà il segnale, scatto!",
     qd_raito: "Questo è il mio nuovo mondo: ogni contrasto è stato previsto esattamente al millimetro.",

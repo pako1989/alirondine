@@ -47,6 +47,8 @@
       barriera: ["OLTRE LA BARRIERA DI GHIACCIO", "Lasci il Trono vuoto e porti sette squadre a nord, oltre la Barriera di Ghiaccio, dove Gelaneve gioca da secoli contro l'inverno. Laggiù non c'è nessun trono: solo un campo bianco e una partita che non è mai finita.", "Serve aver ascoltato davvero Casa Gelaneve."],
       repubblica: ["LA REPUBBLICA DELLE SQUADRE", "Il Trono di Cuoio va in un museo. Al suo posto, un tavolo rotondo con sette sedie uguali: Valdoro diventa una lega, e le casate votano il calendario. Litigano sempre. Ma litigano parlando.", "Serve una credibilità altissima al Consiglio."],
       nessuno: ["IL TRONO DI NESSUNO", "Scuci il Trono, pezzo per pezzo, e con il cuoio cuci sette palloni: uno per casata. Il Trono non c'è più. Il primo pallone della storia torna a fare quello per cui era nato: rotolare.", "Segreto: non tradire mai un patto e trovare tutti i sigilli di cera."],
+      ottavia_verita: ["LA VERITÀ DEL CUOIO", "Dossier Incompiuto: Ottavia legge davanti al Consiglio le righe viola che Ostrico riscriveva da settant'anni. Il calamaio d'argento va al museo, e i patti di Valdoro tornano a valere.", "Nel Dossier, scegli di leggere le firme viola davanti a tutti."],
+      ottavia_parola: ["L'UNICO PATTO", "Dossier Incompiuto: Ottavia firma un solo patto vero con il figlio senza nome, e per la prima volta in sette anni lo rispetta. Il Cancelliere non ha niente da sistemare.", "Nel Dossier, scegli di firmare un patto vero con Casa Tasso."],
     },
     heroLook: (h, K) => ({ bg: ["#2a1a0c", "#c8a050"], shirt: K.F.is("tc_riconosciuto") ? CASATE.tasso.c : h.shirt }),
     heroTitle: (K) => (K.F.is("tc_riconosciuto") ? "di Casa Tasso" : "il figlio senza nome"),
