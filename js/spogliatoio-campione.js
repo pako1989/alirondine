@@ -294,7 +294,7 @@
         .spogLeftCol { overflow: visible; flex-shrink: 0; }
         .spogRightCol { flex: none; overflow: visible; }
         .spogSticky { position: sticky; top: 0; z-index: 2; background: #141024; }
-        .spogMini { display: none; align-items: center; gap: 8px; padding: 6px 12px; border-bottom: 1px solid #2b2344; }
+        .spogMini { display: none; position: absolute; top: 100%; left: 0; right: 0; align-items: center; gap: 8px; padding: 6px 12px; background: #141024; border-bottom: 1px solid #2b2344; box-shadow: 0 6px 12px rgba(0,0,0,.4); }
         .spogMini.on { display: flex; }
         .spogMini canvas { width: 64px; height: 64px; border-radius: 10px; border: 1px solid #473a6a; background: #000; }
         .spogMini canvas + canvas { background: #1f5028; }
@@ -345,13 +345,32 @@
     // Disegna Sprite Campo (96x96)
     const sctx = sCanvas.getContext("2d");
     sctx.clearRect(0, 0, sCanvas.width, sCanvas.height);
-    sctx.save();
-    sctx.translate(48, 64);
-    sctx.scale(2.4, 2.4);
-
+    // esultanza di prova: ~3 secondi di animazione nel riquadro dello sprite
+    const celT = SPOG.celStart ? (SPOG.animFrame - SPOG.celStart) / 30 : -1;
+    const celOn = celT >= 0 && celT < 3.2;
+    if (!celOn && SPOG.celStart) SPOG.celStart = 0;
     const dirNames = ["down", "left", "up", "right"];
-    const curDir = dirNames[SPOG.animDir];
-    const ph = SPOG.previewMode === "cel" ? 0 : (SPOG.animFrame / 5);
+    let curDir = dirNames[SPOG.animDir], ph = SPOG.animFrame / 5, tx = 48, ty = 64, rot = 0, sc = 2.4;
+    if (celOn) {
+      const k = SPOG.h.cel || "corsa", t = celT;
+      curDir = "down"; ph = 0;
+      if (k === "corsa") { curDir = t < 1.6 ? "right" : "left"; ph = SPOG.animFrame / 2; tx = 48 + Math.sin(t * 2) * 26; }
+      else if (k === "salto") { ty = 64 - Math.abs(Math.sin(t * 3.2)) * 30; }
+      else if (k === "ginocchia") { curDir = "right"; tx = Math.min(70, 14 + t * 40); rot = 0.35; ty = 70; }
+      else if (k === "aeroplano") { ph = SPOG.animFrame / 3; tx = 48 + Math.sin(t * 2.4) * 22; rot = Math.cos(t * 2.4) * 0.35; curDir = Math.cos(t * 2.4) > 0 ? "right" : "left"; }
+      else if (k === "capriola") { ty = 56 - Math.sin(Math.min(1, t / 1.2) * Math.PI) * 18; rot = Math.min(1, t / 1.2) * Math.PI * 2; }
+      else if (k === "trenino") { ph = SPOG.animFrame / 3; curDir = "right"; tx = ((t * 40) % 120) - 12; }
+      else { ty = 64 + Math.sin(t * 6) * 2; }
+    }
+    if (celOn) {
+      sctx.fillStyle = "rgba(255,210,63,.18)"; sctx.fillRect(0, 0, 96, 96);
+      for (let i = 0; i < 14; i++) { const cx = (i * 37 + 11) % 96, cy = ((i * 23 + SPOG.animFrame * (1 + i % 3)) % 110) - 10; sctx.fillStyle = ["#ffd23f", "#ff4d5a", "#38bdf8", "#10b981"][i % 4]; sctx.fillRect(cx, cy, 3, 3); }
+      sctx.fillStyle = "#fff"; sctx.font = "900 16px system-ui, sans-serif"; sctx.textAlign = "center"; sctx.fillText("GOL!", 48, 91); sctx.textAlign = "left";
+    }
+    sctx.save();
+    sctx.translate(tx, ty);
+    if (rot) { sctx.translate(0, -12 * sc); sctx.rotate(rot); sctx.translate(0, 12 * sc); }
+    sctx.scale(sc, sc);
 
     // Usa chibi globale di game.js
     if (api && typeof api.chibiTo === "function" && api.CAST && api.CAST.hero) {
@@ -364,12 +383,16 @@
       api.chibi(0, 0, api.CAST.hero, curDir, ph);
     }
     sctx.restore();
+    if (celOn && ["orecchio", "bacio", "trenino"].includes(SPOG.h.cel)) {
+      sctx.font = "18px sans-serif"; sctx.textAlign = "center";
+      sctx.fillText({ orecchio: "👂", bacio: "😘", trenino: "🚂" }[SPOG.h.cel], SPOG.h.cel === "trenino" ? Math.max(10, tx - 22) : 72, 40); sctx.textAlign = "left";
+    }
     // anteprima piccola fissa in alto (telefono), visibile quando quella grande esce dallo schermo
     const mini = document.getElementById("spogMini");
     if (mini) {
       const cont = document.querySelector(".spogContent"), left = document.querySelector(".spogLeftCol");
       const show = !!(cont && left && window.innerWidth <= 820 && cont.scrollTop > left.offsetHeight - 120);
-      mini.classList.toggle("on", show);
+      mini.classList.toggle("on", show); SPOG.miniOn = show;
       if (show) {
         [["spogMiniP", pCanvas], ["spogMiniS", sCanvas]].forEach(([id, src]) => { const m = document.getElementById(id); if (m) { const mc = m.getContext("2d"); mc.clearRect(0, 0, 96, 96); mc.drawImage(src, 0, 0); } });
         const nm = document.getElementById("spogMiniName"); if (nm && nm.textContent !== SPOG.h.name) nm.textContent = SPOG.h.name;
@@ -464,7 +487,7 @@
         <!-- COLONNA DESTRA: TABS & OPZIONI -->
         <div class="spogRightCol">
           <div class="spogSticky">
-          <div class="spogMini" id="spogMini"><canvas id="spogMiniP" width="96" height="96"></canvas><canvas id="spogMiniS" width="96" height="96"></canvas><span id="spogMiniName"></span></div>
+          <div class="spogMini${SPOG.miniOn ? " on" : ""}" id="spogMini"><canvas id="spogMiniP" width="96" height="96"></canvas><canvas id="spogMiniS" width="96" height="96"></canvas><span id="spogMiniName"></span></div>
           <div class="spogTabs">
             <button type="button" class="spogTab ${SPOG.tab === "identita" ? "active" : ""}" data-tab="identita">📋 Identità & Tattica</button>
             <button type="button" class="spogTab ${SPOG.tab === "aspetto" ? "active" : ""}" data-tab="aspetto">💇 Aspetto & Volto</button>
@@ -489,6 +512,7 @@
 
     keepScroll.forEach(([q, y]) => { const el = ov.querySelector(q); if (el && y) el.scrollTop = y; });
     bindEventListeners();
+    drawLivePreviews();
   }
 
   function renderCurrentTabContent() {
@@ -839,11 +863,8 @@
     const testGoalBtn = document.getElementById("spogTestGoalBtn");
     if (testGoalBtn) {
       testGoalBtn.onclick = () => {
-        if (typeof window.gxPlay === "function") {
-          window.gxPlay("goal", { who: "hero", force: SPOG.h.cel || "corsa" }, () => {
-            syncGlobalHero(SPOG.h);
-          });
-        }
+        SPOG.celStart = SPOG.animFrame || 1;
+        const cont = document.querySelector(".spogContent"); if (cont && window.innerWidth <= 820) cont.scrollTo({ top: 0, behavior: "smooth" });
       };
     }
 
@@ -975,7 +996,7 @@
       btn.onclick = () => { SPOG.h.armband = btn.dataset.setArmband; syncGlobalHero(SPOG.h); renderSpogliatoio(); };
     });
     ov.querySelectorAll("[data-set-cel]").forEach((btn) => {
-      btn.onclick = () => { SPOG.h.cel = btn.dataset.setCel; syncGlobalHero(SPOG.h); renderSpogliatoio(); };
+      btn.onclick = () => { SPOG.h.cel = btn.dataset.setCel; SPOG.celStart = SPOG.animFrame || 1; syncGlobalHero(SPOG.h); renderSpogliatoio(); };
     });
 
     // Tiro: Shot, Trail
