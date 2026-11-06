@@ -1,0 +1,40 @@
+// tests/roma-dossier.cjs - «Ave Calcio!»: Dossier di Gannico cap. 4-5 da dati (prove a tempo, scelte, finali, carte, ospite, mazzo)
+const L = require("./lib.cjs");
+const MOD = { mod: "__roma", key: "ali-di-rondine.roma" };
+const info = (p) => L.info(p);
+async function dossier(w) {
+  const save = { v: 1, ch: 4, step: { 1: 9, 2: 9, 3: 9 }, done: { 1: "ok", 2: "ok", 3: "ok" }, ends: ["tribuno", "libero"], max: 4, diffSet: true, intro: { ch1: 1, ch2: 1, ch3: 1 }, st: {}, flags: {} };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await page.evaluate(() => { localStorage.setItem("ali.dossier_enabled", "1"); });
+  const reach = async (z) => { const bad = await L.reachAll(page, z); if (bad.length) errors.push(z + " irraggiungibile: " + bad.join(", ")); };
+  await page.evaluate(() => window.__roma.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 4")); await L.advance(page);
+  if ((await L.zone(page)) !== "rm_g_suburra") errors.push("c4: zona " + (await L.zone(page)));
+  await reach("rm_g_suburra"); if (w === 390) await L.shot(page, "rm_g_suburra");
+  await L.goAct(page, 29, 20); await L.advance(page);
+  let i = await info(page); if (i.step[4] !== 1) errors.push("forziere: " + JSON.stringify(i.step));
+  await L.goAct(page, 5, 17); await L.advance(page); if ((await L.zone(page)) !== "rm_g_armeria") errors.push("bottega: " + (await L.zone(page)));
+  await reach("rm_g_armeria"); if (w === 390) await L.shot(page, "rm_g_armeria");
+  await L.talk(page, "rm_tullio"); await L.advance(page);
+  await L.goAct(page, 5, 3); await L.advance(page, w === 390 ? ["Tronchi i chiodi", "La immergi", "Passi la canna", "Requisirai"] : ["Li lasci passare", "Le dai un calcio", "Ci infili", "Requisirai"]);
+  i = await info(page); if (i.step[4] !== 3 || !!i.flags.rm_g_ispezione_vinta !== (w === 390)) errors.push("ispezione: " + JSON.stringify([i.step, i.flags.rm_g_ispezione_vinta]));
+  await page.evaluate(() => window.__roma._dbg.K.enterZone("rm_g_suburra")); await page.waitForTimeout(400); await L.advance(page);
+  await reach("rm_g_suburra");
+  await L.talk(page, "rm_furbio"); await L.advance(page, ["Il corno di Roma non si compra"]);
+  i = await info(page); if (!i.done[4]) errors.push("c4 non concluso: " + JSON.stringify([i.step, i.done]));
+  await page.evaluate(() => window.T_.click("Inizia il Capitolo 5")); await L.advance(page);
+  if ((await L.zone(page)) !== "rm_g_colosseo") errors.push("c5: zona " + (await L.zone(page)));
+  await reach("rm_g_colosseo"); if (w === 390) await L.shot(page, "rm_g_colosseo");
+  await L.talk(page, "rm_augusta"); await L.advance(page);
+  await L.goAct(page, 15, 12); await L.advance(page); if ((await L.zone(page)) !== "rm_g_tribunale") errors.push("loggia: " + (await L.zone(page)));
+  await reach("rm_g_tribunale"); if (w === 390) await L.shot(page, "rm_g_tribunale");
+  await L.goAct(page, 6, 3); await L.advance(page, ["Codice delle Dodici Lame", "Mostri i chiodi", "sta sulla sabbia"]);
+  i = await info(page); if (i.step[5] !== 2 || !i.flags.rm_g_editto) errors.push("disputa: " + JSON.stringify([i.step, i.flags.rm_g_editto]));
+  await L.talk(page, "rm_cesare"); await L.advance(page, [w === 390 ? "Giustizia per la Plebe" : "Ecco il Codice"]);
+  i = await info(page); const fin = w === 390 ? "gannico_plebe" : "gannico_imperiale";
+  const e = await page.evaluate(() => window.__roma._dbg.K.mem().ends); if (!i.done[5] || !e.includes(fin)) errors.push("c5 non concluso: " + JSON.stringify([i.step, i.done, e]));
+  const own = await page.evaluate(() => window.__sogni._load().own); if (!own.includes("rm_gannico") || !own.includes("rm_tullio")) errors.push("carte non sbloccate");
+  const g = await page.evaluate(() => window.__borgoGuests.list().find((x) => x.id === "rm_gannico")); if (!g || !g.on) errors.push("ospite Gannico: " + JSON.stringify(g));
+  const d = await page.evaluate(() => window.__carteDecks.list().find((x) => /Gannico/.test(x.t))); if (!d || !d.unlocked) errors.push("mazzo Destino: " + JSON.stringify(d));
+  L.check(`Ave Calcio · Dossier di Gannico cap. 4-5 da dati (${w} px)`, errors); await browser.close();
+}
+(async () => { await dossier(390); await dossier(320); })().catch((e) => { console.error("✗ roma-dossier:", e.stack); process.exit(1); });

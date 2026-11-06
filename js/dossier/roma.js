@@ -233,7 +233,7 @@
             flavor: {
               T: "Un banco da ciabattino intriso d'olio e pece. Ci sono dieci paia di sandali da lizza in riparazione.",
               L: "Pelli di vacca e cuoio di toro appese a seccare. Profumo acre di conciatura all'antica.",
-              D: "Forme di legno di tutte le misure: dal piede leggero dei centrocampisti alla zampa enorme dei difensori traces.",
+              D: "Forme di legno di tutte le misure: dal piede leggero dei centrocampisti alla zampa enorme dei difensori.",
               A: "Un'anfora di pece bollente tenuta tiepida da carboni spenti.",
               b: "Uno sgabello basso a tre zampe, consumato da quarant'anni di lavoro artigiano."
             },
@@ -788,9 +788,18 @@
                     ["rm_gannico", "[serio] Cesare sta entrando nella loggia. È il momento di presentare le prove."]
                   ]
                 },
-                { step: 2 },
-                { quest: ["rm_g_finale", "Il Verdetto davanti a Cesare", "Parla con Cesare nella Loggia dei Magistrati."] },
-                { done: true }
+                {
+                  trial: {
+                    title: "La Disputa dell'Editto", bg: "rm_colosseo", secs: 7, need: 2,
+                    rounds: [
+                      { who: "rm_furbio", prompt: "Furbio sventola una pergamena: «L'editto dice che il pallone d'oro del Senato è il pallone ufficiale». Cosa rispondi?", options: [{ label: "«Il Codice delle Dodici Lame vuole un pallone uguale per tutti»", ok: true }, { label: "«Ha ragione, Senatore»" }, { label: "Soffi nel corno per zittirlo" }], good: "Il cancelliere annuisce e cancella una riga.", bad: "La riga resta. Furbio sorride sotto i baffi." },
+                      { who: "rm_furbio", prompt: "«E chi lo dice che i sandali chiodati sono vietati? Nessuna tavola di bronzo!»", options: [{ label: "Mostri i chiodi requisiti nella bottega di Tullio", ok: true }, { label: "«Lo dico io, e basta»" }, { label: "Cambi argomento" }], good: "I chiodi tintinnano sulla cattedra. Silenzio in loggia.", bad: "Senza prove, la tua parola pesa come una piuma." },
+                      { who: "rm_furbio", prompt: "«L'arbitro deve stare dove lo mette il Senato: in tribuna, all'ombra!»", options: [{ label: "«L'arbitro sta sulla sabbia, dove si gioca»", ok: true }, { label: "«All'ombra, volentieri»" }, { label: "«Decida Cesare»" }], good: "Dagli spalti della plebe arriva un applauso.", bad: "Il cancelliere scrive «in tribuna». Gannico stringe il corno." }
+                    ],
+                    win: [{ flag: { rm_g_editto: true } }, { say: [["rm_gannico", "[felice] Tre righe cancellate, una sabbia pulita. Ora Cesare può ascoltare."]] }, { step: 2 }, { quest: ["rm_g_finale", "Il Verdetto davanti a Cesare", "Parla con Cesare nella Loggia dei Magistrati."] }, { done: true }],
+                    lose: [{ say: [["rm_gannico", "[serio] Le parole di Furbio pesano più dell'oro. Ma la verità la porto lo stesso davanti a Cesare."]] }, { step: 2 }, { quest: ["rm_g_finale", "Il Verdetto davanti a Cesare", "Parla con Cesare nella Loggia dei Magistrati."] }, { done: true }]
+                  }
+                }
               ]
             },
             {
