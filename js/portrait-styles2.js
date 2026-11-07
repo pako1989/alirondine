@@ -163,9 +163,11 @@
     // DETTAGLI (2026-11-07): c.marks = elenco separato da virgole, valgono in tutti gli stili e per Campione e PNG.
     // freckles lentiggini · mole neo · blush guance rosse · wrinkles rughe (automatiche per i personaggi tag "gray") · plaster cerotto
     // paint righe da tifoso (colore maglia) · earring orecchino d'oro · tired occhiaie · nosebreak naso da pugile · tattoo tatuaggio sul collo
-    const M = new Set(String(c.marks || "").split(/[ ,]+/).filter(Boolean)); if (c.tag === "gray" && !M.has("noage")) M.add("wrinkles");
-    if (!M.has("noauto")) { const nm = String((c.name || "") + " " + (c.sub || "")).toLowerCase(); // dettagli automatici dal ruolo scritto nel nome: vale per i personaggi di sempre e per quelli futuri
-      [[/pugil|boxe|ring|lottator|picchiator/, "nosebreak"], [/tifos|ultr|curva|capo coro/, "paint"], [/pirat|corsar|bucanier|filibust/, "earring"], [/portual|marinai|nostrom|scaricator|galeott|detenut|carcerat/, "tattoo"], [/stanc|insonn|nottambul|guardian(o|a) nottur|custode di notte/, "tired"], [/bimb|ragazzin|piccol[ao] |monell|scugnizz/, "freckles"]].forEach(([re, k]) => { if (re.test(nm) && (k !== "freckles" || [...nm].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0, 7) % 2 === 0)) M.add(k); }); } // lentiggini solo a circa metà dei ragazzini (sempre gli stessi)
+    const M = new Set(String(c.marks || "").split(/[ ,]+/).filter(Boolean)); const auto = !M.has("noauto") && !c.trail && c.marks === undefined, hn = (salt) => [...String(c.name || "") + salt].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0, 7) % 100; // auto: solo PNG senza marks scelti (il Campione ha c.trail)
+    if (c.tag === "gray" && !M.has("noage") && (!auto || hn("w") < 75)) M.add("wrinkles"); // rughe a 3 anziani su 4
+    if (auto) { if (hn("m") < 9) M.add("mole"); if (hn("f") < 7) M.add("freckles"); if (hn("b") < 6) M.add("blush"); } // un tocco qua e là anche sugli altri
+    if (auto) { const nm = String((c.name || "") + " " + (c.sub || "")).toLowerCase(); // dettagli automatici dal ruolo scritto nel nome: vale per i personaggi di sempre e per quelli futuri
+      [[/pugil|boxe|ring|lottator|picchiator/, "nosebreak"], [/tifos|ultr|curva|capo coro/, "paint"], [/pirat|corsar|bucanier|filibust/, "earring"], [/portual|marinai|nostrom|scaricator|galeott|detenut|carcerat/, "tattoo"], [/stanc|insonn|nottambul|guardian(o|a) nottur|custode di notte/, "tired"], [/bimb|ragazzin|piccol[ao] |monell|scugnizz/, "freckles"]].forEach(([re, k]) => { if (re.test(nm) && hn(k) < (k === "freckles" ? 50 : 60)) M.add(k); }); } // dal ruolo: non tutti (circa 6 su 10, lentiggini metà), sempre gli stessi
     const sk = c.skin || "#e0b48a", dk = (a) => `rgba(60,25,15,${a})`;
     if (M.has("blush")) { g.fillStyle = "rgba(255,90,110,.28)"; [-1, 1].forEach((sd) => { g.beginPath(); g.ellipse(sd * 10.5, 13.5, 4.2, 2.6, 0, 0, 7); g.fill(); }); }
     if (M.has("freckles")) { g.fillStyle = dk(0.42); [[-12, 11], [-9.5, 12.5], [-12.5, 14], [-10, 15], [12, 11], [9.5, 12.5], [12.5, 14], [10, 15], [-3, 10.5], [3, 10.5]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 0.75, 0, 7); g.fill(); }); }
@@ -187,7 +189,7 @@
   };
   const withMods = FS.draw;
   FS.draw = function (style, g, id, c, expr) {
-    if (!c || !(typeof c.beard === "string" || c.scar || c.streak || c.band || c.marks || c.tag === "gray" || /pugil|boxe|ring|lottator|picchiator|tifos|ultr|curva|capo coro|pirat|corsar|bucanier|filibust|portual|marinai|nostrom|scaricator|galeott|detenut|carcerat|stanc|insonn|nottambul|nottur|bimb|ragazzin|piccol|monell|scugnizz/i.test(String((c.name || "") + " " + (c.sub || ""))))) return withMods.call(FS, style, g, id, c, expr);
+    if (!c) return withMods.call(FS, style, g, id, c, expr); // i dettagli (anche automatici) valgono per tutti
     const c2 = typeof c.beard === "string" ? Object.assign({}, c, { beard: false }) : c; // la barba a stile la disegniamo noi
     const r = withMods.call(FS, style, g, id, c2, expr);
     if (r !== false) { try { FS.mods(g, c, {}); } catch (e) {} }

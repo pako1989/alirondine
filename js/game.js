@@ -1135,7 +1135,7 @@
     if (c.glasses) { g.strokeStyle = "#222"; g.lineWidth = 1.5; g.strokeRect(-14, -4, 12, 11); g.strokeRect(2, -4, 12, 11); px(-2, 1, 4, 1.5, "#222"); }
     if (c.beard === true) { g.fillStyle = c.hair + "cc"; g.beginPath(); g.ellipse(0, 20, 14, 8, 0, 0, Math.PI); g.fill(); }
     if (c.scar) { g.strokeStyle = "#b35a5a"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(10, -6); g.lineTo(15, 10); g.stroke(); }
-    if (window.__faceStyles && window.__faceStyles.mods && (typeof c.beard === "string" || c.streak || c.band || c.marks || c.tag === "gray" || /pugil|boxe|tifos|ultr|pirat|corsar|bucanier|portual|marinai|nostrom|galeott|detenut|carcerat|nottur|bimb|ragazzin|monell|scugnizz/i.test(String(c.name || "")))) window.__faceStyles.mods(g, c, { noScar: true });
+    if (window.__faceStyles && window.__faceStyles.mods) window.__faceStyles.mods(g, c, { noScar: true });
     AL.forEach((a) => portraitAcc(a, "head"));
     px(-4, 16, 8, 2, "#8a3b3b");
     g.restore();
