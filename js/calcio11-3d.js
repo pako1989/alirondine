@@ -337,6 +337,20 @@
 .c11Banner b{font:900 14px system-ui;color:#ffd23f}
 .c11Banner span{font:700 11px system-ui;color:#e2e8f0}
 .c11Radar{position:absolute;left:50%;transform:translateX(-50%);bottom:6px;width:120px;height:42px;background:rgba(2,6,23,0.78);border:1px solid #475569;border-radius:6px;pointer-events:none}
+@media (orientation:landscape) and (max-height:520px){
+.c11Wrap{max-width:none;padding:0 8px}
+.c11Bar{padding:3px 0}
+.c11Stage{position:fixed;left:0;right:0;top:44px;bottom:0;max-height:none;aspect-ratio:auto;border:0;border-radius:0;z-index:1}
+.c11Hud{position:fixed;top:46px;left:50%;transform:translateX(-50%);width:min(70%,560px);z-index:3;margin:0;padding:3px 10px;background:rgba(15,23,42,.78)}
+.c11Banner{top:44px}
+.c11Pad{position:fixed;left:0;right:0;bottom:6px;z-index:4;display:flex;justify-content:space-between;align-items:flex-end;padding:0 16px;margin:0;pointer-events:none}
+.c11Stick,.c11Btns{pointer-events:auto;opacity:.88}
+.c11Stick{margin:0}
+.c11Btns{grid-template-columns:repeat(3,82px)}
+.c11Btn{min-height:44px}
+.c11KeyHint{display:none}
+.c11Radar{bottom:4px}
+}
 .c11Grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:8px 0}
 .c11Card{background:#151f36;border:1.5px solid #334155;border-radius:12px;padding:10px;cursor:pointer;touch-action:manipulation;transition:border-color .15s}
 .c11Card.on{border-color:#ffd23f;background:#1e2946}
@@ -1023,12 +1037,14 @@
       if (ball.holder && ball.holder.team === "B") {
         const opp = ball.holder;
         const dist = hypot(user.x - opp.x, user.z - opp.z);
-        if (dist < 4.2) {
+        if (dist < 5.5) {
           ball.holder = user;
           ball.lastKick = "A";
+          ball.noStealT = 1.6; // 2026-11-07: palla protetta, il pressing non te la ruba subito
           opp.vx *= 0.2;
           opp.vz *= 0.2;
-          opp.tackleCooldown = 1.4;
+          opp.stunT = 1.0;
+          opp.tackleCooldown = 2.2;
           showBanner("GRAN CONTRASTO!", `${user.data.name} ruba palla a ${opp.data.name}!`, 1400);
           return;
         }
@@ -1037,9 +1053,10 @@
       // 2. Se la palla è libera ma vicina
       if (!ball.holder) {
         const distB = hypot(user.x - ball.x, user.z - ball.z);
-        if (distB < 4.5) {
+        if (distB < 5.5) {
           ball.holder = user;
           ball.lastKick = "A";
+          ball.noStealT = 1.0;
           showBanner("INTERCETTO IN SCIVOLATA!", user.data.name, 1200);
           return;
         }
@@ -1328,6 +1345,8 @@
       };
 
       // AI Compagni Squadra A (senza palla)
+      let pressA = null, minADist = 999;
+      teamA.forEach((q, qi) => { if (qi === 0 || qi === activeAIdx) return; const d = hypot(q.x - ball.x, q.z - ball.z); if (d < minADist) { minADist = d; pressA = q; } });
       teamA.forEach((p, idx) => {
         const isUser = idx === activeAIdx;
         if (!isUser) {
@@ -1338,12 +1357,13 @@
             p.z += (targetZ - p.z) * 0.1;
             p.rot = 0;
           } else {
-            // Movimento a fisarmonica verso la base + attrazione palla
-            const targetX = p.baseX + (ball.x * 0.42);
-            const targetZ = p.baseZ + (ball.z * 0.32);
-            p.vx = (targetX - p.x) * 0.04;
-            p.vz = (targetZ - p.z) * 0.04;
-            p.rot = Math.atan2(p.vz, p.vx || 0.001);
+            // 2026-11-07: compagni attivi. Con palla: i più avanzati si smarcano in avanti (+x), con ondeggio. Senza palla: linea che sale/scende con la palla e il compagno più vicino pressa.
+            const aHas = ball.holder && ball.holder.team === "A", fw = p.baseX > 0 ? 1 : p.baseX > -HX * 0.45 ? 0.55 : 0.2;
+            let targetX = p.baseX + ball.x * 0.5 + (aHas ? fw * 16 : -fw * 4), targetZ = p.baseZ + ball.z * 0.38 + (aHas ? Math.sin(performance.now() / 900 + idx * 1.7) * 5 * fw : 0), mx = p.spd * 0.85;
+            if (!aHas && p === pressA) { targetX = ball.x; targetZ = ball.z; mx = p.spd * 1.05; }
+            targetX = clamp(targetX, -HX + 4, HX - 4); targetZ = clamp(targetZ, -HZ + 2, HZ - 2);
+            const ddx = targetX - p.x, ddz = targetZ - p.z, dd = hypot(ddx, ddz);
+            if (dd > 1.2) { const sp = Math.min(mx, dd * 0.08 + 0.02); p.vx = ddx / dd * sp; p.vz = ddz / dd * sp; p.rot = Math.atan2(ddz, ddx); } else { p.vx *= 0.8; p.vz *= 0.8; }
           }
         }
         updatePlayer(p, isUser);
@@ -1369,6 +1389,7 @@
           updatePlayer(p, false);
           return;
         }
+        if (p.stunT > 0) { p.stunT -= dt; p.vx *= 0.5; p.vz *= 0.5; updatePlayer(p, false); return; } // 2026-11-07: sgambettato dal contrasto
 
         // Se il giocatore B è il portatore di palla
         if (ball.holder === p) {
@@ -1424,19 +1445,20 @@
             }
           }
         } else {
-          // Posizione base tattica specchiata con baricentro mobile
-          const targetX = p.baseX + (ball.x * 0.45);
-          const targetZ = p.baseZ + (ball.z * 0.35);
-          p.vx = (targetX - p.x) * 0.045;
-          p.vz = (targetZ - p.z) * 0.045;
-          p.rot = Math.atan2(p.vz, p.vx || -0.001);
+          // 2026-11-07: anche gli avversari si muovono: con palla salgono verso -x, senza palla fanno linea sulla palla
+          const bHas = ball.holder && ball.holder.team === "B", fwB = p.baseX < 0 ? 1 : p.baseX < HX * 0.45 ? 0.55 : 0.2;
+          const targetX = clamp(p.baseX + ball.x * 0.5 - (bHas ? fwB * 16 : -fwB * 4 * 0), -HX + 4, HX - 4);
+          const targetZ = clamp(p.baseZ + ball.z * 0.38 + (bHas ? Math.sin(performance.now() / 900 + idx * 1.3) * 5 * fwB : 0), -HZ + 2, HZ - 2);
+          const ddx = targetX - p.x, ddz = targetZ - p.z, dd = hypot(ddx, ddz);
+          if (dd > 1.2) { const sp = Math.min(p.spd * 0.85, dd * 0.08 + 0.02); p.vx = ddx / dd * sp; p.vz = ddz / dd * sp; p.rot = Math.atan2(ddz, ddx); } else { p.vx *= 0.8; p.vz *= 0.8; }
         }
 
         updatePlayer(p, false);
       });
 
       // --- CONTATTO FISICO E PRESSING CORPO A CORPO ---
-      if (ball.holder) {
+      if (ball.noStealT > 0) ball.noStealT -= dt;
+      if (ball.holder && !(ball.noStealT > 0)) {
         const holder = ball.holder;
         const defenders = holder.team === "A" ? teamB : teamA;
         for (let i = 0; i < defenders.length; i++) {
@@ -1446,7 +1468,7 @@
           if (dist < 1.6) {
             def.pressTicks = (def.pressTicks || 0) + 1;
             // Pressione fisica corpo a corpo continuata
-            if (def.pressTicks > 12) {
+            if (def.pressTicks > (def.team === "B" ? 40 : 22)) {
               def.pressTicks = 0;
               sfx("tackle");
               if (def.team === "A") {
@@ -1459,6 +1481,7 @@
                 // L'avversario CPU toglie palla all'utente
                 ball.holder = def;
                 ball.lastKick = "B";
+                ball.noStealT = 1.2;
                 showBanner("PRESSING AVVERSARIO!", `${def.data.name} ruba palla!`, 1300);
               }
               break;
