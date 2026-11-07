@@ -138,7 +138,15 @@
   // Sincronizza i dati globali per game.js e gli altri moduli
   // MAGLIA DELLE SAGHE = ALTERNATIVA alla divisa personalizzata (Pasquale 2026-11-07): indossarla mette il suo colore, tinta unita,
   // e mette da parte colore/secondo colore/fantasia scelti nella Divisa (h.divisa). Toccare di nuovo la Divisa la riporta e toglie la maglia.
-  function wearSagaShirt(h, id, val) { if (!h.shirtCos || !h.divisa) h.divisa = { shirt: h.shirt, shirt2: h.shirt2, pattern: h.pattern }; h.shirt = val; h.pattern = "unita"; h.shirtCos = id || val; }
+  // Lo stile della maglia viene dal capo: c.pat / c.val2 se scritti nella saga, altrimenti dal nome (strisce → pali, banda/fascia → banda,
+  // tuta/giacca/divisa/uniforme… → maniche a contrasto, il resto tinta unita); il secondo colore è una tinta più scura o più chiara del primo.
+  function shirtStyle(id, val) {
+    const C = (window.__borgoApi && window.__borgoApi.COSM) || {}, c = C[id] || {}, lb = String(c.label || "").toLowerCase();
+    const pat = c.pat || (/strisce|righe|pali|zebra|rigat/.test(lb) ? "strisce" : /banda|fascia/.test(lb) ? "banda" : /tuta|giacca|divisa|uniforme|giubb|cappott|casacca|camice|toga|grembiul|armatura|corazza|tunica|livrea/.test(lb) ? "maniche" : "unita");
+    let v2 = c.val2; if (!v2) { const n = parseInt(String(val).replace("#", "").padEnd(6, "0").slice(0, 6), 16) || 0, r = n >> 16, g = (n >> 8) & 255, b = n & 255, L = (0.3 * r + 0.59 * g + 0.11 * b) / 255, f = (x) => Math.round(L > 0.55 ? x * 0.45 : x + (255 - x) * 0.6); v2 = "#" + [r, g, b].map((x) => f(x).toString(16).padStart(2, "0")).join(""); }
+    return { pat, v2 };
+  }
+  function wearSagaShirt(h, id, val) { if (!h.shirtCos || !h.divisa) h.divisa = { shirt: h.shirt, shirt2: h.shirt2, pattern: h.pattern }; const st = shirtStyle(id, val); h.shirt = val; h.pattern = st.pat; h.shirt2 = st.v2; h.shirtCos = id || val; }
   function backToDivisa(h) { if (h.shirtCos && h.divisa) Object.assign(h, { shirt: h.divisa.shirt, shirt2: h.divisa.shirt2, pattern: h.divisa.pattern }); delete h.shirtCos; delete h.divisa; }
   window.__sagaShirt = { wear: wearSagaShirt, back: backToDivisa };
   function syncGlobalHero(h) {
@@ -787,7 +795,7 @@
 
     return `
       <div class="spogSecTitle">Maglie Speciali delle Saghe · ${maglie.filter(([k]) => isOwned(k)).length}/${maglie.length}</div>
-      <div style="font-size:11.5px;color:#a99dc4;margin:-4px 0 8px">La maglia di una saga è un'<b>alternativa</b> alla tua divisa: si indossa così com'è, senza fantasia. La divisa personalizzata resta salvata: tocca un colore o una fantasia nella scheda Divisa, o il tasto qui sotto, per rimetterla.</div>
+      <div style="font-size:11.5px;color:#a99dc4;margin:-4px 0 8px">La maglia di una saga è un'<b>alternativa</b> alla tua divisa: si indossa così com'è fatta (tinta unita, pali, banda o maniche, secondo il capo). La divisa personalizzata resta salvata: tocca un colore o una fantasia nella scheda Divisa, o il tasto qui sotto, per rimetterla.</div>
       ${h.shirtCos ? `<button type="button" class="spogChip" data-back-divisa="1" style="margin:0 0 10px">↩ Torna alla divisa personalizzata</button>` : ""}
       ${renderList(maglie, h.shirt, 'data-equip-shirt')}
 
