@@ -1959,7 +1959,7 @@
     body.querySelectorAll("[data-src]").forEach((b) => (b.onclick = () => { GF.src = b.dataset.src; openGuardaroba(); }));
     body.querySelectorAll("[data-id]").forEach((b) => (b.onclick = () => { GF.sel = b.dataset.id; openGuardaroba(); OV.scrollTop = 0; }));
     const un = body.querySelector("[data-unsel]"); if (un) un.onclick = () => { GF.sel = null; openGuardaroba(); };
-    const wr = body.querySelector("[data-wear]"); if (wr) wr.onclick = () => { const c = C[sel], f = KIND[kindOf(c)][1], nh = Object.assign({}, h, { [f]: c.val }); if (f === "acc") nh.accId = sel; A.heroSave(nh); GF.sel = null; if (window.toast) window.toast("Indossato: " + c.label, "success", "👕"); openGuardaroba(); };
+    const wr = body.querySelector("[data-wear]"); if (wr) wr.onclick = () => { const c = C[sel], f = KIND[kindOf(c)][1], nh = Object.assign({}, h, { [f]: c.val }); if (f === "acc") nh.accId = sel; if (f === "shirt") { nh.shirt = h.shirt; if (window.__sagaShirt) window.__sagaShirt.wear(nh, sel, c.val); else nh.shirt = c.val; } A.heroSave(nh); GF.sel = null; if (window.toast) window.toast("Indossato: " + c.label, "success", "👕"); openGuardaroba(); };
   }
   function worn(h, c) { const f = KIND[kindOf(c)][1]; return !!(f && h[f] === c.val); }
   function item(k, c, owned, h) {

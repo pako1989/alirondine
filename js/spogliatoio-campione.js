@@ -136,6 +136,11 @@
   }
 
   // Sincronizza i dati globali per game.js e gli altri moduli
+  // MAGLIA DELLE SAGHE = ALTERNATIVA alla divisa personalizzata (Pasquale 2026-11-07): indossarla mette il suo colore, tinta unita,
+  // e mette da parte colore/secondo colore/fantasia scelti nella Divisa (h.divisa). Toccare di nuovo la Divisa la riporta e toglie la maglia.
+  function wearSagaShirt(h, id, val) { if (!h.shirtCos || !h.divisa) h.divisa = { shirt: h.shirt, shirt2: h.shirt2, pattern: h.pattern }; h.shirt = val; h.pattern = "unita"; h.shirtCos = id || val; }
+  function backToDivisa(h) { if (h.shirtCos && h.divisa) Object.assign(h, { shirt: h.divisa.shirt, shirt2: h.divisa.shirt2, pattern: h.divisa.pattern }); delete h.shirtCos; delete h.divisa; }
+  window.__sagaShirt = { wear: wearSagaShirt, back: backToDivisa };
   function syncGlobalHero(h) {
     if (!h) return;
     writeJSON(HERO_KEY, h);
@@ -766,9 +771,9 @@
       <div class="spogGrid2">
         ${items.slice().sort((x, y) => (isOwned(y[0]) ? 1 : 0) - (isOwned(x[0]) ? 1 : 0)).map(([k, c]) => { // sbloccati in cima, poi i bloccati
           const own = isOwned(k);
-          const active = curVal === c.val;
+          const active = onSelectAttr === "data-equip-shirt" ? h.shirtCos === k : curVal === c.val; // maglie: in uso solo se indossata come alternativa
           return `
-            <div class="spogCardPreviewBox ${active ? "active" : ""}" ${own ? `${onSelectAttr}="${c.val}" style="cursor:pointer;text-align:left;border-color:${active ? "#ffd23f" : "#30264d"};background:${active ? "#231a3d" : "#141022"}"` : `style="text-align:left;opacity:.55;border-color:#201833"`}>
+            <div class="spogCardPreviewBox ${active ? "active" : ""}" ${own ? `${onSelectAttr}="${c.val}" data-equip-id="${k}" style="cursor:pointer;text-align:left;border-color:${active ? "#ffd23f" : "#30264d"};background:${active ? "#231a3d" : "#141022"}"` : `style="text-align:left;opacity:.55;border-color:#201833"`}>
               <div style="display:flex;justify-content:space-between">
                 <span style="font-weight:800;color:${active ? "#ffd23f" : own ? "#fff" : "#999"}">${c.label}</span>
                 <span style="font-size:11px">${own ? (active ? "✓ IN USO" : "✓ SBLOCCATO") : "🔒 BLOCCATO"}</span>
@@ -782,7 +787,8 @@
 
     return `
       <div class="spogSecTitle">Maglie Speciali delle Saghe · ${maglie.filter(([k]) => isOwned(k)).length}/${maglie.length}</div>
-      <div style="font-size:11.5px;color:#a99dc4;margin:-4px 0 8px">Una maglia sbloccata imposta il <b>colore principale</b> della divisa. Fantasia e secondo colore della scheda Divisa restano sopra: se li cambi dopo, vince l'ultima scelta.</div>
+      <div style="font-size:11.5px;color:#a99dc4;margin:-4px 0 8px">La maglia di una saga è un'<b>alternativa</b> alla tua divisa: si indossa così com'è, senza fantasia. La divisa personalizzata resta salvata: tocca un colore o una fantasia nella scheda Divisa, o il tasto qui sotto, per rimetterla.</div>
+      ${h.shirtCos ? `<button type="button" class="spogChip" data-back-divisa="1" style="margin:0 0 10px">↩ Torna alla divisa personalizzata</button>` : ""}
       ${renderList(maglie, h.shirt, 'data-equip-shirt')}
 
       <div class="spogSecTitle">Tagli & Acconciature Sbloccate</div>
@@ -999,13 +1005,13 @@
 
     // Divisa: Shirt, Shirt2, Pattern, Armband, Cel
     ov.querySelectorAll("[data-set-shirt]").forEach((btn) => {
-      btn.onclick = () => { SPOG.h.shirt = btn.dataset.setShirt; syncGlobalHero(SPOG.h); renderSpogliatoio(); };
+      btn.onclick = () => { backToDivisa(SPOG.h); SPOG.h.shirt = btn.dataset.setShirt; syncGlobalHero(SPOG.h); renderSpogliatoio(); };
     });
     ov.querySelectorAll("[data-set-shirt2]").forEach((btn) => {
-      btn.onclick = () => { SPOG.h.shirt2 = btn.dataset.setShirt2; syncGlobalHero(SPOG.h); renderSpogliatoio(); };
+      btn.onclick = () => { backToDivisa(SPOG.h); SPOG.h.shirt2 = btn.dataset.setShirt2; syncGlobalHero(SPOG.h); renderSpogliatoio(); };
     });
     ov.querySelectorAll("[data-set-pattern]").forEach((btn) => {
-      btn.onclick = () => { SPOG.h.pattern = btn.dataset.setPattern; syncGlobalHero(SPOG.h); renderSpogliatoio(); };
+      btn.onclick = () => { backToDivisa(SPOG.h); SPOG.h.pattern = btn.dataset.setPattern; syncGlobalHero(SPOG.h); renderSpogliatoio(); };
     });
     ov.querySelectorAll("[data-set-armband]").forEach((btn) => {
       btn.onclick = () => { SPOG.h.armband = btn.dataset.setArmband; syncGlobalHero(SPOG.h); renderSpogliatoio(); };
@@ -1031,7 +1037,10 @@
 
     // Guardaroba Equip
     ov.querySelectorAll("[data-equip-shirt]").forEach((btn) => {
-      btn.onclick = () => { SPOG.h.shirt = btn.dataset.equipShirt; syncGlobalHero(SPOG.h); renderSpogliatoio(); };
+      btn.onclick = () => { wearSagaShirt(SPOG.h, btn.dataset.equipId, btn.dataset.equipShirt); syncGlobalHero(SPOG.h); renderSpogliatoio(); };
+    });
+    ov.querySelectorAll("[data-back-divisa]").forEach((btn) => {
+      btn.onclick = () => { backToDivisa(SPOG.h); syncGlobalHero(SPOG.h); renderSpogliatoio(); };
     });
     ov.querySelectorAll("[data-equip-style]").forEach((btn) => {
       btn.onclick = () => { SPOG.h.style = btn.dataset.equipStyle; syncGlobalHero(SPOG.h); renderSpogliatoio(); };
