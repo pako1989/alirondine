@@ -278,7 +278,7 @@
     post(o, cv); FX_CACHE[key] = cv; const ks = Object.keys(FX_CACHE); if (ks.length > 160) delete FX_CACHE[ks[0]];
     return cv;
   }
-  const fxKey = (st, id, c, expr) => st + "|" + id + "|" + (expr || "") + "|" + (c.skin || "") + (c.hair || "") + (c.shirt || "") + (c.style || "") + (c.cap || "") + (c.num || "") + "|" + (c.face || "") + (c.acc || "") + (c.glasses ? "g" : "") + (c.shades ? "s" : "") + "|" + (c.beard || "") + (c.scar ? "r" : "") + (c.streak || "") + (c.band || "") + "|" + (c.pattern || "") + (c.shirt2 || "");
+  const fxKey = (st, id, c, expr) => st + "|" + id + "|" + (expr || "") + "|" + (c.skin || "") + (c.hair || "") + (c.shirt || "") + (c.style || "") + (c.cap || "") + (c.num || "") + "|" + (c.face || "") + (c.acc || "") + (c.glasses ? "g" : "") + (c.shades ? "s" : "") + "|" + (c.beard || "") + (c.scar ? "r" : "") + (c.streak || "") + (c.band || "") + (c.marks || "") + (c.tag === "gray" ? "o" : "") + "|" + (c.pattern || "") + (c.shirt2 || "");
   const lum = (r, g2, b) => (0.299 * r + 0.587 * g2 + 0.114 * b) / 255;
   // MANGA: bianco e nero, chine e retini a puntini come una tavola stampata
   function manga(g, id, c, expr) {

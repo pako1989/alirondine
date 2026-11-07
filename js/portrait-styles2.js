@@ -156,6 +156,26 @@
     else if (b === "folta") { bowl(5, 33, 0.96, 16.5); g.fillStyle = "#7a2c3c"; g.fillRect(-3.4, 18.6, 6.8, 1.8); }
     else if (b === "pizzetto") { g.fillStyle = hair; g.beginPath(); g.ellipse(0, 24.5, 3.6, 5, 0, 0, 7); g.fill(); must(1.6); }
     else if (b === "baffi") must(3.2);
+    else if (b === "corta") { bowl(8, 29, 0.62, 15.5); must(2.2); }
+    else if (b === "lunga") { bowl(5, 42, 0.95, 16.5); g.fillStyle = "#7a2c3c"; g.fillRect(-3.4, 18.6, 6.8, 1.8); }
+    else if (b === "basette") { g.fillStyle = hair; g.globalAlpha = 0.9; [-1, 1].forEach((sd) => { g.beginPath(); g.moveTo(sd * 16.5, -4); g.lineTo(sd * 16.8, 15); g.lineTo(sd * 13.2, 17); g.lineTo(sd * 13, -4); g.closePath(); g.fill(); }); g.globalAlpha = 1; }
+    else if (b === "mosca") { g.fillStyle = hair; g.beginPath(); g.ellipse(0, 24, 2, 2.6, 0, 0, 7); g.fill(); }
+    // DETTAGLI (2026-11-07): c.marks = elenco separato da virgole, valgono in tutti gli stili e per Campione e PNG.
+    // freckles lentiggini · mole neo · blush guance rosse · wrinkles rughe (automatiche per i personaggi tag "gray") · plaster cerotto
+    // paint righe da tifoso (colore maglia) · earring orecchino d'oro · tired occhiaie · nosebreak naso da pugile · tattoo tatuaggio sul collo
+    const M = new Set(String(c.marks || "").split(/[ ,]+/).filter(Boolean)); if (c.tag === "gray" && !M.has("noage")) M.add("wrinkles");
+    const sk = c.skin || "#e0b48a", dk = (a) => `rgba(60,25,15,${a})`;
+    if (M.has("blush")) { g.fillStyle = "rgba(255,90,110,.28)"; [-1, 1].forEach((sd) => { g.beginPath(); g.ellipse(sd * 10.5, 13.5, 4.2, 2.6, 0, 0, 7); g.fill(); }); }
+    if (M.has("freckles")) { g.fillStyle = dk(0.42); [[-12, 11], [-9.5, 12.5], [-12.5, 14], [-10, 15], [12, 11], [9.5, 12.5], [12.5, 14], [10, 15], [-3, 10.5], [3, 10.5]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 0.75, 0, 7); g.fill(); }); }
+    if (M.has("mole")) { g.fillStyle = dk(0.75); g.beginPath(); g.arc(7.5, 17.5, 1.1, 0, 7); g.fill(); }
+    if (M.has("wrinkles")) { g.strokeStyle = dk(0.3); g.lineWidth = 0.8; g.beginPath(); g.moveTo(-7, -9); g.quadraticCurveTo(0, -11, 7, -9); g.moveTo(-5, -12); g.quadraticCurveTo(0, -13.5, 5, -12); [-1, 1].forEach((sd) => { g.moveTo(sd * 14, 3); g.lineTo(sd * 16, 1.5); g.moveTo(sd * 14, 5); g.lineTo(sd * 16.2, 5); g.moveTo(sd * 5.5, 15); g.quadraticCurveTo(sd * 7, 18, sd * 6, 21); }); g.stroke(); }
+    if (M.has("tired")) { g.strokeStyle = "rgba(90,60,110,.4)"; g.lineWidth = 1.2; [-1, 1].forEach((sd) => { g.beginPath(); g.arc(sd * 9.5, 7.5, 3.2, Math.PI * 0.15, Math.PI * 0.85); g.stroke(); }); }
+    if (M.has("nosebreak")) { g.strokeStyle = dk(0.45); g.lineWidth = 1.1; g.beginPath(); g.moveTo(-0.5, 6); g.lineTo(1.5, 9); g.lineTo(0, 11.5); g.stroke(); }
+    if (M.has("plaster")) { g.save(); g.translate(9, 9.5); g.rotate(-0.5); g.fillStyle = "#f2d4a8"; g.fillRect(-4.5, -1.6, 9, 3.2); g.fillStyle = "#e0b88a"; g.fillRect(-1.4, -1.6, 2.8, 3.2); g.restore(); }
+    if (M.has("paint")) { const pc = c.shirt || "#ff4d5a", p2 = c.shirt2 || "#ffffff"; [-1, 1].forEach((sd) => { [[pc, 0], [p2, 2.2]].forEach(([col, dy]) => { g.fillStyle = col; g.beginPath(); g.moveTo(sd * 8, 10 + dy); g.lineTo(sd * 14, 9 + dy); g.lineTo(sd * 14, 10.6 + dy); g.lineTo(sd * 8, 11.6 + dy); g.closePath(); g.fill(); }); }); }
+    if (M.has("earring")) { g.fillStyle = "#ffd23f"; g.strokeStyle = "#a8801a"; g.lineWidth = 0.6; g.beginPath(); g.arc(-17.5, 10.5, 1.6, 0, 7); g.fill(); g.stroke(); }
+    if (M.has("tattoo")) { g.fillStyle = "rgba(30,50,110,.75)"; g.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? 1.4 : 3.2; g.lineTo(-3 + Math.cos(a) * r, 27.5 + Math.sin(a) * r); } g.closePath(); g.fill(); }
+    void sk;
     if (c.scar && !o.noScar) { g.strokeStyle = "#e08a90"; g.lineWidth = 1.9; g.beginPath(); g.moveTo(6.5, -4); g.lineTo(10.5, 6); g.stroke(); g.lineWidth = 1; g.beginPath(); g.moveTo(5.3, -0.3); g.lineTo(9.3, 0.8); g.moveTo(7.2, 3.2); g.lineTo(11.4, 4); g.stroke(); }
     if (!c.cap) {
       if (c.streak) { g.strokeStyle = c.streak; g.globalAlpha = 0.92; g.lineWidth = 3.6; g.beginPath(); g.moveTo(-3, -29); g.quadraticCurveTo(5, -23, 7, -12); g.stroke(); g.lineWidth = 2; g.beginPath(); g.moveTo(-8, -27); g.quadraticCurveTo(-3, -21, -3, -14); g.stroke(); g.globalAlpha = 1; }
@@ -165,7 +185,7 @@
   };
   const withMods = FS.draw;
   FS.draw = function (style, g, id, c, expr) {
-    if (!c || !(typeof c.beard === "string" || c.scar || c.streak || c.band)) return withMods.call(FS, style, g, id, c, expr);
+    if (!c || !(typeof c.beard === "string" || c.scar || c.streak || c.band || c.marks || c.tag === "gray")) return withMods.call(FS, style, g, id, c, expr);
     const c2 = typeof c.beard === "string" ? Object.assign({}, c, { beard: false }) : c; // la barba a stile la disegniamo noi
     const r = withMods.call(FS, style, g, id, c2, expr);
     if (r !== false) { try { FS.mods(g, c, {}); } catch (e) {} }

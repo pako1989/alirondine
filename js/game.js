@@ -1135,7 +1135,7 @@
     if (c.glasses) { g.strokeStyle = "#222"; g.lineWidth = 1.5; g.strokeRect(-14, -4, 12, 11); g.strokeRect(2, -4, 12, 11); px(-2, 1, 4, 1.5, "#222"); }
     if (c.beard === true) { g.fillStyle = c.hair + "cc"; g.beginPath(); g.ellipse(0, 20, 14, 8, 0, 0, Math.PI); g.fill(); }
     if (c.scar) { g.strokeStyle = "#b35a5a"; g.lineWidth = 1.5; g.beginPath(); g.moveTo(10, -6); g.lineTo(15, 10); g.stroke(); }
-    if (window.__faceStyles && window.__faceStyles.mods && (typeof c.beard === "string" || c.streak || c.band)) window.__faceStyles.mods(g, c, { noScar: true });
+    if (window.__faceStyles && window.__faceStyles.mods && (typeof c.beard === "string" || c.streak || c.band || c.marks || c.tag === "gray")) window.__faceStyles.mods(g, c, { noScar: true });
     AL.forEach((a) => portraitAcc(a, "head"));
     px(-4, 16, 8, 2, "#8a3b3b");
     g.restore();
@@ -5385,7 +5385,7 @@
   window.heroLoad = heroLoad;
   window.heroEditor = heroEditor;
   function heroCast(h) {
-    CAST.hero = { name: h.name, tag: h.nick ? `«${h.nick}»` : "", hair: h.hair, style: h.style, skin: h.skin, eye: h.eye || "#2a1a0a", bg: [h.shirt, h.shirt2 || "#ffd23f"], shirt: h.shirt, shirt2: h.shirt2, pattern: h.pattern || "unita", armband: h.armband || "#ffd23f", role: h.role || "A", foot: h.foot || "dx", cel: h.cel || "corsa", num: String(h.num), face: h.face || "", acc: h.acc, accId: h.accId && COSM[h.accId] && COSM[h.accId].val === h.acc ? h.accId : undefined, cap: h.acc === "cappellino" ? "#ffd23f" : h.acc === "berretto" ? "#26324a" : undefined, beard: h.beard || undefined, scar: h.scar || undefined, streak: h.streak || undefined, band: h.band || undefined, nick: h.nick || undefined, quote: h.quote || undefined, trail: h.trail || "fuoco" };
+    CAST.hero = { name: h.name, tag: h.nick ? `«${h.nick}»` : "", hair: h.hair, style: h.style, skin: h.skin, eye: h.eye || "#2a1a0a", bg: [h.shirt, h.shirt2 || "#ffd23f"], shirt: h.shirt, shirt2: h.shirt2, pattern: h.pattern || "unita", armband: h.armband || "#ffd23f", role: h.role || "A", foot: h.foot || "dx", cel: h.cel || "corsa", num: String(h.num), face: h.face || "", acc: h.acc, accId: h.accId && COSM[h.accId] && COSM[h.accId].val === h.acc ? h.accId : undefined, cap: h.acc === "cappellino" ? "#ffd23f" : h.acc === "berretto" ? "#26324a" : undefined, beard: h.beard || undefined, scar: h.scar || undefined, marks: h.marks || undefined, streak: h.streak || undefined, band: h.band || undefined, nick: h.nick || undefined, quote: h.quote || undefined, trail: h.trail || "fuoco" };
   }
   // Il campione in campo: M.hero (partite), T.hero (rigori)
   const heroOn = () => !!(M && M.hero);
@@ -5449,7 +5449,7 @@
       face: [["", "Volto 1"], ...[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => ["v" + n, "Volto " + n])], // forma del viso, occhi, naso, bocca (negli stili dei volti)
       shirt: uq([...Object.entries(H_SHIRT), ...of("shirt")]),
       cel: [["", "A caso"], ["corsa", "Corsa alla bandierina"], ["salto", "Salto"], ["ginocchia", "Scivolata in ginocchio"], ["mucchio", "Mucchio"], ["bandiere", "Sotto la curva"], ["aeroplano", "Aeroplano"], ["capriola", "Capriola"], ["abbraccio", "Abbraccio"], ["orecchio", "Mano all'orecchio"], ["trenino", "Trenino"], ["bacio", "Bacio allo stemma"]],
-      beard: [["", "Nessuna"], ["incolta", "Barba incolta"], ["folta", "Barba folta"], ["pizzetto", "Pizzetto"], ["baffi", "Baffi"]],
+      beard: [["", "Nessuna"], ["incolta", "Barba incolta"], ["corta", "Barba corta"], ["folta", "Barba folta"], ["lunga", "Barba lunga"], ["pizzetto", "Pizzetto"], ["mosca", "Mosca"], ["baffi", "Baffi"], ["basette", "Basette"]],
       scar: [["", "Nessuno"], ["1", "Cicatrice sul sopracciglio"]],
       streak: [["", "Nessuna"], ["#f2f2f2", "Bianca"], ["#ff4d5a", "Rossa"], ["#3fa7ff", "Azzurra"], ["#ffd23f", "Dorata"], ["#a855f7", "Viola"]],
       band: [["", "Nessuna"], ["#ff4d5a", "Rossa"], ["#1d3fa3", "Blu"], ["#111111", "Nera"], ["#f2f2f2", "Bianca"], ["#ffd23f", "Gialla"]],

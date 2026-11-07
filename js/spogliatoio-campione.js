@@ -166,6 +166,7 @@
         acc: h.acc,
         beard: h.beard || undefined,
         scar: h.scar || undefined,
+        marks: h.marks || undefined,
         streak: h.streak || undefined,
         band: h.band || undefined,
         nick: h.nick || undefined,
@@ -631,7 +632,7 @@
         <div class="spogFieldGroup">
           <label class="spogLabel">Barba & Baffi</label>
           <div class="spogChipGrid">
-            ${[["", "Nessuna"], ["incolta", "Incolta"], ["folta", "Folta"], ["pizzetto", "Pizzetto"], ["baffi", "Baffi"]].map(([k, lbl]) => `
+            ${[["", "Nessuna"], ["incolta", "Incolta"], ["corta", "Corta"], ["folta", "Folta"], ["lunga", "Lunga"], ["pizzetto", "Pizzetto"], ["mosca", "Mosca"], ["baffi", "Baffi"], ["basette", "Basette"]].map(([k, lbl]) => `
               <button type="button" class="spogChip ${h.beard === k ? "active" : ""}" data-set-beard="${k}">${lbl}</button>
             `).join("")}
           </div>
@@ -642,6 +643,14 @@
             <button type="button" class="spogChip ${!h.scar ? "active" : ""}" data-set-scar="">Nessuno</button>
             <button type="button" class="spogChip ${h.scar === "1" ? "active" : ""}" data-set-scar="1">Cicatrice Sopracciglio</button>
           </div>
+        </div>
+      </div>
+      <div class="spogFieldGroup" style="margin-top:10px">
+        <label class="spogLabel">Dettagli del Volto <span style="font-weight:600;opacity:.7">(tocca per accendere/spegnere, anche più di uno)</span></label>
+        <div class="spogChipGrid">
+          ${[["freckles", "Lentiggini"], ["mole", "Neo"], ["blush", "Guance rosse"], ["tired", "Occhiaie"], ["wrinkles", "Rughe"], ["nosebreak", "Naso da pugile"], ["plaster", "Cerotto"], ["paint", "Righe da tifoso"], ["earring", "Orecchino d'oro"], ["tattoo", "Tatuaggio sul collo"]].map(([k, lbl]) => `
+            <button type="button" class="spogChip ${String(h.marks || "").split(",").includes(k) ? "active" : ""}" data-tog-mark="${k}">${lbl}</button>
+          `).join("")}
         </div>
       </div>
     `;
@@ -980,6 +989,9 @@
     });
     ov.querySelectorAll("[data-set-beard]").forEach((btn) => {
       btn.onclick = () => { SPOG.h.beard = btn.dataset.setBeard; syncGlobalHero(SPOG.h); renderSpogliatoio(); };
+    });
+    ov.querySelectorAll("[data-tog-mark]").forEach((btn) => {
+      btn.onclick = () => { const k = btn.dataset.togMark, m = new Set(String(SPOG.h.marks || "").split(",").filter(Boolean)); if (m.has(k)) m.delete(k); else m.add(k); SPOG.h.marks = [...m].join(","); syncGlobalHero(SPOG.h); renderSpogliatoio(); };
     });
     ov.querySelectorAll("[data-set-scar]").forEach((btn) => {
       btn.onclick = () => { SPOG.h.scar = btn.dataset.setScar; syncGlobalHero(SPOG.h); renderSpogliatoio(); };
