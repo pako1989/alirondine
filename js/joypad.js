@@ -58,12 +58,12 @@
     el.innerHTML = "<b>▲</b><b>▼</b><b>◀</b><b>▶</b><i></i>"; const knob = el.querySelector("i"); let pid = null;
     function set(x, y) {
       const m = Math.min(1, Math.hypot(x, y)), R = el.clientWidth * 0.3;
-      keys.left = keys.right = keys.up = keys.down = false; keys.ax = keys.ay = 0;
+      const M = o.map || {}; ["left", "right", "up", "down"].forEach((d) => { keys[M[d] || d] = false; }); keys.ax = keys.ay = 0;
       if (m < 0.25) { knob.style.transform = ""; return; }
       const a = Math.atan2(y, x); knob.style.transform = `translate(${Math.cos(a) * m * R}px,${Math.sin(a) * m * R}px)`;
       keys.ax = Math.cos(a) * m; keys.ay = Math.sin(a) * m;
       const sct = Math.round(a / (Math.PI / 4));
-      keys.right = [-1, 0, 1].includes(sct); keys.left = [3, 4, -4, -3].includes(sct); keys.down = [1, 2, 3].includes(sct); keys.up = [-1, -2, -3].includes(sct);
+      keys[M.right || "right"] = [-1, 0, 1].includes(sct); keys[M.left || "left"] = [3, 4, -4, -3].includes(sct); keys[M.down || "down"] = [1, 2, 3].includes(sct); keys[M.up || "up"] = [-1, -2, -3].includes(sct);
     }
     const move = (e) => { const r = el.getBoundingClientRect(), R = r.width * 0.3 || 1; set((e.clientX - (r.left + r.width / 2)) / R, (e.clientY - (r.top + r.height / 2)) / R); };
     el.addEventListener("pointerdown", (e) => { e.preventDefault(); e.stopPropagation(); pid = e.pointerId; try { el.setPointerCapture(pid); } catch (x) { /* ok */ } el.classList.add("on"); move(e); });
@@ -73,12 +73,24 @@
     el.addEventListener("contextmenu", (e) => e.preventDefault()); el._set = set;
     return el;
   }
+  // UNDERPAD: mette il joystick a sinistra della barra dei pulsanti di un minigioco (sotto il campo) e impila i pulsanti a destra.
+  // map traduce le direzioni nei nomi dei tasti del motore: ARROWS = { left: "ArrowLeft", … }, LRUD = { left: "l", … }.
+  const ARROWS = { left: "ArrowLeft", right: "ArrowRight", up: "ArrowUp", down: "ArrowDown" }, LRUD = { left: "l", right: "r", up: "u", down: "d" };
+  function underPad(pad, keys, map, o) {
+    if (!pad || !keys || pad._jpRow) return null; o = o || {};
+    const row = document.createElement("div"); row.className = "jpRow";
+    row.style.cssText = `width:${o.width || "min(100%,460px)"};display:flex;gap:12px;align-items:center;margin-top:6px;flex:none`;
+    pad.parentNode.insertBefore(row, pad); const st = stick(keys, { map, size: o.size || 124 }); row.appendChild(st); row.appendChild(pad);
+    Object.assign(pad.style, { flex: "1", width: "auto", minWidth: "0", display: "flex", flexDirection: "column", gap: "8px", margin: "0", justifyContent: "center" });
+    [...pad.children].forEach((c) => { c.style.width = "100%"; c.style.flex = "none"; c.style.minHeight = c.style.minHeight || "46px"; });
+    pad._jpRow = row; return st;
+  }
   function detach(pad) { if (!pad._jp) return; pad._jp.set(0, 0); pad._jp.el.remove(); pad._jp = null; pad.classList.remove("jpOn"); }
   function scan() { const on = mode() === "joy"; PADS.forEach(([sel, attr]) => document.querySelectorAll(sel).forEach((p) => (on ? attach(p, attr) : detach(p)))); }
   let q = 0; const later = () => { if (!q) q = requestAnimationFrame(() => { q = 0; scan(); }); };
   // in orizzontale il «✕ Esci» delle saghe va in alto, al centro della scena (css/style.css usa --cvL/--cvT/--cvW)
   function cvVars() { const c = document.getElementById("cv"); if (!c) return; const r = c.getBoundingClientRect(), d = document.documentElement.style; d.setProperty("--cvL", r.left + "px"); d.setProperty("--cvT", r.top + "px"); d.setProperty("--cvW", r.width + "px"); }
   function start() { scan(); cvVars(); new MutationObserver(later).observe(document.body, { childList: true, subtree: true }); addEventListener("resize", cvVars); setInterval(cvVars, 1000); }
-  window.__joypad = { mode, set: (m) => { try { localStorage.setItem(KEY, m === "frecce" ? "frecce" : "joy"); } catch (e) { /* ok */ } scan(); }, scan, stick, pad: (p) => p && p._jp };
+  window.__joypad = { mode, set: (m) => { try { localStorage.setItem(KEY, m === "frecce" ? "frecce" : "joy"); } catch (e) { /* ok */ } scan(); }, scan, stick, underPad, ARROWS, LRUD, pad: (p) => p && p._jp };
   if (document.body) start(); else document.addEventListener("DOMContentLoaded", start);
 })();

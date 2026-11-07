@@ -209,6 +209,7 @@
     el.querySelector(".passa").addEventListener("pointerdown", (e) => { e.preventDefault(); act("passa"); });
     S.cadiBtn.addEventListener("pointerdown", (e) => { e.preventDefault(); act("cadi"); });
     el.querySelector(".esci").onclick = () => { if (S && !S.over) finish(true); };
+    if (window.__joypad && window.__joypad.underPad) window.__joypad.underPad(el.querySelector(".pad"), S.keys, window.__joypad.ARROWS, { width: "min(100%,420px)" }); // joystick sotto il campo
     S.kd = (e) => { if (!S) return; if (/^Arrow/.test(e.key)) { S.keys[e.key] = true; e.preventDefault(); e.stopPropagation(); } else if (e.key === " " || e.key === "z") { act("tira"); e.preventDefault(); e.stopPropagation(); } else if (e.key === "x") { act("passa"); e.preventDefault(); e.stopPropagation(); } else if (e.key === "c") { act("cadi"); e.preventDefault(); e.stopPropagation(); } };
     S.ku = (e) => { if (S && /^Arrow/.test(e.key)) { S.keys[e.key] = false; e.stopPropagation(); } };
     window.addEventListener("keydown", S.kd, true); window.addEventListener("keyup", S.ku, true);

@@ -872,6 +872,7 @@
     rootEl.querySelector("#anello-act-hip").onclick = () => { S.keys.hip = true; };
     rootEl.querySelector("#anello-act-knee").onclick = () => { S.keys.knee = true; };
     rootEl.querySelector("#anello-act-roar").onclick = () => { S.keys.roar = true; };
+    if (window.__joypad && window.__joypad.underPad) window.__joypad.underPad(rootEl.querySelector("#anello-act-hip").parentNode, S.keys, window.__joypad.LRUD, { width: "100%" }); // joystick sotto il campo
   }
 
   function unmountUI() {

@@ -274,6 +274,7 @@
     ["pointerup", "pointercancel", "lostpointercapture"].forEach((ev) => cv.addEventListener(ev, () => { S.joy = null; }));
     [["pass", heroPass], ["shoot", heroShoot], ["tmp", useTempo], ["fis", useFischio]].forEach(([c, fn]) => el.querySelector("." + c).addEventListener("pointerdown", (e) => { e.preventDefault(); fn(); hud(); }));
     const KM = { ArrowLeft: "ArrowLeft", ArrowRight: "ArrowRight", ArrowUp: "ArrowUp", ArrowDown: "ArrowDown", a: "a", d: "d", w: "w", s: "s", A: "a", D: "d", W: "w", S: "s" };
+    if (window.__joypad && window.__joypad.underPad) window.__joypad.underPad(el.querySelector(".pad"), S.keys, window.__joypad.ARROWS, { width: "min(100%,420px)" }); // joystick sotto il campo
     const kd = (e) => { if (!el.isConnected) return; if (KM[e.key]) { S.keys[KM[e.key]] = true; e.preventDefault(); e.stopPropagation(); } else if (e.key === " ") { heroShoot(); e.preventDefault(); e.stopPropagation(); } else if (e.key === "p" || e.key === "P") { heroPass(); e.stopPropagation(); } else if (e.key === "t" || e.key === "T") { useTempo(); e.stopPropagation(); } else if (e.key === "f" || e.key === "F") { useFischio(); e.stopPropagation(); } };
     const ku = (e) => { if (KM[e.key]) { S.keys[KM[e.key]] = false; e.stopPropagation(); } };
     window.addEventListener("keydown", kd, true); window.addEventListener("keyup", ku, true);

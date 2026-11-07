@@ -643,6 +643,7 @@
     const shotBtn = root.querySelector("#corrente-shot-btn");
     shotBtn.onpointerdown = () => { S.keys.x = true; };
     shotBtn.onpointerup = () => { S.keys.x = false; };
+    if (window.__joypad && window.__joypad.underPad) window.__joypad.underPad(shotBtn.parentNode, S.keys, window.__joypad.LRUD, { width: "100%" }); // joystick sotto il campo
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);

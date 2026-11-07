@@ -540,6 +540,7 @@
     cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
     const bt = (sel, fn) => $(sel).addEventListener("pointerdown", (e) => { e.preventDefault(); fn(); });
     bt(".dash", doDash); bt(".kick", () => doKick(false));
+    if (window.__joypad && window.__joypad.underPad) window.__joypad.underPad(el.querySelector(".pad"), S.keys, window.__joypad.ARROWS, { width: "min(100%,480px)" }); // joystick sotto il campo
     const kd = (e) => { if (!el.isConnected) return; if (e.key === " " || e.key === "Enter") { e.preventDefault(); if (!S.keys[" "]) doKick(false); S.keys[" "] = 1; } else if (e.key === "Shift" || e.key === "x" || e.key === "X") { e.preventDefault(); if (!S.keys.Shift) doDash(); S.keys.Shift = 1; } else if (/^(Arrow|[wasdWASD])/.test(e.key)) { e.preventDefault(); S.keys[e.key.length === 1 ? e.key.toLowerCase() : e.key] = 1; } };
     const ku = (e) => { if (e.key === " " || e.key === "Enter") S.keys[" "] = 0; else if (e.key === "Shift" || e.key === "x" || e.key === "X") S.keys.Shift = 0; else delete S.keys[e.key.length === 1 ? e.key.toLowerCase() : e.key]; };
     window.addEventListener("keydown", kd); window.addEventListener("keyup", ku);
