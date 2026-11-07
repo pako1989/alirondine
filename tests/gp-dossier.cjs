@@ -1,0 +1,42 @@
+// tests/gp-dossier.cjs - «Gran Premio del Pallone»: Dossier di Smeraldo cap. 4-5 da dati (prove a tempo, scelte, finali, carte, ospite, mazzo)
+const L = require("./lib.cjs");
+const MOD = { mod: "__gp", key: "ali-di-rondine.gp" };
+const info = (p) => L.info(p);
+async function dossier(w) {
+  const save = { v: 1, ch: 4, step: { 1: 9, 2: 9, 3: 9 }, done: { 1: "ok", 2: "ok", 3: "ok" }, ends: ["scacchi", "voce"], max: 4, diffSet: true, intro: { ch1: 1, ch2: 1, ch3: 1 }, st: {}, flags: {} };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await page.evaluate(() => localStorage.setItem("ali.dossier_enabled", "1"));
+  const reach = async (z) => { const bad = await L.reachAll(page, z); if (bad.length) errors.push(z + " irraggiungibile: " + bad.join(", ")); };
+  const K = "window.__gp._dbg.K";
+  await page.evaluate(() => window.__gp.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 4")); await L.advance(page);
+  if ((await L.zone(page)) !== "gp_s_paddock") errors.push("c4: zona " + (await L.zone(page)));
+  await reach("gp_s_paddock"); if (w === 390) await L.shot(page, "gp_s_paddock");
+  await L.goAct(page, 26, 12); await L.advance(page);
+  let i = await info(page); if (i.step[4] !== 1) errors.push("pompa: " + JSON.stringify(i.step));
+  await L.goAct(page, 7, 7); await L.advance(page); if ((await L.zone(page)) !== "gp_s_boxverde") errors.push("box: " + (await L.zone(page)));
+  await reach("gp_s_boxverde"); if (w === 390) await L.shot(page, "gp_s_boxverde");
+  await L.talk(page, "gp_clotilde"); await L.advance(page);
+  await L.goAct(page, 4, 4); await L.advance(page, w === 390 ? ["Bussola d'acciaio", "Spurgare il condotto", "Scaricare l'incidenza", "Mescola verde"] : ["Pinza da cucina", "Versare acqua", "Raddrizzare", "Gomme tassellate"]);
+  i = await info(page); if (i.step[4] !== 3) errors.push("pit stop: " + JSON.stringify([i.step, i.flags]));
+  await page.evaluate((k) => eval(k).enterZone("gp_s_paddock"), K); await page.waitForTimeout(400); await L.advance(page);
+  await L.talk(page, "gp_nembo"); await L.advance(page, ["Mostra la certificazione"]);
+  i = await info(page); if (!i.done[4]) errors.push("c4 non concluso: " + JSON.stringify([i.step, i.done]));
+  await page.evaluate(() => window.T_.click("Inizia il Capitolo 5")); await L.advance(page);
+  if ((await L.zone(page)) !== "gp_s_circuito") errors.push("c5: zona " + (await L.zone(page)));
+  await reach("gp_s_circuito"); if (w === 390) await L.shot(page, "gp_s_circuito");
+  await L.talk(page, "gp_bullone"); await L.advance(page);
+  await L.goAct(page, 24, 7); await L.advance(page); if ((await L.zone(page)) !== "gp_s_torre") errors.push("torre: " + (await L.zone(page)));
+  await reach("gp_s_torre"); if (w === 390) await L.shot(page, "gp_s_torre");
+  await L.talk(page, "gp_rosalba"); await L.advance(page);
+  await L.goAct(page, 4, 4); await L.advance(page, w === 390 ? ["cinquanta metri", "Allargare al massimo", "Parzializzare", "diffusore ecologico"] : ["Frenare dentro", "Tagliare dritto", "Mollare il volante", "Aprire il cofano"]);
+  i = await info(page); if (i.step[5] !== 3) errors.push("telemetria: " + JSON.stringify([i.step, i.flags]));
+  await L.talk(page, "gp_nembo"); await L.advance(page);
+  await L.talk(page, "gp_bullone"); await L.advance(page, [w === 390 ? "Alleanza Verde-Oro" : "Resta indipendente"]);
+  i = await info(page); const fin = w === 390 ? "smeraldo_verde_oro" : "smeraldo_solitario";
+  const e = await page.evaluate((k) => eval(k).mem().ends, K); if (!i.done[5] || !e.includes(fin)) errors.push("c5 non concluso: " + JSON.stringify([i.step, i.done, e]));
+  const own = await page.evaluate(() => window.__sogni._load().own); if (!own.includes("gp_smeraldo") || !own.includes("gp_clotilde")) errors.push("carte non sbloccate");
+  const g = await page.evaluate(() => window.__borgoGuests.list().find((x) => x.id === "gp_smeraldo")); if (!g || !g.on) errors.push("ospite Smeraldo: " + JSON.stringify(g));
+  const d = await page.evaluate(() => window.__carteDecks.list().find((x) => x.id === "gpg")); if (!d || !d.unlocked) errors.push("mazzo Destino gpg: " + JSON.stringify(d));
+  L.check(`Gran Premio · Dossier di Smeraldo cap. 4-5 da dati (${w} px)`, errors); await browser.close();
+}
+(async () => { await dossier(390); await dossier(320); })().catch((e) => { console.error("✗ gp-dossier:", e.stack); process.exit(1); });

@@ -521,7 +521,7 @@
           ]
         },
         obj: {
-          Y: [
+          "gp_s_paddock:Y": [
             {
               when: { step: 0 },
               do: [
@@ -558,7 +558,7 @@
               ]
             }
           ],
-          M: [
+          "gp_s_boxverde:M": [
             {
               when: { step: 2 },
               do: [
@@ -680,7 +680,7 @@
               ]
             }
           ],
-          x: [
+          "gp_s_paddock:x": [
             {
               when: { notFlag: "gp_s_baule_c4" },
               do: [
@@ -1171,7 +1171,7 @@
           ]
         },
         obj: {
-          U: [
+          "gp_s_torre:U": [
             {
               when: { step: 2 },
               do: [
@@ -1293,7 +1293,7 @@
               ]
             }
           ],
-          x: [
+          "gp_s_circuito:x": [
             {
               when: { notFlag: "gp_s_baule_c5" },
               do: [
