@@ -202,6 +202,9 @@
   const NEWEST = ["milano", "carriera", "fango", "leo", "alcatraz2", "tipografia", "zampano", "burattini", "tifosi", "falsari", "moviola", "sasso", "banda", "neve", "onde", "latta", "missione", "corriere", "compagnia", "diga", "vuota", "mondiale", "cavaliere", "gala", "circuiti", "replica", "officina", "figurine", "rotta", "fischietto", "capitani", "carte", "quattordici", "sigilli", "fortino", "cenere", "note", "spia", "fiume", "piramide", "treno", "alcatraz", "milano", "gp", "tempo", "dungeon", "roma", "regno", "naufraghi", "campana", "galletta", "pugno", "montagna", "cavallo", "razzo", "quartiere", "titano", "ducati", "grigio", "colline", "campetto", "trono", "mondi", "lampioni", "stagione", "mantello", "cronache", "torneo", "spazio", "dopo", "detective", "vento", "muro", "cristalli", "doppio", "libro"];
   const modOf = (s) => (s.mod ? window[s.mod] : null);
   const available = (s) => (s.hide && safe(() => s.hide(), false) ? false : s.mod ? !!window[s.mod] : s.fn ? typeof window[s.fn] === "function" : !!(api() && api()[s.api]));
+  // DOSSIER INCOMPIUTI: capitoli extra della saga (solo con opzione Dossier attiva) → badge e «3+2 capitoli»
+  const dossierOf = (s) => { const m = modOf(s), d = m && m.dossier ? safe(() => m.dossier(), null) : null; return d && d.on ? d : null; };
+  const chTxt = (s, d) => (d ? `${d.base}+${d.extra}` : `${s.ch}`);
   function state(s) {
     const m = modOf(s), inf = m && m.info ? safe(() => m.info(), null) : null, ends = m && m.endings ? safe(() => m.endings(), []) : [];
     const doneN = inf && inf.done ? Object.keys(inf.done).length : 0, started = !!(s.key && safe(() => localStorage.getItem(s.key), null)) || doneN > 0 || (inf && inf.ch > 1);
@@ -1103,10 +1106,11 @@
     return sagasList.map(({ s, x }) => {
       const isFav = r.favs.includes(s.id);
       const isNew = !r.seen[s.id] && !x.started && NEWEST.includes(s.id);
+      const dos = dossierOf(s);
       const badge = x.finished ? `<span class="badge done">✓ CONCLUSA</span>` : x.started ? `<span class="badge run">IN CORSO</span>` : isNew ? `<span class="badge new">NUOVA</span>` : "";
       const prog = x.pct != null && (x.started || x.finished) ? `<div class="pbar"><i style="width:${Math.max(4, x.pct)}%"></i></div>` : "";
       const favBtn = `<button type="button" class="salFav${isFav ? " on" : ""}" data-fav="${s.id}" title="${isFav ? "Rimuovi dai preferiti" : "Fissa tra le saghe preferite in cima"}" aria-label="Preferita">${isFav ? "⭐" : "☆"}</button>`;
-      return `<div class="card${isFav ? " isFav" : ""}" data-id="${s.id}"><img alt="" loading="lazy" src="${cover(s)}"><div class="t"><span class="e">${s.e}</span>${esc(s.t)}</div>${favBtn}<div class="info">${s.g.map((k) => `<span class="tag" style="background:${GEN[k][1]}">${GEN[k][0]}</span>`).join("")}<div style="display:flex;justify-content:space-between;align-items:center;gap:6px"><span>${x.finished ? "Conclusa" : x.started ? `Capitolo ${x.ch}${s.ch ? `/${s.ch}` : ""}` : "Da iniziare"}</span>${x.ends.length ? `<span>🏆 ${x.endsFound}/${x.ends.length}</span>` : ""}</div>${prog}</div>${badge ? `<div class="stamp">${badge}</div>` : ""}</div>`;
+      return `<div class="card${isFav ? " isFav" : ""}" data-id="${s.id}"><img alt="" loading="lazy" src="${cover(s)}"><div class="t"><span class="e">${s.e}</span>${esc(s.t)}</div>${favBtn}<div class="info">${dos ? `<span class="tag" style="background:#6a4a1a" title="${dos.open ? "Dossier Incompiuto aperto" : "Trova 2 finali per aprirlo"}">📂 Dossier +${dos.extra}${dos.open ? "" : " 🔒"}</span>` : ""}${s.g.map((k) => `<span class="tag" style="background:${GEN[k][1]}">${GEN[k][0]}</span>`).join("")}<div style="display:flex;justify-content:space-between;align-items:center;gap:6px"><span>${x.finished ? (dos && dos.open && x.doneN < dos.base + dos.extra ? "Conclusa · 📂 Dossier da giocare" : "Conclusa") : x.started ? `Capitolo ${x.ch}${s.ch ? `/${chTxt(s, dos)}` : ""}` : "Da iniziare"}</span>${x.ends.length ? `<span>🏆 ${x.endsFound}/${x.ends.length}</span>` : ""}</div>${prog}</div>${badge ? `<div class="stamp">${badge}</div>` : ""}</div>`;
     }).join("");
   }
 
@@ -1658,9 +1662,10 @@
     if (!s || !OV) return; const x = state(s), r = rec(); r.seen[s.id] = 1; recSave(r);
     const sh = document.createElement("div"); sh.className = "sheet";
     const doneSaga = !!(x.finished || x.endsFound > 0);
+    const dosD = dossierOf(s);
     const regiaHtml = window.__regia && window.__regia.renderSagaDetailBlock ? window.__regia.renderSagaDetailBlock(s.id, doneSaga) : "";
     const ends = x.ends.length ? `<div class="sec"><span>Finali</span><span>${x.endsFound}/${x.ends.length}</span></div><div class="ends">${x.ends.map((e) => endRow(e.found, e.title, e.found ? e.desc : (s.hints && s.hints[e.id]) || "Un finale ancora nascosto.")).join("")}</div>` : "";
-    sh.innerHTML = `<div class="box"><img alt="" src="${cover(s)}"><div class="in"><h3>${s.e} ${esc(s.t)}</h3><div>${s.g.map((k) => `<span class="tag" style="background:${GEN[k][1]}">${GEN[k][0]}</span>`).join("")}</div><p>${esc(s.d)}</p><p style="color:#c9d2ea;font-size:13px">${x.finished ? "✓ Saga conclusa." : x.started ? `In corso · capitolo ${x.ch}${s.ch ? ` di ${s.ch}` : ""}${x.doneN ? ` · ${x.doneN} capitoli conclusi` : ""}.` : "Non l'hai ancora iniziata."}${s.ch ? ` ${s.ch} capitoli.` : ""}</p>${regiaHtml}${ends}<div class="act"><button type="button" class="ghost">◂ Indietro</button>${x.ends.length ? `<button type="button" class="ghost" data-tree="1">🌳 Albero Bivi</button>` : ""}<button type="button" class="play">${x.started ? "Continua ▸" : "Gioca ▸"}</button></div></div></div>`;
+    sh.innerHTML = `<div class="box"><img alt="" src="${cover(s)}"><div class="in"><h3>${s.e} ${esc(s.t)}</h3><div>${s.g.map((k) => `<span class="tag" style="background:${GEN[k][1]}">${GEN[k][0]}</span>`).join("")}</div><p>${esc(s.d)}</p><p style="color:#c9d2ea;font-size:13px">${x.finished ? "✓ Saga conclusa." : x.started ? `In corso · capitolo ${x.ch}${s.ch ? ` di ${chTxt(s, dosD)}` : ""}${x.doneN ? ` · ${x.doneN} capitoli conclusi` : ""}.` : "Non l'hai ancora iniziata."}${s.ch ? (dosD ? ` ${dosD.base} capitoli + ${dosD.extra} del Dossier Incompiuto (📂 ${dosD.open ? "aperto" : "si apre con 2 finali"}).` : ` ${s.ch} capitoli.`) : ""}</p>${regiaHtml}${ends}<div class="act"><button type="button" class="ghost">◂ Indietro</button>${x.ends.length ? `<button type="button" class="ghost" data-tree="1">🌳 Albero Bivi</button>` : ""}<button type="button" class="play">${x.started ? "Continua ▸" : "Gioca ▸"}</button></div></div></div>`;
     sh.onclick = (e) => { if (e.target === sh) sh.remove(); };
     sh.querySelector(".ghost").onclick = () => sh.remove();
     const tb = sh.querySelector("[data-tree]"); if (tb) tb.onclick = () => { sh.remove(); openAlbero(() => detail(s), s.id); };

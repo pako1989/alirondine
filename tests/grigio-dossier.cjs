@@ -1,0 +1,40 @@
+// tests/grigio-dossier.cjs - «Il Cavaliere della Notte»: Dossier di Brume cap. 4-5 da dati (prove a tempo, scelte, finali, carte, ospite, mazzo)
+const L = require("./lib.cjs");
+const MOD = { mod: "__grigio", key: "ali-di-rondine.grigio" };
+const info = (p) => L.info(p);
+async function dossier(w) {
+  const save = { v: 1, ch: 4, step: { 1: 9, 2: 9, 3: 9 }, done: { 1: "ok", 2: "ok", 3: "ok" }, ends: ["luce", "ombra"], max: 4, diffSet: true, intro: { ch1: 1, ch2: 1, ch3: 1 }, st: {}, flags: {} };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await page.evaluate(() => localStorage.setItem("ali.dossier_enabled", "1"));
+  const reach = async (z) => { const bad = await L.reachAll(page, z); if (bad.length) errors.push(z + " irraggiungibile: " + bad.join(", ")); };
+  await page.evaluate(() => window.__grigio.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 4")); await L.advance(page);
+  if ((await L.zone(page)) !== "gr_b_moli") errors.push("c4: zona " + (await L.zone(page)));
+  await reach("gr_b_moli"); if (w === 390) await L.shot(page, "gr_b_moli");
+  await L.goAct(page, 24, 17); await L.advance(page);
+  let i = await info(page); if (i.step[4] !== 1) errors.push("lampione: " + JSON.stringify(i.step));
+  await L.goAct(page, 7, 7); await L.advance(page); if ((await L.zone(page)) !== "gr_b_ufficio") errors.push("dogana: " + (await L.zone(page)));
+  await reach("gr_b_ufficio"); if (w === 390) await L.shot(page, "gr_b_ufficio");
+  await L.talk(page, "gr_gancio"); await L.advance(page);
+  await L.goAct(page, 4, 4); await L.advance(page, w === 390 ? ["stetoscopio", "tre gol", "rubinetto a farfalla", "griglia forata"] : ["Prendere a calci", "gatto del guardiano", "Tranciare", "Bruciare"]);
+  i = await info(page); if (i.step[4] !== 3) errors.push("caveau: " + JSON.stringify([i.step, i.flags]));
+  await page.evaluate(() => window.__grigio._dbg.K.enterZone("gr_b_moli")); await page.waitForTimeout(400); await L.advance(page);
+  await L.talk(page, "gr_dora"); await L.advance(page, ["Mostra le prove"]);
+  i = await info(page); if (!i.done[4]) errors.push("c4 non concluso: " + JSON.stringify([i.step, i.done]));
+  await page.evaluate(() => window.T_.click("Inizia il Capitolo 5")); await L.advance(page);
+  if ((await L.zone(page)) !== "gr_b_porto") errors.push("c5: zona " + (await L.zone(page)));
+  await reach("gr_b_porto"); if (w === 390) await L.shot(page, "gr_b_porto");
+  await L.talk(page, "gr_marisa"); await L.advance(page);
+  await L.goAct(page, 24, 7); await L.advance(page); if ((await L.zone(page)) !== "gr_b_salotto") errors.push("salotto: " + (await L.zone(page)));
+  await reach("gr_b_salotto"); if (w === 390) await L.shot(page, "gr_b_salotto");
+  await L.talk(page, "gr_dora"); await L.advance(page);
+  await L.goAct(page, 4, 4); await L.advance(page, w === 390 ? ["blocchetti doppi", "mediatori", "ispettore corrotto", "conto fiduciario"] : ["caramelle", "pescatore", "custode del faro", "Distribuire monete"]);
+  i = await info(page); if (i.step[5] !== 3) errors.push("audit: " + JSON.stringify([i.step, i.flags]));
+  await L.talk(page, "gr_dora"); await L.advance(page, [w === 390 ? "Patto del Silenzio" : "Ultimo Mercante"]);
+  i = await info(page); const fin = w === 390 ? "brume_patto_silenzio" : "brume_scacco_ombra";
+  const e = await page.evaluate(() => window.__grigio._dbg.K.mem().ends); if (!i.done[5] || !e.includes(fin)) errors.push("c5 non concluso: " + JSON.stringify([i.step, i.done, e]));
+  const own = await page.evaluate(() => window.__sogni._load().own); if (!own.includes("gr_brume") || !own.includes("gr_dora")) errors.push("carte non sbloccate");
+  const g = await page.evaluate(() => window.__borgoGuests.list().find((x) => x.id === "gr_brume")); if (!g || !g.on) errors.push("ospite Brume: " + JSON.stringify(g));
+  const d = await page.evaluate(() => window.__carteDecks.list().find((x) => x.id === "grb")); if (!d || !d.unlocked) errors.push("mazzo Destino grb: " + JSON.stringify(d));
+  L.check(`Cavaliere della Notte · Dossier di Brume cap. 4-5 da dati (${w} px)`, errors); await browser.close();
+}
+(async () => { await dossier(390); await dossier(320); })().catch((e) => { console.error("✗ grigio-dossier:", e.stack); process.exit(1); });

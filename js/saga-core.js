@@ -2154,6 +2154,7 @@
     }
     const pub = {
       version: 1, KEY, addChapter, open: openMain, SFX, _has: (n) => !!CHAPTERS[n],
+      dossier() { const ex = Object.keys(CHAPTERS).filter((k) => +k > BASE).length; return ex ? { base: BASE, extra: ex, on: isDossierEnabled(), open: dossierOpen() } : null; }, // Salone: badge «📂 Dossier» e capitoli 5+2
       menuEntry(back) {
         const h = hero(), c = activeChapter(), m = mem();
         return { label: `${ICON} ${TITLE}`, cls: "hot", fn: () => openMain({ onExit: back }), sub: h ? `${h.name} · ${c ? "Capitolo " + c.n + (m.done[c.n] ? " concluso" : " in corso") : "saga"}${cfg.menuSub ? " · " + cfg.menuSub : ""}` : "Crea prima il tuo campione" };
