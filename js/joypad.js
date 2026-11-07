@@ -50,12 +50,35 @@
     el.addEventListener("contextmenu", (e) => e.preventDefault());
     pad._jp = { el, set }; pad.appendChild(el); pad.classList.add("jpOn");
   }
+  // STICK per i minigiochi a canvas: joystick SOTTO il campo (non sopra), scrive direttamente in un oggetto keys {left,right,up,down}
+  // e, se serve, il vettore analogico in keys.ax/keys.ay (da -1 a 1). Uso: host.appendChild(window.__joypad.stick(S.keys)).
+  function stick(keys, o) {
+    css(); o = o || {}; const el = document.createElement("div"); el.className = "jp jpStick"; el.setAttribute("aria-label", "Joystick");
+    el.style.cssText = `position:relative;inset:auto;margin:0;width:${o.size || 120}px;height:${o.size || 120}px;flex:none;touch-action:none`;
+    el.innerHTML = "<b>▲</b><b>▼</b><b>◀</b><b>▶</b><i></i>"; const knob = el.querySelector("i"); let pid = null;
+    function set(x, y) {
+      const m = Math.min(1, Math.hypot(x, y)), R = el.clientWidth * 0.3;
+      keys.left = keys.right = keys.up = keys.down = false; keys.ax = keys.ay = 0;
+      if (m < 0.25) { knob.style.transform = ""; return; }
+      const a = Math.atan2(y, x); knob.style.transform = `translate(${Math.cos(a) * m * R}px,${Math.sin(a) * m * R}px)`;
+      keys.ax = Math.cos(a) * m; keys.ay = Math.sin(a) * m;
+      const sct = Math.round(a / (Math.PI / 4));
+      keys.right = [-1, 0, 1].includes(sct); keys.left = [3, 4, -4, -3].includes(sct); keys.down = [1, 2, 3].includes(sct); keys.up = [-1, -2, -3].includes(sct);
+    }
+    const move = (e) => { const r = el.getBoundingClientRect(), R = r.width * 0.3 || 1; set((e.clientX - (r.left + r.width / 2)) / R, (e.clientY - (r.top + r.height / 2)) / R); };
+    el.addEventListener("pointerdown", (e) => { e.preventDefault(); e.stopPropagation(); pid = e.pointerId; try { el.setPointerCapture(pid); } catch (x) { /* ok */ } el.classList.add("on"); move(e); });
+    el.addEventListener("pointermove", (e) => { if (e.pointerId === pid) move(e); });
+    const up = (e) => { if (e.pointerId !== pid) return; pid = null; el.classList.remove("on"); set(0, 0); };
+    ["pointerup", "pointercancel", "lostpointercapture"].forEach((t) => el.addEventListener(t, up));
+    el.addEventListener("contextmenu", (e) => e.preventDefault()); el._set = set;
+    return el;
+  }
   function detach(pad) { if (!pad._jp) return; pad._jp.set(0, 0); pad._jp.el.remove(); pad._jp = null; pad.classList.remove("jpOn"); }
   function scan() { const on = mode() === "joy"; PADS.forEach(([sel, attr]) => document.querySelectorAll(sel).forEach((p) => (on ? attach(p, attr) : detach(p)))); }
   let q = 0; const later = () => { if (!q) q = requestAnimationFrame(() => { q = 0; scan(); }); };
   // in orizzontale il «✕ Esci» delle saghe va in alto, al centro della scena (css/style.css usa --cvL/--cvT/--cvW)
   function cvVars() { const c = document.getElementById("cv"); if (!c) return; const r = c.getBoundingClientRect(), d = document.documentElement.style; d.setProperty("--cvL", r.left + "px"); d.setProperty("--cvT", r.top + "px"); d.setProperty("--cvW", r.width + "px"); }
   function start() { scan(); cvVars(); new MutationObserver(later).observe(document.body, { childList: true, subtree: true }); addEventListener("resize", cvVars); setInterval(cvVars, 1000); }
-  window.__joypad = { mode, set: (m) => { try { localStorage.setItem(KEY, m === "frecce" ? "frecce" : "joy"); } catch (e) { /* ok */ } scan(); }, scan, pad: (p) => p && p._jp };
+  window.__joypad = { mode, set: (m) => { try { localStorage.setItem(KEY, m === "frecce" ? "frecce" : "joy"); } catch (e) { /* ok */ } scan(); }, scan, stick, pad: (p) => p && p._jp };
   if (document.body) start(); else document.addEventListener("DOMContentLoaded", start);
 })();

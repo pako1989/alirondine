@@ -37,7 +37,7 @@
     STATE = S;
     css();
     const el = document.createElement("div"); el.className = "rnOv";
-    el.innerHTML = `<div class="hud"><span class="n0"></span><span class="sc"></span><span class="n1"></span></div><div class="bar"><i class="clock"></i><span class="tip"></span></div><canvas width="${W * 2}" height="${H * 2}"></canvas><div class="pad"><button type="button" class="pass">↪ PASSA</button><button type="button" class="thr">📦 LANCIA</button></div><div class="help">Tocca o trascina sul campo: il razzo vola lì. Tasti: frecce, Spazio lancia, P passa.</div>`;
+    el.innerHTML = `<div class="hud"><span class="n0"></span><span class="sc"></span><span class="n1"></span></div><div class="bar"><i class="clock"></i><span class="tip"></span></div><canvas width="${W * 2}" height="${H * 2}"></canvas><div class="pad"><div class="stk"></div><div class="btns"><button type="button" class="thr">📦 LANCIA</button><button type="button" class="pass">↪ PASSA</button></div></div><div class="help">Joystick: guida il razzo (oppure tocca il campo). Tasti: frecce, Spazio lancia, P passa.</div>`;
     document.body.appendChild(el); S.el = el;
     el.querySelector(".n0").textContent = o.us || "Noi"; el.querySelector(".n1").textContent = opp.name;
     el.style.setProperty("--us", usCol); el.style.setProperty("--opp", opp.color);
@@ -134,11 +134,11 @@
         else steer(s, P.x, P.y, oppMax, oppAcc);
       });
       // i droni-portieri: il loro reagisce secondo la difficoltà
-      const pr = S.parcel; S.keepers.forEach((k, i) => { const coming = i ? pr.x > 200 : pr.x < 120, ty = coming ? clamp(pr.y + pr.vy * 4, GY0 + 6, GY1 - 6) : GM, sp = i ? 1.05 * oppK * (DF.gk1 || 1) : 1.45 * (DF.gk0 || 1); k.y += clamp(ty - k.y, -sp, sp); });
+      const pr = S.parcel; S.keepers.forEach((k, i) => { const coming = i ? pr.x > 200 : pr.x < 120, ty = coming ? clamp(pr.y + pr.vy * 4, GY0 + 6, GY1 - 6) : GM, sp = i ? 1.05 * oppK * (1 + 2 * (DF.gk1 || 0)) : 1.45 * (1 + 2 * (DF.gk0 || 0)); k.y += clamp(ty - k.y, -sp, sp); });
     }
     // ------------------------------------------------------------ comandi del Campione
     function control() {
-      const k = S.keys, dx = (k.right ? 1 : 0) - (k.left ? 1 : 0), dy = (k.down ? 1 : 0) - (k.up ? 1 : 0);
+      const k = S.keys, dx = k.ax || (k.right ? 1 : 0) - (k.left ? 1 : 0), dy = k.ay || (k.down ? 1 : 0) - (k.up ? 1 : 0); // joystick: direzione analogica
       if (dx || dy) S.tgt = { x: HERO.x + dx * 40, y: HERO.y + dy * 40 };
       if (S.tgt) { steer(HERO, S.tgt.x, S.tgt.y, 2.25, 0.16); if (Math.hypot(S.tgt.x - HERO.x, S.tgt.y - HERO.y) < 5 && !dx && !dy) S.tgt = null; }
     }
@@ -199,6 +199,7 @@
     cv.addEventListener("pointerdown", (e) => { e.preventDefault(); down = true; S.tgt = toCanvas(e); try { cv.setPointerCapture(e.pointerId); } catch (x) {} });
     cv.addEventListener("pointermove", (e) => { if (down) S.tgt = toCanvas(e); });
     cv.addEventListener("pointerup", () => { down = false; }); cv.addEventListener("pointercancel", () => { down = false; });
+    if (window.__joypad && window.__joypad.stick) el.querySelector(".stk").appendChild(window.__joypad.stick(S.keys, { size: 128 })); else el.querySelector(".stk").remove();
     el.querySelector(".thr").addEventListener("pointerdown", (e) => { e.preventDefault(); throwHero(); });
     el.querySelector(".pass").addEventListener("pointerdown", (e) => { e.preventDefault(); passHero(); });
     const KM = { ArrowLeft: "left", ArrowRight: "right", ArrowUp: "up", ArrowDown: "down", a: "left", d: "right", w: "up", s: "down" };
@@ -225,7 +226,7 @@
 .rnOv .hud .n0{color:var(--us)}.rnOv .hud .n1{text-align:right;color:#c8d0ff}.rnOv .hud .sc{font:900 22px 'Courier New',monospace;color:#ffd23f}
 .rnOv .bar{width:min(100%,460px);display:flex;gap:8px;align-items:center;font:600 12px system-ui}.rnOv .bar i{font-style:normal;color:#ffd23f;font-family:'Courier New',monospace;font-weight:900}.rnOv .tip{flex:1;opacity:.9}.rnOv .tip b{color:#ffd23f}
 .rnOv canvas{width:min(100%,460px);height:auto;aspect-ratio:320/200;flex:none;border:2px solid #c8a040;border-radius:14px;touch-action:none}
-.rnOv .pad{width:min(100%,460px);display:grid;grid-template-columns:1fr 1.4fr;gap:8px}
+.rnOv .pad{width:min(100%,460px);display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:6px}.rnOv .pad .stk{flex:none;padding:4px}.rnOv .pad .btns{flex:1;display:flex;flex-direction:column;gap:10px;max-width:220px}.rnOv .pad .btns button{min-height:58px}
 .rnOv .pad button{min-height:54px;border-radius:14px;border:2px solid #c8a040;background:#2a1a4a;color:#fff;font:900 15px system-ui;cursor:pointer}.rnOv .pad .thr{background:linear-gradient(#ff8a3a,#d8501a)}.rnOv button:disabled{opacity:.4}
 .rnOv .help{width:min(100%,460px);font-size:11px;opacity:.65}
 .rnOv .quit{position:absolute;right:8px;bottom:8px;min-height:32px;font-size:11px;padding:4px 10px;border-radius:8px;border:1px solid #c8a040;background:#1a1030;color:#fff}
