@@ -308,7 +308,7 @@
 .c11Bar .x{width:38px;height:38px;border-radius:10px;border:1px solid #475569;background:#1e293b;color:#f8fafc;font-size:16px;cursor:pointer;flex-shrink:0}
 .c11Sum{font-size:13px;line-height:1.45;color:#cbd5e1;margin:8px 0}
 .c11Sec{margin:14px 0 8px;font:800 13px system-ui;color:#7dd3fc;text-transform:uppercase;letter-spacing:.5px;display:flex;justify-content:space-between;align-items:center}
-.c11Stage{position:relative;width:100%;aspect-ratio:16/10;max-height:55vh;background:#020617;border:2px solid #334155;border-radius:14px;overflow:hidden;touch-action:none}
+.c11Stage{position:relative;width:100%;aspect-ratio:16/10;max-height:62vh;background:#020617;border:2px solid #334155;border-radius:14px;overflow:hidden;touch-action:none}
 .c11Stage canvas{display:block;width:100%!important;height:100%!important}
 .c11CamBtn{position:absolute;top:8px;right:8px;background:rgba(15,23,42,0.85);border:1.5px solid #38bdf8;border-radius:8px;color:#f8fafc;font:800 11.5px system-ui;padding:5px 9px;cursor:pointer;z-index:15;display:flex;align-items:center;gap:4px;touch-action:manipulation;box-shadow:0 2px 8px rgba(0,0,0,0.45);backdrop-filter:blur(4px);transition:all .15s}
 .c11CamBtn:active{transform:scale(0.95);background:#0369a1}
@@ -1225,6 +1225,8 @@
 
     function loop(now) {
       if (!M || !M.running) return;
+      // 2026-11-07: la fisica è a passi fissi per frame: sui telefoni a 90/120 Hz tutto andava 1,5-2 volte più veloce. Massimo 60 passi al secondo.
+      if (now - lastTime < 14) { M.animId = requestAnimationFrame(loop); return; }
       const dt = Math.min((now - lastTime) / 1000, 0.05);
       lastTime = now;
 
@@ -1253,6 +1255,14 @@
       // Caricamento tiro
       if (isChargingShoot) {
         shootCharge = Math.min(1.0, shootCharge + dt * 1.5);
+      }
+
+      // 2026-11-07: cambio automatico in difesa: se la palla è degli avversari (o libera) e un compagno è molto più vicino, lo controlli tu
+      M.swT = (M.swT || 0) - dt;
+      if (M.swT <= 0 && (!ball.holder || ball.holder.team === "B")) {
+        M.swT = 0.6; const cur = teamA[activeAIdx], dCur = hypot(cur.x - ball.x, cur.z - ball.z); let bi = activeAIdx, bd = dCur;
+        teamA.forEach((p) => { if (p.idx === 0) return; const d = hypot(p.x - ball.x, p.z - ball.z); if (d < bd) { bd = d; bi = p.idx; } });
+        if (bi !== activeAIdx && bd + 4 < dCur) activeAIdx = bi;
       }
 
       // --- MOVIMENTO GIOCATORE ATTIVO SQUADRA A ---
@@ -1537,9 +1547,9 @@
       // --- SISTEMA TELECAMERE 3D MULTIPLE ---
       const curCam = CAM_MODES[curCamIdx].id;
       if (curCam === "broadcast") {
-        const camTargetX = clamp(ball.x * 0.74, -30, 30);
-        const camTargetY = 19 + Math.abs(ball.x) * 0.05;
-        const camTargetZ = 40;
+        const camTargetX = clamp(ball.x * 0.85, -38, 38); // 2026-11-07: TV più vicina (prima y 19 / z 40: giocatori minuscoli sul telefono)
+        const camTargetY = 12.5 + Math.abs(ball.x) * 0.04;
+        const camTargetZ = 26 + ball.z * 0.3;
         camera.position.x += (camTargetX - camera.position.x) * 0.08;
         camera.position.y += (camTargetY - camera.position.y) * 0.08;
         camera.position.z += (camTargetZ - camera.position.z) * 0.08;
