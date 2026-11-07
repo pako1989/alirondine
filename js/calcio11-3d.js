@@ -1011,13 +1011,20 @@
       ball.holder = null;
       const power = clamp(shootCharge, 0.3, 1.0);
       // Mira verso la porta avversaria (HX, 0) con leggera deviazione Z data dal joystick
-      const targetZ = inputStick.z * (GW * 0.45);
+      // 2026-11-07: tiri non più centrali. Joystick su/giù = angolo scelto; fermo = angolo opposto al portiere. Poca forza = più errore. L'altezza è calcolata perché la palla arrivi in porta (prima saliva troppo e finiva sopra la traversa).
+      const gk = teamB[0], moving = Math.abs(inputStick.z) > 0.25;
+      const side = moving ? Math.sign(inputStick.z) : (gk.z > 0 ? -1 : 1);
+      let targetZ = side * GW * 0.38 + (Math.random() - 0.5) * GW * 0.12;
+      if (power < 0.65) targetZ += (Math.random() - 0.5) * (0.65 - power) * GW * 1.6;
       const dx = HX - user.x;
       const dz = targetZ - user.z;
       const d = hypot(dx, dz) || 1;
-      ball.vx = (dx / d) * (1.6 + power * 1.2);
-      ball.vz = (dz / d) * (1.6 + power * 1.2);
-      ball.vy = 0.25 + power * 0.45;
+      const spd = 1.6 + power * 1.2;
+      ball.vx = (dx / d) * spd;
+      ball.vz = (dz / d) * spd;
+      const tf = Math.max(3, Math.abs(dx) / Math.max(0.5, ball.vx)), hT = 0.4 + Math.random() * 1.5;
+      ball.vy = Math.max(0.04, (hT - BALL_R + 0.011 * tf * tf) / tf);
+      ball.lastKickId = (ball.lastKickId || 0) + 1;
       ball.lastKick = "A";
       sfx("kick");
       shootCharge = 0;
@@ -1352,9 +1359,10 @@
         if (!isUser) {
           if (idx === 0) {
             // Portiere A: protegge l'area piccola
-            const targetZ = clamp(ball.z * 0.4, -GW / 2, GW / 2);
+            let targetZ = clamp(ball.z * 0.4, -GW / 2, GW / 2), gain = 0.1;
+            if (!ball.holder && ball.vx < -1.2) { if (p.errFor !== ball.lastKickId) { p.errFor = ball.lastKickId; p.err = (Math.random() - 0.5) * GW * 0.8; } targetZ = clamp(ball.z + ball.vz * ((ball.x + HX) / ball.vx) + p.err, -GW / 2 - 0.5, GW / 2 + 0.5); gain = 0.3; } // 2026-11-07: si tuffa sui tiri
             p.x = -HX + 2.5;
-            p.z += (targetZ - p.z) * 0.1;
+            p.z += clamp((targetZ - p.z) * gain, -0.4, 0.4);
             p.rot = 0;
           } else {
             // 2026-11-07: compagni attivi. Con palla: i più avanzati si smarcano in avanti (+x), con ondeggio. Senza palla: linea che sale/scende con la palla e il compagno più vicino pressa.
@@ -1374,9 +1382,10 @@
       teamB.forEach((p, idx) => {
         if (idx === 0) {
           // Portiere B: protegge la porta destra
-          const targetZ = clamp(ball.z * 0.4, -GW / 2, GW / 2);
+          let targetZ = clamp(ball.z * 0.4, -GW / 2, GW / 2), gain = 0.1;
+          if (!ball.holder && ball.vx > 1.2) { if (p.errFor !== ball.lastKickId) { p.errFor = ball.lastKickId; p.err = (Math.random() - 0.5) * GW * 0.8; } targetZ = clamp(ball.z + ball.vz * ((HX - ball.x) / ball.vx) + p.err, -GW / 2 - 0.5, GW / 2 + 0.5); gain = 0.3; } // 2026-11-07: si tuffa sui tiri
           p.x = HX - 2.5;
-          p.z += (targetZ - p.z) * 0.1;
+          p.z += clamp((targetZ - p.z) * gain, -0.4, 0.4);
           p.rot = Math.PI;
         } else {
           const dToBall = hypot(p.x - ball.x, p.z - ball.z);
@@ -1404,8 +1413,8 @@
           if (p.x < -HX + 24 && Math.random() < 0.025) {
             ball.holder = null;
             ball.vx = -1.9 - Math.random() * 0.5;
-            ball.vz = (Math.random() - 0.5) * 1.2;
-            ball.vy = 0.35 + Math.random() * 0.3;
+            { const tf = Math.max(3, (p.x + HX) / -ball.vx), tz = (Math.random() < 0.5 ? -1 : 1) * GW * (0.1 + Math.random() * 0.3); ball.vz = (tz - p.z) / tf; ball.vy = Math.max(0.04, (0.4 + Math.random() * 1.6 - BALL_R + 0.011 * tf * tf) / tf); } // 2026-11-07: tiro CPU in porta (prima spesso sopra la traversa)
+            ball.lastKickId = (ball.lastKickId || 0) + 1;
             ball.lastKick = "B";
             sfx("kick");
           }
