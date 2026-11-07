@@ -738,9 +738,11 @@
   function renderTabGuardaroba(h) {
     const COSM = (window.__borgoApi && window.__borgoApi.COSM) || {};
     const api = window.__borgoApi;
+    let ownSet = null; try { ownSet = api && api.cosOwned ? new Set(api.cosOwned()) : null; } catch (e) { ownSet = null; } // stesso elenco del Guardaroba: __borgoApi non espone borgoLoad, prima ogni capo non-storia risultava bloccato
     const isOwned = (k) => {
       const c = COSM[k];
       if (!c) return false;
+      if (ownSet) return ownSet.has(k);
       if (c.story) return c.story();
       const b = (api && api.borgoLoad) ? api.borgoLoad() : null;
       return b && b.cos && b.cos.includes(k);
@@ -753,7 +755,7 @@
 
     const renderList = (items, curVal, onSelectAttr) => `
       <div class="spogGrid2">
-        ${items.map(([k, c]) => {
+        ${items.slice().sort((x, y) => (isOwned(y[0]) ? 1 : 0) - (isOwned(x[0]) ? 1 : 0)).map(([k, c]) => { // sbloccati in cima, poi i bloccati
           const own = isOwned(k);
           const active = curVal === c.val;
           return `
@@ -770,7 +772,8 @@
     `;
 
     return `
-      <div class="spogSecTitle">Maglie Speciali delle Saghe</div>
+      <div class="spogSecTitle">Maglie Speciali delle Saghe · ${maglie.filter(([k]) => isOwned(k)).length}/${maglie.length}</div>
+      <div style="font-size:11.5px;color:#a99dc4;margin:-4px 0 8px">Una maglia sbloccata imposta il <b>colore principale</b> della divisa. Fantasia e secondo colore della scheda Divisa restano sopra: se li cambi dopo, vince l'ultima scelta.</div>
       ${renderList(maglie, h.shirt, 'data-equip-shirt')}
 
       <div class="spogSecTitle">Tagli & Acconciature Sbloccate</div>
