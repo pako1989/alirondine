@@ -234,7 +234,7 @@
     // Rondine 1938-2038
     ["rt_tilly", "tempo", "c", 46, 62, 76, "C", 1], ["rt_baldo", "tempo", "c", 64, 70, 48, "D", 1],
     ["rt_dorino", "tempo", "r", 74, 56, 70, "A", 1], ["rt_quarzo", "tempo", "c", 40, 58, 82, "C", 1], ["rt_rino", "tempo", "r", 78, 50, 72, "A", 2],
-    ["rt_aldo", "tempo", "c", 50, 64, 76, "C", 4], ["rt_ines78", "tempo", "r", 62, 70, 84, "C", 5],
+    ["rt_aldo", "tempo", "c", 50, 64, 76, "C", 4], ["rt_ines78", "tempo", "r", 62, 80, 74, "D", 5],
     ["rt_mister", "tempo", "e", 56, 74, 84, "C", 2], ["rt_vera", "tempo", "e", 52, 80, 78, "D", 3], ["rt_nonna", "tempo", "l", 70, 76, 90, "C", 3],
     // Dungeon di Fine Stagione
     ["dg_asterio", "dungeon", "c", 52, 80, 48, "D", 1], ["dg_fiamma", "dungeon", "r", 78, 46, 66, "A", 1], ["dg_meda", "dungeon", "r", 56, 60, 82, "C", 2], ["dg_ruggine", "dungeon", "e", 48, 84, 72, "D", 3],
@@ -583,8 +583,8 @@
     sq_brina: "Gusto del giorno: vittoria. Molto fredda.", sq_gommo: "Mi allungo fino alla porta, se serve.", sq_scintilla: "Il forno sono io. E anche il tiro.", sq_ines: "Il ferro mi vuole bene. Anche il pallone, oggi.", rz_ferruccio: "E IL CORRIERE TIRA… CONSEGNATO!", rz_timbro: "Gol approvato. In triplice copia.", rz_borea: "Ho parato un asteroide. Un pallone è facile.", rz_orsola: "Come ai campetti: chi vince decide.", cs_ugo: "Idea: vinciamo. Questa funziona.", cs_max: "Che bella partita! Tutte le partite sono belle!", cs_lucilla: "Contratto firmato. Gol incluso.", cs_baldo: "Che zoccolata!",
     rm_furbio: "Un senatore non perde mai: al massimo rinvia il risultato al prossimo plebiscito.", rm_spartaco: "Gli scudi si spezzano, ma la difesa della Suburra non crolla mai!", rm_augusta: "Gli astri avevano previsto questo gol all'incrocio fin dal primo tempo.", rm_cesare: "Veni, vidi, vici: pollice verso l'alto per questo trionfo nell'arena!",
     re_evaristo: "Con tutto il rispetto: il pallone è in fuorigioco di protocollo.", re_oriele: "Una corona si porta con la schiena dritta. E con un buon paio di scarpe.", re_perla: "Un buon conto è come una buona partita: nessuno lo vede, finché non torna.", re_ulderico: "Avanti. E se non si può, avanti lo stesso.", re_scilla: "Corro più veloce della marea. Quasi sempre.", re_tullio: "Una guerra si vince con la penna. Quella di mio padre, in particolare.", re_anselmo: "Ho ottantadue anni e un gatto: governo per metà ciascuno.", re_cedro: "Secondo l'articolo tredici, il pallone è sempre in gioco.", re_brando: "La pace è una guerra che si è messa in ordine. Anche a pallone.",
-    rt_aldo: "Taglia la pellicola, incolla il contropiede: al cinema il gol non sbaglia mai.",
-    rt_ines78: "Al bar si sa tutto prima dei giornali. Anche chi segna domenica.",
+    rt_aldo: "Taglia la pellicola, incolla il contropiede: al cinema come in campo, il tempo è tutto un montaggio.",
+    rt_ines78: "Un caffè al vetro, due chiacchiere e niente scuse sui gol subiti: qui si gioca a testa alta.",
     my_xavier: "Volo a pelo d'albero e cross tesi verso l'anello: la fisica dell'aria non mente mai!",
     my_balam: "Il rimbalzo della pietra verde nell'acqua sacra insegna che nessuna traiettoria è perduta.",
     gl_zenzero: "Un pizzico di radice pestata negli scarpini e corri più veloce del vento di prua!",
