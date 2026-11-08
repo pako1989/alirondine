@@ -1,0 +1,45 @@
+// tests/cavallo-dossier.cjs - «Il Cavallo Star»: Dossier di Max cap. 4-5 da dati (prove a tempo, contratto, finali, carte, ospite, mazzo)
+const L = require("./lib.cjs");
+const MOD = { mod: "__cavallo", key: "ali-di-rondine.cavallo" };
+const info = (p) => L.info(p);
+async function dossier(w) {
+  const save = { v: 1, ch: 4, step: { 1: 9, 2: 9, 3: 9 }, done: { 1: "ok", 2: "ok", 3: "ok" }, ends: ["diretta", "serie"], max: 4, diffSet: true, intro: { ch1: 1, ch2: 1, ch3: 1 }, st: {}, flags: {} };
+  const { browser, page, errors } = await L.setup({ w, ...MOD, save });
+  await page.evaluate(() => localStorage.setItem("ali.dossier_enabled", "1"));
+  const reach = async (z) => { const bad = await L.reachAll(page, z); if (bad.length) errors.push(z + " irraggiungibile: " + bad.join(", ")); };
+  const coppia = w === 390;
+  await page.evaluate(() => window.__cavallo.open()); await page.evaluate(() => window.T_.click("Inizia il Capitolo 4")); await L.advance(page);
+  if ((await L.zone(page)) !== "cs_m_canile") errors.push("c4: zona " + (await L.zone(page)));
+  await reach("cs_m_canile"); if (w === 390) await L.shot(page, "cs_m_canile");
+  await L.talk(page, "cs_briciola"); await L.advance(page);
+  let i = await info(page); if (i.step[4] !== 1) errors.push("briciola: " + JSON.stringify(i.step));
+  await L.goAct(page, 22, 10); await L.advance(page); if ((await L.zone(page)) !== "cs_m_camerino") errors.push("camerino: " + (await L.zone(page)));
+  await reach("cs_m_camerino"); if (w === 390) await L.shot(page, "cs_m_camerino");
+  await L.talk(page, "cs_cesare"); await L.advance(page, ["Balsamo Dorato", "Una su e una piegata", "Sorriso a bocca aperta", "Palla a Max"]);
+  i = await info(page); if (i.step[4] !== 3) errors.push("toeletta: " + JSON.stringify([i.step, i.flags]));
+  await L.talk(page, "cs_wanda"); await L.advance(page, [coppia ? "Zoccoli & Zampe" : "Non firmo"]);
+  i = await info(page); if (i.step[4] !== 4) errors.push("wanda: " + JSON.stringify([i.step, i.flags]));
+  await page.evaluate(() => window.__cavallo._dbg.K.enterZone("cs_m_canile")); await page.waitForTimeout(400); await L.advance(page);
+  await L.talk(page, "cs_lucilla"); await L.advance(page);
+  i = await info(page); if (!i.done[4]) errors.push("c4 non concluso: " + JSON.stringify([i.step, i.done]));
+  await page.evaluate(() => window.T_.click("Inizia il Capitolo 5")); await L.advance(page);
+  if ((await L.zone(page)) !== "cs_m_campetto") errors.push("c5: zona " + (await L.zone(page)));
+  await reach("cs_m_campetto"); if (w === 390) await L.shot(page, "cs_m_campetto");
+  await L.talk(page, "cs_baldo"); await L.advance(page);
+  await L.talk(page, "cs_ugo"); await L.advance(page);
+  await L.talk(page, "cs_baldo"); await L.advance(page, ["Pallonetto morbido", "Scatto veloce", "Sponda di testa", "ZOCCOLI E ZAMPE, SENZA REGIA"]);
+  i = await info(page); if (i.step[5] !== 3) errors.push("partita: " + JSON.stringify([i.step, i.flags]));
+  await L.goAct(page, 5, 8); await L.advance(page); if ((await L.zone(page)) !== "cs_m_baracca") errors.push("baracca: " + (await L.zone(page)));
+  await reach("cs_m_baracca");
+  await page.evaluate(() => window.__cavallo._dbg.K.enterZone("cs_m_campetto")); await page.waitForTimeout(400); await L.advance(page);
+  await L.talk(page, "cs_viola"); await L.advance(page);
+  const fin = coppia ? "max_amicizia" : "max_liberta";
+  i = await info(page); const e = await page.evaluate(() => window.__cavallo._dbg.K.mem().ends);
+  if (!i.done[5] || !e.includes(fin)) errors.push("c5 non concluso: " + JSON.stringify([i.step, i.done, e, i.flags]));
+  const own = await page.evaluate(() => window.__sogni._load().own);
+  ["cs_max", "cs_briciola"].concat(coppia ? ["cs_wanda"] : []).forEach((c) => { if (!own.includes(c)) errors.push("carta non sbloccata: " + c); });
+  const g = await page.evaluate(() => window.__borgoGuests.list().find((x) => x.id === "cs_max")); if (!g || !g.on) errors.push("ospite Max: " + JSON.stringify(g));
+  const d = await page.evaluate(() => window.__carteDecks.list().find((x) => x.id === "csm")); if (!d || !d.unlocked) errors.push("mazzo Destino csm: " + JSON.stringify(d));
+  L.check(`Cavallo Star · Dossier di Max cap. 4-5 da dati (${w} px)`, errors); await browser.close();
+}
+(async () => { await dossier(390); await dossier(320); })().catch((e) => { console.error("✗ cavallo-dossier:", e.stack); process.exit(1); });

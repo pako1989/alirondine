@@ -35,7 +35,8 @@
     function ok(w) {
       if (!w) return true; const s = S();
       if (w.step != null) { const r = arr(w.step); if (r.length === 1 ? s !== r[0] : s < r[0] || s > r[1]) return false; }
-      if (w.flag && !arr(w.flag).every((f) => F.is(f))) return false;
+      if (w.is !== undefined) { if (F.get(w.flag) !== w.is) return false; } // flag con valore preciso: { flag: "x", is: "valore" }
+      else if (w.flag && !arr(w.flag).every((f) => F.is(f))) return false;
       if (w.notFlag && arr(w.notFlag).some((f) => F.is(f))) return false;
       return true;
     }

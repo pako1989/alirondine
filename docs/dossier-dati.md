@@ -19,7 +19,7 @@ window.__dossierDati.add({ saga: "titano", after: 3, chapters: [ { n: 4, … }, 
 Le tessere sono quelle del core/della saga (a=muro, t=albero, ":"=sentiero, "+"=pavimento interno, v=uscita interno, s=panca, L/T/B…=oggetti con `act`/`flavor`).
 
 ## Dialoghi e oggetti
-`talk: { idPNG: [ { when:{step:n|[da,a], flag:"x"|[..], notFlag:"y"}, do:[azioni] } ] }` — vale la prima voce con `when` vero.
+`talk: { idPNG: [ { when:{step:n|[da,a], flag:"x"|[..], notFlag:"y", is:"valore"}, do:[azioni] } ] }` — vale la prima voce con `when` vero.
 `obj: { "zona:carattere": [ …stesso formato… ] }`. `blocks: { nome: [azioni] }` richiamabili con `{call:"nome"}`.
 
 ## Azioni (eseguite in ordine; `{done:true}` chiude il dialogo)

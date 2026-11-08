@@ -193,7 +193,7 @@
             ],
             npcs: [
               { id: "cs_briciola", at: [24, 17], when: { step: [0, 1] } },
-              { id: "cs_lucilla", at: [8, 18], when: { step: [3, 9] } },
+              { id: "cs_lucilla", at: [8, 18], when: { step: [4, 9] } },
               { id: "cs_wanda", at: [14, 18], when: { step: 9 } },
             ],
             layout: [
@@ -400,7 +400,7 @@
           ],
           cs_lucilla: [
             {
-              when: { step: [3, 4] },
+              when: { step: 4 },
               do: [
                 {
                   say: [
@@ -516,6 +516,7 @@
                     ["cs_cesare", "[felice] Perfetto! Sembri appena uscito dalla cucciolata! Wanda sta entrando, fatti trovare pronto."],
                   ],
                 },
+                { call: "verso_wanda" },
               ],
               else: [
                 {
@@ -523,8 +524,11 @@
                     ["cs_cesare", "[triste] Mmh, sei un po' arruffato, ma pazienza: diremo che è lo stile «cucciolo ribelle». Wanda è qui!"],
                   ],
                 },
+                { call: "verso_wanda" },
               ],
             },
+          ],
+          verso_wanda: [
             { step: 3 },
             { quest: ["cs_m_toeletta", "Il Contratto di Wanda", "Wanda Volpe è nel camerino con la cartella."] },
             { done: true },
@@ -634,7 +638,7 @@
               ["voce", "Il vecchio campetto dietro la collina degli studios. Qui l'erba cresce spontanea ai bordi del gesso e non ci sono microfoni nascosti. Solo il vento che scende dai monti di Lustrino."],
             ],
             npcs: [
-              { id: "cs_baldo", at: [17, 10], when: { step: [0, 1] } },
+              { id: "cs_baldo", at: [17, 10], when: { step: [0, 9] } },
               { id: "cs_ugo", at: [8, 16], when: { step: [1, 2] } },
               { id: "cs_briciola", at: [6, 17], when: { step: [1, 2] } },
               { id: "cs_nina", at: [26, 18], when: { step: 3 } },
