@@ -26,6 +26,7 @@
 //     scroll: { eng: "__scorri", name: "I livelli", levels: { id: { name, icon, d, theme, map: [righe], signs, boss } }, bonus(K), kit: "guanti", practice: { theme, map, signs }, practiceName, practiceSub, banName },  // A SCORRIMENTO: K.scroll.play(id, o, cb(r)) livello platform 2D (js/scorri.js); record per livello, Mappa dei livelli (K.scroll.open)
 //     build: { name, res: "legno", empty: "O", kinds: { id: { n, icon, tile, cost, d } }, sites: { id: { zone, at: [tx, ty], tag, n } }, when(K) },  // LE COSTRUZIONI: cantieri sulla mappa, K.build.place/at/list/open; restano tra i capitoli
 //     recall: { name, icon, era: "vero", tile: "§", after: ":", tellLabel, trueLabel, marks: { id: { zone, at: [tx, ty], t, d } }, when(K) },  // IL RICORDO: la zona in due versioni (spec.eras[era] è quella vera), discrepanze da trovare; K.recall.toggle/found/count/mark
+//     board: { eng: "__tabellone", name: "Il Tabellone", cards: { id_oggetto: "id_carta" }, rivals: { k: { id, n, icon, col, ai } }, wins: "flag", caught: "flag" },  // IL TABELLONE: K.board.play({ from, to, rivals, story }, cb(r)) tirata di gioco dell'oca; carte dallo Zaino, vittorie/bari restano
 //     perks: { name: "Il Bivio dei Poteri", perks: { id: { n, icon, d, max, tag } } },  // IL BIVIO DEI POTERI: K.perks.offer({ n: 3, tag, q }, cb(id)) scelta 1 su 3 di un potere che resta tra i capitoli; lv/give/all/list/html
 //     rhythm: { eng: "__ritmo", name: "Il Repertorio", songs: { id: { n, icon, d, song, mode, venue, need } }, mates(K) },  // IL REPERTORIO: K.rhythm.play(id, o, cb(r)) brano a tempo (js/ritmo.js); stelle e precisione per brano, K.rhythm.open(back), morale() per la partita dopo
 //     cold: { name: "Calore", icon: "🌡️", max: 8, sec: 14, home: ["zona", tx, ty], onZero(K) },  // IL TERMOMETRO: spec.cold (true o moltiplicatore) fa scendere il Calore; spec.warm = [[tx, ty, r]] e gli interni lo fanno risalire; K.cold.get/add/warm
@@ -544,7 +545,7 @@
       return out + `<br><span style="color:var(--dim)">▷ = strade non prese. Per provarle: Capitoli → rigioca.</span>`;
     }
     function journal(back, inZone) {
-      const html = journalHtml() + (CRW ? CRW.html() : "") + (PLN ? PLN.html() : "") + (BLB ? BLB.html() : "") + (PRS ? PRS.html() : "") + (SCR ? SCR.html() : "") + (RIT ? RIT.html() : "") + (BLD ? BLD.html() : "") + (RCL ? RCL.html() : "") + (PRK ? PRK.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + (WGT ? WGT.html() : "") + (RAD ? RAD.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
+      const html = journalHtml() + (CRW ? CRW.html() : "") + (PLN ? PLN.html() : "") + (BLB ? BLB.html() : "") + (PRS ? PRS.html() : "") + (SCR ? SCR.html() : "") + (RIT ? RIT.html() : "") + (BLD ? BLD.html() : "") + (RCL ? RCL.html() : "") + (PRK ? PRK.html() : "") + (BRD ? BRD.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + (WGT ? WGT.html() : "") + (RAD ? RAD.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
       const jb = (RAD ? [{ label: `${RAD.icon} ${RAD.name} · ${RAD.freq().toFixed(1)} MHz`, sub: "Ruota la manopola e intercetta segnali", fn: () => RAD.open(() => journal(back, inZone), inZone) }] : []).concat(BLB ? [{ label: `${BLB.icon} ${BLB.name}`, sub: BLB.statusTxt(), fn: () => BLB.open(() => journal(back, inZone), inZone) }] : []).concat(PRS ? [{ label: `${PRS.icon} ${PRS.name}`, sub: PRS.statusTxt(), fn: () => PRS.open(() => journal(back, inZone), inZone) }] : []).concat(DOS ? Object.keys(DOS.cases).filter((c) => DOS.list(c).length).map((c) => ({ label: "🗂️ Dossier · " + DOS.cases[c].t, sub: "Confronta prove e testimonianze", fn: () => DOS.open(c, () => journal(back, inZone), inZone) })) : []).concat(CAT && CAT.list().length ? [{ label: "🃏 Album", sub: `${CAT.team().length}/${CAT.max} in squadra`, fn: () => CAT.open(() => journal(back, inZone), inZone) }] : []).concat(CRW && CRW.count() ? [{ label: "⚔️ Schiera la compagnia", sub: `${CRW.field().length}/${CRW.max} in squadra`, fn: () => CRW.pick(() => journal(back, inZone), inZone) }] : []).concat((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
       if (inZone) return api.trAsk("voce", html, jb, bgNow());
       api.scene(BG0, "voce", html, jb, JN());
@@ -1428,6 +1429,39 @@
       return { lv, give, all, list, offer, html, perks: PK };
     })();
 
+    // -------------------------------------------------------------- IL TABELLONE (cfg.board, opt-in): una tirata di gioco dell'oca come pezzo di capitolo (motore js/tabellone.js)
+    // cfg.board = { eng: "__tabellone", name: "Il Tabellone", icon: "🪿", cards: { id_oggetto: "id_carta" } (oggetti dello Zaino che diventano carte in mano),
+    //   rivals: { chiave: { id, n, icon, col, ai } }, wins: "flag vittorie", caught: "flag bari beccati", quit: "testo se ti alzi dal tavolo" }
+    // K.board.play({ title, from, to, rivals: ["chiave"], story: { casella: { who, t, text, opts: [{ label, sub, eff: { move, skip, give, flag, rival, rmove }, after }] } }, diff, bg }, cb(r))
+    //   la mano si costruisce dallo Zaino; a fine tirata le carte usate escono dallo Zaino, quelle pescate entrano; r.flags diventano flag della saga; vittorie e bari restano.
+    // K.board.wins() · caught() · html() nel diario (tirate giocate, vinte, migliore piazzamento)
+    const BRD = cfg.board && (() => {
+      const C0 = cfg.board, CARDS = C0.cards || {}, RV = C0.rivals || {}, WF = C0.wins || "bd_wins", CF = C0.caught || "bd_caught";
+      const ITEM = {}; Object.keys(CARDS).forEach((k) => (ITEM[CARDS[k]] = k));
+      const wins = () => F.get(WF, 0) | 0, caught = () => F.get(CF, 0) | 0, played = () => F.get("bd_played", 0) | 0;
+      function play(o, cb) {
+        const hand = []; if (INV) Object.keys(CARDS).forEach((it) => { for (let i = 0; i < INV.count(it); i++) hand.push(CARDS[it]); });
+        const eng = window[C0.eng || "__tabellone"]; if (!eng || !eng.start) { say([["voce", "Il tabellone non si è caricato. Ricarica la pagina e riprova."]]); return; }
+        const go = () => ownMatch(eng.start, Object.assign({ title: C0.name || "Il Tabellone", diff: 1 }, o, { hand, rivals: (o.rivals || []).map((k) => (typeof k === "string" ? RV[k] : k)).filter(Boolean),
+          done: (r) => safe(() => {
+            r = r || {};
+            if (r.quit) return ask("voce", C0.quit || "Ti alzi dal tabellone. La tirata riprende quando vuoi.", [{ label: "🎲 Riprendi la tirata", sub: "Si ricomincia da capo", fn: go }, { label: "◂ Più tardi", fn: () => done() }]);
+            if (INV) {
+              (r.used || []).forEach((c) => ITEM[c] && INV.take(ITEM[c]));
+              const before = {}; hand.forEach((c) => (before[c] = (before[c] || 0) + 1)); (r.used || []).forEach((c) => (before[c] = (before[c] || 0) - 1));
+              const after = {}; (r.hand || []).forEach((c) => (after[c] = (after[c] || 0) + 1)); Object.keys(after).forEach((c) => { for (let i = 0; i < after[c] - (before[c] || 0); i++) if (ITEM[c]) INV.give(ITEM[c]); });
+            }
+            F.set("bd_played", played() + 1); if (r.caught) F.set(CF, caught() + r.caught); if (r.win) F.set(WF, wins() + 1);
+            const best = F.get("bd_best", 0) | 0; if (r.rank && (!best || r.rank < best)) F.set("bd_best", r.rank);
+            Object.keys(r.flags || {}).forEach((f) => { if (f !== "beccato") F.set(f, true); });
+            cb && cb(r);
+          }, null) }));
+        go();
+      }
+      const html = () => (played() ? `<br><br><b>${esc((C0.icon || "🪿") + " " + (C0.name || "Il Tabellone"))}</b><br>Tirate giocate ${played()} · vinte ${wins()}${caught() ? " · bari beccati " + caught() : ""}${F.get("bd_best", 0) ? " · miglior piazzamento " + F.get("bd_best", 0) + "°" : ""}` : "");
+      return { play, wins, caught, played, html };
+    })();
+
     // -------------------------------------------------------------- IL DOSSIER (cfg.cases): prove e testimonianze, confronti, verdetto
     // cfg.cases = { id_caso: { t, q, items: { id: { t, d, icon, kind: "prova"|"testimonianza" } }, links: [[a, b, "cosa non torna"]], verdicts: [{ id, label, sub }] } }
     // K.dossier: add(caso, item) · has · list(caso) · found(caso) (contraddizioni scoperte) · solid(caso) (0..1) · open(back, inZone, caso) (schermata: tocca due voci
@@ -2084,7 +2118,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, plan: PLN, billboard: BLB, press: PRS, scroll: SCR, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN, radio: RAD, cold: COLD, rhythm: RIT, build: BLD, recall: RCL, perks: PRK,
+      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, plan: PLN, billboard: BLB, press: PRS, scroll: SCR, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN, radio: RAD, cold: COLD, rhythm: RIT, build: BLD, recall: RCL, perks: PRK, board: BRD,
       // un minigioco proprio della saga (start = window.__xxx.start): o passa al motore, cb(r) a fine partita
       minigame: (start, o, cb) => ownMatch(start, Object.assign({}, o, { done: (r) => safe(() => cb(r || {}), null) })),
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
