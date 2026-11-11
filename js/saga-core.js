@@ -27,6 +27,7 @@
 //     build: { name, res: "legno", empty: "O", kinds: { id: { n, icon, tile, cost, d } }, sites: { id: { zone, at: [tx, ty], tag, n } }, when(K) },  // LE COSTRUZIONI: cantieri sulla mappa, K.build.place/at/list/open; restano tra i capitoli
 //     recall: { name, icon, era: "vero", tile: "§", after: ":", tellLabel, trueLabel, marks: { id: { zone, at: [tx, ty], t, d } }, when(K) },  // IL RICORDO: la zona in due versioni (spec.eras[era] è quella vera), discrepanze da trovare; K.recall.toggle/found/count/mark
 //     board: { eng: "__tabellone", name: "Il Tabellone", cards: { id_oggetto: "id_carta" }, rivals: { k: { id, n, icon, col, ai } }, wins: "flag", caught: "flag" },  // IL TABELLONE: K.board.play({ from, to, rivals, story }, cb(r)) tirata di gioco dell'oca; carte dallo Zaino, vittorie/bari restano
+//     deduce: { name: "Il Taccuino", group: 3, attrs: { a: { n, opts } }, faces: { fid: { t, img, ans, hide, notes } }, known, photo(g, W, H, f, K, sel), hintKey, onConfirm(K, fids) },  // IL TACCUINO: chi è chi (volti × attributi), conferma a terne; K.deduce.see/learn/note/set/open/count
 //     perks: { name: "Il Bivio dei Poteri", perks: { id: { n, icon, d, max, tag } } },  // IL BIVIO DEI POTERI: K.perks.offer({ n: 3, tag, q }, cb(id)) scelta 1 su 3 di un potere che resta tra i capitoli; lv/give/all/list/html
 //     rhythm: { eng: "__ritmo", name: "Il Repertorio", songs: { id: { n, icon, d, song, mode, venue, need } }, mates(K) },  // IL REPERTORIO: K.rhythm.play(id, o, cb(r)) brano a tempo (js/ritmo.js); stelle e precisione per brano, K.rhythm.open(back), morale() per la partita dopo
 //     cold: { name: "Calore", icon: "🌡️", max: 8, sec: 14, home: ["zona", tx, ty], onZero(K) },  // IL TERMOMETRO: spec.cold (true o moltiplicatore) fa scendere il Calore; spec.warm = [[tx, ty, r]] e gli interni lo fanno risalire; K.cold.get/add/warm
@@ -545,8 +546,8 @@
       return out + `<br><span style="color:var(--dim)">▷ = strade non prese. Per provarle: Capitoli → rigioca.</span>`;
     }
     function journal(back, inZone) {
-      const html = journalHtml() + (CRW ? CRW.html() : "") + (PLN ? PLN.html() : "") + (BLB ? BLB.html() : "") + (PRS ? PRS.html() : "") + (SCR ? SCR.html() : "") + (RIT ? RIT.html() : "") + (BLD ? BLD.html() : "") + (RCL ? RCL.html() : "") + (PRK ? PRK.html() : "") + (BRD ? BRD.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + (WGT ? WGT.html() : "") + (RAD ? RAD.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
-      const jb = (RAD ? [{ label: `${RAD.icon} ${RAD.name} · ${RAD.freq().toFixed(1)} MHz`, sub: "Ruota la manopola e intercetta segnali", fn: () => RAD.open(() => journal(back, inZone), inZone) }] : []).concat(BLB ? [{ label: `${BLB.icon} ${BLB.name}`, sub: BLB.statusTxt(), fn: () => BLB.open(() => journal(back, inZone), inZone) }] : []).concat(PRS ? [{ label: `${PRS.icon} ${PRS.name}`, sub: PRS.statusTxt(), fn: () => PRS.open(() => journal(back, inZone), inZone) }] : []).concat(DOS ? Object.keys(DOS.cases).filter((c) => DOS.list(c).length).map((c) => ({ label: "🗂️ Dossier · " + DOS.cases[c].t, sub: "Confronta prove e testimonianze", fn: () => DOS.open(c, () => journal(back, inZone), inZone) })) : []).concat(CAT && CAT.list().length ? [{ label: "🃏 Album", sub: `${CAT.team().length}/${CAT.max} in squadra`, fn: () => CAT.open(() => journal(back, inZone), inZone) }] : []).concat(CRW && CRW.count() ? [{ label: "⚔️ Schiera la compagnia", sub: `${CRW.field().length}/${CRW.max} in squadra`, fn: () => CRW.pick(() => journal(back, inZone), inZone) }] : []).concat((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
+      const html = journalHtml() + (CRW ? CRW.html() : "") + (PLN ? PLN.html() : "") + (BLB ? BLB.html() : "") + (PRS ? PRS.html() : "") + (SCR ? SCR.html() : "") + (RIT ? RIT.html() : "") + (BLD ? BLD.html() : "") + (RCL ? RCL.html() : "") + (PRK ? PRK.html() : "") + (BRD ? BRD.html() : "") + (DDC ? DDC.html() : "") + (DOS ? DOS.html() : "") + (RTE ? RTE.html() : "") + (CAT ? CAT.html() : "") + (STM ? STM.html() : "") + (WGT ? WGT.html() : "") + (RAD ? RAD.html() : "") + choicesHtml() + cluesHtml() + questsHtml();
+      const jb = (DDC && DDC.total() ? [{ label: `${DDC.faces && cfg.deduce.icon || "📓"} ${cfg.deduce.name || "Il Taccuino"} · ${DDC.count()}/${DDC.total()}`, sub: "Chi è chi: volti, nomi e destini", fn: () => DDC.open(() => journal(back, inZone), inZone) }] : []).concat(RAD ? [{ label: `${RAD.icon} ${RAD.name} · ${RAD.freq().toFixed(1)} MHz`, sub: "Ruota la manopola e intercetta segnali", fn: () => RAD.open(() => journal(back, inZone), inZone) }] : []).concat(BLB ? [{ label: `${BLB.icon} ${BLB.name}`, sub: BLB.statusTxt(), fn: () => BLB.open(() => journal(back, inZone), inZone) }] : []).concat(PRS ? [{ label: `${PRS.icon} ${PRS.name}`, sub: PRS.statusTxt(), fn: () => PRS.open(() => journal(back, inZone), inZone) }] : []).concat(DOS ? Object.keys(DOS.cases).filter((c) => DOS.list(c).length).map((c) => ({ label: "🗂️ Dossier · " + DOS.cases[c].t, sub: "Confronta prove e testimonianze", fn: () => DOS.open(c, () => journal(back, inZone), inZone) })) : []).concat(CAT && CAT.list().length ? [{ label: "🃏 Album", sub: `${CAT.team().length}/${CAT.max} in squadra`, fn: () => CAT.open(() => journal(back, inZone), inZone) }] : []).concat(CRW && CRW.count() ? [{ label: "⚔️ Schiera la compagnia", sub: `${CRW.field().length}/${CRW.max} in squadra`, fn: () => CRW.pick(() => journal(back, inZone), inZone) }] : []).concat((mem().choices || []).some((x) => x.s) ? [{ label: "↩ Rivivi una scelta", sub: "Ripartire da un bivio con le statistiche di allora", fn: () => choiceMenu(back, inZone) }] : []).concat([{ label: "◂ Indietro", fn: back }]);
       if (inZone) return api.trAsk("voce", html, jb, bgNow());
       api.scene(BG0, "voce", html, jb, JN());
     }
@@ -1462,6 +1463,73 @@
       return { play, wins, caught, played, html };
     })();
 
+    // -------------------------------------------------------------- IL TACCUINO (cfg.deduce, opt-in): deduzione alla «chi è chi», volti × attributi, conferma a terne
+    // cfg.deduce = { name: "Il Taccuino", icon: "📓", group: 3, attrs: { a: { n: "Chi è", opts: { id: "etichetta" } } }, faces: { fid: { t: "posizione nella foto", img: "id_cast", ans: { a: "id" }, hide: true, notes: { k: "testo" } } },
+    //   known: { a: ["id", ...] } (opzioni note da subito), photo(g, W, H, f, K, sel) (disegna la foto in testa al taccuino, facoltativo; restituisce [[fid, x, y, r]] per i tocchi), hintKey, onConfirm(K, [fid]) }
+    // K.deduce: see(fid) (il volto entra nel taccuino) · learn(attr, id) (un'opzione diventa sceglibile) · note(fid, k) · set(fid, attr, id) → fid confermati ora
+    //   ok(fid) · count() · total() · seen(fid) · val(fid, attr) · known(attr, id) · open(back, inZone) · html() (riepilogo nel diario)
+    // Le risposte si confermano solo a gruppi di cfg.group (3) volti giusti in tutti gli attributi: così non si va a tentativi. Gli ultimi (meno di 3) si confermano da soli quando sono giusti.
+    const DDC = cfg.deduce && (() => {
+      const C0 = cfg.deduce, AT = obj(C0.attrs), FC = obj(C0.faces), GRP = Math.max(1, C0.group | 0 || 3), nm = C0.name || "Il Taccuino", ic = C0.icon || "📓";
+      const KN = {}; Object.keys(obj(C0.known)).forEach((a) => arr(C0.known[a]).forEach((o) => (KN[a + ":" + o] = 1)));
+      const seen = (f) => !!FC[f] && (!FC[f].hide || F.is("dd_s_" + f));
+      const known = (a, o) => !!KN[a + ":" + o] || F.is("dd_o_" + a + "_" + o);
+      const val = (f, a) => F.get("dd_v_" + f + "_" + a, "") || "";
+      const ok = (f) => F.is("dd_k_" + f);
+      const right = (f) => Object.keys(AT).every((a) => !FC[f].ans || val(f, a) === FC[f].ans[a]);
+      const list = () => Object.keys(FC).filter(seen);
+      const count = () => Object.keys(FC).filter(ok).length, total = () => list().length;
+      function see(f, quiet) { if (!FC[f] || F.is("dd_s_" + f)) return false; F.set("dd_s_" + f, true); if (!quiet && FC[f].hide && api && api.trToast) safe(() => api.trToast(`${ic} Un volto nuovo nel ${nm}`)); return true; }
+      function learn(a, o, quiet) { if (!AT[a] || !obj(AT[a].opts)[o] || known(a, o)) return false; F.set("dd_o_" + a + "_" + o, true); if (!quiet) { SFX.ding(); note(`${nm}: ${AT[a].opts[o]}`); if (api && api.trToast) safe(() => api.trToast(`${ic} ${AT[a].n}: ${AT[a].opts[o]}`)); } return true; }
+      function noteF(f, k, quiet) { if (!FC[f] || !obj(FC[f].notes)[k] || F.is("dd_n_" + f + "_" + k)) return false; F.set("dd_n_" + f + "_" + k, true); if (!quiet && api && api.trToast) safe(() => api.trToast(`${ic} Appunto: ${FC[f].t}`)); return true; }
+      // conferma: tra i volti non ancora confermati e giusti, a gruppi di GRP; se i non confermati sono meno di GRP basta che siano tutti giusti
+      function check() {
+        const open = list().filter((f) => !ok(f)), good = open.filter(right); let now = [];
+        if (good.length >= GRP) now = good.slice(0, Math.floor(good.length / GRP) * GRP);
+        else if (open.length && open.length < GRP && good.length === open.length && list().length === Object.keys(FC).filter((f) => !FC[f].hide || seen(f)).length) now = good;
+        now.forEach((f) => F.set("dd_k_" + f, true));
+        if (now.length) { SFX.ding(); note(`${nm}: ${now.length} confermati (${count()}/${total()})`); if (C0.onConfirm) safe(() => C0.onConfirm(K, now)); }
+        return now;
+      }
+      function set(f, a, o) { if (!FC[f] || ok(f) || !AT[a]) return []; F.set("dd_v_" + f + "_" + a, o ? String(o).slice(0, 38) : ""); return check(); }
+      const hints = () => (C0.hintKey ? safe(() => localStorage.getItem(C0.hintKey) === "1", false) : false);
+      function css() {
+        if (document.getElementById("ddCss")) return; const st = document.createElement("style"); st.id = "ddCss";
+        st.textContent = `.ddOv{position:fixed;inset:0;z-index:290;background:#1b140c;color:#f5ead6;font-family:Georgia,serif;overflow:auto;touch-action:manipulation}.ddOv .wr{max-width:620px;margin:0 auto;padding:8px 8px 70px}
+.ddOv h3{margin:4px 0;font:900 18px Georgia,serif;color:var(--ac)}.ddOv .sub{font-size:12px;opacity:.85;margin-bottom:6px}.ddOv canvas{width:100%;height:auto;display:block;border:3px solid #e7dcc4;border-radius:4px;box-shadow:0 4px 16px rgba(0,0,0,.5);background:#3a2c1c}
+.ddOv .row{display:flex;gap:8px;align-items:flex-start;border-bottom:1px dashed rgba(245,234,214,.25);padding:7px 2px}.ddOv .row.on{background:rgba(251,191,36,.12)}.ddOv .row.ok{opacity:.92}.ddOv .row img{width:46px;height:46px;border-radius:6px;filter:sepia(.85) contrast(1.05);border:2px solid #7f1d1d;flex:none;background:#4a3a28}
+.ddOv .row .tx{flex:1;min-width:0}.ddOv .row b{display:block;font-size:13px}.ddOv .row small{display:block;font-size:11px;opacity:.8;line-height:1.3}.ddOv select{width:100%;margin-top:4px;min-height:34px;font:14px Georgia,serif;background:#f5ead6;color:#1c1917;border-radius:6px;border:1px solid #7f1d1d}
+.ddOv .okb{color:#86efac;font-weight:900}.ddOv .ft{position:fixed;left:0;right:0;bottom:0;background:rgba(27,20,12,.96);border-top:1px solid #7f1d1d;padding:8px;display:flex;gap:8px;justify-content:center}.ddOv .ft button{min-height:46px;min-width:140px;border-radius:10px;border:2px solid var(--ac);background:#7f1d1d;color:#fff;font:800 15px Georgia,serif}
+.ddOv .bn{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);background:#7f1d1d;color:#fff;border:3px solid #fbbf24;padding:14px 22px;border-radius:12px;font:900 18px Georgia,serif;text-align:center;z-index:2;animation:ddB 2.2s forwards;pointer-events:none}@keyframes ddB{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}80%{opacity:1}100%{opacity:0}}`;
+        document.head.appendChild(st);
+      }
+      function open(back, inZone) {
+        css(); const old = document.getElementById("ddOv"); if (old) old.remove();
+        const ov = document.createElement("div"); ov.id = "ddOv"; ov.className = "ddOv"; ov.style.setProperty("--ac", TH.accent || "#fbbf24"); document.body.appendChild(ov);
+        let sel = null, raf = 0, hot = [];
+        const img = (f) => safe(() => (api.portraitImg ? api.portraitImg(FC[f].img || f) : ""), "") || "";
+        const opts = (f, a) => { const v = val(f, a), O = obj(AT[a].opts); return `<select data-f="${f}" data-a="${a}"><option value="">— ${esc(AT[a].n)} —</option>${Object.keys(O).filter((o) => known(a, o) || o === v).map((o) => `<option value="${o}"${o === v ? " selected" : ""}>${esc(O[o])}</option>`).join("")}</select>`; };
+        function draw() {
+          const fl = list(), hn = hints() ? fl.filter((f) => !ok(f) && right(f)).length : -1;
+          ov.innerHTML = `<div class="wr"><h3>${ic} ${esc(nm)}</h3><div class="sub">Confermati <b>${count()}/${fl.length}</b> · le risposte si confermano solo a gruppi di ${GRP} giuste.${hn >= 0 ? ` · 💡 Giusti non ancora confermati: <b>${hn}</b>` : ""}</div>`
+            + (C0.photo ? `<canvas width="640" height="400"></canvas>` : "")
+            + fl.map((f, i) => { const fc = FC[f], O = (a) => obj(AT[a].opts)[fc.ans ? fc.ans[a] : ""] || ""; const ns = Object.keys(obj(fc.notes)).filter((k) => F.is("dd_n_" + f + "_" + k)).map((k) => `<small>✎ ${esc(fc.notes[k])}</small>`).join("");
+              return `<div class="row${ok(f) ? " ok" : ""}${sel === f ? " on" : ""}" data-row="${f}"><img alt="" src="${img(f)}"><div class="tx"><b>${i + 1}. ${esc(fc.t)}</b>${ns}`
+                + (ok(f) ? Object.keys(AT).map((a) => `<small class="okb">✔ ${esc(O(a))}</small>`).join("") : Object.keys(AT).map((a) => opts(f, a)).join("")) + `</div></div>`; }).join("")
+            + `</div><div class="ft"><button type="button" data-x="1">◂ Chiudi il ${esc(nm.replace(/^Il /, ""))}</button></div>`;
+          ov.querySelectorAll("select").forEach((s) => (s.onchange = () => { const now = set(s.dataset.f, s.dataset.a, s.value); sel = s.dataset.f; draw(); if (now.length) { const b = document.createElement("div"); b.className = "bn"; b.innerHTML = `✔ ${now.length} confermati<br><small>${count()}/${list().length}</small>`; ov.appendChild(b); setTimeout(() => b.remove(), 2300); } }));
+          ov.querySelector("[data-x]").onclick = close;
+          const cv = ov.querySelector("canvas"); if (cv) cv.onclick = (e) => { const r = cv.getBoundingClientRect(), x = (e.clientX - r.left) * 320 / r.width, y = (e.clientY - r.top) * 200 / r.height; const h = hot.find(([f, hx, hy, hr]) => Math.hypot(hx - x, hy - y) < hr); if (h && seen(h[0])) { sel = h[0]; draw(); const row = ov.querySelector(`[data-row="${h[0]}"]`); if (row) row.scrollIntoView({ block: "center", behavior: "smooth" }); } };
+        }
+        function loop() { const cv = ov.querySelector("canvas"); if (cv && C0.photo) { const g = cv.getContext("2d"); g.setTransform(2, 0, 0, 2, 0, 0); hot = safe(() => C0.photo(g, 320, 200, frNow(), K, sel), []) || []; } raf = requestAnimationFrame(loop); }
+        function close() { cancelAnimationFrame(raf); ov.remove(); if (back) back(); else if (inZone) done(); }
+        DDC.close = close; draw(); loop();
+      }
+      const html = () => (total() ? `<br><br><b>${esc(ic + " " + nm)}</b><br>Volti confermati ${count()}/${total()}` : "");
+      const api2 = { see, learn, note: noteF, set, ok, count, total, seen, val, known, right, open, html, list, check, close: null, attrs: AT, faces: FC };
+      return api2;
+    })();
+
     // -------------------------------------------------------------- IL DOSSIER (cfg.cases): prove e testimonianze, confronti, verdetto
     // cfg.cases = { id_caso: { t, q, items: { id: { t, d, icon, kind: "prova"|"testimonianza" } }, links: [[a, b, "cosa non torna"]], verdicts: [{ id, label, sub }] } }
     // K.dossier: add(caso, item) · has · list(caso) · found(caso) (contraddizioni scoperte) · solid(caso) (0..1) · open(back, inZone, caso) (schermata: tocca due voci
@@ -2118,7 +2186,7 @@
       lore: (id, d) => { LORE[id] = d; },
       cast: (id, c, bio) => { if (!SCAST.includes(id)) SCAST.push(id); if (api.CAST && !api.CAST[id]) api.CAST[id] = Object.assign({ tag: "", eye: "#2a2a2a", skin: "#e0b48a" }, c); if (bio && api.BIO && !api.BIO[id]) api.BIO[id] = bio; },
       cos: (id, d) => { COS[id] = d; if (api && api.COSM && !api.COSM[id]) api.COSM[id] = d; },
-      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, plan: PLN, billboard: BLB, press: PRS, scroll: SCR, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN, radio: RAD, cold: COLD, rhythm: RIT, build: BLD, recall: RCL, perks: PRK, board: BRD,
+      clock: CLOCK, alert: ALERT, rel: REL, inv: INV, crew: CRW, plan: PLN, billboard: BLB, press: PRS, scroll: SCR, tactics: TAC, dossier: DOS, route: RTE, catch: CAT, steam: STM, flood: FLD, weight: WGT, hack: HCK, alibi: ALB, roof: RFT, chain: CHN, radio: RAD, cold: COLD, rhythm: RIT, build: BLD, recall: RCL, perks: PRK, board: BRD, deduce: DDC,
       // un minigioco proprio della saga (start = window.__xxx.start): o passa al motore, cb(r) a fine partita
       minigame: (start, o, cb) => ownMatch(start, Object.assign({}, o, { done: (r) => safe(() => cb(r || {}), null) })),
       end: (id) => { const m = mem(); if (ENDINGS[id] && !m.ends.includes(id)) { m.ends.push(id); save(); } },
