@@ -48,6 +48,7 @@
     fango: ["ali-di-rondine.fango", "Dal Fango alla Leggenda", "#a16207", "__fango"],
     golfo: ["ali-di-rondine.director-carriera", "Carriera del Golfo", "#1d4ed8", "__directorCarriera"],
     foto58: ["ali-di-rondine.foto58", "La Foto del '58", "#7f1d1d", "__foto58"],
+    conte: ["ali-di-rondine.conte", "Il Conte di Montecalcio", "#7f1d1d", "__conte"],
     oca: ["ali-di-rondine.oca", "Il Gioco dell'Oca del Conte", "#fbbf24", "__oca"],
     tifosi: ["ali-di-rondine.tifosi", "La Notte dei Tifosi Morti", "#84cc16", "__tifosi"],
     corriere: ["ali-di-rondine.corriere", "Il Corriere del Pallone", "#f59e0b", "__corriere"],
@@ -142,6 +143,11 @@
     ["f5_viola", "foto58", "c", 40, 62, 84, "C", 1], ["f5_ilario58", "foto58", "r", 30, 86, 70, "P", 1], ["f5_rina", "foto58", "c", 36, 70, 78, "C", 2],
     ["f5_carmine", "foto58", "r", 62, 80, 76, "D", 2], ["f5_mauro", "foto58", "c", 50, 76, 66, "D", 3], ["f5_ottavio", "foto58", "e", 54, 94, 72, "D", 3],
     ["f5_ilario", "foto58", "e", 38, 70, 92, "C", 4], ["f5_renzo", "foto58", "l", 94, 58, 88, "A", 4],
+    // Il Conte di Montecalcio
+    ["ct_gino", "conte", "c", 50, 76, 70, "D", 1], ["ct_ersilia", "conte", "e", 30, 60, 90, "C", 1], ["ct_ottavia", "conte", "r", 36, 70, 82, "C", 1],
+    ["ct_pina", "conte", "c", 44, 70, 76, "C", 2], ["ct_tullio", "conte", "r", 64, 92, 60, "D", 2], ["ct_remo", "conte", "r", 58, 66, 76, "C", 2],
+    ["ct_nina", "conte", "e", 70, 60, 88, "C", 3], ["ct_cosimo", "conte", "c", 38, 64, 82, "P", 3], ["ct_beppe", "conte", "r", 86, 52, 70, "A", 3],
+    ["ct_ettore", "conte", "e", 42, 70, 90, "C", 4], ["ct_brandolini", "conte", "l", 70, 60, 94, "C", 4], ["ct_ferrante", "conte", "l", 50, 78, 96, "D", 4],
     // Il Gioco dell'Oca del Conte
     ["oc_tonio", "oca", "c", 58, 84, 52, "D", 1], ["oc_ofelia", "oca", "c", 50, 54, 82, "C", 1], ["oc_cosimo", "oca", "c", 40, 90, 60, "P", 2],
     ["oc_damiano", "oca", "c", 80, 46, 60, "A", 2], ["oc_arrigo", "oca", "r", 66, 58, 86, "C", 1], ["oc_ernestina", "oca", "r", 52, 72, 80, "C", 1],
@@ -578,6 +584,10 @@
     f5_viola: "Le cose, se nessuno le scrive, spariscono.", f5_ilario58: "Mamma ha detto di non sporcarmi i calzoni.", f5_rina: "Alla terza proposta ho detto sì.",
     f5_carmine: "Qui si gioca in undici.", f5_mauro: "In galleria rallento sempre. Per le buche.", f5_ottavio: "Via, ragazzino! La tengo io!",
     f5_ilario: "Il solitario si vince sempre, se bari con te stesso.", f5_renzo: "Sorridi, che magari è l'ultima.",
+    ct_gino: "Il caffè lo faccio col polso.", ct_ersilia: "Una faccia sola è mezza faccia.", ct_ottavia: "Respiri. Ha l'aria di chi trattiene un'opinione.",
+    ct_pina: "Le arance a peso, le informazioni a fiducia.", ct_tullio: "Non ci avete capito, ma ci avete sentito.", ct_remo: "Un solo modulo, e lo difendo come un testamento.",
+    ct_nina: "Con un pallone sgonfio si impara a volare.", ct_cosimo: "Io non dimentico: archivio.", ct_beppe: "Il nove? È solo il più difficile da riempire.",
+    ct_ettore: "Certamente. Non ho visto niente, ricordo tutto.", ct_brandolini: "Una comunità ha sempre bisogno di un colpevole.", ct_ferrante: "Mai contare i soldi davanti a un ragazzo.",
     oc_tonio: "Ventotto ammonizioni. Tutte meritate, tranne una.", oc_ofelia: "Sicura al cinquanta per cento. L'altro cinquanta è un santino.", oc_cosimo: "Mi sono mosso prima. Di poco. Un passo.",
     oc_damiano: "Undici metri e venti. Li ho misurati io.", oc_arrigo: "Gioco pulito. Una volta sola.", oc_ernestina: "Il brodo è sempre sul fuoco.",
     oc_gilda: "Il testamento è chiaro. Le persone, meno.", oc_conte: "Il gioco dell'oca è fatto anche per perdere.",
@@ -739,6 +749,7 @@
   const RAR = { c: ["Comune", "#9aa5b1", 1], r: ["Rara", "#3a8ad8", 2], e: ["Epica", "#a85ad8", 3], l: ["Leggendaria", "#ffd23f", 4] };
   // i legami tra saghe diverse: +3 di intesa se entrambi in squadra
   const LINKS = [
+    ["ct_nina", "ct_ferrante", "Un pallone sgonfio"], ["ct_gino", "ct_tullio", "Caffè e Curva"], ["ct_ersilia", "ct_ettore", "Palazzo Vanni"], ["ct_ottavia", "ct_cosimo", "Referti e registri"], ["ct_ferrante", "f5_carmine", "Allenatori di una volta"],
     ["tp_ada", "rf_nilde", "Voci Libere del '68 e '77"], ["tp_clara", "dc_agata", "Obiettivo e Taccuino"], ["tp_goffredo", "bur_taddeo", "Mastri di Piombo e di Pioppo"],
     ["ci_tonio", "bp_rocco", "Trombe e Bombardini"], ["ci_lila", "bur_colombina", "Funi e Fili d'Aria"], ["ci_zampano", "bur_taddeo", "Vecchi Capocomici"], ["ci_ercole", "lt_ferro", "Ghisa e Latta"], ["ci_orloff", "bur_duca", "Palchi d'Oro"],
     ["bur_taddeo", "lt_ferro", "Bottega e Fonderia"], ["bur_colombina", "dc_agata", "Intrighi alla Ribalta"], ["bur_duca", "bur_taddeo", "L'Arte e la Corte"],
