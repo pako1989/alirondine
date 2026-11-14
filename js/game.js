@@ -2429,6 +2429,7 @@
       if (typeof window.hapticTrigger === "function") window.hapticTrigger("tackle");
       const p = pcTack(a, hm("drib"));
       if (Math.random() < clamp(p + (M.cup ? M.cup.support * 0.04 : 0), 0.15, 0.96)) { M.poss = "us"; M.zone = clamp(6 - M.zone, 1, 3); if (M.cup && M.cup.rule === "win-ball") M.cup.done = true; ttCounter(); say(`Scivolata pulita su <b>${esc(a.name)}</b>! Palla vostra, zona ${M.zone}.${M.cup && M.cup.rule === "win-ball" ? " Recupero riuscito: ora costruisci l'azione." : ""}`); }
+      else if (pcOn("piazzati") && M.zone >= 3 && Math.random() < 0.14) { M.zone = 4; say(`Entri in ritardo su <b>${esc(a.name)}</b>: <b>fallo</b>. Punizione per loro, dal limite.`); hud(); return buttons([{ label: "Sistema la barriera ▸", cls: "hot", fn: () => theirSet("punizione") }]); }
       else { M.zone += Math.random() < DF.run2[hLv()] ? 2 : 1; say(`<b>${esc(a.name)}</b> ti salta e avanza${M.zone >= 5 && hLv() ? " di corsa, fino in area" : ""}.`); gxCardMaybe(a); }
     }
     if (kind === "special") {
@@ -2444,6 +2445,28 @@
     if (kind === "cover") { tick(3, 5); M.guts = Math.min(S.st.grinta, M.guts + Math.round(12 * dfRegen())); M.zone++; say("Stringi le linee e rifiati. Loro avanzano con calma."); }
     if (M.poss === "them" && (M.zone >= 5 || (M.zone >= 4 && Math.random() < 0.55 + DF.push[hLv()]))) { if (kind === "cover" && hi === "shot") M.covB = 1; return oppShot(a); }
     hud(); setTimeout(turn, 300);
+  }
+  // cut-in animato la prima volta che compare una novità di gameplay
+  function pzCut(title, sub, icon) { try { const k = PREFIX + "pz-" + title; if (!localStorage.getItem(k)) { localStorage.setItem(k, "1"); if (typeof showFeatureCutIn === "function") showFeatureCutIn(title, sub, icon); } } catch {} }
+  // Piazzati dei rivali (opzione «Difendi i piazzati»): il battitore guarda un punto (70% sincero), tu scegli la marcatura giusta
+  const PZ_TELL = { primo: "verso il primo palo", secondo: "lontano, verso il secondo palo", corto: "il compagno al limite dell'area" };
+  const PZ_OPT = { angolo: { primo: ["Presidia il primo palo", "Un uomo sul palo vicino"], secondo: ["Zona sul secondo palo", "Tutti a coprire lontano"], corto: ["Esci sul corto", "Un uomo sul compagno al limite"] },
+    punizione: { primo: ["Barriera stretta", "Contro il tiro sotto, vicino"], secondo: ["Barriera alta", "Contro il giro sul secondo palo"], corto: ["Esci sul passaggio corto", "Contro la palla toccata al limite"] } };
+  function theirSet(kind) {
+    const t = TEAMS[M.team], ks = ["primo", "secondo", "corto"], real = pick(ks), tell = Math.random() < 0.7 ? real : pick(ks), taker = (pick(t.atk) || ["Il battitore"])[0];
+    pzCut("DIFENDI I PIAZZATI", "Leggi il battitore e scegli la marcatura", "🧱");
+    M.poss = "them"; tick(1, 2);
+    $("text").innerHTML = `<span class="t">${kind === "angolo" ? "Calcio d'angolo per loro" : "Punizione per loro"}. <b>${esc(taker)}</b> posa il pallone e guarda <em>${PZ_TELL[tell]}</em>. Come marchi?<br><span style="color:var(--dim)">Un battitore che guarda a lungo… a volte bluffa.</span></span>`;
+    const res = (pick_) => {
+      let pr = pick_ === real ? 0.06 : pick_ === "tutti" ? (real === "corto" ? 0.38 : 0.22) : 0.42;
+      pr = clamp(pr - (S.st.contr - 15) / 400 + (M.cm && M.cm.oppK ? 0 : 0), 0.03, 0.6) * dfx();
+      const ok = pick_ === real;
+      if (Math.random() < pr) { M.score[1] += cmG(1); sfx("crowd"); M.poss = "us"; M.zone = 1; say(`${ok ? "Marcatura giusta, ma" : "Mancata lettura:"} <b>${esc(taker)}</b> la mette dentro. ${M.score[0]}–${M.score[1]}.`); }
+      else if (ok) { sfx("kick"); M.poss = Math.random() < 0.6 ? "us" : "them"; M.zone = M.poss === "us" ? 2 : 2; say(`<b>Letto!</b> Era ${PZ_TELL[real]}: ${M.poss === "us" ? "ripartenza vostra, palla in zona 2!" : "allontanata, ma loro restano lì."}`); }
+      else { M.poss = "them"; M.zone = 2; say(`${PZ_TELL[real][0].toUpperCase() + PZ_TELL[real].slice(1)}: non era la tua lettura, ma la difesa tiene. Palla a loro, zona 2.`); }
+      hud(); buttons([{ label: "Avanti ▸", fn: turn }]);
+    };
+    buttons(ks.map((k) => ({ label: PZ_OPT[kind][k][0], sub: PZ_OPT[kind][k][1], fn: () => res(k) })).concat([{ label: "Tutti dentro", sub: "Prudente: mai perfetto, mai scoperto", fn: () => res("tutti") }]));
   }
   function oppShot(a) {
     const t = TEAMS[M.team];
@@ -2491,8 +2514,8 @@
       }
       if (preO) $("text").querySelector(".t").insertAdjacentHTML("afterbegin", preO);
       M.poss = "us"; M.zone = 1;
-      if (M.areaPunch) { M.areaPunch = false; if (!(power > save)) { M.poss = "them"; M.zone = 4; $("text").querySelector(".t").insertAdjacentHTML("beforeend", " Respinta in angolo: restano in attacco."); } }
-      hud(); buttons([{ label: "Avanti ▸", fn: turn }]);
+      if (M.areaPunch) { M.areaPunch = false; if (!(power > save)) { M.poss = "them"; M.zone = 4; $("text").querySelector(".t").insertAdjacentHTML("beforeend", " Respinta in angolo: restano in attacco."); if (pcOn("piazzati")) M.spNext = "angolo"; } }
+      hud(); buttons([{ label: "Avanti ▸", fn: () => { const k = M.spNext; if (k) { M.spNext = null; return theirSet(k); } turn(); } }]);
     };
     const gatto = () => {
       spend(25); $("choices").innerHTML = ""; sfx("special"); voci(gkN() === "Nico" || gkN() === "Ernesta" ? "gatto" : "special");
@@ -5768,7 +5791,7 @@
     mini: ["Calci d'angolo", "Dopo una respinta del portiere, l'angolo lo batti tu"],
   };
   // 15l · Partita classica: quattro aggiunte, ognuna spegnibile (spente = regole di prima)
-  const SET_PC = { coppie: ["Schemi a coppie avanzati", "Con grande intesa, ogni compagno sblocca un secondo tiro in coppia (intesa 14)"], rete: ["Rete strappata", "Un tiro potentissimo può bucare la rete: cut-in speciale, un po' di grinta e il conto delle reti strappate"], star: ["Fuoriclasse rivali", "Il capitano avversario carica lo speciale con una frase sua e un cut-in nei colori della squadra"], gkf: ["Portieri che si stancano", "Più tiri affronta, più un portiere cala (il tuo e il loro); all'intervallo recupera"], duelli: ["Duelli 1 contro 1", "Dribbling in attacco (zona 3+): leggi il difensore e scegli finta, scatto o protezione"], area: ["Comandi in area", "Parata, pugno o uscita: li scegli tu col tuo portiere, e anche il portiere avversario li usa"], tempo: ["Tiro a tempo", "Ferma la barra al momento giusto: preciso = tiro più forte, sbagliato = più debole"], fiato: ["Grinta di riserva", "A secco puoi tirare lo stesso (più debole); rifiatare ridà almeno 10"], spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
+  const SET_PC = { schemi: ["Schemi da corner", "Prima di battere un angolo scegli lo schema: Palo corto, Il Treno o Finta e controfinta"], piazzati: ["Difendi i piazzati", "Quando loro hanno un angolo o una punizione, leggi dove guarda il battitore e scegli come marcare"], coppie: ["Schemi a coppie avanzati", "Con grande intesa, ogni compagno sblocca un secondo tiro in coppia (intesa 14)"], rete: ["Rete strappata", "Un tiro potentissimo può bucare la rete: cut-in speciale, un po' di grinta e il conto delle reti strappate"], star: ["Fuoriclasse rivali", "Il capitano avversario carica lo speciale con una frase sua e un cut-in nei colori della squadra"], gkf: ["Portieri che si stancano", "Più tiri affronta, più un portiere cala (il tuo e il loro); all'intervallo recupera"], duelli: ["Duelli 1 contro 1", "Dribbling in attacco (zona 3+): leggi il difensore e scegli finta, scatto o protezione"], area: ["Comandi in area", "Parata, pugno o uscita: li scegli tu col tuo portiere, e anche il portiere avversario li usa"], tempo: ["Tiro a tempo", "Ferma la barra al momento giusto: preciso = tiro più forte, sbagliato = più debole"], fiato: ["Grinta di riserva", "A secco puoi tirare lo stesso (più debole); rifiatare ridà almeno 10"], spec: ["Speciali a rotazione", "Al massimo 3 speciali per turno; ripetere lo stesso stanca"], risk: ["Indicatore di rischio", "Facile, incerto o difficile sui pulsanti"], def: ["Difesa a indizi", "Indovina la mossa dell'attaccante: bonus se giusta, malus se sbagli"], pass: ["Passaggio a scelta", "Scegli il compagno a cui passare"] };
   const setDefault = () => ({ v: 1, style: "90", t: Object.fromEntries(Object.keys(SET_T).map((k) => [k, true])), pc: Object.fromEntries(Object.keys(SET_PC).map((k) => [k, true])), speed: "normale", big: false, anim: true, diff: "normale", gfx: "migliorata", crt: false, eco: false, dis: false, cardView: "holo3d", mangaView: "comic", trophyView: "3d", bgArt: "detailed", confetti: true, proActionFx: true, tsubasa: false, windWeather: true, azDiff: "norm", azCtl: "joystick", azPowerUps: true, azAimAssist: true, faces: "flat", pfx: 1, envWeather: "spento", ambientFx: false });
   const envFxOn = () => SET.ambientFx !== false && (SET.envWeather || "spento") !== "spento";
   function setLoad() {
@@ -9126,9 +9149,25 @@
     }
     const zs = Object.keys(CZ), heavy = pick(zs);
     MGm.def = zs.map((z) => (z === heavy ? 3 : Math.random() < 0.5 ? 1 : 0));
-    MGm.phase = "aim"; MGm.zone = null; MGm.t = 0; MGm.msg = "";
+    MGm.phase = "aim"; MGm.zone = null; MGm.t = 0; MGm.msg = ""; MGm.pm = 1; MGm.spd = 1;
+    if (MGm.ctx === "match" && pcOn("schemi")) return cornerScheme(zs);
+    cornerAim(zs);
+  }
+  // Schemi da corner (opzione «Schemi da corner»): lo schema cambia i difensori delle zone e la difficoltà del tiro
+  function cornerScheme(zs) {
+    pzCut("SCHEMI DA CORNER", "Palo corto · Il Treno · Finta e controfinta", "🚩");
+    const m = mate(), lo = (i, n) => { MGm.def[i] = Math.max(0, MGm.def[i] - n); };
+    $("text").innerHTML = `<span class="t">Angolo! Prima del cross, lo schema. ${esc(m)} ti guarda: <em>«Dimmi cosa facciamo.»</em><br><span style="color:var(--dim)">Difensori: ${zs.map((z, i) => `${CZ[z].name} ${["nessuno", "uno", "due", "tre"][MGm.def[i]]}`).join(" · ")}</span></span>`;
+    buttons([
+      { label: "Classico", sub: "Nessuna variante: cross e speranza", fn: () => cornerAim(zs) },
+      { label: `Palo corto con ${m}`, sub: "Primo palo con un difensore in meno, cross un po' più sporco", fn: () => { lo(0, 1); MGm.pm = 0.95; cornerAim(zs); } },
+      { label: "Il Treno", sub: "Tutti in corsa: dischetto con due difensori in meno, ma la barra corre più veloce", cls: "hot", fn: () => { lo(1, 2); MGm.spd = 1.35; cornerAim(zs); } },
+      { label: "Finta e controfinta", sub: "Secondo palo e dischetto con un difensore in meno, ma il tiro è più incerto", fn: () => { lo(2, 1); lo(1, 1); MGm.pm = 0.88; cornerAim(zs); } },
+    ]);
+  }
+  function cornerAim(zs) {
     $("text").innerHTML = `<span class="t">${MGm.ctx === "match" ? "Calcio d'angolo! Guarda dove si ammucchiano i difensori, scegli la zona e poi calcia." : `Angolo <b>${MGm.n + 1}</b>/5 · Gol <b>${MGm.goals}</b>`}. Dove la metti?</span>`;
-    buttons(zs.map((z) => ({ label: CZ[z].name, sub: ["libero", "un difensore", "", "tre difensori"][MGm.def[zs.indexOf(z)]] || "", fn: () => cornerPower(z) })));
+    buttons(zs.map((z) => ({ label: CZ[z].name, sub: ["libero", "un difensore", "due difensori", "tre difensori"][MGm.def[zs.indexOf(z)]] || "", fn: () => cornerPower(z) })));
   }
   function cornerPower(z) {
     MGm.zone = z; MGm.phase = "power"; MGm.bar = 0; MGm.dir = 1;
@@ -9136,7 +9175,7 @@
       if (!MGm || MGm.phase !== "power") return;
       const d = Math.abs(MGm.bar - 0.72); MGm.q = d <= 0.05 ? 3 : d <= 0.14 ? 2 : 1;
       const def = MGm.def[Object.keys(CZ).indexOf(MGm.zone)];
-      const p = [0.15, 0.5, 0.8][MGm.q - 1] * [1, 0.7, 0.5, 0.35][def] / miniDiff();
+      const p = [0.15, 0.5, 0.8][MGm.q - 1] * [1, 0.7, 0.5, 0.35][def] * (MGm.pm || 1) / miniDiff();
       MGm.goal = Math.random() < p; MGm.phase = "fly"; MGm.t = 0; sfx("kick"); $("choices").innerHTML = "";
     } }]);
   }
@@ -9152,7 +9191,7 @@
     if (m.zone) { g.strokeStyle = "#ffd23f"; g.lineWidth = 1; g.beginPath(); g.arc(CZ[m.zone].x, CZ[m.zone].y + 6, 14 + Math.sin(frame / 6) * 2, 0, 7); g.stroke(); }
     man(22, 186, usCol(), "#fff");
     if (m.phase === "power") {
-      m.bar += m.dir * 0.022 * miniDiff(); if (m.bar > 1 || m.bar < 0) { m.dir *= -1; m.bar = clamp(m.bar, 0, 1); }
+      m.bar += m.dir * 0.022 * miniDiff() * (m.spd || 1); if (m.bar > 1 || m.bar < 0) { m.dir *= -1; m.bar = clamp(m.bar, 0, 1); }
       px(40, 184, 200, 10, "#0009"); px(40 + 200 * 0.58, 184, 200 * 0.28, 10, "#2f7a3a"); px(40 + 200 * 0.67, 184, 200 * 0.1, 10, "#ffd23f"); px(40 + 200 * m.bar - 1, 180, 3, 18, "#fff");
       ball(18, 184, 4);
     } else if (m.phase === "fly" || m.phase === "done") {
@@ -14925,7 +14964,7 @@
   MODES8.push(() => seasonDone(1)
     ? { label: "Sfide a obiettivo", sub: ((r) => `Medaglie ${OBJ.filter((o) => r.obj[o.id]).length}/${OBJ.length} · ori ${OBJ.filter((o) => r.obj[o.id] >= 3).length}`)(dfRec()), fn: objMenu }
     : { label: "???", sub: "Si sblocca più avanti nella storia", disabled: true, fn: () => {} });
-  if (/[?&]debug/.test(location.search)) window.__df = { DF, dfRec, dfAim, dfAimNote, dfPre, dfKeep, hLv, OBJ, objStart, objMenu, legOpen, startMatch: (st, S0) => { if (S0) S = S0; statsBox(); startMatch(st); }, setS: (s) => { S = s; } };
+  if (/[?&]debug/.test(location.search)) window.__df = { pz: { theirSet, cornerStart, getM: () => M, setM: (o) => Object.assign(M, o) }, DF, dfRec, dfAim, dfAimNote, dfPre, dfKeep, hLv, OBJ, objStart, objMenu, legOpen, startMatch: (st, S0) => { if (S0) S = S0; statsBox(); startMatch(st); }, setS: (s) => { S = s; } };
   // ================= v11 · ANIMAZIONI: tagli cinematografici, parate al rallenty, duelli, replay =================
   // Tutto segue «Animazioni», «Velocità scene» e «Grafica»: con la grafica classica o le animazioni spente torna il vecchio primo piano.
   // Se il telefono fatica (effetti pesanti spenti), le scene restano ma con meno particelle.
